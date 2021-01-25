@@ -1,23 +1,44 @@
-#include <ultra64.h>
+/*====================================================================
+ *
+ * Copyright 1993, Silicon Graphics, Inc.
+ * All Rights Reserved.
+ *
+ * This is UNPUBLISHED PROPRIETARY SOURCE CODE of Silicon Graphics,
+ * Inc.; the contents of this file may not be disclosed to third
+ * parties, copied or duplicated in any form, in whole or in part,
+ * without the prior written permission of Silicon Graphics, Inc.
+ *
+ * RESTRICTED RIGHTS LEGEND:
+ * Use, duplication or disclosure by the Government is subject to
+ * restrictions as set forth in subdivision (c)(1)(ii) of the Rights
+ * in Technical Data and Computer Software clause at DFARS
+ * 252.227-7013, and/or in similar or successor clauses in the FAR,
+ * DOD or NASA FAR Supplement. Unpublished - rights reserved under the
+ * Copyright Laws of the United States.
+ *====================================================================*/
 
-#include "functions.h"
-#include "variables.h"
+#include "n_synthInternals.h"
 
+// FIXME: when we can...
+// N_ALGlobals *n_alGlobals=0;
+// N_ALSynth *n_syn=0;
 
-void n_alInit(struct07 *arg0, s32 arg1) {
-    if (D_8002BA40 == 0) {
-        D_8002BA40 = arg0;
-        if (D_8002BA44 == 0) {
-            D_8002BA44 = D_8002BA40;
-            n_alSynNew(arg1);
+void n_alInit(N_ALGlobals *g, ALSynConfig *c)
+{
+    if (!n_alGlobals) { /* already initialized? */
+        n_alGlobals = g;
+        if(!n_syn) {
+            n_syn = &n_alGlobals->drvr;
+            n_alSynNew(c);
         }
     }
 }
 
-void n_alClose(s32 arg0) {
-    if (D_8002BA40) {
+void n_alClose(N_ALGlobals *glob)
+{
+    if (n_alGlobals) {
         n_alSynDelete();
-        D_8002BA40 = 0;
-        D_8002BA44 = 0;
+        n_alGlobals = 0;
+        n_syn = 0;
     }
 }
