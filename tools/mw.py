@@ -98,23 +98,26 @@ def cmd_new(a):
     if not found:
         sys.exit(f"{func}: no GLOBAL_ASM stub in {MAIN}/src")
     cfile, asm = found
-    if sha1(MAIN / BIN) != INNER_SHA:
-        sys.exit("main conker/build is not a matching build — run `make -C conker` first")
     ws = ws_dir(func)
     if ws.exists():
         if not a.force:
             sys.exit(f"{ws} exists (use --force to recreate)")
         shutil.rmtree(ws)
-    ws.mkdir(parents=True)
-    subprocess.run(["cp", "-a", "--reflink=auto", str(MAIN), str(ws / "conker")], check=True)
+    # Snapshot main under a shared lock so a concurrent `land` can't be mid-build.
+    with open(LOCK, "a") as lk:
+        fcntl.flock(lk, fcntl.LOCK_SH)
+        if sha1(MAIN / BIN) != INNER_SHA:
+            sys.exit("main conker/build is not a matching build — run `make -C conker` first")
+        ws.mkdir(parents=True)
+        subprocess.run(["cp", "-a", "--reflink=auto", str(MAIN), str(ws / "conker")], check=True)
+        # Pristine copy of the editable trees: the merge base for `land`.
+        (ws / "base").mkdir()
+        for d in ("src", "include"):
+            subprocess.run(["cp", "-a", "--reflink=auto", str(MAIN / d), str(ws / "base" / d)], check=True)
+        head = subprocess.run(["git", "-C", str(REPO), "rev-parse", "HEAD"],
+                              capture_output=True, text=True).stdout.strip()
     for name in ("ido", "tools"):
         (ws / name).symlink_to(REPO / name)
-    # Pristine copy of the editable trees: the merge base for `land`.
-    (ws / "base").mkdir()
-    for d in ("src", "include"):
-        subprocess.run(["cp", "-a", "--reflink=auto", str(MAIN / d), str(ws / "base" / d)], check=True)
-    head = subprocess.run(["git", "-C", str(REPO), "rev-parse", "HEAD"],
-                          capture_output=True, text=True).stdout.strip()
     words = target_words(MAIN / asm)
     m = {"func": func, "file": str(cfile), "asm": asm, "head": head,
          "vram": words[0][0], "size": 4 * len(words)}
@@ -258,7 +261,7 @@ def cmd_land(a):
     files = changed_files(ws)
     if not files:
         sys.exit("no changes in workspace")
-    with open(LOCK, "w") as lk:
+    with open(LOCK, "a") as lk:
         fcntl.flock(lk, fcntl.LOCK_EX)
         if not find_stub(MAIN, func):
             sys.exit(f"{func} is no longer a stub in main (already landed?)")
