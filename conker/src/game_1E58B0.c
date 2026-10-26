@@ -1,5 +1,7 @@
 #include <ultra64.h>
+#define func_150ADA20 func_150ADA20_u8_proto
 #include "functions.h"
+#undef func_150ADA20
 #include "variables.h"
 
 
@@ -171,6 +173,34 @@ void func_151B8668(s32 arg0, u8 arg1, s32 arg2) {
     func_15134908(&sp18, 0, arg1, arg2);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E58B0/func_151B86F4.s")
+void func_15143794(s16, s16, f32, f32 *);
+void func_151A26EC(f32 *, f32 *, f32 *, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+
+s32 func_150ADA20(void);
+
+void func_151B86F4(f32 a0, f32 a1, f32 a2, f32 a3, f32 a4, f32 a5, u8 *a6) {
+    f32 sp84[3];
+    f32 sp78[3];
+    f32 sp6C[3];
+    f32 r;
+
+    sp84[0] = a0;
+    sp84[1] = a1;
+    sp84[2] = a2;
+    func_15143794((s16)(func_150ADA20() & 0xFF), (s16)((func_150ADA20() % 65U) - 32),
+                  func_150ADA68() * 945.0f * 0.00999999977648f, sp78);
+    r = (func_150ADA68() * 157.0f + 604.0f) * 0.00100000005f;
+    sp6C[0] = 0.0f;
+    sp6C[1] = 0.0f;
+    sp6C[2] = 0.0f;
+    sp78[0] += -a3 * D_800BE9A8 * r;
+    sp78[1] += -a4 * D_800BE9A8 * r;
+    sp78[2] += -a5 * D_800BE9A8 * r;
+    func_151A26EC(sp84, sp6C, sp78, 1.0f,
+                  (func_150ADA68() * 157.0f + -151.0f) * 0.00100000005f,
+                  func_150ADA68() * 55.0f + 75.0f, (func_150ADA20() % 26U) + 25,
+                  (func_150ADA20() % 101U) + 100, 10, 25, 0, -1, 0, 0, 0, a6[0xC], a6[1]);
+}
+
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1E58B0/func_151B8908.s")
