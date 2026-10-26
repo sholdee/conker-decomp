@@ -12,7 +12,8 @@ extern s32 func_15146078(struct Arg1514FB98 *, struct Vec3F *, struct Vec3F *);
 extern s32 func_15144E80(struct Vec3F *, struct Vec3F *, struct Vec3F *, struct Vec3F *);
 extern f32 func_15144A74(struct Vec3F *, struct Vec3F *);
 extern s32 func_15145128(struct Vec3F *, struct Vec3F *, f32 *, f32 *);
-extern void func_1514F8F8(void *, void *, struct Vec3F *, struct Vec3F *, f32, u8, s32);
+struct Local1514F8F8;
+extern void func_1514F8F8(struct Local1514F8F8 *, struct Vec3F *, struct Vec3F *, struct Vec3F *, f32, u8, s32);
 extern void *func_15130280(void *, u8, s32, s32, u8, s32);
 extern f32 D_800A601C;
 extern f32 D_800A6020;
@@ -657,7 +658,73 @@ s32 func_1514F6E8(struct Local1514F6E8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_17CAF0/func_1514F808.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_17CAF0/func_1514F8F8.s")
+struct Local1514F8F8 {
+    s32 unk0;
+    s32 unk4;
+    u8 unk8[0xC];
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+    s32 unk2C;
+    s32 unk30;
+    f32 unk34;
+    f32 unk38;
+    f32 unk3C;
+    f32 unk40;
+    s16 unk44;
+    s16 unk46;
+    s16 unk48;
+    s16 unk4A;
+    s16 unk4C;
+    s16 unk4E;
+    s8 unk50;
+};
+
+extern void func_15143874(s32, f32, f32 *, f32 *);
+extern void func_151A2AD4(void *, f32 *, f32, f32, s32, f32, f32, f32, f32, s16, s16, s16, s16, s16, s16, s8, u8, s32);
+
+void func_1514F8F8(struct Local1514F8F8 *arg0, struct Vec3F *arg1, struct Vec3F *arg2, struct Vec3F *arg3, f32 arg4, u8 arg5, s32 arg6) {
+    s32 rand;
+    struct Vec3F spB0;
+    f32 spAC;
+    f32 spA8;
+    f32 temp_f20;
+    f32 temp_f22;
+    s32 count;
+
+    arg1->x *= 1000.0f;
+    arg1->y *= 1000.0f;
+    arg1->z *= 1000.0f;
+
+    count = (func_150ADA20() % (u32)(arg0->unk4 + 1)) + arg0->unk0;
+    if (count != 0) {
+        do {
+            temp_f20 = (func_150ADA68() * arg0->unk18) + arg0->unk14;
+            rand = func_150ADA20();
+            temp_f22 = func_150ADA68();
+            func_15143874((s16)(rand & 0xFF), temp_f22 * arg4, &spA8, &spAC);
+
+            spB0.x = ((arg2->x * spA8) + (arg3->x * spAC) + arg1->x) * temp_f20;
+            spB0.y = ((arg2->y * spA8) + (arg3->y * spAC) + arg1->y) * temp_f20;
+            spB0.z = ((arg2->z * spA8) + (arg3->z * spAC) + arg1->z) * temp_f20;
+
+            temp_f22 = func_150ADA68();
+            temp_f20 = func_150ADA68();
+            func_151A2AD4(arg0->unk8, &spB0.x,
+                          ((temp_f22 = temp_f22) * arg0->unk20) + arg0->unk1C,
+                          ((temp_f20 = temp_f20) * arg0->unk28) + arg0->unk24,
+                          (func_150ADA20() % (u32)(arg0->unk30 + 1)) + arg0->unk2C,
+                          arg0->unk34, arg0->unk38, arg0->unk3C, arg0->unk40,
+                          arg0->unk44, arg0->unk46, arg0->unk48, arg0->unk4A,
+                          arg0->unk4C, arg0->unk4E, arg0->unk50, arg5, arg6);
+            count--;
+        } while (count != 0);
+    }
+}
+
 
 void func_1514FB98(struct Arg1514FB98 *arg0, u8 arg1, s32 arg2) {
     struct Vec3F sp34;
