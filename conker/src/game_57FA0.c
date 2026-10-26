@@ -15,7 +15,45 @@ void func_1502AAF0(void) {
 void func_1502AAF8(s32 arg0) {
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_57FA0/func_1502AB04.s")
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8;
+    s32 unkC;
+} struct_game_57FA0_0;
+
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+} struct_game_57FA0_1;
+
+extern struct_game_57FA0_0 D_800C3D68[];
+extern u8 D_800C3EA0;
+
+void func_1502AB04(s32 arg0, s32 *arg1, s32 arg2, s32 arg3) {
+    struct_game_57FA0_0 *entry;
+    struct_game_57FA0_1 *payload;
+    struct_game_57FA0_1 *src;
+    u32 count;
+    u32 i;
+
+    count = arg0;
+    if (count != 0) {
+        bcopy(&D_800C3D68[count], D_800C3D68, ((-(s32)count) << 4) + 0x100);
+    }
+
+    for (i = 0x10 - count; i < 0x10; i++) {
+        entry = &D_800C3D68[i];
+        payload = (struct_game_57FA0_1 *)&entry->unk8;
+        src = (struct_game_57FA0_1 *)arg1;
+        *payload = *src;
+        arg1 += 2;
+        entry->unk4 = arg2;
+        entry->unk0 = arg3;
+        arg3 += 8;
+    }
+}
+
 #pragma GLOBAL_ASM("asm/nonmatchings/game_57FA0/func_1502AC88.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_57FA0/func_1502AF04.s")
 extern u8 D_AB1950;
