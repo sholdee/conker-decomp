@@ -121,7 +121,41 @@ s32 func_1518C57C(EffectEmitter *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1B8F40/func_1518C69C.s")
+u8 func_151D8E20(void);
+
+s32 func_1518C69C(EffectEmitter *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
+    EffectSpawnPacket sp50;
+    EffectState *temp;
+    EffectPoint *base;
+
+    temp = arg0->field_0x98;
+    base = arg0->field_0x94;
+    sp50.field_0x80 = 0;
+    sp50.field_0x8A = 0x100;
+    sp50.field_0x8C = (s32)base[arg0->field_0x2D].field_0x0;
+    sp50.field_0x8E = (s32)arg4;
+    sp50.field_0x90 = (s32)base[arg0->field_0x2D].field_0x8;
+    sp50.field_0x94 = (func_150ADA20() % 0x15U) + 0x23;
+    sp50.field_0x92 = sp50.field_0x94;
+    sp50.field_0xA2 = -1;
+    sp50.field_0xA0 = 0x12;
+    sp50.field_0x98 = 0xC;
+    sp50.field_0xA1 = 0;
+    sp50.field_0x96 = (s32)arg4;
+    func_1516865C(&sp50, 0xFF, 0xFF, 0xFF, 0xFF);
+    func_15168800((s32)&sp50, arg0->field_0xC, arg0->field_0x1);
+    temp->field_0x20 = 4;
+    {
+    u8 id;
+    f32 pos[3];
+    pos[0] = base[arg0->field_0x2D].field_0x0;
+    pos[1] = arg4;
+    pos[2] = base[arg0->field_0x2D].field_0x8;
+    id = func_151D8E20();
+    func_151DBCBC(id, func_150ADA68() * 40.0f + 100.0f, 0xFF, arg5, pos, arg0->field_0xC, arg0->field_0x1);
+    }
+    return 1;
+}
 
 typedef struct {
     u8 pad0[0x24];
