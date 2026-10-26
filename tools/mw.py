@@ -11,7 +11,7 @@ Workspaces never touch the main tree; `land` is the only writer, and it re-gates
   mw.py check FUNC [-U N] [--no-diff]
                                build + verdict + asm diff
   mw.py land  FUNC             merge src/include edits into main, full sha gate, commit
-  mw.py pick  [--min B] [--max B] [--jtbl] [-n N]
+  mw.py pick  [--min B] [--max B] [--no-jtbl] [--desc] [-n N]
                                list remaining stubs by size
   mw.py rm    FUNC             delete a workspace
 
@@ -322,7 +322,7 @@ def cmd_pick(a):
         if n * 4 < a.min or n * 4 > a.max:
             continue
         jt = bool(re.search(r"\bjr\s+\$(?!ra\b)", text))
-        if jt and not a.jtbl:
+        if jt and a.no_jtbl:
             continue
         if not re.search(r"^glabel ", text, re.M) or ".word 0x" in text and "jr" not in text:
             continue
@@ -345,7 +345,7 @@ def main():
     p.add_argument("--no-diff", action="store_true")
     p = sub.add_parser("land"); p.add_argument("func")
     p = sub.add_parser("pick"); p.add_argument("--min", type=int, default=0)
-    p.add_argument("--max", type=int, default=10**9); p.add_argument("--jtbl", action="store_true")
+    p.add_argument("--max", type=int, default=10**9); p.add_argument("--no-jtbl", action="store_true")
     p.add_argument("--desc", action="store_true"); p.add_argument("-n", type=int, default=50)
     p = sub.add_parser("rm"); p.add_argument("func")
     a = ap.parse_args()
