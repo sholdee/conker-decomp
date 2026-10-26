@@ -383,7 +383,69 @@ void func_151BE1E4(struct260 *arg0) {
     func_15149368(arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E73B0/func_151BE210.s")
+typedef struct {
+    u8 pad0[0x8];
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    f32 unk30;
+    f32 unk34;
+    f32 unk38;
+    f32 unk3C;
+    f32 unk40;
+    f32 unk44;
+    f32 unk48;
+    f32 unk4C;
+} Sub151BE210;
+
+typedef struct {
+    u8 pad0[0x2C];
+    f32 unk2C;
+    f32 unk30;
+    u8 pad34[0x28];
+    u8 unk5C;
+    u8 pad5D[0xB3];
+    union { Sub151BE210 unk110; struct { u8 pad[0x24]; f32 unk134; } s; } u;
+} Obj151BE210;
+
+s32 func_151BE210(Obj151BE210 *obj) {
+    Sub151BE210 *sub;
+
+    sub = &obj->u.unk110;
+    obj->u.s.unk134 -= D_800BE9A4;
+    if (obj->u.s.unk134 < 0.0f) {
+        sub->unk24 = func_150ADA68() * 4.0f;
+        sub->unk18 = func_150ADA68() * sub->unk10 + sub->unk8;
+    }
+    obj->unk2C = obj->unk2C + ((sub->unk18 - obj->unk2C) * 0.3499999940395355f);
+    sub->unk28 -= D_800BE9A4;
+    if (sub->unk28 < 0.0f) {
+        sub->unk28 = func_150ADA68() * 9.0f;
+        if (func_150ADA20() & 1) {
+            sub->unk1C = func_150ADA68() * sub->unk14 + sub->unkC;
+        } else {
+            sub->unk1C = func_150ADA68() * sub->unk20 + sub->unkC;
+        }
+    }
+    obj->unk30 = obj->unk30 + ((sub->unk1C - obj->unk30) * 0.4000000059604645f);
+    sub->unk38 -= D_800BE9A4;
+    if (sub->unk38 < 0.0f) {
+        sub->unk38 = func_150ADA68() * 10.0f;
+        sub->unk34 = func_150ADA68() * sub->unk30 + sub->unk2C;
+    }
+    sub->unk3C = sub->unk3C + ((sub->unk34 - sub->unk3C) * 0.4f);
+    obj->unk5C = sub->unk3C;
+    sub->unk40 = sub->unk40 + ((sub->unk48 - sub->unk40) * 0.6500000357627869f);
+    sub->unk44 = sub->unk44 + ((sub->unk4C - sub->unk44) * 0.6500000357627869f);
+    return 1;
+}
 
 typedef struct {
     s32 unk0;
