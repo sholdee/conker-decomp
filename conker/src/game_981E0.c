@@ -1497,7 +1497,46 @@ void func_15070D24(s32 arg0) {
 
     func_151602C0(&sp4C.header, &sp4C.header2, (func_150ADA20() % 0xC9U) + 0x37, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0);
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_15070F60.s")
+extern Vec3w_15070D24 D_80099BA0;
+extern Vec3w_15070D24 D_80099BAC;
+extern void func_151D5334(struct17*, f32, f32, f32, s32, s32, s32);
+void func_15070F60(s32 arg0) {
+    Stack_15070D24 sp58;
+
+    sp58.sp84 = D_80099BA0;
+    sp58.sp78 = D_80099BAC;
+
+    if (D_800D154C->unk1D4 == 0) {
+        return;
+    }
+
+    if ((D_800D154C->unk74 & 0xF) == 0xF) {
+        return;
+    }
+
+    sp58.sp70[0] = (func_150ADA68() * 180.0f) + 150.0f;
+    sp58.sp70[1] = func_150ADA68() * 2.0f + 2.5f;
+
+    func_15143134(&sp58.sp84, sp58.sp64, ((u8)arg0 ? 1 : 2) * 0x40 + (s32)D_800D154C->unk1D4);
+
+    func_15102B38((s32)D_800D154C, (*((u8 *)&arg0 + 3)) ? 1 : 2, (s32)&sp58.sp84, (s32)&sp58.sp78, sp58.sp70,
+                  ((func_150ADA20() + 0U) % 5U) + 5, ((func_150ADA20() + 0U) % 0x9CU) + 0x64,
+                  (func_150ADA68() * 4000.0f) + 4000.0f,
+                  (s32)sp58.sp64, 0xFF, 0, -1, 0xFF, 0);
+
+    sp58.header.unk0 = 3;
+    sp58.header.unk1 = -1;
+    sp58.header.unk2 = (func_150ADA20() % 5U) + 3;
+    sp58.header.unk4 = 0;
+
+    sp58.header2.unk0 = (s32)sp58.sp64[0];
+    sp58.header2.unk4 = (s32)sp58.sp64[1];
+    sp58.header2.unk8 = (s32)sp58.sp64[2];
+
+    func_151602C0(&sp58.header, &sp58.header2, (func_150ADA20() % 0xC9U) + 0x37, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0);
+    func_151D5404((struct17 *)sp58.sp64, 506.0f, 1013.0f, 0.0009871668880805373f, 0xF, 0x14, 0xFF, 0);
+    func_151D5334((struct17 *)sp58.sp64, 506.0f, 1013.0f, 0.0009871668880805373f, 5, 0xFF, 0);
+}
 void func_15071230(s32 arg0) {
     func_15070F60(0);
 }
