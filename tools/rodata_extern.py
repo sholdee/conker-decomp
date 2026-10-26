@@ -244,7 +244,7 @@ def main():
     tag = re.sub(r"\W", "_", obj_name(obj))
     index = {}
     for addr in set(resolved.values()):
-        name = f"__ro_{tag}_{addr:08X}"
+        name = f".ro.{tag}.{addr:08X}"  # dotted: decomp-permuter treats it as a symbol
         sym = Symbol.from_parts(elf.fmt, elf.sym_strtab.add_str(name), addr, 0,
                                 STB_GLOBAL << 4, 0, SHN_ABS, elf.sym_strtab, name)
         index[addr] = len(elf.symbol_entries)
