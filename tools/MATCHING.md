@@ -8,6 +8,7 @@ mips2) to the EXACT original bytes. The verdict is the whole code bin's sha1 —
 python3 ~/conker/tools/mw.py new FUNC        # private workspace ~/conker-ws/FUNC (main tree is never touched)
 #   edit  ~/conker-ws/FUNC/conker/src/<file>.c   — replace the stub line for FUNC with C
 #   read  ~/conker-ws/FUNC/target.s (target asm), ~/conker-ws/FUNC/m2c.c (machine draft — types are guesses)
+#         ~/conker-ws/FUNC/prev.c if present: an earlier attempt's best C (often close — start from it)
 python3 ~/conker/tools/mw.py check FUNC      # ~2s: build + link + sha1; prints RESULT: MATCH | DIFF | BUILD-FAIL | STUB
                                              #   -q = summary only; a link failure still shows the object diff
 python3 ~/conker/tools/mw.py land FUNC       # only after RESULT: MATCH — merges into main, re-gates, commits

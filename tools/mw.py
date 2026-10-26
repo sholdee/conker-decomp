@@ -137,10 +137,17 @@ def cmd_new(a):
     if r.returncode or not r.stdout.strip():
         r = run(f"python3 ../tools/mips_to_c/m2c.py {asm}", wc, timeout=120)
     (ws / "m2c.c").write_text(r.stdout or r.stderr)
+    seed = REPO / ".nearmiss" / f"{func}.json"
+    if seed.exists():
+        js = json.loads(seed.read_text())
+        (ws / "prev.c").write_text(f"/* prior best attempt (old score {js.get('score')}); may be a good start */\n"
+                                   + js.get("c", ""))
     print(f"workspace : {ws}")
     print(f"edit      : {wc / cfile}   (replace the GLOBAL_ASM line for {func})")
     print(f"target    : {ws / 'target.s'}  ({m['size']} bytes, vram {m['vram']:08X})")
     print(f"m2c draft : {ws / 'm2c.c'}")
+    if (ws / "prev.c").exists():
+        print(f"prior try : {ws / 'prev.c'}")
     print(f"check     : python3 {REPO}/tools/mw.py check {func}")
 
 
