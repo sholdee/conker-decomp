@@ -191,13 +191,20 @@ def main():
                 offs.append(entries[k]); k += 4
             tables[x] = offs
 
-    def span(x):
-        """Bytes of the literal at X: up to the next referenced offset (max 8) or a NUL."""
+    LOAD_WIDTH = {0x20: 1, 0x24: 1, 0x21: 2, 0x25: 2, 0x23: 4, 0x31: 4, 0x39: 4,
+                  OP_LDC1: 8, OP_SDC1: 8}  # lb lbu lh lhu lw lwc1 swc1 ldc1 sdc1
+
+    def literal(x, lo):
+        """Bytes of the literal at X as the referencing instruction uses it: a load reads its
+        own width; an address (addiu) may be a string (through its NUL) or data (one word)."""
         nxt = min([o for o in ref_offs if o > x] + [len(rodata.data)])
-        b = rodata.data[x:min(nxt, x + 64)]
-        if b"\0" in b and b.index(b"\0") >= 4:  # strings: through the terminator
+        b = rodata.data[x:min(nxt, x + 256)]
+        width = LOAD_WIDTH.get(ins_at(lo.r_offset) >> 26)
+        if width:
+            return b[:width]
+        if b"\0" in b and b.index(b"\0") >= 1 and all(32 <= c < 127 or c in (9, 10) for c in b[:b.index(b"\0")]):
             return b[:b.index(b"\0") + 1]
-        return b[:8] if len(b) >= 8 else b
+        return b[:4]
 
     rom = Rom(basebin, yaml_path)
     tv = rom.text_vram(obj_name(obj))
@@ -216,9 +223,7 @@ def main():
                 if x in tables:
                     ok = a in rom.find_table(tables[x], base)
                 else:
-                    lit = span(x)
-                    if not lit.endswith(b"\0"):
-                        lit = lit[:8 if ins_at(lo.r_offset) >> 26 in (OP_LDC1, OP_SDC1) else 4]
+                    lit = literal(x, lo)
                     have = rom.at_vram(a, len(lit))
                     ok = have == lit
                     if not ok and have is not None:
@@ -227,16 +232,14 @@ def main():
                 if ok:
                     addr = a
         if addr is None:
-            hits = rom.find_table(tables[x], base) if x in tables else rom.search(span(x) or b"\0\0\0\0")
+            hits = rom.find_table(tables[x], base) if x in tables else rom.search(literal(x, lo) or b"\0\0\0\0")
             if hits:
                 near = [v for v in resolved.values() if v]
                 addr = min(hits, key=lambda h: min((abs(h - v) for v in near), default=0))
             else:
                 addr = 0
                 if x not in tables:
-                    lit = span(x)
-                    if not lit.endswith(b"\0"):
-                        lit = lit[:8 if ins_at(lo.r_offset) >> 26 in (OP_LDC1, OP_SDC1) else 4]
+                    lit = literal(x, lo)
                     notes.append(f"literal at file .text+0x{lo.r_offset:X} is {show(lit)}, which appears "
                                  f"nowhere in the ROM rodata — wrong value/precision?")
         resolved[x] = addr
