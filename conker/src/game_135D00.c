@@ -5,7 +5,142 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_135D00/func_15108850.s")
+
+typedef struct {
+    f32 unk00;
+    f32 unk04;
+    f32 unk08;
+    f32 unk0C;
+    f32 unk10;
+    s32 unk14;
+    u8 unk18;
+    u8 pad19[3];
+    s32 unk1C;
+    u8 unk20;
+    u8 pad21[3];
+} Payload_15108850;
+
+typedef struct {
+    u8 unk00;
+    u8 unk01;
+    u8 unk02;
+    u8 pad03;
+    s16 unk04;
+    u8 pad06[2];
+    s32 unk08;
+    s32 unk0C;
+    s32 unk10;
+    s32 unk14;
+    s32 unk18;
+    s32 unk1C;
+    s32 unk20;
+    u8 unk24;
+    u8 unk25;
+    u8 pad26[0xA];
+    s32 unk30;
+    s32 unk34;
+    u8 unk38;
+    u8 pad39[3];
+} Init_15108850;
+
+struct Ret_15108850 {
+    u8 pad[0x50];
+    s32 off;
+};
+
+struct Ret_15108850 *func_1513B5E0(void *arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4);
+struct225 *func_1516037C(void *arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4);
+
+void func_15108850(s32 arg0) {
+    struct Ret_15108850 *ret;
+
+    {
+        Init_15108850 init1;
+        Payload_15108850 payload1;
+
+        payload1.unk10 = 226.0f;
+        payload1.unk14 = 0x3E7;
+        payload1.unk18 = 0xFF;
+        payload1.unk1C = -1;
+        payload1.unk20 = 1;
+        init1.unk02 = 1;
+        init1.unk04 = 0x12C;
+        init1.unk30 = 9;
+        payload1.unk00 = 0.0f;
+        payload1.unk04 = 0.0f;
+        payload1.unk08 = 0.0f;
+        payload1.unk0C = 0.0f;
+        init1.unk00 = 0;
+        init1.unk01 = 0;
+        init1.unk34 = 0x1AB;
+        init1.unk08 = 1;
+        init1.unk0C = 0x220205;
+        init1.unk10 = 0x40600;
+        init1.unk24 = 0;
+        init1.unk25 = 0;
+        init1.unk14 = 1;
+        init1.unk18 = 0x36;
+        init1.unk1C = 0x80;
+        init1.unk20 = 0x20;
+        init1.unk38 = 1;
+
+        ret = func_1513B5E0(&init1, 1, 0x24, 0xFF, 1);
+        if (ret != 0) {
+            memcpy((u8 *)ret + ret->off + 0xF8, &payload1, 0x24);
+            {
+                Header header;
+                void *ptr;
+                ptr = ret;
+                header.unk0 = 2;
+                header.unk1 = 8;
+                header.unk2 = 0x12C;
+                header.unk4 = 0x13;
+                ret = (struct Ret_15108850 *)func_1516037C(&header, arg0, 4, 0xFF, 1);
+                if (ret != 0) {
+                    memcpy((u8 *)ret + 0x18, &ptr, 4);
+                }
+            }
+        }
+    }
+
+    {
+        struct Ret_15108850 *ret2;
+        s32 pad;
+        Init_15108850 init2;
+        Payload_15108850 payload2;
+
+        payload2.unk10 = 226.0f;
+        payload2.unk14 = 0x3E7;
+        payload2.unk18 = 0xFF;
+        payload2.unk1C = -1;
+        payload2.unk20 = 1;
+        init2.unk01 = 1;
+        init2.unk02 = 4;
+        init2.unk04 = 0x12C;
+        init2.unk30 = 9;
+        payload2.unk00 = 0.0f;
+        payload2.unk04 = 0.0f;
+        payload2.unk08 = 0.0f;
+        payload2.unk0C = 0.0f;
+        init2.unk00 = 0;
+        init2.unk34 = 0x1AC;
+        init2.unk08 = 1;
+        init2.unk0C = 0x220205;
+        init2.unk10 = 0x40600;
+        init2.unk24 = 0;
+        init2.unk25 = 0;
+        init2.unk14 = 1;
+        init2.unk18 = 0x36;
+        init2.unk1C = 0x80;
+        init2.unk20 = 0x20;
+        init2.unk38 = 1;
+
+        ret2 = func_1513B5E0(&init2, 1, 0x24, 0xFF, 1);
+        if (ret2 != 0) {
+            memcpy((u8 *)(ret2) + (ret2)->off + 0xF8, &payload2, 0x24);
+        }
+    }
+}
 
 extern f32 D_800BE9A4;
 extern f32 D_800A2470;
