@@ -28,7 +28,7 @@ extern void func_10004074(void *arg0);
 void func_15031C14(void *arg0);
 void func_1503F7B8(void *arg0);
 void func_1518CA04(s32 arg0);
-s32 func_1502FE10(s32 arg0, void *arg1, void *arg2, void *arg3, void *arg4, void *arg5, void *arg6);
+s32 func_1502FE10(s32 arg0, s32 *arg1, u8 *arg2, s32 *arg3, s32 *arg4, s32 *arg5, s32 *arg6);
 s32 func_1503F62C(s32 arg0, s32 arg1, void *arg2, void *arg3, void *arg4, void *arg5, void *arg6);
 
 typedef struct Game5D2C0EffectState {
@@ -86,7 +86,62 @@ typedef struct Game5D2C0AnimationOwner {
     struct197 *field_0x48;
 } Game5D2C0AnimationOwner;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_5D2C0/func_1502FE10.s")
+typedef struct {
+    s32 unk0;
+    u32 unk4;
+    s32 unk8;
+    u32 unkC;
+    s32 unk10;
+    s32 unk14;
+    s32 unk18;
+} struct_func_1502FE10;
+
+extern u8 D_800DF7D0[];
+extern s32 D_800DF9B8[];
+extern struct_func_1502FE10 *D_800E0148[];
+struct_func_1502FE10 *func_1502B6BC(s32, s32, s32, s32, s32, s32);
+void func_1510CE60(s32, s32, s32, s32, s32 *);
+void func_15168E54(s32, s32);
+
+s32 func_1502FE10(s32 arg0, s32 *arg1, u8 *arg2, s32 *arg3, s32 *arg4, s32 *arg5, s32 *arg6) {
+    struct_func_1502FE10 *temp_s3;
+    s32 i;
+
+    if (D_800DF7D0[arg0] == 0) {
+        temp_s3 = func_1502B6BC(0, 0, 0, 2, 9, arg0);
+        if (temp_s3 == 0) {
+            return 1;
+        }
+        *arg1 = temp_s3->unk0;
+        *arg2 = temp_s3->unk4 >> 2;
+        if ((s32)*arg2 > 0) {
+            i = 0;
+            do {
+                ((s32 *)*arg1)[i] += (s32)temp_s3;
+                func_1510CE60(((s32 *)*arg1)[i], 0, 1, 0x3E, &D_800DF9B8[arg0]);
+                func_15168E54(((s32 *)*arg1)[i], (s32)temp_s3);
+                i++;
+            } while (i < (s32)*arg2);
+        }
+        D_800E0148[arg0] = temp_s3;
+    } else {
+        temp_s3 = D_800E0148[arg0];
+        *arg1 = temp_s3->unk0;
+        *arg2 = temp_s3->unk4 >> 2;
+    }
+    D_800DF7D0[arg0]++;
+    *arg3 = (s32)&temp_s3->unk18;
+    if (arg4 != 0) {
+        *arg4 = temp_s3->unk10;
+    }
+    if (arg5 != 0) {
+        *arg5 = temp_s3->unk8;
+        if (arg6 != 0) {
+            *arg6 = temp_s3->unkC >> 4;
+        }
+    }
+    return 0;
+}
 
 typedef struct Func1502FFD8Arg0 {
     u8 pad0[1];

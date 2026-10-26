@@ -124,7 +124,90 @@ void func_15194B94(s32 arg0, struct127* arg1, s32 arg2) {
     func_151949F4(1, arg0, temp);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1C1150/func_15194BF0.s")
+void func_15194BF0(s32 arg0, struct127 *arg1, u8 *arg2) {
+    s32 id;
+    struct126 *temp_v0;
+    struct127 *temp_t6;
+    s32 temp_v1;
+
+    id = arg1->id;
+    if (id >= 0x3C) {
+        switch (id) {
+        case 0x58:
+        case 0x5A:
+        case 0x5B:
+        case 0x5F:
+        case 0x74:
+        case 0x75:
+        case 0x7A:
+        case 0x80:
+        case 0x87:
+        case 0x88:
+        case 0x90:
+        case 0x96:
+        case 0x98:
+        case 0x9C:
+        case 0x9D:
+        case 0x9F:
+        case 0xA0:
+        case 0xB0:
+        case 0xB1:
+        case 0xB2:
+        case 0xB4:
+            goto full_body;
+        case 0x7C:
+            goto cleanup_body;
+        }
+    } else {
+        if (id >= 0x17) {
+            if (id != 0x3B) {
+                return;
+            }
+            goto full_body;
+        } else {
+            switch (id) {
+            case 0:
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+            case 0x11:
+            case 0x14:
+                goto full_body;
+            case 0x16:
+                goto stop_then_cleanup;
+            }
+        }
+    }
+    return;
+
+stop_then_cleanup:
+    func_15136C3C(arg1, 1, 1, 1, 1, 0, 0xFF, 1);
+    func_15145A50(arg1);
+
+cleanup_body:
+    if (arg1->unk65 != 0) {
+        temp_v1 = arg1->unk65 - 1;
+        temp_t6 = arg1;
+        D_800CC2D0[temp_v1].unk232 = 0xA;
+        D_800CC2D0[temp_v1].unk218 = NULL;
+        temp_t6->unk65 = 0;
+after_store_unk65:
+        return;
+    }
+    return;
+
+full_body:
+    func_15136C3C(arg1, 1, 1, 1, 1, 0, 0xFF, 1);
+    func_15145A50(arg1);
+    func_1507CD64(arg1, 6);
+    temp_v0 = arg1->unk31C;
+    if (temp_v0 != NULL) {
+        if (((u8 *) temp_v0)[0x19B] != 0) {
+            func_15063B64(arg1);
+        }
+    }
+}
 
 s32 func_15194FF4(s32, s32, s32, s32);
 

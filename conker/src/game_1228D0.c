@@ -181,7 +181,71 @@ void func_150F568C(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1228D0/func_150F56B0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1228D0/func_150F5A54.s")
+s32 func_150F5A54(s32 arg0, struct127 *arg1) {
+    struct197 *anim;
+    Gfx *gfx;
+    s32 count;
+    s32 forceTwo;
+    f32 scale;
+    s32 value;
+
+    anim = arg1->unk2D0;
+    if (anim == 0) {
+        return 0;
+    }
+
+    gfx = **(Gfx ***)(arg0 + 0x24);
+    count = 1;
+    forceTwo = 0;
+    switch (*(s32 *)(arg0 + 0x38)) {
+    case 0:
+        if (arg1->unk84.uh == 5) {
+            scale = 1.0f;
+            *(s32 *)(arg0 + 0x38) = 1;
+        } else {
+            forceTwo = 1;
+        }
+        break;
+    case 1:
+        scale = 1.0f;
+        break;
+    case 2:
+        scale = 0.0f;
+        break;
+    }
+
+    if (arg1->unk84.uh == 5) {
+        if (anim->unk8 < 69.0f) {
+            scale = 1.0f;
+        } else if (84.0f < anim->unk8) {
+            scale = 0.0f;
+            *(s32 *)(arg0 + 0x38) = 2;
+        } else {
+            scale = (anim->unk8 - 69.0f) / 15;
+            scale = 1.0f - scale;
+        }
+    }
+
+    arg0 = 0;
+    do {
+        count--;
+        if (*(s8 *)((arg0 << 3) + (u8 *)gfx) != -0xE) {
+            do {
+            } while (*(s8 *)((u8 *)gfx + (++arg0 << 3)) != -0xE);
+        }
+        if (count != 0) {
+            arg0++;
+        }
+    } while (count != 0);
+
+    if (forceTwo != 0) {
+        value = 2;
+    } else {
+        value = (s32)((58.0f * scale) + 44.0f);
+    }
+    gfx[arg0].words.w0 = (G_SETTILESIZE << 24) | (2 << 12) | (value & 0xFFF);
+    return 0;
+}
 
 void func_150F5C08(void *arg0, s16 arg1, u8 arg2, s32 arg3) {
     struct {

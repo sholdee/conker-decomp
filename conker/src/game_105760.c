@@ -4,7 +4,8 @@
 
 void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_105760/func_150D82B0.s")
+void func_150D82B0(s32 arg0) {
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_105760/func_150D82BC.s")
 
