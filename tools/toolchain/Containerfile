@@ -1,0 +1,7 @@
+FROM docker.io/library/ubuntu:24.04
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y binutils-mips-linux-gnu build-essential git less libglib2.0-0t64 python-is-python3 python3 python3-pip python3-venv unzip wget cpp && rm -rf /var/lib/apt/lists/*
+COPY requirements.txt /
+COPY tools/n64splat/requirements.txt /splat-req.txt
+RUN python3 -m pip install --break-system-packages --no-cache-dir -r /requirements.txt -r /splat-req.txt 'pycparser<3'
+WORKDIR /conker
