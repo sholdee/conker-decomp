@@ -265,7 +265,53 @@ void func_1517F7B4(void)
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1AC2F0/func_1517F814.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1AC2F0/func_1517F9F4.s")
+Gfx *func_1517F9F4(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 arg5) {
+    typedef struct {
+        char pad0[0x24];
+        f32 unk24;
+        f32 unk28;
+        f32 unk2C;
+        f32 unk30;
+        char pad34[0x14C];
+    } Struct1517F9F4;
+    Struct1517F9F4 *vp;
+    s32 temp;
+    s32 clipped;
+    s32 top;
+    s32 bottom;
+    s32 right;
+    s32 t;
+
+    if (lrx < ulx) {
+        temp = ulx;
+        ulx = lrx;
+        lrx = temp;
+    }
+    if (lry < uly) {
+        temp = uly;
+        uly = lry;
+        lry = temp;
+    }
+    vp = &((Struct1517F9F4 *)D_800BE628)[arg5];
+    temp = vp->unk2C;
+    top = vp->unk24;
+    right = vp->unk30;
+    bottom = vp->unk28;
+    if (!((uly < bottom) && (top < lry) && (ulx < right) && (temp < lrx))) {
+        return gfx;
+    }
+
+    if (ulx < temp) { clipped = temp; } else { if (right < ulx) { t = right; } else { t = ulx; } clipped = t; }
+    ulx = clipped;
+    if (uly < top) { clipped = top; } else { if (bottom < uly) { t = bottom; } else { t = uly; } clipped = t; }
+    uly = clipped;
+    if (lrx < temp) { clipped = temp; } else { if (right < lrx) { t = right; } else { t = lrx; } clipped = t; }
+    lrx = clipped;
+    if (lry < top) { clipped = top; } else { if (bottom < lry) { t = bottom; } else { t = lry; } clipped = t; }
+    lry = clipped;
+    gDPFillRectangle(gfx++, ulx, uly, lrx, lry);
+    return gfx;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1AC2F0/func_1517FB9C.s")
 

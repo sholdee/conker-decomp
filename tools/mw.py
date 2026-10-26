@@ -44,10 +44,34 @@ WORD_RE = re.compile(r"^\s*/\* [0-9A-F]+ ([0-9A-F]{8}) ([0-9A-F]{8}) \*/", re.M)
 BIN = "build/conker.us.bin"
 
 
+TCD_SOCK = WS_ROOT / ".tcd.sock"
+
+
 def run(cmd, cwd, check=False, timeout=600):
-    """Run a command inside the toolchain container."""
-    full = ["podman", "exec", "-w", str(cwd), CONTAINER, "bash", "-c", cmd]
-    p = subprocess.run(full, capture_output=True, text=True, timeout=timeout)
+    """Run a command inside the toolchain container — via the tcd socket when it is up
+    (tools/toolchain/tcd.py; `podman exec` serializes on podman's lock under load)."""
+    p = None
+    if TCD_SOCK.exists():
+        import socket
+        import types
+        try:
+            with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as so:
+                so.settimeout(timeout + 30)
+                so.connect(str(TCD_SOCK))
+                so.sendall((json.dumps({"cmd": cmd, "cwd": str(cwd), "timeout": timeout}) + "\n").encode())
+                buf = b""
+                while not buf.endswith(b"\n"):
+                    chunk = so.recv(1 << 16)
+                    if not chunk:
+                        break
+                    buf += chunk
+            resp = json.loads(buf)
+            p = types.SimpleNamespace(returncode=resp["rc"], stdout=resp["out"], stderr="")
+        except (OSError, ValueError):
+            p = None
+    if p is None:
+        full = ["podman", "exec", "-w", str(cwd), CONTAINER, "bash", "-c", cmd]
+        p = subprocess.run(full, capture_output=True, text=True, timeout=timeout)
     if check and p.returncode:
         sys.exit(f"command failed: {cmd}\n{p.stdout[-2000:]}{p.stderr[-2000:]}")
     return p
@@ -273,11 +297,34 @@ def check_tree(func, m, wc, want, quiet=False, U=2):
     return 1, out + ["RESULT: DIFF"]
 
 
+def log_check(ws, code, out, n, batch=False):
+    """Append one line per check to ws/checks.jsonl (read by tools/dashboard.py)."""
+    import time
+    rec = {"t": round(time.time(), 1), "result": ["MATCH", "DIFF", "BUILD-FAIL", "STUB"][code], "n": n}
+    text = "\n".join(out)
+    mm = re.search(r"DIFF: (\d+)/(\d+) words equal", text)
+    if mm:
+        rec["same"] = int(mm.group(1))
+    if code == 0:
+        rec["same"] = n
+    mm = re.search(r"ROWS: structural (\d+)\s+register-only (\d+)\s+immediate/offset (\d+)", text)
+    if mm:
+        rec["structural"], rec["register"], rec["immediate"] = map(int, mm.groups())
+    if batch:
+        rec["batch"] = True
+    try:
+        with open(ws / "checks.jsonl", "a") as fh:
+            fh.write(json.dumps(rec) + "\n")
+    except OSError:
+        pass
+
+
 def cmd_check(a):
     m = meta(a.func)
     ws = ws_dir(a.func)
     want = [w for _, w in target_words(ws / "target.s")]
     code, out = check_tree(a.func, m, ws / "conker", want, quiet=a.q or a.no_diff, U=a.U)
+    log_check(ws, code, out, len(want))
     print("\n".join(out))
     return code
 
@@ -311,6 +358,7 @@ def cmd_batch(a):
             wc = slots / str(k) / "conker"
             shutil.copy(f, wc / m["file"])
             code, out = check_tree(func, m, wc, want, quiet=True)
+            log_check(ws, code, out, len(want), batch=True)
             summ = " | ".join(l for l in out if l.startswith(("DIFF", "ROWS", "FRAME", "MATCH", "BUILD-FAIL")))
             return f, code, summ
         finally:

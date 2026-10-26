@@ -9,3 +9,5 @@ podman build -t conker-tc -f "$REPO/tools/toolchain/Containerfile" "$REPO"
 podman rm -f conker-tc >/dev/null 2>&1 || true
 podman run -d --name conker-tc --userns=keep-id --security-opt label=disable \
   -v "$REPO:$REPO" -v "$WS:$WS" -e HOME="$HOME" conker-tc sleep infinity
+# Command daemon: mw.py talks to it over a socket instead of paying podman's exec lock per call.
+podman exec -d conker-tc python3 "$REPO/tools/toolchain/tcd.py" "$WS/.tcd.sock"

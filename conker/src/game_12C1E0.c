@@ -10,7 +10,7 @@ void func_150FF2D4(u8 *, struct17 *, struct17 *, struct17 *, struct17 *, struct1
 s32 func_151C229C(struct17 *arg0, struct17 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11, struct127 *arg12, s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24, s32 arg25, s32 arg26);
 void func_151D3F14(struct17 *arg0, u8 arg1, s32 arg2);
 void func_151D4408(struct17 *, struct17 *, void *, struct127 *, f32, s32, s32);
-void func_150FF474(struct17 *, struct17 *, s32, s32);
+void func_150FF474(struct17 *, struct17 *, u8, s32);
 
 typedef u8 Func150FED30Entry[0x40];
 
@@ -89,7 +89,7 @@ void func_150FF2D4(u8 *, struct17 *, struct17 *, struct17 *, struct17 *, struct1
 void func_150F7470(struct17 *, struct17 *, s32, s32, s32, s32, f32, f32, f32, struct127 *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 void func_151D3F14(struct17 *arg0, u8 arg1, s32 arg2);
 void func_151D4408(struct17 *, struct17 *, void *, struct127 *, f32, s32, s32);
-void func_150FF474(struct17 *, struct17 *, s32, s32);
+void func_150FF474(struct17 *, struct17 *, u8, s32);
 extern void func_1505D1C4(f32, f32, f32, s32, s32, s32, s32, s32);
 
 typedef u8 Func150FF084Entry[0x40];
@@ -178,7 +178,68 @@ void func_150FF2AC(struct127 *arg0, struct17 *arg1, struct17 *arg2, struct17 *ar
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_12C1E0/func_150FF2D4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_12C1E0/func_150FF474.s")
+void func_150FF474(struct17 *arg0, struct17 *arg1, u8 arg2, s32 arg3) {
+    struct packet {
+        u8 unk0;
+        u8 unk1;
+        s16 unk2;
+        s16 unk4;
+        u8 pad6[2];
+        s32 unk8;
+        s32 unkC;
+        u8 unk10;
+        u8 unk11;
+        u8 unk12;
+        u8 unk13;
+        f32 unk14;
+        f32 unk18;
+        struct17 unk1C;
+        struct17 unk28;
+        f32 unk34;
+        f32 unk38;
+        f32 unk3C;
+        s32 unk40;
+        u8 unk44;
+        u8 unk45;
+        u8 unk46;
+        u8 unk47;
+        s32 unk48;
+        u8 unk4C;
+    };
+    u8 i;
+    s32 temp;
+    s32 x;
+    struct packet sp84;
+
+    sp84.unk0 = 0x5F;
+    sp84.unk1 = 5;
+    sp84.unk2 = 0x2203;
+    sp84.unk8 = 0;
+    sp84.unkC = 0;
+    sp84.unk10 = 0xFF;
+    sp84.unk11 = 0xFF;
+    sp84.unk12 = 0xFF;
+    sp84.unk13 = 0xFF;
+    sp84.unk1C = *arg0;
+    sp84.unk34 = 0.0f;
+    sp84.unk38 = 0.0f;
+    sp84.unk3C = 0.0f;
+    sp84.unk40 = 0x40CC0009;
+    sp84.unk45 = 0xFF;
+    sp84.unk46 = 0;
+    sp84.unk47 = 7;
+    sp84.unk4C = 0xFF;
+    sp84.unk48 = 0;
+    sp84.unk4 = (func_150ADA20() & 3) + 3;
+    for (i = 0; i < 6; i++) {
+        sp84.unk14 = (func_150ADA68() * 11.10000038f) + 5.0f;
+        sp84.unk18 = (func_150ADA68() * 0.9990000725f) + 2.48300004f;
+        sp84.unk28 = arg1[i];
+        sp84.unk44 = (func_150ADA20() % 0x9CU) + 0x64;
+        temp = (func_150ADA20() & 1) ? 2 : 0;
+        func_1513D2F0(&sp84, (s32)&D_800A4AA0, 0, 0, 0, 0x1B, temp + 1, 0, 0, 0, arg2, arg3);
+    }
+}
 
 s32 func_150FF6B4(struct127 *arg0, s32 arg1, s32 arg2) {
     if (arg0->id == 0x98) {

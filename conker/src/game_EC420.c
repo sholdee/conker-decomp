@@ -166,7 +166,116 @@ s32 func_150BF0F4(Struct150BF0F4 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_EC420/func_150BFA7C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_EC420/func_150BFFE0.s")
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3F_150BFFE0;
+
+typedef struct {
+    s16 unk0;
+    s16 unk2;
+    u8 unk4;
+    u8 pad5;
+    s16 unk6;
+    s32 unk8;
+    s32 unkC;
+    s16 unk10;
+    s16 unk12;
+    s32 unk14;
+    s32 unk18;
+    u8 unk1C;
+    u8 unk1D;
+    u8 unk1E;
+    u8 unk1F;
+    u8 unk20;
+    u8 unk21;
+    u8 unk22;
+    u8 unk23;
+    u8 unk24;
+    u8 unk25;
+    s16 unk26;
+    s16 unk28;
+    s16 unk2A;
+    f32 unk2C;
+    f32 unk30;
+    f32 unk34;
+    Vec3F_150BFFE0 unk38;
+    s16 unk44;
+    s16 unk46;
+    s16 unk48;
+    s16 unk4A;
+    f32 unk4C;
+    f32 unk50;
+    f32 unk54;
+    f32 unk58;
+    s32 unk5C;
+    u8 unk60;
+    s8 unk61;
+    u8 unk62;
+    u8 unk63;
+    u8 unk64;
+    u8 pad65[3];
+    f32 unk68;
+} Struct150BFFE0;
+
+void func_15136C3C(struct127 *, s32, s32, s32, s32, s32, s32, s32);
+void func_15153634(Struct150BFFE0 *arg0, u8 arg1, u8 arg2, s32 arg3);
+
+void func_150BFFE0(struct127 *arg0) {
+    Vec3F_150BFFE0 pos;
+    Struct150BFFE0 sp28;
+
+    pos.x = arg0->x_position;
+    pos.y = arg0->unk180 + 70.0f;
+    pos.z = arg0->z_position;
+    func_15136C3C(arg0, 0, 0, 1, 0, 0, 0xFF, 1);
+    sp28.unk0 = 0x11;
+    sp28.unk2 = 7;
+    sp28.unk4 = 0x6C;
+    sp28.unk6 = 0x5103;
+    sp28.unk8 = 0x200005;
+    sp28.unkC = 0;
+    sp28.unk10 = 0x28;
+    sp28.unk12 = 0x14;
+    sp28.unk14 = 0;
+    sp28.unk18 = 0;
+    sp28.unk1F = 0xFF;
+    sp28.unk1C = 0x4E;
+    sp28.unk1D = 0x54;
+    sp28.unk1E = 0x7B;
+    sp28.unk20 = 0xA4;
+    sp28.unk21 = 0xA1;
+    sp28.unk22 = 0xC8;
+    sp28.unk23 = 0x9B;
+    sp28.unk24 = 0x64;
+    sp28.unk25 = 0xFF;
+    sp28.unk26 = 0x1E;
+    sp28.unk28 = 8;
+    sp28.unk2A = 0x1E;
+    sp28.unk2C = 1.019999981f;
+    sp28.unk30 = 451.0f;
+    sp28.unk34 = 501.0f;
+    sp28.unk38.x = pos.x;
+    sp28.unk38.y = pos.y + 35.0f;
+    sp28.unk38.z = pos.z;
+    sp28.unk44 = 0;
+    sp28.unk46 = -0x14;
+    sp28.unk48 = 0xFF;
+    sp28.unk4A = 0x1E;
+    sp28.unk4C = 15.0f;
+    sp28.unk50 = 39.0f;
+    sp28.unk54 = 0.3540000021f;
+    sp28.unk58 = 0.6260000467f;
+    sp28.unk5C = 0x40040E07;
+    sp28.unk60 = 0x10;
+    sp28.unk61 = -1;
+    sp28.unk62 = 8;
+    sp28.unk63 = 6;
+    sp28.unk64 = 1;
+    sp28.unk68 = 0.8775510192f;
+    func_15153634(&sp28, 0xFF, 0xFF, 1);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_EC420/func_150C01DC.s")
 

@@ -1,6 +1,8 @@
 #include <ultra64.h>
 
+#define func_1506160C func_1506160C_hdr
 #include "functions.h"
+#undef func_1506160C
 #include "variables.h"
 
 
@@ -1364,7 +1366,61 @@ void func_150615DC(struct127 *arg0) {
     arg0->unkB = arg0->unkC = arg0->unkD = arg0->unkE.ub[0] = 0xFF;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1506160C.s")
+void func_1506160C(struct127 *arg0, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
+    s32 bit;
+    s32 hi;
+
+    if (arg1 >= 8) {
+        if (arg1 != 10) {
+            if (arg1 == 8) {
+                bit = 1 << (u8)arg4;
+                arg0->unkE.ub[1] |= bit;
+                arg2 = 0;
+            } else {
+                bit = 1 << (u8)arg4;
+                arg0->unkE.ub[1] &= ~bit;
+                arg2 = 0xFF;
+            }
+            hi = bit << 4;
+            if (arg0->unkE.ub[1] & hi) {
+                ((u8 *)arg0 + (u8)arg4)[0xB] = arg2;
+            }
+            arg0->unkE.ub[1] &= ~hi;
+        } else {
+            arg0->unkE.ub[1] |= (1 << (u8)arg4) << 4;
+            arg2 = 0;
+        }
+        if ((arg0->pad2FC[1] != 0) || (D_800DBFF4[(u8)arg4] != 0)) {
+            ((u8 *)arg0 + (u8)arg4)[0xB] = arg2;
+        }
+    } else if (arg1 >= arg0->unkA) {
+        if (arg1 == 4) {
+            arg0->unkA = arg1;
+            arg0->unk7 = 0;
+            arg0->unk8 = 0xFF;
+            arg0->unk9 = 0x20;
+        } else if (arg1 == 5) {
+            arg0->unkA = arg1;
+            arg0->unk8 = 0;
+            arg0->unk9 = 0x20;
+        } else if (arg1 == 6) {
+            arg0->unkA = arg1;
+            arg0->unk8 = 0;
+            arg0->unk9 = 8;
+        } else if (arg1 == 2) {
+            arg0->unkA = arg1;
+            arg0->unk8 = arg2;
+            arg0->unk9 = arg3;
+        } else if (arg1 == 1) {
+            arg0->unkA = 0;
+            arg0->unk7 = arg2;
+            arg0->unk8 = arg2;
+        }
+        if (*(s32 *)D_800DBFF4 != 0) {
+            arg0->unk7 = arg0->unk8;
+        }
+    }
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_150617BC.s")
 // ???
 s32 func_1506196C(u8 *arg0, s32 arg1) {

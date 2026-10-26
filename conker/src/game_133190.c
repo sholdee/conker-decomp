@@ -171,7 +171,97 @@ void *func_151061EC(struct S151061EC *arg0) {
     return &arg0->elems[i];
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_133190/func_15106214.s")
+struct Vec15106214 { f32 x; f32 y; f32 z; };
+struct S15106214Record {
+    f32 unk0;
+    struct Vec15106214 unk4;
+    struct Vec15106214 unk10;
+    struct Vec15106214 unk1C;
+    struct Vec15106214 unk28;
+};
+struct S15106214Arg {
+    u8 pad0[0x14];
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    f32 unk30;
+    f32 unk34;
+    f32 unk38;
+    f32 unk3C;
+    f32 unk40;
+    u8 pad44[0x48 - 0x44];
+    s32 unk48;
+    u8 pad4C[0x64 - 0x4C];
+    f32 unk64;
+};
+
+struct S15106214Record *func_151061E0(struct102 *arg0);
+f32 func_151064B4(f32 arg0);
+f32 func_151064DC(f32 arg0);
+f32 func_15106510(f32 arg0);
+f32 func_15106540(f32 arg0);
+f32 func_15106558(f32 arg0);
+f32 func_15106584(f32 arg0);
+f32 func_151065BC(f32 arg0);
+f32 func_151065EC(f32 arg0);
+s32 func_15146078(struct Vec15106214 *arg0, struct Vec15106214 *arg1, struct Vec15106214 *arg2);
+
+#define A ((struct S15106214Arg *)arg0)
+void func_15106214(struct102 *arg0) {
+    struct S15106214Record *rec;
+    f32 step;
+    struct S15106214Record *out;
+    s32 i;
+    f32 t;
+    f32 b0;
+    f32 b1;
+    f32 b2;
+    f32 b3;
+    f32 d0;
+    f32 d1;
+    f32 d2;
+    f32 d3;
+    rec = func_151061E0(arg0);
+    step = A->unk64;
+    i = 0;
+    t = step;
+    if (A->unk48 > 0) {
+        do {
+
+        out = &rec[i];
+        out->unk0 = t;
+        b0 = func_151064B4(t);
+        b1 = func_151064DC(t);
+        b2 = func_15106510(t);
+        b3 = func_15106540(t);
+        d0 = func_15106558(t);
+        d1 = func_15106584(t);
+        d2 = func_151065BC(t);
+        d3 = func_151065EC(t);
+        out->unk4.x = (A->unk38 * b3) + ((A->unk14 * b0) + (A->unk20 * b1) + (A->unk2C * b2));
+        out->unk4.y = (A->unk3C * b3) + ((A->unk18 * b0) + (A->unk24 * b1) + (A->unk30 * b2));
+        out->unk4.z = (A->unk40 * b3) + ((A->unk1C * b0) + (A->unk28 * b1) + (A->unk34 * b2));
+        out->unk10.x = (A->unk38 * d3) + ((A->unk14 * d0) + (A->unk20 * d1) + (A->unk2C * d2));
+        out->unk10.y = (A->unk3C * d3) + ((A->unk18 * d0) + (A->unk24 * d1) + (A->unk30 * d2));
+        out->unk10.z = (A->unk40 * d3) + ((A->unk1C * d0) + (A->unk28 * d1) + (A->unk34 * d2));
+        if (func_15146078(&out->unk10, &out->unk1C, &out->unk28) == 0) {
+            out->unk1C.x = 0.0f;
+            out->unk1C.y = 0.0f;
+            out->unk1C.z = 0.0f;
+            out->unk28.x = 0.0f;
+            out->unk28.y = 0.0f;
+            out->unk28.z = 0.0f;
+        }
+        i += 1;
+        t += step;
+        } while (i < A->unk48);
+    }
+}
+#undef A
 
 f32 func_151064B4(f32 arg0) {
     f32 t = 1.0f - arg0;

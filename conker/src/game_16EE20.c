@@ -850,7 +850,63 @@ f32 func_15144C8C(f32 arg0, f32 arg1) {
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15144CEC.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15144E80.s")
+struct struct_15144E80 {
+    s16 unk0;
+    s16 unk2;
+    s16 unk4;
+    s16 unk6;
+    s16 unk8;
+    s16 unkA;
+    s16 unkC;
+    s16 unkE;
+    s16 unk10;
+};
+
+s32 func_15144E80(struct struct_15144E80 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3) {
+    struct17 sp54;
+    struct17 sp48;
+    struct17 sp3C;
+    struct17 sp30;
+    struct17 sp24;
+    struct17 sp18;
+
+    if (arg3 != NULL) {
+    } else {
+        arg3 = &sp30;
+    }
+
+    ((struct17 *)&sp3C)->unk0 = (f32)arg0->unk0;
+    ((struct17 *)&sp3C)->unk4 = (f32)arg0->unk2;
+    ((struct17 *)&sp3C)->unk8 = (f32)arg0->unk4;
+    ((struct17 *)&sp48)->unk0 = (f32)arg0->unk6;
+    ((struct17 *)&sp48)->unk4 = (f32)arg0->unk8;
+    ((struct17 *)&sp48)->unk8 = (f32)arg0->unkA;
+    ((struct17 *)&sp54)->unk0 = (f32)arg0->unkC;
+    ((struct17 *)&sp54)->unk4 = (f32)arg0->unkE;
+    ((struct17 *)&sp54)->unk8 = (f32)arg0->unk10;
+
+    if ((((struct17 *)&sp48)->unk0 == ((struct17 *)&sp3C)->unk0) && (((struct17 *)&sp48)->unk4 == ((struct17 *)&sp3C)->unk4) && (((struct17 *)&sp48)->unk8 == ((struct17 *)&sp3C)->unk8)) {
+        return 0;
+    }
+    if ((((struct17 *)&sp54)->unk0 == ((struct17 *)&sp3C)->unk0) && (((struct17 *)&sp54)->unk4 == ((struct17 *)&sp3C)->unk4) && (((struct17 *)&sp54)->unk8 == ((struct17 *)&sp3C)->unk8)) {
+        return 0;
+    }
+    if ((((struct17 *)&sp54)->unk0 == ((struct17 *)&sp48)->unk0) && (((struct17 *)&sp54)->unk4 == ((struct17 *)&sp48)->unk4) && (((struct17 *)&sp54)->unk8 == ((struct17 *)&sp48)->unk8)) {
+        return 0;
+    }
+
+    sp24.unk0 = ((struct17 *)&sp3C)->unk0 - ((struct17 *)&sp48)->unk0;
+    sp24.unk4 = ((struct17 *)&sp3C)->unk4 - ((struct17 *)&sp48)->unk4;
+    sp24.unk8 = ((struct17 *)&sp3C)->unk8 - ((struct17 *)&sp48)->unk8;
+    sp18.unk0 = ((struct17 *)&sp54)->unk0 - ((struct17 *)&sp48)->unk0;
+    sp18.unk4 = ((struct17 *)&sp54)->unk4 - ((struct17 *)&sp48)->unk4;
+    sp18.unk8 = ((struct17 *)&sp54)->unk8 - ((struct17 *)&sp48)->unk8;
+
+    func_151450B4(&sp24, &sp18, arg3);
+    func_151450B4(&sp24, arg3, arg1);
+    *arg2 = sp24;
+    return 1;
+}
 
 void func_151450B4(struct17 *arg0, struct17 *arg1, struct17 *arg2) {
     arg2->unk0 = arg0->unk4 * arg1->unk8 - arg0->unk8 * arg1->unk4;
