@@ -176,6 +176,15 @@ def asm_diff(wc, func, n, U):
     return re.sub(r"\x1b\[[0-9;]*m", "", d.stdout).rstrip()
 
 
+def frame(words):
+    """Stack frame size from the first `addiu sp,sp,-N` (0x27BDxxxx)."""
+    for w in words[:8]:
+        v = int(w, 16)
+        if v >> 16 == 0x27BD and v & 0x8000:
+            return 0x10000 - (v & 0xFFFF)
+    return None
+
+
 def cmd_check(a):
     func = a.func
     ws = ws_dir(func)
@@ -220,6 +229,12 @@ def cmd_check(a):
         print(f"MATCH: {func} — whole code bin sha1 matches the ROM. Run: mw.py land {func}")
         print("RESULT: MATCH")
         return 0
+    fw, fg = frame(want), frame(got)
+    if fw != fg:
+        print(f"FRAME: target allocates 0x{fw or 0:X} bytes of stack, yours 0x{fg or 0:X}")
+    notes = wc / "build" / (m["file"].removesuffix(".c") + ".c.o.notes")
+    if notes.exists():
+        print("LITERALS: " + notes.read_text().strip().replace("\n", "\nLITERALS: "))
     if first is None:
         print(f"FUNC-BYTES-MATCH but the bin differs elsewhere (rodata/data/other funcs): "
               f"check for new string/float literals, statics, or edited headers.")

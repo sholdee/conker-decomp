@@ -139,6 +139,7 @@ def main():
     if sys.argv[1] == "--labels":
         return write_labels(sys.argv[2], sys.argv[3])
     basebin, yaml_path, obj = sys.argv[1:4]
+    Path(obj + ".notes").unlink(missing_ok=True)
     if owns_rodata(yaml_path, obj):
         return  # this file's .rodata is linked from C already
     elf = ElfFile(Path(obj).read_bytes())
@@ -203,6 +204,7 @@ def main():
     base = tv[1] if tv else None
 
     resolved = {}
+    notes = []
     for hi, lo, x in refs:
         if x in resolved:
             continue
@@ -217,7 +219,11 @@ def main():
                     lit = span(x)
                     if not lit.endswith(b"\0"):
                         lit = lit[:8 if ins_at(lo.r_offset) >> 26 in (OP_LDC1, OP_SDC1) else 4]
-                    ok = rom.at_vram(a, len(lit)) == lit
+                    have = rom.at_vram(a, len(lit))
+                    ok = have == lit
+                    if not ok and have is not None:
+                        notes.append(f"literal at file .text+0x{lo.r_offset:X} is {show(lit)} but the "
+                                     f"original rodata at 0x{a:08X} holds {show(have)}")
                 if ok:
                     addr = a
         if addr is None:
@@ -227,6 +233,12 @@ def main():
                 addr = min(hits, key=lambda h: min((abs(h - v) for v in near), default=0))
             else:
                 addr = 0
+                if x not in tables:
+                    lit = span(x)
+                    if not lit.endswith(b"\0"):
+                        lit = lit[:8 if ins_at(lo.r_offset) >> 26 in (OP_LDC1, OP_SDC1) else 4]
+                    notes.append(f"literal at file .text+0x{lo.r_offset:X} is {show(lit)}, which appears "
+                                 f"nowhere in the ROM rodata — wrong value/precision?")
         resolved[x] = addr
 
     tag = re.sub(r"\W", "_", obj_name(obj))
@@ -251,6 +263,19 @@ def main():
     for rs in rel_tx:
         rs.data = b"".join(r.to_bin() for r in rs.relocations)
     elf.write(obj)
+    if notes:
+        Path(obj + ".notes").write_text("\n".join(notes) + "\n")
+
+
+def show(b):
+    """Human form of a rodata literal: float/double value, else the string or hex."""
+    if len(b) == 4:
+        return f"0x{b.hex().upper()} ({struct.unpack('>f', b)[0]!r}f)"
+    if len(b) == 8:
+        return f"0x{b.hex().upper()} ({struct.unpack('>d', b)[0]!r})"
+    if b.endswith(b"\0"):
+        return repr(b[:-1].decode("latin1"))
+    return "0x" + b.hex().upper()
 
 
 if __name__ == "__main__":
