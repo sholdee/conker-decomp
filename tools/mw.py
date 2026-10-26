@@ -8,7 +8,7 @@ verdict is exact (whole-bin sha1) and there is no "isolated vs in-project" gap.
 Workspaces never touch the main tree; `land` is the only writer, and it re-gates.
 
   mw.py new   FUNC [--force]   create ~/conker-ws/FUNC (+ m2c draft)
-  mw.py check FUNC [-U N] [--no-diff]
+  mw.py check FUNC [-U N] [--no-diff] [-q]
                                build + verdict + asm diff
   mw.py land  FUNC             merge src/include edits into main, full sha gate, commit
   mw.py pick  [--min B] [--max B] [--no-jtbl] [--desc] [-n N]
@@ -167,6 +167,12 @@ def built_words(wc, vram, size, func):
     return start, words
 
 
+def asm_diff(wc, func, n, U):
+    d = run(f"python3 ../tools/asm-differ/diff.py -o {func} --format plain --no-pager "
+            f"-U {U} --max-size {n + 16} 2>&1", wc, timeout=300)
+    return re.sub(r"\x1b\[[0-9;]*m", "", d.stdout).rstrip()
+
+
 def cmd_check(a):
     func = a.func
     ws = ws_dir(func)
@@ -186,9 +192,14 @@ def cmd_check(a):
     r = run("make -j4 build/conker.us.bin 2>&1", wc)
     if r.returncode or not (wc / BIN).exists():
         errs = [l for l in r.stdout.splitlines()
-                if re.search(r"error|Error|undefined reference|cfe:|warning: .*implicit", l)]
+                if re.search(r"error|Error|undefined|discarded|referenced in|multiple definition|"
+                             r"cfe:|warning: .*implicit", l)]
         print("BUILD-FAIL")
         print("\n".join(errs[:25]) or r.stdout[-3000:])
+        obj = wc / "build" / (m["file"].removesuffix(".c") + ".c.o")
+        if obj.exists() and not a.no_diff and not a.q:
+            print("(object compiled; link failed — object-level diff follows)")
+            print(asm_diff(wc, func, len(want), a.U))
         print("RESULT: BUILD-FAIL")
         return 2
 
@@ -212,12 +223,8 @@ def cmd_check(a):
     else:
         print(f"DIFF: {same}/{len(want)} words equal at same offset; size built {4*len(got)} "
               f"vs target {4*len(want)}; first mismatch at +0x{4*first:X}")
-    if not a.no_diff:
-        d = run(f"python3 ../tools/asm-differ/diff.py -o {func} --format plain --no-pager "
-                f"-U {a.U} --max-size {len(want) + 16} 2>&1", wc, timeout=300)
-        out = d.stdout
-        out = re.sub(r"\x1b\[[0-9;]*m", "", out)
-        print(out.rstrip())
+    if not a.no_diff and not a.q:
+        print(asm_diff(wc, func, len(want), a.U))
     print("RESULT: DIFF")
     return 1
 
@@ -343,6 +350,7 @@ def main():
     p = sub.add_parser("new"); p.add_argument("func"); p.add_argument("--force", action="store_true")
     p = sub.add_parser("check"); p.add_argument("func"); p.add_argument("-U", type=int, default=2)
     p.add_argument("--no-diff", action="store_true")
+    p.add_argument("-q", action="store_true", help="summary line only")
     p = sub.add_parser("land"); p.add_argument("func")
     p = sub.add_parser("pick"); p.add_argument("--min", type=int, default=0)
     p.add_argument("--max", type=int, default=10**9); p.add_argument("--no-jtbl", action="store_true")

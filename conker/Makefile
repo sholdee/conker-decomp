@@ -82,7 +82,7 @@ OPT_FLAGS := -O2 -g3
 MIPSBIT := -mips2 -o32
 
 ASM_PROCESSOR_DIR := ../tools/asm-processor
-JTBL_EXTERN = $(PYTHON) ../tools/jtbl_extern.py $(BASENAME).$(VERSION).bin $(BASENAME).$(VERSION).yaml
+RODATA_EXTERN = $(PYTHON) ../tools/rodata_extern.py $(BASENAME).$(VERSION).bin $(BASENAME).$(VERSION).yaml
 
 # Target version differences
 
@@ -203,12 +203,12 @@ $(GLOBAL_ASM_O_FILES): $(BUILD_DIR)/%.c.o: %.c include/variables.h include/struc
 	$(CC) -c -32 $(CFLAGS) $(OPT_FLAGS) $(LOOP_UNROLL) $(MIPSBIT) -o $@ $(BUILD_DIR)/$<
 	$(PYTHON) $(ASM_PROCESSOR_DIR)/asm_processor.py $(OPT_FLAGS) $< --post-process $@ \
 		--assembler "$(AS) $(ASFLAGS)" --asm-prelude $(ASM_PROCESSOR_DIR)/prelude.inc
-	$(JTBL_EXTERN) $@
+	$(RODATA_EXTERN) $@
 endif
 
 $(BUILD_DIR)/%.c.o: %.c
 	$(CC) -c -32 $(CFLAGS) $(OPT_FLAGS) $(MIPSBIT) -o $@ $<
-	$(JTBL_EXTERN) $@
+	$(RODATA_EXTERN) $@
 
 $(BUILD_DIR)/%.s.o: %.s
 	$(AS) $(ASFLAGS) -o $@ $<

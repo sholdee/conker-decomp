@@ -9,6 +9,7 @@ python3 ~/conker/tools/mw.py new FUNC        # private workspace ~/conker-ws/FUN
 #   edit  ~/conker-ws/FUNC/conker/src/<file>.c   — replace the stub line for FUNC with C
 #   read  ~/conker-ws/FUNC/target.s (target asm), ~/conker-ws/FUNC/m2c.c (machine draft — types are guesses)
 python3 ~/conker/tools/mw.py check FUNC      # ~2s: build + link + sha1; prints RESULT: MATCH | DIFF | BUILD-FAIL | STUB
+                                             #   -q = summary only; a link failure still shows the object diff
 python3 ~/conker/tools/mw.py land FUNC       # only after RESULT: MATCH — merges into main, re-gates, commits
 ```
 `check` output: a `DIFF:` summary line (words equal, size, first mismatch offset) and an
@@ -23,12 +24,13 @@ function is right but something ELSE in the bin changed — e.g. a new literal i
   edits. Never edit asm/, Makefile, yaml, tools.
 - Never add a `#pragma GLOBAL_ASM`. Other stubs in the same file stay as they are.
 - C89: all declarations at the top of a block. No `//`-only tricks needed (`-Xcpluscomm` is on).
-- Rodata: the game's float/double constants, strings and tables live in asm data files.
-  Reference them as `extern f32 D_800XXXXX;` (the `%hi/%lo(D_...)` symbol in target.s)
-  instead of writing a literal — a literal adds a NEW .rodata entry and breaks the bin.
-  Exceptions: constants built with `lui`/`mtc1` (no D_ load) ARE literals — write them.
+- Literals are fine: write float/double/string literals naturally (`10000.0f`, `"name"`). The
+  build retargets every .rodata reference in your object to the ROM's original address
+  (tools/rodata_extern.py), using the original instruction at the same offset. Do NOT replace a
+  literal with `extern f32 D_...` — IDO allocates registers differently for a global load.
+  Use `extern` only for genuine globals/tables the function indexes or that are not literals.
 - Switches are fine: write a normal `switch`. The build retargets the compiler's jump table to
-  the ROM's original `jtbl_<vram>` (tools/jtbl_extern.py), so case order/density must make IDO
+  the ROM's original table (tools/rodata_extern.py), so case order/density must make IDO
   emit the same table (same first case and length — read them off the target's `sltiu`/`addiu`).
 - Do not stop at "close". A function is done only at RESULT: MATCH (then land it).
 
