@@ -1286,7 +1286,27 @@ struct127 *func_1505EEB0(s32 state, s32 *arg1) {
 // }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505EEF4.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505EFD0.s")
+extern u8 D_800CC3F7;
+extern struct127 D_800CC5FC;
+
+struct127 *func_1505EFD0(s32 arg0) {
+    struct127 *ptr;
+    s32 i;
+
+    ptr = &D_800CC5FC;
+    if (D_800CC2D0[0].interaction_state != 0) {
+        if (arg0 == D_800CC3F7) {
+            return (struct127 *)(D_800CC2D4 - 4);
+        }
+    }
+
+    for (i = 1; i < 25; i++, ptr++) {
+        if ((ptr->interaction_state != 0) && (arg0 == ptr->unk127)) {
+            return ptr;
+        }
+    }
+    return NULL;
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505F0AC.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505F188.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505F298.s")
