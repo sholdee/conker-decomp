@@ -666,7 +666,85 @@ s32 func_1514A4EC(struct Foo1514A4EC *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_176A00/func_1514A6A0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_176A00/func_1514AB5C.s")
+
+void func_1514AB5C(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, s16 arg9, s16 arg10, u8 arg11) {
+    struct {
+        f32 unk00;
+        f32 unk04;
+        f32 unk08;
+        f32 unk0C;
+        f32 unk10;
+        f32 unk14;
+        f32 unk18;
+        f32 unk1C;
+        s16 unk20;
+        s16 unk22;
+        s16 unk24;
+        u8 unk26;
+        u8 unk27;
+        u8 unk28;
+        u8 unk29;
+        s16 unk2A;
+        u8 unk2C;
+        u8 unk2D;
+        u8 unk2E;
+        u8 unk2F;
+        s32 unk30;
+        u8 unk34;
+        char pad35[3];
+        f32 unk38;
+        char pad3C[4];
+        f32 unk40;
+        f32 unk44;
+    } sp88;
+    s32 range;
+    u8 angle;
+    f32 sin;
+    f32 cos;
+    f32 radius;
+    f32 scale;
+    f32 height;
+
+    if (arg4 > 0) {
+        sp88.unk20 = 0x6231; sp88.unk22 = 0x1A4D;
+        sp88.unk26 = 0;
+        sp88.unk27 = 0;
+        sp88.unk28 = 0;
+        sp88.unk29 = 0xFF;
+        sp88.unk2A = 1;
+        sp88.unk2C = 0xFF;
+        sp88.unk2D = 0xFF;
+        sp88.unk2F = arg11;
+        sp88.unk38 = 0.0f;
+        sp88.unk40 = 0.04500000179f;
+        sp88.unk44 = 0.6999999881f;
+        range = arg10;
+        sp88.unk30 = 0;
+        sp88.unk2E = 0;
+        sp88.unk34 = 0xF;
+        sp88.unk04 = arg1;
+        range++;
+
+        do {
+            angle = func_150ADA20() & 0xFF;
+            sin = func_151423D8((u8)(angle - 0x40));
+            cos = func_151423D8(angle);
+            radius = func_150ADA68() * arg3;
+            scale = (func_150ADA68() * arg6) + arg5;
+            height = (func_150ADA68() * arg8) + arg7;
+            sp88.unk00 = (radius * sin) + arg0;
+            sp88.unk08 = (radius * cos) + arg2;
+            sp88.unk0C = 22.60000038f * scale;
+            sp88.unk14 = 13.78600025f * scale;
+            sp88.unk10 = 57.96900177f * height;
+            sp88.unk18 = 42.7140007f * height;
+            sp88.unk1C = 118.76300048828125f * height;
+            sp88.unk24 = (func_150ADA20() % (u32)range) + arg9;
+            func_15149550((Struct15149550Arg *)&sp88, 0xA, 0, 0, 0xFF, 1);
+            arg4 = (s16)(arg4 - 1);
+        } while (arg4 != 0);
+    }
+}
 
 u8 func_150ADA20(void);
 f32 func_150ADA68(void);
