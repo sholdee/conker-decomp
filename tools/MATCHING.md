@@ -12,7 +12,14 @@ python3 ~/conker/tools/mw.py new FUNC        # private workspace ~/conker-ws/FUN
 python3 ~/conker/tools/mw.py check FUNC      # ~2s: build + link + sha1; prints RESULT: MATCH | DIFF | BUILD-FAIL | STUB
                                              #   -q = summary only; a link failure still shows the object diff
 python3 ~/conker/tools/mw.py land FUNC       # only after RESULT: MATCH — merges into main, re-gates, commits
+python3 ~/conker/tools/mw.py batch FUNC a.c b.c …   # try whole-file variants in parallel, one summary line each
+python3 ~/conker/tools/mw.py objdump FUNC    # your build's disassembly (with relocations)
+python3 ~/conker/tools/mw.py reset FUNC [--all]     # restore the file(s) from the pristine base
 ```
+Judge progress by the `ROWS:` line (structural / register-only / immediate counts), not the
+asm-differ `CURRENT` score, which is not monotonic. Get structural to 0 first. When only
+register-only rows remain and ~15 focused tries make no progress, stop and report it: the
+coordinator runs the permuter (`tools/mw_perm.py`) on regalloc-only residue.
 `check` output: a `DIFF:` summary line (words equal, size, first mismatch offset) and an
 asm-differ table: left = TARGET, right = CURRENT (your build), with `r` = register-only diff,
 `i` = immediate diff, `|` = different instruction, `<`/`>` = missing/extra instruction.

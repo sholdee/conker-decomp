@@ -10,6 +10,10 @@ Workspaces never touch the main tree; `land` is the only writer, and it re-gates
   mw.py new   FUNC [--force]   create ~/conker-ws/FUNC (+ m2c draft)
   mw.py check FUNC [-U N] [--no-diff] [-q]
                                build + verdict + asm diff
+  mw.py batch FUNC V1.c V2.c … [-j N]
+                               try full replacements of the function's .c file in parallel
+  mw.py reset FUNC [--all]     restore the .c (or every edited file) from the base snapshot
+  mw.py objdump FUNC           disassembly of the function as built (with relocations)
   mw.py land  FUNC             merge src/include edits into main, full sha gate, commit
   mw.py pick  [--min B] [--max B] [--no-jtbl] [--desc] [-n N]
                                list remaining stubs by size
@@ -192,66 +196,161 @@ def frame(words):
     return None
 
 
-def cmd_check(a):
-    func = a.func
-    ws = ws_dir(func)
-    m = meta(func)
-    wc = ws / "conker"
-    want = [w for _, w in target_words(ws / "target.s")]
+def diff_counts(wc, func, n):
+    """Classify asm-differ rows: structural (insert/delete/opcode), register-only, immediate."""
+    d = run(f"python3 ../tools/asm-differ/diff.py -o {func} --format json --no-pager "
+            f"--max-size {n + 16} 2>/dev/null", wc, timeout=300)
+    try:
+        rows = json.loads(d.stdout)["rows"]
+    except (ValueError, KeyError):
+        return None
+    c = {"structural": 0, "register": 0, "immediate": 0}
+    for r in rows:
+        b, cur = r.get("base"), r.get("current")
+        if not b or not cur:
+            c["structural"] += 1
+            continue
+        if b.get("mnemonic") != cur.get("mnemonic"):
+            c["structural"] += 1
+            continue
+        fm = {t.get("format") for t in cur.get("text", []) + b.get("text", [])}
+        if "register" in fm and not fm & {"immediate", "diff_change", "diff_add", "diff_remove"}:
+            c["register"] += 1
+        elif fm & {"immediate", "diff_change", "diff_add", "diff_remove"}:
+            c["immediate"] += 1
+    return c
 
-    # Must be genuinely de-stubbed: no live pragma may still pull in an .s with this glabel.
+
+def check_tree(func, m, wc, want, quiet=False, U=2):
+    """Build tree wc and judge func. Returns (code, output lines); 0 = MATCH."""
+    out = []
     for asm in stubbed_asm(wc):
         p = wc / asm
         if p.exists() and re.search(rf"^glabel {re.escape(func)}\b", p.read_text(), re.M):
-            print(f"STUB: {func} is still provided by GLOBAL_ASM({asm}) — replace it with C")
-            print("RESULT: STUB")
-            return 3
-
+            return 3, [f"STUB: {func} is still provided by GLOBAL_ASM({asm}) — replace it with C",
+                       "RESULT: STUB"]
     (wc / BIN).unlink(missing_ok=True)
     r = run("make -j4 build/conker.us.bin 2>&1", wc)
+    obj = wc / "build" / (m["file"].removesuffix(".c") + ".c.o")
     if r.returncode or not (wc / BIN).exists():
         errs = [l for l in r.stdout.splitlines()
                 if re.search(r"error|Error|undefined|discarded|referenced in|multiple definition|"
                              r"cfe:|warning: .*implicit", l)]
-        print("BUILD-FAIL")
-        print("\n".join(errs[:25]) or r.stdout[-3000:])
-        obj = wc / "build" / (m["file"].removesuffix(".c") + ".c.o")
-        if obj.exists() and not a.no_diff and not a.q:
-            print("(object compiled; link failed — object-level diff follows)")
-            print(asm_diff(wc, func, len(want), a.U))
-        print("RESULT: BUILD-FAIL")
-        return 2
+        out += ["BUILD-FAIL", "\n".join(errs[:25]) or r.stdout[-3000:]]
+        if obj.exists() and not quiet:
+            out += ["(object compiled; link failed — object-level diff follows)",
+                    asm_diff(wc, func, len(want), U)]
+        return 2, out + ["RESULT: BUILD-FAIL"]
 
     start, got = built_words(wc, m["vram"], m["size"], func)
-    bin_ok = sha1(wc / BIN) == INNER_SHA
     if got is None:
-        print(f"{func} not found in the linked elf")
-        print("RESULT: BUILD-FAIL")
-        return 2
+        return 2, [f"{func} not found in the linked elf", "RESULT: BUILD-FAIL"]
+    if sha1(wc / BIN) == INNER_SHA:
+        return 0, [f"MATCH: {func} — whole code bin sha1 matches the ROM. Run: mw.py land {func}",
+                   "RESULT: MATCH"]
     same = sum(1 for x, y in zip(want, got) if x == y)
     first = next((i for i, (x, y) in enumerate(zip(want, got)) if x != y), None)
     if first is None and len(got) != len(want):
         first = min(len(got), len(want))
-    if bin_ok:
-        print(f"MATCH: {func} — whole code bin sha1 matches the ROM. Run: mw.py land {func}")
-        print("RESULT: MATCH")
-        return 0
     fw, fg = frame(want), frame(got)
     if fw != fg:
-        print(f"FRAME: target allocates 0x{fw or 0:X} bytes of stack, yours 0x{fg or 0:X}")
-    notes = wc / "build" / (m["file"].removesuffix(".c") + ".c.o.notes")
+        out.append(f"FRAME: target allocates 0x{fw or 0:X} bytes of stack, yours 0x{fg or 0:X}")
+    notes = Path(str(obj) + ".notes")
     if notes.exists():
-        print("LITERALS: " + notes.read_text().strip().replace("\n", "\nLITERALS: "))
+        out.append("LITERALS: " + notes.read_text().strip().replace("\n", "\nLITERALS: "))
     if first is None:
-        print(f"FUNC-BYTES-MATCH but the bin differs elsewhere (rodata/data/other funcs): "
-              f"check for new string/float literals, statics, or edited headers.")
+        out.append("FUNC-BYTES-MATCH but the bin differs elsewhere (rodata/data/other funcs): "
+                   "check for new string/float literals, statics, or edited headers.")
     else:
-        print(f"DIFF: {same}/{len(want)} words equal at same offset; size built {4*len(got)} "
-              f"vs target {4*len(want)}; first mismatch at +0x{4*first:X}")
-    if not a.no_diff and not a.q:
-        print(asm_diff(wc, func, len(want), a.U))
-    print("RESULT: DIFF")
-    return 1
+        out.append(f"DIFF: {same}/{len(want)} words equal; size built {4*len(got)} vs target "
+                   f"{4*len(want)}; first mismatch at +0x{4*first:X} (function-relative)")
+    c = diff_counts(wc, func, len(want))
+    if c:
+        out.append(f"ROWS: structural {c['structural']}  register-only {c['register']}  "
+                   f"immediate/offset {c['immediate']}   (fix structural first; 0/0/0 = match)")
+    if not quiet:
+        out.append(asm_diff(wc, func, len(want), U))
+    return 1, out + ["RESULT: DIFF"]
+
+
+def cmd_check(a):
+    m = meta(a.func)
+    ws = ws_dir(a.func)
+    want = [w for _, w in target_words(ws / "target.s")]
+    code, out = check_tree(a.func, m, ws / "conker", want, quiet=a.q or a.no_diff, U=a.U)
+    print("\n".join(out))
+    return code
+
+
+def cmd_batch(a):
+    """Try several full replacements of the function's .c file in parallel slot trees."""
+    from concurrent.futures import ThreadPoolExecutor
+    func = a.func
+    ws = ws_dir(func)
+    m = meta(func)
+    want = [w for _, w in target_words(ws / "target.s")]
+    files = [Path(f).resolve() for f in a.files]
+    nslot = min(a.j, len(files))
+    slots = ws / "batch"
+    for k in range(nslot):
+        sd = slots / str(k)
+        if sd.exists():
+            shutil.rmtree(sd)
+        sd.mkdir(parents=True)
+        subprocess.run(["cp", "-a", "--reflink=auto", str(ws / "conker"), str(sd / "conker")], check=True)
+        for name in ("ido", "tools"):
+            (sd / name).symlink_to(REPO / name)
+    free = list(range(nslot))
+    import threading
+    lock = threading.Lock()
+
+    def one(f):
+        with lock:
+            k = free.pop()
+        try:
+            wc = slots / str(k) / "conker"
+            shutil.copy(f, wc / m["file"])
+            code, out = check_tree(func, m, wc, want, quiet=True)
+            summ = " | ".join(l for l in out if l.startswith(("DIFF", "ROWS", "FRAME", "MATCH", "BUILD-FAIL")))
+            return f, code, summ
+        finally:
+            with lock:
+                free.append(k)
+
+    with ThreadPoolExecutor(nslot) as ex:
+        results = list(ex.map(one, files))
+    for f, code, summ in results:
+        print(f"{f.name}\t{['MATCH', 'DIFF', 'BUILD-FAIL', 'STUB'][code]}\t{summ}")
+    for f, code, _ in results:
+        if code == 0:
+            shutil.copy(f, ws / "conker" / m["file"])
+            print(f"MATCH: {f.name} copied into the workspace — run: mw.py land {func}")
+            break
+    shutil.rmtree(slots, ignore_errors=True)
+
+
+def cmd_reset(a):
+    """Restore the function's .c file (or every edited file with --all) from the base snapshot."""
+    ws = ws_dir(a.func)
+    m = meta(a.func)
+    files = changed_files(ws) if a.all else [Path(m["file"])]
+    for f in files:
+        b = ws / "base" / f
+        if b.exists():
+            shutil.copy(b, ws / "conker" / f)
+        else:
+            (ws / "conker" / f).unlink(missing_ok=True)
+        print(f"reset {f}")
+
+
+def cmd_objdump(a):
+    """Disassembly of the function as currently built in the workspace."""
+    ws = ws_dir(a.func)
+    m = meta(a.func)
+    wc = ws / "conker"
+    obj = "build/" + m["file"].removesuffix(".c") + ".c.o"
+    r = run(f"mips-linux-gnu-objdump -drz --disassemble={a.func} {obj}", wc)
+    print(r.stdout[r.stdout.find("<" + a.func + ">"):] if r.stdout else r.stderr)
 
 
 # ---------------------------------------------------------------- land
@@ -376,13 +475,18 @@ def main():
     p = sub.add_parser("check"); p.add_argument("func"); p.add_argument("-U", type=int, default=2)
     p.add_argument("--no-diff", action="store_true")
     p.add_argument("-q", action="store_true", help="summary line only")
+    p = sub.add_parser("batch", help="try variant .c files in parallel")
+    p.add_argument("func"); p.add_argument("files", nargs="+"); p.add_argument("-j", type=int, default=8)
+    p = sub.add_parser("reset"); p.add_argument("func"); p.add_argument("--all", action="store_true")
+    p = sub.add_parser("objdump"); p.add_argument("func")
     p = sub.add_parser("land"); p.add_argument("func")
     p = sub.add_parser("pick"); p.add_argument("--min", type=int, default=0)
     p.add_argument("--max", type=int, default=10**9); p.add_argument("--no-jtbl", action="store_true")
     p.add_argument("--desc", action="store_true"); p.add_argument("-n", type=int, default=50)
     p = sub.add_parser("rm"); p.add_argument("func")
     a = ap.parse_args()
-    sys.exit({"new": cmd_new, "check": cmd_check, "land": cmd_land,
+    sys.exit({"new": cmd_new, "check": cmd_check, "land": cmd_land, "batch": cmd_batch,
+              "reset": cmd_reset, "objdump": cmd_objdump,
               "pick": cmd_pick, "rm": cmd_rm}[a.cmd](a) or 0)
 
 
