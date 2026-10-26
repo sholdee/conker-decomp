@@ -3,6 +3,9 @@
 #include "functions.h"
 #include "variables.h"
 
+extern s32 func_1510D0EC(s32, s32, s32, s32);
+void func_15042D94(s32, s32, u8, s32 *, ...);
+extern u8 D_D16[];
 
 // need to figure out D_800D2460
 #pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_1508F060.s")
@@ -50,47 +53,58 @@ void func_1508F9C4(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_150911F4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_15091534.s")
-// NON-MATCHING: needs some love
-// Gfx* func_15091534(Gfx* arg0, struct257 *arg1, u8 *arg2) {
-//     u32 temp_v0;
-//
-//     *arg2 = 0;
-//     // get address for texture?
-//     temp_v0 = func_1510D0EC(&arg1->unkD16, 0, 3, 0);;
-//     // tmp = arg0;
-//     if (temp_v0 != 0x80000000) {
-//       // FD50000012345678
-//       gDPSetTextureImage(arg0++, G_IM_FMT_CI, G_IM_SIZ_16b, 1, temp_v0);
-//       // F550000007098260
-//       gDPSetTile(arg0++, G_IM_FMT_CI, G_IM_SIZ_16b, 0, 0x0000, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD);
-//       // E600000000000000
-//       gDPLoadSync(arg0++);
-//       // F3000000073FF000
-//       gDPLoadBlock(arg0++, G_TX_LOADTILE, 0, 0, 1023, 0);
-//       // E700000000000000
-//       gDPPipeSync(arg0++);
-//       // F540080000098260
-//       gDPSetTile(arg0++, G_IM_FMT_CI, G_IM_SIZ_4b, 4, 0x0000, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD);
-//       // F2000000000FC0FC
-//       // FIXME: what are these macros
-//       // gDPSetTileSize(arg0++, G_TX_RENDERTILE, 0, 0, qu102(63), qu102(63));
-//       gDPSetTileSize(arg0++, G_TX_RENDERTILE, 0, 0, 63, 63);
-//       // FD10000012345678
-//       gDPSetTextureImage(arg0++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, temp_v0 + 2048);
-//       // E600000000000000
-//       gDPLoadSync(arg0++);
-//       // F00000000603C000
-//       gDPLoadTLUTCmd(arg0++, 6, 15);
-//       // EF00AC3F00504244
-//       gDPSetOtherMode(arg0++, G_AD_DISABLE | G_CD_MAGICSQ | G_CK_NONE | G_TC_FILT | G_TF_BILERP | G_TT_RGBA16 | G_TL_TILE | G_TD_CLAMP | G_TP_NONE | G_CYC_1CYCLE | G_PM_NPRIMITIVE | 0x0000000F, G_AC_NONE | G_ZS_PRIM | G_RM_XLU_SURF | G_RM_XLU_SURF2);
-//
-//       *arg2 = (u8)1;
-//     }
-//     return arg0;
-// }
+Gfx* func_15091534(Gfx* arg0, struct257 *arg1, u8 *arg2) {
+    s32 temp_v0;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_150916B4.s")
+    *arg2 = 0;
+    temp_v0 = func_1510D0EC((s32)arg1 + (s32)D_D16, 0, 3, 0);
+
+    if (temp_v0 != (s32)0x80000000) {
+        gDPSetTextureImage(arg0++, G_IM_FMT_CI, G_IM_SIZ_16b, 1, temp_v0);
+        gDPSetTile(arg0++, G_IM_FMT_CI, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD);
+        gDPLoadSync(arg0++);
+        gDPLoadBlock(arg0++, G_TX_LOADTILE, 0, 0, 1023, 0);
+        gDPPipeSync(arg0++);
+        gDPSetTile(arg0++, G_IM_FMT_CI, G_IM_SIZ_4b, 4, 0, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD);
+        gDPSetTileSize(arg0++, G_TX_RENDERTILE, 0, 0, 0xFC, 0xFC);
+        gDPSetTextureImage(arg0++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, temp_v0 + 0x800);
+        gDPLoadSync(arg0++);
+        gDPLoadTLUTCmd(arg0++, 6, 15);
+        gDPSetOtherMode(arg0++, 0x00AC3F, 0x00504244);
+
+        *arg2 = 1;
+    }
+
+    return arg0;
+}
+
+void func_150916B4(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+    volatile s32 pad[2];
+    s32 seconds;
+    s32 hundredths;
+
+    if (arg2 >= 0x57030) {
+        arg2 = 0x57030;
+    }
+
+    hundredths = ((arg2 % 60) * 100) / 60;
+    if (hundredths >= 100) {
+        hundredths = 99;
+    }
+
+    arg0 -= 8;
+    if (arg2 >= 0) {
+        seconds = arg2 / 60;
+        func_15042D94((arg0 - (((seconds / 60) >= 10) ? 5 : 0)) - 8, arg1, (u8)arg3, &D_8009DCC0, seconds / 60);
+        func_15042D94(arg0, arg1, arg3, &D_8009DCC4, seconds % 60);
+        func_15042D94(arg0 + 0x10, arg1, arg3, &D_8009DCCC, hundredths);
+        return;
+    }
+
+    func_15042D94(arg0 - 8, arg1, (u8)arg3, &D_8009DCD4);
+    func_15042D94(arg0, arg1, arg3, &D_8009DCD8);
+    func_15042D94(arg0 + 0x10, arg1, arg3, &D_8009DCE0);
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_150918EC.s")
 
 void func_15093818(s32 arg0) {
