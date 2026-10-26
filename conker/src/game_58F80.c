@@ -234,7 +234,28 @@ void func_1502D54C(s32 arg0, s32 *arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502D824.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502DB20.s")
+extern u16 D_800C4ED0[];
+
+s32 func_1502DB20(s32 arg0) {
+    switch (arg0) {
+    case 0x3B:
+    case 0x75:
+    case 0x82:
+    case 0x88:
+    case 0x90:
+    case 0x96:
+    case 0x98:
+    case 0x9C:
+    case 0x9D:
+    case 0x9F:
+    case 0xA0:
+    case 0xB1:
+    case 0xB2:
+    case 0xB4:
+        return D_800C4ED0[arg0] - 4;
+    }
+    return D_800C4ED0[arg0];
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502DB84.s")
 
