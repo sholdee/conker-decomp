@@ -8,9 +8,12 @@ Builds run in the podman container `conker-tc` (ubuntu 24.04 + binutils-mips-lin
 python reqs; `tools/toolchain/Containerfile`). It must be running:
 ```
 podman start conker-tc   # or create it: tools/toolchain/run.sh
+podman exec -d conker-tc python3 ~/conker/tools/toolchain/tcd.py ~/conker-ws/.tcd.sock   # after a start
 podman exec -w ~/conker conker-tc bash -c 'make -C conker -j32 && make -C conker replace && make -j16'
 ```
-A clean build of the code bin is ~5 s; one file + relink + sha ~0.6 s.
+A clean build of the code bin is ~5 s; one file + relink + sha ~0.6 s. `mw.py` sends commands to
+the `tcd` socket daemon when it is up — `podman exec` serializes on podman's lock and took
+20-40 s per call with a 16-agent fleet; it remains the fallback.
 
 ## Matching
 Read `tools/MATCHING.md` (the agent brief). In short:
