@@ -1,7 +1,9 @@
 #include <ultra64.h>
 #define func_150ADA20 func_150ADA20_u8_proto
 #define func_15083E90 func_15083E90_s32_proto
+#define func_15083568 func_15083568_void_proto
 #include "functions.h"
+#undef func_15083568
 #undef func_15083E90
 #undef func_150ADA20
 #include "variables.h"
@@ -12,7 +14,10 @@ extern struct172 D_80086CC4[];
 extern void func_150302F0(struct127 *arg0, s32 arg1);
 extern s32 D_80086CAC[];
 extern void func_15036C70(struct127 *arg0);
-extern void func_150825C0(s32 arg0, s32 arg1);
+/* Returns 0 from every early-exit path (`or v0,zero,zero` before the epilogue in
+   golden) and tail-returns func_15082A44's result, so the symbol is s32-valued;
+   func_1508295C below simply discards the value. */
+extern s32 func_150825C0(s32 arg0, s32 arg1);
 extern u8 D_800D2100;
 extern u8 D_800D2101;
 extern u8 D_800BE590;
@@ -72,7 +77,128 @@ void func_15081E0C(struct127 *arg0, u16 arg1, u8 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_AEB40/func_15081E78.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_AEB40/func_150825C0.s")
+/* --- func_150825C0 -------------------------------------------------- */
+
+/* structs.h's struct258 describes the same table but is only 0x10 bytes and has
+   no members below 0x4; golden indexes D_800D20FC with a 0x30 (48) byte stride
+   (`sll t4,s2,2; subu t4,t4,s2; sll s2,t4,4`) and reads u8 fields at +1/+2, so
+   this file uses a local 0x30-byte view instead of retyping the shared header. */
+typedef struct {
+    u8  unk0;
+    u8  unk1;
+    u8  unk2;
+    u8  unk3;
+    s16 unk4;
+    s16 unk6;
+    s16 unk8;
+    s16 unkA;
+    u8  padC[0x24];
+} GameAEB40Spawn;
+
+extern u8 *D_800D210C;
+extern f32 D_8009CC30;
+extern f32 D_8009CC34;
+extern f32 D_8009CC38;
+extern f32 D_8009CC3C;
+extern f32 D_800D9C10[][4][4];
+extern s32 func_150A6360(void *arg0, f32 arg1[4][4], f32 arg2, f32 arg3, f32 arg4,
+                         f32 arg5, f32 arg6, f32 arg7);
+extern s32 func_15082A44(GameAEB40Spawn *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+
+/* The two squared component distances are NAMED f32 LOCALS with a self-assigning
+   square, not one inline expression.  That is what makes IDO emit golden's
+   `mul.s $f0,$f0,$f0' / `mul.s $f2,$f2,$f2': an inline `(a-b)*(a-b)' allocates a
+   FRESH fp temp for the product, an in-place `d = d * d' on a local reuses the
+   operand's register.  The two forms are visible side by side in already-matched
+   code -- game_83300's func_1505A6F8 (`x = ...; x *= x;' -> mul.s $f2,$f2,$f2)
+   versus func_1505693C (`(temp_f2 * temp_f2)' -> mul.s $f6,$f2,$f2).  Written
+   inline here the function scores 30 with the identical instruction stream and
+   only those two products plus their sum landing in fresh registers. */
+s32 func_150825C0(s32 arg0, s32 arg1) {
+    f32 rad;
+    s32 i;
+    u16 t;
+    u8 ok;
+    u8 flags;
+    s32 j;
+    f32 dx;
+    f32 dz;
+
+    if (D_800D210C[arg0] != 0) {
+        return 0;
+    }
+    if (((GameAEB40Spawn *)D_800D20FC)[arg0].unk2 == 1) {
+        return 0;
+    }
+    if (((GameAEB40Spawn *)D_800D20FC)[arg0].unk6 == 0x7FFF) {
+        return 0;
+    }
+    /* arg1 is dead on entry -- this block returns on every path -- so it is the
+       function's only spare int-width storage, and it is homed in the caller's
+       arg slot (`sw a1,0x54(sp)'), which is why golden's copy of D_800BE9A0 into
+       it (`or a1,v1,zero' feeding `subu t4,a1,a0') costs no frame bytes. */
+    if ((*(u16 **)&D_800D2110)[arg0]) {
+        arg1 = D_800BE9A0;
+        if ((*(u16 **)&D_800D2110)[arg0] <= arg1) {
+            (*(u16 **)&D_800D2110)[arg0] = 0;
+        } else {
+            (*(u16 **)&D_800D2110)[arg0] = (*(u16 **)&D_800D2110)[arg0] - arg1;
+        }
+        return 0;
+    }
+    flags = ((GameAEB40Spawn *)D_800D20FC)[arg0].unk1;
+    if (arg0 >= 5) {
+        t = flags & 6;
+        if (t != 0) {
+            if (t == 2) {
+                rad = D_8009CC30;
+            } else if (t == 4) {
+                rad = D_8009CC34;
+            } else {
+                rad = D_8009CC38;
+            }
+            ok = 1;
+            for (j = 0; j < D_8008FD8C; j++) {
+                if (D_800CC2D0[j].interaction_state == 0) {
+                    continue;
+                }
+                if (D_800CC2D0[j].unk127 == 0xFF) {
+                    continue;
+                }
+                if (*(u16 *)((u8 *)&D_800D2138 + 0x208) &
+                    (1 << D_800CC2D0[j].unk127)) {
+                    dx = D_800CC2D0[j].x_position - ((GameAEB40Spawn *)D_800D20FC)[arg0].unk6;
+                    dx = dx * dx;
+                    dz = D_800CC2D0[j].z_position - ((GameAEB40Spawn *)D_800D20FC)[arg0].unkA;
+                    dz = dz * dz;
+                    if (dx + dz <= rad) {
+                        ok = 0;
+                        break;
+                    }
+                }
+            }
+            if (ok != 0) {
+                return 0;
+            }
+        }
+    }
+    if (flags & 8) {
+        ok = 1;
+        for (i = 0; i <= D_80082FA0; i++) {
+            if (func_150A6360((void *)((i * 0x180) + D_800BE628), D_800D9C10[i],
+                              ((GameAEB40Spawn *)D_800D20FC)[arg0].unk6,
+                              ((GameAEB40Spawn *)D_800D20FC)[arg0].unk8 + 150,
+                              ((GameAEB40Spawn *)D_800D20FC)[arg0].unkA,
+                              150.0f, 150.0f, D_8009CC3C) != 0) {
+                ok = 0;
+            }
+        }
+        if (ok == 0) {
+            return 0;
+        }
+    }
+    return func_15082A44((GameAEB40Spawn *)((arg0 * 0x30) + (s32)D_800D20FC), arg0, 0, 0, 0);
+}
 
 void func_1508295C(s32 arg0, s32 arg1, s32 arg2) {
     s32 start;
@@ -132,7 +258,43 @@ void func_150832AC(struct127 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_AEB40/func_15083384.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_AEB40/func_15083568.s")
+typedef struct Part15083568 {
+    /* 0x00 */ u8 b0;
+    /* 0x01 */ u8 b1;
+    /* 0x02 */ u8 b2;
+    /* 0x03 */ u8 type;
+    /* 0x04 */ u8 b4;
+    /* 0x05 */ u8 b5;
+    /* 0x06 */ u8 b6;
+    /* 0x07 */ u8 b7;
+    /* 0x08 */ u8 data[6];
+    /* 0x0E */ u8 bE;
+    /* 0x0F */ u8 bF;
+} Part15083568;
+
+struct127 *func_15083AC8(struct127 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, f32 arg8);
+extern struct127 *func_15030AF4(struct127 *, s32, s32, s32, s32, s32, s32, s32, s32, u8 *, s32, s32, s32);
+
+struct127 *func_15083568(struct127 *arg0, s32 arg1, f32 arg2, s32 arg3) {
+    Part15083568 *parts;
+    struct127 *ret;
+    s32 i;
+
+    /* arg1 is a 1-based set id; decremented in place as in func_150836CC */
+    arg1--;
+    ret = NULL;
+    parts = (Part15083568 *)D_80086CC4[arg1].unk0;
+    for (i = 0; i < D_80086CC4[arg1].unk4; i++) {
+        if (parts[i].type == 0) {
+            ret = func_15083AC8(arg0, parts[i].b1, parts[i].b0, 0, parts[i].b2, parts[i].b4, parts[i].b5, parts[i].b6, arg2);
+        } else {
+            ret = func_15030AF4(arg0, parts[i].b0, parts[i].b1, parts[i].b7, parts[i].b4, parts[i].b5, arg3, arg1 + 1, parts[i].b2,
+                                parts[i].data, (parts[i].type == 2) ? parts[i].b6 : -1, parts[i].bE, parts[i].bF);
+        }
+    }
+    return ret;
+
+}
 
 void func_150836CC(struct127 *arg0, s32 arg1) {
     struct172 *temp_s2;
@@ -164,11 +326,35 @@ void func_150836CC(struct127 *arg0, s32 arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_AEB40/func_150837D4.s")
+void func_150837D4(s32 arg0, s32 arg1, s32 arg2) {
+    struct127 *obj = &D_800CC2D0[arg0];
+    GameAEB40Def *def;
+
+    obj->id = arg1;
+    if (arg1 == 0xFF) {
+        obj->unkE4 = 0;
+        obj->unkE6 = 0;
+        obj->unkE8 = 0;
+        obj->unkD2 = 70;
+        obj->unkD4 = 70;
+        obj->unkD6 = 0;
+        *(s16 *)((u8 *)obj + 0x160) = 0;
+        *(f32 *)((u8 *)obj + 0xC8) = 0.0f;
+    } else {
+        *(f32 *)((u8 *)obj + 0xC8) = *(s16 *)((u8 *)D_800D1C90[arg1] + 6);
+        func_15062BDC(obj, obj->xz_scale, obj->y_scale);
+        def = (GameAEB40Def *)D_800D1C90[arg1];
+        obj->unk5 = def->unk12;
+    }
+    obj->unk6 = func_15084D00(obj);
+    if (((u16 *)D_800C5A90)[obj->unk6] != 0) {
+        *(s32 *)((u8 *)obj + 0x58) = func_1502B020(0, 2, 2, obj->unk6);
+    }
+}
 
 extern s32 allocate_memory(s32, s32, s32, s32);
 
-s32 func_150838EC(struct127 *arg0, u16 arg1, s32 arg2, f32 arg3) {
+s32 func_150838EC(struct127 *arg0, s32 arg1, s32 arg2, f32 arg3) {
     s32 idx;
 
     idx = arg0->id;
@@ -228,7 +414,84 @@ void func_150839B8(struct127 *arg0, s32 arg1, void *arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_AEB40/func_15083AC8.s")
+extern struct127 *func_1505ED34(void);
+
+struct127 *func_15083AC8(struct127 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, f32 arg8) {
+    struct127 *obj;
+    GameAEB40ActorSlots *slots;
+    s32 paused;
+    s32 blocked;
+    s32 i;
+
+    func_1503D774(arg2, 0);
+    func_1503D660(arg2, 0);
+    obj = func_1505ED34();
+    obj->unique_id = 0xFF - (obj - D_800CC2D0);
+    obj->unkAB = arg3;
+    obj->interaction_state = arg4;
+    func_150615DC(obj);
+    obj->unk232 = 1;
+    obj->health = 1;
+    obj->immune = 0xFF;
+    obj->unk65 = (arg0 - D_800CC2D0) + 1;
+    obj->unk5C = arg1;
+    obj->unk123 = 1;
+    obj->id = arg2;
+    obj->pad66 = arg0->pad66;
+    obj->pad66 &= ~0x10;
+    obj->pad66 |= 0;
+    *((u8 *)obj + 0x1DD) = *((u8 *)arg0 + 0x1DD);
+    *((u8 *)obj + 0x1DE) = *((u8 *)arg0 + 0x1DE);
+    *((u8 *)obj + 0x1DF) = *((u8 *)arg0 + 0x1DE);
+    *((u8 *)obj + 0x1E0) = *((u8 *)arg0 + 0x1E0);
+    *((u8 *)obj + 0x1E1) = *((u8 *)arg0 + 0x1E1);
+    *((u8 *)obj + 0x1E2) = *((u8 *)arg0 + 0x1E2);
+    if (arg6 == 0) {
+        obj->xz_scale = 1.0f;
+        obj->y_scale = 1.0f;
+        obj->unk154 = 1.0f;
+        obj->unk158 = 1.0f;
+    } else {
+        obj->xz_scale = arg0->xz_scale;
+        obj->y_scale = arg0->y_scale;
+        obj->unk154 = arg0->unk154;
+        obj->unk158 = arg0->unk158;
+    }
+    obj->unk101 = arg6;
+    obj->padAC = arg5;
+    func_1503D774(arg2, 0);
+    if (arg5 & 1) {
+        obj->unkF8 |= 0x4000;
+        *(f32 *)((u8 *)obj + 0x270) = (f32)(u32)*(u16 *)((u8 *)D_800D1C90[arg2] + 0xE) * obj->xz_scale;
+    }
+    paused = 0;
+    if (arg5 & 2) {
+        paused = 1;
+    }
+    slots = (GameAEB40ActorSlots *)obj;
+    for (i = 0; i <= D_80082FA0; i++) {
+        slots->field_0x304[i] = (s32)func_1515D480(1);
+    }
+    if ((&slots->field_0x300)[i] != 0) {
+        obj->unk301[0] = 1;
+    }
+    slots->field_0x314 = func_1515D440();
+    if (D_800C35EA == 1) {
+        blocked = 1;
+    } else {
+        blocked = 0;
+    }
+    if (blocked) {
+        D_800C3638 = 0;
+    }
+    func_150839B8(obj, arg2, NULL);
+    func_150837D4(obj - D_800CC2D0, arg2, 1);
+    func_150838EC(obj, arg7, paused, arg8);
+    if (blocked) {
+        D_800C3638 = 1;
+    }
+    return obj;
+}
 
 extern u8 D_800D2100;
 
@@ -284,7 +547,22 @@ s32 func_15083E0C(u8 id) {
     return -1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_AEB40/func_15083E90.s")
+struct127 *func_15083E90(u8 arg0) {
+    struct127 *p;
+    s32 i;
+
+    if (arg0 == 0) {
+        return NULL;
+    }
+    p = D_800CC2D0;
+    for (i = 0; i < 26; i++) {
+        if (p->interaction_state != 0 && p->unique_id == arg0) {
+            return p;
+        }
+        p++;
+    }
+    return NULL;
+}
 
 s32 func_15083FB0(u8 arg0) {
     struct127 *temp;
@@ -330,7 +608,7 @@ extern s32 D_800D1F80[187];
 extern void func_150843AC(void *arg0, s32 arg1);
 void func_150843AC(void *arg0, s32 arg1)
 {
-  unsigned char new_var;
+  unsigned char limit;
   s32 *p;
   s32 i;
   u8 idx;
@@ -338,9 +616,9 @@ void func_150843AC(void *arg0, s32 arg1)
   {
     return;
   }
-  new_var = 8;
+  limit = 8;
   idx = ((u8 *) (*((s32 *) (((u8 *) arg0) + 0x2C4))))[arg1];
-  for (p = (s32 *) (((s8 *) arg0) + (arg1 << 3)), i = 0; i != new_var; p++, i += 4)
+  for (p = (s32 *) (((s8 *) arg0) + (arg1 << 3)), i = 0; i != limit; p++, i += 4)
   {
     s32 cur = *((s32 *) (((u8 *) p) + 0x28C));
     if (cur != 0)
