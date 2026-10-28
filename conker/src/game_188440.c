@@ -125,6 +125,18 @@ void func_1515B674(s16 arg0) {
     }
 }
 
+typedef struct Obj1515B994 {
+    char pad0[0x14];
+    /* 0x14 */ f32 unk14;
+    char pad18[4];
+    /* 0x1C */ f32 unk1C;
+    char pad20[0x74 - 0x20];
+    /* 0x74 */ f32 unk74;
+    /* 0x78 */ f32 unk78;
+    /* 0x7C */ f32 unk7C;
+    /* 0x80 */ f32 unk80;
+} Obj1515B994;
+
 #pragma GLOBAL_ASM("asm/nonmatchings/game_188440/func_1515B994.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_188440/func_1515BA10.s")
@@ -135,7 +147,8 @@ void func_1515BA1C(s16 arg0) {
     func_1515AF90(arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_188440/func_1515BA48.s")
+void func_1515BA48(s32 arg0) {
+}
 
 extern void func_1515B674(s16);
 
