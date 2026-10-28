@@ -617,7 +617,99 @@ void func_15088824(Struct15088824 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_B3020/func_15088A08.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_B3020/func_15088D58.s")
+typedef struct Entry15088D58 {
+    f32 value0;
+    f32 value4;
+    f32 phase8;
+    f32 directionC;
+    f32 direction10;
+    u8 pad14[0x18];
+    u8 node2C;
+    u8 pad2D[2];
+    s8 group2F;
+    u8 pad30;
+    s8 actor31;
+    u8 pad32[0x52];
+} Entry15088D58;
+
+typedef struct Actor15088D58 {
+    u8 pad0[0x14];
+    f32 field14;
+    f32 field18;
+    f32 field1C;
+    u8 pad20[0x20];
+    f32 angle40;
+    u8 pad44[0x32];
+    s16 rotation76;
+    s16 rotation78;
+    s16 rotation7A;
+    u8 pad7C[0xA8];
+    u8 field124;
+} Actor15088D58;
+
+s32 func_15088A08(void *, f32);
+void func_15088F30(f32 *, f32 *, f32 *, f32 *);
+f32 func_150497E0(f32 *, s32, f32);
+f32 func_150498A4(f32 *, s32, f32, f32 *);
+f32 func_15144BC8(f32);
+extern f32 D_8009DA04;
+
+void func_15088D58(Actor15088D58 *arg0) {
+    Entry15088D58 *entry;
+    f32 angle;
+    f32 x_derivative;
+    f32 z_derivative;
+    f32 xs[4];
+    f32 ys[4];
+    f32 zs[4];
+    s32 rotation;
+    s32 index;
+    s32 i;
+    s32 link;
+    s32 again;
+    u8 *target;
+    u8 *cursor;
+    int tmp1;
+    tmp1 = 0xFF;
+
+    index = func_1508855C((struct127 *)arg0);
+    if (index >= 0) {
+        entry = (Entry15088D58 *)(D_800872A0 + index * 0x84);
+        entry->value0 = 0.5f;
+        entry->value4 = 0.5f;
+        entry->phase8 = 0.5f;
+        do {
+            again = 0;
+            i = 0;
+            cursor = entry->node2C * 0x10 + (u8 *)D_800D2350;
+            do {
+                link = cursor[9];
+                i++;
+                if (tmp1 != link) {
+                    target = link * 0x10 + (u8 *)D_800D2350;
+                    if (target[0xE] == 4) {
+                        again = target[0xF];
+                    }
+                }
+                cursor++;
+            } while (i != 5);
+            if (again != 0) {
+                func_15088A08(entry, 1.0f);
+            }
+        } while (again != 0);
+        entry->phase8 = 0.0f;
+        func_15088F30((f32 *)entry, xs, ys, zs);
+        arg0->field14 = func_150498A4(xs, 0, entry->phase8, &x_derivative);
+        arg0->field18 = func_150497E0(ys, 0, entry->phase8);
+        arg0->field1C = func_150498A4(zs, 0, entry->phase8, &z_derivative);
+        angle = func_15144BC8((f32)(func_1505A630(entry->direction10, entry->directionC, 0) + 0x8000) * 0.005493164f);
+        arg0->angle40 = angle;
+        rotation = (s32)(short)(s32)(angle * D_8009DA04) - 0x4000;
+        arg0->rotation7A = rotation;
+        arg0->rotation78 = rotation;
+        arg0->rotation76 = rotation;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_B3020/func_15088F30.s")
 
