@@ -29,7 +29,70 @@ typedef struct {
 extern Struct15136698Table D_80089BAC;
 
 // requires jump table
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15134070.s")
+s32 func_15134070(void *arg0) {
+    switch (*((u8 *)arg0 + 4)) {
+    case 135:
+    case 176:
+        return 0xE;
+    case 177:
+        return 0xF;
+    case 180:
+        return 0x10;
+    case 112:
+    case 178:
+        return 0x11;
+    case 0xAB:
+        return 0x12;
+    case 16:
+    case 56:
+    case 145:
+        return 0xD;
+    case 152:
+        return 0xC;
+    case 52:
+        return 0xB;
+    case 71:
+        return 0xA;
+    case 17:
+    case 20:
+    case 59:
+        return 1;
+    case 90:
+    case 95:
+    case 116:
+    case 117:
+    case 122:
+        return 2;
+    case 88:
+    case 91:
+    case 128:
+        return 3;
+    case 22:
+    case 136:
+    case 144:
+        return 4;
+    case 156:
+        return 5;
+    case 157:
+        return 6;
+    case 150:
+        return 7;
+    case 160:
+        return 8;
+    case 159:
+        return 9;
+    case 0x9A:
+        return 0x13;
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+        return 0;
+    default:
+        return 0x63;
+    }
+}
 
 s32 func_1513416C(struct102 *arg0) {
     s16 temp_v0 = arg0->unk1C;
