@@ -1406,7 +1406,50 @@ struct127 *func_1505EFD0(s32 arg0) {
     return NULL;
 }
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505F0AC.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505F188.s")
+void func_1505F188(struct127 *argp) {
+#define arg0 ((u32)argp)
+    s32 *p;
+    f32 one;
+    f32 initial;
+
+    for (p = (s32 *)arg0; p < (s32 *)(arg0 + 0x32C); p++) {
+        *p = 0;
+    }
+    one = 1.0f;
+    initial = -10000.0f;
+    *(s8 *)((u8 *)arg0 + 0x2FD) = 2;
+    *(s16 *)((u8 *)arg0 + 0x38) = -0x2710;
+    *(f32 *)((u8 *)arg0 + 0x14C) = one;
+    *(f32 *)((u8 *)arg0 + 0x150) = one;
+    *(f32 *)((u8 *)arg0 + 0x118) = initial;
+    *(f32 *)((u8 *)arg0 + 0x180) = initial;
+    *(f32 *)((u8 *)arg0 + 0x24) = 3.3f;
+    *(u8 *)((u8 *)arg0 + 0x1DC) = 0xFF;
+    *(u8 *)((u8 *)arg0 + 0x127) = 0xFF;
+    *(u16 *)((u8 *)arg0 + 0x84) = 0xFFFF;
+    *(u8 *)((u8 *)arg0 + 0x13F) = 0xFF;
+    *(s32 *)((u8 *)arg0 + 0x2C4) = (s32) (arg0 + 4);
+    *(s8 *)((u8 *)arg0 + 0x2C8) = 1;
+    *(s8 *)((u8 *)arg0 + 0x2C9) = 1;
+    *(u8 *)((u8 *)arg0 + 4) = 0xFF;
+    *(s8 *)((u8 *)arg0 + 0x2CB) = 0x32;
+    *(f32 *)((u8 *)arg0 + 0x48) = one;
+    *(s8 *)((u8 *)arg0 + 0x6E) = (s8) ((func_150ADA20() % 50U) + 0x32);
+    func_150615DC((void *) arg0);
+    *(u8 *)((u8 *)arg0 + 0x1DD) = 0xFF;
+    *(u8 *)((u8 *)arg0 + 0x1DE) = 0xFF;
+    *(u8 *)((u8 *)arg0 + 0x1DF) = 0xFF;
+    *(s16 *)((u8 *)arg0 + 0x18C) = 0;
+    *(s16 *)((u8 *)arg0 + 0x18E) = 0;
+    *(s16 *)((u8 *)arg0 + 0x190) = 0;
+    *(s16 *)((u8 *)arg0 + 0x192) = 0;
+    *(s16 *)((u8 *)arg0 + 0x194) = 0;
+    *(s16 *)((u8 *)arg0 + 0x196) = 0xA;
+    *(s16 *)((u8 *)arg0 + 0x198) = 0xA;
+    *(s16 *)((u8 *)arg0 + 0x19A) = 0;
+    *(s16 *)((u8 *)arg0 + 0x19C) = 0;
+#undef arg0
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505F298.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1506045C.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_15060778.s")
