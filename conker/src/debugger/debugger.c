@@ -11,6 +11,7 @@ extern u8 D_160037F0;
 extern func_160006CC_sp3C D_16003B48;
 
 void func_160006CC(struct118 *arg0);
+void func_16000590(struct118 *thread);
 void func_16001044(s32 position, s32 mode, u32 value);
 
 void func_16000000(void) {
@@ -172,7 +173,46 @@ void func_16000424(struct118 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/func_16000590.s")
+extern u8 *D_16003B30[6];
+extern u8 D_160047A4[];
+extern u8 D_160047AC[];
+
+void func_16000590(struct118 *thread) {
+    s32 position;
+    s32 i;
+    s32 base;
+    u32 bits;
+    u32 page = 0;
+    u32 *words = (u32 *)thread;
+
+    bits = words[0x12C / 4];
+    func_160012B0(3, D_160047A4);
+    func_16001044(0xA, 0, bits);
+    bits >>= 12;
+    position = 0x2C;
+    for (i = 0; i < 6; i++, bits >>= 1) {
+        if (bits & 1) {
+            func_160012B0(position, D_16003B30[i]);
+            position += 0x20;
+        }
+    }
+    i = 0;
+    position = 0xC3;
+    if (D_16003B28 == 1) {
+        base = 0x4C;
+    } else {
+        base = 0x6C;
+        page = 0x10;
+    }
+    do {
+        func_160012B0(position, D_160047AC);
+        func_16001044(position + 2, 1, i + page);
+        func_16001044(position + 5, 2, words[base + 1]);
+        base += 2;
+        position += 0x20;
+        i++;
+    } while (i < 16);
+}
 
 void func_160006CC(struct118 *arg0) {
     func_160006CC_sp3C sp3C;
