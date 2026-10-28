@@ -548,7 +548,23 @@ fail:
     return -1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_B3020/func_150885EC.s")
+void bcopy(const void *, void *, int);
+#define D_800872A0_S32 ((s32)D_800872A0)
+
+void func_150885EC(s32 arg0, s32 arg1) {
+    s32 sp24;
+    s32 sp20;
+
+    if (D_800872A0_S32 != 0) {
+        sp24 = ((s8 *)D_800872A0_S32 + arg1 * 0x84)[0x31];
+        sp20 = ((s8 *)D_800872A0_S32 + arg1 * 0x84)[0x30];
+        bcopy((void *)((arg0 * 0x84) + D_800872A0_S32),
+              (void *)((arg1 * 0x84) + D_800872A0_S32), 0x84);
+        *(s8 *)(D_800872A0_S32 + arg1 * 0x84 + 0x31) = sp24;
+        *(s8 *)(D_800872A0_S32 + arg1 * 0x84 + 0x30) = sp20;
+    }
+}
+#undef D_800872A0_S32
 
 extern s32 D_800D2394;
 extern s8 D_800D2398;
