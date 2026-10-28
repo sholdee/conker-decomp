@@ -129,7 +129,39 @@ void func_15004A4C(void) {
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_30E90/func_15004AAC.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_30E90/func_15004BF0.s")
+s32 func_15004BF0(s32 arg0) {
+    typedef struct { u8 before[0x72]; u8 objectId; u8 after[0x2D]; } Entry;
+    s32 objectIndex;
+    s32 candidateObjectId;
+
+    if (arg0 == 0) {
+        candidateObjectId = 1;
+        for (objectIndex = (arg0 = D_800DBF00); objectIndex < D_800DBEF0; objectIndex++) {
+            if (candidateObjectId == ((Entry *)D_800DBEF4)[objectIndex].objectId) {
+                candidateObjectId++;
+                objectIndex = arg0 - 1;
+            }
+            if (candidateObjectId >= 0x100) {
+                candidateObjectId = 0xFF;
+                break;
+            }
+        }
+    } else {
+        arg0 = 0xFF - D_800DBF00;
+        candidateObjectId = arg0;
+        for (objectIndex = 0; objectIndex < D_800DBEF0; objectIndex++) {
+            if (candidateObjectId == ((Entry *)D_800DBEF4)[objectIndex].objectId) {
+                candidateObjectId--;
+                objectIndex = -1;
+            }
+            if (candidateObjectId <= 0) {
+                candidateObjectId = arg0;
+                break;
+            }
+        }
+    }
+    return candidateObjectId;
+}
 typedef struct { s8 unk0; s8 unk1; s8 unk2; u8 unk3; u32 unk4; } Struct15004CE0;
 
 void func_15004CE0(Struct15004CE0 *arg0, u32 arg1) {
