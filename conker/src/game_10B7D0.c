@@ -1,7 +1,9 @@
 #include <ultra64.h>
 #define func_15048A40 func_15048A40_hdr
+#define func_150DE32C func_150DE32C_hdr
 #include "functions.h"
 #undef func_15048A40
+#undef func_150DE32C
 #include "variables.h"
 extern f32 func_15048A40(u8 arg0);
 extern u8 D_80090204[];
@@ -39,7 +41,12 @@ typedef struct {
 } struct_150DE458;
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_10B7D0/func_150DE320.s")
+void func_150DE320(s32 arg0) {
+}
+
+extern s32 func_150A32B4(struct178 *, s32, s32, s32);
+extern u8 *func_151149AC(u8);
+extern void func_150A2864(s32, s32);
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_10B7D0/func_150DE32C.s")
 
