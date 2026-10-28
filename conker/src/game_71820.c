@@ -450,7 +450,6 @@ s32 func_15045384(Vec3f_15045D48 *arg0, f32 arg1, Game71820Hit *arg2) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_71820/func_1504554C.s")
 
 extern void func_1510F800(s32);
 extern s32 func_150A6500(s16, s16, s32, u16);
@@ -489,6 +488,71 @@ struct conker150472C0_src
   s32 unk5C;
   s32 unk60;
 };
+
+extern f32 D_80098D4C;
+
+s32 func_1504554C(struct conker15045714 *arg0, f32 arg1, struct conker150472C0_dst *arg2) {
+    s32 count;
+    s32 best;
+    s32 scan_index;
+    f32 height;
+
+    if (arg0->field_0x04 < arg1) {
+        arg2->field_0x1C &= ~2;
+        return 0;
+    }
+    arg2->field_0x00 = D_80098D4C;
+    best = -1;
+    func_1510F800(3);
+    count = func_150A4FA0((s32)arg0->field_0x00, (s32)arg0->field_0x08);
+    scan_index = 0;
+    if (count > 0) {
+        Game71820Candidate *scan = D_800D3300;
+
+        do {
+            height = (f32)scan->height * 0.00390625f;
+            if ((height <= arg0->field_0x04) && (arg2->field_0x00 < height)) {
+                best = scan_index;
+                arg2->field_0x00 = height;
+            }
+            scan_index++;
+            scan++;
+        } while (scan_index < count);
+    }
+    if (best != -1) {
+        Game71820Candidate *candidate;
+        s32 *source;
+        u32 copy_index;
+        u8 *output;
+        s32 offset;
+        s32 flags;
+        s32 updated_flags;
+        s32 active;
+
+        candidate = &D_800D3300[best];
+        source = candidate->sources;
+        offset = candidate->index;
+        copy_index = 0;
+        output = (u8 *)arg2;
+        for (; copy_index != 3; copy_index++, output += 6) {
+            s16 *point = (s16 *)(source[copy_index] + offset);
+            *(s16 *)(output + 4) = point[0];
+            *(s16 *)(output + 6) = point[1];
+            *(s16 *)(output + 8) = point[2];
+        }
+        arg2->field_0x18 = 0;
+        arg2->field_0x1C |= 6;
+        arg2->field_0x1D = 4;
+        arg2->field_0x20 = 0;
+        if (arg1 <= arg2->field_0x00) {
+            arg2->field_0x1C |= 2;
+            return 1;
+        }
+        return 0;
+    }
+    arg2->field_0x1C &= ~2;
+    return 0;
+}
 
 void func_15045714(struct conker15045714 *arg0, u16 arg1, s32 *arg2, s32 arg3) {
     func_1510F800(2);
