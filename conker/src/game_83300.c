@@ -1,8 +1,10 @@
 #include <ultra64.h>
 
 #define func_1506160C func_1506160C_hdr
+#define func_1505841C func_1505841C_hdr
 #include "functions.h"
 #undef func_1506160C
+#undef func_1505841C
 #define D_800D1550 D_800D1550_hdr
 #include "variables.h"
 #undef D_800D1550
@@ -342,7 +344,71 @@ s32 func_1505693C(struct127 *arg0, s32 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_15056A00.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_15056B08.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505841C.s")
+typedef struct Func1505841CActor {
+    u8 pad0[0x28];
+    f32 vertical;
+    u8 pad2C[0x10];
+    f32 speed;
+    u8 pad40[0x10C];
+    f32 scale;
+    u8 pad150[0x80];
+    s8 pitch;
+    u8 pad1D1[0x52];
+    u8 mode;
+    u8 pad224[8];
+    u16 motion_flags;
+    u8 pad22E[0x16];
+    u16 animation;
+    u8 rate_flags;
+    u8 pad247[2];
+    u8 rate_low;
+    u8 pad24A[6];
+    u8 strength;
+    u8 pad251[0x7F];
+    void *field_2D0;
+} Func1505841CActor;
+
+void func_1505841C(Func1505841CActor *arg0, f32 arg1) {
+    void *inner;
+    f32 speed;
+    f32 fade;
+    f32 rate;
+    f32 scaled_speed;
+    s32 flags;
+
+    flags = arg0->rate_flags;
+    rate = (f32)(((flags & 0x1F) << 8) + arg0->rate_low) * D_80099468;
+    if (!(flags & 0x80)) {
+        speed = arg0->speed;
+        if ((speed <= 1.0f) || ((arg0->motion_flags & 0x10) && (arg0->vertical == 0.0f))) {
+            rate = arg1;
+        } else {
+            scaled_speed = speed;
+            scaled_speed *= 0.5f / arg0->scale;
+            rate *= 10.0f;
+            rate = scaled_speed / rate + D_8009946C;
+            if (!(flags & 0x20)) {
+                rate += D_80099470;
+            }
+        }
+    }
+    if (arg0->mode == 0xD) {
+        rate = (f32)(arg0->strength & 0x7F) * D_80099474;
+    }
+    if (flags == 0xFF) {
+        rate = 0.0f;
+    }
+    func_1505E650((struct127 *)arg0, arg0->animation, rate,
+                 (f32)arg0->pitch, 0.0f, 0.0f, 0);
+    if (arg0->rate_flags == 0xFF) {
+        fade = (f32)((s32 (*)[16])D_800418B0)[D_800419A0][0];
+        if (fade >= 0.0f) {
+            inner = arg0->field_2D0;
+            *(f32 *)((u8 *)inner + 8) = (*(f32 *)((u8 *)inner + 0x18) * (32768.0f - fade)) / 32768.0f;
+        }
+    }
+}
+
 // NON-MATCHING: JUSTREG
 // void func_1505841C(struct127 *arg0, f32 arg1) {
 //     struct197 *temp_v0_2;
