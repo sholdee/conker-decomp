@@ -159,7 +159,9 @@ s32 func_1515B994(void *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_188440/func_1515BA10.s")
+void func_1515BA10(s32 arg0) {
+
+}
 
 extern void func_1515AF90(s16);
 
