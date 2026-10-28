@@ -4,7 +4,21 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_1420/func_10001420.s")
+void func_10001420(void) {
+    s32 a = 0;
+    s32 b = 0;
+    s32 cnt = 4064;
+    s32 occ;
+    s32 occ2;
+    s32 *tmp = (s32 *)&D_80043B40;
+    if (1) {
+        occ = 0;
+        occ2 = 0;
+        do {
+            *tmp++ = 0;
+        } while ((u32)tmp < ((u32)&D_80043B40 + cnt + a + b + occ + occ2));
+    }
+}
 // JUSTREG (verified 2026-06-18): the body below is structurally byte-perfect
 // vs the target — every instruction/immediate/branch matches — but IDO -O2
 // allocates v0/v1 where the target uses a1/a0. Imported into decomp-permuter.
