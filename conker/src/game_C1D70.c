@@ -235,7 +235,28 @@ s32 func_15095760(Gfx *arg0, struct Pt15095760 *arg1) {
     return func_15095A90((s32)arg0, (s32)arg1, sp44, sp40, sp38, 1, 0, 0, 0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C1D70/func_150958B0.s")
+typedef struct Cmd150958B0 {
+    u32 w0;
+    u32 w1;
+} Cmd150958B0;
+
+Cmd150958B0 *func_150958B0(Cmd150958B0 *arg0, s16 *arg1, s32 *arg2) {
+    f32 sp44;
+    f32 sp40;
+    f32 sp3C;
+    f32 sp38;
+
+    if (func_1509563C((f32)arg1[0], (f32)arg1[1], (f32)arg1[2], &sp44, &sp40, &sp3C, &sp38, 4000.0f) == 0) {
+        *arg2 = 0;
+        return arg0;
+    }
+    func_15095B08((s32)arg1, sp44, sp40, sp38, 1, arg2);
+    if (*arg2 != 0) {
+        { Cmd150958B0 *command = arg0++; command->w0 = 0xE7000000; command->w1 = 0; }
+        { Cmd150958B0 *command = arg0++; command->w0 = _SHIFTL(0xEE, 24, 8); command->w1 = _SHIFTL(sp3C / sp38 * 16352.0f + 16352.0f, 16, 16) | _SHIFTL(0, 0, 16); }
+    }
+    return arg0;
+}
 
 void func_15095A48(s32 arg0, s32 arg1, f32 arg2, f32 arg3) {
     func_15095A90(arg0, arg1, arg2, arg3, 4096.0f, 0, 0, 0, 0);
