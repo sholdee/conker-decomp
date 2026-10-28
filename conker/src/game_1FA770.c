@@ -122,7 +122,70 @@ void func_151CD3CC(struct260 *arg0, s32 arg1, u8 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1FA770/func_151CD4C0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1FA770/func_151CD674.s")
+typedef struct Game1FA770Particle {
+    f32 x;
+    f32 y;
+    u8 pad08[4];
+    f32 velocity;
+    u8 pad10[0xC];
+} Game1FA770Particle;
+
+typedef struct Vec3i151CD674 {
+    s32 x;
+    s32 y;
+    s32 z;
+} Vec3i151CD674;
+
+s32 func_151CD674(u8 *actor) {
+    u8 *owner;
+    Game1FA770Particle *particles;
+    Game1FA770Particle *particle;
+    s32 cursor;
+    f32 velocity;
+    f32 gravity;
+    f32 acceleration;
+    f32 step;
+    f32 travel;
+    f32 squared;
+
+    owner = *(u8 **)(actor + 0x98);
+    particles = *(Game1FA770Particle **)(actor + 0x94);
+    if ((*(s8 *)(actor + 0x2C) < 2) && (*(u16 *)(actor + 0x1E) & 8)) {
+        return 0;
+    }
+    cursor = *(s8 *)(actor + 0x2E);
+    if (cursor != *(s8 *)(actor + 0x2D)) {
+        gravity = -0.25500003f;
+        acceleration = -0.12750001f;
+        do {
+            cursor--;
+            if (cursor < 0) {
+                cursor = actor[0x25] - 1;
+            }
+            particle = &particles[cursor];
+            velocity = particle->velocity;
+            step = D_800BE9A4;
+            travel = velocity * step;
+            squared = step * step;
+            particle->y = particle->y + (travel + acceleration * squared);
+            particle->velocity = (f32)velocity + gravity * D_800BE9A4;
+            if (particle->y < *(f32 *)(owner + 0x44)) {
+                if (cursor != *(s8 *)(actor + 0x2D)) {
+                    do {
+                        *(s8 *)(actor + 0x2D) += 1;
+                        if (actor[0x25] == *(s8 *)(actor + 0x2D)) {
+                            *(s8 *)(actor + 0x2D) = 0;
+                        }
+                        *(s8 *)(actor + 0x2C) -= 1;
+                    } while (cursor != *(s8 *)(actor + 0x2D));
+                }
+                particles[*(s8 *)(actor + 0x2D)].y = *(f32 *)(owner + 0x44);
+            }
+        } while (cursor != *(s8 *)(actor + 0x2D));
+    }
+    *(Vec3i151CD674 *)(actor + 0x54) = *(Vec3i151CD674 *)(actor + 0x10);
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1FA770/func_151CD7BC.s")
 
