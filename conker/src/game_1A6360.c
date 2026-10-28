@@ -83,7 +83,39 @@ void func_15178EFC(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1A6360/func_15179008.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1A6360/func_151794C8.s")
+void func_151794C8(void) {
+    s32 x;
+    s32 y;
+    s32 z;
+    f32 angle;
+    f32 vy;
+    f32 vz;
+    f32 c;
+    f32 s;
+    f32 vx;
+
+    x = (s32)D_800DBFF0->unk2F8;
+    y = (s32)D_800DBFF0->unk2FC;
+    z = (s32)D_800DBFF0->unk300;
+
+    /* offset (0, 500, 0) rotated by unk398, then by unk3A0 */
+    angle = D_800DBFF0->unk398;
+    c = func_150AD78C(angle);
+    s = func_150AD780(angle);
+    vy = 500.0f * c;
+    vz = -500.0f * s;
+    vx = 0.0f;
+
+    angle = D_800DBFF0->unk3A0;
+    c = func_150AD78C(angle);
+    s = func_150AD780(angle);
+    x += vx * s + vz * c;
+    z += vz * s - vx * c;
+    y += vy;
+    D_800DD438.unk0 = x;
+    D_800DD438.unk4 = z;
+    D_800DD438.unk2 = y;
+}
 
 void func_15179600(s32 arg0, s32 arg1) {
     typedef struct {
@@ -169,15 +201,15 @@ void func_15179AB8(void)
   s32 i;
   s32 off;
   s32 **p;
-  int new_var;
+  int stride;
   s32 *obj;
   i = ((s16) D_800DD436) - 1;
-  new_var = 4;
+  stride = 4;
   if (i < 0)
   {
     return;
   }
-  off = i * new_var;
+  off = i * stride;
   p = (s32 **) (((u8 *) D_800DD440) + off);
   do
   {
@@ -190,7 +222,7 @@ void func_15179AB8(void)
         return;
       }
     }
-    off -= new_var;
+    off -= stride;
     p--;
   }
   while (off >= 0);
