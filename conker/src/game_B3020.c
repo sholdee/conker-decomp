@@ -925,7 +925,9 @@ void func_15088F30(Obj15088F30 *arg0, f32 *outX, f32 *outY, f32 *outZ) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_B3020/func_150896EC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_B3020/func_15089BB0.s")
+void func_15089BB0(void) {
+    D_800D23B0 = 0;
+}
 
 void *func_1509B570(s32);
 void func_1508BC20(void);
