@@ -1,6 +1,11 @@
 #include <ultra64.h>
+/* functions.h declares func_150A29C8(u8, u16); golden reads both args as full words. */
+#define func_150A29C8 func_150A29C8_hdr
 #include "functions.h"
+#undef func_150A29C8
+#define D_800D3098 D_800D3098_array_decl_in_variables_h
 #include "variables.h"
+#undef D_800D3098
 
 extern f32 D_8009F5A0;
 extern f32 D_8009F5A4;
@@ -16,7 +21,122 @@ struct Func150A0D14Arg {
     f32 unk30;
 };
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_CDE80/func_150A09D0.s")
+/* Partial view of struct108 (the camera record) covering the target fields. */
+struct Func150A09D0Camera {
+    u8  pad0[0x938];
+    f32 unk938;
+    f32 unk93C;
+    f32 unk940;
+    f32 unk944;
+    u8  unk948;
+    u8  unk949;
+    u8  pad94A[0x56];
+};
+
+/* struct178 with the fields past 0x6 named (structs.h has them as a blob). */
+typedef struct {
+    /* 0x00 */ s16 unk0;
+    /* 0x02 */ s16 unk2;
+    /* 0x04 */ s16 unk4;
+    /* 0x06 */ s16 unk6;
+    /* 0x08 */ u8  pad8[0xC];
+    /* 0x14 */ u8  unk14;
+    /* 0x15 */ u8  unk15;
+    /* 0x16 */ u8  pad16;
+    /* 0x17 */ u8  unk17;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ u32 unk1C;
+    /* 0x20 */ u32 unk20;
+    /* 0x24 */ u8  pad24[0x10];
+} ObjRec; /* size 0x34 */
+
+/* variables.h declares D_800D3098 as `struct178 D_800D3098[73]`; the symbol really
+   holds a POINTER to the object table.  Shadowed above so this file sees the real type. */
+extern ObjRec *D_800D3098;
+
+void func_1000FC18(u16 arg0, s16 arg1, s16 arg2, s16 arg3, s32 arg4);
+s32 func_150A1DA0(u8 *arg0, struct178 *arg1, s32 arg2);
+void func_150A23E4(struct178 *arg0);
+
+void func_150A09D0(s32 arg0) {
+    u32 count;
+    s32 i;
+
+    arg0 = arg0;
+    for (i = 0; i < (u32)D_800D3094; i++) {
+        switch ((s32)D_800D3098[i].unk15 >> 2) {
+        case 2:
+            if (D_800D3098[i].unk20 == 1) {
+                D_800D3098[i].unk20 ^= 3;
+            } else if (D_800D3098[i].unk20 == 2) {
+                func_1000FC18(D_800D3098[i].unk1C >> 16,
+                              D_800D3098[i].unk0,
+                              D_800D3098[i].unk2,
+                              D_800D3098[i].unk4,
+                              D_800D3098[i].unk18);
+                D_800D3098[i].unk20 = 0;
+            }
+            if (D_800C35EA == 1) {
+                if (func_150A1DA0((u8 *)D_800CC2D0, (struct178 *)&D_800D3098[i], 0) == 0) {
+                    func_150A23E4((struct178 *)&D_800D3098[i]);
+                }
+            }
+            break;
+        case 7:
+            if ((D_800D3098[i].unk15 & 3) == 3) {
+                D_800D3098[i].unk20 = 0;
+            } else {
+                if (D_800D3098[i].unk20 == 1) {
+                    D_800D3098[i].unk20 = 2;
+                } else if (D_800D3098[i].unk20 == 2) {
+                    if (func_1000E46C(D_800D3098[i].unk17, 0, D_800D3098[i].unk18, 0)) {
+                        if (func_1000E46C(D_800D3098[i].unk17, 100, D_800D3098[i].unk1C, 0)) {
+                            D_800D3098[i].unk20 = 0;
+                        }
+                    }
+                }
+            }
+            break;
+        case 4:
+            if (D_800D3098[i].unk17 != 9) {
+                count = D_800D3098[i].unk1C & 0xFF;
+                if (count != 0) {
+                    if (D_800D3098[i].unk14 == 0) {
+                        count--;
+                    } else {
+                        count = 0;
+                    }
+                    D_800D3098[i].unk1C = (D_800D3098[i].unk1C & ~0xFF) | count;
+                    if (count == 0) {
+                        count = D_800D3098[i].unk1C;
+                        D_800DDF5C[(count >> 8) & 0xFF] = 0;
+                        D_800D3098[i].unk1C &= 0xFFFF0000;
+                    }
+                }
+            }
+            /* fallthrough */
+        case 0:
+            if (D_800D3098[i].unk17 == 0xC) {
+                if (D_800D3098[i].unk14 == 0) {
+                    s32 j;
+
+                    for (j = 0; j <= D_80082FA0; j++) {
+                        struct Func150A09D0Camera *cam;
+
+                        cam = (struct Func150A09D0Camera *)(D_800DBFF0 + j);
+                        cam->unk93C = (f32)D_800D3098[i].unk0;
+                        cam->unk940 = (f32)D_800D3098[i].unk2;
+                        cam->unk944 = (f32)D_800D3098[i].unk4;
+                        cam->unk938 = (f32)D_800D3098[i].unk6;
+                        cam->unk949 = D_800D3098[i].unk18;
+                        cam->unk948 = 1;
+                    }
+                }
+            }
+            break;
+        }
+    }
+}
 
 void func_150A0D14(struct Func150A0D14Arg *arg0) {
     f32 angle;
@@ -31,7 +151,9 @@ void func_150A0D14(struct Func150A0D14Arg *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_CDE80/func_150A0D8C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_CDE80/func_150A1040.s")
+s32 func_150A1040(s32 arg0) {
+    return arg0 + 0x400;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_CDE80/func_150A104C.s")
 
@@ -97,7 +219,22 @@ void func_150A278C(u8 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_CDE80/func_150A2864.s")
+extern u64 D_800D30F0[][3];
+
+void func_150A2864(u32 arg0, s32 arg1) {
+    s32 i;
+
+    arg0 &= 0xFFF;
+    if (arg0 < (u32)D_800D3094) {
+        (*(ObjRec **)&D_800D3098)[arg0].unk14 = arg1;
+    }
+    if (arg1 == 1) {
+        for (i = 0; i < 0x10; i++) {
+            D_800D30F0[i][arg0 >> 6] &= ~(1ULL << (arg0 & 0x3F));
+        }
+    }
+}
+
 
 void func_150A2940(s32 arg0, s32 arg1, s32 arg2) {
     typedef u8 entry[0x34];
@@ -114,7 +251,19 @@ void func_150A2940(s32 arg0, s32 arg1, s32 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_CDE80/func_150A29C8.s")
+s32 func_150A29C8(u32 arg0, u32 arg1) {
+    arg1 &= 0xFFF;
+    if ((u32)D_800D3094 < arg1) {
+        return 1;
+    }
+    if (arg0 < 0x10 && (*(u16 *)&D_800D2340 & (1 << arg0))) {
+        if ((D_800D30F0[arg0][arg1 >> 6] >> (arg1 & 0x3F)) & 1) {
+            return 0;
+        }
+        return 1;
+    }
+    return func_150A1DA0((u8 *)&D_800CC2D0[arg0], (struct178 *)&D_800D3098[arg1], 1);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_CDE80/func_150A2AEC.s")
 
@@ -137,7 +286,25 @@ s32 func_150A2CA4(u32 arg0) {
     return -1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_CDE80/func_150A2D84.s")
+s32 func_150A2D84(s32 a0, s32 a1) {
+    struct108 *p;
+    u8 sp18[0x32C];
+
+    p = &D_800DBFF0[a0];
+    a1 &= 0xFFF;
+    if ((u32)D_800D3094 < (u32)a1) {
+        return 1;
+    }
+    *(f32 *)&sp18[0x14] = p->unk2F8;
+    *(f32 *)&sp18[0x18] = p->unk2FC;
+    *(f32 *)&sp18[0x1C] = p->unk300;
+    *(f32 *)&sp18[0x180] = *(f32 *)&sp18[0x18];
+    *(f32 *)&sp18[0x2C] = p->unk304;
+    *(f32 *)&sp18[0x30] = p->unk308;
+    *(f32 *)&sp18[0x34] = p->unk30C;
+    return func_150A1DA0(sp18, (struct178 *)&D_800D3098[a1], 0);
+}
+
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_CDE80/func_150A2E4C.s")
 
@@ -205,7 +372,31 @@ s32 func_150A3058(s32 arg0, s16 arg1, s16 arg2, s16 arg3) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_CDE80/func_150A3194.s")
+ObjRec *func_150A3194(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+    s32 i;
+    struct127 actor;
+
+    actor.x_position = (f32)arg2;
+    actor.old_x_position = (f32)arg2;
+    actor.y_position = (f32)arg3;
+    actor.unk180 = (f32)arg3;
+    actor.old_y_position = (f32)arg3;
+    actor.z_position = (f32)arg4;
+    actor.old_z_position = (f32)arg4;
+
+    for (i = 0; i < (u32)D_800D3094; i++) {
+        if (D_800D3098[i].unk14 == 0) {
+            if (arg0 == ((s32)D_800D3098[i].unk15 >> 2)) {
+                if (arg1 == D_800D3098[i].unk17) {
+                    if (func_150A1DA0((u8 *)&actor, (struct178 *)&D_800D3098[i], 0) == 0) {
+                        return &D_800D3098[i];
+                    }
+                }
+            }
+        }
+    }
+    return 0;
+}
 
 s32 func_150A32B4(struct178 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     u8 sp24[0x32C];
