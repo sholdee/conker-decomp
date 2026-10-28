@@ -148,7 +148,23 @@ void func_15194588(s32 arg0, s32 arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1C1150/func_151945CC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1C1150/func_15194794.s")
+void func_151B01B8(s32, s32);
+void func_151B09BC(s32, s32, s32, s32, s32);
+void *func_151AF270();
+
+void func_15194794(s32 arg0, Game1C1150Event *arg1, s8 *arg2) {
+    func_151B01B8(arg0, (s32)arg1);
+    func_151B09BC(arg0, (s32)arg1, 0x3E8, 0xFF, 0);
+    switch (arg1->type) {
+        case 0:
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+            func_151AF270(arg1, 0xFF, 1);
+            break;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1C1150/func_15194810.s")
 
