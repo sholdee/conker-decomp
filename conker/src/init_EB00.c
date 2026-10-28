@@ -15,9 +15,9 @@
 s32 func_10010344(u16, void *, u32, s16, u16);
 #include "variables.h"
 
-s32 func_10010E78(s32 arg0, s32 arg1, u16 arg2, s16 arg3, u8 arg4,
-                   s32 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9,
-                   s16 argA);
+u16 func_10010E78(u16 arg0, s32 arg1, u16 arg2, s32 arg3, s32 arg4,
+                   s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9,
+                   s32 argA);
 void func_10011624(struct15 *arg0, s32 *arg1, s32 arg2, s32 arg3);
 s32 func_1510F8CC(s32 arg0);
 s32 func_1000F568(s32 arg0, s32 arg1);
@@ -1022,16 +1022,16 @@ u16 func_10010BE8(u16 arg0, s32 sound, u16 volume, u8 pan,
     return result;
 }
 
-s32 func_10010E78(s32 arg0, s32 arg1, u16 arg2, s16 arg3, u8 arg4,
-                  s32 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9,
-                  s16 argA) {
+u16 func_10010E78(u16 arg0, s32 arg1, u16 arg2, s32 arg3, s32 arg4,
+                  s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9,
+                  s32 argA) {
     s32 sp2C;
     u32 temp_t1;
 
-    temp_t1 = func_1000F6B8(arg5, arg6, arg7, arg8, &sp2C, (s32) arg9, (s32) argA);
-    temp_t1 = (u32) (arg2 * temp_t1) >> 0xF;
+    temp_t1 = func_1000F6B8(arg5, (s16)arg6, (s16)arg7, (s16)arg8, &sp2C, (s16)arg9, (s16)argA);
+    temp_t1 = ((u32)arg2 * temp_t1) >> 15;
     if (temp_t1 != 0) {
-        return func_10010BE8((u16) arg0, arg1, temp_t1, sp2C & 0x7F, arg3, (sp2C & 0x80) | arg4, D_80041FD9);
+        return func_10010BE8(arg0, arg1, (u16)temp_t1, sp2C & 0x7F, ((s16 *)&arg3)[1], (sp2C & 0x80) | (u8)arg4, D_80041FD9);
     }
     return 0;
 }
@@ -1044,7 +1044,42 @@ void func_10010F88(s32 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4,
                    s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9) {
     func_10010E78(0, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_10010FFC.s")
+typedef struct {
+    u8 pad0[0xE];
+    u16 fieldE;
+} SoundOwnerScale;
+
+s32 func_10010FFC(u16 arg0, s32 arg1, u16 arg2, s16 arg3,
+                  u8 arg4, SoundOwnerState_10344 *owner) {
+    f32 scale;
+
+    if ((owner == 0) || (owner->field0 == 0)) {
+        return 0;
+    }
+    if (owner->field318 != 0) {
+        arg0 = func_10010BE8(arg0, arg1, arg2, 0x40,
+                              arg3, arg4, D_80041FD9);
+    } else {
+        arg2 = (u16)((arg2 + arg2 + arg2) >> 2);
+        if (owner->field4 != 0xFF) {
+            scale = (f32)(u32)((SoundOwnerScale *)D_800D1C90[owner->field4])->fieldE * owner->field14C;
+        } else {
+            scale = 0.0f;
+        }
+        if (scale > 256.0f) {
+            scale = 1.0f;
+        } else if (scale < 80.0f) {
+            scale = 0.3125f;
+        } else {
+            scale *= 0.00390625f;
+        }
+        arg0 = func_10010E78(arg0, arg1, arg2, arg3,
+                              arg4, 0, (s32)owner->field14,
+                              (s32)owner->field18, (s32)owner->field1C,
+                              0x1F4, (s32)(2000.0f * scale) + 0x1F5);
+    }
+    return arg0;
+}
 
 void func_100111C8(u16 arg0) {
     struct120 *tmp = &D_800425E0[arg0 & 0xF];
