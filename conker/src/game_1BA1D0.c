@@ -18,6 +18,38 @@ extern void func_151D2AB0(s32);
 extern s32 func_151D2F00(s32, s32, s32, s32);
 extern struct225 *func_1519021C(s32, struct Struct1519021CArg1 *, u8, s16, u8, s32);
 
+typedef struct Game1BBFC0Vec3f {
+    f32 x;
+    f32 y;
+    f32 z;
+} Game1BBFC0Vec3f;
+
+typedef struct Game1BBFC0Vertex {
+    s16 x, y, z, flag;
+    u8 other[8];
+} Game1BBFC0Vertex;
+
+typedef struct Game1BBFC0Beam {
+    u8 unknown0[0x2C];
+    f32 width;
+    f32 progress;
+    Game1BBFC0Vec3f start;
+    Game1BBFC0Vec3f end;
+    u8 unknown4C[0x74];
+    u8 vertexTemplate[0x40];
+    u8 *buffers[1];
+} Game1BBFC0Beam;
+
+typedef struct Game1BBFC0Camera {
+    u8 unknown0[0x2F8];
+    Game1BBFC0Vec3f position;
+    u8 unknown304[0x69C];
+} Game1BBFC0Camera;
+
+void *memcpy(void *, const void *, u32);
+f32 sqrtf(f32);
+#pragma intrinsic(sqrtf)
+
 struct SoundLinkedPayload {
     u8 pad_0x0[0x46];
     s16 field_0x46;
@@ -245,7 +277,98 @@ s32 func_1518E6D4(void *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1BA1D0/func_1518E73C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1BA1D0/func_1518EB10.s")
+void *func_1518EB10(Game1BBFC0Beam *arg0, s16 arg1) {
+    Game1BBFC0Vertex *vertices;
+    void *result;
+    f32 progress;
+    Game1BBFC0Vec3f tip;
+    f32 dx, dy, dz;
+    f32 vx, vy, vz;
+    f32 nx, ny, nz;
+    f32 lengthSquared;
+    u8 fresh;
+    Game1BBFC0Vec3f *eye;
+    f32 scale;
+
+    func_151D5D60(arg0->buffers, arg1, 0x40, (void **)&vertices, &fresh);
+    result = vertices;
+    if (vertices != NULL) {
+        if (fresh != 0) {
+            memcpy(arg0->buffers[arg1], arg0->vertexTemplate, 0x40);
+            memcpy(arg0->buffers[arg1] + 0x40, arg0->vertexTemplate, 0x40);
+        }
+    } else {
+        return NULL;
+    }
+    progress = arg0->progress;
+    dx = arg0->end.x - arg0->start.x;
+    dy = arg0->end.y - arg0->start.y;
+    dz = arg0->end.z - arg0->start.z;
+    tip.x = arg0->start.x + dx * progress;
+    tip.y = arg0->start.y + dy * progress;
+    tip.z = arg0->start.z + dz * progress;
+    eye = (Game1BBFC0Vec3f *)&D_800DBFF0[arg1].unk2F8;
+    dx = tip.x - arg0->start.x;
+    dy = tip.y - arg0->start.y;
+    dz = tip.z - arg0->start.z;
+    vx = arg0->start.x - eye->x;
+    vy = arg0->start.y - eye->y;
+    vz = arg0->start.z - eye->z;
+    nx = dy * vz - vy * dz;
+    ny = dz * vx - vz * dx;
+    nz = dx * vy - vx * dy;
+    lengthSquared = nx * nx + ny * ny + nz * nz;
+    if (lengthSquared == 0.0f) {
+        nx = 0.0f;
+        ny = 0.0f;
+        nz = 0.0f;
+    } else {
+        scale = arg0->width / sqrtf(lengthSquared);
+        nx *= scale;
+        ny *= scale;
+        nz *= scale;
+    }
+    vertices->x = arg0->start.x + nx;
+    vertices->y = arg0->start.y + ny;
+    vertices->z = arg0->start.z + nz;
+    vertices->flag = 0;
+    vertices++;
+    vertices->x = arg0->start.x - nx;
+    vertices->y = arg0->start.y - ny;
+    vertices->z = arg0->start.z - nz;
+    vertices->flag = 0;
+    vertices++;
+    dx = -dx;
+    dy = -dy;
+    dz = -dz;
+    vx = tip.x - eye->x;
+    vy = tip.y - eye->y;
+    vz = tip.z - eye->z;
+    nx = dy * vz - vy * dz;
+    ny = dz * vx - vz * dx;
+    nz = dx * vy - vx * dy;
+    lengthSquared = nx * nx + ny * ny + nz * nz;
+    if (lengthSquared == 0.0f) {
+        nx = 0.0f;
+        ny = 0.0f;
+        nz = 0.0f;
+    } else {
+        scale = arg0->width / sqrtf(lengthSquared);
+        nx *= scale;
+        ny *= scale;
+        nz *= scale;
+    }
+    vertices->x = tip.x + nx;
+    vertices->y = tip.y + ny;
+    vertices->z = tip.z + nz;
+    vertices->flag = 0;
+    vertices++;
+    vertices->x = tip.x - nx;
+    vertices->y = tip.y - ny;
+    vertices->z = tip.z - nz;
+    vertices->flag = 0;
+    return result;
+}
 
 struct Struct1518EF54Sub {
     u8 pad0[0x4C];
