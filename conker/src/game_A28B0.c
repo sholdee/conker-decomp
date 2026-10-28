@@ -607,7 +607,19 @@ call_func_1504715C:
 //         func_15075400(D_800D1890);
 //     }
 // }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_150767F4.s")
+void func_150767F4(void) {
+    struct127 *other;
+    u16 angle;
+
+    other = (struct127 *) ((u8 *)D_800CC2D0 + D_800D154C->unk222 * 0x32C);
+    angle = (s32)func_1505A630(other->x_position - D_800D154C->x_position,
+                        D_800D154C->z_position - other->z_position, 0);
+    if ((((angle >> 8) -
+           (*(u16 *)((u8 *)D_800CC34A + D_800D154C->unk222 * 0x32C) >> 8) +
+          D_800D1891) & 0xFF) < D_800D1891 * 2) {
+        func_15075400(D_800D1890);
+    }
+}
 
 // PERMUTER CANDIDATE best 595: the body below is byte-exact everywhere EXCEPT one instruction.
 // (Fixes over the older reconstruction: unkA8 is stored as `i + 0x80` (addiu, the 0x80 "valid" bit
