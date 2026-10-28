@@ -1,7 +1,13 @@
 #include <ultra64.h>
 #define func_1513EDE4 func_1513EDE4_orig
+#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
+#define func_10010F88 func_10010F88_void_decl_in_functions_h
 #include "functions.h"
 #undef func_1513EDE4
+#undef func_150ADA20
+#undef func_10010F88
+void func_10010F88(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+u32 func_150ADA20(void);
 #include "variables.h"
 
 typedef struct {
@@ -299,7 +305,90 @@ void func_150FCFD4(struct127 *arg0, u8 arg1, s32 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_129EE0/func_150FD514.s")
+extern void func_1502EA98(struct127 *, u8, u8, u8, u8, s32, u8);
+extern void func_15107B78(struct127 *, s32, s32, s32, s32);
+extern void func_151D5334(struct17 *, f32, f32, f32, s32, u8, s32);
+extern void func_150E7FEC(f32, s32, void *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
+extern void func_150E83AC(struct17 *, s16, u8, s32);
+extern f32 sinf(f32);
+
+s32 func_150FD514(Actor150FD514 *arg0) {
+    struct127 *owner;
+    Ext150FCFD4 *ext;
+    f32 z;
+    f32 x;
+    struct17 pos;
+
+    ext = &arg0->ext;
+    owner = ext->unk0;
+    if (owner != NULL) {
+        if (owner->interaction_state == 0 || owner->unique_id != ext->unk4) {
+            ext->unk0 = NULL;
+            owner = NULL;
+        }
+        /* BUG (original game): owner may have just been set to NULL above, and is dereferenced anyway */
+        x = owner->x_position;
+        z = owner->z_position;
+    } else {
+        x = arg0->unk34;
+        z = arg0->unk3C;
+    }
+    if (owner != NULL) {
+        func_1502EA98(owner, 0xFF, 0, 0, 0xFF, 0, 4);
+        ext->unk2C += (0.091000006f + func_150ADA68() * 0.07f) * D_800BE9A4;
+        while (ext->unk2C > 1.0f) {
+            func_15107B78(owner, (s16)(func_150ADA20() & 0xFF), (s16)((func_150ADA20() % 101) - 63), arg0->unkC, arg0->unk1);
+            ext->unk2C -= 1.0f;
+        }
+    }
+    if (ext->unkC > 20.0f) {
+        arg0->unk2C = (50.0f - ext->unkC) * 0.033333335f * ext->unk8;
+    } else if (ext->unkC > 10.0f) {
+        arg0->unk2C = ext->unk8;
+    } else {
+        arg0->unk2C = ext->unkC * 0.1f * ext->unk8;
+        if (ext->unk58 == 0) {
+            if (owner != NULL) {
+                func_1505D024(owner, 0x16, owner->unk7A, -1);
+                func_10010F88(0x69D, 0x7D00, 0, 0, 0, arg0->unk34, arg0->unk38, arg0->unk3C, 0x1F4, 0xBB8);
+            }
+            ext->unk58 = 1;
+            func_151D5404((struct17 *)&arg0->unk34, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, arg0->unkC, arg0->unk1);
+            func_151D5334((struct17 *)&arg0->unk34, 506.0f, 1013.0f, 0.0009871669f, 5, arg0->unkC, arg0->unk1);
+            if (ext->unk59 & 1) {
+                pos.unk0 = arg0->unk34;
+                pos.unk4 = ext->unk30.unk00;
+                pos.unk8 = arg0->unk3C;
+                func_150E7FEC(func_150ADA68() * 78.0f + 125.0f, (u8)((func_150ADA20() % 76) + 180), &ext->unk30.unk04, &pos,
+                              (func_150ADA20() % 207) + 302, 0, 1, 0, 0, 0, arg0->unkC, 0);
+                func_150E83AC(&pos, (func_150ADA20() % 80) + 243, arg0->unkC, arg0->unk1);
+            }
+        }
+    }
+    arg0->unk5C = sinf(ext->unk10) * 57.0f + 198.0f;
+    ext->unk10 += 0.28500003f * D_800BE9A4;
+    ext->unk10 = func_15144B68(ext->unk10);
+    ext->unk1C += 0.10700001f * D_800BE9A4;
+    ext->unk20 += -0.086f * D_800BE9A4;
+    ext->unk1C = func_15144B68(ext->unk1C);
+    ext->unk20 = func_15144B68(ext->unk20);
+    ext->unk14 = func_150AD78C(ext->unk1C) * 1666.0f + -4633.0f;
+    ext->unk18 = func_150AD78C(ext->unk20) * 1192.0f + 1242.0f;
+    if (ext->unk28 != NULL) {
+        ext->unk28->unk2C = ext->unk28->unk30 = arg0->unk2C * 0.02f;
+        ext->unk28->unk5C = arg0->unk5C;
+        ext->unk28->unk34 = x;
+        ext->unk28->unk3C = z;
+    }
+    arg0->unk34 = x;
+    arg0->unk3C = z;
+    ext->unkC -= D_800BE9A4;
+    if (ext->unkC < 0.0f) {
+        return 0;
+    }
+    return 1;
+}
+
 
 void func_150FDB0C(void *arg0, s32 arg1, u8 arg2)
 {
