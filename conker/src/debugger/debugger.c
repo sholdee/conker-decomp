@@ -11,6 +11,7 @@ extern u8 D_160037F0;
 extern func_160006CC_sp3C D_16003B48;
 
 void func_160006CC(struct118 *arg0);
+void func_16001044(s32 position, s32 mode, u32 value);
 
 void func_16000000(void) {
     func_160012B0(278, &D_160046AC);
@@ -557,13 +558,90 @@ s32 func_16000B14(struct OSThread_s *thread) {
 //     }
 // }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/func_16001044.s")
+u8 *func_1600160C();
+u8 *func_160014F0(u8 *destination, u8 character);
+s32 func_16001B34(u8 *buffer, const u8 *format, ...);
+
+typedef struct DebuggerDecimalPowers {
+    s32 power[10];
+} DebuggerDecimalPowers;
+extern DebuggerDecimalPowers D_16003B50;
+extern const u8 D_160047E4[];
+extern const u8 D_160047E8[];
+extern const u8 D_160047F0[];
+extern const u8 D_160047F4[];
+
+void func_16001044(s32 position, s32 mode, u32 value) {
+    s32 index;
+    s32 started;
+    s32 decimal_index;
+    s32 digit;
+    s32 exponent;
+    u8 character;
+    DebuggerDecimalPowers powers;
+    s32 power;
+    u32 mantissa;
+    f32 copy;
+    u8 buffer[36];
+    u8 *destination;
+
+    powers = D_16003B50;
+    if ((position >= (D_160038A0 << 5)) && (position < 0x341)) {
+        destination = func_1600160C(position);
+        switch (mode) {
+        case 0:
+            destination += 0x70;
+            index = 0;
+            do {
+                character = value & 0xF;
+                if (character >= 10) {
+                    character += 7;
+                }
+                character += '0';
+                func_160014F0(destination, character);
+                value = (s32)value >> 4;
+                index++;
+                destination -= 0x10;
+            } while (index != 8);
+            break;
+        case 1:
+            if ((s32)value < 0) {
+                destination = func_160014F0(destination, '-');
+                value = -value;
+            }
+            started = 0;
+            for (decimal_index = 9; decimal_index >= 0; decimal_index--) {
+                power = powers.power[decimal_index];
+                digit = (s32)value / power;
+                value = (s32)value % power;
+                if ((digit > 0) || started || (decimal_index == 0)) {
+                    destination = func_160014F0(destination, digit + '0');
+                    started = 1;
+                }
+            }
+            break;
+        case 2:
+            exponent = (s32)(value & 0x7F800000) >> 23;
+            mantissa = value << 9;
+            if (((exponent <= 0) || (exponent >= 0xFF)) &&
+                ((exponent != 0) || mantissa)) {
+                func_160012B0(position, D_160047E4);
+                return;
+            }
+            *(s32 *)&copy = value;
+            func_16001B34(buffer, D_160047E8, D_160047F0, D_160047F4,
+                          (f64)copy);
+            func_160012B0(position, buffer);
+            break;
+        }
+    }
+}
 
 void func_160012B0(s32 arg0, u8 *arg1) {
     if (arg1 && (arg0 >= (D_160038A0 << 5)) && (arg0 < 833)) {
         s32 fb = func_1600160C();
         while (*arg1 != 0) {
-            fb = func_160014F0(fb, *arg1 & 0xFF);
+            fb = func_160014F0(fb, *arg1);
             *arg1++;
         }
     }
