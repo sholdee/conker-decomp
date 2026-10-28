@@ -353,7 +353,24 @@ s32 func_151422F8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     return arg4;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15142314.s")
+void func_15142314(Mtx *arg0, s32 arg1, f32 *arg2) {
+    u8 *p;
+
+    p = ((u8 *)arg0) + (arg1 << 6);
+    if (D_800C3E90 != 0) {
+        p = ((u8 *)arg0) + (arg1 << 6);
+        do {
+            f32 scale = 0.000015258789f;
+            arg2[0] = (((f32)((*((s16 *)(p + 0x18))) << 0x10)) + ((f32)(*((s16 *)(p + 0x38))))) * scale;
+            arg2[1] = (((f32)((*((s16 *)(p + 0x1A))) << 0x10)) + ((f32)(*((s16 *)(p + 0x3A))))) * scale;
+            arg2[2] = (((f32)((*((s16 *)(p + 0x1C))) << 0x10)) + ((f32)(*((s16 *)(p + 0x3C))))) * scale;
+        } while (0);
+        return;
+    }
+    arg2[0] = *((f32 *)(p + 0x30));
+    arg2[1] = *((f32 *)(p + 0x34));
+    arg2[2] = *((f32 *)(p + 0x38));
+}
 f32 func_151423D8(u8 arg0) {
     s32 temp_v1;
     s32 temp_v0 = arg0;
