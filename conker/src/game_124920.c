@@ -243,7 +243,155 @@ void func_150F7F8C(void *arg0, u8 arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_124920/func_150F802C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_124920/func_150F81BC.s")
+extern s32 func_15145128(struct17 *, struct17 *, f32 *, f32 *);
+extern s32 func_15146078(struct17 *, struct17 *, struct17 *);
+
+typedef struct {
+    f32 *unk0;
+    struct17 unk4;
+    f32 unk10;
+} Func150F802CExtra;
+
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    s16 unk2;
+    s16 unk4;
+    s32 unk8;
+    s32 unkC;
+    u8 unk10;
+    u8 unk11;
+    u8 unk12;
+    u8 unk13;
+    f32 unk14;
+    f32 unk18;
+    struct17 unk1C;
+    struct17 unk28;
+    f32 unk34;
+    f32 unk38;
+    f32 unk3C;
+    s32 unk40;
+    u8 unk44;
+    u8 unk45;
+    u8 unk46;
+    u8 unk47;
+    s32 unk48;
+    u8 unk4C;
+    u8 pad4D[3];
+    s32 unk50;
+} Func150F81BCSpawn;
+
+typedef struct {
+    struct17 unk0;
+    struct17 unkC;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+} Func150F81BCExtra;
+
+typedef struct {
+    u8 pad0;
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD[0x13];
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+    u8 pad2C[0xC];
+    f32 unk38;
+    f32 unk3C;
+    f32 unk40;
+    u8 pad44[0x12C];
+    Func150F802CExtra unk170;
+} Func150F81BCObj;
+
+s32 func_150F81BC(Func150F81BCObj *arg0) {
+    Func150F802CExtra *ext;
+
+    ext = &arg0->unk170;
+    arg0->unk38 = ext->unk0[0];
+    arg0->unk3C = ext->unk0[1];
+    arg0->unk40 = ext->unk0[2];
+    arg0->unk20 = ext->unk0[3];
+    arg0->unk24 = ext->unk0[4];
+    arg0->unk28 = ext->unk0[5];
+    {
+        struct17 diff;
+        f32 dist;
+        f32 unused;
+        struct17 dir;
+        f32 count;
+
+        diff.unk0 = arg0->unk38 - ext->unk4.unk0;
+        diff.unk4 = arg0->unk3C - ext->unk4.unk4;
+        diff.unk8 = arg0->unk40 - ext->unk4.unk8;
+        ext->unk10 += D_800BE9A4;
+        if (func_15145128(&diff, &dir, &dist, &unused) != 0) {
+            struct17 step;
+            void *ret;
+            Func150F81BCSpawn spawn;
+            Func150F81BCExtra extra;
+
+            step.unk0 = dir.unk0 * 20.0f;
+            step.unk4 = dir.unk4 * 20.0f;
+            step.unk8 = dir.unk8 * 20.0f;
+            count = dist * 0.05000000075f;
+            if (count > 1.0f) {
+                f32 rate;
+
+                rate = ext->unk10 / count;
+                func_15146078(&diff, &extra.unk0, &extra.unkC);
+                extra.unk20 = 0.4630000293f;
+                extra.unk24 = 8.241000175f;
+                extra.unk28 = 3.888999939f;
+                spawn.unk0 = 0x7A;
+                spawn.unk1 = 0;
+                spawn.unk2 = 0x4404;
+                spawn.unk4 = 0xA;
+                spawn.unk8 = 0;
+                spawn.unkC = 0;
+                spawn.unk10 = 0xFF;
+                spawn.unk11 = 0xFF;
+                spawn.unk12 = 0xFF;
+                spawn.unk13 = 0xFF;
+                spawn.unk18 = 0.0f;
+                spawn.unk14 = 0.0f;
+                spawn.unk28 = *(struct17 *)&D_800A5480;
+                spawn.unk34 = 1.0f;
+                spawn.unk38 = 1.0f;
+                spawn.unk3C = 1.0f;
+                spawn.unk40 = 0xCC0008;
+                spawn.unk45 = 0xFF;
+                spawn.unk46 = 0;
+                spawn.unk47 = 6;
+                spawn.unk48 = 0;
+                spawn.unk4C = 0xFF;
+                spawn.unk50 = 0;
+                do {
+                    extern s32 D_800A4AA0;
+
+                    extra.unk1C = 4.712388992f;
+                    extra.unk18 = 27.0f - ext->unk10;
+                    spawn.unk1C = ext->unk4;
+                    spawn.unk44 = extra.unk18 * 6.481481552f;
+                    ret = func_1513D2F0(&spawn, (s32)&D_800A4AA0, 0x24, 0, 0, 0x21, 0, 0, 0, 0x2C, arg0->unkC, arg0->unk1);
+                    if (ret != NULL) {
+                        memcpy((u8 *)ret + 0x110, &extra, sizeof(extra));
+                    }
+                    ext->unk4.unk0 += step.unk0;
+                    ext->unk4.unk4 += step.unk4;
+                    ext->unk4.unk8 += step.unk8;
+                    count -= 1.0f;
+                    ext->unk10 -= rate;
+                } while (count > 1.0f);
+            }
+        }
+    }
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_124920/func_150F85A0.s")
 
