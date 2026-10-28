@@ -1526,7 +1526,18 @@ struct127 *func_1505EEB0(s32 state, s32 *arg1) {
 //     return tmp;
 // }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505EEF4.s")
+struct127 *func_1505EEF4(s32 arg0) {
+    struct127 *tmp = (struct127 *)&D_800CC2D0;
+    s32 i;
+
+    for (i = 0; i < 25; i++) {
+        if ((tmp->interaction_state != 0) && (arg0 == tmp->unk13F)) {
+            return tmp;
+        }
+        tmp++;
+    }
+    return NULL;
+}
 extern u8 D_800CC3F7;
 extern struct127 D_800CC5FC;
 
