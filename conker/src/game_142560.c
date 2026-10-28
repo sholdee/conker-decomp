@@ -592,7 +592,48 @@ void func_151174F0(struct Obj151174F0 *arg0) {
     arg0->unk0 = func_151172D8((struct Obj151174A0 *)arg0, arg0->unk0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_142560/func_15117518.s")
+f32 func_15117518(struct Obj151174F0 *arg0, f32 current) {
+    f32 velocity;
+    s32 sound_index;
+    f32 target;
+    f32 after;
+    f32 before;
+    f32 rebound;
+    f32 acceleration;
+
+    rebound = *(f32 *)((u8 *)arg0 + 0x7C);
+    acceleration = *(f32 *)((u8 *)arg0 + 0x80) * (f32)D_800BE9E4;
+    velocity = *(f32 *)((u8 *)arg0 + 0x84);
+    target = (f32)((*(s32 *)((u8 *)arg0 + 0x3C) << 22) >> 22);
+    if (current != target || velocity != 0.0f) {
+        sound_index = *(s32 *)((u8 *)arg0 + 0x3C) >> 10;
+        if (velocity == 0.0f && sound_index != 0 && D_80089260[sound_index].unk0 != 0) {
+            func_15114D24((struct Obj15116BAC *)arg0, D_80089260[sound_index].unk0, 24000, 200, 2500, 0);
+        }
+        before = func_15048A70(current, target);
+        current += velocity * (f32)D_800BE9E4;
+        after = func_15048A70(current, target);
+        if ((after <= 0.0f && before > 0.0f) || (after >= 0.0f && before < 0.0f)) {
+            current = target;
+            velocity = -rebound * velocity;
+            after = 0;
+        } else if (after > 0.0f) {
+            velocity += acceleration;
+        } else {
+            velocity -= acceleration;
+        }
+        if (fabsf(after) < 2.0f && fabsf(velocity) < 1.0f) {
+            current = target;
+            velocity = 0.0f;
+        } else if (current < 0.0f) {
+            current += 360.0f;
+        } else if (current >= 360.0f) {
+            current -= 360.0f;
+        }
+        *(f32 *)((u8 *)arg0 + 0x84) = velocity;
+    }
+    return current;
+}
 
 extern f32 func_15117518(struct Obj151174F0 *, f32);
 
