@@ -336,4 +336,70 @@ void func_151090DC(void) {
     func_15169260(&sp18, 2, 0, 0x1E);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_135D00/func_15109120.s")
+void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
+f32 *func_15144B34(s32);
+
+typedef struct {
+    u8 pad0[0x50];
+    s32 unk50;
+    u8 pad54[4];
+    Vtx *unk58[2][4];
+    Mtx unk78[2];
+} S15109120;
+
+s32 func_15109120(S15109120 *arg0, s16 arg1) {
+    f32 mtx[4][4];
+    f32 *src;
+    f32 *dir;
+    f32 cs;
+    f32 sn;
+    f32 inv;
+    f32 x;
+    f32 z;
+    f32 tu;
+    f32 tv;
+    f32 pa;
+    f32 oz;
+    f32 oy;
+    f32 ox;
+    s32 i;
+
+    src = (f32 *)((u8 *)(arg0 + 1) + arg0->unk50);
+    func_150A8050(mtx, src[0], 0.0f, src[1]);
+    mtx[3][1] = src[4];
+    mtx[0][0] *= 0.1570000052f;
+    mtx[0][1] *= 0.1570000052f;
+    mtx[0][2] *= 0.1570000052f;
+    mtx[1][0] *= 0.1570000052f;
+    mtx[1][1] *= 0.1570000052f;
+    mtx[1][2] *= 0.1570000052f;
+    mtx[2][0] *= 0.1570000052f;
+    mtx[2][1] *= 0.1570000052f;
+    mtx[2][2] *= 0.1570000052f;
+    guMtxF2L(mtx, &arg0->unk78[D_800BE9C0]);
+    dir = func_15144B34(arg1);
+    x = dir[0];
+    if (0.0000999999975f < fabsf(x) || 0.0000999999975f < fabsf(dir[1])) {
+        f32 zz;
+        f32 ii;
+        zz = dir[2];
+        ii = 1.0f / sqrtf(x * x + zz * zz);
+        cs = zz * ii;
+        sn = -x * ii;
+    } else {
+        cs = 1.0f;
+        sn = 0.0f;
+    }
+    i = 0;
+    do {
+        Vtx *v;
+        v = &arg0->unk58[D_800BE9C0][arg1][i];
+        inv = v->v.ob[0]; pa = v->v.ob[1]; z = v->v.ob[2]; func_150A7960((f32 *)mtx, inv, pa, z, &ox, &oy, &oz);
+        i++;
+        tv = oy * 0.3580000103f + 81.0f;
+        tu = ((ox * cs) + (oz * sn)) * 0.2130000144f + 26.0f;
+        v->v.tc[0] = (s16)(s32)(tu * 32.0f);
+        v->v.tc[1] = (s16)(s32)(tv * 32.0f);
+    } while (i != 16);
+    return 1;
+}
