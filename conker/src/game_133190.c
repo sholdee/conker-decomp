@@ -161,7 +161,10 @@ void func_1510608C(struct S1510608C *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_133190/func_151061E0.s")
+struct S15106214Record;
+struct S15106214Record *func_151061E0(struct102 *arg0) {
+    return (struct S15106214Record *)((s32)arg0 + 0x88);
+}
 
 struct S151061EC {
     u8 pad0[0x48];
