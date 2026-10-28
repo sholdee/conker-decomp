@@ -423,17 +423,24 @@ def git(*args, check=True):
     return p.stdout
 
 
+def stub_sizes(funcs):
+    """{func: bytes} for funcs that are still stubs in main."""
+    st = {Path(a).stem: a for a in stubbed_asm(MAIN)}
+    return {f: 4 * len(WORD_RE.findall((MAIN / st[f]).read_text())) for f in funcs if f in st}
+
+
 def cmd_land(a):
-    func = a.func
-    ws = ws_dir(func)
-    m = meta(func)
+    ws = ws_dir(a.func)
+    m = meta(a.func)
+    targets = m.get("funcs") or [m["func"]]
     files = changed_files(ws)
     if not files:
         sys.exit("no changes in workspace")
     with open(LOCK, "a") as lk:
         fcntl.flock(lk, fcntl.LOCK_EX)
-        if not find_stub(MAIN, func):
-            sys.exit(f"{func} is no longer a stub in main (already landed?)")
+        sizes = stub_sizes(targets)
+        if not sizes:
+            sys.exit(f"{', '.join(targets)}: no longer stubs in main (already landed?)")
         rels = [str(Path("conker") / f) for f in files]
         dirty = git("status", "--porcelain", "--", *rels).strip()
         if dirty:
@@ -460,6 +467,7 @@ def cmd_land(a):
                 sys.exit(f"{f}: merge conflict with main — recreate the workspace or merge by hand")
             merged[f] = p.stdout
         backup = {f: (MAIN / f).read_bytes() if (MAIN / f).exists() else None for f in files}
+        before = set(sizes)
         for f, data in merged.items():
             (MAIN / f).write_bytes(data)
 
@@ -473,19 +481,26 @@ def cmd_land(a):
 
         (MAIN / BIN).unlink(missing_ok=True)
         r = run("make -j16 2>&1", MAIN)
-        ok = sha1(MAIN / BIN) == INNER_SHA and not find_stub(MAIN, func)
-        if not ok:
+        still = {Path(x).stem for x in stubbed_asm(MAIN)}
+        landed = sorted(before - still)
+        if sha1(MAIN / BIN) != INNER_SHA or not landed:
             restore()
             print(r.stdout[-3000:])
-            sys.exit(f"LAND-FAIL: {func} — main build does not match after merge; reverted")
+            sys.exit(f"LAND-FAIL: {', '.join(targets)} — main build does not match after merge; reverted")
+        total = sum(sizes[f] for f in landed)
         git("add", *rels)
-        msg = f"game: match {func} ({m['size']} bytes) [mw]"
+        if len(landed) == 1:
+            msg = f"game: match {landed[0]} ({total} bytes) [mw]"
+        else:
+            msg = (f"game: match {len(landed)} functions ({total} bytes) [mw]\n\n"
+                   + "\n".join(f"match {f} ({sizes[f]} bytes)" for f in landed))
         git("commit", "-q", "-m", msg + "\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>")
         with open(REPO / "tools" / "mw_landed.tsv", "a") as fh:
-            fh.write(f"{func}\t{m['file']}\t{m['size']}\n")
+            for f in landed:
+                fh.write(f"{f}\t{m['file']}\t{sizes[f]}\n")
         git("add", "tools/mw_landed.tsv")
         git("commit", "-q", "--amend", "--no-edit")
-        print(f"LANDED: {func} ({m['size']} bytes) — {git('rev-parse', '--short', 'HEAD').strip()}")
+        print(f"LANDED: {', '.join(landed)} ({total} bytes) — {git('rev-parse', '--short', 'HEAD').strip()}")
 
 
 # ---------------------------------------------------------------- pick / rm
