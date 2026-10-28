@@ -2,7 +2,20 @@
 #define func_15169260 func_15169260_s32
 #include "functions.h"
 #undef func_15169260
+/* variables.h declares the D_800DC460/D_800DC464 list head/tail as s32 and D_800DC468 as u16;
+ * func_15132444 walks them as node pointers and reads D_800DC468 with lh, so the real types
+ * are made file-local here (the shared header is left alone). */
+#define D_800DC460 D_800DC460_s32_decl_in_variables_h
+#define D_800DC464 D_800DC464_s32_decl_in_variables_h
+#define D_800DC468 D_800DC468_u16_decl_in_variables_h
 #include "variables.h"
+#undef D_800DC460
+#undef D_800DC464
+#undef D_800DC468
+struct Node15132444;
+extern struct Node15132444 *D_800DC460;
+extern struct Node15132444 *D_800DC464;
+extern s16 D_800DC468[];
 
 void func_15132444(struct102 *arg0);
 s32 func_1513264C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
@@ -183,7 +196,86 @@ typedef struct {
 extern Data15133E3C D_800A3860;
 void func_15169260(Data15133E3C *, s32, s32, u8);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_15F680/func_151321D0.s")
+typedef struct {
+    u8 pad_0[0x38];
+    struct17 field_0x38;
+    u8 pad_44[0x1C];
+    u32 field_0x60;
+    s16 field_0x64;
+    u8 pad_66[0xA];
+    u8 field_0x70;
+    u8 field_0x71;
+    u8 field_0x72;
+    u8 pad_73[0x3];
+    u8 field_0x76;
+    u8 field_0x77;
+    u8 pad_78[0xA];
+    s16 field_0x82;
+    s16 field_0x84;
+    u8 pad_86[0xC2];
+    u8 field_0x148;
+} Func151321D0Arg0;
+
+typedef s32 (*Func151321D0Callback)(Func151321D0Arg0 *);
+
+extern Func151321D0Callback D_800898B0[];
+extern Func151321D0Callback D_80089914[];
+extern Func151321D0Callback D_8008997C[];
+extern Func151321D0Callback D_80089988[];
+s32 func_1514672C(struct17 *arg0);
+
+void func_151321D0(Func151321D0Arg0 *arg0) {
+    s32 temp;
+    u8 stopped;
+
+    stopped = 0;
+    arg0->field_0x60 &= 0xFFDFFFFF;
+    if ((arg0->field_0x60 & 0x10) && (arg0->field_0x148 & 0x18)) {
+        temp = D_80089988[arg0->field_0x77](arg0);
+        if (temp == 0) {
+            stopped = 1;
+        }
+    } else if (arg0->field_0x71 != 0) {
+        temp = D_800898B0[arg0->field_0x71](arg0);
+        if (temp == 0) {
+            stopped = 1;
+        }
+    }
+
+    if ((arg0->field_0x72 != 0) && !stopped) {
+        temp = D_80089914[arg0->field_0x72](arg0);
+        if (temp == 0) {
+            stopped = 1;
+        }
+    }
+
+    if ((arg0->field_0x60 & 0x80) && !stopped) {
+        arg0->field_0x64 -= D_800BE9E4;
+        if (arg0->field_0x64 < 0) {
+            stopped = 1;
+        }
+    }
+
+    if ((arg0->field_0x60 & 0x2000) && !stopped) {
+        if (arg0->field_0x64 < arg0->field_0x82) {
+            temp = arg0->field_0x64 * arg0->field_0x84;
+            if (temp < arg0->field_0x70) {
+                arg0->field_0x70 = temp;
+            }
+        }
+    }
+
+    if (!stopped && !(arg0->field_0x60 & 0x80000)) {
+        stopped = func_1514672C(&arg0->field_0x38) == 0;
+    }
+
+    if (stopped) {
+        if (arg0->field_0x76 != 0) {
+            D_8008997C[arg0->field_0x76](arg0);
+        }
+        func_1516972C((struct102 *)arg0);
+    }
+}
 
 extern void (*D_800899B0[])(s32);
 
@@ -203,7 +295,53 @@ void func_151323F8(Func151323ACArg0 *arg0) {
     D_800899D4[idx]((s32)arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_15F680/func_15132444.s")
+typedef struct Node15132444 {
+    s32 *unk0;
+    struct Node15132444 *next;
+    struct Node15132444 *prev;
+    u8 padC[2];
+    u8 unkE;
+} Node15132444;
+
+typedef struct {
+    u8 pad0[0x66];
+    u16 unk66;
+    u8 pad68[0x24];
+    Node15132444 *unk8C;
+} Obj15132444;
+
+void func_1510D630(s32);
+void func_151325C8(void *arg0);
+
+void func_15132444(struct102 *arg0) {
+    D_800DC63C--;
+    D_800DC468[((Obj15132444 *)arg0)->unk66]--;
+    if (D_800DC468[((Obj15132444 *)arg0)->unk66] == 0) {
+        if (((Obj15132444 *)arg0)->unk8C->unkE != 0) {
+            D_800DC468[((Obj15132444 *)arg0)->unk66] = 1;
+        } else {
+            func_1510D630(D_800DC640[((Obj15132444 *)arg0)->unk66]);
+            if (((Obj15132444 *)arg0)->unk8C->prev == NULL) {
+                D_800DC460 = ((Obj15132444 *)arg0)->unk8C->next;
+                if (D_800DC460 != NULL) {
+                    D_800DC460->prev = NULL;
+                } else {
+                    D_800DC464 = NULL;
+                }
+            } else {
+                ((Obj15132444 *)arg0)->unk8C->prev->next = ((Obj15132444 *)arg0)->unk8C->next;
+                if (((Obj15132444 *)arg0)->unk8C->next != NULL) {
+                    ((Obj15132444 *)arg0)->unk8C->next->prev = ((Obj15132444 *)arg0)->unk8C->prev;
+                } else {
+                    D_800DC464 = ((Obj15132444 *)arg0)->unk8C->prev;
+                }
+            }
+            func_100043B4(((Obj15132444 *)arg0)->unk8C->unk0, 4);
+            func_100043B4((s32 *)((Obj15132444 *)arg0)->unk8C, 4);
+        }
+    }
+    func_151325C8(arg0);
+}
 
 void func_15132570(struct102 *arg0) {
     func_15132444(arg0);
@@ -726,7 +864,7 @@ void func_15133E3C(s32 arg0, u8 arg1) {
     func_15169260(&sp18, 2, arg0, arg1);
 }
 
-s32 func_15133EEC(s32 arg0, u16 arg1, u8 arg2, s32 arg3);
+Gfx *func_15133EEC(Gfx *gfx, u16 arg1, u8 arg2, s32 arg3);
 
 void func_15133E84(s32 arg0, void *arg1, s32 arg2) {
     func_15133EEC(arg0, *(u16 *)((u8 *)arg1 + 0x170), *(u8 *)((u8 *)arg1 + 0x172), *(s32 *)((u8 *)arg1 + 0x174));
@@ -736,7 +874,34 @@ void func_15133EB8(s32 arg0, void *arg1, s32 arg2) {
     func_15133EEC(arg0, *(u16 *)((u8 *)arg1 + 0x174), *(u8 *)((u8 *)arg1 + 0x176), *(s32 *)((u8 *)arg1 + 0x178));
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_15F680/func_15133EEC.s")
+typedef struct {
+    s32 *unk0;
+    u8 pad4[6];
+    u8 unkA;
+    u8 unkB;
+} Entry15133EEC;
+
+extern Entry15133EEC D_80090B60[];
+extern s32 func_1510D0EC(s32, s32 *, s32, s32);
+
+Gfx *func_15133EEC(Gfx *gfx, u16 arg1, u8 arg2, s32 arg3) {
+    s32 data;
+    u8 kind;
+    u8 fmt;
+    Entry15133EEC *e;
+    s32 size;
+
+    e = &D_80090B60[arg1];
+    data = *e->unk0;
+    kind = e->unkA;
+    fmt = e->unkB;
+    data = func_1510D0EC(data, &size, arg3, 0);
+    gSPSegment(gfx++, arg2, data);
+    if (kind == 2) {
+        gSPSegment(gfx++, arg2 + 1, data + size - ((fmt == 1) ? 0x200 : 0x20));
+    }
+    return gfx;
+}
 
 typedef struct {
     u8 unk0[4];
