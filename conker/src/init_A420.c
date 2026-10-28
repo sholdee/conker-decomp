@@ -76,7 +76,43 @@ void func_1000E40C(s32, s32);
 // }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/init_A420/func_1000A750.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/init_A420/func_1000B060.s")
+f32 sqrtf(f32);
+#pragma intrinsic(sqrtf)
+
+s32 func_1000B060(f32 x, f32 y, s32 offset) {
+    s16 value;
+    s16 mode;
+    f32 ratio;
+    s32 rounded;
+
+    ratio = sqrtf(x * x + y * y);
+    if (D_8002C214 < ratio) {
+        ratio = x / ratio;
+    }
+    mode = 0x80;
+    rounded = (s32)((f64)func_150487E0(ratio) * D_8002C218);
+    value = rounded;
+    if (y > 0.0f) {
+        if ((s16)rounded < 0) {
+            value = -0x80 - (s16)rounded;
+        } else {
+            value = 0x80 - (s16)rounded;
+        }
+    }
+    value += offset;
+    value = (s8)value;
+    if (value >= 0x60 || value < -0x60) {
+        value = 0;
+    } else if (value >= 0x20) {
+        value = 0x5F - value;
+    } else if (value < -0x20) {
+        value = -0x5F - value;
+    } else {
+        mode = 0;
+        value += value;
+    }
+    return (value + 0x40) | mode;
+}
 // NON-MATCHING: fair amount to fix up
 // s32 func_1000B060(f32 arg0, f32 arg1, s32 arg2) {
 //     s16 phi_a1;
