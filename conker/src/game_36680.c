@@ -557,7 +557,70 @@ void func_1500ABA0(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_36680/func_1500AC14.s")
 // GOTO hell
-#pragma GLOBAL_ASM("asm/nonmatchings/game_36680/func_1500AD84.s")
+typedef struct Game36680ResourceInfo {
+    u8 flags;
+    u8 frames;
+    u16 length;
+    s16 x;
+    s16 y;
+    u8 width;
+    u8 pad9;
+} Game36680ResourceInfo;
+
+extern u8 D_80095CE0[];
+extern u16 D_800BE478[];
+extern u8 D_80095CC4[];
+extern s16 D_800BE438[][2];
+extern u8 D_800DDBC0[];
+extern u8 D_800DDBE0[];
+extern u8 D_800DDBF0[];
+extern u8 D_800DDC20[][2];
+extern u8 D_800DDC80[];
+
+void func_1500AD84(s32 arg0, s32 arg1, s32 arg2) {
+    Game36680ResourceInfo *info;
+    u8 *cursor;
+    s32 flags;
+
+    if (arg1 != 255) {
+        cursor = &D_800DDBD0[arg0];
+        info = &((Game36680ResourceInfo *)D_80095CE0)[arg1];
+        *cursor = info->frames;
+        flags = info->flags;
+        if (flags & 0x10) {
+            *cursor -= 1;
+            D_800DDBE0[arg0] = *cursor;
+        } else {
+            D_800DDBE0[arg0] = 0;
+        }
+        if (flags & 0x80) {
+            D_800DDBF0[arg0] = 2;
+        } else {
+            D_800DDBF0[arg0] = 1;
+        }
+        cursor = (u8 *)D_800BE438[arg0];
+        ((s16 *)cursor)[0] = info->x;
+        ((s16 *)cursor)[1] = info->y;
+        D_800DDBC0[arg0] = arg1;
+        D_800DDC80[arg0] = arg2 & 0xFF7F;
+        if (arg2 & 0x80) {
+            D_800DDC00 |= 1 << arg0;
+        }
+        if (flags & 1) {
+            D_800DDC04 |= 1 << arg0;
+        }
+        if (flags & 8) {
+            D_800DDC08 |= 1 << arg0;
+        }
+    } else {
+        D_800DDBD0[arg0] = 0;
+    }
+    arg1 = D_80095CC4[arg0];
+    D_800BE478[arg0] = 0;
+    cursor = D_800DDC20[arg0];
+    cursor[0] = arg1;
+    cursor[1] = arg1;
+}
 struct Struct800DDD18
 {
   s16 unk0;
