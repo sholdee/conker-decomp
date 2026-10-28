@@ -929,7 +929,28 @@ void func_1513F4B0(struct210 *arg0, s16 arg1) {
     func_15140410(arg0, &arg0->unk110, &arg0->unk11C, arg1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513F4E4.s")
+s16 func_15143044(u8, s32);
+
+Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2) {
+    extern s16 D_800DD1BE;
+    extern u8 D_800A4BA8[];
+    s32 v0;
+    u8 *p;
+
+    v0 = func_15143044(arg1, 0);
+    if (v0 != D_800DD1BE) {
+        if (*arg2 == 1) {
+            gDPPipeSync(gdl++);
+            *arg2 = 0;
+        }
+        p = &D_800A4BA8[arg1 * 16];
+        gDPSetCombine(gdl++,
+            GCCc0w0(p[0], p[2], p[4], p[6]) | GCCc1w0(p[8], p[10]),
+            GCCc0w1(p[1], p[3], p[5], p[7]) | GCCc1w1(p[9], p[12], p[14], p[11], p[13], p[15]));
+        D_800DD1BE = v0;
+    }
+    return gdl;
+}
 // PERMUTER NO ZERO (best 730). word0 (first ~52 instrs) BYTE-PERFECT; word1's ops are
 // byte-identical to target but IDO's delay-slot scheduling gives a different temp-register
 // rotation from the first pair on (all `r`/reorder marks, no wrong ops). Reconstruction:
