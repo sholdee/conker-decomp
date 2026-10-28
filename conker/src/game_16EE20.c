@@ -103,7 +103,46 @@ void func_151419D0(struct102 *arg0, struct A1_151419D0 *arg1, u8 arg2) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15141A7C.s")
 // requires jump table
 #pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15141C0C.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15141CC0.s")
+s32 func_15141CC0(u32 arg0) {
+    if (D_800BE9F0 == 0x2F) {
+        return 6;
+    }
+    if (D_800BE9F0 == 0x42) {
+        return 7;
+    }
+    if (D_800BE9F0 == 0x27) {
+        return 8;
+    }
+    if (D_800BE9F0 == 0x19) {
+        return 5;
+    }
+    switch (arg0) {
+    case 10:
+        return 0;
+    case 7:
+        return 2;
+    case 11:
+        return 1;
+    case 15:
+        return 3;
+    case 2:
+    case 8:
+    case 12:
+        if (D_800BE9F0 == 2) {
+            return 7;
+        }
+        return 4;
+    case 5:
+        if (D_800BE9F0 == 0x14) {
+            return 5;
+        }
+        return 9;
+    case 0:
+        return 9;
+    default:
+        return 9;
+    }
+}
 
 void func_15141DA4(void *arg0, s32 arg1, s32 arg2) {
     if ((arg1 < 12) && (arg1 >= 0) &&
