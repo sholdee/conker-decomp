@@ -3,7 +3,95 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1B8F40/func_1518BA90.s")
+typedef struct Node1518BA90 {
+    u8 pad0[8];
+    struct Node1518BA90 *next;
+    u8 padC[0x18];
+    void *owner;
+    u8 type;
+} Node1518BA90;
+
+typedef struct Spawn1518BA90 {
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 scale;
+    s16 field10;
+    s16 field12;
+    void *owner;
+    u8 type;
+    s8 field19;
+    s8 field1A;
+} Spawn1518BA90;
+
+typedef struct Owner1518BA90 {
+    u8 pad0[4];
+    u8 kind;
+    u8 pad5[0x36];
+    u8 type;
+} Owner1518BA90;
+
+extern u8 D_800DCE50[];
+extern f32 D_800A7434;
+extern f32 D_800A7438;
+extern f32 D_800A743C;
+s32 func_1518BCD0(void *arg0, u8 arg1, s32 arg2);
+
+s32 func_1518BA90(void *arg0, u8 arg1, s32 arg2) {
+    u8 *block;
+    Spawn1518BA90 spawn;
+    Node1518BA90 *node;
+    s32 i;
+
+    if (arg0 == 0) {
+        return 0;
+    }
+    i = 0;
+    do {
+        block = D_800DCE50 + i * 0x1A0;
+        for (node = *(Node1518BA90 **)(block + 0x7C); node != 0; node = node->next) {
+            if (node->owner == arg0 ||
+                node->type == ((Owner1518BA90 *)arg0)->type) {
+                return (s32)node;
+            }
+        }
+        i++;
+    } while ((u8 *)&D_800DD190 != D_800DCE50 + i * 0x1A0);
+
+    switch (*(u8 *)((u8 *)arg0 + 4) + 1) {
+    case 0:
+        return 0;
+    case 8:
+        spawn.field12 = 0x37;
+        spawn.field10 = 4;
+        spawn.field19 = 5;
+        spawn.field1A = 0x13;
+        spawn.x = D_800A7434;
+        spawn.y = D_800A7438;
+        spawn.z = D_800A743C;
+        spawn.scale = 5.0f;
+        break;
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+        spawn.field12 = 0;
+        spawn.field10 = 5;
+        spawn.field19 = 5;
+        spawn.field1A = 0x13;
+        spawn.x = 10.0f;
+        spawn.y = 10.0f;
+        spawn.z = 10.0f;
+        spawn.scale = 10.0f;
+        break;
+    default:
+        return 0;
+    }
+    spawn.owner = arg0;
+    spawn.type = *(u8 *)((u8 *)arg0 + 0x3B);
+    return func_1518BCD0(&spawn, arg1, arg2);
+}
 
 extern u8 D_800DCE50[];
 
@@ -52,7 +140,7 @@ typedef struct {
     s32 field_0x30;
 } EffectObject1F;
 
-s32 func_1518BCD0(s32 arg0, s32 arg1, s32 arg2) {
+s32 func_1518BCD0(void *arg0, u8 arg1, s32 arg2) {
     EffectObject1F *temp_v0;
 
     temp_v0 = (EffectObject1F *)func_15167A68(0x1F, arg2, 0x44, 1, (u8)arg1, 1);
