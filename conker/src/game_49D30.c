@@ -808,7 +808,9 @@ void func_150221E8(s16 arg0, s16 arg1, s16 arg2, f32 arg3) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_49D30/func_15022234.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_49D30/func_15022248.s")
+void func_15022248(s32 arg0) {
+    D_800C354A[arg0] = 0;
+}
 
 void func_1502225C(s32 arg0, s32 arg1) {
     s32 i;
