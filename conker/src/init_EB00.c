@@ -881,7 +881,7 @@ s32 func_1001147C(u16 arg0) {
 extern s32 func_1000A420(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6,
                          s32 arg7, s32 arg8, s32 *arg9, s32 *argA, s32 *argB);
 
-void func_100114D0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 *arg6, s32 *arg7, s32 *arg8) {
+s32 func_100114D0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 *arg6, s32 *arg7, s32 *arg8) {
     struct00 *best;
     u32 bestDist;
     u32 i;
@@ -890,6 +890,7 @@ void func_100114D0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
     u32 dz;
     s32 vol;
     u32 d;
+    s32 result;
 
     best = D_80041F68;
     if (D_80082FA0 != 0) {
@@ -905,11 +906,227 @@ void func_100114D0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
             }
         }
     }
-    func_1000A420(arg0 - best->unkC, arg1 - best->unk10, arg2 - best->unk14, best->unk18,
+    result = func_1000A420(arg0 - best->unkC, arg1 - best->unk10, arg2 - best->unk14, best->unk18,
                   arg0 - best->unk0, arg1 - best->unk4, arg2 - best->unk8, arg4, arg5, arg6, &vol, arg8);
     *arg7 = ((u32)vol * arg3) >> 15;
+    return result;
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_10011624.s")
+typedef struct {
+    u16 field0;
+    s16 positionX;
+    s16 positionY;
+    s16 positionZ;
+    u16 field8;
+    s16 fieldA;
+    s32 valueC;
+    u32 flags;
+    void *callback;
+    void *owner;
+    s32 key;
+    s16 cents;
+    u8 field22;
+    u8 field23;
+    u16 handle;
+    s16 field26;
+    s16 field28;
+    u8 pad2A[2];
+    f32 pitch;
+} SoundArrayRecord;
+
+typedef struct {
+    s32 x0;
+    s32 y4;
+    s32 z8;
+    s32 xC;
+    s32 y10;
+    s32 z14;
+    f32 field18;
+} SoundSpatialRecord;
+
+typedef s32 (*SoundRecordCallback)(void *, s32 *, u32 *, s32 *, s32 *,
+                                    s32 *, u16 *);
+
+s32 func_1000A750(s32, s32, s32, s32, f32, s32, s32, s32, s32, s32,
+                  s32 *, s32 *, s32 *);
+extern f32 D_8002C400;
+extern f32 D_8002C404;
+
+#define SPATIAL ((SoundSpatialRecord *)D_80041F68)
+
+void func_10011624(struct15 *records, s32 *count, s32 start, s32 end) {
+    SoundArrayRecord *record;
+    u32 flags;
+    s32 pan;
+    s32 temporary;
+    u32 volume;
+    s32 active;
+    s32 distance;
+    s32 cents;
+    u16 sound;
+    u16 handle;
+    s32 mix;
+    union {
+        f32 value;
+        s32 bits;
+    } pitch;
+    s32 index;
+    s32 offset;
+    s32 *panOut;
+    s32 fxmix;
+    f32 ratio;
+    f32 unclampedRatio;
+    f32 pitchDelta;
+
+    index = start;
+    if ((index < *count) && (index < end)) {
+        offset = index * sizeof(*records);
+        do {
+        record = (SoundArrayRecord *)((u8 *)records + offset);
+        flags = record->flags;
+        if (record->flags & 0x80) {
+            goto next_record;
+        }
+        if (record->flags & 0x1000) {
+            record->flags &= ~0x1000;
+            goto next_record;
+        }
+        handle = record->handle;
+        if ((flags & 1) && (handle != 0) && (func_1000F3D0(handle) == 0)) {
+            handle = 0;
+            flags &= ~1;
+            if (!(flags & 8)) {
+                flags |= 0x80;
+                record->field0 = 0;
+            }
+            record->field26 = 0;
+            record->field22 = 0;
+            record->handle = 0;
+            record->flags = flags;
+            record->pitch = 1.0f;
+        }
+        if ((flags & 2) || (handle == 0)) {
+            if (flags & 0x100) {
+                pan = 0x40;
+                panOut = 0;
+            } else {
+                panOut = &pan;
+            }
+            if (flags & 0x40) {
+                active = func_1000A750(record->positionY,
+                         SPATIAL->xC, SPATIAL->y10, SPATIAL->z14,
+                         SPATIAL->field18, SPATIAL->x0,
+                         SPATIAL->y4, SPATIAL->z8,
+                         record->field8, record->fieldA, &pan,
+                         (s32 *)&volume, &distance);
+                volume = (u32)(record->valueC * volume) >> 15;
+            } else {
+                active = func_100114D0(record->positionX, record->positionY,
+                         record->positionZ, record->valueC, record->field8,
+                         record->fieldA, panOut, (s32 *)&volume, &distance);
+            }
+            if (D_800BE615 != 0) {
+                volume = 0;
+            }
+            cents = record->cents;
+            mix = record->field23;
+            sound = record->field0;
+            if ((flags & 0x10) && (record->callback != 0)) {
+                record->flags = flags;
+                if (((SoundRecordCallback)record->callback)((void *)(offset + (u32)records),
+                        &active, &volume, &pan, &cents, &mix, &sound) != 0) {
+                    func_1000FE88(records, index, count);
+                    goto next_record;
+                }
+                handle = record->handle;
+                flags = record->flags;
+            }
+            if (sound != 0) {
+                if (volume != 0) {
+                    f32 alCents2Ratio(s32);
+
+                    fxmix = (pan & 0x80) | mix;
+                    pan &= 0x7F;
+                    if (flags & 0x200) {
+                        pan = 0x80 - pan;
+                        if (pan == 0x80) {
+                            pan = 0x7F;
+                        }
+                        fxmix ^= 0x80;
+                    }
+                    pitch.value = alCents2Ratio(cents);
+                    if (handle == 0) {
+                        if (flags & 0xC00) {
+                            if ((flags & 0xC00) == 0x400) {
+                                temporary = 0;
+                            } else {
+                                temporary = 1;
+                            }
+                        } else {
+                            temporary = D_80041FD9;
+                        }
+                        handle = func_10010BE8(0, sound, (u16)volume,
+                                             (u8)pan, cents, fxmix, temporary);
+                        if (handle != 0) {
+                            flags |= 1;
+                            record->field0 = sound;
+                        }
+                    } else {
+                        if (volume != (u16)record->field26) {
+                            func_1000F85C(handle, 8, volume);
+                        }
+                        if (pan != (record->field22 & 0x7F)) {
+                            func_1000F85C(handle, 4, pan);
+                        }
+                        if (fxmix != (record->field23 | (record->field22 & 0x80))) {
+                            func_1000F85C(handle, 0x100, fxmix);
+                        }
+                        if (flags & 4) {
+                            temporary = ((u16)record->field28 - distance) * D_800BE9E4 / 3;
+                            if (temporary >= 0x16F) {
+                                ratio = 2.0f;
+                            } else {
+                                unclampedRatio = D_8002C400 / (f32)(0x16F - temporary);
+                                ratio = unclampedRatio;
+                                if (unclampedRatio > 2.0f) {
+                                    ratio = 2.0f;
+                                } else if (unclampedRatio < 0.5f) {
+                                    ratio = 0.5f;
+                                }
+                            }
+                            pitch.value *= ratio;
+                            pitchDelta = pitch.value - record->pitch;
+                            pitch.value = record->pitch + pitchDelta * D_8002C404;
+                        }
+                        start = pitch.bits;
+                        if (pitch.value != record->pitch) {
+                            func_1000F85C(handle, 0x11, start);
+                        }
+                    }
+                    record->field28 = distance;
+                    record->field26 = volume;
+                    record->field22 = pan | fxmix;
+                    record->field23 = mix;
+                    record->pitch = pitch.value;
+                } else if (flags & 8) {
+                    if (handle != 0) {
+                        func_100111C8(handle);
+                    }
+                    handle = 0;
+                    flags &= ~1;
+                } else {
+                    func_1000FE88(records, index, count);
+                    goto next_record;
+                }
+            }
+        }
+        record->handle = handle;
+        record->flags = flags;
+next_record:
+        index++;
+        offset += sizeof(*records);
+        } while ((index < *count) && (index < end));
+    }
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_10011BB8.s")
 
 void func_10011E88(s32 arg0) {
