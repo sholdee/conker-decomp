@@ -276,7 +276,81 @@ void func_151872B0(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1B1600/func_151873E4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1B1600/func_151875E0.s")
+typedef struct {
+    u8 pad0[0x80];
+    f32 unk80;
+    f32 unk84;
+    f32 unk88;
+    f32 unk8C;
+    f32 unk90;
+    s16 unk94;
+    s16 unk96;
+    u8 unk98;
+    u8 pad99[7];
+} Particle151875E0;
+
+typedef struct {
+    u8 pad0[0x90];
+    f32 unk90;
+    f32 unk94;
+    f32 unk98;
+    f32 unk9C;
+    f32 unkA0;
+    Particle151875E0 *unkA4;
+    s16 unkA8;
+    s16 unkAA;
+} Obj151875E0;
+
+extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
+extern void *allocate_memory(s32, s32, s32, s32);
+
+void func_151875E0(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7) {
+    Obj151875E0 *obj;
+    s32 i;
+    s32 a;
+
+    obj = func_15167A68(6, 0, 0xB0, 1, 0xFF, 1);
+    if (obj != NULL) {
+        obj->unkA4 = allocate_memory(0x780, 1, 2, 1);
+        if (obj->unkA4 == NULL) {
+            func_1516972C((struct102 *)obj);
+            return;
+        }
+        obj->unk90 = arg0;
+        obj->unk94 = arg1;
+        obj->unk98 = arg2;
+        obj->unkA8 = 0;
+        obj->unkAA = arg4;
+        obj->unk9C = arg6;
+        obj->unkA0 = arg7;
+        for (i = 0, a = 0; a != 1080; a += 90, i++) {
+            if (a < 360) {
+                obj->unkA4[i].unk80 = 7 - (func_150ADA20() & 0xFU);
+                obj->unkA4[i].unk84 = 0.0f;
+                obj->unkA4[i].unk88 = (func_150ADA20() & 0x3FU) + (a - 30) * 1;
+                obj->unkA4[i].unk98 = 0;
+            } else if (a < 720) {
+                obj->unkA4[i].unk80 = 0.0f;
+                obj->unkA4[i].unk84 = (func_150ADA20() & 0x3FU) + (a - 570) * 1;
+                obj->unkA4[i].unk88 = 7 - (func_150ADA20() & 0xFU);
+                obj->unkA4[i].unk98 = 0;
+            } else {
+                obj->unkA4[i].unk80 = (func_150ADA20() & 0x3FU) + (a - 30) * 1;
+                obj->unkA4[i].unk84 = 97 - (func_150ADA20() & 0xFU);
+                obj->unkA4[i].unk88 = 0.0f;
+                obj->unkA4[i].unk98 = 1;
+            }
+            if (arg3 >= 4) {
+                obj->unkA4[i].unk8C = (func_150ADA20() % (u32)(arg3 >> 2)) + arg3;
+            } else {
+                obj->unkA4[i].unk8C = arg3;
+            }
+            obj->unkA4[i].unk90 = func_150ADA20() & 0xFU;
+            obj->unkA4[i].unk94 = 0;
+            obj->unkA4[i].unk96 = arg4 - (func_150ADA20() & arg5);
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1B1600/func_15187978.s")
 
