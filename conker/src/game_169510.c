@@ -708,7 +708,59 @@ void func_1513D668(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s16 a
 #pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513DB00.s")
 
 // jump table
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513DF9C.s")
+extern void (*D_80089F64[])(void *, s32, u8);
+
+void func_1513DF9C(void *arg0, s32 arg1, u8 arg2) {
+    s32 index;
+
+    if (!(*(s32 *)((u8 *)arg0 + 0x58) & 0x400000)) {
+        index = 0;
+        goto dispatch;
+    }
+    switch (*(u8 *)((u8 *)arg0 + 0x19)) {
+    case 12:
+        index = 10;
+        break;
+    case 11:
+        index = 9;
+        break;
+    case 0:
+    case 2:
+        index = 0;
+        break;
+    case 1:
+        index = 1;
+        break;
+    case 5:
+        index = 2;
+        break;
+    case 6:
+        index = 3;
+        break;
+    case 3:
+        index = 4;
+        break;
+    case 7:
+        index = 5;
+        break;
+    case 8:
+        index = 6;
+        break;
+    case 9:
+        index = 7;
+        break;
+    case 4:
+        index = 8;
+        break;
+    default:
+        goto unknown_type;
+    }
+    goto dispatch;
+unknown_type:
+    index = 0;
+dispatch:
+    D_80089F64[index](arg0, arg1, arg2);
+}
 
 void func_1513E070(s32 arg0, s32 arg1, s32 arg2) {
 }
