@@ -877,7 +877,7 @@ s32 func_10003C6C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 void func_100043B4(s32 *arg0, u32 arg1);
 //func_100046E4
 void func_1000480C(s32 devAddr, void *dramAddr, u32 size);
-void func_100049E0(s32 arg0);
+void func_100049E0(void *arg0);
 //func_10004DB0
 void func_100050A0(OSMesgQueue *arg0);
 void func_100052A0(s32 arg0);

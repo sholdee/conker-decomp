@@ -1,14 +1,135 @@
+#define D_8003B234 D_8003B234_hdr
+#define D_8003A5C8 D_8003A5C8_hdr
+#define D_8003B240 D_8003B240_hdr
+#define D_8003A580 D_8003A580_hdr
 #include <ultra64.h>
 
 #include "functions.h"
 #include "variables.h"
+#undef D_8003B234
+#undef D_8003A5C8
+#undef D_8003B240
+#undef D_8003A580
 
 void func_10004F00(void);
 void func_10004FE0(void);
 
 
 // contains jr
-#pragma GLOBAL_ASM("asm/nonmatchings/init_49E0/func_100049E0.s")
+typedef struct SchedulerClient_49E0 {
+    struct SchedulerClient_49E0 *next;
+    OSMesgQueue *queue;
+    u32 flags;
+} SchedulerClient_49E0;
+
+extern SchedulerClient_49E0 *D_8003B234;
+extern u16 D_8003A5C8;
+extern u8 D_8003B240[];
+extern s8 D_8003A580;
+
+void func_10004DB0(void);
+
+void func_100049E0(void *arg0) {
+    void *message;
+    SchedulerClient_49E0 *client;
+    u64 delay;
+
+    D_8003A581 = 0;
+    D_8003A582 = 0;
+    D_8003A584 = 1;
+    D_8003A583 = 0;
+    *(s16 *)D_8003B240 = 1;
+    message = 0;
+    arg0 = 0;
+    D_8003A5C8 = 4;
+    while (1) {
+        osRecvMesg(&D_8003B218, &message, 1);
+        switch ((s32)message) {
+        case 0:
+            client = D_8003B234;
+            while (client != 0) {
+                if ((client->flags & 1) == 0) {
+                    osSendMesg(client->queue, D_8003B240, 0);
+                }
+                client = client->next;
+            }
+            if ((D_8003B238 != 0xFF) && (D_8003B238 < 0xFF)) {
+                D_8003B238++;
+            }
+            if (D_8003B23A != 0) {
+                D_8003B23A--;
+            }
+            arg0 = (void *)(u32)D_8003A581;
+            if ((arg0 == 0) && (D_8002AC6C == 0)) {
+                if (osRecvMesg(&D_8003B200, (OSMesg *)&D_8002AC54, 0) == 0) {
+                    delay = 200000;
+                    if ((D_8003A582 != 0) || ((osAiGetStatus() & 0x80000000U) == 0)) {
+                        delay = 20000;
+                    }
+                    osSetTimer((OSTimer *)&D_8003A588, delay, 0, &D_8003B218, (void *)3);
+                    D_8002AC6C = 1;
+                }
+            }
+            if (D_8003A581 == 0) {
+                func_10004DB0();
+            }
+            arg0 = 0;
+            break;
+        case 2:
+            if (D_8003A582 == 3) {
+                if (osSpTaskYielded(&D_8002AC50->list) == 1) {
+                    osSpTaskLoad(&D_8002AC54->list);
+                    osSpTaskStartGo(&D_8002AC54->list);
+                    D_8003A581 = 1;
+                    D_8003A582 = 4;
+                } else {
+                    D_8003A582 = 1;
+                    osSpTaskLoad(&D_8002AC54->list);
+                    osSpTaskStartGo(&D_8002AC54->list);
+                    D_8003A581 = 1;
+                    D_8003A583 = 0;
+                }
+            } else if (D_8003A581 != 0) {
+                osSendMesg(D_8002AC54->msgQ, D_8002AC54->msg, 1);
+                D_8003A581 = 0;
+                if (D_8003A582 == 4) {
+                    osSpTaskLoad(&D_8002AC50->list);
+                    osSpTaskStartGo(&D_8002AC50->list);
+                    D_8003A580 = 1;
+                    D_8003A582 = 1;
+                }
+            } else {
+                D_8003A583 = 0;
+                if (D_8003A584 == 1) {
+                    func_10004FE0();
+                }
+            }
+            break;
+        case 1:
+            D_8003A584 = 1;
+            if (D_8003A583 == 0) {
+                func_10004FE0();
+            }
+            break;
+        case 3:
+            D_8002AC6C = (s32)arg0;
+            if (D_8003A583 != 0) {
+                osSpTaskYield();
+                D_8003A582 = 3;
+            } else {
+                osSpTaskLoad(&D_8002AC54->list);
+                osSpTaskStartGo(&D_8002AC54->list);
+                D_8003A581 = 1;
+            }
+            break;
+        case 6:
+            if (D_8002AC5C == 0) {
+                osContStartReadData(&D_800BE900);
+            }
+            break;
+        }
+    }
+}
 // void func_100049E0(s32 arg0) {
 //     u32 sp64;
 //     s32 sp5C;
