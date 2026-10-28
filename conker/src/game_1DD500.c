@@ -145,7 +145,28 @@ s32 func_151B1828(CompactOscillatorObject *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1DD500/func_151B1918.s")
+void func_151B1918(struct260 *arg0) {
+    struct {
+        s32 head[2];
+        s32 count;
+        s32 entries[11][3];
+    } *list;
+    s32 i;
+
+    list = (void *)((u8 *)arg0 + 0x28);
+    list->count = 0;
+    *(f32 *)((u8 *)arg0 + 0xB8) = 0.0f;
+    for (i = 0; i < 11; i++) {
+        s32 *entry = list->entries[i];
+
+        if (list->entries[i][0] != 0) {
+            func_1516972C((struct102 *)entry[0]);
+        }
+        entry[0] = 0;
+        entry[1] = 0;
+        entry[2] = 0;
+    }
+}
 
 typedef struct {
     s32 unk0;
