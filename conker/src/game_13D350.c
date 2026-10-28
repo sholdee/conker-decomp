@@ -363,7 +363,92 @@ Game13D350Cmd *func_151135C4(Game13D350Cmd *arg0, s32 arg1, s16 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_13D350/func_15113C88.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_13D350/func_15113E54.s")
+
+extern s32 D_800DBF98;
+
+/* struct131 with the fields this file needs spelled out (the shared header
+   stops at unk6F). */
+typedef struct Struct15113E54 {
+    u8  pad0[0x38];
+    /* 0x38 */ void (*unk38)(struct Struct15113E54 *);
+    u8  pad3C[0x1E];
+    /* 0x5A */ s16 unk5A;
+    /* 0x5C */ s16 unk5C;
+    /* 0x5E */ s16 unk5E;
+    u8  pad60[0xE];
+    /* 0x6E */ u8  unk6E;
+    /* 0x6F */ u8  unk6F;
+    u8  pad70[0x10];
+    /* 0x80 */ s32 unk80;
+    u8  pad84[0x1C];
+} Struct15113E54; /* size 0xA0 */
+
+typedef struct {
+    /* 0x00 */ s16 unk0;
+    /* 0x02 */ u16 unk2;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ u16 unk8[8];
+} Struct150174C0; /* size 0x18 */
+
+#define RECORDS (*(Struct150174C0 **)&D_800D23C0)
+
+void func_15113E54(s32 arg0) {
+    s16 x;
+    s16 y;
+    s16 z;
+    s32 flags;
+    s32 i;
+    s32 j;
+    s32 count;
+    s32 offset;
+    s32 entry;
+    Struct15113E54 *obj;
+
+    arg0 = arg0;
+    x = 0;
+    y = 0;
+    z = 0;
+    flags = 0;
+    i = 0;
+    count = D_800DBEF0 - D_800DBF98;
+    if (count > 0) {
+        offset = 0;
+        do {
+            obj = (Struct15113E54 *)((u8 *)offset + (s32)D_800DBEF4);
+            if (((obj->unk6F & 0x40) == 0x40) && (obj->unk6E == 0)) {
+                obj->unk38(obj);
+            }
+            i++;
+            offset += 0xA0;
+        } while (i != count);
+    }
+
+    for (i = 0; i < (s32)D_80087380; i++) {
+        if ((RECORDS[i].unk8[0] >> 12) == 2) {
+            for (j = 0; j < RECORDS[i].unk2; j++) {
+                entry = RECORDS[i].unk8[j];
+                if ((entry >> 12) == 2) {
+                    obj = (Struct15113E54 *)(((entry & 0xFFF) * 0xA0) + (s32)D_800DBEF4);
+                    if (((obj->unk6F & 0x40) == 0x40) && (obj->unk6E == 0)) {
+                        if (j != 0) {
+                            obj->unk5A = x;
+                            obj->unk5C = y;
+                            obj->unk5E = z;
+                            obj->unk80 = flags;
+                        }
+                        obj->unk38(obj);
+                    }
+                    if (j == 0) {
+                        x = obj->unk5A;
+                        y = obj->unk5C;
+                        z = obj->unk5E;
+                        flags = obj->unk80;
+                    }
+                }
+            }
+        }
+    }
+}
 
 extern s32 *D_800DBF94;
 
