@@ -67,7 +67,122 @@ s32 func_15147DA0(void *arg0, void *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_175250/func_1514803C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_175250/func_151488C4.s")
+typedef struct {
+    s32 x;
+    s32 y;
+    s32 z;
+} Vec3i_151488C4;
+
+typedef struct {
+    f32 x, y, z;
+    f32 velocity;
+    u16 phase;
+    u8 pad12[2];
+} Game175250Point;
+
+typedef struct {
+    f32 field0;
+    f32 speedX;
+    f32 speedY;
+    f32 speedZ;
+    f32 gravity;
+    u8 pad14[4];
+    u8 flags;
+    u8 pad19[7];
+    s8 state;
+    u8 pad21[2];
+    u8 callback23;
+    u8 callback24;
+    u8 pad25[3];
+} Game175250Motion;
+
+typedef struct {
+    f32 height;
+    u8 data[0x19];
+    u8 kind;
+    u8 pad1E[0x16];
+} Game175250Collision;
+
+typedef struct {
+    u8 pad0[0x10];
+    Vec3i_151488C4 position;
+    u8 pad1C[9];
+    u8 capacity;
+    u8 pad26[6];
+    s8 count;
+    s8 start;
+    s8 end;
+    u8 pad2F[0x31];
+    Game175250Collision collision;
+    Game175250Point *points;
+    Game175250Motion *motion;
+} Game175250Trail;
+
+s32 func_151488C4(Game175250Trail *arg0) {
+    Game175250Point *points;
+    Game175250Motion *motion;
+    s32 phase;
+    struct {
+        u16 step;
+        u8 pad2[2];
+    } interval;
+    s32 index;
+    s32 count;
+    s32 phaseIndex;
+    Game175250Point *point;
+
+    points = arg0->points;
+    motion = arg0->motion;
+    index = arg0->start;
+    if (index != arg0->end) {
+        do {
+            point = (Game175250Point *)((u32)points + index * 0x14);
+            index++;
+            point->velocity -= motion->gravity * D_800BE9A4;
+            point->x += motion->speedX * D_800BE9A4;
+            point->y += point->velocity * D_800BE9A4;
+            point->z += motion->speedZ * D_800BE9A4;
+            if (index == arg0->capacity) {
+                index = 0;
+            }
+        } while (index != arg0->end);
+    }
+    count = arg0->count;
+    if (count < arg0->capacity - 1) {
+        phase = (motion->flags & 0x20) ? 0x1000 : 0;
+        if (count != 0) {
+            interval.step = 0x1000 / count;
+        }
+        arg0->count = count + 1;
+        *(Vec3i_151488C4 *)&points[arg0->end] = arg0->position;
+        points[arg0->end].velocity = motion->speedY;
+        arg0->end++;
+        if (arg0->end == arg0->capacity) {
+            arg0->end = 0;
+        }
+        phaseIndex = arg0->start;
+        if (phaseIndex != arg0->end) {
+            do {
+                points[phaseIndex].phase = phase;
+                if (motion->flags & 0x20) {
+                    phase = (phase - interval.step) & 0xFFFF;
+                } else {
+                    phase += interval.step;
+                    phase &= 0xFFFF;
+                }
+                phaseIndex++;
+                if (phaseIndex == arg0->capacity) {
+                    phaseIndex = 0;
+                }
+            } while (phaseIndex != arg0->end);
+        }
+    } else if (motion->flags & 0x17) {
+        motion->state = 3;
+    } else {
+        motion->state = 2;
+    }
+    return 1;
+}
 
 s32 func_15148AF4(struct Struct15148AF4_arg0 *arg0) {
     s32 idx;
