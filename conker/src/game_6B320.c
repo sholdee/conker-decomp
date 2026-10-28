@@ -194,7 +194,40 @@ s32 func_1503E1F4(s32 arg0, s32 arg1) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_6B320/func_1503E260.s")
+typedef struct {
+    void *entity;
+    u8 pad_4[8];
+    s16 field_C;
+    u8 pad_E[2];
+} func_1503E260_Slot;
+
+extern u8 *D_80084460[];
+void func_10004074(s32);
+
+void func_1503E260(s32 arg0) {
+    s32 i;
+    u8 *list;
+    s32 count;
+
+    if (((func_1503E260_Slot *)D_800C6660)[arg0].pad_E[1] != 0) {
+        list = D_80084460[((func_1503E260_Slot *)D_800C6660)[arg0].pad_E[0]];
+        if (list != 0) {
+            count = D_80098914[((func_1503E260_Slot *)D_800C6660)[arg0].pad_E[0]];
+            for (i = 0; i < count; i++) {
+                if (list[i] != 0xFF && func_1503E1F4(i, arg0) != 0) {
+                    *(s32 *)((u8 *)D_800CC2D0 + arg0 * 0x32C + 0x94) |= 1 << list[i];
+                }
+            }
+        }
+        ((func_1503E260_Slot *)D_800C6660)[arg0].pad_E[1] = 0;
+        if (((func_1503E260_Slot *)D_800C6660)[arg0].entity != 0) {
+            func_10004074((s32)((func_1503E260_Slot *)D_800C6660)[arg0].entity);
+        }
+        ((func_1503E260_Slot *)D_800C6660)[arg0].entity = 0;
+        ((u8 *)D_800CC2D0 + arg0 * 0x32C)[0x74] &= 0xFF7F;
+    }
+}
+
 
 void func_1503E3C4(s32 arg0, s32 arg1, s32 arg2, struct func_1503E3C4_s *arg3, s32 arg4) {
     struct func_1503E3C4_mtx sp94;
