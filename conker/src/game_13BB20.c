@@ -36,7 +36,41 @@ extern void func_150A6760(s32);
 extern void func_150F33F8(s32);
 extern s32 func_1510FE30(s32);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_13BB20/func_1510E670.s")
+extern void func_150AD8B0(f32 *, f32 *, f32 *);
+
+s32 func_1510E670(s32 arg0) {
+    s32 *tri;
+    s32 base;
+    s16 *v0;
+    s16 *v1;
+    s16 *v2;
+    f32 a[3];
+    f32 b[3];
+    f32 c[3];
+    f32 y;
+
+    tri = (s32 *)((unkfunc_1510F8D8 *)&D_800D3300)[arg0].unk4;
+    base = ((unkfunc_1510F8D8 *)&D_800D3300)[arg0].unk8;
+    if (tri != NULL) {
+        v0 = (s16 *)(tri[0] + base);
+        v1 = (s16 *)(tri[1] + base);
+        v2 = (s16 *)(tri[2] + base);
+        a[0] = v1[0] - v0[0];
+        a[1] = v1[1] - v0[1];
+        a[2] = v1[2] - v0[2];
+        b[0] = v2[0] - v0[0];
+        b[1] = v2[1] - v0[1];
+        b[2] = v2[2] - v0[2];
+        func_150AD8B0(a, b, c);
+        y = c[1];
+        if (y < 0.0f) {
+            return 0;
+        } else {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 void func_1510E950(s32, s32, s32, s32, s32, s32, s32, f32, f32, f32, f32, u16, s32, f32, f32, s32);
 
@@ -54,9 +88,62 @@ void func_1510E8BC(s32 a0, s32 a1, s32 a2, s32 a3, s32 arg4, s32 arg5, f32 arg6,
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_13BB20/func_1510E950.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_13BB20/func_1510F648.s")
+extern void func_1510F800();
+extern void func_150A64C8(s32, s32, s32 *, s32);
+extern void func_150A44F0(s32, s32 *, s32);
+extern s32 func_150A43E0(s32, s32, s32, s32 *);
+extern f32 D_800A2D98;
+extern s32 D_800D3830;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_13BB20/func_1510F720.s")
+f32 func_1510F648(f32 arg0, f32 arg1, f32 arg2) {
+    f32 ret;
+    s32 sp28;
+    s32 y;
+
+    func_1510F800(2);
+    y = (s32)arg1;
+    func_150A64C8((s16)(s32)arg0, (s16)(s32)arg2, &sp28, y);
+    func_150A44F0(sp28, &D_800D3830, 0);
+    if (func_150A43E0((s32)arg0, (s32)arg2, sp28, &D_800D3830)) {
+        ret = (f32)(s32)D_800D3300 * 0.00390625f;
+    } else {
+        ret = D_800A2D98;
+    }
+    return ret;
+}
+
+#define ABS_1510F720(x) ((x) < 0 ? -(x) : (x))
+
+s32 func_1510F720(s32 x, s32 y, s32 r, unkfunc_1510FE30 **out) {
+    unkfunc_1510FE30 *node;
+    s32 count;
+    s32 off;
+
+    node = D_800DBE48;
+    count = 0;
+    while (node != NULL) {
+        if (ABS_1510F720(node->unk8 - x) < r + node->unk6
+            && ABS_1510F720(node->unkA - y) < r + node->unk6) {
+            if (node->unkC != 0) {
+                off = node->unkC;
+            } else {
+                *out++ = node;
+                count++;
+                off = node->unk4;
+            }
+        } else {
+            off = node->unk4;
+        }
+        if (off != 0) {
+            node = (unkfunc_1510FE30 *)((u8 *)node + off);
+        } else {
+            node = NULL;
+        }
+    }
+    return count;
+}
+#undef ABS_1510F720
+
 
 extern void func_150A49F4(void);
 
@@ -66,7 +153,9 @@ void func_1510F800() {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_13BB20/func_1510F820.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_13BB20/func_1510F8CC.s")
+s32 func_1510F8CC(s32 arg0) {
+    return arg0 & 0x1F;
+}
 
 s32 func_1510F8D8(s32 arg0, s32 arg1, s32 arg2, s32 *arg3) {
     s32 count;
@@ -131,7 +220,36 @@ void func_1510FC34(s32 arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_13BB20/func_1510FD20.s")
+#define ABS_1510FD20(x) ((x) < 0 ? -(x) : (x))
+
+s32 func_1510FD20(s32 arg0, s32 arg1) {
+    unkfunc_1510FE30 *node;
+
+    node = D_800DBE48;
+    while (node != NULL) {
+        if (node->unkC != 0) {
+            if (ABS_1510FD20(arg0 - node->unk8) <= node->unk6 && ABS_1510FD20(arg1 - node->unkA) <= node->unk6) {
+                node = (unkfunc_1510FE30 *)((u8 *)node + node->unkC);
+            } else if (node->unk4 != 0) {
+                node = (unkfunc_1510FE30 *)((u8 *)node + node->unk4);
+            } else {
+                node = NULL;
+            }
+        } else {
+            if (ABS_1510FD20(arg0 - node->unk8) <= node->unk6 && ABS_1510FD20(arg1 - node->unkA) <= node->unk6) {
+                return (s32)node;
+            }
+            if (node->unk4 != 0) {
+                node = (unkfunc_1510FE30 *)((u8 *)node + node->unk4);
+            } else {
+                node = NULL;
+            }
+        }
+    }
+    return 0;
+}
+
+#undef ABS_1510FD20
 
 s32 func_1510FE30(s32 arg0) {
     unkfunc_1510FE30 *temp_v0;
