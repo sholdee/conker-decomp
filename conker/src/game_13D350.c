@@ -204,7 +204,34 @@ Gfx *func_15110600(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3) {
     return gfx;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_13D350/func_151106A8.s")
+extern u8 D_800BEAC2;
+
+Gfx *func_151106A8(Gfx *arg0) {
+    if (D_80082FA4 == 0) {
+        { Gfx *command = arg0++; command->words.w0 = _SHIFTL(0xE7, 24, 8); command->words.w1 = 0; }
+        { Gfx *command = arg0++; command->words.w0 = 0xEF302C0F; command->words.w1 = 4; }
+        { Gfx *command = arg0++; command->words.w0 = 0xFCFFFFFF; command->words.w1 = 0xFFFE793C; }
+        { Gfx *command = arg0++; command->words.w0 = _SHIFTL(0xFF, 24, 8) | _SHIFTL(0, 21, 3) | _SHIFTL(2, 19, 2) | _SHIFTL(D_800BE620 - 1, 0, 12); command->words.w1 = D_800BE9C4; }
+        { Gfx *command = arg0++; command->words.w0 = 0xF7000000; command->words.w1 = 0xFFFCFFFC; }
+        arg0 = (Gfx *)func_1501A490((s32)arg0, 0xFF, 0, 0, 0, 0);
+        { Gfx *command = arg0++; command->words.w0 = _SHIFTL(0xF6, 24, 8) | _SHIFTL(D_800BE620 - 2, 14, 10) | _SHIFTL(D_800BE624, 2, 10); command->words.w1 = _SHIFTL(2, 14, 10) | _SHIFTL(0, 2, 10); }
+        { Gfx *command = arg0++; command->words.w0 = _SHIFTL(0xE7, 24, 8); command->words.w1 = 0; }
+        arg0 = func_1501A680(arg0);
+        if (D_80082FA0 != 0) {
+            { Gfx *command = arg0++; command->words.w0 = _SHIFTL(0xE7, 24, 8); command->words.w1 = 0; }
+            arg0 = (Gfx *)func_1501A490((s32)arg0, 0xFF, 0, 0, 0, 0);
+            { Gfx *command = arg0++; command->words.w0 = 0xF7000000; command->words.w1 = 0x10001; }
+            arg0 = func_1501A6CC(arg0, 0, (D_800BE624 >> 1) - 6, D_800BE620, (D_800BE624 >> 1) + 6);
+            if (D_80082FA0 != 1) {
+                arg0 = func_1501A6CC(arg0, (D_800BE620 >> 1) - 1, 0, (D_800BE620 >> 1) + 1, D_800BE624);
+            }
+            if (D_800BEAC2 != 0) {
+                arg0 = func_1501A6CC(arg0, 0, 0, D_800BE620, D_800BE624);
+            }
+        }
+    }
+    return arg0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_13D350/func_151108C4.s")
 
