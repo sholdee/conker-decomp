@@ -109,7 +109,78 @@ u8 func_15192308(AngleVelocityState *arg0, s32 arg1) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1BF090/func_15192358.s")
+typedef struct Game1BF090FloatVector {
+    f32 values[3];
+} Game1BF090FloatVector;
+
+typedef struct Game1BF090Emitter {
+    f32 scale;
+    u8 pad4[0xC];
+    f32 height;
+    u8 data[0x12];
+    u8 kind;
+} Game1BF090Emitter;
+
+typedef struct Game1BF090Effect {
+    u8 pad0;
+    u8 group;
+    u8 pad2[0xA];
+    u8 mode;
+    u8 padD[0x1E];
+    u8 index;
+    u8 pad2C[0x14];
+    f32 position[3];
+    u8 pad4C[0x5C];
+    Game1BF090Emitter emitter;
+} Game1BF090Effect;
+
+void func_151436B4(f32, f32, f32, f32 *);
+void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32,
+                  s32, s32, s32, s32, s32, s32, s32, s32);
+
+u8 func_15192358(s32 arg0, s32 arg1) {
+    u8 result;
+    f32 factor;
+    Game1BF090FloatVector position;
+    Game1BF090FloatVector direction;
+    f32 size_random;
+    f32 speed_random;
+    f32 angle_random;
+    register u32 count_random;
+    u32 duration_random;
+    Game1BF090Emitter *emitter;
+
+    result = 1;
+    emitter = &((Game1BF090Effect *)arg0)->emitter;
+    if (((Game1BF090Effect *)arg0)->position[1] < ((Game1BF090Effect *)arg0)->emitter.height) {
+        result = 0;
+        position.values[0] = ((Game1BF090Effect *)arg0)->position[0];
+        position.values[1] = emitter->height + 2.0f;
+        position.values[2] = ((Game1BF090Effect *)arg0)->position[2];
+        func_151D9B8C(emitter->kind, emitter->scale * 0.08308f,
+                      ((Game1BF090Effect *)arg0)->index, (s32)emitter->data, (struct17 *)&position,
+                      100, 0, 1, 0, ((Game1BF090Effect *)arg0)->mode,
+                      ((Game1BF090Effect *)arg0)->group);
+        angle_random = func_150ADA68();
+        speed_random = func_150ADA68();
+        size_random = func_150ADA68();
+        factor = 0.001f;
+        func_151436B4(angle_random * 6.2831855f,
+                      (speed_random * 1000.0f + -1207.0f) * factor,
+                      (size_random * 3557.0f + 5336.0f) * factor,
+                      (f32 *)&direction);
+        size_random = func_150ADA68();
+        duration_random = func_150ADA20();
+        count_random = func_150ADA20();
+        factor = 1.0f;
+        func_151DA6F8((f32 *)&position, (f32 *)&direction, size_random * 0.20600002f + 0.20600002f,
+                      (s16)(duration_random % 21U + 35), ((Game1BF090Effect *)arg0)->index,
+                      emitter->scale * 0.02495f, count_random % 7U + 5, 0,
+                      factor, factor, 1, emitter->kind, 0, 0x10, 0xF, 0,
+                      ((Game1BF090Effect *)arg0)->mode, ((Game1BF090Effect *)arg0)->group);
+    }
+    return result;
+}
 
 u8 func_15192308(AngleVelocityState *arg0, s32 arg1);
 u8 func_15192358(s32 arg0, s32 arg1);
