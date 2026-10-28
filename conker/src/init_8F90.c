@@ -607,5 +607,163 @@ s32 func_10009FFC(void) {
     return func_10009CBC;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_8F90/func_1000A03C.s")
+typedef struct {
+    u16 type;
+    u8 priority;
+    u8 status;
+    OSMesgQueue *returnQueue;
+    void *dramAddress;
+    u32 deviceAddress;
+    u32 size;
+    void *piHandle;
+} TransferIoMessage;
+
+typedef struct {
+    u8 pad0[0xA];
+    u8 fieldA;
+} AudioWaveState;
+
+typedef struct {
+    u8 pad0[8];
+    AudioWaveState *wave;
+} AudioBankSound;
+
+typedef struct {
+    u8 pad0[0xE];
+    s16 soundCount;
+    AudioBankSound *sounds[1];
+} AudioInstrument;
+
+void func_10004074(s32);
+void func_1000A348(void);
+extern s32 D_8003E384;
+
+void func_1000A03C(void) {
+    u32 i;
+    u32 sound;
+    s32 found;
+    s32 received;
+    void *message;
+    AudioBufferState *record;
+    AudioBufferState *next;
+    AudioInstrument *instrument;
+    AudioWaveState *wave;
+    s32 busy;
+
+    received = 0;
+    message = 0;
+    for (i = 0; i < D_8002AE50; i++) {
+        if (osRecvMesg((OSMesgQueue *)&D_800416F0, &message, 0) != -1) {
+            record = D_800406A0_MGR.pending;
+            received++;
+            found = 0;
+            while (record != 0 && found == 0) {
+                if (record->buffer == ((TransferIoMessage *)message)->dramAddress) {
+                    if (record == D_800406A0_MGR.pending) {
+                        D_800406A0_MGR.pending = record->next;
+                    }
+                    {
+                        AudioBufferState *element = record;
+
+                        if (element->next != 0) {
+                            element->next->prev = element->prev;
+                        }
+                        if (element->prev != 0) {
+                            element->prev->next = element->next;
+                        }
+                    }
+                    record->next = 0;
+                    record->prev = 0;
+                    if (D_800406A0_MGR.active != 0) {
+                        AudioBufferState *linkNode = record;
+                        AudioBufferState *linkAfter = D_800406A0_MGR.active;
+
+                        linkNode->next = linkAfter->next;
+                        linkNode->prev = linkAfter;
+                        if (linkAfter->next != 0) {
+                            linkAfter->next->prev = linkNode;
+                        }
+                        linkAfter->next = linkNode;
+                    } else {
+                        D_800406A0_MGR.active = record;
+                        record->next = 0;
+                        record->prev = 0;
+                    }
+                    if (record->field16 == 1) {
+                        instrument = record->buffer;
+                        for (sound = 0; sound < (u32)instrument->soundCount; sound++) {
+                            instrument->sounds[sound] = (AudioBankSound *)
+                                ((u32)instrument->sounds[sound] + (u32)record->buffer);
+                        }
+                    }
+                    record->state = 1;
+                    record->count++;
+                    found = 1;
+                } else {
+                    record = record->next;
+                }
+            }
+        }
+    }
+    D_8002AE50 -= received;
+    record = D_800406A0_MGR.freeAnchor;
+    if (record != 0) {
+        do {
+            busy = 0;
+            next = record->next;
+            if (record->field16 == 1) {
+                AudioInstrument *cleanupInstrument = record->buffer;
+                for (sound = 0; sound < (u32)cleanupInstrument->soundCount; sound++) {
+                    wave = cleanupInstrument->sounds[sound]->wave;
+                    if (wave->fieldA != 0) {
+                        wave->fieldA = 0;
+                        busy = 1;
+                    }
+                }
+            }
+            if (busy == 0) {
+                record->count = 0;
+                record->state = 0;
+                func_10004074((s32)record->buffer);
+                record->ownerSlot = 0;
+                if (record == D_800406A0_MGR.freeAnchor) {
+                    D_800406A0_MGR.freeAnchor = next;
+                }
+                {
+                    AudioBufferState *element = record;
+
+                    if (element->next != 0) {
+                        element->next->prev = element->prev;
+                    }
+                    if (element->prev != 0) {
+                        element->prev->next = element->next;
+                    }
+                }
+                if (D_800406A0_MGR.base != 0) {
+                    AudioBufferState *linkNode = record;
+                    AudioBufferState *linkAfter = D_800406A0_MGR.base;
+
+                    linkNode->next = linkAfter->next;
+                    linkNode->prev = linkAfter;
+                    if (linkAfter->next != 0) {
+                        linkAfter->next->prev = record;
+                    }
+                    linkAfter->next = record;
+                    record = next;
+                    continue;
+                } else {
+                    D_800406A0_MGR.base = record;
+                    record->next = 0;
+                    record->prev = 0;
+                }
+            }
+            record = next;
+        } while (next != 0);
+    }
+    if (D_8003E384 != 0) {
+        func_1000A348();
+        D_8003E384 = 0;
+    }
+}
+
 #pragma GLOBAL_ASM("asm/nonmatchings/init_8F90/func_1000A348.s")
