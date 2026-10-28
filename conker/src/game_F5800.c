@@ -153,7 +153,39 @@ extern s32 D_80090230[5];
 extern s32 D_80090244[5];
 extern s32 func_1510D0EC(s32, s32 *, s32, s32);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_F5800/func_150C8600.s")
+s32 func_1510D0EC(s32, s32 *, s32, s32);
+extern s32 *D_80088810[2];
+
+typedef struct GameF5800Command {
+    u32 w0;
+    u32 w1;
+} GameF5800Command;
+
+GameF5800Command *func_150C8600(GameF5800Command *arg0) {
+    typedef struct { s32 *entries[2]; } PointerPair;
+    s32 record_offset;
+    s32 command_offset;
+    s32 workspace[2];
+    s32 variant;
+    PointerPair tables;
+    s32 result;
+
+    tables = *(PointerPair *)D_80088810;
+    for (record_offset = 0, command_offset = 4; command_offset != 0x2C; command_offset += 4, record_offset += 0xA) {
+        variant = *(s16 *)((u8 *)D_800BE4E0 + record_offset + 4) >> 8;
+        if (variant < 0) {
+            variant = 0;
+        } else if (variant >= 5) {
+            variant = 4;
+        }
+        if (*((u8 *)D_800BE4E0 + record_offset) >= 2) {
+            *((u8 *)D_800BE4E0 + record_offset) = 0;
+        }
+        result = func_1510D0EC(tables.entries[*((u8 *)D_800BE4E0 + record_offset)][variant], workspace, 3, 0);
+        { GameF5800Command *command = arg0++; command->w0 = (command_offset & 0xFFFF) | 0xDB060000; command->w1 = result; }
+    }
+    return arg0;
+}
 
 typedef struct {
     u8 pad0[0x34];
