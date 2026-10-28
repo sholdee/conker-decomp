@@ -95,7 +95,33 @@ s32 func_1517B7A8(s16 *a0, s16 *a1, s32 *a2, s32 a3) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1A89B0/func_1517B7F8.s")
+s32 func_1517B7F8(void *arg0, void *arg1, s32 *arg2, s32 arg3) {
+    s32 temp_v1;
+    s32 temp_v0;
+
+    temp_v0 = *arg2;
+    if (temp_v0 >= 0xD00) {
+        return 1;
+    }
+    temp_v1 = temp_v0 - 0x600;
+    if (temp_v0 >= 0x100) {
+        temp_v1 = 0x190000 - (temp_v1 * temp_v1);
+        *(s16 *)((u8 *)arg1 + 2) = (s16) (*(s16 *)((u8 *)arg0 + 2) + (temp_v1 / 7680));
+        temp_v0 = *arg2;
+        if (temp_v0 >= 0x200) {
+            if (temp_v0 >= 0xA01) {
+                *arg2 = temp_v0 - 0x800;
+            } else {
+                *arg2 = 0x200;
+            }
+        }
+    } else {
+        *(s16 *)((u8 *)arg1 + 2) = (s16) *(s16 *)((u8 *)arg0 + 2);
+    }
+    *(s16 *)((u8 *)arg1 + 0) = (s16) *(s16 *)((u8 *)arg0 + 0);
+    *(s16 *)((u8 *)arg1 + 4) = (s16) *(s16 *)((u8 *)arg0 + 4);
+    return 0;
+}
 
 typedef struct {
     s16 unk0;
