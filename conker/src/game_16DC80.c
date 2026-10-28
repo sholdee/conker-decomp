@@ -109,7 +109,36 @@ void func_15141250(void *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_16DC80/func_151412BC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16DC80/func_1514143C.s")
+void func_1514143C(void *arg0) {
+    typedef struct {
+        f32 unk0;
+        f32 unk4;
+        f32 unk8;
+    } Vec;
+    typedef struct {
+        u8 pad[0x44];
+        Vec *unk44;
+    } Mid;
+    typedef struct {
+        u8 pad0[0x34];
+        f32 unk34;
+        f32 unk38;
+        f32 unk3C;
+        u8 pad40[0xD0];
+        Mid unk110;
+    } Local;
+    Local *a = arg0;
+    Mid *m;
+
+    if (a->unk110.unk44 != 0) {
+    def_:
+        m = &a->unk110;
+    use:
+        m->unk44->unk0 = a->unk34;
+        m->unk44->unk4 = a->unk38;
+        m->unk44->unk8 = a->unk3C;
+    }
+}
 
 extern f32 D_800BE9A4;
 
