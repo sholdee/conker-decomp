@@ -262,7 +262,20 @@ f32 func_1515F008(s16 *arg0, s32 arg1) {
     return (f32)hi * 1.52587890625e-05f;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18A8F0/func_1515F040.s")
+extern s32 D_800DCD10[];
+
+void func_1515F040(f32 arg0, s32 arg1) {
+    f32 var_fv0;
+
+    var_fv0 = 32767.0f;
+    if (var_fv0 <= arg0) {
+        arg0 = var_fv0;
+    } else if (arg0 < -32768.0f) {
+        arg0 = -32768.0f;
+    }
+    arg0 *= 65536.0f;
+    D_800DCD10[arg1] = (s32) arg0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_18A8F0/func_1515F0AC.s")
 
