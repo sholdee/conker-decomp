@@ -1040,7 +1040,42 @@ s32 func_1508DAEC(s32 arg0, s32 arg1)
 void func_1508E6C8(void) {
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_B3020/func_1508E6D0.s")
+s32 func_1508E6D0(s32 arg0) {
+    switch (arg0) {
+    case 0x3F:
+        return 0x708;
+    case 0x14:
+        return 0xC80;
+    case 0x22:
+        return 0x1F4;
+    case 0x23:
+        return 0x2710;
+    case 0x16:
+        return 0x186A0;
+    case 0x15:
+        return 0x1F4;
+    case 0x21:
+        return 0x1F4;
+    case 0x24:
+        return 0x186A0;
+    case 0x19:
+    case 0x40:
+        return 0x1F4;
+    case 0x9:
+        return 0x1388;
+    case 0x38:
+        return 0x1388;
+    case 0x18:
+    case 0x41:
+        return 0x186A0;
+    case 0x3:
+        return 0x2EE;
+    case 0x37:
+        return 0x5DC;
+    default:
+        return 0x186A0;
+    }
+}
 
 s32 func_1508E780(s32 arg0) {
     if (*(s16 *)((u8 *)D_800D23B0 + 0x16BC) != 0xB8) {
