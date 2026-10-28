@@ -1,6 +1,9 @@
 #include <ultra64.h>
 
+/* functions.h declares func_150A7CB0 with s32 params; this file passes floats */
+#define func_150A7CB0 func_150A7CB0_s32
 #include "functions.h"
+#undef func_150A7CB0
 #include "variables.h"
 
 
@@ -52,7 +55,10 @@ typedef struct {
 } Struct15017B20; /* size 0x28 */
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0x15];
+    /* 0x00 */ s16 x, y, z;
+    /* 0x06 */ s16 sizeX, sizeY, sizeZ;
+    /* 0x0C */ f32 angleX, angleY;
+    /* 0x14 */ u8 pad14;
     /* 0x15 */ u8 unk15;
     /* 0x16 */ u8 unk16;
     /* 0x17 */ u8 pad17[0x34 - 0x17];
@@ -134,4 +140,90 @@ void func_15017B20(Struct15017B20_In *arg0, s32 arg1) {
         }
     }
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_44C40/func_15017FA4.s")
+void func_150A7960(f32 m[4][4], f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
+void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
+void func_150A7DA0(f32 mtx[4][4], f32, f32, f32);
+void func_150A7CB0(f32 mtx[4][4], f32 x, f32 y, f32 z);
+
+void func_15017FA4(Struct15017B20_In *arg0, Struct15017B20 *arg1) {
+    s32 i;
+    s32 shape;
+    s32 invalid;
+    s32 minX, maxX, minY, maxY, minZ, maxZ;
+    f32 transform[4][4];
+    f32 rotation[4][4];
+    f32 signX, signY, signZ;
+    f32 x, y, z;
+
+    invalid = 0;
+    shape = arg0->unk15 & 3;
+    switch (shape) {
+    default:
+        invalid = 1;
+        break;
+    case 0:
+        func_150A7DA0(rotation, 0.0f, 1.0f, 0.0f);
+        func_150A7CB0(transform, arg0->sizeX, arg0->sizeY * 0.5f, arg0->sizeX);
+        func_150A7A48(rotation, transform, transform);
+        func_150A8050(rotation, arg0->angleX, arg0->angleY, 0.0f);
+        func_150A7A48(transform, rotation, transform);
+        break;
+    case 1:
+        func_150A7CB0(transform, arg0->sizeX, arg0->sizeX, arg0->sizeX);
+        break;
+    case 2:
+        func_150A7DA0(rotation, 0.0f, 1.0f, 0.0f);
+        func_150A7CB0(transform, arg0->sizeX, arg0->sizeY * 0.5f, arg0->sizeZ);
+        func_150A7A48(rotation, transform, transform);
+        func_150A8050(rotation, arg0->angleX, arg0->angleY, 0.0f);
+        func_150A7A48(transform, rotation, transform);
+        break;
+    }
+    minZ = 0;
+    minY = 0;
+    minX = 0;
+    maxZ = 0;
+    maxY = 0;
+    maxX = 0;
+    if (!invalid) {
+        for (i = 0; i < 8; i++) {
+            if (i & 1) {
+                signX = 1.0f;
+            } else {
+                signX = -1.0f;
+            }
+            if (i & 2) {
+                signY = 1.0f;
+            } else {
+                signY = -1.0f;
+            }
+            if (i & 4) {
+                signZ = 1.0f;
+            } else {
+                signZ = -1.0f;
+            }
+            func_150A7960(transform, signX, signY, signZ, &x, &y, &z);
+            if (x < minX) {
+                minX = x;
+            } else if (maxX < x) {
+                maxX = x;
+            }
+            if (y < minY) {
+                minY = y;
+            } else if (maxY < y) {
+                maxY = y;
+            }
+            if (z < minZ) {
+                minZ = z;
+            } else if (maxZ < z) {
+                maxZ = z;
+            }
+        }
+    }
+    arg1->min_x = arg0->x + minX;
+    arg1->max_x = arg0->x + maxX;
+    arg1->min_y = arg0->y + minY;
+    arg1->max_y = arg0->y + maxY;
+    arg1->min_z = arg0->z + minZ;
+    arg1->max_z = arg0->z + maxZ;
+}
