@@ -23,7 +23,7 @@ void func_10004250(void);
 void func_10004308(void);
 void func_1000440C(void);
 void func_10004470(void);
-s32  func_10004514(s32 devAddr, void *dramAddr, u32 size, s32 arg3);
+void func_10004514(s32 devAddr, void *dramAddr, u32 size, s32 arg3);
 void func_10004674(void);
 void func_10004F00(void);
 void func_10004FE0(void);

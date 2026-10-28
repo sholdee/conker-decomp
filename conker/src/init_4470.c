@@ -18,7 +18,7 @@ void func_10004470(void) {
     D_8003A571 = 0;
 }
 
-s32 func_10004514(s32 devAddr, void *dramAddr, u32 size, s32 arg3) {
+void func_10004514(s32 devAddr, void *dramAddr, u32 size, s32 arg3) {
     OSMesgQueue *msgQueue;
     OSIoMesg tmpIoMsg;
     OSIoMesg *ioMsg;
