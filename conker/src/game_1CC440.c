@@ -332,13 +332,32 @@ void func_151A0AF8(struct Obj151A0AF8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1CC440/func_151A0C0C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1CC440/func_151A0E40.s")
+void func_151A11CC(f32 arg0, f32 arg1, f32 arg2, f32 arg3,
+                  f32 arg4, s32 arg5, s32 arg6, s32 arg7,
+                  s32 arg8, s32 arg9, f32 arg10, s32 arg11,
+                  s32 arg12, s32 arg13, s32 arg14, s32 arg15,
+                  s32 arg16, f32 arg17, s32 arg18, s32 arg19,
+                  s32 arg20, s32 arg21, s32 arg22, s32 arg23,
+                  s32 arg24, s32 arg25, s32 arg26, s32 arg27);
+
+void func_151A0E40(f32 arg0, f32 arg1, f32 arg2, u8 arg3, s32 arg4) {
+    func_151A11CC(
+        arg0, arg1, arg2, 163.0f, 2.019f, 0xA0, 0x4B, 0x41F, 0x4F6,
+        1, 2.019f, 0x87, 0x44, 0x41F, 0x4F6, 2, 1, 2.019f, 0x46,
+        0x42, 0x41F, 0x4F6, 7, 0x41, 4, 1, arg3, arg4);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1CC440/func_151A0F28.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1CC440/func_151A1010.s")
 
-void func_151A11CC(f32 arg0, f32 arg1, s32 arg2, s32 arg3) {
+void func_151A11CC(f32 arg0, f32 arg1, f32 arg2, f32 arg3,
+                  f32 arg4, s32 arg5, s32 arg6, s32 arg7,
+                  s32 arg8, s32 arg9, f32 arg10, s32 arg11,
+                  s32 arg12, s32 arg13, s32 arg14, s32 arg15,
+                  s32 arg16, f32 arg17, s32 arg18, s32 arg19,
+                  s32 arg20, s32 arg21, s32 arg22, s32 arg23,
+                  s32 arg24, s32 arg25, s32 arg26, s32 arg27) {
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1CC440/func_151A11E4.s")
