@@ -58,4 +58,27 @@ void func_1503F904(struct Game1503F904 *arg0, s32 arg1, s32 arg2) {
     func_1503F800((s32)arg0 + 0x320, (s16)(s32)arg0->unk14, (s16)(s32)arg0->unk1C, arg1, 1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_6CCB0/func_1503F964.s")
+void func_1503F964(void) {
+    s32 var_a0;
+    s32 temp_v0;
+
+    if (D_800C67F0 != 0) {
+        temp_v0 = D_800C67F1;
+        var_a0 = D_800C67F1 + 1;
+        if (var_a0 >= 0x19) {
+            var_a0 = 0;
+        }
+        if (var_a0 != temp_v0) {
+            do {
+                if ((*(s32 *)((u8 *)D_800CC2D0 + (var_a0 * 0x32C) + 0xF8) & 0x800000) != 0) {
+                    D_800C67F1 = (u8)var_a0;
+                    return;
+                }
+                var_a0 += 1;
+                if (var_a0 >= 0x19) {
+                    var_a0 = 0;
+                }
+            } while (var_a0 != temp_v0);
+        }
+    }
+}
