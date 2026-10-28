@@ -133,7 +133,54 @@ void func_151603FC(struct225 *arg0) {
 }
 
 // requires jump table
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_151604A0.s")
+extern void (*D_8008B150[])(void *);
+
+void func_151604A0(void *arg0, u8 *arg1, u8 arg2) {
+    u8 *object = arg0;
+    void (*callback)(void *);
+    struct17 position;
+
+    switch (arg2) {
+    case 0x17:
+    case 0x18:
+    case 0x1C:
+    case 0x1F:
+    case 0x22:
+        if (*arg1 != object[0x12]) {
+            return;
+        }
+        switch (arg2) {
+        case 0:
+            break;
+        case 0x17:
+            (*(u8 **)(object + 0x14))[9] = 0;
+            break;
+        case 0x18:
+            (*(u8 **)(object + 0x14))[9] = 1;
+            break;
+        case 0x1C:
+            position.unk0 = (f32)*(s16 *)((u8 *)*(void **)(object + 0x14) + 0xE);
+            position.unk4 = (f32)*(s16 *)((u8 *)*(void **)(object + 0x14) + 0x10);
+            position.unk8 = (f32)*(s16 *)((u8 *)*(void **)(object + 0x14) + 0x12);
+            func_151618BC(0x3E80, 0, 0, 0, &position, 0x1F4, 0x3E8);
+            return;
+        case 0x1F:
+            object[0xF] = 0xB;
+            (*(u8 **)(object + 0x14))[9] = 0;
+            break;
+        case 0x22:
+            func_1516972C((struct102 *)arg0);
+            return;
+        }
+        break;
+    default:
+        callback = D_8008B150[object[0x12]];
+        if (callback != 0) {
+            callback(arg0);
+        }
+        break;
+    }
+}
 
 s32 func_15160600(struct225 *arg0) {
     arg0->unk14->unk2F = func_151422DC(0, &D_800A6690, 0, 0xFF, 0xFF, &D_800A6698, 575);
