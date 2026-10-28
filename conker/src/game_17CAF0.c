@@ -1009,7 +1009,102 @@ void func_15150D1C(struct Local15150D1CArg *arg0, u8 arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_17CAF0/func_151511FC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_17CAF0/func_15151670.s")
+typedef struct {
+    struct Vec3F position;
+    s16 life, enabled;
+    s32 active;
+    u8 field14, fade, pad16[2];
+    s32 field18;
+} Game151670Spawn;
+
+typedef struct {
+    f32 size;
+    struct Vec3F velocity;
+    f32 growth;
+    u8 pad14[4];
+    u8 red, green, blue, alpha;
+    s16 field1C, field1E;
+} Game151670Motion;
+
+typedef struct {
+    struct Vec3F position;
+    struct Vec3F normal;
+    s16 triangle[9];
+    u8 pad2A[2];
+    f32 spread;
+    f32 sizeBase, sizeRange, growthBase, growthRange, speedBase, speedRange;
+    s16 countBase, countRange, fadeBase, fadeRange, lifeBase, lifeRange;
+    u8 green, enabled, red, pad57;
+    s32 callbacks[6];
+    u8 blue, alphaBase, alphaRange, pad73;
+    s32 field74, field78;
+    s32 flags[8];
+    s16 field9C, field9E;
+    s32 fieldA0;
+} Game151670Config;
+
+void func_15151670(Game151670Config *arg0, u8 arg1, s32 arg2) {
+    Game151670Spawn spawn;
+    Game151670Motion motion;
+    u8 kind;
+    struct Vec3F basis1;
+    f32 magnitude1, inverse1;
+    struct Vec3F basis2;
+    f32 magnitude2, inverse2;
+    struct Vec3F basis3;
+    f32 magnitude3, inverse3;
+    f32 speed;
+    f32 second;
+    f32 first;
+    s32 count;
+    u32 random;
+
+    kind = arg1;
+    if (func_15144E80((struct Vec3F *)arg0->triangle, &basis1, &basis2, &basis3) != 0) {
+        func_15145128(&basis1, &basis1, &magnitude1, &inverse1);
+        func_15145128(&basis2, &basis2, &magnitude2, &inverse2);
+        func_15145128(&basis3, &basis3, &magnitude3, &inverse3);
+        if (func_15144A74(&basis3, &arg0->normal) < 0.0f) {
+            basis3.x = -basis3.x;
+            basis3.y = -basis3.y;
+            basis3.z = -basis3.z;
+        }
+        basis3.x *= 1000.0f;
+        basis3.y *= 1000.0f;
+        basis3.z *= 1000.0f;
+        spawn.active = 1;
+        spawn.enabled = arg0->enabled;
+        motion.green = arg0->green;
+        motion.blue = arg0->blue;
+        motion.red = arg0->red;
+        motion.field1C = arg0->field9C;
+        motion.field1E = arg0->field9E;
+        spawn.position = arg0->position;
+        spawn.field18 = arg0->fieldA0;
+        count = func_150ADA20() % (u32)(arg0->countRange + 1) + arg0->countBase;
+        if (count != 0) {
+            do {
+                random = func_150ADA20();
+                func_15143874((s16)(random & 0xFF), func_150ADA68() * arg0->spread,
+                              &first, &second);
+                speed = func_150ADA68() * arg0->speedRange + arg0->speedBase;
+                motion.alpha = func_150ADA20() % (u32)(arg0->alphaRange + 1) + arg0->alphaBase;
+                spawn.fade = func_150ADA20() % (u32)(arg0->fadeRange + 1) + arg0->fadeBase;
+                spawn.life = func_150ADA20() % (u32)(arg0->lifeRange + 1) + arg0->lifeBase;
+                motion.size = func_150ADA68() * arg0->sizeRange + arg0->sizeBase;
+                motion.growth = func_150ADA68() * arg0->growthRange + arg0->growthBase;
+                motion.velocity.x = (basis1.x * first + basis2.x * second + basis3.x) * speed;
+                motion.velocity.y = (basis1.y * first + basis2.y * second + basis3.y) * speed;
+                motion.velocity.z = (basis1.z * first + basis2.z * second + basis3.z) * speed;
+                func_15147DA0(&spawn, &motion, 0, arg0->callbacks[0], arg0->callbacks[1],
+                             arg0->callbacks[2], arg0->callbacks[3], arg0->callbacks[4],
+                             arg0->callbacks[5], arg0->field74, arg0->field78,
+                             arg0->flags, 0, kind, arg2);
+                count--;
+            } while (count != 0);
+        }
+    }
+}
 
 void func_15151A38(struct Local15151A38Arg *arg0, u8 arg1, s32 arg2) {
     struct Local15151A38Pos spDC;
