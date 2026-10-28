@@ -1,5 +1,10 @@
 #include <ultra64.h>
+/* functions.h types func_150ADA20 as returning u8; golden spills/uses the full u32 return
+ * (same shadow-prototype idiom as game_121A20.c). */
+#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
+#undef func_150ADA20
+u32 func_150ADA20(void);
 #include "variables.h"
 
 void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
@@ -7,7 +12,22 @@ void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 void func_150D82B0(s32 arg0) {
 }
 
+extern s32 D_80090298[];
+extern f32 D_800A0B10; /* 1/17; stays in asm/data/2455D0.rodata.s (shared with func_150D83D8/func_150D85AC) */
+
 #pragma GLOBAL_ASM("asm/nonmatchings/game_105760/func_150D82BC.s")
+
+typedef struct Draw150D83D8 {
+    u8 pad0[0x18];
+    s16 unk18;
+    u8 pad1A[0xA];
+    Gfx **unk24;
+    u8 pad28[0x10];
+    s32 unk38;
+    s32 unk3C;
+} Draw150D83D8;
+
+extern f32 D_800A0B14; /* 0.01f; asm/data/2455D0.rodata.s */
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_105760/func_150D83D8.s")
 
@@ -219,7 +239,9 @@ s32 func_150D88E0(void *arg0, struct127 *arg1, u8 arg2) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_105760/func_150D8A20.s")
+s32 func_150D8A20(s32 arg0, s32 arg1) {
+    return 0x8;
+}
 
 extern f32 D_800A0B30;
 extern f32 D_800A0B34;
