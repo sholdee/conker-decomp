@@ -561,7 +561,62 @@ void func_1502EEF4(s32 arg0) {
     func_1507E3C0(&D_800CC2D0[arg0]);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502F01C.s")
+u8 *func_1507E908(void *, s32);
+typedef struct {
+    u8 pad0[8];
+    u8 e[1][3];
+} Fn1502F01CTbl;
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8;
+} Fn1502F01CTex;
+extern Fn1502F01CTex *D_800C5338[];
+
+Gfx *func_1502F01C(Gfx *gdl, s32 arg1) {
+    u8 *obj;
+    u8 sp80[2];
+    s32 id;
+    u8 *res;
+    s32 i;
+    Fn1502F01CTex *tex;
+
+    obj = (u8 *)&D_800CC2D0[arg1];
+    id = obj[4];
+    res = NULL;
+    for (i = 0; i < 2; i++) {
+        if (obj[0x6C + i] >= 10) {
+            sp80[i] = obj[0x6C + i] - 10;
+        } else {
+            sp80[i] = ((Fn1502F01CTbl *)D_800D1C90[id])->e[i][obj[0x6C + i]];
+            if (obj[0x6F] && !res) {
+                res = func_1507E908(obj, obj[0x6F]);
+            }
+            if (res != NULL) {
+                s32 sp68[2];
+                sp68[0] = res[0];
+                sp68[1] = res[1];
+                if (res != NULL) {
+                    if (sp68[i] != ((Fn1502F01CTbl *)D_800D1C90[id])->e[i][2]) {
+                        if (obj[0x6C + i] == 0) {
+                            sp80[i] = sp68[i];
+                        }
+                    } else {
+                        sp80[i] = sp68[i];
+                    }
+                }
+            }
+        }
+    }
+    tex = D_800C5338[obj[4]];
+    if (tex != NULL) {
+        gSPSegment(gdl++, 6, tex[sp80[0]].unk0);
+        gSPSegment(gdl++, 7, tex[sp80[1]].unk0);
+        gSPSegment(gdl++, 10, tex[obj[0x68]].unk0);
+        gSPSegment(gdl++, 11, tex[obj[0x69]].unk0);
+    }
+    return gdl;
+}
 
 void func_1502F264(s32 arg0) {
     struct127 *obj;
