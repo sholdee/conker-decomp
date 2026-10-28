@@ -262,7 +262,93 @@ void func_15105548(struct207 *arg0, s32 *arg1, u8 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_131F30/func_1510558C.s")
+typedef struct { f32 x, y, z; } Vec3f_1510558C;
+typedef struct Game131F30Surface { s16 values[9]; } Game131F30Surface;
+typedef struct Game131F30Color { s32 value; } Game131F30Color;
+typedef struct Game131F30Factor { f32 value; } Game131F30Factor;
+typedef struct Game131F30Descriptor {
+    s32 count, spread;
+    Vec3f_1510558C position, velocity;
+    Game131F30Surface surface;
+    u8 pad32[2];
+    f32 field34, field38, field3C, field40, field44;
+    s16 duration, durationRange;
+    f32 field4C, field50, field54;
+} Game131F30Descriptor;
+typedef struct Game131F30Part {
+    u8 pad0[0x30];
+    Vec3f_1510558C position;
+    u8 pad3C[0x24];
+    Vec3f_1510558C velocity;
+    Game131F30Surface surface;
+    u8 pad7E[0xA];
+    s32 flags;
+} Game131F30Part;
+typedef struct Game131F30Emitter {
+    u8 pad0, group, pad2[0xA], mode, padD[0x103];
+    Game131F30Part part;
+} Game131F30Emitter;
+
+s32 func_15102920(f32, s32, void *, void *, s32, s32, s32, s32, s32, s32);
+void func_151C329C(void *, u8, s32);
+void func_15151D6C(Game131F30Descriptor *, Game131F30Color *, Game131F30Factor *, s32, u8, s32);
+extern Game131F30Color D_800A23A4;
+extern Game131F30Factor D_800A23A8;
+extern f32 D_800A23C0, D_800A23C4, D_800A23C8, D_800A23CC, D_800A23D0;
+extern f32 D_800A23D4, D_800A23D8, D_800A23DC, D_800A23E0, D_800A23E4, D_800A23E8;
+
+void func_1510558C(Game131F30Emitter *arg0) {
+    Game131F30Part *part;
+    u32 flags;
+    struct {
+        Game131F30Factor factor;
+        Game131F30Color color;
+        Game131F30Descriptor descriptor;
+    } work;
+    u32 lifetime;
+    u32 random;
+    f32 fraction;
+
+    part = (Game131F30Part *)((u8 *)arg0 + 0x110);
+    fraction = func_150ADA68();
+    random = func_150ADA20();
+    lifetime = func_150ADA20() % 81U + 0x32;
+    func_15102920(fraction * 25.0f + 15.0f, ((random % 56U) + 0xC8) & 0xFF,
+                  &part->surface, &part->position, lifetime, 1, 1,
+                  part->flags, arg0->mode, arg0->group);
+    flags = part->flags;
+    if ((flags & 0x1F) == 9) {
+        if (func_150ADA68() < D_800A23C0) {
+            func_151C329C(&part->position, arg0->mode, arg0->group);
+        }
+    } else {
+        if (func_150ADA68() < D_800A23C4) {
+            func_151C329C(&part->position, arg0->mode, arg0->group);
+        }
+        if (func_150ADA68() < D_800A23C8) {
+            work.color = D_800A23A4;
+            work.factor = D_800A23A8;
+            work.descriptor.count = 1;
+            work.descriptor.spread = 3;
+            work.descriptor.position = part->position;
+            work.descriptor.velocity.x = -part->velocity.x;
+            work.descriptor.velocity.y = -part->velocity.y;
+            work.descriptor.velocity.z = -part->velocity.z;
+            work.descriptor.surface = part->surface;
+            work.descriptor.field34 = D_800A23CC;
+            work.descriptor.field38 = D_800A23D0;
+            work.descriptor.duration = 15;
+            work.descriptor.durationRange = 15;
+            work.descriptor.field3C = D_800A23D4;
+            work.descriptor.field40 = D_800A23D8;
+            work.descriptor.field44 = D_800A23DC;
+            work.descriptor.field4C = D_800A23E0;
+            work.descriptor.field50 = D_800A23E4;
+            work.descriptor.field54 = D_800A23E8;
+            func_15151D6C(&work.descriptor, &work.color, &work.factor, 1, arg0->mode, arg0->group);
+        }
+    }
+}
 
 void func_15105848(struct207 *arg0, s32 arg1, u8 arg2) {
     struct206 *temp_v0;
