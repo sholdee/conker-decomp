@@ -254,7 +254,7 @@ def check_tree(func, m, wc, want, quiet=False, U=2):
             return 3, [f"STUB: {func} is still provided by GLOBAL_ASM({asm}) — replace it with C",
                        "RESULT: STUB"]
     (wc / BIN).unlink(missing_ok=True)
-    r = run("make -j4 build/conker.us.bin 2>&1", wc)
+    r = run("make -j2 build/conker.us.bin 2>&1", wc)
     obj = wc / "build" / (m["file"].removesuffix(".c") + ".c.o")
     if r.returncode or not (wc / BIN).exists():
         errs = [l for l in r.stdout.splitlines()
@@ -524,7 +524,7 @@ def main():
     p.add_argument("--no-diff", action="store_true")
     p.add_argument("-q", action="store_true", help="summary line only")
     p = sub.add_parser("batch", help="try variant .c files in parallel")
-    p.add_argument("func"); p.add_argument("files", nargs="+"); p.add_argument("-j", type=int, default=8)
+    p.add_argument("func"); p.add_argument("files", nargs="+"); p.add_argument("-j", type=int, default=4)
     p = sub.add_parser("reset"); p.add_argument("func"); p.add_argument("--all", action="store_true")
     p = sub.add_parser("objdump"); p.add_argument("func")
     p = sub.add_parser("land"); p.add_argument("func")
