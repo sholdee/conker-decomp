@@ -717,7 +717,96 @@ s32 func_151BEC94(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4) {
     return arg0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E73B0/func_151BECB8.s")
+typedef struct {
+    /* 0x000 */ u8 pad0;
+    /* 0x001 */ u8 unk1;
+    /* 0x002 */ u8 pad2[0xA];
+    /* 0x00C */ u8 unkC;
+    /* 0x00D */ u8 padD[3];
+    /* 0x010 */ u8 unk10;
+    /* 0x011 */ u8 pad11[0x37];
+    /* 0x048 */ u8 unk48;
+    /* 0x049 */ u8 pad49[0xB];
+    /* 0x054 */ struct17 unk54;
+    /* 0x060 */ s32 unk60;
+    /* 0x064 */ u8 pad64[0x98];
+    /* 0x0FC */ s32 unkFC;
+    /* 0x100 */ u8 pad100[0x1B];
+    /* 0x11B */ u8 unk11B;
+    /* 0x11C */ u8 pad11C[4];
+} S151BECB8;
+
+typedef struct {
+    /* 0x00 */ f32 unk0;
+    /* 0x04 */ struct17 unk4;
+    /* 0x10 */ u8 unk10;
+} S151BECB8Params;
+
+extern void func_1515C1A0(struct127 *, f32 *, f32 *, f32 *);
+extern f32 func_15143E64(struct17 *);
+void func_151BF340(u8 arg0, s32 arg1);
+void *func_151BEEE0(f32 arg0, struct17 *arg1, s32 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8);
+void func_151BF0C8();
+s32 func_151BEE94(struct127 *arg0);
+
+s32 func_151BECB8(S151BECB8 *arg0) {
+    s32 ret = 1;
+
+    {
+        struct127 *p;
+        S151BECB8Params *params;
+        f32 range = 43.0f;
+        f32 radius;
+        f32 height;
+        f32 pos[3];
+        struct17 diff;
+
+        p = D_800CC2D0;
+        do {
+            if (func_151BEE94(p) != 0) {
+                f32 dist;
+
+                params = (S151BECB8Params *)((u8 *)arg0 + 0x120);
+                func_1515C1A0(p, pos, &radius, &height);
+                diff.unk0 = pos[0] - params->unk4.unk0;
+                diff.unk4 = pos[1] - params->unk4.unk4;
+                diff.unk8 = pos[2] - params->unk4.unk8;
+                dist = func_15143E64(&diff);
+                if (dist - radius < range) {
+                    func_15085710(p->unk127, 3, params->unk10);
+                    ret = 0;
+                    func_10010F30(0x511, 0x7D00, 0x40, 0, 0);
+                    func_151BF340(arg0->unkC, arg0->unk1);
+                    func_151BF0C8(&params->unk4);
+                    {
+                        s32 v;
+                        s32 kind;
+
+                        kind = arg0->unk48;
+                        switch (kind) {
+                            case 1:
+                                v = 1;
+                                break;
+                            case 2:
+                                v = 2;
+                                break;
+                            case 3:
+                                v = 0;
+                                break;
+                            case 0:
+                            default:
+                                v = 0;
+                                break;
+                        }
+                        func_151BEEE0(params->unk0, &arg0->unk54, arg0->unkFC, arg0->unk11B, v, arg0->unk10 & 0x10, arg0->unk60, arg0->unkC, arg0->unk1);
+                    }
+                }
+            }
+            p++;
+        } while (p != (struct127 *)&D_800D1548);
+    }
+    return ret;
+}
 
 s32 func_151BEE94(struct127 *arg0) {
     if (arg0->unk127 == 0xFF) {
