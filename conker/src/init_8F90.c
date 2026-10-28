@@ -454,7 +454,147 @@ void func_10009B90(struct54 *arg0) {
 //     // return temp_v0;
 // }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_8F90/func_10009CBC.s")
+typedef struct AudioBufferState {
+    struct AudioBufferState *next;
+    struct AudioBufferState *prev;
+    s32 savedValue;
+    s32 *ownerSlot;
+    void *buffer;
+    s8 count;
+    u8 state;
+    u8 field16;
+} AudioBufferState;
+
+typedef struct {
+    u8 initialized;
+    u8 pad1[3];
+    AudioBufferState *active;
+    void *base;
+    AudioBufferState *pending;
+    AudioBufferState *freeAnchor;
+} AudioBankManager;
+
+#define D_800406A0_MGR (*(AudioBankManager *)&D_800406A0)
+
+extern void *allocate_memory(s32, s32, s32, s32);
+extern u32 D_8002AE50;
+extern OSIoMesg D_80041330[];
+
+s32 func_10009CBC(void *arg0, s32 mode) {
+    AudioBufferState *record;
+    AudioBufferState *reuse;
+    s32 size;
+    s32 alignedSize;
+    AudioBufferState *anchor;
+    u32 value;
+    s32 *ownerSlot;
+
+    reuse = 0;
+    value = *(u32 *)arg0;
+    if (value & 1) {
+        if (mode == 0) {
+            size = (value & 0xFF) + 1;
+        } else {
+            size = (value & 0xFF & ~1) << 6;
+        }
+        record = D_800406A0_MGR.base;
+        if (record == 0) {
+            record = D_800406A0_MGR.active;
+            while (record != 0) {
+                if (record->count == 0 && record->field16 == 0 && record->state == 2) {
+                    reuse = record;
+                }
+                record = record->next;
+            }
+            record = reuse;
+            if (reuse != 0) {
+                ownerSlot = reuse->ownerSlot;
+                *ownerSlot = reuse->savedValue;
+                func_100043B4(reuse->buffer, 4);
+                reuse->buffer = 0;
+                reuse->ownerSlot = 0;
+                if (reuse == D_800406A0_MGR.active) {
+                    D_800406A4 = (struct54 *)reuse->next;
+                }
+                {
+                    AudioBufferState *element = reuse;
+
+                    if (element->next != 0) {
+                        element->next->prev = element->prev;
+                    }
+                    if (element->prev != 0) {
+                        element->prev->next = element->next;
+                    }
+                }
+            }
+        } else {
+            D_800406A0_MGR.base = record->next;
+            {
+                AudioBufferState *element = record;
+
+                if (element->next != 0) {
+                    element->next->prev = element->prev;
+                }
+                if (element->prev != 0) {
+                    element->prev->next = element->next;
+                }
+            }
+        }
+        if (record != 0) {
+            record->next = 0;
+            record->prev = 0;
+            if (D_800406A0_MGR.pending != 0) {
+                AudioBufferState *linkNode = record;
+                AudioBufferState *linkAfter = D_800406A0_MGR.pending;
+
+                linkNode->next = linkAfter->next;
+                linkNode->prev = linkAfter;
+                if (linkAfter->next != 0) {
+                    linkAfter->next->prev = linkNode;
+                }
+                linkAfter->next = linkNode;
+            } else {
+                D_800406A0_MGR.pending = record;
+                record->next = 0;
+                record->prev = 0;
+            }
+            record->savedValue = value;
+            record->count = 0;
+            record->field16 = mode;
+            record->ownerSlot = arg0;
+            record->state = 0;
+            if (D_8002AE50 < 0x28U) {
+                alignedSize = (size + 0xF) & ~0xF;
+                record->buffer = (void *)allocate_memory(alignedSize, 0xFF, 2, 0);
+                bzero(record->buffer, alignedSize);
+            } else {
+                record->buffer = 0;
+            }
+            if (record->buffer != 0) {
+                osWritebackDCache(record->buffer, alignedSize);
+                osInvalDCache(record->buffer, alignedSize);
+                osPiStartDma(&D_80041330[D_8002AE50++], 1, 0,
+                             (value >> 5) & ~7U, record->buffer, alignedSize,
+                             (OSMesgQueue *)&D_800416F0);
+                *(u32 *)arg0 = (u32)record;
+            }
+        }
+        return 0;
+    }
+    *(u32 *)arg0 = value;
+    record = (AudioBufferState *)value;
+    if (record->state != 0) {
+        if (mode == 1) {
+            if (record->state == 1) {
+                record->state = 2;
+            } else {
+                record->count++;
+            }
+        }
+        return (s32)record->buffer;
+    }
+    return 0;
+}
 
 s32 func_10009FFC(void) {
     if (D_800406A0.unk0 == 0) {
