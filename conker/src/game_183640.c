@@ -228,9 +228,158 @@ typedef struct {
 } Struct151563B8;
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_183640/func_15156190.s")
+/* prior best attempt (old score 15); may be a good start */
+struct Obj15156190Vec {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8;
+};
 
-extern void func_15156190(void *arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4);
+struct Obj15156190Vec4 {
+    struct Obj15156190Vec unk0;
+    s32 padC;
+};
+
+struct Obj15156190Src {
+    struct Obj15156190Vec unk0;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    u8 unk20;
+    u8 unk21;
+    u8 unk22;
+    u8 unk23;
+    u8 unk24;
+    u8 unk25;
+    u8 unk26;
+    u8 unk27;
+    u8 unk28;
+    u8 pad29;
+    s16 unk2A;
+    u16 unk2C;
+    u8 pad2E[2];
+    f32 unk30;
+    u8 unk34;
+    u8 pad35;
+    s16 unk36;
+    s16 unk38;
+};
+
+struct Obj15156190Ret {
+    u8 pad0[0x10];
+    struct Obj15156190Vec unk10;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    struct Obj15156190Vec unk28;
+    f32 unk34;
+    f32 unk38;
+    f32 unk3C;
+    u8 unk40;
+    u8 pad41;
+    s16 unk42;
+    u16 unk44;
+    u8 pad46[2];
+    f32 unk48;
+    u8 unk4C;
+    u8 pad4D;
+    s16 unk4E;
+    s16 unk50;
+    u8 pad52[0xC];
+    s16 unk5E;
+    s16 unk60;
+    s16 unk62;
+    u8 unk64;
+    u8 unk65;
+    u8 unk66;
+    u8 unk67;
+    u8 pad68[6];
+    s16 unk6E;
+    u8 pad70[4];
+    u8 unk74;
+    u8 unk75;
+    u8 unk76;
+    u8 unk77;
+    u8 pad78[6];
+    s16 unk7E;
+    u8 pad80[4];
+    u8 unk84;
+    u8 unk85;
+    u8 unk86;
+    u8 unk87;
+    u8 unk88[0x10];
+};
+
+void *func_15156190(struct Obj15156190Src *arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4)
+{
+  struct Obj15156190Ret *temp_v0;
+  struct Obj15156190Ret *sp44;
+  s32 id;
+  struct Obj15156190Vec sp30;
+  switch (arg1)
+  {
+    case 0:
+      id = 0x2C;
+      break;
+
+    case 1:
+      id = 0x53;
+      break;
+
+    default:
+      id = 0x2C;
+      break;
+
+  }
+
+  temp_v0 = (struct Obj15156190Ret *) func_15167A68(id, arg4, arg2 + 0x98, 1, (u8) arg3, 1);
+  if (temp_v0 == 0)
+  {
+    return 0;
+  }
+  sp44 = temp_v0;
+  sp44->unk5E = 0;
+  sp44->unk64 = arg0->unk24;
+  sp44->unk65 = arg0->unk25;
+  sp44->unk66 = arg0->unk26;
+  sp44->unk67 = arg0->unk27;
+  sp44->unk60 = 0;
+  sp44->unk62 = 0;
+  sp44->unk6E = 0;
+  sp44->unk74 = arg0->unk20;
+  sp44->unk75 = arg0->unk21;
+ do { } while (0);
+  sp44->unk76 = arg0->unk22;
+  sp44->unk77 = arg0->unk23;
+  sp44->unk7E = 0;
+  sp44->unk84 = arg0->unk20;
+  sp44->unk85 = arg0->unk21;
+  sp44->unk86 = arg0->unk22;
+  sp44->unk87 = arg0->unk23;
+  sp30 = arg0->unk0;
+  sp44->unk28 = sp30;
+  sp44->unk10 = sp30;
+  sp44->unk1C = arg0->unkC * arg0->unk18;
+  sp44->unk20 = arg0->unk10 * arg0->unk18;
+  sp44->unk24 = arg0->unk14 * arg0->unk18;
+  sp44->unk34 = arg0->unkC * arg0->unk1C;
+  sp44->unk38 = arg0->unk10 * arg0->unk1C;
+  sp44->unk3C = arg0->unk14 * arg0->unk1C;
+  sp44->unk40 = arg0->unk28;
+  sp44->unk42 = arg0->unk2A;
+  sp44->unk44 = arg0->unk2C;
+  sp44->unk48 = arg0->unk30;
+  sp44->unk4C = arg0->unk34;
+  sp44->unk4E = arg0->unk36;
+  sp44->unk50 = arg0->unk38;
+  bzero(sp44->unk88, 0x10);
+  return sp44;
+}
+
+
+extern void *func_15156190(struct Obj15156190Src *arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4);
 
 void func_15156388(void *arg0, u8 arg1, s32 arg2) {
     func_15156190(arg0, arg1, arg2, 0xFF, 0);
