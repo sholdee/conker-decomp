@@ -470,7 +470,153 @@ void func_150B031C(void *arg0) {
     func_1513259C(arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_DC6B0/func_150B0348.s")
+typedef struct {
+    s16 unk0;
+    s16 unk2;
+    u8 unk4;
+    u8 pad5;
+    u16 unk6;
+    s32 unk8;
+    s32 unkC;
+    s16 unk10;
+    s16 unk12;
+    s32 unk14;
+    s32 unk18;
+    u8 unk1C;
+    u8 unk1D;
+    u8 unk1E;
+    u8 unk1F;
+    u8 unk20;
+    u8 unk21;
+    u8 unk22;
+    u8 unk23;
+    u8 unk24;
+    u8 unk25;
+    s16 unk26;
+    s16 unk28;
+    s16 unk2A;
+    f32 unk2C;
+    f32 unk30;
+    f32 unk34;
+    struct17 unk38;
+    s16 unk44;
+    s16 unk46;
+    s16 unk48;
+    s16 unk4A;
+    f32 unk4C;
+    f32 unk50;
+    f32 unk54;
+    f32 unk58;
+    s32 unk5C;
+    s8 unk60;
+    s8 unk61;
+    u8 unk62;
+    u8 unk63;
+    u8 unk64;
+    u8 pad65[3];
+    f32 unk68;
+} Arg15153634;
+
+typedef struct {
+    s32 unk00;
+    s32 unk04;
+    struct17 unk08;
+    s16 unk14;
+    s16 unk16;
+    s16 unk18;
+    s16 unk1A;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+    s16 unk2C;
+    s16 unk2E;
+    f32 unk30;
+    f32 unk34;
+    f32 unk38;
+} Arg15152190;
+
+extern void func_15153634(Arg15153634 *, s32, u8, s32);
+extern void func_15152190(Arg15152190 *, const s32 *, const f32 *, s32, f32, s32, u8, s32);
+
+extern const s32 D_8009F790[5];
+extern const f32 D_8009F7A4[5];
+
+void func_150B0348(u8 *arg0, u8 arg1, s32 arg2) {
+    struct17 pos;
+
+    pos.unk0 = *(f32 *)(arg0 + 0x14);
+    pos.unk4 = *(f32 *)(arg0 + 0x18) + 30.0f;
+    pos.unk8 = *(f32 *)(arg0 + 0x1C);
+    {
+    Arg15153634 a;
+
+    a.unk0 = 0xA;
+    a.unk2 = 7;
+    a.unk4 = 0x6C;
+    a.unk6 = 0x5103;
+    a.unk8 = 0x200005;
+    a.unkC = 0;
+    a.unk10 = 0x1E;
+    a.unk12 = 0xF;
+    a.unk14 = 0;
+    a.unk18 = 0;
+    a.unk1F = 0xFF;
+    a.unk1C = 0x7F;
+    a.unk1D = 0x4B;
+    a.unk1E = 6;
+    a.unk20 = 0x80;
+    a.unk21 = 0x53;
+    a.unk22 = 0;
+    a.unk23 = 0x64;
+    a.unk24 = 0x64;
+    a.unk25 = 0xFF;
+    a.unk26 = 0x20;
+    a.unk28 = 7;
+    a.unk2A = 0x20;
+    a.unk2C = 1.025728941f;
+    a.unk30 = 351.0f;
+    a.unk34 = 200.0f;
+    a.unk38 = pos;
+    a.unk44 = 0;
+    a.unk46 = -0x19;
+    a.unk48 = 0xFF;
+    a.unk4A = 0x15;
+    a.unk4C = 5.0f;
+    a.unk50 = 25.0f;
+    a.unk54 = 0.008f;
+    a.unk58 = 0.266f;
+    a.unk5C = 0x40E07;
+    a.unk60 = 0x10;
+    a.unk61 = -1;
+    a.unk62 = 8;
+    a.unk63 = 6;
+    a.unk64 = 1;
+    a.unk68 = 0.938608f;
+    func_15153634(&a, 0xFF, arg1, arg2);
+    }
+    {
+    Arg15152190 b;
+
+    b.unk00 = 0x24;
+    b.unk04 = 0xA;
+    b.unk08 = pos;
+    b.unk14 = 0;
+    b.unk16 = 0xFF;
+    b.unk18 = -0x28;
+    b.unk1A = 0x14;
+    b.unk1C = 11.0f;
+    b.unk20 = 8.0f;
+    b.unk24 = -1.09f;
+    b.unk28 = 0.3710000217f;
+    b.unk2C = 0x22;
+    b.unk2E = 0xF;
+    b.unk30 = 0.302000016f;
+    b.unk34 = 0.3180000186f;
+    b.unk38 = 9.687f;
+    func_15152190(&b, D_8009F790, D_8009F7A4, 5, 65.0f, 0, arg1, arg2);
+    }
+}
 
 extern s32 func_151149AC(u32);
 
