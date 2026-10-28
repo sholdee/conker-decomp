@@ -165,7 +165,39 @@ s32 func_15141564(struct conk141478 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16DC80/func_151415D4.s")
+s32 func_151415D4(void *arg0) {
+    typedef struct {
+        f32 unk0, unk4, unk8, unkC, unk10, unk14, unk18, unk1C, unk20;
+    } Mid;
+    typedef struct {
+        u8 pad[0x158];
+        f32 unk158;
+        u8 pad15C[0x14];
+        Mid unk170;
+    } Local;
+    Local *a = arg0;
+    Mid *m = &a->unk170;
+    f32 d;
+    if (m->unkC < m->unk10) {
+        a->unk158 = m->unk4;
+    } else if (m->unkC < m->unk14) {
+        f32 s;
+        s = (m->unkC - m->unk10) * m->unk20;
+        a->unk158 = m->unk4 + (m->unk8 * s);
+    } else if (m->unkC < m->unk18) {
+        a->unk158 = m->unk0;
+    } else {
+        d = 1.0f - ((m->unkC - m->unk18) * m->unk20);
+        a->unk158 = m->unk4 + (m->unk8 * d);
+
+    }
+    m->unkC = m->unkC + D_800BE9A4;
+
+    while (m->unk1C < m->unkC) {
+        m->unkC = m->unkC - m->unk1C;
+    }
+    return 1;
+}
 
 void func_151416E8(void *arg0, s32 arg1, s32 arg2) {
     Callback_151416E8 *callbacks;
