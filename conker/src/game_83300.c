@@ -1559,7 +1559,18 @@ struct127 *func_1505EFD0(s32 arg0) {
     }
     return NULL;
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505F0AC.s")
+struct127 *func_1505F0AC(s32 arg0) {
+    struct127 *tmp = (struct127 *)&D_800CC2D0;
+    s32 i;
+
+    for (i = 0; i < 25; i++) {
+        if ((tmp->interaction_state != 0) && (arg0 == tmp->id)) {
+            return tmp;
+        }
+        tmp++;
+    }
+    return NULL;
+}
 void func_1505F188(struct127 *argp) {
 #define arg0 ((u32)argp)
     s32 *p;
