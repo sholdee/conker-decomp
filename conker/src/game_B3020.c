@@ -758,7 +758,7 @@ typedef struct Actor15088D58 {
     u8 field124;
 } Actor15088D58;
 
-void func_15088F30(f32 *, f32 *, f32 *, f32 *);
+void func_15088F30();
 f32 func_150497E0(f32 *, s32, f32);
 f32 func_150498A4(f32 *, s32, f32, f32 *);
 f32 func_15144BC8(f32);
@@ -821,7 +821,54 @@ void func_15088D58(Actor15088D58 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_B3020/func_15088F30.s")
+typedef struct {
+    s16 x;
+    s16 y;
+    s16 z;
+    u8 pad6[3];
+    u8 links[5];
+    u8 type;
+    u8 padF;
+} Node15088F30;
+
+typedef struct {
+    f32 t;
+    u8 pad4[0x27];
+    u8 ids[4];
+} Obj15088F30;
+
+void func_15088F30(Obj15088F30 *arg0, f32 *outX, f32 *outY, f32 *outZ) {
+    s32 i;
+    s32 j;
+    u8 id;
+    Node15088F30 *node;
+    Node15088F30 *next;
+    f32 dx;
+    f32 dz;
+
+    for (i = 0; i < 4; i++) {
+        if (arg0->ids[i] != 0xFF) {
+            node = &((Node15088F30 *)D_800D2350)[arg0->ids[i]];
+            next = node;
+            for (j = 0; j < 5; j++) {
+                id = node->links[j];
+                if ((id != 0xFF) && (((Node15088F30 *)D_800D2350)[id].type == 4)) {
+                    next = id + (Node15088F30 *)D_800D2350;
+                    j = 5;
+                }
+            }
+            dx = next->x - node->x;
+            dz = next->z - node->z;
+            outX[i] = node->x + (dx * arg0->t);
+            outY[i] = node->y;
+            outZ[i] = node->z + (dz * arg0->t);
+        } else {
+            outX[i] = i * 64;
+            outY[i] = 0.0f;
+            outZ[i] = 0.0f;
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_B3020/func_1508907C.s")
 
