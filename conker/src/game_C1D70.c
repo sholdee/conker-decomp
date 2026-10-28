@@ -63,7 +63,25 @@ void func_1509499C(struct1509499C_arg0 *arg0, s32 *arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C1D70/func_15094AB8.s")
+void func_15094AB8(Vtx *arg0, s16 (*arg1)[2], s32 arg2, f32 arg3, s32 arg4, s32 arg5) {
+    f32 cx;
+    f32 cy;
+    f32 s;
+    f32 c;
+    s32 i;
+
+    s = sinf(arg3 * 0.01745329238f);
+    c = cosf(arg3 * 0.01745329238f);
+    cx = (arg4 / 2) << 5;
+    cy = (arg5 / 2) << 5;
+    for (i = 0; i < arg2; i++) {
+        arg0[i].v.tc[0] = ((arg1[i][0] - cx) * c) - ((arg1[i][1] - cy) * s) + cx;
+        arg0[i].v.tc[1] = ((arg1[i][0] - cx) * s) + ((arg1[i][1] - cy) * c) + cy;
+    }
+}
+
+void func_15094E98(void) {
+}
 
 extern Mtx D_800D2CA8[];
 void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
