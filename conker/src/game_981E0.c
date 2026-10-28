@@ -2827,7 +2827,21 @@ void func_15074870(void) {
 //         p->unk138 = p->unk138 + (temp >> 24);
 //     }
 // }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1507488C.s")
+void func_1507488C(void) {
+    u8 index;
+    u8 mask;
+    u8 enabled;
+
+    index = D_800D1580 >> 0x10;
+    mask = D_800D1580 >> 8;
+    enabled = D_800D1580 & 1;
+    if (((s32 *)((u8 *)D_800D154C + 0x2E4))[index] & mask) {
+        enabled ^= 1;
+    }
+    if (enabled != 0) {
+        *(u8 *)((u8 *)D_800D154C + 0x138) += (u8)(D_800D1580 >> 0x18);
+    }
+}
 
 void func_150748F4(void) {
     D_800CC3D7 = (s8) D_800D1580;
