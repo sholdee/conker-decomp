@@ -137,7 +137,27 @@ typedef struct Obj1515B994 {
     /* 0x80 */ f32 unk80;
 } Obj1515B994;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_188440/func_1515B994.s")
+s32 func_1515B994(void *arg0) {
+    typedef struct {
+        u8 pad0[0x14];
+        f32 x;
+        u8 pad18[4];
+        f32 z;
+        u8 pad20[0x54];
+        f32 acceleration;
+        f32 velocity;
+        f32 base;
+        f32 scale;
+    } Motion;
+    Motion *motion = arg0;
+    f32 previous;
+
+    previous = motion->velocity;
+    motion->x += previous * D_800BE9A4 + 0.5f * motion->acceleration * D_800BE9A4;
+    motion->velocity = motion->velocity + motion->acceleration * D_800BE9A4;
+    motion->z = motion->base + motion->scale * (motion->velocity + previous) * 0.5f;
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_188440/func_1515BA10.s")
 
