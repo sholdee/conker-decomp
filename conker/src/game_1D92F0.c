@@ -612,7 +612,28 @@ void func_151AE890(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1D92F0/func_151AE984.s")
+void func_151AE984(f32 *arg0, f32 arg1, f32 arg2, f32 arg3, s32 arg4,
+                   u8 arg5) {
+    f32 scale;
+    f32 sp58[3];
+    f32 shade;
+    u32 sp50;
+    u32 sp4C;
+    f32 sp48;
+
+    scale = 0.10300001f;
+    sp58[0] = -arg1 * scale;
+    sp58[1] = -arg2 * scale;
+    sp58[2] = -arg3 * scale;
+    sp48 = func_150ADA68();
+    sp4C = func_150ADA20();
+    sp50 = func_150ADA20();
+    shade = (func_150ADA68() * 219.0f) + 77.0f;
+    func_151D9014(arg0, sp58, 0, (sp48 * 0.60200006f) + -1.0450001f,
+                  (sp4C % 31U) + 0x3C, (sp50 % 101U) + 0x9B,
+                  shade, (u8)arg4,
+                  1.0f, 1.0f, 0, 0, 1, 0, (u8)arg5, 1);
+}
 
 u8 func_150ADA20(void);
 f32 func_150ADA68(void);
