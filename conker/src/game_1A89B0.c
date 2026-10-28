@@ -57,7 +57,58 @@ s32 func_1517B7A8(s16 *a0, s16 *a1, s32 *a2, s32 a3) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1A89B0/func_1517B7F8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1A89B0/func_1517B89C.s")
+typedef struct {
+    s16 unk0;
+    s16 unk2;
+    s16 unk4;
+    u8 pad6[2];
+    u8 unk8;
+    u8 pad9[4];
+    s8 unkD;
+} Game1A89B0Position;
+
+extern s32 D_8008CEB4;
+extern Game1A89B0Position *D_800DDD18;
+
+void func_1517B89C(s32 first, s32 last) {
+    s32 left;
+    s32 right;
+    s32 pivot;
+
+    left = first;
+    if (first < last) {
+        right = last;
+        while (1) {
+            if (D_8008CEB4 == 0) {
+                pivot = D_800DDD18[last].unk0;
+                while (D_800DDD18[left].unk0 < pivot && left < last) left++;
+                while (pivot < D_800DDD18[right].unk0 && first < right) right--;
+            } else {
+                pivot = D_800DDD18[last].unk4;
+                while (D_800DDD18[left].unk4 < pivot && left < last) left++;
+                while (pivot < D_800DDD18[right].unk4 && first < right) right--;
+            }
+            if (left < right) {
+                {
+                    Game1A89B0Position swap = D_800DDD18[left];
+                    D_800DDD18[left] = D_800DDD18[right];
+                    D_800DDD18[right] = swap;
+                }
+                left++;
+                right--;
+            } else {
+                break;
+            }
+        }
+        {
+            Game1A89B0Position pivotSwap = D_800DDD18[left];
+            D_800DDD18[left] = D_800DDD18[last];
+            D_800DDD18[last] = pivotSwap;
+            func_1517B89C(first, left - 1);
+            func_1517B89C(left + 1, last);
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1A89B0/func_1517BBAC.s")
 
