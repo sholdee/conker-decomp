@@ -80,9 +80,15 @@ void func_150E3340(f32 *arg0, s32 *arg1, s32 arg2, s16 arg3) {
     func_150E3020(temp_a0, temp_a1, temp_a2, temp_a0, temp_a1, temp_a2, 0x1A, 10.0f, 0, arg0[0], arg0[1], arg0[2], arg2, arg3);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1104D0/func_150E33CC.s")
+void func_1000E7A0(s32, s32);
 
-extern void func_150E33CC(void);
+s32 func_150E33CC(s32 arg0, s32 arg1, void **arg2, s32 arg3) {
+    if (*arg2 == NULL) {
+        return 1;
+    }
+    func_1000E7A0(2, (s32)*arg2);
+    return 0;
+}
 
 s32 func_150E3414(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, f32 arg8) {
     Game1104D0EffectInstance *temp;
