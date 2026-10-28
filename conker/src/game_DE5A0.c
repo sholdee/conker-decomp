@@ -47,6 +47,49 @@ void func_150B10F0(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_DE5A0/func_150B1484.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_DE5A0/func_150B17DC.s")
+extern f32 D_8009F8C4;
+extern f32 D_8009F8C8;
+
+struct127 *func_1505EEB0(s32 state, s32 *arg1);
+void func_15056B08(struct127 *arg0);
+void func_1505A770(struct127 *arg0);
+
+void func_150B17DC(struct127 *arg0) {
+    s32 sp3C;
+    f32 angle;
+    f32 sp34;
+    f32 sp30;
+    f32 sp2C;
+    struct127 *other;
+
+    other = func_1505EEB0(0xA, &sp3C);
+    func_15056B08(arg0);
+    if (arg0->unk1E5 == 2) {
+        arg0->x_position = other->x_position;
+        arg0->z_position = other->z_position;
+        arg0->y_position = other->y_position + ((f32)(arg0->unk21C / 5) + 160.0f);
+        arg0->y_velocity = 0.0f;
+        arg0->gravity = D_8009F8C4;
+        arg0->unk7E = 0;
+    } else {
+        angle = (f32)(u32)arg0->unk7E;
+        angle *= D_8009F8C8;
+        other->unkB8 = func_150AD78C(angle) * 6.0f;
+        func_1505A770(arg0);
+        other->y_position = arg0->y_position - 170.0f;
+        other->unk13C = D_800C3E78 + 100;
+        func_1505A184(other->unk7A, other->unkB8 * -7.0f, 0.0f, &sp34, &sp30, &sp2C);
+        other->x_position = arg0->x_position + sp34;
+        other->z_position = arg0->z_position + sp30;
+        other->unk7A = other->unk7A + (D_800BE9A0 << 8);
+        arg0->unk7E = arg0->unk7E + D_800BE9A0;
+        other->in_water = 0;
+        other->xz_velocity = 0.0f;
+        other->unk16C = 0.0f;
+        other->unk170 = 0.0f;
+    }
+    arg0->unk7A = func_1505A630(D_800CC2D0[0].x_position - arg0->x_position, arg0->z_position - D_800CC2D0[0].z_position, 0);
+    arg0->unk40 = (s16)(arg0->unk7A + 0x4000) * 0.0054931640625f;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_DE5A0/func_150B19E0.s")
