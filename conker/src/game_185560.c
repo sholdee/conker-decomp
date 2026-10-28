@@ -638,8 +638,6 @@ u8 func_1515942C(struct102 *arg0, s16 arg1, s16 arg2, s16 arg3, s16 arg4, s16 ar
 
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_185560/func_15159594.s")
-
 typedef struct {
     f32 unk0;
     u8 unk4;
@@ -676,6 +674,45 @@ typedef struct {
     u8 pad6C[0x3C];
     Sub151596BC sub;
 } Struct151596BC;
+
+s32 func_151596BC(Struct151596BC *arg0, s32 arg1);
+u8 func_151D8E20(void);
+s32 func_15046C00(f32 *, u16, f32, u8 *);
+s32 func_1514672C(f32 *);
+extern f32 D_800A63A4;
+
+u8 func_15159594(u8 *arg0, s32 arg1) {
+    u8 result;
+    s32 found;
+
+    result = 1;
+    if (func_151596BC((Struct151596BC *)arg0, arg1) != 0) {
+        if (*(f32 *)(arg0 + 0x5C) > 0.0f) {
+            f32 position[3];
+
+            position[0] = *(f32 *)(arg0 + 0x4C) + *(f32 *)(arg0 + 0x40);
+            position[1] = *(f32 *)((u8 *)arg1 + 4);
+            position[2] = *(f32 *)(arg0 + 0x54) + *(f32 *)(arg0 + 0x48);
+            if (func_1514672C(position) == 0) {
+                return 0;
+            }
+            found = func_15046C00(position, 0, *(f32 *)(arg0 + 0x44), arg0 + 0x80);
+            if (found != 0) {
+                position[1] = *(f32 *)(arg0 + 0x80);
+                if (*(u8 *)(arg0 + 0x9D) == 3) {
+                    func_151DBCBC(func_151D8E20(), *(f32 *)(arg0 + 0xA8) * D_800A63A4,
+                                  0xFF, (s32)(arg0 + 0x84), position,
+                                  *(u8 *)(arg0 + 0xC), *(u8 *)(arg0 + 1));
+                }
+                result = 0;
+            }
+        }
+    } else {
+        result = 0;
+    }
+    return result;
+}
+
 
 s32 func_151596BC(Struct151596BC *arg0, s32 arg1) {
     Sub151596BC *sub;
