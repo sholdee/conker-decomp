@@ -585,7 +585,78 @@ s32 func_1000C350(s32 arg0, u8 arg1, f32 arg2, f32 arg3, f32 arg4)
 
 void func_1000E40C(s32 arg0, s32 arg1);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000C530.s")
+s32 func_1000C530(s32 arg0, u8 arg1, f32 arg2, f32 arg3, f32 arg4) {
+    s32 oldMode;
+    s32 mode;
+    s32 countdown;
+    u32 upper;
+    s32 oldLow;
+    u32 fade;
+    s32 low;
+    s32 high;
+    s32 oldHigh;
+
+    upper = (u32)arg0 >> 8;
+    mode = oldMode = arg0 & 3;
+    countdown = ((u32)arg0 >> 2) & 0x3F;
+    oldLow = upper & 0xFF;
+    oldHigh = ((u32)arg0 >> 16) & 0xFF;
+    fade = arg0 & 0xFF000000;
+    low = oldLow; high = oldHigh;
+    if (D_80041F08 != 0 &&
+        (oldMode != 2 || countdown == 0 || D_80041F08 == 2)) {
+        mode = D_80041F08;
+        low = D_80041F0C & 0xFF;
+        high = D_80041F0C >> 8;
+        countdown = 0x1E;
+    }
+    if (countdown != 0) {
+        countdown -= D_800BE9E4;
+        if (countdown <= 0) {
+            countdown = 0;
+            mode = 0;
+        }
+    }
+    if (mode != oldMode) {
+        if (oldMode != 0) {
+            func_100085F8(((u8 *)&arg1)[0], oldMode + 9);
+        }
+        if (mode != 0) {
+            func_10008824(((u8 *)&arg1)[0], (u8)(mode + 9), (u8)low);
+            func_100086FC(((u8 *)&arg1)[0], (u8)(mode + 9), (u8)(high >> 7));
+            func_10008744(((u8 *)&arg1)[0], (u8)(mode + 9), high & 0x7F);
+        }
+    } else if (oldMode != 0 && D_80041F08 != 0 && upper != D_80041F0C) {
+        if (low != oldLow) {
+            func_10008824(((u8 *)&arg1)[0], (u8)(oldMode + 9), (u8)low);
+        }
+        if (high != oldHigh) {
+            if ((high ^ oldHigh) & 0x80) {
+                func_100086FC(((u8 *)&arg1)[0], (u8)(mode + 9), (u8)(high >> 7));
+            }
+            func_10008744(((u8 *)&arg1)[0], (u8)(mode + 9), high & 0x7F);
+        }
+    }
+    if (D_80041F04 & 0x10) {
+        D_80041F04 &= ~0x10;
+        if (fade == 0) {
+            func_1000886C(((u8 *)&arg1)[0], 0xC0, 0x80);
+        }
+        fade = 0xFF000000;
+    }
+    if (fade != 0) {
+        upper = ((u32)D_800BE9E4 << 23) & 0xFF000000;
+        if (upper < fade) {
+            fade -= upper;
+        } else {
+            func_10008790(((u8 *)&arg1)[0], 0xC0, 0, 0x5A);
+            fade = 0;
+        }
+    }
+    D_80041F08 = 0;
+    return (countdown * 4) | mode | (low << 8) | (high << 16) | fade;
+}
+
 #pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000C7E8.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000C934.s")
