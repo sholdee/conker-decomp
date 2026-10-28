@@ -782,7 +782,55 @@ s32 func_150337E4(void *arg0, s32 arg1) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_5D2C0/func_15033838.s")
+void func_151026BC(void *, s32, s32, s32, s32, s32);
+void func_151027E8(void *);
+
+s32 func_15033838(u8 *arg0, u8 *arg1) {
+    s32 var_a2;
+    s32 var_v1;
+    u8 *temp_v0_3;
+
+    var_v1 = 0;
+    if (arg0[6] == 0x16) {
+        var_a2 = 4;
+        if (*(u16 *)(arg1 + 0x84) == 0x165) {
+            var_v1 = 1;
+        }
+    } else if (arg0[6] == 0x89) {
+        var_a2 = 6;
+        switch (*(u16 *)(arg1 + 0x84)) {
+        case 0x221:
+        case 0x223:
+        case 0x31B:
+            if ((*(u8 **)(arg1 + 0x31C))[0x198] == 2) {
+                var_v1 = 1;
+            }
+            break;
+        }
+    } else {
+        var_a2 = 5;
+        if (*(u16 *)(arg1 + 0x84) == 0x157) {
+            var_v1 = 1;
+        }
+    }
+    if (*(s32 *)(arg0 + 0x38) == 0) {
+        if (var_v1 != 0) {
+            temp_v0_3 = *(u8 **)(arg1 + 0x31C);
+            if ((temp_v0_3[0x197] != 0) || (var_a2 == 6)) {
+                if ((*(u16 *)(temp_v0_3 + 0x8A) & 0x2000) == 0x2000) {
+                    if (*(u16 *)(temp_v0_3 + 0x19E) == 0) {
+                        *(s32 *)(arg0 + 0x38) = 1;
+                        func_151026BC(arg1, -1, var_a2, 1, 0xFF, 1);
+                    }
+                }
+            }
+        }
+    } else if ((var_v1 == 0) || (temp_v0_3 = *(u8 **)(arg1 + 0x31C), ((*(u16 *)(temp_v0_3 + 0x8A) & 0x2000) == 0)) || ((temp_v0_3[0x197] == 0) && (var_a2 != 6))) {
+        *(s32 *)(arg0 + 0x38) = 0;
+        func_151027E8(arg1);
+    }
+    return 0;
+}
 
 s32 func_150339C8(Game5D2C0EffectState *arg0, Game5D2C0PositionState *arg1) {
     func_150334B8(arg0, arg1);
