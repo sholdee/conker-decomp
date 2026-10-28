@@ -306,7 +306,96 @@ s32 func_1504530C(s32 arg0, s32 arg1, s32 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_71820/func_15045384.s")
+void func_1510F800(s32);
+typedef struct Vec3f_15045D48 {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3f_15045D48;
+
+typedef struct Game71820Hit {
+    f32 height;
+    s16 points[9];
+    s32 object;
+    u8 flags;
+    u8 active;
+    u8 pad1E[2];
+    s32 field20;
+} Game71820Hit;
+
+typedef struct Game71820Candidate {
+    s32 height;
+    s32 *sources;
+    s32 index;
+    s32 padC;
+} Game71820Candidate;
+
+s32 func_150A4FA0(s32, s32);
+extern f32 D_80098D48;
+extern Game71820Candidate D_800D3300[];
+
+s32 func_15045384(Vec3f_15045D48 *arg0, f32 arg1, Game71820Hit *arg2) {
+    s32 count;
+    s32 best;
+    s32 scan_index;
+    f32 height;
+
+    if (arg1 < arg0->y) {
+        arg2->flags &= ~2;
+        return 0;
+    }
+    arg2->height = D_80098D48;
+    best = -1;
+    func_1510F800(3);
+    count = func_150A4FA0((s32)arg0->x, (s32)arg0->z);
+    scan_index = 0;
+    if (count > 0) {
+        Game71820Candidate *scan = D_800D3300;
+
+        do {
+            height = (f32)scan->height * 0.00390625f;
+            if ((arg0->y <= height) && (height < arg2->height)) {
+                best = scan_index;
+                arg2->height = height;
+            }
+            scan_index++;
+            scan++;
+        } while (scan_index < count);
+    }
+    if (best != -1) {
+        Game71820Candidate *candidate;
+        s32 *source;
+        u32 copy_index;
+        u8 *output;
+        s32 offset;
+        s32 flags;
+        s32 updated_flags;
+        s32 active;
+
+        candidate = &D_800D3300[best];
+        source = candidate->sources;
+        offset = candidate->index;
+        copy_index = 0;
+        output = (u8 *)arg2;
+        for (; copy_index != 3; copy_index++, output += 6) {
+            s16 *point = (s16 *)(source[copy_index] + offset);
+            *(s16 *)(output + 4) = point[0];
+            *(s16 *)(output + 6) = point[1];
+            *(s16 *)(output + 8) = point[2];
+        }
+        arg2->object = 0;
+        arg2->flags |= 6;
+        arg2->active = 4;
+        arg2->field20 = 0;
+        if (arg2->height <= arg1) {
+            arg2->flags |= 2;
+            return 1;
+        }
+        return 0;
+    }
+    arg2->flags &= ~2;
+    return 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_71820/func_1504554C.s")
 
@@ -387,29 +476,6 @@ s32 func_15045800(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_71820/func_15045880.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_71820/func_15045AE4.s")
-
-typedef struct Vec3f_15045D48 {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f_15045D48;
-
-typedef struct Game71820Hit {
-    f32 height;
-    s16 points[9];
-    s32 object;
-    u8 flags;
-    u8 active;
-    u8 pad1E[2];
-    s32 field20;
-} Game71820Hit;
-
-typedef struct Game71820Candidate {
-    s32 height;
-    s32 *sources;
-    s32 index;
-    s32 padC;
-} Game71820Candidate;
 
 typedef struct Game71820Surface {
     u8 pad0[0x40];
