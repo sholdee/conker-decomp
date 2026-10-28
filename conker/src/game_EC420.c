@@ -160,7 +160,150 @@ s32 func_150BF0F4(Struct150BF0F4 *arg0) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_EC420/func_150BF21C.s")
+extern u8 D_800C35E8;
+extern f32 sinf(f32);
+
+typedef struct {
+    /* 0x000 */ f32 x;
+    /* 0x004 */ f32 y;
+    /* 0x008 */ f32 z;
+    /* 0x00C */ u8 padC[0x4];
+    /* 0x010 */ s16 rx;
+    /* 0x012 */ s16 ry;
+    /* 0x014 */ s16 rz;
+    /* 0x016 */ u16 count;
+    /* 0x018 */ u8 pad18[0x8];
+    /* 0x020 */ s16 *dst[2];
+    /* 0x028 */ s16 *src;
+    /* 0x02C */ f32 sx;
+    /* 0x030 */ f32 sy;
+    /* 0x034 */ f32 sz;
+    /* 0x038 */ u8 pad38[0x4];
+    /* 0x03C */ s32 unk3C;
+    /* 0x040 */ u8 pad40[0x33];
+    /* 0x073 */ u8 unk73;
+    /* 0x074 */ u16 unk74;
+    /* 0x076 */ u8 pad76[0x6];
+    /* 0x07C */ f32 unk7C;
+    /* 0x080 */ f32 unk80;
+    /* 0x084 */ f32 unk84;
+    /* 0x088 */ u8 pad88[0x54];
+    /* 0x0DC */ s32 unkDC;
+    /* 0x0E0 */ u8 padE0[0x44];
+    /* 0x124 */ f32 unk124;
+} Struct150BF21C;
+
+extern f32 cosf(f32);
+extern void func_15114D24(Struct150BF21C *, s32, s32, s16, s16, s32);
+extern void func_15114F04(Struct150BF21C *, s32, s32);
+extern void func_150A7DA0(f32 [4][4], f32, f32, f32);
+extern void func_15043F6C(f32 [4][4], f32, f32, f32, f32, f32, f32, f32, f32, f32);
+extern void func_150A7A48(f32 [4][4], f32 [4][4], f32 [4][4]);
+extern void func_150A7960(f32 [4][4], f32, f32, f32, f32 *, f32 *, f32 *);
+
+void func_150BF21C(Struct150BF21C *arg0) {
+    s16 *dst;
+    s16 *src;
+    f32 diff;
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 spd;
+    s32 paused;
+    f32 amp;
+    f32 mtx[4][4];
+    f32 mtx2[4][4];
+    f32 factor;
+    s32 i;
+    f32 amp3;
+
+    y = arg0->unk7C;
+    amp = 0.0f;
+    factor = 0.05f;
+    if (D_800C35EA == 0) {
+        paused = 0;
+    } else if (D_800C35E8 == 1) {
+        paused = 0;
+    } else {
+        paused = 1;
+    }
+    if (D_800BE9B4 != 0) {
+        y = arg0->unk3C;
+        arg0->unk7C = y;
+    }
+    if (!paused) {
+        diff = arg0->unk3C - y;
+        if (diff == 0.0f) {
+            arg0->unk84 = 0.0f;
+            arg0->unk80 += 0.05f;
+            amp = ((y / 1500.0f) + 1.0f) * D_800BE9A4;
+            if (amp < 0.0f) {
+                amp = 0.0f;
+            }
+            func_15114D24(arg0, -1, 0x7D00, 0x1F4, 0x7D0, 0);
+        } else {
+            factor = 0.2f;
+            arg0->unk80 = 0.0f;
+            spd = arg0->unk84;
+            if (diff < 0.0f) {
+                if (-60.0f < spd) {
+                    spd -= 5.0f;
+                }
+            } else {
+                if (spd < 6.0f) {
+                    spd += 0.5f;
+                }
+                func_15114D24(arg0, 0xB9, 0x7D00, 0x1F4, 0x7D0, 1);
+            }
+            arg0->unk84 = spd;
+            if (fabsf(spd) < fabsf(diff)) {
+                y += spd * D_800BE9A4;
+                if (spd < -25.0f) {
+                    arg0->unk124 = -10.0f;
+                } else {
+                    arg0->unk124 = spd * 0.4000000060f;
+                }
+                arg0->unkDC = 0x7D00;
+                arg0->unk73 &= ~3;
+                arg0->unk73 |= 2;
+                if (arg0->unk74 == 0) {
+                    func_15114D24(arg0, 0xB9, 0x3E80, 0x3E8, 0xFA0, 0);
+                }
+                func_15114F04(arg0, 0x3E80, spd * 500.0f);
+            } else {
+                y = arg0->unk3C;
+                if (spd < 0.0f) {
+                    arg0->unkDC = 0x80;
+                }
+                arg0->unk73 &= ~3;
+                arg0->unk73 |= 3;
+                arg0->unk124 = 0.0f;
+                func_15114D24(arg0, -1, 0, 0, 0, 0);
+            }
+            arg0->unk7C = y;
+            arg0->unk84 = spd;
+        }
+        amp3 = amp * 3.0f;
+        arg0->x += ((amp3 * sinf(arg0->unk80)) - arg0->x) * factor;
+        arg0->y += (((amp * 4.0f) * sinf(arg0->unk80 * 1.100000024f)) - arg0->y) * factor;
+        arg0->z += ((amp3 * cosf(arg0->unk80)) - arg0->z) * factor;
+    } else {
+        y = 0.0f;
+    }
+    func_150A7DA0(mtx, 0.0f, y, 0.0f);
+    func_15043F6C(mtx2, arg0->x, arg0->y, arg0->z, arg0->sx, arg0->sy, arg0->sz, arg0->rx, arg0->ry, arg0->rz);
+    func_150A7A48(mtx, mtx2, mtx);
+    dst = arg0->dst[D_800BE9C0];
+    src = arg0->src;
+    for (i = 0; i < arg0->count; i++) {
+        func_150A7960(mtx, src[0], src[1], src[2], &x, &y, &z);
+        dst[0] = x;
+        dst[1] = y;
+        dst[2] = z;
+        src += 8;
+        dst += 8;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_EC420/func_150BF760.s")
 
