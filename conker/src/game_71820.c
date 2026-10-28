@@ -353,7 +353,8 @@ void func_15045714(struct conker15045714 *arg0, u16 arg1, s32 *arg2, s32 arg3) {
     *arg2 = func_150A6500((s16)arg0->field_0x00, (s16)arg0->field_0x08, arg3, arg1);
 }
 
-s32 func_15045F8C(struct conker15045714 *arg0, f32 arg1, s32 *arg2, s32 arg3);
+struct Game71820Hit;
+s32 func_15045F8C(struct conker15045714 *arg0, f32 arg1, s32 *arg2, struct Game71820Hit *arg3);
 
 s32 func_15045780(struct conker15045714 *arg0, u16 arg1, f32 arg2, s32 arg3) {
     s32 sp1C;
@@ -364,7 +365,7 @@ s32 func_15045780(struct conker15045714 *arg0, u16 arg1, f32 arg2, s32 arg3) {
         return 0;
     }
     func_15045714(arg0, arg1, &sp1C, (s32)&sp18);
-    return func_15045F8C(arg0, arg2, &sp18, arg3);
+    return func_15045F8C(arg0, arg2, &sp18, (struct Game71820Hit *)arg3);
 }
 
 extern s32 func_15047004(struct conker15045714 *, s32, struct conker150472C0_dst *);
@@ -498,7 +499,76 @@ s32 func_15045D48(Vec3f_15045D48 *arg0, f32 arg1, s32 *arg2, Game71820Hit *arg3)
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_71820/func_15045F8C.s")
+extern f32 D_80098D5C;
+
+s32 func_15045F8C(struct conker15045714 *arg0, f32 arg1, s32 *arg2, Game71820Hit *arg3) {
+    s32 count;
+    s32 best;
+    s32 scan_index;
+    f32 height;
+
+    arg3->height = D_80098D5C;
+    best = -1;
+    func_150A44F0(*(s32 *)arg2, D_800D3830, 0);
+    count = func_150A43E0((s32)arg0->field_0x00, (s32)arg0->field_0x08, *(s32 *)arg2, D_800D3830);
+    scan_index = 0;
+    if (count > 0) {
+        Game71820Candidate *scan = D_800D3300;
+        do {
+            height = (f32)scan->height * 0.00390625f;
+            if ((height <= arg0->field_0x04) && (arg3->height < height)) {
+                best = scan_index;
+                arg3->height = height;
+            }
+            scan_index++;
+            scan++;
+        } while (scan_index < count);
+    }
+    if (best != -1) {
+        Game71820Candidate *candidate;
+        s32 *source;
+        s32 copy_index;
+        s32 *copy_source;
+        s32 surface_index;
+        u8 *output;
+        s32 offset;
+        s32 *materials;
+
+        candidate = &D_800D3300[best];
+        source = candidate->sources;
+        offset = candidate->index;
+        copy_index = 0;
+        output = (u8 *)arg3;
+        copy_source = source;
+        for (; copy_index != 3; copy_index++, copy_source++, output += 6) {
+            s16 *point = (s16 *)(*copy_source + offset);
+            *(s16 *)(output + 4) = point[0];
+            *(s16 *)(output + 6) = point[1];
+            *(s16 *)(output + 8) = point[2];
+        }
+        surface_index = candidate->padC;
+        arg3->field20 = surface_index * 0xA0 + D_800DBEF4;
+        materials = ((Game71820Surface *)arg3->field20)->materials;
+        if (materials != 0) {
+            s32 triangle_index = ((u8 *)source - D_800DBE3C) / 12 - ((Game71820Surface *)arg3->field20)->first_triangle;
+            *(s32 *)((u8 *)arg3 + 0x18) = materials[triangle_index];
+        } else {
+            *(s32 *)((u8 *)arg3 + 0x18) = ((Game71820Surface *)arg3->field20)->default_material;
+        }
+        arg3->flags |= 6;
+        if ((((Game71820Surface *)arg3->field20)->flags & 0x80) == 0x80) {
+            arg3->flags |= 1;
+        }
+        arg3->active = 3;
+        if (arg1 <= arg3->height) {
+            arg3->flags |= 2;
+            return 1;
+        }
+        return 0;
+    }
+    arg3->flags &= ~2;
+    return 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_71820/func_150461D0.s")
 
