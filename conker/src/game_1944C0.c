@@ -86,7 +86,26 @@ extern struct Some15171F04 *D_8008CA4C[];
 
 void func_15169070(s32, s32, s32, u8);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_15167010.s")
+void func_15167010(void) {
+    struct115 *var_s0;
+    struct115 *end;
+    void (*func)(void);
+    s32 pad;
+
+    var_s0 = (struct115 *)&D_8008B4A8;
+    end = (struct115 *)((u32)var_s0 + 0x1484);
+    pad = 0;
+loop:
+    func = (void (*)(void))var_s0->unk18;
+    if (func != 0) {
+        func();
+    }
+    var_s0++;
+    pad ^= 0;
+    if ((u32)var_s0 < (u32)end) {
+        goto loop;
+    }
+}
 // PERMUTER CANDIDATE (best 400): target uses OSR limit `addiu s2,s0,0x1484` (base-relative)
 // + phantom saved reg s1; can't trigger the `<`-preserving strength-reduction form from C.
 // Closest form (loop body byte-identical, only the 3-instruction preamble differs):
