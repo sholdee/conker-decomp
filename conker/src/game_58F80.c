@@ -183,11 +183,192 @@ s32 func_1502C3BC(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502C408.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502C608.s")
+typedef struct {
+    u8 pad0[0x7];
+    u8 unk7;
+    u8 pad8[0x58];
+    s16 unk60;
+    s16 unk62;
+} Actor1502C608;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502C6E8.s")
+extern u8 *D_8008CA4C[];
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502C974.s")
+#define ACTOR_1502C608 ((Actor1502C608 *)&D_800CC2D0[arg0])
+
+void func_1502C608(s32 arg0) {
+    s32 period;
+    s16 pos;
+    s16 speed;
+
+    if (D_800BEAC0 == 0) {
+        pos = ACTOR_1502C608->unk60;
+        speed = ACTOR_1502C608->unk62;
+        if (ACTOR_1502C608->unk7 != 0) {
+            period = D_8008CA4C[func_1502C3BC(arg0)][4] << 8;
+            pos += speed;
+            if (pos >= period) {
+                pos -= period;
+            } else if (pos < 0) {
+                pos += period;
+            }
+            ACTOR_1502C608->unk60 = pos;
+        }
+    }
+}
+#undef ACTOR_1502C608
+
+
+extern f32 D_80096DE0;
+extern f32 D_80096DE4;
+extern s32 func_150849A0(struct127 *);
+extern void func_150837D4(s32, s32, s32);
+
+void func_1502C6E8(s32 arg0, s16 arg1, s32 arg2) {
+    struct108 *cam;
+    struct127 *obj;
+    s32 mode;
+    s32 lod;
+    s32 maxLod;
+    s32 model;
+    f32 dists[4];
+    f32 diff;
+    f32 distSq;
+
+    cam = &D_800DBFF0[arg1];
+    obj = &D_800CC2D0[arg0];
+    if (obj->unk1C9 != 0) {
+        return;
+    }
+    if (obj->unk5 == 7) {
+        return;
+    }
+    dists[0] = 500.0f;
+    dists[1] = D_80096DE0;
+    dists[2] = D_80096DE4;
+    dists[3] = 2000.0f;
+    maxLod = ((u8 *)obj)[0x2C8] - 1;
+    if (maxLod == -1) {
+        return;
+    }
+    mode = func_150849A0(obj);
+    diff = cam->unk2F8 - obj->x_position;
+    distSq = diff * diff;
+    diff = cam->unk2FC - obj->y_position;
+    diff = diff * diff;
+    distSq += diff;
+    diff = cam->unk300 - obj->z_position;
+    diff = diff * diff;
+    distSq += diff;
+    if (distSq < (dists[0] * dists[0])) {
+        lod = 0;
+    } else if (distSq < (dists[1] * dists[1])) {
+        lod = 1;
+    } else if (distSq < (dists[2] * dists[2])) {
+        lod = 2;
+    } else if (distSq < (dists[3] * dists[3])) {
+        lod = 3;
+    } else {
+        lod = 4;
+    }
+    if ((lod >= 2) && (obj->xz_velocity < 3.0f)) {
+        lod--;
+    }
+    if (mode) {
+        if (mode == 0x5A) {
+            if (lod == 0) {
+                lod = 1;
+            }
+        }
+    } else if (D_800BE616 != 0) {
+        lod = 1;
+    }
+    if (D_800C35EA == 1) {
+        lod = 0;
+    }
+    if (maxLod < lod) {
+        lod = maxLod;
+        if (lod < 0) {
+            lod = 0;
+        }
+    }
+    if (lod == -1) {
+        return;
+    }
+    if (lod == ((u8 *)obj)[0x1C8]) {
+        return;
+    }
+    model = (*(u8 **)((u8 *)obj + 0x2C4))[lod];
+    func_150837D4(arg0, model, 0);
+    ((u8 *)obj)[0x1C8] = lod;
+}
+
+extern s32 D_800BE9C8[];
+extern s32 D_800BEBA4;
+extern void *D_800DF7C0;
+extern u8 D_800DF7C4;
+extern void func_150849CC(struct127 *, s32 *);
+extern void func_1502D630(struct127 *, s32 *, s32);
+extern s32 func_1502CCFC(s32, s32, s32, void *, s32, s32 *, s32, s32);
+void func_1502D54C(s32, s32 *);
+
+s32 func_1502C974(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+    s32 lod;
+    s32 alpha;
+    s32 colours[4];
+    s32 cond;
+    void *model;
+    s32 orig;
+    struct127 *obj;
+
+    orig = arg0;
+    if ((D_800C3638 != 0) && (D_800C3656 == 0) && (func_150229E4(&D_800CC2D0[arg1]) == 0)) {
+        return arg0;
+    }
+    obj = &D_800CC2D0[arg1];
+    if ((obj->unk74 & (1 << arg2)) == (1 << arg2)) {
+        return arg0;
+    }
+    if (func_1506196C(obj, arg2) == 0) {
+        return arg0;
+    }
+    if (obj->unk1D4 == NULL) {
+        return arg0;
+    }
+    if ((arg3 != 4) && (arg3 != 5) && (arg3 != 3)) {
+        func_1502C6E8(arg1, arg2, arg3);
+        lod = ((u8 *)obj)[0x1C8];
+    } else {
+        func_150849CC(obj, &lod);
+    }
+    func_1502D54C(arg1, colours);
+    if (*(s16 *)((u8 *)D_800B0DF0 + 0x3E) != 0) {
+        func_1502D630(obj, colours, arg2);
+    } else {
+        colours[3] = 0xFF;
+    }
+    alpha = func_1506196C(obj, arg2);
+    if (alpha < 0xFF) {
+        if ((obj->camera != NULL) && (obj->camera->unk2C == 0x100) && (arg2 != obj->unk127)) {
+            alpha = 0xFF;
+        }
+    }
+    if (arg3 == 4) {
+        alpha = (D_800DF7C4 * alpha) >> 8;
+        model = D_800DF7C0;
+    } else {
+        model = obj->unk1D4;
+    }
+    arg0 = func_1502CCFC(arg0, arg1, arg2, model, alpha, colours, arg3, arg4);
+    if (((arg0 - D_800BE9C8[D_800BE9C0]) >> 3) > D_800BEBA4) {
+        cond = 1;
+    } else {
+        cond = 0;
+    }
+    if (cond) {
+        return orig;
+    }
+    return arg0;
+}
 
 void func_1502CC34(void *arg0, s32 arg1, s32 arg2, void *arg3, s32 *arg4, s32 *arg5, s32 *arg6, s32 *arg7, s32 *arg8, s32 *arg9, s32 *argA, s32 *argB, s32 *argC, s32 *argD) {
     u8 *temp_v0;
@@ -273,7 +454,8 @@ void func_1502E474(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502E4C4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502E9FC.s")
+void func_1502E9FC(s32 arg0, s32 arg1) {
+}
 
 void func_1502EA0C(ActorInteractionFields *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     arg0->field_0xA4 = 4;
@@ -283,7 +465,14 @@ void func_1502EA0C(ActorInteractionFields *arg0, s32 arg1, s32 arg2, s32 arg3, s
     arg0->field_0xA7 = 0xFF;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502EA50.s")
+typedef struct {
+    u8 pad0[0xA4];
+    /* 0xA4 */ u8 unkA4;
+} S1502EA50;
+
+void func_1502EA50(S1502EA50 *arg0) {
+    arg0->unkA4 = 0x5;
+}
 
 void func_1502EA60(u8 *arg0, s32 arg1) {
     arg0[0xA4] = 2;
@@ -314,13 +503,113 @@ void func_1502EA98(ActorInteractionFields *arg0, s32 arg1, s32 arg2, s32 arg3, s
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502EC34.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502EE8C.s")
+/* The two u8 slots at actor record +0x6A (struct127 still calls this word pad68). */
+typedef struct Act1502EE8C {
+    char pad0[0x6A];
+    /* 0x6A */ u8 unk6A[2];
+    char pad6C[0x32C - 0x6C];
+} Act1502EE8C;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502EEF4.s")
+s32 func_1502EE8C(s32 arg0, s32 arg1) {
+    s32 v;
+    s32 r;
+
+    v = ((Act1502EE8C *)D_800CC2D0)[arg0].unk6A[arg1];
+    if (v >= 2) {
+        if (v >= 4) {
+            r = 2;
+        } else {
+            r = v - 2;
+        }
+    } else {
+        r = v;
+    }
+    return r;
+}
+
+
+/* The two u8 counters at actor record +0x6C (struct127 still calls this pad6C). */
+typedef struct Act1502EEF4 {
+    char pad0[0x6C];
+    /* 0x6C */ u8 unk6C[2];
+    char pad6E[0x32C - 0x6E];
+} Act1502EEF4;
+
+extern void func_1507E3C0(struct127 *);
+
+void func_1502EEF4(s32 arg0) {
+    s32 i;
+    u8 r;
+
+    for (i = 0; i < 2; i++) {
+        if (((Act1502EEF4 *)D_800CC2D0)[arg0].unk6C[i] >= 10) {
+            continue;
+        }
+        r = func_1502EE8C(arg0, i);
+        if (r == 0) {
+            if (((Act1502EEF4 *)D_800CC2D0)[arg0].unk6C[i] > 0) {
+                ((Act1502EEF4 *)D_800CC2D0)[arg0].unk6C[i]--;
+            }
+        } else if (r == 1) {
+            if (((Act1502EEF4 *)D_800CC2D0)[arg0].unk6C[i] < 2) {
+                ((Act1502EEF4 *)D_800CC2D0)[arg0].unk6C[i]++;
+            }
+        } else {
+            ((Act1502EEF4 *)D_800CC2D0)[arg0].unk6C[i] = 1;
+        }
+    }
+    func_1507E3C0(&D_800CC2D0[arg0]);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502F01C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502F264.s")
+void func_1502F264(s32 arg0) {
+    struct127 *obj;
+    struct127 *parent;
+    f32 (*bone)[4][4];
+    s32 i;
+
+    obj = &D_800CC2D0[arg0];
+    if (obj->unk65 == 0) {
+        return;
+    }
+    parent = &D_800CC2D0[obj->unk65 - 1];
+    if ((obj->unk101 & 2) == 2) {
+        return;
+    }
+    bone = (f32 (*)[4][4])parent->unk1D4;
+    if (bone == NULL) {
+        obj->x_position = parent->x_position;
+        obj->y_position = parent->y_position;
+        obj->z_position = parent->z_position;
+    } else {
+        bone += obj->unk5C;
+        obj->x_position = (*bone)[3][0];
+        obj->y_position = (*bone)[3][1];
+        obj->z_position = (*bone)[3][2];
+    }
+    obj->unk180 = parent->unk180;
+    obj->y_velocity = -4.0f;
+    if (!(obj->unk101 & 0x20)) {
+        obj->unk76 = parent->unk76;
+        obj->xz_velocity = parent->xz_velocity;
+        obj->unk40 = parent->unk40;
+        obj->unk76 = parent->unk76; /* copied twice in the original */
+        obj->unk7A = parent->unk7A;
+        obj->unk78 = parent->unk78;
+    }
+    if (!(obj->unk101 & 0x40)) {
+        obj->unk7 = parent->unk7;
+        obj->unk8 = parent->unk8;
+        obj->unk9 = parent->unk9;
+        obj->unkA = parent->unkA;
+        obj->unkE.ub[1] = parent->unkE.ub[1];
+        for (i = 0; i <= D_80082FA0; i++) {
+            (&obj->unkB)[i] = (&parent->unkB)[i];
+        }
+    }
+
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502F3C8.s")
 
