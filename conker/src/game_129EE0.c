@@ -28,7 +28,7 @@ typedef struct {
 } ScaleUpdateNode;
 
 extern ScaleUpdateNode *func_1513EDE4(ScaleUpdateState *arg0, s16 arg1);
-extern void func_150FCBC0(s32 arg0);
+extern void func_150FCBC0(u8 arg0);
 extern s32 func_1000EC24();
 extern void func_15164F0C(s32 arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern void func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
@@ -67,7 +67,103 @@ void func_150FCA30(void) {
     func_151D8868(&sp44, 0, 0xFF, 0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_129EE0/func_150FCBC0.s")
+typedef struct {
+    /* 0x00 */ s16 unk00;
+    /* 0x02 */ s16 unk02;
+    /* 0x04 */ s16 unk04;
+    /* 0x06 */ s16 unk06;
+    /* 0x08 */ s32 unk08;
+    /* 0x0C */ s32 unk0C;
+    /* 0x10 */ struct17 unk10;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ s32 unk34;
+    /* 0x38 */ s32 unk38;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ f32 unk40;
+    /* 0x44 */ f32 unk44;
+    /* 0x48 */ f32 unk48;
+    /* 0x4C */ s16 unk4C;
+    /* 0x4E */ s16 unk4E;
+    /* 0x50 */ s16 unk50;
+    /* 0x52 */ s16 unk52;
+    /* 0x54 */ s16 unk54;
+    /* 0x56 */ s16 unk56;
+    /* 0x58 */ s8 unk58;
+} Struct150FCBC0;
+
+
+extern const s16 D_800A1EE0[3][2];
+void *func_151541B8(struct17 *, f32, s32, f32, f32, u8, s32);
+extern void func_15143874(s32, f32, f32 *, f32 *);
+extern void func_1514FCE8(Struct150FCBC0 *, u8, s32);
+
+void func_150FCBC0(u8 arg0) {
+    struct134 *obj;
+    struct17 pos;
+    const s16 *range;
+    Struct150FCBC0 desc;
+    s16 count;
+    u8 angle;
+    u32 r;
+    f32 rnd;
+
+    if (arg0 >= 3) {
+        return;
+    }
+    obj = D_800D9AA0[arg0];
+    if (obj == NULL) {
+        return;
+    }
+    pos.unk0 = obj->unk0;
+    pos.unk4 = (s16)obj->unk2 + (s16)obj->unk8 * 0.5f;
+    pos.unk8 = obj->unk4;
+    rnd = func_150ADA68();
+    func_151541B8(&pos, rnd * 4.0f + 12.0f, 0x40D637C9, (f32)((func_150ADA20() % 0x38U) + 0xC8), 2.6090002f, 0xFF, 1);
+    count = (func_150ADA20() & 1) + 3;
+    if (count > 0) {
+        range = D_800A1EE0[arg0];
+        desc.unk02 = 0x50;
+        desc.unk04 = -0x20;
+        desc.unk06 = 0x2B;
+        desc.unk08 = 1;
+        desc.unk0C = 8;
+        desc.unk1C = 249.0f;
+        desc.unk20 = 451.0f;
+        desc.unk24 = 506.0f;
+        desc.unk28 = 100.0f;
+        desc.unk2C = 1505.0f;
+        desc.unk30 = 1511.0f;
+        desc.unk34 = 3;
+        desc.unk38 = 2;
+        desc.unk3C = 90.0f;
+        desc.unk40 = 0.813f;
+        desc.unk44 = -2.0f;
+        desc.unk48 = 1.085f;
+        desc.unk4C = 12;
+        desc.unk4E = 50;
+        desc.unk50 = 100;
+        desc.unk52 = 100;
+        desc.unk54 = 12;
+        desc.unk56 = 12;
+        desc.unk58 = -1;
+        do {
+            r = func_150ADA20();
+            angle = range[0] + (r % (range[1] + 1));
+            desc.unk00 = angle - 40;
+            func_15143874((s16)angle, (s16)obj->unk6, &desc.unk10.unk0, &desc.unk10.unk8);
+            desc.unk10.unk0 += obj->unk0;
+            desc.unk10.unk8 += obj->unk4;
+            desc.unk10.unk4 = func_150ADA68() * (s16)obj->unk8 + (s16)obj->unk2;
+            func_1514FCE8(&desc, 0xFF, 1);
+            count--;
+        } while (count > 0);
+    }
+}
 
 extern f32 D_800A1F2C;
 extern void func_15165BB0(s32 *arg0, s32 *arg1, s32 arg2, s32 arg3, f32 arg4);
