@@ -1,5 +1,13 @@
 #include <ultra64.h>
+/* include/functions.h declares func_150ADA20 as returning u8.  The golden code for
+ * func_150DFEFC feeds its result straight into `divu` with no zero-extension, which a
+ * u8-returning declaration cannot produce, so the real return type is a word.  Per project
+ * policy the shared header is left alone and the correct prototype is made file-local:
+ * the header's declaration is renamed out of the way while functions.h is included. */
+#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
+#undef func_150ADA20
+s32 func_150ADA20(void);
 #include "variables.h"
 
 
@@ -78,9 +86,127 @@ s32 func_150DF8C0(s32 a0) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_10CD70/func_150DF920.s")
+typedef struct {
+    DisplayListWord0 field_0x0;
+    s32 field_0x4;
+} DisplayListCmd;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_10CD70/func_150DFBD0.s")
+extern u8 D_800D9950[];
+extern void func_150A2864(s32, s32);
+extern void func_150A3444(s32, s16, s16, s16);
+extern void func_151749A0(s32, s32);
+
+void func_150DF920(s32 arg0) {
+    struct127 *obj;
+    s32 i;
+    s32 j;
+    s32 id;
+    s32 slot;
+    f32 x;
+    f32 y;
+    f32 z;
+    s32 active;
+    DisplayListCmd *dl;
+    s32 c;
+    s32 uls;
+    s32 ult;
+
+    if (arg0 != 0) {
+        return;
+    }
+
+    func_151749A0(5, 4);
+
+    id = 6;
+    slot = 3;
+    for (i = 0; i < 2; i++) {
+        obj = func_15083E90((u8)id);
+        id = 7;
+        if (obj != NULL) {
+            func_150A2864(slot, 0);
+            x = obj->x_position;
+            y = obj->y_position + 200.0f;
+            z = obj->z_position;
+            func_150A3444(slot, (s16)x, (s16)y, (s16)z);
+        } else {
+            func_150A2864(slot, 1);
+        }
+        slot = 4;
+    }
+
+    dl = (DisplayListCmd *)D_800B0E00[0];
+
+    for (i = 0; i < 3; i++) {
+        active = func_150DF8C0(i);
+        if (active) {
+            if (D_800D9950[i] < 0x60) {
+                D_800D9950[i] += D_800BE9E4;
+                if (D_800D9950[i] > 0x60) {
+                    D_800D9950[i] = 0x60;
+                }
+            }
+        } else {
+            D_800D9950[i] = 0;
+        }
+
+        j = -1;
+        do {
+            j++;
+            while ((((DisplayListCmd *)((j << 3) + (u8 *)dl))->field_0x0.field_0x0_s8 != -3) &&
+                   (((DisplayListCmd *)((j << 3) + (u8 *)dl))->field_0x0.field_0x0_s8 != -0x21)) {
+                j++;
+            }
+            if (((DisplayListCmd *)((j << 3) + (u8 *)dl))->field_0x0.field_0x0_s8 == -0x21) {
+                j = -1;
+                break;
+            }
+        } while (((DisplayListCmd *)((u8 *)dl + (j * 8)))->field_0x4 != ((i << 24) + 0x02000000));
+
+        if (j != -1) {
+            while ((c = ((DisplayListCmd *)((j << 3) + (u8 *)dl))->field_0x0.field_0x0_s8) != -0xE) {
+                j++;
+            }
+
+            if (j != -1) {
+                if (active) {
+                    uls = ((u32)((DisplayListCmd *)((u8 *)dl + (j * 8)))->field_0x0.field_0x0_s32 >> 12) & 0xFFF;
+                    ult = ((DisplayListCmd *)((u8 *)dl + (j * 8)))->field_0x0.field_0x0_s32 & 0xFFF;
+                    ult += (D_800D9950[i] / 16) * D_800BE9E4;
+                } else {
+                    ult = 2;
+                    uls = 2;
+                }
+                ((DisplayListCmd *)((u8 *)dl + (j * 8)))->field_0x0.field_0x0_s32 =
+                    0xF2000000 | ((uls & 0xFFF) << 12) | (ult & 0xFFF);
+            }
+        }
+    }
+}
+
+extern s32 D_80090324[];
+extern u8 D_800DD405;
+
+Gfx *func_150DFBD0(Gfx *gdl) {
+    s32 i;
+    s32 seg;
+    s32 addr;
+    s32 out;
+    s32 tex;
+    u8 idx;
+
+    for (i = 0; i < 3; i++) {
+        if (func_150DF8C0(i) != 0) {
+            idx = D_800DD405;
+            tex = D_80090324[idx + 9];
+        } else {
+            tex = D_80090324[8];
+        }
+        addr = func_1510D0EC(tex, &out, 3, 0);
+        seg = i + 2;
+        gSPSegment(gdl++, seg, addr);
+    }
+    return gdl;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_10CD70/func_150DFCA8.s")
 
@@ -133,7 +259,78 @@ s32 func_150DFDD0(Game10CD70Object *arg0, Game10CD70FadeState *arg1) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_10CD70/func_150DFEFC.s")
+/* The 12-byte record at +0x28 that func_150E02C0 also hands to func_15149514 as
+ * (arg0 + 0x28, arg0 + 0x2C): an actor handle plus three independent countdowns. */
+typedef struct {
+    /* 0x00 */ struct127 *obj;
+    /* 0x04 */ u8  id;
+    /* 0x05 */ u8  pad5;
+    /* 0x06 */ s16 timer0;
+    /* 0x08 */ s16 timer1;
+    /* 0x0A */ s16 timer2;
+} SmokeSource; /* size 0xC */
+
+typedef struct {
+    /* 0x00 */ u8  pad0;
+    /* 0x01 */ u8  unk1;
+    /* 0x02 */ u8  pad2[0xA];
+    /* 0x0C */ u8  unkC;
+    /* 0x0D */ u8  padD;
+    /* 0x0E */ s16 unkE;
+    /* 0x10 */ u8  pad10[0x18];
+    /* 0x28 */ SmokeSource src;
+} SmokeEmitter;
+
+extern struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
+extern void func_15107700(struct127 *, s16, s16, s16, s32, f32, f32, s16, s16, u8 *, u8, s32);
+extern void func_15107B78(struct127 *, s32, s32, s32, s32);
+
+void func_150DFEFC(SmokeEmitter *arg0) {
+    SmokeSource *src;
+    struct127 *obj;
+    Header header;
+    Header2 header2;
+    s8 count;
+
+    obj = arg0->src.obj;
+    src = &arg0->src;
+    if ((obj->interaction_state == 0) || (obj->unique_id != src->id)) {
+        arg0->unkE = -1;
+        return;
+    }
+    src->timer0 -= D_800BE9E4;
+    if (src->timer0 < 0) {
+        header2.unk0 = (s32)obj->x_position;
+        header2.unk4 = (s32)obj->y_position;
+        header2.unk8 = (s32)obj->z_position;
+        header.unk0 = 3;
+        header.unk1 = -1;
+        header.unk2 = (func_150ADA20() % 0xBU) + 5;
+        header.unk4 = 0;
+        func_151602C0(&header, &header2, (func_150ADA20() % 0x79U) + 0x32, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg0->unkC, arg0->unk1);
+        src->timer0 = (func_150ADA20() % 0x51U) + 0x45;
+    }
+    src->timer1 -= D_800BE9E4;
+    if (src->timer1 < 0) {
+        u8 colour[4];
+
+        count = (func_150ADA20() % 3U) + 2;
+        do {
+            colour[0] = 0xAE;
+            colour[1] = 0xD2;
+            colour[2] = 0xFF;
+            colour[3] = (func_150ADA20() % 0x3DU) + 0x96;
+            func_15107700(obj, (s16)(func_150ADA20() & 0xFF), (s16)((func_150ADA20() % 0x81U) - 0x3F), (s16)((func_150ADA20() % 0x15U) + 0xA), 4, 40.0f, (func_150ADA68() * 20.0f) + 25.0f, 0, 2, colour, arg0->unkC, arg0->unk1);
+            count--;
+        } while (count > 0);
+        src->timer1 = (func_150ADA20() % 0x8DU) + 0x19;
+    }
+    src->timer2 -= D_800BE9E4;
+    if (src->timer2 < 0) {
+        func_15107B78(obj, (s16)(func_150ADA20() & 0xFF), (s16)((func_150ADA20() & 0x7F) - 0x40), arg0->unkC, arg0->unk1);
+        src->timer2 = (func_150ADA20() % 0x1AU) + 0xF;
+    }
+}
 
 void func_150E02C0(s32 arg0, s32 arg1, s32 arg2) {
     func_15149514(arg1, (u8)arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
