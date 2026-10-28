@@ -46,7 +46,106 @@ typedef struct {
 } Struct150C3D5CLocals;
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/func_150C1F60.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/func_150C2290.s")
+typedef struct {
+    /* 0x00 */ f32 unk00;
+    /* 0x04 */ f32 unk04;
+    /* 0x08 */ f32 unk08;
+    /* 0x0C */ f32 unk0C;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ s16 unk24;
+    /* 0x26 */ s16 unk26;
+    /* 0x28 */ s16 unk28;
+    /* 0x2A */ s16 unk2A;
+    /* 0x2C */ s16 unk2C;
+    /* 0x2E */ s16 unk2E;
+    /* 0x30 */ s16 unk30;
+    /* 0x32 */ s16 unk32;
+    /* 0x34 */ s16 unk34;
+    /* 0x36 */ s16 unk36;
+    /* 0x38 */ s8 unk38;
+    /* 0x39 */ s8 unk39;
+    /* 0x3A */ s8 unk3A;
+    /* 0x3C */ s32 unk3C;
+    /* 0x40 */ s32 unk40;
+    /* 0x44 */ s32 unk44;
+    /* 0x48 */ s32 unk48;
+    /* 0x4C */ s32 unk4C;
+    /* 0x50 */ s32 unk50;
+    /* 0x54 */ u8 unk54;
+    /* 0x55 */ u8 unk55;
+    /* 0x56 */ u8 unk56;
+    /* 0x58 */ s32 unk58;
+    /* 0x5C */ s32 unk5C;
+    /* 0x60 */ s32 unk60;
+    /* 0x64 */ s32 unk64;
+    /* 0x68 */ s32 unk68;
+    /* 0x6C */ s32 unk6C;
+    /* 0x70 */ s32 unk70;
+    /* 0x74 */ s32 unk74;
+    /* 0x78 */ s32 unk78;
+    /* 0x7C */ s8 unk7C;
+    /* 0x7D */ s8 unk7D;
+    /* 0x7E */ s16 pad7E;
+    /* 0x80 */ s16 unk80;
+    /* 0x82 */ s16 unk82;
+    /* 0x84 */ s32 pad84;
+} Struct150C2558;
+
+void func_15151A38(Struct150C2558 *, u8, s32);
+
+void func_150C2290(u8 arg0) {
+    Struct150C2558 sp18;
+
+    sp18.unk00 = 8152.0f;
+    sp18.unk04 = 40.0f;
+    sp18.unk08 = 309.0f;
+    sp18.unk1C = 100.0f;
+    sp18.unk20 = 57.5f;
+    sp18.unk0C = 55.59999847f;
+    sp18.unk10 = 39.0f;
+    sp18.unk24 = 2;
+    sp18.unk26 = 3;
+    sp18.unk28 = -0x29;
+    sp18.unk2C = -0x16;
+    sp18.unk2A = 0x15;
+    sp18.unk2E = 0x16;
+    sp18.unk30 = 7;
+    sp18.unk32 = 0;
+    sp18.unk34 = 0x30;
+    sp18.unk36 = 0x15;
+    sp18.unk14 = 0.4600000083f;
+    sp18.unk18 = 1.0f;
+    sp18.unk38 = 0xB;
+    sp18.unk39 = 1;
+    sp18.unk3A = 0x28;
+    sp18.unk3C = 1;
+    sp18.unk40 = 4;
+    sp18.unk44 = 0;
+    sp18.unk48 = 0;
+    sp18.unk4C = 0;
+    sp18.unk50 = 0;
+    sp18.unk54 = 0xFF;
+    sp18.unk55 = 0xFF;
+    sp18.unk56 = 0;
+    sp18.unk58 = 3;
+    sp18.unk5C = 0xFF;
+    sp18.unk60 = 0;
+    sp18.unk64 = 0x220005;
+    sp18.unk68 = 0x1D0600;
+    sp18.unk6C = 1;
+    sp18.unk70 = 0x3B;
+    sp18.unk74 = 0x80;
+    sp18.unk78 = 0x20;
+    sp18.unk7C = 0;
+    sp18.unk7D = 7;
+    sp18.unk80 = 0xC;
+    sp18.unk82 = 0x15;
+    func_15151A38(&sp18, (u8)arg0, 1);
+}
 // TODO: figure out this struct!
 // void func_150C2290(s32 arg0) {
 //     s16 sp9A;
@@ -194,56 +293,6 @@ s32 func_150C251C(void *arg0) {
 }
 extern f32 D_800A0270;
 
-typedef struct {
-    /* 0x00 */ f32 unk00;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ f32 unk08;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ s16 unk24;
-    /* 0x26 */ s16 unk26;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ s16 unk2A;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ s16 unk2E;
-    /* 0x30 */ s16 unk30;
-    /* 0x32 */ s16 unk32;
-    /* 0x34 */ s16 unk34;
-    /* 0x36 */ s16 unk36;
-    /* 0x38 */ s8 unk38;
-    /* 0x39 */ s8 unk39;
-    /* 0x3A */ s8 unk3A;
-    /* 0x3C */ s32 unk3C;
-    /* 0x40 */ s32 unk40;
-    /* 0x44 */ s32 unk44;
-    /* 0x48 */ s32 unk48;
-    /* 0x4C */ s32 unk4C;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ u8 unk54;
-    /* 0x55 */ u8 unk55;
-    /* 0x56 */ u8 unk56;
-    /* 0x58 */ s32 unk58;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ s32 unk60;
-    /* 0x64 */ s32 unk64;
-    /* 0x68 */ s32 unk68;
-    /* 0x6C */ s32 unk6C;
-    /* 0x70 */ s32 unk70;
-    /* 0x74 */ s32 unk74;
-    /* 0x78 */ s32 unk78;
-    /* 0x7C */ s8 unk7C;
-    /* 0x7D */ s8 unk7D;
-    /* 0x7E */ s16 pad7E;
-    /* 0x80 */ s16 unk80;
-    /* 0x82 */ s16 unk82;
-    /* 0x84 */ s32 pad84;
-} Struct150C2558;
-
-void func_15151A38(Struct150C2558 *, u8, s32);
 
 s32 func_150C2558(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
     Struct150C2558 sp18;
