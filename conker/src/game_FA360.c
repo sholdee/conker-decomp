@@ -143,7 +143,83 @@ s32 func_150CCEB0(struct Arg150CCEB0 *arg0, u8 arg1, u8 arg2) {
     return ret;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_FA360/func_150CD17C.s")
+typedef struct Drift150CD17C {
+    f32 vx;
+    f32 vy;
+    f32 vz;
+    f32 gravity;
+    f32 drag;
+    f32 offsetX;
+    f32 offsetY;
+    f32 offsetZ;
+    u8 pad20[4];
+    f32 swayAngle;
+    f32 swaySpeed;
+    f32 swayRadius;
+    f32 phase;
+    f32 phaseSpeed;
+    f32 phaseScale;
+    f32 minVy;
+} Drift150CD17C;
+
+typedef struct Drifter150CD17C {
+    u8 pad0[0x34];
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 offsetX;
+    f32 offsetY;
+    f32 offsetZ;
+    f32 sway[3];
+    u8 pad58[0xB8];
+    Drift150CD17C drift;
+} Drifter150CD17C;
+
+void func_151436B4(f32, f32, f32, f32 *);
+
+s32 func_150CD17C(Drifter150CD17C *arg0) {
+    Drift150CD17C *drift;
+    s32 i;
+    f32 wave;
+    f32 angle;
+    f32 period;
+
+    drift = &arg0->drift;
+    arg0->x += drift->vx * D_800BE9A4;
+    arg0->y += drift->vy * D_800BE9A4 + 0.5f * drift->gravity * D_800BE9A4 * D_800BE9A4;
+    arg0->z += drift->vz * D_800BE9A4;
+    drift->vy += drift->gravity * D_800BE9A4;
+    for (i = D_800BE9E4; i != 0; i--) {
+        drift->vx *= drift->drag;
+        drift->vz *= drift->drag;
+    }
+    if (drift->vy > 0.0f) {
+        for (i = D_800BE9E4; i != 0; i--) {
+            drift->vy *= drift->drag;
+        }
+    }
+    if (drift->vy < drift->minVy) {
+        drift->vy = drift->minVy;
+    }
+    if (drift->vy < 0.0f) {
+        wave = sinf(drift->phase);
+        angle = drift->phaseScale * wave + 1.5707964f;
+        func_151436B4(drift->swayRadius, angle, drift->swayAngle, arg0->sway);
+        period = 6.2831855f;
+        drift->swayAngle += drift->swaySpeed * D_800BE9A4;
+        drift->phase += drift->phaseSpeed * D_800BE9A4;
+        while (drift->phase > period) {
+            drift->phase -= period;
+        }
+        while (drift->phase < 0.0f) {
+            drift->phase += period;
+        }
+    }
+    arg0->offsetX += drift->offsetX;
+    arg0->offsetY += drift->offsetY;
+    arg0->offsetZ += drift->offsetZ;
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_FA360/func_150CD59C.s")
 
