@@ -101,7 +101,17 @@ s16 *func_150343B0(s16 *arg0, s32 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_61490/func_15034420.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_61490/func_150344A0.s")
+s16 *func_150344A0(s16 *arg0, s32 arg1) {
+    s32 value;
+
+    arg0[0] = 0x12;
+    value = ((s16 *)&D_800CC2D0[arg1].unk2E4)[1];
+    arg0[1] = value * 3.640889f;
+    arg0[2] = 0xE;
+    value = -((s16 *)&D_800CC2D0[arg1].unk2E4)[0];
+    arg0[3] = value * 3.640889f;
+    return arg0 + 4;
+}
 
 void func_1503B9BC(void);
 
