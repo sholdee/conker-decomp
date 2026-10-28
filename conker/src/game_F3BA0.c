@@ -75,7 +75,7 @@ s32 func_150C682C(u8 *arg0) {
     return 0;
 }
 
-s32 func_150C68C4(s32 arg0);
+s32 func_150C68C4(s32 arg0, u8 *arg1);
 
 void func_150C6870(u8 *arg0) {
     s32 temp = *(s32 *)((u8 *)arg0 + 0x18);
@@ -83,11 +83,94 @@ void func_150C6870(u8 *arg0) {
         u8 *p = *(u8 **)((u8 *)arg0 + 0x70) + 0x58;
         p[4] = 1;
     } else {
-        *(s32 *)((u8 *)arg0 + 0x70) = func_150C68C4(temp);
+        *(s32 *)((u8 *)arg0 + 0x70) = func_150C68C4(temp, arg0);
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_F3BA0/func_150C68C4.s")
+typedef struct {
+    u8 pad0[0x14];
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    u8 pad20[0x1B];
+    u8 unk3B;
+} Actor150C68C4;
+
+typedef struct {
+    u8 *unk0;
+    u8 unk4;
+    f32 unk8;
+} Link150C68C4;
+
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    u8 unk8;
+    void *unkC;
+    u8 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    s16 unk28;
+    u8 unk2A;
+    u8 unk2B;
+    u8 unk2C;
+    u8 unk2D;
+} Spawn150C68C4;
+
+extern f32 D_800A0450;
+extern f32 D_800A0454;
+extern f32 D_800A0458;
+void *memcpy(void *, const void *, u32);
+extern s32 func_15045800(f32 *, s32, f32, f32 *);
+extern void *func_1513418C(void *, s32, u8, s32);
+
+s32 func_150C68C4(s32 arg0, u8 *arg1) {
+    Spawn150C68C4 spawn;
+    Link150C68C4 link;
+    void *ret;
+    f32 pos[3];
+    s32 hit;
+
+    link.unk0 = arg1;
+    link.unk4 = 1;
+    pos[0] = ((Actor150C68C4 *)arg0)->unk14;
+    pos[1] = ((Actor150C68C4 *)arg0)->unk18 + D_800A0450;
+    pos[2] = ((Actor150C68C4 *)arg0)->unk1C;
+    hit = func_15045800(pos, 0, ((Actor150C68C4 *)arg0)->unk18 - 100.0f, (f32 *)(arg1 + 0x34));
+    {
+        extern f32 D_800A0454;
+
+        if (hit) {
+            link.unk8 = *(f32 *)(arg1 + 0x34);
+        } else {
+            link.unk8 = ((Actor150C68C4 *)arg0)->unk18 + D_800A0454;
+        }
+    }
+    spawn.unk0 = 0;
+    spawn.unk4 = 0;
+    spawn.unk8 = ((Actor150C68C4 *)arg0)->unk3B;
+    spawn.unkC = (void *)arg0;
+    spawn.unk10 = 0;
+    spawn.unk14 = 0.0f;
+    spawn.unk18 = 0.0f;
+    spawn.unk1C = 0.0f;
+    spawn.unk20 = 80.0f;
+    spawn.unk24 = D_800A0458;
+    spawn.unk28 = 0x12C;
+    spawn.unk2A = 10;
+    spawn.unk2B = 5;
+    spawn.unk2C = 2;
+    spawn.unk2D = 3;
+    ret = func_1513418C(&spawn, 0xC, 0xFF, 0);
+    if (ret != NULL) {
+        memcpy((u8 *)ret + 0x58, &link, 0xC);
+    }
+    return (s32)ret;
+}
+
 
 typedef struct GameF3BA0Burst {
     s32 flags, zero4;
