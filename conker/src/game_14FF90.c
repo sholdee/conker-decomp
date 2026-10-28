@@ -877,7 +877,60 @@ void func_15125924(struct108 *arg0) {
         }
     }
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_15125A6C.s")
+void func_1512D560(void *, s32, s32);
+extern f32 D_800C3614;
+extern f32 D_800C3618;
+extern f32 D_800C361C;
+extern f32 D_800C3624;
+extern s8 D_800C365C;
+
+void func_15125A6C(struct108 *arg0) {
+    f32 offsetCos;
+    f32 offsetSin;
+    f32 radius;
+    f32 yaw;
+    f32 offsetRadius;
+    f32 height;
+    f32 trig;
+    f32 angle;
+    f32 offsetAngle;
+    u8 mode;
+
+    mode = arg0->unk23E;
+    if (mode == 0x2A) {
+        yaw = arg0->unk3D0->unk40;
+        if (arg0->unk2C != 0x40000) {
+            func_1512D560(arg0, 5, 0);
+            arg0->unk7E4 = 1U;
+        }
+        *D_800DBFF4 = 3;
+        ((struct168 *)&D_800C3600)->unk0 = 1;
+        ((struct168 *)&D_800C3600)->unk4 = 0;
+        radius = 138.0f;
+        offsetRadius = 46.0f;
+        height = 96.0f;
+        angle = yaw * D_800A3550;
+        trig = sinf(angle);
+        offsetAngle = (yaw - 90.0f) * D_800A3554;
+        offsetSin = sinf(offsetAngle);
+        D_800C3614 = (offsetSin * offsetRadius) + (arg0->unk3D0->x_position + (radius * trig));
+        D_800C3618 = arg0->unk3D0->y_position + height;
+        trig = cosf(angle);
+        offsetCos = cosf(offsetAngle);
+        D_800C361C = (offsetCos * offsetRadius) + (arg0->unk3D0->z_position + (radius * trig));
+        ((struct168 *)&D_800C3600)->unk20 = 0.0f;
+        D_800C3624 = -180.0f;
+        ((struct168 *)&D_800C3600)->unk8 = 0.0f;
+        ((struct168 *)&D_800C3600)->unk28 = yaw - 180.0f;
+        D_800C365C = 0;
+        func_1512D560(arg0, 7, (s32)&D_800C3600);
+        return;
+    }
+    if (arg0->unk7E4 != 0) {
+        func_1512D560(arg0, 6, 0);
+        arg0->unk7E4 = 0U;
+    }
+}
 // NON-MATCHING: miles away
 // void func_15125A6C(struct108 *arg0) {
 //     f32 pad3C;
