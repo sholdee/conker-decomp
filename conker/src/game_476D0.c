@@ -119,7 +119,37 @@ void func_1501A220(s32 arg0, s32 arg1) {
 //     func_1510B070(arg1);
 // }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_476D0/func_1501A39C.s")
+typedef union Game476D0DisplayCommandA {
+    struct {
+        u32 word0;
+        u32 word1;
+    } words;
+    u64 alignment;
+} Game476D0DisplayCommandA;
+
+typedef struct Game476D0RenderView {
+    u8 unknown00[0x40];
+    Vp viewports[2];
+    u8 unknown60[0x120];
+} Game476D0RenderView;
+
+extern u8 D_8002C930;
+extern Game476D0DisplayCommandA *D_800BE9C8[];
+
+void func_1501A39C(void) {
+    s32 i;
+    Game476D0DisplayCommandA *gdl;
+
+    for (i = 0; i < 2; i++) {
+        gdl = D_800BE9C8[i];
+        { Game476D0DisplayCommandA *command = gdl++; command->words.word0 = 0xDB060000; command->words.word1 = 0; }
+        { Game476D0DisplayCommandA *command = gdl++; command->words.word0 = 0xDB060000; command->words.word1 = 0; }
+        { Game476D0DisplayCommandA *command = gdl++; command->words.word0 = 0xDE000000; command->words.word1 = (u32)&D_8002C930; }
+        { Game476D0DisplayCommandA *command = gdl++; command->words.word0 = 0xFE000000; command->words.word1 = D_800BE9C4; }
+        { Game476D0DisplayCommandA *command = gdl++; command->words.word0 = 0xDC080008; command->words.word1 = (u32)&((Game476D0RenderView *)D_800BE628)[0].viewports[i]; }
+        D_800BE9D8[i] = (s32)gdl;
+    }
+}
 // NON-MATCHING: something along these lines
 // extern Gfx* D_800BE9C8;
 // extern s32 D_8002C930;
