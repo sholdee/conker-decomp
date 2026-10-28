@@ -2,7 +2,11 @@
 #define func_151422C0 func_151422C0_header
 #include "functions.h"
 #undef func_151422C0
+#define D_800DBFF0 D_800DBFF0_hdr
 #include "variables.h"
+#undef D_800DBFF0
+
+void *memcpy(void *, const void *, u32);
 
 void func_1519CDB0(s32, f32, s32);
 extern void *allocate_memory(s32, s32, s32, s32);
@@ -632,7 +636,132 @@ s32 func_15197BBC(Struct15197BBC *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1C2C60/func_15197C10.s")
+typedef struct Vec3f_15197C10 {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3f_15197C10;
+
+typedef struct CharacterFlamethrowerBeamVertex {
+    s16 x, y, z, flag;
+    u8 other[8];
+} CharacterFlamethrowerBeamVertex;
+
+typedef struct CharacterFlamethrowerBeam {
+    u8 unknown0[0x2C];
+    f32 width;
+    f32 progress;
+    Vec3f_15197C10 start;
+    Vec3f_15197C10 end;
+    u8 unknown4C[0x74];
+    u8 vertexTemplate[0x40];
+    u8 *buffers[1];
+} CharacterFlamethrowerBeam;
+
+typedef struct CharacterFlamethrowerBeamCamera {
+    u8 unknown0[0x2F8];
+    Vec3f_15197C10 position;
+    u8 unknown304[0x69C];
+} CharacterFlamethrowerBeamCamera;
+
+void func_151D5D60(void *, s16, s32, void **, u8 *);
+f32 sqrtf(f32);
+#pragma intrinsic(sqrtf)
+extern CharacterFlamethrowerBeamCamera *D_800DBFF0;
+
+void *func_15197C10(CharacterFlamethrowerBeam *arg0, s16 arg1) {
+    CharacterFlamethrowerBeamVertex *vertices;
+    void *result;
+    f32 progress;
+    Vec3f_15197C10 tip;
+    f32 dx, dy, dz;
+    f32 vx, vy, vz;
+    f32 nx, ny, nz;
+    f32 lengthSquared;
+    u8 fresh;
+    Vec3f_15197C10 *eye;
+    f32 scale;
+
+    func_151D5D60(arg0->buffers, arg1, 0x40, (void **)&vertices, &fresh);
+    arg1; /* no-op: shifts uopt state so stores via vertices[1] reload it (file-context dependent) */
+    result = vertices;
+    if (vertices != NULL) {
+        if (fresh != 0) {
+            memcpy(arg0->buffers[arg1], arg0->vertexTemplate, 0x40);
+            memcpy(arg0->buffers[arg1] + 0x40, arg0->vertexTemplate, 0x40);
+        }
+    } else {
+        return NULL;
+    }
+    progress = arg0->progress;
+    dx = arg0->end.x - arg0->start.x;
+    dy = arg0->end.y - arg0->start.y;
+    dz = arg0->end.z - arg0->start.z;
+    tip.x = arg0->start.x + dx * progress;
+    tip.y = arg0->start.y + dy * progress;
+    tip.z = arg0->start.z + dz * progress;
+    eye = &D_800DBFF0[arg1].position;
+    dx = tip.x - arg0->start.x;
+    dy = tip.y - arg0->start.y;
+    dz = tip.z - arg0->start.z;
+    vx = arg0->start.x - eye->x;
+    vy = arg0->start.y - eye->y;
+    vz = arg0->start.z - eye->z;
+    nx = dy * vz - vy * dz;
+    ny = dz * vx - vz * dx;
+    nz = dx * vy - vx * dy;
+    lengthSquared = nx * nx + ny * ny + nz * nz;
+    if (lengthSquared == 0.0f) {
+        nx = 0.0f;
+        ny = 0.0f;
+        nz = 0.0f;
+    } else {
+        scale = arg0->width / sqrtf(lengthSquared);
+        nx *= scale;
+        ny *= scale;
+        nz *= scale;
+    }
+    vertices->x = arg0->start.x + nx;
+    vertices->y = arg0->start.y + ny;
+    vertices->z = arg0->start.z + nz;
+    vertices->flag = 0;
+    vertices++;
+    vertices->x = arg0->start.x - nx;
+    vertices->y = arg0->start.y - ny;
+    vertices->z = arg0->start.z - nz;
+    vertices->flag = 0;
+    vertices++;
+    dx = -dx;
+    dy = -dy;
+    dz = -dz;
+    vx = tip.x - eye->x;
+    vy = tip.y - eye->y;
+    vz = tip.z - eye->z;
+    nx = dy * vz - vy * dz;
+    ny = dz * vx - vz * dx;
+    nz = dx * vy - vx * dy;
+    lengthSquared = nx * nx + ny * ny + nz * nz;
+    if (lengthSquared == 0.0f) {
+        nx = 0.0f;
+        ny = 0.0f;
+        nz = 0.0f;
+    } else {
+        scale = arg0->width / sqrtf(lengthSquared);
+        nx *= scale;
+        ny *= scale;
+        nz *= scale;
+    }
+    vertices->x = tip.x + nx;
+    vertices->y = tip.y + ny;
+    vertices->z = tip.z + nz;
+    vertices->flag = 0;
+    vertices++;
+    vertices->x = tip.x - nx;
+    vertices->y = tip.y - ny;
+    vertices->z = tip.z - nz;
+    vertices->flag = 0;
+    return result;
+}
 
 typedef struct {
     s32 unk0;
