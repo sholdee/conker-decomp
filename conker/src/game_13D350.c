@@ -207,7 +207,79 @@ s32 func_151140C4(struct131 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_13D350/func_15114188.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_13D350/func_15114348.s")
+typedef struct {
+    /* 0x00 */ f32 rotX;
+    /* 0x04 */ f32 rotY;
+    /* 0x08 */ f32 rotZ;
+    /* 0x0C */ u8 pad0C[4];
+    /* 0x10 */ s16 x;
+    /* 0x12 */ s16 y;
+    /* 0x14 */ s16 z;
+    /* 0x16 */ u8 pad16[0x44];
+    /* 0x5A */ s16 ox;
+    /* 0x5C */ s16 oy;
+    /* 0x5E */ s16 oz;
+    /* 0x60 */ f32 a;
+    /* 0x64 */ f32 b;
+    /* 0x68 */ f32 c;
+    /* 0x6C */ u8 pad6C[0x34];
+} Struct15114348;
+
+void func_150A7960(f32 m[4][4], f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
+
+void func_15114348(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    f32 rx;
+    f32 ry;
+    f32 rz;
+    f32 m[4][4];
+    f32 m2[4][4];
+    f32 zaxis[3];
+    f32 yaxis[3];
+    f32 xaxis[3];
+
+    xaxis[0] = 1.0f;
+    xaxis[1] = 0.0f;
+    xaxis[2] = 0.0f;
+    yaxis[0] = 0.0f;
+    yaxis[1] = 1.0f;
+    yaxis[2] = 0.0f;
+    zaxis[0] = 0.0f;
+    zaxis[1] = 0.0f;
+    zaxis[2] = 1.0f;
+    dx = *arg1 - ((Struct15114348 *)D_800DBEF4)[arg0].x;
+    dy = *arg2 - ((Struct15114348 *)D_800DBEF4)[arg0].y;
+    dz = *arg3 - ((Struct15114348 *)D_800DBEF4)[arg0].z;
+    if (((Struct15114348 *)D_800DBEF4)[arg0].rotX != 0.0f) {
+        guRotateF(m, ((Struct15114348 *)D_800DBEF4)[arg0].rotX, 1, 0, 0);
+        func_150A7960(m, yaxis[0], yaxis[1], yaxis[2], &yaxis[0], &yaxis[1], &yaxis[2]);
+        func_150A7960(m, zaxis[0], zaxis[1], zaxis[2], &zaxis[0], &zaxis[1], &zaxis[2]);
+    }
+    if (((Struct15114348 *)D_800DBEF4)[arg0].rotZ != 0.0f) {
+        guRotateF(m, ((Struct15114348 *)D_800DBEF4)[arg0].rotZ, zaxis[0], zaxis[1], zaxis[2]);
+        func_150A7960(m, yaxis[0], yaxis[1], yaxis[2], &yaxis[0], &yaxis[1], &yaxis[2]);
+        func_150A7960(m, xaxis[0], xaxis[1], xaxis[2], &xaxis[0], &xaxis[1], &xaxis[2]);
+    }
+    if (((Struct15114348 *)D_800DBEF4)[arg0].rotY != 0.0f) {
+        guRotateF(m, ((Struct15114348 *)D_800DBEF4)[arg0].rotY, yaxis[0], yaxis[1], yaxis[2]);
+        func_150A7960(m, xaxis[0], xaxis[1], xaxis[2], &xaxis[0], &xaxis[1], &xaxis[2]);
+        func_150A7960(m, zaxis[0], zaxis[1], zaxis[2], &zaxis[0], &zaxis[1], &zaxis[2]);
+    }
+    guRotateF(m, ((Struct15114348 *)D_800DBEF4)[arg0].a, xaxis[0], xaxis[1], xaxis[2]);
+    guRotateF(m2, ((Struct15114348 *)D_800DBEF4)[arg0].c, zaxis[0], zaxis[1], zaxis[2]);
+    func_150A7A48(m, m2, m);
+    guRotateF(m2, ((Struct15114348 *)D_800DBEF4)[arg0].b, yaxis[0], yaxis[1], yaxis[2]);
+    func_150A7A48(m, m2, m);
+    func_150A7960(m, dx, dy, dz, &rx, &ry, &rz);
+    rx = ((Struct15114348 *)D_800DBEF4)[arg0].ox + (rx - dx);
+    ry = ((Struct15114348 *)D_800DBEF4)[arg0].oy + (ry - dy);
+    rz = ((Struct15114348 *)D_800DBEF4)[arg0].oz + (rz - dz);
+    *arg1 += rx;
+    *arg2 += ry;
+    *arg3 += rz;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_13D350/func_1511473C.s")
 
