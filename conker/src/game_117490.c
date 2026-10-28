@@ -247,7 +247,26 @@ void func_150EA11C(Vec3F_EA11C *arg0, Vec3F_EA11C *arg1, s32 arg2, s32 arg3, f32
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_117490/func_150EA490.s")
+typedef struct Game117940Phase {
+    u32 phase_80;
+    s32 phase_step_84;
+    f32 base_88;
+    f32 amplitude_8C;
+} Game117940Phase;
+
+typedef struct Game117940State {
+    u8 pad0[0x80];
+    Game117940Phase phase;
+} Game117940State;
+
+f32 func_150EA490(Game117940State *arg0) {
+    Game117940Phase *phase = &arg0->phase;
+    f32 result;
+
+    result = (func_151423D8((phase->phase_80 >> 16) - 0x40) * phase->amplitude_8C) + phase->base_88;
+    phase->phase_80 += (u32)phase->phase_step_84 * (u32)D_800BE9E4;
+    return result;
+}
 
 typedef struct {
     /* 0x00 */ s32 unk0;
