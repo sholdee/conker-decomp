@@ -37,16 +37,65 @@ s32 __osSiRawStartDma(s32 dir, void *dramAddr);
 
 /* func_151DD65C = __osPackEepWriteData.  Byte-perfect at the tree default.
  *
- * The other three are parked near-misses, all with golden's instruction sequence already:
- *   func_151DD4E0 (osEepromWrite)  mism=85,  n=94/95   -- same missing trailing `b` as
- *       osEepromRead in game_20A5F0; see the note there.
+ * func_151DD4E0 = osEepromWrite: the osEepromRead shape (game_20A5F0) with `ptr += 4`
+ * and no `i` local (the frame has no slot for one).
+ *
+ * The others are parked near-misses, all with golden's instruction sequence already:
  *   func_151DD710 (__osEepStatus)  mism=89,  n=109/108 -- one instruction too MANY.
  *   func_151DD8C0 (demo playback)  mism=35,  n=44/44   -- every instruction is golden's;
  *       the residue is register allocation (golden keeps &D_800BE748 in $a1 and the frame
  *       pointer in $a0 and starts short-lived temps at $t8; we use $a0/$v0/$t7).  Six
  *       spellings of the frame-pointer expression all land within 45-50.
  */
-#pragma GLOBAL_ASM("asm/nonmatchings/game_20A990/func_151DD4E0.s")
+s32 func_151DD710(OSMesgQueue *mq, OSContStatus *data);
+void func_151DD65C(u8 address, u8 *buffer);
+
+s32 func_151DD4E0(OSMesgQueue *mq, u8 address, u8 *buffer) {
+    s32 ret = 0;
+    u16 type;
+    u8 *ptr;
+    __OSContEepromFormat eepromformat;
+    OSContStatus sdata;
+
+    ptr = (u8 *) &D_800E0A30;
+    __osSiGetAccess();
+    ret = func_151DD710(mq, &sdata);
+    if (ret == 0) {
+        type = sdata.type & (CONT_EEPROM | CONT_EEP16K);
+        switch (type) {
+            case CONT_EEPROM:
+                if (address >= 64) {
+                    ret = -1;
+                }
+                break;
+            case CONT_EEPROM | CONT_EEP16K:
+                if (address >= 256) {
+                    ret = -1;
+                }
+                break;
+            default:
+                ret = CONT_NO_RESPONSE_ERROR;
+        }
+    }
+    if (ret != 0) {
+        __osSiRelAccess();
+        return ret;
+    }
+    while (sdata.status & CONT_EEPROM_BUSY) {
+        func_151DD710(mq, &sdata);
+    }
+    func_151DD65C(address, buffer);
+    __osSiRawStartDma(OS_WRITE, &D_800E0A30);
+    osRecvMesg(mq, NULL, OS_MESG_BLOCK);
+    __osSiRawStartDma(OS_READ, &D_800E0A30);
+    __osContLastCmd = 5;
+    osRecvMesg(mq, NULL, OS_MESG_BLOCK);
+    ptr += 4;
+    eepromformat = *(__OSContEepromFormat *) ptr;
+    ret = (eepromformat.rxsize & 0xC0) >> 4;
+    __osSiRelAccess();
+    return ret;
+}
 
 void func_151DD65C(u8 address, u8 *buffer) {
     u8 *ptr;
