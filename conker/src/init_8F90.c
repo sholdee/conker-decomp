@@ -267,7 +267,106 @@ void func_10009400(s32 arg0) {
     } while (1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_8F90/func_100095A0.s")
+typedef struct {
+    u32 type;
+    u32 flags;
+    void *boot;
+    u32 bootSize;
+    void *microcode;
+    u32 microcodeSize;
+    void *microcodeData;
+    u32 microcodeDataSize;
+    void *stack;
+    u32 stackSize;
+    void *output;
+    void *outputSize;
+    Acmd *commands;
+    u32 commandSize;
+    void *yieldData;
+    u32 yieldSize;
+} AudioRspTask95A0;
+
+typedef struct {
+    void *next;
+    u8 pad4[8];
+    u32 flags;
+    void *framebuffer;
+    u8 pad14[4];
+    AudioRspTask95A0 task;
+    OSMesgQueue *completionQueue;
+    void *completionMessage;
+} AudioSchedulerTask95A0;
+
+typedef struct {
+    u8 *buffer;
+    u8 *adjustedBuffer;
+    s16 samples;
+    u8 padA[6];
+    AudioSchedulerTask95A0 scheduler;
+    s16 completion;
+} AudioTaskRecord95A0;
+
+#define info ((AudioTaskRecord95A0 *)arg0)
+#define lastInfo ((AudioTaskRecord95A0 *)arg1)
+s32 func_100095A0(struct50 *arg0, struct51 *arg1) {
+    s16 *audioPtr;
+    Acmd *cmdp;
+    s32 cmdLen;
+    s32 samplesLeft;
+    AudioSchedulerTask95A0 *t;
+    u32 end;
+
+    audioPtr = (s16 *)osVirtualToPhysical(info->buffer);
+    func_100099BC();
+    func_1000A03C();
+    samplesLeft = *(volatile u32 *)0xA4500004 >> 2;
+    if (lastInfo != NULL) {
+        osAiSetNextBuffer(lastInfo->adjustedBuffer, lastInfo->samples << 2);
+    }
+    if (samplesLeft >= 0xF9 && D_80040F84 == 0) {
+        info->samples = D_80040F88;
+        D_80040F84 = 2;
+    } else {
+        info->samples = D_80040F8C;
+        if (D_80040F84 != 0) {
+            D_80040F84--;
+        }
+    }
+    end = (u32)audioPtr + (info->samples << 2);
+    if ((end & 0x1FFF) == 0) {
+        audioPtr += 8;
+        info->adjustedBuffer = info->buffer + 0x10;
+    } else {
+        info->adjustedBuffer = info->buffer;
+    }
+    cmdp = n_alAudioFrame(D_8003E388.ACMDList[D_8002AE4C], &cmdLen, audioPtr, info->samples);
+    if (cmdLen == 0) {
+        return 0;
+    }
+    t = &info->scheduler;
+    t->next = NULL;
+    t->completionQueue = (OSMesgQueue *)&D_8003E608;
+    t->completionMessage = &info->completion;
+    t->flags = 2;
+    t->framebuffer = NULL;
+    t->task.commands = D_8003E388.ACMDList[D_8002AE4C];
+    t->task.commandSize = (cmdp - D_8003E388.ACMDList[D_8002AE4C]) * sizeof(Acmd);
+    t->task.type = 2;
+    t->task.boot = (u8 *)&D_100290D0;
+    t->task.bootSize = (s32)&D_100291A0 - (s32)&D_100290D0;
+    t->task.flags = 0;
+    t->task.microcode = (u8 *)&D_100290D0 + 0xD0;
+    t->task.microcodeData = D_8002C960;
+    t->task.microcodeDataSize = 0x800;
+    t->task.yieldData = NULL;
+    t->task.yieldSize = 0x400;
+    osWritebackDCacheAll();
+    osSendMesg(&D_8003B200, t, 1);
+    D_8002AE4C ^= 1;
+    return 1;
+}
+#undef info
+#undef lastInfo
 
 s32 func_100097CC(u32 arg0, s32 arg1, s32 arg2) {
     void *sp2C;
