@@ -904,7 +904,190 @@ void func_1000D2F8(s32 arg0, f32 arg1, f32 arg2, f32 arg3) {
     }
 }
 #pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000D758.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000D96C.s")
+typedef struct {
+    u16 volume;
+    u8 pad2[2];
+    s32 flags;
+    void *callback;
+    u8 markerCount;
+    u8 padD[3];
+} SequenceVolumeEntry;
+
+#define SEQ_VOL ((SequenceVolumeEntry *)D_8002B074)
+#define SEQ_B2F4(x) ((SequenceRecordState *)func_1000B2F4(x))
+#define SEQ_B3D4(a, b) func_1000B3D4((struct151 *)(a), (struct151 *)(b))
+
+void func_1000D96C(s32 arg0, s32 arg1, s32 arg2) {
+    SequenceRecordState *outgoing;
+    SequenceRecordState *incoming;
+    s32 sync;
+
+    outgoing = 0;
+    incoming = 0;
+    sync = 0;
+    arg0 &= 0xFFF;
+    arg1 &= 0xFFF;
+    if (arg0 != 0 && func_1000B1FC(arg0) != 0) {
+        SequenceRecordState *record;
+        SequenceRecordState *child;
+
+        record = (SequenceRecordState *)func_1000B1B0(arg0);
+        if (record == 0) {
+            return;
+        }
+        child = record->state;
+        if (child != 0) {
+            if (child->index == -1) {
+                record->target54 = 0x8000;
+                record->duration56 = 0x400;
+                child->id = -1;
+                record->state->index = -1;
+                record->state = 0;
+            }
+            arg0 = 0;
+            if (arg1 == 0) {
+                return;
+            }
+            goto lookup_outgoing;
+        } else if (record->pauseMode != 0 || record->target54 == 0) {
+            record->target54 = 0x8000;
+            record->current52 = 0;
+            record->duration56 = 0x400;
+            arg0 = 0;
+            if (arg1 == 0) {
+                return;
+            }
+lookup_outgoing:
+            ;
+        } else {
+            return;
+        }
+    }
+    if (arg1 != 0) {
+        outgoing = (SequenceRecordState *)func_1000B1B0(arg1);
+    }
+    if (outgoing != 0) {
+        if (outgoing != 0 && outgoing->state != 0) {
+            if (arg0 != 0) {
+                return;
+            }
+        } else if (arg2 == 4 || arg2 == 6) {
+            if (arg0 != 0) {
+                incoming = SEQ_B2F4(arg0);
+            }
+            if (incoming != 0 || arg0 == 0) {
+                if (arg0 != 0) {
+                    SequenceVolumeEntry *entry;
+
+                    entry = &SEQ_VOL[arg0];
+                    if ((entry->flags & 0x20) && (SEQ_VOL[arg1].flags & 0x20)) {
+                        sync = 1;
+                    }
+                    incoming->ownerSync = sync;
+                    if (entry->flags & 8) {
+                        incoming->target54 = 0x8000;
+                        incoming->current52 = 0;
+                        incoming->duration56 = 0x3C;
+                    } else if (sync != 0) {
+                        incoming->target54 = 0x8000;
+                        incoming->current52 = 0;
+                        incoming->duration56 = 0x100;
+                    }
+                    incoming->owner = outgoing;
+                    incoming->startMask = 2;
+                    SEQ_B3D4(incoming, 0);
+                }
+                if (arg2 == 6) {
+                    if (arg0 != 0) {
+                        outgoing->fadeMask = 2;
+                    }
+                    outgoing->ownerSync = 0;
+                    outgoing->owner = outgoing;
+                    outgoing->target54 = 0;
+                    if (SEQ_VOL[arg1].flags & 8) {
+                        outgoing->duration56 = 0x28;
+                        return;
+                    }
+                    outgoing->duration56 = 0xA0;
+                    return;
+                }
+                incoming = SEQ_B2F4(0);
+                if (incoming != 0) {
+                    if (arg0 != 0) {
+                        outgoing->fadeMask = 2;
+                    }
+                    outgoing->ownerSync = 0;
+                    outgoing->owner = outgoing;
+                    outgoing->target54 = 0;
+                    if (sync != 0) {
+                        outgoing->duration56 = 0x80;
+                    } else {
+                        outgoing->duration56 = 0x200;
+                    }
+                    incoming->startMask = 0x80;
+                    incoming->owner = outgoing;
+                    SEQ_B3D4(incoming, outgoing);
+                }
+            }
+        } else {
+            goto simple_transition;
+        }
+        return;
+    } else {
+        goto fallback_lookup;
+    }
+fallback_lookup:
+    if (arg1 != 0) {
+        outgoing = (SequenceRecordState *)func_1000B1FC(arg1);
+        if (outgoing != 0) {
+            if (arg0 != 0) {
+                bzero(outgoing, 0x64);
+                outgoing->index = -1;
+                if (arg0 < 0x96) {
+                    outgoing->target = SEQ_VOL[arg0].volume;
+                } else {
+                    outgoing->target = 0x6590;
+                }
+                outgoing->current = outgoing->target;
+                outgoing->value = outgoing->current4C = outgoing->current52 =
+                    outgoing->target54 = outgoing->current58 =
+                    outgoing->target5A = 0x8000;
+                outgoing->field8 = &D_8002B9D4;
+                outgoing->fieldC = &D_8002B9F4;
+                outgoing->owner = outgoing;
+            } else {
+                outgoing->startMask = 0x80;
+            }
+            outgoing->id = arg0;
+            return;
+        }
+    }
+simple_transition:
+    if (arg0 != 0 || outgoing != 0) {
+        incoming = SEQ_B2F4(arg0);
+    }
+    if (incoming != 0) {
+        if (arg2 == 3) {
+            incoming->target54 = 0x8000;
+            incoming->current52 = 0;
+            incoming->duration56 = 0x400;
+        } else if (arg2 == 2) {
+            incoming->startMask = 1;
+            incoming->owner = outgoing;
+        } else if (arg2 == 1) {
+            incoming->startMask = 2;
+            incoming->owner = outgoing;
+        } else if (arg2 == 5) {
+            incoming->startMask = 0x80;
+            incoming->owner = outgoing;
+            if (outgoing != 0) {
+                outgoing->target54 = 0;
+                outgoing->duration56 = 0x200;
+            }
+        }
+        SEQ_B3D4(incoming, outgoing);
+    }
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000DE1C.s")
 s32 func_1000853C(u8 arg0);
 extern struct151 *D_800417B0[];
