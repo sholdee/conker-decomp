@@ -1,5 +1,10 @@
 #include <ultra64.h>
+/* functions.h declares func_150ADA20 as returning u8; its asm returns a full word
+ * (dsra32 v0), and func_151AF388 spills the result as a word. File-local prototype. */
+#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
+#undef func_150ADA20
+u32 func_150ADA20(void);
 #include "variables.h"
 
 extern f32 D_800A9D84;
@@ -99,7 +104,7 @@ extern s8 D_800A9023[];
 extern ObjectSpawnParams D_800A9180[];
 
 void func_15143794(s32, s32, f32, f32 *);
-void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, u8, s32);
+void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1D92F0/func_151ABE40.s")
 
@@ -160,7 +165,7 @@ s32 func_151AC408(ObjectEffectState *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg
     sp4C[2] = arr[arg0->field_0x2D].field_0x08;
     color = func_151D8E20();
     if (func_150ADA20() & 1) {
-        life = ((u32)func_150ADA20() % 41) + 80;
+        life = (func_150ADA20() % 41) + 80;
         func_151D9B8C(color, ptr->field_0x00 * 6.0f, ptr->field_0x1B, arg5, (struct17 *)sp4C, life, 1, 1, 0, arg0->field_0x0C, arg0->field_0x01);
     } else {
         func_151DAB58(color, ptr->field_0x00 * 1.5f, ptr->field_0x1B, sp4C, 1, arg0->field_0x0C, arg0->field_0x01);
@@ -635,7 +640,6 @@ void func_151AE984(f32 *arg0, f32 arg1, f32 arg2, f32 arg3, s32 arg4,
                   1.0f, 1.0f, 0, 0, 1, 0, (u8)arg5, 1);
 }
 
-u8 func_150ADA20(void);
 f32 func_150ADA68(void);
 f32 func_151423D8(u8);
 extern f32 D_800A9D98;
@@ -749,7 +753,31 @@ void func_151AF338(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, v
     func_151AF388(sp24, arg3, arg4, arg5, *(u8 *)((s32)arg6 + 0xC));
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1D92F0/func_151AF388.s")
+typedef u32 (*RandU32Fn_151AF388)(void);
+typedef void (*SpawnFn_151AF388)(f32 *, f32 *, s32, f32, s32, s32, f32, s32,
+                                 f32, f32, s32, s32, s32, s32, s32, s32);
+
+void func_151AF388(f32 *arg0, f32 arg1, f32 arg2, f32 arg3, s32 arg4) {
+    f32 factor = 0.13000001f;
+    f32 vector[3];
+    u8 flag;
+
+    vector[0] = -arg1 * factor;
+    vector[1] = -arg2 * factor;
+    vector[2] = -arg3 * factor;
+    if (func_150ADA20() & 1) {
+        flag = 1;
+    } else {
+        flag = 0;
+    }
+    func_151D9014(arg0, vector, 0,
+                   (func_150ADA68() * 0.126f) + -0.702f,
+                   (func_150ADA20() & 0xF) + 0xA,
+                   (func_150ADA20() % 45U) + 0x89,
+                   (func_150ADA68() * 202.0f) + 142.0f,
+                   flag, 1.7f, 1.7f, 0, 0, 1, 0,
+                   (u8)arg4, 1);
+}
 
 void func_151AF4D0(GameObjectTransformOwner *arg0, s32 arg1, s32 arg2, s32 arg3) {
     f32 sp44[3];
