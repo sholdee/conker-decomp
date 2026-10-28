@@ -592,7 +592,60 @@ void func_1516F548(
         (s32)func_1000EBC4, (void *)arg3, 0, 0, 0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_19A8B0/func_1516F864.s")
+typedef struct Game19A8B0Motion {
+    u8 pad0[0xE];
+    s16 x;
+    s16 y;
+    s16 z;
+    s16 scaleX;
+    s16 scaleY;
+    s16 velocityY;
+    u8 pad1A[5];
+    u8 alpha;
+    u8 pad20[3];
+    u8 kind;
+    u8 active;
+    u8 yFraction;
+    s8 velocityXHigh;
+    u8 velocityXLow;
+    s8 velocityZHigh;
+    u8 velocityZLow;
+    u8 xFraction;
+    u8 zFraction;
+    u8 sizeHigh;
+    u8 sizeLow;
+    u8 pad2E[2];
+    void *link;
+} Game19A8B0Motion;
+
+#define MOTION ((Game19A8B0Motion *)arg0)
+void func_1516F864(s32 arg0) {
+    s32 x;
+    s32 velocity;
+    s32 z;
+
+    x = MOTION->x;
+    x <<= 8;
+    x += MOTION->xFraction;
+    velocity = MOTION->velocityXHigh;
+    velocity <<= 8;
+    velocity += MOTION->velocityXLow;
+    x += velocity * D_800BE9E4;
+    MOTION->x = x >> 8;
+    x = (u8)x;
+    MOTION->xFraction = x;
+    z = MOTION->z;
+    z <<= 8;
+    z += MOTION->zFraction;
+    velocity = MOTION->velocityZHigh;
+    velocity <<= 8;
+    velocity += MOTION->velocityZLow;
+    z += velocity * D_800BE9E4;
+    MOTION->z = z >> 8;
+    z = (u8)z;
+    MOTION->zFraction = z;
+}
+#undef MOTION
 
 void func_1516F8EC(s32 arg0, s32 arg1)
 {
