@@ -831,4 +831,83 @@ void func_1519CD64(struct Obj1519CD64 *a0) {
     a0->unkD |= 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1C2C60/func_1519CDB0.s")
+typedef struct CFIdentity1519CDB0 {
+    char pad0[0x76];
+    u16 unk76;
+} CFIdentity1519CDB0;
+
+typedef struct CFState1519CDB0 {
+    CFIdentity1519CDB0 *identity;
+    char pad4[0x148];
+    f32 spacing;
+} CFState1519CDB0;
+
+typedef struct CFActor1519CDB0 {
+    char pad0[0x10];
+    f32 position[3];
+    char pad1C[0x9];
+    u8 point_capacity;
+    char pad26[0x6];
+    s8 unk2C;
+    s8 point_index;
+    s8 point_end;
+    char pad2F[0x65];
+    void *points;
+    CFState1519CDB0 *state;
+} CFActor1519CDB0;
+
+typedef struct CFTrailPoint1519CDB0 {
+    f32 position[3];
+    u8 padC[0x10];
+    f32 distance;
+    u8 pad20[0x8];
+} CFTrailPoint1519CDB0;
+
+s32 func_1505D1C4(f32, f32, f32, s32, s32, s32, s32, s32);
+
+void func_1519CDB0(s32 arg0_, f32 arg1, s32 arg2) {
+#define arg0 ((CFActor1519CDB0 *)arg0_)
+    f32 spacing;
+    f32 factor;
+    f32 total;
+    f32 next;
+    u8 *points;
+    s32 index;
+    CFState1519CDB0 *state;
+    CFTrailPoint1519CDB0 *point;
+    CFIdentity1519CDB0 *identity;
+    f32 *previous;
+
+    state = arg0->state;
+    points = arg0->points;
+    previous = arg0->position;
+    if (arg0->unk2C >= 2) {
+        f32 interpolated_z;
+        total = 0.0f;
+        spacing = state->spacing * arg1;
+        index = arg0->point_end;
+        next = 0.0f;
+        do {
+            f32 distance;
+            index--;
+            if (index < 0) {
+                index = arg0->point_capacity - 1;
+            }
+            point = (CFTrailPoint1519CDB0 *)(index * 0x28 + points);
+            distance = point->distance;
+            total += distance;
+            if (next <= total) {
+                identity = state->identity;
+                factor = (total - next) / distance;
+                func_1505D1C4(((previous[0] - point->position[0]) * factor) + point->position[0],
+                    ((previous[1] - point->position[1]) * factor) + point->position[1],
+                    (interpolated_z = ((previous[2] - point->position[2]) * factor) + point->position[2]), arg2,
+                    ((s32)identity - (s32)D_800CC2D0) / 0x32C,
+                    identity->unk76, 0, 0);
+                next += spacing;
+            }
+            previous = point->position;
+        } while (index != arg0->point_index);
+    }
+#undef arg0
+}
