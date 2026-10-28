@@ -294,7 +294,36 @@ void func_1507DE4C(struct127 *arg0) {
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A9D90/func_1507DF10.s")
+void func_1507DF10(void *arg0, s32 arg1) {
+    switch (arg1) {
+    case 9:
+        *(s32 *)((u8 *)arg0 + 0x94) = (s32) (*(s32 *)((u8 *)arg0 + 0x94) | 0x20);
+        *(s32 *)((u8 *)arg0 + 0x9C) = (s32) (*(s32 *)((u8 *)arg0 + 0x9C) | 0x78);
+        *(s32 *)((u8 *)arg0 + 0x2E4) = 1;
+        return;
+    case 8:
+        *(s32 *)((u8 *)arg0 + 0x94) |= 0x40;
+        *(s32 *)((u8 *)arg0 + 0x94) &= ~0x200;
+        *(s32 *)((u8 *)arg0 + 0x9C) = (s32) (*(s32 *)((u8 *)arg0 + 0x9C) | 0xF00);
+        *(s32 *)((u8 *)arg0 + 0x2E4) = 2;
+        return;
+    case 6:
+    case 7:
+        *(s32 *)((u8 *)arg0 + 0x94) |= 0xE;
+        *(s32 *)((u8 *)arg0 + 0x94) &= ~0x410;
+        *(s32 *)((u8 *)arg0 + 0x9C) = (s32) (*(s32 *)((u8 *)arg0 + 0x9C) | 0xEE0000);
+        *(s32 *)((u8 *)arg0 + 0x2E4) = 4;
+        return;
+    case 4:
+    case 5:
+        *(s32 *)((u8 *)arg0 + 0x94) |= 0x80;
+        *(s32 *)((u8 *)arg0 + 0x94) &= ~0x500;
+        *(s32 *)((u8 *)arg0 + 0x2E4) = 8;
+        /* fallthrough */
+    default:
+        return;
+    }
+}
 void func_1507DFE4(s32 arg0, s32 arg1) {
     s32 temp;
     s16 sp5C[3];
