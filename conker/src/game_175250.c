@@ -207,7 +207,70 @@ s32 func_15148AF4(struct Struct15148AF4_arg0 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_175250/func_15148BA4.s")
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3f_15148BA4;
+
+typedef s32 (*Game175250HitCallback)(void *, f32, f32, f32, f32, void *);
+extern Game175250HitCallback D_8008A430[];
+extern Game175250HitCallback D_8008A450[];
+s32 func_15046C80(f32 *, u16, f32, void *);
+
+s32 func_15148BA4(Game175250Trail *arg0) {
+    s32 index;
+    Game175250Motion *motion;
+    s32 points;
+    Vec3f_15148BA4 oldPosition;
+    Vec3f_15148BA4 position;
+    u8 callback;
+
+    motion = arg0->motion;
+    points = (s32)arg0->points;
+    index = arg0->end;
+    if (motion->flags & 7) {
+        oldPosition = *(Vec3f_15148BA4 *)((u32)points + arg0->start * 0x14);
+    }
+    do {
+        index--;
+        if (index < 0) {
+            index = arg0->capacity - 1;
+        }
+        ((Game175250Point *)((u32)points + index * 0x14))->velocity -= motion->gravity * D_800BE9A4;
+        ((Game175250Point *)((u32)points + index * 0x14))->x += motion->speedX * D_800BE9A4;
+        ((Game175250Point *)((u32)points + index * 0x14))->y += ((Game175250Point *)((u32)points + index * 0x14))->velocity * D_800BE9A4;
+        ((Game175250Point *)((u32)points + index * 0x14))->z += motion->speedZ * D_800BE9A4;
+    } while (index != arg0->start);
+    if (motion->flags & 0x17) {
+        if (((Game175250Point *)((u32)points + arg0->start * 0x14))->y < oldPosition.y) {
+            position.x = ((Game175250Point *)((u32)points + arg0->start * 0x14))->x;
+            position.y = oldPosition.y;
+            position.z = ((Game175250Point *)((u32)points + arg0->start * 0x14))->z;
+            if (func_15046C80(&position.x, 0, ((Game175250Point *)((u32)points + arg0->start * 0x14))->y,
+                              &arg0->collision) != 0) {
+                if (arg0->collision.kind == 3) {
+                    callback = motion->callback24;
+                    if (callback != 0 &&
+                        D_8008A450[callback](arg0, oldPosition.x, oldPosition.y,
+                                             oldPosition.z, arg0->collision.height,
+                                             arg0->collision.data) == 0) {
+                        return 0;
+                    }
+                } else {
+                    callback = motion->callback23;
+                    if (callback != 0 &&
+                        D_8008A430[callback](arg0, oldPosition.x, oldPosition.y,
+                                             oldPosition.z, arg0->collision.height,
+                                             arg0->collision.data) == 0) {
+                        return 0;
+                    }
+                }
+            }
+        }
+    }
+    return 1;
+}
 
 s32 func_15148DE0(void *arg0) {
     s32 idx;
