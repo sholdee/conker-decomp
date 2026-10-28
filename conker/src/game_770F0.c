@@ -19,7 +19,47 @@ extern f32 sqrtf(f32);
 
 #pragma function sqrtf
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_770F0/func_15049CB8.s")
+typedef struct { s32 v[3]; } Nxt3;
+extern Nxt3 D_80085FF0;
+
+void func_15049CB8(f32 m[4][4], f32 *q) {
+    f32 tr;
+    f32 s;
+    s32 i;
+    s32 j;
+    s32 k;
+
+    tr = m[0][0] + m[1][1] + m[2][2] + 1.0f;
+    if (tr > 0.01f) {
+        extern f32 sqrtf(f32);
+
+        s = sqrtf(tr);
+        q[0] = s * 0.5f;
+        s = 0.5f / s;
+        q[1] = (m[1][2] - m[2][1]) * s;
+        q[2] = (m[2][0] - m[0][2]) * s;
+        q[3] = (m[0][1] - m[1][0]) * s;
+    } else {
+        Nxt3 nxt = D_80085FF0;
+        f32 t;
+
+        i = 0;
+        if (m[0][0] < m[1][1]) {
+            i = 1;
+        }
+        if (m[i][i] < m[2][2]) {
+            i = 2;
+        }
+        j = nxt.v[i];
+        k = nxt.v[j];
+        s = sqrtf(m[i][i] - m[j][j] - m[k][k] + 1.0f);
+        q[i + 1] = s * 0.5f;
+        t = 0.5f / s;
+        q[0] = (m[j][k] - m[k][j]) * t;
+        q[j + 1] = (m[i][j] + m[j][i]) * t;
+        q[k + 1] = (m[i][k] + m[k][i]) * t;
+    }
+}
 
 void func_15049EDC(f32 *a, f32 *b, f32 t, f32 *out) {
     f32 cosom;
