@@ -118,7 +118,30 @@ s32 func_15085DF8(f32 arg0, f32 arg1, f32 arg2, s8 arg3, s8 arg4) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_B3020/func_15086364.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_B3020/func_15086BD0.s")
+#pragma intrinsic(sqrtf)
+
+f32 func_15086BD0(s32 arg0, s32 arg1) {
+    f32 temp_fa0;
+    f32 temp_fa1;
+    f32 temp_fv1;
+    s16 (*base)[8];
+    u8 *temp_a2;
+    u8 *temp_v1;
+
+    if ((arg0 == 0xFF) || (arg1 == 0xFF)) {
+        return 0.0f;
+    }
+    base = (s16 (*)[8])D_800D2350;
+    temp_v1 = (u8 *)base[arg0];
+    temp_a2 = (u8 *)base[arg1];
+    temp_fv1 = (f32) (*(s16 *)((u8 *)temp_v1 + 0) - *(s16 *)((u8 *)temp_a2 + 0));
+    temp_fa0 = (f32) (*(s16 *)((u8 *)temp_v1 + 2) - *(s16 *)((u8 *)temp_a2 + 2));
+    temp_fa1 = (f32) (*(s16 *)((u8 *)temp_v1 + 4) - *(s16 *)((u8 *)temp_a2 + 4));
+    return sqrtf((temp_fv1 * temp_fv1) + (temp_fa0 * temp_fa0) + (temp_fa1 * temp_fa1));
+}
+
+void func_15086C68(void) {
+}
 
 extern void func_150A3194(s32, s32, s32, s32, s32);
 
