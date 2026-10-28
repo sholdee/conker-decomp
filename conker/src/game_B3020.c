@@ -965,7 +965,47 @@ void func_1508B1D4(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_B3020/func_1508B20C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_B3020/func_1508B2A8.s")
+typedef struct {
+    f32 x;
+    f32 z;
+    f32 radiusSq;
+    f32 dist[8];
+    s16 count;
+    u8 ids[8];
+    u8 visited[1];
+} Search1508B2A8;
+
+void func_1508B2A8(u8 id, Search1508B2A8 *s) {
+    Node15088F30 *node;
+    f32 dx;
+    f32 dist;
+    s32 j;
+    u8 link;
+
+    /* BUG (original game): the bit index should be id & 7, so ids 8 apart share a visited bit */
+    s->visited[id >> 3] |= 1 << (id & 3);
+    node = id + (Node15088F30 *)D_800D2350;
+    dx = node->x - s->x;
+    dist = node->z - s->z;
+    dist = (dx * dx) + (dist * dist);
+    if (s->radiusSq < dist) {
+        if (s->count < 8) {
+            s->ids[s->count] = id;
+            s->dist[s->count] = dist;
+            s->count++;
+        }
+    } else {
+        for (j = 0; j < 5; j++) {
+            if (node->links[j] != 0xFF) {
+                link = node->links[j];
+                if (!(s->visited[link >> 3] & (1 << (link & 3)))) {
+                    func_1508B2A8(node->links[j], s);
+                }
+            }
+        }
+    }
+}
+
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_B3020/func_1508B3F8.s")
 
