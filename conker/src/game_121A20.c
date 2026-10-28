@@ -139,8 +139,6 @@ void func_150F4570(struct17 *arg0, struct17 *arg1, u8 arg2, f32 arg3, f32 arg4, 
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_121A20/func_150F48D0.s")
-
 typedef struct {
     u8 pad0[0x20];
     f32 unk20;
@@ -162,6 +160,33 @@ typedef struct {
     u8 pad8C[0xE4];
     struct sub150F4_full unk170;
 } Actor150F4;
+
+extern void func_1514373C(f32 arg0, f32 arg1, f32 *arg2, f32 *arg3);
+
+s32 func_150F48D0(Actor150F4 *arg0) {
+    struct sub150F4_full *p;
+
+    p = &arg0->unk170;
+    p->unk0 -= D_800BE9A4;
+    if (p->unk0 <= 0.0f) {
+        return 0;
+    }
+    {
+    f32 h;
+    f32 r;
+    func_1514373C(p->unk10, p->unk20, &r, &h);
+    p->unk10 += p->unk14 * D_800BE9A4;
+    p->unk4.unk0 += arg0->unk44 * D_800BE9A4;
+    p->unk4.unk4 += arg0->unk48 * D_800BE9A4;
+    p->unk4.unk8 += arg0->unk4C * D_800BE9A4;
+    arg0->unk38.unk0 = p->unk4.unk0 + r * p->unk18;
+    arg0->unk38.unk4 = p->unk4.unk4 + h;
+    arg0->unk38.unk8 = p->unk4.unk8 - r * p->unk1C;
+    }
+    arg0->unk20 += arg0->unk50 * D_800BE9A4;
+    arg0->unk24 += arg0->unk54 * D_800BE9A4;
+    arg0->unk28 += arg0->unk58 * D_800BE9A4;
+}
 
 extern struct17 *func_15144B34(s32);
 extern f32 func_15143E64(struct17 *);
