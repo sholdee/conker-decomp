@@ -166,7 +166,116 @@ struct260 *func_151A3504(struct frame151A3504 *arg0, u8 arg1) {
     return temp_v0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1D0840/func_151A361C.s")
+typedef struct TimedVec151A361C {
+    f32 x;
+    f32 y;
+    f32 z;
+} TimedVec151A361C;
+
+typedef struct TimedEntry151A361C {
+    TimedVec151A361C value0;
+    f32 fieldC;
+    s16 field10;
+    s16 field12;
+    u8 field14;
+    u8 field15;
+    u8 pad16[2];
+} TimedEntry151A361C;
+
+typedef struct TimedState151A361C {
+    u8 *owner;
+    u8 identity;
+    u8 transformIndex;
+    u8 pad06[2];
+    TimedVec151A361C input08;
+    f32 field14;
+    s16 field18;
+    s16 field1A;
+    s16 field1C;
+    u8 pad1E[2];
+    f32 field20;
+    f32 field24;
+    u8 field28;
+    u8 field29;
+    s8 field2A;
+    u8 pad2B[5];
+    u8 flags30;
+    u8 pad31[3];
+    TimedVec151A361C previous34;
+    f32 field40;
+    u8 field44;
+    u8 pad45[3];
+    f32 field48;
+    u8 field4C;
+} TimedState151A361C;
+
+typedef struct TimedObject151A361C {
+    u8 pad0[0xC];
+    u8 fieldC;
+    u8 pad0D[3];
+    TimedVec151A361C position10;
+    u8 pad1C[2];
+    u16 flags1E;
+    u8 pad20[5];
+    u8 field25;
+    u8 pad26[6];
+    s8 field2C;
+    s8 field2D;
+    s8 field2E;
+    u8 pad2F[0x25];
+    TimedVec151A361C output54;
+    u8 pad60[0x34];
+    TimedEntry151A361C *entries94;
+    TimedState151A361C *state98;
+} TimedObject151A361C;
+
+s32 func_151A361C(TimedObject151A361C *arg0) {
+    TimedState151A361C *state = arg0->state98;
+    TimedEntry151A361C *entries = arg0->entries94;
+    TimedEntry151A361C *entry;
+    s32 index;
+
+    if (arg0->field2C < 2 && (state->flags30 & 1)) {
+        return 0;
+    }
+    state->field4C = (u32)state->field4C + (u32)(s32)state->field2A * (u32)D_800BE9E4;
+    index = arg0->field2E;
+    if (index != arg0->field2D) {
+        do {
+            index--;
+            if (index < 0) {
+                index = arg0->field25 - 1;
+            }
+            entry = &entries[index];
+            if (entry->field12 > 0) {
+                entry->field12 = (u32)(s32)entry->field12 - (u32)D_800BE9E4;
+            } else {
+                entry->field10 = (u32)(s32)entry->field10 - (u32)D_800BE9E4 * (u32)(s32)state->field1C;
+            }
+            entry->field14 = 0xFF;
+            entry->fieldC += D_800BE9A4 * state->field24;
+            if (entry->field10 < 0) {
+                state->flags30 &= ~2;
+                while (index != arg0->field2D) {
+                    arg0->field2D++;
+                    if (arg0->field2D == arg0->field25) {
+                        arg0->field2D = 0;
+                    }
+                    arg0->field2C--;
+                }
+                entries[arg0->field2D].field10 = 0;
+            }
+        } while (index != arg0->field2D);
+    }
+    if (arg0->field2C > 0) {
+        arg0->output54 = entries[arg0->field2D].value0;
+    } else {
+        arg0->output54.x = 0.0f;
+        arg0->output54.y = 0.0f;
+        arg0->output54.z = 0.0f;
+    }
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1D0840/func_151A37C0.s")
 
