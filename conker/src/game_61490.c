@@ -9,7 +9,71 @@ extern void func_150F1A00(struct127 *);
 extern void func_150DFDA4(struct127 *);
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_61490/func_15033FE0.s")
+typedef struct GameCommand {
+    s16 opcode;
+    s16 value;
+} GameCommand;
+
+GameCommand *func_150341BC(GameCommand *, s32);
+s16 *func_15034340(s16 *, s32);
+s16 *func_150343B0(s16 *, s32);
+GameCommand *func_15034420(GameCommand *, s32);
+s16 *func_150344A0(s16 *, s32);
+void *func_150BE438(void *, s32);
+GameCommand *func_150B58F0(GameCommand *, s32);
+GameCommand *func_150F1B48(GameCommand *, s32);
+GameCommand *func_150D8590(GameCommand *, s32);
+s32 func_1503DA3C(s32, s32);
+s16 *func_15034860(GameCommand *, struct127 *, s32, s32);
+
+void func_15033FE0(GameCommand *arg0, s32 arg1) {
+    struct127 *actor;
+    s32 first;
+    GameCommand *cursor;
+
+    actor = &D_800CC2D0[arg1];
+    cursor = arg0;
+    if (actor->unk1D4 == 0) {
+        arg0->opcode = 0x1000;
+        return;
+    }
+    if (actor->interaction_state == 1) {
+        cursor = func_150341BC(arg0, arg1);
+    } else {
+        switch (actor->id) {
+        case 0x2B:
+            cursor = func_150D8590(arg0, arg1);
+            break;
+        case 0x28:
+        case 0x77:
+            cursor = (GameCommand *)func_150344A0(&arg0->opcode, arg1);
+            break;
+        case 0x4B:
+            cursor = func_150B58F0(arg0, arg1);
+            break;
+        case 0x7B:
+            cursor = func_150F1B48(arg0, arg1);
+            break;
+        case 0x8A:
+            cursor = func_15034420(arg0, arg1);
+            break;
+        case 0x21:
+            cursor = func_150BE438(arg0, arg1);
+            break;
+        case 0x98:
+            cursor = (GameCommand *)func_15034340((s16 *)arg0, arg1);
+            break;
+        case 0x5A:
+        case 0x74:
+        case 0x7A:
+        case 0x8D:
+            cursor = (GameCommand *)func_150343B0((s16 *)arg0, arg1);
+            break;
+        }
+    }
+    first = func_1503DA3C(actor->id, 0);
+    *func_15034860(cursor, actor, first, func_1503DA3C(actor->id, 1)) = 0x1000;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_61490/func_150341BC.s")
 
