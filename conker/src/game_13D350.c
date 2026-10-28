@@ -729,4 +729,30 @@ void func_15114F04(s32 arg0, s32 arg1, s32 arg2) {
     func_1001001C(func_15114CC4, arg0, 0, arg1, arg2);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_13D350/func_15114F44.s")
+extern s32 D_800DBF9C;
+extern s32 D_800DBFA0;
+extern s32 D_800DBFA4;
+
+void func_15114F44(s32 arg0, s32 arg1, s32 arg2) {
+    s32 j;
+    s32 i;
+    u32 (*list)[3];
+
+    if ((D_800BE9F0 == 0x12) || (D_800BE9F0 == 0x36) || (D_800BE9F0 == 0x13)) {
+        for (j = 0; j < 2; j++) {
+            list = (u32 (*)[3])D_800DBDD8[j];
+            for (i = 0; i < D_800DBE18[j]; i++) {
+                /* every command word must be a KSEG0 address, 4-byte aligned */
+                if (((list[i][0] & 0xF0000000) != 0x80000000) || ((list[i][1] & 0xF0000000) != 0x80000000) ||
+                    ((list[i][2] & 0xF0000000) != 0x80000000) ||
+                    (list[i][0] & 3) || (list[i][1] & 3) || (list[i][2] & 3)) {
+                    D_8003C8E0 = 0xC00005A;
+                    func_150AD770();
+                }
+            }
+        }
+        D_800DBF9C = arg0;
+        D_800DBFA0 = arg1;
+        D_800DBFA4 = arg2;
+    }
+}
