@@ -1,5 +1,12 @@
 #include <ultra64.h>
+/* include/functions.h declares func_15169260's first parameter as s32; func_150E8930 passes
+ * a struct address that IDO must build directly in a0, which only a pointer parameter
+ * produces.  The header declaration is renamed out of the way and a file-local prototype
+ * is used instead (same approach as game_10CD70.c). */
+#define func_15169260 func_15169260_s32_decl_in_functions_h
 #include "functions.h"
+#undef func_15169260
+void func_15169260(void *, s32, s32, s32);
 #include "variables.h"
 
 typedef struct {
@@ -63,7 +70,7 @@ extern f32 D_800A131C;
 extern f32 D_800A1320;
 extern void func_151D3FF4(Struct150E81A8Vec *arg0, u8 arg1, s32 arg2);
 extern void func_1514FCE8(Struct150E81A8 *arg0, u8 arg1, s32 arg2);
-extern void func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
+extern void *func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
 extern s32 func_151337C0(f32 *arg0);
 
 
@@ -524,7 +531,7 @@ void func_150E8854(void) {
 }
 
 extern f32 D_800A1378;
-extern void func_150E8930(void *);
+extern void func_150E8930();
 
 void func_150E88C0(void *arg0) {
     *(f32 *)((u8 *)arg0 + 0x28) -= D_800BE9A4;
@@ -534,7 +541,54 @@ void func_150E88C0(void *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_113D60/func_150E8930.s")
+typedef struct Game115D70Pair {
+    s32 first;
+    s32 second;
+} Game115D70Pair;
+
+typedef struct Game115D70Spawn {
+    s8 active;
+    u8 pad1;
+    s16 duration;
+    s8 size;
+    s8 enabled;
+    s8 sentinel;
+    u8 pad7;
+} Game115D70Spawn;
+
+extern Game115D70Pair D_80088A80;
+extern u8 D_800BE9EB;
+extern void func_15164F0C(u8, u8, void *, u8, s32);
+void func_150E8A80(void);
+void func_150E90DC(void);
+
+void func_150E8930(void) {
+    Game115D70Pair sp30;
+    Game115D70Spawn sp28;
+    s32 active;
+
+    sp30 = D_80088A80;
+    func_15169260(&sp30, 2, 0, 0x1B);
+    func_15164F0C(0, D_800BE9EB, 0, 0xFF, 1);
+    sp28.active = 1;
+    sp28.duration = (func_150ADA20() % 21U) + 0x14;
+    sp28.enabled = 1;
+    sp28.size = (func_150ADA20() % 6U) + 3;
+    sp28.sentinel = -1;
+    func_151D8868(&sp28, 0, 0xFF, 1);
+    active = D_800DCDC4;
+    if (active != 0) {
+        func_150E8A80();
+        active = D_800DCDC4;
+    }
+    if (active != 0) {
+        func_150E90DC();
+    }
+    func_10010F30(0x4C8, 0x7FFF, 0x40,
+                   (s16)(0x200 - (func_150ADA20() & 0x400)), 0);
+    func_10010F30(0x4CD, 0x5DC0, 0x40,
+                   (s16)(0x200 - (func_150ADA20() & 0x400)), 0);
+}
 
 extern f32 D_800A137C;
 extern f32 D_800A1380;
