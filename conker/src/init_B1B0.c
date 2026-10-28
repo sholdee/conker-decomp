@@ -860,9 +860,6 @@ s32 func_1000CD40(s32 arg0, s32 arg1, s32 arg2) {
     return arg0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000CDA0.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000CEAC.s")
-
 typedef struct SequenceRecordState {
     s32 index;
     s32 id;
@@ -894,6 +891,33 @@ typedef struct SequenceRecordState {
     u8 pad5E[2];
     struct SequenceRecordState *state;
 } SequenceRecordState;
+
+s32 func_1000CDA0(u8 arg0, SequenceRecordState *record) {
+    if (arg0 == 0) {
+        return 1;
+    }
+    if (record != 0) {
+        if (record->index >= 0) {
+            if (D_800417B0[record->index] == 0 || record->id <= 0) {
+                return 1;
+            }
+            if (func_1000853C(record->index) == 3) {
+                return 1;
+            }
+            if (!(D_8002B078[record->id][0] & 0x20)) {
+                D_800418AC[record->index] |= 3;
+            }
+            arg0 &= ~D_800418AC[record->index];
+        } else {
+            return 1;
+        }
+    } else {
+        return 1;
+    }
+    return arg0 == 0;
+}
+#pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000CEAC.s")
+
 
 typedef s32 (*SequenceCallback)(s32, s32, f32, f32, f32);
 
