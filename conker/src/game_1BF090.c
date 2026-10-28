@@ -194,7 +194,59 @@ u8 func_1519257C(s32 arg0, s32 arg1) {
     return ret;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1BF090/func_151925C4.s")
+extern Header2 D_800A8030[];
+extern u8 D_800A8060[];
+extern f32 D_800A8064[];
+extern f32 D_800A8074[];
+extern f32 D_800A8084[];
+extern f32 D_800A8094[];
+extern s16 D_800A80A4[];
+extern s16 D_800A80AC[];
+extern f32 D_800A80B4[];
+extern f32 D_800A80C4[];
+extern f32 D_800A80D4[];
+extern u8 D_800A80E4[];
+
+s32 func_151925C4(u8 *arg0, s16 arg1, u8 arg2, s32 arg3) {
+    s32 kind;
+    s32 result;
+    u8 mode;
+
+    if (arg0 == 0) {
+        return 0;
+    }
+    kind = -1;
+    result = 0;
+    switch (arg0[4]) {
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+        kind = 0;
+        break;
+    case 0x10:
+        kind = 1;
+        break;
+    case 0x58:
+        kind = 2;
+        break;
+    case 0x79:
+        kind = 3;
+        break;
+    }
+    if (kind != -1) {
+        result = (s32)func_15191BE0((struct Struct15191BE0Arg0 *)arg0, &D_800A8030[kind],
+                               D_800A8060[kind], D_800A8064[kind],
+                               D_800A8074[kind], arg1,
+                               D_800A8084[kind], D_800A8094[kind],
+                               D_800A80A4[kind], D_800A80AC[kind],
+                               0x64, 0x9B, D_800A80B4[kind],
+                               D_800A80C4[kind], D_800A80D4[kind],
+                               D_800A80E4[kind], arg2, arg3);
+    }
+    return result;
+}
 
 void func_1519277C(s32 arg0, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
