@@ -3,11 +3,61 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_770F0/func_15049C40.s")
+void func_15049C40(f32 *arg0, f32 *arg1) {
+    f32 d;
+
+    d = (arg0[0] * arg1[0]) + (arg0[1] * arg1[1]) + (arg0[2] * arg1[2]) + (arg0[3] * arg1[3]);
+    if (d < 0.0f) {
+        arg1[0] = -arg1[0];
+        arg1[1] = -arg1[1];
+        arg1[2] = -arg1[2];
+        arg1[3] = -arg1[3];
+    }
+}
+
+extern f32 sqrtf(f32);
+
+#pragma function sqrtf
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_770F0/func_15049CB8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_770F0/func_15049EDC.s")
+void func_15049EDC(f32 *a, f32 *b, f32 t, f32 *out) {
+    f32 cosom;
+    f32 omega;
+    f32 ang0;
+    f32 ang1;
+    f32 sinom;
+    f32 scale0;
+    f32 scale1;
+
+    cosom = (a[0] * b[0]) + (a[1] * b[1]) + (a[2] * b[2]) + (a[3] * b[3]);
+    if (cosom < -0.99999f) {
+        scale0 = 1.0f - t;
+        out[0] = scale0 * a[0] - b[0] * t;
+        out[1] = scale0 * a[1] - b[1] * t;
+        out[2] = scale0 * a[2] - b[2] * t;
+        out[3] = scale0 * a[3] - b[3] * t;
+    } else if (cosom <= 0.99999f) {
+        extern f32 func_15048360(f32);
+
+        omega = func_15048360(cosom);
+        ang0 = (1.0f - t) * omega;
+        ang1 = t * omega;
+        sinom = sinf(omega);
+        scale0 = sinf(ang0) / sinom;
+        scale1 = sinf(ang1) / sinom;
+        out[0] = scale0 * a[0] + b[0] * scale1;
+        out[1] = scale0 * a[1] + b[1] * scale1;
+        out[2] = scale0 * a[2] + b[2] * scale1;
+        out[3] = scale0 * a[3] + b[3] * scale1;
+    } else {
+        scale0 = 1.0f - t;
+        out[0] = scale0 * a[0] + b[0] * t;
+        out[1] = scale0 * a[1] + b[1] * t;
+        out[2] = scale0 * a[2] + b[2] * t;
+        out[3] = scale0 * a[3] + b[3] * t;
+    }
+}
 
 void func_1504A140(f32 *q, f32 *m) {
     f32 s;
