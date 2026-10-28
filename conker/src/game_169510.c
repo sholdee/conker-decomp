@@ -5,7 +5,8 @@
 
 typedef struct {
     s32 unk0;
-    u16 unk4;
+    u8  unk4;
+    u8  unk5;
     u16 unk6;
     u16 unk8;
     u16 unkA;
@@ -50,22 +51,136 @@ void func_1513FFF4(struct1513FFF4 *arg0, u8 arg1, u8 arg2);
 void func_151400D0(Dst151400D0 *dst, Src151400D0 *src);
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513C060.s")
+typedef struct {
+    u8  pad0[0x10];
+    s32 unk10;
+    s32 unk14;
+    s32 unk18;
+    s16 unk1C;
+    u8  unk1E;
+    u8  pad1F[0x1];
+    s32 unk20;
+    s32 unk24;
+    u8  unk28;
+    u8  pad29[0x4];
+    u8  unk2D;
+    u8  pad2E[0xC];
+    s16 unk3A;
+    s16 unk3C;
+    u8  pad3E[0x42];
+    u8  unk80;
+    u8  unk81;
+} Anim1513C060;
+
+extern s32 (*D_80089C70[])(Anim1513C060 *);
+extern s32 (*D_80089CA8[])(Anim1513C060 *);
+
+void func_1513C060(Anim1513C060 *arg0) {
+    s32 rate;
+    s8 finished;
+    s32 numFrames;
+    s32 limit;
+    s32 temp;
+
+    if (!(arg0->unk10 & 1)) {
+        return;
+    }
+
+    finished = 0;
+    if (arg0->unk18 & 1) {
+        arg0->unk1C -= D_800BE9E4;
+        if (arg0->unk1C < 0) {
+            finished = 1;
+        }
+    }
+    if (arg0->unk80 != 0) {
+        if (D_80089C70[arg0->unk80](arg0) == 0) {
+            finished = 1;
+        }
+    }
+
+    if ((arg0->unk18 & 0x8000) && !finished) {
+        if (arg0->unk1C < arg0->unk3A) {
+            temp = arg0->unk1C * arg0->unk3C;
+            if (temp < arg0->unk28) {
+                arg0->unk28 = temp;
+            }
+        }
+    }
+    if (arg0->unk18 & 0x10000) {
+        if (!finished) {
+            if (arg0->unk1C < arg0->unk3A) {
+                temp = arg0->unk1C * arg0->unk3C;
+                if (temp < arg0->unk28) {
+                    arg0->unk2D = temp;
+                }
+            }
+        }
+    }
+
+    if (!finished) {
+        rate = arg0->unk24;
+        if (rate != 0) {
+            numFrames = D_80090B60[arg0->unk1E].unk4;
+            limit = (numFrames << 16) - 1;
+            arg0->unk20 += rate * D_800BE9E4;
+            if (limit < arg0->unk20) {
+                if (arg0->unk18 & 2) {
+                    finished = 1;
+                } else if (arg0->unk18 & 0x40) {
+                    arg0->unk24 = 0;
+                    arg0->unk20 = limit;
+                } else if (arg0->unk18 & 4) {
+                    arg0->unk20 = limit - (arg0->unk20 % limit);
+                    arg0->unk24 = -rate;
+                } else {
+                    do {
+                        arg0->unk20 -= limit;
+                    } while (limit < arg0->unk20);
+                }
+            } else if (arg0->unk20 < 0) {
+                if (arg0->unk18 & 8) {
+                    finished = 1;
+                } else if (arg0->unk18 & 0x80) {
+                    arg0->unk24 = 0;
+                    arg0->unk20 = 0;
+                } else if (arg0->unk18 & 4) {
+                    arg0->unk20 = (-arg0->unk20) % limit;
+                    arg0->unk24 = -rate;
+                } else {
+                    do {
+                        arg0->unk20 += limit;
+                    } while (arg0->unk20 < 0);
+                }
+            }
+        }
+    }
+
+    if (finished) {
+        if (arg0->unk81 != 0) {
+            if (D_80089CA8[arg0->unk81](arg0) != 0) {
+                func_1516972C(arg0);
+            }
+        } else {
+            func_1516972C(arg0);
+        }
+    }
+}
 
 struct210 *func_1513C350(struct210 *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5, s32 arg6, struct167 *arg7, s32 arg8, u8 arg9, s32 argA) {
     struct210 *temp_v0;
-    u8 phi_v0;
+    u8 id;
     s32 i;
 
     if (arg1 == 0) {
         arg1 = &D_800A4AA0;
     }
     if (arg0->unk0 & 0x40000) {
-        phi_v0 = 0x4A;
+        id = 0x4A;
     } else {
-        phi_v0 = 0x1B;
+        id = 0x1B;
     }
-    temp_v0 = func_15167A68(phi_v0, argA, arg8 + 0xB0, 1, arg9, 1);
+    temp_v0 = func_15167A68(id, argA, arg8 + 0xB0, 1, arg9, 1);
     if (temp_v0 == 0) {
         return NULL;
     }
@@ -266,23 +381,140 @@ void func_1513CF9C(s32 arg0, s32 arg1, u8 arg2) {
 void func_1513CFD0(s32 arg0, s32 arg1, s32 arg2) {
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513CFE4.s")
+typedef struct {
+    u8  pad0[0x10];
+    s32 unk10;
+    u8  pad14[0x4];
+    u8  unk18;
+    u8  pad19[0x3];
+    s16 unk1C;
+    u8  pad1E[0x2];
+    s32 unk20;
+    s32 unk24;
+    u8  pad28[0x3];
+    u8  unk2B;
+    u8  pad2C[0x2C];
+    s32 unk58;
+    u8  unk5C;
+    u8  pad5D[0xF];
+    s16 unk6C;
+    s16 unk6E;
+    u8  unk70;
+    u8  unk71;
+    u8  unk72;
+} Anim1513CFE4;
+
+extern s32 (*D_80089CB8[])(Anim1513CFE4 *);
+extern s32 (*D_80089D60[])(Anim1513CFE4 *);
+extern s32 (*D_80089E10[])(Anim1513CFE4 *);
+
+void func_1513CFE4(Anim1513CFE4 *arg0) {
+    s32 rate;
+    s8 finished;
+    s32 numFrames;
+    s32 limit;
+    s32 temp;
+
+    if (!(arg0->unk10 & 1)) {
+        return;
+    }
+
+    finished = 0;
+    if (arg0->unk58 & 1) {
+        arg0->unk1C -= D_800BE9E4;
+        if (arg0->unk1C < 0) {
+            finished = 1;
+        }
+    }
+    if (arg0->unk70 != 0) {
+        if (D_80089CB8[arg0->unk70](arg0) == 0) {
+            finished = 1;
+        }
+    }
+    if (arg0->unk71 != 0) {
+        if (D_80089D60[arg0->unk71](arg0) == 0) {
+            finished = 1;
+        }
+    }
+
+    if ((arg0->unk58 & 0x8000000) && !finished) {
+        if (arg0->unk1C < arg0->unk6C) {
+            temp = arg0->unk1C * arg0->unk6E;
+            if (temp < arg0->unk5C) {
+                arg0->unk5C = temp;
+            }
+        }
+    }
+    if (arg0->unk58 & 0x10000000) {
+        if (!finished) {
+            if (arg0->unk1C < arg0->unk6C) {
+                temp = arg0->unk1C * arg0->unk6E;
+                if (temp < arg0->unk5C) {
+                    arg0->unk2B = temp;
+                }
+            }
+        }
+    }
+
+    if (!finished) {
+        rate = arg0->unk24;
+        if (rate != 0) {
+            numFrames = D_80090B60[arg0->unk18].unk4;
+            limit = (numFrames << 16) - 1;
+            arg0->unk20 += rate * D_800BE9E4;
+            if (limit < arg0->unk20) {
+                if (arg0->unk58 & 0x800) {
+                    finished = 1;
+                } else if (arg0->unk58 & 0x400) {
+                    arg0->unk20 = limit - (arg0->unk20 % limit);
+                    arg0->unk24 = -rate;
+                } else {
+                    do {
+                        arg0->unk20 -= limit;
+                    } while (limit < arg0->unk20);
+                }
+            } else if (arg0->unk20 < 0) {
+                if (arg0->unk58 & 0x1000) {
+                    finished = 1;
+                } else if (arg0->unk58 & 0x400) {
+                    arg0->unk20 = (-arg0->unk20) % limit;
+                    arg0->unk24 = -rate;
+                } else {
+                    do {
+                        arg0->unk20 += limit;
+                    } while (arg0->unk20 < 0);
+                }
+            }
+        }
+    }
+
+    if (finished) {
+        if (arg0->unk72 != 0) {
+            if (D_80089E10[arg0->unk72](arg0) != 0) {
+                finished = 0;
+            }
+        }
+    }
+    if (finished) {
+        func_1516972C(arg0);
+    }
+}
 
 void *func_1513D2F0(void *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, u8 argA, s32 argB) {
     struct210 *temp_v0;
     s32 flags;
-    s32 phi_v0;
+    s32 id;
     s32 i;
 
     flags = *(s32 *)((u8 *)arg0 + 0x40);
     if (flags & 0x800000) {
-        phi_v0 = 0x56;
+        id = 0x56;
     } else if (flags & 0x2000000) {
-        phi_v0 = 0x49;
+        id = 0x49;
     } else {
-        phi_v0 = 0x1C;
+        id = 0x1C;
     }
-    temp_v0 = func_15167A68(phi_v0, argB, arg9 + 0x110, 1, argA, (flags & 0x80000000U) ? 2 : 1);
+    temp_v0 = func_15167A68(id, argB, arg9 + 0x110, 1, argA, (flags & 0x80000000U) ? 2 : 1);
     if (temp_v0 == NULL) {
         return NULL;
     }
@@ -505,19 +737,11 @@ void func_1513E134(void) {
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513E13C.s")
+// PERMUTER CANDIDATE best 3348 — reconstruction below is semantically close (first 12 instrs match)
+// but FP store scheduling + a +4 stack-slot shift on sp48/sp1C/sp30 differ.
 // void func_1513E13C(struct210 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 arg6) {
-//     f32 sp48;
-//     f32 sp30;
-//     f32 sp1C;
-//
-//     f32 temp_f0;
-//     f32 temp_f12;
-//     f32 temp_f14;
-//     f32 temp_f16;
-//     f32 temp_f18;
-//     f32 temp_f2;
-//     s32 temp_f10;
-//
+//     f32 sp48; f32 sp30; f32 sp1C;
+//     f32 temp_f0, temp_f12, temp_f14, temp_f16, temp_f18, temp_f2; s32 temp_f10;
 //     sp48 = func_151423D8((arg6 - 0x40));
 //     temp_f0 = func_151423D8(arg6);
 //     temp_f12 = arg5 * sp48;
@@ -582,72 +806,30 @@ typedef struct {
 } struct_func_1513E6E8;
 
 s32 func_1513E6E8(struct_func_1513E6E8 *arg0) {
-    struct_func_1513E6E8_110 *temp_v0;
-    s32 temp_v1;
+    struct_func_1513E6E8_110 *vel;
 
-    temp_v0 = &arg0->unk110;
-    temp_v1 = arg0->unk58;
-    if (temp_v1 & 0x20) {
-        temp_v0->unkC = temp_v0->unkC + (temp_v0->unk2C * D_800BE9A4);
-        temp_v1 = arg0->unk58;
+    vel = &arg0->unk110;
+    if (arg0->unk58 & 0x20) {
+        vel->unkC = vel->unkC + (vel->unk2C * D_800BE9A4);
     }
-    if (temp_v1 & 0x40) {
-        arg0->unk34 = arg0->unk34 + (temp_v0->unk8 * D_800BE9A4);
-        temp_v1 = *(volatile s32 *)((u8 *)arg0 + 0x58);
-        arg0->unk38 = arg0->unk38 + (temp_v0->unkC * D_800BE9A4);
-        arg0->unk3C = arg0->unk3C + (temp_v0->unk10 * D_800BE9A4);
+    if (arg0->unk58 & 0x40) {
+        arg0->unk34 = arg0->unk34 + (vel->unk8 * D_800BE9A4);
+        arg0->unk38 = arg0->unk38 + (vel->unkC * D_800BE9A4);
+        arg0->unk3C = arg0->unk3C + (vel->unk10 * D_800BE9A4);
     }
-    if (temp_v1 & 0x80) {
-        arg0->unk40 = arg0->unk40 + (temp_v0->unk14 * D_800BE9A4);
-        temp_v1 = *(volatile s32 *)((u8 *)arg0 + 0x58);
-        arg0->unk44 = arg0->unk44 + (temp_v0->unk18 * D_800BE9A4);
-        arg0->unk48 = arg0->unk48 + (temp_v0->unk1C * D_800BE9A4);
+    if (arg0->unk58 & 0x80) {
+        arg0->unk40 = arg0->unk40 + (vel->unk14 * D_800BE9A4);
+        arg0->unk44 = arg0->unk44 + (vel->unk18 * D_800BE9A4);
+        arg0->unk48 = arg0->unk48 + (vel->unk1C * D_800BE9A4);
     }
-    if (temp_v1 & 0x100) {
-        arg0->unk4C = arg0->unk4C + (temp_v0->unk20 * D_800BE9A4);
-        arg0->unk50 = arg0->unk50 + (temp_v0->unk24 * D_800BE9A4);
-        arg0->unk54 = arg0->unk54 + (temp_v0->unk28 * D_800BE9A4);
+    if (arg0->unk58 & 0x100) {
+        arg0->unk4C = arg0->unk4C + (vel->unk20 * D_800BE9A4);
+        arg0->unk50 = arg0->unk50 + (vel->unk24 * D_800BE9A4);
+        arg0->unk54 = arg0->unk54 + (vel->unk28 * D_800BE9A4);
     }
     arg0->unk5D = 0xFF;
     return 1;
 }
-// s32 func_1513E6E8(void *arg0) {
-//     void *temp_v0;
-//     void *temp_v0_2;
-//     void *temp_v0_3;
-//     void *temp_v0_4;
-//     s32 phi_v1;
-//     s32 phi_v1_2;
-//
-//     if ((arg0->unk58 & 0x20) != 0) {
-//         temp_v0 = arg0->unk110;
-//         temp_v0->unkC = (f32) (temp_v0->unkC + (temp_v0->unk2C * D_800BE9A4));
-//     }
-//     phi_v1 = arg0->unk58;
-//     if ((arg0->unk58 & 0x40) != 0) {
-//         temp_v0_2 = arg0->unk110;
-//         arg0->unk34 = (f32) (arg0->unk34 + (temp_v0_2->unk8 * D_800BE9A4));
-//         arg0->unk38 = (f32) (arg0->unk38 + (temp_v0_2->unkC * D_800BE9A4));
-//         arg0->unk3C = (f32) (arg0->unk3C + (temp_v0_2->unk10 * D_800BE9A4));
-//         phi_v1 = arg0->unk58;
-//     }
-//     temp_v0_3 = arg0->unk110;
-//     phi_v1_2 = phi_v1;
-//     if ((phi_v1 & 0x80) != 0) {
-//         arg0->unk40 = (f32) (arg0->unk40 + (temp_v0_3->unk14 * D_800BE9A4));
-//         arg0->unk44 = (f32) (arg0->unk44 + (temp_v0_3->unk18 * D_800BE9A4));
-//         arg0->unk48 = (f32) (arg0->unk48 + (temp_v0_3->unk1C * D_800BE9A4));
-//         phi_v1_2 = arg0->unk58;
-//     }
-//     temp_v0_4 = arg0->unk110;
-//     if ((phi_v1_2 & 0x100) != 0) {
-//         arg0->unk4C = (f32) (arg0->unk4C + (temp_v0_4->unk20 * D_800BE9A4));
-//         arg0->unk50 = (f32) (arg0->unk50 + (temp_v0_4->unk24 * D_800BE9A4));
-//         arg0->unk54 = (f32) (arg0->unk54 + (temp_v0_4->unk28 * D_800BE9A4));
-//     }
-//     arg0->unk5D = (u8)0xFF;
-//     return 1;
-// }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513E83C.s")
 
@@ -748,6 +930,27 @@ void func_1513F4B0(struct210 *arg0, s16 arg1) {
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513F4E4.s")
+// PERMUTER NO ZERO (best 730). word0 (first ~52 instrs) BYTE-PERFECT; word1's ops are
+// byte-identical to target but IDO's delay-slot scheduling gives a different temp-register
+// rotation from the first pair on (all `r`/reorder marks, no wrong ops). Reconstruction:
+// typedef struct { u8 unk0..unkF; } CombineEntry;  // 16-byte combiner mux table entry
+// extern CombineEntry D_800A4BA8[]; extern s16 D_800DD1BE; extern s16 func_15143044(u8, s32);
+// Gfx *func_1513F4E4(Gfx *gfx, u8 arg1, u8 *arg2) {
+//     s16 temp_v0 = func_15143044(arg1, 0);
+//     if (temp_v0 != D_800DD1BE) {
+//         CombineEntry *e; Gfx *g2;
+//         if (arg2[0] == 1) { gDPPipeSync(gfx++); arg2[0] = 0; }
+//         e = &D_800A4BA8[arg1];
+//         g2 = gfx++;
+//         g2->words.w0 = (((e->unkA & 0x1F) | ((e->unk8 & 0xF) << 5) | ((e->unk0 & 0xF) << 20)
+//              | ((e->unk2 & 0x1F) << 15) | ((e->unk4 & 7) << 12) | ((e->unk6 & 7) << 9)) & 0xFFFFFF) | 0xFC000000;
+//         g2->words.w1 = (e->unkF & 7) | ((e->unk9 & 0xF) << 24) | ((e->unkC & 7) << 21) | ((e->unkE & 7) << 18)
+//              | ((e->unkB & 7) << 6) | ((e->unkD & 7) << 3) | (e->unk1 << 28) | ((e->unk3 & 7) << 15)
+//              | ((e->unk5 & 7) << 12) | ((e->unk7 & 7) << 9);
+//         D_800DD1BE = temp_v0;
+//     }
+//     return gfx;
+// }
 
 void func_1513F680(struct171 *arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4) {
     arg0->unk70 = arg1;
@@ -876,4 +1079,68 @@ void func_151403DC(s32 arg0, u8 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_15140410.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_151406AC.s")
+/* Sort-list node (0x110 bytes); func_151406AC insertion-sorts one D_800DCE50 bucket by key. */
+typedef struct Node151406AC {
+    u8 pad0[4];
+    struct Node151406AC *prev;
+    struct Node151406AC *next;
+    u8 padC[0xC];
+    u8 unk18;
+    u8 pad19[7];
+    s32 unk20;
+    u8 pad24[0xEC];
+} Node151406AC;
+
+extern u8 D_800DCE50[];
+
+s32 func_151406AC(s32 arg0, s32 arg1, s32 arg2, s16 arg3) {
+    Node151406AC head;
+    Node151406AC **slot;
+    Node151406AC *cur;
+    Node151406AC *prev;
+    Node151406AC *next;
+    Node151406AC *node;
+    s32 key;
+    s32 nodeKey;
+
+    if (arg3 != 0) {
+        return arg0;
+    }
+    slot = &((Node151406AC *(*)[104])D_800DCE50)[arg2][arg1];
+    node = *slot;
+    head.unk18 = 0;
+    head.unk20 = 0;
+    head.next = node;
+    /* BUG (original game): dereferences the list head before the NULL check below
+       (and again after the sort); an empty bucket writes to address 4. */
+    node->prev = &head;
+    if (node != NULL) {
+        for (cur = node->next; cur != NULL; cur = next) {
+            prev = cur->prev;
+            next = cur->next;
+            key = (cur->unk18 << 8) + (cur->unk20 >> 16);
+            for (node = prev; node != NULL; node = node->prev) {
+                nodeKey = (node->unk18 << 8) + (node->unk20 >> 16);
+                if (key < nodeKey) {
+                    continue;
+                }
+                if (node != prev) {
+                    prev->next = cur->next;
+                    if (cur->next != NULL) {
+                        cur->next->prev = cur->prev;
+                    }
+                    cur->next = node->next;
+                    if (cur->next != NULL) {
+                        cur->next->prev = cur;
+                    }
+                    cur->prev = node;
+                    node->next = cur;
+                }
+                break;
+            }
+        }
+    }
+    *slot = head.next;
+    head.next->prev = NULL;
+    return arg0;
+}
