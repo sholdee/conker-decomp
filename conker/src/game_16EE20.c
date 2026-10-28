@@ -754,7 +754,97 @@ f32 func_15143E64(struct17 *arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15143E94.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_1514401C.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_151441A4.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_151442FC.s")
+void func_151442FC(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 arg10, u8 arg11, u8 arg12, u8 arg13) {
+    s16 temp_v0;
+    s16 temp_v0_2;
+    s16 temp_v0_3;
+
+    switch (arg13) {
+    case 2:
+    case 3:
+        *arg0 = (s16) arg4;
+        *arg1 = (s16) arg5;
+        *arg2 = (s16) arg6;
+        *arg3 = (s16) arg7;
+        return;
+    case 13:
+        *arg0 = (s16) arg4;
+        *arg1 = (s16) arg5;
+        *arg2 = (s16) arg6;
+        *arg3 = 0;
+        return;
+    case 0:
+        *arg3 = 0;
+        temp_v0 = *arg3;
+        *arg2 = temp_v0;
+        *arg1 = temp_v0;
+        *arg0 = temp_v0;
+        return;
+    case 1:
+        *arg2 = (s16) arg12;
+        *arg1 = (s16) arg12;
+        *arg0 = (s16) arg12;
+        *arg3 = 0;
+        return;
+    case 7:
+    case 12:
+        *arg2 = 0;
+        temp_v0_2 = *arg2;
+        *arg1 = temp_v0_2;
+        *arg0 = temp_v0_2;
+        *arg3 = (s16) arg11;
+        return;
+    case 8:
+        *arg2 = 0;
+        temp_v0_3 = *arg2;
+        *arg1 = temp_v0_3;
+        *arg0 = temp_v0_3;
+        *arg3 = (s16) arg7;
+        return;
+    case 4:
+        *arg2 = (s16) arg12;
+        *arg1 = (s16) arg12;
+        *arg0 = (s16) arg12;
+        *arg3 = (s16) ((s32) (arg7 * arg11) >> 8);
+        return;
+    case 5:
+        *arg2 = (s16) arg12;
+        *arg1 = (s16) arg12;
+        *arg0 = (s16) arg12;
+        *arg3 = (s16) ((s32) (arg7 * arg11) >> 8);
+        return;
+    case 6:
+        *arg0 = (s16) arg4;
+        *arg1 = (s16) arg5;
+        *arg2 = (s16) arg6;
+        *arg3 = (s16) arg11;
+        return;
+    case 10:
+        *arg0 = (s16) arg8;
+        *arg1 = (s16) arg9;
+        *arg2 = (s16) arg10;
+        *arg3 = (s16) arg11;
+        return;
+    case 11:
+        *arg0 = (s16) arg8;
+        *arg1 = (s16) arg9;
+        *arg2 = (s16) arg10;
+        *arg3 = (s16) arg7;
+        return;
+    case 9:
+        *arg2 = (s16) arg12;
+        *arg1 = (s16) arg12;
+        *arg0 = (s16) arg12;
+        *arg3 = (s16) arg11;
+        return;
+    default:
+        *arg2 = (s16) arg12;
+        *arg1 = (s16) arg12;
+        *arg0 = (s16) arg12;
+        *arg3 = (s16) ((s32) (arg7 * arg11) >> 8);
+        return;
+    }
+}
 s32 func_151444DC(s32 arg0, s32 arg1, s32 arg2) {
     s32 range;
     if (arg1 < arg0) {
