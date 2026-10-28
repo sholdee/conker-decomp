@@ -631,7 +631,38 @@ void func_1501E540(s32 arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_49D30/func_1501E73C.s")
+typedef struct {
+    u8 pad0[0x6A];
+    u8 unk6A;
+    u8 unk6B;
+    u8 unk6C;
+    u8 unk6D;
+} Obj1501E73C;
+
+void func_1507EABC(void *);
+
+void func_1501E73C(s32 arg0) {
+    s32 i;
+    Obj1501E73C *obj;
+
+    for (i = 0; i < D_800C363A[arg0]; i++) {
+        if (*(u16 *)&D_800C35F0[arg0][i * 8] == 2) {
+            obj = (Obj1501E73C *)func_15083E90(D_800C35F0[arg0][i * 8 + 2]);
+            if (obj == NULL) {
+                continue;
+            }
+            if (obj->unk6C >= 10) {
+                obj->unk6C = 0;
+                obj->unk6A = 0;
+            }
+            if (obj->unk6D >= 10) {
+                obj->unk6D = 0;
+                obj->unk6B = 0;
+            }
+            func_1507EABC(obj);
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_49D30/func_1501E81C.s")
 
