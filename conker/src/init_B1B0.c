@@ -1014,7 +1014,6 @@ void func_1000D2F8(s32 arg0, f32 arg1, f32 arg2, f32 arg3) {
         }
     }
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000D758.s")
 typedef struct {
     u16 volume;
     u8 pad2[2];
@@ -1025,6 +1024,75 @@ typedef struct {
 } SequenceVolumeEntry;
 
 #define SEQ_VOL ((SequenceVolumeEntry *)D_8002B074)
+
+s32 func_151F2CDC(void);
+void func_1000CEAC(s32);
+#define D_800427F4_U (*(u16 *)&D_800427F4)
+
+void func_1000D758(f32 arg0, f32 arg1, s32 arg2) {
+    SequenceVolumeEntry *entries;
+    s32 mask5;
+    s32 mask40;
+    s32 mask34;
+    s32 mask12;
+    s32 i;
+    s32 id;
+    s32 flags;
+    s32 mode;
+    SequenceRecordState *record;
+
+    mask5 = 0;
+    mask40 = 0;
+    mask34 = 0;
+    mask12 = 0;
+    if ((u8)D_80041F00 == 0) {
+        entries = (SequenceVolumeEntry *)D_8002B074;
+        for (i = 0; i < 3; i++) {
+            record = (SequenceRecordState *)D_800417B0[i];
+            if (record != 0) {
+                id = record->id;
+                if (id > 0) {
+                    flags = entries[id].flags;
+                    mode = flags & ~0xF0;
+                    if (flags & 0x40) {
+                        mask40 |= 1 << i;
+                    }
+                    if (mode == 5) {
+                        mask5 |= 1 << i;
+                    } else if (mode == 4 || mode == 3) {
+                        mask34 |= 1 << i;
+                    } else if (mode == 1 || mode == 2) {
+                        mask12 |= 1 << i;
+                    }
+                }
+            }
+        }
+        if (mask5 != 0) {
+            func_1000CBF0(0x1770, 0x400, mask5 ^ 0xFF ^ mask40);
+            func_1000CBF0(0x8000, 0x6400, mask5);
+        } else if (mask34 != 0) {
+            func_1000CBF0(0x1F4, 0x400, mask34 ^ 0xFF);
+            func_1000CBF0(0x8000, 0x800, mask34);
+        } else if (func_151F2CDC() == 1 &&
+                   (D_800427F4_U < 0x7D || D_800427F4_U >= 0x81) &&
+                   D_800427F4_U < 0x1C9 && D_800427F4_U != 0x170 &&
+                   D_800427F4_U != 0x171) {
+            func_1000CBF0(0x36B0, 0x200, mask12 ^ 0xFF);
+        } else {
+            func_1000CBF0(0x8000, 0x800, 0xFF);
+        }
+        i = 0;
+        do {
+            func_1000CEAC(i);
+            i++;
+        } while (i < 3);
+        i = 0;
+        do {
+            func_1000D2F8(i, arg0, arg1, *(f32 *)&arg2);
+            i++;
+        } while (i != 3);
+    }
+}
 #define SEQ_B2F4(x) ((SequenceRecordState *)func_1000B2F4(x))
 #define SEQ_B3D4(a, b) func_1000B3D4((struct151 *)(a), (struct151 *)(b))
 
