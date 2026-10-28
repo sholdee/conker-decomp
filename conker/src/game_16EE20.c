@@ -1531,7 +1531,86 @@ u8 func_15145C90(s32 arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15145CD0.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15145DB4.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15145EA4.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15146078.s")
+s32 func_15146078(struct17 *arg0, struct17 *arg1, struct17 *arg2) {
+    u8 count;
+    u8 axis;
+    u8 zeroAxis;
+    u32 i;
+    u32 j;
+    u32 k;
+    f32 len;
+    f32 invLen;
+
+    if ((arg0->unk0 == 0.0f) && (arg0->unk4 == 0.0f) && (arg0->unk8 == 0.0f)) {
+        return 0;
+    }
+
+    count = 0;
+    if (arg0->unk0 == 0.0f) {
+        count++;
+        zeroAxis = 0;
+    } else {
+        axis = 0;
+    }
+    if (arg0->unk4 == 0.0f) {
+        count++;
+        zeroAxis = 1;
+    } else {
+        axis = 1;
+    }
+    if (arg0->unk8 == 0.0f) {
+        count++;
+        zeroAxis = 2;
+    } else {
+        axis = 2;
+    }
+
+    if (count == 2) {
+        switch (axis) {
+        case 0:
+            arg1->unk0 = 0.0;
+            arg1->unk4 = 1.0;
+            arg1->unk8 = 0.0;
+            arg2->unk0 = 0.0;
+            arg2->unk4 = 0.0;
+            arg2->unk8 = 1.0;
+            break;
+        case 1:
+            arg1->unk0 = 1.0;
+            arg1->unk4 = 0.0;
+            arg1->unk8 = 0.0;
+            arg2->unk0 = 0.0;
+            arg2->unk4 = 0.0;
+            arg2->unk8 = 1.0;
+            break;
+        case 2:
+            arg1->unk0 = 1.0;
+            arg1->unk4 = 0.0;
+            arg1->unk8 = 0.0;
+            arg2->unk0 = 0.0;
+            arg2->unk4 = 1.0;
+            arg2->unk8 = 0.0;
+            break;
+        }
+        return 1;
+    }
+
+    i = 0;
+    j = 1;
+    k = 2;
+    if ((count == 1) && (zeroAxis == 2)) {
+        j = 2;
+        k = 1;
+    }
+    ((f32 *)arg1)[i] = 1.0;
+    ((f32 *)arg1)[j] = 1.0;
+    ((f32 *)arg1)[k] = -((f32 *)arg0)[i] - (((f32 *)arg0)[j] / ((f32 *)arg0)[k]);
+    func_151450B4(arg1, arg0, arg2);
+    func_151450B4(arg2, arg0, arg1);
+    func_15145128(arg1, arg1, &len, &invLen);
+    func_15145128(arg2, arg2, &len, &invLen);
+    return 1;
+}
 extern u8 D_800BE9C0;
 extern u8 D_800D9BD0[][2][8];
 extern s32 D_800D9E10[];
