@@ -353,7 +353,47 @@ s32 func_1000BC28(s32 arg0, u8 arg1, s32 arg2, s32 arg3) {
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000BCBC.s")
+s32 func_1000BCBC(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4) {
+    f32 distance;
+    u8 volume;
+
+    if (arg0 == 0) {
+        func_10008790(((u8 *)&arg1)[3], 3, 0x10, 0);
+        func_1000886C(((u8 *)&arg1)[3], 4, 0);
+        arg0 = 1;
+    } else if (D_800BE9F0 == 0x13) {
+        arg2 -= 24.0f;
+        arg4 -= 3015.0f;
+        distance = arg2 * arg2 + arg4 * arg4;
+        if (36000000.0f < distance) {
+            volume = 4;
+        } else {
+            volume = (u8)((6000.0f - sqrtf(distance)) * 0.041833334f) + 4;
+        }
+        if (arg0 != volume) {
+            func_1000886C(((u8 *)&arg1)[3], 3, volume);
+        }
+        if (func_150A29C8(0, 0x4041) == 0) {
+            distance = 1290.0f - arg3;
+            if (1290.0f < arg3) {
+                volume = 0x20;
+            } else {
+                distance *= 0.37166667f;
+                if (distance >= 223.0f) {
+                    volume = 0xFF;
+                } else {
+                    volume = (u8)distance + 0x20;
+                }
+            }
+        } else {
+            volume = 0;
+        }
+        if (volume != func_10008A4C(((u8 *)&arg1)[3], 2)) {
+            func_1000886C(((u8 *)&arg1)[3], 4, volume);
+        }
+    }
+    return arg0;
+}
 u32 func_1000BF60(u32 arg0, u8 arg1, f32 arg2, f32 arg3, f32 arg4) {
     s32 sp5C;
     s32 temp;
