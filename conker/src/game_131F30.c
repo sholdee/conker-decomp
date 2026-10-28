@@ -19,7 +19,100 @@ typedef struct Func15105C24Obj {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_131F30/func_15104FF8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_131F30/func_151050B0.s")
+typedef struct {
+    f32 x, y, z;
+} Vec3_151050B0;
+
+typedef struct {
+    f32 f[5];
+    s16 h[5];
+    s32 w0;
+    s32 w1;
+    u8 b[5];
+} Params_151050B0;
+
+typedef struct {
+    struct205 *unk0;
+    s16 unk4;
+    f32 unk8;
+    Vec3_151050B0 pos[4];
+    Vec3_151050B0 dir[4];
+    s32 unk6C;
+} State_151050B0;
+
+typedef struct {
+    u8 pad0;
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD[0x1B];
+    State_151050B0 unk28;
+} Obj_151050B0;
+
+void *func_15106F98(Vec3_151050B0 *, Vec3_151050B0 *, s32, Params_151050B0 *, f32, u8, u8, s32);
+
+void func_151050B0(Obj_151050B0 *arg0) {
+    State_151050B0 *s;
+    Params_151050B0 p;
+    Vec3_151050B0 a;
+    Vec3_151050B0 b;
+    f32 t;
+    u32 i;
+    u8 j;
+
+    s = &arg0->unk28;
+    if (s->unk4 < 0) {
+        s->unk0->unk14 = 1;
+        return;
+    }
+    s->unk0->unk14 = 0;
+    s->unk4 -= D_800BE9E4;
+    if (s->unk4 < 0) {
+        func_151494E0(0, 0x39);
+        func_151494E0(0, 0x4B);
+    }
+    if (func_151464B8(s->unk6C) != 0) {
+        return;
+    }
+    t = func_150ADA68();
+    s->unk8 += (0.04000000283f + t * 0.0700000003f) * D_800BE9A4;
+    if (s->unk8 > 1.0f) {
+        p.f[0] = 10.0f;
+        p.f[1] = 15.0f;
+        p.f[2] = 20.0f;
+        p.f[3] = 44.0f;
+        p.f[4] = 37.0f;
+        p.h[0] = 100;
+        p.h[1] = 0;
+        p.h[2] = 10;
+        p.h[3] = 1;
+        p.h[4] = 10;
+        p.w0 = 4;
+        p.w1 = 2;
+        p.b[0] = 0x7E;
+        p.b[1] = 0xF9;
+        p.b[2] = 0xFF;
+        p.b[3] = 0x37;
+        p.b[4] = 0xC8;
+        do {
+            i = (u8)(func_150ADA68() * 3.0f);
+            j = (func_150ADA68() * 2 + 1) + i;
+            if (j >= 4) {
+                j -= 4;
+            }
+            t = func_150ADA68();
+            a.x = s->pos[i].x + s->dir[i].x * t;
+            a.y = s->pos[i].y + s->dir[i].y * t;
+            a.z = s->pos[i].z + s->dir[i].z * t;
+            t = func_150ADA68();
+            b.x = s->pos[j].x + s->dir[j].x * t;
+            b.y = s->pos[j].y + s->dir[j].y * t;
+            b.z = s->pos[j].z + s->dir[j].z * t;
+            func_15106F98(&a, &b, 3, &p, 0.3250000179f, 2, arg0->unkC, arg0->unk1);
+            s->unk8 -= 1.0f;
+        } while (s->unk8 > 1.0f);
+    }
+}
 
 void func_1510550C(struct102 *arg0, s32 arg1, u8 arg2) {
     if (arg2 == 0x4B) {
