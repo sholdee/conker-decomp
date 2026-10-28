@@ -3,6 +3,7 @@
 #include "variables.h"
 
 
+struct248 *func_1509B950(struct248 *);
 struct249 *func_1509B704(s16 arg0);
 s32 func_1509B5AC(s32 arg0, s32 arg1);
 void func_1509B810();
@@ -93,7 +94,7 @@ typedef struct Node1509 {
     struct Node1509 *prev;
 } Node1509;
 
-extern void func_10004074(void);
+extern void func_10004074();
 
 void func_1509B764(Node1509 *arg0) {
     if (D_800D2F48.length == 1) {
@@ -178,7 +179,25 @@ s32 func_1509B8FC(s16 arg0) {
     func_1509B950(temp_v0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C8950/func_1509B950.s")
+struct248 *func_1509B950(struct248 *arg0) {
+    struct248 *copy;
+    s32 pad;
+
+    pad = 8 - (((s32)arg0 + arg0->unk4) & 7);
+    arg0->unkA = arg0->unk4 + pad;
+    arg0->unk4 = arg0->unkA + arg0->unk6;
+    arg0->unk4 = (arg0->unk4 - (((s32)arg0 + arg0->unk4) & 7)) + 8;
+
+    copy = allocate_memory(arg0->unk4, 0xFF, 2, 0);
+    if (copy == NULL) {
+        while (1) {}
+    }
+
+    bcopy(arg0, copy, arg0->unk4);
+    bzero((u8 *)copy + copy->unkA, copy->unk6);
+    func_10004074(arg0);
+    return copy;
+}
 
 extern s32 D_8003C8E0;
 extern s32 D_800BE9F0;
@@ -191,18 +210,10 @@ extern u8 D_800D2E69;
 void func_1509B764(Node1509 *arg0);
 void func_1509BA04(s32 arg0)
 {
-  volatile s32 pad[2];
+  register struct249 *node;
+  register struct249 *next;
   s32 count;
-  struct249 *node;
-  struct249 *next;
-  s32 new_var;
   s32 i;
-  s32 tmp;
-  s32 idx;
-  s32 new_var2;
-  s32 bit;
-  s32 value;
-  u8 *table;
   count = D_800D2F48.length;
   node = D_800D2F48.unk4;
   if (D_800D2E69 != 0)
@@ -213,15 +224,16 @@ void func_1509BA04(s32 arg0)
   i = 0;
   if (count > 0)
   {
+    u8 *table;
+    s32 tmp;
+    s32 value;
     table = (u8 *) (&D_800D2E70);
     do
     {
       value = node->unk0;
       tmp = value & 0xFFFF03FF;
-      idx = tmp >> 3;
-      bit = 1 << (tmp & ((short) 7));
       next = node->next;
-      if ((((u8 *) D_800D2E4C)[new_var2 = idx] & bit) && (arg0 == 0))
+      if ((*(u8 *)((tmp >> 3) + (s32) D_800D2E4C) & (1 << (tmp & 7))) && (arg0 == 0))
       {
         func_1509B764(node);
         table[tmp] = 3;
@@ -233,7 +245,7 @@ void func_1509BA04(s32 arg0)
         func_150ADAF0(node, 3);
         D_8003C8E0 = 0;
         func_1509B764(node);
-        if ((((u8 *) D_800D2E4C)[new_var = idx] & bit) == 0)
+        if ((*(u8 *)((tmp >> 3) + (s32) D_800D2E4C) & (1 << (tmp & 7))) == 0)
         {
           table[tmp] = 0;
         }
@@ -259,8 +271,33 @@ void func_1509C228(void);
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_C8950/func_1509BFB0.s")
 
-// need a bigger brain
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C8950/func_1509C120.s")
+void func_1509C120(void) {
+    s32 i;
+    s32 n;
+    struct102 *bufs[4];
+    struct102 *old;
+
+    n = func_150ADA20() & 3;
+    old = D_800D2E4C;
+    if (old != NULL) {
+        if (!(func_150ADA20() & 4)) {
+            return;
+        }
+    }
+    for (i = 0; i <= n; i++) {
+        bufs[i] = allocate_memory(0x1B, 0xFF, 2, 0);
+    }
+    for (i = 0; i <= n; i++) {
+        if (i != n) {
+            func_10004074(bufs[i]);
+        }
+    }
+    D_800D2E4C = bufs[n];
+    if (old != NULL) {
+        bcopy(old, D_800D2E4C, 0x1B);
+        func_10004074(old);
+    }
+}
 
 void func_1509C228(void) {
     if ((D_800D2E68 & 8) || (D_800D2E4C->unkF & 1)) {
