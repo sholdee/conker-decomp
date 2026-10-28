@@ -6,7 +6,135 @@ u32 func_150ADA20(void);
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_121A20/func_150F4570.s")
+struct sub150F4_full {
+    f32 unk0;
+    struct17 unk4;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    u8 unk24;
+    u8 pad25[3];
+};
+
+
+typedef struct {
+    f32 unk00;
+    f32 unk04;
+    f32 unk08;
+    f32 unk0C;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    struct17 unk28;
+    struct17 unk34;
+    struct17 unk40;
+    f32 unk4C;
+    s32 unk50;
+    s16 unk54;
+    s16 unk56;
+    u8 unk58;
+    u8 pad59[3];
+    s32 unk5C;
+    u8 unk60;
+    u8 unk61;
+    u8 unk62;
+    u8 unk63;
+    u8 unk64;
+    u8 unk65;
+    u8 unk66;
+    u8 unk67;
+    u8 unk68;
+    s8 unk69;
+    u8 unk6A;
+    u8 pad6B;
+    s32 unk6C;
+    u8 unk70;
+    u8 pad71;
+    s16 unk72;
+    s16 unk74;
+    u8 pad76[2];
+    s32 unk78;
+} Spawn150F4;
+
+extern s32 func_15145128(struct17 *, struct17 *, f32 *, f32 *);
+extern s32 func_1513264C(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
+
+void func_150F4570(struct17 *arg0, struct17 *arg1, u8 arg2, f32 arg3, f32 arg4, f32 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9) {
+    Spawn150F4 spawn;
+    struct17 dir;
+    struct17 diff;
+    f32 len;
+    f32 inv;
+    struct sub150F4_full extra;
+    s32 ret;
+
+    diff.unk0 = arg1->unk0 - arg0->unk0;
+    diff.unk4 = arg1->unk4 - arg0->unk4;
+    diff.unk8 = arg1->unk8 - arg0->unk8;
+    if (func_15145128(&diff, &dir, &len, &inv) != 0) {
+        extra.unk24 = (arg6 ? 1 : 0) | (arg7 ? 2 : 0);
+        extra.unk0 = len * arg4;
+        extra.unk4 = *arg0;
+        extra.unk10 = func_150ADA68() * 6.2831855f;
+        extra.unk14 = func_150ADA68() * 0.2f + 0.08000000566f;
+        if (func_150ADA20() & 1) {
+            extra.unk14 = -extra.unk14;
+        }
+        extra.unk20 = func_150ADA68() * 21.0f + 13.0f;
+        {
+            f32 angle = func_150ADA68() * 6.2831855f;
+            extra.unk18 = cosf(angle);
+            extra.unk1C = sinf(angle);
+        }
+        spawn.unk00 = 1.0f;
+        spawn.unk04 = 1.0f;
+        spawn.unk08 = spawn.unk0C = arg5;
+        spawn.unk10 = func_150ADA68() * 360.0f;
+        spawn.unk14 = func_150ADA68() * 360.0f;
+        spawn.unk18 = func_150ADA68() * 360.0f;
+        spawn.unk1C = 1.0f;
+        spawn.unk20 = 1.0f;
+        spawn.unk24 = 1.0f;
+        spawn.unk28 = *arg0;
+        spawn.unk34.unk0 = dir.unk0 * arg3;
+        spawn.unk34.unk4 = dir.unk4 * arg3;
+        spawn.unk34.unk8 = dir.unk8 * arg3;
+        spawn.unk40.unk0 = func_150ADA68() * 21.90300179f + -10.95150089f;
+        spawn.unk40.unk4 = 0.0f;
+        spawn.unk40.unk8 = func_150ADA68() * 21.90300179f + -10.95150089f;
+        spawn.unk4C = 0.0f;
+        spawn.unk50 = 0x14900;
+        spawn.unk54 = 0x12C;
+        spawn.unk56 = arg2;
+        spawn.unk58 = 8;
+        spawn.unk5C = 0;
+        spawn.unk60 = 0xFF;
+        spawn.unk61 = 0x16;
+        spawn.unk62 = 7;
+        spawn.unk63 = 0;
+        spawn.unk64 = 0;
+        spawn.unk65 = 0;
+        spawn.unk66 = 0;
+        spawn.unk67 = 0;
+        spawn.unk68 = 2;
+        spawn.unk69 = -1;
+        spawn.unk6A = 2;
+        spawn.unk6C = 0;
+        spawn.unk70 = 0;
+        spawn.unk72 = 1;
+        spawn.unk74 = 0xFF;
+        spawn.unk78 = arg7;
+        ret = func_1513264C(&spawn, 3, 0xFF, 0, 0x28, arg8, arg9);
+        if (ret != 0) {
+            memcpy((void *)(ret + 0x170), &extra, sizeof(extra));
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_121A20/func_150F48D0.s")
 
