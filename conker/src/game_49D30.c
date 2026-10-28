@@ -966,7 +966,22 @@ void func_15022848(s32 arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_49D30/func_150228E4.s")
+void func_150228E4(s32 arg0) {
+    s32 i;
+    s32 count;
+    u8 *actor;
+    u8 *countp;
+
+    countp = &D_800C3510[arg0];
+    count = *countp;
+    for (i = 0; i < count; i++) {
+        actor = ((u8 (*)[0x32C])D_800CC2D0)[*(arg0 * 0x19 + (u8 *)D_800C3518 + i)];
+        if (*(s32 *)actor != 0) {
+            func_15060F28((struct127 *)actor, 0);
+            count = *countp;
+        }
+    }
+}
 
 void func_15022998(s32 *arg0) {
     if ((*arg0 == 0x1B) || (*arg0 == 4)) {
