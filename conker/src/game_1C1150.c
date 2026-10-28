@@ -53,7 +53,8 @@ void func_15194588(s32 arg0, s32 arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1C1150/func_15194810.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1C1150/func_151949E0.s")
+void func_151949E0(s32 arg0, s32 arg1, s32 arg2) {
+}
 
 extern void func_15104170(s32);
 
@@ -278,7 +279,37 @@ void func_15194F48(s32 arg0, struct127* arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1C1150/func_151951E0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1C1150/func_15195528.s")
+extern f32 D_800A8708;
+extern void func_1514373C(f32, f32, f32 *, f32 *);
+extern void func_15137610(struct127 *, f32 *, f32 *, f32 *, u8, s32);
+
+void func_15195528(struct127 *arg0, struct127 *arg1, s32 arg2) {
+    f32 angle;
+    f32 from[3];
+    f32 to[3];
+    f32 dir[3];
+    f32 dx;
+    f32 dz;
+
+    if (arg0 != NULL) {
+        angle = arg0->unk40 - 90.0f;
+    } else if (arg1 != NULL) {
+        angle = arg1->unk40 - 90.0f;
+    } else {
+        angle = func_150ADA68() * 360.0f;
+    }
+    func_1514373C(angle * D_800A8708, 1.0f, &dir[0], &dir[2]);
+    dir[1] = 0.0f;
+    dx = dir[0] * 20.0f;
+    from[0] = arg1->x_position + dx;
+    from[1] = arg1->y_position + 50.0f;
+    dz = dir[2] * 20.0f;
+    from[2] = arg1->z_position + dz;
+    to[0] = arg1->x_position - dx;
+    to[1] = arg1->y_position + 50.0f;
+    to[2] = arg1->z_position - dz;
+    func_15137610(arg1, from, to, dir, 0xFF, 1);
+}
 
 void func_151B01B8(s32, s32);
 void func_151B09BC(s32, s32, s32, s32, s32);
