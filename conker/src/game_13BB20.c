@@ -151,7 +151,30 @@ void func_1510F800() {
     func_150A49F4();
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_13BB20/func_1510F820.s")
+void func_1510E388(void *, void *, f32 *, f32 *);
+extern f32 D_800A2D9C;
+
+void func_1510F820(void *arg0, void *arg1, f32 *arg2, f32 *arg3, s32 arg4,
+                   f32 *arg5, f32 *arg6) {
+    f32 sp24;
+    f32 sp20;
+    f32 length;
+    f32 zero;
+
+    zero = 0.0f;
+    func_1510E388(arg0, arg1, &sp24, &sp20);
+    length = sqrtf((sp24 * sp24) + (sp20 * sp20));
+    *arg5 = sp24;
+    *arg6 = sp20;
+    length = length * D_800A2D9C;
+    if (zero == length) {
+        *arg2 = 1.0f;
+        *arg3 = zero;
+        return;
+    }
+    *arg2 = sp24 / length;
+    *arg3 = sp20 / length;
+}
 
 s32 func_1510F8CC(s32 arg0) {
     return arg0 & 0x1F;
