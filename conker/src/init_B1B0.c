@@ -1323,7 +1323,26 @@ simple_transition:
         SEQ_B3D4(incoming, outgoing);
     }
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000DE1C.s")
+void func_1000DE1C(s32 arg0, s32 arg1) {
+    s32 count;
+    s32 i;
+    s32 ids[3];
+    s32 value;
+
+    arg0 &= 0xFFF;
+    if (arg0 == 0) {
+        func_1000DEC4();
+        count = func_1000B548(ids);
+        for (i = 0; i < count; i++) {
+            value = ids[i];
+            if (value > 0) {
+                func_1000D96C(0, value, arg1);
+            }
+        }
+    } else {
+        func_1000D96C(0, arg0, arg1);
+    }
+}
 s32 func_1000853C(u8 arg0);
 extern struct151 *D_800417B0[];
 extern struct137 D_800419A8[12];
