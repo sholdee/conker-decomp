@@ -197,7 +197,44 @@ void func_150D6C98(f32 *arg0, f32 *arg1) {
     arg1[2] = arg0[7];
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1028F0/func_150D6CC4.s")
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3f_150D6CC4;
+
+void func_15131958(void *, f32);
+
+s32 func_150D6CC4(u8 *arg0, s32 arg1) {
+    u8 *state;
+    u8 *object;
+
+    state = arg0 + 0xA8;
+    object = *(u8 **)state;
+    if (*(s32 *)object == 0 || state[4] != object[0x3B]) {
+        return 0;
+    }
+    func_150D6C98((f32 *)object, (f32 *)(arg0 + 0x40));
+    {
+        Vec3f_150D6CC4 previous = *(Vec3f_150D6CC4 *)(arg0 + 0x58);
+        f32 changeX;
+        f32 changeY;
+        f32 changeZ;
+
+        *(f32 *)(arg0 + 0x5C) += *(f32 *)(arg0 + 0x64) * D_800BE9A4;
+        func_15131958(arg0 + 0x58, *(f32 *)(state + 8));
+        changeX = (*(f32 *)(arg0 + 0x58) - previous.x) * D_800BE9A8;
+        changeY = (*(f32 *)(arg0 + 0x5C) - previous.y) * D_800BE9A8;
+        changeZ = (*(f32 *)(arg0 + 0x60) - previous.z) * D_800BE9A8;
+        *(f32 *)(arg0 + 0x4C) += previous.x * D_800BE9A4 +
+            changeX * D_800BE9A4 * D_800BE9A4 * 0.5f;
+        *(f32 *)(arg0 + 0x50) += previous.y * D_800BE9A4 +
+            changeY * D_800BE9A4 * D_800BE9A4 * 0.5f;
+        *(f32 *)(arg0 + 0x54) += previous.z * D_800BE9A4 +
+            changeZ * D_800BE9A4 * D_800BE9A4 * 0.5f;
+    }
+    return 1;
+}
 
 void func_150D6E60(struct260 *arg0, s32 arg1, u8 arg2) {
     SubA150D596C *temp_v0 = (SubA150D596C *)((u8 *)arg0 + 0xA8);
