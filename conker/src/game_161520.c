@@ -394,7 +394,63 @@ f32 func_15135670(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_151356D4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15135BF8.s")
+typedef struct {
+    f32 x;
+    f32 y;
+} Vec2_15135BF8;
+
+typedef struct {
+    s16 timer;
+    f32 unk4;
+    Vec2_15135BF8 vel;
+    f32 unk10;
+    f32 unk14;
+} Sub_15135BF8;
+
+typedef struct {
+    u8 pad0[0x10];
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    u8 pad20[0x50];
+    s16 unk70;
+} Obj_15135BF8;
+
+s32 func_15135BF8(Obj_15135BF8 *arg0) {
+    Sub_15135BF8 *sub;
+    s32 ret;
+
+    sub = (Sub_15135BF8 *)&arg0->unk70;
+    ret = 1;
+    if (arg0->unk70 > 0) {
+        sub->timer -= D_800BE9E4;
+        arg0->unk10 += sub->vel.x * D_800BE9A4;
+        arg0->unk14 += sub->vel.y * D_800BE9A4;
+        arg0->unk18 += sub->unk4 * D_800BE9A4;
+        arg0->unk1C += sub->unk4 * D_800BE9A4;
+    } else {
+        Vec2_15135BF8 tmp;
+
+        tmp = sub->vel;
+        arg0->unk14 += sub->vel.y * D_800BE9A4 + sub->unk10 * D_800BE9A4 * D_800BE9A4 * 0.5f;
+        sub->vel.y += sub->unk10 * D_800BE9A4;
+        tmp.x += sub->vel.x;
+        tmp.y += sub->vel.y;
+        tmp.x *= 0.5f;
+        tmp.y *= 0.5f;
+        {
+            f32 f = fabsf(tmp.x) * sub->unk14;
+
+            arg0->unk18 += f * D_800BE9A4;
+            arg0->unk1C += f * D_800BE9A4;
+        }
+    }
+    if (arg0->unk10 > 200.0f || arg0->unk10 < -200.0f || arg0->unk14 > 200.0f || arg0->unk14 < -200.0f) {
+        ret = 0;
+    }
+    return ret;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15135DD0.s")
 
