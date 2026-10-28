@@ -451,7 +451,43 @@ void func_151D5648(void *arg0, u8 arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_200930/func_151D5A18.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_200930/func_151D5B6C.s")
+s32 func_151452C4(s32 arg0, s32 arg1, struct17 *arg2, f32 arg3, struct17 *arg4, struct17 *arg5, f32 *arg6, f32 *arg7);
+extern s32 (*D_80086C90[])(struct127 *, struct127 *, s32);
+
+s32 func_151D5B6C(s32 arg0, s32 arg1, struct127 *arg2, s8 arg3, s32 arg4) {
+    f32 radius;
+    struct127 *obj;
+    s32 mask;
+    struct17 pos;
+    struct17 sp74;
+    struct17 sp68;
+    f32 sp64;
+    f32 sp60;
+    u8 i;
+
+    mask = -1;
+    for (i = 0; i < 25; i++) {
+        obj = &D_800CC2D0[i];
+        if (obj->interaction_state == 0) continue;
+        if (obj->unk5 == 3) continue;
+        if (D_800BE9F0 != 0x23 && obj->id == 0xFF) continue;
+        if (obj == arg2) continue;
+        if (!(obj->unkF8 & 0x40)) continue;
+        if (arg3 != -1 && D_80086C90[arg3](obj, arg2, arg4) == 0) continue;
+        if (obj->unkD2 < obj->unkD4) {
+            radius = obj->unkD4;
+        } else {
+            radius = obj->unkD2;
+        }
+        pos.unk0 = obj->x_position;
+        pos.unk4 = obj->y_position + obj->unkD6;
+        pos.unk8 = obj->z_position;
+        if (func_151452C4(arg0, arg1, &pos, radius + radius, &sp74, &sp68, &sp64, &sp60)) {
+            mask &= ~(1 << i);
+        }
+    }
+    return mask;
+}
 
 void func_151D5D60(s32 arg0, s16 arg1, s32 arg2, s32 *arg3, s8 *arg4) {
     s8 sp27;
