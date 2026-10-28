@@ -732,7 +732,111 @@ s32 func_151BEE94(struct127 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E73B0/func_151BEEE0.s")
+typedef struct {
+    /* 0x00 */ f32 unk0;
+    /* 0x04 */ f32 unk4;
+    /* 0x08 */ f32 unk8;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ struct17 unk10;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ struct17 unk28;
+    /* 0x34 */ struct17 unk34;
+    /* 0x40 */ struct17 unk40;
+    /* 0x4C */ f32 unk4C;
+    /* 0x50 */ s32 unk50;
+    /* 0x54 */ s16 unk54;
+    /* 0x56 */ s16 unk56;
+    /* 0x58 */ u8  unk58;
+    /* 0x59 */ u8  pad59[3];
+    /* 0x5C */ s32 unk5C;
+    /* 0x60 */ u8  unk60;
+    /* 0x61 */ u8  unk61;
+    /* 0x62 */ u8  unk62;
+    /* 0x63 */ u8  unk63;
+    /* 0x64 */ u8  unk64;
+    /* 0x65 */ u8  unk65;
+    /* 0x66 */ u8  unk66;
+    /* 0x67 */ u8  unk67;
+    /* 0x68 */ u8  unk68;
+    /* 0x69 */ u8  pad69;
+    /* 0x6A */ u8  unk6A;
+    /* 0x6B */ u8  pad6B;
+    /* 0x6C */ s32 unk6C;
+    /* 0x70 */ u8  unk70;
+    /* 0x71 */ u8  pad71;
+    /* 0x72 */ s16 unk72;
+    /* 0x74 */ s16 unk74;
+    /* 0x78 */ s32 pad78;
+} S151BEEE0;
+
+typedef struct { u8 b[3]; } U8x3_151BEEE0;
+extern U8x3_151BEEE0 D_8008FBC0;
+extern void *func_15132A4C(void *, s32, s32, s32, u8, s32);
+extern void func_15133760(void *, void *);
+
+void *func_151BEEE0(f32 arg0, struct17 *arg1, s32 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8) {
+    void *ret;
+    U8x3_151BEEE0 tbl = D_8008FBC0;
+
+    if (arg4 >= 3) {
+        return NULL;
+    }
+    {
+    S151BEEE0 sp44;
+    s32 i;
+
+    sp44.unk0 = 1.0f;
+    sp44.unk4 = 1.0f;
+    sp44.unkC = 0.9230000377f;
+    sp44.unk8 = 0.9230000377f;
+    sp44.unk10.unk0 = 0.0f;
+    sp44.unk10.unk4 = arg0;
+    sp44.unk10.unk8 = 0.0f;
+    sp44.unk1C = 1.0f;
+    sp44.unk20 = 1.0f;
+    sp44.unk24 = 1.0f;
+    sp44.unk28 = *arg1;
+    sp44.unk34.unk0 = 0.0f;
+    sp44.unk34.unk4 = 0.0f;
+    sp44.unk34.unk8 = 0.0f;
+    sp44.unk40.unk0 = 0.0f;
+    sp44.unk40.unk4 = 0.0f;
+    sp44.unk40.unk8 = 0.0f;
+    sp44.unk4C = 0.0f;
+    sp44.unk50 = (arg5 ? 0x4000 : 0) | 0x1D00 | 0x80000 | 0x40000;
+    sp44.unk54 = 0x12C;
+    sp44.unk56 = 0x26;
+    sp44.unk58 = tbl.b[arg4];
+    sp44.unk5C = arg6;
+    sp44.unk60 = 0xFF;
+    if (D_800BE9F0 == 7) {
+        sp44.unk61 = 0x18;
+    } else {
+        sp44.unk61 = 0;
+    }
+    sp44.unk62 = 0;
+    sp44.unk63 = 0;
+    sp44.unk64 = 0;
+    sp44.unk65 = 0;
+    sp44.unk66 = 0;
+    sp44.unk67 = 0;
+    sp44.unk68 = 2;
+    sp44.unk6A = 0;
+    sp44.unk6C = 0;
+    sp44.unk70 = 0;
+    sp44.unk72 = 1;
+    sp44.unk74 = 0xFF;
+    ret = func_15132A4C(&sp44, arg2, arg3, 0, arg7, arg8);
+    if (ret != NULL) {
+        for (i = 0; i < 2; i++) {
+            func_15133760((u8 *)ret + 0x90 + i * 0x40, ret);
+        }
+    }
+    return ret;
+    }
+}
 
 typedef struct {
     f32 x;
