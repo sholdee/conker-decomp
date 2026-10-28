@@ -350,7 +350,8 @@ void func_1514D564(struct127 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_179F30/func_1514D64C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_179F30/func_1514D96C.s")
+void func_1514D96C(s32 arg0) {
+}
 
 s32 func_15158BD0(s32, s32, s32);
 s32 func_1514EC1C(s32, s32, s16);
@@ -446,7 +447,8 @@ void func_1514DB18(s32 arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_179F30/func_1514DB58.s")
+void func_1514DB58(s32 arg0) {
+}
 
 extern s32 D_800BE9F0;
 void func_151B2060(void);
