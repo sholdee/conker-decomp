@@ -792,7 +792,19 @@ u8 *func_160014F0(u8 *destination, u8 character) {
 }
 
 // splat into framebuffer
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/func_1600160C.s")
+u8 *func_1600160C(s32 position) {
+    s32 row = position & 0xFFE0;
+    s32 offset = row;
+
+    if (D_160038A8 != 0x124) {
+        offset = (row >> 2) + row;
+    }
+    offset = (offset >> 2) * (D_160038A8 << 1);
+    offset += (position & 0x1F) << 4;
+    offset += D_160038A8 << 2;
+    offset += 0x10;
+    return (u8 *)D_8002AAE8[D_16003888] + offset;
+}
 
 // contains delay slot
 void func_16001678(void) {
