@@ -1349,7 +1349,7 @@ extern u8   D_800DDE3E;
 extern u8   D_800DDE3F;
 extern u8   D_800DDE40;
 extern u8   D_800DDE50;
-extern s32  D_800DDE80[55]; // 220 bytes?
+extern struct Slot800DDE80 { void *field0; u8 pad4[8]; s32 fieldC; void *field10; } D_800DDE80[11]; // 220 bytes
 
 extern s32  D_800DF7C8[];
 extern u8   D_800DDF5C[];
