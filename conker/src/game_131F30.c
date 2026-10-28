@@ -5,6 +5,8 @@
 u32 func_150ADA20(void);
 #include "variables.h"
 
+void func_151058B4();
+
 extern s32 D_800DCE50[][0x68];
 
 typedef struct Func15105C24Obj {
@@ -277,7 +279,116 @@ void func_15105848(struct207 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_131F30/func_151058B4.s")
+typedef struct {
+    s16 x;
+    s16 y;
+    s16 z;
+} Func151058B4Target;
+
+typedef struct {
+    Func151058B4Target *target;
+    f32 rate;
+    s16 *unk8;
+} Func151058B4Data;
+
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+    s16 unkC;
+    s16 unkE;
+    s32 unk10;
+    s8 unk14;
+    u8 unk15;
+} Func151058B4Spawn;
+
+typedef struct {
+    f32 unk0;
+    f32 vel[3];
+    f32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 unk16;
+    u8 unk17;
+    u8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+    u8 unk1C;
+    u8 unk1D;
+    u8 unk1E;
+    u8 unk1F;
+    u8 unk20;
+    u8 unk21;
+    s32 unk24;
+    s32 unk28;
+    s16 unk2C;
+    s16 unk2E;
+    s16 unk30;
+    u8 unk32;
+    f32 unk34;
+    s8 unk38;
+    u8 unk39;
+} Func151058B4Particle;
+
+extern void func_151432BC(Func151058B4Target *, f32 *, f32 *, f32 *, f32 *);
+extern void func_15143794(s16, s16, f32, f32 *);
+extern void func_1515C2F0(Func151058B4Spawn *, s32, Func151058B4Particle *, s32, s32, s32);
+
+void func_151058B4(struct131 *arg0) {
+    Func151058B4Data *data;
+    f32 count;
+    u32 angle;
+    Func151058B4Spawn spawn;
+    Func151058B4Particle part;
+    f32 sp8C;
+    f32 sp88;
+
+    if (func_151464B8(((Func151058B4Data *)((u8 *)arg0 + 0x28))->unk8) == 0) {
+        data = (Func151058B4Data *)((u8 *)arg0 + 0x28);
+        count = (func_150ADA68() * 0.0013f + 0.001899999916f) * data->rate;
+        if (count > 1.0f) {
+            spawn.unkE = 0x15;
+            spawn.unk10 = 0xA;
+            spawn.unk14 = -1;
+            part.unk14 = 4;
+            part.unk15 = 2;
+            part.unk16 = 3;
+            part.unk17 = 0x61;
+            part.unk18 = 0xF2;
+            part.unk19 = 0xFF;
+            part.unk1B = 0xFF;
+            part.unk1C = 0xFF;
+            part.unk1D = 0xFF;
+            part.unk1E = 0xFF;
+            part.unk1F = 0xFF;
+            part.unk20 = 3;
+            part.unk21 = 0x24;
+            part.unk24 = 0x200005;
+            part.unk28 = 0x60600;
+            part.unk2C = 0x14;
+            part.unk2E = 0xC;
+            part.unk30 = 1;
+            part.unk32 = 0;
+            part.unk34 = 1.0f;
+            part.unk38 = -1;
+            part.unk39 = 0;
+            spawn.y = data->target->y;
+            do {
+                part.unk1A = func_150ADA20() % 101U + 155;
+                spawn.unk15 = (func_150ADA20() & 3) + 3;
+                func_151432BC(data->target, &spawn.x, &spawn.z, &sp8C, &sp88);
+                spawn.unkC = func_150ADA20() % 31U + 30;
+                part.unk0 = func_150ADA68() * 10.13f + 7.399999619f;
+                angle = func_150ADA20();
+                func_15143794(angle & 0xFF, func_150ADA20() % 22U - 54, func_150ADA68() * 20.0f + 30.0f, part.vel);
+                part.unk10 = func_150ADA68() * 1.486000061f + -3.048f;
+                func_1515C2F0(&spawn, 0, &part, 0, ((u8 *)arg0)[0xC], ((u8 *)arg0)[1]);
+                count -= 1.0f;
+            } while (count > 1.0f);
+        }
+    }
+}
 // void func_151058B4(void *arg0) {
 //     s8 spE1;
 //     s8 spE0;
