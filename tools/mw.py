@@ -18,6 +18,8 @@ Workspaces never touch the main tree; `land` is the only writer, and it re-gates
   mw.py pick  [--min B] [--max B] [--no-jtbl] [--desc] [-n N]
                                list remaining stubs by size
   mw.py rm    FUNC             delete a workspace
+  mw.py similar FUNC [-n N]    matched twins (identical code modulo symbols/regs/imms) + near twins
+  mw.py note  FUNC [text…]     append to / print the attempt ledger (survives resumes)
 
 Builds run inside the `conker-tc` podman container (see tools/toolchain/).
 """
@@ -177,6 +179,8 @@ def cmd_new(a):
     if (ws / "prev.c").exists():
         print(f"prior try : {ws / 'prev.c'}")
     print(f"check     : python3 {REPO}/tools/mw.py check {func}")
+    if (ws / "notes.md").exists():
+        print("ledger    :\n" + (ws / "notes.md").read_text().rstrip())
 
 
 # ---------------------------------------------------------------- check
@@ -503,6 +507,122 @@ def cmd_land(a):
         print(f"LANDED: {', '.join(landed)} ({total} bytes) — {git('rev-parse', '--short', 'HEAD').strip()}")
 
 
+# ---------------------------------------------------------------- similar / note
+
+SIB_DIR = WS_ROOT / ".siblings"
+
+
+def sibling_index():
+    """{func: {"obj": path, "lv": [h0, h1, h2], "ops": [...level-1 tokens]}} over the golden build.
+    Built once from `objdump -dr` of conker/expected (the golden objects never change)."""
+    cache = SIB_DIR / "index.json"
+    if cache.exists():
+        return json.loads(cache.read_text())
+    SIB_DIR.mkdir(parents=True, exist_ok=True)
+    dump = SIB_DIR / "objdump.txt"
+    run(f"find expected/build/src -name '*.c.o' | sort | while read o; do echo \"@@@ $o\"; "
+        f"mips-linux-gnu-objdump -dr --no-show-raw-insn \"$o\"; done > {dump}", MAIN, timeout=1800)
+    import hashlib as hl
+    idx, cur, obj, insns = {}, None, None, []
+
+    def flush():
+        if cur and insns:
+            lv = []
+            for level in range(3):
+                toks = [norm(i, level) for i in insns]
+                lv.append(hl.sha1("\n".join(toks).encode()).hexdigest()[:16])
+            idx[cur] = {"obj": obj, "lv": lv, "ops": [norm(i, 1) for i in insns]}
+
+    def norm(ins, level):
+        mnem, ops, sym, rel = ins
+        if sym:
+            ops = re.sub(r"(-?0x[0-9a-f]+|-?\d+)(?=\(|$)", "SYM", ops, count=1)
+        if rel is not None:
+            ops = re.sub(r"[0-9a-f]+ <[^>]*>", f"L{rel:+d}", ops)
+        if level >= 1:
+            ops = re.sub(r"\b(zero|at|v[01]|a[0-3]|t\d|s[0-8]|k[01]|gp|sp|fp|ra|\$?f\d+)\b", "R", ops)
+        if level >= 2:
+            ops = re.sub(r"-?0x[0-9a-f]+|\b-?\d+\b", "I", ops)
+        return mnem + " " + ops
+
+    start = 0
+    for line in dump.read_text(errors="replace").splitlines():
+        if line.startswith("@@@ "):
+            flush(); cur, insns, obj = None, [], line[4:].replace("expected/", "", 1)
+            continue
+        mm = re.match(r"^([0-9a-f]+) <([\w.]+)>:$", line)
+        if mm:
+            flush(); insns = []
+            cur = None if mm.group(2).startswith(".") else mm.group(2)
+            start = int(mm.group(1), 16)
+            continue
+        mm = re.match(r"^\s+([0-9a-f]+):\s+(\S+)\s*(.*)$", line)
+        if mm and cur:
+            addr, mnem, ops = int(mm.group(1), 16), mm.group(2), mm.group(3).strip()
+            bt = re.search(r"\b([0-9a-f]+) <", ops)
+            rel = int(bt.group(1), 16) - addr if bt and not mnem.startswith("jal") else None
+            insns.append([mnem, ops, False, rel])
+            continue
+        if re.match(r"^\s+[0-9a-f]+: R_MIPS_", line) and insns:
+            insns[-1][2] = True
+    flush()
+    cache.write_text(json.dumps(idx))
+    return idx
+
+
+def cmd_similar(a):
+    """Matched twins of FUNC (identical normalized code), then near twins, then unmatched twins."""
+    import difflib
+    idx = sibling_index()
+    if a.func not in idx:
+        sys.exit(f"{a.func} not in the golden objects")
+    stubs = {Path(x).stem for x in stubbed_asm(MAIN)}
+    me = idx[a.func]
+    exact, unmatched = [], []
+    for f, e in idx.items():
+        if f == a.func:
+            continue
+        for level in range(3):
+            if e["lv"][level] == me["lv"][level]:
+                (unmatched if f in stubs else exact).append((level, f, e["obj"]))
+                break
+    exact.sort(); unmatched.sort()
+    for level, f, obj in exact[: a.n]:
+        print(f"TWIN level {level} ({['same code', 'same up to registers', 'same up to registers+immediates'][level]}): "
+              f"{f}  in {obj.replace('build/', '').replace('.c.o', '.c')}  (matched — copy its C, adapt names)")
+    n = len(me["ops"])
+    near = []
+    for f, e in idx.items():
+        if f == a.func or f in stubs or abs(len(e["ops"]) - n) > max(4, n // 8):
+            continue
+        sm = difflib.SequenceMatcher(None, me["ops"], e["ops"], autojunk=False)
+        if sm.real_quick_ratio() < 0.85 or sm.quick_ratio() < 0.85:
+            continue
+        r = sm.ratio()
+        if r >= 0.85:
+            near.append((r, f, e["obj"]))
+    for r, f, obj in sorted(near, reverse=True)[: a.n]:
+        if any(f == x[1] for x in exact):
+            continue
+        print(f"NEAR {r:.0%}: {f}  in {obj.replace('build/', '').replace('.c.o', '.c')}  (matched, similar shape)")
+    if unmatched:
+        print(f"UNMATCHED TWINS (one match may serve all): {', '.join(f for _, f, _ in unmatched[: a.n])}")
+    if not exact and not near:
+        print("no matched twin or near twin")
+
+
+def cmd_note(a):
+    """Append to (or print) the function's attempt ledger, kept across agents and resumes."""
+    ws = ws_dir(a.func)
+    led = ws / "notes.md"
+    if a.text:
+        import time
+        with open(led, "a") as fh:
+            fh.write(f"- {time.strftime('%Y-%m-%d %H:%M')} {' '.join(a.text)}\n")
+    if led.exists():
+        print(led.read_text().rstrip())
+
+
 # ---------------------------------------------------------------- pick / rm
 
 def cmd_pick(a):
@@ -547,10 +667,14 @@ def main():
     p.add_argument("--max", type=int, default=10**9); p.add_argument("--no-jtbl", action="store_true")
     p.add_argument("--desc", action="store_true"); p.add_argument("-n", type=int, default=50)
     p = sub.add_parser("rm"); p.add_argument("func")
+    p = sub.add_parser("similar", help="matched twins / near twins of FUNC")
+    p.add_argument("func"); p.add_argument("-n", type=int, default=5)
+    p = sub.add_parser("note", help="append to / print the function's attempt ledger")
+    p.add_argument("func"); p.add_argument("text", nargs="*")
     a = ap.parse_args()
     sys.exit({"new": cmd_new, "check": cmd_check, "land": cmd_land, "batch": cmd_batch,
               "reset": cmd_reset, "objdump": cmd_objdump,
-              "pick": cmd_pick, "rm": cmd_rm}[a.cmd](a) or 0)
+              "pick": cmd_pick, "rm": cmd_rm, "similar": cmd_similar, "note": cmd_note}[a.cmd](a) or 0)
 
 
 if __name__ == "__main__":

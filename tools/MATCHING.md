@@ -15,7 +15,13 @@ python3 ~/conker/tools/mw.py land FUNC       # only after RESULT: MATCH — merg
 python3 ~/conker/tools/mw.py batch FUNC a.c b.c …   # try whole-file variants in parallel, one summary line each
 python3 ~/conker/tools/mw.py objdump FUNC    # your build's disassembly (with relocations)
 python3 ~/conker/tools/mw.py reset FUNC [--all]     # restore the file(s) from the pristine base
+python3 ~/conker/tools/mw.py similar FUNC    # matched TWINS (same code modulo symbols/regs/imms) — check FIRST
+python3 ~/conker/tools/mw.py note FUNC "…"   # ledger: record each hypothesis tried and its result
 ```
+Before writing anything, run `similar`: a matched twin's C is the fastest start (copy it,
+adapt names/constants, declare this function's own data). Read `mw.py note FUNC` (the ledger)
+when resuming, and append one line per hypothesis family you try (what, result) so the next
+agent does not repeat dead ends.
 Judge progress by the `ROWS:` line (structural / register-only / immediate counts), not the
 asm-differ `CURRENT` score, which is not monotonic. Get structural to 0 first. When only
 register-only rows remain and ~15 focused tries make no progress, stop and report it: the
@@ -61,6 +67,50 @@ function is right but something ELSE in the bin changed — e.g. a new literal i
    in a GPR (`mfc1` to a0-a3) or a comparison result passed as a stack argument can reserve
    extra unused words. Use `-U 1000` to see every sp offset unfolded.
 5. Keep your best version (copy the .c aside) — don't wander away from a lower score.
+6. After one failed sweep of a hypothesis family (e.g. statement orders), switch families
+   instead of repeating it; record the sweep in the ledger.
+
+## Diagnosis checklist (check these before reshaping statements)
+- **Callee contracts first.** Extra argument homes, odd int<->float moves, or a value kept
+  live across a call often mean a callee's PROTOTYPE is wrong (pointer vs int, float vs int,
+  width, return type). Read the callee's asm; fix the declaration before tuning expressions.
+- **Frame accounting** (when FRAME differs or every sp offset is shifted). The local area is:
+  named homes (every named local, in declaration order from the frame top, unused /
+  register-only / `register` ones included, natural alignment; block-scoped locals count and
+  sibling blocks do not share) + call-arg temps (each argument expression that itself
+  contains a call reserves a word: `f(g(x))` one, a 3-deep chain three; the area holds the
+  largest statement's count) + spill words + 0/1 alignment word + other uopt temps (a
+  variable array index `a[i]` can reserve one where `*(a + i)` does not). Count the target's
+  words, then add/remove real locals or split nested calls until the counts agree, THEN try
+  declaration orders.
+- **Float registers.** IDO's FP temporaries rotate through $f4 $f6 $f8 $f10 $f16 $f18, never
+  $f12/$f14 — those mean a register-allocated value. A literal and an `extern f32` load get
+  different allocation priority: try the literal (full precision).
+- **Real state vs recomputable addresses.** Keep genuine loop state / value snapshots in
+  named variables; do not name values IDO recomputes (addresses, `&arr[i]`). Test one storage
+  change at a time.
+- **Lifetimes explain scheduling.** Neither shorter nor longer scopes are universally better;
+  reason from where each value is last used.
+
+## IDO source idioms (m2c shows what IDO emitted, not what was written)
+- **Strength-reduced loops:** a counter plus a cursor stepped by the element size
+  (`p += 0xC`) is a plain indexed loop over `table[i]` — write that; IDO re-reduces it. A dead
+  `or vN,zero,zero` before a pointer-compared loop is the eliminated counter. Index
+  fixed-stride arrays with a row view, e.g. `((u8 (*)[0x32C])&D_800CC2D0)[i]`.
+- **Pointer-range loops:** a `bne` against an end symbol can be `for (i = 0; i < N; i++)`
+  over the blocks before it.
+- **Guarded do/while:** `if (c) { do {...} while (c); }` == `while (c) {...}` — prefer `while`.
+  Keep a goto loop if the structured form gets unrolled (search loops with an early `return`
+  unroll 4x).
+- **Compiler unrolling:** a short scalar prologue then a 4-store loop is ONE simple loop,
+  remainder peeled first — write the single loop before tuning its schedule.
+- **Named pointer in v0:** `lw v0,X(a0)` used as a base then `li v0,1` for the return comes
+  from a named pointer local (`data = state->field;`), not a chained expression.
+- **Display lists:** `or v1,a0,zero … addiu a0,a0,8 … or v0,a0,zero` is a GBI block on
+  `arg0++` returning `arg0` (see the decompile-microcode skill for gSP/gDP macros).
+- **Local widths:** widening an m2c `u8` temporary to `s32` can fix allocation; when only byte
+  stack offsets differ, reorder named locals or change their widths. Declaring a loop
+  pointer inside the loop body opens a -g3 scope that keeps stores before the increments.
 
 IDO idioms: `~/conker/tools/ido_cookbook.md` (read it), `~/conker/tools/ido_reference.md`
 (large, grep it for a specific symptom). Matched C in other `src/*.c` files is a good style
