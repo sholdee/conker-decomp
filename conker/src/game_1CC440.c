@@ -120,7 +120,46 @@ void func_1519F400(struct Obj1519F400 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1CC440/func_1519F48C.s")
+struct Sub1519F48C {
+    u8 pad0[0x58];
+    s32 unk58;
+    s32 unk5C;
+    s32 unk60;
+};
+
+struct Ref1519F48C {
+    struct Sub1519F48C *unk0;
+    u8 unk4;
+};
+
+struct Obj1519F48C {
+    u8 pad0[0x1E];
+    u16 unk1E;
+    s32 unk20;
+    u8 pad24[0xC];
+    u8 unk30;
+    u8 pad31[0x67];
+    struct Ref1519F48C *unk98;
+};
+
+void func_1519F48C(struct Obj1519F48C *arg0) {
+    struct Ref1519F48C *p = arg0->unk98;
+    s32 *ptr;
+
+    if (p->unk0 != 0) {
+        ptr = (s32 *)((u8 *)p->unk0 + 0x58);
+        if (arg0->unk20 == 6) {
+            ptr[0] = 0;
+        }
+        if (arg0->unk20 == 7) {
+            ptr[2] = 0;
+        }
+        p->unk0 = 0;
+    }
+    arg0->unk30 = 0;
+    arg0->unk1E &= ~2;
+    p->unk4 |= 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1CC440/func_1519F4F0.s")
 
@@ -144,8 +183,6 @@ void func_151A0928(struct Obj151A0928 *arg0) {
         ptr[3] = 0;
     }
 }
-
-void func_1519F48C(void);
 
 struct Sub151A0950 {
     u8 pad0[0x18];
@@ -172,7 +209,7 @@ void func_151A0950(struct Obj151A0950 *arg0, struct Arg151A0950 *arg1, u8 arg2) 
         if (v0 != 0) {
             temp = v0->unk18;
             if (arg1->unk0 == temp || arg1->unk4 == v0->unk1C) {
-                func_1519F48C();
+                func_1519F48C((struct Obj1519F48C *)arg0);
             }
         }
     }
@@ -476,9 +513,130 @@ void func_151A1EE8(struct Src151A1EE8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1CC440/func_151A1FB4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1CC440/func_151A24A8.s")
+typedef struct Fade151A24A8 {
+    s16 unk0;
+    s16 unk2;
+    s16 unk4;
+    s16 unk6;
+    s16 unk8;
+    s16 unkA;
+    s16 unkC;
+    s16 unkE;
+    s16 unk10;
+    s16 unk12;
+    s16 unk14;
+    s16 unk16;
+    s16 unk18;
+    s16 unk1A;
+} Fade151A24A8;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1CC440/func_151A25E0.s")
+typedef struct Obj151A24A8 {
+    u8 pad0[0x14];
+    s32 unk14;
+    u8 pad18[0x2F - 0x18];
+    u8 unk2F;
+    u8 pad30[0x2];
+    s16 unk32;
+    s16 unk34;
+    s16 unk36;
+    s16 unk38;
+    u8 pad3A[0x5];
+    u8 unk3F;
+    u8 unk40;
+    u8 unk41;
+    u8 unk42;
+    u8 pad43;
+    u16 unk44;
+    u8 pad46[0xA];
+    Fade151A24A8 unk50;
+} Obj151A24A8;
+
+void func_151A24A8(Obj151A24A8 *arg0) {
+    Fade151A24A8 *s = &arg0->unk50;
+
+    if (arg0->unk38 > s->unk4) {
+        arg0->unk3F = (s->unk2 - arg0->unk38) * s->unk0;
+    }
+    if (arg0->unk38 > s->unkA) {
+        arg0->unk34 = arg0->unk36 = (s->unk8 - arg0->unk38) * s->unk6;
+    }
+    if (arg0->unk38 < s->unk10) {
+        arg0->unk3F = arg0->unk38 * s->unk12;
+    }
+    if (arg0->unk38 < s->unk14) {
+        s16 d = s->unk16 * D_800BE9E4;
+
+        arg0->unk34 += d;
+        arg0->unk36 += d;
+    }
+    if (arg0->unk38 < s->unkC) {
+        arg0->unk2F = 0x13;
+        arg0->unk44 |= 0x101;
+        arg0->unk40 = arg0->unk41 = arg0->unk42 = arg0->unk38 * s->unkE;
+        arg0->unk14 = 0x520003;
+    }
+    if (arg0->unk38 < s->unk18) {
+        arg0->unk32 = s->unk1A;
+        s->unk18 = -9999;
+    }
+}
+
+typedef struct Fade151A25E0 {
+    s16 unk0;
+    s16 unk2;
+    s16 unk4;
+    s16 unk6;
+    s16 unk8;
+    s16 unkA;
+    s16 unkC;
+    s16 unkE;
+    s16 unk10;
+    s16 unk12;
+    s16 unk14;
+    s16 unk16;
+    s16 unk18;
+    s16 unk1A;
+} Fade151A25E0;
+
+typedef struct Obj151A25E0 {
+    u8 pad0[0x32];
+    s16 unk32;
+    s16 unk34;
+    s16 unk36;
+    s16 unk38;
+    u8 pad3A[0x5];
+    u8 unk3F;
+    u8 unk40;
+    u8 unk41;
+    u8 unk42;
+    u8 pad43[0xD];
+    Fade151A25E0 unk50;
+} Obj151A25E0;
+
+void func_151A25E0(Obj151A25E0 *arg0) {
+    Fade151A25E0 *s = &arg0->unk50;
+
+    if (arg0->unk38 > s->unk4) {
+        arg0->unk3F = (s->unk2 - arg0->unk38) * s->unk0;
+    }
+    if (arg0->unk38 > s->unkA) {
+        arg0->unk34 = arg0->unk36 = (s->unk8 - arg0->unk38) * s->unk6;
+    }
+    if (arg0->unk38 < s->unk10) {
+        arg0->unk3F = arg0->unk38 * s->unk12;
+    }
+    if (arg0->unk38 < s->unk14) {
+        s16 d = s->unk16 * D_800BE9E4;
+
+        arg0->unk34 += d;
+        arg0->unk36 += d;
+    }
+    if (arg0->unk38 < s->unk18) {
+        arg0->unk32 = s->unk1A;
+        s->unk18 = -9999;
+    }
+    arg0->unk40 = arg0->unk41 = arg0->unk42 = arg0->unk38 * s->unkE;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1CC440/func_151A26EC.s")
 
