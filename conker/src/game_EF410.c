@@ -425,7 +425,44 @@ s32 func_150C2FCC(f32 *arg0) {
     }
     return 1;
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/func_150C308C.s")
+s32 func_15144B34(s32);
+
+s32 func_150C308C(void *arg0) {
+    u8 flag;
+    f32 tmp1;
+    u8 sp1F;
+    f32 x;
+    f32 z;
+    f32 magnitude;
+    u8 *vector;
+
+    flag = 0;
+    if (*(s16 *)((u8 *)arg0 + 0x1C) >= 6) {
+        sp1F = 0;
+        vector = (u8 *)func_15144B34(D_80082FA4);
+        x = *(f32 *)vector;
+        tmp1 = *(f32 *)(vector + 8);
+        z = (magnitude = tmp1);
+        tmp1 = x;
+        magnitude = tmp1 * tmp1 + magnitude * z;
+        if (magnitude < D_800A0310) {
+            flag = 1;
+        } else {
+            flag = sp1F;
+            magnitude = *(f32 *)vector;
+            if (D_800A0314 <
+                func_15144C8C(func_150484A0(magnitude,
+                                           *(f32 *)(vector + 8)),
+                              *(f32 *)((u8 *)arg0 + 0x160))) {
+                flag = 1;
+            }
+        }
+    }
+    if (flag != 0) {
+        *(s16 *)((u8 *)arg0 + 0x1C) = 5;
+    }
+    return 1;
+}
 // ? func_150C308C(void *arg0) {
 //     u8 sp1F;
 //     f32 temp_f0;
