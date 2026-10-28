@@ -35,7 +35,60 @@ s32 func_15044964(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s3
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_71820/func_15044370.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_71820/func_15044380.s")
+typedef struct conker15044380Obj {
+    u8 pad0[0xF8];
+    u32 flagsF8;
+    u8 padFC[0x179];
+    u8 status275;
+} conker15044380Obj;
+
+extern u8 D_80089120;
+extern u8 D_80089123;
+extern u8 D_800CBDD3;
+extern f32 D_800CBDF4;
+extern f32 D_800CBDF8;
+void func_1510F800(s32);
+void func_15044660(conker15044380Obj *, f32, f32, f32);
+s32 func_150AB1F0(f32, f32, f32, conker15044380Obj *, s32);
+void func_150AC3E4(f32, f32, f32, conker15044380Obj *, s32);
+
+s32 func_15044380(f32 arg0, f32 arg1, f32 arg2, conker15044380Obj *arg3, s32 arg4, s32 arg5) {
+    s32 index;
+    s32 total;
+    s32 saved_mode;
+    u8 *active;
+
+    D_800CBDF4 = -32768.0f;
+    D_800CBDF8 = -32768.0f;
+    total = 0;
+    arg3->status275 = 0;
+    func_15044660(arg3, arg0, arg1, arg2);
+    saved_mode = D_800CBDD3;
+    for (active = &D_80089123, index = 3; index >= 0; index--, active--) {
+        if (*active == 1 && (index != 3 || !(arg3->flagsF8 & 0x200))) {
+            func_1510F800(index);
+            if (D_800DBE62 == 0) continue;
+            total += func_150AB1F0(arg0, arg1, arg2, arg3, arg4);
+        }
+    }
+    active = &D_80089120;
+    index = 0;
+    if (arg5 != 0) {
+        do {
+            if (*active == 1) {
+                func_1510F800(index);
+                if (D_800DBE62 != 0) {
+                    func_150AC3E4(arg0, arg1, arg2, arg3, 0);
+                }
+            }
+            index++;
+            active++;
+        } while (index != 3);
+    }
+    func_1510F800(0);
+    D_800CBDD3 = saved_mode;
+    return total;
+}
 
 void func_1504452C(s16 **arg0, struct17 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, s32 arg7) {
     s16 **src;
