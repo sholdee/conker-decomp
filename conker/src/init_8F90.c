@@ -872,4 +872,51 @@ void func_1000A03C(void) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_8F90/func_1000A348.s")
+void func_1000A348(void) {
+    AudioBufferState *record;
+    AudioBufferState *next;
+    AudioBufferState *anchor;
+    s32 *ownerSlot;
+
+    record = D_800406A0_MGR.active;
+    if (record != 0) {
+        do {
+            next = record->next;
+            if ((record->count == 0) && (record->field16 == 0)) {
+                ownerSlot = record->ownerSlot;
+                *ownerSlot = record->savedValue;
+                record->ownerSlot = 0;
+                if (record == D_800406A0_MGR.active) {
+                    D_800406A0_MGR.active = next;
+                }
+                if (record->next != 0) {
+                    record->next->prev = record->prev;
+                }
+                if (record->prev != 0) {
+                    record->prev->next = record->next;
+                }
+                anchor = D_800406A0_MGR.freeAnchor;
+                if (anchor != 0) {
+                    {
+                        AudioBufferState *linkNode = record;
+                        AudioBufferState *linkAfter;
+
+                        linkNode->next = anchor->next;
+                        linkNode->prev = anchor;
+                        linkAfter = anchor;
+                        anchor = linkAfter->next;
+                        if (linkAfter->next != 0) {
+                            linkAfter->next->prev = linkNode;
+                        }
+                        linkAfter->next = linkNode;
+                    }
+                } else {
+                    D_800406A0_MGR.freeAnchor = record;
+                    record->next = 0;
+                    record->prev = 0;
+                }
+            }
+            record = next;
+        } while (next != 0);
+    }
+}
