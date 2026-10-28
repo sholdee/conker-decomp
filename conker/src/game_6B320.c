@@ -178,7 +178,73 @@ void func_1503E3C4(s32 arg0, s32 arg1, s32 arg2, struct func_1503E3C4_s *arg3, s
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_6B320/func_1503E5F8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_6B320/func_1503E82C.s")
+typedef struct {
+    u8 pad0[0x24];
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    f32 unk30;
+    f32 unk34;
+    f32 unk38;
+    f32 unk3C;
+    f32 unk40;
+    f32 unk44;
+    u8 pad48[0x1C];
+    u8 unk64;
+    u8 pad65[3];
+} func_1503E82C_entry;
+
+typedef struct {
+    func_1503E82C_entry *unk0;
+    s32 unk4;
+    s32 unk8;
+    s16 unkC;
+    u8 unkE;
+    u8 unkF;
+} func_1503E82C_state;
+
+extern void func_150A7DA0(f32 mtx[4][4], f32 x, f32 y, f32 z);
+extern u8 D_80098914[];
+
+void func_1503E82C(s32 arg0) {
+    s32 count;
+    s8 *tbl;
+    s32 i;
+    s32 idx;
+    f32 (*mtx)[4];
+    f32 sp64[4][4];
+    func_1503E82C_entry *e;
+
+    if (D_800CC2D0[arg0].unk1D4 != NULL) {
+        count = D_80098914[((func_1503E82C_state *)&D_800C6660[arg0])->unkE];
+        tbl = D_80084454[((func_1503E82C_state *)&D_800C6660[arg0])->unkE];
+        for (i = 0; i < count; i++) {
+            if (tbl[i] == -2) {
+                continue;
+            }
+            e = &((func_1503E82C_state *)&D_800C6660[arg0])->unk0[i];
+            if (e->unk64 == 0) {
+                continue;
+            }
+            mtx = (f32 (*)[4])((u8 *)D_800CC2D0[arg0].unk1D4 + (i << 6));
+            idx = D_80084454[((func_1503E82C_state *)&D_800C6660[arg0])->unkE][i];
+            if (idx != -1) {
+                func_150A7DA0(sp64, e->unk24, e->unk28, e->unk2C);
+                func_150A7A48(sp64, (f32 (*)[4])((u8 *)D_800CC2D0[arg0].unk1D4 + (idx << 6)), sp64);
+                e = &((func_1503E82C_state *)&D_800C6660[arg0])->unk0[i];
+                func_150A8050(mtx, e->unk30, e->unk34, e->unk38);
+                func_150A7A48(mtx, sp64, mtx);
+                e = &((func_1503E82C_state *)&D_800C6660[arg0])->unk0[i];
+                func_150A7CB0(sp64, *(s32 *)&e->unk3C, *(s32 *)&e->unk40, *(s32 *)&e->unk44);
+                func_150A7A48(sp64, mtx, mtx);
+            } else {
+                func_150A8050(mtx, e->unk30, e->unk34, e->unk38);
+                e = &((func_1503E82C_state *)&D_800C6660[arg0])->unk0[i];
+                func_15043EC8(mtx, e->unk3C, e->unk40, e->unk44, e->unk24, e->unk28, e->unk2C);
+            }
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_6B320/func_1503EA54.s")
 
