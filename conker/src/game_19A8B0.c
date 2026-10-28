@@ -326,7 +326,13 @@ void func_1516D99C(
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_19A8B0/func_1516DB90.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_19A8B0/func_1516E778.s")
+void func_1516E778(u32 arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
+    func_1516D99C((s16)(arg0 >> 16), (s16)(arg0 & 0xFFFF), 0, arg2,
+        0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0,
+        8, 8, 1, 0, 0, 0, 0, 0x155, 0x155, 0x155, 0x155, arg1,
+        0x1E, 0, 0xFF, 0x28, 0x168, 0x18, 0x21, 4, 0, 1,
+        0, 0, 0, 0, 0, arg3, arg4);
+}
 
 extern u8 D_800A6E00[];
 extern u8 D_800A6E0C[][3];
