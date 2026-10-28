@@ -95,7 +95,35 @@ void func_150D7630(s32 arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1048D0/func_150D765C.s")
+typedef struct {
+    s32 *t[2];
+} TexTables_150D765C;
+extern TexTables_150D765C D_80088900; /* = { D_80090230, D_80090244 } */
+extern s32 func_1510D0EC(s32, s32 *, s32, s32);
+
+Gfx *func_150D765C(Gfx *gdl) {
+    s32 i;
+    s32 seg;
+    s32 frame;
+    s32 out;
+    s32 set;
+    s32 idx;
+    s32 addr;
+    TexTables_150D765C tables = D_80088900;
+
+    set = 0;
+    frame = D_800D9910 >> 8;
+    for (i = 0; i < 6; i++) {
+        if (i >= 4) {
+            set = 1;
+        }
+        idx = (frame + i * 13) % 5;
+        addr = func_1510D0EC(tables.t[set][idx], &out, 3, 0);
+        seg = i + 2;
+        gSPSegment(gdl++, seg, addr);
+    }
+    return gdl;
+}
 
 s32 func_1508855C(s32);
 void func_150885EC(s32, s32);
