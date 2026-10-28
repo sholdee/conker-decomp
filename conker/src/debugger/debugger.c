@@ -740,7 +740,37 @@ void func_16001390(s16 arg0, s16 arg1, register s16 arg2, s16 arg3)
   }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/func_160014F0.s")
+extern const u8 D_16003CE0[];
+
+u8 *func_160014F0(u8 *destination, u8 character) {
+    u16 *pixel;
+    u16 color;
+    u32 column;
+    u16 bits;
+    u32 row;
+    const u8 *glyph;
+    s32 code;
+    u16 value;
+
+    pixel = (u16 *)destination;
+    color = D_1600388C;
+    column = character;
+    bits = column;
+    code = bits;
+    if (code < 0x20) {
+        code = 0x20;
+    }
+    row = 0, glyph = D_16003CE0 + ((code - 0x20) << 3);
+    for (; row < 8; row++, glyph++) {
+        for (column = 0, bits = *glyph; column < 8; column++) {
+            value = (bits & 0x80) ? color : 1;
+            bits <<= 1;
+            *pixel++ = value;
+        }
+        pixel += D_160038A8 - 8;
+    }
+    return destination + 0x10;
+}
 
 // splat into framebuffer
 #pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/func_1600160C.s")
