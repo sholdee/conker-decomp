@@ -468,4 +468,130 @@ void func_150C04C0(Vec3F150C04C0 *arg0, void *arg1, s32 arg2, u8 arg3, u8 arg4, 
     func_15150400(&sp34, &sp2C, arg4, arg5);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_EC420/func_150C0648.s")
+typedef struct {
+    /* 0x000 */ u8 unk0;
+    /* 0x001 */ u8 unk1;
+    /* 0x002 */ u8 pad2[0xA];
+    /* 0x00C */ u8 unkC;
+    /* 0x00D */ u8 padD[0xB];
+    /* 0x018 */ f32 unk18;
+    /* 0x01C */ u8 pad1C[0x1C];
+    /* 0x038 */ f32 unk38;
+    /* 0x03C */ f32 unk3C;
+    /* 0x040 */ f32 unk40;
+    /* 0x044 */ u8 pad44[0x1C];
+    /* 0x060 */ s32 unk60;
+    /* 0x064 */ u8 pad64[0x2];
+    /* 0x066 */ u16 unk66;
+    /* 0x068 */ u8 pad68[0xA8];
+    /* 0x110 */ u8 unk110[0x60];
+    /* 0x170 */ f32 unk170;
+} Struct150C0648;
+
+
+extern s32 func_15133B98(Struct150C0648 *, s32, s32, s32, f32, s32);
+
+s32 func_150C0648(Struct150C0648 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
+    u8 flag;
+
+    if (func_150ADA68() < arg0->unk170) {
+        {
+            Struct150C04C0 desc;
+            Struct150C04C0Color color;
+            s32 ints[1];
+            const f32 floats[1] = { 1.0f };
+
+            ints[0] = arg0->unk66;
+            desc.unk00 = 2;
+            desc.unk04 = 0;
+            desc.unk08.x = arg0->unk38;
+            desc.unk08.y = arg4 + 20.0f;
+            desc.unk08.z = arg0->unk40;
+            desc.unk14 = 5.0f;
+            desc.unk18 = 4.0f;
+            desc.unk1C = -1.210000038f;
+            desc.unk20 = 0.4720000327f;
+            desc.unk24 = 0x28;
+            desc.unk26 = 0x1E;
+            desc.unk28 = arg0->unk18 * 0.3600000143f;
+            desc.unk2C = arg0->unk18 * 0.4130000174f;
+            desc.unk30 = 31.52700233f;
+            desc.unk34 = arg0->unk110;
+            desc.unk38 = 1.0f;
+            desc.unk3C = 0;
+            desc.unk40 = 0;
+            desc.unk44 = 10.0f;
+            desc.unk48 = ints;
+            desc.unk4C = (void *)floats;
+            desc.unk50 = 1;
+            desc.unk54 = 0;
+            if (arg0->unk60 & 0x800) {
+                flag = 1;
+            } else {
+                flag = 0;
+            }
+            desc.unk58 = flag;
+            desc.unk59 = 0xA;
+            desc.unk5C = 0;
+            desc.unk60 = NULL;
+            color.unk0 = 0;
+            color.unk2 = 0xFF;
+            color.unk4 = -0x2A;
+            color.unk6 = 0x19;
+            func_15150400(&desc, &color, arg0->unkC, arg0->unk1);
+            {
+            Struct150BFFE0 a;
+            f32 y;
+
+            y = arg4 + 20.0f;
+            a.unk0 = 1;
+            a.unk2 = 2;
+            a.unk4 = 0x6C;
+            a.unk6 = 0x5103;
+            a.unk8 = 0x200005;
+            a.unkC = 0;
+            a.unk10 = 0x1E;
+            a.unk12 = 0x10;
+            a.unk14 = 0;
+            a.unk18 = 0;
+            a.unk1F = 0xFF;
+            a.unk1C = 0x4E;
+            a.unk1D = 0x54;
+            a.unk1E = 0x7B;
+            a.unk20 = 0xA4;
+            a.unk21 = 0xA1;
+            a.unk22 = 0xC8;
+            a.unk23 = 0xC8;
+            a.unk24 = 0x37;
+            a.unk25 = 0xFF;
+            a.unk26 = 0x14;
+            a.unk28 = 0xC;
+            a.unk2A = 0x14;
+            a.unk2C = 1.024461985f;
+            a.unk30 = 178.0f;
+            a.unk34 = 91.0f;
+            a.unk38.x = arg0->unk38;
+            a.unk38.y = y;
+            a.unk38.z = arg0->unk40;
+            a.unk44 = 0;
+            a.unk46 = -0x12;
+            a.unk48 = 0xFF;
+            a.unk4A = 0xB;
+            a.unk4C = 4.0f;
+            a.unk50 = 6.0f;
+            a.unk54 = 0.006000000052f;
+            a.unk58 = 0.0f;
+            a.unk5C = 0x40040E07;
+            a.unk60 = 0x10;
+            a.unk61 = -1;
+            a.unk62 = 8;
+            a.unk63 = 6;
+            a.unk64 = 1;
+            a.unk68 = 0.9535999894f;
+            func_15153634(&a, 0xFF, arg0->unkC, arg0->unk1);
+            }
+        }
+        return 0;
+    }
+    return func_15133B98(arg0, arg1, arg2, arg3, arg4, arg5);
+}
