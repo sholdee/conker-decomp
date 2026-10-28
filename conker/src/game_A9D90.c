@@ -1,6 +1,8 @@
 #include <ultra64.h>
 
+#define func_1506160C func_1506160C_hdr
 #include "functions.h"
+#undef func_1506160C
 #include "variables.h"
 
 extern s32 func_15084D70(s32, s32, s32, s16*, f32*, u8*, u8*, s32*, s32*, s32, s32*);
@@ -17,7 +19,121 @@ void func_1507C8E0(struct127 *arg0, s32 arg1) {
 }
 
 // "goto" hell
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A9D90/func_1507C8FC.s")
+typedef struct C8FCStatus {
+    u8 pad0[0x84];
+    u8 team;
+    u8 pad85[0x9B];
+    u8 state;
+    u8 pad121;
+    u8 finished;
+    u8 pad123;
+    s16 timer;
+    s16 elapsed;
+} C8FCStatus;
+
+typedef struct C8FCPlayer {
+    u8 pad0[7];
+    u8 controller;
+    u8 pad8[0x314];
+    C8FCStatus *status;
+    u8 pad320[0xC];
+} C8FCPlayer;
+
+void func_1507CD0C(struct127 *);
+void func_1506160C(struct127 *, u8, u8, u8, u8);
+void func_1507D4F8(s32);
+void func_1507E1D0(void *, f32 *, f32 *, f32 *);
+void func_1517EE40(s32, s32, s32, s32, s8, s32);
+void func_1517F814(s32, f32, f32, f32, s32);
+
+void func_1507C8FC(void) {
+    s32 i;
+    f32 x;
+    f32 y;
+    f32 z;
+    C8FCPlayer *player;
+
+    if (D_800BEAC0 == 0) {
+        player = (C8FCPlayer *)&D_800CC2D0;
+        for (i = 0; i < D_8008FD8C; i++, player++) {
+            if (player->status == NULL) {
+                continue;
+            }
+            if (player->status->state == 0) {
+                player->status->elapsed = 0;
+                continue;
+            }
+            if (player->status->state == 1) {
+                continue;
+            }
+            if (i <= D_80082FA0) {
+                if (D_800BE616 != 0 && (D_800D18A2 & (1 << i))) {
+                    player->status->state = 2;
+                    player->status->timer = 60;
+                }
+                if (player->status->state == 11) {
+                    func_1517EE40(0, 0, 0, 15, 1, i);
+                    player->status->state = 12;
+                    continue;
+                }
+                if (player->status->state == 12) {
+                    if (func_1517EFAC(i) != 0) {
+                        func_1507D4F8(i);
+                    }
+                    continue;
+                }
+                if (player->status->state == 2) {
+                    if (player->status->timer > 0) {
+                        player->status->timer -= D_800BE9E4;
+                    } else {
+                        func_1507CD0C((struct127 *)player);
+                    }
+                } else if (player->status->state == 7) {
+                    if (player->status->timer > 0) {
+                        player->status->timer -= D_800BE9E4;
+                    } else {
+                        player->status->state = 8;
+                        func_1506160C((struct127 *)player, 2, 0, 60, 0);
+                    }
+                }
+                player->status->elapsed += D_800BE9E4;
+                if ((D_800BE710[i] & 0x8000) || (D_800BE616 != 0 && player->status->team == 0) ||
+                    func_150859AC((s16)i, 3) < 2 || (player->status->team == 1 && player->status->elapsed >= 181)) {
+                    player->status->finished = 1;
+                }
+                if (D_8008FDBC & 0x80) {
+                    player->status->finished = 0;
+                }
+                func_1507E1D0(player, &x, &y, &z);
+                func_1517F814(0, x, y, z, i);
+                if (player->status->finished != 0 && player->status->state == 5) {
+                    player->status->state = 6;
+                }
+                if (player->status->state == 9) {
+                    func_1507D4F8(i);
+                }
+            } else if (player->status->state == 11) {
+                func_1507D4F8(i);
+                continue;
+            } else if (player->status->state == 2) {
+                if (player->status->timer > 0) {
+                    player->status->timer -= D_800BE9E4;
+                } else {
+                    player->status->state = 7;
+                }
+            } else {
+                player->status->elapsed += D_800BE9E4;
+                if (player->controller == 0xFF && player->status->elapsed >= 161) {
+                    func_1506160C((struct127 *)player, 2, 0, 60, 0);
+                }
+                if (player->status->elapsed >= 181 && player->status->state != 10) {
+                    func_1507D4F8(i);
+                }
+            }
+        }
+        D_8008FDBC &= ~0x80;
+    }
+}
 
 void func_1507CD0C(struct127 *arg0) {
     s32 temp_lo = ((s32)arg0 - (s32)&D_800CC2D0) / (s32)sizeof(struct127);
