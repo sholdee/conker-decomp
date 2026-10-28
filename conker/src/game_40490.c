@@ -1,6 +1,8 @@
 #include <ultra64.h>
 
+#define func_1000FA64 func_1000FA64_narrow_proto
 #include "functions.h"
+#undef func_1000FA64
 #include "variables.h"
 
 void func_151A9390(s32 arg0, s32 arg1, struct134 *arg2, s32 arg3, f32 arg4, f32 arg5, s32 arg6, s32 arg7, s32 arg8);
@@ -181,7 +183,60 @@ s32 func_1501374C(struct16 *arg0) {
 }
 
 // fat struct definition:
-#pragma GLOBAL_ASM("asm/nonmatchings/game_40490/func_15013778.s")
+/* func_1000FA64 passes its arguments as full words (callers do not truncate). */
+u16 func_1000FA64(s32, s32, s32, s32, s32, s32, s32, void *, void *, s32, s32, s32);
+void func_150A8050(f32 mtx[4][4], f32 arg1, f32 arg2, f32 arg3);
+extern f32 D_80096640;
+extern f32 D_80096644;
+
+typedef struct Game40490BeamPacket {
+    f32 position[3];
+    f32 direction[3];
+    f32 height;
+    f32 width;
+    f32 rotation[2];
+    f32 zero;
+    f32 field2C;
+    f32 field30;
+} Game40490BeamPacket;
+
+s32 func_15013778(u8 *arg0) {
+    s32 result;
+    Game40490BeamPacket packet;
+    f32 matrix[4][4];
+
+    if (*(s16 *)(arg0 + 8) != 0) {
+        f32 inverse;
+        s16 height;
+
+        packet.height = 2.0f * (f32)*(s16 *)(arg0 + 8);
+        inverse = 1.0f / packet.height;
+        packet.width = (f32)*(s16 *)(arg0 + 6);
+        packet.rotation[0] = *(f32 *)(arg0 + 0xC);
+        packet.rotation[1] = *(f32 *)(arg0 + 0x10);
+        packet.zero = 0.0f;
+        packet.field2C = D_80096640;
+        packet.field30 = D_80096644;
+        packet.position[0] = (f32)*(s16 *)(arg0 + 0);
+        packet.position[1] = (f32)*(s16 *)(arg0 + 2);
+        packet.position[2] = (f32)*(s16 *)(arg0 + 4);
+        func_150A8050(matrix, *(f32 *)(arg0 + 0xC), *(f32 *)(arg0 + 0x10), 0.0f);
+        func_150A7960((f32 *)matrix, 0.0f, packet.height, 0.0f,
+                      &packet.direction[0], &packet.direction[1], &packet.direction[2]);
+        packet.direction[0] *= inverse;
+        packet.direction[1] *= inverse;
+        packet.direction[2] *= inverse;
+        result = (s32)func_15149130(0x12C, -1, 0x19, -1, 0, 0x17, (struct37 *)0x34, 0xFF, 0);
+        if (result != 0) {
+            memcpy((void *)(result + 0x28), &packet, 0x34);
+        }
+        height = *(s16 *)(arg0 + 8);
+        func_1000FA64(0x67C, *(s16 *)(arg0 + 0),
+                      (s16)(*(s16 *)(arg0 + 2) + height), *(s16 *)(arg0 + 4),
+                      0x2EE0, height * 2, height / 2, (void *)func_1000EF40, 0, 0, 8, 0);
+    }
+    return 1;
+}
 
 s32 func_1501396C(struct16 *arg0) {
     u8 idx = arg0->unk17;
