@@ -103,7 +103,90 @@ u32 *func_15183BA4(u32 *arg0, s32 arg1, s32 arg2, s32 arg3) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1B0740/func_15183C28.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1B0740/func_15183D28.s")
+typedef struct {
+    void *field0;
+    u8 pad4[8];
+    s32 fieldC;
+    void *field10;
+} Game1B0740Slot;
+
+typedef struct Game1B0740Wave {
+    u8 pad0[0x18];
+    f32 angle;
+    u8 pad1C[8];
+    f32 velocity;
+    f32 amplitude;
+    f32 frequency;
+    f32 radius;
+    u8 pad34[4];
+} Game1B0740Wave;
+
+void func_15165C80(f32 *, u8 *, f32, f32 *, f32, f32, u8 *, s32);
+void func_1517725C(u8);
+void func_15179DB0(u8);
+void func_15183C28(s32);
+extern Game1B0740Wave D_8008D0B0[];
+extern Game1B0740Wave D_8008D318[];
+extern u8 *D_8008D3C0[];
+extern u8 D_800A72E8[];
+
+void func_15183D28(void) {
+    s32 i;
+    s32 value;
+    Game1B0740Wave *wave;
+
+    for (i = 0; i < 11; i++) {
+        if (D_800DDF68[i] >= -1 && (((Game1B0740Slot *)D_800DDE80)[i].field0 == NULL || D_800DDF78[i] == 0)) {
+            D_800DDF68[i] = -2;
+        }
+    }
+    for (i = 0; i < 4; i++) {
+        if (D_800DDF60[i] > 0) {
+            value = D_800DDF60[i] - D_800BE9E4;
+            if (value < 0) {
+                value = 0;
+            }
+            D_800DDF60[i] = value;
+        }
+    }
+    for (i = 0; i < 7; i++) {
+        if (D_800DDF68[i] == 1) {
+            wave = &D_8008D0B0[i];
+            func_15165C80(&wave->angle, *(u8 **)((u8 *)&((Game1B0740Slot *)D_800DDE80)[i] + 8), wave->radius, &wave->velocity,
+                          wave->amplitude, wave->frequency, D_8008D3C0[i], D_800A72E8[i]);
+        }
+    }
+    for (i = 2; i < 5; i++) {
+        if (D_800DDF68[i] == 1) {
+            wave = &D_8008D318[i - 2];
+            func_15165C80(&wave->angle, *(u8 **)((u8 *)&((Game1B0740Slot *)D_800DDE80)[i] + 4), wave->radius, &wave->velocity,
+                          wave->amplitude, wave->frequency, D_8008D3C0[i], D_800A72E8[i]);
+        }
+    }
+    if (D_800DDF68[7] == 1) {
+        func_1517725C(7);
+    }
+    for (i = 0; i < 2; i++) {
+        if (D_800DDF68[i + 8] == 1) {
+            func_15179DB0(i + 8);
+        }
+    }
+    if (D_800DDF68[7] == 1) {
+        D_800DDF68[10] = 1;
+    }
+    for (i = 0; i < 11; i++) {
+        if (D_800DDF68[i] == -2 && ((Game1B0740Slot *)D_800DDE80)[i].field0 != NULL) {
+            func_15183C28(i);
+        }
+    }
+    for (i = 0; i < 11; i++) {
+        if (D_800DDF68[i] > 0) {
+            D_800DDF68[i] = 0;
+        } else if (D_800DDF68[i] >= -1) {
+            D_800DDF68[i]--;
+        }
+    }
+}
 
 typedef struct {
     char pad[0x57];
