@@ -562,17 +562,64 @@ void func_15116D7C(struct Obj15116D7C *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_142560/func_15116EA4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_142560/func_151172D8.s")
+typedef struct Motion151172D8 {
+    u8 pad0[0x3C];
+    s32 packedTarget;
+    u8 pad40[0x3C];
+    f32 damping;
+    f32 acceleration;
+    f32 velocity;
+} Motion151172D8;
+
+extern f32 D_800A2FD8;
+
+f32 func_151172D8(Motion151172D8 *arg0, f32 angle) {
+    f32 velocity;
+    f32 delta;
+    f32 target;
+    f32 magnitude;
+    f32 damping;
+    f32 acceleration;
+
+    damping = arg0->damping;
+    acceleration = arg0->acceleration;
+    velocity = arg0->velocity;
+    target = (f32)((arg0->packedTarget << 22) >> 22);
+    if (angle != target || velocity != 0.0f) {
+        if (velocity == 0.0f && (arg0->packedTarget >> 10) != 0) {
+            if (D_80089260[arg0->packedTarget >> 10].unk0 != 0) {
+                func_15114D24((struct Obj15116BAC *)arg0, D_80089260[arg0->packedTarget >> 10].unk0, 0x5DC0, 0xC8, 0x9C4, 0);
+            }
+        }
+        angle += velocity * (f32)D_800BE9E4;
+        delta = func_15048A70(angle, target);
+        magnitude = fabsf(delta);
+        if (delta > 0.0f) {
+            velocity += magnitude * acceleration;
+        } else {
+            velocity -= magnitude * acceleration;
+        }
+        velocity *= damping;
+        if (fabsf(delta) < D_800A2FD8 && fabsf(velocity) < D_800A2FD8) {
+            angle = target;
+            velocity = 0.0f;
+        } else if (angle < 0.0f) {
+            angle += 360.0f;
+        } else if (angle >= 360.0f) {
+            angle -= 360.0f;
+        }
+        arg0->velocity = velocity;
+    }
+    return angle;
+}
 
 struct Obj151174A0 {
     char pad0[0x8];
     f32 unk8;
 };
 
-extern f32 func_151172D8(struct Obj151174A0 *, f32);
-
 void func_151174A0(struct Obj151174A0 *arg0) {
-    arg0->unk8 = func_151172D8(arg0, arg0->unk8);
+    arg0->unk8 = func_151172D8((Motion151172D8 *)arg0, arg0->unk8);
 }
 
 struct Obj151174C8 {
@@ -581,7 +628,7 @@ struct Obj151174C8 {
 };
 
 void func_151174C8(struct Obj151174C8 *arg0) {
-    arg0->unk4 = func_151172D8((struct Obj151174A0 *)arg0, arg0->unk4);
+    arg0->unk4 = func_151172D8((Motion151172D8 *)arg0, arg0->unk4);
 }
 
 struct Obj151174F0 {
@@ -589,7 +636,7 @@ struct Obj151174F0 {
 };
 
 void func_151174F0(struct Obj151174F0 *arg0) {
-    arg0->unk0 = func_151172D8((struct Obj151174A0 *)arg0, arg0->unk0);
+    arg0->unk0 = func_151172D8((Motion151172D8 *)arg0, arg0->unk0);
 }
 
 f32 func_15117518(struct Obj151174F0 *arg0, f32 current) {
