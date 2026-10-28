@@ -718,7 +718,79 @@ void func_15168B10(s32 arg0, s32 arg1) {
 // RMW forwarding). Remainder is a v0<->t6 register rotation on `lo`/`masked` + constant-hoist
 // scheduling (li 0x1E vs lui order) that no C form pinned. Best reconstruction:
 // permuter NO ZERO, best 305 (improved from 1057)
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_15168B44.s")
+typedef struct Local15168B44 { u8 pad0[0x14]; s32 unk14; u8 pad18[0x20]; s16 unk38; u8 pad3A[5]; u8 unk3F; } Local15168B44;
+
+void func_15168B44(void *arg0)
+{
+  Local15168B44 *a;
+  s32 v1;
+  s32 new_var2;
+  u16 t6;
+  u16 hi;
+  u8 a2;
+  s32 new_var;
+  s32 c0;
+  s32 z0;
+  s32 z1;
+  s32 z2;
+  s32 t9;
+  s32 z3;
+  s32 z4;
+  s32 z5;
+  s32 keep;
+  a = arg0;
+  hi = 0x1E;
+  v1 = a->unk14;
+  new_var2 = v1;
+  t6 = ((u16) new_var2) ^ 0;
+  new_var = t6 - (1 & 0xFFFFFFFFu);
+  if (t6 != 0)
+  {
+    c0 = v1;
+    z0 = 0;
+    z1 = 0;
+    z2 = 0;
+    z3 = 0;
+    z4 = 0;
+    z5 = 0;
+    keep = new_var & 0xFFFF;
+    new_var = keep * 0;
+    if (a)
+    {
+    }
+    hi++;
+    hi--;
+    t9 = (v1 & 0xFFFF0000) | new_var;
+    v1 = 0;
+    a->unk14 = t9;
+    a->unk38 = hi;
+    if (keep)
+    {
+      ;
+    }
+    *((s32 *) (((s8 *) arg0) + 0x14)) = ((t9 | keep) | (((((((c0 * 0) | (z0 * 0)) | (z1 * 0)) | (z2 * 0)) | (z3 * 0)) | (z4 * 0)) | (z4 = z5 * 0))) & 0xFFFFFFFFu;
+    return;
+  }
+  hi = (u16) (v1 >> 16);
+  v1 = a->unk3F;
+  if (0)
+  {
+  }
+  a2 = v1;
+  if (hi < a2)
+  {
+    a->unk3F = a2 - hi;
+    if (1)
+    {
+    }
+    a->unk38 = 0x1E;
+  }
+  else
+  {
+    a2 = 0;
+    a->unk38 = (a2, 0);
+  }
+}
 // void func_15168B44(struct102 *arg0) {
 //     s32 lo = *(s32 *)((u8 *)arg0 + 0x14) & 0xFFFF;
 //     s32 hi;
