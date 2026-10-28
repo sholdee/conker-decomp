@@ -193,7 +193,60 @@ void func_1509D054(void) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C9EC0/func_1509D08C.s")
+s32 func_1509D08C(s32 arg0, s32 arg1, s32 *arg2, s32 *arg3) {
+    u8 *base;
+    u8 *entry;
+    s16 **resource;
+    s16 *dependencies;
+    s16 dependency;
+    u32 index;
+    u32 count;
+
+    base = (u8 *)D_800D2FB0;
+    entry = ((u8 (*)[8])base)[arg1];
+    if (base == 0) {
+        if (arg2 != 0) {
+            *arg2 = 0xBF;
+        }
+        if (arg3 != 0) {
+            *arg3 = 0;
+        }
+        return 0;
+    }
+    resource = *(s16 ***)(entry + 8);
+    if (resource == 0) {
+        if (arg2 != 0) {
+            *arg2 = 0xBF;
+        }
+        if (arg3 != 0) {
+            *arg3 = 0;
+        }
+        return 0;
+    }
+    if (arg2 != 0) {
+        *arg2 = resource[2][0];
+        resource = *(s16 ***)(entry + 8);
+    }
+    if (arg3 != 0) {
+        *arg3 = resource[0][0];
+        resource = *(s16 ***)(entry + 8);
+    }
+    index = 0;
+    count = *(u32 *)((u8 *)resource + 0xC);
+    if (count != 0) {
+        dependencies = resource[2];
+        do {
+            dependency = *dependencies;
+            index++;
+            if (!(
+                  ((u8 *)D_800D2E4C)[dependency >> 3] & 1 << (*dependencies & 7))) {
+                return 0;
+            }
+            dependencies++;
+        } while (index < count);
+    }
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_C9EC0/func_1509D180.s")
 
