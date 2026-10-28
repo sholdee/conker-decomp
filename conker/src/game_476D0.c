@@ -136,7 +136,45 @@ void func_1501A220(s32 arg0, s32 arg1) {
 //     return tmp;
 // }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_476D0/func_1501A490.s")
+typedef union Game476D0DisplayCommand {
+    struct {
+        u32 word0;
+        u32 word1;
+    } words;
+    u64 alignment;
+} Game476D0DisplayCommand;
+
+void func_1501AF44(f32 *, f32 *, f32 *, f32 *);
+
+s32 func_1501A490(s32 arg0, s16 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
+    { Game476D0DisplayCommand *command = (Game476D0DisplayCommand *)arg0; arg0 += 8; command->words.word0 = 0xE7000000; command->words.word1 = 0; }
+    if (arg1 == 0xFF) {
+        { Game476D0DisplayCommand *command = (Game476D0DisplayCommand *)arg0; arg0 += 8; command->words.word0 = _SHIFTL(0xED, 24, 8) | _SHIFTL((s32)((f32)(2) * 4.0f), 12, 12) | _SHIFTL((s32)((f32)(0) * 4.0f), 0, 12); command->words.word1 = _SHIFTL(arg5, 24, 2) | _SHIFTL((s32)((f32)(D_800BE620 - 2) * 4.0f), 12, 12) | _SHIFTL((s32)((f32)(D_800BE624) * 4.0f), 0, 12); }
+    } else {
+        f32 ulx;
+        f32 lrx;
+        f32 uly;
+        f32 lry;
+        u8 *record;
+
+        record = (u8 *)D_800BE628 + arg1 * 0x180;
+        ulx = *(f32 *)(record + 0x2C);
+        lrx = *(f32 *)(record + 0x30);
+        uly = *(f32 *)(record + 0x24);
+        if (arg4 != 0) {
+            if ((f32)arg4 < *(f32 *)(record + 0x28)) {
+                lry = (f32)arg4;
+            } else {
+                lry = *(f32 *)(record + 0x28);
+            }
+        } else {
+            lry = *(f32 *)(record + 0x28);
+        }
+        func_1501AF44(&ulx, &uly, &lrx, &lry);
+        { Game476D0DisplayCommand *command = (Game476D0DisplayCommand *)arg0; arg0 += 8; command->words.word0 = _SHIFTL(0xED, 24, 8) | _SHIFTL((s32)((f32)(ulx) * 4.0f), 12, 12) | _SHIFTL((s32)((f32)(uly) * 4.0f), 0, 12); command->words.word1 = _SHIFTL(arg5, 24, 2) | _SHIFTL((s32)((f32)(lrx) * 4.0f), 12, 12) | _SHIFTL((s32)((f32)(lry) * 4.0f), 0, 12); }
+    }
+    return arg0;
+}
 
 Gfx *func_1501A680(Gfx *arg0) {
     gDPSetColorImage(arg0++, G_IM_FMT_RGBA, G_IM_SIZ_16b, D_800BE620, D_8002AAE8[D_800BE9C0]);
