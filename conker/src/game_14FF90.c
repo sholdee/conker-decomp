@@ -400,7 +400,77 @@ void func_15124770(struct108 *arg0, s32 arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_151247C0.s")
+void func_150495B0(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
+
+#define F(p, off) (*(f32 *)((u8 *)(p) + (off)))
+
+void func_151247C0(struct108 *arg0) {
+    f32 padA;
+    f32 padB;
+    f32 padC;
+    f32 sp28;
+    struct127 *obj;
+    struct127 *other;
+    u8 flag;
+    f32 t;
+
+    if (arg0->unk7F4 == 0) {
+        obj = arg0->unk3D4;
+        flag = (obj != NULL) ? (*((u8 *)obj + 0x95) | *(s32 *)((u8 *)obj + 0x9C)) : 0;
+        if (flag) {
+            arg0->unk674 = 0.25f;
+        } else {
+            arg0->unk674 = 1.0f;
+        }
+        if (arg0->unk23C) {
+            arg0->unk670 = arg0->unk674;
+            F(arg0, 0x678) = 0;
+        } else {
+            func_150495B0(&arg0->unk670, arg0->unk674, &F(arg0, 0x678), F(arg0, 0x3B4) * 0.25f, F(arg0, 0x3B8) * 0.25f, arg0->unk7B4);
+        }
+        if (arg0->unk244) {
+            if (arg0->unk23C) {
+                obj = arg0->unk3D0;
+                other = (struct127 *)arg0->unk248;
+                arg0->unk2A4 = (obj->x_position + other->x_position) * 0.5f;
+                arg0->unk2A8 = (obj->y_position + other->y_position) * 0.5f;
+                F(arg0, 0x2AC) = (obj->z_position + other->z_position) * 0.5f;
+            } else {
+                obj = arg0->unk3D0;
+                other = (struct127 *)arg0->unk248;
+                arg0->unk2A4 += (((obj->x_position + other->x_position) * 0.5f) - arg0->unk2A4) * arg0->unk670;
+                arg0->unk2A8 = (obj->y_position + other->y_position) * 0.5f;
+                F(arg0, 0x2AC) += (((obj->z_position + other->z_position) * 0.5f) - F(arg0, 0x2AC)) * arg0->unk670;
+            }
+        } else {
+            if (arg0->unk23C) {
+                obj = arg0->unk3D0;
+                arg0->unk2A4 = obj->x_position;
+                F(arg0, 0x2AC) = obj->z_position;
+            } else {
+                obj = arg0->unk3D0;
+                arg0->unk2A4 += (obj->x_position - arg0->unk2A4) * arg0->unk670;
+                F(arg0, 0x2AC) += (obj->z_position - F(arg0, 0x2AC)) * arg0->unk670;
+            }
+            arg0->unk2A8 = obj->y_position;
+        }
+        if (F(arg0, 0x994) != 0.0f || F(arg0, 0x99C) != 0.0f) {
+            if (arg0->unk23C) {
+                F(arg0, 0x994) = F(arg0, 0x99C);
+                F(arg0, 0x998) = 0;
+            } else {
+                func_150495B0(&F(arg0, 0x994), F(arg0, 0x99C), &F(arg0, 0x998), 4.0f, 6.0f, arg0->unk7B4);
+            }
+            sp28 = F(arg0, 0x994) * sinf(arg0->unk39C - D_800A34FC);
+            t = F(arg0, 0x994) * cosf(arg0->unk39C - D_800A3500);
+            arg0->unk2A4 += sp28;
+            F(arg0, 0x2AC) += t;
+        }
+        arg0->unk2BC = arg0->unk2A4;
+        arg0->unk2C4 = F(arg0, 0x2AC);
+        func_15125594(arg0);
+    }
+}
 
 void func_15124AB4(struct108 *arg0) {
     arg0->unk668 = -sinf(arg0->unk398);
