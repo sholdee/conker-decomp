@@ -18,7 +18,62 @@ typedef struct Func15105C24Obj {
     s32 owner;
 } Func15105C24Obj;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_131F30/func_15104A80.s")
+extern s32 *D_800DBF94;
+
+typedef struct {
+    s32 count;
+    const u8 *list;
+    struct127 *obj;
+} Msg35;
+
+void func_15104A80(struct131 *arg0) {
+    struct127 *found;
+
+    found = NULL;
+    {
+        s32 mask;
+        s32 i;
+        struct127 *obj;
+
+        i = arg0 - D_800DBEF4;
+        mask = D_800DBF94[i];
+        if (mask != 0) {
+            for (i = 0; i < 25 && found == NULL; i++) {
+                obj = &D_800CC2D0[i];
+                if (obj->interaction_state != 0 && (mask & (1U << i))) {
+                    found = obj;
+                }
+            }
+        }
+    }
+    if (((u8 *)arg0)[0x72] == 0xF9 || ((u8 *)arg0)[0x72] == 0xF8 || ((u8 *)arg0)[0x72] == 0xF7) {
+        Msg35 msg;
+
+        msg.obj = found;
+        if (((u8 *)arg0)[0x72] == 0xF9) {
+            const u8 list[9] = { 0, 1, 2, 3, 4, 5, 0xF, 0x10, 0x11 };
+
+            msg.count = 9;
+            msg.list = list;
+        } else if (((u8 *)arg0)[0x72] == 0xF8) {
+            const u8 list[9] = { 6, 7, 8, 0x18, 0x19, 0x1A, 0x12, 0x13, 0x14 };
+
+            msg.count = 9;
+            msg.list = list;
+        } else if (((u8 *)arg0)[0x72] == 0xF7) {
+            const u8 list[9] = { 9, 0xA, 0xB, 0xC, 0xD, 0xE, 0x15, 0x16, 0x17 };
+
+            msg.count = 9;
+            msg.list = list;
+        }
+        func_151494E0((s32)&msg, 0x35);
+    } else if (((u8 *)arg0)[0x72] == 0xF6) {
+        Msg35 msg2;
+
+        msg2.obj = found;
+        func_151494E0((s32)&msg2.obj, 0x38);
+    }
+}
 
 s32 func_1000FD38();
 extern s32 func_151464B8(s16 *);
