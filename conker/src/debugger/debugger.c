@@ -576,7 +576,26 @@ s32 func_16000B14(struct OSThread_s *thread) {
     }
     return 0;
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/func_16000F8C.s")
+s32 func_16001B34(u8 *buffer, const u8 *format, ...);
+
+void func_16000F8C(s32 position, f32 value) {
+    f32 copy;
+    u8 buffer[44];
+    u32 exponent;
+
+    if ((position >= (D_160038A0 << 5)) && (position < 0x341)) {
+        copy = value;
+        exponent = (u32)(*(s32 *)&copy & 0x7F800000) >> 23;
+        if (((exponent == 0) || (exponent >= 0xFF)) &&
+            ((exponent = *(s32 *)&copy * 2) != 0)) {
+            func_160012B0(position, D_160047D0);
+            return;
+        }
+        func_16001B34(buffer, D_160047D4, D_160047DC, D_160047E0,
+                      (f64)value);
+        func_160012B0(position, buffer);
+    }
+}
 // NON-MATCHING: lots to figure out
 // void func_16000F8C(s32 arg0, f32 arg1) {
 //     struct165 tmp;
