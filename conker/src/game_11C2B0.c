@@ -766,7 +766,103 @@ void func_150F0938(s32 arg0) {
     func_15160A58(arg0, 2, &D_800A1680, 2, 0x12C, 0xD, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, 0xFF, 1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_11C2B0/func_150F0A24.s")
+typedef struct { f32 x, y, z; } Vec3f_150F0A24;
+typedef struct Game11D830EffectPacket {
+    s32 field_0;
+    s32 field_4;
+    Vec3f_150F0A24 position;
+    f32 field_14;
+    f32 field_18;
+    f32 field_1C;
+    f32 field_20;
+    f32 field_24;
+    f32 field_28;
+    s16 field_2C;
+    s16 field_2E;
+    s16 field_30;
+    s16 field_32;
+    s32 field_34;
+    s32 field_38;
+    s16 field_3C;
+    s16 field_3E;
+    s16 field_40;
+    u8 bytes_42[0x17];
+    u8 pad59[3];
+    s32 field_5C;
+    s32 field_60;
+    s16 field_64;
+    s16 field_66;
+    s16 field_68;
+    s8 field_6A;
+    u8 pad6B;
+    f32 field_6C;
+    s8 field_70;
+    s8 field_71;
+    s8 field_72;
+    s8 field_73;
+} Game11D830EffectPacket;
+
+void func_15152B38(void *, s32, s32, void *);
+extern f32 D_800A1858;
+extern f32 D_800A185C;
+
+void func_150F0A24(f32 *arg0) {
+    Game11D830EffectPacket packet;
+
+    packet.field_0 = 9;
+    packet.field_4 = 6;
+    packet.position = *(Vec3f_150F0A24 *)arg0;
+    packet.field_14 = 14.88f;
+    packet.field_18 = 14.88f;
+    packet.field_1C = D_800A1858;
+    packet.field_20 = D_800A185C;
+    packet.field_24 = 39.0f;
+    packet.field_28 = 35.0f;
+    packet.field_2C = 0;
+    packet.field_2E = 0xFF;
+    packet.field_30 = -0x1F;
+    packet.field_32 = 0x50;
+    packet.field_34 = 3;
+    packet.field_38 = 4;
+    packet.field_3C = 0x14;
+    packet.field_3E = 0x1E;
+    packet.field_40 = 1;
+    packet.bytes_42[0] = 4;
+    packet.bytes_42[1] = 2;
+    packet.bytes_42[2] = 3;
+    packet.bytes_42[3] = 0xFF;
+    packet.bytes_42[4] = 0xFF;
+    packet.bytes_42[5] = 0xFF;
+    packet.bytes_42[6] = 0xFF;
+    packet.bytes_42[7] = 0;
+    packet.bytes_42[8] = 0;
+    packet.bytes_42[9] = 0;
+    packet.bytes_42[0xA] = 0;
+    packet.bytes_42[0xB] = 0xFF;
+    packet.bytes_42[0xC] = 0xFF;
+    packet.bytes_42[0xD] = 0xFF;
+    packet.bytes_42[0xE] = 0xFF;
+    packet.bytes_42[0xF] = 0;
+    packet.bytes_42[0x10] = 0;
+    packet.bytes_42[0x11] = 0;
+    packet.bytes_42[0x12] = 0;
+    packet.bytes_42[0x13] = 0xFF;
+    packet.bytes_42[0x14] = 0;
+    packet.bytes_42[0x15] = 3;
+    packet.bytes_42[0x16] = 0x24;
+    packet.field_5C = 0x200005;
+    packet.field_60 = 0x60600;
+    packet.field_64 = 8;
+    packet.field_66 = 0x1F;
+    packet.field_68 = 1;
+    packet.field_6A = 0;
+    packet.field_6C = 1.0f;
+    packet.field_70 = -1;
+    packet.field_71 = 0;
+    packet.field_72 = -1;
+    packet.field_73 = -1;
+    func_15152B38(&packet, 0xFF, 1, arg0);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_11C2B0/func_150F0BEC.s")
 
