@@ -314,7 +314,50 @@ void func_15113180(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_13D350/func_15113218.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_13D350/func_151135C4.s")
+typedef struct Game13D350Cmd {
+    u32 word0;
+    u32 word1;
+} Game13D350Cmd;
+
+typedef struct Game13D350DrawEntry {
+    u16 index;
+    u16 value;
+} Game13D350DrawEntry;
+
+void *func_151733D8(void *, s32);
+s32 func_151137D4(s32, void *, s32, s32, s32, s32);
+s32 func_1515E544(s32, s32, s32, s32, void *);
+extern u8 **D_80089240;
+extern u8 **D_80089250[];
+extern u8 D_80089470;
+extern u8 D_800D9E21;
+extern u16 D_800DBEE8[];
+
+Game13D350Cmd *func_151135C4(Game13D350Cmd *arg0, s32 arg1, s16 arg2) {
+    s32 viewOffset;
+    s32 flags;
+    s32 index;
+    u8 ***table;
+
+    if (arg1 == 0) {
+        flags = 0;
+    } else {
+        flags = 0x10;
+    }
+    arg0 = func_151733D8(arg0, 0);
+    { Game13D350Cmd *command = arg0++; command->word0 = 0xD9A3FFFF; command->word1 = 0; }
+    { Game13D350Cmd *command = arg0++; command->word0 = 0xD9FFFFFF; command->word1 = 0x20000; }
+    viewOffset = arg2 * 4;
+    table = (u8 ***)((u8 *)&D_80089240 + viewOffset);
+    arg0 = (Game13D350Cmd *)func_1515E544((s32)arg0, *(s32 *)((u8 *)D_800D9E10 + viewOffset), D_800D9E20, D_800D9E21, (u8 *)D_800D9BD0 + arg2 * 0x10 + D_800BE9C0 * 8);
+    for (index = 0; index < D_800DBEE8[arg2]; index++) {
+        arg0 = (Game13D350Cmd *)func_151137D4((s32)arg0, ((Game13D350DrawEntry *)(**table + index * 4))->index * 0xA0 + (u8 *)D_800DBEF4, (s32)(*D_80089250[D_800BE9C0] + (((Game13D350DrawEntry *)(**table + index * 4))->index << 6)), arg2, ((Game13D350DrawEntry *)(**table + index * 4))->value, flags);
+    }
+    { Game13D350Cmd *command = arg0++; command->word0 = 0xDA380003; command->word1 = (u32)&D_80089470; }
+    { Game13D350Cmd *command = arg0++; command->word0 = 0xD9AFFDFF; command->word1 = 0; }
+    { Game13D350Cmd *command = arg0++; command->word0 = 0xD9FFFFFF; command->word1 = 0x20000; }
+    return arg0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_13D350/func_151137D4.s")
 
