@@ -1,5 +1,8 @@
 #include <ultra64.h>
+#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
+#undef func_150ADA20
+u32 func_150ADA20(void);
 #include "variables.h"
 
 extern s32 D_800DCE50[][0x68];
@@ -15,7 +18,115 @@ typedef struct Func15105C24Obj {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_131F30/func_15104A80.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_131F30/func_15104C44.s")
+s32 func_1000FD38();
+extern s32 func_151464B8(s16 *);
+
+typedef struct {
+    void *target;
+    f32 accum;
+    s16 timer;
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 radius;
+    f32 yOffset;
+    f32 floor;
+    u8 pad24[0x20];
+    s16 *unk44;
+} Func15104C44Data;
+
+typedef struct {
+    s16 unk0;
+    u8 unk2;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    f32 unk30;
+    s8 unk34;
+    s32 unk38;
+    f32 unk3C;
+    f32 unk40;
+    s16 unk44;
+    s16 unk46;
+    u8 unk48;
+    u8 unk49;
+    u8 unk4A;
+    u8 unk4B;
+    u8 unk4C;
+} Func15104C44Desc;
+
+extern void func_15143874(s16, f32, f32 *, f32 *);
+extern s32 func_15046C80(f32 *, s32, f32, f32 *);
+extern void func_15105CE0(Func15104C44Desc *, s32, s32, s32);
+
+void func_15104C44(struct131 *arg0) {
+    Func15104C44Data *data;
+
+    data = (Func15104C44Data *)((u8 *)arg0 + 0x28);
+    if (data->timer >= 0) {
+        data->timer -= D_800BE9E4;
+        if (data->timer < 0) {
+            func_1000FD38(func_1000EF40, data->target, 0);
+        }
+        if (func_151464B8(data->unk44) == 0) {
+            data->accum += (0.1970000118f + func_150ADA68() * 0.3f) * D_800BE9A4;
+            if (data->accum > 1.0f) {
+                Func15104C44Desc desc;
+                f32 pos[3];
+                f32 offZ1;
+                f32 offX1;
+                f32 offZ2;
+                f32 offX2;
+
+                pos[1] = data->y + data->yOffset;
+                desc.unk2 = 1;
+                desc.unk34 = -1;
+                desc.unk44 = 3;
+                desc.unk46 = 4;
+                desc.unk4C = 0;
+                desc.unk40 = 45.0f;
+                desc.unk3C = 25.0f;
+                desc.unk4 = data->x;
+                desc.unk8 = data->y + data->yOffset;
+                desc.unkC = data->z;
+                desc.unk14 = data->y + data->yOffset - 180.0f;
+                desc.unk48 = 0x61;
+                desc.unk49 = 0xF2;
+                desc.unk4A = 0xFF;
+                do {
+                    func_15143874(func_150ADA20() & 0xFF, (func_150ADA68() * 0.5f + 0.5f) * data->radius, &pos[0], &pos[2]);
+                    pos[0] += data->x;
+                    pos[2] += data->z;
+                    if (func_15046C80(pos, 0, data->y, &data->floor) != 0) {
+                        func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * 220.0f, &offX1, &offZ1);
+                        func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * 220.0f, &offX2, &offZ2);
+                        desc.unk10 = data->x + offX1;
+                        desc.unk18 = data->z + offZ1;
+                        desc.unk28 = pos[0];
+                        desc.unk2C = data->floor;
+                        desc.unk30 = pos[2];
+                        desc.unk1C = offX2 + pos[0];
+                        desc.unk20 = desc.unk2C + 180.0f;
+                        desc.unk24 = offZ2 + pos[2];
+                        desc.unk0 = func_150ADA20() % 13U + 8;
+                        desc.unk4B = func_150ADA20() % 156U + 100;
+                        desc.unk38 = func_150ADA20() % 3U + 5;
+                        func_15105CE0(&desc, 0, ((u8 *)arg0)[0xC], ((u8 *)arg0)[1]);
+                    }
+                    data->accum -= 1.0f;
+                } while (data->accum > 1.0f);
+            }
+        }
+    }
+}
 
 s32 func_1000FD38();
 
