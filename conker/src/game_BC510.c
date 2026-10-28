@@ -181,5 +181,37 @@ void func_15093878(void) {
     D_800D244C = allocate_memory(0x80, 1, 1, 0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_150938BC.s")
+extern s32 D_800D2450;
+extern u8 D_11AD[];
+void func_150A7D00(s32, f32, f32, f32);
+
+GameBC510Command *func_150938BC(GameBC510Command *arg0) {
+    s32 x = 120;
+    s32 y = 129;
+    s32 z = -303;
+    s32 i;
+    s32 val;
+    s32 tex;
+
+    val = (D_800D2450 / 30) % 60;
+    i = 4;
+    do {
+        tex = func_1510D0EC((s32)D_11AD + (val % 10), 0, 3, 0);
+        if (tex == (s32)0x80000000) {
+            return arg0;
+        }
+        gSPSegment((Gfx *)arg0++, i, tex);
+        if (i == 3) {
+            val = (D_800D2450 / 30) / 60;
+        } else {
+            val = val / 10;
+        }
+        i--;
+    } while (i != 0);
+
+    func_150A7D00((D_800BE9C0 << 6) + D_800D244C, x, y, z);
+    gSPMatrix((Gfx *)arg0++, (D_800BE9C0 << 6) + D_800D244C, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPDisplayList((Gfx *)arg0++, D_800D2448);
+    return arg0;
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_15093B58.s")
