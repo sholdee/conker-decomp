@@ -430,7 +430,61 @@ extern void (*D_8008AFD0[])(Struct15158D2C *);
 extern s8 *D_8008B02C[];
 extern Struct15158D2C_Rule D_800A6200[];
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_185560/func_15158D2C.s")
+void func_15158D2C(Struct15158D2C *arg0) {
+    s32 oldBits;
+    s8 action;
+    u8 old2C;
+    u8 old2D;
+    u8 old2E;
+    u8 old2F;
+    u8 old30;
+    s32 newBits;
+    s32 i;
+
+    old2C = arg0->unk2C;
+    old2D = arg0->unk2D;
+    old2E = arg0->unk2E;
+    old2F = arg0->unk2F;
+    old30 = arg0->unk30;
+
+    arg0->unk2C = func_15159084((Struct15159084 *)arg0->unk18, arg0->unk1D);
+    if (arg0->unk2C == 0) {
+        arg0->unk2D = func_15159120((Struct15159120 *)arg0->unk18, arg0->unk1D);
+    } else {
+        arg0->unk2D = 2;
+    }
+
+    if (arg0->unk2C == 0) {
+        if (arg0->unk2D == 0) {
+            arg0->unk2E = 1;
+        } else {
+            arg0->unk2E = func_15159184((Struct15159184 *)arg0->unk18, arg0->unk1D);
+        }
+    } else {
+        arg0->unk2E = 0;
+    }
+
+    arg0->unk2F = func_15159230(arg0->unk18, &arg0->unk20, arg0->unk2F);
+    arg0->unk20 = arg0->unk18->unk14;
+    arg0->unk24 = arg0->unk18->unk18;
+    arg0->unk28 = arg0->unk18->unk1C;
+    arg0->unk30 = func_151592B8(arg0->unk18, arg0->unk1D);
+
+    if (arg0->unk31 & 1) {
+        newBits = STATE_BITS(arg0->unk2C, arg0->unk2D, arg0->unk2E, arg0->unk2F, arg0->unk30);
+        for (i = 0; i < 28; i++) {
+            action = D_8008B02C[arg0->unk1D][i];
+            if (action != -1) {
+                oldBits = STATE_BITS(old2C, old2D, old2E, old2F, old30);
+                if ((D_800A6200[i].from | oldBits) == D_800A6200[i].from) {
+                    if ((D_800A6200[i].to | newBits) == D_800A6200[i].to) {
+                        D_8008AFD0[action](arg0);
+                    }
+                }
+            }
+        }
+    }
+}
 
 void func_1519F400(void *);
 
