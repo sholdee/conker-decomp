@@ -734,7 +734,6 @@ void func_150F884C(s32 arg0, s32 arg1) {
     func_151494E0((s32)&sp18, 0x3F);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_124920/func_150F887C.s")
 
 
 
@@ -784,6 +783,33 @@ typedef struct {
     s8 unk6;
     u8 pad7;
 } Func150F892CMsg;
+
+void func_150F892C(Func150F892CArg *arg0);
+
+typedef struct {
+    s32 unk0;
+    u8 unk4;
+} Func150F887CMsg;
+
+void func_150F887C(Func150F892CArg *arg0, Func150F887CMsg *arg1, u8 arg2) {
+    Func150F892CSub *sub = &arg0->unk28;
+
+    if (arg2 == 0x42) {
+        if (sub->unk4 == arg1->unk4) {
+            u8 i;
+
+            for (i = 0; i < 7; i++) {
+                sub->unkC[i]->unk6E = 1;
+            }
+            sub->unkC[7]->unk6E = 0;
+            sub->unk8 = 7;
+        }
+    } else if (arg2 == 0x3F) {
+        if (arg0->unk28.unk0 == arg1->unk0) {
+            func_150F892C(arg0);
+        }
+    }
+}
 
 typedef struct {
     f32 unk00;
