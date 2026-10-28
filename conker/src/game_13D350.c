@@ -554,7 +554,30 @@ void func_15114348(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
     *arg3 += rz;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_13D350/func_1511473C.s")
+typedef struct Game13F9D0MovingActor {
+    u8 pad0[0x14];
+    f32 xyz[3];
+    u8 pad20[0x56];
+    u16 angle;
+    u8 pad78[2];
+    s16 angleCopy;
+    u8 pad7C[0xBB];
+    u8 active;
+} Game13F9D0MovingActor;
+
+extern f32 D_800A2F60;
+extern u16 D_800CBDA0[];
+
+void func_1511473C(Game13F9D0MovingActor *arg0, s32 arg1) {
+    if (arg0 == 0 || arg1 >= D_800DBEF0) {
+        return;
+    }
+    func_15114348(arg1, &arg0->xyz[0], &arg0->xyz[1], &arg0->xyz[2]);
+    arg0->angle += *(f32 *)((u8 *)D_800DBEF4 + (arg1 * 0xA0) + 0x64) * D_800A2F60;
+    if ((arg0->active != 0) && ((arg1 + 1) == D_800CBDA0[((s32)((u8 *)arg0 - (u8 *)D_800CC2D0) / 0x32C)])) {
+        arg0->angleCopy = arg0->angle;
+    }
+}
 
 void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
 
