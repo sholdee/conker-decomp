@@ -103,7 +103,21 @@ s16 *func_150343B0(s16 *arg0, s32 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_61490/func_150344A0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_61490/func_1503453C.s")
+void func_1503B9BC(void);
+
+void func_1503453C(s32 arg0) {
+    switch (D_800CC2D4[arg0 * 0x32C]) {
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 0x80:
+    case 0xB0:
+        func_1503B9BC();
+        break;
+    }
+}
 
 void func_150345E4(s32 arg0) {
     if (D_800CC2D0[arg0].unk1D4 != 0) {
