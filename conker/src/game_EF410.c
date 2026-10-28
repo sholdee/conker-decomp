@@ -141,7 +141,42 @@ typedef struct {
 //     func_15151A38(&sp18, arg0 & 0xFF, 1);
 // }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/func_150C2424.s")
+void func_1514C470(f32, f32, f32, f32, f32, f32, f32, s32, s32, f32, s32, u8);
+extern f32 D_800A0268;
+extern f32 D_800A026C;
+
+void func_150C2424(u8 arg0) {
+    f32 *p = &D_800A0268;
+
+    func_1514C470(
+        *p,
+        -490.0f,
+        -328.0f,
+        *p,
+        -490.0f,
+        328.0f,
+        (func_150ADA68() * 8.0f) + 8.0f,
+        1,
+        0,
+        0.0f,
+        0,
+        arg0
+    );
+    func_1514C470(
+        D_800A026C,
+        -560.0f,
+        -580.0f,
+        8117.0f,
+        -560.0f,
+        -580.0f,
+        (func_150ADA68() * 3.0f) + 4.0f,
+        3,
+        0,
+        0.0f,
+        0,
+        arg0
+    );
+}
 s32 func_150C251C(void *arg0) {
     void *temp_v0 = *(void **)((s32)arg0 + 0x98);
     s32 temp_v1 = *(s16 *)((s32)arg0 + 0x1C) << 3;
