@@ -67,7 +67,44 @@ struct Entry150356C8 *func_150356C8(void) {
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_61D10/func_15035714.s")
+s32 func_150A6360(void *, void *, f32, f32, f32, f32, f32, f32);
+extern f32 D_80097D70;
+extern u8 D_800D9C10;
+
+s32 func_15035714(s32 arg0, u8 *arg1, u8 *arg2, f32 arg3) {
+    f32 temp_fa0;
+    f32 temp_ft4;
+    f32 temp_ft5;
+    f32 var_fv0;
+    f32 var_fv1;
+    s32 sp28;
+    u8 *temp_v0;
+    s32 index;
+    f32 delta;
+
+    sp28 = D_800BE628;
+    index = arg1[4];
+    temp_v0 = (u8 *)D_800D1C90[index];
+    var_fv0 = (f32)(u32)*(u16 *)(temp_v0 + 0xE);
+    temp_ft4 = var_fv0;
+    temp_ft5 = var_fv0;
+    temp_ft4 *= *(f32 *)(arg1 + 0x14C);
+    temp_ft5 *= *(f32 *)(arg1 + 0x150);
+    temp_fa0 = *(f32 *)(arg1 + 0x150) * (f32)*(s16 *)(temp_v0 + 0x10);
+    if ((arg0 == 1) || (arg0 == 0)) {
+        delta = (*(f32 *)(arg1 + 0x18) + temp_fa0) - arg3;
+        var_fv1 = arg3 - delta;
+    } else {
+        var_fv1 = *(f32 *)(arg1 + 0x18) + temp_fa0;
+    }
+    if (func_150A6360((void *)sp28, &D_800D9C10,
+                      *(f32 *)(arg2 + 0x30), var_fv1,
+                      *(f32 *)(arg2 + 0x38), temp_ft4, temp_ft5,
+                      D_80097D70) == 0) {
+        return 1;
+    }
+    return 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_61D10/func_15035808.s")
 
