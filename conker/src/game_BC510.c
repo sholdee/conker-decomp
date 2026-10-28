@@ -8,7 +8,14 @@ void func_15042D94(s32, s32, u8, s32 *, ...);
 extern u8 D_D16[];
 
 // need to figure out D_800D2460
-#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_1508F060.s")
+void func_1508F060(void) {
+    s32 i;
+
+    for (i = 0; i < 6; i++) {
+        D_800D2460[i][13] = 0;
+    }
+    D_800D24C0 = 0;
+}
 
 void func_1508F0A4(void) {
     func_1508F0D4();
