@@ -6,7 +6,47 @@
 #undef func_15043BB8
 #include "variables.h"
 
-void func_15042ECC(s32 arg0, s32 *arg1);
+void func_15042ECC();
+
+typedef struct Game70200Anchor {
+    u8 pad0[0x14];
+    f32 x;
+    f32 y;
+    f32 z;
+} Game70200Anchor;
+
+typedef struct Game70200TextNode {
+    Game70200Anchor *attachedObject;
+    f32 scale;
+    s16 x;
+    s16 yOrVerticalOffset;
+    u8 flagsRaw;
+    u8 kindSelector;
+    u8 primaryRed;
+    u8 primaryGreen;
+    u8 primaryBlue;
+    u8 primaryAlpha;
+    u8 field_12;
+    u8 field_13;
+    u8 field_14;
+    u8 field_15;
+    u8 pad_16[2];
+    struct Game70200TextNode *next;
+    u8 text[0x40];
+} Game70200TextNode;
+
+void *allocate_memory(s32, s32, s32, s32);
+s32 func_151EFF94(u8 *, const u8 *, ...);
+extern u8 D_80085CC0[];
+extern u8 D_80085CC4;
+extern s32 D_80098B90;
+extern s32 D_80098B94;
+extern Game70200TextNode *D_800CBD68;
+extern u8 D_800CBD6C;
+extern u8 D_800CBD6D;
+extern u8 D_800CBD6E;
+extern u8 D_800CBD6F;
+
 
 
 void func_15042D50(void) {
@@ -43,7 +83,141 @@ void func_15042E3C(s32 arg0, ...) {
     }
     func_15042ECC(arg0, sp24);
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_70200/func_15042ECC.s")
+void func_15042ECC(u8 *format, s32 *argumentWords) {
+    struct {
+        Game70200TextNode *node;
+        s32 pad;
+        s32 finished;
+        s32 pad2;
+    } local;
+    Game70200TextNode *node;
+    u8 *out;
+    s32 argumentIndex;
+    s32 conversionIndex;
+    u8 ch;
+    u8 flags;
+    u8 *conversion;
+
+    argumentIndex = 0;
+    conversion = &D_80085CC4;
+    while (*format != 0) {
+        local.node = allocate_memory(sizeof(Game70200TextNode), 1, 0, 1);
+        if (local.node == 0) {
+            return;
+        }
+        local.node->next = 0;
+        local.finished = 0;
+        if (D_800CBD68 == 0) {
+            D_800CBD64 = (s32)local.node;
+        } else {
+            D_800CBD68->next = local.node;
+        }
+        out = local.node->text;
+        local.node->kindSelector = 0;
+        do {
+            ch = *format;
+            if (ch == '%') {
+                format++;
+                *conversion = '%';
+                for (conversionIndex = 1; conversionIndex != 0; conversionIndex++, format++) {
+                    u8 *destination = &(&D_80085CC4)[conversionIndex];
+
+                    destination[0] = *format;
+                    destination[1] = 0;
+                    switch (destination[0]) {
+                    case 'X':
+                    case 'd':
+                    case 'x':
+                        func_151EFF94(out, &D_80085CC4,
+                                     argumentWords[argumentIndex++]);
+                        while (*out != 0) {
+                            out++;
+                        }
+                        conversionIndex = -1;
+                        break;
+                    case 'F':
+                    case 'f': {
+                        f32 *number = (f32 *)argumentWords[argumentIndex++];
+                        f32 value = *number;
+
+                        func_151EFF94(out, D_80085CC0, &D_80098B90,
+                                     &D_80098B94,
+                                     (f64)value);
+                        while (*out != 0) {
+                            out++;
+                        }
+                        conversionIndex = -1;
+                        break;
+                    }
+                    case 's':
+                        func_151EFF94(out, &D_80085CC4,
+                                     argumentWords[argumentIndex++]);
+                        while (*out != 0) {
+                            out++;
+                        }
+                        conversionIndex = -1;
+                        break;
+                    case '%':
+                        *out++ = *format;
+                        *out = 0;
+                        conversionIndex = -1;
+                        break;
+                    default:
+                        break;
+                    }
+                }
+            } else if (ch == '#') {
+                local.node->kindSelector = argumentWords[argumentIndex++];
+                format += 2;
+            } else if (ch == '\n') {
+                format++;
+                local.finished = 1;
+            } else if (ch == 0) {
+                local.finished = 1;
+            } else {
+                *out = ch;
+                format++;
+                out++;
+                *out = 0;
+            }
+        } while (local.finished == 0);
+
+        node = local.node;
+        node->flagsRaw = D_800CBD74;
+        node->attachedObject = (Game70200Anchor *)D_800CBD78;
+        if (node->attachedObject != 0) {
+            node->yOrVerticalOffset = D_800CBD7C;
+            flags = node->flagsRaw | 1;
+            node->flagsRaw = (node->flagsRaw = flags);
+            if (D_8008FD90 >= 2) {
+                node->scale = D_800CBD80 + D_800CBD80;
+            } else {
+                node->scale = D_800CBD80;
+            }
+        } else {
+            node->x = D_800CBD70;
+            node->yOrVerticalOffset = D_800CBD72;
+            node->scale = D_800CBD80;
+        }
+        node->primaryRed = D_800CBD60;
+        node->primaryGreen = D_800CBD61;
+        node->primaryBlue = D_800CBD62;
+        node->primaryAlpha = D_800CBD63;
+        node->field_12 = D_800CBD6C;
+        node->field_13 = D_800CBD6D;
+        node->field_14 = D_800CBD6E;
+        node->field_15 = D_800CBD6F;
+        D_800CBD68 = node;
+        if (node->kindSelector != 0) {
+            node->primaryRed = 0xFF;
+            node->primaryGreen = 0xFF;
+            node->primaryBlue = 0xFF;
+        } else {
+            D_800CBD72 += 0xB;
+        }
+    }
+    D_800CBD78 = 0;
+}
 
 void func_150432BC(f32 arg0) {
     D_800CBD80 = arg0;
