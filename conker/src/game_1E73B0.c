@@ -1126,7 +1126,63 @@ void func_151BF340(u8 arg0, s32 arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E73B0/func_151BF81C.s")
+typedef struct Game1EC390Animation {
+    void *primary;
+    void *secondary[2];
+    f32 timer;
+    f32 amount;
+    u8 flags;
+} Game1EC390Animation;
+
+s32 func_1517EF00(s32);
+s32 func_15181CC8(s32);
+extern f32 D_800AA918, D_800AA91C, D_800AA920;
+extern f32 D_800AA924, D_800AA928, D_800AA92C;
+
+void func_151BF81C(void *arg0) {
+    f32 amount;
+    Game1EC390Animation *animation;
+
+    if (D_800BEAC1 != 0 || (animation = (Game1EC390Animation *)((u8 *)arg0 + 0x28), D_800BEAC0 != 0)) {
+        *(s16 *)((u8 *)arg0 + 0xE) = -1;
+        *((u8 *)arg0 + 0xD) |= 1;
+        return;
+    }
+    if (!(animation->flags & 1)) {
+        if (D_800C35EA == 1) return;
+        if (func_15181CC8(0) == 0) return;
+        if (func_1517EF00(0) != 0 || D_800BE9B4 != 0) return;
+        animation->flags |= 1;
+    }
+    if (animation->timer < D_800AA918) {
+        amount = sinf(animation->timer * D_800AA91C * D_800AA920);
+    } else if (D_800AA924 < animation->timer) {
+        amount = sinf((110.0f - animation->timer) * D_800AA928 * D_800AA92C);
+    } else {
+        amount = animation->amount;
+    }
+    if (animation->primary != NULL) {
+        *(f32 *)((u8 *)animation->primary + 0x54) = amount * -85.0f + 150.0f;
+        if (D_800D2458 != 0) *(f32 *)((u8 *)animation->primary + 0x58) = 32.0f;
+        else *(f32 *)((u8 *)animation->primary + 0x58) = 79.0f;
+    }
+    if (animation->secondary[0] != NULL) {
+        *(f32 *)((u8 *)animation->secondary[0] + 0x10) = ((amount * -85.0f + 150.0f) / 1.0f + 48.0f) - 12.0f;
+        if (D_800D2458 != 0) *(f32 *)((u8 *)animation->secondary[0] + 0x14) = -15.0f;
+        else *(f32 *)((u8 *)animation->secondary[0] + 0x14) = -62.0f;
+    }
+    if (animation->secondary[1] != NULL) {
+        *(f32 *)((u8 *)animation->secondary[1] + 0x10) = ((amount * -85.0f + 150.0f) / 1.0f + 48.0f) + 12.0f;
+        if (D_800D2458 != 0) *(f32 *)((u8 *)animation->secondary[1] + 0x14) = -15.0f;
+        else *(f32 *)((u8 *)animation->secondary[1] + 0x14) = -62.0f;
+    }
+    animation->timer -= D_800BE9A4;
+    if (animation->timer < 0.0f) {
+        *(s16 *)((u8 *)arg0 + 0xE) = -1;
+        *((u8 *)arg0 + 0xD) |= 1;
+    }
+}
+
 
 void func_151BFB2C(struct260 *arg0) {
     s32 i;
