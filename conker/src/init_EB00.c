@@ -3,11 +3,14 @@
 #define func_1000EDA0 func_1000EDA0_hdr
 #define func_1000EE70 func_1000EE70_hdr
 #define func_10010BE8 func_10010BE8_hdr
+#define func_10010344 func_10010344_hdr
 #include "functions.h"
 #undef func_1000F85C
 #undef func_1000EDA0
 #undef func_1000EE70
 #undef func_10010BE8
+#undef func_10010344
+s32 func_10010344(u16, void *, u32, s16, u16);
 #include "variables.h"
 
 s32 func_10010E78(s32 arg0, s32 arg1, u16 arg2, s16 arg3, u8 arg4,
@@ -638,7 +641,79 @@ void func_100100E0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     }
 }
 #pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_10010154.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_10010344.s")
+typedef struct {
+    u32 field0;
+    u8 field4;
+    u8 pad5[0xF];
+    f32 field14;
+    f32 field18;
+    f32 field1C;
+    u8 pad20[0x1B];
+    u8 field3B;
+    u8 pad3C[0x48];
+    u16 field84;
+    u8 pad86[6];
+    u16 handle8C;
+    u16 handle8E;
+    u8 pad90[0xAC];
+    u8 field13C;
+    u8 pad13D[0xF];
+    f32 field14C;
+    u8 pad150[0x34];
+    u32 field184;
+    u8 pad188[0x190];
+    u32 field318;
+    u8 *field31C;
+} SoundOwnerState_10344;
+
+u16 func_10010BE8(u16, s32, u16, u8, s16, u8, u8);
+
+s32 func_10010344(u16 sound, void *arg1, u32 volume,
+                  s16 nearDistance, u16 farDistance) {
+    SoundOwnerState_10344 *owner = arg1;
+    s32 flags = 0;
+
+    if ((owner->field0 == 0) || (owner->field0 == 5)) {
+        return 0;
+    }
+    if ((s32)volume < 0) {
+        volume = -(s32)volume;
+        flags = 0x100;
+    }
+    if (owner->field318 != 0) {
+        u8 enabled;
+        s32 mix;
+
+        enabled = D_80041FD9;
+        mix = ((owner->field184 >> 3) & 0x30) * 2;
+        if ((owner->field31C != 0) && (owner->field31C[0x94] == 1)) {
+            enabled = 1;
+            volume = 0x7FFF;
+        }
+        flags = func_10010BE8(owner->handle8C, (u16)sound, (u16)volume,
+                              0x40, 0, mix, enabled);
+    } else {
+        if (owner->field4 == 0x16) {
+            nearDistance *= 2;
+            if (((u16 *)&farDistance)[0] < nearDistance) {
+                nearDistance = ((u16 *)&farDistance)[0] - 0xC8;
+            }
+        } else if ((owner->field4 == 0x8A) && (owner->field13C != 0)) {
+            flags |= 0x100;
+        } else if ((owner->field4 == 0x4F) || (owner->field4 == 0x83)) {
+            flags |= 4;
+        }
+        func_1000FD38((s32)func_1000EE70, (s32)owner, owner->field3B | 0x20000);
+        flags = func_1000FA64((u16)sound, (s16)(s32)owner->field14,
+                              (s16)(s32)owner->field18,
+                              (s16)(s32)owner->field1C, volume,
+                              ((u16 *)&farDistance)[0], nearDistance,
+                              (s32)func_1000EE70, (void *)owner,
+                              owner->field3B | 0x20000, flags, 0);
+    }
+    owner->handle8C = flags;
+    return flags;
+}
 
 void func_10010558(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4, s32 arg5) {
     if (arg5 <= 0) {
