@@ -43,7 +43,68 @@ void *func_1515C2F0(Struct1515C2F0Arg0 *arg0, s32 arg1, void *arg2, s32 arg3, u8
 // }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1897A0/func_1515C388.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1897A0/func_1515C534.s")
+typedef s32 (*Game1897A0ActionCallback)(void *, void *);
+extern Game1897A0ActionCallback D_8008B084[];
+
+s32 func_1515C534(void *arg0) {
+    struct Actor {
+        u8 pad00[0x1C];
+        s16 time;
+        u8 pad1E[0x7A];
+        void *settings;
+    };
+    struct Settings {
+        f32 value;
+        u8 pad04[0x10];
+        u8 flags;
+        u8 pad15[5];
+        u8 intensity;
+        u8 pad1B[0x11];
+        s16 start;
+        s16 slope;
+        s16 end;
+        u8 paused;
+        u8 pad33;
+        f32 attenuation;
+        u8 pad38;
+        s8 callbackIndex;
+    } *settings;
+    struct Actor *actor = arg0;
+    s32 callbackFailed;
+    u32 count;
+
+    settings = actor->settings;
+    callbackFailed = 0;
+    if (settings->callbackIndex != -1) {
+        callbackFailed = (D_8008B084[settings->callbackIndex](arg0, settings) == 0) & 0xFF;
+    }
+    if (callbackFailed == 0) {
+        if (settings->flags & 4) {
+            s16 time = actor->time;
+            s32 newValue;
+
+            if (time < settings->start) {
+                newValue = time * settings->slope;
+                if (newValue < settings->intensity) {
+                    settings->intensity = newValue;
+                }
+            }
+        }
+        if ((settings->flags & 8) && actor->time < settings->end && settings->paused == 0) {
+            count = D_800BE9E4;
+            if (count != 0) {
+                do {
+                    settings->value *= settings->attenuation;
+                    count--;
+                } while (count != 0);
+            }
+        }
+    }
+    if (callbackFailed != 0) {
+        return 0;
+    }
+    return 1;
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1897A0/func_1515C6F4.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1897A0/func_1515CF9C.s")
 
