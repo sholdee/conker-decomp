@@ -4,12 +4,14 @@
 #define func_1000EE70 func_1000EE70_hdr
 #define func_10010BE8 func_10010BE8_hdr
 #define func_10010344 func_10010344_hdr
+#define func_10010154 func_10010154_hdr
 #include "functions.h"
 #undef func_1000F85C
 #undef func_1000EDA0
 #undef func_1000EE70
 #undef func_10010BE8
 #undef func_10010344
+#undef func_10010154
 s32 func_10010344(u16, void *, u32, s16, u16);
 #include "variables.h"
 
@@ -640,7 +642,6 @@ void func_100100E0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
         } while (p < &D_80041FE0[count]);
     }
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_10010154.s")
 typedef struct {
     u32 field0;
     u8 field4;
@@ -667,6 +668,47 @@ typedef struct {
 } SoundOwnerState_10344;
 
 u16 func_10010BE8(u16, s32, u16, u8, s16, u8, u8);
+
+s32 func_10010154(u16 sound, SoundOwnerState_10344 *owner, s32 volume,
+                   s16 arg3, u16 farDistance) {
+    s32 result = 0;
+    s32 flags = 0;
+
+    if ((owner->field0 == 0) || (owner->field0 == 5)) {
+        return 0;
+    }
+    if (owner->field318 != 0) {
+        u32 mixFlags = owner->field184;
+
+        result = func_10010BE8(owner->handle8E, sound, (u16)volume,
+                              0x40, 0, ((mixFlags >> 3) & 0x30) * 2,
+                              D_80041FD9);
+    } else {
+        if (owner->field4 == 0x16) {
+            arg3 *= 2;
+            if (farDistance < arg3) {
+                arg3 = farDistance - 0xC8;
+            }
+        } else if ((owner->field4 == 5U) ||
+                   (owner->field4 == 0x4F) ||
+                   (owner->field4 == 0x83)) {
+            flags = 4;
+        } else if ((owner->field13C != 0) &&
+                   ((owner->field4 == 0x8A) || (owner->field4 == 0x23))) {
+            flags = 0x100;
+        }
+        func_1000FD38((s32)func_1000EE70, (s32)owner, owner->field3B | 0x10000);
+        if (owner->field0 != 0) {
+            result = func_1000FA64(sound, (s16)(s32)owner->field14,
+                                  (s16)(s32)owner->field18,
+                                  (s16)(s32)owner->field1C, volume,
+                                  farDistance, arg3,
+                                  (s32)func_1000EE70, (void *)owner,
+                                  owner->field3B | 0x10000, flags, 0);
+        }
+    }
+    owner->handle8E = result;
+}
 
 s32 func_10010344(u16 sound, void *arg1, u32 volume,
                   s16 nearDistance, u16 farDistance) {
