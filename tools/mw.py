@@ -41,12 +41,69 @@ WS_ROOT = Path(os.environ.get("CONKER_WS", Path.home() / "conker-ws"))
 CONTAINER = os.environ.get("CONKER_CONTAINER", "conker-tc")
 INNER_SHA = (MAIN / "conker.us.sha1").read_text().split()[0]
 LOCK = REPO / ".mw_land.lock"
+RAM_ROOT = Path(os.environ.get("CONKER_RAM", "/dev/shm/conker-build"))
+RAM_BUDGET_MB = int(os.environ.get("CONKER_RAM_MB", "9000"))
+BUILD_MB = 180                       # one build/ copy
+SHARED_DIRS = {"asm", "expected", "assets"}   # read-only: symlinked to main, never copied
 PRAGMA_RE = re.compile(r'^\s*#pragma\s+GLOBAL_ASM\("([^"]+)"\)', re.M)
 WORD_RE = re.compile(r"^\s*/\* [0-9A-F]+ ([0-9A-F]{8}) ([0-9A-F]{8}) \*/", re.M)
 BIN = "build/conker.us.bin"
 
 
 TCD_SOCK = WS_ROOT / ".tcd.sock"
+
+
+def clone_tree(src, dst):
+    """Lean private copy of a conker/ tree: read-only dirs are symlinks to main, sources are
+    reflinked (on disk, so work survives a reboot), build/ lives in RAM (ensure_build).
+    /home is a USB SSD: full copies of ~7000 files per workspace swamped it."""
+    dst.mkdir(parents=True)
+    for item in src.iterdir():
+        if item.name == "build":
+            continue
+        if item.name in SHARED_DIRS:
+            (dst / item.name).symlink_to(MAIN / item.name)
+            continue
+        subprocess.run(["cp", "-a", "--reflink=auto", str(item), str(dst / item.name)], check=True)
+    ensure_build(dst)
+
+
+def ensure_build(wc):
+    """Give tree wc a RAM build/ (copy of main's) unless it has a live one or a real on-disk one."""
+    import time
+    b = wc / "build"
+    if b.exists() and not b.is_symlink():
+        return  # full workspace from before the lean layout
+    if b.is_symlink() and b.exists():
+        os.utime(b.resolve().parent)  # LRU stamp
+        return
+    ram = RAM_ROOT / hashlib.sha1(str(wc).encode()).hexdigest()[:16]
+    if ram.exists():
+        shutil.rmtree(ram, ignore_errors=True)
+    RAM_ROOT.mkdir(parents=True, exist_ok=True)
+    evict_ram(BUILD_MB)
+    ram.mkdir()
+    with open(LOCK, "a") as lk:
+        fcntl.flock(lk, fcntl.LOCK_SH)  # not while a land rewrites main's build
+        subprocess.run(["cp", "-a", str(MAIN / "build"), str(ram / "build")], check=True)
+    if b.is_symlink():
+        b.unlink()
+    b.symlink_to(ram / "build")
+    # Sources this tree changed must rebuild against main's newer objects.
+    now = time.time()
+    for d in ("src", "include"):
+        for f in (wc / d).rglob("*"):
+            if f.is_file():
+                m = MAIN / f.relative_to(wc)
+                if not m.exists() or not filecmp.cmp(f, m, shallow=False):
+                    os.utime(f, (now, now))
+
+
+def evict_ram(need_mb):
+    """Drop least-recently-used RAM builds until need_mb more fits in the budget."""
+    dirs = sorted((d for d in RAM_ROOT.iterdir() if d.is_dir()), key=lambda d: d.stat().st_mtime)
+    while dirs and (len(dirs) * BUILD_MB + need_mb) > RAM_BUDGET_MB:
+        shutil.rmtree(dirs.pop(0), ignore_errors=True)
 
 
 def run(cmd, cwd, check=False, timeout=600):
@@ -139,7 +196,7 @@ def cmd_new(a):
         if sha1(MAIN / BIN) != INNER_SHA:
             sys.exit("main conker/build is not a matching build — run `make -C conker` first")
         ws.mkdir(parents=True)
-        subprocess.run(["cp", "-a", "--reflink=auto", str(MAIN), str(ws / "conker")], check=True)
+        clone_tree(MAIN, ws / "conker")
         # Pristine copy of the editable trees: the merge base for `land`.
         (ws / "base").mkdir()
         for d in ("src", "include"):
@@ -257,9 +314,11 @@ def check_tree(func, m, wc, want, quiet=False, U=2):
         if p.exists() and re.search(rf"^glabel {re.escape(func)}\b", p.read_text(), re.M):
             return 3, [f"STUB: {func} is still provided by GLOBAL_ASM({asm}) — replace it with C",
                        "RESULT: STUB"]
+    ensure_build(wc)
+    obj = wc / "build" / (m["file"].removesuffix(".c") + ".c.o")
+    obj.unlink(missing_ok=True)  # always recompile the function's own file
     (wc / BIN).unlink(missing_ok=True)
     r = run("make -j2 build/conker.us.bin 2>&1", wc)
-    obj = wc / "build" / (m["file"].removesuffix(".c") + ".c.o")
     if r.returncode or not (wc / BIN).exists():
         errs = [l for l in r.stdout.splitlines()
                 if re.search(r"error|Error|undefined|discarded|referenced in|multiple definition|"
@@ -348,7 +407,7 @@ def cmd_batch(a):
         if sd.exists():
             shutil.rmtree(sd)
         sd.mkdir(parents=True)
-        subprocess.run(["cp", "-a", "--reflink=auto", str(ws / "conker"), str(sd / "conker")], check=True)
+        clone_tree(ws / "conker", sd / "conker")
         for name in ("ido", "tools"):
             (sd / name).symlink_to(REPO / name)
     free = list(range(nslot))
@@ -378,6 +437,10 @@ def cmd_batch(a):
             shutil.copy(f, ws / "conker" / m["file"])
             print(f"MATCH: {f.name} copied into the workspace — run: mw.py land {func}")
             break
+    for k in range(nslot):  # free the slots' RAM builds too
+        b = slots / str(k) / "conker" / "build"
+        if b.is_symlink():
+            shutil.rmtree(b.resolve().parent, ignore_errors=True)
     shutil.rmtree(slots, ignore_errors=True)
 
 
