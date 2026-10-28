@@ -299,7 +299,69 @@ void func_151BC5A4(struct260 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E73B0/func_151BC64C.s")
+typedef struct Game1E9A30Trail {
+    s32 x;
+    s32 y;
+    s32 z;
+    s16 lifetime;
+    u8 alpha;
+    u8 pad_F[5];
+} Game1E9A30Trail;
+
+typedef struct Vec3i_151BC64C {
+    s32 x;
+    s32 y;
+    s32 z;
+} Vec3i_151BC64C;
+
+s32 func_151BC64C(u8 *actor) {
+    Game1E9A30Trail *entries;
+    Game1E9A30Trail *entry;
+    s32 cursor;
+    s16 lifetime;
+    s32 opacity;
+
+    entries = *(Game1E9A30Trail **)(actor + 0x94);
+    if ((*(s8 *)(actor + 0x2C) < 2) && (*(u16 *)(actor + 0x1E) & 8)) {
+        return 0;
+    }
+    cursor = *(s8 *)(actor + 0x2E);
+    if (cursor != *(s8 *)(actor + 0x2D)) {
+        do {
+            cursor--;
+            if (cursor < 0) {
+                cursor = actor[0x25] - 1;
+            }
+            entry = &entries[cursor];
+            entry->lifetime -= D_800BE9E4;
+            lifetime = entry->lifetime;
+            if (lifetime < 0) {
+                if (cursor != *(s8 *)(actor + 0x2D)) {
+                    do {
+                        *(s8 *)(actor + 0x2D) += 1;
+                        if (actor[0x25] == *(s8 *)(actor + 0x2D)) {
+                            *(s8 *)(actor + 0x2D) = 0;
+                        }
+                        *(s8 *)(actor + 0x2C) -= 1;
+                    } while (cursor != *(s8 *)(actor + 0x2D));
+                }
+            } else if (lifetime < 0xA) {
+                opacity = lifetime * 0x19;
+                if (opacity < entry->alpha) {
+                    entry->alpha = opacity;
+                }
+            }
+        } while (cursor != *(s8 *)(actor + 0x2D));
+    }
+    if (*(s8 *)(actor + 0x2C) > 0) {
+        *(Vec3i_151BC64C *)(actor + 0x54) = *(Vec3i_151BC64C *)((u8 (*)[sizeof(Game1E9A30Trail)])entries)[*(s8 *)(actor + 0x2D)];
+    } else {
+        *(f32 *)(actor + 0x54) = 0.0f;
+        *(f32 *)(actor + 0x58) = 0.0f;
+        *(f32 *)(actor + 0x5C) = 0.0f;
+    }
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1E73B0/func_151BC794.s")
 
