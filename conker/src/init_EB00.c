@@ -386,7 +386,50 @@ s32 func_1000F568(s32 arg0, s32 arg1) {
     }
     return arg0 + i;
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_1000F6B8.s")
+extern s32 func_1000A420(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6,
+                         s32 arg7, s32 arg8, s32 *arg9, s32 *argA, s32 *argB);
+
+s32 func_1000F6B8(s32 arg0, s16 arg1, s16 arg2, s16 arg3,
+                   s32 *output, s32 nearDistance, s32 farDistance) {
+    s32 result;
+    struct00 *selected;
+    s32 index;
+    s32 dx;
+    s32 dy;
+    s32 bestX;
+    s32 bestY;
+    s32 bestZ;
+    s32 dz;
+    u32 distance;
+
+    if (D_80082FA0 != 0) {
+        u32 closest;
+
+        closest = 0xFFFFFFFF;
+        for (index = 0; index <= D_80082FA0; index++) {
+            dx = arg1 - D_80041F68[index].unkC;
+            dy = arg2 - D_80041F68[index].unk10;
+            dz = arg3 - D_80041F68[index].unk14;
+            distance = dx * dx + dy * dy + dz * dz;
+            if (distance < closest) {
+                closest = distance;
+                selected = &D_80041F68[index];
+                bestX = dx;
+                bestY = dy;
+                bestZ = dz;
+            }
+        }
+    } else {
+        selected = D_80041F68;
+        bestX = arg1 - selected->unkC;
+        bestY = arg2 - selected->unk10;
+        bestZ = arg3 - selected->unk14;
+    }
+    func_1000A420(bestX, bestY, bestZ, selected->unk18,
+                 arg1 - selected->unk0, arg2 - selected->unk4, arg3 - selected->unk8,
+                 (s16)farDistance, (s16)nearDistance, output, &result, 0);
+    return result;
+}
 typedef struct {
     struct31 *unk0;
     u8 pad4[8];
