@@ -222,7 +222,43 @@ void func_1508295C(s32 arg0, s32 arg1, s32 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_AEB40/func_150829D8.s")
+typedef struct Nested150829D8 {
+    u8 pad0[0x56];
+    u8 field_56;
+} Nested150829D8;
+
+typedef struct State150829D8 {
+    u8 pad0[0xF8];
+    u32 flags_F8;
+    u8 padFC[0x220];
+    Nested150829D8 *nested_31C;
+} State150829D8;
+
+void func_150829D8(State150829D8 *arg0) {
+    arg0->flags_F8 &= 0xF7FFFFFD;
+    arg0->flags_F8 |= 4;
+    if ((arg0->nested_31C != 0) && (arg0->nested_31C->field_56 == 0)) {
+        switch (D_800BE9F0) {
+            case 0:
+            case 10:
+            case 14:
+            case 18:
+            case 19:
+            case 25:
+            case 27:
+            case 44:
+            case 60:
+            case 61:
+            case 66:
+            case 67:
+            case 68:
+                break;
+            default:
+                arg0->flags_F8 |= 2;
+                break;
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_AEB40/func_15082A44.s")
 
