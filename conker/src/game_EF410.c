@@ -443,7 +443,60 @@ Gfx *func_150C3160(Gfx *arg0, void *arg1) {
 }
 #pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/func_150C3230.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/func_150C3574.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/func_150C3994.s")
+void func_15188810(struct127 *arg0, s32 arg1, s32 arg2);
+void func_150C1660(f32 arg0, f32 arg1, f32 arg2, u8 arg3);
+void func_1506AC8C(struct127 *arg0, s32 arg1, s32 arg2);
+extern f32 D_800A0334;
+void func_150C3D5C(Struct150C3D5CArg *arg0);
+
+void func_150C3994(struct127 *arg0) {
+    f32 temp_f0;
+    f32 temp_f2;
+
+    if (arg0->interaction_state == 0x14) {
+        if (arg0->unk2E4 == 0) {
+            func_151B9BF0(0x2F, 1, (s16)(s32)arg0->x_position, (s16)(s32)(arg0->y_position + 30.0f), (s32)arg0->z_position, 0x7D0, 0x3E8, 0x190, 0xC8, 0xC00, 0xC00, 1, 1, 0, 0xFF, 0);
+        } else {
+            func_15188810(arg0, 0x64, 0);
+        }
+    }
+    temp_f0 = arg0->y_velocity;
+    if (temp_f0 < 0.0f) {
+        temp_f2 = arg0->unk28;
+        if ((temp_f2 > 20.0f) && (*(u8 *)((u8 *)arg0 + 0x136) == 0) && (temp_f2 < (-20.0f * temp_f0))) {
+            func_10010630(0x92, arg0, 0x7D00, 0xC8, 0x9C4);
+            *(u8 *)((u8 *)arg0 + 0x136) = 1;
+        }
+    }
+    if (arg0->unk83 == 0) {
+        arg0->unk148 = 70.0f;
+        if (arg0->unk2E4 == 0) {
+            func_151B9BF0(0x2F, 1, (s16)(s32)arg0->x_position, (s16)(s32)(arg0->y_position + 30.0f), (s32)arg0->z_position, 0x898, 0x500, 0x320, 0x2BC, 0xC00, 0xC00, 0x14, 1, 0, 0xFF, 0);
+            func_150C1660(arg0->x_position, arg0->y_position + 30.0f, arg0->z_position, 0xFF);
+            func_1506AC8C(arg0, 6, 0);
+        } else {
+            func_15188810(arg0, 0x64, 0);
+        }
+        func_10010344(0x1A9, arg0, 0x7FFF, 0x3E8, 0x7D0);
+        arg0->unkD0 = 1;
+        arg0->unk114 = 500.0f;
+        arg0->unkF8 |= 0x01008000;
+    }
+    arg0->immune = 0xFF;
+    arg0->unk83++;
+    if (arg0->unk83 >= 0xB) {
+        arg0->unkF8 &= ~0x8000;
+    }
+    arg0->unk40 = (f32)(arg0->unk7A + 0x4000) * 0.005493164f;
+    func_15059140(arg0);
+    arg0->unkB8 += arg0->unk148;
+    arg0->unk148 *= D_800A0334;
+    if (((arg0->unk28 == 0.0f) && (arg0->unk83 >= 0x15) && (arg0->unkCC == 0)) || (arg0->unk107 != 0) || (arg0->health == 0)) {
+        func_150C3D5C((Struct150C3D5CArg *)arg0);
+        func_10010630(0x93, arg0, 0x7D00, 0xC8, 0x9C4);
+        func_15060F28(arg0, 1);
+    }
+}
 
 s32 func_150C3D48(s32 arg0) {
     return arg0 + 0xEDCBA988;
