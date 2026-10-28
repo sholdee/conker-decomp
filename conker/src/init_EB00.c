@@ -2,10 +2,12 @@
 #define func_1000F85C func_1000F85C_hdr
 #define func_1000EDA0 func_1000EDA0_hdr
 #define func_1000EE70 func_1000EE70_hdr
+#define func_10010BE8 func_10010BE8_hdr
 #include "functions.h"
 #undef func_1000F85C
 #undef func_1000EDA0
 #undef func_1000EE70
+#undef func_10010BE8
 #include "variables.h"
 
 s32 func_10010E78(s32 arg0, s32 arg1, u16 arg2, s16 arg3, u8 arg4,
@@ -800,7 +802,65 @@ void func_10010AA8(struct127 *arg0) {
     arg0->unk8E = 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_10010BE8.s")
+struct31 *func_10017438(s32, s16, u16, u8, f32, u8, u8, struct31 **);
+
+u16 func_10010BE8(u16 arg0, s32 sound, u16 volume, u8 pan,
+                  s16 cents, u8 arg5, u8 bus) {
+    u16 result;
+    u16 next;
+    u32 index;
+
+    index = arg0 & 0xF;
+    if ((arg0 == D_800425E0[index].unk0) && (arg0 != 0)) {
+        if ((D_800425E0[index].unk8 != 0) &&
+            (func_100173C4(&D_800425E0[index].unk8) != 0)) {
+            func_10017594(D_800425E0[index].unk8);
+            D_800425E0[index].unk8 = 0;
+        }
+    } else if (((D_800425E0[index].unk8 != 0) &&
+                (func_100173C4(&D_800425E0[index].unk8) != 0)) ||
+               (D_800425E0[index].unk4 & 0x8000)) {
+        index = 0;
+        while ((index < 0x10) &&
+               (((D_800425E0[index].unk8 != 0) &&
+                 (func_100173C4(&D_800425E0[index].unk8) != 0)) ||
+                (D_800425E0[index].unk4 & 0x8000))) {
+            index++;
+        }
+    }
+    if (volume < 0x64) {
+        return 0;
+    }
+    if (index >= 0x10) {
+        result = 0;
+    } else {
+        if (sound == 0) {
+            return 0;
+        }
+        if ((sound & 0x7FFF) >= 0x6E3) {
+            return 0;
+        }
+        result = D_800425E0[index].unk2;
+        next = result + 0x10;
+        D_800425E0[index].unk0 = result;
+        if (next < 0x10) {
+            next += 0x10;
+        }
+        D_800425E0[index].unk2 = next;
+        D_800425E0[index].unk4 = sound;
+        if (D_800425E0[index].unk8 != 0) {
+            ((u8 *)D_800425E0[index].unk8)[0x54] = 5;
+        }
+        if ((arg5 & 0x7F) + (u8)D_80041FD8 < 0x80) {
+            arg5 = (u8)(arg5 + (u8)D_80041FD8);
+        } else {
+            arg5 = (u8)(arg5 | 0x7F);
+        }
+        func_10017438(D_8003E368, (sound & 0x7FFF), volume, pan,
+                     alCents2Ratio(cents), arg5, bus, &D_800425E0[index].unk8);
+    }
+    return result;
+}
 
 s32 func_10010E78(s32 arg0, s32 arg1, u16 arg2, s16 arg3, u8 arg4,
                   s32 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9,
