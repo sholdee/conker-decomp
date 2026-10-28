@@ -94,7 +94,33 @@ void func_151B6320(f32 *arg0, u8 arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1E37D0/func_151B6928.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E37D0/func_151B70B4.s")
+void func_151B70B4(void *arg0, void *arg1, u8 arg2) {
+    void *target;
+    s32 current;
+    s32 value;
+
+    target = *(void **)((u8 *)arg0 + 0x98);
+    current = *(s32 *)target;
+    if (arg2 == 0) {
+        if (current == *(s32 *)arg1) {
+            u16 *flags = (u16 *)((u8 *)arg0 + 0x1E);
+
+            *(s8 *)((u8 *)arg0 + 0x30) = 0;
+            *flags |= 8;
+        }
+    } else if (arg2 == 0x2D) {
+        value = *(s32 *)arg1;
+        if (value == *(s32 *)target) {
+            *(s32 *)target = *(s32 *)((u8 *)arg1 + 4);
+            *(u8 *)((u8 *)target + 4) = *(u8 *)((u8 *)arg1 + 9);
+            return;
+        }
+        if (*(s32 *)((u8 *)arg1 + 4) == *(s32 *)target) {
+            *(s32 *)target = value;
+            *(u8 *)((u8 *)target + 4) = *(u8 *)((u8 *)arg1 + 8);
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1E37D0/func_151B7144.s")
 
