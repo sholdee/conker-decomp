@@ -1,5 +1,9 @@
 #include <ultra64.h>
+/* func_150ADA20 returns a full 32-bit value (asm: dsra32 v0); the shared header narrows it to u8 */
+#define func_150ADA20 func_150ADA20_u8
 #include "functions.h"
+#undef func_150ADA20
+u32 func_150ADA20(void);
 #include "variables.h"
 
 struct Vec15107A20 { f32 x; f32 y; f32 z; };
@@ -371,7 +375,97 @@ struct260 *func_15106F98(struct Vec15106F98 *arg0, struct Vec15106F98 *arg1, s32
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_133190/func_151070F8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_133190/func_151072BC.s")
+void func_15143794(s32, s32, f32, f32 *);
+
+typedef struct S151072BCColor {
+    u8 bytes[4];
+} S151072BCColor;
+
+typedef struct S151072BCBeam {
+    s16 life;
+    s8 enabled;
+    u8 pad3;
+    struct Vec15107A20 position;
+    struct Vec15107A20 axis0;
+    struct Vec15107A20 axis1;
+    struct Vec15107A20 contact;
+    s8 flag;
+    u8 pad35[3];
+    s32 count;
+    f32 width;
+    f32 scale;
+    s16 lower;
+    s16 upper;
+    S151072BCColor color;
+    s8 mode;
+    u8 pad4D[3];
+} S151072BCBeam;
+
+typedef struct S151072BCConfig {
+    f32 scaleBase, scaleRange, width, speedBase, speedRange;
+    s16 spread, lower, upper, lifeBase, lifeRange;
+    u8 pad1E[2];
+    s32 countBase, countRange;
+    u8 red, green, blue, alphaBase, alphaRange;
+} S151072BCConfig;
+
+typedef struct S151072BCChain {
+    s32 count, index;
+    struct S15107C1CCreated *child;
+    struct Vec15107A20 *points;
+    S151072BCConfig config;
+} S151072BCChain;
+
+void func_151072BC(u8 *arg0) {
+    S151072BCChain *chain;
+    S151072BCBeam beam;
+    u8 *owner;
+    struct Vec15107A20 direction;
+    S151072BCConfig *config;
+
+    chain = (S151072BCChain *)(arg0 + 0x28);
+    if (*(s32 *)(arg0 + 0x30) == 0) {
+        if (chain->index >= chain->count - 1) {
+            *(s16 *)(arg0 + 0xE) = -1;
+            arg0[0xD] |= 1;
+            return;
+        }
+        owner = arg0;
+        beam.enabled = 1;
+        beam.flag = -1;
+        config = &chain->config;
+        beam.scale = func_150ADA68() * config->scaleRange + config->scaleBase;
+        beam.width = config->width;
+        beam.lower = config->lower;
+        beam.upper = config->upper;
+        beam.position = chain->points[chain->index];
+        beam.contact = chain->points[chain->index + 1];
+        func_15143794((s16)(func_150ADA20() & 0xFF),
+            (s16)(func_150ADA20() % (u32)(config->spread + 1) - (config->spread >> 1) - 0x40),
+            func_150ADA68() * config->speedRange + config->speedBase, &direction.x);
+        beam.axis0.x = beam.position.x + direction.x;
+        beam.axis0.y = beam.position.y + direction.y;
+        beam.axis0.z = beam.position.z + direction.z;
+        func_15143794((s16)(func_150ADA20() & 0xFF),
+            (s16)(func_150ADA20() % (u32)(config->spread + 1) - (config->spread >> 1) - 0x40),
+            func_150ADA68() * config->speedRange + config->speedBase, &direction.x);
+        beam.axis1.x = beam.contact.x + direction.x;
+        beam.axis1.y = beam.contact.y + direction.y;
+        beam.axis1.z = beam.contact.z + direction.z;
+        beam.color.bytes[0] = config->red;
+        beam.color.bytes[1] = config->green;
+        beam.color.bytes[2] = config->blue;
+        beam.life = func_150ADA20() % (u32)(config->lifeRange + 1) + config->lifeBase;
+        beam.color.bytes[3] = func_150ADA20() % (u32)(config->alphaRange + 1) + config->alphaBase;
+        beam.mode = 1;
+        beam.count = func_150ADA20() % (u32)(config->countRange + 1) + config->countBase;
+        chain->child = func_15105CE0(&beam, 4, arg0[0xC], arg0[1]);
+        if (chain->child != NULL) {
+            memcpy(chain->child->unk60, &owner, 4U);
+        }
+        chain->index++;
+    }
+}
 
 struct S15107604 {
     s32 unk0;
