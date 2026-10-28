@@ -1,8 +1,11 @@
 #include <ultra64.h>
 #define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
+#define func_10010F88 func_10010F88_void_decl_in_functions_h
 #include "functions.h"
 #undef func_150ADA20
+#undef func_10010F88
 u32 func_150ADA20(void);
+s32 func_10010F88(s32 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9);
 #include "variables.h"
 
 
@@ -138,7 +141,65 @@ void func_150F4570(struct17 *arg0, struct17 *arg1, u8 arg2, f32 arg3, f32 arg4, 
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_121A20/func_150F48D0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_121A20/func_150F4A38.s")
+typedef struct {
+    u8 pad0[0x20];
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+    u8 pad2C[0xC];
+    struct17 unk38;
+    f32 unk44;
+    f32 unk48;
+    f32 unk4C;
+    f32 unk50;
+    f32 unk54;
+    f32 unk58;
+    u8 pad5C[0x14];
+    u8 unk70;
+    u8 unk71;
+    u8 pad72[0x16];
+    u32 unk88;
+    u8 pad8C[0xE4];
+    struct sub150F4_full unk170;
+} Actor150F4;
+
+extern struct17 *func_15144B34(s32);
+extern f32 func_15143E64(struct17 *);
+
+s32 func_150F4A38(Actor150F4 *arg0) {
+    struct sub150F4_full *p;
+    f32 dist;
+
+    p = &arg0->unk170;
+    if ((p->unk24 & 1) || (p->unk24 & 2)) {
+        struct17 *pos;
+        struct17 diff;
+
+        pos = func_15144B34(0);
+        diff.unk0 = arg0->unk38.unk0 - pos->unk0;
+        diff.unk4 = arg0->unk38.unk4 - pos->unk4;
+        diff.unk8 = arg0->unk38.unk8 - pos->unk8;
+        dist = func_15143E64(&diff);
+    }
+    if (p->unk24 & 1) {
+        if (dist < 500.0f) {
+            arg0->unk70 = 0;
+        } else if (dist < 1200.0f) {
+            arg0->unk70 = (dist - 500.0f) * 0.00142857142857142857 * 255.0;
+        } else {
+            arg0->unk70 = 0xFF;
+        }
+    }
+    if ((p->unk24 & 2) && !(p->unk24 & 4)) {
+        if (arg0->unk88 >> 16) {
+            func_1000F9D4(arg0->unk88 >> 16, arg0->unk38.unk0, arg0->unk38.unk4, arg0->unk38.unk8);
+        } else if (dist < 200.0f) {
+            arg0->unk88 |= func_10010F88(arg0->unk88 & 0xFFFF, (func_150ADA20() & 0x3FFF) + 0x4000, 0, 0, -1,
+                                         arg0->unk38.unk0, arg0->unk38.unk4, arg0->unk38.unk8, 10000, 20000) << 16;
+        }
+    }
+    return 1;
+}
 
 struct sub150F4 { u8 pad[0x24]; u8 unk24; };
 
