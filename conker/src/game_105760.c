@@ -29,7 +29,62 @@ typedef struct Draw150D83D8 {
 
 extern f32 D_800A0B14; /* 0.01f; asm/data/2455D0.rodata.s */
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_105760/func_150D83D8.s")
+typedef struct Pos150D83D8 {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+} Pos150D83D8;
+
+typedef struct Actor150D83D8 {
+    u8 pad0[0x84];
+    u16 unk84;
+    u8 pad86[0x24A];
+    Pos150D83D8 *unk2D0;
+} Actor150D83D8;
+
+s32 func_150D83D8(Draw150D83D8 *arg0, Actor150D83D8 *arg1) {
+    Gfx *list;
+    s32 i;
+    f32 t;
+
+    switch (arg0->unk38) {
+        case 0:
+            arg0->unk3C = 50;
+            arg0->unk18 = D_80090298[27];
+            if (arg1->unk84 == 0x18D && 46.0f <= arg1->unk2D0->unk8) {
+                arg0->unk38 = 1;
+                arg0->unk18 = D_80090298[28];
+            }
+            break;
+        case 1:
+            arg0->unk3C += D_800BE9E4;
+            if (arg0->unk3C >= 100) {
+                arg0->unk3C = 100;
+                arg0->unk38 = 2;
+            }
+            break;
+        case 2:
+            if (arg1->unk84 == 0x18E && 34.0f <= arg1->unk2D0->unk8) {
+                arg0->unk38 = 3;
+            }
+            break;
+        case 3:
+            arg0->unk3C -= D_800BE9E4 * 4;
+            if (arg0->unk3C <= 0) {
+                arg0->unk3C = 0;
+                arg0->unk38 = 4;
+            }
+            break;
+    }
+    t = arg0->unk3C * D_800A0B14;
+    list = *arg0->unk24;
+    i = 0;
+    while (((s8 *)&list[i])[0] != (s8)G_SETTILESIZE) {
+        i++;
+    }
+    list[i].words.w0 = _SHIFTL(G_SETTILESIZE, 24, 8) | _SHIFTL(2, 12, 12) | _SHIFTL((s32)(120.0f * t + 2.0f), 0, 12);
+    return 0;
+}
 
 s16 *func_150D8590(s16 *arg0, s32 arg1) {
     arg0[0] = 0x42;
