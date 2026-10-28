@@ -142,4 +142,66 @@ s32 func_150DB630(void *arg0) {
     return ret;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_108320/func_150DB714.s")
+typedef struct Vtx150DB714 {
+    s16 x, y, z, flag;
+    u8 attributes[8];
+} Vtx150DB714;
+
+typedef struct Values150DB714 {
+    f32 *data[4];
+} Values150DB714;
+
+typedef struct Owner150DB714 {
+    u8 pad0[0xC0];
+    Vtx150DB714 template[4];
+    u8 *buffers[4];
+    Values150DB714 values;
+} Owner150DB714;
+
+extern f32 D_800A0BF0;
+
+void *func_150DB714(Owner150DB714 *owner, s16 bufferIndex) {
+    void *vertices;
+    void *result;
+    f32 cosine;
+    s32 angle;
+    f32 sine;
+    f32 offsetX;
+    f32 offsetZ;
+    Values150DB714 *values;
+    u8 fresh;
+
+    func_151D5D60(owner->buffers, bufferIndex, 0x40, &vertices, &fresh);
+    result = vertices;
+    if (vertices != 0) {
+        if (fresh != 0) {
+            memcpy(owner->buffers[bufferIndex], owner->template, 0x40U);
+            memcpy(owner->buffers[bufferIndex] + 0x40, owner->template, 0x40U);
+        }
+    } else {
+        return 0;
+    }
+    angle = (s32)(*(owner->values.data[1]) * D_800A0BF0);
+    values = (Values150DB714 *)((u8 *)owner + 0x110);
+    sine = func_151423D8((u8)angle);
+    cosine = func_151423D8((u8)(angle - 0x40));
+    offsetX = *values->data[2] * sine;
+    offsetZ = -*values->data[2] * cosine;
+    ((Vtx150DB714 *)vertices)[0].x = (s32)(values->data[0][0] + offsetX);
+    ((Vtx150DB714 *)vertices)[0].y = (s32)(values->data[0][1] + *values->data[3]);
+    ((Vtx150DB714 *)vertices)[0].z = (s32)(values->data[0][2] + offsetZ);
+    ((Vtx150DB714 *)vertices)[0].flag = 0;
+    ((Vtx150DB714 *)vertices)[1].x = (s32)(values->data[0][0] + offsetX);
+    ((Vtx150DB714 *)vertices)[1].y = (s32)(values->data[0][1] - *values->data[3]);
+    ((Vtx150DB714 *)vertices)[1].z = (s32)(values->data[0][2] + offsetZ);
+    ((Vtx150DB714 *)vertices)[1].flag = 0;
+    ((Vtx150DB714 *)vertices)[2].x = (s32)(values->data[0][0] - offsetX);
+    ((Vtx150DB714 *)vertices)[2].y = (s32)(values->data[0][1] - *values->data[3]);
+    ((Vtx150DB714 *)vertices)[2].z = (s32)(values->data[0][2] - offsetZ);
+    ((Vtx150DB714 *)vertices)[2].flag = 0;
+    ((Vtx150DB714 *)vertices)[3].x = (s32)(values->data[0][0] - offsetX);
+    ((Vtx150DB714 *)vertices)[3].y = (s32)(values->data[0][1] + *values->data[3]);
+    ((Vtx150DB714 *)vertices)[3].z = (s32)(values->data[0][2] - offsetZ);
+    ((Vtx150DB714 *)vertices)[3].flag = 0;
+    return result;
+}
