@@ -1780,7 +1780,31 @@ void *func_151541B8(struct Vec3F *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, 
     return ret;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_17CAF0/func_1515452C.s")
+f32 sqrtf(f32);
+
+s32 func_1515452C(u8 *arg0) {
+    f32 temp_fv1;
+    u8 *temp_v0;
+
+    temp_v0 = (void *)(arg0 + 0x170);
+    temp_fv1 = *(f32 *)((u8 *)arg0 + 0x178) * sqrtf(*(f32 *)((u8 *)arg0 + 0x170));
+    *(f32 *)((u8 *)arg0 + 0x18) = temp_fv1;
+    if (!(*(u8 *)((u8 *)arg0 + 0x184) & 1)) {
+        *(f32 *)((u8 *)arg0 + 0x1C) = temp_fv1;
+    }
+    {
+        f32 temp_fv0 = *(f32 *)temp_v0;
+    *(s8 *)((u8 *)arg0 + 0x70) = (s8) (u32) (*(f32 *)((u8 *)temp_v0 + 0xC) - (*(f32 *)((u8 *)temp_v0 + 0x10) * temp_fv0 * temp_fv0));
+    *(f32 *)temp_v0 += D_800BE9A4;
+    if (*(f32 *)((u8 *)temp_v0 + 4) < *(f32 *)temp_v0) {
+        return 0;
+    }
+    *(f32 *)((u8 *)arg0 + 0x20) += *(f32 *)((u8 *)arg0 + 0x50) * D_800BE9A4;
+    *(f32 *)((u8 *)arg0 + 0x24) += *(f32 *)((u8 *)arg0 + 0x54) * D_800BE9A4;
+    *(f32 *)((u8 *)arg0 + 0x28) += *(f32 *)((u8 *)arg0 + 0x58) * D_800BE9A4;
+    return 1;
+    }
+}
 
 struct Local15154684Arg {
     s16 unk00;
