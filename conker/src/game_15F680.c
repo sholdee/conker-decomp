@@ -396,7 +396,78 @@ s32 func_15132DDC(Func15132DDCArg0 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_15F680/func_151332DC.s")
+typedef struct {
+    u8 pad0[0x10];
+    f32 field10;
+    f32 field14;
+    f32 field18;
+    f32 field1C;
+    f32 field20;
+    f32 field24;
+    f32 field28;
+    f32 field2C;
+    f32 field30;
+    f32 field34;
+    f32 field38;
+    f32 field3C;
+    f32 field40;
+    u8 pad44[0xC];
+    f32 field50;
+    f32 field54;
+    f32 field58;
+    u8 pad5C[4];
+    s32 flags60;
+    u8 pad64[0x134 - 0x64];
+    f32 origin[3];
+    u8 pad140[4];
+    f32 field144;
+    u8 flags148;
+    u8 phase149;
+    s8 angle14A;
+} Func151332DCArg0;
+
+s32 func_151332DC(Func151332DCArg0 *arg0) {
+    s32 unused;
+    f32 amplitude;
+    f32 cosine;
+    f32 sine;
+
+    arg0->field2C = 1.0f;
+    arg0->field30 = 1.0f;
+    arg0->field34 = 1.0f;
+    if (arg0->flags60 & 0x40) {
+        arg0->field20 += arg0->field50 * D_800BE9A4;
+        arg0->field24 += arg0->field54 * D_800BE9A4;
+        arg0->field28 += arg0->field58 * D_800BE9A4;
+    }
+    arg0->phase149 += (s32)(576.0f * arg0->field144) * D_800BE9E4;
+    if (arg0->phase149 < 0x80) {
+        amplitude = func_151423D8((u8)(arg0->phase149 - 0x40));
+        amplitude = (1.0f - arg0->field14) * (1.0f - arg0->field144) * amplitude;
+        if (arg0->flags148 & 8) {
+            arg0->field2C *= 1.0f + amplitude;
+            arg0->field30 *= 1.0f - amplitude;
+            arg0->field34 *= 1.0f + amplitude;
+            arg0->field3C = arg0->origin[1] - amplitude * arg0->field10;
+        }
+        if (arg0->flags148 & 0x10) {
+            cosine = func_151423D8((u8)(arg0->angle14A - 0x40));
+            sine = func_151423D8((u8)arg0->angle14A);
+            arg0->field2C *= 1.0f - amplitude;
+            arg0->field30 *= 1.0f + amplitude;
+            arg0->field34 *= 1.0f - amplitude;
+            arg0->field38 = arg0->origin[0] - (amplitude * arg0->field10) * sine;
+            arg0->field40 = arg0->origin[2] + (amplitude * arg0->field10) * cosine;
+return_active:
+            return 1;
+        }
+    } else {
+        memcpy(&arg0->field38, arg0->origin, 0xC);
+        arg0->phase149 = 0;
+        arg0->flags148 &= 0xFFE7;
+    }
+    return 1;
+}
 
 s32 func_151424F4(s32 arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, f32 arg11);
 
