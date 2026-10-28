@@ -967,7 +967,15 @@ void func_15022754(s32 arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_49D30/func_150227BC.s")
+void func_150227BC(s32 arg0) {
+    s32 i;
+    u8 *count;
+
+    count = &D_800C354A[arg0];
+    for (i = 0; i < *count; i++) {
+        *(s8 *)((u8 *)func_151149AC(D_800C3550[arg0][i]) + 0x6E) = 1;
+    }
+}
 
 extern void func_15022398(s32, s32);
 extern void func_150222E0(s32, s32);
