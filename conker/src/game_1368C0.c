@@ -94,7 +94,94 @@ struct260 *func_15109410(void *arg0, s16 arg1, s8 arg2, s8 arg3, f32 arg4, s32 a
     return temp_v0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1368C0/func_151094FC.s")
+typedef struct {
+    s32 unk0;
+    u8 pad4[0x37];
+    u8 unk3B;
+    u8 pad3C[0x1D4 - 0x3C];
+    s32 unk1D4;
+} Obj1368C0;
+
+typedef struct {
+    Obj1368C0 *unk0;
+    u8 unk4;
+    f32 unk8;
+    f32 unkC;
+    s8 unk10;
+    s8 unk11;
+} State151094FC;
+
+typedef struct {
+    u8 pad0[0xE];
+    s16 unkE;
+    u8 pad10[0x18];
+    State151094FC unk28;
+} Actor151094FC;
+
+extern const struct Vec3F15109C20 D_800A24B0[7];
+extern const f32 D_800A2504[7];
+extern const struct Vec3F15109C20 D_800A2520[6];
+extern void (*D_80088C60[])(void *);
+extern void (*D_80088C64[])(void *, struct Vec3F15109C20 *, struct Vec3F15109C20 *, struct Vec3F15109C20 *, struct Vec3F15109C20 *, struct Vec3F15109C20 *);
+extern void func_15143134(const void *, void *, s32);
+extern s32 func_15145128(void *, void *, f32 *, f32 *);
+
+void func_151094FC(Actor151094FC *arg0) {
+    State151094FC *state;
+    Obj1368C0 *obj;
+    struct Vec3F15109C20 a;
+    struct Vec3F15109C20 b;
+    struct Vec3F15109C20 c;
+    struct Vec3F15109C20 d;
+    struct Vec3F15109C20 e;
+    struct Vec3F15109C20 pos;
+    const struct Vec3F15109C20 *p;
+    s32 m;
+    s32 i;
+    f32 r;
+    f32 t;
+
+    state = &arg0->unk28;
+    obj = state->unk0;
+    if (obj->unk0 == 0 || obj->unk3B != state->unk4) {
+        arg0->unkE = -1;
+        return;
+    }
+    state->unk8 += state->unkC * D_800A2504[6] * D_800BE9A4;
+    if (state->unk11 != -1 && obj->unk1D4 != 0) {
+        while (state->unk8 > 1.0f) {
+            r = func_150ADA68() * D_800A2504[6];
+            for (i = 0; D_800A2504[i] < r; i++) {
+                r -= D_800A2504[i];
+            }
+            t = func_150ADA68();
+            p = &D_800A24B0[i];
+            pos.x = p[0].x + (p[1].x - p[0].x) * t;
+            pos.y = p[0].y + (p[1].y - p[0].y) * t;
+            pos.z = p[0].z + (p[1].z - p[0].z) * t;
+            m = obj->unk1D4 + 0x240;
+            func_15143134(&pos, &a, m);
+            func_15143134(&p[0], &b, m);
+            func_15143134(&p[1], &c, m);
+            func_15143134(&D_800A2520[i], &d, m);
+            t = func_150ADA68();
+            e.x = (d.x - c.x) * t + c.x - b.x;
+            e.y = (d.y - c.y) * t + c.y - b.y;
+            e.z = (d.z - c.z) * t + c.z - b.z;
+            func_15145128(&e, &e, NULL, NULL);
+            D_80088C64[state->unk11](arg0, &a, &b, &c, &d, &e);
+            state->unk8 -= 1.0f;
+        }
+    } else {
+        while (state->unk8 > 1.0f) {
+            state->unk8 -= 1.0f;
+        }
+    }
+    if (state->unk10 != -1) {
+        D_80088C60[state->unk10](arg0);
+    }
+}
+
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1368C0/func_15109848.s")
 
