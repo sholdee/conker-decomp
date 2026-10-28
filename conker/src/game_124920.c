@@ -198,7 +198,188 @@ void func_150F7470(struct17 *arg0, struct17 *arg1, s32 arg2, struct17 *arg3, u8 
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_124920/func_150F78B4.s")
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    s16 unk2;
+    s16 unk4;
+    s32 unk8;
+    s32 unkC;
+    u8 unk10;
+    u8 unk11;
+    u8 unk12;
+    u8 unk13;
+    f32 unk14;
+    f32 unk18;
+    struct17 unk1C;
+    struct17 unk28;
+    f32 unk34;
+    f32 unk38;
+    f32 unk3C;
+    s32 unk40;
+    u8 unk44;
+    u8 unk45;
+    u8 unk46;
+    u8 unk47;
+    s32 unk48;
+    u8 unk4C;
+    u8 pad4D[3];
+    s32 unk50;
+} Func150F81BCSpawn;
+
+typedef struct {
+    struct17 unk0;
+    struct17 unkC;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+} Func150F81BCExtra;
+
+typedef struct {
+    s32 unk00;
+    f32 unk04;
+    struct17 unk08;
+    struct17 unk14;
+    struct17 unk20;
+    struct17 unk2C;
+    struct17 unk38;
+    u8 unk44[0x12];
+    s16 unk56;
+    u8 unk58;
+    u8 unk59;
+    u8 unk5A;
+    u8 pad5B;
+    s32 unk5C;
+    s32 unk60;
+    u8 pad64[0xC];
+} Func150F78B4Ray;
+
+typedef struct {
+    u8 pad0;
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD[0x2B];
+    f32 unk38;
+    f32 unk3C;
+    f32 unk40;
+    f32 unk44;
+    f32 unk48;
+    f32 unk4C;
+    u8 pad50[0x2C];
+    s32 unk7C;
+    u8 pad80[8];
+    s32 unk88;
+    u8 pad8C[0xE4];
+    Func150F7470Big unk170;
+} Func150F78B4Obj;
+
+void func_15081690(s32, f32, f32, f32, f32, f32, f32, Func150F78B4Ray *, f32, s32, s32, s32, s32, s32, s32);
+void func_151D4DAC(s32, s32, struct17 *, struct17 *, Func150F78B4Ray *, s32, struct17 *, u8, s32);
+void func_150F7F8C(void *arg0, u8 arg1, s32 arg2);
+
+s8 func_150F78B4(Func150F78B4Obj *arg0) {
+    Func150F7470Big *big;
+    s32 obj;
+    s8 result;
+    f32 step;
+    f32 scale;
+    Func150F78B4Ray ray;
+    f32 count;
+    void *ret;
+
+    result = 1;
+    big = &arg0->unk170;
+    obj = arg0->unk7C;
+    step = (big->unk68 < D_800BE9A4) ? big->unk68 : D_800BE9A4;
+    if (arg0->unk88 != 0) {
+        func_1000F9D4(arg0->unk88, arg0->unk38, arg0->unk3C, arg0->unk40);
+    }
+    scale = big->unk6C * step;
+    if (big->unk70 & 2) {
+        func_15081690(obj, arg0->unk38, arg0->unk3C, arg0->unk40, big->unk38.unk0, big->unk38.unk4, big->unk38.unk8,
+                      &ray, scale, 1, 0, !(big->unk70 & 4), big->unkB0, 0, 0);
+        if (ray.unk59 >= 2) {
+            func_151D4DAC(ray.unk00, obj, &ray.unk08, &ray.unk20, &ray, 0x1A, &big->unk38, arg0->unkC, arg0->unk1);
+            if (big->unk70 & 1) {
+                func_150F7F8C(&ray.unk08, arg0->unkC, arg0->unk1);
+            }
+            result = 0;
+        }
+    }
+    arg0->unk38 += arg0->unk44 * step;
+    arg0->unk3C += arg0->unk48 * step;
+    arg0->unk40 += arg0->unk4C * step;
+    if (result == 1) {
+        big->unk68 -= D_800BE9A4;
+        if (big->unk68 <= 0.0f) {
+            result = 0;
+            if (big->unk70 & 1) {
+                func_150F7F8C(&arg0->unk38, arg0->unkC, arg0->unk1);
+            }
+        }
+    }
+    {
+        Func150F81BCSpawn spawn;
+
+        big->unk8C += scale;
+        big->unk90 += step;
+        count = big->unk8C * 0.01428571437f;
+        if (count > 1.0f) {
+            Func150F81BCExtra extra;
+
+            extra.unk0 = big->unk74;
+            extra.unkC = big->unk80;
+            extra.unk24 = 8.318000793f;
+            extra.unk28 = 8.318000793f;
+            spawn.unk0 = 0x7A;
+            spawn.unk1 = 0;
+            spawn.unk2 = 0x4404;
+            spawn.unk4 = 0xA;
+            spawn.unk8 = 0;
+            spawn.unkC = 0;
+            spawn.unk10 = 0xFF;
+            spawn.unk11 = 0xFF;
+            spawn.unk12 = 0xFF;
+            spawn.unk13 = 0xFF;
+            spawn.unk14 = 0.0f;
+            spawn.unk18 = 0.0f;
+            extra.unk20 = 0.4670000076f;
+            spawn.unk28 = *(struct17 *)&D_800A5480;
+            spawn.unk34 = 1.0f;
+            spawn.unk38 = 1.0f;
+            spawn.unk3C = 1.0f;
+            spawn.unk40 = 0xCC0008;
+            spawn.unk45 = 0xFF;
+            spawn.unk46 = 0;
+            spawn.unk47 = 6;
+            spawn.unk48 = 0;
+            spawn.unk4C = 0xFF;
+            spawn.unk50 = 0;
+            do {
+                extern s32 D_800A4AA0;
+
+                extra.unk1C = 4.712388992f;
+                extra.unk18 = 27.0f - big->unk90;
+                spawn.unk1C = big->unk98;
+                spawn.unk44 = extra.unk18 * 6.481481552f;
+                ret = func_1513D2F0(&spawn, (s32)&D_800A4AA0, 0x24, 0, 0, 0x21, 0, 0, 0, 0x2C, arg0->unkC, arg0->unk1);
+                if (ret != NULL) {
+                    memcpy((u8 *)ret + 0x110, &extra, sizeof(extra));
+                }
+                big->unk8C -= 70.0f;
+                big->unk90 -= big->unk94;
+                big->unk98.unk0 += big->unkA4.unk0;
+                big->unk98.unk4 += big->unkA4.unk4;
+                big->unk98.unk8 += big->unkA4.unk8;
+                count -= 1.0f;
+            } while (count > 1.0f);
+        }
+    }
+    return result;
+}
 
 s32 func_150F7E20(struct Func150F7E20Obj *arg0) {
     f32 temp;
@@ -251,45 +432,6 @@ typedef struct {
     struct17 unk4;
     f32 unk10;
 } Func150F802CExtra;
-
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    s16 unk2;
-    s16 unk4;
-    s32 unk8;
-    s32 unkC;
-    u8 unk10;
-    u8 unk11;
-    u8 unk12;
-    u8 unk13;
-    f32 unk14;
-    f32 unk18;
-    struct17 unk1C;
-    struct17 unk28;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    s32 unk40;
-    u8 unk44;
-    u8 unk45;
-    u8 unk46;
-    u8 unk47;
-    s32 unk48;
-    u8 unk4C;
-    u8 pad4D[3];
-    s32 unk50;
-} Func150F81BCSpawn;
-
-typedef struct {
-    struct17 unk0;
-    struct17 unkC;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-} Func150F81BCExtra;
 
 typedef struct {
     u8 pad0;
