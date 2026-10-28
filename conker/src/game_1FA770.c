@@ -93,7 +93,9 @@ typedef struct {
 
 void func_151CD3CC(struct260 *arg0, s32 arg1, u8 arg2) {
     Sub151CD3CC *sub;
-    volatile s32 unused[3];
+    /* Reserves 12 bytes at the top of the -g3 stack frame that the shipped
+     * build allocated but never referenced. */
+    s32 unused[3];
 
     sub = (Sub151CD3CC *)((s32)arg0 + 0x28);
     if (arg2 == 0x17) {
@@ -167,7 +169,46 @@ void func_151CE4DC(Func151CE4DCArg0 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1FA770/func_151CE51C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1FA770/func_151CE634.s")
+typedef struct Obj151CE634Sub {
+    u8 pad0[0x48];
+    s32 unk48;
+} Obj151CE634Sub;
+
+typedef struct Obj151CE634 {
+    u8 pad0[8];
+    struct Obj151CE634 *next;
+    u8 padC[0x20 - 0xC];
+    s32 unk20;
+    u8 pad24[0x98 - 0x24];
+    Obj151CE634Sub *unk98;
+} Obj151CE634;
+
+extern s32 D_800A5760[];
+extern Obj151CE634 *D_800DCE50[][0x68];
+
+Obj151CE634 *func_151CE634(s32 arg0) {
+    u8 i;
+    s32 j;
+    Obj151CE634 *p;
+
+    for (i = 0; i < 2; i++) {
+        for (j = 0; j < 2; j++) {
+            p = D_800DCE50[j][D_800A5760[i]];
+            while (p != NULL) {
+                if (p->unk20 == 0xB) {
+                    Obj151CE634Sub *sub = p->unk98;
+
+                    if (sub->unk48 == arg0) {
+                        return p;
+                    }
+                }
+                p = p->next;
+            }
+        }
+    }
+    return NULL;
+}
+
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1FA770/func_151CE6D0.s")
 
@@ -179,7 +220,7 @@ s32 func_151CEA20(f32 *arg0) {
     temp_f12 = arg0[0x10];
     arg0[0x11] += temp_f12 * D_800BE9A4;
     *(volatile f32 *)&arg0[0xE] = arg0[0xE] + ((temp_f2 + ((0.5f * temp_f12) * D_800BE9A4)) * D_800BE9A4);
-    *(volatile f32 *)&arg0[0x14] = ((*(volatile f32 *)&arg0[0x13]) * D_800BE9A4) + (*(volatile f32 *)&arg0[0x14]);
+    *(f32 *)&arg0[0x14] = ((*(volatile f32 *)&arg0[0x13]) * D_800BE9A4) + (*(volatile f32 *)&arg0[0x14]);
     if (arg0[0x14] > 1.0f) {
         arg0[0x14] = 1.0f;
     }
@@ -187,7 +228,6 @@ s32 func_151CEA20(f32 *arg0) {
 }
 
 struct260 *func_151CEAAC(void *arg0, void *arg1, u8 arg2, u8 arg3, s32 arg4) {
-    s32 pad_dummy;
     struct {
         f32 unk0;
         f32 unk4;
@@ -198,6 +238,7 @@ struct260 *func_151CEAAC(void *arg0, void *arg1, u8 arg2, u8 arg3, s32 arg4) {
         u8 unk14;
         u8 unk15;
         u8 pad16[2];
+        s32 unk18;
     } sp6C;
     struct {
         void *unk0;
@@ -436,7 +477,7 @@ void func_151D08F0(struct260 *arg0, s32 arg1, u8 arg2) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1FA770/func_151D09A8.s")
 
 void func_151D0ED8(void *arg0) {
-    if (*(struct102 *volatile *)((u8 *)arg0 + 0xA8) != 0) {
+    if (*(struct102 **)((u8 *)arg0 + 0xA8) != 0) {
         func_1516972C(*(struct102 *volatile *)((u8 *)arg0 + 0xA8));
     }
 }
@@ -501,7 +542,7 @@ s32 func_151D1074(f32 *arg0, f32 *arg1) {
     return 1;
 }
 
-s32 func_151D10E4(void *arg0, s32 arg1, s32 arg2);
+s32 func_151D10E4(void *arg0, s32 arg1, u8 arg2);
 
 s32 func_151D10A4(void *arg0, s32 arg1) {
     return func_151D10E4(arg0, arg1, 0);
@@ -513,7 +554,60 @@ s32 func_151D10C4(void *arg0, s32 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1FA770/func_151D10E4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1FA770/func_151D1138.s")
+typedef struct {
+    struct127 *unk0;
+    u8 unk4;
+    u8 pad5[3];
+    s32 unk8;
+    struct17 unkC;
+    struct17 unk18;
+    struct17 unk24;
+    f32 unk30;
+    u8 unk34;
+} Sub151D1138;
+
+extern f32 func_15143E64(struct17 *);
+extern s32 func_1510F8CC(s32);
+void func_151D13E0(struct260 *arg0);
+void func_151D1448(struct260 *arg0);
+
+void func_151D1138(struct260 *arg0) {
+    Sub151D1138 *sub;
+    struct127 *obj;
+    u8 finished = 0;
+    s32 state;
+
+    sub = (Sub151D1138 *)((u8 *)arg0 + 0x28);
+    obj = sub->unk0;
+
+    if (obj->interaction_state == 0 || obj->unique_id != sub->unk4) {
+        arg0->unkE = -1;
+        return;
+    }
+
+    sub->unkC = sub->unk18;
+    if (D_8008FC30[sub->unk34](obj, &sub->unk18) == 0) {
+        sub->unk18 = sub->unkC;
+        finished = 1;
+    }
+
+    sub->unk24.unk0 = sub->unk18.unk0 - sub->unkC.unk0;
+    sub->unk24.unk4 = sub->unk18.unk4 - sub->unkC.unk4;
+    sub->unk24.unk8 = sub->unk18.unk8 - sub->unkC.unk8;
+    sub->unk30 = func_15143E64(&sub->unk24);
+
+    state = func_1510F8CC(obj->unk184);
+    if (sub->unk30 > 300.0f || sub->unk30 <= 0.0f || obj->unk28 != 0.0f || obj->in_water != 0 ||
+        state == 5 || state == 6 || state == 9 || state == 0xD || state == 0xE) {
+        finished = 1;
+    }
+
+    if (finished != 0) {
+        func_151D13E0(arg0);
+    } else if (sub->unk8 == 0) {
+        func_151D1448(arg0);
+    }
+}
 
 void func_151D1328(s32 arg0, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
