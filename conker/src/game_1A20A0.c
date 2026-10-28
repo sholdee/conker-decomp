@@ -217,6 +217,44 @@ void func_15176B84(Obj15176B84 *obj) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1A20A0/func_15176DF0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1A20A0/func_151770C8.s")
+typedef struct Game1770C8Packet {
+    f32 m[4][4];
+} Game1770C8Packet;
+
+s32 func_1510AEE0(f32 *, f32, f32, f32, f32, f32, f32, f32, f32 *, f32 *);
+void *func_15176DF0(u32 *, u8 *, s16);
+extern f32 D_800D35E0;
+extern f32 D_800D35E8; /* (&D_800D35E8)[-1] == 0x800D35E4, which has no symbol of its own */
+extern u8 D_800D9C10[];
+
+void *func_151770C8(u32 *gdl, u8 *arg1, s16 arg2) {
+    Game1770C8Packet packet;
+    s32 culled;
+
+    culled = func_1510AEE0((f32 *)(D_800D9C10 + (arg2 << 6)),
+                      *(f32 *)(arg1 + 0x98), *(f32 *)(arg1 + 0x9C), *(f32 *)(arg1 + 0xA0),
+                      D_800D9B20, 4000.0f, D_800D35E0, (&D_800D35E8)[-1], 0, 0);
+    if (culled == 0) {
+        switch (arg1[0x91]) {
+        case 0:
+            func_150A8050(packet.m, *(f32 *)(arg1 + 0xA8), *(f32 *)(arg1 + 0xAC), *(f32 *)(arg1 + 0xB0));
+            packet.m[3][0] = *(f32 *)(arg1 + 0x98);
+            packet.m[3][1] = *(f32 *)(arg1 + 0x9C);
+            packet.m[3][2] = *(f32 *)(arg1 + 0xA0);
+            guMtxF2L(packet.m, (Mtx *)((arg1 + 0x10) + (D_800BE9C0 << 6)));
+            { u32 *g = gdl; gdl += 2; g[0] = 0xDA380003; g[1] = (u32)((arg1 + 0x10) + (D_800BE9C0 << 6)); }
+            { u32 *g = gdl; gdl += 2; g[0] = 0xDB060004; g[1] = *(u32 *)((u8 *)D_800DDE80 + 0xCC); }
+            { u32 *g = gdl; gdl += 2; g[0] = 0xDE000000; g[1] = *(u32 *)((u8 *)D_800DDE80 + 0xD4); }
+            break;
+        case 1:
+        case 2:
+        case 3:
+        default:
+            gdl = func_15176DF0(gdl, arg1, arg2);
+            break;
+        }
+    }
+    return gdl;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1A20A0/func_1517725C.s")
