@@ -450,7 +450,64 @@ struct S150319CC *func_150319CC(s32 arg0, u8 *arg1) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_5D2C0/func_15031A50.s")
+void func_150D5440(void *, u8, s32);
+void func_150D3360(void *, u8, s32);
+void func_151001B4();
+void func_15163BE8(void *, u8, s32);
+void func_151BD828(void *, u8, s32);
+void func_151D74B0(void *, u8, s8, u8, s32);
+extern s32 D_80090228;
+extern s32 D_8009022C;
+
+void func_15031A50(u8 *arg0, u8 *arg1) {
+    s32 type = arg0[1];
+    u8 *node;
+
+    switch (type) {
+    case 0x37:
+        func_151001B4(arg1);
+        break;
+    case 0x5A:
+        node = *(u8 **)(arg1 + 0x31C);
+        if (node != 0) {
+            *(u16 *)(node + 0x1A6) += 0xAA;
+        }
+        break;
+    case 0x90:
+        *(u32 *)(arg1 + 0x9C) |= 0x70;
+        break;
+    case 0x8F:
+        *(u32 *)(arg1 + 0x9C) |= 0xE00;
+        break;
+    case 0x49:
+        func_15163BE8(arg1, 0xFF, 1);
+        break;
+    case 0x5D:
+        func_150D3360(arg1, 0xFF, 1);
+        func_150D5440(arg1, 0xFF, 1);
+        break;
+    case 0x3D:
+        func_151BD828(arg1, 0xFF, 1);
+        break;
+    case 0x1D:
+        func_151D74B0(arg1, 0, 2, 0xFF, 1);
+        break;
+    case 0x5E:
+    case 0x85:
+        *(u32 *)(arg1 + 0x9C) |= 0x6000;
+        break;
+    case 0x8D:
+        if (func_150859AC(0, 6) < 0x64) {
+            *(s16 *)(arg0 + 0x18) = D_80090228;
+        } else {
+            *(s16 *)(arg0 + 0x18) = D_8009022C;
+        }
+        break;
+    case 0x82:
+        func_151D74B0(arg1, 6, -1, 0xFF, 1);
+        break;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_5D2C0/func_15031C14.s")
 
