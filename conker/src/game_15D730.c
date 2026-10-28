@@ -178,16 +178,90 @@ void func_151303BC(s32 a0, u8 a1, s32 a2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_15D730/func_15130A9C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_15D730/func_1513137C.s")
+typedef struct Game15D730ColorState {
+    u8 pad0[0x24];
+    u8 field24;
+    u8 field25;
+    u8 field26;
+    u8 field27;
+    u8 field28;
+    u8 field29;
+    u8 field2A;
+    u8 field2B;
+    u8 field2C;
+    u8 pad2D[0x43];
+    u8 mode70;
+    u8 mode71;
+} Game15D730ColorState;
+
+void func_1513137C(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, Game15D730ColorState *arg4) {
+    s16 temp_v0;
+    s16 temp_v0_2;
+    s16 temp_v0_3;
+
+    switch (arg4->mode70) {
+    case 1:
+        *arg2 = 0;
+        temp_v0 = *arg2;
+        *arg1 = temp_v0;
+        *arg0 = temp_v0;
+        *arg3 = (s16) ((s32) (arg4->field27 * arg4->field2B) >> 8);
+        return;
+    case 2:
+        *arg0 = (s16) arg4->field24;
+        *arg1 = (s16) arg4->field25;
+        *arg2 = (s16) arg4->field26;
+        *arg3 = (s16) ((s32) (arg4->field27 * arg4->field2B) >> 8);
+        return;
+    case 3:
+        *arg0 = (s16) arg4->field28;
+        *arg1 = (s16) arg4->field29;
+        *arg2 = (s16) arg4->field2A;
+        *arg3 = (s16) ((s32) (arg4->field27 * arg4->field2B) >> 8);
+        return;
+    case 4:
+    case 6:
+        *arg3 = 0;
+        temp_v0_2 = *arg3;
+        *arg2 = temp_v0_2;
+        *arg1 = temp_v0_2;
+        *arg0 = temp_v0_2;
+        return;
+    case 5:
+        *arg2 = 0;
+        temp_v0_3 = *arg2;
+        *arg1 = temp_v0_3;
+        *arg0 = temp_v0_3;
+        *arg3 = (s16) arg4->field2B;
+        return;
+    case 7:
+        *arg0 = (s16) arg4->field24;
+        *arg1 = (s16) arg4->field25;
+        *arg2 = (s16) arg4->field26;
+        *arg3 = (s16) arg4->field2B;
+        return;
+    case 8:
+        *arg0 = (s16) arg4->field24;
+        *arg1 = (s16) arg4->field25;
+        *arg2 = (s16) arg4->field26;
+        *arg3 = 0;
+        return;
+    default:
+        *arg0 = (s16) ((s32) (arg4->field24 * arg4->field2C) >> 8);
+        *arg1 = (s16) ((s32) (arg4->field25 * arg4->field2C) >> 8);
+        *arg2 = (s16) ((s32) (arg4->field26 * arg4->field2C) >> 8);
+        *arg3 = 0;
+        return;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_15D730/func_15131514.s")
 
 void func_15131514(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4);
-void func_1513137C(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4);
 
 void func_1513164C(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7, s32 a8) {
     func_15131514(a4, a5, a6, a7, a8);
-    func_1513137C(a0, a1, a2, a3, a8);
+    func_1513137C((s16 *)a0, (s16 *)a1, (s16 *)a2, (s16 *)a3, (Game15D730ColorState *)a8);
 }
 
 void func_151318E8(f32 *a0, f32 a1);
