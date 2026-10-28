@@ -3,6 +3,7 @@
 #define func_1000EDA0 func_1000EDA0_hdr
 #define func_1000EE70 func_1000EE70_hdr
 #define func_10010BE8 func_10010BE8_hdr
+#define func_10010F30 func_10010F30_hdr
 #define func_10010344 func_10010344_hdr
 #define func_10010154 func_10010154_hdr
 #include "functions.h"
@@ -10,10 +11,13 @@
 #undef func_1000EDA0
 #undef func_1000EE70
 #undef func_10010BE8
+#undef func_10010F30
 #undef func_10010344
 #undef func_10010154
 s32 func_10010344(u16, void *, u32, s16, u16);
 #include "variables.h"
+
+void func_10010F30(s32, s32, s32, s32, s32);
 
 u16 func_10010E78(u16 arg0, s32 arg1, u16 arg2, s32 arg3, s32 arg4,
                    s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9,
@@ -98,7 +102,7 @@ s32 func_1000EC24(struct251 *arg0, s32 arg1, s32 *arg2, struct11 *arg3, struct04
 
     if (temp_v1 <= 0) {
         if (*arg2 != 0) {
-            func_10010F30(arg0->unk1C, *arg2, arg3->unk3, arg4->unk2, *arg5);
+            func_10010F30(arg0->unk1C, *arg2 & 0xFFFF, arg3->unk3, arg4->unk2, *arg5);
         }
         return 1;
     }
@@ -235,7 +239,70 @@ s32 func_1000EF40(struct57 *arg0, struct57 *arg1, s32 *arg2, s32 arg3, s32 arg4,
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_1000EFB4.s")
+typedef struct {
+    u32 field0;
+    u8 field4;
+    u8 pad5[0xF];
+    f32 field14;
+    f32 field18;
+    f32 field1C;
+    u8 pad20[0x64];
+    u16 field84;
+    u8 pad86[0xFE];
+    u32 field184;
+} EFB4OwnerState;
+
+typedef struct {
+    u16 field0;
+    s16 x;
+    s16 y;
+    s16 z;
+    u8 pad8[8];
+    u32 flags;
+    u8 pad14[4];
+    EFB4OwnerState *owner;
+    u16 *ids;
+} EFB4SoundListRecord;
+
+
+
+s32 func_1000EFB4(EFB4SoundListRecord *record, s32 arg1, s32 *active,
+                  u8 *arg3, s32 arg4, s32 *output, u16 *sound) {
+    EFB4OwnerState *owner = record->owner;
+    s32 value;
+    u16 *id;
+    s32 soundId;
+
+    if (owner != 0) {
+        value = *active;
+        if (value != 0) {
+            if (owner->field0 != 0) {
+                for (id = record->ids; *id != 0; id++) {
+                    if ((owner->field84 == *id) || !(record->flags & 1)) {
+                        *output = ((owner->field184 >> 3) & 0x30) * 2;
+                        record->x = (s32)owner->field14;
+                        record->y = (s32)owner->field18;
+                        record->z = (s32)owner->field1C;
+                        return 0;
+                    }
+                }
+            }
+            soundId = *sound;
+            if (soundId == 0xCA) {
+                func_10010F30(0xCB, value & 0xFFFF, arg3[3], 0, *output);
+            } else if (soundId == 0x2CF) {
+                func_10010F30(0x2D7, value & 0xFFFF, arg3[3], 0, *output);
+                func_10010F30((func_150ADA20() % 3U) + 0x2EB,
+                             0x3E80, arg3[3], 0, *output);
+            } else if (soundId == 0x2D2) {
+                func_10010F30(0x2DA, value & 0xFFFF, arg3[3], 0, *output);
+                func_10010F30((func_150ADA20() % 3U) + 0x2EB,
+                             0x3E80, arg3[3], 0, *output);
+            }
+        }
+    }
+    return 1;
+}
 void func_1000F1A8(void) {
     s32 i;
 
@@ -1036,8 +1103,14 @@ u16 func_10010E78(u16 arg0, s32 arg1, u16 arg2, s32 arg3, s32 arg4,
     return 0;
 }
 
-void func_10010F30(s32 arg0, u16 arg1, u8 arg2, s16 arg3, u8 arg4) {
-    func_10010BE8(0, arg0, arg1, arg2, arg3, arg4, D_80041FD9);
+void func_10010F30(arg0, arg1, arg2, arg3, arg4)
+s32 arg0;
+u16 arg1;
+u8 arg2;
+s16 arg3;
+s32 arg4;
+{
+    func_10010BE8(0, arg0, arg1, arg2, arg3, ((u8 *)&arg4)[3], D_80041FD9);
 }
 
 void func_10010F88(s32 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4,
