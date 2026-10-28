@@ -395,7 +395,146 @@ s32 func_16000A5C(void) {
 }
 
 // called from func_10007DAC
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/func_16000B14.s")
+typedef struct {
+    u16 state;
+    u16 retraceCount;
+    void *framep;
+} DebuggerViContext;
+extern DebuggerViContext *D_8002BDE0;
+extern u32 D_8003C8E8[4];
+extern u32 D_160038AC[32];
+extern u32 D_1600392C[32];
+extern u32 D_160039AC[32];
+extern u32 D_16003A2C[32];
+extern u32 D_160039E8;
+extern u32 D_16003A68;
+extern s32 D_16003894;
+extern s32 D_16003898;
+extern void (*D_16003AF8[4])(void);
+extern s32 (*D_16003B08[4])(void);
+extern OSContPad D_160036F0[4];
+void func_16003650(void);
+void func_16001678(void);
+s32 func_16001700(void);
+void func_16001830(OSContPad *data);
+
+s32 func_16000B14(struct OSThread_s *thread) {
+    u32 *context;
+    u32 *frame;
+    u32 entryLo;
+    s32 first;
+    s32 state;
+    s32 stick;
+    u32 pc;
+    u32 page;
+    s32 odd;
+    u32 flags;
+    s32 offset;
+    s32 *entry;
+    u32 *saved;
+    void (*draw)(void);
+    s32 (*input)(void);
+
+    state = 0;
+    first = 1;
+    if (D_8002AC5C != 0) {
+        return 0;
+    }
+    D_16003888 = 0;
+    if ((D_8002AAE8[0] == 0) || (D_8002AAE8[1] == 0)) {
+        D_8002AAE8[0] = 0x80350000;
+        D_8002AAE8[1] = 0x80350000;
+        return 0;
+    }
+    func_16003650();
+    context = D_8003C8E8;
+    saved = context;
+    D_160038AC[15] = saved[0];
+    D_1600392C[15] = saved[1];
+    D_160039E8 = saved[2];
+    D_16003A68 = saved[3];
+    if ((((u32 *)thread)[0x11C / 4] & 0xFF000000) != 0x15000000) {
+        D_16003AF0 = 1;
+    } else {
+        page = ((u32 *)thread)[0x11C / 4] & ~0xFFF;
+        odd = page & 0x1000;
+        pc = page & ~0x1000;
+        page = pc;
+        D_16003AF0 = 0;
+        for (offset = 0; offset < 32; offset++) {
+            if (page == D_160039AC[offset]) {
+                entryLo = odd ? D_1600392C[offset] : D_160038AC[offset];
+                flags = entryLo;
+                if (flags & 2) {
+                    D_16003AF0 = 1;
+                }
+            }
+        }
+    }
+    if ((((u32)D_8003C8E0 >> 24) & 0xFF) == 0xC) {
+        thread = &D_80031AE0;
+    }
+    frame = (u32 *)D_8002BDE0->framep;
+    if ((saved = frame) == (u32 *)D_8002AAE8[1]) {
+        *(s8 *)&D_16003888 = 1;
+    }
+    D_1600389C = (struct118 *)thread;
+    D_160038A4 = 0;
+    if ((((s32 *)thread)[0x120 / 4] == 0x20) &&
+        ((u32)func_150AD770 == ((u32 *)thread)[0x11C / 4])) {
+        *(s8 *)&D_160038A4 = 1;
+    }
+    do {
+        if ((first == 0) && (state & 2)) {
+            func_16001678();
+        }
+        draw = D_16003AF8[D_16003AF4];
+        if (draw != 0) {
+            draw();
+        }
+        osWritebackDCacheAll();
+        do {
+            state = 0;
+            D_16003898 = D_16003894;
+            func_16001700();
+            func_16001830(D_160036F0);
+            if (first != 0) {
+                D_16003898 = D_16003894;
+            }
+            D_16003894 = D_160036F0[0].button;
+            stick = D_160036F0[0].stick_x;
+            if (stick >= 0x33) {
+                D_16003894 |= 0x20000;
+            }
+            if (stick < -0x32) {
+                D_16003894 |= 0x10000;
+            }
+            stick = D_160036F0[0].stick_y;
+            if (stick >= 0x33) {
+                D_16003894 |= 0x40000;
+            }
+            if (stick < -0x32) {
+                D_16003894 |= 0x80000;
+            }
+            D_16003890 = (D_16003894 ^ D_16003898) & D_16003894;
+            input = D_16003B08[D_16003AF4];
+            if (input != 0) {
+                state = input();
+            }
+        } while (!(state & 5));
+        first = 0;
+    } while (!(state & 4));
+    if (D_16003AF0 == 0) {
+        ((s16 *)thread)[0x10 / 2] = 4;
+        ((s16 *)thread)[0x12 / 2] = 0;
+        return 1;
+    }
+    if ((((s32 *)thread)[0x120 / 4] == 0x20) && (D_160038A4 == 0)) {
+        ((s32 *)thread)[0x11C / 4] += 4;
+        return 1;
+    }
+    return 0;
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/func_16000F8C.s")
 // NON-MATCHING: lots to figure out
 // void func_16000F8C(s32 arg0, f32 arg1) {
