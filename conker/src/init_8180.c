@@ -175,7 +175,61 @@ void func_10008C6C(u8 idx, u8 arg1) {
     func_100186DC(&D_8003CA58[idx], &D_8003CD48[idx].pad0[arg1 * 0xEC]);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_8180/func_10008CE8.s")
+typedef struct {
+    u8 *address;
+    s32 length;
+} SequenceFileEntry_8CE8;
+
+typedef struct {
+    s16 revision;
+    s16 count;
+    SequenceFileEntry_8CE8 entries[1];
+} SequenceFile_8CE8;
+
+s32 allocate_memory(s32, s32, s32, s32);
+void func_10004074(void *);
+void func_10004514(u32, void *, u32, s32);
+void func_10018C60(N_ALCSPlayer *);
+void func_10018CB0(N_ALCSPlayer *, ALCSeq *);
+extern u16 D_8003C910[];
+extern u16 D_8003CA3C[];
+extern s32 D_8003CA48[];
+extern SequenceFile_8CE8 *D_8003CD40;
+
+s32 func_10008CE8(u8 arg0, s32 sequence) {
+    s32 address;
+    u32 count;
+
+    count = 0;
+    func_10018C60(D_8003C900[arg0]);
+    while (n_alCSPGetState(D_8003C900[arg0]) != 0 && count != 2000000) {
+        count++;
+    }
+    if (count >= 2000000U) {
+        func_10018C60(D_8003C900[arg0]);
+        while (n_alCSPGetState(D_8003C900[arg0]) != 0 && count < 4000000U) {
+            count++;
+        }
+    }
+    if (sequence != D_8003CA3C[arg0]) {
+        if (D_8003CA48[arg0] != 0) {
+            func_10004074((void *)D_8003CA48[arg0]);
+            D_8003CA48[arg0] = 0;
+        }
+        address = (s32)D_8003CD40->entries[sequence].address;
+        D_8003CA48[arg0] = allocate_memory(D_8003C910[sequence], 0xFF, 2, 2);
+        if (D_8003CA48[arg0] == 0) {
+            return -1;
+        }
+        func_10004514(address, (void *)D_8003CA48[arg0],
+                      (D_8003C910[sequence] + 0xF) & ~0xF, 1);
+        D_8003CA3C[arg0] = sequence;
+    }
+    n_alCSeqNew(&D_8003CA58[arg0], (u8 *)D_8003CA48[arg0]);
+    func_10018CB0(D_8003C900[arg0], &D_8003CA58[arg0]);
+    func_10017B30(D_8003C900[arg0]);
+    return 0;
+}
 // NON-MATCHING: 80% of the way there
 // s32 func_10008CE8(u8 idx, u16 arg1) {
 //     s32 sp3C;
