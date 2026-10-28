@@ -652,7 +652,84 @@ s32 func_1513E6E8(struct_func_1513E6E8 *arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513E83C.s")
 
 // ???
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513EAD8.s")
+typedef struct Game169510ScaledOwner {
+    u8 unknown0[0x2C];
+    f32 width, height;
+    f32 x, y, z;
+    f32 rx, ry, rz;
+    f32 sx, sy, sz;
+    u8 unknown58[0x68];
+    u8 templateData[0x40];
+    u8 *buffers[1];
+} Game169510ScaledOwner;
+
+typedef struct Game169510ScaledVertex {
+    s16 x, y, z, flag;
+    u8 other[8];
+} Game169510ScaledVertex;
+
+void func_151D5D60(void *, s16, s32, void **, u8 *);
+
+void *func_1513EAD8(void *arg0, s32 arg1, s16 arg2) {
+    Game169510ScaledVertex *vertices;
+    Game169510ScaledVertex *result;
+    s16 coords[4][3];
+    f32 heightDelta, heightScale, directionZ, directionX;
+    u8 fresh;
+
+    func_151D5D60((u8 *)arg0 + 0x100, arg2, 0x40, (void **)&vertices, &fresh);
+    result = vertices;
+    if (vertices != 0) {
+        if (fresh != 0) {
+            memcpy(*(u8 **)((u8 *)arg0 + arg2 * 4 + 0x100), (u8 *)arg0 + 0xC0, 0x40);
+            memcpy(*(u8 **)((u8 *)arg0 + arg2 * 4 + 0x100) + 0x40, (u8 *)arg0 + 0xC0, 0x40);
+        }
+    } else {
+        return 0;
+    }
+    directionZ = D_800DD1D8[arg2] * ((Game169510ScaledOwner *)arg0)->width;
+    directionX = D_800DD1E8[arg2] * ((Game169510ScaledOwner *)arg0)->width;
+    heightScale = ((Game169510ScaledOwner *)arg0)->sy * ((Game169510ScaledOwner *)arg0)->height;
+    heightDelta = ((Game169510ScaledOwner *)arg0)->height - heightScale;
+    vertices[0].flag = 0;
+    vertices[1].flag = 0;
+    vertices[2].flag = 0;
+    vertices[3].flag = 0;
+    coords[3][0] = coords[0][0] = (s16)(s32)(((Game169510ScaledOwner *)arg0)->x + directionX);
+    coords[1][1] = coords[0][1] = (s16)(s32)(((Game169510ScaledOwner *)arg0)->y - heightScale);
+    coords[3][2] = coords[0][2] = (s16)(s32)(((Game169510ScaledOwner *)arg0)->z - directionZ);
+    coords[2][0] = coords[1][0] = (s16)(s32)(((Game169510ScaledOwner *)arg0)->x - directionX);
+    coords[3][1] = coords[2][1] = (s16)(s32)(((Game169510ScaledOwner *)arg0)->y + heightDelta);
+    coords[2][2] = coords[1][2] = (s16)(s32)(((Game169510ScaledOwner *)arg0)->z + directionZ);
+    if (*(u8 *)((u8 *)&arg1 + 3) != 0) {
+        vertices[0].x = coords[1][0];
+        vertices[0].y = coords[1][1];
+        vertices[0].z = coords[1][2];
+        vertices[1].x = coords[2][0];
+        vertices[1].y = coords[2][1];
+        vertices[1].z = coords[2][2];
+        vertices[2].x = coords[3][0];
+        vertices[2].y = coords[3][1];
+        vertices[2].z = coords[3][2];
+        vertices[3].x = coords[0][0];
+        vertices[3].y = coords[0][1];
+        vertices[3].z = coords[0][2];
+    } else {
+        vertices[0].x = coords[0][0];
+        vertices[0].y = coords[0][1];
+        vertices[0].z = coords[0][2];
+        vertices[1].x = coords[1][0];
+        vertices[1].y = coords[1][1];
+        vertices[1].z = coords[1][2];
+        vertices[2].x = coords[2][0];
+        vertices[2].y = coords[2][1];
+        vertices[2].z = coords[2][2];
+        vertices[3].x = coords[3][0];
+        vertices[3].y = coords[3][1];
+        vertices[3].z = coords[3][2];
+    }
+    return result;
+}
 
 void func_1513EDB4(s32 arg0, s16 arg1) {
     func_1513EAD8(arg0, 0, arg1);
