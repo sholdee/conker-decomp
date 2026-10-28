@@ -272,7 +272,171 @@ struct260 *func_1510A344(void *arg0, s32 arg1, u8 arg2, s32 arg3) {
     return temp_v0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1368C0/func_1510A40C.s")
+typedef struct {
+    s32 unk0;
+    u8 pad4[0x37];
+    u8 unk3B;
+    u8 pad3C[0x1D4 - 0x3C];
+    s32 unk1D4;
+} Obj1510A40C;
+typedef struct {
+    s32 unk00;
+    s32 unk04;
+    s16 unk08;
+    s16 unk0A;
+    s32 unk0C;
+    s32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 unk16;
+    u8 unk17;
+    u8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+    u8 unk1C;
+    u8 unk1D;
+    s16 unk1E;
+    s16 unk20;
+    s16 unk22;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    struct Vec3F15109C20 unk30;
+    f32 unk3C;
+    f32 unk40;
+    f32 unk44;
+    f32 unk48;
+    f32 unk4C;
+    f32 unk50;
+    f32 unk54;
+    s32 unk58;
+    u8 pad5C[4];
+    u8 unk60;
+    u8 unk61;
+    s8 unk62;
+    s8 unk63;
+    s8 unk64;
+    u8 unk65;
+    u8 pad66[0xA];
+} Effect1510A40C;
+typedef struct {
+    Obj1510A40C *unk0;
+    u8 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+} State1510A40C;
+typedef struct {
+    u8 pad0;
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD;
+    s16 unkE;
+    u8 pad10[0x18];
+    State1510A40C unk28;
+} Actor1510A40C;
+extern struct Vec3F15109C20 D_800A2604;
+extern struct Vec3F15109C20 D_800A2610;
+extern struct Vec3F15109C20 D_800A261C;
+extern struct Vec3F15109C20 D_800A2628;
+extern void func_15143134(const void *, void *, s32);
+extern struct260 *func_15130374(void *, u8, s32, u8, s32);
+
+void func_1510A40C(Actor1510A40C *arg0) {
+    State1510A40C *state;
+    Obj1510A40C *obj;
+    struct Vec3F15109C20 pts[2];
+    struct Vec3F15109C20 dirs[2];
+    s32 m;
+    Effect1510A40C fx;
+    f32 val;
+    f32 scale;
+    u8 sel;
+    struct260 *ret;
+
+    state = &arg0->unk28;
+    obj = state->unk0;
+    if (obj->unk0 == 0 || obj->unk3B != state->unk4) {
+        arg0->unkE = -1;
+        return;
+    }
+    state->unk8 += (state->unkC + func_150ADA68() * state->unk10) * D_800BE9A4;
+    if (state->unk8 > 1.0f && obj->unk1D4 != 0) {
+        m = obj->unk1D4 + 0x240;
+        func_15143134(&D_800A2604, &pts[0], m);
+        func_15143134(&D_800A2610, &pts[1], m);
+        func_15143134(&D_800A261C, &dirs[0], m);
+        func_15143134(&D_800A2628, &dirs[1], m);
+        dirs[0].x -= pts[0].x;
+        dirs[0].y -= pts[0].y;
+        dirs[0].z -= pts[0].z;
+        dirs[1].x -= pts[1].x;
+        dirs[1].y -= pts[1].y;
+        dirs[1].z -= pts[1].z;
+        val = 0.9108009934f;
+        fx.unk1D = 0x29;
+        fx.unk08 = 0xE03;
+        fx.unk00 = 0x200005;
+        fx.unk04 = 0;
+        fx.unk0C = 0;
+        fx.unk10 = 0;
+        fx.unk1E = 0x19;
+        fx.unk20 = 0xA;
+        fx.unk58 = 0xCE05;
+        fx.unk60 = 3;
+        fx.unk61 = 3;
+        fx.unk62 = 0x10;
+        fx.unk63 = -1;
+        fx.unk64 = -1;
+        fx.unk65 = 0;
+        fx.unk22 = 0x19;
+        fx.unk14 = 0xDD;
+        fx.unk15 = 0xD3;
+        fx.unk16 = 0xCD;
+        fx.unk17 = 0xFF;
+        fx.unk18 = 0x57;
+        fx.unk19 = 0x55;
+        fx.unk1A = 0x5A;
+        fx.unk1B = 0xFF;
+        fx.unk1C = 0xFF;
+        fx.unk24 = 1.043205976f;
+        fx.unk3C = 0.0f;
+        fx.unk40 = 0.0f;
+        fx.unk44 = 0.0f;
+        fx.unk54 = 0.0f;
+        do {
+            if (func_150ADA20() & 1) {
+                fx.unk58 |= 0x40;
+            } else {
+                fx.unk58 &= ~0x40;
+            }
+            if (func_150ADA20() & 1) {
+                fx.unk58 |= 0x80;
+            } else {
+                fx.unk58 &= ~0x80;
+            }
+            sel = func_150ADA20() & 1;
+            scale = ((func_150ADA68() * 203.0f) + 96.0f) * 0.001f;
+            fx.unk0A = (func_150ADA20() & 0xF) + 0x14;
+            fx.unk28 = fx.unk2C = (func_150ADA68() * 60.0f) + 60.0f;
+            fx.unk30 = pts[sel];
+            fx.unk48 = dirs[sel].x * scale;
+            fx.unk4C = dirs[sel].y * scale;
+            fx.unk50 = dirs[sel].z * scale;
+            ret = func_15130374(&fx, 1, 4, arg0->unkC, arg0->unk1);
+            if (ret != NULL) {
+                memcpy((u8 *)ret + 0xA8, &val, 4);
+            }
+            state->unk8 -= 1.0f;
+        } while (state->unk8 > 1.0f);
+    } else {
+        while (state->unk8 > 1.0f) {
+            state->unk8 -= 1.0f;
+        }
+    }
+}
 
 void func_1510A870(void *arg0, GameStruct1510A8CCa *arg1, u8 arg2) {
     GameStruct1510A8CCb *v0 = (GameStruct1510A8CCb *)((u8 *)arg0 + 0x28);
