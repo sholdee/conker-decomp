@@ -166,9 +166,16 @@ typedef struct Rec1510B958 {
 } Rec1510B958;
 
 extern f32 D_800D35E0;
-extern f32 D_800D35E4;
+extern f32 D_800D35E8; /* 0x800D35E4 == (&D_800D35E8)[-1]; it has no symbol of its own */
+#define D_800D35E4 ((&D_800D35E8)[-1])
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_138520/func_1510B958.s")
+void func_1510B958(s32 arg0) {
+    Rec1510B958 *record;
+
+    record = (Rec1510B958 *)((u8 *)D_800BE628 + arg0 * 0x180);
+    D_800D35E0 = (((record->unk74 / record->unk6C) - 1.0f) * -1.0f) + record->unk64;
+    D_800D35E4 = (((record->unk78 / record->unk70) - 1.0f) * -1.0f) + record->unk68;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_138520/func_1510B9D0.s")
 
