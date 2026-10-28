@@ -237,7 +237,81 @@ struct260 *func_15109ED4(void *arg0, s16 arg1, s8 arg2, s8 arg3, f32 arg4, s32 a
     return temp_v0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1368C0/func_15109FB8.s")
+extern const f32 D_800A2504[7];
+extern const struct Vec3F15109C20 D_800A2568[7];
+extern const struct Vec3F15109C20 D_800A25BC[6];
+extern void (*D_80088C60[])(void *);
+extern void (*D_80088C64[])(void *, struct Vec3F15109C20 *, struct Vec3F15109C20 *, struct Vec3F15109C20 *, struct Vec3F15109C20 *, struct Vec3F15109C20 *);
+extern s32 func_15145128(void *, void *, f32 *, f32 *);
+
+typedef struct {
+    void *unk0;
+    f32 unk4;
+    f32 unk8;
+    s8 unkC;
+    s8 unkD;
+} State15109FB8;
+
+typedef struct {
+    u8 pad0[0x28];
+    State15109FB8 unk28;
+} Actor15109FB8;
+
+extern void func_1511490C(f32 arg0[4][4], void *arg1);
+extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
+
+void func_15109FB8(Actor15109FB8 *arg0) {
+    State15109FB8 *state;
+
+    state = &arg0->unk28;
+    state->unk4 += state->unk8 * D_800A2504[6] * D_800BE9A4;
+    if (state->unkD != -1) {
+        while (state->unk4 > 1.0f) {
+            f32 mtx[4][4];
+            struct Vec3F15109C20 a;
+            struct Vec3F15109C20 b;
+            struct Vec3F15109C20 c;
+            struct Vec3F15109C20 d;
+            struct Vec3F15109C20 e;
+            const struct Vec3F15109C20 *p;
+            s32 i;
+            f32 r;
+            f32 t;
+            f32 x;
+            f32 y;
+            f32 z;
+
+            func_1511490C(mtx, state->unk0);
+            r = func_150ADA68() * D_800A2504[6];
+            for (i = 0; D_800A2504[i] < r; i++) {
+                r -= D_800A2504[i];
+            }
+            t = func_150ADA68();
+            p = &D_800A2568[i];
+            x = p[0].x + (p[1].x - p[0].x) * t;
+            y = p[0].y + (p[1].y - p[0].y) * t;
+            z = p[0].z + (p[1].z - p[0].z) * t;
+            func_150A7960((f32 *)mtx, x, y, z, &a.x, &a.y, &a.z);
+            func_150A7960((f32 *)mtx, p[0].x, p[0].y, p[0].z, &b.x, &b.y, &b.z);
+            func_150A7960((f32 *)mtx, p[1].x, p[1].y, p[1].z, &c.x, &c.y, &c.z);
+            func_150A7960((f32 *)mtx, D_800A25BC[i].x, D_800A25BC[i].y, D_800A25BC[i].z, &d.x, &d.y, &d.z);
+            t = func_150ADA68();
+            e.x = (d.x - c.x) * t + c.x - b.x;
+            e.y = (d.y - c.y) * t + c.y - b.y;
+            e.z = (d.z - c.z) * t + c.z - b.z;
+            func_15145128(&e, &e, NULL, NULL);
+            D_80088C64[state->unkD](arg0, &a, &b, &c, &d, &e);
+            state->unk4 -= 1.0f;
+        }
+    } else {
+        while (state->unk4 > 1.0f) {
+            state->unk4 -= 1.0f;
+        }
+    }
+    if (state->unkC != -1) {
+        D_80088C60[state->unkC](arg0);
+    }
+}
 
 extern f32 D_800A2684;
 extern f32 D_800A2688;
