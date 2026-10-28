@@ -657,7 +657,40 @@ s32 func_1000C530(s32 arg0, u8 arg1, f32 arg2, f32 arg3, f32 arg4) {
     return (countdown * 4) | mode | (low << 8) | (high << 16) | fade;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000C7E8.s")
+void func_1000D96C(s32, s32, s32);
+
+s32 func_1000C7E8(s32 arg0, s32 arg1, f32 arg2, s32 arg3, f32 arg4) {
+    f32 distance;
+    f32 value;
+
+    if (D_800BE9F0 == 0x31) {
+        if (arg0 != 2) {
+            if (func_1000B1B0(9) == 0) {
+                func_1000E704(0x3E, 0, 0xFFFF);
+                func_1000E40C(0x3E, 0x7FFF);
+                func_1000D96C(0x3D, 0x3E, 4);
+            }
+            return 2;
+        }
+        return 0;
+    }
+    if (D_8002B070 == 0) {
+        D_8002B070 = 1;
+    }
+    if (arg0 != D_8002B070) {
+        arg0 = D_8002B070;
+    }
+    arg2 -= -4000.0f;
+    value = 24000.0f - sqrtf(arg2 * arg2 + arg4 * arg4) * 10.0f;
+    distance = value;
+    if (distance < 100.0f) {
+        value = 100.0f;
+    } else if (24000.0f < distance) {
+        value = 24000.0f;
+    }
+    func_1000E40C(0x3E, (s32)value);
+    return arg0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000C934.s")
 // NON-MATCHING: close but last part isn't quite right
