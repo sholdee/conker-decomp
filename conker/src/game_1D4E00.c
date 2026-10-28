@@ -193,7 +193,22 @@ void func_151A8584(s32 arg0) {
     func_15169804((struct102 *)arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1D4E00/func_151A85D4.s")
+typedef struct {
+    u8 pad_0[0x5C];
+    u8 field_5C;
+} Game1D4E00State_151A85D4;
+
+extern void (*D_8008F958[])(s32);
+
+void func_151A85D4(s32 arg0) {
+    Game1D4E00State_151A85D4 *state = (Game1D4E00State_151A85D4 *)arg0;
+
+    if (D_8008F958[state->field_5C] != NULL) {
+        D_8008F958[state->field_5C](arg0);
+    }
+    func_151A8560((void *)arg0);
+    func_15169824((struct102 *)arg0);
+}
 
 typedef struct {
     u8 bytes[4];
