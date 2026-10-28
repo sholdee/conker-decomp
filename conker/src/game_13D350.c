@@ -16,7 +16,125 @@ typedef struct {
     f32 unk30;
 } Struct151103C8;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_13D350/func_1510FEA0.s")
+typedef struct Game13D350ViewAngles {
+    u8 pad0[0xC];
+    f32 pitch;
+    f32 yaw;
+    f32 roll;
+} Game13D350ViewAngles;
+
+typedef Gfx *(*Game13D350ViewDraw)(Gfx *, f32, f32, f32, f32, f32, f32, s32);
+
+Gfx *func_151106A8(Gfx *);
+s32 func_151108C4(f32, f32, f32, f32, f32);
+extern s16 D_80082FA6;
+extern u8 D_800D9B69;
+extern u8 D_800D9B6A;
+extern u8 D_800D9B6B;
+extern u8 D_800D9B6C;
+extern u8 D_800D9B6D;
+extern u8 D_800D9B6E;
+extern u8 D_800D9B6F;
+extern u8 D_800D9B70;
+extern u8 D_800D9B71;
+extern u8 D_800D9B72;
+extern u8 D_800D9B73;
+extern u8 D_800D9B79;
+extern u8 D_800D9B7A;
+extern u8 D_800D9B7B;
+extern u8 D_800D9B7C;
+extern u8 D_800D9B7D;
+extern u8 D_800D9B7E;
+extern u8 D_800D9B7F;
+extern u8 D_800D9B80;
+extern u8 D_800D9B81;
+extern u8 D_800D9B82;
+extern u8 D_800D9B83;
+extern Game13D350ViewAngles D_800DCDE0[];
+extern Game13D350ViewDraw D_800891D8[];
+
+Gfx *func_1510FEA0(Gfx *arg0, s32 arg1) {
+    u8 *record;
+    f32 pitch;
+    f32 yaw;
+    f32 roll;
+    s32 visible;
+    f32 x;
+    f32 y;
+    f32 z;
+
+    D_800D9B68[0][0] = 0;
+    D_800D9B69 = 0;
+    D_800D9B6A = 0;
+    D_800D9B78[0][0] = 0;
+    D_800D9B79 = 0;
+    D_800D9B7A = 0;
+    D_800D9B6B = 0;
+    D_800D9B6C = 0;
+    D_800D9B6D = 0;
+    D_800D9B7B = 0;
+    D_800D9B7C = 0;
+    D_800D9B7D = 0;
+    D_800D9B6E = 0;
+    D_800D9B6F = 0;
+    D_800D9B70 = 0;
+    D_800D9B7E = 0;
+    D_800D9B7F = 0;
+    D_800D9B80 = 0;
+    D_800D9B71 = 0;
+    D_800D9B72 = 0;
+    D_800D9B73 = 0;
+    D_800D9B81 = 0;
+    D_800D9B82 = 0;
+    D_800D9B83 = 0;
+    { Gfx *command = arg0++; command->words.w0 = 0xD9FFF9FF; command->words.w1 = 0; }
+    arg0 = func_151106A8(arg0);
+    { Gfx *command = arg0++; command->words.w0 = 0xE7000000; command->words.w1 = 0; }
+    if (D_800BE635 != 0) {
+        arg0 = func_15110544(arg0, 0, 0, D_800BE620, D_800BE624, 0, 0, 0);
+    }
+    if (D_800C35EA == 1 && D_800C3681 != 0) {
+        return arg0;
+    }
+    pitch = 360.0f - (*(f32 *)((u8 *)D_800DBFF0 + D_80082FA4 * 0x9A0 + 0x388) + D_800DCDE0[D_80082FA4].pitch);
+    while (pitch < -180.0f) {
+        pitch += 360.0f;
+    }
+    while (pitch >= 180.0f) {
+        pitch -= 360.0f;
+    }
+    yaw = 360.0f - (*(f32 *)((u8 *)D_800DBFF0 + D_80082FA4 * 0x9A0 + 0x380) + D_800DCDE0[D_80082FA4].yaw);
+    while (yaw < 0.0f) {
+        yaw += 360.0f;
+    }
+    while (yaw >= 360.0f) {
+        yaw -= 360.0f;
+    }
+    roll = *(f32 *)((u8 *)D_800DBFF0 + D_80082FA4 * 0x9A0 + 0x5EC) + D_800DCDE0[D_80082FA4].roll;
+    while (roll < -180.0f) {
+        roll += 360.0f;
+    }
+    while (roll >= 180.0f) {
+        roll -= 360.0f;
+    }
+    x = *(f32 *)((u8 *)D_800DBFF0 + D_80082FA4 * 0x9A0 + 0x2F8);
+    y = *(f32 *)((u8 *)D_800DBFF0 + D_80082FA4 * 0x9A0 + 0x2FC);
+    z = *(f32 *)((u8 *)D_800DBFF0 + D_80082FA4 * 0x9A0 + 0x300);
+    if (D_800C3682 != 0) {
+        record = (u8 *)D_800BE628 + D_80082FA4 * 0x180;
+        return func_15110544(arg0,
+                             (s32)*(f32 *)(record + 0x2C), (s32)*(f32 *)(record + 0x24),
+                             (s32)(*(f32 *)(record + 0x30) - 1.0f),
+                             (s32)*(f32 *)(record + 0x28), 0x16, 0x1C, 0x1B);
+    }
+    visible = func_151108C4(x, y, z, pitch, yaw);
+    if (visible != 0) {
+        arg0 = D_800891D8[((u8 *)D_800B0DF0)[8]](arg0, x, y, z, pitch, yaw, roll, visible);
+    }
+    arg0 = (Gfx *)func_1501A490((s32)arg0, D_80082FA6, 0, 0, 0, 0);
+    { Gfx *command = arg0++; command->words.w0 = 0xD9FFFFFF; command->words.w1 = 0x400; }
+    return arg0;
+}
 
 extern s32 D_800BE628;
 void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
