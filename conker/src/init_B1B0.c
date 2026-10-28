@@ -1,8 +1,12 @@
 #include <ultra64.h>
 
+#define func_1000DF68 func_1000DF68_s16_decl_in_functions_h
 #include "functions.h"
+#undef func_1000DF68
 #include "variables.h"
 
+void func_1000DEC4(void);
+void func_1000DF68(s32 arg0, s32 arg1, s32 arg2);
 
 struct151 *func_1000B1B0(s32 arg0) {
     s32 i;
@@ -17,29 +21,28 @@ struct151 *func_1000B1B0(s32 arg0) {
     return NULL;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000B1FC.s")
-// NON-MATCHING: something like this, but not this.
-// struct151 *func_1000B1FC(s32 arg0) {
-//     struct151 *phi_v1_2;
-//     u32 i;
-//
-//     for (i = 0; i < D_800417BC; i += 4) {
-//         if ( D_800417B0[i] != 0 &&  D_800417B0[i]->unk4 == arg0) {
-//             return  D_800417B0[i];
-//         }
-//     }
-//
-//     for (i = 0; i < D_800417BC; i += 4) {
-//         if ( D_800417B0[i] != 0) {
-//             phi_v1_2 =  D_800417B0[i]->unk60;
-//             if (phi_v1_2 != 0 && phi_v1_2->unk4 == arg0) {
-//                 return phi_v1_2;
-//             }
-//         }
-//     }
-//
-//     return NULL;
-// }
+struct151 *func_1000B1FC(s32 arg0) {
+    s32 i;
+    struct00 *temp;
+
+    for (i = 0; i < 3; i++) {
+        if ((D_800417B0[i] != 0) && (arg0 == D_800417B0[i]->unk4)) {
+            return D_800417B0[i];
+        }
+    }
+    for (i = 0; i < 3; i++) {
+        if (D_800417B0[i] != 0) {
+            temp = D_800417B0[i]->unk60;
+            if ((temp != 0) && (arg0 == temp->unk4)) {
+                return (struct151 *)temp;
+            }
+        }
+    }
+    return NULL;
+}
+// func_1000B1FC: the old pipeline parked form A at 20 because its loop end relocates as
+// D_800417B0+0xC rather than the alias D_800417BC. Same address, same bytes: the ROM gate
+// passes, so that 20 was a relocation-NAME artifact of the scorer, not a codegen difference.
 
 void func_1000B294(s32 *arg0) {
     struct151 *temp_v0;
@@ -66,24 +69,24 @@ void func_1000B294(s32 *arg0) {
 // NON-MATCHING: no idea.
 // struct151 * func_1000B294(s32 *arg0) {
 //     s32 i;
-//     struct151 *phi_v1;
+//     struct151 *entry;
 //     struct151 *tmp;
 //     struct151 *ret = NULL;
 //
 //     for (i = 0; i < 3; i++)
 //     {
-//         phi_v1 = &D_800417B0[i];
-//         ret = phi_v1;
-//         if (phi_v1)
+//         entry = &D_800417B0[i];
+//         ret = entry;
+//         if (entry)
 //         {
-//             if (arg0 == phi_v1->unk10)
+//             if (arg0 == entry->unk10)
 //             {
-//                 phi_v1->unk10 = phi_v1;
+//                 entry->unk10 = entry;
 //             }
-//             tmp = *phi_v1->unk60;
+//             tmp = *entry->unk60;
 //             if ((tmp) && (arg0 == tmp->unk10))
 //             {
-//                 phi_v1->unk10 = tmp;
+//                 entry->unk10 = tmp;
 //             }
 //         }
 //     }
@@ -692,32 +695,28 @@ s32 func_1000C7E8(s32 arg0, s32 arg1, f32 arg2, s32 arg3, f32 arg4) {
     return arg0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000C934.s")
-// NON-MATCHING: close but last part isn't quite right
-// s32 func_1000C934(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-//     s32 sp3C;
-//     s32 sp38;
-//     s32 temp_a1;
-//     s32 temp_t7;
-//
-//     sp3C = 0;
-//     temp_t7 = D_800DBFF0->unk5F0 & 1;
-//     if (temp_t7 != 0) {
-//         sp38 = 0x7FFF;
-//     } else {
-//         sp38 = 12000;
-//     }
-//     if ((D_800BE9F0 == 0x37) && (temp_t7 == 0)) {
-//         func_100114D0(2200, 1066, -1600, sp38, 3000, 1500, 0, &sp3C, 0);
-//         sp3C = sp38 - (sp3C & 0xFF00);
-//     }
-//     temp_a1 = sp3C;
-//     if ((sp3C != arg0) & 0xFFFF) {
-//         sp3C = temp_a1;
-//         func_1000E40C(84, sp3C);
-//     }
-//     return sp3C | 0x80000000;
-// }
+s32 func_1000C934(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+    s32 sp3C;
+    s32 sp38;
+    s32 temp_t7;
+
+    sp3C = 0;
+    temp_t7 = D_800DBFF0->unk5F0 & 1;
+    if (temp_t7 != 0) {
+        sp38 = 0x7FFF;
+    } else {
+        sp38 = 12000;
+    }
+    if ((D_800BE9F0 == 0x37) && (temp_t7 == 0)) {
+        func_100114D0(2200, 1066, -1600, sp38, 3000, 1500, 0, &sp3C, 0);
+        sp3C &= 0xFF00;
+        sp3C = sp38 - sp3C;
+    }
+    if ((sp3C != arg0) & 0xFFFF) {
+        func_1000E40C(84, sp3C);
+    }
+    return sp3C | 0x80000000;
+}
 
 s32 func_1000CA18(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     s32 tmp;
@@ -823,22 +822,22 @@ void func_1000CBF0(s32 arg0, s32 arg1, s32 arg2)
 
 // #pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000CC54.s")
 void func_1000CC54(s32 arg0) {
-    s32 phi_a3;
+    s32 volume;
     struct151 *temp_v0;
 
     temp_v0 = D_800417B0[arg0];
     if (temp_v0 != 0) {
-        phi_a3 = (((u32) (temp_v0->unk58 * ((u32) (temp_v0->unk4C * temp_v0->unk52) >> 0xF)) >> 0xF) * temp_v0->unk2C) >> 0xF;
-        if (phi_a3 != temp_v0->unk30) {
+        volume = (((u32) (temp_v0->unk58 * ((u32) (temp_v0->unk4C * temp_v0->unk52) >> 0xF)) >> 0xF) * temp_v0->unk2C) >> 0xF;
+        if (volume != temp_v0->unk30) {
             if (temp_v0->unk30 == 0) {
                 func_10008988(arg0, temp_v0->unk38 ^ 0xFFFF, 1);
             } else {
-                if (phi_a3 == 0) {
+                if (volume == 0) {
                     func_10008988(arg0, temp_v0->unk38 ^ 0xFFFF, 0);
                 }
             }
-            temp_v0->unk30 = phi_a3;
-            func_10008EE0(arg0, phi_a3);
+            temp_v0->unk30 = volume;
+            func_10008EE0(arg0, volume);
         }
     }
 }
@@ -1326,7 +1325,38 @@ void func_1000DEC4(void)
   while (var_s0 != ((struct137 *) D_80041E58));
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000DF68.s")
+void func_1000DF68(s32 arg0, s32 arg1, s32 arg2) {
+    struct151 *p;
+
+    p = func_1000B1FC(arg0);
+    if (p != NULL) {
+        p->unk4E = arg1;
+        if (arg2 == 1) {
+            p->unk4C = arg1;
+            if (p->unk0 >= 0) {
+                func_1000CC54(p->unk0);
+            }
+        }
+        if (arg2 >= 2) {
+            s32 rate;
+
+            rate = p->unk4C - arg1;
+            if (rate < 0) {
+                rate = -rate;
+            }
+            rate /= arg2;
+            if (rate <= 0) {
+                rate = 2;
+            } else if (rate >= 0x8000) {
+                rate = 0x7FFF;
+            }
+            p->unk50 = rate;
+        } else {
+            p->unk50 = 0x200;
+        }
+    }
+}
+
 
 void func_1000E054(s32 arg0, s32 arg1) {
     struct151 *sp1C;
@@ -1374,9 +1404,75 @@ s32 func_1000E134(s32 arg0) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000E17C.s")
+#define VOICE_TYPE(v) (((s32 *)&D_8002B074[(v)->unk4])[1] & ~0xF0)
+/* struct137's 0x60 word is a link to another voice (the shared header still pads it) */
+#define VOICE_LINK60(v) (*(struct137 **)&(v)->pad60)
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000E2F4.s")
+void func_1000E17C(void) {
+    s32 i;
+    struct137 *v;
+
+    for (i = 0; i < 12; i++) {
+        v = &D_800419A8[i];
+        if (v->unk4 > 0) {
+            if (((1 == VOICE_TYPE(v)) || (3 == VOICE_TYPE(v))) && (v->unk0 == -1)) {
+                v->unk4 = -1;
+            }
+        }
+    }
+    for (i = 0; i < 12; i++) {
+        v = &D_800419A8[i];
+        if (v->unk4 > 0) {
+            if ((VOICE_LINK60(v) != NULL) && (VOICE_LINK60(v)->unk4 == -1)) {
+                VOICE_LINK60(v) = NULL;
+            }
+            if ((v->unk10 != NULL) && (v->unk10->unk4 == -1)) {
+                v->unk10 = NULL;
+            }
+        }
+    }
+    for (i = 0; i < 12; i++) {
+        v = &D_800419A8[i];
+        if (v->unk4 > 0) {
+            if (((1 == VOICE_TYPE(v)) || (3 == VOICE_TYPE(v))) && (v->unk0 != -1)) {
+                func_1000DE1C(v->unk4, 4);
+            }
+        }
+    }
+}
+
+void func_1000E2F4(s32 arg0) {
+    struct151 *p;
+    s32 i;
+
+    for (i = 0; i < 3; i++) {
+        p = D_800417B0[i];
+        if (p == NULL) {
+            continue;
+        }
+        if (p->unk4 <= 0) {
+            continue;
+        }
+        if (p->unk15 != 0) {
+            continue;
+        }
+        if (arg0 != 0) {
+            func_10008EE0((u8)i, 0);
+            if ((((s32 *) &D_8002B074[D_800417B0[i]->unk4])[1] & 0x10) != 0) {
+                continue;
+            }
+            func_10008F58((u8)i);
+        } else {
+            if ((((s32 *) &D_8002B074[p->unk4])[1] & 0x10) == 0) {
+                func_100084D8((u8)i);
+                p = D_800417B0[i];
+            }
+            p->unk30 = -1;
+            func_1000CC54(i);
+        }
+    }
+    D_80041F00 = (u8) arg0;
+}
 
 void func_1000E40C(s32 arg0, s32 arg1) {
     struct151 *temp_v0;
@@ -1464,12 +1560,12 @@ s32 func_1000E588(s32 arg0, s32 arg1, s32 arg2) {
 
 s32 func_1000E654(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     struct151 *sp1C;
-    struct151 *phi_a0;
+    struct151 *owner;
 
     sp1C = func_1000B1FC(arg0);
-    phi_a0 = NULL;
+    owner = NULL;
     if (arg3 >= 0) {
-        phi_a0 = func_1000B1FC(arg3);
+        owner = func_1000B1FC(arg3);
     }
 
     if (sp1C != NULL) {
@@ -1481,8 +1577,8 @@ s32 func_1000E654(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
         }
         sp1C->unk24 = arg1;
         sp1C->unk20 = arg2;
-        if (phi_a0 != NULL) {
-            sp1C->unk10 = phi_a0;
+        if (owner != NULL) {
+            sp1C->unk10 = owner;
         }
         return 1;
     }
@@ -1587,7 +1683,34 @@ u8 func_1000E8F0(s32 arg0) {
 }
 
 // initialising with grim loops
-#pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000E934.s")
+/* D_800418B0 and D_800417C0 are [3][16] per-channel tables; variables.h types D_800418B0 as s32[]. */
+extern s32 D_800417C0[3][16];
+extern s32 D_800418A0[];
+extern s32 D_80041890[];
+extern s32 D_80041880[];
+
+void func_1000E934(void) {
+    u32 i;
+    s32 j;
+    s32 k;
+
+    for (i = 0; i < 3; i++) {
+        for (j = 0; j < 16; j++) {
+            ((s32 (*)[16])D_800418B0)[i][j] = 0x8000;
+            D_800417C0[i][j] = 0x100;
+        }
+        func_10008F24(i);
+        D_800417B0[i] = NULL;
+        D_800418A0[i] = 0;
+        D_80041890[i] = 0;
+        D_80041880[i] = 0;
+    }
+    bzero(D_800419A8, sizeof(D_800419A8));
+    D_800419A0 = 0;
+    for (k = 0; k < 12; k++) {
+        D_800419A8[k].unk4 = -1;
+    }
+}
 
 u16 func_1000EA94(s32 arg0) {
     u16 tmp;
