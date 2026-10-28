@@ -37,14 +37,101 @@ void func_151942E8(s32 arg0, s32 arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1C1150/func_15194394.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1C1150/func_15194408.s")
+typedef struct Game1C1150Event {
+    u8 pad0[4];
+    u8 type;
+} Game1C1150Event;
+
+typedef struct Game194408Packet {
+    s16 field00;
+    s16 field02;
+    s16 field04;
+    s16 field06;
+    f32 position[3];
+    f32 field14;
+    f32 field18;
+    f32 field1C;
+    f32 field20;
+    f32 field24;
+    f32 field28;
+    s16 field2C;
+    s16 field2E;
+    s16 field30;
+    s16 field32;
+    s16 field34;
+    s16 field36;
+    s16 field38;
+    s16 field3A;
+    u8 field3C;
+    u8 pad3D[3];
+    f32 field40;
+    s16 field44;
+    s16 field46;
+    s32 field48;
+} Game194408Packet;
+
+extern void func_15153F18(s16 *, void *, s32, s32, s32);
+extern void *func_151AE7B0(void *, f32, s16, u8, s32);
+
+void func_15194408(s32 arg0, Game1C1150Event *arg1) {
+    struct {
+        u8 scratch[0x24];
+        Game194408Packet packet;
+    } locals;
+
+    switch (arg1->type) {
+    case 0:
+        goto spawn;
+    case 1:
+        goto spawn;
+    case 2:
+        goto spawn;
+    case 3:
+        goto spawn;
+    case 4:
+        goto spawn;
+    }
+    return;
+
+spawn:
+    func_151AE7B0(arg1, 0.6f, 0x5A, 0xFF, 1);
+    func_1504715C((f32 *)locals.scratch, (struct127 *)arg1);
+    locals.packet.position[0] = *(f32 *)((u8 *)arg1 + 0x14);
+    locals.packet.position[1] = *(f32 *)((u8 *)arg1 + 0x18) + 50.0f;
+    locals.packet.position[2] = *(f32 *)((u8 *)arg1 + 0x1C);
+    locals.packet.field14 = 6.0f;
+    locals.packet.field2C = 0xC;
+    locals.packet.field2E = 5;
+    locals.packet.field02 = 0xFF;
+    locals.packet.field04 = -0x3F;
+    locals.packet.field00 = 0;
+    locals.packet.field06 = 0x23;
+    locals.packet.field30 = 3;
+    locals.packet.field32 = 2;
+    locals.packet.field34 = 0x1E;
+    locals.packet.field36 = 0x1E;
+    locals.packet.field38 = 0x64;
+    locals.packet.field3A = 0x64;
+    locals.packet.field44 = 0x10;
+    locals.packet.field46 = 0xF;
+    locals.packet.field48 = 0;
+    locals.packet.field3C = 0;
+    locals.packet.field18 = 3.0f;
+    locals.packet.field1C = 0.21f;
+    locals.packet.field20 = 0.406f;
+    locals.packet.field24 = 13.0f;
+    locals.packet.field28 = 8.0f;
+    locals.packet.field40 = 0.3f;
+    func_15153F18(&locals.packet.field00, &locals.packet.position,
+                   (s32)locals.scratch, 0xFF, 1);
+}
 
 extern void func_150C7020(s32, s32, s32, s32);
-extern void func_15194408(s32, s32);
+extern void func_15194408(s32, Game1C1150Event *);
 
 void func_15194588(s32 arg0, s32 arg1, s32 arg2) {
     func_150C7020(arg0, 0x1F4, 0xFF, 1);
-    func_15194408(arg0, arg1);
+    func_15194408(arg0, (Game1C1150Event *)arg1);
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1C1150/func_151945CC.s")
