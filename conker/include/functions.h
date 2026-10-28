@@ -1073,7 +1073,7 @@ void func_15083568(struct127*, s32, f32, s32);
 s32  func_15083E0C(u8);
 struct127 *func_15083E90(s32);
 void func_15085710(s16, s32, s32);
-s32  func_150859AC(s16 arg0, s32 arg1); // a guess
+s32  func_150859AC(s16 arg0, s16 arg1);
 void func_1508B20C(f32, f32, f32, f32);
 s32  func_150A29C8(s32, s32);
 void func_150A7CB0(f32 mtx[4][4], s32 x, s32 y, s32 z);

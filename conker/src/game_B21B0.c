@@ -88,31 +88,41 @@ u8 func_15085420(struct127 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_B21B0/func_15085710.s")
 
-// NEAR-MISS best 1220: the entire switch body (all 7 cases) is BYTE-PERFECT. Two blockers:
-//   (1) HEADER TYPE: functions.h declares `func_150859AC(s16, s32)` but the target sign-
-//       extends AND homes arg1 as a 16-bit param (sw a1,4(sp); sll;sra) — i.e. arg1 must be
-//       s16. Can't redeclare (header conflict). `arg1=(s16)arg1` gives the sll/sra but not the
-//       arg-home; `switch((s16)arg1)` gives an andi mask instead of sign-extend. The header's
-//       s32 arg1 is the root blocker (also drives bnezl vs bnez + duplicated sltiu in the guard).
-//   (2) JUMP TABLE: IDO generates the switch jtbl as anonymous `.rodata`; the golden object
-//       references a named `jtbl_8009D9A0` — object-level rodata symbol mismatch in this
-//       per-function GLOBAL_ASM setup.
-// Reconstruction (needs functions.h fixed to s16 arg1, plus jtbl rodata handling):
-//   extern s32 D_800D213C, D_800D2140, D_800D2148; extern s8 D_800D2144, D_800D2145;
-//   extern u8 D_800D2146; // D_800D2340 is u16 (header says s16 -> read via *(u16*)&)
-//   s32 func_150859AC(s16 arg0, s16 arg1) {
-//     if (arg0 >= 0xFF) return 0;
-//     switch (arg1) {
-//       case 0: return *(u16*)&D_800D2340 & (1 << arg0);
-//       case 1: return *(s32*)((u8*)&D_800D213C + arg0*0x1C);
-//       case 2: return *(s32*)((u8*)&D_800D2140 + arg0*0x1C);
-//       case 3: return *(s8 *)((u8*)&D_800D2144 + arg0*0x1C);
-//       case 4: return *(s8 *)((u8*)&D_800D2145 + arg0*0x1C);
-//       case 5: return *(u8 *)((u8*)&D_800D2146 + arg0*0x1C);
-//       case 6: return *(s32*)((u8*)&D_800D2148 + arg0*0x1C);
-//     } // falls off end (default returns garbage v0, matches target)
-//   }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_B21B0/func_150859AC.s")
+/* Fields recovered from the shared 0x1C-byte player records. */
+typedef struct GameB21B0PlayerRecord {
+    s32 field_0;
+    s32 field_4;
+    s8 field_8;
+    s8 field_9;
+    u8 field_A;
+    u8 padB;
+    s32 field_C;
+    u8 pad10[0xC];
+} GameB21B0PlayerRecord;
+
+extern GameB21B0PlayerRecord D_800D213C[];
+
+s32 func_150859AC(s16 arg0, s16 arg1) {
+    if (arg0 >= 0xFF) {
+        return 0;
+    }
+    switch (arg1) {
+    case 0:
+        return *(u16 *)&D_800D2340 & (1 << arg0);
+    case 1:
+        return D_800D213C[arg0].field_0;
+    case 2:
+        return D_800D213C[arg0].field_4;
+    case 3:
+        return D_800D213C[arg0].field_8;
+    case 4:
+        return D_800D213C[arg0].field_9;
+    case 5:
+        return D_800D213C[arg0].field_A;
+    case 6:
+        return D_800D213C[arg0].field_C;
+    }
+}
 
 void func_15085ABC(s16 arg0) {
     s32 i;
