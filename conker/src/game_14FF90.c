@@ -741,7 +741,19 @@ s32 func_15125490(struct108 *arg0) {
 //     arg0->unk670 = 0.0f;
 //     arg0->unk3D0 = &D_800CC2D0[arg1];
 // }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_151254F4.s")
+void func_151254F4(void *arg0, s32 arg1) {
+    f32 scale;
+
+    scale = 0.01745329238474369f;
+    *(f32 *)((u8 *)arg0 + 0x3A0) = *(f32 *)((u8 *)arg0 + 0x380) * scale;
+    *(f32 *)((u8 *)arg0 + 0x398) = *(f32 *)((u8 *)arg0 + 0x388) * scale;
+    func_15124AB4(arg0);
+    func_151239CC(arg0, 1);
+    *((u8 *)*(void **)((u8 *)arg0 + 0x3D4) + 0x198) = 0;
+    *(s16 *)((u8 *)arg0 + 0x73C) = 0;
+    *(void **)((u8 *)arg0 + 0x3D0) = (void *)((u32)D_800CC2D0 + (u32)arg1 * 0x32CU);
+    *(f32 *)((u8 *)arg0 + 0x670) = 0.0f;
+}
 // NON-MATCHING: first statements in wrong order
 // void func_151254F4(struct108 *arg0, s32 arg1) {
 //     f32 tmp = D_800A352C;
