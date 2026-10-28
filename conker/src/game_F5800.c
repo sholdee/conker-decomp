@@ -39,9 +39,6 @@ typedef struct {
 } Struct150C8350;
 
 void func_150C8350(void) {
-    Struct150C8350 *volatile *recordsPtr;
-    volatile s32 *stepPtr;
-    volatile u8 *scalePtr;
     Struct150C8350 *record;
     register s32 offset;
     s32 clamp;
@@ -54,15 +51,12 @@ void func_150C8350(void) {
     s32 step;
     s32 value;
 
-    scalePtr = &D_800BE9A0;
-    stepPtr = &D_800BE9E4;
-    recordsPtr = (Struct150C8350 *volatile *)&D_800BE4E0;
     clamp = 0x4FF;
     max = 0x500;
     record = (Struct150C8350 *)0;
 
     for (offset = (s32)record; offset != 0x64; offset += sizeof(Struct150C8350)) {
-        record = (Struct150C8350 *)((u8 *)*recordsPtr + offset);
+        record = (Struct150C8350 *)((u8 *)D_800BE4E0 + offset);
         current = record->unk6;
         target = record->unk8;
         if (current != target) {
@@ -72,12 +66,12 @@ void func_150C8350(void) {
             }
 
             diff = adjustedTarget - current;
-            step = *stepPtr << 4;
+            step = D_800BE9E4 << 4;
             absDiff = (diff < 0) ? -diff : diff;
 
             if (absDiff < step) {
                 record->unk6 = adjustedTarget;
-                record = (Struct150C8350 *)((u8 *)*recordsPtr + offset);
+                record = (Struct150C8350 *)((u8 *)D_800BE4E0 + offset);
                 current = record->unk6;
             } else {
                 if (diff < 0) {
@@ -87,29 +81,29 @@ void func_150C8350(void) {
                 }
                 value = step * diff;
                 record->unk6 = current + value;
-                record = (Struct150C8350 *)((u8 *)*recordsPtr + offset);
+                record = (Struct150C8350 *)((u8 *)D_800BE4E0 + offset);
                 current = record->unk6;
             }
         }
 
-        record->unk4 += (current * record->unk2) * *scalePtr;
-        record = (Struct150C8350 *)((u8 *)*recordsPtr + offset);
+        record->unk4 += (current * record->unk2) * D_800BE9A0;
+        record = (Struct150C8350 *)((u8 *)D_800BE4E0 + offset);
         value = record->unk4;
         if (value >= max) {
             record->unk4 = value - max;
-            record = (Struct150C8350 *)((u8 *)*recordsPtr + offset);
+            record = (Struct150C8350 *)((u8 *)D_800BE4E0 + offset);
             record->unk4 = max - record->unk4;
-            record = (Struct150C8350 *)((u8 *)*recordsPtr + offset);
+            record = (Struct150C8350 *)((u8 *)D_800BE4E0 + offset);
             record->unk2 = -record->unk2;
-            record = (Struct150C8350 *)((u8 *)*recordsPtr + offset);
+            record = (Struct150C8350 *)((u8 *)D_800BE4E0 + offset);
             if (record->unk4 >= max) {
                 record->unk4 = clamp;
             }
         } else if (value < 0) {
             record->unk4 = -value;
-            record = (Struct150C8350 *)((u8 *)*recordsPtr + offset);
+            record = (Struct150C8350 *)((u8 *)D_800BE4E0 + offset);
             record->unk2 = -record->unk2;
-            record = (Struct150C8350 *)((u8 *)*recordsPtr + offset);
+            record = (Struct150C8350 *)((u8 *)D_800BE4E0 + offset);
             if (record->unk4 < 0) {
                 record->unk4 = 0;
             }
@@ -126,7 +120,38 @@ void func_150C84F4(s32 arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_F5800/func_150C851C.s")
+void func_150CDB6C(s32);
+
+void func_150C851C(s32 arg0) {
+    s32 i;
+    s32 val;
+    s32 lo;
+    s32 range;
+
+    if (D_800BE4E0 != 0) {
+        func_150CDB6C(arg0);
+        range = ((arg0 * 50) >> 8) + 50;
+        lo = (arg0 * 300) >> 8;
+        for (i = 0; i < 10; i++) {
+            val = lo;
+            val += (u32)func_150ADA20() % range;
+            ((Struct150C8350 *)D_800BE4E0)[i].unk8 = val;
+        }
+    }
+}
+
+
+typedef struct {
+    u8 unk0;
+    u8 pad1[3];
+    s16 unk4;
+    s16 unk6;
+    s16 unk8;
+} Struct150C8600;
+
+extern s32 D_80090230[5];
+extern s32 D_80090244[5];
+extern s32 func_1510D0EC(s32, s32 *, s32, s32);
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_F5800/func_150C8600.s")
 
@@ -453,7 +478,7 @@ s32 func_150CAA04(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5,
 }
 
 s32 func_150CAC28(f32 *arg0, s32 arg1) {
-    volatile f32 *scale;
+    f32 *scale;
     s32 i;
 
     scale = (f32 *)((u8 *)arg0 + 0xA8);
