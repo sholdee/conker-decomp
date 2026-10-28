@@ -1192,7 +1192,54 @@ s32 func_100112BC(s32 arg0, s32 arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_10011310.s")
+typedef struct {
+    u16 value;
+    u8 operation;
+    u8 index;
+} SoundQueueEntry;
+
+#define SQ_D_80041F10 ((SoundQueueEntry *)D_80041F10)
+#define SQ_D_80041F50 (*(s32 *)&D_80041F50)
+
+void func_10011310(void) {
+    s32 i;
+    s32 j;
+    s32 flag;
+    s32 remaining;
+    s32 idx;
+    struct31 *state;
+
+    flag = 0;
+    j = 0;
+    remaining = SQ_D_80041F50;
+    for (i = 0; i < SQ_D_80041F50; i++) {
+        if (SQ_D_80041F10[i].operation > 0) {
+            SQ_D_80041F10[i].operation--;
+        } else {
+            idx = SQ_D_80041F10[i].index;
+            if (D_800425E0[idx].unk0 == SQ_D_80041F10[i].value) {
+                state = D_800425E0[idx].unk8;
+                D_800425E0[idx].unk0 = 0;
+                D_800425E0[idx].unk4 = 0;
+                if (state != NULL) {
+                    func_10017594(state);
+                }
+                D_800425E0[idx].unk8 = NULL;
+            }
+            remaining--;
+            flag = 1;
+        }
+        if (j != i) {
+            SQ_D_80041F10[j] = SQ_D_80041F10[i];
+        }
+        if (flag) {
+            j++;
+        } else {
+            flag = 0;
+        }
+    }
+    SQ_D_80041F50 = remaining;
+}
 
 s32 func_1001147C(u16 arg0) {
     struct120 *tmp;
