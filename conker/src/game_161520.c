@@ -1108,7 +1108,57 @@ void func_15138BC0(struct102 *arg0, u8 arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_1513A24C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_1513A48C.s")
+typedef struct {
+    s32 x;
+    s32 y;
+    s32 z;
+} Vec3i_A48C;
+
+typedef struct {
+    s32 field_0;
+    s32 field_4;
+    Vec3i_A48C position;
+    s16 field_14;
+    s16 field_16;
+    s16 field_18;
+    s16 field_1A;
+    f32 field_1C;
+    f32 field_20;
+    f32 field_24;
+    f32 field_28;
+    s16 field_2C;
+    s16 field_2E;
+    f32 field_30;
+    f32 field_34;
+    f32 field_38;
+} BloodA48CConfig;
+
+void func_15152190(void *, void *, void *, s32, f32, s32, s32, s32);
+extern u8 D_800A4260[];
+extern u8 D_800A4264[];
+
+void func_1513A48C(void *arg0, u8 arg1, s32 arg2) {
+    BloodA48CConfig config;
+
+    config.field_0 = 8;
+    config.field_4 = 4;
+    config.position = *(Vec3i_A48C *)arg0;
+    config.field_14 = 0;
+    config.field_16 = 0xFF;
+    config.field_18 = -0x37;
+    config.field_1A = 0x20;
+    config.field_2C = 0x28;
+    config.field_2E = 0x14;
+    config.field_30 = 0.07f;
+    config.field_34 = 0.07f;
+    config.field_1C = 10.0f;
+    config.field_20 = 9.0f;
+    config.field_24 = -1.0040001f;
+    config.field_28 = 0.254f;
+    config.field_38 = 23.446001f;
+    func_15152190(&config, D_800A4260, D_800A4264, 1, 0.0f, 1,
+                  (s32)arg1, arg2);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_1513A594.s")
 
