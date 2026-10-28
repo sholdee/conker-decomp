@@ -1745,7 +1745,80 @@ void func_15071A64(s32 arg0) {
         func_151DC484(&tmp.unk24, &tmp, 0, 0xFF, 1);
     }
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_15071B18.s")
+typedef struct Game981E0EffectPoint {
+    f32 values[3];
+} Game981E0EffectPoint;
+
+typedef struct Game981E0SmokeConfig {
+    s32 kind;
+    s32 count;
+    Game981E0EffectPoint position;
+    s16 zero14;
+    s16 alpha;
+    s16 minimum;
+    s16 maximum;
+    f32 size0;
+    f32 size1;
+    f32 range0;
+    f32 range1;
+    s16 lifetime;
+    s16 rate;
+    f32 value0;
+    f32 value1;
+    f32 value2;
+} Game981E0SmokeConfig;
+
+void func_151DC260(f32 *, void *, s32, s32, s32);
+void func_15152190(void *, void *, void *, s32, f32, s32, s32, s32);
+extern f32 D_80099BC8[3][3];
+extern u8 D_80099BEC[];
+extern u8 D_80099C04[];
+extern f32 D_80099F34;
+extern f32 D_80099F38;
+extern f32 D_80099F3C;
+extern f32 D_80099F40;
+extern f32 D_80099F44;
+
+void func_15071B18(s32 arg0) {
+    Game981E0EffectPoint point;
+    u8 collision[0x24];
+
+    if ((*(s32 *)((u8 *)D_800D154C + 0x1D4) != 0) &&
+        ((((u8 *)D_800D154C)[0x74] & 0xF) != 0xF)) {
+        func_15143134(D_80099BC8[func_150ADA20() % 3U], point.values,
+                      *(s32 *)((u8 *)D_800D154C + 0x1D4) + 0x1C0);
+        func_1504715C(collision, D_800D154C);
+        if (func_150ADA20() & 1) {
+            if (func_150ADA20() & 1) {
+                func_151DC260(point.values, collision, 0, 0xFF, 1);
+            } else {
+                func_151DC484(point.values, (struct199 *)collision, 0, 0xFF, 1);
+            }
+        }
+        if (func_150ADA20() & 1) {
+            Game981E0SmokeConfig config;
+
+            config.kind = 8;
+            config.count = 5;
+            config.position = point;
+            config.zero14 = 0;
+            config.alpha = 0xFF;
+            config.minimum = -0x40;
+            config.maximum = 0x3C;
+            config.size0 = 10.0f;
+            config.size1 = 10.0f;
+            config.lifetime = 0x19;
+            config.rate = 0x14;
+            config.range0 = D_80099F34;
+            config.range1 = D_80099F38;
+            config.value0 = D_80099F3C;
+            config.value1 = D_80099F40;
+            config.value2 = D_80099F44;
+            func_15152190(&config, D_80099BEC, D_80099C04,
+                          6, 25.0f, 0, 0xFF, 1);
+        }
+    }
+}
 
 void func_15071D08(s32 arg0) {
     func_150F2230(D_800D154C, 0xFF, 1);
