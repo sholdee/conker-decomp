@@ -558,7 +558,25 @@ void func_15107A20(struct127 *arg0, s32 arg1, s32 arg2, struct Vec15107A20 *arg3
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_133190/func_15107AE0.s")
+void func_15107AE0(struct Vec15107A20 *arg0, struct Vec15107A20 *arg1, struct Vec15107A20 *arg2, struct Vec15107A20 *arg3) {
+    f32 *start = (f32 *)arg0;
+    f32 *end = (f32 *)arg1;
+    f32 *first = (f32 *)arg2;
+    f32 *second = (f32 *)arg3;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+
+    dx = end[0] - start[0];
+    dy = end[1] - start[1];
+    dz = end[2] - start[2];
+    first[0] = start[0] + dx * 0.333f;
+    first[1] = start[1] + dy * 0.333f;
+    first[2] = start[2] + dz * 0.333f;
+    second[0] = start[0] + dx * 0.6667f;
+    second[1] = start[1] + dy * 0.6667f;
+    second[2] = start[2] + dz * 0.6667f;
+}
 
 extern void func_1515C244(struct127 *, f32 *, f32 *, f32 *);
 extern void func_15143794(s32, s32, f32, f32 *);
