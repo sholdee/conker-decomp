@@ -1127,7 +1127,74 @@ next_record:
         } while ((index < *count) && (index < end));
     }
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_10011BB8.s")
+typedef struct {
+    u8 pad0[0x2C];
+    u32 flags;
+    u8 pad30[0x274];
+    f32 field2A4;
+    f32 field2A8;
+    f32 field2AC;
+    u8 pad2B0[0x48];
+    f32 field2F8;
+    f32 field2FC;
+    f32 field300;
+    u8 pad304[0x7C];
+    f32 field380;
+    u8 pad384[0x61C];
+} SoundListenerState;
+
+void func_10011310(void);
+
+void func_10011BB8(void) {
+    s32 index;
+    s32 kept;
+    s32 delta;
+
+    if ((D_80041F60 == 0) && (D_80041F61 == 0)) {
+        for (index = 0; index <= D_80082FA0; index++) {
+            SoundListenerState *current = &((SoundListenerState *)D_800DBFF0)[index];
+
+            if ((D_80082FA0 != 0) || (current->flags & 0x80000)) {
+                SPATIAL[index].x0 = (s32)current->field2F8;
+                SPATIAL[index].y4 = (s32)current->field2FC;
+                SPATIAL[index].z8 = (s32)current->field300;
+            } else {
+                SPATIAL[index].x0 = (s32)current->field2A4;
+                SPATIAL[index].y4 = (s32)current->field2A8;
+                SPATIAL[index].z8 = (s32)current->field2AC;
+            }
+            SPATIAL[index].xC = (s32)current->field2F8;
+            SPATIAL[index].y10 = (s32)current->field2FC;
+            SPATIAL[index].z14 = (s32)current->field300;
+            SPATIAL[index].field18 = current->field380;
+        }
+        func_10011310();
+        func_10011624(D_80041FE0, &D_80042760, 0, D_80042760);
+        for (index = 0, kept = 0; index < D_80042760; index++) {
+            D_80041FE0[kept] = D_80041FE0[index];
+            if (!(D_80041FE0[kept].unk10 & 0x80)) {
+                kept++;
+            }
+        }
+        D_80042760 = kept;
+    }
+    if ((D_80041F54 != D_80041FDC) || (D_80041F60 != D_80041F61)) {
+        if (D_80041F61 == 1) {
+            func_10017780(0, 0);
+            func_10017780(1, 0);
+        } else {
+            func_10017780(0, D_80041F54);
+            func_10017780(1, ((u16 *)&D_80041F54)[1]);
+            delta = (s32)((f32)(D_80041FDC - D_80041F54) * D_80041F58);
+            if (delta != 0) {
+                D_80041F54 += delta;
+            } else {
+                D_80041F54 = D_80041FDC;
+            }
+        }
+        D_80041F60 = D_80041F61;
+    }
+}
 
 void func_10011E88(s32 arg0) {
 }
