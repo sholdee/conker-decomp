@@ -1593,7 +1593,62 @@ void func_15062BDC(struct127 *arg0, f32 arg1, f32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_15062D10.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_15062E24.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_15062FC0.s")
+typedef struct Game83300MorphVertex {
+    u8 pad0[8];
+    s16 x;
+    s16 y;
+    u8 padC[4];
+} Game83300MorphVertex;
+
+typedef struct Game83300MorphObject {
+    u8 pad0[4];
+    u8 modelIndex;
+    u8 pad5[0x1C3];
+    u8 channel;
+    u8 pad1C9[0xC3];
+    Game83300MorphVertex *buffers[4];
+} Game83300MorphObject;
+
+extern s32 *D_800C4020[];
+
+void func_15062FC0(Game83300MorphObject *arg0, s32 arg1, u8 arg2,
+                   s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
+    u8 *channelBase;
+    Game83300MorphVertex *source;
+    Game83300MorphVertex *target;
+    s32 offset;
+    s32 i;
+
+    channelBase = (u8 *)arg0 + (arg0->channel * 8);
+    target = ((Game83300MorphVertex **)(channelBase + 0x28C))[D_800BE9C0];
+    source = ((Game83300MorphVertex **)(channelBase + 0x28C))[!D_800BE9C0];
+    if (target == 0) {
+        return;
+    }
+    if (arg1 != -1) {
+        offset = D_800C4020[arg0->modelIndex][arg1] * 0x10;
+        target = (Game83300MorphVertex *)((u8 *)target + offset);
+        source = (Game83300MorphVertex *)((u8 *)source + offset);
+    }
+    if (arg6 != 0) {
+        if (arg3 < target->x) {
+            arg6 -= arg3;
+        } else if (target->x < 0) {
+            arg6 += arg3;
+        }
+    }
+    if (arg7 != 0) {
+        if (arg4 < target->y) {
+            arg7 -= arg4;
+        } else if (target->y < 0) {
+            arg7 += arg4;
+        }
+    }
+    for (i = 0; i < arg5; i++) {
+        target[i].x = source[i].x + arg6;
+        target[i].y = source[i].y + arg7;
+    }
+}
 void func_15194FF4(struct127 *, struct127 *, s32);
 
 void func_15063168(struct127 *arg0) {
