@@ -17,7 +17,28 @@ typedef struct Func15105C24Obj {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_131F30/func_15104C44.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_131F30/func_15104FF8.s")
+s32 func_1000FD38();
+
+void func_15104FF8(struct207 *arg0, s32 arg1, u8 arg2) {
+    struct206 *m = (struct206 *)&arg0->unk28;
+    if ((arg2 == 0x38) && (m->unk0->unk14 == 1)) {
+        *(s16 *)((u8 *)m + 8) = 300;
+        func_1000FD38(func_1000EF40, (struct205 *)((s32)m->unk0), 0);
+        func_1000FA64(
+            0x236,
+            ((s16 *)m->unk0)[0],
+            ((s16 *)m->unk0)[1],
+            ((s16 *)m->unk0)[2],
+            0x4000,
+            0x5DC,
+            0x3E8,
+            (s32)func_1000EF40,
+            m->unk0,
+            0,
+            8,
+            0);
+    }
+}
 
 typedef struct {
     f32 x, y, z;
