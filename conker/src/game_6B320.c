@@ -250,7 +250,75 @@ void func_1503E82C(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_6B320/func_1503EB78.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_6B320/func_1503ECA0.s")
+typedef struct {
+    u8 pad_0[0x1EC];
+    f32 field_1EC;
+} func_1503ECA0_Entity;
+
+typedef struct {
+    func_1503ECA0_Entity *entity;
+    u8 pad_4[8];
+    s16 field_C;
+    u8 pad_E[2];
+} func_1503ECA0_Slot;
+
+void func_1510F800(s32);
+s32 func_1510F8D8(s32, s32, s32, s32);
+
+void func_1503ECA0(s32 arg0) {
+    func_1503ECA0_Entity *entity;
+    func_1503ECA0_Slot *slot;
+    f32 smallScale;
+    f32 largeScale;
+    f32 floor;
+    f32 velocityY;
+    s32 index;
+    s32 offset;
+    u8 *particle;
+    s32 count;
+
+    func_1510F800(0);
+    slot = &((func_1503ECA0_Slot *)D_800C6660)[arg0];
+    index = 0;
+    count = D_80098914[slot->pad_E[0]];
+    offset = 0;
+    if (count > 0) {
+        smallScale = 0.4f;
+        largeScale = 0.8f;
+        do {
+            entity = slot->entity;
+            if (*((u8 *)slot->entity + offset + 0x64) != 0) {
+                particle = (u8 *)entity + offset;
+                if (D_80084454[slot->pad_E[0]][index] == -1 && *(f32 *)(particle + 0x60) != 0.0f) {
+                    floor = func_1510F8D8((s32)*(f32 *)(particle + 0x24), (s32)*(f32 *)(particle + 0x28),
+                                          (s32)*(f32 *)(particle + 0x2C), 0) + 5;
+                    if (*(f32 *)(particle + 0x28) < floor) {
+                        velocityY = *(f32 *)(particle + 0x4C);
+                        *(f32 *)(particle + 0x28) = floor;
+                        if (velocityY < -4.0f) {
+                            *(f32 *)(particle + 0x48) = *(f32 *)(particle + 0x48) * largeScale;
+                            *(f32 *)(particle + 0x4C) = velocityY * -0.5f;
+                            *(f32 *)(particle + 0x50) = *(f32 *)(particle + 0x50) * largeScale;
+                            *(f32 *)(particle + 0x54) = *(f32 *)(particle + 0x54) * -1.0f;
+                            *(f32 *)(particle + 0x58) = *(f32 *)(particle + 0x58) * smallScale;
+                            *(f32 *)(particle + 0x5C) = *(f32 *)(particle + 0x5C) * -1.0f;
+                        } else {
+                            *(f32 *)(particle + 0x5C) = 0.0f;
+                            *(f32 *)(particle + 0x58) = 0.0f;
+                            *(f32 *)(particle + 0x54) = 0.0f;
+                            *(f32 *)(particle + 0x60) = 0.0f;
+                            *(f32 *)(particle + 0x50) = 0.0f;
+                            *(f32 *)(particle + 0x4C) = 0.0f;
+                            *(f32 *)(particle + 0x48) = 0.0f;
+                        }
+                    }
+                }
+            }
+            index++;
+            offset += 0x68;
+        } while (index != count);
+    }
+}
 
 void func_1503EEB8(void) {
 }
