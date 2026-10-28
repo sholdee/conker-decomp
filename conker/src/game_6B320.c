@@ -348,7 +348,58 @@ void func_1503E82C(s32 arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_6B320/func_1503EA54.s")
+struct func_1503EA54_part {
+    u8 pad0[0x24];
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    f32 unk30;
+    f32 unk34;
+    f32 unk38;
+    u8 pad3C[0xC];
+    f32 unk48;
+    f32 unk4C;
+    f32 unk50;
+    f32 unk54;
+    f32 unk58;
+    f32 unk5C;
+    f32 unk60;
+    u8 unk64;
+    u8 pad65[0x3];
+};
+
+
+void func_1503EA54(s32 arg0) {
+    struct func_1503EA54_part *part;
+    s32 count;
+    s32 i;
+    f32 dt;
+
+    count = D_80098914[*(u8 *)&D_800C6660[arg0].pad[2]];
+    dt = D_800BE9E4;
+    for (i = 0; i < count; i++) {
+        if (((struct func_1503EA54_part *)D_800C6660[arg0].unk0)[i].unk64 == 0) {
+            continue;
+        }
+        if (D_80084454[*(u8 *)&D_800C6660[arg0].pad[2]][i] != -1) {
+            continue;
+        }
+        part = &((struct func_1503EA54_part *)D_800C6660[arg0].unk0)[i];
+        part->unk24 += part->unk48 * dt;
+        part->unk28 += part->unk4C * dt;
+        part->unk2C += part->unk50 * dt;
+        part->unk30 += part->unk54 * dt;
+        part->unk34 += part->unk58 * dt;
+        part->unk38 += part->unk5C * dt;
+        part->unk4C += part->unk60 * dt;
+    }
+}
+
+/* The ROM has 8 bytes of `jr ra; nop` between func_1503EA54 and func_1503EB78; splat has
+ * no symbol for them so they fold into func_1503EA54's size. They are an empty leaf
+ * function (same shape as game_1A5440.c func_15178750_pad). */
+static void func_1503EB70(void) {
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_6B320/func_1503EB78.s")
 
