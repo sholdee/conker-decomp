@@ -726,7 +726,17 @@ void func_15076D04(void) {
 //     D_800D154C->unk158 = D_800D154C->y_scale;
 //     func_15062BDC(D_800D154C, D_800D154C->xz_scale, D_800D154C->y_scale);
 // }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_15076D3C.s")
+void func_15076D3C(void) {
+    f32 scale = 0.01f;
+    s16 x = D_800D1890 | (D_800D1891 << 8);
+    s16 y = D_800D1892 | (D_800D1893 << 8);
+
+    *(f32 *) ((u8 *) D_800D154C + 0x14C) = (f32) x * scale;
+    *(f32 *) ((u8 *) D_800D154C + 0x150) = (f32) y * scale;
+    *(f32 *) ((u8 *) D_800D154C + 0x154) = *(f32 *) ((u8 *) D_800D154C + 0x14C);
+    *(f32 *) ((u8 *) D_800D154C + 0x158) = *(f32 *) ((u8 *) D_800D154C + 0x150);
+    func_15062BDC(D_800D154C, *(f32 *) ((u8 *) D_800D154C + 0x14C), *(f32 *) ((u8 *) D_800D154C + 0x150));
+}
 
 void func_15076DF4(void) {
     D_800D154C->interaction_state = D_800D1890;
