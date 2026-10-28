@@ -1,6 +1,11 @@
 #include <ultra64.h>
-
+#define func_1000F85C func_1000F85C_hdr
+#define func_1000EDA0 func_1000EDA0_hdr
+#define func_1000EE70 func_1000EE70_hdr
 #include "functions.h"
+#undef func_1000F85C
+#undef func_1000EDA0
+#undef func_1000EE70
 #include "variables.h"
 
 s32 func_10010E78(s32 arg0, s32 arg1, u16 arg2, s16 arg3, u8 arg4,
@@ -150,8 +155,64 @@ s32 func_1000ECCC(struct_init_EB00_1000ECCC *arg0, s32 arg1, s32 arg2, s32 arg3,
 //     return 0;
 // }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_1000EDA0.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_1000EE70.s")
+s32 func_1000EDA0(struct_init_EB00_1000ECCC *arg0, s32 arg1, s32 arg2, s32 arg3,
+                  s32 arg4, s32 arg5, u16 *arg6) {
+    s16 temp_a1;
+    s32 temp_v1;
+
+    temp_v1 = arg0->unk18.w;
+    temp_a1 = temp_v1;
+    if (*arg6 != 0) {
+        arg0->unk18.w = (*arg6 << 16) | (temp_v1 & 0xFFFF);
+        arg0->unk0 = 0;
+        *arg6 = 0;
+        temp_v1 = arg0->unk18.w;
+    }
+    temp_a1 -= D_800BE9E4;
+    if (temp_a1 <= 0) {
+        *arg6 = temp_v1 >> 16;
+        arg0->unk0 = *arg6;
+        func_10010630(*arg6, arg0->unk1C, arg0->unkC, arg0->unkA, arg0->unk8);
+        return 1;
+    }
+    arg0->unk18.w = (temp_v1 & 0xFFFF0000) | temp_a1;
+    return 0;
+}
+
+
+typedef struct {
+    u8 pad0[2];
+    s16 unk2;
+    s16 unk4;
+    s16 unk6;
+    u8 pad8[0x10];
+    struct127 *unk18;
+    s32 unk1C;
+    u8 pad20[4];
+    u16 unk24;
+} struct_init_EB00_EE70;
+
+s32 func_1000EE70(struct_init_EB00_EE70 *arg0, s32 arg1, s32 *arg2, s32 arg3, s32 arg4, s32 *arg5) {
+    struct127 *obj;
+    u8 uid;
+
+    if ((obj = arg0->unk18) != 0) {
+        if (*arg2 != 0) {
+            uid = arg0->unk1C & 0xFF;
+            if ((obj->interaction_state != 0) && (uid == obj->unique_id)) {
+                *arg5 = (((u32) obj->unk184 >> 3) & 0x30) << 1;
+                arg0->unk2 = (s16) obj->x_position;
+                arg0->unk4 = (s16) obj->y_position;
+                arg0->unk6 = (s16) obj->z_position;
+                return 0;
+            }
+            if (func_1000F44C(arg0->unk24) == 0) {
+                return 0;
+            }
+        }
+    }
+    return 1;
+}
 
 s32 func_1000EF40(struct57 *arg0, struct57 *arg1, s32 *arg2, s32 arg3, s32 arg4, s32 arg5, u16 *arg6) {
     if (arg0->unk10 & 0x80) {
@@ -282,9 +343,63 @@ s32 func_1000F4D8(u16 arg0)
   return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_1000F568.s")
+s32 func_1000F568(s32 arg0, s32 arg1) {
+    s32 r;
+    s32 i;
+    u8 bits;
+    u8 cur;
+    s32 mask;
+
+    r = func_150ADA20() % (u32)arg1;
+    i = r;
+    if (arg0 >= 0x6E2) {
+        return 1;
+    }
+    if (arg1 < 2) {
+        return arg0;
+    }
+    if (D_80041F5C != NULL) {
+        bits = ((u8 *)D_80041F5C)[arg0];
+        if (arg1 < 8) {
+            mask = (1 << arg1) - 1;
+            if (!(bits & 0x80) || !(bits & mask)) {
+                bits = 0xFF;
+            }
+            while (!(bits & (1 << i))) {
+                i = (i + 1) % arg1;
+            }
+            cur = bits ^ (1 << i);
+            ((u8 *)D_80041F5C)[arg0] = cur;
+            if (!(cur & mask)) {
+                ((u8 *)D_80041F5C)[arg0] = bits ^ mask;
+            }
+        } else {
+            ((u8 *)D_80041F5C)[arg0] = r + 1;
+        }
+    }
+    return arg0 + i;
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_1000F6B8.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_1000F85C.s")
+typedef struct {
+    struct31 *unk0;
+    u8 pad4[8];
+} struct_init_EB00_425E8;
+extern struct_init_EB00_425E8 D_800425E8[];
+
+void func_1000F85C(u16 arg0, s16 arg1, s32 arg2) {
+    if (arg0 < 0x10) {
+        return;
+    }
+    if (func_1000F3D0(arg0) != 0) {
+        if (arg1 == 0x10) {
+            f32 sp1C = alCents2Ratio(arg2);
+            arg2 = *(s32 *)&sp1C;
+        } else if (arg1 == 0x11) {
+            arg1 = 0x10;
+        }
+        func_10017714((s32) D_800425E8[arg0 & 0xF].unk0, arg1, arg2);
+    }
+}
 
 void func_1000F91C(u16 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4,
                    s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9) {
@@ -356,9 +471,74 @@ u16 func_1000FA64(u16 arg0, s16 arg1, s16 arg2, s16 arg3, s32 arg4,
     }
     return 0;
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_1000FC18.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_1000FD38.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_1000FDF4.s")
+typedef struct {
+    u16 unk0;
+    s16 unk2;
+    s16 unk4;
+    s16 unk6;
+    u16 unk8;
+    u8 padA[6];
+    s32 unk10;
+    u8 pad14[0x10];
+    u16 unk24;
+    u8 pad26[0xA];
+} struct_init_EB00_FC18;
+
+void func_1000FC18(u16 arg0, s16 arg1, s16 arg2, s16 arg3, u16 arg4) {
+    s32 id;
+    s32 x;
+    s32 y;
+    s32 z;
+    s32 i;
+    struct_init_EB00_FC18 *ptr;
+    u16 handle;
+
+    id = arg0;
+    x = arg1;
+    y = arg2;
+    z = arg3;
+    for (i = 0; i < D_80042760; i++) {
+        ptr = (struct_init_EB00_FC18 *)&D_80041FE0[i];
+        if ((id == ptr->unk0) && (x == ptr->unk2) && (y == ptr->unk4) &&
+            (z == ptr->unk6) && ((ptr->unk8 & 0x7FFF) == arg4)) {
+            handle = D_80041FE0[i].unk24;
+            if (handle != 0) {
+                func_100111C8(handle);
+            }
+            D_80041FE0[i].unk10 |= 0x80;
+        }
+    }
+}
+void func_1000FD38(s32 arg0, s32 arg1, s32 arg2) {
+    s32 i;
+
+    for (i = 0; i < D_80042760; i++) {
+        if ((arg0 == D_80041FE0[i].unk14) && (arg1 == D_80041FE0[i].unk18) &&
+            (arg2 == D_80041FE0[i].unk1C)) {
+            if (D_80041FE0[i].unk24 != 0) {
+                func_100111C8(D_80041FE0[i].unk24);
+            }
+            D_80041FE0[i].unk10 |= 0x80;
+        }
+    }
+}
+// PERMUTER CANDIDATE / JUSTREG (best 40). The index form below is byte-perfect in
+// structure, ordering, and every other register EXCEPT the loop count D_80042760:
+// target keeps it in v0 (blez/slt/reload), IDO gives mine v1. Pure caller-saved
+// coloring; resisted for/while/reversed-compare/explicit-guard/do-while forms (all 40)
+// and a fn-ptr-cast (682, adds addr load). Needs the permuter to flip v0<->v1.
+void func_1000FDF4(u16 arg0) {
+    s32 i;
+    struct15 *temp;
+    for (i = 0; i < D_80042760; i++) {
+        if (D_80041FE0[i].unk24 == arg0) {
+            if ((temp = D_80041FE0)[i].unk24) {
+                func_100111C8(D_80041FE0[i].unk24);
+            }
+            D_80041FE0[i].unk10 |= 0x80;
+        }
+    }
+}
 s32 func_1000FE88(struct15 *arg0, s32 arg1, s32 *arg2) {
     if (arg1 < *arg2) {
         if (((struct15 *)((u8 *)arg0 + (arg1 * 0x30)))->unk24 != 0) {
@@ -391,29 +571,35 @@ s32 func_1000FE88(struct15 *arg0, s32 arg1, s32 *arg2) {
 //     return phi_return;
 // }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_1000FEF0.s")
-// NON-MATCHING: needs a re-work
-// s32 func_1000FEF0(u16 arg0, struct127 *arg1, s32 arg2) {
-//     s32 i;
-//     struct15 *tmp;
-//
-//     if (arg0 == 0) {
-//         // nothing
-//     } else {
-//         for (i = 0; i < D_80042760; i++) {
-//             tmp = &D_80041FE0[i];
-//             if ((arg0 == tmp->unk24) &&
-//                 (arg1 == tmp->unk18) &&
-//                 (arg2 == tmp->unk1C) &&
-//                 ((tmp->unk10 & 0x80) == 0)) {
-//                 return i;
-//             }
-//         }
-//     }
-//     return -1;
-// }
+s32 func_1000FEF0(u16 arg0, void *arg1, s32 arg2) {
+    u16 id;
+    s32 i;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_1000FF90.s")
+    if (!arg0) {
+        return -1;
+    }
+    for (i = 0; i < D_80042760; i++) {
+        if ((arg0 == (*(&D_80041FE0[i])).unk24) && ((s32) arg1 == D_80041FE0[i].unk18) &&
+            (arg2 == D_80041FE0[i].unk1C) && ((D_80041FE0[i].unk10 & 0x80) == 0)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+s32 func_1000FF90(s32 arg0, s32 arg1, s32 arg2) {
+    s32 i;
+
+    for (i = 0; i < D_80042760; i++) {
+        if ((arg0 == D_80041FE0[i].unk14) &&
+            ((arg1 == D_80041FE0[i].unk18) || (arg1 == -1)) &&
+            ((arg2 == D_80041FE0[i].unk1C) || ((u32) arg2 == 0xFFFFFFFFU)) &&
+            ((D_80041FE0[i].unk10 & 0x80) == 0)) {
+            return i;
+        }
+    }
+    return -1;
+}
 void func_1001001C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     s32 i;
     struct15 *tmp;
@@ -431,7 +617,24 @@ void func_1001001C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
         } while (i < D_80042760);
     }
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_100100E0.s")
+void func_100100E0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
+    s32 count;
+    struct15 *p;
+
+    p = D_80041FE0;
+    count = D_80042760;
+    if (count > 0) {
+        p = D_80041FE0;
+        do {
+            if ((arg0 == p->unk14) && (arg1 == p->unk18) && (arg2 == p->unk1C)) {
+                p->unk14 = arg3;
+                p->unk18 = arg4;
+                p->unk1C = arg5;
+            }
+            p++;
+        } while (p < &D_80041FE0[count]);
+    }
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_10010154.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_10010344.s")
 
@@ -443,16 +646,22 @@ void func_10010558(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4, s32 
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_10010630.s")
+// PERMUTER CANDIDATE (best 2084). Arg mapping / all casts byte-correct. Blocked by a
+// register-allocation divergence: target promotes arg2 to saved reg s1 (2 saved regs)
+// and schedules the func_1000EE70 %hi/%lo address late (inside the else); IDO keeps arg2
+// on the stack (1 saved reg, reloads it) and hoists the address into the camera branch,
+// cascading every temp + float register. Local-copy of arg2 didn't force promotion.
 // void func_10010630(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4) {
 //     if (arg1->interaction_state != 0) {
 //         if (arg1->camera != 0) {
-//             func_10010F30(arg0, arg2 & 0xFFFF, 64, 0, (((u32) arg1->unk184 >> 3) & 0x30) * 2); //
+//             func_10010F30(arg0, arg2 & 0xFFFF, 64, 0, (((u32) arg1->unk184 >> 3) & 0x30) * 2);
 //         } else {
-//             func_1000FA64(arg0, arg1->x_position, arg1->y_position, arg1->z_position, arg2, arg4, arg3, (void *)func_1000EE70, arg1, arg1->unique_id, 0, 0);
+//             func_1000FA64(arg0, arg1->x_position, arg1->y_position, arg1->z_position, arg2,
+//                           arg4, arg3, (void *) func_1000EE70, arg1, arg1->unique_id, 0, 0);
 //         }
 //     }
 // }
+#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_10010630.s")
 
 void func_10010720(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4, s32 arg5) {
     if (arg5 <= 0) {
@@ -669,7 +878,37 @@ s32 func_1001147C(u16 arg0) {
     return -1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_100114D0.s")
+extern s32 func_1000A420(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6,
+                         s32 arg7, s32 arg8, s32 *arg9, s32 *argA, s32 *argB);
+
+void func_100114D0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 *arg6, s32 *arg7, s32 *arg8) {
+    struct00 *best;
+    u32 bestDist;
+    u32 i;
+    u32 dx;
+    u32 dy;
+    u32 dz;
+    s32 vol;
+    u32 d;
+
+    best = D_80041F68;
+    if (D_80082FA0 != 0) {
+        bestDist = 0xFFFFFFFF;
+        for (i = 0; i <= D_80082FA0; i++) {
+            dx = arg0 - D_80041F68[i].unkC;
+            dy = arg1 - D_80041F68[i].unk10;
+            dz = arg2 - D_80041F68[i].unk14;
+            d = dx * dx + dy * dy + dz * dz;
+            if (d < bestDist) {
+                bestDist = d;
+                best = &D_80041F68[i];
+            }
+        }
+    }
+    func_1000A420(arg0 - best->unkC, arg1 - best->unk10, arg2 - best->unk14, best->unk18,
+                  arg0 - best->unk0, arg1 - best->unk4, arg2 - best->unk8, arg4, arg5, arg6, &vol, arg8);
+    *arg7 = ((u32)vol * arg3) >> 15;
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_10011624.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_10011BB8.s")
 
