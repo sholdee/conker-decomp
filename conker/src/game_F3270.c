@@ -15,7 +15,9 @@ typedef struct {
 typedef struct {
     char pad_0x0[0x18];
     s32 field_0x18;
-    char pad_0x1C[0x40];
+    char pad_0x1C[0x18];
+    f32 field_0x34;
+    char pad_0x38[0x24];
     GameF3270SpawnedObject *volatile field_0x5C;
 } GameF3270SpawnOwner;
 
@@ -46,7 +48,16 @@ typedef struct {
 } GameF3270ObjectOwner58;
 
 GameF3270Object *func_150C6460(GameF3270ObjectOwner58 *arg0);
-GameF3270SpawnedObject *func_150C5F94(s32 arg0, GameF3270SpawnOwner *arg1);
+typedef struct {
+    char pad_0x0[0x14];
+    f32 field_0x14;
+    f32 field_0x18;
+    f32 field_0x1C;
+    char pad_0x20[0x1B];
+    u8 field_0x3B;
+} GameF3270SpawnSource;
+
+GameF3270SpawnedObject *func_150C5F94(GameF3270SpawnSource *arg0, GameF3270SpawnOwner *arg1);
 
 void func_150C5DC0(GameF3270ObjectOwner58 *arg0) {
     GameF3270B0State *temp;
@@ -102,11 +113,84 @@ void func_150C5F40(GameF3270SpawnOwner *arg0) {
         done:
             ;
     } else {
-        arg0->field_0x5C = func_150C5F94(temp_a2, arg0);
+        arg0->field_0x5C = func_150C5F94((GameF3270SpawnSource *)temp_a2, arg0);
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_F3270/func_150C5F94.s")
+void *memcpy(void *, const void *, u32);
+typedef struct {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ u8 unk8;
+    /* 0x09 */ u8 pad9[0x3];
+    /* 0x0C */ GameF3270SpawnSource *unkC;
+    /* 0x10 */ u8 unk10;
+    /* 0x11 */ u8 pad11[0x3];
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ s16 unk28;
+    /* 0x2A */ u8 unk2A;
+    /* 0x2B */ u8 unk2B;
+    /* 0x2C */ s8 unk2C;
+    /* 0x2D */ u8 unk2D;
+} GameF3270SpawnDesc;
+
+typedef struct {
+    /* 0x00 */ GameF3270SpawnOwner *owner;
+    /* 0x04 */ u8 unk4;
+    /* 0x08 */ f32 unk8;
+} GameF3270SpawnLink;
+
+extern f32 D_800A0410;
+extern f32 D_800A0414;
+extern f32 D_800A0418;
+extern s32 func_15045800(f32 *, s32, f32, f32 *);
+extern GameF3270SpawnedObject *func_1513418C(GameF3270SpawnDesc *, s32, u8, s32);
+
+GameF3270SpawnedObject *func_150C5F94(GameF3270SpawnSource *arg0, GameF3270SpawnOwner *arg1) {
+    GameF3270SpawnDesc desc;
+    GameF3270SpawnLink link;
+    GameF3270SpawnedObject *result;
+
+    link.owner = arg1;
+    link.unk4 = 1;
+    {
+        f32 pos[3];
+
+        pos[0] = arg0->field_0x14;
+        pos[1] = arg0->field_0x18 + D_800A0410;
+        pos[2] = arg0->field_0x1C;
+        if (func_15045800(pos, 0, arg0->field_0x18 - 100.0f, &arg1->field_0x34) != 0) {
+            link.unk8 = arg1->field_0x34;
+        } else {
+            link.unk8 = arg0->field_0x18 + D_800A0414;
+        }
+    }
+    desc.unk0 = 0;
+    desc.unk4 = 0;
+    desc.unk8 = arg0->field_0x3B;
+    desc.unkC = arg0;
+    desc.unk10 = 0;
+    desc.unk14 = 0.0f;
+    desc.unk18 = 0.0f;
+    desc.unk1C = 0.0f;
+    desc.unk20 = 25.0f;
+    desc.unk24 = D_800A0418;
+    desc.unk28 = 300;
+    desc.unk2A = 10;
+    desc.unk2B = 4;
+    desc.unk2C = 1;
+    desc.unk2D = 2;
+    result = func_1513418C(&desc, 0xC, 0xFF, 0);
+    if (result != NULL) {
+        memcpy(&result->field_0x58, &link, sizeof(link));
+    }
+    return result;
+}
+
 
 typedef struct GameF3270Burst {
     s32 flags, zero4;
