@@ -33,14 +33,26 @@ void func_151942E8(s32 arg0, s32 arg1, s32 arg2) {
     func_15193CA0(arg1, 1, 0xFF, 1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1C1150/func_15194320.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1C1150/func_15194394.s")
-
 typedef struct Game1C1150Event {
     u8 pad0[4];
     u8 type;
 } Game1C1150Event;
+
+extern u8 D_800A8210;
+
+void func_15194320(void *arg0, Game1C1150Event *arg1, s32 arg2) {
+    switch (arg1->type) {
+        case 0:
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+            func_1518D1C0((struct127 *)arg1, 0xA, 0, 1, 0xFF, 1, &D_800A8210);
+            break;
+    }
+}
+
+#pragma GLOBAL_ASM("asm/nonmatchings/game_1C1150/func_15194394.s")
 
 typedef struct Game194408Packet {
     s16 field00;
