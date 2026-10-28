@@ -94,7 +94,79 @@ loop:
     return sum;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_49D30/func_1501D044.s")
+extern s32 D_800C35B8[];
+extern u8 D_800C35C0[];
+extern u16 D_800C3C8E;
+extern u8 D_800C35F8;
+extern f32 D_800C3648;
+extern f32 D_800C364C;
+extern f32 D_800C3650;
+extern u8 D_800C3656[];
+extern u8 D_800C3658[];
+extern u8 D_800C365A[];
+extern u8 D_800C365C[];
+extern u8 D_800C365E[];
+extern u8 D_800C3660[];
+extern u8 D_800C3662;
+extern u8 D_800C3C8C;
+extern u8 D_800C3C8D;
+extern u8 D_800C35C2;
+extern u8 D_800C3A58;
+extern f32 D_800C35A4;
+extern s8 D_800C3C8A;
+extern u8 D_800C3C8B;
+extern f32 D_800C3674;
+extern f32 D_800C3678;
+extern s32 D_800C367C;
+extern u8 D_800C3680;
+extern u8 D_800C3672;
+extern u8 D_800C3C9D;
+extern s16 D_800C3C9E;
+extern s32 D_800C3D50;
+void func_150233BC(void);
+
+void func_1501D044(s32 arg0) {
+    f32 zero = 0.0f;
+    f32 initial_value = 999.0f;
+
+    D_800C35B8[arg0] = -0x64;
+    D_800C35B0[arg0] = 0;
+    D_800C35C0[arg0] = 0;
+    D_800C3C8E = 0;
+    D_800C363A[arg0] = 0;
+    (&D_800C35EA)[arg0] = 0;
+    D_800C3D50 = 0;
+    D_800C35F8 = 0xFF;
+    D_800C3648 = zero;
+    D_800C364C = zero;
+    D_800C3650 = zero;
+    ((u8 *)&D_800C3654)[arg0] = 0;
+    D_800C3656[arg0] = 0;
+    D_800C3658[arg0] = 1;
+    D_800C365A[arg0] = 0;
+    D_800C365C[arg0] = 0;
+    D_800C365E[arg0] = 0;
+    D_800C3660[arg0] = 0;
+    D_800C3638 = 0;
+    D_800C3662 = 0;
+    D_800C3C8C = 0;
+    D_800C3C8D = 0;
+    D_800C35C2 = 0;
+    D_800C3A58 = 0;
+    D_800C35A4 = zero;
+    D_800C3C8A = -1;
+    D_800C3C8B = 0;
+    D_800C3674 = initial_value;
+    D_800C3678 = initial_value;
+    D_800C367C = 0;
+    D_800C3680 = 0;
+    D_800C3672 = 0;
+    D_800C3C9D = 0x64;
+    D_800C3C9E = -1;
+    func_150233BC();
+    D_8008FD84[0] = 0;
+    D_800C3670 = 0;
+}
 
 s32 func_1501D1D4(s32 arg0, s32 arg1, s32 arg2) {
     s32 sp34;
