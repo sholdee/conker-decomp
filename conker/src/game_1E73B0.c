@@ -484,7 +484,10 @@ void func_151BD2F8(void *arg0, s32 arg1, s32 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E73B0/func_151BD42C.s")
+s32 func_151BD42C(u8 *arg0) {
+    *(s16 *)(arg0 + 0x80) = 0;
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1E73B0/func_151BD43C.s")
 
