@@ -719,7 +719,190 @@ s32 func_1000CD40(s32 arg0, s32 arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000CDA0.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000CEAC.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000D2F8.s")
+
+typedef struct SequenceRecordState {
+    s32 index;
+    s32 id;
+    void *field8;
+    void *fieldC;
+    struct SequenceRecordState *owner;
+    u8 ownerSync;
+    u8 pauseMode;
+    u8 pad16[2];
+    s32 startMask;
+    s32 fadeMask;
+    s32 field20;
+    s32 field24;
+    s32 volumeOverride;
+    s32 target;
+    s32 current;
+    s32 callbackState;
+    s32 flags38;
+    u8 pad3C[0x10];
+    u16 current4C;
+    u16 value;
+    s16 duration;
+    u16 current52;
+    u16 target54;
+    s16 duration56;
+    u16 current58;
+    u16 target5A;
+    s16 duration5C;
+    u8 pad5E[2];
+    struct SequenceRecordState *state;
+} SequenceRecordState;
+
+typedef s32 (*SequenceCallback)(s32, s32, f32, f32, f32);
+
+extern s32 D_80041880[];
+extern s32 D_80041890[];
+extern s32 D_800418A0[];
+s32 func_1000CDA0(u8, SequenceRecordState *);
+void func_10008C04(u8, u8, s32);
+s32 func_10008CE8(u8, s32);
+
+void func_1000D2F8(s32 arg0, f32 arg1, f32 arg2, f32 arg3) {
+    s32 status;
+    SequenceRecordState **slot;
+    SequenceRecordState *record;
+    s32 channel;
+    s32 offset;
+    SequenceRecordState *child;
+    SequenceRecordState *owner;
+    SequenceCallback callback;
+    s32 i;
+    typedef struct {
+        SequenceCallback callback;
+        u8 pad4[12];
+    } CallbackEntry;
+    typedef struct {
+        u8 markerCount;
+        u8 pad1[15];
+    } MarkerEntry;
+    extern CallbackEntry D_8002B07C[];
+    extern MarkerEntry D_8002B080[];
+
+    channel = (u8)((u32 *)&arg0)[0];
+    status = func_1000853C((u8)((u32 *)&arg0)[0]);
+    offset = (s32)((u32 *)&arg0)[0] * sizeof(*slot);
+    slot = (SequenceRecordState **)&(*(u8 (*)[])D_800417B0)[offset];
+    record = *slot;
+    if (record != 0) {
+        if (record->field24 != 0 &&
+            func_1000CDA0(((u8 *)record)[0x23], record->owner)) {
+            func_10008C6C(((u8 *)&channel)[3], (u8)((*slot)->field24 - 1));
+            record = *slot;
+            if (((u32)record->volumeOverride) != 0) {
+                record->current = ((u32)record->volumeOverride);
+                (*slot)->target = ((u32)record->volumeOverride);
+                record = *slot;
+            }
+            record->current4C = 0x7FFF;
+            (*slot)->value = 0x7FFF;
+            func_1000CC54((s32)((u32 *)&arg0)[0]);
+            (*slot)->field24 = 0;
+            (*slot)->field20 = 0;
+        }
+        record = *slot;
+        if (status == 0) {
+            record->id = 0;
+            record = *slot;
+        }
+        child = record->state;
+        if (child != 0) {
+            if (record->id == 0) {
+                if (func_1000CDA0(((u8 *)child)[0x1B], child->owner)) {
+                    (*slot)->id = -1;
+                    func_1000B294((s32 *)*slot);
+                    child = (*slot)->state;
+                    if (child->id > 0) {
+                        if (func_10008CE8(((u8 *)&channel)[3], child->id) == -1) {
+                            (*slot)->state->owner = 0;
+                            (*slot)->state->startMask = 0;
+                            func_1000B3D4((struct151 *)(*slot)->state, 0);
+                            (*slot)->state = 0;
+                            *slot = 0;
+                        } else {
+                            *slot = (*slot)->state;
+                            (*slot)->index = (s32)((u32 *)&arg0)[0];
+                            (*slot)->startMask = 0;
+                            *(s32 *)((u8 *)D_800418A0 + offset) = 0;
+                            *(s32 *)((u8 *)D_80041890 + offset) = 0;
+                            *(s32 *)((u8 *)D_80041880 + offset) = 0;
+                            record = *slot;
+                            if (D_8002B080[record->id].markerCount != 0) {
+                                func_10008C04(((u8 *)&channel)[3], D_8002B080[record->id].markerCount, 0x64);
+                                record = *slot;
+                            }
+                            if (record->field24 != 0) {
+                                func_10008C6C(((u8 *)&channel)[3], (u8)(record->field24 - 1));
+                                (*slot)->field24 = 0;
+                                record = *slot;
+                            }
+                            record->current = 0;
+                            func_1000CC54((s32)((u32 *)&arg0)[0]);
+                            func_100084D8(((u8 *)&channel)[3]);
+                            if ((*slot)->flags38 != 0) {
+                                func_100088F0(((u8 *)&channel)[3], (*slot)->flags38, 0);
+                            }
+                            i = 0;
+                            do {
+                                if ((*slot)->pad3C[i] != 0) {
+                                    func_10008660(((u8 *)&channel)[3], (u8)i, (*slot)->pad3C[i], 1);
+                                    (*slot)->pad3C[i] = 0;
+                                }
+                                i++;
+                            } while (i != 16);
+                        }
+                    } else {
+                        child->id = -1;
+                        (*slot)->state->owner = 0;
+                        (*slot)->state->startMask = 0;
+                        (*slot)->index = -1;
+                        *slot = 0;
+                    }
+                }
+            } else if (func_1000CDA0(((u8 *)child)[0x1B], child->owner)) {
+                (*slot)->pauseMode = 0;
+                func_10008F24(((u8 *)&channel)[3]);
+            }
+            record = *slot;
+        } else if (record->id == 0) {
+            func_1000B294((s32 *)record);
+            record = 0;
+            (*slot)->id = -1;
+            (*slot)->index = -1;
+            *slot = 0;
+        }
+        if (record != 0) {
+            if (record->id > 0) {
+                callback = D_8002B07C[record->id].callback;
+                if (callback != 0) {
+                    (*slot)->callbackState = callback(record->callbackState, ((u8 *)&channel)[3], arg1, arg2, arg3);
+                    record = *slot;
+                }
+            }
+            if (func_1000CDA0(((u8 *)record)[0x1F], record->owner)) {
+                record = *slot;
+                (*slot)->current4C = func_1000CD40(record->current4C, record->value, (u16)record->duration);
+                record = *slot;
+                (*slot)->current52 = func_1000CD40(record->current52, record->target54, (u16)record->duration56);
+                record = *slot;
+                (*slot)->current58 = func_1000CD40(record->current58, record->target5A, (u16)record->duration5C);
+                (*slot)->fadeMask = 0;
+            }
+            func_1000CC54((s32)((u32 *)&arg0)[0]);
+            record = *slot;
+            if (record->ownerSync != 0 &&
+                ((owner = record->owner) == 0 || owner == record || owner->id <= 0 ||
+                 record->id <= 0 || owner->index < 0)) {
+                record->ownerSync = 0;
+                record = *slot;
+                record->owner = record;
+            }
+        }
+    }
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000D758.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000D96C.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000DE1C.s")
