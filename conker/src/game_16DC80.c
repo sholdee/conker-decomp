@@ -107,7 +107,73 @@ void func_15141250(void *arg0) {
     D_80089FE4[*(u8 *)((u8 *)arg0 + 0x168)](arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16DC80/func_151412BC.s")
+typedef struct Sub151412BC {
+    u8 pad0[0x24];
+    s32 x[4];
+    s32 y[4];
+    u8 pad44[8];
+    s16 out[4];
+} Sub151412BC;
+
+typedef struct Node151412BC {
+    u8 pad0[8];
+    struct Node151412BC *next;
+    u8 padC[0x4C];
+    s32 unk58;
+    u8 pad5C[0xB4];
+    Sub151412BC sub;
+} Node151412BC;
+
+extern u8 D_800DCE50[];
+
+void func_151412BC(void)
+{
+  s32 p;
+  u8 i;
+  u8 j;
+  Node151412BC *new_var;
+  Node151412BC *node;
+  Sub151412BC *sub;
+  for (p = 0; p < 2; p++)
+  {
+    for (i = 0; i < 4; i++)
+    {
+      node = ((Node151412BC *(*)[104]) D_800DCE50)[p][((s32 *) (&D_800A5168))[i]];
+      while (node != 0)
+      {
+        if (node->unk58 & 0x2000)
+        {
+          node->sub.out[3] = 0;
+          node->sub.out[2] = 0;
+          node->sub.out[1] = 0;
+          new_var = node;
+          node->sub.out[0] = 0;
+          if (node->unk58 & 0x10)
+          {
+            j = 0;
+            sub = &new_var->sub;
+            for (; j <= D_80082FA0; j++)
+            {
+              if ((((sub->x[j] >= 0) && (sub->x[j] < D_800BE620)) && (sub->y[j] >= 0)) && (sub->y[j] < D_800BE624))
+              {
+                sub->out[j] = (((u16 *) D_800BE9C4) + (sub->y[j] * D_800BE620))[sub->x[j]];
+              }
+              else
+              {
+                sub->out[j] = 0x7FFF;
+              }
+            }
+
+          }
+        }
+        node = node->next;
+      }
+
+    }
+
+  }
+
+}
 
 void func_1514143C(void *arg0) {
     typedef struct {
