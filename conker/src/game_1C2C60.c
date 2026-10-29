@@ -1135,7 +1135,140 @@ void func_15198D40(Struct15198C90 *arg0) {
 void func_15198D7C(s32 arg0) {
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1C2C60/func_15198D88.s")
+typedef struct {
+    f32 x, y, z;
+} Vec3f_15198D88;
+
+typedef struct {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    s16 unk1C;
+    s16 unk1E;
+    s16 unk20;
+    s16 unk22;
+} Entry15198D88;
+
+typedef struct {
+    u8 pad0[0x74];
+    u8 unk74;
+    u8 pad75[0x7];
+    f32 unk7C;
+} State15198D88;
+
+typedef struct {
+    u8 pad0;
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD[3];
+    Vec3f_15198D88 pos;
+    u8 pad1C[0x7C];
+    State15198D88 *unk98;
+} Obj15198D88;
+
+typedef struct {
+    Vec3f_15198D88 pos;
+    s16 unkC;
+    s16 unkE;
+    s32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 pad16[2];
+} Spawn15198D88;
+
+typedef struct {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    u8 pad14[4];
+    u8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+    u8 pad1C[4];
+} Motion15198D88;
+
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8;
+    s32 unkC;
+    s32 unk10;
+    s32 unk14;
+    s32 unk18;
+    u8 unk1C;
+    u8 unk1D;
+    u8 pad1E[2];
+} Style15198D88;
+
+extern Entry15198D88 D_800A8728[];
+extern s32 func_15147DA0(Spawn15198D88 *, Motion15198D88 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, Style15198D88 *, s32, s32, s32);
+
+void func_15198D88(Obj15198D88 *arg0, Vec3f_15198D88 *arg1) {
+    Style15198D88 style;
+    State15198D88 *state;
+    Entry15198D88 *entry;
+    Spawn15198D88 spawn;
+    Motion15198D88 motion;
+    f32 px;
+    f32 py;
+    f32 pz;
+    f32 speed;
+    u8 a;
+    u8 b;
+    f32 sinA;
+    f32 cosA;
+    f32 sinB;
+    f32 cosB;
+    f32 rad;
+
+    state = arg0->unk98;
+    entry = &D_800A8728[state->unk74];
+    spawn.unkE = 1;
+    motion.unk19 = 0xA;
+    motion.unk1A = 0xFF;
+    motion.unk18 = 0x28;
+    motion.unk1B = 0x82;
+    spawn.pos = arg0->pos;
+    style.unk0 = 0;
+    style.unk4 = 1;
+    style.unk8 = 0x160600;
+    style.unkC = 3;
+    style.unk10 = 0x10;
+    style.unk14 = 0x80;
+    style.unk18 = 0x20;
+    style.unk1C = 0;
+    style.unk1D = 9;
+    do {
+        speed = (func_150ADA68() * entry->unk8) + entry->unk4;
+        a = func_150ADA20() & 0xFF;
+        b = func_150ADA20() & 0xFF;
+        sinA = func_151423D8((u8)(a - 0x40));
+        cosA = func_151423D8(a);
+        sinB = func_151423D8((u8)(b - 0x40));
+        cosB = func_151423D8(b);
+        rad = entry->unk0;
+        px = arg1->x + (rad * cosB * sinA);
+        py = arg1->y - (rad * sinB);
+        pz = arg1->z + (rad * cosB * cosA);
+        spawn.unk15 = (func_150ADA20() % (u32)(entry->unk22 + 1)) + entry->unk20;
+        spawn.unkC = (func_150ADA20() % (u32)(entry->unk1E + 1)) + entry->unk1C;
+        motion.unk0 = (func_150ADA68() * entry->unk10) + entry->unkC;
+        motion.unk10 = (func_150ADA68() * entry->unk18) + entry->unk14;
+        motion.unk4 = (px - arg0->pos.x) * speed;
+        motion.unk8 = (py - arg0->pos.y) * speed;
+        motion.unkC = (pz - arg0->pos.z) * speed;
+        func_15147DA0(&spawn, &motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &style, 0, arg0->unkC, arg0->unk1);
+        state->unk7C -= 1.0f;
+    } while (state->unk7C > 1.0f);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1C2C60/func_151990AC.s")
 
