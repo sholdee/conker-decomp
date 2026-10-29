@@ -1995,7 +1995,77 @@ s32 func_1506196C(u8 *arg0, s32 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_150619A8.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_15061B4C.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_150623F4.s")
+typedef struct { s16 x; s16 y; s16 z; u16 r; } Pt150623F4;
+s32 func_150229E4(struct127 *);
+s32 func_150A6360(void *, void *, f32, f32, f32, f32, f32, f32);
+extern u8 D_800D9C10[];
+
+s32 func_150623F4(struct127 *arg0) {
+    f32 scale;
+    s32 sum;
+    s32 ok;
+    s32 i;
+    u8 idx;
+    f32 dx;
+    f32 dz;
+    f32 height;
+    u8 id;
+    u8 *p;
+
+    scale = (arg0->unk144 != NULL) ? (f32)*(u16 *)((u8 *)arg0->unk144 + 0x2A) : 0.0f;
+    if (scale == 0.0f) {
+        return 1;
+    }
+    if (arg0->unk127 != 0xFF) {
+        return 1;
+    }
+    if ((D_800C3638 != 0) && (func_150229E4(arg0) != 0)) {
+        return 1;
+    }
+    sum = 0;
+    p = (u8 *)arg0;
+    if (D_80082FA0 >= 0) {
+        do {
+            sum += p[0xB];
+            p++;
+        } while (p <= (0, D_80082FA0) + (u8 *)arg0);
+    }
+    if (sum == 0) {
+        return 0;
+    }
+    if ((arg0->unk74 & 0xF) != 0xF) {
+        return 1;
+    }
+    idx = arg0->unk13F;
+    if ((*(u8 **)&D_800D2108)[0, idx] != 0) {
+        ok = 1;
+        for (i = 0; i < D_8008FD8C; i++) {
+            dx = ((Pt150623F4 **)D_800D2104)[idx]->x - D_800CC2D0[i].x_position;
+            dz = ((Pt150623F4 **)D_800D2104)[idx]->z - D_800CC2D0[i].z_position;
+            if ((dx * dx) + (dz * dz) < ((Pt150623F4 **)D_800D2104)[idx]->r * ((Pt150623F4 **)D_800D2104)[idx]->r) {
+                ok = 0;
+                break;
+            }
+        }
+        if (!ok) {
+            return 1;
+        }
+    }
+    id = arg0->id;
+    height = *(s16 *)((u8 *)D_800D1C90[id] + 0x10) * arg0->y_scale;
+    for (i = 0; i <= D_80082FA0; i++) {
+        ok = 1;
+        if (func_150A6360(i * 0x180 + (u8 *)D_800BE628, &D_800D9C10[i * 0x40], arg0->x_position,
+                          arg0->y_position + height, arg0->z_position, scale, scale, 20000.0f) != 0) {
+            ok = 0;
+            break;
+        }
+    }
+    if (!ok) {
+        return 1;
+    }
+    return 0;
+}
 void func_150626EC(struct127 *arg0, s32 arg1) {
     s32 i;
 
