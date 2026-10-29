@@ -1617,7 +1617,127 @@ void func_1511C548(struct Obj1511C548 *arg0) {
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_142560/func_1511C638.s")
+struct Obj1511C638 {
+    u8 pad0[0x10];
+    s16 unk10;
+    s16 unk12;
+    s16 unk14;
+    u8 pad16[0x26];
+    s32 unk3C;
+    u8 pad40[0x2E];
+    u8 unk6E;
+    u8 pad6F[4];
+    u8 unk73;
+    u8 pad74[8];
+    s32 unk7C;
+    s32 unk80;
+    u8 pad84[6];
+    u8 unk8A;
+    u8 pad8B[0x15];
+};
+
+extern void func_15170F4C(struct Obj1511C638 *, u8, s32);
+extern void func_150B2740(u8, u8);
+extern s32 func_1000EC24();
+
+void func_1511C638(struct Obj1511C638 *arg0) {
+    s32 state;
+    struct Obj1511C638 *sub;
+    struct Obj1511C638 *other;
+
+    sub = &arg0[1];
+    state = arg0->unk73 & 3;
+    if (D_800BE9F0 == 4) {
+        other = &arg0[2];
+    } else {
+        other = NULL;
+    }
+    if (state == 1) {
+        state = 0;
+        arg0->unk8A = 0;
+        sub->unk6E = 0;
+        if (other != NULL) {
+            other->unk6E = 0;
+        }
+        if (arg0->unk3C != 0xFF) {
+            func_15173C60(0, arg0->unk3C);
+        }
+    }
+    if (D_800BE9B4 != 0) {
+        if (state == 3) {
+            arg0->unk8A = 0xFF;
+            sub->unk6E = 1;
+            if (other != NULL) {
+                other->unk6E = 1;
+            }
+        } else {
+            arg0->unk8A = 0;
+            sub->unk6E = 0;
+            if (other != NULL) {
+                other->unk6E = 0;
+            }
+        }
+    }
+    if (state == 2) {
+        if (arg0->unk7C < 0) {
+            arg0->unk7C += D_800BE9E4;
+        } else {
+            if (arg0->unk80 == 0) {
+                switch (sub->unk3C & 0xFF) {
+                case 1:
+                    func_15170F4C(sub, 0xFF, 0);
+                    func_10010F30(0x2BE, 0x7FFF, 0x40, 0, 0);
+                    break;
+                case 0: {
+                    u16 sp5A = func_150ADA20() % 3U;
+                    u16 sp58;
+                    const u16 sounds[3] = { 0x2B6, 0x2BD, 0x2BE };
+
+                    sp58 = ((func_150ADA20() & 1) + sp5A + 1) % 3U;
+                    sp5A = sounds[sp5A];
+                    sp58 = sounds[sp58];
+                    func_10010F30(0x2B7, 0x7FFF, 0x40, 0, 0);
+                    func_10010F30(sp5A, 0x7FFF, 10, 0, 0);
+                    func_10010F30(sp58, 0x7FFF, 0x36, 0, 0);
+                    sp5A = func_150ADA20() % 5U;
+                    sp58 = ((func_150ADA20() & 3) + sp5A + 1) % 5U;
+                    func_1000FA64(sp5A + 0x2B1, arg0->unk10, arg0->unk12, arg0->unk14, 0x4000, 0x2711, 0x2710, (s32)func_1000EC24, (void *)0x1001E, 0, 0x200, 0);
+                    func_1000FA64(sp58 + 0x2B1, arg0->unk10, arg0->unk12, arg0->unk14, 0x4000, 0x2711, 0x2710, (s32)func_1000EC24, (void *)0x1001E, 0, 0, 0);
+                    sp5A = func_150ADA20() % 5U;
+                    sp58 = ((func_150ADA20() & 3) + sp5A + 1) % 5U;
+                    func_1000FA64(sp5A + 0x2B1, arg0->unk10, arg0->unk12, arg0->unk14, 0x4000, 0x2711, 0x2710, (s32)func_1000EC24, (void *)0x3C, 0, 0x300, 0);
+                    func_1000FA64(sp58 + 0x2B1, arg0->unk10, arg0->unk12, arg0->unk14, 0x4000, 0x2711, 0x2710, (s32)func_1000EC24, (void *)0x3C, 0, 0x100, 0);
+                }
+                    break;
+                case 2:
+                    break;
+                case 3:
+                    func_150B2740(sub->unk3C >> 8, 0xFF);
+                    break;
+                }
+            }
+            arg0->unk8A = 0xFF;
+            sub->unk6E = 1;
+            if (other != NULL) {
+                other->unk6E = 1;
+            }
+            arg0->unk80 += D_800BE9E4 * 30;
+            if (arg0->unk80 >= 0xFF) {
+                arg0->unk80 = 0xFF;
+                state = 3;
+            }
+            if (arg0->unk3C != 0xFF) {
+                func_15173C60(arg0->unk80, arg0->unk3C);
+            }
+            if (state == 3) {
+                arg0->unk7C = 0;
+                arg0->unk80 = 0;
+            }
+        }
+    }
+    arg0->unk73 &= ~3;
+    arg0->unk73 |= state;
+}
 
 extern f32 D_800A31F4;
 
