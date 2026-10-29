@@ -88,8 +88,6 @@ void func_151B6320(f32 *arg0, u8 arg1, s32 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E37D0/func_151B6420.s")
-
 typedef struct { f32 x, y, z; } Vec151B65D4;
 
 typedef struct {
@@ -135,10 +133,67 @@ typedef struct {
     s8 head;
     u8 pad2F;
     u8 unk30;
-    u8 pad31[0x94 - 0x31];
+    u8 pad31[0x54 - 0x31];
+    Vec151B65D4 unk54;
+    u8 pad60[0x94 - 0x60];
     Entry151B65D4 *entries;
     State151B65D4 *state;
 } Obj151B65D4;
+
+s32 func_151B6420(Obj151B65D4 *arg0) {
+    Entry151B65D4 *entries;
+    s32 i;
+    f32 base;
+    s32 v;
+    f32 d;
+
+    entries = arg0->entries;
+    if (arg0->count < 2 && (arg0->flags & 8)) {
+        return 0;
+    }
+    i = arg0->head;
+    while (i != arg0->tail) {
+        i--;
+        if (i < 0) {
+            i = arg0->capacity - 1;
+        }
+        (i + entries)->unkC -= D_800BE9A4;
+        if ((i + entries)->unkC < 0.0f) {
+            while (i != arg0->tail) {
+                arg0->tail++;
+                if (arg0->tail == arg0->capacity) {
+                    arg0->tail = 0;
+                }
+                arg0->count--;
+            }
+        }
+    }
+    if (arg0->count > 0) {
+        i = arg0->tail;
+        base = entries[arg0->tail].unk18;
+        do {
+            d = (i + entries)->unk18 - base;
+            v = d * 0.4940000176f;
+            if (v >= 0x9C) {
+                (i + entries)->unk10 = 0x9B;
+            } else {
+                (i + entries)->unk10 = v;
+            }
+            i++;
+            if (i >= arg0->capacity) {
+                i = 0;
+            }
+        } while (i != arg0->head);
+    }
+    if (arg0->count > 0) {
+        arg0->unk54 = entries[arg0->tail].pos;
+    } else {
+        arg0->unk54.x = 0.0f;
+        arg0->unk54.y = 0.0f;
+        arg0->unk54.z = 0.0f;
+    }
+    return 1;
+}
 
 f32 func_15143E64(void *);
 
