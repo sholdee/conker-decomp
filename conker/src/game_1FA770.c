@@ -589,7 +589,247 @@ void func_151D08F0(struct260 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1FA770/func_151D09A8.s")
+typedef struct {
+    u8 unk0;
+    struct17 unk4;
+    struct17 unk10;
+    struct17 unk1C;
+    f32 unk28;
+} ShapeA151D09A8; /* 0x2C */
+
+typedef struct {
+    u8 unk0[0x24];
+} Dst151D09A8;
+
+typedef struct {
+    struct17 unk0;
+    s16 unkC;
+    s16 unkE;
+    f32 unk10;
+    f32 unk14;
+    s16 unk18;
+    s16 unk1A;
+    f32 unk1C;
+    f32 unk20;
+    u8 unk24;
+    u8 unk25;
+    u8 pad26[2];
+    f32 unk28;
+    f32 unk2C;
+    u8 unk30;
+    u8 unk31;
+    u8 pad32[2];
+    f32 unk34;
+    u8 unk38;
+    u8 pad39[3];
+    f32 unk3C;
+} EmitA151D09A8; /* 0x40 */
+
+typedef struct {
+    struct17 unk0;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    s16 unk24;
+    s16 unk26;
+    s16 unk28;
+    s16 unk2A;
+    s16 unk2C;
+    s16 unk2E;
+    s16 unk30;
+    s16 unk32;
+    u8 unk34;
+    u8 pad35[3];
+    f32 unk38;
+    s16 unk3C;
+    s16 unk3E;
+    s32 unk40;
+} EmitB151D09A8; /* 0x44 */
+
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s16 unk8;
+    s16 unkA;
+    s32 unkC;
+    s32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 unk16;
+    u8 unk17;
+    u8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+    u8 unk1C;
+    u8 unk1D;
+    s16 unk1E;
+    s16 unk20;
+    s16 unk22;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    struct17 pos;
+    struct17 unk3C;
+    struct17 vel;
+    f32 unk54;
+    u32 unk58;
+    s32 unk5C;
+    u8 unk60;
+    u8 unk61;
+    s8 unk62;
+    s8 unk63;
+    s8 unk64;
+    u8 unk65;
+    u8 unk66;
+    u8 pad67;
+    s16 unk68;
+    u8 pad6A[2];
+    f32 unk6C;
+} Particle151D09A8; /* 0x70 */
+
+extern f32 D_800AAF84[3];
+extern f32 D_800AAF90[3];
+extern void func_15145EA4(s32 *, s32 *, s32, s32);
+extern void func_1504715C(void *, struct127 *);
+extern void func_1514FF44(ShapeA151D09A8 *, EmitA151D09A8 *, Dst151D09A8 *, u8, s32);
+extern void func_15153CCC(ShapeA151D09A8 *, EmitB151D09A8 *, Dst151D09A8 *, u8, s32);
+extern s32 func_1514F6E8(ShapeA151D09A8 *);
+extern void func_1514F808(ShapeA151D09A8 *, f32, struct17 *);
+extern void *func_15130280(void *, u8, s32, s32, u8, s32);
+
+void func_151D09A8(struct127 *arg0, u8 arg1, s32 arg2) {
+    struct17 pos;
+    struct17 dir;
+    Dst151D09A8 dst;
+    ShapeA151D09A8 a;
+
+    if (arg0->unk1D4 != NULL) {
+        {
+            s32 srcs[2];
+            s32 dsts[2];
+
+            srcs[0] = (s32)D_800AAF84;
+            srcs[1] = (s32)D_800AAF90;
+            dsts[0] = (s32)&pos;
+            dsts[1] = (s32)&dir;
+            func_15145EA4(srcs, dsts, (s32)arg0->unk1D4 + 0x80, 2);
+            dir.unk0 -= pos.unk0;
+            dir.unk4 -= pos.unk4;
+            dir.unk8 -= pos.unk8;
+        }
+        func_1504715C(&dst, arg0);
+        a.unk0 = 0;
+        a.unk4 = dir;
+        a.unk10 = a.unk1C = *(struct17 *)&D_800A5480;
+        {
+            EmitA151D09A8 emitA;
+
+            emitA.unk0 = pos;
+            emitA.unkC = 6;
+            emitA.unkE = 8;
+            emitA.unk10 = 0.03999999911f;
+            emitA.unk14 = 0.02999999933f;
+            emitA.unk18 = 0x1E;
+            emitA.unk1A = 0x1E;
+            emitA.unk1C = -1.467000127f;
+            emitA.unk20 = 0.756000042f;
+            emitA.unk24 = 0x9B;
+            emitA.unk25 = 0x64;
+            emitA.unk28 = 403.0f;
+            emitA.unk2C = 455.0f;
+            emitA.unk30 = 1;
+            emitA.unk31 = 2;
+            emitA.unk34 = 0.0f;
+            emitA.unk38 = 1;
+            emitA.unk3C = 0.0f;
+            a.unk28 = 750.0f;
+            func_1514FF44(&a, &emitA, &dst, arg1, arg2);
+        }
+        {
+            EmitB151D09A8 emitB;
+
+            emitB.unk0 = pos;
+            emitB.unkC = 10.0f;
+            emitB.unk10 = 25.0f;
+            emitB.unk14 = 1.253000021f;
+            emitB.unk18 = 0.8230000138f;
+            emitB.unk1C = 0.03500000015f;
+            emitB.unk20 = 0.03199999779f;
+            emitB.unk24 = 0xF;
+            emitB.unk26 = 8;
+            emitB.unk28 = 3;
+            emitB.unk2A = 2;
+            emitB.unk2C = 0x1E;
+            emitB.unk2E = 0x19;
+            emitB.unk30 = 0x9B;
+            emitB.unk32 = 0x64;
+            emitB.unk38 = 0.0f;
+            emitB.unk3C = 0x10;
+            emitB.unk3E = 0xF;
+            emitB.unk40 = 0;
+            emitB.unk34 = 2;
+            a.unk28 = 750.0f;
+            func_15153CCC(&a, &emitB, &dst, arg1, arg2);
+        }
+        if (func_1514F6E8(&a) != 0) {
+            s32 count;
+            Particle151D09A8 spawn;
+            void *ret;
+            s32 pad;
+
+            a.unk28 = 1000.0f;
+            count = (func_150ADA20() % 6U) + 5;
+            spawn.unk1D = 0x3E;
+            spawn.unk8 = 0x2203;
+            spawn.unk0 = 0x200005;
+            spawn.unk4 = 0;
+            spawn.unkC = 0;
+            spawn.unk10 = 0;
+            spawn.unk14 = 0;
+            spawn.unk15 = 0;
+            spawn.unk16 = 0;
+            spawn.unk17 = 0xFF;
+            spawn.unk18 = 0;
+            spawn.unk19 = 0;
+            spawn.unk1A = 0;
+            spawn.unk1B = 0;
+            spawn.unk1C = 0xFF;
+            spawn.pos = pos;
+            spawn.unk3C = *(struct17 *)&D_800A5480;
+            spawn.unk22 = 1;
+            spawn.unk58 = 0xC007;
+            spawn.unk24 = 1.0f;
+            spawn.unkA = (func_150ADA20() % 11U) + 0x28;
+            spawn.unk1E = 1;
+            spawn.unk20 = 0xFF;
+            spawn.unk60 = 6;
+            spawn.unk61 = 8;
+            spawn.unk64 = -1;
+            spawn.unk62 = -1;
+            spawn.unk63 = -1;
+            spawn.unk65 = 0xB;
+            spawn.unk5C = 0;
+            spawn.unk66 = 0xFF;
+            spawn.unk68 = 0;
+            spawn.unk2C = 0.0f;
+            spawn.unk28 = 0.0f;
+            spawn.unk6C = 10000.0f;
+            while (count != 0) {
+                func_1514F808(&a, (func_150ADA68() * 0.03999999911f) + 0.04999999702f, &spawn.vel);
+                spawn.unk54 = (func_150ADA68() * 1.340000033f) + -2.328999996f;
+                ret = func_15130280(&spawn, 1, 0, 4, arg1, arg2);
+                if (ret != NULL) {
+                    *(struct260 **)((u8 *)ret + 0xA8) = func_151CEAAC(NULL, ret, 0, arg1, arg2);
+                }
+                count--;
+            }
+        }
+    }
+}
 
 void func_151D0ED8(void *arg0) {
     if (*(struct102 **)((u8 *)arg0 + 0xA8) != 0) {
