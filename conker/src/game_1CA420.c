@@ -362,7 +362,217 @@ s32 func_1519D240(Arg1519D240 *arg0)
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1CA420/func_1519D454.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1CA420/func_1519D9F4.s")
+typedef struct {
+    f32 x, y, z;
+} Vec3f_1519D9F4;
+
+typedef struct {
+    Vec3f_1519D9F4 pos;
+    u8 pad0C[0xC];
+    f32 width;
+    s16 life;
+    u8 pad1E[2];
+    u8 alpha;
+    u8 level;
+    u8 pad22[2];
+} Point1519D9F4;
+
+typedef struct {
+    u8 pad0[0x10];
+    Vec3f_1519D9F4 pos;
+    u8 pad1C[2];
+    u16 unk1E;
+    u8 pad20[5];
+    u8 unk25;
+    u8 pad26[6];
+    s8 unk2C;
+    s8 unk2D;
+    s8 unk2E;
+    u8 pad2F[0x84 - 0x2F];
+    u8 unk84[0x10];
+    Point1519D9F4 *points;
+    Payload1519D030 *style;
+} Owner1519D9F4;
+
+extern u8 D_80090CD4[];
+extern s32 D_800D2C9C;
+void func_151D5D60(void *, s16, s32, void **, u8 *);
+Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
+Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
+Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
+Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
+Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
+
+Gfx *func_1519D9F4(Owner1519D9F4 *arg0, Gfx *gfx, s16 arg2) {
+    Vtx *vtx;
+    Payload1519D030 *style;
+    Point1519D9F4 *points;
+    Vec3f_1519D9F4 b;
+    Vec3f_1519D9F4 a;
+    s32 j;
+    s32 i;
+    u8 level;
+    u8 prev;
+    s16 alpha;
+    s16 prevAlpha;
+    u8 update;
+    f32 pdz;
+    f32 pdx;
+    f32 dz;
+    f32 dx;
+    s16 count;
+    u8 fade;
+    s32 k;
+
+    if (arg0->unk2C >= 2) {
+        func_151D5D60(arg0->unk84, arg2, (arg0->unk25 * 2 + 10) * sizeof(Vtx), (void **)&vtx, NULL);
+        if (vtx != NULL) {
+            style = arg0->style;
+            points = arg0->points;
+            update = 1;
+            if (style->unk6 & 2) {
+                u8 fade1;
+                s16 count1;
+
+                fade1 = 0;
+                count1 = style->unk5C;
+                k = arg0->unk2D;
+                do {
+                    points[k].alpha = fade1;
+                    k++;
+                    fade1 += style->unk5D;
+                    if (k == arg0->unk25) {
+                        k = 0;
+                    }
+                    count1--;
+                } while (count1 != 0 && k != arg0->unk2E);
+            }
+            if (style->unk6 & 4) {
+                fade = 0;
+                count = style->unk5E;
+                k = arg0->unk2E - 1;
+                if (k < 0) {
+                    k = arg0->unk25 - 1;
+                }
+                do {
+                    points[k].alpha = (points[k].alpha * fade) >> 8;
+                    k--;
+                    fade += style->unk5F;
+                    count--;
+                    if (k < 0) {
+                        k = arg0->unk25 - 1;
+                    }
+                } while (count != 0 && k != arg0->unk2E);
+            }
+            gfx = func_15142E24(gfx, (s32)D_80090CD4, 0, 0, 0, 0, 0x1F, 0, 0, &update, 3);
+            gfx = func_15142C10(gfx, style->unk40, style->unk40, style->unk40, 0xFF, &update);
+            gfx = func_1513F4E4(gfx, 6, &update);
+            gfx = func_15142B7C(gfx, 1, 0x160600);
+            gfx = func_15142FBC(gfx, D_800D2C9C | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, 0x5049D8, &update);
+            if (arg0->unk1E & 2) {
+                j = arg0->unk2E - 1;
+                if (j < 0) {
+                    j = arg0->unk25 - 1;
+                }
+                a = arg0->pos;
+                prev = points[j].level;
+                dx = points[j].width * D_800DD1E8[arg2];
+                dz = points[j].width * D_800DD1D8[arg2];
+                prevAlpha = (points[j].life * points[j].alpha) >> 8;
+            } else {
+                i = arg0->unk2E - 1;
+                if (i < 0) {
+                    i = arg0->unk25 - 1;
+                }
+                j = i - 1;
+                if (j < 0) {
+                    j = arg0->unk25 - 1;
+                }
+                a = points[i].pos;
+                dx = points[i].width * D_800DD1E8[arg2];
+                prev = points[i].level;
+                dz = points[i].width * D_800DD1D8[arg2];
+                prevAlpha = (points[i].life * points[i].alpha) >> 8;
+            }
+            b = points[j].pos;
+            pdx = points[j].width * D_800DD1E8[arg2];
+            level = points[j].level;
+            pdz = points[j].width * D_800DD1D8[arg2];
+            alpha = (points[j].life * points[j].alpha) >> 8;
+            vtx->v.ob[0] = (s16)(s32)(a.x + dx);
+            vtx->v.ob[1] = (s16)(s32)a.y;
+            vtx->v.ob[2] = (s16)(s32)(a.z - dz);
+            vtx->v.tc[0] = prev << 6;
+            vtx->v.tc[1] = 0x7C0;
+            vtx->v.cn[0] = 0xFF;
+            vtx->v.cn[1] = 0xFF;
+            vtx->v.cn[2] = 0xFF;
+            vtx->v.cn[3] = prevAlpha;
+            vtx->v.flag = 0;
+            vtx++;
+            vtx->v.ob[0] = (s16)(s32)(a.x - dx);
+            vtx->v.ob[1] = (s16)(s32)a.y;
+            vtx->v.ob[2] = (s16)(s32)(a.z + dz);
+            vtx->v.tc[0] = prev << 6;
+            vtx->v.tc[1] = 0;
+            vtx->v.cn[0] = 0xFF;
+            vtx->v.cn[1] = 0xFF;
+            vtx->v.cn[2] = 0xFF;
+            vtx->v.cn[3] = prevAlpha;
+            vtx->v.flag = 0;
+            vtx++;
+            do {
+                vtx->v.ob[0] = (s16)(s32)(b.x + pdx);
+                vtx->v.ob[1] = (s16)(s32)b.y;
+                vtx->v.ob[2] = (s16)(s32)(b.z - pdz);
+                vtx->v.tc[0] = level << 6;
+                vtx->v.tc[1] = 0x7C0;
+                vtx->v.cn[0] = 0xFF;
+                vtx->v.cn[1] = 0xFF;
+                vtx->v.cn[2] = 0xFF;
+                vtx->v.cn[3] = alpha;
+                vtx->v.flag = 0;
+                vtx++;
+                vtx->v.ob[0] = (s16)(s32)(b.x - pdx);
+                vtx->v.ob[1] = (s16)(s32)b.y;
+                vtx->v.ob[2] = (s16)(s32)(b.z + pdz);
+                vtx->v.tc[0] = level << 6;
+                vtx->v.tc[1] = 0;
+                vtx->v.cn[0] = 0xFF;
+                vtx->v.cn[1] = 0xFF;
+                vtx->v.cn[2] = 0xFF;
+                vtx->v.cn[3] = alpha;
+                vtx->v.flag = 0;
+                vtx++;
+                gSPVertex(gfx++, vtx - 4, 4, 0);
+                gSP1Triangle(gfx++, 0, 1, 2, 0);
+                gSP1Triangle(gfx++, 1, 3, 2, 0);
+                if (prev < level) {
+                    memcpy(vtx, vtx - 2, 0x20);
+                    vtx[-2].v.tc[0] -= 0x4000;
+                    vtx++;
+                    vtx[-2].v.tc[0] -= 0x4000;
+                    vtx++;
+                }
+                i = j;
+                j--;
+                if (j < 0) {
+                    j = arg0->unk25 - 1;
+                }
+                if (i != arg0->unk2D) {
+                    prev = level;
+                    a = points[i].pos;
+                    b = points[j].pos;
+                    pdx = points[j].width * D_800DD1E8[arg2];
+                    level = points[j].level;
+                    pdz = points[j].width * D_800DD1D8[arg2];
+                    alpha = (points[j].life * points[j].alpha) >> 8;
+                }
+            } while (i != arg0->unk2D);
+        }
+    }
+    return gfx;
+}
 
 typedef struct {
     s32 unk0;
