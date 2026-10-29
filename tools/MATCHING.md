@@ -66,7 +66,10 @@ function is right but something ELSE in the bin changed — e.g. a new literal i
    register (`register` does not avoid it); arrays/structs are sized as declared; a float passed
    in a GPR (`mfc1` to a0-a3) or a comparison result passed as a stack argument can reserve
    extra unused words. Use `-U 1000` to see every sp offset unfolded.
-5. Keep your best version (copy the .c aside) — don't wander away from a lower score.
+5. Your best version is kept automatically: every check that beats your best so far is
+   snapshotted to `best/file.c` in the workspace and to `~/conker/.nearmiss/` (nothing is ever
+   lost, and a later attempt starts from it). Still, don't wander away from your best — restore
+   from `best/file.c` when a line of attack fails.
 6. After one failed sweep of a hypothesis family (e.g. statement orders), switch families
    instead of repeating it; record the sweep in the ledger.
 
