@@ -155,7 +155,167 @@ s32 func_1518BCD0(void *arg0, u8 arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1B8F40/func_1518BD60.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1B8F40/func_1518C0B8.s")
+typedef struct { f32 x, y, z; } Vec3f_C0B8;
+typedef struct { s16 x, y, z; } Vec3s_C0B8;
+
+typedef struct {
+    s32 unk0;
+    u8 pad4[0x37];
+    u8 unk3B;
+    u8 pad3C[0x1AC - 0x3C];
+    Vec3s_C0B8 points[2];
+    s8 unk1B8;
+    u8 pad1B9;
+    s8 unk1BA;
+    u8 pad1BB[0x1D4 - 0x1BB];
+    s32 unk1D4;
+} Model_C0B8;
+
+typedef struct {
+    u8 pad0[0x24];
+    Model_C0B8 *model;
+    u8 unk28;
+    u8 pad29[0x34 - 0x29];
+    f32 unk34[2];
+    f32 unk3C[2];
+} Obj_C0B8;
+
+typedef struct {
+    Obj_C0B8 *obj;
+    s8 idx;
+} Sub_C0B8;
+
+typedef struct {
+    u8 pad0[4];
+    f32 vx;
+    f32 vy;
+    f32 vz;
+    f32 grav;
+    u8 pad14[4];
+    u8 flags;
+    u8 pad19[7];
+    u8 state;
+    u8 pad21[0x48 - 0x21];
+    Sub_C0B8 sub;
+    Vec3f_C0B8 offs[1];
+} Ctrl_C0B8;
+
+typedef struct {
+    Vec3f_C0B8 pos;
+    f32 w;
+    u16 ang;
+} Elem_C0B8;
+
+typedef struct {
+    u8 pad0[0x25];
+    u8 max;
+    u8 pad26[6];
+    s8 n;
+    s8 tail;
+    s8 head;
+    u8 pad2F[0x94 - 0x2F];
+    Elem_C0B8 *elems;
+    Ctrl_C0B8 *ctrl;
+} Trail_C0B8;
+
+s32 func_1518C0B8(Trail_C0B8 *arg0) {
+    Ctrl_C0B8 *ctrl;
+    Elem_C0B8 *elems;
+    s32 i;
+    Sub_C0B8 *sub;
+    Vec3f_C0B8 *offs;
+    Vec3f_C0B8 pos;
+    f32 dx;
+    f32 dz;
+    f32 len2;
+    f32 c;
+    f32 s;
+    f32 inv;
+    u16 ang;
+    u16 step;
+    f32 ox;
+    f32 oz;
+    f32 invdt;
+    f32 rx;
+    f32 rz;
+
+    elems = arg0->elems;
+    ctrl = arg0->ctrl;
+    sub = &ctrl->sub;
+    offs = ctrl->offs;
+    i = arg0->tail;
+    if (sub->obj->model == NULL || sub->obj->model->unk0 == 0 || sub->obj->model->unk1D4 == 0 ||
+        sub->obj->model->unk3B != sub->obj->unk28) {
+        return 0;
+    }
+    pos.x = sub->obj->model->points[sub->idx].x;
+    pos.y = sub->obj->model->points[sub->idx].y;
+    pos.z = sub->obj->model->points[sub->idx].z;
+    dx = sub->obj->model->unk1B8 * 0.00390625f;
+    dz = sub->obj->model->unk1BA * 0.00390625f;
+    len2 = dx * dx + dz * dz;
+    if (len2) {
+        extern f32 sqrtf(f32);
+
+        inv = 1.0f / sqrtf(len2);
+        c = dx * inv;
+        s = dz * inv;
+    } else {
+        s = c = 0.0f;
+    }
+    while (i != arg0->head) {
+        elems[i].w -= ctrl->grav * D_800BE9A4;
+        offs[i].x += ctrl->vx * D_800BE9A4;
+        offs[i].y += elems[i].w;
+        offs[i].z += ctrl->vz * D_800BE9A4;
+        elems[i].pos.x = (pos.x + offs[i].x * s) + offs[i].z * c;
+        elems[i].pos.y = offs[i].y + pos.y;
+        elems[i].pos.z = (pos.z + offs[i].z * s) - offs[i].x * c;
+        i++;
+        if (i == arg0->max) {
+            i = 0;
+        }
+    }
+    if (arg0->n < arg0->max - 1) {
+        ang = 0;
+        step = 0;
+        if (arg0->n != 0) {
+            step = 0x1000 / arg0->n;
+        }
+        elems[arg0->head].pos = pos;
+        elems[arg0->head].w = 0.0f;
+        offs[arg0->head].x = 0.0f;
+        offs[arg0->head].y = 0.0f;
+        offs[arg0->head].z = 0.0f;
+        arg0->n++;
+        arg0->head++;
+        if (arg0->head == arg0->max) {
+            arg0->head = 0;
+        }
+        for (i = arg0->tail; i != arg0->head;) {
+            elems[i].ang = ang;
+            i++;
+            ang += step;
+            if (i == arg0->max) {
+                i = 0;
+            }
+        }
+    } else {
+        invdt = 1.0f / D_800BE9A4;
+        rx = ctrl->vx * s + ctrl->vz * c;
+        rz = ctrl->vz * s - ctrl->vx * c;
+        ox = (pos.x - sub->obj->unk34[sub->idx]) * invdt;
+        oz = (pos.z - sub->obj->unk3C[sub->idx]) * invdt;
+        ctrl->vx = rx + ox;
+        ctrl->vz = rz + oz;
+        if (ctrl->flags & 0x17) {
+            ctrl->state = 3;
+        } else {
+            ctrl->state = 2;
+        }
+    }
+    return 1;
+}
 
 s32 func_1518C540(void* arg0) {
     s32 v1;
