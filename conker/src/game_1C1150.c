@@ -21,16 +21,69 @@ extern s32 func_1518D1C0(struct127 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4
 extern u8 D_800A8244[];
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1C1150/func_15193CA0.s")
+extern void func_151C329C(f32 *arg0, s32 arg1, s32 arg2);
+extern void func_151DC260(f32 *arg0, f32 *arg1, s32 arg2, s32 arg3, s32 arg4);
+extern void func_151DC484(f32 *arg0, f32 *arg1, s32 arg2, s32 arg3, s32 arg4);
+extern s32 func_150A11C4;
+extern s32 func_150A1DA0;
 
-extern void func_15193CA0(s32, s32, s32, s32);
+void func_15193CA0(struct127 *arg0, u8 arg1, u8 arg2, s32 arg3) {
+    f32 pos[3];
+    f32 scratch[9];
+    s32 type;
+
+    func_1504715C(scratch, arg0);
+    pos[0] = D_800CC2C0;
+    pos[1] = D_800CC2C4;
+    pos[2] = D_800CC2C8;
+    {
+        u32 start;
+        u32 sum;
+        u32 end;
+        s32 pad;
+
+        start = (u32)&func_150A11C4;
+        end = (u32)&func_150A1DA0;
+        sum = 0;
+        for (; start < end; start += 4) {
+            sum ^= *(u32 *)start;
+        }
+        if (sum != 0xA3C35D52) {
+            start = (u32)&((s32 *)&D_80043B40)[(osGetCount() & 0xFF) * 8];
+            *(s32 *)start = osGetCount() & 0x3FFFF7;
+        }
+    }
+    if (arg0->id == 6 || arg0->id == 6 || arg0->id == 9 || arg0->id == 0xC || arg0->id == 0xF || arg0->id == 0x10 || arg0->id == 0x12 || arg0->id == 0x17 || arg0->id == 0x1B || arg0->id == 0x1E || arg0->id == 0x28 || arg0->id == 0x29 || arg0->id == 0x2A || arg0->id == 0x2B || arg0->id == 0x2C || arg0->id == 0x2D || arg0->id == 0x2E || arg0->id == 0x30 || arg0->id == 0x34 || arg0->id == 0x38 || arg0->id == 0x3A || arg0->id == 0x41 || arg0->id == 0x42 || arg0->id == 0x4B || arg0->id == 0x46 || arg0->id == 0x47 || arg0->id == 0x49 || arg0->id == 0x4A || arg0->id == 0x4C || arg0->id == 0x4D || arg0->id == 0x4E || arg0->id == 0x4F || arg0->id == 0x51 || arg0->id == 0x52 || arg0->id == 0x55 || arg0->id == 0x56 || arg0->id == 0x5D || arg0->id == 0x60 || arg0->id == 0x61 || arg0->id == 0x62 || arg0->id == 0x63 || arg0->id == 0x66 || arg0->id == 0x67 || arg0->id == 0x6F || arg0->id == 0x70 || arg0->id == 0x73 || arg0->id == 0x77 || arg0->id == 0x7B || arg0->id == 0x7D || arg0->id == 0x7E || arg0->id == 0x7F || arg0->id == 0x82 || arg0->id == 0x83 || arg0->id == 0x84 || arg0->id == 0x89 || arg0->id == 0x8C || arg0->id == 0x8E || arg0->id == 0x8F || arg0->id == 0x91 || arg0->id == 0x94 || arg0->id == 0x9E || arg0->id == 0xA1 || arg0->id == 0xA6 || arg0->id == 0xAB || arg0->id == 0xAC || arg0->id == 0xB2 || arg0->id == 0xB4 || arg0->id == 0xB7 || arg0->id == 0xB8 || arg0->id == 0xB9) {
+        func_151C329C(pos, arg2, arg3);
+        return;
+    }
+    if (arg0->id == 5 || arg0->id == 5 || arg0->id == 7 || arg0->id == 0x13 || arg0->id == 0x20 || arg0->id == 0x23 || arg0->id == 0x44 || arg0->id == 0x5A || arg0->id == 0x5C || arg0->id == 0x5E || arg0->id == 0x5F || arg0->id == 0x6D || arg0->id == 0x74 || arg0->id == 0x75 || arg0->id == 0x78 || arg0->id == 0x7A || arg0->id == 0x8A || arg0->id == 0x8D || arg0->id == 0xAD || arg0->id == 0xAE || arg0->id == 0xAF || arg0->id == 0xB1) {
+        type = 1;
+    } else if (arg0->id == 0 || arg0->id == 1 || arg0->id == 2 || arg0->id == 3 || arg0->id == 4 || arg0->id == 0x96 || arg0->id == 8 || arg0->id == 0xA || arg0->id == 0x11 || arg0->id == 0x14 || arg0->id == 0x16 || arg0->id == 0x1A || arg0->id == 0x21 || arg0->id == 0x22 || arg0->id == 0x26 || arg0->id == 0x27 || arg0->id == 0x31 || arg0->id == 0x36 || arg0->id == 0x3B || arg0->id == 0x3E || arg0->id == 0x50 || arg0->id == 0x53 || arg0->id == 0x54 || arg0->id == 0x58 || arg0->id == 0x5B || arg0->id == 0x64 || arg0->id == 0x69 || arg0->id == 0x71 || arg0->id == 0x6B || arg0->id == 0x72 || arg0->id == 0x76 || arg0->id == 0x79 || arg0->id == 0x80 || arg0->id == 0x86 || arg0->id == 0x87 || arg0->id == 0x88 || arg0->id == 0x90 || arg0->id == 0x97 || arg0->id == 0x98 || arg0->id == 0x9A || arg0->id == 0x9B || arg0->id == 0x9C || arg0->id == 0x9D || arg0->id == 0x9F || arg0->id == 0xA0 || arg0->id == 0xA2 || arg0->id == 0xA4 || arg0->id == 0xA5 || arg0->id == 0xA7 || arg0->id == 0xB0 || arg0->id == 0xB3 || arg0->id == 0xB5 || arg0->id == 0xB6) {
+        type = 0;
+    } else if (arg0->id == 0x25 || arg0->id == 0x25 || arg0->id == 0x92 || arg0->id == 0x95) {
+        type = 2;
+    } else if (arg0->id == 0x3F) {
+        type = 6;
+    } else if (arg0->id == 0x93) {
+        type = 5;
+    } else {
+        return;
+    }
+    if (arg1) {
+        func_151DC484(pos, scratch, type, arg2, arg3);
+        return;
+    }
+    func_151DC260(pos, scratch, type, arg2, arg3);
+}
+
 
 void func_151942B0(s32 arg0, s32 arg1, s32 arg2) {
-    func_15193CA0(arg1, 0, 0xFF, 1);
+    func_15193CA0((struct127 *)arg1, 0, 0xFF, 1);
 }
 
 void func_151942E8(s32 arg0, s32 arg1, s32 arg2) {
-    func_15193CA0(arg1, 1, 0xFF, 1);
+    func_15193CA0((struct127 *)arg1, 1, 0xFF, 1);
 }
 
 typedef struct Game1C1150Event {
