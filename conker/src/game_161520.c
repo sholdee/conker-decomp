@@ -1527,7 +1527,94 @@ void func_15139768(Obj15139768 *arg0, s32 arg1, f32 arg2, s32 arg3, u8 arg4, s32
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15139D74.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_1513A24C.s")
+typedef struct {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ Vec3f_36C3C pos;
+    /* 0x14 */ s16 unk14;
+    /* 0x16 */ s16 unk16;
+    /* 0x18 */ s16 unk18;
+    /* 0x1A */ s16 unk1A;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ s16 unk2C;
+    /* 0x2E */ s16 unk2E;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ f32 unk34;
+    /* 0x38 */ f32 unk38;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ u8 unk40;
+} Cfg080C_1513A24C;
+
+typedef struct {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ u16 unk4;
+    /* 0x06 */ s8 unk6;
+    /* 0x08 */ s32 unk8;
+} Extra080C_1513A24C;
+
+void func_1515080C(Cfg080C_1513A24C *, s32 *, f32 *, s32, Extra080C_1513A24C *, s32, s32, s32, s32, void *, f32, s32, s32, u8, s32);
+void func_15133E3C(s32, u8);
+
+void func_1513A24C(Vec3f_36C3C *arg0, s32 *arg1, f32 *arg2, s32 arg3, f32 arg4, u8 arg5, u8 arg6, u8 *arg7, void *arg8, u8 arg9, s32 argA) {
+    Cfg080C_1513A24C a;
+    Extra080C_1513A24C b;
+    s32 flag;
+
+    a.unk0 = 0x28;
+    a.unk4 = 0;
+    a.pos = *arg0;
+    a.unk14 = 0;
+    a.unk16 = 0xFF;
+    a.unk2C = 0x1E0;
+    a.unk2E = 0xF0;
+    a.unk30 = 1 * arg4;
+    a.unk34 = 0 * arg4;
+    a.unk40 = arg6;
+    b.unk0 = 4;
+    flag = -1;
+    a.unk18 = -0x40;
+    a.unk1A = 0xC;
+    a.unk20 = 5.0f;
+    a.unk3C = 1.0f;
+    a.unk1C = 13.0f;
+    a.unk24 = -1.007000089f;
+    a.unk28 = 0.2520000041f;
+    a.unk38 = 16.10200119f;
+    switch (arg5) {
+    case 0x13:
+        if (D_800BE9F0 == 0x3C) {
+            a.unk3C = 0.0f;
+        }
+        break;
+    case 0xD:
+        a.unk18 = -0x2E;
+        a.unk1A = 0x14;
+        a.unk1C = 15.0f;
+        a.unk20 = 8.0f;
+        a.unk24 = -1.262000084f;
+        a.unk28 = 0.4900000095f;
+        a.unk38 = 12.91100025f;
+        break;
+    case 1: {
+        const u16 tbl[4] = { 0x83, 0x81, 0x82, 0x84 };
+        s32 idx;
+        idx = arg7[0x128];
+        if (idx >= 4) {
+            idx = 3;
+        }
+        b.unk4 = tbl[idx];
+        b.unk6 = 6;
+        b.unk8 = 3;
+        flag = 1;
+        break;
+    }
+    }
+    func_1515080C(&a, arg1, arg2, arg3, &b, 0xC, 6, 1, flag, arg8, 5.0f, 1, D_800BE616 ? 1 : 0, arg9, argA);
+    func_15133E3C(0, 0x45);
+}
 
 typedef struct {
     s32 x;
