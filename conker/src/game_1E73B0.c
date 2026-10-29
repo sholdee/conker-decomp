@@ -363,7 +363,135 @@ s32 func_151BC64C(u8 *actor) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E73B0/func_151BC794.s")
+typedef struct Trail151BC794 {
+    struct17 pos;
+    s16 lifetime;
+    u8 alpha;
+    u8 padF;
+    f32 rot;
+} Trail151BC794;
+
+typedef struct Src151BC794 {
+    s32 unk0;
+    u8 pad4[0x10];
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    u8 pad20[0x1B];
+    u8 unk3B;
+} Src151BC794;
+
+typedef struct Data151BC794 {
+    Src151BC794 *src;
+    u8 unk4;
+    u8 pad5[3];
+    struct17 pos;
+    f32 count;
+    f32 unk18;
+    f32 unk1C;
+    f32 rot;
+} Data151BC794;
+
+typedef struct Actor151BC794 {
+    u8 pad0[0x10];
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    u8 pad1C[2];
+    u16 unk1E;
+    u8 pad20[5];
+    u8 unk25;
+    u8 pad26[6];
+    s8 unk2C;
+    s8 unk2D;
+    s8 unk2E;
+    u8 pad2F[0x65];
+    Trail151BC794 *entries;
+    Data151BC794 *data;
+} Actor151BC794;
+
+extern f32 func_15143E64(struct17 *);
+
+s32 func_151BC794(Actor151BC794 *arg0) {
+    Data151BC794 *data;
+    Trail151BC794 *entries;
+    Src151BC794 *src;
+    struct17 diff;
+    Trail151BC794 *entry;
+    f32 dist;
+    f32 inv;
+    f32 rot0;
+
+    data = arg0->data;
+    entries = arg0->entries;
+    src = data->src;
+    if (src->unk0 == 0 || src->unk3B != data->unk4) {
+        arg0->unk1E |= 8;
+        return 1;
+    }
+    arg0->unk10 = src->unk14;
+    arg0->unk14 = src->unk18;
+    arg0->unk18 = src->unk1C;
+    diff.unk0 = arg0->unk10 - data->pos.unk0;
+    diff.unk4 = arg0->unk14 - data->pos.unk4;
+    diff.unk8 = arg0->unk18 - data->pos.unk8;
+    dist = func_15143E64(&diff);
+    data->count += dist * 0.04870799929f * D_800BE9A4;
+    data->unk1C += dist * 9.708835602f;
+    if (data->count > 1.0f) {
+        struct17 pos;
+        f32 rot;
+        f32 y;
+        f32 yStep;
+        f32 dx;
+        f32 dy;
+        f32 dz;
+        f32 delta;
+
+        inv = 1.0f / data->count;
+        y = data->unk18 + D_800BE9A4;
+        pos = data->pos;
+        rot0 = data->rot;
+        rot = rot0;
+        yStep = -(y * inv);
+        dx = diff.unk0 * inv;
+        dy = diff.unk4 * inv;
+        dz = diff.unk8 * inv;
+        delta = data->unk1C - rot0;
+        do {
+            entry = &entries[arg0->unk2E];
+            entry->pos = pos;
+            entry->lifetime = 12;
+            entry->alpha = 100;
+            entry->rot = rot;
+            while (entry->rot > 16384.0f) {
+                entry->rot -= 32768.0f;
+            }
+            arg0->unk2E++;
+            if (arg0->unk2E == arg0->unk25) {
+                arg0->unk2E = 0;
+            }
+            arg0->unk2C++;
+            if (arg0->unk2E == arg0->unk2D) {
+                arg0->unk2D++;
+                if (arg0->unk2D == arg0->unk25) {
+                    arg0->unk2D = 0;
+                }
+                arg0->unk2C--;
+            }
+            rot += delta * inv;
+            pos.unk0 += dx;
+            pos.unk4 += dy;
+            pos.unk8 += dz;
+            y += yStep;
+            data->count -= 1.0f;
+        } while (data->count > 1.0f);
+        data->pos = pos;
+        data->rot = rot;
+        data->unk18 = y;
+    }
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1E73B0/func_151BCA90.s")
 
