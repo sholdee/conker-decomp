@@ -506,7 +506,71 @@ void func_151076A4(struct102 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_133190/func_15107700.s")
+struct S15107700Payload {
+    struct127 *unk0;
+    u8 unk4;
+    u8 pad5;
+    s16 unk6;
+    s16 unk8;
+    u8 padA[2];
+};
+
+struct S15107C1CCreated *func_15107700(struct127 *arg0, s16 arg1, s16 arg2, s16 arg3, s32 arg4, f32 arg5, f32 arg6, s16 arg7, s16 arg8, u8 *arg9, u8 argA, s32 argB) {
+    struct S15107700Payload payload;
+    struct S15107C1CCreated *created;
+    struct S15107C1CInit init;
+    struct S15107C1CTrace trace;
+    struct Vec15107A20 vec;
+    s32 flag;
+    if (arg0->unk1D4 == NULL) {
+        return NULL;
+    }
+
+    payload.unk0 = arg0;
+    payload.unk4 = arg0->unique_id;
+    payload.unk6 = arg1;
+    payload.unk8 = arg2;
+
+    if (arg3 == -1) {
+        init.unk0 = 0x12C;
+    } else {
+        init.unk0 = arg3;
+    }
+    if (arg3 == -1) {
+        flag = 0;
+    } else {
+        flag = 1;
+    }
+    init.unk2 = flag;
+    init.unk34 = 0;
+    init.unk38 = arg4;
+    init.unk3C = arg5;
+    init.unk40 = arg6;
+    init.unk44 = arg7;
+    init.unk46 = arg8;
+    *(struct S15107C1CBytes4 *)&init.unk48 = *(struct S15107C1CBytes4 *)arg9;
+    init.unk4C = 2;
+
+    /* block-scoped declaration: its debug scope marker keeps IDO from hoisting &init.unk48 out of this block */
+    {
+    void func_15107A20(struct127 *arg0, s32 arg1, s32 arg2, struct Vec15107A20 *arg3, struct Vec15107A20 *arg4);
+    func_15107A20(arg0, arg1, arg2, &init.unk4, &vec);
+    func_15081690(arg0, init.unk4.x, init.unk4.y, init.unk4.z, init.unk4.x - vec.x, init.unk4.y - vec.y, init.unk4.z - vec.z, &trace, 0.0f, 0, 1, 1, -1, 0, 0);
+
+    }
+    if (trace.unk59 == 0) {
+        return NULL;
+    }
+    init.unk28 = trace.unk8;
+
+    func_15107AE0(&init.unk4, &init.unk28, &init.unk10, &init.unk1C);
+    created = func_15105CE0(&init, 0xC, argA, argB);
+    if (created != NULL) {
+        memcpy(created->unk60, &payload, 0xC);
+    }
+    return created;
+}
+
 
 void func_151078E4(s32 *arg0, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, arg0[0x18], arg0[0x18] + 4, (s32)arg0);
