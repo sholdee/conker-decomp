@@ -129,7 +129,125 @@ void func_151C5E74(f32 *a0, f32 *a1, f32 *a2, f32 *a3, f32 arg4, u8 *arg5) {
     func_151D9014(sp6C, sp54, 1, sp50, sp4E, sp4D, sp48, 0, 1.0f, 1.0f, 1, 0, 1, 0, arg5[0xC], arg5[1]);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1F2730/func_151C5F44.s")
+typedef struct {
+    u32 unk00;
+    s32 unk04;
+    s16 unk08;
+    s16 unk0A;
+    s32 unk0C;
+    s32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 unk16;
+    u8 unk17;
+    u8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+    u8 unk1C;
+    u8 unk1D;
+    s16 unk1E;
+    s16 unk20;
+    s16 unk22;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    struct17 unk30;
+    f32 unk3C;
+    f32 unk40;
+    f32 unk44;
+    struct17 unk48;
+    f32 unk54;
+    u32 unk58;
+    s32 unk5C;
+    u8 unk60;
+    u8 unk61;
+    u8 unk62;
+    s8 unk63;
+    s8 unk64;
+    u8 unk65;
+    u8 unk66;
+    u8 pad67;
+    s16 unk68;
+    u8 pad6A[2];
+    f32 unk6C;
+} Params151C5F44; /* 0x70 */
+
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    f32 unk4;
+} Extra151C5F44;
+
+extern void *func_15130280(void *, u8, s32, s32, u8, s32);
+
+void *func_151C5F44(struct17 *arg0, struct17 *arg1, f32 arg2, f32 arg3, u8 arg4, s16 arg5, f32 arg6, u8 arg7,
+                    s32 arg8, u8 arg9, s32 argA) {
+    Params151C5F44 params;
+    f32 scale;
+    void *ret;
+    Extra151C5F44 extra;
+    s32 r2;
+    s32 flag;
+    s32 r1;
+
+    scale = arg3;
+    params.unk1D = 0x6C;
+    params.unk08 = 0x5103;
+    params.unk00 = 0x200005;
+    params.unk04 = 0;
+    params.unk0C = 0;
+    params.unk10 = 0;
+    params.unk1E = 0x14;
+    params.unk20 = 0xC;
+    r1 = ((func_150ADA20() & 1) ? 0x40 : 0);
+    flag = (arg5 == -1) ? 0 : 1;
+    r2 = (func_150ADA20() & 1) ? 0x80 : 0;
+    params.unk58 = r2 | flag | 2 | 4 | r1 | 0x4000 | 0x8000 | 0x200 | 0x800000;
+    params.unk60 = 8;
+    params.unk61 = 6;
+    if (arg7) {
+        params.unk62 = 0x1D;
+    } else {
+        params.unk62 = 0xA;
+    }
+    params.unk63 = -1;
+    params.unk64 = -1;
+    params.unk22 = 1;
+    params.unk65 = 0;
+    extra.unk0 = 1;
+    extra.unk1 = 0;
+    params.unk14 = 0xE2;
+    params.unk15 = 0xB2;
+    params.unk16 = 0x60;
+    params.unk17 = 0xFF;
+    params.unk18 = 0x39;
+    params.unk19 = 0xF;
+    params.unk1A = 0;
+    params.unk1C = 0xFF;
+    params.unk24 = 1.0f;
+    extra.unk4 = 0.7030000091f;
+    params.unk30 = *arg0;
+    params.unk3C = 0.0f;
+    params.unk40 = 0.0f;
+    params.unk44 = 0.0f;
+    params.unk48 = *arg1;
+    params.unk54 = arg2;
+    params.unk1B = arg4;
+    if (arg5 == -1) {
+        params.unk0A = 0x12C;
+    } else {
+        params.unk0A = arg5;
+    }
+    params.unk2C = arg6;
+    params.unk28 = arg6;
+    ret = func_15130280(&params, 1, arg8, 0x10, arg9, argA);
+    if (ret != NULL) {
+        memcpy((u8 *)ret + 0xA8, &scale, 4);
+        memcpy((u8 *)ret + 0xB0, &extra, 8);
+    }
+    return ret;
+}
 
 struct conker151C61A0 {
     /* 0x00 */ s16 unk00;
