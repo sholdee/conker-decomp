@@ -21,7 +21,131 @@ void func_1500C2A0(void) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_39750/func_1500C8D0.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_39750/func_1500CE4C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_39750/func_1500D3AC.s")
+typedef struct {
+    /* 0x00 */ f32 unk00;
+    /* 0x04 */ f32 unk04;
+    /* 0x08 */ f32 unk08;
+    /* 0x0C */ f32 unk0C;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ f32 unk34;
+    /* 0x38 */ f32 unk38;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ f32 unk40;
+    /* 0x44 */ f32 unk44;
+    /* 0x48 */ f32 unk48;
+    /* 0x4C */ f32 unk4C;
+    /* 0x50 */ s32 unk50;
+    /* 0x54 */ s16 unk54;
+    /* 0x56 */ s16 unk56;
+    /* 0x58 */ u8 unk58;
+    u8 pad59[3];
+    /* 0x5C */ s32 unk5C;
+    /* 0x60 */ u8 unk60;
+    /* 0x61 */ u8 unk61;
+    /* 0x62 */ u8 unk62;
+    /* 0x63 */ u8 unk63;
+    /* 0x64 */ u8 unk64;
+    /* 0x65 */ u8 unk65;
+    /* 0x66 */ u8 unk66;
+    /* 0x67 */ u8 unk67;
+    /* 0x68 */ u8 unk68;
+    u8 pad69;
+    /* 0x6A */ u8 unk6A;
+    u8 pad6B;
+    /* 0x6C */ s32 unk6C;
+    /* 0x70 */ u8 unk70;
+    u8 pad71;
+    /* 0x72 */ s16 unk72;
+    /* 0x74 */ s16 unk74;
+    u8 pad76[2];
+} Part_1500D3AC; /* size 0x78 */
+
+void func_15008340(s32, f32 *, f32 *, f32 *, f32 *);
+void func_1510F800(s32);
+void *func_15132A4C(void *, s32, s32, s32, u8, s32);
+
+void func_1500D3AC(s32 arg0, f32 arg1) {
+    f32 phi_f30;
+    s32 pad;
+
+    phi_f30 = func_1514462C(arg0) * arg1 * 2.000000023e-07f;
+    if (phi_f30 > 1.0f) {
+        f32 temp_f22;
+        Part_1500D3AC part;
+        f32 sp90;
+        f32 sp8C;
+        f32 phi_f20;
+        f32 temp_f2;
+        f32 temp_f0;
+
+        part.unk00 = 1.0f;
+        part.unk04 = 1.0f;
+        part.unk1C = 1.0f;
+        part.unk20 = 1.0f;
+        part.unk24 = 1.0f;
+        part.unk50 = 0x4D40;
+        part.unk54 = 0x12C;
+        part.unk58 = 0;
+        part.unk60 = 0xFF;
+        part.unk61 = 0xE;
+        part.unk62 = 0;
+        part.unk63 = 0;
+        part.unk64 = 0;
+        part.unk65 = 0;
+        part.unk66 = 0;
+        part.unk67 = 0;
+        part.unk68 = 2;
+        part.unk6A = 0;
+        part.unk6C = 0;
+        part.unk70 = 0;
+        part.unk72 = 1;
+        part.unk74 = 0xFF;
+        part.unk56 = 0x53;
+        temp_f22 = 1.525902189e-05f;
+        part.unk44 = 0.0f;
+        do {
+            func_15008340(arg0, &part.unk28, &part.unk30, &sp90, &sp8C);
+            phi_f20 = sp90 - sp8C;
+            temp_f2 = ((((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22) * (phi_f20 * 0.5f)) + (sp8C + (phi_f20 * 0.25f));
+            part.unk38 = temp_f2;
+            {
+            f32 temp_f12;
+            temp_f12 = fabsf(temp_f2 - sp90);
+            part.unk2C = temp_f2;
+            temp_f0 = fabsf(temp_f2 - sp8C);
+            if (temp_f0 < temp_f12) {
+                phi_f20 = temp_f0;
+            } else {
+                phi_f20 = temp_f12;
+            }
+            part.unk4C = ((((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 0.75f) + 0.25f) * phi_f20;
+            }
+            temp_f0 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22);
+            part.unk34 = (temp_f0 + temp_f0) * 3.141592741f;
+            part.unk3C = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 0.01300000027f) + 0.005000000354f;
+            part.unk10 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 360.0f);
+            part.unk14 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 360.0f);
+            part.unk18 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 360.0f);
+            part.unk40 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 1.600000024f);
+            part.unk48 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 1.600000024f);
+            temp_f0 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 0.25f) + 1.0f;
+            part.unk08 = temp_f0;
+            part.unk0C = temp_f0;
+            func_1510F800(0);
+            part.unk5C = func_1510FD20(part.unk28, part.unk30);
+            func_15132A4C(&part, 3, 0xFF, 0, 0xFF, 1);
+            phi_f30 -= 1.0f;
+        } while (phi_f30 > 1.0f);
+    }
+}
 // void func_1500D3AC(s32 arg0, f32 arg1) {
 //
 //     f32 temp_f0;
