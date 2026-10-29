@@ -88,7 +88,57 @@ void func_150C553C(struct102 *arg0) {
     func_150C5450(arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_F2820/func_150C5568.s")
+typedef struct {
+    u8 pad0[0x10];
+    s32 unk10;
+    s32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    s8 unk30;
+    u8 pad31[0xC0 - 0x31];
+    f32 unkC0;
+} Obj150C5568;
+
+extern s32 (*D_80088760[])(Obj150C5568 *);
+
+void func_150C5568(Obj150C5568 *arg0) {
+    s32 idx;
+    u8 done;
+    struct17 prev;
+
+    if (arg0->unk10 & 1) {
+        done = 0;
+        idx = arg0->unk30;
+        prev.unk0 = arg0->unk18 - arg0->unk24;
+        prev.unk4 = arg0->unk1C - arg0->unk28;
+        prev.unk8 = arg0->unk20 - arg0->unk2C;
+
+        if (idx != -1) {
+            if (D_80088760[idx](arg0) == 0) {
+                done = 1;
+            }
+        }
+        if (!done) {
+            struct17 diff;
+            s32 pad;
+            extern f32 func_15143E64(struct17 *);
+
+            diff.unk0 = arg0->unk18 - arg0->unk24;
+            diff.unk4 = arg0->unk1C - arg0->unk28;
+            diff.unk8 = arg0->unk20 - arg0->unk2C;
+            if (diff.unk0 != prev.unk0 || diff.unk4 != prev.unk4 || diff.unk8 != prev.unk8) {
+                arg0->unkC0 = func_15143E64(&diff);
+            }
+        }
+        if (done) {
+            func_1516972C((struct102 *)arg0);
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_F2820/func_150C56A4.s")
 
