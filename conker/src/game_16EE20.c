@@ -1427,7 +1427,56 @@ s32 func_151451F0(struct17 *arg0, struct17 *arg1, struct17 *arg2, f32 arg3, f32 
     }
     return 0;
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_151452C4.s")
+s32 func_151452C4(struct17 *arg0, struct17 *arg1, struct17 *arg2, f32 arg3, struct17 *arg4, struct17 *arg5, f32 *arg6, f32 *arg7) {
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    struct17 dir;
+    struct17 org;
+    f32 proj;
+    f32 rr;
+    f32 root;
+    f32 t0;
+    f32 t1;
+    f32 dd;
+
+    dx = arg2->unk0 - arg0->unk0;
+    dy = arg2->unk4 - arg0->unk4;
+    dz = arg2->unk8 - arg0->unk8;
+    dir = *arg1;
+    org = *arg0;
+    dd = (dx * dx) + (dy * dy) + (dz * dz);
+    proj = (dx * dir.unk0) + (dy * dir.unk4) + (dz * dir.unk8);
+    rr = arg3 * arg3;
+    if (rr < dd - (proj * proj)) {
+        return 0;
+    }
+    root = sqrtf(rr - (dd - (proj * proj)));
+    if (proj < root) {
+        root = -root;
+    }
+    t0 = proj - root;
+    t1 = proj + root;
+    arg4->unk0 = (t0 * dir.unk0) + org.unk0;
+    arg4->unk4 = (t0 * dir.unk4) + org.unk4;
+    arg4->unk8 = (t0 * dir.unk8) + org.unk8;
+    *arg6 = t0;
+    arg5->unk0 = (t1 * dir.unk0) + org.unk0;
+    arg5->unk4 = (t1 * dir.unk4) + org.unk4;
+    arg5->unk8 = (t1 * dir.unk8) + org.unk8;
+    *arg7 = t1;
+    {
+        struct17 diff;
+
+        diff.unk0 = arg4->unk0 - arg0->unk0;
+        diff.unk4 = arg4->unk4 - arg0->unk4;
+        diff.unk8 = arg4->unk8 - arg0->unk8;
+        if (func_15144A74(&diff, arg1) < 0.0f) {
+            return 0;
+        }
+        return 1;
+    }
+}
 
 s32 func_151454BC(u8 arg0, f32 arg1, struct17 *arg2) {
     f32 tmp1;
