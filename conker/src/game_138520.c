@@ -37,7 +37,67 @@ void func_1510B070(s32 arg0) {
         1.0f);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_138520/func_1510B128.s")
+extern f32 D_800C3648;
+extern f32 D_800C364C;
+extern f32 D_800C3650;
+f32 cosf(f32);
+f32 sinf(f32);
+void func_1510B5F8(s32 arg0, u16 *perspNorm, f32 fovy, f32 aspect, f32 near, f32 far, f32 scale);
+
+typedef struct {
+    u8 pad0[0xC];
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    u8 pad24[0x6C - 0x24];
+    f32 unk6C;
+    f32 unk70;
+    f32 aspect;
+    f32 fovy;
+    f32 unk7C;
+    f32 unk80;
+    u8 pad84[0x180 - 0x84];
+} Cam1510B128;
+
+#define CAM ((Cam1510B128 *)D_800BE628)
+void func_1510B128(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4) {
+    f32 near;
+    f32 far;
+    f32 pad;
+
+    CAM[arg0].aspect = CAM[arg0].unk6C + arg1 + D_800C3648;
+    CAM[arg0].fovy = CAM[arg0].unk70 + arg2 + D_800C3648;
+    {
+        f32 t;
+        f32 c;
+        f32 s;
+        f32 angle;
+        angle = CAM[arg0].aspect * 0.008726646192f;
+        c = cosf(angle);
+        t = (c * CAM[arg0].unkC) / sinf(angle);
+        CAM[arg0].unk1C = (CAM[arg0].unk14 * t) * CAM[arg0].unk7C * arg3;
+        angle = CAM[arg0].fovy * 0.008726646192f;
+        c = cosf(angle);
+        t = (c * CAM[arg0].unk10) / sinf(angle);
+        CAM[arg0].unk20 = (CAM[arg0].unk18 * t) * CAM[arg0].unk80 * arg3;
+    }
+    if (D_800C364C != 0.0f) {
+        near = D_800C364C;
+    } else if (arg4 != 0.0f) {
+        near = arg4;
+    } else {
+        near = D_800D9B20;
+    }
+    if (D_800C3650 != 0.0f) {
+        far = D_800C3650;
+    } else {
+        far = D_800D9B1C;
+    }
+    func_1510B5F8(arg0, (u16 *)(arg0 * 0x180 + D_800BE628 + 0xB8), CAM[arg0].fovy, CAM[arg0].aspect, near, far, arg3);
+}
 
 void func_1510B128(s32, f32, f32, f32, f32);
 
