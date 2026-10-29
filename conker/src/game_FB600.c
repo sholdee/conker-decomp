@@ -57,8 +57,6 @@ void *func_150CE150(void *arg0, s16 arg1, u8 arg2, s32 arg3)
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_FB600/func_150CE200.s")
-
 typedef struct {
     /* 0x000 */ void *unk0;
     /* 0x004 */ u8 unk4;
@@ -75,6 +73,62 @@ typedef struct {
     /* 0x030 */ s16 xmap[640];
     /* 0x530 */ s16 ymap[480];
 } Zoom150CE450;
+
+extern f32 D_800A07F0[3];
+void func_15143134(void *, void *, s32);
+s32 func_15144CEC(f32 *, f32 *, f32 *, f32 *, f32 *, s32);
+
+s32 func_150CE200(void *arg0) {
+    Zoom150CE450 *p = (Zoom150CE450 *)((u8 *)arg0 + 0x18);
+    f32 pos[3];
+    f32 sp3C;
+    f32 sp38;
+    f32 scale;
+
+    if (*(s32 *)p->unk0 == 0) {
+        return 0;
+    }
+    if (p->unk4 != *((u8 *)p->unk0 + 0x3B)) {
+        return 0;
+    }
+    if (*(s32 *)((u8 *)p->unk0 + 0x1D4) == 0) {
+        p->flags &= ~1;
+    } else {
+        func_15143134(D_800A07F0, pos, *(s32 *)((u8 *)p->unk0 + 0x1D4) + 0xD00);
+        if (func_15144CEC(pos, &p->unk28, &sp3C, &sp38, &scale, D_80082FA4)) {
+            f32 dx;
+            f32 dy;
+            dx = p->unk8 * scale;
+            dy = p->unkC * scale;
+            p->x0 = p->unk28 - dx;
+            p->y0 = p->unk2C - dy;
+            p->x1 = p->unk28 + dx;
+            p->y1 = p->unk2C + dy;
+            if (p->x0 > 291.0f || p->x1 < 0.0f || p->y0 > 215.0f || p->y1 < 0.0f) {
+                p->flags &= ~1;
+            } else {
+                if (p->x0 < 0.0f) {
+                    p->x0 = 0;
+                }
+                if (p->y0 < 0.0f) {
+                    p->y0 = 0;
+                }
+                if (p->x1 > 291.0f) {
+                    p->x1 = 291;
+                }
+                if (p->y1 > 215.0f) {
+                    p->y1 = 215;
+                }
+                p->flags |= 1;
+            lbl_ret:
+                return 1;
+            }
+        } else {
+            p->flags &= ~1;
+        }
+    }
+    return 1;
+}
 
 void func_150CE450(void *arg0, u16 *fb) {
     Zoom150CE450 *p = (Zoom150CE450 *)((u8 *)arg0 + 0x18);
