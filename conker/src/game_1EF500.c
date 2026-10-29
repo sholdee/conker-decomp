@@ -1,7 +1,9 @@
 #include <ultra64.h>
 #define func_150ADA20 func_150ADA20_u8_proto
+#define func_10010F30 func_10010F30_void
 #include "functions.h"
 #undef func_150ADA20
+#undef func_10010F30
 #include "variables.h"
 
 typedef void (*GameFunc151C455CDispatch)(s32);
@@ -9,6 +11,7 @@ typedef void (*GameFunc151C455CCallback)(struct17 *, s32);
 
 extern GameFunc151C455CDispatch D_8008FBD0[];
 extern s32 func_150ADA20(void);
+extern s32 func_10010F30(s32, u16, u8, s16, u8);
 extern s32 func_1000B060(f32, f32, u32);
 extern void func_1000E7A0(u32, s32);
 extern s32 func_1510F8CC(s32);
@@ -58,7 +61,152 @@ void func_151C2050(struct127 *arg0, f32 *arg1, f32 *arg2, s32 arg3, f32 arg4) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1EF500/func_151C229C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1EF500/func_151C2734.s")
+typedef struct {
+    u8 unk0;
+    u8 pad1[0x5F];
+    f32 unk60;
+    f32 unk64;
+    f32 unk68;
+    u8 pad6C[0x20];
+    f32 unk8C;
+    s32 unk90;
+    u8 pad94[4];
+    f32 unk98;
+    u8 pad9C[0xC];
+    s8 unkA8;
+    u8 padA9[3];
+    s32 unkAC;
+} Mover151C43E0;
+
+typedef struct {
+    u8 pad0[0x34];
+    f32 unk34;
+    f32 unk38;
+    f32 unk3C;
+} GameStruct151C4510a;
+
+typedef struct {
+    u8 pad0[0x4];
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+} GameStruct151C4510b;
+
+typedef struct {
+    u8 unk0;
+    u8 pad1[0x83];
+    struct131 *unk84;
+    u8 pad88[0x4];
+    f32 unk8C;
+    u8 pad90[0xC];
+    s8 unk9C;
+} GameStruct151C455C;
+
+typedef struct {
+    u16 unk0;
+    u16 unk2;
+} GameStruct151C2734Sfx;
+
+typedef struct {
+    u8 pad0[0x60];
+    f32 unk60;
+    f32 unk64;
+    f32 unk68;
+    u8 pad6C[0x20];
+    f32 unk8C;
+    u8 pad90[0x8];
+    f32 unk98;
+    u8 pad9C[0x2];
+    u16 unk9E;
+    u8 unkA0;
+    u8 unkA1;
+} GameStruct151C2734Sub;
+
+typedef struct {
+    u8 pad0[0x34];
+    f32 unk34;
+    f32 unk38;
+    f32 unk3C;
+    u8 pad40[0xD0];
+    GameStruct151C2734Sub unk110;
+} GameStruct151C2734;
+
+extern GameStruct151C2734Sfx D_8008FBE8[];
+extern s32 func_1000A420(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32 *, s32 *, s32);
+void func_151C436C(s32 a0, f32 *a1, s32 a2);
+u8 func_151C43E0(struct108 *arg0, Mover151C43E0 *arg1, f32 arg2);
+void func_151C4510(GameStruct151C4510a *a0, GameStruct151C4510b *a1, f32 a2);
+s32 func_151C455C(s32 arg0, GameStruct151C455C *arg1, f32 arg2);
+
+s8 func_151C2734(GameStruct151C2734 *arg0) {
+    s8 ret;
+    GameStruct151C2734Sub *sub;
+    struct108 *found;
+    s32 sound;
+    s32 r;
+    s32 i;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    f32 dot;
+    f32 dist;
+    s32 vol;
+    s32 pan;
+
+    sub = &arg0->unk110;
+    ret = 1;
+    func_151C436C((s32)arg0, (f32 *)sub, D_800BE9E4);
+    if (func_151C43E0((struct108 *)arg0, (Mover151C43E0 *)sub, D_800BE9A4) == 0) {
+        ret = 0;
+    }
+    func_151C4510((GameStruct151C4510a *)arg0, (GameStruct151C4510b *)sub, D_800BE9A4);
+    if (func_151C455C((s32)arg0, (GameStruct151C455C *)sub, D_800BE9A4) == 0) {
+        ret = 0;
+    }
+    if (sub->unkA0 != 0 && ret == 1) {
+        sound = 0;
+        found = NULL;
+        if (sub->unk9E == 0) {
+            r = func_150ADA20() & 7;
+            for (i = 0; i <= D_80082FA0; i++) {
+                found = &D_800DBFF0[i];
+                dx = found->unk2F8 - arg0->unk34;
+                dy = found->unk2FC - arg0->unk38;
+                dz = found->unk300 - arg0->unk3C;
+                dot = sub->unk60 * dx + dy * sub->unk64 + dz * sub->unk68;
+                if (dot < (u32)D_8008FBE8[r].unk2 * sub->unk98 && (D_8008FBE8[r].unk2 - 10) * sub->unk98 < dot) {
+                    dist = sqrtf(dx * dx + dy * dy + dz * dz);
+                    if (dist != 0.0f && dist < sub->unk8C * sub->unk98) {
+                        dot /= dist;
+                        if (0.8999999762f < dot) {
+                            sound = D_8008FBE8[r].unk0;
+                            sub->unkA1 = i;
+                            break;
+                        }
+                    }
+                }
+                found = NULL;
+            }
+        } else if (func_1000F3D0(sub->unk9E)) {
+            found = &D_800DBFF0[sub->unkA1];
+        } else {
+            sub->unkA0 = 0;
+        }
+        if (found != NULL) {
+            vol = 0x40;
+            func_1000A420(arg0->unk34 - found->unk2F8, arg0->unk38 - found->unk2FC, arg0->unk3C - found->unk300,
+                          *(s32 *)&found->unk380, arg0->unk34 - found->unk2F8, arg0->unk38 - found->unk2FC,
+                          arg0->unk3C - found->unk300, 10000, 9999, &vol, &pan, 0);
+            if (sound != 0) {
+                sub->unk9E = func_10010F30(sound, 0x6590, vol & 0x7F, 0, vol & 0x80);
+            } else {
+                func_1000F85C(sub->unk9E, 4, vol & 0x7F);
+                func_1000F85C(sub->unk9E, 0x100, vol & 0x80);
+            }
+        }
+    }
+    return ret;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1EF500/func_151C2AD0.s")
 
@@ -326,22 +474,6 @@ typedef struct {
     u8 pad64[0xC];
 } Ray151C43E0;
 
-typedef struct {
-    u8 unk0;
-    u8 pad1[0x5F];
-    f32 unk60;
-    f32 unk64;
-    f32 unk68;
-    u8 pad6C[0x20];
-    f32 unk8C;
-    s32 unk90;
-    u8 pad94[4];
-    f32 unk98;
-    u8 pad9C[0xC];
-    s8 unkA8;
-    u8 padA9[3];
-    s32 unkAC;
-} Mover151C43E0;
 
 typedef struct {
     u8 pad0[0x34];
@@ -380,19 +512,6 @@ u8 func_151C43E0(struct108 *arg0, Mover151C43E0 *arg1, f32 arg2) {
     return result;
 }
 
-typedef struct {
-    u8 pad0[0x34];
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-} GameStruct151C4510a;
-
-typedef struct {
-    u8 pad0[0x4];
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-} GameStruct151C4510b;
 
 void func_151C4510(GameStruct151C4510a *a0, GameStruct151C4510b *a1, f32 a2) {
     a0->unk34 += a1->unk4 * a2;
@@ -400,15 +519,6 @@ void func_151C4510(GameStruct151C4510a *a0, GameStruct151C4510b *a1, f32 a2) {
     a0->unk3C += a1->unkC * a2;
 }
 
-typedef struct {
-    u8 unk0;
-    u8 pad1[0x83];
-    struct131 *unk84;
-    u8 pad88[0x4];
-    f32 unk8C;
-    u8 pad90[0xC];
-    s8 unk9C;
-} GameStruct151C455C;
 
 s32 func_151C455C(s32 arg0, GameStruct151C455C *arg1, f32 arg2) {
     s32 ret;
