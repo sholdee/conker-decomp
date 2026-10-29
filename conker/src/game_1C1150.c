@@ -487,7 +487,56 @@ void func_15194F48(s32 arg0, struct127* arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1C1150/func_15194FF4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1C1150/func_151951E0.s")
+extern struct127 *func_1505ED34(void);
+extern s32 func_150838EC(struct127 *arg0, s32 arg1, s32 arg2, f32 arg3);
+extern void func_150D10E4(void *arg0, u8 arg1);
+
+#define U8AT(p, off) (*(u8 *)((u8 *)(p) + (off)))
+#define F32AT(p, off) (*(f32 *)((u8 *)(p) + (off)))
+
+void func_151951E0(struct127 *arg0) {
+    struct127 *obj;
+
+    arg0->health = 0;
+    func_1507CD64(arg0, 5);
+    func_15194AB4(arg0);
+    arg0->interaction_state = 0x28;
+    arg0->xz_velocity = -3.0f;
+    F32AT(arg0, 0xBC) = -10.0f - (func_150ADA20() % 5U);
+    arg0->unk148 = (func_150ADA20() % 10U) - 5.0f;
+    arg0->y_velocity = 0.0f;
+    arg0->gravity = 0.0f;
+    obj = func_1505ED34();
+    obj->interaction_state = 0x28;
+    obj->id = arg0->id;
+    obj->immune = 0xFF;
+    obj->stunned = 0xFF;
+    obj->x_position = arg0->x_position;
+    obj->y_position = arg0->y_position;
+    obj->z_position = arg0->z_position;
+    obj->unk40 = arg0->unk40;
+    obj->unk76 = arg0->unk76;
+    obj->unk7A = arg0->unk7A;
+    obj->unkB8 = arg0->unkB8;
+    obj->xz_scale = arg0->xz_scale;
+    obj->y_scale = arg0->y_scale;
+    obj->xz_velocity = 10.0f;
+    F32AT(obj, 0xBC) = (func_150ADA20() % 5U) + 10.0f;
+    obj->unk148 = (func_150ADA20() % 10U) - 5.0f;
+    U8AT(obj, 0x68) = U8AT(arg0, 0x68);
+    U8AT(obj, 0x69) = U8AT(arg0, 0x69);
+    U8AT(obj, 0x6A) = U8AT(arg0, 0x6A);
+    U8AT(obj, 0x6B) = U8AT(arg0, 0x6B);
+    U8AT(obj, 0x6C) = U8AT(arg0, 0x6C);
+    U8AT(obj, 0x6D) = U8AT(arg0, 0x6D);
+    obj->unk76 += (func_150ADA20() % 10922U) - 5461.33349609375f;
+    obj->unk40 = (arg0->unk76 + 0x4000) * 0.0054931640625f;
+    obj->unkF8 = arg0->unkF8;
+    obj->unk9C |= 0x0FFF0000;
+    func_150838EC(obj, arg0->unk84.uh, 0, arg0->animation_speed);
+    func_150D10E4(arg0, 0);
+    func_150D10E4(obj, 1);
+}
 
 extern f32 D_800A8708;
 extern void func_1514373C(f32, f32, f32 *, f32 *);
