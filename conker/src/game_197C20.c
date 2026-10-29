@@ -116,7 +116,9 @@ typedef struct {
     Struct1516CC58_10 *unk10;
     char pad14[0xB];
     u8 unk1F;
-    char pad20[0x18];
+    char pad20[8];
+    f32 unk28;
+    char pad2C[0xC];
     f32 unk38;
     f32 unk3C;
     f32 unk40;
@@ -153,6 +155,8 @@ extern Struct1516CC58_Vp D_8009055C;
 extern Struct1516CC58_Vp D_8009057C;
 extern Struct1516CC58_CC310 D_800CC310[];
 extern f32 cosf(f32);
+extern u16 D_80090562;
+extern u16 D_80090582;
 extern f32 sinf(f32);
 void func_1501A764(s16 arg0, f32 arg1, f32 arg2, f32 arg3, f32 *arg4, f32 *arg5, f32 *arg6);
 void func_1516D0CC(Struct1516CC58 *arg0, f32 *arg1, f32 *arg2, f32 *arg3);
@@ -219,7 +223,50 @@ void func_1516CC58(Struct1516CC58 *arg0) {
     arg0->unk54 = ((sinf(arg0->unk58 + 3.14159274101f) * (arg0->unk3C * 0.5f) * 1.03999996185f) + arg0->unk60) - (f32)sp40;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_197C20/func_1516D0CC.s")
+typedef struct {
+    char pad0[0x24];
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    f32 unk30;
+} Struct1516D0CC_BE628;
+
+void func_1516D0CC(Struct1516CC58 *arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
+    f32 top;
+    f32 y;
+    f32 left;
+    f32 right;
+    f32 xoff;
+    f32 halfW;
+    f32 h;
+    f32 x;
+
+    xoff = (arg0->unk38 / (f32)(u32)D_80090562) * (f32)(u32)D_80090582 * 0.25f * arg0->unk28;
+    x = (*arg1 + (cosf(arg0->unk58 + 3.14159274101f) * (arg0->unk38 * 0.5f) * 1.14999997616f * arg0->unk28)) - xoff;
+    halfW = arg0->unk38 * 0.5f;
+    h = arg0->unk3C;
+    y = *arg2;
+    top = *arg2 - h;
+    left = x - halfW;
+    right = halfW + x;
+    if (arg0 != NULL) {
+        if (top < (*(Struct1516D0CC_BE628 **)&D_800BE628)->unk24) {
+            *arg2 = (*(Struct1516D0CC_BE628 **)&D_800BE628)->unk24 + h;
+        } else if ((*(Struct1516D0CC_BE628 **)&D_800BE628)->unk28 < y) {
+            *arg2 = (*(Struct1516D0CC_BE628 **)&D_800BE628)->unk28;
+        }
+        if (left < (*(Struct1516D0CC_BE628 **)&D_800BE628)->unk2C) {
+            *arg1 -= left - (*(Struct1516D0CC_BE628 **)&D_800BE628)->unk2C;
+        } else if ((*(Struct1516D0CC_BE628 **)&D_800BE628)->unk30 < right) {
+            *arg1 += (*(Struct1516D0CC_BE628 **)&D_800BE628)->unk30 - right;
+        }
+        *arg1 = (s32)*arg1;
+        *arg2 = (s32)*arg2;
+    }
+}
+
+void func_1516D2D8(void) {
+}
 
 void func_1516D2E0(struct_game_197C20_3 *arg0) {
     if ((arg0 != 0) && (arg0->field_0x0 == 0x51)) {
