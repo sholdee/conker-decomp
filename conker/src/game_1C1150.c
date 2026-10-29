@@ -158,7 +158,97 @@ void func_15194588(s32 arg0, s32 arg1, s32 arg2) {
     func_15194408(arg0, (Game1C1150Event *)arg1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1C1150/func_151945CC.s")
+typedef struct Game1945CCVec {
+    f32 x;
+    f32 y;
+    f32 z;
+} Game1945CCVec;
+
+typedef struct Game1945CCPacket {
+    s16 field00;
+    s16 field02;
+    s16 field04;
+    s16 field06;
+    Game1945CCVec position;
+    f32 field14;
+    f32 field18;
+    f32 field1C;
+    f32 field20;
+    f32 field24;
+    f32 field28;
+    s16 field2C;
+    s16 field2E;
+    s16 field30;
+    s16 field32;
+    s16 field34;
+    s16 field36;
+    s16 field38;
+    s16 field3A;
+    u8 field3C;
+    u8 pad3D[3];
+    f32 field40;
+    s16 field44;
+    s16 field46;
+    s32 field48;
+} Game1945CCPacket;
+
+extern u8 D_800A3FE6[];
+extern s32 func_15134070(struct127 *);
+extern void func_151B4CD0(void *, s32, s32);
+
+void func_151945CC(void *arg0, void *arg1, s32 arg2) {
+    Game1945CCVec pos;
+    s16 shade;
+    Game1945CCPacket packet;
+    u8 scratch[0x24];
+
+    shade = ((s32) *(u16 *)((u8 *)arg0 + 0x7A) >> 8) - 0x40;
+    pos.x = *(f32 *)((u8 *)arg1 + 0x14);
+    pos.y = *(f32 *)((u8 *)arg1 + 0x18) + 270.0;
+    pos.z = *(f32 *)((u8 *)arg1 + 0x1C);
+    {
+    s32 kind;
+    s32 profile;
+
+    func_1504715C((f32 *)scratch, (struct127 *)arg1);
+    kind = func_15134070((struct127 *)arg1);
+    if (kind != 0x63) {
+        profile = D_800A3FE6[kind << 4];
+        if (profile != 2) {
+            packet.position = pos;
+            packet.field14 = 6.699999809f;
+            packet.field18 = 2.329999924f;
+            packet.field1C = 0.6800000072f;
+            packet.field20 = 0.0f;
+            packet.field24 = 4.400000095f;
+            packet.field2C = 0xF;
+            packet.field2E = 0xC;
+            packet.field00 = shade - 0x40;
+            packet.field02 = 0x80;
+            packet.field04 = -0xA0;
+            packet.field06 = 0x20;
+            packet.field30 = 3;
+            packet.field32 = 1;
+            packet.field34 = 0x1F;
+            packet.field36 = 0x13;
+            packet.field38 = 0x9B;
+            packet.field3A = 0x64;
+            packet.field44 = 0x10;
+            packet.field46 = 0xF;
+            packet.field48 = 0;
+            packet.field28 = 5.300000191f;
+            packet.field40 = 0.5f;
+            if (profile == 1) {
+                packet.field3C = 1;
+            } else {
+                packet.field3C = 0;
+            }
+            func_15153F18(&packet.field00, &packet.position, (s32)scratch, 0xFF, 1);
+            func_151B4CD0(arg1, 0xFF, 1);
+        }
+    }
+    }
+}
 
 void func_151B01B8(s32, s32);
 void func_151B09BC(s32, s32, s32, s32, s32);
