@@ -325,7 +325,57 @@ Gfx *func_15188D00(Gfx *gfx, s32 idx, s16 arg2) {
     return gfx;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1B5CC0/func_15188E48.s")
+typedef struct Sub15188E48 {
+    char pad0[4];
+    u8 unk4;
+    char pad5[0x1D4 - 5];
+    u8 *unk1D4;
+} Sub15188E48;
+
+typedef struct Node15188E48 {
+    u8 unk0;
+    u8 unk1;
+    u8 unk2;
+    u8 unk3;
+    char pad4[4];
+    u8 *unk8;
+    struct Node15188E48 *unkC;
+    Sub15188E48 *unk10;
+} Node15188E48;
+
+void func_15188E48(Node15188E48 *arg0) {
+    s32 i;
+    s32 count;
+    s32 m;
+    s32 dst;
+    s32 off;
+    u8 *from;
+    u8 *q;
+    s32 len;
+
+    count = arg0->unk1;
+    m = func_1502DB20(arg0->unk10->unk4);
+    dst = D_800BE9C0 * (m * count);
+    off = (D_800BE9C0 ^ 1) * (m * count);
+    for (i = 0; i < count; i++) {
+        len = m << 6;
+        if (i == count - 1) {
+            q = arg0->unk10->unk1D4;
+            if (q == NULL) {
+                arg0->unk2 = 0;
+                return;
+            }
+            from = q;
+        } else {
+            from = arg0->unk8 + ((((i + 1) * m) + off) << 6);
+        }
+        q = arg0->unk8 + ((i * m + dst) << 6);
+        bcopy(from, q, len);
+    }
+    if (arg0->unk2 != arg0->unk1) {
+        arg0->unk2++;
+    }
+}
 
 typedef struct Entry15188F84 {
     u16 index;
