@@ -49,7 +49,97 @@ void func_150064E0(void) {
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_33990/func_15006590.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_33990/func_15006BEC.s")
+typedef struct SaveSlot33990 {
+    /* 0x00 */ u8 pad0[8];
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ u8 padC[2];
+    /* 0x0E */ s8 unkE;
+    /* 0x0F */ s8 padF;
+} SaveSlot33990; /* size = 0x10 */
+
+extern u8 *D_800BE3F0;
+extern u32 D_800BE3E4;
+extern s32 func_1502B5C8(s32, s32, s32, s32);
+
+void func_15006BEC(s32 arg0) {
+    u64 mask;
+    s32 i;
+    s32 j;
+    volatile s32 ret;
+    u8 *p;
+    s32 slot;
+    s32 id;
+    u8 bit;
+    u8 byte;
+    u16 sum;
+
+    id = (((SaveSlot33990 *)&D_800BE3F8)[arg0].unk8 + 1) & 0x7FFFFFFF;
+    j = -1;
+    for (i = 0; i < 3; i++) {
+        if (((SaveSlot33990 *)&D_800BE3F8)[i].unk8 >= 0) {
+            j &= ~(1 << ((SaveSlot33990 *)&D_800BE3F8)[i].unkE);
+        }
+    }
+    slot = 0;
+    for (i = 0; i < 4; i++) {
+        if ((1 << i) & j) {
+            slot = i;
+        }
+    }
+    ((SaveSlot33990 *)&D_800BE3F8)[arg0].unkE = slot;
+    ((SaveSlot33990 *)&D_800BE3F8)[arg0].unk8 = id;
+    if (D_8002AC5C == 0) {
+        for (i = 0; i < 8; i++) { D_800BE358[i] = 0xFE; }
+        osWritebackDCacheAll();
+        func_151DD4E0(&D_800BE900, (slot << 4) + 0x13, D_800BE358);
+    }
+    if (D_800BE3F0 == NULL) {
+        D_800BE3F0 = (u8 *)func_1502B5C8(0, 1, 7, slot) + 8;
+    }
+    p = (u8 *)(u32)D_800BE35A;
+    *p++ = arg0;
+    *p++ = (id >> 24) & 0xFF;
+    *p++ = (id >> 16) & 0xFF;
+    *p++ = (id >> 8) & 0xFF;
+    *p++ = id & 0xFF;
+    for (i = 0; i < 27; i++) { *p++ = ((u8 *)D_800D2E4C)[i]; }
+    for (i = 0; i < 9; i++) { *p++ = D_800D2E60[i]; }
+    *p++ = *(s8 *)&D_800BE3DF;
+    *p++ = D_800BE3E0;
+    D_800BE3E4 = func_150859AC(0, 6);
+    *p++ = (D_800BE3E4 >> 8) & 0xFF;
+    *p++ = (D_800BE3E4) & 0xFF;
+    *p++ = ((u32)D_800BE3E8 >> 24) & 0xFF;
+    *p++ = ((u32)D_800BE3E8 >> 16) & 0xFF;
+    *p++ = ((u32)D_800BE3E8 >> 8) & 0xFF;
+    *p++ = (D_800BE3E8) & 0xFF;
+    for (i = 0; i < 0x45; i++) { p[i] = 0; }
+    byte = 0;
+    bit = 0x80;
+    for (i = 0; i < 0x45; i++) {
+        mask = (u64)1 << (D_800BE3F0[i] - 1);
+        for (j = 0; j < D_800BE3F0[i]; j++) {
+            if (D_800C3A60[i] & mask) {
+                byte |= bit;
+            }
+            if (bit == 1) {
+                *p++ = byte;
+                byte = 0;
+                bit = 0x80;
+            } else {
+                bit >>= 1;
+            }
+            mask >>= 1;
+        }
+    }
+    sum = 0xCC;
+    for (i = 2; i < 0x80; i++) { sum += D_800BE358[i] << (i & 3); }
+    *(u16 *)D_800BE358 = sum;
+    osWritebackDCacheAll();
+    if (D_8002AC5C == 0) {
+        ret = func_151DCEF0(&D_800BE900, (u8)((slot << 4) + 4), D_800BE358, 0x80);
+    }
+}
 // PERMUTER CANDIDATE best 1532: structure byte-exact; only diff is the target keeps the (dead)
 // return of the first func_151DD4E0 call live in a saved reg (s1) -> 8 saved regs. My build DCEs
 // it (no -g3 dead-local slotting here) -> 7 saved regs, shifting all s-reg numbers & stack offsets.
