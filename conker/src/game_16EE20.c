@@ -181,6 +181,8 @@ s32 func_15141CC0(u32 arg0) {
     }
 }
 
+void func_15141E38(void *arg0, s32 arg1);
+
 void func_15141DA4(void *arg0, s32 arg1, s32 arg2) {
     if ((arg1 < 12) && (arg1 >= 0) &&
         (arg2 < 20) && (arg2 >= 0) &&
@@ -192,7 +194,47 @@ void func_15141DA4(void *arg0, s32 arg1, s32 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15141E38.s")
+typedef struct {
+    s32 id;
+    void *obj;
+    u8 b;
+} Info15141E38;
+
+s32 func_1514ECE0(void *, s16, void *);
+s32 func_1514EC1C(s32, s32, s16);
+void *memcpy(void *, const void *, u32);
+
+void func_15141E38(void *arg0, s32 arg1) {
+    void *found;
+    void *node;
+    s32 i;
+
+    found = NULL;
+    node = *(void **)((u8 *)arg0 + 0x2F4);
+    if (func_1514ECE0(node, 0x1A, &node) != 0) {
+        do {
+            void *sub;
+            sub = *(void **)((u8 *)node + 0x10);
+            if (arg1 == *(s32 *)((u8 *)sub + 0x28)) {
+                found = node;
+                *(s16 *)((u8 *)sub + 0xE) = D_8008A0B4[arg1].unk4;
+            }
+            node = *(void **)((u8 *)node + 0x14);
+        } while (func_1514ECE0(node, 0x1A, &node) != 0);
+    }
+    if (found == NULL) {
+        struct260 *ret;
+        Info15141E38 info;
+        info.id = arg1;
+        info.obj = arg0;
+        info.b = *(u8 *)((u8 *)arg0 + 0x3B);
+        ret = func_15149130(D_8008A0B4[arg1].unk4, -1, -1, -1, 1, 0x32, (struct37 *)0xC, 0xFF, 1);
+        if (ret != NULL) {
+            memcpy((u8 *)ret + 0x28, &info, sizeof(info));
+            func_1514EC1C((s32)ret, (s32)arg0, 0x1A);
+        }
+    }
+}
 void func_15141F78(u8 arg0, struct157 *arg1, f32 arg2, u8 arg3, struct157 *arg4, u8 arg5) {
     struct157 tmp;
     f32 temp_f2;
