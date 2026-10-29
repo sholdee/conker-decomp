@@ -374,7 +374,137 @@ s32 func_150303E4(struct127 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_5D2C0/func_15030468.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_5D2C0/func_15030AF4.s")
+typedef struct S15030AF4 {
+    u8 unk0;
+    u8 unk1;
+    u8 unk2;
+    u8 unk3;
+    u8 unk4;
+    u8 unk5;
+    u8 unk6;
+    u8 unk7;
+    u8 unk8;
+    u8 unk9;
+    u16 unkA;
+    u16 unkC;
+    u16 unkE;
+    u8 pad10[3];
+    u8 unk13;
+    u8 pad14;
+    u8 unk15;
+    u8 unk16;
+    u8 unk17;
+    s16 unk18;
+    s16 unk1A;
+    u16 unk1C;
+    s16 unk1E;
+    s16 unk20;
+    s16 unk22;
+    s32 unk24;
+    s32 unk28;
+    s32 unk2C;
+    s32 unk30;
+    void *unk34;
+    s32 unk38;
+    s32 unk3C;
+    f32 unk40;
+    s32 unk44;
+    s32 unk48;
+    s32 unk4C;
+    s32 unk50;
+    struct S15030AF4 *unk54;
+    struct S15030AF4 *unk58;
+} S15030AF4;
+
+void func_15031A50(u8 *arg0, u8 *arg1);
+
+S15030AF4 *func_15030AF4(struct127 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, u16 *arg9, s32 argA, s32 argB, s32 argC) {
+    S15030AF4 *var;
+    S15030AF4 *next;
+    s32 err;
+
+    if (arg0->unique_id == 0) {
+        return 0;
+    }
+    if (!(arg3 & 8)) {
+        var = (S15030AF4 *)D_800C3EE0;
+        if (var != 0) {
+            do {
+                next = var->unk54;
+                if ((var->unk0 == arg0->unique_id) && (var->unk6 == arg7) && (var->unk1 == arg1)) {
+                    return 0;
+                }
+                var = next;
+            } while (next != 0);
+        }
+    }
+    var = allocate_memory(0x5C, 1, 0, 2);
+    if (var == 0) {
+        return 0;
+    }
+    err = 0;
+    if ((S15030AF4 *)D_800C3EE0 != 0) {
+        ((S15030AF4 *)D_800C3EE0)->unk58 = var;
+    }
+    var->unk54 = (S15030AF4 *)D_800C3EE0;
+    var->unk58 = 0;
+    D_800C3EE0 = (s32)var;
+    var->unk0 = arg0->unique_id;
+    var->unk1 = arg1;
+    var->unk2 = arg2;
+    var->unk24 = 0;
+    var->unk28 = 0;
+    var->unk2C = 0;
+    var->unk30 = 0;
+    var->unk3 = 0xFF;
+    var->unk44 = 0;
+    var->unk4 = arg3;
+    var->unk6 = arg7;
+    var->unk40 = 1.0f;
+    var->unk7 = arg8;
+    var->unk38 = 0;
+    var->unk3C = 0;
+    var->unk8 = 0;
+    var->unk9 = 0;
+    var->unk18 = 0;
+    var->unk1A = 0;
+    var->unkA = arg9[0];
+    var->unkC = arg9[1];
+    var->unkE = arg9[2];
+    var->unk17 = argA;
+    var->unk48 = 0;
+    var->unk15 = arg4;
+    var->unk16 = arg5;
+    var->unk1E = argB;
+    var->unk20 = argC;
+    var->unk13 = 0;
+    var->unk4C = 0;
+    var->unk50 = 0;
+    var->unk5 = 0;
+    var->unk22 = 0;
+    if ((arg5 == 4) || (arg3 & 4)) {
+        var->unk34 = allocate_memory(0x80, 1, 2, 2);
+        if (var->unk34 == 0) {
+            err = 1;
+        }
+    } else {
+        var->unk34 = 0;
+    }
+    if (arg6 == 0) {
+        var->unk1C = 0xFFFF;
+    } else {
+        var->unk1C = arg6;
+    }
+    if (!err) {
+        err |= func_1502FFD8((Func1502FFD8Arg0 *)var, (u8 *)arg0);
+    }
+    if (err) {
+        func_15030158((Func15030158Arg0 *)var, 1);
+        return 0;
+    }
+    func_15031A50((u8 *)var, (u8 *)arg0);
+    return var;
+}
 
 extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
 void func_15030D54(void *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6)
