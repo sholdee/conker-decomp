@@ -1,5 +1,8 @@
 #include <ultra64.h>
+#define func_15048A40 func_15048A40_hdr
 #include "functions.h"
+#undef func_15048A40
+extern f32 func_15048A40(u8 arg0);
 #include "variables.h"
 
 extern s32 func_151EF610(void);
@@ -301,9 +304,211 @@ void func_150E4CBC(struct42 *arg0) {
     arg0->unk90 = temp_v0 + D_800BE9E4;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_111670/func_150E4E04.s")
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vtx150E5810;
 
-void func_150E5558(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6) {
+typedef struct {
+    Vtx150E5810 unk0[3];
+} Tri150E5810;
+
+extern void func_15049350(Tri150E5810);
+extern f32 D_800CC214;
+extern f32 D_800CC218;
+
+typedef struct {
+    s32 unk00;
+    s32 unk04;
+    s32 unk08;
+    s16 unk0C;
+    s16 unk0E;
+    s16 unk10;
+    s16 unk12;
+    s16 unk14;
+    s16 unk16;
+    s16 unk18;
+    s16 unk1A;
+    u8 unk1C;
+    u8 unk1D;
+    u8 unk1E;
+    s8 unk1F;
+    s16 unk20;
+    s16 unk22;
+    s16 unk24;
+    s16 unk26;
+    s16 unk28;
+    u8 unk2A;
+    u8 unk2B;
+    u8 unk2C;
+    u8 unk2D;
+    u8 unk2E;
+    u8 unk2F;
+    s32 unk30;
+    s16 unk34;
+    s16 unk36;
+} Spawn150E4E04;
+
+typedef struct {
+    u8 unk0[3];
+    u8 unk3;
+    u8 pad4[0xC];
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+} Struct800D9960;
+
+extern Struct800D9960 D_800D9960[];
+extern u16 D_800A1110[][2];
+extern s32 D_8009187C;
+extern s32 D_800918A0;
+extern s32 D_800918AC;
+extern s32 D_80090520;
+extern void func_150440A0(f32 arg0[4][4], f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9);
+extern f32 func_150489B0(u8);
+extern s32 func_15167D84(void *, s32, s32, s32, s32, s32);
+void func_150E5558(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6, s32 arg7);
+
+void func_150E4E04(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s16 **arg5, s32 arg6) {
+    f32 minScale;
+    f32 rangeScale;
+    s32 ok;
+    s32 count;
+    s32 noFx;
+    s32 noSurface;
+    s32 big;
+    s32 i;
+    Tri150E5810 tri;
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 len;
+    f32 scale;
+    f32 mtx[4][4];
+    Spawn150E4E04 spawn;
+    f32 speed;
+    u8 angle;
+    f32 vx;
+    f32 vy;
+    f32 vz;
+    f32 cs;
+
+    ok = 1;
+    count = 1;
+    noSurface = 0;
+    big = 0;
+    noFx = 0;
+    scale = 815.0f;
+    bzero(&spawn, sizeof(spawn));
+    if (arg3 & 0x8000) {
+        noFx = 1;
+        arg3 ^= 0x8000;
+    }
+    if (arg5 != NULL) {
+        for (i = 0; i < 3; i++) {
+            tri.unk0[i].x = arg5[i][0];
+            tri.unk0[i].y = arg5[i][1];
+            tri.unk0[i].z = arg5[i][2];
+        }
+        func_15049350(tri);
+        x = -D_800CC210;
+        y = -D_800CC214;
+        z = -D_800CC218;
+        len = sqrtf(x * x + y * y + z * z);
+        if (len < 9.999999747e-05f) {
+            return;
+        }
+        x /= len;
+        y /= len;
+        z /= len;
+        if (arg6 != 0xFF && fabsf(y) < 0.8999999762f) {
+            func_150440A0(mtx, 0.0f, 0.0f, 0.0f, x, y, z, 0.0f, 1.0f, 0.0f);
+            func_150A7960((f32 *)mtx, 0.0f, 0.0f, 1.0f, &D_800D9960[arg6].unk10, &D_800D9960[arg6].unk14, &D_800D9960[arg6].unk18);
+        } else {
+            noSurface = 1;
+        }
+    } else {
+        noSurface = 1;
+    }
+    if (arg6 != 0xFF && noSurface) {
+        D_800D9960[arg6].unk3 = 0;
+    }
+    if (noFx == 0) {
+        spawn.unk10 = arg0;
+        spawn.unk12 = arg1;
+        spawn.unk14 = arg2;
+        spawn.unk2C = 0xB4;
+        spawn.unk2D = 0xB4;
+        spawn.unk2E = 0xB4;
+        spawn.unk2F = 0xFF;
+        spawn.unk1F = -1;
+        spawn.unk34 = 0;
+        spawn.unk0C = 0;
+        spawn.unk0E = 0;
+        minScale = (u32)D_800A1110[arg4][1] * 95.0f * 0.00390625f;
+        rangeScale = (u32)D_800A1110[arg4][1] * 130.0f * 0.00390625f;
+        if (arg3 == 0x11) {
+            spawn.unk00 = (s32)&D_8009187C;
+        } else if (arg3 == 0xA) {
+            spawn.unk00 = (s32)&D_800918A0;
+        } else if (arg3 == 4 || arg3 == 9) {
+            spawn.unk00 = (s32)&D_800918A0;
+        } else if (arg3 == 8) {
+            spawn.unk00 = (s32)&D_80090520;
+            minScale = 180.0f;
+            rangeScale = 200.0f;
+        } else {
+            spawn.unk00 = (s32)&D_800918AC;
+        }
+        if (arg4 == 2) {
+            big = 1;
+            spawn.unk22 = -0x175;
+            count = 12;
+            scale *= 0.5f * ((func_151EF610() % 3) + 1);
+        } else if (arg4 == 0) {
+            spawn.unk22 = -0xDA;
+            count = 12;
+            scale *= 0.5f;
+        } else {
+            spawn.unk22 = -0xDA;
+        }
+        while (count-- && ok) {
+            speed = func_150ADA68() * 957.0f + scale;
+            angle = func_151EF610() % 256;
+            if (big) {
+                speed += speed;
+            }
+            if (noSurface) {
+                x = func_15048A40(angle);
+                y = 1.0f;
+                z = func_150489B0(angle);
+            } else {
+                cs = func_15048A40(angle);
+                func_150A7960((f32 *)mtx, cs * 0.5f, func_150489B0(angle) * 0.5f, 1.0f, &x, &y, &z);
+            }
+            vx = 0.3149999976f * x;
+            vy = y;
+            vz = 0.3149999976f * z;
+            spawn.unk28 = (func_151EF610() % 2) + 0x182;
+            spawn.unk16 = speed * vx;
+            spawn.unk20 = speed * vy;
+            spawn.unk18 = speed * vz;
+            func_151EF610();
+            spawn.unk2A = 10;
+            spawn.unk24 = func_150ADA68() * rangeScale + minScale;
+            spawn.unk26 = func_150ADA68() * rangeScale + minScale;
+            if (!func_15167D84(&spawn, 0, 0, -1, 0xFF, 0)) {
+                ok = 0;
+            }
+        }
+        if ((arg3 == 4 || arg3 == 9 || arg3 == 5) && func_151EF610() % 5 == 0) {
+            func_150E5558(arg0, arg1, arg2, x, y, z, arg3, arg4);
+        }
+    }
+}
+
+void func_150E5558(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6, s32 arg7) {
     Struct150E5558 sp34;
     f32 var_f16;
     f32 var_f2;
@@ -381,19 +586,6 @@ void func_150E5558(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s
     func_15132A4C(&sp34, 3, 0xFF, 0, 0xFF, 0);
 }
 
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vtx150E5810;
-
-typedef struct {
-    Vtx150E5810 unk0[3];
-} Tri150E5810;
-
-extern void func_15049350(Tri150E5810);
-extern f32 D_800CC214;
-extern f32 D_800CC218;
 
 typedef struct Struct150E5810 {
     /* 0x00 */ u8 pad0[0x10];
