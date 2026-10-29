@@ -662,7 +662,68 @@ s32 func_151EB930(s32 arg0) {
     return arg0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_215960/func_151EB96C.s")
+extern s16 D_800E0A80;
+extern s32 D_800E0A90;
+
+s32 func_151EB96C(s32 arg0) {
+    s32 pad;
+    s16 alpha;
+    s16 i;
+    s32 count;
+    u8 a;
+    s32 spacing;
+    s32 x;
+    s32 x0;
+    u8 *str;
+    if (D_800E0A80 < 0) {
+        return arg0;
+    }
+    {
+        if (D_800E0A90 < 0x168) {
+            alpha = D_800E0A90 << 2;
+            if (alpha >= 0x100) {
+                alpha = 0xFF;
+            }
+        } else {
+            alpha = 0x1A9 - D_800E0A90;
+            alpha <<= 2;
+            if (alpha < 0) {
+                alpha = 0;
+            }
+            if (alpha >= 0x100) {
+                alpha = 0xFF;
+            }
+        }
+        i = D_800E0A80;
+        count = 0;
+        a = alpha;
+        while (((u8 **)D_800E0BD8)[i][0] != 0x2A) {
+            i++;
+            count++;
+        }
+        if (count >= 0xE) {
+            spacing = 0xB;
+        } else {
+            spacing = 0x11;
+        }
+        func_1504332C(0xFF, 0, 0, a);
+        x = (0xD0 - count * spacing) >> 1;
+        i = D_800E0A80;
+        str = ((u8 **)D_800E0BD8)[i];
+        x0 = x;
+        while (*str != 0x2A) {
+            func_15042D94(0x94, x, 1, str);
+            func_1504332C(0xFF, 0xFF, 0xFF, a);
+            if (x == x0) {
+                x += 0xC;
+            }
+            i++;
+            str = ((u8 **)D_800E0BD8)[i];
+            x += spacing;
+        }
+    }
+    return arg0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_215960/func_151EBB50.s")
 
@@ -990,7 +1051,77 @@ Gfx *func_151EDBDC(Gfx *gfx, GameStruct151ED90C *obj, f32 x, f32 y, f32 scale) {
     return gfx;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_215960/func_151EDF4C.s")
+typedef struct {
+    Gfx *dl;
+    s32 *data;
+    s32 unk8;
+} Struct151EDF4C;
+
+extern Struct151EDF4C *D_80090138;
+extern u8 *D_800E0C7C;
+extern u8 D_800E0C80;
+extern u8 D_800E0C81;
+extern u8 D_800E0C82;
+extern u8 D_800E0C83;
+extern u8 D_800E0C84;
+s32 *func_1502B6BC(s32, s32, s32, s32, s32, s32);
+s32 func_1510CE60(Gfx *, s32, u32, s32, s32 *);
+
+void func_151EDF4C(void) {
+    s32 i;
+    s32 j;
+    s32 pad1;
+    s32 pad2;
+    s32 *data;
+    Gfx *dl;
+    s32 cmd;
+    u8 *vtx;
+
+    D_80090138 = NULL;
+    D_800E0C7C = allocate_memory(0x1A8, 1, 0, 0);
+    if (D_800E0C7C != NULL) {
+        D_80090138 = (Struct151EDF4C *)(D_800E0C7C + 0x40);
+        for (i = 0x1C5, j = 0; i < 0x1E3; i++, j++) {
+            data = func_1502B6BC(0, 1, 0, 2, 9, i);
+            D_80090138[j].data = data;
+            D_80090138[j].dl = (Gfx *)*data;
+            func_1510CE60(D_80090138[j].dl, 0, 1, 0x3E, &D_80090138[j].unk8);
+            dl = D_80090138[j].dl;
+            do {
+                cmd = (dl->words.w0 >> 24) & 0xFF;
+                if (cmd == 1) {
+                    dl->words.w1 += (s32)data;
+                    vtx = (u8 *)(((volatile Gfx *)dl)->words.w1 | 0x80000000);
+                    vtx[0xC] = 0;
+                    vtx[0xD] = 0;
+                    vtx[0xE] = 0;
+                    vtx[0xF] = 0xFF;
+                    vtx += 0x10;
+                    vtx[0xC] = 0;
+                    vtx[0xD] = 0;
+                    vtx[0xE] = 0;
+                    vtx[0xF] = 0xFF;
+                }
+                if (cmd == 0xFC) {
+                    dl->words.w0 = 0xFC127E05;
+                    dl->words.w1 = 0xFFFFF3F8;
+                }
+                if (cmd == 0xEF) {
+                    dl->words.w0 |= 0x100000;
+                    dl->words.w1 = 0x0F0A4000;
+                }
+                dl++;
+            } while (cmd != 0xDF);
+        }
+        D_800E0C80 = 0;
+        D_800E0C81 = 0;
+        D_800E0C82 = 0;
+        D_800E0C83 = 0;
+        D_800E0C7C[0] = 0;
+        D_800E0C7C[0x20] = 0;
+        D_800E0C84 = 0;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_215960/func_151EE184.s")
 

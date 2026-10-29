@@ -971,7 +971,179 @@ void func_15150178(struct Local15150178Angles *arg0, struct Local1514FF44Arg *ar
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_17CAF0/func_15150400.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_17CAF0/func_1515080C.s")
+struct Arg1515080C {
+    s32 unk0;
+    s32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    s16 unk14;
+    s16 unk16;
+    s16 unk18;
+    s16 unk1A;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+    s16 unk2C;
+    s16 unk2E;
+    f32 unk30;
+    f32 unk34;
+    f32 unk38;
+    f32 unk3C;
+    u8 unk40;
+};
+
+typedef struct {
+    f32 unk00;
+    f32 unk04;
+    f32 unk08;
+    volatile f32 unk0C;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    struct Vec3F unk28;
+    struct Vec3F unk34;
+    struct Vec3F unk40;
+    f32 unk4C;
+    s32 unk50;
+    s16 unk54;
+    s16 unk56;
+    u8 unk58;
+    u8 pad59[3];
+    s32 unk5C;
+    u8 unk60;
+    u8 unk61;
+    u8 unk62;
+    u8 unk63;
+    u8 unk64;
+    u8 unk65;
+    u8 unk66;
+    u8 unk67;
+    u8 unk68;
+    s8 unk69;
+    u8 unk6A;
+    u8 pad6B;
+    s32 unk6C;
+    u8 unk70;
+    u8 pad71;
+    s16 unk72;
+    s16 unk74;
+    u8 pad76[2];
+    s32 unk78;
+} Spawn1515080C;
+
+extern void func_15143794(s16, s16, f32, f32 *);
+extern s32 func_1513264C(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
+
+void func_1515080C(struct Arg1515080C *arg0, s32 *arg1, f32 *arg2, s32 arg3, void *arg4, s32 arg5, u8 arg6, u8 arg7, s8 arg8, s32 arg9, f32 argA, u8 argB, u8 argC, u8 argD, s32 argE) {
+    u8 *buf;
+    Spawn1515080C spawn;
+    s32 remaining;
+    s32 count;
+    s32 slot;
+    s32 done;
+    s16 a;
+    s16 b;
+
+    buf = allocate_memory(arg3, 2, 2, 1);
+    if (buf != NULL) {
+        {
+        s32 i;
+        for (i = 0; i < arg3; i++) {
+            buf[i] = 0;
+        }
+        }
+        remaining = arg3;
+        spawn.unk00 = 1.0f;
+        spawn.unk1C = 1.0f;
+        spawn.unk20 = 1.0f;
+        spawn.unk24 = 1.0f;
+        spawn.unk04 = 0.5610000491f;
+        spawn.unk40.y = 0.0f;
+        spawn.unk50 = 0x68 | (arg7 ? 0x80 : 0) | 0x100 | 0x800 | 0x1000 | 0x2000 | 0x10000 | (argB ? 0x4000 : 0) | (argC ? 0x100000 : 0);
+        count = ((u32)func_150ADA20() % (u32)(arg0->unk4 + 1)) + arg0->unk0;
+        if (arg3 < count) {
+            count = arg3;
+        }
+        spawn.unk58 = arg6;
+        spawn.unk5C = 0;
+        spawn.unk60 = 0xFF;
+        spawn.unk62 = 0;
+        spawn.unk64 = 0;
+        spawn.unk65 = 0;
+        spawn.unk66 = 0;
+        spawn.unk67 = 0;
+        spawn.unk68 = 2;
+        spawn.unk6A = 0;
+        spawn.unk6C = 0;
+        spawn.unk70 = 0;
+        spawn.unk72 = 0xC;
+        spawn.unk74 = 0x15;
+        spawn.unk69 = arg8;
+        while (count != 0) {
+            a = ((u32)func_150ADA20() % (arg0->unk16 + 1)) + arg0->unk14;
+            b = ((u32)func_150ADA20() % (arg0->unk1A + 1)) + arg0->unk18;
+            func_15143794(a, b, (func_150ADA68() * arg0->unk20) + arg0->unk1C, &spawn.unk34.x);
+            func_15143794(a, b, argA, &spawn.unk28.x);
+            spawn.unk28.x += arg0->unk8;
+            spawn.unk28.y += arg0->unkC;
+            spawn.unk28.z += arg0->unk10;
+            spawn.unk10 = func_150ADA68() * 360.0f;
+            spawn.unk14 = func_150ADA68() * 360.0f;
+            spawn.unk18 = func_150ADA68() * 360.0f;
+            spawn.unk40.x = (func_150ADA68() * (arg0->unk38 + arg0->unk38)) - arg0->unk38;
+            spawn.unk40.z = (func_150ADA68() * (arg0->unk38 + arg0->unk38)) - arg0->unk38;
+            spawn.unk4C = (func_150ADA68() * arg0->unk28) + arg0->unk24;
+            spawn.unk54 = ((u32)func_150ADA20() % (arg0->unk2E + 1)) + arg0->unk2C;
+            {
+            u32 skip;
+            skip = (u32)func_150ADA20() % remaining;
+            slot = 0;
+            done = 0;
+            do {
+                while (buf[slot] != 0) {
+                    slot++;
+                }
+                if (skip != 0) {
+                    skip--;
+                    slot++;
+                    if (slot >= arg3) {
+                        slot = 0;
+                    }
+                } else {
+                    done = 1;
+                }
+            } while (done == 0);
+            }
+            spawn.unk56 = arg1[slot];
+            spawn.unk0C = (arg0->unk30 + (func_150ADA68() * arg0->unk34)) * arg2[slot];
+            remaining--;
+            spawn.unk08 = spawn.unk0C;
+            buf[slot] = 1;
+            {
+            s32 ret;
+            if (func_150ADA68() < arg0->unk3C) {
+                spawn.unk50 |= 1;
+                spawn.unk63 = arg0->unk40;
+                spawn.unk61 = 0xD;
+            } else {
+                spawn.unk50 &= ~1;
+                spawn.unk63 = 0;
+                spawn.unk61 = 8;
+            }
+            ret = func_1513264C(&spawn, 3, 0xFF, arg9, arg5, argD, argE);
+            if (arg4 != 0 && ret != 0) {
+                memcpy((void *)(ret + 0x170), arg4, arg5);
+            }
+            }
+            count--;
+        }
+    }
+}
 
 void func_15150D1C(struct Local15150D1CArg *arg0, u8 arg1, s32 arg2) {
     void *spACPtr;
@@ -1021,7 +1193,167 @@ void func_15150D1C(struct Local15150D1CArg *arg0, u8 arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_17CAF0/func_15150F90.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_17CAF0/func_151511FC.s")
+typedef struct {
+    s16 countBase;
+    s16 countRange;
+    struct Vec3F position;
+    struct Vec3F normal;
+    s16 triangle[9];
+    u8 pad2E[2];
+    f32 spread;
+    u8 unk34;
+    u8 unk35;
+    u16 unk36;
+    s16 unk38;
+    s16 unk3A;
+    f32 unk3C;
+    f32 unk40;
+    s32 unk44;
+    u8 unk48;
+    u8 unk49;
+    u8 pad4A[2];
+    f32 unk4C;
+    f32 unk50;
+    f32 speedBase;
+    f32 speedRange;
+    u8 unk5C;
+    u8 unk5D;
+    u8 pad5E[2];
+    s32 unk60;
+    s32 unk64;
+    s16 unk68;
+    s16 unk6A;
+    f32 unk6C;
+    f32 unk70;
+} Local151511FCArg;
+
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    u16 unk2;
+    s16 unk4;
+    u8 pad6[2];
+    s32 unk8;
+    s32 unkC;
+    u8 unk10;
+    u8 unk11;
+    u8 unk12;
+    u8 unk13;
+    f32 unk14;
+    f32 unk18;
+    struct Vec3F unk1C;
+    f32 unk28;
+    f32 unk2C;
+    f32 unk30;
+    f32 unk34;
+    f32 unk38;
+    f32 unk3C;
+    s32 unk40;
+    u8 unk44;
+    u8 unk45;
+    u8 unk46;
+    u8 unk47;
+    s32 unk48;
+    s32 pad4C;
+    s32 pad50;
+    s16 unk54;
+    s16 unk56;
+} Local151511FCDesc;
+
+typedef struct {
+    struct Vec3F velocity;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+} Local151511FCExtra;
+
+void func_151511FC(Local151511FCArg *arg0, u8 arg1, s32 arg2)
+{
+  s32 count;
+  struct Vec3F basis1;
+  f32 magnitude1;
+  f32 inverse1;
+  struct Vec3F basis2;
+  f32 magnitude2;
+  f32 inverse2;
+  struct Vec3F basis3;
+  f32 magnitude3;
+  f32 inverse3;
+  Local151511FCDesc desc;
+  Local151511FCExtra extra;
+  f32 speed;
+  f32 second;
+  f32 first;
+  void *ret;
+  s32 rand;
+  desc.unk54 = arg0->unk68;
+  desc.unk56 = arg0->unk6A;
+  desc.unk0 = arg0->unk34;
+  desc.unk1 = arg0->unk35;
+  desc.unk2 = arg0->unk36;
+  desc.unk8 = 0;
+  desc.unkC = 0;
+  desc.unk10 = 0xFF;
+  desc.unk11 = 0xFF;
+  desc.unk12 = 0xFF;
+  desc.unk13 = 0xFF;
+  desc.unk1C = arg0->position;
+  desc.unk34 = 1.0f;
+  desc.unk38 = 1.0f;
+  desc.unk3C = 1.0f;
+  desc.unk40 = arg0->unk44 | 0x08000000;
+  desc.unk45 = 0xFF;
+  desc.unk46 = arg0->unk5C;
+  desc.unk47 = arg0->unk5D;
+  extra.unk10 = arg0->unk6C;
+  if (func_15144E80((struct Vec3F *) arg0->triangle, &basis1, &basis2, &basis3) != 0)
+  {
+    func_15145128(&basis1, &basis1, &magnitude1, &inverse1);
+    func_15145128(&basis2, &basis2, &magnitude2, &inverse2);
+    func_15145128(&basis3, &basis3, &magnitude3, &inverse3);
+    if (func_15144A74(&basis3, &arg0->normal) < 0.0f)
+    {
+      basis3.x = -basis3.x;
+      basis3.y = -basis3.y;
+      basis3.z = -basis3.z;
+    }
+    extra.unk18 = 0.0f;
+    basis3.x *= 1000.0f;
+    basis3.y *= 1000.0f;
+    basis3.z *= 1000.0f;
+    count = (func_150ADA20() % ((u32) (arg0->countRange + 1))) + arg0->countBase;
+    if (count != 0)
+    {
+      do
+      {
+        func_15143874((s16) (func_150ADA20() & 0xFF), func_150ADA68() * arg0->spread, &first, &second);
+        speed = (func_150ADA68() * arg0->speedRange) + arg0->speedBase;
+        desc.unk4 = (func_150ADA68() * arg0->unk3A) + arg0->unk38;
+        desc.unk14 = (desc.unk18 = (func_150ADA68() * arg0->unk40) + arg0->unk3C);
+        desc.unk28 = func_150ADA68() * 360.0f;
+        desc.unk2C = func_150ADA68() * 360.0f;
+        desc.unk30 = func_150ADA68() * 360.0f;
+        desc.unk44 = (func_150ADA20() % ((u32) (arg0->unk49 + 1))) + arg0->unk48;
+        extra.velocity.x = (((basis1.x * first) + (basis2.x * second)) + basis3.x) * speed;
+        extra.velocity.y = (((basis1.y * first) + (basis2.y * second)) + basis3.y) * speed;
+        extra.velocity.z = (((basis1.z * first) + (basis2.z * second)) + basis3.z) * speed;
+        extra.unkC = (func_150ADA68() * arg0->unk50) + arg0->unk4C;
+        extra.unk14 = (func_150ADA68() * (arg0->unk70 + arg0->unk70)) - arg0->unk70;
+        extra.unk1C = (func_150ADA68() * (arg0->unk70 + arg0->unk70)) - arg0->unk70;
+        rand = func_150ADA20();
+        ret = func_1513D2F0(&desc, (s32) ((0, &D_800A4AA0)), 0x19, 0, 0, 0x17, (func_150ADA20() & 1) + ((rand & 1) * 2), arg0->unk60, arg0->unk64, 0x20, arg1, arg2);
+        if (ret != 0)
+        {
+          memcpy(((u8 *) ret) + 0x110, &extra, sizeof(extra));
+        }
+        count--;
+      }
+      while (count != 0);
+    }
+  }
+}
 
 typedef struct {
     struct Vec3F position;
@@ -1194,7 +1526,7 @@ struct Spawn15152190 {
     f32 unk00;
     f32 unk04;
     f32 unk08;
-    f32 unk0C;
+    volatile f32 unk0C;
     f32 unk10;
     f32 unk14;
     f32 unk18;
@@ -2333,7 +2665,7 @@ struct Arg1515548C {
     u8 pad16[0x42];
 };
 
-extern s32 func_151555AC(struct Arg1515548C *, f32 *);
+extern s32 func_151555AC();
 extern u8 *func_15167A68(s32, s32, s32, s32, u8, s32);
 
 u8 *func_1515548C(struct Arg1515548C *arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6) {
@@ -2366,8 +2698,62 @@ void func_15155564(struct Local15155564 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_17CAF0/func_151555AC.s")
+struct Node151555AC {
+    u8 pad0[8];
+    struct Node151555AC *next;
+    u8 padC[4];
+    f32 pos[2];
+    f32 size[2];
+    u8 pad20[0xA];
+    u8 unk2A;
+};
+struct Ids151555AC { s32 id[2]; };
+extern struct Ids151555AC D_800A6030;
+extern u8 D_800DCE50[];
 
+s32 func_151555AC(f32 *arg0, f32 *arg1, s32 *arg2, s32 arg3) {
+    s32 j;
+    struct Ids151555AC ids;
+    u8 i;
+    struct Node151555AC *node;
+    struct Node151555AC *next;
+    s32 found;
+    s32 k;
+    f32 w;
+    f32 h;
+    i = 0;
+    for (j = 0; j < 2; j++) {
+        ids = D_800A6030;
+        i &= 0;
+        do {
+            node = ((struct Node151555AC *(*)[0x68])D_800DCE50)[j][ids.id[i]];
+            while (node != NULL) {
+                next = node->next;
+                k = arg3;
+                found = 0;
+                while (k > 0 && !found) {
+                    if (node->unk2A == arg2[k - 1]) {
+                        found = 1;
+                    } else {
+                        k--;
+                    }
+                }
+                if (found) {
+                    w = arg1[0] + node->size[0];
+                    h = arg1[1] + node->size[1];
+                    if (arg0[0] - w <= node->pos[0] && node->pos[0] <= arg0[0] + w &&
+                        arg0[1] - h <= node->pos[1] && node->pos[1] <= arg0[1] + h) {
+                        return 1;
+                    }
+                }
+                node = next;
+            }
+lbl:
+            i++;
+        } while (i < 2);
+        i = 0;
+    }
+}
 void func_1515572C(s32 arg0, u8 arg1) {
     struct Local1515572CData sp18;
 

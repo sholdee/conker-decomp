@@ -42,7 +42,60 @@ void func_15017868(void) {
     func_1509B4A0(*(((s16*)&D_800BE9F0)+1), 1); // er?
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_44C40/func_15017930.s")
+typedef struct {
+    /* 0x00 */ u8 pad0[0x15];
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 unk16;
+    /* 0x17 */ u8 unk17;
+    /* 0x18 */ u8 pad18[0x8];
+    /* 0x20 */ s32 unk20;
+    /* 0x24 */ u8 pad24[0x10];
+} Obj15017930; /* size 0x34 */
+
+extern void *allocate_memory(s32, s32, s32, s32);
+extern u8 D_800D30D0[];
+extern u8 D_800D30F0[];
+extern Obj15017930 **D_800D3270;
+extern s32 D_800D3274;
+void func_15017B20();
+
+void func_15017930(s32 arg0) {
+    u32 i;
+    u32 n;
+    s32 type;
+
+    D_800D3094 = func_1502B7F0((s32 *)&D_800D3098, 3, 0xC, arg0, 5);
+    n = D_800D3094 / sizeof(Obj15017930);
+    D_800D3094 = n;
+    func_15017B20(*(Obj15017930 **)&D_800D3098, n);
+    D_800D3274 = 0;
+    D_800D3270 = NULL;
+    for (i = 0; i < D_800D3094; i++) {
+        if (((*(Obj15017930 **)&D_800D3098)[i].unk15 >> 2) == 1 && ((*(Obj15017930 **)&D_800D3098)[i].unk17 == 2 || (*(Obj15017930 **)&D_800D3098)[i].unk17 == 0 || (*(Obj15017930 **)&D_800D3098)[i].unk17 == 6)) {
+            D_800D3274++;
+        }
+        type = (*(Obj15017930 **)&D_800D3098)[i].unk15 >> 2;
+        if (type == 2 || type == 7) {
+            (*(Obj15017930 **)&D_800D3098)[i].unk20 = 0;
+        }
+    }
+    if (D_800D3274 != 0) {
+        if ((D_800D3270 = allocate_memory(D_800D3274 * 4, 1, 0, 0)) != NULL) {
+            Obj15017930 **out = D_800D3270;
+            Obj15017930 *base;
+            for (i = 0; i < D_800D3094; i++) {
+                if (((*(Obj15017930 **)&D_800D3098)[i].unk15 >> 2) == 1) {
+                    if ((*(Obj15017930 **)&D_800D3098)[i].unk17 == 2 || (*(Obj15017930 **)&D_800D3098)[i].unk17 == 0 || (*(Obj15017930 **)&D_800D3098)[i].unk17 == 6) {
+                        base = (*(Obj15017930 **)&D_800D3098);
+                        *out++ = &base[i];
+                    }
+                }
+            }
+        }
+    }
+    bzero(D_800D30F0, 0x180);
+    bzero(D_800D30D0, 0x20);
+}
 typedef struct {
     /* 0x00 */ u64 mask[3];
     /* 0x18 */ u8 count;

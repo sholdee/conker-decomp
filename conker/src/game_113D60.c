@@ -4,8 +4,11 @@
  * produces.  The header declaration is renamed out of the way and a file-local prototype
  * is used instead (same approach as game_10CD70.c). */
 #define func_15169260 func_15169260_s32_decl_in_functions_h
+#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
 #undef func_15169260
+#undef func_150ADA20
+u32 func_150ADA20(void);
 void func_15169260(void *, s32, s32, s32);
 #include "variables.h"
 
@@ -76,7 +79,87 @@ extern s32 func_151337C0(f32 *arg0);
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_113D60/func_150E68B0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_113D60/func_150E6B84.s")
+typedef struct {
+    /* 0x00 */ f32 x;
+    /* 0x04 */ f32 y;
+    /* 0x08 */ f32 ampX;
+    /* 0x0C */ f32 ampY;
+    /* 0x10 */ f32 phaseX;
+    /* 0x14 */ f32 phaseY;
+    /* 0x18 */ f32 speedX;
+    /* 0x1C */ f32 speedY;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 count;
+    /* 0x2C */ u8 unk2C[0xC];
+    /* 0x38 */ f32 unk38;
+    /* 0x3C */ s16 unk3C;
+    /* 0x3E */ s16 unk3E;
+    /* 0x40 */ u8 unk40;
+} Struct150E6B84Sub;
+
+typedef struct {
+    /* 0x00 */ u8 unk0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD[0x1B];
+    /* 0x28 */ u8 sub[0x24];
+    /* 0x4C */ f32 rate;
+    /* 0x50 */ f32 accum;
+} Struct150E6B84;
+
+extern f32 sinf(f32);
+extern void func_151436B4(f32, f32, f32, f32 *);
+extern s32 func_150E5FD0(void *, f32 *, f32, f32, f32, u8, s32, u8, u8, s16, s8);
+extern f32 func_15144528(f32, f32, f32);
+
+void func_150E6B84(Struct150E6B84 *arg0) {
+    Struct150E6B84Sub *sub;
+    f32 inv;
+    f32 y;
+    f32 step;
+    f32 pos[9];
+    f32 phaseX;
+    f32 phaseY;
+    f32 vx;
+    f32 vy;
+    f32 s1;
+    f32 s2;
+    u32 rnd;
+    u32 rnd2;
+
+    sub = (Struct150E6B84Sub *)arg0->sub;
+    arg0->accum += arg0->rate * D_800BE9A4;
+    if (arg0->accum > 1.0f) {
+        inv = 1.0f / sub->count;
+        y = sub->unk20 + D_800BE9A4;
+        step = y * inv;
+        phaseX = sub->phaseX;
+        phaseY = sub->phaseY;
+        vx = sub->speedX * D_800BE9A4;
+        vy = sub->speedY * D_800BE9A4;
+        do {
+            s1 = sinf(phaseX);
+            s2 = sinf(phaseY);
+            func_151436B4(sub->x + s1 * sub->ampX, sub->y + s2 * sub->ampY, 5.0f, pos);
+            s1 = func_150ADA68();
+            s2 = func_150ADA68();
+            rnd = func_150ADA20();
+            rnd2 = func_150ADA20();
+            func_150E5FD0(sub->unk2C, pos, sub->unk38, (s1 * 300.0f + 100.0f) * 0.1000000015f,
+                          (s2 * 700.0f + 300.0f) * 0.1000000015f, arg0->unkC, arg0->unk1, sub->unk40,
+                          rnd % 86 + 0xAA, rnd2 % (u32)(sub->unk3E + 1) + sub->unk3C, -1);
+            phaseX += vx * inv;
+            phaseY += vy * inv;
+            y -= step;
+            sub->count -= 1.0f;
+        } while (sub->count > 1.0f);
+        sub->phaseX = func_15144528(phaseX, 6.283185482f, 0.0f);
+        sub->phaseY = func_15144528(phaseY, 6.283185482f, 0.0f);
+        sub->unk20 = y;
+    }
+}
 
 void func_150E6E34(f32 *out) {
     f32 *p;
@@ -200,7 +283,58 @@ void func_150E71E4(s32 arg0, s32 arg1, f32 *arg2, f32 *out) {
     out[7] = func_150ADA68() * D_800A133C;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_113D60/func_150E7290.s")
+typedef struct {
+    /* 0x0 */ f32 unk0;
+    /* 0x4 */ f32 unk4;
+} Struct150E75A0Pos;
+
+typedef struct {
+    /* 0x0 */ s32 unk0[2];
+} Struct150E7290Tbl;
+
+extern Struct150E7290Tbl D_80088A5C;
+void func_150E75A0(Struct150E75A0Pos *arg0, f32 arg1, s16 arg2, u8 arg3, u8 arg4, u8 arg5, s16 arg6, s16 arg7, s32 arg8,
+                   s32 arg9, u8 argA, s32 argB);
+void func_150E76D0(f32 arg0, s16 arg1, u8 arg2, u8 arg3, u8 arg4, s16 arg5, s16 arg6, s32 arg7, s32 arg8, u8 arg9, s32 arg10);
+extern void func_15164F0C(u8, u8, void *, u8, s32);
+
+void func_150E7290(u8 arg0, u8 arg1, s32 arg2) {
+    Struct150E7290Tbl sp60;
+    Struct150E75A0Pos sp58;
+    Struct150E81A8Small sp50;
+    s32 sp4C;
+    u32 sp48;
+    u32 sp44;
+    u32 sp40;
+    f32 sp3C;
+
+    if (func_150ADA68() < 0.00419999985f) {
+        sp60 = D_80088A5C;
+        if (func_150ADA68() < 0.7500000596f) {
+            sp58.unk0 = (func_150ADA68() * 300.0f) + -150.0f;
+            sp58.unk4 = (func_150ADA68() * 200.0f) + -100.0f;
+            sp3C = func_150ADA68();
+            sp40 = func_150ADA20();
+            sp44 = (func_150ADA20() & 1) ? 2 : 0;
+            sp48 = (func_150ADA20() & 1) ? 4 : 0;
+            func_150E75A0(&sp58, ((sp3C * 150.0f) + 200.0f) * 0.1000000015f, (sp40 % 201) + 500, (u8)(sp48 | sp44) | 9,
+                          (func_150ADA20() % 26) + 100, 0xFF, 0x40, 3, (s32)&sp60, 2, arg1, arg2);
+        } else {
+            sp3C = func_150ADA68();
+            sp48 = func_150ADA20();
+            func_150E76D0(((sp3C * 100.0f) + 150.0f) * 0.1000000015f, (sp48 % 201) + 500, 9,
+                          (func_150ADA20() % 26) + 100, 0xFF, 0x40, 3, (s32)&sp60, 2, arg1, arg2);
+        }
+        func_10010F30(0x360, 0x7FFF, 0, 0, 0);
+        func_15164F0C(1, arg0, NULL, arg1, arg2);
+        sp50.unk0 = 1;
+        sp50.unk2 = (func_150ADA20() % 26) + 25;
+        sp50.unk5 = 1;
+        sp50.unk4 = (func_150ADA20() % 6) + 3;
+        sp50.unk6 = -1;
+        func_151D8868(&sp50, 0, 0xFF, 0);
+    }
+}
 
 
 typedef struct {
@@ -254,11 +388,6 @@ extern void *func_1515548C(Struct150E76D0 *, s32, s32, s32, s32, u8, s32);
 typedef struct {
     /* 0x0 */ u8 unk0[1];
 } Struct150E75A0Tbl;
-
-typedef struct {
-    /* 0x0 */ f32 unk0;
-    /* 0x4 */ f32 unk4;
-} Struct150E75A0Pos;
 
 extern Struct150E75A0Tbl D_80088A64;
 
@@ -443,7 +572,60 @@ struct260 *func_150E7994(s16 arg0, f32 arg1, u8 arg2, s32 arg3) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_113D60/func_150E7C9C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_113D60/func_150E7FEC.s")
+typedef struct {
+    /* 0x00 */ s32 unk00;
+    /* 0x04 */ s16 unk04;
+    /* 0x06 */ u8 unk06;
+    /* 0x07 */ u8 unk07;
+    /* 0x08 */ s32 unk08;
+    /* 0x0C */ s32 unk0C;
+    /* 0x10 */ u8 unk10;
+    /* 0x11 */ u8 unk11;
+    /* 0x12 */ u8 unk12;
+    /* 0x13 */ u8 unk13;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 unk16;
+    /* 0x17 */ u8 unk17;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ s32 unk1C;
+    /* 0x20 */ s16 unk20;
+    /* 0x22 */ s16 unk22;
+    /* 0x24 */ s16 unk24;
+} Struct150E7FEC;
+
+void func_150E7FEC(f32 arg0, u8 arg1, s32 arg2, f32 *arg3, s16 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, s32 argB) {
+    s32 pad;
+    Struct150E7FEC sp5C;
+    s32 sp58;
+    s32 sp54;
+
+    sp5C.unk22 = 0x14;
+    sp5C.unk24 = 0xC;
+    sp5C.unk06 = 0x4F;
+    sp5C.unk07 = 0;
+    sp5C.unk00 = ((arg4 == -1) ? 0 : 1) | (arg5 ? 0x400 : 0) | 0x100 | 0x200 | 0x1000 | 0x8000 | 0x40000;
+    sp5C.unk04 = (arg4 == -1) ? 0x12C : arg4 + 0x14;
+    sp5C.unk08 = 0;
+    sp5C.unk0C = 0;
+    sp5C.unk10 = arg1;
+    sp5C.unk11 = 0xFF;
+    sp5C.unk12 = arg7;
+    sp5C.unk13 = arg8;
+    sp5C.unk14 = arg9;
+    sp5C.unk15 = 0xFF;
+    sp5C.unk18 = ((arg6 != 0) ? 2 : 1) + 0x480000;
+    sp5C.unk16 = 0;
+    sp5C.unk17 = 6;
+    if (arg5 != 0) {
+        sp58 = 3;
+        sp54 = 0xFF;
+    } else {
+        sp58 = 0;
+        sp54 = 0;
+    }
+    func_1513C650((s32)&sp5C, 0, 0, arg2, arg3[0], arg3[1], arg3[2], arg0, arg0, func_150ADA20() & 0xFF, (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2), sp58, sp54, 0, argA, argB);
+}
 
 void func_150E81A8(u8 arg0, s32 arg1, s32 arg2) {
     Struct150E81A8Vec sp84;
@@ -509,7 +691,133 @@ void func_150E83AC(struct127 *arg0, s16 arg1, u8 arg2, s32 arg3) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_113D60/func_150E8470.s")
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s16 unk8;
+    s16 unkA;
+    s32 unkC;
+    s32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 unk16;
+    u8 unk17;
+    u8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+    u8 unk1C;
+    u8 unk1D;
+    s16 unk1E;
+    s16 unk20;
+    s16 unk22;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    struct17 unk30;
+    struct17 unk3C;
+    struct17 unk48;
+    f32 unk54;
+    u32 unk58;
+    s32 unk5C;
+    u8 unk60;
+    u8 unk61;
+    u8 unk62;
+    s8 unk63;
+    s8 unk64;
+    u8 unk65;
+    u8 unk66;
+    u8 pad67[9];
+} Spawn150E8470;
+
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    u8 unk2;
+    u8 unk3;
+    f32 unk4;
+    f32 unk8;
+} Extra150E8470;
+
+typedef struct {
+    struct17 pos;
+    f32 accum;
+} Sub150E8470;
+
+typedef struct {
+    u8 pad0;
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD[0x1B];
+    Sub150E8470 unk28;
+} Obj150E8470;
+
+extern void *func_15130280(void *, u8, s32, s32, u8, s32);
+
+void func_150E8470(Obj150E8470 *arg0) {
+    Sub150E8470 *sub;
+
+    sub = &arg0->unk28;
+    sub->accum += (0.09999999404f + func_150ADA68() * 0.08789999783f) * D_800BE9A4;
+    if (sub->accum > 1.0f) {
+        Spawn150E8470 spawn;
+        Extra150E8470 extra;
+        void *ret;
+
+        spawn.unk1D = 0x6C;
+        spawn.unk8 = 0x5103;
+        spawn.unk0 = 0x200005;
+        spawn.unk1E = 0x73;
+        spawn.unk20 = 2;
+        spawn.unk58 = 0x80DE07;
+        spawn.unk60 = 8;
+        spawn.unk61 = 6;
+        spawn.unk62 = 0x19;
+        spawn.unk63 = -1;
+        extra.unk0 = 0;
+        extra.unk1 = 0;
+        spawn.unk4 = 0;
+        spawn.unkC = 0;
+        spawn.unk10 = 0;
+        spawn.unk64 = -1;
+        spawn.unk65 = 0;
+        spawn.unk22 = 0x73;
+        spawn.unk14 = 0x24;
+        spawn.unk15 = 0x22;
+        spawn.unk16 = 0x11;
+        spawn.unk17 = 0xFF;
+        spawn.unk18 = 0x7B;
+        spawn.unk19 = 0x93;
+        spawn.unk1A = 0xAA;
+        spawn.unk1C = 0xFF;
+        spawn.unk24 = 1.022418022f;
+        spawn.unk30 = sub->pos;
+        spawn.unk3C.unk0 = 0.0f;
+        spawn.unk3C.unk4 = 0.0f;
+        spawn.unk3C.unk8 = 0.0f;
+        spawn.unk48.unk0 = 0.0f;
+        spawn.unk48.unk4 = 0.0f;
+        spawn.unk48.unk8 = 0.0f;
+        do {
+            extra.unk2 = func_150ADA20() % 5U + 4;
+            extra.unk3 = func_150ADA20() % 5U + 4;
+            extra.unk4 = func_150ADA68() * 13.0f;
+            extra.unk8 = func_150ADA68() * 13.0f;
+            spawn.unk54 = (func_150ADA68() * 40.0f + 68.0f) * 0.001000000047f;
+            spawn.unk58 &= ~0xC0;
+            spawn.unk58 |= ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);
+            spawn.unk1B = func_150ADA20() % 156U + 100;
+            spawn.unkA = func_150ADA20() % 34U + 0x8D;
+            spawn.unk28 = spawn.unk2C = func_150ADA68() * 71.0f + 80.0f;
+            ret = func_15130280(&spawn, 1, 0, 0xC, arg0->unkC, arg0->unk1);
+            if (ret != NULL) {
+                memcpy((u8 *)ret + 0xA8, &extra, sizeof(extra));
+            }
+            sub->accum -= 1.0f;
+        } while (sub->accum > 1.0f);
+    }
+}
 
 extern s32 func_15131828(s32, s32, s32, s32);
 
@@ -611,7 +919,75 @@ void func_150E8A80(void) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_113D60/func_150E8B1C.s")
+extern f32 *func_15144B34(s32);
+
+typedef struct Node150E8B1C {
+    s32 unk0;
+    s32 unk4;
+    f32 unk8;
+    struct Node150E8B1C *unkC;
+} Node150E8B1C;
+
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD[0x1B];
+    f32 unk28;
+    f32 unk2C;
+    f32 unk30;
+} Struct150E8B1C;
+
+void func_150E8B1C(Struct150E8B1C *arg0) {
+    f32 *pos;
+    f32 *p;
+    Node150E8B1C *node;
+    f32 r;
+    struct {
+        f32 unk00;
+        f32 unk04;
+        f32 unk08;
+        f32 unk0C;
+        f32 unk10;
+        f32 unk14;
+    } sp;
+    f32 *v;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+
+    v = (f32 *)&sp;
+    pos = func_15144B34(D_800BE9E8);
+    p = &arg0->unk28;
+    p[2] += (p[0] + (func_150ADA68() * p[1])) * D_800BE9A4 * D_800DCD90;
+    if (p[2] > 1.0f) {
+        do {
+            r = func_150ADA68() * D_800DCD90;
+            node = (Node150E8B1C *)D_800DCDC4;
+            while (node->unk8 < r) {
+                r -= node->unk8;
+                node = node->unkC;
+            }
+            func_1514470C((struct134 *)node->unk0, (s32)v);
+            dx = sp.unk00 - pos[0];
+            dy = sp.unk04 - pos[1];
+            dz = sp.unk08 - pos[2];
+            if (dx * dx + dy * dy + dz * dz < 3240000.0f) {
+                struct260 *ret;
+
+                sp.unk0C = 0.3171199858f;
+                sp.unk10 = 1.046509981f;
+                sp.unk14 = 0.0f;
+                ret = func_15149130((func_150ADA20() % 13U) + 5, -1, 0x34, -1, 1, 0, (struct37 *)0x18, arg0->unkC, arg0->unk1);
+                if (ret != NULL) {
+                    memcpy((void *)((s32)ret + 0x28), v, 0x18);
+                }
+            }
+            p[2] -= 1.0f;
+        } while (p[2] > 1.0f);
+    }
+}
 
 struct260 *func_15130374(void *, u8, s32, u8, s32);
 void func_151436B4(f32, f32, f32, f32 *);

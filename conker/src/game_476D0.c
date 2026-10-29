@@ -27,6 +27,9 @@ struct struct1501A764c {
     u8 pad50[0x130];
 };
 
+void func_1501A8C0(s32 arg0, s32 arg1, s32 arg2, s16 arg3);
+s32 func_1501AE94(s32 arg0);
+void func_1501AF44(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3);
 
 void func_1501A220(s32 arg0, s32 arg1) {
     s32 phi_s0;
@@ -261,7 +264,122 @@ void func_1501A764(s16 arg0, f32 arg1, f32 arg2, f32 arg3, f32 *arg4, f32 *arg5,
 //     *arg6 = (((f32) temp_v0_2->unk4C + (sp2C * sp28 * (f32) temp_v0_2->unk44)) * 32.0f);
 // }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_476D0/func_1501A8C0.s")
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    u8 pad2[2];
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    u8 pad1C[8];
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    f32 unk30;
+    f32 unk34;
+    f32 unk38;
+    u8 pad3C[4];
+    Vp unk40[2];
+    f32 unk60;
+    f32 unk64;
+    f32 unk68;
+    f32 unk6C;
+    f32 unk70;
+    f32 unk74;
+    f32 unk78;
+    f32 unk7C;
+    f32 unk80;
+    f32 unk84;
+    u8 pad88[0xF8];
+} struct1501A8C0;
+
+extern f32 D_80082FA8[];
+extern s16 D_800BE668[][5][2];
+extern u8 D_800BE630[];
+void func_1501B0A0(s32 arg0, s32 arg1);
+
+void func_1501A8C0(s32 arg0, s32 arg1, s32 arg2, s16 arg3) {
+    f32 sp44;
+    f32 sp40;
+    f32 sp3C;
+    f32 sp38;
+    f32 sp34;
+    f32 temp_f20;
+    f32 temp_f2;
+    f32 temp_f0;
+    f32 temp_f12;
+    f32 temp_f14;
+    f32 t;
+    f32 t2;
+    s16 *tbl;
+
+    ((struct1501A8C0 *)D_800BE628)[arg0].unk4 = (&D_800BE638)[arg1];
+    ((struct1501A8C0 *)D_800BE628)[arg0].unk8 = ((s32 *)&D_800BE650)[arg1];
+    if (arg1 != 0) {
+        ((struct1501A8C0 *)D_800BE628)[arg0].unk4 -= 2.0f;
+        ((struct1501A8C0 *)D_800BE628)[arg0].unk8 -= 2.0f;
+    }
+    ((struct1501A8C0 *)D_800BE628)[arg0].unk64 = D_80082FA8[arg1];
+    ((struct1501A8C0 *)D_800BE628)[arg0].unk68 = 2.0f;
+    if (arg1 == 1) {
+        ((struct1501A8C0 *)D_800BE628)[arg0].unk4 *= D_800BE6B8;
+        ((struct1501A8C0 *)D_800BE628)[arg0].unk6C = 103.0199966f * D_800BE6B8;
+        ((struct1501A8C0 *)D_800BE628)[arg0].unk70 = 50.0f;
+    } else {
+        ((struct1501A8C0 *)D_800BE628)[arg0].unk6C = 60.59999847f;
+        ((struct1501A8C0 *)D_800BE628)[arg0].unk70 = 50.0f;
+    }
+    ((struct1501A8C0 *)D_800BE628)[arg0].unk74 = ((struct1501A8C0 *)D_800BE628)[arg0].unk6C;
+    ((struct1501A8C0 *)D_800BE628)[arg0].unk78 = ((struct1501A8C0 *)D_800BE628)[arg0].unk70;
+    tbl = D_800BE668[arg1][arg0];
+    ((struct1501A8C0 *)D_800BE628)[arg0].unk60 = ((struct1501A8C0 *)D_800BE628)[arg0].unk4 / ((struct1501A8C0 *)D_800BE628)[arg0].unk8;
+    ((struct1501A8C0 *)D_800BE628)[arg0].unkC = ((struct1501A8C0 *)D_800BE628)[arg0].unk4 * 0.5f;
+    ((struct1501A8C0 *)D_800BE628)[arg0].unk10 = ((struct1501A8C0 *)D_800BE628)[arg0].unk8 * 0.5f;
+    ((struct1501A8C0 *)D_800BE628)[arg0].unk34 = tbl[0];
+    ((struct1501A8C0 *)D_800BE628)[arg0].unk38 = tbl[1];
+    ((struct1501A8C0 *)D_800BE628)[arg0].unk2C = ((struct1501A8C0 *)D_800BE628)[arg0].unk34 - ((struct1501A8C0 *)D_800BE628)[arg0].unkC;
+    ((struct1501A8C0 *)D_800BE628)[arg0].unk24 = ((struct1501A8C0 *)D_800BE628)[arg0].unk38 - ((struct1501A8C0 *)D_800BE628)[arg0].unk10;
+    ((struct1501A8C0 *)D_800BE628)[arg0].unk30 = ((struct1501A8C0 *)D_800BE628)[arg0].unk34 + ((struct1501A8C0 *)D_800BE628)[arg0].unkC;
+    ((struct1501A8C0 *)D_800BE628)[arg0].unk28 = ((struct1501A8C0 *)D_800BE628)[arg0].unk38 + ((struct1501A8C0 *)D_800BE628)[arg0].unk10;
+    if (arg3 != 0) {
+        func_1501B0A0(arg0, arg1);
+    } else {
+        temp_f2 = D_800BE638;
+        temp_f12 = temp_f2 / (f32)((s32 *)&D_800BE650)[0];
+        temp_f14 = ((struct1501A8C0 *)D_800BE628)[arg0].unk4 / ((struct1501A8C0 *)D_800BE628)[arg0].unk8;
+        ((struct1501A8C0 *)D_800BE628)[arg0].unk14 = (((struct1501A8C0 *)D_800BE628)[arg0].unk4 / temp_f2) * (temp_f12 / temp_f14);
+        ((struct1501A8C0 *)D_800BE628)[arg0].unk18 = ((struct1501A8C0 *)D_800BE628)[arg0].unk8 / (f32)((s32 *)&D_800BE650)[0];
+    }
+    temp_f20 = ((struct1501A8C0 *)D_800BE628)[arg0].unk6C * 0.5f * 0.01745329238f;
+    sp34 = sinf(temp_f20);
+    ((struct1501A8C0 *)D_800BE628)[arg0].unk7C = sp34 / (cosf(temp_f20) * ((struct1501A8C0 *)D_800BE628)[arg0].unkC);
+    temp_f20 = ((struct1501A8C0 *)D_800BE628)[arg0].unk70 * 0.5f * 0.01745329238f;
+    sp34 = sinf(temp_f20);
+    ((struct1501A8C0 *)D_800BE628)[arg0].unk80 = sp34 / (cosf(temp_f20) * ((struct1501A8C0 *)D_800BE628)[arg0].unk10);
+    t = ((struct1501A8C0 *)D_800BE628)[arg0].unk4 + 10.0f;
+    ((Vp *)D_800BE62C)[arg0].vp.vscale[0] = t + t;
+    t2 = ((struct1501A8C0 *)D_800BE628)[arg0].unk8 + 10.0f;
+    ((Vp *)D_800BE62C)[arg0].vp.vscale[1] = t2 + t2;
+    ((Vp *)D_800BE62C)[arg0].vp.vscale[2] = arg2 >> 1;
+    ((Vp *)D_800BE62C)[arg0].vp.vscale[3] = 0;
+    ((Vp *)D_800BE62C)[arg0].vp.vtrans[0] = ((struct1501A8C0 *)D_800BE628)[arg0].unk34 * 4.0f;
+    ((Vp *)D_800BE62C)[arg0].vp.vtrans[1] = ((struct1501A8C0 *)D_800BE628)[arg0].unk38 * 4.0f;
+    ((Vp *)D_800BE62C)[arg0].vp.vtrans[2] = arg2 >> 1;
+    ((Vp *)D_800BE62C)[arg0].vp.vtrans[3] = 0;
+    do {
+        ((struct1501A8C0 *)D_800BE628)[arg0].unk40[D_800BE9C0] = ((Vp *)D_800BE62C)[arg0];
+    } while (0);
+    ((struct1501A8C0 *)D_800BE628)[arg0].unk40[!D_800BE9C0] = ((struct1501A8C0 *)D_800BE628)[arg0].unk40[D_800BE9C0];
+    ((struct1501A8C0 *)D_800BE628)[arg0].unk84 = 1.0f;
+    ((struct1501A8C0 *)D_800BE628)[arg0].unk1 = func_1501AE94(arg0);
+    func_1501AF44(&((struct1501A8C0 *)(arg0 * 0x180 + D_800BE628))->unk2C, &((struct1501A8C0 *)(arg0 * 0x180 + D_800BE628))->unk24,
+                  &((struct1501A8C0 *)(arg0 * 0x180 + D_800BE628))->unk30, &((struct1501A8C0 *)(arg0 * 0x180 + D_800BE628))->unk28);
+    func_1510B32C(arg0, 0.0f, 0.0f, ((struct1501A8C0 *)D_800BE628)[arg0].unk84);
+    D_800BE630[arg0] = arg0;
+}
 
 s32 func_1501AE94(s32 arg0) {
     f32 a = (f32)D_800BE620 - 2.0f;

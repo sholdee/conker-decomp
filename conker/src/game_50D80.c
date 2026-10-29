@@ -177,7 +177,37 @@ void func_15024130(s32 arg0, s32 arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_50D80/func_150241B4.s")
+extern u16 D_800C3C9A;
+
+void func_150241B4(Elem15024130 *arr, s32 *count, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6) {
+    s32 idx;
+    s32 i;
+
+    if (*count >= D_800C3C9A) {
+        func_15024130(*count, arg6);
+        *count = 0;
+        return;
+    }
+    idx = *count;
+    for (i = 0; i < *count; i++) {
+        if (arr[i].unk4 >= arg5) {
+            idx = i;
+            break;
+        }
+    }
+    i = *count - 1;
+    if (i >= idx) {
+loop2:
+        arr[i + 1] = arr[i];
+        i--;
+        if (i >= idx) goto loop2;
+    }
+    arr[idx].unk0 = arg2;
+    arr[idx].unk8 = arg3;
+    arr[idx].unkA = arg4;
+    arr[idx].unk4 = arg5;
+    (*count)++;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_50D80/func_150242F8.s")
 

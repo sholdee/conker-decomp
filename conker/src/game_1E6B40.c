@@ -7,7 +7,115 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E6B40/func_151B9690.s")
+typedef struct {
+    s32 unk00;
+    s32 unk04;
+    s32 unk08;
+    s16 unk0C;
+    s16 unk0E;
+    s16 unk10;
+    s16 unk12;
+    s16 unk14;
+    s16 unk16;
+    s16 unk18;
+    s16 unk1A;
+    u8 unk1C;
+    u8 unk1D;
+    u8 unk1E;
+    s8 unk1F;
+    s16 unk20;
+    s16 unk22;
+    s16 unk24;
+    s16 unk26;
+    s16 unk28;
+    s8 unk2A;
+    u8 unk2B;
+    u8 unk2C;
+    u8 unk2D;
+    u8 unk2E;
+    u8 unk2F;
+    s8 unk30;
+    s8 unk31;
+    s8 unk32;
+    s16 unk34;
+} Packet151B9690;
+
+extern s32 D_8008CA4C;
+extern s32 func_150ADA20(void);
+s32 func_15167D84(void *, s32, s32, s32, s32, s32);
+
+void func_151B9690(s32 arg0, s32 arg1, s16 arg2, s16 arg3, s16 arg4, s16 arg5, f32 arg6, s16 arg7,
+                   s16 arg8, s16 arg9, s16 argA, s16 argB, s16 argC, s16 argD, s16 argE, u8 argF,
+                   s32 arg10) {
+    Packet151B9690 pkt;
+    s32 saved;
+    s16 *pa;
+    f32 speed;
+    f32 spd;
+    f32 w4;
+    f32 sn;
+    f32 cs;
+    f32 w5;
+    f32 dist;
+    s32 y;
+    u8 r;
+    u8 g;
+    u8 b;
+
+    saved = arg3;
+    arg6 += 180.0f;
+    arg6 += (f32)(s32)((func_150ADA20() % (u32)arg7) - (arg7 >> 1));
+    sn = sinf(arg6 * 0.01745329238f);
+    cs = cosf(arg6 * 0.01745329238f);
+    dist = argA;
+    if (argB == 0) {
+        argB = 1;
+    }
+    dist += (f32)(s32)((func_150ADA20() % (u32)argB) - (argB >> 1));
+    speed = dist;
+    spd = argC;
+    arg2 = (s32)(arg2 + spd * sn);
+    arg4 = (s32)(arg4 + spd * cs);
+    arg3 += 1;
+    y = ((func_150ADA20() % (u32)arg9) - (arg9 >> 1));
+    y = arg8 + y;
+    switch (arg1) {
+    case 2:
+        r = 0x68; g = 0x38; b = 0x10;
+        break;
+    case 0:
+    case 1:
+    case 3:
+    default:
+        r = g = b = 0xFF;
+        break;
+    }
+    pkt.unk00 = (&D_8008CA4C)[arg0];
+    pkt.unk04 = (argD << 16) | (saved & 0xFFFF);
+    pkt.unk08 = arg1;
+    pkt.unk0C = 0;
+    pkt.unk0E = 0x100;
+    pkt.unk10 = arg2;
+    pkt.unk12 = arg3;
+    pkt.unk14 = arg4;
+    pkt.unk16 = (s32)(speed * sn);
+    pkt.unk18 = (s32)(speed * cs);
+    pkt.unk1A = argE;
+    pkt.unk1F = 0;
+    pkt.unk20 = y;
+    pkt.unk22 = -0xA0;
+    pkt.unk24 = argE;
+    pkt.unk26 = argE;
+    pkt.unk28 = 0x190;
+    pkt.unk2A = 0;
+    pkt.unk2B = func_150ADA20();
+    pkt.unk2F = 0xFF;
+    pkt.unk34 = 0;
+    pkt.unk2C = r;
+    pkt.unk2D = g;
+    pkt.unk2E = b;
+    func_15167D84(&pkt, 0, 0, -1, argF, arg10);
+}
 
 typedef struct {
     u8  unk0;
@@ -116,7 +224,7 @@ typedef struct {
 } struct_151B9BF0;
 
 s32 func_15167A68(s32, s32, s32, s32, s32, s32);
-void func_151B9690(u8, u8, s16, s16, s16, s16, f32, s16, s16, s16, s16, s16, s16, s16, s16, u8, s32);
+void func_151B9690(s32, s32, s16, s16, s16, s16, f32, s16, s16, s16, s16, s16, s16, s16, s16, u8, s32);
 
 void func_151B9BF0(s32 arg0, s32 arg1, s16 arg2, s16 arg3, s16 arg4, s16 arg5,
                    s16 arg6, s16 arg7, s16 arg8, s16 arg9, s16 arg10, s16 arg11,

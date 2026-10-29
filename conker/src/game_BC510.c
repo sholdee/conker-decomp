@@ -2,9 +2,12 @@
 
 #define func_15048A40 func_15048A40_hdr
 #define func_150ADA20 func_150ADA20_hdr
+#define func_150A7CB0 func_150A7CB0_hdr
 #include "functions.h"
 #undef func_15048A40
 #undef func_150ADA20
+#undef func_150A7CB0
+void func_150A7CB0(f32 mtx[4][4], f32 x, f32 y, f32 z);
 #include "variables.h"
 extern s32 func_150ADA20(void);
 void func_1508F9F4(void);
@@ -243,7 +246,96 @@ GameBC510Command *func_1508FD38(register GameBC510Command *arg0) {
     if (overflow != 0) return original;
     return arg0;
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_150900F0.s")
+extern s16 D_8008FDCC;
+extern s16 D_8009DC90[][3];
+extern u8 D_800CC49A;
+void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
+
+GameBC510Command *func_150900F0(GameBC510Command *arg0, s32 arg1) {
+    s32 i;
+    s32 count;
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 scale;
+    f32 mtx[4][4];
+    f32 base[4][4];
+    struct256 *p;
+    u32 *dl;
+
+    if (D_800D2588 == 0) {
+        D_800D2588 = func_1518C900(0xB8);
+    }
+    { GameBC510Command *c = arg0++; c->w0 = 0xD9F1FDFE; c->w1 = 0; }
+    { GameBC510Command *c = arg0++; c->w0 = 0xD7000002; c->w1 = 0xFFFFFFFF; }
+    { GameBC510Command *c = arg0++; c->w0 = 0xD9FFFFFF; c->w1 = 0x400; }
+    { GameBC510Command *c = arg0++; c->w0 = 0xE7000000; c->w1 = 0; }
+    { GameBC510Command *c = arg0++; c->w0 = 0xFA000000; c->w1 = 0xFF; }
+    if (arg1 == 0) {
+        { GameBC510Command *c = arg0++; c->w0 = 0xEF08AC0F; c->w1 = 0x55204C; }
+        { GameBC510Command *c = arg0++; c->w0 = 0xFC127E24; c->w1 = 0xFFFFF9FC; }
+        { GameBC510Command *c = arg0++; c->w0 = 0xFB000000; c->w1 = 0; }
+    } else {
+        { GameBC510Command *c = arg0++; c->w0 = 0xDB0E0000; c->w1 = *(u16 *)&D_800D2454; }
+        { GameBC510Command *c = arg0++; c->w0 = 0xDA380007; c->w1 = (u32)&D_800D23D0; }
+        { GameBC510Command *c = arg0++; c->w0 = 0xEF08AC0F; c->w1 = 0x5041CC; }
+        { GameBC510Command *c = arg0++; c->w0 = 0xFC12D225; c->w1 = 0xFFA7FFFF; }
+        { GameBC510Command *c = arg0++; c->w0 = 0xFB000000; c->w1 = (D_8008FDCC & 0xFF) | 0xFFFFFF00; }
+    }
+    count = D_800D2456;
+    dl = (u32 *)D_800D2588;
+    if (arg1 != 0) {
+        x = (f32)D_8009DCB4[3] - 54.0f;
+        y = (f32)D_8009DCB4[4] - 52.0f;
+        z = (f32)D_8009DCB4[5] - 344.7000122f;
+        count = D_800CC49A;
+        func_150A8050(base, 50.0f, -20.0f, -20.0f);
+        scale = 1.0f;
+        {
+            u32 *q = dl;
+            u32 cmd;
+            do {
+                cmd = (u8)(q[0] >> 24);
+                switch (cmd) {
+                case 0xFC:
+                    q[0] = 0;
+                    break;
+                case 0xEF:
+                    q[1] = 0x5041C8;
+                    break;
+                }
+                q += 2;
+            } while (cmd != 0xDF);
+        }
+    } else {
+        x = D_800D2428[0];
+        y = D_800D2428[1];
+        z = D_800D2428[2];
+        func_150A8050(base, D_800D2438[0] + 50.0f, -20.0f, D_800D2438[2] + -20.0f);
+    }
+    func_15043EC8(base, 1.0f, 1.0f, 1.0f, x, y, z);
+    for (i = 0; i < count; i++) {
+        if (arg1 == 0) {
+            scale = D_800D2410[i];
+        }
+        func_150A7CB0(mtx, scale, scale, scale);
+        mtx[3][0] = D_8009DC90[i][0];
+        mtx[3][1] = D_8009DC90[i][1];
+        mtx[3][2] = D_8009DC90[i][2];
+        func_150A7A48(mtx, base, mtx);
+        guMtxF2L(mtx, (Mtx *)(&((Mtx (*)[2])&D_800D2590)[i][D_800BE9C0]));
+        { GameBC510Command *c = arg0++; c->w0 = 0xDA380003; c->w1 = (u32)(&((Mtx (*)[2])&D_800D2590)[i][D_800BE9C0]); }
+        { GameBC510Command *c = arg0++; c->w0 = 0xDE000000; c->w1 = (u32)dl; }
+    }
+    if (arg1 == 0) {
+        for (p = D_800D245C; p != NULL; p = p->unk80) {
+            func_15043E68((Mtx *)((u8 *)p + (D_800BE9C0 << 6)), p->unk9C, p->unkA0, p->unkA4, p->unk84, p->unk88, p->unk8C);
+            { GameBC510Command *c = arg0++; c->w0 = 0xDA380003; c->w1 = (u32)((u8 *)p + (D_800BE9C0 << 6)); }
+            { GameBC510Command *c = arg0++; c->w0 = 0xDE000000; c->w1 = (u32)dl; }
+        }
+    }
+    return arg0;
+}
 typedef struct BC510Entry {
     s16 x;
     s16 y;
@@ -352,7 +444,78 @@ GameBC510Command *func_15090630(GameBC510Command *gfx) {
 }
 #pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_1509093C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_150911F4.s")
+typedef struct BC510Stage {
+    Mtx mtx[2];
+    u32 dl;
+    u32 seg1[2];
+    u8 pad8C[0xA0 - 0x8C];
+    f32 unkA0;
+    f32 unkA4;
+    f32 unkA8;
+    u8 padAC[4];
+    u16 tex[4];
+    u8 padB8[2];
+    u8 alpha;
+    u8 padBB[5];
+} BC510Stage;
+extern u8 D_80083440[];
+extern u8 D_800835C0[];
+extern u8 D_80084160[];
+extern u8 D_80084190[];
+#define STAGE (*(BC510Stage *)&D_800D24C8)
+
+GameBC510Command *func_150911F4(GameBC510Command *gfx) {
+    s32 sp90[6];
+    f32 y;
+    f32 x;
+    s32 t;
+
+    if (STAGE.alpha == 0) {
+        return gfx;
+    }
+    { GameBC510Command *c = gfx++; c->w0 = 0xDE000000; c->w1 = (u32)D_80084160; }
+    { GameBC510Command *c = gfx++; c->w0 = 0xD9FFFFFF; c->w1 = 0x400; }
+    { GameBC510Command *c = gfx++; c->w0 = 0xD9F1FDFE; c->w1 = 0; }
+    { GameBC510Command *c = gfx++; c->w0 = 0xD9BDFFFF; c->w1 = 0; }
+    if (STAGE.alpha < 0xFF) {
+        GameBC510Command *c = gfx++; c->w0 = 0xDB060020; c->w1 = (u32)D_80083440;
+    } else {
+        GameBC510Command *c = gfx++; c->w0 = 0xDB060020; c->w1 = (u32)D_800835C0;
+    }
+    y = -11.0f; y += STAGE.unkA8;
+    x = -1.0f - STAGE.unkA0;
+    func_15043D90(&STAGE.mtx[D_800BE9C0], x, y, 0.0f,
+                  4.050000191f, 4.050000191f, 4.050000191f, 667.0f, 152.0f, -1668.0f);
+    { GameBC510Command *c = gfx++; c->w0 = 0xDA380003; c->w1 = (u32)&STAGE.mtx[D_800BE9C0]; }
+    { GameBC510Command *c = gfx++; c->w0 = 0xF8000000; c->w1 = 0xFF; }
+    { GameBC510Command *c = gfx++; c->w0 = 0xFA00F200; c->w1 = 0; }
+    { GameBC510Command *c = gfx++; c->w0 = 0xFB000000; c->w1 = (STAGE.alpha & 0xFF); }
+    { GameBC510Command *c = gfx++; c->w0 = 0xDB06000C; c->w1 = (u32)&STAGE.mtx[D_800BE9C0]; }
+    { GameBC510Command *c = gfx++; c->w0 = 0xDB060004; c->w1 = STAGE.seg1[D_800BE9C0]; }
+    if (STAGE.tex[0]) {
+        GameBC510Command *c;
+        t = func_1510D0EC(STAGE.tex[0], (s32)sp90, 3, 0);
+        c = gfx++; c->w0 = 0xDB060018; c->w1 = t;
+    }
+    if (STAGE.tex[1]) {
+        GameBC510Command *c;
+        t = func_1510D0EC(STAGE.tex[1], (s32)sp90, 3, 0);
+        c = gfx++; c->w0 = 0xDB06001C; c->w1 = t;
+    }
+    if (STAGE.tex[2]) {
+        GameBC510Command *c;
+        t = func_1510D0EC(STAGE.tex[2], (s32)sp90, 3, 0);
+        c = gfx++; c->w0 = 0xDB060028; c->w1 = t;
+    }
+    if (STAGE.tex[3]) {
+        GameBC510Command *c;
+        t = func_1510D0EC(STAGE.tex[3], (s32)sp90, 3, 0);
+        c = gfx++; c->w0 = 0xDB06002C; c->w1 = t;
+    }
+    { GameBC510Command *c = gfx++; c->w0 = 0xDE000000; c->w1 = STAGE.dl; }
+    { GameBC510Command *c = gfx++; c->w0 = 0xDE000000; c->w1 = (u32)D_80084190; }
+    return gfx;
+}
 
 Gfx* func_15091534(Gfx* arg0, struct257 *arg1, u8 *arg2) {
     s32 temp_v0;

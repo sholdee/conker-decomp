@@ -166,9 +166,304 @@ void func_151BB044(struct127 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1E73B0/func_151BB0E0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E73B0/func_151BB61C.s")
+typedef struct { f32 x, y, z; } Vec3_151BB61C;
+typedef struct { s16 v[9]; } Surf_151BB61C;
+typedef struct {
+    Vec3_151BB61C dir;      /* 0x00 */
+    Surf_151BB61C surf;     /* 0x0C */
+    u8 pad1E[2];
+    f32 unk20;
+    s32 unk24;
+    s32 unk28;
+    Vec3_151BB61C pos;      /* 0x2C */
+    f32 unk38;
+    f32 unk3C;
+    f32 unk40;
+    f32 unk44;
+    f32 unk48;
+    f32 unk4C;
+    s32 unk50;
+    s32 unk54;
+    f32 unk58;
+    f32 unk5C;
+    f32 unk60;
+    f32 unk64;
+    s16 unk68;
+    s16 unk6A;
+    s16 unk6C;
+    s16 unk6E;
+    s16 unk70;
+    s16 unk72;
+    s8 unk74;
+} Fbfc_151BB61C;
+typedef struct {
+    s32 count;
+    s32 spread;
+    Vec3_151BB61C pos;      /* 0x08 */
+    Vec3_151BB61C vel;      /* 0x14 */
+    Surf_151BB61C surf;     /* 0x20 */
+    u8 pad32[2];
+    f32 unk34;
+    f32 unk38;
+    f32 unk3C;
+    f32 unk40;
+    f32 unk44;
+    s16 unk48;
+    s16 unk4A;
+    f32 unk4C;
+    f32 unk50;
+    f32 unk54;
+} Desc_151BB61C;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E73B0/func_151BBA9C.s")
+typedef struct { s32 v[9]; } Colors_151BB61C;
+typedef struct { f32 v[9]; } Scales_151BB61C;
+extern Colors_151BB61C D_800AA718;
+extern Scales_151BB61C D_800AA73C;
+void func_15055A2C(s32, f32, f32, f32, s32);
+s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, void *, f32 *, f32 *, f32 *, s32, s32 *, s32, f32);
+s32 func_15145C90(s32);
+s32 func_15144E80(void *, Vec3_151BB61C *, Vec3_151BB61C *, Vec3_151BB61C *);
+void func_1514FBFC(void *, u8, s32);
+void func_15151D6C(void *, s32 *, f32 *, s32, u8, s32);
+void func_151C04F8(f32 *, u8, s32);
+void func_151C05A4(void *, u8, s32);
+void func_151C05F0(void *, u8, s32);
+void func_151C0644(void *, u8, s32);
+void func_151BBEE4(f32 *arg0, u8 arg1, s32 arg2);
+void func_151BBFBC(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+
+void func_151BB61C(s32 arg0, Vec3_151BB61C *arg1, Vec3_151BB61C *arg2, u8 arg3, s32 arg4) {
+    Surf_151BB61C surf;
+    Vec3_151BB61C hit;
+    Vec3_151BB61C delta;
+    s32 sp1A0;
+    Vec3_151BB61C sp194;
+    Vec3_151BB61C sp188;
+    Vec3_151BB61C sp17C;
+    Fbfc_151BB61C fx;
+
+    if (arg0 != 0) {
+        func_15055A2C(0, arg1->x, arg1->y, arg1->z, 0);
+        delta.x = arg2->x - arg1->x;
+        delta.y = arg2->y - arg1->y;
+        delta.z = arg2->z - arg1->z;
+        func_151C05A4(arg1, arg3, arg4);
+        func_151C05F0(arg1, arg3, arg4);
+        func_151C04F8((f32 *)arg1, arg3, arg4);
+        func_151BBEE4((f32 *)arg1, arg3, arg4);
+        if (func_150AC9C0(arg1->x, arg1->y, arg1->z, delta.x, delta.y, delta.z, 0, &surf, &hit.x, &hit.y, &hit.z, 0, &sp1A0, 0, 0.0f) != 0) {
+            if (func_15145C90(sp1A0) != 0) {
+                func_151BBFBC((s32)&surf, (s32)&hit, arg3 & 0xFF, arg4);
+            }
+            if (func_15144E80(&surf, &sp194, &sp188, &sp17C) != 0 && sp17C.y < 0.0f) {
+                func_151C0644(&hit, arg3, arg4);
+            }
+            fx.dir.x = -delta.x;
+            fx.dir.y = -delta.y;
+            fx.dir.z = -delta.z;
+            fx.surf = surf;
+            fx.unk20 = 494.0f;
+            fx.pos = hit;
+            fx.unk24 = 3;
+            fx.unk28 = 4;
+            fx.unk38 = 0.06089999899f;
+            fx.unk3C = 0.02520000003f;
+            fx.unk40 = 45.0f;
+            fx.unk44 = 53.0f;
+            fx.unk48 = 203.0f;
+            fx.unk4C = 414.0f;
+            fx.unk50 = 7;
+            fx.unk54 = 3;
+            fx.unk58 = 15.0f;
+            fx.unk5C = 0.8800000548f;
+            fx.unk60 = -0.3980000317f;
+            fx.unk64 = 0.3910000324f;
+            fx.unk68 = 25;
+            fx.unk6A = 15;
+            fx.unk6C = 100;
+            fx.unk6E = 100;
+            fx.unk70 = 12;
+            fx.unk72 = 20;
+            fx.unk74 = 0;
+            func_1514FBFC(&fx, arg3, arg4);
+            {
+            Colors_151BB61C colors;
+            Scales_151BB61C scales;
+            Desc_151BB61C desc;
+            colors = D_800AA718;
+            scales = D_800AA73C;
+            desc.count = 6;
+            desc.spread = 6;
+            desc.pos = hit;
+            desc.vel.x = -delta.x;
+            desc.vel.y = -delta.y;
+            desc.vel.z = -delta.z;
+            desc.surf = surf;
+            desc.unk34 = 456.0f;
+            desc.unk38 = 0.02000000142f;
+            desc.unk3C = 0.02000000142f;
+            desc.unk40 = -1.710000038f;
+            desc.unk44 = 0.4480000138f;
+            desc.unk48 = 50;
+            desc.unk4A = 20;
+            desc.unk4C = 0.4990000129f;
+            desc.unk50 = 0.7010000348f;
+            desc.unk54 = 21.50200081f;
+            func_15151D6C(&desc, colors.v, scales.v, 9, arg3, arg4);
+            }
+        }
+    }
+}
+
+typedef struct Vec3i_151BBA9C {
+    s32 x;
+    s32 y;
+    s32 z;
+} Vec3i_151BBA9C;
+
+typedef struct Effect_151BBA9C {
+    s16 field00;
+    s16 field02;
+    s16 field04;
+    s16 field06;
+    s32 field08;
+    s32 field0C;
+    Vec3i_151BBA9C position;
+    f32 field1C;
+    f32 field20;
+    f32 field24;
+    f32 field28;
+    f32 field2C;
+    f32 field30;
+    s32 field34;
+    s32 field38;
+    f32 field3C;
+    f32 field40;
+    f32 field44;
+    f32 field48;
+    s16 field4C;
+    s16 field4E;
+    s16 field50;
+    s16 field52;
+    s16 field54;
+    s16 field56;
+    s8 field58;
+    u8 pad59[3];
+} Effect_151BBA9C;
+
+typedef struct Config_151BBA9C {
+    s32 countBase, countRange;
+    Vec3_151BB61C position;
+    s16 yawBase, yawRange, pitchBase, pitchRange;
+    f32 speedBase, speedRange, durationBase, durationRange;
+    s16 lifeBase, lifeRange;
+    f32 sizeBase, sizeRange, jitter;
+} Config_151BBA9C;
+
+void func_1514FCE8(s16 *, u8, s32);
+void func_15152190(void *, void *, void *, s32, f32, s32, s32, s32);
+s32 func_15046C80(f32 *, u16, f32, void *);
+void func_1504715C(void *, void *);
+extern Vec3_151BB61C D_8008FBA0;
+extern Vec3_151BB61C D_8008FBAC;
+extern f32 D_800AA80C;
+extern f32 D_800AA810;
+extern f32 D_800AA814;
+extern f32 D_800AA818;
+extern f32 D_800AA81C;
+extern f32 D_800AA820;
+extern f32 D_800AA824;
+extern f32 D_800AA828;
+
+void func_151BBA9C(s32 arg0, f32 *arg1, f32 *arg2, u8 arg3, s32 arg4) {
+    Vec3_151BB61C center;
+    Effect_151BBA9C effect;
+    f32 contact[8];
+    f32 ground;
+    Vec3_151BB61C probe;
+    Vec3_151BB61C hit;
+    Vec3_151BB61C normal;
+    Vec3_151BB61C tangent;
+    Vec3_151BB61C facing;
+
+    if (arg0 != 0) {
+        center.x = (arg2[0] + arg1[0]) * 0.5f;
+        center.y = (arg2[1] + arg1[1]) * 0.5f;
+        center.z = (arg2[2] + arg1[2]) * 0.5f;
+        func_151C04F8(&center.x, arg3, arg4);
+        func_151C05A4(&center.x, arg3, arg4);
+        func_151C05F0(&center.x, arg3, arg4);
+        func_15055A2C(1, center.x, center.y, center.z, 0);
+        func_151BBEE4(&center.x, arg3, arg4);
+        effect.field00 = 0;
+        effect.field02 = 0xFF;
+        effect.field04 = -0x40;
+        effect.field06 = 0x47;
+        effect.field08 = 6;
+        effect.field0C = 4 >> ((D_80082FA0 >= 2) ? 1 : 0);
+        effect.position = *(Vec3i_151BBA9C *)&center;
+        effect.field34 = 7;
+        effect.field1C = 23.0f;
+        effect.field20 = 30.0f;
+        effect.field24 = 45.0f;
+        effect.field28 = 53.0f;
+        effect.field2C = 203.0f;
+        effect.field30 = 414.0f;
+        effect.field38 = 3 >> ((D_80082FA0 >= 2 || D_8008FD8C >= 8) ? 1 : 0);
+        effect.field4C = 0x19;
+        effect.field4E = 0xF;
+        effect.field50 = 0x64;
+        effect.field52 = 0x64;
+        effect.field54 = 0xC;
+        effect.field56 = 0x14;
+        effect.field3C = 15.0f;
+        effect.field40 = D_800AA80C;
+        effect.field44 = D_800AA810;
+        effect.field48 = D_800AA814;
+        if (D_80082FA0 >= 2 || D_8008FD8C >= 8) {
+            effect.field58 = -1;
+        } else {
+            effect.field58 = 0;
+        }
+        func_1514FCE8(&effect.field00, arg3, arg4);
+        func_1504715C(&ground, (void *)arg0);
+        probe.x = center.x;
+        probe.y = center.y + 100.0f;
+        probe.z = center.z;
+        if (func_15046C80(&probe.x, 0, center.y - 1000.0f, &ground) != 0) {
+            hit.x = probe.x;
+            hit.y = ground;
+            hit.z = probe.z;
+            func_151BBFBC((s32)contact, (s32)&hit, arg3, arg4);
+            if (func_15144E80(contact, &normal, &tangent, &facing) != 0 && facing.y < 0.0f) {
+                func_151C0644(&hit, arg3, arg4);
+            }
+        }
+        {
+            Config_151BBA9C config;
+            Vec3_151BB61C first = D_8008FBA0;
+            Vec3_151BB61C second = D_8008FBAC;
+
+            config.countBase = 4;
+            config.countRange = 8;
+            config.position = center;
+            config.speedBase = 12.0f;
+            config.speedRange = 6.0f;
+            config.yawBase = 0;
+            config.yawRange = 0xFF;
+            config.pitchBase = -0x3F;
+            config.pitchRange = 0x57;
+            config.lifeBase = 0x32;
+            config.lifeRange = 0xA;
+            config.durationBase = D_800AA818;
+            config.durationRange = D_800AA81C;
+            config.sizeBase = D_800AA820;
+            config.sizeRange = D_800AA824;
+            config.jitter = D_800AA828;
+            func_15152190(&config, &first, &second, 3, 0.0f, 1, arg3, arg4);
+        }
+    }
+}
 
 void func_151BBEE4(f32 *arg0, u8 arg1, s32 arg2) {
     Header header;
@@ -212,7 +507,122 @@ void func_151BC074(s32 arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E73B0/func_151BC104.s")
+extern f32 D_800AA830;
+extern f32 D_800DCA24;
+void *func_15134908(void *, s32, u8, s32);
+void *func_15147A80(void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+void *func_15163414(Header *, f32 *, f32 *, f32 *, s8, u8, u8, u8, u8, u8, u8, u8, s32, u8, s32);
+
+typedef struct {
+    f32 *unk0;
+    f32 *unk4;
+    f32 *unk8;
+    f32 unkC;
+    f32 unk10;
+    s16 unk14;
+    u8 unk16;
+    u8 unk17;
+    u8 unk18;
+    u8 unk19;
+    u8 pad1A[2];
+} Spawn151BC104;
+
+typedef struct {
+    struct127 *owner;
+    u8 ownerId;
+} Extra151BC104;
+
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec151BC104;
+
+typedef struct {
+    Vec151BC104 unk0;
+    s16 unkC;
+    s16 unkE;
+    s32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 pad16[2];
+    s32 unk18;
+} Header151BC104;
+
+typedef struct {
+    struct127 *owner;
+    u8 ownerId;
+    u8 pad5[3];
+    Vec151BC104 unk8;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+} Payload151BC104;
+
+void func_151BC104(struct127 *arg0, u8 arg1, s32 arg2) {
+    void *temp_v0;
+
+    if ((D_80082FA0 < 2) && (D_8008FD8C < 5)) {
+        Spawn151BC104 spawn;
+        Extra151BC104 extra;
+        spawn.unkC = 15.0f;
+        spawn.unk0 = &arg0->x_position;
+        spawn.unk4 = &arg0->y_position;
+        spawn.unk8 = &arg0->z_position;
+        spawn.unk14 = 0x12C;
+        spawn.unk10 = D_800AA830 * D_800DCA24;
+        spawn.unk16 = 4;
+        spawn.unk17 = 4;
+        spawn.unk18 = 1;
+        spawn.unk19 = 0;
+        extra.owner = arg0;
+        extra.ownerId = arg0->unique_id;
+        temp_v0 = func_15134908(&spawn, 8, arg1, arg2);
+        if (temp_v0 != NULL) {
+            memcpy((u8 *)temp_v0 + 0x40, &extra, 8);
+        }
+    }
+    {
+        Header151BC104 header;
+        void *temp_v0_2;
+        Payload151BC104 payload;
+        header.unk15 = 0x28;
+        header.unk0.x = arg0->x_position;
+        header.unk0.y = arg0->y_position;
+        header.unk0.z = arg0->z_position;
+        header.unkC = 0x12C;
+        header.unkE = 6;
+        header.unk10 = 0xC;
+        payload.owner = arg0;
+        payload.ownerId = arg0->unique_id;
+        payload.unk8 = header.unk0;
+        payload.unk14 = 0.0f;
+        payload.unk18 = 0.0f;
+        payload.unk20 = -16384.0f;
+        payload.unk1C = -16384.0f;
+        temp_v0_2 = func_15147A80(&header, 0x28, 0x14, 0xA, 0xA, 0xA, 0, 0, 0, arg1, arg2);
+        if (temp_v0_2 != NULL) {
+            memcpy(*(void **)((u8 *)temp_v0_2 + 0x98), &payload, 0x24);
+        }
+    }
+    {
+        Extra151BC104 extra2;
+        void *temp_v0_3;
+        Header header2;
+        extra2.owner = arg0;
+        extra2.ownerId = arg0->unique_id;
+        header2.unk0 = 2;
+        header2.unk1 = 0xE;
+        header2.unk2 = 0x12C;
+        header2.unk4 = 0x1F;
+        temp_v0_3 = func_15163414(&header2, &arg0->x_position, &arg0->y_position, &arg0->z_position,
+                                0, 0, 0x28, 0xFF, 0xFF, 0xFF, 0xFF, 0, 8, arg1, arg2);
+        if (temp_v0_3 != NULL) {
+            memcpy((u8 *)temp_v0_3 + 0x28, &extra2, 8);
+        }
+    }
+}
 
 void func_15143794(s16, s16, f32, void *);
 void func_151A26EC(f32 *, f32 *, f32 *, f32, f32, f32, s32, s32, s32,
@@ -363,9 +773,335 @@ s32 func_151BC64C(u8 *actor) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E73B0/func_151BC794.s")
+typedef struct Trail151BC794 {
+    struct17 pos;
+    s16 lifetime;
+    u8 alpha;
+    u8 padF;
+    f32 rot;
+} Trail151BC794;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E73B0/func_151BCA90.s")
+typedef struct Src151BC794 {
+    s32 unk0;
+    u8 pad4[0x10];
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    u8 pad20[0x1B];
+    u8 unk3B;
+} Src151BC794;
+
+typedef struct Data151BC794 {
+    Src151BC794 *src;
+    u8 unk4;
+    u8 pad5[3];
+    struct17 pos;
+    f32 count;
+    f32 unk18;
+    f32 unk1C;
+    f32 rot;
+} Data151BC794;
+
+typedef struct Actor151BC794 {
+    u8 pad0[0x10];
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    u8 pad1C[2];
+    u16 unk1E;
+    u8 pad20[5];
+    u8 unk25;
+    u8 pad26[6];
+    s8 unk2C;
+    s8 unk2D;
+    s8 unk2E;
+    u8 pad2F[0x65];
+    Trail151BC794 *entries;
+    Data151BC794 *data;
+} Actor151BC794;
+
+extern f32 func_15143E64(struct17 *);
+
+s32 func_151BC794(Actor151BC794 *arg0) {
+    Data151BC794 *data;
+    Trail151BC794 *entries;
+    Src151BC794 *src;
+    struct17 diff;
+    Trail151BC794 *entry;
+    f32 dist;
+    f32 inv;
+    f32 rot0;
+
+    data = arg0->data;
+    entries = arg0->entries;
+    src = data->src;
+    if (src->unk0 == 0 || src->unk3B != data->unk4) {
+        arg0->unk1E |= 8;
+        return 1;
+    }
+    arg0->unk10 = src->unk14;
+    arg0->unk14 = src->unk18;
+    arg0->unk18 = src->unk1C;
+    diff.unk0 = arg0->unk10 - data->pos.unk0;
+    diff.unk4 = arg0->unk14 - data->pos.unk4;
+    diff.unk8 = arg0->unk18 - data->pos.unk8;
+    dist = func_15143E64(&diff);
+    data->count += dist * 0.04870799929f * D_800BE9A4;
+    data->unk1C += dist * 9.708835602f;
+    if (data->count > 1.0f) {
+        struct17 pos;
+        f32 rot;
+        f32 y;
+        f32 yStep;
+        f32 dx;
+        f32 dy;
+        f32 dz;
+        f32 delta;
+
+        inv = 1.0f / data->count;
+        y = data->unk18 + D_800BE9A4;
+        pos = data->pos;
+        rot0 = data->rot;
+        rot = rot0;
+        yStep = -(y * inv);
+        dx = diff.unk0 * inv;
+        dy = diff.unk4 * inv;
+        dz = diff.unk8 * inv;
+        delta = data->unk1C - rot0;
+        do {
+            entry = &entries[arg0->unk2E];
+            entry->pos = pos;
+            entry->lifetime = 12;
+            entry->alpha = 100;
+            entry->rot = rot;
+            while (entry->rot > 16384.0f) {
+                entry->rot -= 32768.0f;
+            }
+            arg0->unk2E++;
+            if (arg0->unk2E == arg0->unk25) {
+                arg0->unk2E = 0;
+            }
+            arg0->unk2C++;
+            if (arg0->unk2E == arg0->unk2D) {
+                arg0->unk2D++;
+                if (arg0->unk2D == arg0->unk25) {
+                    arg0->unk2D = 0;
+                }
+                arg0->unk2C--;
+            }
+            rot += delta * inv;
+            pos.unk0 += dx;
+            pos.unk4 += dy;
+            pos.unk8 += dz;
+            y += yStep;
+            data->count -= 1.0f;
+        } while (data->count > 1.0f);
+        data->pos = pos;
+        data->rot = rot;
+        data->unk18 = y;
+    }
+    return 1;
+}
+
+typedef struct Trail151BCA90 {
+    struct17 pos;
+    s16 lifetime;
+    u8 alpha;
+    u8 padF;
+    f32 rot;
+} Trail151BCA90;
+
+typedef struct Actor151BCA90 {
+    u8 pad0[0x10];
+    struct17 pos;
+    u8 pad1C[2];
+    u16 unk1E;
+    u8 pad20[5];
+    u8 unk25;
+    u8 pad26[6];
+    s8 unk2C;
+    s8 unk2D;
+    s8 unk2E;
+    u8 pad2F[0x55];
+    u8 buffers[0x10];
+    Trail151BCA90 *entries;
+} Actor151BCA90;
+
+Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
+Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
+Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
+Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
+Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
+extern struct17 *func_15144B34(s32);
+void func_151D5D60(void *, s16, s32, void **, u8 *);
+extern u8 D_80090CD4[];
+extern s32 D_800D2C9C;
+extern struct {
+    s32 unk0;
+    s32 unk4;
+} D_800A4AC8[];
+
+Gfx *func_151BCA90(Actor151BCA90 *arg0, Gfx *gfx, s16 arg2) {
+    Vtx *vtx;
+    Trail151BCA90 *entries;
+    struct17 *cam;
+    u8 update;
+    struct17 b;
+    struct17 a;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    f32 ex;
+    f32 ey;
+    f32 ez;
+    f32 cx;
+    f32 cy;
+    f32 cz;
+    s32 i;
+    s32 j;
+    f32 len[1];
+    u8 alphaA;
+    f32 rotB;
+    f32 rotA;
+    u8 alphaB;
+    f32 scale;
+
+    if (arg0->unk2C >= 2) {
+        func_151D5D60(arg0->buffers, arg2, (arg0->unk25 + 5) * 2 * sizeof(Vtx), (void **)&vtx, 0);
+        if (vtx != NULL) {
+            entries = arg0->entries;
+            cam = func_15144B34(arg2);
+            update = 1;
+            gfx = func_15142E24(gfx, (s32)D_80090CD4, 0, 0, 0, 0, 0x1F, 0, 0, &update, 3);
+            gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &update);
+            gfx = func_1513F4E4(gfx, 0x4E, &update);
+            gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
+            gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4, &update);
+            if (arg0->unk1E & 2) {
+                i = arg0->unk2E - 1;
+                if (i < 0) {
+                    i = arg0->unk25 - 1;
+                }
+                a = arg0->pos;
+                alphaA = 0x80;
+                rotA = 0.0f;
+            } else {
+                j = arg0->unk2E - 1;
+                if (j < 0) {
+                    j = arg0->unk25 - 1;
+                }
+                i = j - 1;
+                if (i < 0) {
+                    i = arg0->unk25 - 1;
+                }
+                a = entries[j].pos;
+                alphaA = entries[j].alpha;
+                rotA = entries[j].rot;
+            }
+            b = entries[i].pos;
+            alphaB = entries[i].alpha;
+            rotB = entries[i].rot;
+
+            ex = a.unk0 - b.unk0;
+            ey = a.unk4 - b.unk4;
+            ez = a.unk8 - b.unk8;
+            dx = a.unk0 - cam->unk0;
+            dy = a.unk4 - cam->unk4;
+            dz = a.unk8 - cam->unk8;
+            cx = (ey * dz) - (dy * ez);
+            cy = (ez * dx) - (dz * ex);
+            cz = (ex * dy) - (dx * ey);
+            len[0] = (cx * cx) + (cy * cy) + (cz * cz);
+            if ((cx * cx) + (cy * cy) + (cz * cz) == 0) {
+                cz = cy = cx = 0.0f;
+            } else {
+                scale = 35.0f / sqrtf(len[0]);
+                cx = cx * scale;
+                cy = cy * scale;
+                cz = cz * scale;
+            }
+            vtx->v.ob[0] = a.unk0 + cx;
+            vtx->v.ob[1] = a.unk4 + cy;
+            vtx->v.ob[2] = a.unk8 + cz;
+            vtx->v.tc[0] = rotA;
+            vtx->v.tc[1] = 0;
+            vtx->v.cn[0] = 0xFF;
+            vtx->v.cn[1] = 0xFF;
+            vtx->v.cn[2] = 0xFF;
+            vtx->v.cn[3] = alphaA;
+            vtx->v.flag = 0;
+            vtx++;
+            vtx->v.ob[0] = a.unk0 - cx;
+            vtx->v.ob[1] = a.unk4 - cy;
+            vtx->v.ob[2] = a.unk8 - cz;
+            vtx->v.tc[0] = rotA;
+            vtx->v.tc[1] = 0x7FF;
+            vtx->v.cn[0] = 0xFF;
+            vtx->v.cn[1] = 0xFF;
+            vtx->v.cn[2] = 0xFF;
+            vtx->v.cn[3] = alphaA;
+            vtx->v.flag = 0;
+            vtx++;
+            do {
+                j = i;
+                ex = a.unk0 - b.unk0;
+                ey = a.unk4 - b.unk4;
+                ez = a.unk8 - b.unk8;
+                dx = b.unk0 - cam->unk0;
+                dy = b.unk4 - cam->unk4;
+                dz = b.unk8 - cam->unk8;
+                cx = (ey * dz) - (dy * ez);
+                cy = (ez * dx) - (dz * ex);
+                cz = (ex * dy) - (dx * ey);
+                len[0] = (cx * cx) + (cy * cy) + (cz * cz);
+                if ((cx * cx) + (cy * cy) + (cz * cz) == 0) {
+                    cz = cy = cx = 0.0f;
+                } else {
+                    scale = 35.0f / sqrtf(len[0]);
+                    cx = cx * scale;
+                    cy = cy * scale;
+                    cz = cz * scale;
+                }
+                vtx->v.ob[0] = b.unk0 + cx;
+                vtx->v.ob[1] = b.unk4 + cy;
+                vtx->v.ob[2] = b.unk8 + cz;
+                vtx->v.tc[0] = rotB;
+                vtx->v.tc[1] = 0;
+                vtx->v.cn[0] = 0xFF;
+                vtx->v.cn[1] = 0xFF;
+                vtx->v.cn[2] = 0xFF;
+                vtx->v.cn[3] = alphaB;
+                vtx->v.flag = 0;
+                vtx++;
+                vtx->v.ob[0] = b.unk0 - cx;
+                vtx->v.ob[1] = b.unk4 - cy;
+                vtx->v.ob[2] = b.unk8 - cz;
+                vtx->v.tc[0] = rotB;
+                vtx->v.tc[1] = 0x7FF;
+                vtx->v.cn[0] = 0xFF;
+                vtx->v.cn[1] = 0xFF;
+                vtx->v.cn[2] = 0xFF;
+                vtx->v.cn[3] = alphaB;
+                vtx->v.flag = 0;
+                vtx++;
+                gSPVertex(gfx++, vtx - 4, 4, 0);
+                gSP1Triangle(gfx++, 0, 1, 2, 0);
+                gSP1Triangle(gfx++, 1, 3, 2, 0);
+                i--;
+                if (i < 0) {
+                    i = arg0->unk25 - 1;
+                }
+                if (j != arg0->unk2D) {
+                    a = b;
+                    b = entries[i].pos;
+                    alphaB = entries[i].alpha;
+                    rotB = entries[i].rot;
+                }
+            } while (j != arg0->unk2D);
+        }
+    }
+    return gfx;
+}
 
 void func_151BD21C(void *arg0, void *arg1, u8 arg2) {
     void *target;

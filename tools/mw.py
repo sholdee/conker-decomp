@@ -307,10 +307,18 @@ def diff_counts(wc, func, n):
             c["structural"] += 1
             continue
         fm = {t.get("format") for t in cur.get("text", []) + b.get("text", [])}
+
+        def body(side):  # instruction text without address / source-line columns
+            txt = "".join(t.get("text", "") for t in side.get("text", []) if t.get("format") != "source_line_num")
+            txt = re.sub(r"^\s*[0-9a-f]+:\s*", "", txt)
+            # same address, different spelling: D_/jtbl_<ADDR> (asm) vs .ro.<file>.<ADDR> (rodata_extern)
+            txt = re.sub(r"\.ro\.\w+\.([0-9A-Fa-f]{8})|\b(?:D|jtbl)_([0-9A-Fa-f]{8})",
+                         lambda mm: "SYM_" + (mm.group(1) or mm.group(2)).upper(), txt)
+            return txt.split()
         if "register" in fm and not fm & {"immediate", "diff_change", "diff_add", "diff_remove"}:
             c["register"] += 1
-        elif fm & {"immediate", "diff_change", "diff_add", "diff_remove"}:
-            c["immediate"] += 1
+        elif fm & {"immediate", "diff_change", "diff_add", "diff_remove"} or body(b) != body(cur):
+            c["immediate"] += 1  # constants, offsets, and stack-slot differences (asm-differ 's' rows)
     return c
 
 
@@ -465,7 +473,7 @@ def cmd_check(a):
     ws = ws_dir(a.func)
     want = [w for _, w in target_words(ws / "target.s")]
     code, out = check_tree(m["func"], m, ws / "conker", want, quiet=a.q or a.no_diff, U=a.U)
-    log_check(ws, code, out, len(want), src=ws / "conker" / m["file"])
+    log_check(ws, code, out, len(want), src=None if a.probe else ws / "conker" / m["file"])
     print("\n".join(out))
     return code
 
@@ -499,7 +507,7 @@ def cmd_batch(a):
             wc = slots / str(k) / "conker"
             shutil.copy(f, wc / m["file"])
             code, out = check_tree(func, m, wc, want, quiet=True)
-            log_check(ws, code, out, len(want), batch=True, src=f)
+            log_check(ws, code, out, len(want), batch=True, src=None if a.probe else f)
             summ = " | ".join(l for l in out if l.startswith(("DIFF", "ROWS", "FRAME", "MATCH", "BUILD-FAIL")))
             return f, code, summ
         finally:
@@ -758,6 +766,28 @@ def cmd_similar(a):
         print("no matched twin or near twin")
 
 
+def cmd_best(a):
+    """Show the ratchet's best attempt; --reset pins the CURRENT workspace file as the best
+    (use when the recorded best was a deliberately wrong probe)."""
+    ws = ws_dir(a.func)
+    m = meta(a.func)
+    if a.reset:
+        want = [w for _, w in target_words(ws / "target.s")]
+        code, out = check_tree(m["func"], m, ws / "conker", want, quiet=True)
+        log_check(ws, code, out, len(want))
+        rec = json.loads(open(ws / "checks.jsonl").read().splitlines()[-1])
+        src = ws / "conker" / m["file"]
+        for q in (ws / "best" / "best.json", NEAR / f"{m['func']}.json"):
+            q.unlink(missing_ok=True)
+        ratchet(ws, m, rec, src)
+        print(f"best reset to the current file: {rec}")
+    for q in (ws / "best" / "best.json", NEAR / f"{m['func']}.json"):
+        if q.exists():
+            e = json.loads(q.read_text())
+            print(f"{q}: {e.get('result')} {e.get('same')}/{e.get('n')} S/R/I "
+                  f"{e.get('structural')}/{e.get('register')}/{e.get('immediate')}")
+
+
 def cmd_near(a):
     """The ratchet queue: every open function's best attempt, closest first."""
     stubs = {Path(x).stem for x in stubbed_asm(MAIN)}
@@ -847,7 +877,9 @@ def main():
     p = sub.add_parser("check"); p.add_argument("func"); p.add_argument("-U", type=int, default=2)
     p.add_argument("--no-diff", action="store_true")
     p.add_argument("-q", action="store_true", help="summary line only")
+    p.add_argument("--probe", action="store_true", help="diagnostic variant: never recorded as a best attempt")
     p = sub.add_parser("batch", help="try variant .c files in parallel")
+    p.add_argument("--probe", action="store_true", help="diagnostic variants: never recorded as best attempts")
     p.add_argument("func"); p.add_argument("files", nargs="+"); p.add_argument("-j", type=int, default=4)
     p = sub.add_parser("reset"); p.add_argument("func"); p.add_argument("--all", action="store_true")
     p = sub.add_parser("objdump"); p.add_argument("func")
@@ -858,6 +890,8 @@ def main():
     p = sub.add_parser("rm"); p.add_argument("func")
     p = sub.add_parser("similar", help="matched twins / near twins of FUNC")
     p.add_argument("func"); p.add_argument("-n", type=int, default=5)
+    p = sub.add_parser("best", help="show the ratchet best; --reset pins the current file as best")
+    p.add_argument("func"); p.add_argument("--reset", action="store_true")
     p = sub.add_parser("near", help="ratchet queue: best attempt of every open function, closest first")
     p.add_argument("-n", type=int, default=40); p.add_argument("--backfill", action="store_true")
     p = sub.add_parser("note", help="append to / print the function's attempt ledger")
@@ -865,7 +899,7 @@ def main():
     a = ap.parse_args()
     sys.exit({"new": cmd_new, "check": cmd_check, "land": cmd_land, "batch": cmd_batch,
               "reset": cmd_reset, "objdump": cmd_objdump,
-              "pick": cmd_pick, "rm": cmd_rm, "similar": cmd_similar, "note": cmd_note, "near": cmd_near}[a.cmd](a) or 0)
+              "pick": cmd_pick, "rm": cmd_rm, "similar": cmd_similar, "note": cmd_note, "near": cmd_near, "best": cmd_best}[a.cmd](a) or 0)
 
 
 if __name__ == "__main__":

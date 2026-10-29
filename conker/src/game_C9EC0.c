@@ -179,7 +179,65 @@ void func_1509CE64(void *arg0, void *arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C9EC0/func_1509CF28.s")
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8;
+    u32 unkC;
+} Res1509CF28;
+
+typedef struct {
+    s32 *unk0;
+    s32 unk4;
+} Ent1509CF28;
+
+extern s32 D_800D2FB0;
+extern Ent1509CF28 *func_1502B6BC(s32, s32, u32 *, s32, s32, s32, s32);
+
+s32 func_1509CF28(s32 arg0, s32 *arg1)
+{
+  Ent1509CF28 *table;
+  u32 i;
+  s32 done;
+  u32 count;
+  s32 *p;
+  s32 flags;
+  s32 pad1;
+  s32 pad2;
+  count = 0;
+  D_800D2FB0 = (s32) func_1502B6BC(0, 0, &count, 3, 8, 0, arg0);
+  if (D_800D2FB0 == 0)
+  {
+    *arg1 = 0;
+    return 0;
+  }
+  table = (Ent1509CF28 *) D_800D2FB0;
+  table->unk4 = count - 1;
+  *arg1 = count - 1;
+  for (i = 1; i < count; i++)
+  {
+    done = 0;
+    p = ((Ent1509CF28 *) D_800D2FB0)[i].unk0;
+    do
+    {
+      p[0] += (s32) ((Ent1509CF28 *) D_800D2FB0)[i].unk0;
+      flags = p[1];
+      if (flags & 0x80000000)
+      {
+        if (1)
+        {
+          done = 1;
+        }
+      }
+      p[1] = flags & (~0xF0000000);
+      p += 2;
+    }
+    while (!done);
+    ((Res1509CF28 *) (&table[1])[i - 1].unk0)->unkC = (((Res1509CF28 *) (&table[1])[i - 1].unk0)->unkC & 0x0FFFFFFF) >> 1;
+  }
+
+  return 1;
+}
 
 extern s32 D_800D2FB0;
 extern s32 func_10004074(s32);
@@ -250,7 +308,81 @@ s32 func_1509D08C(s32 arg0, s32 arg1, s32 *arg2, s32 *arg3) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_C9EC0/func_1509D180.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C9EC0/func_1509D780.s")
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+} Func1509D780Arg;
+
+extern void func_150EB8C4(void);
+extern void func_150F9720(u8);
+extern void *func_1505EEF4(s32);
+extern void func_150F6DB0(void *);
+extern void func_151616D0(u8, u8, s32);
+extern void func_151CD394(s32);
+extern void func_150E35DC(s32);
+extern void func_150B3DD0(void);
+extern void func_150C5C9C(void *);
+extern void func_150C522C(void);
+extern void func_151D2718(s16);
+
+s32 func_1509D780(s32 arg0, Func1509D780Arg *arg1) {
+    void *p;
+
+    switch (arg0) {
+        case 41:
+            func_150EB8C4();
+            break;
+        case 39:
+            func_150F9720(*((u8 *)arg1 + 7));
+            break;
+        case 38:
+            func_151616D0(0x29, 0x18, 0);
+            break;
+        case 36:
+            p = func_1505EEF4(arg1->unk4 & 0xFFF);
+            if (p != NULL) {
+                func_150F6DB0(p);
+            }
+            break;
+        case 26:
+            func_151616D0(0x26, 0x18, 0);
+            break;
+        case 18:
+            func_151CD394(arg1->unk4);
+            break;
+        case 2:
+            D_800D9920 = 0;
+            break;
+        case 4:
+        case 5:
+        case 6:
+            func_150E35DC(arg0 >> 6);
+            break;
+        case 8:
+            func_150B3DD0();
+            break;
+        case 9:
+            p = func_1505EEF4(arg1->unk4 & 0xFFF);
+            if (p == NULL) {
+                return 0;
+            }
+            func_150C5C9C(p);
+            break;
+        case 10:
+            func_150C522C();
+            break;
+        case 19:
+            func_151D2718(*(s16 *)((u8 *)arg1 + 6));
+            break;
+        case 21:
+            func_151616D0(0x20, 0x18, 0);
+            break;
+        case 22:
+            func_151616D0(0x23, 0x28, 0);
+            func_151616D0(0x24, 0x28, 0);
+            break;
+    }
+}
 
 typedef struct {
     s32 unk0;

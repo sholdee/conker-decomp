@@ -64,7 +64,85 @@ void func_15164888(S15164888 *arg0) {
     arg0->unk10 |= 0x2;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_191C30/func_1516489C.s")
+typedef struct {
+    u8 v[3];
+} S1516489CB3;
+
+typedef struct {
+    u8 pad0[0x10];
+    /* 0x10 */ u8 unk10;
+    /* 0x11 */ s8 unk11;
+    /* 0x12 */ s8 unk12;
+    /* 0x14 */ s16 unk14;
+    /* 0x16 */ u8 unk16;
+    /* 0x18 */ f32 amp[6];
+    /* 0x30 */ f32 speed[6];
+    /* 0x48 */ f32 phase[6];
+    /* 0x60 */ S1516489CB3 flagA;
+    /* 0x63 */ S1516489CB3 flagB;
+} S1516489C;
+
+extern s32 (*D_8008B390[])(S1516489C *);
+extern f32 (*D_8008B394[])(S1516489C *);
+extern f32 D_800A6B20[6];
+
+#define WAVE(i, flag, prev) \
+    if (arg0->speed[i] != 0.0f) { \
+        arg0->phase[i] = func_15144B68(arg0->speed[i] * D_800BE9A4 + arg0->phase[i]); \
+        flag = arg0->phase[i] < D_800A6B20[i]; \
+        if ((arg0->unk10 & 2) && (prev != flag)) { \
+            arg0->speed[i] = 0.0f; \
+            arg0->phase[i] = 0.0f; \
+        } \
+        ((f32 (*)[6])D_800DCDE0)[arg0->unk16][i] += sinf(arg0->phase[i]) * arg0->amp[i] * scale; \
+    }
+
+void func_1516489C(S1516489C *arg0) {
+    s32 pad;
+    u8 done;
+    u8 kill;
+    f32 scale;
+    S1516489CB3 prevA;
+    S1516489CB3 prevB;
+
+    done = 0;
+    kill = 0;
+    if (arg0->unk10 & 1) {
+        arg0->unk14 -= D_800BE9E4;
+        if (arg0->unk14 < 0) {
+            kill = 1;
+        }
+    }
+    if (!kill && arg0->unk11 != -1) {
+        if (!D_8008B390[arg0->unk11](arg0)) {
+            kill = 1;
+        }
+    }
+    if (kill) {
+        func_15164888((S15164888 *)arg0);
+    }
+    prevA = arg0->flagA;
+    prevB = arg0->flagB;
+    scale = 1.0f;
+    if (arg0->unk10 & 4) {
+        if (arg0->unk12 != -1) {
+            scale = D_8008B394[arg0->unk12](arg0);
+        }
+    }
+    WAVE(0, arg0->flagA.v[0], prevA.v[0])
+    WAVE(1, arg0->flagA.v[1], prevA.v[1])
+    WAVE(2, arg0->flagA.v[2], prevA.v[2])
+    WAVE(3, arg0->flagB.v[0], prevB.v[0])
+    WAVE(4, arg0->flagB.v[1], prevB.v[1])
+    WAVE(5, arg0->flagB.v[2], prevB.v[2])
+    if (arg0->speed[0] == 0.0f && arg0->speed[1] == 0.0f && arg0->speed[2] == 0.0f &&
+        arg0->speed[3] == 0.0f && arg0->speed[4] == 0.0f && arg0->speed[5] == 0.0f) {
+        done = 1;
+    }
+    if (done) {
+        func_1516972C((struct102 *)arg0);
+    }
+}
 
 void func_15164EE4(void) {
     bzero(D_800DCDE0, 0x60);

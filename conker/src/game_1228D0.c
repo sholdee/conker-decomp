@@ -179,7 +179,64 @@ void func_150F568C(s32 arg0) {
     func_15179008(0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1228D0/func_150F56B0.s")
+extern s32 D_80090274[];
+
+s32 func_150F56B0(s32 arg0, struct127 *arg1) {
+    struct197 *anim;
+    s32 idx;
+    f32 two;
+    f32 t;
+
+    anim = arg1->unk2D0;
+    if (anim == 0) {
+        return 0;
+    }
+    idx = 6;
+    two = 2.0f;
+    if (arg1->unk84.uh == 0xAE) {
+        if ((anim->unk8 >= 36.0f) && (anim->unk8 <= 51.0f)) {
+            t = anim->unk8 - 36.0f;
+            t *= 0.0625f;
+            t = 1.0f - t;
+            idx = (s32)(6.0f * t);
+        } else if ((anim->unk8 > 51.0f) && (anim->unk8 <= 54.0f)) {
+            idx = 0;
+        } else if ((anim->unk8 > 54.0f) && (anim->unk8 <= 60.0f)) {
+            t = anim->unk8 - 54.0f;
+            t *= 0.1428571492f;
+            idx = (s32)(6.0f * t);
+        } else if ((anim->unk8 > 60.0f) && (anim->unk8 <= 65.0f)) {
+            t = anim->unk8 - 60.0f;
+            t *= 0.1666666716f;
+            idx = (s32)(two * t) + 7;
+        } else if ((anim->unk8 > 65.0f) && (anim->unk8 <= 67.0f)) {
+            t = anim->unk8 - 65.0f;
+            t *= 0.3333333433f;
+            t = 1.0f - t;
+            idx = (s32)(two * t) + 7;
+        } else if ((anim->unk8 > 67.0f) && (anim->unk8 <= 70.0f)) {
+            t = anim->unk8 - 67.0f;
+            t *= 0.25f;
+            t = 1.0f - t;
+            idx = (s32)(two * t) + 4;
+        } else if ((anim->unk8 > 70.0f) && (anim->unk8 <= 74.0f)) {
+            t = anim->unk8 - 70.0f;
+            t *= 0.200000003f;
+            idx = (s32)(two * t) + 4;
+        } else if ((anim->unk8 > 74.0f) && (anim->unk8 <= 119.0f)) {
+            t = anim->unk8 - 74.0f;
+            t *= 0.02173913084f;
+            idx = (s32)(two * t) + 7;
+        } else if ((anim->unk8 > 119.0f) && (anim->unk8 <= 150.0f)) {
+            t = anim->unk8 - 119.0f;
+            t *= 0.03125f;
+            t = 1.0f - t;
+            idx = (s32)(two * t) + 7;
+        }
+    }
+    *(s16 *)(arg0 + 0x18) = D_80090274[idx];
+    return 0;
+}
 
 s32 func_150F5A54(s32 arg0, struct127 *arg1) {
     struct197 *anim;
@@ -268,7 +325,173 @@ void func_150F5C08(void *arg0, s16 arg1, u8 arg2, s32 arg3) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1228D0/func_150F5C98.s")
+/* Partial view of the owning actor. */
+typedef struct {
+    s32 interaction_state;
+    u8 pad4[0x3B - 0x4];
+    u8 unique_id;
+    u8 pad3C[0x1D4 - 0x3C];
+    s32 model;
+} EffectOwner5C98;
+
+/* Particle descriptor passed to func_15130280 (0x70 bytes). */
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s16 unk8;
+    s16 unkA;
+    s32 unkC;
+    s32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 unk16;
+    u8 unk17;
+    u8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+    u8 unk1C;
+    u8 unk1D;
+    s16 unk1E;
+    s16 unk20;
+    s16 unk22;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    struct17 pos;
+    struct17 unk3C;
+    struct17 vel;
+    f32 unk54;
+    u32 unk58;
+    s32 unk5C;
+    u8 unk60;
+    u8 unk61;
+    s8 unk62;
+    s8 unk63;
+    s8 unk64;
+    u8 unk65;
+    u8 unk66;
+    u8 pad67;
+    s16 unk68;
+    u8 pad6A[2];
+    f32 unk6C;
+} Particle5C98; /* 0x70 */
+
+typedef struct {
+    EffectOwner5C98 *owner;
+    u8 ownerId;
+    u8 pad5[3];
+    f32 accum;
+} Data5C98;
+
+typedef struct {
+    u8 pad0;
+    u8 unk1;
+    u8 pad2[0xC - 0x2];
+    u8 unkC;
+    u8 padD;
+    s16 state;
+    u8 pad10[0x28 - 0x10];
+    Data5C98 data;
+} Effect5C98;
+
+extern struct17 D_800A1B00;
+extern struct17 D_800A1B0C;
+extern s32 func_15145EA4(s32 *arg0, s32 *arg1, s32 arg2, s32 arg3);
+extern void *func_15130280(void *, u8, s32, s32, u8, s32);
+
+void func_150F5C98(Effect5C98 *effect) {
+    EffectOwner5C98 *owner;
+    Data5C98 *data;
+    Particle5C98 spawn;
+    f32 scale;
+    struct17 a;
+    struct17 b;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    s32 srcs[2];
+    s32 dsts[2];
+
+    owner = effect->data.owner;
+    data = &effect->data;
+    if (owner->interaction_state == 0 || owner->unique_id != data->ownerId) {
+        effect->state = -1;
+        return;
+    }
+    if (owner->model != 0) {
+        data->accum += (0.2600000203f + func_150ADA68() * 0.1950000077f) * D_800BE9A4;
+        if (data->accum > 1.0f) {
+            spawn.unk14 = 0xFF;
+            spawn.unk15 = 0xFF;
+            spawn.unk16 = 0xFF;
+            spawn.unk18 = 0xB4;
+            spawn.unk19 = 0xB4;
+            spawn.unk1A = 0xB4;
+            srcs[0] = (s32)&D_800A1B00;
+            srcs[1] = (s32)&D_800A1B0C;
+            dsts[0] = (s32)&a;
+            dsts[1] = (s32)&b;
+            func_15145EA4(srcs, dsts, owner->model + 0x140, 2);
+            spawn.unk1D = 0x6C;
+            spawn.unk8 = 0x5103;
+            spawn.unk0 = 0x200005;
+            spawn.unk4 = 0x9F0600;
+            spawn.unkC = 0;
+            spawn.unk10 = 0;
+            spawn.unk17 = 0xFF;
+            spawn.unk1C = 0xFF;
+            dx = b.unk0 - a.unk0;
+            dy = b.unk4 - a.unk4;
+            dz = b.unk8 - a.unk8;
+            spawn.unk3C = *(struct17 *)&D_800A5480;
+            spawn.unk58 = 0x84CE07;
+            spawn.unk60 = 8;
+            spawn.unk61 = 6;
+            spawn.unk62 = 0x10;
+            spawn.unk63 = -1;
+            spawn.unk64 = -1;
+            spawn.unk65 = 0;
+            spawn.unk5C = 0;
+            spawn.unk66 = 0xFF;
+            spawn.unk68 = 1000;
+            spawn.unk6C = 1000.0f;
+            scale = 0.9730340242f;
+            spawn.unk24 = 1.022472024f;
+            do {
+                s16 life;
+                f32 k;
+                f32 t;
+                s32 flags;
+                void *ret;
+
+                spawn.unkA = func_150ADA20() % 21U + 20;
+                spawn.unk22 = spawn.unkA;
+                spawn.unk1E = spawn.unkA;
+                spawn.unk20 = 0xFF / spawn.unkA;
+                spawn.unk1B = func_150ADA20() % 26U + 8;
+                spawn.unk28 = spawn.unk2C = func_150ADA68() * 70.0f + 148.0f;
+                spawn.unk54 = func_150ADA68() * 0.2190000117f + 0.08600000292f;
+                k = func_150ADA68() * 0.04100000113f + 0.07800000161f;
+                spawn.vel.unk0 = dx * k;
+                spawn.vel.unk4 = dy * k;
+                spawn.vel.unk8 = dz * k;
+                t = func_150ADA68() * D_800BE9A4;
+                spawn.unk58 &= ~0xC0;
+                spawn.pos.unk0 = spawn.vel.unk0 * t + a.unk0;
+                spawn.pos.unk4 = spawn.vel.unk4 * t + a.unk4;
+                spawn.pos.unk8 = spawn.vel.unk8 * t + a.unk8;
+                flags = (func_150ADA20() & 1) ? 0x80 : 0;
+                spawn.unk58 |= ((func_150ADA20() & 1) ? 0x40 : 0) | flags;
+                ret = func_15130280(&spawn, 1, 0, 4, effect->unkC, effect->unk1);
+                if (ret != NULL) {
+                    memcpy((u8 *)ret + 0xA8, &scale, 4);
+                }
+                data->accum -= 1.0f;
+            } while (data->accum > 1.0f);
+        }
+    }
+}
 
 void func_150F6138(s32 arg0, s32 arg1, u8 arg2) {
     func_15149514(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
@@ -471,7 +694,79 @@ void func_150F64B0(struct210 *arg0) {
     func_151411C4(arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1228D0/func_150F64DC.s")
+typedef struct {
+    /* 0x00 */ struct127 *obj;
+    /* 0x04 */ u8 id;
+    /* 0x05 */ u8 pad5;
+    /* 0x06 */ s16 timer;
+} Func150F64DCLink;
+
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD;
+    /* 0x0E */ s16 unkE;
+    /* 0x10 */ u8 pad10[0x18];
+    /* 0x28 */ Func150F64DCLink link;
+} Func150F64DCSelf;
+
+extern u8 D_800A1B30;
+void func_15143134(void *, f32 *, s32);
+extern struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
+void *func_15107C1C(struct127 *, u8, void *, s16, s32, s32, s32, f32, f32, s32, s32, u8 *, s32, s32);
+
+void func_150F64DC(Func150F64DCSelf *arg0) {
+    Func150F64DCLink *link;
+    struct127 *obj;
+    s8 count;
+
+    obj = arg0->link.obj;
+    link = &arg0->link;
+    if ((obj->interaction_state == 0) || (obj->unique_id != link->id)) {
+        arg0->unkE = -1;
+        return;
+    }
+    if ((obj->unk1D4 != 0) && !(*(s32 *)((u8 *)obj + 0x94) & 2)) {
+        link->timer -= D_800BE9E4;
+        if (link->timer < 0) {
+            func_10010F88(0x679, 0x18CE, 0, 0, 0, obj->x_position, obj->y_position, obj->z_position, 0x7918, 0x7D00);
+            count = (func_150ADA20() & 1) + 2;
+            {
+    f32 pos[3];
+    Header header;
+    Header2 header2;
+    u8 color[4];
+    s32 r1;
+    s32 r2;
+    s32 r3;
+            func_15143134(&D_800A1B30, pos, (s32)obj->unk1D4);
+            header.unk0 = 3;
+            header.unk1 = -1;
+            header.unk2 = (func_150ADA20() % 9U) + 10;
+            header.unk4 = 0;
+            header2.unk0 = pos[0];
+            header2.unk4 = pos[1];
+            header2.unk8 = pos[2];
+            r3 = (func_150ADA20() % 61U) + 60;
+            func_151602C0(&header, &header2, r3, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg0->unkC, arg0->unk1);
+            do {
+                color[0] = 0xA0;
+                color[1] = 0xA0;
+                color[2] = 0xFF;
+                color[3] = (func_150ADA20() % 101U) + 155;
+                r1 = func_150ADA20();
+                r2 = func_150ADA20();
+                r3 = func_150ADA20();
+                func_15107C1C(obj, 0, &D_800A1B30, (u8)r1, (r2 % 43U) - 50, (r3 % 18U) + 5, 4, 27.0f, (func_150ADA68() * 16.0f) + 20.0f, 0, 2, color, arg0->unkC, arg0->unk1);
+                count--;
+            } while (count > 0);
+            link->timer = (func_150ADA20() % 91U) + 90;
+            }
+        }
+    }
+}
 
 void func_150F6850(s32 arg0, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);

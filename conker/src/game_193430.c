@@ -1,5 +1,7 @@
 #include <ultra64.h>
+#define func_15048A40 func_15048A40_hdr
 #include "functions.h"
+#undef func_15048A40
 #include "variables.h"
 
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
@@ -163,6 +165,110 @@ void func_15166204(EffectType4Object *arg0) {
     arg0->field_0x92 = temp_v0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_193430/func_15166268.s")
+extern f32 func_15048A40(u8);
+extern f32 func_150489B0(u8);
+
+Gfx *func_15166268(Gfx *gdl, EffectType4Object *obj, s32 arg2) {
+    s32 pad;
+    s32 x;
+    s32 y;
+    s32 z;
+    s32 size;
+    s32 alpha;
+    s32 thr;
+    s32 half;
+    s32 off0;
+    s32 off1;
+    s32 i;
+
+    if (obj->field_0x92 != 0) {
+        x = obj->field_0x98;
+        y = obj->field_0x9A;
+        z = obj->field_0x9C;
+        size = obj->field_0x9E;
+        half = obj->field_0x93 >> 1;
+        thr = (obj->field_0x93 * 3) / 4;
+        if (obj->field_0x92 < half) {
+            obj->field_0x96 = (obj->field_0x96 * 14) / 15;
+            if (obj->field_0x96 <= 0) {
+                obj->field_0x96 = 1;
+            }
+        }
+        if (obj->field_0x92 < thr) {
+            alpha = (obj->field_0x92 * 255) / thr;
+        } else {
+            alpha = 255;
+        }
+        if (obj->field_0x95 == 0) {
+            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[0].v.ob[0] = x - size;
+            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[0].v.ob[2] = z - size;
+            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[1].v.ob[0] = x + size;
+            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[1].v.ob[2] = z - size;
+            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[2].v.ob[0] = x + size;
+            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[2].v.ob[2] = z + size;
+            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[3].v.ob[0] = x - size;
+            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[3].v.ob[2] = z + size;
+        } else if (obj->field_0x95 == 1) {
+            off0 = (*(s8 *)&obj->field_0x90 * size) / 127;
+            off1 = (*(s8 *)&obj->field_0x91 * size) / 127;
+            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[0].v.ob[0] = x - off0;
+            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[0].v.ob[1] = y + size;
+            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[0].v.ob[2] = z - off1;
+            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[1].v.ob[0] = x + off0;
+            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[1].v.ob[1] = y + size;
+            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[1].v.ob[2] = z + off1;
+            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[2].v.ob[0] = x + off0;
+            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[2].v.ob[1] = y - size;
+            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[2].v.ob[2] = z + off1;
+            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[3].v.ob[0] = x - off0;
+            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[3].v.ob[1] = y - size;
+            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[3].v.ob[2] = z - off1;
+        } else {
+            f32 v[4][3];
+            f32 sinA;
+            f32 cosA;
+            f32 sinB;
+            f32 cosB;
+            f32 vx;
+            f32 vy;
+            f32 vz;
+
+            v[0][0] = -size;
+            v[0][1] = size;
+            v[0][2] = 0.0f;
+            v[1][0] = size;
+            v[1][1] = size;
+            v[1][2] = 0.0f;
+            v[2][0] = size;
+            v[2][1] = -size;
+            v[2][2] = 0.0f;
+            v[3][0] = -size;
+            v[3][1] = -size;
+            v[3][2] = 0.0f;
+            sinA = func_15048A40(obj->field_0xA0);
+            sinB = func_15048A40(obj->field_0xA1);
+            cosA = func_150489B0(obj->field_0xA0);
+            cosB = func_150489B0(obj->field_0xA1);
+            for (i = 0; i < 4; i++) {
+                vx = v[i][0];
+                vy = v[i][1];
+                vz = v[i][2];
+                v[i][1] = cosA * vy - sinA * vz;
+                vz = cosA * vz + sinA * vy;
+                v[i][0] = cosB * vx - sinB * vz;
+                v[i][2] = cosB * vz + sinB * vx;
+                ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[i].v.ob[0] = v[i][0] + x;
+                ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[i].v.ob[1] = v[i][1] + y;
+                ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[i].v.ob[2] = v[i][2] + z;
+            }
+        }
+        gDPPipeSync(gdl++);
+        gDPSetPrimColor(gdl++, 0, 0, 255, 255, 255, alpha);
+        gSPVertex(gdl++, ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v, 4, 0);
+        gSP1Triangle(gdl++, 0, 1, 2, 0);
+        gSP1Triangle(gdl++, 0, 2, 3, 0);
+    }
+    return gdl;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_193430/func_151668B8.s")

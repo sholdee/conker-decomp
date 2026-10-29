@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include "libc/stdarg.h"
 #include "functions.h"
 #include "variables.h"
 
@@ -265,7 +266,7 @@ void func_1509C228(void);
 
 
 void func_15096D08(void);
-s32 func_1509BE40(s32, s32, s32);
+s32 func_1509BE40(s32, s32, s32, ...);
 extern s16 D_800BE9F2;
 extern s32 D_800D2E48;
 extern s32 D_800D2F58;
@@ -336,9 +337,58 @@ void func_1509BBA0(s32 arg0) {
 }
 
 //
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C8950/func_1509BE40.s")
+s32 D_800D2F60[16];
+extern s32 D_800D3840;
+extern s32 (*D_80088498[])(s32, s32, s32 *);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C8950/func_1509BFB0.s")
+s32 func_1509BE40(s32 num, s32 arg1, s32 arg2, ...) {
+    va_list ap;
+    s32 i;
+    s32 cmd;
+    s32 type;
+    s32 saved;
+
+    va_start(ap, num);
+    cmd = va_arg(ap, s32);
+    saved = D_800D3840;
+    type = ((cmd & 0xF000) >> 12) - 1;
+    cmd &= 0xFFF;
+    arg2 = va_arg(ap, s32);
+    D_800D2F60[0] = cmd;
+    D_800D2F60[1] = arg2;
+    for (i = 0; i < num; i++) {
+        D_800D2F60[i + 2] = va_arg(ap, s32);
+    }
+    D_800D3840 = num + 2;
+    D_80088498[type](cmd, arg2, D_800D2F60);
+    D_800D3840 = saved;
+}
+
+extern s32 (*D_800884D4[])(s32, s32, s32 *);
+
+void func_1509BFB0(s32 num, s32 arg1, s32 arg2, ...) {
+    va_list ap;
+    s32 i;
+    s32 cmd;
+    s32 type;
+    s32 saved;
+
+    va_start(ap, num);
+    cmd = va_arg(ap, s32);
+    saved = D_800D3840;
+    type = ((cmd & 0xF000) >> 12) - 1;
+    cmd &= 0xFFF;
+    arg2 = va_arg(ap, s32);
+    D_800D2F60[0] = cmd;
+    D_800D2F60[1] = arg2;
+    for (i = 0; i < num; i++) {
+        D_800D2F60[i + 2] = va_arg(ap, s32);
+    }
+    D_800D3840 = num + 2;
+    D_800884D4[type](cmd, arg2, D_800D2F60);
+    D_800D3840 = saved;
+}
+
 
 void func_1509C120(void) {
     s32 i;

@@ -63,7 +63,88 @@ s32 func_15147DA0(void *arg0, void *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_175250/func_15147EB8.s")
+typedef struct {
+    f32 x, y, z;
+} Vec3f_15147EB8;
+
+typedef struct { Vec3f_15147EB8 v; u8 pad[8]; } Ent15147EB8;
+
+typedef struct {
+    u8 pad0[0x18];
+    u8 unk18;
+    u8 pad19[2];
+    u8 unk1B;
+    s16 unk1C;
+    s16 unk1E;
+    u8 unk20;
+    u8 unk21;
+    u8 unk22;
+} Data15147EB8;
+
+typedef struct {
+    u8 pad0[0x1C];
+    s16 unk1C;
+    u8 pad1E[0xE];
+    s8 unk2C;
+    s8 unk2D;
+    u8 pad2E[0x26];
+    Vec3f_15147EB8 unk54;
+    u8 pad60[0x34];
+    Ent15147EB8 *unk94;
+    Data15147EB8 *unk98;
+} Obj15147EB8;
+
+typedef s32 (*Func15147EB8)();
+extern Func15147EB8 D_8008A3E0[];
+extern Func15147EB8 D_8008A3F8[];
+extern Func15147EB8 D_8008A42C[];
+
+s8 func_15147EB8(Obj15147EB8 *arg0) {
+    Data15147EB8 *data;
+    s8 done;
+    Ent15147EB8 *ent;
+    s16 val;
+    s32 prod;
+    s32 ret;
+
+    data = arg0->unk98;
+    done = 0;
+    if (data->unk20 != 0) {
+        if (D_8008A3E0[data->unk20]() == 0) {
+            done = 1;
+        }
+    }
+    if (data->unk21 != 0 && !done) {
+        if (D_8008A3F8[data->unk21]() == 0) {
+            done = 1;
+        }
+    }
+    if ((data->unk18 & 0x40) && !done) {
+        val = arg0->unk1C;
+        if (val < data->unk1C) {
+            prod = val * data->unk1E;
+            if (prod < data->unk1B) {
+                data->unk1B = prod;
+            }
+        }
+    }
+    ret = !done;
+    if (done) {
+        if (data->unk22 != 0) {
+            done = D_8008A42C[data->unk22](arg0);
+        }
+    }
+    ent = arg0->unk94;
+    if (arg0->unk2C > 0) {
+        arg0->unk54 = ent[arg0->unk2D].v;
+    } else {
+        arg0->unk54.x = 0.0f;
+        arg0->unk54.y = 0.0f;
+        arg0->unk54.z = 0.0f;
+    }
+    return ret;
+}
+
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_175250/func_1514803C.s")
 

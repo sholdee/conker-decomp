@@ -152,4 +152,81 @@ void func_1501C53C(void) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_48FD0/func_1501C57C.s")
+extern u8 D_80084068;
+extern u8 *D_800BE3F0;
+void func_151DCFD8(s32);
+u8 func_151DD460(OSMesgQueue *);
+void func_15007168(void);
+void func_15006590(s32);
+void func_15006BEC(s32);
+void func_1500707C(s32);
+void func_1500727C(void);
+void func_15007360(void);
+void func_15007440(void);
+void func_15007558(void);
+void func_10004074(void *);
+
+void func_1501C57C(void) {
+    s32 i;
+
+    func_151DCFD8(0);
+    if (*(s8 *)&D_80082BB4 != 0) {
+        if (D_80084068 != 2) {
+            D_80084068 = func_151DD460(&D_800BE900);
+        }
+        if (D_80084068 != 2) {
+            switch (*(s8 *)&D_80082BB4) {
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                case 6:
+                case 7:
+                    break;
+            }
+            i = 19;
+            loop:
+            if (i > 0) {
+                i--;
+                goto loop;
+            }
+            if (*(s8 *)&D_80082BB4 == 1) {
+                func_150064E0();
+            } else if (*(s8 *)&D_80082BB4 == 4) {
+                func_15007168();
+            }
+            D_80082BB4 = 0;
+        lbl:;
+        } else {
+            switch (*(s8 *)&D_80082BB4) {
+                case 1:
+                    func_15006590(*(s8 *)&D_800BE3EC);
+                    break;
+                case 2:
+                    func_15006BEC(*(s8 *)&D_800BE3EC);
+                    break;
+                case 3:
+                    func_1500707C(*(s8 *)&D_800BE3EC);
+                    break;
+                case 4:
+                    func_1500727C();
+                    break;
+                case 5:
+                    func_15007360();
+                    break;
+                case 6:
+                    func_15007440();
+                    break;
+                case 7:
+                    func_15007558();
+                    break;
+            }
+            D_80082BB4 = 0;
+            if (D_800BE3F0 != NULL) {
+                func_10004074(D_800BE3F0 - 8);
+                D_800BE3F0 = NULL;
+            }
+        }
+    }
+}

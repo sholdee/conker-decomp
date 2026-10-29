@@ -857,7 +857,7 @@ extern s32  D_800BE62C;
 extern u8   D_800BE635;
 extern s32  D_800BE638;
 extern s32  D_800BE63C[];
-extern s32  D_800BE650;
+extern s32  D_800BE650[];
 extern s32  D_800BE654[];
 extern f32  D_800BE6B8;
 extern struct156 D_800BE760[];

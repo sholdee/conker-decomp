@@ -1,5 +1,8 @@
 #include <ultra64.h>
+#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
+#undef func_150ADA20
+u32 func_150ADA20(void);
 #include "variables.h"
 
 extern f32 D_800A8F68;
@@ -650,7 +653,20 @@ void func_151A8F1C(void *arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
     arg1[1] = arg2[0];
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1D4E00/func_151A8F6C.s")
+void func_15143874(s16, f32, f32 *, f32 *);
+
+void func_151A8F6C(void *arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
+    u8 *state;
+
+    state = (u8 *)arg0 + 0x28;
+    func_15143874((s16)(func_150ADA20() & 0xFF), *(f32 *)(state + 0x20) * func_150ADA68(),
+                  arg1, arg1 + 2);
+    arg1[0] += *(f32 *)(state + 0x10);
+    arg1[2] += *(f32 *)(state + 0x18);
+    arg1[1] = *(f32 *)(state + 0x14);
+    *arg2 = *(f32 *)(state + 0x14);
+    *arg3 = *(f32 *)(state + 0x1C);
+}
 
 void func_151A931C(u8 *, s32, u8);
 

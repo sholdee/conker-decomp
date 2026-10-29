@@ -246,9 +246,151 @@ s32 func_150C8730(Struct150C8730Arg0 *arg0, struct108 *arg1) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_F5800/func_150C88D0.s")
+extern void *func_15167A68(s32, s32, s32, s32, u8, s32);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_F5800/func_150C8A68.s")
+typedef struct {
+    u8 pad0[0x14];
+    s32 count;
+    s16 unk18;
+    u8 pad1A[0x16];
+} Struct150C88D0Def; /* size 0x30 */
+
+typedef struct {
+    u8 pad0[0x10];
+    Struct150C88D0Def def;
+    f32 unk40;
+    f32 unk44;
+    f32 step;
+    s16 unk4C;
+    f32 unk50;
+    u8 *unk54;
+    u8 *unk58;
+    u8 pad5C[0x360 - 0x5C];
+    f32 (*sincos)[2];
+    u8 *unk364;
+    u8 data[1];
+} Struct150C88D0;
+
+Struct150C88D0 *func_150C88D0(Struct150C88D0Def *arg0, s32 arg1, u8 arg2, s32 arg3) {
+    Struct150C88D0 *ret;
+    s32 i;
+
+    ret = func_15167A68(0x31, arg3, (s32)&((f32 (*)[8])((u8 *)arg1 + arg0->count * 8 + 0x408))[arg0->count * 5], 1, arg2, 1);
+    if (ret == NULL) {
+        return NULL;
+    }
+    memcpy(&ret->def, arg0, 0x30);
+    ret->sincos = (f32 (*)[2])ret->data;
+    ret->unk54 = (u8 *)((s32)ret + arg0->count * 8 + 0x368);
+    ret->unk58 = (u8 *)&((f32 (*)[4])((s32)ret + arg0->count * 8 + 0x3B8))[arg0->count * 5];
+    ret->unk364 = (u8 *)&((f32 (*)[8])((s32)ret + arg0->count * 8 + 0x408))[arg0->count * 5];
+    ret->unk40 = 0.0f;
+    ret->unk44 = 0.0f;
+    ret->step = 6.28318548f / ret->def.count;
+    ret->unk50 = 0.0f;
+    ret->unk4C = ret->def.unk18;
+    i = 0;
+    {
+        f32 angle = 0.0f;
+        for (; i < ret->def.count; i++) {
+            ret->sincos[i][0] = sinf(angle);
+            ret->sincos[i][1] = cosf(angle);
+            angle += ret->step;
+        }
+    }
+    return ret;
+}
+
+typedef struct {
+    u8 pad0[0x10];
+    f32 x;
+    f32 y;
+    f32 z;
+    u8 unk1C;
+    s8 unk1D;
+    u8 pad1E[2];
+    f32 unk20;
+    u8 pad24[4];
+    s16 unk28;
+    s16 unk2A;
+    f32 unk2C;
+    s16 unk30;
+    u8 pad32[2];
+    f32 unk34;
+    f32 unk38;
+    s8 unk3C;
+    s8 unk3D;
+    u8 pad3E[2];
+    f32 unk40;
+    f32 unk44;
+    u8 pad48[4];
+    s16 unk4C;
+    u8 pad4E[2];
+    f32 unk50;
+} Struct150C8A68;
+
+extern void (*D_80088858[])(Struct150C8A68 *, f32 *, u8, f32, f32);
+extern s32 (*D_80088860[])(Struct150C8A68 *);
+extern void (*D_80088864[])(Struct150C8A68 *, f32);
+
+void func_150C8A68(Struct150C8A68 *arg0) {
+    s32 pad;
+    u8 done;
+    f32 oldScale;
+    f32 c;
+    f32 s;
+    s32 base;
+    f32 pos[3];
+    u8 angle;
+
+    done = 0;
+    if (arg0->unk1C & 1) {
+        arg0->unk28 -= D_800BE9E4;
+        if (arg0->unk28 < 0) {
+            done = 1;
+        }
+    }
+    if (!done) {
+        s16 t;
+        s16 d;
+        oldScale = arg0->unk44;
+        arg0->unk44 += arg0->unk20 * D_800BE9A4;
+        if (arg0->unk2A < (t = arg0->unk28)) {
+            d = arg0->unk4C - t;
+            arg0->unk40 = d * arg0->unk2C;
+        }
+        if (t < arg0->unk30) {
+            arg0->unk40 = t * arg0->unk34;
+        }
+        if (arg0->unk3C != -1) {
+            arg0->unk50 += arg0->unk38 * D_800BE9A4 * (6.283185482f * arg0->unk44);
+            while (arg0->unk50 > 1.0f) {
+                base = D_800DBFF0[D_80082FA4].unk380 * 0.7111111283f;
+                angle = (func_150ADA20() % 81U) + base - 40;
+                c = func_151423D8(angle - 64);
+                s = func_151423D8(angle);
+                pos[0] = arg0->x + c * arg0->unk44;
+                pos[1] = arg0->y;
+                pos[2] = arg0->z + s * arg0->unk44;
+                if (pos[2] * pos[2] + pos[0] * pos[0] < 10894295.0f) {
+                    D_80088858[arg0->unk3C](arg0, pos, angle, c, s);
+                }
+                arg0->unk50 -= 1.0f;
+            }
+        }
+        if (arg0->unk3D != -1) {
+            D_80088864[arg0->unk3D](arg0, oldScale);
+        }
+        if (arg0->unk1D != -1) {
+            if (D_80088860[arg0->unk1D](arg0) == 0) {
+                done = 1;
+            }
+        }
+    }
+    if (done) {
+        func_1516972C((struct102 *)arg0);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_F5800/func_150C8DB8.s")
 

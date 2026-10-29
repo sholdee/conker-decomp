@@ -371,7 +371,87 @@ void func_151A11CC(f32 arg0, f32 arg1, f32 arg2, f32 arg3,
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1CC440/func_151A11E4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1CC440/func_151A175C.s")
+typedef struct {
+    s16 unk0;
+    s16 unk2;
+    s16 unk4;
+    s16 unk6;
+    s16 unk8;
+    s16 unkA;
+    s16 unkC;
+    s16 unkE;
+    s16 unk10;
+    s16 unk12;
+    s16 unk14;
+    s16 unk16;
+    s16 unk18;
+    s16 unk1A;
+    s16 unk1C;
+    s16 unk1E;
+    s16 unk20;
+} Sub151A175C;
+
+typedef struct {
+    u8 pad0[0x20];
+    s16 unk20;
+    s16 unk22;
+    s16 unk24;
+    u8 pad26[0x6];
+    u8 unk2C;
+    u8 unk2D;
+    u8 unk2E;
+    u8 pad2F[0x5];
+    s16 unk34;
+    s16 unk36;
+    s16 unk38;
+    u8 pad3A[0x5];
+    u8 unk3F;
+    u8 pad40[0x10];
+    Sub151A175C unk50;
+} Obj151A175C;
+
+void func_151A175C(Obj151A175C *arg0) {
+    Sub151A175C *s = &arg0->unk50;
+
+    if (arg0->unk38 > s->unk4) {
+        arg0->unk3F = (s->unk2 - arg0->unk38) * s->unk0;
+    }
+    if (arg0->unk38 > s->unkA) {
+        arg0->unk34 = arg0->unk36 = (s->unk8 - arg0->unk38) * s->unk6;
+    }
+    if (arg0->unk38 > s->unkC) {
+        s32 px, py, pz, vx, vy, vz;
+
+        px = arg0->unk20;
+        px = (px << 8) | arg0->unk2C;
+        vx = s->unkE;
+        vx = (vx << 8) | s->unk14;
+        px += vx * D_800BE9E4;
+        arg0->unk20 = px >> 8;
+        arg0->unk2C = px & 0xFF;
+        py = arg0->unk22;
+        py = (py << 8) | arg0->unk2E;
+        vy = s->unk10;
+        vy = (vy << 8) | s->unk16;
+        py += vy * D_800BE9E4;
+        arg0->unk22 = py >> 8;
+        arg0->unk2E = py & 0xFF;
+        pz = arg0->unk24;
+        pz = (pz << 8) | arg0->unk2D;
+        vz = s->unk12;
+        vz = (vz << 8) | s->unk18;
+        pz += vz * D_800BE9E4;
+        arg0->unk24 = pz >> 8;
+        arg0->unk2D = pz & 0xFF;
+
+    }
+    if (arg0->unk38 < s->unk1A) {
+        arg0->unk3F = arg0->unk38 * s->unk1C;
+    }
+    if (arg0->unk38 < s->unk1E) {
+        arg0->unk34 = arg0->unk36 = arg0->unk38 * s->unk20;
+    }
+}
 
 struct Src151A18DC {
     u8 unk0;
@@ -809,7 +889,7 @@ void func_151A2960(struct Obj151A2960 *arg0, s32 arg1) {
     func_1513170C((s32 *)arg0, arg1);
 }
 
-void func_151A2C24(s32, s32, s32, s32, f32, f32, f32, s32, f32, f32, f32, f32, s16, s16, s16, s16, s16, s16, s8, u8, s32, s32);
+void func_151A2C24(s32, s32, s16, s16, f32, f32, f32, s32, f32, f32, f32, f32, s16, s16, s16, s16, s16, s16, s8, u8, s32, s32);
 
 void func_151A2A14(s32 a0, s16 a1, s16 a2, f32 a3, f32 p4, f32 p5, s32 p6, f32 p7, f32 p8, f32 p9, f32 p10, s16 p11, s16 p12, s16 p13, s16 p14, s16 p15, s16 p16, s8 p17, u8 p18, s32 p19) {
     func_151A2C24(a0, 0, a1, a2, a3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, 1);
@@ -830,7 +910,58 @@ void func_151A2BD0(f32 *in, s32 a1, s32 a2, f32 a3, f32 t, f32 *out) {
     func_15143794((s16) a1, (s16) a2, (1.0f - t) * a3, out);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1CC440/func_151A2C24.s")
+typedef struct {
+    u8 c[4][3];
+} Col151A2C24;
+extern Col151A2C24 D_8008F8E8;
+
+void func_151A2C24(s32 arg0, s32 arg1, s16 arg2, s16 arg3, f32 arg4, f32 arg5, f32 arg6, s32 arg7, f32 arg8, f32 arg9, f32 argA, f32 argB, s16 argC, s16 argD, s16 argE, s16 argF, s16 arg10, s16 arg11, s8 arg12, u8 arg13, s32 arg14, s32 arg15) {
+    s16 minLife;
+    s16 delay;
+    f32 t;
+    f32 step;
+    void (*fn)(s32, s32, s32, f32, f32, f32 *);
+    f32 pos[3];
+    f32 vel[3];
+    s32 c;
+    Col151A2C24 colors;
+
+    if ((u8) arg15 == 0) {
+        fn = (void (*)(s32, s32, s32, f32, f32, f32 *)) func_151A2B84;
+    } else {
+        fn = (void (*)(s32, s32, s32, f32, f32, f32 *)) func_151A2BD0;
+    }
+    if (arg10 < arg11) {
+        minLife = arg10;
+    } else {
+        minLife = arg11;
+    }
+    t = 0.0f;
+    step = 1.0f / (f32) arg7;
+    while (arg7 != 0) {
+        f32 r;
+        s32 a;
+        s32 b;
+
+        delay = (func_150ADA20() % (u32) (argD + 1)) + argC;
+        a = func_150ADA20();
+        b = func_150ADA20();
+        func_15143794((s16) (a & 0xFF), (s16) (b & 0xFF), func_150ADA68() * arg8, pos);
+        fn(arg1, arg2, arg3, arg4, t, vel);
+        colors = D_8008F8E8;
+        c = func_150ADA20() & 3;
+        r = func_150ADA68();
+        a = func_150ADA20();
+        if (func_150ADA68() < 0.0802000016f) {
+            b = 0x19;
+        } else {
+            b = -1;
+        }
+        func_151A26EC((Vec151A26EC *) arg0, (Vec151A26EC *) pos, (Vec151A26EC *) vel, arg9, (r * argB) + argA, (arg6 * t) + arg5, delay + minLife, (a % (u32) (argF + 1)) + argE, arg10, arg11, b, arg12, colors.c[c][0], colors.c[c][1], colors.c[c][2], arg13, arg14);
+        t += step;
+        arg7--;
+    }
+}
 
 void func_151A2F0C(void *arg0) {
     struct Vec151A2F0C {

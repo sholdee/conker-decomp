@@ -342,7 +342,85 @@ void func_150832AC(struct127 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_AEB40/func_15083384.s")
+struct127 *func_15083568(struct127 *arg0, s32 arg1, f32 arg2, s32 arg3);
+
+void func_15083384(struct127 *arg0, s32 arg1) {
+    s32 sp1C;
+    s32 temp_v1;
+    u8 *temp_v0;
+
+    sp1C = -1;
+    switch (arg1) {
+    case 37:
+    case 38:
+        temp_v0 = (u8 *)arg0->unk31C;
+        if (temp_v0 != NULL) {
+            temp_v0[0x1B2] = 1;
+        }
+        break;
+    case 9:
+        arg0->unk94 |= 2;
+        break;
+    case 13:
+        sp1C = 0x76;
+        break;
+    case 14:
+        sp1C = 0x78;
+        break;
+    case 15:
+        sp1C = 0x77;
+        arg0->unk94 |= 2;
+        break;
+    case 29:
+    case 30:
+    case 31:
+    case 32:
+        {
+        s32 temp;
+        temp = arg1 - 29;
+        arg0->unk94 = 0x1E;
+        if (temp < 2) {
+            arg0->unk94 &= ~0x14;
+        } else {
+            arg0->unk94 &= ~8;
+        }
+        if (temp >> 1) {
+            arg0->unk94 &= ~2;
+        }
+        }
+        break;
+    case 17: case 18: case 19: case 20: case 21: case 22:
+    case 23: case 24: case 25: case 26: case 27: case 28:
+        temp_v1 = (arg1 - 17) >> 2;
+        arg0->unk94 = 0x3E;
+        switch (temp_v1) {
+        case 0:
+            arg0->unk94 &= ~4;
+            break;
+        case 1:
+            arg0->unk94 &= ~8;
+            break;
+        case 2:
+            arg0->unk94 &= ~0x10;
+            break;
+        }
+        switch (arg1 - temp_v1 * 4 - 17) {
+        case 1:
+            arg0->unk94 &= ~2;
+            break;
+        case 2:
+            arg0->unk94 &= ~0x20;
+            break;
+        case 3:
+            arg0->unk94 &= ~0x22;
+            break;
+        }
+        break;
+    }
+    if (sp1C != -1) {
+        func_15083568(arg0, sp1C, 0.0f, 0);
+    }
+}
 
 typedef struct Part15083568 {
     /* 0x00 */ u8 b0;
@@ -671,7 +749,94 @@ s32 func_15084000(void) {
     return -1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_AEB40/func_15084044.s")
+extern u16 D_800C57A0[];
+extern s32 func_10004074(void *);
+
+s32 func_15084044(u8 *arg0, s32 arg1) {
+    u8 *slot;
+    u8 *obj;
+    s32 mode;
+    u8 id;
+    s32 val;
+    s32 ret;
+    s32 i;
+    s32 size;
+
+    slot = (u8 *)((s32)arg0 + arg1 * 8);
+    if (arg0[0x65] != 0) {
+        obj = *(u8 **)((u8 *)&D_800CC2D0[arg0[0x65] - 1] + 0x144);
+    } else {
+        obj = *(u8 **)(arg0 + 0x144);
+    }
+    id = (*(u8 **)(arg0 + 0x2C4))[arg1];
+    mode = (obj != NULL) ? (obj[0x10] & 3) : 0;
+    if (id == 0) {
+        mode = 2;
+    }
+    if (*(s32 *)(slot + 0x28C) != 0 && *(s32 *)(slot + 0x290) != 0) {
+        return 0;
+    }
+    val = (&D_800D19A0)[id];
+    if ((&D_800D19A0)[id] == 0) {
+        return 0;
+    }
+    ret = 0;
+    if (mode == 0) {
+        val = (&D_800D19A0)[id];
+        *(s32 *)(slot + 0x290) = val;
+        *(s32 *)(slot + 0x28C) = val;
+        ((u8 *)D_800D1F80)[id] += 2;
+    } else if (mode == 1) {
+        if (*(s32 *)(slot + 0x28C) == 0 || *(s32 *)(slot + 0x28C) == (&D_800D19A0)[id]) {
+            if (((u8 *)D_800D1F80)[id] != 0) {
+                size = D_800C57A0[id] * 16;
+                *(s32 *)(slot + 0x28C) = allocate_memory(size, 1, 2, 2);
+                if (*(s32 *)(slot + 0x28C) == 0) {
+                    ret = 1;
+                } else if (*(s32 *)(slot + 0x28C) != 0) {
+                    bcopy((void *)(&D_800D19A0)[id], (void *)*(s32 *)(slot + 0x28C), size);
+                } else {
+                    *(s32 *)(slot + 0x28C) = (&D_800D19A0)[id];
+                }
+            } else {
+                val = (&D_800D19A0)[id];
+        *(s32 *)(slot + 0x290) = val;
+        *(s32 *)(slot + 0x28C) = val;
+                ((u8 *)D_800D1F80)[id] += 2;
+            }
+        }
+        *(s32 *)(slot + 0x290) = *(s32 *)(slot + 0x28C);
+    } else if (mode == 2) {
+        for (i = 0; i < 2; i++) {
+            if (((s32 (*)[2])(arg0 + 0x28C))[arg1][i] == 0 || ((s32 (*)[2])(arg0 + 0x28C))[arg1][i] == (&D_800D19A0)[id] || (i == 1 && *(s32 *)(slot + 0x28C) == *(s32 *)(slot + 0x290))) {
+                if (((u8 *)D_800D1F80)[id] != 0) {
+                    size = D_800C57A0[id] * 16;
+                    ((s32 (*)[2])(arg0 + 0x28C))[arg1][i] = allocate_memory(size, 1, 2, 2);
+                    if (((s32 (*)[2])(arg0 + 0x28C))[arg1][i] == 0) {
+                        ret = 1;
+                        if (i == 1) {
+                            if (*(s32 *)(slot + 0x28C) != (&D_800D19A0)[id]) {
+                                func_10004074((void *)*(s32 *)(slot + 0x28C));
+                            } else {
+                                ((u8 *)D_800D1F80)[id] -= 1;
+                            }
+                            *(s32 *)(slot + 0x28C) = 0;
+                        }
+                        break;
+                    } else if (((s32 (*)[2])(arg0 + 0x28C))[arg1][i] != 0) {
+                        bcopy((void *)(&D_800D19A0)[id], (void *)((s32 (*)[2])(arg0 + 0x28C))[arg1][i], size);
+                    } else {
+                        ((s32 (*)[2])(arg0 + 0x28C))[arg1][i] = (&D_800D19A0)[id];
+                    }
+                } else {
+                    ((s32 (*)[2])(arg0 + 0x28C))[arg1][i] = (&D_800D19A0)[id];
+                    ((u8 *)D_800D1F80)[id] += 1;
+                }
+            }
+        }
+    }
+    return ret;
+}
 
 extern void func_150843AC(void *arg0, s32 arg1);
 
@@ -757,7 +922,94 @@ void func_15084488(u8 *arg0, s32 arg1, s32 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_AEB40/func_15084558.s")
+void func_15084558(u8 *arg0) {
+    s32 id;
+    u8 *list;
+    s32 i;
+    s32 j;
+    s32 count;
+    s32 k;
+    s32 uniq;
+    s32 freeA;
+    s32 freeB;
+    struct127 *obj;
+    u8 ocount;
+    u8 *olist;
+    s32 c;
+    s32 a;
+    s32 p;
+    s32 q;
+
+    id = arg0[4];
+    if (id != 0xFF && (&D_800D19A0)[id] != 0) {
+        count = arg0[0x2C9];
+        list = *(u8 **)(arg0 + 0x2C4);
+        func_1508434C(arg0);
+        for (i = 0; i < count; i++) {
+            uniq = 1;
+            freeA = 1;
+            freeB = 1;
+            for (j = 0; j < i; j++) {
+                if (list[j] == list[i]) {
+                }
+            }
+            for (j = 0; j < 25; j++) {
+                if (j != ((struct127 *)arg0 - D_800CC2D0)) {
+                    obj = &D_800CC2D0[j];
+                    if (obj->interaction_state != 0 && obj->id != 0xFF && obj->unk5 != 2) {
+                        ocount = obj->unk2C9;
+                        olist = *(u8 **)((u8 *)obj + 0x2C4);
+                        for (k = 0; k < ocount; k++) {
+                            if (olist[k] == list[i]) {
+                                uniq = 0;
+                            }
+                            if (D_800D1588[olist[k]] == D_800D1588[list[i]] && D_800D1588[olist[k]] != 0) {
+                                freeA = 0;
+                            }
+                            if (D_800D1C90[olist[k]] == D_800D1C90[list[i]] && D_800D1C90[olist[k]] != NULL) {
+                                freeB = 0;
+                            }
+                        }
+                    }
+                }
+            }
+            if (freeA && D_800D1588[list[i]] != 0) {
+                a = D_800D1588[list[i]];
+                {
+                    func_100043B4((s32 *)(a - 0x10), 3);
+                    for (k = 0; k < 187; k++) {
+                        if (a == D_800D1588[k]) {
+                            D_800D1588[k] = 0;
+                        }
+                    }
+                }
+            }
+            if (freeB) {
+                p = ((s32 *)D_800D1C90)[list[i]];
+                if (p != 0) {
+                    p -= 0x10;
+                    func_100043B4((s32 *)p, 3);
+                    D_800D1C90[list[i]] = NULL;
+                }
+            }
+            if (uniq) {
+                if ((&D_800D19A0)[list[i]] != 0) {
+                    if (D_800C5C08[id] != 0) {
+                        func_10004074((void *)D_800C5C08[id]);
+                        D_800C5C08[id] = 0;
+                        func_10004074((void *)D_800C6070[id]);
+                        D_800C6070[id] = 0;
+                    }
+                    q = D_800C6360[id];
+                    if (q != 0) {
+                        func_10004074((void *)q);
+                        D_800C6360[id] = 0;
+                    }
+                }
+            }
+        }
+    }
+}
 
 typedef struct {
     u8 pad[0x1C9];

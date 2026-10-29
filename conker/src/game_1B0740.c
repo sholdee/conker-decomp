@@ -3,7 +3,92 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1B0740/func_15183290.s")
+void func_15175390(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, f32, f32, s32);
+void func_1517AA20(f32, s32, s32, s32, s32);
+void func_15177F90(u8, s32, u8, s32, s32, s32, s32, s32, u8, s32, s32);
+void func_15174BF0(s32, s32, s32, s32, s32, s32, f32, f32, s32);
+void func_15174FA4(s32, s32, s32, s32, s32, s32, s32, s32, f32, f32);
+void func_151838B0(s32);
+void func_15183974(s32);
+void func_151839F0(s32, s32);
+void func_15183ACC(s32);
+s32 func_15184118();
+extern f32 D_800CC2E4;
+
+s32 func_15183290(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA) {
+    s32 i;
+    struct127 *obj;
+
+    for (i = 0; i < 4; i++) {
+        if (D_800DDF5C[i] == 0) {
+            break;
+        }
+    }
+    if (i == 4) {
+        return -1;
+    }
+    arg7 *= 16;
+    arg8 *= 16;
+    arg9 *= 16;
+    obj = D_800DBFF0[arg6].unk3D0;
+    switch (arg4) {
+        case 0:
+            func_15177F90(arg3, 0, 0xFE, arg0, arg1, arg2, 0, 0x7FFF, 0xFF, 1, 0);
+            break;
+        case 1:
+            func_15177F90(arg3, (s32)&D_800CC2E4, 0xFE, arg0, arg1, arg2, 0, 0x7FFF, 0xFF, 1, 0);
+            break;
+        case 2:
+            func_151838B0(0);
+            func_15175390(arg3, i, arg0, arg1, arg2, 0x3F, arg6, 0x1E, 0, 0x30003, 10, 0, 0, 1, 2, 0.8000000119f, 0.5f, argA);
+            break;
+        case 3:
+            if (func_15184118(obj)) {
+                func_15174BF0(arg3, i, arg0, arg1, arg2, arg6, 0.8000000119f, 0.5f, argA);
+                break;
+            }
+            return -1;
+        case 8:
+            return -1;
+        case 4:
+            func_151839F0(7, 10);
+            func_15174FA4(arg3, i, arg0, arg1, arg2, arg7 * 4, arg6, 0, 0.8000000119f, 0.5f);
+            break;
+        case 10:
+            func_15183ACC(7);
+            func_15174FA4(arg3, i, arg0, arg1, arg2, arg7 * 4, arg6, 1, 0.8000000119f, 0.5f);
+            break;
+        case 11:
+            func_15183ACC(2);
+            func_15183ACC(3);
+            func_15183ACC(4);
+            func_15183ACC(5);
+            func_15175390(arg3, i, arg0, arg1, arg2, arg7, arg6, arg8, arg9, 0x4D, 0x15, 3, 2, -1, 0, 0.8000000119f, 0.5f, argA);
+            break;
+        case 5:
+            func_15183ACC(2);
+            func_15183ACC(3);
+            func_15183ACC(4);
+            func_15183ACC(5);
+            func_15175390(arg3, i, arg0, arg1, arg2, arg7, arg6, arg8, arg9, 0x4D, 0x15, 3, 2, -1, 2, 0.8000000119f, 0.5f, argA);
+            break;
+        case 6:
+            func_15183974(8);
+            func_15175390(arg3, i, arg0, arg1, arg2, arg7, arg6, arg8, arg9, 0x7D, 0x44, 2, 8, -1, 2, 0.8000000119f, 0.5f, argA);
+            break;
+        case 7:
+            func_15183ACC(6);
+            func_15175390(arg3, i, arg0, arg1, arg2, arg7, arg6, arg8, arg9, 0x4D, 0x14, 0, 6, 0, 2, 0.03999999911f, 0.02500000037f, argA);
+            break;
+        case 9:
+            func_1517AA20(obj->xz_velocity, obj->x_position, obj->y_position, obj->z_position, arg3);
+            break;
+    }
+    if (arg4 != 9) {
+        D_800DDF5C[i] = 1;
+    }
+    return i;
+}
 
 typedef struct {
     s32 unk0;

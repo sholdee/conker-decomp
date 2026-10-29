@@ -1,8 +1,13 @@
 #include <ultra64.h>
 #define func_15048A40 func_15048A40_hdr
+#define func_10010F30 func_10010F30_void
 #include "functions.h"
 #undef func_15048A40
+#undef func_10010F30
+#define D_800DD444 D_800DD444_hdr
 #include "variables.h"
+#undef D_800DD444
+extern s16 D_800DD444;
 
 
 extern u8 D_800DD432;
@@ -15,6 +20,12 @@ extern u16 D_800DD430;
 extern f32 D_800A7208;
 extern f32 sqrtf(f32);
 extern void func_10004074(void *arg0);
+extern s32 func_10010F30(s32, u16, u8, s16, u8);
+extern s32 *allocate_memory(s32, s32, s32, s32);
+void func_151794C8(void);
+void func_15179600(s32 arg0, s32 arg1);
+void func_15179AB8(void);
+void func_15179B14(s32 arg0);
 void func_1516865C(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 s32 func_15168800();
 s32 func_1510F8D8(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
@@ -83,7 +94,104 @@ void func_15178EFC(s32 arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1A6360/func_15179008.s")
+#define S444 D_800DD444
+#define S436 (*(s16 *)&D_800DD436)
+void func_15179008(s32 arg0) {
+    s32 i;
+    s32 temp;
+    s32 max;
+
+    max = 300;
+    temp = D_800DD432;
+    temp -= D_800BE9E4;
+    if (temp <= 0) {
+        if (D_800DD433 < 40) {
+            temp = (func_150ADA20() % 31U) + 20;
+            D_800DD433 = (func_150ADA20() & 0xF) + 170;
+        } else {
+            temp = (func_150ADA20() % 63U) + 60;
+            D_800DD433 = (func_150ADA20() & 0xF) + 20;
+        }
+    }
+    D_800DD432 = temp;
+    switch (D_800DD446) {
+    case 0:
+        if (D_800DD434 == 0) {
+            break;
+        }
+        if (D_800DD434 == 4 || S444 >= 600) {
+            D_800DD440 = (s32)allocate_memory(0x4B0, 1, 0, 0);
+            i = 0;
+            do {
+                ((s32 *)D_800DD440)[i] = 0;
+                i++;
+            } while (i < max);
+            if (D_800DD440 != 0) {
+                D_800DD446 = 1;
+                D_800DD444 = 0;
+                D_800DD430 = func_10010F30(0x6F, 200, 0x40, 0, 0x80);
+            }
+        } else if ((&D_800C35EA)[arg0] == 0) {
+            D_800DD444 += D_800BE9E4;
+        }
+        break;
+    case 1:
+        if (S436 == max) {
+            D_800DD446 = 2;
+            D_800DD444 = 0;
+            break;
+        }
+        for (i = 0; i < 4; i++) {
+            if (S436 != max) {
+                func_15179600(1, 1);
+            }
+        }
+        if (S444 >= 11 && S436 < max) {
+            func_1000F85C(D_800DD430, 8, (S436 << 14) / max);
+            func_1000F85C(D_800DD430, 0x2000, 0);
+        }
+        D_800DD444 += D_800BE9E4;
+        break;
+    case 2:
+        if (D_800DD434 == 1) {
+            *(s8 *)&D_800DD446 = 4;
+            D_800DD444 = S436;
+        } else if (D_800DD434 == 0 || S444 >= 120) {
+            D_800DD446 = 3;
+            D_800DD444 = S436;
+        } else if (D_800DD434 == 3 && (&D_800C35EA)[arg0] == 0) {
+            D_800DD444 += D_800BE9E4;
+        }
+        break;
+    case 3:
+        if (S436 == 0) {
+            D_800DD446 = 0;
+            D_800DD444 = 0;
+            func_100111C8(D_800DD430);
+            func_10004074((void *)D_800DD440);
+            D_800DD440 = 0;
+            break;
+        }
+        for (i = 0; i < 4; i++) {
+            func_15179AB8();
+        }
+        if (S444 != 0) {
+            func_1000F85C(D_800DD430, 8, (S436 << 13) / S444);
+        }
+        break;
+    case 4:
+        for (i = 0; i < S436; i++) {
+            func_15179AB8();
+        }
+        D_800DD446 = 3;
+        D_800DD434 = 0;
+        break;
+    }
+    if (S436 != 0) {
+        func_151794C8();
+        func_15179B14(S436 / 30);
+    }
+}
 
 void func_151794C8(void) {
     s32 x;

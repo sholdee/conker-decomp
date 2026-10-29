@@ -4,10 +4,10 @@
 
 extern u8 D_800DBEA8[];
 extern u8 D_800DD2E4[];
-void func_151733E4(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+void func_151733E4(s32 arg0, s32 arg1, s32 arg2, u32 arg3, s32 arg4);
 
 extern struct104 *D_800B0DF0;
-void func_151733E4(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+void func_151733E4(s32 arg0, s32 arg1, s32 arg2, u32 arg3, s32 arg4);
 extern s8 D_800DD2E0;
 typedef struct 
 {
@@ -77,7 +77,101 @@ Gfx *func_151733D8(Gfx *arg0, s32 arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1A0790/func_151733E4.s")
+extern s16 D_800DD2E8;
+extern s16 D_800DD2EA;
+extern u16 D_800DD2EC;
+extern u16 D_800DD2EE;
+extern s16 D_800DD2F0;
+extern s16 D_800DD2F2;
+extern s16 D_800DD2F4;
+s8 func_15173994(s32 arg0);
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    u8 unk2;
+    u8 unk3;
+    u16 unk4;
+    u16 unk6;
+    u16 unk8;
+    u16 unkA;
+    s16 unkC;
+    s16 unkE;
+} struct151733E4_state;
+
+#define st ((struct151733E4_state *)&D_8008CC70)
+void func_151733E4(s32 arg0, s32 arg1, s32 arg2, u32 arg3, s32 arg4) {
+    s32 i;
+    s32 *p;
+    s32 c;
+    s32 d;
+    s16 a;
+    s16 b;
+    u8 *out;
+    u16 *p4;
+    u16 *p6;
+    u16 *p8;
+    u16 *pA;
+    s16 *pC;
+    s16 *pE;
+
+    D_800DD2F0 = arg3;
+    i = 0;
+    if (arg4 == -1) {
+        out = D_800DD2E4;
+        p4 = &D_800DD2EC;
+        p6 = &D_800DD2EE;
+        p8 = &D_800DD2E8;
+        pA = &D_800DD2EA;
+        pC = &D_800DD2F2;
+        pE = &D_800DD2F4;
+    } else {
+        out = (u8 *)&st[arg4];
+        p4 = (u16 *)(out + 4);
+        p6 = (u16 *)(out + 6);
+        p8 = (u16 *)(out + 8);
+        pA = (u16 *)(out + 0xA);
+        pC = (s16 *)(out + 0xC);
+        pE = (s16 *)(out + 0xE);
+    }
+    do {
+        if (i == 0) {
+            p = &arg0;
+        } else {
+            p = &arg1;
+        }
+        switch (*p) {
+        case 0x7C:
+            *p = 1;
+            break;
+        case 0x7D:
+            *p = 2;
+            break;
+        case 0x7E:
+            *p = func_15173994(arg2);
+            break;
+        case 0x7F:
+            *p = 2;
+            break;
+        }
+        i++;
+    } while (i < 2);
+    for (i = 0; i < 4; i++) {
+        c = ((u8 *)&st[arg0])[i];
+        d = ((u8 *)&st[arg1])[i];
+        out[i] = (s32)((d - c) * arg3) / 4096 + c;
+    }
+    *p4 = (s32)((st[arg1].unk4 - st[arg0].unk4) * arg3) / 4096 + st[arg0].unk4;
+    *p6 = (s32)((st[arg1].unk6 - st[arg0].unk6) * arg3) / 4096 + st[arg0].unk6;
+    *p8 = (s32)((st[arg1].unk8 - st[arg0].unk8) * arg3) / 4096 + st[arg0].unk8;
+    *pA = (s32)((st[arg1].unkA - st[arg0].unkA) * arg3) / 4096 + st[arg0].unkA;
+    a = (st[arg0].unkC == -1) ? (s16)D_800B0DF0->unk2 : st[arg0].unkC;
+    b = (st[arg1].unkC == -1) ? (s16)D_800B0DF0->unk2 : st[arg1].unkC;
+    *pC = (s32)((b - a) * arg3) / 4096 + a;
+    a = (st[arg0].unkE == -1) ? (s16)D_800B0DF0->unk0 : st[arg0].unkE;
+    b = (st[arg1].unkE == -1) ? (s16)D_800B0DF0->unk0 : st[arg1].unkE;
+    *pE = (s32)((b - a) * arg3) / 4096 + a;
+}
+
 
 void func_151738C4(s32 arg0) {
     if (*((s8 *)D_800B0DF0 + 0x46) == -1) {

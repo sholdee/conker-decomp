@@ -141,7 +141,7 @@ typedef struct Node_1517E28C {
     f32 unk10;
     char pad14[0x10];
     struct Node_1517E28C *next;
-    char pad28[0x2];
+    s16 unk28;
     u16 unk2A;
     u16 unk2C;
     u8  unk2E;
@@ -201,7 +201,113 @@ Gfx *func_1517E28C(Gfx *gfx, s32 arg1) {
     return gfx;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1AB530/func_1517E4A8.s")
+typedef struct {
+    u8 pad0[6];
+    s16 w;
+    s16 h;
+    u8 alpha;
+    u8 r;
+    u8 g;
+    u8 b;
+    u8 padE[2];
+    void *tex;
+} Sprite_1517E4A8;
+
+extern u8 D_800903AC;
+extern u8 D_800A7250[][7];
+extern u8 D_800D2DA8;
+extern u8 D_800D2DA9;
+extern u8 D_800D2DAA;
+extern Gfx *func_150950D4(Gfx *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
+extern Gfx *func_15095A48(Gfx *, Sprite_1517E4A8 *, f32, f32);
+extern Gfx *func_1517EA4C(Gfx *arg0);
+
+#ifndef ABS
+#define ABS(x) ((x) < 0 ? -(x) : (x))
+#endif
+
+Gfx *func_1517E4A8(Gfx *gfx, Node_1517E28C *node, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 *arg6) {
+    s32 cur;
+    s32 i;
+    f32 dx;
+    f32 dy;
+    s32 dist;
+    s32 target;
+    s32 step;
+    s32 v;
+    f32 x;
+    f32 y;
+    Sprite_1517E4A8 sprite;
+
+    dx = node->unkC - D_800BE620 * 0.5f;
+    dy = node->unk10 - D_800BE624 * 0.5f;
+    if (arg6 != NULL) {
+        if (arg5 == -1) {
+            target = 0;
+        } else {
+            dist = ((s32)dx * (s32)dx + (s32)dy * (s32)dy) * arg4 / 10;
+            if (dist < 120) {
+                target = (120 - dist) * 176 / 120;
+            } else {
+                target = 0;
+            }
+        }
+        step = D_800BE9E4 * 5;
+        cur = *arg6;
+        if (ABS(target - cur) < step) {
+            cur = target;
+        } else if (cur < target) {
+            cur += step;
+        } else {
+            cur -= step;
+        }
+        *arg6 = cur;
+    }
+    dist = ((s32)dx * (s32)dx + (s32)dy * (s32)dy) * arg4 / 10;
+    if (node->unkC < 2.0f || (f32)(D_800BE620 - 2) <= node->unkC || node->unk10 < 0.0f || (f32)D_800BE624 <= node->unk10) {
+        cur = 0;
+    } else if (arg5 == -1) {
+        cur = 0;
+    } else {
+        cur = (0x1ADB00 / (dist + 10000)) * arg5 / 256;
+    }
+    step = D_800BE9E4 * 10;
+    if (ABS(cur - node->unk28) < step) {
+        node->unk28 = cur;
+    } else if (cur < node->unk28) {
+        node->unk28 = node->unk28 - step;
+    } else {
+        node->unk28 = node->unk28 + step;
+    }
+    if (dist < 200000 && node->unk28 > 0 && fabsf(node->unkC) < 2000.0f && fabsf(node->unk10) < 2000.0f) {
+        D_800D2DA8 = 0xFF;
+        D_800D2DA9 = 0xFF;
+        D_800D2DAA = 0xFF;
+        sprite.tex = &D_800903AC;
+        sprite.r = 0;
+        sprite.g = 0;
+        sprite.b = 0;
+        if (D_800DDD60 == 0) {
+            gfx = func_150950D4(func_1517EA4C(gfx), &D_800903AC, 0, 0, 0, 0, 2, 0x100, 0x100, 3);
+            D_800DDD60 = 1;
+        }
+        cur = node->unk30;
+        cur = (node->unk28 * cur) >> 8;
+        for (i = 0; i < arg3; i++) {
+            x = node->unkC - dx * ((i + 1) * 2) / 5.0f;
+            y = node->unk10 - dy * ((i + 1) * 2) / 5.0f;
+            v = D_800A7250[arg2][i];
+            y += v / 64.0f;
+            sprite.alpha = cur;
+            sprite.w = (f32)(v << 12) * D_800380A0 / 255.0f;
+            sprite.h = (f32)(v << 12) * D_800380A4 / 255.0f;
+            D_800D2DAB = 0;
+            gfx = func_15095A48(gfx, &sprite, x, y);
+            gDPPipeSync(gfx++);
+        }
+    }
+    return gfx;
+}
 
 #define WGFX1517EA4C(pkt, a, b)     \
 {                                   \

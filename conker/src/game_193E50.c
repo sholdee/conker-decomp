@@ -24,6 +24,7 @@ extern s32 D_800DD230;
 void func_151669A0(s32 arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4, s32 arg5) {
     ObjType0DData *temp_v0;
     Mtx *mtx;
+    s32 r;
     s32 temp_s0;
     s32 i;
     f32 temp_f24;
@@ -57,12 +58,93 @@ void func_151669A0(s32 arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4, s32 arg5) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_193E50/func_15166B50.s")
+typedef struct {
+    s32 unk00;
+    s32 unk04;
+    s32 unk08;
+    s16 unk0C;
+    s16 unk0E;
+    s16 unk10;
+    s16 unk12;
+    s16 unk14;
+    s16 unk16;
+    s16 unk18;
+    s16 unk1A;
+    u8 unk1C;
+    u8 unk1D;
+    u8 unk1E;
+    u8 unk1F;
+    s16 unk20;
+    s16 unk22;
+    s16 unk24;
+    s16 unk26;
+    s16 unk28;
+    u8 unk2A;
+    u8 unk2B;
+    u8 unk2C;
+    u8 unk2D;
+    u8 unk2E;
+    u8 unk2F;
+    s32 unk30;
+    s16 unk34;
+    s16 unk36;
+} Spawn15166B50;
+
+extern s32 D_8008CA4C;
+extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
+extern s32 func_15167D84(void *, s32, s32, s32, s32, s32);
+
+void func_15166B50(void *arg0) {
+    f32 mf[4][4];
+    f32 x;
+    f32 y;
+    f32 z;
+    ObjType0DData *obj;
+    s32 i;
+
+    obj = arg0;
+    if (--obj->field_0xD0 == 5) {
+        f32 scale = 4000.0f;
+        Spawn15166B50 spawn;
+        spawn.unk00 = D_8008CA4C;
+        spawn.unk04 = 0;
+        spawn.unk08 = 4;
+        spawn.unk0C = 0;
+        spawn.unk16 = 0;
+        spawn.unk18 = 0;
+        spawn.unk1A = 0;
+        spawn.unk1F = 5;
+        spawn.unk20 = 0;
+        spawn.unk22 = 0;
+        spawn.unk24 = obj->field_0xD8 * scale;
+        spawn.unk26 = obj->field_0xD8 * scale;
+        spawn.unk28 = 0x200;
+        spawn.unk2A = 0;
+        spawn.unk2B = 0;
+        spawn.unk2C = 0xFF;
+        spawn.unk2D = 0xFF;
+        spawn.unk2E = 0xFF;
+        spawn.unk2F = 0xFF;
+        spawn.unk34 = 0;
+        for (i = 0; i < 3; i++) {
+            guMtxL2F(mf, &obj->field_0x10[i]);
+            func_150A7960((f32 *)mf, -400.0f, 10.0f, 0.0f, &x, &y, &z);
+            spawn.unk0E = (func_150ADA20() & 0x7F) + 0x55;
+            spawn.unk10 = x;
+            spawn.unk12 = y;
+            spawn.unk14 = z;
+            func_15167D84(&spawn, 0, 0, -1, ((u8 *)obj)[0xC], ((u8 *)obj)[1]);
+        }
+    } else if (obj->field_0xD0 == 0) {
+        func_1516972C((struct102 *)obj);
+    }
+}
 
 extern Vtx D_8008B3E0[];
 
 Gfx *func_15166D68(Gfx *pkt, ObjType0DData *obj, s32 arg2) {
     Mtx *mtx;
+    s32 r;
     s32 s;
     s32 i;
 

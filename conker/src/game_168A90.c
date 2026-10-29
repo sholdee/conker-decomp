@@ -9,7 +9,7 @@ extern f32 D_800A4A8C;
 extern f32 D_800A4A90;
 extern f32 D_800A4A94;
 extern f32 sinf(f32);
-struct102 *func_1513B5E0(void *, s32, s32, s32, s32);
+struct102 *func_1513B5E0(void *, u8, s32, u8, s32);
 
 typedef struct ObjRenderState {
     u8 pad_0[0x10];
@@ -30,7 +30,59 @@ struct Obj1513BAE8 {
 };
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_168A90/func_1513B5E0.s")
+extern s32 *func_1502B6BC(void *, s32, void *, s32, s32, s32);
+extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
+extern void func_1510CE60(s32, s32, s32, s32, s32);
+
+typedef struct {
+    u8 pad0[0x10];
+    u8 unk10[0x3C];
+    s32 *unk4C;
+    s32 unk50;
+    s32 unk54;
+    u8 *unk58[2][4];
+} Obj1513B5E0;
+
+struct102 *func_1513B5E0(void *arg0, u8 arg1, s32 arg2, u8 arg3, s32 arg4) {
+    Obj1513B5E0 *obj;
+    s32 *data;
+    s32 total;
+    s32 size;
+    u8 *dst;
+    s32 loaded;
+    s32 count;
+    s32 i;
+
+    data = func_1502B6BC(&loaded, 0, &count, 2, *(s32 *)((u8 *)arg0 + 0x30), *(s32 *)((u8 *)arg0 + 0x34));
+    {
+        s32 type;
+
+        size = (*data - (s32)data) - 0x28;
+        total = size * 2 * (D_80082FA0 + 1);
+        if (arg1) {
+            type = 0x54;
+        } else {
+            type = 0x38;
+        }
+        obj = func_15167A68(type, arg4, arg2 + total + 0xF8, 2, arg3, 1);
+        if (obj == NULL) {
+            return NULL;
+        }
+        memcpy(obj->unk10, arg0, 0x3C);
+        obj->unk4C = data;
+    }
+    for (i = 0, dst = (u8 *)obj + 0xF8; i < D_80082FA0 + 1; i++) {
+        obj->unk58[0][i] = dst;
+        obj->unk58[1][i] = dst + size;
+        memcpy(dst, (u8 *)data + 0x28, size);
+        memcpy(obj->unk58[1][i], (u8 *)data + 0x28, size);
+        dst += size * 2 * sizeof(u8);
+    }
+    obj->unk54 = *data;
+    obj->unk50 = total;
+    func_1510CE60(obj->unk54, 0, 1, 0x3E, 0);
+    return (struct102 *)obj;
+}
 extern s32 (*D_80089C18[])(struct102 *);
 extern s32 (*D_80089C28[])(struct102 *, s16);
 

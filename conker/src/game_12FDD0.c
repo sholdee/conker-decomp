@@ -1,5 +1,8 @@
 #include <ultra64.h>
+#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
+#undef func_150ADA20
+u32 func_150ADA20(void);
 #include "variables.h"
 
 typedef struct {
@@ -67,7 +70,80 @@ typedef struct {
 extern void func_15103254(s16 arg0, u8 arg1, f32 arg2, Vec3_15102B38 *arg3, u8 arg4, u8 arg5, s32 arg6);
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_12FDD0/func_15102920.s")
+typedef struct {
+    /* 0x00 */ s32 unk00;
+    /* 0x04 */ s16 unk04;
+    /* 0x06 */ u8 unk06;
+    /* 0x07 */ u8 unk07;
+    /* 0x08 */ s32 unk08;
+    /* 0x0C */ s32 unk0C;
+    /* 0x10 */ u8 unk10;
+    /* 0x11 */ u8 unk11;
+    /* 0x12 */ u8 unk12;
+    /* 0x13 */ u8 unk13;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 unk16;
+    /* 0x17 */ u8 unk17;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ s32 unk1C;
+    /* 0x20 */ s16 unk20;
+    /* 0x22 */ s16 unk22;
+    /* 0x24 */ s16 unk24;
+} Struct15102920;
+
+struct210 *func_15102920(f32 arg0, u8 arg1, s32 arg2, f32 *arg3, s16 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9) {
+    s32 temp_v0;
+    Struct15102920 sp64;
+    s32 sp60;
+    s32 sp5C;
+    s32 pad;
+
+    sp64.unk22 = 0xA;
+    sp64.unk24 = 0x19;
+    temp_v0 = func_1510F8CC(arg7);
+    sp64.unk06 = 0x5C;
+    switch (D_800BE9F0) {
+    case 0x36:
+        if (temp_v0 == 9) {
+            return NULL;
+        }
+        sp64.unk06 = 0x85;
+        arg0 *= 0.6000000238f;
+        break;
+    case 0x26:
+        if (temp_v0 == 2) {
+            return NULL;
+        }
+        break;
+    }
+    sp64.unk07 = 0;
+    sp64.unk00 = ((arg4 == -1) ? 0 : 1) | 0x100 | 0x200 | 0x400 | 0x1000 | 0x8000 | 0x20000;
+    sp64.unk04 = (arg4 == -1) ? 0x12C : arg4;
+    sp64.unk08 = 0;
+    sp64.unk0C = 0;
+    if (D_800BE9F0 == 0x36) {
+        sp64.unk10 = arg1 >> 1;
+    } else {
+        sp64.unk10 = arg1;
+    }
+    sp64.unk11 = 0xFF;
+    sp64.unk14 = 0;
+    sp64.unk13 = 0;
+    sp64.unk12 = 0;
+    sp64.unk15 = 0xFF;
+    sp64.unk18 = ((arg6 != 0) ? 2 : 1) + 0x3B0000;
+    sp64.unk16 = 0;
+    sp64.unk17 = 7;
+    if (arg5 != 0) {
+        sp60 = 3;
+        sp5C = 0xFF;
+    } else {
+        sp60 = 0;
+        sp5C = 0;
+    }
+    return func_1513C650((s32)&sp64, 0, 0, arg2, arg3[0], arg3[1], arg3[2], arg0, arg0, func_150ADA20() & 0xFF, (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2), sp60, sp5C, 0, arg8, arg9);
+}
 
 s32 func_15102B38(struct127 *arg0, u8 arg1, Vec3_15102B38 *arg2, Vec3_15102B38 *arg3, Vec2_15102B38 *arg4, s16 arg5, u8 arg6, f32 arg7, s32 arg8, u8 arg9, s32 argA, s16 argB, u8 argC, s32 argD) {
     Locals15102B38 sp;
@@ -174,7 +250,111 @@ s32 func_15102D90(Obj15102D90 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_12FDD0/func_15102EB8.s")
+typedef struct {
+    u8 pad0[0x14];
+    u8 flags;
+    u8 pad15[3];
+    struct17 start;
+    struct17 end;
+} Seg_15102EB8;
+
+typedef struct {
+    u8 pad0[0x2C];
+    f32 width;
+    f32 t;
+    u8 pad34[0x8C];
+    u8 tmpl[0x40];
+    u8 *buffers[4];
+    Seg_15102EB8 seg;
+} Obj_15102EB8;
+
+typedef struct {
+    s16 x;
+    s16 y;
+    s16 z;
+    s16 flag;
+    u8 pad8[8];
+} Vtx_15102EB8;
+
+extern struct17 *func_15144B34(s32);
+void func_151D5D60(void *, s16, s32, void **, u8 *);
+void func_15145548(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, f32 *arg4);
+
+void *func_15102EB8(Obj_15102EB8 *arg0, s16 arg1) {
+    struct17 *pos;
+    struct17 mid;
+    struct17 dir;
+    Seg_15102EB8 *seg;
+    struct17 closest;
+    f32 dx, dy, dz;
+    f32 nx, ny, nz;
+    Vtx_15102EB8 *vertices;
+    void *result;
+    f32 t;
+    f32 lengthSquared;
+    u8 fresh;
+    f32 scale;
+
+    pos = func_15144B34(arg1);
+    if (!(arg0->seg.flags & 1)) {
+        return NULL;
+    }
+    func_151D5D60(arg0->buffers, arg1, 0x40, (void **)&vertices, &fresh);
+    result = vertices;
+    seg = &arg0->seg;
+    if (vertices != NULL) {
+        if (fresh) {
+            memcpy(arg0->buffers[arg1], arg0->tmpl, 0x40);
+            memcpy(arg0->buffers[arg1] + 0x40, arg0->tmpl, 0x40);
+        }
+    } else {
+        return NULL;
+    }
+    mid.unk0 = seg->start.unk0 + (seg->end.unk0 - seg->start.unk0) * arg0->t;
+    mid.unk4 = seg->start.unk4 + (seg->end.unk4 - seg->start.unk4) * arg0->t;
+    mid.unk8 = seg->start.unk8 + (seg->end.unk8 - seg->start.unk8) * arg0->t;
+    dir.unk0 = mid.unk0 - seg->start.unk0;
+    dir.unk4 = mid.unk4 - seg->start.unk4;
+    dir.unk8 = mid.unk8 - seg->start.unk8;
+    func_15145548(&seg->start, &dir, pos, &closest, &t);
+    dx = closest.unk0 - pos->unk0;
+    dy = closest.unk4 - pos->unk4;
+    dz = closest.unk8 - pos->unk8;
+    nx = dir.unk4 * dz - dy * dir.unk8;
+    ny = dir.unk8 * dx - dz * dir.unk0;
+    nz = dir.unk0 * dy - dx * dir.unk4;
+    lengthSquared = nx * nx + ny * ny + nz * nz;
+    if (lengthSquared == 0.0f) {
+        nx = 0.0f;
+        ny = 0.0f;
+        nz = 0.0f;
+    } else {
+        scale = arg0->width / sqrtf(lengthSquared);
+        nx *= scale;
+        ny *= scale;
+        nz *= scale;
+    }
+    vertices->x = seg->start.unk0 + nx;
+    vertices->y = seg->start.unk4 + ny;
+    vertices->z = seg->start.unk8 + nz;
+    vertices->flag = 0;
+    vertices++;
+    vertices->x = mid.unk0 + nx;
+    vertices->y = mid.unk4 + ny;
+    vertices->z = mid.unk8 + nz;
+    vertices->flag = 0;
+    vertices++;
+    vertices->x = mid.unk0 - nx;
+    vertices->y = mid.unk4 - ny;
+    vertices->z = mid.unk8 - nz;
+    vertices->flag = 0;
+    vertices++;
+    vertices->x = seg->start.unk0 - nx;
+    vertices->y = seg->start.unk4 - ny;
+    vertices->z = seg->start.unk8 - nz;
+    vertices->flag = 0;
+    return result;
+}
 
 typedef struct {
     s32 unk00;

@@ -1,5 +1,7 @@
 #include <ultra64.h>
+#define func_15048A40 func_15048A40_hdr
 #include "functions.h"
+#undef func_15048A40
 #define D_800CBE00 D_800CBE00_s32
 #define D_800D3300 D_800D3300_hdr
 #define D_800DBE3C D_800DBE3C_hdr
@@ -308,8 +310,6 @@ void func_15044A28(void) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_71820/func_15044B78.s")
-
 struct conker15044CE4 {
     char pad0[6];
     s16 unk6;
@@ -319,12 +319,46 @@ struct conker15044CE4 {
     s16 unk10;
     s16 unk12;
     s16 unk14;
-    char pad16[2];
+    u8 unk16;
+    char pad17;
     s16 *unk18;
     s16 *unk1C;
 };
 
-extern void func_15044B78(struct conker15044CE4 *);
+
+extern f32 func_15048A40(u8);
+extern f32 func_150489B0(u8);
+
+s32 func_15044B78(struct conker15044CE4 *arg0) {
+    f32 s;
+    f32 c;
+    f32 rx;
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 pad2c;
+    f32 pad28;
+    f32 pad24;
+    s32 half;
+    s32 h116;
+    s32 h118;
+
+    half = (s16)D_800CC2D0[0].unk31C->unk114 >> 1;
+    h116 = (s16)D_800CC2D0[0].unk31C->unk116;
+    h118 = (s16)D_800CC2D0[0].unk31C->unk118;
+    x = D_800CC2D0[0].x_position - arg0->unk6;
+    y = (D_800CC2D0[0].y_position - arg0->unk8) + half;
+    z = D_800CC2D0[0].z_position - arg0->unkA;
+    c = func_15048A40(arg0->unk16);
+    s = func_150489B0(arg0->unk16);
+    rx = z * s + x * c;
+    x = x * s - z * c;
+    if (fabsf(y) < arg0->unk14 + half && fabsf(x) < arg0->unk12 + h116 && fabsf(rx) < arg0->unk10 + h118) {
+        return 1;
+    }
+    return 0;
+}
+
 
 void func_15044CE4(struct conker15044CE4 *arg0) {
     s16 *sp18 = arg0->unk18;
@@ -391,7 +425,101 @@ void func_15044E88(void) {
     func_1505D024(&D_800CC2D0[0], 1, D_800CC2D0[0].unk7A, -1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_71820/func_15044ED0.s")
+struct conker15045714 {
+    f32 field_0x00;
+    f32 field_0x04;
+    f32 field_0x08;
+};
+
+struct conker150472C0_sub
+{
+  u8 field_0x00[0x10];
+  u16 field_0x10;
+};
+struct conker150472C0_dst
+{
+  f32 field_0x00;
+  struct conker150472C0_sub field_0x04;
+  u8 pad16[2];
+  s32 field_0x18;
+  u8 field_0x1C;
+  u8 field_0x1D;
+  u8 pad1E[2];
+  s32 field_0x20;
+};
+
+typedef struct Game71820Candidate {
+    s32 height;
+    s32 *sources;
+    s32 index;
+    s32 padC;
+} Game71820Candidate;
+
+void func_1510F800(s32);
+s32 func_150A3A70(s32, s32);
+extern f32 D_80098D40;
+extern u8 *D_800DBE3C;
+extern Game71820Candidate D_800D3300[];
+
+s32 func_15044ED0(struct conker15045714 *arg0, f32 arg1, struct conker150472C0_dst *arg2) {
+    s32 count;
+    s32 best;
+    s32 scan_index;
+    f32 height;
+
+    if (arg1 < arg0->field_0x04) {
+        arg2->field_0x1C &= ~2;
+        return 0;
+    }
+    arg2->field_0x00 = D_80098D40;
+    best = -1;
+    func_1510F800(0);
+    count = func_150A3A70((s32)arg0->field_0x00, (s32)arg0->field_0x08);
+    scan_index = 0;
+    if (count > 0) {
+        Game71820Candidate *scan = D_800D3300;
+
+        do {
+            height = (f32)scan->height * 0.00390625f;
+            if ((arg0->field_0x04 <= height) && (height < arg2->field_0x00)) {
+                best = scan_index;
+                arg2->field_0x00 = height;
+            }
+            scan_index++;
+            scan++;
+        } while (scan_index < count);
+    }
+    if (best != -1) {
+        Game71820Candidate *candidate;
+        s32 *source;
+        u32 copy_index;
+        u8 *output;
+        s32 offset;
+
+        candidate = &D_800D3300[best];
+        source = candidate->sources;
+        offset = candidate->index;
+        copy_index = 0;
+        output = (u8 *)arg2;
+        for (; copy_index != 3; copy_index++, output += 6) {
+            s16 *point = (s16 *)(source[copy_index] + offset * 16);
+            *(s16 *)(output + 4) = point[0];
+            *(s16 *)(output + 6) = point[1];
+            *(s16 *)(output + 8) = point[2];
+        }
+        { s32 idx = ((u8 *)candidate->sources - D_800DBE3C) / 12; arg2->field_0x18 = ((s32 *)D_800DBE5C)[idx]; }
+        arg2->field_0x1C |= 5;
+        arg2->field_0x1D = 1;
+        arg2->field_0x20 = 0;
+        if (arg2->field_0x00 <= arg1) {
+            arg2->field_0x1C |= 2;
+            return 1;
+        }
+        return 0;
+    }
+    arg2->field_0x1C &= ~2;
+    return 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_71820/func_150450CC.s")
 
@@ -431,16 +559,8 @@ typedef struct Game71820Hit {
     s32 field20;
 } Game71820Hit;
 
-typedef struct Game71820Candidate {
-    s32 height;
-    s32 *sources;
-    s32 index;
-    s32 padC;
-} Game71820Candidate;
-
 s32 func_150A4FA0(s32, s32);
 extern f32 D_80098D48;
-extern Game71820Candidate D_800D3300[];
 
 s32 func_15045384(Vec3f_15045D48 *arg0, f32 arg1, Game71820Hit *arg2) {
     s32 count;
@@ -509,28 +629,6 @@ s32 func_15045384(Vec3f_15045D48 *arg0, f32 arg1, Game71820Hit *arg2) {
 extern void func_1510F800(s32);
 extern s32 func_150A6500(s16, s16, s32, u16);
 
-struct conker15045714 {
-    f32 field_0x00;
-    f32 field_0x04;
-    f32 field_0x08;
-};
-
-struct conker150472C0_sub
-{
-  u8 field_0x00[0x10];
-  u16 field_0x10;
-};
-struct conker150472C0_dst
-{
-  f32 field_0x00;
-  struct conker150472C0_sub field_0x04;
-  u8 pad16[2];
-  s32 field_0x18;
-  u8 field_0x1C;
-  u8 field_0x1D;
-  u8 pad1E[2];
-  s32 field_0x20;
-};
 struct conker150472C0_src
 {
   u8 pad0[0xC];
@@ -735,7 +833,79 @@ s32 func_15045880(Vec3f_15045D48 *arg0, f32 arg1, s32 *arg2, Game71820Hit *arg3)
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_71820/func_15045AE4.s")
+extern f32 D_80098D54;
+
+s32 func_15045AE4(Vec3f_15045D48 *arg0, f32 arg1, s32 *arg2, Game71820Hit *arg3) {
+    s32 count;
+    s32 best;
+    s32 scan_index;
+    f32 height;
+
+    arg3->height = D_80098D54;
+    best = -1;
+    func_150A44F0(*arg2, D_800D37E0, 0);
+    count = func_150A43E0((s32)arg0->x, (s32)arg0->z, *arg2, D_800D37E0);
+    scan_index = 0;
+    if (count > 0) {
+        Game71820Candidate *scan = D_800D3300;
+        do {
+            height = (f32)scan->height * 0.00390625f;
+            if ((height <= arg0->y) && (arg3->height < height)) {
+                best = scan_index;
+                arg3->height = height;
+            }
+            scan_index++;
+            scan++;
+        } while (scan_index < count);
+    }
+    if (best != -1) {
+        Game71820Candidate *candidate;
+        s32 *source;
+        s32 copy_index;
+        s32 *copy_source;
+        u32 surface_index;
+        u8 *output;
+        s32 offset;
+        s32 *materials;
+
+        candidate = &D_800D3300[best];
+        source = candidate->sources;
+        offset = candidate->index;
+        copy_index = 0;
+        output = (u8 *)arg3;
+        copy_source = source;
+        for (; copy_index != 3; copy_index++, copy_source++, output += 6) {
+            s16 *point = (s16 *)(*copy_source + offset);
+            *(s16 *)(output + 4) = point[0];
+            *(s16 *)(output + 6) = point[1];
+            *(s16 *)(output + 8) = point[2];
+        }
+        surface_index = candidate->padC;
+        arg3->field20 = surface_index * 0xA0 + D_800DBEF4;
+        materials = ((Game71820Surface *)arg3->field20)->materials;
+        if (materials != 0) {
+            s32 triangle_index = ((u8 *)source - D_800DBE3C) / 12 - ((Game71820Surface *)arg3->field20)->first_triangle;
+            *(s32 *)((u8 *)arg3 + 0x18) = materials[triangle_index];
+        } else {
+            *(s32 *)((u8 *)arg3 + 0x18) = ((Game71820Surface *)arg3->field20)->default_material;
+        }
+        arg3->flags |= 6;
+        { s32 unused;
+        if ((((Game71820Surface *)D_800DBEF4)[surface_index = candidate->padC].flags & 0x80) == 0x80) {
+            Game71820Hit *h = arg3;
+            h->flags |= 1;
+        }
+        }
+        arg3->active = 2;
+        if (arg1 <= arg3->height) {
+            arg3->flags |= 2;
+            return 1;
+        }
+        return 0;
+    }
+    arg3->flags &= ~2;
+    return 0;
+}
 
 
 extern Game71820Candidate D_800D3300[];
@@ -886,15 +1056,47 @@ s32 func_15045F8C(struct conker15045714 *arg0, f32 arg1, s32 *arg2, Game71820Hit
     return 0;
 }
 
-/* func_150461D0: PERMUTER CANDIDATE (best hand score 120, no register diffs).
-   Reconstruction in scratchpad/func_1504715C_recon.c. Follows the matched
-   func_150466F8 min/max template; sole diff is one delay-slot instruction: the
-   sp27 spill (func_15045880 result) is scheduled ASAP vs the target's ALAP into
-   func_15045D48's delay slot. */
-// PERMUTER-VERIFIED source exists (matches golden IN ISOLATION, score 0) but does NOT transfer
-// to the whole-file build (pscore 560) — IDO -g3 codegen is TU-context-dependent and the permuter
-// compiles single-function in isolation. See memory/conker-permuter-setup.md. Best in-file: 560.
-#pragma GLOBAL_ASM("asm/nonmatchings/game_71820/func_150461D0.s")
+s32 func_150461D0(struct conker15045714 *arg0, u16 arg1, f32 arg2, struct conker150472C0_dst *arg3) {
+    s32 sp74;
+    s32 sp70;
+    struct conker150472C0_dst sp4C;
+    struct conker150472C0_dst sp28;
+    u8 sp27;
+
+    if (arg2 < arg0->field_0x04) {
+        arg3->field_0x1C &= ~2;
+        return 0;
+    }
+    sp4C = *arg3;
+    sp28 = *arg3;
+    func_15045714(arg0, arg1, &sp74, (s32)&sp70);
+    sp27 = func_15045880((Vec3f_15045D48 *)arg0, arg2, &sp74, (Game71820Hit *)&sp4C);
+    arg0 = (struct conker15045714 *)func_15045D48((Vec3f_15045D48 *)arg0, arg2, &sp70, (Game71820Hit *)&sp28);
+
+    if (sp27 && ((s32)arg0 & 0xFF) != 0) {
+        if (sp4C.field_0x00 < sp28.field_0x00) {
+            *arg3 = sp4C;
+        } else {
+            *arg3 = sp28;
+        }
+        return 1;
+    }
+    if (sp27) {
+        *arg3 = sp4C;
+        return 1;
+    }
+    if (((s32)arg0 & 0xFF) != 0) {
+        *arg3 = sp28;
+        return 1;
+    }
+    if (sp4C.field_0x00 < sp28.field_0x00) {
+        *arg3 = sp4C;
+    } else {
+        *arg3 = sp28;
+    }
+    arg3->field_0x1C &= ~2;
+    return 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_71820/func_15046460.s")
 
@@ -1116,12 +1318,82 @@ s32 func_150470B0(struct conker15045714 *a0, s32 a1, struct conker150472C0_dst *
     return 0;
 }
 
-/* func_1504715C: PERMUTER CANDIDATE (best hand score 2090, semantically correct).
-   Full reconstruction saved to scratchpad/func_1504715C_recon.c. Sole blocker is the
-   float bounding-box load/compute order: IDO schedules iz (feeds +-1000 arith) before
-   the plain-copy iy (ix/iz/iy -> a0/v1/v0 vs target ix/iy/iz -> t0/t3/t6), cascading
-   into the 6/1/%hi(D_800DBEF4) constant hoists. Everything else matches byte-for-byte. */
-#pragma GLOBAL_ASM("asm/nonmatchings/game_71820/func_1504715C.s")
+typedef struct { s16 x, y, z; } Vec3s_1504715C;
+typedef struct { Vec3s_1504715C v[3]; } Tri_1504715C;
+
+typedef struct {
+    /* 0x00 */ f32 unk0;
+    /* 0x04 */ Tri_1504715C tri;
+    /* 0x16 */ u8 pad16[2];
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 unk1D;
+    /* 0x1E */ u8 pad1E[2];
+    /* 0x20 */ s32 unk20;
+} Out1504715C;
+
+typedef struct {
+    /* 0x000 */ u8 pad0[0x14];
+    /* 0x014 */ f32 unk14;
+    /* 0x018 */ f32 unk18;
+    /* 0x01C */ f32 unk1C;
+    /* 0x020 */ u8 pad20[0xD8];
+    /* 0x0F8 */ u32 unkF8;
+    /* 0x0FC */ u8 padFC[0x84];
+    /* 0x180 */ f32 unk180;
+    /* 0x184 */ s32 unk184;
+    /* 0x188 */ u8 pad188[4];
+    /* 0x18C */ Tri_1504715C tri;
+    /* 0x19E */ u8 pad19E[2];
+    /* 0x1A0 */ u16 unk1A0;
+} In1504715C;
+
+
+
+void func_1504715C(Out1504715C *arg0, In1504715C *arg1) {
+    s32 idx;
+    s32 v;
+
+    arg0->unk0 = arg1->unk180;
+    if (arg1->unkF8 & 0x200000) {
+        s16 x;
+        s16 y;
+        s16 z;
+
+        x = arg1->unk14;
+        y = arg1->unk180;
+        z = arg1->unk1C;
+        arg0->tri.v[0].x = x + 1000;
+        arg0->tri.v[0].y = y;
+        arg0->tri.v[0].z = z + 1000;
+        arg0->tri.v[1].x = x - 1000;
+        arg0->tri.v[1].y = y;
+        arg0->tri.v[1].z = z;
+        arg0->tri.v[2].x = x + 1000;
+        arg0->tri.v[2].y = y;
+        arg0->tri.v[2].z = z - 1000;
+    } else {
+        arg0->tri = arg1->tri;
+    }
+    arg0->unk18 = arg1->unk184;
+    arg0->unk1C = 6;
+    if (arg1->unk1A0 != 0) {
+        idx = arg1->unk1A0 - 1;
+        arg0->unk1D = 2;
+        arg0->unk20 = idx * 0xA0 + D_800DBEF4;
+        if (func_15145C90(idx) != 0) {
+            v = 1;
+        } else {
+            v = 0;
+        }
+        arg0->unk1C |= v;
+    lab: ;
+    } else {
+        arg0->unk1D = 1;
+        arg0->unk20 = 0;
+        arg0->unk1C |= 1;
+    }
+}
 
 void func_150472C0(struct conker150472C0_dst *arg0, struct conker150472C0_src *arg1)
 {

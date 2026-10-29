@@ -2,8 +2,11 @@
 /* functions.h declares func_150ADA20 as returning u8; its asm returns a full word
  * (dsra32 v0), and func_151AF388 spills the result as a word. File-local prototype. */
 #define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
+#define func_151D9B8C func_151D9B8C_s32_decl_in_functions_h
 #include "functions.h"
 #undef func_150ADA20
+#undef func_151D9B8C
+void func_151D9B8C(u8, f32, u8, void *, struct17 *, s16, u8, u8, u8, u8, s32);
 u32 func_150ADA20(void);
 #include "variables.h"
 
@@ -106,9 +109,216 @@ extern ObjectSpawnParams D_800A9180[];
 void func_15143794(s32, s32, f32, f32 *);
 void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1D92F0/func_151ABE40.s")
+typedef struct {
+    f32 unk0;
+    s16 unk4;
+    u16 unk6;
+} FxSoundEntry;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1D92F0/func_151AC078.s")
+typedef struct {
+    f32 unk0;
+    s16 unk4;
+    f32 unk8;
+} FxLightEntry;
+
+typedef struct {
+    s8 unk0;
+    s8 unk1;
+    s8 unk2;
+    s8 unk3;
+    s8 unk4;
+} FxEntry5;
+
+typedef struct {
+    u8 pad0[0x1C];
+    u8 unk1C;
+} FxOwner;
+
+extern FxEntry5 D_800A9020[];
+extern FxSoundEntry D_800A9040[];
+extern FxSoundEntry D_800A9158[];
+extern FxLightEntry D_800A925C[];
+void func_1514C678(f32, f32, s32, f32, s32, s32, s32, s32, s32, f32, ObjectSpawnPayload *, s32);
+u8 func_151D8E20(void);
+void func_151DBE80(u8, f32, f32, s16, f32 *, s32, s32, s32, s32, s32);
+
+s32 func_151ABE40(f32 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+    FxEntry5 *entry;
+    u8 color;
+
+    color = func_151D8E20();
+    if (arg1 == 0) {
+        return;
+    }
+    entry = &D_800A9020[arg2];
+    if (entry->unk0 != -1) {
+        ObjectSpawnPayload payload;
+
+        payload.field_0x00 = arg1;
+        payload.field_0x04 = arg4;
+        payload.field_0x08 = color;
+        {
+        FxSoundEntry *snd;
+        snd = &D_800A9040[entry->unk0];
+        func_1514C678(arg0[0], arg0[1], *(s32 *)&arg0[2], snd->unk0, 0, 0xFF,
+                      (func_150ADA20() % (snd->unk6 + 1)) + snd->unk4, 0xB, arg2, 0.0f, &payload, (u8)arg3);
+        }
+    }
+    if (entry->unk2 != -1) {
+        ObjectSpawnPayload payload2;
+
+        payload2.field_0x00 = arg1;
+        payload2.field_0x04 = arg4;
+        payload2.field_0x08 = color;
+        {
+        FxSoundEntry *snd2;
+        snd2 = &D_800A9158[entry->unk2];
+        func_1514C678(arg0[0], arg0[1], *(s32 *)&arg0[2], snd2->unk0, 0, 0xFF,
+                      (func_150ADA20() % (snd2->unk6 + 1)) + snd2->unk4, 0xC, arg2, 0.0f, &payload2, (u8)(u16)arg3);
+        }
+    }
+    if (entry->unk4 != -1 && (((FxOwner *)arg1)->unk1C & 1)) {
+        FxLightEntry *light;
+
+        light = &D_800A925C[entry->unk4];
+        func_151DBE80(color, light->unk0, light->unk8, light->unk4, arg0, arg1 + 4, 0x96, 0, (u8)arg3, arg4);
+    }
+}
+
+typedef struct {
+    /* 0x00 */ u8 unk0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ s16 unk2;
+    /* 0x04 */ u16 unk4;
+    /* 0x08 */ f32 unk8;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ s16 unk18;
+    /* 0x1A */ u16 unk1A;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+} FxSprayParams;
+
+typedef struct {
+    f32 pos[3];
+    s16 unkC;
+    s16 unkE;
+    s32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 pad16[2];
+} FxSpraySpawn;
+
+typedef struct {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    u8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+    u8 pad1C[4];
+} FxSprayPart;
+
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8;
+    s32 unkC;
+    s32 unk10;
+    s32 unk14;
+    s32 unk18;
+    u8 unk1C;
+    u8 unk1D;
+    u8 pad1E[2];
+} FxSprayStyle;
+
+extern s8 D_800A9021[];
+extern FxSprayParams D_800A9068[];
+extern u8 D_800AB3F4[];
+extern u8 D_800AB404[];
+extern s32 func_15147DA0(FxSpraySpawn *, FxSprayPart *, s32, s32, s32, s32, s32, s32, s32, s32, s32, FxSprayStyle *, s32, s32, s32);
+
+s32 func_151AC078(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, ObjectSpawnPayload *argD, u8 argE) {
+    FxSprayParams *params;
+    FxSpraySpawn spawn;
+    FxSprayPart part;
+    s32 pad0;
+    FxSprayStyle style;
+    f32 sinA;
+    f32 cosA;
+    f32 speed;
+    f32 t;
+    s32 v;
+    s16 angle;
+    f32 sinB;
+    f32 cosB;
+    s32 pad1;
+    s32 a;
+    s32 b;
+    s32 pad2;
+
+    params = &D_800A9068[D_800A9021[argB * 5]];
+    sinA = func_151423D8((u8)arg8);
+    cosA = func_151423D8((u8)(arg8 - 0x40));
+    style.unk0 = 0;
+    style.unk4 = 1;
+    style.unk8 = 0x160600;
+    style.unkC = 1;
+    style.unk10 = 0x10;
+    style.unk14 = 0x80;
+    style.unk18 = 0x20;
+    style.unk1C = 0;
+    style.unk1D = 9;
+    spawn.unk10 = 1;
+    spawn.unkE = 1;
+    spawn.pos[1] = arg3;
+    part.unk14 = arg3;
+    spawn.pos[0] = arg2;
+    spawn.pos[2] = arg4;
+    part.unk19 = D_800AB3F4[argD->field_0x08];
+    part.unk1A = 0xFF;
+    if (D_800AB404[argD->field_0x08]) {
+        v = 0x20;
+    } else {
+        v = 0;
+    }
+    part.unk18 = v | 8;
+    {
+        s32 pad;
+    }
+    if (func_150ADA68() < params->unk2C) {
+        part.unk18 |= 3;
+        a = 6;
+        b = 2;
+    } else {
+        a = 0;
+        b = 0;
+        part.unk18 &= ~3;
+    }
+    part.unk1B = (func_150ADA20() % (params->unk1 + 1)) + params->unk0;
+    angle = (func_150ADA20() % (params->unk4 + 1)) + params->unk2;
+    sinB = func_151423D8((u8)angle);
+    cosB = func_151423D8((u8)(angle - 0x40));
+    speed = func_150ADA68() * params->unkC + params->unk8;
+    t = speed * sinB;
+    part.unk4 = t * cosA;
+    part.unk8 = -speed * cosB;
+    part.unkC = t * sinA;
+    spawn.unk15 = (func_150ADA20() % (params->unk14 + 1)) + params->unk10;
+    spawn.unkC = (func_150ADA20() % (params->unk1A + 1)) + params->unk18;
+    part.unk0 = func_150ADA68() * params->unk20 + params->unk1C;
+    part.unk10 = func_150ADA68() * params->unk28 + params->unk24;
+    func_15147DA0(&spawn, &part, 0, 1, 8, 0, a, b, 0, 0, 0, &style, argD->field_0x00, argE, argD->field_0x04);
+    return 1;
+}
 
 s32 func_151AC3CC(s16 *arg0) {
     u8 *ptr = *(u8 **)((u8 *)arg0 + 0x98);
@@ -123,7 +333,7 @@ s32 func_151AC3CC(s16 *arg0) {
 }
 
 u8 func_151D8E20(void);
-void func_151DAB58(u8, f32, u8, f32 *, s32, u8, u8);
+void func_151DAB58(u8, f32, u8, f32 *, s32, u8, s32);
 
 typedef struct {
     f32 field_0x00;
@@ -166,7 +376,7 @@ s32 func_151AC408(ObjectEffectState *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg
     color = func_151D8E20();
     if (func_150ADA20() & 1) {
         life = (func_150ADA20() % 41) + 80;
-        func_151D9B8C(color, ptr->field_0x00 * 6.0f, ptr->field_0x1B, arg5, (struct17 *)sp4C, life, 1, 1, 0, arg0->field_0x0C, arg0->field_0x01);
+        func_151D9B8C(color, ptr->field_0x00 * 6.0f, ptr->field_0x1B, (void *)arg5, (struct17 *)sp4C, life, 1, 1, 0, arg0->field_0x0C, arg0->field_0x01);
     } else {
         func_151DAB58(color, ptr->field_0x00 * 1.5f, ptr->field_0x1B, sp4C, 1, arg0->field_0x0C, arg0->field_0x01);
     }
@@ -765,7 +975,155 @@ void func_151AEAB4(f32 *arg0, s32 arg1, u8 arg2)
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1D92F0/func_151AECA0.s")
+typedef struct {
+    s16 field00;
+    s16 field02;
+    s16 field04;
+    s16 field06;
+    f32 position[3];
+    f32 field14;
+    f32 field18;
+    f32 field1C;
+    f32 field20;
+    f32 field24;
+    f32 field28;
+    s16 field2C;
+    s16 field2E;
+    s16 field30;
+    s16 field32;
+    s16 field34;
+    s16 field36;
+    s16 field38;
+    s16 field3A;
+    u8 field3C;
+    u8 pad3D[3];
+    f32 field40;
+    s16 field44;
+    s16 field46;
+    s32 field48;
+} Packet_151AECA0;
+
+typedef struct {
+    f32 y;
+    u8 unk4[0x19];
+    u8 unk1D;
+    u8 pad1E[6];
+} Floor_151AECA0;
+
+void func_15153F18(s16 *, void *, s32, s32, s32);
+void func_1504715C(void *, void *);
+s32 func_15046C80(f32 *, s32, f32, void *);
+void func_15143874(s16, f32, f32 *, f32 *);
+void func_15136698(f32, f32, u8, u8, s32, void *, f32 *, s32, s32, s32, s32);
+
+void func_151AECA0(f32 *arg0, u8 arg1, s32 arg2) {
+    Floor_151AECA0 floor;
+    Packet_151AECA0 packet;
+    s32 count;
+    f32 probe[3];
+    f32 pos[3];
+    f32 pos2[3];
+    f32 probe2[3];
+    f32 unused0;
+    f32 unusedA;
+    f32 unusedB;
+    f32 unused1;
+    f32 unused2;
+    f32 unused3;
+    f32 unused4;
+    f32 unused5;
+    f32 unused6;
+    f32 unused7;
+    f32 unused8;
+    f32 unused9;
+    f32 unused10;
+    f32 unused11;
+    f32 height;
+    u32 r1;
+    u32 r2;
+    f32 g1;
+    f32 g2;
+    volatile u32 angle;
+
+    if (arg0 == NULL) {
+        return;
+    }
+    func_1504715C(&floor, arg0);
+lbD:
+    packet.position[0] = arg0[5];
+    packet.position[1] = arg0[6];
+    packet.position[2] = arg0[7];
+    packet.field14 = 5.079999924f;
+    packet.field2C = 0xA;
+    packet.field2E = 0;
+    packet.field02 = 0xFF;
+    packet.field04 = -0x3F;
+    packet.field00 = 0;
+    packet.field06 = 0x2D;
+    packet.field30 = 3;
+    packet.field32 = 2;
+    packet.field34 = 0x28;
+    packet.field36 = 0x14;
+    packet.field38 = 0x9B;
+    packet.field3A = 0x64;
+    packet.field44 = 0x10;
+    packet.field46 = 0xF;
+    packet.field48 = 0;
+    packet.field3C = 0;
+    packet.field18 = 3.019999981f;
+    packet.field1C = 0.807000041f;
+    packet.field20 = 0.7010000348f;
+    packet.field24 = 18.0f;
+    packet.field28 = 11.80000019f;
+    packet.field40 = 0.5f;
+    func_15153F18(&packet.field00, packet.position, (s32)&floor, 0xFF, 1);
+lbA:
+    count = (func_150ADA20() % 6) + 7;
+    probe[1] = arg0[6] + 100;
+    while (count != 0) {
+        angle = func_150ADA20();
+        func_15143874((u8)angle, (func_150ADA68() * 59.0f) + 90.0f, &pos[0], &pos[2]);
+lbC:
+        pos[0] += arg0[5];
+        pos[2] += arg0[7];
+        probe[0] = pos[0];
+        probe[2] = pos[2];
+        if (func_15046C80(probe, 0, arg0[6] - 500.0f, &floor) == 0 || floor.unk1D == 3) {
+            return;
+        }
+        pos[1] = floor.y;
+        pos[1] += 10.0f;
+        if (func_150ADA20() & 1) {
+            func_151D9B8C(0, (func_150ADA68() * 4.5f) + 15.0f, (func_150ADA68() * 100.0f) + 155.0f,
+                          floor.unk4, (struct17 *)pos, 100, 0, 1, 0, arg1, arg2);
+        } else {
+            func_151DAB58(0, (func_150ADA68() * 5.900000095f) + 6.099999905f, (func_150ADA68() * 100) + 155,
+                          pos, 1, arg1, arg2);
+        }
+        count--;
+    }
+lbB:
+    pos2[0] = arg0[5];
+    pos2[1] = arg0[6];
+    pos2[2] = arg0[7];
+    probe2[0] = pos2[0];
+    probe2[1] = pos2[1] + 100.0f;
+    probe2[2] = pos2[2];
+    if (func_15046C80(probe2, 0, pos2[1] - 500.0f, &floor) == 0 || floor.unk1D == 3) {
+        return;
+    }
+    pos2[1] = floor.y;
+    pos2[1] += 10.0f;
+    g1 = func_150ADA68();
+    g2 = func_150ADA68();
+    r1 = func_150ADA20();
+    r2 = func_150ADA20();
+    func_15136698(((g1 * 30.0f) + 90.0f) * 0.001000000047f,
+                  ((g2 * 103.0f) + 103.0f) * 9.999999747e-06f,
+                  (r1 % 101) + 0x9B, (r2 % 101) + 0x64,
+                  (func_150ADA20() % 56) + 0x46, floor.unk4, pos2, 0, 1, arg1, arg2);
+lbl:;
+}
 
 typedef struct {
     /* 0x00 */ s32 unk0;

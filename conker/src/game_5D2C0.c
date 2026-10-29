@@ -374,7 +374,137 @@ s32 func_150303E4(struct127 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_5D2C0/func_15030468.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_5D2C0/func_15030AF4.s")
+typedef struct S15030AF4 {
+    u8 unk0;
+    u8 unk1;
+    u8 unk2;
+    u8 unk3;
+    u8 unk4;
+    u8 unk5;
+    u8 unk6;
+    u8 unk7;
+    u8 unk8;
+    u8 unk9;
+    u16 unkA;
+    u16 unkC;
+    u16 unkE;
+    u8 pad10[3];
+    u8 unk13;
+    u8 pad14;
+    u8 unk15;
+    u8 unk16;
+    u8 unk17;
+    s16 unk18;
+    s16 unk1A;
+    u16 unk1C;
+    s16 unk1E;
+    s16 unk20;
+    s16 unk22;
+    s32 unk24;
+    s32 unk28;
+    s32 unk2C;
+    s32 unk30;
+    void *unk34;
+    s32 unk38;
+    s32 unk3C;
+    f32 unk40;
+    s32 unk44;
+    s32 unk48;
+    s32 unk4C;
+    s32 unk50;
+    struct S15030AF4 *unk54;
+    struct S15030AF4 *unk58;
+} S15030AF4;
+
+void func_15031A50(u8 *arg0, u8 *arg1);
+
+S15030AF4 *func_15030AF4(struct127 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, u16 *arg9, s32 argA, s32 argB, s32 argC) {
+    S15030AF4 *var;
+    S15030AF4 *next;
+    s32 err;
+
+    if (arg0->unique_id == 0) {
+        return 0;
+    }
+    if (!(arg3 & 8)) {
+        var = (S15030AF4 *)D_800C3EE0;
+        if (var != 0) {
+            do {
+                next = var->unk54;
+                if ((var->unk0 == arg0->unique_id) && (var->unk6 == arg7) && (var->unk1 == arg1)) {
+                    return 0;
+                }
+                var = next;
+            } while (next != 0);
+        }
+    }
+    var = allocate_memory(0x5C, 1, 0, 2);
+    if (var == 0) {
+        return 0;
+    }
+    err = 0;
+    if ((S15030AF4 *)D_800C3EE0 != 0) {
+        ((S15030AF4 *)D_800C3EE0)->unk58 = var;
+    }
+    var->unk54 = (S15030AF4 *)D_800C3EE0;
+    var->unk58 = 0;
+    D_800C3EE0 = (s32)var;
+    var->unk0 = arg0->unique_id;
+    var->unk1 = arg1;
+    var->unk2 = arg2;
+    var->unk24 = 0;
+    var->unk28 = 0;
+    var->unk2C = 0;
+    var->unk30 = 0;
+    var->unk3 = 0xFF;
+    var->unk44 = 0;
+    var->unk4 = arg3;
+    var->unk6 = arg7;
+    var->unk40 = 1.0f;
+    var->unk7 = arg8;
+    var->unk38 = 0;
+    var->unk3C = 0;
+    var->unk8 = 0;
+    var->unk9 = 0;
+    var->unk18 = 0;
+    var->unk1A = 0;
+    var->unkA = arg9[0];
+    var->unkC = arg9[1];
+    var->unkE = arg9[2];
+    var->unk17 = argA;
+    var->unk48 = 0;
+    var->unk15 = arg4;
+    var->unk16 = arg5;
+    var->unk1E = argB;
+    var->unk20 = argC;
+    var->unk13 = 0;
+    var->unk4C = 0;
+    var->unk50 = 0;
+    var->unk5 = 0;
+    var->unk22 = 0;
+    if ((arg5 == 4) || (arg3 & 4)) {
+        var->unk34 = allocate_memory(0x80, 1, 2, 2);
+        if (var->unk34 == 0) {
+            err = 1;
+        }
+    } else {
+        var->unk34 = 0;
+    }
+    if (arg6 == 0) {
+        var->unk1C = 0xFFFF;
+    } else {
+        var->unk1C = arg6;
+    }
+    if (!err) {
+        err |= func_1502FFD8((Func1502FFD8Arg0 *)var, (u8 *)arg0);
+    }
+    if (err) {
+        func_15030158((Func15030158Arg0 *)var, 1);
+        return 0;
+    }
+    func_15031A50((u8 *)var, (u8 *)arg0);
+    return var;
+}
 
 extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
 void func_15030D54(void *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6)
@@ -474,7 +604,58 @@ s32 func_15030F94(s32 arg0, struct127 *arg1, s32 arg2, s32 arg3) {
     return arg0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_5D2C0/func_15031070.s")
+typedef struct S15031070Sub {
+    u8 pad0[0x3E0];
+    u8 *unk3E0[2];
+    u8 *unk3E8[2];
+    u8 pad3F0[6];
+    u8 unk3F6;
+} S15031070Sub;
+
+typedef struct S15031070 {
+    u8 pad0[2];
+    u8 unk2;
+    u8 pad3[0x1B];
+    u16 unk1E;
+    u16 unk20;
+    u8 pad22[0x12];
+    u8 *unk34;
+    u8 pad38[0x10];
+    S15031070Sub *unk48;
+} S15031070;
+
+s32 func_15031070(S15031070 *arg0, struct127 *arg1, u8 **arg2, u8 **arg3) {
+    S15031070 *other;
+
+    if (arg0->unk48 != NULL) {
+        if (arg0->unk48->unk3F6 == 0) {
+            return 0;
+        }
+        *arg2 = arg0->unk48->unk3E8[D_800BE9C0];
+        *arg3 = arg0->unk48->unk3E0[D_800BE9C0];
+    } else if (arg0->unk34 != NULL) {
+        *arg2 = arg0->unk34 + (D_800BE9C0 << 6);
+        *arg3 = (u8 *)arg1->unk1D4 + (arg0->unk2 << 6);
+    } else if (arg0->unk1E) {
+        other = (S15031070 *)func_1503195C(arg1, arg0->unk1E, 0);
+        if (other == NULL) {
+            return 0;
+        }
+        if (func_15031070(other, arg1, arg2, arg3) == 0) {
+            return 0;
+        }
+        {
+            s32 pad;
+            *arg2 += arg0->unk20 << 6;
+        }
+        return 1;
+    } else {
+        *arg2 = (u8 *)arg1->unk1D4;
+        *arg2 += arg0->unk2 << 6;
+        *arg3 = *arg2;
+    }
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_5D2C0/func_150311C4.s")
 
@@ -621,7 +802,88 @@ void func_15031A50(u8 *arg0, u8 *arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_5D2C0/func_15031C14.s")
+struct S15031C14 {
+    s32 unk0;
+    u8 unk4;
+};
+void func_15100180(void *);
+void func_151616D0(u8, u8, void *);
+void func_15147D64(void *, s32);
+void func_151BD7F4(void *);
+void func_151D4668(void *);
+void func_151D747C(void *);
+void func_151027E8(void *);
+
+void func_15031C14(void *arg0) {
+    u8 *obj;
+    struct S15031C14 sp2C;
+    struct S15031C14 sp24;
+    u8 *node;
+    struct S15031C14 * volatile p;
+
+    obj = (u8 *)func_15083E90(*(u8 *)arg0);
+    if (obj != 0) {
+        switch (((u8 *)arg0)[1]) {
+        case 0x5A:
+            node = *(u8 **)(obj + 0x31C);
+            if (node != 0) {
+                *(u16 *)(node + 0x1A6) -= 0xAA;
+            }
+            break;
+        case 0x90:
+            *(u32 *)(obj + 0x9C) &= ~0x70;
+            break;
+        case 0x8F:
+            *(u32 *)(obj + 0x9C) &= ~0xE00;
+            break;
+        case 0x37:
+        case 0x4B:
+        case 0x4C:
+            func_1000FD38(func_15033BDC, arg0, (s32)obj);
+            if (((u8 *)arg0)[1] == 0x37) {
+                func_15100180(obj);
+            }
+            break;
+        case 0x49:
+            sp2C.unk0 = (s32)obj;
+            sp2C.unk4 = obj[0x3B];
+            func_151616D0(0x10, 0x29, &sp2C);
+            break;
+        case 0x5D:
+            sp24.unk0 = (s32)obj;
+            sp24.unk4 = obj[0x3B];
+            func_15147D64(p = &sp24, 0x2E);
+            func_151494E0((s32)p, 0x2F);
+            break;
+        case 0x3D:
+            func_151BD7F4(obj);
+            break;
+        case 0x1A:
+        case 0x1B:
+        case 0x5F:
+        case 0x65:
+        case 0x66:
+            func_151D4668(obj);
+            break;
+        case 0x1D:
+        case 0x82:
+            func_151D747C(obj);
+            break;
+        case 0x5E:
+        case 0x85:
+            *(u32 *)(obj + 0x9C) &= ~0x6000;
+            break;
+        }
+        switch (((u8 *)arg0)[6]) {
+        case 0x16:
+        case 0x63:
+        case 0x89:
+            func_151027E8(obj);
+            func_151D4668(obj);
+            break;
+        }
+    }
+}
 
 s32 func_15031E2C(void *arg0, s32 arg1) {
     s32 idx;

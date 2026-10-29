@@ -72,11 +72,15 @@ function is right but something ELSE in the bin changed — e.g. a new literal i
    register (`register` does not avoid it); arrays/structs are sized as declared; a float passed
    in a GPR (`mfc1` to a0-a3) or a comparison result passed as a stack argument can reserve
    extra unused words. Use `-U 1000` to see every sp offset unfolded.
-5. Your best version is kept automatically: every check that beats your best so far is
+5. Diagnostic probes that are deliberately WRONG C (a changed constant, a `? 3 : 5` to see what
+   moves) must use `mw.py check FUNC --probe` / `mw.py batch FUNC --probe …` so they are never
+   recorded as your best attempt. If a wrong version got recorded anyway, restore your correct
+   file and run `mw.py best FUNC --reset`.
+6. Your best version is kept automatically: every check that beats your best so far is
    snapshotted to `best/file.c` in the workspace and to `~/conker/.nearmiss/` (nothing is ever
    lost, and a later attempt starts from it). Still, don't wander away from your best — restore
    from `best/file.c` when a line of attack fails.
-6. After one failed sweep of a hypothesis family (e.g. statement orders), switch families
+7. After one failed sweep of a hypothesis family (e.g. statement orders), switch families
    instead of repeating it; record the sweep in the ledger.
 
 ## Diagnosis checklist (check these before reshaping statements)
@@ -117,6 +121,14 @@ function is right but something ELSE in the bin changed — e.g. a new literal i
   from a named pointer local (`data = state->field;`), not a chained expression.
 - **Display lists:** `or v1,a0,zero … addiu a0,a0,8 … or v0,a0,zero` is a GBI block on
   `arg0++` returning `arg0` (see the decompile-microcode skill for gSP/gDP macros).
+- **Block scopes are scheduling barriers (-g3).** Wrapping a run of statements in a new `{ }`
+  block — often with its locals declared inside, sometimes with an unused `s32 pad;` — makes -g3
+  emit a debug block marker that the assembler won't schedule across. This fixed many "one
+  instruction moved up/down" residues (an early `lui`/`lwc1`/reload, a delay-slot fill, float
+  zero stores out of order). Try it before reshaping expressions.
+- **Look at the compiler's own view.** `cc -K` keeps IDO's intermediate files (e.g. the binasm
+  before the assembler's scheduling pass) — compare pre- and post-scheduling order to tell a
+  code-generation difference from a scheduling one. Offline compiles don't count as checks.
 - **Local widths:** widening an m2c `u8` temporary to `s32` can fix allocation; when only byte
   stack offsets differ, reorder named locals or change their widths. Declaring a loop
   pointer inside the loop body opens a -g3 scope that keeps stores before the increments.

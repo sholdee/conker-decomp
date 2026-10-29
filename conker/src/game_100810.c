@@ -5,7 +5,201 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_100810/func_150D3360.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_100810/func_150D3A68.s")
+typedef struct {
+    struct17 pos;
+    f32 unkC;
+    f32 unk10;
+} Entry150D3A68;
+
+typedef struct {
+    u8 pad0[0x34];
+    struct17 unk34;
+    struct17 unk40;
+    u8 pad4C[0xC];
+    s32 unk58;
+    u8 pad5C[0x170 - 0x5C];
+    f32 unk170;
+    f32 unk174;
+} Obj150D3A68;
+
+typedef struct {
+    struct127 *unk0;
+    u8 unk4;
+    u8 unk5;
+    u8 pad6[2];
+    struct126 *unk8;
+    Obj150D3A68 *unkC;
+    Obj150D3A68 *unk10;
+    f32 unk14;
+    f32 unk18;
+} State150D3A68;
+
+typedef struct {
+    u8 pad0;
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD[3];
+    struct17 unk10;
+    u8 pad1C[2];
+    u16 unk1E;
+    u8 pad20[5];
+    u8 unk25;
+    u8 pad26[6];
+    s8 unk2C;
+    s8 unk2D;
+    s8 unk2E;
+    u8 pad2F[0x94 - 0x2F];
+    Entry150D3A68 *unk94;
+    State150D3A68 *unk98;
+} Actor150D3A68;
+
+s32 func_150D4AE0(struct17 *arg0, struct17 *arg1, struct127 *arg2, struct126 *arg3);
+void func_150D4D58(struct17 *arg0, struct17 *arg1, f32 arg2, u8 arg3, s32 arg4);
+extern f32 func_15143E64(struct17 *);
+extern s32 func_1515C0F8(struct127 *, f32 **);
+
+s32 func_150D3A68(Actor150D3A68 *arg0) {
+    State150D3A68 *state;
+    Entry150D3A68 *table;
+    struct127 *obj;
+    struct126 *s126;
+    struct17 prev;
+    struct17 diff;
+    f32 dist;
+    struct17 dir;
+    f32 *sub;
+    u8 old;
+    s32 idx;
+
+    state = arg0->unk98;
+    table = arg0->unk94;
+    obj = state->unk0;
+    s126 = state->unk8;
+    if (obj->interaction_state == 0 || obj->unique_id != state->unk4) {
+        return 0;
+    }
+    if (D_800BE9E4 > 0) {
+        prev = arg0->unk10;
+        switch (func_150D4AE0(&arg0->unk10, &dir, obj, s126)) {
+        case 0:
+            if (state->unkC != NULL) {
+                state->unkC->unk58 &= ~2;
+            }
+            if (state->unk10 != NULL) {
+                state->unk10->unk58 &= ~2;
+            }
+            arg0->unk1E &= ~4;
+            return 1;
+        case 1:
+            if (!(arg0->unk1E & 4)) {
+                prev = arg0->unk10;
+            }
+            arg0->unk1E |= 4;
+            if (state->unkC != NULL) {
+                state->unkC->unk34 = arg0->unk10;
+                state->unkC->unk40 = dir;
+                state->unkC->unk58 &= ~4;
+                state->unkC->unk58 |= 2;
+            }
+            if (state->unk10 != NULL) {
+                state->unk10->unk34 = arg0->unk10;
+                state->unk10->unk40 = dir;
+                state->unk10->unk58 &= ~4;
+                state->unk10->unk58 |= 2;
+            }
+            break;
+        case 2:
+            if (!(arg0->unk1E & 4)) {
+                prev = arg0->unk10;
+            }
+            arg0->unk1E |= 4;
+            if (state->unkC != NULL) {
+                state->unkC->unk58 &= ~2;
+            }
+            if (state->unk10 != NULL) {
+                state->unk10->unk58 &= ~2;
+            }
+            break;
+        }
+        diff.unk0 = arg0->unk10.unk0 - prev.unk0;
+        diff.unk4 = arg0->unk10.unk4 - prev.unk4;
+        diff.unk8 = arg0->unk10.unk8 - prev.unk8;
+        dist = func_15143E64(&diff);
+        {
+            Entry150D3A68 *e = &table[arg0->unk2E];
+        e->pos = arg0->unk10;
+        e->unkC = dist;
+        e->unk10 = 100.0f;
+        arg0->unk2E++;
+        if (arg0->unk2E == arg0->unk25) {
+            arg0->unk2E = 0;
+        }
+        arg0->unk2C++;
+        if (arg0->unk2E == arg0->unk2D) {
+            arg0->unk2D++;
+            if (arg0->unk2D == arg0->unk25) {
+                arg0->unk2D = 0;
+            }
+            arg0->unk2C--;
+        }
+        }
+        if (obj->unk31C != NULL) {
+            sub = (state->unk10 != NULL) ? &state->unk10->unk170 : NULL;
+            old = state->unk5;
+            if (obj->unk31C->unk84 != 0) {
+                if (obj->unk44 > 6.0f) {
+                    state->unk5 = 0;
+                } else if (obj->unk44 > 3.0f) {
+                    state->unk5 = 1;
+                } else {
+                    state->unk5 = 2;
+                }
+            } else {
+                idx = (u8)(obj - D_800CC2D0);
+                if (idx >= 4) {
+                    state->unk5 = 1;
+                } else {
+                                        if (((s8 *)((*(void ***)&D_800BE728)[idx]))[3] > 20) {
+                        state->unk5 = 0;
+                    } else if (((s8 *)((*(void ***)&D_800BE728)[idx]))[3] < -20) {
+                        state->unk5 = 2;
+                    } else {
+                        state->unk5 = 1;
+                    }
+                }
+            }
+            if (state->unk5 == 0) {
+                if (sub != NULL) {
+                    sub[1] = 2.099999905f;
+                }
+                state->unk18 = 50.0f;
+                if (old != state->unk5) {
+                    f32 *sp3C;
+
+                    if (func_1515C0F8(obj, &sp3C) == 0) {
+                        sp3C = &D_800A5480;
+                    }
+                    func_150D4D58(&arg0->unk10, (struct17 *)sp3C, obj->unk40, arg0->unkC, arg0->unk1);
+                }
+            } else if (state->unk5 == 2) {
+                if (sub != NULL) {
+                    sub[1] = 0.200000003f;
+                }
+                state->unk18 = 10.0f;
+                if (old != state->unk5) {
+                }
+            } else {
+                state->unk18 = 20.0f;
+                if (sub != NULL) {
+                    sub[1] = 1.0f;
+                }
+            }
+        }
+    }
+    state->unk14 = state->unk14 + (state->unk18 - state->unk14) * 0.3500000238f;
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_100810/func_150D3FD4.s")
 

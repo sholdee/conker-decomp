@@ -221,9 +221,184 @@ s32 func_150CD17C(Drifter150CD17C *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_FA360/func_150CD59C.s")
+typedef struct Quad150CD59C {
+    u8 pad0[0x2C];
+    f32 halfW;
+    f32 halfH;
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 rotX;
+    f32 rotY;
+    f32 rotZ;
+    f32 offX;
+    f32 offY;
+    f32 offZ;
+    u8 pad58[0x68];
+    u8 template[0x40];
+    u8 *buffers[4];
+    u8 pad110[4];
+    f32 unk114;
+} Quad150CD59C;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_FA360/func_150CD7F8.s")
+void func_151D5D60(void *, s16, s32, void *, u8 *);
+void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
+
+void *func_150CD59C(Quad150CD59C *arg0, s16 arg1) {
+    f32 *v;
+    Vtx *vtx;
+    void *ret;
+    f32 mtx[4][4];
+    f32 verts[4][3];
+    u8 i;
+    u8 fresh;
+
+    func_151D5D60(arg0->buffers, arg1, 0x40, &vtx, &fresh);
+    ret = vtx;
+    if (vtx != 0) {
+        if (fresh != 0) {
+            memcpy(arg0->buffers[arg1], arg0->template, 0x40);
+            memcpy(arg0->buffers[arg1] + 0x40, arg0->template, 0x40);
+        }
+    } else {
+        return 0;
+    }
+    {
+        u8 i;
+
+        verts[0][0] = arg0->halfW;
+        verts[0][1] = arg0->halfH;
+        verts[0][2] = 0.0f;
+        verts[1][0] = -arg0->halfW;
+        verts[1][1] = arg0->halfH;
+        verts[1][2] = 0.0f;
+        verts[2][0] = -arg0->halfW;
+        verts[2][1] = -arg0->halfH;
+        verts[2][2] = 0.0f;
+        verts[3][0] = arg0->halfW;
+        verts[3][1] = -arg0->halfH;
+        verts[3][2] = 0.0f;
+        func_150A8050(mtx, arg0->rotX, arg0->rotY, arg0->rotZ);
+        mtx[3][0] = arg0->x;
+        mtx[3][1] = arg0->y;
+        mtx[3][2] = arg0->z;
+        if (arg0->unk114 < 0.0f) {
+            mtx[3][0] += arg0->offX;
+            mtx[3][1] += arg0->offY;
+            mtx[3][2] += arg0->offZ;
+        }
+        for (i = 0; i < 4; i++) {
+            Vtx *p;
+            v = verts[i];
+            func_150A7960((f32 *)mtx, v[0], v[1], 0.0f, &v[0], &v[1], &v[2]);
+            vtx->v.ob[0] = v[0];
+            vtx->v.ob[1] = v[1];
+            vtx->v.ob[2] = v[2];
+            vtx->v.flag = 0;
+            p = vtx + 1;
+            vtx = p;
+        }
+    }
+    return ret;
+}
+
+struct Particle150CD7F8 {
+    s32 unk00;
+    s32 unk04;
+    f32 unk08;
+    f32 unk0C;
+    f32 unk10;
+    s16 unk14;
+    s16 unk16;
+    s16 unk18;
+    s16 unk1A;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    u8 unk30;
+    s16 unk32;
+    s16 unk34;
+    f32 unk38;
+    f32 unk3C;
+    f32 unk40;
+    f32 unk44;
+    f32 unk48;
+};
+
+struct Arr5_150CD7F8 {
+    f32 v[5];
+};
+
+struct Obj150CD7F8 {
+    u8 pad00;
+    u8 unk01;
+    u8 pad02[0xA];
+    u8 unk0C;
+    u8 pad0D[0x1B];
+    f32 unk28;
+    f32 unk2C;
+};
+
+extern struct Arr5_150CD7F8 D_80088874;
+extern f32 D_800BE9A4;
+extern void func_1514373C(f32, f32, f32 *, f32 *);
+extern void func_15152874(struct Particle150CD7F8 *, u8, u8);
+
+void func_150CD7F8(struct Obj150CD7F8 *arg0) {
+    f32 *pf = &arg0->unk28;
+    struct Particle150CD7F8 p;
+    struct Arr5_150CD7F8 arr;
+    u8 idx;
+    f32 angle;
+    f32 rot;
+    f32 r;
+    s32 pad;
+
+    arg0->unk28 += 0.07999999821f * D_800BE9A4 * arg0->unk2C;
+    if (arg0->unk28 > 1.0f) {
+        p.unk18 = -0x17;
+        p.unk1A = 6;
+        p.unk30 = 0;
+        p.unk24 = 0.9922329783f;
+        p.unk48 = -10.11759949f;
+        do {
+            arr = D_80088874;
+            idx = func_150ADA20() % 5U;
+            angle = arr.v[idx] + func_150ADA68() * 0.5999999642f;
+            rot = D_800DBFF0[D_80082FA4].unk380 - 180.0f;
+            while (rot > 360.0f) {
+                rot -= 360.0f;
+            }
+            while (rot < 0.0f) {
+                rot += 360.0f;
+            }
+            rot *= 0.01745329238f;
+            if (fabsf(angle - rot) < 0.3926991224f) {
+                r = func_150ADA68();
+                p.unk0C = 1613.583496f * r + 2411.008545f + 500.0f;
+                func_1514373C(angle, r * 2026.68000000000029 + 8400.0, &p.unk08, &p.unk10);
+                p.unk00 = 0xF;
+                p.unk04 = 0x14;
+                p.unk14 = (angle + 3.141592741f - 0.151000008f) * 40.74366379f;
+                p.unk16 = 0xC;
+                p.unk32 = 0x226;
+                p.unk34 = 0;
+                p.unk3C = 15.0f;
+                p.unk38 = 15.0f;
+                p.unk44 = 25.30000114f;
+                p.unk40 = 25.30000114f;
+                p.unk1C = 78.59999847f;
+                p.unk20 = 25.20000076f;
+                p.unk28 = -1.10800004f;
+                p.unk2C = 0.201000005f;
+                func_15152874(&p, arg0->unk0C, arg0->unk01);
+            }
+            *pf -= 1.0f;
+        } while (*pf > 1.0f);
+    }
+}
 
 struct Inner150CDB6C {
     s32 unk0;

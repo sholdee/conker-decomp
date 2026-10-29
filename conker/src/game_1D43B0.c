@@ -7,7 +7,229 @@ u32 func_150ADA20(void);
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1D43B0/func_151A6F00.s")
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec151A6F00;
+
+typedef struct {
+    /* 0x00 */ s16 count;
+    /* 0x04 */ f32 x;
+    /* 0x08 */ f32 y;
+    /* 0x0C */ f32 z;
+    /* 0x10 */ s16 unk10;
+    /* 0x14 */ f32 speed;
+    /* 0x18 */ s16 yawBase;
+    /* 0x1A */ s16 yawRange;
+    /* 0x1C */ s16 pitchBase;
+    /* 0x1E */ s16 pitchRange;
+    /* 0x20 */ f32 velBase;
+    /* 0x24 */ f32 velRange;
+    /* 0x28 */ f32 velYBase;
+    /* 0x2C */ f32 velYRange;
+    /* 0x30 */ Vec151A6F00 vel;
+    /* 0x3C */ f32 scaleBase;
+    /* 0x40 */ f32 scaleRange;
+    /* 0x44 */ f32 unk44;
+    /* 0x48 */ f32 unk48;
+    /* 0x4C */ f32 unk4C;
+    /* 0x50 */ f32 unk50;
+    /* 0x54 */ u8 unk54;
+    /* 0x55 */ u8 unk55;
+    /* 0x56 */ s16 unk56;
+    /* 0x58 */ s16 unk58;
+} Params151A6F00;
+
+typedef struct {
+    /* 0x00 */ f32 unk00;
+    /* 0x04 */ f32 unk04;
+    /* 0x08 */ f32 unk08;
+    /* 0x0C */ f32 unk0C;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ Vec151A6F00 vel;
+    /* 0x40 */ f32 unk40;
+    /* 0x44 */ f32 unk44;
+    /* 0x48 */ f32 unk48;
+    /* 0x4C */ f32 unk4C;
+    /* 0x50 */ s32 unk50;
+    /* 0x54 */ s16 unk54;
+    /* 0x56 */ s16 unk56;
+    /* 0x58 */ u8 unk58;
+    /* 0x5C */ s32 unk5C;
+    /* 0x60 */ u8 unk60;
+    /* 0x61 */ u8 unk61;
+    /* 0x62 */ u8 unk62;
+    /* 0x63 */ u8 unk63;
+    /* 0x64 */ u8 unk64;
+    /* 0x65 */ u8 unk65;
+    /* 0x66 */ u8 unk66;
+    /* 0x67 */ u8 unk67;
+    /* 0x68 */ u8 unk68;
+    u8 pad69;
+    /* 0x6A */ u8 unk6A;
+    /* 0x6C */ s32 unk6C;
+    /* 0x70 */ u8 unk70;
+    /* 0x72 */ s16 unk72;
+    /* 0x74 */ s16 unk74;
+    s32 pad78;
+} Particle151A6F00;
+
+typedef struct {
+    f32 unk0;
+    s32 unk4;
+    u8 unk8;
+    u8 unk9;
+    s16 unkA;
+    s16 unkC;
+} Extra151A6F00;
+
+typedef struct {
+    f32 *unk0;
+    f32 *unk4;
+    f32 *unk8;
+    f32 unkC;
+    f32 unk10;
+    s16 unk14;
+    u8 unk16;
+    u8 unk17;
+} Spawn151A6F00;
+
+typedef struct {
+    s32 unk0;
+    void *unk4;
+} Link151A6F00;
+
+extern void *func_15132A4C(void *, s32, s32, s32, u8, s32);
+extern void *func_15134908(void *, s32, u8, s32);
+
+void func_151A6F00(Params151A6F00 *arg0, u8 arg1, u8 arg2, s32 arg3) {
+    s16 i;
+    Particle151A6F00 sp;
+    s32 pad;
+    Extra151A6F00 extra;
+    f32 scale;
+    u8 yaw;
+    u8 pitch;
+    f32 sinYaw;
+    f32 cosYaw;
+    f32 sinPitch;
+    f32 cosPitch;
+    f32 dist;
+    u8 *v;
+
+    i = arg0->count;
+    sp.unk1C = 1.0f;
+    sp.unk20 = 1.0f;
+    sp.unk24 = 1.0f;
+    sp.unk50 = 0x21E9;
+    sp.unk58 = 0;
+    sp.unk54 = arg0->unk10;
+    sp.unk56 = 0x1B;
+    sp.unk10 = 0.0f;
+    sp.unk14 = 0.0f;
+    sp.unk18 = 0.0f;
+    sp.unk44 = 0.0f;
+    sp.unk04 = 0.200000003f;
+    extra.unk0 = -18.0f;
+    extra.unk8 = arg0->unk54;
+    extra.unk9 = arg0->unk55;
+    extra.unkA = arg0->unk56;
+    extra.unkC = arg0->unk58;
+    sp.unk5C = 0;
+    sp.unk60 = 0xFF;
+    sp.unk61 = 1;
+    sp.unk62 = 5;
+    sp.unk63 = 4;
+    sp.unk64 = 0;
+    sp.unk65 = 0;
+    sp.unk66 = 1;
+    sp.unk67 = 0;
+    sp.unk68 = 0;
+    sp.unk6A = 0;
+    sp.unk6C = 0;
+    sp.unk70 = 0;
+    sp.unk72 = 0x20;
+    sp.unk74 = 7;
+    while (i--) {
+        yaw = (func_150ADA20() % (arg0->yawRange + 1)) + arg0->yawBase;
+        pitch = (func_150ADA20() % (arg0->pitchRange + 1)) + arg0->pitchBase;
+        sinYaw = func_151423D8((u8)(yaw - 0x40));
+        cosYaw = func_151423D8(yaw);
+        sinPitch = func_151423D8((u8)(pitch - 0x40));
+        cosPitch = func_151423D8(pitch);
+        dist = func_150ADA68() * arg0->speed;
+        sp.unk28 = arg0->x + dist * cosPitch * sinYaw;
+        sp.unk2C = arg0->y - dist * sinPitch;
+        sp.unk30 = arg0->z + dist * cosPitch * cosYaw;
+        switch (arg1) {
+        case 0: {
+            f32 speed;
+            f32 vspeed;
+            speed = (func_150ADA68() * arg0->velRange) + arg0->velBase;
+            vspeed = (func_150ADA68() * arg0->velYRange) + arg0->velYBase;
+            sp.vel.x = speed * sinYaw;
+            sp.vel.y = vspeed;
+            sp.vel.z = speed * cosYaw;
+        }
+            break;
+        case 1: {
+            f32 speed;
+            speed = (func_150ADA68() * arg0->velRange) + arg0->velBase;
+            sp.vel.x = speed * cosPitch * sinYaw;
+            sp.vel.y = -speed * sinPitch;
+            sp.vel.z = speed * cosPitch * cosYaw;
+        }
+            break;
+        case 2:
+            sp.vel = arg0->vel;
+            break;
+        case 3: {
+            f32 speed;
+            speed = (func_150ADA68() * arg0->velRange) + arg0->velBase;
+            sp.vel.x = arg0->vel.x * speed;
+            sp.vel.y = arg0->vel.y * speed;
+            sp.vel.z = arg0->vel.z * speed;
+            break;
+        }
+        }
+        scale = sp.unk08 = sp.unk0C = (func_150ADA68() * arg0->scaleRange) + arg0->scaleBase;
+        sp.unk00 = scale * 30.0f;
+        sp.unk4C = (func_150ADA68() * arg0->unk48) + arg0->unk44;
+        sp.unk40 = (func_150ADA68() * arg0->unk50) + arg0->unk4C;
+        sp.unk48 = (func_150ADA68() * arg0->unk50) + arg0->unk4C;
+        v = func_15132A4C(&sp, 0, 0, 0x10, arg2, arg3);
+        if (v != NULL) {
+            Spawn151A6F00 spawn;
+            Link151A6F00 *link;
+            void *ret;
+            link = (Link151A6F00 *)(v + 0x170);
+            memcpy(link, &extra, 0x10);
+            spawn.unk0 = (f32 *)(v + 0x38);
+            spawn.unk4 = (f32 *)(v + 0x3C);
+            spawn.unk8 = (f32 *)(v + 0x40);
+            spawn.unkC = 15.0f * sp.unk0C;
+            spawn.unk14 = 0x12C;
+            spawn.unk16 = 0;
+            spawn.unk17 = 1;
+            spawn.unk10 = 0.3580000103f;
+            link->unk4 = NULL;
+            ret = func_15134908(&spawn, 4, arg2, arg3);
+            link->unk4 = ret;
+            if (ret != NULL) {
+                memcpy((u8 *)ret + 0x40, &scale, 4);
+            }
+        }
+    }
+}
 
 struct S151A73EC {
     s32 unk0;

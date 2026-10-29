@@ -1,9 +1,170 @@
 #include <ultra64.h>
+/* include/functions.h declares func_150ADA20 as returning u8, but the routine returns a full
+ * word (its asm ends in dsra32 with no mask); func_151C62D0 copies the result with a plain
+ * move, which a u8 declaration cannot produce. Rename the header's declaration out of the
+ * way and declare the real return type file-locally. */
+#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
+#undef func_150ADA20
+s32 func_150ADA20(void);
 #include "variables.h"
 
+typedef struct 
+{
+  s32 unk0;
+  s32 unk4;
+  s32 unk8;
+} D_800AAB08Entry;
+extern s32 D_800AAB00[];
+extern D_800AAB08Entry D_800AAB08[];
+extern D_800AAB08Entry D_800AAB38[];
+extern D_800AAB08Entry D_800AAB50[];
+typedef struct {
+    s8 active;
+    u8 pad1;
+    s16 duration;
+    s8 size;
+    s8 enabled;
+    s8 sentinel;
+    u8 pad7;
+} Func151C62D0Spawn;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1F3780/func_151C62D0.s")
+extern D_800AAB08Entry D_800AAB20[];
+extern D_800AAB08Entry D_800AAB68[];
+extern u8 D_800DCA20;
+s32 func_151C229C(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11, struct127 *arg12, s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24, s32 arg25, s32 arg26);
+void func_15145740(struct127 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, f32 arg4);
+s32 func_1514654C(struct127 *, s32, s32, void *, void *, s32);
+void func_151D5174(struct127 *, struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, struct17 **, struct17 **, struct17 *);
+void *func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
+s32 func_15142A5C(struct127 *arg0);
+void func_151D5148(struct127 *arg0);
+s32 func_15145EA4(void *arg0, void *arg1, s32 arg2, s32 arg3);
+void func_151D3F14(struct17 *arg0, u8 arg1, s32 arg2);
+void func_151D4408(struct17 *, struct17 *, s32, struct127 *, f32, u8, s32);
+void func_151C6D70(struct127 *, u8, struct17 *, s32, s32, s32);
+
+s32 func_151C62D0(struct127 *arg0, u8 arg1, u8 arg2, s32 arg3, s16 arg4, s32 arg5, s32 arg6) {
+    struct17 sp154;
+    struct17 sp148;
+    struct17 sp13C;
+    struct17 sp130;
+    struct17 sp124;
+    struct17 sp118;
+    struct17 sp10C;
+    struct17 sp100;
+    s32 spFC;
+    struct255 *ptr;
+    struct17 *spF4;
+    struct17 *spF0;
+    struct17 spE4;
+    void *spD0[5];
+    struct17 *spBC[5];
+    f32 dz;
+    f32 dx;
+    f32 inv;
+    f32 off;
+    Func151C62D0Spawn spA4;
+    s32 mask;
+    u32 i;
+
+    if (arg0 == NULL) {
+        return 0;
+    }
+    if (arg1 >= 2) {
+        return 0;
+    }
+    if (func_15142A5C(arg0) != 0) {
+        return 0;
+    }
+    func_151D5148(arg0);
+    if (!arg2) {
+        func_15145740(arg0, &sp148, &sp118, &spE4, 0.8110000491f);
+    }
+    ptr = arg0->unk1D4;
+    if (ptr != NULL) {
+        typedef s32 Func151C62D0T;
+        spFC = (s32)ptr + D_800AAB00[arg1];
+        spBC[0] = &sp154;
+        spBC[1] = &sp10C;
+        spBC[2] = &sp100;
+        spBC[3] = &sp13C;
+        spBC[4] = &sp148;
+        spD0[0] = &D_800AAB08[arg1];
+        spD0[1] = &D_800AAB38[arg1];
+        spD0[2] = &D_800AAB50[arg1];
+        spD0[3] = &D_800AAB68[arg1];
+        spD0[4] = &D_800AAB20[arg1];
+        if (arg3 != 0) {
+            if (func_1514654C(arg0, arg3, 0, spD0, spBC, arg2 ? 5 : 4) == 0) {
+                return 0;
+            }
+        } else {
+            func_15145EA4(spD0, spBC, spFC, arg2 ? 5 : 4);
+        }
+        sp100.unk0 -= sp10C.unk0;
+        sp100.unk4 -= sp10C.unk4;
+        sp100.unk8 -= sp10C.unk8;
+        if (arg2) {
+            sp148.unk0 -= sp154.unk0;
+            sp148.unk4 -= sp154.unk4;
+            sp148.unk8 -= sp154.unk8;
+        }
+    } else {
+        if (arg2) {
+            return 0;
+        }
+        if ((fabsf(sp148.unk0) > 9.999999747e-05f) || (fabsf(sp148.unk8) > 9.999999747e-05f)) {
+            extern s32 D_80082FA0;
+            dx = sp148.unk0;
+            dz = sp148.unk8;
+            inv = 1.0f / sqrtf((dx * dx) + (dz * dz));
+            dz = dz * inv;
+            dx = -dx * inv;
+        } else {
+            dz = 1.0f;
+            dx = 0.0f;
+        }
+        off = arg1 ? 34.0f : -34.0f;
+        sp154.unk0 = arg0->x_position + (off * dx);
+        sp154.unk4 = arg0->y_position + 49.0f;
+        sp154.unk8 = arg0->z_position + (off * dz);
+        sp13C = sp154;
+    }
+    func_151D5174(arg0, &sp154, &sp148, &sp118, &spE4, &sp130, &sp124, &spF4, &spF0, &sp13C);
+    if (arg0->camera != NULL) {
+        spA4.active = 1;
+        spA4.duration = (func_150ADA20() % 11U) + 11;
+        spA4.enabled = 1 << arg0->camera->unk23D;
+        func_150ADA20();
+        spA4.size = 8;
+        spA4.sentinel = -1;
+        func_151D8868(&spA4, 0, 0xFF, 1);
+    }
+    if ((arg0->unk1D4 != NULL) && ((arg0->unk74 & 0xF) != 0xF)) {
+        if (arg2 || ((D_80082FA0 < 2) && (func_150ADA20() & 1))) {
+            func_151D3F14(&sp154, ((u8 *)&arg5)[3], arg6);
+        }
+        if ((arg2 || (D_80082FA0 < 2)) && (func_150ADA20() & 1)) {
+            func_151D4408(&sp10C, &sp100, spFC, arg0, 1.0f, ((u8 *)&arg5)[3], arg6);
+        }
+        i = D_800DCA20;
+        mask = 1;
+        while (i > 0) {
+            mask |= 1 << i;
+            i--;
+        }
+        if (arg2 || !(func_150ADA20() & mask)) {
+            func_151C6D70(arg0, arg1, &sp154, arg4, ((u8 *)&arg5)[3], arg6);
+        }
+    }
+    return func_151C229C(&sp13C, &sp148, spF4, spF0, 1, 0, 300.0f, 0.003333333414f,
+                         func_150ADA68() * 10.0f + 25.0f, func_150ADA68() * 150.0f + 400.0f, 50.0f,
+                         (func_150ADA20() % 156U) + 100, arg0, arg2 ? 0 : 1, arg2 ? 0 : 1, arg2 ? 0 : 1, 8,
+                         arg2 ? 0 : 1, 1, 0, 0x1A, 0.0f, 0xFF, -1, 0, ((u8 *)&arg5)[3], arg6);
+}
+
+
 
 void func_151C69CC(void *a0, s32 a1, u8 a2);
 
@@ -15,12 +176,6 @@ void func_151C69A0(void *a0, s32 a1, s32 a2) {
     func_151C69CC(a0, a2, 1);
 }
 
-typedef struct 
-{
-  s32 unk0;
-  s32 unk4;
-  s32 unk8;
-} D_800AAB08Entry;
 extern s32 D_800AAB00[];
 extern D_800AAB08Entry D_800AAB08[];
 void func_151C69CC(void *a0, s32 a1, u8 a2);
@@ -239,4 +394,39 @@ void func_151C6EA0(ActorIdByteFields *arg0, u8 arg1, s32 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1F3780/func_151C7038.s")
+typedef struct {
+    u8 pad0[0x60];
+    s32 unk60;
+    u8 pad64[0x70 - 0x64];
+    u8 unk70;
+    u8 pad71[0x7C - 0x71];
+    struct127 *unk7C;
+} Func151C7038Arg;
+
+s32 func_151C7038(Func151C7038Arg *arg0) {
+    struct127 *obj;
+    f32 speed;
+
+    obj = arg0->unk7C;
+    if (*(u16 *)((u8 *)obj + 0x84) != 0xE9) {
+        return 0;
+    }
+    if (func_15142A5C(obj) != 0) {
+        arg0->unk60 |= 0x20000;
+    } else {
+        arg0->unk60 &= ~0x20000;
+    }
+    speed = obj->animation_speed * 35.0f;
+    if (speed > 255.0f) {
+        speed = 255;
+    } else if (speed < 0.0f) {
+        speed = 0.0f;
+    }
+    {
+        u8 val;
+
+        val = speed;
+        arg0->unk70 = val;
+    }
+    return 1;
+}

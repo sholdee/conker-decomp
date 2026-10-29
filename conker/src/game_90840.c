@@ -373,7 +373,74 @@ s32 func_15063E84(struct127 *arg0, u16 anim, u16 flags, s32 arg3, s32 arg4) {
 
 #undef CTL
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_90840/func_15063FA0.s")
+typedef struct {
+    u8 pad0[0xB8];
+    f32 unkB8;
+    f32 unkBC;
+    f32 unkC0;
+    u8 padC4[0x109 - 0xC4];
+    u8 unk109;
+    u8 pad10A[0x13C - 0x10A];
+    f32 unk13C;
+    f32 unk140;
+    f32 unk144;
+    u8 pad148[0x16C - 0x148];
+    f32 unk16C;
+    f32 unk170;
+} s15063FA0;
+
+void func_15063FA0(struct127 *arg0, s32 arg1) {
+    f32 sp84;
+    f32 sp80;
+    f32 sp7C;
+    f32 dist;
+    f32 pos[3];
+    f32 off[2];
+    f32 height;
+    f32 radius;
+    f32 angle;
+    f32 pitch;
+    f32 yaw;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    s15063FA0 *p;
+
+    dist = 300.0f;
+    height = 0.0f;
+    radius = 0.0f;
+    switch (arg1) {
+    case 2:
+        radius = 27.0f;
+        break;
+    case 3:
+    case 6:
+        height = -11.0f;
+        dist = 500.0f;
+        break;
+    }
+    angle = ((s15063FA0 *)arg0->unk31C)->unk16C * 0.01745329238f;
+    off[0] = sinf(angle) * radius;
+    off[1] = cosf(angle) * radius;
+    pos[0] = off[0] + ((s15063FA0 *)arg0->unk31C)->unk13C;
+    pos[1] = ((s15063FA0 *)arg0->unk31C)->unk140 + height;
+    pos[2] = off[1] + ((s15063FA0 *)arg0->unk31C)->unk144;
+    p = (s15063FA0 *)arg0->unk31C;
+    if (p->unk109 == 0) {
+        pitch = -p->unk170;
+        yaw = p->unk16C + 90.0f;
+    } else {
+        dx = p->unkB8 - pos[0];
+        dy = p->unkBC - pos[1];
+        dz = p->unkC0 - pos[2];
+        pitch = func_150484A0(dy, sqrtf(dx * dx + dz * dz)) * 57.29577637f;
+        yaw = func_150484A0(dx, dz) * 57.29577637f;
+    }
+    func_1505A184((s16)(pitch * 182.0444489f), dist, 0.0f, &sp84, &sp80, &sp7C);
+    sp80 = -sp80;
+    func_1506C460(yaw, sp84, sp80, 0.0f, 100, arg1, 0.0f, 0.5f, (s32)pos, 1, 1);
+}
+
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_90840/func_150641D8.s")
 

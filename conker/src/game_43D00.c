@@ -51,4 +51,38 @@ void func_15016850(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_43D00/func_150169A0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_43D00/func_15017114.s")
+extern u8 D_800D2101;
+extern void *allocate_memory(s32, s32, s32, s32);
+
+typedef struct {
+    s32 offset;
+    s32 val;
+} Entry43D00;
+
+void func_15017114(s32 arg0) {
+    s16 n;
+    s32 sp40;
+    s32 i;
+    u32 m;
+
+    n = D_800D2100;
+    sp40 = 0;
+    D_800D2104 = allocate_memory(n * 4, 1, 0, 0);
+    m = n;
+    *(u8 **)&D_800D2108 = allocate_memory(m, 1, 0, 0);
+    bzero(D_800D2104, n * 4);
+    bzero(*(u8 **)&D_800D2108, m);
+    for (i = 0; i < D_8008FD8C; i++) {
+        D_800D2104[i] = (s32)allocate_memory(0x10, 1, 2, 0);
+        bzero((void *)D_800D2104[i], 0x10);
+        (*(u8 **)&D_800D2108)[i] = 2;
+    }
+    if (func_1502B7F0(&sp40, 2, 0x10, arg0) != 0) {
+        for (i = D_800D2101; i < D_800D2100; i++) {
+            if (((Entry43D00 *)sp40)[i - D_800D2101].offset != 0) {
+                (*(u8 **)&D_800D2108)[i] = ((Entry43D00 *)sp40)[i - D_800D2101].val;
+                D_800D2104[i] = ((Entry43D00 *)sp40)[i - D_800D2101].offset + sp40;
+            }
+        }
+    }
+}

@@ -374,7 +374,164 @@ void func_150BF760(u8 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_EC420/func_150BFA7C.s")
+typedef struct {
+    /* 0x00 */ f32 unk0;
+    /* 0x04 */ f32 unk4;
+    /* 0x08 */ f32 unk8;
+    /* 0x0C */ u8 padC[0x6];
+    /* 0x12 */ s16 unk12;
+    /* 0x14 */ u8 pad14[0x28];
+    /* 0x3C */ s32 unk3C;
+    /* 0x40 */ u8 pad40[0xF];
+    /* 0x4F */ u8 unk4F;
+    /* 0x50 */ u8 pad50[0x1E];
+    /* 0x6E */ u8 unk6E;
+    /* 0x6F */ u8 pad6F[0x4];
+    /* 0x73 */ u8 unk73;
+    /* 0x74 */ u8 pad74[0x8];
+    /* 0x7C */ s32 unk7C;
+    /* 0x80 */ s32 unk80;
+    /* 0x84 */ s32 unk84;
+    /* 0x88 */ u8 pad88[0x18];
+} Struct150BFA7C; /* size 0xA0 */
+
+typedef struct {
+    /* 0x0 */ u8 unk0;
+    /* 0x2 */ s16 unk2;
+    /* 0x4 */ u8 unk4;
+    /* 0x5 */ u8 unk5;
+    /* 0x6 */ s8 unk6;
+} Struct150BFA7C_Fx;
+
+extern u8 D_800BE9EB;
+extern void func_1508EE0C(s32, s32);
+extern void func_15164F0C(u8, u8, void *, u8, s32);
+extern void func_1518B6B0(f32, f32, f32, s32, s32);
+extern void func_1518CD20(void *, s32, s32);
+extern void *func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
+extern s32 func_151EF610(void);
+
+void func_150BFA7C(Struct150BFA7C *arg0) {
+    s16 sp5E;
+    s16 top;
+    s16 sp5A;
+    s32 temp;
+    s32 sp50;
+    s32 step;
+    s32 diff;
+    s32 state;
+    s32 mode;
+    Struct150BFA7C_Fx fx;
+
+    step = 0x10;
+    mode = (arg0->unk3C >> 16) & 0xFFFF;
+    state = arg0->unk73 & 3;
+    sp50 = 0;
+    if (mode == 0) {
+        sp50 = 0x82;
+    } else if (mode == 2) {
+        sp50 = 0x622;
+        step = 0x30;
+    }
+    if (arg0->unk7C == 0) {
+        arg0->unk7C = arg0->unk12 | 0x80000000;
+    }
+    top = (s16)(arg0->unk7C & 0xFFFF);
+    sp5E = top - 0x50;
+    sp5A = sp5E - sp50;
+    if (mode == 1) {
+        diff = top - arg0->unk12;
+        if (diff != arg0->unk80) {
+            arg0->unk12 = top + arg0->unk80;
+        }
+        return;
+    }
+    if ((arg0->unk4F & 4) && (D_800CC2D0[0].unk31C->unk57 == 1)) {
+        func_1518B6B0(D_800CC2D0[0].x_position, D_800CC2D0[0].y_position, D_800CC2D0[0].z_position, 0xFF, 0);
+        if (state == 0) {
+            func_15164F0C(3, D_800BE9EB, 0, 0xFF, 0);
+            fx.unk0 = 1;
+            fx.unk2 = 0x3C;
+            fx.unk5 = 1;
+            fx.unk4 = 8;
+            fx.unk6 = -1;
+            func_151D8868(&fx, 0, 0xFF, 0);
+        }
+    }
+    if (state == 3) {
+        if (sp5E != arg0->unk12) {
+            arg0->unk12 = sp5E;
+        }
+        if (!(arg0->unk4F & 4) && !(arg0->unk73 & 4)) {
+            state = 1;
+        }
+    } else if (state == 0) {
+        if (top != arg0->unk12) {
+            arg0->unk12 = top;
+        }
+    } else if (state == 2) {
+        arg0->unk80 += D_800BE9E4;
+        if (arg0->unk80 < 0) {
+            arg0->unk0 = ((f32)(func_151EF610() % 5) - 2.0f) * 0.125f;
+            arg0->unk8 = ((f32)(func_151EF610() % 5) - 2.0f) * 0.125f;
+        } else {
+            if (arg0->unk80 < 0x28) {
+                arg0->unk0 = ((f32)(func_151EF610() % 5) - 2.0f) / 12.0f;
+                arg0->unk8 = ((f32)(func_151EF610() % 5) - 2.0f) / 12.0f;
+            } else {
+                arg0->unk8 = 0.0f;
+                arg0->unk0 = 0.0f;
+            }
+            if (arg0->unk12 < sp5E) {
+                if (mode == 0) {
+                    step = ((arg0->unk12 - sp5A + 0x10) * step) / sp50;
+                    if (arg0->unk84 == 0) {
+                        func_1518CD20(arg0, 0xFF, 0);
+                        arg0->unk84 = 1;
+                    }
+                }
+                arg0->unk12 -= step;
+                arg0[1].unk80 = arg0->unk12 - sp5E;
+            } else {
+                arg0->unk12 -= step;
+                arg0->unk84 = 0;
+            }
+            if (arg0->unk12 <= sp5A || step == 0) {
+                arg0->unk12 = sp5A;
+                diff = sp5A - sp5E;
+                top += diff;
+                arg0->unk7C += diff;
+                arg0->unk7C |= 0x80000000;
+                arg0->unk80 = 0;
+                arg0[1].unk7C += diff;
+                arg0[1].unk7C |= 0x80000000;
+                arg0[1].unk80 = 0;
+                if (mode == 4 && state != 3) {
+                    func_1518CD20(arg0, 0xFF, 0);
+                }
+                state = 3;
+                arg0->unk8 = 0.0f;
+                arg0->unk0 = 0.0f;
+                if (mode == 2) {
+                    arg0->unk6E = 1;
+                    arg0[1].unk6E = 1;
+                    func_1508EE0C(2, (u16)(arg0 - (Struct150BFA7C *)D_800DBEF4));
+                    func_1508EE0C(2, (u16)(&arg0[1] - (Struct150BFA7C *)D_800DBEF4));
+                }
+            }
+        }
+    } else if (state == 1) {
+        state = 1;
+        arg0->unk12 += 3;
+        if (arg0->unk12 >= top) {
+            arg0->unk12 = top;
+            state = 0;
+        }
+    }
+    arg0->unk73 &= ~3;
+    arg0->unk73 |= state;
+}
+
 
 typedef struct {
     f32 x;

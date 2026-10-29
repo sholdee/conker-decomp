@@ -541,6 +541,7 @@ void func_151247C0(struct108 *arg0) {
     struct127 *other;
     u8 flag;
     f32 t;
+    f32 t2;
 
     if (arg0->unk7F4 == 0) {
         obj = arg0->unk3D4;
@@ -1317,7 +1318,109 @@ s32 func_15127520(struct_15127520_arg0 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 
     return 0;
 }
 #pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_151277B0.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_151279A0.s")
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3_151279A0;
+
+typedef struct {
+    u8 pad0[0x78];
+    u8 unk78;
+    u8 pad79[0x114 - 0x79];
+    s16 unk114;
+    u8 pad116[0x130 - 0x116];
+    Vec3_151279A0 unk130;
+    Vec3_151279A0 unk13C;
+    Vec3_151279A0 unk148;
+    u8 pad154[0x16C - 0x154];
+    f32 unk16C;
+    f32 unk170;
+    f32 unk174;
+    f32 unk178;
+    f32 unk17C;
+    f32 unk180;
+    u8 pad184[0x197 - 0x184];
+    u8 unk197;
+} struct_151279A0;
+
+s32 func_151279A0(struct127 *arg0, OSContPad *arg1) {
+    struct_151279A0 *s0;
+    s32 type;
+    Vec3_151279A0 pos;
+    Vec3_151279A0 base;
+    f32 speed;
+    Vec3_151279A0 dir;
+    f32 t;
+    f32 t2;
+    s32 buttons;
+    f32 angle;
+
+    s0 = (struct_151279A0 *) arg0->unk31C;
+    type = s0->unk78;
+    speed = D_800BE9E4 * 0.01666666753590107f;
+    if ((type == 0xC) || (type == 0x1B)) {
+        arg1->button |= 0x10;
+    }
+    if (((type == 0x23) || (type == 0x24) || (type == 0x16) || (type == 0x12) || (type == 0x18) ||
+         (type == 0x41) || (type == 0xC) || (type == 0x14) || (type == 0x3F) || (type == 0x1B) ||
+         (type == 0x1F) || (type == 0x29)) &&
+        (arg1->button & 0x10) && (s0->unk197 == 0)) {
+        s0->unk197 = 2;
+        s0->unk13C = base;
+        s0->unk174 = arg0->unk40 - 90.0f;
+        s0->unk178 = 0.0f;
+        s0->unk170 = 0.0f;
+        s0->unk17C = 0.0f;
+        s0->unk180 = 0.0f;
+        s0->unk16C = s0->unk174;
+        func_150627D4(arg0);
+    }
+    if (s0->unk197 == 0) {
+        return 0;
+    }
+    if (s0->unk197 == 2) {
+        buttons = arg1->button;
+        angle = (arg0->unk40 - 90.0f) * 0.01745329238474369f;
+        pos.x = arg0->x_position;
+        pos.y = arg0->y_position + (s0->unk114 * 0.75f);
+        pos.z = arg0->z_position;
+        base = pos;
+        pos.x = (sinf(angle) * 100.0f) + base.x;
+        pos.z = (cosf(angle) * 100.0f) + base.z;
+        base.y += arg0->y_position - arg0->old_y_position;
+        if (!(buttons & 0x10) || (type == 0)) {
+            s0->unk197 = 0;
+            func_150627D4(arg0);
+            return 0;
+        }
+        s0->unk174 -= arg1->stick_x * 0.02500000037252903f;
+        s0->unk178 += arg1->stick_y * 0.02500000037252903f;
+        func_15048758(&s0->unk174);
+        if ((type == 0x1F) || (type == 0x29)) {
+            s0->unk178 = (s0->unk178 < -20.0f) ? -20.0f : ((s0->unk178 > 80.0f) ? 80.0f : s0->unk178);
+        } else {
+            s0->unk178 = (s0->unk178 < -80.0f) ? -80.0f : ((s0->unk178 > 80.0f) ? 80.0f : s0->unk178);
+        }
+        func_15049688(&s0->unk16C, s0->unk174, &s0->unk17C, 6.0f, 8.0f, speed);
+        func_15049688(&s0->unk170, s0->unk178, &s0->unk180, 6.0f, 8.0f, speed);
+        dir.x = 1.0f;
+        t = cosf(s0->unk170 * -0.01745329238474369f) * dir.x;
+        dir.y = sinf(s0->unk170 * -0.01745329238474369f) * dir.x;
+        dir.x = t;
+        t = cosf(s0->unk16C * -0.01745329238474369f) * dir.x;
+        dir.z = sinf(s0->unk16C * -0.01745329238474369f) * dir.x;
+        dir.x = t;
+        pos.x = base.x + dir.x;
+        pos.y = base.y + dir.y;
+        pos.z = base.z + dir.z;
+        s0->unk148 = pos;
+        s0->unk13C = base;
+        s0->unk130 = dir;
+        return 1;
+    }
+
+}
 
 typedef struct {
     u8 pad0[0x84];

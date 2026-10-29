@@ -20,11 +20,11 @@ typedef struct {
     u8 field_0x3B;
 } ActorUniqueIdFields;
 
-void func_1507EBB8(s32 arg0, s32 *arg1, s32 arg2) {
+void func_1507EBB8(u8 *arg0, s32 *arg1, s32 arg2) {
     u8 *dst = D_80086C24[arg2];
     s32 len = D_8009BBF0[arg2];
     if (*arg1 + len < 40) {
-        bcopy(dst, (u8 *)arg0 + *arg1, len);
+        bcopy(dst, arg0 + *arg1, len);
         *arg1 += len;
     }
 }
@@ -157,7 +157,123 @@ void func_1507EFA0(s32 c, u8 *arg1) {
     } while (i >= 0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_AC030/func_1507EFD0.s")
+typedef struct {
+    u8 pad0[2];
+    u16 timer;
+    u8 cur;
+    u8 unk5;
+    u8 pad6;
+    u8 used[5];
+    u8 mode;
+    u8 count;
+} SpeechState;
+
+s32 func_1507FFD8(struct127 *);
+s32 func_1507F4C0(s32 arg0);
+void func_1507FF94(ActorUniqueIdFields *arg0);
+s32 func_1515942C(struct127 *, s32, s32, s32, s32, s32);
+
+void func_1507EFD0(void) {
+    SpeechState *state;
+    u8 buf[40];
+    u8 out[40];
+    s32 count;
+    s32 outLen;
+    s32 idx;
+    u8 *used;
+    s32 sel;
+    s32 ret;
+    s32 v;
+
+    state = (SpeechState *)&D_800D154C->unk31C->unk58;
+    count = 0;
+    if (D_800D154C->pad139[1] != 0) {
+        if (D_800D154C->pad139[0] < 0x21) {
+            func_1507EB80(buf, &count, D_800D154C->pad139[0]);
+        }
+    } else if (D_800D18C0 & 2) {
+        func_1507EB80(buf, &count, 3);
+        D_800D18C0 = 0;
+    } else {
+        if ((s16)D_800D154C->unk31C->unk66 != 0 && D_800D154C->unk31C->unk78 == 0) {
+            v = 0xB;
+            if (state->timer >= 0x79) {
+                D_800D154C->unk31C->unk66 = 0;
+                state->timer = 0;
+                state->mode = 0;
+                v = 0xC;
+                func_1507FF94((ActorUniqueIdFields *)D_800D154C);
+            } else {
+                v = 0xB;
+            }
+            func_1507EB80(buf, &count, v);
+        } else if (D_800D154C->health < 2) {
+            func_1507EB80(buf, &count, 0);
+        } else if (func_1515942C(&D_800CC2D0[D_800C3E78], 0, 0, -1, -1, -1) != 0) {
+            func_1507EB80(buf, &count, 0);
+        } else if (state->timer >= func_1507F4C0(state->mode)) {
+            func_1507EEF4();
+            sel = -1;
+            if (D_800D154C->unk2F8 & 0x200) {
+                sel = 2;
+            } else if (D_800D154C->unk31C->unk78 == 9) {
+                sel = 5;
+            } else if (D_800D154C->unk31C->unk78 == 0x23) {
+                sel = 9;
+            } else if (D_800D154C->unk31C->unk78 == 0x16) {
+                sel = 0xA;
+            } else if (func_1503195C(D_800D154C, 0x17, 0) != NULL) {
+                sel = 6;
+            } else if (D_800BE9F0 == 0x31) {
+                if (D_800D18C0 & 4) {
+                    sel = 8;
+                } else {
+                    sel = 7;
+                }
+            } else if (D_800D154C->id == 0x96 || D_800BE9F0 == 0x10 || D_800BE9F0 == 0x1B ||
+                       D_800BE9F0 == 0x1E || D_800BE9F0 == 0x26 || D_800BE9F0 == 0x2F ||
+                       D_800BE9F0 == 0xE || D_800BE9F0 == 0x28 || D_800BE9F0 == 0x23 ||
+                       D_800BE9F0 == 0x1C || D_800BE9F0 == 0x36 || D_800BE9F0 == 0x3A) {
+                sel = 2;
+            } else if (D_800D18C0 != 0) {
+                if (D_800D18C0 & 1) {
+                    sel = 4;
+                }
+                D_800D18C0 = 0;
+            }
+            if (sel != -1) {
+                count = 0;
+                func_1507EBB8(buf, &count, sel);
+            } else if (state->mode == 1) {
+                func_1507EBB8(buf, &count, 0);
+            } else {
+                func_1507EBB8(buf, &count, 1);
+                if (state->mode == 2 && state->count >= 4 && func_1507FFD8(D_800D154C) != 0) {
+                    func_1507EBB8(buf, &count, 3);
+                }
+            }
+        } else {
+            func_1507EB80(buf, &count, 0);
+        }
+    }
+    used = state->used;
+    ret = func_1507EC38(buf, count, out, &outLen, used);
+    if (outLen >= 2) {
+        idx = func_150ADA20() % (u32)outLen;
+    } else {
+        idx = 0;
+    }
+    state->cur = out[idx];
+    state->unk5 = 0;
+    state->count++;
+    if (state->mode != 0) {
+        state->timer = 0;
+    }
+    if (ret) {
+        func_1507EFA0(state->cur, used);
+    }
+    func_1507EE58(state->cur, used);
+}
 
 extern u8 *D_80086BA0[];
 
@@ -341,4 +457,48 @@ void func_1507FF94(ActorUniqueIdFields *arg0) {
     func_151494E0((s32)&sp20, 0xD);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_AC030/func_1507FFD8.s")
+extern s32 func_15037698(s32 arg0, s32 arg1, s32 arg2, f32 x, f32 y, f32 z, f32 *out, f32 range, s32 arg8, s32 arg9);
+extern s32 func_150A3194(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+extern void *D_800DCE50[];
+typedef struct { s32 v[3]; } Types1507FFD8;
+extern Types1507FFD8 D_80086C50;
+
+s32 func_1507FFD8(struct127 *arg0) {
+    s32 found;
+    s32 i;
+    struct127 *obj;
+    Types1507FFD8 types;
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 dist;
+    f32 out[3];
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    s32 type;
+
+    found = func_150A3194(4, 5, (s32) arg0->x_position, (s32) arg0->y_position, (s32) arg0->z_position);
+    if (found == 0) {
+        found = func_150A3194(4, 0xB, (s32) arg0->x_position, (s32) arg0->y_position, (s32) arg0->z_position);
+    }
+    if (found != 0) {
+        types = D_80086C50;
+        for (i = 0; i < 3; i++) {
+            type = types.v[i];
+            obj = D_800DCE50[type];
+            while (obj != NULL) {
+                x = *(f32 *)((u8 *)obj + 0x98);
+                y = *(f32 *)((u8 *)obj + 0x9C);
+                z = *(f32 *)((u8 *)obj + 0xA0);
+                dist = (x - arg0->x_position) * (x - arg0->x_position) + (y - arg0->y_position) * (y - arg0->y_position) + (z - arg0->z_position) * (z - arg0->z_position);
+                if (dist < 1000000.0f &&
+                    func_15037698(arg0 - D_800CC2D0, 0, 0, x, y, z, out, 90.0f, 0, 0) != 0) {
+                    return 1;
+                }
+                obj = *(struct127 **)((u8 *)obj + 8);
+            }
+        }
+    }
+    return 0;
+}

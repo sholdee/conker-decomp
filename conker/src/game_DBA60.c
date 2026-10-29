@@ -1,6 +1,8 @@
 #include <ultra64.h>
 
+#define func_150ADA20 func_150ADA20_u8_unused
 #include "functions.h"
+#undef func_150ADA20
 #include "variables.h"
 
 
@@ -37,7 +39,215 @@ void func_150AE5B0(struct108 *arg0) {
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_DBA60/func_150AE790.s")
+typedef struct {
+    f32 pos[3];
+    s16 unkC;
+    s16 unkE;
+    s32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 pad16[2];
+} Spawn150AE790;
+
+typedef struct {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    u8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+    u8 pad1C[4];
+} Part150AE790;
+
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8;
+    s32 unkC;
+    s32 unk10;
+    s32 unk14;
+    s32 unk18;
+    u8 unk1C;
+    u8 unk1D;
+    u8 pad1E[2];
+} Style150AE790;
+
+typedef struct {
+    s32 unk00;
+    s32 unk04;
+    s32 unk08;
+    s16 unk0C;
+    s16 unk0E;
+    s16 unk10;
+    s16 unk12;
+    s16 unk14;
+    s16 unk16;
+    s16 unk18;
+    s16 unk1A;
+    u8 unk1C;
+    u8 unk1D;
+    u8 unk1E;
+    s8 unk1F;
+    s16 unk20;
+    s16 unk22;
+    s16 unk24;
+    s16 unk26;
+    s16 unk28;
+    s8 unk2A;
+    u8 unk2B;
+    u8 unk2C;
+    u8 unk2D;
+    u8 unk2E;
+    u8 unk2F;
+    s8 unk30;
+    s8 unk31;
+    s8 unk32;
+    s16 unk34;
+} Packet150AE790;
+
+typedef struct {
+    s32 unk0;
+    u8 pad4[0x37];
+    u8 unk3B;
+    u8 pad3C[0x180 - 0x3C];
+    f32 unk180;
+    u32 unk184;
+    u8 pad188[0x1D4 - 0x188];
+    s32 unk1D4;
+} Obj150AE790;
+
+typedef struct {
+    Obj150AE790 *obj;
+    u8 unk4;
+    u8 unk5;
+} Sub150AE790;
+
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD[0x1B];
+    Sub150AE790 sub;
+} Arg150AE790;
+
+extern s32 D_8008CB14;
+extern s32 func_150ADA20(void);
+void func_15142314(s32, s32, f32 *);
+extern s32 func_15147DA0(Spawn150AE790 *, Part150AE790 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, Style150AE790 *, s32, s32, s32);
+s32 func_15167D84(void *, s32, s32, s32, s32, s32);
+
+void func_150AE790(Arg150AE790 *arg0)
+{
+  Sub150AE790 *sub;
+  Obj150AE790 *obj;
+  Spawn150AE790 spawn;
+  Part150AE790 part;
+  s32 pad0;
+  Style150AE790 style;
+  f32 sinA;
+  f32 cosA;
+  f32 speed;
+  f32 t;
+  f32 sinB;
+  f32 cosB;
+  Packet150AE790 pkt;
+  s32 count;
+  u8 a;
+  u8 b;
+  s32 h;
+  f32 f;
+  f32 g;
+  sub = &arg0->sub;
+  if (arg0->sub.obj == 0)
+  {
+    return;
+  }
+  obj = sub->obj;
+  if (sub->obj->unk0 == 0)
+  {
+    return;
+  }
+  h = obj->unk1D4;
+  if ((h != 0) && (sub->obj->unk3B == sub->unk4))
+  {
+    func_15142314(sub->obj->unk1D4, sub->unk5, spawn.pos);
+    spawn.unk10 = 1;
+    spawn.unkE = 1;
+    part.unk19 = 0;
+    part.unk1A = 0xFF - (((u8) (sub->obj->unk184 >> 5)) << 6);
+    part.unk14 = sub->obj->unk180;
+    part.unk18 = 8;
+    part.unk1B = 0xFF;
+    count = (func_150ADA20() % 9U) + 0xC;
+    style.unk0 = 0;
+    style.unk4 = 1;
+    style.unk8 = 0x160600;
+    style.unkC = 3;
+    style.unk10 = 0x10;
+    style.unk14 = 0x80;
+    style.unk18 = 0x20;
+    style.unk1C = 0;
+    style.unk1D = 9;
+    for (; count != 0; count--)
+    {
+      a = func_150ADA20() & 0xFF;
+      b = func_150ADA20() % 51U;
+      sinA = func_151423D8(a);
+      cosA = func_151423D8(a - 0x40);
+      sinB = func_151423D8(b);
+      cosB = func_151423D8(b - 0x40);
+      speed = (func_150ADA68() * 0.5f) + 18.79999924f;
+      spawn.unk15 = 4;
+      spawn.unkC = (func_150ADA20() & 0xF) + 0x23;
+      part.unk0 = (func_150ADA68() * 2.299999952f) + 2.900000095f;
+      part.unk10 = (func_150ADA68() * 0.1000000015f) + 0.6999999881f;
+      t = speed * sinB;
+      part.unk4 = t * cosA;
+      part.unk8 = (-speed) * cosB;
+      part.unkC = t * sinA;
+      func_15147DA0(&spawn, &part, 0, 1, 2, 0, 0, 0, 0, 0, 0, &style, 0, arg0->unkC, arg0->unk1);
+    }
+
+    f = func_150ADA68() + 2.5f;
+    g = (func_150ADA68() * 200.0f) + 600.0f;
+    pkt.unk1A = g;
+    pkt.unk04 = g / f;
+    pkt.unk26 = 0;
+    pkt.unk24 = 0;
+    pkt.unk2C = 0xFF;
+    pkt.unk30 = 0;
+    pkt.unk31 = 0;
+    pkt.unk32 = 0;
+    pkt.unk2D = 0xFF;
+    pkt.unk2E = 0xFF;
+    pkt.unk28 = 0x64;
+    pkt.unk2F = 0xFF;
+    pkt.unk2A = 0;
+    pkt.unk0C = 0;
+    pkt.unk0E = 0;
+    pkt.unk1C = 0;
+    pkt.unk1E = 0;
+    pkt.unk1D = 0;
+    pkt.unk16 = 0;
+    pkt.unk18 = 0;
+    pkt.unk22 = 0;
+    pkt.unk20 = 0;
+    pkt.unk00 = D_8008CB14;
+    pkt.unk10 = spawn.pos[0];
+    pkt.unk12 = spawn.pos[1];
+    pkt.unk14 = spawn.pos[2];
+    pkt.unk1F = 0xB;
+    pkt.unk34 = 0;
+    pkt.unk2B = 0;
+    pkt.unk08 = 0;
+    func_15167D84(&pkt, 0, 0, -1, arg0->unkC, arg0->unk1);
+  }
+}
 // some funky xor going on
 typedef struct {
     u8 unk0;

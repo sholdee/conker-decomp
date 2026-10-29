@@ -22,7 +22,7 @@ struct Obj15171CA0 {
     s16 unk50;
     s16 unk52;
     s16 unk54;
-    s16 unk56;
+    u16 unk56;
     u8  unk58;
     u8  unk59;
 };
@@ -112,9 +112,272 @@ void func_15171FC0(struct Obj15171CA0 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_19F150/func_151720C4.s")
+extern s32 D_800DD1B4;
+extern s32 D_800DD1B8;
+extern s16 D_800DD1BC;
+extern s16 D_800DD1C0;
+extern s16 D_800DD1C2;
+extern s16 D_800DD1C4;
+extern s16 D_800DD1C6;
+extern s32 D_800D2C9C;
+struct Some151720C4 {
+    s32 unk0;
+    u8 pad4[6];
+    u8 unkA;
+};
+struct Sprite151720C4 { s32 unk0[5]; };
+#define WGFX151720C4(pkt, a, b) { Gfx *_g = (Gfx *)(pkt); _g->words.w0 = (u32)(a); _g->words.w1 = (u32)(b); }
+Gfx *func_15094F70(Gfx *, s32, s32, s32, s32, s32, s32, s32, s32);
+Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_19F150/func_151725FC.s")
+Gfx *func_151720C4(Gfx *gfx, struct Obj15171CA0 *arg1, s32 arg2) {
+    s32 r;
+    s32 g;
+    s32 b;
+    s32 a;
+    s32 ptr;
+    s32 cyc;
+    s32 mode;
+    s32 newCyc;
+    s32 newMode;
+    struct Sprite151720C4 sprite;
+    s32 tex;
+    s32 frame;
+    s32 update;
+    struct Some151720C4 *entry;
+    s32 othermodeH;
+    s32 othermodeL;
+
+    update = 1;
+    if (arg1->unk50 >= 2) {
+    entry = (struct Some151720C4 *)D_8008CA4C[arg1->unk58];
+    frame = arg1->unk52 >> 8;
+    ptr = entry->unk0;
+    tex = ptr;
+    if ((u32)ptr >= 0x10000000) {
+        tex = ((s32 *)ptr)[frame];
+        frame = 0;
+    }
+    if (tex != D_800DD1B4 || frame != D_800DD1B8) {
+        gfx = func_15094F70(gfx, (s32)entry, arg1->unk52, (s32)&sprite, 0, 0, 0, 2, 3);
+        D_800DD1B4 = tex;
+        D_800DD1B8 = frame;
+    }
+    cyc = D_800DD1BC & 0xF;
+    mode = D_800DD1BC & 0xF0;
+    if (!(arg1->unk59 & 1)) {
+        newCyc = 1;
+    } else {
+        newCyc = 2;
+    }
+    if (entry->unkA == 5) {
+        newCyc += 2;
+    }
+    if (cyc != newCyc) {
+        cyc = newCyc;
+        if (update) {
+            gDPPipeSync(gfx++);
+        }
+        update = 0;
+        switch (newCyc) {
+        case 1:
+            othermodeH = 0;
+            othermodeL = 0x504DD8;
+            break;
+        case 2:
+            othermodeH = 0;
+            othermodeL = 0x504B50;
+            break;
+        case 3:
+            othermodeH = 0x100000;
+            othermodeL = 0xC184DD8;
+            break;
+        case 4:
+            othermodeH = 0x100000;
+            othermodeL = 0xC184B50;
+            break;
+        }
+        gDPSetAlphaCompare(gfx++, G_AC_NONE);
+        gSPClearGeometryMode(gfx++, G_FOG | G_LOD);
+    }
+    gfx = func_15142FBC(gfx, othermodeH | G_TP_PERSP | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_DISABLE, othermodeL, (u8 *)&update);
+    if (!(arg1->unk59 & 8)) {
+        if (entry->unkA == 0) {
+            if (arg1->unk56) {
+                newMode = 0x10;
+            } else {
+                newMode = 0x20;
+            }
+        } else if (entry->unkA == 5) {
+            if (arg1->unk56) {
+                newMode = 0x60;
+            } else {
+                newMode = 0x50;
+            }
+        } else {
+            newMode = 0x30;
+        }
+    } else {
+        newMode = 0x40;
+    }
+    if (mode != newMode) {
+        mode = newMode;
+        if (update) {
+            gDPPipeSync(gfx++);
+        }
+        switch (newMode) {
+        case 0x10:
+            WGFX151720C4(gfx++, 0xFC30B261, 0xFF67FFFF);
+            break;
+        case 0x20:
+            WGFX151720C4(gfx++, 0xFCFFB3FF, 0xFF64FE7F);
+            break;
+        case 0x30:
+            WGFX151720C4(gfx++, 0xFCFF97FF, 0xFF2DFEFF);
+            break;
+        case 0x40:
+            WGFX151720C4(gfx++, 0xFCFFFFFF, 0xFFFCF279);
+            break;
+        case 0x50:
+            WGFX151720C4(gfx++, 0xFCFFB5FF, 0xFFFCFE38);
+            break;
+        case 0x60:
+            WGFX151720C4(gfx++, 0xFC30B5FF, 0xFFFFFE38);
+            break;
+        }
+    }
+    D_800DD1BC = cyc | mode;
+    r = (arg1->unk56 >> 8) & 0xF8;
+    g = (arg1->unk56 >> 3) & 0xF8;
+    b = (arg1->unk56 << 2) & 0xF8;
+    if (arg1->unk50 >= 0x1A) {
+        a = 0xFF;
+    } else {
+        a = arg1->unk50 * 10;
+    }
+    if (r != D_800DD1C0 || g != D_800DD1C2 || b != D_800DD1C4 || a != D_800DD1C6) {
+        D_800DD1C0 = r;
+        D_800DD1C2 = g;
+        D_800DD1C4 = b;
+        D_800DD1C6 = a;
+        if (update) {
+            gDPPipeSync(gfx++);
+        }
+        gDPSetPrimColor(gfx++, 1, 0, r, g, b, a);
+    }
+    gSPVertex(gfx++, (u8 *)arg1 + 0x10, 4, 0);
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    gSP1Triangle(gfx++, 0, 2, 3, 0);
+    }
+    return gfx;
+}
+
+typedef struct {
+    s16 ob[3];
+    u16 flag;
+    s16 tc[2];
+    u8 cn[4];
+} Vtx151725FC;
+
+extern s32 func_1510E388(s32, void *, f32 *, f32 *);
+extern s16 D_800A6FD0[];
+extern s16 D_800A6FE0[];
+extern s16 D_800A6FF0[];
+
+s32 func_151725FC(void *arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6, s32 arg7) {
+    f32 lenA;
+    f32 lenB;
+    f32 minsq;
+    f32 denom;
+    f32 unused1;
+    f32 unused2;
+    f32 unused3;
+    f32 v[2][3];
+    f32 unused4;
+    f32 angle;
+    f32 z;
+    f32 x;
+    f32 cx;
+    f32 cy;
+    f32 cs;
+    f32 sn;
+    s16 (*tbl)[2];
+    Vtx151725FC *vtx;
+    s32 n;
+    s32 i;
+
+    vtx = arg0;
+    n = arg6 / 16;
+    if (n == 0) {
+        n = 1;
+    }
+    if (func_1510E388(arg1, 0, &x, &z) == 0) {
+        return 0;
+    }
+    v[0][0] = 0.0f;
+    v[0][2] = -n;
+    v[0][1] = x * v[0][0] + z * v[0][2];
+    denom = (z + z) * (-v[0][1] - v[0][1]) + ((-v[0][2] - v[0][2]) + (-v[0][2] - v[0][2]));
+    if (denom == 0.0f) {
+        denom = 0.001000000047f;
+    }
+    v[1][0] = -n;
+    v[1][1] = ((x * v[1][0] + x * v[1][0]) * (-v[0][2] - v[0][2])) / denom;
+    if (z == 0.0f) {
+        v[1][2] = 0.0f;
+    } else {
+        v[1][2] = (v[1][1] - x * v[1][0]) / z;
+    }
+    lenA = v[0][0] * v[0][0] + v[0][1] * v[0][1] + v[0][2] * v[0][2];
+    if (lenA > 100000000.0f) {
+        lenA = 100000000.0f;
+    }
+    minsq = n * n;
+    if (lenA < minsq) {
+        lenA = minsq;
+    }
+    lenA = sqrtf(lenA);
+    lenB = v[1][0] * v[1][0] + v[1][1] * v[1][1] + v[1][2] * v[1][2];
+    if (lenB > 100000000.0f) {
+        lenB = 100000000.0f;
+    }
+    if (lenB < minsq) {
+        lenB = minsq;
+    }
+    lenB = sqrtf(lenB);
+    for (i = 0; i < 3; i++) {
+        v[0][i] = v[0][i] * arg6 / lenA;
+        v[1][i] = v[1][i] * arg6 / lenB;
+        vtx[0].ob[i] = v[0][i];
+        vtx[1].ob[i] = v[1][i];
+        vtx[2].ob[i] = -v[0][i];
+        vtx[3].ob[i] = -v[1][i];
+    }
+    angle = (arg5 - 225.0f) * 0.01745329238f;
+    cs = cosf(angle);
+    sn = sinf(angle);
+    if ((u8)arg7 == 0x10) {
+        cy = cx = 256.0f;
+        tbl = (s16 (*)[2])D_800A6FF0;
+    } else if ((u8)arg7 == 0x20) {
+        cy = cx = 512.0f;
+        tbl = (s16 (*)[2])D_800A6FE0;
+    } else {
+        cy = cx = 1024.0f;
+        tbl = (s16 (*)[2])D_800A6FD0;
+    }
+    for (i = 0; i < 4; i++) {
+        ((Vtx151725FC *)arg0)[i].tc[0] = ((tbl[i][0] - cx) * cs - (tbl[i][1] - cy) * sn) + cx + 8192.0f;
+        ((Vtx151725FC *)arg0)[i].tc[1] = ((tbl[i][0] - cx) * sn + (tbl[i][1] - cy) * cs) + cy + 8192.0f;
+    }
+    for (i = 0; i < 4; i++) {
+        vtx[i].ob[0] = vtx[i].ob[0] + arg2;
+        vtx[i].ob[1] = vtx[i].ob[1] + arg3;
+        vtx[i].ob[2] = vtx[i].ob[2] + arg4;
+    }
+    return 1;
+}
+
 
 s32 func_15172B20(void *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, u8 arg7) {
     struct sp15172B20 {

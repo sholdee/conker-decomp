@@ -1,11 +1,17 @@
 #include <ultra64.h>
 
+#define func_1515D4D4 func_1515D4D4_header
 #include "functions.h"
+#undef func_1515D4D4
+void func_1515D4D4();
+#define D_800D3098 D_800D3098_header
 #include "variables.h"
+#undef D_800D3098
 
 extern f32 D_80095C64[];
 extern u8 D_800DDBD0[];
 s32 func_1500AF08(s32, s32, s32, s16, s16, s16, s32, u8, s32);
+void func_15009334(s32 arg0);
 
 void func_150091D0(void) {
     int tmp0 = 127;
@@ -55,7 +61,103 @@ void func_150092DC(void) {
 }
 
 // requires jumptable
-#pragma GLOBAL_ASM("asm/nonmatchings/game_36680/func_15009334.s")
+typedef struct Ent15009334 {
+    s16 x;
+    s16 y;
+    s16 z;
+    u8 pad6[0xF];
+    u8 type;
+    u8 flags;
+    u8 pad17;
+    u32 unk18;
+    u32 unk1C;
+    u32 unk20;
+    u8 pad24[0x34 - 0x24];
+} Ent15009334;
+
+typedef struct Node15009334 {
+    struct Node15009334 *next;
+    Ent15009334 *ent;
+} Node15009334;
+
+extern Ent15009334 *D_800D3098;
+extern void *allocate_memory(s32, s32, s32, s32);
+s32 func_1515D5AC(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+
+void func_15009334(s32 arg0) {
+    s32 pad;
+    s32 r;
+    s32 g;
+    s32 b;
+    s32 x;
+    s32 y;
+    s32 z;
+    s32 w;
+    s32 p7;
+    s32 p8;
+    s32 hi;
+    s32 ret;
+    s32 id;
+    Node15009334 *node;
+    s32 type;
+
+    type = D_800D3098[arg0].type >> 2;
+    switch (type) {
+        case 9:
+        case 10:
+        case 16:
+            r = D_800D3098[arg0].unk18 & 0xFF;
+            g = (D_800D3098[arg0].unk18 >> 8) & 0xFF;
+            b = (D_800D3098[arg0].unk18 >> 16) & 0xFF;
+            D_800D3098[arg0].flags |= 4;
+            switch (type) {
+                case 10:
+                    func_1515D4D4(r, g, b, 0);
+                    if (D_800D3098[arg0].unk20 != 0) {
+                        func_1500AB5C(D_800D3098[arg0].unk20);
+                    }
+                    break;
+                case 9:
+                    x = D_800D3098[arg0].x;
+                    y = D_800D3098[arg0].y;
+                    z = D_800D3098[arg0].z;
+                    w = (D_800D3098[arg0].unk1C >> 8) & 0xFF;
+                    p7 = (D_800D3098[arg0].unk18 >> 24) & 0x7F;
+                    p8 = (D_800D3098[arg0].unk18 >> 31) & 1;
+                    id = D_800D3098[arg0].unk20 & 0xFFFF;
+                    hi = (D_800D3098[arg0].unk20 >> 16) & 0xFFFF;
+                    ret = func_1515D5AC(x, y, z, w, r, g, b, p7, p8, hi);
+                    if (ret != 0 && id != 0) {
+                        func_1500A94C(ret, id);
+                    }
+                    break;
+                case 16:
+                    D_800DCD24[0] = r;
+                    D_800DCD24[1] = g;
+                    D_800DCD24[2] = b;
+                    D_800DCD28[0] = D_800D3098[arg0].unk1C & 0xFF;
+                    D_800DCD28[1] = (D_800D3098[arg0].unk1C >> 8) & 0xFF;
+                    D_800DCD28[2] = (D_800D3098[arg0].unk1C >> 16) & 0xFF;
+                    D_800DCD3C = (D_800D3098[arg0].unk1C >> 24) & 0xFF;
+                    D_800DCD3D = (D_800D3098[arg0].unk18 >> 24) & 0xFF;
+                    break;
+            }
+            break;
+        case 15:
+            node = allocate_memory(8, 1, 0, 0);
+            node->ent = &D_800D3098[arg0];
+            node->next = (Node15009334 *)D_800DCD80;
+            D_800DCD80 = (s32)node;
+        lbl15:;
+            break;
+        case 24:
+            node = allocate_memory(8, 1, 0, 0);
+            node->ent = &D_800D3098[arg0];
+            node->next = (Node15009334 *)D_800DCD84;
+            D_800DCD84 = (s32)node;
+            break;
+    }
+}
 
 void func_150095D8(s32 arg0, s32 arg1) {
     func_1516127C(arg0, 0xFF, 1);

@@ -325,7 +325,57 @@ Gfx *func_15188D00(Gfx *gfx, s32 idx, s16 arg2) {
     return gfx;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1B5CC0/func_15188E48.s")
+typedef struct Sub15188E48 {
+    char pad0[4];
+    u8 unk4;
+    char pad5[0x1D4 - 5];
+    u8 *unk1D4;
+} Sub15188E48;
+
+typedef struct Node15188E48 {
+    u8 unk0;
+    u8 unk1;
+    u8 unk2;
+    u8 unk3;
+    char pad4[4];
+    u8 *unk8;
+    struct Node15188E48 *unkC;
+    Sub15188E48 *unk10;
+} Node15188E48;
+
+void func_15188E48(Node15188E48 *arg0) {
+    s32 i;
+    s32 count;
+    s32 m;
+    s32 dst;
+    s32 off;
+    u8 *from;
+    u8 *q;
+    s32 len;
+
+    count = arg0->unk1;
+    m = func_1502DB20(arg0->unk10->unk4);
+    dst = D_800BE9C0 * (m * count);
+    off = (D_800BE9C0 ^ 1) * (m * count);
+    for (i = 0; i < count; i++) {
+        len = m << 6;
+        if (i == count - 1) {
+            q = arg0->unk10->unk1D4;
+            if (q == NULL) {
+                arg0->unk2 = 0;
+                return;
+            }
+            from = q;
+        } else {
+            from = arg0->unk8 + ((((i + 1) * m) + off) << 6);
+        }
+        q = arg0->unk8 + ((i * m + dst) << 6);
+        bcopy(from, q, len);
+    }
+    if (arg0->unk2 != arg0->unk1) {
+        arg0->unk2++;
+    }
+}
 
 typedef struct Entry15188F84 {
     u16 index;
@@ -388,7 +438,106 @@ void func_15188F84(Node15188F84 *node) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1B5CC0/func_15189118.s")
+typedef struct Mtx15189118 {
+    s16 i[4][4];
+    s16 f[4][4];
+} Mtx15189118;
+
+typedef struct Sub15189118 {
+    char pad0[4];
+    u8 unk4;
+    char pad5[0x1D4 - 5];
+    Mtx15189118 *unk1D4;
+} Sub15189118;
+
+typedef struct Node15189118 {
+    u8 unk0;
+    u8 unk1;
+    u8 unk2;
+    u8 unk3;
+    u8 unk4;
+    char pad5[3];
+    Mtx15189118 *unk8;
+    struct Node15189118 *unkC;
+    Sub15189118 *unk10;
+} Node15189118;
+
+void func_15189118(s32 idx) {
+Node15189118 *node;
+s32 count;
+s32 m;
+s32 base;
+s32 i;
+s32 j;
+f32 maxdist;
+Mtx15189118 *cur;
+Mtx15189118 *from;
+Mtx15189118 *q;
+f32 dx;
+f32 dy;
+f32 dz;
+f32 dist;
+f32 ratio;
+f32 cx;
+f32 cy;
+f32 cz;
+f32 fx;
+f32 fy;
+f32 fz;
+
+node = (Node15189118 *)D_800DF7C8[idx];
+while (node != NULL) {
+if (node->unk4 != 0) {
+count = node->unk1;
+m = func_1502DB20(node->unk10->unk4);
+base = D_800BE9C0 * m * count;
+maxdist = (u32)node->unk4;
+for (i = node->unk2 - 1; i >= 0; i--) {
+cur = node->unk8 + (i * m + base);
+if (i + 1 == node->unk2) {
+q = node->unk10->unk1D4;
+if (q == NULL) {
+node->unk2 = 0;
+break;
+}
+from = q;
+} else {
+from = node->unk8 + ((i + 1) * m + base);
+}
+cx = ((cur->i[3][0] << 16) + cur->f[3][0]) * 1.52587890625e-05f;
+cy = ((cur->i[3][1] << 16) + cur->f[3][1]) * 1.52587890625e-05f;
+cz = ((cur->i[3][2] << 16) + cur->f[3][2]) * 1.52587890625e-05f;
+fx = ((from->i[3][0] << 16) + from->f[3][0]) * 1.52587890625e-05f;
+fy = ((from->i[3][1] << 16) + from->f[3][1]) * 1.52587890625e-05f;
+fz = ((from->i[3][2] << 16) + from->f[3][2]) * 1.52587890625e-05f;
+dist = sqrtf((cx - fx) * (cx - fx) + (cy - fy) * (cy - fy) + (cz - fz) * (cz - fz));
+if (maxdist < dist && dist != 0.0f) {
+ratio = maxdist / dist;
+for (j = 0; j < m; j++) {
+cx = ((cur->i[3][0] << 16) + cur->f[3][0]) * 1.52587890625e-05f;
+cy = ((cur->i[3][1] << 16) + cur->f[3][1]) * 1.52587890625e-05f;
+cz = ((cur->i[3][2] << 16) + cur->f[3][2]) * 1.52587890625e-05f;
+fx = ((from->i[3][0] << 16) + from->f[3][0]) * 1.52587890625e-05f;
+fy = ((from->i[3][1] << 16) + from->f[3][1]) * 1.52587890625e-05f;
+fz = ((from->i[3][2] << 16) + from->f[3][2]) * 1.52587890625e-05f;
+cx = (cx - fx) * ratio + fx;
+cy = (cy - fy) * ratio + fy;
+cz = (cz - fz) * ratio + fz;
+cur->i[3][0] = (s32)cx;
+cur->i[3][1] = (s32)cy;
+cur->i[3][2] = (s32)cz;
+cur->f[3][0] = 0;
+cur->f[3][1] = 0;
+cur->f[3][2] = 0;
+cur++;
+from++;
+}
+}
+}
+}
+node = node->unkC;
+}
+}
 
 void func_151895A4(s32 *arg0) {
     func_100043B4((s32 *)arg0[2], 2);
@@ -398,7 +547,66 @@ void func_151895CC(s32 *arg0) {
     func_100043B4((s32 *)arg0[2], 2);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1B5CC0/func_151895F4.s")
+typedef struct Node151895F4 {
+    u8 unk0;
+    u8 unk1;
+    u8 unk2;
+    u8 unk3;
+    char pad4[4];
+    u8 *unk8;
+    struct Node151895F4 *unkC;
+    struct127 *unk10;
+    s32 unk14;
+} Node151895F4;
+
+extern u8 func_150849CC(struct127 *, s32 *);
+extern s32 func_1503DA9C(struct127 *, s32, s32, s32);
+extern s32 func_1502C974(s32, s32, s32, s32, s32);
+extern void *D_800DF7C0;
+extern u8 D_800DF7C4;
+
+s32 func_151895F4(s32 arg0, Node151895F4 *arg1, s16 arg2) {
+    s32 i;
+    s32 m;
+    s32 count;
+    s32 dst;
+    s32 idx;
+    s32 n;
+    s32 shade;
+    s32 active;
+    void **model;
+    s32 alpha;
+    s32 lod;
+    s32 p4;
+    s32 p5;
+    s32 saved;
+
+    active = arg1->unk2;
+    if (active == 0) {
+        return arg0;
+    }
+    func_1503DA9C(arg1->unk10, func_150849CC(arg1->unk10, &lod), lod, 1);
+    n = arg1->unk1;
+    shade = arg1->unk3;
+    m = func_1502DB20(arg1->unk10->id);
+    count = arg1->unk2;
+    dst = D_800BE9C0 * m * n;
+    idx = arg1->unk10 - D_800CC2D0;
+    if (idx < 0 || idx >= 25) {
+        return arg0;
+    }
+    saved = *(s32 *)((u8 *)arg1->unk10 + 0x94);
+    *(s32 *)((u8 *)arg1->unk10 + 0x94) = arg1->unk14;
+    model = &D_800DF7C0;
+    for (i = 0; i < count; i++) {
+        alpha = (((i + 3) * 32) * shade) >> 8;
+        *model = arg1->unk8 + ((dst + i * m) << 6);
+        D_800DF7C4 = alpha;
+        arg0 = func_1502C974(arg0, idx, arg2, 4, 1);
+    }
+    *(s32 *)((u8 *)arg1->unk10 + 0x94) = saved;
+    return arg0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1B5CC0/func_151897A4.s")
 

@@ -3,7 +3,8 @@
 #include "variables.h"
 
 extern s32 D_800DDD58;
-extern s32 func_1517D074(s32, s16, s16, s16, f32, s32, s32, s32, s32, s32);
+extern Gfx D_8008CFA0[];
+Gfx *func_1517D074(Gfx *, s16, s16, s16, f32, s32, s32, u8, u8, s32);
 
 extern s32 func_151EF610(void);
 extern u8 D_80095CE1[];
@@ -200,7 +201,57 @@ void func_1517CFC4(void) {
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1A89B0/func_1517D074.s")
+Gfx *func_1517D074(Gfx *gfx, s16 x, s16 y, s16 z, f32 angle, s32 radius, s32 height, u8 width, u8 depth, s32 timg)
+{
+    u32 i;
+    s16 c;
+    s16 s;
+    Vtx *v;
+
+    i = D_800DDD58;
+    v = &((Vtx *)D_800DDD10[D_800BE9C0])[i * 4];
+    if ((u32)D_800DDD58 >= (u32)D_800DDD0C)
+    {
+        return gfx;
+    }
+
+    gSPDisplayList(gfx++, &D_8008CFA0);
+    gDPSetCombine(gfx++, 0xFFFFFF, 0xFFFCF438);
+    gSPClearGeometryMode(gfx++, G_CULL_BACK);
+    gDPSetOtherMode(gfx++, 0x182C3F, 0x0C184B50);
+
+    angle *= 0.01745329238f;
+    c = cosf(angle) * radius;
+    s = sinf(angle) * radius;
+
+    v[0].v.ob[0] = v[3].v.ob[0] = x + c;
+    v[1].v.ob[1] = y;
+    v[0].v.ob[1] = v[1].v.ob[1];
+    v[0].v.ob[2] = v[3].v.ob[2] = z - s;
+    v[1].v.ob[0] = v[2].v.ob[0] = x - c;
+    v[2].v.ob[1] = v[3].v.ob[1] = (s16)(y + height + height);
+    v[1].v.ob[2] = v[2].v.ob[2] = z + s;
+    v[1].v.tc[0] = v[2].v.tc[0] = (width << 5) - 1;
+    v[2].v.tc[1] = v[3].v.tc[1] = (depth << 5) - 1;
+
+    gSPVertex(gfx++, &((Vtx *)D_800DDD10[D_800BE9C0])[i * 4], 4, 0);
+    gDPLoadTextureBlock(gfx++, timg, G_IM_FMT_RGBA, G_IM_SIZ_16b, width, (depth * 5 + 3) >> 2, 0,
+                        G_TX_CLAMP, G_TX_CLAMP, 0, 0, 0, 0);
+    gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_4b, ((width >> 1) + 7) >> 3, (width * depth) >> 2, 1, 0,
+               G_TX_CLAMP, 0, 0, G_TX_CLAMP, 0, 0);
+    gDPSetTileSize(gfx++, 1, 0, 0, (width - 1) << 2, (depth - 1) << 2);
+
+    ((Vtx *)D_800DDD10[D_800BE9C0])[i * 4].v.flag =
+        ((Vtx *)D_800DDD10[D_800BE9C0])[i * 4 + 1].v.flag =
+        ((Vtx *)D_800DDD10[D_800BE9C0])[i * 4 + 2].v.flag =
+        ((Vtx *)D_800DDD10[D_800BE9C0])[i * 4 + 3].v.flag = 0;
+
+    gSP1Triangle(gfx++, 0, 2, 1, 0);
+    gSP1Triangle(gfx++, 0, 3, 2, 0);
+    gSPSetGeometryMode(gfx++, G_SHADING_SMOOTH);
+    D_800DDD58++;
+    return gfx;
+}
 
 struct Entry1517D578 {
     s16 unk0;
@@ -267,7 +318,26 @@ s32 func_1517D690(s32 arg0, s32 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1A89B0/func_1517D7B0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1A89B0/func_1517DE5C.s")
+void func_1517BBAC(s32, s32, s32, s32, f32, s32, s32, s32);
+
+void func_1517DE5C(void) {
+    s32 i;
+    struct s1517CFC4_a *p;
+
+    if (D_800DDD20 != 0) {
+        for (i = 0; i < 15; i++) {
+            ((u8 (*)[16])&D_800DDA90)[i][0xC] = 0;
+        }
+        func_1517BBAC(D_800CC2D0->x_position, D_800CC2D0->y_position, D_800CC2D0->z_position, 1500,
+                      D_800DBFF0->unk380, D_800DBFF0->unk2F8, D_800DBFF0->unk2FC, D_800DBFF0->unk300);
+        for (i = 0; i < 15; i++) {
+            if (((s32 *)&D_800DD478)[i * 26] != 0 && ((u8 (*)[16])&D_800DDA90)[i][0xC] == 0) {
+                ((s32 *)&D_800DD478)[i * 26] = 0;
+                ((s32 (*)[4])&D_800DDA90)[i][2] = 0;
+            }
+        }
+    }
+}
 
 extern struct { s16 unk0; s16 unk2; s16 unk4; } D_800DD470;
 

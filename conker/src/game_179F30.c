@@ -348,7 +348,107 @@ void func_1514D564(struct127 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_179F30/func_1514D64C.s")
+void func_1514D64C(s32 arg0) {
+    Struct1514E00C_A4 spA4;
+    Struct1514E00C_4C sp4C;
+    Struct1514E00C_2C sp2C;
+
+    sp4C.unk00 = 3;
+    sp4C.unk08 = 0;
+    sp4C.unk0C = 0;
+    sp4C.unk40 = 0x12012;
+    sp4C.unk04 = 0;
+    sp4C.unk45 = 0xFF;
+    sp4C.unk10 = 0xFF;
+    sp4C.unk11 = 0;
+    sp4C.unk12 = 0;
+    sp4C.unk13 = 0xFF;
+    sp4C.unk02 = 0x401;
+    sp4C.unk1C = 0.0f;
+    sp4C.unk20 = 0.0f;
+    sp4C.unk24 = 0.0f;
+    sp4C.unk28 = 0.0f;
+    sp4C.unk2C = 0.0f;
+    sp4C.unk30 = 0.0f;
+
+    spA4.unk00 = 28.0f;
+    spA4.unk04 = 28.0f;
+    spA4.unk10 = 0.5f;
+    spA4.unk14 = 0.5f;
+    spA4.unk08 = 4.0f;
+    spA4.unk0C = 17.0f;
+    spA4.unk18 = 0.75f;
+    spA4.unk1C = 0.25f;
+    spA4.unk20 = 9.999999975e-07f;
+
+    sp2C.unk1D = ((u8 *)arg0)[0x3B];
+    sp2C.unk18 = arg0;
+    sp2C.unk00 = 0.0f;
+    sp2C.unk04 = 0.0f;
+    sp2C.unk0C = 0.0f;
+    sp2C.unk10 = 0.0f;
+    sp2C.unk1C = 0x2B;
+    spA4.unk54 = 0;
+    spA4.unk55 = 0;
+    spA4.unk56 = 0;
+    spA4.unk57 = 0;
+    sp2C.unk1E = 1;
+
+    sp2C.unk08 = 25.0f;
+    sp2C.unk14 = 75.0f;
+    spA4.unk48 = 1.0f;
+
+    func_1514EC1C(func_15189FF0(&sp4C, &spA4, &sp2C, 2, 0, 0, 0), arg0, 9);
+
+    sp4C.unk00 = 3;
+    sp4C.unk08 = 0;
+    sp4C.unk0C = 0;
+    sp4C.unk40 = 0x12012;
+    sp4C.unk04 = 0;
+    sp4C.unk45 = 0xFF;
+    sp4C.unk10 = 0xFF;
+    sp4C.unk11 = 0;
+    sp4C.unk12 = 0;
+    sp4C.unk13 = 0xFF;
+    sp4C.unk02 = 0x401;
+
+    spA4.unk00 = 30.0f;
+    spA4.unk04 = 30.0f;
+    spA4.unk08 = 10.0f;
+    spA4.unk10 = 0.8000000119f;
+    spA4.unk14 = 0.8000000119f;
+
+    sp4C.unk1C = 0.0f;
+    sp4C.unk20 = 0.0f;
+    sp4C.unk24 = 0.0f;
+    sp4C.unk28 = 0.0f;
+    sp4C.unk2C = 0.0f;
+    sp4C.unk30 = 0.0f;
+
+    spA4.unk18 = 0.6000000238f;
+    spA4.unk1C = 0.6000000238f;
+    spA4.unk0C = 16.0f;
+    spA4.unk20 = 9.999999975e-07f;
+
+    sp2C.unk1D = ((u8 *)arg0)[0x3B];
+    sp2C.unk18 = arg0;
+    sp2C.unk1C = 5;
+    spA4.unk54 = 0;
+    spA4.unk55 = 0;
+    spA4.unk56 = 0;
+    spA4.unk57 = 0;
+    sp2C.unk1E = 0;
+    sp2C.unk04 = 10.0f;
+    sp2C.unk00 = 0.0f;
+    sp2C.unk0C = 0.0f;
+    sp2C.unk08 = -70.0f;
+    sp2C.unk10 = 20.0f;
+    sp2C.unk14 = -140.0f;
+    spA4.unk48 = 1.0f;
+
+    func_1514EC1C(func_15189FF0(&sp4C, &spA4, &sp2C, 2, 0, 0, 0), arg0, 0xA);
+    func_15160A58(arg0, 5, &sp2C, 2, 0x12C, 0x28, 0xFF, 0, 0, 0xFF, 0, 1, 0, 0, 0xFF, 1);
+}
 
 void func_1514D96C(s32 arg0) {
 }

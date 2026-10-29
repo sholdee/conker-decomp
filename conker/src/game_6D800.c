@@ -18,7 +18,118 @@ void func_15040350(void *arg0, u32 arg1) {
 }
 
 // contains jump relative
-#pragma GLOBAL_ASM("asm/nonmatchings/game_6D800/func_150403C8.s")
+void func_10007DA0(void);
+s32 func_15040754(struct148 *arg0);
+void func_15040CC8(u8 *arg0);
+
+#define FLUSH()                              \
+    D_8003C8E0 = 0xC00005B;                  \
+    func_150AD770();                         \
+    D_800BE9C0 = 1 - D_800BE9C0;             \
+    func_10007DA0();                         \
+    D_800BE9C0 = 1 - D_800BE9C0;
+
+void func_150403C8(void *arg0, u32 arg1, s32 arg2) {
+    u32 *gfx;
+    s32 pad[2];
+    s32 sp40 = 0;
+    s32 sync;
+    u32 addr;
+    u32 hi;
+
+    gfx = arg0;
+    while (((arg1 == 0) && (*(s8 *)gfx != -0x21)) || ((arg1 != 0) && ((u32)gfx < arg1))) {
+        sync = 0;
+        switch (*(s8 *)gfx) {
+            case -0x22:
+                addr = gfx[1];
+                sp40 = func_150408CC((struct148 *)gfx);
+                hi = (addr >> 24) & 0xF;
+                addr &= 0xFFFFFF;
+                addr += D_800C6860[hi];
+                addr |= 0x80000000;
+                D_800C68A1++;
+                if (D_800C68A1 == 20) {
+                    func_15040CC8((u8 *)gfx);
+                    D_8003C8E0 = 0xC00005B;
+                    func_150AD770();
+                }
+                if ((addr > 0x80000000) && (addr < 0xA0000000) && !(addr & 7)) {
+                    func_150403C8((void *)addr, 0, (s32)gfx);
+                } else {
+                    func_15040CC8((u8 *)gfx);
+                    FLUSH();
+                }
+                if (D_800C68A1 > 0) {
+                    D_800C68A1--;
+                } else {
+                    FLUSH();
+                }
+                break;
+            case -0x19:
+                D_800C68A0 = 0;
+                break;
+            case -0x1C: case -0x1B: case -0x0A: case 0x06: case 0x07:
+            case 0x10: case 0x11: case 0x12: case 0x13: case 0x14: case 0x15: case 0x16: case 0x17:
+            case 0x18: case 0x19: case 0x1A: case 0x1B: case 0x1C: case 0x1D: case 0x1E: case 0x1F:
+                D_800C68A0 = 1;
+                break;
+            case 0x05:
+                sp40 = func_1504082C(gfx);
+                D_800C68A0 = 1;
+                break;
+            case 0x01:
+                sp40 = func_15040754((struct148 *)gfx);
+                break;
+            case -0x03:
+                D_800848B0 = gfx[1];
+                break;
+            case -0x01:
+                sync = 1;
+                break;
+            case -0x1E: case -0x1D: case -0x14: case -0x13: case -0x12:
+            case -0x09: case -0x08: case -0x07: case -0x05: case -0x04: case -0x02:
+                sync = 1;
+                break;
+            case -0x16: case -0x15:
+                sync = 1;
+                break;
+            case -0x25:
+                {
+                    u32 type;
+                    s32 off;
+                    s32 w1;
+                    type = gfx[0] >> 16;
+                    off = gfx[0] & 0xFFFF;
+                    w1 = gfx[1];
+                    if ((type & 0xFF) == 6) {
+                        D_800C6860[off / 4] = w1;
+                    }
+                }
+                break;
+            case -0x2D: case -0x2C: case -0x2B: case -0x2A: case -0x29: case -0x28: case -0x27: case -0x26:
+            case -0x24: case -0x23: case -0x21: case -0x20: case -0x1F: case -0x1A: case -0x18: case -0x17:
+            case -0x11: case -0x10: case -0x0F: case -0x0E: case -0x0D: case -0x0C: case -0x0B:
+            case -0x06: case 0x00: case 0x02: case 0x03: case 0x04: case 0x08:
+                break;
+            default:
+                D_8003C8E0 = 0xC00005B;
+                func_150AD770();
+                break;
+        }
+        if (sync && D_800C68A0) {
+            func_15040CC8((u8 *)gfx);
+            D_800C68A0 = 0;
+            FLUSH();
+        }
+        if (sp40) {
+            sp40 = 0;
+            func_15040CC8((u8 *)gfx);
+            FLUSH();
+        }
+        gfx += 2;
+    }
+}
 
 s32 func_1504072C(s32 arg0) {
     if ((arg0 & 7) != 0) {
@@ -116,7 +227,7 @@ void func_150408B4(s32 arg0) {
 void func_150408C0(s32 arg0) {
 }
 
-void func_150408CC(struct148 *arg0) {
+s32 func_150408CC(struct148 *arg0) {
     func_1504072C(arg0->unk4);
 }
 

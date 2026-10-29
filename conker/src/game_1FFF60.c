@@ -239,7 +239,74 @@ s32 func_151D2F00(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     return (s32)tmp;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1FFF60/func_151D2F90.s")
+typedef struct {
+    s32 unk0;
+    u8 unk4;
+    u8 pad5[0x3B - 0x5];
+    u8 unk3B;
+    u8 pad3C[0x74 - 0x3C];
+    u8 unk74;
+    u8 pad75[0x1D4 - 0x75];
+    s32 unk1D4;
+} Func151D2F90Obj;
+
+typedef struct {
+    u8 pad0[0x10];
+    Func151D2F90Obj *unk10;
+    u8 unk14;
+    u8 pad15;
+    s16 unk16;
+    u8 unk18;
+    s8 unk19;
+    s8 unk1A;
+    s8 unk1B;
+    s8 unk1C;
+} Func151D2F90Inst;
+
+extern s32 (*D_8008FC4C[])(Func151D2F90Inst *);
+extern void (*D_8008FC50[])(Func151D2F90Inst *);
+extern void (*D_8008FC54[])(Func151D2F90Inst *);
+extern void (*D_8008FC58[])(Func151D2F90Inst *);
+
+void func_151D2F90(Func151D2F90Inst *arg0) {
+    Func151D2F90Obj *obj;
+    u8 flags;
+    u8 old;
+    u8 cur;
+
+    obj = arg0->unk10;
+    old = (arg0->unk18 & 2);
+    if ((obj->unk0 == 0) || (obj->unk4 == 0xFF) || (obj->unk3B != arg0->unk14)) {
+        func_1516972C((struct102 *)arg0);
+        return;
+    }
+    if ((obj->unk1D4 != 0) && ((obj->unk74 & 0xF) != 0xF)) {
+        arg0->unk18 |= 2;
+    } else {
+        arg0->unk18 &= ~2;
+    }
+    if (arg0->unk18 & 1) {
+        arg0->unk16 -= D_800BE9E4;
+        if (arg0->unk16 < 0) {
+            if (arg0->unk1C != -1) {
+                D_8008FC58[arg0->unk1C](arg0);
+            }
+            func_1516972C((struct102 *)arg0);
+            return;
+        }
+    }
+    cur = arg0->unk18 & 2;
+    if (old != cur) {
+        if (cur) {
+            D_8008FC50[arg0->unk1A](arg0);
+        } else {
+            D_8008FC54[arg0->unk1B](arg0);
+        }
+    }
+    if ((arg0->unk19 != -1) && (D_8008FC4C[arg0->unk19](arg0) == 0)) {
+        func_1516972C((struct102 *)arg0);
+    }
+}
 
 void func_1516972C(struct102 *arg0);
 extern void (*D_8008FC48[])(struct224 *, Func151D2C40Data *);

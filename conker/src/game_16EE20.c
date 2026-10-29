@@ -102,7 +102,48 @@ void func_151419D0(struct102 *arg0, struct A1_151419D0 *arg1, u8 arg2) {
         }
     }
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15141A7C.s")
+s32 func_15141C0C(void *actor);
+s32 func_15141CC0(u32 arg0);
+u32 func_1510F8CC(s32);
+void func_15141E38(void *arg0, s32 arg1);
+s32 func_1514ECE0(void *, s16, void *);
+
+typedef void (*Fn15141A7C)(void *, s32, s32);
+
+void func_15141A7C(void *arg0, s32 arg1) {
+    s32 kind;
+    s32 idx;
+
+    if (D_800BE616 == 0) {
+        kind = func_15141C0C(arg0);
+        if (D_8008A084[kind] != 0) {
+            idx = ((s32 (*)(s32, void *))D_8008A084[kind])(func_15141CC0(func_1510F8CC(*(s32 *)((u8 *)arg0 + 0x184))), arg0);
+            if (idx != -1) {
+                if (D_8008A0B4[idx].unk0 != 0) {
+                    if (D_8008A0B4[idx].unk4 > 0) {
+                        func_15141E38(arg0, idx);
+                    } else {
+                        (*(Fn15141A7C *)&D_8008A0B4[idx].unk0)(arg0, arg1, 0);
+                    }
+                }
+            }
+        }
+        {
+        void *node;
+        node = *(void **)((u8 *)arg0 + 0x2F4);
+        if (func_1514ECE0(node, 0x1A, &node) != 0) {
+            do {
+                void *sub;
+                sub = *(void **)((u8 *)node + 0x10);
+                if (D_8008A0B4[*(s32 *)((u8 *)sub + 0x28)].unk0 != 0) {
+                    (*(Fn15141A7C *)&D_8008A0B4[*(u32 *)((u8 *)sub + 0x28)].unk0)(arg0, arg1, *(s16 *)((u8 *)sub + 0xE));
+                }
+                node = *(void **)((u8 *)node + 0x14);
+            } while (func_1514ECE0(node, 0x1A, &node) != 0);
+        }
+        }
+    }
+}
 // requires jump table
 s32 func_15141C0C(void *actor) {
     switch (*(u8 *)((u8 *)actor + 4)) {
@@ -181,6 +222,8 @@ s32 func_15141CC0(u32 arg0) {
     }
 }
 
+void func_15141E38(void *arg0, s32 arg1);
+
 void func_15141DA4(void *arg0, s32 arg1, s32 arg2) {
     if ((arg1 < 12) && (arg1 >= 0) &&
         (arg2 < 20) && (arg2 >= 0) &&
@@ -192,7 +235,47 @@ void func_15141DA4(void *arg0, s32 arg1, s32 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15141E38.s")
+typedef struct {
+    s32 id;
+    void *obj;
+    u8 b;
+} Info15141E38;
+
+s32 func_1514ECE0(void *, s16, void *);
+s32 func_1514EC1C(s32, s32, s16);
+void *memcpy(void *, const void *, u32);
+
+void func_15141E38(void *arg0, s32 arg1) {
+    void *found;
+    void *node;
+    s32 i;
+
+    found = NULL;
+    node = *(void **)((u8 *)arg0 + 0x2F4);
+    if (func_1514ECE0(node, 0x1A, &node) != 0) {
+        do {
+            void *sub;
+            sub = *(void **)((u8 *)node + 0x10);
+            if (arg1 == *(s32 *)((u8 *)sub + 0x28)) {
+                found = node;
+                *(s16 *)((u8 *)sub + 0xE) = D_8008A0B4[arg1].unk4;
+            }
+            node = *(void **)((u8 *)node + 0x14);
+        } while (func_1514ECE0(node, 0x1A, &node) != 0);
+    }
+    if (found == NULL) {
+        struct260 *ret;
+        Info15141E38 info;
+        info.id = arg1;
+        info.obj = arg0;
+        info.b = *(u8 *)((u8 *)arg0 + 0x3B);
+        ret = func_15149130(D_8008A0B4[arg1].unk4, -1, -1, -1, 1, 0x32, (struct37 *)0xC, 0xFF, 1);
+        if (ret != NULL) {
+            memcpy((u8 *)ret + 0x28, &info, sizeof(info));
+            func_1514EC1C((s32)ret, (s32)arg0, 0x1A);
+        }
+    }
+}
 void func_15141F78(u8 arg0, struct157 *arg1, f32 arg2, u8 arg3, struct157 *arg4, u8 arg5) {
     struct157 tmp;
     f32 temp_f2;
@@ -431,7 +514,47 @@ void func_151424F4(Mtx *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, 
     sp28[2][2] *= arg8 * arg1;
     guMtxF2L(&sp28, arg0);
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15142600.s")
+void func_15142600(Mtx *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, f32 arg11) {
+    f32 mf[4][4];
+    f32 inv;
+    f32 fx, fy, fz;
+    f32 ux, uy, uz;
+    f32 rx, rz;
+
+    fx = arg9 - arg6;
+    fy = arg10 - arg7;
+    fz = arg11 - arg8;
+    inv = 1.0f / sqrtf(fx * fx + fy * fy + fz * fz);
+    fx *= inv;
+    fy *= inv;
+    fz *= inv;
+    rx = fz;
+    rz = -fx;
+    inv = 1.0f / sqrtf(rx * rx + rz * rz);
+    rx *= inv;
+    rz *= inv;
+    ux = fy * rz;
+    uy = fz * rx - fx * rz;
+    uz = -fy * rx;
+    inv = 1.0f / sqrtf(ux * ux + uy * uy + uz * uz);
+    mf[0][0] = rx * arg3 * arg1;
+    mf[1][0] = ux * inv * arg3 * arg2;
+    mf[2][0] = fx * arg3 * arg1;
+    mf[3][0] = arg6;
+    mf[0][1] = 0.0f;
+    mf[1][1] = uy * inv * arg4 * arg2;
+    mf[2][1] = fy * arg4 * arg1;
+    mf[3][1] = arg7;
+    mf[0][2] = rz * arg5 * arg1;
+    mf[1][2] = uz * inv * arg5 * arg2;
+    mf[2][2] = fz * arg5 * arg1;
+    mf[3][2] = arg8;
+    mf[0][3] = 0.0f;
+    mf[1][3] = 0.0f;
+    mf[2][3] = 0.0f;
+    mf[3][3] = 1.0f;
+    guMtxF2L(mf, arg0);
+}
 void func_15142838(Mtx *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8) {
     f32 mtx[4][4];
 
@@ -1007,7 +1130,60 @@ f32 func_15143E64(struct17 *arg0) {
 
     return sqrtf(x * x + y * y + z * z);
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15143E94.s")
+typedef struct Func15143E94Spawn {
+    s8 active;
+    u8 pad1;
+    s16 duration;
+    s8 size;
+    s8 enabled;
+    s8 sentinel;
+    u8 pad7;
+} Func15143E94Spawn;
+extern void func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
+
+u8 func_15143E94(s32 arg0, s32 arg1) {
+    u8 ret;
+    s8 i;
+    s8 count;
+    u8 found;
+    u8 found2;
+    Func15143E94Spawn spawn;
+
+    ret = 0;
+start:
+    count = D_80082FA0 + 1;
+    i = 0;
+    found = 0;
+    while (!found && i < count) {
+        if (D_800CC2D0[i].health != 0) {
+            found = 1;
+        } else {
+            i++;
+        }
+    }
+    i = 0;
+    if (found) {
+        found2 = 0;
+        while (!found2 && i < count) {
+            if (func_150A29C8(i, arg1) == 0) {
+                found2 = 1;
+            } else {
+                i++;
+            }
+        }
+        if (found2) {
+            func_1512D748(&D_800DBFF0[D_800BE9E8], arg0, 1);
+            spawn.active = 1;
+            spawn.duration = (func_150ADA20() & 0xF) + 0x14;
+            spawn.size = (func_150ADA20() & 3) + 4;
+            spawn.sentinel = -1;
+            spawn.enabled = 1;
+            func_151D8868(&spawn, 0, 0xFF, 0);
+            ret = 1;
+        }
+    }
+    return ret;
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_1514401C.s")
 void func_151441A4(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, u8 arg9, u8 arg10, u8 arg11, u8 arg12, u8 arg13) {
     s16 temp_v0;

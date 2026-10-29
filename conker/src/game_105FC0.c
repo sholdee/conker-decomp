@@ -1,7 +1,10 @@
 #include <ultra64.h>
 #define func_10010F88 func_10010F88_void
+#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
 #undef func_10010F88
+#undef func_150ADA20
+s32 func_150ADA20(void);
 #include "variables.h"
 
 typedef struct {
@@ -508,4 +511,275 @@ s32 func_150DA628(u8 *arg0, s32 arg1) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_105FC0/func_150DA67C.s")
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s16 unk8;
+    s16 unkA;
+    s32 unkC;
+    s32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 unk16;
+    u8 unk17;
+    u8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+    u8 unk1C;
+    u8 unk1D;
+    s16 unk1E;
+    s16 unk20;
+    s16 unk22;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    struct17 pos;
+    struct17 unk3C;
+    struct17 vel;
+    f32 unk54;
+    u32 unk58;
+    s32 unk5C;
+    u8 unk60;
+    u8 unk61;
+    s8 unk62;
+    s8 unk63;
+    s8 unk64;
+    u8 unk65;
+    u8 unk66;
+    u8 pad67;
+    s16 unk68;
+    u8 pad6A[2];
+    f32 unk6C;
+} Particle150DA67C; /* 0x70 */
+
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    u8 unk2;
+    u8 unk3;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+} Sub150DA67C;
+
+typedef struct {
+    u8 unk0[0x10];
+    u16 unk10;
+} Bytes150DA67C;
+
+typedef struct {
+    u8 pad0[4];
+    u8 unk4;
+} Kind150DA67C;
+
+typedef struct {
+    Kind150DA67C *unk0;
+    u8 pad4[4];
+    struct17 unk8;
+    u8 pad14[0x30];
+    Bytes150DA67C unk44;
+    u8 pad56[3];
+    u8 unk59;
+} Obj150DA67C;
+
+typedef struct {
+    u8 pad0[0x40];
+    f32 unk40;
+    f32 unk44;
+    f32 unk48;
+} Data150DA67C;
+
+typedef struct {
+    u8 pad0;
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD[0x8B];
+    Data150DA67C *unk98;
+} Self150DA67C;
+
+typedef struct {
+    struct17 unk0;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    s16 unk24;
+    s16 unk26;
+    s16 unk28;
+    s16 unk2A;
+    s16 unk2C;
+    s16 unk2E;
+    s16 unk30;
+    s16 unk32;
+    u8 unk34;
+    u8 pad35[3];
+    f32 unk38;
+    s16 unk3C;
+    s16 unk3E;
+    s32 unk40;
+} Emit150DA67C; /* 0x44 */
+
+typedef struct {
+    u8 unk0[0x24];
+} Dst150DA67C;
+
+typedef struct {
+    u8 unk0;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    struct17 unk10;
+    struct17 unk1C;
+    f32 unk28;
+} ShapeA150DA67C; /* 0x2C */
+
+typedef struct {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+    Bytes150DA67C unkC;
+    f32 unk20;
+} ShapeB150DA67C; /* 0x24 */
+
+extern void *func_15130280(void *, u8, s32, s32, u8, s32);
+extern void func_150472C0(Dst150DA67C *, Obj150DA67C *);
+extern void func_15153CCC(ShapeA150DA67C *, Emit150DA67C *, Dst150DA67C *, u8, s32);
+extern void func_15153C84(ShapeB150DA67C *, Emit150DA67C *, Dst150DA67C *, u8, s32);
+
+void func_150DA67C(Self150DA67C *arg0, Obj150DA67C *arg1, f32 *arg2) {
+    Data150DA67C *data;
+    Kind150DA67C *kind;
+
+    data = arg0->unk98;
+    kind = arg1->unk0;
+    if (arg1->unk59 != 0) {
+        if (arg1->unk59 >= 2 && (kind->unk4 == 0x33 || kind->unk4 == 0x3A)) {
+            data->unk48 += (0.1990000159f + func_150ADA68() * 0.1540000141f) * D_800BE9A4;
+            if (data->unk48 > 1.0f) {
+                Particle150DA67C spawn;
+                Sub150DA67C sub;
+                void *ret;
+
+                sub.unkC = 0.9936270118f;
+                spawn.unk1D = 0x6C;
+                spawn.unk8 = 0x5103;
+                spawn.unk0 = 0x200005;
+                spawn.unk1E = 0x2E;
+                spawn.unk20 = 5;
+                spawn.unk58 = 0x90DE07;
+                spawn.unk60 = 8;
+                spawn.unk61 = 6;
+                spawn.unk62 = 0x24;
+                spawn.unk63 = -1;
+                spawn.unk4 = 0;
+                spawn.unkC = 0;
+                spawn.unk10 = 0;
+                spawn.unk64 = -1;
+                spawn.unk65 = 0;
+                spawn.unk22 = 0x2E;
+                spawn.unk14 = 0xDD;
+                spawn.unk15 = 0xD3;
+                spawn.unk16 = 0xCD;
+                spawn.unk17 = 0xFF;
+                spawn.unk18 = 0x57;
+                spawn.unk19 = 0x55;
+                spawn.unk1A = 0x5A;
+                spawn.unk1C = 0xFF;
+                spawn.unk3C.unk0 = 0.0f;
+                spawn.unk3C.unk4 = 0.0f;
+                spawn.unk3C.unk8 = 0.0f;
+                spawn.unk24 = 1.038234949f;
+                spawn.pos = arg1->unk8;
+                spawn.vel = *(struct17 *)&D_800A5480;
+                do {
+                    sub.unk0 = func_150ADA20();
+                    sub.unk1 = (s16)func_150ADA20();
+                    sub.unk2 = (func_150ADA20() % 5U) + 4;
+                    sub.unk3 = (func_150ADA20() % 5U) + 4;
+                    sub.unk4 = func_150ADA68() * 10.0f;
+                    sub.unk8 = func_150ADA68() * 10.0f;
+                    spawn.unk54 = func_150ADA68() * 0.0910000056f + 0.1010000035f;
+                    spawn.unk58 &= ~0xC0;
+                    spawn.unk58 |= ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);
+                    spawn.unk1B = (func_150ADA20() % 101U) + 100;
+                    spawn.unkA = (func_150ADA20() % 11U) + 70;
+                    spawn.unk28 = spawn.unk2C = func_150ADA68() * 116.0f + 131.0f;
+                    ret = func_15130280(&spawn, 1, 0, 0x10, arg0->unkC, arg0->unk1);
+                    if (ret != NULL) {
+                        memcpy((u8 *)ret + 0xA8, &sub, sizeof(sub));
+                    }
+                    data->unk48 -= 1.0f;
+                } while (data->unk48 > 1.0f);
+            }
+        } else {
+            data->unk44 += (0.06000000238f + func_150ADA68() * 0.06000000238f) * D_800BE9A4;
+            if (data->unk44 > 1.0f) {
+                Emit150DA67C emit;
+                Dst150DA67C dst;
+
+                func_150472C0(&dst, arg1);
+                emit.unk0 = arg1->unk8;
+                emit.unkC = 3.480000019f;
+                emit.unk24 = 1;
+                emit.unk26 = 2;
+                emit.unk28 = 3;
+                emit.unk2A = 1;
+                emit.unk2C = 0x14;
+                emit.unk2E = 0xA;
+                emit.unk30 = 0xC8;
+                emit.unk32 = 0x37;
+                emit.unk3C = 0x10;
+                emit.unk3E = 0xF;
+                emit.unk40 = 0;
+                emit.unk34 = 3;
+                emit.unk10 = 2.659999847f;
+                emit.unk14 = 1.33100009f;
+                emit.unk18 = 1.160000086f;
+                emit.unk1C = 0.01499999966f;
+                emit.unk20 = 0.00699999975f;
+                emit.unk38 = 0.200000003f;
+                if (arg1->unk59 >= 2) {
+                    ShapeA150DA67C a;
+
+                    a.unk0 = 1;
+                    a.unk4 = -arg2[0];
+                    a.unk8 = -arg2[1];
+                    a.unkC = -arg2[2];
+                    a.unk10 = a.unk1C = *(struct17 *)&D_800A5480;
+                    a.unk28 = 300.0f;
+                    do {
+                        func_15153CCC(&a, &emit, &dst, arg0->unkC, arg0->unk1);
+                        data->unk44 -= 1.0f;
+                    } while (data->unk44 > 1.0f);
+                } else {
+                    ShapeB150DA67C b;
+
+                    b.unk0 = -arg2[0];
+                    b.unk4 = -arg2[1];
+                    b.unk8 = -arg2[2];
+                    b.unkC = arg1->unk44;
+                    b.unk20 = 300.0f;
+                    do {
+                        func_15153C84(&b, &emit, &dst, arg0->unkC, arg0->unk1);
+                        data->unk44 -= 1.0f;
+                    } while (data->unk44 > 1.0f);
+                }
+            }
+        }
+        if (arg1->unk59 == 1) {
+            data->unk40 += (0.200000003f + func_150ADA68() * 0.1040000021f) * D_800BE9A4;
+            if (data->unk40 > 1.0f) {
+                do {
+                    func_151D9B8C(3, func_150ADA68() * 30.0f + 15.0f, (func_150ADA20() % 101U) + 100, (s32)&arg1->unk44, &arg1->unk8,
+                                  (func_150ADA20() % 81U) + 60, 1, 1, 1, arg0->unkC, arg0->unk1);
+                    data->unk40 -= 1.0f;
+                } while (data->unk40 > 1.0f);
+            }
+        }
+    }
+}
+

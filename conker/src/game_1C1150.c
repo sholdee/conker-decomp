@@ -21,16 +21,69 @@ extern s32 func_1518D1C0(struct127 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4
 extern u8 D_800A8244[];
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1C1150/func_15193CA0.s")
+extern void func_151C329C(f32 *arg0, s32 arg1, s32 arg2);
+extern void func_151DC260(f32 *arg0, f32 *arg1, s32 arg2, s32 arg3, s32 arg4);
+extern void func_151DC484(f32 *arg0, f32 *arg1, s32 arg2, s32 arg3, s32 arg4);
+extern s32 func_150A11C4;
+extern s32 func_150A1DA0;
 
-extern void func_15193CA0(s32, s32, s32, s32);
+void func_15193CA0(struct127 *arg0, u8 arg1, u8 arg2, s32 arg3) {
+    f32 pos[3];
+    f32 scratch[9];
+    s32 type;
+
+    func_1504715C(scratch, arg0);
+    pos[0] = D_800CC2C0;
+    pos[1] = D_800CC2C4;
+    pos[2] = D_800CC2C8;
+    {
+        u32 start;
+        u32 sum;
+        u32 end;
+        s32 pad;
+
+        start = (u32)&func_150A11C4;
+        end = (u32)&func_150A1DA0;
+        sum = 0;
+        for (; start < end; start += 4) {
+            sum ^= *(u32 *)start;
+        }
+        if (sum != 0xA3C35D52) {
+            start = (u32)&((s32 *)&D_80043B40)[(osGetCount() & 0xFF) * 8];
+            *(s32 *)start = osGetCount() & 0x3FFFF7;
+        }
+    }
+    if (arg0->id == 6 || arg0->id == 6 || arg0->id == 9 || arg0->id == 0xC || arg0->id == 0xF || arg0->id == 0x10 || arg0->id == 0x12 || arg0->id == 0x17 || arg0->id == 0x1B || arg0->id == 0x1E || arg0->id == 0x28 || arg0->id == 0x29 || arg0->id == 0x2A || arg0->id == 0x2B || arg0->id == 0x2C || arg0->id == 0x2D || arg0->id == 0x2E || arg0->id == 0x30 || arg0->id == 0x34 || arg0->id == 0x38 || arg0->id == 0x3A || arg0->id == 0x41 || arg0->id == 0x42 || arg0->id == 0x4B || arg0->id == 0x46 || arg0->id == 0x47 || arg0->id == 0x49 || arg0->id == 0x4A || arg0->id == 0x4C || arg0->id == 0x4D || arg0->id == 0x4E || arg0->id == 0x4F || arg0->id == 0x51 || arg0->id == 0x52 || arg0->id == 0x55 || arg0->id == 0x56 || arg0->id == 0x5D || arg0->id == 0x60 || arg0->id == 0x61 || arg0->id == 0x62 || arg0->id == 0x63 || arg0->id == 0x66 || arg0->id == 0x67 || arg0->id == 0x6F || arg0->id == 0x70 || arg0->id == 0x73 || arg0->id == 0x77 || arg0->id == 0x7B || arg0->id == 0x7D || arg0->id == 0x7E || arg0->id == 0x7F || arg0->id == 0x82 || arg0->id == 0x83 || arg0->id == 0x84 || arg0->id == 0x89 || arg0->id == 0x8C || arg0->id == 0x8E || arg0->id == 0x8F || arg0->id == 0x91 || arg0->id == 0x94 || arg0->id == 0x9E || arg0->id == 0xA1 || arg0->id == 0xA6 || arg0->id == 0xAB || arg0->id == 0xAC || arg0->id == 0xB2 || arg0->id == 0xB4 || arg0->id == 0xB7 || arg0->id == 0xB8 || arg0->id == 0xB9) {
+        func_151C329C(pos, arg2, arg3);
+        return;
+    }
+    if (arg0->id == 5 || arg0->id == 5 || arg0->id == 7 || arg0->id == 0x13 || arg0->id == 0x20 || arg0->id == 0x23 || arg0->id == 0x44 || arg0->id == 0x5A || arg0->id == 0x5C || arg0->id == 0x5E || arg0->id == 0x5F || arg0->id == 0x6D || arg0->id == 0x74 || arg0->id == 0x75 || arg0->id == 0x78 || arg0->id == 0x7A || arg0->id == 0x8A || arg0->id == 0x8D || arg0->id == 0xAD || arg0->id == 0xAE || arg0->id == 0xAF || arg0->id == 0xB1) {
+        type = 1;
+    } else if (arg0->id == 0 || arg0->id == 1 || arg0->id == 2 || arg0->id == 3 || arg0->id == 4 || arg0->id == 0x96 || arg0->id == 8 || arg0->id == 0xA || arg0->id == 0x11 || arg0->id == 0x14 || arg0->id == 0x16 || arg0->id == 0x1A || arg0->id == 0x21 || arg0->id == 0x22 || arg0->id == 0x26 || arg0->id == 0x27 || arg0->id == 0x31 || arg0->id == 0x36 || arg0->id == 0x3B || arg0->id == 0x3E || arg0->id == 0x50 || arg0->id == 0x53 || arg0->id == 0x54 || arg0->id == 0x58 || arg0->id == 0x5B || arg0->id == 0x64 || arg0->id == 0x69 || arg0->id == 0x71 || arg0->id == 0x6B || arg0->id == 0x72 || arg0->id == 0x76 || arg0->id == 0x79 || arg0->id == 0x80 || arg0->id == 0x86 || arg0->id == 0x87 || arg0->id == 0x88 || arg0->id == 0x90 || arg0->id == 0x97 || arg0->id == 0x98 || arg0->id == 0x9A || arg0->id == 0x9B || arg0->id == 0x9C || arg0->id == 0x9D || arg0->id == 0x9F || arg0->id == 0xA0 || arg0->id == 0xA2 || arg0->id == 0xA4 || arg0->id == 0xA5 || arg0->id == 0xA7 || arg0->id == 0xB0 || arg0->id == 0xB3 || arg0->id == 0xB5 || arg0->id == 0xB6) {
+        type = 0;
+    } else if (arg0->id == 0x25 || arg0->id == 0x25 || arg0->id == 0x92 || arg0->id == 0x95) {
+        type = 2;
+    } else if (arg0->id == 0x3F) {
+        type = 6;
+    } else if (arg0->id == 0x93) {
+        type = 5;
+    } else {
+        return;
+    }
+    if (arg1) {
+        func_151DC484(pos, scratch, type, arg2, arg3);
+        return;
+    }
+    func_151DC260(pos, scratch, type, arg2, arg3);
+}
+
 
 void func_151942B0(s32 arg0, s32 arg1, s32 arg2) {
-    func_15193CA0(arg1, 0, 0xFF, 1);
+    func_15193CA0((struct127 *)arg1, 0, 0xFF, 1);
 }
 
 void func_151942E8(s32 arg0, s32 arg1, s32 arg2) {
-    func_15193CA0(arg1, 1, 0xFF, 1);
+    func_15193CA0((struct127 *)arg1, 1, 0xFF, 1);
 }
 
 typedef struct Game1C1150Event {
@@ -158,7 +211,97 @@ void func_15194588(s32 arg0, s32 arg1, s32 arg2) {
     func_15194408(arg0, (Game1C1150Event *)arg1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1C1150/func_151945CC.s")
+typedef struct Game1945CCVec {
+    f32 x;
+    f32 y;
+    f32 z;
+} Game1945CCVec;
+
+typedef struct Game1945CCPacket {
+    s16 field00;
+    s16 field02;
+    s16 field04;
+    s16 field06;
+    Game1945CCVec position;
+    f32 field14;
+    f32 field18;
+    f32 field1C;
+    f32 field20;
+    f32 field24;
+    f32 field28;
+    s16 field2C;
+    s16 field2E;
+    s16 field30;
+    s16 field32;
+    s16 field34;
+    s16 field36;
+    s16 field38;
+    s16 field3A;
+    u8 field3C;
+    u8 pad3D[3];
+    f32 field40;
+    s16 field44;
+    s16 field46;
+    s32 field48;
+} Game1945CCPacket;
+
+extern u8 D_800A3FE6[];
+extern s32 func_15134070(struct127 *);
+extern void func_151B4CD0(void *, s32, s32);
+
+void func_151945CC(void *arg0, void *arg1, s32 arg2) {
+    Game1945CCVec pos;
+    s16 shade;
+    Game1945CCPacket packet;
+    u8 scratch[0x24];
+
+    shade = ((s32) *(u16 *)((u8 *)arg0 + 0x7A) >> 8) - 0x40;
+    pos.x = *(f32 *)((u8 *)arg1 + 0x14);
+    pos.y = *(f32 *)((u8 *)arg1 + 0x18) + 270.0;
+    pos.z = *(f32 *)((u8 *)arg1 + 0x1C);
+    {
+    s32 kind;
+    s32 profile;
+
+    func_1504715C((f32 *)scratch, (struct127 *)arg1);
+    kind = func_15134070((struct127 *)arg1);
+    if (kind != 0x63) {
+        profile = D_800A3FE6[kind << 4];
+        if (profile != 2) {
+            packet.position = pos;
+            packet.field14 = 6.699999809f;
+            packet.field18 = 2.329999924f;
+            packet.field1C = 0.6800000072f;
+            packet.field20 = 0.0f;
+            packet.field24 = 4.400000095f;
+            packet.field2C = 0xF;
+            packet.field2E = 0xC;
+            packet.field00 = shade - 0x40;
+            packet.field02 = 0x80;
+            packet.field04 = -0xA0;
+            packet.field06 = 0x20;
+            packet.field30 = 3;
+            packet.field32 = 1;
+            packet.field34 = 0x1F;
+            packet.field36 = 0x13;
+            packet.field38 = 0x9B;
+            packet.field3A = 0x64;
+            packet.field44 = 0x10;
+            packet.field46 = 0xF;
+            packet.field48 = 0;
+            packet.field28 = 5.300000191f;
+            packet.field40 = 0.5f;
+            if (profile == 1) {
+                packet.field3C = 1;
+            } else {
+                packet.field3C = 0;
+            }
+            func_15153F18(&packet.field00, &packet.position, (s32)scratch, 0xFF, 1);
+            func_151B4CD0(arg1, 0xFF, 1);
+        }
+    }
+    }
+}
 
 void func_151B01B8(s32, s32);
 void func_151B09BC(s32, s32, s32, s32, s32);
@@ -420,10 +563,10 @@ full_body:
     }
 }
 
-s32 func_15194FF4(s32, s32, s32, s32);
+void func_15194FF4();
 
 s32 func_15194D80(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    return func_15194FF4(arg0, arg1, 0, arg3);
+    func_15194FF4(arg0, arg1, 0, arg3);
 }
 
 s32 func_15194DA4(arg0, arg1, arg2, arg3)
@@ -432,7 +575,7 @@ s32 arg1;
 s32 arg2;
 s32 arg3;
 {
-    return func_15194FF4(arg0, arg1, 1, arg3);
+    func_15194FF4(arg0, arg1, 1, arg3);
 }
 
 void func_15194DC8(s32 arg0, struct127 *arg1, s32 arg2) {
@@ -485,9 +628,105 @@ void func_15194F48(s32 arg0, struct127* arg1, s32 arg2) {
     func_1507CD64(arg1, 6);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1C1150/func_15194FF4.s")
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    struct127 *unk8;
+} Struct15194FF4;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1C1150/func_151951E0.s")
+extern s32 func_1518F51C(void *arg0, u8 arg1, s32 arg2, s8 arg3, s8 arg4, s8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
+extern void func_15190518(void *arg0);
+
+void func_15194FF4(arg0, arg1, arg2)
+struct127 *arg0;
+struct127 *arg1;
+u8 arg2;
+{
+    u8 *ret;
+    Struct15194FF4 sp48;
+
+    func_15190518(arg1);
+    switch (arg1->id) {
+    case 0x0: case 0x1: case 0x2: case 0x3: case 0x4: case 0x11: case 0x14: case 0x16:
+    case 0x3b: case 0x50: case 0x53: case 0x58: case 0x5a: case 0x5f: case 0x70: case 0x74:
+    case 0x75: case 0x7a: case 0x80: case 0x87: case 0x88: case 0x90: case 0x96: case 0x98:
+    case 0x99: case 0x9c: case 0x9d: case 0x9f: case 0xa0: case 0xb0: case 0xb1: case 0xb2:
+    case 0xb4:
+        if (D_800BE616 != 0) {
+            sp48.unk0 = 0x7D;
+            sp48.unk4 = 5;
+            if ((arg0->id == 0xFF) && (arg0->unk124 != 0)) {
+                sp48.unk8 = &D_800CC2D0[arg0->unk124 - 1];
+            } else {
+                sp48.unk8 = arg0;
+            }
+            ret = (u8 *)func_1518F51C(arg1, 0, 250, arg2 ? 0 : -1, arg2 ? 0 : -1, 8, arg2 ? 1 : 0, arg2 ? 0xC : 0, 0xFF, 1);
+            if ((ret != 0) && (arg2 != 0)) {
+                memcpy(ret + 0x90, &sp48, 0xC);
+                {
+                    u8 *temp = (u8 *)arg1->unk31C;
+                    if (temp != NULL) {
+                        temp[0x1AC] = 1;
+                    }
+                }
+            }
+        } else {
+            func_1518F51C(arg1, 0, 300, -1, -1, 8, 0, 0, 0xFF, 1);
+        }
+        break;
+    }
+}
+
+extern struct127 *func_1505ED34(void);
+extern s32 func_150838EC(struct127 *arg0, s32 arg1, s32 arg2, f32 arg3);
+extern void func_150D10E4(void *arg0, u8 arg1);
+
+#define U8AT(p, off) (*(u8 *)((u8 *)(p) + (off)))
+#define F32AT(p, off) (*(f32 *)((u8 *)(p) + (off)))
+
+void func_151951E0(struct127 *arg0) {
+    struct127 *obj;
+
+    arg0->health = 0;
+    func_1507CD64(arg0, 5);
+    func_15194AB4(arg0);
+    arg0->interaction_state = 0x28;
+    arg0->xz_velocity = -3.0f;
+    F32AT(arg0, 0xBC) = -10.0f - (func_150ADA20() % 5U);
+    arg0->unk148 = (func_150ADA20() % 10U) - 5.0f;
+    arg0->y_velocity = 0.0f;
+    arg0->gravity = 0.0f;
+    obj = func_1505ED34();
+    obj->interaction_state = 0x28;
+    obj->id = arg0->id;
+    obj->immune = 0xFF;
+    obj->stunned = 0xFF;
+    obj->x_position = arg0->x_position;
+    obj->y_position = arg0->y_position;
+    obj->z_position = arg0->z_position;
+    obj->unk40 = arg0->unk40;
+    obj->unk76 = arg0->unk76;
+    obj->unk7A = arg0->unk7A;
+    obj->unkB8 = arg0->unkB8;
+    obj->xz_scale = arg0->xz_scale;
+    obj->y_scale = arg0->y_scale;
+    obj->xz_velocity = 10.0f;
+    F32AT(obj, 0xBC) = (func_150ADA20() % 5U) + 10.0f;
+    obj->unk148 = (func_150ADA20() % 10U) - 5.0f;
+    U8AT(obj, 0x68) = U8AT(arg0, 0x68);
+    U8AT(obj, 0x69) = U8AT(arg0, 0x69);
+    U8AT(obj, 0x6A) = U8AT(arg0, 0x6A);
+    U8AT(obj, 0x6B) = U8AT(arg0, 0x6B);
+    U8AT(obj, 0x6C) = U8AT(arg0, 0x6C);
+    U8AT(obj, 0x6D) = U8AT(arg0, 0x6D);
+    obj->unk76 += (func_150ADA20() % 10922U) - 5461.33349609375f;
+    obj->unk40 = (arg0->unk76 + 0x4000) * 0.0054931640625f;
+    obj->unkF8 = arg0->unkF8;
+    obj->unk9C |= 0x0FFF0000;
+    func_150838EC(obj, arg0->unk84.uh, 0, arg0->animation_speed);
+    func_150D10E4(arg0, 0);
+    func_150D10E4(obj, 1);
+}
 
 extern f32 D_800A8708;
 extern void func_1514373C(f32, f32, f32 *, f32 *);

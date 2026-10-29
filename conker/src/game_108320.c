@@ -22,7 +22,123 @@ struct Foo150DB2D8 {
 };
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_108320/func_150DAE70.s")
+typedef struct {
+    f32 x, y, z;
+} Vec3_150DAE70;
+
+typedef struct {
+    u8  unk0;
+    u8  pad1;
+    s16 unk2;
+    s16 unk4;
+    u8  pad6[2];
+    s32 unk8;
+    s32 unkC;
+    u8  unk10;
+    u8  unk11;
+    u8  unk12;
+    u8  unk13;
+    u8  pad14[8];
+    Vec3_150DAE70 pos;
+    Vec3_150DAE70 dir;
+    f32 scale[3];
+    s32 unk40;
+    u8  unk44;
+    u8  unk45;
+    u8  pad46[0x12];
+} Spawn150DAE70;
+
+typedef struct {
+    u8  pad0[0x110];
+    Vec3_150DAE70 vel;
+    f32 unk11C;
+    f32 unk120;
+    f32 unk124;
+    f32 unk128;
+    f32 unk12C;
+    f32 unk130;
+    f32 unk134;
+    u8  unk138;
+} Obj150DAE70;
+
+extern void func_15143134(void *, Vec3_150DAE70 *, s32);
+typedef struct {
+    u8  pad0[0x110];
+    s32 unk110;
+    s32 unk114;
+    s32 unk118;
+    s32 unk11C;
+    s32 unk120;
+} Struct150DB518Obj;
+
+extern Struct150DB518Obj *func_1513D524(s32 arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8);
+extern Vec3_150DAE70 D_80088910[];
+extern Vec3_150DAE70 D_8008891C[];
+extern s32 D_80088928[];
+extern f32 D_8008892C[];
+extern s16 D_80088930[];
+extern f32 D_80088934[];
+extern f32 D_80088938[];
+extern f32 D_8008893C[];
+extern u8 D_80088940[];
+extern f32 D_80088944[];
+extern f32 D_80088948[];
+
+void func_150DAE70(void *arg0, s32 arg1, u8 arg2, s32 arg3) {
+    s32 base;
+    Vec3_150DAE70 from;
+    Vec3_150DAE70 to;
+    Vec3_150DAE70 vel;
+    Spawn150DAE70 spawn;
+    f32 distSq;
+    f32 inv;
+    Obj150DAE70 *obj;
+    s32 bones;
+
+    if (arg0 != NULL) {
+        bones = *(s32 *)((u8 *)arg0 + 0x1D4);
+        if (bones != 0) {
+            base = (D_80088928[arg1] << 6) + bones;
+            func_15143134(&D_80088910[arg1], &from, base);
+            func_15143134(&D_8008891C[arg1], &to, base);
+            vel.x = D_8008892C[arg1] * (to.x - from.x);
+            vel.y = D_8008892C[arg1] * (to.y - from.y);
+            vel.z = D_8008892C[arg1] * (to.z - from.z);
+            distSq = (vel.x * vel.x) + (vel.z * vel.z);
+            if (!(fabsf(distSq) < 9.999999747e-05f)) {
+spawn.unk0 = 0x17;
+spawn.unkC = 0x243A;
+spawn.unk8 = 0;
+spawn.unk40 = 0x401;
+spawn.unk4 = D_80088930[arg1];
+spawn.unk44 = 0xFF;
+spawn.unk45 = 0xFF;
+spawn.unk12 = 0xC8; spawn.unk11 = 0xC8; spawn.unk10 = 0xC8;
+spawn.unk13 = 0xC8;
+spawn.unk2 = 0x401;
+                spawn.pos = from;
+                spawn.scale[0] = 1.0f;
+                spawn.scale[1] = 1.0f;
+                inv = 1.0f / sqrtf(distSq);
+                spawn.scale[2] = 1.0f;
+                spawn.dir.x = vel.z * inv;
+                spawn.dir.y = 0.0f;
+                spawn.dir.z = vel.x * inv;
+                obj = (Obj150DAE70 *)func_1513D524((s32)&spawn, 9, 0, 0, 7, 0, 0x2C, arg2, arg3);
+                if (obj != NULL) {
+                    obj->vel = vel;
+                    obj->unk11C = D_80088934[arg1];
+                    obj->unk120 = D_80088938[arg1];
+                    obj->unk12C = D_80088944[arg1];
+                    obj->unk130 = D_80088948[arg1];
+                    obj->unk124 = obj->unk128 = 1.0f;
+                    obj->unk134 = D_8008893C[arg1];
+                    obj->unk138 = D_80088940[arg1];
+                }
+            }
+        }
+    }
+}
 
 typedef struct {
     f32 vel[3];   /* 0x110 */
@@ -153,16 +269,6 @@ typedef struct {
     u8  pad46[0x12];
 } Struct150DB518;
 
-typedef struct {
-    u8  pad0[0x110];
-    s32 unk110;
-    s32 unk114;
-    s32 unk118;
-    s32 unk11C;
-    s32 unk120;
-} Struct150DB518Obj;
-
-extern Struct150DB518Obj *func_1513D524(s32 arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8);
 
 void func_150DB518(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s16 arg5, u8 arg6, s32 arg7) {
     Struct150DB518 sp38;
