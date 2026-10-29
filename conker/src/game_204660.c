@@ -436,7 +436,7 @@ typedef struct Sub151D7A38 {
 typedef struct Obj151D7A38 {
     /* 0x00 */ u8 pad0[0x10];
     /* 0x10 */ Vec151D7A38 pos;
-    /* 0x1C */ u8 pad1C[2];
+    /* 0x1C */ s16 unk1C;
     /* 0x1E */ u16 unk1E;
     /* 0x20 */ u8 pad20[5];
     /* 0x25 */ u8 unk25;
@@ -444,7 +444,8 @@ typedef struct Obj151D7A38 {
     /* 0x2C */ s8 unk2C;
     /* 0x2D */ s8 unk2D;
     /* 0x2E */ s8 unk2E;
-    /* 0x2F */ u8 pad2F[0x65];
+    /* 0x2F */ u8 pad2F[0x55];
+    /* 0x84 */ u8 unk84[0x10];
     /* 0x94 */ Entry151D7A38 *entries;
     /* 0x98 */ Sub151D7A38 *sub;
 } Obj151D7A38;
@@ -638,7 +639,159 @@ s32 func_151D7CD0(Obj151D7A38 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_204660/func_151D80C4.s")
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+} Mode151D80C4;
+typedef struct {
+    u8 pad0[0xC];
+} Tex151D80C4;
+extern Tex151D80C4 D_80090B60[];
+extern Mode151D80C4 D_800A4AC8[];
+extern s32 D_800D2C9C;
+void func_151D5D60(void *, s16, s32, void **, u8 *);
+Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
+Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
+Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
+Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
+
+extern u8 D_80090CD4[];
+
+Gfx *func_151D80C4(Obj151D7A38 *arg0, Gfx *gfx, s16 arg2) {
+    Sub151D7A38 *sub;
+    Vec151D7A38 cur;
+    Vec151D7A38 prev;
+    s32 i;
+    s32 j;
+    Entry151D7A38 *entries;
+    u8 update;
+    u8 prevA;
+    u8 curA;
+    u8 alpha;
+    s32 last;
+    Entry151D7A38 *p;
+    f32 prevU;
+    f32 curU;
+    f32 dx;
+    Vtx *vtx;
+    f32 dz;
+
+    if (arg0->unk2C < 2) {
+        return gfx;
+    }
+    sub = arg0->sub;
+    entries = arg0->entries;
+    func_151D5D60(arg0->unk84, arg2, (arg0->unk25 * 2 + 10) * sizeof(Vtx), (void **)&vtx, 0);
+    if (vtx == NULL) {
+        return gfx;
+    }
+    update = 1;
+    gfx = func_15142E24(gfx, (s32)D_80090CD4, 0, 0, 0, 0, 0x1F, 0, 0, &update, 0x3E);
+    gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
+    gfx = func_1513F4E4(gfx, 0x4C, &update);
+    gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[1].unk0 | D_800A4AC8[1].unk4, &update);
+    if (arg0->unk1E & 2) {
+        i = arg0->unk2E - 1;
+        if (i < 0) {
+            i = arg0->unk25 - 1;
+        }
+        prev = arg0->pos;
+        prevA = 0;
+        prevU = sub->unk18;
+    } else {
+        j = arg0->unk2E - 1;
+        if (j < 0) {
+            j = arg0->unk25 - 1;
+        }
+        i = j - 1;
+        if (i < 0) {
+            i = arg0->unk25 - 1;
+        }
+        prev = entries[j].pos;
+        prevA = entries[j].unk14;
+        prevU = entries[j].unk18;
+    }
+    p = (Entry151D7A38 *)((u8 *)entries + i * sizeof(Entry151D7A38));
+    cur = p->pos;
+    dx = D_800DD1E8[arg2] * 5.5f;
+    curA = p->unk14;
+    dz = D_800DD1D8[arg2] * 5.5f;
+    curU = p->unk18;
+    if (arg0->unk1E & 8) {
+        alpha = arg0->unk1C * 12;
+    } else {
+        alpha = 0xFF;
+    }
+    prevA = (prevA * alpha) >> 8;
+    vtx->v.ob[0] = prev.x + dx;
+    vtx->v.ob[1] = prev.y;
+    vtx->v.ob[2] = prev.z - dz;
+    vtx->v.tc[0] = prevU;
+    vtx->v.tc[1] = 0x800;
+    vtx->v.cn[0] = 0xFF;
+    vtx->v.cn[1] = 0xFF;
+    vtx->v.cn[2] = 0xFF;
+    vtx->v.cn[3] = prevA;
+    vtx->v.flag = 0;
+    vtx++;
+    vtx->v.ob[0] = prev.x - dx;
+    vtx->v.ob[1] = prev.y;
+    vtx->v.ob[2] = prev.z + dz;
+    vtx->v.tc[0] = prevU;
+    vtx->v.tc[1] = 0;
+    vtx->v.cn[0] = 0xFF;
+    vtx->v.cn[1] = 0xFF;
+    vtx->v.cn[2] = 0xFF;
+    vtx->v.cn[3] = prevA;
+    vtx->v.flag = 0;
+    vtx++;
+    do {
+        curA = (curA * alpha) >> 8;
+        vtx->v.ob[0] = cur.x + dx;
+        vtx->v.ob[1] = cur.y;
+        vtx->v.ob[2] = cur.z - dz;
+        vtx->v.tc[0] = curU;
+        vtx->v.tc[1] = 0x800;
+        vtx->v.cn[0] = 0xFF;
+        vtx->v.cn[1] = 0xFF;
+        vtx->v.cn[2] = 0xFF;
+        vtx->v.cn[3] = curA;
+        vtx->v.flag = 0;
+        vtx++;
+        vtx->v.ob[0] = cur.x - dx;
+        vtx->v.ob[1] = cur.y;
+        vtx->v.ob[2] = cur.z + dz;
+        vtx->v.tc[0] = curU;
+        vtx->v.tc[1] = 0;
+        vtx->v.cn[0] = 0xFF;
+        vtx->v.cn[1] = 0xFF;
+        vtx->v.cn[2] = 0xFF;
+        vtx->v.cn[3] = curA;
+        vtx->v.flag = 0;
+        vtx++;
+        gSPVertex(gfx++, vtx - 4, 4, 0);
+        gSP1Triangle(gfx++, 0, 1, 2, 0);
+        gSP1Triangle(gfx++, 1, 3, 2, 0);
+        if (curU < prevU) {
+            memcpy(vtx, vtx - 2, sizeof(Vtx) * 2);
+            vtx[-2].v.tc[0] -= 0x8000;
+            vtx++;
+            vtx[-2].v.tc[0] -= 0x8000;
+            vtx++;
+        }
+        last = i;
+        i--;
+        if (i < 0) {
+            i = arg0->unk25 - 1;
+        }
+                p = (Entry151D7A38 *)((u8 *)entries + i * sizeof(Entry151D7A38));
+        cur = p->pos;
+        curA = p->unk14;
+        prevU = entries[last].unk18;
+        curU = p->unk18;
+    } while (last != arg0->unk2D);
+    return gfx;
+}
 
 extern f32 D_800AB2EC;
 extern f32 D_800AB2F0;
