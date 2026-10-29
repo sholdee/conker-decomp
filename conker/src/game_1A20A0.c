@@ -5,8 +5,6 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1A20A0/func_15174BF0.s")
-
 typedef struct Game174BF0Actor {
     u8 pad0[0x90];
     s8 group, phase;
@@ -29,6 +27,94 @@ typedef struct Game174FA4Surface {
     s32 height;
     u8 pad04[0xC];
 } Game174FA4Surface;
+
+void *func_15167A68(s32, s32, s32, s32, u8, u8);
+u32 func_150ADA20(void);
+u16 func_10010E78(u16 arg0, s32 arg1, u16 arg2, s32 arg3, s32 arg4,
+                   s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9,
+                   s32 argA);
+s32 func_1510F8D8(s32, s32, s32, s32 *);
+extern u8 D_800A7170[];
+extern s32 D_800DDE88[];
+
+void func_15174BF0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
+                   f32 arg6, f32 arg7, s32 arg8) {
+    Game174BF0Actor *actor;
+    f32 height;
+    s32 x;
+    s32 z;
+    s32 angle;
+    s32 yaw;
+    s32 index;
+    s32 flag;
+    s32 sel;
+    s32 off;
+    struct17 diff;
+    u32 sflags;
+    s32 surface;
+
+    height = (f32)arg3;
+    diff.unk0 = (f32)arg2 - *(f32 *)((u8 *)D_800DBFF0 + arg5 * 0x9A0 + 0x2F8);
+    diff.unk4 = height - *(f32 *)((u8 *)D_800DBFF0 + arg5 * 0x9A0 + 0x2FC);
+    diff.unk8 = (f32)arg4 - *(f32 *)((u8 *)D_800DBFF0 + arg5 * 0x9A0 + 0x300);
+    angle = (s32)func_15048FC8(&diff);
+    index = 0;
+    if (arg0 > 0) {
+        do {
+            actor = func_15167A68(0xA, 0, 0xF8, 1, 0xFF, 1);
+            if (actor == NULL) return;
+            flag = arg8 & 1;
+            x = (s32)(func_150ADA20() & 0x7F) + arg2 - 0x3F;
+            z = (s32)(func_150ADA20() & 0x7F) + arg4 - 0x3F;
+            actor->group = arg1;
+            actor->flags = 3;
+            actor->y = height;
+            actor->x = (f32)x;
+            actor->z = (f32)z;
+            actor->timer = func_150ADA20() % 15U + 0xA;
+            actor->enabled = 1;
+            yaw = (s32)(func_150ADA20() & 0x1F) + angle - 0xF;
+            if (yaw < 0) {
+                yaw += 360;
+            } else if (yaw >= 360) {
+                yaw -= 360;
+            }
+            actor->pitch = (f32)((s32)(func_150ADA20() & 0x1F) - 0xF);
+            actor->yaw = (f32)yaw;
+            actor->roll = 0.0f;
+            actor->velocity = -1.0f;
+            actor->yawStep = (f32)((s32)(func_150ADA20() & 0xFF) - 0x80) * 0.009999999776f;
+            actor->fieldBC = 0.0f;
+            actor->scale = (f32)(s32)(func_150ADA20() & 0xFFFF) * 0.000030517578125f * arg7 + arg6;
+            sel = func_150ADA20() & 1;
+            actor->model = (u8 *)*(s32 *)((u8 *)D_800DDE88 + sel * 20);
+            actor->modelIndex = sel;
+            if (index == 0) {
+                actor->sound = func_10010E78(0, 0xA2, 0x7D00, 0, 0, 0, x, arg3, z, 0x3E8, 0xFA0);
+            } else {
+                actor->sound = 0;
+            }
+            actor->surfaceFlags = 0;
+            if (flag) {
+                actor->flags |= 0x80;
+                actor->baseHeight = (f32)func_1510F8D8(x, arg3, z, &surface);
+                if (surface != 0) {
+                    off = (surface - D_800DBE3C) / 12;
+                    sflags = ((u32 *)D_800DBE5C)[off];
+                } else {
+                    sflags = 0;
+                }
+                actor->surfaceFlags = sflags;
+                actor->brightness = D_800A7170[(sflags >> 5) & 3];
+            } else {
+                actor->brightness = 0;
+            }
+            actor->opacity = 0;
+            actor->fieldF1 = 0;
+            index++;
+        } while (index != arg0);
+    }
+}
 
 void *func_15167A68(s32, s32, s32, s32, u8, u8);
 s32 func_150A3A70(s32, s32);
