@@ -262,7 +262,84 @@ struct vtx151857DC *func_15185DD4(struct vtx151857DC *arg0, s32 arg1, s32 arg2, 
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1B1600/func_15185F24.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1B1600/func_1518652C.s")
+extern s32 func_1510F720(s32, s32, s32, u8 **);
+extern s32 func_150A5B90(u32 *, s32, s32, s32);
+extern u32 *D_800D3694;
+extern void func_1510F800(s32);
+extern s32 D_800D3690;
+extern s32 D_800DF0E8;
+extern s32 D_800DF0EC;
+extern s32 D_800DF0F0;
+extern s32 D_800DF0F4;
+
+s32 func_1518652C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
+    u8 *list[16];
+    s32 count;
+    u32 bits[187];
+    u32 v;
+    u8 *p;
+    u32 max;
+    s32 c;
+
+    max = 0;
+    func_1510F800(0);
+    count = func_1510F720(arg0, arg1, arg2, list);
+    if (count != 0) {
+    bzero(bits, sizeof(bits));
+    while (count != 0) {
+        v = 0;
+        count--;
+        p = list[count] + 0xE;
+        if (D_800DE041 != 0) {
+            while (*p != 0) {
+                c = *p;
+                if (c & 0x80) {
+                    v = *p++ << 8;
+                    v |= *p++;
+                    v &= 0x7FFF;
+                } else {
+                    v += c;
+                    p += 1;
+                }
+                if (v < 0x1760) {
+                    if ((*(u8 **)&D_800D3668)[v] == 1) {
+                        bits[v >> 5] |= 1 << (v & 0x1F);
+                        if (max < v) {
+                            max = v;
+                        }
+                    }
+                }
+            }
+        } else {
+            while (*p != 0) {
+                c = *p;
+                if (c & 0x80) {
+                    v = *p++ << 8;
+                    v |= *p++;
+                    v &= 0x7FFF;
+                } else {
+                    v += c;
+                    p += 1;
+                }
+                if (v < 0x1760) {
+                    bits[v >> 5] |= 1 << (v & 0x1F);
+                    if (max < v) {
+                        max = v;
+                    }
+                }
+            }
+        }
+    }
+    D_800D3690 = D_800DBE3C;
+    D_800D3694 = &bits[max >> 5] + 1;
+    D_800DF0E8 = arg0 - arg2;
+    D_800DF0EC = arg0 + arg2;
+    D_800DF0F0 = arg1 - arg2;
+    D_800DF0F4 = arg1 + arg2;
+    return (func_150A5B90(bits, arg3, arg4, arg5) - arg3) / 20;
+    }
+    return 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1B1600/func_15186794.s")
 
