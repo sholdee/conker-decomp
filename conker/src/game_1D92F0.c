@@ -108,7 +108,140 @@ void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s3
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1D92F0/func_151ABE40.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1D92F0/func_151AC078.s")
+typedef struct {
+    /* 0x00 */ u8 unk0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ s16 unk2;
+    /* 0x04 */ u16 unk4;
+    /* 0x08 */ f32 unk8;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ s16 unk18;
+    /* 0x1A */ u16 unk1A;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+} FxSprayParams;
+
+typedef struct {
+    f32 pos[3];
+    s16 unkC;
+    s16 unkE;
+    s32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 pad16[2];
+} FxSpraySpawn;
+
+typedef struct {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    u8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+    u8 pad1C[4];
+} FxSprayPart;
+
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8;
+    s32 unkC;
+    s32 unk10;
+    s32 unk14;
+    s32 unk18;
+    u8 unk1C;
+    u8 unk1D;
+    u8 pad1E[2];
+} FxSprayStyle;
+
+extern s8 D_800A9021[];
+extern FxSprayParams D_800A9068[];
+extern u8 D_800AB3F4[];
+extern u8 D_800AB404[];
+extern s32 func_15147DA0(FxSpraySpawn *, FxSprayPart *, s32, s32, s32, s32, s32, s32, s32, s32, s32, FxSprayStyle *, s32, s32, s32);
+
+s32 func_151AC078(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, ObjectSpawnPayload *argD, u8 argE) {
+    FxSprayParams *params;
+    FxSpraySpawn spawn;
+    FxSprayPart part;
+    s32 pad0;
+    FxSprayStyle style;
+    f32 sinA;
+    f32 cosA;
+    f32 speed;
+    f32 t;
+    s32 v;
+    s16 angle;
+    f32 sinB;
+    f32 cosB;
+    s32 pad1;
+    s32 a;
+    s32 b;
+    s32 pad2;
+
+    params = &D_800A9068[D_800A9021[argB * 5]];
+    sinA = func_151423D8((u8)arg8);
+    cosA = func_151423D8((u8)(arg8 - 0x40));
+    style.unk0 = 0;
+    style.unk4 = 1;
+    style.unk8 = 0x160600;
+    style.unkC = 1;
+    style.unk10 = 0x10;
+    style.unk14 = 0x80;
+    style.unk18 = 0x20;
+    style.unk1C = 0;
+    style.unk1D = 9;
+    spawn.unk10 = 1;
+    spawn.unkE = 1;
+    spawn.pos[1] = arg3;
+    part.unk14 = arg3;
+    spawn.pos[0] = arg2;
+    spawn.pos[2] = arg4;
+    part.unk19 = D_800AB3F4[argD->field_0x08];
+    part.unk1A = 0xFF;
+    if (D_800AB404[argD->field_0x08]) {
+        v = 0x20;
+    } else {
+        v = 0;
+    }
+    part.unk18 = v | 8;
+    {
+        s32 pad;
+    }
+    if (func_150ADA68() < params->unk2C) {
+        part.unk18 |= 3;
+        a = 6;
+        b = 2;
+    } else {
+        a = 0;
+        b = 0;
+        part.unk18 &= ~3;
+    }
+    part.unk1B = (func_150ADA20() % (params->unk1 + 1)) + params->unk0;
+    angle = (func_150ADA20() % (params->unk4 + 1)) + params->unk2;
+    sinB = func_151423D8((u8)angle);
+    cosB = func_151423D8((u8)(angle - 0x40));
+    speed = func_150ADA68() * params->unkC + params->unk8;
+    t = speed * sinB;
+    part.unk4 = t * cosA;
+    part.unk8 = -speed * cosB;
+    part.unkC = t * sinA;
+    spawn.unk15 = (func_150ADA20() % (params->unk14 + 1)) + params->unk10;
+    spawn.unkC = (func_150ADA20() % (params->unk1A + 1)) + params->unk18;
+    part.unk0 = func_150ADA68() * params->unk20 + params->unk1C;
+    part.unk10 = func_150ADA68() * params->unk28 + params->unk24;
+    func_15147DA0(&spawn, &part, 0, 1, 8, 0, a, b, 0, 0, 0, &style, argD->field_0x00, argE, argD->field_0x04);
+    return 1;
+}
 
 s32 func_151AC3CC(s16 *arg0) {
     u8 *ptr = *(u8 **)((u8 *)arg0 + 0x98);
