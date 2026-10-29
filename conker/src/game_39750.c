@@ -1,7 +1,9 @@
+#define func_1513D2F0 func_1513D2F0_hdr
 #include <ultra64.h>
 
 #include "functions.h"
 #include "variables.h"
+#undef func_1513D2F0
 
 
 void func_1500C2A0(void) {
@@ -152,7 +154,128 @@ void func_1500C2F0(s32 arg0, f32 arg1) {
     }
 }
 #pragma GLOBAL_ASM("asm/nonmatchings/game_39750/func_1500C8D0.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_39750/func_1500CE4C.s")
+typedef struct {
+    /* 0x00 */ u8 unk00;
+    /* 0x01 */ u8 unk01;
+    /* 0x02 */ s16 unk02;
+    /* 0x04 */ s16 unk04;
+    u8 pad06[2];
+    /* 0x08 */ s32 unk08;
+    /* 0x0C */ s32 unk0C;
+    /* 0x10 */ u8 unk10;
+    /* 0x11 */ u8 unk11;
+    /* 0x12 */ u8 unk12;
+    /* 0x13 */ u8 unk13;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ f32 unk34;
+    /* 0x38 */ f32 unk38;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ s32 unk40;
+    /* 0x44 */ u8 unk44;
+    /* 0x45 */ u8 unk45;
+    /* 0x46 */ u8 unk46;
+    /* 0x47 */ u8 unk47;
+    /* 0x48 */ s32 unk48;
+} Spawn_1500CE4C; /* size 0x4C */
+
+typedef struct {
+    /* 0x00 */ f32 unk00;
+    /* 0x04 */ f32 unk04;
+    /* 0x08 */ f32 unk08;
+    /* 0x0C */ f32 unk0C;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+} Extra_1500CE4C; /* size 0x1C */
+
+void *func_1513D2F0(void *arg0, void *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, u8 argA, s32 argB);
+void *memcpy(void *, const void *, u32);
+
+void func_1500CE4C(s32 arg0, f32 arg1) {
+    f32 phi_f26;
+    s32 pad;
+
+    phi_f26 = func_1514462C(arg0) * arg1 * 2.000000023e-07f;
+    if (phi_f26 > 1.0f) {
+        f32 temp_f22;
+        f32 phi_f20;
+        f32 temp_f2;
+        Spawn_1500CE4C spawn;
+        Extra_1500CE4C extra;
+        f32 sp98;
+        f32 sp94;
+        f32 temp_f0;
+        void *ret;
+        s32 pad2;
+        s32 pad3;
+
+        spawn.unk00 = 0x57;
+        spawn.unk01 = 0;
+        spawn.unk02 = 0x3B03;
+        spawn.unk04 = 0x12C;
+        spawn.unk08 = 0;
+        spawn.unk0C = 0;
+        spawn.unk13 = 0xFF;
+        spawn.unk34 = 0.0f;
+        spawn.unk38 = 0.0f;
+        spawn.unk3C = 0.0f;
+        spawn.unk40 = 0x037C0000;
+        spawn.unk45 = 0xFF;
+        spawn.unk46 = 0;
+        spawn.unk47 = 6;
+        extra.unk14 = 0.0f;
+        spawn.unk10 = 0xFF;
+        spawn.unk11 = 0xFF;
+        spawn.unk12 = 0xFF;
+        temp_f22 = 1.525902189e-05f;
+        do {
+            extern s32 D_800A4AA0;
+
+            temp_f0 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 12.0f) + 10.0f;
+            spawn.unk14 = temp_f0;
+            spawn.unk18 = temp_f0;
+            func_15008340(arg0, &spawn.unk1C, &spawn.unk24, &sp98, &sp94);
+            phi_f20 = sp98 - sp94;
+            temp_f2 = ((((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22) * (phi_f20 * 0.5f)) + (sp94 + (phi_f20 * 0.25f));
+            extra.unk00 = temp_f2;
+            {
+            f32 temp_f12;
+            temp_f12 = fabsf(temp_f2 - sp98);
+            spawn.unk20 = temp_f2;
+            temp_f0 = fabsf(temp_f2 - sp94);
+            if (temp_f0 < temp_f12) {
+                phi_f20 = temp_f0;
+            } else {
+                phi_f20 = temp_f12;
+            }
+            extra.unk04 = ((((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 0.75f) + 0.25f) * phi_f20;
+            }
+            temp_f0 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22);
+            extra.unk08 = (temp_f0 + temp_f0) * 3.141592741f;
+            extra.unk0C = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 0.01300000027f) + 0.005000000354f;
+            extra.unk10 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22);
+            extra.unk18 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22);
+            spawn.unk28 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 360.0f);
+            spawn.unk2C = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 360.0f);
+            spawn.unk30 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 360.0f);
+            spawn.unk44 = (osGetCount() * func_150ADA20()) % 156U + 100;
+            func_1510F800(0);
+            spawn.unk48 = func_1510FD20(spawn.unk1C, spawn.unk24);
+            ret = func_1513D2F0(&spawn, &D_800A4AA0, 0x23, 0, 0, 0x1E, 0, 3, 0xFF, 0x1C, 0xFF, 1);
+            if (ret != NULL) {
+                memcpy((u8 *)ret + 0x110, &extra, sizeof(extra));
+            }
+            phi_f26 -= 1.0f;
+        } while (phi_f26 > 1.0f);
+    }
+}
 
 void func_1500D3AC(s32 arg0, f32 arg1) {
     f32 phi_f30;
