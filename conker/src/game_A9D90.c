@@ -147,7 +147,179 @@ void func_1507CD0C(struct127 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A9D90/func_1507CD64.s")
+typedef struct CD64Inner {
+    u8 pad0[0x46];
+    s16 unk46;
+    u8 pad48[0xD8];
+    u8 unk120;
+    u8 unk121;
+    u8 pad122[0x8A];
+    u8 unk1AC;
+} CD64Inner;
+
+typedef struct CD64Msg {
+    struct127 *obj;
+    u8 id;
+} CD64Msg;
+
+extern u8 D_800D18A9;
+extern s16 D_800E0AD0[];
+void func_15169040(void *, s32);
+void func_1504BAF0(struct127 *);
+void func_150E7994(s16, f32, u8, s32);
+
+void func_1507CD64(struct127 *arg0, s32 arg1) {
+    f32 f;
+    s32 sound;
+    u32 r;
+    s32 mode;
+    s32 index;
+    CD64Msg msg;
+    struct127 *saved;
+    s32 changed;
+    s32 flag;
+
+    if (arg0->unk31C == NULL) {
+        return;
+    }
+    index = ((s32)arg0 - (s32)&D_800CC2D0) / (s32)sizeof(struct127);
+    if (index >= D_8008FD8C) {
+        return;
+    }
+    if (((CD64Inner *)arg0->unk31C)->unk120 != 0) {
+        if (arg1 != 9 || arg1 == ((CD64Inner *)arg0->unk31C)->unk121) {
+            return;
+        }
+        changed = 1;
+    } else {
+        changed = 0;
+    }
+    ((CD64Inner *)arg0->unk31C)->unk121 = arg1;
+    if (D_800BE616 != 0 && changed == 0) {
+        if (index < 16) {
+            D_800E0AD0[index]++;
+        }
+        if ((D_8008FDBC & 0x20) && *(u8 *)((u8 *)arg0 + 0x128) == 0) {
+            func_15085710(1, 10, 1);
+        }
+    }
+    msg.obj = arg0;
+    msg.id = arg0->unique_id;
+    func_15169040(&msg, 3);
+    D_800D18A9 = 0;
+lbl2:
+    sound = -1;
+    flag = 0;
+    mode = 0;
+    if (((CD64Inner *)arg0->unk31C)->unk1AC) {
+        D_800D18A9 = 2;
+    }
+    switch (arg1) {
+    case 11:
+        sound = 0x2D4;
+        break;
+    case 12:
+        sound = 0x2D6;
+        break;
+    case 0:
+        sound = 0x58;
+        break;
+    case 1:
+        sound = 0x13;
+        flag = 1;
+        break;
+    case 2:
+        sound = 7;
+        flag = 1;
+        break;
+    case 3:
+        sound = 0x28;
+        D_800D18A9 = 1;
+        break;
+    case 4:
+        sound = 0x24;
+        mode = 1;
+        D_800D18A9 = 1;
+        break;
+    case 5:
+        sound = 0x24;
+        mode = 1;
+        D_800D18A9 = 3;
+        break;
+    case 6:
+        if (arg0->interaction_state == 1 || arg0->interaction_state == 0x15 || arg0->unk5 == 3 ||
+            arg0->unk65 != 0) {
+            sound = 0x170;
+        }
+        mode = 1;
+        break;
+    case 7:
+        sound = 0x16F;
+        break;
+    case 8:
+        sound = 0x170;
+        mode = 1;
+        D_800D18A9 = 3;
+        break;
+    case 15:
+        sound = 0x170;
+        mode = 3;
+        D_800D18A9 = 3;
+        break;
+    case 9:
+        mode = 2;
+        break;
+    case 10:
+        sound = 0x2F;
+        D_800D18A9 = 3;
+        break;
+    case 14:
+        sound = 0x1E;
+        mode = 1;
+        break;
+    case 13:
+        sound = 0x2D8;
+        mode = 1;
+        break;
+    case 16:
+        sound = 0xF6;
+        mode = 1;
+        break;
+    }
+    if (sound != -1) {
+        func_1505E650(arg0, sound, 1.0f, 3.0f, 0.0f, 0.0f, flag);
+    }
+    arg0->health = 0;
+    arg0->immune = 0xFF;
+    arg0->stunned = 0xFF;
+    arg0->disable_run = 0xFF;
+    arg0->unkF8 |= 0x200;
+    arg0->unkE4 = 0;
+    arg0->unkE6 = 0;
+    arg0->xz_velocity = 0.0f;
+    ((CD64Inner *)arg0->unk31C)->unk46 = 0;
+    if (arg0->unk13C != 0) {
+        saved = D_800D154C;
+        D_800D154C = arg0;
+        func_1504BAF0(arg0);
+        D_800D154C = saved;
+    }
+    if (mode == 0 || mode == 3) {
+        ((CD64Inner *)arg0->unk31C)->unk120 = 1;
+    } else {
+        func_1507C8E0(arg0, 0);
+    }
+    if (mode == 2) {
+        ((CD64Inner *)arg0->unk31C)->unk120 = 0xB;
+    } else if (mode == 3) {
+        func_1507D4F8(index);
+    }
+    if (index == 0 && D_800BE9F0 == 4) {
+        r = func_150ADA20();
+        f = func_150ADA68();
+        func_150E7994((s16)(r % 3 + 4), f * 0.1f + 0.3f, 0xFF, 0);
+    }
+}
 void func_1509BFB0(s32 num, s32, s32, ...);
 extern struct127 D_800CC40F[];
 
