@@ -20,6 +20,8 @@ Workspaces never touch the main tree; `land` is the only writer, and it re-gates
   mw.py rm    FUNC             delete a workspace
   mw.py similar FUNC [-n N]    matched twins (identical code modulo symbols/regs/imms) + near twins
   mw.py note  FUNC [text…]     append to / print the attempt ledger (survives resumes)
+  mw.py near  [-n N] [--backfill]
+                               ratchet queue: best attempt of every open function, closest first
 
 Builds run inside the `conker-tc` podman container (see tools/toolchain/).
 """
@@ -189,7 +191,10 @@ def cmd_new(a):
     if ws.exists():
         if not a.force:
             sys.exit(f"{ws} exists (use --force to recreate)")
-        shutil.rmtree(ws)
+        attic = WS_ROOT / ".attic"
+        attic.mkdir(exist_ok=True)
+        import time
+        os.rename(ws, attic / f"{func}.{time.strftime('%Y%m%d-%H%M%S')}")  # ratchet: never delete work
     # Snapshot main under a shared lock so a concurrent `land` can't be mid-build.
     with open(LOCK, "a") as lk:
         fcntl.flock(lk, fcntl.LOCK_SH)
@@ -224,17 +229,20 @@ def cmd_new(a):
     if r.returncode or not r.stdout.strip():
         r = run(f"python3 ../tools/mips_to_c/m2c.py {asm}", wc, timeout=120)
     (ws / "m2c.c").write_text(r.stdout or r.stderr)
-    seed = REPO / ".nearmiss" / f"{func}.json"
+    seed = NEAR / f"{func}.json"
     if seed.exists():
         js = json.loads(seed.read_text())
-        (ws / "prev.c").write_text(f"/* prior best attempt (old score {js.get('score')}); may be a good start */\n"
-                                   + js.get("c", ""))
+        how = (f"{js['same']}/{js['n']} words, rows S/R/I {js.get('structural')}/{js.get('register')}/"
+               f"{js.get('immediate')}" if "same" in js else f"old score {js.get('score')}")
+        (ws / "prev.c").write_text(f"/* best earlier attempt ({how}); start from it */\n" + js.get("c", ""))
+        if (NEAR / f"{func}.c").exists():
+            shutil.copy(NEAR / f"{func}.c", ws / "prev_full.c")
     print(f"workspace : {ws}")
     print(f"edit      : {wc / cfile}   (replace the GLOBAL_ASM line for {func})")
     print(f"target    : {ws / 'target.s'}  ({m['size']} bytes, vram {m['vram']:08X})")
     print(f"m2c draft : {ws / 'm2c.c'}")
     if (ws / "prev.c").exists():
-        print(f"prior try : {ws / 'prev.c'}")
+        print(f"prior try : {ws / 'prev.c'}  (whole file it came from: prev_full.c)")
     print(f"check     : python3 {REPO}/tools/mw.py check {func}")
     if (ws / "notes.md").exists():
         print("ledger    :\n" + (ws / "notes.md").read_text().rstrip())
@@ -360,7 +368,75 @@ def check_tree(func, m, wc, want, quiet=False, U=2):
     return 1, out + ["RESULT: DIFF"]
 
 
-def log_check(ws, code, out, n, batch=False):
+NEAR = REPO / ".nearmiss"   # ratchet store (tracked in git): best attempt of every open function
+
+
+def rank(rec):
+    """Higher is better: match, then fewer structural rows, fewer register rows, more words equal."""
+    if rec.get("result") == "MATCH":
+        return (1, 0, 0, 1.0)
+    if rec.get("result") != "DIFF":
+        return (0, -10**6, -10**6, -1.0)
+    return (0, -rec.get("structural", 10**5), -rec.get("register", 10**5),
+            rec.get("same", 0) / max(1, rec.get("n", 1)))
+
+
+def find_def(text, func):
+    """(start, end) of the definition of func in C text, or None."""
+    for mm in re.finditer(rf"\b{re.escape(func)}\s*\(", text):
+        i = text.index("(", mm.start())
+        depth = 0
+        for j in range(i, len(text)):
+            depth += {"(": 1, ")": -1}.get(text[j], 0)
+            if depth == 0:
+                break
+        k = j + 1
+        while k < len(text) and text[k] in " \t\r\n":
+            k += 1
+        if k >= len(text) or text[k] != "{":
+            continue
+        start = text.rfind("\n", 0, mm.start()) + 1
+        depth = 0
+        for e in range(k, len(text)):
+            depth += {"{": 1, "}": -1}.get(text[e], 0)
+            if depth == 0:
+                return start, e + 1
+    return None
+
+
+def ratchet(ws, m, rec, src):
+    """If rec beats the function's best, snapshot src (the whole .c) into ws/best/ and .nearmiss/."""
+    import time
+    func = m["func"]
+    if rec.get("result") == "STUB" or not Path(src).exists():
+        return
+    bj = ws / "best" / "best.json"
+    cur = json.loads(bj.read_text()) if bj.exists() else None
+    nj = NEAR / f"{func}.json"
+    try:
+        glob_best = json.loads(nj.read_text()) if nj.exists() else None
+    except ValueError:
+        glob_best = None
+    if cur and rank(rec) <= rank(cur):
+        return
+    text = Path(src).read_text(errors="replace")
+    (ws / "best").mkdir(exist_ok=True)
+    (ws / "best" / "file.c").write_text(text)
+    bj.write_text(json.dumps(rec))
+    if glob_best and "same" in glob_best and rank(rec) <= rank(glob_best):
+        return  # an earlier workspace holds a better attempt
+    span = find_def(text, func)
+    entry = dict(rec, func=func, file=m["file"], size=m.get("size"),
+                 checks=sum(1 for _ in open(ws / "checks.jsonl")) if (ws / "checks.jsonl").exists() else None,
+                 updated=time.strftime("%Y-%m-%d %H:%M"), c=text[span[0]:span[1]] if span else "")
+    NEAR.mkdir(exist_ok=True)
+    (NEAR / f"{func}.c").write_text(text)
+    tmp = NEAR / f".{func}.json.tmp"
+    tmp.write_text(json.dumps(entry, indent=1))
+    os.replace(tmp, nj)
+
+
+def log_check(ws, code, out, n, batch=False, src=None):
     """Append one line per check to ws/checks.jsonl (read by tools/dashboard.py)."""
     import time
     rec = {"t": round(time.time(), 1), "result": ["MATCH", "DIFF", "BUILD-FAIL", "STUB"][code], "n": n}
@@ -378,7 +454,9 @@ def log_check(ws, code, out, n, batch=False):
     try:
         with open(ws / "checks.jsonl", "a") as fh:
             fh.write(json.dumps(rec) + "\n")
-    except OSError:
+        if src is not None:
+            ratchet(ws, json.loads((ws / "meta.json").read_text()), rec, src)
+    except (OSError, ValueError, KeyError):
         pass
 
 
@@ -387,7 +465,7 @@ def cmd_check(a):
     ws = ws_dir(a.func)
     want = [w for _, w in target_words(ws / "target.s")]
     code, out = check_tree(a.func, m, ws / "conker", want, quiet=a.q or a.no_diff, U=a.U)
-    log_check(ws, code, out, len(want))
+    log_check(ws, code, out, len(want), src=ws / "conker" / m["file"])
     print("\n".join(out))
     return code
 
@@ -421,7 +499,7 @@ def cmd_batch(a):
             wc = slots / str(k) / "conker"
             shutil.copy(f, wc / m["file"])
             code, out = check_tree(func, m, wc, want, quiet=True)
-            log_check(ws, code, out, len(want), batch=True)
+            log_check(ws, code, out, len(want), batch=True, src=f)
             summ = " | ".join(l for l in out if l.startswith(("DIFF", "ROWS", "FRAME", "MATCH", "BUILD-FAIL")))
             return f, code, summ
         finally:
@@ -566,6 +644,12 @@ def cmd_land(a):
             for f in landed:
                 fh.write(f"{f}\t{m['file']}\t{sizes[f]}\n")
         git("add", "tools/mw_landed.tsv")
+        for f in landed:  # the ratchet store only holds open functions
+            for ext in (".json", ".c"):
+                q = NEAR / f"{f}{ext}"
+                if q.exists():
+                    git("rm", "-q", "--cached", "--ignore-unmatch", str(q.relative_to(REPO)), check=False)
+                    q.unlink()
         git("commit", "-q", "--amend", "--no-edit")
         print(f"LANDED: {', '.join(landed)} ({total} bytes) — {git('rev-parse', '--short', 'HEAD').strip()}")
 
@@ -674,6 +758,48 @@ def cmd_similar(a):
         print("no matched twin or near twin")
 
 
+def cmd_near(a):
+    """The ratchet queue: every open function's best attempt, closest first."""
+    stubs = {Path(x).stem for x in stubbed_asm(MAIN)}
+    if a.backfill:
+        n = 0
+        for mj in sorted(WS_ROOT.glob("*/meta.json")):
+            ws = mj.parent
+            try:
+                m = json.loads(mj.read_text())
+            except ValueError:
+                continue
+            if m["func"] not in stubs or not (ws / "checks.jsonl").exists() or "funcs" in m:
+                continue
+            recs = [json.loads(l) for l in open(ws / "checks.jsonl") if l.strip()]
+            recs = [r for r in recs if not r.get("batch")]
+            if not recs:
+                continue
+            best = max(recs, key=rank)
+            src = ws / "best" / "file.c"
+            if not src.exists():
+                src = ws / "conker" / m["file"]   # pre-ratchet workspace: latest file, best numbers
+                best = dict(best, file_is_latest=True)
+            ratchet(ws, m, best, src)
+            n += 1
+        print(f"backfilled from {n} workspaces")
+    rows = []
+    for j in NEAR.glob("*.json"):
+        try:
+            e = json.loads(j.read_text())
+        except ValueError:
+            continue
+        if e.get("func") in stubs and "same" in e:
+            rows.append(e)
+    rows.sort(key=rank, reverse=True)
+    print(f"{'function':16} {'size':>5} {'words':>9} {'S/R/I':>11}  checks  updated")
+    for e in rows[: a.n]:
+        print(f"{e['func']:16} {e.get('size') or 0:5} {e['same']:4}/{e['n']:<4} "
+              f"{e.get('structural', '-')!s:>3}/{e.get('register', '-')!s:>3}/{e.get('immediate', '-')!s:<3}  "
+              f"{e.get('checks') or '-':>6}  {e.get('updated', '')}{'  (latest, not best)' if e.get('file_is_latest') else ''}")
+    print(f"# {len(rows)} open near-misses", file=sys.stderr)
+
+
 def cmd_note(a):
     """Append to (or print) the function's attempt ledger, kept across agents and resumes."""
     ws = ws_dir(a.func)
@@ -732,12 +858,14 @@ def main():
     p = sub.add_parser("rm"); p.add_argument("func")
     p = sub.add_parser("similar", help="matched twins / near twins of FUNC")
     p.add_argument("func"); p.add_argument("-n", type=int, default=5)
+    p = sub.add_parser("near", help="ratchet queue: best attempt of every open function, closest first")
+    p.add_argument("-n", type=int, default=40); p.add_argument("--backfill", action="store_true")
     p = sub.add_parser("note", help="append to / print the function's attempt ledger")
     p.add_argument("func"); p.add_argument("text", nargs="*")
     a = ap.parse_args()
     sys.exit({"new": cmd_new, "check": cmd_check, "land": cmd_land, "batch": cmd_batch,
               "reset": cmd_reset, "objdump": cmd_objdump,
-              "pick": cmd_pick, "rm": cmd_rm, "similar": cmd_similar, "note": cmd_note}[a.cmd](a) or 0)
+              "pick": cmd_pick, "rm": cmd_rm, "similar": cmd_similar, "note": cmd_note, "near": cmd_near}[a.cmd](a) or 0)
 
 
 if __name__ == "__main__":
