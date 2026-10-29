@@ -203,4 +203,104 @@ void func_151B86F4(f32 a0, f32 a1, f32 a2, f32 a3, f32 a4, f32 a5, u8 *a6) {
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E58B0/func_151B8908.s")
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s16 unk8;
+    s16 unkA;
+    s32 unkC;
+    s32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 unk16;
+    u8 unk17;
+    u8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+    u8 unk1C;
+    u8 unk1D;
+    s16 unk1E;
+    s16 unk20;
+    s16 unk22;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    struct17 pos;
+    struct17 unk3C;
+    struct17 vel;
+    f32 unk54;
+    u32 unk58;
+    s32 unk5C;
+    u8 unk60;
+    u8 unk61;
+    s8 unk62;
+    s8 unk63;
+    s8 unk64;
+    u8 unk65;
+    u8 unk66;
+    u8 pad67;
+    s16 unk68;
+    u8 pad6A[2];
+    f32 unk6C;
+} Struct151B8908Particle; /* 0x70 */
+
+typedef struct {
+    u8 pad0;
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD[0x2B];
+    struct17 unk38;
+} Struct151B8908;
+
+typedef struct {
+    s32 v[4];
+} Struct151B8908Tbl;
+
+extern Struct151B8908Tbl D_800AA4B8;
+extern void *func_15130280(void *, u8, s32, s32, u8, s32);
+
+void func_151B8908(Struct151B8908 *arg0) {
+    s32 pad;
+    Struct151B8908Particle spawn;
+    Struct151B8908Tbl tbl;
+
+    tbl = D_800AA4B8;
+
+    spawn.unk1D = tbl.v[func_150ADA20() & 3];
+    spawn.unk8 = 0x1303;
+    spawn.unk0 = 0x200005;
+    spawn.unk4 = 0;
+    spawn.unkA = 300;
+    spawn.unkC = 0;
+    spawn.unk10 = 0;
+    spawn.unk14 = 0xFF;
+    spawn.unk15 = 0xFF;
+    spawn.unk16 = 0xFF;
+    spawn.unk17 = 0xFF;
+    spawn.unk18 = 0xFF;
+    spawn.unk19 = 0xFF;
+    spawn.unk1A = 0xFF;
+    spawn.unk1B = 0xFF;
+    spawn.unk1C = 0xFF;
+    spawn.unk28 = spawn.unk2C = func_150ADA68() * 500.0f + 900.0f;
+    spawn.pos = arg0->unk38;
+    spawn.unk3C = *(struct17 *)&D_800A5480;
+    spawn.vel = *(struct17 *)&D_800A5480;
+    spawn.unk1E = 1;
+    spawn.unk20 = 0xFF;
+    spawn.unk22 = 1;
+    spawn.unk54 = 0.0f;
+    spawn.unk24 = 1.0f;
+    spawn.unk58 = ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0) | 0x8000 | 0x4000 | 0x40000 | 0x800000;
+    spawn.unk60 = 6;
+    spawn.unk61 = 5;
+    spawn.unk62 = -1;
+    spawn.unk63 = -1;
+    spawn.unk64 = -1;
+    spawn.unk65 = 0;
+    spawn.unk5C = 0;
+    spawn.unk66 = 0xFF;
+    func_15130280(&spawn, 1, 0, 0, arg0->unkC, arg0->unk1);
+}
