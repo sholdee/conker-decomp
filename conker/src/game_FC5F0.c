@@ -253,7 +253,108 @@ void func_150CF680(s16 arg0, u8 arg1, s32 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_FC5F0/func_150CF800.s")
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xC - 2];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD[3];
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ u8 pad18[0x70 - 0x18];
+    /* 0x70 */ struct_150CF680b unk70;
+} Obj150CF800;
+
+typedef struct {
+    f32 x;
+    f32 y;
+} Vec2_150CF800;
+
+typedef struct {
+    u8 pad[8];
+    s8 (*unk8)(void);
+} Struct8008FCD0;
+
+extern Struct8008FCD0 D_8008FCD0;
+void func_15143874(s16, f32, f32 *, f32 *);
+
+s32 func_150CF800(Obj150CF800 *arg0) {
+    f32 t;
+    struct_150CF680 sp;
+    f32 vel[4];
+    s8 count;
+    s32 r;
+    s32 b1;
+    void *obj;
+    struct_150CF680b *sub;
+
+    sub = &arg0->unk70;
+    if (sub->unk0 & 1) {
+        sub->unk4 += 0.1900000125f * D_800BE9A4;
+        t = sub->unk4;
+        if (t >= 1.0f) {
+            sub->unk4 = 1.0f;
+            sub->unk0 &= ~1;
+            count = (func_150ADA20() & 3) + 2;
+            vel[3] = arg0->unk14 + 15.0f;
+            *(Vec2_150CF800 *)&sp.unk0 = *(Vec2_150CF800 *)&arg0->unk10;
+            sp.unk16 = 0xC;
+            sp.unk18 = 0x15;
+            sp.unk1A = 0;
+            sp.unk1B = 0xFF;
+            sp.unk1C = 0xFF;
+            sp.unk1D = 0xFF;
+            sp.unk1F = 0xFF;
+            sp.unk20 = 0xFF;
+            sp.unk21 = 0xFF;
+            sp.unk22 = 0xFF;
+            sp.unk23 = 0xFF;
+            sp.unk24 = 0;
+            sp.unk28 = 0x200004;
+            sp.unk2C = 0x9F0601;
+            sp.unk40 = 0;
+            sp.unk41 = 0xA;
+            sp.unk30 = 0x17;
+            sp.unk34 = 0x44;
+            sp.unk38 = 0x80;
+            sp.unk3C = 0x20;
+            sp.unk48 = 1.0f;
+            sp.unk4C = 1.0f;
+            sp.unk54 = 0.0f;
+            sp.unk50 = 0.0f;
+            sp.unk44 = (u8)D_80082FA0;
+            for (; count > 0; count--) {
+                sp.unk1E = (func_150ADA20() % 101U) + 0x9B;
+                sp.unk10 = D_8008FCD0.unk8();
+                r = func_150ADA20();
+                t = (func_150ADA68() * 2) + 2.5f;
+                func_15143874((s16)((r % 65U) - 0xA0), t, &vel[0], &vel[1]);
+                vel[2] = (func_150ADA68() * 0.3330000043f) + 0.4040000141f;
+                sp.unk8 = sp.unkC = (func_150ADA68() * 1.789999962f) + 1.699999928f;
+                sp.unk12 = (func_150ADA20() % 26U) + 0x1E;
+                if (func_150ADA20() & 1) {
+                    b1 = 2;
+                } else {
+                    b1 = 0;
+                }
+                if (func_150ADA20() & 1) {
+                    r = 4;
+                } else {
+                    r = 0;
+                }
+                sp.unk14 = r | 1 | b1 | 8 | 0x10 | 0x20;
+                obj = func_1515548C(&sp, 0xD, 0, 0, 0x10, arg0->unkC, arg0->unk1);
+                if (obj != NULL) {
+                    memcpy((u8 *)obj + 0x70, vel, 0x10);
+                }
+            }
+            t = sub->unk4;
+        }
+        arg0->unk10 = sub->unk8 + (t * sub->unkC);
+        arg0->unk14 = (sinf(sub->unk4 * 3.141592741f) * -17.5f) + 72.0f;
+    }
+    return 1;
+}
 
 struct sub150CFBEC {
     u8 unk0;
