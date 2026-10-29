@@ -112,7 +112,82 @@ void func_151B01B8(void *arg0, void *arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1DD500/func_151B03B8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1DD500/func_151B09BC.s")
+typedef struct {
+    void *obj;
+    u8 kind;
+} Msg151B09BC;
+
+typedef struct {
+    s32 a;
+    s32 b;
+    s32 c;
+} Triple151B09BC;
+
+typedef struct {
+    void *obj;
+    u8 kind;
+    s32 unk08;
+    Triple151B09BC slots[11];
+    f32 unk90;
+    u8 flag;
+} Data151B09BC;
+
+extern u8 D_800A3FE6[];
+void *memcpy(void *, const void *, u32);
+
+struct260 *func_151B09BC(void *arg0, void *arg1, s16 arg2, u8 arg3, s32 arg4) {
+    struct260 *obj;
+    Data151B09BC data;
+    s32 index;
+    s16 lifetime;
+    u8 hasLifetime;
+    Msg151B09BC msg;
+
+    if (arg0 == NULL) {
+        return NULL;
+    }
+    index = arg1 != 0 ?
+        ((*(u8 *)((u8 *)arg1 + 4) == 0x53 || *(u8 *)((u8 *)arg1 + 4) == 0xA5) ?
+            4 : func_15134070(arg1)) : 4;
+    if (index == 0x63) {
+        return NULL;
+    }
+    if (D_800A3FE6[index * 0x10] == 2) {
+        return NULL;
+    }
+    if (D_800A3FE6[index * 0x10] == 1) {
+        data.flag = 1;
+    } else {
+        data.flag = 0;
+    }
+    msg.obj = arg0;
+    msg.kind = *((u8 *)arg0 + 0x3B);
+    func_151494E0((s32)&msg, 0x13);
+    hasLifetime = 0;
+    if (arg2 == -1) {
+        lifetime = 0x12C;
+    } else {
+        lifetime = arg2;
+        hasLifetime = 1;
+    }
+    data.obj = arg0;
+    data.kind = *((u8 *)arg0 + 0x3B);
+    data.unk08 = 0;
+    data.unk90 = 0.0f;
+    {
+        s32 i;
+    for (i = 0; i < 11; i++) {
+        data.slots[i].a = 0;
+        data.slots[i].b = 0;
+        data.slots[i].c = 0;
+    }
+    }
+    obj = func_151491F4(lifetime, -1, 0x13, hasLifetime, 0xF, 0x98, arg3, arg4);
+    if (obj != NULL) {
+        memcpy((void *)((s32)obj + 0x28), &data, 0x98);
+    }
+    return obj;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1DD500/func_151B0B88.s")
 
