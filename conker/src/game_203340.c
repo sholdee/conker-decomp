@@ -83,7 +83,31 @@ void func_151D61B0(u16 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_203340/func_151D6418.s")
+Gfx *func_151D6418(Gfx *gfx, u8 *img, s32 arg2, s32 alpha) {
+    u32 w;
+    u32 y;
+    u32 h;
+    u8 *p;
+    u32 stride;
+
+    w = D_800BE620;
+    h = D_800BE624;
+    p = img;
+    stride = w * 8;
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, alpha);
+    gDPSetCombineMode(gfx++, G_CC_MODULATEI_PRIM, G_CC_MODULATEI_PRIM);
+    gDPSetOtherMode(gfx++, 0xCFF, 0x504340);
+    gSPLoadGeometryMode(gfx++, 0);
+    gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
+    for (y = 0; y < h; y += 4) {
+        gDPLoadTextureBlock(gfx++, OS_K0_TO_PHYSICAL(p), G_IM_FMT_RGBA, G_IM_SIZ_16b, w, 4, 0, 0, 0, 0, 0, 0, 0);
+        gSPTextureRectangle(gfx++, 0, y << 2, (w - arg2) << 2, (y + 4) << 2, G_TX_RENDERTILE, 0, 0, 1 << 10,
+                            1 << 10);
+        gDPPipeSync(gfx++);
+        p += stride;
+    }
+    return gfx;
+}
 
 void func_151D66F0(s32 arg0, s32 arg1) {
     if (D_800BE9F0 == 6 && D_80038080 == 0) {
