@@ -49,7 +49,67 @@ void *func_1510D970(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_13AE20/func_1510DA84.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_13AE20/func_1510E120.s")
+extern void func_150A7D00(void *, s32, s32, s32);
+extern s32 func_1510D0EC(s32, s32, s32, s32);
+extern s32 func_1506196C(u8 *arg0, s32 arg1);
+extern s32 D_80091770[];
+extern s32 D_800DD1B4;
+extern s32 D_800DD1B0[];
+extern s16 D_800DD1C6;
+
+typedef struct {
+    /* 0x000 */ u8 pad0[0x10];
+    /* 0x010 */ Mtx mtx[2];
+    /* 0x090 */ Vtx vtx[2][4];
+    /* 0x110 */ u8 *unk110;
+    /* 0x114 */ s32 unk114;
+    /* 0x118 */ s32 unk118;
+    /* 0x11C */ s32 unk11C;
+    /* 0x120 */ u8 unk120;
+    /* 0x121 */ u8 unk121;
+    /* 0x122 */ u8 unk122;
+    /* 0x123 */ u8 unk123;
+} Struct_1510E120;
+
+Gfx *func_1510E120(Gfx *gfx, Struct_1510E120 *arg1, s16 arg2) {
+    s32 scale;
+    s32 alpha;
+    s32 tex;
+
+    if (arg1->unk123 != 0) {
+        func_150A7D00(&arg1->mtx[D_800BE9C0], arg1->unk114, arg1->unk11C, arg1->unk118);
+        gSPMatrix(gfx++, &arg1->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+        if (D_800DD1B4 != arg1->unk121) {
+            D_800DD1B0[1] = arg1->unk121; /* same address as D_800DD1B4; a distinct symbol keeps the split %hi/%lo */
+            tex = func_1510D0EC(D_80091770[arg1->unk121], 0, 0x3E, 0);
+            gDPPipeSync(gfx++);
+            gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_16b, 1, tex);
+            gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, 0x7FF, 0);
+        }
+        gDPPipeSync(gfx++);
+        gSPClearGeometryMode(gfx++, G_CULL_BOTH);
+        scale = arg1->unk122;
+        switch (arg1->unk120) {
+            case 0:
+                alpha = func_1506196C(arg1->unk110, arg2);
+                break;
+            case 1:
+                alpha = (arg1->unk110[0x8A] * arg1->unk110[arg2 + 0x8B] + 0xFF) >> 8;
+                break;
+        }
+        scale = (scale * alpha + 0xFF) >> 8;
+        if (scale != D_800DD1C6) {
+            D_800DD1C6 = scale;
+            gDPPipeSync(gfx++);
+            gDPSetPrimColor(gfx++, 1, 0, 0, 0, 0, scale);
+        }
+        gSPVertex(gfx++, arg1->vtx[D_800BE9C0], 4, 0);
+        gSP1Triangle(gfx++, 0, 1, 2, 0);
+        gSP1Triangle(gfx++, 0, 2, 3, 0);
+        gDPPipeSync(gfx++);
+    }
+    return gfx;
+}
 
 typedef struct {
     /* 0x00 */ s16 x;
