@@ -2090,7 +2090,40 @@ void func_15062BDC(struct127 *arg0, f32 arg1, f32 arg2) {
 //     entry->unk0 = (packed & 0xFF000000) | (newY & 0xFFF) | ((newX & 0xFFF) << 12);
 // }
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_15062D10.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_15062E24.s")
+typedef struct Entry62E24 {
+    u8 pad0[8];
+    u16 unk8;
+    u16 unkA;
+} Entry62E24;
+
+extern Entry62E24 *D_800C5338[];
+void func_15094AB8(Vtx *arg0, s16 (*arg1)[2], s32 arg2, f32 arg3, s32 arg4, s32 arg5);
+
+void func_15062E24(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6) {
+    s32 i;
+    s32 w;
+    s32 h;
+    Vtx *vtx;
+
+    if (D_800C6360[arg0] != 0) {
+        for (i = 0; i < 25; i++) {
+            if (D_800CC2D0[i].interaction_state == 0) continue;
+            if (arg0 != D_800CC2D0[i].id) continue;
+            if (D_800CC2D0[i].unk2FA == 0) continue;
+                w = D_800C5338[arg0][arg5].unk8;
+                h = D_800C5338[arg0][arg5].unkA;
+                if (arg6 != 0) {
+                    w *= 2;
+                    h *= 2;
+                }
+                vtx = ((Vtx **)&D_800CC2D0[i].pad288[4])[D_800BE9C0];
+                if (vtx != NULL) {
+                    vtx += arg1;
+                    func_15094AB8(vtx, (s16 (*)[2])D_800C6360[arg0] + arg3, arg2, arg4, h, w);
+                }
+        }
+    }
+}
 typedef struct Game83300MorphVertex {
     u8 pad0[8];
     s16 x;
