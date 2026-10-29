@@ -803,7 +803,58 @@ void func_15198054(void *arg0, s32 arg1, u8 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1C2C60/func_15198570.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1C2C60/func_151987CC.s")
+s32 func_151987CC(Emitter15196748 *arg0) {
+    Desc15196748 *desc;
+    Particle15196748 *arr;
+    struct127 *obj;
+    s32 i;
+    s32 j;
+    Vec15196748 pos;
+    f32 r;
+    f32 h;
+    f32 dx;
+    f32 dz;
+    f32 dy;
+    f32 p1;
+    f32 p2;
+    f32 p3;
+
+    desc = arg0->unk98;
+    arr = arg0->unk94;
+    for (j = 0; j < 25; j++) {
+        obj = &D_800CC2D0[j];
+        if (obj->interaction_state == 0 || obj->unk65 != 0 ||
+            obj->unique_id == (*(struct127 **)desc)->unique_id) {
+            continue;
+        }
+        {
+            i = arg0->unk2E;
+            while (i != arg0->unk2D) {
+                i--;
+                if (i < 0) {
+                    i = arg0->unk25 - 1;
+                }
+                pos = arr[i].pos;
+                r = obj->unkE4;
+                h = obj->unkE6;
+                dx = pos.x - obj->x_position;
+                dz = pos.z - obj->z_position;
+                dy = pos.y - (obj->y_position + (s16)obj->unkE8);
+                dy *= (1.0f + r / h) * 0.5f;
+                if (dx * dx + dy * dy + dz * dz < r * r + 2500.0f) {
+                    while (i != arg0->unk2D) {
+                        arg0->unk2D = arg0->unk2D + 1;
+                        if (arg0->unk2D == arg0->unk25) {
+                            arg0->unk2D = 0;
+                        }
+                        arg0->unk2C = arg0->unk2C - 1;
+                    }
+                }
+            }
+        }
+    }
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1C2C60/func_1519897C.s")
 
