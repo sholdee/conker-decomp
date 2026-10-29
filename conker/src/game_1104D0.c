@@ -45,7 +45,82 @@ typedef struct {
     f32 field_0x54;
 } Game1104D0EffectInstance;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1104D0/func_150E3020.s")
+typedef struct {
+    char pad_0x0[0x10];
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    f32 unk30;
+    f32 unk34;
+    f32 unk38;
+    s32 unk3C;
+    s32 unk40;
+    s32 unk44;
+    u8 unk48;
+    char pad_0x49[0x1];
+    s16 unk4A;
+    f32 unk4C;
+    f32 unk50;
+    f32 unk54;
+    char pad_0x58[0x14];
+    s32 unk6C;
+    u8 unk70;
+    u8 unk71;
+    char pad_0x72[0x2];
+    s32 unk74;
+    s32 unk78;
+    s16 unk7C;
+} Game1104D0Effect;
+
+extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
+
+u8 *func_150E3020(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, f32 arg7, s32 arg8, f32 arg9, f32 argA, f32 argB, s32 argC, s16 argD) {
+    Game1104D0Effect *obj;
+    s32 i;
+
+    obj = func_15167A68(0x27, 0, 0x80, 1, 0xFF, 1);
+    if (obj == NULL) {
+        return NULL;
+    }
+    obj->unk4C = 0.0f;
+    obj->unk50 = 0.0f;
+    obj->unk54 = -10000.0f;
+    obj->unk6C = 0;
+    obj->unk70 = 0;
+    obj->unk71 = 0;
+    obj->unk74 = 0;
+    obj->unk7C = argD;
+    obj->unk78 = argC;
+    obj->unk10 = arg0;
+    obj->unk14 = arg1;
+    obj->unk18 = arg2;
+    obj->unk1C = arg3;
+    obj->unk20 = arg4;
+    obj->unk24 = arg5;
+    obj->unk28 = arg9;
+    obj->unk2C = argA;
+    obj->unk30 = argB;
+    obj->unk34 = arg7;
+    obj->unk38 = arg1;
+    obj->unk3C = arg8;
+    obj->unk40 = arg6;
+    obj->unk44 = 0;
+    obj->unk4A = 0;
+    for (i = 0; i < 8; i++) {
+        if (D_800D99D0[i] == 0) {
+            D_800D99D0[i] = (s32)obj;
+            obj->unk48 = i;
+            return (u8 *)obj;
+        }
+    }
+    obj->unk48 = 0;
+    return (u8 *)obj;
+}
 
 s32 func_150E3208(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
     u8 *temp;
