@@ -1227,7 +1227,90 @@ void func_1511AF30(struct Obj1511AF30 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_142560/func_1511B51C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_142560/func_1511B7D4.s")
+struct Vtx1511B7D4 {
+    s16 x;
+    s16 y;
+    s16 z;
+    u8 pad6[0xA];
+};
+
+struct Obj1511B7D4 {
+    u8 pad0[0x8];
+    f32 unk8;
+    u8 padC[0x4];
+    s16 unk10;
+    s16 unk12;
+    s16 unk14;
+    u8 pad16[0xA];
+    struct Vtx1511B7D4 *unk20[2];
+    struct Vtx1511B7D4 *unk28;
+    u8 pad2C[0x10];
+    s32 unk3C;
+    u8 pad40[0x3C];
+    s32 unk7C;
+    f32 unk80;
+    f32 unk84;
+    u8 pad88[0x18];
+};
+
+extern u8 D_800A2F70;
+extern u8 D_800A2F71[];
+
+void func_1511B7D4(struct Obj1511B7D4 *arg0) {
+    u8 *table;
+    s32 count;
+    s32 dx;
+    s32 dy;
+    f32 angle;
+    f32 s;
+    f32 c;
+    s32 x;
+    s32 y;
+    s32 z;
+    s32 tmp;
+    struct Obj1511B7D4 *objs[2];
+
+    count = 0;
+    if (arg0->unk3C == 0) {
+        table = D_800A2F71;
+        count = D_800A2F70;
+        objs[0] = arg0 - 1;
+        objs[1] = arg0 - 2;
+    }
+    if (arg0->unk80 != objs[0]->unk8 || arg0->unk84 != objs[1]->unk8) {
+        arg0->unk80 = objs[0]->unk8;
+        arg0->unk84 = objs[1]->unk8;
+        arg0->unk7C = 2;
+    }
+    if (arg0->unk7C != 0) {
+        arg0->unk7C--;
+        while (count--) {
+            dx = objs[table[1]]->unk10 - arg0->unk10;
+            angle = -objs[table[1]]->unk8 * 0.01745329238f;
+            dy = objs[table[1]]->unk12 - arg0->unk12;
+            s = sinf(angle);
+            c = cosf(angle);
+            y = arg0->unk28[table[0]].y;
+            x = arg0->unk28[table[0]].x;
+            z = arg0->unk28[table[0]].z;
+            y -= dy;
+            x -= dx;
+            tmp = (s32)(y * c - x * s);
+            x = (s32)(y * s + x * c);
+            y = tmp;
+            x += dx;
+            y += dy;
+            x += arg0->unk10;
+            y += arg0->unk12;
+            z += arg0->unk14;
+            arg0->unk20[D_800BE9C0][table[0]].x = x;
+            arg0->unk20[D_800BE9C0][table[0]].y = y;
+            arg0->unk20[D_800BE9C0][table[0]].z = z;
+            table += 2;
+        }
+    }
+}
+
 
 struct Obj1511BA24 {
     u8 pad0[0x3C];
