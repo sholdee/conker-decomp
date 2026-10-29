@@ -301,14 +301,71 @@ void func_15176B84(Obj15176B84 *obj) {
     func_15175958(obj);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1A20A0/func_15176DF0.s")
+void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
+Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
+
+void *func_15176DF0(Gfx *gdl, u8 *arg1, s16 arg2) {
+    s32 pad;
+    f32 rot[4][4];
+    f32 mtx[4][4];
+    s32 col[3];
+    s32 fade;
+    s32 target;
+
+    if ((D_800DDE80[arg1[0xED]].field0 == NULL) || (D_800DDF78[arg1[0xED]] == 0)) {
+        return gdl;
+    }
+    func_150A8050(mtx, 0.0f, *(f32 *)(arg1 + 0xAC), 0.0f);
+    func_150A8050(rot, *(f32 *)(arg1 + 0xA8), 0.0f, *(f32 *)(arg1 + 0xB0));
+    func_150A7A48(rot, mtx, mtx);
+    mtx[3][0] = *(f32 *)(arg1 + 0x98);
+    mtx[3][1] = *(f32 *)(arg1 + 0x9C);
+    mtx[3][2] = *(f32 *)(arg1 + 0xA0);
+    mtx[0][0] *= *(f32 *)(arg1 + 0xC0);
+    mtx[0][1] *= *(f32 *)(arg1 + 0xC0);
+    mtx[0][2] *= *(f32 *)(arg1 + 0xC0);
+    mtx[1][0] *= *(f32 *)(arg1 + 0xC0);
+    mtx[1][1] *= *(f32 *)(arg1 + 0xC0);
+    mtx[1][2] *= *(f32 *)(arg1 + 0xC0);
+    mtx[2][0] *= *(f32 *)(arg1 + 0xC0);
+    mtx[2][1] *= *(f32 *)(arg1 + 0xC0);
+    mtx[2][2] *= *(f32 *)(arg1 + 0xC0);
+    guMtxF2L(mtx, (Mtx *)((arg1 + 0x10) + (D_800BE9C0 << 6)));
+    gSPMatrix(gdl++, (Mtx *)((arg1 + 0x10) + (D_800BE9C0 << 6)), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPSegment(gdl++, 1, *(u32 *)(arg1 + 0x94));
+    gDPPipeSync(gdl++);
+    fade = arg1[0xEC];
+    target = D_800A7170[(*(u32 *)(arg1 + 0xE8) >> 5) & 3];
+    if (fade != target) {
+        if (fade < target) {
+            fade += D_800BE9E4 * 4;
+            if (target < fade) {
+                fade = target;
+            }
+        } else {
+            fade -= D_800BE9E4 * 4;
+            if (fade < 0) {
+                fade = 0;
+            }
+        }
+        arg1[0xEC] = fade;
+    }
+    col[0] = col[1] = col[2] = fade;
+    {
+    u8 update;
+    update = 0;
+    gdl = func_15142FBC(gdl, 0x82CA0, 0x504A50, &update);
+    gdl->words.w0 = 0xFB000000; gdl->words.w1 = ((col[0] & 0xFF) << 24) | ((col[1] & 0xFF) << 16) | (arg1[0xF0] & 0xFF) | ((col[2] & 0xFF) << 8); gdl++;
+    gSPDisplayList(gdl++, D_800DDE80[arg1[0xED]].fieldC);
+    }
+    return gdl;
+}
 
 typedef struct Game1770C8Packet {
     f32 m[4][4];
 } Game1770C8Packet;
 
 s32 func_1510AEE0(f32 *, f32, f32, f32, f32, f32, f32, f32, f32 *, f32 *);
-void *func_15176DF0(u32 *, u8 *, s16);
 extern f32 D_800D35E0;
 extern f32 D_800D35E8; /* (&D_800D35E8)[-1] == 0x800D35E4, which has no symbol of its own */
 extern u8 D_800D9C10[];
