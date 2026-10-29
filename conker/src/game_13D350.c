@@ -1,8 +1,12 @@
 #include <ultra64.h>
 #define func_1502B7F0 func_1502B7F0__proto
+#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
 #undef func_1502B7F0
+#undef func_150ADA20
 #include "variables.h"
+
+u32 func_150ADA20(void);
 
 extern u8 D_800DBEA8[];
 Gfx *func_15110544(Gfx *gfx, s32 a, s32 b, s32 c, s32 d, u8 r, u8 g, u8 bl);
@@ -281,7 +285,50 @@ void func_1511172C(s32 arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_13D350/func_15111858.s")
+extern void *allocate_memory(s32, s32, s32, s32);
+
+typedef struct Star15111858 {
+    u16 x;
+    u16 y;
+    u16 z;
+    u8 unk6;
+    u8 unk7;
+} Star15111858;
+
+void func_15111858(void) {
+    Star15111858 *p;
+    s32 i;
+
+    D_800DBE80 = allocate_memory(0xFA00, 1, 0, 0);
+    p = (Star15111858 *)D_800DBE80;
+    for (i = 0; i != 8000; i++) {
+        f32 r;
+        f32 ang;
+        f32 v;
+        f32 lat;
+        s32 h;
+        f32 tmp;
+
+        ang = (f32)(func_150ADA20() % 36000U) * 0.0001745329209f;
+        v = (f32)(s32)((func_150ADA20() % 1584400U) - 792100) * 0.009999999776f;
+        if (v >= 0.0f) {
+            lat = 89.0f - sqrtf(v);
+        } else {
+            lat = sqrtf(-v) + -89.0f;
+        }
+        lat *= 0.01745329238f;
+        h = func_150AD78C(lat) * 256.0f;
+        tmp = h;
+        p[i].y = *(u16 *)&tmp;
+        r = sqrtf(0x10000 - h * h);
+        tmp = (s32)(func_150AD78C(ang) * r);
+        p[i].x = *(u16 *)&tmp;
+        tmp = (s32)(func_150AD780(ang) * r);
+        p[i].z = *(u16 *)&tmp;
+        p[i].unk7 = (func_150ADA20() % 191U) + 0x40;
+        p[i].unk6 = func_150ADA20() % 5U;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_13D350/func_15111AF4.s")
 
