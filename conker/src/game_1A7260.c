@@ -108,7 +108,46 @@ void func_15179FE0(u8 arg0, s16 arg1, s16 arg2, s16 arg3, s8 arg4, u16 arg5, u16
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1A7260/func_1517A1EC.s")
+void func_1517A1EC(struct func_1517A84C_obj *obj) {
+    s32 sign;
+    u32 r;
+    s32 a6;
+
+    obj->unk90 += obj->unkA0;
+    obj->unk92 -= obj->unkA2;
+    obj->unk94 += obj->unkA4;
+    obj->unk96 += obj->unk9C;
+    obj->unk98 += obj->unk9D;
+    obj->unk9A += obj->unk9E;
+    if (obj->unkAC == 5) {
+        obj->unkA2++;
+    }
+    if (obj->unkA6 < obj->unkAC) {
+        s32 pad;
+        r = (u32)func_150ADA20() % obj->unkAE;
+        sign = (obj->unkA0 < 0) ? -1 : 1;
+        obj->unkA0 += -sign * r;
+        r = (u32)func_150ADA20() % obj->unkAE;
+        sign = (obj->unkA4 < 0) ? -1 : 1;
+        obj->unkA4 += -sign * r;
+    }
+    a6 = obj->unkA6;
+    a6 -= D_800BE9E4;
+    if (a6 < 0) {
+        s32 b3;
+        a6 = 0;
+        b3 = obj->unkB3;
+        b3 -= D_800BE9E4 * 4;
+        if (b3 < 0) {
+            b3 = 0;
+        }
+        obj->unkB3 = b3;
+    }
+    obj->unkA6 = a6;
+    if (obj->unkB3 == 0 || (obj->unkB2 && (obj->unkB2 >> 4) == (obj->unkB2 & 0xF))) {
+        func_1516972C((struct102 *)obj);
+    }
+}
 
 s32 func_1517A394(arg0)
 s32 arg0;
