@@ -535,7 +535,42 @@ s32 func_151140C4(struct131 *arg0) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_13D350/func_15114188.s")
+typedef struct Struct15114188 {
+    u8  pad0[0x4F];
+    /* 0x4F */ u8  unk4F;
+    u8  pad50[0x28];
+    /* 0x78 */ void (*unk78)(struct Struct15114188 *, struct127 *);
+    u8  pad7C[0x16];
+    /* 0x92 */ u8  unk92;
+    u8  pad93[0xD];
+} Struct15114188; /* size 0xA0 */
+
+struct Game13F9D0MovingActor;
+void func_1511473C(struct Game13F9D0MovingActor *arg0, s32 arg1);
+
+#define OBJS ((Struct15114188 *)D_800DBEF4)
+
+void func_15114188(void) {
+    s32 i;
+    s32 j;
+
+    for (i = 0; i < D_800DBEF0; i++) {
+        if (D_800DBF94[i] != 0) {
+            for (j = 0; j < 25 && D_800DBF94[i] != 0; j++) {
+                if (D_800DBF94[i] & (1 << j)) {
+                    D_800DBF94[i] ^= (1 << j);
+                    if (OBJS[i].unk78 != NULL && (OBJS[i].unk92 != 0 || D_800CC2D0[j].unk127 != 0xFF)) {
+                        OBJS[i].unk78((Struct15114188 *)(i * 0xA0 + (u8 *)D_800DBEF4), &D_800CC2D0[j]);
+                    }
+                    if ((OBJS[i].unk4F & 4) == 4 && !(OBJS[i].unk4F & 8)) {
+                        func_1511473C((struct Game13F9D0MovingActor *)&D_800CC2D0[j], i);
+                    }
+                }
+            }
+            OBJS[i].unk4F &= ~0x8C;
+        }
+    }
+}
 
 typedef struct {
     /* 0x00 */ f32 rotX;
