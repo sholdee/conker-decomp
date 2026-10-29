@@ -92,7 +92,81 @@ void func_1502BD84(struct127 *arg0, s32 arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502BEE4.s")
+extern void func_1503F964(void);
+extern void func_1502F3C8(void);
+extern void func_15030468(void);
+extern void func_1507C22C(s32);
+extern void func_1502F948(ActorInteractionFields *);
+extern u8 D_800C3E90;
+extern s32 D_800C3E74;
+extern u8 D_800C3E70;
+extern s32 D_800D121C;
+
+void func_1502BEE4(void) {
+    struct127 *obj;
+    struct127 *p;
+    s32 i;
+    s32 j;
+    s32 state;
+    u8 order[25];
+    u8 depth[25];
+    s32 n;
+    s32 max;
+
+    func_1503F964();
+    max = 0;
+    D_800C3E90 = 0;
+    D_800C3E74 = 0;
+    for (i = 0; i < 25; i++) {
+        if (D_800CC2D0[i].unk274 != 0) {
+            D_800C3E74 |= 1 << (D_800CC2D0[i].unk274 - 1);
+        }
+    }
+    bzero(depth, 25);
+    for (i = 0; i < 25; i++) {
+        obj = &D_800CC2D0[i];
+        state = obj->interaction_state;
+        if (state != 0) {
+            if (obj->unk65 != 0) {
+                p = obj;
+                depth[i] = 0;
+                while (p->unk65 != 0) {
+                    p = &D_800CC2D0[p->unk65 - 1];
+                    depth[i]++;
+                }
+                if (max < depth[i]) {
+                    max = depth[i];
+                }
+            } else {
+                func_1502BD84(obj, i);
+            }
+        }
+    }
+    n = 0;
+    if (max != 0) {
+        for (i = 1; i <= max; i++) {
+            for (j = 0; j < 25; j++) {
+                if (i == depth[j]) {
+                    order[n++] = j;
+                }
+            }
+        }
+        for (i = 0; i < n; i++) {
+            func_1502BD84(&D_800CC2D0[order[i]], order[i]);
+        }
+    }
+    func_1502F3C8();
+    for (i = 0; i < 25; i++) {
+        if (D_800CC2D0[i].interaction_state != 0) {
+            func_1502F948((ActorInteractionFields *)&D_800CC2D0[i]);
+        }
+    }
+    func_15030468();
+    if (D_800BEAC0 == 0) {
+        func_1507C22C(0);
+    }
+    D_800C3E70 = 0;
+}
 
 void func_1516972C(struct102 *arg0);
 extern s32 D_80082FA0;
