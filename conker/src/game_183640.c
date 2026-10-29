@@ -783,7 +783,126 @@ void func_151572D0(struct151572D0 *ptr) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_183640/func_15157420.s")
+typedef struct {
+    u8 pad0[0x2];
+    s16 unk2;
+} Struct15157420_60;
+
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+} Struct15157420_mode;
+
+typedef struct {
+    u8 pad0[0x10];
+    u8 unk10;
+    u8 pad11[0x2];
+    s8 unk13;
+    s8 unk14;
+    u8 pad15[0xB];
+    s32 unk20;
+    s32 unk24;
+    s32 unk28;
+    s32 unk2C;
+    u8 pad30[0x3];
+    u8 unk33;
+    s32 unk34;
+    s32 unk38;
+    s8 unk3C;
+    s8 unk3D;
+    u8 pad3E[0x2];
+    u8 unk40;
+    u8 unk41;
+    u8 unk42;
+    u8 unk43;
+    u8 unk44;
+    u8 unk45;
+    u8 unk46;
+    u8 unk47;
+    u8 pad48[0x4];
+    void *unk4C;
+    u8 unk50;
+    u8 unk51;
+    u8 pad52[0x2];
+    u8 unk54[0xC];
+    Struct15157420_60 *unk60;
+    u8 pad64[0x4];
+    s32 *unk68;
+    s32 *unk6C;
+    u8 unk70;
+    u8 pad71[0x3];
+    s32 unk74;
+    u8 pad78[0x84];
+    u8 unkFC[1];
+} Struct15157420;
+
+extern Gfx *(*D_8008ADBC[])(Gfx *, Struct15157420 *, s16, u8 *, u8 *);
+extern Gfx *(*D_8008ADCC[])(Gfx *, Struct15157420 *, s16, u8 *);
+extern Struct15157420_mode D_800A4AC8[];
+extern u8 D_80083740[];
+extern u8 D_800838C0[];
+extern u8 D_80083A40[];
+extern u8 D_80083BC0[];
+extern u8 D_800BE9C0;
+
+Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
+Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
+Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
+Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
+Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
+void func_151441A4(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, u8 arg9, u8 arg10, u8 arg11, u8 arg12, u8 arg13);
+void func_151442FC(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 arg10, u8 arg11, u8 arg12, u8 arg13);
+void *func_151462C8(void *arg0, void *arg1, u8 arg2, void *arg3, u8 arg4, s16 arg5, void *arg6, u8 arg7, s32 arg8);
+
+Gfx *func_15157420(Gfx *gfx, Struct15157420 *arg1, s16 arg2) {
+    s32 i;
+    u8 update;
+    s16 primR, primG, primB, primA;
+    s16 envR, envG, envB, envA;
+    u8 cont;
+
+    update = 1;
+    if (arg1->unk13 != -1) {
+        gfx = D_8008ADBC[arg1->unk13](gfx, arg1, arg2, &update, &cont);
+        if (cont == 0) {
+            return gfx;
+        }
+    }
+    if ((arg1->unk10 & 8) && (arg1->unk60 != NULL) && !(arg1->unk60->unk2 & (1 << arg2))) {
+        return gfx;
+    }
+block:
+    gfx = func_15142B7C(gfx, arg1->unk24, arg1->unk28);
+    func_151441A4(&primR, &primG, &primB, &primA, arg1->unk40, arg1->unk41, arg1->unk42, arg1->unk43,
+                  arg1->unk44, arg1->unk45, arg1->unk46, arg1->unk47, 0xFF, arg1->unk3C);
+    func_151442FC(&envR, &envG, &envB, &envA, arg1->unk40, arg1->unk41, arg1->unk42, arg1->unk43,
+                  arg1->unk44, arg1->unk45, arg1->unk46, arg1->unk47, 0xFF, arg1->unk3D);
+    gfx = func_15142C10(gfx, envR, envG, envB, envA, &update);
+    gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &update);
+    gfx = func_1513F4E4(gfx, arg1->unk33, &update);
+    gfx = func_15142FBC(gfx, arg1->unk20 | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | arg1->unk34 | arg1->unk38,
+                        D_800A4AC8[arg1->unk2C].unk0 | D_800A4AC8[arg1->unk2C].unk4, &update);
+    if (arg1->unk10 & 2) {
+        gfx = func_151462C8(gfx, arg1->unkFC, arg1->unk51, arg1->unk4C, arg1->unk50, arg2, arg1->unk54,
+                            (arg1->unk10 & 4) ? 1 : 0, 0);
+    }
+    gDPPipeSync(gfx++);
+    gDPSetFogColor(gfx++, 0, 0, 0, 0xFF);
+    gSPSegment(gfx++, 3, arg1->unk68[D_800BE9C0 + 0xFA]);
+    gSPSegment(gfx++, 1, arg1->unk74);
+    if (arg1->unk43 < 0xFF || arg1->unk47 < 0xFF) {
+        gSPSegment(gfx++, 8, (arg1->unk10 & 0x40) ? D_80083A40 : D_80083740);
+    } else {
+        gSPSegment(gfx++, 8, (arg1->unk10 & 0x40) ? D_80083BC0 : D_800838C0);
+    }
+    for (i = 0; i < arg1->unk70; i++) {
+        gSPDisplayList(gfx++, arg1->unk6C[i]);
+    }
+    if (arg1->unk14 != -1) {
+        gfx = D_8008ADCC[arg1->unk14](gfx, arg1, arg2, &update);
+    }
+    return gfx;
+}
 
 extern u8 D_800BE9C0;
 extern void guMtxIdentF(float mf[4][4]);
