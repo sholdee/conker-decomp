@@ -703,7 +703,47 @@ void func_151D57F8(struct Obj151D57F8 *arg0, u8 arg1) {
     func_150636A4(arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_200930/func_151D5A18.s")
+struct Obj151D5A18 {
+    u8 pad0[0x14];
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    u8 pad20[0x1D4 - 0x20];
+    s32 unk1D4;
+};
+
+void func_15145740(struct Obj151D57F8 *, struct17 *, struct17 *, struct17 *, f32);
+
+void func_151D5A18(struct Obj151D57F8 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, struct17 *arg4, s32 arg5, u8 arg6) {
+    s32 src;
+    s32 dst;
+
+    func_15145740(arg0, arg2, arg3, arg4, 0.8110000491f);
+    if (((struct Obj151D5A18 *)arg0)->unk1D4 != 0) {
+        dst = (s32)arg1;
+        src = arg5;
+        func_15145EA4(&src, &dst, ((struct Obj151D5A18 *)arg0)->unk1D4 + (arg6 << 6), 1);
+    } else {
+        f32 dz;
+        f32 dx;
+
+        if ((9.999999747e-05f < fabsf(arg2->unk0)) || (9.999999747e-05f < fabsf(arg2->unk8))) {
+            f32 inv;
+            f32 z;
+
+            z = arg2->unk8;
+            inv = 1.0f / sqrtf((arg2->unk0 * arg2->unk0) + (z * z));
+            dz = z * inv;
+            dx = -arg2->unk0 * inv;
+        } else {
+            dz = 1.0f;
+            dx = 0.0f;
+        }
+        arg1->unk0 = ((struct Obj151D5A18 *)arg0)->unk14 + (34.0f * dx);
+        arg1->unk4 = ((struct Obj151D5A18 *)arg0)->unk18 + 49.0f;
+        arg1->unk8 = ((struct Obj151D5A18 *)arg0)->unk1C + (34.0f * dz);
+    }
+}
 
 s32 func_151452C4(s32 arg0, s32 arg1, struct17 *arg2, f32 arg3, struct17 *arg4, struct17 *arg5, f32 *arg6, f32 *arg7);
 extern s32 (*D_80086C90[])(struct127 *, struct127 *, s32);
