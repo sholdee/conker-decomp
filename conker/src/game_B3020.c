@@ -1416,7 +1416,107 @@ void func_1508B2A8(u8 id, Search1508B2A8 *s) {
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_B3020/func_1508B3F8.s")
+typedef struct {
+    f32 radiusSq;
+    s16 x;
+    s16 y;
+    s16 z;
+    s16 pad;
+} Entry1508B3F8;
+
+typedef struct {
+    f32 x;
+    f32 z;
+    f32 radiusSq;
+    f32 dist[8];
+    s16 count;
+    u8 ids[8];
+    u8 visited[0x20];
+} Search1508B3F8;
+
+void func_1508B3F8(void) {
+    s32 i;
+    s32 j;
+    s32 found;
+    s32 k;
+    u8 best;
+    s32 r;
+    s32 *zone;
+    struct127 *obj;
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 dx;
+    s32 t;
+    f32 d;
+    Entry1508B3F8 *e;
+    Search1508B3F8 s;
+    f32 bestDist;
+    B3020Struct *node;
+
+    zone = (s32 *)(D_800D23B0 + 0x55C);
+    e = (Entry1508B3F8 *)(D_800D23B0 + 0x1748);
+    for (i = 0; i < D_8008FD8C; i++) {
+        if (zone[i] != -1) {
+            zone[i] = -2;
+        }
+    }
+    for (i = 0; i < *(s8 *)(D_800D23B0 + 0x1745); i++) {
+        found = 0;
+        s.radiusSq = e[i].radiusSq;
+        x = e[i].x;
+        y = e[i].y;
+        z = e[i].z;
+        for (j = D_8008FD90; j < D_8008FD8C; j++) {
+            obj = &D_800CC2D0[j];
+            d = obj->y_position - y;
+            if (d < 200.0f && d > -100.0f) {
+                dx = obj->x_position - x;
+                d = obj->z_position - z;
+                if (dx * dx + d * d < s.radiusSq + 100.0f) {
+                    bestDist = 100000000.0f;
+                    best = 0xFF;
+                    if (!found) {
+                        s.count = 0;
+                        t = func_15085DA8(y);
+                        found = 1;
+                        r = func_15085DF8(x, y, z, 0, t);
+                        if (r != -1) {
+                            s.x = x;
+                            s.z = z;
+                            s.count = 0;
+                            bzero(s.visited, 0x20);
+                            func_1508B2A8(r, (Search1508B2A8 *)&s);
+                        }
+                    }
+                    for (k = 0; k < s.count; k++) {
+                        node = &D_800D2350[s.ids[k]];
+                        dx = node->unk0 - obj->x_position;
+                        d = node->unk4 - obj->z_position;
+                        d = dx * dx + d * d;
+                        if (d < s.dist[k] && d < bestDist) {
+                            best = s.ids[k];
+                            bestDist = d;
+                        }
+                    }
+                    if (best != 0xFF) {
+                        node = &D_800D2350[best];
+                        if (zone[j] != -2) {
+                            ((s32 *)(D_800D23B0 + 0x5C))[j] = 1;
+                        }
+                        zone[j] = ((u8 *)node)[7];
+                    }
+                }
+            }
+        }
+    }
+    for (i = 0; i < D_8008FD8C; i++) {
+        if (zone[i] < 0) {
+            zone[i] = -1;
+        }
+    }
+    *(s8 *)(D_800D23B0 + 0x1745) = 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_B3020/func_1508B9BC.s")
 
