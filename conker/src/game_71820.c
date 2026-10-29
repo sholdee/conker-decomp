@@ -886,15 +886,47 @@ s32 func_15045F8C(struct conker15045714 *arg0, f32 arg1, s32 *arg2, Game71820Hit
     return 0;
 }
 
-/* func_150461D0: PERMUTER CANDIDATE (best hand score 120, no register diffs).
-   Reconstruction in scratchpad/func_1504715C_recon.c. Follows the matched
-   func_150466F8 min/max template; sole diff is one delay-slot instruction: the
-   sp27 spill (func_15045880 result) is scheduled ASAP vs the target's ALAP into
-   func_15045D48's delay slot. */
-// PERMUTER-VERIFIED source exists (matches golden IN ISOLATION, score 0) but does NOT transfer
-// to the whole-file build (pscore 560) — IDO -g3 codegen is TU-context-dependent and the permuter
-// compiles single-function in isolation. See memory/conker-permuter-setup.md. Best in-file: 560.
-#pragma GLOBAL_ASM("asm/nonmatchings/game_71820/func_150461D0.s")
+s32 func_150461D0(struct conker15045714 *arg0, u16 arg1, f32 arg2, struct conker150472C0_dst *arg3) {
+    s32 sp74;
+    s32 sp70;
+    struct conker150472C0_dst sp4C;
+    struct conker150472C0_dst sp28;
+    u8 sp27;
+
+    if (arg2 < arg0->field_0x04) {
+        arg3->field_0x1C &= ~2;
+        return 0;
+    }
+    sp4C = *arg3;
+    sp28 = *arg3;
+    func_15045714(arg0, arg1, &sp74, (s32)&sp70);
+    sp27 = func_15045880((Vec3f_15045D48 *)arg0, arg2, &sp74, (Game71820Hit *)&sp4C);
+    arg0 = (struct conker15045714 *)func_15045D48((Vec3f_15045D48 *)arg0, arg2, &sp70, (Game71820Hit *)&sp28);
+
+    if (sp27 && ((s32)arg0 & 0xFF) != 0) {
+        if (sp4C.field_0x00 < sp28.field_0x00) {
+            *arg3 = sp4C;
+        } else {
+            *arg3 = sp28;
+        }
+        return 1;
+    }
+    if (sp27) {
+        *arg3 = sp4C;
+        return 1;
+    }
+    if (((s32)arg0 & 0xFF) != 0) {
+        *arg3 = sp28;
+        return 1;
+    }
+    if (sp4C.field_0x00 < sp28.field_0x00) {
+        *arg3 = sp4C;
+    } else {
+        *arg3 = sp28;
+    }
+    arg3->field_0x1C &= ~2;
+    return 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_71820/func_15046460.s")
 
