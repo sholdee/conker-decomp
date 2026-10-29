@@ -35,7 +35,179 @@ void func_150D5440(void *arg0, u8 arg1, s32 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1028F0/func_150D54C8.s")
+typedef struct {
+    s32 interaction_state;
+    u8 pad4[0x14 - 0x4];
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    u8 pad20[0x28 - 0x20];
+    f32 unk28;
+    u8 pad2C[0x3B - 0x2C];
+    u8 unique_id;
+    u8 pad3C[0x40 - 0x3C];
+    f32 unk40;
+    u8 pad44[0x180 - 0x44];
+    f32 unk180;
+    s32 unk184;
+} Owner54C8;
+
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s16 unk8;
+    s16 unkA;
+    s32 unkC;
+    s32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 unk16;
+    u8 unk17;
+    u8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+    u8 unk1C;
+    u8 unk1D;
+    s16 unk1E;
+    s16 unk20;
+    s16 unk22;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    struct17 pos;
+    struct17 unk3C;
+    struct17 vel;
+    f32 unk54;
+    u32 unk58;
+    s32 unk5C;
+    u8 unk60;
+    u8 unk61;
+    s8 unk62;
+    s8 unk63;
+    s8 unk64;
+    u8 unk65;
+    u8 unk66;
+    u8 pad67;
+    s16 unk68;
+    u8 pad6A[2];
+    f32 unk6C;
+} Particle54C8; /* 0x70 */
+
+typedef struct {
+    Owner54C8 *owner;
+    u8 ownerId;
+    u8 pad5[3];
+    f32 accum;
+} Data54C8;
+
+typedef struct {
+    u8 pad0;
+    u8 unk1;
+    u8 pad2[0xC - 0x2];
+    u8 unkC;
+    u8 padD;
+    s16 state;
+    u8 pad10[0x28 - 0x10];
+    Data54C8 data;
+} Effect54C8;
+
+extern void *func_15130280(void *, u8, s32, s32, u8, s32);
+extern void func_1514373C(f32 arg0, f32 arg1, f32 *arg2, f32 *arg3);
+extern s32 func_1515C0F8(Owner54C8 *arg0, f32 **arg1);
+
+void func_150D54C8(Effect54C8 *effect) {
+    Owner54C8 *owner;
+    Data54C8 *data;
+    Particle54C8 spawn;
+    f32 c;
+    f32 s;
+    f32 cx;
+    f32 nc;
+    f32 *ref;
+    u8 flip;
+    f32 r1;
+    f32 r2;
+    f32 side;
+
+    owner = effect->data.owner;
+    data = &effect->data;
+    if (owner) {}
+    if (owner->interaction_state == 0 || owner->unique_id != data->ownerId) {
+        effect->state = -1;
+        return;
+    }
+    if (owner->unk28 < 8.0f && (owner->unk184 & 0x1F) == 0xE) {
+        data->accum += (3.000000238f + func_150ADA68() * (f32)1) * D_800BE9A4;
+        if (data->accum > 1.0f) {
+            if (func_1515C0F8(owner, &ref) == 0) {
+                ref = &D_800A5480;
+            }
+            func_1514373C(owner->unk40 * 0.01745329238f, 1.0f, &s, &c);
+            cx = c;
+            nc = -s;
+            spawn.unk1D = 0x28;
+            spawn.unk8 = 0x2203;
+            spawn.unk0 = 0x200005;
+            spawn.unk14 = 0xFF;
+            spawn.unk15 = 0xFF;
+            spawn.unk16 = 0xFF;
+            spawn.unk17 = 0xFF;
+            spawn.unk18 = 0xFF;
+            spawn.unk19 = 0xFF;
+            spawn.unk1A = 0xFF;
+            spawn.unk4 = 0;
+            spawn.unkC = 0;
+            spawn.unk10 = 0;
+            spawn.unk1C = 0xFF;
+            spawn.unk1E = 5;
+            spawn.unk20 = 0x33;
+            spawn.unk22 = 1;
+            spawn.unk58 = 0x84C207;
+            spawn.unk60 = 6;
+            spawn.unk61 = 8;
+            spawn.unk62 = -1;
+            spawn.unk63 = -1;
+            spawn.unk64 = -1;
+            spawn.unk65 = 0;
+            spawn.unk5C = 0;
+            spawn.unk66 = 0xFF;
+            spawn.unk24 = 1.0f;
+            spawn.unk3C.unk0 = 0.0f;
+            spawn.unk3C.unk4 = 0.0f;
+            spawn.unk3C.unk8 = 0.0f;
+            do {
+                flip = func_150ADA20() & 1;
+                r1 = func_150ADA68();
+                r2 = func_150ADA68();
+                if (flip) {
+                    side = 35.0f;
+                } else {
+                    side = -35.0f;
+                }
+                spawn.pos.unk0 = ((owner->unk14 + (cx * side)) - ((s * 180.0f) * 0.5f)) + ((s * 180.0f) * r1);
+                spawn.pos.unk4 = owner->unk180;
+                spawn.pos.unk8 = ((owner->unk1C + (nc * side)) - ((c * 180.0f) * 0.5f)) + ((c * 180.0f) * r1);
+                spawn.vel.unk0 = ((flip ? (r2 = (r2 * 2.907000065f) + 6.000000477f) : -(r2 = (r2 * 2.907000065f) + 6.0000005f)) * cx) - (ref[0] * 0.5640000105f);
+                spawn.vel.unk4 = 3.156000137f * r2;
+                spawn.vel.unk8 = ((flip ? r2 : -r2) * nc) - (ref[2] * 0.564f);
+                spawn.unkA = func_150ADA20() % 10U + 0x1F;
+                spawn.unk1B = func_150ADA20() % 76U + 0xB4;
+                spawn.unk28 = spawn.unk2C = func_150ADA68() * 364.0f + 111.0f;
+                spawn.unk54 = func_150ADA68() * 0.1570000052f + -2.111000061f;
+                spawn.unk58 &= ~0xC0;
+                flip = (func_150ADA20() & 1) ? 0x80 : 0;
+                spawn.unk58 |= ((func_150ADA20() & 1) ? 0x40 : 0) | flip;
+                func_15130280(&spawn, 1, 0, 0, effect->unkC, effect->unk1);
+                data->accum -= 1.0f;
+            } while (data->accum > 1.0f);
+        }
+    }
+}
+
+
+
+
 
 typedef struct {
     s32 unk0;
