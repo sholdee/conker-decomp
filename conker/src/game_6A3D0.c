@@ -23,7 +23,137 @@ struct D800D19A0Header {
     u32 field_0x34;
 };
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_6A3D0/func_1503CF20.s")
+struct Hdr1503CF20 {
+    s32 *unk0;
+    u32 unk4;
+    Gfx **unk8;
+    u32 unkC;
+    s32 unk10;
+    u32 unk14;
+    s32 unk18;
+    u32 unk1C;
+    s32 unk20;
+    s32 unk24;
+    s32 unk28;
+    u32 unk2C;
+    s32 unk30;
+    s32 unk34;
+};
+
+struct E1503DC3C;
+struct124 *func_1502B6BC(s32, s32, s32, s32, s32, s32);
+extern Gfx **D_800C4488[];
+extern s32 D_800C48F0[];
+extern s32 D_800C4BE0[];
+extern struct E1503DC3C *D_800C5338[];
+extern s32 D_800C5048[];
+extern u16 D_800C4310[];
+extern u16 D_800C57A0[];
+extern u16 D_800C4778[];
+extern u16 D_800C5628[];
+extern u16 D_800C4ED0[];
+extern void func_1503D438(s32 *arg0, s32 arg1);
+extern void func_1503D368(s32, s32);
+extern s32 func_1503DC3C(s32);
+extern void func_1510CE60(s32, s32, s32, s32, s32 *);
+extern void func_1503D984(s32 arg0);
+extern s32 func_1503D804(s32 arg0);
+extern s32 func_150028BC(s32);
+extern s32 func_1503D774(s32 arg0, s32 arg1);
+extern s32 func_1503D660(s32 arg0, s32 arg1);
+extern void func_1503DD1C(s32 arg0);
+extern void func_10004074(u32);
+
+s32 func_1503CF20(s32 arg0, s32 arg1, void *arg2, s32 arg3, s32 arg4) {
+    s32 ret;
+    struct Hdr1503CF20 *hdr;
+    s32 size;
+    u32 n;
+    s32 i;
+
+    if (arg0 == 0xFF) {
+        return 0;
+    }
+    if (arg0 >= 0xBB) {
+        return 0;
+    }
+    ret = 0;
+    if ((&D_800D19A0)[arg0] != 0) {
+        return 0;
+    }
+    hdr = (struct Hdr1503CF20 *)func_1502B6BC((s32)&size, 7, 0, 2, 1, arg0);
+    if (hdr == NULL) {
+        return 1;
+    }
+    (&D_800D19A0)[arg0] = (s32)hdr + 0x38;
+    D_800C4020[arg0] = hdr->unk0;
+    D_800C4488[arg0] = hdr->unk8;
+    D_800C48F0[arg0] = hdr->unk28;
+    D_800C4BE0[arg0] = hdr->unk10;
+    D_800C5338[arg0] = (struct E1503DC3C *)hdr->unk18;
+    D_800C5048[arg0] = hdr->unk20;
+    D_800C4310[arg0] = hdr->unk4 >> 2;
+    if (D_800C4020[arg0] != NULL) {
+        n = (u32)D_800C4020[arg0];
+    } else {
+        n = (u32)D_800C4488[arg0];
+    }
+    D_800C57A0[arg0] = (n - (u32)hdr - 0x38) >> 4;
+    D_800C4778[arg0] = hdr->unkC >> 2;
+    for (i = 0; i < D_800C4778[arg0]; i++) {
+        func_1503D438((s32 *)&D_800C4488[arg0][i], (s32)hdr);
+        func_1503D368((s32)D_800C4488[arg0][i], (s32)hdr);
+    }
+    n = hdr->unk2C >> 2;
+    for (i = 0; i < n; i++) {
+        func_1503D438(&((s32 **)D_800C48F0)[arg0][i], (s32)hdr);
+        func_1503D368(((s32 **)D_800C48F0)[arg0][i], (s32)hdr);
+    }
+    D_800C5628[arg0] = hdr->unk1C / 12;
+    D_800C4ED0[arg0] = hdr->unk14 >> 4;
+    if (arg3 != 0) {
+        ret |= func_1503DC3C(arg0);
+        if (ret == 0) {
+            for (i = 0; i < D_800C4778[arg0]; i++) {
+                func_1510CE60((s32)D_800C4488[arg0][i], 0, 0, 0x3E, NULL);
+            }
+        }
+    }
+    if (ret == 0) {
+        func_1503D984(arg0);
+        ret |= func_1503D804(arg0);
+    }
+    if (ret == 0 && ((arg2 != NULL && (*(s32 *)((u8 *)arg2 + 0x18) & 0x4000)) || (arg4 & 1))) {
+        if (func_150028BC(arg0) != 0) {
+            ret |= 8;
+        }
+    }
+    if (ret == 0) {
+        ret |= func_1503D774(arg0, 0);
+        if (ret == 0) {
+            ret |= func_1503D660(arg0, 0);
+        }
+    }
+    if (ret != 0) {
+        if (((u32 *)D_800C6360)[arg0] != 0) {
+            func_10004074(((u32 *)D_800C6360)[arg0]);
+        }
+        func_1503DD1C(arg0);
+        if (D_800C5C08[arg0] != 0) {
+            func_10004074(D_800C5C08[arg0]);
+            D_800C5C08[arg0] = 0;
+        }
+        if (D_800C6070[arg0] != 0) {
+            func_10004074(D_800C6070[arg0]);
+            D_800C6070[arg0] = 0;
+        }
+        if ((&D_800D19A0)[arg0] != 0) {
+            func_10004074((&D_800D19A0)[arg0] - 0x38);
+            (&D_800D19A0)[arg0] = 0;
+        }
+    }
+    return ret;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_6A3D0/func_1503D368.s")
 
@@ -264,7 +394,7 @@ s32 func_1503DA3C(s32 arg0, s32 arg1) {
 }
 
 extern s32 func_1503CF20(s32, s32, void *, s32, s32);
-extern void func_150028BC(s32);
+extern s32 func_150028BC(s32);
 extern s32 func_15084044(void *, s32);
 extern void func_1510CE60(s32, s32, s32, s32, s32 *);
 extern s32 func_1503DC3C(s32);
