@@ -404,7 +404,118 @@ s32 func_151D792C(struct func_151D792C_obj *arg0)
 void func_151D8718(f32 *arg0, f32 *arg1, f32 arg2);
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_204660/func_151D7A38.s")
+typedef struct Vec151D7A38 {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec151D7A38;
+
+typedef struct Entry151D7A38 {
+    /* 0x00 */ Vec151D7A38 pos;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ u8 unk14;
+    /* 0x18 */ f32 unk18;
+} Entry151D7A38;
+
+typedef struct Src151D7A38 {
+    /* 0x00 */ u8 pad0[0x2D];
+    /* 0x2D */ u8 unk2D;
+    /* 0x2E */ u8 pad2E[2];
+    /* 0x30 */ Vec151D7A38 pos;
+} Src151D7A38;
+
+typedef struct Sub151D7A38 {
+    /* 0x00 */ Src151D7A38 *src;
+    /* 0x04 */ Vec151D7A38 pos;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+} Sub151D7A38;
+
+typedef struct Obj151D7A38 {
+    /* 0x00 */ u8 pad0[0x10];
+    /* 0x10 */ Vec151D7A38 pos;
+    /* 0x1C */ u8 pad1C[9];
+    /* 0x25 */ u8 unk25;
+    /* 0x26 */ u8 pad26[6];
+    /* 0x2C */ s8 unk2C;
+    /* 0x2D */ s8 unk2D;
+    /* 0x2E */ s8 unk2E;
+    /* 0x2F */ u8 pad2F[0x65];
+    /* 0x94 */ Entry151D7A38 *entries;
+    /* 0x98 */ Sub151D7A38 *sub;
+} Obj151D7A38;
+
+s32 func_151D7A38(Obj151D7A38 *arg0) {
+    Sub151D7A38 *sub;
+    Entry151D7A38 *entries;
+    Vec151D7A38 target;
+    Src151D7A38 *src;
+    Entry151D7A38 *entry;
+    f32 inv;
+    f32 t;
+    f32 dt;
+    f32 diffx;
+    f32 diffy;
+    f32 diffz;
+    Vec151D7A38 cur;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+
+    sub = arg0->sub;
+    entries = arg0->entries;
+    src = sub->src;
+    if (!(src->unk2D & 1)) {
+        return 0;
+    }
+    target = src->pos;
+    arg0->pos = target;
+    sub->unk14 += 0.25f * D_800BE9A4;
+    if (sub->unk14 > 1.0f) {
+        inv = 1.0f / sub->unk14;
+        t = sub->unk10 + D_800BE9A4;
+        cur = sub->pos;
+        diffx = target.x - sub->pos.x;
+        diffy = target.y - sub->pos.y;
+        diffz = target.z - sub->pos.z;
+        dt = t * inv;
+        dx = diffx * inv;
+        dy = diffy * inv;
+        dz = diffz * inv;
+        do {
+            s32 pad;
+
+            entry = &entries[arg0->unk2E];
+            entry->pos = cur;
+            entry->unkC = 0.0f;
+            entry->unk10 = 0.0f;
+            entry->unk14 = 0;
+            entry->unk18 = 0.0f;
+            func_151D8718((f32 *)entry, &entry->unkC, t);
+            arg0->unk2E++;
+            t -= dt;
+            if (arg0->unk2E == arg0->unk25) {
+                arg0->unk2E = 0;
+            }
+            arg0->unk2C++;
+            if (arg0->unk2E == arg0->unk2D) {
+                arg0->unk2D++;
+                if (arg0->unk2D == arg0->unk25) {
+                    arg0->unk2D = 0;
+                }
+                arg0->unk2C--;
+            }
+            cur.x += dx;
+            cur.y += dy;
+            cur.z += dz;
+            sub->unk14 -= 1.0f;
+        } while (sub->unk14 > 1.0f);
+        sub->pos = cur;
+        sub->unk10 = t;
+    }
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_204660/func_151D7CD0.s")
 
