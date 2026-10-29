@@ -195,7 +195,63 @@ trailing_label:
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_CDE80/func_150A24C0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_CDE80/func_150A25D4.s")
+extern u8 D_800D3090;
+extern u8 D_800D9EB8[][3];
+void func_150E7290(s32 arg0, s32 arg1, s32 arg2);
+void func_150E68B0(u8 *arg0, s32 arg1, u8 *arg2, u8 arg3);
+void func_151CE51C(u8 *arg0, u8 *arg1);
+
+void func_150A25D4(u8 *arg0, u8 *arg1, s32 arg2, s64 arg3) {
+    switch (arg0[0x17]) {
+    case 0:
+        break;
+    case 1:
+        if (arg2 != 0xFF) {
+            func_150E7290(arg2, 0xFF, 0);
+        }
+        break;
+    case 2:
+        if (arg2 != 0xFF) {
+            D_800D9EB8[arg2][0] = *(s32 *)(arg0 + 0x18);
+            D_800D9EB8[arg2][1] = *(s32 *)(arg0 + 0x1C);
+            D_800D9EB8[arg2][2] = *(s32 *)(arg0 + 0x20);
+        }
+        break;
+    case 3:
+        if (arg2 != 0xFF) {
+            func_150E68B0(arg1, arg2, arg0, arg0[0x1B]);
+        }
+        break;
+    case 6: {
+        u8 *p = &D_800D3090;
+        if (!(arg3 & 1)) {
+            *p = 30;
+            func_10010344(0x66F, arg1, 0x5DC0, 0x190, 0x1F4);
+        }
+        *p += D_800BE9E4;
+        if (*p >= 31) {
+            if (*(u16 *)(arg1 + 0xB2) > 0x5A0) {
+                *(u16 *)(arg1 + 0xB2) = 0x4B0;
+            } else if (*(u16 *)(arg1 + 0xB2) < 0xF1) {
+                *(u16 *)(arg1 + 0xB2) = 0x5A;
+            } else {
+                *(u16 *)(arg1 + 0xB2) -= 0xF0;
+            }
+            *p = 0;
+        }
+    }
+        break;
+    case 8:
+        func_151C8674((s32)arg1, (s32)arg0);
+        break;
+    case 9:
+        func_1515F270((s32)arg1, (s32 *)arg0);
+        break;
+    case 10:
+        func_151CE51C(arg1, arg0);
+        break;
+    }
+}
 
 s32 func_150A1DA0(u8 *arg0, struct178 *arg1, s32 arg2);
 void func_15172E7C(u8 *arg0, s32 arg1, s32 arg2);
