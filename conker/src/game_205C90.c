@@ -38,7 +38,62 @@ s32 func_151D87E0(u8 arg0) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_205C90/func_151D8868.s")
+extern u8 D_800BEAC1;
+extern u8 D_800BEAC2;
+extern u8 D_800BEAC3;
+s32 func_15181CC8(s32);
+s32 func_1517EF00(s32);
+extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
+
+typedef struct {
+    u8 pad0[4];
+    u8 unk4;
+    u8 unk5;
+} Struct151D8868In;
+
+typedef struct {
+    u8 pad0[0x13];
+    u8 unk13;
+    u8 pad14[2];
+    u8 unk16;
+} Struct151D8868Out;
+
+void *func_151D8868(Struct151D8868In *arg0, s32 arg1, u8 arg2, s32 arg3) {
+    Struct151D8868Out *obj;
+    u8 j;
+
+    if (D_800E0B94 != 0) {
+        return NULL;
+    }
+    if (func_151D87E0(arg0->unk5) == 0) {
+        return NULL;
+    }
+    if (D_800BEAC0 != 0 || D_800BEAC1 != 0 || D_800BEAC2 != 0 || D_800BEAC3 != 0) {
+        return NULL;
+    }
+    {
+        u8 i;
+    for (i = 0; i <= D_80082FA0; i++) {
+        if (arg0->unk5 & (1 << i)) {
+            if (func_15181CC8(i) == 0 || func_1517EF00(i) != 0) {
+                return NULL;
+            }
+        }
+    }
+    }
+    obj = func_15167A68(0x3F, arg3, arg1 + 0x18, 1, arg2, 1);
+    if (obj == NULL) {
+        return NULL;
+    }
+    memcpy((u8 *)obj + 0xE, arg0, 8);
+    for (j = 0; j < 4; j++) {
+        if (obj->unk13 & (1 << j)) {
+            func_1501C010(j, arg0->unk4);
+        }
+    }
+    obj->unk16 = arg0->unk4;
+    return obj;
+}
 
 void func_151D8A24(struct102 *arg0) {
     u8 dummy[4];
