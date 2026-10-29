@@ -75,7 +75,7 @@ struct S15107C1CCreated {
     void *unk60;
 };
 
-void func_151070F8(struct260 *arg0, s32 arg1, s32 arg2, f32 arg3);
+void func_151070F8(struct260 *arg0, s16 arg1, s16 arg2, f32 arg3);
 void func_15107A20(struct127 *arg0, s32 arg1, s32 arg2, struct Vec15107A20 *arg3, struct Vec15107A20 *arg4);
 void func_15107AE0(struct Vec15107A20 *arg0, struct Vec15107A20 *arg1, struct Vec15107A20 *arg2, struct Vec15107A20 *arg3);
 void func_15107F54(s32 *arg0, u8 arg1, void *arg2, s32 arg3);
@@ -376,7 +376,30 @@ struct260 *func_15106F98(struct Vec15106F98 *arg0, struct Vec15106F98 *arg1, s32
     return temp_v0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_133190/func_151070F8.s")
+void func_151070F8(struct260 *arg0, s16 arg1, s16 arg2, f32 arg3) {
+    struct S15106F98Payload *data = (struct S15106F98Payload *)((u8 *)arg0 + 0x28);
+    struct Vec15106F98 *a;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    f32 t;
+    s16 mid;
+
+    if (arg2 - arg1 < 2) {
+        return;
+    }
+    mid = arg1 + ((arg2 - arg1) >> 1);
+    a = &data->unkC[arg1];
+    dx = data->unkC[arg2].x - data->unkC[arg1].x;
+    dy = data->unkC[arg2].y - data->unkC[arg1].y;
+    dz = data->unkC[arg2].z - data->unkC[arg1].z;
+    t = func_150ADA68() * (arg3 + arg3) + (0.5f - arg3);
+    data->unkC[mid].x = a->x + dx * t;
+    data->unkC[mid].y = a->y + dy * t;
+    data->unkC[mid].z = a->z + dz * t;
+    func_151070F8(arg0, arg1, mid, arg3);
+    func_151070F8(arg0, mid, arg2, arg3);
+}
 
 void func_15143794(s32, s32, f32, f32 *);
 
