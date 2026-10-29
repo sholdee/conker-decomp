@@ -793,7 +793,75 @@ void func_150E8A80(void) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_113D60/func_150E8B1C.s")
+extern f32 *func_15144B34(s32);
+
+typedef struct Node150E8B1C {
+    s32 unk0;
+    s32 unk4;
+    f32 unk8;
+    struct Node150E8B1C *unkC;
+} Node150E8B1C;
+
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD[0x1B];
+    f32 unk28;
+    f32 unk2C;
+    f32 unk30;
+} Struct150E8B1C;
+
+void func_150E8B1C(Struct150E8B1C *arg0) {
+    f32 *pos;
+    f32 *p;
+    Node150E8B1C *node;
+    f32 r;
+    struct {
+        f32 unk00;
+        f32 unk04;
+        f32 unk08;
+        f32 unk0C;
+        f32 unk10;
+        f32 unk14;
+    } sp;
+    f32 *v;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+
+    v = (f32 *)&sp;
+    pos = func_15144B34(D_800BE9E8);
+    p = &arg0->unk28;
+    p[2] += (p[0] + (func_150ADA68() * p[1])) * D_800BE9A4 * D_800DCD90;
+    if (p[2] > 1.0f) {
+        do {
+            r = func_150ADA68() * D_800DCD90;
+            node = (Node150E8B1C *)D_800DCDC4;
+            while (node->unk8 < r) {
+                r -= node->unk8;
+                node = node->unkC;
+            }
+            func_1514470C((struct134 *)node->unk0, (s32)v);
+            dx = sp.unk00 - pos[0];
+            dy = sp.unk04 - pos[1];
+            dz = sp.unk08 - pos[2];
+            if (dx * dx + dy * dy + dz * dz < 3240000.0f) {
+                struct260 *ret;
+
+                sp.unk0C = 0.3171199858f;
+                sp.unk10 = 1.046509981f;
+                sp.unk14 = 0.0f;
+                ret = func_15149130((func_150ADA20() % 13U) + 5, -1, 0x34, -1, 1, 0, (struct37 *)0x18, arg0->unkC, arg0->unk1);
+                if (ret != NULL) {
+                    memcpy((void *)((s32)ret + 0x28), v, 0x18);
+                }
+            }
+            p[2] -= 1.0f;
+        } while (p[2] > 1.0f);
+    }
+}
 
 struct260 *func_15130374(void *, u8, s32, u8, s32);
 void func_151436B4(f32, f32, f32, f32 *);
