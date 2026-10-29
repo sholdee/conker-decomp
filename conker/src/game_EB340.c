@@ -235,4 +235,170 @@ s16 *func_150BE438(s16 *arg0, s32 arg1) {
     return arg0 + 4;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_EB340/func_150BE494.s")
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} EB340Vec;
+
+typedef struct {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ EB340Vec pos;
+    /* 0x14 */ s16 unk14;
+    /* 0x16 */ s16 unk16;
+    /* 0x18 */ s16 unk18;
+    /* 0x1A */ s16 unk1A;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ s16 unk2C;
+    /* 0x2E */ s16 unk2E;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ f32 unk34;
+    /* 0x38 */ f32 unk38;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ s8 unk40;
+} EB340Cfg80C;
+
+typedef struct {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ EB340Vec pos;
+    /* 0x14 */ s16 unk14;
+    /* 0x16 */ s16 unk16;
+    /* 0x18 */ s16 unk18;
+    /* 0x1A */ s16 unk1A;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ s16 unk2C;
+    /* 0x2E */ s16 unk2E;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ f32 unk34;
+    /* 0x38 */ f32 unk38;
+} EB340Cfg2190;
+
+typedef struct {
+    /* 0x00 */ s16 unk00;
+    /* 0x02 */ s16 unk02;
+    /* 0x04 */ s16 unk04;
+    /* 0x06 */ s16 unk06;
+    /* 0x08 */ EB340Vec unk08;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ s16 unk2C;
+    /* 0x2E */ s16 unk2E;
+    /* 0x30 */ s16 unk30;
+    /* 0x32 */ s16 unk32;
+    /* 0x34 */ s16 unk34;
+    /* 0x36 */ s16 unk36;
+    /* 0x38 */ s16 unk38;
+    /* 0x3A */ s16 unk3A;
+    /* 0x3C */ s8 unk3C;
+    /* 0x40 */ f32 unk40;
+    /* 0x44 */ s16 unk44;
+    /* 0x46 */ s16 unk46;
+    /* 0x48 */ s32 unk48;
+} EB340Cfg3F18;
+
+extern s32 D_800A0010[];
+extern f32 D_800A0038[];
+extern s32 D_800A0060[];
+extern f32 D_800A0064[];
+
+void func_1515C244(void *, f32 *, f32 *, f32 *);
+void func_1504715C(void *, void *);
+void func_1515080C(EB340Cfg80C *, s32 *, f32 *, s32, s32, s32, s32, s32, s32, void *, f32, s32, s32, u8, s32);
+void func_15152190(EB340Cfg2190 *, s32 *, f32 *, s32, f32, s32, u8, s32);
+void func_15153F18(EB340Cfg3F18 *, EB340Vec *, void *, u8, s32);
+
+void func_150BE494(u8 *arg0, u8 arg1, s32 arg2) {
+    EB340Vec pos;
+    f32 lo;
+    f32 hi;
+    f32 mid;
+    u8 sp124[0x24];
+    EB340Cfg80C a;
+    EB340Cfg2190 b;
+
+    if (arg0 != NULL) {
+        mid = (*(f32 *)(arg0 + 0x150) + *(f32 *)(arg0 + 0x14C)) * 0.5f;
+        func_1515C244(arg0, &pos.x, &lo, &hi);
+        func_1504715C(sp124, arg0);
+        a.unk0 = 10;
+        a.unk4 = 0;
+        a.pos = pos;
+        a.unk14 = 0;
+        a.unk16 = 0xFF;
+        a.unk18 = -0x40;
+        a.unk1A = 0x32;
+        a.unk1C = 13.0f;
+        a.unk20 = 9.0f;
+        a.unk24 = -1.326000094f;
+        a.unk28 = 0.4410000145f;
+        a.unk2C = 0x4B;
+        a.unk2E = 0x28;
+        a.unk30 = mid;
+        a.unk34 = 0.0f;
+        a.unk38 = 14.09800053f;
+        a.unk3C = 1.0f;
+        a.unk40 = 0xB;
+        func_1515080C(&a, D_800A0010, D_800A0038, 10, 0, 0, 0, 1, -1, sp124, 55.0f, 0, 0, arg1, arg2);
+        b.unk0 = 0x11;
+        b.unk4 = 9;
+        b.pos = pos;
+        b.unk14 = 0;
+        b.unk16 = 0xFF;
+        b.unk18 = -0x3F;
+        b.unk1A = 0x4B;
+        b.unk1C = 14.0f;
+        b.unk20 = 11.0f;
+        b.unk2C = 0x28;
+        b.unk2E = 0x14;
+        b.unk24 = -0.8000000119f;
+        b.unk28 = 0.3030000031f;
+        b.unk30 = 0.151000008f;
+        b.unk34 = 0.1590000093f;
+        b.unk38 = 29.78700066f;
+        func_15152190(&b, D_800A0060, D_800A0064, 1, 10.0f, 0, arg1, arg2);
+        {
+        EB340Cfg3F18 c;
+        c.unk08 = pos;
+        c.unk14 = 6.900000095f;
+        c.unk18 = 14.90000057f;
+        c.unk1C = 1.281000018f;
+        c.unk20 = 0.5430000424f;
+        c.unk24 = 15.69999981f;
+        c.unk28 = 18.89999962f;
+        c.unk2C = 4;
+        c.unk2E = 3;
+        c.unk02 = 0xFF;
+        c.unk00 = 0;
+        c.unk04 = -0x2B;
+        c.unk06 = 0x1A;
+        c.unk30 = 3;
+        c.unk32 = 3;
+        c.unk34 = 0x1E;
+        c.unk36 = 0x14;
+        c.unk38 = 0x9B;
+        c.unk3A = 0x64;
+        c.unk44 = 0x10;
+        c.unk46 = 0xF;
+        c.unk48 = 0;
+        c.unk40 = 0.5f;
+        c.unk3C = 0;
+        func_15153F18(&c, &c.unk08, sp124, arg1, arg2);
+        c.unk3C = 2;
+        func_15153F18(&c, &c.unk08, sp124, arg1, arg2);
+        c.unk3C = 10;
+        func_15153F18(&c, &c.unk08, sp124, arg1, arg2);
+        }
+    }
+}
