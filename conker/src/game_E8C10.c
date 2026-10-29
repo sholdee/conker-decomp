@@ -296,7 +296,41 @@ s32 func_150BCFB8(struct Obj150BCFB8 *arg0, s32 a1, s32 a2, s32 a3, f32 arg5) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_E8C10/func_150BD070.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_E8C10/func_150BD740.s")
+typedef struct { f32 x, y, z; } Vec3f_BD740;
+extern Vec3f_BD740 D_8009FF40[4];
+extern Vec3f_BD740 D_8009FF70[4];
+extern Vec3f_BD740 D_8009FFA0[4];
+void func_15143134(Vec3f_BD740 *src, Vec3f_BD740 *dst, s32 arg2);
+void func_1514C470(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 arg6, s32 arg7,
+                   s32 arg8, f32 arg9, Vec3f_BD740 *arg10, u8 arg11);
+
+void func_150BD740(void *arg0, u8 arg1, s32 arg2) {
+    Vec3f_BD740 pts[4];
+    Vec3f_BD740 a[4];
+    Vec3f_BD740 b[4];
+    s32 i;
+    Vec3f_BD740 d[4];
+
+    if (arg0 != NULL) {
+        if (*(s32 *)((u8 *)arg0 + 0x1D4) != 0) {
+            for (i = 0; i < 4; i++) {
+                func_15143134(&D_8009FF40[i], &pts[i], *(s32 *)((u8 *)arg0 + 0x1D4));
+                func_15143134(&D_8009FF70[i], &a[i], *(s32 *)((u8 *)arg0 + 0x1D4));
+                func_15143134(&D_8009FFA0[i], &b[i], *(s32 *)((u8 *)arg0 + 0x1D4));
+            }
+            d[2].x = b[2].x - a[2].x;
+            d[2].y = b[2].y - a[2].y;
+            d[2].z = b[2].z - a[2].z;
+            func_1514C470(pts[2].x, pts[2].y, pts[2].z, pts[3].x, pts[3].y, pts[3].z,
+                          func_150ADA68() * 6.0f + 14.0f, 0xD, 0, 0.0f, &d[2], arg1);
+            d[3].x = b[3].x - a[3].x;
+            d[3].y = b[3].y - a[3].y;
+            d[3].z = b[3].z - a[3].z;
+            func_1514C470(pts[3].x, pts[3].y, pts[3].z, pts[0].x, pts[0].y, pts[0].z,
+                          func_150ADA68() * 6.0f + 14.0f, 0xD, 0, 0.0f, &d[3], arg1);
+        }
+    }
+}
 
 s32 func_150BD954(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5,
                   s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, s32 arg11,
