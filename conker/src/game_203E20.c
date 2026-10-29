@@ -38,7 +38,134 @@ void func_151D6970(s32 arg0, s32 arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_203E20/func_151D69B4.s")
+typedef struct Pkt151D69B4A {
+    s16 unk00;
+    s16 unk02;
+    s16 unk04;
+    s16 unk06;
+    f32 pos[3];
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+    s16 unk2C;
+    s16 unk2E;
+    s16 unk30;
+    s16 unk32;
+    s16 unk34;
+    s16 unk36;
+    s16 unk38;
+    s16 unk3A;
+    u8 unk3C;
+    u8 pad3D[3];
+    f32 unk40;
+    s16 unk44;
+    s16 unk46;
+    s32 unk48;
+} Pkt151D69B4A;
+
+typedef struct Pkt151D69B4B {
+    s16 unk00;
+    s16 unk02;
+    s16 unk04;
+    s16 unk06;
+    f32 pos[3];
+    s16 unk14;
+    s16 unk16;
+    f32 unk18;
+    f32 unk1C;
+    s16 unk20;
+    s16 unk22;
+    f32 unk24;
+    f32 unk28;
+    u8 unk2C;
+    u8 unk2D;
+    u8 pad2E[2];
+    f32 unk30;
+    f32 unk34;
+    u8 unk38;
+    u8 unk39;
+    u8 pad3A[2];
+    f32 unk3C;
+    u8 unk40;
+    u8 pad41[3];
+    f32 unk44;
+} Pkt151D69B4B;
+
+typedef struct Obj151D69B4 {
+    u8 pad0[0x10];
+    s16 unk10;
+    s16 unk12;
+    s16 unk14;
+} Obj151D69B4;
+
+extern void func_1504715C(void *, void *);
+extern void func_15153F18(s16 *, void *, void *, s32, s32);
+extern void func_15150178(s16 *, void *, void *, s32, s32);
+
+void func_151D69B4(Obj151D69B4 *arg0, void *arg1) {
+    u8 scratch[0x24];
+    Pkt151D69B4A a;
+
+    func_1504715C(scratch, arg1);
+    a.pos[0] = arg0->unk10;
+    a.pos[1] = arg0->unk12;
+    a.pos[2] = arg0->unk14;
+    a.unk14 = 2.49000001f;
+    a.unk2C = 3;
+    a.unk2E = 3;
+    a.unk02 = 0xFF;
+    a.unk04 = -0x2B;
+    a.unk00 = 0;
+    a.unk06 = 0x20;
+    a.unk30 = 3;
+    a.unk32 = 2;
+    a.unk34 = 0x28;
+    a.unk36 = 0x14;
+    a.unk38 = 0x9B;
+    a.unk3A = 0x64;
+    a.unk44 = 0x10;
+    a.unk46 = 0xF;
+    a.unk48 = 0;
+    a.unk3C = 9;
+    a.unk18 = 2.029999971f;
+    a.unk1C = 0.6080000401f;
+    a.unk20 = 0.2569999993f;
+    a.unk24 = 17.0f;
+    a.unk28 = 3.5f;
+    a.unk40 = 0.400000006f;
+    func_15153F18(&a.unk00, a.pos, scratch, 0xFF, 1);
+    {
+    Pkt151D69B4B b;
+    b.pos[0] = arg0->unk10;
+    b.pos[1] = arg0->unk12;
+    b.pos[2] = arg0->unk14;
+    b.unk14 = 0xF;
+    b.unk16 = 6;
+    b.unk00 = 0;
+    b.unk02 = 0xFF;
+    b.unk04 = -0x40;
+    b.unk06 = 0xC;
+    b.unk20 = 0x3C;
+    b.unk22 = 0x2D;
+    b.unk2C = 0xC8;
+    b.unk2D = 0x37;
+    b.unk38 = 1;
+    b.unk39 = 9;
+    b.unk3C = 1.0f;
+    b.unk40 = 0;
+    b.unk44 = 1.0f;
+    b.unk18 = 10.0f;
+    b.unk1C = 6.0f;
+    b.unk24 = -1.506000042f;
+    b.unk28 = 0.8140000105f;
+    b.unk30 = 44.0f;
+    b.unk34 = 88.0f;
+    func_15150178(&b.unk00, b.pos, scratch, 0xFF, 1);
+    }
+}
 
 extern void *func_15157010(void *, s32, f32, s32, s32, s32, u8, s32);
 extern void *func_150CFF10(u8, void *, s16, s32, s8, u8, u8, s32);
