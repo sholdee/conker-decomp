@@ -370,7 +370,45 @@ s32 func_151025F4(u8 *arg0, s32 arg1) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_12DAB0/func_151026BC.s")
+extern f32 D_800A21A0[][3];
+extern f32 D_800A21F4[][3];
+extern u8 D_800A2248[];
+s32 func_15100600(u8 *, f32 *, f32 *, u8, s16, s32, s32, s32, f32, f32, f32, f32, u8, u8, s32);
+
+s32 func_151026BC(u8 *arg0, s16 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5) {
+    s32 a;
+    s32 b;
+
+    if (arg0 == NULL) {
+        return 0;
+    }
+    switch (arg0[4]) {
+        case 0x58:
+        case 0x5B:
+        case 0x80:
+            a = 0x32;
+            b = 0xFF;
+            break;
+        case 0x5A:
+        case 0x5F:
+        case 0x74:
+        case 0x75:
+        case 0x7A:
+            a = 0xFF;
+            b = 0;
+            break;
+        default:
+            if ((*(u8 **)(arg0 + 0x31C))[0x78] == 0x3B) {
+                a = 0xFF;
+                b = 0;
+            } else {
+                a = 0x32;
+                b = 0xFF;
+            }
+            break;
+    }
+    return func_15100600(arg0, D_800A21A0[arg2], D_800A21F4[arg2], D_800A2248[arg2], arg1, a, b, 0, 20.0f, 20, 4.0f, 0.07999999821f, arg3, arg4, arg5);
+}
 
 void func_151027E8(struct210 *arg0) {
     s8 sp18[5];
