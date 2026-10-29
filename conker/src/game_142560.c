@@ -1,7 +1,10 @@
 #include <ultra64.h>
 #define func_15048A40 func_15048A40_void_unused
+#define func_10010F88 func_10010F88_void_decl_in_functions_h
 #include "functions.h"
 #undef func_15048A40
+#undef func_10010F88
+s32 func_10010F88(s32 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9);
 #include "variables.h"
 extern f32 func_15048A40(u8);
 extern void func_15188010(s32, f32 *);
@@ -312,7 +315,125 @@ void func_151163C0(struct Obj151163C0 *arg0) {
     arg0->unk60 = temp_f2 - sp18;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_142560/func_1511650C.s")
+struct Obj1511650C {
+    u8 pad0[0x10];
+    s16 unk10;
+    s16 unk12;
+    s16 unk14;
+    u8 pad16[0x26];
+    s32 unk3C;
+    u8 pad40[0xF];
+    u8 unk4F;
+    u8 pad50[0x14];
+    f32 unk64;
+    u8 pad68[0xC];
+    u16 unk74;
+    u8 pad76[0x6];
+    s32 unk7C;
+    s32 unk80;
+};
+
+struct Obj15116888;
+s32 func_15116888(s32 arg0, s32 arg1, s32 arg2, struct Obj15116888 *arg3);
+
+void func_1511650C(struct Obj1511650C *arg0, s32 arg1, s32 arg2, f32 arg3) {
+    s32 var_a0;
+    s32 var_v0;
+    s32 temp_v1;
+    s32 temp_a1;
+    f32 temp_f14;
+    f32 var_f12;
+    u32 temp_v0;
+    u16 temp_a0;
+
+    if (!(arg0->unk4F & 4)) {
+        var_a0 = 0;
+    } else {
+        var_a0 = func_15116888(arg0->unk10, arg0->unk14, (s32)&arg0->unk7C, (struct Obj15116888 *)D_800CC2D0) >> 3;
+    }
+    if ((arg1 & 1) && (var_a0 < 0)) {
+        var_a0 = 0;
+    }
+    var_v0 = *(s16 *)&arg0->unk3C;
+    var_v0 += var_a0;
+    if (var_a0 != 0) {
+        arg0->unk80 = 0;
+    }
+    temp_v1 = arg0->unk80;
+    temp_a1 = var_v0 * -0.0032;
+    if (temp_v1 <= 0) {
+        var_v0 += temp_a1;
+        if (var_v0 > 0) {
+            var_v0 -= 1;
+            if (var_v0 <= 0) {
+                if (var_a0 == 0) {
+                    if (temp_v1 == 0) {
+                        arg0->unk80 = 20;
+                    } else {
+                        arg0->unk80 = 0;
+                        var_v0 = 0;
+                    }
+                } else {
+                    var_v0 = 0;
+                }
+            }
+        } else if (var_v0 < 0) {
+            var_v0 += 1;
+            if (var_v0 >= 0) {
+                if (var_a0 == 0) {
+                    if (temp_v1 == 0) {
+                        arg0->unk80 = 20;
+                    } else {
+                        arg0->unk80 = 0;
+                        var_v0 = 0;
+                    }
+                } else {
+                    var_v0 = 0;
+                }
+            }
+        }
+    } else if (temp_v1 > 0) {
+        if (var_v0 > 0) {
+            var_v0 += 1;
+            arg0->unk80 = temp_v1 - D_800BE9E4;
+            if (arg0->unk80 <= 0) {
+                arg0->unk80 = -1;
+            }
+        } else {
+            var_v0 -= 1;
+            arg0->unk80 = temp_v1 - D_800BE9E4;
+            if (arg0->unk80 <= 0) {
+                arg0->unk80 = -1;
+            }
+        }
+    }
+    var_v0 <<= 16;
+    arg0->unk3C = (arg0->unk3C & 0xFFFF) | var_v0;
+    func_1511515C((struct Obj1511515C *)arg0);
+    if (arg2 != 0) {
+        f32 one = 1.0f;
+        temp_f14 = arg0->unk64;
+        var_f12 = fabsf(temp_f14) * 0.1000000015f;
+        if (var_f12 > 1.0f) {
+            var_f12 = 1.0f;
+        }
+        temp_v0 = (12767.0f * var_f12) + 20000.0f;
+        temp_a0 = arg0->unk74;
+        var_f12 = (var_f12 * arg3) - 500.0f;
+        if (temp_a0 == 0) {
+            if (0.009999999776f < temp_f14) {
+                arg0->unk74 = func_10010F88(arg2, temp_v0, var_f12, 0, -1, arg0->unk10, arg0->unk12, arg0->unk14, 1000, 6000);
+            }
+        } else {
+            if (0.009999999776f < temp_f14) {
+                func_1000F91C(temp_a0, temp_v0, var_f12, 0, -1, arg0->unk10, arg0->unk12, arg0->unk14, 200, 2000);
+                return;
+            }
+            func_100111C8(temp_a0);
+            arg0->unk74 = 0;
+        }
+    }
+}
 
 struct Obj15116888 {
     u8 pad0[0x14];
