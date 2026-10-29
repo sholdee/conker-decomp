@@ -845,7 +845,83 @@ struct127 *func_15052F58(s32 arg0, s32 arg1) {
     return temp_v0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_77AD0/func_15052F9C.s")
+u8 *func_15033E84(struct127 *arg0);
+
+void func_15052F9C(struct127 *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9) {
+    struct127 *obj;
+    s32 anim;
+    s32 flag;
+    u8 *temp;
+    u16 rot;
+    s32 state;
+
+    flag = 0;
+    anim = -1;
+    if (arg0->id == 0x48) {
+        temp = func_15033E84(arg0);
+        if (temp != NULL) {
+            anim = temp[6];
+        }
+    }
+    obj = &D_800CC2D0[arg0->unk124];
+    if ((arg8 != 0) || ((obj->y_position < (arg0->y_position + (arg1 * arg0->y_scale))) && (obj->y_velocity < 0.0f))) {
+        arg0->unk13C = arg0->unk124 + 0x64;
+        if (arg9 != 0) {
+            D_800D1580 = arg9;
+            func_1506E5FC();
+        }
+        obj->unk1CC = obj->y_position;
+        obj->unk76 = arg0->unk7A;
+        obj->unk31C->unk30 = 0;
+        if (arg0->interaction_state == 0x20) {
+            obj->y_velocity = 0.0f;
+            state = 2;
+            arg0->y_velocity = 0.0f;
+            if (arg0->id == 0x48) {
+                if (anim == 0x7A) {
+                    arg0->unk65 = arg0->unk124 + 1;
+                    arg0->unk5C = arg2;
+                    arg0->unk101 |= arg3;
+                    func_1505E650(obj, 5, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+                    func_15083568(obj, 0x79, 1.0f, 0);
+                    flag = 1;
+                }
+            } else {
+                arg0->y_scale = 0.75f;
+                obj->y_position = arg0->y_position;
+                state = 1;
+                if (D_800BE9F0 == 6) {
+                    state = 0x81;
+                }
+            }
+            obj->unk76 = arg0->unk7A;
+            obj->unk78 = obj->unk76;
+            obj->unk7A = obj->unk76;
+            obj->unk40 = (s16)(obj->unk76 + 0x4000) * 0.005493164f;
+            obj->unk31C->unk4E = state;
+            obj->unk83 = 0;
+            obj->disable_run = 0;
+        lbl:;
+        } else {
+            obj->unk65 = D_800C3E78 + 1;
+            obj->unk5C = arg2;
+            obj->unk101 |= arg3;
+            obj->disable_run = 0;
+        }
+        obj->immune = arg6;
+        obj->unk239 = arg7;
+        obj->unk31C->unk27 = 0;
+        arg0->unk232 = arg5;
+        arg0->unk218 = 0;
+        if (arg4 != 0) {
+            func_1506160C(obj, 1, 0, 0, 0);
+            obj->unk101 |= 0x40;
+        }
+    }
+    if (flag != 0) {
+        func_15060F28(arg0, 0);
+    }
+}
 // NON-MATCHING: plenty still to do here
 // void func_15052F9C(struct127 *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9) {
 //     s32 sp40;
