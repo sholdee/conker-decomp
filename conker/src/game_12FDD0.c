@@ -250,7 +250,111 @@ s32 func_15102D90(Obj15102D90 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_12FDD0/func_15102EB8.s")
+typedef struct {
+    u8 pad0[0x14];
+    u8 flags;
+    u8 pad15[3];
+    struct17 start;
+    struct17 end;
+} Seg_15102EB8;
+
+typedef struct {
+    u8 pad0[0x2C];
+    f32 width;
+    f32 t;
+    u8 pad34[0x8C];
+    u8 tmpl[0x40];
+    u8 *buffers[4];
+    Seg_15102EB8 seg;
+} Obj_15102EB8;
+
+typedef struct {
+    s16 x;
+    s16 y;
+    s16 z;
+    s16 flag;
+    u8 pad8[8];
+} Vtx_15102EB8;
+
+extern struct17 *func_15144B34(s32);
+void func_151D5D60(void *, s16, s32, void **, u8 *);
+void func_15145548(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, f32 *arg4);
+
+void *func_15102EB8(Obj_15102EB8 *arg0, s16 arg1) {
+    struct17 *pos;
+    struct17 mid;
+    struct17 dir;
+    Seg_15102EB8 *seg;
+    struct17 closest;
+    f32 dx, dy, dz;
+    f32 nx, ny, nz;
+    Vtx_15102EB8 *vertices;
+    void *result;
+    f32 t;
+    f32 lengthSquared;
+    u8 fresh;
+    f32 scale;
+
+    pos = func_15144B34(arg1);
+    if (!(arg0->seg.flags & 1)) {
+        return NULL;
+    }
+    func_151D5D60(arg0->buffers, arg1, 0x40, (void **)&vertices, &fresh);
+    result = vertices;
+    seg = &arg0->seg;
+    if (vertices != NULL) {
+        if (fresh) {
+            memcpy(arg0->buffers[arg1], arg0->tmpl, 0x40);
+            memcpy(arg0->buffers[arg1] + 0x40, arg0->tmpl, 0x40);
+        }
+    } else {
+        return NULL;
+    }
+    mid.unk0 = seg->start.unk0 + (seg->end.unk0 - seg->start.unk0) * arg0->t;
+    mid.unk4 = seg->start.unk4 + (seg->end.unk4 - seg->start.unk4) * arg0->t;
+    mid.unk8 = seg->start.unk8 + (seg->end.unk8 - seg->start.unk8) * arg0->t;
+    dir.unk0 = mid.unk0 - seg->start.unk0;
+    dir.unk4 = mid.unk4 - seg->start.unk4;
+    dir.unk8 = mid.unk8 - seg->start.unk8;
+    func_15145548(&seg->start, &dir, pos, &closest, &t);
+    dx = closest.unk0 - pos->unk0;
+    dy = closest.unk4 - pos->unk4;
+    dz = closest.unk8 - pos->unk8;
+    nx = dir.unk4 * dz - dy * dir.unk8;
+    ny = dir.unk8 * dx - dz * dir.unk0;
+    nz = dir.unk0 * dy - dx * dir.unk4;
+    lengthSquared = nx * nx + ny * ny + nz * nz;
+    if (lengthSquared == 0.0f) {
+        nx = 0.0f;
+        ny = 0.0f;
+        nz = 0.0f;
+    } else {
+        scale = arg0->width / sqrtf(lengthSquared);
+        nx *= scale;
+        ny *= scale;
+        nz *= scale;
+    }
+    vertices->x = seg->start.unk0 + nx;
+    vertices->y = seg->start.unk4 + ny;
+    vertices->z = seg->start.unk8 + nz;
+    vertices->flag = 0;
+    vertices++;
+    vertices->x = mid.unk0 + nx;
+    vertices->y = mid.unk4 + ny;
+    vertices->z = mid.unk8 + nz;
+    vertices->flag = 0;
+    vertices++;
+    vertices->x = mid.unk0 - nx;
+    vertices->y = mid.unk4 - ny;
+    vertices->z = mid.unk8 - nz;
+    vertices->flag = 0;
+    vertices++;
+    vertices->x = seg->start.unk0 - nx;
+    vertices->y = seg->start.unk4 - ny;
+    vertices->z = seg->start.unk8 - nz;
+    vertices->flag = 0;
+    return result;
+}
 
 typedef struct {
     s32 unk00;
