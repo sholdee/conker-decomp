@@ -1909,7 +1909,163 @@ void func_1511DD98(u8 *arg0, u8 *arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_142560/func_1511DF6C.s")
+struct Obj1511DF6CSub {
+    u16 unk0;
+    u16 unk2;
+    u16 unk4;
+    u16 unk6;
+    f32 unk8;
+    f32 unkC;
+};
+
+struct Obj1511DF6C {
+    f32 unk0;
+    f32 unk4;
+    u8 pad8[0x8];
+    s16 unk10;
+    s16 unk12;
+    s16 unk14;
+    u8 pad16[0x2];
+    f32 unk18;
+    u8 pad1C[0x10];
+    f32 unk2C;
+    f32 unk30;
+    f32 unk34;
+    u8 pad38[0x1C];
+    u16 unk54;
+    u8 pad56[0x18];
+    u8 unk6E;
+    u8 pad6F[0xD];
+    struct Obj1511DF6CSub *unk7C;
+    s32 unk80;
+    s32 unk84;
+};
+
+extern void *func_1509B570(s32);
+extern void func_1507C3E0(struct127 *, s16 *, s16 *, s16 *);
+extern void func_151D6970(struct127 *, struct Obj1511DF6C *);
+
+void func_1511DF6C(struct Obj1511DF6C *arg0) {
+    f32 dist;
+    s32 hp;
+    f32 radius;
+    f32 scale;
+    s16 height;
+    s16 sp64;
+    s16 sp62;
+    struct Obj1511DF6CSub *sub;
+    s32 skip;
+    s32 anim;
+    s32 i;
+    struct127 *obj;
+    u8 *res;
+    f32 y;
+
+    if (arg0->unk7C == NULL) {
+        arg0->unk7C = allocate_memory(0x10, 1, 0, 0);
+        sub = arg0->unk7C;
+        bzero(sub, 0x10);
+        sub->unkC = arg0->unk2C;
+        arg0->unk34 = 0.0f;
+        arg0->unk30 = 0.0f;
+        arg0->unk2C = 0.0f;
+    } else {
+        sub = arg0->unk7C;
+    }
+    skip = 0;
+    anim = -1;
+    switch (arg0->unk54) {
+    case 0x59:
+    case 0x5A:
+        break;
+    case 0x54:
+        anim = 0x17;
+        if (D_800BE9F0 == 0x2D) {
+            res = func_1509B570(0xBA);
+            if (res != NULL && (hp = *(s32 *)(res + 0x1FE4)) <= 0) {
+                skip = 1;
+            }
+        }
+    default:
+        arg0->unk4 += (f32)D_800BE9E4 * 1.519999981f;
+        dist = cosf(sub->unk0 * 9.587380191e-05f);
+        arg0->unk0 = 8.0f * dist;
+        dist = cosf(sub->unk2 * 9.587380191e-05f);
+        arg0->unk18 = 12.0f * dist;
+        sub->unk0 += (f32)D_800BE9E4 * 507.0f;
+        sub->unk2 += (f32)D_800BE9E4 * 419.0f;
+        break;
+    }
+    if (sub->unk4 < 3 && skip == 0) {
+        for (i = 0; i < D_8008FD8C; i++) {
+            obj = &D_800CC2D0[i];
+            if (obj->interaction_state == 0 || obj->health <= 0 || obj->unk127 == 0xFF) {
+                continue;
+            }
+            if (obj->unk300 == 0) {
+                continue;
+            }
+            if ((arg0->unk84 == 1 && *(u8 *)&obj->pad128 != 0) || (arg0->unk84 == 2 && *(u8 *)&obj->pad128 == 0) ||
+                (arg0->unk84 == 3 && (*(u8 *)&obj->pad128 & 1))) {
+                continue;
+            }
+            if (anim != -1 && func_1503195C(obj, anim, 0) != NULL) {
+                continue;
+            }
+            dist = ((f32)arg0->unk10 - obj->x_position) * ((f32)arg0->unk10 - obj->x_position) + ((f32)arg0->unk14 - obj->z_position) * ((f32)arg0->unk14 - obj->z_position);
+            res = (u8 *)obj->unk31C;
+            radius = 100.0f;
+            scale = (f32)(*(s8 *)(res + 0x1AF) & 0xFF) * 0.015625f;
+            if (res[0x84] != 0) {
+                scale *= 1.399999976f;
+            }
+            radius *= scale;
+            if (dist < radius * radius) {
+                func_1507C3E0(obj, &height, &sp64, &sp62);
+                y = (f32)arg0->unk12;
+                if (y < *(f32 *)&obj->pad17C && obj->y_position < y + radius &&
+                    y - radius < obj->y_position + height) {
+                    arg0->unk80 = obj->unique_id;
+                    sub->unk4 = 3;
+                    func_1511DD98((u8 *)arg0, (u8 *)obj);
+                    func_151D6970(obj, arg0);
+                    break;
+                }
+            }
+        }
+    }
+    if (sub->unk4 == 0) {
+        arg0->unk34 += 0.2599999905f * sub->unkC;
+        if (sub->unkC <= arg0->unk34) {
+            arg0->unk34 = sub->unkC;
+            sub->unk6 = 0;
+            sub->unk4++;
+            sub->unk8 = 0.3000000119f;
+        }
+        arg0->unk30 = arg0->unk34;
+        arg0->unk2C = arg0->unk34;
+    } else if (sub->unk4 == 1) {
+        sub->unk8 -= 0.01999999955f * sub->unkC;
+        if (sub->unk8 <= 0.0f) {
+            sub->unk4++;
+            sub->unk8 = 0.0f;
+        }
+        arg0->unk34 = cosf(sub->unk6 * 9.587380191e-05f) * sub->unk8 + sub->unkC;
+        arg0->unk2C = arg0->unk30 = arg0->unk34;
+        sub->unk6 += D_800BE9E4 * 0x1613;
+    } else if (sub->unk4 == 2) {
+    } else if (sub->unk4 == 3) {
+        arg0->unk34 -= 0.2599999905f * sub->unkC;
+        if (arg0->unk34 <= 0.0f) {
+            sub->unk4 = 0;
+            arg0->unk6E = 1;
+            arg0->unk34 = 0.0f;
+        }
+        arg0->unk30 = arg0->unk34;
+        arg0->unk2C = arg0->unk34;
+    }
+}
+
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_142560/func_1511E780.s")
 
