@@ -971,7 +971,46 @@ void func_15168F84(s32 arg0, s32 *arg1, s32 *arg2) {
 void func_15169040(s32 arg0, u8 arg1) {
     func_15169070(0, 0x68, arg0, arg1);
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_15169070.s")
+typedef struct {
+    u8 pad0[0x1C];
+    void (*unk1C)(struct102 *, s32, u8);
+    u8 pad20[0x14];
+} Struct15169070;
+
+void func_15143D18(s32 *, s32 *, s32, s32);
+void func_1516968C(struct102 *arg0, u8 *arg1, u8 arg2);
+
+void func_15169070(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
+    s32 i;
+    struct102 *node;
+
+    func_15143D18(&arg0, &arg1, 2, 0x68);
+    for (i = arg0; i < arg1; i++) {
+        s32 j;
+        for (j = 0; j != 2; j++) {
+            if (((Struct15169070 *)D_8008B4A8)[i].unk1C != NULL) {
+                node = ((struct102 *(*)[104])D_800DCE50)[j][i];
+                D_800DD190++;
+                while (node != NULL) {
+                    ((struct102 **)D_800DD198)[D_800DD190] = (struct102 *)node->unk8;
+                    func_1516968C(node, (u8 *)arg2, arg3);
+                    ((Struct15169070 *)D_8008B4A8)[i].unk1C(node, arg2, arg3);
+                    node = ((struct102 **)D_800DD198)[D_800DD190];
+                }
+                D_800DD190--;
+            } else {
+                node = ((struct102 *(*)[104])D_800DCE50)[j][i];
+                D_800DD190++;
+                while (node != NULL) {
+                    ((struct102 **)D_800DD198)[D_800DD190] = (struct102 *)node->unk8;
+                    func_1516968C(node, (u8 *)arg2, arg3);
+                    node = ((struct102 **)D_800DD198)[D_800DD190];
+                }
+                D_800DD190--;
+            }
+        }
+    }
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_15169260.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_1516944C.s")
 void func_151695F0(struct127 *arg0, u8 arg1) {
