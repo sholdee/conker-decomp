@@ -1,7 +1,10 @@
 #include <ultra64.h>
 #define func_10010F30 func_10010F30_void
+#define func_150ADA20 func_150ADA20_orig
 #include "functions.h"
 #undef func_10010F30
+#undef func_150ADA20
+s32 func_150ADA20(void);
 #include "variables.h"
 
 extern s32 func_10010F30(s32, u16, u8, s16, u8);
@@ -601,9 +604,127 @@ s32 func_151AADBC(AlphaFadeOwner *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1D6E80/func_151AADF8.s")
+typedef struct {
+    s32 unk0;
+    s16 unk4;
+    u8 unk6;
+    u8 unk7;
+    s32 unk8;
+    s32 unkC;
+    u8 unk10;
+    u8 unk11;
+    u8 unk12;
+    u8 unk13;
+    u8 unk14;
+    u8 unk15;
+    u8 unk16;
+    u8 unk17;
+    s32 unk18;
+    s32 unk1C;
+    u8 unk20;
+    u8 pad21[7];
+} Particle_151AADF8;
 
-extern u8   func_150ADA20(void);
+typedef struct {
+    void *unk0;
+    u8 unk4;
+    u8 pad5[3];
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    s16 unk14;
+    s16 unk16;
+    s16 unk18;
+    u8 pad1A[2];
+    f32 unk1C;
+} Payload_151AADF8;
+
+typedef struct {
+    u8 pad0[4];
+    u8 unk4;
+} Flag_151AADF8;
+
+typedef struct {
+    u8 pad0[0xB0];
+    Flag_151AADF8 unkB0;
+} Eff_151AADF8;
+
+typedef struct {
+    u8 pad0[0x18];
+    Eff_151AADF8 *unk18;
+} Sub_151AADF8;
+
+typedef struct {
+    u8 pad0[0x18];
+    struct_151A9EC0_inner *unk18;
+    u8 pad1C[0x34 - 0x1C];
+    f32 unk34;
+    u8 unk38[0x20];
+    Sub_151AADF8 unk58;
+} Obj_151AADF8;
+
+extern u8 D_800AB414[];
+
+void func_151AADF8(Obj_151AADF8 *arg0) {
+    struct_151A9EC0_inner *v;
+    Sub_151AADF8 *p;
+    Flag_151AADF8 *q;
+    f32 pos[3];
+    Particle_151AADF8 part;
+    Payload_151AADF8 payload;
+    f32 size;
+    u8 color;
+
+    v = arg0->unk18;
+    p = &arg0->unk58;
+    if (p->unk18 != NULL) {
+        q = &p->unk18->unkB0;
+        q->unk4 = 1;
+    dummy:
+        return;
+    }
+    pos[0] = v->unk14;
+    if (-9500.0f < *(f32 *)((u8 *)v + 0x118)) {
+        pos[1] = *(f32 *)((u8 *)v + 0x118) + 100.0f;
+    } else {
+        pos[1] = v->unk18 + 150.0f;
+    }
+    pos[2] = v->unk1C;
+    if (func_15045800(pos, 0, pos[1] - 300.0f, (s32)&arg0->unk34) != 0) {
+        color = func_151D8E20();
+        pos[1] = arg0->unk34;
+        size = (func_150ADA68() * 30.0f) + 50.0f;
+        payload.unk0 = arg0;
+        payload.unk4 = 1;
+        payload.unk16 = 10;
+        payload.unk18 = 10;
+        payload.unk8 = 26214.40039f;
+        payload.unkC = 32768.0f;
+        payload.unk10 = 0.0f;
+        payload.unk14 = 0;
+        payload.unk1C = 0.2310000062f;
+        part.unkC = (s32)(payload.unkC * 0.5f + payload.unk8);
+        part.unk6 = 0x38;
+        part.unk0 = 0x60300;
+        part.unk4 = 0x12C;
+        part.unk10 = 0x96;
+        part.unk8 = 0;
+        part.unk11 = 0xFF;
+        part.unk12 = D_800AB414[color * 3];
+        part.unk13 = D_800AB414[color * 3 + 1];
+        part.unk14 = D_800AB414[color * 3 + 2];
+        part.unk15 = 0xFF;
+        part.unk18 = 0x440001;
+        part.unk16 = 0;
+        part.unk17 = 6;
+        p->unk18 = (Eff_151AADF8 *)func_1513C73C((s32)&part, 7, 1, (s32)arg0->unk38, pos[0], pos[1], pos[2], size, size,
+                            func_150ADA20() & 0xFF, (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2), 0x20, 0xFF, 1);
+        if (p->unk18 != NULL) {
+            memcpy(&p->unk18->unkB0, &payload, 0x20);
+        }
+    }
+}
+
 extern f32  func_150ADA68(void);
 
 typedef struct {
