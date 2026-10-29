@@ -193,7 +193,40 @@ s32 func_1502B224(s32 arg0, void *arg1, u32 arg2, u32 arg3) {
     func_10004514(arg0, arg1, (size + 0xF) & ~0xF, 1);
     return size;
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_57FA0/func_1502B350.s")
+s32 func_1502B350(u8 *arg0, s32 arg1, s32 *arg2) {
+    u32 size;
+    void *buf;
+    void *out;
+
+    size = ((arg1 & 0x0FFFFFFF) + 1) & ~1;
+    out = buf = allocate_memory(size, 1, 2, 2);
+    if (buf == NULL) {
+        return 0;
+    }
+    func_10004514((s32)arg0, buf, (size + 0xF) & ~0xF, 1);
+    if ((arg1 & 0x70000000) == 0x10000000) {
+        *arg2 = *(s32 *)buf & 0x7FFFFFFF;
+        if (*arg2 != 0) {
+            out = NULL;
+            if ((u32)*arg2 < 1000000) {
+                out = allocate_memory((u32)*arg2, 1, 2, 2);
+                if (out != NULL) {
+                    size = func_10006240(buf, out, D_8003809C);
+                } else {
+                    size = 0;
+                }
+            } else {
+                size = 0;
+            }
+        } else {
+            out = NULL;
+            size = 0;
+        }
+        func_10004074(buf);
+    }
+    *arg2 = size;
+    return (s32)out;
+}
 /* Offset-table entry: unk0 is rebased onto the table (-1 = none); bit 31 of unk4 ends the table. */
 typedef struct {
     s32 unk0;
