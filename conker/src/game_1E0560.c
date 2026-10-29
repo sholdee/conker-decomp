@@ -335,7 +335,10 @@ typedef struct {
     u8 pad11[3];
     Vec3f_151B3A7C start;
     Vec3f_151B3A7C end;
-    u8 pad2C[0x1C];
+    u8 pad2C[0x10];
+    f32 unk3C;
+    f32 unk40;
+    u8 pad44[4];
     Node151B3A7C nodes[10];
     f32 unk138;
 } Struct151B3A7C;
@@ -351,9 +354,9 @@ s32 func_151B3A7C(Struct151B3A7C *arg0) {
     f32 dz;
     s32 i;
 
-    dx = arg0->end.x - arg0->start.x;
-    dy = arg0->end.y - arg0->start.y;
-    dz = arg0->end.z - arg0->start.z;
+    dx = -arg0->start.x + arg0->end.x;
+    dy = -arg0->start.y + arg0->end.y;
+    dz = -arg0->start.z + arg0->end.z;
     cur = arg0->start;
     for (i = 0; i < 10; i++) {
         Node151B3A7C *node = &arg0->nodes[i];
@@ -488,7 +491,128 @@ s32 func_151B3FDC(Struct151B3A7C *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E0560/func_151B42A4.s")
+u8 func_151B42A4(Struct151B3A7C *arg0) {
+    u8 ret;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    Vec3f_151B3A7C mid;
+    Vec3f_151B3A7C relStart;
+    Vec3f_151B3A7C relEnd;
+    f32 len;
+    f32 inv;
+    f32 pad3[5];
+    f32 c;
+    f32 s;
+    f32 aZ;
+    f32 ux;
+    f32 uy;
+    f32 u;
+    f32 v;
+    f32 half;
+    f32 dist;
+    f32 d2;
+    f32 hpad;
+    f32 pad4;
+    f32 w;
+    f32 angle2;
+    f32 angleP;
+    f32 sn;
+    f32 cs;
+    f32 sn2;
+    f32 a;
+    f32 b;
+    f32 t;
+    f32 k;
+    Vec3f_151B3A7C cur;
+    Vec3f_151B3A7C np;
+    f32 dX;
+    f32 dY;
+    f32 dZ;
+    f32 vx;
+    f32 vy;
+    f32 aX;
+    f32 aY;
+    s32 i;
+    Node151B3A7C *node;
+
+    ret = 1;
+    dx = -arg0->start.x + arg0->end.x;
+    dy = -arg0->start.y + arg0->end.y;
+    dz = arg0->end.z - arg0->start.z;
+    if ((fabsf(dx) > 9.999999747e-05f) || (fabsf(dz) > 9.999999747e-05f)) {
+        f32 h;
+        mid.x = arg0->start.x + (dx * 0.5f);
+        mid.y = arg0->start.y + (dy * 0.5f);
+        mid.z = arg0->start.z + (dz * 0.5f);
+        relStart.x = arg0->start.x - mid.x;
+        relStart.y = arg0->start.y - mid.y;
+        relStart.z = arg0->start.z - mid.z;
+        relEnd.x = arg0->end.x - mid.x;
+        relEnd.y = arg0->end.y - mid.y;
+        relEnd.z = arg0->end.z - mid.z;
+        len = sqrtf((dx * dx) + (dz * dz));
+        inv = 1.0f / len;
+        c = dz * inv;
+        s = dx * inv;
+        u = ((relEnd.z * c) + (relEnd.x * s)) - ((relStart.z * c) + (relStart.x * s));
+        v = relEnd.y - relStart.y;
+        d2 = (u * u) + (v * v);
+        dist = sqrtf(d2);
+        inv = 1.0f / dist;
+        half = dist * 0.5f;
+        ux = u * inv;
+        uy = v * inv;
+        h = d2 * 0.25f;
+        if (arg0->unk138 < h) {
+            ret = func_151B3A7C(arg0);
+        } else {
+            f32 angle;
+            w = sqrtf(arg0->unk138 - h);
+            node = arg0->nodes;
+            for (i = 0, angle = 0.0f, angle2 = 0.0f; i < 10; i++, angle += 0.3490658700f, angle2 += 0.3490658700f) {
+                Node151B3A7C *n = &node[i];
+                cur = n->pos;
+                sn = sinf(angle);
+                cs = cosf(angle);
+                sn2 = sinf(angle2);
+                a = half * cs;
+                b = w * sn;
+                t = (a * ux) - (b * uy);
+                np.x = (t * s) + mid.x;
+                np.y = ((a * uy) - (b * ux)) + mid.y;
+                np.z = (t * c) + mid.z;
+                if (arg0->unk10 & 2) {
+                    n->pos = np;
+                    n->vel.x = 0.0f;
+                    n->vel.y = 0.0f;
+                    n->vel.z = 0.0f;
+                } else if (*(s32 *)D_800DBFF4 != 0) {
+                    n->pos = np;
+                    n->vel = *(Vec3f_151B3A7C *)&D_800A5480;
+                } else {
+                    dX = (cur.x - np.x) * sn2 * arg0->unk40;
+                    dY = (cur.y - np.y) * sn2 * arg0->unk40;
+                    dZ = (cur.z - np.z) * sn2 * arg0->unk40;
+                    n->pos.x = np.x + dX;
+                    n->pos.y = np.y + dY;
+                    n->pos.z = np.z + dZ;
+                    aX = arg0->unk3C * dX;
+                    aY = arg0->unk3C * dY;
+                    aZ = arg0->unk3C * dZ;
+                    n->pos.x += (n->vel.x * D_800BE9A4) + (0.5f * aX * D_800BE9A4 * D_800BE9A4);
+                    n->pos.y += (n->vel.y * D_800BE9A4) + (0.5f * aY * D_800BE9A4 * D_800BE9A4);
+                    n->pos.z += (n->vel.z * D_800BE9A4) + (0.5f * aZ * D_800BE9A4 * D_800BE9A4);
+                    n->vel.x = n->vel.x + (aX * D_800BE9A4);
+                    n->vel.y = n->vel.y + (aY * D_800BE9A4);
+                    n->vel.z = n->vel.z + (aZ * D_800BE9A4);
+                }
+            }
+        }
+    }
+    arg0->unk10 &= ~2;
+    return ret;
+}
 
 typedef struct {
     s32 unk0;
