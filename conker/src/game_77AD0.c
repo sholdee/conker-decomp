@@ -316,7 +316,40 @@ s32 func_1504AEF4(s32 arg0, s32 arg1) {
 }
 
 // bleurgh
-#pragma GLOBAL_ASM("asm/nonmatchings/game_77AD0/func_1504AF10.s")
+void func_1504AF10(struct127 *arg0, s32 arg1, s32 arg2) {
+    s32 t;
+    s32 idx;
+    s32 type;
+    s32 id;
+
+    if (arg0->unk92 && (arg1 || !(arg0->unk92 >> 15))) {
+        id = arg0->unk92 & 0x7FFF;
+        if ((type = (arg0->unk92 >> 12) & 7) == 0) {
+            type = func_1504AEF4(id, (s32)&idx);
+            if (type != 0) {
+                arg0->unk92 = (type << 12) | idx;
+            }
+        }
+        idx = arg0->unk92 & 0xFFF;
+        if (type == 3) {
+            if (arg2 != 0) {
+                D_800DBEF4[idx].unk4E = 0;
+                arg0->unk92 = 0;
+                return;
+            }
+            D_800DBEF4[idx].unk4E = (arg0 - D_800CC2D0) + 100;
+            if (arg1 != 0) {
+                D_800DBEF4[idx].unk4E = 0;
+                return;
+            }
+            ((u8 *)D_800DBEF4)[idx * 0xA0 + 0x4F] &= ~0x60;
+            ((u8 *)D_800DBEF4)[idx * 0xA0 + 0x4F] |= 0x20;
+            D_800DBEF4[idx].unk10 = arg0->x_position;
+            D_800DBEF4[idx].unk12 = arg0->y_position + (s16)arg0->unk90;
+            D_800DBEF4[idx].unk14 = arg0->z_position;
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_77AD0/func_1504B0FC.s")
 extern s8 D_80099140[];
