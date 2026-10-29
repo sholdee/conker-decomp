@@ -327,7 +327,66 @@ Gfx *func_15188D00(Gfx *gfx, s32 idx, s16 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1B5CC0/func_15188E48.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1B5CC0/func_15188F84.s")
+typedef struct Entry15188F84 {
+    u16 index;
+    u16 value;
+} Entry15188F84;
+
+typedef struct Node15188F84 {
+    u8 unk0;
+    u8 unk1;
+    u8 unk2;
+    u8 unk3;
+    char pad4[4];
+    u8 *unk8;
+    struct Node15188F84 *unkC;
+    u8 *unk10;
+} Node15188F84;
+
+extern Entry15188F84 **D_80089240;
+extern u8 **D_80089250[];
+extern u16 D_800DBEE8[];
+
+void func_15188F84(Node15188F84 *node) {
+    s32 i;
+    s32 count;
+    s32 dst;
+    s32 off;
+    s32 view;
+    u8 *src;
+    u8 *from;
+    s32 next;
+    u8 *p;
+    Node15188F84 *arg0;
+
+    arg0 = node;
+    view = 0;
+    count = arg0->unk1;
+    dst = D_800BE9C0 * count;
+    off = (D_800BE9C0 ^ 1) * count;
+    for (i = 0; i < D_800DBEE8[view]; i++) {
+        p = (u8 *)D_800DBEF4;
+        if (arg0->unk10 == p + (*D_80089240)[i].index * 0xA0) {
+            break;
+        }
+    }
+    if (i == D_800DBEE8[view]) {
+        arg0->unk2 = 0;
+        return;
+    }
+    src = *D_80089250[D_800BE9C0] + ((*D_80089240)[i].index << 6);
+    for (i = 0; i < count; i++) {
+        if (i == count - 1) {
+            from = src;
+        } else {
+            from = arg0->unk8 + ((i + off + 1) << 6);
+        }
+        bcopy(from, arg0->unk8 + ((dst + i) << 6), 0x40);
+    }
+    if (arg0->unk2 != arg0->unk1) {
+        arg0->unk2++;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1B5CC0/func_15189118.s")
 
