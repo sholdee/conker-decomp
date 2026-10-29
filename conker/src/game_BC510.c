@@ -7,6 +7,7 @@
 #undef func_150ADA20
 #include "variables.h"
 extern s32 func_150ADA20(void);
+void func_1508F9F4(void);
 
 extern s32 func_1510D0EC(s32, s32, s32, s32);
 void func_15042D94(s32, s32, u8, s32 *, ...);
@@ -57,7 +58,132 @@ void func_1508F9C4(void) {
     D_800D2410[D_800D2456++] = 0.0f;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_1508F9F4.s")
+typedef struct {
+    s16 unk0;
+    s16 unk2;
+    s16 unk4;
+    s16 unk6;
+    s16 unk8;
+    s16 unkA;
+    u8 unkC;
+    u8 state;
+    u8 unkE;
+    u8 unkF;
+} BC510Bubble;
+extern f32 func_15048A40(u8 arg0);
+
+void func_1508F9F4(void) {
+    s32 i;
+    s32 v;
+    s32 flag;
+    s32 d;
+    s32 n;
+    s32 t;
+    s32 u;
+    s32 j;
+    s32 x;
+
+    u = D_800D24C0;
+    if (u != 0) {
+        u -= D_800BE9E4;
+        if (u < 0) {
+            u = 0;
+        }
+        D_800D24C0 = u;
+    }
+    if (D_800CC2D0[0].in_water) {
+        u = D_800CC2D0[0].unkB2;
+    } else {
+        u = 0;
+    }
+    if (u > 90) {
+        n = u / 240;
+        if (n > 6) {
+            n = 6;
+        }
+        n = 6 - n;
+        n = n * 9;
+        if (n == 0) {
+            flag = 0;
+        }
+    } else {
+        flag = 0;
+    }
+    for (i = 0; i < 6; i++) {
+        BC510Bubble *p = (BC510Bubble *)D_800D2460[i];
+        if (p->state == 2) {
+            v = p->unkA;
+            v -= D_800BE9E4;
+            if (v <= 0) {
+                v = 6;
+                p->state = 3;
+            }
+            p->unkA = v;
+        }
+    sw:
+        switch (p->state) {
+        case 0:
+    LX: ;
+        l0:
+            if (flag != 0 && D_800D24C0 == 0) {
+                D_800D24C0 = 10;
+                p->state = 1;
+                p->unk0 = 0xFC;
+                p->unk2 = 0x60;
+                p->unk6 = 0;
+                p->unkC = 0;
+                p->unkE = func_150ADA20();
+                p->unk8 = 0x500;
+                p->unk4 = 0xFC - ((s32)(p->unk8 * func_15048A40(p->unkE)) >> 8);
+                p->unkF = 0;
+                p->unkA = n;
+            }
+            break;
+        case 1:
+            v = p->unk6;
+            v += D_800BE9E4 * 200;
+            if (v >= 0x666) {
+                p->state = 2;
+                v = 0x666;
+            }
+            p->unk6 = v;
+            break;
+        case 2:
+            d = D_800BE9E4;
+            j = 0;
+            v = p->unkC;
+            if (v < 0x20) {
+                v = v + d;
+                if (v > 0x20) {
+                    v = 0x20;
+                }
+                p->unkC = v;
+            }
+            x = p->unk2;
+            x -= (d * p->unkC) >> 4;
+            *(volatile s16 *)&p->unk2 = x;
+            t = *(volatile s16 *)&p->unk6;
+            if (d > 0) {
+                do {
+                    j++;
+                    t = (t * 0x104) >> 8;
+                } while (j < d);
+            }
+            p->unk6 = t;
+            p->unkE += d * 5;
+            p->unk8 += d * 30;
+            p->unk0 = ((s32)(func_15048A40(p->unkE) * p->unk8) >> 8) + p->unk4;
+            p->unkF += D_800BE9E4 * 10;
+        lbl:
+            break;
+        case 3:
+            if (p->unkA == 0) {
+                p->state = 0;
+            }
+            break;
+        }
+    }
+}
 typedef struct GameBC510Command {
     u32 w0;
     u32 w1;
