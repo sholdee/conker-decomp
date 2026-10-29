@@ -312,7 +312,94 @@ s32 func_151B1478(struct260 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1DD500/func_151B14AC.s")
+struct Struct151B14AC {
+    char pad0[0x2C];
+    f32 unk2C;
+    f32 unk30;
+    f32 unk34;
+    f32 unk38;
+    f32 unk3C;
+    f32 unk40;
+    char pad44[0x4];
+    f32 unk48;
+    char pad4C[0x74];
+    char unkC0[0x40];
+    s16 *unk100[0xB];
+};
+
+extern void func_151D5D60();
+
+s16 *func_151B14AC(struct Struct151B14AC *arg0, s16 arg1) {
+    s16 *var_v0;
+    s16 *ret;
+    f32 sinval;
+    f32 temp_f18;
+    f32 temp_y_cos;
+    f32 temp_y_sin;
+    f32 temp_f2;
+    f32 var_f14;
+    f32 var_f2;
+    f32 *temp_v1;
+    f32 temp_f0;
+    u8 sp3B;
+
+    func_151D5D60(arg0->unk100, arg1, 0x40, &var_v0, &sp3B);
+    ret = var_v0;
+    if (var_v0) {
+        if (sp3B) {
+            memcpy(arg0->unk100[arg1], arg0->unkC0, 0x40);
+            memcpy(arg0->unk100[arg1] + 0x20, arg0->unkC0, 0x40);
+        }
+    } else {
+        return 0;
+    }
+
+    temp_v1 = &D_800DD1E8[arg1];
+    var_f14 = -1.0f;
+    var_f2 = ((*temp_v1 * (arg0->unk40 - arg0->unk34)) - (D_800DD1D8[arg1] * (arg0->unk48 - arg0->unk3C))) * D_800BE9A8;
+    if (var_f2 < 0.0f) {
+        var_f14 = 1.0f;
+        var_f2 = -var_f2;
+    }
+
+    temp_f0 = sqrtf(var_f2) * 0.25f;
+    if (1.570796371f < temp_f0) {
+        temp_f0 = 1.570796371f;
+    }
+
+    temp_f0 = temp_f0 * var_f14;
+    sinval = sinf(temp_f0);
+    temp_f0 = cosf(temp_f0);
+    temp_f2 = arg0->unk2C * temp_f0;
+    temp_f18 = arg0->unk2C * sinval;
+    temp_y_cos = arg0->unk30 * temp_f0;
+    temp_y_sin = arg0->unk30 * sinval;
+
+    var_v0[0] = (*temp_v1 * -temp_f2) + arg0->unk34;
+    var_v0[1] = arg0->unk38 + temp_f18;
+    var_v0[2] = arg0->unk3C - (D_800DD1D8[arg1] * -temp_f2);
+    var_v0[3] = 0;
+
+    var_v0[8] = (*temp_v1 * temp_f2) + arg0->unk34;
+    var_v0[9] = arg0->unk38 - temp_f18;
+    var_v0[10] = arg0->unk3C - (D_800DD1D8[arg1] * temp_f2);
+    var_v0[11] = 0;
+
+    temp_f0 = temp_f2 - temp_y_sin;
+    var_v0[16] = (*temp_v1 * temp_f0) + arg0->unk34;
+    var_v0[17] = (arg0->unk38 - temp_f18) - temp_y_cos;
+    var_v0[18] = arg0->unk3C - (D_800DD1D8[arg1] * temp_f0);
+    var_v0[19] = 0;
+
+    temp_f0 = -(temp_f2 + temp_y_sin);
+    var_v0[24] = (*temp_v1 * temp_f0) + arg0->unk34;
+    var_v0[25] = (arg0->unk38 + temp_f18) - temp_y_cos;
+    var_v0[26] = arg0->unk3C - (D_800DD1D8[arg1] * temp_f0);
+    var_v0[27] = 0;
+
+    return ret;
+}
+
 
 s32 func_151B1828(CompactOscillatorObject *arg0) {
     CompactOscillatorObject *p = arg0;
