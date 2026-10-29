@@ -3,7 +3,82 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_15B200/func_1512DD50.s")
+typedef struct {
+    /* 0x00 */ u8 pad0[0x8];
+    /* 0x08 */ u32 unk8;
+    /* 0x0C */ u8 padC[0x10 - 0xC];
+    /* 0x10 */ s16 unk10;
+    /* 0x12 */ s16 unk12;
+    /* 0x14 */ s16 unk14;
+    /* 0x16 */ s16 unk16;
+    /* 0x18 */ u8 pad18[0x1C - 0x18];
+    /* 0x1C */ s32 unk1C;
+    /* 0x20 */ u32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+} Sub1512DD50A;
+
+typedef struct {
+    /* 0x00 */ u8 type;
+    /* 0x04 */ f32 start[3];
+    /* 0x10 */ f32 dir[3];
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 speed;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+} Sub1512DD50B;
+
+typedef struct {
+    /* 0x000 */ u8 pad0[0x6FC];
+    /* 0x6FC */ Sub1512DD50A a;
+    /* 0x730 */ u8 pad730[0x870 - 0x730];
+    /* 0x870 */ Sub1512DD50B b;
+} Obj1512DD50;
+
+void func_1512DD50(Obj1512DD50 *arg0) {
+    Sub1512DD50B *p0;
+    f32 z;
+    Sub1512DD50A *p1;
+    f32 x;
+    f32 y;
+    f32 sc;
+    f32 b;
+    struct17 tmp;
+    f32 c;
+    f32 d;
+
+    p0 = &arg0->b;
+    p1 = &arg0->a;
+    x = p1->unk10;
+    y = p1->unk12;
+    z = p1->unk14;
+    sc = p1->unk16;
+    c = p1->unk24 * sc;
+    b = p1->unk28 * sc;
+    sc = c;
+    c = p1->unk2C * c;
+    d = -sc * p1->unk30;
+    p0->start[0] = x - c;
+    p0->start[1] = y - b;
+    p0->start[2] = z - d;
+    tmp.unk0 = 2.0f * c;
+    tmp.unk4 = 2.0f * b;
+    tmp.unk8 = 2.0f * d;
+
+    sc = 1.0f / func_150AD930(&tmp.unk0);
+    p0->unk1C = sc;
+    p0->dir[0] = sc * tmp.unk0;
+    p0->dir[1] = sc * tmp.unk4;
+    p0->dir[2] = sc * tmp.unk8;
+    p0->speed = p1->unk20;
+    p0->unk24 = p1->unk8;
+    p0->type = p1->unk1C;
+    p0->unk28 = 0.0f;
+    p0->unk2C = 0.0f;
+}
 // void func_1512DD50(struct108 *arg0) {
 //     s32 pad;
 //     struct17 tmp;
