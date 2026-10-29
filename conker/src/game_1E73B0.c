@@ -166,7 +166,154 @@ void func_151BB044(struct127 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1E73B0/func_151BB0E0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E73B0/func_151BB61C.s")
+typedef struct { f32 x, y, z; } Vec3_151BB61C;
+typedef struct { s16 v[9]; } Surf_151BB61C;
+typedef struct {
+    Vec3_151BB61C dir;      /* 0x00 */
+    Surf_151BB61C surf;     /* 0x0C */
+    u8 pad1E[2];
+    f32 unk20;
+    s32 unk24;
+    s32 unk28;
+    Vec3_151BB61C pos;      /* 0x2C */
+    f32 unk38;
+    f32 unk3C;
+    f32 unk40;
+    f32 unk44;
+    f32 unk48;
+    f32 unk4C;
+    s32 unk50;
+    s32 unk54;
+    f32 unk58;
+    f32 unk5C;
+    f32 unk60;
+    f32 unk64;
+    s16 unk68;
+    s16 unk6A;
+    s16 unk6C;
+    s16 unk6E;
+    s16 unk70;
+    s16 unk72;
+    s8 unk74;
+} Fbfc_151BB61C;
+typedef struct {
+    s32 count;
+    s32 spread;
+    Vec3_151BB61C pos;      /* 0x08 */
+    Vec3_151BB61C vel;      /* 0x14 */
+    Surf_151BB61C surf;     /* 0x20 */
+    u8 pad32[2];
+    f32 unk34;
+    f32 unk38;
+    f32 unk3C;
+    f32 unk40;
+    f32 unk44;
+    s16 unk48;
+    s16 unk4A;
+    f32 unk4C;
+    f32 unk50;
+    f32 unk54;
+} Desc_151BB61C;
+
+typedef struct { s32 v[9]; } Colors_151BB61C;
+typedef struct { f32 v[9]; } Scales_151BB61C;
+extern Colors_151BB61C D_800AA718;
+extern Scales_151BB61C D_800AA73C;
+void func_15055A2C(s32, f32, f32, f32, s32);
+s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, void *, f32 *, f32 *, f32 *, s32, s32 *, s32, f32);
+s32 func_15145C90(s32);
+s32 func_15144E80(void *, Vec3_151BB61C *, Vec3_151BB61C *, Vec3_151BB61C *);
+void func_1514FBFC(void *, u8, s32);
+void func_15151D6C(void *, s32 *, f32 *, s32, u8, s32);
+void func_151C04F8(f32 *, u8, s32);
+void func_151C05A4(void *, u8, s32);
+void func_151C05F0(void *, u8, s32);
+void func_151C0644(void *, u8, s32);
+void func_151BBEE4(f32 *arg0, u8 arg1, s32 arg2);
+void func_151BBFBC(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+
+void func_151BB61C(s32 arg0, Vec3_151BB61C *arg1, Vec3_151BB61C *arg2, u8 arg3, s32 arg4) {
+    Surf_151BB61C surf;
+    Vec3_151BB61C hit;
+    Vec3_151BB61C delta;
+    s32 sp1A0;
+    Vec3_151BB61C sp194;
+    Vec3_151BB61C sp188;
+    Vec3_151BB61C sp17C;
+    Fbfc_151BB61C fx;
+
+    if (arg0 != 0) {
+        func_15055A2C(0, arg1->x, arg1->y, arg1->z, 0);
+        delta.x = arg2->x - arg1->x;
+        delta.y = arg2->y - arg1->y;
+        delta.z = arg2->z - arg1->z;
+        func_151C05A4(arg1, arg3, arg4);
+        func_151C05F0(arg1, arg3, arg4);
+        func_151C04F8((f32 *)arg1, arg3, arg4);
+        func_151BBEE4((f32 *)arg1, arg3, arg4);
+        if (func_150AC9C0(arg1->x, arg1->y, arg1->z, delta.x, delta.y, delta.z, 0, &surf, &hit.x, &hit.y, &hit.z, 0, &sp1A0, 0, 0.0f) != 0) {
+            if (func_15145C90(sp1A0) != 0) {
+                func_151BBFBC((s32)&surf, (s32)&hit, arg3 & 0xFF, arg4);
+            }
+            if (func_15144E80(&surf, &sp194, &sp188, &sp17C) != 0 && sp17C.y < 0.0f) {
+                func_151C0644(&hit, arg3, arg4);
+            }
+            fx.dir.x = -delta.x;
+            fx.dir.y = -delta.y;
+            fx.dir.z = -delta.z;
+            fx.surf = surf;
+            fx.unk20 = 494.0f;
+            fx.pos = hit;
+            fx.unk24 = 3;
+            fx.unk28 = 4;
+            fx.unk38 = 0.06089999899f;
+            fx.unk3C = 0.02520000003f;
+            fx.unk40 = 45.0f;
+            fx.unk44 = 53.0f;
+            fx.unk48 = 203.0f;
+            fx.unk4C = 414.0f;
+            fx.unk50 = 7;
+            fx.unk54 = 3;
+            fx.unk58 = 15.0f;
+            fx.unk5C = 0.8800000548f;
+            fx.unk60 = -0.3980000317f;
+            fx.unk64 = 0.3910000324f;
+            fx.unk68 = 25;
+            fx.unk6A = 15;
+            fx.unk6C = 100;
+            fx.unk6E = 100;
+            fx.unk70 = 12;
+            fx.unk72 = 20;
+            fx.unk74 = 0;
+            func_1514FBFC(&fx, arg3, arg4);
+            {
+            Colors_151BB61C colors;
+            Scales_151BB61C scales;
+            Desc_151BB61C desc;
+            colors = D_800AA718;
+            scales = D_800AA73C;
+            desc.count = 6;
+            desc.spread = 6;
+            desc.pos = hit;
+            desc.vel.x = -delta.x;
+            desc.vel.y = -delta.y;
+            desc.vel.z = -delta.z;
+            desc.surf = surf;
+            desc.unk34 = 456.0f;
+            desc.unk38 = 0.02000000142f;
+            desc.unk3C = 0.02000000142f;
+            desc.unk40 = -1.710000038f;
+            desc.unk44 = 0.4480000138f;
+            desc.unk48 = 50;
+            desc.unk4A = 20;
+            desc.unk4C = 0.4990000129f;
+            desc.unk50 = 0.7010000348f;
+            desc.unk54 = 21.50200081f;
+            func_15151D6C(&desc, colors.v, scales.v, 9, arg3, arg4);
+            }
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1E73B0/func_151BBA9C.s")
 
