@@ -526,7 +526,149 @@ void func_1502E474(void) {
     D_800C3E90 = 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502E4C4.s")
+typedef struct {
+    u8 pad0[0xE];
+    u16 unkE;
+    s16 unk10;
+    u8 pad12[0x2C];
+    u16 unk3E;
+} Ent1502E4C4;
+
+extern u8 D_800C3660;
+extern u8 D_800D9C10[][0x40];
+extern s32 func_150A6360(s32, void *, f32, f32, f32, f32, f32, f32);
+extern s32 func_1503F904(struct127 *, s32, s32);
+void func_1502E9FC(s32 arg0, s32 arg1);
+
+void func_1502E4C4(s32 arg0) {
+    struct127 *obj;
+    u8 id;
+    u8 *tbl;
+    s32 base;
+    f32 width;
+    f32 height;
+    f32 yoff;
+    f32 thresh;
+    s32 maxv;
+    s32 i;
+    s32 mask;
+    s32 flag;
+    s32 lim0;
+    s32 lim;
+    s32 old;
+    s32 cmd;
+
+    mask = 1;
+    obj = &D_800CC2D0[arg0];
+    id = obj->id;
+    if (obj->unk5 == 7) {
+        obj->unk74 &= 0xFFF0;
+        return;
+    }
+    old = obj->unk74;
+    obj->unk74 |= 0xF;
+    if ((D_800C3638 != 0) && (D_800C3656 == 0) && (func_150229E4(obj) == 0)) {
+        return;
+    }
+    if ((obj->unk127 != 0xFF) && !((u16)D_800D2340 & (1 << obj->unk127))) {
+        return;
+    }
+    if ((obj->unk101 & 1) == 1) {
+        return;
+    }
+    if (obj->unk7 == 0) {
+        return;
+    }
+    if (obj->unk65 != 0) {
+        obj->unk74 = D_800CC2D0[obj->unk65 - 1].unk74;
+        return;
+    }
+    width = (u32)((Ent1502E4C4 *)D_800D1C90[id])->unkE * obj->xz_scale;
+    height = (u32)((Ent1502E4C4 *)D_800D1C90[id])->unkE * obj->y_scale;
+    yoff = (((Ent1502E4C4 *)D_800D1C90[id])->unk10 + obj->unkCC) * obj->y_scale;
+    *(f32 *)((u8 *)obj + 0x270) = width;
+    lim0 = *(u16 *)&obj->unk10;
+    if ((D_800C35EA == 1) && (D_800C3660 == 0)) {
+        lim0 = 0;
+    }
+    maxv = 0;
+    if (obj->unk101 & 0x80) {
+        thresh = 0.0f;
+    } else {
+        if (((Ent1502E4C4 *)D_800D1C90[id])->unk3E == 0) {
+            thresh = obj->unkE4;
+        } else if (((Ent1502E4C4 *)D_800D1C90[id])->unk3E == 1) {
+            thresh = 0.0f;
+        } else {
+            thresh = (u32)((Ent1502E4C4 *)D_800D1C90[id])->unk3E * obj->xz_scale;
+        }
+    }
+    for (i = 0; i <= D_80082FA0; i++) {
+        s32 r;
+
+        base = i * 0x180 + D_800BE628;
+        tbl = D_800D9C10[i];
+        flag = 0;
+        if (D_800DBFF0[i].unk3D4->unk197 != 0) {
+            lim = 100000;
+        } else {
+            lim = lim0;
+        }
+        r = func_150A6360(base, tbl, obj->x_position, obj->y_position + yoff,
+                          obj->z_position, width, height, 20000.0f);
+        if (r == 0) {
+            flag = 1;
+        } else {
+            if (r < 0) {
+                r = -r;
+            }
+            if (maxv < r) {
+                maxv = r;
+            }
+            if (((obj->pad66 & 0x80) != 0x80) && (r <= thresh) && (D_800C35EA != 1)) {
+                flag = 1;
+            }
+        }
+        if (flag == 0) {
+            if ((lim != 0) && (i != arg0)) {
+                if (lim < r) {
+                    cmd = 8;
+                } else {
+                    cmd = 9;
+                }
+                func_1506160C(obj, cmd & 0xFF, 0, 0, i);
+            } else {
+                obj->unkE.ub[1] |= (1 << i) << 4;
+                func_1506160C(obj, 9, 0, 0, i);
+                cmd = -1;
+            }
+            if ((obj->unkF8 & 0x800000) && (cmd != 8) && (D_800C35EA != 1) && (func_1503F904(obj, i, old) != 0)) {
+                flag = 1;
+            }
+        } else {
+            cmd = 10;
+        }
+        if (cmd != -1) {
+            func_1506160C(obj, cmd & 0xFF, 1, 0, i);
+        }
+        if (flag == 0) {
+            obj->unk74 &= ~mask;
+        }
+        if (func_1506196C(obj, i) == 0) {
+            obj->unk74 |= mask;
+        }
+        mask <<= 1;
+    }
+    func_1502E9FC((s32)obj, maxv);
+    if ((obj->camera != NULL) && ((obj->camera->unk2C == 0x10000) || (((struct127 *)obj->unk31C)->unk197 != 0))) {
+        obj->unk74 |= 1 << arg0;
+    }
+    if (D_800C35EA != 1) {
+        if (obj->pad2FC[0] != 0) {
+            obj->unk74 |= obj->pad2FC[0];
+        }
+    }
+}
 
 void func_1502E9FC(s32 arg0, s32 arg1) {
 }
