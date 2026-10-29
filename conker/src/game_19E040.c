@@ -118,7 +118,70 @@ void func_15170EC4(s32 arg0, u8 arg1, s32 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_19E040/func_15170F4C.s")
+typedef struct {
+    u16 id;
+    f32 pos[3];
+    f32 rot[3];
+} Entry15170F4C;
+
+extern Entry15170F4C D_800A6ED8[6];
+extern f32 func_150ADA68(void);
+
+void func_15170F4C(s32 arg0, u8 arg1, s32 arg2) {
+    s32 i;
+    Game70F4CPacket packet;
+    Entry15170F4C *e;
+    f32 x;
+    f32 y;
+    f32 z;
+    s32 count;
+    s32 texture;
+
+    count = 6;
+    e = D_800A6ED8;
+    packet.flags[8] = 2;
+    packet.flags[9] = 1;
+    packet.flags[7] = 6;
+    packet.flags[5] = 0;
+    x = ((Obj15170B90 *)arg0)->x;
+    y = ((Obj15170B90 *)arg0)->y;
+    z = ((Obj15170B90 *)arg0)->z;
+    packet.rotation[0] = 0.0f;
+    packet.rotation[1] = 0.0f;
+    packet.rotation[2] = 0.0f;
+    packet.scale[0] = 2.0f;
+    packet.scale[1] = 2.0f;
+    packet.scale[2] = 2.0f;
+    packet.life = 0x3C;
+    packet.flags[0] = 2;
+    packet.flags[1] = 0xFF;
+    packet.flags[2] = 0;
+    packet.flags[3] = 0;
+    packet.flags[4] = 0;
+    packet.color[0] = 0.3000000119f;
+    packet.color[1] = -0.6999999881f;
+    packet.color[2] = -0.200000003f;
+    for (i = 0; i < count; i++) {
+        texture = func_1518C900(e->id);
+        packet.flags[6] = e->id;
+        packet.position[0] = e->pos[0] + x;
+        packet.position[1] = e->pos[1] + y;
+        packet.position[2] = e->pos[2] + z;
+        packet.velocity[0] = e->pos[0] * 0.09000000358f;
+        packet.velocity[1] = fabsf(e->pos[1]) * 0.2300000042f;
+        packet.velocity[2] = e->pos[2] * 0.09000000358f;
+        packet.rotation[0] = e->rot[0];
+        packet.rotation[1] = e->rot[1];
+        packet.rotation[2] = e->rot[2];
+        packet.random[0] = packet.rotation[0] * 0.1000000015f;
+        packet.random[1] = func_150ADA68() * 4.0f - 2.0f;
+        packet.random[2] = func_150ADA68() * 10.0f - 5.0f;
+        packet.texture = texture;
+        func_15168BE4(&packet, arg1, arg2);
+        e++;
+    }
+    ((Obj15170B90 *)arg0)->unk6E = 1;
+}
 
 extern void func_150C3D5C(struct127 *);
 
