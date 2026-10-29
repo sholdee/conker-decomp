@@ -217,7 +217,43 @@ Gfx *func_1517EA4C(Gfx *arg0) {
     return arg0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1AB530/func_1517EAAC.s")
+void func_15110360(s32 arg0, f32 arg1[4][4], f32 arg2, f32 arg3, f32 arg4);
+void func_150A7A00(void *, f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
+
+s32 func_1517EAAC(f32 x, f32 y, f32 z, f32 *outX, f32 *outY) {
+    u8 *player;
+    f32 pitch;
+    f32 yaw;
+    f32 roll;
+    f32 sx;
+    f32 sy;
+    f32 sz;
+    f32 sw;
+    f32 mtx[4][4];
+    f32 cx;
+    f32 cy;
+    f32 scale;
+
+    player = (u8 *)D_800DBFF0 + D_80082FA4 * 0x9A0;
+    pitch = -*(f32 *)(player + 0x388);
+    yaw = -*(f32 *)(player + 0x380);
+    roll = *(f32 *)(player + 0x5EC);
+    func_15110360(D_80082FA4, mtx, pitch, yaw, roll);
+    cx = *(f32 *)((u8 *)D_800BE628 + D_80082FA4 * 0x180 + 0xC);
+    cy = *(f32 *)((u8 *)D_800BE628 + D_80082FA4 * 0x180 + 0x10);
+    func_150A7A00(mtx, x, y, z, &sx, &sy, &sz, &sw);
+    if (sw > 10.0f) {
+        scale = 1.0f / sw;
+        sx = sx * cx * scale;
+        sy = sy * cy * scale;
+        *outX = cx + sx;
+        *outY = cy - sy;
+        return 1;
+    }
+    *outX = 0.0f;
+    *outY = 0.0f;
+    return 0;
+}
 
 extern f32 sqrtf(f32);
 #pragma intrinsic (sqrtf)
