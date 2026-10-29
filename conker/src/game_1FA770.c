@@ -811,4 +811,210 @@ void func_151D2284(s32 arg0) {
     func_15147928(arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1FA770/func_151D22B0.s")
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3_151D22B0;
+
+typedef struct {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ Vec3_151D22B0 pos;
+    /* 0x14 */ s16 unk14;
+    /* 0x16 */ s16 unk16;
+    /* 0x18 */ s16 unk18;
+    /* 0x1A */ s16 unk1A;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ s16 unk2C;
+    /* 0x2E */ s16 unk2E;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ f32 unk34;
+    /* 0x38 */ f32 unk38;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ s8 unk40;
+} Cfg080C_151D22B0;
+
+typedef struct {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ Vec3_151D22B0 pos;
+    /* 0x14 */ s16 unk14;
+    /* 0x16 */ s16 unk16;
+    /* 0x18 */ s16 unk18;
+    /* 0x1A */ s16 unk1A;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ s16 unk2C;
+    /* 0x2E */ s16 unk2E;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ f32 unk34;
+    /* 0x38 */ f32 unk38;
+} Cfg2190_151D22B0;
+
+typedef struct {
+    /* 0x00 */ Vec3_151D22B0 pos;
+    /* 0x0C */ f32 unk0C;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ s16 unk24;
+    /* 0x26 */ s16 unk26;
+    /* 0x28 */ s16 unk28;
+    /* 0x2A */ s16 unk2A;
+    /* 0x2C */ s16 unk2C;
+    /* 0x2E */ s16 unk2E;
+    /* 0x30 */ s16 unk30;
+    /* 0x32 */ s16 unk32;
+    /* 0x34 */ s16 unk34;
+    /* 0x36 */ s16 unk36;
+    /* 0x38 */ s8 unk38;
+    /* 0x39 */ s8 unk39;
+    /* 0x3A */ u8 unk3A;
+    /* 0x3C */ s32 unk3C;
+    /* 0x40 */ s32 unk40;
+    /* 0x44 */ s32 unk44;
+    /* 0x48 */ s32 unk48;
+    /* 0x4C */ s32 unk4C;
+    /* 0x50 */ s32 unk50;
+    /* 0x54 */ u8 unk54;
+    /* 0x55 */ u8 unk55;
+    /* 0x56 */ u8 unk56;
+    /* 0x58 */ s32 unk58;
+    /* 0x5C */ s32 unk5C;
+    /* 0x60 */ s32 unk60;
+    /* 0x64 */ s32 unk64;
+    /* 0x68 */ s32 unk68;
+    /* 0x6C */ s32 unk6C;
+    /* 0x70 */ s32 unk70;
+    /* 0x74 */ s32 unk74;
+    /* 0x78 */ s32 unk78;
+    /* 0x7C */ s8 unk7C;
+    /* 0x7D */ s8 unk7D;
+    /* 0x7E */ s16 pad7E;
+    /* 0x80 */ s16 unk80;
+    /* 0x82 */ s16 unk82;
+    /* 0x84 */ s32 pad84;
+} Cfg1A38_151D22B0;
+
+extern s32 D_800AB0B0[];
+extern f32 D_800AB0E0[];
+extern s32 D_800AB110[];
+extern f32 D_800AB114[];
+
+void func_1515C244(struct127 *, f32 *, f32 *, f32 *);
+void func_1504715C(void *, struct127 *);
+void func_1515080C(Cfg080C_151D22B0 *, s32 *, f32 *, s32, s32, s32, s32, s32, s32, void *, f32, s32, s32, u8, s32);
+void func_15152190(Cfg2190_151D22B0 *, s32 *, f32 *, s32, f32, s32, u8, s32);
+void func_15151A38(Cfg1A38_151D22B0 *, u8, s32);
+
+void func_151D22B0(struct127 *arg0, u8 arg1, s32 arg2) {
+    Vec3_151D22B0 pos;
+    f32 lo;
+    f32 hi;
+    f32 mid;
+    u8 floor[0x24];
+
+    if (arg0 != NULL) {
+        func_10010154(0xAA, arg0, 0x7FFF, 0x3E8, 0xBB8);
+        func_10010A3C(arg0);
+        mid = (arg0->xz_scale + arg0->y_scale) * 0.5f;
+        func_1515C244(arg0, &pos.x, &lo, &hi);
+        func_1504715C(floor, arg0);
+        {
+        Cfg080C_151D22B0 a;
+        a.unk0 = 5;
+        a.unk4 = 5;
+        a.pos = pos;
+        a.unk14 = 0;
+        a.unk16 = 0xFF;
+        a.unk18 = -0x3C;
+        a.unk1A = 0x34;
+        a.unk1C = 15.0f;
+        a.unk20 = 20.0f;
+        a.unk24 = -1.447000027f;
+        a.unk28 = 0.5790000558f;
+        a.unk2C = 0x50;
+        a.unk2E = 0x1E;
+        a.unk30 = 1 * mid;
+        a.unk34 = 0 * mid;
+        a.unk38 = 20.24800110f;
+        a.unk3C = 1.0f;
+        a.unk40 = 0xB;
+        func_1515080C(&a, D_800AB0B0, D_800AB0E0, 0xC, 0, 0, 0, 1, -1, floor, 20.0f, 0, 0, arg1, arg2);
+        }
+        {
+        Cfg2190_151D22B0 b;
+        b.unk0 = 0xF;
+        b.unk4 = 7;
+        b.pos = pos;
+        b.unk1C = 30.0f;
+        b.unk20 = 10.0f;
+        b.unk14 = 0;
+        b.unk16 = 0xFF;
+        b.unk18 = -0x1D;
+        b.unk1A = 0x14;
+        b.unk2C = 0x20;
+        b.unk2E = 0x12;
+        b.unk24 = -1.309000015f;
+        b.unk28 = 0.4200000167f;
+        b.unk30 = 0.1070000082f;
+        b.unk34 = 0.3000000119f;
+        b.unk38 = 19.23800087f;
+        func_15152190(&b, D_800AB110, D_800AB114, 1, 0.0f, 0, arg1, arg2);
+        }
+        {
+        Cfg1A38_151D22B0 c;
+        c.pos = pos;
+        c.unk0C = 5.0f;
+        c.unk10 = 10.0f;
+        c.unk14 = 0.4990000129f;
+        c.unk18 = 0.7040000558f;
+        c.unk1C = 20.0f;
+        c.unk20 = 25.0f;
+        c.unk24 = 0xA;
+        c.unk26 = 7;
+        c.unk2A = 0xFF;
+        c.unk2C = -0x32;
+        c.unk2E = 0x1E;
+        c.unk30 = 3;
+        c.unk32 = 3;
+        c.unk34 = 0x23;
+        c.unk36 = 0xF;
+        c.unk39 = 1;
+        c.unk3A = 0x48;
+        c.unk3C = 1;
+        c.unk55 = 0xC8;
+        c.unk56 = 0x37;
+        c.unk58 = 3;
+        c.unk28 = 0;
+        c.unk38 = 0;
+        c.unk40 = 0;
+        c.unk44 = 0;
+        c.unk48 = 0;
+        c.unk4C = 0;
+        c.unk50 = 0;
+        c.unk54 = 0;
+        c.unk5C = 0xFF;
+        c.unk60 = 0;
+        c.unk64 = 0x220005;
+        c.unk68 = 0x1D0600;
+        c.unk6C = 3;
+        c.unk70 = 0x3B;
+        c.unk74 = 0x80;
+        c.unk78 = 0x20;
+        c.unk7C = 0;
+        c.unk7D = 7;
+        c.unk80 = 0xC;
+        c.unk82 = 0x15;
+        func_15151A38(&c, arg1, arg2);
+        }
+    }
+}
