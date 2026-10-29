@@ -39,6 +39,12 @@ function is right but something ELSE in the bin changed — e.g. a new literal i
   param widths) may be corrected there — `land` re-gates the whole ROM, so a change that alters
   any other function is rejected. Never edit asm/, Makefile, yaml, tools.
 - Never add a `#pragma GLOBAL_ASM`. Other stubs in the same file stay as they are.
+- Keep ALL scratch files (variants, scripts, notes) inside your own workspace, e.g.
+  `~/conker-ws/FUNC/my/`. Never use /tmp or the session scratchpad: other agents share them and
+  overwrite each other's files.
+- Scripted variant sweeps (`mw.py batch`, generators) are fine, but keep each sweep to a few
+  hundred variants; the machine is shared by 16 agents and a permuter daemon. Register-only
+  residue is the permuter's job — stop and report REGALLOC instead of brute-forcing it.
 - C89: all declarations at the top of a block. No `//`-only tricks needed (`-Xcpluscomm` is on).
 - Literals are fine: write float/double/string literals naturally (`10000.0f`, `"name"`). The
   build retargets every .rodata reference in your object to the ROM's original address
