@@ -23,7 +23,140 @@ void func_15192920(void *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1BFDD0/func_151929A4.s")
+typedef struct {
+    u8 pad0[0x14];
+    f32 unk14;
+    u8 pad18[4];
+    f32 unk1C;
+    u8 pad20[0x7A - 0x20];
+    u16 unk7A;
+    u8 pad7C[0x180 - 0x7C];
+    f32 unk180;
+} Obj151929A4;
+
+typedef struct {
+    Obj151929A4 *unk0;
+    u8 unk4;
+    f32 unk8;
+} State151929A4;
+
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD[0x1B];
+    State151929A4 unk28;
+} Actor151929A4;
+
+typedef struct {
+    s32 unk00;
+    s32 unk04;
+    s16 unk08;
+    s16 unk0A;
+    s32 unk0C;
+    s32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 unk16;
+    u8 unk17;
+    u8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+    u8 unk1C;
+    u8 unk1D;
+    s16 unk1E;
+    s16 unk20;
+    s16 unk22;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    f32 unk30[3];
+    f32 unk3C;
+    f32 unk40;
+    f32 unk44;
+    f32 unk48[3];
+    f32 unk54;
+    s32 unk58;
+    u8 pad5C[4];
+    u8 unk60;
+    u8 unk61;
+    u8 unk62;
+    s8 unk63;
+} Fx151929A4;
+
+extern s32 func_1515C0F8(Obj151929A4 *, f32 **);
+extern void func_15143874(s16, f32, f32 *, f32 *);
+extern struct260 *func_15130374(void *, u8, s32, u8, s32);
+
+void func_151929A4(Actor151929A4 *arg0) {
+    State151929A4 *state;
+    u8 flag;
+    s32 pad[2];
+    Fx151929A4 fx;
+    s32 pad2;
+    f32 val;
+    f32 *dir;
+    f32 scale;
+    struct260 *ret;
+
+    state = &arg0->unk28;
+    state->unk8 += (312.0f + (func_150ADA68() * 599.0f)) * 0.001000000047f * D_800BE9A4;
+    if (state->unk8 > 1.0f && func_1515C0F8(state->unk0, &dir) != 0) {
+        fx.unk1D = 0x29;
+        fx.unk08 = 0xE03;
+        fx.unk00 = 0x200005;
+        fx.unk18 = 0xB0;
+        fx.unk19 = 0xA0;
+        fx.unk1A = 0x2A;
+        fx.unk14 = 0x40;
+        fx.unk15 = 0xB;
+        fx.unk16 = 0x6A;
+        fx.unk04 = 0;
+        fx.unk0C = 0;
+        fx.unk10 = 0;
+        fx.unk17 = 0xFF;
+        fx.unk1C = 0xFF;
+        fx.unk60 = 3;
+        fx.unk61 = 3;
+        fx.unk58 = 0xE05;
+        fx.unk62 = 0xA;
+        fx.unk63 = -1;
+        fx.unk1E = 0x14;
+        fx.unk20 = 0xC;
+        fx.unk22 = 0x23;
+        scale = -1.516000032f;
+        fx.unk54 = 0.0f;
+        fx.unk24 = 1.039999962f;
+        val = 0.9500000477f;
+        do {
+            flag = func_150ADA20() & 1;
+            fx.unk0A = (func_150ADA20() % 31U) + 0x14;
+            fx.unk1B = (func_150ADA20() % 156U) + 0x64;
+            fx.unk28 = fx.unk2C = (func_150ADA68() * 150.0f) + 100.0f;
+            func_15143874((s16)(state->unk0->unk7A >> 8), flag ? 20.0f : -20.0f, &fx.unk30[0], &fx.unk30[2]);
+            fx.unk30[0] += state->unk0->unk14;
+            fx.unk30[2] += state->unk0->unk1C;
+            fx.unk30[1] = state->unk0->unk180 + 20.0f;
+            fx.unk58 &= ~0xC0;
+            if (func_150ADA20() & 1) {
+                fx.unk58 |= 0x40;
+            }
+            if (func_150ADA20() & 1) {
+                fx.unk58 |= 0x80;
+            }
+            fx.unk48[0] = dir[0] * scale;
+            fx.unk48[1] = dir[1] * scale;
+            fx.unk48[2] = dir[2] * scale;
+            ret = func_15130374(&fx, 1, 4, arg0->unkC, arg0->unk1);
+            if (ret != NULL) {
+                memcpy((u8 *)ret + 0xA8, &val, 4);
+            }
+            state->unk8 -= 1.0f;
+        } while (state->unk8 > 1.0f);
+    }
+}
 
 struct260 *func_15192D48(void *arg0, s16 arg1, u8 arg2, s32 arg3) {
     struct260 *temp_v0;
