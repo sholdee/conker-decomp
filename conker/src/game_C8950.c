@@ -264,7 +264,76 @@ void func_1509BA04(s32 arg0)
 void func_1509C228(void);
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C8950/func_1509BBA0.s")
+void func_15096D08(void);
+s32 func_1509BE40(s32, s32, s32);
+extern s16 D_800BE9F2;
+extern s32 D_800D2E48;
+extern s32 D_800D2F58;
+
+void func_1509BBA0(s32 arg0) {
+    struct249 *node;
+    s32 i;
+    u16 idx;
+    s32 flags;
+
+    node = D_800D2F48.unk4;
+    func_15096D08();
+    if (!D_800BE616 && D_800BE9F0 != 0x32 && !func_1509BE40(0, 0x2000, 0x93) && arg0 == 2) {
+        return;
+    }
+    func_1509C228();
+    for (i = 0; i < D_800D2F48.length; i++) {
+        idx = node->unk0 & 0x3FF;
+        D_800D2E48 = idx;
+        flags = node->unk0;
+        if (flags & 0x8000) {
+            node = node->next;
+            continue;
+        }
+        if (arg0 == 4) {
+            if (*(u8 *)((idx >> 3) + (s32)D_800D2E4C) & (1 << (idx & 7))) {
+                D_8003C8E0 = 0x6000002;
+                func_150ADAF0(node, 4);
+                D_8003C8E0 = 0;
+                ((u8 *)&D_800D2E70)[idx] = 3;
+                node->unk0 |= 0x8000;
+                node = node->next;
+                continue;
+            }
+        } else if (!(*(u8 *)((idx >> 3) + (s32)D_800D2E4C) & (1 << (idx & 7)))) {
+            if (flags & 0x4000) {
+                D_8003C8E0 = 0x6000003;
+                func_150ADAF0(node, 1);
+                D_8003C8E0 = 0;
+                flags = node->unk0 &= ~0x4000;
+            }
+            if (flags & 0x8000) {
+                node = node->next;
+                continue;
+            }
+            if (!(flags & 0x2000) || D_800BE9F0 == *(u16 *)((u8 *)node + 2)) {
+                if (arg0 == 2 || (arg0 == 1 && !(flags & 0x400))) {
+                    D_8003C8E0 = 0x6000004;
+                    func_150ADAF0(node, arg0);
+                    D_8003C8E0 = 0;
+                }
+                if (arg0 == 2) {
+                    ((u8 *)&D_800D2E70)[idx] = 1;
+                }
+            } else {
+                ((u8 *)&D_800D2E70)[idx] = 2;
+            }
+        } else {
+            ((u8 *)&D_800D2E70)[idx] = 3;
+        }
+        node = node->next;
+    }
+    if (D_800D2F58 != 0) {
+        D_800D2F58 = 0;
+        func_1509B4A0(D_800BE9F2, 0);
+    }
+    D_800D3858 = 0;
+}
 
 //
 #pragma GLOBAL_ASM("asm/nonmatchings/game_C8950/func_1509BE40.s")
