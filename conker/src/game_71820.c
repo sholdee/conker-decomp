@@ -425,7 +425,101 @@ void func_15044E88(void) {
     func_1505D024(&D_800CC2D0[0], 1, D_800CC2D0[0].unk7A, -1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_71820/func_15044ED0.s")
+struct conker15045714 {
+    f32 field_0x00;
+    f32 field_0x04;
+    f32 field_0x08;
+};
+
+struct conker150472C0_sub
+{
+  u8 field_0x00[0x10];
+  u16 field_0x10;
+};
+struct conker150472C0_dst
+{
+  f32 field_0x00;
+  struct conker150472C0_sub field_0x04;
+  u8 pad16[2];
+  s32 field_0x18;
+  u8 field_0x1C;
+  u8 field_0x1D;
+  u8 pad1E[2];
+  s32 field_0x20;
+};
+
+typedef struct Game71820Candidate {
+    s32 height;
+    s32 *sources;
+    s32 index;
+    s32 padC;
+} Game71820Candidate;
+
+void func_1510F800(s32);
+s32 func_150A3A70(s32, s32);
+extern f32 D_80098D40;
+extern u8 *D_800DBE3C;
+extern Game71820Candidate D_800D3300[];
+
+s32 func_15044ED0(struct conker15045714 *arg0, f32 arg1, struct conker150472C0_dst *arg2) {
+    s32 count;
+    s32 best;
+    s32 scan_index;
+    f32 height;
+
+    if (arg1 < arg0->field_0x04) {
+        arg2->field_0x1C &= ~2;
+        return 0;
+    }
+    arg2->field_0x00 = D_80098D40;
+    best = -1;
+    func_1510F800(0);
+    count = func_150A3A70((s32)arg0->field_0x00, (s32)arg0->field_0x08);
+    scan_index = 0;
+    if (count > 0) {
+        Game71820Candidate *scan = D_800D3300;
+
+        do {
+            height = (f32)scan->height * 0.00390625f;
+            if ((arg0->field_0x04 <= height) && (height < arg2->field_0x00)) {
+                best = scan_index;
+                arg2->field_0x00 = height;
+            }
+            scan_index++;
+            scan++;
+        } while (scan_index < count);
+    }
+    if (best != -1) {
+        Game71820Candidate *candidate;
+        s32 *source;
+        u32 copy_index;
+        u8 *output;
+        s32 offset;
+
+        candidate = &D_800D3300[best];
+        source = candidate->sources;
+        offset = candidate->index;
+        copy_index = 0;
+        output = (u8 *)arg2;
+        for (; copy_index != 3; copy_index++, output += 6) {
+            s16 *point = (s16 *)(source[copy_index] + offset * 16);
+            *(s16 *)(output + 4) = point[0];
+            *(s16 *)(output + 6) = point[1];
+            *(s16 *)(output + 8) = point[2];
+        }
+        { s32 idx = ((u8 *)candidate->sources - D_800DBE3C) / 12; arg2->field_0x18 = ((s32 *)D_800DBE5C)[idx]; }
+        arg2->field_0x1C |= 5;
+        arg2->field_0x1D = 1;
+        arg2->field_0x20 = 0;
+        if (arg2->field_0x00 <= arg1) {
+            arg2->field_0x1C |= 2;
+            return 1;
+        }
+        return 0;
+    }
+    arg2->field_0x1C &= ~2;
+    return 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_71820/func_150450CC.s")
 
@@ -465,16 +559,8 @@ typedef struct Game71820Hit {
     s32 field20;
 } Game71820Hit;
 
-typedef struct Game71820Candidate {
-    s32 height;
-    s32 *sources;
-    s32 index;
-    s32 padC;
-} Game71820Candidate;
-
 s32 func_150A4FA0(s32, s32);
 extern f32 D_80098D48;
-extern Game71820Candidate D_800D3300[];
 
 s32 func_15045384(Vec3f_15045D48 *arg0, f32 arg1, Game71820Hit *arg2) {
     s32 count;
@@ -543,28 +629,6 @@ s32 func_15045384(Vec3f_15045D48 *arg0, f32 arg1, Game71820Hit *arg2) {
 extern void func_1510F800(s32);
 extern s32 func_150A6500(s16, s16, s32, u16);
 
-struct conker15045714 {
-    f32 field_0x00;
-    f32 field_0x04;
-    f32 field_0x08;
-};
-
-struct conker150472C0_sub
-{
-  u8 field_0x00[0x10];
-  u16 field_0x10;
-};
-struct conker150472C0_dst
-{
-  f32 field_0x00;
-  struct conker150472C0_sub field_0x04;
-  u8 pad16[2];
-  s32 field_0x18;
-  u8 field_0x1C;
-  u8 field_0x1D;
-  u8 pad1E[2];
-  s32 field_0x20;
-};
 struct conker150472C0_src
 {
   u8 pad0[0xC];
