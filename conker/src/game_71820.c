@@ -1116,12 +1116,82 @@ s32 func_150470B0(struct conker15045714 *a0, s32 a1, struct conker150472C0_dst *
     return 0;
 }
 
-/* func_1504715C: PERMUTER CANDIDATE (best hand score 2090, semantically correct).
-   Full reconstruction saved to scratchpad/func_1504715C_recon.c. Sole blocker is the
-   float bounding-box load/compute order: IDO schedules iz (feeds +-1000 arith) before
-   the plain-copy iy (ix/iz/iy -> a0/v1/v0 vs target ix/iy/iz -> t0/t3/t6), cascading
-   into the 6/1/%hi(D_800DBEF4) constant hoists. Everything else matches byte-for-byte. */
-#pragma GLOBAL_ASM("asm/nonmatchings/game_71820/func_1504715C.s")
+typedef struct { s16 x, y, z; } Vec3s_1504715C;
+typedef struct { Vec3s_1504715C v[3]; } Tri_1504715C;
+
+typedef struct {
+    /* 0x00 */ f32 unk0;
+    /* 0x04 */ Tri_1504715C tri;
+    /* 0x16 */ u8 pad16[2];
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 unk1D;
+    /* 0x1E */ u8 pad1E[2];
+    /* 0x20 */ s32 unk20;
+} Out1504715C;
+
+typedef struct {
+    /* 0x000 */ u8 pad0[0x14];
+    /* 0x014 */ f32 unk14;
+    /* 0x018 */ f32 unk18;
+    /* 0x01C */ f32 unk1C;
+    /* 0x020 */ u8 pad20[0xD8];
+    /* 0x0F8 */ u32 unkF8;
+    /* 0x0FC */ u8 padFC[0x84];
+    /* 0x180 */ f32 unk180;
+    /* 0x184 */ s32 unk184;
+    /* 0x188 */ u8 pad188[4];
+    /* 0x18C */ Tri_1504715C tri;
+    /* 0x19E */ u8 pad19E[2];
+    /* 0x1A0 */ u16 unk1A0;
+} In1504715C;
+
+
+
+void func_1504715C(Out1504715C *arg0, In1504715C *arg1) {
+    s32 idx;
+    s32 v;
+
+    arg0->unk0 = arg1->unk180;
+    if (arg1->unkF8 & 0x200000) {
+        s16 x;
+        s16 y;
+        s16 z;
+
+        x = arg1->unk14;
+        y = arg1->unk180;
+        z = arg1->unk1C;
+        arg0->tri.v[0].x = x + 1000;
+        arg0->tri.v[0].y = y;
+        arg0->tri.v[0].z = z + 1000;
+        arg0->tri.v[1].x = x - 1000;
+        arg0->tri.v[1].y = y;
+        arg0->tri.v[1].z = z;
+        arg0->tri.v[2].x = x + 1000;
+        arg0->tri.v[2].y = y;
+        arg0->tri.v[2].z = z - 1000;
+    } else {
+        arg0->tri = arg1->tri;
+    }
+    arg0->unk18 = arg1->unk184;
+    arg0->unk1C = 6;
+    if (arg1->unk1A0 != 0) {
+        idx = arg1->unk1A0 - 1;
+        arg0->unk1D = 2;
+        arg0->unk20 = idx * 0xA0 + D_800DBEF4;
+        if (func_15145C90(idx) != 0) {
+            v = 1;
+        } else {
+            v = 0;
+        }
+        arg0->unk1C |= v;
+    lab: ;
+    } else {
+        arg0->unk1D = 1;
+        arg0->unk20 = 0;
+        arg0->unk1C |= 1;
+    }
+}
 
 void func_150472C0(struct conker150472C0_dst *arg0, struct conker150472C0_src *arg1)
 {
