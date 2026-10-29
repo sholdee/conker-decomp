@@ -515,15 +515,332 @@ void func_150B791C(void) {
     D_800D9890 = 3;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_E4070/func_150B7B40.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_E4070/func_150B82D0.s")
-
 typedef struct {
     s32 unk0;
     s32 unk4;
     s32 unk8;
 } Vec3_150B85C0;
+
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3_150B7B40;
+
+typedef struct {
+    /* 0x00 */ f32 unk0;
+    /* 0x04 */ f32 unk4;
+    /* 0x08 */ f32 unk8;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C[3];
+    /* 0x28 */ Vec3_150B7B40 pos;
+    /* 0x34 */ f32 vel[3];
+    /* 0x40 */ f32 unk40;
+    /* 0x44 */ f32 unk44;
+    /* 0x48 */ f32 unk48;
+    /* 0x4C */ f32 unk4C;
+    /* 0x50 */ s32 unk50;
+    /* 0x54 */ s16 unk54;
+    /* 0x56 */ s16 unk56;
+    /* 0x58 */ u8 unk58;
+    /* 0x5C */ s32 unk5C;
+    /* 0x60 */ u8 unk60;
+    /* 0x61 */ u8 unk61;
+    /* 0x62 */ u8 unk62;
+    /* 0x63 */ u8 unk63;
+    /* 0x64 */ u8 unk64;
+    /* 0x65 */ u8 unk65;
+    /* 0x66 */ u8 unk66;
+    /* 0x67 */ u8 unk67;
+    /* 0x68 */ u8 unk68;
+    /* 0x69 */ u8 pad69;
+    /* 0x6A */ u8 unk6A;
+    /* 0x6C */ s32 unk6C;
+    /* 0x70 */ u8 unk70;
+    /* 0x72 */ s16 unk72;
+    /* 0x74 */ s16 unk74;
+} Particle150B7B40;
+
+typedef struct {
+    Vec3_150B7B40 unk0;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    s16 unk24;
+    s16 unk26;
+    s16 unk28;
+    s16 unk2A;
+    s16 unk2C;
+    s16 unk2E;
+    s16 unk30;
+    s16 unk32;
+    s16 unk34;
+    s16 unk36;
+    u8 unk38;
+    u8 unk39;
+    u8 unk3A;
+    s32 unk3C;
+    s32 unk40;
+    s32 unk44;
+    s32 unk48;
+    s32 unk4C;
+    s32 unk50;
+    u8 unk54;
+    u8 unk55;
+    u8 unk56;
+    s32 unk58;
+    s32 unk5C;
+    s32 unk60;
+    s32 unk64;
+    s32 unk68;
+    s32 unk6C;
+    s32 unk70;
+    s32 unk74;
+    s32 unk78;
+    u8 unk7C;
+    u8 unk7D;
+    u8 pad7E[2];
+    s16 unk80;
+    s16 unk82;
+    s32 unk84;
+} Burst150B7B40;
+
+typedef struct {
+    /* 0x00 */ f32 unk00;
+    /* 0x04 */ f32 unk04;
+    /* 0x08 */ f32 unk08;
+    /* 0x0C */ f32 unk0C;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ u8  unk1C;
+    /* 0x1D */ u8  pad1D[0x7];
+} Floor150B7B40;
+
+extern f32 D_8009FD30[3];
+extern f32 D_8009FD3C[3];
+extern f32 D_8009FD48[3];
+
+void func_15142314(s32, s32, f32 *);
+void func_15143134(f32 *, f32 *, s32);
+void func_1515C244(struct127 *, f32 *, f32 *, f32 *);
+void func_150B82D0(Vec3_150B7B40 *, f32 *, f32 *, f32 *, u8, s32);
+void func_150B85C0(Vec3_150B85C0 *, f32 *, f32 *, u8, s32);
+void func_1504715C(Floor150B7B40 *, struct127 *);
+s32 func_15046C80(Vec3_150B7B40 *, s32, f32, Floor150B7B40 *);
+void func_1514C678(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, s32, u8);
+s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
+void func_15151A38(Burst150B7B40 *, u8, s32);
+
+void func_150B7B40(struct127 *arg0, u8 arg1, s32 arg2) {
+    f32 pts[2][3];
+    f32 base[3];
+    f32 sx;
+    f32 sy;
+    f32 scale;
+    f32 ss;
+    f32 cc;
+    s32 pad5;
+    Particle150B7B40 p;
+    s32 pad2[3];
+    s8 i;
+    f32 offX;
+    f32 offZ;
+    Vec3_150B7B40 pos;
+    f32 h;
+    f32 r;
+    f32 ratio;
+
+    if (arg0 != NULL) {
+        if (arg0->unk1D4 != NULL) {
+            func_15142314((s32)arg0->unk1D4, 4, pts[0]);
+            func_15142314((s32)arg0->unk1D4, 5, pts[1]);
+            func_15142314((s32)arg0->unk1D4, 0, base);
+        } else {
+            base[0] = arg0->x_position;
+            base[1] = arg0->y_position;
+            base[2] = arg0->z_position;
+            pts[0][0] = base[0] + 20.0f;
+            pts[0][1] = base[1] + 130.0f;
+            pts[0][2] = base[2];
+            pts[1][0] = base[0] - 20.0f;
+            pts[1][1] = base[1] + 130.0f;
+            pts[1][2] = base[2];
+        }
+        ss = func_151423D8(arg0->unk76 >> 8);
+        cc = func_151423D8((arg0->unk76 >> 8) + 0x40);
+        offX = arg0->xz_velocity * ss;
+        offZ = arg0->xz_velocity * cc;
+        {
+            f32 a[3];
+            f32 b[3];
+
+            if (arg0->unk1D4 != NULL) {
+                s32 m;
+                f32 dx;
+                f32 dz;
+
+                m = (s32)arg0->unk1D4 + 0x80;
+                func_15143134(D_8009FD30, &pos.x, m);
+                func_15143134(D_8009FD3C, a, m);
+                func_15143134(D_8009FD48, b, m);
+                h = fabsf(pos.y - a[1]);
+                dx = b[0] - a[0];
+                dz = b[2] - a[2];
+                r = sqrtf(dx * dx + dz * dz);
+            } else {
+                func_1515C244(arg0, &pos.x, &r, &h);
+            }
+        }
+        if (r != 0.0f) {
+            ratio = h / r;
+        } else {
+            ratio = 1.0f;
+        }
+        func_150B82D0(&pos, &h, &r, &ratio, arg1, arg2);
+        func_150B85C0((Vec3_150B85C0 *)&pos, &h, &r, arg1, arg2);
+        {
+            Floor150B7B40 floor;
+            Vec3_150B7B40 ray;
+
+            ray.x = pos.x;
+            ray.y = pos.y + 100.0f;
+            ray.z = pos.z;
+            func_1504715C(&floor, arg0);
+            if (func_15046C80(&ray, 0, pos.y - 2000.0f, &floor) != 0) {
+                ray.y = floor.unk00;
+                func_1514C678(ray.x, ray.y + 31.0f, ray.z, r, 0, 0xFF,
+                              (func_150ADA20() % 11U) + 0x1E, 0x19, 0, 0, 0, arg1);
+            }
+        }
+        p.unk56 = 0;
+        p.unk54 = 0x12C;
+        p.unk4 = 0.6000000238f;
+        p.unk10 = arg0->unkB8;
+        p.unk14 = arg0->unk40;
+        p.unk18 = arg0->unkC4;
+        p.unk1C[0] = 1.0f;
+        p.unk1C[1] = 1.0f;
+        p.unk1C[2] = 1.0f;
+        p.unk50 = 0x197D;
+        p.unk58 = 0;
+        p.unk5C = 0;
+        p.unk60 = 0xFF;
+        p.unk61 = 1;
+        p.unk62 = 0;
+        p.unk63 = 1;
+        p.unk64 = 0;
+        p.unk65 = 1;
+        p.unk66 = 0;
+        p.unk67 = 0;
+        p.unk68 = 0;
+        p.unk6A = 0;
+        p.unk6C = 0;
+        p.unk70 = 0;
+        p.unk72 = 1;
+        p.unk74 = 0xFF;
+        p.unk48 = 0;
+        p.unk4C = -1.600000024f;
+        sx = arg0->xz_scale;
+        if (sx > 1.0f) {
+            sx = 1.0f;
+        }
+        if (sx < 0.5f) {
+            sx = 0.5f;
+        }
+        sy = arg0->y_scale;
+        if (sy > 1.0f) {
+            sy = 1.0f;
+        }
+        if (sy < 0.5f) {
+            sy = 0.5f;
+        }
+        p.unk0 = ((28.0f * sy) + (28.0f * sx)) * 0.5f;
+        p.unk8 = 3.0f * sx;
+        p.unkC = 3.0f * sy;
+        for (i = 0; i < 2; i++) {
+            f32 speed;
+            s16 ang1;
+            s16 ang2;
+            f32 s1;
+            f32 c1;
+            f32 s2;
+            f32 c2;
+            f32 hv;
+            Burst150B7B40 burst;
+
+            speed = (func_150ADA68() * 30.0f * arg0->y_scale) + 10.0f;
+            ang1 = func_150ADA20() & 0x7F;
+            ang2 = -0x20 - (func_150ADA20() & 0x1F);
+            s1 = func_151423D8(ang1);
+            c1 = func_151423D8(ang1 - 0x40);
+            s2 = func_151423D8(ang2);
+            c2 = func_151423D8(ang2 - 0x40);
+            hv = speed * s2;
+            p.pos = *(Vec3_150B7B40 *)pts[i];
+            p.vel[0] = (hv * c1) + offX;
+            p.vel[1] = -speed * c2;
+            p.vel[2] = (hv * s1) + offZ;
+            p.unk40 = 30.0f - (func_150ADA68() * 60.0f);
+            p.unk44 = 30.0f - (func_150ADA68() * 60.0f);
+            func_15132A4C(&p, 3, 2, 0, arg1, 0);
+            scale = ((arg0->xz_scale + arg0->y_scale) * 0.5f) / 0.9599999785f;
+            burst.unk0 = *(Vec3_150B7B40 *)pts[i];
+            burst.unk24 = 4;
+            burst.unk26 = 4;
+            burst.unk2A = 0xFF;
+            burst.unk2C = -0x3F;
+            burst.unk2E = 0x4B;
+            burst.unkC = 3.0f * scale;
+            burst.unk10 = 3.0f * scale;
+            burst.unk14 = 0.6000000238f;
+            burst.unk18 = 0.2310000062f;
+            burst.unk1C = 15.0f * scale;
+            burst.unk20 = 10.0f * scale;
+            burst.unk28 = 0;
+            burst.unk30 = 3;
+            burst.unk32 = 3;
+            burst.unk34 = 0x32;
+            burst.unk36 = 0x14;
+            burst.unk38 = 1;
+            burst.unk39 = 0x21;
+            burst.unk3A = 0x48;
+            burst.unk3C = 1;
+            burst.unk40 = 0;
+            burst.unk44 = 0;
+            burst.unk48 = 0;
+            burst.unk4C = 0;
+            burst.unk50 = 0;
+            burst.unk54 = 0;
+            burst.unk55 = 0x9B;
+            burst.unk56 = 0x64;
+            burst.unk58 = 3;
+            burst.unk5C = 0xFF;
+            burst.unk60 = 0;
+            burst.unk64 = 0x220005;
+            burst.unk68 = 0x1D0600;
+            burst.unk6C = 1;
+            burst.unk70 = 0x3B;
+            burst.unk74 = 0x80;
+            burst.unk78 = 0x20;
+            burst.unk7C = 0;
+            burst.unk7D = 7;
+            burst.unk80 = 0xA;
+            burst.unk82 = 0x19;
+            burst.unk84 = arg0->unk184;
+            func_15151A38(&burst, arg1, arg2);
+        }
+    }
+}
+
+#pragma GLOBAL_ASM("asm/nonmatchings/game_E4070/func_150B82D0.s")
+
 
 typedef struct {
     s32 unk00;
