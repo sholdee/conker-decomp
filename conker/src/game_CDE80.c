@@ -359,7 +359,33 @@ s32 func_150A29C8(u32 arg0, u32 arg1) {
     return func_150A1DA0((u8 *)&D_800CC2D0[arg0], (struct178 *)&D_800D3098[arg1], 1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_CDE80/func_150A2AEC.s")
+s32 func_150A2AEC(u32 arg0, s32 arg1, s32 *arg2) {
+    s32 i;
+    u32 id;
+
+    if (arg0 < 0x10 && (*(u16 *)&D_800D2340 & (1 << arg0))) {
+        for (i = 0; i < arg1; i++) {
+            id = arg2[i];
+            id &= 0xFFF;
+            if (id < (u32)D_800D3094) {
+                if ((D_800D30F0[arg0][id >> 6] >> (id & 0x3F)) & 1) {
+                    return id;
+                }
+            }
+        }
+    } else {
+        for (i = 0; i < arg1; i++) {
+            id = arg2[i];
+            id &= 0xFFF;
+            if (id < (u32)D_800D3094) {
+                if (func_150A1DA0((u8 *)&D_800CC2D0[arg0], (struct178 *)&D_800D3098[id], 1) == 0) {
+                    return id;
+                }
+            }
+        }
+    }
+    return -1;
+}
 
 extern u64 D_800D30F0[][3];
 
