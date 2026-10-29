@@ -4,7 +4,7 @@
 
 extern f32 sinf(f32);
 
-void func_150D278C(s32, void*, u8, u8);
+void func_150D278C(s32, void*, u8, s32);
 
 struct Func150D317CSub {
     f32 unk0;
@@ -50,7 +50,45 @@ void func_150D26F0(u8 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_FFBA0/func_150D278C.s")
+typedef struct {
+    s32 unk0;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    u8 unk1C[0x40];
+    u8 unk5C[3];
+} S150D278C;
+
+void func_150D278C(s32 arg0, void *arg1, u8 arg2, s32 arg3) {
+    S150D278C sp48;
+    struct260 *temp_v0;
+
+    sp48.unk0 = arg0;
+    sp48.unk4 = func_150ADA68() * 2.0f * 3.141592741f;
+    sp48.unk8 = (func_150ADA68() * 0.400000006f) + 0.3000000119f;
+    sp48.unkC = 1.0f / sp48.unk8;
+    sp48.unk10 = (func_150ADA68() * 0.1300000101f) + 0.3000000119f;
+    if (func_150ADA20() & 1) {
+        sp48.unk10 = -sp48.unk10;
+    }
+    sp48.unk14 = 0.0f;
+    sp48.unk18 = 0.0f;
+    memcpy(sp48.unk1C, arg1, 0x40);
+    {
+        const u8 colors[3][3] = { { 0xFF, 0xFF, 0xFF }, { 0xFF, 0x00, 0x00 }, { 0x00, 0xFF, 0x00 } };
+        u8 i = func_150ADA20() % 3U;
+        sp48.unk5C[0] = colors[i][0];
+        sp48.unk5C[1] = colors[i][1];
+        sp48.unk5C[2] = colors[i][2];
+    }
+    temp_v0 = func_15149130((func_150ADA20() % 101U) + 100, -1, 0x32, -1, 1, 0, (struct37 *)0x60, arg2, arg3);
+    if (temp_v0 != NULL) {
+        memcpy((void *)((s32)temp_v0 + 0x28), &sp48, 0x60);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_FFBA0/func_150D2924.s")
 
@@ -76,7 +114,7 @@ s32 func_150D317C(struct Func150D317CObj *arg0) {
     return 0;
 }
 
-void func_150D278C(s32, void*, u8, u8);
+void func_150D278C(s32, void*, u8, s32);
 
 struct S150D32FC {
     s32 unk0;
