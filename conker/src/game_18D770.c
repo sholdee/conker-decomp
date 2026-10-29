@@ -475,7 +475,106 @@ struct225 *func_15160CDC(struct127 *arg0, u8 arg1, struct vec3w_15160A58 *arg2, 
 }
 
 // similar to func_15160B74
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_15160E30.s")
+typedef struct {
+    u8 *unk0;
+    f32 unk4;
+    f32 unk8[3];
+    u8 pad14[0x45];
+    u8 unk59;
+    u8 pad5A[0xA];
+} Ray15160E30;
+
+void func_15081690(void *, f32, f32, f32, f32, f32, f32, Ray15160E30 *, f32, s32, s32, s32, s32, s32, s32);
+s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
+s32 func_15145EA4(f32 **arg0, f32 **arg1, s32 arg2, s32 arg3);
+
+s32 func_15160E30(void *arg0) {
+    u8 *entity;
+    u8 *slot;
+    s32 count;
+
+    entity = *(u8 **)((u8 *)arg0 + 0x18);
+    slot = (u8 *)arg0 + 0x18;
+    if (*(s32 *)entity == 0) {
+        return 0;
+    }
+    if (slot[4] != entity[0x3B]) {
+        return 0;
+    }
+    if (*(s32 *)(entity + 0x1D4) != 0 && (slot[0x24] & 1) && (entity[0x74] & 0xF) != 0xF) {
+        f32 start[3];
+        f32 dir[3];
+        Ray15160E30 ray;
+        f32 *in[2];
+        f32 *out[2];
+
+        in[0] = (f32 *)(slot + 8);
+        in[1] = (f32 *)(slot + 0x14);
+        out[0] = start;
+        out[1] = dir;
+        func_15145EA4(in, out, (slot[5] << 6) + *(s32 *)(entity + 0x1D4), 2);
+        {
+            f32 dist;
+
+        dir[0] -= start[0];
+        dir[1] -= start[1];
+        dir[2] -= start[2];
+        {
+            f32 inv;
+
+        if (func_15145128(dir, dir, &dist, &inv) == 0) {
+            *(s16 *)(*(u8 **)((u8 *)arg0 + 0x14) + 0xE) = (s16)(s32)*(f32 *)(entity + 0x14);
+            *(s16 *)(*(u8 **)((u8 *)arg0 + 0x14) + 0x10) = (s16)(s32)*(f32 *)(entity + 0x18);
+            *(s16 *)(*(u8 **)((u8 *)arg0 + 0x14) + 0x12) = (s16)(s32)*(f32 *)(entity + 0x1C);
+            *(*(u8 **)((u8 *)arg0 + 0x14) + 0x2F) = 0;
+            *(*(u8 **)((u8 *)arg0 + 0x14) + 0x9) = 1;
+            return 1;
+        }
+        }
+        }
+        func_15081690(entity, start[0], start[1], start[2], dir[0], dir[1], dir[2], &ray, 0.0f, 0, 0, 1, -1, 0, 0);
+        count = ray.unk59;
+        if (count == 0) {
+            *(s16 *)(*(u8 **)((u8 *)arg0 + 0x14) + 0xE) = (s16)(s32)*(f32 *)(entity + 0x14);
+            *(s16 *)(*(u8 **)((u8 *)arg0 + 0x14) + 0x10) = (s16)(s32)*(f32 *)(entity + 0x18);
+            *(s16 *)(*(u8 **)((u8 *)arg0 + 0x14) + 0x12) = (s16)(s32)*(f32 *)(entity + 0x1C);
+            *(*(u8 **)((u8 *)arg0 + 0x14) + 0x2F) = 0;
+            *(*(u8 **)((u8 *)arg0 + 0x14) + 0x9) = 1;
+            return 1;
+        }
+        if ((slot[0x24] & 2) && count >= 2) {
+            u8 *hit;
+
+            hit = ray.unk0;
+            if (hit[4] == 0x9E) {
+                *(s32 *)(hit + 0x2E4) = 1;
+            }
+        }
+        *(s16 *)(*(u8 **)((u8 *)arg0 + 0x14) + 0xE) = (s16)(s32)ray.unk8[0];
+        *(s16 *)(*(u8 **)((u8 *)arg0 + 0x14) + 0x10) = (s16)(s32)ray.unk8[1];
+        *(s16 *)(*(u8 **)((u8 *)arg0 + 0x14) + 0x12) = (s16)(s32)ray.unk8[2];
+        {
+            f32 alpha;
+
+            alpha = ray.unk4 * *(f32 *)(slot + 0x20);
+            if (alpha > 255.0f) {
+                alpha = 255.0f;
+            }
+            if (alpha < 0.0f) {
+                alpha = 0.0f;
+            }
+            *(*(u8 **)((u8 *)arg0 + 0x14) + 0x2F) = alpha;
+        }
+        *(*(u8 **)((u8 *)arg0 + 0x14) + 0x9) = 0;
+    } else {
+        *(s16 *)(*(u8 **)((u8 *)arg0 + 0x14) + 0xE) = (s16)(s32)*(f32 *)(entity + 0x14);
+        *(s16 *)(*(u8 **)((u8 *)arg0 + 0x14) + 0x10) = (s16)(s32)*(f32 *)(entity + 0x18);
+        *(s16 *)(*(u8 **)((u8 *)arg0 + 0x14) + 0x12) = (s16)(s32)*(f32 *)(entity + 0x1C);
+        *(*(u8 **)((u8 *)arg0 + 0x14) + 0x2F) = 0;
+        *(*(u8 **)((u8 *)arg0 + 0x14) + 0x9) = 1;
+    }
+    return 1;
+}
 
 s32 func_15161238(struct127 *arg0, struct127 *arg1) {
     if (arg0->interaction_state == 0) {
