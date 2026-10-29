@@ -136,7 +136,59 @@ void func_15096D08(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_C3E20/func_15096D78.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C3E20/func_1509759C.s")
+extern void *func_1505EEF4(s32);
+
+s32 func_1509759C(s32 arg0, s32 arg1, s32 *arg2) {
+    struct108 *obj;
+    s32 ret;
+    struct17 dir;
+    struct17 diff;
+    f32 angle;
+    u8 *ent;
+    Struct_D_800DC020 *pos;
+    f32 dx;
+    f32 dz;
+
+    obj = &D_800DBFF0[arg0];
+    if (D_80082FA0 < arg0) {
+        return 0;
+    }
+    switch (arg1) {
+    case 0x1F:
+        return obj->unk390 * 65536.0f;
+    case 0x1E:
+        return obj->unk37C * 65536.0f;
+    case 0x1D:
+        return ((Struct_D_800D2DC0 *)D_800D2DC0)[arg2[2]].unk0;
+    case 0x20:
+        pos = *(Struct_D_800DC020 **)&D_800DC020;
+        pos = &pos[arg2[2] & 0xFFF];
+        dx = obj->unk2F8 - pos->unk0;
+        dz = obj->unk300 - pos->unk4;
+        return sqrtf(dx * dx + dz * dz);
+    case 0x21:
+        ent = func_1505EEF4(arg2[2] & 0xFFF);
+        if (ent == NULL) {
+            return -1;
+        }
+        angle = obj->unk39C + 1.570796371f;
+        dir.unk0 = sinf(angle);
+        dir.unk4 = 0.0f;
+        dir.unk8 = cosf(angle);
+        func_15048F90((struct17 *)&obj->unk2F8, (struct17 *)(ent + 0x14), &diff);
+        diff.unk4 = 0.0f;
+        if (func_150AD900((f32 *)&dir, (f32 *)&diff) >= 0.0f) {
+            ret = -1;
+        } else {
+            ret = 1;
+        }
+        return ret;
+    default:
+        goto block_default;
+    }
+block_default:
+    return 0;
+}
 
 void func_15097798(s32 arg0) {
     struct108 *temp_v0;
