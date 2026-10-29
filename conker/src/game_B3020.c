@@ -189,7 +189,7 @@ s32 func_15086D48(s32 arg0) {
 
 extern u8 *D_800872A0;
 void func_150891E8(s8 *, struct127 *);
-void func_150896EC(s8 *, struct127 *, s32);
+void func_150896EC();
 
 void func_15087CC0(void) {
     s8 *p;
@@ -962,7 +962,141 @@ u8 func_1508907C(u8 node, u8 type, u8 exclude, u8 sub) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_B3020/func_150891E8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_B3020/func_150896EC.s")
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8;
+    f32 unkC;
+    s32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    f32 unk30;
+    f32 unk34;
+} CamParams150896EC;
+
+typedef struct {
+    u8 pad0[0x34];
+    f32 t;
+    f32 x;
+    f32 y;
+    f32 z;
+    u8 nodes[4];
+    u8 pad48;
+    s8 state;
+    u8 pad4A[2];
+    CamParams150896EC cam;
+} Obj150896EC;
+
+void func_1512D560();
+extern s32 D_800BE9E4;
+
+void func_150896EC(Obj150896EC *arg0, struct127 *arg1, s32 arg2) {
+    struct108 *cam;
+    s32 i;
+    s32 active;
+    f32 angle;
+    u8 next;
+    B3020Struct *entry;
+    CamParams150896EC *p;
+    f32 xs[4];
+    f32 ys[4];
+    f32 zs[4];
+    f32 lxs[4];
+    f32 lys[4];
+    f32 lzs[4];
+
+    if (arg1->camera == NULL) {
+        return;
+    }
+    cam = arg1->camera;
+    p = &arg0->cam;
+    if (arg2 != 0) {
+        p->unk10 = 0x78;
+        p->unkC = 999.0f;
+        func_1512D560(arg1->camera, 0xA, p);
+        func_1512D560(arg1->camera, 6, cam->unk23D);
+        arg0->state = 0;
+        return;
+    }
+    if (arg0->state == 0) {
+        next = D_800D23A8 + 1;
+        i = 0;
+        if (D_80087290 > 0) {
+            do {
+                entry = &D_800D2350[i];
+                if (((u8 *)entry)[0xE] == 6 && next == ((u8 *)entry)[0xF]) {
+                    arg0->nodes[0] = i;
+                    i = D_80087290;
+                }
+                i++;
+            } while (i < D_80087290);
+        }
+        arg0->nodes[1] = func_1508907C(arg0->nodes[0], 6, 0xFF, 0);
+        arg0->nodes[2] = func_1508907C(arg0->nodes[1], 6, arg0->nodes[0], 0);
+        arg0->nodes[3] = func_1508907C(arg0->nodes[2], 6, arg0->nodes[1], 0);
+        arg0->x = arg1->x_position;
+        arg0->y = arg1->y_position;
+        arg0->z = arg1->z_position;
+        arg0->t = 0.0f;
+        func_1512D560(arg1->camera, 5, cam->unk23D);
+        arg0->state = 1;
+    }
+    arg0->t += 0.01700000092f * D_800BE9E4;
+    if (arg0->t >= 1.0f) {
+        if (arg0->nodes[2] == 0xFF) {
+            arg0->t = 1.0f;
+        } else {
+            arg0->t -= 1.0f;
+            arg0->nodes[0] = arg0->nodes[1];
+            arg0->nodes[1] = arg0->nodes[2];
+            arg0->nodes[2] = arg0->nodes[3];
+            arg0->nodes[3] = func_1508907C(arg0->nodes[2], 6, arg0->nodes[1], 0);
+        }
+    }
+    active = 0;
+    for (i = 0; i < 4; i++) {
+        if (arg0->nodes[i] != 0xFF) {
+            func_15086CBC(arg0->nodes[i], &xs[i], &ys[i], &zs[i]);
+            active = 1;
+            func_15086CBC(func_1508907C(arg0->nodes[i], 4, 0xFF, 0), &lxs[i], &lys[i], &lzs[i]);
+        } else if (active == 1) {
+            active = 0;
+            angle = arg1->unk40 * 0.0174500000000000002;
+            xs[i] = arg0->x - sinf(angle) * 500.0f;
+            ys[i] = arg0->y + 180.0f;
+            zs[i] = arg0->z - cosf(angle) * 500.0f;
+            lxs[i] = arg0->x;
+            lys[i] = arg0->y + 120.0f;
+            lzs[i] = arg0->z;
+        } else {
+            xs[i] = xs[i - 1] + (xs[i - 1] - xs[i - 2]);
+            ys[i] = ys[i - 1] + (ys[i - 1] - ys[i - 2]);
+            zs[i] = zs[i - 1] + (zs[i - 1] - zs[i - 2]);
+            lxs[i] = lxs[i - 1] + (lxs[i - 1] - lxs[i - 2]);
+            lys[i] = lys[i - 1] + (lys[i - 1] - lys[i - 2]);
+            lzs[i] = lzs[i - 1] + (lzs[i - 1] - lzs[i - 2]);
+        }
+    }
+    angle = arg0->t;
+    p = &arg0->cam;
+    p->unk14 = func_150497E0(xs, 0, angle);
+    p->unk18 = func_150497E0(ys, 0, angle);
+    p->unk1C = func_150497E0(zs, 0, angle);
+    p->unk20 = func_150497E0(lxs, 0, angle);
+    p->unk24 = func_150497E0(lys, 0, angle);
+    p->unk28 = func_150497E0(lzs, 0, angle);
+    p->unk0 = 0;
+    p->unk4 = 0;
+    p->unk30 = 30.0f;
+    p->unk34 = 30.0f;
+    p->unk2C = 0.0f;
+    func_1512D560(arg1->camera, 7, p);
+}
 
 void func_15089BB0(void) {
     D_800D23B0 = 0;
