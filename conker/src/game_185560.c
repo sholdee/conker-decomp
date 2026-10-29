@@ -1019,7 +1019,162 @@ s32 func_1515A11C(Struct1515A11C *arg0, s32 arg1)
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_185560/func_1515A238.s")
+typedef struct {
+    /* 0x00 */ s32 unk00;
+    /* 0x04 */ s32 unk04;
+    /* 0x08 */ s16 unk08;
+    /* 0x0A */ s16 unk0A;
+    /* 0x0C */ s32 unk0C;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 unk16;
+    /* 0x17 */ u8 unk17;
+    /* 0x18 */ u8 unk18;
+    /* 0x19 */ u8 unk19;
+    /* 0x1A */ u8 unk1A;
+    /* 0x1B */ u8 unk1B;
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 unk1D;
+    /* 0x1E */ s16 unk1E;
+    /* 0x20 */ s16 unk20;
+    /* 0x22 */ s16 unk22;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ Vec15159890 unk30;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ f32 unk40;
+    /* 0x44 */ f32 unk44;
+    /* 0x48 */ Vec15159890 unk48;
+    /* 0x54 */ f32 unk54;
+    /* 0x58 */ s32 unk58;
+    /* 0x5C */ u8 pad5C[0x4];
+    /* 0x60 */ u8 unk60;
+    /* 0x61 */ u8 unk61;
+    /* 0x62 */ u8 unk62;
+    /* 0x63 */ s8 unk63;
+    /* 0x64 */ s8 unk64;
+    /* 0x65 */ u8 unk65;
+    /* 0x66 */ u8 pad66[0xA];
+} Params1515A238;
+
+typedef struct {
+    f32 unk0;
+    u8 unk4;
+    u8 unk5;
+    s8 unk6;
+    s8 unk7;
+    f32 unk8;
+    f32 unkC;
+    u8 unk10;
+    u8 unk11;
+    u8 unk12;
+    u8 unk13;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+} Extra1515A238;
+
+typedef struct {
+    f32 unk0;
+    u8 pad4[0x18];
+    u8 unk1C;
+    u8 pad1D[0x7];
+} Buf1515A238;
+
+void *func_15130280(void *, u8, void *, s32, u8, s32);
+
+void *func_1515A238(f32 *arg0, Vec15159890 *arg1, f32 arg2, f32 arg3, Buf1515A238 *arg4, f32 arg5,
+                    s16 arg6, u8 arg7, u8 arg8, u8 arg9, s32 argA) {
+    void *ret;
+    Params1515A238 params;
+    Extra1515A238 extra;
+    Buf1515A238 buf;
+    s32 r2;
+    s32 r1;
+
+    params.unk1D = 0x2F;
+    params.unk08 = 0x2203;
+    params.unk00 = 0x200005;
+    params.unk04 = 0;
+    params.unk1A = 0;
+    params.unk19 = 0;
+    params.unk18 = 0;
+    params.unk17 = 0;
+    params.unk16 = 0;
+    params.unk15 = 0;
+    params.unk14 = 0;
+    params.unk10 = 0;
+    params.unk0C = 0;
+    params.unk1C = 0xFF;
+    params.unk22 = 0;
+    params.unk24 = 0.0f;
+    r1 = (func_150ADA20() & 1) ? 0x40 : 0;
+    r2 = (func_150ADA20() & 1) ? 0x80 : 0;
+    params.unk58 = r2 | 0x1007 | r1 | 0x8000 | 0x4000;
+    params.unk60 = 6;
+    params.unk61 = 8;
+    if (arg8) {
+        params.unk62 = 0x15;
+    } else {
+        params.unk62 = 0x14;
+    }
+    params.unk63 = -1;
+    params.unk64 = -1;
+    params.unk30 = *(Vec15159890 *)arg0;
+    params.unk3C = 0.0f;
+    params.unk40 = 0.0f;
+    params.unk44 = 0.0f;
+    params.unk1E = 1;
+    params.unk20 = 0xFF;
+    extra.unk0 = arg5;
+    params.unk28 = arg5;
+    params.unk2C = arg5;
+    extra.unk4 = func_150ADA20() & 0xFF;
+    extra.unk5 = func_150ADA20() & 0xFF;
+    extra.unk6 = (func_150ADA20() % 5U) + 4;
+    extra.unk7 = (func_150ADA20() % 5U) + 4;
+    extra.unk8 = ((func_150ADA68() * 0.25f) + 0.150000006f) * extra.unk0;
+    extra.unkC = ((func_150ADA68() * 0.25f) + 0.150000006f) * extra.unk0;
+    extra.unk10 = 0;
+    extra.unk11 = 0;
+    extra.unk12 = (func_150ADA20() % 5U) + 4;
+    extra.unk13 = (func_150ADA20() % 5U) + 4;
+    extra.unk14 = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * extra.unk0;
+    extra.unk18 = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * extra.unk0;
+    params.unk48 = *arg1;
+    params.unk65 = 0;
+    params.unk0A = arg6;
+    params.unk1B = arg7;
+    params.unk54 = arg2;
+    extra.unk1C = arg3;
+    if (arg1->x != 0 || arg1->z != 0) {
+        extra.unk20 = -99999.8984375f;
+    } else {
+        if (arg4 != NULL) {
+            buf = *arg4;
+        } else {
+            buf.unk1C = 0;
+        }
+        if (func_1514672C(arg0)) {
+            if (func_15046C00(arg0, 0, 19500.0f, (u8 *)&buf)) {
+                arg4 = &buf;
+                extra.unk20 = buf.unk0;
+            } else {
+                extra.unk20 = 10000.0f;
+            }
+        } else {
+            extra.unk20 = 10000.0f;
+        }
+    }
+    ret = func_15130280(&params, 2, arg4, 0x24, arg9, argA);
+    if (ret != NULL) {
+        memcpy((u8 *)ret + 0xA8, &extra, 0x24);
+    }
+    return ret;
+}
 
 typedef struct {
     f32 unk0;
