@@ -471,7 +471,79 @@ void func_150F64B0(struct210 *arg0) {
     func_151411C4(arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1228D0/func_150F64DC.s")
+typedef struct {
+    /* 0x00 */ struct127 *obj;
+    /* 0x04 */ u8 id;
+    /* 0x05 */ u8 pad5;
+    /* 0x06 */ s16 timer;
+} Func150F64DCLink;
+
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD;
+    /* 0x0E */ s16 unkE;
+    /* 0x10 */ u8 pad10[0x18];
+    /* 0x28 */ Func150F64DCLink link;
+} Func150F64DCSelf;
+
+extern u8 D_800A1B30;
+void func_15143134(void *, f32 *, s32);
+extern struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
+void *func_15107C1C(struct127 *, u8, void *, s16, s32, s32, s32, f32, f32, s32, s32, u8 *, s32, s32);
+
+void func_150F64DC(Func150F64DCSelf *arg0) {
+    Func150F64DCLink *link;
+    struct127 *obj;
+    s8 count;
+
+    obj = arg0->link.obj;
+    link = &arg0->link;
+    if ((obj->interaction_state == 0) || (obj->unique_id != link->id)) {
+        arg0->unkE = -1;
+        return;
+    }
+    if ((obj->unk1D4 != 0) && !(*(s32 *)((u8 *)obj + 0x94) & 2)) {
+        link->timer -= D_800BE9E4;
+        if (link->timer < 0) {
+            func_10010F88(0x679, 0x18CE, 0, 0, 0, obj->x_position, obj->y_position, obj->z_position, 0x7918, 0x7D00);
+            count = (func_150ADA20() & 1) + 2;
+            {
+    f32 pos[3];
+    Header header;
+    Header2 header2;
+    u8 color[4];
+    s32 r1;
+    s32 r2;
+    s32 r3;
+            func_15143134(&D_800A1B30, pos, (s32)obj->unk1D4);
+            header.unk0 = 3;
+            header.unk1 = -1;
+            header.unk2 = (func_150ADA20() % 9U) + 10;
+            header.unk4 = 0;
+            header2.unk0 = pos[0];
+            header2.unk4 = pos[1];
+            header2.unk8 = pos[2];
+            r3 = (func_150ADA20() % 61U) + 60;
+            func_151602C0(&header, &header2, r3, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg0->unkC, arg0->unk1);
+            do {
+                color[0] = 0xA0;
+                color[1] = 0xA0;
+                color[2] = 0xFF;
+                color[3] = (func_150ADA20() % 101U) + 155;
+                r1 = func_150ADA20();
+                r2 = func_150ADA20();
+                r3 = func_150ADA20();
+                func_15107C1C(obj, 0, &D_800A1B30, (u8)r1, (r2 % 43U) - 50, (r3 % 18U) + 5, 4, 27.0f, (func_150ADA68() * 16.0f) + 20.0f, 0, 2, color, arg0->unkC, arg0->unk1);
+                count--;
+            } while (count > 0);
+            link->timer = (func_150ADA20() % 91U) + 90;
+            }
+        }
+    }
+}
 
 void func_150F6850(s32 arg0, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
