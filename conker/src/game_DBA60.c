@@ -39,7 +39,61 @@ void func_150AE5B0(struct108 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_DBA60/func_150AE790.s")
 // some funky xor going on
-#pragma GLOBAL_ASM("asm/nonmatchings/game_DBA60/func_150AEB9C.s")
+typedef struct {
+    u8 unk0;
+    u8 pad1;
+    s16 unk2;
+} Ent150AEB9C;
+typedef struct {
+    s32 count;
+    Ent150AEB9C *ents;
+} EntList150AEB9C;
+typedef struct {
+    u8 pad0[0x28];
+    void *unk28;
+    u8 unk2C;
+    u8 unk2D;
+} Spawn150AEB9C;
+extern EntList150AEB9C D_800886E0[];
+extern Ent150AEB9C *D_800886E4;
+extern u32 D_15001B08[];
+extern u8 D_800DCE50[];
+void func_15001A08(void);
+
+void func_150AEB9C(u8 *arg0) {
+    u32 *p;
+    u32 sum;
+    s32 i;
+    s32 idx;
+    u32 end;
+
+    idx = 0;
+    if (arg0 != NULL) {
+        sum = 0;
+        end = (u32)D_15001B08;
+        for (p = (u32 *)func_15001A08; (u32)p < end; p++) {
+            sum ^= *p;
+            sum <<= 1;
+        }
+        if (sum != 0xB4E42D60) {
+            *(s32 *)(D_800DCE50 + 0x8C) = 0;
+            *(s32 *)(D_800DCE50 + 0x22C) = 0;
+        }
+        for (i = 0; i < D_800886E0[idx].count; i++) {
+            Spawn150AEB9C *obj;
+            obj = (Spawn150AEB9C *)func_151491F4(D_800886E0[idx].ents[i].unk2, 0, -1, 1, 0x27, 8, 0xFF, 0);
+            if (obj == NULL) {
+                break;
+            } else {
+                EntList150AEB9C *list;
+                list = &D_800886E0[idx];
+                obj->unk28 = arg0;
+                obj->unk2C = arg0[0x3B];
+                obj->unk2D = list->ents[i].unk0;
+            }
+        }
+    }
+}
 
 void func_150AECCC(struct42 *arg0) {
     arg0->unk96 = arg0->unk96 + (arg0->unk94 * D_800BE9E4);
