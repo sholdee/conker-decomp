@@ -885,7 +885,49 @@ void func_15170034(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_19A8B0/func_151700D8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_19A8B0/func_15170500.s")
+extern s32 func_151EF610(void);
+
+void func_15170500(s16 arg0, s16 arg1, s16 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6) {
+    f32 x;
+    f32 z;
+    f32 y;
+    f32 s;
+    s32 ix;
+    s32 iy;
+    s32 iz;
+    f32 w;
+    s32 p2;
+    s32 r;
+
+    z = 0.0f;
+    if (arg4 == 0) {
+        arg3 = D_800CC34A[0];
+    }
+    r = func_151EF610() % 50;
+    x = func_150489B0((u8)arg3);
+    y = -func_15048A40((u8)arg3);
+    s = func_150489B0((u8)r);
+    x *= s;
+    y *= s;
+    w = z * s;
+    x += x; y += y; w += w;
+    if (arg4 != 0) {
+        ix = x * 256.0f;
+        iy = y * 256.0f;
+        iz = w * 256.0f;
+        func_1516D4E8(arg0, arg1, arg2, 0x2A, 0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 6,
+            ix >> 8, ix & 0xFF, iy >> 8, iy & 0xFF, 0, 0, 0, 0, 0, 1, 0x200, 0x166, 0xFF,
+            iz - 0x32, 0, 0, arg5, arg6);
+    } else {
+        ix = x * 256.0f;
+        iy = y * 256.0f;
+        iz = w * 256.0f;
+        func_1516D99C(arg0, arg1, arg2, 0x2A, 0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 6,
+            ix >> 8, ix & 0xFF, iy >> 8, iy & 0xFF, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x200, 0x166,
+            0, 0, 0x14, 0, 0, 0xFF, 0xFF, iz - 0x32, 0xC8, 9, 1, 0, 1, 0x32, 0x14, 0, 0, 0,
+            arg5, arg6);
+    }
+}
 
 typedef struct {
     char pad_0[0x18];
