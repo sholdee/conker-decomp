@@ -244,7 +244,9 @@ void func_150B73F0(Struct73F0 *a0) {
 typedef struct {
     /* 0x00 */ void *unk0;
     /* 0x04 */ void *unk4;
-    /* 0x08 */ u8  pad8[0xC];
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ s32 unk10;
     /* 0x14 */ s16 unk14;
     /* 0x16 */ s16 unk16;
     /* 0x18 */ s16 unk18;
@@ -438,7 +440,80 @@ void func_150B77A8(void) {
     D_800D9890 = 3;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_E4070/func_150B791C.s")
+extern u8 D_8009190C;
+
+void func_150B791C(void) {
+    struct_7484 sp24;
+
+    if (D_800D9898[2] != 0) {
+        func_1516972C((struct102 *)D_800D9898[2]);
+        D_800D9898[2] = 0;
+    }
+    sp24.unk1C = 230.0f;
+    sp24.unk31 = 3;
+    sp24.unk2C = 0x40;
+    sp24.unk2E = 0x10;
+    sp24.unk30 = 5;
+    sp24.unk24 = 0;
+    sp24.unk26 = 0;
+    sp24.unk14 = 0;
+    sp24.unk16 = 0;
+    sp24.unk18 = 0;
+    sp24.unk0 = &D_8009190C;
+    sp24.unk4 = 0;
+    sp24.unk8 = 0;
+    sp24.unk20 = 150.0f;
+    sp24.unkC = sp24.unk20;
+    sp24.unk10 = 0;
+    sp24.unk32 = 0xFF;
+    sp24.unk33 = 0;
+    sp24.unk34 = 0;
+    sp24.unk35 = 0x80;
+    sp24.unk36 = 7;
+    sp24.unk37 = 0x11;
+    sp24.unk38 = 1;
+    sp24.unk39 = 0;
+    sp24.unk28 = 0x1000;
+    sp24.unk2A = 0x1000;
+    if (D_800D9898[5] != 0) {
+        func_1516972C((struct102 *)D_800D9898[5]);
+    }
+    D_800D9898[5] = (s32 *)func_15169968(&sp24);
+    sp24.unk16 = 0x100;
+    sp24.unk8 = 0x100;
+    sp24.unk20 = 170.0f;
+    sp24.unkC = sp24.unk20;
+    sp24.unk35 = 0xFF;
+    if (D_800D9898[6] != 0) {
+        func_1516972C((struct102 *)D_800D9898[5]);
+    }
+    D_800D9898[6] = (s32 *)func_15169968(&sp24);
+    sp24.unk16 = 0x200;
+    sp24.unk8 = 0x200;
+    sp24.unk20 = 190.0f;
+    sp24.unkC = sp24.unk20;
+    sp24.unk35 = 0x80;
+    if (D_800D9898[7] != 0) {
+        func_1516972C((struct102 *)D_800D9898[5]);
+    }
+    D_800D9898[7] = (s32 *)func_15169968(&sp24);
+    sp24.unk14 = 0;
+    sp24.unk16 = 0;
+    sp24.unk18 = 0;
+    sp24.unk31 = 0;
+    sp24.unk2C = 0x58;
+    sp24.unk2E = 0x40;
+    sp24.unk35 = 0xFF;
+    sp24.unk30 = 0;
+    sp24.unk0 = &D_800918E8;
+    sp24.unk1C = 230.0f;
+    sp24.unk20 = 170.0f;
+    if (D_800D9898[9] != 0) {
+        func_1516972C((struct102 *)D_800D9898[9]);
+    }
+    D_800D9898[9] = (s32 *)func_15169968(&sp24);
+    D_800D9890 = 3;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_E4070/func_150B7B40.s")
 
