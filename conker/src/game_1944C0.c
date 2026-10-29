@@ -1011,7 +1011,38 @@ void func_15169070(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
         }
     }
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_15169260.s")
+void func_15169260(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
+    s32 *p;
+    s32 i;
+    s32 j;
+    struct102 *node;
+
+    for (i = 0, p = (s32 *)arg0; i < arg1; i++) {
+        for (j = 0; j != 2; j++) {
+            if (((Struct15169070 *)D_8008B4A8)[*p].unk1C != NULL) {
+                node = ((struct102 *(*)[104])D_800DCE50)[j][*p];
+                D_800DD190++;
+                while (node != NULL) {
+                    ((struct102 **)D_800DD198)[D_800DD190] = (struct102 *)node->unk8;
+                    func_1516968C(node, (u8 *)arg2, arg3);
+                    ((Struct15169070 *)D_8008B4A8)[*p].unk1C(node, arg2, arg3);
+                    node = ((struct102 **)D_800DD198)[D_800DD190];
+                }
+                D_800DD190--;
+            } else {
+                node = ((struct102 *(*)[104])D_800DCE50)[j][*p];
+                D_800DD190++;
+                while (node != NULL) {
+                    ((struct102 **)D_800DD198)[D_800DD190] = (struct102 *)node->unk8;
+                    func_1516968C(node, (u8 *)arg2, arg3);
+                    node = ((struct102 **)D_800DD198)[D_800DD190];
+                }
+                D_800DD190--;
+            }
+        }
+        p++;
+    }
+}
 void func_1516944C(s32 arg0, s32 arg1, u8 arg2) {
     s32 j;
     struct102 *node;
