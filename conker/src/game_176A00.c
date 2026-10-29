@@ -1553,4 +1553,45 @@ void func_1514C678(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, s16 arg5, s
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_176A00/func_1514C858.s")
+void func_1514C858(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, s16 arg5, s16 arg6, s16 arg7,
+                   u8 arg8, s32 arg9, f32 argA, s32 argB, u8 argC) {
+    f32 s0;
+    f32 c0;
+    s16 range;
+    s16 base;
+    u8 angle;
+    s16 i;
+    f32 s;
+    f32 c;
+    f32 x;
+    f32 y;
+    f32 z;
+
+    s0 = func_151423D8(arg4 - 0x40);
+    c0 = func_151423D8(arg4);
+    if (arg6 < arg5) {
+        range = arg5 - arg6 + 1;
+        base = arg6;
+    } else {
+        range = arg6 - arg5 + 1;
+        base = arg5;
+    }
+    i = 0;
+    if (arg7 > 0) {
+        do {
+            angle = (u32)func_150ADA20() % range + base;
+            s = func_151423D8(angle - 0x40);
+            c = func_151423D8(angle);
+            x = arg3 * s0 * c + arg0;
+            y = arg1 - arg3 * s;
+            z = arg3 * c0 * c + arg2;
+            if (D_8008AA00[arg8] != 0) {
+                if (D_8008AA00[arg8](3, i, x, y, z, arg0, arg1, arg2,
+                             angle, arg4, arg3, arg9, argA, argB, argC) == 0) {
+                    return;
+                }
+            }
+            i++;
+        } while (i < arg7);
+    }
+}
