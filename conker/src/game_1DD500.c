@@ -1,5 +1,8 @@
 #include <ultra64.h>
+#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
+#undef func_150ADA20
+u32 func_150ADA20(void);
 #include "variables.h"
 
 typedef struct {
@@ -26,7 +29,26 @@ void func_151B1918(struct260 *arg0);
 void func_15149368(struct260 *arg0);
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1DD500/func_151B0050.s")
+void func_15143794(s16, s16, f32, f32 *);
+void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32,
+                  s32, s32, s32, s32, s32, s32, s32, s32);
+
+s32 func_151B0050(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7,
+                  s16 arg8, s16 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
+    f32 pos[3];
+    f32 dir[3];
+    f32 speed;
+
+    pos[0] = arg2;
+    pos[1] = arg3;
+    pos[2] = arg4;
+    speed = func_150ADA68() * 5.300000191f + 4.400000095f;
+    func_15143794(arg9, arg8, speed, dir);
+    func_151DA6F8(pos, dir, func_150ADA68() * (0.6800000072f - 0.6800000072f) + 0.6800000072f, (s16)(func_150ADA20() % 20U + 0x1F),
+                  func_150ADA20() % 101U + 0x9B, func_150ADA68() * 2.329999924f + 6.699999809f,
+                  (func_150ADA20() & 1) + 3, 1, 1.0f, 1.0f, 0, 0, 0, 0x10, 0xF, 0, argE, 1);
+    return 1;
+}
 
 typedef struct Game1DD500Impact {
     s16 field00;
