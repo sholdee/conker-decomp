@@ -277,7 +277,40 @@ s32 func_150FF6B4(struct127 *arg0, s32 arg1, s32 arg2) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_12C1E0/func_150FF6E0.s")
+extern struct17 D_800A205C;
+extern struct17 D_800A2068;
+extern struct17 D_800A2074;
+extern struct17 D_800A2080[2][6];
+extern s32 func_1514654C(struct127 *, struct126 *, s32, void *, void *, s32);
+
+u8 func_150FF6E0(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, struct17 *arg4, struct127 *arg5, struct126 *arg6) {
+    u8 i;
+    struct17 *src[10];
+    struct17 *dst[10];
+    u8 r;
+
+    r = func_150ADA20() & 1;
+    src[0] = (struct17 *)&D_800A2050;
+    src[1] = &D_800A2068;
+    src[2] = &D_800A2074;
+    src[3] = &D_800A205C;
+    for (i = 0; i < 6; i++) {
+        src[i + 4] = &D_800A2080[r][i];
+        dst[i + 4] = &arg0[i];
+    }
+    dst[0] = arg1;
+    dst[1] = arg2;
+    dst[2] = arg3;
+    dst[3] = arg4;
+    if (func_1514654C(arg5, arg6, 0, src, dst, 10)) {
+        arg3->unk0 -= arg2->unk0;
+        arg3->unk4 -= arg2->unk4;
+        arg3->unk8 -= arg2->unk8;
+    } else {
+        return 0;
+    }
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_12C1E0/func_150FF840.s")
 
