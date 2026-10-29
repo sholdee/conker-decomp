@@ -102,7 +102,48 @@ void func_151419D0(struct102 *arg0, struct A1_151419D0 *arg1, u8 arg2) {
         }
     }
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15141A7C.s")
+s32 func_15141C0C(void *actor);
+s32 func_15141CC0(u32 arg0);
+u32 func_1510F8CC(s32);
+void func_15141E38(void *arg0, s32 arg1);
+s32 func_1514ECE0(void *, s16, void *);
+
+typedef void (*Fn15141A7C)(void *, s32, s32);
+
+void func_15141A7C(void *arg0, s32 arg1) {
+    s32 kind;
+    s32 idx;
+
+    if (D_800BE616 == 0) {
+        kind = func_15141C0C(arg0);
+        if (D_8008A084[kind] != 0) {
+            idx = ((s32 (*)(s32, void *))D_8008A084[kind])(func_15141CC0(func_1510F8CC(*(s32 *)((u8 *)arg0 + 0x184))), arg0);
+            if (idx != -1) {
+                if (D_8008A0B4[idx].unk0 != 0) {
+                    if (D_8008A0B4[idx].unk4 > 0) {
+                        func_15141E38(arg0, idx);
+                    } else {
+                        (*(Fn15141A7C *)&D_8008A0B4[idx].unk0)(arg0, arg1, 0);
+                    }
+                }
+            }
+        }
+        {
+        void *node;
+        node = *(void **)((u8 *)arg0 + 0x2F4);
+        if (func_1514ECE0(node, 0x1A, &node) != 0) {
+            do {
+                void *sub;
+                sub = *(void **)((u8 *)node + 0x10);
+                if (D_8008A0B4[*(s32 *)((u8 *)sub + 0x28)].unk0 != 0) {
+                    (*(Fn15141A7C *)&D_8008A0B4[*(u32 *)((u8 *)sub + 0x28)].unk0)(arg0, arg1, *(s16 *)((u8 *)sub + 0xE));
+                }
+                node = *(void **)((u8 *)node + 0x14);
+            } while (func_1514ECE0(node, 0x1A, &node) != 0);
+        }
+        }
+    }
+}
 // requires jump table
 s32 func_15141C0C(void *actor) {
     switch (*(u8 *)((u8 *)actor + 4)) {
