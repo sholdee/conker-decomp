@@ -217,7 +217,92 @@ u32 *func_1515E544(u32 *arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
     return arg0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18A8F0/func_1515E888.s")
+struct Light1515E888 {
+    u8 pad0[5];
+    u8 r;
+    u8 g;
+    u8 b;
+    u8 pad8[6];
+    s16 x;
+    s16 y;
+    s16 z;
+    u8 pad14[0x1B];
+    u8 radius;
+};
+
+extern u8 D_800D9E21;
+extern struct Light1515E888 *D_800D9E28[];
+void func_1515E278(s32, s32, s32, s32, u8 *, u8 *, u8 *);
+
+void func_1515E888(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5, u8 *arg6, u8 *arg7)
+{
+  f32 sq;
+  f32 dist;
+  f32 pos[3];
+  f32 color[3];
+  s32 i;
+  f32 *new_var;
+  s32 n;
+  struct Light1515E888 *light;
+  struct Light1515E888 **p;
+  f32 f;
+  s32 v;
+  func_1515E278(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+  color[0] = arg5[0];
+  color[1] = arg5[1];
+  color[2] = arg5[2];
+  v = D_800D9E21 & 0x7F;
+  n = v - 1;
+  i = 0;
+  if (n > 0)
+  {
+    p = D_800D9E28;
+    new_var = pos;
+    loop:
+    light = *p;
+
+    if (light != 0)
+    {
+      pos[0] = light->x;
+      pos[1] = light->y;
+      pos[2] = light->z;
+      dist = light->radius * 2048.0f;
+      sq = (((new_var[0] - arg1) * (new_var[0] - arg1)) + ((new_var[1] - arg2) * (new_var[1] - arg2))) + ((new_var[2] - arg3) * (new_var[2] - arg3));
+      f = dist / sq;
+      if (f > 1.0f)
+      {
+        f = 1.0f;
+      }
+      color[0] += f * light->r;
+      color[1] += f * light->g;
+      color[2] += f * light->b;
+    }
+    i++;
+    p++;
+    if (i != n)
+    {
+      goto loop;
+    }
+  }
+  v = color[0];
+  if (v >= 0x100)
+  {
+    v = 0xFF;
+  }
+  arg5[0] = v;
+  v = color[1];
+  if (v >= 0x100)
+  {
+    v = 0xFF;
+  }
+  arg5[1] = v;
+  v = color[2];
+  if (v >= 0x100)
+  {
+    v = 0xFF;
+  }
+  arg5[2] = v;
+}
 
 struct Node1515E43C *func_1515EB84(s32 arg0, s32 arg1, s32 arg2, s32 arg3, struct Node1515EB84 *node) {
     u8 sp34[0x32C];
