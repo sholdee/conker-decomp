@@ -448,7 +448,66 @@ void func_151895CC(s32 *arg0) {
     func_100043B4((s32 *)arg0[2], 2);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1B5CC0/func_151895F4.s")
+typedef struct Node151895F4 {
+    u8 unk0;
+    u8 unk1;
+    u8 unk2;
+    u8 unk3;
+    char pad4[4];
+    u8 *unk8;
+    struct Node151895F4 *unkC;
+    struct127 *unk10;
+    s32 unk14;
+} Node151895F4;
+
+extern u8 func_150849CC(struct127 *, s32 *);
+extern s32 func_1503DA9C(struct127 *, s32, s32, s32);
+extern s32 func_1502C974(s32, s32, s32, s32, s32);
+extern void *D_800DF7C0;
+extern u8 D_800DF7C4;
+
+s32 func_151895F4(s32 arg0, Node151895F4 *arg1, s16 arg2) {
+    s32 i;
+    s32 m;
+    s32 count;
+    s32 dst;
+    s32 idx;
+    s32 n;
+    s32 shade;
+    s32 active;
+    void **model;
+    s32 alpha;
+    s32 lod;
+    s32 p4;
+    s32 p5;
+    s32 saved;
+
+    active = arg1->unk2;
+    if (active == 0) {
+        return arg0;
+    }
+    func_1503DA9C(arg1->unk10, func_150849CC(arg1->unk10, &lod), lod, 1);
+    n = arg1->unk1;
+    shade = arg1->unk3;
+    m = func_1502DB20(arg1->unk10->id);
+    count = arg1->unk2;
+    dst = D_800BE9C0 * m * n;
+    idx = arg1->unk10 - D_800CC2D0;
+    if (idx < 0 || idx >= 25) {
+        return arg0;
+    }
+    saved = *(s32 *)((u8 *)arg1->unk10 + 0x94);
+    *(s32 *)((u8 *)arg1->unk10 + 0x94) = arg1->unk14;
+    model = &D_800DF7C0;
+    for (i = 0; i < count; i++) {
+        alpha = (((i + 3) * 32) * shade) >> 8;
+        *model = arg1->unk8 + ((dst + i * m) << 6);
+        D_800DF7C4 = alpha;
+        arg0 = func_1502C974(arg0, idx, arg2, 4, 1);
+    }
+    *(s32 *)((u8 *)arg1->unk10 + 0x94) = saved;
+    return arg0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1B5CC0/func_151897A4.s")
 
