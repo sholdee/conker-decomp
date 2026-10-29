@@ -207,7 +207,174 @@ void func_1518CD20(s32 arg0, u8 arg1, s32 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1BA1D0/func_1518D1C0.s")
+void *func_1518E3C4(void *arg0, s32 arg1);
+
+typedef struct Node1518D1C0 {
+    u8 pad0[0x8];
+    struct Node1518D1C0 *unk8;
+    u8 padC[0xC];
+    void *unk18;
+    u8 unk1C;
+} Node1518D1C0;
+
+typedef struct Owner1518D1C0 {
+    u8 pad0[0x3B];
+    u8 unk3B;
+    u8 pad3C[0x18E];
+    u8 unk1CA;
+} Owner1518D1C0;
+
+typedef struct Spawn1518D1C0 {
+    void *owner;
+    u8 unk4;
+    s16 unk6;
+    u8 unk8;
+    s8 unk9;
+    u8 unkA;
+} Spawn1518D1C0;
+
+extern u8 D_800DCE50[];
+
+void *func_1518D1C0(Owner1518D1C0 *arg0, s16 arg1, s16 arg2, u8 arg3, u8 arg4, u8 arg5, void *arg6) {
+    Spawn1518D1C0 spawn;
+    s32 i;
+    Node1518D1C0 *node;
+
+    if (arg0 == NULL) {
+        return NULL;
+    }
+    if (arg3) {
+        for (i = 0; i != 2; i++) {
+            D_800DD190++;
+            node = ((Node1518D1C0 *(*)[104])D_800DCE50)[i][33];
+            while (node != NULL) {
+                ((Node1518D1C0 **)D_800DD198)[D_800DD190] = node->unk8;
+                if (arg0 == node->unk18 || node->unk1C == arg0->unk3B) {
+                    func_1516972C((struct102 *)node);
+                }
+                node = ((Node1518D1C0 **)D_800DD198)[D_800DD190];
+            }
+            {
+                extern s8 D_800DD190;
+
+                D_800DD190--;
+            }
+        }
+    }
+    spawn.owner = arg0;
+    spawn.unk4 = arg0->unk3B;
+    switch (arg1) {
+    case 10:
+        spawn.unk6 = 75;
+        spawn.unk8 = arg0->unk1CA ? 1 : 0;
+        spawn.unk9 = 1;
+        spawn.unkA = 7;
+        return func_1518E3C4(&spawn, arg4);
+    case 11:
+        spawn.unk6 = 75;
+        spawn.unk8 = arg0->unk1CA ? 1 : 0;
+        spawn.unk9 = 0;
+        spawn.unkA = 1;
+        return func_1518E3C4(&spawn, arg4);
+    case 12:
+        spawn.unk6 = 75;
+        spawn.unk8 = arg0->unk1CA ? 1 : 0;
+        spawn.unk9 = 1;
+        spawn.unkA = 7;
+        return func_1518E3C4(&spawn, arg4);
+    case 1:
+        spawn.unk6 = 500;
+        spawn.unk8 = 1;
+        spawn.unk9 = 0;
+        spawn.unkA = 1;
+        return func_1518E3C4(&spawn, arg4);
+    case 2:
+        spawn.unk6 = 3000;
+        spawn.unk8 = 1;
+        spawn.unk9 = 1;
+        spawn.unkA = 7;
+        return func_1518E3C4(&spawn, arg4);
+    case 3:
+        spawn.unk6 = 200;
+        spawn.unk8 = 1;
+        spawn.unk9 = -1;
+        spawn.unkA = 8;
+        return func_1518E3C4(&spawn, arg4);
+    case 4:
+        spawn.unk6 = 200;
+        spawn.unk8 = 1;
+        spawn.unk9 = -1;
+        spawn.unkA = 9;
+        return func_1518E3C4(&spawn, arg4);
+    case 5:
+        spawn.unk6 = 3000;
+        spawn.unk8 = 0;
+        spawn.unk9 = -1;
+        spawn.unkA = 2;
+        return func_1518E3C4(&spawn, arg4);
+    case 6:
+        spawn.unk6 = 3000;
+        spawn.unk8 = 0;
+        spawn.unk9 = -1;
+        spawn.unkA = 3;
+        return func_1518E3C4(&spawn, arg4);
+    case 7:
+        spawn.unk6 = 3000;
+        spawn.unk8 = 0;
+        spawn.unk9 = -1;
+        spawn.unkA = 4;
+        return func_1518E3C4(&spawn, arg4);
+    case 8:
+        spawn.unk6 = 3000;
+        spawn.unk8 = 0;
+        spawn.unk9 = -1;
+        spawn.unkA = 5;
+        return func_1518E3C4(&spawn, arg4);
+    case 9:
+        spawn.unk6 = 3000;
+        spawn.unk8 = 0;
+        spawn.unk9 = -1;
+        spawn.unkA = 6;
+        return func_1518E3C4(&spawn, arg4);
+    case 13:
+        spawn.unk6 = arg2;
+        spawn.unk8 = (arg2 == 999) ? 0 : 1;
+        spawn.unk9 = -1;
+        spawn.unkA = 10;
+        return func_1518E3C4(&spawn, arg4);
+    case 14:
+        spawn.unk6 = arg2;
+        spawn.unk8 = 1;
+        spawn.unk9 = -1;
+        spawn.unkA = 11;
+        return func_1518E3C4(&spawn, arg4);
+    case 15:
+        spawn.unk6 = arg2;
+        spawn.unk8 = (arg2 == 999) ? 0 : 1;
+        spawn.unk9 = -1;
+        spawn.unkA = 12;
+        return func_1518E3C4(&spawn, arg4);
+    case 16:
+        spawn.unk6 = arg2;
+        spawn.unk8 = (arg2 == 999) ? 0 : 1;
+        spawn.unk9 = -1;
+        spawn.unkA = 13;
+        return func_1518E3C4(&spawn, arg4);
+    case 17:
+        spawn.unk6 = 300;
+        spawn.unk8 = 1;
+        spawn.unk9 = -1;
+        spawn.unkA = 14;
+        return func_1518E3C4(&spawn, arg4);
+    case 18:
+        spawn.unk6 = arg2;
+        spawn.unk8 = 1;
+        spawn.unk9 = -1;
+        spawn.unkA = 15;
+        return func_1518E3C4(&spawn, arg4);
+    }
+    return NULL;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1BA1D0/func_1518D6E0.s")
 
@@ -386,11 +553,11 @@ void func_1518E5D8(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5, s
     *arg6 = 0x401;
 }
 
-extern s32 func_1518D1C0(s32, s32, s32, s32, u8, u8, void *);
+extern void *func_1518D1C0(Owner1518D1C0 *, s16, s16, u8, u8, u8, void *);
 extern u8 D_800A7460[];
 
 s32 func_1518E66C(void *arg0) {
-    func_1518D1C0(*(s32 *)((char *)arg0 + 0x18), 3, 0, 0, *(u8 *)((char *)arg0 + 0xC), *(u8 *)((char *)arg0 + 1), D_800A7460);
+    func_1518D1C0(*(Owner1518D1C0 **)((char *)arg0 + 0x18), 3, 0, 0, *(u8 *)((char *)arg0 + 0xC), *(u8 *)((char *)arg0 + 1), D_800A7460);
     *(s16 *)((char *)arg0 + 0x1E) = 0x80;
     *(s8 *)((char *)arg0 + 0x21) = -1;
     return 0;
@@ -399,7 +566,7 @@ s32 func_1518E66C(void *arg0) {
 extern u8 D_800A749C[];
 
 s32 func_1518E6D4(void *arg0) {
-    func_1518D1C0(*(s32 *)((char *)arg0 + 0x18), 4, 0, 0, *(u8 *)((char *)arg0 + 0xC), *(u8 *)((char *)arg0 + 1), D_800A749C);
+    func_1518D1C0(*(Owner1518D1C0 **)((char *)arg0 + 0x18), 4, 0, 0, *(u8 *)((char *)arg0 + 0xC), *(u8 *)((char *)arg0 + 1), D_800A749C);
     *(s16 *)((char *)arg0 + 0x1E) = 0x80;
     *(s8 *)((char *)arg0 + 0x21) = -1;
     return 0;
