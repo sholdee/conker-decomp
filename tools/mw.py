@@ -307,10 +307,18 @@ def diff_counts(wc, func, n):
             c["structural"] += 1
             continue
         fm = {t.get("format") for t in cur.get("text", []) + b.get("text", [])}
+
+        def body(side):  # instruction text without address / source-line columns
+            txt = "".join(t.get("text", "") for t in side.get("text", []) if t.get("format") != "source_line_num")
+            txt = re.sub(r"^\s*[0-9a-f]+:\s*", "", txt)
+            # same address, different spelling: D_/jtbl_<ADDR> (asm) vs .ro.<file>.<ADDR> (rodata_extern)
+            txt = re.sub(r"\.ro\.\w+\.([0-9A-Fa-f]{8})|\b(?:D|jtbl)_([0-9A-Fa-f]{8})",
+                         lambda mm: "SYM_" + (mm.group(1) or mm.group(2)).upper(), txt)
+            return txt.split()
         if "register" in fm and not fm & {"immediate", "diff_change", "diff_add", "diff_remove"}:
             c["register"] += 1
-        elif fm & {"immediate", "diff_change", "diff_add", "diff_remove"}:
-            c["immediate"] += 1
+        elif fm & {"immediate", "diff_change", "diff_add", "diff_remove"} or body(b) != body(cur):
+            c["immediate"] += 1  # constants, offsets, and stack-slot differences (asm-differ 's' rows)
     return c
 
 
