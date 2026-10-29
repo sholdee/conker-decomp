@@ -400,4 +400,59 @@ void *func_151770C8(u32 *gdl, u8 *arg1, s16 arg2) {
     return gdl;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1A20A0/func_1517725C.s")
+typedef struct Wave1A20A0 {
+    u8 pad0[0x18];
+    f32 unk18;
+    f32 unk1C;
+    u8 pad20[4];
+    f32 unk24;
+    f32 unk28;
+    u8 pad2C[4];
+    f32 unk30;
+    f32 unk34;
+} Wave1A20A0;
+
+extern Wave1A20A0 D_8008D0B0[];
+
+void func_1517725C(u8 arg0) {
+    f32 a;
+    f32 s;
+    s16 x;
+    s16 y;
+    Wave1A20A0 *w;
+    s16 *v;
+    f32 c;
+
+    w = &D_8008D0B0[arg0];
+    v = *(s16 **)((u8 *)D_800DDE88 + arg0 * 20);
+    a = w->unk24 * 0.01745329238f;
+    w->unk18 = func_150AD78C(a) * w->unk28;
+    a = w->unk18 * 0.01745329238f;
+    s = func_150AD78C(a);
+    c = func_150AD780(a);
+    x = w->unk30 * c;
+    y = w->unk30 * s;
+    v[0xA0 / 2] = -x;
+    v[0xB0 / 2] = -x;
+    v[0x110 / 2] = x;
+    v[0x120 / 2] = x;
+    v[0x112 / 2] = y;
+    v[0x122 / 2] = y;
+    v[0xA2 / 2] = y;
+    v[0xB2 / 2] = y;
+    a = (w->unk24 - 30.0f) * 0.01745329238f;
+    w->unk18 = func_150AD78C(a) * w->unk28;
+    a = w->unk18 * 0.01745329238f;
+    s = func_150AD78C(a);
+    c = func_150AD780(a);
+    x = w->unk34 * c;
+    y = w->unk34 * s;
+    v[0xE0 / 2] = -x;
+    v[0x130 / 2] = x;
+    v[0xE2 / 2] = y;
+    v[0x132 / 2] = y;
+    w->unk24 += w->unk1C;
+    if (w->unk24 >= 360.0f) {
+        w->unk24 -= 360.0f;
+    }
+}
