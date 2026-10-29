@@ -671,7 +671,94 @@ s32 func_15084000(void) {
     return -1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_AEB40/func_15084044.s")
+extern u16 D_800C57A0[];
+extern s32 func_10004074(void *);
+
+s32 func_15084044(u8 *arg0, s32 arg1) {
+    u8 *slot;
+    u8 *obj;
+    s32 mode;
+    u8 id;
+    s32 val;
+    s32 ret;
+    s32 i;
+    s32 size;
+
+    slot = (u8 *)((s32)arg0 + arg1 * 8);
+    if (arg0[0x65] != 0) {
+        obj = *(u8 **)((u8 *)&D_800CC2D0[arg0[0x65] - 1] + 0x144);
+    } else {
+        obj = *(u8 **)(arg0 + 0x144);
+    }
+    id = (*(u8 **)(arg0 + 0x2C4))[arg1];
+    mode = (obj != NULL) ? (obj[0x10] & 3) : 0;
+    if (id == 0) {
+        mode = 2;
+    }
+    if (*(s32 *)(slot + 0x28C) != 0 && *(s32 *)(slot + 0x290) != 0) {
+        return 0;
+    }
+    val = (&D_800D19A0)[id];
+    if ((&D_800D19A0)[id] == 0) {
+        return 0;
+    }
+    ret = 0;
+    if (mode == 0) {
+        val = (&D_800D19A0)[id];
+        *(s32 *)(slot + 0x290) = val;
+        *(s32 *)(slot + 0x28C) = val;
+        ((u8 *)D_800D1F80)[id] += 2;
+    } else if (mode == 1) {
+        if (*(s32 *)(slot + 0x28C) == 0 || *(s32 *)(slot + 0x28C) == (&D_800D19A0)[id]) {
+            if (((u8 *)D_800D1F80)[id] != 0) {
+                size = D_800C57A0[id] * 16;
+                *(s32 *)(slot + 0x28C) = allocate_memory(size, 1, 2, 2);
+                if (*(s32 *)(slot + 0x28C) == 0) {
+                    ret = 1;
+                } else if (*(s32 *)(slot + 0x28C) != 0) {
+                    bcopy((void *)(&D_800D19A0)[id], (void *)*(s32 *)(slot + 0x28C), size);
+                } else {
+                    *(s32 *)(slot + 0x28C) = (&D_800D19A0)[id];
+                }
+            } else {
+                val = (&D_800D19A0)[id];
+        *(s32 *)(slot + 0x290) = val;
+        *(s32 *)(slot + 0x28C) = val;
+                ((u8 *)D_800D1F80)[id] += 2;
+            }
+        }
+        *(s32 *)(slot + 0x290) = *(s32 *)(slot + 0x28C);
+    } else if (mode == 2) {
+        for (i = 0; i < 2; i++) {
+            if (((s32 (*)[2])(arg0 + 0x28C))[arg1][i] == 0 || ((s32 (*)[2])(arg0 + 0x28C))[arg1][i] == (&D_800D19A0)[id] || (i == 1 && *(s32 *)(slot + 0x28C) == *(s32 *)(slot + 0x290))) {
+                if (((u8 *)D_800D1F80)[id] != 0) {
+                    size = D_800C57A0[id] * 16;
+                    ((s32 (*)[2])(arg0 + 0x28C))[arg1][i] = allocate_memory(size, 1, 2, 2);
+                    if (((s32 (*)[2])(arg0 + 0x28C))[arg1][i] == 0) {
+                        ret = 1;
+                        if (i == 1) {
+                            if (*(s32 *)(slot + 0x28C) != (&D_800D19A0)[id]) {
+                                func_10004074((void *)*(s32 *)(slot + 0x28C));
+                            } else {
+                                ((u8 *)D_800D1F80)[id] -= 1;
+                            }
+                            *(s32 *)(slot + 0x28C) = 0;
+                        }
+                        break;
+                    } else if (((s32 (*)[2])(arg0 + 0x28C))[arg1][i] != 0) {
+                        bcopy((void *)(&D_800D19A0)[id], (void *)((s32 (*)[2])(arg0 + 0x28C))[arg1][i], size);
+                    } else {
+                        ((s32 (*)[2])(arg0 + 0x28C))[arg1][i] = (&D_800D19A0)[id];
+                    }
+                } else {
+                    ((s32 (*)[2])(arg0 + 0x28C))[arg1][i] = (&D_800D19A0)[id];
+                    ((u8 *)D_800D1F80)[id] += 1;
+                }
+            }
+        }
+    }
+    return ret;
+}
 
 extern void func_150843AC(void *arg0, s32 arg1);
 
