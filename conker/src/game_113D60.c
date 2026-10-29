@@ -283,7 +283,58 @@ void func_150E71E4(s32 arg0, s32 arg1, f32 *arg2, f32 *out) {
     out[7] = func_150ADA68() * D_800A133C;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_113D60/func_150E7290.s")
+typedef struct {
+    /* 0x0 */ f32 unk0;
+    /* 0x4 */ f32 unk4;
+} Struct150E75A0Pos;
+
+typedef struct {
+    /* 0x0 */ s32 unk0[2];
+} Struct150E7290Tbl;
+
+extern Struct150E7290Tbl D_80088A5C;
+void func_150E75A0(Struct150E75A0Pos *arg0, f32 arg1, s16 arg2, u8 arg3, u8 arg4, u8 arg5, s16 arg6, s16 arg7, s32 arg8,
+                   s32 arg9, u8 argA, s32 argB);
+void func_150E76D0(f32 arg0, s16 arg1, u8 arg2, u8 arg3, u8 arg4, s16 arg5, s16 arg6, s32 arg7, s32 arg8, u8 arg9, s32 arg10);
+extern void func_15164F0C(u8, u8, void *, u8, s32);
+
+void func_150E7290(u8 arg0, u8 arg1, s32 arg2) {
+    Struct150E7290Tbl sp60;
+    Struct150E75A0Pos sp58;
+    Struct150E81A8Small sp50;
+    s32 sp4C;
+    u32 sp48;
+    u32 sp44;
+    u32 sp40;
+    f32 sp3C;
+
+    if (func_150ADA68() < 0.00419999985f) {
+        sp60 = D_80088A5C;
+        if (func_150ADA68() < 0.7500000596f) {
+            sp58.unk0 = (func_150ADA68() * 300.0f) + -150.0f;
+            sp58.unk4 = (func_150ADA68() * 200.0f) + -100.0f;
+            sp3C = func_150ADA68();
+            sp40 = func_150ADA20();
+            sp44 = (func_150ADA20() & 1) ? 2 : 0;
+            sp48 = (func_150ADA20() & 1) ? 4 : 0;
+            func_150E75A0(&sp58, ((sp3C * 150.0f) + 200.0f) * 0.1000000015f, (sp40 % 201) + 500, (u8)(sp48 | sp44) | 9,
+                          (func_150ADA20() % 26) + 100, 0xFF, 0x40, 3, (s32)&sp60, 2, arg1, arg2);
+        } else {
+            sp3C = func_150ADA68();
+            sp48 = func_150ADA20();
+            func_150E76D0(((sp3C * 100.0f) + 150.0f) * 0.1000000015f, (sp48 % 201) + 500, 9,
+                          (func_150ADA20() % 26) + 100, 0xFF, 0x40, 3, (s32)&sp60, 2, arg1, arg2);
+        }
+        func_10010F30(0x360, 0x7FFF, 0, 0, 0);
+        func_15164F0C(1, arg0, NULL, arg1, arg2);
+        sp50.unk0 = 1;
+        sp50.unk2 = (func_150ADA20() % 26) + 25;
+        sp50.unk5 = 1;
+        sp50.unk4 = (func_150ADA20() % 6) + 3;
+        sp50.unk6 = -1;
+        func_151D8868(&sp50, 0, 0xFF, 0);
+    }
+}
 
 
 typedef struct {
@@ -337,11 +388,6 @@ extern void *func_1515548C(Struct150E76D0 *, s32, s32, s32, s32, u8, s32);
 typedef struct {
     /* 0x0 */ u8 unk0[1];
 } Struct150E75A0Tbl;
-
-typedef struct {
-    /* 0x0 */ f32 unk0;
-    /* 0x4 */ f32 unk4;
-} Struct150E75A0Pos;
 
 extern Struct150E75A0Tbl D_80088A64;
 
