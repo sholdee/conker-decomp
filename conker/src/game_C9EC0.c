@@ -252,6 +252,126 @@ s32 func_1509D08C(s32 arg0, s32 arg1, s32 *arg2, s32 *arg3) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_C9EC0/func_1509D780.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C9EC0/func_1509D8FC.s")
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8;
+    s32 unkC;
+    s32 unk10;
+    s32 unk14;
+    s32 unk18;
+} Func1509D8FCArg;
+
+typedef struct {
+    f32 unk0;
+    u8 unk4;
+    u8 unk5;
+    u8 unk6;
+    u8 unk7;
+} Func1509D8FCMsg;
+
+extern void *func_1505EEF4(s32);
+extern void func_15197A7C(void *);
+extern void func_151645C4(u8);
+extern void func_1515F170(s32 arg0, u8 arg1);
+extern void func_151616D0(u8, u8, s32);
+extern void func_150DEC28(u8, u8);
+extern u8 D_800A0960[][16];
+
+s32 func_1509D8FC(s32 arg0, s32 arg1, Func1509D8FCArg *arg2) {
+    switch (arg0) {
+        case 52:
+            if (arg1 == 3) {
+                func_15197A7C(func_1505EEF4(arg2->unk4 & 0xFFF));
+            }
+            break;
+
+        case 50:
+            if (arg1 == 2) {
+                func_151403A8(0, 0x53);
+            } else if (arg1 == 3) {
+                func_151403A8(0, 0x54);
+            }
+            break;
+        case 45:
+            func_151645C4(arg1 == 6);
+            break;
+        case 40:
+            if (arg1 == 2) {
+                func_1515F170(4, 1);
+                func_1515F170(5, 0);
+            } else if (arg1 == 3) {
+                func_1515F170(4, 0);
+                func_1515F170(5, 1);
+            }
+            break;
+        case 31:
+            if (arg1 == 5) {
+                u8 buf[8];
+                buf[0] = arg2->unk8;
+                func_151403A8((s32)buf, 0x36);
+            }
+        case 30:
+            if (arg1 == 2) {
+                u8 buf2[4];
+                buf2[0] = arg2->unk8;
+                func_151494E0((s32)buf2, 0x34);
+            }
+            break;
+        case 29:
+            if (arg1 == 5) {
+                Func1509D8FCMsg msg;
+                msg.unk0 = arg2->unkC;
+                msg.unk4 = arg2->unk8;
+                msg.unk5 = arg2->unk10;
+                msg.unk6 = arg2->unk14;
+                msg.unk7 = arg2->unk18;
+                func_1516944C(0x35, (s32)&msg, 0x33);
+            }
+            break;
+        case 28:
+            if (arg1 == 5) {
+                s32 idx = arg2->unk8;
+                if (idx < 0 || idx >= 3) {
+                    return 1;
+                }
+                func_151494E0((s32)D_800A0960[idx], 0x32);
+            }
+            break;
+        case 11:
+        case 12:
+        case 13:
+        case 14: {
+            s32 x;
+            u8 a;
+            u8 b;
+
+            x = arg0 & 0x3F;
+            if (x == 11) {
+                a = 1;
+            } else if (x == 12) {
+                a = 2;
+            } else if (x == 13) {
+                a = 3;
+            } else if (x == 14) {
+                a = 4;
+            } else {
+                a = 0;
+            }
+            if (arg1 == 2) {
+                b = 0x17;
+            } else if (arg1 == 3) {
+                b = 0x18;
+            } else {
+                b = 0x17;
+            }
+            func_151616D0(a, b, 0);
+            break;
+        }
+        case 17:
+            func_150DEC28(arg2->unk8, arg1 == 3);
+            break;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_C9EC0/func_1509DBBC.s")
