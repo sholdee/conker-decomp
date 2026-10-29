@@ -155,53 +155,52 @@ s32 arg0;
     return arg0;
 }
 
-// NON-MATCHING (best 1431). Structure, frame (0x58), stack-slot of the pipesync flag (sp+0x43) and
-// the whole tail from the mode ternary onwards are byte-exact; the residual is IDO -O2 commoning the
-// ADDRESS of a global that is referenced twice, which the ROM does not do. Two clusters:
-//   * D_800D35E0[0]/[1] -- target emits two independent "lui at,%hi; lwc1 %lo(at)" macro loads;
-//     every C spelling tried (incomplete array, sized array, 2-member struct, (&scalar)[1],
-//     hoisting each into its own local on its own line) makes IDO build "lui/addiu" base in v0
-//     and load 0(v0)/4(v0).  Referencing 0x800D35E4 under its own symbol would avoid the CSE but
-//     that symbol does not exist in undefined_syms_auto.txt, so it would not link.
-//   * D_800DD450 read (condition) + write (body) -- target keeps them as separate assembler macros
-//     ("lui t9,%hi; lh t9,%lo(t9)" and "lui at,%hi; sh t4,%lo(at)"); IDO CSEs the address into a0.
-//     This is the cookbook's documented "same-symbol read+write via split lui %hi/%lo" bail.
-// Both cost one instruction each and cascade into register renames over the rest of the function.
-// Reconstruction (verified correct, only the two CSEs differ):
-//
-// Gfx *func_1517A3A0(Gfx *gfx, struct func_1517A84C_obj *obj, s16 arg2) {
-//     Gfx *mtxCmd; Gfx *syncCmd; Gfx *primCmd; Gfx *dlCmd; s32 mode; u8 update;
-//     if ((obj->unk0 != 0xC) && (obj->unk0 != 0x59)) {
-//         if (func_1510AEE0(D_800D9C10[arg2], obj->unk90, obj->unk92, obj->unk94, D_800D9B20,
-//                           D_800D9B1C, D_800D35E0[0], D_800D35E0[1], NULL, NULL) != 0) {
-//             if (obj->unk0 == 8) {
-//                 if (obj->unkB2 & (1 << arg2)) { obj->unkB2 |= 0x10 << arg2; }
-//             }
-//             return gfx;
-//         }
-//     }
-//     if (obj->unk0 != 9) { obj->unkB2 |= 1 << arg2; }
-//     gfx = (Gfx *)func_1517A9A8((s32)gfx, obj->unk9F);
-//     func_15043D90((Mtx *)((u8 *)obj + (D_800BE9C0 << 6) + 0x10), obj->unk96, obj->unk98,
-//                   obj->unk9A, obj->unkA8, obj->unkA8, obj->unkA8,
-//                   obj->unk90, obj->unk92, obj->unk94);
-//     mtxCmd = gfx++;
-//     mtxCmd->words.w0 = 0xDA380003;
-//     mtxCmd->words.w1 = (u32)((u8 *)obj + (D_800BE9C0 << 6) + 0x10);
-//     if (obj->unkB3 != D_800DD450) {
-//         syncCmd = gfx++;  syncCmd->words.w0 = 0xE7000000;  syncCmd->words.w1 = 0;
-//         primCmd = gfx++;  primCmd->words.w0 = 0xFA000000;  primCmd->words.w1 = obj->unkB3;
-//         D_800DD450 = obj->unkB3;
-//     }
-//     update = 0;
-//     mode = ((obj->unk0 == 8) || (obj->unk0 == 9)) ? 0x5049D8 : 0x504240;
-//     gfx = func_15142FBC(gfx, D_800D2C9C | 0x80000 | 0x2CA0, mode, &update);
-//     dlCmd = gfx++;
-//     dlCmd->words.w0 = 0xDE000000;
-//     dlCmd->words.w1 = (u32)D_8008CDF0;
-//     return gfx;
-// }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1A7260/func_1517A3A0.s")
+s32 func_1510AEE0(f32 *, f32, f32, f32, f32, f32, f32, f32, f32 *, f32 *);
+Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
+extern f32 D_800D35E0;
+extern f32 D_800D35E8;
+extern u8 D_800D9C10[];
+extern s32 D_800D2C9C;
+extern s16 D_800DD450;
+extern u8 D_8008CDF0[];
+s32 func_1517A9A8(s32 arg0, s32 arg1);
+
+Gfx *func_1517A3A0(Gfx *gfx, struct func_1517A84C_obj *obj, s16 arg2) {
+    if ((obj->pad0[0] != 0xC) && (obj->pad0[0] != 0x59)) {
+        if (func_1510AEE0((f32 *)(D_800D9C10 + (arg2 << 6)), obj->unk90, obj->unk92, obj->unk94, D_800D9B20,
+                          D_800D9B1C, D_800D35E0, (&D_800D35E8)[-1], 0, 0) != 0) {
+            if (obj->pad0[0] == 8) {
+                if (obj->unkB2 & (1 << arg2)) {
+                    obj->unkB2 |= 0x10 << arg2;
+                }
+            }
+            return gfx;
+        }
+    }
+    if (obj->pad0[0] != 9) {
+        obj->unkB2 |= 1 << arg2;
+    }
+    gfx = (Gfx *)func_1517A9A8((s32)gfx, obj->unk9F);
+    func_15043D90((Mtx *)((u8 *)obj + (D_800BE9C0 << 6) + 0x10), obj->unk96, obj->unk98,
+                  obj->unk9A, obj->unkA8, obj->unkA8, obj->unkA8,
+                  obj->unk90, obj->unk92, obj->unk94);
+    gSPMatrix(gfx++, (u8 *)obj + (D_800BE9C0 << 6) + 0x10, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    if (D_800DD450 != obj->unkB3) {
+        gDPPipeSync(gfx++);
+        gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, obj->unkB3);
+        ((s16 *)D_800DD460)[-8] = obj->unkB3; /* == D_800DD450; spelled via a neighbour so IDO does not CSE its address with the read */
+    }
+    {
+        s32 pad;
+        s32 mode;
+        u8 update;
+        update = 0;
+        mode = ((obj->pad0[0] == 8) || (obj->pad0[0] == 9)) ? 0x5049D8 : 0x504240;
+        gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, mode, &update);
+    }
+    gSPDisplayList(gfx++, D_8008CDF0);
+    return gfx;
+}
 
 extern void func_1510E82C(s32, s32, f32 *, s32, s32, s32, f32, f32, f32, f32, s32, s32);
 
