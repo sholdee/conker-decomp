@@ -24,7 +24,74 @@ struct Foo150DB2D8 {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_108320/func_150DAE70.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_108320/func_150DB114.s")
+typedef struct {
+    f32 vel[3];   /* 0x110 */
+    f32 unkC;     /* 0x11C */
+    f32 unk10;    /* 0x120 */
+    f32 unk14;    /* 0x124 */
+    f32 unk18;    /* 0x128 */
+    f32 unk1C;    /* 0x12C */
+    f32 unk20;    /* 0x130 */
+    f32 unk24;    /* 0x134 */
+    u8 unk28;     /* 0x138 */
+} Sub150DB114;
+
+typedef struct {
+    char pad0[0x2C];
+    f32 unk2C;
+    f32 unk30;
+    f32 pos[3];
+    char pad40[0x1C];
+    u8 unk5C;
+    char pad5D[0xB3];
+    Sub150DB114 sub;
+} Obj150DB114;
+
+s32 func_150DB114(Obj150DB114 *arg0) {
+    Sub150DB114 *s;
+    f32 damp;
+    s16 t;
+    f32 max;
+    f32 min;
+
+    max = 1.2f;
+    min = 0.8f;
+    damp = arg0->sub.unk24;
+    t = arg0->unk5C;
+    s = &arg0->sub;
+    s->vel[0] *= damp;
+    s->vel[1] *= damp;
+    s->vel[2] *= damp;
+    arg0->pos[0] += s->vel[0] * D_800BE9A4;
+    arg0->pos[1] += s->vel[1] * D_800BE9A4;
+    arg0->pos[2] += s->vel[2] * D_800BE9A4;
+    arg0->sub.unk14 += arg0->sub.unk1C * D_800BE9A4;
+    if (arg0->sub.unk14 > max) {
+        s->unk14 = max;
+        s->unk1C = -s->unk1C;
+    } else if (s->unk14 < min) {
+        s->unk14 = min;
+        s->unk1C = -s->unk1C;
+    }
+    s->unk18 += s->unk20 * D_800BE9A4;
+    if (s->unk18 > max) {
+        s->unk18 = max;
+        s->unk20 = -s->unk20;
+    } else if (s->unk18 < min) {
+        s->unk18 = min;
+        s->unk20 = -s->unk20;
+    }
+    s->unkC += s->unk10 * D_800BE9A4;
+    arg0->unk2C = s->unkC * s->unk14;
+    arg0->unk30 = s->unkC * s->unk18;
+    t -= s->unk28;
+    if (t < 0) {
+        arg0->unk5C = 0;
+        return 0;
+    }
+    arg0->unk5C = t;
+    return 1;
+}
 
 s16 *func_150DB2D8(struct Foo150DB2D8 *arg0, s16 arg1) {
     s16 *var_v0;
