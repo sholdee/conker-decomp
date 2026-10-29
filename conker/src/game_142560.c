@@ -1751,7 +1751,51 @@ void func_1511CB2C(s32 arg0, f32 *arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_142560/func_1511D7BC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_142560/func_1511D9E4.s")
+struct Obj1511D9E4 {
+    u8 pad0[0x10];
+    s16 unk10;
+    s16 unk12;
+    s16 unk14;
+    u16 unk16;
+    u8 pad18[0x8];
+    Vtx *unk20[2];
+    Vtx *unk28;
+    u8 pad2C[0x10];
+    s32 unk3C;
+    u8 pad40[0x3C];
+    s16 (*unk7C)[2];
+    f32 unk80;
+};
+
+extern void func_15094AB8(Vtx *arg0, s16 (*arg1)[2], s32 arg2, f32 arg3, s32 arg4, s32 arg5);
+
+void func_1511D9E4(struct Obj1511D9E4 *arg0) {
+    s16 (*uv)[2];
+    s32 hi;
+    s32 mid;
+    s32 i;
+    f32 speed;
+
+    if (arg0->unk7C == NULL) {
+        uv = arg0->unk7C = allocate_memory(arg0->unk16 * 4, 1, 0, 0);
+        for (i = 0; i < arg0->unk16; i++) {
+            uv[i][0] = arg0->unk28[i].v.tc[0] - 0x2000;
+            uv[i][1] = arg0->unk28[i].v.tc[1] - 0x2000;
+        }
+        for (i = 0; i < arg0->unk16; i++) {
+            arg0->unk20[0][i].v.ob[0] = arg0->unk20[1][i].v.ob[0] = arg0->unk28[i].v.ob[0] + arg0->unk10;
+            arg0->unk20[0][i].v.ob[1] = arg0->unk20[1][i].v.ob[1] = arg0->unk28[i].v.ob[1] + arg0->unk12;
+            arg0->unk20[0][i].v.ob[2] = arg0->unk20[1][i].v.ob[2] = arg0->unk28[i].v.ob[2] + arg0->unk14;
+        }
+    } else {
+        uv = arg0->unk7C;
+    }
+    hi = arg0->unk3C >> 24;
+    mid = (arg0->unk3C >> 16) & 0xFF;
+    speed = (f32)(s16)(arg0->unk3C & 0xFFFF) * 0.01;
+    arg0->unk80 += speed * D_800BE9E4;
+    func_15094AB8(arg0->unk20[D_800BE9C0], uv, arg0->unk16, arg0->unk80, hi, mid);
+}
 
 struct Obj1511DBC4Sub {
     f32 unk0;
