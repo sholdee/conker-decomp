@@ -425,7 +425,157 @@ void func_151C2F48(GameObj151C2F48 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1EF500/func_151C329C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1EF500/func_151C36D8.s")
+typedef struct {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ s16 unk8;
+    /* 0x0A */ s16 unkA;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 unk16;
+    /* 0x17 */ u8 unk17;
+    /* 0x18 */ u8 unk18;
+    /* 0x19 */ u8 unk19;
+    /* 0x1A */ u8 unk1A;
+    /* 0x1B */ u8 unk1B;
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 unk1D;
+    /* 0x1E */ s16 unk1E;
+    /* 0x20 */ s16 unk20;
+    /* 0x22 */ s16 unk22;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ struct17 pos;
+    /* 0x3C */ struct17 unk3C;
+    /* 0x48 */ struct17 vel;
+    /* 0x54 */ f32 unk54;
+    /* 0x58 */ u32 unk58;
+    /* 0x5C */ s32 unk5C;
+    /* 0x60 */ u8 unk60;
+    /* 0x61 */ u8 unk61;
+    /* 0x62 */ s8 unk62;
+    /* 0x63 */ s8 unk63;
+    /* 0x64 */ s8 unk64;
+    /* 0x65 */ u8 unk65;
+    /* 0x66 */ u8 unk66;
+    /* 0x67 */ u8 pad67;
+    /* 0x68 */ s16 unk68;
+    /* 0x6A */ u8 pad6A[2];
+    /* 0x6C */ f32 unk6C;
+} GameParticle151C36D8; /* 0x70 */
+
+extern void *func_15130280(void *, u8, s32, s32, u8, s32);
+
+void func_151C36D8(struct17 *arg0, u8 arg1, s32 arg2) {
+    GameSpawn151C2F48 spawn;
+    GameParticle151C36D8 particle;
+    Header header;
+    Header2 header2;
+
+    spawn.unk00 = 8;
+    spawn.unk04 = 6;
+    spawn.unk08 = *(GameVec151C2F48 *)arg0;
+    spawn.unk14 = 2.599999905f;
+    spawn.unk18 = 2.169999838f;
+    spawn.unk1C = -0.9690000415f;
+    spawn.unk20 = 0.7180000544f;
+    spawn.unk24 = 10.0f;
+    spawn.unk28 = 8.0f;
+    spawn.unk2C = 0;
+    spawn.unk2E = 0xFF;
+    spawn.unk30 = -0x40;
+    spawn.unk32 = 0x50;
+    spawn.unk34 = 3;
+    spawn.unk38 = 0;
+    spawn.unk3C = 0xF;
+    spawn.unk3E = 0xA;
+    spawn.unk40 = 1;
+    spawn.unk42 = 4;
+    spawn.unk43 = 2;
+    spawn.unk44 = 3;
+    spawn.unk45 = 0xFF;
+    spawn.unk46 = 0xFF;
+    spawn.unk47 = 0xFF;
+    spawn.unk48 = 0xFF;
+    spawn.unk49 = 0;
+    spawn.unk4A = 0;
+    spawn.unk4B = 0;
+    spawn.unk4C = 0;
+    spawn.unk4D = 0xFF;
+    spawn.unk4E = 0xFF;
+    spawn.unk4F = 0xFF;
+    spawn.unk50 = 0xFF;
+    spawn.unk51 = 0;
+    spawn.unk52 = 0;
+    spawn.unk53 = 0;
+    spawn.unk54 = 0;
+    spawn.unk55 = 0xFF;
+    spawn.unk56 = 0;
+    spawn.unk57 = 3;
+    spawn.unk58 = 0x24;
+    spawn.unk5C = 0x200005;
+    spawn.unk60 = 0x60600;
+    spawn.unk64 = 8;
+    spawn.unk66 = 0x1F;
+    spawn.unk68 = 1;
+    spawn.unk6A = 0;
+    spawn.unk6C = 1.0f;
+    spawn.unk70 = -1;
+    spawn.unk71 = 0;
+    spawn.unk72 = -1;
+    spawn.unk73 = -1;
+    func_15152B38(&spawn, arg1, arg2);
+
+    particle.unk1D = 0x2B;
+    particle.unk8 = 0x4403;
+    particle.unk0 = 0x200005;
+    particle.unk4 = 0x20000;
+    particle.unkA = (func_150ADA20() % 5U) + 4;
+    particle.unkC = 0;
+    particle.unk10 = 0;
+    particle.unk14 = 0xFF;
+    particle.unk15 = 0xFF;
+    particle.unk16 = 0xFF;
+    particle.unk17 = 0xFF;
+    particle.unk18 = 0xFF;
+    particle.unk19 = 0xFF;
+    particle.unk1A = 0xFF;
+    particle.unk1B = 0xFF;
+    particle.unk1C = 0xFF;
+    particle.unk28 = particle.unk2C = (func_150ADA68() * 60.0f) + 80.0f;
+    particle.pos = *arg0;
+    particle.unk1E = 2;
+    particle.unk20 = 0x7F;
+    particle.unk22 = 1;
+    particle.unk3C.unk0 = 0.0f;
+    particle.unk3C.unk4 = 0.0f;
+    particle.unk3C.unk8 = 0.0f;
+    particle.vel.unk0 = 0.0f;
+    particle.vel.unk4 = 0.0f;
+    particle.vel.unk8 = 0.0f;
+    particle.unk54 = 0.0f;
+    particle.unk24 = 1.0f;
+    particle.unk58 = ((func_150ADA20() & 1) ? 0x40 : 0) | (((func_150ADA20() & 1) ? 0x80 : 0) | 1) | 0x8000 | 0x4000 | 0x200;
+    particle.unk60 = 6;
+    particle.unk61 = 6;
+    particle.unk62 = -1;
+    particle.unk63 = -1;
+    particle.unk64 = -1;
+    particle.unk65 = 4;
+    func_15130280(&particle, 1, 0, 0, arg1, arg2);
+
+    header.unk0 = 3;
+    header.unk1 = -1;
+    header.unk2 = (func_150ADA20() % 7U) + 6;
+    header.unk4 = 0;
+    header2.unk0 = (s32) arg0->unk0;
+    header2.unk4 = (s32) arg0->unk4;
+    header2.unk8 = (s32) arg0->unk8;
+    func_151602C0(&header, &header2, (func_150ADA20() & 1) + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg1, arg2);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1EF500/func_151C3B0C.s")
 
