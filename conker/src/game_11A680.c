@@ -24,7 +24,77 @@ void func_150ED234(f32 *arg0, f32 *arg1) {
     func_150ED1D0((f32)temp * 0.0054931640625f, arg0[0x10]);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_11A680/func_150ED298.s")
+extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
+
+f32 func_150ED298(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5) {
+    u8 *p;
+    f32 g;
+    f32 disc;
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 dx;
+    f32 vy;
+    f32 vx;
+    f32 dz;
+    f32 dy;
+    f32 dist;
+    f32 t;
+    f32 result;
+    f32 s;
+    f32 mf[4][4];
+    f32 t1;
+
+    if (*(u8 **)(arg0 + 0x1D4) != NULL) {
+        p = *(u8 **)(arg0 + 0x1D4);
+        guMtxL2F(mf, (Mtx *)(p + 0xC0));
+        func_150A7960(mf[0], 0.0f, 0.0f, 1.0f, &x, &y, &z);
+        x -= mf[3][0];
+        y -= mf[3][1];
+        z -= mf[3][2];
+        arg1 = func_150484A0(y, sqrtf(x * x + z * z)) * 57.29577637f;
+        if (arg1 > 180.0f) {
+            arg1 -= 360.0f;
+        }
+        x = mf[3][0];
+        y = mf[3][1];
+        z = mf[3][2];
+    } else {
+        x = *(f32 *)(arg0 + 0x14);
+        y = *(f32 *)(arg0 + 0x18);
+        z = *(f32 *)(arg0 + 0x1C);
+    }
+    dx = arg2 - x;
+    dy = arg3 - y;
+    dz = arg4 - z;
+    dist = sqrtf(dx * dx + dz * dz) - arg5;
+    if (dist < 100.0f) {
+        dist = 100.0f;
+    }
+    result = 5000.0f;
+    vx = cosf(arg1 * 0.01745329238f) * 148.25f;
+    vy = sinf(arg1 * 0.01745329238f) * 148.25f;
+    g = -2.5f;
+    disc = vy * vy + 2 * (dy * g);
+    if (disc > 0.0f) {
+        s = sqrtf(disc);
+        t1 = (-vy - s) / g;
+        t = t1;
+        if (t1 > 0.0f) {
+            disc = (-vy + s) / g;
+            if (disc > 0.0f && t1 < disc) {
+                t = disc;
+            }
+        }
+        if (t > 0.0f) {
+            t *= vx;
+            result = dist - t;
+        }
+    } else {
+        result = (func_15048408(sqrtf(-2.0f * dy * g) * 0.006745362654f) * 57.29577637f - arg1) * 1000.0f;
+    }
+    return result;
+}
 
 void func_150ED578(struct127 *arg0) {
     struct126 *temp_v0;
