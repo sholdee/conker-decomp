@@ -1,3 +1,4 @@
+/* 08 14 18 1C 20 24 28 2C 2E 02 04 06 00 30 32 34 36 38 3A 3C 44 46 48 40 */
 #include <ultra64.h>
 #define func_10010F30 func_10010F30_void
 #define func_150ADA20 func_150ADA20_orig
@@ -575,7 +576,103 @@ s32 func_151AABA0(u8 *arg0) {
     return ret;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1D6E80/func_151AABC4.s")
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec_151AABC4;
+
+typedef struct {
+    /* 0x00 */ s16 unk00;
+    /* 0x02 */ s16 unk02;
+    /* 0x04 */ s16 unk04;
+    /* 0x06 */ s16 unk06;
+    /* 0x08 */ Vec_151AABC4 unk08;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ s16 unk2C;
+    /* 0x2E */ s16 unk2E;
+    /* 0x30 */ s16 unk30;
+    /* 0x32 */ s16 unk32;
+    /* 0x34 */ s16 unk34;
+    /* 0x36 */ s16 unk36;
+    /* 0x38 */ s16 unk38;
+    /* 0x3A */ s16 unk3A;
+    /* 0x3C */ u8 unk3C;
+    /* 0x40 */ f32 unk40;
+    /* 0x44 */ s16 unk44;
+    /* 0x46 */ s16 unk46;
+    /* 0x48 */ s32 unk48;
+} Cfg_151AABC4;
+
+typedef struct {
+    f32 y;
+    u8 pad4[0x20];
+} Floor_151AABC4;
+
+extern u8 D_800A8F70[];
+extern void func_15142314(s32, u8, Vec_151AABC4 *, void *);
+extern void func_1504715C();
+extern s32 func_1504697C(Vec_151AABC4 *, s32, f32, Floor_151AABC4 *);
+extern void func_15153F18(Cfg_151AABC4 *, Vec_151AABC4 *, Floor_151AABC4 *, u8, s32);
+
+void func_151AABC4(u8 *arg0, u8 arg1) {
+    Vec_151AABC4 pos;
+    Floor_151AABC4 floor;
+    f32 y;
+    Vec_151AABC4 probe;
+    u8 color;
+    Vec_151AABC4 hit;
+
+    if ((arg0 != NULL) && (*(s32 *)(arg0 + 0x1D4) != 0)) {
+        color = func_151D8E20();
+        func_15142314(*(s32 *)(arg0 + 0x1D4), D_800A8F70[arg1], &pos, arg0);
+        func_1504715C(&floor, arg0);
+        y = pos.y + 50.0f;
+        probe.x = pos.x;
+        probe.y = y;
+        probe.z = pos.z;
+        if (func_1504697C(&probe, 0, y - 100.0f, &floor) != 0) {
+            hit.x = pos.x;
+            hit.y = floor.y;
+            hit.z = pos.z;
+            func_151DBCBC(color, 40.0f, 0x96, (s32)&floor.pad4, &hit, 0xFF, 1);
+            {
+                Cfg_151AABC4 c;
+
+                c.unk08 = hit;
+                c.unk14 = 2.5f;
+                c.unk18 = 1.549999952f;
+                c.unk1C = 0.7910000086f;
+                c.unk20 = 0.2030000091f;
+                c.unk24 = 8.039999962f;
+                c.unk28 = 3.449999809f;
+                c.unk2C = 3;
+                c.unk2E = 3;
+                c.unk02 = 0xFF;
+                c.unk04 = -0x40;
+                c.unk06 = 0x1A;
+                c.unk00 = 0;
+                c.unk30 = 3;
+                c.unk32 = 1;
+                c.unk34 = 0x1E;
+                c.unk36 = 0x14;
+                c.unk38 = 0x9B;
+                c.unk3A = 0x64;
+                c.unk3C = color;
+                c.unk44 = 0x10;
+                c.unk46 = 0xF;
+                c.unk48 = 0;
+                c.unk40 = 0.0f;
+                func_15153F18(&c, &c.unk08, &floor, 0xFF, 1);
+            }
+        }
+    }
+}
 
 typedef struct {
     u8 pad_0x0[0x1B];
