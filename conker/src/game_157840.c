@@ -293,7 +293,79 @@ void func_1512C150(struct108 *arg0) {
 void func_1512C200(s32 arg0) {
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_157840/func_1512C20C.s")
+typedef struct {
+    u8 pad0[0x2A4];
+    struct17 unk2A4;
+    u8 pad2B0[0x48];
+    struct17 unk2F8;
+    u8 pad304[0x78];
+    f32 unk37C;
+    u8 pad380[0x5B0];
+    f32 unk930;
+    f32 unk934;
+    f32 unk938;
+    struct17 unk93C;
+    u8 unk948;
+} struct1512C20C;
+
+extern f32 D_800895B0;
+#define SQ(x) ((x) * (x))
+void func_1508EF80(struct17 *arg0, struct17 *arg1, f32 arg2, struct17 *arg3);
+
+void func_1512C20C(struct1512C20C *arg0) {
+    f32 sp6C;
+    struct17 sp60;
+    struct17 sp54;
+    struct17 sp48;
+
+    if (arg0->unk948) {
+        f32 temp_f0;
+        temp_f0 = arg0->unk2F8.unk0 - arg0->unk93C.unk0;
+        sp6C = arg0->unk2F8.unk8 - arg0->unk93C.unk8;
+        sp60 = arg0->unk2F8;
+        if (sqrtf(SQ(temp_f0) + SQ(sp6C)) < arg0->unk938) {
+            struct17 sp38;
+            f32 sp34;
+            f32 sp30;
+            sp38 = arg0->unk2A4;
+            sp38.unk4 = 0.0f;
+            sp60.unk4 = 0.0f;
+            arg0->unk93C.unk4 = 0.0f;
+            func_150491EC(&arg0->unk93C, &sp60, &sp54);
+            sp34 = func_15048FC8(&sp54) - 180.0f;
+            func_15048758(&sp34);
+            func_150491EC(&sp38, &sp60, &sp48);
+            func_15049148(&sp54, arg0->unk938, &sp54);
+            sp60.unk0 = arg0->unk93C.unk0 + sp54.unk0;
+            sp60.unk4 = 0.0f;
+            sp60.unk8 = arg0->unk93C.unk8 + sp54.unk8;
+            sp6C = sqrtf(SQ(sp38.unk0 - sp60.unk0) + SQ(sp38.unk8 - sp60.unk8));
+            func_15048F90(&sp60, &sp38, &sp54);
+            sp30 = func_15048FC8(&sp54);
+            func_15048758(&sp30);
+            arg0->unk930 = sp30;
+            temp_f0 = func_15048A70(sp34, sp30);
+            if (fabsf(temp_f0) < 35.0f) {
+                if (temp_f0 <= 0.0f) {
+                    temp_f0 = 5.0f;
+                } else {
+                    temp_f0 = -5.0f;
+                }
+                func_1508EF80(&sp60, &arg0->unk93C, temp_f0, &sp60);
+            }
+            D_800895B0 = sp6C;
+            sp60.unk4 = arg0->unk2F8.unk4;
+            arg0->unk2F8 = sp60;
+        } else {
+            D_800895B0 = 0.0f;
+            arg0->unk930 = arg0->unk37C;
+        }
+    } else {
+        D_800895B0 = 0.0f;
+        arg0->unk930 = 0.0f;
+    }
+    arg0->unk948 = 0;
+}
 
 s32 func_1512C47C(s32 arg0) {
     return 0x1;
