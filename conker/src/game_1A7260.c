@@ -123,7 +123,40 @@ s32 arg0;
 // }
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1A7260/func_1517A3A0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1A7260/func_1517A644.s")
+extern void func_1510E82C(s32, s32, f32 *, s32, s32, s32, f32, f32, f32, f32, s32, s32);
+
+void func_1517A644(f32 arg0, u8 arg1, s16 arg2, s16 arg3, s16 arg4) {
+    struct func_1517A84C_obj *obj;
+    s32 n;
+    f32 y;
+    s32 half;
+    s32 pad;
+
+    n = arg0;
+    if (n != 0) {
+        obj = func_15167A68(9, 0, 0xB8, 1, 0xFF, 1);
+        if (obj != NULL) {
+            func_1510E82C(0, 0, &y, 0, 0, 0, arg2, arg3, arg4, arg3, 0, 0);
+            obj->unk92 = obj->unkB0 = y + 3.0f;
+            obj->unk90 = arg2;
+            obj->unk94 = arg4;
+            obj->unk96 = 0x5A;
+            obj->unk98 = (u32)func_150ADA20() % 360;
+            obj->unk9A = 0;
+            obj->unkA0 = 0;
+            obj->unkA4 = 0;
+            obj->unk9F = arg1;
+            obj->unkA8 = (s32)(((u32)func_150ADA20() % 80) + 100) * 0.009999999776f;
+            obj->unkA2 = arg0 * 0.400000006f;
+            half = arg0 * 0.5f;
+            obj->unk9C = ((u32)func_150ADA20() % (u32)n) - half;
+            obj->unk9D = ((u32)func_150ADA20() % (u32)n) - half;
+            obj->unk9E = ((u32)func_150ADA20() % (u32)n) - half;
+            obj->unkA6 = 0;
+            obj->unkB3 = 0xFF;
+        }
+    }
+}
 
 void func_1517A84C(struct func_1517A84C_obj *arg0) {
     s32 temp_v0;
@@ -193,7 +226,7 @@ s32 func_1517A9A8(s32 arg0, s32 arg1) {
 }
 
 u8 func_150ADA20(void);
-extern void func_1517A644(f32, u8, s16, s16, s32);
+extern void func_1517A644(f32, u8, s16, s16, s16);
 void func_1517AA20(f32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4)
 {
   s32 randX;
