@@ -196,7 +196,92 @@ s32 func_1509E900(s32 arg0, s32 arg1, s32 *arg2) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_CBDB0/func_1509ED74.s")
+extern s32 func_15114050(void *, s32);
+extern s32 func_15084000(s32);
+extern s32 func_151140C4(void *);
+
+s32 func_1509ED74(s32 arg0, s32 arg1, s32 *arg2) {
+    Struct1509E900 *obj;
+    s32 i;
+    s32 v;
+
+    obj = (Struct1509E900 *)func_151149AC(arg0 & 0xFF);
+    if (obj == NULL) {
+        return 0;
+    }
+    switch (arg1) {
+    case 19:
+        return func_15114050(obj, -1);
+    case 20:
+        return func_15114050(obj, func_15084000(arg2[2] & 0xFFFF0FFF));
+    case 21:
+        for (i = 0; i < 25; i++) {
+            if (D_800CC2D0[i].interaction_state == arg2[2]) {
+                if (func_15114050(obj, i)) {
+                    return 1;
+                }
+            }
+        }
+        return 0;
+    case 22:
+        if ((obj->unk4F & 4) == 4) {
+            return 1;
+        }
+        return 0;
+    case 23:
+        v = func_151140C4(obj);
+        if (v < 0) {
+            return 0;
+        }
+        return v | 0x2000;
+    case 24:
+        return obj->unk4F;
+    case 25:
+        if (*(s32 *)&obj->unk84 == *(s32 *)&obj->unk7C) {
+            return 1;
+        }
+        return 0;
+    case 26:
+        return obj->unk3C;
+    case 27:
+        return obj->unk73 & 3;
+    case 28:
+        return obj->unk6E == 0;
+    case 29:
+        return obj->unk10;
+    case 30:
+        return obj->unk12;
+    case 31:
+        return obj->unk14;
+    case 32:
+        return obj->unk8;
+    case 33:
+        if (arg2[2] == 0) {
+            return *(s32 *)&obj->unk7C;
+        }
+        if (arg2[2] == 1) {
+            return *(s32 *)&obj->unk80;
+        }
+        if (arg2[2] == 2) {
+            return *(s32 *)&obj->unk84;
+        }
+        break;
+    case 34:
+        if (arg2[2] == 0) {
+            return obj->unk7C;
+        }
+        if (arg2[2] == 1) {
+            return obj->unk80;
+        }
+        if (arg2[2] == 2) {
+            return obj->unk84;
+        }
+        break;
+    case 35:
+        return (obj->unk73 & 4) != 0;
+    }
+    return 0;
+}
 
 extern s32 D_800D3840;
 s32 func_1509F6B0();
