@@ -308,7 +308,81 @@ s32 func_1509D08C(s32 arg0, s32 arg1, s32 *arg2, s32 *arg3) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_C9EC0/func_1509D180.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C9EC0/func_1509D780.s")
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+} Func1509D780Arg;
+
+extern void func_150EB8C4(void);
+extern void func_150F9720(u8);
+extern void *func_1505EEF4(s32);
+extern void func_150F6DB0(void *);
+extern void func_151616D0(u8, u8, s32);
+extern void func_151CD394(s32);
+extern void func_150E35DC(s32);
+extern void func_150B3DD0(void);
+extern void func_150C5C9C(void *);
+extern void func_150C522C(void);
+extern void func_151D2718(s16);
+
+s32 func_1509D780(s32 arg0, Func1509D780Arg *arg1) {
+    void *p;
+
+    switch (arg0) {
+        case 41:
+            func_150EB8C4();
+            break;
+        case 39:
+            func_150F9720(*((u8 *)arg1 + 7));
+            break;
+        case 38:
+            func_151616D0(0x29, 0x18, 0);
+            break;
+        case 36:
+            p = func_1505EEF4(arg1->unk4 & 0xFFF);
+            if (p != NULL) {
+                func_150F6DB0(p);
+            }
+            break;
+        case 26:
+            func_151616D0(0x26, 0x18, 0);
+            break;
+        case 18:
+            func_151CD394(arg1->unk4);
+            break;
+        case 2:
+            D_800D9920 = 0;
+            break;
+        case 4:
+        case 5:
+        case 6:
+            func_150E35DC(arg0 >> 6);
+            break;
+        case 8:
+            func_150B3DD0();
+            break;
+        case 9:
+            p = func_1505EEF4(arg1->unk4 & 0xFFF);
+            if (p == NULL) {
+                return 0;
+            }
+            func_150C5C9C(p);
+            break;
+        case 10:
+            func_150C522C();
+            break;
+        case 19:
+            func_151D2718(*(s16 *)((u8 *)arg1 + 6));
+            break;
+        case 21:
+            func_151616D0(0x20, 0x18, 0);
+            break;
+        case 22:
+            func_151616D0(0x23, 0x28, 0);
+            func_151616D0(0x24, 0x28, 0);
+            break;
+    }
+}
 
 typedef struct {
     s32 unk0;
