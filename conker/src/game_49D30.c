@@ -778,7 +778,46 @@ void func_1501FFE8(f32 *arg0, struct_game49D30_1 *arg1, s32 arg2, s32 arg3) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_49D30/func_15021DB8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_49D30/func_15022024.s")
+typedef struct {
+    u16 unk0;
+    u8 unk2;
+    u8 pad3[5];
+} Elem15022024;
+
+typedef struct {
+    u8 pad0[0x3C];
+    f32 unk3C;
+    f32 unk40;
+} Ent15022024;
+
+
+s32 func_15022024(f32 *arg0, f32 *arg1, s32 arg2, s32 arg3) {
+    s32 i;
+
+    if ((&D_800C35EA)[arg3] != 1) {
+        return 0;
+    }
+    for (i = 0; i < D_800C363A[arg3]; i++) {
+        if (D_800C35C8[arg3][i] != 0) {
+            if (((Elem15022024 *)D_800C35F0[arg3])[i].unk0 == 2 && D_800CC2D0[arg2].unique_id == ((Elem15022024 *)D_800C35F0[arg3])[i].unk2) {
+                arg0[1] = 0.0f;
+                arg1[1] = 0.0f;
+                arg0[0] = 0.0f;
+                arg1[0] = 0.0f;
+                if (((Ent15022024 **)&D_800C3958)[arg3][i].unk3C != -9999.0f) {
+                    arg1[0] = ((Ent15022024 **)&D_800C3958)[arg3][i].unk3C;
+                    arg1[1] = arg1[0];
+                }
+                if (((Ent15022024 **)&D_800C3958)[arg3][i].unk40 != -9999.0f) {
+                    arg0[0] = ((Ent15022024 **)&D_800C3958)[arg3][i].unk40;
+                    arg0[1] = arg0[0];
+                }
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
 
 extern s16 D_800C358C[];
 extern f32 D_800C3594;
