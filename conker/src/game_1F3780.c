@@ -239,4 +239,39 @@ void func_151C6EA0(ActorIdByteFields *arg0, u8 arg1, s32 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1F3780/func_151C7038.s")
+typedef struct {
+    u8 pad0[0x60];
+    s32 unk60;
+    u8 pad64[0x70 - 0x64];
+    u8 unk70;
+    u8 pad71[0x7C - 0x71];
+    struct127 *unk7C;
+} Func151C7038Arg;
+
+s32 func_151C7038(Func151C7038Arg *arg0) {
+    struct127 *obj;
+    f32 speed;
+
+    obj = arg0->unk7C;
+    if (*(u16 *)((u8 *)obj + 0x84) != 0xE9) {
+        return 0;
+    }
+    if (func_15142A5C(obj) != 0) {
+        arg0->unk60 |= 0x20000;
+    } else {
+        arg0->unk60 &= ~0x20000;
+    }
+    speed = obj->animation_speed * 35.0f;
+    if (speed > 255.0f) {
+        speed = 255;
+    } else if (speed < 0.0f) {
+        speed = 0.0f;
+    }
+    {
+        u8 val;
+
+        val = speed;
+        arg0->unk70 = val;
+    }
+    return 1;
+}
