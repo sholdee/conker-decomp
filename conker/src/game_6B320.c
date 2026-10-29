@@ -278,7 +278,60 @@ void func_1503E3C4(s32 arg0, s32 arg1, s32 arg2, struct func_1503E3C4_s *arg3, s
     arg3->unk50 = dz * len;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_6B320/func_1503E5F8.s")
+void func_150AD8B0(f32 *arg0, f32 *arg1, f32 *arg2);
+
+void func_1503E5F8(f32 (*arg0)[4], f32 *arg1, f32 *arg2, f32 *arg3, f32 *arg4, f32 *arg5, f32 *arg6, f32 *arg7, f32 *arg8, f32 *arg9) {
+    f32 m[4][4];
+    f32 cross[4];
+    s32 i;
+    f32 len;
+    f32 dot;
+    f32 rx;
+    f32 ry;
+    f32 rz;
+
+    bcopy(arg0, m, 0x40);
+    *arg1 = m[3][0];
+    *arg2 = m[3][1];
+    *arg3 = m[3][2];
+    for (i = 0; i < 3; i++) {
+        len = func_150AD930(m[i]);
+        if (len == 0.0f) {
+            len = 0.0001f;
+        }
+        if (i == 0) {
+            *arg7 = len;
+        } else if (i == 1) {
+            *arg8 = len;
+        } else {
+            *arg9 = len;
+        }
+        func_15049148((struct17 *)m[i], 1.0f / len, (struct17 *)m[i]);
+    }
+    func_150AD8B0(m[1], m[2], cross);
+    dot = func_150AD900(m[0], cross);
+    if (dot < 0.0f) {
+        *arg7 = -*arg7;
+        *arg8 = -*arg8;
+        *arg9 = -*arg9;
+        for (i = 0; i < 3; i++) {
+            m[i][0] = -m[i][0];
+            m[i][1] = -m[i][1];
+            m[i][2] = -m[i][2];
+        }
+    }
+    ry = func_150487E0(-m[0][2]);
+    if (func_150AD780(ry) != 0.0f) {
+        rx = func_150484A0(m[1][2], m[2][2]);
+        rz = func_150484A0(m[0][1], m[0][0]);
+    } else {
+        rx = func_150484A0(m[1][0], m[1][1]);
+        rz = 0.0f;
+    }
+    *arg4 = rx * 57.29577637f;
+    *arg5 = ry * 57.29577637f;
+    *arg6 = rz * 57.29577637f;
+}
 
 typedef struct {
     u8 pad0[0x24];
