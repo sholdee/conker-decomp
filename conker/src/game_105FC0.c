@@ -243,7 +243,169 @@ stride_set:
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_105FC0/func_150D8FAC.s")
+typedef struct {
+    u8 pad0[0x78];
+    u8 unk78;
+    u8 pad79[0x11];
+    u16 unk8A;
+} Stats150D8FAC;
+
+typedef struct {
+    s32 unk0;
+    u8 pad4[0x37];
+    u8 unk3B;
+    u8 pad3C[0x18E];
+    u8 unk1CA;
+    u8 pad1CB[0x151];
+    Stats150D8FAC *unk31C;
+} Actor150D8FAC;
+
+typedef struct {
+    Actor150D8FAC *unk0;
+    u8 unk4;
+    u8 pad5[3];
+    struct17 unk8;
+    struct17 unk14;
+    struct17 unk20;
+    f32 unk2C;
+    s16 unk30;
+    u8 pad32[2];
+    f32 unk34;
+    f32 unk38;
+    f32 unk3C;
+    f32 unk40;
+    f32 unk44;
+    f32 unk48;
+    u8 unk4C;
+    u8 unk4D;
+} Payload150D8FAC;
+
+typedef struct {
+    struct17 unk0;
+    struct17 unkC;
+    f32 unk18;
+    u8 unk1C;
+    u8 pad1D[3];
+    f32 unk20;
+} Entry150D8FAC;
+
+typedef struct {
+    u8 pad0[0x10];
+    struct17 unk10;
+    u8 pad1C[9];
+    u8 unk25;
+    u8 pad26[6];
+    s8 unk2C;
+    s8 unk2D;
+    s8 unk2E;
+    u8 pad2F[0x65];
+    Entry150D8FAC *unk94;
+    Payload150D8FAC *unk98;
+} Obj150D8FAC;
+
+s32 func_150D8FAC(Obj150D8FAC *arg0) {
+    Payload150D8FAC *payload;
+    Entry150D8FAC *base;
+    Actor150D8FAC *actor;
+    struct17 pos;
+    struct17 vel;
+    f32 time;
+    f32 inv;
+    u16 flags;
+    f32 step;
+    struct17 dpos;
+    struct17 dvel;
+
+    payload = arg0->unk98;
+    base = arg0->unk94;
+    actor = payload->unk0;
+    if ((actor->unk31C->unk78 != 3) || (actor->unk1CA <= 0)) {
+        func_150D8E1C((ConkerStruct150D8E1C *)arg0);
+    }
+    if ((actor->unk0 == 0) || (actor->unk3B != payload->unk4)) {
+        return 0;
+    }
+    func_150D8B10((f32 *)actor, (f32 *)&pos);
+    func_150D8B3C(actor, &vel);
+    arg0->unk10 = pos;
+    if (payload->unk4C & 1) {
+        flags = actor->unk31C->unk8A;
+        if (flags & 0x2000) {
+            payload->unk3C += 0.001379000023f * D_800BE9A4;
+            if (payload->unk3C > 0.04293100163f) {
+                payload->unk3C = 0.04293100163f;
+            }
+        } else {
+            payload->unk3C -= 0.001379000023f * D_800BE9A4;
+            if (payload->unk3C < 0.01724099927f) {
+                payload->unk3C = 0.01724099927f;
+            }
+        }
+    }
+    payload->unk34 += 0.380000025f * D_800BE9A4;
+    if (payload->unk34 > 1.0f) {
+        struct17 cur;
+        struct17 curVel;
+        f32 dpx;
+        f32 dpy;
+        f32 dpz;
+        struct17 dvs;
+        inv = 1.0f / payload->unk34;
+        time = payload->unk2C + D_800BE9A4;
+        cur = payload->unk14;
+        curVel = payload->unk20;
+        step = time * inv;
+        dpos.unk0 = pos.unk0 - payload->unk14.unk0;
+        dpos.unk4 = pos.unk4 - payload->unk14.unk4;
+        dpos.unk8 = pos.unk8 - payload->unk14.unk8;
+        dvel.unk0 = vel.unk0 - payload->unk20.unk0;
+        dvel.unk4 = vel.unk4 - payload->unk20.unk4;
+        dvel.unk8 = vel.unk8 - payload->unk20.unk8;
+        dpx = dpos.unk0 * inv;
+        dpy = dpos.unk4 * inv;
+        dpz = dpos.unk8 * inv;
+        dvs.unk0 = dvel.unk0 * inv;
+        dvs.unk4 = dvel.unk4 * inv;
+        dvs.unk8 = dvel.unk8 * inv;
+        do {
+            Entry150D8FAC *entry;
+
+            entry = &base[arg0->unk2E];
+            entry->unk0 = cur;
+            entry->unkC.unk0 = payload->unk3C * curVel.unk0;
+            entry->unkC.unk4 = payload->unk3C * curVel.unk4;
+            entry->unkC.unk8 = payload->unk3C * curVel.unk8;
+            entry->unk18 = 0.0f;
+            entry->unk1C = 0xFF;
+            entry->unk20 = 0.0f;
+            func_150D8D84(&entry->unk0, &entry->unkC, time);
+            arg0->unk2E++;
+            time -= step;
+            if (arg0->unk2E == arg0->unk25) {
+                arg0->unk2E = 0;
+            }
+            arg0->unk2C++;
+            if (arg0->unk2E == arg0->unk2D) {
+                arg0->unk2D++;
+                if (arg0->unk2D == arg0->unk25) {
+                    arg0->unk2D = 0;
+                }
+                arg0->unk2C--;
+            }
+            cur.unk0 += dpx;
+            cur.unk4 += dpy;
+            cur.unk8 += dpz;
+            curVel.unk0 += dvs.unk0;
+            curVel.unk4 += dvs.unk4;
+            curVel.unk8 += dvs.unk8;
+            payload->unk34 -= 1.0f;
+        } while (payload->unk34 > 1.0f);
+        payload->unk14 = cur;
+        payload->unk20 = curVel;
+        payload->unk2C = time;
+    }
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_105FC0/func_150D942C.s")
 
