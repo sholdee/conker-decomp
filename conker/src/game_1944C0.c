@@ -572,7 +572,67 @@ s32 func_15167D84(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
 // }
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_15167E0C.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_15168118.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_1516865C.s")
+typedef struct {
+    Vtx vtx[8];
+    u8 pad80[8];
+    s16 unk88;
+    u8 pad8A[0xE];
+    u16 unk98;
+    u8 pad9A[2];
+    s16 unk9C;
+    s16 unk9E;
+    u8 unkA0;
+} Struct1516865C;
+
+void func_1516865C(Struct1516865C *arg0, u8 r, u8 g, u8 b, u8 a) {
+    s16 s0;
+    s16 s1;
+    s16 t0;
+    s16 t1;
+    s32 i;
+
+    s1 = 0x2000;
+    s0 = (D_8008CA4C[arg0->unkA0]->unk8 + 0x100) << 5;
+    t1 = 0x2000;
+    t0 = (D_8008CA4C[arg0->unkA0]->unk6 + 0x100) << 5;
+    for (i = 0; i < 2; i++) {
+        arg0->vtx[i * 4 + 1].v.flag = 0;
+        arg0->vtx[i * 4 + 1].v.cn[0] = r;
+        arg0->vtx[i * 4 + 1].v.cn[1] = g;
+        arg0->vtx[i * 4 + 1].v.cn[2] = b;
+        arg0->vtx[i * 4 + 1].v.cn[3] = a;
+        arg0->vtx[i * 4 + 2].v.flag = 0;
+        arg0->vtx[i * 4 + 2].v.cn[0] = r;
+        arg0->vtx[i * 4 + 2].v.cn[1] = g;
+        arg0->vtx[i * 4 + 2].v.cn[2] = b;
+        arg0->vtx[i * 4 + 2].v.cn[3] = a;
+        arg0->vtx[i * 4 + 3].v.flag = 0;
+        arg0->vtx[i * 4 + 3].v.cn[0] = r;
+        arg0->vtx[i * 4 + 3].v.cn[1] = g;
+        arg0->vtx[i * 4 + 3].v.cn[2] = b;
+        arg0->vtx[i * 4 + 3].v.cn[3] = a;
+        arg0->vtx[i * 4 + 0].v.flag = 0;
+        arg0->vtx[i * 4 + 0].v.cn[0] = r;
+        arg0->vtx[i * 4 + 0].v.cn[1] = g;
+        arg0->vtx[i * 4 + 0].v.cn[2] = b;
+        arg0->vtx[i * 4 + 0].v.cn[3] = a;
+    }
+    if (arg0->unk98 & 0x80) {
+        s0 = 0x2000;
+        s1 = (D_8008CA4C[arg0->unkA0]->unk8 + 0x100) << 5;
+    }
+    if (arg0->unk98 & 0x100) {
+        t0 = 0x2000;
+        t1 = (D_8008CA4C[arg0->unkA0]->unk6 + 0x100) << 5;
+    }
+    arg0->vtx[1].v.tc[0] = arg0->vtx[5].v.tc[0] = arg0->vtx[2].v.tc[0] = arg0->vtx[6].v.tc[0] = t1;
+    arg0->vtx[2].v.tc[1] = arg0->vtx[6].v.tc[1] = arg0->vtx[3].v.tc[1] = arg0->vtx[7].v.tc[1] = s1;
+    arg0->vtx[0].v.tc[0] = arg0->vtx[4].v.tc[0] = arg0->vtx[3].v.tc[0] = arg0->vtx[7].v.tc[0] = t0;
+    arg0->vtx[0].v.tc[1] = arg0->vtx[4].v.tc[1] = arg0->vtx[1].v.tc[1] = arg0->vtx[5].v.tc[1] = s0;
+    arg0->unk88 = 0;
+    arg0->unk9C = 0;
+    arg0->unk9E = 0;
+}
 // PERMUTER CANDIDATE (best 3095): leaf func; logic decoded fully (strided 8x0x10 init loop +
 // two conditional value-swaps keyed on obj->0x98 flags 0x80/0x100 + field mirroring). Target
 // homes a1/a2/a3 to caller arg slots (0xc/0x10/0x14) in a leaf while keeping them register-
