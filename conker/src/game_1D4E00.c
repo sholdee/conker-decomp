@@ -336,7 +336,104 @@ void *func_151A8624(u8 *arg0, Header2 *arg1, u8 arg2, s16 arg3,
     return temp_v0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1D4E00/func_151A87F8.s")
+typedef struct {
+    s32 unk0;
+    u8 unk4;
+    u8 pad5[0x14 - 0x5];
+    struct17 unk14;
+    u8 pad20[0x3B - 0x20];
+    u8 unk3B;
+    u8 pad3C[0x1D4 - 0x3C];
+    s32 unk1D4;
+} Owner151A87F8;
+
+typedef struct {
+    Owner151A87F8 *unk0;
+    u8 unk4;
+    u8 pad5[3];
+    struct17 unk8;
+    u8 unk14;
+    u8 pad15[3];
+    struct17 unk18;
+    u8 pad24;
+    u8 unk25;
+} Link151A87F8;
+
+typedef struct {
+    u8 pad0[0x1C];
+    u8 unk1C;
+    u8 pad1D[0x30 - 0x1D];
+    struct17 unk30;
+    struct17 unk3C;
+    struct17 unk48;
+    f32 unk54;
+    f32 unk58;
+    u8 pad5C[4];
+    Link151A87F8 *unk60;
+} Obj151A87F8;
+
+extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, s32, s32 *, s32, f32);
+extern s32 func_15145C90(s32);
+extern void func_15143134(void *, void *, s32);
+extern f32 func_15143E64(struct17 *);
+extern s32 func_15146078(struct17 *, struct17 *, struct17 *);
+
+s32 func_151A87F8(Obj151A87F8 *arg0) {
+    Link151A87F8 *link;
+    Owner151A87F8 *owner;
+    struct17 diff;
+    s32 hit;
+    f32 x;
+    f32 y;
+    f32 z;
+    struct17 tmp;
+
+    link = arg0->unk60;
+    owner = link->unk0;
+    if ((owner->unk0 == 0) || (owner->unk3B != link->unk4) || (owner->unk4 == 0xFF)) {
+        return 0;
+    }
+    if (owner->unk1D4 != 0) {
+        func_15143134(&link->unk8, &arg0->unk30, owner->unk1D4 + (link->unk14 << 6));
+        if (!(link->unk25 & 1)) {
+            x = arg0->unk30.unk0 - (owner->unk14.unk0 + link->unk18.unk0);
+            y = arg0->unk30.unk4 - (owner->unk14.unk4 + link->unk18.unk4);
+            z = arg0->unk30.unk8 - (owner->unk14.unk8 + link->unk18.unk8);
+            if (func_150AC9C0(arg0->unk30.unk0, arg0->unk30.unk4, arg0->unk30.unk8, x, y, z, 0, 0,
+                              &arg0->unk3C.unk0, &arg0->unk3C.unk4, &arg0->unk3C.unk8, 0, &hit, 0, 0.0f)) {
+                if (func_15145C90(hit)) {
+                    link->unk25 |= 1;
+                } else {
+                    arg0->unk1C &= ~2;
+                    return 1;
+                }
+            } else {
+                arg0->unk1C &= ~2;
+                return 1;
+            }
+        }
+        diff.unk0 = arg0->unk3C.unk0 - arg0->unk30.unk0;
+        diff.unk4 = arg0->unk3C.unk4 - arg0->unk30.unk4;
+        diff.unk8 = arg0->unk3C.unk8 - arg0->unk30.unk8;
+        arg0->unk54 = func_15143E64(&diff);
+        if (arg0->unk54 != 0.0f) {
+        lbl0:
+            arg0->unk58 = 1.0f / arg0->unk54;
+            func_15146078(&diff, &tmp, &arg0->unk48);
+            arg0->unk1C |= 2;
+        lbl1:
+            return 1;
+        } else {
+            arg0->unk1C &= ~2;
+        lbl2:
+            return 1;
+        }
+    } else {
+        arg0->unk1C &= ~2;
+    }
+lbl3:
+    return 1;
+}
 
 extern void (*D_8008F964[])(u8 *, s32, u8);
 

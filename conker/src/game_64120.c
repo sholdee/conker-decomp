@@ -34,7 +34,50 @@ void func_15036C70(GameStruct_15036C70 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_64120/func_15036F34.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_64120/func_15037698.s")
+void func_15038468(f32 *arg0, f32 *arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5);
+
+s32 func_15037698(s32 arg0, s32 arg1, s32 arg2, f32 x, f32 y, f32 z, f32 *out, f32 range, s32 arg8, s32 arg9) {
+    f32 (*src)[4];
+    f32 (*dst)[4];
+    f32 delta[3];
+    f32 pos[3];
+    f32 rx;
+    f32 ry;
+    f32 rz;
+    f32 yaw;
+    f32 pitch;
+
+    if (arg8 != 0) {
+        out[0] = x;
+        out[1] = y;
+        out[2] = z;
+        return 1;
+    }
+    src = ((f32 (*)[4][4])D_800CC2D0[arg0].unk1D4)[arg1];
+    if (D_800CC2D0[arg0].unk1D4 == NULL) {
+        return 0;
+    }
+    dst = ((f32 (*)[4][4])D_800CC2D0[arg0].unk1D4)[arg2];
+    src[0][3] = src[1][3] = src[2][3] = dst[0][3] = dst[1][3] = dst[2][3] = 0.0f;
+    src[3][3] = dst[3][3] = 1.0f;
+    pos[0] = src[1][0];
+    pos[1] = src[1][1];
+    pos[2] = src[1][2];
+    delta[0] = x - src[3][0];
+    delta[1] = y - src[3][1];
+    delta[2] = z - src[3][2];
+    rx = delta[0] * dst[0][0] + delta[1] * dst[0][1] + delta[2] * dst[0][2];
+    ry = delta[0] * dst[1][0] + delta[1] * dst[1][1] + delta[2] * dst[1][2];
+    rz = delta[0] * dst[2][0] + delta[1] * dst[2][1] + delta[2] * dst[2][2];
+    func_15038468(&yaw, &pitch, rx, ry, rz, arg9);
+    if (yaw < range && -range < yaw) {
+        out[0] = x;
+        out[1] = y;
+        out[2] = z;
+        return 1;
+    }
+    return 0;
+}
 
 s32 func_15037880(s32 arg0, f32 *arg1) {
     struct127 *obj;

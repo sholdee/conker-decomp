@@ -555,7 +555,6 @@ void func_1500ABA0(s32 arg0) {
     bzero(&D_800DD478, 1560);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_36680/func_1500AC14.s")
 // GOTO hell
 typedef struct Game36680ResourceInfo {
     u8 flags;
@@ -566,6 +565,45 @@ typedef struct Game36680ResourceInfo {
     u8 width;
     u8 pad9;
 } Game36680ResourceInfo;
+
+struct s1500AC14_a {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8;
+    u8 unkC;
+};
+extern s32 func_1502B020(s32 *, s32, s32, s32);
+extern s16 D_800DDB80[][2];
+extern u8 D_80095CE0[];
+extern u16 D_800BE478[];
+
+#define P ((struct s1500AC14_a *)&D_800DDA90)
+#define INFO(id) (&((Game36680ResourceInfo *)D_80095CE0)[id])
+void func_1500AC14(void) {
+    s32 i;
+    s32 id;
+    s32 size;
+    u32 len;
+
+    for (i = 0; i != 15; i++) {
+        P[i].unk0 = 0;
+        P[i].unk8 = 0;
+        P[i].unk4 = 0;
+        P[i].unkC = 0;
+        id = ((u16 (*)[2])&D_800BE4A0)[i][0];
+        if (id != 0xFF && (D_800BE478[i] != 0 || ((u16 (*)[2])&D_800BE4A0)[i][0] == 0x3B)) {
+            P[i].unk0 = func_1502B020(&size, 2, 0, id);
+            P[i].unk4 = (size + 0xF) & ~0xF;
+            len = INFO(id)->length;
+            if (size == 0 || len == 0) {
+                len = 0;
+                P[i].unk0 = 0;
+            }
+            D_800DDB80[i][0] = (INFO(id)->width << 5) - 1;
+            D_800DDB80[i][1] = (((len / INFO(id)->width) << 6) / 5) - 1;
+        }
+    }
+}
 
 extern u8 D_80095CE0[];
 extern u16 D_800BE478[];

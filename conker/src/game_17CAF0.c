@@ -201,7 +201,7 @@ struct Local15153CCCArg {
     s32 unk40;
 };
 
-extern void func_15143794(s32, s32, f32, f32 *);
+extern void func_15143794(s16, s16, f32, f32 *);
 extern void func_151C5F44(s32, f32 *, f32, f32, s32, s32, f32, s32, s32, u8, s32);
 extern void func_150CCEB0(struct Local15152874Spawn *, u8, u8);
 extern void (*D_8008AC60[])(u8 *);
@@ -1171,7 +1171,130 @@ void func_15151A38(struct Local15151A38Arg *arg0, u8 arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_17CAF0/func_15151D6C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_17CAF0/func_15152190.s")
+struct Arg15152190 {
+    s32 unk0;
+    s32 unk4;
+    struct Vec3F unk8;
+    s16 unk14;
+    s16 unk16;
+    s16 unk18;
+    s16 unk1A;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+    s16 unk2C;
+    s16 unk2E;
+    f32 unk30;
+    f32 unk34;
+    f32 unk38;
+};
+
+struct Spawn15152190 {
+    f32 unk00;
+    f32 unk04;
+    f32 unk08;
+    f32 unk0C;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    struct Vec3F unk28;
+    struct Vec3F unk34;
+    f32 unk40;
+    f32 unk44;
+    f32 unk48;
+    f32 unk4C;
+    s32 unk50;
+    s16 unk54;
+    s16 unk56;
+    u8 unk58;
+    u8 pad59[3];
+    s32 unk5C;
+    u8 unk60;
+    u8 unk61;
+    u8 unk62;
+    u8 unk63;
+    u8 unk64;
+    u8 unk65;
+    u8 unk66;
+    u8 unk67;
+    u8 unk68;
+    u8 pad69;
+    u8 unk6A;
+    u8 pad6B;
+    s32 unk6C;
+    u8 unk70;
+    u8 pad71;
+    s16 unk72;
+    s16 unk74;
+    s16 pad76;
+};
+
+void func_15152190(struct Arg15152190 *arg0, s32 *arg1, f32 *arg2, u32 arg3, f32 arg4, u8 arg5, u8 arg6, s32 arg7) {
+    s32 count;
+    s32 idx;
+    struct Spawn15152190 sp70;
+    s16 a;
+    s16 b;
+
+    sp70.unk00 = 1.0f;
+    sp70.unk04 = 1.0f;
+    sp70.unk1C = 1.0f;
+    sp70.unk20 = 1.0f;
+    sp70.unk24 = 1.0f;
+    sp70.unk44 = 0.0f;
+    sp70.unk50 = (arg5 ? 0x100000 : 0) | 0x29E8;
+    sp70.unk58 = 0;
+    sp70.unk5C = 0;
+    sp70.unk60 = 0xFF;
+    sp70.unk61 = 8;
+    sp70.unk62 = 0;
+    sp70.unk63 = 0;
+    sp70.unk64 = 0;
+    sp70.unk65 = 0;
+    sp70.unk66 = 0;
+    sp70.unk67 = 0;
+    sp70.unk68 = 2;
+    sp70.unk6A = 0;
+    sp70.unk6C = 0;
+    sp70.unk70 = 0;
+    sp70.unk72 = 0xC;
+    sp70.unk74 = 0x15;
+    count = (func_150ADA20() % (u32)(arg0->unk4 + 1)) + arg0->unk0;
+
+    if (count != 0) {
+        do {
+            a = (s16)((func_150ADA20() % (u32)(arg0->unk16 + 1)) + arg0->unk14);
+            b = (s16)((func_150ADA20() % (u32)(arg0->unk1A + 1)) + arg0->unk18);
+            sp70.unk10 = func_150ADA68() * 360.0f;
+            sp70.unk14 = func_150ADA68() * 360.0f;
+            sp70.unk18 = func_150ADA68() * 360.0f;
+            func_15143794(a, b, (func_150ADA68() * arg0->unk20) + arg0->unk1C, &sp70.unk34.x);
+            sp70.unk40 = (func_150ADA68() * (arg0->unk38 + arg0->unk38)) - arg0->unk38;
+            sp70.unk48 = (func_150ADA68() * (arg0->unk38 + arg0->unk38)) - arg0->unk38;
+            sp70.unk4C = (func_150ADA68() * arg0->unk28) + arg0->unk24;
+            sp70.unk54 = (func_150ADA20() % (u32)(arg0->unk2E + 1)) + arg0->unk2C;
+            func_15143794(a, b, arg4, &sp70.unk28.x);
+            sp70.unk28.x += arg0->unk8.x;
+            sp70.unk28.y += arg0->unk8.y;
+            sp70.unk28.z += arg0->unk8.z;
+
+        lbl1:
+            idx = func_150ADA20() % arg3;
+            sp70.unk56 = arg1[idx];
+            sp70.unk0C = (arg0->unk30 + (func_150ADA68() * arg0->unk34)) * arg2[idx];
+            sp70.unk08 = sp70.unk0C;
+            {
+                void *ret;
+                ret = func_15132A4C(&sp70, 3, 0xFF, 0, arg6, arg7);
+            }
+            count--;
+        } while (count != 0);
+    }
+}
 
 void func_15152520(struct Local15152520Arg *arg0, u8 arg1, s32 arg2) {
     struct Local15152520ParamBlock paramBlock;

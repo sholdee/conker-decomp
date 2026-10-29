@@ -112,7 +112,58 @@ void *func_1518A3C0(struct Vec3F1518A3C0 *arg0, struct Vec3F1518A3C0 *arg1, f32 
     return ret;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1B7870/func_1518A5F4.s")
+struct Sub1518A5F4 {
+    /* 0x00 */ struct Vec3F1518A3C0 pos;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ struct Vec3F1518A3C0 vel;
+    /* 0x1C */ struct Vec3F1518A3C0 unk1C;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+};
+
+struct Obj1518A5F4 {
+    char pad0[0x48];
+    /* 0x48 */ f32 unk48;
+    /* 0x4C */ f32 unk4C;
+    /* 0x50 */ f32 unk50;
+    char pad54[0x100 - 0x54];
+    /* 0x100 */ struct Sub1518A5F4 unk100;
+};
+
+s32 func_15158AFC(void *);
+
+s32 func_1518A5F4(struct Obj1518A5F4 *arg0) {
+    struct Sub1518A5F4 *p = &arg0->unk100;
+
+    func_15158AFC(arg0);
+
+    {
+    struct Vec3F1518A3C0 old;
+    s32 i;
+    old = p->vel;
+    p->vel.y += p->unk28 * D_800BE9A4;
+    for (i = D_800BE9E4; i != 0; i--) {
+        p->vel.x *= p->unk2C;
+        p->vel.y *= p->unk2C;
+        p->vel.z *= p->unk2C;
+    }
+    {
+    f32 ax;
+    f32 ay;
+    f32 az;
+    ax = (p->vel.x - old.x) * D_800BE9A8;
+    ay = (p->vel.y - old.y) * D_800BE9A8;
+    az = (p->vel.z - old.z) * D_800BE9A8;
+    arg0->unk48 += (old.x + 0.5f * ax * D_800BE9A4) * D_800BE9A4;
+    arg0->unk4C += (old.y + 0.5f * ay * D_800BE9A4) * D_800BE9A4;
+    arg0->unk50 += (old.z + 0.5f * az * D_800BE9A4) * D_800BE9A4;
+    }
+    }
+    p->pos.x += p->unk1C.x * D_800BE9A4;
+    p->pos.y += p->unk1C.y * D_800BE9A4;
+    p->pos.z += p->unk1C.z * D_800BE9A4;
+    return 1;
+}
 
 struct Sub1518A914 {
     /* 0x00 */ f32 unk0;

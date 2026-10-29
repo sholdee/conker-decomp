@@ -189,7 +189,59 @@ s32 func_151CD674(u8 *actor) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1FA770/func_151CD7BC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1FA770/func_151CDB94.s")
+typedef struct Game1FA770Trail {
+    f32 x;
+    f32 y;
+    u8 pad08[0xC];
+    s16 alpha;
+    u8 pad16[0x6];
+} Game1FA770Trail;
+
+s32 func_151CDB94(u8 *actor) {
+    Game1FA770Trail *trail;
+    Game1FA770Trail *start;
+    Game1FA770Trail *cur;
+    s32 i;
+    f32 range;
+    f32 inv;
+    f32 d;
+    f32 fade;
+    f32 k;
+
+    trail = *(Game1FA770Trail **)(actor + 0x94);
+    if (*(s8 *)(actor + 0x2C) <= 0) {
+        return 1;
+    }
+    i = *(s8 *)(actor + 0x2E) - 1;
+    if (i < 0) {
+        i = actor[0x25] - 1;
+    }
+    start = &trail[*(s8 *)(actor + 0x2D)];
+    cur = &trail[i];
+    range = fabsf(cur->y - start->y);
+    if (range == 0.0f) {
+        return 1;
+    }
+    inv = 1.0f / range;
+    fade = inv * 10.0f;
+    i = *(s8 *)(actor + 0x2D);
+    do {
+        cur = &trail[i];
+        d = cur->y - start->y;
+        cur->alpha = 0xFF;
+        if (d < range * 0.1970000118f) {
+            k = inv * 5.076141834f;
+            cur->alpha = (u8)(d * k * 255.0f);
+        } else if (range - range * 0.1000000015f < d) {
+            cur->alpha = (u8)((range - d) * fade * 255.0f);
+        }
+        i++;
+        if (i >= actor[0x25]) {
+            i = 0;
+        }
+    } while (i != *(s8 *)(actor + 0x2E));
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1FA770/func_151CDE20.s")
 

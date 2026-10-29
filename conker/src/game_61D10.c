@@ -199,4 +199,26 @@ Gfx *func_15035FE8(Gfx *gfx, s32 arg1) {
     return gfx;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_61D10/func_15036148.s")
+void func_1507C3E0(struct127 *arg0, s16 *arg1, s16 *arg2, s16 *arg3);
+void func_15035808(s32, s32, f32, f32, f32, f32, f32, f32, f32, f32);
+
+void func_15036148(void) {
+    s32 pad;
+    s16 height;
+    s16 sp90;
+    s16 sp8E;
+    s32 i;
+
+    if (!(D_800DBFF0->unk5F0 & 1)) {
+        for (i = 0; i < 25; i++) {
+            if (D_800CC2D0[i].interaction_state != 0 && (D_800CC2D0[i].unk5 == 0 || D_800CC2D0[i].unk5 == 1)) {
+                if (D_800CC2D0[i].unk118 != -10000.0f && D_800CC2D0[i].unk118 < D_800CC2D0[i].y_position && D_800CC2D0[i].unk180 < D_800CC2D0[i].unk118 && D_800CC2D0[i].unk28 > 5.0f) {
+                    func_1507C3E0(&D_800CC2D0[i], &height, &sp90, &sp8E);
+                    if ((f32)height < D_800CC2D0[i].unk118 - D_800CC2D0[i].unk180) {
+                        func_15035808(1, i, D_800CC2D0[i].x_position, D_800CC2D0[i].unk118, D_800CC2D0[i].z_position, 0.0f, 0.0f, 100.0f, 150.0f, 127.0f);
+                    }
+                }
+            }
+        }
+    }
+}

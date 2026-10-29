@@ -173,4 +173,40 @@ s32 func_150FB2E0(void *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_126F60/func_150FB324.s")
+extern s32 func_15145EA4(void *arg0, void *arg1, s32 arg2, s32 arg3);
+void func_150FEC28(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
+void func_151D4408(struct17 *, struct17 *, s32, struct127 *, f32, s32, s32);
+
+void func_150FB324(struct127 *arg0, s32 arg1, s32 arg2) {
+    struct17 sp94;
+    struct17 sp88;
+    struct17 sp7C;
+    s32 sp78;
+    s32 sp74;
+    const struct17 sp68 = { -108.0f, -9.0f, 85.0f };
+    const struct17 sp5C = { -150.0f, -9.0f, 111.0f };
+    const struct17 sp50 = { -32.0f, 4.0f, 40.0f };
+    const struct17 sp44 = { -21.0f, 15.0f, 40.0f };
+    struct17 *sp38[3];
+    struct17 *sp2C[3];
+
+    if (arg0->unk1D4 == 0) {
+        return;
+    }
+        sp38[0] = (struct17 *)&sp68;
+        sp38[1] = (struct17 *)&sp50;
+        sp38[2] = (struct17 *)&sp44;
+        sp2C[0] = &sp94;
+        sp2C[1] = &sp88;
+        sp2C[2] = &sp7C;
+        sp78 = (s32)arg0->unk1D4 + 0x380;
+        func_15145EA4(sp38, sp2C, sp78, 3);
+        sp7C.unk0 -= sp88.unk0;
+        sp7C.unk4 -= sp88.unk4;
+        sp7C.unk8 -= sp88.unk8;
+        {
+            void func_150FEC28(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
+            func_150FEC28((s32)arg0, 0xE, (s32)&sp68, (s32)&sp5C, (s32)&sp94, ((u8 *)&arg1)[3], arg2);
+        }
+        func_151D4408(&sp88, &sp7C, sp78, arg0, 1.0f, ((u8 *)&arg1)[3], arg2);
+}

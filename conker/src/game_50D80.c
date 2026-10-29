@@ -32,8 +32,6 @@ void func_150238D0(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_50D80/func_150238D8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_50D80/func_15023BB0.s")
-
 typedef struct {
     s8 unk0;
     u8 unk1;
@@ -47,6 +45,45 @@ extern Elem15023DE0 *D_800C3688[][30];
 extern u16 *D_800C35D8[];
 extern s32 D_800C35B0[];
 extern s32 D_800C3640[];
+
+s32 func_15023BB0(Elem15023DE0 *arg0, s32 arg1, s32 arg2, Elem15023DE0 **arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10) {
+    Elem15023DE0 *p;
+    s32 time;
+
+    if (D_800C3688[arg10][arg2] != NULL) {
+        time = D_800C3688[arg10][arg2]->unk2;
+        p = D_800C3688[arg10][arg2] + 4;
+        while ((u32) (p - D_800C3688[arg10][arg2]) < D_800C35D8[arg10][arg2]) {
+            if ((p->unk1 == 0) && (p->unk0 == 0)) {
+                time = p->unk2;
+            } else {
+                if ((arg0 < p) && (arg1 == p->unk0) && ((arg4 == 0) || ((arg4 == 1) && (arg5 == p->unk2))) && ((arg6 == 0) || ((arg6 == 1) && (arg7 == p->unk4))) && ((arg8 == 0) || ((arg8 == 1) && (arg9 == p->unk5)))) {
+                    *arg3 = p;
+                    return time;
+                }
+                while (p->unk1 == 0) {
+                    if (p->unk0 == 0) {
+                        time = p->unk2;
+                        break;
+                    }
+                    p++;
+                    if ((u32) (p - D_800C3688[arg10][arg2]) >= D_800C35D8[arg10][arg2]) {
+                        break;
+                    }
+                    if ((arg0 < p) && (arg1 == p->unk0) && ((arg4 == 0) || ((arg4 == 1) && (arg5 == p->unk2))) && ((arg6 == 0) || ((arg6 == 1) && (arg7 == p->unk4))) && ((arg8 == 0) || ((arg8 == 1) && (arg9 == p->unk5)))) {
+                        *arg3 = p;
+                        return time;
+                    }
+                }
+                time += p->unk1;
+            }
+            p++;
+        }
+    }
+    *arg3 = NULL;
+    return D_800C3640[arg10];
+}
+
 
 void func_15023DE0(Elem15023DE0 **arg0, Elem15023DE0 **arg1, s32 *arg2, s32 *arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, s32 arg11) {
     Elem15023DE0 *p;

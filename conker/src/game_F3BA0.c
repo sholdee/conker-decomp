@@ -304,4 +304,110 @@ void func_150C6D68(Func150C6D40Arg* arg0) {
     func_1513470C((struct102*)arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_F3BA0/func_150C6D90.s")
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3F_150C6D90;
+
+typedef struct {
+    s32 unk0;
+    s16 unk4;
+    u8 unk6;
+    u8 unk7;
+    s32 unk8;
+    s32 unkC;
+    u8 unk10;
+    u8 unk11;
+    u8 unk12;
+    u8 unk13;
+    u8 unk14;
+    u8 unk15;
+    u8 unk16;
+    u8 unk17;
+    s32 unk18;
+    s32 unk1C;
+    u8 unk20;
+    u8 pad21[7];
+} Particle_150C6D90;
+
+typedef struct {
+    u8 pad0[0x14];
+    Vec3F_150C6D90 pos;
+    u8 pad20[0x1B4];
+    s32 unk1D4;
+} Actor_150C6D90;
+
+extern Vec3F_150C6D90 D_800887E0;
+extern u8 D_800AB414[][3];
+void func_15143134(Vec3F_150C6D90 *, Vec3F_150C6D90 *, s32);
+u8 func_151D8E20(void);
+
+RandomLerpObject *func_150C6D90(RandomLerpOwner *arg0) {
+    RandomLerpObject *ret;
+    Vec3F_150C6D90 pos;
+    Actor_150C6D90 *actor;
+
+    ret = NULL;
+    actor = *(Actor_150C6D90 **)((u8 *)arg0 + 0x18);
+    if (actor->unk1D4) {
+        Vec3F_150C6D90 zero;
+        zero = D_800887E0;
+        func_15143134(&zero, &pos, actor->unk1D4);
+    } else {
+        pos.x = actor->pos.x;
+        pos.y = actor->pos.y;
+        pos.z = actor->pos.z;
+    }
+    {
+    Vec3F_150C6D90 probe;
+    probe.x = pos.x;
+    probe.y = pos.y + 200.0f;
+    probe.z = pos.z;
+    if (func_15045800((f32 *)&probe, 0, pos.y - 200.0f, (f32 *)((u8 *)arg0 + 0x34)) != 0) {
+    Particle_150C6D90 part;
+    RandomLerpState state;
+    f32 size;
+    u8 color;
+    s32 rand2;
+    s32 rand1;
+    s32 rand0;
+        color = func_151D8E20();
+        probe.y = *(f32 *)((u8 *)arg0 + 0x34);
+        size = func_150ADA68() * 100.0f + 200.0f;
+        state.field_0x00 = (s32)arg0;
+        state.field_0x04 = 1;
+        state.field_0x08 = 26214.40039f;
+        state.field_0x0C = 32768.0f;
+        state.field_0x10 = 0.0f;
+        state.field_0x14 = 0;
+        state.field_0x16 = 10;
+        state.field_0x18 = 10;
+        state.field_0x1C = 0.2310000062f;
+        part.unkC = (s32)(state.field_0x0C * 0.5f + state.field_0x08);
+        part.unk6 = 0x38;
+        part.unk0 = 0x20300;
+        part.unk4 = 0x12C;
+        part.unk10 = 0x96;
+        part.unk8 = 0;
+        part.unk11 = 0xFF;
+        part.unk12 = D_800AB414[color][0];
+        part.unk13 = D_800AB414[color][1];
+        part.unk14 = D_800AB414[color][2];
+        part.unk15 = 0xFF;
+        part.unk18 = 0x440001;
+        part.unk16 = 0;
+        part.unk17 = 6;
+        rand0 = func_150ADA20();
+        rand1 = func_150ADA20();
+        rand2 = func_150ADA20();
+        ret = (RandomLerpObject *)func_1513C73C((s32)&part, 9, 3, (s32)((u8 *)arg0 + 0x38), probe.x, probe.y, probe.z, size, size,
+                            rand0 & 0xFF, ((rand2 & 1) * 2) + (rand1 & 1), 0x20,
+                            *((u8 *)arg0 + 0xC), *((u8 *)arg0 + 1));
+        if (ret != NULL) {
+            memcpy(&ret->field_0xB0, &state, sizeof(state));
+        }
+    }
+    }
+    return ret;
+}

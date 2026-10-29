@@ -21,7 +21,38 @@ extern u8 D_800DE041;
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1B1600/func_15184368.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1B1600/func_15184DF0.s")
+extern s32 func_150AD9A0(s32, s32, s32);
+extern void func_15184150(s32, f32 *, f32 *, f32 *);
+extern f32 D_800D368C;
+
+s32 func_15184DF0(s32 arg0, s32 arg1, f32 *arg2, f32 *arg3, f32 *arg4) {
+    f32 x;
+    f32 y;
+    f32 z;
+    s32 dist;
+
+    x = D_800CC2D0[arg0].x_position;
+    y = D_800CC2D0[arg0].y_position;
+    z = D_800CC2D0[arg0].z_position;
+    dist = func_150AD9A0(x - D_800DBFF0[arg1].unk2F8,
+                         y - D_800DBFF0[arg1].unk2FC,
+                         z - D_800DBFF0[arg1].unk300);
+    if (dist > 2000) {
+        D_800D3688 = 0.0f;
+        D_800D368C = D_800D3688;
+        return 0;
+    }
+    func_15184150(arg0, arg2, arg3, arg4);
+    *arg2 *= 1.299999952f;
+    *arg3 *= 1.299999952f;
+    *arg4 *= 1.299999952f;
+    if ((*arg2 == 0.0f) || (*arg3 == 0.0f) || (*arg4 == 0.0f)) {
+        D_800D3688 = 0.0f;
+        D_800D368C = D_800D3688;
+        return 0;
+    }
+    return dist;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1B1600/func_15184FA4.s")
 

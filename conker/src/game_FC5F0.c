@@ -1,5 +1,8 @@
 #include <ultra64.h>
+#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
+#undef func_150ADA20
+s32 func_150ADA20(void);
 #include "variables.h"
 
 extern s32 (*D_800888A0[])(struct260 *);
@@ -12,7 +15,78 @@ extern struct struct_150D032C_prefix D_800A0880;
 extern f32 D_800A0888;
 void func_15042D94(s32, s32, s32, u8 *);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_FC5F0/func_150CF140.s")
+typedef struct {
+    s32 unk0;
+    u8 pad4[0x3B - 4];
+    u8 unk3B;
+    u8 pad3C[0x1D4 - 0x3C];
+    s32 unk1D4;
+} Obj150CF140;
+
+typedef struct {
+    Obj150CF140 *unk0;
+    u8 unk4;
+    u8 pad5[3];
+    f32 unk8;
+} Sub150CF140;
+
+typedef struct {
+    u8 pad0[1];
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD;
+    s16 unkE;
+    u8 pad10[0x18];
+    Sub150CF140 unk28;
+} Arg150CF140;
+
+typedef struct {
+    f32 value;
+    u8 pad[0x20];
+} Floor150CF140;
+
+void func_1504715C(Floor150CF140 *, Obj150CF140 *);
+void func_15143794(s16, s16, f32, f32 *);
+void func_1515C244(Obj150CF140 *, f32 *, f32 *, f32 *);
+void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32,
+                   s32, Floor150CF140 *, s32, s32, s32, s32);
+
+void func_150CF140(Arg150CF140 *arg0) {
+    Sub150CF140 *sub;
+    Obj150CF140 *obj;
+    f32 pos[3];
+    f32 radius;
+    Floor150CF140 floor;
+    f32 lo;
+    f32 hi;
+    f32 sp74[3];
+    f32 sp80[3];
+    u8 angle;
+
+    obj = arg0->unk28.unk0;
+    sub = &arg0->unk28;
+    if ((obj->unk0 == 0) || (obj->unk3B != sub->unk4)) {
+        arg0->unkE = -1;
+        return;
+    }
+    if (obj->unk1D4 != 0) {
+        sub->unk8 += (0.05999999866f + (func_150ADA68() * 0.07039999962f)) * D_800BE9A4;
+        func_1515C244(obj, pos, &lo, &hi);
+        radius = (lo + hi) * 0.5f;
+        func_1504715C(&floor, obj);
+        while (sub->unk8 > 1.0f) {
+            angle = func_150ADA20() & 0xFF;
+            func_15143794(angle, (s16)((func_150ADA20() % 76U) - 0x40), radius, sp74);
+            sp74[0] += pos[0];
+            sp74[1] += pos[1];
+            sp74[2] += pos[2];
+            func_15143794(angle, (s16)((func_150ADA20() % 54U) - 0x38), (func_150ADA68() * 1.443000078f) + 2.268000126f, sp80);
+            func_151D9014(sp74, sp80, 5, (func_150ADA68() * 0.2860000134f) + -0.7870000601f, (func_150ADA20() % 21U) + 0x1E, (func_150ADA20() % 156U) + 0x64, (func_150ADA68() * 50.0f) + 48.0f, 1, 1.0f, 1.0f, 0, &floor, 1, 0, arg0->unkC, arg0->unk1);
+            sub->unk8 -= 1.0f;
+        }
+    }
+}
 
 typedef struct {
     s32 unk0;

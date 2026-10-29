@@ -112,7 +112,95 @@ typedef struct {
 extern void func_1504715C(struct_func_151C9AC0_sp20 *, struct_func_151C9AC0_arg0 *);
 extern s32 func_151ABE40(f32 *, struct_func_151C9AC0_sp20 *, s32, u8, s32);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1F4650/func_151C71A0.s")
+typedef struct {
+    s16 x;
+    s16 y;
+    s16 z;
+    u8 pad6[2];
+    s16 rot;
+    u8 padA[2];
+    f32 unkC;
+    f32 unk10;
+    u8 unk14;
+    u8 pad15[3];
+    u32 flags;
+    u32 color;
+    u32 unk20;
+} Game1F4650Beam;
+extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
+extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, void *, void *, s32, f32);
+extern void func_151C756C(f32 *, void *, f32 *, void *, Game1F4650Beam *, Game1F4650Beam *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, f32, f32, s32, s32, s32);
+
+s32 func_151C71A0(Game1F4650Beam *arg0) {
+    f32 z;
+    f32 y;
+    f32 x;
+    f32 ez;
+    f32 ey;
+    f32 ex;
+    f32 dz;
+    f32 dy;
+    f32 dx;
+    f32 nz;
+    f32 ny;
+    f32 nx;
+    f32 mz;
+    f32 my;
+    f32 mx;
+    f32 mtx[4][4];
+    s32 hit1;
+    s32 hit2;
+    u8 info1[0x14];
+    u8 info2[0x14];
+    f32 hitpos1[3];
+    f32 hitpos2[3];
+    s32 sB8;
+    s32 sB4;
+    s32 sB0;
+    s32 sAC;
+    s32 b27;
+    s32 b29;
+    s32 b30;
+    s32 b31;
+
+    if (arg0->unk14 == 1) {
+        return 1;
+    }
+    x = arg0->x;
+    y = arg0->y;
+    z = arg0->z;
+    func_150A8050(mtx, arg0->unkC, arg0->unk10, 0);
+    func_150A7960(&mtx[0][0], 0.0f, arg0->rot, 0.0f, &ex, &ey, &ez);
+    ex += x;
+    ey += y;
+    ez += z;
+    dx = ex - x;
+    dy = ey - y;
+    dz = ez - z;
+    mx = dx * 0.5f + x;
+    my = dy * 0.5f + y;
+    mz = dz * 0.5f + z;
+    nx = -dx;
+    ny = -dy;
+    nz = -dz;
+    hit1 = func_150AC9C0(mx, my, mz, nx, ny, nz, 0, info1, &hitpos1[0], &hitpos1[1], &hitpos1[2], &sB8, &sB0, 0, 0.0f);
+    hit2 = func_150AC9C0(mx, my, mz, dx, dy, dz, 0, info2, &hitpos2[0], &hitpos2[1], &hitpos2[2], &sB4, &sAC, 0, 0.0f);
+    if (hit1 == 0 || hit2 == 0) {
+        return 1;
+    }
+    b30 = ((b27 = ((arg0->flags & 0x8000000) >> 27) == 0), (b29 = ((arg0->flags & 0x20000000) >> 29) == 0), ((arg0->flags & 0x40000000) >> 30)) ? 1 : 0;
+    b31 = ((arg0->flags & 0x80000000) >> 31) == 0;
+    func_151C756C(hitpos1, info1, hitpos2, info2, arg0, arg0,
+                  arg0->color & 0xFF, (arg0->color & 0xFF00) >> 8, (arg0->color & 0xFF0000) >> 16,
+                  (arg0->flags & 0x1000000) >> 24,
+                  arg0->flags & 0xFF, (arg0->flags & 0xFF00) >> 8, (arg0->flags & 0xFF0000) >> 16,
+                  (arg0->flags & 0x2000000) >> 25, (arg0->flags & 0x4000000) >> 26,
+                  b27, b29, b30, (arg0->flags & 0x10000000) >> 28,
+                  (f32)(arg0->unk20 & 0xFF) * 0.02463994361f,
+                  (f32)((arg0->unk20 & 0xFF00) >> 8) * 0.003079992952f,
+                  b31, 0xFF, 1);
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1F4650/func_151C756C.s")
 

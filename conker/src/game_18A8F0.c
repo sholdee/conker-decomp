@@ -217,7 +217,92 @@ u32 *func_1515E544(u32 *arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
     return arg0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18A8F0/func_1515E888.s")
+struct Light1515E888 {
+    u8 pad0[5];
+    u8 r;
+    u8 g;
+    u8 b;
+    u8 pad8[6];
+    s16 x;
+    s16 y;
+    s16 z;
+    u8 pad14[0x1B];
+    u8 radius;
+};
+
+extern u8 D_800D9E21;
+extern struct Light1515E888 *D_800D9E28[];
+void func_1515E278(s32, s32, s32, s32, u8 *, u8 *, u8 *);
+
+void func_1515E888(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5, u8 *arg6, u8 *arg7)
+{
+  f32 sq;
+  f32 dist;
+  f32 pos[3];
+  f32 color[3];
+  s32 i;
+  f32 *new_var;
+  s32 n;
+  struct Light1515E888 *light;
+  struct Light1515E888 **p;
+  f32 f;
+  s32 v;
+  func_1515E278(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+  color[0] = arg5[0];
+  color[1] = arg5[1];
+  color[2] = arg5[2];
+  v = D_800D9E21 & 0x7F;
+  n = v - 1;
+  i = 0;
+  if (n > 0)
+  {
+    p = D_800D9E28;
+    new_var = pos;
+    loop:
+    light = *p;
+
+    if (light != 0)
+    {
+      pos[0] = light->x;
+      pos[1] = light->y;
+      pos[2] = light->z;
+      dist = light->radius * 2048.0f;
+      sq = (((new_var[0] - arg1) * (new_var[0] - arg1)) + ((new_var[1] - arg2) * (new_var[1] - arg2))) + ((new_var[2] - arg3) * (new_var[2] - arg3));
+      f = dist / sq;
+      if (f > 1.0f)
+      {
+        f = 1.0f;
+      }
+      color[0] += f * light->r;
+      color[1] += f * light->g;
+      color[2] += f * light->b;
+    }
+    i++;
+    p++;
+    if (i != n)
+    {
+      goto loop;
+    }
+  }
+  v = color[0];
+  if (v >= 0x100)
+  {
+    v = 0xFF;
+  }
+  arg5[0] = v;
+  v = color[1];
+  if (v >= 0x100)
+  {
+    v = 0xFF;
+  }
+  arg5[1] = v;
+  v = color[2];
+  if (v >= 0x100)
+  {
+    v = 0xFF;
+  }
+  arg5[2] = v;
+}
 
 struct Node1515E43C *func_1515EB84(s32 arg0, s32 arg1, s32 arg2, s32 arg3, struct Node1515EB84 *node) {
     u8 sp34[0x32C];
@@ -247,7 +332,101 @@ struct Node1515E43C *func_1515EB84(s32 arg0, s32 arg1, s32 arg2, s32 arg3, struc
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18A8F0/func_1515EC78.s")
+struct Light1515EC78 {
+    u8 col[3];
+    u8 pad3;
+    u8 colc[3];
+    u8 pad7;
+    s8 dir[3];
+    u8 padB;
+    u8 unkC;
+    u8 padD[0x13];
+    s16 unk20[4];
+    s16 unk28[4];
+};
+
+struct Obj1515EC78 {
+    u8 pad0[5];
+    u8 col[3];
+    u8 pad8[6];
+    s16 unkE;
+    s16 unk10;
+    s16 unk12;
+    s16 unk14[4][3];
+    u8 pad2C[3];
+    u8 unk2F;
+    u8 unk30;
+};
+
+extern f32 D_800D9C10[][4][4];
+extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
+
+void func_1515EC78(struct Obj1515EC78 *arg0, s32 arg1, struct Light1515EC78 *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6) {
+    s32 i;
+    f32 out[3];
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    f32 s;
+    s32 n[3];
+    s32 pos[3];
+    f32 *p;
+
+    pos[0] = arg0->unkE;
+    if (pos[0] != -0x8000) {
+        pos[1] = arg0->unk10;
+        pos[2] = arg0->unk12;
+    } else {
+        p = (f32 *)((arg0->unk12 & 0xFFFF) | (arg0->unk10 << 16));
+        pos[0] = p[0];
+        pos[1] = p[1];
+        pos[2] = p[2];
+    }
+    if (arg6 & 2) {
+        dx = pos[0] - arg3;
+        dy = pos[1] - arg4;
+        dz = pos[2] - arg5;
+        s = sqrtf(dx * dx + dy * dy + dz * dz);
+        if (s) {
+            s = 127.0f / s;
+            dx *= s;
+            dy *= s;
+            dz *= s;
+        } else {
+            dz = dy = 0.0f;
+            dx = 127.0f;
+        }
+        n[0] = dx;
+        n[1] = dy;
+        n[2] = dz;
+    } else {
+        n[0] = 0;
+        n[1] = 0;
+        n[2] = 0x7F;
+    }
+        if (arg0->unk30 & (1 << arg1)) {
+        pos[0] = arg0->unk14[arg1][0];
+        pos[1] = arg0->unk14[arg1][1];
+        pos[2] = arg0->unk14[arg1][2];
+    } else {
+        func_150A7960(D_800D9C10[arg1][0], pos[0], pos[1], pos[2], &out[0], &out[1], &out[2]);
+        pos[0] = out[0];
+        pos[1] = out[1];
+        pos[2] = out[2];
+        arg0->unk14[arg1][0] = pos[0];
+        arg0->unk14[arg1][1] = pos[1];
+        arg0->unk14[arg1][2] = pos[2];
+        arg0->unk30 |= (1 << arg1);
+    }
+    for (i = 0; i < 3; i++) {
+        arg2->col[i] = arg0->col[i];
+        arg2->colc[i] = arg0->col[i];
+        arg2->dir[i] = n[i];
+        arg2->unk20[i] = pos[i];
+        arg2->unk28[i] = pos[i];
+    }
+    arg2->unkC = arg0->unk2F;
+}
 
 void func_1515EF74(s16 *arg0) {
     func_1515F040(1.0f / func_1515F008(arg0, 0), 0);

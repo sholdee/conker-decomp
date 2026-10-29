@@ -361,7 +361,64 @@ Game13D350Cmd *func_151135C4(Game13D350Cmd *arg0, s32 arg1, s16 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_13D350/func_151137D4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_13D350/func_15113C88.s")
+typedef struct Struct15113C88 {
+    u8 pad0[0x4C];
+    u8 unk4C;
+    u8 pad4D[2];
+    u8 unk4F;
+    u8 pad50[0x20];
+    u8 unk70;
+    u8 pad71[0x1A];
+    u8 unk8B[9];
+    struct102 *unk94;
+    u8 pad98[8];
+} Struct15113C88;
+
+extern s32 func_15022B08(s32, s32);
+extern struct102 *func_1510D970(s32, void *, s32, s32, s32);
+extern u8 D_800C3658;
+
+void func_15113C88(void) {
+    s32 i;
+    s32 offset;
+    s32 j;
+    s32 found;
+    s32 show;
+    Struct15113C88 *obj;
+
+    i = 0;
+    offset = 0;
+    if (D_800DBEF0 > 0) {
+        do {
+            found = 0;
+            obj = (Struct15113C88 *)((u8 *)offset + (s32)D_800DBEF4);
+            for (j = 0; j < D_80082FA0; j++) {
+                if (func_150859AC(j, 0) != 0 && obj->unk8B[j] == 0) {
+                    found = 1;
+                    break;
+                }
+            }
+            do {
+                if ((obj->unk70 & 8) || obj->unk4C == 0 || (obj->unk4F & 0x10) == 0x10 || found ||
+                    (D_800C3658 == 0 && D_800C35EA == 1 && func_15022B08(i, 0) == 0) || !(obj->unk4F & 1)) {
+                    show = 0;
+                } else {
+                    show = 1;
+                }
+            } while (0);
+            if (show) {
+                if (obj->unk94 == NULL) {
+                    obj->unk94 = func_1510D970(1, obj, 0, 1, 0);
+                }
+            } else if (obj->unk94 != NULL) {
+                func_1516972C(obj->unk94);
+                obj->unk94 = NULL;
+            }
+            i++;
+            offset += 0xA0;
+        } while (i < D_800DBEF0);
+    }
+}
 
 
 extern s32 D_800DBF98;

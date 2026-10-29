@@ -39,6 +39,12 @@ function is right but something ELSE in the bin changed — e.g. a new literal i
   param widths) may be corrected there — `land` re-gates the whole ROM, so a change that alters
   any other function is rejected. Never edit asm/, Makefile, yaml, tools.
 - Never add a `#pragma GLOBAL_ASM`. Other stubs in the same file stay as they are.
+- Keep ALL scratch files (variants, scripts, notes) inside your own workspace, e.g.
+  `~/conker-ws/FUNC/my/`. Never use /tmp or the session scratchpad: other agents share them and
+  overwrite each other's files.
+- Scripted variant sweeps (`mw.py batch`, generators) are fine, but keep each sweep to a few
+  hundred variants; the machine is shared by 16 agents and a permuter daemon. Register-only
+  residue is the permuter's job — stop and report REGALLOC instead of brute-forcing it.
 - C89: all declarations at the top of a block. No `//`-only tricks needed (`-Xcpluscomm` is on).
 - Literals are fine: write float/double/string literals naturally (`10000.0f`, `"name"`). The
   build retargets every .rodata reference in your object to the ROM's original address
@@ -66,7 +72,10 @@ function is right but something ELSE in the bin changed — e.g. a new literal i
    register (`register` does not avoid it); arrays/structs are sized as declared; a float passed
    in a GPR (`mfc1` to a0-a3) or a comparison result passed as a stack argument can reserve
    extra unused words. Use `-U 1000` to see every sp offset unfolded.
-5. Keep your best version (copy the .c aside) — don't wander away from a lower score.
+5. Your best version is kept automatically: every check that beats your best so far is
+   snapshotted to `best/file.c` in the workspace and to `~/conker/.nearmiss/` (nothing is ever
+   lost, and a later attempt starts from it). Still, don't wander away from your best — restore
+   from `best/file.c` when a line of attack fails.
 6. After one failed sweep of a hypothesis family (e.g. statement orders), switch families
    instead of repeating it; record the sweep in the ledger.
 

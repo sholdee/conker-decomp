@@ -579,64 +579,58 @@ void func_15058EA4(struct127 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 
     }
 }
 
-// NON-MATCHING: best 400 (PERMUTER CANDIDATE: one extra `sw a2,0x18(sp)` spill of unused arg2 +
-// missing `mov.s f12,f20` arg1-copy + a handful of at/t7/v0 and f10/f4 regalloc renames.)
-// void func_15058F24(struct127 *arg0, f32 arg1, f32 arg2) {
-//     f32 temp_f12;
-//     f32 temp_f14;
-//     f32 tmp;
-//     f32 temp_f16;
-//
-//     temp_f16 = 0.5f - arg1;
-//     if (arg1 >= 0.5f) {
-//         arg1 -= 0.5f;
-//     }
-//     temp_f14 = arg0->unk118 + 9.0f;
-//     if ((arg0->y_position < temp_f14) || ((arg0->in_water < 0x64) == 0)) {
-//
-//         if (0) {};
-//
-//         if (arg0->in_water == 0) {
-//             arg0->y_position = temp_f14;
-//             arg0->in_water = (u8)0x64U;
-//             arg0->gravity = temp_f16 * -6.0f;
-//             arg0->y_velocity *= arg1;
-//         } else {
-//             if ((temp_f14 + 100.0f) < arg0->y_position) {
-//                 arg0->in_water = (u8)0U;
-//             }
-//             if (temp_f16 < 0.0f) {
-//                 arg0->gravity = temp_f16 * -6.0f;
-//             } else {
-//                 temp_f12 = arg0->y_position - ((temp_f14 + 10.0f) - (120.0f * arg1));
-//                 if ((fabsf(temp_f12) < 2.0f) && (fabsf(arg0->y_velocity) < 2.0f)) {
-//                     tmp = temp_f12 * D_800994A4;
-//                     arg0->gravity = 1.0f;
-//                     arg0->y_velocity = 0.0f;
-//                     arg0->y_position -= tmp;
-//                 } else {
-//                     if (temp_f12 > 0.0f) {
-//                         if (arg0->y_velocity > 0.0f) {
-//                             arg0->gravity = temp_f16 * 6.0f;
-//                             arg0->y_velocity *= 0.5f;
-//                         }
-//                     } else {
-//                         temp_f12 = temp_f16 * 80.0f;
-//                         if (arg0->y_velocity > temp_f12) {
-//                             arg0->y_velocity = temp_f12;
-//                         }
-//                         arg0->gravity = temp_f16 * -6.0f;
-//                     }
-//                 }
-//             }
-//         }
-//         temp_f12 = -100.0f * arg1;
-//         if (arg0->y_velocity < temp_f12) {
-//             arg0->y_velocity = temp_f12;
-//         }
-//     }
-// }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_15058F24.s")
+void func_15058F24(struct127 *arg0, f32 arg1, f32 arg2) {
+    f32 temp_f12;
+    f32 temp_f14;
+    f32 temp_f16;
+
+    temp_f12 = arg1;
+    temp_f16 = 0.5f - arg1;
+    if (arg1 >= 0.5f) {
+        arg1 -= 0.5f;
+    }
+    if (arg2) {}
+    temp_f14 = arg0->unk118 + 9.0f;
+    if ((arg0->y_position < (arg0->unk118 + 9.0f)) || (arg0->in_water >= 0x64)) {
+        if (arg0->in_water == 0) {
+            arg0->y_position = temp_f14;
+            arg0->in_water = 0x64;
+            arg0->gravity = temp_f16 * -6.0f;
+            arg0->y_velocity *= temp_f12;
+        } else {
+            if ((temp_f14 + 100.0f) < arg0->y_position) {
+                arg0->in_water = 0;
+            }
+            if (temp_f16 < 0.0f) {
+                arg0->gravity = temp_f16 * -6.0f;
+            } else {
+                temp_f12 = arg0->y_position - ((temp_f14 + 10.0f) - (120.0f * arg1));
+                if ((fabsf(temp_f12) < 2.0f) && (fabsf(arg0->y_velocity) < 2.0f)) {
+                    arg0->y_position -= temp_f12 * D_800994A4;
+                    arg0->y_velocity = 0.0f;
+                    arg0->gravity = 1.0f;
+                } else {
+                    if (temp_f12 > 0.0f) {
+                        if (arg0->y_velocity > 0.0f) {
+                            arg0->gravity = temp_f16 * 6.0f;
+                            arg0->y_velocity /= 2.0f;
+                        }
+                    } else {
+                        temp_f12 = temp_f16 * 80.0f;
+                        if (temp_f12 < arg0->y_velocity) {
+                            arg0->y_velocity = temp_f12;
+                        }
+                        arg0->gravity = temp_f16 * -6.0f;
+                    }
+                }
+            }
+        }
+        temp_f12 = -100.0f * arg1;
+        if (arg0->y_velocity < temp_f12) {
+            arg0->y_velocity = temp_f12;
+        }
+    }
+}
 
 void func_15059140(struct127 *arg0) {
     f32 sp2C;

@@ -178,7 +178,90 @@ void func_15194794(s32 arg0, Game1C1150Event *arg1, s8 *arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1C1150/func_15194810.s")
+typedef struct Vec3_15194810 {
+    f32 x, y, z;
+} Vec3_15194810;
+
+typedef struct Game194810Packet {
+    s16 field00;
+    s16 field02;
+    s16 field04;
+    s16 field06;
+    Vec3_15194810 position;
+    f32 field14;
+    f32 field18;
+    f32 field1C;
+    f32 field20;
+    f32 field24;
+    f32 field28;
+    s16 field2C;
+    s16 field2E;
+    s16 field30;
+    s16 field32;
+    s16 field34;
+    s16 field36;
+    s16 field38;
+    s16 field3A;
+    u8 field3C;
+    u8 pad3D[3];
+    f32 field40;
+    s16 field44;
+    s16 field46;
+    s32 field48;
+} Game194810Packet;
+
+void func_15194810(s32 arg0, Game1C1150Event *arg1, s32 arg2) {
+    Vec3_15194810 pos;
+    Game194810Packet packet;
+    u8 scratch[0x24];
+    Struct15195738Small small;
+
+    switch (arg1->type) {
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 0x53:
+        pos.x = *(f32 *)((u8 *)arg1 + 0x14);
+        pos.y = *(f32 *)((u8 *)arg1 + 0x18) + 95.0f;
+        pos.z = *(f32 *)((u8 *)arg1 + 0x1C);
+    fence:
+        func_1504715C((f32 *)scratch, (struct127 *)arg1);
+        packet.position = pos;
+        packet.field14 = 10.0f;
+        packet.field2C = 0xF;
+        packet.field2E = 0xA;
+        packet.field02 = 0xFF;
+        packet.field04 = -0x3F;
+        packet.field00 = 0;
+        packet.field06 = 0x39;
+        packet.field30 = 3;
+        packet.field32 = 2;
+        packet.field34 = 0x46;
+        packet.field36 = 0x16;
+        packet.field38 = 0x9B;
+        packet.field3A = 0x64;
+        packet.field44 = 0x10;
+        packet.field46 = 0xF;
+        packet.field48 = 0;
+        packet.field3C = 0;
+        packet.field18 = 5.0f;
+        packet.field1C = 0.6750000119f;
+        packet.field20 = 0.2310000062f;
+        packet.field24 = 5.0f;
+        packet.field28 = 25.10000038f;
+        packet.field40 = 0.5f;
+        func_15153F18(&packet.field00, &packet.position, (s32)scratch, 0xFF, 1);
+        small.unk0 = 1;
+        small.unk2 = (func_150ADA20() % 0xBU) + 0x14;
+        small.unk4 = 8;
+        small.unk6 = -1;
+        small.unk5 = 1;
+        func_151D8868(&small, 0, 0xFF, 0);
+        break;
+    }
+}
 
 void func_151949E0(s32 arg0, s32 arg1, s32 arg2) {
 }

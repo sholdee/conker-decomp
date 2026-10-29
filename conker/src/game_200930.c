@@ -557,7 +557,65 @@ void func_151D5714(struct127 *arg0, f32 *arg1, f32 *arg2, u8 arg3, f32 arg4, u8 
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_200930/func_151D57F8.s")
+struct Sub151D57F8 {
+    u8 pad0[0xB0];
+    u8 unkB0[0x8];
+    f32 unkB8;
+    f32 unkBC;
+    f32 unkC0;
+    u8 padC4[0x109 - 0xC4];
+    u8 unk109;
+};
+
+struct Obj151D57F8 {
+    u8 pad0[0x31C];
+    struct Sub151D57F8 *unk31C;
+};
+
+extern s32 D_8008FC8C[];
+extern u8 *D_8008FC94[];
+void func_151D5A18(struct Obj151D57F8 *, struct17 *, struct17 *, struct17 *, struct17 *, s32, u8);
+void func_151D5174(struct Obj151D57F8 *, struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, struct17 **, struct17 **, struct17 *);
+s32 func_15145128(struct17 *, struct17 *, f32 *, f32 *);
+void func_15081690(struct Obj151D57F8 *, f32, f32, f32, f32, f32, f32, void *, f32, s32, s32, s32, s32, s32, s32);
+void func_150636A4(struct Obj151D57F8 *);
+
+void func_151D57F8(struct Obj151D57F8 *arg0, u8 arg1) {
+    struct17 pos;
+    struct17 vA0;
+    struct17 v94;
+    struct17 v88;
+    struct17 v7C;
+    struct17 v70;
+    struct17 *base;
+    struct17 *ofs;
+
+    func_151D5A18(arg0, &pos, &vA0, &v94, &v88, D_8008FC8C[arg1], *D_8008FC94[arg1]);
+    func_151D5174(arg0, &pos, &vA0, &v94, &v88, &v7C, &v70, &base, &ofs, NULL);
+    arg0->unk31C->unk109 = 1;
+    if (base == NULL) {
+        base = &pos;
+    }
+    if (ofs == NULL) {
+        ofs = &vA0;
+    }
+    arg0->unk31C->unkB8 = base->unk0 + ofs->unk0 * 9999.0f;
+    arg0->unk31C->unkBC = base->unk4 + ofs->unk4 * 9999.0f;
+    arg0->unk31C->unkC0 = base->unk8 + ofs->unk8 * 9999.0f;
+    if (arg0->unk31C->unk109) {
+        struct17 dir;
+        f32 len;
+
+        dir.unk0 = arg0->unk31C->unkB8 - pos.unk0;
+        dir.unk4 = arg0->unk31C->unkBC - pos.unk4;
+        dir.unk8 = arg0->unk31C->unkC0 - pos.unk8;
+        if (func_15145128(&dir, &dir, &len, NULL) != 0) {
+            func_15081690(arg0, pos.unk0, pos.unk4, pos.unk8, dir.unk0, dir.unk4, dir.unk8,
+                          arg0->unk31C->unkB0, len * 1.00999999f, 0, 0, 0, -1, 0, 0);
+        }
+    }
+    func_150636A4(arg0);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_200930/func_151D5A18.s")
 

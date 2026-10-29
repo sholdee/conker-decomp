@@ -111,7 +111,109 @@ void func_150807F4(s32 arg0, s32 arg1, s32 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_AD9B0/func_15080828.s")
+typedef struct {
+    char *name;
+    s32 unk4;
+    u16 *unk8;
+    u32 unkC;
+} Res15080828;
+
+typedef struct {
+    s32 flags;
+    char *text;
+    u8 unk8;
+    u8 pad9[0xF];
+    f32 *unk18;
+    f32 *unk1C;
+    f32 *unk20;
+    s16 unk24;
+    s16 unk26;
+    u8 unk28;
+    u8 unk29;
+    u8 unk2A;
+    u8 unk2B;
+} Struct1958;
+
+extern u8 D_800D2E40;
+Res15080828 *func_1502B6BC(s32, s32, s32, s32, s32, s32, s32);
+s32 allocate_memory(s32, s32, s32, s32);
+s32 func_1516A7B0(s32, s32, s32, void (*)(s32, s32, s32), Struct1958 *, s32);
+s32 strlen(const char *);
+
+void func_15080828(s32 arg0) {
+    char *text;
+    s32 sp40;
+
+    if (arg0 == 0) {
+        if (!(D_800D2E68 & 0x10)) {
+            sp40 = 1;
+        } else {
+            sp40 = 0;
+        }
+    } else {
+        sp40 = 0;
+    }
+    D_800D1944 = (s32)func_1502B6BC(0, 0, 0, 3, 0x1A, D_800BEAAB, D_800D1940);
+    if (D_800D1944 != 0) {
+        D_800D1994 = 0;
+        D_800D1998 = (s32)((Res15080828 *)D_800D1944)->unk8;
+        D_800D1995 = ((Res15080828 *)D_800D1944)->unkC >> 1;
+        if (sp40) {
+            s32 sp3C;
+            s32 sp38;
+            Res15080828 *res;
+            s32 sp30;
+            u32 sp2C;
+            D_800D1948 = (s32)func_1502B6BC(0, 0, 0, 3, 0x1A, D_800BEAAB, 0x43);
+            if (D_800D1944 == 0) {
+                return;
+            }
+            sp3C = strlen(((Res15080828 *)D_800D1948)->name) + 1;
+            sp38 = strlen(((Res15080828 *)D_800D1944)->name) + 1;
+            D_800D194C = allocate_memory(sp3C + sp38 + 1, 1, 0, 0);
+            bcopy(((Res15080828 *)D_800D1948)->name, (void *)D_800D194C, sp3C);
+            ((u8 *)D_800D194C)[sp3C - 1] = 0xBD;
+            bcopy(((Res15080828 *)D_800D1944)->name, (u8 *)D_800D194C + sp3C, sp38);
+            sp2C = ((Res15080828 *)D_800D1948)->unkC >> 1;
+            sp30 = D_800D1995 + sp2C;
+            D_800D1998 = allocate_memory(sp30 * 2, 1, 0, 0);
+            bcopy(((Res15080828 *)D_800D1948)->unk8, (void *)D_800D1998, sp2C * 2);
+            bcopy(((Res15080828 *)D_800D1944)->unk8, sp2C + (u16 *)D_800D1998, D_800D1995 * 2);
+            D_800D1995 = sp30;
+        } else {
+            D_800D1948 = 0;
+        }
+        D_800D1941 = 1;
+        if (sp40) {
+            text = (char *)D_800D194C;
+        } else {
+            text = ((Res15080828 *)D_800D1944)->name;
+        }
+        ((Struct1958 *)D_800D1958)->flags = 0x38013;
+        if ((sp40 || arg0 || !(D_800D2E60[D_800D1940 >> 3] & (1 << (D_800D1940 & 7)))) && D_800D2E40 == 0) {
+            ((Struct1958 *)D_800D1958)->flags |= 0x60;
+        }
+        if (arg0 || D_800D1940 == 0x42) {
+            ((Struct1958 *)D_800D1958)->flags |= 0x80;
+        }
+        ((Struct1958 *)D_800D1958)->text = text;
+        ((Struct1958 *)D_800D1958)->unk26 = 100;
+        ((Struct1958 *)D_800D1958)->unk8 = 1;
+        ((Struct1958 *)D_800D1958)->unk24 = 0;
+        ((Struct1958 *)D_800D1958)->unk2B = 0;
+        ((Struct1958 *)D_800D1958)->unk18 = &D_800D1988;
+        ((Struct1958 *)D_800D1958)->unk1C = &D_800D198C;
+        ((Struct1958 *)D_800D1958)->unk20 = &D_800D1990;
+        ((Struct1958 *)D_800D1958)->unk28 = 0xFF;
+        ((Struct1958 *)D_800D1958)->unk29 = 0xFF;
+        ((Struct1958 *)D_800D1958)->unk2A = 0xFF;
+        D_800D1988 = 78.0f;
+        D_800D198C = 48.0f;
+        D_800D1990 = 9.0f;
+        D_800D1950 = func_1516A7B0(0, 0, 0, func_150807F4, (Struct1958 *)D_800D1958, 0);
+        ((u8 *)D_800D1950)[0x14] = 0;
+    }
+}
 
 extern void func_1516D2E0(s32);
 extern s32 func_10004074(s32);

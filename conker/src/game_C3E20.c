@@ -23,7 +23,91 @@ s32 func_150969A0(s32 arg0) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C3E20/func_15096A68.s")
+typedef struct {
+    /* 0x00 */ u8 unk0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 unk2;
+    /* 0x03 */ u8 pad3;
+    /* 0x04 */ s16 unk4;
+    /* 0x06 */ u8 pad6[6];
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ u8 pad14[0xC];
+    /* 0x20 */ f32 unk20;
+} Struct_D_800D2DC0;
+
+typedef struct {
+    /* 0x00 */ s16 unk0;
+    /* 0x02 */ s16 unk2;
+    /* 0x04 */ s16 unk4;
+    /* 0x06 */ u8 pad6[6];
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+} Struct_D_800DC020;
+
+extern f32 D_800D2DB8;
+void func_1512D560(struct108 *, s32, struct168 *);
+
+s32 func_15096A68(s32 arg0) {
+    u8 idx;
+    Struct_D_800DC020 *pos;
+    struct108 *obj;
+    struct108 *obj2;
+
+    switch (((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unk0) {
+    case 1:
+        idx = ((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unk1;
+        obj = &D_800DBFF0[idx];
+        pos = *(Struct_D_800DC020 **)&D_800DC020;
+        pos = &pos[((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unk2 & 0xFF];
+        D_800D2DB8 = obj->unk2C0;
+        D_800D2DB4 = 1;
+        D_800DBFF4[idx] = 3;
+        ((struct168 *)&D_800C3600)->unk0 = 1;
+        ((struct168 *)&D_800C3600)->unk4 = 0;
+        ((struct168 *)&D_800C3600)->unk14 = pos->unk0;
+        ((struct168 *)&D_800C3600)->unk18 = pos->unk2;
+        ((struct168 *)&D_800C3600)->unk1C = pos->unk4;
+        ((struct168 *)&D_800C3600)->unk20 = pos->unk14;
+        ((struct168 *)&D_800C3600)->unk24 = pos->unkC;
+        ((struct168 *)&D_800C3600)->unk28 = pos->unk10;
+        ((struct168 *)&D_800C3600)->unk8 = 0.0f;
+        func_1512D560(obj, 5, 0);
+        func_1512D560(obj, 7, (struct168 *)&D_800C3600);
+        if (!(((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unkC & 1)) {
+            obj->unk3D0->unk7 = 0;
+            obj->unk3D0->unk25C |= 0x200;
+        }
+        D_800D2E30[arg0] = ((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unk10;
+        ((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unk0 = 2;
+    lbl1:
+        break;
+    case 2:
+        obj2 = &D_800DBFF0[((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unk1];
+        ((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unk4 -= D_800BE9A0;
+        if (obj2->unk3D0->health == 0) {
+            ((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unk4 = 0;
+        }
+        if (((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unk4 <= 0) {
+            obj2->pad3A4 = ((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unk20;
+            if (!(((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unkC & 2)) {
+                func_1512D560(obj2, 6, 0);
+            }
+            D_800D2DB4 = 0;
+            if (!(((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unkC & 1)) {
+                obj2->unk3D0->unk25C &= ~0x200;
+                obj2->unk3D0->unk7 = 0xFF;
+            }
+            ((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unk4 = 0;
+            ((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unk0 = 0;
+            obj2->unk2C0 = D_800D2DB8;
+            return 0;
+        }
+        break;
+    }
+    return 1;
+}
 
 extern u8 D_800C35EA;
 extern s32 func_15096A68(s32);
@@ -52,7 +136,59 @@ void func_15096D08(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_C3E20/func_15096D78.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C3E20/func_1509759C.s")
+extern void *func_1505EEF4(s32);
+
+s32 func_1509759C(s32 arg0, s32 arg1, s32 *arg2) {
+    struct108 *obj;
+    s32 ret;
+    struct17 dir;
+    struct17 diff;
+    f32 angle;
+    u8 *ent;
+    Struct_D_800DC020 *pos;
+    f32 dx;
+    f32 dz;
+
+    obj = &D_800DBFF0[arg0];
+    if (D_80082FA0 < arg0) {
+        return 0;
+    }
+    switch (arg1) {
+    case 0x1F:
+        return obj->unk390 * 65536.0f;
+    case 0x1E:
+        return obj->unk37C * 65536.0f;
+    case 0x1D:
+        return ((Struct_D_800D2DC0 *)D_800D2DC0)[arg2[2]].unk0;
+    case 0x20:
+        pos = *(Struct_D_800DC020 **)&D_800DC020;
+        pos = &pos[arg2[2] & 0xFFF];
+        dx = obj->unk2F8 - pos->unk0;
+        dz = obj->unk300 - pos->unk4;
+        return sqrtf(dx * dx + dz * dz);
+    case 0x21:
+        ent = func_1505EEF4(arg2[2] & 0xFFF);
+        if (ent == NULL) {
+            return -1;
+        }
+        angle = obj->unk39C + 1.570796371f;
+        dir.unk0 = sinf(angle);
+        dir.unk4 = 0.0f;
+        dir.unk8 = cosf(angle);
+        func_15048F90((struct17 *)&obj->unk2F8, (struct17 *)(ent + 0x14), &diff);
+        diff.unk4 = 0.0f;
+        if (func_150AD900((f32 *)&dir, (f32 *)&diff) >= 0.0f) {
+            ret = -1;
+        } else {
+            ret = 1;
+        }
+        return ret;
+    default:
+        goto block_default;
+    }
+block_default:
+    return 0;
+}
 
 void func_15097798(s32 arg0) {
     struct108 *temp_v0;

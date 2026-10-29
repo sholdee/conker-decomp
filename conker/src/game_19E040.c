@@ -8,7 +8,99 @@ extern f32 D_800A6FC0;
 extern f32 D_800A6FC4;
 void func_151717FC(struct127 *, f32, f32, f32, f32, f32, s32, s32, s32, s32, f32, s32, s32);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_19E040/func_15170B90.s")
+typedef struct Game70F4CPacket {
+    f32 position[3];
+    f32 rotation[3];
+    f32 velocity[3];
+    f32 random[3];
+    f32 scale[3];
+    s32 life;
+    s32 texture;
+    u32 pad44;
+    f32 color[3];
+    u8 flags[10];
+    u8 pad5E[2];
+} Game70F4CPacket;
+
+typedef struct {
+    u8 pad0[0x10];
+    s16 x;
+    s16 y;
+    s16 z;
+    u8 pad16[0x6E - 0x16];
+    u8 unk6E;
+} Obj15170B90;
+
+extern f32 D_800A6E90[6][3];
+s32 func_1518C900(s32);
+void func_15168BE4(void *, u8, s32);
+u32 func_150ADA20();
+void func_151718F0(f32, f32, f32, f32, s32, f32, s32, s32, s32, s32);
+
+void func_15170B90(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5) {
+    s32 i;
+    Game70F4CPacket packet;
+    f32 x;
+    f32 y;
+    f32 z;
+    s32 id;
+    s32 texture;
+    s32 r;
+
+    x = ((Obj15170B90 *)arg0)->x;
+    y = ((Obj15170B90 *)arg0)->y;
+    z = ((Obj15170B90 *)arg0)->z;
+    packet.rotation[0] = 0.0f;
+    packet.rotation[1] = 0.0f;
+    packet.rotation[2] = 0.0f;
+    packet.scale[0] = 1.0f;
+    packet.scale[1] = 1.0f;
+    packet.scale[2] = 1.0f;
+    packet.life = 0x3C;
+    packet.color[0] = 0.3000000119f;
+    packet.color[1] = -0.6999999881f;
+    packet.flags[0] = 2;
+    packet.color[2] = -0.200000003f;
+    packet.flags[1] = 0xFF;
+    packet.flags[2] = 0;
+    packet.flags[3] = 0;
+    packet.flags[4] = 0;
+    packet.flags[5] = 0x3C;
+    packet.flags[7] = arg2;
+    packet.flags[8] = 0;
+    packet.flags[9] = 0;
+    for (i = 0; i < 6; i++) {
+        if (arg3 & 2) {
+            const u8 ids[6] = { 7, 2, 3, 8, 9, 10 };
+            id = ids[i];
+        } else if (arg3 & 1) {
+            id = arg1 + i;
+        } else {
+            id = arg1;
+        }
+        texture = func_1518C900(id);
+        packet.position[0] = D_800A6E90[i][0] + x;
+        packet.position[1] = D_800A6E90[i][1] + y;
+        packet.position[2] = D_800A6E90[i][2] + z;
+        packet.flags[6] = id;
+        packet.velocity[0] = D_800A6E90[i][0] * 0.07999999821f;
+        packet.velocity[1] = fabsf(D_800A6E90[i][1]) * 0.07999999821f + 7.0f;
+        packet.velocity[2] = D_800A6E90[i][2] * 0.07999999821f;
+        r = func_150ADA20();
+        packet.velocity[0] += (f32)(r >> 16) * 0.00006103515625f;
+        r = func_150ADA20();
+        packet.velocity[1] += (f32)(r >> 16) * 0.00006103515625f;
+        r = func_150ADA20();
+        packet.velocity[2] += (f32)(r >> 16) * 0.00006103515625f;
+        packet.random[0] = (f32)((s32)func_150ADA20() >> 16) * 0.0000762939453125f;
+        packet.random[1] = (f32)((s32)func_150ADA20() >> 16) * 0.0000762939453125f;
+        packet.random[2] = (f32)((s32)func_150ADA20() >> 16) * 0.0000762939453125f;
+        packet.texture = texture;
+        func_15168BE4(&packet, arg4, arg5);
+    }
+    func_151718F0(x, y - 80.0f, z, 70.0f, 500, 0.00457763671875f, 0, 10, arg4, arg5);
+    ((Obj15170B90 *)arg0)->unk6E = 1;
+}
 
 extern s32 D_800BE9F0;
 void func_15170B90(s32, s32, s32, s32, u8, s32);
@@ -35,19 +127,6 @@ void func_151711C4(struct127 *arg0) {
     func_15060F28(arg0, 1);
 }
 
-typedef struct Game70F4CPacket {
-    f32 position[3];
-    f32 rotation[3];
-    f32 velocity[3];
-    f32 random[3];
-    f32 scale[3];
-    s32 life;
-    s32 texture;
-    u32 pad44;
-    f32 color[3];
-    u8 flags[10];
-    u8 pad5E[2];
-} Game70F4CPacket;
 
 s32 func_1518C900(s32);
 void func_15168BE4(void *, u8, s32);

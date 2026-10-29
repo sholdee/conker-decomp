@@ -1,5 +1,9 @@
 #include <ultra64.h>
+#define func_15048A40 func_15048A40_hdr
+#define func_150ADA20 func_150ADA20_hdr
 #include "functions.h"
+#undef func_15048A40
+#undef func_150ADA20
 #include "variables.h"
 
 
@@ -87,7 +91,46 @@ void func_150C7968(GameObj150C7968 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_F4D20/func_150C79BC.s")
+extern f32 func_15048A40(u8 arg0);
+extern u32 func_150ADA20(void);
+extern void func_1000D96C(s32, s32, s32);
+extern void func_1000DE1C(s32, s32);
+extern f32 func_150489B0(u8);
+extern void func_15179FE0(u8, s16, s32, s16, s32, s32, s32, s32, s32, s32, s32);
+extern s32 D_800887F4;
+
+void func_150C79BC(s32 arg0) {
+    s32 y;
+    s32 dy;
+    s32 dx;
+    s32 dz;
+    s32 r;
+    u8 angle;
+
+    dx = (s32)D_800DBFF0[arg0].unk2F8 + 2418;
+    dy = (s32)D_800DBFF0[arg0].unk2FC - 2500;
+    dz = (s32)D_800DBFF0[arg0].unk300 - 1775;
+    if ((dy >= -199) && (dx * dx + dz * dz < 1440000)) {
+        if (D_800887F4 == 0) {
+            func_1000D96C(0x5F, 0xF, 6);
+            func_1000DE1C(0x10, 4);
+            D_800887F4 = 1;
+        }
+    } else if (D_800887F4 != 0) {
+        func_1000D96C(0xF, 0x5F, 4);
+        func_1000D96C(0x10, 0, 3);
+        D_800887F4 = 0;
+    }
+    dy = (s32)D_800DBFF0[arg0].unk2FC - 1583;
+    if ((dy < 0) && (dx * dx + dz * dz < 810000) && ((func_150ADA20() & 0xFFFF) < 0x2000)) {
+        r = func_150ADA20() % 900U;
+        angle = func_150ADA20();
+        dx = func_150489B0(angle) * r + -2418.0f;
+        dz = func_15048A40(angle) * r + 1775.0f;
+        r = (f32)((func_150ADA20() & 0xFFFF) * 2) * (1.0f / 65536.0f);
+        func_15179FE0(r, dx, 1583, dz, 7, 1200, 37, 10, 30, 3, 8);
+    }
+}
 
 typedef struct {
     s32 unk0;

@@ -413,7 +413,70 @@ void func_15132A88(Obj15132A88 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_15F680/func_15132B80.s")
+typedef struct {
+    u8 pad_0[0x38];
+    u8 field_0x38[0x28];
+    s32 field_0x60;
+    u8 pad_64[0xC];
+    u8 field_0x70;
+    u8 pad_71[0x8];
+    s8 field_0x79;
+    u8 field_0x7A;
+    u8 pad_7B;
+    s32 field_0x7C;
+    u8 field_0x80;
+    u8 pad_81[0xB];
+    Gfx ***field_0x8C;
+    u8 field_0x90[0x98];
+    s32 field_0x128;
+    u8 pad_12C[0x20];
+    s32 field_0x14C[1];
+} Obj15132B80;
+
+extern u8 D_80083740[];
+extern u8 D_800838C0[];
+extern Gfx *(*D_800899A4[])(Gfx *, Obj15132B80 *, s16);
+Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
+Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
+void *func_151462C8(void *arg0, s32 *arg1, u8 arg2, void *arg3, u8 arg4, s16 arg5, struct17 *arg6, u8 arg7, s32 arg8);
+
+Gfx *func_15132B80(Gfx *gfx, Obj15132B80 *arg1, s16 arg2) {
+    Obj15132B80 *obj;
+    u8 sync;
+
+    obj = arg1;
+    if (!(obj->field_0x60 & 0x200000)) {
+        return gfx;
+    }
+    if (obj->field_0x60 & 0x20000) {
+        return gfx;
+    }
+    if (!(obj->field_0x60 & 0x40000)) {
+        return gfx;
+    }
+    sync = 1;
+    if (obj->field_0x70 < 0xFF) {
+        gSPSegment(gfx++, 8, D_80083740);
+    } else {
+        gSPSegment(gfx++, 8, D_800838C0);
+    }
+    if (obj->field_0x60 & 0x10000) {
+        if (obj->field_0x79 != -1) {
+            gfx = D_800899A4[obj->field_0x79](gfx, obj, arg2);
+        }
+    }
+    gfx = func_15142C10(gfx, 0, 0, 0, obj->field_0x70, &sync);
+    gfx = func_15142B7C(gfx,
+                        ((obj->field_0x60 & 0x800) ? 0x20000 : 0) | ((obj->field_0x60 & 0x1000) ? 0x400000 : 0) | 1 | 4 | 0x200000,
+                        ((obj->field_0x60 & 0x800) ? 0 : 0x20000) | ((obj->field_0x60 & 0x1000) ? 0 : 0x400000) | 0x600 | 0x10000 | 0x40000 | 0x80000);
+    if (obj->field_0x60 & 0x800) {
+        gfx = func_151462C8(gfx, obj->field_0x14C, obj->field_0x7A, (void *)obj->field_0x7C, obj->field_0x80, arg2,
+                            (struct17 *)obj->field_0x38, (obj->field_0x60 & 0x1000) ? 1 : 0, obj->field_0x128);
+    }
+    gSPMatrix(gfx++, &obj->field_0x90[D_800BE9C0 << 6], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPDisplayList(gfx++, **obj->field_0x8C);
+    return gfx;
+}
 
 s32 func_15132DDC(Func15132DDCArg0 *arg0) {
     Func15132DDCLocals sp38;

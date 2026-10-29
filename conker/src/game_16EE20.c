@@ -1427,7 +1427,56 @@ s32 func_151451F0(struct17 *arg0, struct17 *arg1, struct17 *arg2, f32 arg3, f32 
     }
     return 0;
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_151452C4.s")
+s32 func_151452C4(struct17 *arg0, struct17 *arg1, struct17 *arg2, f32 arg3, struct17 *arg4, struct17 *arg5, f32 *arg6, f32 *arg7) {
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    struct17 dir;
+    struct17 org;
+    f32 proj;
+    f32 rr;
+    f32 root;
+    f32 t0;
+    f32 t1;
+    f32 dd;
+
+    dx = arg2->unk0 - arg0->unk0;
+    dy = arg2->unk4 - arg0->unk4;
+    dz = arg2->unk8 - arg0->unk8;
+    dir = *arg1;
+    org = *arg0;
+    dd = (dx * dx) + (dy * dy) + (dz * dz);
+    proj = (dx * dir.unk0) + (dy * dir.unk4) + (dz * dir.unk8);
+    rr = arg3 * arg3;
+    if (rr < dd - (proj * proj)) {
+        return 0;
+    }
+    root = sqrtf(rr - (dd - (proj * proj)));
+    if (proj < root) {
+        root = -root;
+    }
+    t0 = proj - root;
+    t1 = proj + root;
+    arg4->unk0 = (t0 * dir.unk0) + org.unk0;
+    arg4->unk4 = (t0 * dir.unk4) + org.unk4;
+    arg4->unk8 = (t0 * dir.unk8) + org.unk8;
+    *arg6 = t0;
+    arg5->unk0 = (t1 * dir.unk0) + org.unk0;
+    arg5->unk4 = (t1 * dir.unk4) + org.unk4;
+    arg5->unk8 = (t1 * dir.unk8) + org.unk8;
+    *arg7 = t1;
+    {
+        struct17 diff;
+
+        diff.unk0 = arg4->unk0 - arg0->unk0;
+        diff.unk4 = arg4->unk4 - arg0->unk4;
+        diff.unk8 = arg4->unk8 - arg0->unk8;
+        if (func_15144A74(&diff, arg1) < 0.0f) {
+            return 0;
+        }
+        return 1;
+    }
+}
 
 s32 func_151454BC(u8 arg0, f32 arg1, struct17 *arg2) {
     f32 tmp1;
@@ -1707,7 +1756,74 @@ void func_15146508(struct127 *arg0, struct127 *arg1) {
     func_15169040(&tmp, 45, arg0, arg1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_1514654C.s")
+typedef struct {
+    u8 pad0[0x3E8];
+    Mtx *unk3E8[3];
+    u8 pad3F4[2];
+    u8 unk3F6;
+} Func1514654C_Sub48;
+
+typedef struct {
+    u8 pad0[2];
+    u8 unk2;
+    u8 pad3[0x1B];
+    u16 unk1E;
+    u16 unk20;
+    u8 pad22[0x12];
+    Mtx *unk34;
+    u8 pad38[0x10];
+    Func1514654C_Sub48 *unk48;
+} Func1514654C_Arg1;
+
+s32 func_15031070(struct126 *, struct127 *, Mtx **, s32 *);
+void func_15145EA4(f32 **, f32 **, Mtx *, s32);
+
+s32 func_1514654C(struct127 *arg0, Func1514654C_Arg1 *arg1, s32 arg2, f32 **arg3, f32 **arg4, s32 arg5) {
+    s32 i;
+    Mtx *mtx;
+    struct126 *obj;
+    Mtx *sp90;
+    s32 sp8C;
+    f32 mf[4][4];
+
+    if ((arg0 == NULL) || (arg1 == NULL) || (arg0->unk1D4 == NULL)) {
+        return 0;
+    }
+    if (arg1->unk48 != NULL) {
+        if (arg1->unk48->unk3F6 == 0) {
+            return 0;
+        }
+        mtx = arg1->unk48->unk3E8[D_800BE9C0] + arg2;
+    } else if (arg1->unk1E) {
+        obj = func_1503195C(arg0, arg1->unk1E, 0);
+        if (obj == NULL) {
+            return 0;
+        }
+        if (func_15031070(obj, arg0, &sp90, &sp8C) == 0) {
+            return 0;
+        }
+        if (*(s32 *)((u8 *)obj + 0x48) != 0) {
+            mtx = &sp90[arg1->unk20];
+        } else {
+            mtx = sp90;
+        }
+    end:;
+    } else if (arg1->unk34 != NULL) {
+        mtx = arg1->unk34 + D_800BE9C0;
+    } else {
+        func_15145EA4(arg3, arg4, (Mtx *)arg0->unk1D4 + arg1->unk2, arg5);
+        return 1;
+    }
+    if (mtx != NULL) {
+        guMtxL2F(mf, mtx);
+        for (i = 0; i < arg5; i++) {
+            func_150A7960(mf[0], arg3[i][0], arg3[i][1], arg3[i][2], arg4[i], arg4[i] + 1, arg4[i] + 2);
+        }
+    } else {
+        return 0;
+    }
+    return 1;
+}
 
 s32 func_1514672C(struct17 *arg0) {
     f32 temp_f2;

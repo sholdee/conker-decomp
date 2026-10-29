@@ -31,7 +31,48 @@ extern f32 D_800A7220;
 extern struct func_1517A84C_obj *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern u8 func_150ADA20(void);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1A7260/func_15179DB0.s")
+struct Unk8008D0B0 {
+    u8 pad0[0x18];
+    f32 rate[2];
+    f32 angle[2];
+    f32 amp;
+    u8 pad2C[0xC];
+};
+extern struct Unk8008D0B0 D_8008D0B0[];
+extern u8 D_800A7210[];
+
+void func_15179DB0(u8 arg0) {
+    s32 i;
+    s32 j;
+    s16 v;
+    {
+    Vtx *vtx[2];
+    f32 *angle[2];
+    f32 *rate[2];
+
+    vtx[1] = *(Vtx **)((u8 *)&D_800DDE80[arg0] + 4);
+    vtx[0] = *(Vtx **)((u8 *)&D_800DDE80[arg0] + 8);
+    angle[0] = &D_8008D0B0[arg0].angle[0];
+    angle[1] = &D_8008D0B0[arg0].angle[1];
+    rate[0] = &D_8008D0B0[arg0].rate[0];
+    rate[1] = &D_8008D0B0[arg0].rate[1];
+    for (i = 0; i < 2; i++) {
+        v = D_8008D0B0[arg0].amp * sinf(*angle[i] * 0.01745329238f);
+        vtx[i][2].v.ob[0] = v;
+        vtx[i][3].v.ob[0] = v;
+        v = -(v >> 1);
+        for (j = 0; j < 7; j++) {
+            vtx[i][D_800A7210[j]].v.ob[0] = v;
+        }
+        vtx[i][6].v.ob[0] = v + 18;
+        vtx[i][8].v.ob[0] = v - 18;
+        *angle[i] += *rate[i];
+        if (*angle[i] >= 360.0f) {
+            *angle[i] -= 360.0f;
+        }
+    }
+    }
+}
 
 void func_15179FE0(u8 arg0, s16 arg1, s16 arg2, s16 arg3, s8 arg4, u16 arg5, u16 arg6, u8 arg7, u8 arg8, u8 arg9, s32 arg10) {
     struct func_1517A84C_obj *obj;
@@ -123,7 +164,40 @@ s32 arg0;
 // }
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1A7260/func_1517A3A0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1A7260/func_1517A644.s")
+extern void func_1510E82C(s32, s32, f32 *, s32, s32, s32, f32, f32, f32, f32, s32, s32);
+
+void func_1517A644(f32 arg0, u8 arg1, s16 arg2, s16 arg3, s16 arg4) {
+    struct func_1517A84C_obj *obj;
+    s32 n;
+    f32 y;
+    s32 half;
+    s32 pad;
+
+    n = arg0;
+    if (n != 0) {
+        obj = func_15167A68(9, 0, 0xB8, 1, 0xFF, 1);
+        if (obj != NULL) {
+            func_1510E82C(0, 0, &y, 0, 0, 0, arg2, arg3, arg4, arg3, 0, 0);
+            obj->unk92 = obj->unkB0 = y + 3.0f;
+            obj->unk90 = arg2;
+            obj->unk94 = arg4;
+            obj->unk96 = 0x5A;
+            obj->unk98 = (u32)func_150ADA20() % 360;
+            obj->unk9A = 0;
+            obj->unkA0 = 0;
+            obj->unkA4 = 0;
+            obj->unk9F = arg1;
+            obj->unkA8 = (s32)(((u32)func_150ADA20() % 80) + 100) * 0.009999999776f;
+            obj->unkA2 = arg0 * 0.400000006f;
+            half = arg0 * 0.5f;
+            obj->unk9C = ((u32)func_150ADA20() % (u32)n) - half;
+            obj->unk9D = ((u32)func_150ADA20() % (u32)n) - half;
+            obj->unk9E = ((u32)func_150ADA20() % (u32)n) - half;
+            obj->unkA6 = 0;
+            obj->unkB3 = 0xFF;
+        }
+    }
+}
 
 void func_1517A84C(struct func_1517A84C_obj *arg0) {
     s32 temp_v0;
@@ -193,7 +267,7 @@ s32 func_1517A9A8(s32 arg0, s32 arg1) {
 }
 
 u8 func_150ADA20(void);
-extern void func_1517A644(f32, u8, s16, s16, s32);
+extern void func_1517A644(f32, u8, s16, s16, s16);
 void func_1517AA20(f32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4)
 {
   s32 randX;

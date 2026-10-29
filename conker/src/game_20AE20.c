@@ -93,7 +93,20 @@ extern u8 D_800E0BD1;
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_20AE20/func_151DD970.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_20AE20/func_151DD9E4.s")
+extern s8 D_800E0BE0[];
+extern s8 D_8008FE54[];
+extern s8 D_8008FE6C[];
+extern s8 D_8008FE84[];
+
+void func_151DD9E4(void) {
+    s32 i;
+
+    for (i = 0; i < 23; i++) {
+        if ((D_800E0BE0[i] < D_8008FE6C[i]) || (D_8008FE84[i] < D_800E0BE0[i])) {
+            D_800E0BE0[i] = D_8008FE54[i];
+        }
+    }
+}
 
 s32 func_151DDB94(s32 arg0) {
     return ~arg0;
@@ -564,7 +577,62 @@ void func_151E4314(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_20AE20/func_151E43DC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_20AE20/func_151E4BD8.s")
+extern s8 D_8008FE2C;
+extern u16 D_8008FDC0;
+extern s8 D_800AB68C[];
+extern struct Struct151E4314 D_800AB7BC[];
+extern s8 D_800E0A86;
+extern s8 D_800E0AC0;
+extern s8 D_800E0AC1;
+extern s8 D_800E0AC2;
+extern s8 D_800E0AC3;
+
+void func_151E4BD8(void) {
+    s8 idx;
+    s8 count;
+    s16 arg1;
+    s32 i;
+
+    D_8008FE2C = 0;
+    D_800BEAC1 = 0;
+    D_8008FDA4 = 0;
+    D_800E0A90 = 0;
+    count = 0;
+    idx = D_800AB68C[D_8008FDD4->pad42 * 10 + 7];
+    D_8008FDC0 &= 0xF369;
+    if (D_800AB68C[D_8008FDD4->pad42 * 10 + 5] >= 0) {
+        for (i = 0; i < 4; i++) {
+            if ((&D_800E0AC0)[i] == 1) {
+                count++;
+            }
+        }
+        count = count >= 2;
+    }
+    if (idx < 0 || count != 0) {
+        if (idx == -2 && D_800E0A86 == 0) {
+            D_800E0B94 = 6;
+            D_8008FD80 = 2;
+            D_8008FDC0 = 0;
+            return;
+        }
+        arg1 = 0x1D;
+        if (count == 0) {
+            D_800E0B94 = 3;
+        } else {
+            D_800E0B94 = 6;
+            D_8008FD80 = 4;
+        }
+    } else {
+        arg1 = D_800AB7BC[idx].unk0;
+        D_800E0B94 = 6;
+        D_8008FD80 = 1;
+    }
+    D_800D2E40 = 0;
+    func_1501C730(6, arg1, 0, 0, 1);
+    func_151E557C();
+    D_8008FD8C = 1;
+    D_8008FD90 = 1;
+}
 
 extern u8 D_800E0B94;
 

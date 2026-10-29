@@ -1,5 +1,9 @@
 #include <ultra64.h>
+#define func_15048A40 func_15048A40_hdr
+#define func_150ADA20 func_150ADA20_hdr
 #include "functions.h"
+#undef func_15048A40
+#undef func_150ADA20
 #define D_800D1550 D_800D1550_hdr
 #include "variables.h"
 #undef D_800D1550
@@ -43,7 +47,41 @@ void func_150B10F0(u8 *arg0) {
     func_1505E650((struct127 *)arg0, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_DE5A0/func_150B12FC.s")
+void func_15056B08(struct127 *arg0);
+s32  func_150535F4(struct127 *arg0);
+void func_1502178C(struct127 *arg0, s32 arg1, s32 arg2);
+
+void func_150B12FC(struct127 *arg0) {
+    s16 pad;
+    s16 prevAngle;
+    f32 delta;
+
+    prevAngle = *(s16 *)&arg0->unk76;
+    arg0->unk80 = 0xA;
+    {
+    f32 y;
+    y = (f32)((s16 *)D_800D2104[arg0->unk13F])[1];
+    func_15058EA4(arg0, y, 1.0f, y, -0.6999999881f, 12.0f, -16.0f);
+    }
+    func_15056B08(arg0);
+    prevAngle = prevAngle - arg0->unk76;
+    delta = (f32)(s16)(prevAngle * 6) * 0.00390625f - arg0->unkC4;
+    if (delta > 6.0f) {
+        delta = 6.0f;
+    } else if (delta < -6.0f) {
+        delta = -6.0f;
+    }
+    arg0->unk148 = arg0->unk148 + (delta - arg0->unk148) * 0.05000000075f;
+    {
+    f32 t;
+    arg0->unkC4 += arg0->unk148;
+    }
+    arg0->unk40 = (f32)(s16)(arg0->unk7A + 0x4000) * 0.005493164f;
+    func_15059140(arg0);
+    if (func_150535F4(arg0) == 0) {
+        func_1502178C(arg0, 0, -1);
+    }
+}
 
 void func_15056B08(struct127 *arg0);
 void func_150585F0(struct127 *arg0, f32 arg1);
@@ -176,4 +214,107 @@ void func_150B17DC(struct127 *arg0) {
     arg0->unk40 = (s16)(arg0->unk7A + 0x4000) * 0.0054931640625f;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_DE5A0/func_150B19E0.s")
+typedef struct {
+    s32 flags;
+    s32 unk4;
+    u8 pad08[4];
+    s16 unkC, unkE;
+    s16 x, y, z, velocityX, velocityZ;
+    s16 unk1A;
+    s8 fractionX, fractionY, fractionZ, mode;
+    s16 velocityY, size, unk24, unk26, life;
+    s8 fade;
+    u8 unk2B;
+    u8 red, green, blue, alpha;
+    u8 pad30[4];
+    s16 kind;
+} Packet150B19E0;
+
+extern f32 func_15048A40(u8 arg0);
+extern u32 func_150ADA20(void);
+extern f32 func_150489B0(u8 arg0);
+extern void func_150562FC(struct127 *arg0);
+extern void func_150597FC(struct127 *arg0);
+extern void func_1510F800(s32);
+extern s32 func_1510F8D8(s16, s16, s16, s32);
+extern s32 func_15167D84(void *, s32, s32, s32, s32, s32);
+extern s32 D_8008CAE0;
+extern f32 D_800CC2E4;
+extern f32 D_800CC2EC;
+extern u8 D_800B86A4[][0x32C];
+
+void func_150B19E0(struct127 *arg0) {
+    f32 target;
+    f32 dist;
+    f32 speed;
+    f32 sine;
+    f32 cosine;
+    Packet150B19E0 packet;
+    u32 r;
+    u8 angle;
+
+    target = 0.0f;
+    arg0->unkB0 = 0x19;
+    arg0->unkF8 &= ~4;
+    arg0->unk13C = 0;
+    arg0->unkF8 |= 0x80;
+    if (arg0->xz_velocity > 1.0f) {
+        arg0->unkF8 |= 4;
+    }
+    arg0->stunned = 0xA;
+    arg0->unk239 = 3;
+    arg0->unkFC = 0xA7;
+    arg0->unk80 = 1;
+    if (arg0->unk25C & 0x40) {
+        arg0->unk25C &= ~0x40;
+        arg0->old_x_position = D_800CC2E4;
+        arg0->old_z_position = D_800CC2EC;
+    }
+    if (arg0->unk13D != 0) {
+        func_150562FC(arg0);
+        if ((D_800B86A4[arg0->unk13D][0] == 0 || (D_800CC250 & 4)) && arg0->unk21C >= 9) {
+            target = -20.0f;
+        }
+    }
+    arg0->unkB8 += (target - arg0->unkB8) * 0.200000003f;
+    arg0->unk40 = (s16)(arg0->unk7A + 0x4000) * 0.0054931640625f;
+    func_15059140(arg0);
+    func_150597FC(arg0);
+    func_1505E650(arg0, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+    func_1502178C(arg0, 0, -1);
+    if (arg0->unk13D != 0 && (u8)func_150ADA20() < 40U) {
+        r = func_150ADA20() % 40U;
+        dist = arg0->xz_scale * r;
+        angle = func_150ADA20();
+        sine = func_150489B0(angle);
+        cosine = func_15048A40(angle);
+        packet.unkC = 0;
+        packet.unkE = 0;
+        packet.flags = D_8008CAE0;
+        packet.x = arg0->x_position + sine * dist;
+        packet.y = arg0->y_position;
+        packet.z = arg0->z_position + cosine * dist;
+        func_1510F800(0);
+        packet.unk4 = func_1510F8D8(packet.x, packet.y, packet.z, 0);
+        angle = D_800CC2D0[0].unk76 >> 8;
+        speed = D_800CC2D0[0].xz_velocity * 64.0f;
+        packet.velocityX = func_150489B0(angle) * speed;
+        packet.velocityZ = func_15048A40(angle) * -speed;
+        packet.unk1A = -30;
+        packet.mode = 7;
+        packet.velocityY = 0;
+        packet.size = -80;
+        r = (u8)func_150ADA20();
+        packet.unk2B = r;
+        packet.unk24 = (s32)(r << 12) / 5100 + 0xCC;
+        packet.unk26 = (s32)(r << 12) / 12750 + 0x51;
+        packet.life = 400;
+        packet.fade = 0;
+        packet.red = 0xFF;
+        packet.green = 0xFF;
+        packet.blue = 0;
+        packet.alpha = 0xFF;
+        packet.kind = 0;
+        func_15167D84(&packet, 0, 0, -1, 0xFF, 0);
+    }
+}

@@ -176,7 +176,36 @@ void func_150FF2AC(struct127 *arg0, struct17 *arg1, struct17 *arg2, struct17 *ar
     func_15145740(arg0, arg1, arg2, arg3, D_800A211C);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_12C1E0/func_150FF2D4.s")
+u8 func_150FF6E0(struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, struct127 *, struct126 *);
+void func_151D5174(struct127 *, struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, s32 *, s32 *, struct17 *);
+
+void func_150FF2D4(u8 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, struct17 *arg4, struct17 *arg5, struct17 *arg6, struct17 *arg7, struct17 *arg8, struct17 *arg9, s32 *argA, s32 *argB, struct17 *argC, struct127 *argD, struct126 *argE) {
+    if (*arg0 != 0) {
+        *arg0 = func_150FF6E0(arg1, arg2, arg3, arg4, argC, argD, argE);
+    }
+    if (*arg0 == 0) {
+        f32 temp_f14;
+        f32 var_f16;
+        f32 var_f18;
+        temp_f14 = arg5->unk0;
+        if ((0.0000999999974738f < fabsf(temp_f14)) || (0.0000999999974738f < fabsf(arg5->unk8))) {
+            f32 temp_f2;
+            f32 temp_f12;
+            temp_f2 = arg5->unk8;
+            temp_f12 = 1.0f / sqrtf((temp_f14 * temp_f14) + (temp_f2 * temp_f2));
+            var_f16 = temp_f2 * temp_f12;
+            var_f18 = -temp_f14 * temp_f12;
+        } else {
+            var_f16 = 1.0f;
+            var_f18 = 0.0f;
+        }
+        arg2->unk0 = argD->x_position + (34.0f * var_f18);
+        arg2->unk4 = argD->y_position + 49.0f;
+        arg2->unk8 = argD->z_position + (34.0f * var_f16);
+        *argC = *arg2;
+    }
+    func_151D5174(argD, arg2, arg5, arg6, arg7, arg8, arg9, argA, argB, argC);
+}
 
 void func_150FF474(struct17 *arg0, struct17 *arg1, u8 arg2, s32 arg3) {
     struct packet {

@@ -2,6 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
+extern s32 func_151EF610(void);
+
 extern f32 D_800A1140;
 extern f32 D_800A1144;
 extern f32 D_800A1148;
@@ -11,7 +13,6 @@ extern f32 D_800A1154;
 extern f32 D_800A1158;
 extern f32 D_800A115C;
 extern s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
-extern s32 func_151EF610(f32);
 
 typedef struct Struct150E5558 {
     /* 0x00 */ f32 unk00;
@@ -162,7 +163,115 @@ void func_150E4514(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_111670/func_150E4550.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_111670/func_150E4928.s")
+typedef struct unkfunc_1510F8D8 {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8;
+    s32 unkC;
+} unkfunc_1510F8D8;
+
+typedef struct Struct150E4928 {
+    /* 0x00 */ u8 pad0[0x10];
+    /* 0x10 */ s16 unk10;
+    /* 0x12 */ s16 unk12;
+    /* 0x14 */ s16 unk14;
+    /* 0x16 */ u8 pad16[0xA];
+    /* 0x20 */ s32 unk20[8];
+    /* 0x40 */ s32 unk40;
+    /* 0x44 */ s32 *unk44;
+    /* 0x48 */ u8 pad48[8];
+    /* 0x50 */ u16 unk50;
+    /* 0x52 */ u8 pad52[6];
+    /* 0x58 */ u16 unk58;
+    /* 0x5A */ u8 pad5A[0x46];
+} Struct150E4928;
+
+extern void func_150A44F0(s32, s16 *, s32);
+extern s32 func_150A43E0(s32, s32, s32, s16 *);
+extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
+extern void func_1511490C(f32 arg0[4][4], void *arg1);
+extern void func_1510F800(s32);
+
+void func_150E4928(Struct150E4928 *arg0) {
+    s16 idx;
+    s32 i;
+    s32 found;
+    s32 tries;
+    s16 *verts[3];
+    s32 *tri;
+    s32 x;
+    s32 best;
+    s32 z;
+    f32 height;
+    s32 type;
+    Vtx vtx[3];
+    f32 outx;
+    f32 outy;
+    f32 outz;
+    f32 mtx[4][4];
+
+    height = -10000.0f;
+    tries = 5;
+    if (arg0 - (Struct150E4928 *)D_800DBEF4 < D_800DBEF0 && arg0 - (Struct150E4928 *)D_800DBEF4 >= 0) {
+        idx = arg0 - (Struct150E4928 *)D_800DBEF4;
+        found = 0;
+        func_1510F800(2);
+        func_150A44F0(1, &idx, 0);
+        while (tries != 0) {
+            x = arg0->unk10;
+            z = arg0->unk14;
+            if (arg0->unk50 != 0) {
+                x += (func_151EF610() % arg0->unk50) * 2 - arg0->unk50;
+                z += (func_151EF610() % arg0->unk50) * 2 - arg0->unk50;
+            }
+            found = func_150A43E0(x, z, 1, &idx);
+            if (found) {
+                best = -0x800000;
+                while (found--) {
+                    if (best < ((unkfunc_1510F8D8 *)&D_800D3300)[found].unk0) {
+                        best = ((unkfunc_1510F8D8 *)&D_800D3300)[found].unk0;
+                        tri = (s32 *)((unkfunc_1510F8D8 *)&D_800D3300)[found].unk4;
+                        height = best * 0.00390625f;
+                    }
+                }
+                tries = 0;
+                found = 1;
+            } else {
+                tries--;
+            }
+        }
+        if (found) {
+            if (arg0->unk44 != NULL) {
+                i = ((s32)tri - D_800DBE3C) / 12;
+                type = arg0->unk44[i - arg0->unk58];
+            } else {
+                type = arg0->unk40;
+            }
+            func_1511490C(mtx, arg0);
+            if (tri != NULL) {
+                i = tri[0];
+                i += arg0->unk20[D_800BE9C0];
+                verts[0] = (s16 *)i;
+                i = tri[1];
+                i += arg0->unk20[D_800BE9C0];
+                verts[1] = (s16 *)i;
+                i = tri[2];
+                i += arg0->unk20[D_800BE9C0];
+                verts[2] = (s16 *)i;
+                for (i = 0; i < 3; i++) {
+                    func_150A7960((f32 *)mtx, verts[i][0], verts[i][1], verts[i][2], &outx, &outy, &outz);
+                    vtx[i].v.ob[0] = outx;
+                    vtx[i].v.ob[1] = outy;
+                    vtx[i].v.ob[2] = outz;
+                    verts[i] = (s16 *)&vtx[i];
+                }
+                tri = (s32 *)verts;
+            }
+            func_150E4550(x, height, z, 1, func_1510F8CC(type), (s32)tri, 0);
+        }
+    }
+}
+
 
 void func_150E4CBC(struct42 *arg0) {
     s32 temp_v0;
@@ -221,8 +330,7 @@ void func_150E5558(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s
     sp34.unk20 = 1.0f;
     sp34.unk24 = 1.0f;
     sp34.unk00 = 1.0f;
-    sp34.unk08 = D_800A1148;
-    sp34.unk0C = D_800A1148;
+    sp34.unk08 = sp34.unk0C = D_800A1148;
     sp34.unk28 = arg0;
     sp34.unk2C = arg1;
     sp34.unk30 = arg2;
@@ -239,7 +347,7 @@ void func_150E5558(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s
         sp34.unk04 = D_800A1154;
     }
 
-    sp34.unk54 = (func_151EF610(D_800A1148) % 60) + 0x3C;
+    sp34.unk54 = (func_151EF610() % 60) + 0x3C;
     sp34.unk50 = 0x29E9;
 
     temp_f6 = func_150ADA68();

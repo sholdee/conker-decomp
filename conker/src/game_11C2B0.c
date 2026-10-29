@@ -864,7 +864,120 @@ void func_150F0A24(f32 *arg0) {
     func_15152B38(&packet, 0xFF, 1, arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_11C2B0/func_150F0BEC.s")
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s16 unk8;
+    s16 unkA;
+    s32 unkC;
+    s32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 unk16;
+    u8 unk17;
+    u8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+    u8 unk1C;
+    u8 unk1D;
+    s16 unk1E;
+    s16 unk20;
+    s16 unk22;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    struct17 pos;
+    struct17 unk3C;
+    struct17 vel;
+    f32 unk54;
+    u32 unk58;
+    s32 unk5C;
+    u8 unk60;
+    u8 unk61;
+    s8 unk62;
+    s8 unk63;
+    s8 unk64;
+    u8 unk65;
+    u8 unk66;
+    u8 pad67;
+    s16 unk68;
+    u8 pad6A[2];
+    f32 unk6C;
+} Struct150F0BECParticle; /* 0x70 */
+
+extern void *func_15130280(void *, u8, s32, s32, u8, s32);
+extern f32 D_800A1860;
+extern f32 D_800A1864;
+extern f32 D_800A1868;
+extern f32 D_800A186C;
+
+void func_150F0BEC(Struct150F0E48Src *arg0) {
+    Struct150F0BECParticle spawn;
+    Struct150F0E48Sub sub;
+    void *ret;
+    s32 temp_v0;
+    s32 temp_v1;
+
+    spawn.unk1D = 0x2B;
+    spawn.unk8 = 0x4403;
+    spawn.unk0 = 0x200005;
+    spawn.unk4 = 0x70600;
+    spawn.unkA = 0x12C;
+    spawn.unkC = 0;
+    spawn.unk10 = 0;
+    spawn.unk14 = 0xFF;
+    spawn.unk15 = 0xFF;
+    spawn.unk16 = 0xFF;
+    spawn.unk17 = 0xFF;
+    spawn.unk18 = 0xFF;
+    spawn.unk19 = 0xD9;
+    spawn.unk1A = 0xA0;
+    spawn.unk1B = 0xFF;
+    spawn.unk1C = 0xFF;
+    spawn.unk2C = 250.0f;
+    spawn.unk28 = 250.0f;
+    spawn.pos.unk0 = arg0->unk14;
+    spawn.pos.unk4 = arg0->unk18;
+    spawn.pos.unk8 = arg0->unk1C;
+    spawn.unk3C = *(struct17 *)&D_800A5480;
+    spawn.vel = *(struct17 *)&D_800A5480;
+    spawn.unk1E = 1;
+    spawn.unk20 = 0xFF;
+    spawn.unk22 = 1;
+    spawn.unk54 = 0.0f;
+    spawn.unk24 = 1.0f;
+    if (func_150ADA20() & 1) {
+        temp_v1 = 0x40;
+    } else {
+        temp_v1 = 0;
+    }
+    if (func_150ADA20() & 1) {
+        temp_v0 = 0x80;
+    } else {
+        temp_v0 = 0;
+    }
+    spawn.unk58 = (temp_v0 | temp_v1) | 0x8000 | 0x4000 | 0x40000;
+    spawn.unk60 = 6;
+    spawn.unk61 = 6;
+    spawn.unk62 = 0x25;
+    spawn.unk63 = -1;
+    spawn.unk64 = -1;
+    spawn.unk65 = 0xA;
+    spawn.unk5C = 0;
+    spawn.unk66 = 0xFF;
+    spawn.unk68 = 0;
+    sub.unk0 = arg0;
+    spawn.unk6C = D_800A1860;
+    sub.unk4 = arg0->unk3B;
+    sub.unk8 = func_150ADA68() * 2.0f * D_800A1864;
+    sub.unkC = func_150ADA68() * 2.0f * D_800A1868;
+    sub.unk10 = func_150ADA68() * 2.0f * D_800A186C;
+    ret = func_15130280(&spawn, 1, 0, 0x14, 0xFF, 1);
+    if (ret != NULL) {
+        memcpy((u8 *)ret + 0xA8, &sub, sizeof(sub));
+    }
+}
 
 s32 func_150F0E48(Struct150F0E48Obj *arg0, s32 arg1) {
     Struct150F0E48Sub *sub;

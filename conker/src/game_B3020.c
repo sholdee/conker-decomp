@@ -935,7 +935,30 @@ void func_15088F30(Obj15088F30 *arg0, f32 *outX, f32 *outY, f32 *outZ) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_B3020/func_1508907C.s")
+u8 func_1508907C(u8 node, u8 type, u8 exclude, u8 sub) {
+    s32 i;
+    u8 result;
+    Node15088F30 *n;
+    Node15088F30 *t;
+
+    result = 0xFF;
+    if (node >= D_80087290) {
+        return 0xFF;
+    }
+    n = node + (Node15088F30 *)D_800D2350;
+    for (i = 0; i < 5; i++) {
+        if (n->links[i] != 0xFF && n->links[i] != exclude) {
+            t = n->links[i] + (Node15088F30 *)D_800D2350;
+            if (t->type == type || type == 0xFF) {
+                if (t->padF == sub) {
+                    return n->links[i];
+                }
+                result = n->links[i];
+            }
+        }
+    }
+    return result;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_B3020/func_150891E8.s")
 
@@ -1007,7 +1030,65 @@ s32 func_15089BC0(void) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_B3020/func_15089F9C.s")
+s32 func_15089F9C(s32 arg0) {
+    f32 dx;
+    f32 dz;
+    f32 val;
+    f32 dist;
+    f32 minDist;
+    f32 maxDist;
+    f32 best;
+    s32 mask;
+    s32 count;
+    s32 bit;
+    s32 i;
+    s32 bestIdx;
+    struct127 *other;
+    struct127 *self;
+    s32 *states;
+    s32 off;
+
+    states = (s32 *)(D_800D23B0 + 0xE64);
+    mask = *(s32 *)(D_800D23B0 + 0x14);
+    count = *(s32 *)(D_800D23B0 + 0x10);
+    off = arg0 * 4;
+    bestIdx = -1;
+    if (*(s32 *)(D_800D23B0 + off + 0x15C) == 0) {
+        minDist = 750.0f;
+        maxDist = 3500.0f;
+    } else {
+        minDist = 1500.0f;
+        maxDist = 8000.0f;
+    }
+    best = -1000000.0f;
+    for (i = 0; i < count; i++) {
+        bit = 1 << i;
+        if ((states[i] != 3) && (mask & bit) &&
+            (*(s32 *)(D_800D23B0 + off + 0x16C0) & (bit << 16))) {
+            other = &D_800CC2D0[i];
+            if (other != NULL) {
+                self = &D_800CC2D0[arg0];
+                dx = self->x_position - other->x_position;
+                dz = self->z_position - other->z_position;
+                dist = sqrtf((dx * dx) + (dz * dz));
+            } else {
+                dist = 32000.0f;
+            }
+            if (maxDist < dist) {
+                dist = maxDist;
+            }
+            if (dist < minDist) {
+                dist = minDist;
+            }
+            val = sinf(((dist - minDist) * (6.283185482f / (maxDist - minDist))) + -1.570796371f) + 1.0f;
+            if (best < val) {
+                best = val;
+                bestIdx = i;
+            }
+        }
+    }
+    return bestIdx;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_B3020/func_1508A1BC.s")
 
