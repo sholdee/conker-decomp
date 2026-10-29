@@ -268,7 +268,173 @@ void func_150F5C08(void *arg0, s16 arg1, u8 arg2, s32 arg3) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1228D0/func_150F5C98.s")
+/* Partial view of the owning actor. */
+typedef struct {
+    s32 interaction_state;
+    u8 pad4[0x3B - 0x4];
+    u8 unique_id;
+    u8 pad3C[0x1D4 - 0x3C];
+    s32 model;
+} EffectOwner5C98;
+
+/* Particle descriptor passed to func_15130280 (0x70 bytes). */
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s16 unk8;
+    s16 unkA;
+    s32 unkC;
+    s32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 unk16;
+    u8 unk17;
+    u8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+    u8 unk1C;
+    u8 unk1D;
+    s16 unk1E;
+    s16 unk20;
+    s16 unk22;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    struct17 pos;
+    struct17 unk3C;
+    struct17 vel;
+    f32 unk54;
+    u32 unk58;
+    s32 unk5C;
+    u8 unk60;
+    u8 unk61;
+    s8 unk62;
+    s8 unk63;
+    s8 unk64;
+    u8 unk65;
+    u8 unk66;
+    u8 pad67;
+    s16 unk68;
+    u8 pad6A[2];
+    f32 unk6C;
+} Particle5C98; /* 0x70 */
+
+typedef struct {
+    EffectOwner5C98 *owner;
+    u8 ownerId;
+    u8 pad5[3];
+    f32 accum;
+} Data5C98;
+
+typedef struct {
+    u8 pad0;
+    u8 unk1;
+    u8 pad2[0xC - 0x2];
+    u8 unkC;
+    u8 padD;
+    s16 state;
+    u8 pad10[0x28 - 0x10];
+    Data5C98 data;
+} Effect5C98;
+
+extern struct17 D_800A1B00;
+extern struct17 D_800A1B0C;
+extern s32 func_15145EA4(s32 *arg0, s32 *arg1, s32 arg2, s32 arg3);
+extern void *func_15130280(void *, u8, s32, s32, u8, s32);
+
+void func_150F5C98(Effect5C98 *effect) {
+    EffectOwner5C98 *owner;
+    Data5C98 *data;
+    Particle5C98 spawn;
+    f32 scale;
+    struct17 a;
+    struct17 b;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    s32 srcs[2];
+    s32 dsts[2];
+
+    owner = effect->data.owner;
+    data = &effect->data;
+    if (owner->interaction_state == 0 || owner->unique_id != data->ownerId) {
+        effect->state = -1;
+        return;
+    }
+    if (owner->model != 0) {
+        data->accum += (0.2600000203f + func_150ADA68() * 0.1950000077f) * D_800BE9A4;
+        if (data->accum > 1.0f) {
+            spawn.unk14 = 0xFF;
+            spawn.unk15 = 0xFF;
+            spawn.unk16 = 0xFF;
+            spawn.unk18 = 0xB4;
+            spawn.unk19 = 0xB4;
+            spawn.unk1A = 0xB4;
+            srcs[0] = (s32)&D_800A1B00;
+            srcs[1] = (s32)&D_800A1B0C;
+            dsts[0] = (s32)&a;
+            dsts[1] = (s32)&b;
+            func_15145EA4(srcs, dsts, owner->model + 0x140, 2);
+            spawn.unk1D = 0x6C;
+            spawn.unk8 = 0x5103;
+            spawn.unk0 = 0x200005;
+            spawn.unk4 = 0x9F0600;
+            spawn.unkC = 0;
+            spawn.unk10 = 0;
+            spawn.unk17 = 0xFF;
+            spawn.unk1C = 0xFF;
+            dx = b.unk0 - a.unk0;
+            dy = b.unk4 - a.unk4;
+            dz = b.unk8 - a.unk8;
+            spawn.unk3C = *(struct17 *)&D_800A5480;
+            spawn.unk58 = 0x84CE07;
+            spawn.unk60 = 8;
+            spawn.unk61 = 6;
+            spawn.unk62 = 0x10;
+            spawn.unk63 = -1;
+            spawn.unk64 = -1;
+            spawn.unk65 = 0;
+            spawn.unk5C = 0;
+            spawn.unk66 = 0xFF;
+            spawn.unk68 = 1000;
+            spawn.unk6C = 1000.0f;
+            scale = 0.9730340242f;
+            spawn.unk24 = 1.022472024f;
+            do {
+                s16 life;
+                f32 k;
+                f32 t;
+                s32 flags;
+                void *ret;
+
+                spawn.unkA = func_150ADA20() % 21U + 20;
+                spawn.unk22 = spawn.unkA;
+                spawn.unk1E = spawn.unkA;
+                spawn.unk20 = 0xFF / spawn.unkA;
+                spawn.unk1B = func_150ADA20() % 26U + 8;
+                spawn.unk28 = spawn.unk2C = func_150ADA68() * 70.0f + 148.0f;
+                spawn.unk54 = func_150ADA68() * 0.2190000117f + 0.08600000292f;
+                k = func_150ADA68() * 0.04100000113f + 0.07800000161f;
+                spawn.vel.unk0 = dx * k;
+                spawn.vel.unk4 = dy * k;
+                spawn.vel.unk8 = dz * k;
+                t = func_150ADA68() * D_800BE9A4;
+                spawn.unk58 &= ~0xC0;
+                spawn.pos.unk0 = spawn.vel.unk0 * t + a.unk0;
+                spawn.pos.unk4 = spawn.vel.unk4 * t + a.unk4;
+                spawn.pos.unk8 = spawn.vel.unk8 * t + a.unk8;
+                flags = (func_150ADA20() & 1) ? 0x80 : 0;
+                spawn.unk58 |= ((func_150ADA20() & 1) ? 0x40 : 0) | flags;
+                ret = func_15130280(&spawn, 1, 0, 4, effect->unkC, effect->unk1);
+                if (ret != NULL) {
+                    memcpy((u8 *)ret + 0xA8, &scale, 4);
+                }
+                data->accum -= 1.0f;
+            } while (data->accum > 1.0f);
+        }
+    }
+}
 
 void func_150F6138(s32 arg0, s32 arg1, u8 arg2) {
     func_15149514(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
