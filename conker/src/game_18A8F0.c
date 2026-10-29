@@ -150,7 +150,31 @@ void func_1515D69C(void) {
 void func_1515D6C8(void) {
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18A8F0/func_1515D6D0.s")
+extern s32 D_800DCD10[];
+void func_1515EF74(s16 *arg0);
+
+#define MW1515D6D0(w0v, w1v) { Gfx *_g = (Gfx *)arg0; arg0 += 8; _g->words.w0 = (w0v); _g->words.w1 = (w1v); }
+
+#define MWD(off, v) MW1515D6D0(0xDB100000 | (off), v)
+
+s32 func_1515D6D0(s32 arg0, s32 arg1) {
+    MW1515D6D0(0xDB020000, 0);
+    MW1515D6D0(0xD9FFFFFF, 0x20000);
+    func_1515EF74((s16 *)((u8 *)((struct259 *)D_800BE628 + arg1) + (D_800BE9C0 << 6) + 0x100));
+    MWD(0x00, ((D_800DCD10[0] >> 16) << 16) | ((D_800DCD10[1] >> 16) & 0xFFFF));
+    MWD(0x08, ((D_800DCD10[0] >> 16) << 16) | ((D_800DCD10[1] >> 16) & 0xFFFF));
+    MWD(0x04, (D_800DCD10[2] >> 16) << 16);
+    MWD(0x0C, (D_800DCD10[2] >> 16) << 16);
+    MWD(0x10, ((D_800DCD10[0] & 0xFFFF) << 16) | ((D_800DCD10[1] & 0xFFFF) & 0xFFFF));
+    MWD(0x18, ((D_800DCD10[0] & 0xFFFF) << 16) | ((D_800DCD10[1] & 0xFFFF) & 0xFFFF));
+    MWD(0x14, (D_800DCD10[2] & 0xFFFF) << 16);
+    MWD(0x1C, (D_800DCD10[2] & 0xFFFF) << 16);
+    MWD(0x20, 0);
+    MWD(0x24, D_800DCD10[3] << 16);
+    MWD(0x28, 0);
+    MWD(0x2C, D_800DCD10[3] << 16);
+    return arg0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_18A8F0/func_1515D914.s")
 
