@@ -1,5 +1,8 @@
 #include <ultra64.h>
+#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
+#undef func_150ADA20
+u32 func_150ADA20(void);
 #include "variables.h"
 
 
@@ -77,7 +80,57 @@ void func_150FAA40(u8 arg0, s32 arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_126F60/func_150FAAEC.s")
+typedef struct {
+    u8 count;
+    s16 *ids;
+    f32 *scales;
+} Rec150FA;
+
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    f32 unk8;
+} Emit150FA;
+
+typedef struct {
+    u8 pad0;
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD[0x1B];
+    Emit150FA unk28;
+} Emitter150FA;
+
+extern Rec150FA D_80088B20[];
+void func_1514470C(s32, struct17 *);
+void func_150F4570(struct17 *arg0, struct17 *arg1, u8 arg2, f32 arg3, f32 arg4, f32 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
+
+void func_150FAAEC(Emitter150FA *arg0) {
+    Emit150FA *e;
+    struct17 a;
+    struct17 b;
+    u8 i;
+    f32 speed;
+    u32 n;
+    Rec150FA *rec;
+
+    e = &arg0->unk28;
+    n = 3;
+    e->unk8 += (0.08000000566f + func_150ADA68() * 0.1800000072f) * D_800BE9A4;
+    if (1.0f < e->unk8) {
+        do {
+            func_1514470C(e->unk0, &a);
+            func_1514470C(e->unk4, &b);
+            rec = &D_80088B20[1];
+            i = func_150ADA20() % rec->count;
+            speed = func_150ADA68() * 25.0f + 30.0f;
+            func_150F4570(&a, &b, rec->ids[i], speed, 1.0f / speed,
+                          rec->scales[i] * (func_150ADA68() * (f32)1 + (f32)1), 1, func_150ADA20() % n + 0x2EE,
+                          arg0->unkC, arg0->unk1);
+            e->unk8 -= 1.0f;
+        } while (1.0f < e->unk8);
+    }
+}
 
 void func_150FACE4(struct102 *arg0, s32 arg1, u8 arg2) {
     switch (arg2) {
