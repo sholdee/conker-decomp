@@ -510,10 +510,10 @@ full_body:
     }
 }
 
-s32 func_15194FF4(s32, s32, s32, s32);
+void func_15194FF4();
 
 s32 func_15194D80(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    return func_15194FF4(arg0, arg1, 0, arg3);
+    func_15194FF4(arg0, arg1, 0, arg3);
 }
 
 s32 func_15194DA4(arg0, arg1, arg2, arg3)
@@ -522,7 +522,7 @@ s32 arg1;
 s32 arg2;
 s32 arg3;
 {
-    return func_15194FF4(arg0, arg1, 1, arg3);
+    func_15194FF4(arg0, arg1, 1, arg3);
 }
 
 void func_15194DC8(s32 arg0, struct127 *arg1, s32 arg2) {
@@ -575,7 +575,54 @@ void func_15194F48(s32 arg0, struct127* arg1, s32 arg2) {
     func_1507CD64(arg1, 6);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1C1150/func_15194FF4.s")
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    struct127 *unk8;
+} Struct15194FF4;
+
+extern s32 func_1518F51C(void *arg0, u8 arg1, s32 arg2, s8 arg3, s8 arg4, s8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
+extern void func_15190518(void *arg0);
+
+void func_15194FF4(arg0, arg1, arg2)
+struct127 *arg0;
+struct127 *arg1;
+u8 arg2;
+{
+    u8 *ret;
+    Struct15194FF4 sp48;
+
+    func_15190518(arg1);
+    switch (arg1->id) {
+    case 0x0: case 0x1: case 0x2: case 0x3: case 0x4: case 0x11: case 0x14: case 0x16:
+    case 0x3b: case 0x50: case 0x53: case 0x58: case 0x5a: case 0x5f: case 0x70: case 0x74:
+    case 0x75: case 0x7a: case 0x80: case 0x87: case 0x88: case 0x90: case 0x96: case 0x98:
+    case 0x99: case 0x9c: case 0x9d: case 0x9f: case 0xa0: case 0xb0: case 0xb1: case 0xb2:
+    case 0xb4:
+        if (D_800BE616 != 0) {
+            sp48.unk0 = 0x7D;
+            sp48.unk4 = 5;
+            if ((arg0->id == 0xFF) && (arg0->unk124 != 0)) {
+                sp48.unk8 = &D_800CC2D0[arg0->unk124 - 1];
+            } else {
+                sp48.unk8 = arg0;
+            }
+            ret = (u8 *)func_1518F51C(arg1, 0, 250, arg2 ? 0 : -1, arg2 ? 0 : -1, 8, arg2 ? 1 : 0, arg2 ? 0xC : 0, 0xFF, 1);
+            if ((ret != 0) && (arg2 != 0)) {
+                memcpy(ret + 0x90, &sp48, 0xC);
+                {
+                    u8 *temp = (u8 *)arg1->unk31C;
+                    if (temp != NULL) {
+                        temp[0x1AC] = 1;
+                    }
+                }
+            }
+        } else {
+            func_1518F51C(arg1, 0, 300, -1, -1, 8, 0, 0, 0xFF, 1);
+        }
+        break;
+    }
+}
 
 extern struct127 *func_1505ED34(void);
 extern s32 func_150838EC(struct127 *arg0, s32 arg1, s32 arg2, f32 arg3);
