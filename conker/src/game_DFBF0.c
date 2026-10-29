@@ -328,4 +328,140 @@ s32 func_150B378C(void *a0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_DFBF0/func_150B37C8.s")
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 unk0C;
+    f32 unk10;
+} Pt_150B37C8;
+
+typedef struct {
+    f32 unk00;
+    f32 unk04;
+    u8 pad08[4];
+    f32 unk0C;
+    f32 unk10;
+    u8 pad14[5];
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+    u8 pad1C[4];
+    u8 unk20;
+} State_150B37C8;
+
+typedef struct {
+    u8 pad00[1];
+    u8 unk01;
+    u8 pad02[0xA];
+    u8 unk0C;
+    u8 pad0D[0x18];
+    u8 unk25;
+    u8 pad26[7];
+    s8 unk2D;
+    u8 pad2E[0x66];
+    Pt_150B37C8 *unk94;
+    State_150B37C8 *unk98;
+} Src_150B37C8;
+
+typedef struct {
+    s32 unk00;
+    s16 unk04;
+    s8 unk06;
+    u8 pad07;
+    s32 unk08;
+    s32 unk0C;
+    u8 unk10;
+    u8 unk11;
+    u8 unk12;
+    u8 unk13;
+    u8 unk14;
+    u8 unk15;
+    u8 pad16[2];
+    s32 unk18;
+    u8 pad1C[0xC];
+    Pt_150B37C8 *unk28;
+} Params_150B37C8;
+
+typedef struct {
+    s16 v[3];
+} S16x3_150B37C8;
+
+extern S16x3_150B37C8 D_80088700;
+
+s32 func_15147DA0(void *arg0, void *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
+                  s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, s32 *arg11,
+                  s32 arg12, u8 arg13, s32 arg14);
+
+s32 func_150B37C8(Src_150B37C8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
+    State_150B37C8 *state;
+    Params_150B37C8 tmp;
+    f32 scale;
+    S16x3_150B37C8 tbl;
+    struct { f32 x; f32 y; f32 z; s16 unk0C; s16 unk0E; s32 unk10; u8 pad14; u8 unk15; s32 pad18; } pos;
+    struct { f32 unk00; f32 unk04; f32 unk08; f32 unk0C; f32 unk10; u8 pad14[4]; u8 unk18; u8 unk19; u8 unk1A; u8 unk1B; s32 pad1C; } motion;
+    struct { s32 unk00; s32 unk04; s32 unk08; s32 unk0C; s32 unk10; s32 unk14; s32 unk18; u8 unk1C; u8 unk1D; } style;
+
+    {
+    s32 rand2;
+    s32 rand1;
+    s32 rand0;
+    state = arg0->unk98;
+    tmp.unk28 = arg0->unk94;
+    tbl = D_80088700;
+    state->unk20 = 4;
+    scale = func_150ADA68() * 50.0f + 50.0f;
+    tmp.unk06 = *(tbl.v + func_150ADA20() % 3U);
+    tmp.unk08 = 0;
+    tmp.unk0C = 0;
+    tmp.unk00 = 0x11;
+    tmp.unk04 = 0x96;
+    tmp.unk10 = state->unk1B;
+    tmp.unk11 = state->unk1A;
+    tmp.unk12 = 0;
+    tmp.unk13 = 0;
+    tmp.unk14 = 0;
+    tmp.unk15 = 0xFF;
+    tmp.unk18 = 0x30002;
+
+    rand0 = func_150ADA20();
+    rand1 = func_150ADA20();
+    rand2 = func_150ADA20();
+
+    func_1513C73C((s32)&tmp, 1, 0, arg5,
+                  tmp.unk28[arg0->unk2D].x,
+                  arg4,
+                  tmp.unk28[arg0->unk2D].z,
+                  scale, scale,
+                  rand0 & 0xFF, (rand2 & 1) + (rand1 & 1), 0,
+                  arg0->unk0C, arg0->unk01);
+
+    }
+    style.unk00 = 0;
+    style.unk04 = 1;
+    style.unk08 = 0x160600;
+    style.unk0C = 3;
+    style.unk10 = 0x10;
+    style.unk14 = 0x80;
+    style.unk18 = 0x20;
+    style.unk1C = 0;
+    style.unk1D = 9;
+    pos.unk10 = 1;
+    pos.unk0E = 1;
+    motion.unk19 = state->unk19;
+    motion.unk1A = state->unk1A;
+    motion.unk18 = 8;
+    motion.unk1B = state->unk1B;
+    pos.x = tmp.unk28[arg0->unk2D].x;
+    pos.y = arg4;
+    pos.z = tmp.unk28[arg0->unk2D].z;
+    pos.unk15 = arg0->unk25;
+    pos.unk0C = 0x3C;
+    motion.unk00 = state->unk00 * 0.75f;
+    motion.unk10 = state->unk10;
+    motion.unk04 = state->unk04;
+    motion.unk08 = func_150ADA68() * 15.0f + 15.0f;
+    motion.unk0C = state->unk0C;
+    func_15147DA0(&pos, &motion, 0, 1, 7, 0, 0, 0, 0, 0, 0, (s32 *)&style, 0, arg0->unk0C, arg0->unk01);
+    return 1;
+}
