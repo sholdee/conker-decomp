@@ -86,7 +86,69 @@ void func_1512B100(struct108 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_157840/func_1512B1B8.s")
+typedef struct {
+    s32 shift;
+    s32 base;
+} struct80089630;
+
+typedef struct {
+    u8 pad0[0x2C];
+    f32 unk2C;
+    f32 unk30;
+    u8 pad34[0x180 - 0x34];
+} struct800BE628;
+
+struct Struct1512B5FC;
+extern struct80089630 D_80089630[];
+s32 func_1512B630(struct108 *arg0, struct Struct1512B5FC *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
+
+void func_1512B1B8(struct108 *arg0, s32 arg1, s32 arg2, s32 arg3) {
+    s32 sp74[0x281];
+    s32 start;
+    s32 i;
+    s32 lim;
+    s16 n;
+    u16 code;
+    struct80089630 *tbl;
+    struct1512ABF8 *p;
+    s16 y;
+
+    p = &D_800DC200[arg0->unk23D][arg0->unk1B4];
+    n = p->unk0;
+    y = p->unk2;
+    *(f32 *)((u8 *)arg0 + 0x60C) += (n - *(f32 *)((u8 *)arg0 + 0x60C)) * 0.05000000075f;
+    n = (s16)*(f32 *)((u8 *)arg0 + 0x60C) + 0.5f;
+    *(f32 *)((u8 *)arg0 + 0x610) += (y - *(f32 *)((u8 *)arg0 + 0x610)) * 0.05000000075f;
+    start = n / 4;
+    lim = (n * 3) / 4;
+
+    for (i = start; i < n; i++) {
+        if ((*(struct800BE628 **)&D_800BE628)[arg0->unk23D].unk2C < (f32)(arg1 - i)) {
+            {
+            s16 pad;
+            code = ((u16 *)arg0->unk8BC)[arg1 - i];
+            }
+            tbl = &D_80089630[code >> 13];
+            sp74[n - i] = arg3 - ((u32)(tbl->base + (((code >> 2) & 0x7FF) << tbl->shift)) >> 3);
+            if (func_1512B630(arg0, (struct Struct1512B5FC *)(D_800DC0C0 + arg0->unk23D * 0x4C), sp74[n - i], i, lim, 0)) {
+                i = n;
+            }
+        }
+    }
+    for (i = start; i < n; i++) {
+        if ((f32)(arg1 + i) < (*(struct800BE628 **)&D_800BE628)[arg0->unk23D].unk30) {
+            {
+            s16 pad;
+            code = ((u16 *)arg0->unk8BC)[arg1 + i];
+            }
+            tbl = &D_80089630[code >> 13];
+            (sp74 + i)[n] = arg3 - ((u32)(tbl->base + (((code >> 2) & 0x7FF) << tbl->shift)) >> 3);
+            if (func_1512B630(arg0, (struct Struct1512B5FC *)(D_800DC0C0 + arg0->unk23D * 0x4C + 0xC), (sp74 + i)[n], i, lim, 0)) {
+                i = n;
+            }
+        }
+    }
+}
 
 /* struct108 view: the header types unk5FC as u16 but this function reads it with lh. */
 typedef struct {
