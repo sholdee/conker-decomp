@@ -457,4 +457,48 @@ void func_1507FF94(ActorUniqueIdFields *arg0) {
     func_151494E0((s32)&sp20, 0xD);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_AC030/func_1507FFD8.s")
+extern s32 func_15037698(s32 arg0, s32 arg1, s32 arg2, f32 x, f32 y, f32 z, f32 *out, f32 range, s32 arg8, s32 arg9);
+extern s32 func_150A3194(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+extern void *D_800DCE50[];
+typedef struct { s32 v[3]; } Types1507FFD8;
+extern Types1507FFD8 D_80086C50;
+
+s32 func_1507FFD8(struct127 *arg0) {
+    s32 found;
+    s32 i;
+    struct127 *obj;
+    Types1507FFD8 types;
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 dist;
+    f32 out[3];
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    s32 type;
+
+    found = func_150A3194(4, 5, (s32) arg0->x_position, (s32) arg0->y_position, (s32) arg0->z_position);
+    if (found == 0) {
+        found = func_150A3194(4, 0xB, (s32) arg0->x_position, (s32) arg0->y_position, (s32) arg0->z_position);
+    }
+    if (found != 0) {
+        types = D_80086C50;
+        for (i = 0; i < 3; i++) {
+            type = types.v[i];
+            obj = D_800DCE50[type];
+            while (obj != NULL) {
+                x = *(f32 *)((u8 *)obj + 0x98);
+                y = *(f32 *)((u8 *)obj + 0x9C);
+                z = *(f32 *)((u8 *)obj + 0xA0);
+                dist = (x - arg0->x_position) * (x - arg0->x_position) + (y - arg0->y_position) * (y - arg0->y_position) + (z - arg0->z_position) * (z - arg0->z_position);
+                if (dist < 1000000.0f &&
+                    func_15037698(arg0 - D_800CC2D0, 0, 0, x, y, z, out, 90.0f, 0, 0) != 0) {
+                    return 1;
+                }
+                obj = *(struct127 **)((u8 *)obj + 8);
+            }
+        }
+    }
+    return 0;
+}
