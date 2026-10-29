@@ -64,7 +64,7 @@ typedef struct {
     s32 temp_v0;
 } Locals15102B38;
 
-extern void func_15103254(s16 arg0, u8 arg1, f32 arg2, s32 arg3, u8 arg4, u8 arg5, s32 arg6);
+extern void func_15103254(s16 arg0, u8 arg1, f32 arg2, Vec3_15102B38 *arg3, u8 arg4, u8 arg5, s32 arg6);
 
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_12FDD0/func_15102920.s")
@@ -176,4 +176,92 @@ s32 func_15102D90(Obj15102D90 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_12FDD0/func_15102EB8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_12FDD0/func_15103254.s")
+typedef struct {
+    s32 unk00;
+    s32 unk04;
+    s16 unk08;
+    s16 unk0A;
+    s32 unk0C;
+    s32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 unk16;
+    u8 unk17;
+    u8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+    u8 unk1C;
+    u8 unk1D;
+    s16 unk1E;
+    s16 unk20;
+    s16 unk22;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    Vec3_15102B38 unk30;
+    f32 unk3C;
+    f32 unk40;
+    f32 unk44;
+    f32 unk48;
+    f32 unk4C;
+    f32 unk50;
+    f32 unk54;
+    s32 unk58;
+    u8 pad5C[4];
+    u8 unk60;
+    u8 unk61;
+    s8 unk62;
+    s8 unk63;
+    s8 unk64;
+    u8 unk65;
+    u8 unk66;
+    u8 pad67[13];
+} Fx15103254;
+
+extern s32 D_80088BD0[];
+extern void *func_15130374(void *, u8, s32, u8, s32);
+
+void func_15103254(s16 arg0, u8 arg1, f32 arg2, Vec3_15102B38 *arg3, u8 arg4, u8 arg5, s32 arg6) {
+    Fx15103254 sp2C;
+
+    sp2C.unk1D = *(D_80088BD0 + (func_150ADA20() & 3));
+    sp2C.unk08 = 0x2203;
+    sp2C.unk00 = 0x200005;
+    sp2C.unk04 = 0x20000;
+    sp2C.unk0A = arg0 + 1;
+    sp2C.unk0C = 0;
+    sp2C.unk10 = 0;
+    sp2C.unk14 = 0xFF;
+    sp2C.unk15 = 0xFF;
+    sp2C.unk16 = 0xFF;
+    sp2C.unk17 = 0xFF;
+    sp2C.unk18 = 0xFF;
+    sp2C.unk19 = 0xFF;
+    sp2C.unk1A = 0xFF;
+    sp2C.unk1B = arg1;
+    sp2C.unk1C = 0xFF;
+    sp2C.unk2C = arg2;
+    sp2C.unk28 = arg2;
+    sp2C.unk30 = *arg3;
+    sp2C.unk1E = 3;
+    sp2C.unk20 = 0x55;
+    sp2C.unk22 = 1;
+    sp2C.unk3C = 0.0f;
+    sp2C.unk40 = 0.0f;
+    sp2C.unk44 = 0.0f;
+    sp2C.unk48 = 0.0f;
+    sp2C.unk4C = 0.0f;
+    sp2C.unk50 = 0.0f;
+    sp2C.unk54 = 0.0f;
+    sp2C.unk24 = 1.0f;
+    sp2C.unk58 = (func_150ADA20() & 1 ? 0x40 : 0) | ((func_150ADA20() & 1 ? 0x80 : 0) | 1) | 0x200 | 0x4000 | 0x8000 | 0x40000 | 0x800000;
+    sp2C.unk60 = 6;
+    sp2C.unk61 = 8;
+    sp2C.unk62 = -1;
+    sp2C.unk63 = -1;
+    sp2C.unk64 = -1;
+    sp2C.unk65 = 0;
+    sp2C.unk66 = arg4;
+    func_15130374(&sp2C, 1, 0, arg5, arg6);
+}
