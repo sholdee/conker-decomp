@@ -5,7 +5,170 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_188440/func_1515AF90.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_188440/func_1515B21C.s")
+typedef struct {
+    /* 0x00 */ f32 x;
+    /* 0x04 */ f32 y;
+    /* 0x08 */ f32 z;
+} Vec1515B21C;
+
+typedef struct {
+    /* 0x00 */ s32 unk00;
+    /* 0x04 */ s32 unk04;
+    /* 0x08 */ s16 unk08;
+    /* 0x0A */ s16 unk0A;
+    /* 0x0C */ s32 unk0C;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 unk16;
+    /* 0x17 */ u8 unk17;
+    /* 0x18 */ u8 unk18;
+    /* 0x19 */ u8 unk19;
+    /* 0x1A */ u8 unk1A;
+    /* 0x1B */ u8 unk1B;
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 unk1D;
+    /* 0x1E */ s16 unk1E;
+    /* 0x20 */ s16 unk20;
+    /* 0x22 */ s16 unk22;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ Vec1515B21C unk30;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ f32 unk40;
+    /* 0x44 */ f32 unk44;
+    /* 0x48 */ Vec1515B21C unk48;
+    /* 0x54 */ f32 unk54;
+    /* 0x58 */ s32 unk58;
+    /* 0x5C */ u8 pad5C[0x4];
+    /* 0x60 */ u8 unk60;
+    /* 0x61 */ u8 unk61;
+    /* 0x62 */ u8 unk62;
+    /* 0x63 */ s8 unk63;
+    /* 0x64 */ u8 pad64[0x8];
+} Params1515B21C;
+
+typedef struct {
+    f32 unk0;
+    u8 unk4;
+    u8 unk5;
+    s8 unk6;
+    s8 unk7;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    u8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+} Extra1515B21C;
+
+typedef struct {
+    /* 0x00 */ Vec1515B21C pos;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+} Sub1515B21C;
+
+typedef struct {
+    /* 0x00 */ u8 pad0[0x28];
+    /* 0x28 */ Sub1515B21C sub;
+    /* 0x40 */ u8 pad40[0x4];
+} Arg1515B21C;
+
+extern f32 D_800BE9A4;
+void *func_151303BC(Params1515B21C *, s32, s32);
+
+void func_1515B21C(Arg1515B21C *arg0) {
+    Sub1515B21C *sub;
+    void *temp_v0;
+    Params1515B21C params;
+    Extra1515B21C extra;
+    f32 zero;
+
+    arg0->sub.unk10 += arg0->sub.unkC * D_800BE9A4;
+    sub = &arg0->sub;
+    if (arg0->sub.unk10 > 1.0f) {
+        zero = 0.0f;
+        {
+        f32 temp_f2;
+
+        params.unk1D = 0x2F;
+        params.unk08 = 0xC01;
+        params.unk00 = 0x200005;
+        params.unk04 = 0;
+        params.unk1A = 0;
+        params.unk19 = 0;
+        params.unk18 = 0;
+        params.unk17 = 0;
+        params.unk16 = 0;
+        params.unk15 = 0;
+        params.unk14 = 0;
+        params.unk10 = 0;
+        params.unk0C = 0;
+        params.unk1C = 0xFF;
+        params.unk22 = 0;
+        params.unk24 = zero;
+        params.unk58 = 0x3207;
+        params.unk60 = 5;
+        params.unk61 = 5;
+        params.unk62 = 4;
+        params.unk63 = -1;
+        params.unk30 = sub->pos;
+        params.unk3C = zero;
+        params.unk40 = zero;
+        params.unk44 = zero;
+        params.unk1E = 0x32;
+        params.unk20 = 5;
+        extra.unk4 = 0;
+        extra.unk5 = 0;
+        extra.unk18 = 0;
+        extra.unk19 = 0;
+        params.unk48.x = zero;
+        params.unk48.z = zero;
+        extra.unk10 = 1.200000048f;
+        extra.unk14 = 0.8333333135f;
+        extra.unk24 = sub->unk14;
+
+        if (func_150ADA20() & 1) {
+            params.unk58 |= 0x40;
+        }
+        if (func_150ADA20() & 1) {
+            params.unk58 |= 0x80;
+        }
+
+        do {
+            params.unk48.y = func_150ADA68() * 12.0f * 0.1000000015f;
+            params.unk0A = (func_150ADA20() % 152U) + 0x96;
+            params.unk1B = (func_150ADA20() % 151U) + 0x37;
+            temp_f2 = (func_150ADA68() * 200.0f) + 100.0f;
+            params.unk28 = temp_f2;
+            extra.unk0 = temp_f2;
+            params.unk2C = temp_f2;
+            extra.unk6 = (func_150ADA20() % 5U) + 4;
+            extra.unk7 = (func_150ADA20() % 5U) + 4;
+            extra.unk8 = ((func_150ADA68() * 0.25f) + 0.150000006f) * extra.unk0;
+            extra.unkC = ((func_150ADA68() * 0.25f) + 0.150000006f) * extra.unk0;
+            extra.unk1A = (func_150ADA20() & 3) + 2;
+            extra.unk1B = (func_150ADA20() & 3) + 2;
+            extra.unk1C = ((func_150ADA68() * 0.0700000003f) + 0.05999999866f) * extra.unk0;
+            extra.unk20 = ((func_150ADA68() * 0.0700000003f) + 0.05999999866f) * extra.unk0;
+            params.unk54 = ((func_150ADA68() * 1005.0f) + 600.0f) * 0.001000000047f;
+
+            temp_v0 = func_151303BC(&params, 2, 0x28);
+            if (temp_v0 != NULL) {
+                memcpy((u8 *)temp_v0 + 0xA8, &extra, 0x28);
+            }
+            sub->unk10 -= 1.0f;
+        } while (sub->unk10 > 1.0f);
+        }
+    }
+}
 
 extern void func_1515572C(s16 *, s32);
 
