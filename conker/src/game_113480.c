@@ -162,7 +162,115 @@ s8 func_150E6230(Struct150E6230Object *arg0) {
     return ret;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_113480/func_150E63A0.s")
+typedef struct Vec3f_150E63A0 {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3f_150E63A0;
+
+typedef struct Vtx_150E63A0 {
+    s16 x, y, z, flag;
+    u8 other[7];
+    u8 alpha;
+} Vtx_150E63A0;
+
+typedef struct Obj_150E63A0 {
+    u8 unknown0[0x2C];
+    f32 width;
+    f32 length;
+    Vec3f_150E63A0 start;
+    Vec3f_150E63A0 dir;
+    u8 unknown4C[0x10];
+    u8 alpha;
+    u8 unknown5D[0x63];
+    u8 vertexTemplate[0x40];
+    u8 *buffers[1];
+} Obj_150E63A0;
+
+void func_151D5D60(void *, s16, s32, void **, u8 *);
+f32 sqrtf(f32);
+#pragma intrinsic(sqrtf)
+
+void *func_150E63A0(Obj_150E63A0 *arg0, s16 arg1) {
+    Vec3f_150E63A0 start;
+    Vec3f_150E63A0 end;
+    Vec3f_150E63A0 *eye;
+    f32 dx, dy, dz;
+    f32 vx, vy, vz;
+    f32 nx, ny, nz;
+    f32 scale;
+    f32 length;
+    f32 lengthSquared;
+    f32 pad1;
+    f32 pad2;
+    Vtx_150E63A0 *vertices;
+    void *result;
+    u8 fresh;
+    s32 pad3;
+
+    func_151D5D60(arg0->buffers, arg1, 0x40, (void **)&vertices, &fresh);
+    result = vertices;
+    if (vertices != NULL) {
+        if (fresh != 0) {
+            memcpy(arg0->buffers[arg1], arg0->vertexTemplate, 0x40);
+            memcpy(arg0->buffers[arg1] + 0x40, arg0->vertexTemplate, 0x40);
+        }
+    } else {
+        return NULL;
+    }
+    eye = (Vec3f_150E63A0 *)&D_800DBFF0[arg1].unk2F8;
+    length = arg0->length;
+    start = arg0->start;
+    do { /* VEC3 macro scope: splits uopt's block so length's f0 is reused for dx */
+    end.x = arg0->start.x - arg0->dir.x * length;
+    end.y = arg0->start.y - arg0->dir.y * length;
+    end.z = arg0->start.z - arg0->dir.z * length;
+    } while (0);
+    dx = end.x - start.x;
+    dy = end.y - start.y;
+    dz = end.z - start.z;
+    vx = (dx * 0.5f + start.x) - eye->x;
+    vy = (dy * 0.5f + start.y) - eye->y;
+    vz = (dz * 0.5f + start.z) - eye->z;
+    nx = dy * vz - vy * dz;
+    ny = dz * vx - vz * dx;
+    nz = dx * vy - vx * dy;
+    lengthSquared = nx * nx + ny * ny + nz * nz;
+    if (lengthSquared == 0.0f) {
+        nx = 0.0f;
+        ny = 0.0f;
+        nz = 0.0f;
+    } else {
+        scale = arg0->width / sqrtf(lengthSquared);
+        nx *= scale;
+        ny *= scale;
+        nz *= scale;
+    }
+    vertices->x = start.x - nx;
+    vertices->y = start.y - ny;
+    vertices->z = start.z - nz;
+    vertices->alpha = arg0->alpha;
+    vertices->flag = 0;
+    vertices++;
+    vertices->x = end.x - nx;
+    vertices->y = end.y - ny;
+    vertices->z = end.z - nz;
+    vertices->alpha = 0;
+    vertices->flag = 0;
+    vertices++;
+    vertices->x = end.x + nx;
+    vertices->y = end.y + ny;
+    vertices->z = end.z + nz;
+    vertices->alpha = 0;
+    vertices->flag = 0;
+    vertices++;
+    vertices->x = start.x + nx;
+    vertices->y = start.y + ny;
+    vertices->z = start.z + nz;
+    vertices->alpha = arg0->alpha;
+    vertices->flag = 0;
+    return result;
+}
 
 s32 func_150E679C(void *arg0) {
     s32 v0 = *(s16 *)((u8 *)arg0 + 0x1C);
