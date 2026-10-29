@@ -114,7 +114,90 @@ void func_15158224(Struct15158224 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_185560/func_151582C8.s")
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+} Struct151582C8_mode;
+
+typedef struct {
+    u8 pad0[0x10];
+    u8 unk10;
+    u8 pad11[0x2];
+    s8 unk13;
+    u8 pad14[0x2];
+    u8 unk16;
+    u8 pad17;
+    s32 unk18;
+    s32 unk1C;
+    s32 unk20;
+    s32 unk24;
+    u8 pad28[0x3];
+    u8 unk2B;
+    s32 unk2C;
+    s32 unk30;
+    s8 unk34;
+    s8 unk35;
+    u8 pad36[0x2];
+    u8 unk38;
+    u8 unk39;
+    u8 unk3A;
+    u8 unk3B;
+    u8 unk3C;
+    u8 unk3D;
+    u8 unk3E;
+    u8 unk3F;
+    void *unk40;
+    u8 unk44;
+    u8 unk45;
+    u8 pad46[0x2];
+    u8 unk48[0x10];
+    Mtx unk58[2];
+    u8 unkD8[1];
+} Struct151582C8;
+
+extern s32 (*D_8008AE0C[])(Mtx *, Struct151582C8 *);
+extern Gfx *D_8008AFB8[];
+extern Struct151582C8_mode D_800A4AC8[];
+
+Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
+Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
+Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
+Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
+Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
+void func_151441A4(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, u8 arg9, u8 arg10, u8 arg11, u8 arg12, u8 arg13);
+void func_151442FC(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 arg10, u8 arg11, u8 arg12, u8 arg13);
+void *func_151462C8(void *arg0, void *arg1, u8 arg2, void *arg3, u8 arg4, s16 arg5, void *arg6, u8 arg7, s32 arg8);
+
+Gfx *func_151582C8(Gfx *gfx, Struct151582C8 *arg1, s16 arg2) {
+    s32 pad;
+    s16 primR, primG, primB, primA;
+    s16 envR, envG, envB, envA;
+    u8 update;
+
+    update = 1;
+    if (arg1->unk13 != -1) {
+        if (D_8008AE0C[arg1->unk13](&arg1->unk58[D_800BE9C0], arg1) == 0) {
+            return gfx;
+        }
+    }
+    gfx = func_15142B7C(gfx, arg1->unk1C, arg1->unk20);
+    func_151441A4(&primR, &primG, &primB, &primA, arg1->unk3C, arg1->unk3D, arg1->unk3E, arg1->unk3F,
+                  arg1->unk38, arg1->unk39, arg1->unk3A, arg1->unk3B, 0xFF, arg1->unk34);
+    func_151442FC(&envR, &envG, &envB, &envA, arg1->unk3C, arg1->unk3D, arg1->unk3E, arg1->unk3F,
+                  arg1->unk38, arg1->unk39, arg1->unk3A, arg1->unk3B, 0xFF, arg1->unk35);
+    gfx = func_15142C10(gfx, envR, envG, envB, envA, &update);
+    gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &update);
+    gfx = func_1513F4E4(gfx, arg1->unk2B, &update);
+    gfx = func_15142FBC(gfx, arg1->unk18 | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | arg1->unk2C | arg1->unk30,
+                        D_800A4AC8[arg1->unk24].unk0 | D_800A4AC8[arg1->unk24].unk4, &update);
+    if (arg1->unk10 & 2) {
+        gfx = func_151462C8(gfx, arg1->unkD8, arg1->unk45, arg1->unk40, arg1->unk44, arg2, arg1->unk48,
+                            (arg1->unk10 & 4) ? 1 : 0, 0);
+    }
+    gSPMatrix(gfx++, &arg1->unk58[D_800BE9C0], G_MTX_MODELVIEW | G_MTX_LOAD);
+    gSPDisplayList(gfx++, D_8008AFB8[arg1->unk16]);
+    return gfx;
+}
 
 extern void guMtxF2L(f32 mf[4][4], Mtx *m);
 
