@@ -90,7 +90,145 @@ void func_151B6320(f32 *arg0, u8 arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1E37D0/func_151B6420.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E37D0/func_151B65D4.s")
+typedef struct { f32 x, y, z; } Vec151B65D4;
+
+typedef struct {
+    s32 unk0;
+    u8 pad4[0x14 - 0x4];
+    Vec151B65D4 pos;
+    u8 pad20[0x3B - 0x20];
+    u8 unk3B;
+    f32 unk3C;
+} Target151B65D4;
+
+typedef struct {
+    Target151B65D4 *target;
+    u8 unk4;
+    u8 pad5[3];
+    Vec151B65D4 pos;
+    f32 count;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+} State151B65D4;
+
+typedef struct {
+    Vec151B65D4 pos;
+    f32 unkC;
+    u8 unk10;
+    u8 pad11[3];
+    f32 unk14;
+    f32 unk18;
+} Entry151B65D4;
+
+typedef struct {
+    u8 pad0[0x10];
+    Vec151B65D4 pos;
+    u8 pad1C[2];
+    u16 flags;
+    u8 pad20[5];
+    u8 capacity;
+    u8 pad26[6];
+    s8 count;
+    s8 tail;
+    s8 head;
+    u8 pad2F;
+    u8 unk30;
+    u8 pad31[0x94 - 0x31];
+    Entry151B65D4 *entries;
+    State151B65D4 *state;
+} Obj151B65D4;
+
+f32 func_15143E64(void *);
+
+s32 func_151B65D4(Obj151B65D4 *arg0) {
+    State151B65D4 *state;
+    Entry151B65D4 *entries;
+    Target151B65D4 *target;
+    Vec151B65D4 delta;
+    s32 p0;
+    s32 p1;
+    f32 dist;
+
+    state = arg0->state;
+    entries = arg0->entries;
+    target = state->target;
+    if (target->unk0 == 0 || target->unk3B != state->unk4 || target->unk3C < 15.0f) {
+        arg0->unk30 = 0;
+        arg0->flags |= 8;
+        return 1;
+    }
+    arg0->pos.x = target->pos.x;
+    arg0->pos.y = target->pos.y;
+    arg0->pos.z = target->pos.z;
+    delta.x = arg0->pos.x - state->pos.x;
+    delta.y = arg0->pos.y - state->pos.y;
+    delta.z = arg0->pos.z - state->pos.z;
+    dist = func_15143E64(&delta);
+    state->count += dist * 0.003721999936f * D_800BE9A4;
+    state->unk1C += dist * 4.409547806f;
+    if (state->count > 1.0f) {
+        Entry151B65D4 *e;
+        Vec151B65D4 cur;
+        f32 inv;
+        f32 y;
+        f32 dy;
+        f32 a;
+        f32 b;
+        f32 dx;
+        f32 dz;
+        f32 dw;
+        f32 diff;
+        f32 da;
+        inv = 1.0f / state->count;
+        y = state->unk18 + D_800BE9A4;
+        cur = state->pos;
+        a = state->unk20;
+        b = state->unk24;
+        dy = -(y * inv);
+        dx = delta.x * inv;
+        dz = delta.y * inv;
+        dw = delta.z * inv;
+        diff = state->unk1C - state->unk20;
+        da = diff * inv;
+        do {
+            e = &entries[arg0->head];
+            e->pos = cur;
+            e->unk10 = 0x9B;
+            e->unk14 = a;
+            e->unkC = 13.0f - y;
+            y += dy;
+            while (e->unk14 > 16384.0f) {
+                e->unk14 -= 32768.0f;
+            }
+            e->unk18 = b;
+            arg0->head++;
+            if (arg0->head == arg0->capacity) {
+                arg0->head = 0;
+            }
+            arg0->count++;
+            if (arg0->head == arg0->tail) {
+                arg0->tail++;
+                if (arg0->tail == arg0->capacity) {
+                    arg0->tail = 0;
+                }
+                arg0->count--;
+            }
+            cur.x += dx;
+            cur.y += dz;
+            cur.z += dw;
+            a += da;
+            b += dist * inv;
+            state->count -= 1.0f;
+        } while (state->count > 1.0f);
+        state->pos = cur;
+        state->unk20 = a;
+        state->unk24 = b;
+        state->unk18 = y;
+    }
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1E37D0/func_151B6928.s")
 
