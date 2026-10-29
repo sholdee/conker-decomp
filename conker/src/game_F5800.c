@@ -248,7 +248,96 @@ s32 func_150C8730(Struct150C8730Arg0 *arg0, struct108 *arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_F5800/func_150C88D0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_F5800/func_150C8A68.s")
+typedef struct {
+    u8 pad0[0x10];
+    f32 x;
+    f32 y;
+    f32 z;
+    u8 unk1C;
+    s8 unk1D;
+    u8 pad1E[2];
+    f32 unk20;
+    u8 pad24[4];
+    s16 unk28;
+    s16 unk2A;
+    f32 unk2C;
+    s16 unk30;
+    u8 pad32[2];
+    f32 unk34;
+    f32 unk38;
+    s8 unk3C;
+    s8 unk3D;
+    u8 pad3E[2];
+    f32 unk40;
+    f32 unk44;
+    u8 pad48[4];
+    s16 unk4C;
+    u8 pad4E[2];
+    f32 unk50;
+} Struct150C8A68;
+
+extern void (*D_80088858[])(Struct150C8A68 *, f32 *, u8, f32, f32);
+extern s32 (*D_80088860[])(Struct150C8A68 *);
+extern void (*D_80088864[])(Struct150C8A68 *, f32);
+
+void func_150C8A68(Struct150C8A68 *arg0) {
+    s32 pad;
+    u8 done;
+    f32 oldScale;
+    f32 c;
+    f32 s;
+    s32 base;
+    f32 pos[3];
+    u8 angle;
+
+    done = 0;
+    if (arg0->unk1C & 1) {
+        arg0->unk28 -= D_800BE9E4;
+        if (arg0->unk28 < 0) {
+            done = 1;
+        }
+    }
+    if (!done) {
+        s16 t;
+        s16 d;
+        oldScale = arg0->unk44;
+        arg0->unk44 += arg0->unk20 * D_800BE9A4;
+        if (arg0->unk2A < (t = arg0->unk28)) {
+            d = arg0->unk4C - t;
+            arg0->unk40 = d * arg0->unk2C;
+        }
+        if (t < arg0->unk30) {
+            arg0->unk40 = t * arg0->unk34;
+        }
+        if (arg0->unk3C != -1) {
+            arg0->unk50 += arg0->unk38 * D_800BE9A4 * (6.283185482f * arg0->unk44);
+            while (arg0->unk50 > 1.0f) {
+                base = D_800DBFF0[D_80082FA4].unk380 * 0.7111111283f;
+                angle = (func_150ADA20() % 81U) + base - 40;
+                c = func_151423D8(angle - 64);
+                s = func_151423D8(angle);
+                pos[0] = arg0->x + c * arg0->unk44;
+                pos[1] = arg0->y;
+                pos[2] = arg0->z + s * arg0->unk44;
+                if (pos[2] * pos[2] + pos[0] * pos[0] < 10894295.0f) {
+                    D_80088858[arg0->unk3C](arg0, pos, angle, c, s);
+                }
+                arg0->unk50 -= 1.0f;
+            }
+        }
+        if (arg0->unk3D != -1) {
+            D_80088864[arg0->unk3D](arg0, oldScale);
+        }
+        if (arg0->unk1D != -1) {
+            if (D_80088860[arg0->unk1D](arg0) == 0) {
+                done = 1;
+            }
+        }
+    }
+    if (done) {
+        func_1516972C((struct102 *)arg0);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_F5800/func_150C8DB8.s")
 
