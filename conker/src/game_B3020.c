@@ -1384,7 +1384,94 @@ void func_1508C1A4(s32 arg0, s32 arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_B3020/func_1508C5B8.s")
+s32 func_1508C5B8(s32 arg0, s32 arg1) {
+    u8 cur;
+    u8 other;
+    s32 i;
+    s32 m;
+    s32 j;
+    s32 k;
+    f32 x0;
+    f32 x1;
+    f32 dx;
+    f32 dz;
+    u8 team;
+    struct127 *obj;
+    s8 idx[4];
+    f32 dist[4];
+    s32 *list;
+    s32 mask;
+
+    cur = D_800D23B0[0x1700];
+    other = D_800D23B0[0x1701];
+    list = (s32 *)(D_800D23B0 + 0xE64);
+    if (arg1 != 0) {
+        for (i = 0; i < D_8008FD90; i++) {
+            x0 = D_800CC2D0[i].x_position;
+            x1 = D_800CC2D0[i].x_position;
+            for (k = 0; &dist[k] < &dist[3]; k++) {
+                idx[k] = -1;
+                dist[k] = 900000000.0f;
+            }
+            for (k = D_8008FD90; k < D_8008FD8C; k++) {
+                if (list[i] != list[k] &&
+                    !(((s32 *)(D_800D23B0 + 0x16C0))[i] & (0x10001 << k))) {
+                    dx = x0 - D_800CC2D0[i].x_position;
+                    dz = x1 - D_800CC2D0[i].z_position;
+                    if (i == ((s32 *)(D_800D23B0 + 0x11C))[k]) {
+                        dx *= 0.5f;
+                        dz *= 0.5f;
+                    }
+                    dx = dx * dx + dz * dz;
+                    j = 2;
+                    while (j >= 0 && dx < dist[j]) {
+                        dist[j + 1] = dist[j];
+                        idx[j + 1] = idx[j];
+                        idx[j] = k;
+                        dist[j] = dx;
+                        j--;
+                    }
+                }
+            }
+            for (k = 0; k < 3; k++) {
+                if (idx[k] != -1) {
+                    j = idx[k];
+                    ((s32 *)(D_800D23B0 + 0x16C0))[i] &= ~(0x10001 << j);
+                    ((s32 *)(D_800D23B0 + 0x16C0))[j] &= ~(0x10001 << i);
+                    func_1508C1A4(i, j);
+                }
+            }
+        }
+    }
+    if (arg1 != 0) {
+        obj = &D_800CC2D0[cur];
+        do {
+            team = *(u8 *)&obj->pad128;
+            m = 0;
+            do {
+                other++;
+                if (other >= D_8008FD8C) {
+                    cur++;
+                    if (cur >= D_8008FD8C - 1) {
+                        cur = 0;
+                    }
+                    obj = &D_800CC2D0[cur];
+                    team = *(u8 *)&obj->pad128;
+                    other = cur + 1;
+                }
+                ((s32 *)(D_800D23B0 + 0x16C0))[cur] &= ~(0x10001 << other);
+                ((s32 *)(D_800D23B0 + 0x16C0))[other] &= ~(0x10001 << cur);
+                mask = (1 << cur) | (1 << other);
+                m++;
+            } while (m < 64 && ((D_800D18A0 & mask) ||
+                                    team == *(u8 *)&D_800CC2D0[other].pad128));
+            func_1508C1A4(cur, other);
+        } while (--arg1 != 0);
+    }
+    D_800D23B0[0x1700] = cur;
+    D_800D23B0[0x1701] = other;
+    return ((s32 *)(D_800D23B0 + 0x16C0))[arg0];
+}
 
 s32 func_1508C9CC(void) {
     s32 count;
