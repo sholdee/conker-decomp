@@ -204,7 +204,124 @@ s32 func_151C71A0(Game1F4650Beam *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1F4650/func_151C756C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1F4650/func_151C7E98.s")
+typedef struct {
+    u8 pad0[2];
+    s16 mask;
+} Mask_151C7E98;
+
+typedef struct {
+    f32 tu;
+    f32 tv;
+    u8 pad8[0x7E];
+    u8 flags;
+    u8 pad87[5];
+    Mask_151C7E98 *m1;
+    Mask_151C7E98 *m2;
+} Sub_151C7E98;
+
+typedef struct {
+    u8 pad0[0x30];
+    f32 width;
+    struct17 start;
+    struct17 end;
+    u8 pad4C[0x74];
+    u8 tmpl[0x40];
+    u8 *buffers[4];
+    Sub_151C7E98 sub;
+} Obj_151C7E98;
+
+typedef struct {
+    s16 x;
+    s16 y;
+    s16 z;
+    s16 flag;
+    s16 tc0;
+    u8 padA[6];
+} Vtx_151C7E98;
+
+extern struct17 *func_15144B34(s32);
+void func_151D5D60(void *, s16, s32, void **, u8 *);
+void func_15145548(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, f32 *arg4);
+
+void *func_151C7E98(Obj_151C7E98 *arg0, s16 arg1) {
+    Vtx_151C7E98 *vertices;
+    void *result;
+    struct17 *pos;
+    struct17 dir;
+    struct17 closest;
+    f32 dx, dy, dz;
+    f32 nx, ny, nz;
+    f32 lengthSquared;
+    f32 scale;
+    u8 fresh;
+    Sub_151C7E98 *sub;
+
+    sub = &arg0->sub;
+    if (!(*((u8 *)arg0 + 0x196) & 2)) {
+        return NULL;
+    }
+    if (sub->flags & 4) {
+        if (!(sub->m1->mask & (1 << arg1)) && !(sub->m2->mask & (1 << arg1))) {
+            return NULL;
+        }
+    }
+    func_151D5D60(arg0->buffers, arg1, 0x40, (void **)&vertices, &fresh);
+    result = vertices;
+    if (vertices != NULL) {
+        if (fresh) {
+            memcpy(arg0->buffers[arg1], arg0->tmpl, 0x40);
+            memcpy(arg0->buffers[arg1] + 0x40, arg0->tmpl, 0x40);
+        }
+    } else {
+        return NULL;
+    }
+    pos = func_15144B34(arg1);
+    dir.unk0 = arg0->end.unk0 - arg0->start.unk0;
+    dir.unk4 = arg0->end.unk4 - arg0->start.unk4;
+    dir.unk8 = arg0->end.unk8 - arg0->start.unk8;
+    func_15145548(&arg0->start, &dir, pos, &closest, 0);
+    dx = closest.unk0 - pos->unk0;
+    dy = closest.unk4 - pos->unk4;
+    dz = closest.unk8 - pos->unk8;
+    nx = dir.unk4 * dz - dy * dir.unk8;
+    ny = dir.unk8 * dx - dz * dir.unk0;
+    nz = dir.unk0 * dy - dx * dir.unk4;
+    lengthSquared = nx * nx + ny * ny + nz * nz;
+    if (lengthSquared == 0.0f) {
+        nx = 0.0f;
+        ny = 0.0f;
+        nz = 0.0f;
+    } else {
+        scale = arg0->width / sqrtf(lengthSquared);
+        nx *= scale;
+        ny *= scale;
+        nz *= scale;
+    }
+    vertices->x = arg0->end.unk0 - nx;
+    vertices->y = arg0->end.unk4 - ny;
+    vertices->z = arg0->end.unk8 - nz;
+    vertices->tc0 = sub->tu;
+    vertices->flag = 0;
+    vertices++;
+    vertices->x = arg0->start.unk0 - nx;
+    vertices->y = arg0->start.unk4 - ny;
+    vertices->z = arg0->start.unk8 - nz;
+    vertices->tc0 = sub->tv;
+    vertices->flag = 0;
+    vertices++;
+    vertices->x = arg0->start.unk0 + nx;
+    vertices->y = arg0->start.unk4 + ny;
+    vertices->z = arg0->start.unk8 + nz;
+    vertices->tc0 = sub->tv;
+    vertices->flag = 0;
+    vertices++;
+    vertices->x = arg0->end.unk0 + nx;
+    vertices->y = arg0->end.unk4 + ny;
+    vertices->z = arg0->end.unk8 + nz;
+    vertices->tc0 = sub->tu;
+    vertices->flag = 0;
+    return result;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1F4650/func_151C82D0.s")
 
