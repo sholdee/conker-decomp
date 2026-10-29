@@ -101,4 +101,148 @@ void func_151DC8BC(struct127 *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_209B50/func_151DC97C.s")
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s16 unk8;
+    s16 unkA;
+    s32 unkC;
+    s32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 unk16;
+    u8 unk17;
+    u8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+    u8 unk1C;
+    u8 unk1D;
+    s16 unk1E;
+    s16 unk20;
+    s16 unk22;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    struct17 unk30;
+    struct17 unk3C;
+    struct17 unk48;
+    f32 unk54;
+    u32 unk58;
+    s32 unk5C;
+    u8 unk60;
+    u8 unk61;
+    u8 unk62;
+    s8 unk63;
+    s8 unk64;
+    u8 unk65;
+    u8 unk66;
+    u8 pad67[9];
+} Spawn151DC97C;
+
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    u8 unk2;
+    u8 unk3;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+} Extra151DC97C;
+
+typedef struct {
+    struct17 pos;
+    f32 accum;
+    u8 unk10;
+} Sub151DC97C;
+
+typedef struct {
+    u8 pad0;
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD[0x1B];
+    Sub151DC97C unk28;
+} Obj151DC97C;
+
+extern void *func_15130280(void *, u8, s32, s32, u8, s32);
+
+void func_151DC97C(Obj151DC97C *arg0) {
+    Sub151DC97C *sub;
+
+    sub = &arg0->unk28;
+    sub->accum += (0.1360000074f + func_150ADA68() * 0.1210000068f) * D_800BE9A4;
+    if (sub->accum > 1.0f) {
+        Spawn151DC97C spawn;
+        Extra151DC97C extra;
+        void *ret;
+        u8 i;
+
+        extra.unkC = 0.9704700112f;
+        spawn.unk1D = 0x6C;
+        spawn.unk8 = 0x5103;
+        spawn.unk0 = 0x200005;
+        extra.unk0 = 0;
+        extra.unk1 = 0;
+        spawn.unk4 = 0;
+        spawn.unkC = 0;
+        spawn.unk10 = 0;
+        spawn.unk1E = 0x28;
+        spawn.unk20 = 6;
+        spawn.unk58 = 0x80DE07;
+        spawn.unk60 = 8;
+        spawn.unk61 = 6;
+        spawn.unk62 = 0x16;
+        spawn.unk63 = -1;
+        spawn.unk64 = -1;
+        spawn.unk65 = 0;
+        spawn.unk22 = 0x78;
+        spawn.unk1C = 0xFF;
+        spawn.unk24 = 1.006579041f;
+        spawn.unk30 = sub->pos;
+        spawn.unk3C.unk0 = 0.0f;
+        spawn.unk3C.unk4 = 0.0f;
+        spawn.unk3C.unk8 = 0.0f;
+        spawn.unk48.unk0 = 0.0f;
+        spawn.unk48.unk4 = 0.0f;
+        spawn.unk48.unk8 = 0.0f;
+        if (sub->unk10 == 0) {
+            spawn.unk14 = 0xEF;
+            spawn.unk15 = 0xE0;
+            spawn.unk16 = 0xCD;
+            spawn.unk17 = 0xFF;
+            spawn.unk18 = 0x30;
+            spawn.unk19 = 0x30;
+            spawn.unk1A = 0x30;
+        }
+        do {
+            extra.unk2 = func_150ADA20() % 5U + 4;
+            extra.unk3 = func_150ADA20() % 5U + 4;
+            extra.unk4 = func_150ADA68() * 50.0f;
+            extra.unk8 = func_150ADA68() * 50.0f;
+            spawn.unk54 = func_150ADA68() * 0.151000008f + 0.1910000145f;
+            spawn.unk58 &= ~0xC0;
+            spawn.unk58 |= ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);
+            spawn.unk1B = func_150ADA20() % 56U + 200;
+            spawn.unkA = func_150ADA20() % 36U + 110;
+            spawn.unk28 = spawn.unk2C = func_150ADA68() * 370.0f + 403.0f;
+            if (sub->unk10 != 0) {
+                const u8 colA[3][3] = { { 0xEF, 0xE0, 0xCD }, { 0x9E, 0x9C, 0xA0 }, { 0x9E, 0x9C, 0xA0 } };
+                const u8 colB[3][3] = { { 0x30, 0x30, 0x30 }, { 0x9A, 0x69, 0xD2 }, { 0xD5, 0x83, 0x91 } };
+                i = func_150ADA20() % 3U;
+                spawn.unk14 = colA[i][0];
+                spawn.unk15 = colA[i][1];
+                spawn.unk16 = colA[i][2];
+                spawn.unk17 = 0xFF;
+                spawn.unk18 = colB[i][0];
+                spawn.unk19 = colB[i][1];
+                spawn.unk1A = colB[i][2];
+            }
+            ret = func_15130280(&spawn, 0, 0, 0x10, arg0->unkC, arg0->unk1);
+            if (ret != NULL) {
+                memcpy((u8 *)ret + 0xA8, &extra, sizeof(extra));
+            }
+            sub->accum -= 1.0f;
+        } while (sub->accum > 1.0f);
+    }
+}
