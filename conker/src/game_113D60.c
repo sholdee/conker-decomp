@@ -4,8 +4,11 @@
  * produces.  The header declaration is renamed out of the way and a file-local prototype
  * is used instead (same approach as game_10CD70.c). */
 #define func_15169260 func_15169260_s32_decl_in_functions_h
+#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
 #undef func_15169260
+#undef func_150ADA20
+u32 func_150ADA20(void);
 void func_15169260(void *, s32, s32, s32);
 #include "variables.h"
 
@@ -443,7 +446,60 @@ struct260 *func_150E7994(s16 arg0, f32 arg1, u8 arg2, s32 arg3) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_113D60/func_150E7C9C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_113D60/func_150E7FEC.s")
+typedef struct {
+    /* 0x00 */ s32 unk00;
+    /* 0x04 */ s16 unk04;
+    /* 0x06 */ u8 unk06;
+    /* 0x07 */ u8 unk07;
+    /* 0x08 */ s32 unk08;
+    /* 0x0C */ s32 unk0C;
+    /* 0x10 */ u8 unk10;
+    /* 0x11 */ u8 unk11;
+    /* 0x12 */ u8 unk12;
+    /* 0x13 */ u8 unk13;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 unk16;
+    /* 0x17 */ u8 unk17;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ s32 unk1C;
+    /* 0x20 */ s16 unk20;
+    /* 0x22 */ s16 unk22;
+    /* 0x24 */ s16 unk24;
+} Struct150E7FEC;
+
+void func_150E7FEC(f32 arg0, u8 arg1, s32 arg2, f32 *arg3, s16 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, s32 argB) {
+    s32 pad;
+    Struct150E7FEC sp5C;
+    s32 sp58;
+    s32 sp54;
+
+    sp5C.unk22 = 0x14;
+    sp5C.unk24 = 0xC;
+    sp5C.unk06 = 0x4F;
+    sp5C.unk07 = 0;
+    sp5C.unk00 = ((arg4 == -1) ? 0 : 1) | (arg5 ? 0x400 : 0) | 0x100 | 0x200 | 0x1000 | 0x8000 | 0x40000;
+    sp5C.unk04 = (arg4 == -1) ? 0x12C : arg4 + 0x14;
+    sp5C.unk08 = 0;
+    sp5C.unk0C = 0;
+    sp5C.unk10 = arg1;
+    sp5C.unk11 = 0xFF;
+    sp5C.unk12 = arg7;
+    sp5C.unk13 = arg8;
+    sp5C.unk14 = arg9;
+    sp5C.unk15 = 0xFF;
+    sp5C.unk18 = ((arg6 != 0) ? 2 : 1) + 0x480000;
+    sp5C.unk16 = 0;
+    sp5C.unk17 = 6;
+    if (arg5 != 0) {
+        sp58 = 3;
+        sp54 = 0xFF;
+    } else {
+        sp58 = 0;
+        sp54 = 0;
+    }
+    func_1513C650((s32)&sp5C, 0, 0, arg2, arg3[0], arg3[1], arg3[2], arg0, arg0, func_150ADA20() & 0xFF, (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2), sp58, sp54, 0, argA, argB);
+}
 
 void func_150E81A8(u8 arg0, s32 arg1, s32 arg2) {
     Struct150E81A8Vec sp84;
