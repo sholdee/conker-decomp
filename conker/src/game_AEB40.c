@@ -60,7 +60,57 @@ typedef struct {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_AEB40/func_15081690.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_AEB40/func_15081C20.s")
+extern f32 func_15143E64(struct17 *);
+extern s32 func_15145128(struct17 *, struct17 *, f32 *, f32 *);
+extern s32 func_151452C4(struct17 *arg0, struct17 *arg1, struct17 *arg2, f32 arg3, struct17 *arg4, struct17 *arg5, f32 *arg6, f32 *arg7);
+
+s32 func_15081C20(struct17 *arg0, struct17 *arg1, u8 *arg2, struct17 *arg3, struct17 *arg4, f32 *arg5, f32 *arg6) {
+    struct17 pos;
+
+    pos.unk0 = *(f32 *)(arg2 + 0x14);
+    pos.unk4 = *(s16 *)(arg2 + 0xD6) + *(f32 *)(arg2 + 0x18);
+    pos.unk8 = *(f32 *)(arg2 + 0x1C);
+    {
+        struct17 start;
+        struct17 dir;
+        struct17 center;
+        f32 scale;
+        f32 scale2;
+
+        scale = *(f32 *)(arg2 + 0xDC);
+        scale2 = *(f32 *)(arg2 + 0xE0);
+        start.unk0 = arg0->unk0;
+        start.unk4 = arg0->unk4 * scale;
+        start.unk8 = arg0->unk8;
+        dir.unk0 = arg1->unk0;
+        dir.unk4 = arg1->unk4 * scale;
+        dir.unk8 = arg1->unk8;
+        if (func_15145128(&dir, &dir, NULL, NULL) == 0) {
+            return 0;
+        }
+        center.unk0 = pos.unk0;
+        center.unk4 = pos.unk4 * scale;
+        center.unk8 = pos.unk8;
+        if (func_151452C4(&start, &dir, &center, *(s16 *)(arg2 + 0xD2), arg3, arg4, arg5, arg6) == 0) {
+            return 0;
+        }
+        arg3->unk4 *= scale2;
+        arg4->unk4 *= scale2;
+        {
+            struct17 diff;
+
+            diff.unk0 = arg3->unk0 - arg0->unk0;
+            diff.unk4 = arg3->unk4 - arg0->unk4;
+            diff.unk8 = arg3->unk8 - arg0->unk8;
+            *arg5 = func_15143E64(&diff);
+            diff.unk0 = arg4->unk0 - arg0->unk0;
+            diff.unk4 = arg4->unk4 - arg0->unk4;
+            diff.unk8 = arg4->unk8 - arg0->unk8;
+            *arg6 = func_15143E64(&diff);
+        }
+    }
+    return 1;
+}
 
 extern void func_1507DF10(struct127 *arg0, s32 arg1);
 
