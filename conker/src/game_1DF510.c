@@ -78,7 +78,7 @@ typedef struct {
     s32 *unk24;
 } GameStruct151B2690Sub28;
 
-extern void *func_151B30B0(void *arg0, s32 arg1, s32 arg2, u8 arg3);
+extern void *func_151B30B0();
 extern GameStruct151B2690Vec D_800AA320;
 extern GameStruct151B2690Vec D_800AA32C;
 extern GameStruct151B2690Vec D_800AA368;
@@ -198,7 +198,99 @@ s32 func_151B22F4(s32 *arg0) {
     return 2;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1DF510/func_151B2348.s")
+extern GameStruct151B2690Vec D_800AA338;
+extern GameStruct151B2690Vec D_800AA344;
+extern GameStruct151B2690Vec D_800AA350;
+extern GameStruct151B2690Vec D_800AA35C;
+extern f32 D_800AA380;
+extern f32 D_800AA384;
+
+void func_151B2348(s32 *arg0) {
+    struct127 *obj1;
+    struct127 *obj0;
+    GameStruct151B2100Sub *sub;
+    GameStruct151B2690Sub38 b;
+    GameStruct151B2690Sub30 a;
+
+    obj1 = ((GameStruct151B2100 *)arg0)->unk28.unk8;
+    obj0 = ((GameStruct151B2100 *)arg0)->unk28.unk0;
+    a.unk28 = arg0;
+    a.unk2C = 2;
+    a.unk0 = obj1;
+    a.unk4 = obj1->unique_id;
+    a.unk5 = 5;
+    a.unk8 = D_800AA350;
+    a.unk14 = obj1;
+    a.unk18 = obj1->unique_id;
+    a.unk19 = 10;
+    a.unk1C = D_800AA35C;
+
+    b.unk34 = 0;
+    b.unk0 = 0;
+    b.unk2 = 1000;
+    b.unk4 = obj1->x_position;
+    b.unk8 = obj1->y_position;
+    b.unkC = obj1->z_position;
+    b.unk10 = obj1->x_position;
+    b.unk14 = obj1->y_position;
+    b.unk18 = obj1->z_position;
+    b.unk1C = 1;
+    b.unk1D = 1;
+    b.unk1E = 0;
+    b.unk24 = 3;
+    b.unk20 = 5.0f;
+    b.unk28 = 80.0f;
+    b.unk2C = D_800AA380;
+    b.unk30 = D_800AA384;
+    sub = &((GameStruct151B2100 *)arg0)->unk28;
+    sub->unk18 = (s32)func_151B30B0(&b, 0x3AC49BA6, 0x30, 0xFF, 0);
+    if (sub->unk18 != 0) {
+        memcpy((u8 *)sub->unk18 + 0x150, &a, 0x30);
+    }
+
+    a.unk2C = 1;
+    a.unk0 = obj0;
+    a.unk4 = obj0->unique_id;
+    a.unk5 = 5;
+    a.unk8 = D_800AA320;
+    a.unk14 = obj1;
+    a.unk18 = obj1->unique_id;
+    a.unk19 = 5;
+    a.unk1C = D_800AA338;
+    b.unk4 = obj0->x_position;
+    b.unk8 = obj0->y_position;
+    b.unkC = obj0->z_position;
+    b.unk10 = obj1->x_position;
+    b.unk14 = obj1->y_position;
+    b.unk18 = obj1->z_position;
+    b.unk1E = 0;
+    b.unk28 = 170.0f;
+    sub->unk14 = (s32)func_151B30B0(&b, 0x3AC49BA6, 0x30, 0xFF, 0);
+    if (sub->unk14 != 0) {
+        memcpy((u8 *)sub->unk14 + 0x150, &a, 0x30);
+    }
+
+    a.unk2C = 0;
+    a.unk0 = obj0;
+    a.unk4 = obj0->unique_id;
+    a.unk5 = 5;
+    a.unk8 = D_800AA32C;
+    a.unk14 = obj1;
+    a.unk18 = obj1->unique_id;
+    a.unk19 = 10;
+    a.unk1C = D_800AA344;
+    b.unk4 = obj0->x_position;
+    b.unk8 = obj0->y_position;
+    b.unkC = obj0->z_position;
+    b.unk10 = obj1->x_position;
+    b.unk14 = obj1->y_position;
+    b.unk18 = obj1->z_position;
+    b.unk1E = 0;
+    sub->unk10 = (s32)func_151B30B0(&b, 0x3AC49BA6, 0x30, 0xFF, 0);
+    if (sub->unk10 != 0) {
+        memcpy((u8 *)sub->unk10 + 0x150, &a, 0x30);
+    }
+}
 
 void func_151B2690(s32 *arg0) {
     struct260 *ret;
