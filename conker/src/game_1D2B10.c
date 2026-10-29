@@ -1,5 +1,8 @@
 #include <ultra64.h>
+#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
+#undef func_150ADA20
+u32 func_150ADA20(void);
 #include "variables.h"
 
 extern f32 D_800A8DB0;
@@ -32,7 +35,67 @@ void func_151A5D2C(u16 arg0) {
     func_100111C8(arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1D2B10/func_151A5D58.s")
+typedef struct {
+    s32 field_0x00;
+    s16 field_0x04;
+    u8 field_0x06;
+    u8 field_0x07;
+    s32 field_0x08;
+    s32 field_0x0C;
+    u8 field_0x10;
+    u8 field_0x11;
+    u8 field_0x12;
+    u8 field_0x13;
+    u8 field_0x14;
+    u8 field_0x15;
+    u8 field_0x16;
+    u8 field_0x17;
+    s32 field_0x18;
+    s32 field_0x1C;
+    u8 field_0x20;
+    u8 pad_0x21;
+    s16 field_0x22;
+    s16 field_0x24;
+    u8 pad_0x26[0x6];
+} SparkSpawnParams;
+
+
+struct210 *func_151A5D58(f32 arg0, u8 arg1, s32 arg2, f32 *arg3, s16 arg4, u8 arg5, u8 arg6, u8 arg7, s32 arg8) {
+    SparkSpawnParams tmp;
+
+    if (arg4 <= 0) {
+        return NULL;
+    }
+    tmp.field_0x22 = 0x14;
+    tmp.field_0x24 = 0xC;
+    tmp.field_0x06 = 0x38;
+    tmp.field_0x07 = 0;
+    tmp.field_0x00 = ((arg4 == -1) ? 0 : 1) | (arg5 ? 0x400 : 0) | 0x100 | 0x200 | 0x1000 | 0x2000 | 0x8000 | 0x20000;
+    if (arg4 == -1) {
+        tmp.field_0x04 = 0x12C;
+    } else {
+        tmp.field_0x04 = arg4 + 0x14;
+    }
+    tmp.field_0x08 = 0;
+    if (arg4 == -1) {
+        tmp.field_0x0C = 0;
+    } else {
+        tmp.field_0x0C = 0x140000 / (arg4 + 0x14);
+    }
+    tmp.field_0x10 = arg1;
+    tmp.field_0x11 = 0xFF;
+    tmp.field_0x12 = 0xFF;
+    tmp.field_0x13 = 0x83;
+    tmp.field_0x14 = 0x1E;
+    tmp.field_0x15 = 0xFF;
+    tmp.field_0x18 = (arg6 ? 2 : 3) + 0x440000;
+    tmp.field_0x16 = 0;
+    tmp.field_0x17 = 6;
+    tmp.field_0x20 = 0xFF;
+    return func_1513C650((s32)&tmp, 0, 0, arg2, arg3[0], arg3[1], arg3[2], arg0, arg0,
+                         func_150ADA20() & 0xFF, (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2),
+                         arg5 ? 3 : 0, arg5 ? 0xFF : 0, 0, arg7, arg8);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1D2B10/func_151A5F70.s")
 
