@@ -3,7 +3,48 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_E4070/func_150B6BC0.s")
+void func_150B6C90(void);
+void func_150B6D34(void);
+void func_150B6D78(void);
+void func_150B7484(void);
+void func_150B7560(void);
+void func_150B765C(void);
+void func_150B77A8(void);
+void func_150B768C(void);
+void func_150B791C(void);
+
+void func_150B6BC0(s32 arg0) {
+    switch ((u8)D_800D9890) {
+    case 1:
+        func_150B6C90();
+        return;
+    case 2:
+        func_150B6D34();
+        return;
+    case 4:
+        func_150B6D78();
+        return;
+    case 5:
+        func_150B7484();
+        return;
+    case 6:
+        func_150B7560();
+        return;
+    case 7:
+        func_150B765C();
+        return;
+    case 8:
+        func_150B77A8();
+        return;
+    case 9:
+        func_150B768C();
+        return;
+    case 10:
+        func_150B791C();
+    default:
+        return;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_E4070/func_150B6C90.s")
 
