@@ -22,7 +22,7 @@ struct Obj15171CA0 {
     s16 unk50;
     s16 unk52;
     s16 unk54;
-    s16 unk56;
+    u16 unk56;
     u8  unk58;
     u8  unk59;
 };
@@ -112,7 +112,165 @@ void func_15171FC0(struct Obj15171CA0 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_19F150/func_151720C4.s")
+extern s32 D_800DD1B4;
+extern s32 D_800DD1B8;
+extern s16 D_800DD1BC;
+extern s16 D_800DD1C0;
+extern s16 D_800DD1C2;
+extern s16 D_800DD1C4;
+extern s16 D_800DD1C6;
+extern s32 D_800D2C9C;
+struct Some151720C4 {
+    s32 unk0;
+    u8 pad4[6];
+    u8 unkA;
+};
+struct Sprite151720C4 { s32 unk0[5]; };
+#define WGFX151720C4(pkt, a, b) { Gfx *_g = (Gfx *)(pkt); _g->words.w0 = (u32)(a); _g->words.w1 = (u32)(b); }
+Gfx *func_15094F70(Gfx *, s32, s32, s32, s32, s32, s32, s32, s32);
+Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
+
+Gfx *func_151720C4(Gfx *gfx, struct Obj15171CA0 *arg1, s32 arg2) {
+    s32 r;
+    s32 g;
+    s32 b;
+    s32 a;
+    s32 ptr;
+    s32 cyc;
+    s32 mode;
+    s32 newCyc;
+    s32 newMode;
+    struct Sprite151720C4 sprite;
+    s32 tex;
+    s32 frame;
+    s32 update;
+    struct Some151720C4 *entry;
+    s32 othermodeH;
+    s32 othermodeL;
+
+    update = 1;
+    if (arg1->unk50 >= 2) {
+    entry = (struct Some151720C4 *)D_8008CA4C[arg1->unk58];
+    frame = arg1->unk52 >> 8;
+    ptr = entry->unk0;
+    tex = ptr;
+    if ((u32)ptr >= 0x10000000) {
+        tex = ((s32 *)ptr)[frame];
+        frame = 0;
+    }
+    if (tex != D_800DD1B4 || frame != D_800DD1B8) {
+        gfx = func_15094F70(gfx, (s32)entry, arg1->unk52, (s32)&sprite, 0, 0, 0, 2, 3);
+        D_800DD1B4 = tex;
+        D_800DD1B8 = frame;
+    }
+    cyc = D_800DD1BC & 0xF;
+    mode = D_800DD1BC & 0xF0;
+    if (!(arg1->unk59 & 1)) {
+        newCyc = 1;
+    } else {
+        newCyc = 2;
+    }
+    if (entry->unkA == 5) {
+        newCyc += 2;
+    }
+    if (cyc != newCyc) {
+        cyc = newCyc;
+        if (update) {
+            gDPPipeSync(gfx++);
+        }
+        update = 0;
+        switch (newCyc) {
+        case 1:
+            othermodeH = 0;
+            othermodeL = 0x504DD8;
+            break;
+        case 2:
+            othermodeH = 0;
+            othermodeL = 0x504B50;
+            break;
+        case 3:
+            othermodeH = 0x100000;
+            othermodeL = 0xC184DD8;
+            break;
+        case 4:
+            othermodeH = 0x100000;
+            othermodeL = 0xC184B50;
+            break;
+        }
+        gDPSetAlphaCompare(gfx++, G_AC_NONE);
+        gSPClearGeometryMode(gfx++, G_FOG | G_LOD);
+    }
+    gfx = func_15142FBC(gfx, othermodeH | G_TP_PERSP | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_DISABLE, othermodeL, (u8 *)&update);
+    if (!(arg1->unk59 & 8)) {
+        if (entry->unkA == 0) {
+            if (arg1->unk56) {
+                newMode = 0x10;
+            } else {
+                newMode = 0x20;
+            }
+        } else if (entry->unkA == 5) {
+            if (arg1->unk56) {
+                newMode = 0x60;
+            } else {
+                newMode = 0x50;
+            }
+        } else {
+            newMode = 0x30;
+        }
+    } else {
+        newMode = 0x40;
+    }
+    if (mode != newMode) {
+        mode = newMode;
+        if (update) {
+            gDPPipeSync(gfx++);
+        }
+        switch (newMode) {
+        case 0x10:
+            WGFX151720C4(gfx++, 0xFC30B261, 0xFF67FFFF);
+            break;
+        case 0x20:
+            WGFX151720C4(gfx++, 0xFCFFB3FF, 0xFF64FE7F);
+            break;
+        case 0x30:
+            WGFX151720C4(gfx++, 0xFCFF97FF, 0xFF2DFEFF);
+            break;
+        case 0x40:
+            WGFX151720C4(gfx++, 0xFCFFFFFF, 0xFFFCF279);
+            break;
+        case 0x50:
+            WGFX151720C4(gfx++, 0xFCFFB5FF, 0xFFFCFE38);
+            break;
+        case 0x60:
+            WGFX151720C4(gfx++, 0xFC30B5FF, 0xFFFFFE38);
+            break;
+        }
+    }
+    D_800DD1BC = cyc | mode;
+    r = (arg1->unk56 >> 8) & 0xF8;
+    g = (arg1->unk56 >> 3) & 0xF8;
+    b = (arg1->unk56 << 2) & 0xF8;
+    if (arg1->unk50 >= 0x1A) {
+        a = 0xFF;
+    } else {
+        a = arg1->unk50 * 10;
+    }
+    if (r != D_800DD1C0 || g != D_800DD1C2 || b != D_800DD1C4 || a != D_800DD1C6) {
+        D_800DD1C0 = r;
+        D_800DD1C2 = g;
+        D_800DD1C4 = b;
+        D_800DD1C6 = a;
+        if (update) {
+            gDPPipeSync(gfx++);
+        }
+        gDPSetPrimColor(gfx++, 1, 0, r, g, b, a);
+    }
+    gSPVertex(gfx++, (u8 *)arg1 + 0x10, 4, 0);
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    gSP1Triangle(gfx++, 0, 2, 3, 0);
+    }
+    return gfx;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_19F150/func_151725FC.s")
 
