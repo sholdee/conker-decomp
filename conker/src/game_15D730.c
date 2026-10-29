@@ -174,7 +174,149 @@ void func_151303BC(s32 a0, u8 a1, s32 a2) {
     func_15130374(a0, a1, a2, 0xFF, 0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_15D730/func_151303EC.s")
+typedef struct Obj151303EC {
+    u8 pad0[0x1A];
+    s16 unk1A;
+    s32 unk1C;
+    s32 unk20;
+    u8 pad24[0x7];
+    u8 unk2B;
+    u8 pad2C;
+    u8 unk2D;
+    s16 unk2E;
+    s16 unk30;
+    s16 unk32;
+    f32 unk34;
+    f32 unk38;
+    f32 unk3C;
+    f32 unk40[3];
+    u8 pad4C[0xC];
+    f32 unk58;
+    f32 unk5C;
+    f32 unk60;
+    f32 unk64;
+    s32 unk68;
+    u8 pad6C[0x6];
+    s8 unk72;
+    s8 unk73;
+} Obj151303EC;
+
+typedef struct Vec3_151303EC {
+    f32 x, y, z;
+} Vec3_151303EC;
+
+typedef struct Struct80090B64 {
+    u8 unk0;
+    u8 pad1[0xB];
+} Struct80090B64;
+
+extern Struct80090B64 D_80090B64[];
+extern s32 (*D_80089760[])(Obj151303EC *, Vec3_151303EC *);
+extern void (*D_80089800[])(Obj151303EC *);
+
+void func_151303EC(Obj151303EC *arg0) {
+    s32 unused2;
+    Vec3_151303EC pos;
+    u8 done;
+    s32 i;
+    s32 unused;
+    s32 max;
+    s32 vel;
+    s32 len;
+
+    done = 0;
+    if (arg0->unk68 & 1) {
+        arg0->unk1A -= D_800BE9E4;
+        if (arg0->unk1A < 0) {
+            done = 1;
+        }
+    }
+    if (arg0->unk68 & 2) {
+        arg0->unk5C += arg0->unk64 * D_800BE9A4;
+    }
+    pos = *(Vec3_151303EC *)arg0->unk40;
+    if (arg0->unk68 & 4) {
+        arg0->unk40[0] += arg0->unk58 * D_800BE9A4;
+        arg0->unk40[1] += arg0->unk5C * D_800BE9A4;
+        arg0->unk40[2] += arg0->unk60 * D_800BE9A4;
+    }
+    if (arg0->unk68 & 0x200) {
+        if (arg0->unk1A < arg0->unk2E) {
+            i = (s16)(arg0->unk1A * arg0->unk30);
+            if (i < arg0->unk2B) {
+                arg0->unk2B = i;
+            }
+        }
+    }
+    if ((arg0->unk68 & 0x400) && (arg0->unk1A < arg0->unk32)) {
+        if (arg0->unk68 & 0x800) {
+            i = D_800BE9E4;
+            if (arg0->unk68 & 0x80000) {
+                for (; i != 0; i--) {
+                    arg0->unk38 *= arg0->unk34;
+                }
+            } else if (arg0->unk68 & 0x100000) {
+                for (; i != 0; i--) {
+                    arg0->unk3C *= arg0->unk34;
+                }
+            } else {
+                for (; i != 0; i--) {
+                    arg0->unk38 *= arg0->unk34;
+                    arg0->unk3C *= arg0->unk34;
+                }
+            }
+        } else {
+            if (!(arg0->unk68 & 0x80000)) {
+                arg0->unk3C += arg0->unk34 * D_800BE9E4;
+            }
+            if (!(arg0->unk68 & 0x100000)) {
+                arg0->unk38 += arg0->unk34 * D_800BE9E4;
+            }
+        }
+    }
+    if (!done) {
+        vel = arg0->unk20;
+        if (vel != 0) {
+            len = D_80090B64[arg0->unk2D].unk0;
+            max = (len << 16) - 1;
+            arg0->unk1C += vel * D_800BE9E4;
+            if (max < arg0->unk1C) {
+                if (arg0->unk68 & 0x10) {
+                    done = 1;
+                } else if (arg0->unk68 & 8) {
+                    arg0->unk1C = max - arg0->unk1C % max;
+                    arg0->unk20 = -vel;
+                } else {
+                    do {
+                        arg0->unk1C -= max;
+                    } while (max < arg0->unk1C);
+                }
+            } else if (arg0->unk1C < 0) {
+                if (arg0->unk68 & 0x20) {
+                    done = 1;
+                } else if (arg0->unk68 & 8) {
+                    arg0->unk1C = -arg0->unk1C % max;
+                    arg0->unk20 = -vel;
+                } else {
+                    do {
+                        arg0->unk1C += max;
+                    } while (arg0->unk1C < 0);
+                }
+            }
+        }
+    }
+    if (arg0->unk72 != -1 && !done) {
+        if (D_80089760[arg0->unk72](arg0, &pos) == 0) {
+            done = 1;
+        }
+    }
+    if (done) {
+        if (arg0->unk73 != -1) {
+            D_80089800[arg0->unk73](arg0);
+        }
+        func_1516972C((struct102 *)arg0);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_15D730/func_15130A9C.s")
 
