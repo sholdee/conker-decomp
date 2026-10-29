@@ -559,7 +559,83 @@ void func_150EF910(void *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_11C2B0/func_150EFA4C.s")
+typedef struct {
+    f32 x, y, z;
+} Vec3_150EFA4C;
+
+typedef struct {
+    u8 *actor;
+    u8 pad4[9];
+    u8 slot;
+    u8 padE[0xA];
+    u8 flags;
+    u8 pad19[0x23];
+    f32 unk3C;
+    f32 unk40;
+} Sub_150EFA4C;
+
+typedef struct {
+    u8 pad0[0x34];
+    Vec3_150EFA4C a;
+    Vec3_150EFA4C b;
+    u8 pad4C[0xC4];
+    Sub_150EFA4C sub;
+} Obj_150EFA4C;
+
+typedef struct {
+    u8 pad0[8];
+    Obj_150EFA4C *obj;
+} Holder_150EFA4C;
+
+typedef struct {
+    u8 pad0[0x1C];
+    u8 flags;
+    u8 pad1D[0x13];
+    Vec3_150EFA4C a;
+    Vec3_150EFA4C b;
+    Vec3_150EFA4C c;
+    f32 unk54;
+    f32 unk58;
+    u8 pad5C[4];
+    Holder_150EFA4C *holder;
+} Self_150EFA4C;
+
+extern f32 D_800A1620[][3];
+
+s32 func_150EFA4C(Self_150EFA4C *arg0) {
+    Obj_150EFA4C *obj;
+    Sub_150EFA4C *sub;
+    Holder_150EFA4C *holder;
+
+    holder = arg0->holder;
+    obj = holder->obj;
+    sub = &obj->sub;
+    if (sub->flags & 1) {
+        u8 *actor;
+
+        actor = sub->actor;
+        if (*(s32 *)(actor + 0x1D4)) {
+            u8 slot;
+
+            slot = sub->slot;
+            arg0->a = obj->a;
+            arg0->b = obj->b;
+            arg0->unk54 = sub->unk3C;
+            arg0->unk58 = sub->unk40;
+            func_15143134(D_800A1620[slot], &arg0->c, *(s32 *)(actor + 0x1D4) + (D_800A1638[slot] << 6));
+            arg0->c.x = arg0->c.x - arg0->a.x;
+            arg0->c.y = arg0->c.y - arg0->a.y;
+            arg0->c.z = arg0->c.z - arg0->a.z;
+            arg0->flags |= 2;
+        } else {
+            arg0->flags &= ~2;
+        }
+    } else {
+        arg0->flags &= ~2;
+    }
+    return 1;
+}
+
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_11C2B0/func_150EFB80.s")
 
