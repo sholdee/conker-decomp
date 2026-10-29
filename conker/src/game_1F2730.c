@@ -4,7 +4,78 @@
 
 struct225 *func_151602C0(Header *header, Header2 *header2, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7, s32 offset, u8 arg9, s32 argA);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1F2730/func_151C5280.s")
+void func_15145740(struct127 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4);
+s32 func_1514654C(struct127 *, struct126 *, s32, void *, void *, s32);
+s32 func_151C229C(f32 *arg0, s32 arg1, f32 *arg2, f32 *arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11, struct127 *arg12, s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24, s32 arg25, s32 arg26);
+void func_151C5588(s32 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4);
+void func_151C56A4(f32 *arg0, u8 arg1, s32 arg2);
+extern s32 D_800AAA90;
+extern f32 D_800AAAA8[];
+
+void func_151C5280(struct127 *arg0, u8 arg1, s32 arg2) {
+    f32 pos[3];
+    f32 end[3];
+    f32 dir[3];
+    f32 unkB0[3];
+    struct126 *temp;
+    f32 *tbl[2];
+    f32 *out[2];
+    s32 var_v1;
+    s32 var_v0;
+    s32 rand;
+    f32 rand1;
+    f32 rand0;
+
+    if (arg0 != NULL) {
+        func_15145740(arg0, dir, unkB0, NULL, 0.0f);
+        dir[0] *= 0.001000000047f;
+        dir[1] *= 0.001000000047f;
+        dir[2] *= 0.001000000047f;
+        if (arg0->unk1D4 != 0) {
+            tbl[0] = (f32 *)&D_800AAA90;
+            tbl[1] = D_800AAAA8;
+            out[0] = pos;
+            out[1] = end;
+            temp = func_1503195C(arg0, 0x46, 0);
+            if (temp == NULL) {
+                return;
+            }
+            if (func_1514654C(arg0, temp, 0, tbl, out, 2) == 0) {
+                return;
+            }
+            func_151C56A4(pos, arg1, arg2);
+            if (func_150ADA20() & 1) {
+                func_151C5588((s32)arg0, (s32)pos, 0x46, arg1, arg2);
+            }
+        } else {
+            pos[0] = arg0->x_position;
+            pos[1] = arg0->y_position + 106.0f;
+            pos[2] = arg0->z_position;
+            end[0] = pos[0] + (dir[0] * -82.0f);
+            end[1] = pos[1] + (dir[1] * -82.0f);
+            end[2] = pos[2] + (dir[2] * -82.0f);
+            pos[0] -= dir[0] * -120.0f;
+            pos[1] -= dir[1] * -120.0f;
+            pos[2] -= dir[2] * -120.0f;
+        }
+        rand0 = func_150ADA68();
+        rand1 = func_150ADA68();
+        rand = func_150ADA20();
+        if (arg0->unk1D4 != 0) {
+            var_v1 = 0xFF;
+        } else {
+            var_v1 = 0x80;
+        }
+        if (D_800BE616 != 0) {
+            var_v0 = -1;
+        } else {
+            var_v0 = 2;
+        }
+        func_151C229C(pos, 0, end, dir, 1, 0, 300.0f, 0.003333333414f, (rand0 * 10.0f) + 25.0f,
+                      (rand1 * 150.0f) + 400.0f, 80.0f, (rand % 56U) + 200, arg0, 1, 1, 0, var_v1, 0, 1, 0,
+                      0x1A, 0.0f, 0xFF, var_v0, 0, arg1, arg2);
+    }
+}
 
 extern void func_15102B38(s32, u8, s32, s32, f32 *, s32, s32, f32, s32, s32, s32, s32, u8, s32);
 extern f32 D_800AAABC, D_800AAAC0, D_800AAAC4, D_800AAAC8;

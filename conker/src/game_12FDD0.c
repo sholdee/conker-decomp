@@ -127,7 +127,52 @@ void func_15102D50(s32 arg0, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, arg0 + 0x110, arg0 + 0x114, arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_12FDD0/func_15102D90.s")
+typedef struct {
+    u8 pad0[0x34];
+    Vec3_15102B38 unk34;
+    Vec3_15102B38 unk40;
+    u8 pad4C[0xC4];
+    Payload15102B38 unk110;
+} Obj15102D90;
+
+extern s32 func_1514654C(struct127 *, struct126 *, s32, void *, void *, s32);
+extern s32 func_15145EA4(s32 *arg0, s32 *arg1, s32 arg2, s32 arg3);
+
+s32 func_15102D90(Obj15102D90 *arg0) {
+    struct127 *actor;
+    Payload15102B38 *p;
+    s32 src[2];
+    s32 dst[2];
+
+    p = &arg0->unk110;
+    p->unk14 &= ~1;
+    actor = p->unk0;
+    if (actor->unique_id != p->unk4 || actor->interaction_state == 0) {
+        return 0;
+    }
+    if (actor->unk1D4 == NULL || (actor->unk74 & 0xF) == 0xF) {
+        return 1;
+    }
+    src[0] = (s32)&arg0->unk34;
+    src[1] = (s32)&arg0->unk40;
+    dst[0] = (s32)&p->unk18;
+    dst[1] = (s32)&p->unk24;
+    if (p->unkC != -1) {
+        struct126 *temp;
+
+        temp = func_1503195C(actor, p->unkC, 0);
+        if (temp == NULL) {
+            return 0;
+        }
+        if (func_1514654C(actor, temp, p->unk10, src, dst, 2) == 0) {
+            return 0;
+        }
+    } else {
+        func_15145EA4(src, dst, (s32)actor->unk1D4 + p->unk8, 2);
+    }
+    p->unk14 |= 1;
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_12FDD0/func_15102EB8.s")
 

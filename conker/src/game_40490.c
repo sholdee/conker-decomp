@@ -1,6 +1,8 @@
 #include <ultra64.h>
 
+#define func_1000FA64 func_1000FA64_narrow_proto
 #include "functions.h"
+#undef func_1000FA64
 #include "variables.h"
 
 void func_151A9390(s32 arg0, s32 arg1, struct134 *arg2, s32 arg3, f32 arg4, f32 arg5, s32 arg6, s32 arg7, s32 arg8);
@@ -181,7 +183,60 @@ s32 func_1501374C(struct16 *arg0) {
 }
 
 // fat struct definition:
-#pragma GLOBAL_ASM("asm/nonmatchings/game_40490/func_15013778.s")
+/* func_1000FA64 passes its arguments as full words (callers do not truncate). */
+u16 func_1000FA64(s32, s32, s32, s32, s32, s32, s32, void *, void *, s32, s32, s32);
+void func_150A8050(f32 mtx[4][4], f32 arg1, f32 arg2, f32 arg3);
+extern f32 D_80096640;
+extern f32 D_80096644;
+
+typedef struct Game40490BeamPacket {
+    f32 position[3];
+    f32 direction[3];
+    f32 height;
+    f32 width;
+    f32 rotation[2];
+    f32 zero;
+    f32 field2C;
+    f32 field30;
+} Game40490BeamPacket;
+
+s32 func_15013778(u8 *arg0) {
+    s32 result;
+    Game40490BeamPacket packet;
+    f32 matrix[4][4];
+
+    if (*(s16 *)(arg0 + 8) != 0) {
+        f32 inverse;
+        s16 height;
+
+        packet.height = 2.0f * (f32)*(s16 *)(arg0 + 8);
+        inverse = 1.0f / packet.height;
+        packet.width = (f32)*(s16 *)(arg0 + 6);
+        packet.rotation[0] = *(f32 *)(arg0 + 0xC);
+        packet.rotation[1] = *(f32 *)(arg0 + 0x10);
+        packet.zero = 0.0f;
+        packet.field2C = D_80096640;
+        packet.field30 = D_80096644;
+        packet.position[0] = (f32)*(s16 *)(arg0 + 0);
+        packet.position[1] = (f32)*(s16 *)(arg0 + 2);
+        packet.position[2] = (f32)*(s16 *)(arg0 + 4);
+        func_150A8050(matrix, *(f32 *)(arg0 + 0xC), *(f32 *)(arg0 + 0x10), 0.0f);
+        func_150A7960((f32 *)matrix, 0.0f, packet.height, 0.0f,
+                      &packet.direction[0], &packet.direction[1], &packet.direction[2]);
+        packet.direction[0] *= inverse;
+        packet.direction[1] *= inverse;
+        packet.direction[2] *= inverse;
+        result = (s32)func_15149130(0x12C, -1, 0x19, -1, 0, 0x17, (struct37 *)0x34, 0xFF, 0);
+        if (result != 0) {
+            memcpy((void *)(result + 0x28), &packet, 0x34);
+        }
+        height = *(s16 *)(arg0 + 8);
+        func_1000FA64(0x67C, *(s16 *)(arg0 + 0),
+                      (s16)(*(s16 *)(arg0 + 2) + height), *(s16 *)(arg0 + 4),
+                      0x2EE0, height * 2, height / 2, (void *)func_1000EF40, 0, 0, 8, 0);
+    }
+    return 1;
+}
 
 s32 func_1501396C(struct16 *arg0) {
     u8 idx = arg0->unk17;
@@ -571,8 +626,123 @@ s32 func_150142EC(struct134 *arg0) {
     }
     return 1;
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_40490/func_150144B8.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_40490/func_1501474C.s")
+typedef struct Game40490144B8Packet {
+    void *owner;
+    s32 choice;
+    s32 low;
+    s32 range;
+    s16 countX, countY;
+    f32 sizeX, sizeY;
+    f32 angleX, angleY;
+    f32 arc, factor;
+    f32 steps, inverse, height;
+} Game40490144B8Packet;
+
+void func_15145974(void *, f32 *, f32 *);
+
+s32 func_150144B8(u8 *arg0) {
+    Game40490144B8Packet packet;
+    register u32 value;
+    struct { f32 direction[3]; f32 matrix[16]; } scratch;
+
+    arg0[0x16] |= 4;
+    if (D_80082FA0 >= 2) {
+        return 1;
+    }
+    func_150A8050((void *)scratch.matrix, *(f32 *)(arg0 + 0xC), *(f32 *)(arg0 + 0x10), 0.0f);
+    func_150A7960(scratch.matrix, 0.0f, 100.0f, 0.0f, &scratch.direction[0], &scratch.direction[1], &scratch.direction[2]);
+    func_15145974(scratch.direction, &packet.angleX, &packet.angleY);
+    packet.angleX *= 0.017453292f;
+    packet.angleY *= 0.017453292f;
+    packet.low = *(u32 *)(arg0 + 0x18) & 0xFFU;
+    packet.range = (*(u32 *)(arg0 + 0x18) >> 8) & 0xFFU;
+    value = func_150ADA20();
+    packet.owner = arg0;
+    packet.choice = value % (u32)(packet.range + 1) + packet.low;
+    packet.countX = (*(u32 *)(arg0 + 0x18) >> 16) & 0xFFU;
+    packet.countY = (*(u32 *)(arg0 + 0x18) >> 24) & 0xFFU;
+    packet.sizeX = (f32)(*(u32 *)(arg0 + 0x1C) & 0xFFU) * 0.015625f;
+    packet.sizeY = (f32)((*(u32 *)(arg0 + 0x1C) >> 8) & 0xFFU) * 0.015625f;
+    packet.steps = (f32)((*(u32 *)(arg0 + 0x1C) >> 24) & 0xFFU);
+    packet.inverse = 1.0f / packet.steps;
+    packet.height = (f32)*(s16 *)(arg0 + 8) * packet.inverse;
+    packet.arc = func_150484A0((f32)*(s16 *)(arg0 + 6), (f32)*(s16 *)(arg0 + 8));
+    packet.factor = (f32)((*(u32 *)(arg0 + 0x1C) >> 16) & 0xFFU) * 0.00390625f * 0.7853982f;
+    value = (u32)func_15149130(0x12C, -1, 0x2A, -1, 0, 0, (struct37 *)0x38, 0xFF, 0);
+    if (value != 0) {
+        memcpy((void *)((u32)value + 0x28U), &packet, 0x38);
+    }
+    return 1;
+}
+extern f32 D_80096690;
+extern f32 D_80096694;
+
+typedef struct Game40490PlanePoint {
+    f32 x;
+    f32 z;
+} Game40490PlanePoint;
+
+typedef struct Game40490PlanePacket {
+    Game40490PlanePoint start;
+    Game40490PlanePoint end;
+    f32 edge[4];
+    f32 top;
+    f32 bottom;
+    f32 scaleX;
+    f32 scaleZ;
+    f32 unk30;
+    f32 unk34;
+    f32 unk38;
+    s8 bytes[4];
+} Game40490PlanePacket;
+
+s32 func_1501474C(void *arg) {
+    Game40490PlanePacket packet;
+    void *result;
+    Game40490PlanePoint corners[4];
+    f32 s;
+    f32 c;
+    f32 z;
+    u8 *arg0;
+    f32 x;
+
+    arg0 = arg;
+    arg0[0x16] |= 4;
+    x = *(s16 *)arg0;
+    z = *(s16 *)(arg0 + 4);
+    s = sinf(*(f32 *)(arg0 + 0x10) * D_80096690);
+    c = cosf(*(f32 *)(arg0 + 0x10) * D_80096694);
+    corners[0].x = *(s16 *)(arg0 + 0xA) * s + (*(s16 *)(arg0 + 6) * c + x);
+    corners[0].z = *(s16 *)(arg0 + 0xA) * c + z - *(s16 *)(arg0 + 6) * s;
+    corners[1].x = -*(s16 *)(arg0 + 0xA) * s + (*(s16 *)(arg0 + 6) * c + x);
+    corners[1].z = -*(s16 *)(arg0 + 0xA) * c + z - *(s16 *)(arg0 + 6) * s;
+    corners[2].x = -*(s16 *)(arg0 + 0xA) * s + (-*(s16 *)(arg0 + 6) * c + x);
+    corners[2].z = -*(s16 *)(arg0 + 0xA) * c + z - -*(s16 *)(arg0 + 6) * s;
+    corners[3].x = *(s16 *)(arg0 + 0xA) * s + (-*(s16 *)(arg0 + 6) * c + x);
+    corners[3].z = *(s16 *)(arg0 + 0xA) * c + z - -*(s16 *)(arg0 + 6) * s;
+    packet.start = corners[1];
+    packet.end = corners[2];
+    packet.edge[0] = corners[0].x - corners[1].x;
+    packet.edge[1] = corners[0].z - corners[1].z;
+    packet.edge[2] = corners[3].x - corners[2].x;
+    packet.edge[3] = corners[3].z - corners[2].z;
+    packet.top = *(s16 *)(arg0 + 8) + *(s16 *)(arg0 + 2);
+    packet.bottom = *(s16 *)(arg0 + 2);
+    packet.scaleX = (f32)(*(u32 *)(arg0 + 0x1C) & 0xFF) * 0.00390625f * 0.5f;
+    packet.scaleZ = (f32)((*(u32 *)(arg0 + 0x1C) >> 8) & 0xFF) * 0.00390625f * 0.5f;
+    packet.unk30 = 0.0f;
+    packet.unk34 = (f32)((*(u32 *)(arg0 + 0x1C) >> 16) & 0xFF) * 0.00390625f * 250.0f;
+    packet.unk38 = (f32)((*(u32 *)(arg0 + 0x1C) >> 24) & 0xFF) * 0.00390625f * 250.0f;
+    packet.bytes[0] = *(u32 *)(arg0 + 0x18) & 0xFF;
+    packet.bytes[1] = (*(u32 *)(arg0 + 0x18) >> 8) & 0xFF;
+    packet.bytes[2] = (*(u32 *)(arg0 + 0x18) >> 16) & 0xFF;
+    packet.bytes[3] = (*(u32 *)(arg0 + 0x18) >> 24) & 0xFF;
+    result = func_15149130(0x12C, -1, 0x2C, -1, 0, 0, (struct37 *)0x40, 0xFF, 0);
+    if (result != NULL) {
+        memcpy((u8 *)result + 0x28, &packet, 0x40);
+    }
+    return 1;
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/game_40490/func_15014B60.s")
 
 s32 func_15014F6C(struct134 *arg0) {

@@ -1,5 +1,8 @@
 #include <ultra64.h>
+/* functions.h declares arg3/arg5 as s32; golden reads them as u8 from their home slots. */
+#define func_151D5714 func_151D5714_hdr
 #include "functions.h"
+#undef func_151D5714
 #include "variables.h"
 
 extern void (*D_8008FC70[])(void *, s16, void *);
@@ -76,7 +79,24 @@ void func_151D3E04(s32 *arg0, f32 *arg1, void *arg2, u8 arg3, f32 arg4) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_200930/func_151D3E6C.s")
+extern void func_1505D1C4(f32, f32, f32, s32, s32, u16, s32, s32);
+
+void func_151D3E6C(struct127 *arg0, f32 *arg1, f32 *arg2, s32 arg3) {
+    f32 x = (arg2[0] + arg1[0]) * 0.5f;
+    f32 y = (arg2[1] + arg1[1]) * 0.5f;
+    f32 z = (arg2[2] + arg1[2]) * 0.5f;
+
+    {
+        u16 angle;
+
+        if (arg0->unk31C != NULL) {
+            angle = arg0->unk76 - arg0->unk31C->unk12;
+        } else {
+            angle = arg0->unk76;
+        }
+        func_1505D1C4(x, y, z, arg3, arg0 - D_800CC2D0, angle, 0, 0);
+    }
+}
 
 void func_151D3F14(f32 *arg0, u8 arg1, s32 arg2) {
     Header header;
@@ -307,7 +327,71 @@ void func_151D4D58(void *arg0) {
     func_151D469C(arg0, 1, 0x50, 0xFF, 1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_200930/func_151D4DAC.s")
+extern f32 D_800AB218;
+
+typedef struct {
+    u8 pad0[4];
+    f32 unk4;
+    u8 pad8[0x50];
+    u8 unk58;
+    u8 unk59;
+} S151D4DAC;
+
+void func_151C2050(struct127 *, f32 *, f32 *, s32, f32);
+void func_1507DE4C(struct127 *);
+void func_15138C80(struct127 *, s32, s32);
+void func_15137610(struct127 *, f32 *, f32 *, f32 *, u8, s32);
+s32 func_1505D024(struct127 *, s32, u16, s32);
+
+void func_151D4DAC(struct127 *arg0, struct127 *arg1, f32 *arg2, f32 *arg3, S151D4DAC *arg4, s32 arg5, f32 *arg6, u8 arg7, s32 arg8) {
+    s32 alreadyDead;
+    s32 health;
+    s32 hp;
+    u16 angle;
+
+    if ((arg0->id == 0x9) || (arg0->id == 0xF) || (arg0->id == 0x10) || (arg0->id == 0x12) ||
+        (arg0->id == 0x17) || (arg0->id == 0x1B) || (arg0->id == 0x1E) || (arg0->id == 0x28) ||
+        (arg0->id == 0x29) || (arg0->id == 0x2A) || (arg0->id == 0x2B) || (arg0->id == 0x2C) ||
+        (arg0->id == 0x2E) || (arg0->id == 0x38) || (arg0->id == 0x41) || (arg0->id == 0x42) ||
+        (arg0->id == 0x4B) || (arg0->id == 0x46) || (arg0->id == 0x47) || (arg0->id == 0x49) ||
+        (arg0->id == 0x4A) || (arg0->id == 0x4C) || (arg0->id == 0x4D) || (arg0->id == 0x4E) ||
+        (arg0->id == 0x4F) || (arg0->id == 0x52) || (arg0->id == 0x5D) || (arg0->id == 0x60) ||
+        (arg0->id == 0x61) || (arg0->id == 0x66) || (arg0->id == 0x67) || (arg0->id == 0x70) ||
+        (arg0->id == 0x73) || (arg0->id == 0x77) || (arg0->id == 0x7B) || (arg0->id == 0x89) ||
+        (arg0->id == 0x8C) || (arg0->id == 0x8E) || (arg0->id == 0x8F) || (arg0->id == 0x91) ||
+        (arg0->id == 0x9E) || (arg0->id == 0xA6) || (arg0->id == 0xAB) || (arg0->id == 0xAC) ||
+        (arg0->id == 0xB2) || (arg0->id == 0xB4) || (arg0->id == 0x5B)) {
+        func_151C2050(arg1, arg2, arg6, 9, (arg4 != NULL) ? arg4->unk4 : 0.0f);
+    }
+
+    health = arg0->health;
+    if (health == 0) {
+        alreadyDead = 1;
+    } else {
+        alreadyDead = 0;
+    }
+
+    arg5 |= 0x60000;
+    hp = arg0->health;
+    if ((arg4 != NULL) && (arg4->unk59 == 3) && (arg4->unk58 == 0xA)) {
+        if (health >= 3) {
+            arg0->health = hp - 1;
+        } else {
+            arg0->health = 0;
+            func_1507DE4C(arg0);
+            func_15138C80(arg0, 0xFF, 1);
+            arg5 = 0x100020;
+        }
+    }
+
+    func_15137610(arg0, arg2, arg3, arg6, arg7, arg8);
+
+    if (alreadyDead == 0) {
+        angle = func_150484A0(arg6[0], arg6[2]) * D_800AB218;
+        func_1505D024(arg0, arg5 | 0x80000, (angle - 0x4000) | 1,
+                      (arg1 != NULL) ? (arg1 - D_800CC2D0) : -1);
+    }
+}
 
 void func_151D5148(void *arg0) {
     s16 *p = *(s16 **)((u8 *)arg0 + 0x31C);
@@ -445,13 +529,75 @@ void func_151D5648(void *arg0, u8 arg1, s32 arg2) {
                   (f32)(u32)((temp_a % 0x38U) + 0xC8), 0.0f, arg1, arg2);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_200930/func_151D5714.s")
+extern s32 func_15145EA4(s32 *arg0, s32 *arg1, s32 arg2, s32 arg3);
+
+void func_151D5714(struct127 *arg0, f32 *arg1, f32 *arg2, u8 arg3, f32 arg4, u8 arg5, s32 arg6) {
+    struct17 a;
+    struct17 b;
+    s32 mtx;
+    s32 srcs[2];
+    s32 dsts[2];
+
+    if (arg0->unk1D4 != NULL) {
+        if ((arg0->unk74 & 0xF) != 0xF) {
+            mtx = (s32)arg0->unk1D4 + (arg3 << 6);
+            srcs[0] = (s32)arg1;
+            srcs[1] = (s32)arg2;
+            dsts[0] = (s32)&a;
+            dsts[1] = (s32)&b;
+            func_15145EA4(srcs, dsts, mtx, 2);
+            b.unk0 = b.unk0 - a.unk0;
+            b.unk4 = b.unk4 - a.unk4;
+            b.unk8 = b.unk8 - a.unk8;
+            {
+                void func_151D4408(struct17 *, struct17 *, void *, struct127 *, f32, u8, s32);
+                func_151D4408(&a, &b, (void *)mtx, arg0, arg4, arg5, arg6);
+            }
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_200930/func_151D57F8.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_200930/func_151D5A18.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_200930/func_151D5B6C.s")
+s32 func_151452C4(s32 arg0, s32 arg1, struct17 *arg2, f32 arg3, struct17 *arg4, struct17 *arg5, f32 *arg6, f32 *arg7);
+extern s32 (*D_80086C90[])(struct127 *, struct127 *, s32);
+
+s32 func_151D5B6C(s32 arg0, s32 arg1, struct127 *arg2, s8 arg3, s32 arg4) {
+    f32 radius;
+    struct127 *obj;
+    s32 mask;
+    struct17 pos;
+    struct17 sp74;
+    struct17 sp68;
+    f32 sp64;
+    f32 sp60;
+    u8 i;
+
+    mask = -1;
+    for (i = 0; i < 25; i++) {
+        obj = &D_800CC2D0[i];
+        if (obj->interaction_state == 0) continue;
+        if (obj->unk5 == 3) continue;
+        if (D_800BE9F0 != 0x23 && obj->id == 0xFF) continue;
+        if (obj == arg2) continue;
+        if (!(obj->unkF8 & 0x40)) continue;
+        if (arg3 != -1 && D_80086C90[arg3](obj, arg2, arg4) == 0) continue;
+        if (obj->unkD2 < obj->unkD4) {
+            radius = obj->unkD4;
+        } else {
+            radius = obj->unkD2;
+        }
+        pos.unk0 = obj->x_position;
+        pos.unk4 = obj->y_position + obj->unkD6;
+        pos.unk8 = obj->z_position;
+        if (func_151452C4(arg0, arg1, &pos, radius + radius, &sp74, &sp68, &sp64, &sp60)) {
+            mask &= ~(1 << i);
+        }
+    }
+    return mask;
+}
 
 void func_151D5D60(s32 arg0, s16 arg1, s32 arg2, s32 *arg3, s8 *arg4) {
     s8 sp27;

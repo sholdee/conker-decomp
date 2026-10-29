@@ -32,7 +32,61 @@ struct260 *func_151D71B0(s16 arg0, u8 arg1, u8 arg2, f32 arg3, void *arg4, u8 ar
     return temp_v0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_204660/func_151D7264.s")
+typedef struct Sub151D7264 {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ u8 unk4;
+    /* 0x05 */ u8 unk5;
+    /* 0x06 */ u8 pad6[2];
+    /* 0x08 */ struct17 unk8;
+    /* 0x14 */ f32 unk14;
+} Sub151D7264;
+
+typedef struct Obj151D7264 {
+    /* 0x00 */ u8 pad0[0xD];
+    /* 0x0D */ u8 unkD;
+    /* 0x0E */ s16 unkE;
+    /* 0x10 */ u8 pad10[0x18];
+    /* 0x28 */ Sub151D7264 unk28;
+} Obj151D7264;
+
+extern s32 (*D_8008FCA0[])(Obj151D7264 *);
+extern f32 func_15143E64(struct17 *);
+void func_151D77C8();
+void func_151D7830(s32 *arg0);
+
+void func_151D7264(Obj151D7264 *arg0) {
+    Sub151D7264 *p;
+    struct17 pos;
+    u8 flag;
+    struct17 d;
+
+    p = &arg0->unk28;
+    pos = p->unk8;
+    flag = p->unk5 & 1;
+    if (D_8008FCA0[p->unk4](arg0) == 0) {
+        arg0->unkE = -1;
+        arg0->unkD |= 1;
+        return;
+    }
+    if (p->unk5 & 1) {
+        if (flag) {
+            d.unk0 = p->unk8.unk0 - pos.unk0;
+            d.unk4 = p->unk8.unk4 - pos.unk4;
+            d.unk8 = p->unk8.unk8 - pos.unk8;
+            if (func_15143E64(&d) < p->unk14) {
+                if (p->unk0 == 0) {
+                    func_151D7830((s32 *)arg0);
+                }
+            } else {
+                func_151D77C8((s32 *)arg0);
+            }
+        } else {
+            func_151D77C8((s32 *)arg0);
+        }
+    } else {
+        func_151D77C8((s32 *)arg0);
+    }
+}
 
 extern void (*D_8008FCA4[])(s32 *, s32, u8);
 
@@ -103,7 +157,59 @@ void func_151D7538(s32 arg0, s32 arg1, u8 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_204660/func_151D75C4.s")
+typedef struct Link151D75C4 {
+    /* 0x00 */ struct struct127 *actor;
+    /* 0x04 */ u8 id;
+    /* 0x05 */ u8 bone;
+    /* 0x06 */ s8 handler;
+} Link151D75C4;
+
+typedef struct Obj151D75C4 {
+    /* 0x00 */ u8 pad0[0x28];
+    /* 0x28 */ Sub151D7264 unk28;
+    /* 0x40 */ Link151D75C4 link;
+} Obj151D75C4;
+
+typedef struct Rider151D75C4 {
+    u8 pad0[0x197];
+    u8 active;
+} Rider151D75C4;
+
+extern struct17 D_800AB280[];
+extern u8 D_800AB2D4[];
+extern s32 (*D_8008FCA8[])(Obj151D75C4 *);
+void func_15143134(void *, void *, s32);
+
+s32 func_151D75C4(Obj151D75C4 *arg0) {
+    Link151D75C4 *link;
+    struct struct127 *actor;
+    Sub151D7264 *p;
+
+    p = &arg0->unk28;
+    link = &arg0->link;
+    actor = link->actor;
+    if ((actor->interaction_state == 0) || (actor->unique_id != link->id)) {
+        return 0;
+    }
+    if (actor->unk1D4 == NULL) {
+        p->unk5 &= ~1;
+        return 1;
+    }
+    if ((actor->unk31C != NULL) && (((Rider151D75C4 *)actor->unk31C)->active != 0) && (actor->camera != NULL)) {
+        p->unk5 &= ~1;
+        return 1;
+    }
+    if (actor->unk7 != 0xFF) {
+        p->unk5 &= ~1;
+        return 1;
+    }
+    func_15143134(&D_800AB280[link->bone], &p->unk8, (s32)actor->unk1D4 + (D_800AB2D4[link->bone] << 6));
+    p->unk5 |= 1;
+    if (link->handler != -1) {
+        return D_8008FCA8[link->handler](arg0);
+    }
+    return 1;
+}
 
 s32 func_151D7724(s32 *arg0) {
     s32 *v0 = (s32 *)arg0[0x40 / 4];
@@ -182,6 +288,16 @@ void func_151D7830(s32 *arg0) {
         u8 pad16[2];
         s32 unk18;
     } sp4C;
+    /* NOT a struct-size artefact -- deliberately LEFT IN PLACE.  Both aggregates
+     * above are proven to be exactly 0x1C: the header sp4C by func_15147A80's own
+     * memcpy((u8 *)temp_v0 + 0x10, arg0, 0x1C) (game_174BF0.c:169) and by its
+     * member offsets, and sp68 by its members plus memcpy(..., &sp68, 0x1C).
+     * Golden pins BOTH bases with `addiu a0,sp,0x4C` and `addiu a1,sp,0x68`, so
+     * neither can carry leading padding, and nothing is declared below sp4C for
+     * trailing padding to belong to.  The gap is compiler-TEMP space at
+     * sp+[0x44,0x4C) and is dead in our object.  Measured: deleting it gives
+     * frame 0x80 (breaks the match); a 4-byte `s32 pad_dummy;` gives frame 0x88
+     * with .text byte-identical, so the true shortfall is 4 bytes, not 8. */
     s32 pad_dummy[2];
 
     sp68.unk0 = (s32)arg0;

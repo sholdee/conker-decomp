@@ -1,8 +1,12 @@
 #include <ultra64.h>
 #define func_15169260 func_15169260_s32_decl
+#define func_150ADA20 func_150ADA20_hdr_decl
 #include "functions.h"
 #undef func_15169260
+#undef func_150ADA20
 #include "variables.h"
+
+extern s32 func_150ADA20(void);
 
 struct Vec3F { f32 x; f32 y; f32 z; };
 struct Local1514F6E8 { u8 unk0; u8 pad1[3]; struct Vec3F unk4; struct Vec3F unk10; struct Vec3F unk1C; f32 unk28; };
@@ -656,7 +660,17 @@ s32 func_1514F6E8(struct Local1514F6E8 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_17CAF0/func_1514F808.s")
+extern void func_15143874(s32, f32, f32 *, f32 *);
+
+void func_1514F808(struct Local1514F6E8 *arg0, f32 arg1, struct Vec3F *arg2) {
+    f32 b;
+    f32 a;
+
+    func_15143874((s16)(func_150ADA20() & 0xFF), func_150ADA68() * arg0->unk28, &a, &b);
+    arg2->x = (((arg0->unk10.x * a) + (arg0->unk1C.x * b)) + arg0->unk4.x) * arg1;
+    arg2->y = (((arg0->unk10.y * a) + (arg0->unk1C.y * b)) + arg0->unk4.y) * arg1;
+    arg2->z = (((arg0->unk10.z * a) + (arg0->unk1C.z * b)) + arg0->unk4.z) * arg1;
+}
 
 struct Local1514F8F8 {
     s32 unk0;
@@ -1009,7 +1023,102 @@ void func_15150D1C(struct Local15150D1CArg *arg0, u8 arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_17CAF0/func_151511FC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_17CAF0/func_15151670.s")
+typedef struct {
+    struct Vec3F position;
+    s16 life, enabled;
+    s32 active;
+    u8 field14, fade, pad16[2];
+    s32 field18;
+} Game151670Spawn;
+
+typedef struct {
+    f32 size;
+    struct Vec3F velocity;
+    f32 growth;
+    u8 pad14[4];
+    u8 red, green, blue, alpha;
+    s16 field1C, field1E;
+} Game151670Motion;
+
+typedef struct {
+    struct Vec3F position;
+    struct Vec3F normal;
+    s16 triangle[9];
+    u8 pad2A[2];
+    f32 spread;
+    f32 sizeBase, sizeRange, growthBase, growthRange, speedBase, speedRange;
+    s16 countBase, countRange, fadeBase, fadeRange, lifeBase, lifeRange;
+    u8 green, enabled, red, pad57;
+    s32 callbacks[6];
+    u8 blue, alphaBase, alphaRange, pad73;
+    s32 field74, field78;
+    s32 flags[8];
+    s16 field9C, field9E;
+    s32 fieldA0;
+} Game151670Config;
+
+void func_15151670(Game151670Config *arg0, u8 arg1, s32 arg2) {
+    Game151670Spawn spawn;
+    Game151670Motion motion;
+    u8 kind;
+    struct Vec3F basis1;
+    f32 magnitude1, inverse1;
+    struct Vec3F basis2;
+    f32 magnitude2, inverse2;
+    struct Vec3F basis3;
+    f32 magnitude3, inverse3;
+    f32 speed;
+    f32 second;
+    f32 first;
+    s32 count;
+    u32 random;
+
+    kind = arg1;
+    if (func_15144E80((struct Vec3F *)arg0->triangle, &basis1, &basis2, &basis3) != 0) {
+        func_15145128(&basis1, &basis1, &magnitude1, &inverse1);
+        func_15145128(&basis2, &basis2, &magnitude2, &inverse2);
+        func_15145128(&basis3, &basis3, &magnitude3, &inverse3);
+        if (func_15144A74(&basis3, &arg0->normal) < 0.0f) {
+            basis3.x = -basis3.x;
+            basis3.y = -basis3.y;
+            basis3.z = -basis3.z;
+        }
+        basis3.x *= 1000.0f;
+        basis3.y *= 1000.0f;
+        basis3.z *= 1000.0f;
+        spawn.active = 1;
+        spawn.enabled = arg0->enabled;
+        motion.green = arg0->green;
+        motion.blue = arg0->blue;
+        motion.red = arg0->red;
+        motion.field1C = arg0->field9C;
+        motion.field1E = arg0->field9E;
+        spawn.position = arg0->position;
+        spawn.field18 = arg0->fieldA0;
+        count = func_150ADA20() % (u32)(arg0->countRange + 1) + arg0->countBase;
+        if (count != 0) {
+            do {
+                random = func_150ADA20();
+                func_15143874((s16)(random & 0xFF), func_150ADA68() * arg0->spread,
+                              &first, &second);
+                speed = func_150ADA68() * arg0->speedRange + arg0->speedBase;
+                motion.alpha = func_150ADA20() % (u32)(arg0->alphaRange + 1) + arg0->alphaBase;
+                spawn.fade = func_150ADA20() % (u32)(arg0->fadeRange + 1) + arg0->fadeBase;
+                spawn.life = func_150ADA20() % (u32)(arg0->lifeRange + 1) + arg0->lifeBase;
+                motion.size = func_150ADA68() * arg0->sizeRange + arg0->sizeBase;
+                motion.growth = func_150ADA68() * arg0->growthRange + arg0->growthBase;
+                motion.velocity.x = (basis1.x * first + basis2.x * second + basis3.x) * speed;
+                motion.velocity.y = (basis1.y * first + basis2.y * second + basis3.y) * speed;
+                motion.velocity.z = (basis1.z * first + basis2.z * second + basis3.z) * speed;
+                func_15147DA0(&spawn, &motion, 0, arg0->callbacks[0], arg0->callbacks[1],
+                             arg0->callbacks[2], arg0->callbacks[3], arg0->callbacks[4],
+                             arg0->callbacks[5], arg0->field74, arg0->field78,
+                             arg0->flags, 0, kind, arg2);
+                count--;
+            } while (count != 0);
+        }
+    }
+}
 
 void func_15151A38(struct Local15151A38Arg *arg0, u8 arg1, s32 arg2) {
     struct Local15151A38Pos spDC;
@@ -1226,9 +1335,227 @@ void func_15152B38(struct Local15152B38Arg *arg0, u8 arg1, s32 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_17CAF0/func_15152F70.s")
+struct Local15152F70Header {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8;
+};
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_17CAF0/func_15153298.s")
+struct Local15152F70Arg {
+    struct Local15152F70Header unk0;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    s16 unk24;
+    s16 unk26;
+    s16 unk28;
+    s16 unk2A;
+    s16 unk2C;
+    s16 unk2E;
+    s16 unk30;
+    s16 unk32;
+    s16 unk34;
+    s16 unk36;
+    u8 unk38;
+    u8 unk39;
+    u8 pad3A[2];
+    s32 unk3C;
+    s32 unk40;
+    s32 unk44;
+    s32 unk48;
+    s32 unk4C;
+    s32 unk50;
+    u8 unk54;
+    u8 unk55;
+    u8 pad56[2];
+};
+
+struct Local15152F70Pos {
+    struct Local15152F70Header unk0;
+    s16 unkC;
+    s16 unkE;
+    s32 unk10;
+    u8 pad14;
+    u8 unk15;
+    u8 pad16[2];
+    s32 unk18;
+};
+
+struct Local15152F70Spawn {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    u8 pad14[4];
+    u8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+};
+
+struct Local15152F70Style {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8;
+    s32 unkC;
+    s32 unk10;
+    s32 unk14;
+    s32 unk18;
+    u8 unk1C;
+    u8 unk1D;
+};
+
+void func_15152F70(struct Local15152F70Arg *arg0, u8 arg1) {
+    struct Local15152F70Pos pos;
+    s32 count;
+    struct Local15152F70Spawn spawn;
+    s16 randS1;
+    struct Local15152F70Style style;
+    s16 randS2;
+    f32 temp_f20;
+    f32 temp_f22;
+    f32 temp_f24;
+    f32 temp_f26;
+    f32 temp_f28;
+
+    pos.unk10 = 1;
+    pos.unkE = 1;
+    spawn.unk19 = arg0->unk38;
+    spawn.unk1A = arg0->unk54;
+    spawn.unk18 = arg0->unk39;
+    spawn.unk1B = arg0->unk55;
+    pos.unk0 = arg0->unk0;
+    style.unk0 = 0;
+    style.unk4 = 1;
+    style.unk8 = 0x160600;
+    style.unkC = 3;
+    style.unk10 = 0x10;
+    style.unk14 = 0x80;
+    style.unk18 = 0x20;
+    style.unk1C = 0;
+    style.unk1D = 9;
+    count = (func_150ADA20() % (u32)(arg0->unk26 + 1)) + arg0->unk24;
+
+    if (count != 0) {
+        do {
+            randS1 = (func_150ADA20() % (u32)(arg0->unk2A + 1)) + arg0->unk28;
+            randS2 = (func_150ADA20() % (u32)(arg0->unk2E + 1)) + arg0->unk2C;
+            temp_f22 = func_151423D8((u8)randS2);
+            temp_f24 = func_151423D8((u8)(randS2 - 0x40));
+            temp_f26 = func_151423D8((u8)randS1);
+            temp_f28 = func_151423D8((u8)(randS1 - 0x40));
+            temp_f20 = (func_150ADA68() * arg0->unk20) + arg0->unk1C;
+            pos.unk15 = (func_150ADA20() % (u32)(arg0->unk32 + 1)) + arg0->unk30;
+            pos.unkC = (func_150ADA20() % (u32)(arg0->unk36 + 1)) + arg0->unk34;
+            spawn.unk0 = (func_150ADA68() * arg0->unk10) + arg0->unkC;
+            spawn.unk10 = (func_150ADA68() * arg0->unk18) + arg0->unk14;
+            spawn.unk4 = (temp_f20 * temp_f22) * temp_f28;
+            spawn.unk8 = -temp_f20 * temp_f24;
+            spawn.unkC = (temp_f20 * temp_f22) * temp_f26;
+            func_15147DA0(&pos, &spawn, 0, arg0->unk3C, arg0->unk40, arg0->unk44, arg0->unk48,
+                          arg0->unk4C, arg0->unk50, 0, 0, (s32 *)&style, 0, arg1, 1);
+            count--;
+        } while (count != 0);
+    }
+}
+
+
+typedef struct {
+    u8 red;
+    u8 green;
+    u8 blue;
+    u8 alpha;
+} Color153298;
+
+typedef struct {
+    struct Vec3F position;
+    s16 countBase, countRange, yawBase, yawRange, pitchBase, pitchRange;
+    f32 speedBase, speedRange;
+    s16 lifeBase, lifeRange, sizeBase, sizeRange;
+    s8 mode;
+    u8 kind;
+    s16 fadeBase, fadeRange, field2E;
+    s16 field30, field32, field34, field36;
+    s32 flags;
+    u8 color, alpha;
+} Game153298Config;
+
+typedef struct {
+    s32 flags;
+    u8 pad04[8];
+    s16 field0C, field0E;
+    s16 x, y, z, velocityX, velocityZ;
+    u8 pad1A[2];
+    s8 fractionX, fractionY, fractionZ, mode;
+    s16 velocityY, size, field24, field26, life;
+    s8 fade;
+    u8 pad2B;
+    Color153298 color;
+    s8 field30, field31, field32;
+    u8 pad33;
+    s16 kind;
+} Game153298Packet;
+
+extern void *func_15167D84(void *, s32, s32, s8, u8, s32);
+
+void func_15153298(Game153298Config *arg0, u8 arg1, s32 arg2) {
+    Game153298Packet packet;
+    f32 speed;
+    f32 cosinePitch;
+    f32 sineYaw;
+    f32 cosineYaw;
+    f32 sinePitch;
+    f32 horizontal;
+    s16 yaw;
+    s16 pitch;
+    s32 count;
+
+    packet.x = (s32)arg0->position.x;
+    packet.y = (s32)arg0->position.y;
+    packet.z = (s32)arg0->position.z;
+    packet.fractionX = (u16)(s32)(arg0->position.x * 256.0f);
+    packet.fractionY = (u16)(s32)(arg0->position.y * 256.0f);
+    packet.fractionZ = (u16)(s32)(arg0->position.z * 256.0f);
+    packet.color.red = arg0->color;
+    packet.color.green = arg0->color;
+    packet.color.blue = arg0->color;
+    packet.field30 = 0;
+    packet.field31 = 0;
+    packet.field32 = 0;
+    packet.color.alpha = arg0->alpha;
+    packet.mode = arg0->mode;
+    packet.kind = arg0->kind;
+    packet.field0C = 0;
+    packet.field0E = arg0->field2E;
+    packet.flags = arg0->flags;
+    count = func_150ADA20() % (u32)(arg0->countRange + 1) + arg0->countBase;
+    if (count != 0) {
+        do {
+            yaw = func_150ADA20() % (u32)(arg0->yawRange + 1) + arg0->yawBase;
+            pitch = func_150ADA20() % (u32)(arg0->pitchRange + 1) + arg0->pitchBase;
+            sinePitch = func_151423D8(pitch);
+            cosinePitch = func_151423D8(pitch - 64);
+            sineYaw = func_151423D8(yaw);
+            cosineYaw = func_151423D8(yaw - 64);
+            speed = func_150ADA68() * arg0->speedRange + arg0->speedBase;
+            packet.life = func_150ADA20() % (u32)(arg0->lifeRange + 1) + arg0->lifeBase;
+            horizontal = speed * sinePitch;
+            packet.velocityX = (s32)(horizontal * cosineYaw);
+            packet.velocityY = (s32)(-speed * cosinePitch);
+            packet.velocityZ = (s32)(horizontal * sineYaw);
+            packet.size = func_150ADA20() % (u32)(arg0->sizeRange + 1) + arg0->sizeBase;
+            packet.fade = func_150ADA20() % (u32)(arg0->fadeRange + 1) + arg0->fadeBase;
+            packet.field24 = func_150ADA20() % (u32)(arg0->field32 + 1) + arg0->field30;
+            packet.field26 = func_150ADA20() % (u32)(arg0->field36 + 1) + arg0->field34;
+            func_15167D84(&packet, 0, 0, -1, arg1, arg2);
+            count--;
+        } while (count != 0);
+    }
+}
 
 void func_15153634(struct Local15153634Arg *arg0, u8 arg1, u8 arg2, s32 arg3) {
     struct Local15153634Spawn sp90;
@@ -1594,7 +1921,31 @@ void *func_151541B8(struct Vec3F *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, 
     return ret;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_17CAF0/func_1515452C.s")
+f32 sqrtf(f32);
+
+s32 func_1515452C(u8 *arg0) {
+    f32 temp_fv1;
+    u8 *temp_v0;
+
+    temp_v0 = (void *)(arg0 + 0x170);
+    temp_fv1 = *(f32 *)((u8 *)arg0 + 0x178) * sqrtf(*(f32 *)((u8 *)arg0 + 0x170));
+    *(f32 *)((u8 *)arg0 + 0x18) = temp_fv1;
+    if (!(*(u8 *)((u8 *)arg0 + 0x184) & 1)) {
+        *(f32 *)((u8 *)arg0 + 0x1C) = temp_fv1;
+    }
+    {
+        f32 temp_fv0 = *(f32 *)temp_v0;
+    *(s8 *)((u8 *)arg0 + 0x70) = (s8) (u32) (*(f32 *)((u8 *)temp_v0 + 0xC) - (*(f32 *)((u8 *)temp_v0 + 0x10) * temp_fv0 * temp_fv0));
+    *(f32 *)temp_v0 += D_800BE9A4;
+    if (*(f32 *)((u8 *)temp_v0 + 4) < *(f32 *)temp_v0) {
+        return 0;
+    }
+    *(f32 *)((u8 *)arg0 + 0x20) += *(f32 *)((u8 *)arg0 + 0x50) * D_800BE9A4;
+    *(f32 *)((u8 *)arg0 + 0x24) += *(f32 *)((u8 *)arg0 + 0x54) * D_800BE9A4;
+    *(f32 *)((u8 *)arg0 + 0x28) += *(f32 *)((u8 *)arg0 + 0x58) * D_800BE9A4;
+    return 1;
+    }
+}
 
 struct Local15154684Arg {
     s16 unk00;
@@ -1850,7 +2201,38 @@ void func_15154C90(Struct15154C90 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_17CAF0/func_15154D80.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_17CAF0/func_1515548C.s")
+struct Arg1515548C {
+    u8 pad0[8];
+    f32 unk8;
+    f32 unkC;
+    u8 pad10[4];
+    u16 unk14;
+    u8 pad16[0x42];
+};
+
+extern s32 func_151555AC(struct Arg1515548C *, f32 *);
+extern u8 *func_15167A68(s32, s32, s32, s32, u8, s32);
+
+u8 *func_1515548C(struct Arg1515548C *arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6) {
+    u8 *ret;
+    f32 pos[2];
+
+    if ((arg2 != 0) && (arg3 > 0)) {
+        pos[0] = arg0->unk8;
+        pos[1] = arg0->unkC;
+        if (func_151555AC(arg0, pos) != 0) {
+            return 0;
+        }
+    }
+    ret = func_15167A68((arg0->unk14 & 0x20) ? 0x57 : 0x5D, arg6, arg4 + 0x70, 1, arg5, 1);
+    if (ret == 0) {
+        return 0;
+    }
+    memcpy(ret + 0x10, arg0, 0x58);
+    ret[0x68] = 0;
+    ret[0x68] |= arg1;
+    return ret;
+}
 
 struct Local15155564 { u8 pad[0x2A]; u8 unk2A; };
 extern void (*D_8008AD04[])(struct Local15155564 *, s32, u8);

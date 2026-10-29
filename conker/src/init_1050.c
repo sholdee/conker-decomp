@@ -24,7 +24,67 @@ void func_100010F8(s32 arg0) {
     do {} while(1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_1050/func_10001194.s")
+extern u8 D_151FA130;
+extern u8 D_19EA88;
+extern u8 D_42450;
+s32 allocate_memory(s32, s32, s32, s32);
+s32 func_10006240(s32, s32 *, s32);
+void func_10004074(s32);
+void func_10005BE0(void);
+void func_15007830(void);
+void func_10003BD0(void);
+
+void func_10001194(s32 arg0) {
+    u32 sp28;
+    u32 block_count;
+    s32 sp44;
+    s32 sp40;
+    s32 offset;
+    s32 clear_size;
+    s32 i;
+    u32 framebufferSize;
+
+    func_10005218();
+    clear_size = 0x80400000 - (s32)&D_80043B40;
+    if (D_8000030C == 0) {
+        bzero(&D_80043B40, clear_size);
+    } else {
+        bzero(&D_800E9D10, 0x80400000 - (s32)&D_800E9D10);
+    }
+    osInvalICache(&D_80043B40, clear_size);
+    osInvalDCache(&D_80043B40, clear_size);
+    func_10003920();
+    func_10003930();
+    func_10003BD0();
+    func_1000709C();
+    framebufferSize = 0x1ECC0;
+    D_8002AAE8[0] = func_10003C6C(framebufferSize, 0xFF, 3, 1, 0);
+    D_8002AAE8[1] = func_10003C6C(framebufferSize, 0xFF, 3, 1, 0);
+    osCreateViManager(0xFE);
+    offset = (s32)&D_42450;
+    func_10004514(offset, &D_80082B20, 0x10U, 1);
+    sp44 = D_80082B20 + offset;
+    sp28 = (u32)&D_19EA88 - sp44;
+    sp40 = allocate_memory(sp28, 1, 2, 0);
+    func_10004514(sp44, (void *)sp40, sp28, 1);
+    func_10006240(sp40, &D_80082B20, D_8003809C);
+    func_10004074(sp40);
+    D_800354F8 = ((s32)&D_80033330 + 0xF) & ~0xF;
+    block_count = ((u32)&D_151FA130 - (u32)&func_15000000 + 0xFFF) >> 12;
+    D_800354FC = (s32 *)(((s32)&D_80032B30 + 0xF) & ~0xF);
+    sp28 = block_count + 1;
+    func_10004514(offset + 4, (void *)D_800354FC,
+                  ((((block_count + 2) << 2) + 0xF) | 0xF) ^ 0xF, 1);
+    for (i = 0; i < sp28; i++) {
+        ((s32 *)D_800354FC)[i] =
+            (((s32 *)D_800354FC)[i] ^ 0x8039CCCA) + offset;
+    }
+    D_8003BE74 = 0;
+    func_10005B04(0xEB);
+    func_10001420();
+    func_10005BE0();
+    func_15007830();
+}
 // NON-MATCHING: start/end mostly ok, middle, not-so-much.
 // s32 *allocate_memory(s32, s32, s32, s32);
 // void func_10001194(s32 arg0) {

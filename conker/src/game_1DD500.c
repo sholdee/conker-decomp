@@ -28,7 +28,87 @@ void func_15149368(struct260 *arg0);
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1DD500/func_151B0050.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1DD500/func_151B01B8.s")
+typedef struct Game1DD500Impact {
+    s16 field00;
+    s16 field02;
+    s16 field04;
+    s16 field06;
+    f32 position[3];
+    f32 field14;
+    f32 field18;
+    f32 field1C;
+    f32 field20;
+    f32 field24;
+    f32 field28;
+    s16 field2C;
+    s16 field2E;
+    s16 field30;
+    s16 field32;
+    s16 field34;
+    s16 field36;
+    s16 field38;
+    s16 field3A;
+    s8 field3C;
+    f32 field40;
+    s16 field44;
+    s16 field46;
+    s32 field48;
+} Game1DD500Impact;
+typedef struct Game1DD500Hit { f32 height; u8 geometry[0x20]; } Game1DD500Hit;
+void func_1504715C(void *, void *);
+s32 func_15134070(void *);
+void func_15143134(f32 *, f32 *, s32);
+void func_15153F18(s16 *, void *, s32, s32, s32);
+extern u8 D_800A3FD8[];
+extern f32 D_800AA120;
+
+void func_151B01B8(void *arg0, void *arg1) {
+    Game1DD500Impact packet;
+    u8 shade;
+    Game1DD500Hit hit;
+    s32 effectProfileIndex;
+
+    if ((arg0 != 0) && (*(s32 *)((u8 *)arg0 + 0x1D4) != 0) && ((*(u8 *)((u8 *)arg0 + 0x74) & 0xF) != 0xF)) {
+        func_1504715C(&hit, arg0);
+        effectProfileIndex = arg1 != 0 ?
+            ((*(u8 *)((u8 *)arg1 + 4) == 0x53 || *(u8 *)((u8 *)arg1 + 4) == 0xA5) ?
+                4 : func_15134070(arg1)) : 4;
+        if (effectProfileIndex != 0x63) {
+            if (D_800A3FD8[effectProfileIndex * 0x10 + 0xE] != 2) {
+                shade = ((s32) *(u16 *)((u8 *)arg0 + 0x7A) >> 8) + 0x40;
+                func_15143134(&D_800AA120, &packet.position[0], *(s32 *)((u8 *)arg0 + 0x1D4) + 0x180);
+                packet.field2C = 0xA;
+                packet.field2E = 0x14;
+                packet.field00 = shade - 0x68;
+                packet.field14 = 7.21999979f;
+                packet.field02 = 0xD0;
+                packet.field04 = -0x1B;
+                packet.field06 = 0x36;
+                packet.field30 = 3;
+                packet.field32 = 2;
+                packet.field34 = 0x1E;
+                packet.field36 = 0x28;
+                packet.field38 = 0x9B;
+                packet.field3A = 0x64;
+                packet.field18 = 3.039999962f;
+                packet.field1C = 0.810000062f;
+                packet.field20 = 0.405000031f;
+                packet.field24 = 6.0f;
+                packet.field28 = 13.90000057f;
+                packet.field40 = 0.5f;
+                if (D_800A3FD8[effectProfileIndex * 0x10 + 0xE] == 1) {
+                    packet.field3C = 1;
+                } else {
+                    packet.field3C = 0;
+                }
+                packet.field44 = 0x10;
+                packet.field46 = 0xF;
+                packet.field48 = 0;
+                func_15153F18(&packet.field00, &packet.position[0], (s32) &hit, 0xFF, 1);
+            }
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1DD500/func_151B03B8.s")
 
@@ -65,7 +145,28 @@ s32 func_151B1828(CompactOscillatorObject *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1DD500/func_151B1918.s")
+void func_151B1918(struct260 *arg0) {
+    struct {
+        s32 head[2];
+        s32 count;
+        s32 entries[11][3];
+    } *list;
+    s32 i;
+
+    list = (void *)((u8 *)arg0 + 0x28);
+    list->count = 0;
+    *(f32 *)((u8 *)arg0 + 0xB8) = 0.0f;
+    for (i = 0; i < 11; i++) {
+        s32 *entry = list->entries[i];
+
+        if (list->entries[i][0] != 0) {
+            func_1516972C((struct102 *)entry[0]);
+        }
+        entry[0] = 0;
+        entry[1] = 0;
+        entry[2] = 0;
+    }
+}
 
 typedef struct {
     s32 unk0;

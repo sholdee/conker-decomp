@@ -114,7 +114,37 @@ void func_150FADC8(s32 *arg0, s32 arg1, u8 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_126F60/func_150FAE18.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_126F60/func_150FB188.s")
+typedef struct Func150FB188State {
+    u8 pad0[0x54];
+    f32 field54;
+    f32 field58;
+    f32 field5C;
+} Func150FB188State;
+
+typedef struct Func150FB188Transform {
+    f32 field0;
+    f32 field4;
+    f32 field8;
+    f32 fieldC;
+    f32 field10;
+} Func150FB188Transform;
+
+void func_15157DEC(u8 *, u8 *);
+
+s32 func_150FB188(Func150FB188State *arg0) {
+    Func150FB188Transform transform;
+
+    arg0->field5C = 0.0f;
+    arg0->field54 = -95.0f;
+    arg0->field58 = -80.0f;
+    transform.field0 = 0.0f;
+    transform.field4 = 0.0f;
+    transform.field8 = 0.0f;
+    transform.fieldC = 0.3f;
+    transform.field10 = 0.3f;
+    func_15157DEC((u8 *)arg0, (u8 *)&transform);
+    return 1;
+}
 
 extern s32 func_151D710C(s32, s32, s32, s32, s32);
 extern void func_15157F80(s32, s32, s32, s32, s32);

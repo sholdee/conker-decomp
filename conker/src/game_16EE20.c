@@ -3,7 +3,9 @@
 #define func_15083E90 func_15083E90_s32_proto
 #include "functions.h"
 #undef func_15083E90
+#define D_800D3098 D_800D3098_struct178_view
 #include "variables.h"
+#undef D_800D3098
 
 extern f32 D_800A5698;
 extern f32 D_800A5694;
@@ -102,8 +104,82 @@ void func_151419D0(struct102 *arg0, struct A1_151419D0 *arg1, u8 arg2) {
 }
 #pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15141A7C.s")
 // requires jump table
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15141C0C.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15141CC0.s")
+s32 func_15141C0C(void *actor) {
+    switch (*(u8 *)((u8 *)actor + 4)) {
+    case 121:
+        return 0xA;
+    case 33:
+        return 9;
+    case 123:
+        return 8;
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 150:
+        return 0;
+    case 16:
+    case 145:
+        return 1;
+    case 43:
+        return 2;
+    case 84:
+        return 5;
+    case 54:
+    case 83:
+    case 165:
+        return 6;
+    case 88:
+        return 7;
+    case 69:
+        return 3;
+    case 75:
+        return 4;
+    default:
+        return 0xB;
+    }
+}
+s32 func_15141CC0(u32 arg0) {
+    if (D_800BE9F0 == 0x2F) {
+        return 6;
+    }
+    if (D_800BE9F0 == 0x42) {
+        return 7;
+    }
+    if (D_800BE9F0 == 0x27) {
+        return 8;
+    }
+    if (D_800BE9F0 == 0x19) {
+        return 5;
+    }
+    switch (arg0) {
+    case 10:
+        return 0;
+    case 7:
+        return 2;
+    case 11:
+        return 1;
+    case 15:
+        return 3;
+    case 2:
+    case 8:
+    case 12:
+        if (D_800BE9F0 == 2) {
+            return 7;
+        }
+        return 4;
+    case 5:
+        if (D_800BE9F0 == 0x14) {
+            return 5;
+        }
+        return 9;
+    case 0:
+        return 9;
+    default:
+        return 9;
+    }
+}
 
 void func_15141DA4(void *arg0, s32 arg1, s32 arg2) {
     if ((arg1 < 12) && (arg1 >= 0) &&
@@ -277,7 +353,24 @@ s32 func_151422F8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     return arg4;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15142314.s")
+void func_15142314(Mtx *arg0, s32 arg1, f32 *arg2) {
+    u8 *p;
+
+    p = ((u8 *)arg0) + (arg1 << 6);
+    if (D_800C3E90 != 0) {
+        p = ((u8 *)arg0) + (arg1 << 6);
+        do {
+            f32 scale = 0.000015258789f;
+            arg2[0] = (((f32)((*((s16 *)(p + 0x18))) << 0x10)) + ((f32)(*((s16 *)(p + 0x38))))) * scale;
+            arg2[1] = (((f32)((*((s16 *)(p + 0x1A))) << 0x10)) + ((f32)(*((s16 *)(p + 0x3A))))) * scale;
+            arg2[2] = (((f32)((*((s16 *)(p + 0x1C))) << 0x10)) + ((f32)(*((s16 *)(p + 0x3C))))) * scale;
+        } while (0);
+        return;
+    }
+    arg2[0] = *((f32 *)(p + 0x30));
+    arg2[1] = *((f32 *)(p + 0x34));
+    arg2[2] = *((f32 *)(p + 0x38));
+}
 f32 func_151423D8(u8 arg0) {
     s32 temp_v1;
     s32 temp_v0 = arg0;
@@ -522,7 +615,83 @@ void func_15143134(struct17 *arg0, f32 *arg1, Mtx *arg2) {
     D_800DCA00 = 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_151432BC.s")
+typedef struct Game16EE20Emitter {
+    s16 x;
+    s16 y;
+    s16 z;
+    s16 radiusX;
+    s16 height;
+    s16 radiusZ;
+    u8 padC[4];
+    f32 rotation;
+    u8 pad14;
+    u8 flags;
+} Game16EE20Emitter;
+
+
+void func_151432BC(Game16EE20Emitter *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 *arg4) {
+    switch (arg0->flags & 3) {
+    default:
+        *arg1 = arg0->x;
+        *arg2 = arg0->z;
+        *arg3 = arg0->y + arg0->height;
+        *arg4 = arg0->y - arg0->height;
+        return;
+    case 2:
+        {
+            u8 angle;
+            f32 cosine;
+            f32 sine;
+            f32 offsetX;
+            f32 offsetZ;
+
+            angle = arg0->rotation * D_800A5644;
+            cosine = func_151423D8(angle - 0x40);
+            sine = func_151423D8(angle);
+            offsetX = func_150ADA68() * (2.0f * arg0->radiusX) + -arg0->radiusX;
+            offsetZ = func_150ADA68() * (2.0f * arg0->radiusZ) + -arg0->radiusZ;
+            *arg1 = arg0->x + (offsetX * sine + offsetZ * cosine);
+            *arg2 = arg0->z + (offsetZ * sine - offsetX * cosine);
+            *arg3 = arg0->y + arg0->height;
+            *arg4 = arg0->y;
+        }
+        return;
+    case 0:
+        {
+            u8 angle;
+            f32 cosine;
+            f32 sine;
+            f32 radius;
+
+            angle = func_150ADA20() & 0xFF;
+            cosine = func_151423D8(angle - 0x40);
+            sine = func_151423D8(angle);
+            radius = func_150ADA68() * arg0->radiusX;
+            *arg1 = arg0->x + radius * sine;
+            *arg2 = arg0->z - radius * cosine;
+            *arg3 = arg0->y + arg0->height;
+            *arg4 = arg0->y;
+        }
+        return;
+    case 1:
+        {
+            u8 angle;
+            f32 cosine;
+            f32 sine;
+            f32 radius;
+
+            angle = func_150ADA20() & 0xFF;
+            cosine = func_151423D8(angle - 0x40);
+            sine = func_151423D8(angle);
+            radius = func_150ADA68() * arg0->radiusX;
+            *arg1 = arg0->x + radius * sine;
+            *arg2 = arg0->z - radius * cosine;
+            *arg3 = arg0->y + arg0->height;
+            *arg4 = arg0->y - arg0->height;
+        }
+        return;
+    }
+}
 
 // void func_151432BC(struct208 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 *arg4) {
 //     struct209 tmp;
@@ -634,8 +803,171 @@ void func_15143874(s32 arg0, f32 arg1, f32 *arg2, f32 *arg3) {
     *arg2 = arg1 * temp2;
     *arg3 = arg1 * temp;
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_151438D8.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15143D18.s")
+/* File-local shadow of struct178: the shared header types 0x06..0x33 as one u8 blob,
+   which cannot express the s16/f32/u8/s32 members this search compares. */
+typedef struct {
+    /* 0x00 */ s16 unk0;
+    /* 0x02 */ s16 unk2;
+    /* 0x04 */ s16 unk4;
+    /* 0x06 */ s16 unk6;
+    /* 0x08 */ s16 unk8;
+    /* 0x0A */ s16 unkA;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ u8  unk14;
+    /* 0x15 */ u8  unk15;
+    /* 0x16 */ u8  unk16;
+    /* 0x17 */ u8  unk17;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ s32 unk1C;
+    /* 0x20 */ s32 unk20;
+    /* 0x24 */ u8  unk24[0x10];
+} ObjRec; /* size 0x34 */
+
+/* variables.h declares D_800D3098 as struct178[73]; the asm loads it as a pointer (lw 0(D_800D3098)). */
+extern ObjRec *D_800D3098;
+#define OBJTBL D_800D3098
+
+void func_15143D18(s32 *, s32 *, s32, s32);
+
+ObjRec *func_151438D8(s32 arg0, s32 arg1, u16 arg2, ObjRec *arg3) {
+    s32 i;
+    ObjRec *result;
+    u16 checked;
+    u16 matched;
+
+    result = NULL;
+    if (arg3 == NULL) {
+        return NULL;
+    }
+    func_15143D18(&arg0, &arg1, 0, D_800D3094);
+    for (i = arg0; i < arg1; i++) {
+        checked = 0;
+        matched = 0;
+        if (arg2 & 0x1) {
+            if ((arg3->unk0 == OBJTBL[i].unk0) && (arg3->unk2 == OBJTBL[i].unk2) && (arg3->unk4 == OBJTBL[i].unk4)) {
+                checked |= 0x1;
+                matched |= 0x1;
+            }
+        } else {
+            checked |= 0x1;
+        }
+        if (arg2 & 0x2) {
+            if ((arg3->unk6 == OBJTBL[i].unk6) && (arg3->unk8 == OBJTBL[i].unk8) && (arg3->unkA == OBJTBL[i].unkA)) {
+                checked |= 0x2;
+                matched |= 0x2;
+            }
+        } else {
+            checked |= 0x2;
+        }
+        if (arg2 & 0x4) {
+            if (arg3->unkC == OBJTBL[i].unkC) {
+                checked |= 0x4;
+                matched |= 0x4;
+            }
+        } else {
+            checked |= 0x4;
+        }
+        if (arg2 & 0x8) {
+            if (arg3->unk10 == OBJTBL[i].unk10) {
+                checked |= 0x8;
+                matched |= 0x8;
+            }
+        } else {
+            checked |= 0x8;
+        }
+        if (arg2 & 0x10) {
+            if (arg3->unk14 == OBJTBL[i].unk14) {
+                checked |= 0x10;
+                matched |= 0x10;
+            }
+        } else {
+            checked |= 0x10;
+        }
+        if (arg2 & 0x20) {
+            if (arg3->unk15 == (OBJTBL[i].unk15 >> 2)) {
+                checked |= 0x20;
+                matched |= 0x20;
+            }
+        } else {
+            checked |= 0x20;
+        }
+        if (arg2 & 0x40) {
+            if (arg3->unk16 == OBJTBL[i].unk16) {
+                checked |= 0x40;
+                matched |= 0x40;
+            }
+        } else {
+            checked |= 0x40;
+        }
+        if (arg2 & 0x80) {
+            if (arg3->unk17 == OBJTBL[i].unk17) {
+                checked |= 0x80;
+                matched |= 0x80;
+            }
+        } else {
+            checked |= 0x80;
+        }
+        if (arg2 & 0x100) {
+            if (arg3->unk18 == OBJTBL[i].unk18) {
+                checked |= 0x100;
+                matched |= 0x100;
+            }
+        } else {
+            checked |= 0x100;
+        }
+        if (arg2 & 0x200) {
+            if (arg3->unk1C == OBJTBL[i].unk1C) {
+                checked |= 0x200;
+                matched |= 0x200;
+            }
+        } else {
+            checked |= 0x200;
+        }
+        if (arg2 & 0x400) {
+            if (arg3->unk20 == OBJTBL[i].unk20) {
+                checked |= 0x400;
+                matched |= 0x400;
+            }
+        } else {
+            checked |= 0x400;
+        }
+        if (arg2 & 0x1000) {
+            if (checked == 0x7FF) {
+                result = &OBJTBL[i];
+            }
+        } else {
+            if (matched != 0) {
+                result = &OBJTBL[i];
+            }
+        }
+    }
+    return result;
+}
+void func_15143D18(s32 *arg0, s32 *arg1, s32 arg2, s32 arg3) {
+    s32 t;
+    s32 t2;
+
+    if (arg3 < arg2) {
+        t = arg2 ^ arg3;
+        t2 = arg3 ^ t;
+        arg3 = t2;
+        arg2 = t ^ t2;
+    }
+    if (*arg1 < *arg0) {
+        t = *arg1 ^ *arg0;
+        *arg0 = t;
+        t2 = *arg1 ^ t;
+        *arg1 = t2;
+        *arg0 = *arg0 ^ t2;
+    }
+    if (*arg0 < arg2) {
+        *arg0 = arg2;
+    }
+    if (arg3 < *arg1) {
+        *arg1 = arg3;
+    }
+}
 s32 func_15143DA8(s32 *arg0, s32 arg1, s32 arg2) {
     s32 **pp = &arg0;
     s32 t;
@@ -677,8 +1009,142 @@ f32 func_15143E64(struct17 *arg0) {
 }
 #pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15143E94.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_1514401C.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_151441A4.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_151442FC.s")
+void func_151441A4(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, u8 arg9, u8 arg10, u8 arg11, u8 arg12, u8 arg13) {
+    s16 temp_v0;
+    s16 temp_v0_2;
+
+    switch (arg13) {
+    case 2:
+        *arg0 = (s16) arg8;
+        *arg1 = (s16) arg9;
+        *arg2 = (s16) arg10;
+        *arg3 = (s16) arg11;
+        return;
+    case 0:
+        *arg3 = 0;
+        temp_v0 = *arg3;
+        *arg2 = temp_v0;
+        *arg1 = temp_v0;
+        *arg0 = temp_v0;
+        return;
+    case 1:
+        *arg2 = 0;
+        temp_v0_2 = *arg2;
+        *arg1 = temp_v0_2;
+        *arg0 = temp_v0_2;
+        *arg3 = (s16) arg11;
+        return;
+    case 3:
+        *arg0 = (s16) ((s32) (arg4 * arg12) >> 8);
+        *arg1 = (s16) ((s32) (arg5 * arg12) >> 8);
+        *arg2 = (s16) ((s32) (arg6 * arg12) >> 8);
+        *arg3 = 0;
+        return;
+    case 4:
+        *arg0 = (s16) ((s32) (arg4 * arg12) >> 8);
+        *arg1 = (s16) ((s32) (arg5 * arg12) >> 8);
+        *arg2 = (s16) ((s32) (arg6 * arg12) >> 8);
+        *arg3 = 0;
+        return;
+    default:
+        *arg0 = (s16) ((s32) (arg4 * arg12) >> 8);
+        *arg1 = (s16) ((s32) (arg5 * arg12) >> 8);
+        *arg2 = (s16) ((s32) (arg6 * arg12) >> 8);
+        *arg3 = 0;
+        return;
+    }
+}
+void func_151442FC(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 arg10, u8 arg11, u8 arg12, u8 arg13) {
+    s16 temp_v0;
+    s16 temp_v0_2;
+    s16 temp_v0_3;
+
+    switch (arg13) {
+    case 2:
+    case 3:
+        *arg0 = (s16) arg4;
+        *arg1 = (s16) arg5;
+        *arg2 = (s16) arg6;
+        *arg3 = (s16) arg7;
+        return;
+    case 13:
+        *arg0 = (s16) arg4;
+        *arg1 = (s16) arg5;
+        *arg2 = (s16) arg6;
+        *arg3 = 0;
+        return;
+    case 0:
+        *arg3 = 0;
+        temp_v0 = *arg3;
+        *arg2 = temp_v0;
+        *arg1 = temp_v0;
+        *arg0 = temp_v0;
+        return;
+    case 1:
+        *arg2 = (s16) arg12;
+        *arg1 = (s16) arg12;
+        *arg0 = (s16) arg12;
+        *arg3 = 0;
+        return;
+    case 7:
+    case 12:
+        *arg2 = 0;
+        temp_v0_2 = *arg2;
+        *arg1 = temp_v0_2;
+        *arg0 = temp_v0_2;
+        *arg3 = (s16) arg11;
+        return;
+    case 8:
+        *arg2 = 0;
+        temp_v0_3 = *arg2;
+        *arg1 = temp_v0_3;
+        *arg0 = temp_v0_3;
+        *arg3 = (s16) arg7;
+        return;
+    case 4:
+        *arg2 = (s16) arg12;
+        *arg1 = (s16) arg12;
+        *arg0 = (s16) arg12;
+        *arg3 = (s16) ((s32) (arg7 * arg11) >> 8);
+        return;
+    case 5:
+        *arg2 = (s16) arg12;
+        *arg1 = (s16) arg12;
+        *arg0 = (s16) arg12;
+        *arg3 = (s16) ((s32) (arg7 * arg11) >> 8);
+        return;
+    case 6:
+        *arg0 = (s16) arg4;
+        *arg1 = (s16) arg5;
+        *arg2 = (s16) arg6;
+        *arg3 = (s16) arg11;
+        return;
+    case 10:
+        *arg0 = (s16) arg8;
+        *arg1 = (s16) arg9;
+        *arg2 = (s16) arg10;
+        *arg3 = (s16) arg11;
+        return;
+    case 11:
+        *arg0 = (s16) arg8;
+        *arg1 = (s16) arg9;
+        *arg2 = (s16) arg10;
+        *arg3 = (s16) arg7;
+        return;
+    case 9:
+        *arg2 = (s16) arg12;
+        *arg1 = (s16) arg12;
+        *arg0 = (s16) arg12;
+        *arg3 = (s16) arg11;
+        return;
+    default:
+        *arg2 = (s16) arg12;
+        *arg1 = (s16) arg12;
+        *arg0 = (s16) arg12;
+        *arg3 = (s16) ((s32) (arg7 * arg11) >> 8);
+        return;
+    }
+}
 s32 func_151444DC(s32 arg0, s32 arg1, s32 arg2) {
     s32 range;
     if (arg1 < arg0) {
@@ -1105,7 +1571,86 @@ u8 func_15145C90(s32 arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15145CD0.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15145DB4.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15145EA4.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15146078.s")
+s32 func_15146078(struct17 *arg0, struct17 *arg1, struct17 *arg2) {
+    u8 count;
+    u8 axis;
+    u8 zeroAxis;
+    u32 i;
+    u32 j;
+    u32 k;
+    f32 len;
+    f32 invLen;
+
+    if ((arg0->unk0 == 0.0f) && (arg0->unk4 == 0.0f) && (arg0->unk8 == 0.0f)) {
+        return 0;
+    }
+
+    count = 0;
+    if (arg0->unk0 == 0.0f) {
+        count++;
+        zeroAxis = 0;
+    } else {
+        axis = 0;
+    }
+    if (arg0->unk4 == 0.0f) {
+        count++;
+        zeroAxis = 1;
+    } else {
+        axis = 1;
+    }
+    if (arg0->unk8 == 0.0f) {
+        count++;
+        zeroAxis = 2;
+    } else {
+        axis = 2;
+    }
+
+    if (count == 2) {
+        switch (axis) {
+        case 0:
+            arg1->unk0 = 0.0;
+            arg1->unk4 = 1.0;
+            arg1->unk8 = 0.0;
+            arg2->unk0 = 0.0;
+            arg2->unk4 = 0.0;
+            arg2->unk8 = 1.0;
+            break;
+        case 1:
+            arg1->unk0 = 1.0;
+            arg1->unk4 = 0.0;
+            arg1->unk8 = 0.0;
+            arg2->unk0 = 0.0;
+            arg2->unk4 = 0.0;
+            arg2->unk8 = 1.0;
+            break;
+        case 2:
+            arg1->unk0 = 1.0;
+            arg1->unk4 = 0.0;
+            arg1->unk8 = 0.0;
+            arg2->unk0 = 0.0;
+            arg2->unk4 = 1.0;
+            arg2->unk8 = 0.0;
+            break;
+        }
+        return 1;
+    }
+
+    i = 0;
+    j = 1;
+    k = 2;
+    if ((count == 1) && (zeroAxis == 2)) {
+        j = 2;
+        k = 1;
+    }
+    ((f32 *)arg1)[i] = 1.0;
+    ((f32 *)arg1)[j] = 1.0;
+    ((f32 *)arg1)[k] = -((f32 *)arg0)[i] - (((f32 *)arg0)[j] / ((f32 *)arg0)[k]);
+    func_151450B4(arg1, arg0, arg2);
+    func_151450B4(arg2, arg0, arg1);
+    func_15145128(arg1, arg1, &len, &invLen);
+    func_15145128(arg2, arg2, &len, &invLen);
+    return 1;
+}
 extern u8 D_800BE9C0;
 extern u8 D_800D9BD0[][2][8];
 extern s32 D_800D9E10[];

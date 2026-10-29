@@ -18,6 +18,8 @@ Workspaces never touch the main tree; `land` is the only writer, and it re-gates
   mw.py pick  [--min B] [--max B] [--no-jtbl] [--desc] [-n N]
                                list remaining stubs by size
   mw.py rm    FUNC             delete a workspace
+  mw.py similar FUNC [-n N]    matched twins (identical code modulo symbols/regs/imms) + near twins
+  mw.py note  FUNC [text…]     append to / print the attempt ledger (survives resumes)
 
 Builds run inside the `conker-tc` podman container (see tools/toolchain/).
 """
@@ -39,12 +41,69 @@ WS_ROOT = Path(os.environ.get("CONKER_WS", Path.home() / "conker-ws"))
 CONTAINER = os.environ.get("CONKER_CONTAINER", "conker-tc")
 INNER_SHA = (MAIN / "conker.us.sha1").read_text().split()[0]
 LOCK = REPO / ".mw_land.lock"
+RAM_ROOT = Path(os.environ.get("CONKER_RAM", "/dev/shm/conker-build"))
+RAM_BUDGET_MB = int(os.environ.get("CONKER_RAM_MB", "12000"))
+BUILD_MB = 180                       # one build/ copy
+SHARED_DIRS = {"asm", "expected", "assets"}   # read-only: symlinked to main, never copied
 PRAGMA_RE = re.compile(r'^\s*#pragma\s+GLOBAL_ASM\("([^"]+)"\)', re.M)
 WORD_RE = re.compile(r"^\s*/\* [0-9A-F]+ ([0-9A-F]{8}) ([0-9A-F]{8}) \*/", re.M)
 BIN = "build/conker.us.bin"
 
 
 TCD_SOCK = WS_ROOT / ".tcd.sock"
+
+
+def clone_tree(src, dst):
+    """Lean private copy of a conker/ tree: read-only dirs are symlinks to main, sources are
+    reflinked (on disk, so work survives a reboot), build/ lives in RAM (ensure_build).
+    /home is a USB SSD: full copies of ~7000 files per workspace swamped it."""
+    dst.mkdir(parents=True)
+    for item in src.iterdir():
+        if item.name == "build":
+            continue
+        if item.name in SHARED_DIRS:
+            (dst / item.name).symlink_to(MAIN / item.name)
+            continue
+        subprocess.run(["cp", "-a", "--reflink=auto", str(item), str(dst / item.name)], check=True)
+    ensure_build(dst)
+
+
+def ensure_build(wc):
+    """Give tree wc a RAM build/ (copy of main's) unless it has a live one or a real on-disk one."""
+    import time
+    b = wc / "build"
+    if b.exists() and not b.is_symlink():
+        return  # full workspace from before the lean layout
+    if b.is_symlink() and b.exists():
+        os.utime(b.resolve().parent)  # LRU stamp
+        return
+    ram = RAM_ROOT / hashlib.sha1(str(wc).encode()).hexdigest()[:16]
+    if ram.exists():
+        shutil.rmtree(ram, ignore_errors=True)
+    RAM_ROOT.mkdir(parents=True, exist_ok=True)
+    evict_ram(BUILD_MB)
+    ram.mkdir()
+    with open(LOCK, "a") as lk:
+        fcntl.flock(lk, fcntl.LOCK_SH)  # not while a land rewrites main's build
+        subprocess.run(["cp", "-a", str(MAIN / "build"), str(ram / "build")], check=True)
+    if b.is_symlink():
+        b.unlink()
+    b.symlink_to(ram / "build")
+    # Sources this tree changed must rebuild against main's newer objects.
+    now = time.time()
+    for d in ("src", "include"):
+        for f in (wc / d).rglob("*"):
+            if f.is_file():
+                m = MAIN / f.relative_to(wc)
+                if not m.exists() or not filecmp.cmp(f, m, shallow=False):
+                    os.utime(f, (now, now))
+
+
+def evict_ram(need_mb):
+    """Drop least-recently-used RAM builds until need_mb more fits in the budget."""
+    dirs = sorted((d for d in RAM_ROOT.iterdir() if d.is_dir()), key=lambda d: d.stat().st_mtime)
+    while dirs and (len(dirs) * BUILD_MB + need_mb) > RAM_BUDGET_MB:
+        shutil.rmtree(dirs.pop(0), ignore_errors=True)
 
 
 def run(cmd, cwd, check=False, timeout=600):
@@ -137,7 +196,7 @@ def cmd_new(a):
         if sha1(MAIN / BIN) != INNER_SHA:
             sys.exit("main conker/build is not a matching build — run `make -C conker` first")
         ws.mkdir(parents=True)
-        subprocess.run(["cp", "-a", "--reflink=auto", str(MAIN), str(ws / "conker")], check=True)
+        clone_tree(MAIN, ws / "conker")
         # Pristine copy of the editable trees: the merge base for `land`.
         (ws / "base").mkdir()
         for d in ("src", "include"):
@@ -177,6 +236,8 @@ def cmd_new(a):
     if (ws / "prev.c").exists():
         print(f"prior try : {ws / 'prev.c'}")
     print(f"check     : python3 {REPO}/tools/mw.py check {func}")
+    if (ws / "notes.md").exists():
+        print("ledger    :\n" + (ws / "notes.md").read_text().rstrip())
 
 
 # ---------------------------------------------------------------- check
@@ -253,9 +314,11 @@ def check_tree(func, m, wc, want, quiet=False, U=2):
         if p.exists() and re.search(rf"^glabel {re.escape(func)}\b", p.read_text(), re.M):
             return 3, [f"STUB: {func} is still provided by GLOBAL_ASM({asm}) — replace it with C",
                        "RESULT: STUB"]
-    (wc / BIN).unlink(missing_ok=True)
-    r = run("make -j4 build/conker.us.bin 2>&1", wc)
+    ensure_build(wc)
     obj = wc / "build" / (m["file"].removesuffix(".c") + ".c.o")
+    obj.unlink(missing_ok=True)  # always recompile the function's own file
+    (wc / BIN).unlink(missing_ok=True)
+    r = run("make -j2 build/conker.us.bin 2>&1", wc)
     if r.returncode or not (wc / BIN).exists():
         errs = [l for l in r.stdout.splitlines()
                 if re.search(r"error|Error|undefined|discarded|referenced in|multiple definition|"
@@ -344,7 +407,7 @@ def cmd_batch(a):
         if sd.exists():
             shutil.rmtree(sd)
         sd.mkdir(parents=True)
-        subprocess.run(["cp", "-a", "--reflink=auto", str(ws / "conker"), str(sd / "conker")], check=True)
+        clone_tree(ws / "conker", sd / "conker")
         for name in ("ido", "tools"):
             (sd / name).symlink_to(REPO / name)
     free = list(range(nslot))
@@ -374,6 +437,10 @@ def cmd_batch(a):
             shutil.copy(f, ws / "conker" / m["file"])
             print(f"MATCH: {f.name} copied into the workspace — run: mw.py land {func}")
             break
+    for k in range(nslot):  # free the slots' RAM builds too
+        b = slots / str(k) / "conker" / "build"
+        if b.is_symlink():
+            shutil.rmtree(b.resolve().parent, ignore_errors=True)
     shutil.rmtree(slots, ignore_errors=True)
 
 
@@ -423,17 +490,24 @@ def git(*args, check=True):
     return p.stdout
 
 
+def stub_sizes(funcs):
+    """{func: bytes} for funcs that are still stubs in main."""
+    st = {Path(a).stem: a for a in stubbed_asm(MAIN)}
+    return {f: 4 * len(WORD_RE.findall((MAIN / st[f]).read_text())) for f in funcs if f in st}
+
+
 def cmd_land(a):
-    func = a.func
-    ws = ws_dir(func)
-    m = meta(func)
+    ws = ws_dir(a.func)
+    m = meta(a.func)
+    targets = m.get("funcs") or [m["func"]]
     files = changed_files(ws)
     if not files:
         sys.exit("no changes in workspace")
     with open(LOCK, "a") as lk:
         fcntl.flock(lk, fcntl.LOCK_EX)
-        if not find_stub(MAIN, func):
-            sys.exit(f"{func} is no longer a stub in main (already landed?)")
+        sizes = stub_sizes(targets)
+        if not sizes:
+            sys.exit(f"{', '.join(targets)}: no longer stubs in main (already landed?)")
         rels = [str(Path("conker") / f) for f in files]
         dirty = git("status", "--porcelain", "--", *rels).strip()
         if dirty:
@@ -460,6 +534,7 @@ def cmd_land(a):
                 sys.exit(f"{f}: merge conflict with main — recreate the workspace or merge by hand")
             merged[f] = p.stdout
         backup = {f: (MAIN / f).read_bytes() if (MAIN / f).exists() else None for f in files}
+        before = set(sizes)
         for f, data in merged.items():
             (MAIN / f).write_bytes(data)
 
@@ -473,19 +548,142 @@ def cmd_land(a):
 
         (MAIN / BIN).unlink(missing_ok=True)
         r = run("make -j16 2>&1", MAIN)
-        ok = sha1(MAIN / BIN) == INNER_SHA and not find_stub(MAIN, func)
-        if not ok:
+        still = {Path(x).stem for x in stubbed_asm(MAIN)}
+        landed = sorted(before - still)
+        if sha1(MAIN / BIN) != INNER_SHA or not landed:
             restore()
             print(r.stdout[-3000:])
-            sys.exit(f"LAND-FAIL: {func} — main build does not match after merge; reverted")
+            sys.exit(f"LAND-FAIL: {', '.join(targets)} — main build does not match after merge; reverted")
+        total = sum(sizes[f] for f in landed)
         git("add", *rels)
-        msg = f"game: match {func} ({m['size']} bytes) [mw]"
+        if len(landed) == 1:
+            msg = f"game: match {landed[0]} ({total} bytes) [mw]"
+        else:
+            msg = (f"game: match {len(landed)} functions ({total} bytes) [mw]\n\n"
+                   + "\n".join(f"match {f} ({sizes[f]} bytes)" for f in landed))
         git("commit", "-q", "-m", msg + "\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>")
         with open(REPO / "tools" / "mw_landed.tsv", "a") as fh:
-            fh.write(f"{func}\t{m['file']}\t{m['size']}\n")
+            for f in landed:
+                fh.write(f"{f}\t{m['file']}\t{sizes[f]}\n")
         git("add", "tools/mw_landed.tsv")
         git("commit", "-q", "--amend", "--no-edit")
-        print(f"LANDED: {func} ({m['size']} bytes) — {git('rev-parse', '--short', 'HEAD').strip()}")
+        print(f"LANDED: {', '.join(landed)} ({total} bytes) — {git('rev-parse', '--short', 'HEAD').strip()}")
+
+
+# ---------------------------------------------------------------- similar / note
+
+SIB_DIR = WS_ROOT / ".siblings"
+
+
+def sibling_index():
+    """{func: {"obj": path, "lv": [h0, h1, h2], "ops": [...level-1 tokens]}} over the golden build.
+    Built once from `objdump -dr` of conker/expected (the golden objects never change)."""
+    cache = SIB_DIR / "index.json"
+    if cache.exists():
+        return json.loads(cache.read_text())
+    SIB_DIR.mkdir(parents=True, exist_ok=True)
+    dump = SIB_DIR / "objdump.txt"
+    run(f"find expected/build/src -name '*.c.o' | sort | while read o; do echo \"@@@ $o\"; "
+        f"mips-linux-gnu-objdump -dr --no-show-raw-insn \"$o\"; done > {dump}", MAIN, timeout=1800)
+    import hashlib as hl
+    idx, cur, obj, insns = {}, None, None, []
+
+    def flush():
+        if cur and insns:
+            lv = []
+            for level in range(3):
+                toks = [norm(i, level) for i in insns]
+                lv.append(hl.sha1("\n".join(toks).encode()).hexdigest()[:16])
+            idx[cur] = {"obj": obj, "lv": lv, "ops": [norm(i, 1) for i in insns]}
+
+    def norm(ins, level):
+        mnem, ops, sym, rel = ins
+        if sym:
+            ops = re.sub(r"(-?0x[0-9a-f]+|-?\d+)(?=\(|$)", "SYM", ops, count=1)
+        if rel is not None:
+            ops = re.sub(r"[0-9a-f]+ <[^>]*>", f"L{rel:+d}", ops)
+        if level >= 1:
+            ops = re.sub(r"\b(zero|at|v[01]|a[0-3]|t\d|s[0-8]|k[01]|gp|sp|fp|ra|\$?f\d+)\b", "R", ops)
+        if level >= 2:
+            ops = re.sub(r"-?0x[0-9a-f]+|\b-?\d+\b", "I", ops)
+        return mnem + " " + ops
+
+    start = 0
+    for line in dump.read_text(errors="replace").splitlines():
+        if line.startswith("@@@ "):
+            flush(); cur, insns, obj = None, [], line[4:].replace("expected/", "", 1)
+            continue
+        mm = re.match(r"^([0-9a-f]+) <([\w.]+)>:$", line)
+        if mm:
+            flush(); insns = []
+            cur = None if mm.group(2).startswith(".") else mm.group(2)
+            start = int(mm.group(1), 16)
+            continue
+        mm = re.match(r"^\s+([0-9a-f]+):\s+(\S+)\s*(.*)$", line)
+        if mm and cur:
+            addr, mnem, ops = int(mm.group(1), 16), mm.group(2), mm.group(3).strip()
+            bt = re.search(r"\b([0-9a-f]+) <", ops)
+            rel = int(bt.group(1), 16) - addr if bt and not mnem.startswith("jal") else None
+            insns.append([mnem, ops, False, rel])
+            continue
+        if re.match(r"^\s+[0-9a-f]+: R_MIPS_", line) and insns:
+            insns[-1][2] = True
+    flush()
+    cache.write_text(json.dumps(idx))
+    return idx
+
+
+def cmd_similar(a):
+    """Matched twins of FUNC (identical normalized code), then near twins, then unmatched twins."""
+    import difflib
+    idx = sibling_index()
+    if a.func not in idx:
+        sys.exit(f"{a.func} not in the golden objects")
+    stubs = {Path(x).stem for x in stubbed_asm(MAIN)}
+    me = idx[a.func]
+    exact, unmatched = [], []
+    for f, e in idx.items():
+        if f == a.func:
+            continue
+        for level in range(3):
+            if e["lv"][level] == me["lv"][level]:
+                (unmatched if f in stubs else exact).append((level, f, e["obj"]))
+                break
+    exact.sort(); unmatched.sort()
+    for level, f, obj in exact[: a.n]:
+        print(f"TWIN level {level} ({['same code', 'same up to registers', 'same up to registers+immediates'][level]}): "
+              f"{f}  in {obj.replace('build/', '').replace('.c.o', '.c')}  (matched — copy its C, adapt names)")
+    n = len(me["ops"])
+    near = []
+    for f, e in idx.items():
+        if f == a.func or f in stubs or abs(len(e["ops"]) - n) > max(4, n // 8):
+            continue
+        sm = difflib.SequenceMatcher(None, me["ops"], e["ops"], autojunk=False)
+        if sm.real_quick_ratio() < 0.85 or sm.quick_ratio() < 0.85:
+            continue
+        r = sm.ratio()
+        if r >= 0.85:
+            near.append((r, f, e["obj"]))
+    for r, f, obj in sorted(near, reverse=True)[: a.n]:
+        if any(f == x[1] for x in exact):
+            continue
+        print(f"NEAR {r:.0%}: {f}  in {obj.replace('build/', '').replace('.c.o', '.c')}  (matched, similar shape)")
+    if unmatched:
+        print(f"UNMATCHED TWINS (one match may serve all): {', '.join(f for _, f, _ in unmatched[: a.n])}")
+    if not exact and not near:
+        print("no matched twin or near twin")
+
+
+def cmd_note(a):
+    """Append to (or print) the function's attempt ledger, kept across agents and resumes."""
+    ws = ws_dir(a.func)
+    led = ws / "notes.md"
+    if a.text:
+        import time
+        with open(led, "a") as fh:
+            fh.write(f"- {time.strftime('%Y-%m-%d %H:%M')} {' '.join(a.text)}\n")
+    if led.exists():
+        print(led.read_text().rstrip())
 
 
 # ---------------------------------------------------------------- pick / rm
@@ -524,7 +722,7 @@ def main():
     p.add_argument("--no-diff", action="store_true")
     p.add_argument("-q", action="store_true", help="summary line only")
     p = sub.add_parser("batch", help="try variant .c files in parallel")
-    p.add_argument("func"); p.add_argument("files", nargs="+"); p.add_argument("-j", type=int, default=8)
+    p.add_argument("func"); p.add_argument("files", nargs="+"); p.add_argument("-j", type=int, default=4)
     p = sub.add_parser("reset"); p.add_argument("func"); p.add_argument("--all", action="store_true")
     p = sub.add_parser("objdump"); p.add_argument("func")
     p = sub.add_parser("land"); p.add_argument("func")
@@ -532,10 +730,14 @@ def main():
     p.add_argument("--max", type=int, default=10**9); p.add_argument("--no-jtbl", action="store_true")
     p.add_argument("--desc", action="store_true"); p.add_argument("-n", type=int, default=50)
     p = sub.add_parser("rm"); p.add_argument("func")
+    p = sub.add_parser("similar", help="matched twins / near twins of FUNC")
+    p.add_argument("func"); p.add_argument("-n", type=int, default=5)
+    p = sub.add_parser("note", help="append to / print the function's attempt ledger")
+    p.add_argument("func"); p.add_argument("text", nargs="*")
     a = ap.parse_args()
     sys.exit({"new": cmd_new, "check": cmd_check, "land": cmd_land, "batch": cmd_batch,
               "reset": cmd_reset, "objdump": cmd_objdump,
-              "pick": cmd_pick, "rm": cmd_rm}[a.cmd](a) or 0)
+              "pick": cmd_pick, "rm": cmd_rm, "similar": cmd_similar, "note": cmd_note}[a.cmd](a) or 0)
 
 
 if __name__ == "__main__":

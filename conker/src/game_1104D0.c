@@ -80,9 +80,15 @@ void func_150E3340(f32 *arg0, s32 *arg1, s32 arg2, s16 arg3) {
     func_150E3020(temp_a0, temp_a1, temp_a2, temp_a0, temp_a1, temp_a2, 0x1A, 10.0f, 0, arg0[0], arg0[1], arg0[2], arg2, arg3);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1104D0/func_150E33CC.s")
+void func_1000E7A0(s32, s32);
 
-extern void func_150E33CC(void);
+s32 func_150E33CC(s32 arg0, s32 arg1, void **arg2, s32 arg3) {
+    if (*arg2 == NULL) {
+        return 1;
+    }
+    func_1000E7A0(2, (s32)*arg2);
+    return 0;
+}
 
 s32 func_150E3414(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, f32 arg8) {
     Game1104D0EffectInstance *temp;
@@ -122,7 +128,38 @@ void func_150E3514(Game1104D0EffectInstance *arg0) {
     func_1516972C((struct102 *)arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1104D0/func_150E35DC.s")
+extern u8 D_800DCE50[];
+
+typedef struct Node150E35DC {
+    u8 pad0[0x8];
+    struct Node150E35DC *unk8;
+    u8 padC[0x3C];
+    u8 unk48;
+} Node150E35DC;
+
+void func_150E35DC(s32 arg0) {
+    s32 i;
+    Node150E35DC *node;
+
+    arg0--;
+    for (i = 0; i != 2; i++) {
+        D_800DD190++;
+        node = ((Node150E35DC *(*)[104])D_800DCE50)[i][39];
+        while (node != NULL) {
+            *(Node150E35DC **)((u8 *)D_800DD198 + (D_800DD190 << 2)) = node->unk8;
+            if (arg0 == -1 || arg0 == node->unk48) {
+                func_150E3514((Game1104D0EffectInstance *)node);
+            }
+            node = *(Node150E35DC **)((u8 *)D_800DD198 + (D_800DD190 << 2));
+        }
+        {
+            extern s8 D_800DD190;
+
+            D_800DD190--;
+        }
+    }
+}
+
 
 void func_150E36BC(s32 arg0, s32 *arg1, s32 *arg2, s32 *arg3) {
     Game1104D0EffectInstance *temp;

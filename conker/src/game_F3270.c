@@ -15,7 +15,9 @@ typedef struct {
 typedef struct {
     char pad_0x0[0x18];
     s32 field_0x18;
-    char pad_0x1C[0x40];
+    char pad_0x1C[0x18];
+    f32 field_0x34;
+    char pad_0x38[0x24];
     GameF3270SpawnedObject *volatile field_0x5C;
 } GameF3270SpawnOwner;
 
@@ -46,7 +48,16 @@ typedef struct {
 } GameF3270ObjectOwner58;
 
 GameF3270Object *func_150C6460(GameF3270ObjectOwner58 *arg0);
-GameF3270SpawnedObject *func_150C5F94(s32 arg0, GameF3270SpawnOwner *arg1);
+typedef struct {
+    char pad_0x0[0x14];
+    f32 field_0x14;
+    f32 field_0x18;
+    f32 field_0x1C;
+    char pad_0x20[0x1B];
+    u8 field_0x3B;
+} GameF3270SpawnSource;
+
+GameF3270SpawnedObject *func_150C5F94(GameF3270SpawnSource *arg0, GameF3270SpawnOwner *arg1);
 
 void func_150C5DC0(GameF3270ObjectOwner58 *arg0) {
     GameF3270B0State *temp;
@@ -102,13 +113,175 @@ void func_150C5F40(GameF3270SpawnOwner *arg0) {
         done:
             ;
     } else {
-        arg0->field_0x5C = func_150C5F94(temp_a2, arg0);
+        arg0->field_0x5C = func_150C5F94((GameF3270SpawnSource *)temp_a2, arg0);
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_F3270/func_150C5F94.s")
+void *memcpy(void *, const void *, u32);
+typedef struct {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ u8 unk8;
+    /* 0x09 */ u8 pad9[0x3];
+    /* 0x0C */ GameF3270SpawnSource *unkC;
+    /* 0x10 */ u8 unk10;
+    /* 0x11 */ u8 pad11[0x3];
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ s16 unk28;
+    /* 0x2A */ u8 unk2A;
+    /* 0x2B */ u8 unk2B;
+    /* 0x2C */ s8 unk2C;
+    /* 0x2D */ u8 unk2D;
+} GameF3270SpawnDesc;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_F3270/func_150C60D8.s")
+typedef struct {
+    /* 0x00 */ GameF3270SpawnOwner *owner;
+    /* 0x04 */ u8 unk4;
+    /* 0x08 */ f32 unk8;
+} GameF3270SpawnLink;
+
+extern f32 D_800A0410;
+extern f32 D_800A0414;
+extern f32 D_800A0418;
+extern s32 func_15045800(f32 *, s32, f32, f32 *);
+extern GameF3270SpawnedObject *func_1513418C(GameF3270SpawnDesc *, s32, u8, s32);
+
+GameF3270SpawnedObject *func_150C5F94(GameF3270SpawnSource *arg0, GameF3270SpawnOwner *arg1) {
+    GameF3270SpawnDesc desc;
+    GameF3270SpawnLink link;
+    GameF3270SpawnedObject *result;
+
+    link.owner = arg1;
+    link.unk4 = 1;
+    {
+        f32 pos[3];
+
+        pos[0] = arg0->field_0x14;
+        pos[1] = arg0->field_0x18 + D_800A0410;
+        pos[2] = arg0->field_0x1C;
+        if (func_15045800(pos, 0, arg0->field_0x18 - 100.0f, &arg1->field_0x34) != 0) {
+            link.unk8 = arg1->field_0x34;
+        } else {
+            link.unk8 = arg0->field_0x18 + D_800A0414;
+        }
+    }
+    desc.unk0 = 0;
+    desc.unk4 = 0;
+    desc.unk8 = arg0->field_0x3B;
+    desc.unkC = arg0;
+    desc.unk10 = 0;
+    desc.unk14 = 0.0f;
+    desc.unk18 = 0.0f;
+    desc.unk1C = 0.0f;
+    desc.unk20 = 25.0f;
+    desc.unk24 = D_800A0418;
+    desc.unk28 = 300;
+    desc.unk2A = 10;
+    desc.unk2B = 4;
+    desc.unk2C = 1;
+    desc.unk2D = 2;
+    result = func_1513418C(&desc, 0xC, 0xFF, 0);
+    if (result != NULL) {
+        memcpy(&result->field_0x58, &link, sizeof(link));
+    }
+    return result;
+}
+
+
+typedef struct GameF3270Burst {
+    s32 flags, zero4;
+    s16 texture, lifetime;
+    s32 zeroC, zero10;
+    u8 zero14, zero15, zero16, zero17, zero18, zero19, zero1A;
+    u8 alpha, maximum, kind;
+    s16 duration, period, zero22;
+    f32 zero24, width, height;
+    f32 x, y, z;
+    f32 zero3C, zero40, zero44;
+    f32 vx, vy, vz, rotation;
+    s32 mode, unused5C;
+    s8 field60, field61, field62, field63;
+    u8 pad64[0xC];
+} GameF3270Burst;
+
+typedef struct GameF3270BurstMotion {
+    f32 size;
+    u8 mode0, mode1, count0, count1;
+    f32 amount0, amount1, speed, damping;
+    u8 mode2, mode3, count2, count3;
+    f32 amount2, amount3, sourceScale;
+} GameF3270BurstMotion;
+
+void *func_151303BC(s32, u8, s32);
+void *memcpy(void *, const void *, u32);
+extern f32 D_800A041C, D_800A0420, D_800A0424, D_800A0428;
+extern f32 D_800A042C, D_800A0430, D_800A0434, D_800A0438;
+
+void func_150C60D8(f32 arg0, f32 arg1, f32 arg2, f32 arg3,
+                  f32 arg4, f32 arg5, void *arg6) {
+    GameF3270Burst burst;
+    void *spawned;
+    GameF3270BurstMotion motion;
+    burst.kind = 0x2F;
+    burst.texture = 0xC01;
+    burst.flags = 0x200005;
+    burst.zero4 = 0;
+    burst.zero1A = 0;
+    burst.zero19 = 0;
+    burst.zero18 = 0;
+    burst.zero17 = 0;
+    burst.zero16 = 0;
+    burst.zero15 = 0;
+    burst.zero14 = 0;
+    burst.zero10 = 0;
+    burst.zeroC = 0;
+    burst.maximum = 0xFF;
+    burst.zero22 = 0;
+    burst.zero24 = 0.0f;
+    burst.mode = 0x3207;
+    burst.field60 = 5;
+    burst.field61 = 5;
+    burst.field62 = 4;
+    burst.field63 = -1;
+    burst.x = arg0;
+    burst.y = arg1;
+    burst.zero3C = 0.0f;
+    burst.zero40 = 0.0f;
+    burst.zero44 = 0.0f;
+    burst.duration = 30;
+    burst.period = 8;
+    burst.z = arg2;
+    motion.sourceScale = *(f32 *)((u8 *)arg6 + 0x60);
+    motion.speed = 4.0f;
+    motion.damping = 0.25f;
+    motion.mode0 = 0;
+    motion.mode1 = 0;
+    motion.mode2 = 0;
+    motion.mode3 = 0;
+    burst.vx = -arg3 * 0.2f;
+    burst.vy = 0.0f;
+    burst.vz = -arg5 * 0.2f;
+    if (func_150ADA20() & 1) burst.mode |= 0x40;
+    if (func_150ADA20() & 1) burst.mode |= 0x80;
+    burst.lifetime = func_150ADA20() % 51U + 106;
+    burst.alpha = func_150ADA20() % 101U + 100;
+    motion.size = burst.width = burst.height = func_150ADA68() * 62.0f + 41.0f;
+    motion.count0 = func_150ADA20() % 5U + 4;
+    motion.count1 = func_150ADA20() % 5U + 4;
+    motion.amount0 = (func_150ADA68() * 0.25f + D_800A0420) * motion.size;
+    motion.amount1 = (func_150ADA68() * 0.25f + D_800A0424) * motion.size;
+    motion.count2 = func_150ADA20() % 5U + 4;
+    motion.count3 = func_150ADA20() % 5U + 4;
+    motion.amount2 = (func_150ADA68() * D_800A0428 + D_800A042C) * motion.size;
+    motion.amount3 = (func_150ADA68() * D_800A0430 + D_800A0434) * motion.size;
+    burst.rotation = (func_150ADA68() * 60.0f + 21.0f) * D_800A0438;
+    spawned = func_151303BC((s32)&burst, 2, 0x28);
+    if (spawned != NULL) memcpy((u8 *)spawned + 0xA8, &motion, 0x28);
+}
 
 s32 func_150C63EC(u8 *arg0) {
     s32 ret = 1;

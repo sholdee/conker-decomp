@@ -3,7 +3,44 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_F2820/func_150C5370.s")
+extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
+
+typedef struct {
+    u8 pad0[0x10];
+    s32 unk10;
+    s32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    u8 pad30[0xC0 - 0x30];
+    f32 unkC0;
+} Obj150C5370;
+
+Obj150C5370 *func_150C5370(void *arg0, s32 arg1) {
+    Obj150C5370 *obj;
+    struct17 diff;
+
+    obj = func_15167A68(0x46, 0, arg1 + 0xC8, 1, 0xFF, 1);
+    if (obj == NULL) {
+        return NULL;
+    }
+    memcpy(&obj->unk18, arg0, 0x24);
+    {
+        extern f32 func_15143E64(struct17 *);
+
+        diff.unk0 = obj->unk18 - obj->unk24;
+        diff.unk4 = obj->unk1C - obj->unk28;
+        diff.unk8 = obj->unk20 - obj->unk2C;
+        obj->unkC0 = func_15143E64(&diff);
+    }
+    obj->unk10 = 1;
+    obj->unk14 = 0;
+    return obj;
+}
+
 
 void func_150C5430(struct102 *arg0) {
     func_15169804(arg0);
@@ -80,7 +117,7 @@ extern void func_15143134(void *, s32, s32);
 s32 func_150C5BD4(struct102 *arg0)
 {
   u8 *p = ((u8 *) arg0) + 0xC8;
-  int new_var;
+  u32 offset;
   s32 t0;
   if ((*((s32 *) (*((s32 *) p)))) == 0)
   {
@@ -99,8 +136,8 @@ s32 func_150C5BD4(struct102 *arg0)
   }
   else
   {
-    new_var = (((((p[5] << 6) & 0xFFFFFFFFFFFFFFFFu) & 0xFFFFFFFFFFFFFFFFu) & 0xFFFFFFFFFFFFFFFFu) & 0xFFFFFFFFFFFFFFFFu) & 0xFFFFFFFFFFFFFFFFu;
-    func_15143134(p + 0x8, (s32) (((u8 *) arg0) + 0x24), t0 + (((((new_var & 0xFFFFFFFFFFFFFFFFu) & 0xFFFFFFFFFFFFFFFFu) & 0xFFFFFFFFFFFFFFFFu) & 0xFFFFFFFFFFFFFFFFu) & 0xFFFFFFFFFFFFFFFFu));
+    offset = (p[5] << 4) << 2;
+    func_15143134(p + 0x8, (s32) (((u8 *) arg0) + 0x24), t0 + offset);
   }
   return 1;
 }

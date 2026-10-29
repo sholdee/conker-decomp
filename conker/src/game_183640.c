@@ -228,9 +228,158 @@ typedef struct {
 } Struct151563B8;
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_183640/func_15156190.s")
+/* prior best attempt (old score 15); may be a good start */
+struct Obj15156190Vec {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8;
+};
 
-extern void func_15156190(void *arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4);
+struct Obj15156190Vec4 {
+    struct Obj15156190Vec unk0;
+    s32 padC;
+};
+
+struct Obj15156190Src {
+    struct Obj15156190Vec unk0;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    u8 unk20;
+    u8 unk21;
+    u8 unk22;
+    u8 unk23;
+    u8 unk24;
+    u8 unk25;
+    u8 unk26;
+    u8 unk27;
+    u8 unk28;
+    u8 pad29;
+    s16 unk2A;
+    u16 unk2C;
+    u8 pad2E[2];
+    f32 unk30;
+    u8 unk34;
+    u8 pad35;
+    s16 unk36;
+    s16 unk38;
+};
+
+struct Obj15156190Ret {
+    u8 pad0[0x10];
+    struct Obj15156190Vec unk10;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    struct Obj15156190Vec unk28;
+    f32 unk34;
+    f32 unk38;
+    f32 unk3C;
+    u8 unk40;
+    u8 pad41;
+    s16 unk42;
+    u16 unk44;
+    u8 pad46[2];
+    f32 unk48;
+    u8 unk4C;
+    u8 pad4D;
+    s16 unk4E;
+    s16 unk50;
+    u8 pad52[0xC];
+    s16 unk5E;
+    s16 unk60;
+    s16 unk62;
+    u8 unk64;
+    u8 unk65;
+    u8 unk66;
+    u8 unk67;
+    u8 pad68[6];
+    s16 unk6E;
+    u8 pad70[4];
+    u8 unk74;
+    u8 unk75;
+    u8 unk76;
+    u8 unk77;
+    u8 pad78[6];
+    s16 unk7E;
+    u8 pad80[4];
+    u8 unk84;
+    u8 unk85;
+    u8 unk86;
+    u8 unk87;
+    u8 unk88[0x10];
+};
+
+void *func_15156190(struct Obj15156190Src *arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4)
+{
+  struct Obj15156190Ret *temp_v0;
+  struct Obj15156190Ret *sp44;
+  s32 id;
+  struct Obj15156190Vec sp30;
+  switch (arg1)
+  {
+    case 0:
+      id = 0x2C;
+      break;
+
+    case 1:
+      id = 0x53;
+      break;
+
+    default:
+      id = 0x2C;
+      break;
+
+  }
+
+  temp_v0 = (struct Obj15156190Ret *) func_15167A68(id, arg4, arg2 + 0x98, 1, (u8) arg3, 1);
+  if (temp_v0 == 0)
+  {
+    return 0;
+  }
+  sp44 = temp_v0;
+  sp44->unk5E = 0;
+  sp44->unk64 = arg0->unk24;
+  sp44->unk65 = arg0->unk25;
+  sp44->unk66 = arg0->unk26;
+  sp44->unk67 = arg0->unk27;
+  sp44->unk60 = 0;
+  sp44->unk62 = 0;
+  sp44->unk6E = 0;
+  sp44->unk74 = arg0->unk20;
+  sp44->unk75 = arg0->unk21;
+ do { } while (0);
+  sp44->unk76 = arg0->unk22;
+  sp44->unk77 = arg0->unk23;
+  sp44->unk7E = 0;
+  sp44->unk84 = arg0->unk20;
+  sp44->unk85 = arg0->unk21;
+  sp44->unk86 = arg0->unk22;
+  sp44->unk87 = arg0->unk23;
+  sp30 = arg0->unk0;
+  sp44->unk28 = sp30;
+  sp44->unk10 = sp30;
+  sp44->unk1C = arg0->unkC * arg0->unk18;
+  sp44->unk20 = arg0->unk10 * arg0->unk18;
+  sp44->unk24 = arg0->unk14 * arg0->unk18;
+  sp44->unk34 = arg0->unkC * arg0->unk1C;
+  sp44->unk38 = arg0->unk10 * arg0->unk1C;
+  sp44->unk3C = arg0->unk14 * arg0->unk1C;
+  sp44->unk40 = arg0->unk28;
+  sp44->unk42 = arg0->unk2A;
+  sp44->unk44 = arg0->unk2C;
+  sp44->unk48 = arg0->unk30;
+  sp44->unk4C = arg0->unk34;
+  sp44->unk4E = arg0->unk36;
+  sp44->unk50 = arg0->unk38;
+  bzero(sp44->unk88, 0x10);
+  return sp44;
+}
+
+
+extern void *func_15156190(struct Obj15156190Src *arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4);
 
 void func_15156388(void *arg0, u8 arg1, s32 arg2) {
     func_15156190(arg0, arg1, arg2, 0xFF, 0);
@@ -366,16 +515,16 @@ struct15157010 *func_15157010(u8 *arg0, s32 arg1, f32 arg2, s32 arg3, s32 arg4, 
     struct15157010 *temp_v0;
     f32 (*mtx1)[4];
     f32 (*mtx2)[4];
-    s32 phi_v0;
+    s32 id;
     s32 i;
 
-    phi_v0 = 0x36;
+    id = 0x36;
     if (arg0[0] & 0x80) {
-        phi_v0 = 0x5B;
+        id = 0x5B;
     } else if (arg0[0] & 0x10) {
-        phi_v0 = 0x4C;
+        id = 0x4C;
     }
-    temp_v0 = func_15167A68(phi_v0, arg7, arg5 + 0x120, 1, arg6, 1);
+    temp_v0 = func_15167A68(id, arg7, arg5 + 0x120, 1, arg6, 1);
     if (temp_v0 == 0) {
         return NULL;
     }
@@ -535,7 +684,67 @@ s32 func_15157918(struct15157010 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_183640/func_15157AA8.s")
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} MotionVec;
+
+typedef struct {
+    MotionVec rot;
+    f32 scale;
+    MotionVec vel;
+    MotionVec rotVel;
+    f32 gravity;
+    f32 drag;
+    u8 flags;
+} MotionState;
+
+typedef struct {
+    u8 pad_0x0[0x54];
+    f32 posX;
+    f32 posY;
+    f32 posZ;
+    u8 pad_0x60[0xC0];
+    MotionState motion;
+} struct15157AA8;
+
+s32 func_15157AA8(struct15157AA8 *arg0) {
+    MotionState *p;
+    MotionVec oldVel;
+    f32 accelX;
+    f32 accelY;
+    f32 accelZ;
+    s32 i;
+
+    p = &arg0->motion;
+    if (arg0->motion.flags & 1) {
+        oldVel = p->vel;
+        if (p->flags & 8) {
+            for (i = D_800BE9E4; i != 0; i--) {
+                p->vel.x *= p->drag;
+                p->vel.z *= p->drag;
+            }
+        }
+        if (p->flags & 4) {
+            p->vel.y += p->gravity * D_800BE9A4;
+            accelY = p->gravity;
+        } else {
+            accelY = 0.0f;
+        }
+        accelX = (p->vel.x - oldVel.x) * D_800BE9A8;
+        accelZ = (p->vel.z - oldVel.z) * D_800BE9A8;
+        arg0->posX += (oldVel.x + 0.5f * accelX * D_800BE9A4) * D_800BE9A4;
+        arg0->posY += (oldVel.y + 0.5f * accelY * D_800BE9A4) * D_800BE9A4;
+        arg0->posZ += (oldVel.z + 0.5f * accelZ * D_800BE9A4) * D_800BE9A4;
+    }
+    if (p->flags & 2) {
+        p->rot.x += p->rotVel.x * D_800BE9A4;
+        p->rot.y += p->rotVel.y * D_800BE9A4;
+        p->rot.z += p->rotVel.z * D_800BE9A4;
+    }
+    return 1;
+}
 
 void func_15157D88(s32 arg0, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, arg0 + 0x4C, arg0 + 0x50, arg0);

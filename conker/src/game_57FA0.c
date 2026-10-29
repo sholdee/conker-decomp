@@ -54,7 +54,46 @@ void func_1502AB04(s32 arg0, s32 *arg1, s32 arg2, s32 arg3) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_57FA0/func_1502AC88.s")
+extern u32 D_800C3D60;
+
+s32 func_1502AC88(u8 *arg0, s32 arg1, s32 *arg2) {
+    u8 buf[0x38];
+    u32 romAddr;
+    u32 size;
+    s32 *dst;
+    s32 ret;
+    s32 *ptr;
+    u32 i;
+    u32 j;
+    struct_game_57FA0_0 tmp;
+
+    arg0 += arg1 * 8;
+    arg0 = (u8 *)((u32)arg0 | 0x80000000);
+
+    for (i = 0; i < 16; i++) {
+        if ((u32)arg0 == D_800C3D68[i].unk0) {
+            tmp = D_800C3D68[i];
+            for (j = i; j < 15; j++) {
+                D_800C3D68[j] = D_800C3D68[j + 1];
+            }
+            D_800C3D68[15] = tmp;
+            D_800C3D68[15].unk4 = D_800C3D60;
+            *arg2 = D_800C3D68[15].unkC;
+            return D_800C3D68[15].unk8;
+        }
+    }
+
+    D_800C3D60++;
+    romAddr = (u32)arg0 & 0x7FFFFFF0;
+    size = (((u32)arg0 & 0xE) + 0x1F) & ~0xF;
+    dst = (s32 *)((u32)buf & ~0xF);
+    func_10004514(romAddr, dst, size, 1);
+    ptr = (s32 *)((u8 *)dst + ((u32)arg0 & 0xF));
+    ret = ptr[0];
+    *arg2 = ptr[1];
+    func_1502AB04(2, ptr, D_800C3D60, (u32)arg0);
+    return ret;
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/game_57FA0/func_1502AF04.s")
 extern u8 D_AB1950;
 s32 func_1502AC88(u8 *arg0, s32 arg1, s32 *arg2);
@@ -155,7 +194,29 @@ s32 func_1502B224(s32 arg0, void *arg1, u32 arg2, u32 arg3) {
     return size;
 }
 #pragma GLOBAL_ASM("asm/nonmatchings/game_57FA0/func_1502B350.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_57FA0/func_1502B4A8.s")
+/* Offset-table entry: unk0 is rebased onto the table (-1 = none); bit 31 of unk4 ends the table. */
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+} Pair1502B4A8;
+
+s32 func_1502B4A8(Pair1502B4A8 *arg0, s32 arg1) {
+    s32 i;
+
+    if (arg1 == 0) {
+        while ((arg0[arg1++].unk4 & 0x80000000) == 0) {
+        }
+    }
+    for (i = 0; i < arg1; i++) {
+        arg0[i].unk4 &= 0x0FFFFFFF;
+        if (arg0[i].unk0 == -1 || arg0[i].unk4 == 0) {
+            arg0[i].unk0 = 0;
+        } else {
+            arg0[i].unk0 += (s32)arg0;
+        }
+    }
+    return arg1;
+}
 extern u8 D_AB1950;
 s32 func_1502AC88(u8 *arg0, s32 arg1, s32 *arg2);
 s32 func_1502B350(u8 *arg0, s32 arg1, s32 *arg2);
@@ -197,7 +258,7 @@ s32 func_1502B5C8(s32 *arg0, s32 arg1, s32 arg2, s32 arg3) {
 
     return ret;
 }
-s32 func_1502B4A8(s32 *arg0, s32 arg1);
+s32 func_1502B4A8(Pair1502B4A8 *arg0, s32 arg1);
 
 s32 func_1502B6BC(s32 *arg0, s32 arg1, s32 *arg2, s32 arg3) {
     s32 *more;

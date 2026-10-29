@@ -1,13 +1,17 @@
 #include <ultra64.h>
 
+#define func_1506160C func_1506160C_hdr
 #include "functions.h"
+#undef func_1506160C
+#define D_800D20FC D_800D20FC_hdr
 #include "variables.h"
+#undef D_800D20FC
 
 extern s32 func_15084D70(s32, s32, s32, s16*, f32*, u8*, u8*, s32*, s32*, s32, s32*);
 extern void func_15022190(s16, s16, s16, f32);
 extern void func_1501D348(s32, s32, s32, s32, s32);
 extern void func_1501C730(s32, s32, s32, s32, s32);
-extern void func_1507D1D8(struct127 *);
+extern void func_1507D1D8();
 extern void func_1509C3A0(void);
 
 
@@ -17,7 +21,121 @@ void func_1507C8E0(struct127 *arg0, s32 arg1) {
 }
 
 // "goto" hell
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A9D90/func_1507C8FC.s")
+typedef struct C8FCStatus {
+    u8 pad0[0x84];
+    u8 team;
+    u8 pad85[0x9B];
+    u8 state;
+    u8 pad121;
+    u8 finished;
+    u8 pad123;
+    s16 timer;
+    s16 elapsed;
+} C8FCStatus;
+
+typedef struct C8FCPlayer {
+    u8 pad0[7];
+    u8 controller;
+    u8 pad8[0x314];
+    C8FCStatus *status;
+    u8 pad320[0xC];
+} C8FCPlayer;
+
+void func_1507CD0C(struct127 *);
+void func_1506160C(struct127 *, u8, u8, u8, u8);
+void func_1507D4F8(s32);
+void func_1507E1D0(struct127 *, f32 *, f32 *, f32 *);
+void func_1517EE40(s32, s32, s32, s32, s8, s32);
+void func_1517F814(s32, f32, f32, f32, s32);
+
+void func_1507C8FC(void) {
+    s32 i;
+    f32 x;
+    f32 y;
+    f32 z;
+    C8FCPlayer *player;
+
+    if (D_800BEAC0 == 0) {
+        player = (C8FCPlayer *)&D_800CC2D0;
+        for (i = 0; i < D_8008FD8C; i++, player++) {
+            if (player->status == NULL) {
+                continue;
+            }
+            if (player->status->state == 0) {
+                player->status->elapsed = 0;
+                continue;
+            }
+            if (player->status->state == 1) {
+                continue;
+            }
+            if (i <= D_80082FA0) {
+                if (D_800BE616 != 0 && (D_800D18A2 & (1 << i))) {
+                    player->status->state = 2;
+                    player->status->timer = 60;
+                }
+                if (player->status->state == 11) {
+                    func_1517EE40(0, 0, 0, 15, 1, i);
+                    player->status->state = 12;
+                    continue;
+                }
+                if (player->status->state == 12) {
+                    if (func_1517EFAC(i) != 0) {
+                        func_1507D4F8(i);
+                    }
+                    continue;
+                }
+                if (player->status->state == 2) {
+                    if (player->status->timer > 0) {
+                        player->status->timer -= D_800BE9E4;
+                    } else {
+                        func_1507CD0C((struct127 *)player);
+                    }
+                } else if (player->status->state == 7) {
+                    if (player->status->timer > 0) {
+                        player->status->timer -= D_800BE9E4;
+                    } else {
+                        player->status->state = 8;
+                        func_1506160C((struct127 *)player, 2, 0, 60, 0);
+                    }
+                }
+                player->status->elapsed += D_800BE9E4;
+                if ((D_800BE710[i] & 0x8000) || (D_800BE616 != 0 && player->status->team == 0) ||
+                    func_150859AC((s16)i, 3) < 2 || (player->status->team == 1 && player->status->elapsed >= 181)) {
+                    player->status->finished = 1;
+                }
+                if (D_8008FDBC & 0x80) {
+                    player->status->finished = 0;
+                }
+                func_1507E1D0((struct127 *)player, &x, &y, &z);
+                func_1517F814(0, x, y, z, i);
+                if (player->status->finished != 0 && player->status->state == 5) {
+                    player->status->state = 6;
+                }
+                if (player->status->state == 9) {
+                    func_1507D4F8(i);
+                }
+            } else if (player->status->state == 11) {
+                func_1507D4F8(i);
+                continue;
+            } else if (player->status->state == 2) {
+                if (player->status->timer > 0) {
+                    player->status->timer -= D_800BE9E4;
+                } else {
+                    player->status->state = 7;
+                }
+            } else {
+                player->status->elapsed += D_800BE9E4;
+                if (player->controller == 0xFF && player->status->elapsed >= 161) {
+                    func_1506160C((struct127 *)player, 2, 0, 60, 0);
+                }
+                if (player->status->elapsed >= 181 && player->status->state != 10) {
+                    func_1507D4F8(i);
+                }
+            }
+        }
+        D_8008FDBC &= ~0x80;
+    }
+}
 
 void func_1507CD0C(struct127 *arg0) {
     s32 temp_lo = ((s32)arg0 - (s32)&D_800CC2D0) / (s32)sizeof(struct127);
@@ -38,7 +156,101 @@ void func_1507D158(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     func_1509BFB0(3, temp | 0x2000, arg1, arg2, arg3, arg4);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A9D90/func_1507D1D8.s")
+typedef struct GameA9D90Inner {
+    u8 pad0[0x120];
+    u8 field_120;
+    u8 pad121[3];
+    s16 field_124;
+} GameA9D90Inner;
+
+typedef struct GameA9D90Object {
+    u8 pad0[0x31C];
+    GameA9D90Inner *field_31C;
+} GameA9D90Object;
+
+void func_150054C4(u8 *, u32, s32, s32);
+void func_15085430(void *, s32, s32);
+void func_15181DC8(s32);
+void func_15082A44(s32, s32, s32, s32, s32);
+void func_15088D58(GameA9D90Object *);
+extern s16 D_800BE9F2;
+extern s32 D_800D20FC;
+
+void func_1507D1D8(GameA9D90Object *arg0) {
+    s32 value;
+    s32 saved;
+    s8 player;
+    s8 state;
+    s8 actorState;
+    s8 mode;
+    s32 choice;
+    GameA9D90Inner *inner;
+    s32 slot;
+    union { s32 word; s16 halves[2]; } index;
+
+    inner = arg0->field_31C;
+    saved = *(s16 *)((u8 *)inner + 0x1AA);
+    state = *(s8 *)((u8 *)inner + 0x1B0);
+    actorState = *(s8 *)((u8 *)arg0 + 0x328);
+    mode = *(s8 *)((u8 *)inner + 0x1AF);
+    if (D_800BE616 != 0) {
+        player = inner->pad0[0x11B];
+    } else {
+        player = -1;
+    }
+    if (D_800BE9F0 == 0x2B) {
+        slot = ((u8 *)arg0 - (u8 *)D_800CC2D0) / 812;
+        index.word = (s16)slot;
+        value = func_150859AC((s16)slot, 1);
+        if (value >= 0x11 && value < 0x21) {
+            choice = (func_150ADA20() & 0xF) + 0x11;
+            func_15085710(index.halves[1], 0, choice);
+            if (choice < 0x1D) {
+                *(u8 *)(D_800D20FC + slot * 0x30 + 4) = 0x9C;
+            } else {
+                *(u8 *)(D_800D20FC + slot * 0x30 + 4) = 0x9D;
+            }
+        }
+    }
+    slot = ((u8 *)arg0 - (u8 *)D_800CC2D0) / 812;
+    index.word = slot * 0x30;
+    func_15060F28((struct127 *)arg0, 0);
+    D_800D18A8 = 1;
+    func_15082A44(index.word + D_800D20FC, slot, 0, 0, 0);
+    *(s8 *)((u8 *)arg0->field_31C + 0x1B0) = state;
+    *(s8 *)((u8 *)arg0->field_31C + 0x1AF) = mode;
+    *(s8 *)((u8 *)arg0 + 0x328) = actorState;
+    if (D_80082FA0 >= slot) {
+        func_150054C4(slot * 0x9A0 + (u8 *)D_800DBFF0, slot, D_800BE9F2, (s8)player);
+        func_15181DC8(slot);
+        func_1517EE40(0, 0, 0, 0, 1, slot);
+        func_1517EE40(0, 0, 0, 0x1E, 0, slot);
+    } else {
+        func_15085430(arg0, (s8)player, 0);
+    }
+    D_800D18A8 = 0;
+    arg0->field_31C->field_120 = 0;
+    arg0->field_31C->pad121[1] = 0;
+    arg0->field_31C->field_124 = 0;
+    *(s16 *)((u8 *)arg0->field_31C + 0x1AA) = saved;
+    arg0->pad0[0x1CA] = D_8008726C;
+    *(u16 *)((u8 *)arg0 + 0x22C) = *(u16 *)((u8 *)arg0 + 0x22C) | 0x100;
+    arg0->field_31C->pad0[0x75] = 0;
+    arg0->pad0[0x20F] = 0xFF;
+    arg0->pad0[0x210] = 0xFF;
+    arg0->pad0[0x211] = 0xFF;
+    arg0->pad0[0x232] = 1;
+    *(s32 *)((u8 *)arg0 + 0x218) = 0;
+    arg0->field_31C->pad0[0x11B] = (s8)player;
+    if (D_800BE616 != 0) {
+        arg0->pad0[0x125] = 0x96;
+        *(u8 *)((u8 *)arg0->field_31C + 0x1B1) = arg0->pad0[0x125];
+        if (D_800BE9F0 == 0x33) {
+            func_1507D158(slot, 0x78, 0, 0, 0);
+            func_15088D58(arg0);
+        }
+    }
+}
 
 void func_1507D4F8(s32 arg0) {
     s32 sp24;
@@ -178,7 +390,36 @@ void func_1507DE4C(struct127 *arg0) {
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A9D90/func_1507DF10.s")
+void func_1507DF10(void *arg0, s32 arg1) {
+    switch (arg1) {
+    case 9:
+        *(s32 *)((u8 *)arg0 + 0x94) = (s32) (*(s32 *)((u8 *)arg0 + 0x94) | 0x20);
+        *(s32 *)((u8 *)arg0 + 0x9C) = (s32) (*(s32 *)((u8 *)arg0 + 0x9C) | 0x78);
+        *(s32 *)((u8 *)arg0 + 0x2E4) = 1;
+        return;
+    case 8:
+        *(s32 *)((u8 *)arg0 + 0x94) |= 0x40;
+        *(s32 *)((u8 *)arg0 + 0x94) &= ~0x200;
+        *(s32 *)((u8 *)arg0 + 0x9C) = (s32) (*(s32 *)((u8 *)arg0 + 0x9C) | 0xF00);
+        *(s32 *)((u8 *)arg0 + 0x2E4) = 2;
+        return;
+    case 6:
+    case 7:
+        *(s32 *)((u8 *)arg0 + 0x94) |= 0xE;
+        *(s32 *)((u8 *)arg0 + 0x94) &= ~0x410;
+        *(s32 *)((u8 *)arg0 + 0x9C) = (s32) (*(s32 *)((u8 *)arg0 + 0x9C) | 0xEE0000);
+        *(s32 *)((u8 *)arg0 + 0x2E4) = 4;
+        return;
+    case 4:
+    case 5:
+        *(s32 *)((u8 *)arg0 + 0x94) |= 0x80;
+        *(s32 *)((u8 *)arg0 + 0x94) &= ~0x500;
+        *(s32 *)((u8 *)arg0 + 0x2E4) = 8;
+        /* fallthrough */
+    default:
+        return;
+    }
+}
 void func_1507DFE4(s32 arg0, s32 arg1) {
     s32 temp;
     s16 sp5C[3];
@@ -234,4 +475,30 @@ s32 func_1507E114(s32 arg0) {
     func_15084D70(0, (u8)D_800BE3E0, 1, sp54, sp48, &sp43, &sp42, &sp44, &sp3C, 1, &sp5C);
     return sp5C + 1;
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A9D90/func_1507E1D0.s")
+void func_15143134(void *, f32 *, s32);
+
+void func_1507E1D0(struct127 *arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
+    if (arg0->unk1D4 != NULL) {
+        s32 base;
+        f32 in[3];
+        f32 out[3];
+
+        in[0] = 0.0f;
+        in[1] = arg0->y_scale * 30.0f;
+        in[2] = 0.0f;
+        base = (s32)arg0->unk1D4;
+        if (arg0->interaction_state == 1) {
+            base += 0x300;
+        } else if (arg0->interaction_state == 0x1E) {
+            base += 0xC0;
+        }
+        func_15143134(in, out, base);
+        *arg1 = out[0];
+        *arg2 = out[1];
+        *arg3 = out[2];
+    } else {
+        *arg1 = arg0->x_position;
+        *arg2 = arg0->y_position;
+        *arg3 = arg0->z_position;
+    }
+}

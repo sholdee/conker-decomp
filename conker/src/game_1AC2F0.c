@@ -240,7 +240,20 @@ void func_1517F720(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     D_800DDD8C = arg4;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1AC2F0/func_1517F75C.s")
+extern s32 D_800BE9E4;
+
+void func_1517F75C(void) {
+    s32 i;
+
+    for (i = 0; i <= D_80082FA0; i++) {
+        if (D_800BE9E4 < ((u16 *)D_800DDE10)[i]) {
+            ((u16 *)D_800DDE10)[i] -= D_800BE9E4;
+        } else {
+            ((u16 *)D_800DDE10)[i] = 0;
+        }
+    }
+}
+
 
 extern s32 D_800BE9E4;
 extern u16 D_800DDE08;
@@ -263,7 +276,56 @@ void func_1517F7B4(void)
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1AC2F0/func_1517F814.s")
+typedef struct {
+    char pad0[0xC];
+    f32 unkC;
+    f32 unk10;
+    char pad14[0x10];
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    char pad30[0x150];
+} Struct1517F814;
+extern f32 D_800DDDE8[][2];
+void func_150A7A00(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 *arg4, f32 *arg5, f32 *arg6, f32 *arg7);
+
+void func_1517F814(s32 arg0, f32 arg1, f32 arg2, f32 arg3, s32 arg4) {
+    f32 sp3C;
+    f32 sp38;
+    f32 sp34;
+    f32 sp30;
+    Struct1517F814 *v1;
+
+    if (arg0 == 0) {
+        func_150A7A00((s32)((u8 *)&D_800D9D10 + (arg4 << 6)), arg1, arg2, arg3, &sp3C, &sp38, &sp34, &sp30);
+        if (sp30 == 0.0f) {
+            sp30 = 1.0f;
+        }
+        v1 = &((Struct1517F814 *)D_800BE628)[arg4];
+        sp3C = (v1->unkC * sp3C) / sp30;
+        sp38 = (v1->unk10 * sp38) / sp30;
+        sp3C += v1->unkC;
+        sp38 = v1->unk10 - sp38;
+        sp3C += v1->unk2C;
+        sp38 += v1->unk24;
+    } else {
+        sp3C = arg1;
+        sp38 = arg2;
+        v1 = &((Struct1517F814 *)D_800BE628)[arg4];
+    }
+    if (sp3C > 10000.0f) {
+        sp3C = 10000.0f;
+    } else if (sp3C < -10000.0f) {
+        sp3C = -10000.0f;
+    }
+    if (sp38 > 10000.0f) {
+        sp38 = 10000.0f;
+    } else if (sp38 < -10000.0f) {
+        sp38 = -10000.0f;
+    }
+    D_800DDDE8[arg4][0] = sp3C - v1->unkC;
+    D_800DDDE8[arg4][1] = sp38 - v1->unk10;
+}
 
 Gfx *func_1517F9F4(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 arg5) {
     typedef struct {

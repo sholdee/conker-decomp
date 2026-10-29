@@ -94,7 +94,33 @@ void func_151B6320(f32 *arg0, u8 arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1E37D0/func_151B6928.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E37D0/func_151B70B4.s")
+void func_151B70B4(void *arg0, void *arg1, u8 arg2) {
+    void *target;
+    s32 current;
+    s32 value;
+
+    target = *(void **)((u8 *)arg0 + 0x98);
+    current = *(s32 *)target;
+    if (arg2 == 0) {
+        if (current == *(s32 *)arg1) {
+            u16 *flags = (u16 *)((u8 *)arg0 + 0x1E);
+
+            *(s8 *)((u8 *)arg0 + 0x30) = 0;
+            *flags |= 8;
+        }
+    } else if (arg2 == 0x2D) {
+        value = *(s32 *)arg1;
+        if (value == *(s32 *)target) {
+            *(s32 *)target = *(s32 *)((u8 *)arg1 + 4);
+            *(u8 *)((u8 *)target + 4) = *(u8 *)((u8 *)arg1 + 9);
+            return;
+        }
+        if (*(s32 *)((u8 *)arg1 + 4) == *(s32 *)target) {
+            *(s32 *)target = value;
+            *(u8 *)((u8 *)target + 4) = *(u8 *)((u8 *)arg1 + 8);
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1E37D0/func_151B7144.s")
 
@@ -144,7 +170,81 @@ s32 func_151B76CC(struct151B76CCArg0 *arg0, f32 *arg1) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E37D0/func_151B77F4.s")
+typedef struct { f32 x, y, z; } RingVec3f;
+
+typedef struct Game1E37D0RingEntry {
+    RingVec3f position;
+    f32 distance;
+    u8 state;
+    u8 pad11[3];
+} Game1E37D0RingEntry;
+
+typedef struct Game1E37D0RingState {
+    u8 *linked;
+    u8 pad4[4];
+    u8 selector;
+} Game1E37D0RingState;
+
+typedef struct Game1E37D0RingObject {
+    u8 pad0[0x10];
+    RingVec3f position;
+    u8 pad1C[9];
+    u8 capacity;
+    u8 pad26[6];
+    s8 count;
+    s8 tail;
+    s8 head;
+    u8 pad2F[0x65];
+    Game1E37D0RingEntry *entries;
+    Game1E37D0RingState *state;
+} Game1E37D0RingObject;
+
+extern s32 (*D_8008FB90[])(Game1E37D0RingObject *, RingVec3f *);
+f32 func_15143E64(void *);
+
+s32 func_151B77F4(Game1E37D0RingObject *arg0) {
+    Game1E37D0RingState *state;
+    Game1E37D0RingEntry *entries;
+    RingVec3f previous;
+    RingVec3f delta;
+    f32 distance;
+
+    state = arg0->state;
+    entries = arg0->entries;
+    if (D_800BE9E4 > 0) {
+        previous = arg0->position;
+        if (D_8008FB90[state->selector](arg0, &arg0->position) == 0) {
+            return 0;
+        }
+        if (state->linked != 0) {
+            *(RingVec3f *)(state->linked + 0x40) = arg0->position;
+        }
+        delta.x = arg0->position.x - previous.x;
+        delta.y = arg0->position.y - previous.y;
+        delta.z = arg0->position.z - previous.z;
+        distance = func_15143E64(&delta);
+        {
+            Game1E37D0RingEntry *entry = &entries[arg0->head];
+
+            entry->position = arg0->position;
+            entry->distance = distance;
+            entry->state = 0xFF;
+        }
+        arg0->head++;
+        if (arg0->head == arg0->capacity) {
+            arg0->head = 0;
+        }
+        arg0->count++;
+        if (arg0->head == arg0->tail) {
+            arg0->tail++;
+            if (arg0->tail == arg0->capacity) {
+                arg0->tail = 0;
+            }
+            arg0->count--;
+        }
+    }
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1E37D0/func_151B7998.s")
 

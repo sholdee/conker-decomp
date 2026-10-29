@@ -75,7 +75,7 @@ s32 func_150C682C(u8 *arg0) {
     return 0;
 }
 
-s32 func_150C68C4(s32 arg0);
+s32 func_150C68C4(s32 arg0, u8 *arg1);
 
 void func_150C6870(u8 *arg0) {
     s32 temp = *(s32 *)((u8 *)arg0 + 0x18);
@@ -83,13 +83,185 @@ void func_150C6870(u8 *arg0) {
         u8 *p = *(u8 **)((u8 *)arg0 + 0x70) + 0x58;
         p[4] = 1;
     } else {
-        *(s32 *)((u8 *)arg0 + 0x70) = func_150C68C4(temp);
+        *(s32 *)((u8 *)arg0 + 0x70) = func_150C68C4(temp, arg0);
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_F3BA0/func_150C68C4.s")
+typedef struct {
+    u8 pad0[0x14];
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    u8 pad20[0x1B];
+    u8 unk3B;
+} Actor150C68C4;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_F3BA0/func_150C6A08.s")
+typedef struct {
+    u8 *unk0;
+    u8 unk4;
+    f32 unk8;
+} Link150C68C4;
+
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    u8 unk8;
+    void *unkC;
+    u8 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    s16 unk28;
+    u8 unk2A;
+    u8 unk2B;
+    u8 unk2C;
+    u8 unk2D;
+} Spawn150C68C4;
+
+extern f32 D_800A0450;
+extern f32 D_800A0454;
+extern f32 D_800A0458;
+void *memcpy(void *, const void *, u32);
+extern s32 func_15045800(f32 *, s32, f32, f32 *);
+extern void *func_1513418C(void *, s32, u8, s32);
+
+s32 func_150C68C4(s32 arg0, u8 *arg1) {
+    Spawn150C68C4 spawn;
+    Link150C68C4 link;
+    void *ret;
+    f32 pos[3];
+    s32 hit;
+
+    link.unk0 = arg1;
+    link.unk4 = 1;
+    pos[0] = ((Actor150C68C4 *)arg0)->unk14;
+    pos[1] = ((Actor150C68C4 *)arg0)->unk18 + D_800A0450;
+    pos[2] = ((Actor150C68C4 *)arg0)->unk1C;
+    hit = func_15045800(pos, 0, ((Actor150C68C4 *)arg0)->unk18 - 100.0f, (f32 *)(arg1 + 0x34));
+    {
+        extern f32 D_800A0454;
+
+        if (hit) {
+            link.unk8 = *(f32 *)(arg1 + 0x34);
+        } else {
+            link.unk8 = ((Actor150C68C4 *)arg0)->unk18 + D_800A0454;
+        }
+    }
+    spawn.unk0 = 0;
+    spawn.unk4 = 0;
+    spawn.unk8 = ((Actor150C68C4 *)arg0)->unk3B;
+    spawn.unkC = (void *)arg0;
+    spawn.unk10 = 0;
+    spawn.unk14 = 0.0f;
+    spawn.unk18 = 0.0f;
+    spawn.unk1C = 0.0f;
+    spawn.unk20 = 80.0f;
+    spawn.unk24 = D_800A0458;
+    spawn.unk28 = 0x12C;
+    spawn.unk2A = 10;
+    spawn.unk2B = 5;
+    spawn.unk2C = 2;
+    spawn.unk2D = 3;
+    ret = func_1513418C(&spawn, 0xC, 0xFF, 0);
+    if (ret != NULL) {
+        memcpy((u8 *)ret + 0x58, &link, 0xC);
+    }
+    return (s32)ret;
+}
+
+
+typedef struct GameF3BA0Burst {
+    s32 flags, zero4;
+    s16 texture, lifetime;
+    s32 zeroC, zero10;
+    u8 zero14, zero15, zero16, zero17, zero18, zero19, zero1A;
+    u8 alpha, maximum, kind;
+    s16 duration, period, zero22;
+    f32 zero24, width, height;
+    f32 x, y, z;
+    f32 zero3C, zero40, zero44;
+    f32 vx, vy, vz, rotation;
+    s32 mode, unused5C;
+    s8 field60, field61, field62, field63;
+    u8 pad64[0xC];
+} GameF3BA0Burst;
+
+typedef struct GameF3BA0BurstMotion {
+    f32 size;
+    u8 mode0, mode1, count0, count1;
+    f32 amount0, amount1, speed, damping;
+    u8 mode2, mode3, count2, count3;
+    f32 amount2, amount3, sourceScale;
+} GameF3BA0BurstMotion;
+
+void *func_151303BC(s32, u8, s32);
+void *memcpy(void *, const void *, u32);
+extern f32 D_800A045C, D_800A0460, D_800A0464, D_800A0468;
+extern f32 D_800A046C, D_800A0470, D_800A0474, D_800A0478;
+
+void func_150C6A08(f32 arg0, f32 arg1, f32 arg2, f32 arg3,
+                  f32 arg4, f32 arg5, void *arg6) {
+    GameF3BA0Burst burst;
+    void *spawned;
+    GameF3BA0BurstMotion motion;
+    burst.kind = 0x2F;
+    burst.texture = 0xC01;
+    burst.flags = 0x200005;
+    burst.zero4 = 0;
+    burst.zero1A = 0;
+    burst.zero19 = 0;
+    burst.zero18 = 0;
+    burst.zero17 = 0;
+    burst.zero16 = 0;
+    burst.zero15 = 0;
+    burst.zero14 = 0;
+    burst.zero10 = 0;
+    burst.zeroC = 0;
+    burst.maximum = 0xFF;
+    burst.zero22 = 0;
+    burst.zero24 = 0.0f;
+    burst.mode = 0x3207;
+    burst.field60 = 5;
+    burst.field61 = 5;
+    burst.field62 = 4;
+    burst.field63 = -1;
+    burst.x = arg0;
+    burst.y = arg1;
+    burst.zero3C = 0.0f;
+    burst.zero40 = 0.0f;
+    burst.zero44 = 0.0f;
+    burst.duration = 30;
+    burst.period = 8;
+    burst.z = arg2;
+    motion.sourceScale = *(f32 *)((u8 *)arg6 + 0x60);
+    motion.speed = 4.0f;
+    motion.damping = 0.25f;
+    motion.mode0 = 0;
+    motion.mode1 = 0;
+    motion.mode2 = 0;
+    motion.mode3 = 0;
+    burst.vx = -arg3 * 0.2f;
+    burst.vy = 0.0f;
+    burst.vz = -arg5 * 0.2f;
+    if (func_150ADA20() & 1) burst.mode |= 0x40;
+    if (func_150ADA20() & 1) burst.mode |= 0x80;
+    burst.lifetime = func_150ADA20() % 51U + 106;
+    burst.alpha = func_150ADA20() % 101U + 100;
+    motion.size = burst.width = burst.height = func_150ADA68() * 62.0f + 41.0f;
+    motion.count0 = func_150ADA20() % 5U + 4;
+    motion.count1 = func_150ADA20() % 5U + 4;
+    motion.amount0 = (func_150ADA68() * 0.25f + D_800A0460) * motion.size;
+    motion.amount1 = (func_150ADA68() * 0.25f + D_800A0464) * motion.size;
+    motion.count2 = func_150ADA20() % 5U + 4;
+    motion.count3 = func_150ADA20() % 5U + 4;
+    motion.amount2 = (func_150ADA68() * D_800A0468 + D_800A046C) * motion.size;
+    motion.amount3 = (func_150ADA68() * D_800A0470 + D_800A0474) * motion.size;
+    burst.rotation = (func_150ADA68() * 60.0f + 21.0f) * D_800A0478;
+    spawned = func_151303BC((s32)&burst, 2, 0x28);
+    if (spawned != NULL) memcpy((u8 *)spawned + 0xA8, &motion, 0x28);
+}
 
 typedef struct {
     char pad[0x5C];

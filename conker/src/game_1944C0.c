@@ -86,18 +86,39 @@ extern struct Some15171F04 *D_8008CA4C[];
 
 void func_15169070(s32, s32, s32, u8);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_15167010.s")
-// NON-MATCHING: not hugely far away
+void func_15167010(void) {
+    struct115 *var_s0;
+    struct115 *end;
+    void (*func)(void);
+    s32 pad;
+
+    var_s0 = (struct115 *)&D_8008B4A8;
+    end = (struct115 *)((u32)var_s0 + 0x1484);
+    pad = 0;
+loop:
+    func = (void (*)(void))var_s0->unk18;
+    if (func != 0) {
+        func();
+    }
+    var_s0++;
+    pad ^= 0;
+    if ((u32)var_s0 < (u32)end) {
+        goto loop;
+    }
+}
+// PERMUTER CANDIDATE (best 400): target uses OSR limit `addiu s2,s0,0x1484` (base-relative)
+// + phantom saved reg s1; can't trigger the `<`-preserving strength-reduction form from C.
+// Closest form (loop body byte-identical, only the 3-instruction preamble differs):
 // void func_15167010(void) {
 //     void (*func)(void);
-//     s32 i;
-//
-//     for (i = 0; i < 24; i++)
-//     {
-//         func = D_8008B4A8[i].unk18;
-//         if (func != NULL) {
-//             func();
-//         }
+//     struct115 *end;
+//     struct115 *p;
+//     p = D_8008B4A8;
+//     end = p + 101;
+//     while (p < end) {
+//         func = (void (*)(void))p->unk18;
+//         if (func != NULL) { func(); }
+//         p++;
 //     }
 // }
 
@@ -115,10 +136,216 @@ void func_1516706C(void) {
         funcp++;
     } while (funcp != end);
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_151670C0.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_151671E8.s")
+extern u8 D_800DCE50[];
+
+void func_151670C0(void) {
+    s32 i; s32 j; struct102 *node;
+    for (i = 0; i != 2; i++) {
+        for (j = 0; j != 0x65; j++) {
+            if (D_8008B4A8[j].unk0 != NULL) {
+                node = ((struct102 *(*)[104])D_800DCE50)[i][j];
+                D_800DD190++;
+                while (node != NULL) {
+                    ((struct102 **)D_800DD198)[D_800DD190] = (struct102 *)node->unk8;
+                    D_8008B4A8[j].unk0(node);
+                    node = ((struct102 **)D_800DD198)[D_800DD190];
+                }
+                D_800DD190--;
+            }
+        }
+    }
+}
+typedef struct {
+    void (*unk0)(struct102 *);
+    void (*unk4)(struct102 *);
+    u8 pad8[0x2C];
+} Struct151671E8;
+
+void func_151671E8(void) {
+    s32 i; s32 j; struct102 *node;
+    for (i = 0; i != 2; i++) {
+        for (j = 0; j != 0x65; j++) {
+            if (((Struct151671E8 *)D_8008B4A8)[j].unk4 != NULL) {
+                node = ((struct102 *(*)[104])D_800DCE50)[i][j];
+                D_800DD190++;
+                while (node != NULL) {
+                    ((struct102 **)D_800DD198)[D_800DD190] = (struct102 *)node->unk8;
+                    ((Struct151671E8 *)D_8008B4A8)[j].unk4(node);
+                    node = ((struct102 **)D_800DD198)[D_800DD190];
+                }
+                D_800DD190--;
+            }
+        }
+    }
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_15167310.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_151674F8.s")
+typedef struct {
+    u8 pad0[0x8];
+    Gfx *(*unk8)(Gfx *, struct102 *, s16);
+    u8 padC[0x4];
+    Gfx *unk10;
+    Gfx *(*unk14)(Gfx *, s32, s32, s16);
+    u8 pad18[0x8];
+    Gfx *(*unk20)(Gfx *, s32, s16);
+    Gfx *unk24;
+    u8 pad28[0x8];
+    s8 unk30;
+    u8 pad31[0x3];
+} Struct151674F8;
+
+extern Mtx D_80089470;
+extern s32 D_800BE9C8[];
+extern s32 D_800BEBA4;
+extern u32 D_800DD1B0;
+extern s32 D_800DD1B4;
+extern s32 D_800DD1B8;
+extern s16 D_800DD1BC;
+extern s16 D_800DD1BE;
+extern s16 D_800DD1C8;
+extern s16 D_800DD1CA;
+extern s16 D_800DD1CC;
+extern s16 D_800DD1CE;
+extern s16 D_800DD1F8;
+extern s32 D_800DD1FC;
+extern s32 D_800DD200;
+extern s16 D_800DD204;
+extern s16 D_800DD206;
+extern s32 D_800DD208;
+extern s32 D_800DD20C;
+extern s32 D_800DD210;
+extern s32 D_800DD214;
+extern s32 D_800DD218;
+extern s32 D_800DD21C;
+extern s32 D_800DD220;
+extern s32 D_800DD224;
+extern s32 D_800DD228;
+extern u8 D_800DCE50[];
+void func_15168F84(s32 arg0, s32 *arg1, s32 *arg2);
+
+Gfx *func_151674F8(Gfx *gfx, s32 arg1, s16 arg2, s32 arg3) {
+    s32 i;
+    s32 start;
+    s32 end;
+    struct102 **slot;
+    struct102 *node;
+    s32 overflow;
+    Gfx *orig0;
+    Gfx *prev;
+    Gfx *orig1;
+    s32 cond;
+
+    gSPMatrix(gfx++, &D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    func_15168F84(arg1, &start, &end);
+    for (i = start; i < end; i++) {
+
+        if (((Struct151674F8 *)D_8008B4A8)[i].unk8 != NULL) {
+            slot = (struct102 **)&D_800DCE50[arg3 * 0x1A0 + i * 4];
+            if (*slot != NULL) {
+                D_8003C8E0 = (i & 0xFFFFFF) | 0x7000000;
+                overflow = 0;
+                if (((Struct151674F8 *)D_8008B4A8)[i].unk30 == 0) {
+                    orig0 = gfx;
+                }
+                if (((Struct151674F8 *)D_8008B4A8)[i].unk30 == 1) {
+                    orig1 = gfx;
+                }
+                D_800D2DAB = 0;
+                D_800DD228 = 0;
+                D_800DD220 = 0;
+                D_800DD224 = 2;
+                D_800DD1B0 = -1;
+                D_800DD1B4 = -1;
+                D_800DD1B8 = -1;
+                D_800DD1BC = 0;
+                D_800DD1BE = 0;
+                D_800DD1C0 = D_800DD1C2 = D_800DD1C4 = D_800DD1C6 = -1;
+                D_800DD1C8 = D_800DD1CA = D_800DD1CC = D_800DD1CE = -1;
+                D_800DD1F8 = 0;
+                D_800DD1FC = 0;
+                D_800DD200 = 0;
+                D_800DD204 = -1;
+                D_800DD206 = -1;
+                D_800DD208 = -1;
+                D_800DD20C = -1;
+                D_800DD210 = -1;
+                D_800DD214 = 0;
+                D_800DD218 = 0;
+                D_800DD21C = 0;
+                if (((Struct151674F8 *)D_8008B4A8)[i].unk10 != NULL) {
+                    gSPDisplayList(gfx++, ((Struct151674F8 *)D_8008B4A8)[i].unk10);
+                }
+                if (((Struct151674F8 *)D_8008B4A8)[i].unk14 != NULL) {
+                    gfx = ((Struct151674F8 *)D_8008B4A8)[i].unk14(gfx, i, arg3, arg2);
+                }
+                gSPClearGeometryMode(gfx++, G_LIGHTING);
+                node = *slot;
+                if (((Struct151674F8 *)D_8008B4A8)[i].unk30 == 1) {
+                    D_800DD190++;
+                    if (node != NULL) {
+                        do {
+                            prev = gfx;
+                            ((struct102 **)D_800DD198)[D_800DD190] = (struct102 *)node->unk8;
+                            gfx = ((Struct151674F8 *)D_8008B4A8)[i].unk8(gfx, node, arg2);
+                            if ((((s32)gfx - D_800BE9C8[D_800BE9C0]) >> 3) > D_800BEBA4) {
+                                cond = 1;
+                            } else {
+                                cond = 0;
+                            }
+                            if (cond) {
+                                overflow = 1;
+                                gfx = prev;
+                            }
+                            node = ((struct102 **)D_800DD198)[D_800DD190];
+                        } while (node != NULL);
+                    }
+                    D_800DD190--;
+                } else {
+                    D_800DD190++;
+                    if (node != NULL) {
+                        do {
+                            ((struct102 **)D_800DD198)[D_800DD190] = (struct102 *)node->unk8;
+                            gfx = ((Struct151674F8 *)D_8008B4A8)[i].unk8(gfx, node, arg2);
+                            node = ((struct102 **)D_800DD198)[D_800DD190];
+                        } while (node != NULL);
+                    }
+                    D_800DD190--;
+                }
+                if (((Struct151674F8 *)D_8008B4A8)[i].unk24 != NULL) {
+                    gSPDisplayList(gfx++, ((Struct151674F8 *)D_8008B4A8)[i].unk24);
+                }
+                if (((Struct151674F8 *)D_8008B4A8)[i].unk20 != NULL) {
+                    gfx = ((Struct151674F8 *)D_8008B4A8)[i].unk20(gfx, i, arg2);
+                }
+                if (overflow) {
+                    if ((((s32)gfx - D_800BE9C8[D_800BE9C0]) >> 3) > D_800BEBA4) {
+                        cond = 1;
+                    } else {
+                        cond = 0;
+                    }
+                    if (cond) {
+                        gSPSetGeometryMode(gfx, G_ZBUFFER);
+                        return orig1;
+                    }
+                }
+                if (((Struct151674F8 *)D_8008B4A8)[i].unk30 == 0) {
+                    if ((((s32)gfx - D_800BE9C8[D_800BE9C0]) >> 3) > D_800BEBA4) {
+                        cond = 1;
+                    } else {
+                        cond = 0;
+                    }
+                    if (cond) {
+                        gSPSetGeometryMode(gfx, G_ZBUFFER);
+                        return orig0;
+                    }
+                }
+                D_8003C8E0 = 0;
+            }
+        }
+    }
+    gSPSetGeometryMode(gfx++, G_ZBUFFER);
+    return gfx;
+}
+
 void func_15168A4C(s32 *arg0, s32 arg1);
 
 s32 func_15167A68(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
@@ -178,6 +405,26 @@ void func_15167B44(struct102 *arg0) {
         func_1516972C(arg0);
     }
 }
+// PERMUTER CANDIDATE / near-miss (best ~1090): full reconstruction below; stack frame (0x70)
+// and locals sp50@0x50, sp5C@0x5C match. Blocker: the `mode` value (3/9) is MEMORY-resident at
+// 0x48 in the target (spilled, double beq+bne, sw/lw 0x48(sp)); a clean `s32 mode` stays in a
+// register (single branch). Forcing memory via the func_15168C4C idiom `*(s32*)((u8*)&mode - 4)`
+// gets memory-residence but lands the anchor at 0x6C (slot 0x68, CSE'd base) not 0x4C/0x48 absolute;
+// register renames cascade from the misaligned mode block. Needs the permuter (or exact anchor
+// placement). ObjC58: unk10=s32** (arg1 of E24 + arg6=(*unk10)[unk14>>8]); unk14 s16; unk18/1A/1C/
+// 1E/20 s16; unk22 s8; unk23 u8. sp5C is {s16 x,y,z,unk6,unk8; u8 unkA; u8 unkD} copied from those.
+// Gfx *func_15167C58(Gfx *arg0, ObjC58 *arg1, s32 arg2) {
+//     s32 mode; StructC58a sp5C; StructC58b sp50; Gfx *gfx; s32 **p = arg1->unk10;
+//     sp50.unk0 = 1;
+//     gfx = func_15142E24(arg0, (s32)p, arg1->unk14 << 8, 2, 0x100, 0x100,
+//                         (*p)[arg1->unk14 >> 8], 5, (s32)&sp5C, (u8 *)&sp50, 3);
+//     sp5C.unk0 = arg1->unk18; sp5C.unk2 = arg1->unk1A; sp5C.unk4 = arg1->unk1C;
+//     sp5C.unk6 = arg1->unk1E; sp5C.unk8 = arg1->unk20; sp5C.unkA = arg1->unk23; sp5C.unkD = 0;
+//     if (0xFF != arg1->unk22) { *(s32*)((u8*)&mode - 4) = 3; } else { *(s32*)((u8*)&mode - 4) = 9; }
+//     gfx = func_15142FBC(gfx, 0x2C00,
+//         (D_800A4AC8[*(s32*)((u8*)&mode-4)].unk4 | D_800A4AC8[*(s32*)((u8*)&mode-4)].unk0) | 4, (u8*)&sp50);
+//     return (Gfx *)func_15095760(gfx, &sp5C);
+// }
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_15167C58.s")
 s32 func_15167D84(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     GameObjectHeader *temp;
@@ -190,9 +437,172 @@ s32 func_15167D84(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     temp->field_0x48 = *((s8 *)&arg3 + 3);
     return (s32)temp;
 }
+// PERMUTER CANDIDATE / JUSTREG (best 885): structure is byte-exact -- same instruction
+// count, same addresses, same branch forms (beql/bgezl/blezl/bnel/bltzl), frame 0x20 and
+// the `finished` spill at 0x1b(sp) all match. Residual = 73 register-only renames plus one
+// displaced `lbu 0x2d` load. Cause: the three 24.8 accumulate steps need a named local for
+// the sum (it is used twice: >>8 into the s16 and truncated into the u8), and a named local
+// takes v0/v1/a1 out of IDO's round-robin temp pool; the target keeps that sum in the pool
+// (t2/t8/t5) with v0/v1/a1 holding the packed value and the mflo. Dropping the local (writing
+// the expression twice and letting CSE fold it) fails: the `sh 0x22` store invalidates the
+// `arg0->unk30` load and IDO emits a second multu (2825). Splitting packed/product/sum into
+// separate locals just moves which value owns v0/v1 (1095/1285/1495). The tail t3..t9 diff is
+// a single +4 rotation of the temp counter cascading from that one choice.
+// Best reconstruction (score 885):
+// typedef struct {
+//     char pad_0[0x10];
+//     struct Some15171F04 *unk10;
+//     char pad_14[0x8];
+//     s16 unk1C;
+//     s16 unk1E;
+//     s16 unk20;
+//     s16 unk22;
+//     s16 unk24;
+//     s16 unk26;
+//     s16 unk28;
+//     char pad_2A[0x2];
+//     u8 unk2C;
+//     u8 unk2D;
+//     u8 unk2E;
+//     s8 unk2F;
+//     s16 unk30;
+//     s16 unk32;
+//     char pad_34[0x4];
+//     s16 unk38;
+//     s8 unk3A;
+//     char pad_3B[0x4];
+//     u8 unk3F;
+//     char pad_40[0x4];
+//     u16 unk44;
+//     char pad_46[0x2];
+//     s8 unk48;
+// } GameSpriteObject;
+//
+// void func_15167E0C(GameSpriteObject *arg0) {
+//     void (*func)(struct102 *);
+//     u8 finished;
+//     s32 limit;
+//
+//     finished = 0;
+//     if (arg0->unk38 != 0x7FFF) {
+//         arg0->unk38 -= D_800BE9E4;
+//         if (arg0->unk38 < 0) {
+//             arg0->unk38 = 0;
+//             finished = 1;
+//         }
+//     }
+//
+//     if (arg0->unk3A > 0) {
+//         if (arg0->unk3A < arg0->unk3F) {
+//             arg0->unk3F -= arg0->unk3A;
+//         } else {
+//             arg0->unk38 = 0;
+//             finished = 1;
+//         }
+//     }
+//
+//     if (arg0->unk2F != -1) {
+//         func = D_8008C9C8[arg0->unk2F];
+//         if (func != NULL) {
+//             func((struct102 *)arg0);
+//         }
+//     }
+//
+//     if (arg0->unk38 != 0) {
+//         s32 subY;
+//         s32 subX;
+//         s32 subZ;
+//
+//         arg0->unk30 += arg0->unk32;
+//
+//         subY = ((arg0->unk22 << 8) | arg0->unk2E) + arg0->unk30 * D_800BE9E4;
+//         arg0->unk22 = subY >> 8;
+//         arg0->unk2E = subY;
+//
+//         subX = ((arg0->unk20 << 8) | arg0->unk2C) + arg0->unk26 * D_800BE9E4;
+//         arg0->unk20 = subX >> 8;
+//         arg0->unk2C = subX;
+//
+//         subZ = ((arg0->unk24 << 8) | arg0->unk2D) + arg0->unk28 * D_800BE9E4;
+//         arg0->unk24 = subZ >> 8;
+//         arg0->unk2D = subZ;
+//
+//         if (arg0->unk1E != 0) {
+//             limit = (arg0->unk10->unk4 << 8) - 1;
+//             arg0->unk1C += arg0->unk1E * D_800BE9E4;
+//             if (limit < arg0->unk1C) {
+//                 if (arg0->unk44 & 0x20) {
+//                     arg0->unk38 = 0;
+//                     finished = 1;
+//                 } else {
+//                     arg0->unk44 |= 0x80;
+//                     if (arg0->unk44 & 2) {
+//                         arg0->unk1C = limit - (arg0->unk1C % limit);
+//                         arg0->unk1E = -arg0->unk1E;
+//                     } else {
+//                         do {
+//                             arg0->unk1C -= limit;
+//                         } while (limit < arg0->unk1C);
+//                     }
+//                 }
+//             } else if (arg0->unk1C < 0) {
+//                 if (arg0->unk44 & 0x40) {
+//                     arg0->unk38 = 0;
+//                     finished = 1;
+//                 } else if (arg0->unk44 & 2) {
+//                     arg0->unk1C = -arg0->unk1C % limit;
+//                     arg0->unk1E = -arg0->unk1E;
+//                 } else {
+//                     do {
+//                         arg0->unk1C += limit;
+//                     } while (arg0->unk1C < 0);
+//                 }
+//             }
+//         }
+//     } else {
+//         finished = 1;
+//     }
+//
+//     if (finished != 0) {
+//         if (arg0->unk48 != -1) {
+//             D_8008CA20[arg0->unk48]((struct102 *)arg0);
+//         }
+//         func_1516972C((struct102 *)arg0);
+//     }
+// }
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_15167E0C.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_15168118.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_1516865C.s")
+// PERMUTER CANDIDATE (best 3095): leaf func; logic decoded fully (strided 8x0x10 init loop +
+// two conditional value-swaps keyed on obj->0x98 flags 0x80/0x100 + field mirroring). Target
+// homes a1/a2/a3 to caller arg slots (0xc/0x10/0x14) in a leaf while keeping them register-
+// resident, an IDO arg-home idiom not reproducible from C; register allocation also diverges.
+// Best reconstruction:
+// void func_1516865C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+//     u8 *obj = (u8 *)arg0; s32 v0_val, v1_val, t1_val, t2_val, flags, i; s16 tmp; u8 *q; u8 t0b;
+//     arg1 &= 0xFF; arg2 &= 0xFF; arg3 &= 0xFF;
+//     v0_val = 0x2000; t1_val = 0x2000;
+//     v1_val = ((s32)((D_8008CA4C[obj[0xA0]]->unk8 + 0x100) << 21)) >> 16;
+//     t2_val = ((s32)((D_8008CA4C[obj[0xA0]]->unk6 + 0x100) << 21)) >> 16;
+//     t0b = (u8)arg4; q = obj; i = 0;
+//     do { i++; q += 0x40;
+//         *(s16*)(q-0x2A)=0; q[-0x24]=arg1; q[-0x23]=arg2; q[-0x22]=arg3; q[-0x21]=t0b;
+//         *(s16*)(q-0x1A)=0; q[-0x14]=arg1; q[-0x13]=arg2; q[-0x12]=arg3; q[-0x11]=t0b;
+//         *(s16*)(q-0x0A)=0; q[-0x04]=arg1; q[-0x03]=arg2; q[-0x02]=arg3; q[-0x01]=t0b;
+//         *(s16*)(q-0x3A)=0; q[-0x34]=arg1; q[-0x33]=arg2; q[-0x32]=arg3; q[-0x31]=t0b;
+//     } while (i != 2);
+//     flags = *(u16*)(obj+0x98);
+//     if (flags & 0x80)  { v0_val = ((s32)((D_8008CA4C[obj[0xA0]]->unk8 + 0x100) << 21)) >> 16; v1_val = 0x2000; }
+//     if (flags & 0x100) { t1_val = ((s32)((D_8008CA4C[obj[0xA0]]->unk6 + 0x100) << 21)) >> 16; t2_val = 0x2000; }
+//     *(s16*)(obj+0x68)=t1_val; tmp=*(s16*)(obj+0x68);
+//     *(s16*)(obj+0x7A)=v0_val; *(s16*)(obj+0x78)=t2_val;
+//     *(s16*)(obj+0x28)=tmp; *(s16*)(obj+0x58)=tmp; *(s16*)(obj+0x18)=tmp;
+//     tmp=*(s16*)(obj+0x7A); *(s16*)(obj+0x5A)=v1_val; *(s16*)(obj+0x88)=0;
+//     *(s16*)(obj+0x3A)=tmp; *(s16*)(obj+0x6A)=tmp; *(s16*)(obj+0x2A)=tmp;
+//     tmp=*(s16*)(obj+0x78); *(s16*)(obj+0x9C)=0; *(s16*)(obj+0x9E)=0;
+//     *(s16*)(obj+0x38)=tmp; *(s16*)(obj+0x48)=tmp; *(s16*)(obj+0x8)=tmp;
+//     tmp=*(s16*)(obj+0x5A); *(s16*)(obj+0x1A)=tmp; *(s16*)(obj+0x4A)=tmp; *(s16*)(obj+0xA)=tmp;
+// }
 s32 func_15168800(s32 arg0, s32 arg1, s32 arg2) {
     s32 temp;
 
@@ -323,7 +733,102 @@ void func_15168B10(s32 arg0, s32 arg1) {
     func_15168A4C(arg0, arg1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_15168B44.s")
+// PERMUTER CANDIDATE / JUSTREG (best 1057): structure fully matches (both 0x14 stores kept via
+// RMW forwarding). Remainder is a v0<->t6 register rotation on `lo`/`masked` + constant-hoist
+// scheduling (li 0x1E vs lui order) that no C form pinned. Best reconstruction:
+// permuter NO ZERO, best 305 (improved from 1057)
+typedef struct Local15168B44 { u8 pad0[0x14]; s32 unk14; u8 pad18[0x20]; s16 unk38; u8 pad3A[5]; u8 unk3F; } Local15168B44;
+
+void func_15168B44(void *arg0)
+{
+  Local15168B44 *a;
+  s32 v1;
+  s32 new_var2;
+  u16 t6;
+  u16 hi;
+  u8 a2;
+  s32 new_var;
+  s32 c0;
+  s32 z0;
+  s32 z1;
+  s32 z2;
+  s32 t9;
+  s32 z3;
+  s32 z4;
+  s32 z5;
+  s32 keep;
+  a = arg0;
+  hi = 0x1E;
+  v1 = a->unk14;
+  new_var2 = v1;
+  t6 = ((u16) new_var2) ^ 0;
+  new_var = t6 - (1 & 0xFFFFFFFFu);
+  if (t6 != 0)
+  {
+    c0 = v1;
+    z0 = 0;
+    z1 = 0;
+    z2 = 0;
+    z3 = 0;
+    z4 = 0;
+    z5 = 0;
+    keep = new_var & 0xFFFF;
+    new_var = keep * 0;
+    if (a)
+    {
+    }
+    hi++;
+    hi--;
+    t9 = (v1 & 0xFFFF0000) | new_var;
+    v1 = 0;
+    a->unk14 = t9;
+    a->unk38 = hi;
+    if (keep)
+    {
+      ;
+    }
+    *((s32 *) (((s8 *) arg0) + 0x14)) = ((t9 | keep) | (((((((c0 * 0) | (z0 * 0)) | (z1 * 0)) | (z2 * 0)) | (z3 * 0)) | (z4 * 0)) | (z4 = z5 * 0))) & 0xFFFFFFFFu;
+    return;
+  }
+  hi = (u16) (v1 >> 16);
+  v1 = a->unk3F;
+  if (0)
+  {
+  }
+  a2 = v1;
+  if (hi < a2)
+  {
+    a->unk3F = a2 - hi;
+    if (1)
+    {
+    }
+    a->unk38 = 0x1E;
+  }
+  else
+  {
+    a2 = 0;
+    a->unk38 = (a2, 0);
+  }
+}
+// void func_15168B44(struct102 *arg0) {
+//     s32 lo = *(s32 *)((u8 *)arg0 + 0x14) & 0xFFFF;
+//     s32 hi;
+//     s32 max;
+//     if (lo != 0) {
+//         *(s32 *)((u8 *)arg0 + 0x14) &= 0xFFFF0000;
+//         *(s16 *)((u8 *)arg0 + 0x38) = 0x1E;
+//         *(s32 *)((u8 *)arg0 + 0x14) |= (u16)(lo - 1);
+//     } else {
+//         max = *(u8 *)((u8 *)arg0 + 0x3F);
+//         hi = (*(s32 *)((u8 *)arg0 + 0x14) >> 16) & 0xFFFF;
+//         if (hi < max) {
+//             *(u8 *)((u8 *)arg0 + 0x3F) = max - hi;
+//             *(s16 *)((u8 *)arg0 + 0x38) = 0x1E;
+//         } else {
+//             *(s16 *)((u8 *)arg0 + 0x38) = 0;
+//         }
+//     }
+// }
 void func_15168BAC(struct102 *arg0) {
     u8 temp_v0;
 
@@ -392,8 +897,28 @@ void func_15168E34(s32 *arg0, s32 arg1) {
         *arg0 = val + arg1;
     }
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_15168E54.s")
 typedef struct { s8 unk0; s8 unk1; s8 unk2; u8 unk3; u32 unk4; } Struct15168F08;
+
+// PERMUTER CANDIDATE / JUSTREG (best 717): mirrors matched sibling func_15168F08 but calls
+// func_15168E34; the call forces saved-reg promotion and a delay-slot reschedule (target puts
+// a0=&p->unk4 in the first beq slot + distributes i++ into the bnel slots) that drives a whole-
+// function saved-register rotation (base s1 vs s4). Not steerable from C. Best reconstruction:
+// permuter NO ZERO, best 360 (improved from 717)
+#pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_15168E54.s")
+// void func_15168E54(Struct15168F08 *arg0, s32 arg1) {
+//     s32 i; Struct15168F08 *p; s8 tag;
+//     i = 0; p = arg0;
+//     if (arg0->unk0 == -0x21) { return; }
+//     p = &arg0[i]; tag = p->unk0;
+//     do {
+//         i++;
+//         if ((p->unk0 == 1) || ((p->unk0 == -0x24) && (p->unk3 == 0xE))) {
+//             func_15168E34((s32 *)&p->unk4, arg1);
+//         }
+//         p = &arg0[i];
+//         do { tag = p->unk0; } while (0);
+//     } while (p->unk0 != -0x21);
+// }
 
 void func_15168F08(Struct15168F08 *arg0, s32 arg1) {
     s32 i;

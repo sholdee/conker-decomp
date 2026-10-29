@@ -1,5 +1,8 @@
 #include <ultra64.h>
+#define func_150ADA20 func_150ADA20_u8proto
 #include "functions.h"
+#undef func_150ADA20
+u32 func_150ADA20(void);
 #include "variables.h"
 
 extern u8 D_800A3FE6[];
@@ -26,7 +29,70 @@ typedef struct {
 extern Struct15136698Table D_80089BAC;
 
 // requires jump table
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15134070.s")
+s32 func_15134070(void *arg0) {
+    switch (*((u8 *)arg0 + 4)) {
+    case 135:
+    case 176:
+        return 0xE;
+    case 177:
+        return 0xF;
+    case 180:
+        return 0x10;
+    case 112:
+    case 178:
+        return 0x11;
+    case 0xAB:
+        return 0x12;
+    case 16:
+    case 56:
+    case 145:
+        return 0xD;
+    case 152:
+        return 0xC;
+    case 52:
+        return 0xB;
+    case 71:
+        return 0xA;
+    case 17:
+    case 20:
+    case 59:
+        return 1;
+    case 90:
+    case 95:
+    case 116:
+    case 117:
+    case 122:
+        return 2;
+    case 88:
+    case 91:
+    case 128:
+        return 3;
+    case 22:
+    case 136:
+    case 144:
+        return 4;
+    case 156:
+        return 5;
+    case 157:
+        return 6;
+    case 150:
+        return 7;
+    case 160:
+        return 8;
+    case 159:
+        return 9;
+    case 0x9A:
+        return 0x13;
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+        return 0;
+    default:
+        return 0x63;
+    }
+}
 
 s32 func_1513416C(struct102 *arg0) {
     s16 temp_v0 = arg0->unk1C;
@@ -394,7 +460,63 @@ f32 func_15135670(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_151356D4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15135BF8.s")
+typedef struct {
+    f32 x;
+    f32 y;
+} Vec2_15135BF8;
+
+typedef struct {
+    s16 timer;
+    f32 unk4;
+    Vec2_15135BF8 vel;
+    f32 unk10;
+    f32 unk14;
+} Sub_15135BF8;
+
+typedef struct {
+    u8 pad0[0x10];
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    u8 pad20[0x50];
+    s16 unk70;
+} Obj_15135BF8;
+
+s32 func_15135BF8(Obj_15135BF8 *arg0) {
+    Sub_15135BF8 *sub;
+    s32 ret;
+
+    sub = (Sub_15135BF8 *)&arg0->unk70;
+    ret = 1;
+    if (arg0->unk70 > 0) {
+        sub->timer -= D_800BE9E4;
+        arg0->unk10 += sub->vel.x * D_800BE9A4;
+        arg0->unk14 += sub->vel.y * D_800BE9A4;
+        arg0->unk18 += sub->unk4 * D_800BE9A4;
+        arg0->unk1C += sub->unk4 * D_800BE9A4;
+    } else {
+        Vec2_15135BF8 tmp;
+
+        tmp = sub->vel;
+        arg0->unk14 += sub->vel.y * D_800BE9A4 + sub->unk10 * D_800BE9A4 * D_800BE9A4 * 0.5f;
+        sub->vel.y += sub->unk10 * D_800BE9A4;
+        tmp.x += sub->vel.x;
+        tmp.y += sub->vel.y;
+        tmp.x *= 0.5f;
+        tmp.y *= 0.5f;
+        {
+            f32 f = fabsf(tmp.x) * sub->unk14;
+
+            arg0->unk18 += f * D_800BE9A4;
+            arg0->unk1C += f * D_800BE9A4;
+        }
+    }
+    if (arg0->unk10 > 200.0f || arg0->unk10 < -200.0f || arg0->unk14 > 200.0f || arg0->unk14 < -200.0f) {
+        ret = 0;
+    }
+    return ret;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15135DD0.s")
 
@@ -635,7 +757,137 @@ void func_15136AE4(f32 a0, f32 a1, f32 a2, f32 a3, f32 a4, f32 a5, u8 *a6) {
                     a6[0xC], a6[1]);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15136C3C.s")
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3f_36C3C;
+
+typedef struct Blood36C3CActor {
+    u8 pad0[4];
+    u8 unk4;
+    u8 pad5[0x147];
+    f32 unk14C;
+    f32 unk150;
+} Blood36C3CActor;
+
+typedef struct {
+    f32 values[4];
+} Blood1380B4Vector;
+
+typedef struct Blood36C3CHit {
+    f32 height;
+    u8 geometry[0x20];
+} Blood36C3CHit;
+
+typedef struct Blood36C3CSpray {
+    s32 countBase;
+    s32 countRange;
+    Vec3f_36C3C origin;
+    s16 angleBase;
+    s16 angleRange;
+    s16 pitchBase;
+    s16 pitchRange;
+    f32 maxDistance;
+    f32 sizeBase;
+    f32 sizeRange;
+    s16 lifeBase;
+    s16 lifeRange;
+    u8 kind;
+} Blood36C3CSpray;
+
+s32 func_15134070();
+void func_1504715C();
+void func_1515C244(void *, void *, f32 *, f32 *);
+void func_1513A24C(Vec3f_36C3C *, s32 *, f32 *, s32, f32, u8, u8, u8 *, void *,
+                   u8, s32);
+void func_15150D1C(Blood36C3CSpray *, u8, s32);
+void func_151A9834(Vec3f_36C3C *, f32, f32, void *, s32, u8, s8 *, u8, s32);
+void func_151C61A0(s32, s32, u8, s32);
+void func_1513A48C(void *, u8, s32);
+extern s32 *D_80089A20[];
+extern f32 D_800A3C30;
+extern s32 D_800A3F14[];
+extern s32 D_800A3F64[];
+extern u8 D_800A3FD8[];
+extern Blood1380B4Vector D_800A3FF8;
+extern Blood1380B4Vector D_800A40C8;
+extern Blood1380B4Vector D_800A40F8;
+extern f32 D_800A4630;
+
+#define BLOOD_TBL ((Blood1380B4Vector *)D_800A3FD8)
+
+void func_15136C3C(Blood36C3CActor *arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
+                   u8 arg5, u8 arg6, s32 arg7) {
+    Vec3f_36C3C position;
+    f32 unused0;
+    f32 unused1;
+    f32 halfHeight;
+    Blood36C3CHit hit;
+    s32 kind;
+    Blood36C3CSpray spray;
+    s8 heavy;
+
+    if (arg0 == NULL) {
+        return;
+    }
+    halfHeight = (arg0->unk14C + arg0->unk150) * 0.5f;
+    func_1515C244(arg0, &position, &unused0, &unused1);
+    kind = func_15134070(arg0);
+    if (kind == 0x63) {
+        return;
+    }
+    func_1504715C(&hit, arg0);
+    if (arg3 != 0) {
+        func_1513A24C(&position, D_80089A20[kind], &D_800A3C30,
+                      ((arg5 != 0) || ((kind == 4) && (arg0->unk4 != 0x16)))
+                          ? D_800A3F14[kind] - 2
+                          : D_800A3F14[kind],
+                      halfHeight, kind, D_800A3F64[kind], (u8 *)arg0, &hit, arg6,
+                      arg7);
+    }
+    if (((u8 *)&BLOOD_TBL[kind])[0xE] == 2) {
+        return;
+    }
+    if (arg1 != 0) {
+        spray.countBase = 0xC;
+        spray.countRange = 3;
+        spray.origin = position;
+        spray.angleBase = 0;
+        spray.angleRange = 0xFF;
+        spray.pitchBase = -0x40;
+        spray.pitchRange = 0x45;
+        spray.lifeBase = 0x96;
+        spray.lifeRange = 0x64;
+        spray.maxDistance = D_800A4630;
+        spray.sizeBase = 25.0f;
+        spray.sizeRange = 10.0f;
+        if ((&D_800A3FF8 == &BLOOD_TBL[kind]) || (&D_800A40C8 == &BLOOD_TBL[kind]) ||
+            (&D_800A40F8 == &BLOOD_TBL[kind])) {
+            spray.kind = 1;
+        } else {
+            spray.kind = 0;
+        }
+        func_15150D1C(&spray, arg6, arg7);
+    }
+    if (arg2 != 0) {
+        if ((&D_800A3FF8 == &BLOOD_TBL[kind]) || (&D_800A40C8 == &BLOOD_TBL[kind]) ||
+            (&D_800A40F8 == &BLOOD_TBL[kind])) {
+            heavy = 1;
+        } else {
+            heavy = 0;
+        }
+        func_151A9834(&position, position.y - 300.0f, 300.0f, &hit,
+                      (func_150ADA20() % 6U) + 0x12, 0, &heavy, arg6, arg7);
+    }
+    if (arg4 != 0) {
+        if ((&D_800A3FF8 == &BLOOD_TBL[kind]) || (&D_800A40C8 == &BLOOD_TBL[kind])) {
+            func_151C61A0((s32)&position, (s32)&hit, arg6, arg7);
+        } else {
+            func_1513A48C(&position, arg6, arg7);
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15136F50.s")
 
@@ -919,11 +1171,111 @@ void func_15138BC0(struct102 *arg0, u8 arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_1513A24C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_1513A48C.s")
+typedef struct {
+    s32 x;
+    s32 y;
+    s32 z;
+} Vec3i_A48C;
+
+typedef struct {
+    s32 field_0;
+    s32 field_4;
+    Vec3i_A48C position;
+    s16 field_14;
+    s16 field_16;
+    s16 field_18;
+    s16 field_1A;
+    f32 field_1C;
+    f32 field_20;
+    f32 field_24;
+    f32 field_28;
+    s16 field_2C;
+    s16 field_2E;
+    f32 field_30;
+    f32 field_34;
+    f32 field_38;
+} BloodA48CConfig;
+
+void func_15152190(void *, void *, void *, s32, f32, s32, s32, s32);
+extern u8 D_800A4260[];
+extern u8 D_800A4264[];
+
+void func_1513A48C(void *arg0, u8 arg1, s32 arg2) {
+    BloodA48CConfig config;
+
+    config.field_0 = 8;
+    config.field_4 = 4;
+    config.position = *(Vec3i_A48C *)arg0;
+    config.field_14 = 0;
+    config.field_16 = 0xFF;
+    config.field_18 = -0x37;
+    config.field_1A = 0x20;
+    config.field_2C = 0x28;
+    config.field_2E = 0x14;
+    config.field_30 = 0.07f;
+    config.field_34 = 0.07f;
+    config.field_1C = 10.0f;
+    config.field_20 = 9.0f;
+    config.field_24 = -1.0040001f;
+    config.field_28 = 0.254f;
+    config.field_38 = 23.446001f;
+    func_15152190(&config, D_800A4260, D_800A4264, 1, 0.0f, 1,
+                  (s32)arg1, arg2);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_1513A594.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_1513A5E0.s")
+typedef struct {
+    s32 x;
+    s32 y;
+    s32 z;
+} Vec3i_1513A5E0;
+
+typedef struct {
+    s32 field_0;
+    s32 field_4;
+    Vec3i_1513A5E0 position;
+    s16 field_14;
+    s16 field_16;
+    s16 field_18;
+    s16 field_1A;
+    f32 field_1C;
+    f32 field_20;
+    f32 field_24;
+    f32 field_28;
+    s16 field_2C;
+    s16 field_2E;
+    f32 field_30;
+    f32 field_34;
+    f32 field_38;
+} BloodA5E0Config;
+
+void func_15152190(void *, void *, void *, s32, f32, s32, s32, s32);
+extern u8 D_800A4268[];
+extern u8 D_800A4270[];
+
+void func_1513A5E0(s32 arg0, s32 arg1, s32 arg2) {
+    BloodA5E0Config config;
+
+    config.field_0 = 7;
+    config.field_4 = 7;
+    config.position = *(Vec3i_1513A5E0 *)arg0;
+    config.field_14 = 0;
+    config.field_16 = 0xFF;
+    config.field_18 = -0x32;
+    config.field_1A = 0x1B;
+    config.field_1C = 4.0f;
+    config.field_20 = 4.0f;
+    config.field_2C = 0x19;
+    config.field_2E = 0x28;
+    config.field_30 = 0.0201f;
+    config.field_34 = 0.0201f;
+    config.field_24 = -0.43f;
+    config.field_28 = 0.272f;
+    config.field_38 = 20.187f;
+    func_15152190(&config, D_800A4268, D_800A4270, 2, 0.0f, 1,
+                  (u8)arg1, arg2);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_1513A6E0.s")
 

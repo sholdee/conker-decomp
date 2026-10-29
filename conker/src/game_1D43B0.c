@@ -1,5 +1,9 @@
 #include <ultra64.h>
+/* func_150ADA20 returns a full 32-bit value; the shared header narrows it to u8 */
+#define func_150ADA20 func_150ADA20_u8
 #include "functions.h"
+#undef func_150ADA20
+u32 func_150ADA20(void);
 #include "variables.h"
 
 
@@ -20,9 +24,81 @@ s32 func_151A73EC(void *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1D43B0/func_151A743C.s")
+typedef struct {
+    f32 field_0;
+    void *field_4;
+    u8 spawn;
+    u8 alternate;
+    s16 first;
+    s16 last;
+} Game1D4140Entry;
 
-u8 func_150ADA20(void);
+typedef struct {
+    u8 pad_0[0x10];
+    f32 base_height;
+    f32 bounce;
+    f32 scale;
+    u8 pad1C[0x20];
+    f32 height;
+    u8 pad40[4];
+    f32 velocity_x;
+    f32 velocity_y;
+    f32 velocity_z;
+    f32 rotation_x;
+    f32 rotation_y;
+    f32 rotation_z;
+    u8 pad5C[4];
+    s32 flags;
+    s16 field_64;
+    u8 pad_66[0x10A];
+    Game1D4140Entry field_170;
+} Game1D4140State;
+
+void func_1514AB5C(f32, f32, f32, f32, s32, f32, f32, f32, f32, s32, s32, s32);
+
+s32 func_151A743C(Game1D4140State *arg0, f32 arg1, s32 arg2, f32 arg3, f32 arg4) {
+    Game1D4140Entry *state;
+    u8 alternate;
+
+    state = &arg0->field_170;
+    arg0->height = arg0->base_height + arg4;
+    if (arg0->field_170.field_4 != 0) {
+        func_1516972C(state->field_4);
+        state->field_4 = 0;
+    }
+    if (state->field_0 < arg0->velocity_y) {
+        arg0->flags &= ~7;
+        arg0->flags &= ~8;
+        arg0->flags &= ~0x40;
+        arg0->flags &= ~0x20;
+        arg0->velocity_x = 0.0f;
+        arg0->velocity_y = 0.0f;
+        arg0->velocity_z = 0.0f;
+        if (arg0->field_64 >= 0x21) {
+            arg0->field_64 = 0x20;
+        }
+        if (state->spawn != 0) {
+            alternate = 0;
+            if (state->alternate != 0) {
+                alternate = 1;
+            }
+            func_1514AB5C(arg1, arg4, arg3, arg0->scale * 35.0f,
+                         func_150ADA20() % 3U + 2,
+                         arg0->scale, arg0->scale * 0.5f,
+                         arg0->scale, arg0->scale * 0.5f,
+                         state->first, state->last, alternate);
+        }
+    } else {
+        arg0->velocity_x *= arg0->bounce;
+        arg0->velocity_y = -arg0->velocity_y * arg0->bounce;
+        arg0->velocity_z *= arg0->bounce;
+        arg0->rotation_x *= arg0->bounce;
+        arg0->rotation_y *= arg0->bounce;
+        arg0->rotation_z *= arg0->bounce;
+    }
+    return 1;
+}
+
 f32 func_150ADA68(void);
 extern f32 D_800BE9A8;
 extern f32 D_800A8DC8;
@@ -70,9 +146,103 @@ void func_151A7610(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1D43B0/func_151A77C0.s")
+typedef struct Obj151A77C0 {
+    char pad0[0x14];
+    /* 0x14 */ s32 unk14;
+    char pad18[0x2F - 0x18];
+    /* 0x2F */ u8 unk2F;
+    char pad30[0x34 - 0x30];
+    /* 0x34 */ s16 unk34;
+    /* 0x36 */ s16 unk36;
+    /* 0x38 */ s16 unk38;
+    char pad3A[0x3F - 0x3A];
+    /* 0x3F */ u8 unk3F;
+    /* 0x40 */ u8 unk40;
+    /* 0x41 */ u8 unk41;
+    /* 0x42 */ u8 unk42;
+    char pad43;
+    /* 0x44 */ u16 unk44;
+    char pad46[0x50 - 0x46];
+    /* 0x50 */ s16 unk50;
+    /* 0x52 */ s16 unk52;
+    /* 0x54 */ s16 unk54;
+    /* 0x56 */ s16 unk56;
+    /* 0x58 */ s16 unk58;
+    /* 0x5A */ s16 unk5A;
+} Obj151A77C0;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1D43B0/func_151A787C.s")
+typedef struct Sub151A77C0 {
+    /* 0x0 */ s16 unk0;
+    /* 0x2 */ s16 unk2;
+    /* 0x4 */ s16 unk4;
+    /* 0x6 */ s16 unk6;
+    /* 0x8 */ s16 unk8;
+    /* 0xA */ s16 unkA;
+} Sub151A77C0;
+
+void func_151A77C0(Obj151A77C0 *arg0) {
+    Sub151A77C0 *s;
+
+    s = (Sub151A77C0 *)&arg0->unk50;
+    if (arg0->unk38 < arg0->unk54) {
+        arg0->unk3F = arg0->unk38 * arg0->unk56;
+    }
+    if (arg0->unk38 < s->unk8) {
+        s16 d = s->unkA * D_800BE9E4;
+        arg0->unk34 += d;
+        arg0->unk36 += d;
+    }
+    if (arg0->unk38 < s->unk0) {
+        arg0->unk2F = 0x15;
+        arg0->unk44 |= 0x201;
+        arg0->unk40 = arg0->unk41 = arg0->unk42 = arg0->unk38 * s->unk2;
+        arg0->unk14 = 0xC000F;
+    }
+}
+
+
+typedef struct Obj151A787C {
+    char pad0[0x34];
+    /* 0x34 */ s16 unk34;
+    /* 0x36 */ s16 unk36;
+    /* 0x38 */ s16 unk38;
+    char pad3A[0x3F - 0x3A];
+    /* 0x3F */ u8 unk3F;
+    /* 0x40 */ u8 unk40;
+    /* 0x41 */ u8 unk41;
+    /* 0x42 */ u8 unk42;
+    char pad43[0x50 - 0x43];
+    /* 0x50 */ s16 unk50;
+    /* 0x52 */ s16 unk52;
+    /* 0x54 */ s16 unk54;
+    /* 0x56 */ s16 unk56;
+    /* 0x58 */ s16 unk58;
+    /* 0x5A */ s16 unk5A;
+} Obj151A787C;
+
+typedef struct Sub151A787C {
+    /* 0x0 */ s16 unk0;
+    /* 0x2 */ s16 unk2;
+    /* 0x4 */ s16 unk4;
+    /* 0x6 */ s16 unk6;
+    /* 0x8 */ s16 unk8;
+    /* 0xA */ s16 unkA;
+} Sub151A787C;
+
+void func_151A787C(Obj151A787C *arg0) {
+    Sub151A787C *s;
+
+    s = (Sub151A787C *)&arg0->unk50;
+    if (arg0->unk38 < arg0->unk54) {
+        arg0->unk3F = arg0->unk38 * arg0->unk56;
+    }
+    if (arg0->unk38 < s->unk8) {
+        s16 d = s->unkA * D_800BE9E4;
+        arg0->unk34 += d;
+        arg0->unk36 += d;
+    }
+    arg0->unk40 = arg0->unk41 = arg0->unk42 = arg0->unk38 * s->unk2;
+}
 
 struct S151A7908 {
     s32 unk0;

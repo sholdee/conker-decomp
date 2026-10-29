@@ -1,8 +1,14 @@
 #include <ultra64.h>
 #include "functions.h"
 #define D_800CBE00 D_800CBE00_s32
+#define D_800D3300 D_800D3300_hdr
+#define D_800DBE3C D_800DBE3C_hdr
+#define D_800DBEF4 D_800DBEF4_hdr
 #include "variables.h"
 #undef D_800CBE00
+#undef D_800D3300
+#undef D_800DBE3C
+#undef D_800DBEF4
 
 
 struct conker15044A28 {
@@ -23,13 +29,70 @@ extern f32 D_80098D60;
 extern f32 D_80098D64;
 extern f32 D_80098D68;
 extern f32 sqrtf(f32);
+extern s32 D_800CBD9C;
+extern s32 func_15145C90(s32);
 s32 func_15044964(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7);
 
 #pragma function sqrtf
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_71820/func_15044370.s")
+void func_15044370(void) {
+    D_800CBD9C = 0;
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_71820/func_15044380.s")
+typedef struct conker15044380Obj {
+    u8 pad0[0xF8];
+    u32 flagsF8;
+    u8 padFC[0x179];
+    u8 status275;
+} conker15044380Obj;
+
+extern u8 D_80089120;
+extern u8 D_80089123;
+extern u8 D_800CBDD3;
+extern f32 D_800CBDF4;
+extern f32 D_800CBDF8;
+void func_1510F800(s32);
+void func_15044660(conker15044380Obj *, f32, f32, f32);
+s32 func_150AB1F0(f32, f32, f32, conker15044380Obj *, s32);
+void func_150AC3E4(f32, f32, f32, conker15044380Obj *, s32);
+
+s32 func_15044380(f32 arg0, f32 arg1, f32 arg2, conker15044380Obj *arg3, s32 arg4, s32 arg5) {
+    s32 index;
+    s32 total;
+    s32 saved_mode;
+    u8 *active;
+
+    D_800CBDF4 = -32768.0f;
+    D_800CBDF8 = -32768.0f;
+    total = 0;
+    arg3->status275 = 0;
+    func_15044660(arg3, arg0, arg1, arg2);
+    saved_mode = D_800CBDD3;
+    for (active = &D_80089123, index = 3; index >= 0; index--, active--) {
+        if (*active == 1 && (index != 3 || !(arg3->flagsF8 & 0x200))) {
+            func_1510F800(index);
+            if (D_800DBE62 == 0) continue;
+            total += func_150AB1F0(arg0, arg1, arg2, arg3, arg4);
+        }
+    }
+    active = &D_80089120;
+    index = 0;
+    if (arg5 != 0) {
+        do {
+            if (*active == 1) {
+                func_1510F800(index);
+                if (D_800DBE62 != 0) {
+                    func_150AC3E4(arg0, arg1, arg2, arg3, 0);
+                }
+            }
+            index++;
+            active++;
+        } while (index != 3);
+    }
+    func_1510F800(0);
+    D_800CBDD3 = saved_mode;
+    return total;
+}
 
 void func_1504452C(s16 **arg0, struct17 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, s32 arg7) {
     s16 **src;
@@ -141,7 +204,6 @@ void func_15044A28(void) {
     struct conker15044A28 *node;
     struct conker15044A28 *prev;
     struct conker15044A28 *next;
-    volatile s32 *delta;
     s32 (**funcs0)(struct conker15044A28 *);
     void (**funcs1)(void);
     s32 timer;
@@ -154,7 +216,6 @@ void func_15044A28(void) {
     prev = 0;
     minusOne = -1;
     if (node != 0) {
-        delta = &D_800BE9E4;
         funcs0 = D_80085E80;
         funcs1 = D_80085E8C;
         do {
@@ -166,7 +227,7 @@ void func_15044A28(void) {
                     funcs1[node->unkD]();
                 }
             } else {
-                delay = countdown - *delta;
+                delay = countdown - D_800BE9E4;
                 if (delay < 0) {
                     delay = 0;
                 }
@@ -174,7 +235,7 @@ void func_15044A28(void) {
             }
             timer = node->unk4;
             if (timer != minusOne) {
-                timer -= *delta;
+                timer -= D_800BE9E4;
                 if (timer <= 0) {
                     if (prev == 0) {
                         D_800CBE00[0] = node->next;
@@ -300,9 +361,97 @@ s32 func_1504530C(s32 arg0, s32 arg1, s32 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_71820/func_15045384.s")
+void func_1510F800(s32);
+typedef struct Vec3f_15045D48 {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3f_15045D48;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_71820/func_1504554C.s")
+typedef struct Game71820Hit {
+    f32 height;
+    s16 points[9];
+    s32 object;
+    u8 flags;
+    u8 active;
+    u8 pad1E[2];
+    s32 field20;
+} Game71820Hit;
+
+typedef struct Game71820Candidate {
+    s32 height;
+    s32 *sources;
+    s32 index;
+    s32 padC;
+} Game71820Candidate;
+
+s32 func_150A4FA0(s32, s32);
+extern f32 D_80098D48;
+extern Game71820Candidate D_800D3300[];
+
+s32 func_15045384(Vec3f_15045D48 *arg0, f32 arg1, Game71820Hit *arg2) {
+    s32 count;
+    s32 best;
+    s32 scan_index;
+    f32 height;
+
+    if (arg1 < arg0->y) {
+        arg2->flags &= ~2;
+        return 0;
+    }
+    arg2->height = D_80098D48;
+    best = -1;
+    func_1510F800(3);
+    count = func_150A4FA0((s32)arg0->x, (s32)arg0->z);
+    scan_index = 0;
+    if (count > 0) {
+        Game71820Candidate *scan = D_800D3300;
+
+        do {
+            height = (f32)scan->height * 0.00390625f;
+            if ((arg0->y <= height) && (height < arg2->height)) {
+                best = scan_index;
+                arg2->height = height;
+            }
+            scan_index++;
+            scan++;
+        } while (scan_index < count);
+    }
+    if (best != -1) {
+        Game71820Candidate *candidate;
+        s32 *source;
+        u32 copy_index;
+        u8 *output;
+        s32 offset;
+        s32 flags;
+        s32 updated_flags;
+        s32 active;
+
+        candidate = &D_800D3300[best];
+        source = candidate->sources;
+        offset = candidate->index;
+        copy_index = 0;
+        output = (u8 *)arg2;
+        for (; copy_index != 3; copy_index++, output += 6) {
+            s16 *point = (s16 *)(source[copy_index] + offset);
+            *(s16 *)(output + 4) = point[0];
+            *(s16 *)(output + 6) = point[1];
+            *(s16 *)(output + 8) = point[2];
+        }
+        arg2->object = 0;
+        arg2->flags |= 6;
+        arg2->active = 4;
+        arg2->field20 = 0;
+        if (arg2->height <= arg1) {
+            arg2->flags |= 2;
+            return 1;
+        }
+        return 0;
+    }
+    arg2->flags &= ~2;
+    return 0;
+}
+
 
 extern void func_1510F800(s32);
 extern s32 func_150A6500(s16, s16, s32, u16);
@@ -342,12 +491,78 @@ struct conker150472C0_src
   s32 unk60;
 };
 
+extern f32 D_80098D4C;
+
+s32 func_1504554C(struct conker15045714 *arg0, f32 arg1, struct conker150472C0_dst *arg2) {
+    s32 count;
+    s32 best;
+    s32 scan_index;
+    f32 height;
+
+    if (arg0->field_0x04 < arg1) {
+        arg2->field_0x1C &= ~2;
+        return 0;
+    }
+    arg2->field_0x00 = D_80098D4C;
+    best = -1;
+    func_1510F800(3);
+    count = func_150A4FA0((s32)arg0->field_0x00, (s32)arg0->field_0x08);
+    scan_index = 0;
+    if (count > 0) {
+        Game71820Candidate *scan = D_800D3300;
+
+        do {
+            height = (f32)scan->height * 0.00390625f;
+            if ((height <= arg0->field_0x04) && (arg2->field_0x00 < height)) {
+                best = scan_index;
+                arg2->field_0x00 = height;
+            }
+            scan_index++;
+            scan++;
+        } while (scan_index < count);
+    }
+    if (best != -1) {
+        Game71820Candidate *candidate;
+        s32 *source;
+        u32 copy_index;
+        u8 *output;
+        s32 offset;
+        s32 flags;
+        s32 updated_flags;
+        s32 active;
+
+        candidate = &D_800D3300[best];
+        source = candidate->sources;
+        offset = candidate->index;
+        copy_index = 0;
+        output = (u8 *)arg2;
+        for (; copy_index != 3; copy_index++, output += 6) {
+            s16 *point = (s16 *)(source[copy_index] + offset);
+            *(s16 *)(output + 4) = point[0];
+            *(s16 *)(output + 6) = point[1];
+            *(s16 *)(output + 8) = point[2];
+        }
+        arg2->field_0x18 = 0;
+        arg2->field_0x1C |= 6;
+        arg2->field_0x1D = 4;
+        arg2->field_0x20 = 0;
+        if (arg1 <= arg2->field_0x00) {
+            arg2->field_0x1C |= 2;
+            return 1;
+        }
+        return 0;
+    }
+    arg2->field_0x1C &= ~2;
+    return 0;
+}
+
 void func_15045714(struct conker15045714 *arg0, u16 arg1, s32 *arg2, s32 arg3) {
     func_1510F800(2);
     *arg2 = func_150A6500((s16)arg0->field_0x00, (s16)arg0->field_0x08, arg3, arg1);
 }
 
-s32 func_15045F8C(struct conker15045714 *arg0, f32 arg1, s32 *arg2, s32 arg3);
+struct Game71820Hit;
+s32 func_15045F8C(struct conker15045714 *arg0, f32 arg1, s32 *arg2, struct Game71820Hit *arg3);
 
 s32 func_15045780(struct conker15045714 *arg0, u16 arg1, f32 arg2, s32 arg3) {
     s32 sp1C;
@@ -358,7 +573,7 @@ s32 func_15045780(struct conker15045714 *arg0, u16 arg1, f32 arg2, s32 arg3) {
         return 0;
     }
     func_15045714(arg0, arg1, &sp1C, (s32)&sp18);
-    return func_15045F8C(arg0, arg2, &sp18, arg3);
+    return func_15045F8C(arg0, arg2, &sp18, (struct Game71820Hit *)arg3);
 }
 
 extern s32 func_15047004(struct conker15045714 *, s32, struct conker150472C0_dst *);
@@ -381,10 +596,173 @@ s32 func_15045800(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_71820/func_15045AE4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_71820/func_15045D48.s")
+typedef struct Game71820Surface {
+    u8 pad0[0x40];
+    s32 default_material;
+    s32 *materials;
+    u8 pad48[0x10];
+    u16 first_triangle;
+    u8 pad5A[0x15];
+    u8 flags;
+    u8 pad70[0x30];
+} Game71820Surface;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_71820/func_15045F8C.s")
+extern Game71820Candidate D_800D3300[];
+extern u8 *D_800DBE3C;
+s32 func_150A43E0(s32, s32, s32, void *);
+void func_150A44F0(s32, void *, s32);
+extern f32 D_80098D58;
+extern u8 D_800D3830[];
+extern s32 D_800DBEF4;
 
+s32 func_15045D48(Vec3f_15045D48 *arg0, f32 arg1, s32 *arg2, Game71820Hit *arg3) {
+    s32 count;
+    s32 best;
+    s32 scan_index;
+    f32 height;
+
+    arg3->height = D_80098D58;
+    best = -1;
+    func_150A44F0(*arg2, D_800D3830, 0);
+    count = func_150A43E0((s32)arg0->x, (s32)arg0->z, *arg2, D_800D3830);
+    scan_index = 0;
+    if (count > 0) {
+        Game71820Candidate *scan = D_800D3300;
+        do {
+            height = (f32)scan->height * 0.00390625f;
+            if ((arg0->y <= height) && (height < arg3->height)) {
+                best = scan_index;
+                arg3->height = height;
+            }
+            scan_index++;
+            scan++;
+        } while (scan_index < count);
+    }
+    if (best != -1) {
+        Game71820Candidate *candidate;
+        s32 *source;
+        s32 copy_index;
+        s32 *copy_source;
+        s32 surface_index;
+        u8 *output;
+        s32 offset;
+        s32 *materials;
+
+        candidate = &D_800D3300[best];
+        source = candidate->sources;
+        offset = candidate->index;
+        copy_index = 0;
+        output = (u8 *)arg3;
+        copy_source = source;
+        for (; copy_index != 3; copy_index++, copy_source++, output += 6) {
+            s16 *point = (s16 *)(*copy_source + offset);
+            *(s16 *)(output + 4) = point[0];
+            *(s16 *)(output + 6) = point[1];
+            *(s16 *)(output + 8) = point[2];
+        }
+        surface_index = candidate->padC;
+        arg3->field20 = surface_index * 0xA0 + D_800DBEF4;
+        materials = ((Game71820Surface *)arg3->field20)->materials;
+        if (materials != 0) {
+            s32 triangle_index = ((u8 *)source - D_800DBE3C) / 12 - ((Game71820Surface *)arg3->field20)->first_triangle;
+            *(s32 *)((u8 *)arg3 + 0x18) = materials[triangle_index];
+        } else {
+            *(s32 *)((u8 *)arg3 + 0x18) = ((Game71820Surface *)arg3->field20)->default_material;
+        }
+        arg3->flags |= 6;
+        if ((((Game71820Surface *)arg3->field20)->flags & 0x80) == 0x80) {
+            arg3->flags |= 1;
+        }
+        arg3->active = 3;
+        if (arg3->height <= arg1) {
+            arg3->flags |= 2;
+            return 1;
+        }
+        return 0;
+    }
+    arg3->flags &= ~2;
+    return 0;
+}
+
+extern f32 D_80098D5C;
+
+s32 func_15045F8C(struct conker15045714 *arg0, f32 arg1, s32 *arg2, Game71820Hit *arg3) {
+    s32 count;
+    s32 best;
+    s32 scan_index;
+    f32 height;
+
+    arg3->height = D_80098D5C;
+    best = -1;
+    func_150A44F0(*(s32 *)arg2, D_800D3830, 0);
+    count = func_150A43E0((s32)arg0->field_0x00, (s32)arg0->field_0x08, *(s32 *)arg2, D_800D3830);
+    scan_index = 0;
+    if (count > 0) {
+        Game71820Candidate *scan = D_800D3300;
+        do {
+            height = (f32)scan->height * 0.00390625f;
+            if ((height <= arg0->field_0x04) && (arg3->height < height)) {
+                best = scan_index;
+                arg3->height = height;
+            }
+            scan_index++;
+            scan++;
+        } while (scan_index < count);
+    }
+    if (best != -1) {
+        Game71820Candidate *candidate;
+        s32 *source;
+        s32 copy_index;
+        s32 *copy_source;
+        s32 surface_index;
+        u8 *output;
+        s32 offset;
+        s32 *materials;
+
+        candidate = &D_800D3300[best];
+        source = candidate->sources;
+        offset = candidate->index;
+        copy_index = 0;
+        output = (u8 *)arg3;
+        copy_source = source;
+        for (; copy_index != 3; copy_index++, copy_source++, output += 6) {
+            s16 *point = (s16 *)(*copy_source + offset);
+            *(s16 *)(output + 4) = point[0];
+            *(s16 *)(output + 6) = point[1];
+            *(s16 *)(output + 8) = point[2];
+        }
+        surface_index = candidate->padC;
+        arg3->field20 = surface_index * 0xA0 + D_800DBEF4;
+        materials = ((Game71820Surface *)arg3->field20)->materials;
+        if (materials != 0) {
+            s32 triangle_index = ((u8 *)source - D_800DBE3C) / 12 - ((Game71820Surface *)arg3->field20)->first_triangle;
+            *(s32 *)((u8 *)arg3 + 0x18) = materials[triangle_index];
+        } else {
+            *(s32 *)((u8 *)arg3 + 0x18) = ((Game71820Surface *)arg3->field20)->default_material;
+        }
+        arg3->flags |= 6;
+        if ((((Game71820Surface *)arg3->field20)->flags & 0x80) == 0x80) {
+            arg3->flags |= 1;
+        }
+        arg3->active = 3;
+        if (arg1 <= arg3->height) {
+            arg3->flags |= 2;
+            return 1;
+        }
+        return 0;
+    }
+    arg3->flags &= ~2;
+    return 0;
+}
+
+/* func_150461D0: PERMUTER CANDIDATE (best hand score 120, no register diffs).
+   Reconstruction in scratchpad/func_1504715C_recon.c. Follows the matched
+   func_150466F8 min/max template; sole diff is one delay-slot instruction: the
+   sp27 spill (func_15045880 result) is scheduled ASAP vs the target's ALAP into
+   func_15045D48's delay slot. */
+// PERMUTER-VERIFIED source exists (matches golden IN ISOLATION, score 0) but does NOT transfer
+// to the whole-file build (pscore 560) — IDO -g3 codegen is TU-context-dependent and the permuter
+// compiles single-function in isolation. See memory/conker-permuter-setup.md. Best in-file: 560.
 #pragma GLOBAL_ASM("asm/nonmatchings/game_71820/func_150461D0.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_71820/func_15046460.s")
@@ -607,6 +985,11 @@ s32 func_150470B0(struct conker15045714 *a0, s32 a1, struct conker150472C0_dst *
     return 0;
 }
 
+/* func_1504715C: PERMUTER CANDIDATE (best hand score 2090, semantically correct).
+   Full reconstruction saved to scratchpad/func_1504715C_recon.c. Sole blocker is the
+   float bounding-box load/compute order: IDO schedules iz (feeds +-1000 arith) before
+   the plain-copy iy (ix/iz/iy -> a0/v1/v0 vs target ix/iy/iz -> t0/t3/t6), cascading
+   into the 6/1/%hi(D_800DBEF4) constant hoists. Everything else matches byte-for-byte. */
 #pragma GLOBAL_ASM("asm/nonmatchings/game_71820/func_1504715C.s")
 
 void func_150472C0(struct conker150472C0_dst *arg0, struct conker150472C0_src *arg1)

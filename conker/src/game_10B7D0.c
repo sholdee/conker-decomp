@@ -1,7 +1,9 @@
 #include <ultra64.h>
 #define func_15048A40 func_15048A40_hdr
+#define func_150DE32C func_150DE32C_hdr
 #include "functions.h"
 #undef func_15048A40
+#undef func_150DE32C
 #include "variables.h"
 extern f32 func_15048A40(u8 arg0);
 extern u8 D_80090204[];
@@ -39,9 +41,30 @@ typedef struct {
 } struct_150DE458;
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_10B7D0/func_150DE320.s")
+void func_150DE320(s32 arg0) {
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_10B7D0/func_150DE32C.s")
+extern s32 func_150A32B4(struct178 *, s32, s32, s32);
+extern u8 *func_151149AC(u8);
+extern void func_150A2864(s32, s32);
+
+void func_150DE32C(s32 arg0, s32 arg1, s32 arg2) {
+    s32 i;
+    u8 *p;
+    const u8 ids[8] = { 0x18, 0x19, 0x1A, 0x1B, 0x0D, 0x30, 0x31, 0x32 };
+    const u8 alt[8] = { 0xF6, 0xF3, 0xF0, 0xED, 0, 0, 0, 0 };
+
+    for (i = 0; i < 8; i++) {
+        if (func_150A32B4(&((struct178 *)*(s32 *)&D_800D3098)[ids[i]], arg0, arg1, arg2) != 0) {
+            if (alt[i]) {
+                p = func_151149AC(alt[i]);
+                p[0x73] = (p[0x73] & ~3) | 3;
+            } else {
+                func_150A2864(ids[i], 1);
+            }
+        }
+    }
+}
 
 void func_150DE458(struct_150DE458 *arg0) {
     s32 pad[4];
@@ -134,7 +157,143 @@ void func_150DE6D8(struct Struct150DE6D8 *arg0) {
     arg0->unk84 += D_800BE9E4 * 24;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_10B7D0/func_150DE7C0.s")
+typedef struct { f32 x, y, z; } Vec3f_150DE7C0;
+
+typedef union Game10BC70Pair {
+    s32 value[2];
+    f32 f[2];
+} Game10BC70Pair;
+
+typedef struct Game10BC70SpawnPacket {
+    u8 field0;
+    s8 field1;
+    s16 field2;
+    s16 field4;
+    u8 pad6[2];
+    s32 field8;
+    s32 fieldC;
+    u8 colour[4];
+    f32 scale[2];
+    Vec3f_150DE7C0 position;
+    Vec3f_150DE7C0 rotation;
+    f32 size[3];
+    s32 field40;
+    u8 field44;
+    u8 field45;
+    u8 field46;
+    u8 field47;
+    s32 field48;
+    u8 field4C;
+    u8 pad4D[3];
+    s32 field50;
+    s16 field54;
+    s16 field56;
+} Game10BC70SpawnPacket;
+
+typedef struct Game10BC70Motion {
+    Vec3f_150DE7C0 velocity;
+    f32 duration;
+    Vec3f_150DE7C0 side;
+    Vec3f_150DE7C0 forward;
+} Game10BC70Motion;
+
+typedef struct Game10BC70Link {
+    s16 timer;
+    u8 pad2[2];
+    s32 source;
+    s32 target;
+} Game10BC70Link;
+
+typedef struct Game10BC70Emitter {
+    u8 pad0;
+    u8 flags01;
+    u8 pad2[0xA];
+    u8 flags0C;
+    u8 padD[0x1B];
+    Game10BC70Link link;
+} Game10BC70Emitter;
+
+void *memcpy(void *, const void *, u32);
+void func_1514470C(s32, void *);
+s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
+extern Game10BC70Pair D_800A0D00;
+extern f32 D_800A0D58;
+
+void func_150DE7C0(Game10BC70Emitter *arg0) {
+    Game10BC70Link *link;
+    Vec3f_150DE7C0 target;
+    Vec3f_150DE7C0 delta;
+    f32 length;
+    f32 unused;
+    f32 base;
+    Game10BC70Motion motion;
+    Game10BC70SpawnPacket packet;
+    Game10BC70Pair kinds;
+    void *result;
+    f32 speed;
+
+    link = &arg0->link;
+    link->timer -= D_800BE9E4;
+    if (link->timer < 0) {
+        kinds = D_800A0D00;
+        packet.field0 = *(kinds.value + (func_150ADA20() & 1));
+        func_1514470C(link->source, &packet.position);
+        func_1514470C(link->target, &target);
+        delta.x = target.x - packet.position.x;
+        delta.y = target.y - packet.position.y;
+        delta.z = target.z - packet.position.z;
+        func_15145128(&delta.x, &motion.velocity.x, &length, &unused);
+        speed = (func_150ADA68() * 30.0f) + 25.0f;
+        base = speed;
+        if (packet.field0 == 0xBF) {
+            speed = base * D_800A0D58;
+        }
+        motion.velocity.x *= speed;
+        motion.velocity.y *= speed;
+        motion.velocity.z *= speed;
+        motion.duration = length / speed;
+        motion.forward.x = delta.x;
+        motion.forward.y = 0.0f;
+        motion.forward.z = delta.z;
+        func_15145128(&motion.forward.x, &motion.forward.x, 0, 0);
+        motion.side.x = -motion.forward.z;
+        motion.side.y = 0.0f;
+        motion.side.z = motion.forward.x;
+        packet.rotation = *(Vec3f_150DE7C0 *)&D_800A5480;
+        packet.field1 = 0;
+        packet.field2 = 0x3B03;
+        packet.field4 = 0x12C;
+        packet.field8 = 0;
+        packet.fieldC = 0;
+        packet.colour[0] = 0xFF;
+        packet.colour[1] = 0xFF;
+        packet.colour[2] = 0xFF;
+        packet.colour[3] = 0xFF;
+        func_150ADA68();
+        packet.scale[1] = 706.0f;
+        packet.scale[0] = 706.0f;
+        packet.rotation = *(Vec3f_150DE7C0 *)&D_800A5480;
+        packet.field40 = 0x065C0000;
+        packet.field44 = 0xFF;
+        packet.field45 = 0xFF;
+        packet.field46 = 0;
+        packet.field47 = 7;
+        packet.field48 = 0;
+        packet.field4C = 0xFF;
+        packet.field50 = 0;
+        packet.field54 = 1;
+        packet.field56 = 0xFF;
+        packet.size[0] = 1.0f;
+        packet.size[1] = 1.0f;
+        packet.size[2] = 1.0f;
+        result = func_1513D2F0((void *)&packet, (s32)&D_800A4AA0, 0x28, 0, 0,
+                               0x26, 0, 3, 0xFF, 0x28, arg0->flags0C, arg0->flags01);
+        if (result != 0) {
+            memcpy((u8 *)result + 0x110, &motion, sizeof(motion));
+        }
+        link->timer = (func_150ADA20() % 201U) + 0xC8;
+    }
+}
 
 s32 func_150DEACC(f32 *arg0) {
     arg0[13] += arg0[68] * D_800BE9A4;

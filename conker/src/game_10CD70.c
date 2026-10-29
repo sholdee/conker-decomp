@@ -1,5 +1,13 @@
 #include <ultra64.h>
+/* include/functions.h declares func_150ADA20 as returning u8.  The golden code for
+ * func_150DFEFC feeds its result straight into `divu` with no zero-extension, which a
+ * u8-returning declaration cannot produce, so the real return type is a word.  Per project
+ * policy the shared header is left alone and the correct prototype is made file-local:
+ * the header's declaration is renamed out of the way while functions.h is included. */
+#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
+#undef func_150ADA20
+s32 func_150ADA20(void);
 #include "variables.h"
 
 
@@ -78,11 +86,162 @@ s32 func_150DF8C0(s32 a0) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_10CD70/func_150DF920.s")
+typedef struct {
+    DisplayListWord0 field_0x0;
+    s32 field_0x4;
+} DisplayListCmd;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_10CD70/func_150DFBD0.s")
+extern u8 D_800D9950[];
+extern void func_150A2864(s32, s32);
+extern void func_150A3444(s32, s16, s16, s16);
+extern void func_151749A0(s32, s32);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_10CD70/func_150DFCA8.s")
+void func_150DF920(s32 arg0) {
+    struct127 *obj;
+    s32 i;
+    s32 j;
+    s32 id;
+    s32 slot;
+    f32 x;
+    f32 y;
+    f32 z;
+    s32 active;
+    DisplayListCmd *dl;
+    s32 c;
+    s32 uls;
+    s32 ult;
+
+    if (arg0 != 0) {
+        return;
+    }
+
+    func_151749A0(5, 4);
+
+    id = 6;
+    slot = 3;
+    for (i = 0; i < 2; i++) {
+        obj = func_15083E90((u8)id);
+        id = 7;
+        if (obj != NULL) {
+            func_150A2864(slot, 0);
+            x = obj->x_position;
+            y = obj->y_position + 200.0f;
+            z = obj->z_position;
+            func_150A3444(slot, (s16)x, (s16)y, (s16)z);
+        } else {
+            func_150A2864(slot, 1);
+        }
+        slot = 4;
+    }
+
+    dl = (DisplayListCmd *)D_800B0E00[0];
+
+    for (i = 0; i < 3; i++) {
+        active = func_150DF8C0(i);
+        if (active) {
+            if (D_800D9950[i] < 0x60) {
+                D_800D9950[i] += D_800BE9E4;
+                if (D_800D9950[i] > 0x60) {
+                    D_800D9950[i] = 0x60;
+                }
+            }
+        } else {
+            D_800D9950[i] = 0;
+        }
+
+        j = -1;
+        do {
+            j++;
+            while ((((DisplayListCmd *)((j << 3) + (u8 *)dl))->field_0x0.field_0x0_s8 != -3) &&
+                   (((DisplayListCmd *)((j << 3) + (u8 *)dl))->field_0x0.field_0x0_s8 != -0x21)) {
+                j++;
+            }
+            if (((DisplayListCmd *)((j << 3) + (u8 *)dl))->field_0x0.field_0x0_s8 == -0x21) {
+                j = -1;
+                break;
+            }
+        } while (((DisplayListCmd *)((u8 *)dl + (j * 8)))->field_0x4 != ((i << 24) + 0x02000000));
+
+        if (j != -1) {
+            while ((c = ((DisplayListCmd *)((j << 3) + (u8 *)dl))->field_0x0.field_0x0_s8) != -0xE) {
+                j++;
+            }
+
+            if (j != -1) {
+                if (active) {
+                    uls = ((u32)((DisplayListCmd *)((u8 *)dl + (j * 8)))->field_0x0.field_0x0_s32 >> 12) & 0xFFF;
+                    ult = ((DisplayListCmd *)((u8 *)dl + (j * 8)))->field_0x0.field_0x0_s32 & 0xFFF;
+                    ult += (D_800D9950[i] / 16) * D_800BE9E4;
+                } else {
+                    ult = 2;
+                    uls = 2;
+                }
+                ((DisplayListCmd *)((u8 *)dl + (j * 8)))->field_0x0.field_0x0_s32 =
+                    0xF2000000 | ((uls & 0xFFF) << 12) | (ult & 0xFFF);
+            }
+        }
+    }
+}
+
+extern s32 D_80090324[];
+extern u8 D_800DD405;
+
+Gfx *func_150DFBD0(Gfx *gdl) {
+    s32 i;
+    s32 seg;
+    s32 addr;
+    s32 out;
+    s32 tex;
+    u8 idx;
+
+    for (i = 0; i < 3; i++) {
+        if (func_150DF8C0(i) != 0) {
+            idx = D_800DD405;
+            tex = D_80090324[idx + 9];
+        } else {
+            tex = D_80090324[8];
+        }
+        addr = func_1510D0EC(tex, &out, 3, 0);
+        seg = i + 2;
+        gSPSegment(gdl++, seg, addr);
+    }
+    return gdl;
+}
+
+extern f32 D_800A0FA0;
+extern f32 D_800A0FA4;
+extern f32 D_800A0FA8;
+extern f32 D_800A0FAC;
+
+void func_150DFCA8(void *arg0) {
+    f32 temp_fa0;
+    f32 var_fv0;
+
+    var_fv0 = *(f32 *)((u8 *)arg0 + 0x64) * (f32)D_800BE9E4;
+    *(f32 *)((u8 *)arg0 + 4) += var_fv0;
+    temp_fa0 = *(f32 *)((u8 *)arg0 + 4);
+    if (temp_fa0 < 11.0f) {
+        var_fv0 = D_800A0FA0;
+        *(f32 *)((u8 *)arg0 + 0x7C) = var_fv0;
+    } else if (*(f32 *)((u8 *)arg0 + 4) > 55.0f) {
+        temp_fa0 = D_800A0FA4;
+        var_fv0 = -temp_fa0;
+        *(f32 *)((u8 *)arg0 + 0x7C) = var_fv0;
+    } else {
+        var_fv0 = *(f32 *)((u8 *)arg0 + 0x7C);
+    }
+    if (*(f32 *)((u8 *)arg0 + 0x64) < var_fv0) {
+        *(f32 *)((u8 *)arg0 + 0x64) = (f32) (*(f32 *)((u8 *)arg0 + 0x64) + D_800A0FA8);
+        if (var_fv0 < *(f32 *)((u8 *)arg0 + 0x64)) {
+            *(f32 *)((u8 *)arg0 + 0x64) = var_fv0;
+        }
+    } else if (var_fv0 < *(f32 *)((u8 *)arg0 + 0x64)) {
+        *(f32 *)((u8 *)arg0 + 0x64) = (f32) (*(f32 *)((u8 *)arg0 + 0x64) - D_800A0FAC);
+        if (*(f32 *)((u8 *)arg0 + 0x64) < var_fv0) {
+            *(f32 *)((u8 *)arg0 + 0x64) = var_fv0;
+        }
+    }
+}
 
 extern f32 D_800A0FB0;
 
@@ -133,7 +292,78 @@ s32 func_150DFDD0(Game10CD70Object *arg0, Game10CD70FadeState *arg1) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_10CD70/func_150DFEFC.s")
+/* The 12-byte record at +0x28 that func_150E02C0 also hands to func_15149514 as
+ * (arg0 + 0x28, arg0 + 0x2C): an actor handle plus three independent countdowns. */
+typedef struct {
+    /* 0x00 */ struct127 *obj;
+    /* 0x04 */ u8  id;
+    /* 0x05 */ u8  pad5;
+    /* 0x06 */ s16 timer0;
+    /* 0x08 */ s16 timer1;
+    /* 0x0A */ s16 timer2;
+} SmokeSource; /* size 0xC */
+
+typedef struct {
+    /* 0x00 */ u8  pad0;
+    /* 0x01 */ u8  unk1;
+    /* 0x02 */ u8  pad2[0xA];
+    /* 0x0C */ u8  unkC;
+    /* 0x0D */ u8  padD;
+    /* 0x0E */ s16 unkE;
+    /* 0x10 */ u8  pad10[0x18];
+    /* 0x28 */ SmokeSource src;
+} SmokeEmitter;
+
+extern struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
+extern void func_15107700(struct127 *, s16, s16, s16, s32, f32, f32, s16, s16, u8 *, u8, s32);
+extern void func_15107B78(struct127 *, s32, s32, s32, s32);
+
+void func_150DFEFC(SmokeEmitter *arg0) {
+    SmokeSource *src;
+    struct127 *obj;
+    Header header;
+    Header2 header2;
+    s8 count;
+
+    obj = arg0->src.obj;
+    src = &arg0->src;
+    if ((obj->interaction_state == 0) || (obj->unique_id != src->id)) {
+        arg0->unkE = -1;
+        return;
+    }
+    src->timer0 -= D_800BE9E4;
+    if (src->timer0 < 0) {
+        header2.unk0 = (s32)obj->x_position;
+        header2.unk4 = (s32)obj->y_position;
+        header2.unk8 = (s32)obj->z_position;
+        header.unk0 = 3;
+        header.unk1 = -1;
+        header.unk2 = (func_150ADA20() % 0xBU) + 5;
+        header.unk4 = 0;
+        func_151602C0(&header, &header2, (func_150ADA20() % 0x79U) + 0x32, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg0->unkC, arg0->unk1);
+        src->timer0 = (func_150ADA20() % 0x51U) + 0x45;
+    }
+    src->timer1 -= D_800BE9E4;
+    if (src->timer1 < 0) {
+        u8 colour[4];
+
+        count = (func_150ADA20() % 3U) + 2;
+        do {
+            colour[0] = 0xAE;
+            colour[1] = 0xD2;
+            colour[2] = 0xFF;
+            colour[3] = (func_150ADA20() % 0x3DU) + 0x96;
+            func_15107700(obj, (s16)(func_150ADA20() & 0xFF), (s16)((func_150ADA20() % 0x81U) - 0x3F), (s16)((func_150ADA20() % 0x15U) + 0xA), 4, 40.0f, (func_150ADA68() * 20.0f) + 25.0f, 0, 2, colour, arg0->unkC, arg0->unk1);
+            count--;
+        } while (count > 0);
+        src->timer1 = (func_150ADA20() % 0x8DU) + 0x19;
+    }
+    src->timer2 -= D_800BE9E4;
+    if (src->timer2 < 0) {
+        func_15107B78(obj, (s16)(func_150ADA20() & 0xFF), (s16)((func_150ADA20() & 0x7F) - 0x40), arg0->unkC, arg0->unk1);
+        src->timer2 = (func_150ADA20() % 0x1AU) + 0xF;
+    }
+}
 
 void func_150E02C0(s32 arg0, s32 arg1, s32 arg2) {
     func_15149514(arg1, (u8)arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
@@ -168,7 +398,39 @@ void func_150E0348(void *arg0, u8 arg1, s32 arg2) {
     func_1513418C(&sp18, 0, arg1, arg2);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_10CD70/func_150E03F8.s")
+void func_15143794(s16, s16, f32, void *);
+void func_151A26EC(f32 *, f32 *, f32 *, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+
+void func_150E03F8(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, void *arg6) {
+    f32 position[3];
+    f32 direction[3];
+    f32 acceleration[3];
+    f32 scale;
+    f32 size_random;
+    u32 random_b;
+    u32 random_a;
+    f32 alpha_random;
+
+    position[0] = arg0;
+    position[1] = arg1;
+    position[2] = arg2;
+    random_a = func_150ADA20();
+    random_b = func_150ADA20();
+    alpha_random = func_150ADA68();
+    func_15143794((s16) (random_a & 0xFF), (s16) ((random_b % 65U) - 0x20), alpha_random * 5.87f, &direction[0]);
+    scale = (func_150ADA68() * 0.16900001f) + 0.186f;
+    acceleration[0] = 0.0f;
+    acceleration[1] = 0.0f;
+    acceleration[2] = 0.0f;
+    direction[0] += -arg3 * D_800BE9A8 * scale;
+    direction[1] += -arg4 * D_800BE9A8 * scale;
+    direction[2] += -arg5 * D_800BE9A8 * scale;
+    alpha_random = func_150ADA68();
+    size_random = func_150ADA68();
+    random_a = func_150ADA20();
+    random_b = func_150ADA20();
+    func_151A26EC(&position[0], &acceleration[0], &direction[0], 0.986891f, (alpha_random * 0.23f) + -0.337f, (size_random * 200.0f) + 150.0f, (random_a % 26U) + 0x28, (random_b % 201U) + 0x37, 0x1E, 0x14, 0, -1, 0x34, 0x35, 0x34, (s32) *((u8 *)arg6 + 0xC), (s32) *((u8 *)arg6 + 1));
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_10CD70/func_150E05F8.s")
 

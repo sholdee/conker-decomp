@@ -133,7 +133,54 @@ void func_151603FC(struct225 *arg0) {
 }
 
 // requires jump table
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_151604A0.s")
+extern void (*D_8008B150[])(void *);
+
+void func_151604A0(void *arg0, u8 *arg1, u8 arg2) {
+    u8 *object = arg0;
+    void (*callback)(void *);
+    struct17 position;
+
+    switch (arg2) {
+    case 0x17:
+    case 0x18:
+    case 0x1C:
+    case 0x1F:
+    case 0x22:
+        if (*arg1 != object[0x12]) {
+            return;
+        }
+        switch (arg2) {
+        case 0:
+            break;
+        case 0x17:
+            (*(u8 **)(object + 0x14))[9] = 0;
+            break;
+        case 0x18:
+            (*(u8 **)(object + 0x14))[9] = 1;
+            break;
+        case 0x1C:
+            position.unk0 = (f32)*(s16 *)((u8 *)*(void **)(object + 0x14) + 0xE);
+            position.unk4 = (f32)*(s16 *)((u8 *)*(void **)(object + 0x14) + 0x10);
+            position.unk8 = (f32)*(s16 *)((u8 *)*(void **)(object + 0x14) + 0x12);
+            func_151618BC(0x3E80, 0, 0, 0, &position, 0x1F4, 0x3E8);
+            return;
+        case 0x1F:
+            object[0xF] = 0xB;
+            (*(u8 **)(object + 0x14))[9] = 0;
+            break;
+        case 0x22:
+            func_1516972C((struct102 *)arg0);
+            return;
+        }
+        break;
+    default:
+        callback = D_8008B150[object[0x12]];
+        if (callback != 0) {
+            callback(arg0);
+        }
+        break;
+    }
+}
 
 s32 func_15160600(struct225 *arg0) {
     arg0->unk14->unk2F = func_151422DC(0, &D_800A6690, 0, 0xFF, 0xFF, &D_800A6698, 575);
@@ -335,7 +382,45 @@ struct225 *func_15160A58(void *arg0, u8 arg1, void *arg2, u8 arg3, s16 arg4, s32
 #endif
 
 // ??
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_15160B74.s")
+void func_15143134(f32 *, f32 *, s32);
+
+u8 func_15160B74(void *arg0) {
+    u8 result;
+    s8 selector;
+    u8 *slot;
+    u8 *entity;
+
+    entity = *(u8 **)((u8 *)arg0 + 0x18);
+    result = 1;
+    slot = (u8 *)arg0 + 0x18;
+    if (*(s32 *)entity == 0) {
+        return 0;
+    }
+    if (slot[4] != entity[0x3B]) {
+        return 0;
+    }
+    if (*(s32 *)(entity + 0x1D4) != 0 && (entity[0x74] & 0xF) != 0xF) {
+        f32 transformed[3];
+
+        func_15143134((f32 *)(slot + 8), transformed,
+                       (slot[5] << 6) + *(s32 *)(entity + 0x1D4));
+        *(s16 *)(*(u8 **)((u8 *)arg0 + 0x14) + 0xE) = (s16)(s32)transformed[0];
+        *(s16 *)(*(u8 **)((u8 *)arg0 + 0x14) + 0x10) = (s16)(s32)transformed[1];
+        *(s16 *)(*(u8 **)((u8 *)arg0 + 0x14) + 0x12) = (s16)(s32)transformed[2];
+    } else {
+        *(s16 *)(*(u8 **)((u8 *)arg0 + 0x14) + 0xE) =
+            (s16)(s32)*(f32 *)(entity + 0x14);
+        *(s16 *)(*(u8 **)((u8 *)arg0 + 0x14) + 0x10) =
+            (s16)(s32)*(f32 *)(entity + 0x18);
+        *(s16 *)(*(u8 **)((u8 *)arg0 + 0x14) + 0x12) =
+            (s16)(s32)*(f32 *)(entity + 0x1C);
+    }
+    selector = *(s8 *)(slot + 0x14);
+    if (selector != -1) {
+        result = D_8008B1F8[selector]((struct225 *)arg0);
+    }
+    return result;
+}
 
 // another struct definition
 struct225 *func_15160CDC(struct127 *arg0, u8 arg1, struct vec3w_15160A58 *arg2, struct vec3w_15160A58 *arg3, f32 arg4, u8 arg5, s16 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 argB, u8 argC, u8 argD, u8 argE, s32 argF) {

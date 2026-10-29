@@ -110,7 +110,170 @@ s32 func_151C2EF0(s32 a0, s32 a1, struct108 *a2, s32 a3, s32 arg4, s32 arg5) {
                          (u8 *)a2 + 0x170, *((u8 *)a2 + 0xC), *((u8 *)a2 + 0x1));
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1EF500/func_151C2F48.s")
+extern f32 D_800AAA3C;
+extern f32 D_800AAA40;
+extern u8 D_800DCA20;
+extern f32 D_800DCA24;
+void func_15102920(f32, s32, void *, void *, s32, s32, s32, s32, s32, s32);
+void func_15152B38(void *, u8, s32);
+s32 func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
+
+typedef struct {
+    /* 0x0 */ f32 a;
+    /* 0x4 */ f32 b;
+    /* 0x8 */ f32 c;
+} GameVec151C2F48;
+
+typedef struct {
+    /* 0x00 */ u8 pad0[0x30];
+    /* 0x30 */ GameVec151C2F48 unk30;
+    /* 0x3C */ u8 pad3C[0x6C - 0x3C];
+    /* 0x6C */ u8 unk6C[0x88 - 0x6C];
+    /* 0x88 */ s32 unk88;
+} GameSub151C2F48;
+
+typedef struct {
+    /* 0x000 */ u8 pad0;
+    /* 0x001 */ u8 unk1;
+    /* 0x002 */ u8 pad2[0xA];
+    /* 0x00C */ u8 unkC;
+    /* 0x00D */ u8 padD[0x110 - 0xD];
+    /* 0x110 */ GameSub151C2F48 unk110;
+} GameObj151C2F48;
+
+typedef struct {
+    /* 0x00 */ s32 unk00;
+    /* 0x04 */ s32 unk04;
+    /* 0x08 */ GameVec151C2F48 unk08;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ s16 unk2C;
+    /* 0x2E */ s16 unk2E;
+    /* 0x30 */ s16 unk30;
+    /* 0x32 */ s16 unk32;
+    /* 0x34 */ s32 unk34;
+    /* 0x38 */ s32 unk38;
+    /* 0x3C */ s16 unk3C;
+    /* 0x3E */ s16 unk3E;
+    /* 0x40 */ s16 unk40;
+    /* 0x42 */ u8 unk42;
+    /* 0x43 */ u8 unk43;
+    /* 0x44 */ u8 unk44;
+    /* 0x45 */ u8 unk45;
+    /* 0x46 */ u8 unk46;
+    /* 0x47 */ u8 unk47;
+    /* 0x48 */ u8 unk48;
+    /* 0x49 */ u8 unk49;
+    /* 0x4A */ u8 unk4A;
+    /* 0x4B */ u8 unk4B;
+    /* 0x4C */ u8 unk4C;
+    /* 0x4D */ u8 unk4D;
+    /* 0x4E */ u8 unk4E;
+    /* 0x4F */ u8 unk4F;
+    /* 0x50 */ u8 unk50;
+    /* 0x51 */ u8 unk51;
+    /* 0x52 */ u8 unk52;
+    /* 0x53 */ u8 unk53;
+    /* 0x54 */ u8 unk54;
+    /* 0x55 */ u8 unk55;
+    /* 0x56 */ u8 unk56;
+    /* 0x57 */ u8 unk57;
+    /* 0x58 */ u8 unk58;
+    /* 0x59 */ u8 pad59[3];
+    /* 0x5C */ s32 unk5C;
+    /* 0x60 */ s32 unk60;
+    /* 0x64 */ s16 unk64;
+    /* 0x66 */ s16 unk66;
+    /* 0x68 */ s16 unk68;
+    /* 0x6A */ u8 unk6A;
+    /* 0x6B */ u8 pad6B;
+    /* 0x6C */ f32 unk6C;
+    /* 0x70 */ s8 unk70;
+    /* 0x71 */ s8 unk71;
+    /* 0x72 */ s8 unk72;
+    /* 0x73 */ s8 unk73;
+} GameSpawn151C2F48;
+
+void func_151C2F48(GameObj151C2F48 *arg0) {
+    GameSub151C2F48 *sub;
+    Header header;
+    Header2 header2;
+
+    sub = &arg0->unk110;
+    func_15102920((func_150ADA68() * 30.0f) + 8.0f, 0xFF, sub->unk6C, &sub->unk30, (func_150ADA20() % 46U) + 0x19, 1, 1, sub->unk88, arg0->unkC, arg0->unk1);
+    if (func_150ADA68() < (D_800AAA3C * D_800DCA24)) {
+        header.unk0 = 3;
+        header.unk1 = -1;
+        header.unk2 = (func_150ADA20() % 7U) + 4;
+        header.unk4 = 0;
+        header2.unk0 = (s32) sub->unk30.a;
+        header2.unk4 = (s32) sub->unk30.b;
+        header2.unk8 = (s32) sub->unk30.c;
+        func_151602C0(&header, &header2, (func_150ADA20() % 9U) + 0xC, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg0->unkC, arg0->unk1);
+
+        {
+            GameSpawn151C2F48 sp54;
+
+            sp54.unk00 = 5 >> D_800DCA20;
+            sp54.unk04 = 4 >> D_800DCA20;
+            sp54.unk08 = sub->unk30;
+            sp54.unk14 = 8.25f;
+            sp54.unk18 = D_800AAA40;
+            sp54.unk1C = 0.0f;
+            sp54.unk20 = 0.0f;
+            sp54.unk24 = 7.0f;
+            sp54.unk28 = 16.0f;
+            sp54.unk2C = 0;
+            sp54.unk2E = 0xFF;
+            sp54.unk30 = -0x3D;
+            sp54.unk32 = 0x50;
+            sp54.unk34 = 3;
+            sp54.unk38 = 1;
+            sp54.unk3C = 0xC;
+            sp54.unk3E = 0xA;
+            sp54.unk40 = 1;
+            sp54.unk42 = 4;
+            sp54.unk43 = 2;
+            sp54.unk44 = 3;
+            sp54.unk45 = 0xFF;
+            sp54.unk46 = 0xFF;
+            sp54.unk47 = 0xFF;
+            sp54.unk48 = 0xFF;
+            sp54.unk49 = 0;
+            sp54.unk4A = 0;
+            sp54.unk4B = 0;
+            sp54.unk4C = 0;
+            sp54.unk4D = 0xFF;
+            sp54.unk4E = 0xFF;
+            sp54.unk4F = 0xFF;
+            sp54.unk50 = 0xFF;
+            sp54.unk51 = 0;
+            sp54.unk52 = 0;
+            sp54.unk53 = 0;
+            sp54.unk54 = 0;
+            sp54.unk55 = 0xFF;
+            sp54.unk56 = 0;
+            sp54.unk57 = 3;
+            sp54.unk58 = 0x24;
+            sp54.unk5C = 0x200005;
+            sp54.unk60 = 0x60600;
+            sp54.unk64 = 0xA;
+            sp54.unk66 = 0x19;
+            sp54.unk68 = 1;
+            sp54.unk6A = 0;
+            sp54.unk6C = 1.0f;
+            sp54.unk70 = -1;
+            sp54.unk71 = 0;
+            sp54.unk72 = -1;
+            sp54.unk73 = -1;
+            func_15152B38(&sp54, arg0->unkC, arg0->unk1);
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1EF500/func_151C329C.s")
 
@@ -144,7 +307,78 @@ void func_151C436C(s32 a0, f32 *a1, s32 a2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1EF500/func_151C43E0.s")
+typedef struct {
+    s32 unk00;
+    f32 unk04;
+    struct17 unk08;
+    struct17 unk14;
+    struct17 unk20;
+    struct17 unk2C;
+    struct17 unk38;
+    u8 unk44[0x12];
+    s16 unk56;
+    u8 unk58;
+    u8 unk59;
+    u8 unk5A;
+    u8 pad5B;
+    s32 unk5C;
+    s32 unk60;
+    u8 pad64[0xC];
+} Ray151C43E0;
+
+typedef struct {
+    u8 unk0;
+    u8 pad1[0x5F];
+    f32 unk60;
+    f32 unk64;
+    f32 unk68;
+    u8 pad6C[0x20];
+    f32 unk8C;
+    s32 unk90;
+    u8 pad94[4];
+    f32 unk98;
+    u8 pad9C[0xC];
+    s8 unkA8;
+    u8 padA9[3];
+    s32 unkAC;
+} Mover151C43E0;
+
+typedef struct {
+    u8 pad0[0x34];
+    struct17 pos;
+} Pos151C43E0;
+
+void func_15081690(s32, f32, f32, f32, f32, f32, f32, Ray151C43E0 *, f32, s32, s32, s32, s32, s32, s32);
+
+u8 func_151C43E0(struct108 *arg0, Mover151C43E0 *arg1, f32 arg2) {
+    u8 result;
+    s32 obj;
+    f32 scale;
+    Ray151C43E0 ray;
+    s32 solid;
+
+    obj = arg1->unk90;
+    result = 1;
+    if (arg1->unk0 & 4) {
+        if (arg1->unk8C < arg2) {
+            scale = arg1->unk98 * arg1->unk8C;
+        } else {
+            scale = arg1->unk98 * arg2;
+        }
+        if (scale != 0.0f) {
+            struct17 *from = &((Pos151C43E0 *)arg0)->pos;
+
+            solid = !(arg1->unk0 & 8);
+            func_15081690(obj, from->unk0, from->unk4, from->unk8, arg1->unk60, arg1->unk64, arg1->unk68, &ray, scale, 1, 0,
+                          solid, arg1->unkA8, 0, arg1->unkAC);
+            if (ray.unk59 >= 2) {
+                func_151C2EF0(ray.unk00, obj, arg0, (s32)&ray.unk08, (s32)&ray.unk20, (s32)&ray);
+                result = 0;
+            }
+        }
+    }
+    return result;
+}
 
 typedef struct {
     u8 pad0[0x34];

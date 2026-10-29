@@ -33,7 +33,20 @@ Gfx *func_150412C0(Gfx *gfx) {
     return gfx;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_6E770/func_150413FC.s")
+s32 func_15041480(u8 arg0);
+Gfx *func_15041508(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3);
+
+
+Gfx *func_150413FC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3) {
+    s32 i;
+
+    i = 0;
+    while (arg3[i] != 0) {
+        gfx = func_15041508(gfx, arg1 + i * 8, arg2, func_15041480(arg3[i]));
+        i++;
+    }
+    return gfx;
+}
 
 s32 func_15041480(u8 arg0) {
     s32 i;
@@ -73,7 +86,75 @@ Gfx *func_15041508(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3)
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_6E770/func_150415E0.s")
+void func_150415E0(s32 arg0, s32 *arg1, s32 *arg2, f32 *arg3, s32 *arg4, f32 *arg5) {
+    if ((arg0 >= 0xA8) && (arg0 < 0x100)) {
+        *arg5 = 1.0f;
+        switch (arg0) {
+            case 0xA8:
+            case 0xA9:
+                *arg1 = 0x20;
+                *arg2 = 0x12;
+                *arg3 = 3.1f;
+                *arg4 = 1;
+                break;
+            case 0xAA:
+            case 0xAB:
+            case 0xAC:
+            case 0xAD:
+                *arg1 = 0x20;
+                *arg2 = 0x1B;
+                *arg3 = 2.0f;
+                *arg4 = 1;
+                *arg5 = 0.603f;
+                break;
+            case 0xAE:
+                *arg1 = 0x10;
+                *arg2 = 0x11;
+                *arg3 = -1.6f;
+                *arg4 = 1;
+                break;
+            case 0xAF:
+            case 0xB0:
+                *arg1 = 0x2E;
+                *arg2 = 0x10;
+                *arg3 = 2.0f;
+                *arg4 = 1;
+                break;
+            case 0xB6:
+            case 0xB7:
+            case 0xB8:
+            case 0xB9:
+                *arg1 = 0x10;
+                *arg2 = 0xC;
+                *arg3 = 2.0f;
+                *arg4 = 0;
+                break;
+            case 0xBA:
+                *arg4 = 0;
+                *arg3 = 0.2f;
+                *arg1 = 0x37;
+                *arg2 = 0xC;
+                break;
+            case 0xB1:
+                *arg1 = 0x26;
+                *arg2 = 0x18;
+                *arg3 = 2.0f;
+                *arg4 = 1;
+                *arg5 = 0.726f;
+                break;
+            default:
+                *arg1 = 0xC;
+                *arg2 = 0x10;
+                *arg3 = 2.0f;
+                *arg4 = 0;
+                break;
+        }
+    } else {
+        *arg3 = 0.0f;
+        *arg1 = 0;
+        *arg2 = 0;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_6E770/func_150417AC.s")
 

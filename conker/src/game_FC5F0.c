@@ -260,7 +260,22 @@ s32 func_150CFD84(unsigned char *arg0, unsigned char **arg1) {
     return temp - arg0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_FC5F0/func_150CFDB8.s")
+s32 func_150CFDB8(unsigned char *arg0) {
+    s32 best;
+    unsigned char *end;
+    unsigned char *sp2C;
+
+    best = 0;
+    end = func_150CFD5C(arg0);
+    while (arg0 < end) {
+        s32 v = func_150CFD84(arg0, &sp2C);
+        if (best < v) {
+            best = v;
+        }
+        arg0 = sp2C + 1;
+    }
+    return best;
+}
 
 struct inner150CFE3C {
     char pad0[0x14];
@@ -432,7 +447,35 @@ void func_150D0134(u8 arg0, s32 arg1, s16 arg2, u8 arg3, void *arg4) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_FC5F0/func_150D01A0.s")
+s32 func_150D01A0(struct260 *arg0) {
+    s8 *state;
+    u8 alpha;
+    u8 fade;
+    struct inner150CFE3C *inner;
+
+    state = *(s8 **)((u8 *)arg0 + 0x48);
+    inner = (struct inner150CFE3C *)((u8 *)arg0 + 0x28);
+    if (((u8 *)arg0)[0x30] & 1) {
+        *state = 8;
+    }
+    if (*state > 0) {
+        fade = *state * 31;
+        alpha = 0xFF - fade;
+        *state -= D_800BE9E4;
+    } else {
+        alpha = 0xFF;
+        fade = 0;
+    }
+    if (alpha) {
+        func_1504332C(0xCE, 0xC4, 0x61, alpha);
+        func_15042D94(0x92, 0xBE, 0x81, inner->unk18[inner->unk15]);
+    }
+    if (fade) {
+        func_1504332C(0xCE, 0xC4, 0x61, fade);
+        func_15042D94(0x92, 0xBE, 0x81, inner->unk18[inner->unk15 ^ 1]);
+    }
+    return 1;
+}
 
 struct frame150D02B4 {
     f32 unk0;
@@ -507,4 +550,32 @@ void func_150D04C4(u8 arg0, s32 arg1, s16 arg2, u8 arg3, void *arg4) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_FC5F0/func_150D0534.s")
+s32 func_150D0534(struct260 *arg0) {
+    s8 *state;
+    u8 alpha;
+    u8 fade;
+    struct inner150CFE3C *inner;
+
+    state = *(s8 **)((u8 *)arg0 + 0x48);
+    inner = (struct inner150CFE3C *)((u8 *)arg0 + 0x28);
+    if (((u8 *)arg0)[0x30] & 1) {
+        *state = 0x14;
+    }
+    if (*state > 0) {
+        fade = *state * 12;
+        alpha = 0xFF - fade;
+        *state -= D_800BE9E4;
+    } else {
+        alpha = 0xFF;
+        fade = 0;
+    }
+    if (alpha) {
+        func_1504332C(0xFF, 0xFF, 0xFF, alpha);
+        func_15042D94(0x14, 0x14, 0x80, inner->unk18[inner->unk15]);
+    }
+    if (fade) {
+        func_1504332C(0xFF, 0xFF, 0xFF, fade);
+        func_15042D94(0x14, 0x14, 0x80, inner->unk18[inner->unk15 ^ 1]);
+    }
+    return 1;
+}

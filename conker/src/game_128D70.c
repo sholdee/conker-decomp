@@ -75,7 +75,22 @@ typedef union {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_128D70/func_150FB8C0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_128D70/func_150FC368.s")
+void func_151C3B0C(void *, f32, f32, f32, f32, s32, s32, s32);
+
+void func_150FC368(void *arg0) {
+    u8 var_v0;
+    void *temp_v0;
+    void *temp_v1;
+    void *temp_v1_2;
+
+    temp_v0 = *(void **)((u8 *)arg0 + 0x1A0);
+    if ((temp_v0 == 0) || (*(s32 *)((u8 *)temp_v0 + 0) == 0) || (*(u8 *)((u8 *)temp_v0 + 4) == 0xFF) || (*(u8 *)((u8 *)arg0 + 0x1A4) != *(u8 *)((u8 *)temp_v0 + 0x3B)) || (temp_v1 = *(void **)((u8 *)temp_v0 + 0x31C), (temp_v1 == 0)) || (*(u8 *)((u8 *)temp_v1 + 0x84) != 0) || (*(u8 *)((u8 *)temp_v0 + 0x127) == 0xFF) || (temp_v1_2 = *(void **)((u8 *)temp_v0 + 0x318), (temp_v1_2 == 0))) {
+        var_v0 = 0xFF;
+    } else {
+        var_v0 = ~(1U << *(u8 *)((u8 *)temp_v1_2 + 0x23D)) & 0xFF;
+    }
+    func_151C3B0C(arg0, 1.0f, 1.0f, 0.6f, 0.0f, 0xFF, 0xFF, var_v0);
+}
 
 void func_150FC438(Arg0_150FC438 *arg0, Arg1_150FC438 *arg1, u8 arg2, u8 arg3) {
     Data_150FC438 sp80;
@@ -135,7 +150,111 @@ block_150FC438_1:
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_128D70/func_150FC614.s")
+typedef struct {
+    u8  pad0[0x1AA];
+    s16 unk1AA;
+} Sub31C_150FC614;
+
+typedef struct {
+    u8  pad0[0x31C];
+    Sub31C_150FC614 *unk31C;
+} Holder_150FC614;
+
+typedef struct {
+    s32 unk0;
+    u8  unk4;
+    u8  pad5[0x36];
+    u8  unk3B;
+    u8  pad3C[0x48];
+    u16 unk84;
+} Owner_150FC614;
+
+typedef struct {
+    Owner_150FC614 *unk0;
+    u8  unk4;
+    u8  pad5[3];
+    f32 unk8;
+    u8  unkC;
+    u8  unkD;
+    u8  padE[2];
+    s32 unk10;
+    s16 unk14;
+    s8  unk16;
+    u8  pad17;
+    Holder_150FC614 *unk18;
+    u8  unk1C;
+    u8  unk1D;
+    u8  pad1E[2];
+} Data_150FC614;
+
+typedef struct {
+    u8  pad0;
+    u8  unk1;
+    u8  pad2[0xA];
+    u8  unkC;
+    u8  padD;
+    s16 unkE;
+    u8  pad10[0x18];
+    Data_150FC614 unk28;
+} Entity_150FC614;
+
+typedef struct {
+    u8  unk0;
+    u8  unk1;
+    s16 unk2;
+    u8  unk4;
+    u8  unk5;
+    s8  unk6;
+    u8  unk7;
+} Spark_150FC614;
+
+extern void func_150FB8C0(Owner_150FC614 *arg0, u8 arg1, f32 arg2, u8 arg3, u8 arg4, u8 arg5);
+extern void func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
+
+void func_150FC614(Entity_150FC614 *arg0) {
+    Data_150FC614 *d;
+    Owner_150FC614 *owner;
+    Spark_150FC614 sp50;
+
+    d = &arg0->unk28;
+    owner = d->unk0;
+    if ((owner->unk0 == 0) || (owner->unk4 == 0xFF) || (owner->unk3B != d->unk4) || (D_800C35EA == 1)) {
+        arg0->unkE = -1;
+        return;
+    }
+    if (owner->unk84 != d->unk1D) {
+        arg0->unkE = -1;
+        return;
+    }
+
+    d->unk8 -= D_800BE9A4;
+    while (d->unk8 < 0.0f) {
+        func_150FB8C0(owner, d->unkC, -d->unk8, d->unkD, arg0->unkC, arg0->unk1);
+        d->unkC ^= 1;
+        if (d->unk18 != NULL) {
+            if (d->unk18->unk31C != NULL) {
+                d->unk18->unk31C->unk1AA++;
+            }
+        }
+        d->unk8 += 4.0f + (func_150ADA68() * 4.0f);
+    }
+
+    if (d->unk16 == -1) {
+        return;
+    }
+    d->unk14 -= D_800BE9E4;
+    if (d->unk14 < 0) {
+        sp50.unk0 = 1;
+        func_150ADA20();
+        sp50.unk2 = 0x1E;
+        sp50.unk5 = 1 << d->unk16;
+        sp50.unk4 = (func_150ADA20() % 6U) + 3;
+        sp50.unk6 = -1;
+        func_151D8868(&sp50, 0, arg0->unkC, arg0->unk1);
+        func_150ADA20();
+        d->unk14 = 250;
+    }
+}
 
 typedef struct {
     s32 unk0;

@@ -63,7 +63,25 @@ void func_1509499C(struct1509499C_arg0 *arg0, s32 *arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C1D70/func_15094AB8.s")
+void func_15094AB8(Vtx *arg0, s16 (*arg1)[2], s32 arg2, f32 arg3, s32 arg4, s32 arg5) {
+    f32 cx;
+    f32 cy;
+    f32 s;
+    f32 c;
+    s32 i;
+
+    s = sinf(arg3 * 0.01745329238f);
+    c = cosf(arg3 * 0.01745329238f);
+    cx = (arg4 / 2) << 5;
+    cy = (arg5 / 2) << 5;
+    for (i = 0; i < arg2; i++) {
+        arg0[i].v.tc[0] = ((arg1[i][0] - cx) * c) - ((arg1[i][1] - cy) * s) + cx;
+        arg0[i].v.tc[1] = ((arg1[i][0] - cx) * s) + ((arg1[i][1] - cy) * c) + cy;
+    }
+}
+
+void func_15094E98(void) {
+}
 
 extern Mtx D_800D2CA8[];
 void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
@@ -89,7 +107,7 @@ void func_15094EA0(s32 arg0) {
 }
 
 extern Gfx D_800873D0[];
-extern s32 D_800D2CA0;
+extern u8 * D_800D2CA0;
 
 Gfx *func_15094F40(Gfx *arg0) {
     gSPDisplayList(arg0++, D_800873D0);
@@ -122,17 +140,17 @@ typedef struct {
 } struct15095060_arg2;
 
 extern void func_15095060(struct15095060_arg0 *, s32, struct15095060_arg2 *);
-extern void func_150950D4(s32, s32 *, s32, s32, s32, s32, s32, s32, s32, s32);
+extern Gfx *func_150950D4(Gfx *, struct15095060_d *, s32, s32, s32, s32, s32, s32, s32, s32);
 extern struct15095060_d D_800D2C90;
 
 void func_15094F70(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8) {
     func_15095060((struct15095060_arg0 *)arg1, arg2, (struct15095060_arg2 *)arg3);
-    func_150950D4(arg0, (s32 *)&D_800D2C90, arg4, arg5, 0, arg6, arg7, 0x100, 0x100, arg8);
+    func_150950D4((Gfx *)arg0, &D_800D2C90, arg4, arg5, 0, arg6, arg7, 0x100, 0x100, arg8);
 }
 
 void func_15094FE8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10) {
     func_15095060((struct15095060_arg0 *)arg1, arg2, (struct15095060_arg2 *)arg3);
-    func_150950D4(arg0, (s32 *)&D_800D2C90, arg4, arg5, 0, arg6, arg7, arg8, arg9, arg10);
+    func_150950D4((Gfx *)arg0, &D_800D2C90, arg4, arg5, 0, arg6, arg7, arg8, arg9, arg10);
 }
 
 void func_15095060(struct15095060_arg0 *arg0, s32 arg1, struct15095060_arg2 *arg2) {
@@ -156,7 +174,84 @@ void func_15095060(struct15095060_arg0 *arg0, s32 arg1, struct15095060_arg2 *arg
     D_800D2C90.unkA = arg0->unk4;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C1D70/func_150950D4.s")
+extern s32 func_1510D0EC(s32, s32, s32, s32);
+extern u8 D_8009DEB0[];
+extern u8 D_8009DEB4[];
+extern u8 D_8009DEB8[];
+extern u8 D_8009DEBC[];
+extern s32 D_800D2C9C;
+
+Gfx *func_150950D4(Gfx *gfx, struct15095060_d *tex, s32 tmem, s32 tile, s32 frame, s32 sfrac, s32 cm, s32 s, s32 t, s32 arg9) {
+    s32 width;
+    s32 size;
+    s32 masks;
+    s32 maskt;
+    s32 i;
+    s32 fmt;
+
+    if (tex->unkA == 0) {
+        frame = 0;
+    }
+    size = D_8009DEB0[tex->unk9] + tex->unk4 * tex->unk6;
+    if (tex->unk8 == 5) {
+        size += (tex->unk4 * tex->unk6) / 4;
+    }
+    size >>= D_8009DEB4[tex->unk9];
+    D_800D2CA0 = (u8 *)tex->unk0;
+    if ((u32)D_800D2CA0 < 0x10000000) {
+        D_800D2CA0 = (u8 *)func_1510D0EC((s32)D_800D2CA0, 0, arg9, 0);
+    }
+    if (D_800D2CA0 != (u8 *)0x80000000) {
+        D_800D2CA0 += (size + size) * frame;
+    }
+    if (tex->unk9 == 0) {
+        width = tex->unk4 >> 1;
+    } else {
+        width = tex->unk4;
+    }
+    masks = 1;
+    for (i = 2; i < tex->unk4; i <<= 1) {
+        masks++;
+    }
+    maskt = 1;
+    for (i = 2; i < tex->unk6; i <<= 1) {
+        maskt++;
+    }
+    if (tex->unk8 != 5) {
+        fmt = tex->unk8;
+    } else {
+        fmt = 0;
+    }
+    gDPPipeSync(gfx++);
+    gDPSetTextureImage(gfx++, fmt, D_8009DEBC[tex->unk9], 1, D_800D2CA0);
+    gDPSetTile(gfx++, fmt, D_8009DEBC[tex->unk9], 0, tmem, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
+    gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, size - 1, 0);
+    gDPSetTile(gfx++, fmt, tex->unk9, (D_8009DEB8[tex->unk9] * width + 7) >> 3, tmem, tile, 0, cm, maskt, 0, cm, masks, 0);
+    gDPSetTileSize(gfx++, tile, (s << 2) + sfrac, t << 2, ((tex->unk4 + s - 1) << 2) + sfrac, (tex->unk6 + t - 1) << 2);
+    if (tex->unk8 == 5) {
+        gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_4b, (D_8009DEB8[G_IM_SIZ_4b] * (width >> 1) + 7) >> 3, tmem + (width * tex->unk6) / 4, tile + 1, 0, cm, maskt, 0, cm, masks, 0);
+        gDPSetTileSize(gfx++, tile + 1, (s << 2) + sfrac, t, ((tex->unk4 + s - 1) << 2) + sfrac, (tex->unk6 + t - 1) << 2);
+    }
+    if (tex->unk8 == 2) {
+        s32 bits;
+        s32 count;
+
+        if (tex->unk9 == 0) {
+            bits = 4;
+            count = 15;
+        } else {
+            bits = 8;
+            count = 255;
+        }
+        gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, D_800D2CA0 + (tex->unk4 * tex->unk6 * bits) / 8);
+        gDPLoadSync(gfx++);
+        gDPLoadTLUTCmd(gfx++, 6, count);
+        D_800D2C9C = 0x8000;
+    } else {
+        D_800D2C9C = 0;
+    }
+    return gfx;
+}
 
 s32 func_1509563C(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4, f32 *arg5, f32 *arg6, f32 arg7) {
     f32 temp_f14;
@@ -217,7 +312,28 @@ s32 func_15095760(Gfx *arg0, struct Pt15095760 *arg1) {
     return func_15095A90((s32)arg0, (s32)arg1, sp44, sp40, sp38, 1, 0, 0, 0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C1D70/func_150958B0.s")
+typedef struct Cmd150958B0 {
+    u32 w0;
+    u32 w1;
+} Cmd150958B0;
+
+Cmd150958B0 *func_150958B0(Cmd150958B0 *arg0, s16 *arg1, s32 *arg2) {
+    f32 sp44;
+    f32 sp40;
+    f32 sp3C;
+    f32 sp38;
+
+    if (func_1509563C((f32)arg1[0], (f32)arg1[1], (f32)arg1[2], &sp44, &sp40, &sp3C, &sp38, 4000.0f) == 0) {
+        *arg2 = 0;
+        return arg0;
+    }
+    func_15095B08((s32)arg1, sp44, sp40, sp38, 1, arg2);
+    if (*arg2 != 0) {
+        { Cmd150958B0 *command = arg0++; command->w0 = 0xE7000000; command->w1 = 0; }
+        { Cmd150958B0 *command = arg0++; command->w0 = _SHIFTL(0xEE, 24, 8); command->w1 = _SHIFTL(sp3C / sp38 * 16352.0f + 16352.0f, 16, 16) | _SHIFTL(0, 0, 16); }
+    }
+    return arg0;
+}
 
 void func_15095A48(s32 arg0, s32 arg1, f32 arg2, f32 arg3) {
     func_15095A90(arg0, arg1, arg2, arg3, 4096.0f, 0, 0, 0, 0);

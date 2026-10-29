@@ -8,7 +8,14 @@ void func_15042D94(s32, s32, u8, s32 *, ...);
 extern u8 D_D16[];
 
 // need to figure out D_800D2460
-#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_1508F060.s")
+void func_1508F060(void) {
+    s32 i;
+
+    for (i = 0; i < 6; i++) {
+        D_800D2460[i][13] = 0;
+    }
+    D_800D24C0 = 0;
+}
 
 void func_1508F0A4(void) {
     func_1508F0D4();
@@ -46,7 +53,65 @@ void func_1508F9C4(void) {
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_1508F9F4.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_1508FD38.s")
+typedef struct GameBC510Command {
+    u32 w0;
+    u32 w1;
+} GameBC510Command;
+GameBC510Command *func_150900F0(GameBC510Command *, s32);
+GameBC510Command *func_150918EC(GameBC510Command *);
+GameBC510Command *func_150938BC(GameBC510Command *);
+GameBC510Command *func_15093B58(GameBC510Command *, s32, s16 *, s32, s32);
+GameBC510Command *func_15090630(GameBC510Command *);
+GameBC510Command *func_150911F4(GameBC510Command *);
+void *func_15094F40(void *);
+void *func_15096934(void *);
+void func_1518CA04(s32);
+extern f32 D_8008FE1C;
+extern s32 D_800BEBA4;
+extern GameBC510Command *D_800BE9C8[];
+
+GameBC510Command *func_1508FD38(register GameBC510Command *arg0) {
+    GameBC510Command *original;
+    s32 index;
+    s32 step;
+    s32 overflow;
+    s16 rows[33];
+
+    original = arg0;
+    if (D_800BE9F0 == 0x1D) return arg0;
+    { GameBC510Command *packet0 = arg0++; packet0->w0 = 0xDB0E0000; packet0->w1 = *(u16 *)&D_800D2454; }
+    { GameBC510Command *packet1 = arg0++; packet1->w0 = 0xDA380007; packet1->w1 = (u32)&D_800D23D0; }
+    if (D_800BE616 != 0) {
+        arg0 = func_150918EC(arg0);
+        overflow = D_800BEBA4 < arg0 - *(D_800BE9C8 + D_800BE9C0) ? 1 : 0;
+        if (overflow != 0) return original;
+        return arg0;
+    }
+    if (D_800D2458 != 0) arg0 = func_150938BC(arg0);
+    if (D_800C35EA == 1) return arg0;
+    if (D_8008CD00 != 0) {
+        step = 0x400;
+        if (D_8008FE1C != 1.0f) {
+            step = (s32)((f32)step / D_8008FE1C);
+            for (index = 0; index < 33; index++) *(rows + index) = (s32)((f32)index * D_8008FE1C);
+        } else {
+            for (index = 0; index < 33; index++) *(rows + index) = index;
+        }
+        arg0 = func_15093B58(arg0, step, rows, 0x2C30, 1);
+    }
+    if (D_800D2428[0] != (f32)D_8009DCB4[0]) arg0 = func_150900F0(arg0, 0);
+    else if (D_800D2588 != 0) {
+        func_1518CA04(0xB8);
+        D_800D2588 = 0;
+    }
+    arg0 = func_150911F4(arg0);
+    arg0 = func_15094F40(arg0);
+    arg0 = func_15090630(arg0);
+    arg0 = func_15096934(arg0);
+    overflow = D_800BEBA4 < arg0 - *(D_800BE9C8 + D_800BE9C0) ? 1 : 0;
+    if (overflow != 0) return original;
+    return arg0;
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_150900F0.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_15090630.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_1509093C.s")
@@ -123,5 +188,37 @@ void func_15093878(void) {
     D_800D244C = allocate_memory(0x80, 1, 1, 0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_150938BC.s")
+extern s32 D_800D2450;
+extern u8 D_11AD[];
+void func_150A7D00(s32, f32, f32, f32);
+
+GameBC510Command *func_150938BC(GameBC510Command *arg0) {
+    s32 x = 120;
+    s32 y = 129;
+    s32 z = -303;
+    s32 i;
+    s32 val;
+    s32 tex;
+
+    val = (D_800D2450 / 30) % 60;
+    i = 4;
+    do {
+        tex = func_1510D0EC((s32)D_11AD + (val % 10), 0, 3, 0);
+        if (tex == (s32)0x80000000) {
+            return arg0;
+        }
+        gSPSegment((Gfx *)arg0++, i, tex);
+        if (i == 3) {
+            val = (D_800D2450 / 30) / 60;
+        } else {
+            val = val / 10;
+        }
+        i--;
+    } while (i != 0);
+
+    func_150A7D00((D_800BE9C0 << 6) + D_800D244C, x, y, z);
+    gSPMatrix((Gfx *)arg0++, (D_800BE9C0 << 6) + D_800D244C, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPDisplayList((Gfx *)arg0++, D_800D2448);
+    return arg0;
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_15093B58.s")

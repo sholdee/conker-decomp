@@ -122,9 +122,127 @@ void func_1519EA78(struct Src1519EA78 *arg0, u16 arg1, f32 arg2, u8 arg3, s32 ar
     func_15152190(&sp34, &sp30, &sp2C, 1, 0.0f, 0, arg3, arg4);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1CBE20/func_1519EB8C.s")
+void *func_1513264C(void *, s32, s32, s32, s32, u8, s32);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1CBE20/func_1519ED24.s")
+void func_1519EB8C(f32 *arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4) {
+    typedef struct { s32 words[3]; } Copy3;
+    struct {
+        f32 *owner;
+        f32 values[13];
+        Copy3 copy38;
+        Copy3 copy44;
+        f32 field50;
+        s32 field54;
+        s16 field58;
+        u16 field5A;
+        u8 field5C;
+        u8 pad5D[3];
+        s32 field60;
+        u8 bytes64[9];
+        u8 pad6D;
+        u8 field6E;
+        u8 pad6F;
+        s32 field70;
+        u8 field74;
+        u8 pad75;
+        s16 field76;
+        s16 field78;
+        u8 pad7A[2];
+        s32 field7C;
+    } packet;
+    void *result;
+
+    packet.owner = arg0;
+    packet.values[0] = 1.0f;
+    packet.values[1] = 1.0f;
+    packet.values[2] = arg0[6] * 0.1f;
+    packet.values[3] = arg0[7] * 0.1f;
+    packet.values[4] = arg0[3];
+    packet.values[5] = arg0[4];
+    packet.values[6] = arg0[5];
+    packet.values[7] = 1.0f;
+    packet.values[8] = 1.0f;
+    packet.values[9] = 1.0f;
+    packet.values[10] = arg0[0];
+    packet.values[11] = arg0[1];
+    packet.values[12] = arg0[2];
+    packet.copy38 = *(Copy3 *)&D_800A5480;
+    packet.copy44 = *(Copy3 *)&D_800A5480;
+    packet.field50 = 0.0f;
+    packet.field54 = 0x980;
+    packet.field58 = arg2;
+    packet.field5A = arg1;
+    packet.field5C = 0;
+    packet.field60 = 0;
+    packet.bytes64[0] = 0xFF;
+    packet.bytes64[1] = 0x15;
+    packet.bytes64[2] = 0;
+    packet.bytes64[3] = 0;
+    packet.bytes64[4] = 0;
+    packet.bytes64[5] = 0;
+    packet.bytes64[6] = 0;
+    packet.bytes64[7] = 0;
+    packet.bytes64[8] = 2;
+    packet.field6E = 0;
+    packet.field70 = 0;
+    packet.field74 = 0;
+    packet.field76 = 1;
+    packet.field78 = 0xFF;
+    packet.field7C = 0;
+    result = func_1513264C(&packet.values[0], 3, 0xFF, 0, 4, arg3, arg4);
+    if (result != 0) {
+        memcpy((u8 *)result + 0x170, &packet.owner, 4);
+    }
+}
+
+struct Src1519ED24 {
+    /* 0x00 */ f32 unk00;
+    /* 0x04 */ f32 unk04;
+    /* 0x08 */ f32 unk08;
+    /* 0x0C */ f32 unk0C;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+};
+
+struct Obj1519ED24 {
+    char pad0[0x18];
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    char pad2C[0x38 - 0x2C];
+    /* 0x38 */ f32 unk38;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ f32 unk40;
+    char pad44[0x170 - 0x44];
+    /* 0x170 */ struct Src1519ED24 *unk170;
+};
+
+extern f32 D_800A8CD8;
+
+/* scale is read once into a local; src lives in a nested block (a -g3 scheduling barrier),
+ * which is what lets the scale load win the cycle-0 tie against the arg0->unk170 load. */
+s32 func_1519ED24(struct Obj1519ED24 *arg0) {
+    f32 scale;
+
+    scale = D_800A8CD8;
+    {
+        struct Src1519ED24 *src = arg0->unk170;
+
+        arg0->unk18 = src->unk18 * scale;
+        arg0->unk1C = src->unk1C * scale;
+        arg0->unk20 = src->unk0C;
+        arg0->unk24 = src->unk10;
+        arg0->unk28 = src->unk14;
+        arg0->unk38 = src->unk00;
+        arg0->unk3C = src->unk04;
+        arg0->unk40 = src->unk08;
+        return 1;
+    }
+}
 
 typedef struct {
     /* 0x00 */ u8  unk0;

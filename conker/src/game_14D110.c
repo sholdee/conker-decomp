@@ -2,12 +2,54 @@
 #include "functions.h"
 #include "variables.h"
 
+extern f32 D_800A3408;
+extern f32 D_800A340C;
+extern f32 D_800A3410;
+extern f32 D_800A3414;
+extern f32 D_800A3418;
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_14D110/func_1511FC60.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_14D110/func_15120158.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_14D110/func_15121490.s")
+void func_15121490(struct127 *arg0, u16 *arg1) {
+    struct126 *stats;
+    s32 state;
+    vertex endPoint;
+    vertex origin;
+    f32 angle;
+    vertex dir;
+    f32 temp;
+
+    arg0->unk31C->unk198 = 0;
+    if (*arg1 & 0x10) {
+        state = arg0->unk31C->unk78;
+        if ((state == 0x9) || (state == 0x38) || (state == 0x39) || (state == 0x37) ||
+            (state == 0x3B) || (state == 0x15) || (state == 0x26) || (state == 0x3A)) {
+            stats = arg0->unk31C;
+            angle = (arg0->unk40 - 90.0f) * D_800A3408;
+            endPoint.x = arg0->x_position;
+            endPoint.y = arg0->y_position + ((f32)(s16)stats->unk114 * 0.75f);
+            endPoint.z = arg0->z_position;
+            origin = endPoint;
+            endPoint.x = (sinf(angle) * 100.0f) + origin.x;
+            endPoint.y = origin.y;
+            endPoint.z = (cosf(angle) * 100.0f) + origin.z;
+            origin.y += arg0->y_position - arg0->old_y_position;
+            *(vertex *)((u8 *)stats + 0x13C) = origin;
+            *(vertex *)((u8 *)stats + 0x148) = endPoint;
+            stats->unk198 = 1;
+            dir.x = 1.0f;
+            temp = dir.x * cosf(*(f32 *)((u8 *)stats + 0x170) * D_800A340C);
+            dir.y = dir.x * sinf(*(f32 *)((u8 *)stats + 0x170) * D_800A3410);
+            dir.x = temp;
+            temp = dir.x * cosf(*(f32 *)((u8 *)stats + 0x16C) * D_800A3414);
+            dir.z = dir.x * sinf(*(f32 *)((u8 *)stats + 0x16C) * D_800A3418);
+            dir.x = temp;
+            *(vertex *)((u8 *)stats + 0x130) = dir;
+        }
+    }
+}
 
 void func_151216F8(struct108 *arg0) {
     s32 temp_v0;
@@ -66,4 +108,44 @@ void func_151216F8(struct108 *arg0) {
     *(f32 *)((u8 *)arg0 + 0x99C) = 0.0f;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_14D110/func_151218C4.s")
+typedef struct {
+    u8 pad0[0x2C];
+    f32 unk2C;
+    u8 pad30[0x1C];
+    u8 unk4C;
+    u8 unk4D;
+} Sub740; /* sub-block at actor+0x740 (func_1511FC60 uses +0x34/+0x4D too) */
+
+void func_151C9ED4(struct108 *);
+
+void func_151218C4(struct108 *arg0) {
+    Sub740 *s = (Sub740 *)((u8 *)arg0 + 0x740);
+
+    if (*arg0->unk36C & 0x10) {
+        return;
+    }
+    if (*(s32 *)((u8 *)arg0 + 0x34) == 0x40) {
+        if (arg0->unk6FC == 0xF) {
+            *(f32 *)((u8 *)arg0 + 0x898) = 0.0f;
+            *(f32 *)((u8 *)arg0 + 0x89C) = 0.0f;
+        }
+        arg0->unk3D4->unk198 = 0;
+        arg0->unk73C = 0;
+        *(s16 *)((u8 *)arg0 + 0x84A) = 0x3C;
+    } else {
+        *(s16 *)((u8 *)arg0 + 0x84A) = 0x3C;
+        arg0->unk73C = 3;
+    }
+    arg0->unk374 = 200.0f;
+    arg0->unk348 = 100.0f;
+    arg0->unk134 = s->unk2C;
+    s->unk4C = 0;
+    arg0->unk190 = 0.0f;
+    *(f32 *)((u8 *)arg0 + 0x99C) = 0.0f;
+    arg0->unk198 = 0.0f;
+    func_1506160C(arg0->unk3D0, 2, 0xFF, 0x20, arg0->unk23D);
+    if (*((u8 *)arg0 + 0x84C) != 0) {
+        func_151C9ED4(arg0);
+        *((u8 *)arg0 + 0x84C) = 0;
+    }
+}

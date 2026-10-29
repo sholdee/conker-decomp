@@ -143,7 +143,20 @@ extern s32 func_150448D0(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 #define LOW_U8(arg) (*(u8 *)((u8 *)&(arg) + 3))
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_19A8B0/func_1516D400.s")
+void func_1516D400(void) {
+    s32 i;
+    s32 v;
+
+    for (i = 0; i < 4; i++) {
+        if ((*(u8 (*)[4])&D_800DD2A0)[i] < 0xFF) {
+            v = (*(u8 (*)[4])&D_800DD2A0)[i] + D_800BE9A0;
+            if (v > 0xFF) {
+                v = 0xFF;
+            }
+            (*(u8 (*)[4])&D_800DD2A0)[i] = v;
+        }
+    }
+}
 
 void func_1516D4E8(
     s32 arg0, s32 arg1, s32 arg2, s32 arg3,
@@ -313,9 +326,81 @@ void func_1516D99C(
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_19A8B0/func_1516DB90.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_19A8B0/func_1516E778.s")
+void func_1516E778(u32 arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
+    func_1516D99C((s16)(arg0 >> 16), (s16)(arg0 & 0xFFFF), 0, arg2,
+        0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0,
+        8, 8, 1, 0, 0, 0, 0, 0x155, 0x155, 0x155, 0x155, arg1,
+        0x1E, 0, 0xFF, 0x28, 0x168, 0x18, 0x21, 4, 0, 1,
+        0, 0, 0, 0, 0, arg3, arg4);
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_19A8B0/func_1516E8CC.s")
+extern u8 D_800A6E00[];
+extern u8 D_800A6E0C[][3];
+
+s32 func_1516E8CC(struct Obj1516D4E8 *arg0) {
+    struct Obj1516D4E8 *vp;
+    s32 temp_v1;
+    s32 idx;
+    s32 temp;
+    s32 i;
+    f32 frac;
+    f32 inv;
+
+    vp = arg0;
+    temp_v1 = arg0->unk1F;
+    if (arg0->unk24 != 0) {
+        if (temp_v1 != 0xFF) {
+            temp_v1 += D_800BE9E4 << 5;
+            if (temp_v1 >= 0x100) {
+                temp_v1 = 0xFF;
+            }
+            vp->unk1F = temp_v1;
+        }
+    } else {
+        if (temp_v1 != 0) {
+            temp_v1 -= D_800BE9E4 << 4;
+            if (temp_v1 < 0) {
+                temp_v1 = 0;
+            }
+            vp->unk1F = temp_v1;
+        }
+    }
+
+    if ((arg0->unk24 == 0) && (temp_v1 == 0)) {
+        return 1;
+    }
+
+    temp = arg0->unk14;
+    idx = arg0->unk24;
+    temp += D_800BE9E4 * 10;
+    arg0->unk16 = temp;
+    arg0->unk14 = temp;
+
+    if (arg0->unk24 == 0) {
+        idx += arg0->unk1F >> 5;
+    } else {
+        idx = idx + 8;
+    }
+
+    for (i = vp->unk26; i < vp->unk26 + 8; i++) {
+        if (idx >= D_800A6E00[i]) {
+            frac = (f32)(idx - D_800A6E00[i]) / (f32)(D_800A6E00[i - 1] - D_800A6E00[i]);
+            inv = 1.0f - frac;
+            arg0->unk1C = D_800A6E0C[i][0] * inv + D_800A6E0C[i - 1][0] * frac;
+            arg0->unk1D = D_800A6E0C[i][1] * inv + D_800A6E0C[i - 1][1] * frac;
+            arg0->unk1E = D_800A6E0C[i][2] * inv + D_800A6E0C[i - 1][2] * frac;
+            break;
+        }
+    }
+    return 0;
+}
+
+/* The ROM has 8 bytes of `jr ra; nop` between func_1516E8CC and func_1516ECAC.
+ * splat has no symbol for them so they fold into func_1516E8CC's size; they are an
+ * empty leaf function, the same shape game_981E0.c func_1507304C and
+ * game_1A5440.c func_15178750_pad already reconstruct. */
+static void func_1516ECA4_pad(void) {
+}
 
 s32 func_1516ECAC(Obj1516FadeState *arg0) {
     s32 temp_v0;
@@ -387,7 +472,10 @@ void func_1516EED4(s32 a0, s32 a1, u8 a2, s32 a3) {
 }
 
 s32 func_1516F024(Obj1516FadeState *arg0) {
-    volatile s32 pad[4];
+    /* Reserves the 16 bytes at the top of the -g3 stack frame (sp+0x58..0x67)
+     * that the shipped build allocated but never referenced.  Declared first so
+     * the remaining locals land on their original stack homes. */
+    s32 pad[4];
     s32 temp_a2;
     struct Table1516F024 sp48;
     struct Table1516F024 sp3C;
@@ -454,26 +542,110 @@ void func_1516F1C0(s32 a0, s32 a1, u8 a2, s32 a3) {
         0, 4, 2, a2, a3);
 }
 
-void func_1516F2F8(u8 a0, s32 a1, s32 a2, s32 a3, volatile u8 a4, s32 a5) {
+void func_1516F2F8(u8 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5) {
     func_1516D99C(3, 0, 0, 0x2B,
         0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0,
         2, 0, 0, 0, 0, 0, 0, 2,
         0, 0, 0, 0, 0, 0, 0, 0x50,
         0x50, 0, 0, a1, 4, 4, a0, 0x10,
         0, 0, 0x81, 4, 0, 1, 0, 0,
-        0, 1, 0, a4, a5);
+        0, 1, 0, LOW_U8(a4), a5);
     func_1516D99C(3, 0, 0, 0x2B,
         0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0,
         2, 0, 0, 0, 0, 0, 0, 3,
         0, 0, 0, 0, 0, 0, 0, 0x50,
         0x50, 0, 0, 7, 4, 4, a0, a2,
         0, 0, 0x81, 5, 0, 1, 0, 0,
-        0, 1, a3, a4, a5);
+        0, 1, a3, LOW_U8(a4), a5);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_19A8B0/func_1516F548.s")
+/* Spawns two type-0xD particle emitters at (arg0, arg1, arg2) -- identical apart
+ * from their spawn table entry (arg10 vs arg11) and the second one's extra mode
+ * byte 6 -- then plays 3-D sound 7 at the same spot with arg3 as its user data.
+ * The position is latched into posX/posY/posZ while the first emitter is being
+ * built so both later calls reuse it. */
+void func_1516F548(
+    s32 arg0, s32 arg1, s32 arg2, s32 arg3,
+    s32 arg4, s32 arg5, s32 arg6, s32 arg7,
+    s32 arg8, s32 arg9, s32 arg10, s32 arg11,
+    s32 arg12, s32 arg13, s32 arg14, s32 arg15,
+    s32 arg16) {
+    s32 posX;
+    s32 posY;
+    s32 posZ;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_19A8B0/func_1516F864.s")
+    func_1516D99C(posX = (s16)arg0, posY = (s16)arg1, posZ = (s16)arg2, 0xD,
+        0, 0x67, 0x17, 0xD, 0, 0, 0x12, 0,
+        2, (u8)arg4, 0, (u8)arg6, 0, 0, 0, arg10,
+        0, 0, 0, 0, 0, 0, 0, (s16)((arg7 << 12) / 4096),
+        (s16)((arg7 << 12) / 4096), (s16)((arg8 << 12) / 4096), (s16)((arg8 << 12) / 4096), (u16)arg3, (u8)arg9, 0x14, 0xFF, 0x10,
+        (s16)arg5, 0xC8, 1, 0, 0, 1, 0, 0,
+        0, 0, 0, LOW_U8(arg15), arg16);
+    func_1516D99C(LOW_S16(posX), LOW_S16(posY), LOW_S16(posZ), 0xD,
+        0, 0x67, 0x17, 0xD, 0, 0, 0x12, 0,
+        2, (u8)arg4, 0, (u8)arg6, 0, 0, 0, arg11,
+        0, 0, 0, 0, 0, 0, 0, (s16)((arg7 << 12) / 4096),
+        (s16)((arg7 << 12) / 4096), (s16)((arg8 << 12) / 4096), (s16)((arg8 << 12) / 4096), (u16)arg3, (u8)arg9, 0x14, 0xFF, 0x10,
+        (s16)arg5, 0xC8, 1, 6, 0, 1, 0, 0,
+        0, 0, 0, LOW_U8(arg15), arg16);
+    func_1000FA64(7, LOW_S16(posX), LOW_S16(posY), LOW_S16(posZ), 0x36B0, 0x3E8, 0x64,
+        (s32)func_1000EBC4, (void *)arg3, 0, 0, 0);
+}
+
+typedef struct Game19A8B0Motion {
+    u8 pad0[0xE];
+    s16 x;
+    s16 y;
+    s16 z;
+    s16 scaleX;
+    s16 scaleY;
+    s16 velocityY;
+    u8 pad1A[5];
+    u8 alpha;
+    u8 pad20[3];
+    u8 kind;
+    u8 active;
+    u8 yFraction;
+    s8 velocityXHigh;
+    u8 velocityXLow;
+    s8 velocityZHigh;
+    u8 velocityZLow;
+    u8 xFraction;
+    u8 zFraction;
+    u8 sizeHigh;
+    u8 sizeLow;
+    u8 pad2E[2];
+    void *link;
+} Game19A8B0Motion;
+
+#define MOTION ((Game19A8B0Motion *)arg0)
+void func_1516F864(s32 arg0) {
+    s32 x;
+    s32 velocity;
+    s32 z;
+
+    x = MOTION->x;
+    x <<= 8;
+    x += MOTION->xFraction;
+    velocity = MOTION->velocityXHigh;
+    velocity <<= 8;
+    velocity += MOTION->velocityXLow;
+    x += velocity * D_800BE9E4;
+    MOTION->x = x >> 8;
+    x = (u8)x;
+    MOTION->xFraction = x;
+    z = MOTION->z;
+    z <<= 8;
+    z += MOTION->zFraction;
+    velocity = MOTION->velocityZHigh;
+    velocity <<= 8;
+    velocity += MOTION->velocityZLow;
+    z += velocity * D_800BE9E4;
+    MOTION->z = z >> 8;
+    z = (u8)z;
+    MOTION->zFraction = z;
+}
+#undef MOTION
 
 void func_1516F8EC(s32 arg0, s32 arg1)
 {
@@ -568,7 +740,85 @@ void func_1516FA88(s16 arg0, s16 arg1, s16 arg2, s32 arg3, u8 arg4, s32 arg5) {
         arg3, 0, 0, arg4, arg5);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_19A8B0/func_1516FBCC.s")
+typedef struct {
+    char pad_0[0x14];
+    s16 sizeX;
+    s16 sizeY;
+    char pad_0x18[0x4];
+    u8 r;
+    u8 g;
+    u8 b;
+    u8 alpha;
+    char pad_0x20[0x4];
+    u8 fadingIn;
+    char pad_0x25[0x1];
+    u8 r0;
+    u8 g0;
+    u8 b0;
+    u8 r1;
+    u8 g1;
+    u8 b1;
+    u8 blend;
+    s8 growX;
+    s8 growY;
+    u8 fadeShift;
+} Obj1516FBCC;
+
+s32 func_1516FBCC(Obj1516FBCC *arg0) {
+    s32 v; /* alpha, then growth, then blend */
+    s32 lo;
+    s32 hi;
+
+    v = arg0->alpha;
+    if (arg0->fadingIn != 0) {
+        if (v != 0xFF) {
+            v += D_800BE9E4 << 4;
+            if (v >= 0x100) {
+                v = 0xFF;
+            }
+            arg0->alpha = v;
+        }
+    } else {
+        if (v != 0) {
+            v -= D_800BE9E4 << arg0->fadeShift;
+            if (v < 0) {
+                v = 0;
+            }
+            arg0->alpha = v;
+        }
+    }
+    if ((arg0->fadingIn == 0) && (v == 0)) {
+        return 1;
+    }
+    v = arg0->growX;
+    v *= D_800BE9E4;
+    arg0->sizeX += v;
+    v = arg0->growY;
+    v *= D_800BE9E4;
+    arg0->sizeY += v;
+    /* BUG (original game): sizeX is tested twice, sizeY never */
+    if ((arg0->sizeX <= 0) || (arg0->sizeX <= 0)) {
+        arg0->sizeX = arg0->sizeY = 0;
+        return 1;
+    }
+    v = arg0->blend;
+    v += D_800BE9E4;
+    if (v >= 0x80) {
+        v = 0x7F;
+    }
+    arg0->blend = v;
+    v *= 2;
+    lo = arg0->r0;
+    hi = arg0->r1;
+    arg0->r = (((hi - lo) * v) >> 8) + lo;
+    lo = arg0->g0;
+    hi = arg0->g1;
+    arg0->g = (((hi - lo) * v) >> 8) + lo;
+    lo = arg0->b0;
+    hi = arg0->b1;
+    arg0->b = (((hi - lo) * v) >> 8) + lo;
+    return 0;
+}
 
 s32 func_1516FD50(Obj1516FadeStepState *arg0) {
     s32 temp_a1;
@@ -637,6 +887,70 @@ void func_15170034(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_19A8B0/func_15170500.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_19A8B0/func_151707E0.s")
+typedef struct {
+    char pad_0[0x18];
+    s16 field_0x18;
+    char pad_0x1A[0x5];
+    u8 field_0x1F;
+    char pad_0x20[0x4];
+    u8 field_0x24;
+    char pad_0x25[0x1];
+    s8 field_0x26;
+    u8 field_0x27;
+    char pad_0x28[0x7];
+    u8 field_0x2F;
+} Obj151707E0;
+
+extern s32 func_151EF610(void);
+
+s32 func_151707E0(Obj151707E0 *arg0) {
+    s32 active;
+    s32 temp;
+    s32 velX;
+
+    active = arg0->field_0x24;
+    temp = arg0->field_0x1F;
+    if (active != 0) {
+        if (temp == 0) {
+            arg0->field_0x24 = (func_150ADA20() % 0x19U) + 0xC8;
+        }
+        if (temp != 0xFE) {
+            temp += D_800BE9E4 << 6;
+            if (temp >= 0xFF) {
+                temp = 0xFE;
+            }
+            arg0->field_0x1F = temp;
+        }
+    } else {
+        if (temp != 0) {
+            temp -= D_800BE9E4 << 4;
+            if (temp < 0) {
+                temp = 0;
+            }
+            arg0->field_0x1F = temp;
+        }
+    }
+
+    if ((arg0->field_0x24 == 0) && (temp == 0)) {
+        return 1;
+    }
+
+    func_1516F864((s32) arg0);
+    if (arg0->field_0x2F != 0) {
+        func_1516F8EC((s32) arg0, (func_151EF610() % 0x20) + 0xE6);
+        func_1516F91C((s32) arg0, (func_151EF610() % 0x20) + 0xE6);
+        arg0->field_0x18 = 0;
+    } else {
+        velX = (arg0->field_0x26 << 8) + arg0->field_0x27;
+        temp = arg0->field_0x26 * 0x100;
+        temp += arg0->field_0x27;
+        if (((velX * velX) + (temp * temp)) >= 0x7D1) {
+            func_1516F8EC((s32) arg0, (func_151EF610() % 0x20) + 0xDC);
+            func_1516F91C((s32) arg0, (func_151EF610() % 0x20) + 0xDC);
+        }
+        arg0->field_0x18 = 0;
+    }
+    return 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_19A8B0/func_151709B4.s")

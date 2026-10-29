@@ -178,16 +178,153 @@ void func_151303BC(s32 a0, u8 a1, s32 a2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_15D730/func_15130A9C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_15D730/func_1513137C.s")
+typedef struct Game15D730ColorState {
+    u8 pad0[0x24];
+    u8 field24;
+    u8 field25;
+    u8 field26;
+    u8 field27;
+    u8 field28;
+    u8 field29;
+    u8 field2A;
+    u8 field2B;
+    u8 field2C;
+    u8 pad2D[0x43];
+    u8 mode70;
+    u8 mode71;
+} Game15D730ColorState;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_15D730/func_15131514.s")
+void func_1513137C(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, Game15D730ColorState *arg4) {
+    s16 temp_v0;
+    s16 temp_v0_2;
+    s16 temp_v0_3;
 
-void func_15131514(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4);
-void func_1513137C(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4);
+    switch (arg4->mode70) {
+    case 1:
+        *arg2 = 0;
+        temp_v0 = *arg2;
+        *arg1 = temp_v0;
+        *arg0 = temp_v0;
+        *arg3 = (s16) ((s32) (arg4->field27 * arg4->field2B) >> 8);
+        return;
+    case 2:
+        *arg0 = (s16) arg4->field24;
+        *arg1 = (s16) arg4->field25;
+        *arg2 = (s16) arg4->field26;
+        *arg3 = (s16) ((s32) (arg4->field27 * arg4->field2B) >> 8);
+        return;
+    case 3:
+        *arg0 = (s16) arg4->field28;
+        *arg1 = (s16) arg4->field29;
+        *arg2 = (s16) arg4->field2A;
+        *arg3 = (s16) ((s32) (arg4->field27 * arg4->field2B) >> 8);
+        return;
+    case 4:
+    case 6:
+        *arg3 = 0;
+        temp_v0_2 = *arg3;
+        *arg2 = temp_v0_2;
+        *arg1 = temp_v0_2;
+        *arg0 = temp_v0_2;
+        return;
+    case 5:
+        *arg2 = 0;
+        temp_v0_3 = *arg2;
+        *arg1 = temp_v0_3;
+        *arg0 = temp_v0_3;
+        *arg3 = (s16) arg4->field2B;
+        return;
+    case 7:
+        *arg0 = (s16) arg4->field24;
+        *arg1 = (s16) arg4->field25;
+        *arg2 = (s16) arg4->field26;
+        *arg3 = (s16) arg4->field2B;
+        return;
+    case 8:
+        *arg0 = (s16) arg4->field24;
+        *arg1 = (s16) arg4->field25;
+        *arg2 = (s16) arg4->field26;
+        *arg3 = 0;
+        return;
+    default:
+        *arg0 = (s16) ((s32) (arg4->field24 * arg4->field2C) >> 8);
+        *arg1 = (s16) ((s32) (arg4->field25 * arg4->field2C) >> 8);
+        *arg2 = (s16) ((s32) (arg4->field26 * arg4->field2C) >> 8);
+        *arg3 = 0;
+        return;
+    }
+}
+
+void func_15131514(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, Game15D730ColorState *arg4) {
+    s16 temp_v0;
+    s16 temp_v0_3;
+    u8 temp_v0_2;
+    u8 temp_v0_4;
+    u8 temp_v0_5;
+
+    switch (arg4->mode71) {
+    case 1:
+    case 5:
+        *arg2 = 0;
+        temp_v0 = *arg2;
+        *arg1 = temp_v0;
+        *arg0 = temp_v0;
+        *arg3 = 0;
+        return;
+    case 2:
+        temp_v0_2 = arg4->field2C;
+        *arg2 = (s16) temp_v0_2;
+        *arg1 = (s16) temp_v0_2;
+        *arg0 = (s16) temp_v0_2;
+        *arg3 = 0;
+        return;
+    case 8:
+        *arg2 = 0;
+        temp_v0_3 = *arg2;
+        *arg1 = temp_v0_3;
+        *arg0 = temp_v0_3;
+        *arg3 = (s16) arg4->field2B;
+        return;
+    case 3:
+        *arg0 = (s16) arg4->field24;
+        *arg1 = (s16) arg4->field25;
+        *arg2 = (s16) arg4->field26;
+        *arg3 = 0;
+        return;
+    case 4:
+    case 6:
+        *arg0 = (s16) arg4->field28;
+        *arg1 = (s16) arg4->field29;
+        *arg2 = (s16) arg4->field2A;
+        *arg3 = (s16) arg4->field2B;
+        return;
+    case 7:
+        temp_v0_4 = arg4->field2C;
+        *arg2 = (s16) temp_v0_4;
+        *arg1 = (s16) temp_v0_4;
+        *arg0 = (s16) temp_v0_4;
+        *arg3 = (s16) arg4->field2B;
+        return;
+    case 9:
+        *arg0 = (s16) arg4->field24;
+        *arg1 = (s16) arg4->field25;
+        *arg2 = (s16) arg4->field26;
+        *arg3 = (s16) arg4->field2B;
+        return;
+    default:
+        temp_v0_5 = arg4->field2C;
+        *arg2 = (s16) temp_v0_5;
+        *arg1 = (s16) temp_v0_5;
+        *arg0 = (s16) temp_v0_5;
+        *arg3 = (s16) ((s32) (arg4->field27 * arg4->field2B) >> 8);
+        return;
+    }
+}
+
 
 void func_1513164C(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7, s32 a8) {
-    func_15131514(a4, a5, a6, a7, a8);
-    func_1513137C(a0, a1, a2, a3, a8);
+    func_15131514((s16 *)a4, (s16 *)a5, (s16 *)a6, (s16 *)a7, (Game15D730ColorState *)a8);
+    func_1513137C((s16 *)a0, (s16 *)a1, (s16 *)a2, (s16 *)a3, (Game15D730ColorState *)a8);
 }
 
 void func_151318E8(f32 *a0, f32 a1);
@@ -245,7 +382,9 @@ s32 func_151317C8(s32 *a0) {
     return D_80089844[idx](a0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_15D730/func_15131814.s")
+s32 func_15131814(s32 arg0, s32 arg1) {
+    return 0;
+}
 
 void func_15131828(Obj15130280 *arg0, f32 *arg1, u8 *arg2, u8 *arg3) {
     arg0->field_0x4C = arg1[0] * func_151423D8((u8)(arg2[0] - 0x40));
@@ -281,22 +420,64 @@ s32 func_15131958(f32 *a0, f32 a1) {
     }
 }
 
-s32 func_151319C4(void *arg0, s32 arg1, void *arg2);
+typedef struct Obj151319C4 {
+    u8 pad0[0x3C];
+    f32 unk3C;
+    f32 unk40;
+    f32 unk44;
+    f32 unk48;
+    u8 pad4C[0x34];
+    f32 unk80;
+} Obj151319C4;
+
+typedef struct Arg151319C4 {
+    u8 unk0;
+    s8 unk1;
+} Arg151319C4;
+
+s32 func_151319C4(Obj151319C4 *arg0, f32 *arg1, Arg151319C4 *arg2);
 
 s32 func_151319A4(u8 *arg0, s32 arg1) {
-    return func_151319C4(arg0, arg1, arg0 + 0xA8);
+    return func_151319C4((Obj151319C4 *)arg0, (f32 *)arg1, (Arg151319C4 *)(arg0 + 0xA8));
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_15D730/func_151319C4.s")
+extern s32 func_1514672C(f32 *);
+extern s32 func_15046C80(f32 *, s32, f32, f32 *);
+extern f32 D_800A3844;
+extern s32 (*D_80089874[])(Obj151319C4 *, f32 *, f32 *, Arg151319C4 *);
+
+s32 func_151319C4(Obj151319C4 *arg0, f32 *arg1, Arg151319C4 *arg2) {
+    u8 ret;
+    f32 sp30[3];
+
+    ret = 1;
+    if ((arg2->unk0 & 1) && arg2->unk1 != -1 && D_80089874[arg2->unk1] != NULL && arg0->unk44 < arg1[1]) {
+        sp30[0] = arg0->unk40;
+        sp30[1] = arg1[1];
+        sp30[2] = arg0->unk48;
+        if (func_1514672C(sp30) == 0) {
+            return 0;
+        }
+        if (func_15046C80(sp30, 0, arg0->unk44 - arg0->unk3C * D_800A3844, &arg0->unk80) != 0) {
+            f32 sp24[3];
+
+            sp24[0] = sp30[0];
+            sp24[1] = arg0->unk80;
+            sp24[2] = sp30[2];
+            ret = D_80089874[arg2->unk1](arg0, arg1, sp24, arg2);
+        }
+    }
+    return ret;
+}
 
 s32 func_15131AFC(Obj15130280 *arg0, s32 arg1) {
     func_15131958(arg0->field_0x58, arg0->field_0xA8);
-    return func_151319C4(arg0, arg1, &arg0->field_0xB0);
+    return func_151319C4((Obj151319C4 *)arg0, (f32 *)arg1, (Arg151319C4 *)&arg0->field_0xB0);
 }
 
 s32 func_15131B3C(Obj15130280 *arg0, s32 arg1) {
     func_15131918(arg0->field_0x58, arg0->field_0xA8);
-    return func_151319C4(arg0, arg1, &arg0->field_0xB0);
+    return func_151319C4((Obj151319C4 *)arg0, (f32 *)arg1, (Arg151319C4 *)&arg0->field_0xB0);
 }
 
 s32 func_15131B7C(Obj15131B7C *arg0, s32 arg1, f32 *arg2, Struct15131B7CArg3 *arg3) {

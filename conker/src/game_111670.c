@@ -61,7 +61,44 @@ typedef struct Struct150E5558 {
 } Struct150E5558;
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_111670/func_150E41C0.s")
+typedef struct Struct150E42F8D99F0
+{
+  s16 unk0;
+  s16 unk2;
+  s16 unk4;
+} Struct150E42F8D99F0;
+extern Struct150E42F8D99F0 D_800D99F0;
+
+void func_150E41C0(void) {
+    s32 x;
+    s32 y;
+    s32 z;
+    f32 angle;
+    f32 dy;
+    f32 dz;
+    f32 s;
+    f32 c;
+    f32 dx;
+
+    x = D_800DBFF0->unk2F8;
+    y = D_800DBFF0->unk2FC;
+    z = D_800DBFF0->unk300;
+    angle = D_800DBFF0->unk398;
+    s = sinf(angle);
+    c = cosf(angle);
+    dx = 0.0f;
+    dy = 500.0f * s;
+    dz = -500.0f * c;
+    angle = D_800DBFF0->unk3A0;
+    s = sinf(angle);
+    c = cosf(angle);
+    x += dx * c + dz * s;
+    z += dz * c - dx * s;
+    y += dy;
+    D_800D99F0.unk0 = x;
+    D_800D99F0.unk2 = y;
+    D_800D99F0.unk4 = z;
+}
 
 u8 func_150ADA20(void);
 extern s32 D_800DBE3C;
@@ -71,13 +108,6 @@ extern f32 D_800A1060;
 extern s32 func_1510F8CC(s32);
 extern s32 func_1510F8D8(s32, s32, s32, s32 *);
 extern void func_150E4550(f32, f32, f32, s32, s32, s32, s32);
-typedef struct Struct150E42F8D99F0
-{
-  s16 unk0;
-  s16 pad2;
-  s16 unk4;
-} Struct150E42F8D99F0;
-extern Struct150E42F8D99F0 D_800D99F0;
 void func_150E42F8(s32 arg0)
 {
   s32 temp_s0;

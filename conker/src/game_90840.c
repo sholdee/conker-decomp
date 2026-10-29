@@ -101,13 +101,13 @@ struct sub150636A4
 };
 void func_150636A4(struct127 *arg0)
 {
-  struct tgt150636A4 *new_var;
+  struct tgt150636A4 *target;
   struct mid150636A4 *temp_v0;
   temp_v0 = ((struct sub150636A4 *) arg0->unk31C)->unkB0;
   if (temp_v0 != 0)
   {
-    new_var = temp_v0->unk31C;
-    if (new_var != 0)
+    target = temp_v0->unk31C;
+    if (target != 0)
     {
       temp_v0->unk31C->unk195 = 0x1E;
       temp_v0->unk31C->unk196 = arg0 - D_800CC2D0;
@@ -116,7 +116,121 @@ void func_150636A4(struct127 *arg0)
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_90840/func_150636F0.s")
+typedef struct Game90840Requests {
+    u8 pad0[0x78];
+    u8 action;
+    u8 pad79[0x36];
+    u8 soundPending;
+    u8 padB0[0xFA];
+    s16 count;
+    u8 pad1AC[8];
+    u8 pending;
+} Game90840Requests;
+
+void func_15063FA0(struct127 *, s32);
+void func_151D57F8(struct127 *, s32);
+s32 func_15081E78(struct127 *, void *, s32);
+void func_10010558(u16, void *, s32, s32, s32, s32);
+void func_150FFCC8(void *, void *, void *, void *, void *);
+void func_150FFD84(f32 *, f32 *, s32, s32);
+void func_1512D2E4(void *, s32);
+
+void func_150636F0(void) {
+    struct127 *actor;
+    s32 index;
+    s32 action;
+    f32 position[3];
+    f32 direction[3];
+    f32 side[3];
+    f32 up[3];
+    Game90840Requests *requests;
+    void *resource;
+
+    D_800CC2B0 = 0;
+    actor = D_800CC2D0;
+    index = 0;
+    do {
+        if ((*(s32 *)actor != 0) && (actor->unk31C != 0) &&
+            (((Game90840Requests *)actor->unk31C)->pending != 0)) {
+            D_800C3E78 = index;
+            D_800D154C = actor;
+            requests = (Game90840Requests *)actor->unk31C;
+            if (requests->pending & 1) {
+                func_15063628(actor, 0.0f);
+                requests = (Game90840Requests *)actor->unk31C;
+            }
+            if (requests->pending & 4) {
+                func_151D57F8(actor, 0);
+                requests = (Game90840Requests *)actor->unk31C;
+            }
+            if (requests->pending & 8) {
+                func_151D57F8(actor, 1);
+                requests = (Game90840Requests *)actor->unk31C;
+            }
+            if (requests->pending & 2) {
+                action = requests->action & ~0x80;
+                switch (action) {
+                case 0x18:
+                case 0x41:
+                    func_15063FA0(actor, 6);
+                    requests = (Game90840Requests *)actor->unk31C;
+                    requests->count++;
+                    resource = *(void **)((u8 *)actor + 0x318);
+                    if (resource != 0) {
+                        func_1512D2E4(resource, 1);
+                    }
+                    break;
+                case 0x14:
+                case 0x3F:
+                    if (action == 0x14) {
+                        func_15063FA0(actor, 2);
+                    } else {
+                        func_15063FA0(actor, 0x12);
+                    }
+                    requests = (Game90840Requests *)actor->unk31C;
+                    requests->count++;
+                    resource = *(void **)((u8 *)actor + 0x318);
+                    if (resource != 0) {
+                        func_1512D2E4(resource, 1);
+                    }
+                    break;
+                case 0x24:
+                    if (func_15081E78(actor, (u8 *)requests + 0xB0, 7) != 2) {
+                        requests = (Game90840Requests *)actor->unk31C;
+                        if (requests->soundPending != 0) {
+                            requests->soundPending = 0;
+                            if (func_10010894(actor) == 0) {
+                                func_10010558((u16)((u32)func_150ADA20() % 3 + 0x53B),
+                                             actor, 0x7D00, 0x320, 0xBB8, 0x1E);
+                            }
+                        }
+                    }
+                    resource = *(void **)((u8 *)actor + 0x318);
+                    if (resource != 0) {
+                        func_1512D2E4(resource, 1);
+                    }
+                    break;
+                case 0x3B:
+                    func_15081E78(actor, (u8 *)requests + 0xB0, 0x10);
+                    func_150FFCC8(actor, position, direction, side, up);
+                    func_150FFD84(position, direction, 0xFF, 1);
+                    break;
+                case 0x23:
+                    func_15081E78(actor, (u8 *)requests + 0xB0, 8);
+                    resource = *(void **)((u8 *)actor + 0x318);
+                    if (resource != 0) {
+                        func_1512D2E4(resource, 0);
+                    }
+                    break;
+                }
+                requests = (Game90840Requests *)actor->unk31C;
+            }
+            requests->pending = 0;
+        }
+        index++;
+        actor++;
+    } while (index != 0x19);
+}
 
 s32 func_150639BC(struct127 *arg0) {
     D_800CC2B2 = arg0->unk7A - arg0->unk31C->unk12 - func_15063390(arg0);
@@ -185,9 +299,79 @@ void func_15063B64(struct127 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_90840/func_15063C60.s")
+/* Object-level asm-differ reports score 40 here, but the difference is NOT codegen: all
+ * 137 instructions, registers, branch targets, delay slots and IDO's peel-1-then-unroll-by-4
+ * are identical. The only differing words are four relocation ADDENDS, where the extracted
+ * .s names interior symbols of D_800CC2D0[26] (D_800CC5FC = +0x32C, D_800CC2D4 = +0x4,
+ * D_800CC335 = +0x65, D_800D121C = +0x4F4C) and C naturally spells them as base+offset.
+ * Both resolve to the same linked addresses, so the ROM bytes are identical -- which the
+ * force-clean full-ROM sha1 gate confirms. */
+struct127 *func_15063C60(struct127 *arg0, s32 arg1) {
+    s32 i;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_90840/func_15063E84.s")
+    for (i = 0; i < 25; i++) {
+        if ((D_800CC2D0[i].interaction_state != 0) && (arg1 == D_800CC2D0[i].id) &&
+            (((arg0 - D_800CC2D0) + 1) == D_800CC2D0[i].unk65)) {
+            return &D_800CC2D0[i];
+        }
+    }
+    return NULL;
+}
+
+typedef struct Ctl15063E84 {
+    u8 pad0[0x27];
+    u8 unk27;
+    u8 pad28[0x50];
+    u8 unk78;
+    u8 pad79[0x1C];
+    u8 unk95;
+    u8 pad96[0x84];
+    u8 unk11A;
+} Ctl15063E84;
+
+/* struct126 declares unk95 as s8; golden reads it with lbu, so view the block through a local u8 layout. */
+#define CTL ((Ctl15063E84 *)arg0->unk31C)
+
+s32 func_15063E84(struct127 *arg0, u16 anim, u16 flags, s32 arg3, s32 arg4) {
+    s32 state;
+
+    if (arg4 & 0x4000) {
+        if (arg0->unk28 == 0.0f) {
+            if (arg0->y_velocity <= 0.0f) {
+                if (CTL->unk95 == 0) {
+                    if (arg0->unk84.uh != anim) {
+                        state = CTL->unk11A;
+                        if (state == 0 || state == 2) {
+                            if (CTL->unk27 == 0) {
+                                if (arg3 != 0 && arg0->disable_jump != 0) {
+                                    return 999;
+                                }
+                                if (flags & 1) {
+                                    arg0->disable_jump = 20;
+                                }
+                                if (arg3 != 0) {
+                                    if (CTL->unk11A == 2) {
+                                        return 999;
+                                    }
+                                    CTL->unk11A = 1;
+                                } else {
+                                    CTL->unk11A = 3;
+                                }
+                                CTL->unk78 = arg3;
+                                arg0->disable_run = 0xFF;
+                                arg0->unk83 = 0xFF;
+                                return anim;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return 999;
+}
+
+#undef CTL
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_90840/func_15063FA0.s")
 
@@ -214,7 +398,40 @@ void func_150649A0(s32 arg0, s32 arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_90840/func_15064A14.s")
+void func_15064A14(struct127 *arg0) {
+    struct127 *partner;
+    s32 anim;
+    s32 big;
+
+    partner = &D_800CC2D0[arg0->unk65 - 1];
+    anim = 0xF;
+    if (partner->id == 0xC) {
+        anim = 0x5A;
+        if (partner->unk84.uh == 0xC) {
+            anim = 0x5B;
+        } else if (partner->unk84.uh == 0xD) {
+            anim = 0x5C;
+        }
+    } else if (partner->id == 0x53) {
+        anim = 0x8C;
+        if (partner->unk84.uh == 0xB) {
+            anim = 0xA2;
+        } else if (partner->unk84.uh == 0xD) {
+            anim = 0xA3;
+        }
+    } else if (partner->id == 0x21) {
+        anim = 0x169;
+    } else if (partner->id == 0x8A) {
+        big = ((arg0->unk31C != NULL) && (((u8 *)arg0->unk31C)[0x1B2] != 0)) ? 1 : 0;
+        if (partner->unk232 == 4) {
+            anim = big ? 0x350 : 0x1A4;
+        } else {
+            anim = big ? 0x34F : 0x1A1;
+        }
+    }
+    func_1505E650(arg0, anim, 1.0f, 6.0f, 0.0f, 0.0f, 0);
+    func_150649A0(arg0->unk65 - 1, D_800C3E78);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_90840/func_15064B94.s")
 

@@ -11,6 +11,8 @@ extern u8 D_160037F0;
 extern func_160006CC_sp3C D_16003B48;
 
 void func_160006CC(struct118 *arg0);
+void func_16000590(struct118 *thread);
+void func_16001044(s32 position, s32 mode, u32 value);
 
 void func_16000000(void) {
     func_160012B0(278, &D_160046AC);
@@ -171,7 +173,46 @@ void func_16000424(struct118 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/func_16000590.s")
+extern u8 *D_16003B30[6];
+extern u8 D_160047A4[];
+extern u8 D_160047AC[];
+
+void func_16000590(struct118 *thread) {
+    s32 position;
+    s32 i;
+    s32 base;
+    u32 bits;
+    u32 page = 0;
+    u32 *words = (u32 *)thread;
+
+    bits = words[0x12C / 4];
+    func_160012B0(3, D_160047A4);
+    func_16001044(0xA, 0, bits);
+    bits >>= 12;
+    position = 0x2C;
+    for (i = 0; i < 6; i++, bits >>= 1) {
+        if (bits & 1) {
+            func_160012B0(position, D_16003B30[i]);
+            position += 0x20;
+        }
+    }
+    i = 0;
+    position = 0xC3;
+    if (D_16003B28 == 1) {
+        base = 0x4C;
+    } else {
+        base = 0x6C;
+        page = 0x10;
+    }
+    do {
+        func_160012B0(position, D_160047AC);
+        func_16001044(position + 2, 1, i + page);
+        func_16001044(position + 5, 2, words[base + 1]);
+        base += 2;
+        position += 0x20;
+        i++;
+    } while (i < 16);
+}
 
 void func_160006CC(struct118 *arg0) {
     func_160006CC_sp3C sp3C;
@@ -395,8 +436,166 @@ s32 func_16000A5C(void) {
 }
 
 // called from func_10007DAC
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/func_16000B14.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/func_16000F8C.s")
+typedef struct {
+    u16 state;
+    u16 retraceCount;
+    void *framep;
+} DebuggerViContext;
+extern DebuggerViContext *D_8002BDE0;
+extern u32 D_8003C8E8[4];
+extern u32 D_160038AC[32];
+extern u32 D_1600392C[32];
+extern u32 D_160039AC[32];
+extern u32 D_16003A2C[32];
+extern u32 D_160039E8;
+extern u32 D_16003A68;
+extern s32 D_16003894;
+extern s32 D_16003898;
+extern void (*D_16003AF8[4])(void);
+extern s32 (*D_16003B08[4])(void);
+extern OSContPad D_160036F0[4];
+void func_16003650(void);
+void func_16001678(void);
+s32 func_16001700(void);
+void func_16001830(OSContPad *data);
+
+s32 func_16000B14(struct OSThread_s *thread) {
+    u32 *context;
+    u32 *frame;
+    u32 entryLo;
+    s32 first;
+    s32 state;
+    s32 stick;
+    u32 pc;
+    u32 page;
+    s32 odd;
+    u32 flags;
+    s32 offset;
+    s32 *entry;
+    u32 *saved;
+    void (*draw)(void);
+    s32 (*input)(void);
+
+    state = 0;
+    first = 1;
+    if (D_8002AC5C != 0) {
+        return 0;
+    }
+    D_16003888 = 0;
+    if ((D_8002AAE8[0] == 0) || (D_8002AAE8[1] == 0)) {
+        D_8002AAE8[0] = 0x80350000;
+        D_8002AAE8[1] = 0x80350000;
+        return 0;
+    }
+    func_16003650();
+    context = D_8003C8E8;
+    saved = context;
+    D_160038AC[15] = saved[0];
+    D_1600392C[15] = saved[1];
+    D_160039E8 = saved[2];
+    D_16003A68 = saved[3];
+    if ((((u32 *)thread)[0x11C / 4] & 0xFF000000) != 0x15000000) {
+        D_16003AF0 = 1;
+    } else {
+        page = ((u32 *)thread)[0x11C / 4] & ~0xFFF;
+        odd = page & 0x1000;
+        pc = page & ~0x1000;
+        page = pc;
+        D_16003AF0 = 0;
+        for (offset = 0; offset < 32; offset++) {
+            if (page == D_160039AC[offset]) {
+                entryLo = odd ? D_1600392C[offset] : D_160038AC[offset];
+                flags = entryLo;
+                if (flags & 2) {
+                    D_16003AF0 = 1;
+                }
+            }
+        }
+    }
+    if ((((u32)D_8003C8E0 >> 24) & 0xFF) == 0xC) {
+        thread = &D_80031AE0;
+    }
+    frame = (u32 *)D_8002BDE0->framep;
+    if ((saved = frame) == (u32 *)D_8002AAE8[1]) {
+        *(s8 *)&D_16003888 = 1;
+    }
+    D_1600389C = (struct118 *)thread;
+    D_160038A4 = 0;
+    if ((((s32 *)thread)[0x120 / 4] == 0x20) &&
+        ((u32)func_150AD770 == ((u32 *)thread)[0x11C / 4])) {
+        *(s8 *)&D_160038A4 = 1;
+    }
+    do {
+        if ((first == 0) && (state & 2)) {
+            func_16001678();
+        }
+        draw = D_16003AF8[D_16003AF4];
+        if (draw != 0) {
+            draw();
+        }
+        osWritebackDCacheAll();
+        do {
+            state = 0;
+            D_16003898 = D_16003894;
+            func_16001700();
+            func_16001830(D_160036F0);
+            if (first != 0) {
+                D_16003898 = D_16003894;
+            }
+            D_16003894 = D_160036F0[0].button;
+            stick = D_160036F0[0].stick_x;
+            if (stick >= 0x33) {
+                D_16003894 |= 0x20000;
+            }
+            if (stick < -0x32) {
+                D_16003894 |= 0x10000;
+            }
+            stick = D_160036F0[0].stick_y;
+            if (stick >= 0x33) {
+                D_16003894 |= 0x40000;
+            }
+            if (stick < -0x32) {
+                D_16003894 |= 0x80000;
+            }
+            D_16003890 = (D_16003894 ^ D_16003898) & D_16003894;
+            input = D_16003B08[D_16003AF4];
+            if (input != 0) {
+                state = input();
+            }
+        } while (!(state & 5));
+        first = 0;
+    } while (!(state & 4));
+    if (D_16003AF0 == 0) {
+        ((s16 *)thread)[0x10 / 2] = 4;
+        ((s16 *)thread)[0x12 / 2] = 0;
+        return 1;
+    }
+    if ((((s32 *)thread)[0x120 / 4] == 0x20) && (D_160038A4 == 0)) {
+        ((s32 *)thread)[0x11C / 4] += 4;
+        return 1;
+    }
+    return 0;
+}
+s32 func_16001B34(u8 *buffer, const u8 *format, ...);
+
+void func_16000F8C(s32 position, f32 value) {
+    f32 copy;
+    u8 buffer[44];
+    u32 exponent;
+
+    if ((position >= (D_160038A0 << 5)) && (position < 0x341)) {
+        copy = value;
+        exponent = (u32)(*(s32 *)&copy & 0x7F800000) >> 23;
+        if (((exponent == 0) || (exponent >= 0xFF)) &&
+            ((exponent = *(s32 *)&copy * 2) != 0)) {
+            func_160012B0(position, D_160047D0);
+            return;
+        }
+        func_16001B34(buffer, D_160047D4, D_160047DC, D_160047E0,
+                      (f64)value);
+        func_160012B0(position, buffer);
+    }
+}
 // NON-MATCHING: lots to figure out
 // void func_16000F8C(s32 arg0, f32 arg1) {
 //     struct165 tmp;
@@ -418,13 +617,90 @@ s32 func_16000A5C(void) {
 //     }
 // }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/func_16001044.s")
+u8 *func_1600160C();
+u8 *func_160014F0(u8 *destination, u8 character);
+s32 func_16001B34(u8 *buffer, const u8 *format, ...);
+
+typedef struct DebuggerDecimalPowers {
+    s32 power[10];
+} DebuggerDecimalPowers;
+extern DebuggerDecimalPowers D_16003B50;
+extern const u8 D_160047E4[];
+extern const u8 D_160047E8[];
+extern const u8 D_160047F0[];
+extern const u8 D_160047F4[];
+
+void func_16001044(s32 position, s32 mode, u32 value) {
+    s32 index;
+    s32 started;
+    s32 decimal_index;
+    s32 digit;
+    s32 exponent;
+    u8 character;
+    DebuggerDecimalPowers powers;
+    s32 power;
+    u32 mantissa;
+    f32 copy;
+    u8 buffer[36];
+    u8 *destination;
+
+    powers = D_16003B50;
+    if ((position >= (D_160038A0 << 5)) && (position < 0x341)) {
+        destination = func_1600160C(position);
+        switch (mode) {
+        case 0:
+            destination += 0x70;
+            index = 0;
+            do {
+                character = value & 0xF;
+                if (character >= 10) {
+                    character += 7;
+                }
+                character += '0';
+                func_160014F0(destination, character);
+                value = (s32)value >> 4;
+                index++;
+                destination -= 0x10;
+            } while (index != 8);
+            break;
+        case 1:
+            if ((s32)value < 0) {
+                destination = func_160014F0(destination, '-');
+                value = -value;
+            }
+            started = 0;
+            for (decimal_index = 9; decimal_index >= 0; decimal_index--) {
+                power = powers.power[decimal_index];
+                digit = (s32)value / power;
+                value = (s32)value % power;
+                if ((digit > 0) || started || (decimal_index == 0)) {
+                    destination = func_160014F0(destination, digit + '0');
+                    started = 1;
+                }
+            }
+            break;
+        case 2:
+            exponent = (s32)(value & 0x7F800000) >> 23;
+            mantissa = value << 9;
+            if (((exponent <= 0) || (exponent >= 0xFF)) &&
+                ((exponent != 0) || mantissa)) {
+                func_160012B0(position, D_160047E4);
+                return;
+            }
+            *(s32 *)&copy = value;
+            func_16001B34(buffer, D_160047E8, D_160047F0, D_160047F4,
+                          (f64)copy);
+            func_160012B0(position, buffer);
+            break;
+        }
+    }
+}
 
 void func_160012B0(s32 arg0, u8 *arg1) {
     if (arg1 && (arg0 >= (D_160038A0 << 5)) && (arg0 < 833)) {
         s32 fb = func_1600160C();
         while (*arg1 != 0) {
-            fb = func_160014F0(fb, *arg1 & 0xFF);
+            fb = func_160014F0(fb, *arg1);
             *arg1++;
         }
     }
@@ -483,10 +759,52 @@ void func_16001390(s16 arg0, s16 arg1, register s16 arg2, s16 arg3)
   }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/func_160014F0.s")
+extern const u8 D_16003CE0[];
+
+u8 *func_160014F0(u8 *destination, u8 character) {
+    u16 *pixel;
+    u16 color;
+    u32 column;
+    u16 bits;
+    u32 row;
+    const u8 *glyph;
+    s32 code;
+    u16 value;
+
+    pixel = (u16 *)destination;
+    color = D_1600388C;
+    column = character;
+    bits = column;
+    code = bits;
+    if (code < 0x20) {
+        code = 0x20;
+    }
+    row = 0, glyph = D_16003CE0 + ((code - 0x20) << 3);
+    for (; row < 8; row++, glyph++) {
+        for (column = 0, bits = *glyph; column < 8; column++) {
+            value = (bits & 0x80) ? color : 1;
+            bits <<= 1;
+            *pixel++ = value;
+        }
+        pixel += D_160038A8 - 8;
+    }
+    return destination + 0x10;
+}
 
 // splat into framebuffer
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/func_1600160C.s")
+u8 *func_1600160C(s32 position) {
+    s32 row = position & 0xFFE0;
+    s32 offset = row;
+
+    if (D_160038A8 != 0x124) {
+        offset = (row >> 2) + row;
+    }
+    offset = (offset >> 2) * (D_160038A8 << 1);
+    offset += (position & 0x1F) << 4;
+    offset += D_160038A8 << 2;
+    offset += 0x10;
+    return (u8 *)D_8002AAE8[D_16003888] + offset;
+}
 
 // contains delay slot
 void func_16001678(void) {

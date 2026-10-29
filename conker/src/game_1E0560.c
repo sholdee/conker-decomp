@@ -171,7 +171,50 @@ final_return:
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1E0560/func_151B42A4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E0560/func_151B47D8.s")
+typedef struct {
+    s32 unk0;
+    u8 pad4[0x37];
+    u8 unk3B;
+    u8 pad3C[0x198];
+    s32 unk1D4;
+} Struct151B47D8Actor;
+
+typedef struct {
+    Struct151B47D8Actor *unk0;
+    u8 unk4;
+    u8 unk5;
+    u8 pad6[2];
+    f32 unk8[3];
+} Struct151B47D8Part;
+
+typedef struct {
+    u8 pad0[0x10];
+    u8 unk10;
+} Struct151B47D8;
+
+typedef struct {
+    Struct151B47D8Part p0;
+    Struct151B47D8Part p1;
+} Struct151B47D8Pair;
+
+void func_15143134(void *, s32, s32);
+
+s32 func_151B47D8(Struct151B47D8 *arg0, Struct151B47D8Pair *arg1, s32 arg2, u8 arg3) {
+    Struct151B47D8Actor *a = arg1->p0.unk0;
+    Struct151B47D8Actor *b = arg1->p1.unk0;
+
+    if (a->unk1D4 == 0 || b->unk1D4 == 0) {
+        arg0->unk10 |= 0xC;
+        return 1;
+    }
+    if (a->unk0 == 0 || a->unk3B != arg1->p0.unk4 || b->unk0 == 0 || b->unk3B != arg1->p1.unk4) {
+        return 0;
+    }
+    arg0->unk10 &= ~(arg3 ? 4 : 8);
+    func_15143134(arg3 ? arg1->p0.unk8 : arg1->p1.unk8, arg2,
+                  arg3 ? a->unk1D4 + (arg1->p0.unk5 << 6) : b->unk1D4 + (arg1->p1.unk5 << 6));
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1E0560/func_151B48DC.s")
 
@@ -194,7 +237,58 @@ s32 func_151B498C(s32 arg0, s32 *arg1, s32 *arg2, s32 *arg3, s32 *arg4, s32 *arg
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E0560/func_151B4A14.s")
+typedef struct {
+    u8 pad0[0xA4];
+    u8 unkA4;
+} Model151B4A14;
+
+typedef struct {
+    u8 pad0[0x150];
+    Model151B4A14 *unk150;
+} Obj151B4A14;
+
+extern void func_1502EC34(void *, u32 *, u32 *, u32 *, u32 *);
+
+u8 func_151B4A14(Obj151B4A14 *arg0, s32 *arg1, s32 *arg2, s32 *arg3, s32 *arg4, s32 *arg5,
+                 s32 *arg6, s32 *arg7, s32 *arg8, s32 *arg9, s32 *arg10, s32 *arg11,
+                 u8 *arg12, u8 *arg13) {
+    u8 ret;
+    s32 mode1;
+    s32 mode2;
+    Model151B4A14 *model;
+    u32 r;
+    u32 g;
+    u32 b;
+    u32 a;
+    s32 full;
+    u32 alpha;
+
+    ret = 1;
+    full = 0xFF;
+    mode1 = 0x200005;
+    mode2 = 0x60600;
+    model = arg0->unk150;
+    func_1502EC34(model, &r, &g, &b, &a);
+    if (model->unkA4 & 1) {
+        *arg1 = mode1;
+        *arg2 = mode2;
+        *arg3 = r;
+        *arg4 = g;
+        *arg5 = b;
+        *arg6 = full;
+        *arg9 = alpha = a;
+        *arg8 = alpha;
+        *arg7 = alpha;
+        *arg10 = full;
+        *arg11 = 0x100000;
+        *arg12 = 5;
+        *arg13 = 0x2F;
+    } else {
+        ret = func_151B498C(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13);
+    }
+    return ret;
+
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1E0560/func_151B4B78.s")
 

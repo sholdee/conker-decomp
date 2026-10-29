@@ -73,7 +73,24 @@ void func_151839F0(s32 arg0, s32 arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1B0740/func_15183ACC.s")
+void func_1510CE60(s32, s32, s32, s32, void *);
+
+void func_15183ACC(s32 arg0) {
+    u8 *allocated;
+
+    if (D_800DDE80[arg0].field0 == 0) {
+        allocated = (u8 *)func_1502B6BC(0, 0, 0, 2, 9, arg0 + 0xAD);
+        if (allocated != 0) {
+            D_800DDE80[arg0].field0 = allocated;
+            *(s32 *)((u8 *)(&D_800DDE80[arg0]) + 4) = *(s32 *)allocated;
+            *(s32 *)((u8 *)(&D_800DDE80[arg0]) + 8) = *(s32 *)(allocated + 8);
+            D_800DDE80[arg0].fieldC = *(s32 *)(allocated + 0x18);
+            D_800DDF78[arg0] = *(s32 *)(allocated + 0x10);
+            func_1510CE60(D_800DDF78[arg0], 0, 1, 0x3E, (u8 *)(&D_800DDE80[arg0]) + 0x10);
+            D_800DDF68[arg0] = 1;
+        }
+    }
+}
 
 extern u8 D_800A72D0[];
 
@@ -101,9 +118,122 @@ u32 *func_15183BA4(u32 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     return arg0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1B0740/func_15183C28.s")
+extern s8 D_800DDF70;
+extern s8 D_800DDF71;
+extern s32 D_800DDF20;
+extern s32 D_800DDF98;
+void func_1510D630(s32);
+void func_10004074(s16 *);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1B0740/func_15183D28.s")
+void func_15183C28(s32 arg0) {
+    if (((Struct15183974 *)D_800DDE80)[arg0].unk10 != 0) {
+        func_1510D630(((Struct15183974 *)D_800DDE80)[arg0].unk10);
+        ((Struct15183974 *)D_800DDE80)[arg0].unk10 = 0;
+    }
+    if (arg0 == 8) {
+        if (D_800DDF71 != -2) {
+            return;
+        }
+    } else if (arg0 == 9) {
+        if (D_800DDF70 == -2) {
+            if (D_800DDF20 != 0) {
+                func_10004074((s16 *) D_800DDF20);
+                D_800DDF20 = 0;
+                D_800DDF98 = 0;
+            }
+        }
+    }
+    if (((Struct15183974 *)D_800DDE80)[arg0].unk0 != 0) {
+        func_10004074((s16 *) ((Struct15183974 *)D_800DDE80)[arg0].unk0);
+        ((Struct15183974 *)D_800DDE80)[arg0].unk0 = 0;
+        D_800DDF78[arg0] = 0;
+    }
+}
+
+typedef struct {
+    void *field0;
+    u8 pad4[8];
+    s32 fieldC;
+    void *field10;
+} Game1B0740Slot;
+
+typedef struct Game1B0740Wave {
+    u8 pad0[0x18];
+    f32 angle;
+    u8 pad1C[8];
+    f32 velocity;
+    f32 amplitude;
+    f32 frequency;
+    f32 radius;
+    u8 pad34[4];
+} Game1B0740Wave;
+
+void func_15165C80(f32 *, u8 *, f32, f32 *, f32, f32, u8 *, s32);
+void func_1517725C(u8);
+void func_15179DB0(u8);
+void func_15183C28(s32);
+extern Game1B0740Wave D_8008D0B0[];
+extern Game1B0740Wave D_8008D318[];
+extern u8 *D_8008D3C0[];
+extern u8 D_800A72E8[];
+
+void func_15183D28(void) {
+    s32 i;
+    s32 value;
+    Game1B0740Wave *wave;
+
+    for (i = 0; i < 11; i++) {
+        if (D_800DDF68[i] >= -1 && (((Game1B0740Slot *)D_800DDE80)[i].field0 == NULL || D_800DDF78[i] == 0)) {
+            D_800DDF68[i] = -2;
+        }
+    }
+    for (i = 0; i < 4; i++) {
+        if (D_800DDF60[i] > 0) {
+            value = D_800DDF60[i] - D_800BE9E4;
+            if (value < 0) {
+                value = 0;
+            }
+            D_800DDF60[i] = value;
+        }
+    }
+    for (i = 0; i < 7; i++) {
+        if (D_800DDF68[i] == 1) {
+            wave = &D_8008D0B0[i];
+            func_15165C80(&wave->angle, *(u8 **)((u8 *)&((Game1B0740Slot *)D_800DDE80)[i] + 8), wave->radius, &wave->velocity,
+                          wave->amplitude, wave->frequency, D_8008D3C0[i], D_800A72E8[i]);
+        }
+    }
+    for (i = 2; i < 5; i++) {
+        if (D_800DDF68[i] == 1) {
+            wave = &D_8008D318[i - 2];
+            func_15165C80(&wave->angle, *(u8 **)((u8 *)&((Game1B0740Slot *)D_800DDE80)[i] + 4), wave->radius, &wave->velocity,
+                          wave->amplitude, wave->frequency, D_8008D3C0[i], D_800A72E8[i]);
+        }
+    }
+    if (D_800DDF68[7] == 1) {
+        func_1517725C(7);
+    }
+    for (i = 0; i < 2; i++) {
+        if (D_800DDF68[i + 8] == 1) {
+            func_15179DB0(i + 8);
+        }
+    }
+    if (D_800DDF68[7] == 1) {
+        D_800DDF68[10] = 1;
+    }
+    for (i = 0; i < 11; i++) {
+        if (D_800DDF68[i] == -2 && ((Game1B0740Slot *)D_800DDE80)[i].field0 != NULL) {
+            func_15183C28(i);
+        }
+    }
+    for (i = 0; i < 11; i++) {
+        if (D_800DDF68[i] > 0) {
+            D_800DDF68[i] = 0;
+        } else if (D_800DDF68[i] >= -1) {
+            D_800DDF68[i]--;
+        }
+    }
+}
 
 typedef struct {
     char pad[0x57];

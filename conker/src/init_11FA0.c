@@ -44,7 +44,105 @@ void func_10011FEC(void) {
 }
 
 // jump table
-#pragma GLOBAL_ASM("asm/nonmatchings/init_11FA0/func_10012020.s")
+typedef struct {
+    f32 values[2];
+} MainSelectorPair;
+
+extern MainSelectorPair D_8002BA10;
+extern MainSelectorPair D_8002BA18;
+
+#define D_80042780_A ((f32 *)&D_80042780)
+#define D_80042788_A ((f32 *)&D_80042788)
+
+void func_10012020(void) {
+    extern f32 D_80042784;
+    s32 i;
+    f32 volume = 0.0f;
+    s32 selector;
+    MainSelectorPair gains = D_8002BA10;
+    MainSelectorPair frequencies = D_8002BA18;
+    f32 scale;
+
+    selector = D_80042770;
+    if ((*(u32 *)((u8 *)D_800DBFF0 + 0x5F0) & 1) && !(((u8 *)D_800B0DF0)[0x2A] & 1)) {
+        selector = 1;
+    }
+    if (D_80042774 != 0) {
+        selector = D_80042774;
+    } else if (D_80042778 != 0) {
+        selector = D_80042778;
+    }
+    if (selector == 6) {
+        selector = 0;
+    }
+    switch (selector) {
+        case 1:
+            volume = (13.0f - D_80042790) + D_80042790;
+            D_8004277C = 0;
+            gains.values[0] = 127.0f;
+            frequencies.values[0] = D_80042780_A[0] + ((519.0f + sinf(D_80042798 * 0.052359879f) * 200.0f) - D_80042780_A[0]);
+            break;
+        case 2:
+            D_8004277C = 0;
+            volume = 70.0f;
+            gains.values[0] = 127.0f;
+            frequencies.values[0] = sinf(D_80042798 * 0.34906584f) * 200.0f + 450.0f;
+            break;
+        case 3:
+            volume = (52.0f - D_80042790) * 0.08f + D_80042790;
+            D_8004277C = 0;
+            gains.values[0] = D_80042788_A[0] + (127.0f - D_80042788_A[0]) * 0.08f;
+            frequencies.values[0] = D_80042780_A[0] + ((436.0f + sinf(D_80042798 * 0.122173049f) * 282.0f) - D_80042780_A[0]) * 0.08f;
+            D_80041FD9 = 0;
+            break;
+        case 4:
+            D_8004277C = 4;
+            gains.values[1] = 127.0f;
+            if (D_800BE9B4 != 0) {
+                frequencies.values[1] = 400.0f;
+            } else {
+                frequencies.values[1] = D_80042784 + (400.0f - D_80042784);
+            }
+            D_80041FD9 = 0;
+            break;
+        case 5:
+            gains.values[1] = 127.0f;
+            frequencies.values[1] = 520.0f;
+            D_80041FD9 = 0;
+            break;
+        default:
+            if (D_8004277C == 4) {
+                frequencies.values[1] = D_80042784 + (11000.0f - D_80042784) * 0.05f;
+                if (frequencies.values[1] < 9000.0f) {
+                    D_8004277C = 4;
+                } else {
+                    D_8004277C = 0;
+                    D_80041FD9 = 1;
+                }
+            }
+            break;
+    }
+    D_80042798 += D_800BE9A4;
+    if (volume != D_80042790 || D_80042794 != 1.0f) {
+        scale = volume / 127.0f;
+        for (i = 0; i < 3; i++) {
+            func_10008BC0((u8)i, scale, 1.0f);
+        }
+        D_80042790 = volume;
+        D_80042794 = 1.0f;
+    }
+    for (i = 0; i < 2; i++) {
+        if (frequencies.values[i] != D_80042780_A[i]) {
+            func_10008B60((u8)i, (u8)i, 9, 0, (s32)frequencies.values[i]);
+            D_80042780_A[i] = frequencies.values[i];
+        }
+        if (gains.values[i] != D_80042788_A[i]) {
+            func_10008B60((u8)i, (u8)i, 8, 0, (s32)gains.values[i]);
+            D_80042788_A[i] = gains.values[i];
+        }
+    }
+    D_80042770 = 0;
+}
 // f32 func_10012020(void) {
 //     f32 sp68;
 //     f32 sp60;

@@ -109,7 +109,128 @@ void func_150EEF40(struct210 *arg0, u8 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_11C2B0/func_150EEF80.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_11C2B0/func_150EF38C.s")
+typedef struct { f32 x, y, z; } Vec3f_150EF38C;
+
+typedef struct Game11C2B0Effect {
+    u8 pad0[9];
+    u8 hidden;
+    u8 padA[4];
+    s16 position[3];
+} Game11C2B0Effect;
+
+typedef struct Game11C2B0EffectOwner {
+    u8 pad0[0x14];
+    Game11C2B0Effect *sprite;
+} Game11C2B0EffectOwner;
+
+typedef struct Game11C2B0Link {
+    u8 *actor;
+    u8 group;
+    u8 pad5[3];
+    u8 *target;
+    u8 targetGroup;
+    u8 slot;
+    u8 padE[2];
+    f32 phase10;
+    f32 phase14;
+    u8 flags;
+    u8 pad19[0x13];
+    Game11C2B0EffectOwner *effect;
+    Vec3f_150EF38C direction;
+    f32 distance;
+    f32 inverse;
+} Game11C2B0Link;
+
+typedef struct Game11C2B0Beam {
+    u8 pad0[0x2C];
+    f32 width;
+    u8 pad30[4];
+    Vec3f_150EF38C start;
+    Vec3f_150EF38C end;
+    u8 pad4C[0x10];
+    u8 alpha;
+    u8 pad5D[0xB3];
+    Game11C2B0Link link;
+} Game11C2B0Beam;
+
+typedef struct Game11C2B0Hit {
+    void *object;
+    u8 pad4[0x55];
+    u8 count;
+    u8 pad5A[0xA];
+} Game11C2B0Hit;
+
+s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
+void func_15081690(void *, f32, f32, f32, f32, f32, f32, void *, f32, s32, s32, s32, s32, s32, s32);
+s32 func_1505D024(void *, s32, s32, s32);
+void func_1502EA98(void *, s32, s32, s32, s32, s32, s32);
+extern f32 D_800A181C;
+extern f32 D_800A1820;
+
+s32 func_150EF38C(Game11C2B0Beam *arg0) {
+    Game11C2B0Link *link;
+    u8 *actor;
+    u8 *target;
+    s16 *position;
+    Game11C2B0Hit hit;
+    f32 angle;
+    void *object;
+
+    link = &arg0->link;
+    actor = link->actor;
+    target = link->target;
+    if (link->group != actor[0x3B] || *(s32 *)actor == 0 || actor[4] == 0xFF) {
+        return 0;
+    }
+    if (link->targetGroup != target[0x3B] || *(s32 *)target == 0) {
+        return 0;
+    }
+    if (*(s32 *)(actor + 0x94) & D_800A163C[link->slot]) {
+        return 0;
+    }
+    link->flags &= ~1;
+    if (*(s32 *)(actor + 0x1D4) != 0) {
+        func_15143134((f32 *)&((u8 *)D_800A15F0)[link->slot * 0xC], &arg0->start.x,
+                      *(s32 *)(actor + 0x1D4) + (D_800A1638[link->slot] << 6));
+        arg0->end.x = ((Vec3f_150EF38C *)(target + 0x14))->x;
+        arg0->end.y = ((Vec3f_150EF38C *)(target + 0x14))->y;
+        arg0->end.z = ((Vec3f_150EF38C *)(target + 0x14))->z;
+        link->direction.x = arg0->end.x - arg0->start.x;
+        link->direction.y = arg0->end.y - arg0->start.y;
+        link->direction.z = arg0->end.z - arg0->start.z;
+        if (func_15145128(&link->direction.x, &link->direction.x, &link->distance, &link->inverse) != 0) {
+            link->flags |= 1;
+        }
+    }
+    link->phase10 += D_800A181C * D_800BE9A4;
+    angle = func_15144B68(link->phase10);
+    link->phase10 = angle;
+    arg0->width = sinf(angle) * 5.0f + 16.0f;
+    link->phase14 += D_800A1820 * D_800BE9A4;
+    angle = func_15144B68(link->phase14);
+    link->phase14 = angle;
+    arg0->alpha = sinf(angle) * 25.0f + 230.0f;
+    if (link->flags & 1) {
+        if (link->effect != NULL) {
+            link->effect->sprite->hidden = 0;
+            position = link->effect->sprite->position;
+            position[0] = arg0->start.x;
+            position[1] = arg0->start.y;
+            position[2] = arg0->start.z;
+        }
+        func_15081690(actor, arg0->start.x, arg0->start.y, arg0->start.z,
+                      link->direction.x, link->direction.y, link->direction.z,
+                      &hit, link->distance, 1, 0, 1, 4, 0, 0);
+        if (hit.count >= 2) {
+            object = hit.object;
+            func_1502EA98(object, 0xFF, 0, 0, 0x90, 0, 1);
+            func_1505D024(object, 0xA0038, 0, (actor - (u8 *)D_800CC2D0) / 0x32C);
+        }
+    } else if (link->effect != NULL) {
+        link->effect->sprite->hidden = 1;
+    }
+    return 1;
+}
 
 s32 func_150EF784(u8 *arg0, s32 arg1, s32 arg2) {
     if (arg0[4] == 0x28) {
@@ -519,7 +640,11 @@ void func_150F02EC(struct260 *arg0) {
     func_15149368(arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_11C2B0/func_150F0318.s")
+void func_150F0318(struct260 *arg0) {
+    s32 *t = *(s32 **)((u8 *)arg0 + 0x28);
+
+    t[0x4D] = 0;
+}
 
 void func_150F0380(struct210 *arg0);
 
@@ -535,7 +660,11 @@ void func_150F0354(struct210 *arg0) {
     func_151411C4(arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_11C2B0/func_150F0380.s")
+void func_150F0380(struct210 *arg0) {
+    s32 *t = *(s32 **)((u8 *)arg0 + 0x178);
+
+    t[0x4E] = 0;
+}
 
 void func_150F03E8(struct210 *arg0);
 void func_151617C4(struct210 *arg0);
@@ -552,7 +681,11 @@ void func_150F03BC(struct210 *arg0) {
     func_151617E4(arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_11C2B0/func_150F03E8.s")
+void func_150F03E8(struct210 *arg0) {
+    s32 *t = *(s32 **)((u8 *)arg0 + 0x18);
+
+    t[0x4F] = 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_11C2B0/func_150F03F8.s")
 
@@ -633,7 +766,103 @@ void func_150F0938(s32 arg0) {
     func_15160A58(arg0, 2, &D_800A1680, 2, 0x12C, 0xD, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, 0xFF, 1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_11C2B0/func_150F0A24.s")
+typedef struct { f32 x, y, z; } Vec3f_150F0A24;
+typedef struct Game11D830EffectPacket {
+    s32 field_0;
+    s32 field_4;
+    Vec3f_150F0A24 position;
+    f32 field_14;
+    f32 field_18;
+    f32 field_1C;
+    f32 field_20;
+    f32 field_24;
+    f32 field_28;
+    s16 field_2C;
+    s16 field_2E;
+    s16 field_30;
+    s16 field_32;
+    s32 field_34;
+    s32 field_38;
+    s16 field_3C;
+    s16 field_3E;
+    s16 field_40;
+    u8 bytes_42[0x17];
+    u8 pad59[3];
+    s32 field_5C;
+    s32 field_60;
+    s16 field_64;
+    s16 field_66;
+    s16 field_68;
+    s8 field_6A;
+    u8 pad6B;
+    f32 field_6C;
+    s8 field_70;
+    s8 field_71;
+    s8 field_72;
+    s8 field_73;
+} Game11D830EffectPacket;
+
+void func_15152B38(void *, s32, s32, void *);
+extern f32 D_800A1858;
+extern f32 D_800A185C;
+
+void func_150F0A24(f32 *arg0) {
+    Game11D830EffectPacket packet;
+
+    packet.field_0 = 9;
+    packet.field_4 = 6;
+    packet.position = *(Vec3f_150F0A24 *)arg0;
+    packet.field_14 = 14.88f;
+    packet.field_18 = 14.88f;
+    packet.field_1C = D_800A1858;
+    packet.field_20 = D_800A185C;
+    packet.field_24 = 39.0f;
+    packet.field_28 = 35.0f;
+    packet.field_2C = 0;
+    packet.field_2E = 0xFF;
+    packet.field_30 = -0x1F;
+    packet.field_32 = 0x50;
+    packet.field_34 = 3;
+    packet.field_38 = 4;
+    packet.field_3C = 0x14;
+    packet.field_3E = 0x1E;
+    packet.field_40 = 1;
+    packet.bytes_42[0] = 4;
+    packet.bytes_42[1] = 2;
+    packet.bytes_42[2] = 3;
+    packet.bytes_42[3] = 0xFF;
+    packet.bytes_42[4] = 0xFF;
+    packet.bytes_42[5] = 0xFF;
+    packet.bytes_42[6] = 0xFF;
+    packet.bytes_42[7] = 0;
+    packet.bytes_42[8] = 0;
+    packet.bytes_42[9] = 0;
+    packet.bytes_42[0xA] = 0;
+    packet.bytes_42[0xB] = 0xFF;
+    packet.bytes_42[0xC] = 0xFF;
+    packet.bytes_42[0xD] = 0xFF;
+    packet.bytes_42[0xE] = 0xFF;
+    packet.bytes_42[0xF] = 0;
+    packet.bytes_42[0x10] = 0;
+    packet.bytes_42[0x11] = 0;
+    packet.bytes_42[0x12] = 0;
+    packet.bytes_42[0x13] = 0xFF;
+    packet.bytes_42[0x14] = 0;
+    packet.bytes_42[0x15] = 3;
+    packet.bytes_42[0x16] = 0x24;
+    packet.field_5C = 0x200005;
+    packet.field_60 = 0x60600;
+    packet.field_64 = 8;
+    packet.field_66 = 0x1F;
+    packet.field_68 = 1;
+    packet.field_6A = 0;
+    packet.field_6C = 1.0f;
+    packet.field_70 = -1;
+    packet.field_71 = 0;
+    packet.field_72 = -1;
+    packet.field_73 = -1;
+    func_15152B38(&packet, 0xFF, 1, arg0);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_11C2B0/func_150F0BEC.s")
 
@@ -756,9 +985,105 @@ void func_150F1684(struct func150F1684_sub *arg0, struct func150F1684_sub *arg1,
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_11C2B0/func_150F16DC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_11C2B0/func_150F1A00.s")
+typedef struct {
+    u16 v[3];
+} Rates150F1A00;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_11C2B0/func_150F1B48.s")
+typedef struct {
+    u8 pad0[0x14];
+    s16 unk14;
+} Timer150F1A00;
+
+typedef struct {
+    u8 pad0[0xF80];
+    f32 m[4][4];
+} Model150F1A00;
+
+typedef struct {
+    u8 pad0[0x1D4];
+    Model150F1A00 *unk1D4;
+    u8 pad1D8[0x10C];
+    s32 unk2E4;
+} Actor150F1A00;
+
+extern Rates150F1A00 D_80088B00;
+extern f32 D_800A18E8;
+extern f32 D_800A18EC;
+extern f32 D_800A18F0;
+f32 cosf(f32);
+
+void func_150F1A00(Actor150F1A00 *arg0) {
+    Model150F1A00 *model;
+    Rates150F1A00 rates;
+    s32 idx;
+    Timer150F1A00 *timer;
+    u16 rate;
+    f32 scale;
+    s32 i;
+    s32 j;
+    f32 *row;
+
+    rates = D_80088B00;
+    idx = 0;
+    if ((arg0->unk2E4 & 3) == 3) {
+        idx = 1;
+    }
+    if ((arg0->unk2E4 & 0xC) == 0xC) {
+        idx = 2;
+    }
+    rate = rates.v[idx];
+    timer = (Timer150F1A00 *)&D_800CC298;
+    timer->unk14 += rate * D_800BE9E4;
+    scale = (((cosf(timer->unk14 * D_800A18E8) + 1.0f) * 0.5f) * D_800A18EC) + D_800A18F0;
+    model = arg0->unk1D4;
+    for (i = 0, row = model->m[0]; i < 3; i++, row += 4) {
+        for (j = 0; j < 3; j++) {
+            row[j] *= scale;
+        }
+    }
+}
+
+typedef struct {
+    u8 pad0[0x12];
+    s16 unk12;
+} Tilt150F1B48;
+
+/* D_800CC298 is typed s32 in variables.h; this function sees it as a tilt record. */
+#define TILT ((Tilt150F1B48 *)&D_800CC298)
+
+extern f32 D_800A18F4;
+extern f32 D_800A18F8;
+
+s16 *func_150F1B48(s16 *arg0, s32 arg1) {
+    s32 down;
+    s32 step;
+    s32 v;
+    s32 i;
+
+    down = (D_800CC2D0[arg1].unk84.uh == 0x21) ? 1 : 0;
+    step = D_800BE9E4 * 0x222;
+    if (down) {
+        v = TILT->unk12 - step;
+        if (D_800A18F4 < v) {
+            TILT->unk12 = v;
+        } else {
+            TILT->unk12 = -0x1999;
+        }
+    } else {
+        v = TILT->unk12 + step;
+        if (v < D_800A18F8) {
+            TILT->unk12 = v;
+        } else {
+            TILT->unk12 = 0x1555;
+        }
+    }
+    for (i = 0; i < 6; i++) {
+        *arg0++ = 0xB2 + i * 6;
+        *arg0++ = TILT->unk12;
+    }
+    return arg0;
+
+}
 
 void func_150F1CB0(ActorStateFields *arg0) {
     if (arg0->field_0x84 == 0x14) {
@@ -777,7 +1102,37 @@ void func_150F1CB0(ActorStateFields *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_11C2B0/func_150F1D10.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_11C2B0/func_150F20F0.s")
+extern u8 D_800D98F0;
+extern f32 D_800A191C;
+
+void func_150F20F0(s32 arg0) {
+    f32 x;
+    f32 z;
+    s32 vol;
+    s32 sp48;
+    s32 sp44;
+    struct127 *obj;
+
+    obj = &D_800CC2D0[arg0];
+    x = obj->x_position;
+    z = obj->z_position;
+    x *= x;
+    z *= z;
+    /* squares the already-squared terms: compares x^4 + z^4, as golden does */
+    x = (x * x) + (z * z);
+    if (D_800D98F0 != 0) {
+        if (D_800BE9E4 < D_800D98F0) {
+            D_800D98F0 -= D_800BE9E4;
+        } else {
+            D_800D98F0 = 0;
+        }
+    } else if (x > D_800A191C) {
+        func_100114D0(0, (s32)D_800CC2D0[arg0].y_position, 0, 0x7FFF, 0x4E20, 0x4A38, &vol, &sp48, &sp44);
+        vol += 0x80;
+        D_800D98F0 = (func_150ADA20() & 0x7F) + 0x80;
+        func_10010F30(((u32)func_150ADA20() % 3) + 0x6C, 0x5DC0, vol, 0, 0);
+    }
+}
 
 void func_150F2230(struct127 *arg0, s32 arg1, s32 arg2) {
     struct { f32 x; f32 y; f32 z; } sp2C;

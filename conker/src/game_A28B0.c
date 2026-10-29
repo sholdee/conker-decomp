@@ -7,7 +7,7 @@ s32 func_1505D024(struct127 *arg0, s32 arg1, u16 arg2, s32 arg3);
 void func_1504715C(f32 *arg0, struct127 *arg1);
 void func_1514B364(f32 *arg0, f32 *arg1, s32 arg2, s32 arg3);
 void func_15197A7C(struct127 *arg0);
-void func_15056A00(struct127 *arg0, s32 arg1, s32 arg2, u8 arg3);
+u8 func_15056A00(struct127 *arg0, u8 arg1, u8 arg2);
 
 typedef struct {
     char pad_0[0x8];
@@ -15,6 +15,11 @@ typedef struct {
     char pad_1[0x2];
     s16 field_0xC;
 } PathPointWindow;
+
+/* D_80099A3C is declared s16[] in the header but is really a table of 10-byte rows. */
+typedef struct {
+    u8 b[0xA];
+} Row56A00;
 
 
 void func_15075400(s32 arg0) {
@@ -91,7 +96,7 @@ void func_15075650(void)
 {
   u8 range;
   u8 temp_a0;
-  u8 phi_a2;
+  u8 prevIndex;
   struct127 *temp_v1;
   temp_a0 = (*((u8 **) (&D_800D2108)))[0, D_800D154C->unk13F] - 1;
   if (D_800D154C->unk21F != 0)
@@ -111,13 +116,13 @@ void func_15075650(void)
   {
     if (D_800D154C->unk223 != 0xD)
     {
-      phi_a2 = D_800D154C->unk21E - 1;
+      prevIndex = D_800D154C->unk21E - 1;
       if (D_800D154C->unk21E <= D_800D154C->unk220)
       {
-        phi_a2 = temp_a0 - 1;
+        prevIndex = temp_a0 - 1;
       }
       temp_a0 = (func_150ADA20() % ((u32) range)) + D_800D154C->unk220;
-      if (temp_a0 != phi_a2)
+      if (temp_a0 != prevIndex)
       {
         D_800D154C->unk21E = temp_a0;
         temp_v1 = D_800D154C;
@@ -146,7 +151,6 @@ void func_15075650(void)
     {
       D_800D154C->unk44 = 0.5f;
     }
- if (1) { } if (1) { } if (1) { }
   }
   if (D_800D154C->unk21E < D_800D154C->unk220)
   {
@@ -160,32 +164,32 @@ extern u8 D_800D2108[];
 
 // NON-MATCHING: 95% there
 // void func_15075650(void) {
-//     u8 phi_a0;
-//     u8 phi_a2;
+//     u8 range;
+//     u8 prevIndex;
 //
-//     phi_a0 = D_800D2108[D_800D154C->unk13F] - 1;
+//     range = D_800D2108[D_800D154C->unk13F] - 1;
 //     if (D_800D154C->unk21F != 0) {
-//         phi_a0 = D_800D154C->unk21F;
+//         range = D_800D154C->unk21F;
 //     }
-//     phi_a0 = phi_a0 - D_800D154C->unk220;
+//     range = range - D_800D154C->unk220;
 //     if (D_800D1891 == 0xFF) { // -1
 //         if (D_800D154C->unk223 != 0xD) {
-//             D_800D154C->unk21E = (func_150ADA20() % (u32) phi_a0) + D_800D154C->unk220;
+//             D_800D154C->unk21E = (func_150ADA20() % (u32) range) + D_800D154C->unk220;
 //         }
 //     } else if (D_800D1891 == 0xFE) { // -2
 //         if (D_800D154C->unk223 != 0xD) {
-//             phi_a2 = D_800D154C->unk21E - 1;
+//             prevIndex = D_800D154C->unk21E - 1;
 //             if (D_800D154C->unk21E <= D_800D154C->unk220) {
-//                 phi_a2 = phi_a0 - 1;
+//                 prevIndex = range - 1;
 //             }
-//             phi_a0 = (func_150ADA20() % (u32) phi_a0) + D_800D154C->unk220;
-//             if (phi_a0 != phi_a2) {
-//                 D_800D154C->unk21E = phi_a0;
+//             range = (func_150ADA20() % (u32) range) + D_800D154C->unk220;
+//             if (range != prevIndex) {
+//                 D_800D154C->unk21E = range;
 //             }
 //         }
 //     } else {
 //         if (D_800D1891 == 0xFF) { // impossible?
-//             D_800D154C->unk21E = phi_a0 - 1;
+//             D_800D154C->unk21E = range - 1;
 //         } else {
 //             D_800D154C->unk21E = D_800D1891;
 //         }
@@ -232,7 +236,7 @@ void func_15075884(void) {
 //     f32 temp_f12;
 //     f32 temp_f2;
 //     struct169 *temp_v1;
-//     f32 phi_f2;
+//     f32 speed;
 //
 //     func_15075548();
 //     temp_v1 = D_800D2104[(D_800D154C->unk13F) + (D_800D154C->unk21E)];
@@ -242,56 +246,31 @@ void func_15075884(void) {
 //     D_800D154C->unk44 = 2.0f * (temp_f0 / D_800D1891);
 // }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_15075938.s")
-// NON-MATCHING: 2nd half ok, 1st is a mystery
+// PERMUTER CANDIDATE best 940: MYSTERY SOLVED - the "1st half" temp_v0 is a LOAD
+// (*(u8**)&D_800D2108)[unk13F] (D_800D2108 holds a pointer, same idiom as func_15075650), NOT the
+// sum `unk13F + D_800D2108` the old comment guessed. Logic is now byte-exact. Residual: target uses
+// branch-likely `bgezl` (else-block's unk13F load in delay) vs my `bgez`+nop, and hoists the
+// `lui a1,%hi(D_800D1891)` to the top so temp_v0 lands in v0 both paths (mine puts it in a1 in the
+// >=0 path -> extra `move v0,a1`). Scheduling near-miss.
 // void func_15075938(void) {
-//     u8 tmp;
-//     u8 changed;
-//     s32 temp_a0;
-//     s32 phi_v1;
-//     u8 temp_v0;
-//
+//     u8 changed; s32 temp_a0; s32 refIndex; u8 temp_v0;
 //     changed = 0;
-//
 //     temp_a0 = D_800D154C->unk21E - D_800D154C->unk221;
 //     if (temp_a0 < 0) {
-//         temp_v0 = D_800D154C->unk13F + D_800D2108;
+//         temp_v0 = (*(u8 **)&D_800D2108)[D_800D154C->unk13F];
 //         temp_a0 = (temp_a0 + temp_v0) - 1;
 //     } else {
-//         temp_v0 = D_800D154C->unk13F + D_800D2108;
-//         if ((temp_v0 - 1) <= temp_a0) {
-//             temp_a0 = (temp_a0 - temp_v0) + 1;
-//         }
+//         temp_v0 = (*(u8 **)&D_800D2108)[D_800D154C->unk13F];
+//         if ((temp_v0 - 1) <= temp_a0) { temp_a0 = (temp_a0 - temp_v0) + 1; }
 //     }
-//
-//     if (D_800D1891 == 0xFF) {
-//         phi_v1 = temp_v0 - 2;
-//     } else {
-//         phi_v1 = D_800D1891;
-//     }
-//
-//     if (D_800D1892 == 0) {
-//         if (phi_v1 == temp_a0) {
-//             changed = 1;
-//         }
-//     } else if (D_800D1892 == 1) {
-//         if (phi_v1 != temp_a0) {
-//             changed = 1;
-//         }
-//     } else if (D_800D1892 == 2) {
-//         if (phi_v1 < temp_a0) {
-//             changed = 1;
-//         }
-//     } else {
-//         if (phi_v1 > temp_a0) {
-//             changed = 1;
-//         }
-//     }
-//
-//     if (changed) {
-//         func_15075400(D_800D1890);
-//     }
+//     if (D_800D1891 == 0xFF) { refIndex = temp_v0 - 2; } else { refIndex = D_800D1891; }
+//     if (D_800D1892 == 0)      { if (refIndex == temp_a0) changed = 1; }
+//     else if (D_800D1892 == 1) { if (refIndex != temp_a0) changed = 1; }
+//     else if (D_800D1892 == 2) { if (refIndex <  temp_a0) changed = 1; }
+//     else                      { if (refIndex >  temp_a0) changed = 1; }
+//     if (changed) { func_15075400(D_800D1890); }
 // }
+#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_15075938.s")
 
 void func_15075A50(void) {
     u8 temp_v0 = D_800D154C->unk21E;
@@ -616,50 +595,71 @@ call_func_1504715C:
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_150767F4.s")
-// NON-MATCHING: JUSTREG
+// PERMUTER CANDIDATE best 1005: the old JUSTREG reconstruction had wrong signs; the target is
+// ((tmp0 - (D_800CC34A[...]>>8)) + D_800D1891). Splitting out tmp1 dropped 2005->1005. Residual is a
+// register rotation (mine runs ~1 temp behind target) coupled to a `beqzl` (branch-likely, `lw ra`
+// in delay, D_800D1890 lui hoisted) vs my plain `beqz` (lui in delay). Register+branch near-miss.
 // void func_150767F4(void) {
-//     struct127 *tmp = &D_800CC2D0[D_800D154C->unk222]; // * 0x32C) ;
-//
+//     struct127 *tmp = &D_800CC2D0[D_800D154C->unk222];
 //     s32 tmp0 = func_1505A630(tmp->x_position - D_800D154C->x_position, D_800D154C->z_position - tmp->z_position, 0) >> 8;
-//
-//     if ((tmp0 + ((D_800CC34A[D_800D154C->unk222 * 0x196] >> 8) - D_800D1891) & 0xFF) < (D_800D1891 * 2)) {
+//     s32 tmp1 = D_800CC34A[D_800D154C->unk222 * 0x196] >> 8;
+//     if ((((tmp0 - tmp1) + D_800D1891) & 0xFF) < (D_800D1891 * 2)) {
 //         func_15075400(D_800D1890);
 //     }
 // }
+void func_150767F4(void) {
+    struct127 *other;
+    u16 angle;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_150768DC.s")
-// NON-MATCHING: almost JUSTREG
+    other = (struct127 *) ((u8 *)D_800CC2D0 + D_800D154C->unk222 * 0x32C);
+    angle = (s32)func_1505A630(other->x_position - D_800D154C->x_position,
+                        D_800D154C->z_position - other->z_position, 0);
+    if ((((angle >> 8) -
+           (*(u16 *)((u8 *)D_800CC34A + D_800D154C->unk222 * 0x32C) >> 8) +
+          D_800D1891) & 0xFF) < D_800D1891 * 2) {
+        func_15075400(D_800D1890);
+    }
+}
+
+// PERMUTER CANDIDATE best 595: the body below is byte-exact everywhere EXCEPT one instruction.
+// (Fixes over the older reconstruction: unkA8 is stored as `i + 0x80` (addiu, the 0x80 "valid" bit
+// that func_15076B5C later masks off with &0x7F), arc/angle are s32 not u8 (the target divides
+// arc by 2 with the signed bgez+addiu correction and compares with a signed slt), and
+// unk218 -= 1 is a struct216* decrement, i.e. addiu -5.)
+// Residual: at 0x1640 the target has a redundant `move t7,t6` homing the shifted func_1505A630
+// result; IDO coalesces that copy away from every C form tried (named local, inlined call,
+// raw+shift split, inner-scope decl, extra named subexpressions). With 0x1640 free, IDO's
+// scheduler speculates `addiu t2,s3,0x80` up into it, which leaves `sb` as the if-body's first
+// instruction; a store can't be speculated into a delay slot, so the final `beqz at,<inc>`
+// degrades to `beqzl at,<latch>` with a duplicated increment. That single artifact also drives a
+// 3-way callee-saved rotation (selfIndex s8<->s5, &D_800D1891 s5<->s6, the 25 bound s6<->s8).
 // void func_150768DC(void) {
-//     u8 temp_s2;
-//     f32 temp_f20;
-//     s32 temp_fp;
-//     struct127 *temp_v0;
-//     struct127 *current;
-//     f32 phi_f22;
+//     struct127 *target;
 //     s32 i;
-//     u8 tmp0;
-//     struct124 *foo;
-//     u8 tmp1;
+//     s32 arc;
+//     s32 angle;
+//     s32 selfIndex;
+//     u8 reaction;
+//     f32 best;
+//     f32 dist;
 //
-//
-//     phi_f22 = D_800D1890 * 8;
+//     best = D_800D1890 * 8;
 //     D_800D154C->unkA8 = 0;
-//     temp_fp = ((s32)D_800D154C - (s32)D_800CC2D0) / (s32)sizeof(struct127);
+//     selfIndex = ((s32)D_800D154C - (s32)D_800CC2D0) / (s32)sizeof(struct127);
 //
 //     for (i = 0; i < 25; i++) {
-//         current = &D_800CC2D0[i];
-//         if ((current->unk0 != 0) && (current->health != 0) && ((current->unkF8 & 0x20) != 0) && (i != temp_fp)) {
-//             if ((D_800D1891 != 0) || (D_800D154C->id != current->id)) {
-//                 if (!(fabsf(D_800D154C->y_position - current->y_position) > 50.0f)) {
-//                     temp_f20 = func_1505A72C(D_800D154C, current);
-//                     if (temp_f20 < phi_f22) {
-//                         foo = D_800D1C90[D_800D154C->id];
-//                         temp_s2 = foo->unk17;
-//                         tmp1 = func_1505A630(current->x_position - D_800D154C->x_position, D_800D154C->z_position - current->z_position, 0) >> 8;
-//                         if ((((((D_800D154C->unk76 >> 8) + D_800D154C->unk2CA) - tmp1) + (temp_s2 / 2)) & 0xFF) < temp_s2) {
-//                             D_800D154C->unkA8 = i;
-//                             phi_f22 = temp_f20;
+//         if ((D_800CC2D0[i].interaction_state != 0) && (D_800CC2D0[i].health != 0) &&
+//             ((D_800CC2D0[i].unkF8 & 0x20) != 0) && (i != selfIndex)) {
+//             if ((D_800D1891 != 0) || (D_800D154C->id != D_800CC2D0[i].id)) {
+//                 if (!(fabsf(D_800D154C->y_position - D_800CC2D0[i].y_position) > 50.0f)) {
+//                     dist = func_1505A72C(D_800D154C, &D_800CC2D0[i]);
+//                     if (dist < best) {
+//                         arc = D_800D1C90[D_800D154C->id]->unk17;
+//                         angle = func_1505A630(D_800CC2D0[i].x_position - D_800D154C->x_position,
+//                                               D_800D154C->z_position - D_800CC2D0[i].z_position, 0) >> 8;
+//                         if ((((((D_800D154C->unk76 >> 8) + D_800D154C->unk2CA) - angle) + (arc / 2)) & 0xFF) < arc) {
+//                             D_800D154C->unkA8 = i + 0x80;
+//                             best = dist;
 //                         }
 //                     }
 //                 }
@@ -670,15 +670,16 @@ call_func_1504715C:
 //     if (D_800D154C->unkA8 != 0) {
 //         D_800D154C->unk218 = func_1507BB28(0, D_800D1893);
 //         D_800D154C->unk218 -= 1;
-//         tmp0 = D_800D1892;
-//         if (tmp0 != 0) {
-//             temp_v0 = &D_800CC2D0[D_800D154C->unkA8 & 0x7F];
-//             temp_v0->unk218 = 0;
-//             temp_v0->unk232 = tmp0;
-//             temp_v0->unk222 = temp_fp;
+//         reaction = D_800D1892;
+//         if (reaction != 0) {
+//             target = &D_800CC2D0[D_800D154C->unkA8 & 0x7F];
+//             target->unk218 = 0;
+//             target->unk232 = reaction;
+//             target->unk222 = selfIndex;
 //         }
 //     }
 // }
+#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_150768DC.s")
 
 void func_15076B5C(void) {
     D_800D154C->unk222 = (D_800D154C->unkA8 & 0x7F);
@@ -723,20 +724,31 @@ void func_15076D04(void) {
     D_800D154C->xz_velocity = D_800D1890;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_15076D3C.s")
-// ???
+// PERMUTER CANDIDATE best 415: ops byte-exact (tmp2->v1, temp_a3->a3 aligned, call passes the
+// float fields as ints in a1/a2). Residual: IDO schedules the `scale = D_8009A144` load LATE (near
+// the first mul) while the target hoists `lwc1 f0,%lo(D_8009A144)` to the top; that + a small
+// register cascade is the only diff. A `volatile`/in-place-(s16) nudge regressed to 455.
 // void func_15076D3C(void) {
-//     s32 temp_a3;
-//     s32 tmp2;
-//
-//     temp_a3 = D_800D1892 | (D_800D1893 << 8);
-//     tmp2 = D_800D1890 | (D_800D1891 << 8);
-//     D_800D154C->xz_scale = (s16)tmp2 * D_8009A144;
-//     D_800D154C->y_scale = (s16)temp_a3 * D_8009A144;
+//     f32 scale = D_8009A144;
+//     s32 tmp2 = D_800D1890 | (D_800D1891 << 8);
+//     s32 temp_a3 = D_800D1892 | (D_800D1893 << 8);
+//     D_800D154C->xz_scale = (s16)tmp2 * scale;
+//     D_800D154C->y_scale = (s16)temp_a3 * scale;
 //     D_800D154C->unk154 = D_800D154C->xz_scale;
 //     D_800D154C->unk158 = D_800D154C->y_scale;
-//     func_15062BDC(&D_800D154C, D_800D154C->xz_scale, D_800D154C->y_scale);
+//     func_15062BDC(D_800D154C, D_800D154C->xz_scale, D_800D154C->y_scale);
 // }
+void func_15076D3C(void) {
+    f32 scale = 0.01f;
+    s16 x = D_800D1890 | (D_800D1891 << 8);
+    s16 y = D_800D1892 | (D_800D1893 << 8);
+
+    *(f32 *) ((u8 *) D_800D154C + 0x14C) = (f32) x * scale;
+    *(f32 *) ((u8 *) D_800D154C + 0x150) = (f32) y * scale;
+    *(f32 *) ((u8 *) D_800D154C + 0x154) = *(f32 *) ((u8 *) D_800D154C + 0x14C);
+    *(f32 *) ((u8 *) D_800D154C + 0x158) = *(f32 *) ((u8 *) D_800D154C + 0x150);
+    func_15062BDC(D_800D154C, *(f32 *) ((u8 *) D_800D154C + 0x14C), *(f32 *) ((u8 *) D_800D154C + 0x150));
+}
 
 void func_15076DF4(void) {
     D_800D154C->interaction_state = D_800D1890;
@@ -813,7 +825,7 @@ void func_15077190(void) {
 }
 
 void func_150771F0(void) {
-    s32 phi_a1;
+    s32 mode;
     u8 temp_a2;
     u8 temp_a3;
 
@@ -821,11 +833,11 @@ void func_150771F0(void) {
         temp_a2 = D_800D1890;
         temp_a3 = D_800D1891;
         if (D_800D1892 != 0) {
-            phi_a1 = 1;
+            mode = 1;
         } else {
-            phi_a1 = 2;
+            mode = 2;
         }
-        func_1506160C(D_800D154C, phi_a1, temp_a2, temp_a3, 0);
+        func_1506160C(D_800D154C, mode, temp_a2, temp_a3, 0);
     } else {
         if (D_800D1892 == 0) {
             func_1502EA60(D_800D154C, D_800D1890);
@@ -836,11 +848,11 @@ void func_150771F0(void) {
 }
 // NON-MATCHING: something isnt right...
 // void func_150771F0(void) {
-//     s32 phi_a1;
+//     s32 mode;
 //
 //     if (D_800D1893 == 0) {
-//         phi_a1 = (D_800D1892 != 0) ? 1 : 2;
-//         func_1506160C(D_800D154C, phi_a1, D_800D1890, D_800D1891, 0);
+//         mode = (D_800D1892 != 0) ? 1 : 2;
+//         func_1506160C(D_800D154C, mode, D_800D1890, D_800D1891, 0);
 //     } else {
 //         if (D_800D1892 == 0) {
 //             func_1502EA60(D_800D154C, D_800D1890);
@@ -887,8 +899,40 @@ void func_15077364(void) {
     D_800D154C->unk248 = (u8) D_800D1892;
 }
 
-// ??
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_15077404.s")
+// PERMUTER CANDIDATE (best 1170): ops match; register renames (target uses a1 for
+// &D_800D154C, IDO gives a0) + scheduling of the D_800D1891/D_800D1892 byte loads.
+// void func_15077404(void) {
+//     if (D_800D1893 != 0) {
+//         s32 v0 = (s16)(((((Func15077404State *)D_800D154C)->pad23F[7] & 0x1F) << 8) + ((Func15077404State *)D_800D154C)->pad23F[0xA] + (s16)((D_800D1891 << 8) + D_800D1892) * D_800BE9E4);
+//         if (v0 < 0) { v0 = 0; }
+//         ((Func15077404State *)D_800D154C)->pad23F[7] = (v0 >> 8) | 0x80;
+//         ((Func15077404State *)D_800D154C)->pad23F[0xA] = v0;
+//     } else {
+//         ((Func15077404State *)D_800D154C)->pad23F[7] = D_800D1890;
+//     }
+// }
+typedef struct Func15077404State {
+    u8 pad0[0x23F];
+    u8 pad23F[0xB];
+} Func15077404State;
+
+void func_15077404(void) {
+    if (D_800D1893 != 0) {
+        s16 var_v0;
+        s16 delta;
+
+        var_v0 = ((Func15077404State *)D_800D154C)->pad23F[0xA] + ((((Func15077404State *)D_800D154C)->pad23F[7] & 0x1F) << 8);
+        delta = (D_800D1891 << 8) + D_800D1892;
+        var_v0 += delta * D_800BE9E4;
+        if (var_v0 < 0) {
+            var_v0 = 0;
+        }
+        ((Func15077404State *)D_800D154C)->pad23F[7] = (var_v0 >> 8) | 0x80;
+        ((Func15077404State *)D_800D154C)->pad23F[0xA] = (u8) var_v0;
+    } else {
+        ((Func15077404State *)D_800D154C)->pad23F[7] = D_800D1890;
+    }
+}
 
 void func_150774B4(void) {
     if ((D_800D154C->unk20F == D_800D154C->unk211) || (D_800D154C->unk211 == 0xFF)) {
@@ -1013,7 +1057,7 @@ void func_15077C1C(void) {
 }
 
 void func_15077C38(void) {
-    struct127 *phi_s0;
+    struct127 *actor;
     f32 tmp0;
     f32 distance;
     s32 i;
@@ -1022,17 +1066,17 @@ void func_15077C38(void) {
     D_800D154C->unk222 = (u8)0;
 
     for (i = 0; i < 25; i++) {
-        phi_s0 = &D_800CC2D0[i];
-        if (((phi_s0->interaction_state != 0) && (phi_s0->health != 0)) &&
-            ((phi_s0->immune == 0) || (phi_s0->immune == 0xFF)) &&
-            ((phi_s0->unk65 == 0) || (D_800D1892 != 0)) &&
-            ((phi_s0->id == D_800D1890) || ((phi_s0->interaction_state == D_800D1891) &&
-            (phi_s0->stunned == 0)))) {
+        actor = &D_800CC2D0[i];
+        if (((actor->interaction_state != 0) && (actor->health != 0)) &&
+            ((actor->immune == 0) || (actor->immune == 0xFF)) &&
+            ((actor->unk65 == 0) || (D_800D1892 != 0)) &&
+            ((actor->id == D_800D1890) || ((actor->interaction_state == D_800D1891) &&
+            (actor->stunned == 0)))) {
             if (D_800D1893 == 0) {
                 D_800D154C->unk222 = i;
                 return;
             }
-            distance = func_1505A72C(D_800D154C, phi_s0);
+            distance = func_1505A72C(D_800D154C, actor);
             if (tmp0 > distance) {
                 D_800D154C->unk222 = i;
                 tmp0 = distance;
@@ -1074,53 +1118,26 @@ void func_15077F34(void) {
 }
 
 void func_15077F64(void) {
-    volatile u16 pad[4];
-    volatile u8 pad2;
-    u8 temp_t6;
-    PathPointWindow *temp_v0;
-    f32 temp_f12;
-    f32 temp_f14;
-    s32 temp_t5;
-    s32 phi_a0;
-    s32 phi_a1;
+    f32 dx;
+    f32 dz;
+    u8 turn;
+    u8 index;
+    PathPointWindow *point;
 
-    temp_t6 = D_800D1890 - 1;
-    temp_v0 = (PathPointWindow *)(((u8 *)D_800D2104[D_800D154C->unk13F]) + (D_800D154C->unk21E * 8));
-    temp_f12 = ((f32)temp_v0->field_0x8) - D_800D154C->x_position;
-    temp_f14 = D_800D154C->z_position - ((f32)temp_v0->field_0xC);
-    D_800D154C->unk78 = func_1505A630(temp_f12, temp_f14, 0);
-    ;
-    phi_a0 = (phi_a1 = (((s32)(D_800D154C->unk78 - D_800D154C->unk76)) >> 8) & 0xFF);
-    if (phi_a0 & 0x80) {
-        phi_a1 = -(phi_a1 & 0xFFu);
-        phi_a0 = phi_a1 & 0xFF;
-        phi_a1 = phi_a0;
+    index = D_800D1890 - 1;
+    point = (PathPointWindow *)((u8 *)D_800D2104[D_800D154C->unk13F] + (D_800D154C->unk21E * 8));
+    dx = (f32)point->field_0x8 - D_800D154C->x_position;
+    dz = D_800D154C->z_position - (f32)point->field_0xC;
+    D_800D154C->unk78 = func_1505A630(dx, dz, 0);
+    turn = (D_800D154C->unk78 - D_800D154C->unk76) >> 8;
+    if (turn & 0x80) {
+        turn = -turn;
     }
-    if (((u8 *)D_80099A3C)[(temp_t6 * 5) * 2] < phi_a0) {
+    if (((Row56A00 *)D_80099A3C)[index].b[0] < turn) {
         D_800D154C->unk250 = D_800D1891;
-        func_15056A00(D_800D154C, phi_a1, temp_t6 & 0xFF, temp_t6);
+        func_15056A00(D_800D154C, turn, index);
     }
 }
-// NON-MATCHING: what is D_800D2104 ???
-// void func_15056A00(s32, s32, u8);
-// void func_15077F64(void) {
-//     u8 temp_t6;
-//     struct169 *temp_v0;
-//     s32 phi_a0;
-//     s32 phi_a1;
-//
-//     temp_t6 = D_800D1890 - 1;
-//     temp_v0 = D_800D2104[D_800D154C->unk13F] + (D_800D154C->unk21E);
-//     D_800D154C->unk78 = func_1505A630(temp_v0->unk8 - D_800D154C->x_position, D_800D154C->z_position - temp_v0->unkC, 0);
-//     phi_a0 = phi_a1 = ((s32) (D_800D154C->unk78 - D_800D154C->unk76) >> 8) & 0xff;
-//     if ((phi_a0 & 0x80) != 0) {
-//         phi_a1 = phi_a0 = -phi_a0 & 0xFF;
-//     }
-//     if ((u8)D_80099A3C[temp_t6 * 0xA] < phi_a0) {
-//         D_800D154C->unk250 = (u8) D_800D1891;
-//         func_15056A00(D_800D154C, phi_a1, temp_t6);
-//     }
-// }
 
 void func_15078074(void) {
     f32 temp_f20;
@@ -1195,50 +1212,50 @@ void func_15078358(void) {
 
 void func_1507839C(void) {
     struct127 *tmp;
-    f32 phi_f0;
-    f32 phi_f2;
+    f32 distance;
+    f32 threshold;
 
     if (D_800D1892 == 0) {
         tmp = &D_800CC2D0[D_800D154C->unk222];
-        phi_f0 = func_1505A6F8(D_800D154C, tmp);
+        distance = func_1505A6F8(D_800D154C, tmp);
     } else if (D_800D1892 == 1) {
         tmp = &D_800CC2D0[D_800D154C->unk222];
-        phi_f0 = func_1505A72C(D_800D154C, tmp);
+        distance = func_1505A72C(D_800D154C, tmp);
     } else {
-        phi_f0 = fabsf(D_800D154C->y_position - *(f32 *)((s32)D_800CC2E8 + (D_800D154C->unk222 * 812)));
+        distance = fabsf(D_800D154C->y_position - *(f32 *)((s32)D_800CC2E8 + (D_800D154C->unk222 * 812)));
     }
 
-    phi_f2 = D_800D1893 * 8;
+    threshold = D_800D1893 * 8;
     if (D_800D1893 == 0xFF) {
-        phi_f2 = D_800D154C->unk23D * 8;
+        threshold = D_800D154C->unk23D * 8;
     }
-    if (((D_800D1891 == 0) && (phi_f0 < phi_f2)) ||
-        ((D_800D1891 == 1) && (phi_f2 < phi_f0))) {
+    if (((D_800D1891 == 0) && (distance < threshold)) ||
+        ((D_800D1891 == 1) && (threshold < distance))) {
         func_15075400(D_800D1890);
     }
 }
 // NON-MATCHING: JUSTREG
 // void func_1507839C(void) {
 //     struct127 *tmp;
-//     f32 phi_f0;
-//     f32 phi_f2;
+//     f32 distance;
+//     f32 threshold;
 //
 //     if (D_800D1892 == 0) {
 //         tmp = &D_800CC2D0[D_800D154C->unk222];
-//         phi_f0 = func_1505A6F8(D_800D154C, tmp);
+//         distance = func_1505A6F8(D_800D154C, tmp);
 //     } else if (D_800D1892 == 1) {
 //         tmp = &D_800CC2D0[D_800D154C->unk222];
-//         phi_f0 = func_1505A72C(D_800D154C, tmp);
+//         distance = func_1505A72C(D_800D154C, tmp);
 //     } else {
-//         phi_f0 = fabsf(D_800D154C->y_position - D_800CC2D0[D_800D154C->unk222].y_position);
+//         distance = fabsf(D_800D154C->y_position - D_800CC2D0[D_800D154C->unk222].y_position);
 //     }
 //
-//     phi_f2 = D_800D1893 * 8;
+//     threshold = D_800D1893 * 8;
 //     if (D_800D1893 == 0xFF) {
-//         phi_f2 = D_800D154C->unk23D * 8;
+//         threshold = D_800D154C->unk23D * 8;
 //     }
-//     if (((D_800D1891 == 0) && (phi_f0 > phi_f2)) ||
-//         ((D_800D1891 == 1) && (phi_f0 > phi_f2))) {
+//     if (((D_800D1891 == 0) && (distance > threshold)) ||
+//         ((D_800D1891 == 1) && (distance > threshold))) {
 //         func_15075400(D_800D1890);
 //     }
 // }
@@ -1336,7 +1353,7 @@ void func_150790C4(void) {
 
 u8 func_1507911C(void) {
     s16 temp_a2;
-    s16 phi_a0;
+    s16 coord;
     u8 idx;
 
     temp_a2 = (D_800D1891 << 8) | D_800D1892;
@@ -1344,11 +1361,11 @@ u8 func_1507911C(void) {
     if (idx != 0) {
         idx = D_800C3E78;
     }
-    phi_a0 = D_800CC2D0[idx].y_position;
+    coord = D_800CC2D0[idx].y_position;
     if ((D_800D1893 & 2) != 0) {
-        phi_a0 = D_800CC2D0[idx].x_position;
+        coord = D_800CC2D0[idx].x_position;
     }
-    if (phi_a0 < temp_a2) {
+    if (coord < temp_a2) {
         func_15075400(D_800D1890);
     }
 }
@@ -1411,9 +1428,9 @@ void func_150793D8(void) {
     f32 sp34;
     f32 sp30;
     f32 sp2C;
-    volatile s16 pad0;
-    volatile s16 pad1;
-    volatile s16 pad2;
+    s16 pad0;
+    s16 pad1;
+    s16 pad2;
     s16 x;
     s16 z;
 
@@ -1544,13 +1561,13 @@ void func_150798F8(void) {
 }
 
 void func_15079928(void) {
-    s32 phi_a3;
+    s32 mask;
 
-    phi_a3 = ((D_800D1891 << 0x10) + D_800D1892) & 0xFFFF;
-    if (phi_a3 == 0) {
-        phi_a3 = 0xFFFF;
+    mask = ((D_800D1891 << 0x10) + D_800D1892) & 0xFFFF;
+    if (mask == 0) {
+        mask = 0xFFFF;
     }
-    func_1507E7E4(D_800D154C, D_800D1890, D_800D1893, phi_a3, 0);
+    func_1507E7E4(D_800D154C, D_800D1890, D_800D1893, mask, 0);
 }
 
 void func_15079988(void) {
@@ -1622,7 +1639,7 @@ void func_15079F6C(void) {
 // }
 
 void func_15079FBC(void) {
-    s16 phi_v1;
+    s16 speed;
 
     if ((D_800CC2D0->unk65 == 0) || (D_800CC2D0->unk44 < 5.0f)) {
         D_800D154C->unk232 = D_800D1891;
@@ -1634,15 +1651,15 @@ void func_15079FBC(void) {
     D_800D154C->unk78 = D_800CC2D0->unk31C->unk4C;
 
     if (D_800CC2D0->unk31C->chased) {
-        phi_v1 = D_800CC2D0->unk44;
+        speed = D_800CC2D0->unk44;
     } else {
-        phi_v1 = D_800CC2D0->unk44 * D_8009A1E4;
+        speed = D_800CC2D0->unk44 * D_8009A1E4;
     }
-    if (phi_v1 < 17) {
+    if (speed < 17) {
         D_800D1893 += 1;
         D_800D1890 = 8;
     }
-    D_800D1892 = phi_v1;
+    D_800D1892 = speed;
     func_15075F40();
     D_800D154C->unkF4 |= 0x40;
 }
@@ -1739,7 +1756,7 @@ void func_1507A4D4(void) {
 }
 
 void func_1507A528(void) {
-    s32 phi_a0;
+    s32 limit;
     s32 temp_a1;
 
     if (D_800D1890 == 0) {
@@ -1748,9 +1765,9 @@ void func_1507A528(void) {
         D_800D154C->unk221 = -D_800D154C->unk221;
     } else if (D_800D1890 == 2) {
         if (D_800D1892 != 0) {
-            phi_a0 = D_800D1892;
+            limit = D_800D1892;
         } else {
-            phi_a0 = (*(u8 **)&D_800D2108)[*(u8 *)((u8 *)D_800D154C + 0x13F)] - 1;
+            limit = (*(u8 **)&D_800D2108)[*(u8 *)((u8 *)D_800D154C + 0x13F)] - 1;
         }
         D_800D154C->unk221 = -D_800D154C->unk221;
         temp_a1 = D_800D154C->unk21E + D_800D154C->unk221;
@@ -1759,11 +1776,11 @@ void func_1507A528(void) {
         } else {
             temp_a1 -= D_800D1893;
         }
-        if (temp_a1 >= phi_a0) {
-            temp_a1 = temp_a1 - phi_a0;
+        if (temp_a1 >= limit) {
+            temp_a1 = temp_a1 - limit;
         } else {
             if (temp_a1 < 0) {
-                temp_a1 = temp_a1 + phi_a0;
+                temp_a1 = temp_a1 + limit;
             }
         }
         D_800D154C->unk21E = temp_a1;
@@ -1771,7 +1788,7 @@ void func_1507A528(void) {
 }
 // NON-MATCHING: 99% there..
 // void func_1507A528(void) {
-//     s32 phi_a0;
+//     s32 limit;
 //     s32 temp_a1;
 //
 //     if (D_800D1890 == 0) {
@@ -1780,9 +1797,9 @@ void func_1507A528(void) {
 //         D_800D154C->unk221 = -D_800D154C->unk221;
 //     } else if (D_800D1890 == 2) {
 //         if (D_800D1892 != 0) {
-//             phi_a0 = D_800D1892;
+//             limit = D_800D1892;
 //         } else {
-//             phi_a0 = (u8)(D_800D2108 + D_800D154C->unk13F) - 1;
+//             limit = (u8)(D_800D2108 + D_800D154C->unk13F) - 1;
 //         }
 //         D_800D154C->unk221 = -D_800D154C->unk221;
 //         temp_a1 = D_800D154C->unk21E + D_800D154C->unk221;
@@ -1791,11 +1808,11 @@ void func_1507A528(void) {
 //         } else {
 //             temp_a1 -= D_800D1893;
 //         }
-//         if (temp_a1 >= phi_a0) {
-//             temp_a1 = temp_a1 - phi_a0;
+//         if (temp_a1 >= limit) {
+//             temp_a1 = temp_a1 - limit;
 //         } else {
 //             if (temp_a1 < 0) {
-//                 temp_a1 = temp_a1 + phi_a0;
+//                 temp_a1 = temp_a1 + limit;
 //             }
 //         }
 //         D_800D154C->unk21E = temp_a1;
@@ -2185,13 +2202,13 @@ void func_1507B958(void) {
 }
 
 void func_1507B974(void) {
-    struct127 *phi_v1;
+    struct127 *actor;
 
-    phi_v1 = D_800D154C;
+    actor = D_800D154C;
     if (D_800D154C->unk65 != 0) {
-        phi_v1 = &D_800CC2D0[D_800D154C->unk65 - 1];
+        actor = &D_800CC2D0[D_800D154C->unk65 - 1];
     }
-    if (D_800D1891 == *(u16 *)((u8 *)D_800D2104[phi_v1->unk13F] + (phi_v1->unk21E * 8) + (D_800D1893 << 3) + 6)) {
+    if (D_800D1891 == *(u16 *)((u8 *)D_800D2104[actor->unk13F] + (actor->unk21E * 8) + (D_800D1893 << 3) + 6)) {
         D_800D1892 ^= 1;
     }
     if (D_800D1892 != 0) {
@@ -2200,14 +2217,14 @@ void func_1507B974(void) {
 }
 // NON-MATCHING: dont think D_800D2104 is correct
 // void func_1507B974(void) {
-//     struct127 *phi_v1;
+//     struct127 *actor;
 //     struct169 *foo;
 //
-//     phi_v1 = D_800D154C;
+//     actor = D_800D154C;
 //     if (D_800D154C->unk65 != 0) {
-//         phi_v1 = &D_800CC2D0[D_800D154C->unk65 - 1];
+//         actor = &D_800CC2D0[D_800D154C->unk65 - 1];
 //     }
-//     foo = &D_800D2104[phi_v1->unk13F + phi_v1->unk21E + D_800D1893];
+//     foo = &D_800D2104[actor->unk13F + actor->unk21E + D_800D1893];
 //     if (D_800D1891 == foo->unk0) {
 //         D_800D1892 ^= 1;
 //     }
@@ -2235,8 +2252,46 @@ void func_1507BAF8(void) {
 void func_1507BB20(void) {
 }
 
-// scary loops
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_1507BB28.s")
+typedef struct {
+    s32 unk0;
+    u8 unk4;
+} Entry1507BB28;
+
+extern Entry1507BB28 D_80086A88[];
+extern u8 D_8009A120[];
+
+int func_1507BB28(s32 arg0, s32 arg1) {
+    s32 p;
+    Entry1507BB28 *tbl;
+    s32 i;
+
+    p = D_800D1588[D_800D154C->id];
+    if (p == 0) {
+        return (s32)D_8009A120;
+    }
+    tbl = *(Entry1507BB28 **)(p - 0x10);
+    if (tbl == NULL) {
+        return (s32)D_8009A120;
+    }
+    i = 0;
+    while (arg1 != tbl[i].unk4) {
+        if (tbl[i].unk0 == 0) {
+            Entry1507BB28 *def = D_80086A88;
+            i = 0;
+            while (arg1 != def[i].unk4) {
+                if (def[i].unk0 == 0) {
+                    /* end of the default table without a match: the original game hangs here */
+                    while (1) {
+                    }
+                }
+                i++;
+            }
+            return def[i].unk0;
+        }
+        i++;
+    }
+    return tbl[i].unk0;
+}
 
 void func_1507BC14(struct127 *arg0) {
 
