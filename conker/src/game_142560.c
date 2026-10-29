@@ -560,7 +560,92 @@ void func_15116D7C(struct Obj15116D7C *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_142560/func_15116EA4.s")
+typedef struct {
+    u8 frames;
+    u8 count;
+} Anim15116EA4;
+
+typedef struct {
+    s32 start;
+    s32 end;
+} Rom15116EA4;
+
+extern Anim15116EA4 D_80089320[];
+extern Rom15116EA4 D_8002AAD0[];
+
+struct Obj15116EA4 {
+    u8 pad0[0x10];
+    s16 unk10;
+    s16 unk12;
+    s16 unk14;
+    u8 pad16[0xA];
+    Vtx *unk20[2];
+    u8 pad28[0x14];
+    s32 unk3C;
+    u8 pad40[0x3C];
+    s32 unk7C;
+    s16 *unk80;
+    s32 unk84;
+};
+
+void func_15116EA4(struct Obj15116EA4 *arg0) {
+    s32 size;
+    f32 frac;
+    u32 frameSize;
+    s32 n;
+    s32 i;
+    s16 *cur;
+    s16 *next;
+    s32 idx;
+    s32 pos;
+    s32 frames;
+    s32 count;
+    s32 speed;
+    s32 frame;
+
+    idx = arg0->unk3C & 0xFFFF;
+    frames = D_80089320[idx].frames;
+    pos = arg0->unk84;
+    count = D_80089320[idx].count;
+    size = D_8002AAD0[frames].end - D_8002AAD0[frames].start;
+    speed = arg0->unk3C >> 16;
+    if (arg0->unk80 == NULL) {
+        arg0->unk80 = allocate_memory(size, 1, 2, 0);
+        func_10004514(D_8002AAD0[frames].start, arg0->unk80, size, 1);
+    }
+    frac = count * (pos * 1.525902189e-05f);
+    frame = frac;
+    frac = frac - frame;
+    if (count == frame) {
+        frac = 1.0f;
+        frame--;
+    }
+    frameSize = (size / count) & ~1;
+    n = frameSize / 6;
+    cur = (s16 *)((u8 *)arg0->unk80 + frame * frameSize);
+    if (frame + 1 != (u32)count) {
+        next = (s16 *)((u8 *)arg0->unk80 + (frame + 1) * frameSize);
+    } else {
+        next = cur;
+    }
+    for (i = 0; i < n; i++) {
+        arg0->unk20[D_800BE9C0][i].v.ob[0] = cur[i * 3 + 0] + (next[i * 3 + 0] - (f32)cur[i * 3 + 0]) * frac + arg0->unk10;
+        arg0->unk20[D_800BE9C0][i].v.ob[2] = cur[i * 3 + 2] + (next[i * 3 + 2] - (f32)cur[i * 3 + 2]) * frac + arg0->unk12;
+        arg0->unk20[D_800BE9C0][i].v.ob[1] = cur[i * 3 + 1] + (next[i * 3 + 1] - (f32)cur[i * 3 + 1]) * frac + arg0->unk14;
+    }
+    if (arg0->unk7C < pos) {
+        pos -= speed;
+        if (pos < arg0->unk7C) {
+            pos = arg0->unk7C;
+        }
+    } else if (pos < arg0->unk7C) {
+        pos += speed;
+        if (arg0->unk7C < pos) {
+            pos = arg0->unk7C;
+        }
+    }
+    arg0->unk84 = pos;
+}
 
 typedef struct Motion151172D8 {
     u8 pad0[0x3C];
