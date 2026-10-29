@@ -18,7 +18,130 @@ void func_150F6DB0(ActorUniqueIdFields *arg0) {
     func_151494E0((s32)&sp18, 0x3E);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_124260/func_150F6DE4.s")
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s16 unk8;
+    s16 unkA;
+    s32 unkC;
+    s32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 unk16;
+    u8 unk17;
+    u8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+    u8 unk1C;
+    u8 unk1D;
+    s16 unk1E;
+    s16 unk20;
+    s16 unk22;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    struct17 pos;
+    struct17 unk3C;
+    struct17 vel;
+    f32 unk54;
+    u32 unk58;
+    s32 unk5C;
+    u8 unk60;
+    u8 unk61;
+    s8 unk62;
+    s8 unk63;
+    s8 unk64;
+    u8 unk65;
+    u8 unk66;
+    u8 pad67;
+    s16 unk68;
+    u8 pad6A[2];
+    f32 unk6C;
+} Func150F6DE4Spawn;
+
+typedef struct {
+    s32 unk0;
+    u8 unk4;
+    s32 unk8[27];
+    u8 unk74;
+} Func150F6DE4Data;
+
+typedef struct {
+    u8 pad0;
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+} Func150F6DE4Obj;
+
+extern void *func_15130280(void *, u8, s32, s32, u8, s32);
+
+struct260 *func_150F6DE4(ActorUniqueIdFields *arg0) {
+    Func150F6DE4Data data;
+    u8 i;
+    struct260 *temp_v0;
+
+    data.unk0 = (s32)arg0;
+    data.unk4 = arg0->field_0x3B;
+    for (i = 0; i < 2; i++) {
+        data.unk8[i] = 0;
+    }
+    data.unk74 = 0;
+    temp_v0 = func_15149130(0x12C, -1, 0x43, -1, 0, 0x37, (struct37 *)0x78, 0xFF, 1);
+    if (temp_v0 != NULL) {
+        s32 dest;
+
+        dest = (s32)temp_v0 + 0x28;
+        memcpy(dest, &data, sizeof(data));
+        {
+            Func150F6DE4Spawn spawn;
+
+            spawn.unk8 = 0x4417;
+            spawn.unk0 = 0x200004;
+            spawn.unk4 = 0;
+            spawn.unkA = 0x12C;
+            spawn.unkC = 0;
+            spawn.unk10 = 0;
+            spawn.unk14 = 0xFF;
+            spawn.unk15 = 0xFF;
+            spawn.unk16 = 0xFF;
+            spawn.unk17 = 0xFF;
+            spawn.unk1C = 0xFF;
+            spawn.unk28 = spawn.unk2C = 1511.0f;
+            spawn.pos = *(struct17 *)&D_800A5480;
+            spawn.unk3C = *(struct17 *)&D_800A5480;
+            spawn.vel = *(struct17 *)&D_800A5480;
+            spawn.unk1E = 1;
+            spawn.unk20 = 0xFF;
+            spawn.unk22 = 1;
+            spawn.unk58 = 0x64C000;
+            spawn.unk60 = 8;
+            spawn.unk61 = 6;
+            spawn.unk62 = -1;
+            spawn.unk63 = -1;
+            spawn.unk64 = 3;
+            spawn.unk65 = 0;
+            spawn.unk5C = 0;
+            spawn.unk66 = 0xFF;
+            spawn.unk68 = 0xA;
+            spawn.unk1D = 0x64;
+            spawn.unk18 = 0;
+            spawn.unk19 = 0;
+            spawn.unk1A = 0xFF;
+            spawn.unk1B = 0xFF;
+            spawn.unk54 = 0.0f;
+            spawn.unk24 = 1.0f;
+            spawn.unk6C = 20.0f;
+            *(void **)(dest + 8) = func_15130280(&spawn, 1, 0, 0, ((Func150F6DE4Obj *)temp_v0)->unkC, ((Func150F6DE4Obj *)temp_v0)->unk1);
+            spawn.unk18 = 0xFF;
+            spawn.unk19 = 0;
+            spawn.unk1A = 0;
+            spawn.unk1B = 0xFF;
+            *(void **)(dest + 0xC) = func_15130280(&spawn, 1, 0, 0, ((Func150F6DE4Obj *)temp_v0)->unkC, ((Func150F6DE4Obj *)temp_v0)->unk1);
+        }
+    }
+    return temp_v0;
+}
 
 typedef struct {
     /* 0x00 */ u8 pad_0[0x40];
