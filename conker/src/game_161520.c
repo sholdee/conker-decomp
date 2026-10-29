@@ -1163,7 +1163,74 @@ void func_15138BC0(struct102 *arg0, u8 arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15138E98.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15139578.s")
+typedef struct {
+    u8 pad0;
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD[3];
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    u8 pad20[0x10];
+    f32 unk30;
+    f32 unk34;
+    f32 unk38;
+    f32 unk3C;
+    f32 unk40;
+    f32 unk44;
+    f32 unk48;
+    f32 unk4C;
+    f32 unk50;
+    f32 unk54;
+    f32 unk58;
+    f32 unk5C;
+    s32 unk60;
+} Struct15139578;
+
+s32 func_15139578(Struct15139578 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
+    struct17 pos;
+    f32 damp;
+    u32 r;
+    f32 rf;
+    s32 flag;
+
+    damp = arg0->unk14;
+    arg0->unk3C = arg0->unk10 + arg4;
+    arg0->unk44 = arg0->unk44 * damp;
+    arg0->unk48 = arg0->unk48 * -damp;
+    arg0->unk4C = arg0->unk4C * damp;
+    arg0->unk50 = arg0->unk50 * damp;
+    arg0->unk54 = arg0->unk54 * damp;
+    arg0->unk58 = arg0->unk58 * damp;
+    if (fabsf(arg0->unk48) < 4.0f) {
+        arg0->unk44 = 0.0f;
+        arg0->unk60 &= ~0x69;
+        arg0->unk48 = 0.0f;
+        arg0->unk4C = 0.0f;
+        arg0->unk50 = 0.0f;
+        arg0->unk54 = 0.0f;
+        arg0->unk58 = 0.0f;
+        arg0->unk5C = 0.0f;
+    }
+    if (arg0->unk30 != 2.0f) {
+        pos.unk0 = arg0->unk38;
+        pos.unk4 = arg4;
+        pos.unk8 = arg0->unk40;
+        if (arg0->unk30) {
+            flag = 1;
+        } else {
+            flag = 0;
+        }
+        rf = func_150ADA68();
+        r = func_150ADA20();
+        func_151D9B8C(flag, (rf * 27.60000038f + 19.70000076f) * ((arg0->unk18 + arg0->unk1C) * 0.5f),
+                      (r % 101U) + 100, arg5, &pos, (func_150ADA20() % 144U) + 0x50, 1, 1, 0,
+                      arg0->unkC, arg0->unk1);
+    }
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15139768.s")
 
