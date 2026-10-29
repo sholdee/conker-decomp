@@ -75,7 +75,45 @@ void func_15033FE0(GameCommand *arg0, s32 arg1) {
     *func_15034860(cursor, actor, first, func_1503DA3C(actor->id, 1)) = 0x1000;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_61490/func_150341BC.s")
+GameCommand *func_150341BC(GameCommand *arg0, s32 arg1) {
+    struct127 *obj;
+    struct126 *sub;
+    s16 angle;
+    s32 id;
+    s32 op;
+
+    obj = &D_800CC2D0[arg1];
+    sub = obj->unk31C;
+    if ((sub != NULL) && !(obj->unk2F8 & 0x80)) {
+        angle = *(f32 *)&obj->pad54 * 182.0444489f;
+        id = obj->unk84.uh;
+        if ((id != 0x42) && (id != 0x14) && (id != 0x76)) {
+            op = (sub->unk78 == 0xA) ? 0 : 4;
+            arg0->opcode = op + 6;
+            arg0->value = angle;
+            arg0++;
+        } else {
+            arg0->opcode = 0xA;
+            arg0->value = angle;
+            arg0++;
+            arg0->opcode = 4;
+            arg0->value = -angle;
+        lbl:
+            arg0++;
+        }
+    }
+    if (obj->unk1D1 != 0) {
+        arg0->opcode = 6;
+        arg0++;
+        arg0[-1].value = obj->unk1D1 * 200;
+    }
+    if ((D_800CC2D0[D_800C3E78].unk31C != NULL) && (D_800CC2D0[D_800C3E78].unk31C->unk12 != 0)) {
+        arg0->opcode = 8;
+        arg0++;
+        arg0[-1].value = -D_800CC2D0[D_800C3E78].unk31C->unk12;
+    }
+    return arg0;
+}
 
 s16 *func_15034340(s16 *arg0, s32 arg1) {
     struct127 *obj = &D_800CC2D0[arg1];
