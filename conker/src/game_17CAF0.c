@@ -971,7 +971,179 @@ void func_15150178(struct Local15150178Angles *arg0, struct Local1514FF44Arg *ar
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_17CAF0/func_15150400.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_17CAF0/func_1515080C.s")
+struct Arg1515080C {
+    s32 unk0;
+    s32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    s16 unk14;
+    s16 unk16;
+    s16 unk18;
+    s16 unk1A;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+    s16 unk2C;
+    s16 unk2E;
+    f32 unk30;
+    f32 unk34;
+    f32 unk38;
+    f32 unk3C;
+    u8 unk40;
+};
+
+typedef struct {
+    f32 unk00;
+    f32 unk04;
+    f32 unk08;
+    volatile f32 unk0C;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    struct Vec3F unk28;
+    struct Vec3F unk34;
+    struct Vec3F unk40;
+    f32 unk4C;
+    s32 unk50;
+    s16 unk54;
+    s16 unk56;
+    u8 unk58;
+    u8 pad59[3];
+    s32 unk5C;
+    u8 unk60;
+    u8 unk61;
+    u8 unk62;
+    u8 unk63;
+    u8 unk64;
+    u8 unk65;
+    u8 unk66;
+    u8 unk67;
+    u8 unk68;
+    s8 unk69;
+    u8 unk6A;
+    u8 pad6B;
+    s32 unk6C;
+    u8 unk70;
+    u8 pad71;
+    s16 unk72;
+    s16 unk74;
+    u8 pad76[2];
+    s32 unk78;
+} Spawn1515080C;
+
+extern void func_15143794(s16, s16, f32, f32 *);
+extern s32 func_1513264C(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
+
+void func_1515080C(struct Arg1515080C *arg0, s32 *arg1, f32 *arg2, s32 arg3, void *arg4, s32 arg5, u8 arg6, u8 arg7, s8 arg8, s32 arg9, f32 argA, u8 argB, u8 argC, u8 argD, s32 argE) {
+    u8 *buf;
+    Spawn1515080C spawn;
+    s32 remaining;
+    s32 count;
+    s32 slot;
+    s32 done;
+    s16 a;
+    s16 b;
+
+    buf = allocate_memory(arg3, 2, 2, 1);
+    if (buf != NULL) {
+        {
+        s32 i;
+        for (i = 0; i < arg3; i++) {
+            buf[i] = 0;
+        }
+        }
+        remaining = arg3;
+        spawn.unk00 = 1.0f;
+        spawn.unk1C = 1.0f;
+        spawn.unk20 = 1.0f;
+        spawn.unk24 = 1.0f;
+        spawn.unk04 = 0.5610000491f;
+        spawn.unk40.y = 0.0f;
+        spawn.unk50 = 0x68 | (arg7 ? 0x80 : 0) | 0x100 | 0x800 | 0x1000 | 0x2000 | 0x10000 | (argB ? 0x4000 : 0) | (argC ? 0x100000 : 0);
+        count = ((u32)func_150ADA20() % (u32)(arg0->unk4 + 1)) + arg0->unk0;
+        if (arg3 < count) {
+            count = arg3;
+        }
+        spawn.unk58 = arg6;
+        spawn.unk5C = 0;
+        spawn.unk60 = 0xFF;
+        spawn.unk62 = 0;
+        spawn.unk64 = 0;
+        spawn.unk65 = 0;
+        spawn.unk66 = 0;
+        spawn.unk67 = 0;
+        spawn.unk68 = 2;
+        spawn.unk6A = 0;
+        spawn.unk6C = 0;
+        spawn.unk70 = 0;
+        spawn.unk72 = 0xC;
+        spawn.unk74 = 0x15;
+        spawn.unk69 = arg8;
+        while (count != 0) {
+            a = ((u32)func_150ADA20() % (arg0->unk16 + 1)) + arg0->unk14;
+            b = ((u32)func_150ADA20() % (arg0->unk1A + 1)) + arg0->unk18;
+            func_15143794(a, b, (func_150ADA68() * arg0->unk20) + arg0->unk1C, &spawn.unk34.x);
+            func_15143794(a, b, argA, &spawn.unk28.x);
+            spawn.unk28.x += arg0->unk8;
+            spawn.unk28.y += arg0->unkC;
+            spawn.unk28.z += arg0->unk10;
+            spawn.unk10 = func_150ADA68() * 360.0f;
+            spawn.unk14 = func_150ADA68() * 360.0f;
+            spawn.unk18 = func_150ADA68() * 360.0f;
+            spawn.unk40.x = (func_150ADA68() * (arg0->unk38 + arg0->unk38)) - arg0->unk38;
+            spawn.unk40.z = (func_150ADA68() * (arg0->unk38 + arg0->unk38)) - arg0->unk38;
+            spawn.unk4C = (func_150ADA68() * arg0->unk28) + arg0->unk24;
+            spawn.unk54 = ((u32)func_150ADA20() % (arg0->unk2E + 1)) + arg0->unk2C;
+            {
+            u32 skip;
+            skip = (u32)func_150ADA20() % remaining;
+            slot = 0;
+            done = 0;
+            do {
+                while (buf[slot] != 0) {
+                    slot++;
+                }
+                if (skip != 0) {
+                    skip--;
+                    slot++;
+                    if (slot >= arg3) {
+                        slot = 0;
+                    }
+                } else {
+                    done = 1;
+                }
+            } while (done == 0);
+            }
+            spawn.unk56 = arg1[slot];
+            spawn.unk0C = (arg0->unk30 + (func_150ADA68() * arg0->unk34)) * arg2[slot];
+            remaining--;
+            spawn.unk08 = spawn.unk0C;
+            buf[slot] = 1;
+            {
+            s32 ret;
+            if (func_150ADA68() < arg0->unk3C) {
+                spawn.unk50 |= 1;
+                spawn.unk63 = arg0->unk40;
+                spawn.unk61 = 0xD;
+            } else {
+                spawn.unk50 &= ~1;
+                spawn.unk63 = 0;
+                spawn.unk61 = 8;
+            }
+            ret = func_1513264C(&spawn, 3, 0xFF, arg9, arg5, argD, argE);
+            if (arg4 != 0 && ret != 0) {
+                memcpy((void *)(ret + 0x170), arg4, arg5);
+            }
+            }
+            count--;
+        }
+    }
+}
 
 void func_15150D1C(struct Local15150D1CArg *arg0, u8 arg1, s32 arg2) {
     void *spACPtr;
@@ -1354,7 +1526,7 @@ struct Spawn15152190 {
     f32 unk00;
     f32 unk04;
     f32 unk08;
-    f32 unk0C;
+    volatile f32 unk0C;
     f32 unk10;
     f32 unk14;
     f32 unk18;
