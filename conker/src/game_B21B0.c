@@ -103,7 +103,87 @@ void func_15085430(struct127 *arg0, s32 arg1, s32 arg2) {
     func_15169040((s32)&sp50, 4);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_B21B0/func_15085710.s")
+typedef struct GameB21B0PlayerRecordA {
+    s32 field_0;
+    s32 field_4;
+    s8 field_8;
+    s8 field_9;
+    u8 field_A;
+    u8 padB;
+    s32 field_C;
+    u8 pad10[0xC];
+} GameB21B0PlayerRecordA;
+
+typedef struct GameB21B0PlayerTable {
+    s32 unk0;
+    GameB21B0PlayerRecordA recs[1];
+} GameB21B0PlayerTable;
+
+#define PREC(i) (((GameB21B0PlayerRecordA *)(&D_800D2138 + 1))[i])
+#define PPTR(i) ((GameB21B0PlayerRecordA *)((s32)&D_800D2138 + ((i) * 28 + 4)))
+
+void func_15085710(s16 arg0, s16 arg1, s32 arg2) {
+    GameB21B0PlayerRecordA *p;
+
+    if (arg0 >= 0xFF) {
+        return;
+    }
+    switch (arg1) {
+    case 0:
+        PREC(arg0).field_0 = arg2;
+        break;
+    case 1:
+        PREC(arg0).field_4 = arg2;
+        break;
+    case 2:
+        if (D_8008FDBC & 1) {
+            arg2 = 6;
+        }
+        PREC(arg0).field_8 = arg2;
+        break;
+    case 3:
+        p = PPTR(arg0);
+        p->field_8 += arg2;
+        p->field_8 = (p->field_8 > 100) ? 100 : p->field_8;
+        break;
+    case 4:
+        if (!(D_8008FDBC & 1)) {
+            p = PPTR(arg0);
+            p->field_8 -= arg2;
+        }
+        break;
+    case 5:
+        PREC(arg0).field_9 = arg2;
+        break;
+    case 6:
+        p = PPTR(arg0);
+        p->field_9 += arg2;
+        p->field_9 = (p->field_9 > 99) ? 99 : p->field_9;
+        break;
+    case 7:
+        p = PPTR(arg0);
+        p->field_9 -= arg2;
+        p->field_9 = (p->field_9 < 0) ? 0 : p->field_9;
+        break;
+    case 8:
+        PREC(arg0).field_A = arg2;
+        break;
+    case 9:
+        PREC(arg0).field_C = arg2;
+        break;
+    case 10:
+        if (!D_800BE616 || !*(s8 *)&D_800E0C20) {
+            GameB21B0PlayerRecordA *q = PPTR(arg0);
+            q->field_C += arg2;
+        }
+        break;
+    case 11:
+        p = PPTR(arg0);
+        p->field_C -= arg2;
+        p->field_C = (p->field_C < 0) ? 0 : p->field_C;
+        break;
+    }
+}
 
 /* Fields recovered from the shared 0x1C-byte player records. */
 typedef struct GameB21B0PlayerRecord {
