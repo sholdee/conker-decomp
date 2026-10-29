@@ -1307,7 +1307,65 @@ f32 func_1505D34C(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 *arg4) {
     return (arg1 * sp24) + arg2 * temp_f0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505D408.s")
+extern u8 D_800CC26C;
+extern u8 D_800CC26D;
+
+void func_1505D408(struct127 *arg0, struct127 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, s32 arg7) {
+    f32 temp_f0;
+    f32 temp_f18;
+    f32 var_f2;
+    s32 temp_a2;
+    s32 temp_t0;
+    u8 var_v0;
+    u8 var_v1;
+
+    var_f2 = 0.400000006f;
+    var_v0 = 0;
+    var_v1 = 0;
+    if (arg5 < 1.0f) {
+        arg5 = 1.200000048f;
+    }
+    if ((arg2 == 0.0f) && (arg4 == 0.0f)) {
+        arg2 = 1.0f;
+    }
+    D_800CC268 |= 1 << arg7;
+    if (arg1->unkF8 & 0x10) {
+        D_800CC26C = arg7;
+        var_f2 = 0.8000000119f;
+        if ((arg1->id == 0x61) && (arg0->interaction_state == 1)) {
+            goto end;
+        }
+    }
+    if (arg0->unkF8 & 1) {
+        var_v0 = 1;
+    }
+    if (arg0->unkF8 & 0x200) {
+        var_v0 |= 2;
+    }
+    if (arg1->unkF8 & 1) {
+        var_v1 = 1;
+    }
+    if (arg1->unkF8 & 0x200) {
+        var_v1 |= 2;
+    }
+    if (var_v1 >= var_v0) {
+        if ((arg1->unkF8 & 0x400) && (arg1->unk28 == 0.0f)) {
+            D_800CC26D = arg7 + 100;
+        }
+        temp_f0 = sqrtf(arg5);
+        temp_f18 = 1.0f / temp_f0;
+        arg2 *= temp_f18;
+        arg3 *= temp_f18;
+        arg4 *= temp_f18;
+        arg6 -= temp_f0;
+        arg6 *= var_f2;
+        arg0->x_position += arg6 * arg2;
+        arg0->z_position += arg6 * arg4;
+        arg0->y_position += arg6 * arg3;
+    }
+end:
+    ;
+}
 void func_1505D408(struct127 *arg0, struct127 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, s32 arg7);
 
 void func_1505D5D0(struct127 *arg0, struct127 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, s32 arg7,
