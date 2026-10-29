@@ -238,7 +238,63 @@ s32 func_1515858C(Mtx *arg0, Obj1515 *arg1) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_185560/func_15158684.s")
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3f15158684;
+
+typedef struct {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    Vec3f15158684 vel;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+} Phys15158684;
+
+typedef struct {
+    u8 pad0[0x48];
+    f32 unk48;
+    f32 unk4C;
+    f32 unk50;
+    u8 pad54[0xF8 - 0x54];
+    Phys15158684 phys;
+} Obj15158684;
+
+s32 func_15158684(Obj15158684 *arg0) {
+    Phys15158684 *p;
+    Vec3f15158684 prev;
+    s32 i;
+
+    p = &arg0->phys;
+    prev = p->vel;
+    for (i = D_800BE9E4; i != 0; i--) {
+        p->vel.x *= p->unk2C;
+        p->vel.z *= p->unk2C;
+    }
+    {
+        f32 changeX;
+        f32 changeZ;
+        f32 accel;
+
+        p->vel.y += p->unk28 * D_800BE9A4;
+        changeX = (p->vel.x - prev.x) * D_800BE9A8;
+        accel = p->unk28;
+        changeZ = (p->vel.z - prev.z) * D_800BE9A8;
+        arg0->unk48 += (prev.x + 0.5f * changeX * D_800BE9A4) * D_800BE9A4;
+        arg0->unk4C += (prev.y + .5f * accel * D_800BE9A4) * D_800BE9A4;
+        arg0->unk50 += (prev.z + 0.50f * changeZ * D_800BE9A4) * D_800BE9A4;
+    }
+    p->unk0 += p->unk1C * D_800BE9A4;
+    p->unk4 += p->unk20 * D_800BE9A4;
+    p->unk8 += p->unk24 * D_800BE9A4;
+    return 1;
+}
 
 s32 func_15158920(Mtx *arg0, Obj1515 *arg1) {
     f32 scale;
