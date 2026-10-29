@@ -431,7 +431,47 @@ void func_151424F4(Mtx *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, 
     sp28[2][2] *= arg8 * arg1;
     guMtxF2L(&sp28, arg0);
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15142600.s")
+void func_15142600(Mtx *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, f32 arg11) {
+    f32 mf[4][4];
+    f32 inv;
+    f32 fx, fy, fz;
+    f32 ux, uy, uz;
+    f32 rx, rz;
+
+    fx = arg9 - arg6;
+    fy = arg10 - arg7;
+    fz = arg11 - arg8;
+    inv = 1.0f / sqrtf(fx * fx + fy * fy + fz * fz);
+    fx *= inv;
+    fy *= inv;
+    fz *= inv;
+    rx = fz;
+    rz = -fx;
+    inv = 1.0f / sqrtf(rx * rx + rz * rz);
+    rx *= inv;
+    rz *= inv;
+    ux = fy * rz;
+    uy = fz * rx - fx * rz;
+    uz = -fy * rx;
+    inv = 1.0f / sqrtf(ux * ux + uy * uy + uz * uz);
+    mf[0][0] = rx * arg3 * arg1;
+    mf[1][0] = ux * inv * arg3 * arg2;
+    mf[2][0] = fx * arg3 * arg1;
+    mf[3][0] = arg6;
+    mf[0][1] = 0.0f;
+    mf[1][1] = uy * inv * arg4 * arg2;
+    mf[2][1] = fy * arg4 * arg1;
+    mf[3][1] = arg7;
+    mf[0][2] = rz * arg5 * arg1;
+    mf[1][2] = uz * inv * arg5 * arg2;
+    mf[2][2] = fz * arg5 * arg1;
+    mf[3][2] = arg8;
+    mf[0][3] = 0.0f;
+    mf[1][3] = 0.0f;
+    mf[2][3] = 0.0f;
+    mf[3][3] = 1.0f;
+    guMtxF2L(mf, arg0);
+}
 void func_15142838(Mtx *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8) {
     f32 mtx[4][4];
 
