@@ -1595,17 +1595,115 @@ void func_15079A58(void) {
 //     D_800D2110[D_800D154C->unk13F] = tmp;
 // }
 
-void func_15079A98(s32 arg0) {
+u16 func_15079A98(s32 arg0) {
     struct169 *temp_v0;
     struct127 *temp_v1;
 
     temp_v0 = ((struct169**)D_800D2104)[D_800D154C->unk13F];
     temp_v1 = &D_800CC2D0[arg0];
-    func_1505A630(temp_v0->unk0 - temp_v1->x_position, temp_v1->z_position - temp_v0->unk4, 0);
+    return func_1505A630(temp_v0->unk0 - temp_v1->x_position, temp_v1->z_position - temp_v0->unk4, 0);
 }
 
-// requires jump table
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_15079B30.s")
+void func_15079B30(void) {
+    s32 idx;
+    s32 *ptr;
+    struct127 *saved_ptr;
+    s32 saved_idx;
+    u16 a;
+    s32 sel;
+    sel = D_800D1891;
+    if (sel == 0) goto body;
+lbl:
+    switch (D_800D1891) {
+    case 1:
+    body:
+        idx = D_800C3E78;
+        break;
+    default:
+        idx = func_15083FB0((u8)(D_800D1891 - 2));
+        if (idx == -1) {
+            return;
+        }
+        break;
+    }
+    switch (D_800D1892) {
+    case 1:
+        ptr = &D_800CC2D0[idx].unk2E4;
+        break;
+    case 2:
+        ptr = &D_800CC2D0[idx].unk2E8;
+        break;
+    case 3:
+        ptr = &D_800CC2D0[idx].unk2EC;
+        break;
+    case 4:
+    case 5:
+    {
+        extern struct127 *D_800D154C;
+        saved_ptr = D_800D154C;
+        saved_idx = D_800C3E78;
+        D_800D154C = &D_800CC2D0[idx];
+        D_800C3E78 = idx;
+        if (D_800D154C->unk232 != D_800D1890) {
+            D_800D154C->unk232 = D_800D1890;
+            D_800D154C->unk218 = func_1507BB28(0, D_800D154C->unk232);
+            D_800D154C->unk21C = 0;
+        }
+        D_800C3E78 = saved_idx;
+        D_800D154C = saved_ptr;
+        return;
+    }
+    case 6:
+        *(f32 *)&D_800CC2D0[idx].padC8 = D_800D1890;
+        return;
+    case 7:
+        D_800CC2D0[idx].unkB8 = 0.0f;
+        return;
+    case 8:
+    {
+        a = func_15079A98(D_800D154C->unk222);
+        if ((func_15079A98(D_800C3E78) - a) & 0x8000) {
+            D_800D154C->unk221 = D_800D1890;
+        }
+        return;
+    }
+    case 9:
+    {
+        u16 tmp = (D_800D1893 << 8) | D_800D1890;
+        D_800D154C->unk244 = tmp;
+        return;
+    }
+    case 10:
+        D_800D154C->unk236 = D_800D154C->unk23D + (s8)D_800D1890;
+        return;
+    case 11:
+        D_800D154C->pad22A = D_800D1890;
+        return;
+    }
+    switch (D_800D1893) {
+    case 0:
+        *ptr = D_800D1890;
+        break;
+    case 1:
+        *ptr -= 1;
+        break;
+    case 2:
+        *ptr += D_800BE9E4;
+        break;
+    case 3:
+        *ptr += 1;
+        break;
+    case 4:
+        *ptr -= D_800BE9E4;
+        break;
+    case 5:
+        *ptr -= D_800CC264;
+        break;
+    case 6:
+        *ptr += D_800CC264;
+        break;
+    }
+}
 
 void func_15079F24(void) {
     D_800D154C->unk48 = D_800D1898[D_800D1890];
