@@ -3,7 +3,45 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_203340/func_151D5E90.s")
+Gfx *func_151D5E90(Gfx *gfx, void *img, s32 arg2, s32 arg3) {
+    u32 w;
+    u32 x;
+    u32 h;
+    u32 y;
+    u32 dy;
+    u32 dx;
+    u32 x2;
+
+    dy = dy;
+    w = D_800BE620;
+    h = D_800BE624;
+
+    gDPPipeSync(gfx++);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPSetOtherMode(gfx++, 0xCFF, 0xF0A4000);
+    gSPLoadGeometryMode(gfx++, 0);
+    gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
+    dy = 16;
+    for (y = 0; y < h; y += dy) {
+        x = 0;
+        dx = 128;
+        if (y + dy > h) {
+            dy = h - y;
+        }
+        for (; x < w; x += dx) {
+            if (x + dx > w) {
+                dx = w - x;
+            }
+            gDPLoadTextureTile(gfx++, img, G_IM_FMT_RGBA, G_IM_SIZ_16b, w, h, x, y, x + dx - 1, y + dy - 1, 0,
+                               0, 0, 0, 0, 0, 0);
+            gSPTextureRectangle(gfx++, x << 2, y << 2, (x + dx) << 2, (y + dy) << 2, G_TX_RENDERTILE, x << 5, y << 5,
+                                1 << 10, 1 << 10);
+            gDPPipeSync(gfx++);
+        }
+    }
+    gDPSetOtherMode(gfx++, 0x80C3F, 0xF0A4000);
+    return gfx;
+}
 
 void func_151D61B0(u16 *arg0) {
     s32 y;
