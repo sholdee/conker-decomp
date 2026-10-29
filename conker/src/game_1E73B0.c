@@ -212,7 +212,122 @@ void func_151BC074(s32 arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E73B0/func_151BC104.s")
+extern f32 D_800AA830;
+extern f32 D_800DCA24;
+void *func_15134908(void *, s32, u8, s32);
+void *func_15147A80(void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+void *func_15163414(Header *, f32 *, f32 *, f32 *, s8, u8, u8, u8, u8, u8, u8, u8, s32, u8, s32);
+
+typedef struct {
+    f32 *unk0;
+    f32 *unk4;
+    f32 *unk8;
+    f32 unkC;
+    f32 unk10;
+    s16 unk14;
+    u8 unk16;
+    u8 unk17;
+    u8 unk18;
+    u8 unk19;
+    u8 pad1A[2];
+} Spawn151BC104;
+
+typedef struct {
+    struct127 *owner;
+    u8 ownerId;
+} Extra151BC104;
+
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec151BC104;
+
+typedef struct {
+    Vec151BC104 unk0;
+    s16 unkC;
+    s16 unkE;
+    s32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 pad16[2];
+    s32 unk18;
+} Header151BC104;
+
+typedef struct {
+    struct127 *owner;
+    u8 ownerId;
+    u8 pad5[3];
+    Vec151BC104 unk8;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+} Payload151BC104;
+
+void func_151BC104(struct127 *arg0, u8 arg1, s32 arg2) {
+    void *temp_v0;
+
+    if ((D_80082FA0 < 2) && (D_8008FD8C < 5)) {
+        Spawn151BC104 spawn;
+        Extra151BC104 extra;
+        spawn.unkC = 15.0f;
+        spawn.unk0 = &arg0->x_position;
+        spawn.unk4 = &arg0->y_position;
+        spawn.unk8 = &arg0->z_position;
+        spawn.unk14 = 0x12C;
+        spawn.unk10 = D_800AA830 * D_800DCA24;
+        spawn.unk16 = 4;
+        spawn.unk17 = 4;
+        spawn.unk18 = 1;
+        spawn.unk19 = 0;
+        extra.owner = arg0;
+        extra.ownerId = arg0->unique_id;
+        temp_v0 = func_15134908(&spawn, 8, arg1, arg2);
+        if (temp_v0 != NULL) {
+            memcpy((u8 *)temp_v0 + 0x40, &extra, 8);
+        }
+    }
+    {
+        Header151BC104 header;
+        void *temp_v0_2;
+        Payload151BC104 payload;
+        header.unk15 = 0x28;
+        header.unk0.x = arg0->x_position;
+        header.unk0.y = arg0->y_position;
+        header.unk0.z = arg0->z_position;
+        header.unkC = 0x12C;
+        header.unkE = 6;
+        header.unk10 = 0xC;
+        payload.owner = arg0;
+        payload.ownerId = arg0->unique_id;
+        payload.unk8 = header.unk0;
+        payload.unk14 = 0.0f;
+        payload.unk18 = 0.0f;
+        payload.unk20 = -16384.0f;
+        payload.unk1C = -16384.0f;
+        temp_v0_2 = func_15147A80(&header, 0x28, 0x14, 0xA, 0xA, 0xA, 0, 0, 0, arg1, arg2);
+        if (temp_v0_2 != NULL) {
+            memcpy(*(void **)((u8 *)temp_v0_2 + 0x98), &payload, 0x24);
+        }
+    }
+    {
+        Extra151BC104 extra2;
+        void *temp_v0_3;
+        Header header2;
+        extra2.owner = arg0;
+        extra2.ownerId = arg0->unique_id;
+        header2.unk0 = 2;
+        header2.unk1 = 0xE;
+        header2.unk2 = 0x12C;
+        header2.unk4 = 0x1F;
+        temp_v0_3 = func_15163414(&header2, &arg0->x_position, &arg0->y_position, &arg0->z_position,
+                                0, 0, 0x28, 0xFF, 0xFF, 0xFF, 0xFF, 0, 8, arg1, arg2);
+        if (temp_v0_3 != NULL) {
+            memcpy((u8 *)temp_v0_3 + 0x28, &extra2, 8);
+        }
+    }
+}
 
 void func_15143794(s16, s16, f32, void *);
 void func_151A26EC(f32 *, f32 *, f32 *, f32, f32, f32, s32, s32, s32,
