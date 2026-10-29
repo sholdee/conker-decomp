@@ -122,7 +122,99 @@ void func_150B71A8(void *arg0)
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_E4070/func_150B7220.s")
+typedef struct {
+    /* 0x00 */ void *unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ s16 unk14;
+    /* 0x16 */ s16 unk16;
+    /* 0x18 */ s16 unk18;
+    /* 0x1A */ s16 unk1A;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ s16 unk24;
+    /* 0x26 */ s16 unk26;
+    /* 0x28 */ s16 unk28;
+    /* 0x2A */ s16 unk2A;
+    /* 0x2C */ s16 unk2C;
+    /* 0x2E */ s16 unk2E;
+    /* 0x30 */ u8 unk30;
+    /* 0x31 */ u8 unk31;
+    /* 0x32 */ u8 unk32;
+    /* 0x33 */ u8 unk33;
+    /* 0x34 */ u8 unk34;
+    /* 0x35 */ u8 unk35;
+    /* 0x36 */ u8 unk36;
+    /* 0x37 */ u8 unk37;
+    /* 0x38 */ u8 unk38;
+    /* 0x39 */ u8 unk39;
+    /* 0x3A */ u8 pad3A[2];
+} Struct150B7220;
+
+extern u8 D_80091924;
+s32 func_15169900(void *arg0, s32 arg1);
+
+void func_150B7220(s32 arg0, s32 arg1, s32 arg2, s32 arg3)
+{
+  Struct150B7220 sp44;
+  s32 r;
+  s32 x;
+  s32 y;
+  x = arg0;
+  y = arg1;
+  sp44.unk0 = &D_80091924;
+  sp44.unk8 = (x << 16) | (y & 0xFFFF);
+  sp44.unk28 = 0x1000;
+  sp44.unk2A = 0x1000;
+  sp44.unkC = arg2;
+  sp44.unk14 = arg2;
+  sp44.unk18 = 0;
+  sp44.unk24 = 0;
+  sp44.unk26 = 0;
+  sp44.unk2C = 0x10;
+  sp44.unk2E = 0x10;
+  sp44.unk30 = 7;
+  sp44.unk31 = 2;
+  sp44.unk32 = 0xFF;
+  sp44.unk33 = 0;
+  sp44.unk34 = 0;
+  if (y)
+  {
+  }
+  sp44.unk35 = 0xFF;
+  sp44.unk36 = 7;
+  sp44.unk37 = 0x11;
+  if (x < (D_800BE638 >> 1))
+  {
+ do { r = D_800BE638 - x; } while (0);
+  }
+  else
+  {
+    r = x;
+  }
+  sp44.unk10 = (x << 16) | ((y - r) & 0xFFFF);
+  sp44.unk39 = 0;
+  sp44.unk16 = 0;
+  sp44.unk1C = x;
+  sp44.unk20 = y - r;
+  func_15169900(&sp44, arg3);
+  sp44.unk10 = (x << 16) | ((y + r) & 0xFFFF);
+  sp44.unk39 = 8;
+  sp44.unk20 = y + r;
+  func_15169900(&sp44, arg3);
+  sp44.unk1C = x - r;
+  sp44.unk10 = ((x - r) << 16) | (y & 0xFFFF);
+  sp44.unk39 = 4;
+  sp44.unk16 = 0x100;
+  sp44.unk20 = y;
+  func_15169900(&sp44, arg3);
+  sp44.unk10 = ((x + r) << 16) | (y & 0xFFFF);
+  sp44.unk39 = 0;
+  sp44.unk1C = x + r;
+  func_15169900(&sp44, arg3);
+}
 
 typedef struct {
     char pad18[0x18];
