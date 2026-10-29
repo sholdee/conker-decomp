@@ -471,7 +471,66 @@ s32 func_151DA08C(u8 arg0, f32 arg1, f32 arg2, u8 arg3, s16 arg4, s32 arg5, void
     }
     return ret;
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/func_151DA368.s")
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    s8 unk2;
+    s8 unk3;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    u8 unk18;
+} Struct151DA368Sub;
+
+void func_151DB5D0(s32, f32 *, f32 *, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32);
+
+s32 func_151DA368(void *arg0) {
+    Struct151DA368Sub *p;
+    s32 pad;
+    f32 pos[3];
+    f32 vel[3];
+    f32 sp98;
+    f32 dist;
+    f32 c;
+    f32 avg;
+    s16 angle;
+
+    p = (Struct151DA368Sub *)((u8 *)arg0 + 0x128);
+    p->unk0 = p->unk0 + p->unk2 * D_800BE9E4;
+    p->unk1 = p->unk1 + p->unk3 * D_800BE9E4;
+    *(f32 *)((u8 *)arg0 + 0x2C) = func_151423D8(p->unk0 - 0x40) * p->unk4 + p->unk10;
+    *(f32 *)((u8 *)arg0 + 0x30) = func_151423D8(p->unk1 - 0x40) * p->unk8 + p->unk10;
+lbl:
+    p->unkC += (0.150000006f + func_150ADA68() * 0.1000000015f) * D_800BE9A4;
+    avg = (*(f32 *)((u8 *)arg0 + 0x30) + *(f32 *)((u8 *)arg0 + 0x2C)) * 0.5f;
+    if (p->unkC > 1.0f) {
+        sp98 = avg * 500.0f;
+        do {
+            angle = func_150ADA20() & 0xFF;
+            dist = func_150ADA68() * sp98;
+            c = func_151423D8(angle - 0x40);
+            pos[0] = func_151423D8(angle) * dist + *(f32 *)((u8 *)arg0 + 0x34);
+            pos[1] = *(f32 *)((u8 *)arg0 + 0x38) + -3.5f;
+            pos[2] = *(f32 *)((u8 *)arg0 + 0x3C) + c * dist;
+            {
+                s16 life;
+
+            vel[0] = 0.0f;
+            vel[1] = 0.0f;
+            vel[2] = 0.0f;
+            life = (func_150ADA20() % 51U) + 0x96;
+            dist = func_150ADA68();
+            func_151DB5D0(p->unk18, pos, vel, avg * 471.0f, (dist * 154.0f + 10106.0f) * 9.999999747e-05f, 1.0f,
+                          (func_150ADA68() * 25.0f + -50.0f) * 0.001000000047f, life, 0x9B, life, 0xFF / life, 1,
+                          *((u8 *)arg0 + 0xC), *((u8 *)arg0 + 1));
+            }
+            p->unkC = p->unkC - 1.0f;
+        } while (p->unkC > 1.0f);
+    }
+    return 1;
+}
 // TODO when we know what arg0 is...
 s32 func_151DA6A8(s32 *arg0) {
     s32 i;
