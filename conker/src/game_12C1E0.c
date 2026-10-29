@@ -385,4 +385,118 @@ void func_150FFD2C(struct127 *arg0, struct127 *arg1, s32 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_12C1E0/func_150FFD84.s")
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s16 unk8;
+    s16 unkA;
+    s32 unkC;
+    s32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 unk16;
+    u8 unk17;
+    u8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+    u8 unk1C;
+    u8 unk1D;
+    s16 unk1E;
+    s16 unk20;
+    s16 unk22;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    struct17 unk30;
+    struct17 unk3C;
+    struct17 unk48;
+    f32 unk54;
+    u32 unk58;
+    s32 unk5C;
+    u8 unk60;
+    u8 unk61;
+    s8 unk62;
+    s8 unk63;
+    s8 unk64;
+    u8 unk65;
+    u8 unk66;
+    u8 pad67;
+    s16 unk68;
+    u8 pad6A[2];
+    f32 unk6C;
+} Func150FFD84Spawn;
+
+extern void *func_15130280(void *, u8, s32, s32, u8, s32);
+extern void func_15143794(s16, s16, f32, f32 *);
+extern void func_15145974(struct17 *, f32 *, f32 *);
+typedef struct { s32 v[4]; } Func150FFD84Colors;
+extern Func150FFD84Colors D_800A2160;
+
+void func_150FFD84(struct17 *arg0, struct17 *arg1, u8 arg2, s32 arg3) {
+    Func150FFD84Spawn spawn;
+    s32 count;
+    s16 angle1;
+    s16 angle2;
+    s32 r1;
+    f32 yaw;
+    f32 pitch;
+
+    count = func_150ADA20() % 9U + 10;
+    spawn.unk8 = 0x2203;
+    spawn.unk0 = 0x200005;
+    spawn.unk4 = 0;
+    spawn.unkC = 0;
+    spawn.unk10 = 0;
+    spawn.unk14 = 0xFF;
+    spawn.unk15 = 0xFF;
+    spawn.unk16 = 0xFF;
+    spawn.unk17 = 0xFF;
+    spawn.unk18 = 0xFF;
+    spawn.unk19 = 0xFF;
+    spawn.unk1A = 0xFF;
+    spawn.unk1C = 0xFF;
+    spawn.unk30 = *arg0;
+    spawn.unk3C = *(struct17 *)&D_800A5480;
+    spawn.unk1E = 7;
+    spawn.unk20 = 0x24;
+    spawn.unk22 = 1;
+    spawn.unk58 = 0x4C207;
+    spawn.unk60 = 0;
+    spawn.unk61 = 7;
+    spawn.unk62 = -1;
+    spawn.unk63 = -1;
+    spawn.unk64 = -1;
+    spawn.unk65 = 0;
+    spawn.unk5C = 0;
+    spawn.unk66 = 0xFF;
+    spawn.unk24 = 1.0f;
+    func_15145974(arg1, &yaw, &pitch);
+    pitch = 0.0f;
+    angle1 = (s16)(yaw * 182.0444489f);
+    angle1 >>= 8;
+    angle1 -= 0x8A;
+    angle2 = (s16)(pitch * 182.0444489f);
+    angle2 >>= 8;
+    angle2 -= 0x8A;
+    do {
+        Func150FFD84Colors colors;
+        s32 r2;
+
+        colors = D_800A2160;
+        spawn.unk1D = colors.v[func_150ADA20() & 3];
+        spawn.unkA = func_150ADA20() % 13U + 10;
+        spawn.unk1B = func_150ADA20() % 101U + 155;
+        spawn.unk28 = spawn.unk2C = func_150ADA68() * 155.0f + 75.0f;
+        r1 = func_150ADA20();
+        r2 = func_150ADA20();
+        func_15143794(r1 % 21U + angle1, r2 % 21U + angle2, func_150ADA68() * 20.0f + 20.0f, &spawn.unk48.unk0);
+        spawn.unk54 = func_150ADA68() * 0.6210000515f + -0.6570000052f;
+        spawn.unk58 &= ~0xC0;
+        r1 = (func_150ADA20() & 1) ? 0x80 : 0;
+        r2 = (func_150ADA20() & 1) ? 0x40 : 0;
+        spawn.unk58 |= r2 | r1;
+        func_15130280(&spawn, 1, 0, 0, arg2, arg3);
+        count--;
+    } while (count > 0);
+}
