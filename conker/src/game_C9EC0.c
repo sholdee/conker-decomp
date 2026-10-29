@@ -179,7 +179,65 @@ void func_1509CE64(void *arg0, void *arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C9EC0/func_1509CF28.s")
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8;
+    u32 unkC;
+} Res1509CF28;
+
+typedef struct {
+    s32 *unk0;
+    s32 unk4;
+} Ent1509CF28;
+
+extern s32 D_800D2FB0;
+extern Ent1509CF28 *func_1502B6BC(s32, s32, u32 *, s32, s32, s32, s32);
+
+s32 func_1509CF28(s32 arg0, s32 *arg1)
+{
+  Ent1509CF28 *table;
+  u32 i;
+  s32 done;
+  u32 count;
+  s32 *p;
+  s32 flags;
+  s32 pad1;
+  s32 pad2;
+  count = 0;
+  D_800D2FB0 = (s32) func_1502B6BC(0, 0, &count, 3, 8, 0, arg0);
+  if (D_800D2FB0 == 0)
+  {
+    *arg1 = 0;
+    return 0;
+  }
+  table = (Ent1509CF28 *) D_800D2FB0;
+  table->unk4 = count - 1;
+  *arg1 = count - 1;
+  for (i = 1; i < count; i++)
+  {
+    done = 0;
+    p = ((Ent1509CF28 *) D_800D2FB0)[i].unk0;
+    do
+    {
+      p[0] += (s32) ((Ent1509CF28 *) D_800D2FB0)[i].unk0;
+      flags = p[1];
+      if (flags & 0x80000000)
+      {
+        if (1)
+        {
+          done = 1;
+        }
+      }
+      p[1] = flags & (~0xF0000000);
+      p += 2;
+    }
+    while (!done);
+    ((Res1509CF28 *) (&table[1])[i - 1].unk0)->unkC = (((Res1509CF28 *) (&table[1])[i - 1].unk0)->unkC & 0x0FFFFFFF) >> 1;
+  }
+
+  return 1;
+}
 
 extern s32 D_800D2FB0;
 extern s32 func_10004074(s32);
