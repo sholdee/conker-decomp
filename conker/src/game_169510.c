@@ -924,7 +924,7 @@ void *func_1513E83C(void *arg0, s16 arg1) {
         return 0;
     }
     {
-        s32 pad; /* -g3 scope: its .bgnb splits the &mtx init from the first load */
+        s16 pad; /* -g3 scope: its .bgnb splits the &mtx init from the first load */
 
         coords[0][0] = owner->width;
         coords[0][1] = owner->height;
@@ -1197,7 +1197,55 @@ void func_151400D0(Dst151400D0 *dst, Src151400D0 *src) {
     dst[0].unk6 = 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_15140190.s")
+void *func_15140190(void *arg0, s16 arg1) {
+    Game169510ScaledVertex *vertices;
+    Game169510ScaledVertex *result;
+    f32 mtx[4][4];
+    f32 coords[4][3];
+    u8 i;
+    u8 fresh;
+
+    func_151D5D60((u8 *)arg0 + 0x100, arg1, 0x40, (void **)&vertices, &fresh);
+    result = vertices;
+    if (vertices != 0) {
+        if (fresh != 0) {
+            memcpy(*(u8 **)((u8 *)arg0 + arg1 * 4 + 0x100), (u8 *)arg0 + 0xC0, 0x40);
+            memcpy(*(u8 **)((u8 *)arg0 + arg1 * 4 + 0x100) + 0x40, (u8 *)arg0 + 0xC0, 0x40);
+        }
+    } else {
+        return 0;
+    }
+    {
+        s16 pad;
+
+        coords[0][0] = ((Game169510ScaledOwner *)arg0)->width;
+        coords[0][1] = ((Game169510ScaledOwner *)arg0)->height;
+        coords[0][2] = 0.0f;
+        coords[1][0] = -((Game169510ScaledOwner *)arg0)->width;
+        coords[1][1] = ((Game169510ScaledOwner *)arg0)->height;
+        coords[1][2] = 0.0f;
+        coords[2][0] = -((Game169510ScaledOwner *)arg0)->width;
+        coords[2][1] = -((Game169510ScaledOwner *)arg0)->height;
+        coords[2][2] = 0.0f;
+        coords[3][0] = ((Game169510ScaledOwner *)arg0)->width;
+        coords[3][1] = -((Game169510ScaledOwner *)arg0)->height;
+        coords[3][2] = 0.0f;
+        func_150A8050(mtx, ((Game169510ScaledOwner *)arg0)->rx, ((Game169510ScaledOwner *)arg0)->ry, ((Game169510ScaledOwner *)arg0)->rz);
+        mtx[3][0] = ((Game169510ScaledOwner *)arg0)->x;
+        mtx[3][1] = ((Game169510ScaledOwner *)arg0)->y;
+        mtx[3][2] = ((Game169510ScaledOwner *)arg0)->z;
+        for (i = 0; i < 4; i++) {
+            f32 *c = coords[i];
+            func_150A7960(mtx, c[0], c[1], 0.0f, &c[0], &c[1], &c[2]);
+            vertices->x = c[0];
+            vertices->y = c[1];
+            vertices->z = c[2];
+            vertices->flag = 0;
+            vertices++;
+        }
+    }
+    return result;
+}
 
 void func_151403A8(s32 arg0, u8 arg1) {
     func_15169260(&D_800A5168, 4, arg0, arg1);
