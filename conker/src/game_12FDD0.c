@@ -1,5 +1,8 @@
 #include <ultra64.h>
+#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
+#undef func_150ADA20
+u32 func_150ADA20(void);
 #include "variables.h"
 
 typedef struct {
@@ -67,7 +70,80 @@ typedef struct {
 extern void func_15103254(s16 arg0, u8 arg1, f32 arg2, Vec3_15102B38 *arg3, u8 arg4, u8 arg5, s32 arg6);
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_12FDD0/func_15102920.s")
+typedef struct {
+    /* 0x00 */ s32 unk00;
+    /* 0x04 */ s16 unk04;
+    /* 0x06 */ u8 unk06;
+    /* 0x07 */ u8 unk07;
+    /* 0x08 */ s32 unk08;
+    /* 0x0C */ s32 unk0C;
+    /* 0x10 */ u8 unk10;
+    /* 0x11 */ u8 unk11;
+    /* 0x12 */ u8 unk12;
+    /* 0x13 */ u8 unk13;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 unk16;
+    /* 0x17 */ u8 unk17;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ s32 unk1C;
+    /* 0x20 */ s16 unk20;
+    /* 0x22 */ s16 unk22;
+    /* 0x24 */ s16 unk24;
+} Struct15102920;
+
+struct210 *func_15102920(f32 arg0, u8 arg1, s32 arg2, f32 *arg3, s16 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9) {
+    s32 temp_v0;
+    Struct15102920 sp64;
+    s32 sp60;
+    s32 sp5C;
+    s32 pad;
+
+    sp64.unk22 = 0xA;
+    sp64.unk24 = 0x19;
+    temp_v0 = func_1510F8CC(arg7);
+    sp64.unk06 = 0x5C;
+    switch (D_800BE9F0) {
+    case 0x36:
+        if (temp_v0 == 9) {
+            return NULL;
+        }
+        sp64.unk06 = 0x85;
+        arg0 *= 0.6000000238f;
+        break;
+    case 0x26:
+        if (temp_v0 == 2) {
+            return NULL;
+        }
+        break;
+    }
+    sp64.unk07 = 0;
+    sp64.unk00 = ((arg4 == -1) ? 0 : 1) | 0x100 | 0x200 | 0x400 | 0x1000 | 0x8000 | 0x20000;
+    sp64.unk04 = (arg4 == -1) ? 0x12C : arg4;
+    sp64.unk08 = 0;
+    sp64.unk0C = 0;
+    if (D_800BE9F0 == 0x36) {
+        sp64.unk10 = arg1 >> 1;
+    } else {
+        sp64.unk10 = arg1;
+    }
+    sp64.unk11 = 0xFF;
+    sp64.unk14 = 0;
+    sp64.unk13 = 0;
+    sp64.unk12 = 0;
+    sp64.unk15 = 0xFF;
+    sp64.unk18 = ((arg6 != 0) ? 2 : 1) + 0x3B0000;
+    sp64.unk16 = 0;
+    sp64.unk17 = 7;
+    if (arg5 != 0) {
+        sp60 = 3;
+        sp5C = 0xFF;
+    } else {
+        sp60 = 0;
+        sp5C = 0;
+    }
+    return func_1513C650((s32)&sp64, 0, 0, arg2, arg3[0], arg3[1], arg3[2], arg0, arg0, func_150ADA20() & 0xFF, (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2), sp60, sp5C, 0, arg8, arg9);
+}
 
 s32 func_15102B38(struct127 *arg0, u8 arg1, Vec3_15102B38 *arg2, Vec3_15102B38 *arg3, Vec2_15102B38 *arg4, s16 arg5, u8 arg6, f32 arg7, s32 arg8, u8 arg9, s32 argA, s16 argB, u8 argC, s32 argD) {
     Locals15102B38 sp;
