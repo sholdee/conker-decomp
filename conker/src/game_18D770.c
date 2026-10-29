@@ -1287,7 +1287,91 @@ struct225 *func_1516295C(struct226 *arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, s
 // }
 
 // a biggun'
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_15162B28.s")
+typedef struct {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    u8  unk24;
+    s8  unk25;
+    s8  unk26;
+    s8  unk27;
+    s8  unk28;
+} Sub15162B28;
+
+typedef struct {
+    u8 pad0[0x14];
+    struct226 *unk14;
+    Sub15162B28 unk18;
+} Arg15162B28;
+
+extern void (*D_8008B364[])(Arg15162B28 *, s32);
+
+s32 func_15162B28(Arg15162B28 *arg0) {
+    Sub15162B28 *sub;
+    s8 idx;
+    u8 prev;
+    s32 state;
+
+    prev = arg0->unk18.unk24;
+    sub = &arg0->unk18;
+    if (arg0->unk18.unkC < arg0->unk18.unk10) {
+        arg0->unk14->unk2F = sub->unk4;
+        sub->unk24 = 0;
+    } else {
+        if (sub->unkC < sub->unk14) {
+            f32 t;
+
+            t = (sub->unkC - sub->unk10) * sub->unk20;
+            arg0->unk14->unk2F = sub->unk4 + sub->unk8 * t;
+            sub->unk24 = 1;
+        } else {
+            if (sub->unkC < sub->unk18) {
+                arg0->unk14->unk2F = sub->unk0;
+                sub->unk24 = 2;
+            } else {
+                f32 t;
+
+                t = 1.0f - (sub->unkC - sub->unk18) * sub->unk20;
+                arg0->unk14->unk2F = sub->unk4 + sub->unk8 * t;
+                sub->unk24 = 3;
+            }
+        }
+    }
+    state = sub->unk24;
+    if (state != prev) {
+        switch (state) {
+        case 0:
+            idx = sub->unk25;
+            break;
+        case 1:
+            idx = sub->unk26;
+            break;
+        case 2:
+            idx = sub->unk27;
+            break;
+        case 3:
+            idx = sub->unk28;
+            break;
+        default:
+            idx = -1;
+            break;
+        }
+        if (idx != -1) {
+            D_8008B364[idx](arg0, state);
+        }
+    }
+    sub->unkC += D_800BE9A4;
+    while (sub->unk1C < sub->unkC) {
+        sub->unkC -= sub->unk1C;
+    }
+    return 1;
+}
 
 void func_15162EF8(struct239 *arg0) {
     s8 sp1C[9]; // FIXME: what size should this be?
