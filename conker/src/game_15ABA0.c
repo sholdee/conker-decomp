@@ -92,4 +92,46 @@ void func_1512D748(struct108 *arg0, s32 arg1, s32 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_15ABA0/func_1512D980.s")
+void func_1512D980(struct108 *arg0) {
+    SomeStruct1512 *sp = &D_800DC2C0[arg0->unk23D];
+    f32 sign;
+
+    if (func_150ADA20() & 1) {
+        sign = 1.0f;
+    } else {
+        sign = -1.0f;
+    }
+    if ((sp->unk28 != -1.0f) && (sp->unk50 != 5) && !(arg0->unk84 & 0x80000)) {
+        sp->unk54 = sinf(sp->unk28 * 0.03333333507f * sp->unk0 * 360.0f * 0.01745329238f) * (sign * sp->unk2C);
+        sp->unk58 = sinf(sp->unk28 * 0.03333333507f * sp->unk4 * 360.0f * 0.01745329238f) * (1 * sp->unk2C);
+        sp->unk5C = sinf(sp->unk28 * 0.03333333507f * sp->unk8 * 360.0f * 0.01745329238f) * (-1.0f * sp->unk2C);
+        sp->unk60 = sinf(sp->unk28 * 0.03333333507f * sp->unkC * 360.0f * 0.01745329238f) * (-1.0f * sp->unk2C);
+        if ((sp->unk28 <= sp->unk3C) && (sp->unk2C >= 0.0f)) {
+            if (sp->unk28 <= sp->unk30) {
+                if ((sp->unk50 == 0) && (sp->unk64 != 0)) {
+                    sp->unk50 = 1;
+                }
+                sp->unk2C += sp->unk40 * D_800BE9A4;
+            } else if (sp->unk28 <= sp->unk34) {
+                if ((sp->unk50 == 1) && (sp->unk64 != 0)) {
+                    sp->unk50 = 2;
+                }
+                sp->unk2C -= sp->unk44 * D_800BE9A4;
+            } else if (sp->unk28 <= sp->unk38) {
+                if ((sp->unk50 == 2) && (sp->unk64 != 0)) {
+                    sp->unk50 = 3;
+                }
+            } else if (sp->unk28 < sp->unk3C) {
+                if ((sp->unk50 == 3) && (sp->unk64 != 0)) {
+                    sp->unk50 = 4;
+                }
+                sp->unk2C -= sp->unk4C * D_800BE9A4;
+            } else {
+                func_1512D6F0((u8 *)arg0);
+            }
+            sp->unk28 += (u32)D_800BE9A0;
+        } else {
+            sp->unk50 = 5;
+        }
+    }
+}
