@@ -425,7 +425,70 @@ void func_151D5148(void *arg0) {
     p[0x1AA / 2]++;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_200930/func_151D5174.s")
+struct Obj151D57F8;
+
+struct Sub151D5174 {
+    u8 pad0[0x84];
+    u8 unk84;
+    u8 pad85[0x130 - 0x85];
+    struct17 unk130;
+    struct17 unk13C;
+    u8 pad148[0x198 - 0x148];
+    u8 unk198;
+};
+
+struct Obj151D5174 {
+    u8 pad0[0x1D4];
+    s32 unk1D4;
+    u8 pad1D8[0x31C - 0x1D8];
+    struct Sub151D5174 *unk31C;
+};
+
+#define OBJ ((struct Obj151D5174 *)arg0)
+
+void func_151D5174(struct Obj151D57F8 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, struct17 *arg4, struct17 *arg5, struct17 *arg6, struct17 **arg7, struct17 **arg8, struct17 *arg9) {
+    struct17 *pos;
+    struct17 sp48;
+    struct17 sp3C;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    f32 t;
+
+    if (OBJ->unk1D4 != 0) {
+        if (OBJ->unk31C != NULL && (OBJ->unk31C->unk198 == 2 || OBJ->unk31C->unk84 != 0)) {
+            pos = &OBJ->unk31C->unk13C;
+            func_151450B4(arg2, arg3, &sp48);
+            func_151450B4(&sp48, arg4, &sp3C);
+            if (arg9 != NULL) {
+                dx = arg9->unk0 - pos->unk0;
+                dy = arg9->unk4 - pos->unk4;
+                dz = arg9->unk8 - pos->unk8;
+            } else {
+                dx = arg1->unk0 - pos->unk0;
+                dy = arg1->unk4 - pos->unk4;
+                dz = arg1->unk8 - pos->unk8;
+            }
+            t = sp3C.unk0 * dx + sp3C.unk4 * dy + sp3C.unk8 * dz;
+            t /= sp3C.unk0 * OBJ->unk31C->unk130.unk0 + sp3C.unk4 * OBJ->unk31C->unk130.unk4 +
+                 sp3C.unk8 * OBJ->unk31C->unk130.unk8;
+            arg5->unk0 = pos->unk0 + t * OBJ->unk31C->unk130.unk0;
+            arg5->unk4 = pos->unk4 + t * OBJ->unk31C->unk130.unk4;
+            arg5->unk8 = pos->unk8 + t * OBJ->unk31C->unk130.unk8;
+            arg6->unk0 = OBJ->unk31C->unk130.unk0;
+            arg6->unk4 = OBJ->unk31C->unk130.unk4;
+            arg6->unk8 = OBJ->unk31C->unk130.unk8;
+            *arg7 = arg5;
+            *arg8 = arg6;
+        end:
+            return;
+        }
+    }
+    *arg7 = NULL;
+    *arg8 = NULL;
+}
+
+#undef OBJ
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_200930/func_151D5334.s")
 
