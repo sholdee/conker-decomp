@@ -107,7 +107,207 @@ void func_150EEF40(struct210 *arg0, u8 arg1) {
     func_151403A8(&sp18, 0x43);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_11C2B0/func_150EEF80.s")
+typedef struct {
+    u8 pad_0[0x3B];
+    u8 field_0x3B;
+} ActorIdByteFields;
+
+typedef struct {
+    /* 0x00 */ u8 unk0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ s16 unk2;
+    /* 0x04 */ s16 unk4;
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ u8 unk10;
+    /* 0x11 */ u8 unk11;
+    /* 0x12 */ u8 unk12;
+    /* 0x13 */ u8 unk13;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ struct17 unk1C;
+    /* 0x28 */ struct17 unk28;
+    /* 0x34 */ f32 unk34;
+    /* 0x38 */ f32 unk38;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ s32 unk40;
+    /* 0x44 */ u8 unk44;
+    /* 0x45 */ u8 unk45;
+    /* 0x46 */ u8 unk46;
+    /* 0x47 */ u8 unk47;
+    /* 0x48 */ s32 unk48;
+    /* 0x4C */ u8 unk4C;
+    /* 0x50 */ s32 unk50;
+    /* 0x54 */ s16 unk54;
+    /* 0x56 */ s16 unk56;
+} Spawn150EEF80; /* 0x58 */
+
+typedef struct {
+    /* 0x00 */ struct_150EEE00_arg0 *unk0;
+    /* 0x04 */ u8 unk4;
+    /* 0x08 */ struct127 *unk8;
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 unkD;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ u8 unk18;
+    /* 0x1C */ void *unk1C[2];
+    /* 0x24 */ struct260 *unk24;
+    /* 0x28 */ s32 unk28;
+    /* 0x2C */ struct225 *unk2C;
+    /* 0x30 */ struct17 unk30;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ f32 unk40;
+} Ext150EEF80; /* 0x44 */
+
+typedef struct {
+    /* 0x00 */ s16 unk0;
+    /* 0x02 */ s16 unk2;
+    /* 0x04 */ f32 unk4;
+    /* 0x08 */ f32 unk8;
+    /* 0x0C */ u8 unkC;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 unk16;
+    /* 0x17 */ u8 unk17;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ s8 unk1D;
+    /* 0x20 */ f32 unk20[10];
+    /* 0x48 */ f32 unk48;
+    /* 0x4C */ u8 unk4C;
+} Part150EEF80; /* 0x50 */
+
+typedef struct {
+    /* 0x00 */ struct_150EEE00_arg0 *unk0;
+    /* 0x04 */ u8 unk4;
+    /* 0x08 */ void *unk8;
+    /* 0x0C */ u8 unkC;
+} Link150EEF80; /* 0x10 */
+
+typedef struct {
+    /* 0x00 */ void *unk0;
+    /* 0x04 */ f32 unk4;
+} Link2150EEF80; /* 0x8 */
+
+typedef struct {
+    u8 pad0[0x60];
+    void *unk60;
+} Obj150EEF80;
+
+extern f32 D_800A1814;
+extern f32 D_800A1818;
+extern void *func_151A7950(void *, s32, u8, s32);
+s32 func_150EFEC8(ActorIdByteFields *, u8, u8, u8, u8, s32, u8, s32);
+struct225 *func_150F0198(u8, u8, u8, u8, s32, u8, s32);
+
+void *func_150EEF80(struct_150EEE00_arg0 *arg0, u8 arg1, u8 arg2, s32 arg3) {
+    void *ret;
+    Spawn150EEF80 spawn;
+    Ext150EEF80 ext;
+    Ext150EEF80 *dst;
+
+    if (arg0 == NULL) {
+        return NULL;
+    }
+    if (arg1 >= 2) {
+        return NULL;
+    }
+    ext.unk10 = func_150ADA68() * 6.283185482f;
+    ext.unk14 = func_150ADA68() * 6.283185482f;
+    ext.unk0 = arg0;
+    ext.unk4 = arg0->pad0[0x3B];
+    ext.unk8 = func_15083E90(0x12);
+    ext.unkC = 0x12;
+    ext.unkD = arg1;
+    ext.unk30 = *(struct17 *)&D_800A5480;
+    ext.unk18 = 0;
+    spawn.unk0 = 0x94;
+    spawn.unk1 = 7;
+    spawn.unk2 = 0x2203;
+    spawn.unk4 = 0x12C;
+    spawn.unk8 = 0;
+    spawn.unkC = 0;
+    spawn.unk10 = 0xFF;
+    spawn.unk11 = 0xFF;
+    spawn.unk12 = 0xFF;
+    spawn.unk13 = 0xFF;
+    ext.unk40 = 1.0f;
+    spawn.unk18 = 1.0f;
+    ext.unk3C = 0.0f;
+    spawn.unk34 = 0.0f;
+    spawn.unk38 = 0.0f;
+    spawn.unk3C = 0.0f;
+    spawn.unk14 = 100.0f;
+    spawn.unk1C = *(struct17 *)&D_800A5480;
+    spawn.unk28 = *(struct17 *)&D_800A5480;
+    spawn.unk40 = 0x046C0008;
+    spawn.unk44 = 0xFF;
+    spawn.unk45 = 0xFF;
+    spawn.unk46 = 0;
+    spawn.unk47 = 7;
+    spawn.unk48 = 0;
+    spawn.unk4C = 0xFF;
+    spawn.unk50 = 0;
+    spawn.unk54 = 1;
+    spawn.unk56 = 0xFF;
+    ret = func_1513D2F0(&spawn, (s32)&D_800A4AA0, 0x1D, 0, 0, 0x1C, 0, 0, 0, 0x44, arg2, arg3);
+    if (ret != NULL) {
+        dst = (Ext150EEF80 *)((u8 *)ret + 0x110);
+        memcpy(dst, &ext, sizeof(ext));
+        {
+        Part150EEF80 part;
+        Link150EEF80 link;
+        Link2150EEF80 link2;
+        struct260 *tmp;
+        part.unk0 = 0x12C;
+        part.unk2 = 9;
+        part.unk4 = 1.0f;
+        part.unk8 = 1.0f;
+        part.unkC = 0;
+        part.unk14 = 0xFF;
+        part.unk15 = 0xDC;
+        part.unk16 = 0xA0;
+        part.unk17 = 0xC8;
+        part.unk1C = 0;
+        part.unk1D = -1;
+        part.unk20[0] = 0.0f;
+        part.unk20[1] = 0.0f;
+        part.unk20[2] = 0.0f;
+        part.unk20[3] = 0.0f;
+        part.unk20[4] = 0.0f;
+        part.unk20[5] = 0.0f;
+        part.unk20[6] = 0.0f;
+        part.unk20[7] = 0.0f;
+        part.unk20[8] = 0.0f;
+        part.unk20[9] = 0.0f;
+        part.unk48 = 1.0f;
+        link.unk0 = arg0;
+        part.unk10 = 0.9499999881f;
+        part.unk18 = 40.0f;
+        link.unk4 = arg0->pad0[0x3B];
+        link.unk8 = ret;
+        part.unk4C = 1;
+        for (link.unkC = 0; link.unkC < 2; link.unkC++) {
+            dst->unk1C[link.unkC] = func_151A7950(&part, 0x10, arg2, arg3);
+            if (dst->unk1C[link.unkC] != NULL) {
+                memcpy(((Obj150EEF80 *)dst->unk1C[link.unkC])->unk60, &link, sizeof(link));
+            }
+        }
+        link2.unk0 = ret;
+        link2.unk4 = 0.0f;
+        tmp = func_15149130(0x12C, -1, 0x22, -1, 0, 0x20, (struct37 *)8, arg2, arg3);
+        dst->unk24 = tmp;
+        if (tmp != NULL) {
+            memcpy((u8 *)tmp + 0x28, &link2, sizeof(link2));
+        }
+        dst->unk28 = func_150EFEC8((ActorIdByteFields *)arg0, arg1, 0xFF, 0xD9, 0xA0, (s32)ret, arg2, arg3);
+        dst->unk2C = func_150F0198(0x46, 0xFF, 0x82, 0, (s32)ret, arg2, arg3);
+        }
+    }
+    return ret;
+}
 
 typedef struct { f32 x, y, z; } Vec3f_150EF38C;
 
@@ -370,11 +570,6 @@ typedef struct {
     u8 pad06[2];
     s32 unk08;
 } Payload_150EFEC8;
-
-typedef struct {
-    u8 pad_0[0x3B];
-    u8 field_0x3B;
-} ActorIdByteFields;
 
 typedef struct {
     f32 unk00;
