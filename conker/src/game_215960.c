@@ -662,7 +662,68 @@ s32 func_151EB930(s32 arg0) {
     return arg0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_215960/func_151EB96C.s")
+extern s16 D_800E0A80;
+extern s32 D_800E0A90;
+
+s32 func_151EB96C(s32 arg0) {
+    s32 pad;
+    s16 alpha;
+    s16 i;
+    s32 count;
+    u8 a;
+    s32 spacing;
+    s32 x;
+    s32 x0;
+    u8 *str;
+    if (D_800E0A80 < 0) {
+        return arg0;
+    }
+    {
+        if (D_800E0A90 < 0x168) {
+            alpha = D_800E0A90 << 2;
+            if (alpha >= 0x100) {
+                alpha = 0xFF;
+            }
+        } else {
+            alpha = 0x1A9 - D_800E0A90;
+            alpha <<= 2;
+            if (alpha < 0) {
+                alpha = 0;
+            }
+            if (alpha >= 0x100) {
+                alpha = 0xFF;
+            }
+        }
+        i = D_800E0A80;
+        count = 0;
+        a = alpha;
+        while (((u8 **)D_800E0BD8)[i][0] != 0x2A) {
+            i++;
+            count++;
+        }
+        if (count >= 0xE) {
+            spacing = 0xB;
+        } else {
+            spacing = 0x11;
+        }
+        func_1504332C(0xFF, 0, 0, a);
+        x = (0xD0 - count * spacing) >> 1;
+        i = D_800E0A80;
+        str = ((u8 **)D_800E0BD8)[i];
+        x0 = x;
+        while (*str != 0x2A) {
+            func_15042D94(0x94, x, 1, str);
+            func_1504332C(0xFF, 0xFF, 0xFF, a);
+            if (x == x0) {
+                x += 0xC;
+            }
+            i++;
+            str = ((u8 **)D_800E0BD8)[i];
+            x += spacing;
+        }
+    }
+    return arg0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_215960/func_151EBB50.s")
 
