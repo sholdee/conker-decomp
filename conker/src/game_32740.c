@@ -79,7 +79,89 @@ void func_15005290(s32 arg0, s32 arg1) {
 //     D_800DC010 = allocate_memory((D_80082FA0 * 0x9A0) + 0x9A0, 1, 2, 0);
 // }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_32740/func_150054C4.s")
+void func_1512D66C(u8 *arg0);
+void func_1512D6F0(u8 *arg0);
+void func_15125924(struct108 *arg0);
+void func_151298C0(void *arg0, s32 arg1, struct127 *arg2);
+void func_15085430(struct127 *, s32, s32);
+
+void func_150054C4(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3) {
+    u16 i;
+    struct127 *temp_a2;
+    u8 temp_v0;
+
+    bzero(arg0, 0x9A0);
+    arg0->unk23C = 1;
+    arg0->unk23D = arg1;
+    for (i = 0; i < 0x15; i++) {
+        func_151239CC(arg0, i);
+        arg0->unk1B6[i] = 999;
+    }
+    temp_v0 = arg0->unk23D;
+    temp_a2 = &D_800CC2D0[temp_v0];
+    *(f32 *)&arg0->unk5D4 = ((f32)D_800BE624 * 60.0f) / 216.0f;
+    arg0->unk5D8 = ((f32)D_800BE624 * 40.0f) / 216.0f;
+    arg0->unk2C = 1;
+    arg0->unkDC = 0;
+    arg0->unk3D0 = temp_a2;
+    arg0->unk24C = 1.0f;
+    arg0->unk250 = 1.0f;
+    arg0->unk3CC = temp_v0;
+    temp_a2->camera = arg0;
+    arg0->unk134 = 1;
+    arg0->unk84 = 0xE;
+    arg0->unk240 = 0;
+    arg0->unk1E0 = 0xD;
+    arg0->unk1B4 = 3;
+    arg0->unk5CC = 1.0f;
+    arg0->unk3A8 = 0.0f;
+    func_15124B18(arg0);
+    arg0->unk272 = -1;
+    arg0->unk5FA = 1;
+    arg0->unk3E8 = 1;
+    arg0->unk67C = (u32)*(u16 *)((u8 *)D_800B0DF0 + 2);
+    arg0->unk2B0 = arg0->unk2A4;
+    arg0->unk2B4 = arg0->unk2A8;
+    arg0->unk2B8 = *(f32 *)&arg0->unk2AC;
+    arg0->unk384 = 999.0f;
+    arg0->unk5F0 |= 0x80000000;
+    func_15124AB4(arg0);
+    func_15125394(arg0);
+    arg0->unk5FC = 0xA;
+    arg0->unk26C = 1;
+    func_1512D66C((u8 *)arg0);
+    temp_v0 = arg0->unk23D;
+    arg0->unk238 = -1;
+    arg0->unk3CC = temp_v0;
+    arg0->unk368 = temp_v0;
+    temp_a2 = &D_800CC2D0[temp_v0];
+    arg0->unk3D0 = temp_a2;
+    arg0->unk3D4 = (struct127 *)temp_a2->unk31C;
+    func_151298C0(arg0, arg2, temp_a2);
+    arg0->unk7CC = 2;
+    arg0->unk3F4 = -1.0f;
+    arg0->unk3F8 = -1.0f;
+    arg0->unk7BC = 999.0f;
+    arg0->unk3E0 = arg0->unk3A0;
+    *(f32 *)((u8 *)arg0->unk3D4 + 0x18C) = 999.0f;
+    func_1512D6F0((u8 *)arg0);
+    func_15125924(arg0);
+    arg0->unk674 = 1.0f;
+    func_15085430(arg0->unk3D0, arg3, 0);
+    func_15005A60(arg0, arg2);
+    arg0->unk364 = -10000.0f;
+    *(struct167 *)&arg0->unk2E0 = *(struct167 *)&arg0->unk2BC;
+    *(struct167 *)&arg0->unk2EC = *(struct167 *)&arg0->unk2F8;
+    arg0->unk7E8 = 50.0f;
+    arg0->unk86C = 999.0f;
+    arg0->unk8BC = D_800BE2B0[arg0->unk23D];
+    D_80089520 = 0;
+    D_800C3671 = 0;
+    D_80089524[arg0->unk23D] = 0;
+    D_80089534[arg0->unk23D] = 0;
+    arg0->unk5FE = 0x3C;
+    arg0->unk23C = 1;
+}
 // NON-MATCHING: not a terrible start.
 // void func_150054C4(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3) {
 //     f32 temp_f2;
