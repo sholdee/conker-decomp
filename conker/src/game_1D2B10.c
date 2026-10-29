@@ -99,7 +99,126 @@ struct210 *func_151A5D58(f32 arg0, u8 arg1, s32 arg2, f32 *arg3, s16 arg4, u8 ar
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1D2B10/func_151A5F70.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1D2B10/func_151A6068.s")
+typedef struct {
+    s16 unk0;
+    s16 unk2;
+    s16 unk4;
+    s16 unk6;
+    s16 unk8;
+} Obj151A6068;
+
+typedef struct {
+    Obj151A6068 *unk0;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    s32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 unk16;
+    u8 unk17;
+    f32 unk18;
+} Ext151A6068;
+
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    s16 unk2;
+    s16 unk4;
+    s32 unk8;
+    s32 unkC;
+    u8 unk10;
+    u8 unk11;
+    u8 unk12;
+    u8 unk13;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    f32 unk30;
+    f32 unk34;
+    f32 unk38;
+    f32 unk3C;
+    s32 unk40;
+    u8 unk44;
+    u8 unk45;
+    u8 unk46;
+    u8 unk47;
+    s32 unk48;
+    u8 unk4C;
+    u8 pad4D[0xB];
+} Spawn151A6068;
+
+extern s32 func_1516284C(Header *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
+
+void func_151A6068(Obj151A6068 *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5) {
+    Spawn151A6068 spawn;
+    Ext151A6068 ext;
+    void *ret;
+    Ext151A6068 *dst;
+    Header sfx;
+    s32 ipos[3];
+
+    ext.unk0 = arg0;
+    ext.unk4 = 0.0f;
+    ext.unk8 = (func_150ADA68() * 80.0f) + -380.0f;
+    ext.unkC = (func_150ADA68() * 1300.0f) + 2700.0f;
+    ext.unk10 = 0;
+    ext.unk14 = func_150ADA20();
+    ext.unk15 = ((u8)func_150ADA20() & 3) + 4;
+    ext.unk16 = 0xFF;
+    ext.unk18 = 0.0f;
+    ext.unk17 = arg3;
+    spawn.unk0 = 0x6B;
+    spawn.unk1 = 0xA;
+    spawn.unk2 = 0x4C03;
+    spawn.unk4 = 0xF0;
+    spawn.unk8 = 0;
+    spawn.unkC = 0;
+    spawn.unk10 = 0xFF;
+    spawn.unk11 = 0xFF;
+    spawn.unk12 = 0xFF;
+    spawn.unk13 = 0xFF;
+    spawn.unk14 = arg0->unk6;
+    spawn.unk18 = arg0->unk8;
+    spawn.unk1C = arg0->unk0;
+    spawn.unk20 = arg0->unk2;
+    spawn.unk24 = arg0->unk4;
+    spawn.unk40 = 0x01EC0009;
+    spawn.unk44 = 0xFF;
+    spawn.unk45 = 0xFF;
+    spawn.unk46 = 0;
+    spawn.unk47 = 0;
+    spawn.unk48 = arg1;
+    spawn.unk4C = 0xFF;
+    spawn.unk28 = 0.0f;
+    spawn.unk2C = 0.0f;
+    spawn.unk30 = 0.0f;
+    spawn.unk34 = 1.0f;
+    spawn.unk38 = 1.0f;
+    spawn.unk3C = 1.0f;
+    ret = func_1513D2F0(&spawn, (s32)&D_800A4AA0, 0, 0x28, 0, 0x20, 0, 0, 0, 0x1C, arg4, arg5);
+    if (ret != NULL) {
+        dst = (Ext151A6068 *)((u8 *)ret + 0x110);
+        memcpy(dst, &ext, sizeof(ext));
+        if (arg2) {
+            ipos[0] = arg0->unk0;
+            ipos[1] = arg0->unk2 + (arg0->unk8 >> 1);
+            ipos[2] = arg0->unk4;
+            sfx.unk0 = 2;
+            sfx.unk1 = 2;
+            sfx.unk2 = 300;
+            sfx.unk4 = 6;
+            dst->unk10 = func_1516284C(&sfx, ipos, 0xFF, 0x79, 0, 0xFF, 0, 0, 0xE, arg4, arg5);
+        }
+    }
+    if (arg2) {
+        func_1000FA64(0x1AA, arg0->unk0, arg0->unk2, arg0->unk4, 0x4000, 0x3E8, 0x2EE, (s32)func_1000EF40, arg0, 0, 8, func_150ADA20() & 0x300);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1D2B10/func_151A6350.s")
 
