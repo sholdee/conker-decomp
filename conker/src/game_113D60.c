@@ -79,7 +79,87 @@ extern s32 func_151337C0(f32 *arg0);
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_113D60/func_150E68B0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_113D60/func_150E6B84.s")
+typedef struct {
+    /* 0x00 */ f32 x;
+    /* 0x04 */ f32 y;
+    /* 0x08 */ f32 ampX;
+    /* 0x0C */ f32 ampY;
+    /* 0x10 */ f32 phaseX;
+    /* 0x14 */ f32 phaseY;
+    /* 0x18 */ f32 speedX;
+    /* 0x1C */ f32 speedY;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 count;
+    /* 0x2C */ u8 unk2C[0xC];
+    /* 0x38 */ f32 unk38;
+    /* 0x3C */ s16 unk3C;
+    /* 0x3E */ s16 unk3E;
+    /* 0x40 */ u8 unk40;
+} Struct150E6B84Sub;
+
+typedef struct {
+    /* 0x00 */ u8 unk0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD[0x1B];
+    /* 0x28 */ u8 sub[0x24];
+    /* 0x4C */ f32 rate;
+    /* 0x50 */ f32 accum;
+} Struct150E6B84;
+
+extern f32 sinf(f32);
+extern void func_151436B4(f32, f32, f32, f32 *);
+extern s32 func_150E5FD0(void *, f32 *, f32, f32, f32, u8, s32, u8, u8, s16, s8);
+extern f32 func_15144528(f32, f32, f32);
+
+void func_150E6B84(Struct150E6B84 *arg0) {
+    Struct150E6B84Sub *sub;
+    f32 inv;
+    f32 y;
+    f32 step;
+    f32 pos[9];
+    f32 phaseX;
+    f32 phaseY;
+    f32 vx;
+    f32 vy;
+    f32 s1;
+    f32 s2;
+    u32 rnd;
+    u32 rnd2;
+
+    sub = (Struct150E6B84Sub *)arg0->sub;
+    arg0->accum += arg0->rate * D_800BE9A4;
+    if (arg0->accum > 1.0f) {
+        inv = 1.0f / sub->count;
+        y = sub->unk20 + D_800BE9A4;
+        step = y * inv;
+        phaseX = sub->phaseX;
+        phaseY = sub->phaseY;
+        vx = sub->speedX * D_800BE9A4;
+        vy = sub->speedY * D_800BE9A4;
+        do {
+            s1 = sinf(phaseX);
+            s2 = sinf(phaseY);
+            func_151436B4(sub->x + s1 * sub->ampX, sub->y + s2 * sub->ampY, 5.0f, pos);
+            s1 = func_150ADA68();
+            s2 = func_150ADA68();
+            rnd = func_150ADA20();
+            rnd2 = func_150ADA20();
+            func_150E5FD0(sub->unk2C, pos, sub->unk38, (s1 * 300.0f + 100.0f) * 0.1000000015f,
+                          (s2 * 700.0f + 300.0f) * 0.1000000015f, arg0->unkC, arg0->unk1, sub->unk40,
+                          rnd % 86 + 0xAA, rnd2 % (u32)(sub->unk3E + 1) + sub->unk3C, -1);
+            phaseX += vx * inv;
+            phaseY += vy * inv;
+            y -= step;
+            sub->count -= 1.0f;
+        } while (sub->count > 1.0f);
+        sub->phaseX = func_15144528(phaseX, 6.283185482f, 0.0f);
+        sub->phaseY = func_15144528(phaseY, 6.283185482f, 0.0f);
+        sub->unk20 = y;
+    }
+}
 
 void func_150E6E34(f32 *out) {
     f32 *p;
