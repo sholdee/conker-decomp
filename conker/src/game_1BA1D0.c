@@ -875,7 +875,83 @@ s32 func_1518FC44(void *arg0, struct Vec3i2 *arg1) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1BA1D0/func_1518FC84.s")
+typedef struct Fc84Params {
+    u8 pad0[0x30];
+    f32 scale;      /* 0x30 */
+    f32 base;       /* 0x34 */
+    f32 range;      /* 0x38 */
+    f32 unk3C;      /* 0x3C */
+    s16 unk40;
+    s16 unk42;
+    s16 unk44;
+    s16 unk46;
+    u8 pad48[4];
+    u8 unk4C;
+} Fc84Params;
+
+typedef struct Fc84Info {
+    u8 pad0[0x30];
+    Fc84Params p;
+} Fc84Info;
+
+typedef struct Fc84Sub {
+    u8 pad0[0x44];
+    f32 unk44;
+    f32 unk48;
+} Fc84Sub;
+
+typedef struct Fc84Obj {
+    u8 pad0[0x1C];
+    s16 unk1C;
+    u8 pad1E[0x58 - 0x1E];
+    s32 unk58;
+    u8 pad5C[0x6C - 0x5C];
+    s16 unk6C;
+    s16 unk6E;
+    u8 unk70;
+    u8 unk71;
+    u8 pad72[0x110 - 0x72];
+    Fc84Sub sub;
+    u8 pad15C[0x148 - 0x15C];
+} Fc84Obj;
+
+typedef struct Fc84Arg0 {
+    u8 pad0[0x2C];
+    struct102 *obj;
+    Fc84Info *info;
+    f32 x, y, z;
+} Fc84Arg0;
+
+void func_1518FC84(Fc84Arg0 *arg0, f32 *arg1) {
+    struct102 *obj;
+    Fc84Sub *sub;
+    Fc84Params *p;
+    Fc84Info *info;
+
+    obj = arg0->obj;
+    if (arg0->info == NULL) {
+        func_1516972C(obj);
+        return;
+    }
+    info = arg0->info;
+    ((f32 *)((u8 *)obj + 0x148))[0] = (arg1[0] - arg0->x) * info->p.scale;
+    ((f32 *)((u8 *)obj + 0x148))[1] = (arg1[1] - arg0->y) * info->p.scale;
+    ((f32 *)((u8 *)obj + 0x148))[2] = (arg1[2] - arg0->z) * info->p.scale;
+    p = &info->p;
+    sub = &((Fc84Obj *)obj)->sub;
+    sub->unk44 = func_150ADA68() * p->range + p->base;
+    sub->unk48 = p->unk3C;
+    ((Fc84Obj *)obj)->unk6C = p->unk40;
+    ((Fc84Obj *)obj)->unk6E = p->unk42;
+    ((Fc84Obj *)obj)->unk1C = func_150ADA20() % (u32)(p->unk46 + 1) + p->unk44;
+    if (p->unk4C & 1) {
+        ((Fc84Obj *)obj)->unk70 = 0x21;
+    } else {
+        ((Fc84Obj *)obj)->unk70 = 0x20;
+    }
+    ((Fc84Obj *)obj)->unk71 = 0x24;
+    ((Fc84Obj *)obj)->unk58 |= 0x08000001;
+}
 
 s32 func_1518FDC4(void *arg0, u8 *arg1, u8 arg2) {
 
