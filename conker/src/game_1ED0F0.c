@@ -148,7 +148,64 @@ void func_151BFDA0(struct Vec3F151BFDA0 *arg0, struct Vec3F151BFDA0 *arg1, u8 ar
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1ED0F0/func_151BFE84.s")
+struct Copy18_151BFE84 {
+    u8 bytes[0x10];
+    u16 unk10;
+};
+
+struct Local151BFE84_FBFC {
+    struct Vec3F151BFDA0 unk0;
+    struct Copy18_151BFE84 unkC;
+    u8 pad1E[2];
+    f32 unk20;
+    u8 unk24[0x8];
+    struct Vec3F151BFDA0 unk2C;
+    u8 unk38[0x40];
+};
+
+s32 func_15144E80(void *, struct Vec3F151BFDA0 *, struct Vec3F151BFDA0 *, struct Vec3F151BFDA0 *);
+void func_1514FBFC(void *, u8, s32);
+
+void func_151BFE84(struct Copy18_151BFE84 *arg0, struct Vec3F151BFDA0 *arg1, struct Vec3F151BFDA0 *arg2, u8 arg3, u8 arg4, s32 arg5) {
+    struct Vec3F151BFDA0 sp114;
+    struct Vec3F151BFDA0 sp108;
+    struct Vec3F151BFDA0 spFC;
+
+    func_151C0418((f32 *)arg1, (*(u8*)&arg4), (*(s32*)&arg5));
+    func_151C04F8((f32 *)arg1, (*(u8*)&arg4), (*(s32*)&arg5));
+    func_151C05A4(arg1, (*(u8*)&arg4), (*(s32*)&arg5));
+    func_151C05F0(arg1, (*(u8*)&arg4), (*(s32*)&arg5));
+    if (arg0 != NULL && (*(u8*)&arg3) != 0) {
+        if (func_15144E80(arg0, &sp114, &sp108, &spFC) != 0 && spFC.y < 0.0f) {
+            func_151C0644(arg1, (*(u8*)&arg4), (*(s32*)&arg5));
+        }
+    }
+    if (arg0 != NULL && (*(u8*)&arg3) != 0) {
+        func_151C0360(arg0, arg1, (*(u8*)&arg4), (*(s32*)&arg5));
+    }
+    if (arg3) {
+        if (arg0 != NULL) {
+            struct Local151BFE84_FBFC sp84;
+
+            sp84.unk0.x = -arg2->x;
+            sp84.unk0.y = -arg2->y;
+            sp84.unk0.z = -arg2->z;
+            sp84.unkC = *arg0;
+            sp84.unk2C = *arg1;
+            func_151BFC40(&sp84.unk24, &sp84.unk20);
+            func_1514FBFC(&sp84, (*(u8*)&arg4), (*(s32*)&arg5));
+        } else {
+            struct Local151BFDA0 sp20;
+
+            sp20.unk0.x = -arg2->x;
+            sp20.unk0.y = -arg2->y;
+            sp20.unk0.z = -arg2->z;
+            func_151BFC40(&sp20.unk10, &sp20.unkC);
+            sp20.unk18 = *arg1;
+            func_1514FB98(&sp20, (*(u8*)&arg4), (*(s32*)&arg5));
+        }
+    }
+}
 
 void func_151C0098(struct Vec3F151BFDA0 *arg0, s32 arg1, volatile u8 arg2, u8 arg3, s32 arg4) {
     Struct151C0098 sp64;
