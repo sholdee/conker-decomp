@@ -438,7 +438,106 @@ void func_15188F84(Node15188F84 *node) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1B5CC0/func_15189118.s")
+typedef struct Mtx15189118 {
+    s16 i[4][4];
+    s16 f[4][4];
+} Mtx15189118;
+
+typedef struct Sub15189118 {
+    char pad0[4];
+    u8 unk4;
+    char pad5[0x1D4 - 5];
+    Mtx15189118 *unk1D4;
+} Sub15189118;
+
+typedef struct Node15189118 {
+    u8 unk0;
+    u8 unk1;
+    u8 unk2;
+    u8 unk3;
+    u8 unk4;
+    char pad5[3];
+    Mtx15189118 *unk8;
+    struct Node15189118 *unkC;
+    Sub15189118 *unk10;
+} Node15189118;
+
+void func_15189118(s32 idx) {
+Node15189118 *node;
+s32 count;
+s32 m;
+s32 base;
+s32 i;
+s32 j;
+f32 maxdist;
+Mtx15189118 *cur;
+Mtx15189118 *from;
+Mtx15189118 *q;
+f32 dx;
+f32 dy;
+f32 dz;
+f32 dist;
+f32 ratio;
+f32 cx;
+f32 cy;
+f32 cz;
+f32 fx;
+f32 fy;
+f32 fz;
+
+node = (Node15189118 *)D_800DF7C8[idx];
+while (node != NULL) {
+if (node->unk4 != 0) {
+count = node->unk1;
+m = func_1502DB20(node->unk10->unk4);
+base = D_800BE9C0 * m * count;
+maxdist = (u32)node->unk4;
+for (i = node->unk2 - 1; i >= 0; i--) {
+cur = node->unk8 + (i * m + base);
+if (i + 1 == node->unk2) {
+q = node->unk10->unk1D4;
+if (q == NULL) {
+node->unk2 = 0;
+break;
+}
+from = q;
+} else {
+from = node->unk8 + ((i + 1) * m + base);
+}
+cx = ((cur->i[3][0] << 16) + cur->f[3][0]) * 1.52587890625e-05f;
+cy = ((cur->i[3][1] << 16) + cur->f[3][1]) * 1.52587890625e-05f;
+cz = ((cur->i[3][2] << 16) + cur->f[3][2]) * 1.52587890625e-05f;
+fx = ((from->i[3][0] << 16) + from->f[3][0]) * 1.52587890625e-05f;
+fy = ((from->i[3][1] << 16) + from->f[3][1]) * 1.52587890625e-05f;
+fz = ((from->i[3][2] << 16) + from->f[3][2]) * 1.52587890625e-05f;
+dist = sqrtf((cx - fx) * (cx - fx) + (cy - fy) * (cy - fy) + (cz - fz) * (cz - fz));
+if (maxdist < dist && dist != 0.0f) {
+ratio = maxdist / dist;
+for (j = 0; j < m; j++) {
+cx = ((cur->i[3][0] << 16) + cur->f[3][0]) * 1.52587890625e-05f;
+cy = ((cur->i[3][1] << 16) + cur->f[3][1]) * 1.52587890625e-05f;
+cz = ((cur->i[3][2] << 16) + cur->f[3][2]) * 1.52587890625e-05f;
+fx = ((from->i[3][0] << 16) + from->f[3][0]) * 1.52587890625e-05f;
+fy = ((from->i[3][1] << 16) + from->f[3][1]) * 1.52587890625e-05f;
+fz = ((from->i[3][2] << 16) + from->f[3][2]) * 1.52587890625e-05f;
+cx = (cx - fx) * ratio + fx;
+cy = (cy - fy) * ratio + fy;
+cz = (cz - fz) * ratio + fz;
+cur->i[3][0] = (s32)cx;
+cur->i[3][1] = (s32)cy;
+cur->i[3][2] = (s32)cz;
+cur->f[3][0] = 0;
+cur->f[3][1] = 0;
+cur->f[3][2] = 0;
+cur++;
+from++;
+}
+}
+}
+}
+node = node->unkC;
+}
+}
 
 void func_151895A4(s32 *arg0) {
     func_100043B4((s32 *)arg0[2], 2);
