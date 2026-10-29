@@ -305,7 +305,40 @@ f32 func_151065EC(f32 arg0) {
     return 3.0f * arg0 * arg0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_133190/func_15106610.s")
+struct S15106610Arg {
+    u8 pad0[0x14];
+    struct Vec15106214 unk14;
+    u8 pad20[0x38 - 0x20];
+    struct Vec15106214 unk38;
+    u8 pad44[0x48 - 0x44];
+    s32 unk48;
+    f32 unk4C;
+};
+void func_15143874(s16, f32, f32 *, f32 *);
+
+#define A ((struct S15106610Arg *)arg0)
+void func_15106610(struct102 *arg0) {
+    struct S15106214Record *rec;
+    struct Vec15106214 *out;
+    s32 i;
+    s32 j;
+
+    rec = func_151061E0(arg0);
+    out = func_151061EC((struct S151061EC *)arg0);
+    out[0] = A->unk14;
+    out[A->unk48 + 1] = A->unk38;
+    for (i = 1, j = 0; i < A->unk48 + 1; i++, j++) {
+        struct Vec15106214 *o = &out[i];
+        struct S15106214Record *q = &rec[j];
+        f32 sp54;
+        f32 sp50;
+        func_15143874((s16)(func_150ADA20() & 0xFF), func_150ADA68() * A->unk4C, &sp50, &sp54);
+        o->x = q->unk1C.x * sp50 + q->unk28.x * sp54 + q->unk4.x;
+        o->y = q->unk1C.y * sp50 + q->unk28.y * sp54 + q->unk4.y;
+        o->z = q->unk1C.z * sp50 + q->unk28.z * sp54 + q->unk4.z;
+    }
+}
+#undef A
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_133190/func_151067B8.s")
 
