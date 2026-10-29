@@ -780,7 +780,166 @@ void func_151D13E0(struct260 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1FA770/func_151D1448.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1FA770/func_151D15D0.s")
+typedef struct {
+    f32 x, y, z;
+} Vec3_151D15D0;
+
+typedef struct {
+    f32 x, z;
+} Vec2_151D15D0;
+
+typedef struct {
+    Vec3_151D15D0 pos;
+    f32 speed;
+    f32 invLen;
+    u8 alpha;
+    u8 pad15[3];
+    f32 unk18;
+    f32 unk1C;
+    Vec2_151D15D0 n;
+} Rec_151D15D0;
+
+typedef struct {
+    u8 pad0[0x18];
+    Vec3_151D15D0 pos;
+    f32 vx;
+    f32 vy;
+    f32 vz;
+    f32 speed;
+} Inner_151D15D0;
+
+typedef struct {
+    u8 pad0[0x28];
+    Inner_151D15D0 inner;
+} Base_151D15D0;
+
+typedef struct {
+    Base_151D15D0 *base;
+    f32 angle;
+} Src_151D15D0;
+
+typedef struct {
+    u8 pad0[0x10];
+    Vec3_151D15D0 pos;
+    u8 pad1C[2];
+    u16 flags;
+    u8 pad20[5];
+    u8 count;
+    u8 pad26[6];
+    s8 n;
+    s8 tail;
+    s8 head;
+    u8 pad2F[0x94 - 0x2F];
+    Rec_151D15D0 *recs;
+    Src_151D15D0 *src;
+} Obj_151D15D0;
+
+extern f32 func_15144528(f32, f32, f32);
+
+s32 func_151D15D0(Obj_151D15D0 *arg0) {
+    Src_151D15D0 *src;
+    Rec_151D15D0 *recs;
+    Base_151D15D0 *base;
+    Inner_151D15D0 *inner;
+
+    src = arg0->src;
+    recs = arg0->recs;
+    base = src->base;
+    inner = &base->inner;
+    if (D_800BE9E4 > 0) {
+        arg0->pos = inner->pos;
+        arg0->flags |= 4;
+        {
+        Rec_151D15D0 *rec;
+        f32 len;
+        s16 i0;
+        s16 i1;
+        s16 i2;
+        f32 dx0;
+        f32 dz0;
+        f32 inv1;
+        Vec2_151D15D0 d1;
+        Rec_151D15D0 *p1;
+        Rec_151D15D0 *p2;
+        Vec2_151D15D0 nrm;
+        f32 lenSq;
+
+        rec = &recs[arg0->head];
+        rec->pos = arg0->pos;
+        rec->speed = inner->speed;
+        len = sqrtf(inner->vx * inner->vx + inner->vz * inner->vz);
+        if (len == 0.0f) {
+            rec->invLen = 1.0f;
+        } else {
+            rec->invLen = 1.0f / len;
+        }
+        rec->unk1C = 100.0f;
+        rec->unk18 = src->angle;
+        rec->alpha = 0xFF;
+        src->angle = src->angle + rec->speed * 21.85000038f;
+        src->angle = func_15144528(src->angle, 8192.0f, 0.0f);
+        if (len) {
+            rec->n.x = -inner->vz * rec->invLen;
+            rec->n.z = inner->vx * rec->invLen;
+        } else {
+            rec->n.x = 0.0f;
+            rec->n.z = 0.0f;
+        }
+        arg0->head++;
+        if (arg0->head == arg0->count) {
+            arg0->head = 0;
+        }
+        arg0->n++;
+        if (arg0->head == arg0->tail) {
+            arg0->tail++;
+            if (arg0->tail == arg0->count) {
+                arg0->tail = 0;
+            }
+            arg0->n--;
+        }
+        if (arg0->n >= 3) {
+            i1 = arg0->head - 1;
+            if (i1 < 0) {
+                i1 = arg0->count - 1;
+            }
+            i1 = i1 - 1;
+            if (i1 < 0) {
+                i1 = arg0->count - 1;
+            }
+            i2 = i1 - 1;
+            if (i2 < 0) {
+                i2 = arg0->count - 1;
+            }
+            if (rec->speed) {
+                p1 = &recs[i1];
+                if (p1->speed) {
+                    p2 = &recs[i2];
+                    inv1 = p1->invLen;
+                    dx0 = (rec->pos.x - p1->pos.x) * rec->invLen;
+                    dz0 = (rec->pos.z - p1->pos.z) * rec->invLen;
+                    d1.x = (p2->pos.x - p1->pos.x) * inv1;
+                    d1.z = (p2->pos.z - p1->pos.z) * inv1;
+                    nrm.x = -(dz0 - d1.z);
+                    nrm.z = dx0 - d1.x;
+                    lenSq = nrm.x * nrm.x + nrm.z * nrm.z;
+                    if (lenSq > 9.999999747e-05f) {
+                        f32 inv;
+
+                        inv = 1.0f / sqrtf(lenSq);
+                        nrm.x *= inv;
+                        nrm.z *= inv;
+                        p1->n = nrm;
+                    } else {
+                        p1->n.x = 0.0f;
+                        p1->n.z = 0.0f;
+                    }
+                }
+            }
+        }
+        }
+    }
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1FA770/func_151D197C.s")
 
