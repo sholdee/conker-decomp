@@ -1021,7 +1021,167 @@ void func_15150D1C(struct Local15150D1CArg *arg0, u8 arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_17CAF0/func_15150F90.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_17CAF0/func_151511FC.s")
+typedef struct {
+    s16 countBase;
+    s16 countRange;
+    struct Vec3F position;
+    struct Vec3F normal;
+    s16 triangle[9];
+    u8 pad2E[2];
+    f32 spread;
+    u8 unk34;
+    u8 unk35;
+    u16 unk36;
+    s16 unk38;
+    s16 unk3A;
+    f32 unk3C;
+    f32 unk40;
+    s32 unk44;
+    u8 unk48;
+    u8 unk49;
+    u8 pad4A[2];
+    f32 unk4C;
+    f32 unk50;
+    f32 speedBase;
+    f32 speedRange;
+    u8 unk5C;
+    u8 unk5D;
+    u8 pad5E[2];
+    s32 unk60;
+    s32 unk64;
+    s16 unk68;
+    s16 unk6A;
+    f32 unk6C;
+    f32 unk70;
+} Local151511FCArg;
+
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    u16 unk2;
+    s16 unk4;
+    u8 pad6[2];
+    s32 unk8;
+    s32 unkC;
+    u8 unk10;
+    u8 unk11;
+    u8 unk12;
+    u8 unk13;
+    f32 unk14;
+    f32 unk18;
+    struct Vec3F unk1C;
+    f32 unk28;
+    f32 unk2C;
+    f32 unk30;
+    f32 unk34;
+    f32 unk38;
+    f32 unk3C;
+    s32 unk40;
+    u8 unk44;
+    u8 unk45;
+    u8 unk46;
+    u8 unk47;
+    s32 unk48;
+    s32 pad4C;
+    s32 pad50;
+    s16 unk54;
+    s16 unk56;
+} Local151511FCDesc;
+
+typedef struct {
+    struct Vec3F velocity;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+} Local151511FCExtra;
+
+void func_151511FC(Local151511FCArg *arg0, u8 arg1, s32 arg2)
+{
+  s32 count;
+  struct Vec3F basis1;
+  f32 magnitude1;
+  f32 inverse1;
+  struct Vec3F basis2;
+  f32 magnitude2;
+  f32 inverse2;
+  struct Vec3F basis3;
+  f32 magnitude3;
+  f32 inverse3;
+  Local151511FCDesc desc;
+  Local151511FCExtra extra;
+  f32 speed;
+  f32 second;
+  f32 first;
+  void *ret;
+  s32 rand;
+  desc.unk54 = arg0->unk68;
+  desc.unk56 = arg0->unk6A;
+  desc.unk0 = arg0->unk34;
+  desc.unk1 = arg0->unk35;
+  desc.unk2 = arg0->unk36;
+  desc.unk8 = 0;
+  desc.unkC = 0;
+  desc.unk10 = 0xFF;
+  desc.unk11 = 0xFF;
+  desc.unk12 = 0xFF;
+  desc.unk13 = 0xFF;
+  desc.unk1C = arg0->position;
+  desc.unk34 = 1.0f;
+  desc.unk38 = 1.0f;
+  desc.unk3C = 1.0f;
+  desc.unk40 = arg0->unk44 | 0x08000000;
+  desc.unk45 = 0xFF;
+  desc.unk46 = arg0->unk5C;
+  desc.unk47 = arg0->unk5D;
+  extra.unk10 = arg0->unk6C;
+  if (func_15144E80((struct Vec3F *) arg0->triangle, &basis1, &basis2, &basis3) != 0)
+  {
+    func_15145128(&basis1, &basis1, &magnitude1, &inverse1);
+    func_15145128(&basis2, &basis2, &magnitude2, &inverse2);
+    func_15145128(&basis3, &basis3, &magnitude3, &inverse3);
+    if (func_15144A74(&basis3, &arg0->normal) < 0.0f)
+    {
+      basis3.x = -basis3.x;
+      basis3.y = -basis3.y;
+      basis3.z = -basis3.z;
+    }
+    extra.unk18 = 0.0f;
+    basis3.x *= 1000.0f;
+    basis3.y *= 1000.0f;
+    basis3.z *= 1000.0f;
+    count = (func_150ADA20() % ((u32) (arg0->countRange + 1))) + arg0->countBase;
+    if (count != 0)
+    {
+      do
+      {
+        func_15143874((s16) (func_150ADA20() & 0xFF), func_150ADA68() * arg0->spread, &first, &second);
+        speed = (func_150ADA68() * arg0->speedRange) + arg0->speedBase;
+        desc.unk4 = (func_150ADA68() * arg0->unk3A) + arg0->unk38;
+        desc.unk14 = (desc.unk18 = (func_150ADA68() * arg0->unk40) + arg0->unk3C);
+        desc.unk28 = func_150ADA68() * 360.0f;
+        desc.unk2C = func_150ADA68() * 360.0f;
+        desc.unk30 = func_150ADA68() * 360.0f;
+        desc.unk44 = (func_150ADA20() % ((u32) (arg0->unk49 + 1))) + arg0->unk48;
+        extra.velocity.x = (((basis1.x * first) + (basis2.x * second)) + basis3.x) * speed;
+        extra.velocity.y = (((basis1.y * first) + (basis2.y * second)) + basis3.y) * speed;
+        extra.velocity.z = (((basis1.z * first) + (basis2.z * second)) + basis3.z) * speed;
+        extra.unkC = (func_150ADA68() * arg0->unk50) + arg0->unk4C;
+        extra.unk14 = (func_150ADA68() * (arg0->unk70 + arg0->unk70)) - arg0->unk70;
+        extra.unk1C = (func_150ADA68() * (arg0->unk70 + arg0->unk70)) - arg0->unk70;
+        rand = func_150ADA20();
+        ret = func_1513D2F0(&desc, (s32) ((0, &D_800A4AA0)), 0x19, 0, 0, 0x17, (func_150ADA20() & 1) + ((rand & 1) * 2), arg0->unk60, arg0->unk64, 0x20, arg1, arg2);
+        if (ret != 0)
+        {
+          memcpy(((u8 *) ret) + 0x110, &extra, sizeof(extra));
+        }
+        count--;
+      }
+      while (count != 0);
+    }
+  }
+}
 
 typedef struct {
     struct Vec3F position;
