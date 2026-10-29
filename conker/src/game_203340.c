@@ -130,4 +130,34 @@ void func_151D66F0(s32 arg0, s32 arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_203340/func_151D6778.s")
+extern void *allocate_memory(s32, s32, s32, s32);
+Gfx *func_1501A680(Gfx *arg0);
+
+Gfx *func_151D6778(Gfx *gfx) {
+    s32 alpha;
+    s32 img;
+
+    if ((D_800BE574 == 0 && D_800BE9F0 != 0x32 && D_800BE9F0 != 0x33) || D_800BEAC0 != 0) {
+        return gfx;
+    }
+    alpha = D_800BE574;
+    if (D_800BE574 != 0) {
+        gDPPipeSync(gfx++);
+        img = D_800BE570;
+        if (img != 0) {
+            gfx = func_151D6418(gfx, (u8 *)img, 0, alpha);
+        } else {
+            D_800BE570 = (s32)allocate_memory(D_800BE620 * D_800BE624 * 2, 1, 3, 1);
+            if (D_800BE570 == 0) {
+                return gfx;
+            }
+        }
+        gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, D_800BE620, D_800BE570);
+        gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, D_800BE620, D_800BE624);
+        gfx = func_151D5E90(gfx, (void *)D_8002AAE8[D_800BE9C0], 0, 4);
+        gDPSetOtherMode(gfx++, 0x82C3F, 0x552230);
+        gSPSetGeometryMode(gfx++, 0x220405);
+        gfx = func_1501A680(gfx);
+    }
+    return gfx;
+}
