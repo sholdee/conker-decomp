@@ -1059,7 +1059,71 @@ struct225 *func_1516284C(Header *header, s32 arg1, s32 arg2, s32 arg3, s32 arg4,
     return temp_v0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_1516295C.s")
+typedef struct {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    s8  unk24;
+    s8  unk25;
+    s8  unk26;
+    s8  unk27;
+    s8  unk28;
+} Src1516295C;
+
+struct225 *func_1516295C(struct226 *arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, s8 arg5, s8 arg6, s8 arg7, s8 arg8, s8 arg9, s32 argA, u8 argB, s32 argC) {
+    struct225 *temp_v0;
+    Header header;
+    Src1516295C src;
+
+    if (arg1 >= 5) {
+        return NULL;
+    }
+
+    src.unk25 = arg6;
+    src.unk26 = arg7;
+    src.unk27 = arg8;
+    src.unk28 = arg9;
+    src.unk0 = D_800A6880[arg1];
+    src.unk4 = D_800A6894[arg1];
+    src.unk8 = D_800A6880[arg1] - D_800A6894[arg1];
+    src.unkC = D_800A68A8[arg1];
+    src.unk10 = D_800A68BC[arg1];
+    src.unk14 = D_800A68BC[arg1] + D_800A68D0[arg1];
+    src.unk18 = (D_800A68BC[arg1] + D_800A68D0[arg1]) + D_800A68E4[arg1];
+    src.unk1C = ((D_800A68BC[arg1] + D_800A68D0[arg1]) + D_800A68E4[arg1]) + D_800A68D0[arg1];
+
+
+    if (src.unkC < D_800A68BC[arg1]) {
+        src.unk24 = 0;
+    } else if (src.unkC < src.unk14) {
+        src.unk24 = 1;
+    } else if (src.unkC < src.unk18) {
+        src.unk24 = 2;
+    } else if (src.unkC < src.unk1C) {
+        src.unk24 = 3;
+    } else {
+        src.unk24 = 4;
+    }
+
+    header.unk0 = arg3;
+    header.unk1 = arg5;
+    header.unk2 = arg4;
+    header.unk4 = arg2;
+
+    src.unk20 = 1.0f / D_800A68D0[arg1];
+
+    temp_v0 = func_1516037C(&header, arg0, argA + 0x30, argB, argC);
+    if (temp_v0 != NULL) {
+        memcpy(&temp_v0->unk18, &src, 0x30);
+    }
+    return temp_v0;
+}
 // s32 func_1516295C(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, s8 arg5, s8 arg6, s8 arg7, s8 arg8, s8 arg9, s32 argA, u8 argB, s32 argC) {
 //     struct225 *temp_v0;
 //     Header header;
