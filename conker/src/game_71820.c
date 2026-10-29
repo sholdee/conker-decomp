@@ -121,7 +121,60 @@ void func_1504452C(s16 **arg0, struct17 *arg1, f32 arg2, f32 arg3, f32 arg4, f32
 void func_15044658(void) {
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_71820/func_15044660.s")
+extern f32 D_800CBDD8;
+extern f32 D_800CBDDC;
+void func_1507C3E0(conker15044380Obj *arg0, s16 *arg1, s16 *arg2, s16 *arg3);
+
+void func_15044660(conker15044380Obj *arg0, f32 arg1, f32 arg2, f32 arg3) {
+    s16 height;
+    s16 unk2C;
+    s16 unk2A;
+    s32 half;
+    s32 index;
+
+    func_1507C3E0(arg0, &height, &unk2C, &unk2A);
+    if (*(s32 *)arg0 == 0x2D || *(s32 *)arg0 == 0x2E || *(s32 *)arg0 == 0x2C) {
+        D_800CBDDC = 0.0f;
+        D_800CBDD8 = height;
+    } else {
+        height += fabsf(arg2 - *(f32 *)(arg0->pad0 + 0x18));
+        index = (struct127 *)arg0 - D_800CC2D0;
+    }
+    if (arg0->pad0[5] == 5) {
+        D_800CBDDC = 0.0f;
+        D_800CBDD8 = height;
+        return;
+    }
+    if (arg0->pad0[0xAD] != 0) {
+        D_800CBDD8 = height;
+        D_800CBDDC = height >> 1;
+        return;
+    }
+    if (arg0->pad0[4] == 0x53) {
+        D_800CBDD8 = height;
+        D_800CBDDC = height >> 1;
+        return;
+    }
+    if (arg0->pad0[4] == 0x28) {
+        half = 20;
+        D_800CBDD8 = height - half;
+        D_800CBDDC = half + D_800CBDD8 * 0.5f;
+        return;
+    }
+    if (index >= 0 && index < D_8008FD8C && *(f32 *)(arg0->pad0 + 0x28) != 0.0f) {
+        D_800CBDD8 = height;
+        D_800CBDDC = height >> 1;
+        return;
+    }
+    if (arg0->pad0[4] == 0x25) {
+        half = height / 2;
+        D_800CBDD8 = height - half;
+        D_800CBDDC = half + D_800CBDD8 * 0.5f;
+        return;
+    }
+    D_800CBDD8 = height;
+    D_800CBDDC = height >> 1;
+}
 
 struct conker150448D0 {
     struct conker150448D0 *next;
