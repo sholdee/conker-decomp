@@ -935,7 +935,30 @@ void func_15088F30(Obj15088F30 *arg0, f32 *outX, f32 *outY, f32 *outZ) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_B3020/func_1508907C.s")
+u8 func_1508907C(u8 node, u8 type, u8 exclude, u8 sub) {
+    s32 i;
+    u8 result;
+    Node15088F30 *n;
+    Node15088F30 *t;
+
+    result = 0xFF;
+    if (node >= D_80087290) {
+        return 0xFF;
+    }
+    n = node + (Node15088F30 *)D_800D2350;
+    for (i = 0; i < 5; i++) {
+        if (n->links[i] != 0xFF && n->links[i] != exclude) {
+            t = n->links[i] + (Node15088F30 *)D_800D2350;
+            if (t->type == type || type == 0xFF) {
+                if (t->padF == sub) {
+                    return n->links[i];
+                }
+                result = n->links[i];
+            }
+        }
+    }
+    return result;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_B3020/func_150891E8.s")
 
