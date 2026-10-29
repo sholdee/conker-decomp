@@ -156,7 +156,47 @@ void func_1515589C(Obj1515589C *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_182C30/func_15155CFC.s")
+typedef struct {
+    u8 pad0[0x10];
+    u8 unk10;
+    u8 unk11;
+    u8 unk12;
+    u8 pad13[5];
+    Mtx unk18[2];
+    f32 unk98;
+} Obj15155CFC;
+
+extern Gfx *func_15096934(Gfx *);
+extern s32 *D_800E03E0;
+
+Gfx *func_15155CFC(Gfx *gfx, Obj15155CFC *arg1, s16 arg2) {
+    s32 state;
+    s32 idx;
+    f32 sp5C;
+    struct127 *obj;
+    f32 f;
+
+    state = arg1->unk11;
+    idx = arg1->unk10;
+    if ((state == 1) || (state == 3)) {
+        obj = &D_800CC2D0[idx];
+        if (obj->unk31C->unk75 == 5) {
+            f = 85.0f;
+        } else {
+            f = 0.0f;
+        }
+        sp5C = D_800DBFF0[arg2].unk380;
+        gfx = func_15096934(gfx);
+        func_15043D90(&arg1->unk18[D_800BE9C0], 0.0f, sp5C, 0.0f, 2.25f, 2.25f, 2.25f, obj->x_position,
+                      func_15048A40(arg1->unk12) * 15.0f + (obj->y_position + 160.0f + f + arg1->unk98),
+                      obj->z_position);
+        gSPMatrix(gfx++, &arg1->unk18[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+        gSPClearGeometryMode(gfx++, G_ZBUFFER);
+        gSPDisplayList(gfx++, *D_800E03E0);
+        gSPSetGeometryMode(gfx++, G_ZBUFFER);
+    }
+    return gfx;
+}
 
 void func_1515F10C(struct226 *arg0, struct225 *arg1);
 void func_1518CA04(s32 arg0);
