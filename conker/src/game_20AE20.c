@@ -671,7 +671,45 @@ void func_151E4E64(void) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_20AE20/func_151E4EE8.s")
+extern f32 D_8008FDD0;
+extern f32 D_800ABA2C;
+extern f32 D_800ABA30;
+extern f32 D_800ABA34;
+extern f32 D_800DDDC8;
+extern f32 D_800DDDD8;
+
+void func_151E4EE8(void) {
+    s32 v;
+
+    D_8008FDD0 = 1.0f - (f32)*(u8 *)&D_800E0B96 / 255.0f;
+    if ((u8)D_8008FD74 == 0xFF) {
+        if (D_800ABA2C < D_800DDDC8) {
+            *(u8 *)&D_800E0B96 += D_800BE9E4;
+            if (*(u8 *)&D_800E0B96 < 0x55) {
+                D_800DDDD8 = D_800ABA30;
+            } else {
+                D_800DDDD8 = D_800ABA34;
+            }
+        }
+        if (D_800DDDC8 < 1.0f) {
+            return;
+        }
+        if (*(u8 *)&D_800E0B96 < 0x6E) {
+            return;
+        }
+    } else if (*(u8 *)&D_800E0B96 != 0xFF) {
+        v = *(u8 *)&D_800E0B96 + D_800BE9E4 * (u8)D_8008FD74;
+        if (v >= 0x100) {
+            v = 0xFF;
+        }
+        *(u8 *)&D_800E0B96 = v;
+        return;
+    }
+    *(u8 *)&D_800E0B96 = 0xFF;
+    D_8008FD74 = 8;
+    D_8008FDD0 = 1.0f;
+    D_800E0A88();
+}
 
 extern struct Struct151E5034 *D_8008FDD4;
 
