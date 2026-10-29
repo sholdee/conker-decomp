@@ -78,7 +78,134 @@ struct TimedSoundObject {
     struct TimedSoundTrigger field_0x90;
 };
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1BA1D0/func_1518CD20.s")
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s16 unk8;
+    s16 unkA;
+    s32 unkC;
+    s32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 unk16;
+    u8 unk17;
+    u8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+    u8 unk1C;
+    u8 unk1D;
+    s16 unk1E;
+    s16 unk20;
+    s16 unk22;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    struct17 pos;
+    struct17 unk3C;
+    struct17 vel;
+    f32 unk54;
+    u32 unk58;
+    s32 unk5C;
+    u8 unk60;
+    u8 unk61;
+    s8 unk62;
+    s8 unk63;
+    s8 unk64;
+    u8 unk65;
+    u8 unk66;
+    u8 pad67;
+    s16 unk68;
+    u8 pad6A[2];
+    f32 unk6C;
+} Particle1518CD20; /* 0x70 */
+
+extern void *func_15130280(void *, u8, s32, s32, u8, s32);
+extern void func_1514373C(f32 arg0, f32 arg1, f32 *arg2, f32 *arg3);
+extern void func_15145DB4(s32, struct17 *, struct17 *, s32);
+
+void func_1518CD20(s32 arg0, u8 arg1, s32 arg2) {
+    s16 count;
+    Particle1518CD20 spawn;
+    s16 remaining;
+    struct17 *b;
+    s16 i;
+    f32 scale;
+    struct17 *a;
+
+    count = remaining = func_150ADA20() % 11U + 25;
+    if (count > 0) {
+        a = (struct17 *)func_10003C6C((count + 1) * sizeof(struct17), 3, 1, 0, 1);
+        b = (struct17 *)func_10003C6C((count + 1) * sizeof(struct17), 3, 1, 0, 1);
+        if (a == NULL || b == NULL) {
+            return;
+        }
+        {
+            for (i = 0; i < count; i++) {
+                func_1514373C(func_150ADA68() * 3.141592741f + 3.141592741f, 114.0f, &a[i].unk0, &a[i].unk8);
+                a[i].unk0 += 111.0f;
+                a[i].unk4 = -90.0f;
+            }
+            i = 0;
+            a[count].unk0 = 111.0f;
+            a[count].unk4 = -90.0f;
+            a[count].unk8 = 0.0f;
+            func_15145DB4(arg0, a, b, count + 1);
+            spawn.unk1D = 0x6C;
+            spawn.unk8 = 0x5103;
+            spawn.unk0 = 0x200005;
+            spawn.unk14 = 0xE7;
+            spawn.unk15 = 0xE7;
+            spawn.unk16 = 0xB6;
+            spawn.unk18 = 0x9E;
+            spawn.unk19 = 0x9E;
+            spawn.unk1A = 0x62;
+            spawn.unk4 = 0;
+            spawn.unkC = 0;
+            spawn.unk10 = 0;
+            spawn.unk17 = 0xFF;
+            spawn.unk1C = 0xFF;
+            spawn.unk3C.unk0 = 0.0f;
+            spawn.unk3C.unk4 = 0.0f;
+            spawn.unk3C.unk8 = 0.0f;
+            spawn.unk1E = 0x19;
+            spawn.unk20 = 0xA;
+            spawn.unk58 = 0x80CE07;
+            spawn.unk60 = 8;
+            spawn.unk61 = 6;
+            spawn.unk62 = 0x10;
+            spawn.unk63 = -1;
+            spawn.unk64 = -1;
+            spawn.unk65 = 0;
+            spawn.unk24 = 1.040568948f;
+            scale = 0.8533809781f;
+            do {
+                f32 speed;
+                s32 flags;
+                void *ret;
+
+                spawn.unk58 &= ~0xC0;
+                flags = (func_150ADA20() & 1) ? 0x80 : 0;
+                spawn.unk58 |= ((func_150ADA20() & 1) ? 0x40 : 0) | flags;
+                speed = (func_150ADA68() * 202.0f + 250.0f) * 0.001000000047f;
+                spawn.unk22 = spawn.unkA = func_150ADA20() % 26U + 25;
+                spawn.unk28 = spawn.unk2C = func_150ADA68() * 105.0f + 150.0f;
+                spawn.pos = b[i];
+                spawn.vel.unk0 = (b[i].unk0 - b[count].unk0) * speed;
+                spawn.vel.unk4 = (b[i].unk4 - b[count].unk4) * speed;
+                spawn.vel.unk8 = (b[i].unk8 - b[count].unk8) * speed;
+                spawn.unk54 = (func_150ADA68() * 880.0f + 13.0f) * 0.001000000047f;
+                spawn.unk1B = func_150ADA20() % 176U + 80;
+                ret = func_15130280(&spawn, 1, 0, 4, arg1, arg2);
+                if (ret != NULL) {
+                    memcpy((u8 *)ret + 0xA8, &scale, 4);
+                }
+                remaining--;
+                i++;
+            } while (remaining > 0);
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1BA1D0/func_1518D1C0.s")
 
