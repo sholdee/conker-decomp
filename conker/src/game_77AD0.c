@@ -1099,8 +1099,62 @@ block_1505327C:
 //     }
 // }
 
-s32 func_15053430(void);
-#pragma GLOBAL_ASM("asm/nonmatchings/game_77AD0/func_15053430.s")
+s32 func_15053430();
+s32 func_1507D754(struct127 *arg0);
+void func_151669A0(s32 arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4, s32 arg5);
+void func_15055B0C(struct127 *arg0, s32 arg1);
+
+s32 func_15053430(arg0)
+    struct127 *arg0;
+{
+    u8 tmp;
+    s32 var_t1;
+
+    if (arg0->id == 0xFF) {
+        func_15060F28(arg0, 1);
+        return 1;
+    }
+    
+    tmp = D_800D1C90[arg0->id]->data.i.unk0;
+    if ((arg0->unk10E != 0) && (arg0->unk10E < 0xF0)) {
+        func_1505D2B8(arg0, 9);
+        goto end;
+    }
+    var_t1 = 0;
+    if ((arg0->unk10E < 0xF0) && (tmp & 0x20)) {
+        func_151669A0((s32)arg0->x_position, (s32)(arg0->y_position + 50.0f), (s32)arg0->z_position, 0.5f, 0xFF, 0);
+    }
+    if (tmp & 4) {
+        var_t1 = func_1507D754(arg0);
+    }
+    if (tmp & 2) {
+        arg0->interaction_state = 0x2A;
+        return 1;
+    }
+    if (tmp & 0x80) {
+        func_15055B0C(arg0, 0x4B0);
+        return 1;
+    }
+    if (tmp & 1) {
+        func_15053694(arg0);
+        return 1;
+    }
+    if (tmp & 0x40) {
+        (*(s16 **)&D_800D2110)[arg0->unk13F] = 0x4E2;
+        func_15060F28(arg0, 1);
+        return 1;
+    }
+    if (var_t1 == 1) {
+        func_150536D0(arg0);
+        return 1;
+    }
+    if (var_t1 == 0) {
+        func_15060F28(arg0, 1);
+    }
+    return 1;
+end:
+    return 0;
+}
 
 s32 func_150535F4(struct127 *arg0) {
     u8 tmp;
