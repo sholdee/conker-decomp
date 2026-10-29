@@ -1,6 +1,9 @@
 #include <ultra64.h>
+#define func_15048A40 func_15048A40_hdr0
 #define func_15169260 func_15169260_s32
 #include "functions.h"
+#undef func_15048A40
+extern f32 func_15048A40(u8);
 #undef func_15169260
 #include "variables.h"
 
@@ -275,7 +278,98 @@ s32 func_1518E6D4(void *arg0) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1BA1D0/func_1518E73C.s")
+struct Struct1518E73C {
+    u8 pad0[0x2C];
+    f32 unk2C;
+    f32 unk30;
+    f32 unk34;
+    f32 unk38;
+    f32 unk3C;
+    f32 unk40;
+    u8 pad44[0x4];
+    f32 unk48;
+    u8 pad4C[0x74];
+    u8 unkC0[0x40];
+    u8 *unk100[0x18];
+    f32 unk160;
+};
+
+typedef struct Vtx1518E73C {
+    s16 x, y, z, flag;
+    u8 other[8];
+} Vtx1518E73C;
+
+extern f32 func_150489B0(u8);
+
+void *func_1518E73C(struct Struct1518E73C *arg0, s16 arg1) {
+    Vtx1518E73C *vertices;
+    void *result;
+    f32 cx;
+    f32 rz;
+    f32 rx;
+    f32 sn;
+    f32 cs;
+    f32 sx;
+    f32 t;
+    f32 sy;
+    f32 cy;
+    f32 var_f12;
+    f32 var_f2;
+    s32 sign;
+    u8 fresh;
+
+    func_151D5D60(arg0->unk100, arg1, 0x40, &vertices, &fresh);
+    result = vertices;
+    if (vertices != NULL) {
+        if (fresh != 0) {
+            memcpy(arg0->unk100[arg1], arg0->unkC0, 0x40);
+            memcpy(arg0->unk100[arg1] + 0x40, arg0->unkC0, 0x40);
+        }
+    } else {
+        return NULL;
+    }
+    rz = D_800DD1D8[arg1];
+    rx = D_800DD1E8[arg1];
+    sign = -1;
+    var_f12 = (((arg0->unk40 - arg0->unk34) * rx) - (rz * (arg0->unk48 - arg0->unk3C))) * D_800BE9A8;
+    if (var_f12 < 0.0f) {
+        var_f12 = -var_f12;
+        sign = 0;
+    }
+    var_f2 = sqrtf(var_f12) * arg0->unk160;
+    if (1.570796371f < var_f2) {
+        var_f2 = 1.570796371f;
+    }
+    if (sign != 0) {
+        var_f2 = -var_f2;
+    }
+    {
+        u16 angle;
+        angle = (u8)(var_f2 * 40.74366379f);
+        sn = func_15048A40(angle);
+        cs = func_150489B0(angle);
+    }
+    cx = arg0->unk2C * cs;
+    sx = arg0->unk2C * sn;
+    sy = arg0->unk30 * sn;
+    cy = arg0->unk30 * cs;
+    vertices[0].x = arg0->unk34 + cx * rx;
+    vertices[0].y = arg0->unk38 + sx;
+    vertices[0].z = arg0->unk3C - cx * rz;
+    t = -cx;
+    vertices[1].x = arg0->unk34 + t * rx;
+    vertices[1].y = arg0->unk38 - sx;
+    vertices[1].z = arg0->unk3C - t * rz;
+    t = -(cx + sy);
+    vertices[2].x = arg0->unk34 + t * rx;
+    vertices[2].y = (arg0->unk38 + cy) - sx;
+    vertices[2].z = arg0->unk3C - t * rz;
+    t = cx - sy;
+    vertices[3].x = arg0->unk34 + t * rx;
+    vertices[3].y = arg0->unk38 + cy + sx;
+    vertices[3].z = arg0->unk3C - t * rz;
+    return result;
+}
 
 void *func_1518EB10(Game1BBFC0Beam *arg0, s16 arg1) {
     Game1BBFC0Vertex *vertices;
