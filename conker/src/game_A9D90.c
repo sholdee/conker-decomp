@@ -526,7 +526,158 @@ void func_1507D4F8(s32 arg0) {
 //     //return temp_a0_2->unk31C;
 // }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A9D90/func_1507D754.s")
+typedef struct D754Obj {
+    /* 0x00 */ f32 unk0;
+    /* 0x04 */ f32 unk4;
+    /* 0x08 */ f32 unk8;
+    /* 0x0C */ u8 pad0C[4];
+    /* 0x10 */ s16 unk10;
+    /* 0x12 */ s16 unk12;
+    /* 0x14 */ s16 unk14;
+    /* 0x16 */ u8 pad16[0x58];
+    /* 0x6E */ u8 unk6E;
+    /* 0x6F */ u8 pad6F[0xD];
+    /* 0x7C */ s32 unk7C;
+    /* 0x80 */ s32 unk80;
+    /* 0x84 */ s32 unk84;
+    /* 0x88 */ u8 pad88[2];
+    /* 0x8A */ u8 unk8A;
+} D754Obj;
+
+extern void func_150B0348(struct127 *, s32, s32);
+extern void func_150BFFE0(struct127 *);
+extern void func_150D85AC(struct127 *);
+extern void func_150F1D10(struct127 *, s32, s32);
+extern void func_151C9740(struct127 *, s32, s32);
+extern void func_151CFA4C(struct127 *, s32, s32);
+extern void func_150BE494(struct127 *, s32, s32);
+extern void func_150AEB9C(struct127 *);
+extern void func_151BA518(struct127 *, s32, s32);
+extern D754Obj *func_151149AC(s32);
+extern void *func_1507515C(struct127 *);
+extern void func_15136C3C(void *, s32, s32, s32, s32, s32, s32, s32);
+extern void func_150B7B40(struct127 *, s32, s32);
+extern void func_150BC488(struct127 *);
+extern void func_150BBB5C(struct127 *);
+extern void func_151A6C90(struct127 *, s32, s32);
+extern void func_150E0870(struct127 *, s32, s32);
+extern void func_151D22B0(struct127 *, s32, s32);
+void func_1507DB44(s32 arg0, s32 arg1);
+
+s32 func_1507D754(struct127 *arg0) {
+    D754Obj *obj;
+    void *temp;
+
+    switch (arg0->id) {
+    case 0x7F:
+        func_150B0348(arg0, 0xFF, 1);
+        break;
+    case 0x10:
+    case 0x38:
+    case 0x91:
+        func_150BFFE0(arg0);
+        break;
+    case 0x3A:
+    case 0x3D:
+        func_150D85AC(arg0);
+        break;
+    case 0x4A:
+        func_150F1D10(arg0, 0xFF, 1);
+        break;
+    case 0x47:
+        func_151C9740(arg0, 0xFF, 1);
+        break;
+    case 0x25:
+        if (arg0->unk2EC != 0 || D_800BE9F0 == 6 || D_800BE9F0 == 0x3B) {
+            func_151CFA4C(arg0, 0xFF, 1);
+        }
+        return 0;
+    case 0x79:
+        func_150BE494(arg0, 0xFF, 1);
+        break;
+    case 0x5:
+    case 0xAD:
+    case 0xAE:
+    case 0xAF:
+        arg0->pad320[8] = 0;
+        func_1507DB44((s32)arg0, 0);
+        func_150AEB9C(arg0);
+        return 1;
+    case 0x53:
+        if (D_800BE616 != 0) {
+            func_1507CD64(arg0, 0xA);
+            return 2;
+        }
+        break;
+    case 0x90:
+        if (D_800BE616 != 0 && D_800BE9F0 == 0x33) {
+            func_1507CD64(arg0, 8);
+            return 2;
+        }
+        break;
+    case 0x28:
+    case 0x77:
+        obj = NULL;
+        func_151BA518(arg0, 0xFF, 1);
+        func_15145A50(arg0);
+        if (D_800BE616 != 0) {
+            func_1507CD64(arg0, 6);
+            obj = func_151149AC((u8)(arg0->unk127 + 0xB));
+        } else {
+            if (D_800BE9F0 == 0x23) {
+                obj = func_151149AC(1);
+            }
+            temp = func_1507515C(arg0);
+            if (temp != NULL && D_800C35EA != 1) {
+                func_15136C3C(temp, 1, 1, 1, 1, 0, 0xFF, 1);
+            }
+        }
+        if (obj != NULL) {
+            obj->unk6E = 0;
+            obj->unk10 = arg0->x_position;
+            obj->unk12 = arg0->y_position;
+            obj->unk14 = arg0->z_position;
+            obj->unk0 = arg0->unkB8;
+            obj->unk4 = arg0->unk40;
+            obj->unk8 = arg0->unkC4;
+            obj->unk8A = 0xFF;
+            obj->unk7C = 0;
+            obj->unk80 = 0;
+            obj->unk84 = 0;
+        }
+        if (D_800BE616 != 0) {
+            return 2;
+        }
+        break;
+    case 0xD:
+        func_150B7B40(arg0, 0xFF, 1);
+        break;
+    case 0x20:
+        if (arg0->y_velocity < -20.0f) {
+            func_150BC488(arg0);
+        } else {
+            func_150BBB5C(arg0);
+        }
+        break;
+    case 0x4F:
+    case 0x83:
+        func_151A6C90(arg0, 0xFF, 1);
+        break;
+    case 0x34:
+        func_150E0870(arg0, 0xFF, 1);
+        break;
+    case 0x44:
+        func_151D22B0(arg0, 0xFF, 1);
+        break;
+    }
+    return 0;
+}
+
+void func_1507DB34(void) {
+}
+
+void func_1507DB3C(void) {
+}
 
 void func_1507DB44(s32 arg0, s32 arg1) {
     func_1503DE70(arg0, arg1, -1);
