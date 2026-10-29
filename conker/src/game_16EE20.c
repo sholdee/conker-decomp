@@ -1007,7 +1007,60 @@ f32 func_15143E64(struct17 *arg0) {
 
     return sqrtf(x * x + y * y + z * z);
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15143E94.s")
+typedef struct Func15143E94Spawn {
+    s8 active;
+    u8 pad1;
+    s16 duration;
+    s8 size;
+    s8 enabled;
+    s8 sentinel;
+    u8 pad7;
+} Func15143E94Spawn;
+extern void func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
+
+u8 func_15143E94(s32 arg0, s32 arg1) {
+    u8 ret;
+    s8 i;
+    s8 count;
+    u8 found;
+    u8 found2;
+    Func15143E94Spawn spawn;
+
+    ret = 0;
+start:
+    count = D_80082FA0 + 1;
+    i = 0;
+    found = 0;
+    while (!found && i < count) {
+        if (D_800CC2D0[i].health != 0) {
+            found = 1;
+        } else {
+            i++;
+        }
+    }
+    i = 0;
+    if (found) {
+        found2 = 0;
+        while (!found2 && i < count) {
+            if (func_150A29C8(i, arg1) == 0) {
+                found2 = 1;
+            } else {
+                i++;
+            }
+        }
+        if (found2) {
+            func_1512D748(&D_800DBFF0[D_800BE9E8], arg0, 1);
+            spawn.active = 1;
+            spawn.duration = (func_150ADA20() & 0xF) + 0x14;
+            spawn.size = (func_150ADA20() & 3) + 4;
+            spawn.sentinel = -1;
+            spawn.enabled = 1;
+            func_151D8868(&spawn, 0, 0xFF, 0);
+            ret = 1;
+        }
+    }
+    return ret;
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_1514401C.s")
 void func_151441A4(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, u8 arg9, u8 arg10, u8 arg11, u8 arg12, u8 arg13) {
     s16 temp_v0;
