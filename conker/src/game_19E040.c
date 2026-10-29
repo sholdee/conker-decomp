@@ -1,7 +1,9 @@
 #include <ultra64.h>
 #define func_150ADA20 func_150ADA20_u8_proto
+#define func_15048A40 func_15048A40_void_proto
 #include "functions.h"
 #undef func_150ADA20
+#undef func_15048A40
 #include "variables.h"
 
 extern f32 D_800A6FC0;
@@ -245,7 +247,68 @@ void func_151717FC(struct127 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 
     func_151700D8((f32 *)verts, cx, cz, arg7, argA, arg6, arg8, arg9, (u8)argB, argC);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_19E040/func_151718F0.s")
+f32 func_15048A40(u8);
+f32 func_150489B0(u8);
+typedef struct {
+    u8 v[3];
+} Color151718F0;
+extern Color151718F0 D_8008CC20;
+void func_1516D4E8(s16, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
+                   s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+
+void func_151718F0(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s32 arg4, f32 arg5, s32 arg6, s32 arg7,
+                   s32 arg8, s32 arg9) {
+    s32 i;
+    s32 angle;
+    u8 a;
+    f32 sn;
+    f32 cs;
+    f32 z;
+    s32 c;
+    u8 chi;
+    u8 clo;
+    f32 scale;
+    s32 spd;
+    s32 s;
+    u32 r;
+    f32 x;
+    u8 shi;
+    u8 slo;
+    s32 step;
+    u32 r1;
+    u32 r2;
+    s32 pad;
+    const u8 colors[1][3] = { { 0x45, 0x53, 0x68 } };
+
+    if (arg7 != 0) {
+        angle = 0;
+        step = 0xFFFF / arg7;
+        for (i = 0; i < arg7; i++) {
+            a = angle >> 8;
+            angle |= 0;
+            sn = func_15048A40(a);
+            a |= 0; a |= 0; a |= 0; a |= 0; a |= 0; a |= 0; a |= 0; a |= 0; a |= 0;
+            cs = func_150489B0(a);
+            z = arg3 * cs + arg2;
+            c = 200.0f * cs;
+            chi = c >> 8;
+            clo = c;
+            r1 = func_150ADA20();
+            scale = (f32)(r1 & 0xFFFF) * 0.0000152587890625f + 100.0f;
+            r2 = func_150ADA20();
+            spd = (f32)(r2 & 0xFFFF) * arg5 + (f32)arg4;
+            r = func_150ADA20();
+            s = 200.0f * sn;
+            x = arg3 * sn + arg0;
+            shi = s >> 8;
+            slo = s;
+            func_1516D4E8(x, arg1, z, 0xD, 0, colors[arg6][0], colors[arg6][1],
+                          colors[arg6][2], 0, 0, 0, 0, 2, shi, slo, chi, clo, 0, 0, 5, 0, 0,
+                          0, (s16)spd, (s16)spd, (r & 0xF) + 0xA, scale, 0, 0, (u8)arg8, arg9);
+            angle += step;
+        }
+    }
+}
 
 extern void func_150AEEB0(void *);
 extern void func_150BD740(void *, u8, s32);
