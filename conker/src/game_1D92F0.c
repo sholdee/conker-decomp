@@ -106,7 +106,81 @@ extern ObjectSpawnParams D_800A9180[];
 void func_15143794(s32, s32, f32, f32 *);
 void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1D92F0/func_151ABE40.s")
+typedef struct {
+    f32 unk0;
+    s16 unk4;
+    u16 unk6;
+} FxSoundEntry;
+
+typedef struct {
+    f32 unk0;
+    s16 unk4;
+    f32 unk8;
+} FxLightEntry;
+
+typedef struct {
+    s8 unk0;
+    s8 unk1;
+    s8 unk2;
+    s8 unk3;
+    s8 unk4;
+} FxEntry5;
+
+typedef struct {
+    u8 pad0[0x1C];
+    u8 unk1C;
+} FxOwner;
+
+extern FxEntry5 D_800A9020[];
+extern FxSoundEntry D_800A9040[];
+extern FxSoundEntry D_800A9158[];
+extern FxLightEntry D_800A925C[];
+void func_1514C678(f32, f32, s32, f32, s32, s32, s32, s32, s32, f32, ObjectSpawnPayload *, s32);
+u8 func_151D8E20(void);
+void func_151DBE80(u8, f32, f32, s16, f32 *, s32, s32, s32, s32, s32);
+
+s32 func_151ABE40(f32 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+    FxEntry5 *entry;
+    u8 color;
+
+    color = func_151D8E20();
+    if (arg1 == 0) {
+        return;
+    }
+    entry = &D_800A9020[arg2];
+    if (entry->unk0 != -1) {
+        ObjectSpawnPayload payload;
+
+        payload.field_0x00 = arg1;
+        payload.field_0x04 = arg4;
+        payload.field_0x08 = color;
+        {
+        FxSoundEntry *snd;
+        snd = &D_800A9040[entry->unk0];
+        func_1514C678(arg0[0], arg0[1], *(s32 *)&arg0[2], snd->unk0, 0, 0xFF,
+                      (func_150ADA20() % (snd->unk6 + 1)) + snd->unk4, 0xB, arg2, 0.0f, &payload, (u8)arg3);
+        }
+    }
+    if (entry->unk2 != -1) {
+        ObjectSpawnPayload payload2;
+
+        payload2.field_0x00 = arg1;
+        payload2.field_0x04 = arg4;
+        payload2.field_0x08 = color;
+        {
+        FxSoundEntry *snd2;
+        snd2 = &D_800A9158[entry->unk2];
+        func_1514C678(arg0[0], arg0[1], *(s32 *)&arg0[2], snd2->unk0, 0, 0xFF,
+                      (func_150ADA20() % (snd2->unk6 + 1)) + snd2->unk4, 0xC, arg2, 0.0f, &payload2, (u8)(u16)arg3);
+        }
+    }
+    if (entry->unk4 != -1 && (((FxOwner *)arg1)->unk1C & 1)) {
+        FxLightEntry *light;
+
+        light = &D_800A925C[entry->unk4];
+        func_151DBE80(color, light->unk0, light->unk8, light->unk4, arg0, arg1 + 4, 0x96, 0, (u8)arg3, arg4);
+    }
+}
 
 typedef struct {
     /* 0x00 */ u8 unk0;
