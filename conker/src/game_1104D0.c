@@ -252,7 +252,244 @@ void func_150E36BC(s32 arg0, s32 *arg1, s32 *arg2, s32 *arg3) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1104D0/func_150E3738.s")
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3_150E3738;
+
+typedef struct {
+    s16 unk0[9];
+} Sub_150E3738;
+
+typedef struct {
+    s32 unk0;
+    f32 unk4;
+    Vec3_150E3738 unk8;
+    Vec3_150E3738 unk14;
+    Vec3_150E3738 unk20;
+    Vec3_150E3738 unk2C;
+    Vec3_150E3738 unk38;
+    Sub_150E3738 unk44;
+    s16 unk56;
+    u8 unk58;
+    u8 unk59;
+    u8 unk5A;
+    s32 unk5C;
+    s32 unk60;
+} Particle_150E3738;
+
+typedef struct {
+    s32 unk0;
+    char pad4[0x10];
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+} Target_150E3738;
+
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    char pad2[0xA];
+    u8 unkC;
+    char padD[3];
+    Vec3_150E3738 pos;
+    Vec3_150E3738 target;
+    Vec3_150E3738 unk28;
+    f32 unk34;
+    f32 unk38;
+    Target_150E3738 *unk3C;
+    s32 unk40;
+    s32 unk44;
+    u8 unk48;
+    char pad49[1];
+    u16 unk4A;
+    f32 unk4C;
+    f32 unk50;
+    f32 unk54;
+    Sub_150E3738 unk58;
+    char pad6A[2];
+    s32 unk6C;
+    u8 unk70;
+    u8 unk71;
+    char pad72[2];
+    s32 unk74;
+    f32 *unk78;
+    s16 unk7C;
+} Effect_150E3738;
+
+extern s32 func_15046C80(Vec3_150E3738 *, s32, f32, f32 *);
+extern s32 func_15145128(Vec3_150E3738 *, Vec3_150E3738 *, f32 *, f32 *);
+extern void func_15143874(s16, f32, f32 *, f32 *);
+extern s32 func_151C229C(Vec3_150E3738 *, void *, s32, s32, s32, Particle_150E3738 *, f32, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, s32, s32, s32);
+extern void func_15103254(s16, u8, f32, Vec3_150E3738 *, s32, s32, s32);
+
+void func_150E3738(Game1104D0EffectInstance *arg0) {
+    Effect_150E3738 *e;
+    Vec3_150E3738 start;
+    Vec3_150E3738 next;
+    Vec3_150E3738 delta;
+    Vec3_150E3738 step;
+    f32 dist;
+    f32 move;
+    f32 scale;
+    s32 spawned;
+    Vec3_150E3738 p;
+    Vec3_150E3738 hit;
+    f32 pad178;
+    Vec3_150E3738 pos;
+    Vec3_150E3738 dir;
+    f32 len;
+    f32 pad158;
+    f32 offz;
+    f32 offx;
+    f32 unused;
+    f32 r2;
+    s32 c;
+    Particle_150E3738 particle;
+    f32 r;
+    s32 ang;
+
+    e = (Effect_150E3738 *)arg0;
+    spawned = 0;
+    if (e->unk7C != -99) {
+        e->unk7C -= D_800BE9E4;
+        if (e->unk7C < 0) {
+            func_150E3514((Game1104D0EffectInstance *)e);
+        }
+    }
+    start = e->pos;
+    if (e->unk3C != NULL) {
+        if (e->unk3C->unk0 == 0) {
+            func_150E3514((Game1104D0EffectInstance *)e);
+            return;
+        }
+        e->target.x = e->unk3C->unk14;
+        e->target.y = e->unk3C->unk18;
+        e->target.z = e->unk3C->unk1C;
+    } else if (e->unk78 != NULL) {
+        e->target.x = e->unk78[0];
+        e->target.y = e->unk78[1];
+        e->target.z = e->unk78[2];
+    }
+    delta.x = e->target.x - e->pos.x;
+    delta.y = e->target.y - e->pos.y;
+    delta.z = e->target.z - e->pos.z;
+    dist = sqrtf(delta.x * delta.x + delta.y * delta.y + delta.z * delta.z);
+    move = e->unk34 * D_800BE9E4;
+    if (e->unk78 == NULL) {
+        if (e->unk44 == 0) {
+            if (dist <= move) {
+                if (e->unk3C != NULL) {
+                    e->unk44 = 30;
+                    e->unk3C = NULL;
+                    e->target.x += delta.x * 500.0f;
+                    e->target.y += delta.y * 500.0f;
+                    e->target.z += delta.z * 500.0f;
+                } else {
+                    func_150E3514((Game1104D0EffectInstance *)e);
+                    return;
+                }
+            }
+        } else {
+            e->unk44 -= D_800BE9E4;
+            if (e->unk44 <= 0) {
+                func_150E3514((Game1104D0EffectInstance *)e);
+                return;
+            }
+        }
+    }
+    if (dist != 0.0f) {
+        extern f32 D_800BE9A4;
+
+        scale = move / dist;
+        step.x = scale * delta.x;
+        step.y = scale * delta.y;
+        step.z = scale * delta.z;
+        next.x = start.x + step.x;
+        next.y = start.y + step.y;
+        next.z = start.z + step.z;
+    } else {
+        next = e->target;
+        step = delta;
+    }
+    e->pos = next;
+    e->unk4C += (526.0f + func_150ADA68() * 1228.0f) * 0.001000000047f * D_800BE9A4;
+    while (e->unk4C > 1.0f) {
+        pos = e->unk28;
+        {
+            f32 rnd;
+
+            rnd = func_150ADA68();
+            ang = func_150ADA20();
+            func_15143874(ang & 0xFF, func_150ADA68() * 129.0f, &offx, &offz);
+            p.x = rnd * step.x + start.x + offx;
+            p.y = rnd * step.y + start.y + 200.0f;
+            p.z = rnd * step.z + start.z + offz;
+        }
+        hit = p;
+        if (func_15046C80(&p, 0, p.y - 1000.0f, &e->unk54) != 0) {
+            hit.y = e->unk54;
+        }
+        {
+            extern s32 func_15145128(Vec3_150E3738 *, Vec3_150E3738 *, f32 *, f32 *);
+
+            dir.x = hit.x - pos.x;
+            dir.y = hit.y - pos.y;
+            dir.z = hit.z - pos.z;
+        }
+        if (func_15145128(&dir, &dir, &len, &unused) != 0) {
+            move = func_150ADA68() * D_800BE9A4;
+            scale = 190.0f * move;
+            pos.x += dir.x * scale;
+            pos.y += dir.y * scale;
+            pos.z += dir.z * scale;
+            len -= scale;
+        }
+        particle.unk0 = 0;
+        particle.unk4 = len;
+        particle.unk8 = hit;
+        particle.unk14 = hit;
+        particle.unk20 = hit;
+        particle.unk2C = pos;
+        particle.unk38 = dir;
+        particle.unk44 = e->unk58;
+        particle.unk56 = 0;
+        particle.unk58 = 0;
+        particle.unk59 = 1;
+        particle.unk5A = 0;
+        if (e->unk71 == 2 || e->unk71 == 3) {
+            particle.unk5C = e->unk74;
+        } else {
+            particle.unk5C = 0;
+        }
+        particle.unk60 = e->unk6C;
+        r2 = func_150ADA68();
+        scale = func_150ADA68();
+        c = func_150ADA20();
+        if (spawned != 0 || e->unk78 != NULL) {
+            ang = 2;
+        } else {
+            ang = 1;
+        }
+        if (func_151C229C(&pos, NULL, 0, 0, 0, &particle, 190.0f, 0.00526315812f, r2 * 50.0f + 10.0f,
+                          scale * 191.0f + 160.0f, 80.0f, (c % 176U) + 80, 0, 0, 0, 0, 0, 0, 1, ang,
+                          e->unk40, 0.0f, 0xFF, -1, 0, e->unkC, e->unk1) != 0) {
+            spawned = 1;
+        }
+        e->unk4C -= 1.0f;
+    }
+    if (e->unk78 == NULL) {
+        e->unk50 += (56.0f + func_150ADA68() * 235.0f) * 0.001000000047f * D_800BE9A4;
+        while (e->unk50 > 1.0f) {
+            c = func_150ADA20();
+            ang = func_150ADA20();
+            func_15103254((c & 3) + 6, (ang % 156U) + 100,
+                          func_150ADA68() * 1548.0f + 1093.0f, &e->unk28, 0xFF, e->unkC, e->unk1);
+            e->unk50 -= 1.0f;
+        }
+    }
+}
 
 void func_150E4010(Game1104D0EffectObj *arg0) {
     Game1104D0EffectState *temp;
