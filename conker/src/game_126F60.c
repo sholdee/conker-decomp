@@ -112,7 +112,180 @@ void func_150FADC8(s32 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_126F60/func_150FAE18.s")
+extern void *func_15157010(void *, s32, f32, s32, s32, s32, u8, s32);
+extern void *func_1515548C(void *, s32, s32, s32, s32, u8, s32);
+
+typedef struct {
+    /* 0x00 */ u8 unk00;
+    /* 0x01 */ s8 unk01;
+    /* 0x02 */ u8 unk02;
+    /* 0x03 */ s8 unk03;
+    /* 0x04 */ s8 unk04;
+    /* 0x05 */ u8 pad05;
+    /* 0x06 */ s16 unk06;
+    /* 0x08 */ s32 unk08;
+    /* 0x0C */ s32 unk0C;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ s32 unk1C;
+    /* 0x20 */ s32 unk20;
+    /* 0x24 */ s32 unk24;
+    /* 0x28 */ s32 unk28;
+    /* 0x2C */ u8 unk2C;
+    /* 0x2D */ u8 unk2D;
+    /* 0x2E */ u8 pad2E[2];
+    /* 0x30 */ u8 unk30;
+    /* 0x31 */ u8 unk31;
+    /* 0x32 */ u8 unk32;
+    /* 0x33 */ u8 unk33;
+    /* 0x34 */ u8 unk34;
+    /* 0x35 */ u8 unk35;
+    /* 0x36 */ u8 unk36;
+    /* 0x37 */ u8 unk37;
+    /* 0x38 */ u8 unk38;
+    /* 0x39 */ u8 pad39[3];
+    /* 0x3C */ s32 unk3C;
+    /* 0x40 */ u8 unk40;
+    /* 0x41 */ u8 unk41;
+    /* 0x42 */ u8 pad42[2];
+    /* 0x44 */ struct17 unk44;
+    /* 0x50 */ s32 unk50;
+    /* 0x54 */ s16 unk54;
+    /* 0x56 */ s16 unk56;
+} S150FAE18Main;
+
+typedef struct {
+    /* 0x00 */ f32 unk00;
+    /* 0x04 */ f32 unk04;
+    /* 0x08 */ f32 unk08;
+    /* 0x0C */ f32 unk0C;
+    /* 0x10 */ u8  unk10;
+    /* 0x11 */ u8  pad11;
+    /* 0x12 */ s16 unk12;
+    /* 0x14 */ s16 unk14;
+    /* 0x16 */ s16 unk16;
+    /* 0x18 */ s16 unk18;
+    /* 0x1A */ u8  unk1A;
+    /* 0x1B */ u8  unk1B;
+    /* 0x1C */ u8  unk1C;
+    /* 0x1D */ u8  unk1D;
+    /* 0x1E */ u8  unk1E;
+    /* 0x1F */ u8  unk1F;
+    /* 0x20 */ u8  unk20;
+    /* 0x21 */ u8  unk21;
+    /* 0x22 */ u8  unk22;
+    /* 0x23 */ u8  unk23;
+    /* 0x24 */ s32 unk24;
+    /* 0x28 */ s32 unk28;
+    /* 0x2C */ s32 unk2C;
+    /* 0x30 */ s32 unk30;
+    /* 0x34 */ s32 unk34;
+    /* 0x38 */ s32 unk38;
+    /* 0x3C */ s32 unk3C;
+    /* 0x40 */ u8  unk40;
+    /* 0x41 */ u8  unk41;
+    /* 0x42 */ u8  pad42[2];
+    /* 0x44 */ u8  unk44;
+    /* 0x45 */ u8  pad45[3];
+    /* 0x48 */ f32 unk48;
+    /* 0x4C */ f32 unk4C;
+    /* 0x50 */ f32 unk50;
+    /* 0x54 */ f32 unk54;
+} S150FAE18Part;
+
+void func_150FAE18(s16 arg0, u8 arg1, s32 arg2) {
+    s16 pad;
+    s16 id;
+
+    id = arg0;
+    {
+    S150FAE18Main spC4;
+    void *ret;
+
+    spC4.unk38 = 0;
+    spC4.unk00 = 0x61;
+    spC4.unk01 = 3;
+    spC4.unk02 = 4;
+    spC4.unk03 = 2;
+    spC4.unk04 = 0;
+    spC4.unk06 = arg0;
+    spC4.unk08 = 0xA5;
+    spC4.unk0C = 0x17;
+    spC4.unk10 = 0;
+    spC4.unk14 = 0x200405;
+    spC4.unk18 = 0x60200;
+    spC4.unk2D = 8;
+    spC4.unk1C = 1;
+    spC4.unk20 = 0x38;
+    spC4.unk2C = 0;
+    spC4.unk24 = 0x80;
+    spC4.unk28 = 0x20;
+    spC4.unk30 = 0xFF;
+    spC4.unk31 = 0xFF;
+    spC4.unk32 = 0xFF;
+    spC4.unk33 = 0xFF;
+    spC4.unk34 = 0xFF;
+    spC4.unk35 = 0xFF;
+    spC4.unk36 = 0xFF;
+    spC4.unk37 = 0xFF;
+    spC4.unk3C = 0;
+    spC4.unk40 = 0;
+    spC4.unk41 = 1;
+    spC4.unk44 = *(struct17 *)&D_800A5480;
+    spC4.unk54 = 0xA;
+    spC4.unk56 = 0x19;
+    ret = func_15157010(&spC4, 0, 1.0, 0, 0, 2, arg1, arg2);
+    if (ret != NULL) {
+        memcpy((u8 *)ret + 0x120, &id, 2);
+    }
+    {
+    S150FAE18Part sp68;
+    u8 i;
+    const s16 tbl[8] = { 0xCE, 0xC5, 0xC4, 0xC4, 0xC4, 0xC4, 0xC4, 0xC4 };
+
+    sp68.unk04 = 62.0f;
+    sp68.unk12 = arg0;
+    sp68.unk14 = 0x29;
+    sp68.unk16 = 0xA;
+    sp68.unk18 = 0x19;
+    sp68.unk08 = 16.0f;
+    sp68.unk0C = 16.0f;
+    sp68.unk1A = 0;
+    sp68.unk1B = 0xFF;
+    sp68.unk1C = 0xFF;
+    sp68.unk1D = 0xFF;
+    sp68.unk1E = 0xFF;
+    sp68.unk1F = 0xFF;
+    sp68.unk20 = 0xFF;
+    sp68.unk21 = 0xFF;
+    sp68.unk22 = 0xFF;
+    sp68.unk23 = 0xFF;
+    sp68.unk24 = 0;
+    sp68.unk28 = 0x200405;
+    sp68.unk2C = 0x60200;
+    sp68.unk40 = 0;
+    sp68.unk41 = 7;
+    sp68.unk30 = 0x19;
+    sp68.unk34 = 0x22;
+    sp68.unk38 = 0x80;
+    sp68.unk3C = 0x20;
+    sp68.unk44 = 0;
+    sp68.unk48 = 1.0f;
+    sp68.unk4C = 1.0f;
+    sp68.unk50 = 0.0f;
+    sp68.unk54 = 0.0f;
+    for (i = 0; i < 8; i++) {
+        sp68.unk00 = i * 24.75f + -65.0f;
+        sp68.unk10 = tbl[i];
+        ret = func_1515548C(&sp68, 0xE, 0, 0, 2, arg1, arg2);
+        if (ret != NULL) {
+            memcpy((u8 *)ret + 0x70, &id, 2);
+        }
+    }
+    }
+    }
+}
 
 typedef struct Func150FB188State {
     u8 pad0[0x54];
