@@ -116,7 +116,134 @@ struct S1510608C {
 
 extern s32 (*D_80088C10[])(struct S1510608C *arg0, u8 *arg1);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_133190/func_15105CE0.s")
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s16 unk8;
+    s16 unkA;
+    s32 unkC;
+    s32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 unk16;
+    u8 unk17;
+    u8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+    u8 unk1C;
+    u8 unk1D;
+    s16 unk1E;
+    s16 unk20;
+    s16 unk22;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    struct Vec15107A20 pos;
+    struct Vec15107A20 unk3C;
+    struct Vec15107A20 vel;
+    f32 unk54;
+    u32 unk58;
+    s32 unk5C;
+    u8 unk60;
+    u8 unk61;
+    s8 unk62;
+    s8 unk63;
+    s8 unk64;
+    u8 unk65;
+    u8 unk66;
+    u8 pad67;
+    s16 unk68;
+    u8 pad6A[2];
+    f32 unk6C;
+} Spawn15105CE0;
+
+typedef struct { u8 pad[0x34]; } S34;
+typedef struct {
+    u8 pad0[0x10];
+    struct S15107C1CInit init;
+    void *unk60;
+    f32 unk64;
+    s16 unk68;
+    u8 pad6A[2];
+    void *unk6C[2];
+    u8 unk74[0x10];
+    s32 unk84;
+} Obj15105CE0;
+
+extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
+extern void *func_15130280(void *, u8, s32, s32, u8, s32);
+
+#define INIT ((struct S15107C1CInit *)arg0)
+struct S15107C1CCreated *func_15105CE0(void *arg0, s32 arg1, u8 arg2, s32 arg3) {
+    Obj15105CE0 *obj;
+    s32 n;
+    u8 i;
+    s32 m;
+
+    n = INIT->unk38;
+    m = INIT->unk38 + 2;
+    obj = func_15167A68(0x40, arg3, n * sizeof(S34) + m * 0xC + arg1 + 0x88, 1, arg2, 1);
+    if (obj == NULL) {
+        return NULL;
+    }
+    memcpy(&obj->init, INIT, 0x50);
+    obj->unk60 = (u8 *)obj + n * sizeof(S34) + m * 0xC + 0x88;
+    obj->unk64 = 1.0f / (INIT->unk38 + 1);
+    obj->unk68 = func_150ADA20() % (INIT->unk46 + 1) + INIT->unk44;
+    func_15106214((struct102 *)obj);
+    func_15106610((struct102 *)obj);
+    obj->unk6C[0] = 0;
+    obj->unk6C[1] = 0;
+    bzero(obj->unk74, 0x10);
+    obj->unk84 = (obj->init.unk38 * 3 << 4) + 0x60;
+    {
+    Spawn15105CE0 spawn;
+
+    spawn.unk1D = 0x2B;
+    spawn.unk8 = 0x4404;
+    spawn.unk0 = 0x200005;
+    spawn.unk4 = 0;
+    spawn.unkA = 0x12C;
+    spawn.unkC = 0;
+    spawn.unk10 = 0;
+    spawn.unk14 = 0xFF;
+    spawn.unk15 = 0xFF;
+    spawn.unk16 = 0xFF;
+    spawn.unk17 = 0xFF;
+    spawn.unk18 = ((u8 *)&INIT->unk48)[0];
+    spawn.unk19 = ((u8 *)&INIT->unk48)[1];
+    spawn.unk1A = ((u8 *)&INIT->unk48)[2];
+    spawn.unk1B = ((u8 *)&INIT->unk48)[3];
+    spawn.unk1C = 0xFF;
+    spawn.unk3C = *(struct Vec15107A20 *)&D_800A5480;
+    spawn.vel = *(struct Vec15107A20 *)&D_800A5480;
+    spawn.unk1E = 1;
+    spawn.unk20 = 0xFF;
+    spawn.unk22 = 1;
+    spawn.unk58 = 0xC000;
+    spawn.unk60 = 6;
+    spawn.unk61 = 6;
+    spawn.unk62 = -1;
+    spawn.unk63 = -1;
+    spawn.unk64 = -1;
+    spawn.unk65 = 0;
+    spawn.unk5C = 0;
+    spawn.unk66 = 0xFF;
+    spawn.unk68 = 0;
+    spawn.unk54 = 0.0f;
+    spawn.unk24 = 1.0f;
+    spawn.unk6C = 1000000.0f;
+    spawn.unk28 = spawn.unk2C = INIT->unk40 * 0.07692307979f * 200.0f;
+    for (i = 0; i < 2; i++) {
+        spawn.pos = (&INIT->unk4)[(i == 0) ? 0 : 3];
+        spawn.unk58 = (func_150ADA20() ? 0x40 : 0) | (func_150ADA20() ? 0x80 : 0);
+        obj->unk6C[i] = func_15130280(&spawn, 0, 0, 0, arg2, arg3);
+    }
+    }
+    return (struct S15107C1CCreated *)obj;
+}
+#undef INIT
 
 void func_1510608C(struct S1510608C *arg0) {
     s32 (*fn)(struct S1510608C *, u8 *);
