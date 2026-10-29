@@ -768,7 +768,75 @@ void func_150E90DC(void) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_113D60/func_150E9178.s")
+extern f32 *func_15144B34(s32);
+
+typedef struct Node150E9178 {
+    s32 unk0;
+    s32 unk4;
+    f32 unk8;
+    struct Node150E9178 *unkC;
+} Node150E9178;
+
+void func_150E9178(Struct150E8D5C *arg0) {
+    f32 *pos;
+    f32 *p;
+    Node150E9178 *node;
+    f32 r;
+    struct {
+        f32 unk00;
+        f32 unk04;
+        f32 unk08;
+        f32 unk0C;
+        f32 unk10;
+        f32 unk14;
+        f32 unk18;
+        u8 pad1C[0x14];
+        s32 unk30;
+        u8 unk34;
+        u8 unk35;
+        s32 unk38;
+    } sp;
+    f32 *v;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+
+    v = (f32 *)&sp;
+    pos = func_15144B34(D_800BE9E8);
+    p = &arg0->unk28;
+    p[2] += (p[0] + (func_150ADA68() * p[1])) * D_800BE9A4 * D_800DCD90;
+    if (p[2] > 1.0f) {
+        do {
+            r = func_150ADA68() * D_800DCD90;
+            node = (Node150E9178 *)D_800DCDC4;
+            while (node->unk8 < r) {
+                r -= node->unk8;
+                node = node->unkC;
+            }
+            func_1514470C((struct134 *)node->unk0, (s32)v);
+            dx = sp.unk00 - pos[0];
+            dy = sp.unk04 - pos[1];
+            dz = sp.unk08 - pos[2];
+            if (dx * dx + dy * dy + dz * dz < 1960000.0f) {
+                struct260 *ret;
+
+                sp.unk0C = 0.1932400018f;
+                sp.unk10 = 0.3140099943f;
+                sp.unk14 = 0.0f;
+                sp.unk18 = 99999.89844f;
+                sp.unk30 = 0;
+                sp.unk34 = 0;
+                sp.unk35 = 0;
+                sp.unk38 = 0;
+                ret = func_15149130((func_150ADA20() % 13U) + 5, -1, 0x37, -1, 1, 0, (struct37 *)0x3C, arg0->unkC, arg0->unk1);
+                if (ret != NULL) {
+                    memcpy((void *)((s32)ret + 0x28), v, 0x3C);
+                }
+            }
+            p[2] -= 1.0f;
+        } while (p[2] > 1.0f);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_113D60/func_150E93DC.s")
 
