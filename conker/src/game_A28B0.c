@@ -1,6 +1,8 @@
 #include <ultra64.h>
 
+#define func_15048A40 func_15048A40_hdr
 #include "functions.h"
+#undef func_15048A40
 #include "variables.h"
 
 s32 func_1505D024(struct127 *arg0, s32 arg1, u16 arg2, s32 arg3);
@@ -1264,7 +1266,54 @@ void func_15078520(void) {
     func_15075400(D_800D1890);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_15078544.s")
+extern f32 func_15048A40(u8);
+extern f32 func_150489B0(u8);
+typedef struct {
+    u8 pad[8];
+    struct { s16 x, y, z, w; } p[1];
+} Win78544;
+extern f32 sinf(f32);
+extern f32 cosf(f32);
+
+void func_15078544(void) {
+    struct127 *obj;
+    f32 y;
+    f32 x;
+    f32 ox;
+    f32 oz;
+    f32 s;
+    f32 c;
+    f32 ang;
+    u8 a;
+    f32 z;
+    s32 mode;
+    u8 v;
+
+    mode = D_800D1890 >> 6;
+    D_800D1890 &= 0x3F;
+    x = D_800CC2D0[D_800D154C->unk222].x_position;
+    z = D_800CC2D0[D_800D154C->unk222].z_position;
+    y = D_800CC2D0[D_800D154C->unk222].y_position;
+    ox = ((((s8)D_800D1891 << 4) | (D_800D1893 >> 4)) * 8);
+    oz = ((((s8)D_800D1892 << 4) | (D_800D1893 & 0xF)) * 8);
+    if (mode == 0) {
+        a = ((D_800CC2D0[D_800D154C->unk222].unk7A >> 8) & 0xFF) - 0x40;
+        s = func_15048A40(a);
+        c = func_150489B0(a);
+    } else if (mode == 1) {
+        s = 0.0f;
+        c = 1.0f;
+    } else {
+        ang = func_150484A0(D_800D154C->x_position - x, D_800D154C->z_position - z);
+        s = sinf(ang);
+        c = cosf(ang);
+    }
+    x += ox * c + oz * s;
+    z += oz * c - ox * s;
+    ((Win78544 *)D_800D2104[D_800D154C->unk13F])->p[D_800D1890].x = x;
+    ((Win78544 *)D_800D2104[D_800D154C->unk13F])->p[D_800D1890].y = y;
+    ((Win78544 *)D_800D2104[D_800D154C->unk13F])->p[D_800D1890].z = z;
+}
 void func_1507879C(void) {
     struct197 *temp_v0;
     f32 temp_f0;
