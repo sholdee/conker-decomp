@@ -743,7 +743,73 @@ s32 func_1501474C(void *arg) {
     }
     return 1;
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_40490/func_15014B60.s")
+extern u8 D_800A0938[][3];
+struct102 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+
+typedef struct Game4049014B60Packet {
+    f32 pos[3];
+    f32 rot[3];
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    struct102 *effects[6];
+    f32 unk3C;
+    void *owner;
+    u8 active;
+} Game4049014B60Packet;
+
+s32 func_15014B60(u8 *arg0) {
+    Game4049014B60Packet packet;
+    s32 i;
+    struct260 *result;
+    Header2 pos;
+    Header header;
+    u32 count;
+
+    arg0[0x16] |= 4;
+    packet.active = 1;
+    packet.owner = arg0;
+    packet.pos[0] = *(s16 *)(arg0 + 0);
+    packet.pos[1] = *(s16 *)(arg0 + 2);
+    packet.pos[2] = *(s16 *)(arg0 + 4);
+    count = osGetCount();
+    packet.rot[0] = (f32)((func_150ADA20() * count) & 0xFFFF) * 1.5259021893143654e-05f * 360.0f;
+    count = osGetCount();
+    packet.rot[1] = (f32)((func_150ADA20() * count) & 0xFFFF) * 1.5259021893143654e-05f * 360.0f;
+    count = osGetCount();
+    packet.rot[2] = (f32)((func_150ADA20() * count) & 0xFFFF) * 1.5259021893143654e-05f * 360.0f;
+    packet.unk18 = (f32)(*(u32 *)(arg0 + 0x18) & 0xFFFF) * 0.152587890625f * 0.0010000000474974513f;
+    packet.unk1C = (f32)((*(u32 *)(arg0 + 0x18) >> 16) & 0xFFFF) * 0.152587890625f * 0.0010000000474974513f;
+    packet.unk20 = (f32)(*(u32 *)(arg0 + 0x1C) & 0xFFFF) * 0.152587890625f * 0.0010000000474974513f;
+    packet.unk3C = (f32)((*(u32 *)(arg0 + 0x1C) >> 16) & 0xFFFF) * 0.457763671875f * 9.999999974752427e-07f;
+    pos.unk0 = *(s16 *)(arg0 + 0);
+    pos.unk4 = *(s16 *)(arg0 + 2);
+    pos.unk8 = *(s16 *)(arg0 + 4);
+    for (i = 0; i < 6; i++) {
+        s32 r;
+        s32 g;
+
+        header.unk0 = 2;
+        header.unk1 = -1;
+        header.unk2 = 0x12C;
+        header.unk4 = 0;
+        r = (D_800BE9F0 == 0x40) ? 0xFF : D_800A0938[i][0];
+        g = (D_800BE9F0 == 0x40) ? 0 : D_800A0938[i][1];
+        count = (D_800BE9F0 == 0x40) ? 0 : D_800A0938[i][2];
+        packet.effects[i] = func_151602C0(&header, &pos, 5, r, g, count, 0xFF, 0, 0, 0xFF, 0);
+    }
+    result = func_15149130(0x12C, -1, 0x2E, -1, 0, 0x29, (struct37 *)0x48, 0xFF, 0);
+    if (result != NULL) {
+        memcpy((u8 *)result + 0x28, &packet, 0x48);
+        return 1;
+    }
+    for (i = 0; i < 6; i++) {
+        if (packet.effects[i] != NULL) {
+            func_1516972C(packet.effects[i]);
+        }
+    }
+    return 1;
+}
 
 s32 func_15014F6C(struct134 *arg0) {
     struct {
