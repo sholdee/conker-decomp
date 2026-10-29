@@ -396,7 +396,213 @@ void func_151963B4(void *arg0) {
     func_15147928(arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1C2C60/func_15196438.s")
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8;
+} Vec15196438;
+
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3f15196438;
+
+typedef struct {
+    /* 0x00 */ s16 unk0;
+    /* 0x04 */ f32 unk4;
+    /* 0x08 */ f32 unk8;
+    /* 0x0C */ u8 unkC;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ u8 unk14;
+    /* 0x18 */ Vec15196438 unk18;
+    /* 0x24 */ Vec15196438 unk24;
+    /* 0x30 */ s8 unk30;
+    /* 0x31 */ u8 unk31;
+    /* 0x32 */ u8 unk32;
+    /* 0x33 */ u8 unk33;
+    /* 0x34 */ f32 unk34;
+    /* 0x38 */ f32 unk38;
+    /* 0x3C */ s8 unk3C;
+    /* 0x3D */ s8 unk3D;
+    /* 0x3E */ s8 unk3E;
+    /* 0x3F */ s8 unk3F;
+    /* 0x40 */ s8 unk40;
+    /* 0x41 */ s8 unk41;
+    /* 0x42 */ s8 unk42;
+    /* 0x44 */ u16 unk44;
+    /* 0x46 */ u8 unk46;
+    /* 0x47 */ u8 unk47;
+    /* 0x48 */ f32 unk48;
+    /* 0x4C */ u8 unk4C;
+    /* 0x50 */ f32 unk50;
+    /* 0x54 */ u8 unk54;
+    /* 0x58 */ f32 unk58;
+    /* 0x5C */ u8 unk5C;
+    /* 0x5D */ u8 unk5D;
+    /* 0x5E */ u8 unk5E;
+    /* 0x5F */ u8 unk5F;
+} Entry15196438;
+
+typedef struct {
+    /* 0x00 */ void *unk0;
+    /* 0x04 */ u8 unk4;
+    /* 0x05 */ u8 unk5;
+    /* 0x06 */ s8 unk6;
+    /* 0x07 */ s8 unk7;
+    /* 0x08 */ Vec15196438 unk8;
+    /* 0x14 */ Vec15196438 unk14;
+    /* 0x20 */ Vec3f15196438 unk20;
+    /* 0x2C */ Vec3f15196438 unk2C;
+    /* 0x38 */ f32 unk38;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ f32 unk40;
+    /* 0x44 */ f32 unk44;
+    /* 0x48 */ f32 unk48;
+    /* 0x4C */ f32 unk4C;
+    /* 0x50 */ s8 unk50;
+    /* 0x51 */ u8 unk51;
+    /* 0x52 */ u8 unk52;
+    /* 0x53 */ u8 unk53;
+    /* 0x54 */ u8 unk54;
+    /* 0x58 */ f32 unk58;
+    /* 0x5C */ f32 unk5C;
+    /* 0x60 */ s8 unk60;
+    /* 0x61 */ s8 unk61;
+    /* 0x62 */ s8 unk62;
+    /* 0x63 */ s8 unk63;
+    /* 0x64 */ s8 unk64;
+    /* 0x65 */ s8 unk65;
+    /* 0x66 */ s16 unk66;
+    /* 0x68 */ s8 unk68;
+    /* 0x69 */ u8 unk69;
+    /* 0x6A */ u8 unk6A;
+    /* 0x6C */ f32 unk6C;
+    /* 0x70 */ f32 unk70;
+    /* 0x74 */ u8 unk74;
+    /* 0x78 */ f32 unk78;
+    /* 0x7C */ f32 unk7C;
+    /* 0x80 */ u8 unk80;
+    /* 0x84 */ f32 unk84;
+    /* 0x88 */ f32 unk88;
+    /* 0x8C */ u8 unk8C;
+    /* 0x8D */ u8 unk8D;
+    /* 0x8E */ u8 unk8E;
+    /* 0x8F */ u8 unk8F;
+} Payload15196438;
+
+typedef struct {
+    /* 0x00 */ Vec3f15196438 unk0;
+    /* 0x0C */ s16 unkC;
+    /* 0x0E */ u16 unkE;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 pad16[2];
+    /* 0x18 */ s32 unk18;
+} Header15196438;
+
+extern Entry15196438 D_800A87A0[];
+extern s16 (*D_8008F890[])(void);
+extern f32 (*D_8008F870[])(void *, s32);
+extern void (*D_8008F87C[])(void *);
+void func_15143134(void *, Vec3f15196438 *, s32);
+void *func_15147A80(void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+
+void *func_15196438(void *arg0, s32 arg1, u8 arg2, s32 arg3)
+{
+  Header15196438 header;
+  Payload15196438 payload;
+  void *obj;
+  s32 base;
+  Entry15196438 *entry;
+  Payload15196438 *p;
+  if (arg0 == 0)
+  {
+    return 0;
+  }
+  if ((*((s32 *) (((u8 *) arg0) + 0x1D4))) == 0)
+  {
+    return 0;
+  }
+  entry = &D_800A87A0[arg1];
+  payload.unk0 = arg0;
+  payload.unk4 = *(((u8 *) arg0) + 0x3B);
+  payload.unk6 = 2;
+  payload.unk50 = 0;
+  payload.unk4C = 0.0f;
+  payload.unk70 = 0.0f;
+  payload.unk7C = 0.0f;
+  payload.unk88 = 0.0f;
+  payload.unk60 = entry->unk3C;
+  payload.unk61 = entry->unk3D;
+  payload.unk62 = entry->unk3E;
+  header.unkC = entry->unk0;
+  payload.unk40 = entry->unk4;
+  payload.unk48 = entry->unk8;
+  payload.unk51 = entry->unkC;
+  header.unk15 = entry->unk10;
+  payload.unk5 = entry->unk14;
+  payload.unk8 = entry->unk18;
+  payload.unk14 = entry->unk24;
+  payload.unk7 = entry->unk30;
+  payload.unk52 = entry->unk31;
+  payload.unk53 = entry->unk32;
+  payload.unk54 = entry->unk33;
+  header.unkE = entry->unk44;
+  payload.unk6A = entry->unk47;
+  payload.unk74 = entry->unk4C;
+  payload.unk80 = entry->unk54;
+  payload.unk63 = entry->unk3F;
+  payload.unk58 = entry->unk34;
+  payload.unk5C = entry->unk38;
+  payload.unk6C = entry->unk48;
+  payload.unk78 = entry->unk50;
+  payload.unk84 = entry->unk58;
+  payload.unk64 = entry->unk40;
+  payload.unk65 = entry->unk41;
+  payload.unk68 = entry->unk42;
+  payload.unk69 = entry->unk46;
+  payload.unk8C = entry->unk5C;
+  payload.unk8D = entry->unk5D;
+  payload.unk8E = entry->unk5E;
+  payload.unk8F = entry->unk5F;
+  if (payload.unk63 != (-1))
+  {
+    payload.unk66 = D_8008F890[payload.unk63]();
+  }
+  else
+  {
+    payload.unk66 = 0;
+  }
+  base = (*((s32 *) (((u8 *) payload.unk0) + 0x1D4))) + (payload.unk5 << 6);
+  func_15143134(&payload.unk8, &payload.unk20, base);
+  func_15143134(&payload.unk14, &payload.unk2C, base);
+  header.unk10 = 3;
+  header.unk0.x = payload.unk20.x;
+  header.unk0.y = payload.unk20.y;
+  header.unk0.z = payload.unk20.z;
+  payload.unk3C = 0.0f;
+  obj = func_15147A80(&header, 0x90, 0x24, 2, 2, 2, 0, 0, 0, arg2, arg3);
+  if (obj != 0)
+  {
+    p = *((Payload15196438 **) (((u8 *) obj) + 0x98));
+    memcpy(*((Payload15196438 **) (((u8 *) obj) + 0x98)), &payload, 0x90);
+    if (p->unk7 != (-1))
+    {
+      p->unk38 = D_8008F870[p->unk7](obj, p->unk7);
+    }
+    else
+    {
+      p->unk38 = 0.0f;
+    }
+    if (payload.unk60 != (-1))
+    {
+      D_8008F87C[payload.unk60](obj);
+    }
+  }
+  return obj;
+}
 
 typedef struct {
     /* 0x00 */ f32 x;
