@@ -124,7 +124,53 @@ void func_151B3A34(struct102 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E0560/func_151B3A7C.s")
+typedef struct {
+    f32 x, y, z;
+} Vec3f_151B3A7C;
+
+typedef struct {
+    Vec3f_151B3A7C pos;
+    Vec3f_151B3A7C vel;
+} Node151B3A7C;
+
+typedef struct {
+    u8 pad0[0x10];
+    u8 unk10;
+    u8 pad11[3];
+    Vec3f_151B3A7C start;
+    Vec3f_151B3A7C end;
+    u8 pad2C[0x1C];
+    Node151B3A7C nodes[10];
+} Struct151B3A7C;
+
+s32 func_151B3A7C(Struct151B3A7C *arg0) {
+    s32 pad1;
+    s32 pad2;
+    s32 pad3;
+    s32 pad4;
+    Vec3f_151B3A7C cur;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    s32 i;
+
+    dx = arg0->end.x - arg0->start.x;
+    dy = arg0->end.y - arg0->start.y;
+    dz = arg0->end.z - arg0->start.z;
+    cur = arg0->start;
+    for (i = 0; i < 10; i++) {
+        Node151B3A7C *node = &arg0->nodes[i];
+        node->pos = cur;
+        node->vel.x = 0.0f;
+        node->vel.y = 0.0f;
+        node->vel.z = 0.0f;
+        cur.x += dx * 0.1111111119f;
+        cur.y += dy * 0.1111111119f;
+        cur.z += dz * 0.1111111119f;
+    }
+    arg0->unk10 &= ~2;
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1E0560/func_151B3CF0.s")
 
