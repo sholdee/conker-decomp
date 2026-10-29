@@ -12,6 +12,7 @@ extern f32 D_800D1550;
 
 
 void func_15058F24(struct127 *arg0, f32, f32);
+void func_1505D6F0(struct127 *arg0, s32 arg1);
 u8   func_150599C8(struct127 *arg0, u8 arg1, u16 arg2);
 void func_1505A250(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4);
 void func_1505A770(void *arg0);
@@ -1390,7 +1391,107 @@ void func_1505D5D0(struct127 *arg0, struct127 *arg1, f32 arg2, f32 arg3, f32 arg
         func_1505D408(arg0, arg1, dx, dy, dz, distSq, sumRadius, arg7);
     }
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505D6F0.s")
+void func_1505D6F0(struct127 *arg0, s32 arg1)
+{
+  f32 dx;
+  f32 dy;
+  f32 dz;
+  f32 distSq;
+  f32 sumRadius;
+  f32 radius;
+  f32 objRadius;
+  f32 height;
+  f32 x;
+  f32 y;
+  f32 z;
+  s32 i;
+  s32 count;
+  struct127 *obj;
+  struct126 *temp;
+  D_800CC268 = 0;
+  D_800CC26C = 0;
+  D_800CC26D = 0;
+  count = 25;
+  if (((((((arg0->interaction_state != 1) || ((D_800CC2D0[arg1].unk31C->unk4E == 0) && (D_800CC2D0[arg1].unk31C->unk27 == 0))) && (arg0->unk13D < 100)) && (arg0->unkE4 != 0)) && (arg0->unk65 == 0)) && (!(arg0->unkF8 & 0x01000000))) && (!(arg0->unkF8 & 0x4000)))
+  {
+    radius = arg0->unkE4;
+    height = arg0->unkEC;
+    x = arg0->x_position;
+    y = arg0->y_position + ((s16) arg0->unkE8);
+    z = arg0->z_position;
+    if (arg0->unkF8 & 0x02000000)
+    {
+      count = 1;
+    }
+    for (i = 0; i < count; i++)
+    {
+      obj = &D_800CC2D0[i];
+      if (obj->interaction_state == 0)
+      {
+        continue;
+      }
+      if (obj->unkE4 < 2)
+      {
+        continue;
+      }
+      if ((obj->unkF8 & 0x02000000) && (arg0->unk127 == 0xFF))
+      {
+        continue;
+      }
+      if (obj->unkF8 & 0x01000000)
+      {
+        continue;
+      }
+      if (i == arg1)
+      {
+        continue;
+      }
+      if (obj->unk65 == (arg1 + 1))
+      {
+        continue;
+      }
+      if (obj->unk13D >= 100)
+      {
+        continue;
+      }
+      if (obj->unk2FA == 0)
+      {
+        continue;
+      }
+      objRadius = obj->unkE4;
+      sumRadius = radius + objRadius;
+      dx = x - obj->x_position;
+      dz = z - obj->z_position;
+      dy = y - (obj->y_position + ((s16) obj->unkE8));
+      dy *= (height + obj->unkEC) * 0.5f;
+      if (((((D_800BE616 != 0) && ((((dx * dx) + (dy * dy)) + (dz * dz)) < 30000.0f)) && (arg0->interaction_state == 1)) && (obj->interaction_state == 1)) && ((*(((u8 *) obj) + 0x128)) != (*(((u8 *) arg0) + 0x128))))
+      {
+        temp = arg0->unk31C;
+        if ((temp->unk78 == 0) && (obj->unk31C->unk78 != 0))
+        {
+          temp->chased = 20;
+        }
+      }
+      distSq = ((dx * dx) + (dy * dy)) + (dz * dz);
+      if (distSq < (sumRadius * sumRadius))
+      {
+        func_1505D408(arg0, obj, dx, dy, dz, distSq, sumRadius, i);
+      }
+      if (obj->id == 0x34)
+      {
+        if (obj->unk251 == 2)
+        {
+          func_1505D5D0(arg0, obj, x, y, z, height, radius, i, 120.0f, 250.0f, 120.0f, -130.0f, 0.0f);
+        }
+        else
+        {
+          func_1505D5D0(arg0, obj, x, y, z, height, radius, i, 130.0f, 140.0f, 250.0f, -50.0f, 0.0f);
+        }
+      }
+    }
+
+  }
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505DADC.s")
 f32 func_1505DF10(struct127 *arg0, u8 arg1, u16 *arg2, f32 *arg3, f32 *arg4, s32 arg5);
 
