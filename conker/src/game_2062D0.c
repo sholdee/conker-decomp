@@ -1340,7 +1340,93 @@ void func_151DC034(struct17 *arg0, f32 arg1, u8 arg2, s16 arg3, u8 arg4, u8 arg5
     sp30.unk6C = 1000.0f;
     func_15130280(&sp30, 1, 0, 0, arg5, arg6);
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/func_151DC260.s")
+struct struct217XXX {
+    s16 unk0;
+    s16 unk2;
+    s16 unk4;
+    s16 unk6;
+    struct three unk8;
+    s16 unk14;
+    s16 unk16;
+    f32 unk18;
+    f32 unk1C;
+    s16 unk20;
+    s16 unk22;
+    f32 unk24;
+    f32 unk28;
+    u8 unk2C;
+    u8 unk2D;
+    u8 pad2E[2];
+    f32 unk30;
+    f32 unk34;
+    s8 unk38;
+    u8 unk39;
+    u8 pad3A[2];
+    f32 unk3C;
+    s8 unk40;
+    u8 pad41[3];
+    f32 unk44;
+};
+
+extern void func_15150178(struct struct217XXX *arg0, struct three *arg1, s32 arg2, u8 arg3, s32 arg4);
+
+void func_151DC260(struct00 *arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
+    struct struct218XXX tmp;
+
+    tmp.unk8 = *(struct three *)arg0;
+    tmp.unk2C = 0xA;
+    tmp.unk2E = 0xA;
+    tmp.unk2 = 0xFF;
+    tmp.unk4 = -0x40;
+    tmp.unk6 = 0x28;
+    tmp.unk14 = 3.0f;
+    tmp.unk0 = 0;
+    tmp.unk30 = 3;
+    tmp.unk32 = 1;
+    tmp.unk34 = 0x3C;
+    tmp.unk36 = 0x28;
+    tmp.unk38 = 0x64;
+    tmp.unk3A = 0x64;
+    tmp.unk44 = 0x10;
+    tmp.unk46 = 0xF;
+    tmp.unk48 = 0;
+    tmp.unk18 = 4.0f;
+    tmp.unk1C = 0.807000041f;
+    tmp.unk20 = 0.5100000501f;
+    tmp.unk24 = 12.0f;
+    tmp.unk28 = 11.0f;
+    tmp.unk40 = 1.0f;
+    tmp.unk3C = arg2;
+    func_15153F18(&tmp, &tmp.unk8, arg1, arg3, arg4);
+
+    {
+        struct struct217XXX tmp2;
+
+        tmp2.unk8 = *(struct three *)arg0;
+        tmp2.unk0 = 0;
+        tmp2.unk14 = 0xC;
+        tmp2.unk18 = 6.0f;
+        tmp2.unk16 = 6;
+        tmp2.unk2 = 0xFF;
+        tmp2.unk4 = -0x40;
+        tmp2.unk6 = 0x24;
+        tmp2.unk20 = 0x23;
+        tmp2.unk22 = 0xF;
+        tmp2.unk2C = 0x9B;
+        tmp2.unk2D = 0x64;
+        tmp2.unk1C = 8.0f;
+        tmp2.unk38 = 1;
+        tmp2.unk24 = -1.266000032f;
+        tmp2.unk28 = 0.4660000205f;
+        tmp2.unk39 = arg2;
+        tmp2.unk30 = 123.0f;
+        tmp2.unk34 = 134.0f;
+        tmp2.unk40 = 1;
+        tmp2.unk3C = 0.6000000238f;
+        tmp2.unk44 = 0.0f;
+        func_15150178(&tmp2, &tmp2.unk8, arg1, arg3, arg4);
+    }
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/func_151DC484.s")
 
 // typedef struct {
