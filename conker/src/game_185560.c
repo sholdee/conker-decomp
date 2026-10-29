@@ -959,7 +959,138 @@ void func_15159BB0(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, u
     func_15159890(sp24, sp18, arg6[0xC], arg6[0x1]);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_185560/func_15159C08.s")
+typedef struct {
+    /* 0x00 */ Vec15159890 pos;
+    /* 0x0C */ Vec15159890 scale;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+} Sub15159C08;
+
+typedef struct {
+    f32 unk0;
+    u8 unk4;
+    u8 unk5;
+    s8 unk6;
+    s8 unk7;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+} Extra15159C08;
+
+extern u8 D_800BE9EB;
+extern float sinf(float);
+extern float cosf(float);
+void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
+
+void func_15159C08(u8 *arg0) {
+    Sub15159C08 *s0;
+    void *temp_v0;
+
+    s0 = (Sub15159C08 *)(arg0 + 0x28);
+    if (func_151454BC(D_800BE9EB, 3000.0f, (struct17 *)s0)) {
+        s0->unk28 += (s0->unk2C + (func_150ADA68() * s0->unk30)) * D_800BE9A4;
+        if (s0->unk28 > 1.0f) {
+    Params15159890 params;
+    Extra15159C08 extra;
+    f32 angle;
+    f32 radius;
+    f32 x;
+    f32 z;
+    f32 scale;
+    f32 inv;
+    f32 mtx[4][4];
+    f32 dist;
+    f32 size;
+    f32 temp_f2;
+            params.unk1D = 0x2F;
+            params.unk08 = 0xC01;
+            params.unk00 = 0x200005;
+            params.unk04 = 0;
+            params.unk1A = 0;
+            params.unk19 = 0;
+            params.unk18 = 0;
+            params.unk17 = 0;
+            params.unk16 = 0;
+            params.unk15 = 0;
+            params.unk14 = 0;
+            params.unk10 = 0;
+            params.unk0C = 0;
+            params.unk1C = 0xFF;
+            params.unk22 = 0;
+            params.unk24 = 0.0f;
+            params.unk58 = 0x1205;
+            params.unk60 = 5;
+            params.unk61 = 5;
+            params.unk62 = 0xC;
+            params.unk63 = -1;
+            params.unk30 = s0->pos;
+            params.unk3C = 0.0f;
+            params.unk40 = 0.0f;
+            params.unk44 = 0.0f;
+            extra.unk4 = 0;
+            extra.unk5 = 0;
+            params.unk54 = 0.0f;
+            do {
+                angle = func_150ADA68() * 6.283185482f;
+                radius = func_150ADA68() * s0->unk1C;
+                x = sinf(angle) * radius;
+                z = cosf(angle) * radius;
+                func_150A8050(mtx, s0->unk20, s0->unk24, 0.0f);
+                func_150A7960((f32 *)mtx, x, 0.0f, z, &extra.unk10, &extra.unk14, &extra.unk18);
+                extra.unk1C = func_150ADA68() * 6.283185482f;
+                extra.unk20 = ((func_150ADA68() * 320.0f) + -160.0f) * 0.001000000047f;
+                {
+                s16 isize;
+
+                scale = ((func_150ADA68() * 161.0f) + 446.0f) * 0.009999999776f;
+                inv = 1.0f / scale;
+                dist = s0->unk18 * inv;
+                size = ((func_150ADA68() * 6596.0f) + 2402.0f) * 0.1000000015f * inv;
+                params.unk48.x = s0->scale.x * scale;
+                params.unk48.y = s0->scale.y * scale;
+                params.unk48.z = s0->scale.z * scale;
+                if (dist > 500.0f) {
+                    params.unk0A = 500;
+                } else {
+                    params.unk0A = (size * 0.5f) + dist;
+                }
+                params.unk1E = size;
+                params.unk20 = 0xFF / params.unk1E;
+                params.unk58 &= ~0xC0;
+                if (func_150ADA20() & 1) {
+                    params.unk58 |= 0x40;
+                }
+                if (func_150ADA20() & 1) {
+                    params.unk58 |= 0x80;
+                }
+                params.unk1B = (func_150ADA20() % 51U) + 0x7C;
+                temp_f2 = (func_150ADA68() * 100.0f) + 240.0f;
+                params.unk28 = temp_f2;
+                extra.unk0 = temp_f2;
+                params.unk2C = temp_f2;
+                extra.unk6 = (func_150ADA20() % 5U) + 4;
+                extra.unk7 = (func_150ADA20() % 5U) + 4;
+                extra.unk8 = ((func_150ADA68() * 0.25f) + 0.150000006f) * extra.unk0;
+                extra.unkC = ((func_150ADA68() * 0.25f) + 0.150000006f) * extra.unk0;
+                temp_v0 = func_151303BC(&params, 2, 0x24);
+                if (temp_v0 != NULL) {
+                    memcpy((u8 *)temp_v0 + 0xA8, &extra, 0x24);
+                }
+                s0->unk28 -= 1.0f;
+                }
+            } while (s0->unk28 > 1.0f);
+        }
+    }
+}
 
 extern float sinf(float angle);
 f32 func_151423D8(u8);
