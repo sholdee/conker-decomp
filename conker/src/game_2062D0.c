@@ -363,7 +363,29 @@ u8 func_151D9B34(void) {
     return tmp[func_150ADA20() & 3];
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/func_151D9B8C.s")
+typedef struct {
+    s32 unk0;
+    s16 unk4;
+    u8 unk6;
+    u8 unk7;
+    s32 unk8;
+    s32 unkC;
+    u8 unk10;
+    u8 unk11;
+    u8 unk12;
+    u8 unk13;
+    u8 unk14;
+    u8 unk15;
+    u8 unk16;
+    u8 unk17;
+    s32 unk18;
+    s32 unk1C;
+    u8 unk20;
+    u8 pad21;
+    s16 unk22;
+    s16 unk24;
+    u8 pad26[2];
+} Struct151D9B8CParams;
 
 typedef struct {
     s16 unk0;
@@ -374,6 +396,65 @@ typedef struct {
     u8 unk15;
     u8 unk16;
 } Struct151D9EB0Sub;
+
+s32 func_15144E80(s32, struct17 *, struct17 *, struct17 *);
+s32 func_15145128(struct17 *, struct17 *, f32 *, f32 *);
+f32 func_15144A74(struct17 *, struct17 *);
+
+void func_151D9B8C(u8 arg0, f32 arg1, u8 arg2, s32 arg3, struct17 *arg4, s16 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, s32 argA) {
+    Struct151D9B8CParams tmp;
+    struct260 *ret;
+    struct17 spA0;
+    struct17 sp94;
+    struct17 sp88;
+    struct17 sp7C;
+
+    tmp.unk22 = 0x20;
+    tmp.unk24 = 7;
+    tmp.unk6 = D_8008FD04[arg0]();
+    tmp.unk0 = ((arg5 == -1) ? 0 : 1) | (D_800AB330[arg0] ? 0x20000 : 0) | 0x100 | 0x200 | 0x400 | 0x1000 | 0x2000 | 0x4000 | 0x8000;
+    if (arg5 == -1) {
+        tmp.unk4 = 0x12C;
+    } else {
+        tmp.unk4 = arg5;
+    }
+    tmp.unk8 = 0;
+    tmp.unkC = 0;
+    tmp.unk10 = arg2;
+    tmp.unk11 = 0xFF;
+    tmp.unk14 = 0;
+    tmp.unk13 = 0;
+    tmp.unk12 = 0;
+    tmp.unk15 = 0xFF;
+    tmp.unk18 = (arg6 ? 2 : 3) + ((arg7 ? 0x3B : 0x22) << 16);
+    tmp.unk7 = 0;
+    tmp.unk16 = 0;
+    tmp.unk17 = 7;
+    tmp.unk20 = 0xFF;
+    tmp.unk1C = 0;
+    if (func_1513C650((s32)&tmp, 0, 0, arg3, arg4->unk0, arg4->unk4, arg4->unk8, arg1, arg1,
+                      func_150ADA20() & 0xFF, (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2),
+                      arg7 ? 3 : 0, arg7 ? 0xFF : 0, 0, arg9, argA) != NULL &&
+        arg8 && func_15144E80(arg3, &spA0, &sp94, &sp88)) {
+        sp7C = *(struct17 *)&D_800AB3E8;
+        func_15145128(&sp88, &sp88, NULL, NULL);
+        if (func_15144A74(&sp88, &sp7C) < -0.5f) {
+            s32 pad;
+            Struct151D9EB0Sub sub;
+            sub.unk0 = 0;
+            sub.unk4 = arg1 * 4.5f;
+            sub.unk8 = *arg4;
+            sub.unk14 = arg2;
+            sub.unk15 = arg7;
+            sub.unk16 = arg0;
+            ret = func_15149130((arg5 == -1) ? 0x12C : arg5, -1, 0x4A, -1, (arg5 == -1) ? 0 : 1, 0, (struct37 *)0x18, arg9, argA);
+            if (ret != NULL) {
+                memcpy((void *)((s32)ret + 0x28), &sub, 0x18);
+            }
+        }
+    }
+}
+
 
 void func_151D9EB0(void *arg0) {
     Struct151D9EB0Sub *sp50;
