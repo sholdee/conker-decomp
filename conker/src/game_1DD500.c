@@ -116,7 +116,93 @@ void func_151B01B8(void *arg0, void *arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1DD500/func_151B0B88.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1DD500/func_151B118C.s")
+typedef struct {
+    f32 vx;
+    f32 vy;
+    f32 vz;
+    f32 ay;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    u8 unk24;
+    u8 unk25;
+} Game1DD500Proj;
+
+typedef struct {
+    u8 pad0;
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD[0x23];
+    f32 unk30;
+    f32 pos[3];
+    f32 lag[3];
+    u8 pad4C[0x10];
+    u8 unk5C;
+    u8 pad5D[0x1B];
+    f32 unk78;
+    f32 unk7C;
+    u8 pad80[0x90];
+    Game1DD500Proj proj;
+} Game1DD500ProjObj;
+
+s32 func_15046C80(f32 *, s32, f32, void *);
+void func_151DAB58(u8, f32, u8, f32 *, s32, s32, s32);
+
+s32 func_151B118C(Game1DD500ProjObj *arg0) {
+    f32 dx;
+    f32 dz;
+    f32 dy;
+    Game1DD500Proj *p;
+    s8 ret;
+    f32 oldY;
+    f32 oldVz;
+    f32 oldVx;
+    f32 probe[3];
+    f32 pos[3];
+    f32 size;
+
+    p = &arg0->proj;
+    oldY = arg0->pos[1];
+    oldVx = p->vx;
+    oldVz = p->vz;
+    ret = 1;
+    p->vx *= 0.25f * D_800BE9A4;
+    p->vz *= 0.25f * D_800BE9A4;
+    dx = (p->vx + oldVx) * 0.5f * D_800BE9A4;
+    dy = p->vy * D_800BE9A4 + p->ay * D_800BE9A4 * D_800BE9A4 * 0.5f;
+    dz = (p->vz + oldVz) * 0.5f * D_800BE9A4;
+    p->vy += p->ay * D_800BE9A4;
+    arg0->pos[0] += dx;
+    arg0->pos[1] += dy;
+    arg0->pos[2] += dz;
+    arg0->lag[0] += dx;
+    arg0->lag[1] += dy;
+    arg0->lag[2] += dz;
+    arg0->lag[0] = (arg0->lag[0] - arg0->pos[0]) * 0.706000030f + arg0->pos[0];
+    arg0->lag[1] = (arg0->lag[1] - arg0->pos[1]) * 0.706000030f + arg0->pos[1];
+    arg0->lag[2] = (arg0->lag[2] - arg0->pos[2]) * 0.706000030f + arg0->pos[2];
+    if (p->unk24) {
+        probe[0] = arg0->pos[0];
+        probe[1] = oldY - arg0->unk30;
+        probe[2] = arg0->pos[2];
+        if (func_15046C80(probe, 0, arg0->pos[1] - arg0->unk30, &arg0->unk78)) {
+            pos[0] = probe[0];
+            pos[1] = arg0->unk78 + 5.0f;
+            pos[2] = probe[2];
+            size = ((p->unk14 + p->unk1C * 0.5f) + (p->unk18 + p->unk20 * 0.5f)) * 0.5f;
+            if (func_150ADA20() & 1) {
+                func_151D9B8C(p->unk25, size * 1.70000005f, arg0->unk5C, (s32)&arg0->unk7C, (struct17 *)pos, 100, 0, 1, 0, arg0->unkC, arg0->unk1);
+            } else {
+                func_151DAB58(p->unk25, size * 0.680000007f, arg0->unk5C, pos, 1, arg0->unkC, arg0->unk1);
+            }
+            ret = 0;
+        }
+    }
+    return ret;
+}
 
 s32 func_151B1478(struct260 *arg0) {
     s32 v1;
