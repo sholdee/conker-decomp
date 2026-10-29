@@ -174,7 +174,46 @@ void func_1501C880(s32 arg0, s32 arg1) {
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_49D30/func_1501CC3C.s")
+typedef struct {
+    s32 textStart;
+    s32 textEnd;
+    s32 dataStart;
+    s32 dataEnd;
+} struct_1501CC3C;
+
+extern u8 D_2D4B0[];
+extern s8 D_80084070;
+extern s8 D_80084074;
+extern struct_1501CC3C D_80084078[];
+extern s32 D_800BEB98;
+
+void func_1501CC3C(void) {
+    s32 idx;
+    s32 ofs;
+    struct_1501CC3C *e;
+
+    idx = D_800B0DF0->pad2A[1];
+    if (idx >= 2) {
+        idx -= 2;
+        ofs = 0;
+    } else {
+        ofs = 4;
+    }
+    if (D_800BEB98 == 1) {
+        idx += 2;
+    }
+    if ((idx != D_80084070) || (ofs != D_80084074)) {
+        func_10004514(D_80084078[idx].textStart + (s32)D_2D4B0, D_800C1060, D_80084078[idx].textEnd - D_80084078[idx].textStart, 1);
+        D_800BEB9C = (u64 *)((D_80084078[idx].textEnd - D_80084078[idx].textStart) + (u8 *)D_800C1060);
+        func_10004514(D_80084078[idx].dataStart + (s32)D_2D4B0, D_800BEB9C, D_80084078[idx].dataEnd - D_80084078[idx].dataStart, 1);
+        D_80084070 = idx;
+        D_80084074 = ofs;
+        e = D_80084078 + (idx + ofs);
+        func_10004514(e->textStart + (s32)D_2D4B0, D_800BEBB0, e->textEnd - e->textStart, 1);
+        D_800BEAD0 = (u64 *)((e->textEnd - e->textStart) + (u8 *)D_800BEBB0);
+        func_10004514(e->dataStart + (s32)D_2D4B0, D_800BEAD0, e->dataEnd - e->dataStart, 1);
+    }
+}
 
 extern s32 D_800C3960[];
 
