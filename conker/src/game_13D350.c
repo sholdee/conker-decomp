@@ -312,7 +312,115 @@ void func_15113180(void) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_13D350/func_15113218.s")
+typedef struct Game13D350Entry {
+    u16 index;
+    u16 value;
+} Game13D350Entry;
+
+typedef struct Struct15113218Obj {
+    u8 pad0[0x10];
+    s16 unk10;
+    s16 unk12;
+    s16 unk14;
+    u8 pad16[0x16];
+    s32 unk2C;
+    s32 unk30;
+    s32 unk34;
+    u8 pad38[0x16];
+    u8 unk4E;
+    u8 pad4F[0x21];
+    u8 unk70;
+    u8 pad71[0x2F];
+} Struct15113218Obj;
+
+typedef struct Struct15113218Sub {
+    u8 pad0[0x30];
+    f32 x;
+    f32 y;
+    f32 z;
+} Struct15113218Sub;
+
+typedef struct Struct15113218Actor {
+    u8 pad0[0x14];
+    f32 x;
+    f32 y;
+    f32 z;
+    u8 pad20[0x70];
+    s16 unk90;
+    u8 pad92[0x142];
+    Struct15113218Sub *unk1D4;
+    u8 pad1D8[0x154];
+} Struct15113218Actor;
+
+struct Struct1511490C;
+void func_1511490C(f32 arg0[4][4], struct Struct1511490C *arg1);
+void func_150A7B80(void *);
+extern u8 **D_80089240;
+extern u8 **D_80089250[];
+extern u16 D_800DBEE8[];
+extern f32 D_800DBF08[][4][4];
+
+void func_15113218(void) {
+    Struct15113218Obj *obj;
+    Struct15113218Actor *actor;
+    Struct15113218Sub *sub;
+    f32 mf[4][4];
+    s32 j;
+    s32 i;
+    u16 idx;
+    s32 pad1;
+    f32 rot[3];
+    s32 pad2;
+    s32 pad3;
+    s32 pad4;
+
+    for (i = 0; i <= D_80082FA0; i++) {
+        if (func_150859AC(i, 0) == 0) {
+            continue;
+        }
+        {
+            for (j = 0; j < D_800DBEE8[i]; j++) {
+                obj = (Struct15113218Obj *)&D_800DBEF4[((Game13D350Entry *)*(&D_80089240)[i])[j].index];
+                if ((obj->unk70 & 1) == 1) {
+                    func_150A7B80(*D_80089250[D_800BE9C0] + (((Game13D350Entry *)*(&D_80089240)[i])[j].index << 6));
+                    continue;
+                }
+                if (obj->unk4E == 3) {
+                    continue;
+                }
+                if (obj->unk4E < 3) {
+                    func_1511490C(mf, (struct Struct1511490C *)obj);
+                    guMtxF2L(mf, (Mtx *)(*D_80089250[D_800BE9C0] + (((Game13D350Entry *)*(&D_80089240)[i])[j].index << 6)));
+                } else if (obj->unk4E > 100 && obj->unk4E < 125) {
+                    actor = &((Struct15113218Actor *)D_800CC2D0)[obj->unk4E - 100];
+                    if (actor->unk1D4 == NULL) {
+                        func_150A7CB0(mf, obj->unk2C, obj->unk30, obj->unk34);
+                        mf[3][0] = actor->x;
+                        mf[3][1] = actor->y;
+                        mf[3][2] = actor->z;
+                        guMtxF2L(mf, (Mtx *)(*D_80089250[D_800BE9C0] + (((Game13D350Entry *)*(&D_80089240)[i])[j].index << 6)));
+                    } else {
+                        rot[2] = 0.0f;
+                        rot[0] = rot[2];
+                        rot[1] = actor->unk90;
+                        sub = actor->unk1D4;
+                        func_150A7CB0(mf, obj->unk2C, obj->unk30, obj->unk34);
+                        mf[3][0] = sub->x;
+                        mf[3][1] = sub->y;
+                        mf[3][2] = sub->z;
+                        func_150442C0(mf, rot[0], rot[1], rot[2]);
+                        obj->unk10 = mf[3][0];
+                        obj->unk12 = mf[3][1];
+                        obj->unk14 = mf[3][2];
+                        guMtxF2L(mf, (Mtx *)(*D_80089250[D_800BE9C0] + (((Game13D350Entry *)*(&D_80089240)[i])[j].index << 6)));
+                    }
+                } else {
+                    guMtxF2L(D_800DBF08[D_800BE9C0], (Mtx *)(*D_80089250[D_800BE9C0] + (((Game13D350Entry *)*(&D_80089240)[i])[j].index << 6)));
+                }
+            }
+        }
+    }
+}
 
 typedef struct Game13D350Cmd {
     u32 word0;
