@@ -1,5 +1,7 @@
 #include <ultra64.h>
+#define func_15048A40 func_15048A40_hdr
 #include "functions.h"
+#undef func_15048A40
 #include "variables.h"
 
 
@@ -192,7 +194,99 @@ void func_15179600(s32 arg0, s32 arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1A6360/func_151797B0.s")
+
+typedef struct {
+    u8 pad0[0x90];
+    s32 unk90;
+    s16 unk94;
+    u8 pad96[0x6];
+    s16 unk9C;
+    s16 unk9E;
+    s16 unkA0;
+    u8 padA2[0xC];
+    u16 unkAE;
+    u8 padB0;
+    u8 unkB1;
+    u8 padB2[2];
+    u8 unkB4;
+} Obj151797B0;
+
+extern f32 func_15048A40(u8 arg0);
+extern f32 func_150489B0(u8 arg0);
+
+void func_151797B0(Obj151797B0 *arg0) {
+    f32 dist;
+    f32 sn;
+    f32 cs;
+    f32 dx;
+    f32 step;
+    f32 dz;
+    s32 speed;
+    s32 vol;
+    s32 wrapped;
+    s32 flags;
+    s16 cx;
+    s16 cy;
+    s16 cz;
+
+    dx = (f32)arg0->unkA0 - D_800DBFF0->unk300;
+    dz = (f32)arg0->unk9C - D_800DBFF0->unk2F8;
+    dist = sqrtf(dx * dx + dz * dz);
+    vol = 80.0f - (80.0f * dist) / 1000.0f;
+    if (vol < 0) {
+        vol = 0;
+    }
+    speed = arg0->unkAE;
+    arg0->unkB4 = vol;
+    speed += (u32)((D_800DD433 << 4) * ((func_150ADA20() & 0xFF) + 0x80)) >> 9;
+    speed = speed * 0.888890028f;
+    if (speed > 0x3200) {
+        speed = 0x3200;
+    }
+    arg0->unkAE = speed;
+    step = arg0->unkB1 * D_800BE9E4;
+    sn = func_15048A40(arg0->unkAE >> 8);
+    arg0->unk9C = arg0->unk9C + step * sn;
+    cs = func_150489B0(arg0->unkAE >> 8);
+    arg0->unk9E = arg0->unk9E - step * cs;
+    wrapped = 0;
+    cx = D_800DD438.unk0;
+    cy = D_800DD438.unk2;
+    cz = D_800DD438.unk4;
+    if (arg0->unk9C < cx - 500) {
+        arg0->unk9C = cx - (cx - arg0->unk9C) + 1000;
+        wrapped = 1;
+    } else if (arg0->unk9C > cx + 500) {
+        arg0->unk9C = cx + (arg0->unk9C - cx) - 1000;
+        wrapped = 1;
+    }
+    if (arg0->unk9E < cy - 500) {
+        arg0->unk9E = cy - (cy - arg0->unk9E) + 1000;
+        wrapped = 1;
+    } else if (arg0->unk9E > cy + 500) {
+        arg0->unk9E = cy + (arg0->unk9E - cy) - 1000;
+        wrapped = 1;
+    }
+    if (arg0->unkA0 < cz - 500) {
+        arg0->unkA0 = cz - (cz - arg0->unkA0) + 1000;
+        wrapped = 1;
+    } else if (arg0->unkA0 > cz + 500) {
+        arg0->unkA0 = cz + (arg0->unkA0 - cz) - 1000;
+        wrapped = 1;
+    }
+    flags = arg0->unk90;
+    if ((flags & 2) && wrapped) {
+        D_800DD436 = (s16)D_800DD436 - 1;
+        ((s32 *)D_800DD440)[arg0->unk94] = 0;
+        func_1516972C((struct102 *)arg0);
+    } else if (flags & 1) {
+        if (wrapped) {
+            arg0->unk90 = flags ^ 1;
+        } else {
+            arg0->unkB4 = 0;
+        }
+    }
+}
 
 extern u16 D_800DD436;
 extern s32 D_800DD440;
