@@ -43,7 +43,41 @@ void func_150B10F0(u8 *arg0) {
     func_1505E650((struct127 *)arg0, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_DE5A0/func_150B12FC.s")
+void func_15056B08(struct127 *arg0);
+s32  func_150535F4(struct127 *arg0);
+void func_1502178C(struct127 *arg0, s32 arg1, s32 arg2);
+
+void func_150B12FC(struct127 *arg0) {
+    s16 pad;
+    s16 prevAngle;
+    f32 delta;
+
+    prevAngle = *(s16 *)&arg0->unk76;
+    arg0->unk80 = 0xA;
+    {
+    f32 y;
+    y = (f32)((s16 *)D_800D2104[arg0->unk13F])[1];
+    func_15058EA4(arg0, y, 1.0f, y, -0.6999999881f, 12.0f, -16.0f);
+    }
+    func_15056B08(arg0);
+    prevAngle = prevAngle - arg0->unk76;
+    delta = (f32)(s16)(prevAngle * 6) * 0.00390625f - arg0->unkC4;
+    if (delta > 6.0f) {
+        delta = 6.0f;
+    } else if (delta < -6.0f) {
+        delta = -6.0f;
+    }
+    arg0->unk148 = arg0->unk148 + (delta - arg0->unk148) * 0.05000000075f;
+    {
+    f32 t;
+    arg0->unkC4 += arg0->unk148;
+    }
+    arg0->unk40 = (f32)(s16)(arg0->unk7A + 0x4000) * 0.005493164f;
+    func_15059140(arg0);
+    if (func_150535F4(arg0) == 0) {
+        func_1502178C(arg0, 0, -1);
+    }
+}
 
 void func_15056B08(struct127 *arg0);
 void func_150585F0(struct127 *arg0, f32 arg1);
