@@ -1064,7 +1064,87 @@ void func_151E7EF8(void) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_20AE20/func_151E7F60.s")
+typedef struct {
+    u8 pad0[4];
+    u8 unk4;
+    u8 pad5;
+    s16 unk6;
+    s16 unk8;
+    s16 unkA;
+    u8 unkC;
+    u8 unkD;
+    u8 padE[0x22];
+} Spawn151E7F60;
+
+typedef struct {
+    f32 unk0;
+    s8 unk4;
+    u8 unk5;
+    u8 unk6;
+    u8 pad7;
+} Entry151E7F60;
+
+typedef struct {
+    s16 unk0;
+    s16 unk2;
+    s16 unk4;
+    u8 unk6;
+    u8 pad7;
+} Pos151E7F60;
+
+extern struct127 *D_800E0BA0[];
+extern Entry151E7F60 D_800AB57C[];
+extern Pos151E7F60 D_800AB940[];
+extern s32 func_15082A44(void *, s32, s32, s32, s32);
+extern void func_15083384(struct127 *, u8);
+
+void func_151E7F60(s32 arg0, s32 arg1) {
+    s32 slot;
+    s32 id;
+    Spawn151E7F60 *spawn;
+    s32 i;
+    s32 kind;
+    struct127 *obj;
+
+    if (D_800E0BA0[arg0] != NULL) {
+        func_15060F28(D_800E0BA0[arg0], 1);
+    }
+    id = func_15083E0C(arg0 + 0x10);
+    spawn = (Spawn151E7F60 *)((id * 0x30) + (s32)D_800D20FC);
+    kind = D_800AB57C[arg1].unk5;
+    i = arg0;
+    if (D_8008FDD4->unk2C == 7) {
+        i++;
+    }
+    spawn->unk4 = kind;
+    spawn->unk6 = D_800AB940[i].unk0;
+    spawn->unk8 = D_800AB940[i].unk2;
+    spawn->unk8 += D_800AB57C[arg1].unk4;
+    spawn->unkA = D_800AB940[i].unk4;
+    spawn->unkC = D_800AB940[i].unk6;
+    if (kind == 0x53) {
+        spawn->unkD = 0x24;
+    } else {
+        spawn->unkD = 0xE;
+    }
+    slot = func_15082A44(spawn, id, 0, 0, 0);
+    if (slot != 0) {
+        obj = &D_800CC2D0[slot - 1];
+        D_800E0BA0[arg0] = obj;
+        obj->unk5 = 7;
+        obj->unk2F8 |= 3;
+        obj->xz_scale = obj->y_scale = D_800AB57C[arg1].unk0;
+        if (obj->id == 0 || obj->id == 0x80) {
+            obj->unk31C = allocate_memory(0x1C0, 1, 0, 0);
+            bzero(obj->unk31C, 0x1C0);
+        }
+        if (kind == 0x3B) {
+            *(s8 *)&obj->pad68 = arg0 + 1;
+        }
+        func_15083384(obj, D_800AB57C[arg1].unk6);
+        func_1505E650(obj, 0xF, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_20AE20/func_151E81EC.s")
 
