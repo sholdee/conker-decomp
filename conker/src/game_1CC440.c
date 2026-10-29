@@ -371,7 +371,87 @@ void func_151A11CC(f32 arg0, f32 arg1, f32 arg2, f32 arg3,
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1CC440/func_151A11E4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1CC440/func_151A175C.s")
+typedef struct {
+    s16 unk0;
+    s16 unk2;
+    s16 unk4;
+    s16 unk6;
+    s16 unk8;
+    s16 unkA;
+    s16 unkC;
+    s16 unkE;
+    s16 unk10;
+    s16 unk12;
+    s16 unk14;
+    s16 unk16;
+    s16 unk18;
+    s16 unk1A;
+    s16 unk1C;
+    s16 unk1E;
+    s16 unk20;
+} Sub151A175C;
+
+typedef struct {
+    u8 pad0[0x20];
+    s16 unk20;
+    s16 unk22;
+    s16 unk24;
+    u8 pad26[0x6];
+    u8 unk2C;
+    u8 unk2D;
+    u8 unk2E;
+    u8 pad2F[0x5];
+    s16 unk34;
+    s16 unk36;
+    s16 unk38;
+    u8 pad3A[0x5];
+    u8 unk3F;
+    u8 pad40[0x10];
+    Sub151A175C unk50;
+} Obj151A175C;
+
+void func_151A175C(Obj151A175C *arg0) {
+    Sub151A175C *s = &arg0->unk50;
+
+    if (arg0->unk38 > s->unk4) {
+        arg0->unk3F = (s->unk2 - arg0->unk38) * s->unk0;
+    }
+    if (arg0->unk38 > s->unkA) {
+        arg0->unk34 = arg0->unk36 = (s->unk8 - arg0->unk38) * s->unk6;
+    }
+    if (arg0->unk38 > s->unkC) {
+        s32 px, py, pz, vx, vy, vz;
+
+        px = arg0->unk20;
+        px = (px << 8) | arg0->unk2C;
+        vx = s->unkE;
+        vx = (vx << 8) | s->unk14;
+        px += vx * D_800BE9E4;
+        arg0->unk20 = px >> 8;
+        arg0->unk2C = px & 0xFF;
+        py = arg0->unk22;
+        py = (py << 8) | arg0->unk2E;
+        vy = s->unk10;
+        vy = (vy << 8) | s->unk16;
+        py += vy * D_800BE9E4;
+        arg0->unk22 = py >> 8;
+        arg0->unk2E = py & 0xFF;
+        pz = arg0->unk24;
+        pz = (pz << 8) | arg0->unk2D;
+        vz = s->unk12;
+        vz = (vz << 8) | s->unk18;
+        pz += vz * D_800BE9E4;
+        arg0->unk24 = pz >> 8;
+        arg0->unk2D = pz & 0xFF;
+
+    }
+    if (arg0->unk38 < s->unk1A) {
+        arg0->unk3F = arg0->unk38 * s->unk1C;
+    }
+    if (arg0->unk38 < s->unk1E) {
+        arg0->unk34 = arg0->unk36 = arg0->unk38 * s->unk20;
+    }
+}
 
 struct Src151A18DC {
     u8 unk0;
