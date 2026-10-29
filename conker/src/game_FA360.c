@@ -221,7 +221,86 @@ s32 func_150CD17C(Drifter150CD17C *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_FA360/func_150CD59C.s")
+typedef struct Quad150CD59C {
+    u8 pad0[0x2C];
+    f32 halfW;
+    f32 halfH;
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 rotX;
+    f32 rotY;
+    f32 rotZ;
+    f32 offX;
+    f32 offY;
+    f32 offZ;
+    u8 pad58[0x68];
+    u8 template[0x40];
+    u8 *buffers[4];
+    u8 pad110[4];
+    f32 unk114;
+} Quad150CD59C;
+
+void func_151D5D60(void *, s16, s32, void *, u8 *);
+void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
+
+void *func_150CD59C(Quad150CD59C *arg0, s16 arg1) {
+    f32 *v;
+    Vtx *vtx;
+    void *ret;
+    f32 mtx[4][4];
+    f32 verts[4][3];
+    u8 i;
+    u8 fresh;
+
+    func_151D5D60(arg0->buffers, arg1, 0x40, &vtx, &fresh);
+    ret = vtx;
+    if (vtx != 0) {
+        if (fresh != 0) {
+            memcpy(arg0->buffers[arg1], arg0->template, 0x40);
+            memcpy(arg0->buffers[arg1] + 0x40, arg0->template, 0x40);
+        }
+    } else {
+        return 0;
+    }
+    {
+        u8 i;
+
+        verts[0][0] = arg0->halfW;
+        verts[0][1] = arg0->halfH;
+        verts[0][2] = 0.0f;
+        verts[1][0] = -arg0->halfW;
+        verts[1][1] = arg0->halfH;
+        verts[1][2] = 0.0f;
+        verts[2][0] = -arg0->halfW;
+        verts[2][1] = -arg0->halfH;
+        verts[2][2] = 0.0f;
+        verts[3][0] = arg0->halfW;
+        verts[3][1] = -arg0->halfH;
+        verts[3][2] = 0.0f;
+        func_150A8050(mtx, arg0->rotX, arg0->rotY, arg0->rotZ);
+        mtx[3][0] = arg0->x;
+        mtx[3][1] = arg0->y;
+        mtx[3][2] = arg0->z;
+        if (arg0->unk114 < 0.0f) {
+            mtx[3][0] += arg0->offX;
+            mtx[3][1] += arg0->offY;
+            mtx[3][2] += arg0->offZ;
+        }
+        for (i = 0; i < 4; i++) {
+            Vtx *p;
+            v = verts[i];
+            func_150A7960((f32 *)mtx, v[0], v[1], 0.0f, &v[0], &v[1], &v[2]);
+            vtx->v.ob[0] = v[0];
+            vtx->v.ob[1] = v[1];
+            vtx->v.ob[2] = v[2];
+            vtx->v.flag = 0;
+            p = vtx + 1;
+            vtx = p;
+        }
+    }
+    return ret;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_FA360/func_150CD7F8.s")
 
