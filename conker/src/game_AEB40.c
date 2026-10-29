@@ -342,7 +342,85 @@ void func_150832AC(struct127 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_AEB40/func_15083384.s")
+struct127 *func_15083568(struct127 *arg0, s32 arg1, f32 arg2, s32 arg3);
+
+void func_15083384(struct127 *arg0, s32 arg1) {
+    s32 sp1C;
+    s32 temp_v1;
+    u8 *temp_v0;
+
+    sp1C = -1;
+    switch (arg1) {
+    case 37:
+    case 38:
+        temp_v0 = (u8 *)arg0->unk31C;
+        if (temp_v0 != NULL) {
+            temp_v0[0x1B2] = 1;
+        }
+        break;
+    case 9:
+        arg0->unk94 |= 2;
+        break;
+    case 13:
+        sp1C = 0x76;
+        break;
+    case 14:
+        sp1C = 0x78;
+        break;
+    case 15:
+        sp1C = 0x77;
+        arg0->unk94 |= 2;
+        break;
+    case 29:
+    case 30:
+    case 31:
+    case 32:
+        {
+        s32 temp;
+        temp = arg1 - 29;
+        arg0->unk94 = 0x1E;
+        if (temp < 2) {
+            arg0->unk94 &= ~0x14;
+        } else {
+            arg0->unk94 &= ~8;
+        }
+        if (temp >> 1) {
+            arg0->unk94 &= ~2;
+        }
+        }
+        break;
+    case 17: case 18: case 19: case 20: case 21: case 22:
+    case 23: case 24: case 25: case 26: case 27: case 28:
+        temp_v1 = (arg1 - 17) >> 2;
+        arg0->unk94 = 0x3E;
+        switch (temp_v1) {
+        case 0:
+            arg0->unk94 &= ~4;
+            break;
+        case 1:
+            arg0->unk94 &= ~8;
+            break;
+        case 2:
+            arg0->unk94 &= ~0x10;
+            break;
+        }
+        switch (arg1 - temp_v1 * 4 - 17) {
+        case 1:
+            arg0->unk94 &= ~2;
+            break;
+        case 2:
+            arg0->unk94 &= ~0x20;
+            break;
+        case 3:
+            arg0->unk94 &= ~0x22;
+            break;
+        }
+        break;
+    }
+    if (sp1C != -1) {
+        func_15083568(arg0, sp1C, 0.0f, 0);
+    }
+}
 
 typedef struct Part15083568 {
     /* 0x00 */ u8 b0;
