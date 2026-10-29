@@ -1054,7 +1054,107 @@ void func_151AB930(struct127 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1D6E80/func_151AB9C8.s")
+typedef struct {
+    s32 unk0;
+    u8 pad4[0x10];
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    u8 pad20[0x1B];
+    u8 unk3B;
+    u8 pad3C[0x48];
+    u16 unk84;
+} Ent_151AB9C8;
+
+typedef struct {
+    Ent_151AB9C8 *unk0;
+    u8 unk4;
+    u8 pad5[3];
+    s32 unk8;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    u8 unk18;
+} Sub_151AB9C8;
+
+typedef struct {
+    u8 pad0;
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD;
+    s16 unkE;
+    u8 pad10[0x18];
+    Sub_151AB9C8 unk28;
+} Obj_151AB9C8;
+
+typedef struct {
+    u8 pad[0x24];
+} Floor_151AB9C8;
+
+extern void func_1504715C(Floor_151AB9C8 *, Ent_151AB9C8 *);
+extern void func_151D9014(f32 *, f32 *, u8, f32, s32, s32, f32, s32, f32, f32, s32, Floor_151AB9C8 *, s32, s32, u8, u8);
+
+void func_151AB9C8(Obj_151AB9C8 *arg0) {
+    Sub_151AB9C8 *sub;
+    u8 dead;
+    Floor_151AB9C8 floor;
+    f32 pos[3];
+    f32 vel[3];
+    s16 yaw;
+    s16 pitch;
+    f32 sinP;
+    f32 cosP;
+    f32 sinY;
+    f32 cosY;
+    f32 speed;
+    s32 r1;
+    s32 r2;
+
+    dead = 0;
+    sub = &arg0->unk28;
+    if (arg0->unk28.unk0->unk0 == 0) {
+        dead = 1;
+    } else if (sub->unk0->unk3B != sub->unk4) {
+        dead = 1;
+    } else if (sub->unk0->unk84 != sub->unk8) {
+        dead = 1;
+    }
+    if (!dead) {
+        sub = &arg0->unk28;
+        sub->unkC += (sub->unk10 + func_150ADA68() * sub->unk14) * D_800BE9A4;
+        if (sub->unkC > 1.0f) {
+            func_1504715C(&floor, sub->unk0);
+            do {
+                yaw = func_150ADA20() & 0xFF;
+                pitch = (func_150ADA20() % 46U) - 0x3F;
+                sinP = func_151423D8(pitch);
+                cosP = func_151423D8(pitch - 0x40);
+                sinY = func_151423D8(yaw);
+                cosY = func_151423D8(yaw - 0x40);
+                speed = (func_150ADA68() * 713.0f + 500.0f) * 0.009999999776f;
+                pos[0] = sub->unk0->unk14 + 30.0f * sinP * cosY;
+                pos[1] = sub->unk0->unk18 - 75.0f * cosP;
+                pos[2] = sub->unk0->unk1C + 30.0f * sinP * sinY;
+                vel[0] = speed * sinP * cosY;
+                vel[1] = -speed * cosP;
+                vel[2] = speed * sinP * sinY;
+                {
+                    f32 t;
+                t = func_150ADA68();
+                r1 = func_150ADA20();
+                r2 = func_150ADA20();
+                func_151D9014(pos, vel, sub->unk18, t * 0.5f + -1.0f, (u32)r1 % 26U + 0x20, (u32)r2 % 101U + 100,
+                              func_150ADA68() * 34.0f + 52.0f, 1, 1.0f, 1.0f, 1, &floor, 1, 0, arg0->unkC, arg0->unk1);
+                }
+                sub->unkC -= 1.0f;
+            } while (sub->unkC > 1.0f);
+        }
+    }
+    if (dead) {
+        arg0->unkE = -1;
+    }
+}
 
 typedef struct {
     s32 unk0;
