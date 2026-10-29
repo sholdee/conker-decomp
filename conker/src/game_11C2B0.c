@@ -882,7 +882,87 @@ void func_150F03E8(struct210 *arg0) {
     t[0x4F] = 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_11C2B0/func_150F03F8.s")
+typedef struct {
+    u8 pad0[0x1D4];
+    s32 unk1D4;
+    u8 pad1D8[0x114];
+    s32 unk2EC;
+} Struct150F03F8;
+
+extern f32 D_800A1640[][3];
+extern f32 D_800A1658[][3];
+extern u8 D_800A1670[];
+extern s32 func_15145EA4(s32 *arg0, s32 *arg1, s32 arg2, s32 arg3);
+extern void func_15102B38(Struct150F03F8 *, u8, f32 *, f32 *, f32 *, s32, s32, f32, struct17 *, s32, s32, s32, u8, s32);
+s32 func_151C229C(struct17 *arg0, struct17 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11, Struct150F03F8 *arg12, s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24, s32 arg25, s32 arg26);
+
+s32 func_150F03F8(Struct150F03F8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
+    s32 ret;
+    struct17 pos;
+    struct17 dir;
+    s32 srcs[2];
+    s32 dsts[2];
+    Header hdr;
+    Header2 hdr2;
+    f32 sp98[2];
+    s32 sp94;
+    f32 rand1;
+    f32 rand0;
+    s32 sp88;
+    u8 *sp84;
+
+    if (arg0 == NULL) {
+        return 0;
+    }
+    if (((u8 *)&arg1)[3] >= 2) {
+        return 0;
+    }
+    if (arg0->unk1D4 == 0) {
+        return 0;
+    }
+    if (arg0->unk2EC < 0x5A) {
+        return 0;
+    }
+    srcs[0] = (s32)D_800A1640[((u8 *)&arg1)[3]];
+    srcs[1] = (s32)D_800A1658[((u8 *)&arg1)[3]];
+    dsts[0] = (s32)&pos;
+    dsts[1] = (s32)&dir;
+    sp88 = (D_800A1670[((u8 *)&arg1)[3]] << 6) + arg0->unk1D4;
+    sp84 = &D_800A1670[((u8 *)&arg1)[3]];
+    func_15145EA4(srcs, dsts, sp88, 2);
+    dir.unk0 -= pos.unk0;
+    dir.unk4 -= pos.unk4;
+    dir.unk8 -= pos.unk8;
+    {
+        f32 func_150ADA68(void);
+
+        rand0 = func_150ADA68();
+        rand1 = func_150ADA68();
+        func_150ADA20();
+        ret = func_151C229C(&pos, &dir, 0, 0, 0, 0, 150.0f, 0.006666666828f, rand0 * 19.0f + 38.0f,
+                            rand1 * 363.0f + 149.0f, 50.0f, 0xFF, arg0, 1, 1, 0, 8, 0, 1, 0, 0xA0038, 0.0f,
+                            0xFF, -1, 0, ((u8 *)&arg2)[3], arg3);
+    }
+    hdr.unk0 = 3;
+    hdr.unk1 = -1;
+    hdr.unk2 = (func_150ADA20() % 5U) + 4;
+    hdr.unk4 = 0;
+    hdr2.unk0 = pos.unk0;
+    hdr2.unk4 = pos.unk4;
+    hdr2.unk8 = pos.unk8;
+    sp88 = (func_150ADA20() % 51U) + 0x50;
+    func_151602C0(&hdr, &hdr2, sp88, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0,
+                  ((u8 *)&arg2)[3], arg3);
+    sp98[1] = (func_150ADA68() * 1906.0f + 969.0f) * 0.001000000047f;
+    sp98[0] = (func_150ADA68() * 911.0f + 628.0f) * 0.1000000015f;
+    sp88 = func_150ADA20();
+    sp94 = func_150ADA20();
+    rand0 = func_150ADA68() * 2000.0f + 2000.0f;
+    func_15102B38(arg0, *sp84, D_800A1640[((u8 *)&arg1)[3]], D_800A1658[((u8 *)&arg1)[3]], sp98,
+                  (sp88 % 3U) + 8, (sp94 % 1U) + 0xFF, rand0, &pos, 0xFF, 0, -1,
+                  ((u8 *)&arg2)[3], arg3);
+    return ret;
+}
 
 typedef struct {
     s32 unk0;
