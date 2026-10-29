@@ -1277,7 +1277,179 @@ void func_1513A5E0(s32 arg0, s32 arg1, s32 arg2) {
                   (u8)arg1, arg2);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_1513A6E0.s")
+typedef struct {
+    f32 unk00;
+    f32 unk04;
+    f32 unk08;
+    f32 unk0C;
+    struct17 unk10;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    struct17 unk28;
+    struct17 unk34;
+    f32 unk40;
+    f32 unk44;
+    f32 unk48;
+    f32 unk4C;
+    s32 unk50;
+    s16 unk54;
+    s16 unk56;
+    s8 unk58;
+    s32 unk5C;
+    u8 unk60;
+    u8 unk61;
+    u8 unk62;
+    u8 unk63;
+    u8 unk64;
+    u8 unk65;
+    u8 unk66;
+    u8 unk67;
+    s8 unk68;
+    u8 unk69;
+    s8 unk6A;
+    void *unk6C;
+    u8 unk70;
+    s16 unk72;
+    s16 unk74;
+    s32 unk78;
+} SpawnA6E0;
+
+typedef struct {
+    u8 pad0[0x3B];
+    u8 unk3B;
+    u8 pad3C[0x74 - 0x3C];
+    u8 unk74;
+    u8 pad75[0x14C - 0x75];
+    f32 unk14C;
+    f32 unk150;
+    u8 pad154[0x1D4 - 0x154];
+    s32 unk1D4;
+} ObjA6E0;
+
+extern u8 D_800A4278[];
+extern s32 D_800A4280[];
+extern s32 D_800A4290[];
+extern struct17 D_800A42A0[];
+extern void func_1503F404(s32, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
+extern s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
+extern s32 func_1513264C(void *, s32, s32, s32, s32, u8, s32);
+extern void func_15143794(s16, s16, f32, f32 *);
+f32 func_150ADA68(void);
+
+void func_1513A6E0(ObjA6E0 *arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4) {
+    u8 idx;
+    u8 i;
+    u8 mask;
+    struct17 v;
+
+    idx = func_150ADA20() % 6U;
+    {
+    SpawnA6E0 spawn;
+    u8 extra[4];
+    s32 pad1;
+    extra[0] = 0xC;
+    spawn.unk00 = 1.0f;
+    spawn.unk04 = 1.0f;
+    spawn.unk08 = spawn.unk0C = (arg0->unk14C + arg0->unk150) * 0.5f;
+    spawn.unk10.unk0 = 0.0f;
+    spawn.unk10.unk4 = 0.0f;
+    spawn.unk10.unk8 = 0.0f;
+    spawn.unk1C = 1.0f;
+    spawn.unk20 = 1.0f;
+    spawn.unk24 = 1.0f;
+    spawn.unk28.unk0 = 0.0f;
+    spawn.unk28.unk4 = 0.0f;
+    spawn.unk28.unk8 = 0.0f;
+    spawn.unk34.unk0 = 0.0f;
+    spawn.unk34.unk4 = 0.0f;
+    spawn.unk34.unk8 = 0.0f;
+    spawn.unk40 = 0.0f;
+    spawn.unk44 = 0.0f;
+    spawn.unk48 = 0.0f;
+    spawn.unk4C = 0.0f;
+    spawn.unk50 = 0x101900;
+    spawn.unk54 = 0x64;
+    spawn.unk58 = 5;
+    spawn.unk5C = 0;
+    spawn.unk60 = 0xFF;
+    spawn.unk61 = 0;
+    spawn.unk62 = 0;
+    spawn.unk63 = 0;
+    spawn.unk64 = 0;
+    spawn.unk65 = 0;
+    spawn.unk66 = 0;
+    spawn.unk67 = 0;
+    spawn.unk68 = 5;
+    spawn.unk6A = 1;
+    spawn.unk6C = arg0;
+    spawn.unk70 = arg0->unk3B;
+    spawn.unk72 = 0xC;
+    spawn.unk74 = 0x15;
+    for (i = 0, mask = 1; i < 4; i++, mask <<= 1) {
+        if (D_800A4278[idx] & mask) {
+            s32 ret;
+            spawn.unk56 = D_800A4280[i];
+            ret = func_15132A4C(&spawn, 3, 0xFF, 1, arg3, arg4);
+            if (ret != 0) {
+                memcpy((void *)(ret + 0x170), extra, 1);
+            }
+        }
+    }
+    }
+    if (arg0->unk1D4 != 0 && (arg0->unk74 & 0xF) != 0xF) {
+        struct17 a;
+        struct17 b;
+        SpawnA6E0 spawn2;
+        u8 mask2;
+        u32 r1;
+        u32 r2;
+        func_1513A5E0(arg1, arg3 & 0xFF, arg4);
+        {
+        s32 q;
+        func_1503F404(arg0->unk1D4 + 0x300, &a.unk0, &a.unk4, &a.unk8, &v.unk0, &v.unk4, &v.unk8, &b.unk0, &b.unk4, &b.unk8);
+        }
+        spawn2.unk00 = 1.0f;
+        spawn2.unk04 = 0.6490000486f;
+        spawn2.unk08 = spawn2.unk0C = (arg0->unk14C + arg0->unk150) * 0.5f;
+        spawn2.unk10 = v;
+        spawn2.unk1C = 1.0f;
+        spawn2.unk20 = 0.0f;
+        spawn2.unk24 = 1.0f;
+        spawn2.unk44 = 0.0f;
+        spawn2.unk58 = 0;
+        spawn2.unk5C = 0;
+        spawn2.unk60 = 0xFF;
+        spawn2.unk62 = 0;
+        spawn2.unk64 = 0;
+        spawn2.unk65 = 0;
+        spawn2.unk66 = 0;
+        spawn2.unk67 = 0;
+        spawn2.unk6A = 1;
+        spawn2.unk6C = arg0;
+        spawn2.unk70 = arg0->unk3B;
+        spawn2.unk72 = 0xC;
+        spawn2.unk74 = 0x15;
+        spawn2.unk50 = 0x1039E9;
+        spawn2.unk61 = 0xD;
+        spawn2.unk68 = 2;
+        spawn2.unk63 = 9;
+        for (i = 0, mask2 = 1; i < 4; i++, mask2 <<= 1) {
+            if (!(D_800A4278[idx] & mask2)) {
+                spawn2.unk56 = D_800A4290[i];
+                func_15143134(&D_800A42A0[i], (s32)&spawn2.unk28, arg0->unk1D4 + 0x300);
+                r1 = func_150ADA20();
+                r2 = func_150ADA20();
+                func_15143794(r1 & 0xFF, r2 % 35U - 84, func_150ADA68() * 6.119999886f + 3.0f, &spawn2.unk34.unk0);
+                spawn2.unk40 = func_150ADA68() * 30.7460022f + -15.3730011f;
+                spawn2.unk48 = func_150ADA68() * 30.7460022f + -15.3730011f;
+                spawn2.unk4C = func_150ADA68() * 0.2080000043f + -0.7080000043f;
+                spawn2.unk54 = func_150ADA20() % 101U + 60;
+                func_1513264C(&spawn2, 3, 0xFF, arg2, 0, arg3, arg4);
+            }
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_1513ABB8.s")
 
