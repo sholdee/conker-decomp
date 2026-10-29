@@ -318,7 +318,26 @@ s32 func_1517D690(s32 arg0, s32 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1A89B0/func_1517D7B0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1A89B0/func_1517DE5C.s")
+void func_1517BBAC(s32, s32, s32, s32, f32, s32, s32, s32);
+
+void func_1517DE5C(void) {
+    s32 i;
+    struct s1517CFC4_a *p;
+
+    if (D_800DDD20 != 0) {
+        for (i = 0; i < 15; i++) {
+            ((u8 (*)[16])&D_800DDA90)[i][0xC] = 0;
+        }
+        func_1517BBAC(D_800CC2D0->x_position, D_800CC2D0->y_position, D_800CC2D0->z_position, 1500,
+                      D_800DBFF0->unk380, D_800DBFF0->unk2F8, D_800DBFF0->unk2FC, D_800DBFF0->unk300);
+        for (i = 0; i < 15; i++) {
+            if (((s32 *)&D_800DD478)[i * 26] != 0 && ((u8 (*)[16])&D_800DDA90)[i][0xC] == 0) {
+                ((s32 *)&D_800DD478)[i * 26] = 0;
+                ((s32 (*)[4])&D_800DDA90)[i][2] = 0;
+            }
+        }
+    }
+}
 
 extern struct { s16 unk0; s16 unk2; s16 unk4; } D_800DD470;
 
