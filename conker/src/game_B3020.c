@@ -183,7 +183,105 @@ s32 func_15086D48(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_B3020/func_15086D94.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_B3020/func_150870D0.s")
+extern u8 *D_800872A0;
+extern s8 D_800D23A8;
+extern s32 D_800D2394;
+extern void *allocate_memory(s32, s32, s32, s32);
+u8 func_150888A8(u8, u8, s32);
+void func_15088824();
+
+typedef struct {
+    u8 pad0[9];
+    u8 unk9[5];
+    u8 unkE;
+    u8 unkF;
+} B3020Bytes;
+
+void func_150870D0(s32 arg0, s32 arg1, s32 arg2)
+{
+  u8 *p;
+  s32 count;
+  s32 i;
+  B3020Bytes *e;
+  u8 *q;
+  u8 start;
+  u8 best;
+  u8 fwd;
+  u8 back;
+  u8 sel;
+  u8 path[3];
+  B3020Struct *new_var;
+  u8 idx;
+  D_800872A0 = 0;
+  start = func_15086D48(arg0);
+  if (start == 0xFF)
+  {
+    return;
+  }
+  new_var = &D_800D2350[start];
+  best = D_800D23A8 * 0xFF;
+  sel = 0xFF;
+  q = (u8 *) new_var;
+  for (i = 0; i < 5; i++, q++)
+  {
+    idx = q[9];
+    if (idx != 0xFF)
+    {
+      e = (B3020Bytes *) (&D_800D2350[idx]);
+      if (e->unkE == 0)
+      {
+        if (((D_800D23A8 == 0) && (e->unkF >= best)) || ((D_800D23A8 != 0) && (e->unkF <= best)))
+        {
+          best = e->unkF;
+          sel = idx;
+        }
+      }
+    }
+  }
+
+  if (sel != 0xFF)
+  {
+    fwd = func_150888A8(start, sel, 0);
+    back = func_150888A8(sel, start, 0);
+  }
+  if (((sel == 0xFF) || (back == 0xFF)) || (fwd == 0xFF))
+  {
+    return;
+  }
+  path[1] = sel;
+  path[2] = fwd;
+  count = 0;
+  do
+  {
+    path[0] = path[1];
+    path[1] = path[2];
+    path[2] = func_150888A8(path[0], path[1], 0);
+    count++;
+  }
+  while (start != path[0]);
+  D_800D2399 = arg2;
+  D_800D2398 = arg1;
+  arg1 += arg2;
+  D_800D2394 = 0;
+  D_800872A0 = allocate_memory(arg1 * 0x84, 1, 0, 0);
+  for (i = 0; i < arg1; i++)
+  {
+    p = &D_800872A0[i * 0x84];
+    func_15088824(p);
+    p[0x2B] = back;
+    p[0x2C] = start;
+    p[0x2D] = sel;
+    p[0x2E] = fwd;
+    if (i < D_800D2398)
+    {
+      p[0x31] = i;
+    }
+    p[0x30] = i >= D_8008FD90;
+    p[0x26] = count;
+  }
+
+  D_800D239A = 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_B3020/func_15087350.s")
 
