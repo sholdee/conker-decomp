@@ -130,7 +130,30 @@ void func_151D3FF4(f32 *arg0, u8 arg1, s32 arg2) {
     func_151602C0(&header, &header2, (func_150ADA20() % 0x18U) + 0x22, 0xFF, 0xA1, 0xA2, 0xFF, 0, 0, arg1, arg2);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_200930/func_151D40D4.s")
+void func_1507C3E0(struct127 *arg0, s16 *arg1, s16 *arg2, s16 *arg3);
+
+void func_151D40D4(struct17 *arg0, struct17 *arg1, struct127 *arg2, struct127 *arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
+    u16 angle;
+    struct17 pos;
+    s16 height;
+
+    if (arg1 != NULL) {
+        angle = (u16)(func_150484A0(arg1->unk0, arg1->unk8) * 10430.37793f);
+        angle = (angle - 0x4000) | 1;
+        pos.unk0 = arg0->unk0 + (arg1->unk0 * -90.0f);
+        pos.unk4 = arg0->unk4 + (arg1->unk4 * -90.0f);
+        pos.unk8 = arg0->unk8 + (arg1->unk8 * -90.0f);
+    } else {
+        pos = *arg0;
+        if (arg3 != NULL) {
+            func_1507C3E0(arg3, &height, NULL, NULL);
+            pos.unk4 += height >> 1;
+        }
+        angle = 0;
+    }
+    func_1505D1C4(arg0->unk0, arg0->unk4, arg0->unk8, arg5, arg2 - D_800CC2D0, angle, arg7, (s32)&pos);
+    func_1505D1C4(arg0->unk0, arg0->unk4, arg0->unk8, arg6, arg2 - D_800CC2D0, angle, arg7, (s32)&pos);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_200930/func_151D42E8.s")
 
