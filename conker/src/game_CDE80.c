@@ -193,7 +193,64 @@ s32 func_150A1040(s32 arg0) {
     return arg0 + 0x400;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_CDE80/func_150A104C.s")
+struct Func150A104CArg {
+    u8 pad0[0x84];
+    u32 unk84;
+    u8 pad88[0x2F8 - 0x88];
+    f32 unk2F8;
+    f32 unk2FC;
+    f32 unk300;
+    f32 unk304;
+    f32 unk308;
+    f32 unk30C;
+    u8 pad310[0x364 - 0x310];
+    f32 unk364;
+};
+
+void func_150A104C(struct Func150A104CArg *arg0, ObjRec **arg1, s32 arg2)
+{
+  u8 sp4C[0x32C];
+  *((f32 *) (&sp4C[0x14])) = arg0->unk2F8;
+  *((f32 *) (&sp4C[0x18])) = arg0->unk2FC;
+  *((f32 *) (&sp4C[((((((((((0x1C & 0xFFFFFFFFFFFFFFFFu) & 0xFFFFFFFFFFFFFFFFu) & 0xFFFFFFFFFFFFFFFFu) & 0xFFFFFFFFFFFFFFFFu) & 0xFFFFFFFFFFFFFFFFu) & 0xFFFFFFFFFFFFFFFFu) & 0xFFFFFFFFFFFFFFFFu) & 0xFFFFFFFFFFFFFFFFu) & 0xFFFFFFFFFFFFFFFFu) & 0xFFFFFFFFFFFFFFFFu) & 0xFFFFFFFFFFFFFFFFu])) = arg0->unk300;
+  *((f32 *) (&sp4C[0x180])) = *((f32 *) (&sp4C[0x18]));
+  *((f32 *) (&sp4C[0x2C])) = arg0->unk304;
+  *((f32 *) (&sp4C[0x30])) = arg0->unk308;
+  *((f32 *) (&sp4C[0x34])) = arg0->unk30C;
+  arg0->unk364 = -10000.0f;
+  arg0->unk84 &= ~0x40000;
+  while (arg2 != 0)
+  {
+    if (!arg1)
+    {
+    }
+    if (((*arg1) != 0) && (func_150A1DA0(sp4C, (struct178 *) (*arg1), 0) == 0))
+    {
+      if ((((s32) (*arg1)->unk15) >> 2) == 1)
+      {
+        switch ((*arg1)->unk17)
+        {
+          case 2:
+            arg0->unk364 = (*arg1)->unk2 + (*((s16 *) (((u8 *) (*arg1)) + 8)));
+            break;
+
+          case 0:
+            arg0->unk84 |= 0x40000;
+            break;
+
+          case 6:
+            arg0->unk84 &= ~0x40000;
+            break;
+
+        }
+
+      }
+    }
+    arg2--;
+    arg1++;
+  }
+
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_CDE80/func_150A11C4.s")
 
