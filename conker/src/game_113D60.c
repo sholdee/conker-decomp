@@ -509,7 +509,133 @@ void func_150E83AC(struct127 *arg0, s16 arg1, u8 arg2, s32 arg3) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_113D60/func_150E8470.s")
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s16 unk8;
+    s16 unkA;
+    s32 unkC;
+    s32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 unk16;
+    u8 unk17;
+    u8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+    u8 unk1C;
+    u8 unk1D;
+    s16 unk1E;
+    s16 unk20;
+    s16 unk22;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    struct17 unk30;
+    struct17 unk3C;
+    struct17 unk48;
+    f32 unk54;
+    u32 unk58;
+    s32 unk5C;
+    u8 unk60;
+    u8 unk61;
+    u8 unk62;
+    s8 unk63;
+    s8 unk64;
+    u8 unk65;
+    u8 unk66;
+    u8 pad67[9];
+} Spawn150E8470;
+
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    u8 unk2;
+    u8 unk3;
+    f32 unk4;
+    f32 unk8;
+} Extra150E8470;
+
+typedef struct {
+    struct17 pos;
+    f32 accum;
+} Sub150E8470;
+
+typedef struct {
+    u8 pad0;
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD[0x1B];
+    Sub150E8470 unk28;
+} Obj150E8470;
+
+extern void *func_15130280(void *, u8, s32, s32, u8, s32);
+
+void func_150E8470(Obj150E8470 *arg0) {
+    Sub150E8470 *sub;
+
+    sub = &arg0->unk28;
+    sub->accum += (0.09999999404f + func_150ADA68() * 0.08789999783f) * D_800BE9A4;
+    if (sub->accum > 1.0f) {
+        Spawn150E8470 spawn;
+        Extra150E8470 extra;
+        void *ret;
+
+        spawn.unk1D = 0x6C;
+        spawn.unk8 = 0x5103;
+        spawn.unk0 = 0x200005;
+        spawn.unk1E = 0x73;
+        spawn.unk20 = 2;
+        spawn.unk58 = 0x80DE07;
+        spawn.unk60 = 8;
+        spawn.unk61 = 6;
+        spawn.unk62 = 0x19;
+        spawn.unk63 = -1;
+        extra.unk0 = 0;
+        extra.unk1 = 0;
+        spawn.unk4 = 0;
+        spawn.unkC = 0;
+        spawn.unk10 = 0;
+        spawn.unk64 = -1;
+        spawn.unk65 = 0;
+        spawn.unk22 = 0x73;
+        spawn.unk14 = 0x24;
+        spawn.unk15 = 0x22;
+        spawn.unk16 = 0x11;
+        spawn.unk17 = 0xFF;
+        spawn.unk18 = 0x7B;
+        spawn.unk19 = 0x93;
+        spawn.unk1A = 0xAA;
+        spawn.unk1C = 0xFF;
+        spawn.unk24 = 1.022418022f;
+        spawn.unk30 = sub->pos;
+        spawn.unk3C.unk0 = 0.0f;
+        spawn.unk3C.unk4 = 0.0f;
+        spawn.unk3C.unk8 = 0.0f;
+        spawn.unk48.unk0 = 0.0f;
+        spawn.unk48.unk4 = 0.0f;
+        spawn.unk48.unk8 = 0.0f;
+        do {
+            extra.unk2 = func_150ADA20() % 5U + 4;
+            extra.unk3 = func_150ADA20() % 5U + 4;
+            extra.unk4 = func_150ADA68() * 13.0f;
+            extra.unk8 = func_150ADA68() * 13.0f;
+            spawn.unk54 = (func_150ADA68() * 40.0f + 68.0f) * 0.001000000047f;
+            spawn.unk58 &= ~0xC0;
+            spawn.unk58 |= ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);
+            spawn.unk1B = func_150ADA20() % 156U + 100;
+            spawn.unkA = func_150ADA20() % 34U + 0x8D;
+            spawn.unk28 = spawn.unk2C = func_150ADA68() * 71.0f + 80.0f;
+            ret = func_15130280(&spawn, 1, 0, 0xC, arg0->unkC, arg0->unk1);
+            if (ret != NULL) {
+                memcpy((u8 *)ret + 0xA8, &extra, sizeof(extra));
+            }
+            sub->accum -= 1.0f;
+        } while (sub->accum > 1.0f);
+    }
+}
 
 extern s32 func_15131828(s32, s32, s32, s32);
 
