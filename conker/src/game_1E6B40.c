@@ -1,11 +1,97 @@
 #include <ultra64.h>
+#define func_15048A40 func_15048A40_void_unused
+#define func_150ADA20 func_150ADA20_u8_unused
 #include "functions.h"
+#undef func_15048A40
+#undef func_150ADA20
 #include "variables.h"
 
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1E6B40/func_151B9690.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E6B40/func_151B9964.s")
+typedef struct {
+    u8  unk0;
+    u8  unk1;
+    u8  pad2[0xA];
+    u8  unkC;
+    u8  padD[0x7];
+    s32 unk14;
+    s32 unk18;
+    u8  pad1C[0x4];
+    s16 unk20;
+    s16 unk22;
+    s16 unk24;
+    u8  pad26[0x4];
+    s16 unk2A;
+    u8  pad2C[0x4];
+    s16 unk30;
+    u8  pad32[0x2];
+    s16 unk34;
+    s16 unk36;
+    s16 unk38;
+    u8  pad3A;
+    u8  unk3B;
+    u8  pad3C[0x3];
+    u8  unk3F;
+} struct_151B9964;
+
+extern f32 func_15048A40(u8);
+extern f32 func_150489B0(u8);
+extern s32 func_150ADA20(void);
+extern void func_15171D4C(f32, f32, f32, s32, s32, s32, f32, s32, s32, s32, s32, s32, s32, s32);
+
+void func_151B9964(struct_151B9964 *arg0) {
+    s32 cur;
+    s32 top;
+    s32 hi;
+    s32 v;
+    f32 sp5C;
+    s16 y;
+    s32 diff;
+    s32 mode;
+    u8 angle;
+
+    mode = arg0->unk18;
+    if (mode == 1) {
+        angle = arg0->unk3B;
+        angle += D_800BE9E4 * 4 + D_800BE9E4 * 2;
+        arg0->unk3B = angle;
+        arg0->unk2A = (s32)(arg0->unk2A * 0.9900000095f);
+        sp5C = arg0->unk2A;
+        arg0->unk34 = (s32)((func_15048A40(angle) + 3.0f) * sp5C * 0.3333333433f);
+        arg0->unk36 = (s32)((func_150489B0(angle) + 3.0f) * sp5C * 0.3333333433f);
+    } else {
+        cur = arg0->unk34;
+        hi = arg0->unk14 >> 16;
+        if (hi != cur) {
+            v = cur - D_800BE9E4 * 4;
+            if (v < hi) {
+                v = hi;
+            }
+            arg0->unk36 = v;
+            arg0->unk34 = v;
+        }
+    }
+    v = arg0->unk22;
+    y = arg0->unk14 & 0xFFFF;
+    if (y >= v) {
+        arg0->unk38 = 0;
+        if (mode == 0) {
+            if ((func_150ADA20() & 0xFF) < 0x40) {
+                func_15171D4C(arg0->unk20, y, arg0->unk24, 0xA, 0, 0x13, 0.0f, 0, 0x32, 0xF, 0x100, 0, arg0->unkC, arg0->unk1);
+            }
+            if ((func_150ADA20() & 0xFF) < 0xF) {
+                func_150ADA20();
+                func_10010F88(0x70, 0x1388, 0, 0, 0, arg0->unk20, y, arg0->unk24, 0x1F4, 0x7D0);
+            }
+        }
+    } else {
+        diff = v - y;
+        if (arg0->unk30 < 0 && diff < 0x40) {
+            arg0->unk3F = diff * 4;
+        }
+    }
+}
 
 typedef struct {
     u8  unk0;
