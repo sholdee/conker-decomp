@@ -512,4 +512,37 @@ void func_15187978(Obj_15187978 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1B1600/func_15187A98.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1B1600/func_15187D6C.s")
+extern void func_151EFE00(f32 *);
+
+void func_15187D6C(f32 *arg0, f32 arg1, f32 arg2, f32 arg3) {
+    f32 sx;
+    f32 cx;
+    f32 sz;
+    f32 sy;
+    f32 cy;
+    f32 cz;
+    f32 t;
+
+    arg1 *= 0.01745329238f;
+    arg2 *= 0.01745329238f;
+    arg3 *= 0.01745329238f;
+    sx = sinf(arg1);
+    cx = cosf(arg1);
+    sy = sinf(arg2);
+    cy = cosf(arg2);
+    sz = sinf(arg3);
+    cz = cosf(arg3);
+    func_151EFE00(arg0);
+    t = sx * sy;
+    arg0[6] = sx;
+    arg0[0] = (cy * cz) - (t * sz);
+    arg0[1] = (cy * sz) + (t * cz);
+    arg0[2] = -sy * cx;
+    t = sx * cy;
+    arg0[4] = -cx * sz;
+    arg0[5] = cx * cz;
+    arg0[8] = (sy * cz) + (t * sz);
+    arg0[9] = (sy * sz) - (t * cz);
+    arg0[10] = cx * cy;
+}
+
