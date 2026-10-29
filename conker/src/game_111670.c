@@ -381,4 +381,86 @@ void func_150E5558(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s
     func_15132A4C(&sp34, 3, 0xFF, 0, 0xFF, 0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_111670/func_150E5810.s")
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vtx150E5810;
+
+typedef struct {
+    Vtx150E5810 unk0[3];
+} Tri150E5810;
+
+extern void func_15049350(Tri150E5810);
+extern f32 D_800CC214;
+extern f32 D_800CC218;
+
+typedef struct Struct150E5810 {
+    /* 0x00 */ u8 pad0[0x10];
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ u8 pad18[0x24];
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ f32 unk40;
+    /* 0x44 */ f32 unk44;
+    /* 0x48 */ f32 unk48;
+    /* 0x4C */ f32 unk4C;
+    /* 0x50 */ f32 unk50;
+    /* 0x54 */ f32 unk54;
+    /* 0x58 */ f32 unk58;
+    /* 0x5C */ s32 unk5C;
+    /* 0x60 */ s32 unk60;
+} Struct150E5810;
+
+s32 func_150E5810(Struct150E5810 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s16 (*arg5)[3]) {
+    Tri150E5810 tri;
+    s32 i;
+    f32 len;
+    f32 s;
+    f32 dot;
+    struct17 v;
+    struct17 n;
+    struct17 r;
+
+    arg0->unk3C = arg0->unk10 * 1.100000024f + arg4;
+    if (arg0->unk48 > -2.0f) {
+        arg0->unk44 = 0.0f;
+        arg0->unk60 &= ~0x6F;
+        arg0->unk48 = 0.0f;
+        arg0->unk4C = 0.0f;
+    } else {
+        if (arg5 != NULL) {
+        lbl:
+            for (i = 0; i < 3; i++) {
+                tri.unk0[i].x = arg5[i][0];
+                tri.unk0[i].y = arg5[i][1];
+                tri.unk0[i].z = arg5[i][2];
+            }
+            func_15049350(tri);
+            n.unk0 = -D_800CC210;
+            n.unk4 = -D_800CC214;
+            n.unk8 = -D_800CC218;
+            len = func_150AD930(&n.unk0);
+            if (len > 9.999999747e-06f) {
+                func_15049148(&n, 1.0f / len, &r);
+                v.unk0 = arg0->unk44;
+                v.unk4 = arg0->unk48;
+                v.unk8 = arg0->unk4C;
+                dot = func_150AD900(&r.unk0, &v.unk0);
+                func_15049148(&r, 2.0f * dot, &n);
+                func_15048F58(&v, &n, &n);
+                arg0->unk44 = arg0->unk14 * n.unk0 * 0.8000000119f;
+                arg0->unk48 = arg0->unk14 * n.unk4;
+                arg0->unk4C = arg0->unk14 * n.unk8 * 0.8000000119f;
+            }
+        } else {
+            arg0->unk44 = arg0->unk44 * arg0->unk14;
+            arg0->unk48 = -arg0->unk48 * arg0->unk14;
+            arg0->unk4C = arg0->unk4C * arg0->unk14;
+        }
+        arg0->unk50 = arg0->unk50 * arg0->unk14;
+        arg0->unk54 = arg0->unk54 * arg0->unk14;
+        arg0->unk58 = arg0->unk58 * arg0->unk14;
+    }
+    return 1;
+}
