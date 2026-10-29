@@ -390,7 +390,102 @@ void func_151AE06C(struct127 *arg0, struct133 *arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1D92F0/func_151AE0E4.s")
+typedef struct {
+    u8 pad0[4];
+    f32 unk4;
+    u8 pad8[0x10];
+} Key151AE2BC;
+
+typedef struct {
+    u8 pad0[0x38];
+    Key151AE2BC *unk38;
+    u8 pad3C[6];
+    u8 unk42;
+} Track151AE2BC;
+
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+    u8 padC[0xC];
+} Key151AE0E4;
+
+typedef struct {
+    u8 pad0[0x38];
+    Key151AE0E4 *keys;
+    f32 unk3C;
+    u8 pad40[2];
+    u8 unk42;
+    u8 pad43;
+    void *unk44;
+    u8 pad48[0xA];
+    s16 unk52;
+} Node151AE0E4;
+
+typedef struct {
+    u8 pad0[0x98];
+    u8 unk98;
+    u8 pad99[3];
+    Node151AE0E4 *unk9C;
+    f32 unkA0;
+} Ctl151AE0E4;
+
+typedef struct {
+    u8 pad0[0x14];
+    f32 x;
+    f32 y;
+    f32 z;
+    u8 pad20[0x6A];
+    u8 unk8A;
+    u8 pad8B[0x79];
+    u8 unk104;
+    u8 pad105[0xC5];
+    u8 unk1CA;
+    u8 pad1CB[0x151];
+    Ctl151AE0E4 *unk31C;
+} Obj151AE0E4;
+
+typedef struct Node151AE590 {
+    u8 pad0[0x8];
+    struct Node151AE590 *next;
+    u8 padC[0x4];
+    u8 unk10;
+} Node151AE590;
+
+Node151AE590 *func_151AE590(u8 arg0);
+void func_151AE2BC(f32 *arg0, Track151AE2BC *arg1, f32 arg2, f32 arg3, f32 arg4);
+
+void func_151AE0E4(u8 *arg0, u8 arg1) {
+    Node151AE0E4 *node;
+    f32 pos[3];
+    s32 i;
+    s32 n;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    f32 dist;
+
+    node = (Node151AE0E4 *)func_151AE590(arg1);
+    if (node == NULL) {
+        while (1) {
+        }
+    }
+    if (node->unk52 == 0 && ((Obj151AE0E4 *)arg0)->unk1CA != 0 && ((Obj151AE0E4 *)arg0)->unk104 == 0) {
+        func_151AE2BC(&((Obj151AE0E4 *)arg0)->unk31C->unkA0, (Track151AE2BC *)node, ((Obj151AE0E4 *)arg0)->x, ((Obj151AE0E4 *)arg0)->y, ((Obj151AE0E4 *)arg0)->z);
+        n = 140.0f / node->unk3C;
+        i = (f32)(node->unk42 - n - 1) * ((Obj151AE0E4 *)arg0)->unk31C->unkA0;
+        pos[0] = node->keys[i].x;
+        pos[1] = node->keys[i].y;
+        pos[2] = node->keys[i].z;
+        dist = (pos[0] - ((Obj151AE0E4 *)arg0)->x) * (pos[0] - ((Obj151AE0E4 *)arg0)->x) + (pos[1] - ((Obj151AE0E4 *)arg0)->y) * (pos[1] - ((Obj151AE0E4 *)arg0)->y) + (pos[2] - ((Obj151AE0E4 *)arg0)->z) * (pos[2] - ((Obj151AE0E4 *)arg0)->z);
+        if (!(10000.0f < dist)) {
+            ((Obj151AE0E4 *)arg0)->unk31C->unk98 = arg1;
+            ((Obj151AE0E4 *)arg0)->unk8A = 0x12;
+            ((Obj151AE0E4 *)arg0)->unk31C->unk9C = node;
+            node->unk44 = arg0;
+        }
+    }
+}
 
 extern f32 D_800A9294;
 
@@ -406,20 +501,7 @@ void func_151AE264(GameObjectFxOwner *arg0) {
     arg0->field_0x31C->field_0x9C = 0;
 }
 
-typedef struct {
-    u8 pad0[4];
-    f32 unk4;
-    u8 pad8[0x10];
-} Key151AE2BC;
-
-typedef struct {
-    u8 pad0[0x38];
-    Key151AE2BC *unk38;
-    u8 pad3C[6];
-    u8 unk42;
-} Track151AE2BC;
-
-void func_151AE2BC(f32 *arg0, Track151AE2BC *arg1, s32 arg2, f32 arg3) {
+void func_151AE2BC(f32 *arg0, Track151AE2BC *arg1, f32 arg2, f32 arg3, f32 arg4) {
     s32 n;
     s32 i;
     f32 d;
@@ -448,13 +530,6 @@ void func_151AE2BC(f32 *arg0, Track151AE2BC *arg1, s32 arg2, f32 arg3) {
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1D92F0/func_151AE3A8.s")
-
-typedef struct Node151AE590 {
-    u8 pad0[0x8];
-    struct Node151AE590 *next;
-    u8 padC[0x4];
-    u8 unk10;
-} Node151AE590;
 
 extern Node151AE590 *D_800DCE50[][104];
 extern s32 D_800A9270[];
