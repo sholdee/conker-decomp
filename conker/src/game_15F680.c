@@ -369,7 +369,168 @@ void func_151325C8(void *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_15F680/func_1513264C.s")
+typedef struct {
+    u8 pad0[0x34];
+    f32 unk34;
+    f32 unk38;
+    f32 unk3C;
+    u8 pad40[0x10];
+    s32 unk50;
+    u8 pad54[2];
+    u16 unk56;
+} Arg1513264C;
+
+typedef struct Node1513264C {
+    s32 *unk0;
+    struct Node1513264C *next;
+    struct Node1513264C *prev;
+    u16 unkC;
+    u8 unkE;
+} Node1513264C;
+
+typedef struct {
+    s32 w[9];
+} Copy24_1513264C;
+
+typedef struct {
+    u8 pad0[0x10];
+    u8 unk10[0x50];
+    s32 unk60;
+    u8 pad64[0x28];
+    Node1513264C *unk8C;
+    u8 pad90[0x80];
+    f32 unk110;
+    u8 pad114[0x14];
+    s32 unk128;
+    u8 unk12C;
+    u8 unk12D;
+    u8 pad12E[2];
+    s32 unk130;
+    f32 unk134;
+    f32 unk138;
+    f32 unk13C;
+    f32 unk140;
+    f32 unk144;
+    u8 unk148;
+    u8 unk149;
+    u8 pad14A[2];
+    s32 unk14C;
+    u8 unk150;
+    u8 pad151[3];
+    s32 unk154[4];
+    s32 unk164;
+    s32 unk168;
+} Obj1513264C;
+
+extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
+extern void *allocate_memory(s32, s32, s32, s32);
+extern void func_15168A9C(void *);
+extern void func_10004074(void *);
+extern s32 func_1515D480(s32);
+extern s32 func_1515D440(void);
+s32 func_151336A8(s32 arg0, s32 **arg1, s32 arg2);
+
+#define SRC ((Arg1513264C *)arg0)
+s32 func_1513264C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6) {
+    Obj1513264C *obj;
+    Node1513264C *newNode;
+    s32 i;
+
+    if (D_800DC63C > 300) {
+        return 0;
+    }
+    obj = func_15167A68((SRC->unk50 & 0x4000) ? 0x48 : 0x19, arg6, arg4 + 0x170, 1, arg5, (SRC->unk50 & 0x400000) ? 2 : 1);
+    if (obj == NULL) {
+        return 0;
+    }
+    if (D_800DC468[SRC->unk56] == 0) {
+        newNode = allocate_memory(0x10, 1, 2, (SRC->unk50 & 0x400000) ? 2 : 1);
+        if (newNode == NULL) {
+            func_15168A9C(obj);
+            func_10004074(obj);
+            return 0;
+        }
+        if (func_151336A8(SRC->unk56, (s32 **)newNode, (s32)obj)) {
+            newNode->next = (Node1513264C *)D_800DC460;
+            if (newNode->next != NULL) {
+                newNode->next->prev = newNode;
+            } else {
+                D_800DC464 = (struct Node15132444 *)newNode;
+            }
+            D_800DC460 = (struct Node15132444 *)newNode;
+            newNode->prev = NULL;
+            newNode->unkC = SRC->unk56;
+            if (SRC->unk50 & 0x100000) {
+                if (D_800BE9F0 == 0x3B || D_800BE9F0 == 6 || D_800BE9F0 == 0x13 || D_800BE616 != 0 ||
+                    D_800BE9F0 == 2) {
+                    newNode->unkE = 0;
+                } else {
+                    newNode->unkE = 1;
+                }
+            } else {
+                newNode->unkE = 0;
+            }
+        } else {
+            func_15168A9C(obj);
+            func_10004074(obj);
+            func_10004074(newNode);
+            return 0;
+        }
+    } else {
+        s32 count;
+
+        newNode = (Node1513264C *)D_800DC460;
+        count = 100;
+        while (newNode->unkC != SRC->unk56) {
+            count--;
+            newNode = newNode->next;
+            if (count <= 0) {
+                break;
+            }
+        }
+        if (count <= 0) {
+            func_15168A9C(obj);
+            func_10004074(obj);
+            return 0;
+        }
+    }
+    D_800DC468[SRC->unk56]++;
+    obj->unk8C = newNode;
+    memcpy(obj->unk10, (void *)arg0, 0x7C);
+    obj->unk149 = 0;
+    obj->unk134 = 0.0f;
+    obj->unk138 = 0.0f;
+    obj->unk13C = 0.0f;
+    obj->unk140 = sqrtf(SRC->unk34 * SRC->unk34 + SRC->unk38 * SRC->unk38 + SRC->unk3C * SRC->unk3C);
+    obj->unk148 = 0;
+    obj->unk144 = 1.0f;
+    if (arg3 != 0) {
+        *(Copy24_1513264C *)&obj->unk110 = *(Copy24_1513264C *)arg3;
+    } else {
+        obj->unk110 = -10000.0f;
+        obj->unk130 = 0;
+        obj->unk12D = 0;
+        obj->unk12C = 0;
+        obj->unk128 = 0;
+    }
+    D_800DC63C++;
+    obj->unk150 = 0;
+    obj->unk14C = arg1;
+    obj->unk168 = arg2;
+    for (i = 0; i < 4; i++) {
+        obj->unk154[i] = 0;
+    }
+    obj->unk164 = 0;
+    if (arg1 != 0) {
+        for (i = 0; i <= D_80082FA0; i++) {
+            obj->unk154[i] = func_1515D480(arg1);
+        }
+        obj->unk164 = func_1515D440();
+    }
+    obj->unk60 &= ~0x200000;
+    return (s32)obj;
+}
+#undef SRC
 
 s32 func_15132A4C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5) {
     return func_1513264C(arg0, arg1, arg2, 0, arg3, arg4, arg5);
