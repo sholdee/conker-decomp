@@ -1,7 +1,12 @@
 #include <ultra64.h>
 
+#define func_15048A40 func_15048A40_hdr
+#define func_150ADA20 func_150ADA20_hdr
 #include "functions.h"
+#undef func_15048A40
+#undef func_150ADA20
 #include "variables.h"
+extern s32 func_150ADA20(void);
 
 extern s32 func_1510D0EC(s32, s32, s32, s32);
 void func_15042D94(s32, s32, u8, s32 *, ...);
@@ -113,7 +118,112 @@ GameBC510Command *func_1508FD38(register GameBC510Command *arg0) {
     return arg0;
 }
 #pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_150900F0.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_15090630.s")
+typedef struct BC510Entry {
+    s16 x;
+    s16 y;
+    s16 unk4;
+    s16 scale;
+    s16 unk8;
+    s16 timer;
+    u8 unkC;
+    u8 state;
+    u8 unkE;
+    u8 sound;
+} BC510Entry;
+
+typedef struct BC510Sprite {
+    s32 unk0;
+    s16 unk4;
+    s16 w;
+    s16 h;
+    u8 alpha;
+    u8 unkB;
+    u8 unkC;
+    u8 flip;
+    u8 padE[2];
+} BC510Sprite;
+
+typedef struct BC510Tex {
+    s32 id;
+    s32 unk4;
+    s32 unk8;
+} BC510Tex;
+
+extern f32 func_15048A40(u8 arg0);
+extern BC510Tex D_800903D4;
+extern BC510Tex D_80091840;
+GameBC510Command *func_15094F70(GameBC510Command *, BC510Tex *, s32, BC510Sprite *, s32, s32, s32, s32, s32);
+GameBC510Command *func_15095A48(GameBC510Command *, BC510Sprite *, f32, f32);
+
+#define ENT ((BC510Entry *)D_800D2460)
+GameBC510Command *func_15090630(GameBC510Command *gfx) {
+    s32 i;
+    BC510Sprite sprite;
+    s32 first;
+    s32 x;
+    s32 y;
+    s32 bits;
+    f32 f;
+    s32 scale;
+    s32 t;
+    s32 tex;
+
+    sprite.alpha = 0xFF;
+    sprite.flip = 0;
+    { GameBC510Command *c = gfx++; c->w0 = 0xE7000000; c->w1 = 0; }
+    { GameBC510Command *c = gfx++; c->w0 = 0xFCFFB5FF; c->w1 = 0xFFFCFE38; }
+    { GameBC510Command *c = gfx++; c->w0 = 0xEF102C0F; c->w1 = 0x0C184244; }
+    first = 1;
+    i = 0;
+    do {
+        if (ENT[i].state == 1 || ENT[i].state == 2) {
+            if (first) {
+                func_1510D0EC(D_80091840.id, (s32)&tex, 3, 0);
+                first = 0;
+                gfx = func_15094F70(gfx, &D_800903D4, 0, &sprite, 0, 0, 0, 2, 3);
+            }
+            f = func_15048A40(ENT[i].sound);
+            x = ENT[i].x;
+            y = ENT[i].y;
+            sprite.w = ENT[i].scale * (0.200000003f * f + 1.0f);
+            sprite.h = ENT[i].scale * (-0.200000003f * f + 1.0f);
+            gfx = func_15095A48(gfx, &sprite, x, y);
+        }
+        i++;
+    } while (i < 6);
+    first = 1;
+    i = 0;
+    do {
+        bits = 0;
+        if (ENT[i].state == 3) {
+            scale = ENT[i].scale;
+            x = ENT[i].x;
+            y = ENT[i].y;
+            sprite.w = scale;
+            sprite.h = scale;
+            if ((u8)func_150ADA20() < 0x80U) {
+                bits = 1;
+            }
+            if ((u8)func_150ADA20() < 0x80U) {
+                bits |= 2;
+            }
+            sprite.flip = bits;
+            if (first) {
+                first = 0;
+                gfx = func_15094F70(gfx, &D_80091840, 0, &sprite, 0, 0, 0, 2, 3);
+            }
+            gfx = func_15095A48(gfx, &sprite, x, y);
+            t = ENT[i].timer;
+            t -= D_800BE9E4;
+            if (t < 0) {
+                t = 0;
+            }
+            ENT[i].timer = t;
+        }
+        i++;
+    } while (i != 6);
+    return gfx;
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_1509093C.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_150911F4.s")
