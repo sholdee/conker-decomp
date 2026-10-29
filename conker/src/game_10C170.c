@@ -5,7 +5,48 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_10C170/func_150DECC0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_10C170/func_150DF334.s")
+typedef struct {
+    u8 pad0[0x24];
+} Floor150DF334;
+
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD[0x1B];
+    struct17 unk28;
+} Actor150DF334;
+
+s32 func_1504697C(struct17 *, s32, f32, Floor150DF334 *);
+void func_150E83AC(struct17 *, s16, u8, s32);
+void func_151A9834(struct17 *, f32, f32, Floor150DF334 *, s32, s32, s32, s32, s32);
+
+void func_150DF334(Actor150DF334 *arg0) {
+    struct17 *pos;
+    Floor150DF334 floor;
+    u8 onGround;
+    struct17 sp60;
+    struct17 sp54;
+    struct17 sp48;
+
+    pos = &arg0->unk28;
+    onGround = 0;
+    sp54.unk0 = arg0->unk28.unk0;
+    sp54.unk4 = arg0->unk28.unk4 + 500.0f;
+    sp54.unk8 = arg0->unk28.unk8;
+    if (func_1504697C(&sp54, 0, sp54.unk4 - 1000.0f, &floor) != 0) {
+        sp60.unk0 = pos->unk0;
+        sp60.unk4 = *(f32 *)&floor;
+        sp60.unk8 = pos->unk8;
+        onGround = 1;
+    }
+    func_150E83AC(onGround ? &sp60 : pos, (s16)(func_150ADA20() % 62U + 120), arg0->unkC, arg0->unk1);
+    pos = onGround ? &sp60 : &arg0->unk28;
+    sp48 = *pos;
+    sp48.unk4 += 500.0f;
+    func_151A9834(&sp48, sp48.unk4 - 1000.0f, 250.0f, &floor, func_150ADA20() % 3U + 3, 1, 0, arg0->unkC, arg0->unk1);
+}
 
 typedef struct {
     struct17 unk0;
