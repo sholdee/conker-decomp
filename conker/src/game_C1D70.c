@@ -349,7 +349,89 @@ s32 func_15095A90(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     return arg0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C1D70/func_15095B08.s")
+extern f32 D_800380A4;
+extern f32 D_800D2C70;
+extern f32 D_800D2C74;
+extern f32 D_800D2C78;
+extern f32 D_800D2C7C;
+extern f32 D_800D2C80;
+extern f32 D_800D2C84;
+extern f32 D_800D2C88;
+
+typedef struct {
+    u8 pad0[4];
+    u16 unk4;
+    u16 unk6;
+} Struct15095B08_sub;
+
+typedef struct {
+    u8 pad0[6];
+    s16 unk6;
+    s16 unk8;
+    u8 padA[6];
+    Struct15095B08_sub *unk10;
+} Struct15095B08_arg0;
+
+typedef struct {
+    u8 pad0[0x14];
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    f32 unk30;
+    u8 pad34[0x180 - 0x34];
+} Struct15095B08_cam;
+
+void func_15095B08(s32 arg0, f32 arg1, f32 arg2, f32 arg3, s32 arg4, s32 *arg5) {
+    Struct15095B08_arg0 *obj = (Struct15095B08_arg0 *)arg0;
+    Struct15095B08_cam *cam;
+    Struct15095B08_sub *sub;
+    f32 sx;
+    f32 sy;
+    f32 inv;
+    f32 w;
+    f32 h;
+    s16 a;
+    s16 b;
+
+    *arg5 = 0;
+    if (obj->unk6 != 0) {
+        if (obj->unk8 != 0) {
+            sx = obj->unk6;
+            sy = obj->unk8;
+            sx *= D_800380A0;
+            sy *= D_800380A4;
+            if (arg4 != 0) {
+                cam = &((Struct15095B08_cam *)D_800BE628)[D_80082FA4];
+                sx *= cam->unk1C;
+                sy *= cam->unk20;
+            } else {
+                cam = &((Struct15095B08_cam *)D_800BE628)[D_80082FA4];
+                sx *= cam->unk14;
+                sy *= cam->unk18;
+            }
+            sub = obj->unk10;
+            inv = 1.0f / arg3;
+            w = (f32)(u32)sub->unk4 * sx * inv;
+            h = (f32)(u32)sub->unk6 * sy * inv;
+            arg1 = arg1 - w * 0.5f;
+            arg2 = arg2 - h * 0.5f;
+            if (cam->unk2C <= arg1 + w && arg1 < cam->unk30 && cam->unk24 <= arg2 + h && arg2 < cam->unk28) {
+                *arg5 = 1;
+            }
+            D_800D2C70 = sx;
+            D_800D2C74 = sy;
+            D_800D2C78 = arg1;
+            D_800D2C7C = arg2;
+            D_800D2C80 = arg3;
+            D_800D2C84 = w;
+            D_800D2C88 = h;
+        }
+    }
+}
 
 s32 func_15095D34(s32, s32, s32, s32, s32);
 
