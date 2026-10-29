@@ -178,7 +178,6 @@ s32 func_1515D6D0(s32 arg0, s32 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_18A8F0/func_1515D914.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18A8F0/func_1515E278.s")
 
 struct Node1515E43C {
     char pad0[0x18];
@@ -192,6 +191,51 @@ struct Node1515EB84 {
 };
 
 struct Node1515E43C *func_1515EB84(s32, s32, s32, s32, struct Node1515EB84 *);
+void func_1515E43C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4, u8 *arg5, u8 *arg6, u8 *arg7);
+
+void func_1515E278(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4, u8 *arg5, u8 *arg6) {
+    struct Node1515E43C *node;
+    s32 i;
+    s32 t;
+    u8 sp50[3];
+    u8 sp4C[3];
+    u8 sp48[3];
+    u8 sp47;
+    u8 sp46;
+    s32 s;
+    u8 *dst;
+    s32 v;
+
+    node = func_1515EB84(arg0, arg1, arg2, arg3, (struct Node1515EB84 *)D_800DCD80);
+    if (node != NULL) {
+        arg4[0] = node->unk18 & 0xFF;
+        arg4[1] = (node->unk18 >> 8) & 0xFF;
+        arg4[2] = (node->unk18 >> 16) & 0xFF;
+    } else {
+        v = (0x100 - (s32)((((u32)arg5 >> 5) & 3) << 6));
+        dst = arg4;
+        for (i = 0; i < 3; i++) {
+            *dst++ = ((*(u8 (*)[3])&D_800DCD20)[i] * v) >> 8;
+        }
+    }
+    if ((s32)arg6 & 0x10) {
+        func_1515E43C(arg0, arg1, arg2, arg3, sp4C, sp48, &sp47, &sp46);
+        dst = arg4;
+        for (i = 0; i < 3; i++) {
+            s = (u8)((((0xFF - *dst) * sp47) >> 8) + *dst);
+            sp50[i] = (sp4C[i] * s) >> 8;
+            s = (u8)((((0xFF - *dst) * sp46) >> 8) + *dst);
+            *dst = (sp48[i] * s) >> 8;
+            t = *dst + ((sp50[i] * 7) >> 3);
+            if (t > 0xFF) {
+                t = 0xFF;
+            }
+            *dst = t;
+            dst++;
+        }
+    }
+}
+
 
 void func_1515E43C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4, u8 *arg5, u8 *arg6, u8 *arg7) {
     struct Node1515E43C *node;
