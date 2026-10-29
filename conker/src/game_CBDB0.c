@@ -8,7 +8,77 @@ extern struct127 *func_1505EEF4();
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_CBDB0/func_1509ED74.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_CBDB0/func_1509EFF0.s")
+extern s32 D_800D3840;
+s32 func_1509F6B0();
+s32 func_1509F4E8();
+s32 func_1509F5A8();
+s32 func_1509F6E8();
+s32 func_15103C14();
+s32 func_1509F354();
+s32 func_1509F47C();
+void func_1509F5F4();
+
+s32 func_1509EFF0(s32 arg0, u32 *arg1) {
+    s32 ret;
+    s32 a;
+    s32 b;
+    s32 c;
+
+    if (D_800D3840 == 1) {
+        ret = func_1509F6B0(arg0, 0x7FFF, 0, 0x40);
+    } else {
+        ret = arg1[1];
+        switch (ret) {
+        case 1:
+            b = 0x40;
+            if (D_800D3840 >= 4) {
+                a = arg1[3];
+                if (D_800D3840 == 5) {
+                    b = arg1[4];
+                }
+            } else {
+                a = 0;
+            }
+            ret = func_1509F6B0(arg0, arg1[2], a, b);
+            break;
+        case 0:
+            ret = arg1[5];
+            switch (ret & 0xF000) {
+            case 0x2000:
+                return func_1509F354(arg0, arg1[2] & 0xFFF, arg1[3], arg1[4], ret & 0xFFF, arg1[6], arg1[7]);
+            case 0x3000:
+                func_1509F47C(arg0, arg1[2] & 0xFFF, arg1[4], ret & 0xFFF, arg1[6], arg1[7]);
+                return 0;
+            case 0x4000:
+                return func_1509F4E8(arg0, arg1[2] & 0xFFF, arg1[4], ret & 0xFFF, arg1[6]);
+            default:
+                ret = func_1509F5A8(arg0, arg1[2] & 0xFFF, arg1[4]);
+                break;
+            }
+            break;
+        case 2:
+            c = 0;
+            if (D_800D3840 >= 7 && arg1[6] != 0) {
+                c = 1;
+            }
+            func_1509F5F4(arg0 & 0xFFF, arg1[2], arg1[3] & 0xFFF, arg1[4], arg1[5], c);
+            ret = 0;
+            break;
+        case 3:
+            ret = func_1509F6E8(arg0, arg1[3] & 0xFFF, arg1[2], arg1[4], arg1[5]);
+            break;
+        case 4:
+            func_15103C14(arg0, arg1[3] & 0xFFF, arg1[2], arg1[4], arg1[5]);
+            return 0x7000;
+        default:
+            return 0;
+        }
+    }
+    if (ret != 0) {
+        ret = (ret << 16) | 0x7000;
+    }
+    return ret;
+}
 
 s32 func_1509F248(s32 arg0, u32 *arg1) {
     if (arg0 != 0) {
@@ -39,7 +109,9 @@ s32 func_1509F33C(s32 arg0, s32 arg1, s32 arg2) {
     return 0;
 }
 
-s32 func_1509F354(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s16 arg5, s32 arg6) {
+s32 func_1509F354(arg0, arg1, arg2, arg3, arg4, arg5, arg6)
+    s32 arg0; s32 arg1; s32 arg2; s32 arg3; s32 arg4; s16 arg5; s32 arg6;
+{
     struct127 *temp;
     s32 range;
     u8 idx;
@@ -72,7 +144,9 @@ extern s32 func_151149AC(u32);
 extern s32 func_1000F568(s32, u8);
 extern void func_15114D24(s32, s32, s32, s16, s32, s32);
 
-void func_1509F47C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s16 arg4, s32 arg5) {
+s32 func_1509F47C(arg0, arg1, arg2, arg3, arg4, arg5)
+    s32 arg0; s32 arg1; s32 arg2; s32 arg3; s16 arg4; s32 arg5;
+{
     s32 temp;
 
     temp = func_151149AC(arg3 & 0xFF);
@@ -82,7 +156,7 @@ void func_1509F47C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s16 arg4, s32 arg5) {
 void func_10010F88(s32 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9);
 extern struct178 D_800D3098[73];
 extern s32 func_1000F568(s32, u8);
-void func_1509F4E8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4)
+s32 func_1509F4E8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4)
 {
   struct178 *e;
   s32 h;
@@ -100,14 +174,16 @@ extern s32 func_1000F568(s32, u8);
 
 extern s32 func_1000F568(s32, u8);
 
-void func_1509F5A8(s32 arg0, s32 arg1, s32 arg2) {
+s32 func_1509F5A8(s32 arg0, s32 arg1, s32 arg2) {
     s32 temp;
 
     temp = func_1000F568(arg0, (u8)(arg1 - arg0 + 1));
     func_10010F30(temp, (u16)arg2, 0x40, 0, 0);
 }
 
-void func_1509F5F4(u16 arg0, s32 arg1, s32 arg2, s16 arg3, s32 arg4, s32 arg5) {
+void func_1509F5F4(arg0, arg1, arg2, arg3, arg4, arg5)
+    u16 arg0; s32 arg1; s32 arg2; s16 arg3; s32 arg4; s32 arg5;
+{
     struct127 *temp;
 
     temp = func_1505EEF4(arg2);
@@ -133,7 +209,7 @@ void func_1509F660(s32 arg0, s32 arg1) {
     }
 }
 
-void func_1509F6B0(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+s32 func_1509F6B0(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     func_10010F30(arg0, arg1, arg3, arg2, 0);
 }
 
