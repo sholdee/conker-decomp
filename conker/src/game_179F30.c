@@ -1140,7 +1140,123 @@ void func_1514EE70(u8 *arg0) {
     func_1514EC1C(v0, (s32) arg0, 0x16);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_179F30/func_1514EECC.s")
+typedef struct Struct1514EECC_C4 {
+    /* 0x00 */ u8 unk00;
+    /* 0x01 */ u8 unk01;
+    /* 0x02 */ u16 unk02;
+    /* 0x04 */ s16 unk04;
+    /* 0x06 */ u8 pad06[2];
+    /* 0x08 */ s32 unk08;
+    /* 0x0C */ s32 unk0C;
+    /* 0x10 */ u8 unk10;
+    /* 0x11 */ u8 unk11;
+    /* 0x12 */ u8 unk12;
+    /* 0x13 */ u8 unk13;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ f32 unk34;
+    /* 0x38 */ f32 unk38;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ s32 unk40;
+    /* 0x44 */ u8 unk44;
+    /* 0x45 */ u8 unk45;
+    /* 0x46 */ u8 unk46;
+    /* 0x47 */ u8 unk47;
+    /* 0x48 */ s32 unk48;
+    /* 0x4C */ u8 unk4C;
+    /* 0x4D */ u8 pad4D[3];
+    /* 0x50 */ s32 unk50;
+    /* 0x54 */ s16 unk54;
+    /* 0x56 */ s16 unk56;
+} Struct1514EECC_C4;
+
+typedef struct Struct1514EECC_48 {
+    /* 0x00 */ Vec3w1514F308 unk00;
+    /* 0x0C */ Vec3w1514F308 unk0C;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 unk1D;
+    /* 0x1E */ s8 unk1E;
+    /* 0x1F */ u8 pad1F;
+} Struct1514EECC_48;
+
+extern u8 D_800A5934;
+extern Vec3w1514F308 D_800A5940;
+extern Vec3w1514F308 D_800A594C;
+
+void func_1514EECC(s32 arg0) {
+    s32 v0;
+    v0 = func_15160A58(arg0, 1, &D_800A5934, 2, 0x12C, 2, 0xFF, 0, 0, 0xFF, 0, 3, 0, 0, 0xFF, 1);
+    func_1514EC1C(v0, arg0, 0x19);
+    {
+    Struct1514EECC_C4 spC4;
+    Struct1514E00C_A4 sp68;
+    Struct1514EECC_48 sp48;
+
+
+    spC4.unk00 = 0x69;
+    spC4.unk40 = 0x04ED200A;
+    spC4.unk04 = 0x12C;
+    spC4.unk08 = 0;
+    spC4.unk0C = 0;
+    spC4.unk45 = 0xFF;
+    spC4.unk10 = 0xFF;
+    spC4.unk11 = 0;
+    spC4.unk12 = 0;
+    spC4.unk13 = 0xFF;
+    spC4.unk02 = 0x4403;
+    spC4.unk1C = 0.0f;
+    spC4.unk20 = 0.0f;
+    spC4.unk24 = 0.0f;
+    spC4.unk28 = 0.0f;
+    spC4.unk2C = 0.0f;
+    spC4.unk30 = 0.0f;
+    spC4.unk01 = 3;
+    spC4.unk18 = 100.0f;
+    spC4.unk14 = 100.0f;
+    spC4.unk34 = 1.0f;
+    spC4.unk38 = 1.0f;
+    spC4.unk3C = 1.0f;
+    spC4.unk44 = 0xFF;
+    spC4.unk46 = 0;
+    spC4.unk47 = 6;
+    spC4.unk48 = 0;
+    spC4.unk4C = 0xFF;
+    spC4.unk50 = 0;
+    spC4.unk54 = 1;
+    spC4.unk56 = 0xFF;
+
+    sp68.unk04 = 95.0f;
+    sp68.unk00 = 95.0f;
+    sp68.unk0C = 65.0f;
+    sp68.unk08 = 65.0f;
+    sp68.unk10 = 0.150000006f;
+    sp68.unk14 = 0.150000006f;
+    sp68.unk18 = 0.6999999881f;
+    sp68.unk1C = 0.400000006f;
+    sp68.unk20 = 9.999999975e-07f;
+
+    sp48.unk1D = ((u8 *)arg0)[0x3B];
+    sp48.unk18 = arg0;
+    sp48.unk00 = D_800A5940;
+    sp48.unk0C = D_800A594C;
+    sp48.unk1C = 1;
+    sp68.unk54 = 0;
+    sp68.unk55 = 0;
+    sp68.unk56 = 0;
+    sp68.unk57 = 0;
+    sp68.unk48 = 1.0f;
+    sp48.unk1E = 3;
+
+    func_15189FF0(&spC4, &sp68, &sp48, 2, 0, 0, 0);
+    }
+}
 
 void func_1514F110(void) {
     func_1514F194();
