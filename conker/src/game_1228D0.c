@@ -179,7 +179,64 @@ void func_150F568C(s32 arg0) {
     func_15179008(0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1228D0/func_150F56B0.s")
+extern s32 D_80090274[];
+
+s32 func_150F56B0(s32 arg0, struct127 *arg1) {
+    struct197 *anim;
+    s32 idx;
+    f32 two;
+    f32 t;
+
+    anim = arg1->unk2D0;
+    if (anim == 0) {
+        return 0;
+    }
+    idx = 6;
+    two = 2.0f;
+    if (arg1->unk84.uh == 0xAE) {
+        if ((anim->unk8 >= 36.0f) && (anim->unk8 <= 51.0f)) {
+            t = anim->unk8 - 36.0f;
+            t *= 0.0625f;
+            t = 1.0f - t;
+            idx = (s32)(6.0f * t);
+        } else if ((anim->unk8 > 51.0f) && (anim->unk8 <= 54.0f)) {
+            idx = 0;
+        } else if ((anim->unk8 > 54.0f) && (anim->unk8 <= 60.0f)) {
+            t = anim->unk8 - 54.0f;
+            t *= 0.1428571492f;
+            idx = (s32)(6.0f * t);
+        } else if ((anim->unk8 > 60.0f) && (anim->unk8 <= 65.0f)) {
+            t = anim->unk8 - 60.0f;
+            t *= 0.1666666716f;
+            idx = (s32)(two * t) + 7;
+        } else if ((anim->unk8 > 65.0f) && (anim->unk8 <= 67.0f)) {
+            t = anim->unk8 - 65.0f;
+            t *= 0.3333333433f;
+            t = 1.0f - t;
+            idx = (s32)(two * t) + 7;
+        } else if ((anim->unk8 > 67.0f) && (anim->unk8 <= 70.0f)) {
+            t = anim->unk8 - 67.0f;
+            t *= 0.25f;
+            t = 1.0f - t;
+            idx = (s32)(two * t) + 4;
+        } else if ((anim->unk8 > 70.0f) && (anim->unk8 <= 74.0f)) {
+            t = anim->unk8 - 70.0f;
+            t *= 0.200000003f;
+            idx = (s32)(two * t) + 4;
+        } else if ((anim->unk8 > 74.0f) && (anim->unk8 <= 119.0f)) {
+            t = anim->unk8 - 74.0f;
+            t *= 0.02173913084f;
+            idx = (s32)(two * t) + 7;
+        } else if ((anim->unk8 > 119.0f) && (anim->unk8 <= 150.0f)) {
+            t = anim->unk8 - 119.0f;
+            t *= 0.03125f;
+            t = 1.0f - t;
+            idx = (s32)(two * t) + 7;
+        }
+    }
+    *(s16 *)(arg0 + 0x18) = D_80090274[idx];
+    return 0;
+}
 
 s32 func_150F5A54(s32 arg0, struct127 *arg1) {
     struct197 *anim;
