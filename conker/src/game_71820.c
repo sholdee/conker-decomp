@@ -1,5 +1,7 @@
 #include <ultra64.h>
+#define func_15048A40 func_15048A40_hdr
 #include "functions.h"
+#undef func_15048A40
 #define D_800CBE00 D_800CBE00_s32
 #define D_800D3300 D_800D3300_hdr
 #define D_800DBE3C D_800DBE3C_hdr
@@ -308,8 +310,6 @@ void func_15044A28(void) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_71820/func_15044B78.s")
-
 struct conker15044CE4 {
     char pad0[6];
     s16 unk6;
@@ -319,12 +319,46 @@ struct conker15044CE4 {
     s16 unk10;
     s16 unk12;
     s16 unk14;
-    char pad16[2];
+    u8 unk16;
+    char pad17;
     s16 *unk18;
     s16 *unk1C;
 };
 
-extern void func_15044B78(struct conker15044CE4 *);
+
+extern f32 func_15048A40(u8);
+extern f32 func_150489B0(u8);
+
+s32 func_15044B78(struct conker15044CE4 *arg0) {
+    f32 s;
+    f32 c;
+    f32 rx;
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 pad2c;
+    f32 pad28;
+    f32 pad24;
+    s32 half;
+    s32 h116;
+    s32 h118;
+
+    half = (s16)D_800CC2D0[0].unk31C->unk114 >> 1;
+    h116 = (s16)D_800CC2D0[0].unk31C->unk116;
+    h118 = (s16)D_800CC2D0[0].unk31C->unk118;
+    x = D_800CC2D0[0].x_position - arg0->unk6;
+    y = (D_800CC2D0[0].y_position - arg0->unk8) + half;
+    z = D_800CC2D0[0].z_position - arg0->unkA;
+    c = func_15048A40(arg0->unk16);
+    s = func_150489B0(arg0->unk16);
+    rx = z * s + x * c;
+    x = x * s - z * c;
+    if (fabsf(y) < arg0->unk14 + half && fabsf(x) < arg0->unk12 + h116 && fabsf(rx) < arg0->unk10 + h118) {
+        return 1;
+    }
+    return 0;
+}
+
 
 void func_15044CE4(struct conker15044CE4 *arg0) {
     s16 *sp18 = arg0->unk18;
