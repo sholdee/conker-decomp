@@ -141,6 +141,7 @@ typedef struct {
     Vec3f_151B3A7C end;
     u8 pad2C[0x1C];
     Node151B3A7C nodes[10];
+    f32 unk138;
 } Struct151B3A7C;
 
 s32 func_151B3A7C(Struct151B3A7C *arg0) {
@@ -213,7 +214,83 @@ final_return:
     return ret;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E0560/func_151B3FDC.s")
+s32 func_151B3FDC(Struct151B3A7C *arg0) {
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    Vec3f_151B3A7C mid;
+    Vec3f_151B3A7C relStart;
+    Vec3f_151B3A7C relEnd;
+    f32 len;
+    f32 inv;
+    f32 c;
+    f32 s;
+    f32 pad1;
+    f32 u;
+    f32 v;
+    f32 pad2[7];
+    f32 half;
+    f32 dist;
+    f32 d2;
+    f32 ux;
+    f32 uy;
+    f32 w;
+    f32 angle;
+    f32 sn;
+    f32 cs;
+    f32 a;
+    f32 b;
+    f32 t;
+    s32 i;
+    Node151B3A7C *node;
+
+    dx = arg0->end.x - arg0->start.x;
+    dy = arg0->end.y - arg0->start.y;
+    dz = arg0->end.z - arg0->start.z;
+    if ((fabsf(dx) > 9.999999747e-05f) || (fabsf(dz) > 9.999999747e-05f)) {
+        f32 h;
+        mid.x = arg0->start.x + (dx * 0.5f);
+        mid.y = arg0->start.y + (dy * 0.5f);
+        mid.z = arg0->start.z + (dz * 0.5f);
+        relStart.x = arg0->start.x - mid.x;
+        relStart.y = arg0->start.y - mid.y;
+        relStart.z = arg0->start.z - mid.z;
+        relEnd.x = arg0->end.x - mid.x;
+        relEnd.y = arg0->end.y - mid.y;
+        relEnd.z = arg0->end.z - mid.z;
+        len = sqrtf((dx * dx) + (dz * dz));
+        inv = 1.0f / len;
+        c = dz * inv;
+        s = dx * inv;
+        u = ((relEnd.z * c) + (relEnd.x * s)) - ((relStart.z * c) + (relStart.x * s));
+        v = relEnd.y - relStart.y;
+        d2 = (u * u) + (v * v);
+        dist = sqrtf(d2);
+        inv = 1.0f / dist;
+        half = dist * 0.5f;
+        ux = u * inv;
+        uy = v * inv;
+        h = d2 * 0.25f;
+        if (arg0->unk138 < h) {
+            return func_151B3A7C(arg0);
+        }
+        w = sqrtf(arg0->unk138 - h);
+        angle = 0.0f;
+        node = arg0->nodes;
+        for (i = 0; i < 10; i++, angle += 0.3490658700f) {
+            Node151B3A7C *n = &node[i];
+            sn = sinf(angle);
+            cs = cosf(angle);
+            a = half * cs;
+            b = w * sn;
+            t = (a * ux) - (b * uy);
+            n->pos.x = (t * s) + mid.x;
+            n->pos.y = ((a * uy) - (b * ux)) + mid.y;
+            n->pos.z = (t * c) + mid.z;
+        }
+    }
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1E0560/func_151B42A4.s")
 
