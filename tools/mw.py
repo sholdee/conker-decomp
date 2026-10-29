@@ -426,7 +426,7 @@ def ratchet(ws, m, rec, src):
     if glob_best and "same" in glob_best and rank(rec) <= rank(glob_best):
         return  # an earlier workspace holds a better attempt
     span = find_def(text, func)
-    entry = dict(rec, func=func, file=m["file"], size=m.get("size"),
+    entry = dict(rec, func=func, file=m["file"], size=m.get("size"), head=m.get("head"),
                  checks=sum(1 for _ in open(ws / "checks.jsonl")) if (ws / "checks.jsonl").exists() else None,
                  updated=time.strftime("%Y-%m-%d %H:%M"), c=text[span[0]:span[1]] if span else "")
     NEAR.mkdir(exist_ok=True)
@@ -461,10 +461,10 @@ def log_check(ws, code, out, n, batch=False, src=None):
 
 
 def cmd_check(a):
-    m = meta(a.func)
+    m = meta(a.func)             # a.func names the workspace; usually the function itself
     ws = ws_dir(a.func)
     want = [w for _, w in target_words(ws / "target.s")]
-    code, out = check_tree(a.func, m, ws / "conker", want, quiet=a.q or a.no_diff, U=a.U)
+    code, out = check_tree(m["func"], m, ws / "conker", want, quiet=a.q or a.no_diff, U=a.U)
     log_check(ws, code, out, len(want), src=ws / "conker" / m["file"])
     print("\n".join(out))
     return code
