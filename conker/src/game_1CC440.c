@@ -666,7 +666,114 @@ void func_151A25E0(Obj151A25E0 *arg0) {
     arg0->unk40 = arg0->unk41 = arg0->unk42 = arg0->unk38 * s->unkE;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1CC440/func_151A26EC.s")
+typedef struct {
+    f32 x, y, z;
+} Vec151A26EC;
+
+typedef struct {
+    s32 unk00;
+    s32 unk04;
+    s16 unk08;
+    s16 unk0A;
+    s32 unk0C;
+    s32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 unk16;
+    u8 unk17;
+    u8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+    u8 unk1C;
+    u8 unk1D;
+    s16 unk1E;
+    s16 unk20;
+    s16 unk22;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    Vec151A26EC unk30;
+    Vec151A26EC unk3C;
+    Vec151A26EC unk48;
+    f32 unk54;
+    s32 unk58;
+    u8 pad5C[4];
+    u8 unk60;
+    u8 unk61;
+    u8 unk62;
+    s8 unk63;
+    s8 unk64;
+    u8 unk65;
+    u8 pad66[0xA];
+} Fx151A26EC;
+
+typedef struct {
+    f32 unk0;
+    s16 unk4;
+    s16 unk6;
+    s16 unk8;
+    s8 unkA;
+} Extra151A26EC;
+
+s32 func_151A26EC(Vec151A26EC *arg0, Vec151A26EC *arg1, Vec151A26EC *arg2, f32 arg3, f32 arg4, f32 arg5,
+                  s16 arg6, u8 arg7, s16 arg8, s16 arg9, s16 argA, s8 argB, u8 argC, u8 argD, u8 argE,
+                  u8 argF, s32 arg10) {
+    Extra151A26EC sp9C;
+    struct260 *ret;
+    Fx151A26EC sp28;
+
+    if (arg8 <= 0) {
+        arg8 = 1;
+    }
+    if (arg9 <= 0) {
+        arg9 = 1;
+    }
+    sp9C.unk0 = arg3;
+    sp9C.unk4 = arg9;
+    sp9C.unk6 = 0xFF / arg9;
+    sp28.unk1E = arg8;
+    sp28.unk20 = 0xFF / arg8;
+    sp9C.unk8 = argA;
+    sp9C.unkA = argB;
+    sp28.unk1D = 0x27;
+    sp28.unk08 = 0x5203;
+    sp28.unk00 = 0x200005;
+    sp28.unk04 = 0;
+    sp28.unk0A = arg6;
+    sp28.unk0C = 0;
+    sp28.unk10 = 0;
+    sp28.unk14 = argC;
+    sp28.unk15 = argD;
+    sp28.unk16 = argE;
+    sp28.unk17 = 0xFF;
+    sp28.unk18 = 0xFF;
+    sp28.unk19 = 0xFF;
+    sp28.unk1A = 0xFF;
+    sp28.unk1B = arg7;
+    sp28.unk1C = 0xFF;
+    sp28.unk2C = arg5;
+    sp28.unk28 = arg5;
+    sp28.unk30 = *arg0;
+    sp28.unk3C = *arg1;
+    sp28.unk48 = *arg2;
+    sp28.unk22 = 1;
+    sp28.unk54 = arg4;
+    sp28.unk24 = 1.0f;
+    sp28.unk58 = (func_150ADA20() & 1 ? 0x40 : 0) | (1 | 2 | 4 | (func_150ADA20() & 1 ? 0x80 : 0)) | 0x200 | 0x1000 | 0x4000 | 0x8000 | 0x800000;
+    sp28.unk60 = 7;
+    sp28.unk61 = 2;
+    sp28.unk62 = 0x11;
+    sp28.unk63 = -1;
+    sp28.unk64 = -1;
+    sp28.unk65 = 2;
+    ret = func_15130374(&sp28, 1, 0x10, argF, arg10);
+    if (ret != NULL) {
+        memcpy((u8 *)ret + 0xA8, &sp9C.unk0, 8);
+        memcpy((u8 *)ret + 0xB0, &sp9C.unk4, 8);
+    }
+    return 0;
+}
 
 struct Sub151A2960 {
     s16 unk0;
