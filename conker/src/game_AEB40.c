@@ -844,7 +844,94 @@ void func_15084488(u8 *arg0, s32 arg1, s32 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_AEB40/func_15084558.s")
+void func_15084558(u8 *arg0) {
+    s32 id;
+    u8 *list;
+    s32 i;
+    s32 j;
+    s32 count;
+    s32 k;
+    s32 uniq;
+    s32 freeA;
+    s32 freeB;
+    struct127 *obj;
+    u8 ocount;
+    u8 *olist;
+    s32 c;
+    s32 a;
+    s32 p;
+    s32 q;
+
+    id = arg0[4];
+    if (id != 0xFF && (&D_800D19A0)[id] != 0) {
+        count = arg0[0x2C9];
+        list = *(u8 **)(arg0 + 0x2C4);
+        func_1508434C(arg0);
+        for (i = 0; i < count; i++) {
+            uniq = 1;
+            freeA = 1;
+            freeB = 1;
+            for (j = 0; j < i; j++) {
+                if (list[j] == list[i]) {
+                }
+            }
+            for (j = 0; j < 25; j++) {
+                if (j != ((struct127 *)arg0 - D_800CC2D0)) {
+                    obj = &D_800CC2D0[j];
+                    if (obj->interaction_state != 0 && obj->id != 0xFF && obj->unk5 != 2) {
+                        ocount = obj->unk2C9;
+                        olist = *(u8 **)((u8 *)obj + 0x2C4);
+                        for (k = 0; k < ocount; k++) {
+                            if (olist[k] == list[i]) {
+                                uniq = 0;
+                            }
+                            if (D_800D1588[olist[k]] == D_800D1588[list[i]] && D_800D1588[olist[k]] != 0) {
+                                freeA = 0;
+                            }
+                            if (D_800D1C90[olist[k]] == D_800D1C90[list[i]] && D_800D1C90[olist[k]] != NULL) {
+                                freeB = 0;
+                            }
+                        }
+                    }
+                }
+            }
+            if (freeA && D_800D1588[list[i]] != 0) {
+                a = D_800D1588[list[i]];
+                {
+                    func_100043B4((s32 *)(a - 0x10), 3);
+                    for (k = 0; k < 187; k++) {
+                        if (a == D_800D1588[k]) {
+                            D_800D1588[k] = 0;
+                        }
+                    }
+                }
+            }
+            if (freeB) {
+                p = ((s32 *)D_800D1C90)[list[i]];
+                if (p != 0) {
+                    p -= 0x10;
+                    func_100043B4((s32 *)p, 3);
+                    D_800D1C90[list[i]] = NULL;
+                }
+            }
+            if (uniq) {
+                if ((&D_800D19A0)[list[i]] != 0) {
+                    if (D_800C5C08[id] != 0) {
+                        func_10004074((void *)D_800C5C08[id]);
+                        D_800C5C08[id] = 0;
+                        func_10004074((void *)D_800C6070[id]);
+                        D_800C6070[id] = 0;
+                    }
+                    q = D_800C6360[id];
+                    if (q != 0) {
+                        func_10004074((void *)q);
+                        D_800C6360[id] = 0;
+                    }
+                }
+            }
+        }
+    }
+}
 
 typedef struct {
     u8 pad[0x1C9];
