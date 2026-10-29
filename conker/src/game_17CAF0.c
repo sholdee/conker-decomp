@@ -2333,7 +2333,7 @@ struct Arg1515548C {
     u8 pad16[0x42];
 };
 
-extern s32 func_151555AC(struct Arg1515548C *, f32 *);
+extern s32 func_151555AC();
 extern u8 *func_15167A68(s32, s32, s32, s32, u8, s32);
 
 u8 *func_1515548C(struct Arg1515548C *arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6) {
@@ -2366,8 +2366,62 @@ void func_15155564(struct Local15155564 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_17CAF0/func_151555AC.s")
+struct Node151555AC {
+    u8 pad0[8];
+    struct Node151555AC *next;
+    u8 padC[4];
+    f32 pos[2];
+    f32 size[2];
+    u8 pad20[0xA];
+    u8 unk2A;
+};
+struct Ids151555AC { s32 id[2]; };
+extern struct Ids151555AC D_800A6030;
+extern u8 D_800DCE50[];
 
+s32 func_151555AC(f32 *arg0, f32 *arg1, s32 *arg2, s32 arg3) {
+    s32 j;
+    struct Ids151555AC ids;
+    u8 i;
+    struct Node151555AC *node;
+    struct Node151555AC *next;
+    s32 found;
+    s32 k;
+    f32 w;
+    f32 h;
+    i = 0;
+    for (j = 0; j < 2; j++) {
+        ids = D_800A6030;
+        i &= 0;
+        do {
+            node = ((struct Node151555AC *(*)[0x68])D_800DCE50)[j][ids.id[i]];
+            while (node != NULL) {
+                next = node->next;
+                k = arg3;
+                found = 0;
+                while (k > 0 && !found) {
+                    if (node->unk2A == arg2[k - 1]) {
+                        found = 1;
+                    } else {
+                        k--;
+                    }
+                }
+                if (found) {
+                    w = arg1[0] + node->size[0];
+                    h = arg1[1] + node->size[1];
+                    if (arg0[0] - w <= node->pos[0] && node->pos[0] <= arg0[0] + w &&
+                        arg0[1] - h <= node->pos[1] && node->pos[1] <= arg0[1] + h) {
+                        return 1;
+                    }
+                }
+                node = next;
+            }
+lbl:
+            i++;
+        } while (i < 2);
+        i = 0;
+    }
+}
 void func_1515572C(s32 arg0, u8 arg1) {
     struct Local1515572CData sp18;
 
