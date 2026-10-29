@@ -802,7 +802,88 @@ void func_15031A50(u8 *arg0, u8 *arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_5D2C0/func_15031C14.s")
+struct S15031C14 {
+    s32 unk0;
+    u8 unk4;
+};
+void func_15100180(void *);
+void func_151616D0(u8, u8, void *);
+void func_15147D64(void *, s32);
+void func_151BD7F4(void *);
+void func_151D4668(void *);
+void func_151D747C(void *);
+void func_151027E8(void *);
+
+void func_15031C14(void *arg0) {
+    u8 *obj;
+    struct S15031C14 sp2C;
+    struct S15031C14 sp24;
+    u8 *node;
+    struct S15031C14 * volatile p;
+
+    obj = (u8 *)func_15083E90(*(u8 *)arg0);
+    if (obj != 0) {
+        switch (((u8 *)arg0)[1]) {
+        case 0x5A:
+            node = *(u8 **)(obj + 0x31C);
+            if (node != 0) {
+                *(u16 *)(node + 0x1A6) -= 0xAA;
+            }
+            break;
+        case 0x90:
+            *(u32 *)(obj + 0x9C) &= ~0x70;
+            break;
+        case 0x8F:
+            *(u32 *)(obj + 0x9C) &= ~0xE00;
+            break;
+        case 0x37:
+        case 0x4B:
+        case 0x4C:
+            func_1000FD38(func_15033BDC, arg0, (s32)obj);
+            if (((u8 *)arg0)[1] == 0x37) {
+                func_15100180(obj);
+            }
+            break;
+        case 0x49:
+            sp2C.unk0 = (s32)obj;
+            sp2C.unk4 = obj[0x3B];
+            func_151616D0(0x10, 0x29, &sp2C);
+            break;
+        case 0x5D:
+            sp24.unk0 = (s32)obj;
+            sp24.unk4 = obj[0x3B];
+            func_15147D64(p = &sp24, 0x2E);
+            func_151494E0((s32)p, 0x2F);
+            break;
+        case 0x3D:
+            func_151BD7F4(obj);
+            break;
+        case 0x1A:
+        case 0x1B:
+        case 0x5F:
+        case 0x65:
+        case 0x66:
+            func_151D4668(obj);
+            break;
+        case 0x1D:
+        case 0x82:
+            func_151D747C(obj);
+            break;
+        case 0x5E:
+        case 0x85:
+            *(u32 *)(obj + 0x9C) &= ~0x6000;
+            break;
+        }
+        switch (((u8 *)arg0)[6]) {
+        case 0x16:
+        case 0x63:
+        case 0x89:
+            func_151027E8(obj);
+            func_151D4668(obj);
+            break;
+        }
+    }
+}
 
 s32 func_15031E2C(void *arg0, s32 arg1) {
     s32 idx;
