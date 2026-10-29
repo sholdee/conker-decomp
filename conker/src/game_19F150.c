@@ -272,7 +272,112 @@ Gfx *func_151720C4(Gfx *gfx, struct Obj15171CA0 *arg1, s32 arg2) {
     return gfx;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_19F150/func_151725FC.s")
+typedef struct {
+    s16 ob[3];
+    u16 flag;
+    s16 tc[2];
+    u8 cn[4];
+} Vtx151725FC;
+
+extern s32 func_1510E388(s32, void *, f32 *, f32 *);
+extern s16 D_800A6FD0[];
+extern s16 D_800A6FE0[];
+extern s16 D_800A6FF0[];
+
+s32 func_151725FC(void *arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6, s32 arg7) {
+    f32 lenA;
+    f32 lenB;
+    f32 minsq;
+    f32 denom;
+    f32 unused1;
+    f32 unused2;
+    f32 unused3;
+    f32 v[2][3];
+    f32 unused4;
+    f32 angle;
+    f32 z;
+    f32 x;
+    f32 cx;
+    f32 cy;
+    f32 cs;
+    f32 sn;
+    s16 (*tbl)[2];
+    Vtx151725FC *vtx;
+    s32 n;
+    s32 i;
+
+    vtx = arg0;
+    n = arg6 / 16;
+    if (n == 0) {
+        n = 1;
+    }
+    if (func_1510E388(arg1, 0, &x, &z) == 0) {
+        return 0;
+    }
+    v[0][0] = 0.0f;
+    v[0][2] = -n;
+    v[0][1] = x * v[0][0] + z * v[0][2];
+    denom = (z + z) * (-v[0][1] - v[0][1]) + ((-v[0][2] - v[0][2]) + (-v[0][2] - v[0][2]));
+    if (denom == 0.0f) {
+        denom = 0.001000000047f;
+    }
+    v[1][0] = -n;
+    v[1][1] = ((x * v[1][0] + x * v[1][0]) * (-v[0][2] - v[0][2])) / denom;
+    if (z == 0.0f) {
+        v[1][2] = 0.0f;
+    } else {
+        v[1][2] = (v[1][1] - x * v[1][0]) / z;
+    }
+    lenA = v[0][0] * v[0][0] + v[0][1] * v[0][1] + v[0][2] * v[0][2];
+    if (lenA > 100000000.0f) {
+        lenA = 100000000.0f;
+    }
+    minsq = n * n;
+    if (lenA < minsq) {
+        lenA = minsq;
+    }
+    lenA = sqrtf(lenA);
+    lenB = v[1][0] * v[1][0] + v[1][1] * v[1][1] + v[1][2] * v[1][2];
+    if (lenB > 100000000.0f) {
+        lenB = 100000000.0f;
+    }
+    if (lenB < minsq) {
+        lenB = minsq;
+    }
+    lenB = sqrtf(lenB);
+    for (i = 0; i < 3; i++) {
+        v[0][i] = v[0][i] * arg6 / lenA;
+        v[1][i] = v[1][i] * arg6 / lenB;
+        vtx[0].ob[i] = v[0][i];
+        vtx[1].ob[i] = v[1][i];
+        vtx[2].ob[i] = -v[0][i];
+        vtx[3].ob[i] = -v[1][i];
+    }
+    angle = (arg5 - 225.0f) * 0.01745329238f;
+    cs = cosf(angle);
+    sn = sinf(angle);
+    if ((u8)arg7 == 0x10) {
+        cy = cx = 256.0f;
+        tbl = (s16 (*)[2])D_800A6FF0;
+    } else if ((u8)arg7 == 0x20) {
+        cy = cx = 512.0f;
+        tbl = (s16 (*)[2])D_800A6FE0;
+    } else {
+        cy = cx = 1024.0f;
+        tbl = (s16 (*)[2])D_800A6FD0;
+    }
+    for (i = 0; i < 4; i++) {
+        ((Vtx151725FC *)arg0)[i].tc[0] = ((tbl[i][0] - cx) * cs - (tbl[i][1] - cy) * sn) + cx + 8192.0f;
+        ((Vtx151725FC *)arg0)[i].tc[1] = ((tbl[i][0] - cx) * sn + (tbl[i][1] - cy) * cs) + cy + 8192.0f;
+    }
+    for (i = 0; i < 4; i++) {
+        vtx[i].ob[0] = vtx[i].ob[0] + arg2;
+        vtx[i].ob[1] = vtx[i].ob[1] + arg3;
+        vtx[i].ob[2] = vtx[i].ob[2] + arg4;
+    }
+    return 1;
+}
+
 
 s32 func_15172B20(void *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, u8 arg7) {
     struct sp15172B20 {
