@@ -414,7 +414,54 @@ void func_1503A60C(void) {
     dst->unk38 = *(f32 *)&D_800CC2D0[D_800C3E78].pad178;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_64120/func_1503A678.s")
+extern u8 D_800C3FFA;
+extern u8 D_80084404[];
+void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
+
+void func_1503A678(void) {
+    struct127 *obj;
+    f32 (*m)[4];
+    f32 sz;
+    f32 sy;
+    f32 sx;
+    f32 f;
+    f32 inv;
+    f32 mtx[4][4];
+    f32 tmp[4][4];
+    f32 pos[3];
+
+    obj = &D_800CC2D0[D_800C3E78];
+    if (obj->id == 0x22) {
+        f = *((u8 *)&D_800CC2D0[D_800C3E78] + 0x20A);
+        f /= 64.0f;
+        f += 1.0f;
+        if (D_800C3FFA == 0) {
+            sx = f;
+            sy = 1.0f;
+            sz = f;
+        } else {
+            sx = 1.0f / f;
+            sy = 1.0f;
+            sz = 1.0f / f;
+        }
+        m = (f32 (*)[4])((u8 *)D_800CC2D0[D_800C3E78].unk1D4 + (D_80084404[D_800C3FFA] << 6));
+        m[3][3] = 1.0f;
+        m[0][3] = 0.0f;
+        m[1][3] = 0.0f;
+        m[2][3] = 0.0f;
+        pos[0] = m[3][0];
+        pos[1] = m[3][1];
+        pos[2] = m[3][2];
+        guMtxIdentF(mtx);
+        func_150A7CB0(mtx, *(s32 *)&sx, *(s32 *)&sy, *(s32 *)&sz);
+        func_150A7A48(m, mtx, tmp);
+        bcopy(tmp, m, 0x40);
+        m[3][0] = pos[0];
+        m[3][1] = pos[1];
+        m[3][2] = pos[2];
+        D_800C3FFA++;
+    }
+}
 
 extern u8 D_800C3FFA;
 extern void func_15036F34(void);
