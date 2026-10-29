@@ -1,7 +1,13 @@
 #include <ultra64.h>
 #define func_151422C0 func_151422C0_header
+#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
+#define func_1513D2F0 func_1513D2F0_hdr
 #include "functions.h"
 #undef func_151422C0
+#undef func_150ADA20
+#undef func_1513D2F0
+u32 func_150ADA20(void);
+void *func_1513D2F0(void *arg0, void *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, u8 argA, s32 argB);
 #define D_800DBFF0 D_800DBFF0_hdr
 #include "variables.h"
 #undef D_800DBFF0
@@ -1381,7 +1387,426 @@ s32 func_15199A10(Struct15199A10 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1C2C60/func_15199C34.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1C2C60/func_1519A9A4.s")
+typedef struct {
+    struct17 unk0;
+    struct17 unkC;
+    f32 unk18;
+    f32 unk1C;
+    u8 unk20;
+    char pad21[3];
+    f32 unk24;
+} Struct1519A9A4Point;
+
+typedef struct {
+    char pad0[0x14];
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+} Struct1519A9A4Obj;
+
+typedef struct {
+    Struct1519A9A4Obj *unk0;
+    char pad4[0x28 - 0x4];
+    f32 unk28;
+    char pad2C[0x35 - 0x2C];
+    s8 unk35;
+    char pad36[0x3A - 0x36];
+    u8 unk3A;
+    char pad3B;
+    f32 unk3C;
+    f32 unk40;
+    f32 unk44;
+    char pad48[4];
+    f32 unk4C;
+    f32 unk50;
+    s16 unk54;
+    s16 unk56;
+    f32 unk58;
+    f32 unk5C;
+    f32 unk60;
+    f32 unk64;
+    f32 unk68;
+    f32 unk6C;
+    f32 unk70;
+    f32 unk74;
+    f32 unk78;
+    f32 unk7C;
+    s16 unk80;
+    s16 unk82;
+    f32 unk84;
+    u8 unk88;
+    u8 unk89;
+    char pad8A[2];
+    f32 unk8C;
+    char pad90[0x134 - 0x90];
+    f32 unk134;
+    char pad138[0x140 - 0x138];
+    f32 unk140;
+    f32 unk144;
+    char pad148[0x14C - 0x148];
+    f32 unk14C;
+    u8 unk150;
+} Struct1519A9A4Data;
+
+typedef struct {
+    char pad0;
+    u8 unk1;
+    char pad2[0xC - 0x2];
+    u8 unkC;
+    char padD[0x10 - 0xD];
+    struct17 unk10;
+    char pad1C[0x1E - 0x1C];
+    u16 unk1E;
+    char pad20[0x25 - 0x20];
+    u8 unk25;
+    char pad26[0x2C - 0x26];
+    s8 unk2C;
+    s8 unk2D;
+    s8 unk2E;
+    char pad2F[0x94 - 0x2F];
+    Struct1519A9A4Point *unk94;
+    Struct1519A9A4Data *unk98;
+} Struct1519A9A4;
+
+typedef struct {
+    struct17 unk0;
+    struct17 unkC;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    s16 unk28;
+    s16 unk2A;
+} Struct1519A9A4Extra;
+
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    s16 unk2;
+    s16 unk4;
+    s32 unk8;
+    s32 unkC;
+    u8 unk10;
+    u8 unk11;
+    u8 unk12;
+    u8 unk13;
+    f32 unk14;
+    f32 unk18;
+    struct17 unk1C;
+    struct17 unk28;
+    f32 unk34;
+    f32 unk38;
+    f32 unk3C;
+    s32 unk40;
+    u8 unk44;
+    u8 unk45;
+    u8 unk46;
+    u8 unk47;
+    s32 unk48;
+} Struct1519A9A4Spawn;
+
+extern void (*D_8008F8A8[])(void *);
+s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
+f32 func_15143E64(struct17 *);
+f32 func_15144528(f32, f32, f32);
+void func_15143794(s16, s16, f32, f32 *);
+
+s32 func_1519A9A4(Struct1519A9A4 *arg0) {
+    Struct1519A9A4Data *data;
+    Struct1519A9A4Point *pts;
+    f32 maxLen;
+
+    data = arg0->unk98;
+    pts = arg0->unk94;
+    maxLen = data->unk28;
+    if ((data->unk150 & 4) && arg0->unk2C >= 2) {
+        Struct1519A9A4Obj *obj;
+        struct17 *end;
+        s32 i;
+        struct17 hitPos;
+        f32 x;
+        f32 y;
+        f32 z;
+        f32 dx;
+        f32 dy;
+        f32 hit;
+        f32 dz;
+
+        obj = data->unk0;
+        if (arg0->unk1E & 2) {
+            end = &arg0->unk10;
+        } else {
+            i = arg0->unk2E;
+            i--;
+            if (i < 0) {
+                i = arg0->unk25 - 1;
+            }
+            end = &pts[i].unk0;
+        }
+        x = obj->unk14;
+        y = obj->unk18 + 48.0f;
+        z = obj->unk1C;
+        dx = end->unk0 - x;
+        dy = end->unk4 - y;
+        dz = end->unk8 - z;
+        if (func_150AC9C0(x, y, z, dx, dy, dz, 0, 0, &hitPos.unk0, &hitPos.unk4,
+                          &hitPos.unk8, &hit, 0, 0, 0.0f) != 0 &&
+            hit < maxLen) {
+            maxLen = hit;
+        }
+    }
+    if (arg0->unk2C >= 2) {
+        struct17 *prev;
+        s32 i;
+        struct17 diff;
+
+        i = arg0->unk2E;
+        data->unk14C = 0.0f;
+        if (arg0->unk1E & 2) {
+            prev = &arg0->unk10;
+        } else {
+            i--;
+            if (i < 0) {
+                i = arg0->unk25 - 1;
+            }
+            prev = &pts[i].unk0;
+        }
+        do {
+            Struct1519A9A4Point *p;
+
+            i--;
+            if (i < 0) {
+                i = arg0->unk25 - 1;
+            }
+            p = &pts[i];
+            diff.unk0 = p->unk0.unk0 - prev->unk0;
+            diff.unk4 = p->unk0.unk4 - prev->unk4;
+            diff.unk8 = p->unk0.unk8 - prev->unk8;
+            p->unk1C = func_15143E64(&diff);
+            data->unk14C += p->unk1C;
+            if (maxLen < data->unk14C) {
+                if (p->unk1C) {
+                    f32 t = (data->unk14C - maxLen) / p->unk1C;
+
+                    p->unk0.unk0 -= diff.unk0 * t;
+                    p->unk0.unk4 -= diff.unk4 * t;
+                    p->unk0.unk8 -= diff.unk8 * t;
+                    p->unk1C = p->unk1C * (1.0f - t);
+                }
+                while (i != arg0->unk2D) {
+                    arg0->unk2D++;
+                    if (arg0->unk2D == arg0->unk25) {
+                        arg0->unk2D = 0;
+                    }
+                    arg0->unk2C--;
+                }
+                data->unk14C = maxLen;
+            }
+            prev = &p->unk0;
+        } while (i != arg0->unk2D);
+    }
+    if (arg0->unk2C >= 2) {
+        f32 sum;
+        f32 fadeStart;
+        f32 fadeLen;
+        f32 inv;
+        s32 i;
+
+        sum = 0.0f;
+        i = arg0->unk2E;
+        fadeStart = data->unk14C * data->unk3C;
+        fadeLen = data->unk14C - fadeStart;
+        inv = 1.0f / fadeLen;
+        do {
+            Struct1519A9A4Point *p;
+
+            i--;
+            if (i < 0) {
+                i = arg0->unk25 - 1;
+            }
+            p = &pts[i];
+            sum += p->unk1C;
+            if (fadeStart < sum) {
+                s32 pad;
+
+                p->unk20 = data->unk140 * ((fadeLen - (sum - fadeStart)) * inv);
+            } else {
+                p->unk20 = data->unk3A;
+            }
+        } while (i != arg0->unk2D);
+    }
+    if (arg0->unk2C >= 2) {
+        s32 i;
+        f32 sum;
+
+        data->unk144 += data->unk40 * D_800BE9A4;
+        data->unk144 = func_15144528(data->unk144, 16383.0f, -16384.0f);
+        i = arg0->unk2E;
+        sum = 0.0f;
+        do {
+            Struct1519A9A4Point *p;
+
+            i--;
+            if (i < 0) {
+                i = arg0->unk25 - 1;
+            }
+            p = &pts[i];
+            sum += p->unk1C;
+            p->unk24 = func_15144528(data->unk144 + sum * data->unk44, 16383.0f, -16384.0f);
+        } while (i != arg0->unk2D);
+    }
+    if (arg0->unk2C >= 3 && (!(data->unk150 & 0x20) || !(data->unk150 & 0x10)) && maxLen <= data->unk14C) {
+        data->unk134 += (data->unk4C + func_150ADA68() * data->unk50) * pts[arg0->unk2D].unk18 * D_800BE9A4;
+        if (data->unk134 > 1.0f) {
+            s32 head;
+            s32 next;
+            s32 i;
+            Struct1519A9A4Spawn spawn;
+            Struct1519A9A4Extra extra;
+            s32 found;
+            Struct1519A9A4Point *last;
+            Struct1519A9A4Point *a;
+            Struct1519A9A4Point *b;
+            struct17 pos;
+            f32 alpha;
+            struct17 dir;
+            f32 sum;
+            f32 target;
+            void *ret;
+            s32 pad4;
+
+            head = arg0->unk2D;
+            alpha = 0.0f;
+            next = head + 1;
+            if (next == arg0->unk25) {
+                next = 0;
+            }
+            sum = 0.0f;
+            found = 0;
+            last = NULL;
+            target = data->unk14C * data->unk84;
+            i = arg0->unk2E;
+            do {
+                Struct1519A9A4Point *p;
+
+                i--;
+                if (i < 0) {
+                    i = arg0->unk25 - 1;
+                }
+                p = &pts[i];
+                sum += p->unk1C;
+                if (target <= sum) {
+                    found = 1;
+                    if (last != NULL && p->unk1C) {
+                        f32 t = (sum - target) / p->unk1C;
+
+                        pos.unk0 = p->unk0.unk0 + (last->unk0.unk0 - p->unk0.unk0) * t;
+                        pos.unk4 = p->unk0.unk4 + (last->unk0.unk4 - p->unk0.unk4) * t;
+                        pos.unk8 = p->unk0.unk8 + (last->unk0.unk8 - p->unk0.unk8) * t;
+                        alpha = p->unk18 + (last->unk18 - p->unk18) * t;
+                        dir.unk0 = p->unk0.unk0 - last->unk0.unk0;
+                        dir.unk4 = p->unk0.unk4 - last->unk0.unk4;
+                        dir.unk8 = p->unk0.unk8 - last->unk0.unk8;
+                    } else {
+                        pos = p->unk0;
+                        alpha = p->unk18;
+                        dir.unk0 = 0.0f;
+                        dir.unk4 = 0.0f;
+                        dir.unk8 = 0.0f;
+                    }
+                }
+                last = p;
+            } while (i != arg0->unk2D && found == 0);
+            spawn.unk8 = 0;
+            spawn.unkC = 0;
+            extra.unk1C = data->unk78;
+            extra.unk20 = data->unk7C;
+            extra.unk24 = data->unk8C;
+            extra.unk28 = data->unk80;
+            extra.unk2A = data->unk82;
+            spawn.unk1 = 0;
+            spawn.unk2 = 0x2203;
+            spawn.unk10 = 0xFF;
+            spawn.unk11 = 0xFF;
+            spawn.unk12 = 0xFF;
+            spawn.unk13 = 0xFF;
+            spawn.unk34 = 1.0f;
+            spawn.unk38 = 0.0f;
+            spawn.unk3C = 1.0f;
+            spawn.unk40 = 0x40CC05E1;
+            spawn.unk45 = 0xFF;
+            spawn.unk46 = 0;
+            spawn.unk47 = 7;
+            spawn.unk48 = 0;
+            a = &pts[head];
+            b = &pts[next];
+            do {
+                extern s32 D_800A4AA0;
+                f32 r1;
+                f32 r2;
+                f32 r3;
+                s32 r;
+                struct17 vel;
+
+                r1 = func_150ADA68() * data->unk60 + data->unk58;
+                r2 = func_150ADA68() * data->unk64 + data->unk5C;
+                r3 = func_150ADA68() * data->unk6C + data->unk68;
+                spawn.unk14 = 24.22288895f * r1;
+                spawn.unk18 = 3.440458536f * r2;
+                extra.unk0.unk0 = b->unkC.unk0 * r3;
+                extra.unk0.unk4 = b->unkC.unk4 * r3;
+                extra.unk0.unk8 = b->unkC.unk8 * r3;
+                extra.unkC.unk0 = a->unkC.unk0 * r3;
+                extra.unkC.unk4 = a->unkC.unk4 * r3;
+                extra.unkC.unk8 = a->unkC.unk8 * r3;
+                extra.unk18 = func_150ADA68() * data->unk74 + data->unk70;
+                if (func_150ADA20() & 1) {
+                    spawn.unk0 = 0x13;
+                } else {
+                    spawn.unk0 = 0x14;
+                }
+                spawn.unk4 = func_150ADA20() % (data->unk56 + 1) + data->unk54;
+                func_15143794((s16)(func_150ADA20() & 0xFF), (s16)((func_150ADA20() & 0x7F) - 0x3F), alpha, &vel.unk0);
+                spawn.unk1C.unk0 = pos.unk0 + vel.unk0;
+                spawn.unk1C.unk4 = pos.unk4 + vel.unk4;
+                spawn.unk1C.unk8 = pos.unk8 + vel.unk8;
+                spawn.unk28.unk0 = spawn.unk1C.unk0 + dir.unk0;
+                spawn.unk28.unk4 = spawn.unk1C.unk4 + dir.unk4;
+                spawn.unk28.unk8 = spawn.unk1C.unk8 + dir.unk8;
+                spawn.unk44 = func_150ADA20() % (data->unk89 + 1) + data->unk88;
+                ret = func_1513D2F0(&spawn, &D_800A4AA0, 0x1F, 0x22, 0, 0x1A, ((func_150ADA20() & 1) ? 1 : 0) | 2, 0, 0, 0x2C,
+                                    arg0->unkC, arg0->unk1);
+                if (ret != NULL) {
+                    memcpy((u8 *)ret + 0x110, &extra, sizeof(extra));
+                }
+                data->unk134 -= 1.0f;
+            } while (data->unk134 > 1.0f);
+        }
+    }
+    if (data->unk35 != -1) {
+        D_8008F8A8[data->unk35](arg0);
+    }
+    if ((data->unk150 & 2) && arg0->unk2C >= 2) {
+        struct17 *end;
+        Struct1519A9A4Point *h;
+        s32 i;
+        s32 pad9;
+
+        if (arg0->unk1E & 2) {
+            end = &arg0->unk10;
+        } else {
+            i = arg0->unk2E - 1;
+            if (i < 0) {
+                i = arg0->unk25 - 1;
+            }
+            end = &pts[i].unk0;
+        }
+        h = &pts[arg0->unk2D];
+        func_1508B20C((h->unk0.unk0 + end->unk0) * 0.5f, (h->unk0.unk4 + end->unk4) * 0.5f,
+                      (h->unk0.unk8 + end->unk8) * 0.5f, data->unk14C * 0.5f);
+    }
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1C2C60/func_1519B4B8.s")
 
