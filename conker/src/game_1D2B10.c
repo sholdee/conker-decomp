@@ -13,7 +13,148 @@ extern void func_151D3FF4(void *, u8, s32);
 extern void func_151D5514(void *, u8, s32);
 extern void func_151541B8(void *, f32, s32, f32, f32, u8, s32);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1D2B10/func_151A5660.s")
+typedef struct { s16 x; s16 y2; s16 z; s16 r6; s16 h8; s16 rA; u8 pad[4]; f32 ang; u8 b14; u8 b15; } F5660Src;
+typedef struct {
+    F5660Src *src; f32 f4; f32 f8; f32 fC; f32 f10; f32 f14; f32 f18; f32 f1c; f32 f20;
+    s16 s24; s16 s26; f32 f28; f32 f2c; f32 f30; f32 f34; f32 f38; f32 f3c;
+    u8 b40; u8 b41; u8 b42; u8 pad43; u8 pad44[4]; f32 f48; u8 pad4c[0x20]; s32 h6c;
+} F5660Obj;
+typedef struct { f32 x, y, z, f8c, fcc, fd0, fd4, fd8; s16 sdc, sde, se0; u8 be2, be3, be4, be5; s16 se6; u8 be8, be9, bea, beb; s32 sec; u8 bf0; f32 ff4, ff8, ffc, f100; } F5660P;
+extern s32 func_151464B8(s32);
+extern s32 func_15046C80(f32 *, s32, f32, f32 *);
+extern void func_15149550(void *, s32, s32, s32, s32, s32);
+void func_151A5660(u8 *arg0)
+{
+  F5660Obj *s0;
+  F5660P P;
+  f32 fa_2;
+  f32 fb_2;
+  f32 fc_2;
+  f32 fd_2;
+  f32 fa_0;
+  f32 fb_0;
+  f32 fc_0;
+  f32 fa_1;
+  f32 fb_1;
+  f32 fc_1;
+  f32 fd;
+  f32 fe;
+  f32 y0;
+  f32 y1;
+  u32 r;
+  u32 r8;
+  u8 a;
+  f32 sp[3];
+  s0 = (F5660Obj *) (arg0 + 0x28);
+  if ((*((s32 *) (arg0 + 0x28))) == 0)
+  {
+    *((s16 *) (arg0 + 0xE)) = -1;
+    return;
+  }
+  if ((s0->src->b14 != 1) && ((s0->h6c == 0) || (func_151464B8(s0->h6c) == 0)))
+  {
+    s0->fC = s0->fC + ((s0->f8 * s0->f4) * D_800BE9A4);
+    if (s0->fC > 1.0f)
+    {
+      P.sdc = 0x6231;
+      P.sde = 0x1A4D;
+      P.be2 = 0;
+      P.be3 = 0;
+      P.be4 = 0;
+      P.be5 = 0xFF;
+      P.se6 = 1;
+      P.be9 = 0xFF;
+      P.sec = 0;
+      P.bea = 0;
+      P.beb = 0;
+      P.bf0 = 0x10;
+      P.ff8 = s0->f10;
+ do { switch (s0->src->b15 & 3) { default: P.x = s0->src->x; P.z = s0->src->z; y1 = s0->src->y2 + s0->src->h8; y0 = s0->src->y2 - s0->src->h8;
+            break;
+
+          case 2:
+            r8 = ((u32) (s0->src->ang * 0.7111111283f)) & 0xFF;
+            fa_2 = func_151423D8(r8 - 0x40);
+            fb_2 = func_151423D8(r8);
+            fc_2 = (func_150ADA68() * (2.0f * s0->src->r6)) + (-s0->src->r6);
+            fd_2 = (func_150ADA68() * (2.0f * s0->src->rA)) + (-s0->src->rA);
+            P.x = s0->src->x + ((fc_2 * fb_2) + (fd_2 * fa_2));
+            P.z = s0->src->z + ((fd_2 * fb_2) - (fc_2 * fa_2));
+          {
+            extern s32 padx;
+            y1 = s0->src->y2 + s0->src->h8;
+            y0 = s0->src->y2 - s0->src->h8;
+          }
+            break;
+
+          case 0:
+            a = func_150ADA20() & 0xFF;
+            fa_0 = func_151423D8(a - 0x40);
+            fb_0 = func_151423D8(a);
+            fc_0 = func_150ADA68() * s0->src->r6;
+            P.x = s0->src->x + (fc_0 * fb_0);
+            P.z = s0->src->z - (fc_0 * fa_0);
+          {
+            extern s32 padx;
+            y1 = s0->src->y2 + s0->src->h8;
+            y0 = s0->src->y2;
+          }
+            break;
+
+          case 1:
+            a = func_150ADA20() & 0xFF;
+            fa_1 = func_151423D8(a - 0x40);
+            fb_1 = func_151423D8(a);
+            fc_1 = func_150ADA68() * s0->src->r6;
+            P.x = s0->src->x + (fc_1 * fb_1);
+            P.z = s0->src->z - (fc_1 * fa_1);
+          {
+            extern s32 padx;
+            y1 = s0->src->y2 + s0->src->h8;
+            y0 = s0->src->y2 - s0->src->h8;
+          }
+            break;
+
+        }
+
+        if (s0->b40 != 0)
+        {
+          sp[0] = P.x;
+          sp[1] = y1;
+          sp[2] = P.z;
+          if (func_15046C80(sp, 0, y0, &s0->f48) != 0)
+          {
+            P.y = s0->f48;
+          }
+          else
+          {
+            extern s32 padx;
+            P.y = y0;
+          }
+        }
+        else
+        {
+          P.y = y0;
+        }
+        fd = (func_150ADA68() * s0->f18) + s0->f14;
+        fe = (func_150ADA68() * s0->f20) + s0->f1c;
+        P.f8c = 22.60000038f * fd;
+        P.fd0 = 13.78600025f * fd;
+        P.fcc = 57.96900177f * fe;
+        P.fd4 = 42.7140007f * fe;
+        P.fd8 = 118.7630005f * fe;
+        P.se0 = (func_150ADA20() % ((u32) (s0->s26 + 1))) + s0->s24;
+        P.ff4 = (func_150ADA68() * s0->f2c) + s0->f28;
+        P.ffc = (func_150ADA68() * s0->f34) + s0->f30;
+        P.f100 = (func_150ADA68() * s0->f3c) + s0->f38;
+        P.be8 = (func_150ADA20() % ((u32) (s0->b42 + 1))) + s0->b41;
+        func_15149550(&P, 0xA, 0, 0, arg0[0xC], arg0[1]);
+        s0->fC = s0->fC - 1.0f;
+      }
+      while (s0->fC > 1.0f);
+    }
+  }
+}
 
 void func_151A5D2C(u16 arg0);
 
