@@ -969,7 +969,155 @@ void func_15150178(struct Local15150178Angles *arg0, struct Local1514FF44Arg *ar
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_17CAF0/func_15150400.s")
+struct Arg15150400 {
+    s32 unk0;
+    s32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    s16 unk24;
+    s16 unk26;
+    f32 unk28;
+    f32 unk2C;
+    f32 unk30;
+    s32 unk34;
+    f32 unk38;
+    f32 unk3C;
+    f32 unk40;
+    f32 unk44;
+    s32 *unk48;
+    f32 *unk4C;
+    u32 unk50;
+    f32 unk54;
+    u8 unk58;
+    u8 unk59;
+    u8 pad5A[2];
+    s32 unk5C;
+    void *unk60;
+};
+
+struct Angles15150400 {
+    s16 unk0;
+    s16 unk2;
+    s16 unk4;
+    s16 unk6;
+};
+
+typedef struct {
+    f32 unk00;
+    f32 unk04;
+    f32 unk08;
+    volatile f32 unk0C;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    struct Vec3F unk28;
+    struct Vec3F unk34;
+    struct Vec3F unk40;
+    f32 unk4C;
+    s32 unk50;
+    s16 unk54;
+    s16 unk56;
+    u8 unk58;
+    u8 pad59[3];
+    s32 unk5C;
+    u8 unk60;
+    u8 unk61;
+    u8 unk62;
+    u8 unk63;
+    u8 unk64;
+    u8 unk65;
+    u8 unk66;
+    u8 unk67;
+    u8 unk68;
+    s8 unk69;
+    u8 unk6A;
+    u8 pad6B;
+    s32 unk6C;
+    u8 unk70;
+    u8 pad71;
+    s16 unk72;
+    s16 unk74;
+    u8 pad76[2];
+    s32 unk78;
+} Spawn15150400;
+
+extern s32 func_1513264C(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
+
+void func_15150400(struct Arg15150400 *arg0, struct Angles15150400 *arg1, u8 arg2, s32 arg3) {
+    s32 count;
+    Spawn15150400 spawn;
+    s16 a;
+    s16 b;
+
+    spawn.unk1C = 1.0f;
+    spawn.unk20 = 1.0f;
+    spawn.unk24 = 1.0f;
+    spawn.unk40.y = 0.0f;
+    spawn.unk50 = 0x1 | 0x8 | 0x20 | 0x40 | 0x80 | 0x100 | ((arg0->unk58 & 1) ? 0x800 : 0) | 0x2000 | 0x10000;
+    spawn.unk58 = 0;
+    spawn.unk5C = 0;
+    spawn.unk60 = 0xFF;
+    spawn.unk62 = 0;
+    spawn.unk64 = 0;
+    spawn.unk65 = 0;
+    spawn.unk66 = 0;
+    spawn.unk67 = 0;
+    spawn.unk68 = 2;
+    spawn.unk69 = -1;
+    spawn.unk6A = 0;
+    spawn.unk6C = 0;
+    spawn.unk70 = 0;
+    spawn.unk72 = 0xC;
+    spawn.unk74 = 0x15;
+    spawn.unk78 = 0;
+    count = (func_150ADA20() % (u32)(arg0->unk4 + 1)) + arg0->unk0;
+    while (count != 0) {
+        a = (func_150ADA20() % (u32)(arg1->unk2 + 1)) + arg1->unk0;
+        b = (func_150ADA20() % (u32)(arg1->unk6 + 1)) + arg1->unk4;
+        if (func_150ADA68() < arg0->unk38) {
+            spawn.unk61 = 0xD;
+            spawn.unk63 = arg0->unk59;
+        } else {
+            spawn.unk61 = 8;
+            spawn.unk63 = 0;
+        }
+        spawn.unk04 = (func_150ADA68() * arg0->unk40) + arg0->unk3C;
+        spawn.unk10 = func_150ADA68() * 360.0f;
+        spawn.unk14 = func_150ADA68() * 360.0f;
+        spawn.unk18 = func_150ADA68() * 360.0f;
+        func_15143794(a, b, (func_150ADA68() * arg0->unk18) + arg0->unk14, &spawn.unk34.x);
+        spawn.unk40.x = (func_150ADA68() * (arg0->unk30 + arg0->unk30)) - arg0->unk30;
+        spawn.unk40.z = (func_150ADA68() * (arg0->unk30 + arg0->unk30)) - arg0->unk30;
+        spawn.unk4C = (func_150ADA68() * arg0->unk20) + arg0->unk1C;
+        spawn.unk54 = (func_150ADA20() % (u32)(arg0->unk26 + 1)) + arg0->unk24;
+        func_15143794(a, b, arg0->unk54, &spawn.unk28.x);
+        spawn.unk28.x += arg0->unk8;
+        spawn.unk28.y += arg0->unkC;
+        spawn.unk28.z += arg0->unk10;
+        {
+        u32 idx;
+        s32 ret;
+        idx = func_150ADA20() % arg0->unk50;
+        spawn.unk56 = arg0->unk48[idx];
+        spawn.unk0C = (arg0->unk28 + (func_150ADA68() * arg0->unk2C)) * arg0->unk4C[idx];
+        spawn.unk08 = spawn.unk0C;
+        spawn.unk00 = arg0->unk44 * spawn.unk08;
+        ret = func_1513264C(&spawn, (arg0->unk58 & 1) ? 3 : 0, 0xFF, arg0->unk34, arg0->unk5C, arg2, arg3);
+        if (arg0->unk5C > 0 && ret != 0) {
+            memcpy((void *)(ret + 0x170), arg0->unk60, arg0->unk5C);
+        }
+        }
+        count--;
+    }
+}
 
 struct Arg1515080C {
     s32 unk0;
