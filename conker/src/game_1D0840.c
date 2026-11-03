@@ -279,7 +279,261 @@ s32 func_151A361C(TimedObject151A361C *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1D0840/func_151A37C0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1D0840/func_151A3BE4.s")
+typedef struct {
+    f32 x, y, z;
+} Vec3f_151A3BE4;
+
+typedef struct {
+    Vec3f_151A3BE4 pos;
+    f32 width;
+    s16 unk10;
+    u8 pad12[2];
+    u8 unk14;
+    u8 unk15;
+    u8 pad16[2];
+} Point151A3BE4;
+
+typedef struct {
+    u8 pad0[0x2B];
+    u8 unk2B;
+    u8 unk2C;
+    u8 unk2D;
+    u8 unk2E;
+    u8 pad2F;
+    u8 unk30;
+    u8 pad31[0x4C - 0x31];
+    u8 unk4C;
+} Style151A3BE4;
+
+typedef struct {
+    u8 pad0[0x10];
+    Vec3f_151A3BE4 pos;
+    u8 pad1C[2];
+    u16 unk1E;
+    u8 pad20[5];
+    u8 unk25;
+    u8 pad26[6];
+    s8 unk2C;
+    s8 unk2D;
+    s8 unk2E;
+    u8 pad2F[0x84 - 0x2F];
+    u8 unk84[0x10];
+    Point151A3BE4 *points;
+    Style151A3BE4 *style;
+} Owner151A3BE4;
+
+extern s32 D_800D2C9C;
+extern u8 D_80090CD4[];
+void func_151D5D60(void *, s16, s32, void **, u8 *);
+Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
+Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
+Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
+Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
+Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
+Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
+
+Gfx *func_151A3BE4(Owner151A3BE4 *arg0, Gfx *gfx, s16 arg2) {
+    Vtx *vtx;
+    f32 dx, dy, dz, ex, ey, ez;
+    f32 nx, ny, nz, len, sc;
+    u8 k;
+    s32 idx;
+    Vec3f_151A3BE4 b;
+    Vec3f_151A3BE4 a;
+    s32 j;
+    s32 i;
+    u8 prev;
+    u8 lvl;
+    u8 alphaPrev;
+    u8 alpha;
+    u8 update;
+    f32 *cam;
+    Point151A3BE4 *points;
+    Style151A3BE4 *style;
+
+    if (arg0->unk2C >= 2) {
+        func_151D5D60(arg0->unk84, arg2, (arg0->unk25 + 5) * 2 * sizeof(Vtx), (void **)&vtx, 0);
+        if (vtx != NULL) {
+            style = arg0->style;
+            cam = &D_800DBFF0[arg2].unk2F8;
+            points = arg0->points;
+            update = 1;
+        fence:;
+            if (style->unk30 & 2) {
+                u8 k;
+                s16 n;
+
+                k = 0;
+                n = style->unk2B;
+                idx = arg0->unk2D;
+                do {
+                    points[idx].unk14 = k;
+                    idx++;
+                    k += style->unk2C;
+                    if (idx == arg0->unk25) {
+                        idx = 0;
+                    }
+                    n--;
+                } while (n != 0 && idx != arg0->unk2E);
+            }
+            if (style->unk30 & 4) {
+                u8 m;
+                s16 n2;
+
+                m = 0;
+                n2 = style->unk2D;
+                idx = arg0->unk2E - 1;
+                if (idx < 0) {
+                    idx = arg0->unk25 - 1;
+                }
+                do {
+                    points[idx].unk14 = (points[idx].unk14 * m) >> 8;
+                    idx--;
+                    m += style->unk2E;
+                    n2 = n2 - 1;
+                    if (idx < 0) {
+                        idx = arg0->unk25 - 1;
+                    }
+                } while (n2 != 0 && idx != arg0->unk2E);
+            }
+            gfx = func_15142E24(gfx, (s32)D_80090CD4, 0, 0, 0, 0, 0x1F, 0, 0, &update, 3);
+            gfx = func_15142B7C(gfx, 1, 0x160600);
+            gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &update);
+            gfx = func_15142CF0(gfx, 0, 0, 0, 0, 0, 0, &update);
+            gfx = func_1513F4E4(gfx, 6, &update);
+            gfx = func_15142FBC(gfx, D_800D2C9C | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, 0x5049D8, &update);
+            if (arg0->unk1E & 2) {
+                j = arg0->unk2E - 1;
+                if (j < 0) {
+                    j = arg0->unk25 - 1;
+                }
+                a = arg0->pos;
+                lvl = (points[j].unk15 + style->unk4C);
+                alpha = (points[j].unk10 * points[j].unk14) >> 8;
+            } else {
+                i = arg0->unk2E - 1;
+                if (i < 0) {
+                    i = arg0->unk25 - 1;
+                }
+                j = i - 1;
+                if (j < 0) {
+                    j = arg0->unk25 - 1;
+                }
+                a = points[i].pos;
+                lvl = (points[i].unk15 + style->unk4C);
+                alpha = (points[i].unk10 * points[i].unk14) >> 8;
+            }
+            b = points[j].pos;
+            prev = (points[j].unk15 + style->unk4C);
+            alphaPrev = (points[j].unk10 * points[j].unk14) >> 8;
+            ex = a.x - b.x;
+            ey = a.y - b.y;
+            ez = a.z - b.z;
+            dx = a.x - cam[0];
+            dy = a.y - cam[1];
+            dz = a.z - cam[2];
+            nx = ey * dz - dy * ez;
+            ny = ez * dx - dz * ex;
+            nz = ex * dy - dx * ey;
+            len = nx * nx + ny * ny + nz * nz;
+            if (len == 0.0f) {
+                nz = ny = nx = 0.0f;
+            } else {
+                sc = points[j].width / sqrtf(len);
+                nx = nx * sc;
+                ny = ny * sc;
+                nz = nz * sc;
+            }
+            *(s16 *)((u8 *)vtx + 0) = (s32)(a.x + nx);
+            *(s16 *)((u8 *)vtx + 2) = (s32)(a.y + ny);
+            *(s16 *)((u8 *)vtx + 4) = (s32)(a.z + nz);
+            *(s16 *)((u8 *)vtx + 8) = lvl << 6;
+            *(s16 *)((u8 *)vtx + 0xA) = 0x7C0;
+            *((u8 *)vtx + 0xC) = 0xFF;
+            *((u8 *)vtx + 0xD) = 0xFF;
+            *((u8 *)vtx + 0xE) = 0xFF;
+            *((u8 *)vtx + 0xF) = alpha;
+            *(s16 *)((u8 *)vtx + 6) = 0;
+            vtx++;
+            *(s16 *)((u8 *)vtx + 0) = (s32)(a.x - nx);
+            *(s16 *)((u8 *)vtx + 2) = (s32)(a.y - ny);
+            *(s16 *)((u8 *)vtx + 4) = (s32)(a.z - nz);
+            *(s16 *)((u8 *)vtx + 8) = lvl << 6;
+            *(s16 *)((u8 *)vtx + 0xA) = 0;
+            *((u8 *)vtx + 0xC) = 0xFF;
+            *((u8 *)vtx + 0xD) = 0xFF;
+            *((u8 *)vtx + 0xE) = 0xFF;
+            *((u8 *)vtx + 0xF) = alpha;
+            *(s16 *)((u8 *)vtx + 6) = 0;
+            vtx++;
+            do {
+                ex = a.x - b.x;
+                ey = a.y - b.y;
+                ez = a.z - b.z;
+                dx = b.x - cam[0];
+                dy = b.y - cam[1];
+                dz = b.z - cam[2];
+                nx = ey * dz - dy * ez;
+                ny = ez * dx - dz * ex;
+                nz = ex * dy - dx * ey;
+                len = nx * nx + ny * ny + nz * nz;
+                if (len == 0.0f) {
+                    nz = ny = nx = 0.0f;
+                } else {
+                    sc = points[j].width / sqrtf(len);
+                    nx = nx * sc;
+                    ny = ny * sc;
+                    nz = nz * sc;
+                }
+                *(s16 *)((u8 *)vtx + 0) = (s32)(b.x + nx);
+                *(s16 *)((u8 *)vtx + 2) = (s32)(b.y + ny);
+                *(s16 *)((u8 *)vtx + 4) = (s32)(b.z + nz);
+                *(s16 *)((u8 *)vtx + 8) = prev << 6;
+                *(s16 *)((u8 *)vtx + 0xA) = 0x7C0;
+                *((u8 *)vtx + 0xC) = 0xFF;
+                *((u8 *)vtx + 0xD) = 0xFF;
+                *((u8 *)vtx + 0xE) = 0xFF;
+                *((u8 *)vtx + 0xF) = alphaPrev;
+                *(s16 *)((u8 *)vtx + 6) = 0;
+                vtx++;
+                *(s16 *)((u8 *)vtx + 0) = (s32)(b.x - nx);
+                *(s16 *)((u8 *)vtx + 2) = (s32)(b.y - ny);
+                *(s16 *)((u8 *)vtx + 4) = (s32)(b.z - nz);
+                *(s16 *)((u8 *)vtx + 8) = prev << 6;
+                *(s16 *)((u8 *)vtx + 0xA) = 0;
+                *((u8 *)vtx + 0xC) = 0xFF;
+                *((u8 *)vtx + 0xD) = 0xFF;
+                *((u8 *)vtx + 0xE) = 0xFF;
+                *((u8 *)vtx + 0xF) = alphaPrev;
+                *(s16 *)((u8 *)vtx + 6) = 0;
+                vtx++;
+                gSPVertex(gfx++, vtx - 4, 4, 0);
+                gSP1Triangle(gfx++, 0, 1, 2, 0);
+                gSP1Triangle(gfx++, 1, 3, 2, 0);
+                if (lvl < prev) {
+                    memcpy(vtx, vtx - 2, 0x20);
+                    *(s16 *)((u8 *)vtx - 0x18) -= 0x4000;
+                    vtx++;
+                    *(s16 *)((u8 *)vtx - 0x18) -= 0x4000;
+                    vtx++;
+                }
+                i = j;
+                j--;
+                if (j < 0) {
+                    j = arg0->unk25 - 1;
+                }
+                if (i != arg0->unk2D) {
+                    lvl = prev;
+                    a = b;
+                    b = points[j].pos;
+                    prev = (points[j].unk15 + style->unk4C);
+                    alphaPrev = (points[j].unk10 * points[j].unk14) >> 8;
+                }
+            } while (i != arg0->unk2D);
+        }
+    }
+    return gfx;
+}
 
 struct frame151A4590 {
     s32 unk0;
