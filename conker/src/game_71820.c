@@ -1098,7 +1098,49 @@ s32 func_150461D0(struct conker15045714 *arg0, u16 arg1, f32 arg2, struct conker
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_71820/func_15046460.s")
+s32 func_15046460(struct conker15045714 *arg0, u16 arg1, f32 arg2, struct conker150472C0_dst *arg3) {
+    s32 first_set;
+    s32 second_set;
+    struct conker150472C0_dst first_hit;
+    struct conker150472C0_dst second_hit;
+    u8 first_result;
+    u8 second_result;
+
+    if (arg0->field_0x04 < arg2) {
+        arg3->field_0x1D = 0;
+        arg3->field_0x20 = 0;
+        arg3->field_0x1C &= ~2;
+        return 0;
+    }
+    first_hit = *arg3;
+    second_hit = *arg3;
+    func_15045714(arg0, arg1, &first_set, (s32)&second_set);
+    first_result = func_15045AE4((Vec3f_15045D48 *)arg0, arg2, &first_set, (Game71820Hit *)&first_hit);
+    second_result = func_15045F8C(arg0, arg2, &second_set, (Game71820Hit *)&second_hit);
+    if (first_result && second_result) {
+        if (second_hit.field_0x00 < first_hit.field_0x00) {
+            *arg3 = first_hit;
+            return 1;
+        }
+        *arg3 = second_hit;
+        return 1;
+    }
+    if (first_result != 0) {
+        *arg3 = first_hit;
+        return 1;
+    }
+    if (second_result != 0) {
+        *arg3 = second_hit;
+        return 1;
+    }
+    if (second_hit.field_0x00 < first_hit.field_0x00) {
+        *arg3 = first_hit;
+    } else {
+        *arg3 = second_hit;
+    }
+    arg3->field_0x1C &= ~2;
+    return 0;
+}
 
 s32 func_150461D0(struct conker15045714 *, u16, f32, struct conker150472C0_dst *);
 s32 func_15046460(struct conker15045714 *, u16, f32, struct conker150472C0_dst *);

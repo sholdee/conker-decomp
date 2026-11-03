@@ -235,7 +235,7 @@ void func_15007644(void);
 void func_1500764C(void);
 void func_15007668(void);
 void func_15007684(void);
-void func_150076A0(void);
+void func_150076A0();
 void func_150076BC(s32 arg0);
 void func_15007718(s32 arg0);
 void func_15007750(s32 arg0);

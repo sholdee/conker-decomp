@@ -517,7 +517,42 @@ void func_151E2284(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_20AE20/func_151E22BC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_20AE20/func_151E2404.s")
+extern s8 *D_80082BBC;
+
+void func_151E2404(void) {
+    s8 *record;
+    s32 index;
+
+    index = D_800AB690[*(s8 *)((u8 *)D_8008FDD4 + 0x42) * 10];
+    record = D_80082BBC + (index * 10);
+    record[0] = 0;
+    record[1] = D_800E0BE0[2];
+    record[2] = D_800E0BE0[3];
+    record[3] = D_800E0BE0[0x10];
+    record[4] = D_800E0BE0[0x11];
+    switch (index) {
+        case 0:
+            record[5] = D_800E0BE0[4];
+            break;
+        case 1:
+        case 2:
+            record[5] = D_800E0BE0[0xD];
+            record[6] = D_800E0BE0[0xE];
+            break;
+        case 5:
+        case 7:
+            record[5] = D_800E0BE0[0x12];
+            break;
+        case 8:
+        case 9:
+            record[5] = D_800E0BE0[7];
+            record[6] = D_800E0BE0[0x13];
+            break;
+    }
+    record[8] = D_800E0BE0[0x16];
+    record[9] = D_800E0BE0[6];
+    func_150076A0(D_800E0BE0);
+}
 
 extern s8 D_800AB694[];
 extern s8 D_8008FE44[];

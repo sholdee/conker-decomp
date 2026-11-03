@@ -323,7 +323,105 @@ void *func_151C7E98(Obj_151C7E98 *arg0, s16 arg1) {
     return result;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1F4650/func_151C82D0.s")
+typedef struct SightOscillation {
+    f32 x, y, centerX, centerY, radiusX, radiusY;
+    f32 angleX, angleY, speedX, speedY;
+    u8 pad28[4];
+    void *animation;
+    u8 pad30[0x10];
+    void *objects[5];
+    f32 phase;
+    u8 alternate;
+    u8 pad59[0x25];
+    s16 activeTime;
+    u8 pad80[2];
+    s16 timer, period;
+    u8 flags;
+    u8 pad87;
+    void *secondary;
+    u8 pad8C[0xC];
+    f32 brightnessAngle, brightnessSpeed;
+} SightOscillation;
+
+extern f32 D_800AAC50, D_800AAC54;
+
+s32 func_151C82D0(void *arg0) {
+    SightOscillation *state = (SightOscillation *)((u8 *)arg0 + 0x110);
+    s16 period;
+    void *object;
+    void *object1;
+    void *object2;
+    void *object3;
+
+    if (state->flags & 1) {
+        period = state->period;
+        state->timer += D_800BE9E4;
+        while (state->timer >= period) {
+            state->timer -= period;
+        }
+        if (state->timer < state->activeTime) {
+            state->flags |= 2;
+        } else {
+            state->flags &= 0xFFFD;
+        }
+    }
+    if (state->flags & 2) {
+        state->angleX += state->speedX * D_800BE9A4;
+        state->angleY += state->speedY * D_800BE9A4;
+        state->angleX = func_15144B68(state->angleX);
+        state->angleY = func_15144B68(state->angleY);
+        state->x = func_150AD78C(state->angleX) * state->radiusX + state->centerX;
+        state->y = func_150AD78C(state->angleY) * state->radiusY + state->centerY;
+        object = state->animation;
+        if (object != NULL) {
+            *((u8 *)*(void **)((u8 *)object + 0x14) + 9) = 0;
+        }
+        object = state->secondary;
+        if (object != NULL && (state->flags & 0x10)) {
+            *((u8 *)object + 0x14) = 0;
+        }
+    } else {
+        object = state->animation;
+        if (object != NULL) {
+            *((u8 *)*(void **)((u8 *)object + 0x14) + 9) = 1;
+        }
+        object = state->secondary;
+        if (object != NULL) {
+            *((u8 *)object + 0x14) = 1;
+        }
+    }
+    state->phase += D_800AAC50 * D_800BE9A4;
+    while (state->phase > 1.0f) {
+        if (state->flags & 2) {
+            state->alternate ^= 1;
+        }
+        state->phase -= 1.0f;
+    }
+    if (state->alternate != 0) {
+        object = state->objects[0];
+        *(u32 *)((u8 *)object + 0x60) &= 0xFFFDFFFF;
+        object1 = state->objects[1];
+        *(u32 *)((u8 *)object1 + 0x60) |= 0x20000;
+        object2 = state->objects[3];
+        *(u32 *)((u8 *)object2 + 0x60) &= 0xFFFDFFFF;
+        object3 = state->objects[4];
+        *(u32 *)((u8 *)object3 + 0x60) |= 0x20000;
+    } else {
+        object = state->objects[0];
+        *(u32 *)((u8 *)object + 0x60) |= 0x20000;
+        object1 = state->objects[1];
+        *(u32 *)((u8 *)object1 + 0x60) &= 0xFFFDFFFF;
+        object2 = state->objects[3];
+        *(u32 *)((u8 *)object2 + 0x60) |= 0x20000;
+        object3 = state->objects[4];
+        *(u32 *)((u8 *)object3 + 0x60) &= 0xFFFDFFFF;
+    }
+    if (state->flags & 8) {
+        *((u8 *)arg0 + 0x5C) = (u32)(func_150AD78C(state->brightnessAngle) * 112.5f + D_800AAC54);
+        state->brightnessAngle = func_15144B68(state->brightnessAngle + state->brightnessSpeed * D_800BE9A4);
+    }
+    return 1;
+}
 
 void func_151C8674(s32 arg0, s32 arg1) {
     struct {
