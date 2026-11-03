@@ -154,7 +154,359 @@ typedef struct Struct1514E00C_A4 {
 } Struct1514E00C_A4;
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_179F30/func_1514CA80.s")
+s32 func_1514CA80(struct127 *arg0, s32 *arg1, s32 *arg2, s32 *arg3) {
+    u8 ret = 0;
+
+    switch (arg0->id) {
+    case 94:
+        *arg3 = 0x19;
+        ret = 4;
+        break;
+    case 154:
+        *arg3 = 0x18;
+        ret = 4;
+        break;
+    case 16:
+    case 46:
+        *arg3 = 0x17;
+        ret = 4;
+        break;
+    case 127:
+        *arg3 = 0x16;
+        ret = 4;
+        break;
+    case 153:
+        *arg3 = 0x15;
+        ret = 4;
+        break;
+    case 137:
+    case 186:
+        *arg3 = 0x14;
+        ret = 4;
+        break;
+    case 173:
+        *arg3 = 0x11;
+        ret = 4;
+        break;
+    case 134:
+        *arg3 = 0x12;
+        ret = 4;
+        break;
+    case 82:
+        *arg3 = 0x13;
+        ret = 4;
+        break;
+    case 95:
+        *arg3 = 0x1B;
+        ret = 4;
+        break;
+    case 107:
+        *arg3 = 0x10;
+        ret = 4;
+        break;
+    case 148:
+        *arg3 = 0xE;
+        ret = 4;
+        break;
+    case 37:
+        *arg3 = 0x1A;
+        ret = 4;
+        break;
+    case 146:
+        *arg3 = 0xF;
+        ret = 4;
+        break;
+    case 159:
+    case 160:
+        *arg3 = 0xD;
+        ret = 4;
+        break;
+    case 147:
+        *arg3 = 0xC;
+        ret = 4;
+        break;
+    case 141:
+        *arg3 = 0xB;
+        ret = 4;
+        break;
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 150:
+        *arg3 = 0;
+        ret = 4;
+        break;
+    case 8:
+        *arg3 = 2;
+        ret = 4;
+        break;
+    case 10:
+        *arg3 = 3;
+        ret = 4;
+        break;
+    case 41:
+    case 42:
+        *arg3 = 4;
+        ret = 4;
+        break;
+    case 83:
+        *arg3 = 5;
+        ret = 4;
+        break;
+    case 119:
+        *arg3 = 6;
+        ret = 4;
+        break;
+    case 71:
+        *arg3 = 7;
+        ret = 4;
+        break;
+    case 40:
+        *arg3 = 8;
+        ret = 4;
+        break;
+    case 123:
+        *arg3 = 9;
+        ret = 4;
+        break;
+    case 18:
+        *arg3 = 0xA;
+        ret = 4;
+        break;
+    }
+
+    switch (D_800BE9F0) {
+    case 43:
+        *arg2 = 0x15;
+        ret |= 2;
+        if (arg0->id == 0x9C || arg0->id == 0x9D) {
+            *arg1 = 0;
+            ret |= 1;
+        }
+        break;
+    case 29:
+        *arg2 = 0x14;
+        ret |= 2;
+        if (arg0->unique_id == 9) {
+            *arg1 = 0;
+            ret |= 1;
+        }
+        break;
+    case 0:
+        *arg2 = 0x10;
+        ret |= 2;
+        if (arg0->unique_id == 1) {
+            *arg1 = 0;
+            ret |= 1;
+        }
+        break;
+    case 44:
+        *arg2 = 0x11;
+        ret |= 2;
+        if (arg0->unique_id == 1) {
+            *arg1 = 0;
+            ret |= 1;
+        }
+        break;
+    case 35:
+        *arg2 = 0xF;
+        ret |= 2;
+        if (arg0->unique_id == 1) {
+            *arg1 = 0;
+            ret |= 1;
+        }
+        break;
+    case 47:
+        *arg2 = 0x12;
+        ret |= 2;
+        if (arg0->unique_id == 1) {
+            *arg1 = 0;
+            ret |= 1;
+        }
+        break;
+    case 53:
+        *arg2 = 0x13;
+        ret |= 2;
+        if (arg0->unique_id == 1) {
+            *arg1 = 0;
+            ret |= 1;
+        }
+        break;
+    case 40:
+        *arg2 = 0xE;
+        ret |= 2;
+        if (arg0->unique_id == 1) {
+            *arg1 = 0;
+            ret |= 1;
+        }
+        break;
+    case 27:
+        *arg2 = 0xA;
+        ret |= 2;
+        if (arg0->unique_id == 1) {
+            *arg1 = 0;
+            ret |= 1;
+        }
+        break;
+    case 30:
+        *arg2 = 0xB;
+        ret |= 2;
+        if (arg0->unique_id == 1) {
+            *arg1 = 0;
+            ret |= 1;
+        }
+        break;
+    case 38:
+        *arg2 = 0xC;
+        ret |= 2;
+        if (arg0->unique_id == 1) {
+            *arg1 = 0;
+            ret |= 1;
+        }
+        break;
+    case 28:
+        *arg2 = 0xD;
+        ret |= 2;
+        if (arg0->unique_id == 1) {
+            *arg1 = 0;
+            ret |= 1;
+        }
+        break;
+    case 14:
+        *arg2 = 7;
+        ret |= 2;
+        switch (arg0->unique_id) {
+        case 8:
+            *arg1 = 0;
+            ret |= 1;
+            break;
+        case 1:
+            *arg1 = 1;
+            ret |= 1;
+            break;
+        }
+        break;
+    case 4:
+        *arg2 = 6;
+        ret |= 2;
+        if (arg0->unique_id == 1) {
+            *arg1 = 0;
+            ret |= 1;
+        }
+        break;
+    case 7:
+        *arg2 = 5;
+        ret |= 2;
+        if (arg0->unique_id == 0x10) {
+            *arg1 = 0;
+            ret |= 1;
+        }
+        break;
+    case 12:
+        *arg2 = 3;
+        ret |= 2;
+        break;
+    case 2:
+        *arg2 = 0;
+        ret |= 2;
+        switch (arg0->unique_id) {
+        case 9:
+            *arg1 = 0;
+            ret |= 1;
+            break;
+        case 7:
+            *arg1 = 1;
+            ret |= 1;
+            break;
+        case 14:
+        case 15:
+        case 23:
+        case 25:
+            *arg1 = 2;
+            ret |= 1;
+            break;
+        case 13:
+            *arg1 = 3;
+            ret |= 1;
+            break;
+        }
+        break;
+    case 10:
+        *arg2 = 1;
+        ret |= 2;
+        switch (arg0->unique_id) {
+        case 6:
+            *arg1 = 0;
+            ret |= 1;
+            break;
+        case 7:
+            *arg1 = 1;
+            ret |= 1;
+            break;
+        case 8:
+            *arg1 = 2;
+            ret |= 1;
+            break;
+        case 9:
+            *arg1 = 3;
+            ret |= 1;
+            break;
+        case 10:
+            *arg1 = 4;
+            ret |= 1;
+            break;
+        case 11:
+            *arg1 = 5;
+            ret |= 1;
+            break;
+        case 12:
+            *arg1 = 6;
+            ret |= 1;
+            break;
+        case 13:
+            *arg1 = 7;
+            ret |= 1;
+            break;
+        case 15:
+            *arg1 = 8;
+            ret |= 1;
+            break;
+        }
+        break;
+    case 6:
+        *arg2 = 2;
+        ret |= 2;
+        break;
+    case 16:
+        *arg2 = 4;
+        ret |= 2;
+        if (arg0->unique_id == 6) {
+            *arg1 = 0;
+            ret |= 1;
+        }
+        break;
+    case 20:
+        *arg2 = 8;
+        ret |= 2;
+        if (arg0->unique_id == 0x10) {
+            *arg1 = 0;
+            ret |= 1;
+        }
+        break;
+    case 23:
+        *arg2 = 9;
+        ret |= 2;
+        if (arg0->unique_id == 1) {
+            *arg1 = 0;
+            ret |= 1;
+        }
+        break;
+    }
+    return ret;
+}
+
 
 s32 func_1514D15C(struct127 *arg0) {
     s32 sp44;
