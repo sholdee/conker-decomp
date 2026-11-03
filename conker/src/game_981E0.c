@@ -1001,7 +1001,49 @@ void func_1506DE04(void) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506DE84.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506E0EC.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506E2CC.s")
+void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
+void func_151700D8(f32 *, f32, f32, s32, f32, s32, s32, s32, s32, s32);
+
+void func_1506E2CC(void) {
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 s;
+    f32 t;
+    f32 h;
+    s32 i;
+    f32 verts[4][3];
+    f32 px;
+    f32 pz;
+
+    if (D_800D154C->unk1D4 != NULL) {
+        s = 100.0f;
+        t = 100.0f;
+        h = D_800D154C->unk180;
+        x = s;
+        z = s;
+        for (i = 0; i < 4; i++) {
+            y = 0.0f;
+            func_150A7960((f32 *)D_800D154C->unk1D4, x, y, z, &x, &y, &z);
+            verts[i][0] = x;
+            verts[i][1] = h;
+            verts[i][2] = z;
+            if (i == 0) {
+                z = s;
+                x = -s;
+            } else if (i == 1) {
+                x = -s;
+                z = -t;
+            } else if (i == 2) {
+                x = s;
+                z = -s;
+            }
+        }
+        px = D_800D154C->x_position;
+        pz = D_800D154C->z_position;
+        func_151700D8((f32 *)verts, px, pz, 5, D_800D154C->xz_scale * 0.5f, 0, 4, 4, 0xFF, 0);
+    }
+}
 // PERMUTER/REGALLOC CANDIDATE (best 4009): logic byte-close but cmd wants register a3 (IDO gives v1)
 // which cascades all temp regs; v1=cmd&0x7FFF wants early compute + spill to 0x18 (IDO computes it
 // late); first test wants plain bgez (IDO emits bgezl). Reconstruction:
