@@ -187,7 +187,121 @@ s32 func_151CD674(u8 *actor) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1FA770/func_151CD7BC.s")
+typedef struct Vec2f151CD7BC { f32 x; f32 z; } Vec2f151CD7BC;
+
+typedef struct Owner151CD7BC {
+    f32 amp0;
+    f32 amp1;
+    f32 phase0;
+    f32 phase1;
+    f32 rate0;
+    f32 rate1;
+    Vec2f151CD7BC pos;
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+    f32 phase2;
+    f32 rate2;
+    f32 unk34;
+    f32 unk38;
+    f32 unk3C;
+    f32 unk40;
+} Owner151CD7BC;
+
+typedef struct Particle151CD7BC {
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 vel;
+    f32 unk10;
+    s16 alpha;
+    f32 unk18;
+} Particle151CD7BC;
+
+s32 func_151CD7BC(u8 *actor) {
+    Owner151CD7BC *owner;
+    Particle151CD7BC *particles;
+    Particle151CD7BC *p;
+    f32 h;
+    f32 dh;
+    f32 dz;
+    f32 dx;
+    Vec2f151CD7BC pos;
+    f32 inv;
+    f32 a;
+    f32 da;
+    f32 b;
+    f32 vel;
+    f32 db;
+    f32 gravity;
+    f32 acceleration;
+    s32 tail;
+
+    owner = *(Owner151CD7BC **)(actor + 0x98);
+    particles = *(Particle151CD7BC **)(actor + 0x94);
+    owner->phase0 += owner->rate0 * D_800BE9A4;
+    owner->phase1 += owner->rate1 * D_800BE9A4;
+    owner->phase0 = func_15144B68(owner->phase0);
+    owner->phase1 = func_15144B68(owner->phase1);
+    owner->phase2 += owner->rate2 * D_800BE9A4;
+    owner->phase2 = func_15144B68(owner->phase2);
+    owner->unk40 += 0.2730129957f * D_800BE9A4;
+    owner->unk3C += (10220.0f + func_150ADA68() * 9434.0f) * 0.009999999776f * D_800BE9A4;
+    while (owner->unk3C >= 16384.0f) {
+        owner->unk3C -= 16384.0f;
+    }
+    if (owner->unk40 > 1.0f) {
+        inv = 1.0f / owner->unk40;
+        h = owner->unk20 + D_800BE9A4;
+        dh = -(h * inv);
+        pos = owner->pos;
+        dx = (*(f32 *)(actor + 0x10) + (sinf(owner->phase0) * owner->amp0)) - owner->pos.x;
+        dz = (*(f32 *)(actor + 0x18) + (sinf(owner->phase1) * owner->amp1)) - owner->pos.z;
+        da = (owner->unk24 + (sinf(owner->phase2) * owner->unk28)) - owner->unk34;
+        db = owner->unk3C - owner->unk38;
+        a = owner->unk34;
+        b = owner->unk3C;
+        gravity = -0.255000025f;
+        acceleration = -0.1275000125f;
+        vel = -3.772000074f;
+        while (owner->unk40 > 1.0f) {
+            p = &particles[*(s8 *)(actor + 0x2E)];
+            p->x = pos.x;
+            p->y = *(f32 *)(actor + 0x14);
+            p->z = pos.z;
+            p->vel = vel;
+            p->unk10 = a;
+            p->alpha = 0xFF;
+            p->unk18 = b;
+            p->y = p->y + ((vel * D_800BE9A4) + (acceleration * (D_800BE9A4 * D_800BE9A4)));
+            p->vel = (f32)vel + gravity * D_800BE9A4;
+            *(s8 *)(actor + 0x2E) += 1;
+            if (actor[0x25] == *(s8 *)(actor + 0x2E)) {
+                *(s8 *)(actor + 0x2E) = 0;
+            }
+            tail = *(s8 *)(actor + 0x2D);
+            *(s8 *)(actor + 0x2C) += 1;
+            if (tail == *(s8 *)(actor + 0x2E)) {
+                *(s8 *)(actor + 0x2D) = tail + 1;
+                if (actor[0x25] == *(s8 *)(actor + 0x2D)) {
+                    *(s8 *)(actor + 0x2D) = 0;
+                }
+                *(s8 *)(actor + 0x2C) -= 1;
+            }
+            pos.x += dx * inv;
+            pos.z += dz * inv;
+            a += da * inv;
+            b += db * inv;
+            h += dh;
+            owner->unk40 -= 1.0f;
+        }
+        owner->pos = pos;
+        owner->unk34 = a;
+        owner->unk38 = b;
+        owner->unk20 = h;
+    }
+    return 1;
+}
 
 typedef struct Game1FA770Trail {
     f32 x;
