@@ -159,22 +159,22 @@ void func_1516D400(void) {
 }
 
 void func_1516D4E8(
-    s32 arg0, s32 arg1, s32 arg2, s32 arg3,
+    s16 arg0, s16 arg1, s16 arg2, s32 arg3,
     s32 arg4, s32 arg5, s32 arg6, s32 arg7,
     s32 arg8, s32 arg9, s32 arg10, s32 arg11,
     s32 arg12, s32 arg13, s32 arg14, s32 arg15,
     s32 arg16, s32 arg17, s32 arg18, s32 arg19,
     s32 arg20, s32 arg21, s32 arg22, s32 arg23,
     s32 arg24, s32 arg25, s32 arg26, s32 arg27,
-    volatile s32 arg28, s32 arg29, s32 arg30) {
+    volatile s32 arg28, u8 arg29, s32 arg30) {
     struct Obj1516D4E8 *ret;
     s32 temp_a2;
 
-    ret = (struct Obj1516D4E8 *)func_15167A68(arg27 != 0 ? 0x67 : 0x12, arg30, 0x34, 0, LOW_U8(arg29), 1);
+    ret = (struct Obj1516D4E8 *)func_15167A68(arg27 != 0 ? 0x67 : 0x12, arg30, 0x34, 0, arg29, 1);
     if (ret != NULL) {
-        ret->unkE = LOW_S16(arg0);
-        ret->unk10 = LOW_S16(arg1);
-        ret->unk12 = LOW_S16(arg2);
+        ret->unkE = arg0;
+        ret->unk10 = arg1;
+        ret->unk12 = arg2;
         ret->unk1A = LOW_U8(arg3);
         ret->unk1B = LOW_U8(arg4);
         ret->unk1C = LOW_U8(arg5);
@@ -995,4 +995,27 @@ s32 func_151707E0(Obj151707E0 *arg0) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_19A8B0/func_151709B4.s")
+void func_151709B4(s32 arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, u8 arg5, s32 arg6) {
+    s32 i;
+    f32 x;
+    f32 y;
+    f32 z;
+    s32 ix;
+    s32 iz;
+    s32 iy;
+    s32 pad;
+    s32 pad2;
+
+    for (i = 0; i < arg3; i++) {
+        func_15170034(0x40, &x, &y, &z);
+        x *= arg4;
+        y *= arg4 + arg4;
+        z *= arg4;
+        ix = x;
+        iz = z;
+        iy = y;
+        func_1516D4E8(arg0, arg1, arg2, 0x2F, 0, 0xFF, 0xFF, 0xFF, 0, 0xFF, 0, 0, 7,
+            ix >> 8, ix & 0xFF, iz >> 8, iz & 0xFF, 0, 0, 0, 0, 0, 0, 0x200, 0x200, 0x28,
+            iy, 0, 0, arg5, arg6);
+    }
+}
