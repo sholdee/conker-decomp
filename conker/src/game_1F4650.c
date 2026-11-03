@@ -15,7 +15,7 @@ extern void func_1514373C(f32, f32, f32 *, f32 *);
 extern void func_15145974(struct17 *, f32 *, f32 *);
 extern void func_1000FD38(void *, void *, s32);
 extern s32 func_151C87E0(s32, s32);
-extern void func_151C899C(s32, s32);
+extern void func_151C899C();
 extern void *func_1515548C(void *, u8, s32, s32, s32, u8, s32);
 extern void func_15160274(s32, s32, s32);
 extern void func_1515572C(s32, s32);
@@ -481,7 +481,123 @@ s32 func_151C87AC(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, 
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1F4650/func_151C87E0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1F4650/func_151C899C.s")
+typedef struct { f32 x, y, z; } V3_899C;
+typedef struct { u8 b[0x10]; u16 h; } B18_899C;
+typedef struct {
+    u8 pad0[0x5A];
+    B18_899C c5A;
+    B18_899C c6C;
+    u8 pad7E[0x94 - 0x7E];
+    u8 unk94;
+} Sub110_899C;
+typedef struct {
+    u8 pad0;
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD[0x34 - 0xD];
+    V3_899C p34;
+    V3_899C p40;
+    V3_899C p4C;
+    u8 pad58[0x110 - 0x58];
+    Sub110_899C s110;
+} Ent_899C;
+typedef struct {
+    V3_899C pos;
+    B18_899C copy;
+    f32 f20;
+    s32 i24, i28;
+    V3_899C v2C;
+    f32 f38, f3C, f40, f44, f48, f4C;
+    s32 i50, i54;
+    f32 f58, f5C, f60, f64;
+    s16 s68, s6A, s6C, s6E, s70, s72;
+    s8 s74;
+} Cfg_899C;
+typedef struct { s8 a, b; s16 c; s8 d; } S60_899C;
+typedef struct { s8 a; s16 b; s8 c, d, e; } S58_899C;
+extern u8 *D_800AAC30[];
+extern void func_1514FBFC(void *, u8, s32);
+extern void func_151602C0(void *, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern void func_150E7FEC(f32, u8, void *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
+extern void func_15164F0C(s32, u8, s32, u8, s32);
+extern void func_151D8868(void *, s32, s32, s32);
+extern void func_1505D024(s32, u8 *, s32, s32);
+extern void func_1000EC24();
+
+#define E arg1
+#define PC sub
+typedef struct { u8 pad[0x318]; u8 *unk318; } A0_899C;
+void func_151C899C(A0_899C *arg0, Ent_899C *arg1) {
+    Sub110_899C *sub;
+    Cfg_899C cfg;
+    s32 v68[3];
+    S60_899C s60;
+    S58_899C s58;
+
+    sub = &E->s110;
+    cfg.f20 = 491.0f;
+    cfg.f38 = 0.06049999967f;
+    cfg.f3C = 0.0522999987f;
+    cfg.f40 = 30.0f;
+    cfg.f44 = 83.0f;
+    cfg.i24 = 5;
+    cfg.i28 = 3;
+    cfg.i50 = 5;
+    cfg.i54 = 4;
+    cfg.s68 = 0x12;
+    cfg.s6A = 9;
+    cfg.s6C = 0x64;
+    cfg.s6E = 0x64;
+    cfg.s70 = 0xC;
+    cfg.s72 = 0xF;
+    cfg.s74 = 0;
+    cfg.f48 = 211.0f;
+    cfg.f4C = 150.0f;
+    cfg.f58 = 21.0f;
+    cfg.f5C = 0.6980000138f;
+    cfg.f60 = -0.4450000226f;
+    cfg.f64 = 0.4410000145f;
+    cfg.v2C = E->p34;
+    cfg.pos = E->p4C;
+    cfg.copy = sub->c5A;
+    func_1514FBFC(&cfg, E->unkC, E->unk1);
+    cfg.v2C = E->p40;
+    cfg.pos.x = -E->p4C.x;
+    cfg.pos.y = -E->p4C.y;
+    cfg.pos.z = -E->p4C.z;
+    cfg.copy = sub->c6C;
+    func_1514FBFC(&cfg, E->unkC, E->unk1);
+    v68[0] = E->p34.x;
+    v68[1] = E->p34.y;
+    v68[2] = E->p34.z;
+    s60.a = 3;
+    s60.b = -1;
+    s60.c = func_150ADA20() % 9U + 0x11;
+    s60.d = 0;
+    func_151602C0(&s60, v68, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, E->unkC, E->unk1);
+    v68[0] = E->p40.x;
+    v68[1] = E->p40.y;
+    v68[2] = E->p40.z;
+    func_151602C0(&s60, v68, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, E->unkC, E->unk1);
+    func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, func_150ADA20() % 66U + 0xBE, &PC->c5A, &E->p34, -1, 1, 1, 0, 0, 0, E->unkC, 0);
+    func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, func_150ADA20() % 66U + 0xBE, &sub->c6C, &E->p40, -1, 1, 1, 0, 0, 0, E->unkC, 0);
+    if (arg0 != 0) {
+        func_15164F0C(2, arg0->unk318[0x23D], 0, E->unkC, E->unk1);
+        s58.a = 1;
+        s58.b = 0x28;
+        s58.d = 1;
+        s58.c = 8;
+        s58.e = -1;
+        func_151D8868(&s58, 0, 0xFF, 0);
+    }
+    if (arg0 != 0) {
+        func_1505D024((s32)arg0, D_800AAC30[PC->unk94], 0, -1);
+    }
+    func_10010F88(0x2F5, 0x7FFF, func_150ADA20() % 500U, 0, 0, E->p34.x, E->p34.y, E->p34.z, 0x7D0, 0x898);
+    func_1000FA64(0x2F6, E->p40.x, E->p40.y, E->p40.z, 0x7FFF, 0x898, 0x7D0, (s32)&func_1000EC24, (void *)5, 0, 0, func_150ADA20() % 500U);
+    func_1516972C((struct102 *)arg1);
+}
 
 typedef struct {
     f32 x;
