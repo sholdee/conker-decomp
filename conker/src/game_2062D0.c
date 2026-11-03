@@ -42,7 +42,7 @@ extern f32 D_800AB4A4;
 extern f32 D_800AB4A8;
 extern f32 D_800AB4AC;
 
-void func_151D9014(void *arg0, f32 *arg1, u8 arg2, f32 arg3, s32 arg4, u8 arg5, f32 arg6, s32 arg7, f32 arg8, f32 arg9, u8 argA, s32 argB, s32 argC, s32 argD, u8 argE, s32 argF);
+void *func_151D9014(void *arg0, f32 *arg1, u8 arg2, f32 arg3, s16 arg4, u8 arg5, f32 arg6, s32 arg7, f32 arg8, f32 arg9, u8 argA, s32 argB, s32 argC, s32 argD, u8 argE, s32 argF);
 
 typedef struct {
     u8 unk0;
@@ -174,7 +174,132 @@ u8 func_151D8FE0(void) {
 
 // big struct definition
 // void func_151D9014(void *arg0, f32 *arg1, u8 arg2, f32 arg3, s16 arg4, u8 arg5, f32 arg6, u8 arg7, f32 arg8, f32 arg9, u8 argA, s32 argB, u8 argC, u8 argD, u8 argE, s32 argF);
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/func_151D9014.s")
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s16 unk8;
+    s16 unkA;
+    s32 unkC;
+    s32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 unk16;
+    u8 unk17;
+    u8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+    u8 unk1C;
+    u8 unk1D;
+    s16 unk1E;
+    s16 unk20;
+    s16 unk22;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    struct17 pos;
+    struct17 unk3C;
+    struct17 vel;
+    f32 unk54;
+    u32 unk58;
+    s32 unk5C;
+    u8 unk60;
+    u8 unk61;
+    s8 unk62;
+    s8 unk63;
+    s8 unk64;
+    u8 unk65;
+    u8 unk66;
+    u8 pad67;
+    s16 unk68;
+    u8 pad6A[2];
+    f32 unk6C;
+} Particle9014; /* 0x70 */
+
+typedef struct {
+    f32 unk0;
+    u8 unk4;
+    u8 unk5;
+    u8 unk6;
+    u8 unk7;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    u8 unk18;
+    u8 unk19;
+    u8 pad1A[2];
+} Extra9014; /* 0x1C */
+
+extern void *func_15130280(void *, u8, s32, s32, u8, s32);
+
+void *func_151D9014(void *arg0, f32 *arg1, u8 arg2, f32 arg3, s16 arg4, u8 arg5, f32 arg6, s32 arg7, f32 arg8, f32 arg9, u8 argA, s32 argB, s32 argC, s32 argD, u8 argE, s32 argF) {
+    void *ret;
+    Particle9014 spawn;
+    Extra9014 extra;
+
+    spawn.unk1D = D_8008FCD0[arg2]();
+    spawn.unk8 = ((argA ? 0x44 : 0x22) << 8) + 3;
+    spawn.unk0 = 0x200005;
+    spawn.unk4 = 0;
+    spawn.unkC = 0;
+    spawn.unk10 = 0;
+    spawn.unk14 = 0;
+    spawn.unk15 = 0;
+    spawn.unk16 = 0;
+    spawn.unk17 = 0xFF;
+    spawn.unk18 = 0;
+    spawn.unk19 = 0;
+    spawn.unk1A = 0;
+    spawn.unk1B = arg5;
+    spawn.unk1C = 0xFF;
+    spawn.pos = *(struct17 *)arg0;
+    spawn.unk3C = *(struct17 *)&D_800A5480;
+    spawn.vel = *(struct17 *)arg1;
+    spawn.unk22 = 1;
+    spawn.unk54 = arg3;
+    spawn.unk24 = 1.0f;
+    spawn.unk58 = ((arg4 == -99) ? 0 : 1) | 2 | 4 | ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0) | 0x200 | 0x4000 | 0x8000 | (argA ? 0x10000 : 0) | (D_800AB330[arg2] ? 0x800000 : 0);
+    if (arg4 == -99) {
+        spawn.unkA = 300;
+        spawn.unk1E = 1;
+        spawn.unk20 = 0xFF;
+    } else {
+        spawn.unkA = arg4 + 0x12;
+        spawn.unk1E = 0x12;
+        spawn.unk20 = 0xE;
+    }
+    spawn.unk60 = 6;
+    spawn.unk61 = 8;
+    spawn.unk64 = -1;
+    spawn.unk62 = (u8)arg7 ? 0x21 : 0x22;
+    spawn.unk63 = -1;
+    spawn.unk65 = 0;
+    spawn.unk5C = 0;
+    spawn.unk66 = 0xFF;
+    spawn.unk68 = 0;
+    spawn.unk6C = 10000.0f;
+    extra.unk4 = func_150ADA20() & 0xFF;
+    extra.unk5 = func_150ADA20() & 0xFF;
+    if (spawn.unk1D == 0x40 || spawn.unk1D == 0x67) {
+        extra.unk0 = spawn.unk28 = spawn.unk2C = arg6 * 0.6999999881f;
+    } else {
+        extra.unk0 = spawn.unk28 = spawn.unk2C = arg6;
+    }
+    extra.unk6 = (func_150ADA20() % 6U) + 5;
+    extra.unk7 = (func_150ADA20() % 6U) + 5;
+    extra.unk8 = ((func_150ADA68() * 0.25f) + 0.200000003f) * extra.unk0;
+    extra.unkC = ((func_150ADA68() * 0.25f) + 0.200000003f) * extra.unk0;
+    extra.unk10 = arg8;
+    extra.unk18 = arg2;
+    extra.unk14 = arg9;
+    extra.unk19 = ((u8)argC ? 0 : 1) | ((u8)argD ? 2 : 0);
+    ret = func_15130280(&spawn, 1, argB, 0x1C, argE, argF);
+    if (ret != NULL) {
+        memcpy((u8 *)ret + 0xA8, &extra, sizeof(extra));
+    }
+    return ret;
+}
 
 s32 func_151D93F4(void *arg0, void *arg1) {
     s32 res;
