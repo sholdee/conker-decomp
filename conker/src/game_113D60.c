@@ -664,7 +664,53 @@ struct260 *func_150E7994(s16 arg0, f32 arg1, u8 arg2, s32 arg3) {
     return obj;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_113D60/func_150E7C9C.s")
+typedef struct {
+    /* 0x00 */ f32 rate;
+    /* 0x04 */ f32 accum;
+    /* 0x08 */ s16 count;
+    /* 0x0A */ s16 idx;
+    /* 0x0C */ s32 pad0C;
+    /* 0x10 */ Struct150E75A0Pos pts[1];
+} Struct150E7C9CData;
+
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD;
+    /* 0x0E */ s16 unkE;
+    /* 0x10 */ u8 pad10[0x18];
+    /* 0x28 */ Struct150E7C9CData data;
+} Struct150E7C9C;
+
+void func_150E7C9C(Struct150E7C9C *arg0) {
+    s32 pad1;
+    s32 pad2;
+    Struct150E75A0Pos pos;
+    f32 t;
+    s32 b2;
+    s32 b4;
+    Struct150E7C9CData *p;
+
+    p = &arg0->data;
+    p->accum += p->rate * D_800BE9A4;
+    while ((p->accum > 1.0f) && (p->idx != p->count)) {
+        pos.unk0 = ((f32*)p->pts)[p->idx * 2];
+        pos.unk4 = ((f32*)p->pts)[p->idx * 2 + 1];
+        t = func_150ADA68();
+        b4 = (func_150ADA20() & 1) ? 4 : 0;
+        b2 = (func_150ADA20() & 1) ? 2 : 0;
+        func_150E75A0(&pos, (t * 12.0f) + 30.0f, 0x12C, (u8)(b2 | b4), (func_150ADA68() * 25.0f) + 100.0f, 0xFF, 1, 0xFF,
+                      0, 0, arg0->unkC, arg0->unk1);
+        func_10010F30(0x360, 0x7FFF, (pos.unk0 * 0.4315068424f) + 64.0f, 0, 0);
+        p->idx++;
+        p->accum -= 1.0f;
+    }
+    if (p->idx >= p->count) {
+        arg0->unkE = -1;
+    }
+}
 
 typedef struct {
     /* 0x00 */ s32 unk00;
