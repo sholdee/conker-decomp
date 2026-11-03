@@ -1501,7 +1501,151 @@ void func_15151A38(struct Local15151A38Arg *arg0, u8 arg1, s32 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_17CAF0/func_15151D6C.s")
+struct Arg15151D6C {
+    s32 unk0;
+    s32 unk4;
+    struct Vec3F unk8;
+    struct Vec3F unk14;
+    struct Vec3F unk20;
+    u8 pad2C[0x8];
+    f32 unk34;
+    f32 unk38;
+    f32 unk3C;
+    f32 unk40;
+    f32 unk44;
+    s16 unk48;
+    s16 unk4A;
+    f32 unk4C;
+    f32 unk50;
+    f32 unk54;
+};
+
+struct Spawn15151D6C {
+    f32 unk00;
+    f32 unk04;
+    f32 unk08;
+    volatile f32 unk0C;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    struct Vec3F unk28;
+    struct Vec3F unk34;
+    f32 unk40;
+    f32 unk44;
+    f32 unk48;
+    f32 unk4C;
+    s32 unk50;
+    s16 unk54;
+    s16 unk56;
+    u8 unk58;
+    u8 pad59[3];
+    s32 unk5C;
+    u8 unk60;
+    u8 unk61;
+    u8 unk62;
+    u8 unk63;
+    u8 unk64;
+    u8 unk65;
+    u8 unk66;
+    u8 unk67;
+    u8 unk68;
+    u8 pad69;
+    u8 unk6A;
+    u8 pad6B;
+    s32 unk6C;
+    u8 unk70;
+    u8 pad71;
+    s16 unk72;
+    s16 unk74;
+    s16 pad76;
+};
+
+
+void func_15151D6C(struct Arg15151D6C *arg0, s32 *arg1, f32 *arg2, u32 arg3, u8 arg4, s32 arg5) {
+    s32 count;
+    s32 idx;
+    struct Spawn15151D6C sp;
+    struct Vec3F right;
+    f32 rightLen;
+    f32 rightUnused;
+    struct Vec3F up;
+    f32 upLen;
+    f32 upUnused;
+    struct Vec3F fwd;
+    f32 fwdLen;
+    f32 fwdUnused;
+    f32 s;
+    f32 c;
+    f32 scale;
+    f32 spread1;
+    f32 spread2;
+
+    if (func_15144E80(&arg0->unk20, &right, &up, &fwd) != 0) {
+        func_15145128(&right, &right, &rightLen, &rightUnused);
+        func_15145128(&up, &up, &upLen, &upUnused);
+        func_15145128(&fwd, &fwd, &fwdLen, &fwdUnused);
+        if (func_15144A74(&fwd, &arg0->unk14) < 0.0f) {
+            fwd.x = -fwd.x;
+            fwd.y = -fwd.y;
+            fwd.z = -fwd.z;
+        }
+        fwd.x *= 1000.0f;
+        fwd.y *= 1000.0f;
+        fwd.z *= 1000.0f;
+        sp.unk00 = 1.0f;
+        sp.unk04 = 1.0f;
+        sp.unk1C = 1.0f;
+        sp.unk20 = 1.0f;
+        sp.unk24 = 1.0f;
+        sp.unk28 = arg0->unk8;
+        sp.unk44 = 0.0f;
+        sp.unk50 = 0x29E8;
+        count = (func_150ADA20() % (u32)(arg0->unk4 + 1)) + arg0->unk0;
+        sp.unk58 = 0;
+        sp.unk5C = 0;
+        sp.unk60 = 0xFF;
+        sp.unk61 = 8;
+        sp.unk62 = 0;
+        sp.unk63 = 0;
+        sp.unk64 = 0;
+        sp.unk65 = 0;
+        sp.unk66 = 0;
+        sp.unk67 = 0;
+        sp.unk68 = 2;
+        sp.unk6A = 0;
+        sp.unk6C = 0;
+        sp.unk70 = 0;
+        sp.unk72 = 0xC;
+        sp.unk74 = 0x15;
+        if (count != 0) {
+            do {
+                scale = (func_150ADA68() * arg0->unk3C) + arg0->unk38;
+                func_15143874((s16)(func_150ADA20() & 0xFF), func_150ADA68() * arg0->unk34, &c, &s);
+                sp.unk34.x = ((right.x * c) + (up.x * s) + fwd.x) * scale;
+                sp.unk34.y = ((right.y * c) + (up.y * s) + fwd.y) * scale;
+                sp.unk34.z = ((right.z * c) + (up.z * s) + fwd.z) * scale;
+                sp.unk10 = func_150ADA68() * 360.0f;
+                sp.unk14 = func_150ADA68() * 360.0f;
+                sp.unk18 = func_150ADA68() * 360.0f;
+            lbl1:
+                idx = func_150ADA20() % arg3;
+                sp.unk56 = arg1[idx];
+                sp.unk0C = (arg0->unk4C + (func_150ADA68() * arg0->unk50)) * arg2[idx];
+                sp.unk08 = sp.unk0C;
+            lbl2:
+                sp.unk40 = (func_150ADA68() * (arg0->unk54 + arg0->unk54)) - arg0->unk54;
+                sp.unk48 = (func_150ADA68() * (arg0->unk54 + arg0->unk54)) - arg0->unk54;
+                sp.unk4C = (func_150ADA68() * arg0->unk44) + arg0->unk40;
+                sp.unk54 = (func_150ADA20() % (u32)(arg0->unk4A + 1)) + arg0->unk48;
+                func_15132A4C(&sp, 3, 0xFF, 0, arg4, arg5);
+                count--;
+            } while (count != 0);
+        }
+    }
+}
 
 struct Arg15152190 {
     s32 unk0;
