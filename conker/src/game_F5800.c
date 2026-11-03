@@ -507,8 +507,6 @@ s32 func_150CA07C(f32 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_F5800/func_150CA150.s")
-
 typedef struct {
     f32 unk0;
     f32 unk4;
@@ -516,6 +514,172 @@ typedef struct {
 } Struct150CA930;
 
 extern void func_1514C678(f32, f32, s32, f32, s32, s32, s32, s32, s32, f32, s32, s32);
+void func_150CA930(Struct150CA930 *arg0);
+
+extern f32 D_800A05A0;
+extern f32 D_800A05A4;
+extern f32 D_800A05A8;
+extern s32 func_15193CA0[];
+extern s32 func_151942B0[];
+void func_1504715C(void *, void *);
+s32 func_15046C80(void *, s32, f32, void *);
+void func_150CCD90(f32, f32 *, f32 *, f32 *);
+
+typedef struct {
+    f32 x, y, z;
+} V3_150CA150;
+
+typedef struct {
+    V3_150CA150 pos;
+    u8 unkF0;
+    s8 unkF1;
+    f32 unkF4;
+    s32 unkF8;
+    s16 unkFC;
+    s16 unkFE;
+    f32 unk100;
+    s16 unk104;
+    f32 unk108;
+    f32 unk10C;
+    u8 unk110;
+    u8 unk111;
+} Def_150CA150;
+
+typedef struct {
+    s32 unk0;
+    s16 unk4;
+    u8 unk6;
+    u8 pad7;
+    s32 unk8;
+    s32 unkC;
+    u8 unk10, unk11, unk12, unk13;
+    u8 unk14, unk15, unk16, unk17;
+    s32 unk18;
+} Fx_150CA150;
+
+void func_150CA150(u8 *arg0) {
+    V3_150CA150 pos;
+    f32 r, g, b;
+    u8 cr, cg, cb;
+    f32 floor[9];
+    u8 hit;
+    u32 end;
+    u32 p;
+    s32 sum;
+    u8 padA[4];
+
+    hit = 0;
+    if (arg0 != NULL) {
+        func_1504715C(floor, arg0);
+        func_1512D748(&D_800DBFF0[D_800BE9E8], 7, 1);
+        pos.x = *(f32 *)(arg0 + 0x14);
+        pos.y = *(f32 *)(arg0 + 0x18) + 100.0f;
+        pos.z = *(f32 *)(arg0 + 0x1C);
+        if (func_15046C80(&pos, 0, *(f32 *)(arg0 + 0x18) - 300.0f, floor) != 0) {
+            hit = 1;
+            pos.y = floor[0];
+        } else {
+            pos.y = *(f32 *)(arg0 + 0x180);
+        }
+        sum = 0;
+        end = (u32)func_151942B0;
+        for (p = (u32)func_15193CA0; p < end; p += 4) {
+            sum ^= ~*(s32 *)p;
+        }
+        if (sum != 0x79844C6B) {
+            D_800C3E7C = 0;
+        }
+        func_150CCD90(pos.z, &r, &g, &b);
+        cr = r;
+        cg = g;
+        cb = b;
+        func_151D5404((struct17 *)&pos, 500.0f, 5000.0f, 0.0002f, 0xC, 0xF, 0xFF, 0);
+        {
+            Def_150CA150 def;
+            u8 padB[0x14];
+        def.pos = pos;
+        def.unkF4 = 43.20000076f;
+        def.unkF0 = 1;
+        def.unkF1 = -1;
+        def.unkF8 = 0xD;
+        def.unkFC = 0x65;
+        def.unkFE = 0x58;
+        def.unk100 = 21.80000114f / (f32)(s16)def.unkF8;
+        def.unk104 = 0x13;
+        def.unk108 = 21.80000114f / (f32)def.unk104;
+        def.unk110 = 1;
+        def.unk111 = 0;
+        def.unk10C = 7.999999798e-05f;
+        func_150C88D0((Struct150C88D0Def *)&def, 0, 0xFF, 1);
+        }
+        if (hit != 0) {
+            Fx_150CA150 fx;
+            f32 d0;
+            f32 r2;
+            f32 sc;
+            u8 ang;
+            f32 sinv, cosv;
+            u8 padC[8];
+            s16 col[4][5];
+            s16 life;
+            u8 spark[3];
+
+            ang = -0x40 - (*(u16 *)(arg0 + 0x7A) >> 8);
+            cosv = func_151423D8(ang);
+            sinv = func_151423D8(ang - 0x40);
+            r2 = sc = (func_150ADA68() * 96.0f + 352.0f) * 0.5f;
+            fx.unk0 = 0x701;
+            func_150ADA20();
+            fx.unk4 = 0x408;
+            fx.unk8 = 0;
+            fx.unkC = 0;
+            fx.unk10 = func_150ADA20() % 41U + 0xB4;
+            fx.unk11 = 0xFF;
+            fx.unk12 = 0xFF;
+            fx.unk13 = 0xFF;
+            fx.unk16 = 0;
+            fx.unk14 = 0xFF;
+            fx.unk15 = 0xFF;
+            fx.unk18 = 0x260001;
+            fx.unk17 = 6;
+            col[0][3] = 0xFF;
+            col[0][4] = 0;
+            col[1][3] = 0xFF;
+            col[1][4] = 0;
+            col[2][3] = 0xFF;
+            col[2][4] = 0;
+            col[3][3] = 0xFF;
+            col[3][4] = 0;
+            fx.unk6 = 0x51;
+            col[0][0] = cr;
+            col[1][0] = cr;
+            col[2][0] = cr;
+            col[3][0] = cr;
+            col[0][1] = cg;
+            col[1][1] = cg;
+            col[2][1] = cg;
+            col[3][1] = cg;
+            col[0][2] = cb;
+            col[1][2] = cb;
+            col[2][2] = cb;
+            col[3][2] = cb;
+            func_1513C5B0(&fx, col, 0xC, 0, sc * cosv + pos.x - sc * sinv, pos.y + 10.0f, sc * cosv + pos.z + sc * sinv, r2, r2, ang, 0, 0, 0xFF, 0);
+            fx.unk6 = 0x52;
+            func_1513C5B0(&fx, col, 0xC, 0, sc * cosv + pos.x - (-1.0f * sc) * sinv, pos.y + 10.0f, (-1.0f * sc) * cosv + pos.z + sc * sinv, r2, r2, ang, 0, 0, 0xFF, 0);
+            fx.unk6 = 0x53;
+            func_1513C5B0(&fx, col, 0xC, 0, (-1.0f * sc) * cosv + pos.x - sc * sinv, pos.y + 10.0f, sc * cosv + pos.z + (-1.0f * sc) * sinv, r2, r2, ang, 0, 0, 0xFF, 0);
+            fx.unk6 = 0x54;
+            func_1513C5B0(&fx, col, 0xC, 0, (-1.0f * sc) * cosv + pos.x - (-1.0f * sc) * sinv, pos.y + 10.0f, (-1.0f * sc) * cosv + pos.z + (-1.0f * sc) * sinv, r2, r2, ang, 0, 0, 0xFF, 0);
+            func_150CA930((Struct150CA930 *)&pos);
+            life = func_150ADA20() % 21U + 10;
+            spark[0] = cr;
+            spark[1] = cg;
+            spark[2] = cb;
+            func_1514C678(pos.x, pos.y, *(s32 *)&pos.z, func_150ADA68() * 81.0f + 150.0f, 0, 0xFF, life, 0x14, 0, 0.0f, (s32)spark, 0xFF);
+        }
+    }
+}
+
 
 void func_150CA930(Struct150CA930 *arg0) {
     s16 temp;
