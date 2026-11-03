@@ -1469,7 +1469,132 @@ s32 func_151BD42C(u8 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E73B0/func_151BD43C.s")
+typedef struct {
+    s32 unk00;
+    s32 unk04;
+    s16 unk08;
+    s16 unk0A;
+    s32 unk0C;
+    s32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 unk16;
+    u8 unk17;
+    u8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+    u8 unk1C;
+    u8 unk1D;
+    s16 unk1E;
+    s16 unk20;
+    s16 unk22;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    f32 unk30[3];
+    f32 unk3C[3];
+    f32 unk48[3];
+    f32 unk54;
+    s32 unk58;
+    u8 pad5C[4];
+    u8 unk60;
+    u8 unk61;
+    u8 unk62;
+    s8 unk63;
+    s8 unk64;
+    u8 unk65;
+} Fx151BD43C;
+
+typedef struct {
+    u8 pad0[0x14];
+    f32 unk14[3];
+    u8 pad20[0x3B - 0x20];
+    u8 unk3B;
+    u8 pad3C[0x74 - 0x3C];
+    u8 unk74;
+} Owner151BD43C;
+
+typedef struct {
+    u8 pad0;
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD[0x1C - 0xD];
+    Owner151BD43C *unk1C;
+    u8 pad20[0x74 - 0x20];
+    f32 unk74;
+} Actor151BD43C;
+
+typedef struct {
+    Owner151BD43C *owner;
+    u8 ownerId;
+} Extra151BD43C;
+
+struct260 *func_15130374(void *, u8, s32, u8, s32);
+
+void func_151BD43C(f32 *arg0, f32 *arg1, s32 arg2, s32 arg3, f32 arg4, Actor151BD43C *arg5) {
+    struct260 *ret;
+    Owner151BD43C *owner;
+    Fx151BD43C fx;
+    f32 val;
+    s32 pad;
+    Extra151BD43C extra;
+    s32 pad2;
+
+    owner = arg5->unk1C;
+    if ((owner->unk74 & 0xF) != 0xF) {
+        fx.unk1D = 0x29;
+        fx.unk08 = 0xE03;
+        fx.unk00 = 0x200005;
+        fx.unk04 = 0;
+        fx.unk0C = 0;
+        fx.unk10 = 0;
+        fx.unk54 = ((func_150ADA68() * 251.0f) + 44.0f) * 0.001000000047f;
+        fx.unk1E = 0x14;
+        fx.unk20 = 0xC;
+        fx.unk58 = (func_150ADA20() & 1 ? 0x40 : 0) | (1 | 2 | 4 | (func_150ADA20() & 1 ? 0x80 : 0)) | 0x200 | 0x400 | 0x800 | 0x1000 | 0x4000 | 0x8000;
+        fx.unk60 = 3;
+        fx.unk61 = 3;
+        fx.unk63 = -1;
+        fx.unk64 = -1;
+        fx.unk65 = 7;
+        fx.unk22 = 0x22;
+        fx.unk14 = 0xDD;
+        fx.unk15 = 0xD3;
+        fx.unk16 = 0xCD;
+        fx.unk17 = 0xFF;
+        fx.unk18 = 0x57;
+        fx.unk19 = 0x55;
+        fx.unk1A = 0x5A;
+        val = 0.9347190261f;
+        fx.unk24 = 1.034358025f;
+        fx.unk1B = (func_150ADA20() % 156U) + 0x64;
+        fx.unk1C = 0xFF;
+        fx.unk0A = (func_150ADA20() % 18U) + 0x19;
+        fx.unk28 = fx.unk2C = (func_150ADA68() * 53.0f) + 49.0f;
+        fx.unk48[0] = (arg1[0] - arg0[0]) * arg5->unk74;
+        fx.unk48[1] = (arg1[1] - arg0[1]) * arg5->unk74;
+        fx.unk48[2] = (arg1[2] - arg0[2]) * arg5->unk74;
+        fx.unk30[0] = arg0[0] - arg5->unk1C->unk14[0];
+        fx.unk30[1] = arg0[1] - arg5->unk1C->unk14[1];
+        fx.unk30[2] = arg0[2] - arg5->unk1C->unk14[2];
+        fx.unk30[0] += fx.unk48[0] * arg4;
+        fx.unk30[1] += fx.unk48[1] * arg4;
+        fx.unk30[2] += fx.unk48[2] * arg4;
+        extra.owner = arg5->unk1C;
+        extra.ownerId = arg5->unk1C->unk3B;
+        fx.unk62 = 0x13;
+        fx.unk3C[0] = arg5->unk1C->unk14[0];
+        fx.unk3C[1] = arg5->unk1C->unk14[1];
+        fx.unk3C[2] = arg5->unk1C->unk14[2];
+        ret = func_15130374(&fx, 1, 0x10, arg5->unkC, arg5->unk1);
+        if (ret != NULL) {
+            memcpy((u8 *)ret + 0xA8, &val, 4);
+            memcpy((u8 *)ret + 0xB0, &extra, 8);
+        }
+    }
+}
 
 f32 func_151BD750(s16 *arg0) {
     s16 temp;
