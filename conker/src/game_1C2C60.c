@@ -90,6 +90,8 @@ typedef struct Struct15195984 {
     s32 unk18;
     s16 unk1C[5];
     s16 unk26[5];
+    u8 unk30[5];
+    u8 unk35[5];
 } Struct15195984;
 
 void *func_15195984(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
@@ -129,7 +131,90 @@ s16 func_15195A84(s16 arg0, s32 arg1, s32 arg2, s32 arg3) {
     return arg0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1C2C60/func_15195AA8.s")
+typedef struct {
+    s32 pos;
+    s32 size;
+} Struct15195DD4Cmd;
+
+extern s32 func_15195868(s32, s32, s32, s32 *);
+
+void *func_15195AA8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
+    s32 idx;
+    s32 key;
+    s32 size;
+    s32 depth;
+    s32 pos;
+    s32 i = arg3;
+    Struct15195984 *node = 0;
+
+    if (arg0 == 0) {
+        return 0;
+    }
+    if (arg3 == -1) {
+        i = 0;
+    }
+    do {
+        idx = func_15195868(arg0, arg1, i, &depth);
+        if (idx == -1) {
+            arg3 = 0;
+        } else {
+            if (arg1 == 0) {
+                arg1 = D_800E08F0;
+            }
+            size = ((Struct15195DD4Cmd *) arg0 + idx)->size;
+            pos = ((Struct15195DD4Cmd *) arg0 + idx)->pos;
+            node = (Struct15195984 *) D_800E08E8;
+            if (arg4 != 0) {
+                key = -1;
+            } else {
+                key = arg1;
+            }
+            while ((node != 0) && (node->unk8 != 0)) {
+                node = node->next;
+            }
+            if (node == 0) {
+                node = func_15195984(arg1, size, pos, arg2);
+                if (node != 0) {
+                    arg4 = 0;
+                    node->unk12 = arg6;
+                    node->unk13 = arg7;
+                } else {
+                    return 0;
+                }
+            } else {
+                idx = func_15195A84(idx, (s32) node, size, arg2);
+                arg4 = 0;
+            }
+            if (node->unk14 < depth) {
+                node->unk14 = depth;
+            }
+            if (arg5 == 0) {
+                key = 0;
+                while (key < 5 && node->unk1C[key] != -1) {
+                    key++;
+                }
+                if (key < 5) {
+                    node->unk1C[key] = idx;
+                    node->unk30[key] = depth;
+                }
+            } else {
+                key = 0;
+                while (key < 5 && node->unk26[key] != -1) {
+                    key++;
+                }
+                if (key < 5) {
+                    node->unk26[key] = idx;
+                    node->unk35[key] = depth;
+                }
+            }
+            i++;
+        }
+    } while (arg3 == -1);
+    if (arg1 == D_800E08F0) {
+        D_800E08F0--;
+    }
+    return node;
+}
 
 typedef struct Struct15195D00 {
     char pad0[0x8];
@@ -172,11 +257,6 @@ void func_15195D00(Struct15195984 *arg0, s32 arg1, s32 arg2, s32 arg3) {
 }
 
 extern s32 func_15195868(s32, s32, s32, s32 *);
-
-typedef struct {
-    s32 pos;
-    s32 size;
-} Struct15195DD4Cmd;
 
 s32 func_15195DD4(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6) {
     s32 idx;
