@@ -436,7 +436,85 @@ void func_1500D3AC(s32 arg0, f32 arg1) {
 //     }
 // }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_39750/func_1500D8C8.s")
+void func_1500D8C8(s32 arg0, f32 arg1) {
+    f32 phi_f30;
+    s32 pad;
+
+    phi_f30 = func_1514462C(arg0) * arg1 * 1.999999995e-06f;
+    if (phi_f30 > 1.0f) {
+        f32 temp_f22;
+        Part_1500D3AC part;
+        f32 sp90;
+        f32 sp8C;
+
+        part.unk00 = 1.0f;
+        part.unk04 = 1.0f;
+        part.unk1C = 1.0f;
+        part.unk20 = 1.0f;
+        part.unk24 = 1.0f;
+        part.unk50 = 0x4D40;
+        part.unk54 = 0x12C;
+        part.unk58 = 0;
+        part.unk60 = 0xFF;
+        part.unk61 = 0xE;
+        part.unk62 = 0;
+        part.unk63 = 0;
+        part.unk64 = 0;
+        part.unk65 = 0;
+        part.unk66 = 0;
+        part.unk67 = 0;
+        part.unk68 = 2;
+        part.unk6A = 0;
+        part.unk6C = 0;
+        part.unk70 = 0;
+        part.unk72 = 1;
+        part.unk74 = 0xFF;
+        temp_f22 = 1.525902189e-05f;
+        part.unk44 = 0.0f;
+        do {
+                        s32 pad2;
+            const u16 types[14] = { 0x76, 0x77, 0x78, 0x79, 0x53, 0x3E, 0x3D, 0x39, 0x02, 0x03, 0x4E, 0x4F, 0x50, 0x51 };
+            f32 phi_f20;
+            f32 temp_f2;
+            f32 temp_f0;
+
+            func_15008340(arg0, &part.unk28, &part.unk30, &sp90, &sp8C);
+            phi_f20 = sp90 - sp8C;
+            temp_f2 = ((((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22) * (phi_f20 * 0.5f)) + (sp8C + (phi_f20 * 0.25f));
+            part.unk38 = temp_f2;
+            {
+            f32 temp_f12;
+            temp_f12 = fabsf(temp_f2 - sp90);
+            part.unk2C = temp_f2;
+            temp_f0 = fabsf(temp_f2 - sp8C);
+            if (temp_f0 < temp_f12) {
+                phi_f20 = temp_f0;
+            } else {
+                phi_f20 = temp_f12;
+            }
+            part.unk4C = ((((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 0.75f) + 0.25f) * phi_f20;
+            }
+            temp_f0 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22);
+            part.unk34 = (temp_f0 + temp_f0) * 3.141592741f;
+            part.unk3C = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 0.01300000027f) + 0.005000000354f;
+            part.unk10 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 360.0f);
+            part.unk14 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 360.0f);
+            part.unk18 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 360.0f);
+            part.unk40 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 1.600000024f);
+            part.unk48 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 1.600000024f);
+            part.unk56 = types[(osGetCount() * func_150ADA20()) % 14U];
+            part.unk08 = part.unk0C = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 0.25f) + 0.5f;
+            if (part.unk56 == 0x39) {
+                part.unk08 *= 0.349999994f;
+                part.unk0C *= 0.349999994f;
+            }
+            func_1510F800(0);
+            part.unk5C = func_1510FD20(part.unk28, part.unk30);
+            func_15132A4C(&part, 3, 0xFF, 0, 0xFF, 1);
+            phi_f30 -= 1.0f;
+        } while (phi_f30 > 1.0f);
+    }
+}
 
 typedef struct {
     s32 unk0;
