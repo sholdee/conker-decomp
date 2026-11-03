@@ -474,7 +474,146 @@ void func_15039ED0(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 *arg4, f32 arg
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_64120/func_1503A08C.s")
+typedef struct {
+    s16 unk0;
+    u8 pad2[0x24];
+    u8 unk26;
+    u8 pad27[0x9];
+    s8 unk30;
+    u8 pad31[0x9];
+    u8 unk3A;
+} Def_1503A08C;
+
+s32 func_1503D774(s32 arg0, s32 arg1);
+void func_1507C3E0(struct127 *arg0, s16 *arg1, s16 *arg2, s16 *arg3);
+
+#define OBJ_S16(o) (*(s16 *)((u8 *)arg0 + (o)))
+#define OBJ_S8(o) (*(s8 *)((u8 *)arg0 + (o)))
+
+void func_1503A08C(struct127 *arg0) {
+    Def_1503A08C *def;
+    f32 (*m)[4];
+    f32 cx;
+    f32 cy;
+    f32 cz;
+    f32 mag;
+    f32 ax;
+    f32 ay;
+    f32 az;
+    f32 alen;
+    f32 bx;
+    f32 by;
+    f32 bz;
+    f32 blen;
+    s16 sp36;
+    s16 sp34;
+    s16 sp32;
+    s32 h;
+    f32 scale;
+
+    if (arg0->id != 0xFF) {
+        if ((arg0->unk1D4 != NULL) && (D_800D1C90[arg0->id] != NULL)) {
+            if (func_1503D774(arg0->id, 0) == 0) {
+                def = (Def_1503A08C *)D_800D1C90[arg0->id];
+                m = (f32 (*)[4])arg0->unk1D4;
+                m = (f32 (*)[4])((u8 *)m + (def->unk26 << 6));
+                scale = arg0->y_scale;
+                alen = def->unk3A * scale;
+                if (alen != 0) {
+                    cx = m[0][0];
+                    cy = m[0][1];
+                    cz = m[0][2];
+                    blen = cx * cx + cy * cy + cz * cz;
+                    mag = blen;
+                    if (blen != 0) {
+                        mag = sqrtf(blen);
+                    }
+                    if (mag != 0) {
+                        mag = alen / mag;
+                    }
+                    ax = cx * mag;
+                    ay = cy * mag;
+                    az = cz * mag;
+                } else {
+                    az = 0.0f;
+                    ay = 0.0f;
+                    ax = 0.0f;
+                }
+                blen = def->unk0 * scale;
+                if (blen != 0) {
+                    cx = m[1][0];
+                    cy = m[1][1];
+                    cz = m[1][2];
+                    mag = sqrtf(cx * cx + cy * cy + cz * cz);
+                    if (mag != 0) {
+                        mag = blen / mag;
+                    }
+                    bx = cx * mag;
+                    by = cy * mag;
+                    bz = cz * mag;
+                } else {
+                    bx = by = bz = 0.0f;
+                }
+                cx = m[2][0];
+                cy = m[2][1];
+                cz = m[2][2];
+                blen = def->unk30 * scale;
+                if (blen != 0) {
+                    mag = sqrtf(cx * cx + cy * cy + cz * cz);
+                    if (mag != 0) {
+                        mag = blen / mag;
+                    }
+                    cx *= mag;
+                    cy *= mag;
+                    cz *= mag;
+                    mag = 127.0f / blen;
+                    OBJ_S8(0x1B8) = cx * mag;
+                    OBJ_S8(0x1B9) = cy * mag;
+                    OBJ_S8(0x1BA) = cz * mag;
+                } else {
+                    mag = sqrtf(cx * cx + cy * cy + cz * cz);
+                    if (mag != 0) {
+                        mag = 127.0f / mag;
+                    }
+                    OBJ_S8(0x1B8) = cx * mag;
+                    OBJ_S8(0x1B9) = cy * mag;
+                    OBJ_S8(0x1BA) = cz * mag;
+                    cx = cy = cz = 0.0f;
+                }
+                OBJ_S16(0x1A4) = m[3][0] + cx;
+                OBJ_S16(0x1A6) = m[3][1] + cy;
+                OBJ_S16(0x1A8) = m[3][2] + cz;
+                OBJ_S16(0x1AA) = m[3][1] + by;
+                mag = OBJ_S16(0x1A4);
+                OBJ_S16(0x1AC) = mag + ax + bx;
+                OBJ_S16(0x1AE) = OBJ_S16(0x1A6) + ay + by;
+                OBJ_S16(0x1B0) = OBJ_S16(0x1A8) + az + bz;
+                OBJ_S16(0x1B2) = mag - ax + bx;
+                OBJ_S16(0x1B4) = OBJ_S16(0x1A6) - ay + by;
+                OBJ_S16(0x1B6) = OBJ_S16(0x1A8) - az + bz;
+            }
+        } else {
+            def = (Def_1503A08C *)D_800D1C90[arg0->id];
+            if (def != NULL) {
+                h = def->unk0;
+            } else {
+                h = 0;
+            }
+            func_1507C3E0(arg0, &sp36, &sp34, &sp32);
+            OBJ_S16(0x1A4) = arg0->x_position;
+            OBJ_S16(0x1A6) = arg0->y_position + (sp36 * 7) / 8;
+            OBJ_S16(0x1A8) = arg0->z_position;
+            OBJ_S16(0x1AA) = OBJ_S16(0x1A6) + h * arg0->y_scale;
+            OBJ_S16(0x1AC) = OBJ_S16(0x1A4);
+            OBJ_S16(0x1B2) = OBJ_S16(0x1A4);
+            OBJ_S16(0x1AE) = OBJ_S16(0x1AA);
+            OBJ_S16(0x1B4) = OBJ_S16(0x1AA);
+            OBJ_S16(0x1B0) = OBJ_S16(0x1A8);
+            OBJ_S16(0x1B6) = OBJ_S16(0x1A8);
+            arg0->unk2CA = 0;
+        }
+    }
+}
 
 typedef struct {
     u8  pad0[0x30];
