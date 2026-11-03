@@ -521,7 +521,80 @@ s32 func_15044ED0(struct conker15045714 *arg0, f32 arg1, struct conker150472C0_d
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_71820/func_150450CC.s")
+extern f32 D_80098D44;
+extern f32 D_800DBE68;
+extern f32 D_800DBE6C;
+extern f32 D_800DBE70;
+extern f32 D_800DBE74;
+
+s32 func_150450CC(struct conker15045714 *arg0, f32 arg1, struct conker150472C0_dst *arg2) {
+    s32 count;
+    s32 best;
+    s32 scan_index;
+    f32 height;
+
+    if (arg0->field_0x04 < arg1) {
+        arg2->field_0x1C &= ~2;
+        return 0;
+    }
+    arg2->field_0x00 = D_80098D44;
+    best = -1;
+    func_1510F800(0);
+    D_800DBE68 = arg0->field_0x00;
+    D_800DBE6C = arg0->field_0x04;
+    D_800DBE70 = arg0->field_0x08;
+    D_800DBE74 = arg1;
+    count = func_150A3A70((s32)arg0->field_0x00, (s32)arg0->field_0x08);
+    scan_index = 0;
+    if (count > 0) {
+        Game71820Candidate *scan = D_800D3300;
+
+        do {
+            height = (f32)scan->height * 0.00390625f;
+            if ((height <= arg0->field_0x04) && (arg2->field_0x00 < height)) {
+                best = scan_index;
+                arg2->field_0x00 = height;
+            }
+            scan_index++;
+            scan++;
+        } while (scan_index < count);
+    }
+    if (best != -1) {
+        Game71820Candidate *candidate;
+        s32 *source;
+        u32 copy_index;
+        u8 *output;
+        s32 offset;
+
+        candidate = &D_800D3300[best];
+        source = candidate->sources;
+        offset = candidate->index;
+        copy_index = 0;
+        output = (u8 *)arg2;
+        for (; copy_index != 3; copy_index++, output += 6) {
+            s16 *point = (s16 *)(source[copy_index] + offset * 16);
+            *(s16 *)(output + 4) = point[0];
+            *(s16 *)(output + 6) = point[1];
+            *(s16 *)(output + 8) = point[2];
+        }
+        if (D_800DBE5C != 0) {
+            s32 idx = ((u8 *)candidate->sources - D_800DBE3C) / 12;
+            arg2->field_0x18 = ((s32 *)D_800DBE5C)[idx];
+        } else {
+            arg2->field_0x18 = 0;
+        }
+        arg2->field_0x1C |= 7;
+        arg2->field_0x1D = 1;
+        arg2->field_0x20 = 0;
+        if (arg1 <= arg2->field_0x00) {
+            arg2->field_0x1C |= 2;
+            return 1;
+        }
+        return 0;
+    }
+    arg2->field_0x1C &= ~2;
+    return 0;
+}
 
 struct conker15045714;
 struct conker150472C0_dst;
