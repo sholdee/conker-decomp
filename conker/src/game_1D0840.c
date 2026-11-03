@@ -73,7 +73,7 @@ void func_151A4590(s32, u8);
 void func_151A499C(void *, u8);
 void *func_1513418C(void *, s32, u8, s32);
 struct260 *func_15130374(void *, u8, s32, u8, s32);
-u16 func_10010154(u16, void *, u16, s16, u16);
+u16 func_10010154(u16, void *, s32, s16, u16);
 s32 func_15160A58(void *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern s32 func_15147A80(void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 struct struct151A4E34;
