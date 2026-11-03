@@ -125,7 +125,232 @@ void func_15081E0C(struct127 *arg0, u16 arg1, u8 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_AEB40/func_15081E78.s")
+typedef struct {
+    struct127 *obj;
+    f32 unk4;
+    f32 x;
+    f32 y;
+    f32 z;
+    u8 pad14[4];
+    f32 unk18;
+    u8 pad1C[4];
+    f32 unk20;
+    u8 pad24[0x14];
+    f32 vx;
+    f32 vy;
+    f32 vz;
+    u8 pad44[0x12];
+    u16 unk56;
+    u8 unk58;
+    u8 unk59;
+    u8 unk5A;
+} F81E78Arg;
+
+#define F32(p, o) (*(f32 *)((u8 *)(p) + (o)))
+
+extern u8 D_80099AC4[];
+extern u8 D_80099AD1;
+extern f32 D_8009CC28;
+extern void func_150D728C(void *, void *, void *, u8, s32);
+extern void func_150EB484(f32 *, f32 *, f32 *);
+extern void func_15104608(f32, f32, s32, s32);
+extern void func_1506AC8C(struct127 *, s32, s32);
+extern void func_151D3480(void *, void *, void *, u8, u8, s32);
+extern void func_15145974(void *, f32 *, f32 *);
+extern void func_150B5C38(void *, u8, s32);
+extern void func_150B6754(u8, s32);
+extern void func_1507DE4C(struct127 *);
+extern void func_15060A9C(s32, struct127 *);
+extern void func_15138C80(struct127 *, s32, s32);
+extern void func_15060A30(s32, struct127 *);
+extern void func_15081E0C(struct127 *, u16, u8);
+extern void func_150335C8(void *, struct127 *, s32, s32, s32, s32);
+extern void func_15137610(struct127 *, void *, void *, void *, u8, s32);
+extern void func_150D7120(void *, u8, s32);
+extern s32 func_1505D024(struct127 *, s32, u16, s32);
+
+#define B8(p, o) (*(u8 *)((u8 *)(p) + (o)))
+
+s32 func_15081E78(struct127 *arg0, F81E78Arg *arg1, s32 arg2) {
+    s32 snd;
+    f32 sp3A8;
+    f32 sp3A4;
+    u8 sp3A3;
+    struct127 *obj;
+    struct126 *x;
+    volatile s32 flag;
+    s32 v1;
+    s32 res;
+    s32 a2;
+    s32 pad;
+
+    sp3A3 = 1;
+    x = arg0->unk31C;
+    if (x != 0) {
+        (*(s16 *)((u8 *)x + 0x1AA))++;
+    }
+    if (arg1->unk59 == 0) {
+        return 0;
+    }
+    if (arg1->unk59 == 1) {
+        switch (arg2) {
+        case 18:
+            res = 4;
+            break;
+        case 6:
+            res = 0;
+            break;
+        case 2:
+            res = 1;
+            break;
+        case 7:
+            res = 5;
+            break;
+        case 11:
+            res = 3;
+            break;
+        case 12:
+            res = 2;
+            break;
+        case 13:
+            res = -1;
+            func_150D728C((u8 *)arg1 + 0x44, &arg1->x, &arg1->vx, 0xFF, 1);
+            break;
+        case 5:
+            if (D_800BE9F0 == 14) {
+                f32 vc;
+                f32 va[3];
+                f32 vb[3];
+                va[0] = arg1->x + arg1->vx * 5.0f;
+                va[1] = arg1->y + arg1->vy * 5.0f;
+                va[2] = arg1->z + arg1->vz * 5.0f;
+                vb[0] = arg1->x - arg1->vx * 5.0f;
+                vb[1] = arg1->y - arg1->vy * 5.0f;
+                vb[2] = arg1->z - arg1->vz * 5.0f;
+                func_150EB484(va, vb, &vc);
+            }
+        case 9:
+        case 10:
+            res = -1;
+            func_15104608(arg1->x, arg1->y, *(s32 *)&arg1->z, B8(arg0, 0x124));
+            func_1506AC8C(arg0, 2, 0);
+            break;
+        default:
+            res = 5;
+            break;
+        }
+        if (res != -1) {
+            func_151D3480(&arg1->x, &arg1->vx, (u8 *)arg1 + 0x44, res, 0xFF, 1);
+        }
+        return 1;
+    }
+    obj = arg1->obj;
+    if (arg2 == 5 || arg2 == 9 || arg2 == 10) {
+        func_1506AC8C(arg0, 3, 0);
+    }
+    if (B8(obj, 0x1CA) == 0) {
+    lbl0:
+        flag = 1;
+    } else {
+        flag = 0;
+    }
+    if ((B8(obj, 0x125) != 0 || B8(obj, 0x104) != 0) && flag == 0) {
+        return 2;
+    }
+    v1 = 0;
+    snd = D_80099AC4[arg2];
+    if (arg2 == 7) {
+        if (D_800BE9F0 == 0x2B) {
+            snd = 0x27;
+        }
+    }
+    func_15145974(&arg1->vx, &sp3A8, &sp3A4);
+    if (arg1->unk59 == 2) {
+        if (B8(obj, 4) == 0x94) {
+            sp3A3 = 0;
+            func_150B5C38(&arg1->x, 0xFF, 1);
+            func_150B6754(0xFF, 1);
+        }
+    } else if (arg1->unk59 == 3) {
+        if (D_800BE616 == 0) {
+            if (B8(obj, 4) == 0x9F || B8(obj, 4) == 0xA0) {
+                if (1000.0f < arg1->unk4) {
+                    v1 = 1;
+                }
+            }
+        }
+        if (arg1->unk58 == 10 && (obj->unk31C == 0 || B8(obj->unk31C, 0x1AD) == 0) && v1 == 0) {
+            if ((u32)arg2 != 2 && (u32)arg2 != 0x12 && (u32)arg2 != 0xB && (u32)arg2 != 0xC) {
+                func_1507DE4C(obj);
+                if (obj->unk31C != 0) {
+                    B8(obj->unk31C, 0x1AD) = 1;
+                }
+                if (B8(obj, 4) == 0x80 && arg1->unk5A == 0 && arg1->y - 5.5f > arg1->unk18) {
+                    func_15060A9C((func_150ADA20() & 7) + 0x2E3, obj);
+                }
+                func_15138C80(obj, 0xFF, 1);
+                snd = 0x20;
+                if (B8(obj, 4) == 0x9F || B8(obj, 4) == 0xA0) {
+                    if (obj->unk2EC != 0) {
+                        snd = 0x3D;
+                    }
+                }
+                func_15060A30(0xAA, obj);
+            } else {
+                func_15060A30(0x107, obj);
+            }
+            if (arg2 != 0xB && arg2 != 0xC && B8(obj, 0x1CA) != 0) {
+                B8(obj, 0x1CA) = 1;
+            }
+        } else if (B8(obj, 4) == 0x9F || B8(obj, 4) == 0xA0) {
+            func_15081E0C(obj, arg1->unk58, v1);
+        }
+        switch (arg2) {
+        case 2:
+            a2 = 0x2A;
+            break;
+        case 0x12:
+            a2 = 0x22;
+            break;
+        case 0xC:
+            a2 = 0x6B;
+            break;
+        case 0xB:
+            a2 = 0x6D;
+            break;
+        default:
+            a2 = 0;
+            break;
+        }
+        if (a2 != 0 && B8(obj, 0x1CA) < 2) {
+            struct127 big;
+
+            F32(&big, 0x14) = arg1->x;
+            F32(&big, 0x18) = arg1->y;
+            F32(&big, 0x1C) = arg1->z;
+            F32(&big, 0xB8) = sp3A4;
+            F32(&big, 0x40) = sp3A8 + 180.0f;
+            F32(&big, 0xC4) = 0.0f;
+            F32(&big, 0x14C) = *(f32 *)((u8 *)obj + 0x14C);
+            F32(&big, 0x150) = *(f32 *)((u8 *)obj + 0x150);
+            func_150335C8(&big, obj, a2, arg1->unk56, 1, 0);
+            if (arg1->unk58 == 10) {
+                snd = 0x20;
+            }
+        }
+    }
+    if (sp3A3 != 0) {
+        func_15137610((struct127 *)arg1->obj, &arg1->x, &arg1->unk20, &arg1->vx, 0xFF, 1);
+    }
+    if (&D_80099AD1 == &D_80099AC4[arg2]) {
+        func_150D7120(&arg1->x, 0xFF, 1);
+    }
+    if (flag == 0) {
+        func_1505D024(obj, snd | 0x80000, (sp3A8 - 90.0f) * D_8009CC28, arg0 - D_800CC2D0);
+    }
+    return 2;
+}
+
 
 /* --- func_150825C0 -------------------------------------------------- */
 
