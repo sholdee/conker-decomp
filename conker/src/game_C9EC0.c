@@ -306,7 +306,252 @@ s32 func_1509D08C(s32 arg0, s32 arg1, s32 *arg2, s32 *arg3) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C9EC0/func_1509D180.s")
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8;
+    s32 unkC;
+    s32 unk10;
+    s32 unk14;
+    s32 unk18;
+    s32 unk1C;
+    s32 unk20;
+} Func1509D180Arg;
+typedef struct {
+    f32 unk0;
+    f32 unk4;
+    s32 pad8;
+    s32 unkC;
+    s32 unk10;
+    s32 unk14;
+    s32 unk18;
+    u8 unk1C;
+    u8 unk1D;
+    s32 unk20;
+    s32 pad[3];
+} Func1509D180Out;
+typedef struct {
+    s32 unk0[5];
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+} Func1509D180Obj;
+extern void *func_1505EEF4(s32);
+extern void func_150BD070(s32, s32);
+extern void func_150FAD28(void);
+extern void func_150FAA40(s32, s32);
+extern void func_15108120(void *, s32, s32);
+extern void func_150ECC00(void *, s32, s32);
+extern void func_150FAD78(void);
+extern void func_150FCFD4(void *, s32, s32);
+extern void func_150E0300(void);
+extern void func_151557FC(s32, s32, f32);
+extern void *func_150F6DE4(void *);
+extern void func_1514EC1C(void *, void *, s32);
+extern s32 func_15046C80(f32 *, s32, f32, void *);
+extern void func_151BFE84(void *, void *, void *, s32, s32, s32);
+extern void func_15136C3C(void *, s32, s32, s32, s32, s32, s32, s32);
+extern void func_151C0098(f32 *, void *, s32, s32, s32);
+extern void func_150FCA30(void);
+extern s32 func_1518F51C(void *, u8, s32, s32, s8, s8, u8, s32, u8, s32);
+extern void func_150E1060(s32, s32, s32);
+extern void func_151CD35C(s32);
+extern void func_1000E7A0(s32, s32);
+extern void func_151616D0(u8, u8, s32);
+extern void func_150B53D0(void *, s32, s32, s32);
+extern void func_150BEF7C(s32);
+extern void func_15178EFC(s32);
+extern s32 func_150E3208(s32, s32, s32, s32, s32, s32, s32, s32);
+extern s32 func_150E32D0(s32, s32, s32, void *, s32, f32);
+extern s32 func_150E3414(s32, s32, s32, s32, s32, s32, void *, s32, f32);
+extern void func_150DECC0(f32 *, s32, s32);
+extern void func_150E81A8(s32, s32, s32);
+extern void func_150E8930(void);
+extern void func_151D26C0(s16);
+extern void func_15163A60(s32, s32, s32);
+extern void func_150D5A6C(void *, s32, s32);
+extern u8 D_8009F0D0;
+extern u8 D_800D9920;
+extern struct127 D_800CC2D0[26];
+
+s32 func_1509D180(s32 arg0, Func1509D180Arg *arg1) {
+    s32 ret;
+    void *p;
+
+    ret = 0;
+    switch (arg0) {
+        case 51:
+            func_150BD070(0xFF, 1);
+            break;
+        case 49:
+            func_150FAD28();
+            break;
+        case 48:
+            func_150FAA40(0xFF, 1);
+            break;
+        case 47:
+            p = func_1505EEF4(arg1->unk4 & 0xFFF);
+            if (p != 0) {
+                func_15108120(p, 0xFF, 1);
+            }
+            break;
+        case 46:
+            p = func_1505EEF4(arg1->unk4 & 0xFFF);
+            if (p != 0) {
+                func_150ECC00(p, 0xFF, 1);
+            }
+            break;
+        case 44:
+            func_150FAD78();
+            break;
+        case 42:
+            p = func_1505EEF4(arg1->unk4 & 0xFFF);
+            if (p != 0) {
+                func_150FCFD4(p, 0xFF, 1);
+            }
+            break;
+        case 43:
+            func_150E0300();
+            break;
+        case 37:
+            func_151557FC(arg1->unk4 & 0xFFF, 0x78, (f32)arg1->unk8);
+            break;
+        case 36:
+            arg1 = func_1505EEF4(arg1->unk4 & 0xFFF);
+            if (arg1 != 0) {
+                func_1514EC1C(func_150F6DE4(arg1), arg1, 0x1B);
+            }
+            break;
+        case 34:
+            {
+            Func1509D180Out sp90;
+            f32 sp84[3];
+            sp90.unk0 = -10000.0f;
+            sp90.unk18 = 0;
+            sp90.unk1C = 0;
+            sp90.unk1D = 0;
+            sp90.unk20 = 0;
+            sp84[0] = arg1->unk4;
+            sp84[1] = 20000.0f;
+            sp84[2] = arg1->unk8;
+            if (func_15046C80(sp84, 0, sp90.unk0, &sp90) != 0) {
+                {
+                f32 sp78[3];
+                sp84[1] = sp90.unk0;
+                sp78[0] = 0.0f;
+                sp78[2] = 0.0f;
+                sp78[1] = -1.0f;
+                func_151BFE84(&sp90.unk4, sp84, sp78, 1, 0xFF, 1);
+                }
+            }
+            }
+            break;
+        case 35:
+            p = func_1505EEF4(arg1->unk4 & 0xFFF);
+            func_15136C3C(p, 1, 1, 1, 1, 0, 0xFF, 1);
+            break;
+        case 33:
+            {
+            f32 sp64[5];
+            p = func_1505EEF4(arg1->unk4 & 0xFFF);
+            if (p != 0) {
+                sp64[0] = ((Func1509D180Obj *)p)->unk14;
+                sp64[1] = ((Func1509D180Obj *)p)->unk18 + 50.0f;
+                sp64[2] = ((Func1509D180Obj *)p)->unk1C;
+                func_151C0098(sp64, p, 1, 0xFF, 1);
+            }
+            }
+            break;
+        case 27:
+            func_150FCA30();
+            break;
+        case 24:
+            {
+            u8 sp5C[8];
+            sp5C[0] = D_8009F0D0;
+            p = func_15083E90(*((u8 *)arg1 + 7));
+            func_1518F51C(p ? p : p, sp5C[arg1->unk8], *(s16 *)((u8 *)arg1 + 0xE), -1, -1, -1, 0, 0, 0xFF, 1);
+            }
+            break;
+        case 20:
+            func_150E1060(*((u8 *)arg1 + 7), 0xFF, 1);
+            break;
+        case 18:
+            func_151CD35C(arg1->unk4);
+            break;
+        case 16:
+            func_1000E7A0(0x10, 0);
+            func_151616D0(0x16, 0x1F, 0);
+            break;
+        case 0:
+            p = func_1505EEF4(arg1->unk4 & 0xFFF);
+            func_150B53D0(p, *(s16 *)((u8 *)arg1 + 0xA), 0xFF, 1);
+            break;
+        case 1:
+            func_150BEF7C(arg1->unk4);
+            return 1;
+        case 2:
+            D_800D9920 = 1;
+            break;
+        case 3:
+            func_15178EFC(arg1->unk4);
+            break;
+        case 4:
+            ret = func_150E3208(arg1->unk4, arg1->unk8, arg1->unkC, arg1->unk10, arg1->unk14, arg1->unk18, arg1->unk1C, arg1->unk20);
+            if (ret != 0) {
+                ret = (ret << 6) | 0xE000 | 4;
+            }
+            break;
+        case 5:
+            p = func_1505EEF4(arg1->unk10 & 0xFFF);
+            if (p != 0) {
+ ret = func_150E32D0(arg1->unk4, arg1->unk8, arg1->unkC, p, arg1->unk14, (f32)arg1->unk1C);
+ if (ret != 0) {
+ s32 pad;
+ ret = (ret << 6) | 0xE000 | 4;
+ }
+ }
+ break;
+        case 6:
+            ret = func_150E3414(arg1->unk4, arg1->unk8, arg1->unkC, arg1->unk10, arg1->unk14, arg1->unk18, D_800CC2D0, arg1->unk1C, (f32)arg1->unk20);
+            if (ret != 0) {
+                ret = (ret << 6) | 0xE000 | 4;
+            }
+            break;
+        case 7:
+            {
+            f32 sp44[5];
+            if (arg1->unk4 == 999) {
+                sp44[0] = arg1->unk8;
+                sp44[1] = arg1->unkC;
+                sp44[2] = arg1->unk10;
+                func_150DECC0(sp44, 0xFF, 1);
+            } else {
+                func_150E81A8(arg1->unk4 & 0xFF, 0xFF, 1);
+            }
+            }
+            break;
+        case 15:
+            func_150E8930();
+            break;
+        case 19:
+            func_151D26C0(*(s16 *)((u8 *)arg1 + 6));
+            break;
+        case 22:
+            func_151616D0(0x23, 0x27, 0);
+            func_151616D0(0x24, 0x27, 0);
+            break;
+        case 23:
+            func_15163A60(*((u8 *)arg1 + 7), 0xFF, 1);
+            break;
+        case 32:
+            p = func_1505EEF4(arg1->unk4 & 0xFFF);
+            func_150D5A6C(p, 0xFF, 1);
+            break;
+    }
+    return ret;
+}
+
 
 typedef struct {
     s32 unk0;
