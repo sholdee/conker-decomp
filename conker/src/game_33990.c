@@ -48,7 +48,147 @@ void func_150064E0(void) {
     D_800D2E45 = 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_33990/func_15006590.s")
+extern u8 *D_800BE3F0;
+extern u32 D_800BE3E4;
+extern s32 func_1502B5C8();
+
+typedef struct LoadSlot33990 {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ u32 unk4;
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s8 unkC;
+    /* 0x0D */ u8 unkD;
+    /* 0x0E */ s8 unkE;
+    /* 0x0F */ s8 padF;
+} LoadSlot33990;
+
+void func_15006590(s32 arg0) {
+    u64 mask;
+    s32 i;
+    s32 j;
+    u16 sum;
+    u8 *p;
+    u8 *q;
+    u8 byte;
+    u8 bit;
+    s32 cnt;
+    u8 v;
+    u32 t;
+    LoadSlot33990 *ent;
+    u8 sp7F;
+    s32 sp78;
+    u8 buf[27];
+
+    for (i = 0; i < 27; i++) {
+        buf[i] = ((u8 *)D_800D2E4C)[i];
+    }
+    if (D_800BE3F0 == NULL) {
+        D_800BE3F0 = (u8 *)func_1502B5C8(0, 1, 7) + 8;
+    }
+    osWritebackDCache(D_800BE358, 0x80);
+    osInvalDCache(D_800BE358, 0x80);
+    func_151DD3A0(&D_800BE900, (u8)(arg0 * 16 + 4), D_800BE358, 0x80);
+    p = D_800BE358;
+    sum = 0xCC;
+    i = 2;
+    do {
+        sum += p[i] << (i & 3);
+        i++;
+    } while (i < 0x80);
+    p += 2;
+    i = 0;
+    if (sum != *(u16 *)D_800BE358) {
+        func_150064E0();
+        if (D_800BE3DC >= 0 && D_80082BC0 != 0) {
+            for (i = 0; i < 27; i++) {
+                ((u8 *)D_800D2E4C)[i] = buf[i];
+            }
+        }
+        if (arg0 * 16 + 4 == 0x34) {
+            D_80082BC0 = 0;
+        }
+    } else {
+        sp7F = *p;
+        p += 5;
+        sp78 = p[-4] << 24;
+        sp78 |= p[-3] << 16;
+        sp78 |= p[-2] << 8;
+        sp78 |= p[-1];
+        do {
+            ((u8 *)D_800D2E4C)[i] = *p++;
+            i++;
+        } while (i < 27);
+        for (i = 0; i < 9; i++) {
+            D_800D2E60[i] = *p++;
+        }
+        D_800BE3DF = *p++;
+        D_800BE3E0 = *p++;
+        D_800BE3E4 = *p++ << 8;
+        D_800BE3E4 |= *p++;
+        func_15085710(0, 9, D_800BE3E4);
+        t = *p++ << 24;
+        t |= *p++ << 16;
+        t |= *p++ << 8;
+        t |= *p++;
+        D_800BE3E8 = t;
+        byte = *p++;
+        bit = 0x80;
+        for (i = 0; i < 0x45; i++) {
+            D_800C3A60[i] = 0;
+            mask = (u64)1 << (D_800BE3F0[i] - 1);
+            for (j = 0; j < D_800BE3F0[i]; j++) {
+                if (byte & bit) {
+                    D_800C3A60[i] |= mask;
+                }
+                if (bit == 1) {
+                    byte = *p++;
+                    bit = 0x80;
+                } else {
+                    bit >>= 1;
+                }
+                mask >>= 1;
+            }
+        }
+        if (D_80082BC0 != 0 && sp7F < 3) {
+            (&D_800BE3D8)[arg0] = sp7F;
+            if (((LoadSlot33990 *)&D_800BE3F8)[sp7F].unk8 < sp78) {
+                cnt = 0;
+                for (i = 0; i < 27; i++) {
+                    v = ((u8 *)D_800D2E4C)[i];
+                    for (j = 8; j != 0; j--) {
+                        if (v & 1) {
+                            cnt++;
+                        }
+                        v >>= 1;
+                    }
+                }
+                ((LoadSlot33990 *)&D_800BE3F8)[sp7F].unk0 = D_800BE3E8;
+                ((LoadSlot33990 *)&D_800BE3F8)[sp7F].unkD = cnt;
+                ((LoadSlot33990 *)&D_800BE3F8)[sp7F].unkC = *(s8 *)&D_800BE3DF;
+                ((LoadSlot33990 *)&D_800BE3F8)[sp7F].unk4 = D_800BE3E4;
+                ((LoadSlot33990 *)&D_800BE3F8)[sp7F].unk8 = sp78;
+                ((LoadSlot33990 *)&D_800BE3F8)[sp7F].unkE = arg0;
+                if ((u8)cnt >= D_800BE3DC) {
+                    D_800BE3DC = (u8)cnt;
+                    if (D_800D2E68 & 0x20) {
+                        D_800BE3DE = 1;
+                    }
+                } else {
+                    for (i = 0; i < 27; i++) {
+                        ((u8 *)D_800D2E4C)[i] = buf[i];
+                    }
+                }
+            } else {
+                for (i = 0; i < 27; i++) {
+                    ((u8 *)D_800D2E4C)[i] = buf[i];
+                }
+            }
+        }
+        if (arg0 * 16 + 4 == 0x34) {
+            D_80082BC0 = 0;
+        }
+    }
+}
 typedef struct SaveSlot33990 {
     /* 0x00 */ u8 pad0[8];
     /* 0x08 */ s32 unk8;
