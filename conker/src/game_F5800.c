@@ -491,7 +491,51 @@ void func_150C99B4(Struct150C99B4 *arg0, struct17 *arg1, s32 arg2, s32 arg3) {
     func_15130374(&stack.sp38, 1, 0, arg0->unkC, arg0->unk1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_F5800/func_150C9BDC.s")
+typedef struct {
+    u8 pad0[0x10];
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    u8 pad1C[0x28];
+    f32 unk44;
+} Struct150C9BDC;
+
+extern s32 func_1505D024(struct127 *, s32, u16, s32);
+
+void func_150C9BDC(Struct150C9BDC *arg0, s32 arg1) {
+    s32 i;
+    struct127 *obj;
+    f32 dx;
+    f32 dz;
+    f32 dist;
+    f32 diff;
+
+    for (i = 0; i < 25; i++) {
+        obj = &D_800CC2D0[i];
+        if ((obj->interaction_state != 0) && (obj->unk28 < 20.0f) && (obj->immune == 0) &&
+            ((obj->id == 0x53) || (obj->interaction_state == 1))) {
+            dx = obj->x_position - arg0->unk10;
+            dz = obj->z_position - arg0->unk18;
+            dist = sqrtf((dx * dx) + (dz * dz)) - 100.0f;
+            if ((obj->id == 0x53) && (obj->unk13C == 0)) {
+                dist -= 150.0f;
+            }
+            diff = arg0->unk44 - dist;
+            if ((diff >= 0.0f) && (diff < 250.0f)) {
+                if (obj->id == 0x53) {
+                    obj->disable_run = 10;
+                    obj->unk218 = NULL;
+                    obj->unk232 = 0x13;
+                    if (D_800CC2D0[obj->unk124].unk65 != 0) {
+                        obj->unk232 = 0x14;
+                    }
+                } else {
+                    func_1505D024(obj, 0x6000E, obj->unk7A, -1);
+                }
+            }
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_F5800/func_150C9DC4.s")
 
