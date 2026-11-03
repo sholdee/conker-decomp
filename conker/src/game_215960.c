@@ -725,7 +725,137 @@ s32 func_151EB96C(s32 arg0) {
     return arg0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_215960/func_151EBB50.s")
+typedef struct {
+    /* 0x00 */ void *img;
+    /* 0x04 */ u16 pad4;
+    /* 0x06 */ u16 width;
+    /* 0x08 */ u16 height;
+    /* 0x0A */ u8 fmt;
+    /* 0x0B */ u8 siz;
+} Tex151EBB50;
+extern Tex151EBB50 D_80090060;
+extern u8 D_800917EC;
+extern u8 D_85D;
+extern u8 D_89C;
+extern f32 D_800ABAE8;
+extern s32 D_800E0A90;
+extern s32 D_800BE620;
+extern s32 D_800BE624;
+
+#define MIN(a, b) ((b) < (a) ? (b) : (a))
+Gfx *func_151EBB50(Gfx *gfx) {
+    s32 alpha;
+    f32 scale;
+
+    alpha = 0xFF - ((D_800E0A90 - 0xF0) << 3);
+    if (alpha < 0) {
+        alpha = 0;
+    }
+    if (alpha >= 0x100) {
+        alpha = 0xFF;
+    }
+
+    gDPPipeSync(gfx++);
+    gDPSetOtherMode(gfx++, 0x082C3F, 0x504340);
+    gDPSetCombine(gfx++, 0xFFFFFF, 0xFFFEFB7D);
+    gDPSetEnvColor(gfx++, 0, 0, 0, 0xFF);
+    gfx = func_1501A6CC(gfx, 0, 0, D_800BE620, D_800BE624);
+    if (D_80000300 == 0) {
+        return gfx;
+    }
+    gSPDisplayList(gfx++, &D_80090028);
+    if (D_800E0A90 < 0xF0) {
+        alpha = 0xFF - ((D_800E0A90 - 0xB4) << 3);
+        if (alpha < 0) {
+            alpha = 0;
+        }
+        if (alpha >= 0x100) {
+            alpha = 0xFF;
+        }
+        scale = D_800E0A90 / 180.0f + 0.75f;
+        if (scale > 1.5f) {
+            scale = 1.5f;
+        }
+        func_150432BC(scale);
+        func_1504332C(0xFF, 0, 0, alpha);
+        func_15042D94(0x94, 0x69, 1, D_800E0BD8[0x238 / 4]);
+        func_150432BC(1.0f);
+    } else if (D_800E0A90 < 0x21C) {
+        if (D_800E0A90 < 0x12C) {
+            alpha = D_800E0A90 - 0xF0;
+            alpha = (alpha << 3);
+            if (alpha >= 0x100) {
+                alpha = 0xFF;
+            }
+        } else {
+            alpha = 0xFF - ((D_800E0A90 - 0x1E0) << 3);
+            if (alpha < 0) {
+                alpha = 0;
+            }
+            if (alpha >= 0x100) {
+                alpha = 0xFF;
+            }
+        }
+        gDPPipeSync(gfx++);
+        gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, alpha >> 2);
+        gfx = func_151ED430(gfx, &D_800917F8, 0x92, 0x67, 5, 6, 1.0f, 0);
+        gDPPipeSync(gfx++);
+        gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, alpha);
+        gfx = func_151ED430(gfx, &D_800917EC, 0x92, 0x1C, 2, 1, 1.0f, 0);
+        func_1504332C(0xFF, 0xFF, 0xFF, alpha);
+        func_15042D94(0x94, 0x9D, 1, D_800E0BD8[0x204 / 4]);
+        func_15042D94(0x94, 0xAA, 1, D_800E0BD8[0x208 / 4]);
+        func_15042D94(0x94, 0xBC, 1, D_800E0BD8[0x20C / 4]);
+        func_150432BC(D_800ABAE8);
+        func_15042D94(0x94, 0x2D, 1, D_800E0BD8[0x210 / 4]);
+        func_15042D94(0x94, 0x37, 1, D_800E0BD8[0x214 / 4]);
+        func_15042D94(0x94, 0x41, 1, D_800E0BD8[0x218 / 4]);
+        func_15042D94(0x94, 0x4B, 1, D_800E0BD8[0x21C / 4]);
+        func_15042D94(0x94, 0x55, 1, D_800E0BD8[0x220 / 4]);
+        func_15042D94(0x94, 0x5F, 1, D_800E0BD8[0x224 / 4]);
+        func_15042D94(0x94, 0x69, 1, D_800E0BD8[0x228 / 4]);
+        func_15042D94(0x94, 0x73, 1, D_800E0BD8[0x22C / 4]);
+        func_15042D94(0x94, 0x7D, 1, D_800E0BD8[0x230 / 4]);
+        func_15042D94(0x94, 0x87, 1, D_800E0BD8[0x234 / 4]);
+        func_150432BC(1.0f);
+        gDPPipeSync(gfx++);
+        gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, alpha);
+        D_80090060.img = &D_89C;
+        D_80090060.width = 0x10;
+        D_80090060.height = 0x10;
+        gfx = func_151ED430(gfx, &D_80090060, 0xC7, 0xB0, 1, 1, 1.0f, 0);
+        D_80090060.width = 0x20;
+        D_80090060.height = 0x20;
+    } else {
+        if (D_800E0A90 < 0x258) {
+            alpha = D_800E0A90 - 0x21C;
+            alpha = (alpha << 3);
+            if (alpha >= 0x100) {
+                alpha = 0xFF;
+            }
+        } else {
+            alpha = 0xFF - ((D_800E0A90 - 0x30C) << 3);
+            if (alpha < 0) {
+                alpha = 0;
+            }
+            if (alpha >= 0x100) {
+                alpha = 0xFF;
+            }
+        }
+        gDPSetEnvColor(gfx++, 0xFF, 0, 0, alpha);
+        D_80090060.fmt = 4;
+        D_80090060.siz = 1;
+        D_80090060.img = &D_85D;
+        D_80090060.width = 0x40;
+        D_80090060.height = 0x40;
+        gfx = func_151ED430(gfx, &D_80090060, 0x94, 0x69, 3, 1, 1.0f, 0);
+        D_80090060.width = 0x20;
+        D_80090060.height = 0x20;
+        D_80090060.fmt = 0;
+        D_80090060.siz = 3;
+    }
+    return gfx;
+}
 
 extern s32 D_800E0A90;
 extern s32 *D_800E0BD8;
