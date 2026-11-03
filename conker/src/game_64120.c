@@ -33,7 +33,81 @@ void func_15036C70(GameStruct_15036C70 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_64120/func_15036CE8.s")
+extern u8 D_800C3FFA;
+extern f32 D_800C3FE8[3];
+void func_150379DC(f32 *, s32, s32, s32, f32, s32, s32);
+void func_15038620(s32, s32, f32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+
+void func_15036CE8(void) {
+    struct127 *obj;
+    s32 sp70;
+    f32 *data;
+    f32 *pos;
+    f32 val;
+    s32 pad1;
+    s32 pad2;
+    s32 sp58;
+    s32 pad3;
+    u8 type;
+
+    obj = &D_800CC2D0[D_800C3E78];
+    data = *(f32 **)((u8 *)obj + 0x324);
+    if (data == NULL) {
+        return;
+    }
+    switch (obj->id) {
+        case 59:
+        case 117:
+        case 128:
+        case 136:
+        case 144:
+        case 150:
+        case 152:
+        case 156:
+        case 157:
+        case 159:
+        case 160:
+        case 176:
+        case 177:
+        case 178:
+        case 180:
+            if (D_800C3FFA == 0) {
+                D_800C3FFA = 1;
+                return;
+            }
+            break;
+    }
+    if (D_800C35EA == 1 && D_800C3FFA == 0) {
+        D_800C3FFA = 1;
+        return;
+    }
+    sp70 = 0;
+    sp58 = 1;
+    if (D_800C3FFA == 0) {
+        type = 7;
+        sp58 = 0;
+        sp70 = 1;
+        if (*(u16 *)((u8 *)D_800D154C + 0x2F8) & 0x100) {
+            *(s16 *)((u8 *)data + 0x3A) = 0x2D;
+            *(s16 *)((u8 *)data + 0x40) = 0x40;
+        } else if (data[0] == -99999.0f) {
+            D_800C3FFA = 1;
+            return;
+        }
+    } else {
+        type = 12;
+        ;
+    }
+    if (D_800C3FFA == 0 && !(*(u16 *)((u8 *)D_800D154C + 0x2F8) & 0x100)) {
+        D_800C3FE8[0] = -99999.0f;
+        D_800C3FE8[1] = -99999.0f;
+        D_800C3FE8[2] = -99999.0f;
+    } else {
+        func_150379DC(D_800C3FE8, type, 0, D_800C3E78, 90.0f, 0xFF, 0);
+    }
+    func_15038620(type, 0, D_800C3FE8, D_800C3E78, sp70, 0, D_800C3FFA, 3, 0, 0, 0, sp58, 0);
+    D_800C3FFA++;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_64120/func_15036F34.s")
 
