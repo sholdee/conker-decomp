@@ -1308,7 +1308,118 @@ void func_150E9178(Struct150E8D5C *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_113D60/func_150E93DC.s")
+extern u8 D_800A12F0[];
+extern f32 D_800A12F4[];
+extern s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
+
+typedef struct {
+    /* 0x00 */ f32 unk00;
+    /* 0x04 */ f32 unk04;
+    /* 0x08 */ f32 unk08;
+    /* 0x0C */ f32 unk0C;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ f32 unk34;
+    /* 0x38 */ f32 unk38;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ f32 unk40;
+    /* 0x44 */ f32 unk44;
+    /* 0x48 */ f32 unk48;
+    /* 0x4C */ f32 unk4C;
+    /* 0x50 */ s32 unk50;
+    /* 0x54 */ s16 unk54;
+    /* 0x56 */ s16 unk56;
+    /* 0x58 */ u8 unk58;
+    /* 0x5C */ s32 unk5C;
+    /* 0x60 */ u8 unk60;
+    /* 0x61 */ u8 unk61;
+    /* 0x62 */ u8 unk62;
+    /* 0x63 */ u8 unk63;
+    /* 0x64 */ u8 unk64;
+    /* 0x65 */ u8 unk65;
+    /* 0x66 */ u8 unk66;
+    /* 0x67 */ u8 unk67;
+    /* 0x68 */ u8 unk68;
+    /* 0x69 */ u8 unk69;
+    /* 0x6A */ u8 unk6A;
+    /* 0x6C */ s32 unk6C;
+    /* 0x70 */ u8 unk70;
+    /* 0x72 */ s16 unk72;
+    /* 0x74 */ s16 unk74;
+} Spawn150E93DC;
+
+void func_150E93DC(Struct150E8D5C *arg0) {
+    f32 *p;
+    s32 ret;
+    Spawn150E93DC sp;
+    s32 i;
+    u8 extra[0x1C];
+    f32 zero;
+
+    p = &arg0->unk28;
+    p[5] += (p[3] + (func_150ADA68() * p[4])) * D_800BE9A4;
+    if (p[5] > 1.0f) {
+        zero = 0.0f;
+        {
+            f32 f;
+
+            sp.unk00 = zero;
+            sp.unk04 = 1.0f;
+            sp.unk1C = 1.0f;
+            sp.unk20 = 1.0f;
+            sp.unk24 = 1.0f;
+            sp.unk50 = 0x49E8;
+            sp.unk34 = zero;
+            sp.unk38 = zero;
+            sp.unk3C = zero;
+            sp.unk44 = zero;
+            sp.unk58 = 0;
+            sp.unk5C = 0;
+            sp.unk60 = 0xFF;
+            sp.unk62 = 0;
+            sp.unk63 = 0;
+            sp.unk64 = 0;
+            sp.unk65 = 0;
+            sp.unk66 = 0;
+            sp.unk67 = 0;
+            sp.unk68 = 2;
+            sp.unk6A = 2;
+            sp.unk6C = 0;
+            sp.unk70 = 0;
+            sp.unk72 = 1;
+            sp.unk74 = 0xFF;
+            do {
+                i = func_150ADA20() % 1U;
+                sp.unk56 = D_800A12F0[i];
+                sp.unk08 = sp.unk0C = D_800A12F4[i] * ((func_150ADA68() * 351.0f) + 400.0f) * 0.001000000047f;
+                sp.unk10 = func_150ADA68() * 360.0f;
+                sp.unk14 = func_150ADA68() * 360.0f;
+                sp.unk18 = func_150ADA68() * 360.0f;
+                sp.unk4C = ((func_150ADA68() * 423.0f) + -1401.0f) * 0.001000000047f;
+                sp.unk54 = (func_150ADA20() % 1U) + 100;
+                sp.unk40 = ((func_150ADA68() * 27374.0f) + -13687.0f) * 0.001000000047f;
+                sp.unk48 = ((func_150ADA68() * 27374.0f) + -13687.0f) * 0.001000000047f;
+                func_151436B4(func_150ADA68() * 6.283185482f, func_150ADA68() * 6.283185482f, func_150ADA68() * 50.0f, &sp.unk28);
+                sp.unk28 += p[0];
+                sp.unk2C += p[1];
+                sp.unk30 += p[2];
+                sp.unk61 = 8;
+                ret = func_15132A4C(&sp, 3, 0xFF, 0x1C, arg0->unkC, arg0->unk1);
+                if (ret != 0) {
+                    memcpy((u8 *)ret + 0x170, extra, 0x1C);
+                }
+                p[5] -= 1.0f;
+            } while (p[5] > 1.0f);
+        }
+    }
+}
 
 s32 func_150E971C(f32 *arg0) {
     f32 *temp_v1;
