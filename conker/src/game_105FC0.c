@@ -410,7 +410,257 @@ s32 func_150D8FAC(Obj150D8FAC *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_105FC0/func_150D942C.s")
+typedef struct {
+    struct17 pos;
+    u8 padC[0xC];
+    f32 len;
+    u8 alpha;
+    u8 pad1D[3];
+    f32 unk20;
+} Seg150D942C; /* 0x24 */
+
+typedef struct {
+    u8 *obj;
+    u8 pad4[0x2C];
+    u16 unk30;
+    u8 pad32[6];
+    f32 unk38;
+} Data150D942C;
+
+typedef struct {
+    u8 pad0[0x10];
+    struct17 pos;
+    u8 pad1C[2];
+    u16 flags;
+    u8 pad20[5];
+    u8 cap;
+    u8 pad26[6];
+    s8 count;
+    s8 tail;
+    s8 head;
+    u8 pad2F[0x94 - 0x2F];
+    Seg150D942C *buf;
+    Data150D942C *data;
+} Self150D942C;
+
+typedef struct {
+    u8 *obj;
+    f32 dist;
+    struct17 pos;
+    u8 pad14[0x45];
+    u8 flag;
+    u8 pad5A[0x68 - 0x5A];
+} Hit150D942C;
+
+f32 sqrtf(f32);
+
+
+
+
+extern f32 func_150484A0(f32, f32);
+extern f32 func_15143E64(f32 *);
+extern f32 func_15144528(f32, f32, f32);
+extern void func_15081690(u8 *, s32, s32, s32, f32, f32, f32, Hit150D942C *, f32, s32, s32, s32, s32, s32, s32);
+extern void func_1505A250(f32, f32, f32, f32 *, f32 *);
+extern void func_1505D024(u8 *, s32, u16, s32);
+extern void func_150DA67C();
+
+#define OB(o, off, T) (*(T *)((u8 *)(o) + (off)))
+
+s32 func_150D942C(Self150D942C *arg0) {
+    s32 sz;
+    s32 i;
+    f32 acc;
+    f32 sp17C;
+    f32 f24;
+    f32 f2;
+    f32 sp164[3];
+    f32 f0;
+    f32 f12;
+    f32 sp150[3];
+    Hit150D942C spE8;
+    Seg150D942C *buf;
+    Seg150D942C *prev;
+    Data150D942C *data;
+    u8 *obj;
+    u8 *hobj;
+    f32 t16;
+    f32 t18;
+    s32 conv;
+    s32 i2, i3;
+    f32 rcp;
+    f32 spB8;
+    f32 inv;
+
+    sz = arg0->count;
+    data = arg0->data;
+    buf = arg0->buf;
+    obj = data->obj;
+    if (sz >= 2) {
+        acc = 0.0f;
+        i = arg0->head;
+        if (arg0->flags & 2) {
+            prev = (Seg150D942C *)&arg0->pos;
+        } else {
+            i -= 1;
+            if (i < 0) {
+                i = arg0->cap - 1;
+            }
+            prev = &buf[i];
+        }
+        f24 = 1195.0f;
+        do {
+            Seg150D942C *cur;
+            f12 = -9999.0f;
+            i -= 1;
+            if (i < 0) {
+                i = arg0->cap - 1;
+            }
+            cur = &buf[i];
+            sp164[0] = cur->pos.unk0 - prev->pos.unk0;
+            sp164[1] = cur->pos.unk4 - prev->pos.unk4;
+            sp164[2] = cur->pos.unk8 - prev->pos.unk8;
+            f0 = func_15143E64(sp164);
+            acc += f0;
+            cur->len = f0;
+            if (f24 < acc) {
+                if (cur->len != 0) {
+                    f12 = 1.0f / cur->len;
+                    sp150[0] = sp164[0] * f12;
+                    sp150[1] = sp164[1] * f12;
+                    f2 = (acc - f24) * f12;
+                    sp150[2] = sp164[2] * f12;
+                    cur->pos.unk0 = cur->pos.unk0 - sp164[0] * f2;
+                    cur->pos.unk4 = cur->pos.unk4 - sp164[1] * f2;
+                    cur->pos.unk8 = cur->pos.unk8 - sp164[2] * f2;
+                    cur->len = cur->len * (1.0f - f2);
+                }
+                acc = f24;
+                if (i != arg0->tail) {
+                    do {
+                        arg0->tail += 1;
+                        if (arg0->tail == arg0->cap) {
+                            arg0->tail = 0;
+                        }
+                        arg0->count -= 1;
+                    } while (i != arg0->tail);
+                }
+            }
+
+            if (cur->len != 0.0f) {
+                if (f12 == -9999.0f) {
+                    f12 = 1.0f / cur->len;
+                    sp150[0] = sp164[0] * f12;
+                    sp150[1] = sp164[1] * f12;
+                    sp150[2] = sp164[2] * f12;
+                }
+                func_15081690(obj, *(s32 *)&prev->pos.unk0, *(s32 *)&prev->pos.unk4, *(s32 *)&prev->pos.unk8, sp150[0], sp150[1], sp150[2], &spE8, cur->len, 0, 0, 1, -1, 0, 0);
+                if (spE8.flag != 0) {
+                    func_150DA67C(arg0, &spE8, sp150);
+                    if (spE8.flag >= 2) {
+                        hobj = spE8.obj;
+                        OB(hobj, 0x2EC, s32) = 1;
+                        if (OB(hobj, 4, u8) == 0x3A) {
+                            OB(hobj, 0x232, u8) = 0xA;
+                            OB(hobj, 0x218, s32) = 0;
+                        } else if (OB(hobj, 4, u8) == 0x10 && OB(hobj, 0x251, u8) == 1) {
+                            func_1505A250(OB(hobj, 0x14, f32) - spE8.pos.unk0, OB(hobj, 0x1C, f32) - spE8.pos.unk8, ((1.0f - (acc - 50.0f) * 0.001052631531f) * 0.4550000131f) + 0.2010000050f, &OB(hobj, 0x164, f32), &OB(hobj, 0x168, f32));
+                            if (OB(hobj, 0x232, u8) == 0xF) {
+                                s32 padx;
+                                OB(hobj, 0x218, s32) = 0;
+                            }
+                        } else if (OB(hobj, 4, u8) == 0x10) {
+                            t16 = cur->pos.unk0 - OB(obj, 0x14, f32);
+                            t18 = cur->pos.unk8 - OB(obj, 0x1C, f32);
+                            if (OB(hobj, 0x232, u8) == 0x10) {
+                                OB(hobj, 0x3C, f32) = OB(hobj, 0x3C, f32) * 0.7200000286f;
+                                f2 = 1.0f / (sqrtf(t16 * t16 + t18 * t18) * -0.07000000030f);
+                                func_1505A250(t16 * f2, t18 * f2, 0.7f, &OB(hobj, 0x164, f32), &OB(hobj, 0x168, f32));
+                            }
+                            if (OB(hobj, 0x125, u8) == 0) {
+                                s32 pady;
+                                OB(hobj, 0x232, u8) = 0xF;
+                                OB(hobj, 0x218, s32) = 0;
+                            }
+                        } else if (OB(hobj, 4, u8) == 0x91) {
+                            OB(hobj, 0x232, u8) = 3;
+                            OB(hobj, 0x218, s32) = 0;
+                        } else if (OB(hobj, 4, u8) == 0x90) {
+                            OB(hobj, 0x232, u8) = 0x2C;
+                            OB(hobj, 0x218, s32) = 0;
+                        } else {
+                            conv = (struct127 *)obj - D_800CC2D0;
+                            func_1505D024(hobj, 0xE0036, ((u16)(func_150484A0(sp150[0], sp150[2]) * 10430.37793f) - 0x4000) | 1, conv);
+                        }
+                    }
+                    cur->pos = spE8.pos;
+                    acc = acc - cur->len;
+                    cur->len = spE8.dist;
+                    acc += cur->len;
+                    if (i != arg0->tail) {
+                        do {
+                            arg0->tail += 1;
+                            if (arg0->tail == arg0->cap) {
+                                arg0->tail = 0;
+                            }
+                            arg0->count -= 1;
+                        } while (i != arg0->tail);
+                    }
+                    if (data->unk30 != 0) {
+                        func_1000F91C(data->unk30, 0x7FFF, 0, 0, 0, (s32)cur->pos.unk0, (s32)cur->pos.unk4, (s32)cur->pos.unk8, 0x1F4, 0x1388);
+                    }
+                }
+            }
+            prev = cur;
+        } while (i != arg0->tail);
+        sz = arg0->count;
+    }
+    if (sz >= 2) {
+        data->unk38 = data->unk38 + -395.0f * D_800BE9A4;
+        data->unk38 = func_15144528(data->unk38, 16383.0f, -16384.0f);
+        spB8 = 0.0f;
+        i2 = arg0->head;
+        for (;;) {
+            Seg150D942C *cur2;
+            i2 -= 1;
+            if (i2 < 0) {
+                i2 = arg0->cap - 1;
+            }
+            cur2 = &buf[i2];
+            spB8 += cur2->len;
+            cur2->unk20 = func_15144528(data->unk38 + spB8 * 29.02999878f, 16383.0f, -16384.0f);
+            if (i2 != arg0->tail) {
+                continue;
+            }
+            break;
+        }
+        sz = arg0->count;
+    }
+    if (sz >= 2) {
+        f0 = 0.0f;
+        t16 = acc * 0.8020000458f;
+        i3 = arg0->head;
+        inv = acc - t16;
+        rcp = 1.0f / inv;
+        do {
+            Seg150D942C *cur3;
+            i3 -= 1;
+            if (i3 < 0) {
+                i3 = arg0->cap - 1;
+            }
+            cur3 = &buf[i3];
+            f0 += cur3->len;
+            if (t16 < f0) {
+                s32 padz;
+                cur3->alpha = (u32)((inv - (f0 - t16)) * rcp * 155.0f);
+            } else {
+                cur3->alpha = 0x9B;
+            }
+        } while (i3 != arg0->tail);
+    }
+    return 1;
+}
+
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_105FC0/func_150D9C7C.s")
 
