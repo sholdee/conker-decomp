@@ -3,7 +3,244 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_100810/func_150D3360.s")
+typedef struct {
+    struct17 pos;
+    s16 unkC;
+    u16 unkE;
+    s32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 pad16[2];
+    s32 unk18;
+} Hdr150D3360;
+
+typedef struct {
+    struct127 *unk0;
+    u8 unk4;
+    u8 unk5;
+    u8 pad6[2];
+    struct126 *unk8;
+    s32 unkC;
+    s32 unk10;
+    f32 unk14;
+    f32 unk18;
+} Data150D3360;
+
+typedef struct {
+    f32 unk0, unk4, unk8, unkC, unk10, unk14, unk18, unk1C, unk20;
+    s32 unk24, unk28, unk2C, unk30, unk34, unk38, unk3C, unk40, unk44;
+    f32 unk48;
+    s16 unk4C, unk4E, unk50, unk52;
+    u8 unk54, unk55, unk56, unk57, unk58;
+    s8 unk59;
+} Emit150D3360;
+
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    s16 unk2;
+    s16 unk4;
+    u8 pad6[2];
+    s32 unk8;
+    s32 unkC;
+    u8 unk10, unk11, unk12, unk13;
+    f32 unk14;
+    f32 unk18;
+    struct17 unk1C;
+    struct17 unk28;
+    f32 unk34, unk38, unk3C;
+    s32 unk40;
+    u8 unk44, unk45, unk46, unk47;
+    s32 unk48;
+    u8 unk4C;
+    u8 pad4D[3];
+    s32 unk50;
+    s16 unk54;
+    s16 unk56;
+} Spawn150D3360;
+
+typedef struct {
+    s16 unk0;
+    f32 unk4;
+} Tail150D3360;
+
+typedef struct {
+    struct127 *unk0;
+    s32 unk4[6];
+} Ret150D3360;
+
+extern s32 D_800A09C0[];
+s32 func_150D4AE0(struct17 *arg0, struct17 *arg1, struct127 *arg2, struct126 *arg3);
+s32 func_150D5124();
+void *func_151407D0(void *, s32, void *, u8, u8, u8, u8, s8, u8, s32);
+void *func_15147A80(void *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
+
+void func_150D3360(struct127 *arg0, u8 arg1, s32 arg2) {
+    Hdr150D3360 hdr;
+    Data150D3360 data;
+    struct126 *s126;
+    struct17 dir;
+    Data150D3360 *s0;
+
+    hdr.unk15 = 0x19;
+    hdr.unkC = 0x12C;
+    hdr.unkE = 0x12;
+    hdr.unk10 = 0xF;
+    hdr.unk14 = 1;
+    data.unk18 = 20.0f;
+    data.unk14 = 20.0f;
+    data.unk5 = 1;
+    data.unkC = 0;
+    data.unk10 = 0;
+    data.unk0 = arg0;
+    data.unk4 = arg0->unique_id;
+    s126 = func_1503195C(arg0, (arg0->id == 0x48) ? 0x7A : 0x79, 0);
+    if (s126 != NULL) {
+        if (func_150D4AE0(&hdr.pos, &dir, arg0, data.unk8 = s126) != 0) {
+            hdr.unkE |= 4;
+        } else {
+            hdr.pos.unk0 = 0.0f;
+            hdr.pos.unk4 = 0.0f;
+            hdr.pos.unk8 = 0.0f;
+            dir.unk0 = 0.0f;
+            dir.unk8 = 0.0f;
+            dir.unk4 = 500.0f;
+        }
+        s0 = func_15147A80(&hdr, 0x20, 0x14, 0, 0xD, 0xD, 0, 0, 0, arg1, arg2);
+        if (s0 != NULL) {
+            s0 = *(Data150D3360 **)((u8 *)s0 + 0x98);
+            memcpy(s0, &data, 0x1C);
+            if (D_8008FD8C < 5) {
+                func_1000FA64(0x5B3, s0->unk0->x_position, s0->unk0->y_position, s0->unk0->z_position, 0x3E8, 0x3E8, 0xC8, (s32)func_150D5124, s0, 0x5B3, 0xC, 0);
+            }
+            func_1000FA64(0x5B4, s0->unk0->x_position, s0->unk0->y_position, s0->unk0->z_position, 0x3E8, 0x3E8, 0xC8, (s32)func_150D5124, s0, 0x5B4, 0xC, 0);
+            if (D_8008FD8C < 7 || arg0->camera != NULL) {
+                func_1000FA64(0x5BC, s0->unk0->x_position, s0->unk0->y_position, s0->unk0->z_position, 0x3E8, 0x3E8, 0xC8, (s32)func_150D5124, s0, 0x5BC, 0xC, 0);
+            }
+            {
+                Emit150D3360 emit;
+                Spawn150D3360 spawn;
+
+                emit.unk0 = 200.0f;
+                emit.unk4 = 40.0f;
+                emit.unk8 = 40.0f;
+                emit.unkC = 40.0f;
+                emit.unk10 = 0.05000000075f;
+                emit.unk14 = 0.05000000075f;
+                emit.unk18 = 0.4499999881f;
+                emit.unk1C = 0.3000000119f;
+                emit.unk20 = 9.999999975e-07f;
+                emit.unk24 = -1;
+                emit.unk34 = -1;
+                emit.unk28 = -1;
+                emit.unk38 = -1;
+                emit.unk2C = -1;
+                emit.unk3C = -1;
+                emit.unk30 = -1;
+                emit.unk40 = -1;
+                emit.unk44 = 0;
+                emit.unk48 = 1.0f;
+                emit.unk4C = 0;
+                emit.unk4E = 0;
+                emit.unk50 = 0;
+                emit.unk52 = 0;
+                emit.unk54 = 0;
+                emit.unk55 = 0;
+                emit.unk56 = 0;
+                emit.unk57 = 0;
+                emit.unk58 = 0;
+                emit.unk59 = -1;
+                spawn.unk0 = 0x15;
+                spawn.unk1 = 3;
+                spawn.unk2 = 0x5503;
+                spawn.unk4 = 0x12C;
+                spawn.unk8 = 0;
+                spawn.unkC = 0;
+                spawn.unk10 = 0xFF;
+                spawn.unk11 = 0xFF;
+                spawn.unk12 = 0xFF;
+                spawn.unk13 = 0xFF;
+                spawn.unk14 = 100.0f;
+                spawn.unk18 = 100.0f;
+                spawn.unk1C = hdr.pos;
+                spawn.unk28 = dir;
+                spawn.unk34 = 1.0f;
+                spawn.unk38 = 1.0f;
+                spawn.unk3C = 1.0f;
+                spawn.unk40 = 0xCD2006;
+                spawn.unk44 = 0xFF;
+                spawn.unk45 = 0xFF;
+                spawn.unk46 = 0;
+                spawn.unk47 = 6;
+                spawn.unk48 = 0;
+                spawn.unk4C = 0xFF;
+                s0->unkC = (s32)func_151407D0(&emit, 0x60, &spawn, 0, 0, 0, 0, -1, arg1, arg2);
+            }
+            {
+                Emit150D3360 emit;
+                Spawn150D3360 spawn;
+                Tail150D3360 tail;
+
+                tail.unk0 = 0;
+                tail.unk4 = 1.0f;
+                emit.unk0 = emit.unk4 = 45.0f;
+                emit.unk8 = emit.unkC = 25.5f;
+                emit.unk14 = emit.unk10 = 0.1000000015f;
+                emit.unk18 = 1.0f;
+                emit.unk24 = -1;
+                emit.unk34 = -1;
+                emit.unk28 = -1;
+                emit.unk38 = -1;
+                emit.unk2C = -1;
+                emit.unk3C = -1;
+                emit.unk30 = -1;
+                emit.unk40 = -1;
+                emit.unk44 = 0;
+                emit.unk48 = 1.0f;
+                emit.unk4C = 0;
+                emit.unk4E = 0;
+                emit.unk50 = 0;
+                emit.unk52 = 0;
+                emit.unk54 = 0;
+                emit.unk55 = 0;
+                emit.unk56 = 0;
+                emit.unk57 = 0;
+                emit.unk58 = 0;
+                emit.unk59 = -1;
+                emit.unk1C = 0.8000000119f;
+                emit.unk20 = 9.999999975e-07f;
+                spawn.unk0 = *(D_800A09C0 + (func_150ADA20() & 3));
+                spawn.unk1 = 3;
+                spawn.unk2 = 0x2203;
+                spawn.unk4 = 0x12C;
+                spawn.unk8 = 0;
+                spawn.unkC = 0;
+                spawn.unk10 = 0xFF;
+                spawn.unk11 = 0xFF;
+                spawn.unk12 = 0xFF;
+                spawn.unk13 = 0xFF;
+                spawn.unk14 = 100.0f;
+                spawn.unk18 = 100.0f;
+                spawn.unk1C = hdr.pos;
+                spawn.unk28 = dir;
+                spawn.unk40 = 0xCD2006;
+                spawn.unk44 = 0xFF;
+                spawn.unk45 = 0xFF;
+                spawn.unk46 = 0;
+                spawn.unk47 = 7;
+                spawn.unk48 = 0;
+                spawn.unk4C = 0xFF;
+                spawn.unk34 = 1.0f;
+                spawn.unk38 = 1.0f;
+                spawn.unk3C = 1.0f;
+                s0->unk10 = (s32)func_151407D0(&emit, 0x68, &spawn, 0, 0x27, 0, 0, -1, arg1, arg2);
+                if (s0->unk10 != 0) {
+                    memcpy((u8 *)s0->unk10 + 0x170, &tail, 8);
+                }
+            }
+        }
+    }
+}
 
 typedef struct {
     struct17 pos;
