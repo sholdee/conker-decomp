@@ -880,7 +880,40 @@ void func_150B7B40(struct127 *arg0, u8 arg1, s32 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_E4070/func_150B82D0.s")
+void func_15143794(s16, s16, f32, f32 *);
+void *func_1518A3C0(f32 *, f32 *, f32, f32 *, f32 *, f32, f32, u8, s16, u8, s32, u8, s32);
+
+void func_150B82D0(Vec3_150B7B40 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, u8 arg4, s32 arg5) {
+    s32 n;
+    f32 pos[3];
+    f32 rot[3];
+    f32 vel[3];
+    f32 sc[3];
+    s16 ang1;
+    s16 ang2;
+
+    n = (func_150ADA20() % 26U) + 0x23;
+    while (n > 0) {
+        ang1 = func_150ADA20() & 0xFF;
+        ang2 = (func_150ADA20() % 61U) - 0x3F;
+        func_15143794(ang1, ang2, *arg2, pos);
+        pos[1] *= *arg3;
+        pos[0] += arg0->x;
+        pos[1] += arg0->y;
+        pos[2] += arg0->z;
+        rot[0] = func_150ADA68() * 360.0f;
+        rot[1] = func_150ADA68() * 360.0f;
+        rot[2] = func_150ADA68() * 360.0f;
+        func_15143794(ang1, ang2, ((func_150ADA68() * 1221.0f) + 1806.0f) * 0.009999999776f, vel);
+        sc[0] = ((func_150ADA68() * 3140.0f) + -1570.0f) * 0.009999999776f;
+        sc[1] = 0.0f;
+        sc[2] = ((func_150ADA68() * 3140.0f) + -1570.0f) * 0.009999999776f;
+        func_1518A3C0(pos, rot, ((func_150ADA68() * 104.0f) + 78.0f) * 0.001000000047f, vel, sc,
+                      ((func_150ADA68() * 633.0f) + -1064.0f) * 0.001000000047f, 0.9425339699f, 1,
+                      (func_150ADA20() % 51U) + 0x4B, 0, 0, 0xFF, 1);
+        n--;
+    }
+}
 
 
 typedef struct {
