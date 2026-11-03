@@ -23,7 +23,7 @@ extern s16 D_80087290;
 extern s16 D_80087294;
 extern B3020Struct *D_800D2350;
 s16 *func_1502B5C8(s32 *, s32, s32, s32);
-void func_15085BE8(void);
+s32 func_15085BE8(void);
 
 void func_15085B70(s32 arg0) {
     s16 *temp_v0;
@@ -41,7 +41,65 @@ void func_15085B70(s32 arg0) {
     func_15085BE8();
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_B3020/func_15085BE8.s")
+extern u8 D_800D2358;
+extern f32 D_800D2360[];
+extern u8 D_800D237C[];
+
+typedef struct {
+    s16 unk0;
+    s16 unk2;
+    s16 unk4;
+    u8 unk6;
+    u8 unk7;
+    s16 unk8;
+    s16 unkA;
+    s16 unkC;
+    s16 unkE;
+} B3020Struct2;
+
+s32 func_15085BE8(void) {
+    s32 i;
+    s32 ret;
+    s32 idx;
+    f32 val;
+    s32 a;
+    s32 b;
+    f32 min[6];
+    f32 max[6];
+
+    ret = 0;
+    for (i = 0; i < 6; i++) {
+        min[i] = 10000.0f;
+        max[i] = -10000.0f;
+    }
+    for (i = 0; i < D_80087290; i++) {
+        idx = ((B3020Struct2 *)D_800D2350)[i].unk6;
+        val = ((B3020Struct2 *)D_800D2350)[i].unk2;
+        if (val < min[idx]) {
+            min[idx] = val;
+        }
+        if (max[idx] < val) {
+            max[idx] = val;
+        }
+    }
+    D_800D2358 = 0;
+    for (i = 0; i < 6; i++) {
+        if (min[i] <= max[i]) {
+            D_800D237C[D_800D2358] = i;
+            D_800D2358++;
+        }
+    }
+    for (i = 0; i < D_800D2358 - 1; i++) {
+        a = D_800D237C[i];
+        b = D_800D237C[i + 1];
+        D_800D2360[i] = (max[a] + min[b]) * 0.5f;
+        if (max[a] > min[b]) {
+            ret = 1;
+        }
+    }
+    D_800D2360[i] = 100000.0f;
+    return ret;
+}
 
 extern f32 D_800D2360[];
 extern u8 D_800D237C[];
