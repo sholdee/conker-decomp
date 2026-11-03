@@ -444,7 +444,209 @@ void func_15063FA0(struct127 *arg0, s32 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_90840/func_150641D8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_90840/func_150642AC.s")
+extern s32 D_800CC28C;
+void func_15074664(void);
+void func_15060A30(s32 arg0, struct127 *arg1);
+void func_1505A250(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4);
+
+void func_150642AC(struct127 *arg0, s32 arg1, f32 arg2, s32 arg3, s32 arg4) {
+    s32 anim;
+    f32 speed;
+    f32 blend;
+    struct127 *obj;
+    struct126 *inner;
+    u8 *sub;
+    f32 dx;
+    f32 dist;
+    f32 dz;
+    s16 x;
+    s16 z;
+    f32 sp44;
+    f32 sp40;
+    f32 sp3C;
+
+    anim = 0;
+    speed = 1.0f;
+    blend = 4.0f;
+    if (arg4 != 0) {
+        arg1 &= ~0x4000;
+        D_800CC28C &= ~0x4000;
+    }
+    if (arg0->unk31C->pad79[2] != 0) {
+        switch (arg0->unk31C->pad79[2]) {
+        case 1: {
+            s16 pad;
+
+            arg0->unk83 = 0xFF;
+            arg0->disable_run = 0xFF;
+            x = (arg0->unk2E4 >> 16) & 0xFFFF;
+            z = arg0->unk2E4 & 0xFFFF;
+            arg0->unk84.uh = 0;
+            arg0->unk31C->unk30 = 0xD;
+            *(f32 *)&arg0->unk31C->unk28 = x;
+            *(f32 *)&arg0->unk31C->unk2C = z;
+            anim = 0x96;
+            arg0->unk76 = arg0->unk2E8 & 0xFFFF;
+        }
+            break;
+        case 2:
+            speed = 0.8000000119f;
+            anim = 0xDD;
+            arg0->disable_run = 0xFF;
+            arg0->unk83 = 0xFF;
+            break;
+        case 3:
+            D_800D1580 = 1;
+            func_15074664();
+            if (arg0->in_water != 0 || (s32)arg0->unk28 != 0) {
+                func_15083568(arg0, 0x17, 1.0f, 0);
+                arg0->unk31C->unk11A = 2;
+            } else {
+                arg0->disable_run = 0xFF;
+                arg0->disable_jump = 0xFF;
+                arg0->unk83 = 0xFF;
+                speed = 3.0f;
+                anim = 0x151;
+                arg0->unk31C->unk11A = 1;
+            }
+            break;
+        case 4:
+            D_800D1580 = 0;
+            func_15074664();
+            if (arg0->in_water != 0 || (s32)arg0->unk28 != 0) {
+                func_150836CC(arg0, 0x17);
+                arg0->unk31C->unk11A = 0;
+            } else {
+                arg0->disable_run = 0xFF;
+                arg0->disable_jump = 0xFF;
+                arg0->unk83 = 0xFF;
+                speed = 3.0f;
+                anim = 0x14E;
+                arg0->unk31C->unk11A = 3;
+            }
+            break;
+        case 5:
+            obj = func_1505F0AC(0x6C);
+            arg0->unk81 = 1;
+            if (obj->unk2E4 == 0) {
+                arg0->unk1CC = arg0->y_position;
+                obj->unk2E4 = 100;
+                anim = 0x38;
+            }
+            if (obj->unk2E4 >= 100) {
+                if (obj->unk1D4 != NULL) {
+                    sub = (u8 *)obj->unk1D4 + 0x140;
+                    arg0->y_position = *(s16 *)(sub + 0x1A) + 20;
+                }
+            }
+            if (arg1 & 0x8000) {
+                if (obj->unk2E4 == 100) {
+                    obj->unk2E4 = 0x7A;
+                    obj->unk2E8 = 0x7A;
+                    anim = 0x16;
+                    func_15060A30(0x38E, arg0);
+                }
+            }
+            break;
+        case 6:
+        case 8:
+            if ((arg1 & 0x4000) && (arg2 <= 0.0f)) {
+                speed = 2.0f;
+                arg0->unk83 = 0xFF;
+                arg0->disable_run = 0xFF;
+                anim = 0x33;
+            }
+            break;
+        case 9:
+            anim = 0x22D;
+            arg0->disable_run = 0xFF;
+            arg0->unk83 = 0xFF;
+            break;
+        case 10:
+            if (arg0->unk28 <= 1.0f) {
+                anim = 0x19A;
+                arg0->unk83 = 0xFF;
+            }
+            arg0->disable_run = 0xC8;
+            arg0->disable_jump = 0xC8;
+            break;
+        case 12:
+            if (arg0->unk28 <= 1.0f) {
+                anim = 0x2E7;
+                arg0->unk83 = 0xFF;
+            }
+            arg0->disable_run = 0xC8;
+            arg0->disable_jump = 0xC8;
+            break;
+        case 11:
+            dx = arg0->x_position - -1884.0f;
+            dz = arg0->z_position - 100.0f;
+            dist = sqrtf(dx * dx + dz * dz);
+            if (dist < 1000.0f) {
+                u16 angle;
+
+                angle = func_1505A630(-dx, dz, 0);
+                func_1505A184(angle, 20.0f, 0.0f, &sp44, &sp40, &sp3C);
+                func_1505A250(sp44, sp40, (1200.0f - dist) * 0.001000000047f, &arg0->unk16C, &arg0->unk170);
+            }
+            break;
+        default:
+            break;
+        }
+        arg0->unk31C->pad79[2] = 0;
+    }
+    if (arg0->unk31C->unk198 == 0 && anim == 0 && (arg1 & 0x4000) && (arg0->unk31C->unk4E & 0xF) != 1 &&
+        arg2 <= 0.0f && arg0->disable_run != 0xFF) {
+        if (arg0->unk13C >= 100) {
+            if (!(arg0->unk25C & 0x20)) {
+                anim = 0xD6;
+                speed = 1.149999976f;
+                if (D_800BE616 != 0) {
+                    anim = 0x118;
+                    speed = 1.0f;
+                }
+                if (D_800BE9F0 == 0x30) {
+                    anim = 0x28D;
+                }
+                arg0->unk83 = 0xFF;
+                arg0->disable_run = 0xFF;
+            }
+        } else if ((arg0->unk31C->unk75 == 0 && arg0->unk31C->pad79[3] == 0) || arg0->unk31C->unk4E == 2) {
+            if (D_800BE9F0 != 0x2D && D_800BE9F0 != 0x2B && D_800BE9F0 != 0x30 && D_800BE9F0 != 0x34) {
+                anim = 0x33;
+                if ((s16)arg0->unk31C->unk8 != 0) {
+                    arg0->unk83 = 0xFF;
+                    arg0->disable_run = 0xFF;
+                    speed = 1.600000024f;
+                } else {
+                    arg0->unk83 = 0xFF;
+                    if (D_800BE616 == 0) {
+                        anim = 0x1DC;
+                    } else if (D_800E9D00 & 0x400) {
+                        anim = 0x355;
+                    } else if (D_800E9D00 & 0x800) {
+                        anim = 0x1DC;
+                    } else {
+                        anim = 0x354;
+                    }
+                    speed = 1.350000024f;
+                    if (arg0->unk31C->unk84 == 0 && arg0->unk31C->unk4E == 0) {
+                        arg0->disable_run = 0xFF;
+                        arg0->y_velocity = -4.0f;
+                        arg0->unk76 = arg0->unk31C->unk4C;
+                        speed = 1.0;
+                        anim = 0x46;
+                    }
+                    arg0->unk80 = 1;
+                    blend = 0.0f;
+                }
+            }
+        }
+    }
+    if (anim != 0 && anim != 999 && arg3 == 0) {
+        func_1505E650(arg0, anim, speed, blend, 0.0f, 0.0f, 0);
+    }
+}
 
 void func_150649A0(s32 arg0, s32 arg1) {
     struct127 *objects;
