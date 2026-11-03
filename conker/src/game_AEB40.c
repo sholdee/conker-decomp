@@ -58,7 +58,152 @@ typedef struct {
 } GameAEB40ActorSlots;
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_AEB40/func_15081690.s")
+typedef struct {
+    /* 0x00 */ struct127 *obj;
+    /* 0x04 */ f32 dist;
+    /* 0x08 */ struct17 hit;
+    /* 0x14 */ struct17 centre;
+    /* 0x20 */ struct17 far;
+    /* 0x2C */ struct17 start;
+    /* 0x38 */ struct17 end;
+    /* 0x44 */ u8 unk44[0x12];
+    /* 0x56 */ s16 unk56;
+    /* 0x58 */ s8 unk58;
+    /* 0x59 */ u8 unk59;
+    /* 0x5A */ s8 unk5A;
+    /* 0x5C */ struct131 *unk5C;
+    /* 0x60 */ s32 unk60;
+} GameAEB40RayHit;
+
+extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, f32 *, s32 *, void *, f32);
+extern s32 func_1508114C(struct127 *obj, struct17 *rayOrigin, struct17 *rayDir, struct17 *outNear, struct17 *outFar, struct17 *outCentre, f32 *outDist, s32 *outIndex, s32 *outBone, s32 *outPart, s16 *outOffset);
+s32 func_15081C20(struct17 *arg0, struct17 *arg1, u8 *arg2, struct17 *arg3, struct17 *arg4, f32 *arg5, f32 *arg6);
+extern s32 (*D_80086C90[])(struct127 *, struct127 *, s32);
+
+void func_15081690(struct127 *arg0, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 z2, GameAEB40RayHit *out, f32 maxDist, s32 skipWorld, s32 skipObjs, s32 skipBones, s8 filter, s32 filterArg, s32 ignoreMask) {
+    s32 surf;
+    f32 hitX;
+    f32 hitY;
+    f32 hitZ;
+    f32 dist;
+    f32 dist2;
+    s32 part;
+    s32 bone;
+    s16 offset[4];
+    s32 i;
+    struct127 *obj;
+    s32 best;
+    s32 skip;
+    s32 ret;
+    u8 slots[25];
+    struct17 near;
+    struct17 far;
+    struct17 centre;
+    struct17 start;
+    struct17 end;
+    s32 index;
+    s32 surfIdx;
+
+    start.unk0 = x1;
+    start.unk4 = y1;
+    start.unk8 = z1;
+    end.unk0 = x2;
+    end.unk4 = y2;
+    end.unk8 = z2;
+    out->dist = -1.0f;
+    out->obj = NULL;
+    out->unk59 = 0;
+    out->start = start;
+    best = -1;
+    out->end = end;
+    out->unk5C = NULL;
+    out->unk60 = 0;
+    if (maxDist == 0.0f) {
+        maxDist = 9999999.0f;
+    }
+    if (arg0 != NULL) {
+        skip = arg0->unk124 - 1;
+    } else {
+        skip = -1;
+    }
+    bzero(slots, sizeof(slots));
+    for (i = 0; i < 25; i++) {
+        if (D_800CC2D0[i].interaction_state == 0) {
+            continue;
+        }
+        if (D_800CC2D0[i].unk65 != 0) {
+            slots[D_800CC2D0[i].unk65 - 1] = i + 1;
+        }
+    }
+    if (skipWorld == 0 &&
+        func_150AC9C0(x1, y1, z1, x2, y2, z2, &surf, out->unk44, &hitX, &hitY, &hitZ, &dist, &surfIdx, &out->unk60, 0.0f) != 0 &&
+        dist < maxDist) {
+        out->dist = dist;
+        out->unk59 = 1;
+        out->hit.unk0 = hitX;
+        out->hit.unk4 = hitY;
+        out->hit.unk8 = hitZ;
+        out->far = out->hit;
+        if (surfIdx != -1) {
+            out->unk5C = &D_800DBEF4[surfIdx];
+        } else {
+            out->unk5C = NULL;
+        }
+    }
+    if (skipObjs == 0) {
+        for (i = 0; i < 25; i++) {
+            if ((1 << i) & ignoreMask) {
+                continue;
+            }
+            if (skip == i) {
+                continue;
+            }
+            obj = &D_800CC2D0[i];
+            if (obj->interaction_state == 0) {
+                continue;
+            }
+            if (obj->unk5 == 3) {
+                continue;
+            }
+            if (obj == arg0) {
+                continue;
+            }
+            if (!(obj->unkF8 & 0x40)) {
+                continue;
+            }
+            if (filter != -1 && D_80086C90[filter](obj, arg0, filterArg) == 0) {
+                continue;
+            }
+            if (skipBones == 0) {
+                ret = func_1508114C(obj, &start, &end, &near, &far, &centre, &dist, &index, &bone, &part, offset);
+                if (ret > 0 && dist < maxDist && (out->dist == -1.0f || dist < out->dist) && best != slots[i]) {
+                    out->dist = dist;
+                    out->obj = obj;
+                    best = i + 1;
+                    out->unk58 = part;
+                    out->unk56 = bone;
+                    out->hit = near;
+                    out->centre = centre;
+                    out->unk5A = index;
+                    out->far = far;
+                    out->unk59 = 3;
+                }
+                if (ret != -1) {
+                    continue;
+                }
+            }
+            if (func_15081C20(&start, &end, (u8 *)obj, &near, &far, &dist, &dist2) != 0 &&
+                dist < maxDist && (out->dist == -1.0f || dist < out->dist) && best != slots[i]) {
+                out->dist = dist;
+                out->obj = obj;
+                best = i + 1;
+                out->hit = near;
+                out->far = far;
+                out->unk59 = 2;
+            }
+        }
+    }
+}
 
 extern f32 func_15143E64(struct17 *);
 extern s32 func_15145128(struct17 *, struct17 *, f32 *, f32 *);
