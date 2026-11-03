@@ -293,7 +293,54 @@ s32 func_15184DF0(s32 arg0, s32 arg1, f32 *arg2, f32 *arg3, f32 *arg4) {
     return dist;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1B1600/func_15184FA4.s")
+extern Gfx D_8008D448[];
+extern Vp D_8008D3E8;
+extern Mtx D_89470;
+extern s16 D_80082FA6;
+Gfx *func_1501A680(Gfx *arg0);
+extern s32 func_1506196C(struct127 *, s32);
+extern Gfx *func_1502CCFC(Gfx *, s32, s32, struct255 *, s32, s32 *, s32, s32);
+Gfx *func_1510B7B4(Gfx *gfx, s32 idx);
+
+Gfx *func_15184FA4(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3) {
+    s32 lod;
+    s32 col[3];
+
+    if (D_800CC2D0[arg1].unk127 == 0xFF) {
+        lod = D_800CC2D0[arg1].pad1C8 + 1;
+    } else {
+        lod = D_800CC2D0[arg1].pad1C8;
+    }
+    gDPPipeSync(gfx++);
+    gDPSetColorImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_8b, 64, D_800DF088);
+    gSPDisplayList(gfx++, D_8008D448);
+    gSPPerspNormalize(gfx++, D_800DF0D0[arg2]);
+    gSPViewport(gfx++, &D_8008D3E8);
+    gSPMatrix(gfx++, &D_800DF2F8[arg2][D_800BE9C0], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, &D_89470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    col[0] = col[1] = col[2] = 0;
+    gfx = func_1502CCFC(gfx, arg1, arg3, D_800CC2D0[arg1].unk1D4, func_1506196C(&D_800CC2D0[arg1], arg3), col, 3, 1);
+    gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(gfx++);
+    if (lod < 2) {
+        gDPSetCombine(gfx++, 0xFFFFFF, 0xFFFCF87C);
+        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+        gDPSetOtherMode(gfx++, 0x3C3F, 0x0F0A4000);
+        gDPLoadTextureBlock(gfx++, D_800DF088, G_IM_FMT_I, G_IM_SIZ_8b, 64, 64, 0, G_TX_WRAP, G_TX_WRAP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
+        gSPTextureRectangle(gfx++, 0, 0, 0xFC, 0xFC, G_TX_RENDERTILE, 0x10, 0x10, 0x400, 0x400);
+        if (lod == 0) {
+            gDPPipeSync(gfx++);
+            gDPLoadTextureBlock(gfx++, D_800DF088, G_IM_FMT_I, G_IM_SIZ_8b, 64, 64, 0, G_TX_WRAP, G_TX_WRAP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
+            gSPTextureRectangle(gfx++, 0, 0, 0xFC, 0xFC, G_TX_RENDERTILE, 0x10, 0x10, 0x400, 0x400);
+        }
+        gDPPipeSync(gfx++);
+    }
+    gSPSetGeometryMode(gfx++, G_SHADING_SMOOTH | G_ZBUFFER);
+    gfx = (Gfx *)func_1501A490((s32)func_1501A680(gfx), D_80082FA6, 0, 0, 0, 0);
+    gfx = func_1510B7B4(gfx, arg3);
+    D_800CC2D0[arg1].unk123 = 1;
+    return gfx;
+}
 
 struct vtx151857DC {
     f32 x;       /* 0x0 */
