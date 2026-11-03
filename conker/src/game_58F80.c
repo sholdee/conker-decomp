@@ -1040,7 +1040,111 @@ void func_1502F264(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502F3C8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502F490.s")
+typedef struct {
+    u32 start;
+    s32 count;
+    s32 id;
+} Seg1502F490;
+
+typedef struct {
+    u8 pad0[4];
+    u8 unk4;
+    u8 pad5[0x1D4 - 5];
+    u8 *unk1D4;
+    u8 *unk1D8;
+} Obj1502F490;
+
+extern u16 D_800C5EF8[];
+void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
+
+void func_1502F490(Obj1502F490 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, s32 arg4) {
+    f32 diff[3];
+    f32 res[3];
+    s32 idx[3];
+    s32 i;
+    s32 j;
+    s32 mask;
+    s32 seg;
+    u8 id;
+    u32 p[3];
+    f32 v[2][3][3];
+    f32 e1[2][3];
+    f32 e2[2][3];
+    u8 *mtx;
+    f32 s;
+    f32 t;
+
+    id = arg0->unk4;
+    if (D_800C6070[id] == 0) {
+        return;
+    }
+    for (i = 0; i < 3; i++) {
+        p[i] = *(s32 *)(D_800C6070[id] + arg4 * 12 + i * 4) + (&D_800D19A0)[id];
+    }
+    seg = 0;
+    mask = 0;
+    do {
+        if (seg == D_800C5EF8[id]) {
+            return;
+        }
+        for (i = 0; i < 3; i++) {
+            if (!(mask & (1 << i))) {
+                if (p[i] >= ((Seg1502F490 *)D_800C5C08[id])[seg].start && p[i] < ((Seg1502F490 *)D_800C5C08[id])[seg].start + ((Seg1502F490 *)D_800C5C08[id])[seg].count * 16) {
+                    mask = (1 << i) | mask;
+                    idx[i] = ((Seg1502F490 *)D_800C5C08[id])[seg].id;
+                }
+            }
+        }
+        seg++;
+    } while (mask != 7);
+
+    if (arg0->unk1D8 == NULL || arg0->unk1D4 == NULL) {
+        return;
+    }
+    mtx = arg0->unk1D8;
+    for (i = 0; i < 2; i++) {
+        if (i == 1) {
+            mtx = arg0->unk1D4;
+        }
+        for (j = 0; j < 3; j++) {
+            func_150A7960((f32 *)(mtx + (idx[j] << 6)), ((s16 *)p[j])[0], ((s16 *)p[j])[1], ((s16 *)p[j])[2],
+                          &v[i][j][0], &v[i][j][1], &v[i][j][2]);
+        }
+    }
+    for (i = 0; i < 2; i++) {
+        for (j = 0; j < 3; j++) {
+            e1[i][j] = v[i][1][j] - v[i][0][j];
+            e2[i][j] = v[i][2][j] - v[i][0][j];
+        }
+    }
+    diff[0] = *arg1 - v[0][0][0];
+    diff[1] = *arg2 - v[0][0][1];
+    diff[2] = *arg3 - v[0][0][2];
+    s = e1[0][0] * e2[0][2] - e1[0][2] * e2[0][0];
+    if (s != 0.0f) {
+        s = (diff[0] * e2[0][2] - diff[2] * e2[0][0]) / s;
+    } else {
+        s = -100.0f;
+    }
+    if (s < 0.0f || s > 1.0f) {
+        return;
+    }
+    if (e2[0][2] != 0.0f) {
+        t = (diff[2] - s * e1[0][2]) / e2[0][2];
+    } else {
+        t = -100.0f;
+    }
+    if (t < 0.0f || t > 1.0f) {
+        return;
+    }
+    for (i = 0; i < 3; i++) {
+        res[i] = s * e1[1][i] + e2[1][i] * t;
+    }
+    diff[1] = s * e1[0][1] + e2[0][1] * t;
+    *arg1 += res[0] + v[1][0][0] - diff[0] - v[0][0][0];
+    *arg2 += res[1] + v[1][0][1] - diff[1] - v[0][0][1];
+    *arg3 += res[2] + v[1][0][2] - diff[2] - v[0][0][2];
+}
 
 void func_1502F948(ActorInteractionFields *arg0) {
     s32 idx;
