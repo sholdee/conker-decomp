@@ -249,7 +249,7 @@ void func_1516D678(struct Obj1516D4E8 *arg0)
 #pragma GLOBAL_ASM("asm/nonmatchings/game_19A8B0/func_1516D738.s")
 
 void func_1516D99C(
-    s32 arg0, s32 arg1, s32 arg2, s32 arg3,
+    s16 arg0, s16 arg1, s16 arg2, s32 arg3,
     s32 arg4, s32 arg5, s32 arg6, s32 arg7,
     s32 arg8, s32 arg9, s32 arg10, s32 arg11,
     s32 arg12, s32 arg13, s32 arg14, s32 arg15,
@@ -259,17 +259,17 @@ void func_1516D99C(
     s32 arg28, s32 arg29, s32 arg30, s32 arg31,
     s32 arg32, s32 arg33, s32 arg34, s32 arg35,
     s32 arg36, s32 arg37, s32 arg38, s32 arg39,
-    s32 arg40, s32 arg41, s32 arg42, s32 arg43,
-    s32 arg44, s32 arg45, s32 arg46, s32 arg47,
+    s32 arg40, u8 arg41, s32 arg42, s32 arg43,
+    s32 arg44, s32 arg45, s32 arg46, u8 arg47,
     s32 arg48) {
     struct Obj1516D99C *ret;
     s32 temp_v1;
 
-    ret = func_15167A68(arg44 != 0 ? 0x66 : 0x11, arg48, 0x4C, 0, LOW_U8(arg47), 1);
+    ret = func_15167A68(arg44 != 0 ? 0x66 : 0x11, arg48, 0x4C, 0, arg47, 1);
     if (ret != NULL) {
-        ret->unkE = LOW_S16(arg0);
-        ret->unk10 = LOW_S16(arg1);
-        ret->unk12 = LOW_S16(arg2);
+        ret->unkE = arg0;
+        ret->unk10 = arg1;
+        ret->unk12 = arg2;
         ret->unk14 = LOW_S16(arg27);
         ret->unk16 = LOW_S16(arg28);
         ret->unk18 = LOW_S16(arg29);
@@ -312,11 +312,11 @@ void func_1516D99C(
         ret->unk42 = 0;
         ret->unk43 = LOW_U8(arg40);
         if (arg44 != 0) {
-            if (LOW_U8(arg41) >= 4) {
-                LOW_U8(arg41) = 3;
+            if (arg41 >= 4) {
+                arg41 = 3;
             }
         }
-        ret->unk44 = LOW_U8(arg41);
+        ret->unk44 = arg41;
         ret->unk45 = LOW_U8(arg42);
         ret->unk46 = LOW_U8(arg43);
         ret->unk47 = LOW_U8(arg45);
@@ -441,7 +441,6 @@ s32 func_1516ECAC(Obj1516FadeState *arg0) {
     return 0;
 }
 
-extern void func_1516D99C();
 
 void func_1516ED68(s32 a0, s32 a1, u8 a2, s32 a3) {
     u8 v;
@@ -530,7 +529,6 @@ s32 func_1516F024(Obj1516FadeState *arg0) {
     return 0;
 }
 
-extern void func_1516D99C();
 
 void func_1516F1C0(s32 a0, s32 a1, u8 a2, s32 a3) {
     func_1516D99C(2, 0, 0, 0x2D,
@@ -570,25 +568,22 @@ void func_1516F548(
     s32 arg8, s32 arg9, s32 arg10, s32 arg11,
     s32 arg12, s32 arg13, s32 arg14, s32 arg15,
     s32 arg16) {
-    s32 posX;
-    s32 posY;
-    s32 posZ;
 
-    func_1516D99C(posX = (s16)arg0, posY = (s16)arg1, posZ = (s16)arg2, 0xD,
+    func_1516D99C((s16)arg0, (s16)arg1, (s16)arg2, 0xD,
         0, 0x67, 0x17, 0xD, 0, 0, 0x12, 0,
         2, (u8)arg4, 0, (u8)arg6, 0, 0, 0, arg10,
         0, 0, 0, 0, 0, 0, 0, (s16)((arg7 << 12) / 4096),
         (s16)((arg7 << 12) / 4096), (s16)((arg8 << 12) / 4096), (s16)((arg8 << 12) / 4096), (u16)arg3, (u8)arg9, 0x14, 0xFF, 0x10,
         (s16)arg5, 0xC8, 1, 0, 0, 1, 0, 0,
         0, 0, 0, LOW_U8(arg15), arg16);
-    func_1516D99C(LOW_S16(posX), LOW_S16(posY), LOW_S16(posZ), 0xD,
+    func_1516D99C((s16)arg0, (s16)arg1, (s16)arg2, 0xD,
         0, 0x67, 0x17, 0xD, 0, 0, 0x12, 0,
         2, (u8)arg4, 0, (u8)arg6, 0, 0, 0, arg11,
         0, 0, 0, 0, 0, 0, 0, (s16)((arg7 << 12) / 4096),
         (s16)((arg7 << 12) / 4096), (s16)((arg8 << 12) / 4096), (s16)((arg8 << 12) / 4096), (u16)arg3, (u8)arg9, 0x14, 0xFF, 0x10,
         (s16)arg5, 0xC8, 1, 6, 0, 1, 0, 0,
         0, 0, 0, LOW_U8(arg15), arg16);
-    func_1000FA64(7, LOW_S16(posX), LOW_S16(posY), LOW_S16(posZ), 0x36B0, 0x3E8, 0x64,
+    func_1000FA64(7, (s16)arg0, (s16)arg1, (s16)arg2, 0x36B0, 0x3E8, 0x64,
         (s32)func_1000EBC4, (void *)arg3, 0, 0, 0);
 }
 
@@ -859,7 +854,38 @@ s32 func_1516FD50(Obj1516FadeStepState *arg0) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_19A8B0/func_1516FE1C.s")
+void func_1516FE1C(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
+    s32 sp_s2;
+    s16 posHi;
+    s16 posLo;
+    s32 var_a1;
+    s32 i;
+    s32 var_s1;
+    s32 pos;
+
+    var_s1 = 0;
+    i = 0;
+    if (D_800CC2D0[arg0].interaction_state == 1) {
+        posHi = 4;
+        posLo = 0;
+        sp_s2 = 0x19;
+        var_a1 = 1;
+    } else {
+        pos = (s32)&D_800CC2D0[arg0].x_position;
+        posHi = (s16)(pos >> 16);
+        posLo = (s16)(pos & 0xFFFF);
+        arg0 = 0xFF;
+        var_a1 = 0x21;
+    }
+    do {
+        if (i == 1) {
+            sp_s2 = 0x1B;
+            var_s1 = 8;
+        }
+        func_1516D99C(posHi, posLo, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, var_s1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xAA, 0xAA, 0xAA, 0xAA, (u16)arg1, 0x1E, 0, (u8)arg0, 0x1E, 0x168, 0x18, (u16)var_a1, 4, 0, 1, 0, 0, 0, sp_s2, 0, arg2, arg3);
+        i++;
+    } while (i != 2);
+}
 
 extern u8 func_150ADA20(void);
 extern f32 func_150489B0(u8);
