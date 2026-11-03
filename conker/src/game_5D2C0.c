@@ -534,12 +534,22 @@ struct S15030F94 {
     u8 pad1[2];
     u8 unk3;
     u8 unk4;
-    u8 pad5[0x4F];
+    u8 unk5;
+    u8 pad6[0xD];
+    u8 unk13;
+    u8 unk14;
+    u8 pad15[3];
+    u16 unk18;
+    u16 unk1A;
+    u8 pad1C[8];
+    Gfx **unk24;
+    Gfx *unk28[2];
+    u8 pad30[0x24];
     struct S15030F94 *unk54;
 };
 
 s32 func_1506196C(struct127 *, s32);
-s32 func_150311C4(s32, struct S15030F94 *, struct127 *, s32, s32);
+Gfx *func_150311C4(Gfx *, struct S15030F94 *, struct127 *, s32, s32);
 
 s32 func_15030E08(s32 arg0, s32 arg1, s32 arg2) {
     struct S15030F94 *var;
@@ -576,7 +586,7 @@ s32 func_15030E08(s32 arg0, s32 arg1, s32 arg2) {
                 continue;
             }
         }
-        arg0 = func_150311C4(arg0, var, obj, arg1, 0);
+        arg0 = (s32)func_150311C4((Gfx *)arg0, var, obj, arg1, 0);
         var = next;
     }
     return arg0;
@@ -598,7 +608,7 @@ s32 func_15030F94(s32 arg0, struct127 *arg1, s32 arg2, s32 arg3) {
             var = next;
             continue;
         }
-        arg0 = func_150311C4(arg0, var, arg1, arg2, arg3);
+        arg0 = (s32)func_150311C4((Gfx *)arg0, var, arg1, arg2, arg3);
         var = next;
     }
     return arg0;
@@ -657,7 +667,151 @@ s32 func_15031070(S15031070 *arg0, struct127 *arg1, u8 **arg2, u8 **arg3) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_5D2C0/func_150311C4.s")
+extern u8 D_80082FC0[];
+extern u8 D_80083140[];
+extern u8 D_800D9E28[];
+extern u8 D_800DD2E4[];
+extern Gfx *D_800BE9C8[];
+extern s32 D_800BEBA4;
+extern void func_1502D54C(s32, s32 *);
+extern void func_1502D630(struct127 *, s32 *, s32, s32);
+extern void func_1502CC34(struct127 *, s32, s32, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *);
+extern void func_150832AC(struct127 *);
+extern s32 func_1510D0EC(void *, s32 *, s32, s32);
+extern Gfx *func_1515D914(Gfx *, s32, s32, s32, s32, s32, s32, s32, void *, void *, s32, void *, s32, void *);
+extern Gfx *func_1515E544(Gfx *, s32, s32, s32, void *);
+extern Gfx *func_15035D6C(Gfx *, struct S15030F94 *, s32, s32, s32);
+
+#define OBJ_U8(o, off) (*(u8 *)((u8 *)(o) + (off)))
+#define OBJ_S32(o, off) (*(s32 *)((u8 *)(o) + (off)))
+
+Gfx *func_150311C4(Gfx *gdl, struct S15030F94 *arg1, struct127 *arg2, s32 arg3, s32 arg4) {
+    u8 *sp114;
+    u8 *sp110;
+    s32 sp104[3];
+    s32 sp100;
+    s32 spFC;
+    s32 spF8;
+    s32 spF4;
+    s32 spF0;
+    s32 spEC;
+    s32 spE8;
+    s32 spE4;
+    s32 spE0;
+    s32 spDC;
+    s32 spD8;
+    s32 spD4;
+    s32 spD0;
+    s32 spBC[5];
+    u16 t;
+    Gfx *orig;
+    s32 v;
+    s32 doit;
+    s32 called;
+
+    orig = gdl;
+    if (arg1->unk5 == 0) {
+        return gdl;
+    }
+    gDPPipeSync(gdl++);
+    spD0 = arg1->unk3;
+    v = func_1506196C(arg2, arg3);
+    if (v != 0xFF) {
+        spD0 = (s32)((u32)v * spD0) >> 8;
+    }
+    if (spD0 < 0xFF) {
+        gSPSegment(gdl++, 8, D_80082FC0);
+    } else {
+        gSPSegment(gdl++, 8, D_80083140);
+    }
+    if (func_15031070((S15031070 *)arg1, arg2, &sp114, &sp110) == 0) {
+        return gdl;
+    }
+    func_1502D54C(arg2 - D_800CC2D0, spBC);
+    if (((s16 *)D_800B0DF0)[0x3E / 2] != 0) {
+        func_1502D630(&D_800CC2D0[arg2 - D_800CC2D0], spBC, arg3, arg2 - D_800CC2D0);
+    } else {
+        spBC[3] = 0xFF;
+    }
+    func_1502CC34(arg2, arg3, spD0, spBC, &spF8, &spF4, &spF0, &spEC, &spE8, &spE4, &spE0, &spDC, &spD8, &spD4);
+    doit = 1;
+    sp100 = ((s16 *)D_800B0DF0)[0x3E / 2];
+    if ((OBJ_U8(arg2, 0x66) & 0xC) == 0xC) {
+        gSPSetGeometryMode(gdl++, 0x20000);
+        gSPClearGeometryMode(gdl++, 0x400000);
+    } else if (((OBJ_U8(arg2, 0x66) & 0xC) != 8) && !(arg1->unk4 & 1)) {
+        gSPClearGeometryMode(gdl++, 0x420000);
+        doit = 0;
+    } else if (D_800DCD7C != 0) {
+        gSPSetGeometryMode(gdl++, 0x420000);
+    } else {
+        gSPClearGeometryMode(gdl++, 0x420000);
+        doit = 0;
+    }
+    if (doit != 0) {
+        if (OBJ_S32(arg2, arg3 * 4 + 0x304) == 0) {
+            func_150832AC(arg2);
+            called = 1;
+        } else {
+            called = 0;
+        }
+        if (OBJ_S32(arg2, arg3 * 4 + 0x304) != 0) {
+            if ((OBJ_U8(arg2, 0x2FD) != 0) || (called != 0)) {
+                v = 0xA;
+            } else {
+                v = 2;
+            }
+            if ((arg2->unk5 != 5) && (OBJ_U8(arg2, 0x302) != 0) && (OBJ_U8(arg2, 0x66) & 0xC) && (called == 0)) {
+                gdl = func_1515E544(gdl, OBJ_S32(arg2, arg3 * 4 + 0x304), OBJ_U8(arg2, 0x301), OBJ_U8(arg2, 0x302),
+                                    (u8 *)OBJ_S32(arg2, 0x314) + D_800BE9C0 * 8);
+            } else {
+                gdl = func_1515D914(gdl, arg3, (s32)arg2->x_position, (s32)arg2->y_position, (s32)arg2->z_position,
+                                    OBJ_S32(arg2, 0x184), OBJ_S32(arg2, arg3 * 4 + 0x304), OBJ_U8(arg2, 0x301),
+                                    (u8 *)OBJ_S32(arg2, 0x314) + D_800BE9C0 * 8, (u8 *)arg2 + 0x302, 2,
+                                    (u8 *)arg2 + 0x1DD, v, D_800D9E28);
+            }
+        }
+    }
+    if (sp100 == 0) {
+        gDPSetFogColor(gdl++, spE0, spDC, spD8, spD4);
+    } else {
+        gDPSetFogColor(gdl++, D_800DD2E4[0], D_800DD2E4[1], D_800DD2E4[2], spD4);
+    }
+    gDPSetFogColor(gdl++, spE0, spDC, spD8, spD4);
+    gDPSetPrimColor(gdl++, 0xF2, 0, spF8, spF4, spF0, 0);
+    gDPSetEnvColor(gdl++, spEC, spE8, spE4, spD0);
+    gSPSegment(gdl++, 3, sp114);
+    gSPSegment(gdl++, 1, arg1->unk28[D_800BE9C0]);
+    t = arg1->unk18;
+    if (t != 0) {
+        v = func_1510D0EC(t, sp104, 0x3E, 0);
+        gSPSegment(gdl++, 6, v);
+    }
+    if (arg1->unk1A != 0) {
+        v = func_1510D0EC(arg1->unk1A, sp104, 0x3E, 0);
+        gSPSegment(gdl++, 7, v);
+    }
+    if (arg4 == 0) {
+        gSPSetGeometryMode(gdl++, 0x400);
+        for (called = 0; called < arg1->unk14; called++) {
+            if (!(arg1->unk13 & (1 << called))) {
+                gSPDisplayList(gdl++, arg1->unk24[called]);
+            }
+        }
+    } else {
+        gSPSetGeometryMode(gdl++, 0x200);
+        gdl = func_15035D6C(gdl, arg1, spEC, spE8, spE4);
+    }
+    if (D_800BEBA4 < (gdl - D_800BE9C8[D_800BE9C0])) {
+        v = 1;
+    } else {
+        v = 0;
+    }
+    if (v != 0) {
+        return orig;
+    }
+    return gdl;
+}
 
 void func_1503192C(struct127 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     struct126 *temp;
