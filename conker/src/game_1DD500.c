@@ -1,7 +1,10 @@
 #include <ultra64.h>
 #define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
+#define func_151D9B8C func_151D9B8C_decl_in_functions_h
 #include "functions.h"
 #undef func_150ADA20
+#undef func_151D9B8C
+void func_151D9B8C(u8, f32, u8, void *, struct17 *, s16, u8, u8, u8, u8, s32);
 u32 func_150ADA20(void);
 #include "variables.h"
 
@@ -132,7 +135,109 @@ void func_151B01B8(void *arg0, void *arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1DD500/func_151B03B8.s")
+typedef struct {
+    f32 y;
+    u8 pad4[0x14];
+    s32 f18;
+    s8 f1C;
+    u8 f1D;
+    s32 f20;
+} Probe151B03B8;
+extern void func_15143874(s16, f32, f32 *, f32 *);
+s32 func_15046C80(f32 *, s32, f32, void *);
+s32 func_1504697C(f32 *, s32, f32, void *);
+void func_151DAB58(u8, f32, u8, f32 *, s32, u8, s32);
+void func_15136698(f32, f32, s32, s32, s32, void *, f32 *, s32, s32, u8, s32);
+extern f32 D_800AA2B4, D_800AA2B8, D_800AA2BC, D_800AA2C0, D_800AA2C4, D_800AA2C8;
+extern f32 D_800AA2CC, D_800AA2D0, D_800AA2D4, D_800AA2D8, D_800AA2DC;
+
+void func_151B03B8(void *arg0, u8 arg1, s32 arg2) {
+    Game1DD500Impact packet;
+    Game1DD500Hit hit;
+    s32 n;
+    Probe151B03B8 pa;
+    f32 spD4[3];
+    f32 spC8[3];
+    f32 spBC[3];
+    Probe151B03B8 pb;
+
+    if (arg0 != NULL) {
+        func_1504715C(&hit, arg0);
+        packet.position[0] = *(f32 *)((u8 *)arg0 + 0x14);
+        packet.position[1] = *(f32 *)((u8 *)arg0 + 0x18);
+        packet.position[2] = *(f32 *)((u8 *)arg0 + 0x1C);
+        packet.field14 = D_800AA2B4;
+        packet.field2C = 0xA;
+        packet.field02 = 0xFF;
+        packet.field04 = -0x3F;
+        packet.field2E = 0;
+        packet.field00 = 0;
+        packet.field06 = 0x2D;
+        packet.field30 = 3;
+        packet.field32 = 2;
+        packet.field34 = 0x28;
+        packet.field36 = 0x14;
+        packet.field38 = 0x9B;
+        packet.field3A = 0x64;
+        packet.field3C = 0;
+        packet.field44 = 0x10;
+        packet.field46 = 0xF;
+        packet.field48 = 0;
+        packet.field18 = D_800AA2B8;
+        packet.field1C = D_800AA2BC;
+        packet.field20 = D_800AA2C0;
+        packet.field24 = 18.0f;
+        packet.field28 = D_800AA2C4;
+        packet.field40 = 0.5f;
+        func_15153F18(&packet.field00, &packet.position[0], (s32)&hit, 0xFF, 1);
+        n = func_150ADA20() % 6U + 0xC;
+        pa.f18 = 0;
+        pa.f1C = 0;
+        pa.f1D = 0;
+        pa.f20 = 0;
+        pa.y = D_800AA2C8;
+        spD4[1] = *(f32 *)((u8 *)arg0 + 0x18) + 100.0f;
+        if (n != 0) for (;;) {
+            func_15143874((s16)(func_150ADA20() & 0xFF), func_150ADA68() * 100.0f + 110.0f, &spC8[0], &spC8[2]);
+            spC8[0] += *(f32 *)((u8 *)arg0 + 0x14);
+            spC8[2] += *(f32 *)((u8 *)arg0 + 0x1C);
+            spD4[0] = spC8[0];
+            spD4[2] = spC8[2];
+            if ((func_15046C80(spD4, 0, *(f32 *)((u8 *)arg0 + 0x18) - 500.0f, &pa.y) == 0) || (pa.f1D == 3)) {
+                return;
+            }
+            spC8[1] = pa.y;
+            spC8[1] += 10.0f;
+            if (func_150ADA20() & 1) {
+                func_151D9B8C(0, func_150ADA68() * 4.5f + 15.0f, (u32)(func_150ADA68() * (f32)100 + 155.0f), pa.pad4, (struct17 *)spC8, 100, 0, 1, 0, arg1, arg2);
+            } else {
+                func_151DAB58(0, func_150ADA68() * D_800AA2CC + D_800AA2D0, (u32)(func_150ADA68() * (f32)100 + 155.0f), spC8, 1, arg1, arg2);
+            }
+            n--;
+            if (n == 0) break;
+        }
+        spBC[0] = *(f32 *)((u8 *)arg0 + 0x14);
+        spBC[1] = *(f32 *)((u8 *)arg0 + 0x18);
+        spBC[2] = *(f32 *)((u8 *)arg0 + 0x1C);
+        pb.f20 = 0;
+        pb.f1D = 0;
+        pb.f1C = 0;
+        pb.f18 = 0;
+        pb.y = D_800AA2D4;
+        {
+        f32 sp8C[3];
+        sp8C[0] = spBC[0];
+        sp8C[1] = spBC[1] + 100.0f;
+        sp8C[2] = spBC[2];
+        if ((func_1504697C(sp8C, 0, spBC[1] - 500.0f, &pb.y) == 0) || (pb.f1D == 3)) {
+            return;
+        }
+        }
+        spBC[1] = pb.y;
+        spBC[1] += 10.0f;
+        func_15136698((func_150ADA68() * 40.0f + 120.0f) * D_800AA2D8, (func_150ADA68() * 123.0f + 123.0f) * D_800AA2DC, (func_150ADA20() % 101U + 0x9B) & 0xFF, (func_150ADA20() % 101U + 0x64) & 0xFF, func_150ADA20() % 56U + 0x46, (u8 *)&pb + 4, spBC, 0, 1, arg1, arg2);
+    }
+}
 
 typedef struct {
     void *obj;
@@ -246,7 +351,7 @@ typedef struct {
 } Game1DD500ProjObj;
 
 s32 func_15046C80(f32 *, s32, f32, void *);
-void func_151DAB58(u8, f32, u8, f32 *, s32, s32, s32);
+void func_151DAB58(u8, f32, u8, f32 *, s32, u8, s32);
 
 s32 func_151B118C(Game1DD500ProjObj *arg0) {
     f32 dx;
@@ -291,7 +396,7 @@ s32 func_151B118C(Game1DD500ProjObj *arg0) {
             pos[2] = probe[2];
             size = ((p->unk14 + p->unk1C * 0.5f) + (p->unk18 + p->unk20 * 0.5f)) * 0.5f;
             if (func_150ADA20() & 1) {
-                func_151D9B8C(p->unk25, size * 1.70000005f, arg0->unk5C, (s32)&arg0->unk7C, (struct17 *)pos, 100, 0, 1, 0, arg0->unkC, arg0->unk1);
+                func_151D9B8C(p->unk25, size * 1.70000005f, arg0->unk5C, (void *)&arg0->unk7C, (struct17 *)pos, 100, 0, 1, 0, arg0->unkC, arg0->unk1);
             } else {
                 func_151DAB58(p->unk25, size * 0.680000007f, arg0->unk5C, pos, 1, arg0->unkC, arg0->unk1);
             }

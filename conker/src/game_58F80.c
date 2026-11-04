@@ -380,9 +380,9 @@ extern s32 D_800BE9C8[];
 extern s32 D_800BEBA4;
 extern void *D_800DF7C0;
 extern u8 D_800DF7C4;
-extern void func_150849CC(struct127 *, s32 *);
+extern s32 func_150849CC(struct127 *, s32 *);
 extern void func_1502D630(struct127 *, s32 *, s32);
-extern s32 func_1502CCFC(s32, s32, s32, void *, s32, s32 *, s32, s32);
+extern Gfx *func_1502CCFC(Gfx *, s32, s32, void *, s32, s32 *, s32, s32);
 void func_1502D54C(s32, s32 *);
 
 s32 func_1502C974(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
@@ -432,7 +432,7 @@ s32 func_1502C974(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     } else {
         model = obj->unk1D4;
     }
-    arg0 = func_1502CCFC(arg0, arg1, arg2, model, alpha, colours, arg3, arg4);
+    arg0 = (s32)func_1502CCFC((Gfx *)arg0, arg1, arg2, model, alpha, colours, arg3, arg4);
     if (((arg0 - D_800BE9C8[D_800BE9C0]) >> 3) > D_800BEBA4) {
         cond = 1;
     } else {
@@ -465,7 +465,163 @@ void func_1502CC34(void *arg0, s32 arg1, s32 arg2, void *arg3, s32 *arg4, s32 *a
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502CCFC.s")
+extern s32 func_1503DA9C(struct127 *, s32, s32, s32);
+Gfx *func_1502F01C(Gfx *, s32);
+extern Gfx *func_1502F9FC(Gfx *, s32);
+extern void func_1502FD70(struct127 *);
+extern Gfx *func_15030F94(Gfx *, struct127 *, s32, s32);
+extern Gfx *func_1515D914(Gfx *, s32, s32, s32, s32, s32, s32, s32, s32, u8 *, s32, u8 *, s32, void *);
+extern void func_151EFE88(void *);
+extern u16 D_800C4778[];
+extern Gfx **D_800C48F0[];
+extern Gfx **D_800C4488[];
+extern u8 D_800DD2E4[];
+extern u8 D_800D9900;
+extern u8 D_800D9E28[];
+extern u8 D_800C3E98[];
+extern u8 D_C3E98[];
+extern u8 D_80084160[];
+extern u8 D_800832C0[];
+extern u8 D_80082FC0[];
+extern u8 D_80083140[];
+extern u8 D_80084190[];
+
+Gfx *func_1502CCFC(Gfx *gdl, s32 arg1, s32 arg2, void *arg3, s32 arg4, s32 *arg5, s32 arg6, s32 arg7) {
+    struct127 *obj;
+    s32 i;
+    s32 sp144;
+    s32 sp140;
+    s32 sp13C;
+    s32 idx;
+    s32 t;
+    s32 sp130;
+    s32 flag;
+    s32 sp128;
+    s32 sp124;
+    s32 sp120;
+    s32 sp11C;
+    s32 sp118;
+    s32 sp114;
+    s32 sp110;
+    s32 sp10C;
+    s32 sp108;
+    s32 sp104;
+    s32 n;
+
+    obj = &D_800CC2D0[arg1];
+    sp140 = obj->id;
+    if ((arg6 == 3) || (arg6 == 4) || (arg6 == 5)) {
+        sp140 = func_150849CC(obj, &sp144);
+    } else {
+        sp144 = ((u8 *)obj)[0x1C8];
+    }
+    if (func_1503DA9C(obj, sp140, sp144, (arg6 == 3) ? 0 : 1) != 0) {
+        return gdl;
+    }
+    idx = D_800BE9C0;
+    t = idx * 4;
+    if (*(s32 *)((u8 *)obj + sp144 * 8 + t + 0x28C) == 0) {
+        return gdl;
+    }
+    if (arg7 != 0) {
+        gSPDisplayList(gdl++, (u32)D_80084160);
+    } else {
+        gDPPipeSync(gdl++);
+    }
+    gdl = func_1502F01C(gdl, arg1);
+    gdl = func_1502F9FC(gdl, arg1);
+    gSPSegment(gdl++, 3, (u32)arg3);
+    gSPSegment(gdl++, 1, *(s32 *)((u8 *)obj + sp144 * 8 + t + 0x28C) - 0x38);
+    func_1502CC34(obj, arg2, arg4, arg5, &sp128, &sp124, &sp120, &sp11C, &sp118, &sp114, &sp110, &sp10C, &sp108, &sp104);
+    if (arg6 == 5) {
+        gSPSegment(gdl++, 8, (u32)D_800832C0);
+    } else if (arg6 == 3) {
+        gSPSegment(gdl++, 8, (u32)D_800832C0);
+    } else if (arg4 < 0xFF) {
+        gSPSegment(gdl++, 8, (u32)D_80082FC0);
+    } else {
+        gSPSegment(gdl++, 8, (u32)D_80083140);
+    }
+    gSPClearGeometryMode(gdl++, 0x600);
+    if (arg6 == 0) {
+        gSPSetGeometryMode(gdl++, 0x200);
+    } else {
+        gSPSetGeometryMode(gdl++, 0x400);
+    }
+    flag = 1;
+    sp130 = *(s16 *)((u8 *)D_800B0DF0 + 0x3E);
+    if ((obj->pad66 & 0xC) == 0xC) {
+        gSPSetGeometryMode(gdl++, 0x20000);
+        gSPClearGeometryMode(gdl++, 0x400000);
+    } else if ((obj->pad66 & 0xC) != 8) {
+        gSPClearGeometryMode(gdl++, 0x420000);
+        flag = 0;
+    } else if (D_800DCD7C != 0) {
+        gSPSetGeometryMode(gdl++, 0x420000);
+    } else {
+        gSPClearGeometryMode(gdl++, 0x420000);
+        flag = 0;
+    }
+    if (arg6 == 3) {
+        gSPClearGeometryMode(gdl++, 0x420000);
+        flag = 0;
+    }
+    if (flag != 0) {
+        t = (((u8 *)obj)[0x2FE] == 0) ? 0xA : 2;
+        if (D_800D9900 != 0) {
+            t |= 8;
+        }
+        gdl = func_1515D914(gdl, arg2, (s32)obj->x_position, (s32)obj->y_position, (s32)obj->z_position,
+                            obj->unk184, *(s32 *)((u8 *)obj + arg2 * 4 + 0x304), ((u8 *)obj)[0x301],
+                            *(s32 *)((u8 *)obj + 0x314) + D_800BE9C0 * 8, (u8 *)obj + 0x302, 2, (u8 *)obj + 0x1DD, t, D_800D9E28);
+    }
+    sp13C = -1;
+    for (i = 0; i < D_800C4778[sp140]; i++) {
+        if (!(*(s32 *)((u8 *)obj + 0x94) & (1 << i))) {
+            if (!(*(s32 *)((u8 *)obj + 0x98) & (1 << i))) {
+                if (sp13C != 0) {
+                    gDPPipeSync(gdl++);
+                    sp13C = 0;
+                    if (sp130 == 0) {
+                        gDPSetFogColor(gdl++, sp110, sp10C, sp108, sp104);
+                    } else {
+                        gDPSetFogColor(gdl++, D_800DD2E4[0], D_800DD2E4[1], D_800DD2E4[2], sp104);
+                    }
+                    gDPSetPrimColor(gdl++, 0xF2, 0, sp128, sp124, sp120, 0);
+                    gDPSetEnvColor(gdl++, sp11C, sp118, sp114, arg4);
+                }
+            } else if (sp13C != 1) {
+                gDPPipeSync(gdl++);
+                gDPSetFogColor(gdl++, 0, 0, 0, 0xFF);
+                gDPSetPrimColor(gdl++, 0xF2, 0, 0, 0, 0, 0);
+                gDPSetEnvColor(gdl++, 0, 0, 0, 0xFF);
+                sp13C = 1;
+            }
+            if (arg6 == 3) {
+                if (D_800C48F0[sp140] != 0) {
+                    gSPDisplayList(gdl++, (u32)D_800C48F0[sp140][i]);
+                    continue;
+                }
+            } else {
+                func_151EFE88(D_800C3E98);
+                gSPMatrix(gdl++, (u32)D_C3E98, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+                gSPDisplayList(gdl++, (u32)D_800C4488[sp140][i]);
+            }
+        }
+    }
+    func_1502FD70(obj);
+    ((u8 *)obj)[0x2FE] = 1;
+    if (arg6 == 0) {
+        gdl = func_15030F94(gdl, obj, arg2, 1);
+    }
+    if (arg7 != 0) {
+        gSPDisplayList(gdl++, (u32)D_80084190);
+    }
+    if (arg6 == 0) {
+        gSPGeometryMode(gdl++, 0x200, 0x400);
+    }
+    return gdl;
+}
 
 void func_1502D54C(s32 arg0, s32 *arg1) {
     u8 *temp_v0;
@@ -884,7 +1040,111 @@ void func_1502F264(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502F3C8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502F490.s")
+typedef struct {
+    u32 start;
+    s32 count;
+    s32 id;
+} Seg1502F490;
+
+typedef struct {
+    u8 pad0[4];
+    u8 unk4;
+    u8 pad5[0x1D4 - 5];
+    u8 *unk1D4;
+    u8 *unk1D8;
+} Obj1502F490;
+
+extern u16 D_800C5EF8[];
+void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
+
+void func_1502F490(Obj1502F490 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, s32 arg4) {
+    f32 diff[3];
+    f32 res[3];
+    s32 idx[3];
+    s32 i;
+    s32 j;
+    s32 mask;
+    s32 seg;
+    u8 id;
+    u32 p[3];
+    f32 v[2][3][3];
+    f32 e1[2][3];
+    f32 e2[2][3];
+    u8 *mtx;
+    f32 s;
+    f32 t;
+
+    id = arg0->unk4;
+    if (D_800C6070[id] == 0) {
+        return;
+    }
+    for (i = 0; i < 3; i++) {
+        p[i] = *(s32 *)(D_800C6070[id] + arg4 * 12 + i * 4) + (&D_800D19A0)[id];
+    }
+    seg = 0;
+    mask = 0;
+    do {
+        if (seg == D_800C5EF8[id]) {
+            return;
+        }
+        for (i = 0; i < 3; i++) {
+            if (!(mask & (1 << i))) {
+                if (p[i] >= ((Seg1502F490 *)D_800C5C08[id])[seg].start && p[i] < ((Seg1502F490 *)D_800C5C08[id])[seg].start + ((Seg1502F490 *)D_800C5C08[id])[seg].count * 16) {
+                    mask = (1 << i) | mask;
+                    idx[i] = ((Seg1502F490 *)D_800C5C08[id])[seg].id;
+                }
+            }
+        }
+        seg++;
+    } while (mask != 7);
+
+    if (arg0->unk1D8 == NULL || arg0->unk1D4 == NULL) {
+        return;
+    }
+    mtx = arg0->unk1D8;
+    for (i = 0; i < 2; i++) {
+        if (i == 1) {
+            mtx = arg0->unk1D4;
+        }
+        for (j = 0; j < 3; j++) {
+            func_150A7960((f32 *)(mtx + (idx[j] << 6)), ((s16 *)p[j])[0], ((s16 *)p[j])[1], ((s16 *)p[j])[2],
+                          &v[i][j][0], &v[i][j][1], &v[i][j][2]);
+        }
+    }
+    for (i = 0; i < 2; i++) {
+        for (j = 0; j < 3; j++) {
+            e1[i][j] = v[i][1][j] - v[i][0][j];
+            e2[i][j] = v[i][2][j] - v[i][0][j];
+        }
+    }
+    diff[0] = *arg1 - v[0][0][0];
+    diff[1] = *arg2 - v[0][0][1];
+    diff[2] = *arg3 - v[0][0][2];
+    s = e1[0][0] * e2[0][2] - e1[0][2] * e2[0][0];
+    if (s != 0.0f) {
+        s = (diff[0] * e2[0][2] - diff[2] * e2[0][0]) / s;
+    } else {
+        s = -100.0f;
+    }
+    if (s < 0.0f || s > 1.0f) {
+        return;
+    }
+    if (e2[0][2] != 0.0f) {
+        t = (diff[2] - s * e1[0][2]) / e2[0][2];
+    } else {
+        t = -100.0f;
+    }
+    if (t < 0.0f || t > 1.0f) {
+        return;
+    }
+    for (i = 0; i < 3; i++) {
+        res[i] = s * e1[1][i] + e2[1][i] * t;
+    }
+    diff[1] = s * e1[0][1] + e2[0][1] * t;
+    *arg1 += res[0] + v[1][0][0] - diff[0] - v[0][0][0];
+    *arg2 += res[1] + v[1][0][1] - diff[1] - v[0][0][1];
+    *arg3 += res[2] + v[1][0][2] - diff[2] - v[0][0][2];
+}
 
 void func_1502F948(ActorInteractionFields *arg0) {
     s32 idx;

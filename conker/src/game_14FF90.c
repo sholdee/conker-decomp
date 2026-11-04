@@ -1317,7 +1317,69 @@ s32 func_15127520(struct_15127520_arg0 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 
     arg0->unk10 &= ~0x80;
     return 0;
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_151277B0.s")
+s32 func_151277B0(struct_15127520_arg0 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *arg6) {
+    struct108 *obj;
+    u32 count;
+    u32 oldTime;
+    u32 newTime;
+    s32 changed;
+    f32 time;
+
+    obj = arg0->unk18;
+    oldTime = arg0->unk1C & 0xFFFFFF;
+    count = arg0->unk1C >> 24;
+    time = *(f32 *)((u8 *)obj->unk3D4 + 0x178) * *(f32 *)((u8 *)obj->unk3D4 + 0x174);
+    newTime = *(u32 *)&time & 0xFFFFFF;
+    changed = 0;
+
+    if (*arg6 == 0x622) {
+        *arg6 = 0;
+    }
+
+    arg0->unk2 = obj->unk3D0->x_position;
+    arg0->unk4 = obj->unk3D0->y_position;
+    arg0->unk6 = obj->unk3D0->z_position;
+
+    if (obj->unk3D4->unk197 == 2) {
+        if (oldTime != newTime) {
+            if (count < 10) {
+                if ((((oldTime - newTime) < 0) ? -(oldTime - newTime) : (oldTime - newTime)) > 100) {
+                    count += D_800BE9E4;
+                }
+            } else {
+                changed = 1;
+            }
+        } else {
+            count = 0;
+        }
+        arg0->unk1C = (count << 24) | newTime;
+
+        if (changed) {
+            if (*arg6 != 0x61C) {
+                if (arg0->unk24 != 0) {
+                    func_100111C8(arg0->unk24);
+                }
+                arg0->unk24 = 0;
+                arg0->unk10 &= ~0x80;
+                *arg6 = 0x61C;
+            }
+        } else if (*arg6 == 0x61C) {
+            if (arg0->unk24 != 0) {
+                func_100111C8(arg0->unk24);
+            }
+            arg0->unk24 = 0;
+            *arg6 = 0x61D;
+            arg0->unk10 &= ~0x80;
+        }
+    } else {
+        return 1;
+    }
+
+    if (arg0->unk24 == 0 && *arg6 == 0) {
+        arg0->unk10 &= ~0x80;
+    }
+    return 0;
+}
 typedef struct {
     f32 x;
     f32 y;

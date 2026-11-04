@@ -650,7 +650,83 @@ void func_150C29F0(Struct150C29F0 *arg0) {
     func_15149550(&sp3C, 0xA, 1, 0, arg0->unkC, arg0->unk1);
     arg0->unkE = (func_150ADA20() % 51U) + 25;
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/func_150C2C00.s")
+void func_1514373C(f32 arg0, f32 arg1, f32 *arg2, f32 *arg3);
+s32 func_15144B34(s32);
+void *memcpy(void *, const void *, u32);
+
+void func_150C2C00(Struct150C29F0 *arg0)
+{
+  f32 *t;
+  f32 *vec;
+  f32 d;
+  Struct15149550Arg_EF410 sp94;
+  f32 s;
+  f32 sp8C;
+  f32 s2;
+  s32 ret;
+  t = &arg0->unk28.x;
+  *t += (((func_150ADA68() * 20.0f) * 9.99999971718e-10f) * D_800BE9A4) * 36447764.0f;
+  if ((*t) > 1.0f)
+  {
+    if (1)
+    {
+      vec = (f32 *) func_15144B34(D_80082FA4);
+      d = (vec[2] * vec[2]) + (vec[0] * vec[0]);
+      if (2500000.0f < d)
+      {
+        sp94.unk20 = 0x6231;
+        sp94.unk22 = 0x1A4D;
+        sp94.unk0.unk4 = -390.0f;
+        sp94.unk26 = 0;
+        sp94.unk27 = 0;
+        sp94.unk28 = 0;
+        sp94.unk29 = 0xFF;
+        sp94.unk2D = 0xFF;
+        sp94.unk2E = 0x14;
+        sp94.unk2F = 1;
+        sp94.unk30 = 4;
+        sp94.unk2A = 1;
+        sp94.unk34 = 0x19;
+        sp94.unk3C = 0.0f;
+        sp94.unk40 = 0.0450000018f;
+        sp94.unk44 = 0.699999988f;
+        do
+        {
+          sp8C = (func_150ADA68() * 5.86594247818f) + 0.957203984261f;
+          if (func_15144C8C(func_150484A0(vec[0], vec[2]), sp8C) < 0.400000006f)
+          {
+            func_1514373C(sp8C, (func_150ADA68() * 1278.0f) + 3900.0f, &sp94.unk0.unk0, &sp94.unk0.unk8);
+            s = ((func_150ADA68() * 1991.0f) + 1985.0f) * 0.00100000005f;
+            s2 = ((func_150ADA68() * 1493.0f) + 3000.0f) * 0.00100000005f;
+            sp94.unkC = 22.6000003815f * s;
+            sp94.unk14 = 13.7860002518f * s;
+            sp94.unk10 = 57.9690017700f * s2;
+            sp94.unk18 = 42.7140007019f * s2;
+            sp94.unk1C = 118.763000488f * s2;
+            sp94.unk24 = (func_150ADA20() % 151U) + 50;
+            sp94.unk38 = (func_150ADA68() * 500.0f) * 0.00100000005f;
+            sp94.unk2C = (func_150ADA20() % 156U) + 100;
+            ret = func_15149550(&sp94, 0xA, 1, 0, arg0->unkC, arg0->unk1);
+            if (ret)
+            {
+              memcpy(((u8 *) ret) + 0x160, &sp8C, 4);
+            }
+          }
+          *t -= 1.0f;
+        }
+        while ((*t) > 1.0f);
+      }
+      else
+      {
+        do
+        {
+          *t -= 1.0f;
+        }
+        while ((*t) > 1.0f);
+      }
+    }
+  }
+}
 s32 func_150C2FCC(f32 *arg0) {
     arg0[11] -= arg0[11] * arg0[84];
     arg0[12] -= arg0[12] * arg0[84];

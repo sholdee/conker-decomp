@@ -73,4 +73,117 @@ void func_1518804C(s32 arg0, f32 arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1B5370/func_151880C0.s")
+
+#define FADES_ ((FadeB *)D_800DF700)
+typedef struct FadeB {
+    u8 cur[3];
+    u8 end[3];
+    u8 p6[3];
+    u8 pad[3];
+    f32 val;
+    s32 type;
+    f32 rate;
+    s32 pad18;
+    union { s32 i; f32 f; } st;
+    union { s32 i; f32 f; } t;
+} FadeB;
+extern u8 D_800A7390[];
+extern f32 sinf(f32);
+extern s32 func_151EF610(void);
+void func_151880C0(void) {
+    s32 i;
+    for (i = 0; i < D_800DF7B4; i++) {
+        switch (FADES_[i].type) {
+        case 0:
+            break;
+        case 1:
+            FADES_[i].val = (sinf(FADES_[i].st.f) + 1.0f) * 0.5f;
+            FADES_[i].st.f = FADES_[i].rate * D_800BE9A4 + FADES_[i].st.f;
+            if (FADES_[i].st.f >= 6.283185482f) {
+                FADES_[i].st.f = FADES_[i].st.f - 6.283185482f;
+            }
+            break;
+        case 2:
+            if (FADES_[i].t.i == 0) {
+                FADES_[i].t.i = -8;
+                FADES_[i].val = 1.0f;
+            } else if (FADES_[i].t.i < 0) {
+                FADES_[i].t.i += D_800BE9E4;
+                if (FADES_[i].t.i >= 0) {
+                    FADES_[i].val = 0.0f;
+                    FADES_[i].st.i++;
+                    if ((u32)FADES_[i].st.i >= 8) {
+                        FADES_[i].st.i = 0;
+                    }
+                    FADES_[i].t.i = D_800A7390[FADES_[i].st.i];
+                }
+            } else {
+                FADES_[i].t.i -= D_800BE9E4;
+                if (FADES_[i].t.i < 0) {
+                    FADES_[i].t.i = 0;
+                }
+            }
+            break;
+        case 3:
+            switch (FADES_[i].st.i) {
+            case 0:
+                FADES_[i].val += FADES_[i].rate * D_800BE9E4;
+                if (FADES_[i].t.f <= FADES_[i].val) {
+                    FADES_[i].val = FADES_[i].t.f;
+                    if (FADES_[i].t.f == 1.0f) {
+                        if (!(func_151EF610() & 1)) {
+                            FADES_[i].t.f = 0.0f;
+                        } else {
+                            FADES_[i].t.f = 0.5f;
+                        }
+                        FADES_[i].st.i = 2;
+                    } else {
+                        FADES_[i].st.i = 1;
+                        FADES_[i].t.i = func_151EF610() % 30 + 30;
+                    }
+                }
+                break;
+            case 1:
+                FADES_[i].t.i -= D_800BE9E4;
+                if (FADES_[i].t.i <= 0) {
+                    FADES_[i].st.i = (func_151EF610() % 2) * 2;
+                    if (FADES_[i].st.i == 0) {
+                        FADES_[i].t.f = 1.0f;
+                    } else {
+                        FADES_[i].t.f = 0.0f;
+                    }
+                }
+                break;
+            case 2:
+                FADES_[i].val -= FADES_[i].rate * D_800BE9E4;
+                if (FADES_[i].val <= FADES_[i].t.f) {
+                    FADES_[i].val = FADES_[i].t.f;
+                    if (FADES_[i].t.f == 0.0f) {
+                        FADES_[i].st.i = 3;
+                        FADES_[i].t.i = func_151EF610() % 30 + 30;
+                    } else {
+                        FADES_[i].st.i = 1;
+                        FADES_[i].t.i = func_151EF610() % 30 + 30;
+                    }
+                }
+                break;
+            case 3:
+                FADES_[i].t.i -= D_800BE9E4;
+                if (FADES_[i].t.i <= 0) {
+                    FADES_[i].st.i = 0;
+                    if (!(func_151EF610() & 1)) {
+                        FADES_[i].t.f = 0.5f;
+                    } else {
+                        FADES_[i].t.f = 1.0f;
+                    }
+                }
+                break;
+            }
+            break;
+        }
+        FADES_[i].p6[0] = FADES_[i].cur[0] + (FADES_[i].end[0] - FADES_[i].cur[0]) * FADES_[i].val;
+        FADES_[i].p6[1] = FADES_[i].cur[1] + (FADES_[i].end[1] - FADES_[i].cur[1]) * FADES_[i].val;
+        FADES_[i].p6[2] = FADES_[i].cur[2] + (FADES_[i].end[2] - FADES_[i].cur[2]) * FADES_[i].val;
+    }
+}
+

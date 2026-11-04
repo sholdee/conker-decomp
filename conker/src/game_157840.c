@@ -473,7 +473,148 @@ s32 func_1512B630(struct108 *arg0, struct Struct1512B5FC *arg1, s32 arg2, s32 ar
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_157840/func_1512B730.s")
+typedef struct {
+    u8 unk0;
+    u8 pad1[3];
+    s32 unk4;
+    s32 unk8;
+} Ent1512B730;
+
+typedef struct {
+    Ent1512B730 e[4];
+    u8 unk30;
+    u8 pad31[0x4C - 0x31];
+} Rec1512B730;
+
+typedef struct {
+    u8 pad0[0xAD];
+    u8 unkAD;
+    u8 padAE[0x120 - 0xAE];
+    u8 unk120;
+} Sub1512B730;
+
+typedef struct {
+    /* 0x000 */ u8 pad0[0x2C];
+    /* 0x02C */ s32 unk2C;
+    /* 0x030 */ u8 pad30[0x1B4 - 0x30];
+    /* 0x1B4 */ s16 unk1B4;
+    /* 0x1B6 */ u8 pad1B6[0x23C - 0x1B6];
+    /* 0x23C */ u8 unk23C;
+    /* 0x23D */ u8 unk23D;
+    /* 0x23E */ u8 pad23E[0x26C - 0x23E];
+    /* 0x26C */ f32 unk26C;
+    /* 0x270 */ u8 pad270[0x348 - 0x270];
+    /* 0x348 */ f32 unk348;
+    /* 0x34C */ u8 pad34C[0x374 - 0x34C];
+    /* 0x374 */ f32 unk374;
+    /* 0x378 */ u8 pad378[0x3D0 - 0x378];
+    /* 0x3D0 */ Sub1512B730 *unk3D0;
+    /* 0x3D4 */ Sub1512B730 *unk3D4;
+    /* 0x3D8 */ u8 pad3D8[0x3F0 - 0x3D8];
+    /* 0x3F0 */ s16 unk3F0;
+    /* 0x3F2 */ u8 pad3F2[2];
+    /* 0x3F4 */ f32 unk3F4;
+    /* 0x3F8 */ f32 unk3F8;
+    /* 0x3FC */ u8 pad3FC[0x5FE - 0x3FC];
+    /* 0x5FE */ s16 unk5FE;
+} Obj1512B730;
+
+#define REC (&((Rec1512B730 *)D_800DC0C0)[arg0->unk23D])
+s32 func_1512B730(Obj1512B730 *arg0, f32 *arg1, s32 arg2) {
+    s32 ret;
+    u8 a;
+    u8 b;
+    u8 c;
+    u8 d;
+    f32 f0;
+    f32 f2;
+    f32 f12;
+
+    ret = 0;
+    a = REC->e[0].unk0;
+    b = REC->e[1].unk0;
+    c = REC->e[2].unk0;
+    d = REC->e[3].unk0;
+    f0 = REC->e[0].unk4 + 1.0f;
+    f2 = REC->e[1].unk4 + 1.0f;
+    if (a == 2 && b != 2) {
+        REC->unk30 = 0;
+    } else if (a != 2 && b == 2) {
+        REC->unk30 = 1;
+    }
+    if (c == 2 && d != 2) {
+        ((Rec1512B730 *)D_800DC0C0)[arg0->unk23D].unk30 = 2;
+    } else if (c != 2 && d == 2) {
+        ((Rec1512B730 *)D_800DC0C0)[arg0->unk23D].unk30 = 3;
+    }
+    if (a == 2 || b == 2) {
+        f12 = D_800DC200[arg0->unk23D][arg0->unk1B4].unk0 + 1;
+        if (a == 2 && b == 2) {
+            if (arg0->unk3D0->unkAD != 1 && arg0->unk3D4->unk120 == 0) {
+                arg0->unk5FE -= D_800BE9E4;
+                if (arg0->unk5FE < 0) {
+                    arg0->unk5FE = 0;
+                }
+            }
+            if (arg0->unk2C != 0x80) {
+                arg0->unk3F0 = 30;
+            }
+                    if (REC->e[1].unk4 < REC->e[0].unk4) {
+                *arg1 = f12 - f0;
+            } else if (REC->e[0].unk4 < REC->e[1].unk4) {
+                *arg1 = f2 - f12;
+            } else if (REC->unk30 == 0) {
+                *arg1 = f12 - f0;
+            } else {
+                *arg1 = f2 - f12;
+            }
+        } else {
+            arg0->unk3F0 = 0;
+            arg0->unk5FE = 60;
+                    if (REC->e[0].unk0 == 2) {
+                if (arg0->unk23C != 0) {
+                    *arg1 = f12 - (REC->e[0].unk4 + 1.0f);
+                } else {
+                    *arg1 = f12 - (REC->e[0].unk4 + 1.0f);
+                }
+            } else {
+                if (arg0->unk23C != 0) {
+                    *arg1 = (REC->e[1].unk4 + 1.0f) - f12;
+                } else {
+                    *arg1 = (REC->e[1].unk4 + 1.0f) - f12;
+                }
+            }
+        }
+        {
+        s32 pad;
+        ret = 1;
+        arg0->unk26C = 0.004999999888f;
+        }
+    } else {
+        ((Rec1512B730 *)D_800DC0C0)[arg0->unk23D].e[0].unk0 = 4;
+        ((Rec1512B730 *)D_800DC0C0)[arg0->unk23D].e[1].unk0 = 4;
+        *arg1 -= *arg1 * 0.1000000015f;
+        arg0->unk5FE = 60;
+    }
+    if (arg0->unk3F0 != 0) {
+        arg0->unk3F0 -= D_800BE9E4;
+        if (arg0->unk3F0 < 0) {
+            arg0->unk3F0 = 0;
+        }
+        if (arg0->unk3F4 == -1.0f) {
+            arg0->unk3F4 = arg0->unk374;
+            arg0->unk3F8 = arg0->unk348;
+            arg0->unk374 = 150.0f;
+            arg0->unk348 = 275.0f;
+        }
+    } else if (arg0->unk3F4 != -1.0f) {
+        arg0->unk374 = arg0->unk3F4;
+        arg0->unk348 = arg0->unk3F8;
+        arg0->unk3F4 = -1.0f;
+        arg0->unk3F8 = -1.0f;
+    }
+    return ret;
+}
 
 typedef struct {
     /* 0x000 */ u8 pad0[0x14];

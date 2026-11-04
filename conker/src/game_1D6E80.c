@@ -471,7 +471,154 @@ s32 func_151AA5A4(struct_AA48C_effect *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1D6E80/func_151AA6D8.s")
+typedef struct {
+    /* 0x00 */ f32 x;
+    /* 0x04 */ f32 y;
+    /* 0x08 */ f32 z;
+} Vec3F_AA6D8;
+
+typedef struct {
+    /* 0x00 */ u8 pad0[0x74];
+    /* 0x74 */ f32 unk74;
+} struct_AA6D8_arg5;
+
+typedef struct {
+    /* 0x00 */ s32 unk00;
+    /* 0x04 */ s32 unk04;
+    /* 0x08 */ s16 unk08;
+    /* 0x0A */ s16 unk0A;
+    /* 0x0C */ s32 unk0C;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 unk16;
+    /* 0x17 */ u8 unk17;
+    /* 0x18 */ u8 unk18;
+    /* 0x19 */ u8 unk19;
+    /* 0x1A */ u8 unk1A;
+    /* 0x1B */ u8 unk1B;
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 unk1D;
+    /* 0x1E */ s16 unk1E;
+    /* 0x20 */ s16 unk20;
+    /* 0x22 */ s16 unk22;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ Vec3F_AA6D8 unk30;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ f32 unk40;
+    /* 0x44 */ f32 unk44;
+    /* 0x48 */ f32 unk48;
+    /* 0x4C */ f32 unk4C;
+    /* 0x50 */ f32 unk50;
+    /* 0x54 */ f32 unk54;
+    /* 0x58 */ s32 unk58;
+    /* 0x5C */ u8 pad5C[0x4];
+    /* 0x60 */ u8 unk60;
+    /* 0x61 */ u8 unk61;
+    /* 0x62 */ u8 unk62;
+    /* 0x63 */ s8 unk63;
+} struct_AA6D8_params;
+
+typedef struct {
+    /* 0x00 */ f32 unk00;
+    /* 0x04 */ u8 unk04;
+    /* 0x05 */ u8 unk05;
+    /* 0x06 */ u8 unk06;
+    /* 0x07 */ u8 unk07;
+    /* 0x08 */ f32 unk08;
+    /* 0x0C */ f32 unk0C;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ u8 unk18;
+    /* 0x19 */ u8 unk19;
+    /* 0x1A */ u8 unk1A;
+    /* 0x1B */ u8 unk1B;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ u8 pad24[0x4];
+} struct_AA6D8_extra;
+
+void *func_151303BC(s32, u8, s32);
+
+void func_151AA6D8(Vec3F_AA6D8 *arg0, Vec3F_AA6D8 *arg1, s32 arg2, s32 arg3, f32 arg4, struct_AA6D8_arg5 *arg5) {
+    void *temp_v0;
+    f32 temp_f2;
+    s32 padAC;
+    struct_AA6D8_params params;
+    s32 pad44;
+    struct_AA6D8_extra extra;
+
+    params.unk1D = 0x2F;
+    params.unk08 = 0xC01;
+    params.unk00 = 0x200005;
+    params.unk04 = 0;
+    params.unk1A = 0;
+    params.unk19 = 0;
+    params.unk18 = 0;
+    params.unk17 = 0;
+    params.unk16 = 0;
+    params.unk15 = 0;
+    params.unk14 = 0;
+    params.unk10 = 0;
+    params.unk0C = 0;
+    params.unk1C = 0xFF;
+    params.unk22 = 0;
+    params.unk24 = 0.0f;
+    params.unk58 = 0x1207;
+    params.unk60 = 5;
+    params.unk61 = 5;
+    params.unk62 = 4;
+    params.unk63 = -1;
+    params.unk3C = 0.0f;
+    params.unk40 = 0.0f;
+    params.unk44 = 0.0f;
+    params.unk1E = 0x14;
+    params.unk20 = 0xC;
+    extra.unk04 = 0;
+    extra.unk05 = 0;
+    extra.unk18 = 0;
+    extra.unk19 = 0;
+    extra.unk10 = 3.5f;
+    extra.unk14 = 0.2857142985f;
+
+    params.unk48 = (arg1->x - arg0->x) * arg5->unk74;
+    params.unk4C = (arg1->y - arg0->y) * arg5->unk74;
+    params.unk50 = (arg1->z - arg0->z) * arg5->unk74;
+    params.unk30 = *arg0;
+    params.unk30.x += params.unk48 * arg4;
+    params.unk30.y += params.unk4C * arg4;
+    params.unk30.z += params.unk50 * arg4;
+
+    if (func_150ADA20() & 1) {
+        params.unk58 |= 0x40;
+    }
+    if (func_150ADA20() & 1) {
+        params.unk58 |= 0x80;
+    }
+
+    params.unk0A = (func_150ADA20() % 51U) + 0x32;
+    params.unk1B = (func_150ADA20() % 101U) + 0x64;
+    temp_f2 = (func_150ADA68() * 39.0f) + 31.0f;
+    params.unk28 = temp_f2;
+    extra.unk00 = temp_f2;
+    params.unk2C = temp_f2;
+    extra.unk06 = (func_150ADA20() % 5U) + 4;
+    extra.unk07 = (func_150ADA20() % 5U) + 4;
+    extra.unk08 = ((func_150ADA68() * 0.25f) + 0.150000006f) * extra.unk00;
+    extra.unk0C = ((func_150ADA68() * 0.25f) + 0.150000006f) * extra.unk00;
+    extra.unk1A = (func_150ADA20() % 5U) + 4;
+    extra.unk1B = (func_150ADA20() % 5U) + 4;
+    extra.unk1C = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * extra.unk00;
+    extra.unk20 = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * extra.unk00;
+    params.unk54 = ((func_150ADA68() * 70.0f) + 73.0f) * 0.001000000047f;
+
+    temp_v0 = func_151303BC((s32)&params, 2, 0x28);
+    if (temp_v0 != NULL) {
+        memcpy((u8 *)temp_v0 + 0xA8, &extra, 0x28);
+    }
+}
 
 typedef struct Sub151AAA4C {
     char pad0[0x8];

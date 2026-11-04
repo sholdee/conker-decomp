@@ -521,7 +521,80 @@ s32 func_15044ED0(struct conker15045714 *arg0, f32 arg1, struct conker150472C0_d
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_71820/func_150450CC.s")
+extern f32 D_80098D44;
+extern f32 D_800DBE68;
+extern f32 D_800DBE6C;
+extern f32 D_800DBE70;
+extern f32 D_800DBE74;
+
+s32 func_150450CC(struct conker15045714 *arg0, f32 arg1, struct conker150472C0_dst *arg2) {
+    s32 count;
+    s32 best;
+    s32 scan_index;
+    f32 height;
+
+    if (arg0->field_0x04 < arg1) {
+        arg2->field_0x1C &= ~2;
+        return 0;
+    }
+    arg2->field_0x00 = D_80098D44;
+    best = -1;
+    func_1510F800(0);
+    D_800DBE68 = arg0->field_0x00;
+    D_800DBE6C = arg0->field_0x04;
+    D_800DBE70 = arg0->field_0x08;
+    D_800DBE74 = arg1;
+    count = func_150A3A70((s32)arg0->field_0x00, (s32)arg0->field_0x08);
+    scan_index = 0;
+    if (count > 0) {
+        Game71820Candidate *scan = D_800D3300;
+
+        do {
+            height = (f32)scan->height * 0.00390625f;
+            if ((height <= arg0->field_0x04) && (arg2->field_0x00 < height)) {
+                best = scan_index;
+                arg2->field_0x00 = height;
+            }
+            scan_index++;
+            scan++;
+        } while (scan_index < count);
+    }
+    if (best != -1) {
+        Game71820Candidate *candidate;
+        s32 *source;
+        u32 copy_index;
+        u8 *output;
+        s32 offset;
+
+        candidate = &D_800D3300[best];
+        source = candidate->sources;
+        offset = candidate->index;
+        copy_index = 0;
+        output = (u8 *)arg2;
+        for (; copy_index != 3; copy_index++, output += 6) {
+            s16 *point = (s16 *)(source[copy_index] + offset * 16);
+            *(s16 *)(output + 4) = point[0];
+            *(s16 *)(output + 6) = point[1];
+            *(s16 *)(output + 8) = point[2];
+        }
+        if (D_800DBE5C != 0) {
+            s32 idx = ((u8 *)candidate->sources - D_800DBE3C) / 12;
+            arg2->field_0x18 = ((s32 *)D_800DBE5C)[idx];
+        } else {
+            arg2->field_0x18 = 0;
+        }
+        arg2->field_0x1C |= 7;
+        arg2->field_0x1D = 1;
+        arg2->field_0x20 = 0;
+        if (arg1 <= arg2->field_0x00) {
+            arg2->field_0x1C |= 2;
+            return 1;
+        }
+        return 0;
+    }
+    arg2->field_0x1C &= ~2;
+    return 0;
+}
 
 struct conker15045714;
 struct conker150472C0_dst;
@@ -1098,7 +1171,49 @@ s32 func_150461D0(struct conker15045714 *arg0, u16 arg1, f32 arg2, struct conker
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_71820/func_15046460.s")
+s32 func_15046460(struct conker15045714 *arg0, u16 arg1, f32 arg2, struct conker150472C0_dst *arg3) {
+    s32 first_set;
+    s32 second_set;
+    struct conker150472C0_dst first_hit;
+    struct conker150472C0_dst second_hit;
+    u8 first_result;
+    u8 second_result;
+
+    if (arg0->field_0x04 < arg2) {
+        arg3->field_0x1D = 0;
+        arg3->field_0x20 = 0;
+        arg3->field_0x1C &= ~2;
+        return 0;
+    }
+    first_hit = *arg3;
+    second_hit = *arg3;
+    func_15045714(arg0, arg1, &first_set, (s32)&second_set);
+    first_result = func_15045AE4((Vec3f_15045D48 *)arg0, arg2, &first_set, (Game71820Hit *)&first_hit);
+    second_result = func_15045F8C(arg0, arg2, &second_set, (Game71820Hit *)&second_hit);
+    if (first_result && second_result) {
+        if (second_hit.field_0x00 < first_hit.field_0x00) {
+            *arg3 = first_hit;
+            return 1;
+        }
+        *arg3 = second_hit;
+        return 1;
+    }
+    if (first_result != 0) {
+        *arg3 = first_hit;
+        return 1;
+    }
+    if (second_result != 0) {
+        *arg3 = second_hit;
+        return 1;
+    }
+    if (second_hit.field_0x00 < first_hit.field_0x00) {
+        *arg3 = first_hit;
+    } else {
+        *arg3 = second_hit;
+    }
+    arg3->field_0x1C &= ~2;
+    return 0;
+}
 
 s32 func_150461D0(struct conker15045714 *, u16, f32, struct conker150472C0_dst *);
 s32 func_15046460(struct conker15045714 *, u16, f32, struct conker150472C0_dst *);
@@ -1497,7 +1612,107 @@ void func_15047688(Mtx *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, 
     guMtxF2L(&sp30, arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_71820/func_15047700.s")
+#pragma intrinsic(sqrtf)
+
+void func_15047700(f32 mf[4][4], s32 arg1, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp) {
+    f32 len;
+    f32 xLook;
+    f32 yLook;
+    f32 zLook;
+    f32 xRight;
+    f32 yRight;
+    f32 zRight;
+
+    guMtxIdentF(mf);
+
+    xLook = xAt - xEye;
+    yLook = yAt - yEye;
+    zLook = zAt - zEye;
+    if (xLook == 0.0f && yLook == 0.0f && zLook == 0.0f) {
+        zLook = 1.0f;
+        xLook = 0.0f;
+        yLook = 0.0f;
+    }
+
+    len = -1.0f / sqrtf(xLook * xLook + yLook * yLook + zLook * zLook);
+    xLook *= len;
+    yLook *= len;
+    zLook *= len;
+
+    xRight = yUp * zLook - zUp * yLook;
+    yRight = zUp * xLook - xUp * zLook;
+    zRight = xUp * yLook - yUp * xLook;
+    len = xRight * xRight + yRight * yRight + zRight * zRight;
+    if (len != 0.0f) {
+        len = 1.0f / sqrtf(len);
+        xRight *= len;
+        yRight *= len;
+        zRight *= len;
+    } else {
+        xRight = 1.0f;
+        yRight = 0.0f;
+        zRight = 0.0f;
+    }
+
+    xUp = yLook * zRight - zLook * yRight;
+    yUp = zLook * xRight - xLook * zRight;
+    zUp = xLook * yRight - yLook * xRight;
+    len = xUp * xUp + yUp * yUp + zUp * zUp;
+    if (len != 0.0f) {
+        len = 1.0f / sqrtf(len);
+        xUp *= len;
+        yUp *= len;
+        zUp *= len;
+    } else {
+        xUp = 0.0f;
+        yUp = 1.0f;
+        zUp = 0.0f;
+    }
+
+    ((LookAt *)arg1)->l[0].l.dir[0] = (s32)((xRight * 128.0f) < 127.0f ? (xRight * 128.0f) : 127.0f) & 0xFF;
+    ((LookAt *)arg1)->l[0].l.dir[1] = (s32)((yRight * 128.0f) < 127.0f ? (yRight * 128.0f) : 127.0f) & 0xFF;
+    ((LookAt *)arg1)->l[0].l.dir[2] = (s32)((zRight * 128.0f) < 127.0f ? (zRight * 128.0f) : 127.0f) & 0xFF;
+    ((LookAt *)arg1)->l[1].l.dir[0] = (s32)((xUp * 128.0f) < 127.0f ? (xUp * 128.0f) : 127.0f) & 0xFF;
+    ((LookAt *)arg1)->l[1].l.dir[1] = (s32)((yUp * 128.0f) < 127.0f ? (yUp * 128.0f) : 127.0f) & 0xFF;
+    ((LookAt *)arg1)->l[1].l.dir[2] = (s32)((zUp * 128.0f) < 127.0f ? (zUp * 128.0f) : 127.0f) & 0xFF;
+
+    ((LookAt *)arg1)->l[0].l.col[0] = 0;
+    ((LookAt *)arg1)->l[0].l.col[1] = 0;
+    ((LookAt *)arg1)->l[0].l.col[2] = 0;
+    ((LookAt *)arg1)->l[0].l.pad1 = 0;
+    ((LookAt *)arg1)->l[0].l.colc[0] = 0;
+    ((LookAt *)arg1)->l[0].l.colc[1] = 0;
+    ((LookAt *)arg1)->l[0].l.colc[2] = 0;
+    ((LookAt *)arg1)->l[0].l.pad2 = 0;
+    ((LookAt *)arg1)->l[1].l.col[0] = 0;
+    ((LookAt *)arg1)->l[1].l.col[1] = 0x80;
+    ((LookAt *)arg1)->l[1].l.col[2] = 0;
+    ((LookAt *)arg1)->l[1].l.pad1 = 0;
+    ((LookAt *)arg1)->l[1].l.colc[0] = 0;
+    ((LookAt *)arg1)->l[1].l.colc[1] = 0x80;
+    ((LookAt *)arg1)->l[1].l.colc[2] = 0;
+    ((LookAt *)arg1)->l[1].l.pad2 = 0;
+
+    mf[0][0] = xRight;
+    mf[1][0] = yRight;
+    mf[2][0] = zRight;
+    mf[3][0] = -(xEye * xRight + yEye * yRight + zEye * zRight);
+
+    mf[0][1] = xUp;
+    mf[1][1] = yUp;
+    mf[2][1] = zUp;
+    mf[3][1] = -(xEye * xUp + yEye * yUp + zEye * zUp);
+
+    mf[0][2] = xLook;
+    mf[1][2] = yLook;
+    mf[2][2] = zLook;
+    mf[3][2] = -(xEye * xLook + yEye * yLook + zEye * zLook);
+
+    mf[0][3] = 0.0f;
+    mf[1][3] = 0.0f;
+    mf[2][3] = 0.0f;
+    mf[3][3] = 1.0f;
+}
 
 void func_15047700(f32 mf[4][4], s32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 

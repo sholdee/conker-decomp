@@ -216,7 +216,107 @@ void func_151DE8E8(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_20AE20/func_151DE8F0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_20AE20/func_151DF1BC.s")
+extern u8 D_800E0A94;
+extern s8 D_800E0BE9;
+extern s8 D_8008FEF8;
+extern u8 D_8008FE34;
+extern f32 D_8008FDE8;
+extern u8 D_800E0A97;
+extern char D_800AB800[];
+void func_1001263C(s32 arg0, s32 arg1, s32 arg2);
+struct216 *func_1507BB28(s32, s32);
+void func_1000DE1C(s32, s32);
+void func_151E7E9C(void);
+
+void func_151DF1BC(void) {
+    u16 unused;
+    s32 val;
+    s32 id;
+    struct127 *obj;
+
+    obj = func_15083E90(9);
+    if (D_800E0A96 != -1) {
+        val = D_800E0A95 - (D_800BE9E4 << 5);
+        if (val <= 0) {
+            val = 0;
+            D_8008FEF8 = D_8008FEF8 == 0;
+            if (D_8008FEF8 == 0) {
+                id = 0xE;
+                func_1001263C((func_150ADA20() & 1) + 0xC8, 0x7D00, 0x40);
+            } else {
+                id = 0xF;
+                func_1001263C((func_150ADA20() % 3U) + 0xBE, 0x7D00, 0x40);
+            }
+            if (obj != NULL) {
+                obj->unk232 = id;
+                D_800D154C = obj;
+                D_800C3E78 = D_800D154C - D_800CC2D0;
+                obj->unk218 = func_1507BB28(0, obj->unk232);
+                obj->unk21C = 0;
+                obj->pad201[0] = 0x14;
+            }
+            D_800E0A96 = -1;
+        }
+        D_8008FDD4->unk20 &= 0xFFCF;
+    } else {
+        val = D_800E0A95 + (D_800BE9E4 << 5);
+        if (val >= 0x100) {
+            val = 0xFF;
+        }
+    }
+    D_800E0A95 = val;
+    val = (D_800E0A94 * val) >> 8;
+    if (val >= 0xFE) {
+        val = 0xFF;
+    }
+    if (D_8008FEF8 == 0) {
+        func_151E3344(0x200200, 0, 1, val & 0xFF, 1);
+        if ((D_8008FE34 == 9) && (D_8008FDD4->unk20 & 0xC)) {
+            func_151E7E9C();
+            func_1000DE1C(D_800E0A97, 0);
+            D_800E0A97 = func_1000EA94(D_800E0BE9);
+        }
+        {
+        s32 flags;
+        flags = D_8008FDD4->unk20;
+        if ((flags & 0x10) && (D_8008FE34 == 0x15) && (D_8008FDE8 == 0.0f)) {
+            D_800E0A96 = 1;
+            D_8008FDD4->unk20 &= 0xFFCF;
+            flags = D_8008FDD4->unk20;
+        }
+        if (flags & 0x20) {
+            func_15007668();
+        }
+        }
+    }
+    if (obj != NULL) {
+        if (func_151F2CDC() == 1) {
+            if (obj->unk1FF == 0) {
+                obj->unk1FF = 1;
+            }
+        } else {
+            obj->unk1FF = 0;
+        }
+    }
+    if (D_8008FEF8 != 0) {
+        if (D_8008FDD4->unk20 & 0x20) {
+            D_800E0A96 = 1;
+        }
+        D_8008FDD4->unk20 &= 0xFFDF;
+        if (D_8008FEF8 != 0) {
+            func_1504332C(0xFF, 0, 0, val);
+            func_15042D94(0x94, 0x14, 0x81, D_800AB800, 0x10);
+        }
+        D_800BE9EC = 0;
+        if (D_800E9D00 & 0x400000) {
+            D_800BE9EC = 1;
+        }
+        if (D_800E9D00 & 0x800000) {
+            D_800BE9EC = 2;
+        }
+    }
+}
+
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_20AE20/func_151DF574.s")
 
@@ -517,7 +617,42 @@ void func_151E2284(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_20AE20/func_151E22BC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_20AE20/func_151E2404.s")
+extern s8 *D_80082BBC;
+
+void func_151E2404(void) {
+    s8 *record;
+    s32 index;
+
+    index = D_800AB690[*(s8 *)((u8 *)D_8008FDD4 + 0x42) * 10];
+    record = D_80082BBC + (index * 10);
+    record[0] = 0;
+    record[1] = D_800E0BE0[2];
+    record[2] = D_800E0BE0[3];
+    record[3] = D_800E0BE0[0x10];
+    record[4] = D_800E0BE0[0x11];
+    switch (index) {
+        case 0:
+            record[5] = D_800E0BE0[4];
+            break;
+        case 1:
+        case 2:
+            record[5] = D_800E0BE0[0xD];
+            record[6] = D_800E0BE0[0xE];
+            break;
+        case 5:
+        case 7:
+            record[5] = D_800E0BE0[0x12];
+            break;
+        case 8:
+        case 9:
+            record[5] = D_800E0BE0[7];
+            record[6] = D_800E0BE0[0x13];
+            break;
+    }
+    record[8] = D_800E0BE0[0x16];
+    record[9] = D_800E0BE0[6];
+    func_150076A0(D_800E0BE0);
+}
 
 extern s8 D_800AB694[];
 extern s8 D_8008FE44[];

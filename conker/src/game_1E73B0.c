@@ -155,7 +155,251 @@ void func_151BA468(struct260 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E73B0/func_151BA518.s")
+typedef struct { f32 x, y, z; } V3_151BA518;
+typedef struct {
+    s16 a0, a2, a4, a6;
+    s32 a8, aC;
+    f32 f10, f14, f18;
+    f32 f1c, f20, f24, f28, f2c, f30;
+    s32 i34, i38;
+    f32 f3c, f40, f44, f48;
+    s16 s4c[6];
+    s8 b58;
+} Cfg151BA518;
+typedef struct {
+    f32 f0, f4, f8, fC;
+    V3_151BA518 pos;
+    f32 f1c, f20, f24;
+    V3_151BA518 t;
+    V3_151BA518 vel;
+    f32 f40, f44, f48, f4c;
+    s32 i50;
+    s16 s54, s56;
+    s8 b58;
+    s32 i5c;
+    u8 b60, b61, b62, b63, b64, b65, b66, b67, b68, b69;
+    s8 b6a;
+    void *p6c;
+    u8 b70;
+    s16 s72, s74;
+    s32 pad78, pad7c;
+} Part151BA518;
+extern V3_151BA518 D_800AA590, D_800AA59C, D_800AA5A8, D_800AA5B4[], D_800AA5CC[], D_800AA5FC[];
+extern f32 D_800AA62C[];
+extern V3_151BA518 D_800AA63C, D_800AA648[], D_800AA660[], D_800AA678[], D_800AA6A8[], D_800AA6D8[];
+extern f32 D_800AA708[];
+extern f32 D_800AA7BC, D_800AA7C0, D_800AA7C4, D_800AA7C8, D_800AA7CC, D_800AA7D0, D_800AA7D4, D_800AA7D8, D_800AA7DC;
+void func_1514FCE8(s16 *, u8, s32);
+extern void func_1504715C(void *, void *);
+extern void func_1503F404(s32, f32 *, f32 *, f32 *, V3_151BA518 *, f32 *, f32 *, f32 *, f32 *, f32 *);
+extern void func_1513264C(Part151BA518 *, s32, s32, void *, s32, u8, s32);
+extern void func_15143134(V3_151BA518 *, V3_151BA518 *, s32);
+
+void func_151BA518(void *arg0, u8 arg1, s32 arg2) {
+    Cfg151BA518 cfg;
+    u8 sp168[0x24];
+    V3_151BA518 sp15C;
+    Part151BA518 p;
+    f32 spD8, spD4, spD0, spCC, spC8, spC4;
+    s32 s3;
+    s32 i1, i2, i3;
+    s32 v0;
+    f32 f20, f22, f28;
+
+    cfg.a0 = 0;
+    cfg.a2 = 0xFF;
+    cfg.a4 = -0x3F;
+    cfg.a6 = 0x34;
+    cfg.a8 = 6;
+    if (D_80082FA0 >= 2) {
+        v0 = 1;
+    } else {
+        v0 = 0;
+    }
+    cfg.aC = 5 >> v0;
+    cfg.f10 = ((f32 *)arg0)[5];
+    cfg.f14 = ((f32 *)arg0)[6] + 25.0f;
+    cfg.f18 = ((f32 *)arg0)[7];
+    cfg.i34 = 6;
+    cfg.f1c = 50.0f;
+    cfg.f20 = 42.0f;
+    cfg.f24 = 98.0f;
+    cfg.f28 = 68.0f;
+    cfg.f2c = 609.0f;
+    cfg.f30 = 271.0f;
+    if ((D_80082FA0 >= 2) || (D_8008FD8C >= 8)) {
+        v0 = 1;
+    } else {
+        v0 = 0;
+    }
+    cfg.i38 = 3 >> v0;
+    cfg.s4c[0] = 0x19;
+    cfg.s4c[1] = 0xF;
+    cfg.s4c[2] = 0x64;
+    cfg.s4c[3] = 0x64;
+    cfg.s4c[4] = 0xC;
+    cfg.s4c[5] = 0x14;
+    cfg.f3c = 18.0f;
+    cfg.f40 = 0.7690000534f;
+    cfg.f44 = -0.1690000147f;
+    cfg.f48 = 0;
+    if ((D_80082FA0 >= 2) || (D_8008FD8C >= 8)) {
+        cfg.b58 = -1;
+    } else {
+        cfg.b58 = 0;
+    }
+    func_1514FCE8((s16 *)&cfg, arg1, arg2);
+    if ((*(s32 *)((u8 *)arg0 + 0x1D4) != 0) && ((*((u8 *)arg0 + 0x74) & 0xF) != 0xF)) {
+        func_1504715C(sp168, arg0);
+        s3 = *(s32 *)((u8 *)arg0 + 0x1D4) + 0x40;
+        {
+            typedef s32 T151;
+            func_1503F404(s3, &spD0, &spD4, &spD8, &sp15C.x, &sp15C.y, &sp15C.z, &spC4, &spC8, &spCC);
+        }
+        {
+            typedef s32 T152;
+            p.f0 = 1.0f;
+            p.f1c = 1.0f;
+            p.f20 = 1.0f;
+            p.f24 = 1.0f;
+            p.f4 = 0.6999999881f;
+            p.f44 = 0.0f;
+            p.i50 = 0x39E9;
+            p.b58 = 0;
+            p.i5c = 0;
+            p.b60 = 0xFF;
+            p.b61 = 0xD;
+            p.b62 = 0;
+            p.b63 = 0xC;
+            p.b64 = 0;
+            p.b65 = 0;
+            p.b66 = 0;
+            p.b67 = 0;
+            p.b68 = 2;
+            p.b6a = 0;
+            p.p6c = arg0;
+            p.b70 = *((u8 *)arg0 + 0x3B);
+            p.s72 = 0xC;
+            p.s74 = 0x15;
+        }
+        f22 = 0.001000000047f;
+        f28 = -488.0f * f22;
+        f20 = ((func_150ADA68() * 200.0f) + 83.0f) * f22;
+        p.s54 = (func_150ADA20() % 36U) + 0x1E;
+        p.s56 = 0x27;
+        p.f8 = 0.75f;
+        p.fC = 0.75f;
+        func_150ADA68();
+        p.f4c = f28;
+        func_15143134(&D_800AA590, &p.t, s3);
+        func_15143134(&D_800AA59C, &p.vel, s3);
+        p.vel.x = p.vel.x - p.t.x;
+        p.vel.y = p.vel.y - p.t.y;
+        p.vel.z = p.vel.z - p.t.z;
+        p.vel.x = p.vel.x * f20;
+        p.vel.y = p.vel.y * f20;
+        p.vel.z = p.vel.z * f20;
+        p.pos = sp15C;
+        p.pos.x += 109.0f;
+        p.f40 = ((func_150ADA68() * 28864.0f) + -14432.0f) * f22;
+        p.f48 = ((func_150ADA68() * 28864.0f) + -14432.0f) * f22;
+        func_1513264C(&p, 3, 0xFF, sp168, 0, arg1, arg2);
+
+        f20 = ((func_150ADA68() * 200.0f) + 83.0f) * f22;
+        p.s54 = (func_150ADA20() % 36U) + 0x1E;
+        p.s56 = 0x28;
+        p.f8 = 0.5f;
+        p.fC = 0.5f;
+        func_150ADA68();
+        p.f4c = f28;
+        func_15143134(&D_800AA5A8, &p.t, s3);
+        func_15143134(&D_800AA5B4[func_150ADA20() & 1], &p.vel, s3);
+        p.vel.x = p.vel.x - p.t.x;
+        p.vel.y = p.vel.y - p.t.y;
+        p.vel.z = p.vel.z - p.t.z;
+        p.vel.x = p.vel.x * f20;
+        p.vel.y = p.vel.y * f20;
+        p.vel.z = p.vel.z * f20;
+        p.pos = sp15C;
+        p.f40 = ((func_150ADA68() * 28864.0f) + -14432.0f) * f22;
+        p.f48 = ((func_150ADA68() * 28864.0f) + -14432.0f) * f22;
+        func_1513264C(&p, 3, 0xFF, sp168, 0, arg1, arg2);
+
+        p.s56 = 0x29;
+        for (i1 = 0; i1 != 4; i1++) {
+            if (func_150ADA20() & 1) {
+                f20 = ((func_150ADA68() * 200.0f) + 83.0f) * f22;
+                p.s54 = (func_150ADA20() % 36U) + 0x1E;
+                p.f8 = p.fC = D_800AA62C[i1];
+                func_150ADA68();
+                p.f4c = f28;
+                func_15143134(&D_800AA5CC[i1], &p.t, s3);
+                func_15143134(&D_800AA5FC[i1], &p.vel, s3);
+                p.vel.x = p.vel.x - p.t.x;
+                p.vel.y = p.vel.y - p.t.y;
+                p.vel.z = p.vel.z - p.t.z;
+                p.vel.x = p.vel.x * f20;
+                p.vel.y = p.vel.y * f20;
+                p.vel.z = p.vel.z * f20;
+                p.pos = sp15C;
+                p.f40 = ((func_150ADA68() * 28864.0f) + -14432.0f) * f22;
+                p.f48 = ((func_150ADA68() * 28864.0f) + -14432.0f) * f22;
+                func_1513264C(&p, 3, 0xFF, sp168, 0, arg1, arg2);
+            }
+        }
+        p.s56 = 0x2B;
+        func_15143134(&D_800AA63C, &p.t, s3);
+        p.f8 = p.fC = 0.550999999f;
+        for (i2 = 0; i2 != 2; i2++) {
+            if (func_150ADA20() & 1) {
+                f20 = ((func_150ADA68() * 200.0f) + 83.0f) * f22;
+                p.s54 = (func_150ADA20() % 36U) + 0x1E;
+                func_150ADA68();
+                p.f4c = f28;
+                func_15143134(&D_800AA648[i2], &p.vel, s3);
+                p.vel.x = p.vel.x - p.t.x;
+                p.vel.y = p.vel.y - p.t.y;
+                p.vel.z = p.vel.z - p.t.z;
+                p.vel.x = p.vel.x * f20;
+                p.vel.y = p.vel.y * f20;
+                p.vel.z = p.vel.z * f20;
+                p.pos = sp15C;
+                p.pos.x += D_800AA660[i2].x;
+                p.pos.y += D_800AA660[i2].y;
+                p.pos.z += D_800AA660[i2].z;
+                p.f40 = ((func_150ADA68() * 28864.0f) + -14432.0f) * f22;
+                p.f48 = ((func_150ADA68() * 28864.0f) + -14432.0f) * f22;
+                func_1513264C(&p, 3, 0xFF, sp168, 0, arg1, arg2);
+            }
+        }
+        p.s56 = 0x2C;
+        for (i3 = 0; i3 != 4; i3++) {
+            if (func_150ADA20() & 1) {
+                f20 = ((func_150ADA68() * 200.0f) + 83.0f) * f22;
+                p.s54 = (func_150ADA20() % 36U) + 0x1E;
+                p.f8 = p.fC = D_800AA708[i3];
+                func_150ADA68();
+                p.f4c = f28;
+                func_15143134(&D_800AA678[i3], &p.t, s3);
+                func_15143134(&D_800AA6A8[i3], &p.vel, s3);
+                p.vel.x = p.vel.x - p.t.x;
+                p.vel.y = p.vel.y - p.t.y;
+                p.vel.z = p.vel.z - p.t.z;
+                p.vel.x = p.vel.x * f20;
+                p.vel.y = p.vel.y * f20;
+                p.vel.z = p.vel.z * f20;
+                p.pos = sp15C;
+                p.pos.x += D_800AA6D8[i3].x;
+                p.pos.y += D_800AA6D8[i3].y;
+                p.pos.z += D_800AA6D8[i3].z;
+                p.f40 = ((func_150ADA68() * 28864.0f) + -14432.0f) * f22;
+                p.f48 = ((func_150ADA68() * 28864.0f) + -14432.0f) * f22;
+                func_1513264C(&p, 3, 0xFF, sp168, 0, arg1, arg2);
+            }
+        }
+    }
+}
+
 
 void func_151BB044(struct127 *arg0) {
     func_1000FA64(0x4A7, (s16)(s32)arg0->x_position,
@@ -1225,7 +1469,132 @@ s32 func_151BD42C(u8 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E73B0/func_151BD43C.s")
+typedef struct {
+    s32 unk00;
+    s32 unk04;
+    s16 unk08;
+    s16 unk0A;
+    s32 unk0C;
+    s32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 unk16;
+    u8 unk17;
+    u8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+    u8 unk1C;
+    u8 unk1D;
+    s16 unk1E;
+    s16 unk20;
+    s16 unk22;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    f32 unk30[3];
+    f32 unk3C[3];
+    f32 unk48[3];
+    f32 unk54;
+    s32 unk58;
+    u8 pad5C[4];
+    u8 unk60;
+    u8 unk61;
+    u8 unk62;
+    s8 unk63;
+    s8 unk64;
+    u8 unk65;
+} Fx151BD43C;
+
+typedef struct {
+    u8 pad0[0x14];
+    f32 unk14[3];
+    u8 pad20[0x3B - 0x20];
+    u8 unk3B;
+    u8 pad3C[0x74 - 0x3C];
+    u8 unk74;
+} Owner151BD43C;
+
+typedef struct {
+    u8 pad0;
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD[0x1C - 0xD];
+    Owner151BD43C *unk1C;
+    u8 pad20[0x74 - 0x20];
+    f32 unk74;
+} Actor151BD43C;
+
+typedef struct {
+    Owner151BD43C *owner;
+    u8 ownerId;
+} Extra151BD43C;
+
+struct260 *func_15130374(void *, u8, s32, u8, s32);
+
+void func_151BD43C(f32 *arg0, f32 *arg1, s32 arg2, s32 arg3, f32 arg4, Actor151BD43C *arg5) {
+    struct260 *ret;
+    Owner151BD43C *owner;
+    Fx151BD43C fx;
+    f32 val;
+    s32 pad;
+    Extra151BD43C extra;
+    s32 pad2;
+
+    owner = arg5->unk1C;
+    if ((owner->unk74 & 0xF) != 0xF) {
+        fx.unk1D = 0x29;
+        fx.unk08 = 0xE03;
+        fx.unk00 = 0x200005;
+        fx.unk04 = 0;
+        fx.unk0C = 0;
+        fx.unk10 = 0;
+        fx.unk54 = ((func_150ADA68() * 251.0f) + 44.0f) * 0.001000000047f;
+        fx.unk1E = 0x14;
+        fx.unk20 = 0xC;
+        fx.unk58 = (func_150ADA20() & 1 ? 0x40 : 0) | (1 | 2 | 4 | (func_150ADA20() & 1 ? 0x80 : 0)) | 0x200 | 0x400 | 0x800 | 0x1000 | 0x4000 | 0x8000;
+        fx.unk60 = 3;
+        fx.unk61 = 3;
+        fx.unk63 = -1;
+        fx.unk64 = -1;
+        fx.unk65 = 7;
+        fx.unk22 = 0x22;
+        fx.unk14 = 0xDD;
+        fx.unk15 = 0xD3;
+        fx.unk16 = 0xCD;
+        fx.unk17 = 0xFF;
+        fx.unk18 = 0x57;
+        fx.unk19 = 0x55;
+        fx.unk1A = 0x5A;
+        val = 0.9347190261f;
+        fx.unk24 = 1.034358025f;
+        fx.unk1B = (func_150ADA20() % 156U) + 0x64;
+        fx.unk1C = 0xFF;
+        fx.unk0A = (func_150ADA20() % 18U) + 0x19;
+        fx.unk28 = fx.unk2C = (func_150ADA68() * 53.0f) + 49.0f;
+        fx.unk48[0] = (arg1[0] - arg0[0]) * arg5->unk74;
+        fx.unk48[1] = (arg1[1] - arg0[1]) * arg5->unk74;
+        fx.unk48[2] = (arg1[2] - arg0[2]) * arg5->unk74;
+        fx.unk30[0] = arg0[0] - arg5->unk1C->unk14[0];
+        fx.unk30[1] = arg0[1] - arg5->unk1C->unk14[1];
+        fx.unk30[2] = arg0[2] - arg5->unk1C->unk14[2];
+        fx.unk30[0] += fx.unk48[0] * arg4;
+        fx.unk30[1] += fx.unk48[1] * arg4;
+        fx.unk30[2] += fx.unk48[2] * arg4;
+        extra.owner = arg5->unk1C;
+        extra.ownerId = arg5->unk1C->unk3B;
+        fx.unk62 = 0x13;
+        fx.unk3C[0] = arg5->unk1C->unk14[0];
+        fx.unk3C[1] = arg5->unk1C->unk14[1];
+        fx.unk3C[2] = arg5->unk1C->unk14[2];
+        ret = func_15130374(&fx, 1, 0x10, arg5->unkC, arg5->unk1);
+        if (ret != NULL) {
+            memcpy((u8 *)ret + 0xA8, &val, 4);
+            memcpy((u8 *)ret + 0xB0, &extra, 8);
+        }
+    }
+}
 
 f32 func_151BD750(s16 *arg0) {
     s16 temp;

@@ -178,7 +178,47 @@ void func_151671E8(void) {
         }
     }
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_15167310.s")
+typedef struct {
+    u8 pad0[0xC];
+    void (*unkC)(struct102 *);
+    u8 pad10[0x24];
+} Struct15167310;
+
+extern f32 D_800DD1D0[];
+
+void func_15167310(void) {
+    s32 k;
+    f32 angle;
+
+    for (k = 0; k < D_80082FA0 + 1; k++) {
+        angle = D_800DBFF0[k].unk3A0;
+        D_800DD1D8[k] = sinf(angle);
+        D_800DD1E8[k] = cosf(angle);
+    }
+    angle = D_800DBFF0->unk3A0;
+    D_800DD1D0[0] = sinf(angle);
+    D_800DD1D0[1] = cosf(angle);
+    {
+        s32 i;
+        s32 j;
+        struct102 *node;
+
+    for (j = 0; j != 0x68; j++) {
+        for (i = 0; i != 2; i++) {
+            if (((struct102 *(*)[104])D_800DCE50)[i][j] != NULL && ((Struct15167310 *)D_8008B4A8)[j].unkC != NULL) {
+                node = ((struct102 *(*)[104])D_800DCE50)[i][j];
+                D_800DD190++;
+                while (node != NULL) {
+                    ((struct102 **)D_800DD198)[D_800DD190] = (struct102 *)node->unk8;
+                    ((Struct15167310 *)D_8008B4A8)[j].unkC(node);
+                    node = ((struct102 **)D_800DD198)[D_800DD190];
+                }
+                D_800DD190--;
+            }
+        }
+    }
+    }
+}
 typedef struct {
     u8 pad0[0x8];
     Gfx *(*unk8)(Gfx *, struct102 *, s16);

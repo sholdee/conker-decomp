@@ -1184,7 +1184,50 @@ start:
     }
     return ret;
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_1514401C.s")
+typedef struct {
+    u8 unk0;
+    u8 pad1[0xB];
+} Unk80090B64;
+extern Unk80090B64 D_80090B64[];
+
+s32 func_1514401C(u8 arg0, u32 *arg1, s32 *arg2, u8 arg3) {
+    s32 max;
+    s32 ret;
+    s32 n;
+
+    ret = 0;
+    n = D_80090B64[arg0].unk0;
+    max = (n << 16) - 1;
+    *arg2 += *arg1 * D_800BE9E4;
+    if (max < *arg2) {
+        if (arg3 & 1) {
+            ret = 1;
+        } else if (arg3 & 2) {
+            *arg1 = 0;
+            *arg2 = max;
+        } else if (arg3 & 4) {
+            *arg2 = max - (*arg2 % max);
+            *arg1 = -*arg1;
+        } else {
+            do {
+                *arg2 -= max;
+            } while (max < *arg2);
+        }
+    } else if ((*arg2 < 0) && !(arg3 & 8)) {
+        if (arg3 & 0x10) {
+            *arg1 = 0;
+            *arg2 = 0;
+        } else if (arg3 & 4) {
+            *arg2 = -*arg2 % max;
+            *arg1 = -*arg1;
+        } else {
+            do {
+                *arg2 += max;
+            } while (*arg2 < 0);
+        }
+    }
+    return ret;
+}
 void func_151441A4(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, u8 arg9, u8 arg10, u8 arg11, u8 arg12, u8 arg13) {
     s16 temp_v0;
     s16 temp_v0_2;

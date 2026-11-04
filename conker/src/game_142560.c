@@ -972,7 +972,340 @@ void func_15117DA4(struct Obj15117DA4 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 *
     arg4[2] = *(volatile f32 *)&arg4[2] + arg0->unk14;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_142560/func_15117F3C.s")
+struct F7Cw {
+    u8 p0[0x17];
+    u8 unk17;
+    u8 p18[0xF];
+    u8 unk27;
+    u8 p28[0x43];
+    u8 unk6B;
+    s16 unk6C;
+    s16 unk6E;
+    s16 unk70;
+};
+
+struct F7Tg {
+    s32 p0;
+    u8 p4[0x10];
+    f32 x;
+    f32 y;
+    f32 z;
+    u8 p20[0x45];
+    u8 unk65;
+    u8 p66[0x80];
+    s16 unkE6;
+    u8 pE8[0x1C];
+    u8 unk104;
+    u8 p105[0x216];
+    struct F7Cw *w;
+    u8 p320[0xC];
+};
+
+struct F7O {
+    f32 unk0;
+    u8 p4[0x28];
+    f32 ox;
+    f32 oy;
+    f32 oz;
+    u8 p38[0x17];
+    u8 unk4F;
+    u8 p50[0x23];
+    u8 unk73;
+    u16 unk74;
+    u8 p76[6];
+    s32 unk7C;
+    f32 unk80;
+    f32 unk84;
+};
+
+extern void func_15060A30(s32, void *);
+
+void func_15117F3C(struct F7O *o) {
+    f32 limit;
+    s32 d1;
+    f32 f84;
+    f32 f80;
+    struct F7Tg *p;
+    struct F7Cw *w;
+    s32 i;
+    f32 dx;
+    f32 dy;
+    s32 flag8;
+    s32 sound;
+    f32 thr;
+    s32 d2;
+    struct F7Tg *target;
+    s32 d3;
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 pos[3];
+    s32 d4;
+    s32 mode;
+    s32 t1;
+    s32 flag4;
+    s32 timer;
+    f32 dz;
+    f32 dist;
+
+    limit = 40.0;
+    thr = 40000.0f;
+    sound = 0x4B8;
+    mode = o->unk73 & 3;
+    flag4 = o->unk73 & 4;
+    flag8 = o->unk73 & 8;
+    switch (D_800BE9F0) {
+    case 1:
+    case 41:
+        x = -13.0f;
+        y = 76.0f;
+        z = 354.0f;
+        thr = 10000.0f;
+        break;
+    case 11:
+        x = 70.0f;
+        y = 120.0f;
+        z = 329.0f;
+        sound = 0x4BA;
+        flag8 = 8;
+        break;
+    case 23:
+        x = 0.0f;
+        y = 125.0f;
+        z = 322.0f;
+        break;
+    case 40:
+        limit = 55.0f;
+        x = 0.0f;
+        y = 99.0f;
+        z = 168.0f;
+        flag8 = 8;
+        break;
+    case 53:
+        limit = 20.0f;
+        x = 0.0f;
+        y = -328.0f;
+        z = 549.0f;
+        break;
+    case 47:
+        limit = 90.0f;
+        thr = 5625.0f;
+        x = 0.0f;
+        y = 61.0f;
+        z = 104.0f;
+        flag8 = 8;
+        break;
+    case 60:
+        limit = 30;
+        thr = 10000.0f;
+        x = 22.0f;
+        y = 13.0f;
+        z = 419.0f;
+        flag8 = 8;
+        break;
+    case 65:
+        limit = 45.0f;
+        if (flag4 == 4) {
+            thr = -1.0f;
+        }
+        x = 0.0f;
+        y = 25.0f;
+        z = 336.0f;
+        flag8 = 8;
+        break;
+    case 64:
+        limit = 45.0f;
+        x = 0.0f;
+        y = 47.0f;
+        z = 72.0f;
+        flag8 = 8;
+        thr = 10000.0f;
+        break;
+    default:
+        return;
+    }
+    x *= o->ox;
+    y *= o->oy;
+    z *= o->oz;
+    thr *= o->oz * o->oz;
+    if (o->unk7C == 0) {
+        o->unk7C = 2;
+        if (mode == 3) {
+            o->unk0 = limit;
+        }
+    }
+    timer = (o->unk7C >> 8) & 0xFF;
+    f80 = o->unk80;
+    f84 = o->unk84;
+    t1 = o->unk7C & 1;
+    if (t1) {
+    }
+    func_15117DA4((struct Obj15117DA4 *)o, x, y, z, pos);
+    target = 0;
+    if (mode != 3 && mode != 1) {
+        for (i = 0; i < D_8008FD8C; i++) {
+            p = &((struct F7Tg *)D_800CC2D0)[i];
+            if (p->unk65) {
+                continue;
+            }
+            if (p->unk104) {
+                continue;
+            }
+            w = p->w;
+            if (w->unk17) {
+                continue;
+            }
+            if (w->unk27) {
+                continue;
+            }
+            if (w->unk6B >= 4) {
+                continue;
+            }
+            if (p->y + 40.0f < pos[1]) {
+                dy = (p->y + (f32)p->unkE6) - pos[1];
+                dz = p->z - pos[2];
+                dx = p->x - pos[0];
+                dist = dz * dz + (dx * dx + dy * dy);
+                if (dist) {
+                }
+                if (dist < thr) {
+                    target = p;
+                    break;
+                }
+            }
+        }
+    }
+    if (target == 0 && mode == 2) {
+        for (i = 0; i < D_8008FD8C; i++) {
+            p = &((struct F7Tg *)D_800CC2D0)[i];
+            if (p->w->unk6B != 0) {
+                target = p;
+                break;
+            }
+        }
+    }
+    if (target != 0 || mode == 2) {
+        if (target != 0 && t1 == 0) {
+            func_15060A30(0x16B, target);
+        }
+        if (flag4 == 0) {
+            mode = 2;
+            if (t1 == 0) {
+                timer = 0x32;
+                t1++;
+                f80 = 0.0f;
+            }
+            if (target != 0) {
+                if (timer != 0) {
+                    target->w->unk6B = 1;
+                } else {
+                    target->w->unk6B = 2;
+                }
+            }
+            if (timer != 0) {
+                if (D_800BE9E4 < timer) {
+                    timer -= D_800BE9E4;
+                } else {
+                    timer = 0;
+                }
+            } else {
+                f84 += f80;
+                if (30.0f < f84) {
+                    f84 = 30.0f;
+                }
+                f80 += 0.02999999933f;
+                if (0.200000003f < f80) {
+                    if (o->unk74 == 0) {
+                        func_15114D24((struct Obj15116BAC *)o, sound, 0x7D00, 0x5DC, 0xDAC, 0);
+                    }
+                }
+                o->unk0 += f84;
+                if (limit <= o->unk0) {
+                    o->unk0 = limit;
+                    f84 = 0.0f;
+                    f80 = 0.0f;
+                    mode = 3;
+                    t1 = 0;
+                    func_15114D24((struct Obj15116BAC *)o, 0x14, 0x7D00, 0x5DC, 0xDAC, 4);
+                    if (target != 0) {
+                        target->w->unk6B = 0;
+                    }
+                }
+            }
+            if (target != 0) {
+                func_15117DA4((struct Obj15117DA4 *)o, x, y, z, pos);
+                target->w->unk6C = (s16)pos[0];
+                target->w->unk6E = (s16)pos[1];
+                target->w->unk70 = (s16)pos[2];
+            }
+        } else {
+            if (target != 0 && (w = target->w) != 0) {
+                if (t1 == 0 && w->unk6B == 0) {
+                    timer = 0x32;
+                    t1++;
+                }
+                if (timer != 0) {
+                    w->unk6B = 3;
+                } else if (w->unk6B == 3) {
+                    w->unk6B = 4;
+                    t1 = 0;
+                }
+                if (timer != 0) {
+                    if (D_800BE9E4 < timer) {
+                        timer -= D_800BE9E4;
+                    } else {
+                        timer = 0;
+                    }
+                }
+            }
+        }
+        if (target != 0) {
+            if (target->w != 0) {
+                func_15117DA4((struct Obj15117DA4 *)o, x, y, z, pos);
+                target->w->unk6C = (s16)pos[0];
+                target->w->unk6E = (s16)pos[1];
+                target->w->unk70 = (s16)pos[2];
+            }
+        }
+    } else if (flag8 == 0 || mode == 1) {
+        if (0.0f < o->unk0) {
+            if (t1 == 0) {
+                f80 = 0.1000000015f;
+                t1++;
+            }
+            mode = 1;
+            f84 += 0.1000000015f;
+            if (30.0f < f84) {
+                f84 = 30.0f;
+            }
+            f80 += 0.05000000075f;
+            o->unk0 = o->unk0 - f84;
+            if (o->unk0 <= 0.0f) {
+                o->unk0 = 0.0f;
+                t1 = 0;
+                mode = 0;
+                f80 = 0.0f;
+                f84 = 0.0f;
+            }
+        }
+        if (target != 0) {
+            target->w->unk6B = 0;
+        }
+    }
+    o->unk73 &= 0xFFFC;
+    o->unk73 |= mode;
+    o->unk7C &= 0xFE;
+    o->unk7C |= timer << 8;
+    o->unk7C |= t1;
+    o->unk80 = f80;
+    o->unk84 = f84;
+    o->unk4F &= 0xFF9F;
+    if (mode == 2 || (mode == 0 && timer != 0)) {
+        o->unk4F |= 0x20;
+    } else {
+        o->unk4F |= 0;
+    }
+}
 
 s32 func_151189AC(void *arg0, s32 arg1);
 
@@ -1324,10 +1657,104 @@ void func_151196D4(struct Obj151194D4 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_142560/func_1511A410.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_142560/func_1511A494.s")
+typedef struct {
+    s32 *unk0;
+    u8 unk4;
+    u8 unk5;
+    s8 unk6;
+    u8 unk7;
+    u8 unk8;
+    u8 pad9[3];
+} Struct1511A494Entry;
+
+typedef struct {
+    u8 pad0[0x1C];
+    s32 unk1C;
+    u8 pad20[0x34];
+    u16 unk54;
+} Struct1511A494Arg;
+
+extern Struct1511A494Entry D_80089324[];
+extern Struct1511A494Entry D_80089444[];
+extern s32 func_1511A410(s32, s32 *);
+extern s32 func_1510D0EC(s32, s32 *, s32, s32);
+extern void func_1510D874(void *, s32, s32, s32, s32);
+
+void func_1511A494(Struct1511A494Arg *arg0, s32 *arg1, s32 *arg2) {
+    s32 pad64;
+    s32 sp60;
+    s32 i;
+    Struct1511A494Entry *found;
+    s32 id;
+    s32 frame;
+    s32 dir;
+    s32 sp48;
+    s32 type;
+    s32 width;
+    s32 offset;
+    s32 x;
+
+    found = NULL;
+    for (i = 0; i < 24; i++) {
+        id = D_80089324[i].unk5;
+        if (D_80089324[i].unk6 != -1) {
+            if (D_800BE9F0 != D_80089324[i].unk6) {
+                continue;
+            }
+            if (id != 0xFF) {
+                id |= 0x8000;
+            }
+        }
+        if (id == 0xFF || id == arg0->unk54) {
+            found = &D_80089324[i];
+            break;
+        }
+    }
+    if (found != NULL) {
+        if (*arg1 == 0) {
+            x = func_1511A410(arg0->unk1C, &sp48);
+            *arg1 = (sp48 << 16) | x;
+        } else {
+            sp48 = (u16)(*arg1 >> 16);
+        }
+        dir = (*arg2 >> 16) & 0xFFFF;
+        dir = (s16)dir;
+        frame = *arg2 & 0xFFFF;
+        if (dir == 0) {
+            dir = 1;
+        }
+        frame += dir;
+        if (found->unk8 != 0) {
+            if (frame < 0) {
+                dir = 1;
+                frame = found->unk7;
+            } else if (frame >= found->unk4 * found->unk7) {
+                dir = -1;
+                frame = (found->unk4 - 1) * found->unk7;
+            }
+        } else {
+            if (frame >= found->unk4 * found->unk7) {
+                frame -= found->unk4 * found->unk7;
+                dir = 1;
+            }
+        }
+        x = found->unk0[frame / found->unk7];
+        offset = 0;
+        if (D_800BE9F0 == 6 || D_800BE9F0 == 0x3B) {
+            type = 3;
+        } else {
+            type = 0x3E;
+        }
+        width = func_1510D0EC(x, &sp60, type, 0);
+        if (sp48 != 0) {
+            offset = sp60 + width - 0x20;
+        }
+        func_1510D874(arg0, width, offset, 4, 5);
+        *arg2 = (dir << 16) | frame;
+    }
+}
 
 extern void func_15116110(void *);
-extern void func_1511A494(void *, void *, void *);
 
 void func_1511A6FC(s32 *arg0) {
     if (arg0[0xF] != 0) {

@@ -285,7 +285,207 @@ s32 func_151B65D4(Obj151B65D4 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E37D0/func_151B6928.s")
+typedef struct Trail151B6928 {
+    struct17 pos;
+    u8 pad0C[4];
+    u8 alpha;
+    u8 pad11[3];
+    f32 rot;
+    u8 pad18[4];
+} Trail151B6928;
+
+typedef struct Actor151B6928 {
+    u8 pad0[0x10];
+    struct17 pos;
+    u8 pad1C[2];
+    u16 unk1E;
+    u8 pad20[5];
+    u8 unk25;
+    u8 pad26[6];
+    s8 unk2C;
+    s8 unk2D;
+    s8 unk2E;
+    u8 pad2F[0x55];
+    u8 buffers[0x10];
+    Trail151B6928 *entries;
+} Actor151B6928;
+
+Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
+Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
+Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
+Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
+Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
+extern struct17 *func_15144B34(s32);
+void func_151D5D60(void *, s16, s32, void **, u8 *);
+extern u8 D_80090CD4[];
+extern s32 D_800D2C9C;
+extern struct {
+    s32 unk0;
+    s32 unk4;
+} D_800A4AC8[];
+
+Gfx *func_151B6928(Actor151B6928 *arg0, Gfx *gfx, s16 arg2) {
+    Vtx *vtx;
+    Trail151B6928 *entries;
+    struct17 *cam;
+    u8 update;
+    struct17 b;
+    struct17 a;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    f32 ex;
+    f32 ey;
+    f32 ez;
+    f32 cx;
+    f32 cy;
+    f32 cz;
+    s32 i;
+    s32 j;
+    f32 len[1];
+    u8 alphaA;
+    f32 rotB;
+    f32 rotA;
+    u8 alphaB;
+    f32 scale;
+
+    if (arg0->unk2C >= 2) {
+        func_151D5D60(arg0->buffers, arg2, (arg0->unk25 + 5) * 2 * sizeof(Vtx), (void **)&vtx, 0);
+        if (vtx != NULL) {
+            entries = arg0->entries;
+            cam = func_15144B34(arg2);
+            update = 1;
+            gfx = func_15142E24(gfx, (s32)D_80090CD4, 0, 0, 0, 0, 0x1F, 0, 0, &update, 3);
+            gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &update);
+            gfx = func_1513F4E4(gfx, 0x4E, &update);
+            gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
+            gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4, &update);
+            if (arg0->unk1E & 2) {
+                i = arg0->unk2E - 1;
+                if (i < 0) {
+                    i = arg0->unk25 - 1;
+                }
+                a = arg0->pos;
+                alphaA = 0x80;
+                rotA = 0.0f;
+            } else {
+                j = arg0->unk2E - 1;
+                if (j < 0) {
+                    j = arg0->unk25 - 1;
+                }
+                i = j - 1;
+                if (i < 0) {
+                    i = arg0->unk25 - 1;
+                }
+                a = entries[j].pos;
+                alphaA = entries[j].alpha;
+                rotA = entries[j].rot;
+            }
+            b = entries[i].pos;
+            alphaB = entries[i].alpha;
+            rotB = entries[i].rot;
+
+            ex = a.unk0 - b.unk0;
+            ey = a.unk4 - b.unk4;
+            ez = a.unk8 - b.unk8;
+            dx = a.unk0 - cam->unk0;
+            dy = a.unk4 - cam->unk4;
+            dz = a.unk8 - cam->unk8;
+            cx = (ey * dz) - (dy * ez);
+            cy = (ez * dx) - (dz * ex);
+            cz = (ex * dy) - (dx * ey);
+            len[0] = (cx * cx) + (cy * cy) + (cz * cz);
+            if ((cx * cx) + (cy * cy) + (cz * cz) == 0) {
+                cz = cy = cx = 0.0f;
+            } else {
+                scale = 10.0f / sqrtf(len[0]);
+                cx = cx * scale;
+                cy = cy * scale;
+                cz = cz * scale;
+            }
+            vtx->v.ob[0] = a.unk0 + cx;
+            vtx->v.ob[1] = a.unk4 + cy;
+            vtx->v.ob[2] = a.unk8 + cz;
+            vtx->v.tc[0] = rotA;
+            vtx->v.tc[1] = 0;
+            vtx->v.cn[0] = 0xFF;
+            vtx->v.cn[1] = 0xFF;
+            vtx->v.cn[2] = 0xFF;
+            vtx->v.cn[3] = alphaA;
+            vtx->v.flag = 0;
+            vtx++;
+            vtx->v.ob[0] = a.unk0 - cx;
+            vtx->v.ob[1] = a.unk4 - cy;
+            vtx->v.ob[2] = a.unk8 - cz;
+            vtx->v.tc[0] = rotA;
+            vtx->v.tc[1] = 0x7FF;
+            vtx->v.cn[0] = 0xFF;
+            vtx->v.cn[1] = 0xFF;
+            vtx->v.cn[2] = 0xFF;
+            vtx->v.cn[3] = alphaA;
+            vtx->v.flag = 0;
+            vtx++;
+            do {
+                j = i;
+                ex = a.unk0 - b.unk0;
+                ey = a.unk4 - b.unk4;
+                ez = a.unk8 - b.unk8;
+                dx = b.unk0 - cam->unk0;
+                dy = b.unk4 - cam->unk4;
+                dz = b.unk8 - cam->unk8;
+                cx = (ey * dz) - (dy * ez);
+                cy = (ez * dx) - (dz * ex);
+                cz = (ex * dy) - (dx * ey);
+                len[0] = (cx * cx) + (cy * cy) + (cz * cz);
+                if ((cx * cx) + (cy * cy) + (cz * cz) == 0) {
+                    cz = cy = cx = 0.0f;
+                } else {
+                    scale = 10.0f / sqrtf(len[0]);
+                    cx = cx * scale;
+                    cy = cy * scale;
+                    cz = cz * scale;
+                }
+                vtx->v.ob[0] = b.unk0 + cx;
+                vtx->v.ob[1] = b.unk4 + cy;
+                vtx->v.ob[2] = b.unk8 + cz;
+                vtx->v.tc[0] = rotB;
+                vtx->v.tc[1] = 0;
+                vtx->v.cn[0] = 0xFF;
+                vtx->v.cn[1] = 0xFF;
+                vtx->v.cn[2] = 0xFF;
+                vtx->v.cn[3] = alphaB;
+                vtx->v.flag = 0;
+                vtx++;
+                vtx->v.ob[0] = b.unk0 - cx;
+                vtx->v.ob[1] = b.unk4 - cy;
+                vtx->v.ob[2] = b.unk8 - cz;
+                vtx->v.tc[0] = rotB;
+                vtx->v.tc[1] = 0x7FF;
+                vtx->v.cn[0] = 0xFF;
+                vtx->v.cn[1] = 0xFF;
+                vtx->v.cn[2] = 0xFF;
+                vtx->v.cn[3] = alphaB;
+                vtx->v.flag = 0;
+                vtx++;
+                gSPVertex(gfx++, vtx - 4, 4, 0);
+                gSP1Triangle(gfx++, 0, 1, 2, 0);
+                gSP1Triangle(gfx++, 1, 3, 2, 0);
+                i--;
+                if (i < 0) {
+                    i = arg0->unk25 - 1;
+                }
+                if (j != arg0->unk2D) {
+                    a = b;
+                    b = entries[i].pos;
+                    alphaB = entries[i].alpha;
+                    rotB = entries[i].rot;
+                }
+            } while (j != arg0->unk2D);
+        }
+    }
+    return gfx;
+}
+
 
 void func_151B70B4(void *arg0, void *arg1, u8 arg2) {
     void *target;

@@ -2,6 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
+s32 func_150380C0(f32 *, s32, s32, s32, f32, s32, f32 *, s32, s32, s32, s32);
+extern f32 D_800C3FD0[];
+
 
 extern f32 D_80098250;
 extern f32 D_8009862C;
@@ -30,7 +33,81 @@ void func_15036C70(GameStruct_15036C70 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_64120/func_15036CE8.s")
+extern u8 D_800C3FFA;
+extern f32 D_800C3FE8[3];
+void func_150379DC(f32 *, s32, s32, s32, f32, s32, s32);
+void func_15038620(s32, s32, f32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+
+void func_15036CE8(void) {
+    struct127 *obj;
+    s32 sp70;
+    f32 *data;
+    f32 *pos;
+    f32 val;
+    s32 pad1;
+    s32 pad2;
+    s32 sp58;
+    s32 pad3;
+    u8 type;
+
+    obj = &D_800CC2D0[D_800C3E78];
+    data = *(f32 **)((u8 *)obj + 0x324);
+    if (data == NULL) {
+        return;
+    }
+    switch (obj->id) {
+        case 59:
+        case 117:
+        case 128:
+        case 136:
+        case 144:
+        case 150:
+        case 152:
+        case 156:
+        case 157:
+        case 159:
+        case 160:
+        case 176:
+        case 177:
+        case 178:
+        case 180:
+            if (D_800C3FFA == 0) {
+                D_800C3FFA = 1;
+                return;
+            }
+            break;
+    }
+    if (D_800C35EA == 1 && D_800C3FFA == 0) {
+        D_800C3FFA = 1;
+        return;
+    }
+    sp70 = 0;
+    sp58 = 1;
+    if (D_800C3FFA == 0) {
+        type = 7;
+        sp58 = 0;
+        sp70 = 1;
+        if (*(u16 *)((u8 *)D_800D154C + 0x2F8) & 0x100) {
+            *(s16 *)((u8 *)data + 0x3A) = 0x2D;
+            *(s16 *)((u8 *)data + 0x40) = 0x40;
+        } else if (data[0] == -99999.0f) {
+            D_800C3FFA = 1;
+            return;
+        }
+    } else {
+        type = 12;
+        ;
+    }
+    if (D_800C3FFA == 0 && !(*(u16 *)((u8 *)D_800D154C + 0x2F8) & 0x100)) {
+        D_800C3FE8[0] = -99999.0f;
+        D_800C3FE8[1] = -99999.0f;
+        D_800C3FE8[2] = -99999.0f;
+    } else {
+        func_150379DC(D_800C3FE8, type, 0, D_800C3E78, 90.0f, 0xFF, 0);
+    }
+    func_15038620(type, 0, D_800C3FE8, D_800C3E78, sp70, 0, D_800C3FFA, 3, 0, 0, 0, sp58, 0);
+    D_800C3FFA++;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_64120/func_15036F34.s")
 
@@ -397,7 +474,146 @@ void func_15039ED0(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 *arg4, f32 arg
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_64120/func_1503A08C.s")
+typedef struct {
+    s16 unk0;
+    u8 pad2[0x24];
+    u8 unk26;
+    u8 pad27[0x9];
+    s8 unk30;
+    u8 pad31[0x9];
+    u8 unk3A;
+} Def_1503A08C;
+
+s32 func_1503D774(s32 arg0, s32 arg1);
+void func_1507C3E0(struct127 *arg0, s16 *arg1, s16 *arg2, s16 *arg3);
+
+#define OBJ_S16(o) (*(s16 *)((u8 *)arg0 + (o)))
+#define OBJ_S8(o) (*(s8 *)((u8 *)arg0 + (o)))
+
+void func_1503A08C(struct127 *arg0) {
+    Def_1503A08C *def;
+    f32 (*m)[4];
+    f32 cx;
+    f32 cy;
+    f32 cz;
+    f32 mag;
+    f32 ax;
+    f32 ay;
+    f32 az;
+    f32 alen;
+    f32 bx;
+    f32 by;
+    f32 bz;
+    f32 blen;
+    s16 sp36;
+    s16 sp34;
+    s16 sp32;
+    s32 h;
+    f32 scale;
+
+    if (arg0->id != 0xFF) {
+        if ((arg0->unk1D4 != NULL) && (D_800D1C90[arg0->id] != NULL)) {
+            if (func_1503D774(arg0->id, 0) == 0) {
+                def = (Def_1503A08C *)D_800D1C90[arg0->id];
+                m = (f32 (*)[4])arg0->unk1D4;
+                m = (f32 (*)[4])((u8 *)m + (def->unk26 << 6));
+                scale = arg0->y_scale;
+                alen = def->unk3A * scale;
+                if (alen != 0) {
+                    cx = m[0][0];
+                    cy = m[0][1];
+                    cz = m[0][2];
+                    blen = cx * cx + cy * cy + cz * cz;
+                    mag = blen;
+                    if (blen != 0) {
+                        mag = sqrtf(blen);
+                    }
+                    if (mag != 0) {
+                        mag = alen / mag;
+                    }
+                    ax = cx * mag;
+                    ay = cy * mag;
+                    az = cz * mag;
+                } else {
+                    az = 0.0f;
+                    ay = 0.0f;
+                    ax = 0.0f;
+                }
+                blen = def->unk0 * scale;
+                if (blen != 0) {
+                    cx = m[1][0];
+                    cy = m[1][1];
+                    cz = m[1][2];
+                    mag = sqrtf(cx * cx + cy * cy + cz * cz);
+                    if (mag != 0) {
+                        mag = blen / mag;
+                    }
+                    bx = cx * mag;
+                    by = cy * mag;
+                    bz = cz * mag;
+                } else {
+                    bx = by = bz = 0.0f;
+                }
+                cx = m[2][0];
+                cy = m[2][1];
+                cz = m[2][2];
+                blen = def->unk30 * scale;
+                if (blen != 0) {
+                    mag = sqrtf(cx * cx + cy * cy + cz * cz);
+                    if (mag != 0) {
+                        mag = blen / mag;
+                    }
+                    cx *= mag;
+                    cy *= mag;
+                    cz *= mag;
+                    mag = 127.0f / blen;
+                    OBJ_S8(0x1B8) = cx * mag;
+                    OBJ_S8(0x1B9) = cy * mag;
+                    OBJ_S8(0x1BA) = cz * mag;
+                } else {
+                    mag = sqrtf(cx * cx + cy * cy + cz * cz);
+                    if (mag != 0) {
+                        mag = 127.0f / mag;
+                    }
+                    OBJ_S8(0x1B8) = cx * mag;
+                    OBJ_S8(0x1B9) = cy * mag;
+                    OBJ_S8(0x1BA) = cz * mag;
+                    cx = cy = cz = 0.0f;
+                }
+                OBJ_S16(0x1A4) = m[3][0] + cx;
+                OBJ_S16(0x1A6) = m[3][1] + cy;
+                OBJ_S16(0x1A8) = m[3][2] + cz;
+                OBJ_S16(0x1AA) = m[3][1] + by;
+                mag = OBJ_S16(0x1A4);
+                OBJ_S16(0x1AC) = mag + ax + bx;
+                OBJ_S16(0x1AE) = OBJ_S16(0x1A6) + ay + by;
+                OBJ_S16(0x1B0) = OBJ_S16(0x1A8) + az + bz;
+                OBJ_S16(0x1B2) = mag - ax + bx;
+                OBJ_S16(0x1B4) = OBJ_S16(0x1A6) - ay + by;
+                OBJ_S16(0x1B6) = OBJ_S16(0x1A8) - az + bz;
+            }
+        } else {
+            def = (Def_1503A08C *)D_800D1C90[arg0->id];
+            if (def != NULL) {
+                h = def->unk0;
+            } else {
+                h = 0;
+            }
+            func_1507C3E0(arg0, &sp36, &sp34, &sp32);
+            OBJ_S16(0x1A4) = arg0->x_position;
+            OBJ_S16(0x1A6) = arg0->y_position + (sp36 * 7) / 8;
+            OBJ_S16(0x1A8) = arg0->z_position;
+            OBJ_S16(0x1AA) = OBJ_S16(0x1A6) + h * arg0->y_scale;
+            OBJ_S16(0x1AC) = OBJ_S16(0x1A4);
+            OBJ_S16(0x1B2) = OBJ_S16(0x1A4);
+            OBJ_S16(0x1AE) = OBJ_S16(0x1AA);
+            OBJ_S16(0x1B4) = OBJ_S16(0x1AA);
+            OBJ_S16(0x1B0) = OBJ_S16(0x1A8);
+            OBJ_S16(0x1B6) = OBJ_S16(0x1A8);
+            arg0->unk2CA = 0;
+        }
+    }
+}
 
 typedef struct {
     u8  pad0[0x30];
@@ -477,4 +693,21 @@ void func_1503A7F0(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_64120/func_1503A830.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_64120/func_1503B708.s")
+void func_1503B708(void *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4,
+                   s32 arg5, f32 *arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10) {
+    f32 *scratch;
+    f32 value;
+
+    scratch = D_800C3FD0;
+    value = -99999.0f;
+    *(f32 *)((u8 *)arg0 + 0) = value;
+    *(f32 *)((u8 *)arg0 + 4) = value;
+    *(f32 *)((u8 *)arg0 + 8) = value;
+    scratch[0] = value;
+    scratch[1] = value;
+    scratch[2] = value;
+    if (func_15037880(arg3, arg0) == 0) {
+        func_150380C0(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7,
+                      arg8, arg9, arg10);
+    }
+}

@@ -1501,7 +1501,48 @@ s32 func_1515A60C(Struct1515A60C *arg0, s32 arg1) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_185560/func_1515A78C.s")
+typedef struct {
+    f32 unk0;
+    u8 pad4[0x1C];
+    f32 unk20;
+} Sub1515A78C;
+
+u8 func_1515A78C(Struct1515A60C *arg0, s32 arg1) {
+    Sub1515A78C *sub;
+    u8 result;
+    f32 position[3];
+
+    result = 1;
+    sub = (Sub1515A78C *)&arg0->sub;
+    func_1515A60C(arg0, arg1);
+    if (arg0->unk5C < 0.0f) {
+        return 1;
+    }
+    position[0] = *(f32 *)((u8 *)arg0 + 0x40) + arg0->unk4C;
+    position[1] = *(f32 *)((u8 *)arg1 + 4);
+    position[2] = *(f32 *)((u8 *)arg0 + 0x48) + arg0->unk54;
+    if (sub->unk20 == -99999.8984375f) {
+        if (func_1514672C(position) == 0) {
+            return 0;
+        }
+        if (func_15046C00(position, 0, *(f32 *)((u8 *)arg0 + 0x44), (u8 *)arg0 + 0x80) != 0) {
+            position[1] = *(f32 *)((u8 *)arg0 + 0x80);
+            result = 0;
+        }
+    } else if (sub->unk20 <= *(f32 *)((u8 *)arg0 + 0x44)) {
+        position[1] = sub->unk20;
+        result = 0;
+    }
+    if (result == 0) {
+        if (func_150ADA68() < 0.200000003f) {
+            if (*((u8 *)arg0 + 0x9D) == 3) {
+                func_151DBCBC(func_151D8E20(), sub->unk0 * 0.200000003f, *((u8 *)arg0 + 0x2B),
+                              (s32)((u8 *)arg0 + 0x84), position, *((u8 *)arg0 + 0xC), *((u8 *)arg0 + 1));
+            }
+        }
+    }
+    return result;
+}
 
 s32 func_1514ECE0(void *, s16, void *);
 

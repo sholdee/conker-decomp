@@ -637,7 +637,117 @@ s32 func_150EFA4C(Self_150EFA4C *arg0) {
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_11C2B0/func_150EFB80.s")
+typedef struct {
+    struct17 pos;
+    s16 unkC;
+    s16 unkE;
+    s32 unk10;
+    s8 unk14;
+    u8 unk15;
+} Spawn150EFB80;
+
+typedef struct {
+    f32 unk0;
+    f32 vel[3];
+    f32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 unk16;
+    u8 unk17;
+    u8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+    u8 unk1C;
+    u8 unk1D;
+    u8 unk1E;
+    u8 unk1F;
+    u8 unk20;
+    u8 unk21;
+    s32 unk24;
+    s32 unk28;
+    s16 unk2C;
+    s16 unk2E;
+    s16 unk30;
+    u8 unk32;
+    f32 unk34;
+    s8 unk38;
+    u8 unk39;
+} Part150EFB80;
+
+typedef struct {
+    u8 pad0[0x40];
+    struct17 pos;
+    u8 pad4C[0x128 - 0x4C];
+    u8 flags;
+} Obj150EFB80;
+
+typedef struct {
+    Obj150EFB80 *obj;
+    f32 rate;
+} Data150EFB80;
+
+extern void func_15143794(s16, s16, f32, f32 *);
+extern void func_1515C2F0(Spawn150EFB80 *, s32, Part150EFB80 *, s32, s32, s32);
+
+void func_150EFB80(u8 *arg0) {
+    Data150EFB80 *data;
+    Obj150EFB80 *obj;
+    u32 angle;
+    u32 pitch;
+    Spawn150EFB80 spawn;
+    Part150EFB80 part;
+    f32 sp88;
+
+    data = (Data150EFB80 *)(arg0 + 0x28);
+    data->rate += (364.0f + func_150ADA68() * 300.0f) * 0.001000000047f;
+    if (data->rate > 1.0f) {
+        obj = data->obj;
+        if (obj->flags & 1) {
+            spawn.pos = obj->pos;
+            spawn.unkE = 5;
+            spawn.unk10 = 0xA;
+            part.unk14 = 4;
+            part.unk15 = 2;
+            part.unk16 = 3;
+            part.unk17 = 0x9D;
+            part.unk18 = 0x72;
+            part.unk19 = 0x2E;
+            part.unk1B = 0;
+            part.unk1C = 0;
+            part.unk1D = 0;
+            part.unk1E = 0;
+            part.unk1F = 0xFF;
+            part.unk20 = 3;
+            part.unk21 = 0x24;
+            part.unk24 = 0x200005;
+            part.unk28 = 0x60600;
+            part.unk2C = 0xC;
+            part.unk2E = 0x15;
+            part.unk30 = 1;
+            part.unk32 = 0;
+            part.unk34 = 1.0f;
+            part.unk38 = -1;
+            part.unk39 = 0;
+            do {
+                spawn.unk15 = func_150ADA20() % 3U + 3;
+                spawn.unkC = (func_150ADA20() & 0xF) + 0x28;
+                part.unk0 = func_150ADA68() * 10.0f + 22.0f;
+                angle = func_150ADA20();
+                pitch = func_150ADA20();
+                func_15143794(angle & 0xFF, pitch % 31U - 55, func_150ADA68() * 15.0f + 25.0f, part.vel);
+                part.unk10 = (func_150ADA68() * 740.0f + -1761.0f) * 0.001000000047f;
+                part.unk1A = func_150ADA20() % 101U + 155;
+                func_1515C2F0(&spawn, 0, &part, 0, arg0[0xC], arg0[1]);
+                data->rate -= 1.0f;
+            } while (data->rate > 1.0f);
+        } else {
+            do {
+                data->rate -= 1.0f;
+            } while (data->rate > 1.0f);
+        }
+    }
+}
 
 typedef struct {
     s32 unk00;
@@ -1568,7 +1678,83 @@ void func_150F1684(struct func150F1684_sub *arg0, struct func150F1684_sub *arg1,
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_11C2B0/func_150F16DC.s")
+typedef struct {
+    u8 pad0[4];
+    u8 unk4;
+    u8 pad5[0x8F];
+    s32 unk94;
+    u8 pad98[0x13C];
+    s32 unk1D4;
+} Struct150F16DC;
+
+extern f32 D_800A168C[][4][2][3];
+extern f32 D_800A174C[][4][2][3];
+extern u8 D_800A180C[][2];
+
+void func_150F16DC(Struct150F16DC *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+    struct17 pos;
+    u8 idx;
+
+    if (arg0 == NULL) {
+        return;
+    }
+    if (((u8 *)&arg2)[3] >= 4) {
+        return;
+    }
+    if (((u8 *)&arg1)[3] >= 2) {
+        return;
+    }
+    if (arg0->unk4 == 0x23) {
+        idx = 1;
+    } else {
+        const u8 masks[2] = { 4, 2 };
+        if (masks[((u8 *)&arg1)[3]] & arg0->unk94) {
+            return;
+        }
+        idx = 0;
+    }
+    {
+        s32 srcs[1];
+        s32 dsts[1];
+        Header hdr;
+        Header2 hdr2;
+        f32 sp5C[2];
+        s32 sp58;
+        f32 rand0;
+        s32 sp50;
+        f32 (*sp4C)[3];
+        u8 *sp48;
+
+        if (arg0->unk1D4 == 0) {
+            return;
+        }
+        srcs[0] = (s32)D_800A168C[idx][((u8 *)&arg2)[3]][((u8 *)&arg1)[3]];
+        dsts[0] = (s32)&pos;
+        sp50 = (D_800A180C[idx][((u8 *)&arg1)[3]] << 6) + arg0->unk1D4;
+        sp48 = &D_800A180C[idx][((u8 *)&arg1)[3]];
+        sp4C = D_800A168C[idx][((u8 *)&arg2)[3]];
+        func_15145EA4(srcs, dsts, sp50, 1);
+        hdr.unk0 = 3;
+        hdr.unk1 = -1;
+        hdr.unk2 = (func_150ADA20() % 5U) + 4;
+        hdr.unk4 = 0;
+        hdr2.unk0 = pos.unk0;
+        hdr2.unk4 = pos.unk4;
+        hdr2.unk8 = pos.unk8;
+        sp50 = (func_150ADA20() % 51U) + 0x50;
+        func_151602C0(&hdr, &hdr2, sp50, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0,
+                      ((u8 *)&arg3)[3], arg4);
+        sp5C[1] = (func_150ADA68() * 701.0f + 1925.0f) * 0.001000000047f;
+        sp5C[0] = (func_150ADA68() * 1155.0f + 1526.0f) * 0.1000000015f;
+        sp50 = func_150ADA20();
+        sp58 = func_150ADA20();
+        rand0 = func_150ADA68() * 1877.0f + 2414.0f;
+        func_15102B38((Struct150F03F8 *)arg0, *sp48, sp4C[((u8 *)&arg1)[3]],
+                      D_800A174C[idx][((u8 *)&arg2)[3]][((u8 *)&arg1)[3]], sp5C,
+                      (sp50 % 6U) + 8, (sp58 % 1U) + 0xFF, rand0, &pos, 0xFF, 0, -1,
+                      ((u8 *)&arg3)[3], arg4);
+    }
+}
 
 typedef struct {
     u16 v[3];
