@@ -92,7 +92,7 @@ extern struct127 *D_800D154C;
 extern u8 D_800D1890;
 extern u8 D_800D1891;
 extern u8 D_800D1892;
-extern u8 D_800D2108[];
+extern u8 *D_800D2108;
 void func_15075498(void);
 void func_15075650(void)
 {
@@ -162,7 +162,7 @@ void func_15075650(void)
 }
 
 extern struct127 *D_800D154C;
-extern u8 D_800D2108[];
+extern u8 *D_800D2108;
 
 // NON-MATCHING: 95% there
 // void func_15075650(void) {
@@ -272,7 +272,38 @@ void func_15075884(void) {
 //     else                      { if (refIndex >  temp_a0) changed = 1; }
 //     if (changed) { func_15075400(D_800D1890); }
 // }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_15075938.s")
+void func_15075938(void) {
+    s32 position;
+    s32 desired;
+    s32 matched;
+
+    matched = 0;
+    position = D_800D154C->unk21E - (s8)D_800D154C->unk221;
+    if (position < 0) {
+        position += D_800D2108[D_800D154C->unk13F] - 1;
+    } else if (position >= D_800D2108[D_800D154C->unk13F] - 1) {
+        position -= D_800D2108[D_800D154C->unk13F] - 1;
+    }
+    desired = D_800D1891 == 0xFF ? D_800D2108[D_800D154C->unk13F] - 2 : D_800D1891;
+    if (D_800D1892 == 0) {
+        if (desired == position) {
+            matched = 1;
+        }
+    } else if (D_800D1892 == 1) {
+        if (desired != position) {
+            matched = 1;
+        }
+    } else if (D_800D1892 == 2) {
+        if (desired < position) {
+            matched = 1;
+        }
+    } else if (position < desired) {
+        matched = 1;
+    }
+    if (matched != 0) {
+        func_15075400(D_800D1890);
+    }
+}
 
 void func_15075A50(void) {
     u8 temp_v0 = D_800D154C->unk21E;
@@ -946,7 +977,7 @@ void func_150774B4(void) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_15077508.s")
 
 extern struct127 *D_800D154C;
-extern u8 D_800D2108[];
+extern u8 *D_800D2108;
 void func_150778F0(void)
 {
   u8 temp_t9;
