@@ -1642,7 +1642,102 @@ s32 func_151987CC(Emitter15196748 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1C2C60/func_1519897C.s")
+typedef struct Node1519897C {
+    /* 0x00 */ u8 pad0[0x8];
+    /* 0x08 */ struct Node1519897C *unk8;
+    /* 0x0C */ u8 padC[0x91 - 0xC];
+    /* 0x91 */ u8 unk91;
+    /* 0x92 */ s16 unk92;
+    /* 0x94 */ s32 unk94;
+    /* 0x98 */ f32 unk98;
+    /* 0x9C */ f32 unk9C;
+    /* 0xA0 */ f32 unkA0;
+    /* 0xA4 */ u8 padA4[0x4];
+    /* 0xA8 */ f32 unkA8;
+    /* 0xAC */ u8 padAC[0x8];
+    /* 0xB4 */ f32 unkB4;
+    /* 0xB8 */ f32 unkB8;
+    /* 0xBC */ u8 padBC[0xC];
+    /* 0xC8 */ f32 unkC8;
+    /* 0xCC */ u8 padCC[0xED - 0xCC];
+    /* 0xED */ u8 unkED;
+} Node1519897C;
+
+extern u8 D_800DCE50[];
+void func_15183ACC(s32);
+s32 func_1510F8D8(s32, s32, s32, s32);
+
+s32 func_1519897C(Emitter15196748 *arg0) {
+    Desc15196748 *desc = arg0->unk98;
+    Particle15196748 *arr = arg0->unk94;
+    struct127 *obj;
+    void *sub;
+    Node1519897C *head;
+    Node1519897C *node;
+    s32 i;
+    s32 j;
+    f32 nx;
+    f32 ny;
+    f32 nz;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    f32 r;
+    u8 list[3] = { 0x15, 0x16, 0x17 };
+    Vec15196748 pos;
+
+    obj = *(struct127 **)desc;
+    sub = obj->unk31C;
+    if (sub == NULL) {
+        return 0;
+    }
+    if (*(u8 *)((u8 *)sub + 0x58) != 1) {
+        obj->unk2F8 &= ~0x100;
+        return 0;
+    }
+    if (&arr) {
+    }
+    for (i = 0; i < 3; i++) {
+        head = ((Node1519897C **)D_800DCE50)[list[i]];
+        if (head != NULL) {
+            node = head;
+            j = arg0->unk2E;
+            D_800DD190++;
+            while (node != NULL) {
+                ((Node1519897C **)D_800DD198)[D_800DD190] = node->unk8;
+                nx = node->unk98;
+                ny = node->unk9C;
+                nz = node->unkA0;
+                while (j != arg0->unk2D) {
+                    j--;
+                    if (j < 0) {
+                        j = arg0->unk25 - 1;
+                    }
+                    pos = arr[j].pos;
+                    r = arr[j].unk18;
+                    dx = pos.x - nx;
+                    dy = pos.y - ny;
+                    dz = pos.z - nz;
+                    if (dx * dx + dy * dy + dz * dz < r * r + 900.0f) {
+                        func_15183ACC(5);
+                        func_15168B10((s32)node, 0x18);
+                        node->unkED = 5;
+                        node->unk94 = *(s32 *)((u8 *)D_800DDE80 + 0x6C);
+                        node->unk92 = 9;
+                        node->unkB8 = 40.0f;
+                        node->unkA8 = 40.0f;
+                        node->unkB4 = 0.0f;
+                        node->unkC8 = func_1510F8D8(node->unk98, node->unk9C, node->unkA0, 0);
+                        node->unk91 = 4;
+                    }
+                }
+                node = ((Node1519897C **)D_800DD198)[D_800DD190];
+            }
+            D_800DD190--;
+        }
+    }
+    return 1;
+}
 
 void func_15198C60(void) {
     func_10010F30(0x1AA, 0x7FFF, 0x40, 0, 0);
