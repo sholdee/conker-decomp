@@ -562,7 +562,54 @@ Gfx *func_150195A0(Gfx *arg0, s16 arg1)
 //     arg0 = (Gfx *)func_151674F8(arg0, 3, 0, 1);
 //     func_15096934(arg0);
 // }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_45B80/func_150198FC.s")
+Gfx *func_151D5E90(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3);
+void func_151D61B0(s32 arg0);
+Gfx *func_1517E28C(Gfx *arg0, s32 arg1);
+Gfx *func_15172F70(Gfx *arg0);
+Gfx *func_15181EE0(Gfx *arg0);
+Gfx *func_1517F564(Gfx *arg0);
+Gfx *func_1508FD38(Gfx *arg0);
+s32 func_15096934(Gfx *arg0);
+s32 func_150198FC(Gfx *arg0) {
+    static s8 D_80082F90;
+    if (D_800BE575 == 1) {
+        arg0 = func_151D6778(arg0);
+    }
+    if (D_80082FA0 != 0) {
+        D_80082FA4 = D_80082FA0 + 1;
+        gSPViewport(arg0++, (D_80082FA4 * 0x180) + D_800BE628 + 64);
+    } else {
+        gSPViewport(arg0++, D_800BE628 + 64);
+    }
+    arg0 = (Gfx *)func_1501A490((s32)arg0, 0xFF, 0, 0, 0, 0);
+    if (D_800BEAC0 != 0) {
+        if (D_80082F90 == 0) {
+            gDPSetColorImage(arg0++, G_IM_FMT_RGBA, G_IM_SIZ_16b, D_800BE620, D_800BE9C4);
+            gDPSetScissor(arg0++, G_SC_NON_INTERLACE, 0, 0, D_800BE620, D_800BE624);
+            arg0 = func_151D5E90(arg0, D_8002AAE8[1 - D_800BE9C0], 0, 1);
+            arg0 = func_1501A680(arg0);
+            D_80082F90 = 1;
+        } else if (D_80082F90 < 5) {
+            D_80082F90 = D_80082F90 + 1;
+            func_151D61B0(D_800BE9C4);
+        }
+        arg0 = func_151D5E90(arg0, D_800BE9C4, 0, 1);
+    } else {
+        D_80082F90 = 0;
+    }
+    if (func_1517EFAC(0) == 0) {
+        arg0 = func_1517E28C(arg0, D_800BE9F0);
+        arg0 = func_15172F70(arg0);
+        arg0 = func_15181EE0(arg0);
+    }
+    arg0 = func_1517F564(arg0);
+    if ((D_800BEAC0 == 0) && (D_800BEAC1 == 0)) {
+        arg0 = func_1508FD38(arg0);
+    }
+    arg0 = (Gfx *)func_151674F8(arg0, 3, 0, 0);
+    arg0 = (Gfx *)func_151674F8(arg0, 3, 0, 1);
+    return func_15096934(arg0);
+}
 
 s32 func_15019BB8(Gfx *arg0, s32 arg1) {
     gSPViewport(arg0++, (s32)((u8 *)D_800BE628 + arg1 * 0x180) + D_800BE9C0 * 0x10 + 64);
