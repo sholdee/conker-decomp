@@ -153,7 +153,88 @@ void func_151152A8(struct Obj151152A8 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_142560/func_15115368.s")
+
+struct Obj15115368 {
+    f32 unk0;
+    u8 pad4[0x4];
+    f32 unk8;
+    u8 padC[0x4];
+    s16 unk10;
+    s16 unk12;
+    s16 unk14;
+    u8 pad16[0x3C - 0x16];
+    s32 unk3C;
+    u8 pad40[0xF];
+    u8 unk4F;
+    u8 pad50[0x2C];
+    s32 unk7C;
+    s32 unk80;
+    s32 unk84;
+};
+
+void func_15115368(struct Obj15115368 *arg0) {
+    s32 lo;
+    s32 range;
+    f32 t;
+    f32 d;
+    f32 s;
+
+    range = (s8)(arg0->unk3C >> 8);
+    lo = arg0->unk3C >> 24;
+    if (arg0->unk4F & 4) {
+        arg0->unk80 += D_800BE9E4;
+    }
+    if (arg0->unk80 <= lo) {
+        if (!(arg0->unk4F & 4) && arg0->unk80 != 0) {
+            arg0->unk80 = lo;
+        }
+    } else if (arg0->unk80 <= lo + range) {
+        if (!(arg0->unk4F & 4)) {
+            arg0->unk80 = lo + range;
+        }
+    } else {
+        if (!(arg0->unk4F & 4)) {
+            arg0->unk80 += D_800BE9E4;
+        }
+        t = arg0->unk80 - lo - range;
+        if (arg0->unk84 == 0) {
+            s = sinf(t * 0.628000021f * 2);
+            arg0->unk0 = -3 * s;
+            s = sinf(t * 0.628000021f * 3);
+            arg0->unk8 = 2 * s;
+            if (t > 10.0f) {
+                if (arg0->unk7C == 0) {
+                    arg0->unk7C = arg0->unk12;
+                }
+                arg0->unk12 -= (s8)(arg0->unk3C >> 16) * D_800BE9E4;
+                if ((arg0->unk3C & 0xFF) * 16 < arg0->unk7C - arg0->unk12) {
+                    s32 pad;
+                    arg0->unk4F &= ~0x61;
+                    arg0->unk4F |= 0x20;
+                    arg0->unk84 = 1;
+                }
+            }
+        } else {
+            {
+                f32 dx;
+                f32 dz;
+                dx = D_800CC2D0[0].x_position - arg0->unk10;
+                dz = D_800CC2D0[0].z_position - arg0->unk14;
+                dx = dx * dx;
+                dz = dz * dz;
+                d = dx + dz;
+            }
+            if (d > 250000.0f) {
+                arg0->unk4F &= ~0x61;
+                arg0->unk4F |= 1;
+                arg0->unk12 = arg0->unk7C;
+                arg0->unk7C = 0;
+                arg0->unk84 = 0;
+                arg0->unk80 = 0;
+            }
+        }
+    }
+}
 void func_151155C0(void *arg0);
 
 struct Obj1511575C {
