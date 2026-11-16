@@ -39,7 +39,10 @@ extern u8 D_800D2100;
 
 typedef struct {
     f32 unk0;
-    u8 pad4[0x3C];
+    f32 *unk4;
+    u8 pad8[0x34];
+    u8 unk3C;
+    u8 pad3D[3];
 } struct_game49D30_0;
 
 typedef struct {
@@ -1230,7 +1233,71 @@ void func_1501FFE8(f32 *arg0, struct_game49D30_1 *arg1, s32 arg2, s32 arg3) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_49D30/func_15020388.s")
+void func_15020388(s32 arg0, s32 arg1) {
+    s32 i;
+    s32 j;
+    f32 pts[4][3];
+    f32 buf[2][3];
+    f32 z;
+    f32 d[3];
+    f32 c[3];
+    f32 b[3];
+    f32 a[3];
+    f32 len;
+    f32 t;
+    f32 x;
+    f32 y;
+    f32 dist;
+    u8 cur;
+    u16 flag;
+
+    if (D_800C35C8[arg1][arg0] >= 2) {
+        D_800C3A50[arg1][arg0].unk3C = 0xFF;
+        len = 0.0f;
+        cur = 0;
+        for (i = 0; i < D_800C35C8[arg1][arg0] - 1; i++) {
+            flag = D_800C3868[arg1][arg0][i].unk6;
+            func_1501FFE8(&pts[0][0], D_800C3868[arg1][arg0], i, D_800C35C8[arg1][arg0]);
+            D_800C3A50[arg1][arg0].unk4[i] = len;
+            if (flag == 0) {
+                for (j = 0; j < 3; j++) {
+                    a[j] = -0.5f * pts[0][j] + 1.5f * pts[1][j] + -1.5f * pts[2][j] + 0.5f * pts[3][j];
+                    b[j] = pts[0][j] + -2.5f * pts[1][j] + 2.0f * pts[2][j] + -0.5f * pts[3][j];
+                    c[j] = -0.5f * pts[0][j] + 0.5f * pts[2][j];
+                    d[j] = pts[1][j];
+                }
+                for (j = 0; j < 3; j++) {
+                    buf[!cur][j] = d[j];
+                }
+                for (t = 0.01f; t <= 1.0f; t += 0.01f) {
+                    x = ((a[0] * t + b[0]) * t + c[0]) * t + d[0];
+                    buf[cur][0] = x;
+                    buf[cur][1] = ((a[1] * t + b[1]) * t + c[1]) * t + d[1];
+                    buf[cur][2] = ((a[2] * t + b[2]) * t + c[2]) * t + d[2];
+                    dist = x - buf[!cur][0];
+                    z = buf[cur][1] - buf[!cur][1];
+                    x = *(volatile f32 *)&buf[cur][2] - buf[!cur][2];
+                    dist = dist * dist;
+                    z = z * z;
+                    x = x * x;
+                    dist += z + x;
+                    if (dist != 0.0f) {
+                        len += sqrtf(dist);
+                    }
+                    cur ^= 1;
+                }
+            } else {
+                dist = pts[2][2] - pts[1][2];
+                t = pts[2][0] - pts[1][0];
+                y = pts[2][1] - pts[1][1];
+                len += sqrtf(dist * dist + (t * t + y * y));
+            }
+        }
+        D_800C3A50[arg1][arg0].unk4[i] = len;
+        D_800C3A50[arg1][arg0].unk0 = len;
+        D_800C3A50[arg1][arg0].unk3C = 0xFF;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_49D30/func_15020878.s")
 
