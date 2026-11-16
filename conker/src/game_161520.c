@@ -405,7 +405,87 @@ void *func_15134908(void *arg0, s32 arg1, u8 arg2, s32 arg3) {
     return sp24;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_151349D0.s")
+typedef struct {
+    u8 pad0[0x10];
+    f32 *x;
+    f32 *y;
+    f32 *z;
+    f32 radius;
+    f32 rate;
+    s16 lifetime;
+    u8 flags;
+    u8 emitter;
+    u8 field28;
+    s8 callback;
+    u8 pad2A[2];
+    BloodDripVec3f previous;
+    f32 inverseDiameter;
+    f32 accumulator;
+} BloodTrail;
+
+extern s32 (*D_80089B18[])(void *);
+extern void (*D_80089AFC[])(f32, f32, f32, f32, f32, f32, void *);
+
+void func_151349D0(BloodTrail *trail) {
+    u8 flags;
+    f32 position[3];
+    f32 deltaZ;
+    f32 deltaY;
+    f32 deltaX;
+    f32 randomX;
+    f32 randomY;
+
+    position[0] = *trail->x;
+    position[1] = *trail->y;
+    position[2] = *trail->z;
+    if (trail->flags & 4) {
+        if ((trail->callback != -1) && (D_80089B18[trail->callback](trail) == 0)) {
+            func_1516972C((struct102 *)trail);
+            return;
+        }
+    }
+    flags = trail->flags;
+    if (flags & 2) {
+        trail->flags = flags & ~2;
+    } else {
+        f32 scale;
+        f32 distance;
+
+        deltaX = trail->previous.x - position[0];
+        deltaY = trail->previous.y - position[1];
+        deltaZ = trail->previous.z - position[2];
+        distance = sqrtf(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
+        scale = trail->inverseDiameter * distance + 1.0f;
+        trail->accumulator += scale * D_800BE9A4 * trail->rate;
+        if (trail->accumulator > 7.0f) {
+            trail->accumulator = 7.0f;
+        }
+        while (trail->accumulator > 1.0f) {
+            f32 diameter;
+            f32 fraction;
+
+            diameter = trail->radius + trail->radius;
+            fraction = func_150ADA68();
+            if (D_80089AFC[trail->emitter] != NULL) {
+                randomX = func_150ADA68();
+                randomY = func_150ADA68();
+                D_80089AFC[trail->emitter](
+                    (position[0] + deltaX * fraction + trail->radius) - randomX * diameter,
+                    (position[1] + deltaY * fraction + trail->radius) - randomY * diameter,
+                    (position[2] + deltaZ * fraction + trail->radius) - func_150ADA68() * diameter,
+                    deltaX, deltaY, deltaZ, trail);
+            }
+            trail->accumulator -= 1.0f;
+        }
+    }
+    trail->previous = *(BloodDripVec3f *)position;
+    if (trail->flags & 1) {
+        trail->lifetime -= D_800BE9E4;
+        if (trail->lifetime < 0) {
+            func_1516972C((struct102 *)trail);
+        }
+    }
+}
 
 void func_15134C98(struct260 *arg0, s32 arg1, u8 arg2) {
     if (((struct102 *)arg0)->unk28 == 1) {
