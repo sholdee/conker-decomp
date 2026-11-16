@@ -94,7 +94,23 @@ s32 func_1502AC88(u8 *arg0, s32 arg1, s32 *arg2) {
     func_1502AB04(2, ptr, D_800C3D60, (u32)arg0);
     return ret;
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_57FA0/func_1502AF04.s")
+s32 func_1502AF04(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
+    typedef struct { u32 address; u32 flags; } Relocation;
+    u32 i;
+    s32 source;
+    u8 *aligned;
+    Relocation *entries;
+
+    arg2 <<= 3;
+    source = (s32)arg0 + arg2;
+    aligned = (u8 *)((arg1 + 8) & ~0xF);
+    func_10004514(source & ~0xF, aligned, ((source & 0xE) + (arg3 << 3) + 0xF) & ~0xF, 1);
+    entries = (Relocation *)((s32)aligned + (source & 0xFU));
+    for (i = 0; i < (u32)arg3; i++) {
+        entries[i].address += (u32)arg0;
+    }
+    return (s32)aligned + (source & 0xFU);
+}
 extern u8 D_AB1950;
 s32 func_1502AC88(u8 *arg0, s32 arg1, s32 *arg2);
 s32 func_1502AF04(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
