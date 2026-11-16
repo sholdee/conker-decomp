@@ -660,7 +660,25 @@ void func_1501E1B4(s32 arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_49D30/func_1501E2F8.s")
+void func_1501E400(s32 arg0);
+
+void func_1501E2F8(s32 arg0) {
+    if (((&D_800C35EA)[arg0] == 1) && (D_800C35B0[arg0] >= D_800C3640[arg0])) {
+        if (D_800C3C8C == 0) {
+            func_1501E81C(0, arg0);
+            if ((&D_800C35EA)[arg0] == 1) {
+                func_1501E400(0);
+                func_150242F8(1, 0);
+                func_1501EC38(0);
+                func_150242F8(0, 0);
+                func_15020EC4(0);
+                func_1501E2F8(0);
+            }
+        } else {
+            D_800C3C8C = 2;
+        }
+    }
+}
 
 void func_15080228(void);
 
