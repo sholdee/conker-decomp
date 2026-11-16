@@ -353,7 +353,109 @@ void func_15175390(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1A20A0/func_15175958.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1A20A0/func_1517685C.s")
+typedef struct {
+    u8 pad0[0x90];
+    u8 unk90;
+    u8 unk91;
+    s16 unk92;
+    u8 pad94[4];
+    f32 unk98;
+    f32 unk9C;
+    f32 unkA0;
+    u8 padA4[4];
+    f32 unkA8;
+    f32 unkAC;
+    u8 padB0[4];
+    f32 unkB4;
+    f32 unkB8;
+    u8 padBC[0xC];
+    f32 unkC8;
+    f32 unkCC;
+    u8 padD0[0x14];
+    f32 unkE4;
+    u8 padE8[5];
+    u8 unkED;
+} struct1517685C;
+
+s32 func_150AD960(s32, s32, s32, s32);
+void func_15175958();
+u32 func_150ADA20(void);
+
+void func_1517685C(struct1517685C *arg0) {
+    s32 r;
+    f32 cc;
+    s32 t;
+
+    if (D_800DDF5C[arg0->unk90] != 0) {
+        D_800DDF68[arg0->unkED] = 1;
+        switch (arg0->unk91) {
+        case 0:
+            if (func_150AD960((s32)D_800CC2D0->x_position, (s32)D_800CC2D0->z_position, (s32)arg0->unk98, (s32)arg0->unkA0) < 400) {
+                arg0->unk91 = 1;
+                arg0->unkB4 = -1 - (s32)(func_150ADA20() & 3); arg0->unkA8 = -8.0f;
+                return;
+            }
+            {
+                f32 a8;
+
+                if (arg0->unkCC != 0.0f) {
+                    arg0->unkA8 = arg0->unkA8 + arg0->unkCC;
+                    if (arg0->unkCC < 0.0f) {
+                        arg0->unkAC = arg0->unkAC + arg0->unkB8;
+                    }
+                    a8 = arg0->unkA8;
+                    if (a8 > 45.0f) {
+                        arg0->unkCC = -5.0f;
+                    } else if ((arg0->unkCC < 0) && (a8 > 25.0f)) {
+                        r = func_150ADA20() & 0xFF;
+                        if (r < 0x33) {
+                            arg0->unkCC = 5.0f;
+                        }
+                    }
+                    if (arg0->unkA8 <= 10.0f) {
+                        arg0->unkCC = 0.0f;
+                        return;
+                    }
+                } else {
+                    r = func_150ADA20() & 0xFF;
+                    if (r < 0x19) {
+                        arg0->unkCC = 5.0f;
+                        if (r < 0xD) {
+                            arg0->unkB8 = (s32)(func_150ADA20() % 6U) - 3;
+                            return;
+                        }
+                        arg0->unkB8 = 0.0f;
+                    lbl1:
+                        return;
+                    }
+                }
+            }
+            break;
+        case 1:
+        lbl2:
+            if (arg0->unk9C >= (300.0f + arg0->unkC8)) {
+                arg0->unk91 = 2;
+                arg0->unk92 &= ~1;
+                arg0->unk92 |= 4;
+                arg0->unkE4 = (s32)(func_150ADA20() & 0x7F) + (300.0f + arg0->unkC8);
+            }
+            func_15175958(arg0);
+            return;
+        default:
+        case 2:
+        case 3:
+            if (arg0->unk9C < arg0->unkE4) {
+                arg0->unkB4 = -1.5f;
+            } else if (arg0->unkA8 < 0) {
+                arg0->unkB4 = 1.5f;
+            }
+            func_15175958(arg0);
+            return;
+        }
+    } else {
+        func_1516972C((struct102 *)arg0);
+    }
+}
 
 typedef struct {
     s32 unk0;
