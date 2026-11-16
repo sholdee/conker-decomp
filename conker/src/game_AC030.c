@@ -441,7 +441,71 @@ void func_1507FC2C(struct127 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_AC030/func_1507FEA0.s")
+typedef struct GameAC030AnimationState {
+    u8 mode;
+    u8 pad1;
+    u16 timer;
+    u8 sequence;
+    u8 frame;
+    u8 pad6[6];
+    u8 field_C;
+    u8 field_D;
+    s16 delay;
+} GameAC030AnimationState;
+
+typedef struct GameAC030NestedState {
+    u8 pad0[0x58];
+    GameAC030AnimationState animation;
+} GameAC030NestedState;
+
+typedef struct GameAC030RootState {
+    u8 pad0[0x127];
+    u8 field_127;
+    u8 pad128[0x12];
+    u8 cooldown;
+    u8 pad13B[0x1E1];
+    GameAC030NestedState *nested;
+} GameAC030RootState;
+
+void func_1507FEA0(GameAC030RootState *arg0) {
+    GameAC030AnimationState *anim;
+    u8 cooldown;
+    u16 timer;
+    s16 delay;
+    s32 limit;
+
+    if ((arg0->nested == NULL) || (arg0->field_127 == 0xFF)) {
+        return;
+    }
+    cooldown = arg0->cooldown;
+    anim = &arg0->nested->animation;
+    if (cooldown != 0) {
+        arg0->cooldown = cooldown - 1;
+    }
+    if ((anim->mode == 1) && (D_800C35EA != 1)) {
+        limit = 0xFFFF - D_800BE9E4;
+        timer = anim->timer;
+        if (timer < limit) {
+            anim->timer = timer + D_800BE9E4;
+        }
+    } else {
+        anim->timer = 0;
+        anim->sequence = 0;
+        anim->frame = 0;
+        anim->field_C = 0;
+        anim->field_D = 0;
+    }
+    delay = arg0->nested->animation.delay;
+    if (delay != 0) {
+        if (D_800BE9E4 < delay) {
+            arg0->nested->animation.delay = delay - D_800BE9E4;
+        } else {
+            func_1507FF94((ActorUniqueIdFields *)arg0);
+            arg0->nested->animation.delay = 0;
+        }
+    }
+    func_1507FC2C((struct127 *)arg0);
+}
 
 void func_15191B8C(s32 arg0, u8 arg1);
 
