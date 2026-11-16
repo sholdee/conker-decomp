@@ -3425,62 +3425,73 @@ void func_15060D54(Game83300ActorLink *arg0) {
         }
     }
 }
-// PERMUTER CANDIDATE best 1815 (object-level; the body below is structurally correct and only
-// 2 instructions short of the target). Needs these locally-declared callees/globals:
-//   extern s32 func_1514D310(struct127 *); extern void func_151695F0(struct127 *, u8);
-//   extern void func_15084558(struct127 *); extern void func_1504AF10(struct127 *, s32, s32);
-//   extern void func_1503E260(s32); extern void func_150626EC(struct127 *, s32);
-//   extern void func_15060D54(struct127 *); extern s32 func_150303E4(struct127 *);
-//   extern void func_15188AD0(s32); extern void func_10004074(void *); extern u8 *D_800D210C;
-// Keys already found: the free-list loop only matches with a truncating increment
-// (`s32 i; for (i = 0; i <= D_80082FA0; i = (u8)(i + 1))`) -- a plain `u8 i; i++` makes IDO
-// CSE the zero-extension into a second loop-carried value, which steals s0, homes `i` at
-// sp+0x27 and grows the frame 0x20->0x28 (2180). Binding the unk144 flags word to its own
-// local puts it in a1 as the target does (1830->1815).
-// Residual (unsteerable): (a) target keeps arg0->unk144 in v0 and emits a redundant
-// `move v1,v0` live-range split before the else-else `sb ...,2(v1)`; IDO gives us v1 directly
-// and never emits the copy. (b) target fills the else-else `b` delay slot by DUPLICATING the
-// merge-point `lw a0,0x260(s1)` and branching past it, where IDO sinks our `sb` into the slot.
-// (c) a coupled v0-vs-a0 JUSTREG cascade over the 0x264/0x268/0x26C/0x314/0x31C frees (target
-// loads them to v0 + `move a0,v0`; IDO coalesces ours straight into a0). Named locals,
-// declaration order, register/inner-scope hints and while/do-while forms all leave (a)-(c) fixed.
-// void func_15060F28(struct127 *arg0, s32 arg1) {
-//     u16 flags;
-//     func_1514D310(arg0);
-//     func_151695F0(arg0, 0);
-//     if ((arg0->unk5 != 2) && (arg0->unk5 != 3)) { func_15084558(arg0); func_150626EC(arg0, arg1); }
-//     if (arg1 == 1) { func_1504AF10(arg0, 1, 0); func_1503E260(arg0 - D_800CC2D0); }
-//     if (arg0->unk13F != 0xFF) {
-//         if (arg1 != 2) {
-//             if (arg0->unk144 != NULL) {
-//                 flags = arg0->unk144->unk0;
-//                 if (flags & 0x20) { arg0->unk144->unk2 = 1; D_800D210C[arg0->unk13F] = 0; }
-//                 else if (flags & 1) { D_800D210C[arg0->unk13F] = 0; }
-//                 else { arg0->unk144->unk2 = 1; D_800D210C[arg0->unk13F] &= 0x80; }
-//             } else { D_800D210C[arg0->unk13F] &= 0x80; }
-//         } else { D_800D210C[arg0->unk13F] = 0; }
-//     }
-//     if (*(void **)((u8 *)arg0 + 0x260) != NULL) func_10004074(*(void **)((u8 *)arg0 + 0x260));
-//     if (*(void **)((u8 *)arg0 + 0x264) != NULL) func_10004074(*(void **)((u8 *)arg0 + 0x264));
-//     if (*(void **)((u8 *)arg0 + 0x268) != NULL) func_10004074(*(void **)((u8 *)arg0 + 0x268));
-//     if (*(void **)((u8 *)arg0 + 0x26C) != NULL) func_10004074(*(void **)((u8 *)arg0 + 0x26C));
-//     if (*(void **)((u8 *)arg0 + 0x1D8) != NULL) func_10004074(*(void **)((u8 *)arg0 + 0x1D8));
-//     if (*(struct102 **)((u8 *)arg0 + 0x2D4) != NULL) func_1516972C(*(struct102 **)((u8 *)arg0 + 0x2D4));
-//     if (*(s32 **)((u8 *)arg0 + 0x304) != NULL) {
-//         s32 i;
-//         for (i = 0; i <= D_80082FA0; i = (u8)(i + 1))
-//             func_100043B4(*(s32 **)((u8 *)arg0 + (i * 4) + 0x304), 4);
-//     }
-//     if (*(s32 **)((u8 *)arg0 + 0x314) != NULL) func_100043B4(*(s32 **)((u8 *)arg0 + 0x314), 4);
-//     if (arg0->unk2D0 != NULL) func_10004074(arg0->unk2D0);
-//     if (*(void **)((u8 *)arg0 + 0x324) != NULL) func_10004074(*(void **)((u8 *)arg0 + 0x324));
-//     if ((arg0->unk31C != NULL) && (*(void **)((u8 *)arg0->unk31C + 0x11C) != NULL))
-//         func_10004074(*(void **)((u8 *)arg0->unk31C + 0x11C));
-//     func_10010AA8(arg0); func_150303E4(arg0); func_15060D54(arg0); func_15188AD0((s32)arg0);
-//     if (arg0->unk31C != NULL) func_10004074(arg0->unk31C);
-//     func_1505F188(arg0);
-// }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_15060F28.s")
+extern s32 func_1514D310(struct127 *);
+extern void func_151695F0(struct127 *, s32);
+extern void func_15084558(struct127 *);
+extern void func_1504AF10(struct127 *, s32, s32);
+extern void func_1503E260(s32);
+extern s32 func_150303E4(struct127 *);
+extern void func_15188AD0(struct127 *);
+extern void func_10004074(void *);
+extern u8 *D_800D210C;
+void func_150626EC(struct127 *arg0, s32 arg1);
+
+void func_15060F28(struct127 *arg0, s32 arg1) {
+    func_1514D310(arg0);
+    func_151695F0(arg0, 0);
+    if ((arg0->unk5 != 2) && (arg0->unk5 != 3)) {
+        func_15084558(arg0);
+        func_150626EC(arg0, arg1);
+    }
+    if (arg1 == 1) {
+        func_1504AF10(arg0, 1, 0);
+        func_1503E260(arg0 - D_800CC2D0);
+    }
+    if (arg0->unk13F != 0xFF) {
+        if (arg1 != 2) {
+            if ((*(s32 *)((u8 *)arg0 + 0x144)) != 0) {
+                if (((struct129 *)(*(s32 *)((u8 *)arg0 + 0x144)))->unk0 & 0x20) {
+                    ((struct129 *)(*(s32 *)((u8 *)arg0 + 0x144)))->unk2 = 1;
+                    D_800D210C[arg0->unk13F] = 0;
+                } else if (((struct129 *)(*(s32 *)((u8 *)arg0 + 0x144)))->unk0 & 1) {
+                    D_800D210C[arg0->unk13F] = 0;
+                } else {
+                    s32 pad;
+                    ((struct129 *)(*(s32 *)((u8 *)arg0 + 0x144)))->unk2 = 1;
+                    D_800D210C[arg0->unk13F] &= 0x80;
+                }
+            } else {
+                D_800D210C[arg0->unk13F] &= 0x80;
+            }
+        } else {
+            D_800D210C[arg0->unk13F] = 0;
+        }
+    }
+    if (*(void **)((u8 *)arg0 + 0x260) != NULL) func_10004074(*(void **)((u8 *)arg0 + 0x260));
+    if (*(s32 *)((u8 *)arg0 + 0x264) != 0) func_10004074((void *)*(s32 *)((u8 *)arg0 + 0x264));
+    if (*(s32 *)((u8 *)arg0 + 0x268) != 0) func_10004074((void *)*(s32 *)((u8 *)arg0 + 0x268));
+    if (*(s32 *)((u8 *)arg0 + 0x26C) != 0) func_10004074((void *)*(s32 *)((u8 *)arg0 + 0x26C));
+    if (*(void **)((u8 *)arg0 + 0x1D8) != NULL) func_10004074(*(void **)((u8 *)arg0 + 0x1D8));
+    if (*(struct102 **)((u8 *)arg0 + 0x2D4) != NULL) func_1516972C(*(struct102 **)((u8 *)arg0 + 0x2D4));
+    if (*(s32 **)((u8 *)arg0 + 0x304) != NULL) {
+        s32 i;
+        for (i = 0; i <= D_80082FA0; i = (u8)(i + 1)) {
+            func_100043B4(*(s32 **)((u8 *)arg0 + (i * 4) + 0x304), 4);
+        }
+    }
+    if (*(s32 *)((u8 *)arg0 + 0x314) != 0) func_100043B4((s32 *)*(s32 *)((u8 *)arg0 + 0x314), 4);
+    if (arg0->unk2D0 != NULL) func_10004074(arg0->unk2D0);
+    if (*(void **)((u8 *)arg0 + 0x324) != NULL) func_10004074(*(void **)((u8 *)arg0 + 0x324));
+    if ((arg0->unk31C != NULL) && (*(void **)((u8 *)arg0->unk31C + 0x11C) != NULL)) {
+        func_10004074(*(void **)((u8 *)arg0->unk31C + 0x11C));
+    }
+    func_10010AA8(arg0);
+    func_150303E4(arg0);
+    func_15060D54((Game83300ActorLink *)arg0);
+    func_15188AD0(arg0);
+    if (arg0->unk31C != NULL) func_10004074((void *)(s32)arg0->unk31C);
+    func_1505F188(arg0);
+}
 typedef struct PathPt150611E8 {
     s16 x;
     s16 y;
