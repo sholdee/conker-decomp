@@ -372,7 +372,54 @@ s32 func_151B3A7C(Struct151B3A7C *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E0560/func_151B3CF0.s")
+s32 func_151B3CF0(Struct151B3A7C *arg0) {
+    Vec3f_151B3A7C delta;
+    Vec3f_151B3A7C mid;
+    Vec3f_151B3A7C a;
+    Vec3f_151B3A7C b;
+    f32 inv;
+    f32 nx;
+    f32 nz;
+    f32 px;
+    f32 py;
+    f32 heading;
+    f32 angle;
+    f32 r;
+    s32 i;
+
+    delta.x = arg0->end.x - arg0->start.x;
+    delta.y = arg0->end.y - arg0->start.y;
+    delta.z = arg0->end.z - arg0->start.z;
+    if ((0.0001f < fabsf(delta.x)) || (0.0001f < fabsf(delta.z))) {
+        mid.x = arg0->start.x + (delta.x * 0.5f);
+        mid.y = arg0->start.y + (delta.y * 0.5f);
+        mid.z = arg0->start.z + (delta.z * 0.5f);
+        a.x = arg0->start.x - mid.x;
+        a.y = arg0->start.y - mid.y;
+        a.z = arg0->start.z - mid.z;
+        b.x = arg0->end.x - mid.x;
+        b.y = arg0->end.y - mid.y;
+        b.z = arg0->end.z - mid.z;
+        inv = 1.0f / sqrtf((delta.x * delta.x) + (delta.z * delta.z));
+        nx = delta.z * inv;
+        nz = delta.x * inv;
+        px = ((b.z * nx) + (b.x * nz)) - ((a.z * nx) + (a.x * nz));
+        py = b.y - a.y;
+        heading = func_150484A0(py, px);
+        r = sqrtf((px * px) + (py * py)) * 0.5f;
+        angle = heading - 3.1415927f;
+        for (i = 0; i < 10; i++, angle += 0.34906587f) {
+            Node151B3A7C *point = &arg0->nodes[i];
+            f32 s = sinf(angle);
+            f32 c = cosf(angle);
+
+            point->pos.x = (r * c * nz) + mid.x;
+            point->pos.y = (r * s) + mid.y;
+            point->pos.z = (r * c * nx) + mid.z;
+        }
+    }
+    return 1;
+}
 
 s32 func_151B3F28(Struct151B3F28 *arg0, f32 *arg1, u8 arg2) {
     Struct151B3F28Inner **temp_v0;
