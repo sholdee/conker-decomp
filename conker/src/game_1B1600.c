@@ -851,54 +851,7 @@ typedef struct {
 
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern void *allocate_memory(s32, s32, s32, s32);
-
-void func_151875E0(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7) {
-    Obj151875E0 *obj;
-    s32 i;
-    s32 a;
-
-    obj = func_15167A68(6, 0, 0xB0, 1, 0xFF, 1);
-    if (obj != NULL) {
-        obj->unkA4 = allocate_memory(0x780, 1, 2, 1);
-        if (obj->unkA4 == NULL) {
-            func_1516972C((struct102 *)obj);
-            return;
-        }
-        obj->unk90 = arg0;
-        obj->unk94 = arg1;
-        obj->unk98 = arg2;
-        obj->unkA8 = 0;
-        obj->unkAA = arg4;
-        obj->unk9C = arg6;
-        obj->unkA0 = arg7;
-        for (i = 0, a = 0; a != 1080; a += 90, i++) {
-            if (a < 360) {
-                obj->unkA4[i].unk80 = 7 - (func_150ADA20() & 0xFU);
-                obj->unkA4[i].unk84 = 0.0f;
-                obj->unkA4[i].unk88 = (func_150ADA20() & 0x3FU) + (a - 30) * 1;
-                obj->unkA4[i].unk98 = 0;
-            } else if (a < 720) {
-                obj->unkA4[i].unk80 = 0.0f;
-                obj->unkA4[i].unk84 = (func_150ADA20() & 0x3FU) + (a - 570) * 1;
-                obj->unkA4[i].unk88 = 7 - (func_150ADA20() & 0xFU);
-                obj->unkA4[i].unk98 = 0;
-            } else {
-                obj->unkA4[i].unk80 = (func_150ADA20() & 0x3FU) + (a - 30) * 1;
-                obj->unkA4[i].unk84 = 97 - (func_150ADA20() & 0xFU);
-                obj->unkA4[i].unk88 = 0.0f;
-                obj->unkA4[i].unk98 = 1;
-            }
-            if (arg3 >= 4) {
-                obj->unkA4[i].unk8C = (func_150ADA20() % (u32)(arg3 >> 2)) + arg3;
-            } else {
-                obj->unkA4[i].unk8C = arg3;
-            }
-            obj->unkA4[i].unk90 = func_150ADA20() & 0xFU;
-            obj->unkA4[i].unk94 = 0;
-            obj->unkA4[i].unk96 = arg4 - (func_150ADA20() & arg5);
-        }
-    }
-}
+void func_151875E0(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7);
 
 typedef struct {
     u8  pad0[0x8C];
@@ -917,64 +870,8 @@ typedef struct {
 } Obj_15187978;
 
 extern s32 func_10004074(void *);
-
-void func_15187978(Obj_15187978 *arg0) {
-    s32 i;
-
-    if (arg0->unkA8 < 0) {
-        func_10004074(arg0->unkA4);
-        func_1516972C((struct102 *)arg0);
-        return;
-    }
-    arg0->unkA8 += D_800BE9E4;
-    if (arg0->unkAA < arg0->unkA8) {
-        arg0->unkA8 = -10;
-    } else if (arg0->unkA8 >= 0) {
-        for (i = 0; i < 12; i++) {
-            if (arg0->unkA4[i].unk94 < arg0->unkA4[i].unk96) {
-                arg0->unkA4[i].unk94 += D_800BE9E4;
-                if (arg0->unkA4[i].unk96 < arg0->unkA4[i].unk94) {
-                    arg0->unkA4[i].unk94 = arg0->unkA4[i].unk96;
-                }
-                arg0->unkA4[i].unk90 += arg0->unkA4[i].unk8C - arg0->unkA4[i].unk8C / 3.0f * arg0->unkA4[i].unk94 / arg0->unkA4[i].unk96;
-            }
-        }
-    }
-}
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1B1600/func_15187A98.s")
+void func_15187978(Obj_15187978 *arg0);
 
 extern void func_151EFE00(f32 *);
-
-void func_15187D6C(f32 *arg0, f32 arg1, f32 arg2, f32 arg3) {
-    f32 sx;
-    f32 cx;
-    f32 sz;
-    f32 sy;
-    f32 cy;
-    f32 cz;
-    f32 t;
-
-    arg1 *= 0.01745329238f;
-    arg2 *= 0.01745329238f;
-    arg3 *= 0.01745329238f;
-    sx = sinf(arg1);
-    cx = cosf(arg1);
-    sy = sinf(arg2);
-    cy = cosf(arg2);
-    sz = sinf(arg3);
-    cz = cosf(arg3);
-    func_151EFE00(arg0);
-    t = sx * sy;
-    arg0[6] = sx;
-    arg0[0] = (cy * cz) - (t * sz);
-    arg0[1] = (cy * sz) + (t * cz);
-    arg0[2] = -sy * cx;
-    t = sx * cy;
-    arg0[4] = -cx * sz;
-    arg0[5] = cx * cz;
-    arg0[8] = (sy * cz) + (t * sz);
-    arg0[9] = (sy * sz) - (t * cz);
-    arg0[10] = cx * cy;
-}
+void func_15187D6C(f32 *arg0, f32 arg1, f32 arg2, f32 arg3);
 

@@ -1011,26 +1011,11 @@ void func_151B8318(struct102 *arg0, struct S151B8318 *arg1, u8 arg2) {
         }
     }
 }
-
-void func_151B8370(void *arg0) {
-    s32 v0 = *(s32 *)((u8 *)arg0 + 0x98);
-    struct102 *v = *(struct102 **)v0;
-    if (v != 0) {
-        func_1516972C(v);
-    }
-}
+void func_151B8370(void *arg0);
 
 extern void func_151B8370(void *);
 extern void func_151478F4(void *);
-
-void func_151B83A0(void *arg0) {
-    func_151B8370(arg0);
-    func_151478F4(arg0);
-}
+void func_151B83A0(void *arg0);
 
 extern void func_15147928(void *);
-
-void func_151B83CC(void *arg0) {
-    func_151B8370(arg0);
-    func_15147928(arg0);
-}
+void func_151B83CC(void *arg0);

@@ -307,32 +307,11 @@ void func_150FC818(void *arg0, s32 arg1, u8 arg2) {
         }
     }
 }
-
-s32 func_150FC930(struct260 *arg0, s32 arg1, s32 arg2) {
-    u8 v = *((u8 *)arg0 + 4);
-    if (v == 0x12 || v == 0x23 || v == 0x73 || v == 0x8A) {
-        return 0;
-    }
-    return 1;
-}
-
-void func_150FC974(struct260 *arg0) {
-    s32 *p = (s32 *)((u8 *)arg0 + 0x38);
-    if (*p != 0) {
-        func_1516972C((struct102 *)*p);
-    }
-}
+s32 func_150FC930(struct260 *arg0, s32 arg1, s32 arg2);
+void func_150FC974(struct260 *arg0);
 
 extern void func_150FC974(struct260 *);
-
-void func_150FC9A4(struct260 *arg0) {
-    func_150FC974(arg0);
-    func_1514933C(arg0);
-}
+void func_150FC9A4(struct260 *arg0);
 
 extern void func_15149368(struct260 *);
-
-void func_150FC9D0(struct260 *arg0) {
-    func_150FC974(arg0);
-    func_15149368(arg0);
-}
+void func_150FC9D0(struct260 *arg0);
