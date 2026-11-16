@@ -122,7 +122,7 @@ void func_1519F168(struct Obj1519F108 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1CC440/func_1519F1C8.s")
 
-s32 *func_1519F1C8(void *arg0, s32 arg1);
+s32 *func_1519F1C8();
 
 struct Sub1519F3B8 {
     s32 *unk0;
@@ -330,7 +330,53 @@ s32 func_1519F4F0(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1CC440/func_1519FE6C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1CC440/func_151A084C.s")
+typedef struct Node151A084CData {
+    s32 field0;
+    u8 pad4[4];
+    s32 field8;
+} Node151A084CData;
+
+typedef struct Node151A084C {
+    u8 pad0[0x18];
+    void *field18;
+    u8 field1C;
+    u8 pad1D[0x3B];
+    Node151A084CData data58;
+} Node151A084C;
+
+void func_151A084C(u8 *arg0) {
+    struct Lookup { Node151A084C *node; u8 mode; };
+    s32 result;
+    Node151A084CData *data;
+    u8 *object;
+    u8 done;
+    struct Lookup *lookup;
+
+    done = 0;
+    lookup = (struct Lookup *)(arg0 + 0x28);
+    object = lookup->node->field18;
+    data = &lookup->node->data58;
+    if (*(s32 *)object == 0) {
+        done = 1;
+    }
+    if (lookup->node->field1C != object[0x3B]) {
+        done = 1;
+    }
+    if ((done == 0) && (*(s32 *)(object + 0x1D4) != 0)) {
+        done = 1;
+        result = (s32)func_1519F1C8(lookup->node, lookup->mode, lookup, arg0);
+        if (lookup->mode == 6) {
+            data->field0 = result;
+        } else {
+            data->field8 = result;
+        }
+    }
+    if (done) {
+        func_151A0928(arg0);
+        *(s16 *)(arg0 + 0xE) = -1;
+        arg0[0xD] |= 1;
+    }
+}
 
 struct Obj151A0928 {
     u8 pad0[0x28];
