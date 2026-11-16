@@ -137,6 +137,10 @@ $(BUILD_DIR)/$(SRC_DIR)/libultra/io/aisetfreq.c.o: OPT_FLAGS := -O1
 
 $(BUILD_DIR)/$(SRC_DIR)/libultra/os/getthreadpri.c.o: OPT_FLAGS := -O1
 $(BUILD_DIR)/$(SRC_DIR)/libultra/os/initialize.c.o: OPT_FLAGS := -O1
+# The game was built with a raised optimizer size limit: functions over IDO's default -Olimit
+# (uopt ~1000 blocks, as1 500) come out unoptimized otherwise (func_1504CB98, func_150265CC,
+# func_1502460C, func_15065A5C). The whole bin is unchanged with it (2026-11-16).
+$(BUILD_DIR)/$(SRC_DIR)/game_%.c.o: OLIMIT := -Olimit 3000
 
 $(BUILD_DIR)/$(SRC_DIR)/init_3920.c.o: OPT_FLAGS := -O2
 
@@ -215,14 +219,14 @@ $(TARGET).elf: $(O_FILES) $(BUILD_DIR)/$(LD_SCRIPT) $(GLOBAL_ASM_O_FILES)
 ifndef PERMUTER
 $(GLOBAL_ASM_O_FILES): $(BUILD_DIR)/%.c.o: %.c include/variables.h include/structs.h include/functions.h
 	$(PYTHON) $(ASM_PROCESSOR_DIR)/asm_processor.py $(OPT_FLAGS) $< > $(BUILD_DIR)/$<
-	$(CC) -c -32 $(CFLAGS) $(OPT_FLAGS) $(LOOP_UNROLL) $(MIPSBIT) -o $@ $(BUILD_DIR)/$<
+	$(CC) -c -32 $(CFLAGS) $(OPT_FLAGS) $(OLIMIT) $(LOOP_UNROLL) $(MIPSBIT) -o $@ $(BUILD_DIR)/$<
 	$(PYTHON) $(ASM_PROCESSOR_DIR)/asm_processor.py $(OPT_FLAGS) $< --post-process $@ \
 		--assembler "$(AS) $(ASFLAGS)" --asm-prelude $(ASM_PROCESSOR_DIR)/prelude.inc
 	$(RODATA_EXTERN) $@
 endif
 
 $(BUILD_DIR)/%.c.o: %.c
-	$(CC) -c -32 $(CFLAGS) $(OPT_FLAGS) $(MIPSBIT) -o $@ $<
+	$(CC) -c -32 $(CFLAGS) $(OPT_FLAGS) $(OLIMIT) $(MIPSBIT) -o $@ $<
 	$(RODATA_EXTERN) $@
 
 $(BUILD_DIR)/%.s.o: %.s
