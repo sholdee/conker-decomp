@@ -153,7 +153,119 @@ void func_150EB614(Obj150EB614 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1188E0/func_150EB8C4.s")
+typedef struct {
+    f32 unk00;
+    f32 unk04;
+    f32 unk08;
+    f32 unk0C;
+    struct17 unk10;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    struct17 unk28;
+    struct17 unk34;
+    f32 unk40;
+    f32 unk44;
+    f32 unk48;
+    f32 unk4C;
+    s32 unk50;
+    s16 unk54;
+    s16 unk56;
+    u8 unk58;
+    u8 pad59[3];
+    s32 unk5C;
+    u8 unk60;
+    u8 unk61;
+    u8 unk62;
+    u8 unk63;
+    u8 unk64;
+    u8 unk65;
+    u8 unk66;
+    u8 unk67;
+    u8 unk68;
+    s8 unk69;
+    u8 unk6A;
+    u8 pad6B;
+    s32 unk6C;
+    u8 unk70;
+    u8 pad71;
+    s16 unk72;
+    s16 unk74;
+    u8 pad76[2];
+    s32 unk78;
+} Func150EB8C4Spawn;
+
+extern u8 D_800BE9EB;
+void func_150E83AC(void *, s16, u8, s32);
+void *func_15164F0C(u8, u8, void *, u8, s32);
+void func_151D3FF4(void *, u8, s32);
+void func_151D5514(void *, u8, s32);
+void *func_151541B8(void *, f32, f32, f32, f32, u8, s32);
+extern struct17 D_800A1490;
+extern struct17 D_800A149C;
+extern struct17 D_800A14A8[4];
+extern u8 D_800A14D8[4];
+extern void func_15143794(s16, s16, f32, f32 *);
+extern s32 func_1513264C(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
+
+void func_150EB8C4(void)
+{
+  Func150EB8C4Spawn spawn;
+  func_15164F0C(2, D_800BE9EB, 0, 0xFF, 1);
+  func_150E83AC(&D_800A149C, (s16) ((func_150ADA20() % 62U) + 0x78), 0xFF, 1);
+  func_151D5514(&D_800A1490, 0xFF, 1);
+  func_151D3FF4(&D_800A1490, 0xFF, 1);
+  func_151541B8(&D_800A1490, (func_150ADA68() * 4.0f) + 12.0f, 1.6409999f, (f32) ((func_150ADA20() % 56U) + 0xC8), 0.0f, 0xFF, 1);
+  {
+    u8 i;
+    s32 r1;
+    s32 r2;
+    spawn.unk0C = 1.0f;
+    spawn.unk08 = 1.0f;
+    spawn.unk00 = 9.0f;
+    spawn.unk04 = 0.4350000322f;
+    spawn.unk10 = *((struct17 *) (&D_800A5480));
+    spawn.unk44 = 0.0f;
+    spawn.unk1C = 1.0f;
+    spawn.unk20 = 1.0f;
+    spawn.unk24 = 1.0f;
+    spawn.unk50 = 0x29E9;
+    spawn.unk58 = 0;
+    spawn.unk5C = 0;
+    spawn.unk60 = 0xFF;
+    spawn.unk61 = 0xD;
+    spawn.unk62 = 0;
+    spawn.unk63 = 0xC;
+    if (r2)
+    {
+    }
+    spawn.unk64 = 0;
+    spawn.unk65 = 0;
+    spawn.unk66 = 0;
+    spawn.unk67 = 0;
+    spawn.unk68 = 2;
+    spawn.unk6A = 2;
+    spawn.unk6C = 0;
+    spawn.unk70 = 0;
+    spawn.unk72 = 0x19;
+    spawn.unk74 = 0xA;
+    spawn.unk78 = 0;
+    for (i = 0; i < 4; i++)
+    {
+      spawn.unk28 = D_800A14A8[i];
+      r1 = func_150ADA20();
+      r2 = func_150ADA20();
+      func_15143794((r1 % 26U) + 0x2D, (r2 & 0xF) - 0x19, (func_150ADA68() * 30.0f) + 15.0f, &spawn.unk34.unk0);
+      spawn.unk40 = (func_150ADA68() * 15.10800076f) + (-7.554000378f);
+      spawn.unk48 = (func_150ADA68() * 15.10800076f) + (-7.554000378f);
+      spawn.unk4C = (func_150ADA68() * 0.6170000434f) + (-1.621000051f);
+      spawn.unk54 = (func_150ADA20() % 51U) + 0x32;
+      spawn.unk56 = D_800A14D8[i];
+      func_1513264C(&spawn, 3, 0xFF, 0, 0, 0xFF, 1);
+    }
+
+  }
+}
 
 typedef struct Game1188E0Event {
     u8 type;
