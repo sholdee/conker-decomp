@@ -2501,7 +2501,23 @@ void func_15060BE0(struct127 *arg0) {
         *(s16 *)((u8 *)arg0 + 0x1C0) = (s16) (s32) arg0->z_position;
     }
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_15060D54.s")
+typedef struct Game83300ActorLink {
+    s32 active;
+    u8 pad4[0x61];
+    u8 owner_index;
+    u8 pad66[0x2C6];
+} Game83300ActorLink;
+
+void func_15060D54(Game83300ActorLink *arg0) {
+    s32 i;
+
+    for (i = 0; i < 25; i++) {
+        if ((((Game83300ActorLink *)&D_800CC2D0)[i].active != 0) &&
+            ((arg0 - (Game83300ActorLink *)&D_800CC2D0) + 1 == ((Game83300ActorLink *)&D_800CC2D0)[i].owner_index)) {
+            ((Game83300ActorLink *)&D_800CC2D0)[i].owner_index = 0;
+        }
+    }
+}
 // PERMUTER CANDIDATE best 1815 (object-level; the body below is structurally correct and only
 // 2 instructions short of the target). Needs these locally-declared callees/globals:
 //   extern s32 func_1514D310(struct127 *); extern void func_151695F0(struct127 *, u8);
