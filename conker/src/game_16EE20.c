@@ -706,7 +706,49 @@ Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3) {
 s16 func_15143044(u8 arg0, s32 arg1) {
     return 0x7FFF - arg0;
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_1514306C.s")
+typedef struct {
+    s32 *unk0;
+    s32 unk4;
+    s32 unk8;
+} Entry1514306C;
+extern Entry1514306C D_80090B60[];
+extern s32 D_80091564[];
+extern s32 D_80091514;
+extern s32 D_800915B0;
+
+s32 func_1514306C(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
+    s32 ret;
+
+    switch (arg3) {
+        case 4:
+            ret = D_800915B0;
+            break;
+        case 3:
+            ret = D_80091514;
+            break;
+        case 1:
+            ret = 0;
+            break;
+        case 2:
+            ret = D_80091564[arg1];
+            break;
+        case 5:
+            ret = arg1;
+            break;
+        case 6:
+            arg1 = *(s32 *)arg0;
+            if ((u32)*(s32 *)arg0 >= 0x10000000) {
+                ret = ((s32 *)*(s32 *)arg0)[arg2];
+            } else {
+                ret = arg1;
+            }
+            break;
+        default:
+            ret = D_80090B60[arg1].unk0[arg2];
+            break;
+    }
+    return ret;
+}
 void func_15143134(struct17 *arg0, f32 *arg1, Mtx *arg2) {
     f32 sp38[4][4];
 
