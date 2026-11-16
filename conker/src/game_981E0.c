@@ -3245,7 +3245,83 @@ void func_150730D0(void) {
       }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_15073118.s")
+extern struct127 *func_1505ED34(void);
+extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
+extern s32 func_1515D480(s32);
+extern s32 *func_1515D440(void);
+extern s32 func_15158BD0(struct127 *, s32, s32);
+extern void func_1514EC1C(s32, struct127 *, s32);
+extern u8 D_800C3E90;
+
+typedef struct {
+    u8 pad_0[0x300];
+    s32 field_0x300;
+    s32 field_0x304[4];
+    s32 *field_0x314;
+} Game981E0ActorSlots;
+
+u8 *func_15073118(u8 *arg0, s32 arg1, s32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, s32 argA) {
+    Mtx *mtx;
+    f32 mf[4][4];
+    struct127 *obj;
+    f32 x;
+    f32 y;
+    f32 z;
+    s32 i;
+
+    obj = func_1505ED34();
+    obj->gravity = arg9;
+    obj->y_velocity = arg8;
+    obj->xz_velocity = arg7;
+    obj->unk83 = argA;
+    if ((((struct127 *)arg0)->unk1D4 != 0) && (arg1 != -1)) {
+        mtx = (Mtx *)((struct127 *)arg0)->unk1D4 + arg1;
+        if (D_800C3E90 != 0) {
+            guMtxL2F(mf, mtx);
+            mtx = (Mtx *)mf;
+        }
+        func_150A7960((f32 *)mtx, arg3, arg4, arg5, &x, &y, &z);
+    } else {
+        x = ((struct127 *)arg0)->x_position;
+        y = ((struct127 *)arg0)->y_position;
+        z = ((struct127 *)arg0)->z_position;
+    }
+    obj->x_position = x;
+    obj->y_position = y;
+    obj->z_position = z;
+    obj->unk76 = obj->unk7A = (f32)((struct127 *)arg0)->unk7A + arg6 * 182.0444489f;
+    obj->interaction_state = 0x21;
+    obj->immune = 0xFF;
+    obj->unkF8 = 2;
+    if (arg2 != 0x42) {
+        obj->unkF8 = 0x100E;
+    }
+    obj->pad66 = ((struct127 *)arg0)->pad66 & 0xC;
+    obj->unkE4 = 10;
+    obj->unkE6 = 10;
+    obj->unkEC = 1.0f;
+    obj->unkF0 = 1.0f;
+    obj->unkDC = 1.0f;
+    obj->unkE0 = 1.0f;
+    obj->xz_scale = 0.5f;
+    obj->y_scale = 0.5f;
+    if (arg2 == 0x1F) {
+        *(f32 *)&obj->padC8 = 10.0f;
+    }
+    obj->unk278 = arg2;
+    obj->unk5 = 5;
+    obj->unique_id = 255U - (obj - D_800CC2D0);
+    func_15083568(obj, arg2, 1.0f, 0);
+    for (i = 0; i <= D_80082FA0; i++) {
+        ((Game981E0ActorSlots *)obj)->field_0x304[i] = func_1515D480(1);
+    }
+    if ((&((Game981E0ActorSlots *)obj)->field_0x300)[i] != 0) {
+        obj->unk301[0] = 1;
+    }
+    ((Game981E0ActorSlots *)obj)->field_0x314 = func_1515D440();
+    func_1514EC1C(func_15158BD0(obj, 1, 0), obj, 0x13);
+    return (u8 *)obj;
+}
 s32 func_15037698(s32, s32, s32, f32, f32, f32, f32 *, f32, s32, s32);
 u8 *func_15073118(u8 *, s32, s32, f32, f32, f32, f32, f32, f32, f32, s32);
 extern f32 D_8009A09C;
