@@ -2601,7 +2601,94 @@ void func_150730D0(void) {
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_15073118.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1507342C.s")
+s32 func_15037698(s32, s32, s32, f32, f32, f32, f32 *, f32, s32, s32);
+u8 *func_15073118(u8 *, s32, s32, f32, f32, f32, f32, f32, f32, f32, s32);
+extern f32 D_8009A09C;
+extern f32 D_8009A0A0;
+extern f32 D_8009A0A4;
+extern f32 D_8009A0A8;
+extern f32 D_8009A0AC;
+extern f32 D_8009A0B0;
+extern f32 D_8009A0B4;
+extern f32 D_8009A0B8;
+extern f32 D_8009A0BC;
+extern f32 D_8009A0C0;
+extern f32 D_8009A0C4;
+extern f32 D_8009A0C8;
+extern f32 D_8009A0CC;
+extern f32 D_8009A0D0;
+extern f32 D_8009A0D4;
+
+void func_1507342C(void) {
+    u8 *obj;
+    s32 rot;
+    f32 y;
+    f32 x;
+    f32 unk84[7];
+
+    if (D_800D1580 == 0) {
+        f32 dist;
+        u8 *target;
+        s32 hit;
+        f32 dx;
+        f32 dy;
+        f32 dz;
+        f32 angle;
+        f32 unk48;
+
+        hit = 0;
+        target = *(u8 **)((u8 *)D_800D154C + 0x318);
+        if (func_15037698(((u8 *)D_800D154C - (u8 *)&D_800CC2D0) / 0x32C, 0x17, 0x17,
+                          *(f32 *)(target + 0x2F8), *(f32 *)(target + 0x2FC), *(f32 *)(target + 0x300),
+                          &dist, 30.0f, 0, 0) != 0 &&
+            (u32)func_150ADA20() % 1000 < 200) {
+            hit = 1;
+        }
+        obj = func_15073118((u8 *)D_800D154C, 0x17, 0x1F, 0.0f, 0.0f, 16.0f, 0.0f, D_8009A09C, D_8009A0A0, D_8009A0A4, 100);
+        *(s32 *)(obj + 0xF8) |= 0x01000000;
+        if (hit != 0) {
+            dx = *(f32 *)(target + 0x2F8) - *(f32 *)(obj + 0x14);
+            dy = *(f32 *)(target + 0x2FC) - *(f32 *)(obj + 0x18);
+            dz = *(f32 *)(target + 0x300) - *(f32 *)(obj + 0x1C);
+            angle = func_150484A0(dx, dz) * D_8009A0A8;
+            unk48 = angle;
+            if (angle > 180.0f) {
+                unk48 = angle - 360.0f;
+            }
+            angle = *(f32 *)(obj + 0x3C) * dy / sqrtf(dx * dx + dz * dz);
+            *(f32 *)(obj + 0x20) = angle;
+            *(f32 *)(obj + 0x24) = 0.0f;
+            *(s32 *)(obj + 0x2E4) = 1;
+            rot = (s16)(unk48 * D_8009A0AC) - 0x4000;
+            *(s16 *)(obj + 0x7A) = rot;
+            *(s16 *)(obj + 0x76) = rot;
+        } else {
+            *(s32 *)(obj + 0x2E4) = 0;
+        }
+    } else if (D_800D1580 == 1) {
+        f32 t;
+        f32 spread;
+
+        spread = *(s32 *)((u8 *)D_800D154C + 0x2E4) * D_8009A0B0;
+        t = (s32)((u32)func_150ADA20() % 40 - 20) * spread;
+        y = D_8009A0B4 + t;
+        t = (s32)((u32)func_150ADA20() % 40 - 20) * spread;
+        x = D_8009A0B8 + t;
+        func_15073118((u8 *)D_800D154C, 0xE, 0x42, 0.0f, 0.0f, 16.0f, (s32)((u32)func_150ADA20() % 40 - 20) * spread, x, y, D_8009A0BC, 100);
+    } else if (D_800D1580 == 2) {
+        obj = func_15073118((u8 *)D_800D154C, 9, 0x35, 0.0f, D_8009A0C0, 0.0f, 180.0f, D_8009A0C4, D_8009A0C8, 3.5f, 100);
+        *(f32 *)(obj + 0xB8) = 180.0f;
+        *(s32 *)(obj + 0xF8) |= 0x01000000;
+    } else if (D_800D1580 == 3) {
+        f32 t;
+
+        t = (s32)((u32)func_150ADA20() % 40 - 20) * 10.0f;
+        y = D_8009A0CC + t;
+        t = (s32)((u32)func_150ADA20() % 40 - 20) * 10.0f;
+        x = D_8009A0D0 + t;
+        func_15073118((u8 *)D_800D154C, 0xE, 0x88, 0.0f, 0.0f, 16.0f, (s32)((u32)func_150ADA20() % 40 - 20) * 10.0f, x, y, D_8009A0D4, 100);
+    }
+}
 
 void func_150738E8(void) {
     u8 temp_v0 = (u8)(D_800D154C->unk13C - 100);
