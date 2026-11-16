@@ -20,7 +20,57 @@ void func_151A11CC(f32, f32, f32, f32, f32, s32, s32, s32,
                    s32, s32, s32, s32);
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1CC440/func_1519EF90.s")
+extern f32 D_800A8CE0;
+extern f32 D_800A8CE4;
+f32 sqrtf(f32);
+#pragma intrinsic(sqrtf)
+
+f32 fabsf(f32);
+#pragma intrinsic(fabsf)
+
+s32 func_1519EF90(u8 *arg0, u8 arg1, u8 *arg2) {
+    f32 *state;
+    f32 *data;
+    f32 dx;
+    f32 dz;
+    f32 dirX;
+    f32 dirZ;
+    f32 dist;
+
+    data = (f32 *)(*(u8 **)arg0 + 0x58);
+    state = *(f32 **)(*(u8 **)arg0 + 0x18);
+    if (*(s32 *)((u8 *)state + 0x1D4) == 0) {
+        return 0;
+    }
+    dx = state[5] - *(f32 *)(arg0 + 0x20);
+    dz = state[7] - *(f32 *)(arg0 + 0x24);
+    if ((D_800A8CE0 < fabsf(dx)) || (D_800A8CE0 < fabsf(dz))) {
+        f32 inv;
+
+        inv = 1.0f / sqrtf((dx * dx) + (dz * dz));
+        dirX = dz * inv;
+        dirZ = dx * inv;
+    } else {
+        u8 angle;
+
+        angle = func_15143E08((struct127 *)state);
+        dirX = func_151423D8(angle);
+        dirZ = func_151423D8(angle - 0x40);
+    }
+    if (arg1 == 6) {
+        dist = data[4];
+    } else {
+        dist = -data[4];
+    }
+    *(f32 *)(arg2 + 0) = state[5] + (dist * dirX);
+    *(f32 *)(arg2 + 8) = state[7] - (dist * dirZ);
+    if (state[0x46] < D_800A8CE4) {
+        *(f32 *)(arg2 + 4) = state[6];
+    } else {
+        *(f32 *)(arg2 + 4) = state[0x46];
+    }
+    return 1;
+}
 
 struct Sub1519F108 {
     u8 pad0[0x58];
