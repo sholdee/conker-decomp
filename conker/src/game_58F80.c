@@ -1267,6 +1267,49 @@ void func_1502F948(ActorInteractionFields *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502F9FC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502FBE8.s")
+extern void func_1507EABC(void *);
+
+#define actor ((u8 *)arg0)
+void func_1502FBE8(struct127 *arg0) {
+    s32 next;
+    void *old;
+    s32 selection;
+
+    if (actor[0x1C9] == 0) {
+        return;
+    }
+    old = ((void **)D_800D1588)[actor[4]];
+    if (actor[0x1C9] == 0xFF) {
+        actor[0x1C9] = 0;
+        next = 0;
+    } else {
+        next = actor[0x1C9] - 1;
+        if (next >= actor[0x2C9] || next == actor[0x1C8]) {
+            return;
+        }
+    }
+    selection = (*(u8 **)(actor + 0x2C4))[next];
+    func_150837D4((actor - (u8 *)D_800CC2D0) / 0x32C, selection, 0);
+    actor[0x1C8] = next;
+    if (D_800C35EA == 1) {
+        D_800C3638 = 0;
+    }
+    if (old != ((void **)D_800D1588)[selection]) {
+        if (*(u16 *)(actor + 0x84) >= ((u16 *)D_800C5A90)[selection]) {
+            *(u16 *)(actor + 0x84) = 0xFFFF;
+            func_1505E650(arg0, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+        } else {
+            s32 anim = *(u16 *)(actor + 0x84);
+
+            *(u16 *)(actor + 0x84) = 0xFFFF;
+            func_1505E650(arg0, anim, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+        }
+    }
+    if (D_800C35EA == 1) {
+        D_800C3638 = 1;
+    }
+    func_1507EABC(actor);
+}
+#undef actor
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502FD70.s")
