@@ -401,21 +401,20 @@ void func_15007440(void) {
     D_8008FE30 = 1;
 }
 
-// PERMUTER CANDIDATE best 610: checksum loop byte-exact. Two residual blockers:
-// (1) the dead func_151DCEF0 return -> target keeps `sw v0,0x18(sp)` (frame 0x20); my build DCEs it
-//     (a `volatile s32 ret` restores the store but overshoots frame to 0x30). Same blocker as
-//     func_15007360. (2) copy-loop v0/v1 swap: IDO CSEs &D_800BE358 into a saved reg across the loop
-//     (move v0,dst) instead of the target's rematerialize-at-bottom, swapping dst/src regs.
-// void func_15007558(void) {
-//     u16 sum; s32 i; s8 *src; u8 *dst; u8 *p;
-//     src = D_800E0BE0; dst = D_800BE358;
-//     do { dst++; dst[1] = *src++; } while (src < (s8 *)&D_800E0BFC);
-//     sum = 0xCC; p = D_800BE35A; i = 2;
-//     do { sum += *p++ << (i & 3); i++; } while (i != 0x1E);
-//     *(u16 *)D_800BE358 = sum;
-//     if (D_8002AC5C == 0) { func_151DCEF0(&D_800BE900, 0, D_800BE358, 0x20); }
-// }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_33990/func_15007558.s")
+/* The dead func_151DCEF0 result is kept on the stack via a volatile local (sw v0,0x18(sp)). */
+void func_15007558(void) {
+    u16 sum;
+    volatile s32 ret;
+    s32 i;
+
+    for (i = 0; i < 0x1C; i++) { D_800BE358[i + 2] = D_800E0BE0[i]; }
+    sum = 0xCC;
+    for (i = 2; i < 0x1E; i++) { sum += D_800BE358[i] << (i & 3); }
+    *(u16 *)D_800BE358 = sum;
+    if (D_8002AC5C == 0) {
+        ret = func_151DCEF0(&D_800BE900, 0, D_800BE358, 0x20);
+    }
+}
 
 void func_15007644(void) {
 }
