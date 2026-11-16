@@ -850,7 +850,270 @@ s32 func_15196748(Emitter15196748 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1C2C60/func_15196B4C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1C2C60/func_15197148.s")
+typedef struct Vec3f_15197C10 {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3f_15197C10;
+
+typedef struct CharacterFlamethrowerBeamCamera {
+    u8 unknown0[0x2F8];
+    Vec3f_15197C10 position;
+    u8 unknown304[0x69C];
+} CharacterFlamethrowerBeamCamera;
+
+void func_151D5D60(void *, s16, s32, void **, u8 *);
+f32 sqrtf(f32);
+#pragma intrinsic(sqrtf)
+extern CharacterFlamethrowerBeamCamera *D_800DBFF0;
+
+typedef struct {
+    Vec3f_15197C10 pos;
+    u8 pad0C[0xC];
+    f32 size;
+    s16 life;
+    u8 pad1E;
+    u8 alpha;
+    u8 level;
+    u8 pad21[3];
+} Point15197148;
+
+typedef struct {
+    u8 pad0[0x51];
+    u8 color;
+    u8 pad52[0xA];
+    f32 width;
+} Style15197148;
+
+typedef struct {
+    u8 pad0[0x10];
+    Vec3f_15197C10 pos;
+    u8 pad1C[2];
+    u16 flags1E;
+    u8 pad20[5];
+    u8 capacity;
+    u8 pad26[6];
+    s8 count;
+    s8 tail;
+    s8 head;
+    u8 pad2F[0x84 - 0x2F];
+    u8 buffers[0x10];
+    Point15197148 *points;
+    Style15197148 *style;
+} Owner15197148;
+
+typedef struct {
+    s32 id;
+    u16 width;
+    u16 height;
+    u8 unk8;
+    u8 unk9;
+    u8 fmt;
+} TexSrc15197148;
+
+typedef struct {
+    s32 id;
+    s32 *idp;
+    u8 fmt;
+    u16 width;
+    u16 height;
+    u8 unkE;
+    u8 unkF;
+} TexDesc15197148;
+
+extern TexSrc15197148 D_800915B0;
+extern s32 D_800D2C9C;
+s32 func_15142E24(s32, s32, s32, s32, s32, s32, s32, u8, s32, u8 *, s32);
+Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
+Gfx *func_1513F4E4(Gfx *, u8, u8 *);
+Gfx *func_15142B7C(Gfx *, s32, s32);
+Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
+
+Gfx *func_15197148(Owner15197148 *arg0, Gfx *gfx, s16 arg2) {
+    Vtx_t *vtx;
+    Vec3f_15197C10 *eye;
+    Vec3f_15197C10 next;
+    Vec3f_15197C10 cur;
+    Point15197148 *points;
+    Style15197148 *style;
+    s32 i;
+    s32 j;
+    Vec3f_15197C10 toCam;
+    Vec3f_15197C10 delta;
+    Vec3f_15197C10 n;
+    f32 len;
+    u8 prev;
+    u8 level;
+    u8 flag;
+    u8 alpha;
+    f32 width;
+    s32 old;
+
+    if (arg0->count >= 2) {
+        func_151D5D60(arg0->buffers, arg2, (arg0->capacity * 2 + 10) * sizeof(Vtx), (void **)&vtx, NULL);
+        if (vtx != NULL) {
+            eye = &D_800DBFF0[arg2].position;
+            style = arg0->style;
+            points = arg0->points;
+            flag = 1;
+            {
+                TexDesc15197148 tex;
+
+                tex.id = D_800915B0.id;
+                tex.idp = &tex.id;
+                tex.fmt = D_800915B0.fmt;
+                tex.width = D_800915B0.width;
+                tex.height = D_800915B0.height;
+                tex.unkE = D_800915B0.unk8;
+                tex.unkF = D_800915B0.unk9;
+                gfx = (Gfx *)func_15142E24((s32)gfx, (s32)&tex.idp, 0, 0, 0x100, 0x100, 0, 4, 0, &flag, 3);
+                gfx = func_15142C10(gfx, style->color, style->color, style->color, 0xFF, &flag);
+                gfx = func_15142B7C(gfx, 1, 0x160600);
+                gfx = func_1513F4E4(gfx, 0xB, &flag);
+                gfx = func_15142FBC(gfx, D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, 0x5049D8, &flag);
+                if (arg0->flags1E & 2) {
+                    j = arg0->head - 1;
+                    if (j < 0) {
+                        j = arg0->capacity - 1;
+                    }
+                    cur = arg0->pos;
+                    next = points[j].pos;
+                    level = points[j].level;
+                    prev = points[j].level;
+                    width = style->width;
+                } else {
+                    i = arg0->head - 1;
+                    if (i < 0) {
+                        i = arg0->capacity - 1;
+                    }
+                    j = i - 1;
+                    if (j < 0) {
+                        j = arg0->capacity - 1;
+                    }
+                    cur = points[i].pos;
+                    next = points[j].pos;
+                    prev = points[i].level;
+                    level = points[j].level;
+                    width = points[j].size;
+                }
+                delta.x = cur.x - next.x;
+                delta.y = cur.y - next.y;
+                delta.z = cur.z - next.z;
+                toCam.x = cur.x - eye->x;
+                toCam.y = cur.y - eye->y;
+                toCam.z = cur.z - eye->z;
+                n.x = delta.y * toCam.z - toCam.y * delta.z;
+                n.y = delta.z * toCam.x - toCam.z * delta.x;
+                n.z = delta.x * toCam.y - toCam.x * delta.y;
+                len = sqrtf(n.x * n.x + n.y * n.y + n.z * n.z);
+                if (len == 0.0f) {
+                    n.x = 0.0f;
+                    n.y = 0.0f;
+                    n.z = 0.0f;
+                } else {
+                    f32 scale;
+
+                    scale = width / len;
+                    n.x *= scale;
+                    n.y *= scale;
+                    n.z *= scale;
+                }
+                alpha = (points[j].life * points[j].alpha) >> 8;
+                vtx->ob[0] = cur.x + n.x;
+                vtx->ob[1] = cur.y + n.y;
+                vtx->ob[2] = cur.z + n.z;
+                vtx->tc[0] = (prev + 0x100) << 6;
+                vtx->tc[1] = 0x47C0;
+                vtx->cn[0] = 0xFF;
+                vtx->cn[1] = 0xFF;
+                vtx->cn[2] = 0xFF;
+                vtx->cn[3] = alpha;
+                vtx->flag = 0;
+                vtx++;
+                vtx->ob[0] = cur.x - n.x;
+                vtx->ob[1] = cur.y - n.y;
+                vtx->ob[2] = cur.z - n.z;
+                vtx->tc[0] = (prev + 0x100) << 6;
+                vtx->tc[1] = 0x4000;
+                vtx->cn[0] = 0xFF;
+                vtx->cn[1] = 0xFF;
+                vtx->cn[2] = 0xFF;
+                vtx->cn[3] = alpha;
+                vtx->flag = 0;
+                vtx++;
+                do {
+                    delta.x = cur.x - next.x;
+                    delta.y = cur.y - next.y;
+                    delta.z = cur.z - next.z;
+                    toCam.x = next.x - eye->x;
+                    toCam.y = next.y - eye->y;
+                    toCam.z = next.z - eye->z;
+                    n.x = delta.y * toCam.z - toCam.y * delta.z;
+                    n.y = delta.z * toCam.x - toCam.z * delta.x;
+                    n.z = delta.x * toCam.y - toCam.x * delta.y;
+                    len = sqrtf(n.x * n.x + n.y * n.y + n.z * n.z);
+                    if (len == 0.0f) {
+                        n.x = 0.0f;
+                    n.y = 0.0f;
+                    n.z = 0.0f;
+                    } else {
+                        f32 scale;
+
+                        scale = points[j].size / len;
+                        n.x *= scale;
+                        n.y *= scale;
+                        n.z *= scale;
+                    }
+                    alpha = (points[j].life * points[j].alpha) >> 8;
+                    vtx->ob[0] = next.x + n.x;
+                    vtx->ob[1] = next.y + n.y;
+                    vtx->ob[2] = next.z + n.z;
+                    vtx->tc[0] = (level + 0x100) << 6;
+                    vtx->tc[1] = 0x47C0;
+                    vtx->cn[0] = 0xFF;
+                    vtx->cn[1] = 0xFF;
+                    vtx->cn[2] = 0xFF;
+                    vtx->cn[3] = alpha;
+                    vtx->flag = 0;
+                    vtx++;
+                    vtx->ob[0] = next.x - n.x;
+                    vtx->ob[1] = next.y - n.y;
+                    vtx->ob[2] = next.z - n.z;
+                    vtx->tc[0] = (level + 0x100) << 6;
+                    vtx->tc[1] = 0x4000;
+                    vtx->cn[0] = 0xFF;
+                    vtx->cn[1] = 0xFF;
+                    vtx->cn[2] = 0xFF;
+                    vtx->cn[3] = alpha;
+                    vtx->flag = 0;
+                    vtx++;
+                    gSPVertex(gfx++, vtx - 4, 4, 0);
+                    gSP1Triangle(gfx++, 0, 1, 2, 0);
+                    gSP1Triangle(gfx++, 1, 3, 2, 0);
+                    old = prev < level;
+                    prev = level;
+                    if (old) {
+                        memcpy(vtx, vtx - 2, 0x20);
+                        vtx[-2].tc[0] -= 0x4000;
+                        vtx++;
+                        vtx[-2].tc[0] -= 0x4000;
+                        vtx++;
+                    }
+                    i = j;
+                    j--;
+                    if (j < 0) {
+                        j = arg0->capacity - 1;
+                    }
+                    cur = points[i].pos;
+                    next = points[j].pos;
+                    level = points[j].level;
+                } while (i != arg0->tail);
+            }
+        }
+    }
+    return gfx;
+}
+
 
 extern f32 D_800A8AA4;
 
@@ -930,12 +1193,6 @@ s32 func_15197BBC(Struct15197BBC *arg0) {
     return 1;
 }
 
-typedef struct Vec3f_15197C10 {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f_15197C10;
-
 typedef struct CharacterFlamethrowerBeamVertex {
     s16 x, y, z, flag;
     u8 other[8];
@@ -952,16 +1209,6 @@ typedef struct CharacterFlamethrowerBeam {
     u8 *buffers[1];
 } CharacterFlamethrowerBeam;
 
-typedef struct CharacterFlamethrowerBeamCamera {
-    u8 unknown0[0x2F8];
-    Vec3f_15197C10 position;
-    u8 unknown304[0x69C];
-} CharacterFlamethrowerBeamCamera;
-
-void func_151D5D60(void *, s16, s32, void **, u8 *);
-f32 sqrtf(f32);
-#pragma intrinsic(sqrtf)
-extern CharacterFlamethrowerBeamCamera *D_800DBFF0;
 
 void *func_15197C10(CharacterFlamethrowerBeam *arg0, s16 arg1) {
     CharacterFlamethrowerBeamVertex *vertices;
