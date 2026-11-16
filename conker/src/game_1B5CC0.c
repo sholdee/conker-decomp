@@ -608,7 +608,52 @@ s32 func_151895F4(s32 arg0, Node151895F4 *arg1, s16 arg2) {
     return arg0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1B5CC0/func_151897A4.s")
+typedef struct Model151897A4 {
+    char pad0[0x8A];
+    u8 unk8A;
+} Model151897A4;
+
+typedef struct Node151897A4 {
+    u8 unk0;
+    u8 unk1;
+    u8 unk2;
+    u8 unk3;
+    char pad4[4];
+    u8 *unk8;
+    struct Node151897A4 *unkC;
+    Model151897A4 *unk10;
+    s32 unk14;
+} Node151897A4;
+
+extern s32 func_151137D4(s32, Model151897A4 *, u8 *, s32, s32, s32);
+
+s32 func_151897A4(s32 arg0, Node151897A4 *arg1, s16 arg2) {
+    s32 i;
+    s32 count;
+    s32 shade;
+    s32 n;
+    s32 dst;
+    s32 alpha;
+    s32 pad1;
+    s32 pad2;
+    s32 saved;
+
+    if (arg1->unk2 == 0) {
+        return arg0;
+    }
+    count = arg1->unk2;
+    n = arg1->unk1;
+    shade = arg1->unk3;
+    dst = D_800BE9C0 * n;
+    saved = arg1->unk10->unk8A;
+    for (i = 0; i < count; i++) {
+        alpha = (((i + 3) * 32) * shade) >> 8;
+        arg1->unk10->unk8A = alpha;
+        arg0 = func_151137D4(arg0, arg1->unk10, arg1->unk8 + ((dst + i) << 6), arg2, 0, 0);
+    }
+    arg1->unk10->unk8A = saved;
+    return arg0;
+}
 
 typedef struct Node151898C0 {
     char pad0[12];
