@@ -1518,7 +1518,52 @@ void func_15023440(struct_game49D30_2 *arg0, s32 arg1) {
     entry->unk0 = 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_49D30/func_150234A4.s")
+typedef struct Game49D30Record {
+    s16 active;
+    u8 pad2[0xA];
+    u8 flagC;
+    u8 padD[0x27];
+    s32 resource34;
+} Game49D30Record;
+
+Game49D30Record *func_150234A4(s32 arg0, s32 arg1) {
+    s32 i;
+    Game49D30Record *found;
+    Game49D30Record *slot;
+
+    arg0++;
+    found = NULL;
+    slot = NULL;
+    for (i = 0; i < 3; i++) {
+        if ((((Game49D30Record *)&D_800C3CA0) + i)->active == arg0) {
+            if (arg1 != 0 && (((Game49D30Record *)&D_800C3CA0) + i)->flagC != 0) {
+                slot = (Game49D30Record *)&D_800C3CA0;
+                func_15023440((struct_game49D30_2 *)slot, 1);
+            } else {
+                found = ((Game49D30Record *)&D_800C3CA0) + i;
+            }
+            break;
+        }
+        if ((((Game49D30Record *)&D_800C3CA0) + i)->active == 0) {
+            slot = ((Game49D30Record *)&D_800C3CA0) + i;
+            if (arg1 != 0 && slot->flagC != 0) {
+                func_15023440((struct_game49D30_2 *)slot, 1);
+            }
+            break;
+        }
+    }
+    if (i == 3) {
+        slot = (Game49D30Record *)&D_800C3CA0;
+        func_15023440((struct_game49D30_2 *)slot, 1);
+    }
+    if (found != NULL) {
+        return found;
+    }
+    if (slot != NULL) {
+        slot->active = arg0;
+    }
+    return slot;
+}
 
 s32 func_150235DC(s32 arg0) {
     struct127 *temp_v0;
