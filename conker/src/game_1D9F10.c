@@ -609,7 +609,85 @@ void func_151AE2BC(f32 *arg0, Track151AE2BC *arg1, f32 arg2, f32 arg3, f32 arg4)
     *arg0 = (f32)(i - 1) / (f32)(n - 3) + d / (f32)(n - 1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1D9F10/func_151AE3A8.s")
+typedef struct {
+    u8 pad0[0x9C];
+    void *unk9C;
+    f32 unkA0;
+    u8 padA4[0xA];
+    u8 unkAE;
+} Ctl151AE3A8;
+
+typedef struct {
+    u8 pad0[0x14];
+    f32 x;
+    f32 y;
+    f32 z;
+    u8 pad20[0x2FC];
+    Ctl151AE3A8 *unk31C;
+} Obj151AE3A8;
+
+s32 func_151AE3A8(u8 *arg0) {
+    f32 oz;
+    f32 oy;
+    f32 ox;
+    f32 nx;
+    f32 ny;
+    f32 nz;
+    f32 speed;
+    f32 frac;
+    Ctl151AE3A8 *ctl;
+    Obj151AE3A8 *obj;
+    Node151AE0E4 *node;
+    u8 angle;
+    f32 s;
+    f32 c;
+    s32 n;
+    s32 i;
+    f32 t;
+    s32 pad;
+    f32 a[3];
+    f32 b[3];
+
+    obj = *(Obj151AE3A8 **)(arg0 + 0x1C);
+    node = (Node151AE0E4 *)obj->unk31C->unk9C;
+    angle = func_15143E08((struct127 *)obj) - 0x80;
+    s = func_151423D8(angle - 0x40);
+    c = func_151423D8(angle);
+    ctl = obj->unk31C;
+    frac = ctl->unkA0;
+    speed = *(f32 *)(arg0 + 0x28);
+    ox = obj->x;
+    oy = obj->y;
+    oz = obj->z;
+    n = 140.0f / node->unk3C;
+    {
+        s32 pad3;
+
+        i = (f32)(node->unk42 - n - 1) * frac;
+    }
+    ctl->unkAE = i;
+    t = (f32)(node->unk42 - n - 1) * frac - (f32)i;
+    a[0] = node->keys[i].x;
+    a[1] = node->keys[i].y;
+    a[2] = node->keys[i].z;
+    b[0] = node->keys[i + 1].x;
+    b[1] = node->keys[i + 1].y;
+    b[2] = node->keys[i + 1].z;
+    {
+        s32 pad2;
+
+        nx = a[0] + (b[0] - a[0]) * t;
+        ny = a[1] + (b[1] - a[1]) * t;
+        nz = a[2] + (b[2] - a[2]) * t;
+        nx += speed * s;
+        nz += speed * c;
+    }
+    obj->x = (nx - ox) + ox;
+    obj->y = (ny - oy) + oy;
+    obj->z = (nz - oz) + oz;
+
+}
+
 
 extern Node151AE590 *D_800DCE50[][104];
 extern s32 D_800A9270[];
