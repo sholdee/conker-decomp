@@ -546,7 +546,76 @@ struct vtx151857DC *func_15185DD4(struct vtx151857DC *arg0, s32 arg1, s32 arg2, 
     return arg3;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1B1600/func_15185F24.s")
+struct vin15185F24 {
+    f32 x;
+    f32 y;
+    f32 z;
+    s16 *col;
+    s32 unk10;
+};
+
+s32 func_15185F24(struct vin15185F24 *arg0, s32 arg1, s32 arg2, Vtx_t *arg3, s32 *arg4, s32 arg5) {
+    struct vtx151857DC buf[2][26];
+    s32 i;
+    s32 j;
+    struct vtx151857DC *src;
+    struct vtx151857DC *dst;
+    f32 scale;
+    s16 *col;
+    s32 mid[3];
+    s32 *p;
+
+    src = (struct vtx151857DC *)arg0;
+    dst = buf[0];
+    for (i = 0; i < arg1; i++) {
+        col = arg0[i].col;
+        *dst = *src;
+        dst->unkC = col[0];
+        dst->unkE = col[1];
+        dst->unk10 = col[2];
+        dst++;
+        src++;
+    }
+    for (i = 0; i < 6; i++) {
+        arg1 = ((u32)func_15185DD4(buf[i & 1], arg1, i, buf[(i & 1) ^ 1]) - (u32)buf[(i & 1) ^ 1]) / 20;
+    }
+    mid[0] = 0;
+    arg4[0] = 0;
+    if (arg5 != 0) {
+        for (j = 0; j < 2; j++) {
+            mid[j + 1] = ((u32)func_15185DD4(buf[i & 1], arg1, j + 6, &buf[(i & 1) ^ 1][mid[j]]) - (u32)buf[(i & 1) ^ 1]) / 20;
+        }
+        i++;
+        for (j = 0, p = arg4; j < 4;) {
+            arg1 = mid[1] - mid[0];
+            *p = ((u32)func_15185DD4(&buf[i & 1][mid[0]], arg1, (j++ >> 1) + 8, &buf[(i & 1) ^ 1][*p++]) - (u32)buf[(i & 1) ^ 1]) / 20;
+            arg1 = mid[2] - mid[1];
+            *p = ((u32)func_15185DD4(&buf[i & 1][mid[1]], arg1, (j++ >> 1) + 8, &buf[(i & 1) ^ 1][*p++]) - (u32)buf[(i & 1) ^ 1]) / 20;
+        }
+        arg1 = *p;
+        i++;
+    } else {
+        arg4[1] = arg4[2] = arg4[3] = arg4[4] = arg1;
+    }
+    dst = buf[i & 1];
+    for (i = 0; i < arg1; i++) {
+        arg3[i].ob[0] = dst->unkC;
+        arg3[i].ob[1] = dst->unkE;
+        arg3[i].ob[2] = dst->unk10;
+        scale = 1020.0f / dst->z;
+        dst->x *= scale;
+        dst->y *= scale;
+        arg3[i].tc[0] = 1024.0f - dst->x;
+        arg3[i].tc[1] = dst->y + 1024.0f;
+        arg3[i].cn[0] = 0;
+        arg3[i].cn[1] = 0;
+        arg3[i].cn[2] = 0;
+        arg3[i].cn[3] = (u32)(D_800DE02C - ((dst->z - D_800D368C) / (D_800D3688 - D_800D368C)) * D_800DE02C);
+        arg3[i].flag = 0;
+        dst++;
+    }
+    return arg1;
+}
 
 extern s32 func_1510F720(s32, s32, s32, u8 **);
 extern s32 func_150A5B90(u32 *, s32, s32, s32);
