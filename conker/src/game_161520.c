@@ -458,7 +458,148 @@ f32 func_15135670(s32 arg0) {
     return func_151422DC(0, &D_800A3FB4, 0, 2000, 1000, &D_800A3FBC, 2938) * D_800A45B4;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_151356D4.s")
+void *func_1515548C(void *, u8, s32, s32, s32, u8, s32);
+typedef struct {
+    f32 x, y;
+} Blood356D4Position;
+
+typedef struct {
+    Blood356D4Position position;
+    f32 width, height;
+    u8 texture;
+    u8 pad11;
+    s16 lifetime;
+    u16 flags;
+    s16 duration, period;
+    u8 mode, red, green, blue, alpha, maximum;
+    u8 endRed, endGreen, endBlue, endAlpha;
+    s32 zero24, zero28, zero2C;
+    s32 field30, field34, field38, field3C;
+    u8 field40, field41;
+    u8 pad42[0x16];
+} Blood356D4Particle;
+
+typedef struct {
+    s16 owner;
+    f32 growth, velocityX, velocityY, field10, field14;
+} Blood356D4Motion;
+
+typedef struct {
+    u8 value[2];
+} Blood356D4Kinds;
+
+extern Blood356D4Kinds D_80089BA0;
+extern s32 D_80089BA4;
+extern Blood356D4Kinds D_80089BA8;
+
+void *func_151356D4(Blood356D4Position *arg0, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9, u8 arg10, s32 arg11) {
+    void *result;
+    Blood356D4Particle particle;
+    Blood356D4Motion motion;
+    Blood356D4Kinds kinds;
+    s32 data;
+    f32 scale;
+    f32 count;
+    Blood356D4Particle spark;
+    Blood356D4Kinds sparkKinds;
+    s32 flip;
+
+    kinds = D_80089BA0;
+    data = D_80089BA4;
+    motion.owner = arg6;
+    motion.growth = (func_150ADA68() * 100.0f + 100.0f) * arg1 * 0.001f;
+    motion.velocityX = func_150ADA68() * 6.0f * arg0->x * 0.001f;
+    motion.velocityY = func_150ADA68() * 6.0f * arg0->y * 0.001f;
+    motion.field10 = arg2;
+    motion.field14 = arg3;
+    particle.position = *arg0;
+    particle.width = arg1;
+    particle.height = arg1;
+    particle.texture = kinds.value[func_150ADA20() & 1];
+    particle.lifetime = arg7;
+    flip = (func_150ADA20() & 1) ? 2 : 0;
+    particle.flags = ((particle.texture == 0x3A) ? ((func_150ADA20() & 1) ? 4 : 0) : 0) | 9 | flip;
+    particle.duration = arg8;
+    particle.period = arg9;
+    particle.mode = 2;
+    particle.red = 0xFF;
+    particle.green = 0xFF;
+    particle.blue = 0xFF;
+    particle.maximum = 0xFF;
+    particle.endRed = 0xFF;
+    particle.endGreen = 0xFF;
+    particle.endBlue = 0xFF;
+    particle.zero24 = 0;
+    particle.zero28 = 0;
+    particle.zero2C = 0;
+    particle.field40 = 0;
+    particle.field41 = 9;
+    particle.field30 = 7;
+    particle.field34 = 0x3C;
+    particle.field38 = 0x80;
+    particle.field3C = 0x20;
+    particle.alpha = arg4;
+    particle.endAlpha = arg5;
+    result = func_1515548C(&particle, 3, (s32)&data, 1, 0x18, arg10, arg11);
+    if (result != NULL) {
+        memcpy((u8 *)result + 0x70, &motion, 0x18);
+        scale = (particle.width + particle.height) * 0.5f;
+        count = (func_150ADA68() * 300.0f + 100.0f) * arg1 * 0.001f;
+        spark.lifetime = 0x32;
+        spark.flags = 9;
+        spark.duration = 0x10;
+        spark.period = 0xF;
+        spark.mode = 3;
+        spark.red = 0xFF;
+        spark.green = 0xFF;
+        spark.blue = 0xFF;
+        spark.alpha = arg4;
+        spark.maximum = 0xFF;
+        spark.endRed = 0xFF;
+        spark.endGreen = 0xFF;
+        spark.endBlue = 0xFF;
+        spark.endAlpha = arg5;
+        spark.zero24 = 0;
+        spark.zero28 = 0;
+        spark.zero2C = 0;
+        spark.field40 = 0;
+        spark.field41 = 9;
+        spark.field30 = 7;
+        spark.field34 = 0x3C;
+        spark.field38 = 0x40;
+        spark.field3C = 0;
+        spark.width = (func_150ADA68() * 120.0f + 80.0f) * (arg1 * scale) * 0.0001f;
+        spark.height = (func_150ADA68() * 120.0f + 80.0f) * (arg1 * scale) * 0.0001f;
+        while (count > 1.0f) {
+            sparkKinds = D_80089BA8;
+            {
+                s16 angle;
+                f32 cosine;
+                f32 sine;
+                f32 distance;
+
+                angle = func_150ADA20() & 0xFF;
+                cosine = func_151423D8(angle - 0x40);
+                sine = func_151423D8(angle);
+                distance = (func_150ADA68() * 300.0f + 1300.0f) * scale * 0.001f;
+                spark.position.x = arg0->x + distance * sine;
+                spark.position.y = arg0->y + distance * cosine;
+            }
+            spark.texture = sparkKinds.value[func_150ADA20() & 1];
+            spark.flags &= ~6;
+            if (func_150ADA20() & 1) {
+                spark.flags |= 2;
+            }
+            if (func_150ADA20() & 1) {
+                spark.flags |= 4;
+            }
+            func_1515548C(&spark, 0, 0, 0, 0, arg10, arg11);
+            count -= 1.0f;
+        }
+    }
+    return result;
+}
+
 
 typedef struct {
     f32 x;
