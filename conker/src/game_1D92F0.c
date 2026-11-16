@@ -573,7 +573,135 @@ void func_151ACB94(s32 arg0, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, arg0 + 0x1C, arg0 + 0x20, arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1D92F0/func_151ACBD4.s")
+typedef struct {
+    /* 0x00 */ u8 pad0[0x10];
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ f32 unk34;
+    /* 0x38 */ f32 (*unk38)[6];
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ u16 unk40;
+    /* 0x42 */ u8 unk42;
+    /* 0x43 */ u8 pad43;
+    /* 0x44 */ s32 unk44;
+    /* 0x48 */ Vtx *unk48;
+    /* 0x4C */ f32 unk4C;
+    /* 0x50 */ u8 pad50[2];
+    /* 0x52 */ s16 unk52;
+} Obj151ACBD4;
+
+typedef struct {
+    /* 0x00 */ u8 pad0[6];
+    /* 0x06 */ u16 unk6;
+    /* 0x08 */ u16 unk8;
+    /* 0x0A */ u8 padA[2];
+} Tex151ACBD4;
+
+extern Tex151ACBD4 D_80090B60[];
+extern void *allocate_memory(s32, s32, s32, s32);
+
+Obj151ACBD4 *func_151ACBD4(void *arg0, s32 arg1)
+{
+  Obj151ACBD4 *obj;
+  Tex151ACBD4 *tex;
+  s32 i;
+  s32 n;
+  s32 m;
+  s32 j;
+  s32 x;
+  s32 y0;
+  s32 y1;
+  s32 z;
+  s32 shift;
+  s32 w;
+  u8 r;
+  u8 g;
+  u8 b;
+  s32 t;
+  s32 h;
+  s32 u;
+  s32 c0;
+  s32 c1;
+  s32 c2;
+  s32 c3;
+  obj = (Obj151ACBD4 *) func_15167A68((D_800BE9F0 == 0x2C) ? (0x4E) : (0x2F), 0, arg1 + 0x58, 1, 0xFF, 1);
+  if (obj == 0)
+  {
+    return 0;
+  }
+  memcpy(((u8 *) obj) + 0x10, arg0, 0x24);
+  obj->unk44 = 0;
+  obj->unk52 = 0;
+  obj->unk34 = 1.0f / obj->unk2C;
+  m = 19;
+ obj->unk38 = allocate_memory(0x1E0, 1, 0, 0); obj->unk42 = m + 1;
+  x = obj->unk14;
+  z = obj->unk1C;
+  y1 = obj->unk18;
+  y0 = obj->unk24;
+  for (i = 0; i < (m + 1); i++)
+  {
+    obj->unk38[i][0] = x;
+    obj->unk38[i][1] = ((i * (y1 - y0)) / m) + y0;
+    obj->unk38[i][2] = z;
+    obj->unk38[i][3] = 0.0f;
+ obj->unk38[i][4] = 0.0f; obj->unk38[i][5] = 0.0f; } obj->unk3C = ((f32) (y1 - y0)) / ((f32) m); obj->unk48 = allocate_memory(0xA00, 1, 2, 0); if (D_800BE9F0 == 0xB) { obj->unk40 = 0x37; shift = 4; } else { obj->unk40 = 0x36; shift = 5; } g = (r = 0xFF); if (D_800BE9F0 == 0x39) { r = 0x58; g = 0x4B; b = 0x2C; } else { b = 0xFF; } tex = &D_80090B60[obj->unk40];
+  w = tex->unk6 >> 2;
+  h = tex->unk8 - 1;
+  c0 = 0x100 << 5;
+  c1 = (w + 0x100) << 5;
+  c2 = ((w * 2) + 0x100) << 5;
+  c3 = ((w * 3) + 0x100) << 5;
+  for (j = 0; j < 2; j++)
+  {
+    if (m)
+    {
+      for (i = 0, u = 0x100; i < 20; i++, u += h)
+      {
+        t = u << shift;
+        obj->unk48[(((j * 20) + i) * 4) + 0].v.flag = 0;
+ do { obj->unk48[(((j * 20) + i) * 4) + 0].v.tc[0] = c0; } while (0);
+        obj->unk48[(((j * 20) + i) * 4) + 0].v.tc[1] = t;
+        obj->unk48[(((j * 20) + i) * 4) + 0].v.cn[0] = r;
+        obj->unk48[(((j * 20) + i) * 4) + 0].v.cn[1] = g;
+        obj->unk48[(((j * 20) + i) * 4) + 0].v.cn[2] = b;
+        obj->unk48[(((j * 20) + i) * 4) + 0].v.cn[3] = 0xFF;
+        obj->unk48[(((j * 20) + i) * 4) + 1].v.flag = 0;
+        obj->unk48[(((j * 20) + i) * 4) + 1].v.tc[0] = c1;
+        obj->unk48[(((j * 20) + i) * 4) + 1].v.tc[1] = t;
+        obj->unk48[(((j * 20) + i) * 4) + 1].v.cn[0] = r;
+        obj->unk48[(((j * 20) + i) * 4) + 1].v.cn[1] = g;
+        obj->unk48[(((j * 20) + i) * 4) + 1].v.cn[2] = b;
+        obj->unk48[(((j * 20) + i) * 4) + 1].v.cn[3] = 0xFF;
+        obj->unk48[(((j * 20) + i) * 4) + 2].v.flag = 0;
+        obj->unk48[(((j * 20) + i) * 4) + 2].v.tc[0] = c2;
+        obj->unk48[(((j * 20) + i) * 4) + 2].v.tc[1] = t;
+        obj->unk48[(((j * 20) + i) * 4) + 2].v.cn[0] = r;
+        obj->unk48[(((j * 20) + i) * 4) + 2].v.cn[1] = g;
+        obj->unk48[(((j * 20) + i) * 4) + 2].v.cn[2] = b;
+        obj->unk48[(((j * 20) + i) * 4) + 2].v.cn[3] = 0xFF;
+        obj->unk48[(((j * 20) + i) * 4) + 3].v.flag = 0;
+        obj->unk48[(((j * 20) + i) * 4) + 3].v.tc[0] = c3;
+        obj->unk48[(((j * 20) + i) * 4) + 3].v.tc[1] = t;
+        obj->unk48[(((j * 20) + i) * 4) + 3].v.cn[0] = r;
+        obj->unk48[(((j * 20) + i) * 4) + 3].v.cn[1] = g;
+        obj->unk48[(((j * 20) + i) * 4) + 3].v.cn[2] = b;
+        obj->unk48[(((j * 20) + i) * 4) + 3].v.cn[3] = 0xFF;
+      }
+
+    }
+  }
+
+  obj->unk4C = 0;
+  return obj;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1D92F0/func_151AD174.s")
 
