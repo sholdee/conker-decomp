@@ -1,8 +1,15 @@
 #include <ultra64.h>
 
 #define func_150ADA20 func_150ADA20_u8_proto
+#define func_10010154 func_10010154_hdr
+#define func_10010630 func_10010630_hdr
 #include "functions.h"
 #undef func_150ADA20
+#undef func_10010154
+#undef func_10010630
+/* volume (arg2) is unsigned at the call sites. */
+u16 func_10010154(u16 arg0, void *arg1, u32 arg2, s16 arg3, u16 arg4);
+void func_10010630(u16 arg0, struct127 *arg1, u32 arg2, s16 arg3, u16 arg4);
 #define D_80099A3C D_80099A3C_s16_hdr
 #define D_80099A3E D_80099A3E_s16_hdr
 #include "variables.h"
@@ -13,6 +20,7 @@ extern u8 D_80099A3C[];
 extern u8 D_80099A3E;
 
 void func_15131D4C(s32 arg0, s32 arg1);
+void func_1506BF5C(void);
 s32 func_1000F568(s32 arg0, s32 arg1);
 extern s32 func_151EF610(void);
 extern s32 D_800D187C;
@@ -706,7 +714,103 @@ void func_1506BF1C(void) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506BF5C.s")
+extern u8 *D_80086CAC[];
+extern f32 D_80099C48;
+u16 func_10011EB8(s32 arg0, u16 *arg1, s32 arg2);
+s32 func_1510F8CC(s32);
+
+void func_1506BF5C(void) {
+    u32 sound;
+    u32 owner;
+    u16 volume;
+    f32 level;
+    f32 max;
+    u32 top;
+    s32 type;
+    u8 id;
+
+    sound = D_800D1580 & 0x7FF;
+    id = D_800D154C->id;
+    top = (u32)D_800D1580 >> 24;
+    if (D_800D1C90[id]->unk4 != 0) {
+        owner = *D_80086CAC[(u8)D_800D1C90[id]->unk5];
+    } else {
+        owner = id;
+    }
+    D_800D187C = 0;
+    switch (D_800D1580 & 0xC000) {
+    case 0x4000:
+        if (owner != top) {
+            return;
+        }
+        break;
+    case 0x8000:
+        if (owner == top) {
+            return;
+        }
+        break;
+    }
+    if (D_800D1580 & 0x10000) {
+        D_800D187C = D_800D1580 + 1;
+        return;
+    }
+    volume = 0x7D00;
+    switch (D_800D1580 & 0x3800) {
+    case 0x2000:
+        if (D_80082FA0 >= 2) {
+            break;
+        }
+        type = func_1510F8CC(D_800D154C->unk184);
+        if (type == 0xC && D_800D154C->unkCC > -17.0f) {
+            sound = func_1000F568(0x9C, 2);
+        } else if (D_80099C48 != D_800D154C->unk118 && D_800D154C->y_position <= D_800D154C->unk118) {
+            sound = func_10011EB8(8, NULL, sound);
+            type = 8;
+        } else {
+            sound = func_10011EB8(type, &volume, sound);
+        }
+        if (sound == 0) {
+            break;
+        }
+        if (D_800D154C->unk31C != NULL) {
+            level = *(f32 *)D_800D154C->unk31C;
+        } else {
+            level = D_800D154C->y_velocity;
+        }
+        if (type == 0xC) {
+            max = 10.0f;
+        } else {
+            max = 30.0f;
+        }
+        if (max < level) {
+            level = max;
+        }
+        if (level < 0.0f) {
+            level = 0.0f;
+        }
+        level *= (f32)0.5 / max;
+        level += 0.5f;
+        volume = volume * level;
+        if (type == 8) {
+            func_10010630(sound, D_800D154C, volume, 500, 2500);
+            break;
+        }
+    case 0:
+        func_10010154(sound, D_800D154C, volume, 500, 2500);
+        break;
+    case 0x1000:
+        func_10010344(sound, D_800D154C, 0x7D00, 500, 2500);
+        break;
+    case 0x3800:
+        if (func_1001147C(D_800D154C->unk8E) != sound) {
+            func_10010154(sound, D_800D154C, volume, 500, 2500);
+        }
+        break;
+    case 0x3000:
+        func_10010630(sound, D_800D154C, 0x7D00, 500, 2500);
+        break;
+    }
+}
 
 void func_1506C32C(void) {
     s32 cmd;
