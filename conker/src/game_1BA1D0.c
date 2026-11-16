@@ -2046,7 +2046,99 @@ void func_15191400(struct Struct15191400Arg *arg0) {
     bzero(arg0->unk24, 0x2D0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1BA1D0/func_15191520.s")
+struct Sub15191520 {
+    f32 vx;
+    f32 vy;
+    f32 vz;
+    f32 grav;
+    f32 drag;
+    u8 pad_14[4];
+    f32 damp;
+    u8 pad_1C[0x1C];
+    f32 floor;
+    u8 unk3C[0x19];
+    u8 type;
+    u8 pad_56[6];
+    u8 color;
+};
+
+struct Obj15191520 {
+    u8 pad_0;
+    u8 unk1;
+    u8 pad_2[0xA];
+    u8 unkC;
+    u8 pad_D[0x1F];
+    f32 unk2C;
+    f32 unk30;
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 x2;
+    f32 y2;
+    f32 z2;
+    u8 pad_4C[0x10];
+    u8 unk5C;
+    u8 pad_5D[0xB3];
+    struct Sub15191520 sub;
+};
+
+s32 func_1514672C(struct17 *arg0);
+s32 func_15046C80(f32 *arg0, s32 arg1, f32 arg2, void *arg3);
+void func_151DAB58(u8, f32, u8, struct17 *, s32, u8, u8);
+
+s8 func_15191520(struct Obj15191520 *arg0) {
+    f32 dx;
+    f32 dz;
+    f32 dy;
+    struct Sub15191520 *sub;
+    s8 ret;
+    f32 oldY;
+    f32 oldVz;
+    f32 oldVx;
+
+    oldY = arg0->y;
+    sub = &arg0->sub;
+    ret = 1;
+    oldVx = sub->vx;
+    oldVz = sub->vz;
+    sub->vx *= sub->drag * D_800BE9A4;
+    sub->vz *= sub->drag * D_800BE9A4;
+    dx = (sub->vx + oldVx) * 0.5f * D_800BE9A4;
+    dy = sub->vy * D_800BE9A4 + sub->grav * D_800BE9A4 * D_800BE9A4 * 0.5f;
+    dz = (sub->vz + oldVz) * 0.5f * D_800BE9A4;
+    sub->vy += sub->grav * D_800BE9A4;
+    arg0->x += dx;
+    arg0->y += dy;
+    arg0->z += dz;
+    arg0->x2 += dx;
+    arg0->y2 += dy;
+    arg0->z2 += dz;
+    arg0->x2 = arg0->x + (arg0->x2 - arg0->x) * sub->damp;
+    arg0->y2 = arg0->y + (arg0->y2 - arg0->y) * sub->damp;
+    arg0->z2 = arg0->z + (arg0->z2 - arg0->z) * sub->damp;
+    {
+    struct17 pos;
+    pos.unk0 = arg0->x;
+    pos.unk4 = oldY - arg0->unk30;
+    pos.unk8 = arg0->z;
+
+    if (func_1514672C(&pos) == 0) {
+        return 0;
+    }
+    if (func_15046C80((f32 *)&pos, 0, arg0->y - arg0->unk30, &sub->floor) != 0) {
+        pos.unk4 = sub->floor;
+        if (sub->type == 3) {
+            func_151DBCBC(sub->color, arg0->unk2C * arg0->unk30 * 0.25f, arg0->unk5C, (s32)&sub->unk3C, &pos, arg0->unkC, arg0->unk1);
+        } else if (func_150ADA20() & 1) {
+            func_151D9B8C(sub->color, arg0->unk2C * arg0->unk30 * 0.150000006f, arg0->unk5C, (s32)&sub->unk3C, &pos, (func_150ADA20() % 41U) + 0x50, 1, 1, 0, arg0->unkC, arg0->unk1);
+        } else {
+            func_151DAB58(sub->color, arg0->unk2C * arg0->unk30 * 0.05000000075f, arg0->unk5C, &pos, 1, arg0->unkC, arg0->unk1);
+        }
+        ret = 0;
+    }
+    }
+    return ret;
+}
 
 s32 func_1519187C(void *arg0)
 {
