@@ -860,7 +860,134 @@ void func_1506C43C(void) {
 // requires jump table
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506C460.s")
 // requires jump table
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506CE6C.s")
+extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
+extern void func_15145974(void *, f32 *, f32 *);
+extern void *D_800CC5EC;
+
+void func_1506CE6C(void) {
+    s32 idx;
+    s32 cmd;
+    f32 yaw;
+    f32 pitch;
+    f32 dist;
+    f32 sp88;
+    f32 sp84;
+    f32 sp80;
+    f32 sp7C;
+    f32 sp78;
+    f32 (*mtxs)[16];
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 a;
+    f32 b;
+    f32 t;
+    s32 flag;
+    s32 sp54;
+    f32 *sp50;
+    f32 vec[3];
+
+    sp54 = 0;
+    sp88 = 0.0f;
+    yaw = 45.0f;
+    dist = 323.0f;
+    sp7C = 0.5f;
+    pitch = (D_800D154C->unk7A + 0x4000) * 0.0054931640625f;
+    idx = -1;
+    flag = 0;
+    sp50 = NULL;
+    cmd = D_800D1580;
+    if (cmd == 5 || cmd == 9 || cmd == 10) {
+        idx = 3;
+    }
+    if (idx != -1) {
+        if (D_800D154C->unk1D4 != NULL) {
+            mtxs = (f32 (*)[16])D_800D154C->unk1D4;
+            func_150A7960(mtxs[idx], 0.0f, 0.0f, 1.0f, &x, &y, &z);
+            x -= mtxs[idx][12];
+            y -= mtxs[idx][13];
+            z -= mtxs[idx][14];
+            a = func_150484A0(x, z);
+            b = func_150484A0(y, sqrtf(x * x + z * z));
+            a *= 57.29577637f;
+            b *= 57.29577637f;
+            if (a > 180.0f) {
+                a -= 360.0f;
+            }
+            if (b > 180.0f) {
+                b -= 360.0f;
+            }
+            pitch = a;
+            yaw = b;
+        }
+    } else if (D_800D154C->camera != NULL && D_800D154C->camera->unk2C == 0x100) {
+        yaw = D_800D154C->camera->unk780;
+        if (yaw < 0.0f) {
+            yaw = yaw * -0.5f + yaw * -0.2333000004f + 7.0f;
+        } else {
+            yaw = yaw * -0.5f + (60.0f - yaw) * 0.1330000013f;
+        }
+        yaw *= 1.40625f;
+    } else {
+        yaw = -D_800D154C->unk1D1;
+    }
+
+    switch (cmd) {
+    case 2:
+    case 11:
+    case 12:
+    case 18:
+        flag = 1;
+        yaw = yaw;
+        break;
+    case 15:
+        yaw *= 2.200000048f;
+        yaw += 7.0f;
+        sp88 = 3.299999952f;
+        yaw = yaw;
+        break;
+    case 1:
+        sp88 = 2.400000095f;
+        yaw = yaw;
+        break;
+    case 3:
+        dist = 500.0f;
+        func_15145974((u8 *)D_800CC5EC + 0xE8, &pitch, &yaw);
+        vec[0] = *(f32 *)((u8 *)D_800CC5EC + 0xDC);
+        vec[1] = *(f32 *)((u8 *)D_800CC5EC + 0xE0);
+        vec[2] = *(f32 *)((u8 *)D_800CC5EC + 0xE4);
+        flag = 1;
+        sp50 = vec;
+        yaw = -yaw;
+        break;
+    case 6:
+        flag = 1;
+        yaw = 0.0f;
+        dist = 500.0f;
+        break;
+    case 17:
+        sp54 = 0x30;
+        yaw = 0.0f;
+        dist = 150.0f;
+        break;
+    case 4:
+        dist = 250.0f;
+        yaw = yaw;
+        break;
+    case 5:
+    case 9:
+    case 10:
+        flag = 1;
+        sp88 = 5.0f;
+        dist = 593.0f;
+        sp7C = 1.5f;
+        yaw = yaw;
+        break;
+    }
+    func_1505A184((s16)(yaw * 182.0444489f), dist, 0.0f, &sp84, &sp80, &sp78);
+    sp80 = -sp80;
+    func_1506C460(pitch, sp84, sp80, sp88, 100, cmd, 0.0f, sp7C, (s32)sp50, sp54, flag);
+}
 
 extern struct127 *func_1505EEF4(s32 arg0);
 extern void func_151A3390(void *arg0, u8 arg1);
@@ -2693,6 +2820,7 @@ struct127 *func_150721E8(struct127 *arg0) {
 }
 
 struct127 *func_15072208(struct127 *arg0, s32 arg1) {
+    f32 t;
     s32 idx;
     s32 count;
     s32 i;
