@@ -351,7 +351,20 @@ void func_1511617C(struct Obj1511617C *arg0) {
 
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_142560/func_151162D4.s")
+void func_151162D4(void *arg0) {
+    f32 scale;
+    u32 step;
+    s16 prev;
+    f32 offset;
+
+    prev = *(f32 *)((u8 *)arg0 + 0x18) + (f32) *(s16 *)((u8 *)arg0 + 0x12);
+    scale = (s16) (*(s32 *)((u8 *)arg0 + 0x3C) & 0xFFFF);
+    step = (*(s32 *)((u8 *)arg0 + 0x3C) >> 16) & 0xFFFF;
+    offset = cosf((f32) *(s32 *)((u8 *)arg0 + 0x7C) * 0.0054931640625f) * scale;
+    *(f32 *)((u8 *)arg0 + 0x18) = offset;
+    *(s32 *)((u8 *)arg0 + 0x7C) += step * D_800BE9E4;
+    *(s16 *)((u8 *)arg0 + 0x5C) = ((f32) *(s16 *)((u8 *)arg0 + 0x12) + offset) - prev;
+}
 
 void func_151163C0(struct Obj151163C0 *arg0) {
     volatile f32 sp2C;
