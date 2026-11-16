@@ -38,6 +38,7 @@ void func_15058F24(struct127 *arg0, f32, f32);
 void func_1505D6F0(struct127 *arg0, s32 arg1);
 u8   func_150599C8(struct127 *arg0, u8 arg1, u16 arg2);
 void func_1505A250(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4);
+void func_150611E8(struct127 *arg0, s32 arg1);
 void func_1505A770(void *arg0);
 void func_15059C84(void *arg0);
 f32  func_1505A3A8(f32 arg0, void *arg1, f32 arg2, f32 arg3, u8 arg4);
@@ -3304,7 +3305,71 @@ void func_15060D54(Game83300ActorLink *arg0) {
 //     func_1505F188(arg0);
 // }
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_15060F28.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_150611E8.s")
+typedef struct PathPt150611E8 {
+    s16 x;
+    s16 y;
+    s16 z;
+    u16 speed;
+} PathPt150611E8;
+
+void func_150611E8(struct127 *arg0, s32 arg1) {
+    s32 count;
+    s32 closest;
+    s32 i;
+    s32 best;
+    s16 x;
+    s16 z;
+    PathPt150611E8 *pts;
+    f32 speed;
+    f32 scale;
+    s32 dx;
+    s32 dz;
+    u16 angle;
+    s32 dist;
+
+    count = D_800D2108[arg1];
+    if (count < 3) {
+        return;
+    }
+    x = arg0->x_position;
+    z = arg0->z_position;
+    best = 0x7FFFFFFF;
+    for (i = 0; i < count; i++) {
+        dx = x - ((PathPt150611E8 **)D_800D2104)[arg1][i].x;
+        dz = z - ((PathPt150611E8 **)D_800D2104)[arg1][i].z;
+        if (dx * dx + dz * dz < best) {
+            closest = i;
+            best = dx * dx + dz * dz;
+        }
+    }
+    if (closest != 0 && closest != count - 1) {
+        pts = ((PathPt150611E8 **)D_800D2104)[arg1];
+        if (best > 28000) {
+            dx = x - pts[closest + 1].x;
+            dz = z - pts[closest + 1].z;
+            dist = dx * dx + dz * dz;
+            dx = x - pts[closest - 1].x;
+            dz = z - pts[closest - 1].z;
+            if (dx * dx + dz * dz < dist) {
+                closest--;
+            }
+        }
+        if (pts[closest + 1].speed == 0) {
+            speed = 8.0f;
+        } else {
+            speed = (u32)pts[closest + 1].speed;
+        }
+        scale = speed * 0.0025f;
+        if (scale > 1.0f) {
+            scale = 1.0f;
+        }
+        angle = func_1505A630(pts[closest + 1].x - pts[closest].x, pts[closest].z - pts[closest + 1].z, 0);
+        if (arg0->unk31C != NULL && speed > 20.0f) {
+            *(s16 *)((u8 *)arg0->unk31C + 0x68) = angle | 1;
+        }
+        func_150593C4(arg0, angle, speed, scale);
+    }
+}
 
 // TODO: is this really struct127?
 void func_150615DC(struct127 *arg0) {
