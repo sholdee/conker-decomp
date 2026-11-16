@@ -2523,7 +2523,73 @@ s32 func_1508E780(s32 arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_B4080/func_1508E89C.s")
+void func_15062800(struct127 *, struct127 *);
+
+s32 func_1508E89C(s32 arg0, s32 arg1) {
+    struct127 *obj;
+    s32 savedRot;
+    s32 bit0;
+    s32 tmp;
+    u8 slot;
+    s8 *res;
+
+    obj = &D_800CC2D0[arg0];
+    if (((u8 *)&D_800D18A4)[arg0] > 50) {
+        if (!(D_800D18A2 & (1 << arg0))) {
+            bit0 = 1 << arg0;
+            D_800D18A2 |= bit0;
+            D_800D18A0 &= ~bit0;
+            D_800D18A0 |= (1 << arg1);
+            tmp = func_150859AC(arg1, 3);
+            func_15085710(arg0, 2, tmp);
+            func_15085710(arg1, 2, 0);
+            if (*(s32 *)(D_800D23B0 + 0x18) != 0) {
+                *(s32 *)(D_800D23B0 + 0x18) &= ~bit0;
+                *(s32 *)(D_800D23B0 + 0x18) |= (1 << arg1);
+            }
+            if (D_800D23B0 + 0x9C) {
+                ((s32 *)(D_800D23B0 + 0x9C))[arg0] = ((s32 *)(D_800D23B0 + 0x9C))[arg1];
+            }
+            if (D_800D23B0 + 0x39C) {
+                ((s32 *)(D_800D23B0 + 0x39C))[arg0] = ((s32 *)(D_800D23B0 + 0x39C))[arg1];
+            }
+            if (D_800D23B0 + 0x3DC) {
+                ((s32 *)(D_800D23B0 + 0x3DC))[arg0] = ((s32 *)(D_800D23B0 + 0x3DC))[arg1];
+            }
+            if (D_800D23B0 + 0xEB0) {
+                ((s32 *)(D_800D23B0 + 0xEB0))[arg0] = ((s32 *)(D_800D23B0 + 0xEB0))[arg1];
+                if (((s32 *)(D_800D23B0 + 0xEB0))[arg0] >= 0) {
+                    ((s32 *)(D_800D23B0 + 0xF70))[((s32 *)(D_800D23B0 + 0xEB0))[arg0]] = arg0;
+                }
+            }
+            ((s32 *)(D_800D23B0 + 0x16C0))[arg0] = ((s32 *)(D_800D23B0 + 0x16C0))[arg1];
+            savedRot = obj->unk31C->unk1AA;
+            func_15062800(&D_800CC2D0[arg1], obj);
+            if (D_800BE9F0 == 0x3F) {
+                if (obj->unk13C >= 100) {
+                    slot = obj->unk13C - 100;
+                    res = func_1509B570(D_800D2E48);
+                    if (res != NULL) {
+                        s32 idx;
+                        s32 id;
+
+                        idx = obj - D_800CC2D0;
+                        id = D_800CC2D0[slot].unique_id - 20;
+                        *(s32 *)(res + id * 4 + 0x24B8) = idx | 0x2000;
+                        *(s32 *)(res + id * 4 + 0x24DC) = idx;
+                    }
+                }
+            }
+            obj->unk31C->unk84 = 0;
+            obj->immune = 90;
+            obj->unk31C->unk1AA = savedRot;
+            *((u8 *)obj->unk31C + 0x1AF) = 0x40;
+            func_15128774(obj->camera, obj);
+            (*(s8 *)&D_8008FD94)++;
+        }
+    }
+    return 0;
+}
 
 extern struct127 D_800CC40F[];
 
