@@ -1683,7 +1683,224 @@ s8 func_151E5FAC(void) {
     return D_8008FD90;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_20AE20/func_151E5FF4.s")
+typedef struct {
+    /* 0x00 */ char pad0[0x46];
+    /* 0x46 */ s16 unk46[4];
+    /* 0x4E */ char pad4E[0x18];
+    /* 0x66 */ struct {
+        /* 0x00 */ s16 unk0;
+        /* 0x02 */ s16 unk2;
+        /* 0x04 */ s16 unk4;
+        /* 0x06 */ s16 unk6;
+        /* 0x08 */ s16 unk8;
+        /* 0x0A */ s16 unkA;
+    } rec[4];
+} ScoreState151E5FF4;
+
+s32 func_1000F568(s32 arg0, s32 arg1);
+void func_10010558(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4, s32 arg5);
+
+#define SCORE ((ScoreState151E5FF4 *)D_8008FDD4)
+
+void func_151E5FF4(struct127 *arg0, struct127 *arg1, s32 arg2) {
+    struct127 *player;
+    s32 pad50;
+    s32 idx;
+    s32 idx2;
+    s32 sound;
+    s32 delay;
+    s32 count;
+    s32 state;
+    s32 state2;
+    s32 r;
+    u8 v;
+    s32 h;
+
+    player = arg0;
+    idx = arg0 - D_800CC2D0;
+    if (idx >= D_8008FD8C) {
+        idx = arg0->unk124 - 1;
+        if (idx >= 0) {
+            player = &D_800CC2D0[idx];
+        }
+    }
+    if ((idx >= 0) && (idx < D_8008FD8C) && (idx < D_8008FD8C)) {
+        idx2 = arg1 - D_800CC2D0;
+        D_800E0BB8[idx2] = idx | 0x80;
+        if (idx < D_8008FD90) {
+            if (D_800E0C00[idx] != D_800E0C00[idx2]) {
+                SCORE->rec[idx].unk0++;
+                if (arg2 == 0x2E) {
+                    SCORE->rec[idx].unk4++;
+                }
+            }
+            if ((arg1->health <= 0) && (D_800E0C00[idx] == D_800E0C00[idx2]) && (arg2 != 0x2D)) {
+                SCORE->rec[idx].unkA++;
+            }
+        }
+        if (arg1->health <= 0) {
+            if ((SCORE->unk46[idx] < 9999) && (D_800E0C00[idx] != D_800E0C00[idx2])) {
+                SCORE->unk46[idx]++;
+                if (D_8008FDBC & 0x200) {
+                    func_15085710(D_800E0C00[idx] != 0, 10, 1);
+                }
+            }
+        }
+        if (idx2 < D_8008FD90) {
+            SCORE->rec[idx2].unk8++;
+        }
+        if ((player != arg1) && (arg1->unk31C != NULL) && (player->health != 0)) {
+            sound = 0;
+            delay = 0;
+            player->unk31C->pad98[0x17] = 0;
+            count = 0;
+            if (arg2 == 0x33) {
+                v = arg1->unk31C->unk78;
+                if ((v == 0x21) || (v == 0x22)) {
+                    func_10010630(0x510, arg1, 0x61A8, 0x12C, 0x190);
+                }
+            } else if ((player->id == 0x75) && (arg1->health <= 0)) {
+                if (player->id == arg1->id) {
+                    if ((idx2 < D_8008FD90) && (SCORE->rec[idx2].unkA >= 4)) {
+                        sound = 0x665;
+                        count = 4;
+                    }
+                } else if (arg2 == 0x34) {
+                    if ((func_150ADA20() & 3) == 3) {
+                        sound = 0x52A;
+                    }
+                } else {
+                    sound = 0x4D1;
+                    count = 3;
+                }
+                if (sound != 0) {
+                    if (count != 0) {
+                        sound = func_1000F568(sound, count);
+                    }
+                    func_10010558(sound, player, 0x6D60, 0x320, 0xBB8, delay);
+                }
+            } else if (player->id == 0x80) {
+                state = -1;
+                if ((arg0 != player) && (arg0->interaction_state == 4)) {
+                    state = (u16)arg0->unk278;
+                }
+                if (player->id == arg1->id) {
+                    if ((idx2 < D_8008FD90) && (SCORE->rec[idx2].unkA >= 4)) {
+                        count = 8;
+                        sound = 0x65A;
+                    }
+                } else if (state == 2) {
+                    if ((arg1->health <= 0) || ((func_150ADA20() & 7) == 0)) {
+                        count = 3;
+                        sound = 0x571;
+                    }
+                } else if (*((u8 *)arg1->unk31C + 0x1AC) != 0) {
+                    if ((arg2 != 0x21) && ((arg1->health <= 0) || ((func_150ADA20() & 3) == 3))) {
+                        count = 4;
+                        sound = 0x582;
+                        delay = 0x1E;
+                    }
+                } else if (arg2 == 0x2E) {
+                    delay = 0x1E;
+                    if ((player->unk31C->unk78 == 0x23) && ((func_150ADA20() & 3) == 0)) {
+                        sound = 0x587;
+                    } else {
+                        sound = 0x579;
+                        count = 3;
+                    }
+                } else if (arg2 == 0x2F) {
+                    if (func_150ADA20() & 1) {
+                        sound = 0x588;
+                        delay = 0x1E;
+                    }
+                } else if (arg2 == 0x2C) {
+                    sound = 0x56D;
+                    count = 7;
+                    delay = 0x3C;
+                } else if (((arg2 == 0x21) || (arg2 == 0x20) || (arg2 == 0x31)) &&
+                           ((arg1->health <= 0) || ((func_150ADA20() & 7) == 3))) {
+                    sound = 0x571;
+                    count = 3;
+                    delay = 0x1E;
+                }
+                if (sound != 0) {
+                    if (count != 0) {
+                        sound = func_1000F568(sound, count);
+                    }
+                    func_10010558(sound, player, 0x7D00, 0x258, 0x7D0, delay);
+                }
+            } else if (player->id == 0x3B) {
+                state2 = -1;
+                if ((arg0 != player) && (arg0->interaction_state == 4)) {
+                    state2 = (u16)arg0->unk278;
+                }
+                if (state2 == 2) {
+                    if ((arg1->health <= 0) || ((func_150ADA20() & 7) == 7)) {
+                        sound = 0x538;
+                        count = 3;
+                    }
+                } else if (arg2 == 0x2E) {
+                    sound = 0x52F;
+                    count = 3;
+                    delay = 0x1E;
+                } else if ((arg2 == 0x2C) || (arg2 == 0x2F)) {
+                    sound = 0x540;
+                    count = 2;
+                    delay = 0x3C;
+                } else if ((arg2 == 0x25) || (arg2 == 0x26)) {
+                    h = arg1->health;
+                    if (idx & 1) {
+                        if (h >= 2) {
+                            sound = 0x55F - h;
+                            delay = 0x1E;
+                        }
+                    } else {
+                        sound = 0x565 - h;
+                        delay = 0x1E;
+                    }
+                } else if (arg2 == 0x21) {
+                    if ((func_150ADA20() & 3) == 3) {
+                        sound = 0x52C;
+                        delay = 0x1E;
+                    }
+                } else if (arg2 == 0x20) {
+                    r = func_150ADA20() & 0xF;
+                    if (r != 0) {
+                        r++;
+                    }
+                    if (r < 4) {
+                        sound = r + 0x52B;
+                        delay = 0x1E;
+                    }
+                }
+                if (sound != 0) {
+                    if (count != 0) {
+                        sound = func_1000F568(sound, count);
+                    }
+                    func_10010558(sound, player, 0x7D00, 0x258, 0x7D0, delay);
+                }
+            } else if ((player->id == 0x88) && (arg1->health <= 0)) {
+                if (arg2 == 0x34) {
+                    if ((func_150ADA20() & 3) == 3) {
+                        sound = 0x52A;
+                    }
+                } else if (arg2 == 0x21) {
+                    sound = 0x41A;
+                } else {
+                    sound = 0x415;
+                    delay = 0x1E;
+                    count = 5;
+                }
+                if (sound != 0) {
+                    if (count != 0) {
+                        sound = func_1000F568(sound, count);
+                    }
+                    func_10010558(sound, player, 0x6D60, 0x320, 0xBB8, delay);
+                }
+            }
+        }
+    }
+}
 
 extern s8 D_800E0BEA;
 extern s8 D_800E0BD3;
