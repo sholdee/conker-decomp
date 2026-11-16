@@ -1030,7 +1030,72 @@ void func_1506DE04(void) {
 }
 
 // jump table
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506DE84.s")
+void func_1516F1C0(s32, s32, u8, s32);
+void func_1516F2F8(u8, s32, s32, s32, u8, s32);
+void func_151875E0(f32, f32, f32, s32, s32, s32, f32, f32);
+void func_150AFDB0(void);
+void func_150AFE64(s32);
+void func_1506E0EC(void);
+void func_1506E2CC(void);
+
+void func_1506DE84(void) {
+    switch (D_800D1580) {
+    case 0:
+        if (*(f32 *)((u8 *)D_800D154C + 0x28) == 0.0f) {
+            func_151875E0(*(f32 *)((u8 *)D_800D154C + 0x14),
+                          *(f32 *)((u8 *)D_800D154C + 0x18),
+                          *(f32 *)((u8 *)D_800D154C + 0x1C),
+                          30, 30, 7, 0.1f, 0.1f);
+        }
+        return;
+    case 1:
+        if ((u32)(func_150ADA20() & 0xFF) < 0x40U) {
+            func_151875E0(*(f32 *)((u8 *)D_800D154C + 0x14),
+                          *(f32 *)((u8 *)D_800D154C + 0x18),
+                          *(f32 *)((u8 *)D_800D154C + 0x1C),
+                          10, 20, 7, 0.03f, 0.02f);
+            D_800D1580 = 0x106;
+            func_1506BA4C(0x12C, 0x708);
+        }
+        return;
+    case 2:
+        func_1516F1C0(D_800C3E78, 0x10, 0xFF, 0);
+        return;
+    case 3:
+        func_1516F1C0(D_800C3E78, 0x28, 0xFF, 0);
+        return;
+    case 4:
+        func_1516F1C0(D_800C3E78, 0x28, 0xFF, 0);
+        return;
+    case 5:
+        func_1516F2F8(D_800C3E78, 30, 20, 2, 0xFF, 0);
+        return;
+    case 6:
+        func_1516F2F8(D_800C3E78, 18, 12, 2, 0xFF, 0);
+        return;
+    case 7:
+        func_1516F2F8(D_800C3E78, 60, 120, 2, 0xFF, 0);
+        return;
+    case 8:
+        func_1506E0EC();
+        return;
+    case 9:
+        func_150AFE64(0);
+        return;
+    case 10:
+        func_150AFE64(1);
+        return;
+    case 11:
+        func_1506E2CC();
+        return;
+    case 12:
+        func_1516F2F8(D_800C3E78, 18, 12, 0, 0xFF, 0);
+        return;
+    case 13:
+        func_150AFDB0();
+        break;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506E0EC.s")
 void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
