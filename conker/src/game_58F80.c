@@ -44,7 +44,62 @@ extern void func_1503DF48(s32);
 extern void func_150A4B04(struct127 *);
 extern void func_1517AD00(s32, s32, s32);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502BAD0.s")
+typedef struct { u32 first, second; } Game58F80Command;
+typedef struct {
+    s32 active;
+    u8 model, kind;
+    u8 pad6[0x17E];
+    u32 flags;
+    u8 pad188[0x1A4];
+} Game58F80DrawActor;
+extern u8 D_80084160[];
+extern u8 D_80084190[];
+extern s32 func_1506196C(struct127 *, s32);
+void *func_1502C408(void *, s32);
+s32 func_1502C974(s32, s32, s32, s32, s32);
+void *func_150368C4(s32, s32, s32);
+s32 func_15030E08(s32, s32, s32);
+
+Game58F80Command *func_1502BAD0(Game58F80Command *commands, s32 mode, s16 arg2) {
+    Game58F80DrawActor *actor;
+    s32 index;
+    s32 active;
+
+    { Game58F80Command *opening = commands++; opening->first = 0xDE000000; opening->second = (u32)D_80084160; }
+    actor = (Game58F80DrawActor *)&D_800CC2D0;
+    for (index = 0; index != 25; index++, actor++) {
+        D_8003C8E0 = (index & 0xFFFFFF) | 0x01000000;
+        active = actor->active;
+        if (active == 0 || actor->kind == 3 || actor->kind == 5) continue;
+        if (actor->kind == 2) {
+            if (mode != 2) continue;
+        } else if (actor->model == 0xFF) continue;
+        if (mode == 6) {
+            if (actor->kind != 7) continue;
+        } else if (mode == 0) {
+            if (!((actor->flags >> 9) & 1)) continue;
+        } else if (mode == 1) {
+            if (actor->kind == 7 || actor->kind == 1) continue;
+            if (actor->kind == 0 && func_1506196C((struct127 *)actor, arg2) < 0xFF) continue;
+        } else if (mode == 2 && actor->kind != 2) {
+            if (actor->kind == 7 || (actor->kind != 0 && actor->kind != 1)) continue;
+            if (actor->kind == 0 && func_1506196C((struct127 *)actor, arg2) == 0xFF) continue;
+        }
+        if (actor->kind == 2) {
+            commands = func_1502C408(commands, index);
+        } else {
+            commands = (Game58F80Command *)func_1502C974((s32)commands, index, arg2, mode, 0);
+            if (index == 0) commands = func_150368C4((s32)commands, index, arg2);
+        }
+    }
+    D_8003C8E0 = 0x01FFFFFF;
+    if (mode == 1) commands = (Game58F80Command *)func_15030E08((s32)commands, arg2, 0);
+    else if (mode == 2) commands = (Game58F80Command *)func_15030E08((s32)commands, arg2, 1);
+    else if (mode == 6) commands = (Game58F80Command *)func_15030E08((s32)commands, arg2, 2);
+    { Game58F80Command *closing = commands++; closing->first = 0xDE000000; closing->second = (u32)D_80084190; }
+    D_8003C8E0 = 0;
+    return commands;
+}
 
 void func_1502BD84(struct127 *arg0, s32 arg1) {
     arg0->unk1D4 = NULL;
