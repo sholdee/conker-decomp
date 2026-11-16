@@ -1539,7 +1539,55 @@ void func_15198110(Emitter15198110 *arg0, s32 arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1C2C60/func_15198570.s")
+extern void func_1505D024(struct127 *, s32, u16, s32);
+extern s32 func_1518D1C0(struct127 *, s32, s32, s32, s32, s32, s32 *);
+extern s32 D_800A8A84;
+
+s32 func_15198570(Emitter15196748 *arg0) {
+    Desc15196748 *desc;
+    Particle15196748 *arr;
+    struct127 *obj;
+    s32 i;
+    Vec15196748 pos;
+    f32 r;
+    f32 h;
+    f32 d;
+    f32 dx;
+    f32 dz;
+    f32 dy;
+    f32 p1;
+
+    desc = arg0->unk98;
+    arr = arg0->unk94;
+    obj = &D_800CC2D0[0];
+    i = arg0->unk2E;
+    while (i != arg0->unk2D) {
+        i--;
+        if (i < 0) {
+            i = arg0->unk25 - 1;
+        }
+        pos = arr[i].pos;
+        r = obj->unkE4;
+        h = obj->unkE6;
+        dx = pos.x - obj->x_position;
+        dz = pos.z - obj->z_position;
+        dy = pos.y - (obj->y_position + (s16)obj->unkE8);
+        dy *= (1.0f + r / h) * 0.5f;
+        d = dx * dx + dy * dy + dz * dz;
+        if (d < r * r) {
+            func_1505D024(obj, 0x60006, obj->unk7A, ((s32)*(struct127 **)desc - (s32)D_800CC2D0) / 0x32C);
+            func_1518D1C0(obj, 0xB, 0, 1, ((u8 *)arg0)[0xC], ((u8 *)arg0)[1], &D_800A8A84);
+            while (i != arg0->unk2D) {
+                arg0->unk2D = arg0->unk2D + 1;
+                if (arg0->unk2D == arg0->unk25) {
+                    arg0->unk2D = 0;
+                }
+                arg0->unk2C = arg0->unk2C - 1;
+            }
+        }
+    }
+    return 1;
+}
 
 s32 func_151987CC(Emitter15196748 *arg0) {
     Desc15196748 *desc;
@@ -1550,11 +1598,11 @@ s32 func_151987CC(Emitter15196748 *arg0) {
     Vec15196748 pos;
     f32 r;
     f32 h;
+    f32 d;
     f32 dx;
     f32 dz;
     f32 dy;
     f32 p1;
-    f32 p2;
     f32 p3;
 
     desc = arg0->unk98;
