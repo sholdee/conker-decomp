@@ -95,7 +95,113 @@ typedef struct {
     AnimPlaybackState *field_0x2D0;
 } AnimPlaybackOwner;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_15055E50.s")
+typedef struct {
+    s16 x;
+    s16 z;
+    s16 y;
+    s16 h;
+    u16 r;
+} Seg15055E50;
+
+typedef struct {
+    Seg15055E50 *segs;
+    u16 count;
+    u16 id;
+} Tbl15055E50;
+
+extern Tbl15055E50 *D_800D18B0;
+
+void func_15055E50(struct127 *arg0, s32 arg1) {
+    s32 pad[5];
+    f32 bestX;
+    f32 bestZ;
+    f32 dist;
+    f32 inv;
+    f32 dx;
+    f32 dz;
+    f32 sz;
+    f32 r;
+    f32 best;
+    f32 y;
+    s32 i;
+    s32 ok;
+    s32 found;
+    u16 flags;
+    s32 count;
+    Seg15055E50 *seg;
+    Seg15055E50 *segs;
+
+    ok = 1;
+    found = 0;
+    if (arg0->id == 0x3A) {
+        if (arg0->x_position > 1200.0f) {
+            arg0->x_position = 1200.0f;
+        }
+        if (arg0->x_position < -1200.0f) {
+            arg0->x_position = -1200.0f;
+        }
+        if (arg0->z_position > 1200.0f) {
+            arg0->z_position = 1200.0f;
+        }
+        if (arg0->z_position < -1200.0f) {
+            arg0->z_position = -1200.0f;
+        }
+    }
+    if ((arg1 != 0) && (D_800D18B0 != NULL) && (arg0->unk13D < 100)) {
+        best = 1000000000.0f;
+        i = 0;
+        while (arg1 != D_800D18B0[i].id) {
+            if (D_800D18B0[i].segs == NULL) {
+                return;
+            }
+            i++;
+        }
+        segs = D_800D18B0[i].segs;
+        count = D_800D18B0[i].count;
+        for (i = 0; i < count; i++) {
+            seg = &segs[i];
+            if (ok || (seg->r & 0x8000)) {
+                y = arg0->y_position;
+                if ((seg->y <= y) && (y <= (seg->h + seg->y))) {
+                    flags = seg->r;
+                    r = flags & 0x7FFF;
+                    dx = arg0->x_position - seg->x;
+                    sz = seg->z;
+                    dz = arg0->z_position - sz;
+                    flags &= 0x8000;
+                    if (flags) {
+                        dist = (dx * dx) + (dz * dz) + 0.1f;
+                        if (dist < (r * r)) {
+                            inv = 1.0f / sqrtf(dist);
+                            arg0->x_position = seg->x + (dx * inv * r);
+                            arg0->z_position = seg->z + (dz * inv * r);
+                            arg0->unkF4 |= 0x2000;
+                        }
+                    } else {
+                        found = 1;
+                        dist = (dx * dx) + (dz * dz) + 0.1f;
+                        if (dist < (r * r)) {
+                            ok = 0;
+                        } else {
+                            if ((sqrtf(dist) - r) < best) {
+                                inv = 1.0f / sqrtf(dist);
+                                best = sqrtf(dist) - r;
+                                bestX = seg->x + (dx * inv * r);
+                                bestZ = sz;
+                                bestZ += dz * inv * r;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (ok && found) {
+            arg0->x_position = bestX;
+            arg0->z_position = bestZ;
+            arg0->unkF4 |= 0x2000;
+        }
+    }
+}
 
 void func_15056150(struct127 *arg0) {
     f32 temp_f0;
