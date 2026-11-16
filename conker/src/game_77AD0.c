@@ -1891,7 +1891,58 @@ void func_15054A94(u8 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_77AD0/func_15054F74.s")
+void func_15054F74(struct127 *arg0) {
+    s16 phi_v1;
+    f32 sp50;
+    f32 sp4C;
+    f32 sp48;
+    s16 x;
+    s16 z;
+
+    if (arg0->id == 12) {
+        if ((D_800C3E78 + 1) != D_800CC2D0[arg0->unk124].unk65) {
+            if (arg0->unk232 == 18) {
+                func_15052F9C(arg0, 50.0f, 0, 4, 0, 12, 0, 8, 0, 0);
+            } else if (D_800CC268 & 1) {
+                if (arg0->unk25C & 0x400) {
+                    arg0->unk124 = 0;
+                    func_1505327C(arg0, 39.0f, 3.0f, 18, 0);
+                }
+            }
+        }
+    } else if (arg0->id == 0x4B) {
+        func_1505A184(arg0->unk7A ^ 0x8000, 500.0f, 0.0f, &sp50, &sp48, &sp4C);
+        x = (s16)arg0->x_position + sp50;
+        z = (s16)arg0->z_position + sp48;
+        arg0->unk2EC = (x << 0x10) | (z & 0xFFFF);
+        if (arg0->unk84.uh != 0xF) {
+            phi_v1 = func_1505A630(D_800CC2D0[0].x_position - arg0->x_position, arg0->z_position - D_800CC2D0[0].z_position, 0);
+        } else {
+            phi_v1 = arg0->unk7A - 0x800;
+        }
+        phi_v1 -= arg0->unk7A;
+        phi_v1 /= 3;
+        arg0->unk7A += phi_v1;
+        arg0->xz_scale = 2.0f;
+        arg0->y_scale = 2.0f;
+        arg0->unk40 = 90.0f;
+    label:
+        ;
+    } else if (((arg0->id == 0x1B) || (arg0->id == 0x7E)) && (arg0->unk2E4 != 0)) {
+        if (D_800BE616 != 0) {
+            func_1508B20C(arg0->x_position, arg0->y_position, arg0->z_position, 900.0f);
+        }
+        if (D_800BE9E4 < arg0->unk2E4) {
+            if ((arg0->unk2E4 >= 0x78) && (arg0->unk2E4 < (D_800BE9E4 + 0x78))) {
+                func_10010154(0x3A1, arg0, 0x7D00, 0x1F4, 0x3E8);
+            }
+            arg0->unk2E4 -= D_800BE9E4;
+        } else {
+            arg0->unk232 = 6;
+            arg0->unk218 = 0;
+        }
+    }
+}
 // void func_15054F74(struct127 *arg0) {
 //     s16 phi_v1;
 //
@@ -1925,8 +1976,8 @@ void func_15054A94(u8 *arg0) {
 //                 phi_v1 = (s16) (arg0->unk7A - 0x800);
 //             }
 //             arg0->unk7A += (s16) (phi_v1 - arg0->unk7A) / 3;
-//             arg0->unk14C = 2.0f;
-//             arg0->unk150 = 2.0f;
+//             arg0->xz_scale = 2.0f;
+//             arg0->y_scale = 2.0f;
 //             arg0->unk40 = 90.0f;
 //         } else if (((arg0->id == 0x1B) || ((arg0->id == 0x7E))) && (arg0->unk2E4 != 0)) {
 //             if (D_800BE616 != 0) {
