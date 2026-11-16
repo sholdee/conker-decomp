@@ -92,7 +92,7 @@ extern s8 D_800E0B99;
 extern s8 D_800E0BB1;
 extern u8 D_800E0BD1;
 
-extern s8 D_800E0BE0[];
+static s8 D_800E0BE0[0x17];
 extern s8 D_8008FE54[];
 extern s8 D_8008FE6C[];
 extern s8 D_8008FE84[];
@@ -807,7 +807,29 @@ void func_151E5034(void) {
     D_8008FDD4->unk8 = 0.0f;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_20F9A0/func_151E50C8.s")
+extern struct Struct151E5034 D_800E0AF0;
+void func_151E6BFC(void);
+extern u8 D_800AB570[];
+
+void func_151E50C8(void) {
+    s32 i;
+
+    for (i = 0; i < 0x17; i++) D_800E0BE0[i] = D_8008FE54[i];
+    D_800E0A90 = 0;
+    func_151E6BFC();
+    if (D_8008FDD4 == NULL) {
+        D_8008FDD4 = &D_800E0AF0;
+        func_151E5034();
+        if (D_8008FDD4->unk3E == 1) {
+            D_8008FDD4->unk2C = D_800AB570[D_8008FDD4->unk2C];
+        }
+    }
+    func_15017790();
+    D_800E0B94 = 0xB;
+    D_800D2E40 = 0;
+    func_1501C730(6, 0x25, 0, 0, 1);
+    D_800E0B95 = D_800E0B94;
+}
 
 void func_151E51EC(void) {
     u8 state;
