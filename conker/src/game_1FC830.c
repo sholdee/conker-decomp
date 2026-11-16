@@ -277,7 +277,140 @@ typedef struct {
 s32 func_151CF120(Game1FC5D0Actor *arg0);
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1FC830/func_151CF380.s")
+typedef struct {
+    TrailVec3 pos;
+    u8 pad0C[8];
+    f32 width;
+    TrailVec2 off;
+    f32 dx, dz;
+} Ent151CF380;
+
+typedef struct {
+    u8 pad0[0x1D4];
+    s32 unk1D4;
+} Sub151CF380;
+
+typedef struct {
+    Sub151CF380 *sub;
+} Info151CF380;
+
+typedef struct {
+    u8 pad0[0x25];
+    u8 count;
+    u8 pad26[6];
+    s8 num;
+    s8 head;
+    s8 tail;
+    u8 pad2F[0x55];
+    u8 unk84[0x10];
+    Ent151CF380 *points;
+    Info151CF380 *info;
+} Obj151CF380;
+
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+} Mode151CF380;
+
+extern Mode151CF380 D_800A4AC8[];
+extern s32 D_800D2C9C;
+void func_151D5D60(void *, s16, s32, void **, u8 *);
+Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
+Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
+Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
+Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
+
+Gfx *func_151CF380(Obj151CF380 *arg0, Gfx *gfx, s16 arg2) {
+    Info151CF380 *info;
+    TrailVec3 b;
+    TrailVec3 a;
+    s32 i;
+    s32 j;
+    Ent151CF380 *points;
+    u8 update;
+    f32 wa;
+    f32 ax;
+    f32 az;
+    f32 wb;
+    f32 bx;
+    f32 bz;
+    TrailVec2 d;
+    TrailVec2 c;
+    Vtx *vtx;
+
+    if (arg0->num < 2) {
+        return gfx;
+    }
+    info = arg0->info;
+    points = arg0->points;
+    if (info->sub != NULL && info->sub->unk1D4 == 0) {
+        return gfx;
+    }
+    func_151D5D60(arg0->unk84, arg2, (arg0->count * 2 + 10) * sizeof(Vtx), (void **)&vtx, NULL);
+    update = 1;
+    gfx = func_15142B7C(func_15142C10(gfx, 0xED, 0xD2, 0x85, 0xC8, &update), 0x200005, 0x1F0600);
+    gfx = func_15142FBC(func_1513F4E4(gfx, 0x54, &update), D_800D2C9C | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[1].unk0 | D_800A4AC8[1].unk4, &update);
+    i = arg0->tail - 1;
+    if (i < 0) {
+        i = arg0->count - 1;
+    }
+    j = i - 1;
+    if (j < 0) {
+        j = arg0->count - 1;
+    }
+    a = points[i].pos;
+    wa = points[i].width;
+    ax = points[i].dx * wa;
+    az = points[i].dz * wa;
+    c = points[i].off;
+    b = points[j].pos;
+    wb = points[j].width;
+    bx = points[j].dx * wb;
+    bz = points[j].dz * wb;
+    d = points[j].off;
+    vtx->v.ob[0] = (s32)(a.x + c.x + ax);
+    vtx->v.ob[1] = (s32)a.y;
+    vtx->v.ob[2] = (s32)(a.z + c.z + az);
+    vtx->v.flag = 0;
+    vtx++;
+    vtx->v.ob[0] = (s32)(a.x - c.x + ax);
+    vtx->v.ob[1] = (s32)a.y;
+    vtx->v.ob[2] = (s32)(a.z - c.z + az);
+    vtx->v.flag = 0;
+    vtx++;
+    do {
+        vtx->v.ob[0] = (s32)(b.x + d.x + bx);
+        vtx->v.ob[1] = (s32)b.y;
+        vtx->v.ob[2] = (s32)(b.z + d.z + bz);
+        vtx->v.flag = 0;
+        vtx++;
+        vtx->v.ob[0] = (s32)(b.x - d.x + bx);
+        vtx->v.ob[1] = (s32)b.y;
+        vtx->v.ob[2] = (s32)(b.z - d.z + bz);
+        vtx->v.flag = 0;
+        vtx++;
+        gSPVertex(gfx++, vtx - 4, 4, 0);
+        gSP2Triangles(gfx++, 0, 1, 2, 0, 1, 3, 2, 0);
+        i = j;
+        j--;
+        if (j < 0) {
+            j = arg0->count - 1;
+        }
+        if (i != arg0->head) {
+            a = points[i].pos;
+            wa = points[i].width;
+            ax = points[i].dx * wa;
+            az = points[i].dz * wa;
+            b = points[j].pos;
+            wb = points[j].width;
+            bx = points[j].dx * wb;
+            bz = points[j].dz * wb;
+            d = points[j].off;
+            c = points[i].off;
+        }
+    } while (i != arg0->head);
+    return gfx;
+}
 
 struct s151CF844 { s32 pad[0x26]; s32 *unk98p; };
 
