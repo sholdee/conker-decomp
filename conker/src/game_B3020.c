@@ -172,7 +172,87 @@ s32 func_15085DF8(f32 arg0, f32 arg1, f32 arg2, s8 arg3, s8 arg4) {
     return bestIdx;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_B3020/func_15086098.s")
+s32 func_15086C70(s32 arg0);
+s32 func_150A32B4(void *arg0, s32 arg1, s32 arg2, s32 arg3);
+s32 func_15086364(s32 arg0, s8 arg1, s8 arg2, s32 arg3, s32 arg4);
+
+s32 func_15086098(f32 x, f32 y, f32 z, s8 arg3, s8 arg4, s32 arg5, s32 arg6) {
+    s32 idx;
+    s32 ptr;
+    B3020Struct *entry;
+    s32 result;
+    s32 i;
+    s32 best;
+    B3020Struct *other;
+    s32 n;
+    u8 *links;
+    f32 bestDist;
+    f32 rad;
+    f32 dx;
+    f32 dz;
+    f32 ex;
+    f32 ez;
+    f32 inv;
+    f32 t;
+    f32 d;
+    f32 px;
+    f32 pz;
+    f32 dist;
+
+    result = 0xFF;
+    idx = func_15085DF8(x, y, z, 0, func_15085DA8(y));
+    if (arg3 > 0 && idx != 0xFF) {
+        ptr = func_15086C70(idx);
+        if (ptr != 0 && func_150A32B4((void *)ptr, (s32)x, (s32)y, (s32)z) != 0) {
+            result = func_15086364(idx, arg3, arg4, arg5, arg6);
+        } else {
+            entry = &D_800D2350[idx];
+            rad = (u32)((u8 *)entry)[8] * 2.0f;
+            if (100000000.0f < rad * rad) {
+                result = func_15086364(idx, arg3, arg4, arg5, arg6);
+            } else {
+                bestDist = 100000000.0f;
+                best = 0xFF;
+                i = 0;
+                links = (u8 *)entry;
+                do {
+                    n = links[9];
+                    i = (i + 1) | 0;
+                    if (n != 0xFF) {
+                        other = (B3020Struct *)((u8 *)D_800D2350 + n * 16);
+                        dx = other->unk0 - entry->unk0;
+                        dz = other->unk4 - entry->unk4;
+                        inv = 1.0f / sqrtf(dx * dx + dz * dz);
+                        dx *= inv;
+                        dz *= inv;
+                        d = -(entry->unk0 * dx + entry->unk4 * dz);
+                        t = x * dx + z * dz + d;
+                        if (t > 0.0f) {
+                            dx = x - (entry->unk0 + dx * t);
+                            dz = z - (entry->unk4 + dz * t);
+                            dist = dx * dx + dz * dz;
+                            if (dist < bestDist) {
+                                best = n;
+                                bestDist = dist;
+                            }
+                        }
+                    }
+                    links++;
+                } while (i < 5);
+                if (best != 0xFF) {
+                    n = func_15086364(idx, arg3, arg4, arg5, arg6);
+                    if (n == best) {
+                        result = n;
+                    }
+                }
+            }
+        }
+    }
+    if (result != 0xFF) {
+        idx = result;
+    }
+    return idx;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_B3020/func_15086364.s")
 
@@ -183,7 +263,7 @@ void func_15086C68(void);
 extern void func_150A3194(s32, s32, s32, s32, s32);
 
 extern B3020Struct *D_800D2350;
-void func_15086C70(s32 arg0);
+s32 func_15086C70(s32 arg0);
 
 extern s16 D_80087290;
 s32 func_15086CBC(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3);
