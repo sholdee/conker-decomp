@@ -271,4 +271,31 @@ Gfx *func_15166268(Gfx *gdl, EffectType4Object *obj, s32 arg2) {
     return gdl;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_193430/func_151668B8.s")
+s32 func_15094F70();
+s32 func_15142FBC();
+extern s32 D_800903F4;
+extern s32 D_800A4AC8[][2];
+extern s32 D_800D2C9C;
+extern s16 D_800DCE40;
+extern s32 D_800DD220;
+extern s32 D_800DD224;
+extern void *D_800DD228;
+extern s32 D_800DD230;
+
+void func_151668B8(void *arg0, s32 arg1, s32 arg2, s32 arg3) {
+    u8 changed;
+    s16 offset;
+
+    offset = D_800DCE40;
+    D_800DD228 = &D_800903F4;
+    D_800DCE40 = offset + 0x80;
+    changed = 1;
+    D_800DD220 = offset;
+    if (D_800DCE40 >= 0x500) {
+        D_800DCE40 = 0;
+    }
+    D_800DD224 = 1;
+    func_15142FBC((void *)func_15094F70(arg0, D_800DD228, D_800DD220, &D_800DD230, 0, 0, 0, D_800DD224, 3),
+                  D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20,
+                  D_800A4AC8[3][0] | D_800A4AC8[3][1], &changed);
+}
