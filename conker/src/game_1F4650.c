@@ -1323,7 +1323,91 @@ void func_151CAB78(void *arg0, u8 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1F4650/func_151CAD28.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1F4650/func_151CB110.s")
+typedef struct {
+    u8 pad0[0x34];
+    f32 unk34;
+    f32 unk38;
+} struct_func_151CB110_s2;
+
+typedef struct {
+    s32 unk0;
+    struct_func_151CB110_s2 *unk4;
+    u16 *unk8;
+    s32 unkC;
+    s32 unk10;
+} struct_func_151CB110_s0;
+
+typedef struct {
+    u8 pad0[0x18];
+    struct_func_151CB110_s0 sub;
+} struct_func_151CB110_arg0;
+
+extern u8 D_800BEAC2;
+
+void func_151CB110(struct_func_151CB110_arg0 *arg0, u16 *arg1) {
+    struct_func_151CB110_s2 *s2;
+    s32 i;
+    s32 row;
+    s32 src;
+    f32 x;
+    f32 y;
+    f32 w;
+    f32 invw;
+    f32 k;
+    s32 dst[2][2];
+    s32 pad;
+    s32 srcp[2][2];
+
+    if (D_800BEAC0 != 0 || D_800BEAC1 != 0) {
+        return;
+    }
+    if (D_800BEAC2 != 0) {
+        return;
+    }
+    i = 0;
+    s2 = arg0->sub.unk4;
+    {
+    struct_func_151CB110_s0 *s0 = &arg0->sub;
+    src = arg0->sub.unkC + arg0->sub.unk10;
+    row = 0;
+    do {
+        memcpy(s0->unk8 + row, (u8 *)arg1 + src * 2, 0x30);
+        i++;
+        row += 0x18;
+        src += D_800BE620;
+    } while (i != 0x18);
+
+    {
+    s32 q;
+    for (y = -1.0f; y < 0.0f; y += 0.08333333582f) {
+        w = func_15145A0C(fabsf(y), 1.0f, 1.0f);
+        if (w) {
+        dst[0][1] = (s32)(s2->unk38 + y * 12.0f) * D_800BE620;
+        dst[1][1] = (s32)(s2->unk38 - y * 12.0f) * D_800BE620;
+        invw = 1.0f / w;
+        k = 1.0f - (1.0f - w * 0.6693121791f);
+        x = -w;
+        while (x < 0.0f) {
+            f32 t;
+            t = func_15145A0C(fabsf(x), w, invw);
+            dst[0][0] = (s32)(s2->unk34 + x * 12.0f);
+            dst[1][0] = (s32)(s2->unk34 - x * 12.0f);
+            t = 1.0f - t * k;
+            srcp[0][0] = (s32)(x * t * 12.0f + 12.0f);
+            srcp[0][1] = (s32)(y * t * 12.0f + 12.0f) * 0x18;
+            srcp[1][0] = (s32)(12.0f - x * t * 12.0f);
+            srcp[1][1] = (s32)(12.0f - y * t * 12.0f) * 0x18;
+            *(arg1 + dst[0][1] + dst[0][0]) = *(s0->unk8 + srcp[0][0] + srcp[0][1]);
+            *(arg1 + dst[0][1] + dst[1][0]) = *(s0->unk8 + srcp[1][0] + srcp[0][1]);
+            *(arg1 + dst[1][1] + dst[1][0]) = *(s0->unk8 + srcp[1][0] + srcp[1][1]);
+            *(arg1 + dst[1][1] + dst[0][0]) = *(s0->unk8 + srcp[0][0] + srcp[1][1]);
+            x += 0.08333333582f;
+        }
+        }
+    }
+    }
+    }
+}
 
 void func_151CB49C(struct102 *arg0, void **arg1, u8 arg2) {
     void *temp_v0;
