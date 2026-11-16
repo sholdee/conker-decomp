@@ -120,7 +120,110 @@ void func_1519F168(struct Obj1519F108 *arg0) {
     func_15147928(arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1CC440/func_1519F1C8.s")
+typedef struct {
+    struct17 unk0;
+    s16 unkC;
+    u16 unkE;
+    s32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 pad16[2];
+    s32 unk18;
+} Header1519F1C8;
+
+typedef struct {
+    void *unk0;
+    u8 unk4;
+    u8 pad5[3];
+    f32 unk8;
+    f32 unkC;
+    struct17 unk10;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    s16 unk28;
+    u8 unk2A;
+    u8 unk2B;
+    u8 unk2C;
+    u8 pad2D;
+    s16 unk2E;
+    s16 unk30;
+    s16 unk32;
+    s16 unk34;
+    u8 pad36[2];
+    f32 unk38;
+    f32 unk3C;
+    u8 unk40;
+    u8 unk41;
+    u8 unk42;
+    u8 unk43;
+    u8 unk44;
+    u8 unk45;
+    s16 unk46;
+    s16 unk48;
+    s16 unk4A;
+    f32 unk4C;
+} Payload1519F1C8;
+
+extern u8 D_800AB414[];
+u8 func_151D8E20(void);
+void *func_15147A80(void *, s32, s32, s32, s32, s32, s32, s32, void *, s32, s32);
+
+s32 *func_1519F1C8(arg0, arg1)
+    u8 *arg0;
+    u8 arg1;
+{
+    f32 *obj;
+    Header1519F1C8 header;
+    Payload1519F1C8 payload;
+    s32 *result;
+    u8 color;
+    u32 mode;
+
+    obj = *(f32 **)(arg0 + 0x18);
+    color = func_151D8E20();
+    payload.unk0 = arg0;
+    header.unkE = 0x42;
+    header.unkC = 0x12C;
+    header.unk15 = 0xA;
+    payload.unk2E = 0xC8;
+    payload.unk4 = 6;
+    payload.unk40 = 3;
+    payload.unk41 = 0x55;
+    payload.unk42 = 3;
+    payload.unk43 = 0x55;
+    payload.unk44 = 0x88;
+    payload.unk45 = 0xC4;
+    payload.unk28 = 0;
+    payload.unk46 = 0;
+    payload.unk30 = 0xFF;
+    payload.unk32 = 0x28;
+    payload.unk34 = 0x19;
+    payload.unk48 = 6;
+    payload.unk4A = 0x325;
+    payload.unk8 = 0.0150000006f;
+    payload.unk38 = 5.800000191f;
+    payload.unk3C = 1.0f;
+    payload.unkC = 0.0f;
+    payload.unk1C = 0.0f;
+    mode = arg1;
+    header.unk10 = mode;
+    payload.unk4C = 1.5f;
+    payload.unk20 = obj[5];
+    payload.unk24 = obj[7];
+    if (func_1519EF90((u8 *)&payload, mode, (u8 *)&header) != 0) {
+        payload.unk10 = header.unk0;
+        header.unkE |= 4;
+    }
+    payload.unk2A = D_800AB414[color * 3];
+    payload.unk2B = D_800AB414[color * 3 + 1];
+    payload.unk2C = D_800AB414[color * 3 + 2];
+    result = func_15147A80(&header, 0x50, 0x24, 5, 5, 5, 0, 0, arg0 + 0x34, 0xFF, 1);
+    if (result != NULL) {
+        memcpy((void *)result[0x98 / 4], &payload, 0x50);
+    }
+    return result;
+}
 
 s32 *func_1519F1C8();
 
