@@ -5,7 +5,73 @@
 
 
 void func_1000E40C(s32, s32);
-#pragma GLOBAL_ASM("asm/nonmatchings/init_A420/func_1000A420.s")
+s32 func_150AD960(s32, s32, s32, s32);
+s32 func_150AD9A0(s32, s32, s32);
+
+s32 func_1000A420(s32 arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 *arg9, s32 *argA, s32 *argB) {
+    f32 ratio;
+    s32 ret;
+    s16 value;
+    s32 rounded;
+    s32 mode;
+    s32 result;
+
+    mode = 0x80;
+    if (arg7 & 0x8000) {
+        arg7 &= 0x7FFF;
+        ret = func_150AD960(arg4, arg6, 0, 0);
+    } else {
+        ret = func_150AD9A0(arg4, arg5, arg6);
+    }
+    result = 0x7FFF - ((arg8 - ret) << 15) / (arg8 - arg7);
+    if (result >= 401) {
+        if (arg9 != NULL) {
+            if (func_150AD960(arg0, arg2, 0, 0) >= 31) {
+                ratio = sqrtf(arg0 * arg0 + arg2 * arg2);
+                if (D_8002C200 < ratio) {
+                    ratio = arg0 / ratio;
+                }
+                rounded = (s32)((f64)func_150487E0(ratio) * D_8002C208);
+                value = rounded;
+                if (arg2 > 0) {
+                    if ((s16)rounded < 0) {
+                        value = -0x80 - (s16)rounded;
+                    } else {
+                        value = 0x80 - (s16)rounded;
+                    }
+                }
+                value += arg3 * D_8002C210;
+                value = (s8)value;
+                if (value >= 0x60 || value < -0x60) {
+                    value = 0;
+                } else if (value >= 0x20) {
+                    value = 0x5F - value;
+                } else if (value < -0x20) {
+                    value = -0x5F - value;
+                } else {
+                    mode = 0;
+                    value += value;
+                }
+                *arg9 = (value + 0x40) | mode;
+            } else {
+                *arg9 = 0x40;
+            }
+        }
+        if (0x7FFF - ((arg8 - ret) << 15) / (arg8 - arg7) < 0) {
+            result = (arg8 - arg7) * 0;
+        }
+        if (result >= 0x8000) {
+            result = 0x7FFF;
+        }
+        *argA = result;
+    } else {
+        *argA = 0;
+    }
+    if (argB != NULL) {
+        *argB = ret;
+    }
+    return ret;
+}
 // NON-MATCHING: mostly just regalloc
 // s32 func_150AD960(s32, s32, s32, s32);
 // s32 func_150AD9A0(s32, s32, s32);
