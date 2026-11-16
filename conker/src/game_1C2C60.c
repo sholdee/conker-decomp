@@ -1352,7 +1352,132 @@ void func_15198D88(Obj15198D88 *arg0, Vec3f_15198D88 *arg1) {
     } while (state->unk7C > 1.0f);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1C2C60/func_151990AC.s")
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3f_151990AC;
+
+typedef struct {
+    char pad0[0x10];
+    f32 position[3];
+    char pad1C[0x98 - 0x1C];
+    void *state;
+} Actor151990AC;
+
+typedef struct {
+    char pad0[0x80];
+    u8 unk80;
+    f32 unk84;
+    f32 unk88;
+} Jet151990AC;
+
+typedef struct {
+    f32 radius;
+    f32 speed;
+    f32 speed_range;
+    s16 acceleration;
+    s16 acceleration_range;
+    s16 fade;
+    s16 fade_range;
+    s16 size;
+    s16 size_range;
+} EmissionPreset151990AC;
+
+typedef struct {
+    void *texture;
+    char pad4[8];
+    s16 frame;
+    s16 frame_rate;
+    s16 position[3];
+    s16 velocity_x;
+    s16 velocity_z;
+    char pad1A[2];
+    u8 fraction_x;
+    u8 fraction_y;
+    u8 fraction_z;
+    s8 callback;
+    s16 velocity_y;
+    s16 acceleration;
+    s16 width;
+    s16 height;
+    s16 lifetime;
+    s8 fade;
+    char pad2B;
+    u8 red;
+    u8 green;
+    u8 blue;
+    u8 alpha;
+    u8 environment[3];
+    char pad33;
+    u16 flags;
+    char pad36[2];
+} Emission151990AC;
+
+void *func_15167D84(void *, s32, s32, s8, u8, s32);
+extern u8 D_80090514[];
+extern EmissionPreset151990AC D_800A8770[];
+
+void func_151990AC(Actor151990AC *arg0, Vec3f_151990AC *arg1) {
+    f32 speed;
+    Emission151990AC packet;
+    f32 cosine1;
+    f32 sine1;
+    f32 cosine2;
+    f32 sine2;
+    f32 x;
+    f32 y;
+    f32 z;
+    u8 angle1;
+    u8 angle2;
+    u32 rnd;
+    EmissionPreset151990AC *preset;
+    Jet151990AC *state;
+
+    state = (Jet151990AC *)arg0->state;
+    preset = &D_800A8770[state->unk80];
+    packet.position[0] = arg0->position[0];
+    packet.position[1] = arg0->position[1];
+    packet.position[2] = arg0->position[2];
+    packet.fraction_x = 0;
+    packet.fraction_z = 0;
+    packet.fraction_y = 0;
+    packet.red = 0xFF;
+    packet.green = 0xFF;
+    packet.blue = 0xFF;
+    packet.environment[0] = 0;
+    packet.environment[1] = 0;
+    packet.environment[2] = 0;
+    packet.alpha = 0xFF;
+    packet.callback = -1;
+    packet.flags = 0x12;
+    packet.frame = 0;
+    packet.frame_rate = 0;
+    packet.texture = D_80090514;
+    packet.lifetime = 300;
+    do {
+        speed = func_150ADA68() * preset->speed_range + preset->speed;
+        rnd = func_150ADA20();
+        angle1 = rnd & 255;
+        rnd = func_150ADA20();
+        angle2 = rnd & 255;
+        cosine1 = func_151423D8(angle1 - 64);
+        sine1 = func_151423D8(angle1);
+        cosine2 = func_151423D8(angle2 - 64);
+        sine2 = func_151423D8(angle2);
+        x = arg1->x + preset->radius * sine2 * cosine1;
+        y = arg1->y - preset->radius * cosine2;
+        z = arg1->z + preset->radius * sine2 * sine1;
+        packet.velocity_x = (x - arg0->position[0]) * speed;
+        packet.velocity_y = (y - arg0->position[1]) * speed;
+        packet.velocity_z = (z - arg0->position[2]) * speed;
+        packet.acceleration = func_150ADA20() % (u32)(preset->acceleration_range + 1) + preset->acceleration;
+        packet.fade = func_150ADA20() % (u32)(preset->fade_range + 1) + preset->fade;
+        packet.width = packet.height = func_150ADA20() % (u32)(preset->size_range + 1) + preset->size;
+        func_15167D84(&packet, 0, 0, -1, *((u8 *)arg0 + 0xC), *((u8 *)arg0 + 1));
+        state->unk88 -= 1.0f;
+    } while (state->unk88 > 1.0f);
+}
 
 struct ConkerStruct151993B4 {
     char pad0[0x1E];
