@@ -165,7 +165,116 @@ void func_1519F48C(struct Obj1519F48C *arg0) {
     p->unk4 |= 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1CC440/func_1519F4F0.s")
+typedef struct Vec3f_1519F4F0 {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3f_1519F4F0;
+
+typedef struct Config_1519F4F0 {
+    void *owner;
+    u8 type;
+    u8 pad5[3];
+    f32 field8;
+    f32 fieldC;
+    Vec3f_1519F4F0 position;
+    f32 field1C;
+    f32 field20;
+    f32 field24;
+    s16 field28;
+    u8 color[3];
+    u8 pad2D;
+    s16 field2E;
+    s16 field30;
+    s16 field32;
+    s16 field34;
+    u8 pad36[2];
+    f32 field38;
+    f32 field3C;
+    u8 field40;
+    u8 field41;
+    u8 field42;
+    u8 field43;
+    u8 field44;
+    u8 field45;
+    s16 field46;
+    s16 field48;
+    s16 field4A;
+    f32 field4C;
+} Config_1519F4F0;
+
+typedef struct TrailPoint_1519F4F0 {
+    f32 x, z, y, fieldC;
+    s16 size, delay, alpha;
+    u8 pad16[2];
+    s16 life;
+    u8 pad1A[2];
+    f32 velocityX, velocityZ;
+} TrailPoint_1519F4F0;
+
+s32 func_15045800(Vec3f_1519F4F0 *, u16, f32, void *);
+extern f32 D_800BE9A4;
+extern s32 D_800BE9E4;
+
+s32 func_1519F4F0(u8 *arg0) {
+    TrailPoint_1519F4F0 *base;
+    TrailPoint_1519F4F0 *point;
+    Config_1519F4F0 *config;
+    s32 index, expired;
+
+    config = *(Config_1519F4F0 **)(arg0 + 0x98);
+    base = *(TrailPoint_1519F4F0 **)(arg0 + 0x94);
+    if (*(s8 *)(arg0 + 0x2C) < 2 && (config->type & 1)) return 0;
+    index = *(s8 *)(arg0 + 0x2E);
+    if (index != *(s8 *)(arg0 + 0x2D)) {
+        do {
+            index--;
+            expired = 0;
+            if (index < 0) index = arg0[0x25] - 1;
+            point = base + index;
+            point->life = (u32)point->life - (u32)D_800BE9E4;
+            if (point->life < 0) expired = 1;
+            point->alpha = 255;
+            if (point->delay > 0) point->delay = (u32)point->delay - (u32)D_800BE9E4;
+            else point->size = (u32)point->size - (u32)config->field34 * (u32)D_800BE9E4;
+            point->fieldC += config->field3C * D_800BE9A4;
+            point->x += point->velocityX * D_800BE9A4;
+            point->z += point->velocityZ * D_800BE9A4;
+            {
+                Vec3f_1519F4F0 probe;
+                probe.x = point->x;
+                probe.y = point->y + 30.0f;
+                probe.z = point->z;
+                if (20000.0f < fabsf(probe.x) || 20000.0f < fabsf(probe.z)) expired = 1;
+                else if (func_15045800(&probe, 0, point->y - 30.0f, arg0 + 0x60) != 0) {
+                    point->y = *(f32 *)(arg0 + 0x60);
+                } else expired = 1;
+            }
+            if (point->size < 0) expired = 1;
+            if (expired != 0) {
+                if (index != *(s8 *)(arg0 + 0x2D)) {
+                    do {
+                        *(s8 *)(arg0 + 0x2D) += 1;
+                        if (arg0[0x25] == *(s8 *)(arg0 + 0x2D)) *(s8 *)(arg0 + 0x2D) = 0;
+                        *(s8 *)(arg0 + 0x2C) -= 1;
+                    } while (index != *(s8 *)(arg0 + 0x2D));
+                }
+                base[*(s8 *)(arg0 + 0x2D)].size = 0;
+            }
+        } while (index != *(s8 *)(arg0 + 0x2D));
+    }
+    config->field46 = (u32)config->field46 + (u32)config->field48 * (u32)D_800BE9E4;
+    if (*(s8 *)(arg0 + 0x2C) > 0) {
+        *(f32 *)(arg0 + 0x54) = base[*(s8 *)(arg0 + 0x2D)].x;
+        *(f32 *)(arg0 + 0x58) = base[*(s8 *)(arg0 + 0x2D)].y;
+        *(f32 *)(arg0 + 0x5C) = base[*(s8 *)(arg0 + 0x2D)].z;
+    } else {
+        *(f32 *)(arg0 + 0x54) = 0.0f;
+        *(f32 *)(arg0 + 0x58) = 0.0f;
+        *(f32 *)(arg0 + 0x5C) = 0.0f;
+    }
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1CC440/func_1519F7F0.s")
 
