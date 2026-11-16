@@ -523,7 +523,46 @@ struct Foo1514BC08Sub {
 s32 func_1514BC08(void *arg0, void *arg1);
 void func_1514BE00(u8 *arg0);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1792D0/func_1514BE20.s")
+typedef struct {
+    char pad0[0x34];
+    struct17 unk34;
+    struct17 unk40;
+    char pad4C[0x15C - 0x4C];
+    f32 unk15C;
+} Struct1514BE20;
+
+extern s32 func_15145128(struct17 *, struct17 *, f32 *, f32 *);
+
+void func_1514BE20(void *arg) {
+    struct17 target;
+    struct17 lerp;
+    Struct1514BE20 *obj;
+    struct17 diff;
+    f32 len;
+    f32 inv;
+
+    obj = arg;
+    target.unk0 = obj->unk34.unk0;
+    target.unk4 = obj->unk34.unk4 + 100.0f;
+    target.unk8 = obj->unk34.unk8;
+    lerp.unk0 = obj->unk40.unk0 + (target.unk0 - obj->unk40.unk0) * obj->unk15C;
+    lerp.unk4 = obj->unk40.unk4 + (target.unk4 - obj->unk40.unk4) * obj->unk15C;
+    lerp.unk8 = obj->unk40.unk8 + (target.unk8 - obj->unk40.unk8) * obj->unk15C;
+    {
+        s32 pad;
+
+        diff.unk0 = lerp.unk0 - obj->unk34.unk0;
+        diff.unk4 = lerp.unk4 - obj->unk34.unk4;
+        diff.unk8 = lerp.unk8 - obj->unk34.unk8;
+        if (func_15145128(&diff, &diff, &len, &inv)) {
+            obj->unk40.unk0 = obj->unk34.unk0 + diff.unk0 * 100.0f;
+            obj->unk40.unk4 = obj->unk34.unk4 + diff.unk4 * 100.0f;
+            obj->unk40.unk8 = obj->unk34.unk8 + diff.unk8 * 100.0f;
+        } else {
+            obj->unk40 = obj->unk34;
+        }
+    }
+}
 void func_1514BF50(f32 *arg0);
 void func_1514BF7C(u8 *arg0);
 
