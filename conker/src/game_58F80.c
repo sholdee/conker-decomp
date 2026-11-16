@@ -973,7 +973,59 @@ void func_1502EA98(ActorInteractionFields *arg0, s32 arg1, s32 arg2, s32 arg3, s
     arg0->field_0xA4 = 6;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502EAFC.s")
+void func_1502EAFC(struct127 *arg0) {
+    switch (*(u8 *)((u8 *)arg0 + 0xA4)) {
+    case 2:
+    case 3: {
+        s32 lo = *(u8 *)((u8 *)arg0 + 0xA6) * D_800BE9E4;
+        u8 v1 = *(u8 *)((u8 *)arg0 + 0xA5);
+
+        if (lo < (s32) v1) {
+            *(u8 *)((u8 *)arg0 + 0xA5) = (u8) (v1 - lo);
+        } else {
+            *(u8 *)((u8 *)arg0 + 0xA5) = 0U;
+        }
+    }
+        break;
+    case 5: {
+        s32 t1 = D_800BE9E4 * 0xA;
+        u8 v1 = *(u8 *)((u8 *)arg0 + 0xA7);
+
+        if (t1 < (s32) v1) {
+            *(u8 *)((u8 *)arg0 + 0xA7) = (u8) (v1 - t1);
+        } else {
+            *(u8 *)((u8 *)arg0 + 0xA4) = 0U;
+        }
+    }
+        /* fallthrough */
+    case 4:
+        *(u8 *)((u8 *)arg0 + 0xA5) += *(u8 *)((u8 *)arg0 + 0xA6) * D_800BE9E4;
+        break;
+    case 6: {
+        s32 lo = *(u8 *)((u8 *)arg0 + 0xA6) * D_800BE9E4;
+        u8 v1 = *(u8 *)((u8 *)arg0 + 0xA5);
+
+        if ((s32) v1 < (0xFF - lo)) {
+            *(u8 *)((u8 *)arg0 + 0xA5) = (u8) (v1 + lo);
+        } else {
+            *(u8 *)((u8 *)arg0 + 0xA5) = 0xFFU;
+        }
+        *(u8 *)((u8 *)arg0 + 0xA4) = 7U;
+    }
+        break;
+    case 7: {
+        s32 lo = *(u8 *)((u8 *)arg0 + 0xA6) * D_800BE9E4;
+        u8 v1 = *(u8 *)((u8 *)arg0 + 0xA5);
+
+        if (lo < (s32) v1) {
+            *(u8 *)((u8 *)arg0 + 0xA5) = (u8) (v1 - lo);
+        } else {
+            *(u8 *)((u8 *)arg0 + 0xA4) = 0U;
+        }
+    }
+        break;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502EC34.s")
 
