@@ -2964,7 +2964,189 @@ void func_1511CB2C(s32 arg0, f32 *arg1) {
     *arg1 = D_800A31F4;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_142560/func_1511CB44.s")
+struct Wave1511CB44 {
+    u8 *phases;
+    u16 phase;
+    u16 speed;
+    f32 amp;
+    s32 unkC;
+    u8 unk10;
+    u8 unk11;
+    u8 unk12;
+    u8 unk13;
+    f32 angle;
+    s16 (*uv)[2];
+};
+
+struct Obj1511CB44 {
+    u8 pad0[0x10];
+    s16 unk10;
+    s16 unk12;
+    s16 unk14;
+    u16 unk16;
+    u8 pad18[0x8];
+    Vtx *unk20[2];
+    Vtx *unk28;
+    u8 pad2C[0x46];
+    u8 unk72;
+    u8 pad73[0x9];
+    struct Wave1511CB44 *unk7C;
+    u8 pad80[0xA];
+    u8 unk8A;
+};
+
+extern s32 D_800902D8;
+extern s32 func_15195FB0(void *, s32, s32, s32, s32, s32, s32);
+extern f32 func_150489B0(u8);
+extern void func_15094AB8(Vtx *arg0, s16 (*arg1)[2], s32 arg2, f32 arg3, s32 arg4, s32 arg5);
+
+void func_1511CB44(struct Obj1511CB44 *arg0) {
+    Vtx *dst;
+    Vtx *src;
+    s32 pad9C;
+    s32 pad98;
+    s32 pad94;
+    f32 base;
+    s32 pad8C;
+    s32 created;
+    struct Wave1511CB44 *st;
+    s32 i;
+    f32 scale;
+    f32 w;
+    f32 s;
+    f32 z;
+    f32 y;
+    u32 half;
+    u16 speed;
+    u8 c;
+    u8 off;
+    s32 mode;
+    s32 pad5C;
+    f32 rate;
+    s32 p1;
+    s32 p2;
+
+    rate = 0.0f;
+    if (D_800BE9F0 == 4) {
+        mode = 0;
+    } else if (D_800BE9F0 == 0x13) {
+        mode = 1;
+        if (arg0->unk72 == 0xFE) {
+            rate = 0.4530000091f;
+            p1 = 0x20;
+            p2 = 0x20;
+        }
+    } else {
+        return;
+    }
+    func_1511CB2C((s32)arg0, &base);
+    base -= arg0->unk14;
+    if (arg0->unk7C == NULL) {
+        created = 1;
+        arg0->unk7C = allocate_memory(0x1C, 1, 0, 0);
+        st = arg0->unk7C;
+        st->phases = allocate_memory(arg0->unk16, 1, 0, 0);
+        if (rate != 0.0f) {
+            st->uv = allocate_memory(arg0->unk16 * 4, 1, 0, 0);
+            for (i = 0; i < arg0->unk16; i++) {
+                st->uv[i][0] = arg0->unk28[i].v.tc[0] - 0x2000;
+                st->uv[i][1] = arg0->unk28[i].v.tc[1] - 0x2000;
+            }
+            st->angle = 0.0f;
+        }
+    } else {
+        created = 0;
+    }
+    st = arg0->unk7C;
+    if (created) {
+        if (mode == 0) {
+            st->speed = 0x1DA;
+            st->unk13 = 0x6D;
+            st->amp = 100.0f;
+            scale = 0.1000000015f;
+        } else {
+            scale = 1.0f;
+            st->speed = 0x259;
+            st->unk13 = 0x6D;
+            st->amp = 36.0f;
+        }
+        st->phase = 0;
+        dst = arg0->unk20[D_800BE9C0];
+        src = arg0->unk28;
+        for (i = 0; i < arg0->unk16; i++) {
+            s = base - arg0->unk28[i].v.ob[2];
+            st->phases[i] = s * scale;
+            dst->v.ob[0] = src->v.ob[0] + arg0->unk10;
+            dst->v.ob[2] = src->v.ob[2] + arg0->unk14;
+            dst++;
+            src++;
+        }
+        st->unk12 = 0;
+        st->unk10 = 0;
+        if (D_800BE9F0 == 4) {
+            if (arg0->unk72 != 0xF2) {
+                if (arg0->unk72 == 0xF1) {
+                    st->unk11 = 0;
+                } else {
+                    st->unk11 = 0x80;
+                }
+                st->unk12 = 1;
+            }
+        }
+        if (mode == 1) {
+            st->unkC = func_15195FB0(arg0, D_800902D8, 0, 0, 0, 0, 8);
+        }
+    }
+    dst = arg0->unk20[D_800BE9C0];
+    src = arg0->unk28;
+    off = st->phase >> 8;
+    scale = 0.8100000024f;
+    for (i = 0; i < arg0->unk16; i++) {
+        w = func_150489B0(st->phases[i] + off);
+        y = (f32)(src->v.ob[1] + arg0->unk12) + w * st->amp;
+        if (mode == 0) {
+            z = src->v.ob[2] + arg0->unk14;
+            if (z < 12000.0f) {
+                w += 1.0f;
+                w *= 0.5f;
+                s = (z - 12000.0f) * ((1.0f - scale) * w + scale);
+                z = 12000.0f + s;
+                dst->v.ob[2] = z;
+            }
+        }
+        dst->v.ob[1] = y;
+        if (st->unk12 == 0) {
+            w += 1.0f;
+            c = 32.5f * w + 190.0f;
+            dst->v.cn[0] = c;
+            dst->v.cn[1] = c;
+            dst->v.cn[2] = c;
+        }
+        dst++;
+        src++;
+    }
+    speed = st->speed;
+    if (mode == 0) {
+        half = (u16)(st->speed >> 1);
+        c = st->unk13;
+        s = (func_150489B0((st->phase >> 8) + c) + 1.0f) * 0.5f * half;
+        speed = half + s;
+    }
+    st->phase -= speed * D_800BE9E4;
+    if (st->unk12) {
+        st->unk10 += D_800BE9E4 * 2;
+        arg0->unk8A = (func_150489B0(st->unk10 + st->unk11) + 1.0f) * 0.5f * 205.0f + 50.0f;
+    }
+    if (rate != 0.0f) {
+        func_15094AB8(arg0->unk20[D_800BE9C0], st->uv, arg0->unk16, st->angle, p1, p2);
+        st->angle += rate;
+        if (st->angle >= 360.0f) {
+            st->angle -= 360.0f;
+        } else if (st->angle < 0.0f) {
+            st->angle += 360.0f;
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_142560/func_1511D394.s")
 
