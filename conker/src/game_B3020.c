@@ -1116,7 +1116,6 @@ u8 func_1508907C(u8 node, u8 type, u8 exclude, u8 sub) {
     return result;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_B3020/func_150891E8.s")
 
 typedef struct {
     s32 unk0;
@@ -1147,6 +1146,132 @@ typedef struct {
     u8 pad4A[2];
     CamParams150896EC cam;
 } Obj150896EC;
+
+#define obj ((Obj150891E8 *)arg0)
+typedef struct {
+    u8 pad0[0x30];
+    s8 state;
+    u8 pad31[0x19];
+    u8 cur;
+    u8 next;
+    CamParams150896EC cam;
+} Obj150891E8;
+
+void func_1512D560();
+
+void func_150891E8(s8 *arg0, struct127 *arg1) {
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    s32 a2;
+    s32 b2;
+    s32 i;
+    f32 min2;
+    u32 j;
+    u8 link;
+    f32 min;
+    Node15088F30 *entry;
+    Node15088F30 *other;
+    u8 a;
+    u8 b;
+    u8 start;
+    u8 sub;
+    CamParams150896EC *p;
+    struct108 *cam;
+
+    if (arg1->camera == NULL) {
+        return;
+    }
+    if (D_8008FDBC & 0x40) {
+        sub = 1;
+    } else {
+        sub = 0;
+    }
+    cam = arg1->camera;
+    if (obj->state == 2) {
+        for (i = 0; i < D_80087290; i++) {
+            entry = (Node15088F30 *)&D_800D2350[i];
+            if (entry->type == 5 && entry->padF == 2) {
+                obj->cur = i;
+                obj->next = i;
+                for (j = 0; j < 5; j++) {
+                    if (entry->links[j] != 0xFF) {
+                        other = (Node15088F30 *)&D_800D2350[entry->links[j]];
+                        if ((!D_800D23A8 && other->padF == 3) || (D_800D23A8 && other->padF != 3)) {
+                            obj->next = entry->links[j];
+                        }
+                    }
+                }
+                i = D_80087290;
+            }
+        }
+        b = obj->next;
+        min = 1000000000.0f;
+        a = obj->cur;
+        start = b;
+        do {
+            entry = (Node15088F30 *)&D_800D2350[b];
+            a2 = func_1508907C(b, 0xFF, a, sub);
+            a = b;
+            b = a2;
+            dx = arg1->x_position - entry->x;
+            dz = arg1->z_position - entry->z;
+            min2 = dx * dx + dz * dz;
+            if (min2 < min) {
+                min = min2;
+                obj->cur = a;
+                obj->next = a2;
+            }
+        } while (b != start);
+        func_1512D560(arg1->camera, 5, 0);
+        obj->state = 3;
+    }
+    p = &obj->cam;
+    b2 = obj->next;
+    a2 = obj->cur;
+    entry = (Node15088F30 *)&D_800D2350[a2];
+    other = (Node15088F30 *)&D_800D2350[b2];
+    dx = arg1->x_position - other->x;
+    dz = arg1->z_position - other->z;
+    min2 = dx * dx + dz * dz;
+    dx = arg1->x_position - entry->x;
+    dz = arg1->z_position - entry->z;
+    min = dx * dx + dz * dz;
+    if (min2 < min) {
+        obj->cur = b2;
+        obj->next = func_1508907C(obj->cur, 0xFF, a2, sub);
+        entry = other;
+        dx = arg1->x_position - entry->x;
+        dz = arg1->z_position - entry->z;
+        min = min2;
+    }
+    dy = arg1->y_position - entry->y;
+    min = sqrtf(dy * dy + min);
+    dx /= min;
+    dy /= min;
+    dz /= min;
+    if (min > 1000.0f) {
+        min = 1000.0f;
+    }
+    p->unk0 = 0;
+    p->unk20 = arg1->x_position;
+    p->unk24 = arg1->y_position;
+    p->unk28 = arg1->z_position;
+    p->unk14 = arg1->x_position - dx * min;
+    p->unk18 = arg1->y_position - dy * min;
+    p->unk1C = arg1->z_position - dz * min;
+    p->unk4 = 0;
+    p->unk30 = 30.0f;
+    p->unk34 = 30.0f;
+    p->unk2C = 0.0f;
+    func_1512D560(arg1->camera, 7, p);
+    cam->unk19C = 30.0f;
+    cam->unk1A4 = 30.0f;
+    cam->unk1A0 = 30.0f;
+    cam->unk1A8 = 30.0f;
+}
+#undef obj
+
 
 void func_1512D560();
 extern s32 D_800BE9E4;
