@@ -696,7 +696,54 @@ void func_1502D54C(s32 arg0, s32 *arg1) {
     arg1[0] = 0xFF;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502D630.s")
+void func_150A7A00(void *, f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
+extern f32 D_80096DE8;
+extern f32 D_80096DEC;
+extern f32 D_80096DF0;
+extern f32 D_80096DF4;
+extern u8 D_800D2CA8[];
+extern u16 D_800DD2E8;
+extern u16 D_800DD2EC;
+
+void func_1502D630(struct127 *arg0, s32 *arg1, s32 arg2) {
+    f32 far;
+    f32 near;
+    f32 step;
+    f32 first;
+    f32 last;
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 w;
+    f32 amount;
+
+    if (D_800D9B1C != 0.0f) {
+        first = 1.0f / D_800D9B1C;
+    } else {
+        first = D_80096DE8;
+    }
+    if (D_800D9B20 != 0.0f) {
+        last = 1.0f / D_800D9B20;
+    } else {
+        last = D_80096DEC;
+    }
+    step = (first - last) * D_80096DF0;
+    near = (f32)(u32)D_800DD2E8 * step + last;
+    far = (f32)(u32)D_800DD2EC * step + last;
+    func_150A7A00(D_800D2CA8 + (arg2 << 6), arg0->x_position,
+                 arg0->y_position, arg0->z_position, &x, &y, &z, &w);
+    w = (w != 0.0f) ? 1.0f / w : D_80096DF4;
+    if (w < 0) {
+        amount = 0;
+    } else if (w >= far) {
+        amount = 0;
+    } else if (w <= near) {
+        amount = 1.0f;
+    } else {
+        amount = (w - far) / (near - far);
+    }
+    arg1[3] = (1.0f - amount) * 255.0f;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502D824.s")
 
