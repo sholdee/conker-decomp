@@ -238,8 +238,6 @@ struct210 *func_151A5D58(f32 arg0, u8 arg1, s32 arg2, f32 *arg3, s16 arg4, u8 ar
                          arg5 ? 3 : 0, arg5 ? 0xFF : 0, 0, arg7, arg8);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1D2B10/func_151A5F70.s")
-
 typedef struct {
     s16 unk0;
     s16 unk2;
@@ -247,6 +245,51 @@ typedef struct {
     s16 unk6;
     s16 unk8;
 } Obj151A6068;
+
+void func_151A6068(Obj151A6068 *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5);
+
+typedef struct Game1D3420Message {
+    s32 count;
+    u8 *ids;
+    s32 value;
+} Game1D3420Message;
+
+typedef struct Game1D3420Target {
+    u8 *object;
+    u8 id;
+    u8 pad05[3];
+    s32 argument;
+    u8 flags;
+    u8 pad0D[3];
+    s32 value;
+} Game1D3420Target;
+
+void func_151A5F70(u8 *arg0, void *arg1, u8 arg2) {
+    Game1D3420Message *msg = arg1;
+    s32 i;
+    s32 found;
+    Game1D3420Target *target;
+
+    if (arg2 == 0x35) {
+        target = (Game1D3420Target *)(arg0 + 0x28);
+        i = 0;
+        found = 0;
+        while (i < msg->count && found == 0) {
+            if (target->id == msg->ids[i]) {
+                found = 1;
+            } else {
+                i++;
+            }
+        }
+        if (found != 0) {
+            if (target->object[0x14] == 1) {
+                func_151A6068((Obj151A6068 *)target->object, target->argument, target->flags & 1, target->flags & 2, arg0[0xC], arg0[1]);
+                target->object[0x14] = 0;
+                target->value = msg->value;
+            }
+        }
+    }
+}
 
 typedef struct {
     Obj151A6068 *unk0;
