@@ -875,22 +875,23 @@ void func_10010558(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4, s32 
     }
 }
 
-// PERMUTER CANDIDATE (best 2084). Arg mapping / all casts byte-correct. Blocked by a
-// register-allocation divergence: target promotes arg2 to saved reg s1 (2 saved regs)
-// and schedules the func_1000EE70 %hi/%lo address late (inside the else); IDO keeps arg2
-// on the stack (1 saved reg, reloads it) and hoists the address into the camera branch,
-// cascading every temp + float register. Local-copy of arg2 didn't force promotion.
-// void func_10010630(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4) {
-//     if (arg1->interaction_state != 0) {
-//         if (arg1->camera != 0) {
-//             func_10010F30(arg0, arg2 & 0xFFFF, 64, 0, (((u32) arg1->unk184 >> 3) & 0x30) * 2);
-//         } else {
-//             func_1000FA64(arg0, arg1->x_position, arg1->y_position, arg1->z_position, arg2,
-//                           arg4, arg3, (void *) func_1000EE70, arg1, arg1->unique_id, 0, 0);
-//         }
-//     }
-// }
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_10010630.s")
+// The three empty ifs add uopt references to arg2 (no code is emitted) so that IDO
+// promotes it to s1 the way the target does. IDO needs >=5 refs to promote a param.
+void func_10010630(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4) {
+    if (arg2) {}
+    if (arg2) {}
+    if (arg2) {}
+    if (arg1->interaction_state != 0) {
+        if (arg1->camera != 0) {
+            u32 mix = arg1->unk184;
+
+            func_10010F30(arg0, (u16)arg2, 64, 0, ((mix >> 3) & 0x30) * 2);
+        } else {
+            func_1000FA64(arg0, arg1->x_position, arg1->y_position, arg1->z_position, arg2,
+                          arg4, arg3, (s32) func_1000EE70, arg1, arg1->unique_id, 0, 0);
+        }
+    }
+}
 
 void func_10010720(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4, s32 arg5) {
     if (arg5 <= 0) {
