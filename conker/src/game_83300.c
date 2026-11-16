@@ -410,7 +410,520 @@ void func_15056A00(struct127 *arg0, u8 arg1, u8 arg2) {
         arg0->unk138 = 0;
     }
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_15056B08.s")
+typedef struct WayPt15056B08 {
+    s16 x;
+    s16 y;
+    s16 z;
+    u16 r;
+} WayPt15056B08;
+
+typedef struct ActorInfo15056B08 {
+    u8 pad0[0x17];
+    u8 unk17;
+    u8 unk18;
+    u8 unk19;
+} ActorInfo15056B08;
+
+struct Func1505841CActor;
+void func_1505841C(struct Func1505841CActor *arg0, f32 arg1);
+struct216 *func_1507BB28(s32, s32);
+void func_1507BC14(struct127 *);
+s32 func_150229E4(struct127 *);
+void func_15047390(f32 mf[4][4], f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9);
+void func_1504C9E4(struct127 *arg0, s8 arg1, u8 arg2);
+u8 func_15059B54(struct127 *arg0, u16 arg1);
+extern f32 D_800CC2E4;
+extern f32 D_800CC2EC;
+
+void func_15056B08(struct127 *arg0) {
+    f32 tx;
+    f32 tz;
+    f32 ty;
+    s32 state;
+    f32 rangeSq;
+    f32 dist;
+    u8 idx;
+    u8 mode;
+    f32 sp158;
+    f32 sp154;
+    u8 sp153;
+    u16 t22E;
+    f32 speed;
+    u16 sp14A;
+    u8 sp149;
+    f32 d2;
+    struct127 *obj;
+    f32 sp13C;
+    u8 sp13B;
+    ActorInfo15056B08 *info;
+    f32 dx;
+    f32 dz;
+    f32 sp3C;
+
+    sp13B = 1;
+    if (arg0->unk23A) {
+        arg0->unk218 = func_1507BB28(4, arg0->unk23A);
+        arg0->unk21C = 0;
+        arg0->unk23A = 0;
+    }
+    if ((D_800C3638 != 0) && (func_150229E4(arg0) != 0)) {
+        return;
+    }
+    if ((arg0->unkF4 & 0x1000) && (arg0->unk28 < 0.200000003f)) {
+        arg0->unk21C = 0;
+    }
+    func_1507BC14(arg0);
+    mode = arg0->unk223;
+    if ((mode == 0xE) || (mode == 0xF) || (mode == 0x10)) {
+        mode = 1;
+    }
+    if (mode == 0x11) {
+        mode = 0;
+    }
+    if (arg0->stunned != 0) {
+        return;
+    }
+    sp14A = (((arg0->unk1E5 << 8) + arg0->unk1E7) * D_800CC264) / 100;
+    sp149 = arg0->unk1E6;
+    if (D_800D2108[arg0->unk13F] == 0) {
+        arg0->xz_velocity = 0.0f;
+        func_1505841C((struct Func1505841CActor *)arg0, 0.0f);
+        return;
+    }
+    state = mode;
+    info = (ActorInfo15056B08 *)D_800D1C90[arg0->id];
+    if (arg0->unk23D == 0xFF) {
+        rangeSq = 1000000000.0f;
+    } else {
+        rangeSq = arg0->unk23D * 8;
+        rangeSq *= rangeSq;
+    }
+    if (((WayPt15056B08 **)D_800D2104)[arg0->unk13F]->r != 0) {
+        tx = ((WayPt15056B08 **)D_800D2104)[arg0->unk13F]->x - arg0->x_position;
+        tz = ((WayPt15056B08 **)D_800D2104)[arg0->unk13F]->z - arg0->z_position;
+    }
+    if ((arg0->unk25C & 4) && !(arg0->unk25C & 1) && ((state == 1) || (state == 3))) {
+        arg0->unk21C = 0;
+    }
+    if ((arg0->unk25C & 1) && ((state == 0) || (state == 5))) {
+        if (func_1505693C(arg0, arg0->pad259[2]) != 0) {
+            arg0->unk218 = func_1507BB28(1, arg0->unk233);
+            arg0->unk21C = 0;
+            arg0->unkA8 = arg0->pad259[2] | 0x80;
+            arg0->unk222 = arg0->pad259[2];
+        }
+    }
+    if (arg0->pad259[1] != 0) {
+        arg0->unk44 = arg0->pad259[1];
+    }
+    if ((state == 1) || (state == 0xC) || (state == 2) || (state == 3) || (state == 9) || (state == 0xA) ||
+        ((state == 6) && !(arg0->unk22C & 1))) {
+        idx = arg0->unk222;
+        obj = &D_800CC2D0[idx];
+        tx = obj->x_position;
+        tz = obj->z_position;
+        ty = obj->y_position;
+        if (arg0->unk223 == 0x10) {
+            f32 sp124;
+            f32 sp120;
+            f32 sp11C;
+
+            sp120 = func_1505A72C(obj, arg0);
+            sp124 = obj->xz_velocity * (sp120 / arg0->unk231);
+            func_1505A184(obj->unk76, sp124, 0.0f, &sp124, &sp120, &sp11C);
+            tx += sp124;
+            tz += sp120;
+        }
+        dx = tx - arg0->x_position;
+        dz = tz - arg0->z_position;
+        dist = sqrtf((dx * dx) + (dz * dz));
+        if ((state == 1) && (arg0->unk44 > 1.0f) && (sqrtf(rangeSq) < (dist * 0.8000000119f))) {
+            arg0->unk21C = 0;
+        }
+        if (arg0->id != 0x16) {
+            if ((state == 1) && (arg0->unk234 != 0) && ((dist < 370.0f) || (arg0->id == 0x21)) && (idx < 4) &&
+                ((arg0->xz_velocity > 15.0f) || (arg0->id == 0x53))) {
+                if (obj->unk31C != NULL) {
+                    obj->unk31C->chased = 10;
+                }
+            }
+            if ((state == 2) && (dist < 470.0f) && (idx < 4) && (((arg0->unk76 - obj->unk76) - 0x4000) & 0x8000)) {
+                if (obj->unk31C != NULL) {
+                    obj->unk31C->chasing = 6;
+                }
+            }
+        }
+        if (state != 9) {
+            f32 range;
+            s32 ok;
+            u16 angle;
+
+            if ((state != 0xA) && (state != 0xC)) {
+                sp13B = 0;
+            }
+            if ((arg0->unk22C & 0x80) &&
+                (fabsf((arg0->y_position - arg0->unk28) - (obj->y_position - obj->unk28)) > 30.0f)) {
+                arg0->unk21C = 0;
+            }
+            if (arg0->unk223 != 0xF) {
+                if (func_1505693C(arg0, arg0->unk222) == 0) {
+                    arg0->unk21C = 0;
+                }
+            }
+            if ((u16)arg0->unk22E != 0) {
+                range = 0.0f;
+            } else if (!arg0->unk236) {
+                range = arg0->pad23C * 8;
+            } else {
+                range = (arg0->unk236 == 0xFF) ? 3000000.0f : arg0->unk236 * 8;
+            }
+            if (((state == 1) || (state == 6) || (state == 0xA)) && (arg0->unk234 != 0) && (dist < range)) {
+                ok = 1;
+                if ((arg0->id == 8) && (range < fabsf(arg0->y_position - obj->y_position))) {
+                    ok = 0;
+                }
+                if (arg0->pad22A != 0) {
+                    range = arg0->pad22A * 8.0f;
+                    if ((D_800C3E78 != 0) && (fabsf(arg0->y_position - D_800CC2E8[0]) < range)) {
+                        ok = 0;
+                    }
+                }
+                if (ok) {
+                    angle = func_1505A630(dx, -dz, 0);
+                    if (arg0->unk237 &&
+                        (((((arg0->unk76 - angle) >> 8) + (arg0->unk237 / 2)) & 0xFF) < arg0->unk237)) {
+                        arg0->unk218 = func_1507BB28(2, arg0->unk234);
+                        arg0->unk21C = 0;
+                    }
+                }
+            }
+        }
+    }
+    if (sp13B != 0) {
+        s32 sp10C;
+
+        t22E = *(u16 *)&arg0->unk22E;
+        if (arg0->unk235 != 0) {
+            sp10C = 0;
+        } else {
+            sp10C = 1;
+        }
+        if (t22E != 0) {
+            if (D_800BE9A0 >= t22E) {
+                arg0->unk22E = 0;
+            } else {
+                arg0->unk22E = t22E - D_800BE9A0;
+            }
+        }
+        if (arg0->unk241 != 0) {
+            s32 i;
+            s32 best;
+            f32 bestDist;
+            f32 ox;
+            f32 oz;
+            f32 d;
+            s32 cone;
+            s32 angHi;
+
+            best = 0;
+            bestDist = arg0->unk23F * 8;
+            for (i = 0; i < 25; i++) {
+                obj = &D_800CC2D0[i];
+                if ((obj->interaction_state != 0) && (obj->id == arg0->unk240) && (obj->unk2FA != 0)) {
+                    ox = obj->x_position - arg0->x_position;
+                    oz = arg0->z_position - obj->z_position;
+                    d = sqrtf((ox * ox) + (oz * oz));
+                    if (d < bestDist) {
+                        cone = info->unk17 * 3;
+                        cone /= 2;
+                        angHi = (u8)(func_1505A630(ox, oz, 0) >> 8);
+                        if ((((((arg0->unk7A >> 8) - angHi) + (cone / 2)) & 0xFF) < cone)) {
+                            best = i + 1;
+                            bestDist = d;
+                        }
+                    }
+                }
+            }
+            if (best != 0) {
+                arg0->unk218 = func_1507BB28(0, arg0->unk241);
+                arg0->unk21C = 0;
+                arg0->unk222 = best - 1;
+                arg0->unkA8 = best + 0x7F;
+                arg0->unk22E = 5;
+                if (arg0->unk242 != 0) {
+                    D_800D154C = &D_800CC2D0[best - 1];
+                    D_800CC2D0[best - 1].unk218 = func_1507BB28(0, arg0->unk242);
+                    D_800CC2D0[best - 1].unk21C = 0;
+                    D_800CC2D0[best - 1].unk222 = D_800C3E78;
+                    D_800D154C = arg0;
+                }
+            }
+        }
+        if (((u16)arg0->unk22E == 0) && (state != 4) && (state != 7) &&
+            (((sp10C == 0) && (arg0->unk235 != 0)) ||
+             ((sp10C == 1) && (arg0->unk233 != 0) && !(arg0->unk25C & 4)))) {
+            u8 spEB;
+            f32 px;
+            f32 pz;
+            f32 dsq;
+            u8 t229;
+
+            if (info->unk18 <= arg0->xz_velocity) {
+                if (func_1505693C(arg0, 0) != 0) {
+                    spEB = 0;
+                    px = D_800CC2E4 - (s16)arg0->pad1A4;
+                    pz = *(s16 *)&arg0->pad1A8 - D_800CC2EC;
+                    if ((arg0->id == 0x9E) && (arg0->unk2E4 == 0)) {
+                        rangeSq = 129600.0f;
+                    }
+                    dsq = (px * px) + (pz * pz);
+                    if ((dsq < rangeSq) && (dsq < 100000000.0f)) {
+                        if (func_1505693C(arg0, 0) != 0) {
+                            if (arg0->unk229 == 0xFF) {
+                                dsq = sqrtf(rangeSq);
+                            } else {
+                                dsq = arg0->unk229 * 8.0f;
+                            }
+                            if ((D_800C3E78 != 0) &&
+                                (!arg0->unk229 || (fabsf(arg0->y_position - D_800CC2E8[0]) < dsq))) {
+                                if (arg0->id == 0x9E) {
+                                    f32 mtx[4][4];
+                                    f32 sp94;
+                                    f32 sp90;
+                                    f32 sp8C;
+
+                                    func_1505A184(arg0->unk7A, 9000.0f, arg0->unkB8, &sp94, &sp90, &sp8C);
+                                    sp94 += arg0->x_position;
+                                    sp90 += arg0->z_position;
+                                    sp8C += arg0->y_position;
+                                    func_15047390(mtx, arg0->x_position, arg0->y_position, arg0->z_position, sp94, sp8C,
+                                                  sp90, 0.0f, 1.0f, 0);
+                                    if (func_15049440(mtx, D_800CC2E4, D_800CC2E8[0], D_800CC2EC, 80.0f, 80.0f, 0.0f,
+                                                      4000.0f, 320.0f, 320.0f) != 0) {
+                                        spEB = 1;
+                                    }
+                                } else {
+                                    s32 sp88;
+
+                                    sp88 = info->unk17;
+                                    if (sp10C == 0) {
+                                        sp88 *= 3;
+                                    }
+                                    if (((((((arg0->unk7A >> 8) + arg0->unk2CA) - (u8)(func_1505A630(px, pz, 0) >> 8)) +
+                                           (sp88 / 2)) & 0xFF) < sp88)) {
+                                        spEB = 1;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (spEB) {
+                        if (sp10C == 0) {
+                            arg0->unk218 = func_1507BB28(3, arg0->unk235);
+                        } else {
+                            arg0->unk218 = func_1507BB28(1, arg0->unk233);
+                        }
+                        arg0->unk21C = 0;
+                        arg0->unk222 = spEB - 1;
+                        arg0->unkA8 = spEB + 0x7F;
+                    }
+                }
+            }
+        }
+        if (state != 9) {
+            if ((state == 6) || (state == 0xC)) {
+                tx = D_800CC2D0[arg0->unk222].x_position;
+                tz = D_800CC2D0[arg0->unk222].z_position;
+                ty = D_800CC2D0[arg0->unk222].y_position;
+            } else {
+                tx = ((WayPt15056B08 **)D_800D2104)[arg0->unk13F][arg0->unk21E + 1].x;
+                tz = ((WayPt15056B08 **)D_800D2104)[arg0->unk13F][arg0->unk21E + 1].z;
+                ty = ((WayPt15056B08 **)D_800D2104)[arg0->unk13F][arg0->unk21E + 1].y;
+            }
+            if ((state == 5) || (state == 6)) {
+                f32 sp84;
+                f32 sp80;
+                f32 sp7C;
+
+                if ((state == 6) && (arg0->unk22C & 1)) {
+                    arg0->unk86 = D_800CC2D0[arg0->unk222].unk7A >> 8;
+                }
+                arg0->unk86 += arg0->unk257;
+                sp84 = arg0->unk258 * 16.0f;
+                func_1505A184(arg0->unk86 << 8, sp84, 0.0f, &sp84, &sp80, &sp7C);
+                tx += sp84;
+                tz += sp80;
+            }
+        }
+    }
+    speed = arg0->unk44;
+    if ((state != 7) && (state != 8)) {
+        tx = tx - arg0->x_position;
+        tz = arg0->z_position - tz;
+        ty = arg0->y_position - ty;
+        if ((state == 6) && (arg0->unk22C & 1) && ((fabsf(tx) + fabsf(tz)) < 100.0f)) {
+            speed = 0.0f;
+            tx = D_800CC2D0[arg0->unk222].x_position - arg0->x_position;
+            tz = arg0->z_position - D_800CC2D0[arg0->unk222].z_position;
+            arg0->unk78 = func_1505A630(tx, tz, 0);
+        } else if ((arg0->unk44 >= 0.5f) && !(arg0->unkF4 & 0x40)) {
+            arg0->unk78 = func_1505A630(tx, tz, 0);
+        }
+    }
+    sp158 = arg0->unk247 / 10.0f;
+    sp3C = (tx * tx) + (tz * tz);
+    d2 = sp3C;
+    if (arg0->unk22C & 8) {
+        d2 += ty * ty;
+    }
+    d2 = sqrtf(d2);
+    if ((state != 4) && (state != 7) && (state != 8)) {
+        u8 k;
+        u8 n;
+        u16 sp78;
+        u16 ang;
+        s32 flags;
+
+        sp78 = arg0->unk76;
+        if (state == 2) {
+            arg0->unk78 ^= 0x8000;
+            if (!(arg0->unkF4 & 0x4000)) {
+                arg0->unk78 += (((arg0->unk21C / 100) & 0x20) - 0x10) << 8;
+            }
+        }
+        if (arg0->unk223 == 0x11) {
+            arg0->unk78 += (((arg0->unk21C / 100) & 0x10) - 8) << 9;
+        }
+        if ((arg0->unkF4 & 0x200) && (*(f32 *)&arg0->unk1F4 < 3.0f)) {
+            sp14A = 0;
+            sp149 = 0;
+        }
+        sp13C = arg0->unk23E * 8;
+        sp153 = func_15059B54(arg0, sp14A);
+        if (state != 0xD) {
+            if (((u8)arg0->unk24F != 0) && ((state != 0) || (sp13C < d2))) {
+                k = (u8)arg0->unk24F - 1;
+                if (((u8(*)[10])D_80099A3C)[k][0] < sp153) {
+                    arg0->unk76 = sp78;
+                    func_15056A00(arg0, sp153, k);
+                }
+            }
+        }
+        if (state == 0xD) {
+            sp14A = 0;
+            sp149 = 0;
+        }
+        if ((info->unk19 < sp153) && (state != 2)) {
+            speed = 0.0f;
+            if (arg0->unk24A && (arg0->xz_velocity > 15.0f)) {
+                arg0->unk218 = func_1507BB28(6, arg0->unk24A);
+                arg0->unk21C = 0;
+                arg0->unk222 = 0;
+            }
+        }
+        if (((state == 0) || (state == 0xA)) && (d2 < sp13C)) {
+            n = D_800D2108[arg0->unk13F] - 1;
+            if (arg0->unk21F != 0) {
+                n = arg0->unk21F;
+            }
+            if (arg0->unk22C & 4) {
+                arg0->x_position = ((WayPt15056B08 **)D_800D2104)[arg0->unk13F][arg0->unk21E + 1].x;
+                arg0->z_position = ((WayPt15056B08 **)D_800D2104)[arg0->unk13F][arg0->unk21E + 1].z;
+                arg0->unk1FC |= 8;
+                if (arg0->unk22C & 8) {
+                    arg0->y_position = ((WayPt15056B08 **)D_800D2104)[arg0->unk13F][arg0->unk21E + 1].y;
+                }
+            }
+            if (!(arg0->unkF4 & 0x10)) {
+                arg0->unk21C = 0;
+            }
+            arg0->unk21E += arg0->unk221;
+            arg0->unk21E += n;
+            arg0->unk21E %= n;
+            if (arg0->unk21E < arg0->unk220) {
+                arg0->unk21E = arg0->unk220;
+            }
+        }
+        ang = arg0->unk78;
+        if (arg0->unkF4 & 0x20000) {
+            ang = func_1505A630(D_800CC2D0[arg0->unk222].x_position - arg0->x_position,
+                                arg0->z_position - D_800CC2D0[arg0->unk222].z_position, 0);
+        }
+        sp153 = func_150599C8(arg0, sp149, ang);
+        sp154 = arg0->unk248 / 10.0f;
+        if ((arg0->unk3A != 0) && (arg0->unk28 == 0.0f) && !(arg0->unk3A & 3 & D_800D1548)) {
+            arg0->unk84.uh = 0xFF;
+            arg0->y_velocity = arg0->unk3A;
+        }
+        flags = arg0->unkF4;
+        if (flags & 1) {
+            speed = 0.0f;
+        }
+        if ((arg0->unk22C & 0x10) && (arg0->unk28 == 0.0f)) {
+            speed = 0.0f;
+            sp158 = 1.0f;
+        }
+        if (arg0->interaction_state == 1) {
+            arg0->unk44 = speed;
+            return;
+        }
+        if (flags & 0x80000) {
+            f32 h;
+
+            h = ty + 70.0f;
+            if (D_800BE9F0 == 0x26) {
+                h -= 45.0f * arg0->y_scale;
+            }
+            ang = func_1505A630(sqrtf(sp3C), h, 0);
+            func_1504C9E4(arg0, (s16)ang / 200, 0);
+        } else if (arg0->unk1D1 != 0) {
+            func_1504C9E4(arg0, 0, 0);
+        }
+        if (arg0->unkF8 & 0x40000) {
+            f32 sp68;
+            f32 sp64;
+            f32 sp60;
+            f32 r;
+
+            speed = arg0->unk44;
+            func_1505A184(arg0->unk78, speed, 0.0f, &sp68, &sp64, &sp60);
+            if ((speed < 1.0f) || (((sp78 - arg0->unk78) + 0x4000) & 0x8000)) {
+                r = sp154;
+            } else {
+                r = sp158;
+            }
+            func_1505A250(sp68, sp64, r, (f32 *)&arg0->pad174, (f32 *)&arg0->pad178);
+            arg0->unk76 = func_1505A630(*(f32 *)&arg0->pad174, -*(f32 *)&arg0->pad178, 0);
+            r = sqrtf((*(f32 *)&arg0->pad178 * *(f32 *)&arg0->pad178) + (*(f32 *)&arg0->pad174 * *(f32 *)&arg0->pad174));
+            arg0->xz_velocity = r + r;
+        } else {
+            func_1505A3A8(speed, arg0, sp158, sp154, sp153);
+        }
+    } else {
+        func_150599C8(arg0, arg0->unk1E6, arg0->unk78);
+        arg0->unk76 = arg0->unk78;
+        arg0->xz_velocity = speed;
+    }
+    func_1505841C((struct Func1505841CActor *)arg0, sp158);
+    if ((arg0->unk22C & 8) && !(arg0->unk1FC & 8)) {
+        f32 a;
+        f32 lim;
+
+        a = (u32)func_1505A630(sqrtf(sp3C), ty, 0) * 0.005493164f;
+        if (a > 180.0f) {
+            a -= 360.0f;
+        }
+        a = (a - arg0->unkB8) * 0.25f;
+        lim = sp14A * 0.005493164f;
+        if (a > lim) {
+            a = lim;
+        }
+        if (a < -lim) {
+            a = -lim;
+        }
+        arg0->unkB8 = arg0->unkB8 + a;
+    }
+}
 typedef struct Func1505841CActor {
     u8 pad0[0x28];
     f32 vertical;
