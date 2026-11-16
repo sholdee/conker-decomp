@@ -1318,7 +1318,111 @@ void func_15136C3C(Blood36C3CActor *arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15136F50.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15137610.s")
+typedef struct BloodImpactActor {
+    u8 pad0[4];
+    u8 kind;
+    u8 pad5[0x6F];
+    u8 flags74;
+    u8 pad75[0x8F];
+    u8 state104;
+    u8 pad105[0x20];
+    u8 state125;
+    u8 pad126[0xA4];
+    u8 count;
+    u8 pad1CB[9];
+    void *transforms;
+} BloodImpactActor;
+
+void func_15136F50(void *, void *, void *, u8, u8, s32);
+void func_151C329C(void *, u8, s32);
+void func_151C577C(void *, void *, void *, u8, u8, u8, u8, s32);
+void func_151036B4(void *, u8, s32);
+
+void func_15137610(BloodImpactActor *arg0, void *arg1, void *arg2,
+                   void *arg3, u8 arg4, s32 arg5) {
+    s32 mode;
+
+    if (arg0 != 0) {
+        if (arg0->transforms == 0 || (arg0->flags74 & 0xF) == 0xF ||
+            (s32)arg0->count <= 0) {
+            return;
+        }
+        mode = arg0->kind;
+        switch (mode) {
+            case 5:
+            case 0xAD:
+            case 0xAE:
+            case 0xAF:
+                mode = 3;
+                break;
+            case 0x5B:
+            case 0x70:
+            case 0xA6:
+            case 0xB2:
+            case 0xB4:
+                func_151036B4(arg1, arg4, arg5);
+                mode = 2;
+                break;
+            case 0x28:
+            case 0x77:
+            case 0x8A:
+            case 0x8C:
+                if ((func_150ADA20() & 1) == 0) {
+                    mode = 2;
+                    break;
+                }
+                return;
+            case 0x42:
+                if ((func_150ADA20() & 3) == 0) {
+                    mode = 2;
+                    break;
+                }
+                return;
+            case 0x5A:
+            case 0x5F:
+            case 0x74:
+            case 0x75:
+            case 0x7A:
+            case 0x8D:
+            case 0xB1:
+                mode = arg0->state125;
+                if (mode == 0xFF) {
+                    if ((func_150ADA20() & 0x1F) == 0) {
+                        mode = 1;
+                        break;
+                    }
+                } else if (mode == 0 && arg0->state104 == 0) {
+                    mode = 1;
+                    break;
+                }
+                return;
+            default:
+                if (arg0->state125 == 0 && arg0->state104 == 0) {
+                    mode = 0;
+                } else {
+                    return;
+                }
+                break;
+        }
+    } else {
+        mode = 0;
+    }
+    switch (mode) {
+        case 1:
+            func_151C577C(arg1, arg2, arg3, 1, 1, 1, arg4, arg5);
+            return;
+        case 2:
+            func_151C329C(arg1, arg4, arg5);
+            return;
+        case 3:
+            func_15136F50(arg1, arg2, arg3, 1, arg4, arg5);
+            return;
+        default:
+        case 0:
+            func_15136F50(arg1, arg2, arg3, 0, arg4, arg5);
+            return;
+    }
+}
 
 typedef struct Blood3783CHit {
     f32 height;
