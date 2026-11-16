@@ -323,7 +323,43 @@ Gfx *func_151A7D6C(Gfx *gdl, Game1D4E00Bolt *arg1, s16 arg2) {
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1D4E00/func_151A8340.s")
+typedef struct {
+    u8 pad0[0x64];
+    f32 (*points)[6];
+} Curve8340;
+
+void func_151A8340(void *arg0, s16 first, s16 last, f32 amp, s16 depth) {
+    s16 middle;
+
+    if (last - first < 2) {
+        return;
+    }
+    if (depth <= 0) {
+        return;
+    }
+    {
+        f32 dx;
+        f32 dy;
+        f32 dz;
+        f32 *a;
+
+        {
+            f32 *b;
+
+            a = &((Curve8340 *)arg0)->points[first][0];
+            middle = first + ((last - first) >> 1);
+            b = ((Curve8340 *)arg0)->points[last];
+            dx = b[0] - ((Curve8340 *)arg0)->points[first][0];
+            dy = b[1] - ((Curve8340 *)arg0)->points[first][1];
+            dz = b[2] - ((Curve8340 *)arg0)->points[first][2];
+        }
+        ((Curve8340 *)arg0)->points[middle][0] = (a[0] + dx * 0.5f) + (func_150ADA68() * (amp + amp) + -amp);
+        ((Curve8340 *)arg0)->points[middle][1] = (a[1] + dy * 0.5f) + (func_150ADA68() * (amp + amp) + -amp);
+        ((Curve8340 *)arg0)->points[middle][2] = a[2] + dz * 0.5f;
+    }
+    func_151A8340(arg0, first, middle, amp, depth - 1);
+    func_151A8340(arg0, middle, last, amp, depth - 1);
+}
 
 extern void func_151D5E30(void *);
 
