@@ -1,6 +1,9 @@
+#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#undef func_150ADA20
+u32 func_150ADA20(void);
 
 extern f32 D_800AA97C;
 extern f32 D_800AA980;
@@ -297,7 +300,7 @@ void func_151C0360(void *arg0, void *arg1, s32 arg2, s32 arg3) {
                   ((u32)r2 % 205U) + 299, 1, 1, 0, 0, 0, (u8)arg2, 0);
 }
 
-void func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
+s32 func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
 void func_151C0418(f32 *arg0, u8 arg1, s32 arg2) {
     Header header;
@@ -339,43 +342,6 @@ void func_150E83AC(void *, s16, u8, s32);
 
 void func_151C0644(void *arg0, u8 arg1, s32 arg2) {
     func_150E83AC(arg0, (s16)((u32)func_150ADA20() % 0x3E + 0x78), arg1, arg2);
-}
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1ED0F0/func_151C0698.s")
-
-typedef struct {
-    u8 pad0[0x38];
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-} Struct151C110CInner;
-
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    s16 unk6;
-    u8 pad8[0x10];
-    Struct151C110CInner *unk18;
-} Struct151C110C;
-
-s32 func_151C110C(Struct151C110C *arg0, s32 arg1, void **arg2, s32 arg3, s32 arg4, s32 arg5, s16 *arg6) {
-    Struct151C110CInner *temp_v1;
-    s16 *temp_t3;
-
-    temp_v1 = arg0->unk18;
-    temp_t3 = arg6;
-    if (temp_v1 != NULL) {
-        if (*arg2 != NULL) {
-            arg0->unk2 = temp_v1->unk38;
-            arg0->unk4 = temp_v1->unk3C;
-            arg0->unk6 = temp_v1->unk40;
-            return 0;
-        }
-    }
-
-    *temp_t3 = 0;
-    return 0;
 }
 
 typedef struct {
@@ -421,6 +387,359 @@ typedef struct {
     /* 0x5C */ Obj151C1D5C *unk5C;
     /* 0x60 */ s32 unk60;
 } Ray151C196C;
+
+typedef struct {
+    /* 0x000 */ u8 pad0[0x130];
+    /* 0x130 */ Vec151C196C unk130;
+    /* 0x13C */ Vec151C196C unk13C;
+    /* 0x148 */ u8 pad148[0x4F];
+    /* 0x197 */ u8 unk197;
+} Cam151C0698;
+
+typedef struct {
+    /* 0x000 */ u8 pad0[0x23D];
+    /* 0x23D */ u8 unk23D;
+} Ctl151C0698;
+
+typedef struct {
+    /* 0x000 */ u8 pad0[4];
+    /* 0x004 */ u8 unk04;
+    /* 0x005 */ u8 pad5[0xF];
+    /* 0x014 */ f32 unk14;
+    /* 0x018 */ f32 unk18;
+    /* 0x01C */ f32 unk1C;
+    /* 0x020 */ u8 pad20[0x45];
+    /* 0x065 */ u8 unk65;
+    /* 0x066 */ u8 pad66[0xE];
+    /* 0x074 */ u8 unk74;
+    /* 0x075 */ u8 pad75[0x15F];
+    /* 0x1D4 */ s32 unk1D4;
+    /* 0x1D8 */ u8 pad1D8[0x140];
+    /* 0x318 */ Ctl151C0698 *unk318;
+    /* 0x31C */ Cam151C0698 *unk31C;
+} Actor151C0698;
+
+typedef struct {
+    s32 w[4];
+} Blk151C0698;
+
+typedef struct {
+    /* 0x000 */ Ray151C196C ray;
+    /* 0x064 */ f32 unk64;
+    /* 0x068 */ f32 unk68;
+    /* 0x06C */ Actor151C0698 *unk6C;
+    /* 0x070 */ Blk151C0698 unk70;
+    /* 0x080 */ struct102 *unk80;
+    /* 0x084 */ struct102 *unk84;
+    /* 0x088 */ s32 unk88;
+    /* 0x08C */ s32 unk8C;
+    /* 0x090 */ u16 unk90;
+    /* 0x092 */ u8 unk92;
+    /* 0x093 */ u8 pad93;
+    /* 0x094 */ f32 unk94;
+    /* 0x098 */ Vec151C196C unk98;
+    /* 0x0A4 */ Res151C1D5C unkA4;
+    /* 0x0C8 */ u8 unkC8;
+    /* 0x0C9 */ u8 padC9[3];
+    /* 0x0CC */ s32 unkCC;
+} Spawn151C0698;
+
+typedef struct {
+    /* 0x00 */ f32 unk00;
+    /* 0x04 */ f32 unk04;
+    /* 0x08 */ f32 unk08;
+    /* 0x0C */ f32 unk0C;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ Vec151C196C pos;
+    /* 0x34 */ Vec151C196C vel;
+    /* 0x40 */ Vec151C196C unk40;
+    /* 0x4C */ f32 unk4C;
+    /* 0x50 */ s32 unk50;
+    /* 0x54 */ s16 unk54;
+    /* 0x56 */ s16 unk56;
+    /* 0x58 */ u8 unk58;
+    /* 0x5C */ s32 unk5C;
+    /* 0x60 */ u8 unk60;
+    /* 0x61 */ u8 unk61;
+    /* 0x62 */ u8 unk62;
+    /* 0x63 */ u8 unk63;
+    /* 0x64 */ u8 unk64;
+    /* 0x65 */ u8 unk65;
+    /* 0x66 */ u8 unk66;
+    /* 0x67 */ u8 unk67;
+    /* 0x68 */ u8 unk68;
+    /* 0x69 */ u8 pad69;
+    /* 0x6A */ u8 unk6A;
+    /* 0x6C */ s32 unk6C;
+    /* 0x70 */ u8 unk70;
+    /* 0x72 */ s16 unk72;
+    /* 0x74 */ s16 unk74;
+    /* 0x76 */ u8 pad76[6];
+} Desc151C0698;
+
+f32 func_15144AA8(u8, void *);
+void func_15145740(Actor151C0698 *, Vec151C196C *, void *, s32, f32);
+s32 func_151D5B6C(Vec151C196C *, Vec151C196C *, Actor151C0698 *, s32, Blk151C0698 *);
+void *func_15132A4C(Desc151C0698 *, s32, s32, s32, u8, s32);
+void func_15145974(Vec151C196C *, f32 *, f32 *);
+s32 func_151B8908(void *);
+s32 func_151B8400(void *);
+s32 func_151B8668(void *, u8, s32);
+void func_15145EA4(Vec151C196C **, Vec151C196C **, s32, s32);
+void func_15102B38(Actor151C0698 *, s32, Vec151C196C *, Vec151C196C *, f32 *, s32, s32, f32,
+                   Vec151C196C *, s32, s32, s32, u8, s32);
+void func_15103254(s16, u8, f32, Vec151C196C *, s32, u8, s32);
+void func_151C1798(GameObjectMatrixSource *arg0, s32 arg1);
+void func_151C1860(f32 *arg0, u8 arg1, s32 arg2);
+s32 func_151C196C(Ray151C196C *arg0, Vec151C196C *arg1, Vec151C196C *arg2, Vec151C196C *arg3,
+                  Vec151C196C *arg4, s32 arg5, s32 arg6, Vec151C196C *arg7, f32 *arg8,
+                  Res151C1D5C *arg9, s32 arg10);
+s32 func_151C110C();
+#define RAND() func_150ADA20()
+
+void func_151C0698(Actor151C0698 *arg0, Actor151C0698 *arg1, Blk151C0698 *arg2, u8 arg3, u8 arg4, s32 arg5) {
+    Ray151C196C ray;
+    f32 depth;
+    Vec151C196C hitPos;
+    Res151C1D5C res;
+    u8 useCam;
+    Vec151C196C pos;
+    Vec151C196C dir;
+    Vec151C196C camPos;
+    Vec151C196C camDir;
+    s32 mode;
+    Vec151C196C *src;
+    Actor151C0698 *who;
+    f32 angle;
+    u8 sp218[0x14];
+    Spawn151C0698 spawn;
+    Desc151C0698 desc;
+    void *obj;
+    Spawn151C0698 *p;
+    Header header;
+    Header2 header2;
+
+    depth = 0.0f;
+    if (D_800BE616 != 0) {
+        if (arg0->unk1D4 != 0) {
+            func_151C1798((GameObjectMatrixSource *) arg0, (s32) &pos);
+        } else {
+            pos.x = arg0->unk14;
+            pos.y = arg0->unk18 + 65.0f;
+            pos.z = arg0->unk1C;
+        }
+    } else {
+        src = &arg0->unk31C->unk13C;
+        obj = arg0->unk318;
+        if (obj != NULL) {
+            if (arg0->unk65 != 0) {
+lbl1:
+                pos.x = src->x;
+                pos.y = src->y + -13.0f;
+                pos.z = src->z;
+            } else if (arg0->unk31C->unk197 != 0) {
+                extern u8 D_800BE616;
+
+                angle = func_15144AA8(((Ctl151C0698 *) obj)->unk23D, obj) * 0.01745329238f;
+                pos.x = cosf(angle) * 25.0f + src->x;
+                pos.y = src->y;
+                pos.z = src->z - sinf(angle) * 25.0f;
+            } else if (arg0->unk1D4 != 0) {
+                func_151C1798((GameObjectMatrixSource *) arg0, (s32) &pos);
+            } else {
+                pos.x = arg0->unk14;
+                pos.y = arg0->unk18 + 65.0f;
+                pos.z = arg0->unk1C;
+            }
+        } else if (arg0->unk1D4 != 0) {
+            func_151C1798((GameObjectMatrixSource *) arg0, (s32) &pos);
+        } else {
+            pos.x = arg0->unk14;
+            pos.y = arg0->unk18 + 65.0f;
+            pos.z = arg0->unk1C;
+        }
+    }
+
+    if ((arg0->unk31C != NULL && arg0->unk31C->unk197 != 0) || arg1 != NULL) {
+        extern u8 D_800BE616;
+
+        who = (arg1 != NULL) ? arg1 : arg0;
+
+        useCam = 1;
+        src = &who->unk31C->unk13C;
+        camPos = *src;
+        camDir.x = who->unk31C->unk130.x;
+        camDir.y = who->unk31C->unk130.y;
+        camDir.z = who->unk31C->unk130.z;
+    } else {
+        func_15145740(arg0, &dir, sp218, 0, 0.0f);
+        useCam = 0;
+        dir.x *= 0.001000000047f;
+        dir.y *= 0.001000000047f;
+        dir.z *= 0.001000000047f;
+    }
+
+    if (D_800BE9F0 == 0x24) {
+        mode = 0;
+    } else {
+        mode = func_151D5B6C(useCam ? &camPos : &pos, useCam ? &camDir : &dir, arg0, 3, arg2);
+    }
+
+    if (func_151C196C(&ray, &pos, useCam ? NULL : &dir, useCam ? &camPos : NULL,
+                      useCam ? &camDir : NULL, (s32) arg0, (s32) arg2, &hitPos, &depth, &res,
+                      mode) != 0) {
+        extern u8 D_800BE616;
+
+        spawn.unkCC = mode;
+        spawn.unk80 = NULL;
+        spawn.ray = ray;
+        spawn.unk84 = NULL;
+        desc.unk00 = 1.0f;
+        desc.unk04 = 1.0f;
+        desc.unk08 = 0.04700000212f;
+        desc.unk0C = 0.04700000212f;
+        desc.unk10 = 0.0f;
+        desc.unk14 = 0.0f;
+        desc.unk18 = 0.0f;
+        desc.unk1C = 1.0f;
+        desc.unk20 = 1.0f;
+        desc.unk24 = 1.0f;
+        desc.pos = pos;
+        desc.unk4C = 0.0f;
+        desc.unk50 = 0x500920;
+        desc.unk54 = 0x12C;
+        desc.unk56 = 0x2F;
+        desc.unk58 = 1;
+        spawn.unk6C = arg0;
+        spawn.unk70 = *arg2;
+        spawn.unk94 = depth * 0.004999999888f;
+        spawn.unk98 = hitPos;
+        spawn.unkC8 = (s8)((depth != 0) ? 1 : 0);
+        spawn.unkA4 = res;
+        spawn.unk68 = 200.0f;
+        desc.vel.x = spawn.ray.unk38.x * spawn.unk68;
+        desc.vel.y = spawn.ray.unk38.y * spawn.unk68;
+        desc.vel.z = spawn.ray.unk38.z * spawn.unk68;
+        func_15145974(&desc.vel, &desc.unk14, &desc.unk10);
+        desc.unk18 = 0.0f;
+        desc.unk40.x = 0.0f;
+        desc.unk40.y = 0.0f;
+        desc.unk40.z = 0.0f;
+        spawn.unk64 = spawn.ray.unk04 * 0.004999999888f;
+        spawn.unk92 = arg3;
+        desc.unk5C = 0;
+        desc.unk60 = 0xFF;
+        desc.unk61 = 0xA;
+        desc.unk62 = 0;
+        desc.unk63 = 0;
+        desc.unk64 = 0;
+        desc.unk65 = 0;
+        desc.unk66 = 0;
+        desc.unk67 = 0;
+        desc.unk68 = 2;
+        desc.unk6A = 2;
+        desc.unk6C = 0;
+        desc.unk70 = 0;
+        desc.unk72 = 1;
+        desc.unk74 = 0xFF;
+        obj = func_15132A4C(&desc, 3, 0xFF, 0xD0, arg4, arg5);
+        if (obj != NULL) {
+            p = (Spawn151C0698 *) ((u8 *) obj + 0x170);
+            memcpy(p, &spawn, 0xD0);
+            header.unk0 = 2;
+            header.unk1 = -1;
+            header.unk2 = 0x12C;
+            header.unk4 = 0;
+            header2.unk0 = (s32) pos.x;
+            header2.unk4 = (s32) pos.y;
+            header2.unk8 = (s32) pos.z;
+            p->unk80 = (struct102 *) func_151602C0(&header, &header2, 0x28, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg4, arg5);
+            p->unk84 = (struct102 *) func_151B8908(obj);
+            p->unk90 = func_1000FA64((RAND() % 3U) + 0x2EE, pos.x, pos.y, pos.z, 0x7530, 0x3E8, 0x1F4, (s32) func_151C110C, obj, 0, 4, 0);
+            p->unk88 = func_151B8400(obj);
+            if (D_80082FA0 < 2 && D_8008FD8C < 4) {
+                p->unk8C = func_151B8668(obj, arg4, arg5);
+            } else {
+                extern u8 D_800BE616;
+
+                p->unk8C = 0;
+            }
+        } else {
+            if (spawn.unk80 != NULL) {
+                func_1516972C(spawn.unk80);
+            }
+            if (spawn.unk84 != NULL) {
+                func_1516972C(spawn.unk84);
+            }
+        }
+        if (arg0->unk1D4 != 0 && (arg0->unk74 & 0xF) != 0xF) {
+            if (arg0->unk04 != 0x77 && arg0->unk04 != 0x28) {
+                const Vec151C196C a = { 3.0f, 125.0f, 35.0f };
+                const Vec151C196C b = { 6.0f, -50.0f, 35.0f };
+                const Vec151C196C c = { 3.0f, 200.0f, 35.0f };
+                f32 scl[2];
+                Vec151C196C outA;
+                Vec151C196C outB;
+                Vec151C196C *in[2];
+                Vec151C196C *out[2];
+
+                scl[0] = func_150ADA68() * 10.0f + 25.0f;
+                scl[1] = func_150ADA68() * 1.009000063f + 2.013000011f;
+                in[0] = &a;
+                in[1] = &b;
+                out[0] = &outA;
+                out[1] = &outB;
+                func_15145EA4(in, out, arg0->unk1D4 + 0x240, 2);
+                func_15102B38(arg0, 9, &a, &c, scl, (RAND() % 3U) + 8,
+                              (RAND() % 56U) + 200, func_150ADA68() * 204.0f + 601.0f,
+                              &outA, 0xFF, 0, -1, arg4, arg5);
+                func_15103254((RAND() % 3U) + 8, (RAND() % 56U) + 200,
+                              func_150ADA68() * 204.0f + 601.0f, &outB, 0xFF, arg4, arg5);
+                func_151C1860((f32 *) &outB, arg4, arg5);
+            }
+        }
+    }
+}
+
+typedef struct {
+    u8 pad0[0x38];
+    f32 unk38;
+    f32 unk3C;
+    f32 unk40;
+} Struct151C110CInner;
+
+typedef struct {
+    s16 unk0;
+    s16 unk2;
+    s16 unk4;
+    s16 unk6;
+    u8 pad8[0x10];
+    Struct151C110CInner *unk18;
+} Struct151C110C;
+
+s32 func_151C110C(Struct151C110C *arg0, s32 arg1, void **arg2, s32 arg3, s32 arg4, s32 arg5, s16 *arg6) {
+    Struct151C110CInner *temp_v1;
+    s16 *temp_t3;
+
+    temp_v1 = arg0->unk18;
+    temp_t3 = arg6;
+    if (temp_v1 != NULL) {
+        if (*arg2 != NULL) {
+            arg0->unk2 = temp_v1->unk38;
+            arg0->unk4 = temp_v1->unk3C;
+            arg0->unk6 = temp_v1->unk40;
+            return 0;
+        }
+    }
+
+    *temp_t3 = 0;
+    return 0;
+}
 
 typedef struct Model151C1180 {
     u8 pad0[0x14];
