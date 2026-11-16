@@ -2039,7 +2039,64 @@ s32 func_1508B9BC(void) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_B4080/func_1508BC20.s")
+void func_1508BC20(void) {
+    s32 i;
+    f32 fn;
+    s32 pos;
+    s32 val;
+    s32 dir;
+    s32 delta;
+    s32 step;
+    s32 h;
+    u8 *base;
+    s8 n;
+    s8 used[16];
+
+    n = D_8008FD8C;
+    base = (u8 *)D_800D23B0 + 0x15B4;
+    h = n >> 1;
+    if (h < 2) {
+        h = 2;
+    }
+    step = 0xAA / h;
+    fn = n;
+    for (i = 0; i < n; i++) {
+        for (h = 0; h < 16; h++) used[h] = 0;
+        dir = -1;
+        val = 0x55;
+        delta = step;
+        pos = func_150ADA68() * fn;
+        if (func_150ADA68() > 0.5f) {
+            dir = 1;
+        }
+        while (used[pos] != 0) {
+            pos += dir;
+            if (pos < 0) {
+                pos = n - 1;
+            }
+            if (pos >= n) {
+                pos = 0;
+            }
+        }
+        used[pos] = 1;
+        for (h = 0; h < n; h++) {
+            if (val < 0x100) {
+                base[pos] = val;
+            } else {
+                base[pos] = 0xFF;
+            }
+            pos++;
+            if (pos >= n) {
+                pos = 0;
+            }
+            val += delta;
+            if (val >= 0x100) {
+                delta = -delta;
+            }
+        }
+        base += 0x10;
+    }
+}
 
 s32 func_1508BF14(void) {
     s32 numSlots;
