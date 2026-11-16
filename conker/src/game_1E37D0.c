@@ -843,7 +843,105 @@ s32 func_151B77F4(Game1E37D0RingObject *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E37D0/func_151B7998.s")
+s32 func_151B7998(Game1E37D0RingObject *arg0)
+{
+  Game1E37D0RingEntry *entries;
+  f32 total;
+  f32 scale;
+  s32 i;
+  s32 prev;
+  f32 t;
+  Game1E37D0RingEntry *cur;
+  Game1E37D0RingEntry *next;
+  f32 dx;
+  f32 dy;
+  f32 dz;
+  f32 dist;
+  f32 inv;
+  f32 k;
+  s32 j;
+  entries = arg0->entries;
+  if (arg0->count >= 2)
+  {
+    total = 0.0f;
+    i = arg0->head - 1;
+    if (i < 0)
+    {
+      i = arg0->capacity - 1;
+    }
+    while (i != arg0->tail)
+    {
+      prev = i;
+      i--;
+      if (i < 0)
+      {
+        i = arg0->capacity - 1;
+      }
+      cur = &entries[prev];
+      total += cur->distance;
+      if ((scale = 1198.0f) < total)
+      {
+        next = &entries[i];
+        if (cur->distance != 0)
+        {
+          t = (total - scale) / cur->distance;
+          dx = next->position.x - cur->position.x;
+          dy = next->position.y - cur->position.y;
+          dz = next->position.z - cur->position.z;
+          next->position.x = next->position.x - (dx * t);
+          next->position.y = next->position.y - (dy * t);
+          next->position.z = next->position.z - (dz * t);
+          cur->distance = cur->distance * (1.0f - t);
+        }
+        total = scale;
+        while (i != arg0->tail)
+        {
+          arg0->tail++;
+          if (arg0->tail == arg0->capacity)
+          {
+ goto dummy_label_317127; dummy_label_317127: ;
+            arg0->tail = 0;
+          }
+          arg0->count--;
+        }
+
+      }
+    }
+
+    if (total != 0)
+    {
+      scale = 1.0f / total;
+    }
+    else
+    {
+      scale = 0.0f;
+    }
+    { }
+  }
+  if (arg0->count >= 2)
+  {
+    j = arg0->head;
+    dist = total;
+    k = 255.0f * scale;
+    do
+    {
+      j--;
+      if (j < 0)
+      {
+        j = arg0->capacity - 1;
+      }
+      cur = &entries[j];
+      cur->state = dist * k;
+      dist -= cur->distance;
+      next_iter:
+      ;
+
+      ;
+    }
+    while (j != arg0->tail);
+  }
+  return 1;
+}
 
 extern u8 D_80091100[];
 
