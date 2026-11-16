@@ -740,7 +740,36 @@ s32 func_15159230(Struct15158BD0_src *arg0, f32 *arg1, u8 arg2) {
     return ret;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_185560/func_151592B8.s")
+extern u16 D_8008B040;
+
+s32 func_151592B8(Struct15158BD0_src *arg0, u8 arg1) {
+    s32 var_v1;
+    s32 var_v0;
+    union { u16 value; u8 bytes[2]; } data;
+
+    if (arg1 == 0) {
+        var_v0 = 0;
+        data.value = D_8008B040;
+        var_v1 = 1;
+        do {
+            if (*(u16 *)((u8 *)arg0 + 0x84) == data.bytes[var_v1--]) {
+                var_v0 = 1;
+            }
+        } while ((var_v0 == 0) && (var_v1 >= 0));
+    } else {
+        var_v0 = 0;
+    }
+    if (var_v0 != 0) {
+        var_v1 = 3;
+    } else if (*(u8 *)((u8 *)arg0 + 0xAD) != 0) {
+        var_v1 = 2;
+    } else if (*(f32 *)((u8 *)arg0 + 0x28) != 0.0f) {
+        var_v1 = 1;
+    } else {
+        var_v1 = 4;
+    }
+    return var_v1;
+}
 
 s32 func_15159370(struct127 *arg0, u8 *arg1) {
     s32 ret;
