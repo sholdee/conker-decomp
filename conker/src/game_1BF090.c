@@ -145,7 +145,7 @@ struct Struct15191D54Arg0 {
 void func_15143134(void *, f32 *, s32);
 s32 func_1514672C(f32 *);
 s32 func_15046F84(f32 *, s32, f32, f32 *);
-void func_1519203C(f32 *, f32 *, f32, s16, s32, s32, f32, s32, f32, s32 *, s32, s32, s32);
+void *func_1519203C(f32 *, f32 *, f32, s32, s32, s32, f32, s32, f32, s32 *, s32, s32, s32);
 extern f32 D_800A80E8;
 extern f32 D_800A80EC;
 extern f32 D_800A80F0;
@@ -209,7 +209,121 @@ void func_15191D54(struct Struct15191D54Arg0 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1BF090/func_1519203C.s")
+typedef struct Vec1519203C {
+    s32 x;
+    s32 y;
+    s32 z;
+} Vec1519203C;
+
+typedef struct Game1BF090Spawn {
+    s32 header;
+    s32 owner;
+    s16 type, lifetime;
+    s32 fieldC, field10;
+    u8 color[4];
+    u8 field18, field19, field1A, mode, group, kind;
+    s16 field1E, field20, count;
+    f32 scale, scaleX, scaleY;
+    Vec1519203C position;
+    f32 rotation[3];
+    Vec1519203C direction;
+    f32 speed;
+    s32 flags;
+    u8 pad5C[4];
+    u8 channel0, channel1, channel2;
+    s8 channel3, channel4;
+    u8 channel5;
+    u8 pad66[0xA];
+} Game1BF090Spawn;
+
+typedef struct Game1BF090Packed {
+    u8 bytes[16];
+    u16 last;
+} Game1BF090Packed;
+
+typedef struct Game1BF090Fragment {
+    f32 scale;
+    u8 random[4];
+    f32 scaleX, scaleY, height;
+    Game1BF090Packed body;
+    u8 kind;
+} Game1BF090Fragment;
+
+void *func_15130374(s32, u8, s32, u8, s32);
+extern s32 (*D_8008FCD0[])(void);
+extern f32 D_800A80F4, D_800A80F8;
+
+void *func_1519203C(f32 *position, f32 *direction,
+                    f32 speed, s32 lifetime, s32 mode, s32 group,
+                    f32 scale, s32 unused, f32 height, s32 *body,
+                    s32 kind, s32 priority, s32 owner) {
+    void *effect;
+    Game1BF090Spawn spawn;
+    Game1BF090Fragment fragment;
+    s32 second;
+    s32 first;
+
+    spawn.type = 0x4401;
+    spawn.header = 0x200005;
+    spawn.owner = 0;
+    spawn.fieldC = 0;
+    spawn.field10 = 0;
+    spawn.color[0] = 0;
+    spawn.color[1] = 0;
+    spawn.color[2] = 0;
+    spawn.color[3] = 0xFF;
+    spawn.field18 = 0;
+    spawn.field19 = 0;
+    spawn.field1A = 0;
+    spawn.mode = ((u8 *)&mode)[3];
+    spawn.group = ((u8 *)&group)[3];
+    spawn.position = *(Vec1519203C *)position;
+    spawn.rotation[0] = 0.0f;
+    spawn.rotation[1] = 0.0f;
+    spawn.rotation[2] = 0.0f;
+    spawn.direction = *(Vec1519203C *)direction;
+    spawn.speed = speed;
+    spawn.count = 1;
+    spawn.scale = 1.0f;
+    if (func_150ADA20() & 1) {
+        first = 0x40;
+    } else {
+        first = 0;
+    }
+    if (func_150ADA20() & 1) {
+        second = 0x80;
+    } else {
+        second = 0;
+    }
+    spawn.flags = second | 0xC207 | first | 0x10000;
+    spawn.lifetime = (s16)lifetime + 0x12;
+    spawn.field1E = 0x12;
+    spawn.field20 = 0xE;
+    spawn.channel0 = 6;
+    spawn.channel1 = 8;
+    spawn.channel2 = 0xF;
+    spawn.channel3 = -1;
+    spawn.channel4 = -1;
+    spawn.channel5 = 3;
+    fragment.random[0] = func_150ADA20() & 0xFF;
+    fragment.random[1] = func_150ADA20() & 0xFF;
+    spawn.kind = D_8008FCD0[((u8 *)&kind)[3]]();
+    spawn.scaleY = scale;
+    spawn.scaleX = scale;
+    fragment.scale = scale;
+    fragment.random[2] = func_150ADA20() % 6U + 5;
+    fragment.random[3] = func_150ADA20() % 6U + 5;
+    fragment.scaleX = (func_150ADA68() * 0.25f + D_800A80F4) * fragment.scale;
+    fragment.scaleY = (func_150ADA68() * 0.25f + D_800A80F8) * fragment.scale;
+    fragment.height = height;
+    fragment.body = *(Game1BF090Packed *)body;
+    fragment.kind = ((u8 *)&kind)[3];
+    effect = func_15130374((s32)&spawn, 1, 0x28, ((u8 *)&priority)[3], owner);
+    if (effect != 0) {
+        memcpy((u8 *)effect + 0xA8, &fragment, 0x28U);
+    }
+    return effect;
+}
 
 extern void func_15131C84(s32, s32, s32, s32, s32, s32);
 
