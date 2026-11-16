@@ -1084,7 +1084,21 @@ void func_1506D570(void) {
 //         func_1507E7E4(obj, (cmd >> 24) & 0xFF, (cmd >> 16) & 0xFF, val, 0);
 //     }
 // }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506D584.s")
+extern f32 D_80099D48;
+extern void func_1507E7E4(u8 *, u8, u8, u16, s32);
+void func_1506D584(void) {
+    struct127 *obj = D_800D154C;
+    f32 divisor; u16 val; u8 a; u8 b;
+    if (((u8 *)obj)[0x70] != 0x2A) {
+        a = D_800D1580 >> 24;
+        b = (D_800D1580 >> 16) & 0xFF;
+        val = D_800D1580 & 0xFFFF;
+        divisor = obj->unk2D0->unk10;
+        if (divisor == 0.0f) divisor = D_80099D48;
+        if (val != 0xFFFF) val = (u32)((f32)val / divisor);
+        func_1507E7E4((u8 *)obj, a, b, val, 0);
+    }
+}
 // ???
 void func_1506D6B4(void) {
     struct127 *p = D_800D154C;
