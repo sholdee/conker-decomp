@@ -1003,7 +1003,83 @@ Gfx *func_151ED29C(Gfx *gfx, GameTex151ED29C *tex, s32 *sizeOut) {
     return gfx;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_215960/func_151ED430.s")
+typedef struct Game215960Sprite {
+    s32 resource;
+    u8 pad4[2];
+    u16 width;
+    u16 height;
+    u8 format;
+    u8 size;
+} Game215960Sprite;
+
+#define MIN_ED430(a, b) (((a) < (b)) ? (a) : (b))
+#define MAX_ED430(a, b) (((a) > (b)) ? (a) : (b))
+#undef MIN
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
+
+Gfx *func_151ED430(Gfx *arg0, void *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, s32 arg7) {
+    s32 column;
+    s32 row;
+    s32 width;
+    s32 height;
+    s32 top;
+    s32 blockSize;
+    s32 resource;
+    s32 dsdx;
+    s32 dtdy;
+    s32 address;
+    s32 continued;
+    s32 remaining;
+    f32 scale;
+
+    continued = 0;
+    arg0 = func_151ED29C(arg0, arg1, &blockSize);
+    if (arg7 < 0) {
+        scale = 1.0f;
+        arg7 = 0;
+    } else {
+        scale = arg6;
+    }
+    resource = ((Game215960Sprite *)arg1)->resource + arg7;
+    width = (u32)((Game215960Sprite *)arg1)->width * scale * D_8008FE1C;
+    height = (u32)((Game215960Sprite *)arg1)->height * arg6 * D_8008FE20;
+    dtdy = 1024.0f / (arg6 * D_8008FE20);
+    dsdx = 1024.0f / (scale * D_8008FE1C);
+    arg2 = arg2 * D_8008FE1C;
+    arg3 = arg3 * D_8008FE20;
+    arg2 -= (width * arg4) >> 1;
+    top = arg3 - ((height * arg5) >> 1);
+    for (column = 0; column < arg4; column++) {
+        arg3 = top;
+        for (row = 0; row < arg5; row++) {
+            if (!continued) {
+                address = func_1510D0EC(resource, (s32)&remaining, 3, 0);
+            }
+            if (address != (s32)0x80000000) {
+                gDPPipeSync(arg0++);
+                gDPSetTextureImage(arg0++, ((Game215960Sprite *)arg1)->format, D_8009DEBC[((Game215960Sprite *)arg1)->size], 1, address);
+                gDPLoadBlock(arg0++, G_TX_LOADTILE, 0, 0, blockSize - 1, 0);
+                { Gfx *command = arg0++; command->words.w0 = (_SHIFTL(0xE4, 24, 8) | _SHIFTL(MAX_ED430((s16)(((arg2 + width) << 2)), 0), 12, 12) | _SHIFTL(MAX_ED430((s16)(((arg3 + height) << 2)), 0), 0, 12)); command->words.w1 = (_SHIFTL((0), 24, 3) | _SHIFTL(MAX_ED430((s16)((arg2 << 2)), 0), 12, 12) | _SHIFTL(MAX_ED430((s16)((arg3 << 2)), 0), 0, 12)); { Gfx *command = arg0++; command->words.w0 = _SHIFTL(0xE1, 24, 8); command->words.w1 = (u32)((_SHIFTL(((0) - (((s16)((arg2 << 2)) < 0) ? (((s16)(dsdx) < 0) ? (MAX_ED430((((s16)((arg2 << 2)) * (s16)(dsdx)) >> 7), 0)) : (MIN_ED430((((s16)((arg2 << 2)) * (s16)(dsdx)) >> 7), 0))) : 0)), 16, 16) | _SHIFTL(((0) - ((((arg3 << 2)) < 0) ? (((s16)(dtdy) < 0) ? (MAX_ED430((((s16)((arg3 << 2)) * (s16)(dtdy)) >> 7), 0)) : (MIN_ED430((((s16)((arg3 << 2)) * (s16)(dtdy)) >> 7), 0))) : 0)), 0, 16))); } { Gfx *command = arg0++; command->words.w0 = _SHIFTL(0xF1, 24, 8); command->words.w1 = (u32)((_SHIFTL((dsdx), 16, 16) | _SHIFTL((dtdy), 0, 16))); } }
+            }
+            arg3 += height;
+            if (remaining > 0x1000) {
+                continued = 1;
+                if (address != 0) {
+                    address += (blockSize << ((Game215960Sprite *)arg1)->size) >> 1;
+                }
+                remaining -= (blockSize << ((Game215960Sprite *)arg1)->size) >> 1;
+            } else {
+                continued = 0;
+                resource++;
+            }
+        }
+        arg2 += width;
+    }
+    gDPPipeSync(arg0++);
+    return arg0;
+}
+#undef MIN
+#define MIN(a, b) ((b) < (a) ? (b) : (a))
 
 typedef struct {
     /* 0x00 */ Gfx **unk0;
