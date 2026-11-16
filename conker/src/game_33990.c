@@ -353,7 +353,21 @@ void func_15007168(void) {
 //         func_15007168();
 //     }
 // }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_33990/func_1500727C.s")
+void func_1500727C(void) {
+    s32 i;
+    u16 sum;
+
+    func_151DD3A0(&D_800BE900, 0x44, (s16 *)D_800BE2F0, 0x70);
+    sum = 0xCC;
+    i = 2;
+    do {
+        sum += D_800BE2F0[i] << (i & 3);
+        i++;
+    } while (i < 0x68);
+    if (*(u16 *)D_800BE2F0 != sum) {
+        func_15007168();
+    }
+}
 // PERMUTER CANDIDATE best 1265: same unrolled-checksum 3-register rotation {sum,i,p}->{v0,v1,a0}
 // as func_1500727C, plus target keeps the (dead) func_151DCEF0 return in a stack slot (frame -0x20
 // vs my -0x18) which my build DCEs. Reconstruction:
