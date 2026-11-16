@@ -1026,7 +1026,69 @@ void func_1501FFE8(f32 *arg0, struct_game49D30_1 *arg1, s32 arg2, s32 arg3) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_49D30/func_1502178C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_49D30/func_15021DB8.s")
+typedef struct {
+    u16 kind;
+    u8 actor, pad3[2];
+    s8 index;
+    s16 height;
+} Game49D30Selection;
+
+s32 func_15021DB8(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, s32 arg4, s32 arg5) {
+    s32 index;
+    u8 *choices;
+    s32 matrixOffset;
+    u8 *camera;
+    f32 sentinel;
+
+    if ((&D_800C35EA)[arg5] != 1) {
+        return 0;
+    }
+    for (index = 0; index < D_800C363A[arg5]; index++) {
+        if (((u16 *)D_800C35C8[arg5])[index] == 0) {
+            continue;
+        }
+        if (((Game49D30Selection *)D_800C35F0[arg5])[index].kind != 2 ||
+            ((u8 (*)[0x32C])&D_800CC2D0)[arg4][0x3B] != ((Game49D30Selection *)D_800C35F0[arg5])[index].actor) {
+            continue;
+        }
+        choices = ((u8 *(*)[30])D_800C3960)[arg5][index];
+        if (choices[2] != 0xFF) {
+            Game49D30Selection *selection;
+            s32 slot;
+
+            selection = (Game49D30Selection *)(((u8 *(*)[30])D_800C3688)[arg5][index] + choices[2] * 8);
+            slot = selection->index;
+            matrixOffset = slot * 0x44;
+            arg3[0] = *(f32 *)(((u8 **)&D_800C3958)[arg5] + matrixOffset);
+            arg3[1] = *(f32 *)(((u8 **)&D_800C3958)[arg5] + matrixOffset + 4) + (f32)selection->height;
+            arg3[2] = *(f32 *)(((u8 **)&D_800C3958)[arg5] + matrixOffset + 8);
+            return 0;
+        }
+        if (choices[1] != 0xFF) {
+            Game49D30Selection *selection;
+
+            selection = (Game49D30Selection *)(((u8 *(*)[30])D_800C3688)[arg5][index] + choices[1] * 8);
+            if (selection->index == 0) {
+                matrixOffset = index * 0x44;
+                *arg0 = *(f32 *)(((u8 **)&D_800C3958)[arg5] + matrixOffset + 0x28);
+                *arg1 = *(f32 *)(((u8 **)&D_800C3958)[arg5] + matrixOffset + 0x24);
+                *arg2 = *(f32 *)(((u8 **)&D_800C3958)[arg5] + matrixOffset + 0x2C);
+                return 1;
+            }
+            camera = (u8 *)D_800DBFF0;
+            arg3[0] = *(f32 *)(camera + 0x2F8);
+            arg3[1] = *(f32 *)(camera + 0x2FC) + (f32)selection->height;
+            arg3[2] = *(f32 *)(camera + 0x300);
+            return 0;
+        }
+        sentinel = -99999.0f;
+        arg3[0] = sentinel;
+        arg3[1] = sentinel;
+        arg3[2] = sentinel;
+        return 0;
+    }
+    return 0;
+}
 
 typedef struct {
     u16 unk0;
