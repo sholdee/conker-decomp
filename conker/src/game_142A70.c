@@ -359,7 +359,37 @@ void func_15115EDC(struct S_15115EDC *arg0, struct A_15115EDC *arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_142A70/func_15115F68.s")
+struct S_15115F68 {
+    f32 unk0;
+    u8 pad4[0x38];
+    s32 unk3C;
+    u8 pad40[0x3C];
+    f32 unk7C;
+    f32 unk80;
+};
+
+void func_15115F68(struct S_15115F68 *arg0) {
+    s8 a;
+    s8 b;
+    s8 c;
+    s8 d;
+
+    a = (s8)arg0->unk3C; b = (s8)(arg0->unk3C >> 16);
+    c = (s8)(arg0->unk3C >> 8); d = (s8)(arg0->unk3C >> 24);
+    if ((s8)arg0->unk3C) {
+        arg0->unk0 += (arg0->unk7C / a) + b;
+    } else {
+        arg0->unk0 += (s32)(b * D_800BE9E4);
+    }
+    if (c < arg0->unk0) {
+        arg0->unk0 = c;
+    } else if (arg0->unk0 < d) {
+        arg0->unk0 = d;
+    }
+    arg0->unk80 = 0.0f;
+    arg0->unk7C = 0.0f;
+}
+
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_142A70/func_15116058.s")
 
