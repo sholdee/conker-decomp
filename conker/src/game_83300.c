@@ -3017,4 +3017,50 @@ void func_15063168(struct127 *arg0) {
 //     arg0->unk1CC = arg0->y_position; arg0->old_z_position = arg0->z_position;
 //     arg0->unkC4 = uC4; cam->unk3D4 = (struct127 *) arg0->unk31C;
 // }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_15063254.s")
+void func_15082A44(void *, s32, s32, s32, s32);
+void func_15063254(struct127 *arg0, s32 arg1, s32 arg2, f32 arg3) {
+    struct129 *ptr;
+    s32 sp50;
+    s32 index;
+    struct108 *saved;
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 b8;
+    f32 f40;
+    f32 c4;
+    s32 rot;
+
+    sp50 = arg0->unk13F;
+    ptr = arg0->unk144;
+    ptr->unk4 = arg1;
+    ptr->unk3 = arg2;
+    ptr->unk20 = arg3;
+    ptr->unk24 = arg3;
+    ptr->unk2 = 0;
+    saved = arg0->camera;
+    x = arg0->x_position;
+    y = arg0->y_position;
+    z = arg0->z_position;
+    b8 = arg0->unkB8;
+    f40 = arg0->unk40;
+    c4 = arg0->unkC4;
+    rot = arg0->unk76;
+    index = ((s32)arg0 - (s32)&D_800CC2D0) / 812;
+    func_15060F28(arg0, 0);
+    func_15082A44(ptr, sp50, 0, 0, index + 1);
+    arg0->camera = saved;
+    arg0->x_position = x;
+    arg0->y_position = y;
+    arg0->z_position = z;
+    arg0->unkB8 = b8;
+    arg0->unk40 = f40;
+    arg0->unkC4 = c4;
+    arg0->unk76 = rot;
+    arg0->unk7A = rot;
+    arg0->old_x_position = x;
+    arg0->old_y_position = y;
+    arg0->old_z_position = arg0->z_position;
+    arg0->unk1CC = arg0->y_position;
+    arg0->camera->unk3D4 = (struct127 *)arg0->unk31C;
+}
