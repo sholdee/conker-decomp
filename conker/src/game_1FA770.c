@@ -1333,7 +1333,7 @@ typedef struct {
 extern f32 func_15143E64(struct17 *);
 extern s32 func_1510F8CC(s32);
 void func_151D13E0(struct260 *arg0);
-void func_151D1448(struct260 *arg0);
+void func_151D1448();
 
 void func_151D1138(struct260 *arg0) {
     Sub151D1138 *sub;
@@ -1427,7 +1427,64 @@ void func_151D13E0(struct260 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1FA770/func_151D1448.s")
+void func_151D1448(u8 *arg0) {
+    u8 *link;
+    struct {
+        Vec3i151CD674 position;
+        s16 type;
+        s16 subtype;
+        s32 mode;
+        u8 flag;
+        u8 value;
+        u8 pad_16[2];
+        s32 reserved;
+        u8 *object;
+        f32 zero;
+        u8 color;
+        u8 pad_25[3];
+        f32 range;
+        f32 width;
+        f32 height;
+        f32 extent;
+        f32 source_value;
+    } packet;
+    u8 *state;
+    u8 *result;
+
+    link = arg0 + 0x28;
+    state = *(u8 **)link;
+    packet.object = arg0;
+    packet.color = 0xFF;
+    packet.zero = 0.0f;
+    if (state[4] == 0x25) {
+        packet.range = 800.0f;
+        packet.width = 36.0f;
+        packet.height = 50.0f;
+        packet.extent = 200.0f;
+    } else {
+        if (D_80082FA0 > 0) {
+            packet.range = 260.0f;
+        } else {
+            packet.range = 500.0f;
+        }
+        packet.width = 40.0f;
+        packet.height = 40.0f;
+        packet.extent = 180.0f;
+    }
+    packet.source_value = *(f32 *)(*(u8 **)link + 0x14C);
+    packet.value = 0x19;
+    packet.position = *(Vec3i151CD674 *)(link + 0x18);
+    packet.type = 0x12C;
+    packet.subtype = 0x36;
+    packet.mode = 0x13;
+    packet.flag = 6;
+    packet.reserved = 0;
+    result = (u8 *)func_15147A80(&packet, 0x20, 0x28, 0, 0x11, 0x12, 0, 0, 0, arg0[0xC], arg0[1]);
+    if (result != 0) {
+        memcpy(*(void **)(result + 0x98), &packet.object, 0x20);
+        *(u8 **)(link + 8) = result;
+    }
+}
 
 typedef struct {
     f32 x, y, z;
