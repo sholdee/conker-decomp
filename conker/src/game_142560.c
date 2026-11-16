@@ -155,7 +155,73 @@ void func_151152A8(struct Obj151152A8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_142560/func_15115368.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_142560/func_151155C0.s")
+void func_151155C0(void *arg0) {
+    s32 divisor;
+    s32 count;
+    s32 target;
+    s32 enabled;
+    s32 crossed;
+    s32 start;
+    s32 step;
+    s16 next;
+
+    divisor = (u8)(*(s32 *)((u8 *)arg0 + 0x3C) >> 16);
+    count = (u8)(*(s32 *)((u8 *)arg0 + 0x3C) >> 24) + 1;
+    target = (s16)*(s32 *)((u8 *)arg0 + 0x3C);
+    enabled = 0;
+    crossed = 0;
+    start = *(s16 *)((u8 *)arg0 + 0x12);
+    if ((*(u8 *)((u8 *)arg0 + 0x4F) & 4) == 4) {
+        enabled = 1;
+    }
+    if (*(s32 *)((u8 *)arg0 + 0x7C) == 0) {
+        *(s32 *)((u8 *)arg0 + 0x7C) = *(s16 *)((u8 *)arg0 + 0x12);
+    }
+    step = (target - *(s32 *)((u8 *)arg0 + 0x7C)) / divisor;
+    if (*(s32 *)((u8 *)arg0 + 0x80) == 0) {
+        if (*(s32 *)((u8 *)arg0 + 0x7C) == *(s16 *)((u8 *)arg0 + 0x12)) {
+            if (enabled) {
+                *(s32 *)((u8 *)arg0 + 0x80) = count;
+            }
+        } else {
+            next = *(s16 *)((u8 *)arg0 + 0x12) - step;
+            if (*(s32 *)((u8 *)arg0 + 0x7C) < target) {
+                if (*(s32 *)((u8 *)arg0 + 0x7C) < next) {
+                    crossed = 1;
+                }
+            } else if (next < *(s32 *)((u8 *)arg0 + 0x7C)) {
+                crossed = 1;
+            }
+            if (crossed) {
+                *(s16 *)((u8 *)arg0 + 0x12) = next;
+            } else {
+                *(s16 *)((u8 *)arg0 + 0x12) = *(s32 *)((u8 *)arg0 + 0x7C);
+                *(s32 *)((u8 *)arg0 + 0x80) = -count;
+            }
+        }
+    }
+    if (*(s32 *)((u8 *)arg0 + 0x80) > 0) {
+        next = *(s16 *)((u8 *)arg0 + 0x12) + step;
+        if (*(s32 *)((u8 *)arg0 + 0x7C) < target) {
+            if (next < target) {
+                crossed = 1;
+            }
+        } else if (target < next) {
+            crossed = 1;
+        }
+        if (crossed) {
+            *(s16 *)((u8 *)arg0 + 0x12) = next;
+            *(s32 *)((u8 *)arg0 + 0x80) = count;
+        } else {
+            *(s16 *)((u8 *)arg0 + 0x12) = target;
+            *(s32 *)((u8 *)arg0 + 0x80) = *(s32 *)((u8 *)arg0 + 0x80) - 1;
+        }
+    }
+    if (*(s32 *)((u8 *)arg0 + 0x80) < 0) {
+        *(s32 *)((u8 *)arg0 + 0x80) = *(s32 *)((u8 *)arg0 + 0x80) + 1;
+    }
+    *(s16 *)((u8 *)arg0 + 0x5C) = *(s16 *)((u8 *)arg0 + 0x12) - start;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_142560/func_1511575C.s")
 
