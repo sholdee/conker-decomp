@@ -141,7 +141,117 @@ s32 func_1000A420(s32 arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4, s32 arg5, s3
 //     return ret;
 // }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_A420/func_1000A750.s")
+typedef struct {
+    s16 x;
+    s16 y;
+    s16 z;
+    s16 pad;
+} PathPoint_A750;
+
+s32 func_1000A420(s32, s32, s32, f32, s32, s32, s32, s32, s32, s32 *, s32 *, s32 *);
+
+#define PTS (((PathPoint_A750 **)D_800D2104)[arg0])
+#define DIST (dx * dx + dy * dy + dz * dz)
+
+s32 func_1000A750(s32 arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 x, s32 y, s32 z, s32 arg8, s32 arg9,
+                  s32 *argA, s32 *argB, s32 *argC) {
+    s32 dx;
+    s32 dy;
+    s32 dz;
+    s32 dist;
+    s32 prev;
+    s32 best;
+    s32 bestIdx;
+    s32 i;
+    s32 prevBest;
+    s32 nextBest;
+    s32 count;
+    s32 flag;
+    PathPoint_A750 *pts;
+    s16 resX;
+    s16 resY;
+    s16 resZ;
+    struct17 seg;
+    struct17 rel;
+    f32 lenSq;
+    f32 dot;
+
+    flag = 0;
+    count = D_800D2108[arg0];
+    bestIdx = -2;
+    if (count == 0) {
+        return 0;
+    }
+    best = 0x7FFFFFFF;
+    prev = best;
+    pts = PTS;
+    for (i = 0; i < count; i++) {
+        dx = x - pts->x;
+        dy = y - pts->y;
+        dz = z - pts->z;
+        dist = DIST;
+        if (dist < best) {
+            bestIdx = i;
+            prevBest = prev;
+            best = dist;
+        } else if (i - 1 == bestIdx) {
+            nextBest = dist;
+        }
+        prev = dist;
+        pts++;
+    }
+    resX = PTS[bestIdx].x;
+    resY = PTS[bestIdx].y;
+    resZ = PTS[bestIdx].z;
+    if (count >= 2 && best >= 0x6D61) {
+        if (bestIdx >= count - 1 || prevBest < nextBest) {
+            bestIdx--;
+        }
+        seg.unk0 = PTS[bestIdx + 1].x - PTS[bestIdx].x;
+        seg.unk4 = PTS[bestIdx + 1].y - PTS[bestIdx].y;
+        seg.unk8 = PTS[bestIdx + 1].z - PTS[bestIdx].z;
+        rel.unk0 = x - PTS[bestIdx].x;
+        rel.unk4 = y - PTS[bestIdx].y;
+        rel.unk8 = z - PTS[bestIdx].z;
+        dot = func_150AD900(&seg.unk0, &rel.unk0);
+        if (dot < 0.0f) {
+            flag = 1;
+        } else {
+            lenSq = func_150AD930(&seg.unk0);
+            lenSq = lenSq * lenSq;
+            if (lenSq < dot) {
+                flag = 1;
+            }
+        }
+        if (flag) {
+            func_150AD900(&seg.unk0, &rel.unk0);
+            if (prevBest < nextBest) {
+                bestIdx++;
+            } else {
+                bestIdx--;
+            }
+            seg.unk0 = PTS[bestIdx + 1].x - PTS[bestIdx].x;
+            seg.unk4 = PTS[bestIdx + 1].y - PTS[bestIdx].y;
+            seg.unk8 = PTS[bestIdx + 1].z - PTS[bestIdx].z;
+            rel.unk0 = x - PTS[bestIdx].x;
+            rel.unk4 = y - PTS[bestIdx].y;
+            rel.unk8 = z - PTS[bestIdx].z;
+            dot = func_150AD900(&seg.unk0, &rel.unk0);
+            lenSq = func_150AD930(&seg.unk0);
+            lenSq = lenSq * lenSq;
+        }
+        if (lenSq != 0.0f) {
+            if (dot < lenSq) {
+                func_15049148(&seg, dot / lenSq, &seg);
+            }
+            resX = PTS[bestIdx].x + seg.unk0;
+            resY = PTS[bestIdx].y + seg.unk4;
+            resZ = PTS[bestIdx].z + seg.unk8;
+        }
+    }
+    return func_1000A420(resX - arg1, resY - arg2, resZ - arg3, arg4, resX - x, resY - y, resZ - z, arg8, arg9, argA,
+                         argB, argC);
+}
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 
