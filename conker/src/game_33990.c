@@ -280,26 +280,29 @@ void func_15006BEC(s32 arg0) {
         ret = func_151DCEF0(&D_800BE900, (u8)((slot << 4) + 4), D_800BE358, 0x80);
     }
 }
-// PERMUTER CANDIDATE best 1532: structure byte-exact; only diff is the target keeps the (dead)
-// return of the first func_151DD4E0 call live in a saved reg (s1) -> 8 saved regs. My build DCEs
-// it (no -g3 dead-local slotting here) -> 7 saved regs, shifting all s-reg numbers & stack offsets.
-// Likely the original uses that return value. Reconstruction:
-// void func_1500707C(s32 arg0) {
-//     s32 i; u8 *p358 = D_800BE358; s8 *p3D8 = &D_800BE3D8;
-//     for (i = 0; i < 8; i++) { p358[i] = 0xFF; }
-//     osWritebackDCacheAll();
-//     if (D_8002AC5C == 0) {
-//         for (i = 0; i < 4; i++) {
-//             if (arg0 == *p3D8) {
-//                 s32 idx = (i << 4) + 4;
-//                 s32 ret = func_151DD4E0(&D_800BE900, (u8)idx, p358);
-//                 func_151DD4E0(&D_800BE900, (u8)(idx + 1), p358);
-//             }
-//             p3D8++;
-//         }
-//     }
-// }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_33990/func_1500707C.s")
+void func_1500707C(s32 arg0) {
+    s32 i;
+    s32 ret;
+    s32 idx;
+    s32 idx2;
+    u8 *p358 = D_800BE358;
+    s8 *p3D8;
+    for (i = 0; i < 8; i++) { p358[i] = 0xFF; }
+    osWritebackDCacheAll();
+    p3D8 = &D_800BE3D8;
+    if (D_8002AC5C == 0) {
+        for (i = 0; i < 4; i++) {
+            if (arg0 == *p3D8) {
+                idx = i * 16 + 4;
+                ret = func_151DD4E0(&D_800BE900, idx, p358);
+                idx2 = idx + 1;
+                ret = func_151DD4E0(&D_800BE900, idx2, p358) + ret - ret;
+                if (ret) {}
+            }
+            p3D8++;
+        }
+    }
+}
 void func_15007168(void) {
     s32 i;
 
