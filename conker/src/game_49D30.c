@@ -1236,7 +1236,131 @@ void func_1501FFE8(f32 *arg0, struct_game49D30_1 *arg1, s32 arg2, s32 arg3) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_49D30/func_15020EC4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_49D30/func_1502178C.s")
+typedef struct {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    u8 pad20[0x14];
+    f32 unk34;
+    f32 unk38;
+    u8 pad3C[0x8];
+} Ent1502178C;
+
+typedef struct {
+    u16 kind;
+    u8 actor;
+    u8 pad3[5];
+} Sel1502178C;
+
+extern void func_1510E7A4(void *, void *, f32 *, void *, void *, void *, f32, f32, f32, f32, u16, struct127 *, f32, f32);
+
+extern f32 D_800D35E0; /* ((u8 *)&D_800D35E0)[-4] == D_800D35DC; a distinct base keeps IDO from hoisting the address */
+
+void func_1502178C(struct127 *arg0, s32 arg1, s32 arg2) {
+    s32 i;
+    f32 floorY;
+    struct127 *obj;
+    s32 end;
+    Sel1502178C *sel;
+    f32 angle;
+    f32 old[3];
+    s32 start;
+    s32 changed;
+
+    if ((&D_800C35EA)[arg1] == 1) {
+        D_800C3638 = 0;
+        if (arg2 != -1) {
+            start = arg2;
+            end = arg2 + 1;
+        } else {
+            start = 0;
+            end = D_800C363A[arg1];
+        }
+        for (i = start; i < end; i++) {
+            if (D_800C35C8[arg1][i] == 0) continue; {
+                sel = &((Sel1502178C *)D_800C35F0[arg1])[i];
+                if (sel->kind == 2) {
+                    obj = func_15083E90(sel->actor);
+                    if (obj != NULL && obj == arg0) {
+                        old[0] = obj->x_position;
+                        old[1] = obj->y_position;
+                        old[2] = obj->z_position;
+                        obj->x_position = ((Ent1502178C **)&D_800C3958)[arg1][i].unk0;
+                        obj->y_position = ((Ent1502178C **)&D_800C3958)[arg1][i].unk4 + ((Ent1502178C **)&D_800C3958)[arg1][i].unk38;
+                        obj->z_position = ((Ent1502178C **)&D_800C3958)[arg1][i].unk8;
+                        obj->unk1CC = obj->y_position;
+                        if (D_800C3C88 == 0) {
+                            obj->xz_velocity = (obj->x_position - old[0]) * (obj->x_position - old[0]) + (obj->z_position - old[2]) * (obj->z_position - old[2]);
+                            if (obj->xz_velocity) {
+                                obj->xz_velocity = sqrtf(obj->xz_velocity) * 2.0f;
+                            }
+                        } else {
+                            obj->xz_velocity = 0.0f;
+                        }
+                        if (obj->unk31C != NULL) {
+                            *(f32 *)obj->unk31C = obj->xz_velocity * 2.0f;
+                        }
+                        *(f32 *)&obj->pad54 = 0.0f;
+                        obj->unkCC = 0;
+                        changed = 0;
+                        *(u8 *)&D_800D35DC = (arg0 - D_800CC2D0) + 1;
+                        func_1510E7A4(&obj->pad188, &obj->unk18C, &floorY, &obj->unk118, &obj->unk184, (u8 *)obj + 0x1A2,
+                                      obj->x_position, obj->y_position, obj->z_position, obj->y_position, 0, obj,
+                                      -10000.0f, arg0->y_position);
+                        ((u8 *)&D_800D35E0)[-4] = 0;
+                        obj->unk180 = floorY;
+                        obj->unkD0 = 0;
+                        obj->unk28 = obj->y_position - obj->unk180;
+                        if (obj->interaction_state == 1) {
+                            if (obj->unk118 != -10000.0f && obj->y_position < obj->unk118) {
+                                obj->in_water = 1;
+                            } else {
+                                obj->in_water = 0;
+                                obj->unkB2 = 0;
+                            }
+                        }
+                        if (((Ent1502178C **)&D_800C3958)[arg1][i].unk18 != -9999.0f) {
+                            changed = 1;
+                            obj->xz_scale = ((Ent1502178C **)&D_800C3958)[arg1][i].unk18 * 0.009999999776f;
+                            obj->unk154 = ((Ent1502178C **)&D_800C3958)[arg1][i].unk18 * 0.009999999776f;
+                        }
+                        if (((Ent1502178C **)&D_800C3958)[arg1][i].unk1C != -9999.0f) {
+                            changed = 1;
+                            obj->y_scale = ((Ent1502178C **)&D_800C3958)[arg1][i].unk1C * 0.009999999776f;
+                            obj->unk158 = ((Ent1502178C **)&D_800C3958)[arg1][i].unk1C * 0.009999999776f;
+                        }
+                        if (changed) {
+                            func_15062BDC(obj, obj->xz_scale, obj->y_scale);
+                        }
+                        obj->unkB8 = ((Ent1502178C **)&D_800C3958)[arg1][i].unkC;
+                        angle = ((Ent1502178C **)&D_800C3958)[arg1][i].unk10 + 180.0f;
+                        while (angle >= 360.0f) {
+                            angle -= 360.0f;
+                        }
+                        while (angle < 0.0f) {
+                            angle += 360.0f;
+                        }
+                        obj->unk76 = obj->unk7A = obj->unk78 = (s16)((u32)(angle * 182.0444489f) - 0x4000);
+                        obj->unk40 = angle;
+                        obj->unkC4 = ((Ent1502178C **)&D_800C3958)[arg1][i].unk14;
+                        ((Ent1502178C **)&D_800C3958)[arg1][i].unk34 = (((Ent1502178C **)&D_800C3958)[arg1][i].unk34 < 0.0f) ? 0.0f : (((Ent1502178C **)&D_800C3958)[arg1][i].unk34 > 255.0f) ? 255.0f : ((Ent1502178C **)&D_800C3958)[arg1][i].unk34;
+                        func_1506160C(obj, 1, ((Ent1502178C **)&D_800C3958)[arg1][i].unk34, 0, 0);
+                        obj->old_x_position = obj->x_position;
+                        obj->old_y_position = obj->y_position;
+                        obj->old_z_position = obj->z_position;
+                    }
+                }
+            }
+        }
+        D_800C3638 = 1;
+    }
+}
+
 
 typedef struct {
     u16 kind;
