@@ -1818,7 +1818,55 @@ void func_1505D6F0(struct127 *arg0, s32 arg1)
 
   }
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505DADC.s")
+f32 func_1505DF10(struct127 *arg0, u8 arg1, u16 *arg2, f32 *arg3, f32 *arg4, s32 arg5);
+s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, void *, void *, void *, f32 *, s32, s32, f32);
+
+u8 func_1505DADC(struct127 *arg0, u16 *arg1, u8 arg2, u8 arg3, u8 arg4)
+{
+  u8 bestStunned;
+  u8 i;
+  u16 angle;
+  struct127 *obj;
+  f32 best;
+  f32 dist;
+  f32 distXZ;
+  f32 dy;
+  s32 sp00[2];
+  s32 spBC[5];
+  f32 spB8;
+  f32 spB4;
+  f32 spB0;
+  f32 hitDist;
+  u8 bestIdx;
+  best = 10000000.0f;
+  bestStunned = 0;
+  bestIdx = 0xFF;
+  if (arg3 == 0xFE)
+  {
+    best = 40000.0f;
+  }
+  for (i = 0; i < 25; i++)
+  {
+    obj = &D_800CC2D0[i];
+    if ((((((obj->interaction_state != 0) && (obj->health != 0)) && (i != ((u8) (arg0 - D_800CC2D0)))) && (obj->unkF8 & 0x40)) && (i != arg3)) && (obj->unk2FA != 0))
+    {
+      dist = func_1505DF10(arg0, i, &angle, &distXZ, &dy, 0);
+      if ((((dist < best) || ((obj->stunned == 0) && (bestStunned != 0))) && (((u8) ((((s32) (angle - arg0->unk7A)) >> 8) + arg4)) < (arg4 * 2))) && (((u8) ((((u8) (func_1505A630(sqrtf(distXZ), -dy, 0) >> 8)) - arg2) + 0x10)) < 0x20))
+      {
+        if ((func_150AC9C0(arg0->x_position, arg0->y_position + 80.0f, arg0->z_position, D_800CC2D0[i].x_position - arg0->x_position, D_800CC2D0[i].y_position - arg0->y_position, D_800CC2D0[i].z_position - arg0->z_position, sp00, spBC, &spB8, &spB4, &spB0, &hitDist, 0, 0, 0.0f) == 0) || (!((hitDist = hitDist * hitDist) < dist)))
+        {
+          bestStunned = obj->stunned;
+          bestIdx = i;
+          best = dist;
+          *arg1 = angle;
+        }
+      }
+ goto dummy_label_512857; dummy_label_512857: ;
+    }
+  }
+
+  return bestIdx;
+}
 f32 func_1505DF10(struct127 *arg0, u8 arg1, u16 *arg2, f32 *arg3, f32 *arg4, s32 arg5);
 
 s8 func_1505DDA8(struct127 *arg0, s32 arg1, u16 arg2, f32 arg3) {
