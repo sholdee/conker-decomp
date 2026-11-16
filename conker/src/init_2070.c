@@ -18,8 +18,6 @@ void func_10002088(s32 arg0, ...) {
 }
 
 // this is a beast:
-#pragma GLOBAL_ASM("asm/nonmatchings/init_2070/func_100020D0.s")
-
 // contains a jump table
 typedef struct {
     union {
@@ -39,6 +37,103 @@ typedef struct {
     unsigned int flags;
     unsigned char qual;
 } _Pft;
+
+extern u8 D_8002AAF0[];
+extern u8 D_8002AB14[];
+extern u8 D_8002BF80[];
+extern u8 D_8002BF84[];
+extern u32 D_8002BF8C[];
+char *strchr(const char *str, s32 ch);
+void func_10002718(_Pft *px, va_list *pap, unsigned char code, unsigned char *ac);
+
+#define ATOI(dst, src)                         \
+    for (dst = 0; *src >= '0' && *src <= '9'; ++src) {  \
+        if (dst < 999)                                  \
+            dst = dst * 10 + *src - '0';                \
+    }
+#define PUT(s, n)                              \
+    if (0 < (n)) {                                      \
+        if ((arg = (u8 *)(*pfn)(arg, s, n)) != NULL)    \
+            x.nchar += (n);                             \
+        else                                            \
+            return x.nchar;                             \
+    }
+#define PAD(s, n)                                      \
+    if (0 < (n)) {                                              \
+        int i, j = (n);                                         \
+        for (; 0 < j; j -= i) {                                 \
+            i = 32 < (unsigned int)j ? 32 : j;                  \
+            PUT(s, i);                                 \
+        }                                                       \
+    }
+
+int func_100020D0(s32 (*pfn)(u8 *, u8 *, u32), u8 *arg, u8 *fmt, va_list args) {
+    _Pft x;
+
+    x.nchar = 0;
+    while (1) {
+        u8 *s;
+        u8 c;
+        u8 *t;
+        u8 ac[32];
+
+        s = fmt;
+        while ((c = *s++) > 0) {
+            if (c == '%') {
+                s--;
+                break;
+            }
+        }
+        PUT(fmt, s - fmt);
+        if (c == 0) {
+            return x.nchar;
+        }
+        fmt = ++s;
+        for (x.flags = 0; (t = (u8 *)strchr((char *)D_8002BF84, *s)) != NULL; s++) {
+            x.flags |= D_8002BF8C[t - D_8002BF84];
+        }
+        if (*s == '*') {
+            x.width = va_arg(args, int);
+            if (x.width < 0) {
+                x.width = -x.width;
+                x.flags |= 4;
+            }
+            s++;
+        } else {
+            ATOI(x.width, s);
+        }
+        if (*s != '.') {
+            x.prec = -1;
+        } else if (*++s == '*') {
+            x.prec = va_arg(args, int);
+            ++s;
+        } else {
+            ATOI(x.prec, s);
+        }
+        x.qual = strchr((char *)D_8002BF80, *s) ? *s++ : '\0';
+        if (x.qual == 'l' && *s == 'l') {
+            x.qual = 'L';
+            ++s;
+        }
+        func_10002718(&x, &args, *s, ac);
+        x.width -= x.n0 + x.nz0 + x.n1 + x.nz1 + x.n2 + x.nz2;
+        if (!(x.flags & 4)) {
+            PAD(D_8002AAF0, x.width);
+        }
+        PUT(ac, x.n0);
+        PAD(D_8002AB14, x.nz0);
+        PUT(x.s, x.n1);
+        PAD(D_8002AB14, x.nz1);
+        PUT(x.s + x.n1, x.n2);
+        PAD(D_8002AB14, x.nz2);
+        if (x.flags & 4) {
+            PAD(D_8002AAF0, x.width);
+        }
+        fmt = s + 1;
+    }
+    return 0;
+}
+
 
 #define FLAGS_SPACE 1
 #define FLAGS_PLUS 2
