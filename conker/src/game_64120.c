@@ -191,7 +191,99 @@ s32 func_15037880(s32 arg0, f32 *arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_64120/func_150379DC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_64120/func_150380C0.s")
+s32 func_150380C0(f32 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5, f32 *arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA) {
+    s32 i;
+    f32 dist;
+    f32 dx;
+    f32 dz;
+    f32 dy;
+    s32 found;
+    f32 range;
+    s32 selfId;
+    s32 next;
+    s32 flag;
+    s32 excl;
+
+    found = -1;
+    flag = 1;
+    excl = -1;
+    if ((&D_800C35EA)[0] == 1 || (&D_800C35EA)[1] == 1) {
+        arg0[0] = -99999.0f;
+        arg0[1] = -99999.0f;
+        arg0[2] = -99999.0f;
+        return 0;
+    }
+    next = arg3 + 1;
+    selfId = D_800CC2D0[arg3].id;
+    if (selfId == 5 || selfId == 0xAD || selfId == 0xAE || selfId == 0xAF) {
+        flag = 0;
+    }
+    if (selfId == 0x2D) {
+        excl = 0x2C;
+    }
+    if (arg9 == 0) {
+        range = D_800CC2D0[arg3].unk23D * 8;
+        range = range * range;
+    } else {
+        range = 1600000000.0f;
+    }
+    for (i = 0; i < 25; i++) {
+        if (D_800CC2D0[i].interaction_state == 0) {
+            continue;
+        }
+        if (D_800CC2D0[i].id == 0xFF) {
+            continue;
+        }
+        if (i == arg3) {
+            continue;
+        }
+        if (next == D_800CC2D0[i].unk65) {
+            continue;
+        }
+        if (D_800CC2D0[arg3].unk65 == i + 1) {
+            continue;
+        }
+        if (flag == 0 && selfId == D_800CC2D0[i].id) {
+            continue;
+        }
+        if (excl == D_800CC2D0[i].id) {
+            continue;
+        }
+        if ((arg8 != 0 || (D_800CC2D0[arg3].unk2F8 & 7) == 4) && D_800CC2D0[i].unk127 == 0xFF) {
+            continue;
+        }
+        if ((D_800CC2D0[arg3].unk2F8 & 7) == 5 && D_800CC2D0[i].unk127 != 0xFF) {
+            continue;
+        }
+        dx = D_800CC2D0[arg3].x_position - D_800CC2D0[i].x_position;
+        dz = D_800CC2D0[arg3].z_position - D_800CC2D0[i].z_position;
+        dy = D_800CC2D0[arg3].y_position - D_800CC2D0[i].y_position;
+        dx = dx * dx;
+        dz = dz * dz;
+        dy = dy * dy;
+        dist = dx + dz + dy;
+        if (i == D_800CC2D0[arg3].unk222 && (D_800CC2D0[arg3].unk223 == 1 || D_800CC2D0[arg3].unk223 == 12)) {
+            dist = 0.0f;
+        }
+        if ((dist < range && dist < *arg6) || arg5 == D_800CC2D0[i].id) {
+            if (func_15037698(arg3, arg1, arg2, (s16)D_800CC2D0[i].pad1A4, *(s16 *)((u8 *)&D_800CC2D0[i] + 0x1AA),
+                              *(s16 *)((u8 *)&D_800CC2D0[i] + 0x1A8), arg0, arg4, arg7, argA) != 0) {
+                *arg6 = dist;
+                found = i;
+                if (arg5 == D_800CC2D0[i].id) {
+                    break;
+                }
+            }
+        }
+    }
+    if (found != -1) {
+        return D_800CC2D0[found].pad139[2] + 1;
+    }
+    arg0[0] = -99999.0f;
+    arg0[1] = -99999.0f;
+    arg0[2] = -99999.0f;
+    return 0;
+}
 
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
