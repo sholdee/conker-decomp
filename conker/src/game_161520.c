@@ -2485,4 +2485,129 @@ void func_1513B0B8(void *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_1513B0F8.s")
+void func_151036B4(void *, u8, s32);
+extern u8 D_800A4324[];
+extern s32 D_800A4328[];
+extern s32 D_800A4330[];
+extern f32 D_800A4338[][3];
+void func_1513B0F8(Blood1380B4State *arg0, f32 *arg1, void *arg2, u8 arg3, s32 arg4) {
+    u8 index;
+    Vec3f_36C3C rotation;
+    BloodParticlePacket spawn;
+    u8 i;
+    u8 mask;
+    u8 bit;
+    u8 tag;
+    u32 yaw;
+    u32 pitch;
+    f32 first[3];
+    f32 second[3];
+    BloodParticlePacket drop;
+
+    func_151036B4(arg1, arg3, arg4);
+    {
+        u32 random = func_150ADA20();
+
+        index = random % 3;
+    }
+    tag = 0xC;
+    spawn.field0 = 1.0f;
+    spawn.field4 = 1.0f;
+    spawn.field8 = spawn.fieldC = (arg0->field_14C + arg0->field_150) * 0.5f;
+    spawn.angles.x = 0.0f;
+    spawn.angles.y = 0.0f;
+    spawn.angles.z = 0.0f;
+    spawn.scale.x = 1.0f;
+    spawn.scale.y = 1.0f;
+    spawn.scale.z = 1.0f;
+    spawn.position.x = 0.0f;
+    spawn.position.y = 0.0f;
+    spawn.position.z = 0.0f;
+    spawn.velocity.x = 0.0f;
+    spawn.velocity.y = 0.0f;
+    spawn.velocity.z = 0.0f;
+    spawn.field40.x = 0.0f;
+    spawn.field40.y = 0.0f;
+    spawn.field40.z = 0.0f;
+    spawn.field4C = 0.0f;
+    spawn.field50 = 0x101900;
+    spawn.field54 = 100;
+    spawn.field58 = 5;
+    spawn.field5C = 0;
+    spawn.field60 = 0xFF;
+    spawn.field61 = 0;
+    spawn.field62 = 0;
+    spawn.field63 = 0;
+    spawn.field64 = 0;
+    spawn.field65 = 0;
+    spawn.field66 = 0;
+    spawn.field67 = 0;
+    spawn.field68 = 5;
+    spawn.field6A = 1;
+    spawn.owner = arg0;
+    spawn.field70 = arg0->field_3B;
+    spawn.field72 = 0xC;
+    spawn.field74 = 0x15;
+    for (i = 0, mask = 1; i < 2; i++, mask <<= 1) {
+        if (D_800A4324[index] & mask) {
+            void *particle;
+
+            spawn.field56 = D_800A4328[i];
+            particle = (void *)func_15132A4C(&spawn, 3, 0xFF, 1, arg3, arg4);
+            if (particle != NULL) {
+                memcpy((u8 *)particle + 0x170, &tag, 1);
+            }
+        }
+    }
+    if (arg0->field_1D4 == NULL) {
+        return;
+    }
+    if ((arg0->field_74 & 0xF) == 0xF) {
+        return;
+    }
+    func_1503F404((s32)(arg0->field_1D4 + 0x300), &first[0], &first[1], &first[2],
+                  &rotation.x, &rotation.y, &rotation.z,
+                  &second[0], &second[1], &second[2]);
+    drop.field0 = 1.0f;
+    drop.field4 = 0.64900005f;
+    drop.field8 = drop.fieldC = (arg0->field_14C + arg0->field_150) * 0.5f;
+    drop.angles = rotation;
+    drop.scale.x = 1.0f;
+    drop.scale.y = 2.0f;
+    drop.scale.z = 1.0f;
+    drop.field40.y = 0.0f;
+    drop.field58 = 0;
+    drop.field5C = 0;
+    drop.field60 = 0xFF;
+    drop.field62 = 0;
+    drop.field64 = 0;
+    drop.field65 = 0;
+    drop.field66 = 0;
+    drop.field67 = 0;
+    drop.field6A = 1;
+    drop.owner = arg0;
+    drop.field70 = arg0->field_3B;
+    drop.field72 = 0xC;
+    drop.field74 = 0x15;
+    drop.field50 = 0x1039E9;
+    drop.field61 = 0xD;
+    drop.field68 = 2;
+    drop.field63 = 9;
+    for (i = 0, bit = 1; i < 2; i++, bit <<= 1) {
+        if (!(D_800A4324[index] & bit)) {
+            u32 random;
+
+            drop.field56 = D_800A4330[i];
+            func_15143134(D_800A4338[i], (s32)&drop.position.x, (s32)(arg0->field_1D4 + 0x300));
+            yaw = func_150ADA20();
+            pitch = func_150ADA20();
+            func_15143794((u8)yaw, (pitch % 35U) - 0x54, (func_150ADA68() * 6.12f) + 3.0f, &drop.velocity.x);
+            drop.field40.x = (func_150ADA68() * 30.746002f) + -15.373001f;
+            drop.field40.z = (func_150ADA68() * 30.746002f) + -15.373001f;
+            drop.field4C = (func_150ADA68() * 0.208f) + -0.708f;
+            random = func_150ADA20();
+            drop.field54 = (random % 101U) + 0x3C;
+            func_1513264C(&drop, 3, 0xFF, (s32)arg2, 0, arg3, arg4);
+        }
+    }
+}
