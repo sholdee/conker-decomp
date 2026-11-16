@@ -645,7 +645,174 @@ void func_151D469C(void *arg0, s32 a1, s32 a2, s32 a3, s32 a4) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_200930/func_151D4794.s")
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s16 unk8;
+    s16 unkA;
+    s32 unkC;
+    s32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 unk16;
+    u8 unk17;
+    u8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+    u8 unk1C;
+    u8 unk1D;
+    s16 unk1E;
+    s16 unk20;
+    s16 unk22;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    struct17 unk30;
+    struct17 unk3C;
+    struct17 unk48;
+    f32 unk54;
+    u32 unk58;
+    s32 unk5C;
+    u8 unk60;
+    u8 unk61;
+    u8 unk62;
+    s8 unk63;
+    s8 unk64;
+    u8 unk65;
+    u8 unk66;
+    u8 pad67[9];
+} Spawn151D4794;
+
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    u8 unk2;
+    u8 unk3;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+} Extra151D4794;
+
+typedef struct {
+    void *unk0;
+    u8 unk4;
+    u8 pad5;
+    s16 unk6;
+    u8 unk8;
+    u8 pad9[3];
+    f32 unkC;
+    u8 unk10;
+    u8 pad11[3];
+    struct17 pos;
+} Sub151D4794;
+
+typedef struct {
+    u8 pad0;
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD;
+    s16 unkE;
+    u8 pad10[0x18];
+    Sub151D4794 unk28;
+} Obj151D4794;
+
+extern void *func_15130280(void *, u8, s32, s32, u8, s32);
+extern f32 func_15143E64(struct17 *);
+
+void func_151D4794(Obj151D4794 *arg0) {
+    Sub151D4794 *sub;
+    u8 flag;
+    struct17 prev;
+    void *obj;
+    struct17 diff;
+
+    obj = arg0->unk28.unk0;
+    prev = arg0->unk28.pos;
+    sub = &arg0->unk28;
+    flag = arg0->unk28.unk10 & 1;
+    if (*(s32 *)obj == 0 || sub->unk4 != *((u8 *)obj + 0x3B)) {
+        arg0->unkE = -1;
+        return;
+    }
+    if (*(s32 *)((u8 *)obj + 0x1D4) != 0 && (*((u8 *)obj + 0x74) & 0xF) != 0xF) {
+        D_8008FC70[sub->unk8](obj, sub->unk6, &sub->pos);
+        sub->unk10 |= 1;
+    }
+    if (flag) {
+        diff.unk0 = sub->pos.unk0 - prev.unk0;
+        diff.unk4 = sub->pos.unk4 - prev.unk4;
+        diff.unk8 = sub->pos.unk8 - prev.unk8;
+        if (func_15143E64(&diff) > 5.0f) {
+            return;
+        }
+        sub->unkC += (0.200000003f + func_150ADA68() * 0.2090000063f) * D_800BE9A4;
+        if (sub->unkC > 1.0f) {
+            Spawn151D4794 spawn;
+            Extra151D4794 extra;
+            void *ret;
+
+            extra.unkC = 0.9156860113f;
+            spawn.unk1D = 0x6C;
+            spawn.unk8 = 0x5103;
+            spawn.unk0 = 0x200005;
+            spawn.unk1E = 0x46;
+            spawn.unk20 = 3;
+            spawn.unk58 = 0x90DE07;
+            spawn.unk60 = 8;
+            spawn.unk61 = 6;
+            spawn.unk62 = 0x20;
+            spawn.unk63 = -1;
+            spawn.unk4 = 0;
+            spawn.unkC = 0;
+            spawn.unk10 = 0;
+            spawn.unk64 = -1;
+            spawn.unk65 = 0;
+            spawn.unk22 = 0x46;
+            spawn.unk14 = 0xDD;
+            spawn.unk15 = 0xD3;
+            spawn.unk16 = 0xCD;
+            spawn.unk17 = 0xFF;
+            spawn.unk18 = 0x57;
+            spawn.unk19 = 0x55;
+            spawn.unk1A = 0x5A;
+            spawn.unk1C = 0xFF;
+            spawn.unk3C.unk0 = 0.0f;
+            spawn.unk3C.unk4 = 0.0f;
+            spawn.unk3C.unk8 = 0.0f;
+            spawn.unk24 = 1.025550008f;
+            do {
+                {
+                f32 r = func_150ADA68();
+                spawn.unk30.unk0 = diff.unk0 * r + prev.unk0;
+                spawn.unk30.unk4 = diff.unk4 * r + prev.unk4;
+                spawn.unk30.unk8 = diff.unk8 * r + prev.unk8;
+                }
+                spawn.unk48.unk0 = diff.unk0 * D_800BE9A8 * 0.2980000079f;
+                spawn.unk48.unk4 = diff.unk4 * D_800BE9A8 * 0.2980000079f;
+                spawn.unk48.unk8 = diff.unk8 * D_800BE9A8 * 0.2980000079f;
+                extra.unk0 = func_150ADA20() & 0xFF;
+                extra.unk1 = func_150ADA20() & 0xFF;
+                extra.unk2 = func_150ADA20() % 5U + 4;
+                extra.unk3 = func_150ADA20() % 5U + 4;
+                extra.unk4 = func_150ADA68() * 6.0f;
+                extra.unk8 = func_150ADA68() * 6.0f;
+                spawn.unk54 = func_150ADA68() * 0.1800000072f + 0.1300000101f;
+                spawn.unk58 &= ~0xC0;
+                spawn.unk58 |= ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);
+                spawn.unk1B = func_150ADA20() % 61U + 60;
+                spawn.unkA = func_150ADA20() % 11U + 70;
+                spawn.unk28 = spawn.unk2C = func_150ADA68() * 40.0f + 40.0f;
+                ret = func_15130280(&spawn, 1, 0, 0x10, arg0->unkC, arg0->unk1);
+                if (ret != NULL) {
+                    memcpy((u8 *)ret + 0xA8, &extra, sizeof(extra));
+                }
+                sub->unkC -= 1.0f;
+            } while (sub->unkC > 1.0f);
+        }
+    }
+}
 
 void func_151D4C38(void *arg0, struct S151D469C *arg1, u8 arg2) {
     struct S151D469C *p;
