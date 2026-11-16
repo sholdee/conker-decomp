@@ -62,6 +62,7 @@ extern f32 D_800A35A8;
 extern f32 D_800A35AC;
 
 void func_15120158(struct108 *arg0);
+void func_15122C5C(struct108 *arg0);
 void func_15121C80(struct108 *arg0, f32 arg1);
 void func_151220D0(struct108 *arg0);
 void func_15122170(struct108 *arg0);
@@ -176,7 +177,143 @@ void func_15122AE0(void) {
     D_800894B0 += 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_15122C5C.s")
+typedef struct {
+    s32 x;
+    s32 y;
+    s32 z;
+} V3_15122C5C;
+
+void func_1510B128(s32, f32, f32, f32, f32);
+void func_15097798(u8);
+void func_15130230(struct108 *arg0, s32 arg1);
+void func_15125A6C(struct108 *arg0);
+void func_15128CB0(struct108 *arg0);
+void func_15125DB4(struct108 *arg0);
+void func_15127EB8(struct108 *arg0);
+void func_1512E8E0(struct108 *arg0);
+void func_15126138(struct108 *arg0);
+void func_15125C40(struct108 *arg0);
+void func_15128680(struct108 *arg0);
+void func_1512317C(struct108 *arg0);
+void func_15125394(struct108 *arg0);
+void func_15123568(struct108 *arg0);
+void func_1512C200(struct108 *arg0);
+void func_15125924(struct108 *arg0);
+void func_151283B8(struct108 *arg0);
+void func_15125594(struct108 *arg0);
+void func_15123070(struct108 *arg0);
+void func_15123508(struct108 *arg0);
+void func_1512D390(struct108 *arg0);
+void func_1512D980(struct108 *arg0);
+void func_1512C068(struct108 *arg0);
+void func_1512B100(struct108 *arg0);
+void func_1512C20C(struct108 *arg0);
+void func_1512BB10(struct108 *arg0);
+void func_1512C150(struct108 *arg0);
+void func_151284C4(struct108 *arg0);
+s32 func_15128540(struct108 *arg0);
+void func_151287E0(struct108 *arg0, f32 *arg1, f32 *arg2);
+
+void func_15122C5C(struct108 *arg0) {
+    V3_15122C5C *temp_a0;
+    V3_15122C5C *temp_a1;
+    struct127 *temp_v0;
+    s16 temp_v1;
+    u8 idx;
+    f32 var_f0;
+
+    if (arg0->unk23C) {
+        *(V3_15122C5C *)&arg0->unk2E0 = *(V3_15122C5C *)&arg0->unk2BC;
+        *(V3_15122C5C *)&arg0->unk2EC = *(V3_15122C5C *)&arg0->unk2F8;
+    }
+    temp_v0 = arg0->unk3D4;
+    temp_a0 = (V3_15122C5C *)&arg0->unk2BC;
+    temp_a1 = (V3_15122C5C *)&arg0->unk2F8;
+    if ((arg0->unk3D4 != NULL) && (arg0->unk73C != 3) && ((arg0->unk2C != 0x100) || (arg0->unk73C != 0))) {
+            arg0->unk23E = *(u8 *)&arg0->unk3D4->unk78;
+    }
+    if (D_800DBFF4[arg0->unk23D] != 4) {
+        arg0->unk5F0 &= ~4;
+    }
+    if (!(arg0->unk2C & 0x400000)) {
+        *temp_a0 = *(V3_15122C5C *)&arg0->unk2E0;
+        *temp_a1 = *(V3_15122C5C *)&arg0->unk2EC;
+    }
+    idx = arg0->unk23D;
+    arg0->unk36C = (*(u16 ***)&D_800BE728)[idx];
+    arg0->unk36A = D_800BE710[idx];
+    *(V3_15122C5C *)&arg0->unk304 = *temp_a1;
+    arg0->unk358 = arg0->unk35C;
+    *(V3_15122C5C *)&arg0->unk2C8 = *temp_a0;
+    if (arg0->unk23C != 0) {
+        arg0->unk19C = arg0->unk1A4;
+        arg0->unk1A0 = arg0->unk1A8;
+    } else {
+        arg0->unk19C += (arg0->unk1A4 - arg0->unk19C) * 0.10000000149011612f;
+        arg0->unk1A0 += (arg0->unk1A8 - arg0->unk1A0) * 0.10000000149011612f;
+    }
+    if (arg0->unk2C & 0x100) {
+        var_f0 = 16.0f;
+    } else {
+        var_f0 = 0.0f;
+    }
+    func_1510B128(idx = arg0->unk23D, arg0->unk19C, arg0->unk1A0, *(f32 *)((*(u8 **)&D_800BE628) + idx * 0x180 + 0x84), var_f0);
+    func_15097798(arg0->unk23D);
+    func_15125A6C(arg0);
+    func_15128CB0(arg0);
+    func_15125DB4(arg0);
+    if ((arg0->unk3D4->unk120 != 0) && (arg0->unk3D4->unk197 != 0)) {
+        func_15127EB8(arg0);
+    }
+    if (func_15128540(arg0) == 0) {
+        if ((arg0->unk84 & 0x08000000) && !(arg0->unk84 & 0x400)) {
+            func_1512E8E0(arg0);
+        }
+        func_15130230(arg0, D_800BE9F0);
+        func_15126138(arg0);
+        func_15125C40(arg0);
+        func_15128680(arg0);
+        func_1512317C(arg0);
+        func_15125394(arg0);
+        if (!(arg0->unk84 & 0x08000000) && !(arg0->unk84 & 0x400)) {
+            func_1512E8E0(arg0);
+        }
+        func_15123568(arg0);
+        func_1512C200(arg0);
+        func_15125924(arg0);
+        func_151283B8(arg0);
+        if (arg0->unk23C != 0) {
+            func_15125594(arg0);
+            func_15123070(arg0);
+            func_151283B8(arg0);
+            func_151283B8(arg0);
+        }
+        func_15123508(arg0);
+        if ((arg0->unk84 & 2) && (arg0->unk3D4->unk120 == 0)) {
+            func_1512D390(arg0);
+        }
+        func_15125594(arg0);
+        func_151256BC(arg0);
+        func_1512D980(arg0);
+        func_1512C068(arg0);
+        func_1512B100(arg0);
+        func_1512C20C(arg0);
+        func_1512BB10(arg0);
+        if (arg0->unk23C != 0) {
+            func_1512C068(arg0);
+            func_1512B100(arg0);
+            func_1512C20C(arg0);
+            func_1512BB10(arg0);
+        }
+        func_15125594(arg0);
+        func_15123070(arg0);
+        if (arg0->unk7F4 == 0) {
+            func_151287E0(arg0, 0, 0);
+        }
+        func_1512C150(arg0);
+        func_151284C4(arg0);
+    }
+}
 // NON-MATCHING: 80% there
 // void func_15122C5C(struct108 *arg0) {
 //     f32 blend;
