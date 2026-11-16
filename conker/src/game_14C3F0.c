@@ -1096,7 +1096,105 @@ void func_1511F3E8(struct Obj1511F3E8 *arg0) {
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_14C3F0/func_1511F4D0.s")
+struct Obj1511F4D0 {
+    u8 pad0[0x10];
+    s16 unk10;
+    s16 unk12;
+    u8 pad14[0x1C];
+    f32 unk30;
+    u8 pad34[0x8];
+    s32 unk3C;
+    u8 pad40[0x33];
+    u8 unk73;
+    u8 pad74[0x8];
+    s32 unk7C;
+    u8 pad80[0x4];
+    s32 unk84;
+    u8 pad88[0x2A];
+    s16 unkB2;
+    u8 padB4[0x9C];
+    s16 unk150;
+    u8 pad152[0x9E];
+    s16 unk1F0;
+};
+
+void func_1511F4D0(struct Obj1511F4D0 *arg0) {
+    s32 state;
+    s32 width;
+    s32 height;
+    s32 unused;
+    s32 scale;
+    s32 tmp;
+    s32 origin[4];
+
+    state = arg0->unk73 & 3;
+    width = arg0->unk73 & 4;
+    if (width == 4) {
+        if (state == 2) {
+            state = 0;
+        } else if (state == 1) {
+            state = 3;
+        }
+    }
+    scale = arg0->unk3C;
+    scale = (s32)((f32)scale * arg0->unk30);
+    tmp = arg0->unk84;
+    height = (tmp >> 16) & 0xFFFF;
+    width = tmp & 0xFFFF;
+    if (arg0->unk7C == 0) {
+        arg0->unk7C = (arg0->unk10 & 0xFFFF) | ((arg0->unk12 & 0xFFFF) << 16);
+        if (state == 3) {
+            width = 13;
+            height = 13;
+        } else {
+            height = 0;
+            width = 0;
+        }
+    }
+    origin[1] = (s16)(arg0->unk7C & 0xFFFF);
+    origin[2] = (s16)((arg0->unk7C >> 16) & 0xFFFF);
+    if (state == 2) {
+        tmp = width + D_800BE9E4;
+        if (tmp < 13) {
+            width = tmp;
+        } else {
+            width = 13;
+        }
+        if (width >= 9) {
+            tmp = height + D_800BE9E4;
+            if (tmp < 13) {
+                height = tmp;
+            } else {
+                height = 13;
+                state = 3;
+            }
+        }
+    } else if (state == 1) {
+        tmp = height - D_800BE9E4;
+        if (tmp > 0) {
+            height = tmp;
+        } else {
+            height = 0;
+        }
+        if (height < 4) {
+            tmp = width - D_800BE9E4;
+            if (tmp > 0) {
+                width = tmp;
+            } else {
+                width = 0;
+                state = 0;
+            }
+        }
+    }
+    arg0->unk12 = origin[2] + (s32)((u32)width * scale) / 13;
+    arg0->unkB2 = origin[2] - (s32)((u32)(scale + 1) * width) / 13;
+    tmp = (s32)((u32)height * scale) / 13;
+    arg0->unk150 = origin[1] - tmp;
+    arg0->unk1F0 = origin[1] + tmp;
+    arg0->unk84 = (width & 0xFFFF) | ((height & 0xFFFF) << 16);
+    arg0->unk73 &= ~3;
+    arg0->unk73 |= state;
+}
 
 void func_1511F768(s32 *arg0, s32 arg1) {
     if (arg0[0x20] == 0) {
