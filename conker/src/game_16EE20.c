@@ -1971,7 +1971,63 @@ void func_15145A50(struct127 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15145AD8.s")
+void func_1515C1A0(void *, struct17 *, f32 *, f32 *);
+
+s32 func_15145AD8(struct17 *arg0, struct17 *arg1, struct127 *arg2, struct17 *arg3, struct17 *arg4, f32 *arg5, f32 *arg6, struct17 *arg7) {
+    struct17 sp7C;
+    f32 sp78;
+    f32 sp74;
+    struct17 sp68;
+    struct17 sp5C;
+    struct17 sp50;
+
+    if (arg5 != NULL) {
+        arg5 = &sp78;
+    }
+    if (arg6 != NULL) {
+        arg6 = &sp74;
+    }
+    if (arg7 != NULL) {
+        arg7 = &sp7C;
+    }
+    func_1515C1A0(arg2, arg7, arg5, arg6);
+    if (*arg6 == 0.0f) {
+        return 0;
+    }
+    if (*arg5 == 0.0f) {
+        return 0;
+    }
+    {
+    f32 sp4C;
+    f32 sp48;
+    f32 sp44;
+    f32 sp40;
+    f32 sp3C;
+    sp40 = arg2->unkDC;
+    sp3C = arg2->unkE0;
+    sp68.unk0 = arg0->unk0;
+    sp68.unk4 = arg0->unk4 * sp40;
+    sp68.unk8 = arg0->unk8;
+    sp5C.unk0 = arg1->unk0;
+    sp5C.unk4 = arg1->unk4 * sp40;
+    sp5C.unk8 = arg1->unk8;
+    {
+    f32 sp38;
+    if (func_15145128(&sp5C, &sp5C, &sp4C, &sp38) == 0) {
+        return 0;
+    }
+    sp50.unk0 = arg7->unk0;
+    sp50.unk4 = arg7->unk4 * sp40;
+    sp50.unk8 = arg7->unk8;
+    if (func_151451F0(&sp68, &sp5C, &sp50, *arg5, sp4C, arg3, arg4, &sp48, &sp44) == 0) {
+        return 0;
+    }
+    arg3->unk4 *= sp3C;
+    arg4->unk4 *= sp3C;
+    }
+    }
+    return 1;
+}
 
 u8 func_15145C90(s32 arg0) {
     if (arg0 < 0) {
