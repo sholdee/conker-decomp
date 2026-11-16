@@ -772,7 +772,142 @@ s32 func_1502DB20(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502DB84.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502DF38.s")
+extern void func_1502DB84(f32 mtx[4][4], s32 arg1);
+typedef struct {
+    u8 pad0[0xC8];
+    f32 unkC8;
+} Obj58F80C8;
+
+
+void func_1502DF38(s32 arg0, s32 arg1) {
+    f32 mtx[4][4];
+    struct127 *obj;
+    struct127 *other;
+    s32 visible;
+    s32 i;
+    s32 j;
+    s32 max;
+    s32 v;
+    f32 (*src)[4];
+    f32 scale;
+    void *ptr;
+    s32 idx;
+
+    obj = &D_800CC2D0[arg0];
+    if (obj->xz_scale == 0.0f) {
+        obj->xz_scale = 0.1000000015f;
+        obj->unk154 = 0.1000000015f;
+    }
+    if (obj->y_scale == 0.0f) {
+        obj->y_scale = 0.1000000015f;
+        obj->unk158 = 0.1000000015f;
+    }
+    if ((obj->pad66 & 0x20) == 0x20) {
+        visible = 0;
+    } else {
+        visible = 1;
+    }
+    if (obj->unk31C != NULL && obj->unk31C->pad196[1] != 0) {
+        visible = 0;
+    }
+    if ((1 << arg0) & D_800C3E74) {
+        visible = 0;
+    }
+    if (obj->id == 0x8A) {
+        other = func_15072208(obj, 0);
+        if (other != NULL && other->unk31C != NULL && other->unk31C->pad196[1] != 0) {
+            visible = 0;
+        }
+    }
+    if (visible) {
+        if ((obj->unk74 & 0xF) == 0xF) {
+            return;
+        }
+        max = 0;
+        for (i = 0; i <= D_80082FA4; i++) {
+            v = func_1506196C(obj, i);
+            if (max < v) {
+                max = v;
+            }
+        }
+        if (max == 0) {
+            return;
+        }
+    }
+    D_800C3E78 = arg0;
+    if (obj->unk65 && !(obj->unk101 & 0x10)) {
+        idx = obj->unk65 - 1;
+        src = (f32 (*)[4])D_800CC2D0[idx].unk1D4;
+        if (src == NULL) {
+            return;
+        }
+        src = (f32 (*)[4])((u8 *)src + (obj->unk5C << 6));
+        if (!(obj->unk101 & 4)) {
+            for (i = 0; i < 3; i++) {
+                if (i == 1) {
+                    scale = obj->y_scale;
+                } else {
+                    scale = obj->xz_scale;
+                }
+                for (j = 0; j < 3; j++) {
+                    mtx[i][j] = src[i][j] * scale;
+                }
+                mtx[i][3] = 0.0f;
+                mtx[3][i] = src[3][i];
+            }
+            mtx[3][3] = 1.0f;
+        } else {
+            f32 len;
+            for (i = 0; i < 3; i++) {
+                len = sqrtf(src[i][0] * src[i][0] + src[i][1] * src[i][1] + src[i][2] * src[i][2]);
+                if (i == 1) {
+                    scale = obj->y_scale / len;
+                } else {
+                    scale = obj->xz_scale / len;
+                }
+                for (j = 0; j < 3; j++) {
+                    mtx[i][j] = src[i][j] * scale;
+                }
+                mtx[i][3] = 0.0f;
+                mtx[3][i] = src[3][i];
+            }
+            mtx[3][3] = 1.0f;
+        }
+    } else {
+        func_150A9B0C(mtx, obj->unkB8, obj->unk40, obj->unkC4, obj->xz_scale, obj->y_scale, obj->xz_scale);
+        if (obj->unk101 & 0x10) {
+            other = &D_800CC2D0[obj->unk65 - 1];
+            src = (f32 (*)[4])D_800CC2D0[obj->unk65 - 1].unk1D4;
+            if (src == NULL) {
+                mtx[3][0] = 0;
+                mtx[3][1] = 0;
+                mtx[3][2] = 0;
+            } else {
+                src = (f32 (*)[4])((u8 *)src + (obj->unk5C << 6));
+                mtx[3][0] = src[3][0];
+                mtx[3][1] = src[3][1];
+                mtx[3][2] = src[3][2];
+            }
+        } else {
+            other = obj;
+            mtx[3][0] = obj->x_position;
+            mtx[3][1] = obj->y_position + obj->y_scale * ((Obj58F80C8 *)obj)->unkC8;
+            mtx[3][2] = obj->z_position;
+        }
+        if (other->unk2D0 != NULL && *(s32 *)((u8 *)other->unk2D0 + 0x28) == 0) {
+            mtx[3][1] += other->unkCC;
+        }
+    }
+    if (arg1) {
+        ptr = (void *)D_800C3E88;
+        obj->unk1D4 = ptr;
+        bcopy(mtx, ptr, 0x40);
+        D_800C3E88 += 0x40;
+        D_800C3E7A++;
+        return;
+    }
+    func_1502DB84(mtx, arg0);
+}
 
 extern u8 D_800C3E90;
 extern void func_150A9984(s32, s32);
