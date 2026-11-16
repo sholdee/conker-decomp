@@ -705,7 +705,128 @@ void func_1513D668(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s16 a
 //     return 1;
 // }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513DB00.s")
+typedef struct {
+    u8 pad0[0x10];
+    s32 unk10;
+    u8 pad14[0x4];
+    u8 unk18;
+    u8 pad19;
+    u16 unk1A;
+    u8 pad1C[0x4];
+    s32 unk20;
+    u8 pad24[0x4];
+    u8 unk28;
+    u8 unk29;
+    u8 unk2A;
+    u8 unk2B;
+    u8 pad2C[0x8];
+    u8 unk34[0x24];
+    s32 unk58;
+    u8 unk5C;
+    u8 unk5D;
+    u8 unk5E;
+    u8 unk5F;
+    s16 *unk60;
+    u8 unk64;
+    u8 pad65[0x3];
+    s32 unk68;
+    u8 pad6C[0x7];
+    u8 unk73;
+    u8 pad74[0x28];
+    u8 unk9C[0x64];
+    s32 unk100[4];
+} Obj1513DB00;
+
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+} Mode1513DB00;
+
+extern s32 (*D_80089E1C[])(Obj1513DB00 *, s16);
+extern Mode1513DB00 D_800A4AC8[];
+extern u32 D_800D2C9C;
+Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
+Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
+Gfx *func_15142CF0(Gfx *, s32, s32, s32, s32, s32, s32, u8 *);
+Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
+Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
+void func_151441A4(s16 *, s16 *, s16 *, s16 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+void func_151442FC(s16 *, s16 *, s16 *, s16 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+Gfx *func_151462C8(Gfx *, void *, s32, s32, s32, s16, void *, s32, s32);
+Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
+
+Gfx *func_1513DB00(Gfx *arg0, Obj1513DB00 *arg1, s16 arg2) {
+    s32 pad8C;
+    u8 flag;
+    s16 r1;
+    s16 g1;
+    s16 b1;
+    s16 a1;
+    s16 r2;
+    s16 g2;
+    s16 b2;
+    s16 a2;
+    u8 mode;
+    u8 hi;
+    s16 bits;
+    s32 cyc;
+    s32 vtx;
+
+    if (arg1->unk10 & 1) {
+        flag = 1;
+        if ((arg1->unk58 & 8) && !(arg1->unk64 & (1 << arg2))) {
+            if (arg1->unk100[arg2]) {
+                func_100043B4((s32 *)arg1->unk100[arg2], 2);
+                arg1->unk100[arg2] = 0;
+            }
+            return arg0;
+        }
+        mode = arg1->unk1A & 0xFF;
+        hi = (arg1->unk1A & 0xFF00) >> 8;
+        bits = arg1->unk58 & 0xC000;
+        if ((arg1->unk58 & 0x01000000) && arg1->unk60 != NULL && !(arg1->unk60[1] & (1 << arg2))) {
+            if (arg1->unk100[arg2]) {
+                func_100043B4((s32 *)arg1->unk100[arg2], 2);
+                arg1->unk100[arg2] = 0;
+            }
+            return arg0;
+        }
+        vtx = D_80089E1C[arg1->unk73](arg1, arg2);
+        if (vtx == 0) {
+            if (arg1->unk100[arg2]) {
+                func_100043B4((s32 *)arg1->unk100[arg2], 2);
+                arg1->unk100[arg2] = 0;
+            }
+            return arg0;
+        }
+        arg0 = func_151462C8(arg0, arg1->unk9C, 0, 0, 0, arg2, arg1->unk34, 2, (arg1->unk58 & 0x04000000) ? arg1->unk68 : 0);
+        func_151441A4(&r1, &g1, &b1, &a1, arg1->unk28, arg1->unk29, arg1->unk2A, arg1->unk2B, 0xFF, 0xFF, 0xFF, arg1->unk5C, arg1->unk5D, (arg1->unk58 & 0x40000) ? arg1->unk5E : 4);
+        func_151442FC(&r2, &g2, &b2, &a2, arg1->unk28, arg1->unk29, arg1->unk2A, arg1->unk2B, 0xFF, 0xFF, 0xFF, arg1->unk5C, arg1->unk5D, (arg1->unk58 & 0x80000) ? arg1->unk5F : 5);
+        cyc = 0;
+        if (bits & 0x4000) {
+            cyc = 0x200;
+        }
+        if (bits & 0x8000) {
+            cyc |= 0x400;
+        }
+        if (arg1->unk58 & 0x100000) {
+            cyc |= 0x20000;
+        }
+        arg0 = func_15142B7C(arg0, cyc | 1, 0x600);
+        if (arg1->unk18 != 0xFF) {
+            s32 wrap;
+            wrap = (arg1->unk58 & 0x200000) ? 0 : 2;
+            arg0 = func_15142E24(arg0, (s32)&D_80090B60[arg1->unk18], arg1->unk20, wrap, 0, 0, arg1->unk18, 0, 0, &flag, (arg1->unk58 & 0x40000000) ? 0x3E : 3);
+        }
+        arg0 = func_15142C10(arg0, r2, g2, b2, a2, &flag);
+        arg0 = func_15142CF0(arg0, 0xF2, 0, r1, g1, b1, a1, &flag);
+        arg0 = func_1513F4E4(arg0, hi, &flag);
+        arg0 = func_15142FBC(arg0, G_PM_NPRIMITIVE | ((arg1->unk58 & 0x20000000) ? G_CYC_2CYCLE : G_CYC_1CYCLE) | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | ((arg1->unk18 == 0xFF) ? 0 : D_800D2C9C) | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[mode].unk0 | D_800A4AC8[mode].unk4, &flag);
+        gSPVertex(arg0++, vtx, 4, 0);
+        gSP2Triangles(arg0++, 0, 1, 2, 0, 0, 2, 3, 0);
+    }
+    return arg0;
+}
 
 // jump table
 extern void (*D_80089F64[])(void *, s32, u8);
