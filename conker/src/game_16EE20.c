@@ -1942,7 +1942,51 @@ u8 func_15145C90(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15145CD0.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15145DB4.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15145EA4.s")
+void func_15145EA4(f32 **arg0, f32 **arg1, Mtx *arg2, s32 arg3) {
+    f32 *input;
+    f32 transform[4][4];
+    f32 *output;
+    f32 **outputs;
+
+    if (D_800C3E90 != 0) {
+        guMtxL2F(transform, arg2);
+        if (arg3 > 0) {
+            f32 **inputs = arg0;
+
+            outputs = arg1;
+            do {
+                input = *inputs;
+                if (input != NULL && (input[0] != 0.0f || input[1] != 0.0f || input[2] != 0.0f)) {
+                    output = *outputs;
+                    func_150A7960(transform[0], input[0], input[1], input[2], output, output + 1, output + 2);
+                } else {
+                    func_15142314(arg2, 0, *outputs);
+                }
+                arg3--;
+                inputs++;
+                outputs++;
+            } while (arg3 > 0);
+        }
+    } else {
+        if (arg3 > 0) {
+            f32 **inputs = arg0;
+
+            outputs = arg1;
+            do {
+                input = *inputs;
+                if (input != NULL && (input[0] != 0.0f || input[1] != 0.0f || input[2] != 0.0f)) {
+                    output = *outputs;
+                    func_150A7960((f32 *)arg2, input[0], input[1], input[2], output, output + 1, output + 2);
+                } else {
+                    func_15142314(arg2, 0, *outputs);
+                }
+                arg3--;
+                inputs++;
+                outputs++;
+            } while (arg3 > 0);
+        }
+    }
+}
 s32 func_15146078(struct17 *arg0, struct17 *arg1, struct17 *arg2) {
     u8 count;
     u8 axis;
