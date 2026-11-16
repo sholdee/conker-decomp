@@ -756,7 +756,80 @@ void func_1504BC38(struct127 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_77AD0/func_1504BE2C.s")
+typedef struct {
+    u8  pad0[0x8];
+    s16 unk8;
+    u8  padA;
+    u8  unkB;
+    u8  padC[2];
+    u16 unkE;
+    u16 unk10;
+    u8  pad12[2];
+    u16 unk14;
+    u8  unk16;
+    u8  pad17[0x3C - 0x17];
+    u8  unk3C;
+} Struct1504BE2C;
+
+void func_1507EB2C(void *arg0);
+extern u16 D_800CC2B2;
+extern f32 D_800CC2B4;
+
+void func_1504BE2C(struct127 *arg0, u16 *arg1, f32 *arg2, s8 *arg3) {
+    s32 pad0;
+    s32 pad1;
+    f32 temp_f12;
+    Struct1504BE2C *sub;
+
+    temp_f12 = ((Struct1504BE2C *)arg0->unk31C)->unkB * 0.02454369329f;
+    D_800CC2B4 = 16.0f;
+    sub = (Struct1504BE2C *)arg0->unk31C;
+    if ((sub->unk16 != 0) && (sub->unk16 == 0)) {
+        func_1507EB2C(arg0);
+        ((Struct1504BE2C *)arg0->unk31C)->unk8 = 0;
+        sub = (Struct1504BE2C *)arg0->unk31C;
+    }
+    if (sub->unkE == 0) {
+        sub->unkE = 0xA6;
+        sub = (Struct1504BE2C *)arg0->unk31C;
+    }
+    sub->unk3C = 5;
+    if (arg1) {
+    }
+    if ((*arg2 > 4.0f) && (arg0->unk84.uh == 0xAA)) {
+        ((Struct1504BE2C *)arg0->unk31C)->unk3C = 1;
+        ((Struct1504BE2C *)arg0->unk31C)->unk10 = *arg1;
+    }
+    func_150AD78C(temp_f12);
+    if (arg1) {
+    }
+    ((Struct1504BE2C *)arg0->unk31C)->unkB += 2;
+    if (((Struct1504BE2C *)arg0->unk31C)->unk16 != 0) {
+        arg0->unkAA = 0x19;
+    } else if (arg0->unk84.uh == 0xA7) {
+        arg0->unkAA = 0x32;
+    } else {
+        arg0->unkAA = 0x20;
+    }
+    *(f32 *)&arg0->pad54 *= 0.5f;
+    if ((arg0->unk84.uh == 0x2C) || (arg0->unk84.uh == 0xE0)) {
+        *arg3 = ((s8 *)D_800CC284)[3] >> 1;
+    } else {
+        if (!(func_150ADA20() & 0x3F)) {
+            ((Struct1504BE2C *)arg0->unk31C)->unk14 = (func_150ADA20() % 25000U) - 12500;
+        }
+        D_800CC2B2 = ((Struct1504BE2C *)arg0->unk31C)->unk14;
+        if (((Struct1504BE2C *)arg0->unk31C)->unk16 != 0) {
+            D_800CC2B2 = (s16)D_800CC2B2 / 3;
+        }
+    }
+    if ((D_800C35EA == 0) && (((Struct1504BE2C *)arg0->unk31C)->unk16 == 0)) {
+        arg0->unk282 = 0x1E;
+        arg0->unk276 = 0;
+    }
+}
+
+
 
 s32 func_1504C078(void) {
     if (D_800D154C->unk31C->unk58 != 1) {
