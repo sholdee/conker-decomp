@@ -442,7 +442,33 @@ void func_15063FA0(struct127 *arg0, s32 arg1) {
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_90840/func_150641D8.s")
+s32 func_1505DADC(void *, u16 *, s32, s32, s32);
+
+u16 func_150641D8(void *arg0, u16 arg1, u16 arg2, u16 arg3) {
+    u16 selected;
+    u8 *actor = arg0;
+    u16 output;
+
+    output = 0;
+    selected = arg1;
+    if (func_150ADA20() & 1) {
+        selected = arg2;
+    }
+    if ((arg1 == *(u16 *)(actor + 0x84)) || (arg2 == *(u16 *)(actor + 0x84))) {
+        if (actor[0x107] < 0x28) {
+            return 0x3E7;
+        }
+        selected = arg3;
+    }
+    if (arg3 == *(u16 *)(actor + 0x84)) {
+        selected = 0x3E7;
+    }
+    if (func_1505DADC(actor, &output, 0, 0xFE, 0x40) != 0xFF) {
+        *(u16 *)(actor + 0x76) = output;
+    }
+    *(u8 *)(actor + 0x83) = 0xFF;
+    return selected;
+}
 
 extern s32 D_800CC28C;
 void func_15074664(void);
