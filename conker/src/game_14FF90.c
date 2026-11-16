@@ -653,7 +653,279 @@ s32 func_151239CC(struct108 *arg0, s32 arg1) {
     }
     return 0;
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_15123A54.s")
+s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s16 *, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
+void func_150AD8B0(struct17 *, struct17 *, struct17 *);
+void func_150495B0(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
+extern f32 D_800895B0;
+extern u8 D_800BEA0C;
+extern f32 D_800DC000;
+
+#define FX(off) (*(f32 *)((u8 *)arg0 + (off)))
+#define SX(off) (*(s32 *)((u8 *)arg0 + (off)))
+#define BX(off) (*(u8 *)((u8 *)arg0 + (off)))
+#define HX(off) (*(u16 *)((u8 *)arg0 + (off)))
+
+void func_15123A54(struct108 *arg0) {
+    f32 angle;
+    f32 saved;
+
+    saved = arg0->unk374;
+    BX(0x600) = 0;
+    FX(0x604) = arg0->unk374;
+    if (D_800C3671 == 0) {
+        if (FX(0x6F8) != 0.0f) {
+            if (FX(0x6F8) < arg0->unk374) {
+                arg0->unk374 = FX(0x6F8);
+            } else {
+                arg0->unk374 = arg0->unk374;
+            }
+        }
+        if (arg0->unk23C == 0) {
+            if ((arg0->unk5F0 & 0x10) && (*arg0->unk36C & 0x10)) {
+                arg0->unk374 = 130.0f;
+            }
+            if ((arg0->unk73C == 0) && (arg0->unk5F0 & 0x40)) {
+                arg0->unk374 = 420.0f;
+            }
+            if (arg0->unk2C & 0x403) {
+                if (arg0->unk36A & 4) {
+                    BX(0x8E4) = 1;
+                    SX(0x8E8) = 180;
+                    FX(0x8E0) = 0.0f;
+                } else if ((*arg0->unk36C & 4) || BX(0x8E4)) {
+                    if (BX(0x8E4) && (*arg0->unk36C & 4)) {
+                        BX(0x8E4) += D_800BEA08;
+                        BX(0x8E4) = (BX(0x8E4) >= 16) ? 15 : BX(0x8E4);
+                    }
+                    if (BX(0x8E4) == 15) {
+                        BX(0x8EC) = 1;
+                        SX(0x7B8) = 20;
+                        arg0->unk374 = 300.0f;
+                        arg0->unk348 = 150.0f;
+                        func_15049688(&arg0->unk37C, arg0->unk3D0->unk40 - 180.0f, &FX(0x8E0), 1.5f, 2.0f, arg0->unk7B4);
+                        if (!(*arg0->unk36C & 4)) {
+                            BX(0x8E4) = 0;
+                        }
+                    } else {
+                        func_15049688(&arg0->unk37C, arg0->unk3D0->unk40 - 180.0f, &FX(0x8E0), 2.0f, 4.0f, arg0->unk7B4);
+                    }
+                    arg0->unk39C = arg0->unk37C * 0.01745329238474369f;
+                    if ((BX(0x8E4) < 15) && !(*arg0->unk36C & 4)) {
+                        if (*(s16 *)&arg0->unk298 == 0) {
+                            SX(0x8E8) -= D_800BEA08;
+                            if (SX(0x8E8) <= 0) {
+                                BX(0x8E4) = 0;
+                            } else if (fabsf(arg0->unk37C - (arg0->unk3D0->unk40 - 180.0f)) <= 2.0f) {
+                                BX(0x8E4) = 0;
+                            }
+                        } else {
+                            BX(0x8E4) = 0;
+                        }
+                    }
+                } else if (BX(0x8EC) != 0) {
+                    func_15124B18(arg0);
+                    BX(0x8EC) = 0;
+                    BX(0x8E4) = 0;
+                }
+            }
+        } else {
+            arg0->unk39C = arg0->unk37C * 0.01745329238474369f;
+        }
+        angle = arg0->unk39C;
+        if (D_800BEA0C != 0) {
+            arg0->unk37C += (f32)1 * FX(0x7E0) * D_800BEA08;
+            arg0->unk39C = arg0->unk37C * 0.01745329238474369f;
+            angle = arg0->unk39C;
+        } else if (func_150ADA20() & 1) {
+            FX(0x7E0) = -1.0f;
+        } else {
+            FX(0x7E0) = 1.0f;
+        }
+        if ((*((u8 *)arg0->unk3D4 + 0x95) != 0) && (arg0->unk5F0 & 0x40)) {
+            angle = arg0->unk3D0->unk40 + 180.0f;
+            func_15049688(&arg0->unk37C, angle, &FX(0x844), 2.0f, 4.0f, arg0->unk7B4);
+            arg0->unk39C = arg0->unk37C * 0.01745329238474369f;
+            angle = arg0->unk39C;
+            arg0->unk374 = 530.0f;
+        }
+        if (arg0->unk2C != 0x2000) {
+            FX(0x370) = sqrtf((arg0->unk2F8 - arg0->unk2BC) * (arg0->unk2F8 - arg0->unk2BC) + (arg0->unk300 - arg0->unk2C4) * (arg0->unk300 - arg0->unk2C4));
+            if ((arg0->unk73C != 0) || (arg0->unk23C != 0) || (*((u8 *)arg0->unk3D0 + 0x102) != 0) ||
+                (!(arg0->unk84 & 0x1000) && (BX(0x92C) == 0) && !(arg0->unk84 & 0x40000) && !(arg0->unk5F0 & 0x80))) {
+                {
+                struct17 dir;
+                s16 tri[10];
+                f32 hit[3];
+                f32 dist;
+                f32 d;
+                s16 tri2[10];
+                f32 vz;
+                f32 vy;
+                f32 vx;
+                struct17 e1;
+                struct17 e2;
+                struct17 n;
+                f32 hit2[3];
+                f32 dist2;
+                f32 prev;
+                struct17 p0;
+                struct17 p1;
+                struct17 p2;
+
+                dir.unk0 = sinf(arg0->unk39C);
+                dir.unk4 = 0.0f;
+                dir.unk8 = cosf(arg0->unk39C);
+                if ((func_150AC9C0(arg0->unk2A4, arg0->unk2A8 + 140.0f, FX(0x2AC), dir.unk0, dir.unk4, dir.unk8, 0, tri,
+                                   &hit[0], &hit[1], &hit[2], &dist, 0, 0, arg0->unk374 + 30.0f) != 0) &&
+                    (dist < arg0->unk374)) {
+
+                    vx = sinf(arg0->unk39C + 3.1415927410125732f) * arg0->unk374;
+                    vz = cosf(arg0->unk39C + 3.1415927410125732f) * arg0->unk374;
+                    p0.unk0 = tri[0];
+                    p0.unk4 = tri[1];
+                    p0.unk8 = tri[2];
+                    p1.unk0 = tri[3];
+                    p1.unk4 = tri[4];
+                    p1.unk8 = tri[5];
+                    p2.unk0 = tri[6];
+                    p2.unk4 = tri[7];
+                    p2.unk8 = tri[8];
+                    func_15048F90(&p0, &p1, &e1);
+                    func_15048F90(&p0, &p2, &e2);
+                    func_150AD8B0(&e2, &e1, &n);
+                    func_1504917C(&n, &n);
+                    if (0.3253220021724701f < func_150AD900(&dir.unk0, &n.unk0)) {
+                        if (func_150AC9C0(arg0->unk2A4 - vx, arg0->unk2A8 + 140.0f, FX(0x2AC) - vz, vx, 0.0f, vz, 0,
+                                       tri2, &hit2[0], &hit2[1], &hit2[2], &dist2, 0, 0, arg0->unk374 + 30.0f) != 0) {
+                        {
+                        f32 dx;
+                        f32 dz;
+
+                        dx = hit2[0] - hit[0];
+                        dz = hit2[2] - hit[2];
+                        if ((sqrtf(dx * dx + dz * dz) < 1.0f) ||
+                         (arg0->unk5F0 & 0x10) || (arg0->unk23E == 0xC) || (arg0->unk23E == 9) ||
+                         (arg0->unk23E == 0x38) || (arg0->unk23E == 0x39) || (arg0->unk23E == 0x37) ||
+                         (arg0->unk23E == 0x3B) || (arg0->unk23E == 0x12) || (arg0->unk23E == 0x15) ||
+                         (arg0->unk23E == 0x26) || (arg0->unk23E == 0x3A) || (arg0->unk23C != 0)) {
+                        prev = arg0->unk374;
+                        if (arg0->unk73C != 0) {
+                            dist -= 16.0f;
+                        } else {
+                            dist -= 12.0f;
+                        }
+                        if (dist < 50.0f) {
+                            dist = 50.0f;
+                        } else {
+                            dist = dist;
+                        }
+                        if (dist < arg0->unk374) {
+                            arg0->unk374 = dist;
+                        } else {
+                            arg0->unk374 = arg0->unk374;
+                        }
+                        if (arg0->unk23E == 3) {
+                            arg0->unk348 *= arg0->unk374 / prev;
+                            if (arg0->unk5F0 & 0x10) {
+                                if (arg0->unk348 < arg0->unk2C0 - arg0->unk354) {
+                                    arg0->unk348 = arg0->unk2C0 - arg0->unk354;
+                                } else {
+                                    arg0->unk348 = arg0->unk348;
+                                }
+                            }
+                        }
+                        FX(0x604) = dist;
+                        BX(0x600) = 1;
+                    }
+                    }
+                    }
+                    }
+                }
+                }
+            }
+            if (arg0->unk7F4 != 0) {
+                arg0->unk374 = D_800DC000;
+            }
+            if (arg0->unk23C != 0) {
+                FX(0x370) = arg0->unk374;
+                FX(0x258) = 0.0f;
+                if (arg0->unk84 & 0x200000) {
+                    if (arg0->unk2C & 0x40) {
+                        FX(0x974) = 1.0f;
+                        FX(0x964) = 1.0f;
+                        FX(0x978) = 2.0f;
+                        FX(0x968) = 2.0f;
+                    } else {
+                        FX(0x978) = 8.0f;
+                        FX(0x968) = 8.0f;
+                        FX(0x974) = 6.0f;
+                        FX(0x964) = 6.0f;
+                    }
+                    FX(0x984) = 0.0f;
+                    FX(0x988) = 0.0f;
+                }
+            } else {
+                if ((SX(0x7B8) != 0) || (arg0->unk2C & 0x100) || ((arg0->unk2C & 0x80) && (*arg0->unk36C & 0x10))) {
+                    FX(0x3B4) = 6.0f;
+                    FX(0x3B8) = 10.0f;
+                } else if ((D_800BE616 != 0) || (arg0->unk84 & 0x200000)) {
+                    if (arg0->unk2C & 0x40) {
+                        FX(0x974) = 1.0f;
+                        FX(0x978) = 2.0f;
+                    } else {
+                        FX(0x974) = 6.0f;
+                        FX(0x978) = 8.0f;
+                    }
+                    func_150495B0(&FX(0x964), FX(0x974), &FX(0x984), 1.0f, 2.0f, arg0->unk7B4);
+                    func_150495B0(&FX(0x968), FX(0x978), &FX(0x988), 1.0f, 2.0f, arg0->unk7B4);
+                    FX(0x3B4) = FX(0x964);
+                    FX(0x3B8) = FX(0x968);
+                } else if ((*((u8 *)arg0->unk3D0 + 0x102) != 0) || (BX(0x8EC) != 0) ||
+                           ((BX(0x92C) != 0) && (HX(0x920) & 0x40))) {
+                    FX(0x3B4) = 6.0f;
+                    FX(0x3B8) = 8.0f;
+                } else if ((arg0->unk36A & 3) || (arg0->unk2C & 0x40)) {
+                    FX(0x3B4) = 1.0f;
+                    FX(0x3B8) = 2.0f;
+                } else {
+                    FX(0x3B4) = 2.0f;
+                    FX(0x3B8) = 3.0f;
+                }
+                if (D_800BEA0C == 0) {
+                    if (BX(0x600) != 0) {
+                        if ((arg0->unk73C != 0) || (D_800BE616 != 0)) {
+                            func_150495B0(&FX(0x370), arg0->unk374, &FX(0x258), 8.0f, 10.0f, arg0->unk7B4);
+                        } else {
+                            func_150495B0(&FX(0x370), arg0->unk374, &FX(0x258), 6.0f, 8.0f, arg0->unk7B4);
+                        }
+                    } else {
+                        func_150495B0(&FX(0x370), arg0->unk374, &FX(0x258), FX(0x3B4), FX(0x3B8), arg0->unk7B4);
+                    }
+                } else if ((D_800895B0 == 0.0f) && ((arg0->unk3E8 != 0) || (*((u8 *)arg0->unk3D0 + 0x102) != 0))) {
+                    func_150495B0(&FX(0x370), 200.0f, &FX(0x258), 4.0f, 8.0f, arg0->unk7B4);
+                } else {
+                    func_150495B0(&FX(0x370), 200.0f, &FX(0x258), 0.5f, 1.0f, arg0->unk7B4);
+                }
+            }
+            arg0->unk2F8 = FX(0x370) * sinf(angle) + arg0->unk2BC;
+            arg0->unk300 = FX(0x370) * cosf(angle) + arg0->unk2C4;
+            FX(0x370) = sqrtf((arg0->unk2F8 - arg0->unk2BC) * (arg0->unk2F8 - arg0->unk2BC) + (arg0->unk300 - arg0->unk2C4) * (arg0->unk300 - arg0->unk2C4));
+            if (arg0->unk374 + arg0->unk374 < FX(0x370)) {
+                if ((*arg0->unk36C & 3) && (D_800BE616 == 0)) {
+                    *arg0->unk36C &= 0xFFFC;
+                    arg0->unk36A &= 0xFFFC;
+                }
+            }
+            arg0->unk374 = saved;
+        }
+    }
+}
+
+#undef FX
+#undef SX
+#undef BX
+#undef HX
+
 
 void func_15124770(struct108 *arg0, s32 arg1) {
     if (arg1 != 0) {
