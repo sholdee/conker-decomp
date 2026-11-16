@@ -2827,7 +2827,183 @@ u32 func_1505E7CC(s32 arg0, struct127 *arg1) {
     }
     return 0;
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505E874.s")
+typedef struct {
+    u16 unk0;
+    u8 unk2;
+    u8 unk3;
+} Game83300AnimSub;
+
+typedef struct {
+    u8 unk0;
+    u8 pad1[3];
+    s32 unk4;
+    u8 unk8;
+    u8 pad9;
+    Game83300AnimSub sub[3];
+    u8 pad16[2];
+} Game83300AnimEntry; /* size 0x18 */
+
+s32 func_1506E46C(struct127 *arg0, s32 *arg1, s32 arg2);
+void func_15060A30(s32 arg0, struct127 *arg1);
+void func_15060B04(s32 arg0, struct127 *arg1, s32 arg2);
+void func_1507CD64(struct127 *arg0, s32 arg1);
+void func_1517F488(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
+
+void func_1505E874(u8 arg0, struct127 *arg1) {
+    s32 *ptr;
+    Game83300AnimEntry *table;
+    f32 scale;
+    f32 speed;
+    s32 i;
+    u16 anim;
+    u16 pad58;
+
+
+    speed = 6.0f;
+    if (arg1->id == 0xFF) {
+        return;
+    }
+    anim = arg1->unk106;
+    ptr = (s32 *)D_800D1588[arg1->id];
+    table = (Game83300AnimEntry *)ptr[-2];
+    if (table == NULL) {
+        return;
+    }
+    if (arg1->unk105 == 0) {
+        arg1->unk10F = table[anim].unk8;
+        arg1->disable_jump = 0;
+        if (arg1->unk31C != NULL) {
+            *((u8 *)arg1->unk31C + 0x26) = 0;
+        }
+        if ((arg1->id == 0x5E) && (arg1->unk13D != 0)) {
+            speed = 0.0f;
+        }
+        if (table[anim].unk4 != 0) {
+            s32 sound;
+            sound = table[anim].unk4;
+            if (func_1506E46C(arg1, &sound, 1) != 0) {
+                if (sound != 0x33) {
+                    func_15060A30(sound, arg1);
+                } else {
+                    func_15060B04(sound, arg1, 0x5DC0);
+                }
+            }
+        }
+    }
+    arg1->unkF4 &= 0xFFF3FEB1;
+    if (arg1->unk105 < 3) {
+        u8 rate;
+        rate = table[anim].sub[arg1->unk105].unk3 & 0xFE;
+        arg1->unk10B &= ~1;
+        arg1->unk10B |= table[anim].sub[arg1->unk105].unk3 & 1;
+        if ((arg1->unk127 != 0xFF) && (arg1->unk105 == 0) && (arg1->unk31C != NULL) &&
+            (arg1->camera != NULL) && (*((u8 *)arg1->unk31C + 0x197) != 0)) {
+            func_1517F488(0xFF, 0, 0, 0xB4, 0x14, arg1->camera->unk23D);
+        }
+        if ((arg1->unk127 != 0xFF) && (arg1->health == 0)) {
+            i = arg1->unk105;
+            while (table[anim].sub[i].unk0 != 0) {
+                i++;
+            }
+            if (i < 2) {
+                i = 2;
+            }
+            if (i == arg1->unk105 + 1) {
+                s32 type;
+                s32 var_a1;
+                type = table[anim].unk0;
+                if (arg1->id == 0x9A) {
+                    var_a1 = 0xE;
+                } else if (arg1->id == 0x53) {
+                    var_a1 = 0xA;
+                } else if (arg1->in_water != 0) {
+                    var_a1 = 4;
+                } else if ((((arg1->unk184 & 0x1F) == 0xE) || ((arg1->unk184 & 0x1F) == 0x13)) &&
+                           (D_800BE9F0 != 0x34)) {
+                    var_a1 = 0xD;
+                } else {
+                    switch (type) {
+                        case 0x20:
+                        case 0x21:
+                        case 0x25:
+                        case 0x26:
+                        case 0x33:
+                        case 0x34:
+                        case 0x48:
+                            var_a1 = 0;
+                            break;
+                        case 0x2D:
+                        case 0x2E:
+                        case 0x2F:
+                            var_a1 = 7;
+                            break;
+                        case 0x2C:
+                            var_a1 = 8;
+                            break;
+                        case 0x42:
+                            var_a1 = 0xC;
+                            break;
+                        case 0x43:
+                            var_a1 = 0xB;
+                            break;
+                        case 0xE:
+                        case 0xF:
+                            var_a1 = 0x10;
+                            break;
+                        case 0x10:
+                            *((u8 *)arg1->unk31C + 0x1AC) = 1;
+                            D_800D1580 = 0xFF010434;
+                            var_a1 = 0;
+                            func_1506E5FC();
+                            D_800D1580 = 0xFF070169;
+                            func_1506E8D8();
+                            break;
+                        default:
+                            var_a1 = 1;
+                            break;
+                    }
+                }
+                func_1507CD64(arg1, var_a1);
+                arg1->unk105 = 3;
+                return;
+            }
+        }
+        if (rate == 0xC8) {
+            arg1->unkF4 |= 8;
+            arg1->unk10B |= 1;
+        }
+        arg1->unk10C = rate * 100;
+        scale = (u32)table[anim].sub[arg1->unk105].unk2;
+        scale = scale / 100.0f;
+        anim = table[anim].sub[arg1->unk105].unk0;
+        if (anim != 0) {
+            arg1->unk105++;
+        }
+        {
+            s32 pad;
+
+            if (scale == 0.0f) {
+                scale = 1.0f;
+            }
+        }
+    } else {
+        arg1->unk10C = 20000;
+        scale = 1.0f;
+        anim = 0;
+    }
+    if (anim == 0) {
+        arg1->unkF4 &= ~8;
+        arg1->stunned = 0;
+        arg1->unk10B = 0;
+        arg1->unk10F = 0;
+        if (arg1->interaction_state == 1) {
+            *((u8 *)arg1->unk31C + 0x58) = 0;
+            arg1->unkF8 &= 0xFEFFFDFF;
+        }
+    } else {
+        func_1505E650(arg1, anim, scale, speed, 0.0f, 0.0f, 0);
+    }
+}
 struct127 *func_1505ED34(void) {
     s32 i;
     struct127 *ptr;
