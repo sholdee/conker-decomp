@@ -223,7 +223,129 @@ void func_151155C0(void *arg0) {
     *(s16 *)((u8 *)arg0 + 0x5C) = *(s16 *)((u8 *)arg0 + 0x12) - start;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_142560/func_1511575C.s")
+struct Obj1511575C {
+    u8 pad0[0x10];
+    s16 unk10;
+    s16 unk12;
+    s16 unk14;
+    u8 pad16[0x3C - 0x16];
+    s32 unk3C;
+    u8 pad40[0xF];
+    u8 unk4F;
+    u8 pad50[0xA];
+    s16 unk5A;
+    s16 unk5C;
+    s16 unk5E;
+    u8 pad60[0x1C];
+    s32 unk7C;
+    s32 unk80;
+    s32 unk84;
+};
+
+extern s32 func_10010E78(u16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+
+void func_1511575C(struct Obj1511575C *arg0) {
+    u8 speed;
+    s16 dx;
+    s16 tx;
+    s16 dy;
+    s32 dz;
+    s16 ty;
+    s16 tz;
+    s32 ox;
+    s32 oy;
+    s32 oz;
+    s16 x;
+    s16 y;
+    s16 z;
+    s16 unk74;
+    s16 state;
+    s32 handle;
+    s32 alpha;
+    s32 enabled;
+    u16 snd;
+
+    speed = arg0->unk3C >> 16;
+    dx = (s8)arg0->unk3C << 6;
+    dy = (s16)((s8)(arg0->unk3C >> 24) << 6);
+    dz = (s16)((s8)(arg0->unk3C >> 8) << 6);
+    enabled = 0;
+    snd = arg0->unk84;
+    ox = arg0->unk10;
+    oy = arg0->unk12;
+    oz = arg0->unk14;
+    handle = (u16)(arg0->unk84 >> 16);
+    if ((arg0->unk4F & 4) == 4) {
+        enabled = 1;
+    }
+    if (arg0->unk7C == 0) {
+        arg0->unk7C = (arg0->unk10 << 16) | (arg0->unk12 & 0xFFFF);
+        arg0->unk80 = arg0->unk14 & 0xFFFF;
+    }
+    x = arg0->unk7C >> 16;
+    y = arg0->unk7C;
+    tx = x + dx;
+    z = arg0->unk80;
+    state = (s8)(arg0->unk80 >> 16);
+    alpha = (u8)(arg0->unk80 >> 24);
+    ty = y + dy;
+    tz = z + dz;
+    if (state == 0) {
+        if (x == arg0->unk10 && y == arg0->unk12 && z == arg0->unk14) {
+            if (enabled) {
+                state = 100;
+            }
+        } else {
+            alpha -= (u8)(255.0f / speed);
+            if (alpha <= 0) {
+                alpha = 0;
+                state = -100;
+                if (handle) {
+                    func_100111C8(handle);
+                    handle = 0;
+                    func_10010F88(0x83, 0x5000, 0, 0, 0, arg0->unk10, arg0->unk12, arg0->unk14, 200, 1000);
+                }
+            } else if (snd && handle == 0) {
+                handle = (u16)func_10010E78(handle, snd, 0x7FFF, 0, 0, 0, arg0->unk10, arg0->unk12, arg0->unk14, 200, 1000);
+            }
+            arg0->unk10 = x + (f32)(tx - x) * (alpha * 0.003921568859f);
+            arg0->unk12 = y + (f32)(ty - y) * (alpha * 0.003921568859f);
+            arg0->unk14 = z + (f32)(tz - z) * (alpha * 0.003921568859f);
+        }
+    }
+    if (state > 0) {
+        if (alpha < 255) {
+            alpha += (u8)(255.0f / speed);
+            state = 100;
+            if (snd && handle == 0) {
+                handle = (u16)func_10010E78(handle, snd, 0x7FFF, 0, 0, 0, arg0->unk10, arg0->unk12, arg0->unk14, 200, 1000);
+            }
+            if (alpha > 255) {
+                alpha = 255;
+            }
+        } else {
+            state--;
+            alpha = 255;
+            if (handle) {
+                func_100111C8(handle);
+                handle = 0;
+                func_10010F88(0x83, 0x5000, 0, 0, 0, arg0->unk10, arg0->unk12, arg0->unk14, 200, 1000);
+            }
+        }
+        arg0->unk10 = x + (f32)(tx - x) * (alpha * 0.003921568859f);
+        arg0->unk12 = y + (f32)(ty - y) * (alpha * 0.003921568859f);
+        arg0->unk14 = z + (f32)(tz - z) * (alpha * 0.003921568859f);
+    }
+    if (state < 0) {
+        state++;
+    }
+    arg0->unk80 &= 0xFFFF;
+    arg0->unk80 = arg0->unk80 | ((state & 0xFF) << 16) | ((alpha & 0xFF) << 24);
+    arg0->unk5A = arg0->unk10 - ox;
+    arg0->unk5C = arg0->unk12 - oy;
+    arg0->unk5E = arg0->unk14 - oz;
+    arg0->unk84 = (handle << 16) | snd;
+}
 
 extern f32 D_800A2FA0;
 extern f32 D_800A2FA4;
