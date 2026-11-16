@@ -16,7 +16,8 @@ struct Struct151E5034 {
     s8 unk2A;
     s8 unk2B;
     s8 unk2C;
-    char pad2D[0x11];
+    s8 unk2D;
+    char pad2E[0x10];
     s8 unk3E;
     s8 unk3F;
     char pad40;
@@ -1289,12 +1290,411 @@ void func_151E6BFC(void) {
     D_8008FDD8 = 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_20F9A0/func_151E6C1C.s")
-
 struct Struct151149AC {
-    char pad0[0x80];
+    char pad0[0x6E];
+    u8 unk6E;
+    char pad6F[0x11];
     s32 unk80;
 };
+
+typedef struct {
+    u8 pad0[9];
+    u8 links[5];
+    u8 padE[2];
+} Node151E6C1C;
+
+typedef struct {
+    u16 unk0;
+    u16 unk2;
+} Snd151E6C1C;
+
+typedef struct {
+    f32 x, y, z;
+} Vec151E6C1C;
+
+extern u8 D_8008FF40[];
+extern f32 D_8008FF48[];
+extern f32 D_8008FF60[];
+extern s8 D_8008FF78[];
+extern s8 D_8008FF80[];
+extern u8 D_8008FF88[];
+extern f32 D_8008FF90[];
+extern u8 D_8008FFB0[2][6];
+extern Snd151E6C1C D_800AB908[];
+extern Snd151E6C1C D_800AB920[];
+extern u8 D_800AB570[];
+extern Node151E6C1C *D_800D2350;
+extern f32 D_8008FDD0;
+extern s32 func_15086CBC(s32, f32 *, f32 *, f32 *);
+extern s32 func_15086D48(s32);
+extern void func_1000D96C(s32, s32, s32);
+f32 func_150497E0(f32 *, s32, f32);
+struct Struct151149AC *func_151149AC(s32);
+extern f32 sinf(f32);
+
+#define F2AC (*(f32 *)&p->unk2AC)
+
+void func_151E6C1C(s32 arg0) {
+    struct108 *p;
+    s32 pad1A0;
+    s32 idx;
+    s32 cnt;
+    s32 id;
+    s32 n;
+    f32 *speeds;
+    f32 t;
+    f32 u;
+    s32 i;
+    s32 k;
+    f32 scale;
+    f32 x[16];
+    f32 y[16];
+    f32 z[16];
+    s8 ids[16];
+    u8 *tbl;
+    Snd151E6C1C *snd;
+    struct Struct151149AC *r;
+    struct Struct151149AC *r2;
+    Node151E6C1C *node;
+    Node151E6C1C *cur;
+    s32 seg;
+    u8 v;
+    s32 state;
+    u8 a;
+    f32 cx, cy, cz;
+    f32 bx, by, bz;
+    f32 ax, ay, az;
+    f32 dx, dy, dz;
+
+    p = &D_800DBFF0[arg0];
+    if (D_8008FDD4->unk3E == 0) {
+        id = 0;
+        n = 6;
+        tbl = D_8008FF40;
+        speeds = D_8008FF48;
+        snd = D_800AB908;
+    } else {
+        id = 0x10;
+        n = 8;
+        tbl = D_8008FF88;
+        speeds = D_8008FF90;
+        snd = D_800AB920;
+    }
+    func_15086CBC(func_15086D48(id), &p->unk2F8, &p->unk2FC, &p->unk300);
+
+    if (D_8008FDD4->unk4 != 0.0f) {
+        D_8008FDD4->unk0 += D_8008FDD4->unk4 * D_800BE9E4;
+        if (D_8008FDD4->unk0 <= 0.0f) {
+            D_8008FDD4->unk0 = 0.0f;
+            D_8008FDD4->unk4 = 0.0f;
+        }
+        if (D_8008FDD4->unk0 >= 1.0f) {
+            D_8008FDD4->unk0 = 0.0f;
+            D_8008FDD4->unk4 = 0.0f;
+            D_8008FDD4->unk2B++;
+            if (D_8008FDD4->unk2B >= n) {
+                D_8008FDD4->unk2B -= n;
+            }
+        }
+    } else if (D_8008FDD4->unkC != 0.0f || D_8008FDD4->unk8 != 0.0f) {
+        if ((D_8008FDD4->unk20 & 0x20) && (D_8008FDD4->unk3E == 0 || D_8008FDD4->unk2B != 0)) {
+            D_8008FDD4->unkC = -speeds[D_8008FDD4->unk2B];
+            func_1000D96C(snd[D_8008FDD4->unk2B].unk2, D_800E0A97, 0);
+            D_800E0A97 = snd[D_8008FDD4->unk2B].unk2;
+        }
+        if (D_8008FDD4->unk2A != 0 && D_8008FDD4->unk3E == 1 && D_8008FDD4->unk2B == 0) {
+            if (D_8008FDD4->unk20 & 0x20) {
+                D_8008FDD4->unkC = speeds[D_8008FDD4->unk2B];
+            }
+        } else if (D_8008FDD4->unk20 & 0x10) {
+            D_8008FDD4->unkC = speeds[D_8008FDD4->unk2B];
+        }
+        D_8008FDD4->unk8 += D_8008FDD4->unkC * D_800BE9E4;
+        if (D_8008FDD4->unk8 >= 1.0f) {
+            D_8008FDD4->unk8 = 1.0f;
+            D_8008FDD4->unkC = 0.0f;
+        } else if (D_8008FDD4->unk8 < 0.0f) {
+            D_8008FDD4->unk8 = 0.0f;
+            D_8008FDD4->unkC = 0.0f;
+            if (D_8008FDD4->unk2C == 0 && D_8008FDD4->unk3E == 1 && D_8008FDD4->unk44 != 0) {
+                D_8008FDD4->unk43 = 1;
+                D_8008FDD4->unk44 = 0;
+            }
+        }
+    } else {
+        if (D_8008FDD4->unk20 & 0x10) {
+            D_8008FDD4->unkC = speeds[D_8008FDD4->unk2B];
+            func_1000D96C(snd[D_8008FDD4->unk2B].unk0, D_800E0A97, 0);
+            D_800E0A97 = snd[D_8008FDD4->unk2B].unk0;
+        } else {
+            if (D_8008FDD4->unk20 & 4) {
+                D_8008FDD4->unk2B--;
+                D_8008FDD4->unk0 = 1.0f;
+                D_8008FDD4->unk4 = -0.05000000075f;
+                if (D_8008FDD4->unk2B < 0) {
+                    D_8008FDD4->unk2B += n;
+                }
+            }
+            if ((D_8008FDD4->unk20 & 8) || D_8008FDD4->unk43 != 0) {
+                D_8008FDD4->unk4 = 0.05000000075f;
+            }
+            D_8008FDD4->unk43 = 0;
+            if (D_8008FDD4->unk2B < 0) {
+                D_8008FDD4->unk2B += n;
+            }
+            if (D_8008FDD4->unk2B >= n) {
+                D_8008FDD4->unk2B -= n;
+            }
+        }
+    }
+
+    scale = D_8008FDD4->unk8;
+    if (D_8008FDD4->unk3E == 0) {
+        scale *= 1.0f - D_8008FF60[D_8008FDD4->unk2C] * D_8008FDD0;
+    } else if (D_8008FDD4->unk2C != 0) {
+        scale *= 0.6000000238f;
+    }
+    t = sinf(D_8008FDD4->unk0 * 3.141590118f - 1.570795059f) * 0.5f + 0.5f;
+    u = sinf(scale * 3.141590118f - 1.570795059f) * 0.5f + 0.5f;
+
+    if (D_8008FDD4->unk3E == 0) {
+        for (i = 0; i < 2; i++) {
+            a = D_8008FFB0[i][D_8008FDD4->unk2C];
+            if (a != 0xFF) {
+                r = func_151149AC(a);
+                if (r != NULL) {
+                    if (D_8008FDD4->unkC > 0.0f || D_8008FDD0 < 1.0f) {
+                        if (D_8008FF78[D_8008FDD4->unk2C] < (s32)(scale * 100.0f)) {
+                            r->unk80 = 1;
+                        }
+                    } else if (D_8008FDD4->unkC < 0.0f) {
+                        if (D_8008FF80[D_8008FDD4->unk2C] >= (s32)(scale * 100.0f)) {
+                            r->unk80 = 0;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    p->unk3D0->unk25C |= 0x200;
+    p->unk3D0->y_position = 1000.0f;
+
+    if (scale > 0.0f) {
+        ids[0] = func_15086D48(id);
+        ids[1] = func_15086D48(tbl[D_8008FDD4->unk2B]);
+        node = &D_800D2350[ids[1]];
+        cnt = 1;
+        while (node != NULL) {
+            cur = node;
+            node = NULL;
+            for (i = 0; i < 5; i++) {
+                v = cur->links[i];
+                if (v != 0xFF && v != ids[cnt - 1]) {
+                    cnt++;
+                    ids[cnt] = v;
+                    node = &D_800D2350[cur->links[i]];
+                    i = 5;
+                }
+            }
+        }
+        cnt++;
+        if (cnt >= 4) {
+            u *= (f32)cnt - 2.0f;
+            seg = u;
+            t = u - (f32)seg;
+            if (seg >= cnt - 2) {
+                seg = seg - 1;
+                t = 1.0f;
+            }
+            i = 1;
+            if (cnt > 0) {
+                do {
+                    func_15086CBC(ids[i - 1], &x[i], &y[i], &z[i]);
+                    i++;
+                } while (i <= cnt);
+            }
+            x[0] = x[1] - (x[2] - x[1]);
+            y[0] = y[1] - (y[2] - y[1]);
+            z[0] = z[1] - (z[2] - z[1]);
+            x[cnt + 1] = x[cnt] + (x[cnt - 1] - x[cnt]);
+            y[cnt + 1] = y[cnt] + (y[cnt - 1] - y[cnt]);
+            z[cnt + 1] = z[cnt] + (z[cnt - 1] - z[cnt]);
+            p->unk2F8 = func_150497E0(x, seg, t);
+            p->unk2FC = func_150497E0(y, seg, t);
+            p->unk300 = func_150497E0(z, seg, t);
+            p->unk2A4 = func_150497E0(x, seg + 1, t);
+            p->unk2A8 = func_150497E0(y, seg + 1, t);
+            F2AC = func_150497E0(z, seg + 1, t);
+        } else {
+            func_15086CBC(ids[0], &x[0], &y[0], &z[0]);
+            func_15086CBC(ids[1], &x[1], &y[1], &z[1]);
+            if (cnt == 3) {
+                func_15086CBC(ids[2], &x[2], &y[2], &z[2]);
+            } else {
+                x[2] = x[1] + (x[1] - x[0]);
+                y[2] = y[1] + (y[1] - y[0]);
+                z[2] = z[1] + (z[1] - z[0]);
+            }
+            p->unk2F8 = x[0] + (x[1] - x[0]) * u;
+            p->unk2FC = y[0] + (y[1] - y[0]) * u;
+            p->unk300 = z[0] + (z[1] - z[0]) * u;
+            p->unk2A4 = x[1] + (x[2] - x[1]) * u;
+            p->unk2A8 = y[1] + (y[2] - y[1]) * u;
+            F2AC = z[1] + (z[2] - z[1]) * u;
+        }
+    } else {
+        idx = D_8008FDD4->unk2B - 1;
+        if (idx < 0) {
+            idx += n;
+        }
+        for (i = 0; i < 4; i++) {
+            func_15086CBC(func_15086D48(tbl[idx]), &x[i], &y[i], &z[i]);
+            idx++;
+            if (idx >= n) {
+                idx -= n;
+            }
+        }
+        p->unk2A4 = func_150497E0(x, 0, t);
+        p->unk2A8 = func_150497E0(y, 0, t);
+        F2AC = func_150497E0(z, 0, t);
+    }
+
+    if (D_8008FDD4->unk2A != 0) {
+        dx = p->unk2F8 - p->unk2A4;
+        dy = p->unk2FC - p->unk2A8;
+        dz = p->unk300 - F2AC;
+        p->unk2A4 = p->unk2F8 + dx;
+        p->unk2A8 = p->unk2FC + dy;
+        F2AC = p->unk300 + dz;
+    }
+    p->unk2A4 += D_8008FDD4->unk10 * D_8008FDD4->unk14;
+    p->unk2A8 += D_8008FDD4->unk10 * D_8008FDD4->unk18;
+    F2AC += D_8008FDD4->unk10 * D_8008FDD4->unk1C;
+    if (D_8008FDD4->unk2A != 3) {
+        D_8008FDD4->unk10 *= 0.8500000238f;
+    } else {
+        D_8008FDD4->unk10 = -((0.25f - D_8008FDD4->unk8) * 4.0f);
+    }
+
+    if (D_8008FDD4->unk3E == 1) {
+        state = 0;
+        func_15086CBC(func_15086D48(id), &ax, &ay, &az);
+        idx = D_8008FDD4->unk2B;
+        if (idx >= n) {
+            idx = 0;
+        }
+        func_15086CBC(func_15086D48(tbl[idx]), &bx, &by, &bz);
+        bx -= ax;
+        by -= ay;
+        bz -= az;
+        if (D_8008FDD4->unk2A != 0) {
+            bx = -bx;
+            by = -by;
+            bz = -bz;
+        }
+        if (D_8008FDD4->unk8 == 0.0f && (D_8008FDD4->unk20 & 0x20) && D_8008FDD4->unk10 < 0.009999999776f &&
+            D_8008FDD4->unk4 == 0.0f) {
+            D_8008FDD4->unk2B = 0;
+            if (D_8008FDD4->unk2D >= 2 && D_8008FDD4->unk2D < 7) {
+                D_8008FDD4->unk2A = 2;
+            }
+            state = 1;
+            D_8008FDD4->unkC = speeds[D_8008FDD4->unk2B];
+            func_1000D96C(snd[D_8008FDD4->unk2B].unk0, D_800E0A97, 0);
+            D_800E0A97 = snd[D_8008FDD4->unk2B].unk0;
+        }
+        if (D_8008FDD4->unk8 < 0.25f && D_8008FDD4->unk2A == 1) {
+            D_8008FDD4->unk2B = 4;
+            state = 2;
+            D_8008FDD4->unk2A = 0;
+        }
+        if (D_8008FDD4->unk8 == 0.0f && D_8008FDD4->unk2A == 3) {
+            D_8008FDD4->unk2B = 4;
+            D_8008FDD4->unk2A = 0;
+            D_8008FDD4->unk10 = 0.0f;
+        }
+        if (state != 0) {
+            func_15086CBC(func_15086D48(tbl[D_8008FDD4->unk2B]), &cx, &cy, &cz);
+            cx -= ax;
+            cy -= ay;
+            cz -= az;
+            if (D_8008FDD4->unk2A != 0) {
+                cx = -cx;
+                cy = -cy;
+                cz = -cz;
+            }
+            D_8008FDD4->unk10 = 1.0f;
+            D_8008FDD4->unk14 = bx - cx;
+            D_8008FDD4->unk18 = by - cy;
+            D_8008FDD4->unk1C = bz - cz;
+        }
+        if (state == 2) {
+            D_8008FDD4->unk10 = 0.0f;
+            D_8008FDD4->unk2B = 0;
+            D_8008FDD4->unk2A = 3;
+        }
+    }
+
+    if (D_8008FDD4->unk8 >= 1.0f && D_8008FDD4->unk2B == 0) {
+        D_8008FDD4->unk3E = 1 - D_8008FDD4->unk3E;
+        D_8008FDD4->unk8 = 0.9900000095f;
+        if (D_8008FDD4->unk3E != 0) {
+            D_8008FDD4->unkC = -D_8008FF90[0];
+        } else {
+            D_8008FDD4->unkC = -D_8008FF48[0];
+        }
+        if (D_8008FDD4->unk3E != 0) {
+            D_8008FDD4->unk2A = 1;
+        } else {
+            D_8008FDD4->unk2A = 0;
+        }
+    }
+    D_8008FDD4->unk2C = D_8008FDD4->unk2B;
+    if (D_8008FDD4->unk0 > 0.5f) {
+        D_8008FDD4->unk2C++;
+    }
+    if (D_8008FDD4->unk2C < 0) {
+        D_8008FDD4->unk2C += n;
+    }
+    if (D_8008FDD4->unk2C >= n) {
+        D_8008FDD4->unk2C -= n;
+    }
+    D_8008FDD4->unk2D = D_8008FDD4->unk2C;
+    if (D_8008FDD4->unk3E == 1) {
+        D_8008FDD4->unk2C = D_800AB570[D_8008FDD4->unk2C];
+    }
+
+    p->unk2BC = p->unk2A4;
+    p->unk2C0 = p->unk2A8;
+    p->unk2C4 = F2AC;
+    *(Vec151E6C1C *)&p->unk2A4 = *(Vec151E6C1C *)&p->unk2BC;
+    p->unk390 = 0.0f;
+    p->unk1A4 = 20.0f;
+    p->unk19C = 20.0f;
+    p->unk1A8 = 15.0f;
+    p->unk1A0 = 15.0f;
+
+    {
+    struct Struct151149AC *q1;
+    r = func_151149AC(0xF8);
+    if (r != NULL) {
+        r->unk6E = 1;
+    }
+    q1 = func_151149AC(0xF6);
+    r2 = func_151149AC(0xF7);
+    if (q1 != NULL && r2 != NULL) {
+        if (D_8008FDD4->unk3E == 0) {
+            q1->unk6E = 0;
+            r2->unk6E = 1;
+        } else {
+            q1->unk6E = 1;
+            r2->unk6E = 0;
+        }
+    }
+    }
+}
+
 extern struct Struct151E5034 *D_8008FDD4;
 extern u8 D_8008FFB0[2][6];
 extern f32 D_800ABA8C;
