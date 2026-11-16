@@ -1097,7 +1097,51 @@ void func_1506DE84(void) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506E0EC.s")
+void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
+void func_151700D8(f32 *, f32, f32, s32, f32, s32, s32, s32, s32, s32);
+void func_151875E0(f32, f32, f32, s32, s32, s32, f32, f32);
+
+void func_1506E0EC(void) {
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 height;
+    f32 width;
+    f32 depth;
+    s32 i;
+    f32 vertices[4][3];
+    f32 pos_x;
+    f32 pos_z;
+
+    if (D_800D154C->unk1D4 != NULL) {
+        width = 270.0f;
+        depth = width;
+        x = width;
+        z = depth;
+        height = D_800D154C->unk180;
+        for (i = 0; i < 4; i++) {
+            y = 0.0f;
+            func_150A7960((f32 *)D_800D154C->unk1D4, x, 0.0f, z, &x, &y, &z);
+            vertices[i][0] = x;
+            vertices[i][1] = height;
+            vertices[i][2] = z;
+            func_151875E0(x, y, z, 0x1E, 0x14, 7, 0.13f, 0.1f);
+            if (i == 0) {
+                z = depth;
+                x = -width;
+            } else if (i == 1) {
+                x = -width;
+                z = -depth;
+            } else if (i == 2) {
+                x = width;
+                z = -depth;
+            }
+        }
+        pos_x = D_800D154C->x_position;
+        pos_z = D_800D154C->z_position;
+        func_151700D8(vertices[0], pos_x, pos_z, 4, D_800D154C->xz_scale, 0, 4, 4, 0xFF, 0);
+    }
+}
 void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 void func_151700D8(f32 *, f32, f32, s32, f32, s32, s32, s32, s32, s32);
 
