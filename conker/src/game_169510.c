@@ -1159,7 +1159,55 @@ s32 func_1513F6E8(ScaleUpdateState *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513F728.s")
+typedef struct {
+    struct17 unk0;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+} Struct1513F728Sub;
+
+typedef struct {
+    char pad0[0x34];
+    struct17 unk34;
+    f32 unk40;
+    f32 unk44;
+    f32 unk48;
+    char pad4C[0xC4];
+    Struct1513F728Sub unk110;
+} Struct1513F728Obj;
+
+s32 func_1513F728(Struct1513F728Obj *arg0) {
+    Struct1513F728Sub *sub;
+    struct17 old;
+    s32 i;
+
+    sub = (Struct1513F728Sub *)((u8 *)arg0 + 0x110);
+    old = sub->unk0;
+    for (i = D_800BE9E4; i != 0; i--) {
+        sub->unk0.unk0 *= sub->unk10;
+        sub->unk0.unk4 *= sub->unk10;
+        sub->unk0.unk8 *= sub->unk10;
+    }
+    {
+        f32 ax;
+        f32 ay;
+        f32 az;
+
+        sub->unk0.unk4 += sub->unkC * D_800BE9A4;
+        ax = (sub->unk0.unk0 - old.unk0) * D_800BE9A8;
+        ay = (sub->unk0.unk4 - old.unk4) * D_800BE9A8;
+        az = (sub->unk0.unk8 - old.unk8) * D_800BE9A8;
+        arg0->unk34.unk0 += (old.unk0 + 0.5f * ax * D_800BE9A4) * D_800BE9A4;
+        arg0->unk34.unk4 += (old.unk4 + 0.5f * ay * D_800BE9A4) * D_800BE9A4;
+        arg0->unk34.unk8 += (old.unk8 + 0.5f * az * D_800BE9A4) * D_800BE9A4;
+    }
+    arg0->unk40 += sub->unk14 * D_800BE9A4;
+    arg0->unk44 += sub->unk18 * D_800BE9A4;
+    arg0->unk48 += sub->unk1C * D_800BE9A4;
+    return 1;
+}
 
 void func_1513FA2C(void *arg0, s16 arg1) {
     f32 stack_vals[2];
