@@ -706,7 +706,53 @@ s32 func_151B47D8(Struct151B47D8 *arg0, Struct151B47D8Pair *arg1, s32 arg2, u8 a
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E0560/func_151B48DC.s")
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 velocity[3];
+} Struct151B48DCPoint;
+
+typedef struct {
+    u8 pad0[0x10];
+    u8 flags;
+    u8 pad11;
+    s16 timer;
+    u8 primaryState[0xC];
+    u8 secondaryState[0xC];
+    s8 primaryCallback;
+    s8 secondaryCallback;
+    u8 pad2E[6];
+    s8 updateCallback;
+    u8 pad35[3];
+    f32 radius;
+    f32 gain;
+    f32 stiffness;
+    u8 pad44[4];
+    Struct151B48DCPoint points[10];
+} Struct151B48DC;
+
+s32 func_151B48DC(Struct151B48DC *arg0) {
+    f32 start;
+    f32 end;
+    f32 step;
+    f32 x;
+    s32 i;
+
+    start = *(f32 *)arg0->primaryState;
+    end = *(f32 *)arg0->secondaryState;
+    step = -(start - end) * 0.1f;
+    x = start;
+    for (i = 0; i < 10; i++, x += step) {
+        Struct151B48DCPoint *point = &arg0->points[i];
+
+        point->x = x;
+        point->y = 0.0f;
+        point->z = 0.0f;
+    }
+    arg0->flags &= ~2;
+    return 1;
+}
 
 s32 func_151B498C(s32 arg0, s32 *arg1, s32 *arg2, s32 *arg3, s32 *arg4, s32 *arg5,
                    s32 *arg6, s32 *arg7, s32 *arg8, s32 *arg9, s32 *arg10, s32 *arg11,
