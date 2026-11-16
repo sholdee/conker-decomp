@@ -185,49 +185,81 @@ extern void func_15102B38(s32, u8, s32, s32, f32 *, s32, s32, f32, s32, s32, s32
 extern void func_150E1570(struct127 *, f32, f32, f32, f32, f32, f32, s32, s32);
 
 
-// PERMUTER CANDIDATE (best 45): logic is byte-correct -- the ONLY residual is a coupled
-// two-register allocation swap (8 lines). IDO ranks the loop-invariant temps by
-// depth-weighted reference count and gives s3..s8 in that order; the *12 array-stride
-// constant scores 21 (guard multu at depth 0 + .cmd multu + loop-bottom multu at depth 1)
-// and the &D_800D1580 base scores 20 (store + float read at depth 1), so IDO hands
-// s3=0xC / s4=&D_800D1580 where the target has s3=&D_800D1580 / s4=0xC. Nothing in the C
-// changes those counts (verified: pointer-walk vs index inner loop, assignment-in-condition
-// to drop one index expression, *(s32*)& on the store, file-local struct types vs casts --
-// all still 45). Everything else matches exactly, including the u8-param promotion, which
-// needs PLAIN TRUTHINESS `if (filter)` / `while (filter)`: the `filter != 0` spelling leaves
-// the param memory-resident (`lbu 0x5b(sp)`) and costs ~850 points of cascade.
-// Reconstruction (byte-correct logic; obj is struct127, 0xB4/0x1C4 are `pad` in structs.h):
-// typedef struct AnimCmd { f32 time; u8 pad4[3]; u8 cmd; s32 arg; } AnimCmd;   // 0xC bytes
-// f32 func_1506AD30(AnimObj *obj, f32 time, u8 filter) {
-//     s32 anim; u8 cmd; s32 i;
-//     if (obj->unk5 == 4) return 0.0f;
-//     D_800D1878 = 0.0f;
-//     if (time < obj->unkB4) obj->unk138 = 0;
-//     D_800D1880 = 1;
-//     while (obj->unk1C4 && (obj->unk1C4[obj->unk138].time <= time) && D_800D1880) {
-//         if (obj->unk1C4[obj->unk138].time < 900.0f) {
-//             D_800D1580 = obj->unk1C4[obj->unk138].arg;
-//             D_800D1874 = *(f32 *)&D_800D1580;
-//             anim = obj->unk2D0->unk28;
-//             if ((D_800C35EA == 0) || (D_800C365E != 0)) {
-//                 cmd = obj->unk1C4[obj->unk138].cmd;
-//                 if (filter) {                 // D_80099A30 = allowed-command list, 0-terminated
-//                     i = 0;
-//                     while (filter) {
-//                         if (D_80099A30[i] == 0) cmd = 0;
-//                         if (cmd == D_80099A30[i]) break;
-//                         i++;
-//                     }
-//                 }
-//                 if (cmd) D_800863FC[cmd]();   // command handler table
-//             }
-//             if (anim != obj->unk2D0->unk28) time = obj->unk2D0->unk8;  // anim changed: resync
-//             else obj->unk138++;
-//         }
-//     }
-//     return D_800D1878;
-// }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506AD30.s")
+typedef struct {
+    f32 time;
+    u8 pad4[3];
+    u8 id;
+    s32 parameter;
+} Game6AD30Event;
+
+typedef struct {
+    u8 pad0[8];
+    f32 time;
+    u8 padC[0x1C];
+    s32 token;
+} Game6AD30State;
+
+typedef struct {
+    u8 pad0[5];
+    u8 kind;
+    u8 pad6[0xAE];
+    f32 previousTime;
+    u8 padB8[0x80];
+    u8 index;
+    u8 pad139[0x8B];
+    Game6AD30Event *events;
+    u8 pad1C8[0x108];
+    Game6AD30State *state;
+} Game6AD30Actor;
+
+typedef void Game6AD30Callback(void);
+extern Game6AD30Callback *D_800863FC[];
+extern u8 D_80099A30[];
+extern u8 D_800C365E;
+
+f32 func_1506AD30(Game6AD30Actor *arg0, f32 arg1, u8 arg2) {
+    s32 token;
+    u8 id;
+
+    if (arg0->kind == 4) {
+        return 0.0f;
+    }
+    D_800D1878 = 0.0f;
+    if (arg1 < arg0->previousTime) {
+        arg0->index = 0;
+    }
+    D_800D1880 = 1;
+    while (arg0->events != 0 && arg0->events[arg0->index].time <= arg1 && D_800D1880 != 0) {
+        if (arg0->events[arg0->index].time < 900.0f) {
+            D_800D1580 = arg0->events[arg0->index].parameter;
+            D_800D1874 = *(f32 *)&D_800D1580;
+            token = arg0->state->token;
+            if (D_800C35EA == 0 || D_800C365E != 0) {
+                id = arg0->events[arg0->index].id;
+                if (arg2) {
+                    s32 i;
+                    for (i = 0; arg2; i++) {
+                        if (D_80099A30[i] == 0) {
+                            id = 0;
+                        }
+                        if (id == D_80099A30[i]) {
+                            break;
+                        }
+                    }
+                }
+                if (id != 0) {
+                    D_800863FC[id]();
+                }
+            }
+            if (token != arg0->state->token) {
+                arg1 = arg0->state->time;
+            } else {
+                arg0->index++;
+            }
+        }
+    }
+    return D_800D1878;
+}
 
 void func_1506AF74(void) {
     if ((D_800D154C->unk100 & 8) != 0) {
