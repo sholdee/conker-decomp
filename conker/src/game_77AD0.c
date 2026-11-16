@@ -481,7 +481,38 @@ void func_1504A730(void) {
 //     D_800D35DC = (u8)0;
 // }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_77AD0/func_1504ADD0.s")
+void func_150ED578(struct127 *arg0);
+
+void func_1504ADD0(void) {
+    s32 i;
+    u8 *p;
+    u8 sp48[6];
+
+    if (D_800C35EA != 1) {
+        for (i = 0; i < 25; i++) {
+            p = &((u8 *)D_800CC2D0)[i * 0x32C];
+            if (*(s32 *)p == 0) {
+                continue;
+            }
+            D_800C3E78 = i;
+            *(u8 **)&D_800D154C = p;
+            if (i < D_8008FD8C) {
+                if (i < 4) {
+                    D_800CC284 = (*(s32 **)&D_800BE728)[i];
+                } else {
+                    bzero(sp48, 6);
+                    *(u8 **)&D_800CC284 = sp48;
+                }
+            }
+            switch (p[4]) {
+            case 0x28:
+            case 0x77:
+                func_150ED578((struct127 *)p);
+                break;
+            }
+        }
+    }
+}
 // NON-MATCHING: whats up with sp48
 // void func_1504ADD0(void) {
 //     struct127 *tmp;
