@@ -475,7 +475,19 @@ void func_151D40D4(struct17 *arg0, struct17 *arg1, struct127 *arg2, struct127 *a
     func_1505D1C4(arg0->unk0, arg0->unk4, arg0->unk8, arg6, arg2 - D_800CC2D0, angle, arg7, (s32)&pos);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_200930/func_151D42E8.s")
+void func_151D42E8(void *arg0, void *arg1, s32 arg2, s32 arg3, s32 arg4) {
+    f32 f;
+    u16 var_v0;
+
+    if (arg1 != 0) {
+        f = func_150484A0(*(f32 *)arg1, *(f32 *)((u8 *)arg1 + 8));
+        var_v0 = (u16)(f * 10430.37793f) - 0x4000 | 1;
+    } else {
+        var_v0 = 0;
+    }
+    func_1505D1C4(*(f32 *)arg0, *(f32 *)((u8 *)arg0 + 4), *(f32 *)((u8 *)arg0 + 8), arg4,
+                  (arg2 - (s32)D_800CC2D0) / 0x32C, var_v0, 0, 0);
+}
 
 struct S151D4408Temps {
     f32 unk00;
