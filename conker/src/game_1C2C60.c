@@ -2,10 +2,12 @@
 #define func_151422C0 func_151422C0_header
 #define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #define func_1513D2F0 func_1513D2F0_hdr
+#define func_1513D524 func_1513D524_hdr
 #include "functions.h"
 #undef func_151422C0
 #undef func_150ADA20
 #undef func_1513D2F0
+#undef func_1513D524
 u32 func_150ADA20(void);
 void *func_1513D2F0(void *arg0, void *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, u8 argA, s32 argB);
 #define D_800DBFF0 D_800DBFF0_hdr
@@ -753,7 +755,7 @@ typedef struct {
 extern void (*D_8008F894[])(void *);
 extern void (*D_8008F89C[])(void *);
 extern s32 (*D_8008F880[])(void *);
-void func_15198110(void *, s32);
+void func_15198110();
 
 s32 func_15196748(Emitter15196748 *arg0) {
     Desc15196748 *desc;
@@ -1340,7 +1342,202 @@ void func_15198054(void *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1C2C60/func_15198110.s")
+typedef struct {
+    /* 0x00 */ Vec15196748 pos;
+    /* 0x0C */ Vec15196748 vel;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ s16 unk1C;
+    /* 0x1E */ s8 unk1E;
+    /* 0x1F */ u8 unk1F;
+    /* 0x20 */ u8 unk20;
+    /* 0x21 */ u8 unk21;
+    /* 0x22 */ u8 pad22[0x2];
+} Particle15198110;
+
+typedef struct {
+    /* 0x00 */ u8 pad0[0x40];
+    /* 0x40 */ f32 unk40;
+    /* 0x44 */ u8 pad44[0x69 - 0x44];
+    /* 0x69 */ u8 unk69;
+    /* 0x6A */ u8 pad6A[0x6C - 0x6A];
+    /* 0x6C */ f32 unk6C;
+    /* 0x70 */ f32 unk70;
+} Desc15198110;
+
+typedef struct {
+    /* 0x00 */ u8 pad0[0x25];
+    /* 0x25 */ u8 unk25;
+    /* 0x26 */ u8 pad26[0x2E - 0x26];
+    /* 0x2E */ s8 unk2E;
+    /* 0x2F */ u8 pad2F[0x94 - 0x2F];
+    /* 0x94 */ Particle15198110 *unk94;
+    /* 0x98 */ Desc15198110 *unk98;
+} Emitter15198110;
+
+typedef struct {
+    f32 unk0;
+    f32 unk4;
+    s16 unk8;
+    s16 unkA;
+} Entry15198110;
+
+typedef struct {
+    /* 0x00 */ u8 unk0;
+    /* 0x02 */ s16 unk2;
+    /* 0x04 */ s16 unk4;
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ u8 unk10;
+    /* 0x11 */ u8 unk11;
+    /* 0x12 */ u8 unk12;
+    /* 0x13 */ u8 unk13;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ Vec15196748 unk1C;
+    /* 0x28 */ Vec15196748 unk28;
+    /* 0x34 */ f32 unk34;
+    /* 0x38 */ f32 unk38;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ s32 unk40;
+    /* 0x44 */ u8 unk44;
+    /* 0x45 */ u8 unk45;
+} Spawn15198110;
+
+typedef struct {
+    /* 0x00 */ f32 unk0;
+    /* 0x04 */ f32 unk4;
+    /* 0x08 */ f32 unk8;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ s16 unk1C;
+    /* 0x1E */ s16 unk1E;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ s32 unk28;
+    /* 0x2C */ s16 unk2C;
+    /* 0x30 */ Vec15196748 unk30;
+    /* 0x3C */ Vec15196748 unk3C;
+    /* 0x48 */ f32 unk48;
+    /* 0x4C */ f32 unk4C;
+    /* 0x50 */ f32 unk50;
+    /* 0x54 */ f32 unk54;
+    /* 0x58 */ s16 unk58;
+    /* 0x5A */ s16 unk5A;
+} Extra15198110;
+
+extern Entry15198110 D_800A8710[];
+extern void *func_1513D524(void *, u8, u8, u8, u8, u8, s32, u8, s32);
+
+void func_15198110(Emitter15198110 *arg0, s32 arg1) {
+    Desc15198110 *desc;
+    Particle15198110 *arr;
+    Particle15198110 *cur;
+    Particle15198110 *next;
+    Entry15198110 *entry;
+    s32 i;
+    void *ret;
+    u8 a;
+    u8 b;
+    Spawn15198110 spawn;
+    Extra15198110 extra;
+    f32 sinA;
+    f32 cosA;
+    f32 sinB;
+    f32 cosB;
+    f32 rad;
+    f32 rc;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    s32 flag;
+
+    desc = arg0->unk98;
+    arr = arg0->unk94;
+    entry = &D_800A8710[desc->unk69];
+    cur = (Particle15198110 *)((u8 *)arr + arg1 * 0x24);
+    desc->unk70 += desc->unk6C;
+    cur->unk21 = 1;
+    if ((i = arg1 + 1) == arg0->unk25) {
+        i = 0;
+    }
+    if (desc->unk70 > 1.0f && i != arg0->unk2E) {
+        s32 pad[2];
+
+        spawn.unk8 = 0;
+        extra.unk20 = 25137.0f;
+        extra.unk24 = 6733.0f;
+        extra.unk2C = 0;
+        spawn.unkC = (extra.unk20 + extra.unk24) * 0.5f;
+        extra.unk48 = desc->unk40;
+        extra.unk58 = 8;
+        extra.unk5A = 0x20;
+        extra.unk4C = 0.8280000091f;
+        extra.unk50 = 0.753000021f;
+        extra.unk54 = -0.0120000001f;
+        extra.unk0 = entry->unk0 * 30.09054375f;
+        extra.unk4 = entry->unk0 * 18.35523224f;
+        extra.unk1C = 0;
+        spawn.unk14 = (extra.unk0 + extra.unk4) * 0.5f;
+        extra.unk8 = spawn.unk14;
+        extra.unkC = entry->unk4 * 3.961740017f;
+        extra.unk10 = entry->unk4 * 2.919177055f;
+        extra.unk14 = entry->unk4 * 8.116548538f;
+        extra.unk1E = 0;
+        spawn.unk34 = 1.0f;
+        spawn.unk3C = 1.0f;
+        spawn.unk40 = 0x40000001;
+        spawn.unk44 = 0xFF;
+        spawn.unk45 = 0xFF;
+        spawn.unk18 = (extra.unkC + extra.unk10) * 0.5f;
+        extra.unk18 = spawn.unk18;
+        spawn.unk38 = 0.0f;
+        if (func_150ADA20() & 1) {
+            spawn.unk0 = 0x13;
+        } else {
+            spawn.unk0 = 0x14;
+        }
+        spawn.unk10 = 0;
+        spawn.unk11 = 0;
+        spawn.unk12 = 0;
+        spawn.unk13 = 0x68;
+        spawn.unk2 = 0x301;
+        next = (Particle15198110 *)((u8 *)arr + i * 0x24);
+        extra.unk30 = next->vel;
+        extra.unk3C = cur->vel;
+        do {
+            a = func_150ADA20() & 0xFF;
+            b = func_150ADA20() & 0xFF;
+            sinA = func_151423D8((u8)(a - 0x40));
+            cosA = func_151423D8(a);
+            sinB = func_151423D8((u8)(b - 0x40));
+            cosB = func_151423D8(b);
+            rad = next->unk18 * 0.8000000119f;
+            spawn.unk4 = (func_150ADA20() % (u32)(entry->unkA + 1)) + entry->unk8;
+            rc = rad * cosB;
+            dx = rc * sinA;
+            dy = -rad * sinB;
+            dz = rc * cosA;
+            spawn.unk1C.x = next->pos.x + dx;
+            spawn.unk1C.y = next->pos.y + dy;
+            spawn.unk1C.z = next->pos.z + dz;
+            spawn.unk28.x = cur->pos.x + dx;
+            spawn.unk28.y = cur->pos.y + dy;
+            spawn.unk28.z = cur->pos.z + dz;
+            if (func_150ADA20() & 1) {
+                flag = 1;
+            } else {
+                flag = 0;
+            }
+            ret = func_1513D524(&spawn, 0xA, 0xB, 0, 9, (u8)(flag | 2), 0x5C, 0xFF, 0);
+            if (ret != NULL) {
+                memcpy((u8 *)ret + 0x110, &extra, sizeof(extra));
+            }
+            desc->unk70 -= 1.0f;
+        } while (desc->unk70 > 1.0f);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1C2C60/func_15198570.s")
 
