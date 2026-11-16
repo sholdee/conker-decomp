@@ -199,7 +199,8 @@ def transplant(func, attempt_text, target_text):
     tgt = chunks(target_text)
     have = {norm(t) for k, t in tgt if k in ("decl", "pp", "func")}
     have |= {norm(prototype(t)) for k, t in tgt if k == "func"}
-    known = " ".join(strip_comments(t) for k, t in tgt if k != "pragma")
+    known = " ".join([strip_comments(t) for k, t in tgt if k in ("decl", "pp")]
+                     + [strip_comments(prototype(t)) for k, t in tgt if k == "func"])
 
     def declares_known(t):
         """The identifier this declaration introduces is already declared in the target."""
