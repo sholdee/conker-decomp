@@ -1940,7 +1940,31 @@ u8 func_15145C90(s32 arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15145CD0.s")
+void func_15145CD0(u8 *arg0, f32 **arg1, f32 **arg2, s32 arg3) {
+    f32 matrix[4][4];
+    f32 **src;
+    f32 **dst;
+    f32 *in;
+    f32 *out;
+
+    func_150A8050(matrix, *(f32 *)(arg0 + 0), *(f32 *)(arg0 + 4), *(f32 *)(arg0 + 8));
+    matrix[3][0] = *(s16 *)(arg0 + 0x10);
+    matrix[3][1] = *(s16 *)(arg0 + 0x12);
+    matrix[3][2] = *(s16 *)(arg0 + 0x14);
+    if (arg3 <= 0) {
+        return;
+    }
+    src = arg1;
+    dst = arg2;
+    do {
+        in = *src;
+        out = *dst;
+        func_150A7960(matrix[0], in[0], in[1], in[2], out, out + 1, out + 2);
+        arg3--;
+        src++;
+        dst++;
+    } while (arg3 > 0);
+}
 typedef struct {
     f32 x, y, z;
 } Func15145DB4_Vec3f;
