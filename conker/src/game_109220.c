@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
 #include "variables.h"
 
@@ -508,10 +509,332 @@ s32 func_150DBD70(u8 arg0) {
     }
     return (s32)r;
 }
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_109220/func_150DC558.s")
-
+#undef func_150ADA20
+u32 func_150ADA20(void);
 void *func_15167D84(void *, s32, s32, s8, u8, s32);
+
+void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32,
+                  s32, s32, s32, s32, s32, s32, s32, s32);
+
+typedef struct Game150DC558Emission {
+    s32 texture;
+    char pad4[8];
+    s16 frame;
+    s16 frame_rate;
+    s16 position[3];
+    s16 velocity_x;
+    s16 velocity_z;
+    char pad1A[2];
+    u8 fraction_x;
+    u8 fraction_y;
+    u8 fraction_z;
+    s8 callback;
+    s16 velocity_y;
+    s16 acceleration;
+    s16 width;
+    s16 height;
+    s16 lifetime;
+    s8 fade;
+    char pad2B;
+    u8 red;
+    u8 green;
+    u8 blue;
+    u8 alpha;
+    u8 environment[3];
+    char pad33;
+    u16 flags;
+    char pad36[2];
+} Game150DC558Emission;
+
+typedef struct Game150DC558Record {
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 speed;
+    f32 width;
+    s16 alpha;
+    u8 color;
+    u8 pad17;
+} Game150DC558Record;
+
+typedef struct Game150DC558Vec {
+    f32 x, y, z;
+} Game150DC558Vec;
+
+typedef struct Game150DC558State {
+    u8 pad0[0x18];
+    f32 gravity;
+    u8 pad1C[8];
+    f32 floor;
+    u8 pad28[0x19];
+    u8 kind;
+    u8 pad42[0x5A];
+    f32 splashRate;
+    f32 splashCount;
+    f32 splashRadius;
+    s16 splashPitchBase;
+    s16 splashPitchRange;
+    f32 splashSpeedBase;
+    f32 splashSpeedRange;
+    f32 splashScaleBase;
+    f32 splashScaleRange;
+    f32 splashSizeBase;
+    f32 splashSizeRange;
+    s16 splashLifetime;
+    s16 splashCountBase;
+    s16 splashCountRange;
+    u8 padCA[2];
+    f32 dropRate;
+    f32 dropCount;
+    f32 dropRadius;
+    s16 dropPitchBase;
+    s16 dropPitchRange;
+    f32 dropSpeedBase;
+    f32 dropSpeedRange;
+    s16 dropLifetime;
+    s16 dropAccelBase;
+    s16 dropAccelRange;
+    s16 dropFadeBase;
+    s16 dropFadeRange;
+    s16 dropSizeBase;
+    f32 dropSizeRange;
+    s32 dropTexture;
+    s32 dropFrameRate;
+    s8 dropCallback;
+    u8 padFD[3];
+    f32 ringY;
+    f32 ringRate;
+    f32 ringCount;
+    f32 ringScaleBase;
+    f32 ringScaleRange;
+    u8 soundTimer;
+    u8 pad115;
+    s16 sound;
+} Game150DC558State;
+
+typedef struct Game150DC558Actor {
+    u8 pad0;
+    u8 field1;
+    u8 pad2[0xA];
+    u8 fieldC;
+    u8 padD[0x18];
+    u8 capacity;
+    u8 pad26[6];
+    s8 count;
+    s8 head;
+    s8 tail;
+    u8 pad2F[0x25];
+    Game150DC558Vec pos;
+    u8 pad60[0x34];
+    Game150DC558Record *records;
+    Game150DC558State *state;
+} Game150DC558Actor;
+
+s32 func_150DC558(Game150DC558Actor *arg0) {
+    Game150DC558State *state;
+    Game150DC558Record *records;
+    s32 index;
+    f32 pos[3];
+    f32 vel[3];
+    Game150DC558Record *rec;
+    s32 timer;
+
+    state = arg0->state;
+    records = arg0->records;
+    index = arg0->tail;
+    while (index != arg0->head) {
+        index--;
+        if (index < 0) {
+            index = arg0->capacity - 1;
+        }
+        rec = (Game150DC558Record *)((u8 *)records + index * sizeof(Game150DC558Record));
+        rec->speed += state->gravity * D_800BE9A4;
+        rec->y += rec->speed * D_800BE9A4;
+        if (rec->y < state->floor) {
+            {
+                f32 speed;
+                u8 angle;
+                u8 angle2;
+                f32 sine1;
+                f32 cosine1;
+                f32 sine2;
+                f32 cosine2;
+                f32 radius;
+
+                state->splashCount += state->splashRate;
+                while (state->splashCount > 1.0f) {
+                    speed = func_150ADA68() * state->splashSpeedRange + state->splashSpeedBase;
+                    angle = func_150ADA20();
+                    sine1 = func_151423D8(angle);
+                    cosine1 = func_151423D8((u8)(angle - 0x40));
+                    angle2 = (func_150ADA20() % (u32)(state->splashPitchRange + 1)) + state->splashPitchBase;
+                    sine2 = func_151423D8(angle2);
+                    cosine2 = func_151423D8((u8)(angle2 - 0x40));
+                    radius = func_150ADA68() * state->splashRadius;
+                    pos[0] = rec->x + radius * cosine1;
+                    pos[1] = state->floor;
+                    pos[2] = rec->z + radius * sine1;
+                    vel[0] = speed * sine2 * cosine1;
+                    vel[1] = -speed * cosine2;
+                    vel[2] = speed * sine2 * sine1;
+                    func_151DA6F8(pos, vel, func_150ADA68() * state->splashSizeRange + state->splashSizeBase,
+                                  state->splashLifetime, (state->kind == 0x18) ? 0x7D : 0xFF,
+                                  func_150ADA68() * state->splashScaleRange + state->splashScaleBase,
+                                  func_150ADA20() % (u32)(state->splashCountRange + 1) + state->splashCountBase, 1,
+                                  1.70000005f, 1.70000005f, 1, (state->kind == 0x18) ? 7 : 2, 0, 0x10, 0xF, 0,
+                                  arg0->fieldC, arg0->field1);
+                    state->splashCount -= 1.0f;
+                }
+            }
+            {
+                Game150DC558Emission packet;
+                f32 speed;
+                u8 angle;
+                u8 angle2;
+                u8 ok;
+                f32 sine1;
+                f32 cosine1;
+                f32 sine2;
+                f32 cosine2;
+                f32 radius;
+
+                state->dropCount += state->dropRate;
+                if (state->dropCount > 1.0f) {
+                    packet.fraction_x = 0;
+                    packet.fraction_z = 0;
+                    packet.fraction_y = 0;
+                    packet.red = 0xFF;
+                    packet.green = 0xFF;
+                    packet.blue = 0xFF;
+                    packet.environment[0] = 0;
+                    packet.environment[1] = 0;
+                    packet.environment[2] = 0;
+                    packet.alpha = 0xFF;
+                    packet.callback = state->dropCallback;
+                    packet.flags = 0x12;
+                    packet.frame = 0;
+                    ok = 1;
+                    packet.frame_rate = state->dropFrameRate;
+                    packet.texture = state->dropTexture;
+                    packet.position[1] = (s16)state->floor;
+                    packet.lifetime = state->dropLifetime;
+                    do {
+                        speed = func_150ADA68() * state->dropSpeedRange + state->dropSpeedBase;
+                        angle = func_150ADA20();
+                        sine1 = func_151423D8(angle);
+                        cosine1 = func_151423D8((u8)(angle - 0x40));
+                        angle2 = (func_150ADA20() % (u32)(state->dropPitchRange + 1)) + state->dropPitchBase;
+                        sine2 = func_151423D8(angle2);
+                        cosine2 = func_151423D8((u8)(angle2 - 0x40));
+                        radius = func_150ADA68() * state->dropRadius;
+                        packet.position[0] = (s16)(rec->x + radius * cosine1);
+                        packet.position[2] = (s16)(rec->z + radius * sine1);
+                        packet.velocity_x = (s16)(speed * sine2 * cosine1);
+                        packet.velocity_y = (s16)(-speed * cosine2);
+                        packet.velocity_z = (s16)(speed * sine2 * sine1);
+                        packet.acceleration = (func_150ADA20() % (u32)(state->dropAccelRange + 1)) + state->dropAccelBase;
+                        packet.fade = (func_150ADA20() % (u32)(state->dropFadeRange + 1)) + state->dropFadeBase;
+                        packet.width = packet.height = (s32)(func_150ADA68() * state->dropSizeRange + state->dropSizeBase);
+                        if (func_15167D84(&packet, 0, 0, -1, arg0->fieldC, arg0->field1) == NULL) {
+                            ok = 0;
+                        }
+                        state->dropCount -= 1.0f;
+                    } while (state->dropCount > 1.0f && ok != 0);
+                    while (state->dropCount > 1.0f) {
+                        state->dropCount -= 1.0f;
+                    }
+                }
+            }
+            {
+                EffectSpawnParams params;
+                f32 scale;
+                s32 okR;
+
+                state->ringCount += state->ringRate;
+                if (state->ringCount > 1.0f) {
+                    okR = 1;
+                    params.field_0x08 = 0;
+                    params.field_0x0C = 0;
+                    params.field_0x00 = 1;
+                    params.field_0x04 = 0x64;
+                    params.field_0x10 = 0xFF;
+                    params.field_0x11 = 0xFF;
+                    params.field_0x12 = 0;
+                    params.field_0x13 = 0;
+                    params.field_0x14 = 0;
+                    params.field_0x15 = 0xFF;
+                    params.field_0x18 = 0x30001;
+                    do {
+                        scale = func_150ADA68() * state->ringScaleRange + state->ringScaleBase;
+                        switch (func_150ADA20() & 1) {
+                        case 0:
+                            params.field_0x06 = 0x1D;
+                            break;
+                        case 1:
+                            params.field_0x06 = 0x1E;
+                            break;
+                        }
+                        if (func_1513C5B0(&params, NULL, 5, 0, rec->x, state->ringY, rec->z, scale, scale,
+                                          func_150ADA20() & 0xFF, (func_150ADA20() & 1) + (func_150ADA20() & 1), 0, 0xFF, 0) == NULL) {
+                            okR = 0;
+                        }
+                        state->ringCount -= 1.0f;
+                    } while (state->ringCount > 1.0f && okR != 0);
+                    while (state->ringCount > 1.0f) {
+                        state->ringCount -= 1.0f;
+                    }
+                }
+            }
+            while (index != arg0->head) {
+                arg0->head++;
+                if (arg0->head == arg0->capacity) {
+                    arg0->head = 0;
+                }
+                arg0->count--;
+            }
+            records[arg0->head].y = state->floor;
+        }
+    }
+    index = arg0->head;
+    records[index].alpha = 0;
+    index++;
+    if (index == arg0->capacity) {
+        index = 0;
+    }
+    rec = (Game150DC558Record *)((u8 *)records + index * sizeof(Game150DC558Record));
+    rec->alpha = 0x3F;
+    index++;
+    if (index == arg0->capacity) {
+        index = 0;
+    }
+    rec = (Game150DC558Record *)((u8 *)records + index * sizeof(Game150DC558Record));
+    rec->alpha = 0x7F;
+    index++;
+    if (index == arg0->capacity) {
+        index = 0;
+    }
+    rec = (Game150DC558Record *)((u8 *)records + index * sizeof(Game150DC558Record));
+    rec->alpha = 0xBE;
+    if (state->sound != 0) {
+
+        timer = state->soundTimer;
+        timer -= D_800BE9E4;
+        if (timer <= 0) {
+            func_10010F30(func_150ADA20() % 10U + state->sound, 0x7FFF, 0x40, 0, 0);
+            timer = func_150ADA20() & 0xC;
+        }
+        state->soundTimer = timer;
+    }
+    if (arg0->count > 0) {
+        arg0->pos = *(Game150DC558Vec *)((u8 *)records + arg0->head * 0x18);
+    } else {
+        arg0->pos.x = 0.0f;
+        arg0->pos.y = 0.0f;
+        arg0->pos.z = 0.0f;
+    }
+    return 1;
+}
+
 
 typedef struct Game10A350Emission {
     s32 texture;
