@@ -1611,7 +1611,7 @@ void func_15137F30(Vec15137 *a0, Vec15137 *a1, Vec15137 *a2, Vec15137 *a3,
 extern u8 D_800A3FD8[];
 void func_15143134(void *, s32, s32);
 
-s32 func_151380B4(s32 *arg0, s32 arg1, s32 arg2) {
+s32 func_151380B4(s32 *arg0, s32 arg1, f32 *arg2) {
     s32 temp_v0 = *(s32 *)((u8 *)arg0 + 0x1D4);
     if (temp_v0 == 0) {
         return 0;
@@ -1619,7 +1619,7 @@ s32 func_151380B4(s32 *arg0, s32 arg1, s32 arg2) {
     if ((*(u8 *)((u8 *)arg0 + 0x74) & 0xF) == 0xF) {
         return 0;
     }
-    func_15143134(&D_800A3FD8[arg1 << 4], arg2, temp_v0 + 0x300);
+    func_15143134(&D_800A3FD8[arg1 << 4], (s32)arg2, temp_v0 + 0x300);
     return 1;
 }
 
@@ -1728,7 +1728,7 @@ typedef struct {
     s32 unk48;
 } LocalDef151382E0;
 
-void func_151382E0(Vec151382E0 *arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4) {
+void func_151382E0(Vec151382E0 *arg0, s32 arg1, void *arg2, u8 arg3, s32 arg4) {
     LocalDef151382E0 tmp;
     s32 temp_v0;
 
@@ -1762,7 +1762,7 @@ void func_151382E0(Vec151382E0 *arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4) {
         } else {
             tmp.unk3C = 0;
         }
-        func_15153F18(&tmp, &tmp.unk08, arg2, arg3, arg4);
+        func_15153F18(&tmp, &tmp.unk08, (s32)arg2, arg3, arg4);
     }
 }
 
@@ -2014,8 +2014,6 @@ void func_15138BC0(struct102 *arg0, u8 arg1, s32 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15138C80.s")
-
 typedef struct {
     u8 pad_0[0x3B];
     u8 field_3B;
@@ -2027,6 +2025,83 @@ typedef struct {
     u8 pad_154[0x80];
     u8 *field_1D4;
 } Blood1380B4State;
+
+typedef struct {
+    f32 height;
+    u8 geometry[0x20];
+} BloodHitRecord;
+
+void func_15138E98(Blood1380B4State *, f32 *, u8, void *, u8, s32);
+struct Obj15139768;
+struct ObjA6E0;
+void func_15139768(struct Obj15139768 *, f32 *, f32, void *, u8, s32);
+void func_15139D74(Blood1380B4State *, f32 *, void *, u8, s32);
+void func_1513A6E0(struct ObjA6E0 *, f32 *, void *, u8, s32);
+void func_1513ABB8(Blood1380B4State *, f32 *, u8, void *, u8, s32);
+void func_1513B0F8(Blood1380B4State *, f32 *, void *, u8, s32);
+void func_1513A594(void *, s32, s32, u8, s32);
+void func_151036B4(void *, u8, s32);
+
+void func_15138C80(Blood1380B4State *arg0, u8 arg1, s32 arg2) {
+    s32 kind;
+    Vec3f_36C3C position;
+    u8 valid;
+    BloodHitRecord hit;
+
+    kind = func_15134070(arg0);
+    if (kind != 0x63) {
+        valid = func_151380B4(arg0, kind, &position.x);
+        func_15138120(arg0, kind, 1);
+        if (valid != 0) {
+            func_1504715C(&hit, arg0);
+            func_151382E0(&position.x, kind, &hit, arg1, arg2);
+            switch (kind) {
+            case 16:
+                func_1513B0F8(arg0, &position.x, &hit, arg1, arg2);
+                return;
+            case 17:
+                func_151036B4(&position.x, arg1, arg2);
+                return;
+            case 0:
+            case 7:
+                func_1513A6E0(arg0, &position.x, &hit, arg1, arg2);
+                return;
+            case 3:
+                func_15138E98(arg0, &position.x, 1, &hit, arg1, arg2);
+                return;
+            case 5:
+            case 6:
+                func_15138E98(arg0, &position.x, 0, &hit, arg1, arg2);
+                return;
+            case 15:
+                func_15139768(arg0, &position.x, 0.6f, &hit, arg1, arg2);
+                return;
+            case 2:
+                func_15139768(arg0, &position.x, 1.0f, &hit, arg1, arg2);
+                return;
+            case 4:
+                func_1513A594(arg0, (s32)&position.x, (s32)&hit, arg1, arg2);
+                return;
+            case 8:
+            case 9:
+                func_1513ABB8(arg0, &position.x, kind == 9, &hit, arg1, arg2);
+                return;
+            case 10:
+            case 11:
+            case 14:
+            case 18:
+            case 19:
+                return;
+            case 1:
+            case 12:
+            case 13:
+            default:
+                func_15139D74(arg0, &position.x, &hit, arg1, arg2);
+                break;
+            }
+        }
+    }
+}
 
 typedef struct BloodParticlePacket {
     f32 field0, field4, field8, fieldC;
@@ -2285,7 +2360,7 @@ s32 func_15139578(Struct15139578 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, 
     return 1;
 }
 
-typedef struct {
+typedef struct Obj15139768 {
     u8 pad0[0x3B];
     u8 unk3B;
     u8 pad3C[0x74 - 0x3C];
@@ -2303,7 +2378,7 @@ extern s32 D_800A41D8[];
 extern struct17 D_800A41E8[];
 extern void func_151C5F44(s32, f32 *, f32, f32, s32, s32, f32, s32, s32, u8, s32);
 
-void func_15139768(Obj15139768 *arg0, s32 arg1, f32 arg2, s32 arg3, u8 arg4, s32 arg5) {
+void func_15139768(Obj15139768 *arg0, f32 *arg1, f32 arg2, void *arg3, u8 arg4, s32 arg5) {
     u8 idx;
     u8 i;
     u8 mask;
@@ -2372,9 +2447,9 @@ void func_15139768(Obj15139768 *arg0, s32 arg1, f32 arg2, s32 arg3, u8 arg4, s32
         Spawn138424 spawn2;
         for (count = (func_150ADA20() & 3) + 5; count > 0; count--) {
             func_15143794((s16)(func_150ADA20() & 0xFF), (s16)(func_150ADA20() % 71U - 60), func_150ADA68() * 6.0f + 6.0f, &dir.unk0);
-            func_151C5F44(arg1, &dir.unk0, func_150ADA68() * 0.1170000061f + -0.1970000118f, 0.9508649707f,
+            func_151C5F44((s32)arg1, &dir.unk0, func_150ADA68() * 0.1170000061f + -0.1970000118f, 0.9508649707f,
                           func_150ADA20() % 66U + 0xBE, func_150ADA20() % 45U + 0x2C, func_150ADA68() * 20.0f + 50.0f,
-                          0, arg3, arg4, arg5);
+                          0, (s32)arg3, arg4, arg5);
         }
         {
             s32 q;
@@ -2414,7 +2489,7 @@ void func_15139768(Obj15139768 *arg0, s32 arg1, f32 arg2, s32 arg3, u8 arg4, s32
                 spawn2.unk48 = func_150ADA68() * 30.7460022f + -15.3730011f;
                 spawn2.unk4C = func_150ADA68() * 0.2080000043f + -0.7080000043f;
                 spawn2.unk54 = func_150ADA20() % 101U + 0x3C;
-                func_1513264C(&spawn2, 3, 0xFF, arg3, 0, arg4, arg5);
+                func_1513264C(&spawn2, 3, 0xFF, (s32)arg3, 0, arg4, arg5);
             }
         }
     }
@@ -2781,7 +2856,7 @@ typedef struct {
     s32 unk78;
 } SpawnA6E0;
 
-typedef struct {
+typedef struct ObjA6E0 {
     u8 pad0[0x3B];
     u8 unk3B;
     u8 pad3C[0x74 - 0x3C];
@@ -2803,7 +2878,7 @@ extern s32 func_1513264C(void *, s32, s32, s32, s32, u8, s32);
 extern void func_15143794(s16, s16, f32, f32 *);
 f32 func_150ADA68(void);
 
-void func_1513A6E0(ObjA6E0 *arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4) {
+void func_1513A6E0(ObjA6E0 *arg0, f32 *arg1, void *arg2, u8 arg3, s32 arg4) {
     u8 idx;
     u8 i;
     u8 mask;
@@ -2870,7 +2945,7 @@ void func_1513A6E0(ObjA6E0 *arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4) {
         u8 mask2;
         u32 r1;
         u32 r2;
-        func_1513A5E0(arg1, arg3 & 0xFF, arg4);
+        func_1513A5E0((s32)arg1, arg3 & 0xFF, arg4);
         {
         s32 q;
         func_1503F404(arg0->unk1D4 + 0x300, &a.unk0, &a.unk4, &a.unk8, &v.unk0, &v.unk4, &v.unk8, &b.unk0, &b.unk4, &b.unk8);
@@ -2911,7 +2986,7 @@ void func_1513A6E0(ObjA6E0 *arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4) {
                 spawn2.unk48 = func_150ADA68() * 30.7460022f + -15.3730011f;
                 spawn2.unk4C = func_150ADA68() * 0.2080000043f + -0.7080000043f;
                 spawn2.unk54 = func_150ADA20() % 101U + 60;
-                func_1513264C(&spawn2, 3, 0xFF, arg2, 0, arg3, arg4);
+                func_1513264C(&spawn2, 3, 0xFF, (s32)arg2, 0, arg3, arg4);
             }
         }
     }
