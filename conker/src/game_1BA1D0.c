@@ -2066,7 +2066,33 @@ s32 func_1519187C(void *arg0)
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1BA1D0/func_151918BC.s")
+void func_151918BC(void *arg0) {
+    u8 *temp_v1;
+    u8 *temp_a0;
+    u8 var_v0;
+
+    temp_a0 = (u8 *)arg0 + 0x28;
+    temp_v1 = *(u8 **)temp_a0;
+    var_v0 = 0;
+    if (*(s32 *)temp_v1 == 0) {
+        var_v0 = 1;
+    } else if (temp_a0[4] != temp_v1[0x3B]) {
+        var_v0 = 1;
+    }
+    if (!var_v0 && (*(s32 *)(temp_v1 + 0x1D4) != 0)) {
+        if ((*(u8 *)((u8 *)arg0 + 0xD) & 1) != 0) {
+            *(s16 *)(temp_a0 + 6) = *(s16 *)((u8 *)arg0 + 0xE);
+            temp_a0[8] |= 1;
+        } else {
+            *(s16 *)(temp_a0 + 6) = 0x12C;
+        }
+        var_v0 = 1;
+        func_15190770(temp_a0, 0, *(u8 *)((u8 *)arg0 + 0xC), *(u8 *)((u8 *)arg0 + 1));
+    }
+    if (var_v0) {
+        func_1516972C(arg0);
+    }
+}
 
 void func_15191980(struct102 *arg0, s32 arg1, u8 arg2)
 {
