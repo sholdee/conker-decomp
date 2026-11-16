@@ -1902,7 +1902,143 @@ void func_151BD828(u8 *arg0, u8 arg1, s32 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E73B0/func_151BDD8C.s")
+typedef struct {
+    u8 pad0[0x48];
+    f32 unk48;
+    f32 unk4C;
+    u8 pad50[8];
+    u8 flags;
+} Part151BDD8C;
+
+typedef struct {
+    u8 pad0[4];
+    f32 unk4;
+} Sub151BDD8C;
+
+typedef struct {
+    u8 pad0[0x34];
+    struct17 start;
+    struct17 end;
+    u8 pad4C[0x110 - 0x4C];
+    Part151BDD8C part;
+} Obj151BDD8C_A;
+
+typedef struct {
+    u8 pad0[0x34];
+    struct17 start;
+    struct17 end;
+    u8 pad4C[0xC];
+    s32 flags58;
+    u8 pad5C[0x170 - 0x5C];
+    Sub151BDD8C sub;
+} Obj151BDD8C_B;
+
+typedef struct {
+    struct127 *owner;
+    u8 ownerId;
+    Obj151BDD8C_A *a[2];
+    Obj151BDD8C_B *b[2];
+} Data151BDD8C;
+
+typedef struct {
+    u8 pad0[0xE];
+    s16 state;
+    u8 pad10[0x18];
+    Data151BDD8C data;
+} Effect151BDD8C;
+
+extern struct17 D_800AA778;
+extern struct17 D_800AA784;
+extern struct17 D_800AA790;
+extern struct17 D_800AA79C;
+extern s32 func_15145EA4(s32 *arg0, s32 *arg1, s32 arg2, s32 arg3);
+
+void func_151BDD8C(Effect151BDD8C *effect) {
+    Data151BDD8C *data;
+    struct127 *owner;
+    struct17 a[2];
+    struct17 b[2];
+    u8 i;
+    u8 j;
+    u8 k;
+    s32 srcs[4];
+    s32 dsts[4];
+    s32 idx;
+
+    data = &effect->data;
+    owner = data->owner;
+    if (owner->interaction_state == 0 || owner->unique_id != data->ownerId) {
+        effect->state = -1;
+        return;
+    }
+    if (owner->unk1D4 != 0 && (owner->unk74 & 0xF) != 0xF) {
+        Obj151BDD8C_A *oa;
+        Obj151BDD8C_B *ob;
+        s32 pad1;
+        s32 pad2;
+
+        srcs[0] = (s32)&D_800AA778;
+        srcs[1] = (s32)&D_800AA784;
+        srcs[2] = (s32)&D_800AA790;
+        srcs[3] = (s32)&D_800AA79C;
+        dsts[0] = (s32)&a[0];
+        dsts[1] = (s32)&a[1];
+        dsts[2] = (s32)&b[0];
+        dsts[3] = (s32)&b[1];
+        func_15145EA4(srcs, dsts, (s32)((Mtx *)owner->unk1D4 + 1), 4);
+        for (i = 0; i < 2; i++) {
+            if (data->a[i] != NULL) {
+                oa = data->a[i];
+                oa->part.flags |= 1;
+                oa->start = a[i];
+                oa->end = b[i];
+            }
+            if (data->b[i] != NULL) {
+                ob = data->b[i];
+                ob->flags58 |= 2;
+                ob->flags58 &= ~4;
+                ob->start = a[i];
+                ob->end = b[i];
+            }
+        }
+    } else {
+        for (j = 0; j < 2; j++) {
+            if (data->a[j] != NULL) {
+                Part151BDD8C *part = &data->a[j]->part;
+
+                part->flags &= ~1;
+            }
+            if (data->b[j] != NULL) {
+                data->b[j]->flags58 &= ~2;
+            }
+        }
+    }
+    idx = owner - D_800CC2D0;
+    if (idx < 4) {
+        for (k = 0; k < 2; k++) {
+            if (data->a[k] != NULL) {
+                Part151BDD8C *part = &data->a[k]->part;
+
+                if (*((u16 **)D_800BE728[0])[(u8)idx] & 0x8000) {
+                    part->unk48 = 6.0f;
+                    part->unk4C = 21.0f;
+                } else {
+                    part->unk48 = 3.0f;
+                    part->unk4C = 8.0f;
+                }
+            }
+            if (data->b[k] != NULL) {
+                Sub151BDD8C *sub = &data->b[k]->sub;
+
+                if (*((u16 **)D_800BE728[0])[(u8)idx] & 0x8000) {
+                    sub->unk4 = 1.5f;
+                } else {
+                    sub->unk4 = 1.0f;
+                }
+            }
+        }
+    }
+}
 
 typedef struct {
     s32 unk0;
