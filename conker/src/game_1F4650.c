@@ -1402,7 +1402,35 @@ s32 func_151CBBE0(void *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1F4650/func_151CBC60.s")
+s32 func_151CBC60(u8 *arg0) {
+    u8 *state = arg0 + 0x70;
+    f32 value;
+    f32 base;
+
+    value = func_151CC1D4(arg0);
+    if (value != *(f32 *)(state + 0x28)) {
+        base = *(f32 *)(state + 0x4C);
+        *(f32 *)(state + 0x28) = value;
+        *(f32 *)(arg0 + 0x1C) = base - *(f32 *)(state + 0x20) * (value - *(f32 *)(state + 0x18)) * base + 1.0f;
+    }
+    if (*(state + 0xC) & 2) {
+        *(f32 *)(state + 0x50) -= D_800BE9A4;
+        value = *(f32 *)(state + 0x50);
+        if (value <= 0.0f) {
+            arg0[0x2B] = *(f32 *)(state + 0x3C);
+            arg0[0x2C] = *(f32 *)(state + 0x40);
+            arg0[0x2D] = *(f32 *)(state + 0x44);
+            arg0[0x2E] = *(f32 *)(state + 0x48);
+            *(state + 0xC) &= ~2;
+        } else {
+            arg0[0x2B] = (*(f32 *)(state + 0x2C) - *(f32 *)(state + 0x3C)) * (value * 0.028571429f) + *(f32 *)(state + 0x3C);
+            arg0[0x2C] = (*(f32 *)(state + 0x30) - *(f32 *)(state + 0x40)) * (*(f32 *)(state + 0x50) * 0.028571429f) + *(f32 *)(state + 0x40);
+            arg0[0x2D] = (*(f32 *)(state + 0x34) - *(f32 *)(state + 0x44)) * (*(f32 *)(state + 0x50) * 0.028571429f) + *(f32 *)(state + 0x44);
+            arg0[0x2E] = (*(f32 *)(state + 0x38) - *(f32 *)(state + 0x48)) * (*(f32 *)(state + 0x50) * 0.028571429f) + *(f32 *)(state + 0x48);
+        }
+    }
+    return 1;
+}
 
 extern f32 D_800AAEC0;
 
