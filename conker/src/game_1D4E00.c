@@ -169,7 +169,159 @@ void func_151A7A90(Header_151A7A90 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1D4E00/func_151A7D6C.s")
+f32 sqrtf(f32);
+#pragma intrinsic(sqrtf)
+s32 func_15142E24(s32, s32, s32, s32, s32, s32, s32, u8, s32, u8 *, s32);
+s32 func_15144B34(s32);
+void func_15145548(void *, void *, void *, void *, f32 *);
+void func_151D5D60(void *, s16, s32, void **, u8 *);
+Gfx *func_1513F4E4(Gfx *, u8, u8 *);
+Gfx *func_15142B7C(Gfx *, s32, s32);
+Gfx *func_15142C10(Gfx *, s32, s32, s32, s32, u8 *);
+Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
+extern u8 D_80090D70[];
+extern s32 D_800A4AC8[][2];
+extern s32 D_800D2C9C;
+
+typedef struct {
+    f32 x, y, z;
+} Vec3f_151A7D6C;
+
+typedef struct {
+    u8 pad0[0xC];
+    Vec3f_151A7D6C pos;
+} Game1D4E00Point;
+
+typedef struct {
+    u8 pad0[0x12];
+    s16 count;
+    u8 pad14[8];
+    u8 flags;
+    u8 pad1D[7];
+    u8 r;
+    u8 g;
+    u8 b;
+    u8 a;
+    f32 width;
+    u8 pad2C[0x38];
+    Game1D4E00Point *points;
+    u8 pad68[4];
+    u8 buffers[0x10];
+    s32 size;
+} Game1D4E00Bolt;
+
+Gfx *func_151A7D6C(Gfx *gdl, Game1D4E00Bolt *arg1, s16 arg2) {
+    Game1D4E00Bolt *self = arg1;
+    Vtx_t *vtx;
+    Vec3f_151A7D6C dir;
+    Vec3f_151A7D6C closest;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    f32 nx;
+    f32 ny;
+    f32 nz;
+    f32 *camera;
+    f32 lenSq;
+    u8 changed;
+    s16 last;
+    f32 scale;
+    s16 i;
+    f32 parameter;
+    s16 j;
+    Vec3f_151A7D6C *a;
+    Vec3f_151A7D6C *b;
+
+    if (arg1->flags & 2) {
+        func_151D5D60(arg1->buffers, arg2, arg1->size, (void **)&vtx, NULL);
+        if (vtx != NULL) {
+            camera = (f32 *)func_15144B34(arg2);
+            changed = 1;
+            last = arg1->count - 1;
+            j = 0;
+            i = 1;
+            gdl = (Gfx *)func_15142E24((s32)gdl, (s32)D_80090D70, 0, 0, 0, 0, 0x2C, 0, 0, &changed, 3);
+            gdl = func_15142B7C(gdl, 0x200005, 0x1F0600);
+            gdl = func_15142C10(gdl, arg1->r, arg1->g, arg1->b, arg1->a, &changed);
+            gdl = func_1513F4E4(gdl, 0x19, &changed);
+            gdl = func_15142FBC(gdl, D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[3][0] | D_800A4AC8[3][1], &changed);
+            dir.x = arg1->points[0].pos.x - arg1->points[last].pos.x;
+            dir.y = arg1->points[0].pos.y - arg1->points[last].pos.y;
+            dir.z = arg1->points[0].pos.z - arg1->points[last].pos.z;
+            func_15145548(&arg1->points[last].pos, &dir, camera, &closest, &parameter);
+            dx = camera[0] - closest.x;
+            dy = camera[1] - closest.y;
+            dz = camera[2] - closest.z;
+            nx = dir.y * dz - dy * dir.z;
+            ny = dir.z * dx - dz * dir.x;
+            nz = dir.x * dy - dx * dir.y;
+            lenSq = nx * nx + ny * ny + nz * nz;
+            if (lenSq == 0.0f) {
+                nx = 0.0f;
+                ny = 0.0f;
+                nz = 0.0f;
+            } else {
+                scale = arg1->width / sqrtf(lenSq);
+                nx *= scale;
+                ny *= scale;
+                nz *= scale;
+            }
+            for (; i < self->count; i++, j++) {
+                b = &arg1->points[i].pos;
+                a = &arg1->points[j].pos;
+                vtx->ob[0] = a->x + nx;
+                vtx->ob[1] = a->y + ny;
+                vtx->ob[2] = a->z + nz;
+                vtx->tc[0] = 0;
+                vtx->tc[1] = 0;
+                vtx->cn[0] = 0xFF;
+                vtx->cn[1] = 0xFF;
+                vtx->cn[2] = 0xFF;
+                vtx->cn[3] = 0xFF;
+                vtx->flag = 0;
+                vtx++;
+                vtx->ob[0] = a->x - nx;
+                vtx->ob[1] = a->y - ny;
+                vtx->ob[2] = a->z - nz;
+                vtx->tc[0] = 0x3C0;
+                vtx->tc[1] = 0;
+                vtx->cn[0] = 0xFF;
+                vtx->cn[1] = 0xFF;
+                vtx->cn[2] = 0xFF;
+                vtx->cn[3] = 0xFF;
+                vtx->flag = 0;
+                vtx++;
+                vtx->ob[0] = b->x - nx;
+                vtx->ob[1] = b->y - ny;
+                vtx->ob[2] = b->z - nz;
+                vtx->tc[0] = 0x3C0;
+                vtx->tc[1] = 0x3C0;
+                vtx->cn[0] = 0xFF;
+                vtx->cn[1] = 0xFF;
+                vtx->cn[2] = 0xFF;
+                vtx->cn[3] = 0xFF;
+                vtx->flag = 0;
+                vtx++;
+                vtx->ob[0] = b->x + nx;
+                vtx->ob[1] = b->y + ny;
+                vtx->ob[2] = b->z + nz;
+                vtx->tc[0] = 0;
+                vtx->tc[1] = 0x3C0;
+                vtx->cn[0] = 0xFF;
+                vtx->cn[1] = 0xFF;
+                vtx->cn[2] = 0xFF;
+                vtx->cn[3] = 0xFF;
+                vtx->flag = 0;
+                vtx++;
+                gSPVertex(gdl++, vtx - 4, 4, 0);
+                gSP1Triangle(gdl++, 0, 1, 2, 0);
+                gSP1Triangle(gdl++, 0, 2, 3, 0);
+            }
+        }
+    }
+    return gdl;
+}
+
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1D4E00/func_151A8340.s")
 
