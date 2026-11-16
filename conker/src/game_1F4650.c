@@ -710,7 +710,64 @@ s32 func_151C87AC(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, 
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1F4650/func_151C87E0.s")
+extern void func_1507C3E0(void *, s16 *, s16 *, s16 *);
+extern s32 func_151451F0(Vec3_151C8FCC *, Vec3_151C8FCC *, Vec3_151C8FCC *, f32, f32, Vec3_151C8FCC *, Vec3_151C8FCC *, f32 *, f32 *);
+
+s32 func_151C87E0(s32 arg0, s32 arg1) {
+    s32 idx;
+    f32 radius;
+    f32 scale;
+    Vec3_151C8FCC pos;
+    f32 half;
+    Vec3_151C8FCC a;
+    f32 ex;
+    f32 ey;
+    f32 ez;
+    Vec3_151C8FCC dir;
+    f32 len;
+    Vec3_151C8FCC outA;
+    Vec3_151C8FCC outB;
+    f32 outC;
+    f32 outD;
+    s16 h;
+    s16 p;
+    s16 r;
+
+    idx = *(u8 *)(arg0 + 4);
+    if (idx < 0xBB && idx != 0xFF) {
+        radius = *(f32 *)(arg0 + 0x14C) * (*(s16 *)((u8 *)D_800D1C90[idx] + 0x1A));
+    } else {
+        radius = 50.0f;
+    }
+    func_1507C3E0((void *)arg0, &h, &p, &r);
+    if ((f32)h == 0.0f) {
+        return 0;
+    }
+    half = (f32)h * 0.5f;
+    pos.x = *(f32 *)(arg0 + 0x14);
+    pos.y = *(f32 *)(arg0 + 0x18) + half;
+    pos.z = *(f32 *)(arg0 + 0x1C);
+    scale = radius / half;
+    a.x = *(f32 *)(arg1 + 0x34);
+    a.y = (*(f32 *)(arg1 + 0x38) - pos.y) * scale + pos.y;
+    a.z = *(f32 *)(arg1 + 0x3C);
+    ex = *(f32 *)(arg1 + 0x40);
+    ey = (*(f32 *)(arg1 + 0x44) - pos.y) * scale + pos.y;
+    ez = *(f32 *)(arg1 + 0x48);
+    dir.x = ex - a.x;
+    dir.y = ey - a.y;
+    dir.z = ez - a.z;
+    {
+        f32 unused;
+        if (func_15145128(&dir, &dir, &len, &unused) == 0) {
+            return 0;
+        }
+        if (func_151451F0(&a, &dir, &pos, radius, len, &outA, &outB, &outC, &outD) != 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 typedef struct { f32 x, y, z; } V3_899C;
 typedef struct { u8 b[0x10]; u16 h; } B18_899C;
