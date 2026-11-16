@@ -844,11 +844,18 @@ def cmd_note(a):
 
 # ---------------------------------------------------------------- pick / rm
 
+def skip_list():
+    """Functions in tools/skip.txt: known to be impossible from C (hand-written asm etc.)."""
+    p = MAIN.parent / "tools" / "skip.txt"
+    return {l.split()[0] for l in p.read_text().splitlines() if l.strip() and not l.startswith("#")} if p.exists() else set()
+
+
 def cmd_pick(a):
     rows = []
+    skip = skip_list()
     for asm, cfile in stubbed_asm(MAIN).items():
         p = MAIN / asm
-        if not p.exists():
+        if not p.exists() or Path(asm).stem in skip:
             continue
         text = p.read_text()
         n = len(WORD_RE.findall(text))
