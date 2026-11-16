@@ -2086,7 +2086,124 @@ void func_15127FEC(struct108 *arg0, s32 arg1, s32 arg2) {
     func_1512A390();
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_15128030.s")
+extern f32 D_800DC004;
+
+typedef struct {
+    /* 0x00 */ u16 state;
+    /* 0x02 */ u16 pad2;
+    /* 0x04 */ f32 unk4;
+    /* 0x08 */ f32 unk8;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ f32 unk34;
+    /* 0x38 */ f32 unk38;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ u16 unk40;
+    /* 0x42 */ u16 pad42;
+    /* 0x44 */ f32 unk44;
+    /* 0x48 */ f32 unk48;
+    /* 0x4C */ s16 unk4C;
+} struct108_7F4;
+
+typedef struct {
+    /* 0x000 */ u8  pad0[0x65C];
+    /* 0x65C */ f32 unk65C;
+    /* 0x660 */ f32 unk660;
+    /* 0x664 */ u8  pad664[0x190];
+    /* 0x7F4 */ struct108_7F4 c;
+} struct108_ext;
+
+#define EXT(a) (((struct108_ext *)(a))->c)
+
+s32 func_15128030(struct108 *arg0) {
+    struct108_7F4 *ctrl;
+
+    ctrl = &EXT(arg0);
+    if (arg0->unk23C != 0) {
+        EXT(arg0).unk2C = D_800A35A0;
+        EXT(arg0).unk40 = 0;
+        EXT(arg0).state = 0;
+        return 0;
+    }
+    switch (ctrl->state) {
+    case 0:
+        return 0;
+    case 1:
+        ctrl->unk1C = sqrtf((arg0->unk2F8 - arg0->unk3D0->x_position) * (arg0->unk2F8 - arg0->unk3D0->x_position) +
+                            (arg0->unk300 - arg0->unk3D0->z_position) * (arg0->unk300 - arg0->unk3D0->z_position));
+        arg0->unk5E8 = 0.0f;
+        ((struct108_ext *)arg0)->unk660 = 0.0f;
+        arg0->unk3A8 = 0.0f;
+        ((struct108_ext *)arg0)->unk65C = 0.0f;
+        EXT(arg0).unk48 = arg0->unk2FC - arg0->unk35C;
+        func_15125594(arg0);
+        ctrl->unk20 = arg0->unk37C;
+        func_151287E0(arg0, &ctrl->unk34, &ctrl->unk38);
+        EXT(arg0).unk4C = ctrl->unk40;
+        ctrl->unk3C = 0.0f;
+        ctrl->state = 2;
+    case 2: {
+        s32 done;
+        f32 angle;
+        done = EXT(arg0).unk4C == 0;
+        if (arg0->unk23C != 0) {
+            done = 1;
+            ctrl->unk3C = 1.0f;
+            EXT(arg0).unk4C = 0;
+        } else {
+            ctrl->unk3C = 1.0f - (f32)EXT(arg0).unk4C / (f32)ctrl->unk40;
+        }
+        func_15123568(arg0);
+        ctrl->unk28 = arg0->unk374;
+        EXT(arg0).unk44 = arg0->unk348;
+        ctrl->unk10 = arg0->unk3D0->x_position;
+        func_15124C38(arg0, &ctrl->unk14);
+        angle = ctrl->unk2C;
+        ctrl->unk18 = arg0->unk3D0->z_position;
+        while (angle < 0.0f) {
+            angle += 360.0f;
+        }
+        arg0->unk2A4 = arg0->unk3D0->x_position;
+        arg0->unk2A8 = arg0->unk3D0->y_position;
+        *(f32 *)&arg0->unk2AC = arg0->unk3D0->z_position;
+        arg0->unk390 = angle;
+        while (arg0->unk390 < -360.0f) {
+            arg0->unk390 += 360.0f;
+        }
+        arg0->unk2BC = ctrl->unk4 + (ctrl->unk10 - ctrl->unk4) * ctrl->unk3C;
+        arg0->unk2C0 = ctrl->unk8 + (ctrl->unk14 - ctrl->unk8) * ctrl->unk3C;
+        arg0->unk2C4 = ctrl->unkC + (ctrl->unk18 - ctrl->unkC) * ctrl->unk3C;
+        if (arg0->unk2C != 0x40) {
+            arg0->unk37C = func_15048720(ctrl->unk3C, ctrl->unk20, ctrl->unk2C);
+            arg0->unk39C = arg0->unk37C * D_800A35A4;
+        }
+        D_800DC000 = ctrl->unk1C + (ctrl->unk28 - ctrl->unk1C) * ctrl->unk3C;
+        D_800DC004 = EXT(arg0).unk48 + (EXT(arg0).unk44 - EXT(arg0).unk48) * ctrl->unk3C;
+        arg0->unk5E8 = func_15048720(ctrl->unk3C, 0.0f, ctrl->unk34);
+        arg0->unk3A8 = func_15048720(ctrl->unk3C, 0.0f, ctrl->unk38);
+        if (done) {
+            EXT(arg0).unk2C = D_800A35A8;
+            EXT(arg0).unk40 = 0;
+            EXT(arg0).state = 0;
+            arg0->unk84 |= 8;
+            break;
+        }
+        EXT(arg0).unk4C -= D_800BE9E4;
+        if (EXT(arg0).unk4C < 0) {
+            EXT(arg0).unk4C = 0;
+        }
+        return 1;
+    }
+    }
+}
 void func_151283B8(struct108 *arg0) {
     switch (arg0->unk2C) {
     case 0x80:
