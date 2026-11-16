@@ -1576,7 +1576,99 @@ void func_1508B3F8(void) {
     *(s8 *)(D_800D23B0 + 0x1745) = 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_B3020/func_1508B9BC.s")
+s32 func_1508C5B8(s32, s32);
+void func_1508A1BC(void);
+
+typedef struct B9BCActor {
+    u8 pad0[0x14];
+    f32 field14;
+    f32 field18;
+    f32 field1C;
+} B9BCActor;
+
+s32 func_1508B9BC(void) {
+    s32 mode;
+    s32 count;
+    s32 *targets;
+    u8 *weights;
+    s32 winner;
+    s32 minimum;
+    s32 index;
+    s32 cost;
+    f32 distance;
+    s32 current;
+    s32 end;
+    s32 *active;
+    s32 *neighbors;
+    s32 *costs;
+    s32 cursor;
+    f32 value;
+
+    mode = 1;
+    count = *(s32 *)((u8 *)D_800D23B0 + 0x10);
+    current = *(s32 *)((u8 *)D_800D23B0 + 4);
+    active = (s32 *)((u8 *)D_800D23B0 + 0x39C);
+    neighbors = (s32 *)((u8 *)D_800D23B0 + 0x5DC);
+    costs = (s32 *)((u8 *)D_800D23B0 + 0x9DC);
+    targets = (s32 *)((u8 *)D_800D23B0 + 0x11C);
+    if (count >= 9) {
+        mode = 4;
+    }
+    func_1508C5B8(0, mode);
+    func_1508A1BC();
+    weights = (u8 *)D_800D23B0 + current * 16 + 0x15B4;
+    winner = -1;
+    minimum = 10000000;
+    index = 0;
+    if (count > 0) {
+        do {
+            if (active[index] > 0) {
+                cost = -1;
+                if (index != current) {
+                    cursor = index * 16;
+                    end = cursor + 16;
+                    while (cursor < end && neighbors[cursor] != -1) {
+                        if (neighbors[cursor] == current) {
+                            cost = costs[cursor];
+                            cursor = end;
+                        } else {
+                            cursor++;
+                        }
+                    }
+                    if (cost != -1) {
+                        value = (f32)(u32)weights[index] * 0.003921569f;
+                        if (index == targets[current]) {
+                            value *= 0.8f;
+                        }
+                        cost = (s32)((f32)cost * value);
+                        if (cost < minimum) {
+                            minimum = cost;
+                            winner = index;
+                        }
+                    }
+                }
+            }
+            index++;
+        } while (index != count);
+    }
+    *(s32 *)((u8 *)D_800D23B0 + current * 4 + 0x49C) = winner;
+    if (winner != -1) {
+        f32 dx;
+        f32 dz;
+        B9BCActor *actor;
+        B9BCActor *other;
+
+        actor = (B9BCActor *)((u8 *)D_800CC2D0 + current * 0x32C);
+        other = (B9BCActor *)((u8 *)D_800CC2D0 + winner * 0x32C);
+        dx = actor->field14 - other->field14;
+        dz = actor->field1C - other->field1C;
+        distance = sqrtf(dx * dx + dz * dz);
+        *(s32 *)((u8 *)D_800D23B0 + current * 4 + 0x45C) = (s32)distance;
+    } else {
+        *(s32 *)((u8 *)D_800D23B0 + current * 4 + 0x45C) = minimum;
+    }
+    return 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_B3020/func_1508BC20.s")
 
