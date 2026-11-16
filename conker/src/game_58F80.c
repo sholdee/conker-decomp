@@ -1162,7 +1162,58 @@ void func_1502EAFC(struct127 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502EC34.s")
+void func_1502EC34(void *arg0, s32 *arg1, s32 *arg2, s32 *arg3, s32 *arg4) {
+    ActorInteractionFields *a = (ActorInteractionFields *)arg0;
+    f32 f;
+
+    switch (a->field_0xA4) {
+    case 1:
+        *arg1 = a->field_0xA5;
+        *arg2 = a->field_0xA6;
+        *arg3 = a->field_0xA7;
+        if (a->field_0xA0 >= 0x100) {
+            f = *(f32 *)a->field_0xA0;
+            f = (f < 0.0f) ? 0.0f : ((f > 255.0f) ? 255.0f : f);
+            *arg4 = f * 2.55f;
+        } else {
+            *arg4 = a->field_0xA0;
+        }
+        break;
+    case 2:
+    case 3:
+        *arg1 = 0;
+        *arg2 = 0;
+        *arg3 = 0;
+        *arg4 = a->field_0xA5;
+        if (a->field_0xA4 == 3) {
+            *arg4 = 0xFF - *arg4;
+        }
+        break;
+    case 4:
+    case 5: {
+        s32 alpha;
+        f32 c;
+        alpha = ((s32)a->field_0xA0 >> 24) & 0xFF;
+        *arg1 = ((s32)a->field_0xA0 >> 16) & 0xFF;
+        *arg2 = ((s32)a->field_0xA0 >> 8) & 0xFF;
+        *arg3 = a->field_0xA0 & 0xFF;
+        c = (cosf(a->field_0xA5 * 0.02454369329f) + 1.0f) * 0.5f;
+        *arg4 = alpha + 64.0f * c;
+        *arg4 += ((0xFF - *arg4) * (0xFF - a->field_0xA7)) >> 8;
+    }
+        break;
+    case 6:
+    case 7: {
+        s32 alpha;
+        alpha = ((s32)a->field_0xA0 >> 24) & 0xFF;
+        *arg1 = ((s32)a->field_0xA0 >> 16) & 0xFF;
+        *arg2 = ((s32)a->field_0xA0 >> 8) & 0xFF;
+        *arg3 = a->field_0xA0 & 0xFF;
+        *arg4 = 0xFF - ((a->field_0xA5 * alpha) >> 8);
+        break;
+    }
+    }
+}
 
 /* The two u8 slots at actor record +0x6A (struct127 still calls this word pad68). */
 typedef struct Act1502EE8C {
