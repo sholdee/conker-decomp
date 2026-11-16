@@ -2509,7 +2509,59 @@ void func_15071FB0(void) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_15071FDC.s")
+extern f32 D_80099F48;
+extern void *D_800CC5EC;
+
+void func_15071FDC(void) {
+    u8 *base;
+    u8 *entry;
+    s32 found;
+    s32 mode;
+    s32 visible;
+    s32 i;
+
+    visible = 1;
+    mode = 0x194;
+    base = (u8 *)&D_800CC2D0;
+    if (D_800D1580 == 0) {
+        found = -1;
+        entry = base;
+        for (i = 0; i < 0x19; i++) {
+            if (*(u8 *)(entry + 0x65) == (D_800C3E78 + 1)) {
+                found = i;
+                break;
+            }
+            entry += 0x32C;
+        }
+        if ((found + 1) != *(u8 *)(base + 0x274)) {
+            return;
+        }
+        *(s16 *)(base + 0x76) = *(u16 *)((u8 *)D_800D154C + 0x76) + 0x8000;
+        *(f32 *)(base + 0x1CC) = D_80099F48;
+    } else {
+        if (*(s32 *)((u8 *)D_800D154C + 0x2E8) >= 0x71) {
+            mode = 0x2E5;
+            *(f32 *)((u8 *)D_800D154C + 0x2E0) = 0.0f;
+        } else {
+            mode = 0x32;
+            *(s16 *)(base + 0x76) = *(u16 *)((u8 *)D_800D154C + 0x76);
+            if (*(u8 *)((u8 *)D_800D154C + 0x251) != 0) {
+                *(f32 *)(base + 0x1CC) = D_800CC2E8[0] + 800.0f;
+            }
+            visible = 0;
+        }
+        *(s32 *)((u8 *)D_800D154C + 0x2E4) = 0x32;
+    }
+    *(f32 *)((u8 *)base + 0x20) = *(f32 *)((u8 *)D_800D154C + 0x2D8);
+    *(f32 *)((u8 *)base + 0x24) = *(f32 *)((u8 *)D_800D154C + 0x2DC);
+    *(f32 *)((u8 *)base + 0x3C) = *(f32 *)((u8 *)D_800D154C + 0x2E0);
+    *((u8 *)base + 0x81) = 1;
+    func_1505E650((struct127 *)base, (u16)mode, 1.0f, 2.0f, 6.0f, 0.0f, 0);
+    *(s8 *)((u8 *)D_800CC5EC + 0x31) = visible;
+    if (*(u8 **)((u8 *)base + 0x318) != 0) {
+        *(s32 *)(*(u8 **)((u8 *)base + 0x318) + 0x5F0) |= 0x400;
+    }
+}
 
 void func_150721A4(void) {
     u16 lo = D_800D1580;
