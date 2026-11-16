@@ -124,7 +124,99 @@ void func_151CD3CC(struct260 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1FA770/func_151CD4C0.s")
+typedef struct {
+    s16 unk0;
+    s16 unk2;
+    s16 unk4;
+    s16 unk6;
+    s16 unk8;
+} Arg151CD4C0;
+
+typedef struct {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+    s16 unkC;
+    s16 unkE;
+    s32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 pad16[2];
+    s32 unk18;
+} Hdr151CD4C0;
+
+typedef struct {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    f32 unk30;
+    f32 unk34;
+    f32 unk38;
+    f32 unk3C;
+    f32 unk40;
+    f32 unk44;
+    s32 unk48;
+    u8 unk4C;
+    u8 pad4D[3];
+} Payload151CD4C0;
+
+void *func_151CD4C0(arg0, arg1, arg2, arg3, arg4)
+    Arg151CD4C0 *arg0;
+    u8 arg1;
+    s32 arg2;
+    u8 arg3;
+    s32 arg4;
+{
+    struct260 *temp_v0;
+    Hdr151CD4C0 header;
+    Payload151CD4C0 payload;
+    f32 size;
+
+    size = arg0->unk6;
+    header.unk15 = 0x23;
+    header.unk0 = arg0->unk0;
+    header.unk4 = arg0->unk2 + arg0->unk8;
+    header.unk8 = arg0->unk4;
+    header.unkC = 0x12C;
+    header.unkE = 0x34;
+    header.unk10 = 0xB;
+    payload.unk44 = arg0->unk2;
+    payload.unk0 = size * 0.125f;
+    payload.unk10 = 0.03000000119f;
+    payload.unk8 = 0.0f;
+    payload.unkC = 0.0f;
+    payload.unk4 = size * 0.125f;
+    payload.unk14 = 0.04000000283f;
+    payload.unk18 = header.unk0;
+    payload.unk1C = header.unk8;
+    payload.unk24 = size * 0.875f;
+    payload.unk34 = payload.unk24;
+    payload.unk28 = size * 0.0625f;
+    payload.unk2C = 0.0f;
+    payload.unk30 = 0.05500000343f;
+    payload.unk40 = 0.0f;
+    payload.unk48 = arg2;
+    payload.unk38 = -16384.0f;
+    payload.unk3C = -16384.0f;
+    payload.unk20 = 0.0f;
+    payload.unk4C = arg1;
+    header.unk18 = 0;
+    header.unk14 = 7;
+    temp_v0 = func_15147A80(&header, 0x50, 0x1C, 9, 9, 9, 0, 0, 0, arg3, arg4);
+    if (temp_v0 != NULL) {
+        memcpy(*(void **)((u8 *)temp_v0 + 0x98), &payload, 0x50);
+    }
+    return temp_v0;
+}
 
 typedef struct Game1FA770Particle {
     f32 x;
