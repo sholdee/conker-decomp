@@ -2173,7 +2173,34 @@ void func_1508EC5C(s32 arg0, s32 arg1) {
     func_1509BFB0(1, temp | 0x2000, 0x61, arg1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_B3020/func_1508ECC0.s")
+typedef struct {
+    u16 unk0;
+    u16 count;
+    s32 unk4;
+    u16 entries[8];
+} GameB4080Group;
+
+s32 func_1508ECC0(u16 arg0, u16 arg1, u16 arg2) {
+    u32 i;
+    u32 j;
+    u32 k;
+    u16 key;
+
+    key = (arg0 << 12) + arg1;
+    for (i = 0; i < D_80087380; i++) {
+        for (j = 0; j < (*(GameB4080Group **)&D_800D23C0)[i].count; j++) {
+            if (key == (*(GameB4080Group **)&D_800D23C0)[i].entries[j]) {
+                for (k = 0; k < (*(GameB4080Group **)&D_800D23C0)[i].count; k++) {
+                    if (arg2 == ((*(GameB4080Group **)&D_800D23C0)[i].entries[k] >> 12) && k != j) {
+                        return (*(GameB4080Group **)&D_800D23C0)[i].entries[k] & 0xFFF;
+                    }
+                }
+                return -1;
+            }
+        }
+    }
+    return -1;
+}
 
 typedef struct {
     s16 unk0;
@@ -2189,13 +2216,6 @@ void func_1508EDBC(s32 arg0) {
         ((Struct1508EDBC *)D_800D23C0)[arg0].unk0 = 0;
     }
 }
-
-typedef struct {
-    u16 unk0;
-    u16 count;
-    s32 unk4;
-    u16 entries[8];
-} GameB4080Group;
 
 void func_1503DDD0(s32);
 void func_15114B94(u32);
