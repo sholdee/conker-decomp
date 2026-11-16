@@ -3696,7 +3696,51 @@ s32 func_1506196C(u8 *arg0, s32 arg1) {
     return temp_v1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_150619A8.s")
+s32 func_150623F4(struct127 *arg0);
+void func_150619A8(void) {
+    s32 i;
+    s32 count;
+    u8 list[25];
+    s32 j;
+    struct127 *obj;
+    struct127 *other;
+    s32 idx;
+
+    count = 0;
+    for (i = 0; i < 25; i++) {
+        obj = &D_800CC2D0[i];
+        if (obj->interaction_state != 0) {
+            if (obj->pad2FC[1] != 0) {
+                obj->pad2FC[1]--;
+            }
+            func_150617BC((u8 *)obj);
+            if (func_150623F4(obj) != 0) {
+                obj->unk2FA |= 1;
+            } else {
+                obj->unk2FA &= ~1;
+                if (((u8 *)obj)[0x20B] != 0 || ((u8 *)obj)[0x20C] != 0 || ((u8 *)obj)[0x20D] != 0 || ((u8 *)obj)[0x20E] != 0) {
+                    list[count] = i;
+                    count++;
+                }
+            }
+        }
+    }
+    if (count != 0) {
+        for (i = 0; i < count; i++) {
+            idx = list[i];
+            obj = &D_800CC2D0[idx];
+            for (j = 0; j < 4; j++) {
+                if (((u8 *)obj)[0x20B + j] != 0) {
+                    other = func_15083E90(((u8 *)obj)[0x20B + j]);
+                    if (other != NULL && (other->unk2FA & 1)) {
+                        obj->unk2FA |= 1;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
 
 typedef struct Game83300Step4 {
     u8 b[4];
