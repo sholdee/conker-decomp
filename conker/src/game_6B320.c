@@ -454,7 +454,38 @@ void func_1503EA54(s32 arg0) {
 static void func_1503EB70(void) {
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_6B320/func_1503EB78.s")
+void func_1503EB78(void *arg0, f32 arg1, f32 arg2, s32 arg3)
+{
+  s32 i;
+  f32 vec[3];
+  s32 mask;
+  s32 add;
+  if (arg3 != 0)
+  {
+    mask = 0x80;
+    add = 0x7F;
+  }
+  else
+  {
+    mask = 0xFF;
+    add = 0;
+  }
+  arg1 *= 0.02745098062f;
+  arg2 *= 0.02745098062f;
+  vec[0] = (vec[2] = arg1);
+  vec[1] = arg2;
+  for (i = 0; i < 3; i++)
+  {
+    ((f32 *) (((u8 *) arg0) + 0x48))[i] *= (((func_150ADA20() & mask) + add) * vec[i]) + 2.0f;
+  }
+
+  for (i = 0; i < 3; i++)
+  {
+    ((f32 *) (((u8 *) arg0) + 0x54))[i] = ((func_150ADA20() & 0xFF) - 0x80) * 0.03125f;
+  }
+
+  *((f32 *) (((u8 *) arg0) + 0x60)) = -0.3000000119f;
+}
 
 typedef struct {
     u8 pad_0[0x1EC];
