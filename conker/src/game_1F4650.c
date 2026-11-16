@@ -1,5 +1,8 @@
 #include <ultra64.h>
+#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
+#undef func_150ADA20
+u32 func_150ADA20(void);
 #include "variables.h"
 
 extern f32 D_800AAED4;
@@ -519,7 +522,7 @@ typedef struct { s8 a; s16 b; s8 c, d, e; } S58_899C;
 extern u8 *D_800AAC30[];
 extern void func_1514FBFC(void *, u8, s32);
 extern void func_151602C0(void *, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_150E7FEC(f32, u8, void *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
+extern void func_150E7FEC(f32, s32, void *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_15164F0C(s32, u8, s32, u8, s32);
 extern void func_151D8868(void *, s32, s32, s32);
 extern void func_1505D024(s32, u8 *, s32, s32);
@@ -580,8 +583,8 @@ void func_151C899C(A0_899C *arg0, Ent_899C *arg1) {
     v68[1] = E->p40.y;
     v68[2] = E->p40.z;
     func_151602C0(&s60, v68, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, E->unkC, E->unk1);
-    func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, func_150ADA20() % 66U + 0xBE, &PC->c5A, &E->p34, -1, 1, 1, 0, 0, 0, E->unkC, 0);
-    func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, func_150ADA20() % 66U + 0xBE, &sub->c6C, &E->p40, -1, 1, 1, 0, 0, 0, E->unkC, 0);
+    func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 0xBE), &PC->c5A, &E->p34, -1, 1, 1, 0, 0, 0, E->unkC, 0);
+    func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 0xBE), &sub->c6C, &E->p40, -1, 1, 1, 0, 0, 0, E->unkC, 0);
     if (arg0 != 0) {
         func_15164F0C(2, arg0->unk318[0x23D], 0, E->unkC, E->unk1);
         s58.a = 1;
@@ -851,7 +854,69 @@ void func_151C970C(s32 arg0, s32 arg1) {
     func_151403A8((s32)&sp18, 0x3A);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1F4650/func_151C9740.s")
+extern s32 func_15046C80(f32 *, u16, f32, void *);
+extern void func_150E83AC(void *, s16, u8, s32);
+extern void func_15136C3C(void *, u8, u8, u8, u8, u8, u8, s32);
+extern void *func_151541B8(void *, f32, f32, f32, f32, u8, s32);
+extern void func_151D5334(void *, f32, f32, f32, u8, u8, s32);
+extern void func_151D5514(void *, u8, s32);
+extern void func_151D3FF4(f32 *, u8, s32);
+void func_151C9AC0(struct_func_151C9AC0_arg0 *arg0, u8 arg1, s32 arg2);
+
+void func_151C9740(struct_func_151C9AC0_arg0 *arg0, u8 arg1, s32 arg2) {
+    struct17 origin;
+    struct17 impact;
+    u8 hit;
+    u8 airborne;
+    struct17 query;
+    union {
+        struct_func_151C9AC0_sp20 transform;
+        f32 values[9];
+    } collision;
+
+    if (arg0 == NULL) {
+        return;
+    }
+    origin.unk0 = arg0->unk14;
+    origin.unk4 = *(f32 *)((u8 *)arg0 + 0x18) + 135.0f;
+    origin.unk8 = arg0->unk1C;
+    hit = 0;
+    airborne = *(f32 *)((u8 *)arg0 + 0x2D8) != 0.0f;
+    if (!airborne) {
+        query.unk0 = origin.unk0;
+        query.unk4 = origin.unk4;
+        query.unk8 = origin.unk8;
+        func_1504715C(&collision.transform, arg0);
+        if (func_15046C80(&query.unk0, 0, origin.unk4 - 200.0f, &collision.transform) != 0 &&
+            (collision.transform.unk0[0x1C] & 1)) {
+            impact.unk0 = query.unk0;
+            hit = 1;
+            impact.unk4 = collision.values[0];
+            impact.unk8 = query.unk8;
+            {
+            func_150E7FEC(func_150ADA68() * 125.0f + 204.0f,
+                (func_150ADA20() % 101U + 0x9B) & 0xFF,
+                &collision.values[1], &impact,
+                func_150ADA20() % 302U + 0x1F4, 0, 1, 0, 0, 0, arg1, 0);
+            }
+        }
+    }
+    func_151D5404(&origin, 506.0f, 1013.0f, 0.000987166888f, 0xF, 0x14, arg1, arg2);
+    func_151D5334(&origin, 506.0f, 1013.0f, 0.000987166888f, 5, arg1, arg2);
+    func_151D5514(&origin, arg1, arg2);
+    func_151D3FF4(&origin.unk0, arg1, arg2);
+    func_150E83AC(hit ? &impact.unk0 : &origin.unk0, (s16)(func_150ADA20() % 62U + 0x78), arg1, arg2);
+    func_151541B8(&origin, 2.0f * func_150ADA68() + 8.0f, 2.4641099f,
+        (f32)(func_150ADA20() % 56U + 0xC8), 0.0f, arg1, arg2);
+    if (!airborne) {
+        func_15136C3C(arg0, 0, 0, 1, 0, 0, arg1, arg2);
+    }
+    func_10010F88(0x60D, 0x7D00, 0, 0, 0, (s32)origin.unk0,
+        (s32)origin.unk4, (s32)origin.unk8, 0x1F4, 0x3E8);
+    if (airborne) {
+        func_151C9AC0(arg0, arg1, arg2);
+    }
+}
 
 void func_151C9AC0(struct_func_151C9AC0_arg0 *arg0, u8 arg1, s32 arg2) {
     f32 sp44[3];
