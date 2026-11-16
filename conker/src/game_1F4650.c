@@ -1332,7 +1332,7 @@ void func_151C9DE8(void *arg0, u8 arg1, s8 arg2, u8 arg3, s32 arg4);
 void func_151CC524(void *, s32, s32, s32, u8, u8);
 void func_151CC840(void *, u8, u8, u8, u8, u8);
 void func_151CCD1C(void *arg0, u8 arg1, u8 arg2, u8 arg3);
-void func_151CB5FC(void *, s32, u8, s8, u8);
+void func_151CB5FC(void *, u8, u8, s8, u8);
 
 void func_151C9BA0(void *arg0, s32 arg1) {
     u8 idx;
@@ -1394,7 +1394,7 @@ void func_151C9F38(void *, u8, u8, s8, u8);
 void func_151CC524(void *, s32, s32, s32, u8, u8);
 void func_151CC840(void *, u8, u8, u8, u8, u8);
 void func_151CCF08(void *, u8, s8, u8);
-void func_151CB5FC(void *, s32, u8, s8, u8);
+void func_151CB5FC(void *, u8, u8, s8, u8);
 
 void func_151C9DE8(void *arg0, u8 arg1, s8 arg2, u8 arg3, s32 arg4) {
     func_151C9F38(arg0, 4, arg1, arg2, arg3);
@@ -2125,7 +2125,139 @@ void func_151CB510(void *arg0) {
     *(u8 *)((s32)arg0 + 0x2E) = (u32)*(f32 *)(base + 4);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1F4650/func_151CB5FC.s")
+typedef struct {
+    /* 0x00 */ f32 unk0;
+    /* 0x04 */ f32 unk4;
+    /* 0x08 */ f32 unk8;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ u8  unk10;
+    /* 0x11 */ u8  pad11;
+    /* 0x12 */ s16 unk12;
+    /* 0x14 */ u16 unk14;
+    /* 0x16 */ s16 unk16;
+    /* 0x18 */ s16 unk18;
+    /* 0x1A */ u8  unk1A;
+    /* 0x1B */ u8  unk1B;
+    /* 0x1C */ u8  unk1C;
+    /* 0x1D */ u8  unk1D;
+    /* 0x1E */ u8  unk1E;
+    /* 0x1F */ u8  unk1F;
+    /* 0x20 */ u8  unk20;
+    /* 0x21 */ u8  unk21;
+    /* 0x22 */ u8  unk22;
+    /* 0x23 */ u8  unk23;
+    /* 0x24 */ s32 unk24;
+    /* 0x28 */ s32 unk28;
+    /* 0x2C */ s32 unk2C;
+    /* 0x30 */ s32 unk30;
+    /* 0x34 */ s32 unk34;
+    /* 0x38 */ s32 unk38;
+    /* 0x3C */ s32 unk3C;
+    /* 0x40 */ u8  unk40;
+    /* 0x41 */ u8  unk41;
+    /* 0x42 */ u8  pad42[2];
+    /* 0x44 */ u8  unk44;
+    /* 0x45 */ u8  pad45[3];
+    /* 0x48 */ f32 unk48;
+    /* 0x4C */ f32 unk4C;
+    /* 0x50 */ f32 unk50;
+    /* 0x54 */ f32 unk54;
+} Emitter151CB5FC;
+
+typedef struct {
+    /* 0x00 */ void *unk0;
+    /* 0x04 */ f32 unk4;
+    /* 0x08 */ f32 unk8;
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 unkD;
+    /* 0x0E */ u8 unkE;
+    /* 0x0F */ u8 padF;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ u8 pad24[0x30];
+    /* 0x54 */ s8 unk54;
+    /* 0x55 */ u8 pad55[3];
+} Payload151CB5FC;
+
+extern f32 D_800AAD84[];
+extern f32 D_800AADAC[];
+
+void func_151CB5FC(void *arg0, u8 arg1, u8 arg2, s8 arg3, u8 arg4) {
+    Emitter151CB5FC sp90;
+    void *temp;
+    Payload151CB5FC sp34;
+
+    sp34.unk4 = 255.0f;
+    sp34.unk8 = 255.0f;
+    sp34.unkD = arg1;
+    sp34.unk0 = arg0;
+    sp34.unkC = (s32)((arg3 == -1) ? 0 : 4);
+    sp34.unk54 = arg3;
+    sp34.unk14 = 255.0f;
+    sp90.unk12 = 0x12C;
+    sp90.unk8 = 49.0f;
+    sp34.unk10 = 0.0f;
+    sp90.unkC = 18.0f;
+    sp90.unk14 = (1 << (*(u8 *)((s32)arg0 + 0x23D) + 0xB)) | ((arg2 ? 0x40 : 0) | 0x32);
+    sp90.unk16 = 1;
+    sp90.unk18 = 0xFF;
+    sp90.unk1A = 7;
+    sp90.unk1B = 0xFF;
+    sp90.unk1C = 0xFF;
+    sp90.unk1D = 0xFF;
+    sp90.unk1F = 0xFF;
+    sp90.unk20 = 0xFF;
+    sp90.unk21 = 0xFF;
+    sp90.unk22 = 0xFF;
+    sp90.unk23 = 0xFF;
+    sp90.unk24 = 0;
+    sp90.unk28 = 0x200004;
+    sp90.unk2C = 0x1F0601;
+    sp90.unk30 = 7;
+    sp90.unk34 = 0x22;
+    sp90.unk38 = 0x80;
+    sp90.unk3C = 0x20;
+    sp90.unk40 = 0;
+    sp90.unk41 = 7;
+    sp90.unk44 = *(u8 *)((s32)arg0 + 0x23D);
+    sp34.unkE = 0;
+    sp90.unk1E = 0xFF;
+    sp90.unk10 = 0x7B;
+    sp34.unk1C = 0.0f;
+    sp90.unk0 = 88.0f;
+    sp90.unk4 = 91.0f;
+    sp34.unk18 = D_800AAD84[D_80082FA0 == 1];
+    sp34.unk20 = D_800AADAC[D_80082FA0 == 1];
+    temp = func_1515548C(&sp90, 5, 0, 0, 0x58, arg4, 0);
+    if (temp != NULL) {
+        memcpy((u8 *)temp + 0x70, &sp34, 0x58);
+    }
+    sp90.unk1E = 0;
+    sp90.unk10 = 0x7C;
+    temp = func_1515548C(&sp90, 5, 0, 0, 0x58, arg4, 0);
+    if (temp != NULL) {
+        memcpy((u8 *)temp + 0x70, &sp34, 0x58);
+    }
+    sp90.unk14 &= 0xFFFD;
+    sp90.unk1E = 0xFF;
+    sp90.unk10 = 0x7B;
+    sp34.unkE = 1;
+    sp90.unk0 = -88.0f;
+    sp90.unk4 = 91.0f;
+    temp = func_1515548C(&sp90, 5, 0, 0, 0x58, arg4, 0);
+    if (temp != NULL) {
+        memcpy((u8 *)temp + 0x70, &sp34, 0x58);
+    }
+    sp90.unk1E = 0;
+    sp90.unk10 = 0x7C;
+    temp = func_1515548C(&sp90, 5, 0, 0, 0x58, arg4, 0);
+    if (temp != NULL) {
+        memcpy((u8 *)temp + 0x70, &sp34, 0x58);
+    }
+}
 
 void func_151CB918(Game1F4650EffectObject *arg0, Game1F4650EffectTriggerEvent *arg1, u8 arg2) {
     Game1F4650EffectState *base = &arg0->field_0x70;
