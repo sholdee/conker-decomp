@@ -2308,7 +2308,489 @@ s32 func_15199A10(Struct15199A10 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1C2C60/func_15199C34.s")
+typedef struct {
+    struct17 unk0;
+    struct17 unkC;
+    f32 unk18;
+    f32 unk1C;
+    u8 unk20;
+    char pad21[3];
+    f32 unk24;
+} Struct15199C34Point;
+
+typedef struct {
+    char pad0[0x1AA];
+    s16 unk1AA;
+} Struct15199C34Sub31C;
+
+typedef struct {
+    char pad0[0x23D];
+    u8 unk23D;
+} Struct15199C34Sub318;
+
+typedef struct {
+    s32 unk0;
+    char pad4[0x14 - 0x4];
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    char pad20[0x3B - 0x20];
+    u8 unk3B;
+    char pad3C[0x74 - 0x3C];
+    u8 unk74;
+    char pad75[0x1D4 - 0x75];
+    s32 unk1D4;
+    char pad1D8[0x318 - 0x1D8];
+    Struct15199C34Sub318 *unk318;
+    Struct15199C34Sub31C *unk31C;
+} Struct15199C34Obj;
+
+typedef struct {
+    Struct15199C34Obj *unk0;
+    u8 unk4;
+    u8 unk5;
+    char pad6[2];
+    struct17 unk8;
+    struct17 unk14;
+    f32 unk20;
+    f32 unk24;
+    char pad28[4];
+    f32 unk2C;
+    f32 unk30;
+    char pad34[0x3A - 0x34];
+    u8 unk3A;
+    char pad3B[0x90 - 0x3B];
+    struct17 unk90;
+    f32 unk9C;
+    f32 unkA0;
+    s32 unkA4;
+    s32 unkA8;
+    s16 unkAC;
+    s16 unkAE;
+    f32 unkB0;
+    f32 unkB4;
+    f32 unkB8;
+    f32 unkBC;
+    f32 unkC0;
+    f32 unkC4;
+    f32 unkC8;
+    s16 unkCC;
+    s16 unkCE;
+    s16 unkD0;
+    s16 unkD2;
+    struct17 unkD4;
+    f32 unkE0;
+    f32 unkE4;
+    s16 unkE8;
+    s16 unkEA;
+    s16 unkEC;
+    s16 unkEE;
+    f32 unkF0;
+    f32 unkF4;
+    f32 unkF8;
+    f32 unkFC;
+    f32 unk100;
+    f32 unk104;
+    f32 unk108;
+    s16 unk10C;
+    s16 unk10E;
+    struct17 unk110;
+    struct17 unk11C;
+    f32 unk128;
+    f32 unk12C;
+    char pad130[0x138 - 0x130];
+    f32 unk138;
+    f32 unk13C;
+    char pad140[0x144 - 0x140];
+    f32 unk144;
+    char pad148[0x150 - 0x148];
+    u8 unk150;
+    s8 unk151;
+    s16 unk152;
+} Struct15199C34Data;
+
+typedef struct {
+    char pad0;
+    u8 unk1;
+    char pad2[0xC - 0x2];
+    u8 unkC;
+    char padD[0x10 - 0xD];
+    struct17 unk10;
+    char pad1C[0x25 - 0x1C];
+    u8 unk25;
+    char pad26[0x2C - 0x26];
+    s8 unk2C;
+    s8 unk2D;
+    s8 unk2E;
+    char pad2F[0x94 - 0x2F];
+    Struct15199C34Point *unk94;
+    Struct15199C34Data *unk98;
+} Struct15199C34;
+
+typedef struct {
+    struct17 pos;
+    s16 unkC;
+    s16 unkE;
+    s32 unk10;
+    s8 unk14;
+    u8 unk15;
+    u8 pad16[2];
+} Struct15199C34Spawn;
+
+typedef struct {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    u8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+    s16 unk1C;
+    s16 unk1E;
+} Struct15199C34Motion;
+
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8;
+    s32 unkC;
+    s32 unk10;
+    s32 unk14;
+    s32 unk18;
+    u8 unk1C;
+    u8 unk1D;
+    u8 pad1E[2];
+} Struct15199C34Style;
+
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s16 unk8;
+    s16 unkA;
+    s32 unkC;
+    s32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 unk16;
+    u8 unk17;
+    u8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+    u8 unk1C;
+    u8 unk1D;
+    s16 unk1E;
+    s16 unk20;
+    s16 unk22;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    struct17 pos;
+    struct17 unk3C;
+    struct17 vel;
+    f32 unk54;
+    u32 unk58;
+    s32 unk5C;
+    u8 unk60;
+    u8 unk61;
+    s8 unk62;
+    s8 unk63;
+    s8 unk64;
+    u8 unk65;
+    u8 unk66;
+    u8 pad67;
+    s16 unk68;
+    u8 pad6A[2];
+    f32 unk6C;
+} Struct15199C34Particle;
+
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    s16 unk2;
+    u8 unk4;
+    u8 unk5;
+    s8 unk6;
+    u8 pad7;
+} Struct15199C34Spark;
+
+void func_15145740(void *, void *, void *, void *, f32);
+s32 func_15146078(struct17 *, struct17 *, struct17 *);
+void func_15143874(s16, f32, f32 *, f32 *);
+void *func_15130280(void *, u8, s32, s32, u8, s32);
+void func_151D8868(void *, s32, s32, s32);
+
+s32 func_15199C34(Struct15199C34 *arg0) {
+    Struct15199C34Data *data;
+    Struct15199C34Point *pts;
+    Struct15199C34Obj *obj;
+    struct17 pos0;
+    struct17 pos1;
+    struct17 pos2;
+    struct17 pos3;
+
+    data = arg0->unk98;
+    pts = arg0->unk94;
+    obj = data->unk0;
+    if (obj->unk0 == 0 || obj->unk3B != data->unk4) {
+        return 0;
+    }
+    if ((obj->unk74 & 0xF) == 0xF) {
+        data->unk150 |= 0x10;
+    } else {
+        data->unk150 &= ~0x10;
+    }
+    if (obj->unk1D4 != 0) {
+        struct17 *inputs[4];
+        struct17 *outputs[4];
+
+        inputs[0] = &data->unk8;
+        inputs[1] = &data->unk14;
+        inputs[2] = &data->unk90;
+        inputs[3] = &data->unkD4;
+        outputs[0] = &pos0;
+        outputs[1] = &pos1;
+        outputs[2] = &pos2;
+        outputs[3] = &pos3;
+        func_15145EA4((s32 *)inputs, (s32 *)outputs, obj->unk1D4 + (data->unk5 << 6), 4);
+        data->unk150 &= ~1;
+    } else {
+        struct17 dir;
+        struct17 up;
+
+        func_15145740(obj, &dir, &up, 0, 0.0f);
+        pos0.unk0 = obj->unk14;
+        pos0.unk4 = obj->unk18 + 33.0f;
+        pos0.unk8 = obj->unk1C;
+        pos1.unk0 = dir.unk0 * 0.03200000152f + pos0.unk0;
+        pos1.unk4 = dir.unk4 * 0.03200000152f + pos0.unk4;
+        pos1.unk8 = dir.unk8 * 0.03200000152f + pos0.unk8;
+        data->unk150 |= 1;
+    }
+    arg0->unk10 = pos0;
+    data->unk12C += data->unk24 * D_800BE9A4;
+    if (data->unk12C > 1.0f) {
+        f32 inv;
+        f32 t;
+        f32 step;
+        struct17 d0;
+        struct17 d1;
+        struct17 cur0;
+        struct17 cur1;
+        f32 ix0;
+        f32 iy0;
+        f32 iz0;
+        f32 ix1;
+        f32 iy1;
+        f32 iz1;
+
+        inv = 1.0f / data->unk12C;
+        t = data->unk128 + D_800BE9A4;
+        step = t * inv;
+        cur0 = data->unk110;
+        cur1 = data->unk11C;
+        d0.unk0 = pos0.unk0 - data->unk110.unk0;
+        d0.unk4 = pos0.unk4 - data->unk110.unk4;
+        d0.unk8 = pos0.unk8 - data->unk110.unk8;
+        d1.unk0 = pos1.unk0 - data->unk11C.unk0;
+        d1.unk4 = pos1.unk4 - data->unk11C.unk4;
+        d1.unk8 = pos1.unk8 - data->unk11C.unk8;
+        ix0 = d0.unk0 * inv;
+        iy0 = d0.unk4 * inv;
+        iz0 = d0.unk8 * inv;
+        ix1 = d1.unk0 * inv;
+        iy1 = d1.unk4 * inv;
+        iz1 = d1.unk8 * inv;
+        do {
+            Struct15199C34Point *p;
+
+            p = &pts[arg0->unk2E];
+            p->unk0 = cur0;
+            p->unkC.unk0 = cur1.unk0 - cur0.unk0;
+            p->unkC.unk4 = cur1.unk4 - cur0.unk4;
+            p->unkC.unk8 = cur1.unk8 - cur0.unk8;
+            p->unk18 = data->unk2C;
+            p->unk1C = 0.0f;
+            p->unk20 = data->unk3A;
+            p->unk24 = data->unk144;
+            func_1519BE1C(&p->unk0, &p->unkC, data->unk20, t);
+            p->unk18 += data->unk30 * t;
+            arg0->unk2E++;
+            if (arg0->unk2E == arg0->unk25) {
+                arg0->unk2E = 0;
+            }
+            arg0->unk2C++;
+            if (arg0->unk2E == arg0->unk2D) {
+                arg0->unk2D++;
+                if (arg0->unk2D == arg0->unk25) {
+                    arg0->unk2D = 0;
+                }
+                arg0->unk2C--;
+            }
+            cur0.unk0 += ix0;
+            cur0.unk4 += iy0;
+            cur0.unk8 += iz0;
+            cur1.unk0 += ix1;
+            cur1.unk4 += iy1;
+            cur1.unk8 += iz1;
+            t -= step;
+            data->unk12C -= 1.0f;
+        } while (data->unk12C > 1.0f);
+        data->unk110 = cur0;
+        data->unk11C = cur1;
+        data->unk128 = t;
+    }
+    if (obj->unk1D4 != 0 && (obj->unk74 & 0xF) != 0xF) {
+        data->unk138 += (data->unk9C + func_150ADA68() * data->unkA0) * D_800BE9A4;
+        if (data->unk138 > 1.0f) {
+            s32 pad;
+            Struct15199C34Spawn spawn;
+            Struct15199C34Motion motion;
+            Struct15199C34Style style;
+            struct17 delta;
+            struct17 axisA;
+            struct17 axisB;
+            f32 c;
+            f32 s;
+            f32 speed;
+
+            style.unk4 = 0x200005;
+            style.unk8 = 0x1F0600;
+            style.unkC = 3;
+            style.unk10 = 0x22;
+            style.unk0 = 0;
+            style.unk14 = 0x80;
+            style.unk18 = 0x20;
+            style.unk1C = 0;
+            style.unk1D = 7;
+            spawn.unkE = 0x15;
+            spawn.unk10 = 1;
+            spawn.unk14 = -1;
+            motion.unk18 = 0x68;
+            motion.unk19 = 0xA;
+            motion.unk1A = 0xFF;
+            motion.unk14 = -10000.0f;
+            motion.unk1C = data->unkD0;
+            motion.unk1E = data->unkD2;
+            do {
+                {
+                    typedef s32 T15199C34a;
+
+                spawn.unk15 = (func_150ADA20() % (u32)(data->unkA8 + 1)) + data->unkA4;
+                spawn.unkC = (func_150ADA20() % (u32)(data->unkAE + 1)) + data->unkAC;
+                    motion.unk0 = func_150ADA68() * data->unkB4 + data->unkB0;
+                }
+                spawn.pos = pos0;
+                delta = pos2;
+                delta.unk0 -= spawn.pos.unk0;
+                delta.unk4 -= spawn.pos.unk4;
+                delta.unk8 -= spawn.pos.unk8;
+                if (func_15146078(&delta, &axisA, &axisB) != 0) {
+                    speed = func_150ADA68() * data->unkBC + data->unkB8;
+                    func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * data->unkC0, &s, &c);
+                    motion.unk4 = (axisA.unk0 * s + axisB.unk0 * c + delta.unk0) * speed;
+                    motion.unk8 = (axisA.unk4 * s + axisB.unk4 * c + delta.unk4) * speed;
+                    motion.unkC = (axisA.unk8 * s + axisB.unk8 * c + delta.unk8) * speed;
+                    motion.unk10 = func_150ADA68() * data->unkC8 + data->unkC4;
+                    motion.unk1B = func_150ADA68() * data->unkCE + data->unkCC;
+                    func_15147DA0((Spawn15198D88 *)&spawn, (Motion15198D88 *)&motion, 0, 1, 0, 0, 0, 0, 0, 0, 0,
+                                  (Style15198D88 *)&style, 0, arg0->unkC, arg0->unk1);
+                }
+                data->unk138 -= 1.0f;
+            } while (data->unk138 > 1.0f);
+        }
+    }
+    if (obj->unk1D4 != 0 && (obj->unk74 & 0xF) != 0xF) {
+        data->unk13C += (data->unkE0 + func_150ADA68() * data->unkE4) * D_800BE9A4;
+        if (data->unk13C > 1.0f) {
+            Struct15199C34Particle part;
+            struct17 delta;
+            struct17 axisA;
+            struct17 axisB;
+            f32 c;
+            f32 s;
+            f32 speed;
+
+            part.unk1D = 0x28;
+            part.unk8 = 0x2203;
+            part.unk0 = 0x200005;
+            part.unk4 = 0x1F0600;
+            part.unkC = 0;
+            part.unk10 = 0;
+            part.unk14 = 0xFF;
+            part.unk15 = 0xFF;
+            part.unk16 = 0xFF;
+            part.unk17 = 0xFF;
+            part.unk18 = 0xFF;
+            part.unk19 = 0xFF;
+            part.unk1A = 0xFF;
+            part.pos = pos0;
+            part.unk3C.unk0 = 0.0f;
+            part.unk3C.unk4 = 0.0f;
+            part.unk3C.unk8 = 0.0f;
+            part.unk1E = data->unk10C;
+            part.unk20 = data->unk10E;
+            part.unk22 = 1;
+            part.unk24 = 1.0f;
+            part.unk58 = 0xC207;
+            part.unk60 = 6;
+            part.unk61 = 8;
+            part.unk62 = -1;
+            part.unk63 = -1;
+            part.unk64 = -1;
+            part.unk65 = 0;
+            do {
+                {
+                    typedef s32 T15199C34b;
+
+                part.unkA = (func_150ADA20() % (u32)(data->unkEA + 1)) + data->unkE8;
+                part.unk1B = (func_150ADA20() % (u32)(data->unkEE + 1)) + data->unkEC;
+                    part.unk28 = part.unk2C = func_150ADA68() * data->unkF4 + data->unkF0;
+                }
+                delta = pos3;
+                delta.unk0 -= part.pos.unk0;
+                delta.unk4 -= part.pos.unk4;
+                delta.unk8 -= part.pos.unk8;
+                if (func_15146078(&delta, &axisA, &axisB) != 0) {
+                    speed = func_150ADA68() * data->unkFC + data->unkF8;
+                    func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * data->unk100, &s, &c);
+                    part.vel.unk0 = (axisA.unk0 * s + axisB.unk0 * c + delta.unk0) * speed;
+                    part.vel.unk4 = (axisA.unk4 * s + axisB.unk4 * c + delta.unk4) * speed;
+                    part.vel.unk8 = (axisA.unk8 * s + axisB.unk8 * c + delta.unk8) * speed;
+                    part.unk54 = func_150ADA68() * data->unk108 + data->unk104;
+                    func_15130280(&part, 1, 0, 0, arg0->unkC, arg0->unk1);
+                }
+                data->unk13C -= 1.0f;
+            } while (data->unk13C > 1.0f);
+        }
+    }
+    data->unk151 += D_800BE9E4;
+    if (data->unk151 >= 0x3D) {
+        if (data->unk0 != NULL && data->unk0->unk31C != NULL) {
+            data->unk0->unk31C->unk1AA++;
+        }
+        data->unk151 = 0;
+    }
+    if ((data->unk150 & 8) && obj->unk318 != NULL) {
+        data->unk152 -= D_800BE9E4;
+        if (data->unk152 < 0) {
+            s32 pad2;
+            Struct15199C34Spark spark;
+
+            spark.unk0 = 1;
+            spark.unk2 = func_150ADA20() % 21U + 0x14;
+            spark.unk5 = 1 << obj->unk318->unk23D;
+            spark.unk4 = func_150ADA20() % 7U + 2;
+            spark.unk6 = -1;
+            func_151D8868(&spark, 0, arg0->unkC, arg0->unk1);
+            data->unk152 = func_150ADA20() % 21U + 0x78;
+        }
+    }
+    return 1;
+}
 
 typedef struct {
     struct17 unk0;
@@ -2827,7 +3309,8 @@ Gfx *func_1519B4B8(FlameActor_1519B4B8 *arg0, Gfx *arg1, s16 arg2) {
         f32 dy;
         f32 dz;
 
-        tail = arg0->point_end - 1;
+        tail = arg0->point_end;
+        tail--;
         index = arg0->point_index;
         if (tail < 0) {
             tail = arg0->point_capacity - 1;
@@ -2856,7 +3339,8 @@ Gfx *func_1519B4B8(FlameActor_1519B4B8 *arg0, Gfx *arg1, s16 arg2) {
     arg1 = func_1513F4E4(arg1, 0x4C, &flag);
     arg1 = func_15142FBC(arg1, D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[3][0] | D_800A4AC8[3][1], &flag);
     if (arg0->flags1E & 2) {
-        index = arg0->point_end - 1;
+        index = arg0->point_end;
+        index--;
         if (index < 0) {
             index = arg0->point_capacity - 1;
         }
@@ -2865,11 +3349,13 @@ Gfx *func_1519B4B8(FlameActor_1519B4B8 *arg0, Gfx *arg1, s16 arg2) {
         curAlpha = state->alpha3A;
         curTexture = state->texture144;
     } else {
-        previous = arg0->point_end - 1;
+        previous = arg0->point_end;
+        previous--;
         if (previous < 0) {
             previous = arg0->point_capacity - 1;
         }
-        index = previous - 1;
+        index = previous;
+        index--;
         if (index < 0) {
             index = arg0->point_capacity - 1;
         }
