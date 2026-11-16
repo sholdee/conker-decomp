@@ -372,7 +372,103 @@ void func_1513CBA4(struct210 *arg0) {
     D_80089F2C[idx]();
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513CBF0.s")
+typedef struct {
+    u8 pad0[0x10];
+    s32 unk10;
+    u8 pad14[4];
+    u32 unk18;
+    u8 pad1C[2];
+    u8 unk1E;
+    u8 pad1F;
+    s32 unk20;
+    u8 pad24[4];
+    u8 unk28;
+    u8 unk29;
+    u8 unk2A;
+    u8 unk2B;
+    u8 unk2C;
+    u8 unk2D;
+    u8 unk2E;
+    u8 unk2F;
+    u32 unk30;
+    s32 unk34;
+    u8 unk38;
+    u8 pad39[7];
+    Vtx unk40[4];
+    u8 unk80[4];
+    u8 unk84[0x20];
+    u8 unkA4[4];
+} Obj1513CBF0;
+
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+} Mode1513DB00;
+extern Mode1513DB00 D_800A4AC8[];
+extern u32 D_800D2C9C;
+Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
+Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
+Gfx *func_15142CF0(Gfx *, s32, s32, s32, s32, s32, s32, u8 *);
+Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
+Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
+void func_151441A4(s16 *, s16 *, s16 *, s16 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+void func_151442FC(s16 *, s16 *, s16 *, s16 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+Gfx *func_151462C8(Gfx *, void *, s32, s32, s32, s16, void *, s32, s32);
+Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
+
+Gfx *func_1513CBF0(Gfx *gfx, Obj1513CBF0 *arg1, s16 arg2) {
+    s32 v1;
+    u8 sp7B;
+    u8 sp7A;
+    u8 sp79;
+    s16 sp76;
+    s32 mode;
+    s16 sp6E;
+    s16 sp6C;
+    s16 sp6A;
+    s16 sp68;
+    s16 sp66;
+    s16 sp64;
+    s16 sp62;
+    s16 sp60;
+
+    if (arg1->unk10 & 1) {
+    if ((arg1->unk18 & 0x2000) && !(arg1->unk38 & (1 << arg2))) {
+        return gfx;
+    }
+    sp7B = 1;
+    sp7A = arg1->unk30 & 0xFF;
+    sp79 = (arg1->unk30 & 0xFFFF0000) >> 16;
+    sp76 = arg1->unk18 & 0x30;
+    gfx = func_151462C8(gfx, arg1->unk84, 0, 0, 0, arg2, arg1->unkA4, 2,
+                        (arg1->unk18 & 0x4000) ? arg1->unk34 : 0);
+    func_151441A4(&sp6E, &sp6C, &sp6A, &sp68, arg1->unk2A, arg1->unk2B, arg1->unk2C, arg1->unk2D,
+                  0xFF, 0xFF, 0xFF, arg1->unk28, arg1->unk29, (arg1->unk18 & 0x100) ? arg1->unk2E : 3);
+    func_151442FC(&sp66, &sp64, &sp62, &sp60, arg1->unk2A, arg1->unk2B, arg1->unk2C, arg1->unk2D,
+                  0xFF, 0xFF, 0xFF, arg1->unk28, arg1->unk29, (arg1->unk18 & 0x200) ? arg1->unk2F : 4);
+    v1 = 0;
+    if (sp76 & 0x10) {
+        v1 = 0x200;
+    }
+    if (sp76 & 0x20) {
+        v1 |= 0x400;
+    }
+    gfx = func_15142B7C(gfx, ((arg1->unk18 & 0x400) ? 0x20000 : 0) | v1 | 1, 0x600);
+    if (arg1->unk1E != 0xFF) {
+        gfx = func_15142E24(gfx, &D_80090B60[arg1->unk1E], arg1->unk20, 2, 0, 0, arg1->unk1E, 0, 0, &sp7B,
+                            (arg1->unk18 & 0x20000) ? 0x3E : 3);
+    }
+    gfx = func_15142C10(gfx, sp66, sp64, sp62, sp60, &sp7B);
+    gfx = func_15142CF0(gfx, 0, 0, sp6E, sp6C, sp6A, sp68, &sp7B);
+    gfx = func_1513F4E4(gfx, sp79, &sp7B);
+    gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | ((arg1->unk1E == 0xFF) ? 0 : D_800D2C9C) | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[sp7A].unk0 | D_800A4AC8[sp7A].unk4, &sp7B);
+
+    gSPVertex(gfx++, arg1->unk40, 4, 0);
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    gSP1Triangle(gfx++, 0, 2, 3, 0);
+    }
+    return gfx;
+}
 
 void func_1513CF9C(s32 arg0, s32 arg1, u8 arg2) {
     D_80089F60[0](arg0, arg1, arg2);
@@ -737,23 +833,8 @@ typedef struct {
     s32 unk100[4];
 } Obj1513DB00;
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-} Mode1513DB00;
 
 extern s32 (*D_80089E1C[])(Obj1513DB00 *, s16);
-extern Mode1513DB00 D_800A4AC8[];
-extern u32 D_800D2C9C;
-Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
-Gfx *func_15142CF0(Gfx *, s32, s32, s32, s32, s32, s32, u8 *);
-Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
-void func_151441A4(s16 *, s16 *, s16 *, s16 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-void func_151442FC(s16 *, s16 *, s16 *, s16 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-Gfx *func_151462C8(Gfx *, void *, s32, s32, s32, s16, void *, s32, s32);
-Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
 
 Gfx *func_1513DB00(Gfx *arg0, Obj1513DB00 *arg1, s16 arg2) {
     s32 pad8C;
