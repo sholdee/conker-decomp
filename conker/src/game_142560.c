@@ -919,7 +919,101 @@ void func_15117798(struct Obj15117798 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_142560/func_151177C0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_142560/func_151179BC.s")
+s32 func_150AD9A0(s32, s32, s32);
+extern f32 D_800A2FDC;
+extern f32 D_800A2FE0;
+extern f32 D_800A2FE4;
+extern f32 D_800A2FE8;
+extern f32 D_800A2FEC;
+extern f32 D_800A2FF0;
+void func_151179BC(void *arg0) {
+    s16 x;
+    s16 y;
+    s16 z;
+    s16 speed;
+    s32 cur;
+    s32 dist;
+    f32 fdist;
+    f32 m;
+    s32 state;
+    s32 delay;
+    f32 cx;
+    f32 sx;
+    f32 cy;
+    f32 sy;
+    f32 cz;
+    f32 sz;
+
+    state = *(u8 *)((u8 *)arg0 + 0x73) & 3;
+    speed = (*(s32 *)((u8 *)arg0 + 0x3C) >> 16) & 0xFFFF;
+    delay = *(s32 *)((u8 *)arg0 + 0x3C) & 0xFFFF;
+    if (*(s32 *)((u8 *)arg0 + 0x80) == 0) {
+        *(s32 *)((u8 *)arg0 + 0x7C) = (*(s16 *)((u8 *)arg0 + 0x12) << 16) | (*(s16 *)((u8 *)arg0 + 0x10) & 0xFFFF);
+        *(s32 *)((u8 *)arg0 + 0x80) = *(s16 *)((u8 *)arg0 + 0x14) | 0x80000000;
+    }
+    x = *(s32 *)((u8 *)arg0 + 0x7C) & 0xFFFF;
+    y = *(s32 *)((u8 *)arg0 + 0x7C) >> 16;
+    z = *(s32 *)((u8 *)arg0 + 0x80) & 0xFFFF;
+    if (state == 0) {
+        *(s16 *)((u8 *)arg0 + 0x10) = x;
+        *(s16 *)((u8 *)arg0 + 0x12) = y;
+        *(s16 *)((u8 *)arg0 + 0x14) = z;
+        return;
+    }
+    cur = func_150AD9A0(x - *(s16 *)((u8 *)arg0 + 0x10), y - *(s16 *)((u8 *)arg0 + 0x12), z - *(s16 *)((u8 *)arg0 + 0x14));
+    if (state == 3) {
+        if (speed < 0) {
+            dist = -speed;
+        } else {
+            dist = speed;
+        }
+        if ((delay != 0) && !(*(u8 *)((u8 *)arg0 + 0x4F) & 4) && !(*(u8 *)((u8 *)arg0 + 0x73) & 4)) {
+            if (D_800BE9E4 < *(s32 *)((u8 *)arg0 + 0x84)) {
+                *(s32 *)((u8 *)arg0 + 0x84) -= D_800BE9E4;
+            } else {
+                state = 1;
+            }
+        } else {
+            *(s32 *)((u8 *)arg0 + 0x84) = delay;
+        }
+    } else if (state == 2) {
+        dist = cur + 6;
+        if (dist >= ((speed < 0) ? -speed : speed)) {
+            state = 3;
+            if (speed < 0) {
+                dist = -speed;
+            } else {
+                dist = speed;
+            }
+            *(s32 *)((u8 *)arg0 + 0x84) = delay;
+        }
+    } else if (state == 1) {
+        if (cur < 3) {
+            dist = 0;
+            state = 0;
+        } else {
+            dist = cur - 3;
+        }
+    }
+    if (cur != dist) {
+        cx = cosf(*(f32 *)((u8 *)arg0 + 0) * D_800A2FDC);
+        sx = sinf(*(f32 *)((u8 *)arg0 + 0) * D_800A2FE0);
+        cy = cosf(*(f32 *)((u8 *)arg0 + 4) * D_800A2FE4);
+        sy = sinf(*(f32 *)((u8 *)arg0 + 4) * D_800A2FE8);
+        cz = cosf(*(f32 *)((u8 *)arg0 + 8) * D_800A2FEC);
+        sz = sinf(*(f32 *)((u8 *)arg0 + 8) * D_800A2FF0);
+        if (speed < 0) {
+            dist = -dist;
+        }
+        fdist = dist;
+        m = cx * sy;
+        *(s16 *)((u8 *)arg0 + 0x10) = x + fdist * ((m * cz) + (sx * sz));
+        *(s16 *)((u8 *)arg0 + 0x12) = y + fdist * ((m * sz) - (sx * cz));
+        *(s16 *)((u8 *)arg0 + 0x14) = z + fdist * cx * cy;
+    }
+    *(u8 *)((u8 *)arg0 + 0x73) &= ~3;
+    *(u8 *)((u8 *)arg0 + 0x73) |= state;
+}
 
 void func_15117D3C(struct Obj151152A8 *arg0, struct127 *arg1) {
     s32 temp = arg0->field_0x3C & 0xFFFF;
