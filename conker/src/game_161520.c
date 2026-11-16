@@ -1,7 +1,10 @@
 #include <ultra64.h>
 #define func_150ADA20 func_150ADA20_u8proto
+#define func_151D9B8C func_151D9B8C_s32proto
 #include "functions.h"
 #undef func_150ADA20
+#undef func_151D9B8C
+void func_151D9B8C(u8, f32, u8, void *, struct17 *, s16, u8, u8, u8, u8, s32);
 u32 func_150ADA20(void);
 #include "variables.h"
 
@@ -861,8 +864,8 @@ s32 func_15135BF8(Obj_15135BF8 *arg0) {
 typedef struct { f32 x, y, z; } V15135DD0;
 typedef struct { f32 a; s32 pad[5]; s32 g; u8 h; u8 i; s32 j; } S15135DD0;
 extern s32 func_15046460(V15135DD0 *, s32, s32, S15135DD0 *);
-extern void func_151DB5D0(s32, void *, V15135DD0 *, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_151DA6F8(void *, V15135DD0 *, f32, s16, s32, f32, s32, s32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern void func_151DB5D0(u8, void *, V15135DD0 *, f32, f32, f32, f32, s32, s32, s32, s32, s32, u8, s32);
+extern void func_151DA6F8(void *, V15135DD0 *, f32, s16, s32, f32, s32, s32, f32, f32, s32, u8, s32, s32, s32, s32, u8, s32);
 extern void func_151D9014(void *, void *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
 extern void func_15143794(s16, s16, f32, f32 *);
 
@@ -904,7 +907,7 @@ void func_15135DD0(V15135DD0 *arg0, V15135DD0 *arg1, s32 arg2, u8 arg3, s32 arg4
             c = func_150ADA68();
             a = func_150ADA68();
             b = func_150ADA68();
-            func_151DB5D0(0, arg0, &spF8, c * 50.0f + 30.0f, a * 0 + 1.00999999f, 1.0f, b * 0.04100000113f, s0, func_150ADA20() % 156U + 100, s0, 255 / s0, 1, fp, arg4);
+            func_151DB5D0(0, arg0, &spF8, c * 50.0f + 30.0f, a * 0 + 1.00999999f, 1.0f, b * 0.04100000113f, s0, func_150ADA20() % 156U + 100, s0, 255 / s0, 1, arg3, arg4);
             i1--;
         }
     } else {
@@ -921,7 +924,7 @@ void func_15135DD0(V15135DD0 *arg0, V15135DD0 *arg1, s32 arg2, u8 arg3, s32 arg4
             x = func_150ADA20();
             s0 = func_150ADA20();
             b = func_150ADA68();
-            func_151DA6F8(arg0, &spE0, a * 1.013000011f, (u32)x % 21U + 20, (u32)s0 % 101U + 100, b * 4.200000286f + 1.899999976f, func_150ADA20() % 3U + 3, 0, 1.0f, 1.0f, 0, 0, 0, 16, 15, 0, fp, arg4);
+            func_151DA6F8(arg0, &spE0, a * 1.013000011f, (u32)x % 21U + 20, (u32)s0 % 101U + 100, b * 4.200000286f + 1.899999976f, func_150ADA20() % 3U + 3, 0, 1.0f, 1.0f, 0, 0, 0, 16, 15, 0, arg3, arg4);
     }
             i--;
         }
@@ -1316,7 +1319,114 @@ void func_15136C3C(Blood36C3CActor *arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15136F50.s")
+extern void func_15143874(s16, f32, f32 *, f32 *);
+extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, f32 *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
+extern s32 func_15145C90(s32);
+extern void func_151DC034(struct17 *, f32, s32, s16, u8, u8, s32);
+s32 func_15137C64(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3,
+                  struct17 *arg4, struct17 *arg5, struct17 *arg6, struct17 *arg7);
+
+void func_15136F50(void *arg0, void *arg1, void *arg2, u8 arg3, u8 arg4, s32 arg5) {
+    struct17 v0;
+    struct17 v1;
+    struct17 v2;
+    struct17 v3;
+    struct17 v4;
+    u8 pad0;
+    u8 doSparks;
+    u8 doDecals;
+    s32 n;
+    f32 sin1;
+    f32 cos1;
+    V15135DD0 vel1;
+    f32 fa;
+    f32 fb;
+    f32 sin2;
+    f32 cos2;
+    V15135DD0 vel2;
+    s32 ret;
+    u32 r;
+    s16 cnt;
+    s32 j;
+    f32 sin3;
+    f32 cos3;
+    s32 pad1;
+    s32 pad2;
+    f32 normal[3];
+    struct17 hit;
+    f32 dist;
+    s32 surface;
+    s32 pad3;
+
+    doSparks = 1;
+    doDecals = 1;
+    ret = func_15137C64(&v0, &v1, &v2, &v3, &v4, arg0, arg1, arg2);
+    if (ret != 0) {
+        if (ret == 2) {
+            doSparks = 0;
+            doDecals = 0;
+        }
+        fa = func_150ADA68();
+        r = func_150ADA20();
+        func_151DC034(&v0, fa * 192.0f + 192.0f, (r % 101U + 0x9B) & 0xFF, (func_150ADA20() & 7) + 0xF, arg3, arg4, arg5);
+        {
+        s32 pad9;
+        n = (func_150ADA20() & 3) + 4;
+        for (; n > 0; n--) {
+            fa = func_150ADA68() * 0.09290000051f + 0.06430000067f;
+            r = func_150ADA20();
+            func_15143874(r & 0xFF, func_150ADA68() * 50.0f, &cos1, &sin1);
+            vel1.x = (v2.unk0 * 100.0f + v3.unk0 * cos1 + v4.unk0 * sin1) * fa;
+            vel1.y = (v2.unk4 * 100.0f + v3.unk4 * cos1 + v4.unk4 * sin1) * fa;
+            vel1.z = (v2.unk8 * 100.0f + v3.unk8 * cos1 + v4.unk8 * sin1) * fa;
+            fb = func_150ADA68();
+            fa = func_150ADA68();
+            r = func_150ADA20();
+            func_151DB5D0(arg3, &v1, &vel1, fb * 80.0f + 120.0f, 1.033617973f, 0.959544003f, fa * 0,
+                          r % 31U + 0x1E, func_150ADA20() % 156U + 0x64, 0x2E, 5, 0, arg4, arg5);
+        }
+        }
+        if (doSparks) {
+            cnt = (func_150ADA20() & 3) + 4;
+            if (cnt != 0) {
+                do {
+                    r = func_150ADA20();
+                    func_15143874(r & 0xFF, func_150ADA68() * 2 + 6.0f, &cos2, &sin2);
+                    vel2.x = v3.unk0 * cos2 + v4.unk0 * sin2;
+                    vel2.y = v3.unk4 * cos2 + v4.unk4 * sin2;
+                    vel2.z = v3.unk8 * cos2 + v4.unk8 * sin2;
+                    r = func_150ADA20();
+                    fa = func_150ADA68();
+                    func_151DA6F8(&v0, &vel2, 0.0f, r % 6U + 8, 0xFF, fa * 1.300000072f + 1.899999976f,
+                                  func_150ADA20() % 3U + 4, 0, 1.0f, 1.0f, 1, arg3, 0, 0x10, 0xF, 0, arg4, arg5);
+                    cnt--;
+                } while (cnt != 0);
+            }
+        }
+        if (doDecals && D_800BE616) {
+            n = (func_150ADA20() & 3) + 3;
+            if (n != 0) {
+                do {
+                    r = func_150ADA20();
+                    func_15143874(r & 0xFF, func_150ADA68() * 140.0f, &cos3, &sin3);
+                    if (func_150AC9C0(v1.unk0, v1.unk4, v1.unk8,
+                                      v2.unk0 * 100.0f + v3.unk0 * cos3 + v4.unk0 * sin3,
+                                      v2.unk4 * 100.0f + v3.unk4 * cos3 + v4.unk4 * sin3,
+                                      v2.unk8 * 100.0f + v3.unk8 * cos3 + v4.unk8 * sin3,
+                                      0, normal, &hit.unk0, &hit.unk4, &hit.unk8, &dist, &surface, 0, 0.0f) != 0 &&
+                        func_15145C90(surface) != 0 && dist < 1999.0f) {
+                        fa = func_150ADA68();
+                        r = func_150ADA20();
+                        func_151D9B8C(arg3, fa * 16.0f + 25.0f, r % 156U + 0x64, normal, &hit,
+                                      func_150ADA20() % 101U + 0x64, 1, 1, 1, arg4, arg5);
+                    }
+                    n--;
+                } while (n != 0);
+            }
+        }
+    }
+}
+
 
 typedef struct BloodImpactActor {
     u8 pad0[4];
