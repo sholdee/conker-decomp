@@ -250,7 +250,14 @@ Gfx *func_151E966C(Gfx *gfx, s32 arg1, s32 arg2, s8 arg3, u8 arg4) {
 
 
 typedef struct {
-    /* 0x00 */ char pad0[0x42];
+    /* 0x00 */ f32 unk0;
+    /* 0x04 */ char pad4[4];
+    /* 0x08 */ f32 unk8;
+    /* 0x0C */ char padC[0x20];
+    /* 0x2C */ s8 unk2C;
+    /* 0x2D */ char pad2D[0x11];
+    /* 0x3E */ s8 unk3E;
+    /* 0x3F */ char pad3F[3];
     /* 0x42 */ s8 unk42;
     /* 0x43 */ char pad43[3];
     /* 0x46 */ s16 unk46[4];
@@ -925,7 +932,72 @@ Gfx *func_151EC1F0(Gfx *gfx) {
     return gfx;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_215960/func_151EC3E8.s")
+typedef struct {
+    /* 0x00 */ char pad0[8];
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ char padD[3];
+} SaveSlot215960; /* size 0x10 */
+
+extern u8 D_800E0A95;
+extern s8 D_8008FEF8;
+extern s32 D_800900BC[];
+Gfx *func_151EC648(Gfx *);
+Gfx *func_151EE184(Gfx *);
+Gfx *func_151EEBE8(Gfx *, s32);
+
+Gfx *func_151EC3E8(Gfx *gfx) {
+    static u8 D_800900D4;
+    s32 alpha;
+
+    if (D_800C35EA == 1) {
+        D_800900D4 = 0;
+        return gfx;
+    }
+    alpha = D_800900D4 + (D_800BE9E4 * 4);
+    if (alpha >= 0x100) {
+        alpha = 0xFF;
+    }
+    D_800900D4 = alpha;
+    gSPDisplayList(gfx++, &D_80090028);
+    if (D_8008FDD4->unk3E == 1) {
+        return func_151EC648(gfx);
+    }
+    if (D_8008FDD4->unk3E == 0) {
+        if (D_8008FDD4->unk2C == 1 && D_8008FEF8 != 0) {
+            gfx = func_151EE184(gfx);
+        } else {
+            alpha = (D_8008FDD4->unk0 - 0.5f) * 512.0f;
+            if (alpha < 0) {
+                alpha = -alpha;
+            }
+            if (alpha >= 0x100) {
+                alpha = 0xFF;
+            }
+            if (D_800900D4 < alpha) {
+                alpha = D_800900D4;
+            }
+            if (D_8008FDD4->unk2C == 1) {
+                alpha = (D_800E0A95 * alpha) >> 8;
+                if (alpha >= 0xFE) {
+                    alpha = 0xFF;
+                }
+            }
+            gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, alpha);
+            gDPSetOtherMode(gfx++, 0x002C3F, 0x504244);
+            *(s32 *)&D_80090060 = D_800900BC[D_8008FDD4->unk2C];
+            gfx = func_151ED430(gfx, &D_80090060, 0x94, 0x1E, 3, 1, 1.0f, 0);
+        }
+        if (D_8008FDD4->unk8 >= 0.5f) {
+            if (D_8008FDD4->unk2C >= 3) {
+                if (((SaveSlot215960 *)&D_800BE3F8)[D_8008FDD4->unk2C - 3].unk8 != -1) {
+                    gfx = func_151EEBE8(gfx, ((SaveSlot215960 *)&D_800BE3F8)[D_8008FDD4->unk2C - 3].unkC);
+                }
+            }
+        }
+    }
+    return gfx;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_215960/func_151EC648.s")
 
