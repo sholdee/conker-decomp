@@ -288,7 +288,60 @@ trailing_label:
     return;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_CDE80/func_150A24C0.s")
+s32 func_15183290(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+
+typedef struct {
+    /* 0x00 */ s16 unk0;
+    /* 0x02 */ s16 unk2;
+    /* 0x04 */ s16 unk4;
+    /* 0x06 */ s16 unk6;
+    /* 0x08 */ u8  pad8[0xF];
+    /* 0x17 */ u8  unk17;
+    /* 0x18 */ s16 unk18;
+    /* 0x1A */ u8 unk1A;
+    /* 0x1B */ u8 unk1B;
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 unk1D;
+    /* 0x1E */ u8 unk1E;
+    /* 0x1F */ u8 unk1F;
+    /* 0x20 */ u32 unk20;
+} ObjRecB;
+
+void func_150A24C0(ObjRec *arg0, s32 arg1) {
+    s32 temp_v0;
+    s32 var_v0;
+    s32 type;
+    s32 sub;
+    s32 posY;
+    s32 b1A;
+    s32 b1C;
+    s32 b1D;
+    s32 w20;
+
+    if (arg1 != 0xFF) {
+        if (((arg0->unk1C & 0xFF) == 0) || (arg0->unk17 == 9)) {
+            type = arg0->unk17;
+            sub = arg0->unk18 & 0xFF;
+            posY = ((ObjRecB *)arg0)->unk18;
+            b1A = ((ObjRecB *)arg0)->unk1A;
+            b1C = ((ObjRecB *)arg0)->unk1C;
+            b1D = ((ObjRecB *)arg0)->unk1D;
+            w20 = arg0->unk20;
+            temp_v0 = func_15183290(arg0->unk0, arg0->unk2 + (b1D * 0x10), arg0->unk4,
+                                    sub, type, arg0->unk6, arg1,
+                                    posY, b1A, b1C, w20);
+            if ((temp_v0 != -1) && (arg0->unk17 != 9)) {
+                arg0->unk1C = (temp_v0 << 8) | 0xF0 | (arg0->unk1C & 0xFFFF0000);
+            }
+        } else {
+            var_v0 = (arg0->unk1C & 0xFF);
+            if (var_v0 < 2) {
+                var_v0 = 2;
+            }
+            arg0->unk1C = (arg0->unk1C & ~0xFF) | var_v0;
+        }
+    }
+}
 
 extern u8 D_800D3090;
 extern u8 D_800D9EB8[][3];
