@@ -1301,7 +1301,249 @@ void func_15020388(s32 arg0, s32 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_49D30/func_15020878.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_49D30/func_15020EC4.s")
+typedef struct {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    u8 pad24[0x10];
+    f32 unk34;
+    f32 unk38;
+    f32 unk3C;
+    f32 unk40;
+} Elem15020EC4; // size 0x44
+
+typedef struct {
+    u16 type;
+    u8 kind;
+    u8 idx;
+    s16 yoff;
+    s16 pad6;
+} Ent15020EC4; // size 0x8
+
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    f32 unk8;
+    f32 unkC;
+    s32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    f32 unk30;
+    f32 unk34;
+} Msg15020EC4;
+
+typedef struct {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+    u8 padC[4];
+    s16 unk10;
+    s16 unk12;
+    s16 unk14;
+    u8 pad16[0x16];
+    f32 unk2C;
+    f32 unk30;
+    f32 unk34;
+    u8 pad38[0x16];
+    u8 unk4E;
+    u8 pad4F[0x20];
+    u8 unk6F;
+    u8 pad70[0x1A];
+    u8 unk8A;
+} Obj15020EC4;
+
+typedef struct { f32 x, y, z; } V3f15020EC4;
+V3f15020EC4 D_800C3620;
+extern void func_15128CB0(struct108 *);
+extern void func_1517D5FC(s16, s16, s16, s32, s32, s32);
+s32 func_15023264(s32 arg0, s32 arg1);
+
+#define MSG2 (*(Msg15020EC4 *)&D_800C3600)
+#define ENT(a, i) ((Ent15020EC4 *)(D_800C35F0[a] + (i) * 8))
+#define ELEM(a, i) (&((Elem15020EC4 **)&D_800C3958)[a][i])
+
+void func_15020EC4(s32 arg0) {
+    s32 i;
+    s32 j;
+    struct108 *player;
+    Elem15020EC4 *e;
+    Obj15020EC4 *o;
+    f32 f22;
+    f32 f20;
+
+    if ((&D_800C35EA)[arg0] == 1) {
+        D_800C3638 = 0;
+        if (D_800C35F8 == 0xFF) {
+            D_800C35F8 = func_15023264(arg0, D_800C35B0[arg0]);
+        }
+        for (j = 0; j != 2; j++) {
+            for (i = 0; i < D_800C363A[arg0]; i++) {
+                if (((u16 **)&D_800C35D0)[arg0][i] == 0) {
+                    continue;
+                }
+                if (D_800C35C8[arg0][i] == 0) {
+                    continue;
+                }
+                if (j == 0) {
+                    if (ENT(arg0, i)->type == 1) {
+                        continue;
+                    }
+                } else if (ENT(arg0, i)->type != 1) {
+                    continue;
+                }
+                if (ENT(arg0, i)->type == 1) {
+                    player = D_800DBFF0;
+                    if (i != D_800C35F8) {
+                        continue;
+                    }
+                    if (!(player->unk2C & 0x40000)) {
+                        if (D_800C3671 == 0) {
+                            func_1512D560(player, 5, (void *)arg0);
+                        }
+                        func_15128CB0(player);
+                    }
+                    e = ELEM(arg0, i);
+                    if (e->unk34 == -9999.0f) {
+                        MSG2.unk8 = 0.0f;
+                    } else {
+                        e->unk34 = (e->unk34 < -20.0f) ? -20.0f : (e->unk34 > 40.0f) ? 40.0f : e->unk34;
+                        e = ELEM(arg0, i);
+                        MSG2.unk8 = e->unk34;
+                    }
+                    if (e->unk3C == -9999.0f) {
+                        f22 = 0.0f;
+                    } else {
+                        e->unk3C = (e->unk3C < -20.0f) ? -20.0f : (e->unk3C > 40.0f) ? 40.0f : e->unk3C;
+                        e = ELEM(arg0, i);
+                        f22 = e->unk3C;
+                    }
+                    if (e->unk40 == -9999.0f) {
+                        f20 = 0.0f;
+                        while (0) { }
+                        MSG2.unk4 = arg0;
+                    } else {
+                        e->unk40 = (e->unk40 < -20.0f) ? -20.0f : (e->unk40 > 40.0f) ? 40.0f : e->unk40;
+                        if (ENT(arg0, i)) { }
+                        e = ELEM(arg0, i);
+                        f20 = e->unk40;
+                        MSG2.unk4 = arg0;
+                    }
+                    MSG2.unk14 = e->unk0;
+                    MSG2.unk18 = e->unk4;
+                    MSG2.unk1C = e->unk8;
+                                        if (ENT(arg0, i)->kind == 1) {
+                        MSG2.unk0 = 0;
+                        MSG2.unk20 = ELEM(arg0, (s8)ENT(arg0, i)->idx)->unk0;
+                        MSG2.unk24 = ELEM(arg0, (s8)ENT(arg0, i)->idx)->unk4 + ENT(arg0, i)->yoff + (e = ELEM(arg0, i))->unk38;
+                        MSG2.unk28 = ELEM(arg0, (s8)ENT(arg0, i)->idx)->unk8;
+                        MSG2.unk2C = -e->unk14;
+                        MSG2.unk30 = f22;
+                        MSG2.unk34 = f20;
+                    } else if (ENT(arg0, i)->kind == 2) {
+{
+    struct127 *ob;
+
+                        ob = func_15083E90(ENT(arg0, i)->idx);
+                        if (ob == NULL) {
+                            continue;
+                        }
+                        MSG2.unk0 = 0;
+                        D_800C3620.x = ob->x_position;
+                        D_800C3620.y = ob->y_position + ENT(arg0, i)->yoff + (e = ELEM(arg0, i))->unk38;
+                        D_800C3620.z = ob->z_position;
+                        MSG2.unk2C = -e->unk14;
+                        MSG2.unk30 = f22;
+                        MSG2.unk34 = f20;
+}
+                    } else if (ENT(arg0, i)->kind == 3) {
+                        Obj15020EC4 *ob3;
+
+                        ob3 = (Obj15020EC4 *)func_151149AC(ENT(arg0, i)->idx);
+                        if (ob3 == NULL) {
+                            continue;
+                        }
+                        MSG2.unk0 = 0;
+                        D_800C3620.x = ob3->unk10;
+                        D_800C3620.y = (ob3->unk12 + ENT(arg0, i)->yoff) + (e = ELEM(arg0, i))->unk38;
+                        D_800C3620.z = ob3->unk14;
+                        MSG2.unk2C = -e->unk14;
+                        MSG2.unk30 = f22;
+                        MSG2.unk34 = f20;
+                    } else if (ENT(arg0, i)->kind == 0) {
+                        MSG2.unk0 = 1;
+                        MSG2.unk20 = -e->unk14;
+                        MSG2.unk24 = e->unkC;
+                        MSG2.unk28 = e->unk10;
+                        MSG2.unk18 = MSG2.unk18 + e->unk38;
+                        MSG2.unk2C = f22;
+                        MSG2.unk30 = f20;
+                    }
+                    if (D_800C3671 == 0) {
+                        func_1512D560(player, 7, &MSG2);
+                    }
+                } else if (ENT(arg0, i)->type == 3) {
+                    o = (Obj15020EC4 *)func_151149AC(ENT(arg0, i)->kind);
+                    if (o == NULL) {
+                        continue;
+                    }
+                    o->unk4E = 0;
+                    o->unk6F &= ~0x80;
+                    o->unk6F = o->unk6F;
+                    o->unk10 = ELEM(arg0, i)->unk0;
+                    o->unk12 = ELEM(arg0, i)->unk4 + ELEM(arg0, i)->unk38;
+                    o->unk14 = ELEM(arg0, i)->unk8;
+                    o->unk0 = ELEM(arg0, i)->unkC;
+                    o->unk4 = ELEM(arg0, i)->unk10;
+                    o->unk8 = ELEM(arg0, i)->unk14;
+                    if (ELEM(arg0, i)->unk18 != -9999.0f) {
+                        o->unk2C = ELEM(arg0, i)->unk18 * 0.01f;
+                    }
+                    if (ELEM(arg0, i)->unk1C != -9999.0f) {
+                        o->unk30 = ELEM(arg0, i)->unk1C * 0.01f;
+                    }
+                    if (ELEM(arg0, i)->unk20 != -9999.0f) {
+                        o->unk34 = ELEM(arg0, i)->unk20 * 0.01f;
+                    }
+                    if ((s32)ELEM(arg0, i)->unk34 >= 0x100) {
+                        o->unk8A = 0xFF;
+                    } else if ((s32)ELEM(arg0, i)->unk34 < 0) {
+                        o->unk8A = 0;
+                    } else {
+                        o->unk8A = (s32)ELEM(arg0, i)->unk34;
+                    }
+                } else if (ENT(arg0, i)->type == 2) {
+                    struct127 *ob2;
+
+                    ob2 = func_15083E90(ENT(arg0, i)->kind);
+                    func_1502178C(ob2, arg0, i);
+                } else if (ENT(arg0, i)->type == 4) {
+                    s32 arr[3];
+
+                    arr[0] = ENT(arg0, i)->kind;
+                    arr[1] = ENT(arg0, i)->kind;
+                    arr[2] = ENT(arg0, i)->kind;
+                } else if (ENT(arg0, i)->type == 5) {
+                    e = ELEM(arg0, i);
+                    if (e->unk34 >= 1.0f) {
+                        func_1517D5FC(e->unk0, e->unk4, e->unk8, 0, e->unk18, e->unk1C);
+                    }
+                }
+            }
+        }
+        D_800C3638 = 1;
+    }
+}
 
 typedef struct {
     f32 unk0;
