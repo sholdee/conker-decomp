@@ -9,8 +9,10 @@
 u32 func_150ADA20(void);
 void *func_1513D2F0(void *arg0, void *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, u8 argA, s32 argB);
 #define D_800DBFF0 D_800DBFF0_hdr
+#define D_800BE628 D_800BE628_hdr
 #include "variables.h"
 #undef D_800DBFF0
+#undef D_800BE628
 
 void *memcpy(void *, const void *, u32);
 
@@ -2021,7 +2023,268 @@ s32 func_1519A9A4(Struct1519A9A4 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1C2C60/func_1519B4B8.s")
+typedef struct Vec3f_1519B4B8 {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3f_1519B4B8;
+
+typedef struct FlameState_1519B4B8 {
+    u8 pad0[0x2C];
+    f32 width;
+    u8 pad30[0xA];
+    u8 alpha3A;
+    u8 pad3B[0x109];
+    f32 texture144;
+    u8 pad148[8];
+    u8 flags150;
+} FlameState_1519B4B8;
+
+typedef struct FlameActor_1519B4B8 {
+    char pad0[0x10];
+    f32 position[3];
+    char pad1C[0x2];
+    u16 flags1E;
+    char pad20[0x5];
+    u8 point_capacity;
+    char pad26[0x6];
+    s8 unk2C;
+    s8 point_index;
+    s8 point_end;
+    char pad2F[0x65];
+    void *points;
+    FlameState_1519B4B8 *state;
+} FlameActor_1519B4B8;
+
+typedef struct FlamePoint_1519B4B8 {
+    Vec3f_1519B4B8 position;
+    Vec3f_1519B4B8 velocity;
+    f32 size;
+    u8 pad1C[4];
+    u8 alpha;
+    u8 pad21[3];
+    f32 texture;
+} FlamePoint_1519B4B8;
+
+typedef struct RenderView_1519B4B8 {
+    u8 pad[0x180];
+} RenderView_1519B4B8;
+
+s32 func_15144B34(s32);
+s32 func_150A6360(void *, void *, f32, f32, f32, f32, f32, f32);
+s32 func_15142E24(s32, s32, s32, s32, s32, s32, s32, u8, s32, u8 *, s32);
+Gfx *func_1513F4E4(Gfx *, u8, u8 *);
+Gfx *func_15142B7C(Gfx *, s32, s32);
+Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
+extern u8 D_800D9C10[];
+extern u8 D_80091064[];
+extern s32 D_800A4AC8[][2];
+extern s32 D_800D2C9C;
+extern RenderView_1519B4B8 *D_800BE628;
+
+Gfx *func_1519B4B8(FlameActor_1519B4B8 *arg0, Gfx *arg1, s16 arg2) {
+    FlameState_1519B4B8 *state;
+    Vec3f_1519B4B8 next;
+    Vec3f_1519B4B8 cur;
+    s32 index;
+    FlamePoint_1519B4B8 *records;
+    Vec3f_1519B4B8 *camera;
+    Vec3f_1519B4B8 toCamera;
+    Vec3f_1519B4B8 delta;
+    Vec3f_1519B4B8 normal;
+    s32 previous;
+    f32 lengthSquared;
+    u8 flag;
+    f32 nextWidth;
+    f32 curWidth;
+    u8 nextAlpha;
+    f32 nextTexture;
+    f32 curTexture;
+    Vtx_t *vtx;
+    u8 curAlpha;
+
+    if (arg0->unk2C < 2) {
+        return arg1;
+    }
+    state = arg0->state;
+    records = arg0->points;
+    if ((state->flags150 & 0x20) && (D_800BE616 == 0) && (state->flags150 & 0x10)) {
+        return arg1;
+    }
+    if (state->flags150 & 1) {
+        s32 tail;
+        FlamePoint_1519B4B8 *first;
+        FlamePoint_1519B4B8 *last;
+        f32 dx;
+        f32 dy;
+        f32 dz;
+
+        tail = arg0->point_end - 1;
+        index = arg0->point_index;
+        if (tail < 0) {
+            tail = arg0->point_capacity - 1;
+        }
+        last = &records[index];
+        first = &records[tail];
+        dx = first->position.x - last->position.x;
+        dy = first->position.y - last->position.y;
+        dz = first->position.z - last->position.z;
+        if (func_150A6360(&D_800BE628[arg2], D_800D9C10 + arg2 * 0x40,
+                          (last->position.x + first->position.x) * 0.5f,
+                          (last->position.y + first->position.y) * 0.5f,
+                          (last->position.z + first->position.z) * 0.5f,
+                          sqrtf(dx * dx + dz * dz), fabsf(dy) + (state->width + state->width), 20000.0f) == 0) {
+            return arg1;
+        }
+    }
+    func_151D5D60((u8 *)arg0 + 0x84, arg2, (arg0->point_capacity * 2 + 10) * sizeof(Vtx_t), (void **)&vtx, NULL);
+    if (vtx == NULL) {
+        return arg1;
+    }
+    camera = (Vec3f_1519B4B8 *)func_15144B34(arg2);
+    flag = 1;
+    arg1 = (Gfx *)func_15142E24((s32)arg1, (s32)D_80091064, 0, 0, 0, 0, 0x6B, 0, 0, &flag, 3);
+    arg1 = func_15142B7C(arg1, 0x200005, 0x1F0600);
+    arg1 = func_1513F4E4(arg1, 0x4C, &flag);
+    arg1 = func_15142FBC(arg1, D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[3][0] | D_800A4AC8[3][1], &flag);
+    if (arg0->flags1E & 2) {
+        index = arg0->point_end - 1;
+        if (index < 0) {
+            index = arg0->point_capacity - 1;
+        }
+        cur = *(Vec3f_1519B4B8 *)arg0->position;
+        curWidth = state->width;
+        curAlpha = state->alpha3A;
+        curTexture = state->texture144;
+    } else {
+        previous = arg0->point_end - 1;
+        if (previous < 0) {
+            previous = arg0->point_capacity - 1;
+        }
+        index = previous - 1;
+        if (index < 0) {
+            index = arg0->point_capacity - 1;
+        }
+        cur = records[previous].position;
+        curWidth = records[previous].size;
+        curAlpha = records[previous].alpha;
+        curTexture = records[previous].texture;
+    }
+    next = records[index].position;
+    nextWidth = records[index].size;
+    nextAlpha = records[index].alpha;
+    nextTexture = records[index].texture;
+    delta.x = cur.x - next.x;
+    delta.y = cur.y - next.y;
+    delta.z = cur.z - next.z;
+    toCamera.x = cur.x - camera->x;
+    toCamera.y = cur.y - camera->y;
+    toCamera.z = cur.z - camera->z;
+    normal.x = delta.y * toCamera.z - toCamera.y * delta.z;
+    normal.y = delta.z * toCamera.x - toCamera.z * delta.x;
+    normal.z = delta.x * toCamera.y - toCamera.x * delta.y;
+    lengthSquared = normal.x * normal.x + normal.y * normal.y + normal.z * normal.z;
+    if (lengthSquared != 0.0f) {
+        f32 scale = curWidth / sqrtf(lengthSquared);
+
+        normal.x *= scale;
+        normal.y *= scale;
+        normal.z *= scale;
+    } else {
+        normal.x = 0.0f;
+        normal.y = 0.0f;
+        normal.z = 0.0f;
+    }
+    vtx->ob[0] = cur.x + normal.x;
+    vtx->ob[1] = cur.y + normal.y;
+    vtx->ob[2] = cur.z + normal.z;
+    vtx->tc[0] = curTexture;
+    vtx->tc[1] = 0x47C0;
+    vtx->cn[0] = 0xFF;
+    vtx->cn[1] = 0xFF;
+    vtx->cn[2] = 0xFF;
+    vtx->cn[3] = curAlpha;
+    vtx->flag = 0;
+    vtx++;
+    vtx->ob[0] = cur.x - normal.x;
+    vtx->ob[1] = cur.y - normal.y;
+    vtx->ob[2] = cur.z - normal.z;
+    vtx->tc[0] = curTexture;
+    vtx->tc[1] = 0x4000;
+    vtx->cn[0] = 0xFF;
+    vtx->cn[1] = 0xFF;
+    vtx->cn[2] = 0xFF;
+    vtx->cn[3] = curAlpha;
+    vtx->flag = 0;
+    vtx++;
+    do {
+        delta.x = cur.x - next.x;
+        delta.y = cur.y - next.y;
+        delta.z = cur.z - next.z;
+        toCamera.x = next.x - camera->x;
+        toCamera.y = next.y - camera->y;
+        toCamera.z = next.z - camera->z;
+        normal.x = delta.y * toCamera.z - toCamera.y * delta.z;
+        normal.y = delta.z * toCamera.x - toCamera.z * delta.x;
+        normal.z = delta.x * toCamera.y - toCamera.x * delta.y;
+        lengthSquared = normal.x * normal.x + normal.y * normal.y + normal.z * normal.z;
+        if (lengthSquared != 0.0f) {
+            f32 scale = nextWidth / sqrtf(lengthSquared);
+
+            normal.x *= scale;
+            normal.y *= scale;
+            normal.z *= scale;
+        } else {
+            normal.x = 0.0f;
+            normal.y = 0.0f;
+            normal.z = 0.0f;
+        }
+        vtx->ob[0] = next.x + normal.x;
+        vtx->ob[1] = next.y + normal.y;
+        vtx->ob[2] = next.z + normal.z;
+        vtx->tc[0] = nextTexture;
+        vtx->tc[1] = 0x47C0;
+        vtx->cn[0] = 0xFF;
+        vtx->cn[1] = 0xFF;
+        vtx->cn[2] = 0xFF;
+        vtx->cn[3] = nextAlpha;
+        vtx->flag = 0;
+        vtx++;
+        vtx->ob[0] = next.x - normal.x;
+        vtx->ob[1] = next.y - normal.y;
+        vtx->ob[2] = next.z - normal.z;
+        vtx->tc[0] = nextTexture;
+        vtx->tc[1] = 0x4000;
+        vtx->cn[0] = 0xFF;
+        vtx->cn[1] = 0xFF;
+        vtx->cn[2] = 0xFF;
+        vtx->cn[3] = nextAlpha;
+        vtx->flag = 0;
+        vtx++;
+        gSPVertex(arg1++, vtx - 4, 4, 0);
+        gSP1Triangle(arg1++, 0, 1, 2, 0);
+        gSP1Triangle(arg1++, 1, 3, 2, 0);
+        if (nextTexture < curTexture) {
+            memcpy(vtx, vtx - 2, 0x20);
+            vtx[-2].tc[0] -= 0x8000;
+            vtx++;
+            vtx[-2].tc[0] -= 0x8000;
+            vtx++;
+        }
+        previous = index;
+        index--;
+        if (index < 0) {
+            index = arg0->point_capacity - 1;
+        }
+        cur = records[previous].position;
+        next = records[index].position;
+        nextWidth = records[index].size;
+        nextAlpha = records[index].alpha;
+        curTexture = records[previous].texture;
+        nextTexture = records[index].texture;
+    } while (previous != arg0->point_index);
+    return arg1;
+}
 
 void func_1519BE1C(struct17 *arg0, struct17 *arg1, f32 arg2, f32 arg3) {
     struct17 sp4;
