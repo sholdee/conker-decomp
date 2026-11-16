@@ -55,7 +55,7 @@ typedef struct {
 extern u8 D_80084160[];
 extern u8 D_80084190[];
 extern s32 func_1506196C(struct127 *, s32);
-void *func_1502C408(void *, s32);
+Gfx *func_1502C408(Gfx *, s32);
 s32 func_1502C974(s32, s32, s32, s32, s32);
 void *func_150368C4(s32, s32, s32);
 s32 func_15030E08(s32, s32, s32);
@@ -310,7 +310,82 @@ s32 func_1502C3BC(s32 arg0) {
     return temp;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502C408.s")
+typedef struct {
+    s32 state;
+    u8 pad4[0x3];
+    u8 unk7;
+    u8 pad8[0xC];
+    f32 x;
+    f32 y;
+    f32 z;
+    u8 pad20[0x40];
+    s16 unk60;
+    u8 pad62[0xC0];
+    u8 unk122;
+} Actor1502C408;
+
+typedef struct {
+    s16 x;
+    s16 y;
+    s16 z;
+    s16 w;
+    s16 h;
+    u8 alpha;
+    u8 unkB;
+    u8 unkC;
+    u8 flip;
+    u8 padE[2];
+} Sprite1502C408;
+
+extern u8 *D_8008CA4C[];
+extern Gfx D_800873D0[];
+extern Gfx D_80087408[];
+Gfx *func_15094F70(Gfx *, u8 *, s32, Sprite1502C408 *, s32, s32, s32, s32, s32);
+Gfx *func_15095760(Gfx *, Sprite1502C408 *);
+
+#define ACTOR ((Actor1502C408 *)&D_800CC2D0[arg1])
+Gfx *func_1502C408(Gfx *gfx, s32 arg1) {
+    s32 pad;
+    Sprite1502C408 sprite;
+    s32 w;
+    s32 h;
+    s32 tex;
+    s16 pad2;
+    s16 pos;
+    s32 alpha;
+    u8 size;
+
+    if (D_800BEAC0 != 0) {
+        return gfx;
+    }
+    alpha = ACTOR->unk7;
+    size = ACTOR->unk122;
+    pos = ACTOR->unk60;
+    if (alpha == 0) {
+        return gfx;
+    }
+    h = w = size * 19;
+    if (ACTOR->state == 3) {
+        h = w = size * 15;
+    }
+    tex = func_1502C3BC(arg1);
+    gSPDisplayList(gfx++, D_800873D0);
+    gDPPipeSync(gfx++);
+    if (gfx != NULL) {
+    }
+    gfx = func_15094F70(gfx, D_8008CA4C[tex], pos, &sprite, 0, 0, 0, 2, 3);
+    sprite.flip = 0;
+    sprite.alpha = alpha;
+    sprite.w = w;
+    sprite.h = h;
+    sprite.x = ACTOR->x;
+    sprite.y = ACTOR->y + (f32)(size / 2);
+    sprite.z = ACTOR->z;
+    gfx = func_15095760(gfx, &sprite);
+    gSPDisplayList(gfx++, D_80087408);
+    return gfx;
+}
+#undef ACTOR
 
 typedef struct {
     u8 pad0[0x7];
