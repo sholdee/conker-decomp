@@ -410,7 +410,163 @@ s32 func_1501D2C4(s32 arg0, s32 arg1) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_49D30/func_1501D348.s")
+typedef struct {
+    u16 n0;
+    u16 n1;
+    u16 n2;
+    u16 n3;
+} Hdr1501D348;
+
+typedef struct {
+    s32 a;
+    u32 b;
+} Ent1501D348;
+
+typedef struct {
+    u8 pad0[4];
+    void *unk4;
+    u8 pad8[0x30];
+    void *unk38;
+    u8 pad3C[4];
+} Anim1501D348;
+
+extern void *allocate_memory(s32, s32, s32, s32);
+extern void func_1501C730(s32, s32, s32, s32, s32);
+extern void func_15020388(s32, s32);
+extern void func_15022BA4(s32);
+extern void func_150238D0(void);
+extern void func_15022234(s32);
+extern void func_15022248(s32);
+extern void func_15022848(s32);
+extern void func_15022754(s32);
+extern void func_15022528(s32);
+extern void func_1501DAAC(s32);
+extern void (*D_800840FC[])(s32, s32, s32, s32);
+extern u8 D_800C35A8;
+extern u8 D_800C3C98;
+extern u16 D_800C3C9A;
+extern s32 D_800C35E0[];
+
+void func_1501D348(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+    Hdr1501D348 *hdr;
+    Ent1501D348 *data;
+    s32 state;
+    s32 i;
+    s32 k;
+    s32 size;
+
+    state = (&D_800C35EA)[arg2];
+    if (state != 1 && D_800C35C4 == 0) {
+        D_800C3C90 = arg3;
+        D_800C3C94 = arg4;
+        if (arg0 != D_800BE9F0) {
+            D_800C35C4 = arg1 + 1;
+            func_1501C730(1, arg0, 0, 0, 0);
+            if ((&D_800C35EA)[arg2] != 0) {
+                D_800C35C5 = 0;
+                return;
+            }
+            D_800C35C5 = 1;
+            return;
+        }
+        (&D_800C35E8)[arg2] = arg1;
+        if (state != 2) {
+            D_800C35A8 = D_800BE9F0;
+            D_800C3C98 = arg1;
+        }
+        func_1501D044(arg2);
+        if (func_1501D1D4(arg0, arg1, arg2) != 0) {
+            data = (Ent1501D348 *)D_800C3668[arg2];
+            hdr = *(Hdr1501D348 **)data;
+            D_800C35C8[arg2] = allocate_memory(hdr->n0 * 2, 1, 0, 0);
+            k = 1;
+            for (i = 0; i < hdr->n0; i++) {
+                D_800C35C8[arg2][i] = data[k].b >> 3;
+                k++;
+            }
+            size = hdr->n1;
+            if (size < hdr->n0) {
+                size = hdr->n0;
+            }
+            ((u16 **)&D_800C35D0)[arg2] = allocate_memory(size * 2, 1, 0, 0);
+            bzero(((u16 **)&D_800C35D0)[arg2], size * 2);
+            size = hdr->n2;
+            if (size < hdr->n0) {
+                size = hdr->n0;
+            }
+            D_800C35D8[arg2] = allocate_memory(size * 2, 1, 0, 0);
+            bzero(D_800C35D8[arg2], size * 2);
+            D_800C35E0[arg2] = (s32)allocate_memory(hdr->n3 * 4, 1, 0, 0);
+            D_800C3A50[arg2] = allocate_memory(hdr->n0 << 6, 1, 0, 0);
+            for (i = 0; i < hdr->n0; i++) {
+                if (D_800C35C8[arg2][i] != 0) {
+                    ((Anim1501D348 *)D_800C3A50[arg2])[i].unk4 = allocate_memory(D_800C35C8[arg2][i] * 4, 1, 0, 0);
+                    ((Anim1501D348 *)D_800C3A50[arg2])[i].unk38 = allocate_memory(0x194, 1, 0, 0);
+                }
+            }
+            ((void **)&D_800C3958)[arg2] = allocate_memory(hdr->n0 * 0x44, 1, 0, 0);
+            for (i = 0; i < hdr->n0; i++) {
+                ((void *(*)[30])D_800C3960)[arg2][i] = allocate_memory(0x10, 1, 0, 0);
+            }
+            for (i = 0; i < hdr->n0; i++) {
+                D_800C35D8[arg2][i] = 0;
+                ((u16 **)&D_800C35D0)[arg2][i] = 0;
+                D_800C35C8[arg2][i] = 0;
+            }
+            D_800C363A[arg2] = hdr->n0;
+            k = 1;
+            for (i = 0; i < hdr->n0; i++) {
+                D_800C35C8[arg2][i] = data[k].b >> 3;
+                D_800C3868[arg2][i] = (struct_game49D30_1 *)data[k].a;
+                k++;
+            }
+            D_800C35F0[arg2] = (u8 *)data[k].a;
+            k += hdr->n0;
+            for (i = 0; i < hdr->n1; i++) {
+                ((u16 **)&D_800C35D0)[arg2][i] = data[k].b >> 3;
+                D_800C3778[arg2][i] = (struct_1501CE54_1 *)data[k].a;
+                k++;
+            }
+            for (i = 0; i < hdr->n2; i++) {
+                D_800C35D8[arg2][i] = data[k].b >> 3;
+                D_800C3688[arg2][i] = (u8 *)data[k].a;
+                k++;
+            }
+            for (i = 0; i < hdr->n3; i++) {
+                ((s32 **)D_800C35E0)[arg2][i] = data[k].a;
+                k++;
+            }
+            if (arg3 != 0) {
+                D_800840FC[arg3](arg0, arg1, arg2, arg4);
+            }
+            D_800C3C9A = func_1501CFF8(arg2);
+            D_800C3D50 = (s32)allocate_memory(D_800C3C9A * 12, 1, 0, 0);
+            D_800C35B0[arg2] = 0;
+            func_1501CDC0(arg2);
+            func_1501CE54(arg2);
+            func_15022BA4(arg2);
+            for (i = 0; i < D_800C363A[arg2]; i++) {
+                func_15020388(i, arg2);
+            }
+            func_150238D0();
+            (&D_800C35EA)[arg2] = 1;
+            D_800C3638 = 1;
+            func_15022234(arg2);
+            func_15022248(arg2);
+            if (D_800C363A[arg2] == 0) {
+                func_1501E81C(0, arg2);
+            }
+            func_150242F8(1, arg2);
+            func_1501EC38(arg2);
+            func_15022848(arg2);
+            func_15022754(arg2);
+            func_15022528(arg2);
+            func_15020EC4(arg2);
+            D_800DBFF4[0] = 4;
+            func_1501DAAC(arg2);
+        }
+    }
+}
 
 typedef struct {
     s16 unk0;
