@@ -432,7 +432,29 @@ void func_150E03F8(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, v
     func_151A26EC(&position[0], &acceleration[0], &direction[0], 0.986891f, (alpha_random * 0.23f) + -0.337f, (size_random * 200.0f) + 150.0f, (random_a % 26U) + 0x28, (random_b % 201U) + 0x37, 0x1E, 0x14, 0, -1, 0x34, 0x35, 0x34, (s32) *((u8 *)arg6 + 0xC), (s32) *((u8 *)arg6 + 1));
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_10CD70/func_150E05F8.s")
+extern f32 D_800A0FD4;
+f32 sqrtf(f32);
+#pragma intrinsic(sqrtf)
+
+void func_150E05F8(void *arg0) {
+    f32 temp_fa0;
+    f32 temp_fa1;
+    f32 temp_fv0;
+    f32 temp_fv1;
+    s32 var_v0;
+    temp_fv1 = *(f32 *)((u8 *)D_800DBFF0 + 0x300) - (f32) *(s16 *)((u8 *)arg0 + 0x14);
+    temp_fa0 = *(f32 *)((u8 *)D_800DBFF0 + 0x2F8) - (f32) *(s16 *)((u8 *)arg0 + 0x10);
+    temp_fa1 = *(f32 *)((u8 *)D_800DBFF0 + 0x2FC) - (f32) *(s16 *)((u8 *)arg0 + 0x12);
+    temp_fv0 = sqrtf((temp_fv1 * temp_fv1) + ((temp_fa0 * temp_fa0) + (temp_fa1 * temp_fa1)));
+    if (temp_fv0 <= 2570.0f) {
+        var_v0 = 0xFF;
+    } else if (temp_fv0 >= D_800A0FD4) {
+        var_v0 = 0;
+    } else {
+        var_v0 = 255 - (temp_fv0 - 2570.0f) * (1 / (D_800A0FD4 - 2570.0f)) * 255.0f;
+    }
+    *(s8 *)((u8 *)arg0 + 0x8A) = var_v0;
+}
 
 extern u8 D_80088988;
 extern const f32 D_800A0F70[][3];
