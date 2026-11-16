@@ -1339,7 +1339,52 @@ void func_15150D1C(struct Local15150D1CArg *arg0, u8 arg1, s32 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_17CAF0/func_15150F90.s")
+typedef struct {
+    s32 countBase, countRange;
+    f32 position[3];
+    f32 speedBase, speedRange;
+    s16 angleBase, angleRange, pitchBase, pitchRange;
+    f32 directionBase, directionRange, jitter;
+    f32 sizeBase, sizeRange, scale;
+    u8 kind, pad3D;
+    s16 lifeBase, lifeRange;
+} Game150F90Config;
+
+void *func_1518A3C0(f32 *, f32 *, f32, f32 *, f32 *, f32, f32, u8, s16, u8, s32, u8, s32);
+
+void func_15150F90(Game150F90Config *arg0, u8 arg1, u8 arg2, s32 arg3) {
+    f32 jitter[3];
+    f32 width;
+    s32 count;
+    f32 angles[3];
+    f32 direction[3];
+
+    width = arg0->jitter + arg0->jitter;
+    jitter[1] = 0.0f;
+    count = (func_150ADA20() % (u32)(arg0->countRange + 1)) + arg0->countBase;
+    if (count != 0) {
+        do {
+            angles[0] = func_150ADA68() * 360.0f;
+            angles[1] = func_150ADA68() * 360.0f;
+            angles[2] = func_150ADA68() * 360.0f;
+            func_15143794(
+                (s16)((func_150ADA20() % (u32)(arg0->angleRange + 1)) + arg0->angleBase),
+                (s16)((func_150ADA20() % (u32)(arg0->pitchRange + 1)) + arg0->pitchBase),
+                func_150ADA68() * arg0->directionRange + arg0->directionBase,
+                direction);
+            jitter[0] = func_150ADA68() * width - arg0->jitter;
+            jitter[2] = func_150ADA68() * width - arg0->jitter;
+            func_1518A3C0(arg0->position, angles,
+                func_150ADA68() * arg0->speedRange + arg0->speedBase,
+                direction, jitter,
+                func_150ADA68() * arg0->sizeRange + arg0->sizeBase,
+                arg0->scale, arg0->kind,
+                (func_150ADA20() % (u32)(arg0->lifeRange + 1)) + arg0->lifeBase,
+                arg1, 0, arg2, arg3);
+            count--;
+        } while (count != 0);
+    }
+}
 
 typedef struct {
     s16 countBase;
