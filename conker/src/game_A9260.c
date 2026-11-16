@@ -152,7 +152,25 @@ void func_1507BDB0(AnimPlay *arg0, f32 arg1, struct127 *arg2, s32 arg3) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A9260/func_1507C22C.s")
+s32 func_150229E4(void *);
+
+void func_1507C22C(s32 arg0) {
+    s32 i;
+    u8 *entry;
+    s32 temp_a0;
+
+    for (i = 0; i < 25; i++) {
+        entry = (u8 *)&D_800CC2D0[i];
+        if (*(s32 *)(entry + 0) == 0) continue;
+        if (*(s32 *)(entry + 0x25C) & 0x200) continue;
+        if ((arg0 != 0) && (entry[5] != 4)) continue;
+        if ((D_800C3638 != 0) && (*(u8 *)&D_800C3654 == 0) && (func_150229E4(entry) == 0)) continue;
+        temp_a0 = *(s32 *)(entry + 0x2D0);
+        if ((temp_a0 != 0) && (entry[0x2FA] != 0)) {
+            func_1507BDB0((AnimPlay *)temp_a0, *(f32 *)(entry + 0x48), (struct127 *)entry, arg0);
+        }
+    }
+}
 
 void func_1507C324(void *arg0, void *arg1) {
     s32 *p0 = *(s32 **)((u8 *)arg0 + 0x2D0);
