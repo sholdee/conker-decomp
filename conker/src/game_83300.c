@@ -2,9 +2,19 @@
 
 #define func_1506160C func_1506160C_hdr
 #define func_1505841C func_1505841C_hdr
+#define func_1000F85C func_1000F85C_hdr
+#define func_1000F91C func_1000F91C_hdr
+#define func_10010BE8 func_10010BE8_hdr
 #include "functions.h"
 #undef func_1506160C
 #undef func_1505841C
+#undef func_1000F85C
+#undef func_1000F91C
+#undef func_10010BE8
+void func_1000F85C(u16, s32, s32);
+void func_1000F91C(u16, s32, s16, s32, s32, s32, s32, s32, s32, s32);
+u16 func_10010E78(u16, s32, u16, s32, s32, s32, s32, s32, s32, s32, s32);
+u16 func_10010BE8(u16, s32, s32, s32, s32, s32, s32);
 #define D_800D1550 D_800D1550_hdr
 #include "variables.h"
 #undef D_800D1550
@@ -2218,7 +2228,60 @@ void func_1506045C(struct127 *arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4) {
         func_150642AC(arg0, arg2, arg3, held, result);
     }
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_15060778.s")
+void func_15060778(s32 arg0, struct127 *arg1, u16 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6) {
+    s32 channel;
+    u32 handle;
+    u16 *slot;
+
+    handle = 0;
+    slot = 0;
+    if (arg6 & 8) {
+        channel = 0;
+    } else {
+        channel = (*(u32 *)&((u8 *)arg1)[0x184] >> 3) & 0x30;
+    }
+    switch (arg6 & 3) {
+    case 1:
+        slot = (u16 *)&((u8 *)arg1)[0x8C];
+        handle = *(u16 *)&((u8 *)arg1)[0x8C];
+        break;
+    case 2:
+    case 3:
+        slot = (u16 *)&((u8 *)arg1)[0x8E];
+        handle = *(u16 *)&((u8 *)arg1)[0x8E];
+        if ((arg6 & 3) == 2) {
+            break;
+        }
+        if ((func_1001147C(handle) == arg0) & 0x7FFF) {
+            if (arg6 & 4) {
+                func_1000F91C(handle, (u16)(arg2 + channel * 50),
+                              (s16)(((u8 *)arg1)[0x13F] * 10 + arg3), channel & 0xFF, 0,
+                              (s32)*(f32 *)&((u8 *)arg1)[0x14],
+                              (s32)*(f32 *)&((u8 *)arg1)[0x18],
+                              (s32)*(f32 *)&((u8 *)arg1)[0x1C], arg4, arg5);
+            } else {
+                func_1000F85C(handle, 0x10, arg3);
+                func_1000F85C(handle, 8, arg2 + channel * 50);
+            }
+            return;
+        }
+        arg0 |= 0x8000;
+        break;
+    }
+    if (arg6 & 4) {
+        handle = func_10010E78(handle, arg0, (u16)(arg2 + channel * 50),
+                              (s16)arg3, channel, 0,
+                              (s32)*(f32 *)&((u8 *)arg1)[0x14],
+                              (s32)*(f32 *)&((u8 *)arg1)[0x18],
+                              (s32)*(f32 *)&((u8 *)arg1)[0x1C], arg4, arg5);
+    } else {
+        handle = func_10010BE8(handle, arg0, (u16)(arg2 + channel * 50),
+                              0x40, arg3, channel, 1);
+    }
+    if (slot != 0) {
+        *slot = handle;
+    }
+}
 void func_15060A30(s32 arg0, struct127 *arg1) {
     if (arg1->camera == NULL) {
         func_10010344(arg0, arg1, 0x6D60, 0x1F4, 0x9C4);
