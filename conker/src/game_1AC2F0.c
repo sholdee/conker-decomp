@@ -445,7 +445,95 @@ void func_15181E18(s32 arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1AC2F0/func_15181EE0.s")
+typedef struct {
+    char pad0[0x4];
+    f32 unk4;
+    f32 unk8;
+    char padC[0x18];
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    f32 unk30;
+    char pad34[0x14C];
+} Struct15181EE0;
+
+extern f32 D_800A72C0;
+extern s32 D_800902C8;
+extern s32 D_800902CC;
+extern s32 func_1510D0EC(s32, s32 *, s32, s32);
+
+Gfx *func_15181EE0(Gfx *gfx) {
+    s16 yl;
+    s16 yh;
+    s32 pad1;
+    s16 top;
+    s16 left;
+    s16 bottom;
+    s16 right;
+    s32 y1;
+    s32 y2;
+    s32 xl;
+    s32 xh;
+    s32 dsdx;
+    s32 dtdy;
+    f32 t;
+    f32 alpha;
+
+    if (D_800DDE18 == 0) {
+        return gfx;
+    }
+    alpha = *(f32 *)D_800DDE18;
+    alpha *= 0.009999999776f;
+    alpha = (alpha < 0.0f) ? 0.0f : ((alpha > 1.0f) ? 1 : alpha);
+    if (alpha == 0.0f) {
+        return gfx;
+    }
+    gDPPipeSync(gfx++);
+    gDPSetFillColor(gfx++, 0x10001);
+    gSPClearGeometryMode(gfx++, 0x1F0001);
+    gSPSetGeometryMode(gfx++, 0x200004);
+    gDPSetOtherMode(gfx++, 0x302C0F, 4);
+    top = ((Struct15181EE0 *)D_800BE628)->unk24;
+    left = ((Struct15181EE0 *)D_800BE628)->unk2C;
+    bottom = ((Struct15181EE0 *)D_800BE628)->unk28;
+    right = ((Struct15181EE0 *)D_800BE628)->unk30;
+    t = ((Struct15181EE0 *)D_800BE628)->unk8 * 0.6999999881f;
+    t += 30.0f;
+    t *= alpha;
+    y1 = (((Struct15181EE0 *)D_800BE628)->unk24 - 30.0f) + t;
+    gfx = func_1517F9F4(gfx, left, top, right, (s16)y1, 0);
+    t = ((Struct15181EE0 *)D_800BE628)->unk8 * (1.0f - D_800A72C0);
+    t += 30.0f;
+    t *= alpha;
+    y2 = (((Struct15181EE0 *)D_800BE628)->unk28 + 30.0f) - t;
+    gfx = func_1517F9F4(gfx, left, (s16)y2, right, bottom, 0);
+    gDPPipeSync(gfx++);
+    gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, 0, G_ON);
+    gDPSetOtherMode(gfx++, 0x002CFF, 0x5011C4);
+    gDPSetCombine(gfx++, 0xFFFFFF, 0xFFFFF3F9);
+    gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_16b, 1, func_1510D0EC(D_800902C8, 0, 3, 0));
+    gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
+    gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, 0x7FF, 0);
+    gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_4b, 8, 0, G_TX_RENDERTILE, 0, G_TX_CLAMP, 7, 0, G_TX_CLAMP, 7, 0);
+    gDPSetTileSize(gfx++, G_TX_RENDERTILE, 2, 2, 0x1FE, 0xFE);
+    dtdy = 0x222;
+    dsdx = (128.0f / ((Struct15181EE0 *)D_800BE628)->unk4) * 1024.0f;
+    yl = y1;
+    yh = y1 + 30;
+    xl = left;
+    xh = right;
+    gSPScisTextureRectangle(gfx++, xl << 2, yl << 2, xh << 2, yh << 2, G_TX_RENDERTILE, 0, 0, dsdx, dtdy);
+    gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_16b, 1, func_1510D0EC(D_800902CC, 0, 3, 0));
+    gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
+    gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, 0x7FF, 0);
+    gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_4b, 8, 0, G_TX_RENDERTILE, 0, G_TX_CLAMP, 7, 0, G_TX_CLAMP, 7, 0);
+    gDPSetTileSize(gfx++, G_TX_RENDERTILE, 2, 2, 0x1FE, 0xFE);
+    yl = y2 - 30;
+    yh = y2;
+    gSPScisTextureRectangle(gfx++, xl << 2, yl << 2, xh << 2, yh << 2, G_TX_RENDERTILE, 0, 0, dsdx, dtdy);
+    gSPSetGeometryMode(gfx++, 1);
+    return gfx;
+}
 
 void func_15182670(s32 arg0, s32 arg1, s32 arg2, s32 arg3, volatile s16 arg4, u8 arg5, u8 arg6, s32 arg7) {
     struct {
