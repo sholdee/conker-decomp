@@ -1638,7 +1638,48 @@ f32 func_15144C8C(f32 arg0, f32 arg1) {
     return tmp;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15144CEC.s")
+typedef struct {
+    char pad0[0xC];
+    f32 unkC;
+    f32 unk10;
+    char pad14[0x20];
+    f32 unk34;
+    f32 unk38;
+    char pad3C[0x144];
+} Struct15144CEC;
+void func_150A7A00(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 *arg4, f32 *arg5, f32 *arg6, f32 *arg7);
+
+s32 func_15144CEC(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 *arg4, u8 arg5) {
+    f32 sp44;
+    f32 sp40;
+    f32 sp3C;
+    f32 x;
+    f32 y;
+
+    if (arg2 == NULL) {
+        arg2 = &sp44;
+    }
+    if (arg3 == NULL) {
+        arg3 = &sp40;
+    }
+    if (arg4 == NULL) {
+        arg4 = &sp3C;
+    }
+    func_150A7A00((s32)((u8 *)&D_800D9D10 + (arg5 << 6)), arg0[0], arg0[1], arg0[2], arg1, arg1 + 1, arg2, arg3);
+    if ((6000.0f <= *arg3) || (*arg3 <= D_800D9B20)) {
+        return 0;
+    }
+    if (*arg3 != 0.0f) {
+        *arg4 = 1.0f / *arg3;
+    } else {
+        return 0;
+    }
+    x = ((Struct15144CEC *)D_800BE628)[arg5].unkC;
+    y = ((Struct15144CEC *)D_800BE628)[arg5].unk10;
+    arg1[0] = ((Struct15144CEC *)D_800BE628)[arg5].unk34 + (arg1[0] * (x + 5.0f)) * *arg4;
+    arg1[1] = ((Struct15144CEC *)D_800BE628)[arg5].unk38 - (arg1[1] * (y + 5.0f)) * *arg4;
+    return 1;
+}
 struct struct_15144E80 {
     s16 unk0;
     s16 unk2;
