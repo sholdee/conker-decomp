@@ -2641,7 +2641,68 @@ void func_1506160C(struct127 *arg0, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
         }
     }
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_150617BC.s")
+void func_150617BC(u8 *arg0) {
+    s32 i;
+    s32 mask;
+    s32 value;
+
+    if (*(s32 *)arg0 != 0) {
+        mask = 1;
+        for (i = 0; i <= D_80082FA0; i++) {
+            if (arg0[0xF] & mask) {
+                if (arg0[i + 0xB] > 0) {
+                    if (((u8 *)&D_800DBFF4)[i] == 0) {
+                        value = arg0[i + 0xB] - 50;
+                        if (value < 0) {
+                            value = 0;
+                        }
+                    } else {
+                        value = 0;
+                    }
+                    arg0[i + 0xB] = value;
+                }
+            } else {
+                if (arg0[i + 0xB] < 0xFF) {
+                    if (((u8 *)&D_800DBFF4)[i] == 0) {
+                        value = arg0[i + 0xB] + 50;
+                        if (value > 0xFF) {
+                            value = 0xFF;
+                        }
+                    } else {
+                        value = 0xFF;
+                    }
+                    arg0[i + 0xB] = value;
+                }
+            }
+            mask <<= 1;
+        }
+        if (arg0[0xA] != 0) {
+            if (arg0[8] != arg0[7]) {
+                if (arg0[7] < arg0[8]) {
+                    value = arg0[9] + arg0[7];
+                    if (arg0[8] < value) {
+                        value = arg0[8];
+                    }
+                } else {
+                    value = arg0[7] - arg0[9];
+                    if (value < arg0[8]) {
+                        value = arg0[8];
+                    }
+                }
+                arg0[7] = value;
+            }
+            if (arg0[8] == arg0[7]) {
+                if (arg0[0xA] == 6) {
+                    func_15060F28((struct127 *)arg0, 1);
+                } else if (arg0[0xA] == 5) {
+                    func_15060F28((struct127 *)arg0, 2);
+                } else {
+                    arg0[0xA] = 0;
+                }
+            }
+        }
+    }
+}
 // ???
 s32 func_1506196C(u8 *arg0, s32 arg1) {
     s32 temp_v1 = arg0[7] * (arg0 + arg1)[0xB];
