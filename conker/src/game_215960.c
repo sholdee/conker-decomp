@@ -656,8 +656,220 @@ Gfx *func_151EADFC(Gfx *gfx, s32 x, s32 y, s32 value) {
 
     return gfx;
 }
+typedef struct {
+    /* 0x00 */ Gfx **unk0;
+    /* 0x04 */ Gfx *unk4[4];
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 unk16[6];
+    /* 0x1C */ s32 unk1C;
+    /* 0x20 */ s32 unk20;
+    /* 0x24 */ s32 unk24;
+    /* 0x28 */ f32 unk28[2][4][4];
+} GameStruct151ED90C;
+typedef struct {
+    /* 0x00 */ void *img;
+    /* 0x04 */ u16 pad4;
+    /* 0x06 */ u16 width;
+    /* 0x08 */ u16 height;
+    /* 0x0A */ u8 fmt;
+    /* 0x0B */ u8 siz;
+} Tex151EBB50;
+extern Tex151EBB50 D_80090060;
+extern u8 D_1647;
+extern u8 D_1648;
+extern u8 D_1653;
+extern u8 D_1654;
+extern u8 D_7D3;
+extern u8 D_7D4;
+extern u8 D_7F1;
+extern u8 D_7F2;
+extern u8 D_7F6;
+extern u8 D_7FC;
+extern u8 D_80E;
+extern u8 D_82F;
+extern u8 D_830;
+extern u8 D_891;
+extern s32 *D_800891BC[];
+extern s8 D_8008FEF0;
+extern GameStruct151ED90C *D_8009005C;
+extern u8 D_800BEAC1;
+extern s16 D_800C3C9E;
+typedef struct {
+    /* 0x00 */ u8 pad0[0x64];
+    /* 0x64 */ s32 unk64;
+} Struct1509B570;
+s32 func_151E564C(void);
+Gfx *func_151E89A0(Gfx *, s32, s32);
+void func_1510D694(s32);
+s32 func_1509BE40(s32, s32, s32);
+Struct1509B570 *func_1509B570(s32);
+Gfx *func_150900F0(Gfx *, s32);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_215960/func_151EB06C.s")
+extern s16 D_8008FDCC;
+extern s16 D_800E0C30;
+extern Mtx D_800E0C38;
+void func_151EDB58();
+GameStruct151ED90C *func_151ED90C(s32, s32, s32, f32);
+Gfx *func_151EDBDC(Gfx *, GameStruct151ED90C *, f32, f32, f32);
+Gfx *func_151EA15C(Gfx *, s32, s32, s32);
+Gfx *func_151EADFC(Gfx *, s32, s32, s32);
+
+#define OBJ58 (*(GameStruct151ED90C **)&D_80090058)
+Gfx *func_151EB06C(Gfx *gfx) {
+    s32 show;
+    s32 value;
+    s32 x;
+    s32 hasValue;
+    s32 i;
+    s32 start;
+    extern s32 func_1510D0EC();
+    static s8 D_800900B8 = 0;
+
+    show = (D_800D2E4C->unk19 & 4) || (D_8008FDA8 < 0);
+    if (D_800BE616 && !D_800BEAC0 && !D_800BEAC1) {
+        if (!func_151E564C() || D_8008FDD4->unk42 == 1) {
+            gfx = func_151E89A0(gfx, 0, 0xFF);
+        }
+    } else {
+        D_800E0C78 = 0;
+    }
+    if (!D_800BEAC0 || D_8008FEF0) {
+        if (OBJ58 != 0) {
+            func_151EDB58(OBJ58);
+            func_151EDB58(D_8009005C);
+            OBJ58 = 0;
+        }
+        D_8008FDCC = 0;
+        D_800900B8 = 0;
+        return gfx;
+    }
+    if (D_800B0DF0->unk8 == 4 && D_800900B8 == 0) {
+        if (D_800BE9F0 == 0x13) {
+            s32 id;
+            id = D_800891BC[D_800B0DF0->unk9][2];
+            for (i = 0; i < 0x48; i++, id++) {
+                if (id != (s32)&D_1647 && id != (s32)&D_1648 && id != (s32)(&D_1648 + 1) &&
+                    id != (s32)&D_1653 && id != (s32)&D_1654 && id != (s32)(&D_1654 + 1)) {
+                    func_1510D694(id);
+                }
+            }
+            start = 0x4E;
+        } else {
+            start = 0;
+        }
+        for (i = start; i < 0x168; i++) {
+            func_1510D694(D_800891BC[D_800B0DF0->unk9][2] + i);
+        }
+    }
+    if (D_800900B8 < 5) {
+        D_800900B8++;
+        return gfx;
+    }
+    D_8008FDCC += 0x20;
+    if (D_8008FDCC >= 0x100) {
+        D_8008FDCC = 0xFF;
+    }
+    gSPDisplayList(gfx++, &D_80090028);
+    gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, D_8008FDCC);
+    D_80090060.img = &D_891;
+    {
+    s32 remaining;
+    s32 pad;
+    func_1510D0EC(&D_7D3, &remaining, 3, 0);
+    func_1510D0EC(&D_7D4, &remaining, 3, 0);
+    func_1510D0EC(&D_7FC, &remaining, 3, 0);
+    func_1510D0EC((&D_7FC + 1), &remaining, 3, 0);
+    func_1510D0EC(&D_7F1, &remaining, 3, 0);
+    func_1510D0EC(&D_7F2, &remaining, 3, 0);
+    func_1510D0EC(&D_82F, &remaining, 3, 0);
+    func_1510D0EC(&D_830, &remaining, 3, 0);
+    if (D_800BE616) {
+        func_1510D0EC(&D_80E, &remaining, 3, 0);
+        func_1510D0EC((&D_80E + 1), &remaining, 3, 0);
+    }
+    if (!D_800BE616) {
+        f32 hw;
+        value = func_150859AC(0, 6);
+        if (value == 0x7D00) {
+            value = 1000000;
+        }
+        if (func_1509BE40(0, 0x5082, 0x1A) && !func_1509BE40(0, 0x5083, 0x1A)) {
+            Struct1509B570 *p = func_1509B570(0x83);
+            if (p != NULL) {
+                if (p->unk64 == 0) {
+                    value = 0;
+                } else if (p->unk64 < 3) {
+                    value = (s32)(value * (u32)p->unk64) / 3;
+                }
+            } else {
+                value = 0;
+            }
+        }
+        if (D_800C35EA == 1 && D_800C3C9E != -1) {
+            if (D_800C3C9E == 0) {
+                value = 0;
+            } else {
+                value = (D_800C3C9E == 0x7D00) ? 1000000 : value - D_800C3C9E;
+            }
+        }
+        if (value > 0) {
+            hasValue = 1;
+        } else {
+            hasValue = 0;
+        }
+        gfx = func_151ED430(gfx, &D_80090060, 0x94, 0x3C, 3, 1, 1.0f, 0);
+        if (OBJ58 == 0) {
+            OBJ58 = func_151ED90C(0xA4, 0x17, 0, 1.0f);
+            D_8009005C = func_151ED90C(0xA2, 8, 0, 1.0f);
+        }
+        gSPSetGeometryMode(gfx++, 0x220404);
+        gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFF);
+        gfx = func_150900F0(gfx, 1);
+        hw = ((f32 *)D_800BE628)[1] * 0.5f;
+        func_151EF954((f32 (*)[4])&D_800E0C38, -hw, hw, -(((f32 *)D_800BE628)[2] * 0.5f), ((f32 *)D_800BE628)[2] * 0.5f, 1.0f, 20000.0f, 1.0f);
+        D_800E0C30 = D_8008FDCC;
+        if (OBJ58 != 0) {
+            i = 10;
+            if (hasValue) {
+                x = -0x10;
+                while (i < value) {
+                    x -= 0x10;
+                    i *= 10;
+                }
+                gfx = func_151EDBDC(gfx, OBJ58, x + -10.0f, -83.0f, 0.2699999809f);
+            }
+        }
+        if (D_8009005C != 0 && show) {
+            gfx = func_151EDBDC(gfx, D_8009005C, 70.0f, 80.0f, 0.3000000119f);
+        }
+        gSPDisplayList(gfx++, &D_80090028);
+        gDPSetOtherMode(gfx++, 0x002C3F, 0x504244);
+        if (show) {
+            s32 n;
+            n = func_150859AC(0, 3);
+            if (n != 0) {
+                n--;
+            }
+            if (n >= 100) {
+                n = 99;
+            }
+            gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, D_8008FDCC);
+            gfx = func_151EADFC(gfx, 0xEC, 0x1E, n);
+        }
+        if (hasValue) {
+            s32 pad4;
+            gDPPipeSync(gfx++);
+            gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, D_8008FDCC);
+            D_80090060.img = &D_7F6;
+            gfx = func_151EADFC(func_151ED430(gfx, &D_80090060, x + 0xA5, 0xAA, 1, 1, 1.0f, 0), x + 0xAD, 0x9B, value);
+        }
+    } else {
+        gfx = func_151EA15C(func_151ED430(gfx, &D_80090060, 0x94, 0x12, 3, 1, 1.0f, 0), 0x85, D_8008FDCC, 1);
+    }
+    }
+    return gfx;
+}
 
 extern s16 D_8008FDCC;
 Gfx *func_151EA15C(Gfx *, s32, s32, s32);
@@ -732,14 +944,6 @@ s32 func_151EB96C(s32 arg0) {
     return arg0;
 }
 
-typedef struct {
-    /* 0x00 */ void *img;
-    /* 0x04 */ u16 pad4;
-    /* 0x06 */ u16 width;
-    /* 0x08 */ u16 height;
-    /* 0x0A */ u8 fmt;
-    /* 0x0B */ u8 siz;
-} Tex151EBB50;
 extern Tex151EBB50 D_80090060;
 extern u8 D_800917EC;
 extern u8 D_85D;
@@ -1153,17 +1357,6 @@ Gfx *func_151ED430(Gfx *arg0, void *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5
 #undef MIN
 #define MIN(a, b) ((b) < (a) ? (b) : (a))
 
-typedef struct {
-    /* 0x00 */ Gfx **unk0;
-    /* 0x04 */ Gfx *unk4[4];
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16[6];
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ s32 unk20;
-    /* 0x24 */ s32 unk24;
-    /* 0x28 */ f32 unk28[2][4][4];
-} GameStruct151ED90C;
 
 extern void *allocate_memory(s32, s32, s32, s32);
 extern s32 func_1503F62C(s32, s32, void *, void *, void *, void *, void *);
