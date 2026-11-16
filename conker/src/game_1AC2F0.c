@@ -377,7 +377,205 @@ Gfx *func_1517F9F4(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 arg5) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1AC2F0/func_1517FB9C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1AC2F0/func_15180580.s")
+typedef struct {
+    char pad0[0x4];
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    char pad14[0x10];
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    f32 unk30;
+    char pad34[0x14C];
+} Struct15180580;
+extern f32 *D_800DDE44;
+extern f32 *D_800DDE48;
+extern f32 *D_800DDE4C;
+extern u8 D_800DDD78[];
+extern u8 D_8008D018[];
+extern s32 D_80090298[];
+extern s32 func_1510D0EC(s32, s32 *, s32, s32);
+Gfx *func_1517FB9C(Gfx *gfx, s32 arg1, s32 arg2, f32 arg3, f32 arg4, s32 arg5);
+
+#define VP15180580 (((Struct15180580 *)D_800BE628)[arg1])
+
+Gfx *func_15180580(Gfx *gfx, s32 arg1) {
+    f32 v;
+
+    if (D_800DDE40 != 0) {
+        if (D_800C35EA == 1) {
+            f32 sc;
+
+            v = *D_800DDE44 * 0.01f;
+            if (v > 1.0f) {
+                v = 1.0f;
+            } else if (v < 0.0f) {
+                v = 0.0f;
+            }
+            sc = *D_800DDE48 * 0.01f;
+            D_800DDDE8[arg1][0] = ((Struct15180580 *)D_800BE628)->unk4 * sc;
+            sc = -(*D_800DDE4C * 0.01f);
+            D_800DDDE8[arg1][1] = ((Struct15180580 *)D_800BE628)->unk8 * sc;
+        } else {
+            v = 1.0f;
+        }
+    } else {
+        v = (&D_800DDDC8)[arg1];
+    }
+    if (v == 0.0f) {
+        return gfx;
+    }
+    WGFX1517F08C(gfx++, 0xDE000000, D_8008D018);
+    WGFX1517F08C(gfx++, 0xE7000000, 0);
+    WGFX1517F08C(gfx++, 0xF7000000, 0x10001);
+    WGFX1517F08C(gfx++, 0xFA000000, 0xFF);
+    WGFX1517F08C(gfx++, 0xFCFFFFFF, 0xFFFDF6FB);
+    WGFX1517F08C(gfx++, 0xEF000CFF, 0x0F0A4004);
+    WGFX1517F08C(gfx++, 0xD9E0FFFE, 0);
+    WGFX1517F08C(gfx++, 0xD9FFFFFF, 0x200004);
+    if (v < 1.0f) {
+        s32 i;
+        s16 ulx;
+        s16 uly;
+        s16 lrx;
+        s16 lry;
+        s16 size;
+        s16 top;
+        s16 left;
+        s16 bottom;
+        s16 right;
+
+        top = VP15180580.unk24;
+        left = VP15180580.unk2C;
+        bottom = VP15180580.unk28;
+        right = VP15180580.unk30;
+        size = (s32)(-399.0f * v + 400.0f);
+        uly = top;
+        ulx = left;
+        lry = (s32)((D_800DDDE8[arg1][1] + VP15180580.unk10) - size);
+        lrx = right;
+        gfx = func_1517F9F4(gfx, ulx, uly, lrx, lry, arg1);
+        uly = (s32)((D_800DDDE8[arg1][1] + VP15180580.unk10) + size);
+        ulx = left;
+        lry = bottom;
+        lrx = right;
+        gfx = func_1517F9F4(gfx, ulx, uly, lrx, lry, arg1);
+        uly = (s32)((D_800DDDE8[arg1][1] + VP15180580.unk10) - size);
+        ulx = left;
+        lry = (s32)((D_800DDDE8[arg1][1] + VP15180580.unk10) + size);
+        lrx = (s32)((D_800DDDE8[arg1][0] + VP15180580.unkC) - size);
+        gfx = func_1517F9F4(gfx, ulx, uly, lrx, lry, arg1);
+        uly = (s32)((D_800DDDE8[arg1][1] + VP15180580.unk10) - size);
+        ulx = (s32)((D_800DDDE8[arg1][0] + VP15180580.unkC) + size);
+        lry = (s32)((D_800DDDE8[arg1][1] + VP15180580.unk10) + size);
+        lrx = right;
+        gfx = func_1517F9F4(gfx, ulx, uly, lrx, lry, arg1);
+        if ((&D_800DDE1C)[arg1] != 0) {
+            WGFX1517F08C(gfx++, 0xE7000000, 0);
+            WGFX1517F08C(gfx++, 0xEF002C0F, 0x0F0A4004);
+            WGFX1517F08C(gfx++, 0xFCFFFFFF, 0xFFFDF6FB);
+            WGFX1517F08C(gfx++, 0xFA000000, 0xFF);
+            for (i = 0; i < 2; i++) {
+                uly = (s32)(VP15180580.unk10 - 1);
+                lry = (s32)(VP15180580.unk10 + 1);
+                gfx = func_1517F9F4(gfx, left - i, uly - i, right + i, lry + i, arg1);
+                ulx = (s32)(VP15180580.unkC - 1);
+                lrx = (s32)(VP15180580.unkC + 1);
+                gfx = func_1517F9F4(gfx, ulx - i, top - i, lrx + i, bottom + i, arg1);
+                if ((&D_800DDE1C)[arg1] == 1) {
+                    s32 pos[2];
+
+                    pos[0] = D_800DDDE8[arg1][0] + VP15180580.unkC;
+                    pos[1] = D_800DDDE8[arg1][1] + VP15180580.unk10;
+                    uly = pos[1] - 60;
+                    ulx = pos[0] - 60;
+                    lry = pos[1] - 58;
+                    lrx = pos[0] - 30;
+                    gfx = func_1517F9F4(gfx, ulx - i, uly - i, lrx + i, lry + i, arg1);
+                    uly = pos[1] - 60;
+                    ulx = pos[0] - 60;
+                    lry = pos[1] - 30;
+                    lrx = pos[0] - 58;
+                    gfx = func_1517F9F4(gfx, ulx - i, uly - i, lrx + i, lry + i, arg1);
+                    uly = pos[1] - 30;
+                    ulx = pos[0] + 58;
+                    lry = pos[1] - 60;
+                    lrx = pos[0] + 60;
+                    gfx = func_1517F9F4(gfx, ulx - i, uly - i, lrx + i, lry + i, arg1);
+                    uly = pos[1] - 58;
+                    ulx = pos[0] + 30;
+                    lry = pos[1] - 60;
+                    lrx = pos[0] + 60;
+                    gfx = func_1517F9F4(gfx, ulx - i, uly - i, lrx + i, lry + i, arg1);
+                    uly = pos[1] + 60;
+                    ulx = pos[0] + 60;
+                    lry = pos[1] + 30;
+                    lrx = pos[0] + 58;
+                    gfx = func_1517F9F4(gfx, ulx - i, uly - i, lrx + i, lry + i, arg1);
+                    uly = pos[1] + 60;
+                    ulx = pos[0] + 60;
+                    lry = pos[1] + 58;
+                    lrx = pos[0] + 30;
+                    gfx = func_1517F9F4(gfx, ulx - i, uly - i, lrx + i, lry + i, arg1);
+                    uly = pos[1] + 60;
+                    ulx = pos[0] - 60;
+                    lry = pos[1] + 30;
+                    lrx = pos[0] - 58;
+                    gfx = func_1517F9F4(gfx, ulx - i, uly - i, lrx + i, lry + i, arg1);
+                    uly = pos[1] + 60;
+                    ulx = pos[0] - 60;
+                    lry = pos[1] + 58;
+                    lrx = pos[0] - 30;
+                    gfx = func_1517F9F4(gfx, ulx - i, uly - i, lrx + i, lry + i, arg1);
+                }
+                if (i == 0) {
+                    WGFX1517F08C(gfx++, 0xE7000000, 0);
+                    WGFX1517F08C(gfx++, 0xEF002C0F, 0x00504244);
+                    WGFX1517F08C(gfx++, 0xF7000000, 0);
+                    WGFX1517F08C(gfx++, 0xFA000000, 0xFFFFFF00);
+                }
+            }
+        }
+        WGFX1517F08C(gfx++, 0xE7000000, 0);
+        WGFX1517F08C(gfx++, 0xFCFFFFFF, 0xFFFFF3F9);
+        WGFX1517F08C(gfx++, 0xD7000002, 0xFFFFFFFF);
+        WGFX1517F08C(gfx++, 0xFD900000, func_1510D0EC(D_80090298[1], NULL, 3, 0));
+        WGFX1517F08C(gfx++, 0xF5900000, 0x07000000);
+        WGFX1517F08C(gfx++, 0xF3000000, 0x077FF000);
+        WGFX1517F08C(gfx++, 0xF5881000, 0x00098260);
+        WGFX1517F08C(gfx++, 0xF2002002, 0x000FE0FE);
+        WGFX1517F08C(gfx++, 0xEF002CFF, 0x005011C4);
+        gfx = func_1517FB9C(gfx, size, 0x40, 0, 0, arg1);
+        if ((&D_800DDE1C)[arg1] != 0) {
+            WGFX1517F08C(gfx++, 0xE7000000, 0);
+            WGFX1517F08C(gfx++, 0xFD700000, func_1510D0EC(D_80090298[2], NULL, 3, 0));
+            WGFX1517F08C(gfx++, 0xF5700000, 0x07000000);
+            WGFX1517F08C(gfx++, 0xF3000000, 0x077FF000);
+            WGFX1517F08C(gfx++, 0xF5681000, 0x00098260);
+            gfx = func_1517FB9C(gfx, size / 2, 0x40, 0, 0, arg1);
+            if ((&D_800DDE1C)[arg1] == 2) {
+                WGFX1517F08C(gfx++, 0xFCFFFFFF, 0xFFFCF279);
+                WGFX1517F08C(gfx++, 0xFD100000, func_1510D0EC(D_80090298[D_800DDD78[arg1] + 3], NULL, 3, 0));
+                WGFX1517F08C(gfx++, 0xF5100000, 0x07000000);
+                WGFX1517F08C(gfx++, 0xF3000000, 0x073FF000);
+                WGFX1517F08C(gfx++, 0xF5101000, 0x00094250);
+                gfx = func_1517FB9C(gfx, size / 4, 0x20, 32.0f, 28.0f, arg1);
+                gfx = func_1517FB9C(gfx, size / 4, 0x20, 28.0f, 32.0f, arg1);
+                if (D_800DDD78[arg1] < 2) {
+                    D_800DDD78[arg1]++;
+                } else {
+                    D_800DDD78[arg1] = 0;
+                }
+            }
+        }
+    } else {
+        gDPFillRectangle(gfx++, VP15180580.unk2C, VP15180580.unk24, VP15180580.unk30, VP15180580.unk28);
+    }
+    WGFX1517F08C(gfx++, 0xD9FFFFFF, 1);
+    return gfx;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1AC2F0/func_151814FC.s")
 
