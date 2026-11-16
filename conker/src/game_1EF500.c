@@ -934,7 +934,292 @@ void func_151C36D8(struct17 *arg0, u8 arg1, s32 arg2) {
     func_151602C0(&header, &header2, (func_150ADA20() & 1) + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg1, arg2);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1EF500/func_151C3B0C.s")
+typedef struct {
+    /* 0x00 */ u8 pad0[0x30];
+    /* 0x30 */ struct17 pos;
+    /* 0x3C */ u8 pad3C[0x60 - 0x3C];
+    /* 0x60 */ struct17 prev;
+    /* 0x6C */ u8 unk6C[0x88 - 0x6C];
+} GameSub151C3B0C;
+
+typedef struct {
+    /* 0x000 */ u8 pad0;
+    /* 0x001 */ u8 unk1;
+    /* 0x002 */ u8 pad2[0xA];
+    /* 0x00C */ u8 unkC;
+    /* 0x00D */ u8 padD[0x110 - 0xD];
+    /* 0x110 */ GameSub151C3B0C unk110;
+    /* 0x198 */ s32 unk198;
+} GameObj151C3B0C;
+
+typedef struct {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s16 unk4;
+    /* 0x06 */ u8 unk6;
+    /* 0x07 */ u8 unk7;
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ u8 unk10;
+    /* 0x11 */ u8 unk11;
+    /* 0x12 */ u8 unk12;
+    /* 0x13 */ u8 unk13;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 unk16;
+    /* 0x17 */ u8 unk17;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ s32 unk1C;
+    /* 0x20 */ u8 unk20;
+    /* 0x21 */ u8 pad21;
+    /* 0x22 */ s16 unk22;
+    /* 0x24 */ s16 unk24;
+} GameDebris151C3B0C; /* 0x28 */
+
+typedef struct {
+    /* 0x00 */ u8 unk00;
+    /* 0x01 */ u8 unk01;
+    /* 0x02 */ s16 unk02;
+    /* 0x04 */ s16 unk04;
+    /* 0x06 */ u8 pad06[2];
+    /* 0x08 */ s32 unk08;
+    /* 0x0C */ s32 unk0C;
+    /* 0x10 */ u8 unk10;
+    /* 0x11 */ u8 unk11;
+    /* 0x12 */ u8 unk12;
+    /* 0x13 */ u8 unk13;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ struct17 pos;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ f32 unk34;
+    /* 0x38 */ f32 unk38;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ s32 flags;
+    /* 0x44 */ u8 unk44;
+    /* 0x45 */ u8 unk45;
+    /* 0x46 */ u8 unk46;
+    /* 0x47 */ u8 unk47;
+    /* 0x48 */ s32 unk48;
+    /* 0x4C */ u8 unk4C;
+    /* 0x4D */ u8 pad4D[7];
+    /* 0x54 */ s16 unk54;
+    /* 0x56 */ s16 unk56;
+} GameSpark151C3B0C; /* 0x58 */
+
+typedef struct {
+    /* 0x00 */ s16 unk0;
+    /* 0x02 */ s16 unk2;
+    /* 0x04 */ u8 unk4;
+    /* 0x05 */ u8 pad5;
+    /* 0x06 */ u16 unk6;
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ s16 unk10;
+    /* 0x12 */ s16 unk12;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 unk1D;
+    /* 0x1E */ u8 unk1E;
+    /* 0x1F */ u8 unk1F;
+    /* 0x20 */ u8 unk20;
+    /* 0x21 */ u8 unk21;
+    /* 0x22 */ u8 unk22;
+    /* 0x23 */ u8 unk23;
+    /* 0x24 */ u8 unk24;
+    /* 0x25 */ u8 unk25;
+    /* 0x26 */ s16 unk26;
+    /* 0x28 */ s16 unk28;
+    /* 0x2A */ s16 unk2A;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ f32 unk34;
+    /* 0x38 */ struct17 unk38;
+    /* 0x44 */ s16 unk44;
+    /* 0x46 */ s16 unk46;
+    /* 0x48 */ s16 unk48;
+    /* 0x4A */ s16 unk4A;
+    /* 0x4C */ f32 unk4C;
+    /* 0x50 */ f32 unk50;
+    /* 0x54 */ f32 unk54;
+    /* 0x58 */ f32 unk58;
+    /* 0x5C */ s32 unk5C;
+    /* 0x60 */ s8 unk60;
+    /* 0x61 */ s8 unk61;
+    /* 0x62 */ u8 unk62;
+    /* 0x63 */ u8 unk63;
+    /* 0x64 */ u8 unk64;
+    /* 0x65 */ u8 pad65[3];
+    /* 0x68 */ f32 unk68;
+} GameSmoke151C3B0C; /* 0x6C */
+
+void func_15153634(void *, u8, u8, s32);
+
+void func_151C3B0C(GameObj151C3B0C *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 arg5, u8 arg6, u8 arg7) {
+    s32 kind;
+    GameSub151C3B0C *sub;
+    s32 type;
+
+    kind = arg0->unk198 & 0x1F;
+    if ((D_800BE9F0 == 0x2B) || (D_800BE9F0 == 0x30)) {
+        switch (kind) {
+        case 1:
+            type = 3;
+            break;
+        case 0:
+        case 5:
+        default:
+            type = 4;
+            break;
+        }
+    } else if ((kind == 0xB) && (D_800BE9F0 == 4)) {
+        type = 1;
+    } else if (((kind == 1) || (kind == 0xA)) && (D_800BE9F0 == 0xE)) {
+        type = 2;
+    } else if (D_800BE9F0 == 0x34) {
+        type = 3;
+    } else if (D_800BE9F0 == 0x27) {
+        type = 5;
+    } else {
+        type = 0;
+        arg3 = arg2 = arg1 = 0.0f;
+    }
+    if (func_150ADA68() < arg1) {
+        GameDebris151C3B0C debris;
+        f32 scale;
+        const s32 shade[6] = { 0x6F, 0x6F, 0x70, 0x70, 0x4F, 0x76 };
+        u8 big;
+
+        scale = (func_150ADA68() * 15.0f) + 15.0f;
+        debris.unk6 = shade[type];
+        debris.unk7 = 0;
+        debris.unk0 = (D_800BE616 ? 0x20000 : 0) | 0xBF01;
+        debris.unk4 = (func_150ADA20() % 61U) + 0x3C;
+        debris.unk8 = 0;
+        debris.unkC = 0;
+        debris.unk10 = (func_150ADA20() % 56U) + 0xC8;
+        debris.unk11 = 0xFF;
+        debris.unk12 = 0;
+        debris.unk13 = 0;
+        debris.unk14 = 0;
+        debris.unk15 = 0xFF;
+        big = (type == 4);
+        debris.unk18 = ((big ? 0x48 : 0x3B) << 16) + 2;
+        debris.unk16 = 0;
+        debris.unk17 = big ? 6 : 7;
+        debris.unk20 = arg5;
+        debris.unk22 = 0x20;
+        debris.unk24 = 7;
+        sub = &arg0->unk110;
+        func_1513C650((s32)&debris, 0, 0, (s32)sub->unk6C, sub->pos.unk0, sub->pos.unk4, sub->pos.unk8,
+                      scale, scale, func_150ADA20() & 0xFF, 0, 0, 0, 0, arg0->unkC, arg0->unk1);
+    }
+    if (func_150ADA68() < arg2) {
+        GameSpark151C3B0C spark;
+        const s32 shade[6] = { 0x6D, 0x6D, 0x6E, 0x6E, 0x6D, 0x6D };
+
+        sub = &arg0->unk110;
+        spark.unk00 = shade[type];
+        spark.unk01 = 0;
+        spark.unk02 = 0x3B03;
+        spark.unk04 = (func_150ADA20() % 6U) + 0xD;
+        spark.unk08 = 0;
+        spark.unk0C = 0;
+        spark.unk10 = 0xFF;
+        spark.unk11 = 0xFF;
+        spark.unk12 = 0xFF;
+        spark.unk13 = 0xFF;
+        spark.unk14 = (func_150ADA68() * 5.0f) + 7.0f;
+        spark.unk18 = (func_150ADA68() * 40.0f) + 10.0f;
+        spark.pos = sub->pos;
+        spark.unk28 = sub->pos.unk0 - sub->prev.unk0;
+        spark.unk2C = sub->pos.unk4 - sub->prev.unk4;
+        spark.unk30 = sub->pos.unk8 - sub->prev.unk8;
+        spark.unk34 = 1.269999981f;
+        spark.unk38 = 1.0f;
+        spark.unk3C = 56.81999969f;
+        spark.flags = (D_800BE616 ? 0x40000000 : 0) | 0x08DC0009;
+        spark.unk44 = (func_150ADA20() % 76U) + 0xB4;
+        spark.unk45 = 0xFF;
+        spark.unk46 = 0;
+        spark.unk47 = 7;
+        spark.unk48 = 0;
+        spark.unk4C = arg7;
+        spark.unk54 = 8;
+        spark.unk56 = 0x1F;
+        func_1513D2F0(&spark, (s32)&D_800A4AA0, 0x22, 0, 0, 0x1C, 2, 0, 0, 0, arg0->unkC, arg0->unk1);
+    }
+    if (func_150ADA68() < arg3) {
+        GameSmoke151C3B0C smoke;
+        const u8 colorA[6][3] = { { 0xB7, 0x77, 0x34 }, { 0xB7, 0x77, 0x34 }, { 0xAA, 0x52, 0x1E },
+                            { 0xAA, 0x52, 0x1E }, { 0x98, 0x92, 0x79 }, { 0xFF, 0xC0, 0x00 } };
+        const u8 colorB[6][3] = { { 0x5C, 0x30, 0x00 }, { 0x5C, 0x30, 0x00 }, { 0x00, 0x00, 0x00 },
+                            { 0x00, 0x00, 0x00 }, { 0x00, 0x00, 0x8D }, { 0x8D, 0x00, 0x00 } };
+
+        smoke.unk0 = 5;
+        smoke.unk2 = 0xF;
+        smoke.unk4 = 0x6C;
+        smoke.unk6 = 0x5103;
+        smoke.unk8 = 0x200005;
+        smoke.unkC = 0;
+        smoke.unk10 = 0x14;
+        smoke.unk12 = 0xF;
+        smoke.unk14 = 0;
+        smoke.unk18 = 0;
+        smoke.unk1F = 0xFF;
+        smoke.unk1C = colorA[type][0];
+        smoke.unk1D = colorA[type][1];
+        smoke.unk1E = colorA[type][2];
+        smoke.unk20 = colorB[type][0];
+        smoke.unk21 = colorB[type][1];
+        smoke.unk22 = colorB[type][2];
+        smoke.unk23 = 0xE6;
+        smoke.unk24 = 0x14;
+        smoke.unk25 = 0xFF;
+        smoke.unk26 = 0x19;
+        smoke.unk28 = 0xA;
+        smoke.unk2A = 0x1E;
+        smoke.unk2C = 1.049999952f;
+        smoke.unk30 = 60.0f;
+        smoke.unk34 = 65.0f;
+        smoke.unk38 = arg0->unk110.pos;
+        smoke.unk44 = 0;
+        smoke.unk46 = -0x28;
+        smoke.unk48 = 0xFF;
+        smoke.unk4A = 0x28;
+        smoke.unk4C = 9.0f;
+        smoke.unk50 = 17.0f;
+        smoke.unk54 = 0.00800000038f;
+        smoke.unk58 = 0.2610000074f;
+        smoke.unk5C = (D_800BE616 ? 0x800000 : 0) | 0x40E07;
+        smoke.unk60 = 0x10;
+        smoke.unk61 = -1;
+        smoke.unk62 = 8;
+        smoke.unk63 = 6;
+        smoke.unk64 = 1;
+        smoke.unk68 = 0.8702070117f;
+        func_15153634(&smoke, arg6, arg0->unkC, arg0->unk1);
+    }
+    if (func_150ADA68() < arg4) {
+        Header header;
+        Header2 header2;
+        const u8 color[2][3] = { { 0xFF, 0xFF, 0xFF }, { 0xFF, 0xA7, 0xA7 } };
+        u8 sel;
+
+        header.unk0 = 3;
+        header.unk1 = -1;
+        sub = &arg0->unk110;
+        header.unk2 = (func_150ADA20() % 6U) + 3;
+        header.unk4 = 0;
+        header2.unk0 = (s32)sub->pos.unk0;
+        header2.unk4 = (s32)sub->pos.unk4;
+        header2.unk8 = (s32)sub->pos.unk8;
+        sel = func_150ADA20() & 1;
+        func_151602C0(&header, &header2, (func_150ADA20() % 6U) + 0xA, color[sel][0], color[sel][1], color[sel][2], 0xFF, 0, 0, arg0->unkC, arg0->unk1);
+    }
+}
 
 void func_151C436C(s32 a0, f32 *a1, s32 a2) {
     f32 x;
