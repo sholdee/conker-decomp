@@ -20,7 +20,9 @@ typedef struct {
 
 
 extern void *allocate_memory(s32, s32, s32, s32);
-extern void func_15012ED8(s32);
+extern void func_15012ED8(u32 *);
+extern u8 D_800BE530[];
+extern s16 D_800BE550[];
 void func_15012C84(struct_func_15012C84 *arg0, u32 arg1);
 extern struct_func_15012C84 *D_800B0E10[];
 extern s32 D_800B0E40[];
@@ -119,7 +121,7 @@ void func_150127B0(void) {
                 }
             }
         }
-        func_15012ED8(D_800B0E00[0]);
+        func_15012ED8((u32 *)D_800B0E00[0]);
     }
 }
 
@@ -134,7 +136,20 @@ void func_15012C84(struct_func_15012C84 *arg0, u32 arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_3FC60/func_15012ED8.s")
+void func_15012ED8(u32 *arg0) {
+    s32 i;
+    s32 op;
+
+    for (i = 0; (op = (s8)(arg0[i * 2] >> 24)) != -0x21; i++) {
+        if (op == -5) {
+            D_800BE550[D_800BE564] = i;
+            D_800BE530[D_800BE564 * 3] = (arg0[i * 2 + 1] >> 24) & 0xFF;
+            D_800BE530[D_800BE564 * 3 + 1] = (arg0[i * 2 + 1] >> 16) & 0xFF;
+            D_800BE530[D_800BE564 * 3 + 2] = (arg0[i * 2 + 1] >> 8) & 0xFF;
+            D_800BE564++;
+        }
+    }
+}
 
 void func_15012F90(void) {
     s32 i;
