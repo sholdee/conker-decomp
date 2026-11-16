@@ -177,7 +177,30 @@ void func_1507E73C(GameAB760ActorState *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_AB760/func_1507E7E4.s")
+typedef struct { u8 pad0[0x6F]; u8 unk6F; u8 unk70; u8 unk71; u16 unk72; } Actor1507E7E4;
+
+void func_1507E7E4(u8 *arg0, u8 arg1, u8 arg2, u16 arg3, s32 arg4) {
+    u8 *temp;
+    u8 *temp2;
+
+    if ((arg1 != ((Actor1507E7E4 *)arg0)->unk6F) || (arg2 != ((Actor1507E7E4 *)arg0)->unk71) || (arg3 != ((Actor1507E7E4 *)arg0)->unk72)) {
+        if ((arg2 == 3) || (arg0[0x70] == arg0[0x6F]) || (arg1 == arg0[0x6F]) || (*(u16 *)(arg0 + 0x72) == 0) || (arg0[0x71] < arg2)) {
+            if (arg1 < func_1507E968(arg0)) {
+                temp = (u8 *)func_1507E908(arg0, arg0[0x6F]);
+                if (temp[4] != 0) {
+                    temp2 = func_1507E9F8(arg0, 0);
+                    if (temp2 != 0) {
+                        func_150302F0(arg0, temp2[temp[4] - 1]);
+                    }
+                }
+                arg0[0x6F] = arg1;
+                *(u16 *)(arg0 + 0x72) = arg3;
+                arg0[0x71] = arg2;
+                func_1507E5C8(arg0, arg4);
+            }
+        }
+    }
+}
 
 extern struct124 *D_800D1C90[];
 s32 func_150849A0(void *arg0);
@@ -245,7 +268,7 @@ void func_1507EA44(void *arg0, s32 arg1, s32 arg2) {
     }
 }
 
-extern void func_1507E7E4(void *, s32, s32, s32, s32);
+extern void func_1507E7E4(u8 *, u8, u8, u16, s32);
 
 void func_1507EABC(void *arg0) {
     func_1507E7E4(arg0, *(u8 *)((s32)arg0 + 0x70), 3, 0xFFFF, 0xA);
