@@ -1143,7 +1143,82 @@ void func_151C4644(GameStruct151C4644 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1EF500/func_151C4820.s")
+typedef struct Game1F1CD0Emission {
+    f32 x, y;
+    f32 amplitudeX, amplitudeY;
+    f32 phaseX, phaseY;
+    f32 speedX, speedY;
+    f32 time, rate;
+    f32 remaining;
+    Vec3f_151C4B0C position;
+    f32 scaleX, scaleY, parameter;
+} Game1F1CD0Emission;
+typedef struct Game1F1CD0Actor {
+    u8 pad0;
+    u8 kind;
+    u8 pad2[0xA];
+    u8 owner;
+    u8 padD[0x1B];
+    Game1F1CD0Emission emission;
+} Game1F1CD0Actor;
+
+void func_151436B4(f32, f32, f32, f32 *);
+
+void func_151C4820(Game1F1CD0Actor *arg0) {
+    Game1F1CD0Emission *emission;
+    f32 inverse;
+    f32 time;
+    f32 timeStep;
+    f32 speedX;
+    f32 speedY;
+    f32 phaseX;
+    f32 phaseY;
+    f32 phaseStepX;
+    f32 phaseStepY;
+    Vec3f_151C4B0C direction;
+
+    emission = &arg0->emission;
+    arg0->emission.remaining += arg0->emission.rate * D_800BE9A4;
+    if (1.0f < arg0->emission.remaining) {
+        inverse = 1.0f / emission->remaining;
+        time = emission->time + D_800BE9A4;
+        timeStep = time * inverse;
+        speedX = emission->speedX * D_800BE9A4;
+        speedY = emission->speedY * D_800BE9A4;
+        phaseX = emission->phaseX;
+        phaseY = emission->phaseY;
+        phaseStepX = speedX * inverse;
+        phaseStepY = speedY * inverse;
+        do {
+            f32 sineX;
+            f32 sineY;
+            f32 x;
+            f32 y;
+            f32 randomX;
+            f32 randomY;
+
+            sineX = sinf(phaseX);
+            sineY = sinf(phaseY);
+            x = emission->x + sineX * emission->amplitudeX;
+            y = emission->y + sineY * emission->amplitudeY;
+            func_151436B4(x, y, 5.0f, &direction.x);
+            randomX = func_150ADA68();
+            randomY = func_150ADA68();
+            func_151C229C(&emission->position, &direction, 0, 0, 0, 0,
+                          emission->scaleX, emission->scaleY, randomX * 40.0f + 55.0f,
+                          randomY * 300.0f + 250.0f, emission->parameter,
+                          func_150ADA20() % 56U + 0xC8, 0, 0, 0, 0, 0, 0, 0,
+                          -1, 0, time, 0xFF, -1, 0, arg0->owner, arg0->kind);
+            phaseX += phaseStepX;
+            phaseY += phaseStepY;
+            time -= timeStep;
+            emission->remaining -= 1.0f;
+        } while (1.0f < emission->remaining);
+        emission->phaseX = func_15144B68(phaseX);
+        emission->phaseY = func_15144B68(phaseY);
+        emission->time = time;
+    }
+}
 
 typedef struct {
     s32 unk0;
