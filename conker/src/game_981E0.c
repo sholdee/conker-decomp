@@ -3034,7 +3034,46 @@ void func_15073A28(void) {
 //         e->unk76 = D_800D154C->unk7A + val;
 //     }
 // }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_15073A50.s")
+typedef struct Game981E0ActorRecord {
+    u8 pad0[0x65];
+    u8 field_65;
+    u8 pad66[0x10];
+    s16 field_76;
+    u8 pad78[0xAD];
+    u8 field_125;
+    u8 pad126[0xA6];
+    f32 field_1CC;
+    u8 pad1D0[0x48];
+    s32 field_218;
+    u8 pad21C[0x16];
+    u8 field_232;
+    u8 pad233[0x41];
+    u8 field_274;
+    u8 pad275[0xB7];
+} Game981E0ActorRecord;
+s32 func_1505D024(void *, s32, u16, s32);
+extern f32 D_8009A0D8;
+
+void func_15073A50(void) {
+    u8 *parent;
+    s32 flags;
+    s32 index;
+
+    parent = (u8 *)D_800D154C;
+    index = parent[0x124];
+    if (((Game981E0ActorRecord *)&D_800CC2D0 + index)->field_65 != 0) {
+        flags = D_800D1580;
+        parent[0x13C] = 0;
+        ((Game981E0ActorRecord *)&D_800CC2D0 + index)->field_125 = 0;
+        func_1505D024((Game981E0ActorRecord *)&D_800CC2D0 + index, D_800D1580 & 0xFF00FF, 0, D_800C3E78);
+        ((Game981E0ActorRecord *)&D_800CC2D0 + index)->field_1CC = D_8009A0D8;
+        if (flags & 0x40000000) {
+            ((Game981E0ActorRecord *)&D_800CC2D0 + index)->field_1CC = *(f32 *)((u8 *)D_800D154C + 0x18);
+        }
+        ((Game981E0ActorRecord *)&D_800CC2D0 + index)->field_125 = 0x14;
+        ((Game981E0ActorRecord *)&D_800CC2D0 + index)->field_76 = *(u16 *)((u8 *)D_800D154C + 0x7A) + flags;
+    }
+}
 
 void func_15073B38(void) {
     struct func_15073B38_inner {
