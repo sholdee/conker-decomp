@@ -659,7 +659,136 @@ s32 func_151D15D0(Obj_151D15D0 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1FEA80/func_151D197C.s")
+typedef struct {
+    u8 pad0[0x14C];
+    f32 unk14C;
+} Inner_151D197C;
+
+typedef struct {
+    u8 pad0[0x28];
+    Inner_151D197C *unk28;
+} Base_151D197C;
+
+typedef struct {
+    Base_151D197C *base;
+    u8 pad4[4];
+    s8 unk8;
+    u8 pad9[3];
+    f32 maxLen;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+} Src_151D197C;
+
+typedef struct {
+    u8 pad0[0x1C];
+    s16 unk1C;
+    u16 flags;
+    u8 pad20[5];
+    u8 count;
+    u8 pad26[6];
+    s8 n;
+    s8 tail;
+    s8 head;
+    u8 pad2F[0x94 - 0x2F];
+    Rec_151D15D0 *recs;
+    Src_151D197C *src;
+} Obj_151D197C;
+
+s32 func_151D197C(Obj_151D197C *arg0) {
+    Src_151D197C *src;
+    Rec_151D15D0 *recs;
+    f32 total;
+    f32 inv;
+    s32 i;
+    s32 prev;
+    Rec_151D15D0 *p;
+    Rec_151D15D0 *q;
+    f32 t;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    f32 qx;
+    f32 qy;
+    f32 qz;
+
+    src = arg0->src;
+    recs = arg0->recs;
+    if (src->base != NULL) {
+        Inner_151D197C *inner = src->base->unk28;
+        src->unk1C = inner->unk14C;
+    }
+    if (arg0->n >= 2) {
+        total = 0;
+        i = arg0->head - 1;
+        if (i < 0) {
+            i = arg0->count - 1;
+        }
+        while (i != arg0->tail) {
+            prev = i;
+            i--;
+            if (i < 0) {
+                i = arg0->count - 1;
+            }
+            p = &recs[prev];
+            total += p->speed;
+            if (src->maxLen < total) {
+                if (p->speed != 0.0f) {
+                    t = (total - src->maxLen) / p->speed;
+                    q = &recs[i];
+                    qx = q->pos.x;
+                    qy = q->pos.y;
+                    qz = q->pos.z;
+                    dx = qx - p->pos.x;
+                    dy = qy - p->pos.y;
+                    dz = qz - p->pos.z;
+                    q->pos.x = qx - dx * t;
+                    q->pos.y = qy - dy * t;
+                    q->pos.z = qz - dz * t;
+                    p->speed = p->speed * (1.0f - t);
+                }
+                while (i != arg0->tail) {
+                    arg0->tail++;
+                    if (arg0->tail == arg0->count) {
+                        arg0->tail = 0;
+                    }
+                    arg0->n--;
+                }
+                total = src->maxLen;
+            }
+        }
+        inv = (total != 0.0f) ? 1.0f / total : 0;
+        ;
+    }
+    if (arg0->n >= 2) {
+        f32 a;
+        f32 b;
+        f32 d;
+        s32 j;
+
+        j = arg0->head;
+        d = total;
+        a = src->unk14 * src->unk1C * inv;
+        b = src->unk18 * inv;
+        do {
+            j--;
+            if (j < 0) {
+                j = arg0->count - 1;
+            }
+            {
+            Rec_151D15D0 *r = &recs[j];
+            r->unk1C = src->unk10 * src->unk1C + d * a;
+            r->alpha = d * b;
+            d -= r->speed;
+            }
+        } while (j != arg0->tail);
+    }
+    if ((arg0->flags & 1) && (arg0->flags & 8)) {
+        src->unk8 = arg0->unk1C * 6;
+    }
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1FEA80/func_151D1C98.s")
 
