@@ -423,7 +423,184 @@ void func_151C2F48(GameObj151C2F48 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1EF500/func_151C329C.s")
+typedef struct {
+    s32 field0;
+    s32 field4;
+    struct17 position8;
+    f32 field14;
+    f32 field18;
+    f32 field1C;
+    f32 field20;
+    f32 field24;
+    f32 field28;
+    s16 field2C;
+    s16 field2E;
+    s16 field30;
+    s16 field32;
+    s32 field34;
+    s32 field38;
+    s16 field3C;
+    s16 field3E;
+    s16 field40;
+    u8 fields42[23];
+    s32 field5C;
+    s32 field60;
+    s16 field64;
+    s16 field66;
+    s16 field68;
+    u8 field6A;
+    f32 field6C;
+    s8 fields70[4];
+} GameEmitterParticle151C329C;
+
+typedef struct {
+    s32 field0;
+    s32 field4;
+    s16 field8;
+    s16 fieldA;
+    s32 fieldC;
+    s32 field10;
+    u8 colors14[9];
+    u8 field1D;
+    s16 field1E;
+    s16 field20;
+    s16 field22;
+    f32 field24;
+    f32 field28;
+    f32 field2C;
+    struct17 position30;
+    f32 field3C;
+    f32 field40;
+    f32 field44;
+    f32 field48;
+    f32 field4C;
+    f32 field50;
+    f32 field54;
+    s32 field58;
+    s32 field5C;
+    s8 fields60[6];
+    u8 fields66[0xA];
+} GameEmitterSpawn151C329C;
+
+typedef struct {
+    u8 field0;
+    s8 field1;
+    s16 field2;
+    u8 field4;
+} GameEmitterLight151C329C;
+
+extern f32 D_800AAA44;
+extern f32 D_800AAA48;
+extern f32 D_800AAA4C;
+extern f32 D_800AAA50;
+extern void *func_15130280(void *, u8, s32, s32, u8, s32);
+
+void func_151C329C(struct17 *arg0, u8 arg1, s32 arg2) {
+    GameEmitterParticle151C329C descriptor;
+    GameEmitterSpawn151C329C spawn;
+    GameEmitterLight151C329C light;
+    Header2 coordinates;
+
+    descriptor.field0 = 5;
+    descriptor.field4 = 7;
+    descriptor.position8 = *arg0;
+    descriptor.field14 = D_800AAA44;
+    descriptor.field18 = D_800AAA48;
+    descriptor.field1C = D_800AAA4C;
+    descriptor.field20 = D_800AAA50;
+    descriptor.field24 = 15.0f;
+    descriptor.field28 = 30.0f;
+    descriptor.field2C = 0;
+    descriptor.field2E = 0xFF;
+    descriptor.field30 = -0x40;
+    descriptor.field32 = 0x50;
+    descriptor.field34 = 3;
+    descriptor.field38 = 1;
+    descriptor.field3C = 0x14;
+    descriptor.field3E = 0xF;
+    descriptor.field40 = 1;
+    descriptor.fields42[0] = 4;
+    descriptor.fields42[1] = 2;
+    descriptor.fields42[2] = 3;
+    descriptor.fields42[3] = 0xFF;
+    descriptor.fields42[4] = 0xFF;
+    descriptor.fields42[5] = 0xFF;
+    descriptor.fields42[6] = 0xFF;
+    descriptor.fields42[7] = 0;
+    descriptor.fields42[8] = 0;
+    descriptor.fields42[9] = 0;
+    descriptor.fields42[10] = 0;
+    descriptor.fields42[11] = 0xFF;
+    descriptor.fields42[12] = 0xFF;
+    descriptor.fields42[13] = 0xFF;
+    descriptor.fields42[14] = 0xFF;
+    descriptor.fields42[15] = 0;
+    descriptor.fields42[16] = 0;
+    descriptor.fields42[17] = 0;
+    descriptor.fields42[18] = 0;
+    descriptor.fields42[19] = 0xFF;
+    descriptor.fields42[20] = 0;
+    descriptor.fields42[21] = 3;
+    descriptor.fields42[22] = 0x24;
+    descriptor.field5C = 0x200005;
+    descriptor.field60 = 0x60600;
+    descriptor.field64 = 8;
+    descriptor.field66 = 0x1F;
+    descriptor.field68 = 1;
+    descriptor.field6A = 0;
+    descriptor.field6C = 1.0f;
+    descriptor.fields70[0] = -1;
+    descriptor.fields70[1] = 0;
+    descriptor.fields70[2] = -1;
+    descriptor.fields70[3] = -1;
+    func_15152B38(&descriptor, arg1, arg2);
+    spawn.field1D = 0x2B;
+    spawn.field8 = 0x4403;
+    spawn.field0 = 0x200005;
+    spawn.field4 = 0x20000;
+    spawn.fieldA = (func_150ADA20() % 7U) + 6;
+    spawn.fieldC = 0;
+    spawn.field10 = 0;
+    spawn.colors14[0] = 0xFF;
+    spawn.colors14[1] = 0xFF;
+    spawn.colors14[2] = 0xFF;
+    spawn.colors14[3] = 0xFF;
+    spawn.colors14[4] = 0xFF;
+    spawn.colors14[5] = 0xFF;
+    spawn.colors14[6] = 0xFF;
+    spawn.colors14[7] = 0xFF;
+    spawn.colors14[8] = 0xFF;
+    spawn.field28 = spawn.field2C = func_150ADA68() * 196.0f + 106.0f;
+    spawn.position30 = *arg0;
+    spawn.field1E = 3;
+    spawn.field20 = 0x55;
+    spawn.field22 = 1;
+    spawn.field3C = 0.0f;
+    spawn.field40 = 0.0f;
+    spawn.field44 = 0.0f;
+    spawn.field48 = 0.0f;
+    spawn.field4C = 0.0f;
+    spawn.field50 = 0.0f;
+    spawn.field54 = 0.0f;
+    spawn.field24 = 1.0f;
+    spawn.field58 = 1 | ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0) | 0x8000 | 0x4000 | 0x200;
+    spawn.fields60[0] = 6;
+    spawn.fields60[1] = 6;
+    spawn.fields60[2] = -1;
+    spawn.fields60[3] = -1;
+    spawn.fields60[4] = -1;
+    spawn.fields60[5] = 4;
+    func_15130280(&spawn, 1, 0, 0, arg1, arg2);
+    light.field0 = 3;
+    light.field1 = -1;
+    light.field2 = (func_150ADA20() % 7U) + 6;
+    light.field4 = 0;
+    coordinates.unk0 = (s32)arg0->unk0;
+    coordinates.unk4 = (s32)arg0->unk4;
+    coordinates.unk8 = (s32)arg0->unk8;
+    func_151602C0((Header *)&light, &coordinates, (func_150ADA20() & 1) + 5,
+                 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg1, arg2);
+}
 
 typedef struct {
     /* 0x00 */ s32 unk0;
