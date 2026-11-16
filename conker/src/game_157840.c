@@ -298,7 +298,98 @@ void func_1512ABF8(void) {
     bzero(D_800DC0C0, 0x130);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_157840/func_1512AD54.s")
+typedef struct {
+    u8 pad0[0x24];
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    f32 unk30;
+    u8 pad34[0x14C];
+} Rec1512AD54;
+
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec1512AD54;
+
+extern f32 D_800A3674;
+extern f32 D_800DC1F0;
+extern f32 D_800DC1F4;
+extern f32 D_800DC1F8;
+extern f32 D_800DC1FC;
+void func_1501A764(s32, f32, f32, f32, f32 *, f32 *, f32 *);
+void func_1508EF80(struct17 *arg0, struct17 *arg1, f32 arg2, struct17 *arg3);
+void func_1512B1B8(struct108 *arg0, s32 arg1, s32 arg2, s32 arg3);
+s32 func_1512B730();
+s32 func_1512B53C();
+
+#define rec (&((Rec1512AD54 *)D_800BE628)[arg0->unk23D])
+#define FLD(T, off) (*(T *)((u8 *)arg0 + (off)))
+
+void func_1512AD54(struct108 *arg0) {
+    s32 x;
+    s32 z;
+    f32 *q;
+    f32 y;
+    Vec1512AD54 pos;
+
+
+    y = arg0->unk2C0;
+    if (func_1512B53C(arg0) != 0) {
+        return;
+    }
+    if (!(arg0->unk84 & 0x10)) {
+        if (*(f32 *)((u8 *)arg0->unk3D0 + 0x180) < *(f32 *)((u8 *)arg0->unk3D0 + 0x17C)) {
+            if (*(f32 *)((u8 *)arg0->unk3D0 + 0x17C) - 40.0f <= y) {
+                y = *(f32 *)((u8 *)arg0->unk3D0 + 0x17C) - 40.0f;
+            }
+        }
+    }
+    func_1501A764(arg0->unk23D, arg0->unk2BC, y, arg0->unk2C4, &D_800DC1F0, &D_800DC1F4, &D_800DC1F8);
+    q = (f32 *)(s32)D_800DC1F8;
+    x = ((s32)D_800DC1F0 < (s32)rec->unk2C) ? (s32)rec->unk2C : (((s32)rec->unk30 < (s32)D_800DC1F0) ? (s32)rec->unk30 : (s32)D_800DC1F0);
+    z = ((s32)D_800DC1F4 < (s32)rec->unk24) ? (s32)rec->unk24 : (((s32)rec->unk28 < (s32)D_800DC1F4) ? (s32)rec->unk28 : (s32)D_800DC1F4);
+    if ((x < rec->unk2C) || (rec->unk30 <= x) || (z < rec->unk24) || (rec->unk28 <= z)) {
+        FLD(s16, 0x5F8) = 1;
+        FLD(u8, 0x8B8) = 0;
+        return;
+    }
+    FLD(u8, 0x8B8) = 1;
+    FLD(s16, 0x8BA) = z;
+    func_1512B1B8(arg0, x, z, (s32)q);
+    pos = *(Vec1512AD54 *)&arg0->unk2F8;
+    func_1512B730(arg0, &FLD(f32, 0x3EC), &D_800DC1FC);
+    if (fabsf(FLD(f32, 0x3EC)) > 3.0f) {
+        func_1508EF80((struct17 *)&pos, (struct17 *)&arg0->unk2BC, FLD(f32, 0x3EC), (struct17 *)&pos);
+        {
+        f32 a;
+        f32 b;
+
+        a = 6.0f;
+        b = 8.0f;
+        if (*arg0->unk36C & 3) {
+            a *= 1.2f;
+            b *= 1.2f;
+        }
+        func_150495B0(&arg0->unk2F8, pos.x, &FLD(f32, 0x3FC), a, b, arg0->unk7B4);
+        func_150495B0(&arg0->unk2FC, pos.y, &FLD(f32, 0x400), a, b, arg0->unk7B4);
+        func_150495B0(&arg0->unk300, pos.z, &FLD(f32, 0x404), a, b, arg0->unk7B4);
+        }
+        FLD(s16, 0x5F8) = 0;
+    lbl:;
+    } else {
+        FLD(s16, 0x5F8) = 1;
+    }
+    q = &D_800DC1FC;
+    if (0.0f != D_800DC1FC) {
+        arg0->unk2FC -= *q;
+    }
+    if (arg0->unk240 == 1) {
+        arg0->unk240 = 0;
+    }
+    arg0->unk698 = 0;
+}
 
 void func_1512B100(struct108 *arg0) {
     s32 temp_v0;
