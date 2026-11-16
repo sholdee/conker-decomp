@@ -2117,7 +2117,133 @@ void func_15139768(Obj15139768 *arg0, s32 arg1, f32 arg2, s32 arg3, u8 arg4, s32
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15139D74.s")
+extern u8 D_800A4218[];
+extern s32 D_800A421C[];
+extern s32 D_800A4228[];
+extern Vec3f_36C3C D_800A4234[];
+
+void func_15139D74(Blood1380B4State *arg0, f32 *arg1, void *arg2, u8 arg3, s32 arg4) {
+    u8 index;
+    Vec3f_36C3C position;
+
+    index = func_150ADA20() % 3U;
+    {
+        BloodParticlePacket burst;
+        u8 tag[1];
+        s32 result;
+        u8 i;
+        u8 mask;
+
+        tag[0] = 0xC;
+        burst.field0 = 1.0f;
+        burst.field4 = 1.0f;
+        burst.field8 = burst.fieldC = (arg0->field_14C + arg0->field_150) * 0.5f;
+        burst.angles.x = 0.0f;
+        burst.angles.y = 0.0f;
+        burst.angles.z = 0.0f;
+        burst.scale.x = 1.0f;
+        burst.scale.y = 1.0f;
+        burst.scale.z = 1.0f;
+        burst.position.x = 0.0f;
+        burst.position.y = 0.0f;
+        burst.position.z = 0.0f;
+        burst.velocity.x = 0.0f;
+        burst.velocity.y = 0.0f;
+        burst.velocity.z = 0.0f;
+        burst.field40.x = 0.0f;
+        burst.field40.y = 0.0f;
+        burst.field40.z = 0.0f;
+        burst.field4C = 0.0f;
+        burst.field50 = 0x101900;
+        burst.field54 = 0x190;
+        burst.field58 = 5;
+        burst.field5C = 0;
+        burst.field60 = 0xFF;
+        burst.field61 = 0;
+        burst.field62 = 0;
+        burst.field63 = 0;
+        burst.field64 = 0;
+        burst.field65 = 0;
+        burst.field66 = 0;
+        burst.field67 = 0;
+        burst.field68 = 5;
+        burst.field6A = 1;
+        burst.owner = arg0;
+        burst.field70 = arg0->field_3B;
+        burst.field72 = 0xC;
+        burst.field74 = 0x15;
+        for (i = 0, mask = 1; i < 3; i++, mask <<= 1) {
+            if (!(D_800A4218[index] & mask)) {
+                continue;
+            }
+            burst.field56 = D_800A421C[i];
+            result = func_15132A4C(&burst, 3, 0xFF, 1, arg3, arg4);
+            if (result != 0) {
+                memcpy((u8 *)result + 0x170, tag, 1);
+            }
+        }
+    }
+    if (arg0->field_1D4 == NULL) {
+        return;
+    }
+    if ((arg0->field_74 & 0xF) == 0xF) {
+        return;
+    }
+    func_1513A5E0((s32)arg1, arg3 & 0xFF, arg4);
+    {
+        f32 first[3];
+        f32 second[3];
+        BloodParticlePacket packet;
+        u32 yaw;
+        u32 pitch;
+        u8 j;
+        u8 bit;
+
+        func_1503F404((s32)(arg0->field_1D4 + 0x300), &first[0], &first[1], &first[2],
+                      &position.x, &position.y, &position.z,
+                      &second[0], &second[1], &second[2]);
+        packet.field0 = 1.0f;
+        packet.field4 = 0.64900005f;
+        packet.field8 = packet.fieldC = (arg0->field_14C + arg0->field_150) * 0.5f;
+        packet.angles = position;
+        packet.scale.x = 1.0f;
+        packet.scale.y = 0.0f;
+        packet.scale.z = 1.0f;
+        packet.field40.y = 0.0f;
+        packet.field58 = 0;
+        packet.field5C = 0;
+        packet.field60 = 0xFF;
+        packet.field62 = 0;
+        packet.field64 = 0;
+        packet.field65 = 0;
+        packet.field66 = 0;
+        packet.field67 = 0;
+        packet.field6A = 1;
+        packet.owner = arg0;
+        packet.field70 = arg0->field_3B;
+        packet.field72 = 0xC;
+        packet.field74 = 0x15;
+        packet.field50 = 0x1039E9;
+        packet.field61 = 0xD;
+        packet.field68 = 2;
+        packet.field63 = 9;
+        for (j = 0, bit = 1; j < 3; j++, bit <<= 1) {
+            if (!(D_800A4218[index] & bit)) {
+                packet.field56 = D_800A4228[j];
+                func_15143134(&D_800A4234[j].x, (s32)&packet.position.x, (s32)(arg0->field_1D4 + 0x300));
+                yaw = func_150ADA20();
+                pitch = func_150ADA20();
+                func_15143794((u8)yaw, (s16)(pitch % 35U - 0x54), func_150ADA68() * 6.12f + 3.0f,
+                              &packet.velocity.x);
+                packet.field40.x = func_150ADA68() * 30.746002f + -15.373001f;
+                packet.field40.z = func_150ADA68() * 30.746002f + -15.373001f;
+                packet.field4C = func_150ADA68() * 0.208f + -0.708f;
+                packet.field54 = func_150ADA20() % 101U + 60;
+                func_1513264C(&packet, 3, 0xFF, (s32)arg2, 0, arg3, arg4);
+            }
+        }
+    }
+}
 
 typedef struct {
     /* 0x00 */ s32 unk0;
