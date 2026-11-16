@@ -1601,7 +1601,128 @@ s32 func_15022B08(s32 arg0, s32 arg1) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_49D30/func_15022BA4.s")
+typedef struct {
+    f32 unk0;
+    u8 pad4;
+    u8 unk5;
+    u8 pad6[2];
+} struct_15022BA4_0;
+
+void func_15022BA4(s32 arg0) {
+    s32 i;
+    s32 j;
+    s32 k;
+    s32 flag;
+    f32 y;
+    f32 x;
+    f32 z;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    struct_game49D30_1 *p;
+
+    for (i = 0; i < D_800C363A[arg0]; i++) {
+        if (D_800C35C8[arg0][i] == 0) {
+            continue;
+        }
+        if (*(u16 *)&D_800C35F0[arg0][i * 8] == 6) {
+            if (D_800C3663 == 0) {
+                p = D_800C3868[arg0][i];
+                func_15022190(p->unk0, p->unk2, p->unk4, 0.0f);
+            }
+            if (D_800C35F0[arg0][i * 8 + 2] == 0) {
+                struct127 *obj;
+                obj = func_15083E90(D_800C35F0[arg0][i * 8 + 3]);
+                if (obj == NULL) {
+                    return;
+                }
+                x = obj->x_position;
+                y = obj->y_position;
+                z = obj->z_position;
+            } else if (D_800C35F0[arg0][i * 8 + 2] == 1) {
+                struct131 *obj;
+                obj = (struct131 *)(s8)D_800C35F0[arg0][i * 8 + 3];
+                obj = func_151149AC((s32)obj);
+                if (obj == NULL) {
+                    return;
+                }
+                x = obj->unk10;
+                y = obj->unk12;
+                z = obj->unk14;
+            } else {
+                return;
+            }
+            p = D_800C3868[arg0][i];
+            dx = x - p->unk0;
+            dy = y - p->unk2;
+            dz = z - p->unk4;
+            for (j = 0; j < D_800C363A[arg0]; j++) {
+                for (k = 0; k < D_800C35C8[arg0][j]; k++) {
+                    D_800C3868[arg0][j][k].unk0 = D_800C3868[arg0][j][k].unk0 + dx;
+                    D_800C3868[arg0][j][k].unk2 = D_800C3868[arg0][j][k].unk2 + dy;
+                    D_800C3868[arg0][j][k].unk4 = D_800C3868[arg0][j][k].unk4 + dz;
+                }
+            }
+            return;
+        } else if (*(u16 *)&D_800C35F0[arg0][i * 8] == 7) {
+            f32 c;
+            f32 s;
+            f32 t;
+            f32 ang;
+            f32 rx;
+            f32 rz;
+            f32 nx;
+            f32 f;
+            struct_15022BA4_0 *e;
+
+            f = 0.0f;
+            for (j = 0; j < ((u16 **)&D_800C35D0)[arg0][i]; j++) {
+                e = &((struct_15022BA4_0 *)D_800C3778[arg0][i])[j];
+                if (e->unk5 == 7) {
+                    f = e->unk0;
+                    break;
+                }
+            }
+            if (D_800C3663 == 0) {
+                p = D_800C3868[arg0][i];
+                func_15022190(p->unk0, p->unk2, p->unk4, f);
+            }
+            t = D_800C3594 - f;
+            D_800C35A4 = t;
+            p = D_800C3868[arg0][i];
+            ang = t * 0.01745329238f;
+            x = p->unk0;
+            y = p->unk2;
+            z = p->unk4;
+            c = cosf(ang);
+            s = sinf(ang);
+            dy = D_800C358C[1] - y;
+            for (j = 0; j < D_800C363A[arg0]; j++) {
+                for (k = 0, flag = 0; k < D_800C35C8[arg0][j]; k++) {
+                    rx = D_800C3868[arg0][j][k].unk0 - x;
+                    rz = D_800C3868[arg0][j][k].unk4 - z;
+                    nx = rx * c + rz * s;
+                    rz = -rx * s + rz * c;
+                    D_800C3868[arg0][j][k].unk0 = D_800C358C[0] + nx;
+                    D_800C3868[arg0][j][k].unk2 = D_800C3868[arg0][j][k].unk2 + dy;
+                    D_800C3868[arg0][j][k].unk4 = D_800C358C[2] + rz;
+                }
+                if (D_800C35D8[arg0][j] != 0 && ((s8 *)D_800C3688[arg0][j])[0x20] == 7) {
+                    flag = 1;
+                }
+                if (flag == 0) {
+                    for (k = 0; k < ((u16 **)&D_800C35D0)[arg0][j]; k++) {
+                        e = &((struct_15022BA4_0 *)D_800C3778[arg0][j])[k];
+                        if (e->unk5 == 7) {
+                            e->unk0 = e->unk0 + t;
+                        }
+                    }
+                }
+            }
+            return;
+        }
+    }
+}
 
 s32 func_15023264(s32 arg0, s32 arg1) {
     s32 i;
