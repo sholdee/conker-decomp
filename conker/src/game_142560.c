@@ -3084,7 +3084,87 @@ void func_1511ED84(struct Obj1511ED84 *arg0) {
     arg0->unk7C = 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_142560/func_1511EF40.s")
+typedef struct {
+    f32 x, y, z, radius, angle, dx, dz;
+    s16 timer;
+    u8 pad1E[6];
+} Game11EF40Motion;
+
+typedef struct {
+    f32 x, y, z;
+} Vec3f_1511EF40;
+
+extern s32 func_15086CBC(s32, f32 *, f32 *, f32 *);
+extern s32 func_15086D48(s32);
+extern f32 D_800A3378;
+
+void func_1511EF40(u8 *arg0) {
+    u8 *player;
+    f32 x, y, z, angle;
+    Game11EF40Motion *motion;
+    u8 *actor;
+    f32 dx;
+
+    if (*(Game11EF40Motion **)(arg0 + 0x7C) == NULL) {
+        motion = *(Game11EF40Motion **)(arg0 + 0x7C) = (Game11EF40Motion *)allocate_memory(0x24, 1, 0, 0);
+        bzero(motion, 0x24);
+    } else {
+        motion = *(Game11EF40Motion **)(arg0 + 0x7C);
+    }
+    if (motion->timer > 0) {
+        motion->timer -= D_800BE9E4;
+        if (motion->timer <= 0) {
+            actor = (u8 *)D_800DBFF0 + *(s32 *)(arg0 + 0x84) * 0x9A0;
+            func_151239CC((struct108 *)actor, 0xA);
+        }
+    }
+    if (*(s32 *)(arg0 + 0x80) == 1) {
+        player = (u8 *)D_800CC2D0 + *(s32 *)(arg0 + 0x84) * 0x32C;
+        *(s16 *)(arg0 + 0x10) = (s32)*(f32 *)(player + 0x14);
+        *(s16 *)(arg0 + 0x12) = (s16)*(f32 *)(player + 0x18) + 100;
+        *(s16 *)(arg0 + 0x14) = (s32)*(f32 *)(player + 0x1C);
+        func_15086CBC(func_15086D48(0x28), &x, &y, &z);
+        motion->dx = (x - *(f32 *)(player + 0x14)) * 0.5f;
+        dx = motion->dx;
+        motion->dz = (z - *(f32 *)(player + 0x1C)) * 0.5f;
+        angle = motion->dz;
+        motion->x = *(f32 *)(player + 0x14) + dx;
+        motion->y = *(f32 *)(player + 0x18) + 100.0f;
+        motion->z = *(f32 *)(player + 0x1C) + angle;
+        motion->radius = sqrtf(dx * dx + angle * angle);
+        motion->angle = -90.0f;
+        *(s32 *)(arg0 + 0x80) = 2;
+        return;
+    }
+    if (*(s32 *)(arg0 + 0x80) == 2) {
+        if (D_80082FA0 >= *(s32 *)(arg0 + 0x84)) {
+            actor = (u8 *)D_800DBFF0 + *(s32 *)(arg0 + 0x84) * 0x9A0;
+            if (*(s32 *)(actor + 0x2C) != 0x400000) {
+                func_15123934((struct108 *)actor, 0x400000, 0, *(s32 *)(actor + 0x134), 0xA);
+            }
+            *(f32 *)(actor + 0x2BC) = *(s16 *)(arg0 + 0x10);
+            *(f32 *)(actor + 0x2C0) = *(s16 *)(arg0 + 0x12);
+            *(f32 *)(actor + 0x2C4) = *(s16 *)(arg0 + 0x14);
+            *(Vec3f_1511EF40 *)(actor + 0x2A4) = *(Vec3f_1511EF40 *)(actor + 0x2BC);
+            *(f32 *)(actor + 0x2F8) = 0.0f;
+            *(f32 *)(actor + 0x300) = 0.0f;
+            *(f32 *)(actor + 0x2FC) = 300.0f;
+            motion->timer = 60;
+        }
+        angle = (motion->angle * D_800A3378) / 180.0f;
+        *(s16 *)(arg0 + 0x12) = (s32)(cosf(angle) * motion->radius + motion->y);
+        dx = sinf(angle);
+        *(s16 *)(arg0 + 0x10) = (s32)(motion->x + motion->dx * dx);
+        *(s16 *)(arg0 + 0x14) = (s32)(motion->z + motion->dz * dx);
+        motion->angle += (f32)D_800BE9E4;
+        if (motion->angle > 90.0f) {
+            motion->angle = 90.0f;
+            *(s32 *)(arg0 + 0x80) = 0;
+            *(s8 *)(arg0 + 0x6E) = 1;
+            if (D_80082FA0 >= *(s32 *)(arg0 + 0x84)) func_151239CC((struct108 *)actor, 0xA);
+        }
+    }
+}
 
 void func_1511F31C(struct Struct1511F31CArg *arg0) {
     f32 sp3C[21];
