@@ -473,7 +473,36 @@ void func_1501B0A0(s32 arg0, s32 arg1) {
     func_1510B128(arg0, x, y, 1.0f, 0.0f);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_476D0/func_1501B22C.s")
+void func_1501B22C(s32 arg0) {
+    f32 s;
+    f32 n;
+    f32 c;
+    f32 hx;
+    struct1501A8C0 *view;
+    f32 hy;
+
+    view = (struct1501A8C0 *)(D_800BE628 + arg0 * 0x180);
+    hx = view->unk74 * 0.5f;
+    hy = view->unk78 * 0.5f;
+    c = cosf(-hx * 0.017453292f);
+    s = sinf(-hx * 0.017453292f);
+    n = -c;
+    *(f32 *)((u8 *)view + 0x88) = -n;
+    *(f32 *)((u8 *)view + 0x94) = n;
+    *(f32 *)((u8 *)view + 0x9C) = s;
+    *(f32 *)((u8 *)view + 0x90) = s;
+    *(f32 *)((u8 *)view + 0x98) = 0.0f;
+    *(f32 *)((u8 *)view + 0x8C) = 0.0f;
+    c = cosf(hy * 0.017453292f);
+    s = -sinf(hy * 0.017453292f);
+    n = -c;
+    *(f32 *)((u8 *)view + 0xA0) = 0.0f;
+    *(f32 *)((u8 *)view + 0xA4) = n;
+    *(f32 *)((u8 *)view + 0xA8) = s;
+    *(f32 *)((u8 *)view + 0xAC) = 0.0f;
+    *(f32 *)((u8 *)view + 0xB0) = -n;
+    *(f32 *)((u8 *)view + 0xB4) = s;
+}
 // JUSTREG: I think?
 // void func_1501B22C(s32 arg0) {
 //     f32 tmp0;
