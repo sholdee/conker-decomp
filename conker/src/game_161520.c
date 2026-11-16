@@ -158,7 +158,126 @@ void *func_1513418C(void *arg0, s32 arg1, s32 arg2, s32 arg3) {
     return temp_v0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_151342BC.s")
+typedef struct {
+    f32 x, y, z;
+} BloodDripVec3f;
+
+typedef struct {
+    u8 pad0[0x10];
+    s32 target[2];
+    u8 field18;
+    u8 pad19[3];
+    void *field1C;
+    u8 field20;
+    u8 pad21[3];
+    f32 offset[3];
+    f32 radius;
+    f32 rate;
+    s16 lifetime;
+    u8 flags;
+    u8 emitter;
+    s8 callback;
+    u8 pad3D[3];
+    BloodDripVec3f previous;
+    f32 inverseDiameter;
+    f32 accumulator;
+} BloodDrip;
+
+extern void (*D_80089A70[])(f32, f32, f32, f32, f32, f32, void *);
+extern s32 (*D_80089AA0[])(void *);
+
+void func_151342BC(BloodDrip *drip) {
+    f32 *source;
+    u8 dead;
+    u8 flags;
+    f32 position[3];
+    s32 target;
+    u8 *bones;
+    f32 deltaZ;
+    f32 deltaY;
+    f32 deltaX;
+    f32 randomX;
+    f32 randomY;
+    s32 index;
+    f32 scale;
+    f32 distance;
+
+    dead = 0;
+    if (drip->flags & 4) {
+        drip->lifetime -= D_800BE9E4;
+        if (drip->lifetime < 0) {
+            dead = 1;
+        }
+    }
+    flags = drip->flags;
+    source = (flags & 8) ? position : &drip->previous.x;
+    if (flags & 1) {
+        position[0] = *(f32 *)((u8 *)drip->field1C + 0x14);
+        position[1] = *(f32 *)((u8 *)drip->field1C + 0x18);
+        position[2] = *(f32 *)((u8 *)drip->field1C + 0x1C);
+    } else {
+        if (flags & 2) {
+            if ((*(s32 *)drip->field1C == 0) || (*(s32 *)drip->field1C == 8) || (drip->field18 != *((u8 *)drip->field1C + 0x3B))) {
+                func_1516972C((struct102 *)drip);
+                return;
+            }
+            bones = *(u8 **)((u8 *)drip->field1C + 0x1D4);
+            if ((bones == NULL) || ((*((u8 *)drip->field1C + 0x74) & 0xF) == 0xF)) {
+                drip->flags = flags | 8;
+                return;
+            }
+            target = (s32)((u8 (*)[0x40])bones)[drip->field20];
+        } else if (!(flags & 0x10)) {
+            index = D_800BE9C0 ? 0 : 1;
+            target = drip->target[index];
+        } else {
+            return;
+        }
+        func_15143134(drip->offset, (s32)position, target);
+    }
+    deltaX = source[0] - position[0];
+    deltaY = source[1] - position[1];
+    deltaZ = source[2] - position[2];
+    distance = sqrtf(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
+    scale = drip->inverseDiameter * distance + 1.0f;
+    drip->accumulator += scale * D_800BE9A4 * drip->rate;
+    if (drip->accumulator > 7.0f) {
+        drip->accumulator = 7.0f;
+    }
+    if ((drip->flags & 0x20) && (D_800C35EA == 1)) {
+        while (drip->accumulator > 1.0f) {
+            drip->accumulator -= 1.0f;
+        }
+    } else {
+        while (drip->accumulator > 1.0f) {
+            f32 diameter;
+            f32 fraction;
+
+            diameter = drip->radius + drip->radius;
+            fraction = func_150ADA68();
+            if (D_80089A70[drip->emitter] != NULL) {
+                randomX = func_150ADA68();
+                randomY = func_150ADA68();
+                D_80089A70[drip->emitter](
+                    (position[0] + deltaX * fraction + drip->radius) - randomX * diameter,
+                    (position[1] + deltaY * fraction + drip->radius) - randomY * diameter,
+                    (position[2] + deltaZ * fraction + drip->radius) - func_150ADA68() * diameter,
+                    deltaX, deltaY, deltaZ, drip);
+            }
+            drip->accumulator -= 1.0f;
+        }
+    }
+    drip->previous = *(BloodDripVec3f *)position;
+    drip->flags &= ~8;
+    if (!dead) {
+        if ((drip->callback != -1) && (D_80089AA0[drip->callback](drip) == 0)) {
+            dead = 1;
+        }
+    }
+    if (dead) {
+        func_1516972C((struct102 *)drip);
+    }
+}
 
 s32 func_151346D0(s32 arg0, struct102 *arg1, s32 arg2) {
     arg1->unk3A &= 0xFFEF;
