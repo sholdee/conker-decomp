@@ -3751,7 +3751,101 @@ s32 func_1519C4E4(C4E4Struct *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1C2C60/func_1519C56C.s")
+typedef struct {
+    u8 pad0[0x2C];
+    f32 width;
+    f32 t;
+    Vec3f_15197C10 start;
+    Vec3f_15197C10 end;
+    u8 pad4C[0x74];
+    u8 tmpl[0x40];
+    u8 *buffers[4];
+} Obj_1519C56C;
+
+typedef struct {
+    s16 x;
+    s16 y;
+    s16 z;
+    s16 flag;
+    u8 pad8[8];
+} Vtx_1519C56C;
+
+void func_15145548(Vec3f_15197C10 *arg0, Vec3f_15197C10 *arg1, Vec3f_15197C10 *arg2, Vec3f_15197C10 *arg3, f32 *arg4);
+
+void *func_1519C56C(Obj_1519C56C *arg0, s16 arg1) {
+    Vtx_1519C56C *vertices;
+    void *result;
+    Vec3f_15197C10 *pos;
+    Vec3f_15197C10 dir;
+    Vec3f_15197C10 mid;
+    f32 dx, dy, dz;
+    f32 nx, ny, nz;
+    Vec3f_15197C10 closest;
+    f32 t;
+    f32 lengthSquared;
+    u8 fresh;
+    f32 scale;
+
+    func_151D5D60(arg0->buffers, arg1, 0x40, (void **)&vertices, &fresh);
+    result = vertices;
+    if (vertices != NULL) {
+        if (fresh) {
+            memcpy(arg0->buffers[arg1], arg0->tmpl, 0x40);
+            memcpy(arg0->buffers[arg1] + 0x40, arg0->tmpl, 0x40);
+        }
+    } else {
+        return NULL;
+    }
+    pos = (Vec3f_15197C10 *)func_15144B34(arg1);
+    dir.x = arg0->end.x - arg0->start.x;
+    dir.y = arg0->end.y - arg0->start.y;
+    dir.z = arg0->end.z - arg0->start.z;
+    mid.x = arg0->start.x + dir.x * arg0->t;
+    mid.y = arg0->start.y + dir.y * arg0->t;
+    mid.z = arg0->start.z + dir.z * arg0->t;
+    dir.x = mid.x - arg0->start.x;
+    dir.y = mid.y - arg0->start.y;
+    dir.z = mid.z - arg0->start.z;
+    func_15145548(&arg0->start, &dir, pos, &closest, &t);
+    dx = closest.x - pos->x;
+    dy = closest.y - pos->y;
+    dz = closest.z - pos->z;
+    nx = dir.y * dz - dy * dir.z;
+    ny = dir.z * dx - dz * dir.x;
+    nz = dir.x * dy - dx * dir.y;
+    lengthSquared = nx * nx + ny * ny + nz * nz;
+    if (lengthSquared != 0.0f) {
+        scale = arg0->width / sqrtf(lengthSquared);
+        nx *= scale;
+        ny *= scale;
+        nz *= scale;
+    lbl: ;
+    } else {
+        nx = 0.0f;
+        ny = 0.0f;
+        nz = 0.0f;
+    }
+    vertices->x = arg0->start.x + nx;
+    vertices->y = arg0->start.y + ny;
+    vertices->z = arg0->start.z + nz;
+    vertices->flag = 0;
+    vertices++;
+    vertices->x = arg0->start.x - nx;
+    vertices->y = arg0->start.y - ny;
+    vertices->z = arg0->start.z - nz;
+    vertices->flag = 0;
+    vertices++;
+    vertices->x = mid.x - nx;
+    vertices->y = mid.y - ny;
+    vertices->z = mid.z - nz;
+    vertices->flag = 0;
+    vertices++;
+    vertices->x = mid.x + nx;
+    vertices->y = mid.y + ny;
+    vertices->z = mid.z + nz;
+    vertices->flag = 0;
+    return result;
+}
 
 struct ConkerStruct1519C910_inner {
     char pad0[0x84];
