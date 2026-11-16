@@ -450,7 +450,28 @@ void func_1501AF44(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_476D0/func_1501B0A0.s")
+void func_1510B128(s32, f32, f32, f32, f32);
+
+void func_1501B0A0(s32 arg0, s32 arg1) {
+    f32 angleX;
+    f32 angleY;
+    f32 tanX;
+    f32 tanY;
+    f32 distX;
+    f32 distY;
+    f32 x;
+    f32 y;
+
+    angleX = ((struct1501A8C0 *)D_800BE628)[arg0].unk6C * 0.008726646f;
+    angleY = ((struct1501A8C0 *)D_800BE628)[arg0].unk70 * 0.008726646f;
+    tanX = sinf(angleX) / cosf(angleX);
+    tanY = sinf(angleY) / cosf(angleY);
+    distX = (f32)(&D_800BE638)[arg1] / (2.0f * tanX);
+    distY = (f32)D_800BE650[arg1] / (2.0f * tanY);
+    x = func_150484A0(((struct1501A8C0 *)D_800BE628)[arg0].unkC, distX) * 114.59155f - ((struct1501A8C0 *)D_800BE628)[arg1].unk6C;
+    y = func_150484A0(((struct1501A8C0 *)D_800BE628)[arg0].unk10, distY) * 114.59155f - ((struct1501A8C0 *)D_800BE628)[arg1].unk70;
+    func_1510B128(arg0, x, y, 1.0f, 0.0f);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_476D0/func_1501B22C.s")
 // JUSTREG: I think?
