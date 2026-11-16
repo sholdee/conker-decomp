@@ -1004,7 +1004,17 @@ typedef struct { s8 unk0; s8 unk1; s8 unk2; u8 unk3; u32 unk4; } Struct15168F08;
 // a0=&p->unk4 in the first beq slot + distributes i++ into the bnel slots) that drives a whole-
 // function saved-register rotation (base s1 vs s4). Not steerable from C. Best reconstruction:
 // permuter NO ZERO, best 360 (improved from 717)
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_15168E54.s")
+void func_15168E54(s8 *arg0, s32 arg1) {
+    s32 i;
+    s8 *p;
+
+    for (i = 0; arg0[i << 3] != -0x21; i++) {
+        p = arg0 + (i << 3);
+        if ((*p == 1) || ((*p == -0x24) && (*(u8 *)(p + 3) == 0xE))) {
+            func_15168E34((s32 *)(p + 4), arg1);
+        }
+    }
+}
 // void func_15168E54(Struct15168F08 *arg0, s32 arg1) {
 //     s32 i; Struct15168F08 *p; s8 tag;
 //     i = 0; p = arg0;
