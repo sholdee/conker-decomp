@@ -116,7 +116,80 @@ s32 func_15086D48(s32 arg0) {
     return 0xFF;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_B4080/func_15086D94.s")
+typedef struct {
+    s16 x;
+    s16 y;
+    s16 z;
+    u8 unk6;
+    u8 unk7;
+    u8 unk8;
+    u8 links[5];
+    u8 unkE;
+    u8 unkF;
+} Node15086D94;
+
+f32 func_15086D94(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4) {
+    s32 p0;
+    s32 p1;
+    s32 p2;
+    s32 p3;
+    u8 id;
+    s32 i;
+    s32 j;
+    Node15086D94 *n1;
+    Node15086D94 *n2;
+    f32 a;
+    f32 b;
+    f32 c;
+    f32 d1;
+    f32 d2;
+    f32 t;
+    f32 best;
+    u8 link;
+
+    id = func_15085DA8(arg1);
+    best = 100.0f;
+    for (i = 0; i < D_80087290; i++) {
+        n1 = (Node15086D94 *)&D_800D2350[i];
+        if (n1->unkE == 1 && n1->unk6 == id) {
+            for (j = 0; j < 5; j++) {
+                link = n1->links[j];
+                if (link != 0xFF && i < link) {
+                    n2 = (Node15086D94 *)&D_800D2350[link];
+                    if (n2->unkE == 1) {
+                        a = n2->z - n1->z;
+                        b = -(f32)(n2->x - n1->x);
+                        c = -((f32)n1->x * a + b * (f32)n1->z);
+                        d1 = arg0 * a + arg2 * b + c;
+                        d2 = (arg0 + arg3) * a + (arg2 + arg4) * b + c;
+                        if ((d2 < 0.0f && d1 >= 0.0f) || (d1 < 0.0f && d2 >= 0.0f)) {
+                            if (d2 < 0.0f) {
+                                d2 = -d2;
+                            }
+                            if (d1 < 0.0f) {
+                                d1 = -d1;
+                            }
+                            t = d1 / (d1 + d2);
+                            c = a;
+                            a = -b;
+                            b = c;
+                            c = -((f32)n1->x * a + b * (f32)n1->z);
+                            d1 = ((t * arg3) + arg0) * a + ((t * arg4) + arg2) * b + c;
+                            d2 = (f32)n2->x * a + b * (f32)n2->z + c;
+                            if (((d2 > 0.0f && d1 > 0.0f && d1 <= d2) || (d2 < 0.0f && d1 < 0.0f && d2 <= d1)) && t < best) {
+                                best = t;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if (best <= 1.0f) {
+        return sqrtf(arg3 * arg3 + arg4 * arg4) * t;
+    }
+    return -1.0f;
+}
 
 extern u8 *D_800872A0;
 extern s8 D_800D23A8;
