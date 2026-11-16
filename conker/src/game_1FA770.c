@@ -396,7 +396,64 @@ void func_151CE4DC(Func151CE4DCArg0 *arg0) {
     func_15147928((s32)arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1FA770/func_151CE51C.s")
+struct Obj151CE634 *func_151CE634(s32);
+void func_1515C1A0(void *, void *, f32 *, f32 *);
+s32 func_1505D024(void *, s32, u16, s32);
+
+typedef struct {
+    f32 position[3];
+    u8 unkC[0x10];
+} Game1FA770TrailPoint;
+
+void func_151CE51C(void *arg0, void *arg1) {
+    f32 position[3];
+    f32 radius;
+    f32 height;
+    u8 *obj;
+
+    obj = (u8 *)func_151CE634(*(s32 *)((u8 *)arg1 + 0x18));
+    if (obj != 0) {
+        func_1515C1A0(arg0, position, &radius, &height);
+        if (*(u16 *)(obj + 0x1E) & 8) {
+            f32 bottom;
+            f32 level;
+
+            bottom = position[1] - height;
+            if (*(s8 *)(obj + 0x2C) > 0) {
+                s32 index;
+                Game1FA770TrailPoint *points;
+
+                index = *(s8 *)(obj + 0x2E) - 1;
+                if (index < 0) {
+                    index = obj[0x25] - 1;
+                }
+                points = *(Game1FA770TrailPoint **)(obj + 0x94);
+                level = points[index].position[1];
+            } else {
+                return;
+            }
+            if (bottom <= level) {
+                func_1505D024(arg0, 0x60019, 0, -1);
+            }
+        } else {
+            f32 top;
+            f32 level;
+
+            top = position[1] + height;
+            if (*(s8 *)(obj + 0x2C) > 0) {
+                Game1FA770TrailPoint *points;
+
+                points = *(Game1FA770TrailPoint **)(obj + 0x94);
+                level = points[*(s8 *)(obj + 0x2D)].position[1];
+            } else {
+                return;
+            }
+            if (level <= top) {
+                func_1505D024(arg0, 0x60019, 0, -1);
+            }
+        }
+    }
+}
 
 typedef struct Obj151CE634Sub {
     u8 pad0[0x48];
