@@ -930,7 +930,149 @@ extern void func_151D6970(struct127 *, struct Obj1511DF6C *);
 void func_1511DF6C(struct Obj1511DF6C *arg0);
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_14BC30/func_1511E780.s")
+extern f32 sinf(f32);
+
+struct Obj1511E780 {
+    u8 pad0[4];
+    f32 unk4;
+    f32 unk8;
+    u8 padC[0x30];
+    s32 unk3C;
+    u8 pad40[0x33];
+    u8 unk73;
+    u8 pad74[8];
+    s32 unk7C;
+    s32 unk80;
+    f32 unk84;
+};
+
+void func_1511E780(struct Obj1511E780 *arg0) {
+    f32 speed;
+    s32 sfx;
+    s32 snd;
+    s32 state;
+    f32 range;
+    f32 rate;
+
+    state = arg0->unk73 & 3;
+    sfx = -1;
+    if (arg0->unk80 == 1) {
+        if (state == 0 || state == 1) {
+            state = 2;
+            sfx = 0;
+        }
+        speed = 1.0f;
+    } else if (arg0->unk80 == 0) {
+        if (state == 3 || state == 2) {
+            state = 1;
+            sfx = 1;
+        }
+        speed = -1.0f;
+    } else {
+        speed = 90.0f;
+    }
+    if (sfx != -1) {
+        snd = arg0->unk3C & 0xFFFF;
+        snd = ((s16 (*)[6])D_80089260)[snd][sfx];
+
+        if (snd > 0) {
+            func_15114D24((struct Obj15116BAC *)arg0, snd, 0x5DC0, 0xC8, 0x9C4, 0);
+        }
+    }
+    speed *= D_800BE9E4;
+    range = 70.0f;
+    rate = 6.0f;
+    switch (arg0->unk3C >> 16) {
+    case 6:
+        rate = 3.0f;
+        range = 82.0f;
+        break;
+    case 2:
+    case 4:
+        range = 80.0f;
+        break;
+    }
+    switch (arg0->unk3C >> 16) {
+    case 0:
+        if (arg0->unk7C == 0) {
+            arg0->unk84 = arg0->unk8;
+        }
+        arg0->unk8 = arg0->unk8 - speed * rate;
+        if (arg0->unk84 < arg0->unk8) {
+            arg0->unk8 = arg0->unk84;
+            state = 0;
+        }
+        if (arg0->unk8 < -110.0f) {
+            arg0->unk8 = -110.0f;
+            state = 3;
+        }
+        break;
+    case 3:
+        if (arg0->unk7C == 0) {
+            arg0->unk84 = arg0->unk4;
+        }
+        arg0->unk4 = arg0->unk4 - speed * 3.0f;
+        if (arg0->unk4 < 260.0f) {
+            arg0->unk4 = 260.0f;
+            state = 3;
+        }
+        if (arg0->unk84 < arg0->unk4) {
+            arg0->unk4 = arg0->unk84;
+            state = 0;
+        }
+        break;
+    case 2:
+    case 8:
+        if (arg0->unk7C == 0) {
+            arg0->unk84 = arg0->unk4;
+        }
+        arg0->unk4 = arg0->unk4 + speed * rate;
+        if (arg0->unk84 + range < arg0->unk4) {
+            arg0->unk4 = arg0->unk84 + range;
+            state = 3;
+        }
+        if (arg0->unk4 < arg0->unk84) {
+            arg0->unk4 = arg0->unk84;
+            state = 0;
+        }
+        break;
+    case 4:
+    case 6:
+    case 7:
+        if (arg0->unk7C == 0) {
+            arg0->unk84 = arg0->unk4;
+        }
+        arg0->unk4 = arg0->unk4 - speed * rate;
+        if (arg0->unk84 < arg0->unk4) {
+            arg0->unk4 = arg0->unk84;
+            state = 0;
+        }
+        if (arg0->unk4 < arg0->unk84 - range) {
+            arg0->unk4 = arg0->unk84 - range;
+            state = 3;
+        }
+        break;
+    case 10:
+        arg0->unk84 += 0.00999999977648f;
+    case 11:
+        arg0->unk84 += 0.0399999991059f * D_800BE9E4;
+        arg0->unk8 = sinf(arg0->unk84) * 10.0f;
+        if (arg0->unk84 > 12.5663709641f) {
+            arg0->unk84 -= 12.5663709641f * (f32)(u32)((func_150ADA20() & 4) + 1);
+            func_15114D24((struct Obj15116BAC *)arg0, 0x503, 0x1F40, 0x96, 0x258, 0);
+        }
+        break;
+    case 12:
+        arg0->unk84 += 0.00999999977648f;
+    case 13:
+        arg0->unk84 += 0.0399999991059f * D_800BE9E4;
+        arg0->unk8 = 180.0 - sinf(arg0->unk84) * 10.0f;
+        break;
+    }
+    arg0->unk7C = 1;
+    arg0->unk73 &= ~3;
+    arg0->unk73 |= state;
+}
 
 struct Obj1511EC50 {
     u8 pad0[0x12];
