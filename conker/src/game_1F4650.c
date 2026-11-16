@@ -944,7 +944,155 @@ s32 func_151C8FCC(s32 arg0, Vec3_151C8FCC *arg1, Vec3_151C8FCC *arg2, u8 arg3, u
     return (s32)temp_v0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1F4650/func_151C9198.s")
+typedef struct {
+    /* 0x00 */ f32 unk0;
+    /* 0x04 */ f32 unk4;
+    /* 0x08 */ f32 unk8;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ struct17 unk28;
+    /* 0x34 */ struct17 unk34;
+    /* 0x40 */ struct17 unk40;
+    /* 0x4C */ f32 unk4C;
+    /* 0x50 */ s32 unk50;
+    /* 0x54 */ s16 unk54;
+    /* 0x56 */ s16 unk56;
+    /* 0x58 */ u8  unk58;
+    /* 0x59 */ u8  pad59[3];
+    /* 0x5C */ s32 unk5C;
+    /* 0x60 */ u8  unk60;
+    /* 0x61 */ u8  unk61;
+    /* 0x62 */ u8  unk62;
+    /* 0x63 */ u8  unk63;
+    /* 0x64 */ u8  unk64;
+    /* 0x65 */ u8  unk65;
+    /* 0x66 */ u8  unk66;
+    /* 0x67 */ u8  unk67;
+    /* 0x68 */ u8  unk68;
+    /* 0x69 */ s8  unk69;
+    /* 0x6A */ u8  unk6A;
+    /* 0x6B */ u8  pad6B;
+    /* 0x6C */ s32 unk6C;
+    /* 0x70 */ u8  unk70;
+    /* 0x71 */ u8  pad71;
+    /* 0x72 */ s16 unk72;
+    /* 0x74 */ s16 unk74;
+    /* 0x76 */ u8  pad76[2];
+} S151C9198;
+
+typedef struct {
+    /* 0x00 */ u8  unk0;
+    /* 0x02 */ s16 unk2;
+    /* 0x04 */ s16 unk4;
+    /* 0x06 */ u8  unk6;
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s16 unkC;
+    /* 0x0E */ u8  unkE;
+    /* 0x10 */ s32 unk10;
+} S151C9198_b;
+
+extern s32 func_15144E80(void *, struct17 *, struct17 *, struct17 *);
+extern void *func_15132A4C(void *, s32, s32, s32, u8, s32);
+extern void func_15133760(void *, void *);
+
+void func_151C9198(struct102 **arg0, Vec3_151C8FCC *arg1, void *arg2, Vec3_151C8FCC *arg3, s32 arg4, u8 arg5, u8 arg6, u8 arg7, s32 arg8) {
+    struct17 spEC;
+    struct17 spE0;
+    struct17 spD4;
+    s32 i;
+    S151C9198 desc;
+    void *ret;
+    S151C9198_b extra;
+
+    if (func_15144E80(arg2, &spEC, &spE0, &spD4) != 0) {
+        func_15145974(&spD4, &desc.unk14, &desc.unk10);
+        desc.unk0 = 1.0f;
+        desc.unk4 = 1.0f;
+        desc.unk1C = 1.0f;
+        desc.unk20 = 1.0f;
+        desc.unk10 += 90.0f;
+        desc.unk24 = 1.0f;
+        desc.unkC = 0.4000000059604645f;
+        desc.unk8 = 0.4000000059604645f;
+        desc.unk18 = 0.0f;
+        desc.unk28 = *(struct17 *)arg1;
+        desc.unk34.unk0 = 0.0f;
+        desc.unk34.unk4 = 0.0f;
+        desc.unk34.unk8 = 0.0f;
+        desc.unk40.unk0 = 0.0f;
+        desc.unk40.unk4 = 0.0f;
+        desc.unk40.unk8 = 0.0f;
+        desc.unk4C = 0.0f;
+        desc.unk50 = (arg6 ? 0x400 : 0) | 0x100 | 0x800 | 0x10000 | 0x4000 | 0x40000 | 0x80000;
+        desc.unk54 = 0x12C;
+        desc.unk56 = 0x36;
+        desc.unk58 = 0;
+        desc.unk5C = arg4;
+        desc.unk60 = 0xFF;
+        desc.unk61 = 0;
+        desc.unk62 = 0;
+        desc.unk63 = 0;
+        desc.unk64 = 0;
+        desc.unk65 = 0;
+        desc.unk66 = 0;
+        desc.unk67 = 0;
+        desc.unk68 = 2;
+        desc.unk6A = 0;
+        desc.unk6C = 0;
+        desc.unk70 = 0;
+        desc.unk72 = 1;
+        desc.unk74 = 0xFF;
+        desc.unk69 = -1;
+        arg0[0] = func_15132A4C(&desc, 3, 0xFF, 0, arg7, arg8);
+        if (arg0[0] != NULL) {
+            for (i = 0; i < 2; i++) {
+                func_15133760((u8 *)arg0[0] + 0x90 + i * 0x40, arg0[0]);
+            }
+        }
+        desc.unk69 = 2;
+        extra.unk0 = 2;
+        extra.unk6 = 4;
+        extra.unkE = 6;
+        extra.unk8 = 0x3E;
+        extra.unk10 = 0x3E;
+        if (arg5) {
+            extra.unk4 = 0x87;
+            extra.unkC = 0x88;
+        } else {
+            extra.unk4 = 0x8B;
+            extra.unkC = 0x8C;
+        }
+        desc.unk56 = 0x37;
+        desc.unk68 = 0;
+        arg0[1] = func_15132A4C(&desc, 3, 0xFF, 0x14, arg7, arg8);
+        if (arg0[1] != NULL) {
+            for (i = 0; i < 2; i++) {
+                func_15133760((u8 *)arg0[1] + 0x90 + i * 0x40, arg0[1]);
+            }
+            memcpy((u8 *)arg0[1] + 0x170, &extra, 0x14);
+        }
+        desc.unk56 = 0x38;
+        if (arg5) {
+            extra.unk4 = 0x89;
+            extra.unkC = 0x8A;
+        } else {
+            extra.unk4 = 0x8D;
+            extra.unkC = 0x8E;
+        }
+        arg0[2] = func_15132A4C(&desc, 3, 0xFF, 0x14, arg7, arg8);
+        if (arg0[2] != NULL) {
+            for (i = 0; i < 2; i++) {
+                func_15133760((u8 *)arg0[2] + 0x90 + i * 0x40, arg0[2]);
+            }
+            memcpy((u8 *)arg0[2] + 0x170, &extra, 0x14);
+        }
+    }
+}
 
 void func_151C94D4(Game1F4650LinkedObject *arg0) {
     register Game1F4650LinkBlock *temp_s0;
