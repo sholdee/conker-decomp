@@ -570,17 +570,6 @@ s32 func_151D15D0(Obj_151D15D0 *arg0) {
         {
         Rec_151D15D0 *rec;
         f32 len;
-        s16 i0;
-        s16 i1;
-        s16 i2;
-        f32 dx0;
-        f32 dz0;
-        f32 inv1;
-        Vec2_151D15D0 d1;
-        Rec_151D15D0 *p1;
-        Rec_151D15D0 *p2;
-        Vec2_151D15D0 nrm;
-        f32 lenSq;
 
         rec = &recs[arg0->head];
         rec->pos = arg0->pos;
@@ -616,6 +605,10 @@ s32 func_151D15D0(Obj_151D15D0 *arg0) {
             arg0->n--;
         }
         if (arg0->n >= 3) {
+            s16 i0;
+            s16 i1;
+            s16 i2;
+
             i1 = arg0->head - 1;
             if (i1 < 0) {
                 i1 = arg0->count - 1;
@@ -629,8 +622,18 @@ s32 func_151D15D0(Obj_151D15D0 *arg0) {
                 i2 = arg0->count - 1;
             }
             if (rec->speed) {
+                f32 dx0;
+                f32 dz0;
+                f32 inv1;
+                Vec2_151D15D0 d1;
+                Rec_151D15D0 *p1;
+
                 p1 = &recs[i1];
                 if (p1->speed) {
+                    Rec_151D15D0 *p2;
+                    Vec2_151D15D0 nrm;
+                    f32 lenSq;
+
                     p2 = &recs[i2];
                     inv1 = p1->invLen;
                     dx0 = (rec->pos.x - p1->pos.x) * rec->invLen;
@@ -638,7 +641,8 @@ s32 func_151D15D0(Obj_151D15D0 *arg0) {
                     d1.x = (p2->pos.x - p1->pos.x) * inv1;
                     d1.z = (p2->pos.z - p1->pos.z) * inv1;
                     nrm.x = -(dz0 - d1.z);
-                    nrm.z = dx0 - d1.x;
+                    nrm.z = dx0;
+                    nrm.z -= d1.x;
                     lenSq = nrm.x * nrm.x + nrm.z * nrm.z;
                     if (lenSq > 9.999999747e-05f) {
                         f32 inv;
@@ -790,7 +794,151 @@ s32 func_151D197C(Obj_151D197C *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1FEA80/func_151D1C98.s")
+typedef struct {
+    f32 x, y, z;
+} Vec3f_151D1C98;
+
+typedef struct Game1FEA80RibbonPoint {
+    Vec3f_151D1C98 position;
+    u8 pad0C[8];
+    u8 alpha;
+    u8 pad15[3];
+    f32 texture;
+    f32 width;
+    f32 directionX;
+    f32 directionZ;
+} Game1FEA80RibbonPoint;
+
+typedef struct Game1FEA80RibbonVertex {
+    s16 x, y, z;
+    s16 flag;
+    s16 s, t;
+    u8 r, g, b, a;
+} Game1FEA80RibbonVertex;
+
+typedef struct Game1FEA80RibbonState {
+    u8 pad0[8];
+    u8 alpha;
+} Game1FEA80RibbonState;
+
+void *memcpy(void *, const void *, u32);
+void func_151D5D60(void *, s16, s32, void **, u8 *);
+s32 func_15142E24(s32, s32, s32, s32, s32, s32, s32, u8, s32, u8 *, s32);
+Gfx *func_15142B7C(Gfx *, s32, s32);
+Gfx *func_1513F4E4(Gfx *, u8, u8 *);
+Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
+extern u8 D_80091430[];
+extern s32 D_800A4AC8[][2];
+extern s32 D_800D2C9C;
+
+Gfx *func_151D1C98(u8 *arg0, Gfx *arg1, s16 arg2) {
+    Game1FEA80RibbonState *state;
+    Vec3f_151D1C98 next;
+    Vec3f_151D1C98 first;
+    Game1FEA80RibbonPoint *points;
+    s32 index;
+    s32 previous;
+    u8 flag;
+    u8 nextAlpha;
+    f32 firstX;
+    f32 firstZ;
+    f32 nextX;
+    f32 nextZ;
+    f32 firstTexture;
+    f32 nextTexture;
+    u16 firstAlpha;
+    Game1FEA80RibbonVertex *vtx;
+
+    if (*(s8 *)(arg0 + 0x2C) < 2) {
+        return arg1;
+    }
+    state = *(Game1FEA80RibbonState **)(arg0 + 0x98);
+    points = *(Game1FEA80RibbonPoint **)(arg0 + 0x94);
+    func_151D5D60(arg0 + 0x84, arg2, (arg0[0x25] * 2 + 10) * sizeof(Game1FEA80RibbonVertex), (void **)&vtx, NULL);
+    if (vtx == NULL) {
+        return arg1;
+    }
+    flag = 1;
+    arg1 = (Gfx *)func_15142E24((s32)arg1, (s32)D_80091430, 0, 0, 0, 0, 0xBC, 0, 0, &flag, 3);
+    arg1 = func_15142B7C(arg1, 0x220005, 0x1D0600);
+    arg1 = func_1513F4E4(arg1, 0x4C, &flag);
+    arg1 = func_15142FBC(arg1, D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[1][0] | D_800A4AC8[1][1], &flag);
+    previous = *(s8 *)(arg0 + 0x2E) - 1;
+    if (previous < 0) {
+        previous = arg0[0x25] - 1;
+    }
+    index = previous - 1;
+    if (index < 0) {
+        index = arg0[0x25] - 1;
+    }
+    first = points[previous].position;
+    firstX = points[previous].width * points[previous].directionX;
+    firstZ = points[previous].width * points[previous].directionZ;
+    firstAlpha = (points[previous].alpha * state->alpha) >> 8;
+    firstTexture = points[previous].texture;
+    next = points[index].position;
+    nextX = points[index].width * points[index].directionX;
+    nextZ = points[index].width * points[index].directionZ;
+    nextAlpha = (points[index].alpha * state->alpha) >> 8;
+    nextTexture = points[index].texture;
+    vtx->x = first.x + firstX;
+    vtx->y = first.y;
+    vtx->z = first.z + firstZ;
+    vtx->a = firstAlpha;
+    vtx->t = firstTexture;
+    vtx->s = 0x7FF;
+    vtx->flag = 0;
+    vtx++;
+    vtx->x = first.x - firstX;
+    vtx->y = first.y;
+    vtx->z = first.z - firstZ;
+    vtx->a = firstAlpha;
+    vtx->t = firstTexture;
+    vtx->s = 0;
+    vtx->flag = 0;
+    vtx++;
+    do {
+        vtx->x = next.x + nextX;
+        vtx->y = next.y;
+        vtx->z = next.z + nextZ;
+        vtx->a = nextAlpha;
+        vtx->t = nextTexture;
+        vtx->s = 0x7FF;
+        vtx->flag = 0;
+        vtx++;
+        vtx->x = next.x - nextX;
+        vtx->y = next.y;
+        vtx->z = next.z - nextZ;
+        vtx->a = nextAlpha;
+        vtx->t = nextTexture;
+        vtx->s = 0;
+        vtx->flag = 0;
+        vtx++;
+        gSPVertex(arg1++, vtx - 4, 4, 0);
+        gSP2Triangles(arg1++, 0, 1, 2, 0, 1, 3, 2, 0);
+        if (firstTexture < nextTexture) {
+            memcpy(vtx, vtx - 2, 0x20);
+            vtx[-2].t -= 0x2000;
+            vtx++;
+            vtx[-2].t -= 0x2000;
+            vtx++;
+        }
+        previous = index;
+        index--;
+        if (index < 0) {
+            index = arg0[0x25] - 1;
+        }
+        if (previous != *(s8 *)(arg0 + 0x2D)) {
+            next = points[index].position;
+            nextX = points[index].width * points[index].directionX;
+            firstTexture = points[previous].texture;
+            nextZ = points[index].width * points[index].directionZ;
+            nextTexture = points[index].texture;
+            nextAlpha = (points[index].alpha * state->alpha) >> 8;
+        }
+    } while (previous != *(s8 *)(arg0 + 0x2D));
+    return arg1;
+}
 
 void func_151D223C(ConkerField98Owner *arg0) {
     ConkerField0Slot *temp_v0;
