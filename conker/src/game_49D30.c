@@ -941,7 +941,45 @@ s32 func_1501F72C(s32 arg0, f32 arg1, f32 *arg2, s32 arg3, s32 *arg4) {
     return sample;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_49D30/func_1501FC8C.s")
+extern f32 D_800969D4;
+
+void func_1501FC8C(s32 arg0, f32 arg1, f32 *arg2, f32 *arg3, f32 *arg4, s32 arg5) {
+    f32 time;
+    s32 key_index;
+    s32 sample_index;
+    f32 positions[6];
+    f32 *times;
+    f32 numerator;
+    f32 ratio;
+
+    if (*(u16 *)((u8 *)D_800C35C8[arg5] + (u32)arg0 * 2U) >= 2) {
+        if (arg1 > 100.0f) {
+            arg1 = 100.0f;
+        }
+        if (arg1 < 0.0f) {
+            arg1 = 0.0f;
+        }
+        time = *(f32 *)((u8 *)D_800C3A50[arg5] + ((u32)arg0 << 6)) * arg1 * D_800969D4;
+        sample_index = func_1501F72C(arg0, time, positions, arg5, &key_index);
+        if (*(u16 *)(*(u8 **)((u8 *)D_800C3868 + (u32)arg5 * 0x78U + (u32)arg0 * 4U) + (u32)key_index * 8U + 6) == 0) {
+            times = *(f32 **)((u8 *)D_800C3A50[arg5] + ((u32)arg0 << 6) + 0x38) + sample_index;
+            arg1 = times[1] - times[0];
+            numerator = time - times[0];
+            if (arg1 != 0) {
+                ratio = numerator / arg1;
+            } else {
+                ratio = 0.0f;
+            }
+            *arg2 = positions[0] + (positions[3] - positions[0]) * ratio;
+            *arg3 = positions[1] + (positions[4] - positions[1]) * ratio;
+            *arg4 = positions[2] + (positions[5] - positions[2]) * ratio;
+            return;
+        }
+        *arg2 = positions[0];
+        *arg3 = positions[1];
+        *arg4 = positions[2];
+    }
+}
 
 void func_1501FE68(s32 arg0, f32 arg1, f32 *arg2, s32 arg3) {
     f32 temp_f12;
