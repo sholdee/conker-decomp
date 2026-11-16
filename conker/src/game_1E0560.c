@@ -826,7 +826,35 @@ u8 func_151B4A14(Obj151B4A14 *arg0, s32 *arg1, s32 *arg2, s32 *arg3, s32 *arg4, 
 
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E0560/func_151B4B78.s")
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 velocity[3];
+} HoltenRopePoint_151B4B78;
+
+typedef struct {
+    u8 pad0[0x10];
+    u8 flags;
+    u8 pad11[0x37];
+    HoltenRopePoint_151B4B78 points[10];
+} HoltenRopeEffect_151B4B78;
+
+s32 func_151B4B78(HoltenRopeEffect_151B4B78 *arg0) {
+    f32 x;
+    s32 i;
+
+    x = -1000.0f;
+    for (i = 0; i < 10; i++, x += 222.22223f) {
+        HoltenRopePoint_151B4B78 *point = &arg0->points[i];
+
+        point->x = x;
+        point->y = 0.0f;
+        point->z = 0.0f;
+    }
+    arg0->flags &= ~2;
+    return 1;
+}
 
 void func_151B4C1C(u8 *arg0) {
     void (*fn)(void *);
