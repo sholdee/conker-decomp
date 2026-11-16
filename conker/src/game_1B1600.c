@@ -20,7 +20,88 @@ extern f32 D_800DE03C;
 extern u8 D_800DE040;
 extern u8 D_800DE041;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1B1600/func_15184150.s")
+typedef struct {
+    u8 pad0[0x30];
+    f32 x;
+    f32 y;
+    f32 z;
+    u8 pad3C[4];
+} Bound15184150;
+
+extern s32 func_1502DB20(s32);
+extern u8 D_800C3E90;
+
+s32 func_15184150(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3)
+{
+  s32 id;
+  struct127 *obj;
+  s32 count;
+  s32 i;
+  f32 dx;
+  f32 dy;
+  f32 dz;
+  struct255 *new_var;
+  obj = &D_800CC2D0[arg0];
+  id = obj->id;
+  *arg3 = 0.0f;
+  *arg2 = 0.0f;
+  *arg1 = 0.0f;
+  if ((obj->unk1D4 == 0) || (D_800C3E90 != 0))
+  {
+    return 0;
+  }
+  count = func_1502DB20(id);
+  for (i = 0; i < count; i++)
+  {
+    new_var = obj->unk1D4;
+    dx = ((Bound15184150 *) new_var)[i].x;
+    dy = ((Bound15184150 *) new_var)[i].y;
+    dz = ((Bound15184150 *) new_var)[i].z;
+    dx -= obj->x_position;
+    dy -= obj->y_position;
+    dz -= obj->z_position;
+    dx = (dx < 0.0f) ? (-dx) : (dx);
+    if ((*arg1) < dx)
+    {
+      *arg1 = dx;
+    }
+    dy = (dy < 0.0f) ? (-dy) : (dy);
+    if ((*arg2) < dy)
+    {
+      *arg2 = dy;
+      if (1)
+      {
+      }
+      if (1)
+      {
+      }
+      if (1)
+      {
+      }
+      if (1)
+      {
+      }
+      if (1)
+      {
+      }
+    }
+    dz = (dz < 0.0f) ? (-dz) : (dz);
+    if (dz > (*arg3))
+    {
+      *arg3 = dz;
+    }
+  }
+
+  if ((((*arg1) == 0.0f) || ((*arg2) == 0.0f)) || ((*arg3) == 0.0f))
+  {
+    dx = D_800D1C90[obj->id]->unk1A;
+    dy = obj->xz_scale * dx;
+    *arg3 = dy;
+    *arg1 = dy;
+    dx = D_800D1C90[obj->id]->unk1C + D_800D1C90[obj->id]->unk1E;
+    *arg2 = obj->y_scale * dx;
+  }
+}
 
 typedef struct Node15184368 {
     struct Node15184368 *next;
@@ -261,7 +342,7 @@ f32 func_15184368(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5) {
 }
 
 extern s32 func_150AD9A0(s32, s32, s32);
-extern void func_15184150(s32, f32 *, f32 *, f32 *);
+extern s32 func_15184150(s32, f32 *, f32 *, f32 *);
 extern f32 D_800D368C;
 
 s32 func_15184DF0(s32 arg0, s32 arg1, f32 *arg2, f32 *arg3, f32 *arg4) {
