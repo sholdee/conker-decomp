@@ -1412,7 +1412,167 @@ void func_151C9F38(void *arg0, u8 arg1, u8 arg2, s8 arg3, u8 arg4) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1F4650/func_151CA6A0.s")
+void func_151CA6A0(void *arg0, u8 arg1) {
+    typedef struct {
+        f32 unk0;
+        f32 unk4;
+        f32 unk8;
+        f32 unkC;
+        u8  unk10;
+        u8  pad11;
+        s16 unk12;
+        u16 unk14;
+        s16 unk16;
+        s16 unk18;
+        u8  unk1A;
+        u8  unk1B;
+        u8  unk1C;
+        u8  unk1D;
+        u8  unk1E;
+        u8  unk1F;
+        u8  unk20;
+        u8  unk21;
+        u8  unk22;
+        u8  unk23;
+        s32 unk24;
+        s32 unk28;
+        s32 unk2C;
+        s32 unk30;
+        s32 unk34;
+        s32 unk38;
+        s32 unk3C;
+        u8  unk40;
+        u8  unk41;
+        u8  pad42[2];
+        u8  unk44;
+        u8  pad45[3];
+        f32 unk48;
+        f32 unk4C;
+        f32 unk50;
+        f32 unk54;
+    } struct_151CA6A0_spA0;
+    typedef struct {
+        void *unk0;
+        f32 unk4;
+        f32 unk8;
+        u8 unkC;
+        u8 unkD;
+        u8 padE[0xA];
+        f32 unk18;
+        f32 unk1C;
+        f32 unk20;
+        f32 unk24;
+        f32 unk28;
+        u8 pad2C[0x2C];
+    } struct_151CA6A0_sp44;
+    struct_151CA6A0_spA0 spA0;
+    void *temp_v0;
+    struct_151CA6A0_sp44 sp44;
+    s32 pad1;
+    s32 pad2;
+
+    sp44.unkD = 0;
+    sp44.unkC = 0;
+    spA0.unkC = 25.0f;
+    spA0.unk8 = 25.0f;
+    sp44.unk0 = arg0;
+    sp44.unk4 = 0.0f;
+    sp44.unk8 = 130.0f;
+    if (D_80082FA0 > 0) {
+        spA0.unk10 = 0x73;
+    } else {
+        spA0.unk10 = 0x5D;
+    }
+    spA0.unk12 = 0x12C;
+    spA0.unk14 = (1 << (*(u8 *)((s32)arg0 + 0x23D) + 0xB)) | 0x50;
+    spA0.unk16 = 1;
+    spA0.unk18 = 0xFF;
+    spA0.unk1A = 7;
+    spA0.unk1B = 0;
+    spA0.unk1C = 0xFF;
+    spA0.unk1D = 0;
+    spA0.unk1E = 0x82;
+    spA0.unk1F = 0xFF;
+    spA0.unk20 = 0xFF;
+    spA0.unk21 = 0xFF;
+    spA0.unk22 = 0xFF;
+    spA0.unk23 = 0xFF;
+    spA0.unk24 = 0;
+    spA0.unk28 = 0x200004;
+    spA0.unk2C = 0x1F0601;
+    spA0.unk30 = 8;
+    spA0.unk34 = 0x44;
+    spA0.unk38 = 0x80;
+    spA0.unk3C = 0x20;
+    spA0.unk40 = 0;
+    spA0.unk41 = 0xA;
+    spA0.unk44 = *(u8 *)((s32)arg0 + 0x23D);
+    spA0.unk14 &= ~6;
+    spA0.unk14 |= 6;
+    spA0.unk0 = 25.0f;
+    spA0.unk4 = 25.0f;
+    temp_v0 = func_1515548C(&spA0, arg1 ? 4 : 0, 0, 0, 0x58, 0xFF, 1);
+    if (temp_v0 != NULL) {
+        memcpy((u8 *)temp_v0 + 0x70, &sp44, 0x58);
+    }
+    spA0.unk14 &= ~6;
+    spA0.unk14 |= 4;
+    spA0.unk0 = -25.0f;
+    spA0.unk4 = 25.0f;
+    temp_v0 = func_1515548C(&spA0, arg1 ? 4 : 0, 0, 0, 0x58, 0xFF, 1);
+    if (temp_v0 != NULL) {
+        memcpy((u8 *)temp_v0 + 0x70, &sp44, 0x58);
+    }
+    spA0.unk14 &= ~6;
+    spA0.unk14 |= 0;
+    spA0.unk0 = -25.0f;
+    spA0.unk4 = -25.0f;
+    temp_v0 = func_1515548C(&spA0, arg1 ? 4 : 0, 0, 0, 0x58, 0xFF, 1);
+    if (temp_v0 != NULL) {
+        memcpy((u8 *)temp_v0 + 0x70, &sp44, 0x58);
+    }
+    spA0.unk14 &= ~6;
+    spA0.unk14 |= 2;
+    spA0.unk0 = 25.0f;
+    spA0.unk4 = -25.0f;
+    temp_v0 = func_1515548C(&spA0, arg1 ? 4 : 0, 0, 0, 0x58, 0xFF, 1);
+    if (temp_v0 != NULL) {
+        memcpy((u8 *)temp_v0 + 0x70, &sp44, 0x58);
+    }
+    {
+        s32 i;
+
+        spA0.unk0 = 0.0f;
+        spA0.unk4 = 0.0f;
+        spA0.unkC = 3.0f;
+        spA0.unk8 = 3.0f;
+        spA0.unk10 = 0x99;
+        spA0.unk14 = (1 << (*(u8 *)((s32)arg0 + 0x23D) + 0xB)) | 0x50;
+        spA0.unk30 = 8;
+        spA0.unk34 = 0x44;
+        sp44.unk28 = 99999.0f;
+        if (D_80082FA0 == 1) {
+            sp44.unk18 = -62.0f;
+        } else {
+            sp44.unk18 = -50.0f;
+        }
+        sp44.unk1C = 0.0f;
+        if (D_80082FA0 == 1) {
+            sp44.unk20 = 0.01612903178f;
+        } else {
+            sp44.unk20 = 0.01999999955f;
+        }
+        i = 0;
+        sp44.unk24 = 0.0f;
+        for (; i < 12; i++) {
+            temp_v0 = func_1515548C(&spA0, 7, 0, 0, 0x58, 0xFF, 1);
+            if (temp_v0 != NULL) {
+                memcpy((u8 *)temp_v0 + 0x70, &sp44, 0x58);
+            }
+            sp44.unk24 += 0.5235987902f;
+        }
+    }
+}
 
 void func_151CAACC(struct102 *arg0, void **arg1, u8 arg2) {
     void (*fn)(struct102 *, void **, u8);
