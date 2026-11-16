@@ -989,7 +989,28 @@ void func_151D5174(struct Obj151D57F8 *arg0, struct17 *arg1, struct17 *arg2, str
 
 #undef OBJ
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_200930/func_151D5334.s")
+struct S151D5334_3C {
+    struct17 unk0;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+};
+
+extern void func_15164F0C(u8, u8, s32, u8, s32);
+
+void func_151D5334(struct17 *arg0, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5, s32 arg6) {
+    s32 i;
+    struct S151D5334_3C sp3C;
+
+    sp3C.unk0 = *arg0;
+    sp3C.unkC = arg1;
+    sp3C.unk10 = arg2;
+    sp3C.unk14 = arg3;
+
+    for (i = 0; i < D_80082FA0 + 1; i++) {
+        func_15164F0C(arg4, i, (s32)&sp3C, arg5, arg6);
+    }
+}
 
 struct S151D5404_30 {
     u8 unk0;
