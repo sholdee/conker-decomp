@@ -689,7 +689,169 @@ void func_1511AF30(struct Obj1511AF30 *arg0) {
 
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1483E0/func_1511B07C.s")
+struct Obj1511B07C {
+    u8 pad0[0x10];
+    s16 unk10;
+    u8 pad12[0x2];
+    s16 unk14;
+    u8 pad16[0x26];
+    s32 unk3C;
+    u8 pad40[0x33];
+    u8 unk73;
+    u16 unk74;
+    u8 pad76[0x6];
+    s32 unk7C;
+    s32 unk80;
+    f32 unk84;
+};
+
+void func_1511B07C(struct Obj1511B07C *arg0) {
+    f32 cur;
+    f32 speed;
+    s32 mode;
+    s32 state;
+    s32 targetX;
+    s32 targetZ;
+    s32 d;
+    s32 moveX;
+    s32 moveZ;
+    s32 sound;
+
+    speed = 7.0f;
+    moveX = 0;
+    moveZ = 0;
+    sound = 0;
+    if (D_800C35EA == 1) {
+        if (func_15022B08((struct131 *)arg0 - D_800DBEF4, 0) != 0) {
+            return;
+        }
+    }
+    if (arg0->unk7C == 0) {
+        arg0->unk7C = arg0->unk10 | 0x80000000;
+        arg0->unk80 = arg0->unk14;
+    }
+    targetX = (s16)arg0->unk7C;
+    targetZ = arg0->unk80;
+    state = arg0->unk3C & 0x3FF;
+    if (state >= 4 && state < 7) {
+        func_1511F990(arg0, 1);
+    }
+    mode = arg0->unk73 & 3;
+    if (mode == 3 || mode == 2) {
+        switch (state) {
+        case 0:
+            targetX = -0x45;
+            targetZ = -0x78;
+            if (mode == 2) {
+                sound = 0x4E;
+            }
+            moveX = 1;
+            break;
+        case 1:
+            targetX = -0x45;
+            targetZ = 0x78;
+            moveX = 1;
+            break;
+        case 2:
+            targetX = 0x64;
+            if (mode == 2) {
+                sound = 0x4E;
+            }
+            break;
+        case 3:
+            targetX = 0;
+            break;
+        case 4:
+            speed = 15.0f;
+            targetX = 0x10E;
+            targetZ = -0x756;
+            moveZ = 1;
+            if (mode == 2) {
+                sound = 0x4E;
+            }
+            break;
+        case 5:
+            targetZ = 0x8C;
+            if (mode == 2) {
+                sound = 0x4C1;
+            }
+            break;
+        case 6:
+            targetZ = -0x8C;
+            break;
+        case 7:
+            speed = 15.0f;
+            targetX = -0x1004;
+            targetZ = 0x1A6;
+            moveX = 1;
+            if (mode == 2) {
+                sound = 0x4E;
+            }
+            break;
+        }
+    } else {
+        switch (state) {
+        case 4:
+            speed = 15.0f;
+            moveX = 1;
+            if (mode == 1) {
+                sound = 0x4E;
+            }
+            break;
+        case 7:
+            speed = 15.0f;
+            moveZ = 1;
+            if (mode == 1) {
+                sound = 0x4E;
+            }
+            break;
+        }
+    }
+    if (sound != 0) {
+        func_15114D24(arg0, sound, 0x7D00, 0x64, 0x9C4, 1);
+    }
+    cur = arg0->unk84;
+    if (mode == 0 || mode == 3) {
+        cur = 0.0f;
+        arg0->unk10 = targetX;
+        arg0->unk14 = targetZ;
+    }
+    if (cur < speed) {
+        cur += (speed - cur) * 0.02999999933f;
+    }
+    if ((moveX != 0 || targetZ == arg0->unk14) && targetX != arg0->unk10 && (moveZ == 0 || targetZ == arg0->unk14)) {
+        d = targetX - arg0->unk10;
+        if (d < -cur) {
+            d = -cur;
+        } else if (cur < d) {
+            d = cur;
+        }
+        arg0->unk10 += d;
+        if (targetX == arg0->unk10) {
+            cur = 0.0f;
+            if (state == 0) {
+                func_15114D24(arg0, 0x4E, 0x7D00, 0x64, 0x9C4, 1);
+            }
+        }
+    } else if (targetZ != arg0->unk14) {
+        d = targetZ - arg0->unk14;
+        if (d < -cur) {
+            d = -cur;
+        } else if (cur < d) {
+            d = cur;
+        }
+        arg0->unk14 += d;
+    } else if (mode == 2 || mode == 1) {
+        arg0->unk73 = ((mode == 2) ? 3 : 0) | (arg0->unk73 &= ~3);
+        if (arg0->unk74 != 0) {
+            func_100111C8(arg0->unk74);
+            arg0->unk74 = 0;
+            func_15114D24(arg0, 0x4C8, 0x7D00, 0x64, 0x9C4, 1);
+        }
+    }
+    arg0->unk84 = cur;
+}
+
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1483E0/func_1511B51C.s")
 
