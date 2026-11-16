@@ -1507,7 +1507,301 @@ s32 func_15089F9C(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_B3020/func_1508A1BC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_B3020/func_1508A6FC.s")
+extern s8 D_800E0BD0;
+extern u8 D_800E0BB8[];
+extern s8 D_800872D0[];
+extern s16 D_800872C4[];
+extern s8 D_800872E0[];
+extern s8 D_800872E8[];
+extern f32 D_800872F8[];
+void func_15042D94(s32, s32, s32, char *, ...);
+s32 func_1508CAD8(s32, s32, s32, s32, s32, s32);
+void func_1508EC5C(s32, s32);
+void func_1508EBF8(s32, s32);
+s32 func_1508DAEC(s32, s32);
+void func_1508B3F8(void);
+
+#define MGR_W(off) ((s32 *)(D_800D23B0 + (off)))
+#define MGR_B(off) ((s8 *)(D_800D23B0 + (off)))
+#define MGR_F(off) ((f32 *)(D_800D23B0 + (off)))
+
+s32 func_1508A6FC(void)
+{
+  s32 i;
+  s32 bit;
+  s32 isNew;
+  s32 team;
+  struct127 *obj;
+  s32 other;
+  s32 type;
+  s32 result;
+  s32 respawn;
+  s32 old;
+  s32 reset;
+  struct127 *tgt;
+  s32 mask14;
+  s32 mask18;
+  s32 count;
+  s32 *arr1C;
+  s32 *teams;
+  s32 *arr35C;
+  s32 *arr31C;
+  s32 *arr39C;
+  s32 *arr19C;
+  s32 *arr21C;
+  s32 *arr29C;
+  s32 *arr25C;
+  s32 *arr41C;
+  s32 *arr3DC;
+  s32 *arr9C;
+  s32 *arrDDC;
+  s32 *arr1574;
+  u8 flag;
+  s32 half;
+  s32 j;
+  s32 pad;
+  s32 flags;
+  u8 *vp;
+  result = 0;
+  i = 0;
+  mask14 = ((s32 *) (D_800D23B0 + 0x14))[0];
+  mask18 = ((s32 *) (D_800D23B0 + 0x18))[0];
+  count = ((s32 *) (D_800D23B0 + 0x10))[0];
+  teams = (s32 *) (D_800D23B0 + 0xE64);
+  arr35C = (s32 *) (D_800D23B0 + 0x35C);
+  arr31C = (s32 *) (D_800D23B0 + 0x31C);
+  arr19C = (s32 *) (D_800D23B0 + 0x19C);
+  arr21C = (s32 *) (D_800D23B0 + 0x21C);
+  arr29C = (s32 *) (D_800D23B0 + 0x29C);
+  arr25C = (s32 *) (D_800D23B0 + 0x25C);
+  arr41C = (s32 *) (D_800D23B0 + 0x41C);
+  arr3DC = (s32 *) (D_800D23B0 + 0x3DC);
+  arrDDC = (s32 *) (D_800D23B0 + 0xDDC);
+  arr1574 = (s32 *) (D_800D23B0 + 0x1574);
+  arr1C = (s32 *) (D_800D23B0 + 0x1C);
+  arr39C = (s32 *) (D_800D23B0 + 0x39C);
+  arr9C = (s32 *) (D_800D23B0 + 0x9C);
+  for (i = 0; i < count; i++)
+  {
+    bit = 1 << i;
+    arr1C[i] = 0;
+    isNew = 0;
+    if (!(mask14 & bit))
+    {
+      if (!(mask18 & bit))
+      {
+        isNew = 1;
+      }
+      mask18 |= bit;
+    }
+    if ((mask14 & bit) || isNew)
+    {
+      obj = &D_800CC2D0[i];
+      team = teams[i];
+      if ((team != 0) && ((*((s16 *) (D_800D23B0 + 0x16BC))) == 0xB9))
+      {
+        obj->unk1E4 = 1;
+      }
+      old = arr29C[i];
+      arr21C[i] += D_800BE9E4;
+      arr29C[i] += D_800BE9E4;
+      arr25C[i] -= D_800BE9E4;
+      if (arr25C[i] <= 0)
+      {
+        arr25C[i] = 0;
+      }
+      arr41C[i] -= D_800BE9E4;
+      if (arr41C[i] <= 0)
+      {
+        arr41C[i] = 0;
+      }
+      arr1574[i] -= D_800BE9E4;
+      if (arr1574[i] < 0)
+      {
+        arr1574[i] = 0;
+      }
+      if ((arr19C[i] == 3) && ((arr25C[i] & 0x1F) >= 0x1D))
+      {
+        func_1508EC5C(i, 0x8000);
+      }
+      arr3DC[i] = D_800E0BB8[i];
+      D_800E0BB8[i] &= 0x7F;
+      if (((s32 *) (D_800D23B0 + 0x4DC)) != 0)
+      {
+        ((s32 *) (D_800D23B0 + 0x4DC))[i] = obj->unk31C->grenade_count;
+      }
+      arr39C[i] = func_150859AC(i, 4);
+      arr9C[i] = func_15085DA8(obj->y_position);
+      if (((arr39C[i] == 0) || isNew) || (obj->pad2FC[1] != 0))
+      {
+        if (arr35C[i] == 0)
+        {
+          if (obj->unk20F != 0xFF)
+          {
+            ((s32 *) (D_800D23B0 + 0x59C))[i] = obj->unk20F;
+          }
+          else
+          {
+            ((s32 *) (D_800D23B0 + 0x59C))[i] = -1;
+            if (!arr3DC)
+            {
+            }
+          }
+          arr35C[i] = 1;
+          arr25C[i] = 0;
+          arr19C[i] = 0;
+          ((s32 *) (D_800D23B0 + 0x5C))[i] = 1;
+          ((s32 *) (D_800D23B0 + 0x11C))[i] = -1;
+          arrDDC[team]--;
+          if ((arr3DC[i] & 0x7F) < count)
+          {
+            other = teams[arr3DC[i] & 0x7F];
+            if (team != other)
+            {
+              arrDDC[other]++;
+            }
+          }
+          if ((*((s16 *) (D_800D23B0 + 0x16BC))) != 0xB9)
+          {
+            ((s32 *) (D_800D23B0 + 0xFF0))[i] = 0;
+            func_1508DAEC(i, 1);
+          }
+          result |= bit;
+        }
+      }
+      else
+      {
+        arr35C[i] = 0;
+      }
+      flag = 1;
+      if ((arr31C[i] != 0) && ((*((s16 *) (D_800D23B0 + 0x16BC))) != 0xB8))
+      {
+        reset = 0;
+        if ((arr19C[i] != 1) && (arr21C[i] < 30))
+        {
+          type = obj->unk232;
+          obj->unk222 = arr31C[i] - 2;
+          if ((type != 4) && (type != 5))
+          {
+            func_1508EBF8(i, 4);
+          }
+          if (type == 4)
+          {
+            arr21C[i] = 0;
+          }
+          if (type == 5)
+          {
+            arr21C[i] = 30;
+            ((f32 *) (D_800D23B0 + 0x1868))[i] = D_800872F8[D_800E0BD0];
+            ((f32 *) (D_800D23B0 + 0x17A8))[i] = (func_150ADA68() * 50.0f) + obj->x_position;
+            ((f32 *) (D_800D23B0 + 0x17E8))[i] = obj->y_position + 40.0f;
+            ((f32 *) (D_800D23B0 + 0x1828))[i] = (func_150ADA68() * 50.0f) + obj->z_position;
+            if ((arr31C[i] - 2) >= 2)
+            {
+              tgt = &D_800CC2D0[arr31C[i] - 2];
+              ((f32 *) (D_800D23B0 + 0x17A8))[i] += (tgt->x_position - obj->x_position) * 0.5f;
+              ((f32 *) (D_800D23B0 + 0x1828))[i] += (tgt->z_position - obj->z_position) * 0.5f;
+            }
+          }
+        }
+        flag = 0;
+        bit = 0;
+        if (D_800872D0[D_800E0BD0] < arr29C[i])
+        {
+          arr29C[i] = 0;
+          old = -1;
+        }
+        if ((arr29C[i] >= 0) && (old < 0))
+        {
+          bit = 1;
+        }
+        if ((D_800872C4[D_800E0BD0] != (-1)) && (arr21C[i] >= D_800872C4[D_800E0BD0]))
+        {
+          reset = 1;
+        }
+        ((s8 *) (D_800D23B0 + 0x1725))[i] += (((s8 *) (D_800D23B0 + 0x1705))[i] - ((s8 *) (D_800D23B0 + 0x1725))[i]) >> 2;
+        ((s8 *) (D_800D23B0 + 0x1735))[i] += (((s8 *) (D_800D23B0 + 0x1715))[i] - ((s8 *) (D_800D23B0 + 0x1735))[i]) >> 2;
+        if (func_1508CAD8(i, arr31C[i] - 2, bit, reset, ((s8 *) (D_800D23B0 + 0x1725))[i], ((s8 *) (D_800D23B0 + 0x1735))[i]) && (arr19C[i] != 1))
+        {
+          arr21C[i] = 0;
+        }
+        if (arr29C[i] == 0)
+        {
+          ((s8 *) (D_800D23B0 + 0x1705))[i] = 0;
+          ((s8 *) (D_800D23B0 + 0x1715))[i] = 0;
+          if (D_800872E8[D_800E0BD0] < ((s32) (func_150ADA68() * 100.0f)))
+          {
+            if (func_150ADA68() > 0.5f)
+            {
+              ((s8 *) (D_800D23B0 + 0x1705))[i] = -50;
+            }
+            else
+            {
+              ((s8 *) (D_800D23B0 + 0x1705))[i] = 50;
+            }
+            if (func_150ADA68() > 0.5f)
+            {
+              ((s8 *) (D_800D23B0 + 0x1715))[i] = 50;
+            }
+            else
+            {
+              ((s8 *) (D_800D23B0 + 0x1715))[i] = 0;
+            }
+          }
+        }
+      }
+      if (flag && ((*((s16 *) (D_800D23B0 + 0x16BC))) != 0xB8))
+      {
+        arr29C[i] = -D_800872E0[D_800E0BD0];
+      }
+      flags = obj->unk22C & 0x200;
+      obj->unk22C &= ~0x200;
+      if (flags || (arr3DC[i] & 0x80))
+      {
+        arr19C[i] = 0;
+        arr1C[i] = 1;
+      }
+      if ((*(((u8 *) obj->unk31C) + 0x1AC)) != 0)
+      {
+        arr25C[i] = 20;
+      }
+    }
+    else
+    {
+      arr39C[i] = 0;
+      arr9C[i] = -1;
+    }
+  }
+
+  ((s32 *) (D_800D23B0 + 0x18))[0] = mask18;
+  if (D_800BE9E4 != 0)
+  {
+    ((f32 *) (D_800D23B0 + 0x16B4))[0] = D_800BE9E4;
+  }
+  else
+  {
+    ((f32 *) (D_800D23B0 + 0x16B4))[0] = 1.0f;
+  }
+  if (((s32 *) (D_800D23B0 + 0x55C)) != 0)
+  {
+    func_1508B3F8();
+  }
+  if ((*((s16 *) (D_800D23B0 + 0x16BC))) == 0xB9)
+  {
+    half = ((s32) (((f32 *) D_800BE628)[0x30 / 4] - ((f32 *) D_800BE628)[0x2C / 4])) >> 1;
+    func_1504332C(0xFF, 0xFF, 0xFF, 0xFF);
+    for (j = 0; j <= D_80082FA0; j++)
+    {
+      if ((*((u8 *) (&D_800CC2D0[j].pad128))) == 0)
+      {
+        vp = ((u8 *) D_800BE628) + (j * 0x180);
+        func_15042D94((s32) ((*((f32 *) (vp + 0x2C))) + ((f32) half)), (s32) ((*((f32 *) (vp + 0x24))) + 6.0f), 1, "%d", arr1574[j] / 60);
+      }
+    }
+
+  }
+  return result;
+}
 
 extern s8 D_8008FD90;
 extern s16 *D_8008FDD4;
