@@ -16,9 +16,22 @@ void func_1000F91C(u16, s32, s16, s32, s32, s32, s32, s32, s32, s32);
 u16 func_10010E78(u16, s32, u16, s32, s32, s32, s32, s32, s32, s32, s32);
 u16 func_10010BE8(u16, s32, s32, s32, s32, s32, s32);
 #define D_800D1550 D_800D1550_hdr
+#define D_800CC298 D_800CC298_hdr
 #include "variables.h"
 #undef D_800D1550
+#undef D_800CC298
 extern f32 D_800D1550;
+typedef struct Game83300Anim298 {
+    f32 unk0;
+    f32 unk4;
+    s8 unk8;
+    s8 unk9;
+    s8 unkA;
+    u8 unkB[4];
+    u8 unkF;
+    u8 unk10;
+} Game83300Anim298;
+extern Game83300Anim298 D_800CC298;
 
 
 void func_15058F24(struct127 *arg0, f32, f32);
@@ -2763,7 +2776,199 @@ s32 func_1506196C(u8 *arg0, s32 arg1) {
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_150619A8.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_15061B4C.s")
+
+typedef struct Game83300Step4 {
+    u8 b[4];
+} Game83300Step4;
+extern Game83300Step4 D_800860F0;
+
+struct Game83300MorphObject;
+void func_15062D10(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
+void func_15062E24(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
+void func_15062FC0(struct Game83300MorphObject *arg0, s32 arg1, u8 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7);
+void func_1501B660(struct127 *arg0, f32 *arg1, s32 arg2);
+f32 func_150489B0(u8 arg0);
+void func_150F1CB0(struct127 *arg0);
+extern s32 *D_800C4020[];
+extern s32 D_8009942C[];
+
+#define ANIM D_800CC298
+#define OBJB(o, off) (((u8 *)(o))[off])
+
+void func_15061B4C(void) {
+    struct127 *unused;
+    s32 id;
+    s32 i;
+    u8 done[10];
+
+    bzero(done, sizeof(done));
+    for (i = 0; i < 25; i++) {
+        if ((D_800CC2D0[i].interaction_state == 0) || (D_800CC2D0[i].unk2FA == 0)) {
+            continue;
+        }
+        id = D_800CC2D0[i].id;
+        if ((id == 0x13) && (done[0] == 0)) {
+            func_15062D10(id, 0x5E, 0, -1, 0, 0);
+            func_15062D10(id, 0x60, 0, -1, 0, 0);
+            func_15062D10(id, 0x62, 0, -1, 0, 0);
+            func_15062D10(id, 0x64, 0, -1, 0, 0);
+            done[0] = 1;
+        } else if ((id == 0x23) && (done[1] == 0)) {
+            func_15062D10(id, 0x1E9, 0, -1, 0, 0);
+            func_15062D10(id, 0x1EB, 0, -1, 0, 0);
+            func_15062D10(id, 0x1ED, 0, -1, 0, 0);
+            func_15062D10(id, 0x1EF, 0, -1, 0, 0);
+            done[1] = 1;
+        } else if ((id == 0x24) && (done[2] == 0)) {
+            if ((func_150ADA20() % 1000U) < 300) {
+                ANIM.unk8 = (func_150ADA20() % 5U) - 2;
+            }
+            func_15062D10(id, 4, -4, ANIM.unk8, 0, 0);
+            if (D_800C4020[id] != NULL) {
+                func_15062E24(id, D_800C4020[id][0], 0x37, 0, ANIM.unk4, 2, 1);
+                func_15062E24(id, D_800C4020[id][1], 0x27, 0x37, ANIM.unk0, 1, 0);
+            }
+            ANIM.unk0 += -4.0f * D_800BE9E4;
+            if (ANIM.unk0 <= 0.0f) {
+                ANIM.unk0 += 360.0f;
+            }
+            ANIM.unk4 += -0.5f * D_800BE9E4;
+            if (ANIM.unk4 <= 0.0f) {
+                ANIM.unk4 += 360.0f;
+            }
+            done[2] = 1;
+        } else if ((id == 0x2C) && (done[3] == 0)) {
+            if (ANIM.unk9 >= 0x29) {
+                ANIM.unkA = -1;
+            } else if (ANIM.unk9 <= 0) {
+                ANIM.unkA = 1;
+            }
+            ANIM.unk9 += ANIM.unkA;
+            func_15062D10(id, 0xAA, ANIM.unk9, 0, 0, 1);
+            done[3] = 1;
+        } else if ((id == 0x3A) && (done[4] == 0)) {
+            f32 weights[4];
+            s32 j;
+            Game83300Step4 step = D_800860F0;
+
+
+            if (D_800CC2D0[i].unk1D4 != NULL) {
+                for (j = 0; j < 4; j++) {
+                    weights[j] = (func_150489B0(ANIM.unkB[j]) + 1.0f) * 0.5f;
+                    ANIM.unkB[j] += step.b[j];
+                }
+                func_1501B660(&D_800CC2D0[i], weights, 1);
+                done[4] = 1;
+            }
+        } else if ((id == 0x3F) && (done[5] == 0)) {
+            func_15062D10(id, 4, 0, -4, 0, 0);
+            done[5] = 1;
+        } else if (id == 0x4B) {
+            if (done[6] == 0) {
+                done[6] = 1;
+                func_15062D10(id, 0x173, -4, 0, 0, 0);
+                func_15062D10(id, 0x175, -2, 0, 0, 0);
+                func_15062D10(id, 0x177, -1, 0, 0, 0);
+            }
+            if (ANIM.unkF >= 4) {
+                ANIM.unkF = 0;
+                if (OBJB(&D_800CC2D0[i], 0x69) == 5) {
+                    OBJB(&D_800CC2D0[i], 0x69) = 0;
+                } else {
+                    OBJB(&D_800CC2D0[i], 0x69)++;
+                }
+                if (OBJB(&D_800CC2D0[i], 0x69) >= 3) {
+                    OBJB(&D_800CC2D0[i], 0x68) = 5 - OBJB(&D_800CC2D0[i], 0x69);
+                } else {
+                    OBJB(&D_800CC2D0[i], 0x68) = OBJB(&D_800CC2D0[i], 0x69);
+                }
+                OBJB(&D_800CC2D0[i], 0x68) += 0xF;
+            } else {
+                ANIM.unkF += D_800BE9E4;
+            }
+        } else if (id == 0x45) {
+            s32 val = OBJB(&D_800CC2D0[i], 0x6D);
+
+            if (val >= 10) {
+                val -= 10;
+            } else {
+                val = val * 2 + 6;
+            }
+            OBJB(&D_800CC2D0[i], 0x68) = val;
+        } else if (id == 0x5B) {
+            s32 v;
+            s32 k;
+
+            for (k = 0; k < 2; k++) {
+                v = OBJB(&D_800CC2D0[i], 0x6C + k);
+                if (v >= 10) {
+                    v -= 10;
+                } else {
+                    v = D_8009942C[v];
+                }
+                OBJB(&D_800CC2D0[i], 0x68 + k) = v;
+            }
+        } else if (id == 0x54) {
+            f32 scale;
+
+            if (D_800CC2D0[i].unk2EC != 0) {
+                if (ANIM.unk10 < 0xEB) {
+                    ANIM.unk10 += 0x14;
+                } else {
+                    ANIM.unk10 = 0xFF;
+                }
+            } else if (ANIM.unk10 >= 0x15) {
+                ANIM.unk10 -= 0x14;
+            } else {
+                ANIM.unk10 = 0;
+            }
+            scale = (u32)ANIM.unk10 * 0.003921568859f;
+            func_1501B660(&D_800CC2D0[i], &scale, 0);
+        } else if (id == 0x8A) {
+            s32 delta;
+            s32 pad;
+
+            if (D_800BE9F0 != 0x30) {
+                if (D_800CC2D0[i].unk84.uh == 1) {
+                    func_15062D10(id, 0x253, 0, 0x10, 0, 0);
+                    func_15062D10(id, 0x255, 0, 8, 0, 0);
+                    func_15062D10(id, 0x257, 0, 4, 0, 0);
+                }
+            } else {
+                if (D_800CC2D0[i].unk84.uh == 1) {
+                    delta = D_800BE9E4 * -40;
+                } else {
+                    delta = 0;
+                }
+                func_15062FC0((struct Game83300MorphObject *)&D_800CC2D0[i], 0, 0, 0x1000, 0x1000, 0xC, 0, delta);
+            }
+        } else if (id == 0x42) {
+            if ((D_800CC2D0[i].unk84.uh == 2) || (D_800CC2D0[i].unk84.uh == 1)) {
+                if (OBJB(&D_800CC2D0[i], 0x68) == 0xD) {
+                    OBJB(&D_800CC2D0[i], 0x68) = 0xC;
+                }
+                if ((func_150ADA20() & 3) == 0) {
+                    if (OBJB(&D_800CC2D0[i], 0x68) == 0x15) {
+                        OBJB(&D_800CC2D0[i], 0x68) = 0xC;
+                    } else {
+                        OBJB(&D_800CC2D0[i], 0x68) = 0x15;
+                    }
+                }
+            } else {
+                OBJB(&D_800CC2D0[i], 0x68) = 0xD;
+            }
+        } else if (id == 0x7B) {
+            func_150F1CB0(&D_800CC2D0[i]);
+        } else if ((id == 0x92) && (done[9] == 0)) {
+            func_15062D10(id, 4, 0, -2, 0, 0);
+            func_15062D10(id, 0x13B, 0, -2, 0, 0);
+            func_15062D10(id, 0x20D, 0, -2, 0, 0);
+            done[9] = 1;
+        } else if (id == 0x43) {
+            func_15062D10(id, 4, 0x14, 8, 0, 0);
+        }
+    }
+}
 typedef struct { s16 x; s16 y; s16 z; u16 r; } Pt150623F4;
 s32 func_150229E4(struct127 *);
 s32 func_150A6360(void *, void *, f32, f32, f32, f32, f32, f32);
@@ -2778,7 +2983,7 @@ s32 func_150623F4(struct127 *arg0) {
     f32 dx;
     f32 dz;
     f32 height;
-    u8 id;
+    s32 id;
     u8 *p;
 
     scale = (arg0->unk144 != NULL) ? (f32)*(u16 *)((u8 *)arg0->unk144 + 0x2A) : 0.0f;
