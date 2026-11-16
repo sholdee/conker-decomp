@@ -1004,7 +1004,44 @@ struct131 *func_151149AC(u8 id) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_13D350/func_15114A1C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_13D350/func_15114B94.s")
+typedef struct Struct15114B94 {
+    u8 pad0[0x4C];
+    u8 enabled;
+    u8 pad4D[2];
+    u8 flags;
+    u8 pad50[0x1E];
+    u8 unk6E;
+    u8 pad6F;
+    u8 state;
+    u8 pad71[0x1A];
+    u8 players[9];
+    struct102 *callback;
+    u8 pad98[8];
+} Struct15114B94;
+
+void func_15114B94(u32 arg0) {
+    u32 threshold;
+
+    if (arg0 < D_800DBEF0) {
+        if (((Struct15114B94 *)D_800DBEF4)[arg0].callback != NULL) {
+            func_1516972C(((Struct15114B94 *)D_800DBEF4)[arg0].callback);
+            ((Struct15114B94 *)D_800DBEF4)[arg0].callback = NULL;
+        }
+        ((Struct15114B94 *)D_800DBEF4)[arg0].state |= 8;
+        ((Struct15114B94 *)D_800DBEF4)[arg0].unk6E = 1;
+    }
+    arg0 = D_800DBEF0 - 1;
+    threshold = D_800DBEF0 - D_800DBF98;
+    while (D_800DBEF0 != 0 && (((Struct15114B94 *)D_800DBEF4)[arg0].state & 8)) {
+        if (arg0 >= threshold && D_800DBF98 != 0) {
+            D_800DBF98--;
+        } else {
+            threshold--;
+        }
+        D_800DBEF0--;
+        arg0--;
+    }
+}
 
 s32 func_15114CC4(void *a0, s32 a1, s32 *a2, s32 a3) {
     s16 *v1 = *(s16 **)((u8 *)a0 + 0x18);
