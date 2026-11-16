@@ -153,7 +153,146 @@ s32 func_1518BCD0(void *arg0, u8 arg1, s32 arg2) {
     return (s32)temp_v0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1B8F40/func_1518BD60.s")
+typedef struct {
+    f32 pos[3];
+    s16 unkC;
+    s16 unkE;
+    s32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 pad16[2];
+} Spawn1518BD60;
+
+typedef struct {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    u8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+    u8 pad1C[4];
+} Part1518BD60;
+
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8;
+    s32 unkC;
+    s32 unk10;
+    s32 unk14;
+    s32 unk18;
+    u8 unk1C;
+    u8 unk1D;
+    u8 pad1E[2];
+} Style1518BD60;
+
+typedef struct {
+    s32 unk0;
+    u8 pad4[0x37];
+    u8 unk3B;
+    u8 pad3C[0x184 - 0x3C];
+    u32 unk184;
+    u8 pad188[0x1AC - 0x188];
+    s16 unk1AC[2][3];
+    u8 pad1B8[0x1D4 - 0x1B8];
+    s32 unk1D4;
+} Target1518BD60;
+
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD[3];
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    s16 unk20;
+    s16 unk22;
+    Target1518BD60 *unk24;
+    u8 unk28;
+    u8 unk29;
+    u8 unk2A;
+    u8 pad2B;
+    s32 unk2C[2];
+    f32 unk34[2];
+    f32 unk3C[2];
+} Emitter1518BD60;
+
+typedef struct {
+    Emitter1518BD60 *owner;
+    u8 index;
+} Link1518BD60;
+
+extern void *func_15147DA0(Spawn1518BD60 *, Part1518BD60 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, Style1518BD60 *, s32, s32, s32);
+
+void func_1518BD60(Emitter1518BD60 *arg0) {
+    u8 i;
+    s32 idx;
+    void *ret;
+    Spawn1518BD60 spawn;
+    Part1518BD60 part;
+    s32 pad;
+    Style1518BD60 style;
+    f32 speed;
+    f32 sinA;
+    f32 cosA;
+    s32 angle;
+    Target1518BD60 *obj;
+    Link1518BD60 *link;
+
+    for (i = 0; i < 2; i++) {
+        arg0->unk2C[i] -= D_800BE9E4;
+        obj = arg0->unk24;
+        if (obj != NULL && obj->unk0 != 0 && obj->unk1D4 != 0 && obj->unk3B == arg0->unk28) {
+            if (arg0->unk2C[i] < 0) {
+                idx = i;
+                if (idx) {}
+                angle = func_150ADA20() % (u32)(arg0->unk22 + 1);
+                sinA = func_151423D8(angle);
+                cosA = func_151423D8(angle - 0x40);
+                speed = func_150ADA68() * arg0->unk14 + arg0->unk10;
+                arg0->unk2C[i] = func_150ADA20() % 23U + 5;
+                style.unk0 = 0;
+                style.unk4 = 1;
+                style.unk8 = 0x160600;
+                style.unkC = 3;
+                style.unk10 = 0x10;
+                style.unk14 = 0x80;
+                style.unk18 = 0x20;
+                style.unk1C = 0;
+                style.unk1D = 9;
+                spawn.unk15 = func_150ADA20() % (u32)(arg0->unk20 + 1) + 3;
+                spawn.unk10 = 1;
+                spawn.unkE = 1;
+                spawn.unkC = func_150ADA20() % 21U + 0x50;
+                part.unk19 = arg0->unk29;
+                part.unk0 = func_150ADA68() * arg0->unk1C + arg0->unk18;
+                part.unk8 = 0.0f;
+                part.unk10 = 0.6539999843f;
+                part.unk4 = speed * cosA;
+                part.unkC = speed * sinA;
+                part.unk18 = arg0->unk2A | 8;
+                part.unk1A = 0xFF - ((u8)(arg0->unk24->unk184 >> 5) << 6);
+                part.unk1B = -1;
+                ret = func_15147DA0(&spawn, &part, spawn.unk15 * 0xC + 8, 5, 1, 0, 2, 1, 0, 0, 0, &style, 0, arg0->unkC, arg0->unk1);
+                if (ret != NULL) {
+                    link = (Link1518BD60 *)((u8 *)*(void **)((u8 *)ret + 0x98) + 0x48);
+                    link->owner = arg0;
+                    link->index = idx;
+                }
+                obj = arg0->unk24;
+            }
+            arg0->unk34[i] = obj->unk1AC[i][0];
+            arg0->unk3C[i] = arg0->unk24->unk1AC[i][2];
+        }
+    }
+}
 
 typedef struct { f32 x, y, z; } Vec3f_C0B8;
 typedef struct { s16 x, y, z; } Vec3s_C0B8;
