@@ -1493,7 +1493,20 @@ void func_1506EEF4(void) {
 //     *((u8 *)D_800D154C + idx + 0x285) = temp;
 //     return hi;
 // }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506EF5C.s")
+void func_1506EF5C(void) {
+    s32 index;
+    s16 first;
+    s16 second;
+
+    index = (D_800D1580 >> 16) & 0xFF;
+    first = (D_800D1580 >> 8) & 0xFF;
+    second = D_800D1580 & 0xFF;
+    *(u16 *)((u8 *)D_800D154C + 0x282) = 0xFFFF;
+    ((u8 *)D_800D154C)[0x276] = 5;
+    index *= 2;
+    ((u8 *)D_800D154C)[index + 0x284] = first;
+    ((u8 *)D_800D154C)[index + 0x285] = second;
+}
 
 void func_1506EFB4(void) {
     D_800D154C->unk282 = (u16)0;
