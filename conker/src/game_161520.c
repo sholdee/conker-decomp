@@ -950,7 +950,50 @@ void func_15135DD0(V15135DD0 *arg0, V15135DD0 *arg1, s32 arg2, u8 arg3, s32 arg4
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15136404.s")
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3f_36404;
+
+typedef struct {
+    f32 height;
+    u8 geometry[0x19];
+    u8 type;
+    u8 pad1E[6];
+} Hit36404;
+
+extern void func_15143874(s16, f32, f32 *, f32 *);
+void func_1504715C();
+s32 func_15046C80(f32 *, u16, f32, void *);
+
+void func_15136404(void *arg0, f32 arg1, u8 arg2, s32 arg3) {
+    f32 scale;
+    f32 count;
+    Hit36404 hit;
+    Vec3f_36404 probe;
+    Vec3f_36404 pos;
+
+    if (arg0 != NULL) {
+        scale = 3.141592741f * arg1 * arg1;
+        count = (func_150ADA68() * 305.0f + 108.0f) * 9.999999975e-07f * scale;
+        func_1504715C(&hit, arg0);
+        while (count > 1.0f) {
+            func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * arg1, &probe.x, &probe.z);
+            probe.x += *(f32 *)((u8 *)arg0 + 0x14);
+            probe.z += *(f32 *)((u8 *)arg0 + 0x1C);
+            probe.y = *(f32 *)((u8 *)arg0 + 0x18) + 500.0f;
+            if (func_15046C80(&probe.x, 0, *(f32 *)((u8 *)arg0 + 0x18) - 5000.0f, &hit) != 0 && hit.type != 3) {
+                pos.x = probe.x;
+                pos.y = hit.height;
+                pos.z = probe.z;
+                func_151D9B8C(0, func_150ADA68() * 20.0f + 10.0f, func_150ADA20() % 101U + 0x64, hit.geometry, (struct17 *)&pos,
+                              func_150ADA20() % 201U + 0x190, 1, 1, 0, arg2, arg3);
+            }
+            count -= 1.0f;
+        }
+    }
+}
 
 typedef struct {
     s32 unk0;
