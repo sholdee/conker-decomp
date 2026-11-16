@@ -1364,4 +1364,42 @@ void func_1502FBE8(struct127 *arg0) {
 }
 #undef actor
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502FD70.s")
+typedef struct {
+    u8 pad0[0x2E];
+    u8 timer;
+} Sub_1502FD70;
+
+typedef struct {
+    u8 pad0[4];
+    u8 id;
+    u8 pad5[0x144 - 5];
+    Sub_1502FD70 *sub;
+} Actor_1502FD70;
+
+void func_1502FD70(struct127 *arg0) {
+    Actor_1502FD70 *actor = (Actor_1502FD70 *)arg0;
+    u8 id = actor->id;
+    u8 *slot;
+
+    if ((D_80038080 == 0) && (D_800BE9F0 == 0x1D)) {
+        ((u8 *)D_800D2040)[id] = 2;
+        return;
+    }
+    slot = &((u8 *)D_800D2040)[id];
+    if (*slot != 0xFF) {
+        if (actor->sub != NULL) {
+            if (actor->sub->timer != 0xFF) {
+                if (actor->sub->timer != 0) {
+                    if (*slot < actor->sub->timer * 30) {
+                        *slot = actor->sub->timer * 30;
+                    }
+                } else {
+                    goto set3;
+                }
+            }
+        } else {
+set3:
+            *slot = 3;
+        }
+    }
+}
