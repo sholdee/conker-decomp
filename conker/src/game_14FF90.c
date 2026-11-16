@@ -638,7 +638,135 @@ void func_15124B18(struct108 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_15124C38.s")
+void func_1507C3E0(void *, s16 *, s16 *, s16 *);
+void func_1507E1D0(void *, f32 *, f32 *, f32 *);
+
+void func_15124C38(void *arg0, f32 *arg1) {
+    f32 target;
+    f32 factor;
+    f32 height;
+
+    if ((*(u16 *)((u8 *)arg0 + 0x7F4) == 0) || (arg1 != 0)) {
+        if ((*(u8 **)((u8 *)arg0 + 0x3D4)) != NULL) {
+            if (((*(u8 **)((u8 *)arg0 + 0x3D4))[0x4E] & 0xF) == 1) {
+                if (*(s32 *)((u8 *)arg0 + 0x2C) & 0x100) {
+                    height = *(s16 *)((*(u8 **)((u8 *)arg0 + 0x3D4)) + 0x114) * D_800A3504;
+                } else {
+                    height = *(s16 *)((*(u8 **)((u8 *)arg0 + 0x3D4)) + 0x114) * D_800A3508;
+                }
+            } else if (*(s32 *)((u8 *)arg0 + 0x2C) & 0x100) {
+                if (*((u8 *)arg0 + 0x23E) == 0) {
+                    if (*(f32 *)((u8 *)arg0 + 0x77C) < -15.0f) {
+                        height = *(s16 *)((*(u8 **)((u8 *)arg0 + 0x3D4)) + 0x114) * D_800A350C + *(s16 *)(*(u8 **)((u8 *)arg0 + 0x3D0) + 0xCC);
+                    } else {
+                        height = *(s16 *)((*(u8 **)((u8 *)arg0 + 0x3D4)) + 0x114) * 0.75f + *(s16 *)(*(u8 **)((u8 *)arg0 + 0x3D0) + 0xCC);
+                    }
+                } else {
+                    height = *(s16 *)((*(u8 **)((u8 *)arg0 + 0x3D4)) + 0x114) * D_800A3510 + *(s16 *)(*(u8 **)((u8 *)arg0 + 0x3D0) + 0xCC);
+                }
+            } else if ((*((u8 *)arg0 + 0x23C) == 0) && (*((u8 *)arg0 + 0x600) != 0)) {
+                height = (f32)*(s16 *)((*(u8 **)((u8 *)arg0 + 0x3D4)) + 0x114) + *(s16 *)(*(u8 **)((u8 *)arg0 + 0x3D0) + 0xCC);
+            } else {
+                height = *(s16 *)((*(u8 **)((u8 *)arg0 + 0x3D4)) + 0x114) * 0.75f + *(s16 *)(*(u8 **)((u8 *)arg0 + 0x3D0) + 0xCC);
+            }
+            if (*(s32 *)((u8 *)arg0 + 0x5F0) & 0x100) {
+                height += 50.0f;
+            } else if (*(s32 *)((u8 *)arg0 + 0x5F0) & 0x200) {
+                height += 150.0f;
+            } else if (*(s32 *)((u8 *)arg0 + 0x5F0) & 0x800) {
+                height = 135.0f;
+            }
+        } else {
+            s16 sp52;
+            s16 sp50;
+            s16 sp4E;
+
+            func_1507C3E0(*(void **)((u8 *)arg0 + 0x3D0), &sp52, &sp50, &sp4E);
+            height = sp52;
+        }
+        if ((*(u8 **)((u8 *)arg0 + 0x3D4))[0x120] != 0) {
+            f32 sp48;
+            f32 sp44;
+            f32 sp40;
+
+            func_1507E1D0(*(void **)((u8 *)arg0 + 0x3D0), &sp40, &sp44, &sp48);
+            func_150495B0((f32 *)((u8 *)arg0 + 0x2C0), sp44, (f32 *)((u8 *)arg0 + 0x2A0), 4.0f, 8.0f,
+                          *(f32 *)((u8 *)arg0 + 0x7B4));
+            return;
+        }
+        {
+            f32 speed;
+            f32 limit;
+
+            if (((*((u8 *)arg0 + 0x23E) == 0xC) || (*((u8 *)arg0 + 0x23E) == 9) || (*((u8 *)arg0 + 0x23E) == 0x38) ||
+                 (*((u8 *)arg0 + 0x23E) == 0x39) || (*((u8 *)arg0 + 0x23E) == 0x37) || (*((u8 *)arg0 + 0x23E) == 0x3B) ||
+                 (*((u8 *)arg0 + 0x23E) == 0x12) || (*((u8 *)arg0 + 0x23E) == 0x15) || (*((u8 *)arg0 + 0x23E) == 0x26) ||
+                 (*((u8 *)arg0 + 0x23E) == 0x3A)) &&
+                (*(s32 *)((u8 *)arg0 + 0x2C) & 0x100)) {
+                height += 30.0f;
+            }
+            if ((*(s32 *)((u8 *)arg0 + 0x2C) & 0x80) || (func_15125490(arg0) != 0)) {
+                target = *(f32 *)(*(u8 **)((u8 *)arg0 + 0x3D0) + 0x18) + height * 0.25f;
+            } else if (*(s32 *)((u8 *)arg0 + 0x84) & 0x20000000) {
+                target = *(f32 *)(*(u8 **)((u8 *)arg0 + 0x3D0) + 0x180) + height;
+            } else if ((D_800C3671 != 0) || ((*(u8 **)((u8 *)arg0 + 0x3D0))[0x137] != 0) ||
+                       (*(u16 *)(*(u8 **)((u8 *)arg0 + 0x3D0) + 0x84) == 0x194) ||
+                       ((*(u8 **)((u8 *)arg0 + 0x3D0))[0xAD] == 1)) {
+                target = *(f32 *)(*(u8 **)((u8 *)arg0 + 0x3D0) + 0x18) + height;
+            } else if ((D_800A3514 == *(f32 *)((u8 *)arg0 + 0x360)) && !(*(s32 *)((u8 *)arg0 + 0x84) & 0x20000000) &&
+                       !(*(s32 *)((u8 *)arg0 + 0x84) & 0x200000) &&
+                       (*(f32 *)(*(u8 **)((u8 *)arg0 + 0x3D0) + 0x28) < 170.0f) &&
+                       (300.0f < *(f32 *)((u8 *)arg0 + 0x370))) {
+                target = *(f32 *)(*(u8 **)((u8 *)arg0 + 0x3D0) + 0x180) + height;
+            } else {
+                factor = *(f32 *)(*(u8 **)((u8 *)arg0 + 0x3D0) + 0x28) * D_800A3518;
+                factor = (factor < 0.0f) ? 0.0f : ((1.0f < factor) ? 1.0f : factor);
+                target = *(f32 *)(*(u8 **)((u8 *)arg0 + 0x3D0) + 0x28) * factor +
+                         *(f32 *)(*(u8 **)((u8 *)arg0 + 0x3D0) + 0x180) + height;
+            }
+            if ((*(u8 **)((u8 *)arg0 + 0x3D0))[0x102] != 0) {
+                if (*(f32 *)((u8 *)arg0 + 0x370) < 100.0f) {
+                    if (*(f32 *)((u8 *)arg0 + 0x2FC) < *(f32 *)(*(u8 **)((u8 *)arg0 + 0x3D0) + 0x18)) {
+                        target = *(f32 *)(*(u8 **)((u8 *)arg0 + 0x3D0) + 0x18) - 10.0f;
+                    } else {
+                        target = *(f32 *)(*(u8 **)((u8 *)arg0 + 0x3D0) + 0x18) + 10.0f;
+                    }
+                } else {
+                    target = *(f32 *)(*(u8 **)((u8 *)arg0 + 0x3D0) + 0x18);
+                }
+            }
+            if (arg1 != 0) {
+                *arg1 = target;
+                return;
+            }
+            if (*((u8 *)arg0 + 0x23C) != 0) {
+                *(f32 *)((u8 *)arg0 + 0x2C0) = target;
+                *(f32 *)((u8 *)arg0 + 0x2A0) = 0.0f;
+                return;
+            }
+            if (*(s32 *)((u8 *)arg0 + 0x5F0) & 0x80) {
+                speed = 5.0f;
+                limit = 8.0f;
+            } else if (*(s32 *)((u8 *)arg0 + 0x2C) & 0x100) {
+                speed = 5.0f;
+                limit = 9.0f;
+            } else if ((*(u8 **)((u8 *)arg0 + 0x3D0))[0x102] != 0) {
+                speed = 7.0f;
+                limit = 9.0f;
+            } else {
+                speed = 4.0f;
+                limit = 8.0f;
+            }
+            if ((*(s32 *)((u8 *)arg0 + 0x84) & 0x200000) && (target < *(f32 *)((u8 *)arg0 + 0x2CC))) {
+                speed += speed;
+                limit += limit;
+            }
+            func_150495B0((f32 *)((u8 *)arg0 + 0x2C0), target, (f32 *)((u8 *)arg0 + 0x2A0), speed, limit,
+                          *(f32 *)((u8 *)arg0 + 0x7B4));
+        }
+    }
+}
+
 
 void func_1512523C(struct108 *arg0) {
     f32 temp_f12;
