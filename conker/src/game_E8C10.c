@@ -712,7 +712,217 @@ s32 func_150BCFB8(struct Obj150BCFB8 *arg0, s32 a1, s32 a2, s32 a3, f32 arg5) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_E8C10/func_150BD070.s")
+typedef struct {
+    f32 f0;
+    f32 f4;
+    f32 f8;
+    f32 fC;
+    f32 f10;
+    f32 f14;
+    f32 f18;
+    f32 f1C;
+    f32 f20;
+    f32 f24;
+    struct17 pos;
+    struct17 vel;
+    f32 f40;
+    f32 f44;
+    f32 f48;
+    f32 f4C;
+    s32 f50;
+    s16 f54;
+    s16 f56;
+    u8 f58;
+    u8 pad59[0x3];
+    s32 f5C;
+    u8 f60;
+    u8 f61;
+    u8 f62;
+    u8 f63;
+    u8 f64;
+    u8 f65;
+    u8 f66;
+    u8 f67;
+    u8 f68;
+    s8 f69;
+    u8 f6A;
+    u8 pad6B[0x1];
+    s32 f6C;
+    u8 f70;
+    u8 pad71[0x1];
+    s16 f72;
+    s16 f74;
+    u8 pad76[0x2];
+    s32 f78;
+} Particle_BD070; /* 0x7C */
+
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s16 unk8;
+    s16 unkA;
+    s32 unkC;
+    s32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 unk16;
+    u8 unk17;
+    u8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+    u8 unk1C;
+    u8 unk1D;
+    s16 unk1E;
+    s16 unk20;
+    s16 unk22;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    struct17 pos;
+    struct17 unk3C;
+    struct17 vel;
+    f32 unk54;
+    u32 unk58;
+    s32 unk5C;
+    u8 unk60;
+    u8 unk61;
+    s8 unk62;
+    s8 unk63;
+    s8 unk64;
+    u8 unk65;
+    u8 unk66;
+    u8 pad67;
+    s16 unk68;
+    u8 pad6A[2];
+    f32 unk6C;
+} Spawn_BD070; /* 0x70 */
+
+void func_1514470C(struct178 *, struct17 *);
+void func_15143794(s16, s16, f32, struct17 *);
+s32 func_1513264C(void *, s32, s32, s32, s32, u8, s32);
+void *func_15130280(void *, u8, s32, s32, u8, s32);
+void func_151D5334(f32 *, f32, f32, f32, s32, u8, s32);
+
+void func_150BD070(u8 arg0, s32 arg1) {
+    struct178 *players[2];
+    const u8 idx[2] = {0x4C, 0x4D};
+    s16 count;
+
+    players[0] = &(*(struct178 **)&D_800D3098)[idx[0]];
+    players[1] = &(*(struct178 **)&D_800D3098)[idx[1]];
+    {
+        Particle_BD070 particle;
+        s32 r1;
+
+        count = func_150ADA20() % 9U + 0xD;
+        particle.f50 = 0x12DE8;
+        particle.f56 = 1;
+        particle.f58 = 0;
+        particle.f5C = 0;
+        particle.f60 = 0xFF;
+        particle.f61 = 8;
+        particle.f62 = 0;
+        particle.f63 = 0;
+        particle.f64 = 0;
+        particle.f65 = 0;
+        particle.f66 = 0;
+        particle.f67 = 0;
+        particle.f68 = 2;
+        particle.f69 = -1;
+        particle.f6A = 2;
+        particle.f6C = 0;
+        particle.f70 = 0;
+        particle.f72 = 0xC;
+        particle.f74 = 0x15;
+        particle.f78 = 0;
+        particle.f0 = 1.0f;
+        particle.f4 = 1.0f;
+        particle.f1C = 1.0f;
+        particle.f20 = 1.0f;
+        particle.f24 = 1.0f;
+        particle.f44 = 0.0f;
+        while (count > 0) {
+            particle.f54 = func_150ADA20() % 26U + 0x28;
+            particle.f8 = particle.fC = func_150ADA68() * 0.2470000088f + 0.2030000091f;
+            particle.f10 = func_150ADA68() * 360.0f;
+            particle.f14 = func_150ADA68() * 360.0f;
+            particle.f18 = func_150ADA68() * 360.0f;
+            particle.f40 = func_150ADA68() * 45.46600342f + -22.73300171f;
+            particle.f48 = func_150ADA68() * 45.46600342f + -22.73300171f;
+            func_1514470C(players[func_150ADA20() & 1], &particle.pos);
+            r1 = func_150ADA20();
+            func_15143794((u32)r1 % 31U - 0x54, func_150ADA20() % 26U - 0x2D, func_150ADA68() * 21.80000114f + 30.20000076f, &particle.vel);
+            particle.f4C = func_150ADA68() * 1.129000068f + -1.909000039f;
+            func_1513264C(&particle, 3, 0xFF, 0, 0, arg0, arg1);
+            count--;
+        }
+    }
+    {
+        Spawn_BD070 spawn;
+        f32 scale;
+        s32 r1;
+        f32 pos[3];
+        f32 pos2[3];
+
+        count = func_150ADA20() % 9U + 0x11;
+        spawn.unk0 = 0x200005;
+        spawn.unk8 = 0x5103;
+        spawn.unk4 = 0;
+        spawn.unkC = 0;
+        spawn.unk10 = 0;
+        spawn.unk14 = 0xD4;
+        spawn.unk15 = 0xAA;
+        spawn.unk16 = 8;
+        spawn.unk17 = 0xFF;
+        spawn.unk18 = 0x15;
+        spawn.unk19 = 4;
+        spawn.unk1A = 0;
+        spawn.unk1C = 0xFF;
+        spawn.unk1D = 0x6C;
+        spawn.unk1E = 0x23;
+        spawn.unk20 = 7;
+        spawn.unk24 = 1.012537003f;
+        spawn.unk3C = *(struct17 *)&D_800A5480;
+        r1 = (func_150ADA20() & 1) ? 0x40 : 0;
+        spawn.unk58 = ((func_150ADA20() & 1) ? 0x80 : 0) | 7 | r1 | 0x8000 | 0x4000 | 0x800 | 0x400 | 0x200 | 0x20000 | 0x800000;
+        spawn.unk5C = 0;
+        spawn.unk60 = 8;
+        spawn.unk61 = 6;
+        spawn.unk62 = 0x10;
+        spawn.unk63 = -1;
+        spawn.unk64 = -1;
+        spawn.unk65 = 0;
+        spawn.unk66 = 0xFF;
+        spawn.unk68 = 0;
+        spawn.unk6C = 0.0f;
+        scale = 0.9170150161f;
+        while (count > 0) {
+            void *ret;
+
+            spawn.unk22 = spawn.unkA = func_150ADA20() % 31U + 0x1E;
+            spawn.unk1B = func_150ADA20() % 101U + 0x9B;
+            spawn.unk28 = spawn.unk2C = func_150ADA68() * 755.0f + 1262.0f;
+            func_1514470C(players[func_150ADA20() & 1], &spawn.pos);
+            r1 = func_150ADA20();
+            func_15143794((u32)r1 % 41U - 0x59, func_150ADA20() % 51U - 0x40, func_150ADA68() * 45.60000229f + 18.80000114f, &spawn.vel);
+            spawn.unk54 = func_150ADA68() * 0.5590000153f + -0.77700001f;
+            ret = func_15130280(&spawn, 1, 0, 4, arg0, arg1);
+            if (ret != NULL) {
+                memcpy((u8 *)ret + 0xA8, &scale, 4);
+            }
+            count--;
+        }
+        pos[0] = players[0]->unk0;
+        pos[1] = players[0]->pad2;
+        pos[2] = players[0]->unk4;
+        func_151D5334(pos, 0.0f, 1000.0f, 0.001f, 5, arg0, arg1);
+        pos2[0] = players[0]->unk0;
+        pos2[1] = players[0]->pad2;
+        pos2[2] = players[0]->unk4;
+        func_151D5404((struct17 *)pos2, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, arg0, arg1);
+    }
+}
 
 typedef struct { f32 x, y, z; } Vec3f_BD740;
 extern Vec3f_BD740 D_8009FF40[4];
