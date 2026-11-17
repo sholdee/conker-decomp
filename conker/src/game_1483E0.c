@@ -578,7 +578,6 @@ typedef struct {
 } Struct1511A494Arg;
 
 extern Struct1511A494Entry D_80089324[];
-extern Struct1511A494Entry D_80089444[];
 extern s32 func_1511A410(s32, s32 *);
 extern s32 func_1510D0EC(s32, s32 *, s32, s32);
 extern void func_1510D874(void *, s32, s32, s32, s32);
@@ -1429,7 +1428,126 @@ void func_1511CB44(struct Obj1511CB44 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1483E0/func_1511D394.s")
+struct Entry1511D394 {
+    f32 unk0;
+    f32 unk4;
+    u16 unk8;
+    u16 unkA;
+    u8 unkC;
+    u8 padD;
+    u16 unkE;
+    u8 unk10;
+    u8 unk11;
+    u8 pad12[2];
+};
+
+extern struct Entry1511D394 D_80089444[];
+
+struct Obj1511D394 {
+    u8 pad0[0x16];
+    u16 unk16;
+    u8 pad18[0x8];
+    Vtx *unk20[2];
+    Vtx *unk28;
+    u8 pad2C[0x10];
+    s32 unk3C;
+    u8 pad40[0x3C];
+    s16 *unk7C;
+    f32 unk80;
+    f32 unk84;
+    u8 pad88[2];
+    u8 unk8A;
+};
+
+struct Owner1511D394 {
+    u8 pad0[0x7C];
+    u16 *unk7C;
+};
+
+void func_1511D394(struct Obj1511D394 *arg0) {
+    u16 *src;
+    struct Owner1511D394 *owner;
+    s32 dx;
+    u8 phase;
+    s32 dy;
+    f32 s;
+    f32 c;
+    f32 diff;
+    s32 offY;
+    s32 baseY;
+    s32 amp;
+    s32 i;
+    s16 *buf;
+    struct Entry1511D394 *e;
+    f32 rate;
+    s32 init;
+    s32 id;
+    f32 step;
+    s32 idx;
+
+    id = arg0->unk3C & 0xFF;
+    owner = (struct Owner1511D394 *)func_151149AC((u8)id);
+    if (owner == NULL) {
+        return;
+    }
+    src = owner->unk7C;
+    if (src == NULL) {
+        return;
+    }
+    e = &D_80089444[(arg0->unk3C >> 8) & 0xFF];
+    offY = e->unkA;
+    baseY = e->unk8;
+    phase = e->unkC;
+    rate = e->unk0;
+    step = e->unk4;
+    amp = e->unkE;
+    if (arg0->unk7C == NULL) {
+        arg0->unk7C = allocate_memory(arg0->unk16 * 2, 1, 0, 0);
+        buf = arg0->unk7C;
+        for (i = 0; i < arg0->unk16; i++) {
+            buf[i] = arg0->unk28[i].v.tc[0];
+        }
+        e->unk11 = 0;
+        init = 1;
+    } else {
+        init = 0;
+        buf = arg0->unk7C;
+    }
+    i = 0;
+    idx = src[2];
+    s = (func_150489B0(((idx >> 8) & 0xFF) + phase) + 1.0f) * 0.5f;
+    c = (func_15048A40(((idx >> 8) & 0xFF) + phase) + 0.5f) * 0.5f;
+    if (init) {
+        arg0->unk84 = s;
+        arg0->unk80 = 0.0f;
+    } else {
+        diff = (s - arg0->unk84) * rate;
+        if (diff > 0.0f) {
+            arg0->unk80 += step;
+            if (diff < arg0->unk80) {
+                arg0->unk80 = diff;
+            }
+        } else {
+            arg0->unk80 -= step;
+            if (arg0->unk80 < diff) {
+                arg0->unk80 = diff;
+            }
+        }
+        arg0->unk84 += arg0->unk80;
+    }
+    dy = arg0->unk84 * offY;
+    dy += baseY;
+    amp = amp * c;
+    if (arg0->unk20[D_800BE9C0][0].v.tc[1] > 0x800) {
+        amp -= 0x800;
+    }
+    for (i = 0; i < arg0->unk16; i++) {
+        arg0->unk20[D_800BE9C0][i].v.tc[0] = buf[i] - dy;
+        arg0->unk20[D_800BE9C0][i].v.tc[1] = arg0->unk20[!D_800BE9C0][i].v.tc[1] + amp;
+    }
+    e->unk11 += D_800BE9E4 * 2;
+    arg0->unk8A = (func_150489B0(e->unk11 + e->unk10) + 1.0f) * 0.5f * 205.0f + 50.0f;
+}
 
 typedef struct Game1483E0WaveState {
     Game1483E0UvPair *coords;
