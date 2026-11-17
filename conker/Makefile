@@ -137,6 +137,8 @@ $(BUILD_DIR)/$(SRC_DIR)/libultra/io/aisetfreq.c.o: OPT_FLAGS := -O1
 
 $(BUILD_DIR)/$(SRC_DIR)/libultra/os/getthreadpri.c.o: OPT_FLAGS := -O1
 $(BUILD_DIR)/$(SRC_DIR)/libultra/os/initialize.c.o: OPT_FLAGS := -O1
+$(BUILD_DIR)/$(SRC_DIR)/libultra/io/crc.c.o: OPT_FLAGS := -O1
+$(BUILD_DIR)/$(SRC_DIR)/libultra/io/crc2.c.o: OPT_FLAGS := -O1
 # The game was built with a raised optimizer size limit: functions over IDO's default -Olimit
 # (uopt ~1000 blocks, as1 500) come out unoptimized otherwise (func_1504CB98, func_150265CC,
 # func_1502460C, func_15065A5C). The whole bin is unchanged with it (2026-11-16).

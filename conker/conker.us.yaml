@@ -173,7 +173,7 @@ segments:
       - [0x257C0, asm, libultra/io/sirawdma]
       - [0x25870, asm, libultra/io/contramwrite]
       - [0x25C20, asm, libultra/io/contramread]
-      - [0x25FD0, asm, libultra/io/crc]
+      - [0x25FD0, c, libultra/io/crc]
       - [0x26150, asm, libultra/os/destroythread]
       - [0x26250, asm, libultra/io/viblack]
       - [0x262C0, asm, libultra/io/pigetstat]
@@ -884,7 +884,8 @@ segments:
       - [0x21F1C0, c,   libultra/io/pfsisplug2]      # dupe of libultra/io/pfsisplug
       - [0x21F530, asm, libultra/io/contramread2]    # dupe of libultra/io/contramread
       - [0x21f8e0, asm, libultra/io/contramwrite2]   # dupe of libultra/io/contramwrite
-      - [0x21fc90, c,   libultra/audio/game_21FC90]  # -g
+      - [0x21fc90, c,   libultra/io/crc2]            # dupe of libultra/io/crc; -O1
+      - [0x21fe10, c,   libultra/audio/game_21FC90]  # -g
       - [0x221290, c, game_221290]
       - [0x225D20, c, game_225D20]
       - [0x2270A0, c, game_2270A0]
