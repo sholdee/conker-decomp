@@ -47,8 +47,6 @@ struct Obj15171CA0 *func_15171CA0(s16 arg0, u16 arg1, u8 arg2, s32 arg3, s32 arg
     return ret;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_19F150/func_15171D4C.s")
-
 struct Some15171F04 {
     u8 pad0[4];
     u8 unk4;
@@ -57,6 +55,41 @@ struct Some15171F04 {
     u16 unk8;
 };
 extern struct Some15171F04 *D_8008CA4C[];
+s32 func_15172B20(void *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, u8 arg7);
+typedef struct {
+    s16 ob[3];
+    u16 flag;
+    s16 tc[2];
+    u8 cn[4];
+} VtxD4C;
+
+#define VTX ((VtxD4C *)((u8 *)temp + 0x10))
+
+void func_15171D4C(f32 arg0, f32 arg1, f32 arg2, s16 arg3, u16 arg4, u8 arg5, f32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s32 argB, u8 argC, s32 argD) {
+    struct Obj15171CA0 *temp;
+
+    temp = func_15171CA0(arg3, arg4, arg5, arg9, argA, argB, argC, argD);
+    if (temp != NULL) {
+        if (!(arg9 & 2)) {
+            if (func_15172B20((u8 *)temp + 0x10, arg0, arg1, arg2, arg6, arg7, arg8, D_8008CA4C[temp->unk58]->unk6) == 0) {
+                func_1516972C((struct102 *)temp);
+            }
+        } else {
+            VTX[0].ob[0] = VTX[3].ob[0] = arg0 - (f32)arg8;
+            VTX[1].ob[0] = VTX[2].ob[0] = (f32)arg8 + arg0;
+            VTX[0].ob[1] = VTX[1].ob[1] = VTX[2].ob[1] = VTX[3].ob[1] = arg1;
+            VTX[0].ob[2] = VTX[1].ob[2] = arg2 - (f32)arg8;
+            VTX[2].ob[2] = VTX[3].ob[2] = (f32)arg8 + arg2;
+            VTX[0].tc[0] = VTX[3].tc[0] = 0x2000;
+            VTX[1].tc[0] = VTX[2].tc[0] = (D_8008CA4C[arg5]->unk6 + 0x100) << 5;
+            VTX[0].tc[1] = VTX[1].tc[1] = 0x2000;
+            VTX[2].tc[1] = VTX[3].tc[1] = (D_8008CA4C[arg5]->unk8 + 0x100) << 5;
+        }
+    }
+}
+
+#undef VTX
+
 s32 func_151725FC(void *arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6, s32 arg7);
 
 void func_15171F04(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s16 arg4, u16 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, u8 arg11, s32 arg12) {
