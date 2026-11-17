@@ -164,7 +164,115 @@ void func_150E4514(s32 arg0) {
     func_150E42F8(arg0 / 0x1E);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_111670/func_150E4550.s")
+typedef struct Struct800A1070 {
+    /* 0x00 */ u16 unk0;
+    /* 0x02 */ u16 unk2;
+    /* 0x04 */ u8 unk4;
+    /* 0x05 */ u8 unk5;
+    /* 0x06 */ u8 unk6;
+    /* 0x07 */ u8 unk7;
+} Struct800A1070;
+
+typedef struct Struct800A1110 {
+    /* 0x00 */ u16 unk0;
+    /* 0x02 */ u16 unk2;
+} Struct800A1110;
+
+typedef struct Struct150E4550 {
+    /* 0x00 */ u8 pad0[0x84];
+    /* 0x84 */ u16 unk84;
+    /* 0x86 */ u16 unk86;
+    /* 0x88 */ u8 pad88[4];
+    /* 0x8C */ s16 unk8C;
+    /* 0x8E */ s16 unk8E;
+    /* 0x90 */ s16 unk90;
+    /* 0x92 */ s16 unk92;
+    /* 0x94 */ s16 unk94;
+    /* 0x96 */ u8 pad96[2];
+    /* 0x98 */ s16 unk98;
+    /* 0x9A */ u8 pad9A[6];
+    /* 0xA0 */ u8 unkA0;
+    /* 0xA1 */ u8 padA1;
+    /* 0xA2 */ u8 unkA2;
+    /* 0xA3 */ u8 padA3;
+    /* 0xA4 */ u8 unkA4;
+    /* 0xA5 */ u8 padA5[3];
+} Struct150E4550;
+
+extern Struct800A1070 D_800A1070[];
+extern f32 D_800A111C[];
+extern u16 D_800A1110[][2];
+extern u8 D_800D9963[];
+void func_150E4E04(f32, f32, f32, s32, s32, s16 **, s32);
+extern void func_15171D4C(f32, f32, f32, s32, s32, s32, f32, s32, s32, s32, s32, s32, s32, s32);
+extern void func_15171F04(f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern void func_151C329C(void *, s32, s32);
+extern void func_1516865C(void *, s32, s32, s32, s32);
+extern void func_15168800(void *, s32, s32);
+
+void func_150E4550(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6) {
+    Struct800A1070 *entry;
+    s32 size;
+    s32 flag;
+    s32 amount;
+    Struct150E4550 sp60;
+
+    size = 0x78;
+    flag = 0;
+    if (arg4 & 0x8000) {
+        arg4 ^= 0x8000;
+        flag = 0x8000;
+    }
+    entry = &D_800A1070[arg4];
+    if (entry->unk2 != 0) {
+        amount = (func_151EF610() % entry->unk7) + entry->unk6 + 1;
+        if (arg3 != 1) {
+            size = 0x1E;
+        }
+        amount = D_800A111C[arg3] * (f32)amount;
+        if (entry->unk2 == 0x13) {
+            func_15171D4C(arg0, arg1, arg2, 0x1E, 0, 0x13, 0.0f, 0, amount, 0xF, 0x55, 0, 0xFF, 0);
+        } else if (arg5 != 0) {
+            func_15171F04(arg0, arg1, arg2, arg5, size, 0xB5AD, entry->unk2, amount, 0, 0, 0, 0xFF, 0);
+        } else {
+            func_15171D4C(arg0, arg1, arg2, (s16)size, 0xB5AD, entry->unk2, 0.0f, 0, amount, 0, 0, 0, 0xFF, 0);
+        }
+    }
+    if (entry->unk5 != 0) {
+        func_150E4E04(arg0, arg1, arg2, entry->unk5 | flag, arg3, (s16 **)arg5, arg6);
+    }
+    if (arg3 != 0 && (func_151EF610() % 100) < entry->unk4) {
+        {
+            f32 pos[3];
+            s32 pad;
+            pos[0] = arg0;
+            pos[1] = arg1 + 20.0f;
+            pos[2] = arg2;
+            func_151C329C(pos, 0xFF, 1);
+        }
+        if (arg6 != 0xFF) {
+            D_800D9963[arg6 * 0x1C] = 100;
+        }
+    } else if (arg6 != 0xFF) {
+        D_800D9963[arg6 * 0x1C] = 0;
+    }
+    if (entry->unk0 != 0) {
+        bzero(&sp60, sizeof(sp60));
+        sp60.unk8C = arg0;
+        sp60.unk8E = arg1;
+        sp60.unk90 = arg2;
+        sp60.unkA2 = 0xD;
+        sp60.unkA0 = entry->unk0;
+        sp60.unk84 = D_800A1110[arg3][0];
+        sp60.unk86 = D_800A1110[arg3][1];
+        sp60.unk98 = 0x2A00;
+        sp60.unk92 = 1;
+        sp60.unk94 = 1;
+        sp60.unkA4 = 0xFF;
+        func_1516865C(&sp60, 0xB4, 0xB4, 0xB4, 0xFF);
+        func_15168800(&sp60, 0xFF, 0);
+    }
+}
 
 typedef struct unkfunc_1510F8D8 {
     s32 unk0;
