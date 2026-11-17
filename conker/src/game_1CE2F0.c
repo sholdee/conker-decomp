@@ -425,7 +425,159 @@ void func_151A18DC(struct Src151A18DC *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1CE2F0/func_151A1998.s")
+typedef struct {
+    void *texture;
+    s32 unk4;
+    s32 unk8;
+    s16 frame;
+    s16 frame_rate;
+    s16 position[3];
+    s16 velocity_x;
+    s16 velocity_z;
+    char pad1A[2];
+    u8 fraction_x;
+    u8 fraction_y;
+    u8 fraction_z;
+    s8 callback;
+    s16 velocity_y;
+    s16 acceleration;
+    s16 width;
+    s16 height;
+    s16 lifetime;
+    s8 fade;
+    char pad2B;
+    u8 red;
+    u8 green;
+    u8 blue;
+    u8 alpha;
+    u8 environment[3];
+    char pad33;
+    u16 flags;
+    char pad36[2];
+} Emission151A1998;
+
+typedef struct {
+    s16 unk0;
+    s16 unk2;
+    s16 unk4;
+    s16 unk6;
+    s16 unk8;
+    s16 unkA;
+    s16 unkC;
+    s16 unkE;
+    s16 unk10;
+    s16 unk12;
+} Extra151A1998;
+
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 radius;
+    f32 unk10;
+    f32 unk14;
+    s16 rate;
+    s16 rate_range;
+    s16 unk1C;
+    s16 unk1E;
+} Sub151A1998;
+
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD[0x28 - 0xD];
+    Sub151A1998 unk28;
+} Obj151A1998;
+
+extern u8 D_80090B60[];
+extern u8 D_80090D34;
+extern s32 func_15167D84(void *, s32, s32, s32, s32, s32);
+
+void func_151A1998(Obj151A1998 *arg0) {
+    Sub151A1998 *p;
+    Emission151A1998 packet;
+    Extra151A1998 extra;
+    f32 cosine1;
+    f32 sine1;
+    f32 cosine2;
+    f32 sine2;
+    f32 r;
+    f32 x;
+    f32 y;
+    f32 z;
+    u8 angle1;
+    u8 angle2;
+    s16 t;
+    s16 life;
+    void *ret;
+
+    arg0->unk28.unk10 += arg0->unk28.unk14 * D_800BE9A4;
+    if (1.0f < arg0->unk28.unk10) {
+        p = &arg0->unk28;
+        packet.red = 0xFF;
+        packet.green = 0xFF;
+        packet.blue = 0xFF;
+        packet.environment[0] = 0;
+        packet.environment[1] = 0;
+        packet.environment[2] = 0;
+        packet.callback = 0x11;
+        packet.flags = 0x120;
+        packet.unk4 = 0xC0001;
+        packet.frame = 0;
+        packet.texture = &D_80090D34;
+        packet.velocity_x = 0;
+        packet.velocity_y = 0;
+        packet.velocity_z = 0;
+        packet.acceleration = 0;
+        packet.fade = 0;
+        packet.alpha = 0;
+        packet.width = packet.height = 0x7D0;
+        do {
+            angle1 = func_150ADA20() & 255;
+            angle2 = func_150ADA20() & 255;
+            cosine1 = func_151423D8(angle1 - 64);
+            sine1 = func_151423D8(angle1);
+            cosine2 = func_151423D8(angle2 - 64);
+            sine2 = func_151423D8(angle2);
+            r = func_150ADA68() * p->radius;
+            x = p->x + r * sine2 * cosine1;
+            y = p->y - r * cosine2;
+            z = p->z + r * sine2 * sine1;
+            if (func_150ADA20() & 1) {
+                packet.flags |= 4;
+            }
+            if (func_150ADA20() & 1) {
+                packet.flags |= 8;
+            }
+            packet.frame_rate = func_150ADA20() % (u32)(p->rate_range + 1) + p->rate;
+            t = func_150ADA20() % (u32)(p->unk1E + 1) + p->unk1C;
+            life = packet.lifetime = D_80090B60[0x1D8] * (0x100 / packet.frame_rate);
+            extra.unk2 = life;
+            extra.unk4 = life - (life >> 2);
+            extra.unk0 = 0xFF / (extra.unk2 - extra.unk4);
+            extra.unk8 = life;
+            extra.unkA = life >> 1;
+            extra.unk6 = t / (extra.unk8 - extra.unkA);
+            extra.unkC = life >> 2;
+            extra.unkE = 0xFF / extra.unkC;
+            extra.unk10 = life >> 1;
+            extra.unk12 = t / extra.unk10;
+            packet.position[0] = x;
+            packet.position[1] = y;
+            packet.position[2] = z;
+            packet.fraction_x = ((s32)(x * 256.0f)) & 0xFF;
+            packet.fraction_z = ((s32)(y * 256.0f)) & 0xFF;
+            packet.fraction_y = ((s32)(z * 256.0f)) & 0xFF;
+            ret = (void *)func_15167D84(&packet, 0, 0x14, -1, arg0->unkC, arg0->unk1);
+            if (ret != NULL) {
+                memcpy((u8 *)ret + 0x50, &extra, 0x14);
+            }
+            p->unk10 -= 1.0f;
+        } while (1.0f < p->unk10);
+    }
+}
 
 struct Sub151A1E34 {
     s16 unk0;
