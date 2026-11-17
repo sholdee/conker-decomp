@@ -536,7 +536,173 @@ void func_151A1EE8(struct Src151A1EE8 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1CE2F0/func_151A1FB4.s")
+struct Sub151A1FB4 {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    s16 unk18;
+    s16 unk1A;
+    s16 unk1C;
+    s16 unk1E;
+    s16 unk20;
+    s16 unk22;
+};
+
+struct Obj151A1FB4 {
+    u8 unk0;
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD[0x1B];
+    struct Sub151A1FB4 unk28;
+};
+
+typedef struct {
+    s16 unk0;
+    s16 unk2;
+    s16 unk4;
+    s16 unk6;
+    s16 unk8;
+    s16 unkA;
+    s16 unkC;
+    s16 unkE;
+    s16 unk10;
+    s16 unk12;
+    s16 unk14;
+    s16 unk16;
+    s16 unk18;
+    s16 unk1A;
+} Fade151A1FB4;
+
+typedef struct {
+    void *unk00;
+    s32 unk04;
+    s32 unk08;
+    s16 unk0C;
+    s16 unk0E;
+    s16 unk10;
+    s16 unk12;
+    s16 unk14;
+    s16 unk16;
+    s16 unk18;
+    s16 unk1A;
+    s8 unk1C;
+    s8 unk1D;
+    s8 unk1E;
+    u8 unk1F;
+    s16 unk20;
+    s16 unk22;
+    s16 unk24;
+    s16 unk26;
+    s16 unk28;
+    u8 unk2A;
+    u8 unk2B;
+    u8 unk2C;
+    u8 unk2D;
+    u8 unk2E;
+    u8 unk2F;
+    u8 unk30;
+    u8 unk31;
+    u8 unk32;
+    u8 unk33;
+    u16 unk34;
+    s16 unk36;
+} Packet151A1FB4;
+
+extern u8 D_80090B60[];
+extern u8 D_80090D34;
+extern s32 func_15167D84(void *, s32, s32, s32, s32, s32);
+
+void func_151A1FB4(struct Obj151A1FB4 *arg0) {
+    struct Sub151A1FB4 *sub;
+    Packet151A1FB4 pkt;
+    Fade151A1FB4 fade;
+    u8 a;
+    u8 b;
+    f32 sinA;
+    f32 cosA;
+    f32 sinB;
+    f32 cosB;
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 r;
+    s16 n;
+    s32 ret;
+
+    arg0->unk28.unk10 += arg0->unk28.unk14 * D_800BE9A4;
+    sub = &arg0->unk28;
+    if (arg0->unk28.unk10 > 1.0f) {
+        pkt.unk2C = 5;
+        pkt.unk2D = 0;
+        pkt.unk2E = 0;
+        pkt.unk30 = 0;
+        pkt.unk31 = 0;
+        pkt.unk32 = 0;
+        pkt.unk1F = 0x12;
+        pkt.unk34 = 0x120;
+        pkt.unk04 = 0xC0001;
+        pkt.unk0C = 0;
+        pkt.unk00 = &D_80090D34;
+        pkt.unk16 = 0;
+        pkt.unk20 = 0;
+        pkt.unk18 = 0;
+        pkt.unk22 = 0;
+        pkt.unk2A = 0;
+        pkt.unk2F = 0;
+        pkt.unk26 = 0x7D0;
+        pkt.unk24 = 0x7D0;
+        do {
+            a = func_150ADA20() & 0xFF;
+            b = func_150ADA20() & 0xFF;
+            cosA = func_151423D8(a - 0x40);
+            sinA = func_151423D8(a);
+            cosB = func_151423D8(b - 0x40);
+            sinB = func_151423D8(b);
+            r = func_150ADA68() * sub->unkC;
+            x = sub->unk0 + r * sinB * cosA;
+            y = sub->unk4 - r * cosB;
+            z = sub->unk8 + r * sinB * sinA;
+            if (func_150ADA20() & 1) {
+                pkt.unk34 |= 4;
+            }
+            if (func_150ADA20() & 1) {
+                pkt.unk34 |= 8;
+            }
+            pkt.unk0E = (func_150ADA20() % (u32)(sub->unk1A + 1)) + sub->unk18;
+            n = (func_150ADA20() % (u32)(sub->unk1E + 1)) + sub->unk1C;
+            pkt.unk28 = D_80090B60[0x1D8] * (0x100 / pkt.unk0E);
+            fade.unk2 = pkt.unk28;
+            fade.unk8 = pkt.unk28;
+            fade.unk4 = pkt.unk28 - (pkt.unk28 >> 2);
+            fade.unk0 = 0xFF / (pkt.unk28 - fade.unk4);
+            fade.unkA = pkt.unk28 >> 1;
+            fade.unk6 = n / (pkt.unk28 - (s16)(pkt.unk28 >> 1));
+            fade.unkC = pkt.unk28 >> 1;
+            fade.unkE = 0xFF / (pkt.unk28 >> 1);
+            fade.unk10 = pkt.unk28 >> 2;
+            fade.unk12 = 0xFF / (pkt.unk28 >> 2);
+            fade.unk14 = pkt.unk28 >> 1;
+            fade.unk16 = (func_150ADA20() % (u32)(sub->unk22 + 1)) + sub->unk20;
+            fade.unk18 = pkt.unk28 >> 1;
+            fade.unk1A = (func_150ADA20() % 81U) + 0x50;
+            pkt.unk10 = x;
+            pkt.unk12 = y;
+            pkt.unk14 = z;
+            pkt.unk1C = ((s32)(x * 256.0f)) & 0xFF;
+            pkt.unk1E = ((s32)(y * 256.0f)) & 0xFF;
+            pkt.unk1D = ((s32)(z * 256.0f)) & 0xFF;
+            ret = func_15167D84(&pkt, 0, 0x1C, -1, arg0->unkC, arg0->unk1);
+            if (ret != 0) {
+                memcpy((u8 *)ret + 0x50, &fade, 0x1C);
+            }
+            sub->unk10 -= 1.0f;
+        } while (sub->unk10 > 1.0f);
+    }
+}
 
 typedef struct Fade151A24A8 {
     s16 unk0;
