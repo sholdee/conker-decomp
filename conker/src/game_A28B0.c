@@ -1404,7 +1404,82 @@ void func_15078A08(void) {
 }
 
 // requires jump table
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_15078A60.s")
+s32 func_15078A60(s32 arg0) {
+    s32 value;
+    s32 diff;
+    s32 pad;
+    u8 angle;
+
+    switch (D_800D1892) {
+    case 0:
+        value = D_800CC2D0[arg0].xz_velocity;
+        break;
+    case 1:
+        value = D_800CC2D0[arg0].unk2E4;
+        break;
+    case 2:
+        value = D_800CC2D0[arg0].unk2E8;
+        break;
+    case 3:
+        value = D_800CC2D0[arg0].unk2EC;
+        break;
+    case 4:
+        value = D_800CC2D0[arg0].y_position;
+        break;
+    case 5:
+        value = D_800CC2D0[arg0].unk44;
+        break;
+    case 6:
+        angle = D_800CC2D0[arg0].unk7A >> 8;
+        angle -= 0x40;
+        diff = (u8)(func_150484A0(D_800CC2D0[arg0].x_position - D_800D154C->x_position, D_800CC2D0[arg0].z_position - D_800D154C->z_position) * 40.74366379f) - angle;
+        value = (u8)diff;
+        if (value > 0x80) {
+            value = 0x100 - value;
+        }
+        break;
+    case 7:
+        value = D_800CC2D0[arg0].unk13C;
+        break;
+    case 8:
+        value = D_800CC2D0[arg0].stunned;
+        break;
+    case 9:
+        value = 0;
+        if (((s16)D_800CC2D0[arg0].unk31C->unk8 != 0) && (D_800CC2D0[arg0].unk31C->unk16 != 0)) {
+            value = 2;
+        }
+        break;
+    case 10:
+        value = D_800CC2D0[arg0].unk28;
+        break;
+    case 11:
+        value = D_800CC2D0[0].unk31C->unk78;
+        break;
+    case 12:
+        value = D_800CC2D0[0].unk31C->matrix_physics;
+        break;
+    case 13:
+        value = D_800CC2D0[0].unk102;
+        break;
+    case 14:
+        value = D_800BE9EC;
+        break;
+    case 15:
+        value = D_800CC2D0[D_800D154C->unk222].id;
+        break;
+    case 16:
+        value = D_800CC2D0[arg0].health;
+        break;
+    case 17:
+        value = D_800CC2D0[D_800D154C->unk222].unk232;
+        break;
+    case 18:
+        value = D_800CC2D0[arg0].disable_run;
+        break;
+    }
+    if (((D_800D1891 == 0) && (value == D_800D1893)) || ((D_800D1891 == 1) && (value != D_800D1893)) || ((D_800D1891 == 2) && (value < D_800D1893)) || ((D_800D1891 == 3) && (value > D_800D1893)) || ((D_800D1891 == 4) && (value <= D_800D1893)) || ((D_800D1891 == 5) && (value >= D_800D1893))) { return 1; } return 0;
+}
 
 void func_1507900C(void) {
     if (func_15078A60(0) != 0) {
