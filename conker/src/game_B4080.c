@@ -1455,7 +1455,116 @@ s32 func_15089F9C(s32 arg0) {
     return bestIdx;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_B4080/func_1508A1BC.s")
+s32 func_1508A1BC(void) {
+    s32 i;
+    s32 j;
+    s32 k;
+    s32 mask;
+    s32 n;
+    s32 dist;
+    s32 myTeam;
+    s32 cur;
+    s32 myMask;
+    s32 *active;
+    s32 *teams;
+    s32 *states;
+    u32 row;
+    s32 count;
+    s32 rawDist;
+    s32 minDist;
+    s32 *kinds;
+    s32 *ids;
+    s32 *dists;
+    f32 dx;
+    struct127 *other;
+    struct127 *self;
+
+    states = (s32 *)(D_800D23B0 + 0xE64);
+    mask = *(s32 *)(D_800D23B0 + 0x14);
+    count = *(s32 *)(D_800D23B0 + 0x10);
+    kinds = (s32 *)(D_800D23B0 + 0x15C);
+    active = (s32 *)(D_800D23B0 + 0x39C);
+    teams = (s32 *)(D_800D23B0 + 0x9C);
+    ids = (s32 *)(D_800D23B0 + 0x5DC);
+    dists = (s32 *)(D_800D23B0 + 0x9DC);
+    D_800D23B0[0x1704]++;
+    if (*(s32 *)(D_800D23B0 + 0x10) == D_800D23B0[0x1704]) {
+        D_800D23B0[0x1704] = 0;
+    }
+    cur = D_800D23B0[0x1704];
+    row = cur * 16;
+    if (!((1 << cur) & mask)) {
+        for (i = 0; i < 16; i++) ids[row + i] = -1;
+        return 0;
+    }
+    n = 0;
+    minDist = 32000;
+    myTeam = states[cur];
+    myMask = ((s32 *)(D_800D23B0 + 0x16C0))[cur];
+    for (i = 0; i < count; i++) {
+        if (active[i] > 0 && myTeam != states[i]) {
+            other = &D_800CC2D0[i];
+            self = &D_800CC2D0[cur];
+            if (other != NULL) {
+                dx = self->x_position - other->x_position;
+                dist = sqrtf((dx * dx) + ((self->z_position - other->z_position) * (self->z_position - other->z_position)));
+            } else {
+                dist = 32000;
+            }
+            rawDist = dist;
+            if (teams[cur] != teams[i]) {
+                dist += 500;
+            }
+            if ((0x10000 << i) & myMask) {
+                if (dist > 3000 && other->unk65 != 0) {
+                    dist = -1;
+                }
+            } else {
+                if (i >= D_8008FD90) {
+                    dist *= 2;
+                }
+                if (*(s16 *)(D_800D23B0 + 0x16BC) != 0xB8 && (kinds[i] == 2 || kinds[i] == 3)) {
+                    dist = -1;
+                }
+            }
+            if (*(s16 *)(D_800D23B0 + 0x16BC) == 0xB7) {
+                if (dist == -1) {
+                    dist = rawDist;
+                }
+                if (other->unk13C != 0) {
+                    if (i >= D_8008FD90) {
+                        dist *= 2;
+                    }
+                    dist = dist / (func_150859AC(i, 6) + 2);
+                }
+            }
+            if (i < D_8008FD90 && dist != -1) {
+                dist *= *(f32 *)(D_800D23B0 + 0x16B8);
+            }
+            if (dist >= 0) {
+                j = 0;
+                while (j < n && (dists + row)[j] < dist) {
+                    j++;
+                }
+                for (k = n; k > j; k--) {
+                    ids[(s32)row + k] = ids[(s32)row + k - 1];
+                    dists[(s32)row + k] = dists[(s32)row + k - 1];
+                }
+                ids[row + j] = i;
+                n++;
+                dists[row + j] = dist;
+            }
+            if (rawDist < minDist) {
+                minDist = rawDist;
+            }
+        }
+    }
+    for (i = n; i < 16; i++) ids[row + i] = -1;
+    if (D_800D23B0 + 0x51C) {
+        ((s32 *)(D_800D23B0 + 0x51C))[cur] = minDist;
+    }
+    return 0;
+}
 
 extern s8 D_800E0BD0;
 extern u8 D_800E0BB8[];
@@ -1946,7 +2055,7 @@ void func_1508B3F8(void) {
 }
 
 s32 func_1508C5B8(s32, s32);
-void func_1508A1BC(void);
+s32 func_1508A1BC(void);
 
 typedef struct B9BCActor {
     u8 pad0[0x14];
