@@ -59,7 +59,6 @@ void func_151C2050(struct127 *arg0, f32 *arg1, f32 *arg2, s32 arg3, f32 arg4) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1EF500/func_151C229C.s")
 
 typedef struct {
     u8 unk0;
@@ -137,6 +136,187 @@ void func_151C436C(s32 a0, f32 *a1, s32 a2);
 u8 func_151C43E0(struct108 *arg0, Mover151C43E0 *arg1, f32 arg2);
 void func_151C4510(GameStruct151C4510a *a0, GameStruct151C4510b *a1, f32 a2);
 s32 func_151C455C(s32 arg0, GameStruct151C455C *arg1, f32 arg2);
+
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3f_151C4B0C;
+
+struct Game1F1F60Hit;
+void *memcpy(void *, const void *, u32);
+s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
+s32 func_151D5B6C(s32 arg0, s32 arg1, struct127 *arg2, s8 arg3, s32 arg4);
+s32 func_151C4B0C(struct Game1F1F60Hit *arg0, struct Game1F1F60Hit *arg1, Vec3f_151C4B0C *arg2, Vec3f_151C4B0C *arg3, f32 *arg4, f32 arg5,
+                  u8 arg6, Vec3f_151C4B0C *arg7, Vec3f_151C4B0C *arg8, u8 *arg9, u8 arg10, f32 arg11, void *arg12, s8 arg13,
+                  u8 arg14, u8 arg15, s32 arg16, u8 arg17);
+
+typedef struct Game1EF500TrailExt {
+    u8 flags;
+    u8 pad1[3];
+    f32 velocity[3];
+    f32 accel[3];
+    f32 drift[3];
+    u8 path[0x38];
+    f32 direction[3];
+    u8 pad6C[0x20];
+    u8 extra[4];
+    u8 *owner;
+    u8 ownerId;
+    u8 pad95[3];
+    f32 scale;
+    s8 field9C;
+    u8 pad9D;
+    s16 field9E;
+    u8 chance;
+    u8 fieldA1;
+    u8 padA2[2];
+    s32 fieldA4;
+    s8 fieldA8;
+    u8 padA9[3];
+    s32 handle;
+} Game1EF500TrailExt;
+
+typedef struct Game1EF500TrailSpawn {
+    u8 field00;
+    u8 field01;
+    s16 field02;
+    s16 field04;
+    u8 pad06[2];
+    s32 field08;
+    s32 field0C;
+    u8 field10;
+    u8 field11;
+    u8 field12;
+    u8 field13;
+    f32 field14;
+    f32 field18;
+    Vec3f_151C4B0C position;
+    f32 field28[6];
+    s32 flags;
+    u8 field44;
+    u8 field45;
+    u8 field46;
+    u8 field47;
+    u8 pad48[4];
+    u8 field4C;
+    u8 pad4D[0xB];
+} Game1EF500TrailSpawn;
+
+void *func_151C229C(Vec3f_151C4B0C *arg0, Vec3f_151C4B0C *arg1, s32 arg2, Vec3f_151C4B0C *arg3, u8 arg4, s32 arg5,
+                    f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, u8 arg11, u8 *arg12,
+                    u8 arg13, u8 arg14, u8 arg15, u8 arg16, u8 arg17, u8 arg18, s8 arg19,
+                    s32 arg20, f32 arg21, u8 arg22, s8 arg23, s32 arg24, u8 arg25, s32 arg26) {
+    void *result;
+    Game1EF500TrailSpawn spawn;
+    Game1EF500TrailExt ext;
+    Vec3f_151C4B0C sourceDir;
+    u8 useSource;
+    Vec3f_151C4B0C targetDir;
+    u8 useTarget;
+    s32 unused; /* extra named home in the original frame */
+    void *from;
+    Vec3f_151C4B0C *dir;
+
+    useSource = 0;
+    useTarget = arg4 && arg3 != NULL;
+    if (useTarget) {
+        targetDir = *arg3;
+    }
+    ext.flags = (arg17 ? 1 : 0) | (arg18 ? 2 : 0) | (arg14 ? 4 : 0) | (arg15 ? 8 : 0);
+    ext.handle = 0;
+    ext.fieldA8 = arg23;
+    ext.field9C = arg19;
+    ext.fieldA4 = arg20;
+    ext.chance = (func_150ADA20() & 0xFFU) < arg16 ? 1 : 0;
+    ext.field9E = 0;
+    ext.fieldA1 = 0;
+    if (arg2 != 0 && arg3 != NULL) {
+        if (!useTarget) {
+            if (func_15145128(&arg3->x, &targetDir.x, NULL, NULL) != 0) {
+                useTarget = 1;
+            } else {
+                return NULL;
+            }
+        }
+        from = (void *)arg2;
+        dir = &targetDir;
+    } else {
+        if (arg1 != NULL) {
+            if (func_15145128(&arg1->x, &sourceDir.x, NULL, NULL) != 0) {
+                useSource = 1;
+            } else {
+                return NULL;
+            }
+        }
+        from = arg0;
+        dir = &sourceDir;
+    }
+    ext.handle = arg14 ? func_151D5B6C((s32)from, (s32)dir, (struct127 *)arg12, arg23, 0) : -1;
+    if (func_151C4B0C((struct Game1F1F60Hit *)arg5, (struct Game1F1F60Hit *)ext.path, arg0,
+                      useSource ? &sourceDir : NULL, (f32 *)ext.extra, arg7, arg13, (Vec3f_151C4B0C *)arg2,
+                      useTarget ? &targetDir : NULL, &ext.flags, 3, arg10, arg12, arg23, arg14, arg15,
+                      ext.handle, 0) == 0) {
+        return NULL;
+    }
+    ext.velocity[0] = ext.direction[0] * arg6;
+    ext.velocity[1] = ext.direction[1] * arg6;
+    ext.velocity[2] = ext.direction[2] * arg6;
+    ext.accel[0] = 0.0f;
+    ext.accel[1] = 0.0f;
+    ext.accel[2] = 0.0f;
+    ext.drift[0] = ext.direction[0] * arg9;
+    ext.drift[1] = ext.direction[1] * arg9;
+    ext.drift[2] = ext.direction[2] * arg9;
+    ext.owner = arg12;
+    ext.ownerId = (arg12 != NULL) ? arg12[0x3B] : 0x63;
+    spawn.field00 = 0x41;
+    ext.scale = arg6;
+    spawn.field01 = 4;
+    spawn.field02 = 0x4503;
+    spawn.field04 = 0x12C;
+    spawn.field08 = 0;
+    spawn.field0C = 0;
+    spawn.field10 = 0;
+    spawn.field11 = 0;
+    spawn.field12 = 0;
+    spawn.field13 = 0xFF;
+    spawn.field44 = arg11;
+    spawn.field45 = 0xFF;
+    spawn.field18 = arg9;
+    spawn.field14 = arg8;
+    spawn.position = *arg0;
+    spawn.field28[0] = 0.0f;
+    spawn.field28[1] = 0.0f;
+    spawn.field28[2] = 0.0f;
+    spawn.field28[3] = 0.0f;
+    spawn.field28[4] = 0.0f;
+    spawn.field28[5] = 0.0f;
+    spawn.flags = 0xC04C0008;
+    spawn.field46 = 0;
+    spawn.field47 = 0;
+    spawn.field4C = arg22;
+    result = func_1513D2F0(&spawn, (s32)&D_800A4AA0, 0x16, 0, 0, 0x14, 0, 0, 0, arg24 + 0xB0, arg25, arg26);
+    if (result != NULL) {
+        u8 failed;
+
+        failed = 0;
+        memcpy((u8 *)result + 0x110, &ext, 0xB0);
+        func_151C436C((s32)result, (f32 *)((u8 *)result + 0x110), (s32)arg21);
+        if (func_151C43E0(result, (Mover151C43E0 *)((u8 *)result + 0x110), arg21) == 0) {
+            failed = 1;
+        }
+        func_151C4510(result, (GameStruct151C4510b *)((u8 *)result + 0x110), arg21);
+        if (func_151C455C((s32)result, (GameStruct151C455C *)((u8 *)result + 0x110), arg21) == 0) {
+            failed = 1;
+        }
+        if (failed) {
+            func_1516972C(result);
+            return NULL;
+        }
+    }
+    return result;
+}
 
 s8 func_151C2734(GameStruct151C2734 *arg0) {
     s8 ret;
@@ -423,7 +603,184 @@ void func_151C2F48(GameObj151C2F48 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1EF500/func_151C329C.s")
+typedef struct {
+    s32 field0;
+    s32 field4;
+    struct17 position8;
+    f32 field14;
+    f32 field18;
+    f32 field1C;
+    f32 field20;
+    f32 field24;
+    f32 field28;
+    s16 field2C;
+    s16 field2E;
+    s16 field30;
+    s16 field32;
+    s32 field34;
+    s32 field38;
+    s16 field3C;
+    s16 field3E;
+    s16 field40;
+    u8 fields42[23];
+    s32 field5C;
+    s32 field60;
+    s16 field64;
+    s16 field66;
+    s16 field68;
+    u8 field6A;
+    f32 field6C;
+    s8 fields70[4];
+} GameEmitterParticle151C329C;
+
+typedef struct {
+    s32 field0;
+    s32 field4;
+    s16 field8;
+    s16 fieldA;
+    s32 fieldC;
+    s32 field10;
+    u8 colors14[9];
+    u8 field1D;
+    s16 field1E;
+    s16 field20;
+    s16 field22;
+    f32 field24;
+    f32 field28;
+    f32 field2C;
+    struct17 position30;
+    f32 field3C;
+    f32 field40;
+    f32 field44;
+    f32 field48;
+    f32 field4C;
+    f32 field50;
+    f32 field54;
+    s32 field58;
+    s32 field5C;
+    s8 fields60[6];
+    u8 fields66[0xA];
+} GameEmitterSpawn151C329C;
+
+typedef struct {
+    u8 field0;
+    s8 field1;
+    s16 field2;
+    u8 field4;
+} GameEmitterLight151C329C;
+
+extern f32 D_800AAA44;
+extern f32 D_800AAA48;
+extern f32 D_800AAA4C;
+extern f32 D_800AAA50;
+extern void *func_15130280(void *, u8, s32, s32, u8, s32);
+
+void func_151C329C(struct17 *arg0, u8 arg1, s32 arg2) {
+    GameEmitterParticle151C329C descriptor;
+    GameEmitterSpawn151C329C spawn;
+    GameEmitterLight151C329C light;
+    Header2 coordinates;
+
+    descriptor.field0 = 5;
+    descriptor.field4 = 7;
+    descriptor.position8 = *arg0;
+    descriptor.field14 = D_800AAA44;
+    descriptor.field18 = D_800AAA48;
+    descriptor.field1C = D_800AAA4C;
+    descriptor.field20 = D_800AAA50;
+    descriptor.field24 = 15.0f;
+    descriptor.field28 = 30.0f;
+    descriptor.field2C = 0;
+    descriptor.field2E = 0xFF;
+    descriptor.field30 = -0x40;
+    descriptor.field32 = 0x50;
+    descriptor.field34 = 3;
+    descriptor.field38 = 1;
+    descriptor.field3C = 0x14;
+    descriptor.field3E = 0xF;
+    descriptor.field40 = 1;
+    descriptor.fields42[0] = 4;
+    descriptor.fields42[1] = 2;
+    descriptor.fields42[2] = 3;
+    descriptor.fields42[3] = 0xFF;
+    descriptor.fields42[4] = 0xFF;
+    descriptor.fields42[5] = 0xFF;
+    descriptor.fields42[6] = 0xFF;
+    descriptor.fields42[7] = 0;
+    descriptor.fields42[8] = 0;
+    descriptor.fields42[9] = 0;
+    descriptor.fields42[10] = 0;
+    descriptor.fields42[11] = 0xFF;
+    descriptor.fields42[12] = 0xFF;
+    descriptor.fields42[13] = 0xFF;
+    descriptor.fields42[14] = 0xFF;
+    descriptor.fields42[15] = 0;
+    descriptor.fields42[16] = 0;
+    descriptor.fields42[17] = 0;
+    descriptor.fields42[18] = 0;
+    descriptor.fields42[19] = 0xFF;
+    descriptor.fields42[20] = 0;
+    descriptor.fields42[21] = 3;
+    descriptor.fields42[22] = 0x24;
+    descriptor.field5C = 0x200005;
+    descriptor.field60 = 0x60600;
+    descriptor.field64 = 8;
+    descriptor.field66 = 0x1F;
+    descriptor.field68 = 1;
+    descriptor.field6A = 0;
+    descriptor.field6C = 1.0f;
+    descriptor.fields70[0] = -1;
+    descriptor.fields70[1] = 0;
+    descriptor.fields70[2] = -1;
+    descriptor.fields70[3] = -1;
+    func_15152B38(&descriptor, arg1, arg2);
+    spawn.field1D = 0x2B;
+    spawn.field8 = 0x4403;
+    spawn.field0 = 0x200005;
+    spawn.field4 = 0x20000;
+    spawn.fieldA = (func_150ADA20() % 7U) + 6;
+    spawn.fieldC = 0;
+    spawn.field10 = 0;
+    spawn.colors14[0] = 0xFF;
+    spawn.colors14[1] = 0xFF;
+    spawn.colors14[2] = 0xFF;
+    spawn.colors14[3] = 0xFF;
+    spawn.colors14[4] = 0xFF;
+    spawn.colors14[5] = 0xFF;
+    spawn.colors14[6] = 0xFF;
+    spawn.colors14[7] = 0xFF;
+    spawn.colors14[8] = 0xFF;
+    spawn.field28 = spawn.field2C = func_150ADA68() * 196.0f + 106.0f;
+    spawn.position30 = *arg0;
+    spawn.field1E = 3;
+    spawn.field20 = 0x55;
+    spawn.field22 = 1;
+    spawn.field3C = 0.0f;
+    spawn.field40 = 0.0f;
+    spawn.field44 = 0.0f;
+    spawn.field48 = 0.0f;
+    spawn.field4C = 0.0f;
+    spawn.field50 = 0.0f;
+    spawn.field54 = 0.0f;
+    spawn.field24 = 1.0f;
+    spawn.field58 = 1 | ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0) | 0x8000 | 0x4000 | 0x200;
+    spawn.fields60[0] = 6;
+    spawn.fields60[1] = 6;
+    spawn.fields60[2] = -1;
+    spawn.fields60[3] = -1;
+    spawn.fields60[4] = -1;
+    spawn.fields60[5] = 4;
+    func_15130280(&spawn, 1, 0, 0, arg1, arg2);
+    light.field0 = 3;
+    light.field1 = -1;
+    light.field2 = (func_150ADA20() % 7U) + 6;
+    light.field4 = 0;
+    coordinates.unk0 = (s32)arg0->unk0;
+    coordinates.unk4 = (s32)arg0->unk4;
+    coordinates.unk8 = (s32)arg0->unk8;
+    func_151602C0((Header *)&light, &coordinates, (func_150ADA20() & 1) + 5,
+                 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg1, arg2);
+}
 
 typedef struct {
     /* 0x00 */ s32 unk0;
@@ -577,7 +934,292 @@ void func_151C36D8(struct17 *arg0, u8 arg1, s32 arg2) {
     func_151602C0(&header, &header2, (func_150ADA20() & 1) + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg1, arg2);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1EF500/func_151C3B0C.s")
+typedef struct {
+    /* 0x00 */ u8 pad0[0x30];
+    /* 0x30 */ struct17 pos;
+    /* 0x3C */ u8 pad3C[0x60 - 0x3C];
+    /* 0x60 */ struct17 prev;
+    /* 0x6C */ u8 unk6C[0x88 - 0x6C];
+} GameSub151C3B0C;
+
+typedef struct {
+    /* 0x000 */ u8 pad0;
+    /* 0x001 */ u8 unk1;
+    /* 0x002 */ u8 pad2[0xA];
+    /* 0x00C */ u8 unkC;
+    /* 0x00D */ u8 padD[0x110 - 0xD];
+    /* 0x110 */ GameSub151C3B0C unk110;
+    /* 0x198 */ s32 unk198;
+} GameObj151C3B0C;
+
+typedef struct {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s16 unk4;
+    /* 0x06 */ u8 unk6;
+    /* 0x07 */ u8 unk7;
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ u8 unk10;
+    /* 0x11 */ u8 unk11;
+    /* 0x12 */ u8 unk12;
+    /* 0x13 */ u8 unk13;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 unk16;
+    /* 0x17 */ u8 unk17;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ s32 unk1C;
+    /* 0x20 */ u8 unk20;
+    /* 0x21 */ u8 pad21;
+    /* 0x22 */ s16 unk22;
+    /* 0x24 */ s16 unk24;
+} GameDebris151C3B0C; /* 0x28 */
+
+typedef struct {
+    /* 0x00 */ u8 unk00;
+    /* 0x01 */ u8 unk01;
+    /* 0x02 */ s16 unk02;
+    /* 0x04 */ s16 unk04;
+    /* 0x06 */ u8 pad06[2];
+    /* 0x08 */ s32 unk08;
+    /* 0x0C */ s32 unk0C;
+    /* 0x10 */ u8 unk10;
+    /* 0x11 */ u8 unk11;
+    /* 0x12 */ u8 unk12;
+    /* 0x13 */ u8 unk13;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ struct17 pos;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ f32 unk34;
+    /* 0x38 */ f32 unk38;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ s32 flags;
+    /* 0x44 */ u8 unk44;
+    /* 0x45 */ u8 unk45;
+    /* 0x46 */ u8 unk46;
+    /* 0x47 */ u8 unk47;
+    /* 0x48 */ s32 unk48;
+    /* 0x4C */ u8 unk4C;
+    /* 0x4D */ u8 pad4D[7];
+    /* 0x54 */ s16 unk54;
+    /* 0x56 */ s16 unk56;
+} GameSpark151C3B0C; /* 0x58 */
+
+typedef struct {
+    /* 0x00 */ s16 unk0;
+    /* 0x02 */ s16 unk2;
+    /* 0x04 */ u8 unk4;
+    /* 0x05 */ u8 pad5;
+    /* 0x06 */ u16 unk6;
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ s16 unk10;
+    /* 0x12 */ s16 unk12;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 unk1D;
+    /* 0x1E */ u8 unk1E;
+    /* 0x1F */ u8 unk1F;
+    /* 0x20 */ u8 unk20;
+    /* 0x21 */ u8 unk21;
+    /* 0x22 */ u8 unk22;
+    /* 0x23 */ u8 unk23;
+    /* 0x24 */ u8 unk24;
+    /* 0x25 */ u8 unk25;
+    /* 0x26 */ s16 unk26;
+    /* 0x28 */ s16 unk28;
+    /* 0x2A */ s16 unk2A;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ f32 unk34;
+    /* 0x38 */ struct17 unk38;
+    /* 0x44 */ s16 unk44;
+    /* 0x46 */ s16 unk46;
+    /* 0x48 */ s16 unk48;
+    /* 0x4A */ s16 unk4A;
+    /* 0x4C */ f32 unk4C;
+    /* 0x50 */ f32 unk50;
+    /* 0x54 */ f32 unk54;
+    /* 0x58 */ f32 unk58;
+    /* 0x5C */ s32 unk5C;
+    /* 0x60 */ s8 unk60;
+    /* 0x61 */ s8 unk61;
+    /* 0x62 */ u8 unk62;
+    /* 0x63 */ u8 unk63;
+    /* 0x64 */ u8 unk64;
+    /* 0x65 */ u8 pad65[3];
+    /* 0x68 */ f32 unk68;
+} GameSmoke151C3B0C; /* 0x6C */
+
+void func_15153634(void *, u8, u8, s32);
+
+void func_151C3B0C(GameObj151C3B0C *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 arg5, u8 arg6, u8 arg7) {
+    s32 kind;
+    GameSub151C3B0C *sub;
+    s32 type;
+
+    kind = arg0->unk198 & 0x1F;
+    if ((D_800BE9F0 == 0x2B) || (D_800BE9F0 == 0x30)) {
+        switch (kind) {
+        case 1:
+            type = 3;
+            break;
+        case 0:
+        case 5:
+        default:
+            type = 4;
+            break;
+        }
+    } else if ((kind == 0xB) && (D_800BE9F0 == 4)) {
+        type = 1;
+    } else if (((kind == 1) || (kind == 0xA)) && (D_800BE9F0 == 0xE)) {
+        type = 2;
+    } else if (D_800BE9F0 == 0x34) {
+        type = 3;
+    } else if (D_800BE9F0 == 0x27) {
+        type = 5;
+    } else {
+        type = 0;
+        arg3 = arg2 = arg1 = 0.0f;
+    }
+    if (func_150ADA68() < arg1) {
+        GameDebris151C3B0C debris;
+        f32 scale;
+        const s32 shade[6] = { 0x6F, 0x6F, 0x70, 0x70, 0x4F, 0x76 };
+        u8 big;
+
+        scale = (func_150ADA68() * 15.0f) + 15.0f;
+        debris.unk6 = shade[type];
+        debris.unk7 = 0;
+        debris.unk0 = (D_800BE616 ? 0x20000 : 0) | 0xBF01;
+        debris.unk4 = (func_150ADA20() % 61U) + 0x3C;
+        debris.unk8 = 0;
+        debris.unkC = 0;
+        debris.unk10 = (func_150ADA20() % 56U) + 0xC8;
+        debris.unk11 = 0xFF;
+        debris.unk12 = 0;
+        debris.unk13 = 0;
+        debris.unk14 = 0;
+        debris.unk15 = 0xFF;
+        big = (type == 4);
+        debris.unk18 = ((big ? 0x48 : 0x3B) << 16) + 2;
+        debris.unk16 = 0;
+        debris.unk17 = big ? 6 : 7;
+        debris.unk20 = arg5;
+        debris.unk22 = 0x20;
+        debris.unk24 = 7;
+        sub = &arg0->unk110;
+        func_1513C650((s32)&debris, 0, 0, (s32)sub->unk6C, sub->pos.unk0, sub->pos.unk4, sub->pos.unk8,
+                      scale, scale, func_150ADA20() & 0xFF, 0, 0, 0, 0, arg0->unkC, arg0->unk1);
+    }
+    if (func_150ADA68() < arg2) {
+        GameSpark151C3B0C spark;
+        const s32 shade[6] = { 0x6D, 0x6D, 0x6E, 0x6E, 0x6D, 0x6D };
+
+        sub = &arg0->unk110;
+        spark.unk00 = shade[type];
+        spark.unk01 = 0;
+        spark.unk02 = 0x3B03;
+        spark.unk04 = (func_150ADA20() % 6U) + 0xD;
+        spark.unk08 = 0;
+        spark.unk0C = 0;
+        spark.unk10 = 0xFF;
+        spark.unk11 = 0xFF;
+        spark.unk12 = 0xFF;
+        spark.unk13 = 0xFF;
+        spark.unk14 = (func_150ADA68() * 5.0f) + 7.0f;
+        spark.unk18 = (func_150ADA68() * 40.0f) + 10.0f;
+        spark.pos = sub->pos;
+        spark.unk28 = sub->pos.unk0 - sub->prev.unk0;
+        spark.unk2C = sub->pos.unk4 - sub->prev.unk4;
+        spark.unk30 = sub->pos.unk8 - sub->prev.unk8;
+        spark.unk34 = 1.269999981f;
+        spark.unk38 = 1.0f;
+        spark.unk3C = 56.81999969f;
+        spark.flags = (D_800BE616 ? 0x40000000 : 0) | 0x08DC0009;
+        spark.unk44 = (func_150ADA20() % 76U) + 0xB4;
+        spark.unk45 = 0xFF;
+        spark.unk46 = 0;
+        spark.unk47 = 7;
+        spark.unk48 = 0;
+        spark.unk4C = arg7;
+        spark.unk54 = 8;
+        spark.unk56 = 0x1F;
+        func_1513D2F0(&spark, (s32)&D_800A4AA0, 0x22, 0, 0, 0x1C, 2, 0, 0, 0, arg0->unkC, arg0->unk1);
+    }
+    if (func_150ADA68() < arg3) {
+        GameSmoke151C3B0C smoke;
+        const u8 colorA[6][3] = { { 0xB7, 0x77, 0x34 }, { 0xB7, 0x77, 0x34 }, { 0xAA, 0x52, 0x1E },
+                            { 0xAA, 0x52, 0x1E }, { 0x98, 0x92, 0x79 }, { 0xFF, 0xC0, 0x00 } };
+        const u8 colorB[6][3] = { { 0x5C, 0x30, 0x00 }, { 0x5C, 0x30, 0x00 }, { 0x00, 0x00, 0x00 },
+                            { 0x00, 0x00, 0x00 }, { 0x00, 0x00, 0x8D }, { 0x8D, 0x00, 0x00 } };
+
+        smoke.unk0 = 5;
+        smoke.unk2 = 0xF;
+        smoke.unk4 = 0x6C;
+        smoke.unk6 = 0x5103;
+        smoke.unk8 = 0x200005;
+        smoke.unkC = 0;
+        smoke.unk10 = 0x14;
+        smoke.unk12 = 0xF;
+        smoke.unk14 = 0;
+        smoke.unk18 = 0;
+        smoke.unk1F = 0xFF;
+        smoke.unk1C = colorA[type][0];
+        smoke.unk1D = colorA[type][1];
+        smoke.unk1E = colorA[type][2];
+        smoke.unk20 = colorB[type][0];
+        smoke.unk21 = colorB[type][1];
+        smoke.unk22 = colorB[type][2];
+        smoke.unk23 = 0xE6;
+        smoke.unk24 = 0x14;
+        smoke.unk25 = 0xFF;
+        smoke.unk26 = 0x19;
+        smoke.unk28 = 0xA;
+        smoke.unk2A = 0x1E;
+        smoke.unk2C = 1.049999952f;
+        smoke.unk30 = 60.0f;
+        smoke.unk34 = 65.0f;
+        smoke.unk38 = arg0->unk110.pos;
+        smoke.unk44 = 0;
+        smoke.unk46 = -0x28;
+        smoke.unk48 = 0xFF;
+        smoke.unk4A = 0x28;
+        smoke.unk4C = 9.0f;
+        smoke.unk50 = 17.0f;
+        smoke.unk54 = 0.00800000038f;
+        smoke.unk58 = 0.2610000074f;
+        smoke.unk5C = (D_800BE616 ? 0x800000 : 0) | 0x40E07;
+        smoke.unk60 = 0x10;
+        smoke.unk61 = -1;
+        smoke.unk62 = 8;
+        smoke.unk63 = 6;
+        smoke.unk64 = 1;
+        smoke.unk68 = 0.8702070117f;
+        func_15153634(&smoke, arg6, arg0->unkC, arg0->unk1);
+    }
+    if (func_150ADA68() < arg4) {
+        Header header;
+        Header2 header2;
+        const u8 color[2][3] = { { 0xFF, 0xFF, 0xFF }, { 0xFF, 0xA7, 0xA7 } };
+        u8 sel;
+
+        header.unk0 = 3;
+        header.unk1 = -1;
+        sub = &arg0->unk110;
+        header.unk2 = (func_150ADA20() % 6U) + 3;
+        header.unk4 = 0;
+        header2.unk0 = (s32)sub->pos.unk0;
+        header2.unk4 = (s32)sub->pos.unk4;
+        header2.unk8 = (s32)sub->pos.unk8;
+        sel = func_150ADA20() & 1;
+        func_151602C0(&header, &header2, (func_150ADA20() % 6U) + 0xA, color[sel][0], color[sel][1], color[sel][2], 0xFF, 0, 0, arg0->unkC, arg0->unk1);
+    }
+}
 
 void func_151C436C(s32 a0, f32 *a1, s32 a2) {
     f32 x;
@@ -786,7 +1428,27 @@ void func_151C4644(GameStruct151C4644 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1EF500/func_151C4820.s")
+typedef struct Game1F1CD0Emission {
+    f32 x, y;
+    f32 amplitudeX, amplitudeY;
+    f32 phaseX, phaseY;
+    f32 speedX, speedY;
+    f32 time, rate;
+    f32 remaining;
+    Vec3f_151C4B0C position;
+    f32 scaleX, scaleY, parameter;
+} Game1F1CD0Emission;
+typedef struct Game1F1CD0Actor {
+    u8 pad0;
+    u8 kind;
+    u8 pad2[0xA];
+    u8 owner;
+    u8 padD[0x1B];
+    Game1F1CD0Emission emission;
+} Game1F1CD0Actor;
+
+void func_151436B4(f32, f32, f32, f32 *);
+void func_151C4820(Game1F1CD0Actor *arg0);
 
 typedef struct {
     s32 unk0;
@@ -800,18 +1462,27 @@ typedef struct {
     s32 unk90;
     u8 unk94;
 } GameStruct151C4AB0b;
+void func_151C4AB0(void *a0, GameStruct151C4AB0a *a1, u8 a2);
 
-void func_151C4AB0(void *a0, GameStruct151C4AB0a *a1, u8 a2) {
-    GameStruct151C4AB0b *v0 = (GameStruct151C4AB0b *)((u8 *)a0 + 0x110);
-    if (a2 == 0x2D) {
-        if (v0->unk90 == a1->unk0) {
-            v0->unk90 = a1->unk4;
-            v0->unk94 = a1->unk9;
-        } else if (v0->unk90 == a1->unk4) {
-            v0->unk90 = a1->unk0;
-            v0->unk94 = a1->unk8;
-        }
-    }
-}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1EF500/func_151C4B0C.s")
+typedef struct Game1F1F60Hit {
+    void *actor;
+    f32 dist;
+    Vec3f_151C4B0C hit;
+    Vec3f_151C4B0C normal;
+    Vec3f_151C4B0C point;
+    Vec3f_151C4B0C start;
+    Vec3f_151C4B0C end;
+    s16 surface[9];
+    s16 field_56;
+    s8 field_58;
+    u8 type;
+    s8 field_5A;
+    u8 pad5B;
+    u8 *field_5C;
+    s32 field_60;
+} Game1F1F60Hit;
+
+s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
+s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, s16 *, f32 *, f32 *, f32 *, f32 *, s32 *, void *, f32);
+s32 func_151C4B0C(Game1F1F60Hit *arg0, Game1F1F60Hit *arg1, Vec3f_151C4B0C *arg2, Vec3f_151C4B0C *arg3, f32 *arg4, f32 arg5, u8 arg6, Vec3f_151C4B0C *arg7, Vec3f_151C4B0C *arg8, u8 *arg9, u8 arg10, f32 arg11, void *arg12, s8 arg13, u8 arg14, u8 arg15, s32 arg16, u8 arg17);

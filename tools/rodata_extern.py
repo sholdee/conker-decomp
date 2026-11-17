@@ -135,18 +135,140 @@ def sext16(v):
     return v - 0x10000 if v & 0x8000 else v
 
 
+DATA_SECTIONS = (".data", ".bss", ".sdata", ".sbss")
+
+
+def owns_section(yaml_path, obj, kind):
+    """True if the yaml links this object's own section `kind` (e.g. a `.data, <name>` subsegment)."""
+    return re.search(rf"\[0x[0-9A-Fa-f]+,\s*\.?{re.escape(kind.lstrip('.'))},\s*{re.escape(obj_name(obj))}\s*\]",
+                     Path(yaml_path).read_text()) is not None
+
+
 def main():
     if sys.argv[1] == "--labels":
         return write_labels(sys.argv[2], sys.argv[3])
     basebin, yaml_path, obj = sys.argv[1:4]
     Path(obj + ".notes").unlink(missing_ok=True)
-    if owns_rodata(yaml_path, obj):
-        return  # this file's .rodata is linked from C already
     elf = ElfFile(Path(obj).read_bytes())
     text = elf.find_section(".text")
-    rodata = elf.find_section(".rodata")
-    if text is None or rodata is None:
+    if text is None:
         return
+    notes = []
+    rom = []  # loaded lazily (the whole bin)
+
+    def get_rom():
+        if not rom:
+            rom.append(Rom(basebin, yaml_path))
+        return rom[0]
+    changed = retarget_data(elf, text, get_rom, yaml_path, obj, notes)
+    rodata = elf.find_section(".rodata")
+    if rodata is not None and not owns_rodata(yaml_path, obj):
+        changed |= retarget_rodata(elf, text, rodata, get_rom, obj, notes)
+    if changed:
+        rel_tx = [s for s in text.relocated_by if s.sh_type == SHT_REL]
+        for rs in rel_tx:
+            rs.data = b"".join(r.to_bin() for r in rs.relocations)
+        elf.write(obj)
+    if notes:
+        Path(obj + ".notes").write_text("\n".join(notes) + "\n")
+
+
+def pair_refs(text, rel_tx, wanted, ins_at):
+    """[(hi or None, lo, X)] for %hi/%lo pairs against symbols in `wanted` {sym_index: base offset}."""
+    refs = []
+    for rs in rel_tx:
+        last_hi = None
+        for r in rs.relocations:
+            if r.sym_index not in wanted:
+                continue
+            if r.rel_type == R_MIPS_HI16:
+                last_hi = r
+            elif r.rel_type == R_MIPS_LO16:
+                hi = last_hi if last_hi is not None and last_hi.sym_index == r.sym_index else None
+                himm = ins_at(hi.r_offset) & 0xFFFF if hi else 0
+                x = wanted[r.sym_index] + (himm << 16) + sext16(ins_at(r.r_offset) & 0xFFFF)
+                refs.append((hi, r, x))
+    return refs
+
+
+def add_abs_symbols(elf, prefix, addrs):
+    index = {}
+    for addr in sorted(set(addrs)):
+        name = f"{prefix}.{addr:08X}"  # dotted: decomp-permuter treats it as a symbol
+        sym = Symbol.from_parts(elf.fmt, elf.sym_strtab.add_str(name), addr, 0,
+                                STB_GLOBAL << 4, 0, SHN_ABS, elf.sym_strtab, name)
+        index[addr] = len(elf.symbol_entries)
+        elf.symbol_entries.append(sym)
+        elf.symtab.data += sym.to_bin()
+    return index
+
+
+def rewrite_refs(text, tdata, refs, resolved_of, index):
+    done_hi = set()
+    for hi, lo, key in refs:
+        for r in (hi, lo):
+            if r is None or id(r) in done_hi:
+                continue
+            if r is hi:
+                done_hi.add(id(r))  # a shared %hi keeps its first partner's symbol
+            r.sym_index = index[resolved_of(key)]
+            w = struct.unpack(">I", tdata[r.r_offset:r.r_offset + 4])[0]
+            tdata[r.r_offset:r.r_offset + 4] = struct.pack(">I", w & 0xFFFF0000)
+    text.data = bytes(tdata)
+
+
+def retarget_data(elf, text, get_rom, yaml_path, obj, notes):
+    """Point %hi/%lo references into this object's own .data/.bss (function-local statics,
+    file statics) at the original address in the game's data segment. The linker script keeps
+    only .text of game objects, and the original values are already assembled from asm/data.
+    Address: a static named D_XXXXXXXX gives it directly (plus the offset into it); otherwise
+    the original instruction pair at the same .text offset; otherwise 0 (links; never matches)."""
+    secs = [elf.find_section(n) for n in DATA_SECTIONS]
+    secs = [s for s in secs if s is not None and not owns_section(yaml_path, obj, s.name)]
+    if not secs:
+        return False
+    idx = {s.index for s in secs}
+    syms = elf.symbol_entries
+    wanted = {i: (0 if s.st_type == STT_SECTION else s.st_value)
+              for i, s in enumerate(syms) if i and s.st_shndx in idx}
+    rel_tx = [s for s in text.relocated_by if s.sh_type == SHT_REL]
+    tdata = bytearray(text.data)
+
+    def ins_at(off):
+        return struct.unpack(">I", tdata[off:off + 4])[0]
+    refs = pair_refs(text, rel_tx, wanted, ins_at)
+    if not refs:
+        return False
+    named = [(s.st_shndx, s.st_value, max(s.st_size, 1), int(m.group(1), 16))
+             for s in syms if s.st_shndx in idx and s.st_type != STT_SECTION
+             for m in [re.fullmatch(r"D_([0-9A-Fa-f]{8})(?:\.\w+)?", s.name or "")] if m]
+    rom = get_rom()
+    tv = rom.text_vram(obj_name(obj))
+    resolved = {}
+    keyed = []
+    for hi, lo, x in refs:
+        shndx = syms[lo.sym_index].st_shndx
+        key = (shndx, x)
+        keyed.append((hi, lo, key))
+        if key in resolved:
+            continue
+        addr = next((a + (x - v) for sh, v, n, a in named if sh == shndx and v <= x < v + n), None)
+        if addr is None and tv and hi is not None:
+            rh, rl = rom.word(tv[0] + hi.r_offset), rom.word(tv[0] + lo.r_offset)
+            if rh >> 26 == OP_LUI and rl >> 26 == ins_at(lo.r_offset) >> 26:
+                addr = ((rh & 0xFFFF) << 16) + sext16(rl & 0xFFFF)
+        if addr is None:
+            addr = 0
+            notes.append(f"static data at {syms[lo.sym_index].name or 'section'}+0x{x:X} (.text+0x{lo.r_offset:X}) "
+                         f"has no known address: name the static D_<ADDR> to place it")
+        resolved[key] = addr
+    tag = re.sub(r"\W", "_", obj_name(obj))
+    index = add_abs_symbols(elf, f".da.{tag}", resolved.values())
+    rewrite_refs(text, tdata, keyed, resolved.get, index)
+    return True
+
+
+def retarget_rodata(elf, text, rodata, get_rom, obj, notes):
     syms = elf.symbol_entries
     ro_syms = {i: (0 if s.st_type == STT_SECTION else s.st_value)
                for i, s in enumerate(syms) if s.st_shndx == rodata.index and i}
@@ -172,7 +294,7 @@ def main():
                 refs.append((hi, r, x))
                 last_hi = None if hi is None else last_hi
     if not refs:
-        return
+        return False
 
     # Jump-table words: R_MIPS_32 in .rel.rodata against .text.
     entries = {}
@@ -206,12 +328,11 @@ def main():
             return b[:b.index(b"\0") + 1]
         return b[:4]
 
-    rom = Rom(basebin, yaml_path)
+    rom = get_rom()
     tv = rom.text_vram(obj_name(obj))
     base = tv[1] if tv else None
 
     resolved = {}
-    notes = []
     for hi, lo, x in refs:
         if x in resolved:
             continue
@@ -263,11 +384,7 @@ def main():
             r.sym_index = index[resolved[x]]
             tdata[r.r_offset:r.r_offset + 4] = struct.pack(">I", ins_at(r.r_offset) & 0xFFFF0000)
     text.data = bytes(tdata)
-    for rs in rel_tx:
-        rs.data = b"".join(r.to_bin() for r in rs.relocations)
-    elf.write(obj)
-    if notes:
-        Path(obj + ".notes").write_text("\n".join(notes) + "\n")
+    return True
 
 
 def show(b):

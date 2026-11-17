@@ -124,4 +124,21 @@ s32 func_151B6010(struct17 *arg0, struct17 *arg1, f32 arg2, struct17 *arg3,
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E34C0/func_151B6254.s")
+void func_15133894(void *);
+
+void func_151B6254(u8 *arg0) {
+    f32 *extra = (f32 *)(arg0 + 0x170);
+
+    extra[0] += 0.55600005f * D_800BE9A4;
+    while (6.2831855f < extra[0]) {
+        extra[0] -= 6.2831855f;
+    }
+    {
+        f32 wave = sinf(extra[0]);
+        f32 value = wave * (0.061000004f * extra[1]) + extra[1];
+
+        *(f32 *)(arg0 + 0x1C) = value;
+        *(f32 *)(arg0 + 0x18) = value;
+    }
+    func_15133894(arg0);
+}

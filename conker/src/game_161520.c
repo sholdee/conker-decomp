@@ -1,7 +1,10 @@
 #include <ultra64.h>
 #define func_150ADA20 func_150ADA20_u8proto
+#define func_151D9B8C func_151D9B8C_s32proto
 #include "functions.h"
 #undef func_150ADA20
+#undef func_151D9B8C
+void func_151D9B8C(u8, f32, u8, void *, struct17 *, s16, u8, u8, u8, u8, s32);
 u32 func_150ADA20(void);
 #include "variables.h"
 
@@ -158,7 +161,126 @@ void *func_1513418C(void *arg0, s32 arg1, s32 arg2, s32 arg3) {
     return temp_v0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_151342BC.s")
+typedef struct {
+    f32 x, y, z;
+} BloodDripVec3f;
+
+typedef struct {
+    u8 pad0[0x10];
+    s32 target[2];
+    u8 field18;
+    u8 pad19[3];
+    void *field1C;
+    u8 field20;
+    u8 pad21[3];
+    f32 offset[3];
+    f32 radius;
+    f32 rate;
+    s16 lifetime;
+    u8 flags;
+    u8 emitter;
+    s8 callback;
+    u8 pad3D[3];
+    BloodDripVec3f previous;
+    f32 inverseDiameter;
+    f32 accumulator;
+} BloodDrip;
+
+extern void (*D_80089A70[])(f32, f32, f32, f32, f32, f32, void *);
+extern s32 (*D_80089AA0[])(void *);
+
+void func_151342BC(BloodDrip *drip) {
+    f32 *source;
+    u8 dead;
+    u8 flags;
+    f32 position[3];
+    s32 target;
+    u8 *bones;
+    f32 deltaZ;
+    f32 deltaY;
+    f32 deltaX;
+    f32 randomX;
+    f32 randomY;
+    s32 index;
+    f32 scale;
+    f32 distance;
+
+    dead = 0;
+    if (drip->flags & 4) {
+        drip->lifetime -= D_800BE9E4;
+        if (drip->lifetime < 0) {
+            dead = 1;
+        }
+    }
+    flags = drip->flags;
+    source = (flags & 8) ? position : &drip->previous.x;
+    if (flags & 1) {
+        position[0] = *(f32 *)((u8 *)drip->field1C + 0x14);
+        position[1] = *(f32 *)((u8 *)drip->field1C + 0x18);
+        position[2] = *(f32 *)((u8 *)drip->field1C + 0x1C);
+    } else {
+        if (flags & 2) {
+            if ((*(s32 *)drip->field1C == 0) || (*(s32 *)drip->field1C == 8) || (drip->field18 != *((u8 *)drip->field1C + 0x3B))) {
+                func_1516972C((struct102 *)drip);
+                return;
+            }
+            bones = *(u8 **)((u8 *)drip->field1C + 0x1D4);
+            if ((bones == NULL) || ((*((u8 *)drip->field1C + 0x74) & 0xF) == 0xF)) {
+                drip->flags = flags | 8;
+                return;
+            }
+            target = (s32)((u8 (*)[0x40])bones)[drip->field20];
+        } else if (!(flags & 0x10)) {
+            index = D_800BE9C0 ? 0 : 1;
+            target = drip->target[index];
+        } else {
+            return;
+        }
+        func_15143134(drip->offset, (s32)position, target);
+    }
+    deltaX = source[0] - position[0];
+    deltaY = source[1] - position[1];
+    deltaZ = source[2] - position[2];
+    distance = sqrtf(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
+    scale = drip->inverseDiameter * distance + 1.0f;
+    drip->accumulator += scale * D_800BE9A4 * drip->rate;
+    if (drip->accumulator > 7.0f) {
+        drip->accumulator = 7.0f;
+    }
+    if ((drip->flags & 0x20) && (D_800C35EA == 1)) {
+        while (drip->accumulator > 1.0f) {
+            drip->accumulator -= 1.0f;
+        }
+    } else {
+        while (drip->accumulator > 1.0f) {
+            f32 diameter;
+            f32 fraction;
+
+            diameter = drip->radius + drip->radius;
+            fraction = func_150ADA68();
+            if (D_80089A70[drip->emitter] != NULL) {
+                randomX = func_150ADA68();
+                randomY = func_150ADA68();
+                D_80089A70[drip->emitter](
+                    (position[0] + deltaX * fraction + drip->radius) - randomX * diameter,
+                    (position[1] + deltaY * fraction + drip->radius) - randomY * diameter,
+                    (position[2] + deltaZ * fraction + drip->radius) - func_150ADA68() * diameter,
+                    deltaX, deltaY, deltaZ, drip);
+            }
+            drip->accumulator -= 1.0f;
+        }
+    }
+    drip->previous = *(BloodDripVec3f *)position;
+    drip->flags &= ~8;
+    if (!dead) {
+        if ((drip->callback != -1) && (D_80089AA0[drip->callback](drip) == 0)) {
+            dead = 1;
+        }
+    }
+    if (dead) {
+        func_1516972C((struct102 *)drip);
+    }
+}
 
 s32 func_151346D0(s32 arg0, struct102 *arg1, s32 arg2) {
     arg1->unk3A &= 0xFFEF;
@@ -286,7 +408,87 @@ void *func_15134908(void *arg0, s32 arg1, u8 arg2, s32 arg3) {
     return sp24;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_151349D0.s")
+typedef struct {
+    u8 pad0[0x10];
+    f32 *x;
+    f32 *y;
+    f32 *z;
+    f32 radius;
+    f32 rate;
+    s16 lifetime;
+    u8 flags;
+    u8 emitter;
+    u8 field28;
+    s8 callback;
+    u8 pad2A[2];
+    BloodDripVec3f previous;
+    f32 inverseDiameter;
+    f32 accumulator;
+} BloodTrail;
+
+extern s32 (*D_80089B18[])(void *);
+extern void (*D_80089AFC[])(f32, f32, f32, f32, f32, f32, void *);
+
+void func_151349D0(BloodTrail *trail) {
+    u8 flags;
+    f32 position[3];
+    f32 deltaZ;
+    f32 deltaY;
+    f32 deltaX;
+    f32 randomX;
+    f32 randomY;
+
+    position[0] = *trail->x;
+    position[1] = *trail->y;
+    position[2] = *trail->z;
+    if (trail->flags & 4) {
+        if ((trail->callback != -1) && (D_80089B18[trail->callback](trail) == 0)) {
+            func_1516972C((struct102 *)trail);
+            return;
+        }
+    }
+    flags = trail->flags;
+    if (flags & 2) {
+        trail->flags = flags & ~2;
+    } else {
+        f32 scale;
+        f32 distance;
+
+        deltaX = trail->previous.x - position[0];
+        deltaY = trail->previous.y - position[1];
+        deltaZ = trail->previous.z - position[2];
+        distance = sqrtf(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
+        scale = trail->inverseDiameter * distance + 1.0f;
+        trail->accumulator += scale * D_800BE9A4 * trail->rate;
+        if (trail->accumulator > 7.0f) {
+            trail->accumulator = 7.0f;
+        }
+        while (trail->accumulator > 1.0f) {
+            f32 diameter;
+            f32 fraction;
+
+            diameter = trail->radius + trail->radius;
+            fraction = func_150ADA68();
+            if (D_80089AFC[trail->emitter] != NULL) {
+                randomX = func_150ADA68();
+                randomY = func_150ADA68();
+                D_80089AFC[trail->emitter](
+                    (position[0] + deltaX * fraction + trail->radius) - randomX * diameter,
+                    (position[1] + deltaY * fraction + trail->radius) - randomY * diameter,
+                    (position[2] + deltaZ * fraction + trail->radius) - func_150ADA68() * diameter,
+                    deltaX, deltaY, deltaZ, trail);
+            }
+            trail->accumulator -= 1.0f;
+        }
+    }
+    trail->previous = *(BloodDripVec3f *)position;
+    if (trail->flags & 1) {
+        trail->lifetime -= D_800BE9E4;
+        if (trail->lifetime < 0) {
+            func_1516972C((struct102 *)trail);
+        }
+    }
+}
 
 void func_15134C98(struct260 *arg0, s32 arg1, u8 arg2) {
     if (((struct102 *)arg0)->unk28 == 1) {
@@ -458,7 +660,148 @@ f32 func_15135670(s32 arg0) {
     return func_151422DC(0, &D_800A3FB4, 0, 2000, 1000, &D_800A3FBC, 2938) * D_800A45B4;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_151356D4.s")
+void *func_1515548C(void *, u8, s32, s32, s32, u8, s32);
+typedef struct {
+    f32 x, y;
+} Blood356D4Position;
+
+typedef struct {
+    Blood356D4Position position;
+    f32 width, height;
+    u8 texture;
+    u8 pad11;
+    s16 lifetime;
+    u16 flags;
+    s16 duration, period;
+    u8 mode, red, green, blue, alpha, maximum;
+    u8 endRed, endGreen, endBlue, endAlpha;
+    s32 zero24, zero28, zero2C;
+    s32 field30, field34, field38, field3C;
+    u8 field40, field41;
+    u8 pad42[0x16];
+} Blood356D4Particle;
+
+typedef struct {
+    s16 owner;
+    f32 growth, velocityX, velocityY, field10, field14;
+} Blood356D4Motion;
+
+typedef struct {
+    u8 value[2];
+} Blood356D4Kinds;
+
+extern Blood356D4Kinds D_80089BA0;
+extern s32 D_80089BA4;
+extern Blood356D4Kinds D_80089BA8;
+
+void *func_151356D4(Blood356D4Position *arg0, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9, u8 arg10, s32 arg11) {
+    void *result;
+    Blood356D4Particle particle;
+    Blood356D4Motion motion;
+    Blood356D4Kinds kinds;
+    s32 data;
+    f32 scale;
+    f32 count;
+    Blood356D4Particle spark;
+    Blood356D4Kinds sparkKinds;
+    s32 flip;
+
+    kinds = D_80089BA0;
+    data = D_80089BA4;
+    motion.owner = arg6;
+    motion.growth = (func_150ADA68() * 100.0f + 100.0f) * arg1 * 0.001f;
+    motion.velocityX = func_150ADA68() * 6.0f * arg0->x * 0.001f;
+    motion.velocityY = func_150ADA68() * 6.0f * arg0->y * 0.001f;
+    motion.field10 = arg2;
+    motion.field14 = arg3;
+    particle.position = *arg0;
+    particle.width = arg1;
+    particle.height = arg1;
+    particle.texture = kinds.value[func_150ADA20() & 1];
+    particle.lifetime = arg7;
+    flip = (func_150ADA20() & 1) ? 2 : 0;
+    particle.flags = ((particle.texture == 0x3A) ? ((func_150ADA20() & 1) ? 4 : 0) : 0) | 9 | flip;
+    particle.duration = arg8;
+    particle.period = arg9;
+    particle.mode = 2;
+    particle.red = 0xFF;
+    particle.green = 0xFF;
+    particle.blue = 0xFF;
+    particle.maximum = 0xFF;
+    particle.endRed = 0xFF;
+    particle.endGreen = 0xFF;
+    particle.endBlue = 0xFF;
+    particle.zero24 = 0;
+    particle.zero28 = 0;
+    particle.zero2C = 0;
+    particle.field40 = 0;
+    particle.field41 = 9;
+    particle.field30 = 7;
+    particle.field34 = 0x3C;
+    particle.field38 = 0x80;
+    particle.field3C = 0x20;
+    particle.alpha = arg4;
+    particle.endAlpha = arg5;
+    result = func_1515548C(&particle, 3, (s32)&data, 1, 0x18, arg10, arg11);
+    if (result != NULL) {
+        memcpy((u8 *)result + 0x70, &motion, 0x18);
+        scale = (particle.width + particle.height) * 0.5f;
+        count = (func_150ADA68() * 300.0f + 100.0f) * arg1 * 0.001f;
+        spark.lifetime = 0x32;
+        spark.flags = 9;
+        spark.duration = 0x10;
+        spark.period = 0xF;
+        spark.mode = 3;
+        spark.red = 0xFF;
+        spark.green = 0xFF;
+        spark.blue = 0xFF;
+        spark.alpha = arg4;
+        spark.maximum = 0xFF;
+        spark.endRed = 0xFF;
+        spark.endGreen = 0xFF;
+        spark.endBlue = 0xFF;
+        spark.endAlpha = arg5;
+        spark.zero24 = 0;
+        spark.zero28 = 0;
+        spark.zero2C = 0;
+        spark.field40 = 0;
+        spark.field41 = 9;
+        spark.field30 = 7;
+        spark.field34 = 0x3C;
+        spark.field38 = 0x40;
+        spark.field3C = 0;
+        spark.width = (func_150ADA68() * 120.0f + 80.0f) * (arg1 * scale) * 0.0001f;
+        spark.height = (func_150ADA68() * 120.0f + 80.0f) * (arg1 * scale) * 0.0001f;
+        while (count > 1.0f) {
+            sparkKinds = D_80089BA8;
+            {
+                s16 angle;
+                f32 cosine;
+                f32 sine;
+                f32 distance;
+
+                angle = func_150ADA20() & 0xFF;
+                cosine = func_151423D8(angle - 0x40);
+                sine = func_151423D8(angle);
+                distance = (func_150ADA68() * 300.0f + 1300.0f) * scale * 0.001f;
+                spark.position.x = arg0->x + distance * sine;
+                spark.position.y = arg0->y + distance * cosine;
+            }
+            spark.texture = sparkKinds.value[func_150ADA20() & 1];
+            spark.flags &= ~6;
+            if (func_150ADA20() & 1) {
+                spark.flags |= 2;
+            }
+            if (func_150ADA20() & 1) {
+                spark.flags |= 4;
+            }
+            func_1515548C(&spark, 0, 0, 0, 0, arg10, arg11);
+            count -= 1.0f;
+        }
+    }
+    return result;
+}
+
 
 typedef struct {
     f32 x;
@@ -521,8 +864,8 @@ s32 func_15135BF8(Obj_15135BF8 *arg0) {
 typedef struct { f32 x, y, z; } V15135DD0;
 typedef struct { f32 a; s32 pad[5]; s32 g; u8 h; u8 i; s32 j; } S15135DD0;
 extern s32 func_15046460(V15135DD0 *, s32, s32, S15135DD0 *);
-extern void func_151DB5D0(s32, void *, V15135DD0 *, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_151DA6F8(void *, V15135DD0 *, f32, s16, s32, f32, s32, s32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern void func_151DB5D0(u8, void *, V15135DD0 *, f32, f32, f32, f32, s32, s32, s32, s32, s32, u8, s32);
+extern void func_151DA6F8(void *, V15135DD0 *, f32, s16, s32, f32, s32, s32, f32, f32, s32, u8, s32, s32, s32, s32, u8, s32);
 extern void func_151D9014(void *, void *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
 extern void func_15143794(s16, s16, f32, f32 *);
 
@@ -564,7 +907,7 @@ void func_15135DD0(V15135DD0 *arg0, V15135DD0 *arg1, s32 arg2, u8 arg3, s32 arg4
             c = func_150ADA68();
             a = func_150ADA68();
             b = func_150ADA68();
-            func_151DB5D0(0, arg0, &spF8, c * 50.0f + 30.0f, a * 0 + 1.00999999f, 1.0f, b * 0.04100000113f, s0, func_150ADA20() % 156U + 100, s0, 255 / s0, 1, fp, arg4);
+            func_151DB5D0(0, arg0, &spF8, c * 50.0f + 30.0f, a * 0 + 1.00999999f, 1.0f, b * 0.04100000113f, s0, func_150ADA20() % 156U + 100, s0, 255 / s0, 1, arg3, arg4);
             i1--;
         }
     } else {
@@ -581,7 +924,7 @@ void func_15135DD0(V15135DD0 *arg0, V15135DD0 *arg1, s32 arg2, u8 arg3, s32 arg4
             x = func_150ADA20();
             s0 = func_150ADA20();
             b = func_150ADA68();
-            func_151DA6F8(arg0, &spE0, a * 1.013000011f, (u32)x % 21U + 20, (u32)s0 % 101U + 100, b * 4.200000286f + 1.899999976f, func_150ADA20() % 3U + 3, 0, 1.0f, 1.0f, 0, 0, 0, 16, 15, 0, fp, arg4);
+            func_151DA6F8(arg0, &spE0, a * 1.013000011f, (u32)x % 21U + 20, (u32)s0 % 101U + 100, b * 4.200000286f + 1.899999976f, func_150ADA20() % 3U + 3, 0, 1.0f, 1.0f, 0, 0, 0, 16, 15, 0, arg3, arg4);
     }
             i--;
         }
@@ -607,7 +950,50 @@ void func_15135DD0(V15135DD0 *arg0, V15135DD0 *arg1, s32 arg2, u8 arg3, s32 arg4
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15136404.s")
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3f_36404;
+
+typedef struct {
+    f32 height;
+    u8 geometry[0x19];
+    u8 type;
+    u8 pad1E[6];
+} Hit36404;
+
+extern void func_15143874(s16, f32, f32 *, f32 *);
+void func_1504715C();
+s32 func_15046C80(f32 *, u16, f32, void *);
+
+void func_15136404(void *arg0, f32 arg1, u8 arg2, s32 arg3) {
+    f32 scale;
+    f32 count;
+    Hit36404 hit;
+    Vec3f_36404 probe;
+    Vec3f_36404 pos;
+
+    if (arg0 != NULL) {
+        scale = 3.141592741f * arg1 * arg1;
+        count = (func_150ADA68() * 305.0f + 108.0f) * 9.999999975e-07f * scale;
+        func_1504715C(&hit, arg0);
+        while (count > 1.0f) {
+            func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * arg1, &probe.x, &probe.z);
+            probe.x += *(f32 *)((u8 *)arg0 + 0x14);
+            probe.z += *(f32 *)((u8 *)arg0 + 0x1C);
+            probe.y = *(f32 *)((u8 *)arg0 + 0x18) + 500.0f;
+            if (func_15046C80(&probe.x, 0, *(f32 *)((u8 *)arg0 + 0x18) - 5000.0f, &hit) != 0 && hit.type != 3) {
+                pos.x = probe.x;
+                pos.y = hit.height;
+                pos.z = probe.z;
+                func_151D9B8C(0, func_150ADA68() * 20.0f + 10.0f, func_150ADA20() % 101U + 0x64, hit.geometry, (struct17 *)&pos,
+                              func_150ADA20() % 201U + 0x190, 1, 1, 0, arg2, arg3);
+            }
+            count -= 1.0f;
+        }
+    }
+}
 
 typedef struct {
     s32 unk0;
@@ -976,9 +1362,220 @@ void func_15136C3C(Blood36C3CActor *arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15136F50.s")
+extern void func_15143874(s16, f32, f32 *, f32 *);
+extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, f32 *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
+extern s32 func_15145C90(s32);
+extern void func_151DC034(struct17 *, f32, s32, s16, u8, u8, s32);
+s32 func_15137C64(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3,
+                  struct17 *arg4, struct17 *arg5, struct17 *arg6, struct17 *arg7);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15137610.s")
+void func_15136F50(void *arg0, void *arg1, void *arg2, u8 arg3, u8 arg4, s32 arg5) {
+    struct17 v0;
+    struct17 v1;
+    struct17 v2;
+    struct17 v3;
+    struct17 v4;
+    u8 pad0;
+    u8 doSparks;
+    u8 doDecals;
+    s32 n;
+    f32 sin1;
+    f32 cos1;
+    V15135DD0 vel1;
+    f32 fa;
+    f32 fb;
+    f32 sin2;
+    f32 cos2;
+    V15135DD0 vel2;
+    s32 ret;
+    u32 r;
+    s16 cnt;
+    s32 j;
+    f32 sin3;
+    f32 cos3;
+    s32 pad1;
+    s32 pad2;
+    f32 normal[3];
+    struct17 hit;
+    f32 dist;
+    s32 surface;
+    s32 pad3;
+
+    doSparks = 1;
+    doDecals = 1;
+    ret = func_15137C64(&v0, &v1, &v2, &v3, &v4, arg0, arg1, arg2);
+    if (ret != 0) {
+        if (ret == 2) {
+            doSparks = 0;
+            doDecals = 0;
+        }
+        fa = func_150ADA68();
+        r = func_150ADA20();
+        func_151DC034(&v0, fa * 192.0f + 192.0f, (r % 101U + 0x9B) & 0xFF, (func_150ADA20() & 7) + 0xF, arg3, arg4, arg5);
+        {
+        s32 pad9;
+        n = (func_150ADA20() & 3) + 4;
+        for (; n > 0; n--) {
+            fa = func_150ADA68() * 0.09290000051f + 0.06430000067f;
+            r = func_150ADA20();
+            func_15143874(r & 0xFF, func_150ADA68() * 50.0f, &cos1, &sin1);
+            vel1.x = (v2.unk0 * 100.0f + v3.unk0 * cos1 + v4.unk0 * sin1) * fa;
+            vel1.y = (v2.unk4 * 100.0f + v3.unk4 * cos1 + v4.unk4 * sin1) * fa;
+            vel1.z = (v2.unk8 * 100.0f + v3.unk8 * cos1 + v4.unk8 * sin1) * fa;
+            fb = func_150ADA68();
+            fa = func_150ADA68();
+            r = func_150ADA20();
+            func_151DB5D0(arg3, &v1, &vel1, fb * 80.0f + 120.0f, 1.033617973f, 0.959544003f, fa * 0,
+                          r % 31U + 0x1E, func_150ADA20() % 156U + 0x64, 0x2E, 5, 0, arg4, arg5);
+        }
+        }
+        if (doSparks) {
+            cnt = (func_150ADA20() & 3) + 4;
+            if (cnt != 0) {
+                do {
+                    r = func_150ADA20();
+                    func_15143874(r & 0xFF, func_150ADA68() * 2 + 6.0f, &cos2, &sin2);
+                    vel2.x = v3.unk0 * cos2 + v4.unk0 * sin2;
+                    vel2.y = v3.unk4 * cos2 + v4.unk4 * sin2;
+                    vel2.z = v3.unk8 * cos2 + v4.unk8 * sin2;
+                    r = func_150ADA20();
+                    fa = func_150ADA68();
+                    func_151DA6F8(&v0, &vel2, 0.0f, r % 6U + 8, 0xFF, fa * 1.300000072f + 1.899999976f,
+                                  func_150ADA20() % 3U + 4, 0, 1.0f, 1.0f, 1, arg3, 0, 0x10, 0xF, 0, arg4, arg5);
+                    cnt--;
+                } while (cnt != 0);
+            }
+        }
+        if (doDecals && D_800BE616) {
+            n = (func_150ADA20() & 3) + 3;
+            if (n != 0) {
+                do {
+                    r = func_150ADA20();
+                    func_15143874(r & 0xFF, func_150ADA68() * 140.0f, &cos3, &sin3);
+                    if (func_150AC9C0(v1.unk0, v1.unk4, v1.unk8,
+                                      v2.unk0 * 100.0f + v3.unk0 * cos3 + v4.unk0 * sin3,
+                                      v2.unk4 * 100.0f + v3.unk4 * cos3 + v4.unk4 * sin3,
+                                      v2.unk8 * 100.0f + v3.unk8 * cos3 + v4.unk8 * sin3,
+                                      0, normal, &hit.unk0, &hit.unk4, &hit.unk8, &dist, &surface, 0, 0.0f) != 0 &&
+                        func_15145C90(surface) != 0 && dist < 1999.0f) {
+                        fa = func_150ADA68();
+                        r = func_150ADA20();
+                        func_151D9B8C(arg3, fa * 16.0f + 25.0f, r % 156U + 0x64, normal, &hit,
+                                      func_150ADA20() % 101U + 0x64, 1, 1, 1, arg4, arg5);
+                    }
+                    n--;
+                } while (n != 0);
+            }
+        }
+    }
+}
+
+
+typedef struct BloodImpactActor {
+    u8 pad0[4];
+    u8 kind;
+    u8 pad5[0x6F];
+    u8 flags74;
+    u8 pad75[0x8F];
+    u8 state104;
+    u8 pad105[0x20];
+    u8 state125;
+    u8 pad126[0xA4];
+    u8 count;
+    u8 pad1CB[9];
+    void *transforms;
+} BloodImpactActor;
+
+void func_15136F50(void *, void *, void *, u8, u8, s32);
+void func_151C329C(void *, u8, s32);
+void func_151C577C(void *, void *, void *, u8, u8, u8, u8, s32);
+void func_151036B4(void *, u8, s32);
+
+void func_15137610(BloodImpactActor *arg0, void *arg1, void *arg2,
+                   void *arg3, u8 arg4, s32 arg5) {
+    s32 mode;
+
+    if (arg0 != 0) {
+        if (arg0->transforms == 0 || (arg0->flags74 & 0xF) == 0xF ||
+            (s32)arg0->count <= 0) {
+            return;
+        }
+        mode = arg0->kind;
+        switch (mode) {
+            case 5:
+            case 0xAD:
+            case 0xAE:
+            case 0xAF:
+                mode = 3;
+                break;
+            case 0x5B:
+            case 0x70:
+            case 0xA6:
+            case 0xB2:
+            case 0xB4:
+                func_151036B4(arg1, arg4, arg5);
+                mode = 2;
+                break;
+            case 0x28:
+            case 0x77:
+            case 0x8A:
+            case 0x8C:
+                if ((func_150ADA20() & 1) == 0) {
+                    mode = 2;
+                    break;
+                }
+                return;
+            case 0x42:
+                if ((func_150ADA20() & 3) == 0) {
+                    mode = 2;
+                    break;
+                }
+                return;
+            case 0x5A:
+            case 0x5F:
+            case 0x74:
+            case 0x75:
+            case 0x7A:
+            case 0x8D:
+            case 0xB1:
+                mode = arg0->state125;
+                if (mode == 0xFF) {
+                    if ((func_150ADA20() & 0x1F) == 0) {
+                        mode = 1;
+                        break;
+                    }
+                } else if (mode == 0 && arg0->state104 == 0) {
+                    mode = 1;
+                    break;
+                }
+                return;
+            default:
+                if (arg0->state125 == 0 && arg0->state104 == 0) {
+                    mode = 0;
+                } else {
+                    return;
+                }
+                break;
+        }
+    } else {
+        mode = 0;
+    }
+    switch (mode) {
+        case 1:
+            func_151C577C(arg1, arg2, arg3, 1, 1, 1, arg4, arg5);
+            return;
+        case 2:
+            func_151C329C(arg1, arg4, arg5);
+            return;
+        case 3:
+            func_15136F50(arg1, arg2, arg3, 1, arg4, arg5);
+            return;
+        default:
+        case 0:
+            func_15136F50(arg1, arg2, arg3, 0, arg4, arg5);
+            return;
+    }
+}
 
 typedef struct Blood3783CHit {
     f32 height;
@@ -1167,7 +1764,7 @@ void func_15137F30(Vec15137 *a0, Vec15137 *a1, Vec15137 *a2, Vec15137 *a3,
 extern u8 D_800A3FD8[];
 void func_15143134(void *, s32, s32);
 
-s32 func_151380B4(s32 *arg0, s32 arg1, s32 arg2) {
+s32 func_151380B4(s32 *arg0, s32 arg1, f32 *arg2) {
     s32 temp_v0 = *(s32 *)((u8 *)arg0 + 0x1D4);
     if (temp_v0 == 0) {
         return 0;
@@ -1175,7 +1772,7 @@ s32 func_151380B4(s32 *arg0, s32 arg1, s32 arg2) {
     if ((*(u8 *)((u8 *)arg0 + 0x74) & 0xF) == 0xF) {
         return 0;
     }
-    func_15143134(&D_800A3FD8[arg1 << 4], arg2, temp_v0 + 0x300);
+    func_15143134(&D_800A3FD8[arg1 << 4], (s32)arg2, temp_v0 + 0x300);
     return 1;
 }
 
@@ -1284,7 +1881,7 @@ typedef struct {
     s32 unk48;
 } LocalDef151382E0;
 
-void func_151382E0(Vec151382E0 *arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4) {
+void func_151382E0(Vec151382E0 *arg0, s32 arg1, void *arg2, u8 arg3, s32 arg4) {
     LocalDef151382E0 tmp;
     s32 temp_v0;
 
@@ -1318,7 +1915,7 @@ void func_151382E0(Vec151382E0 *arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4) {
         } else {
             tmp.unk3C = 0;
         }
-        func_15153F18(&tmp, &tmp.unk08, arg2, arg3, arg4);
+        func_15153F18(&tmp, &tmp.unk08, (s32)arg2, arg3, arg4);
     }
 }
 
@@ -1570,9 +2167,282 @@ void func_15138BC0(struct102 *arg0, u8 arg1, s32 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15138C80.s")
+typedef struct {
+    u8 pad_0[0x3B];
+    u8 field_3B;
+    u8 pad_3C[0x38];
+    u8 field_74;
+    u8 pad_75[0xD7];
+    f32 field_14C;
+    f32 field_150;
+    u8 pad_154[0x80];
+    u8 *field_1D4;
+} Blood1380B4State;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15138E98.s")
+typedef struct {
+    f32 height;
+    u8 geometry[0x20];
+} BloodHitRecord;
+
+void func_15138E98(Blood1380B4State *, f32 *, u8, void *, u8, s32);
+struct Obj15139768;
+struct ObjA6E0;
+void func_15139768(struct Obj15139768 *, f32 *, f32, void *, u8, s32);
+void func_15139D74(Blood1380B4State *, f32 *, void *, u8, s32);
+void func_1513A6E0(struct ObjA6E0 *, f32 *, void *, u8, s32);
+void func_1513ABB8(Blood1380B4State *, f32 *, u8, void *, u8, s32);
+void func_1513B0F8(Blood1380B4State *, f32 *, void *, u8, s32);
+void func_1513A594(void *, s32, s32, u8, s32);
+void func_151036B4(void *, u8, s32);
+
+void func_15138C80(Blood1380B4State *arg0, u8 arg1, s32 arg2) {
+    s32 kind;
+    Vec3f_36C3C position;
+    u8 valid;
+    BloodHitRecord hit;
+
+    kind = func_15134070(arg0);
+    if (kind != 0x63) {
+        valid = func_151380B4(arg0, kind, &position.x);
+        func_15138120(arg0, kind, 1);
+        if (valid != 0) {
+            func_1504715C(&hit, arg0);
+            func_151382E0(&position.x, kind, &hit, arg1, arg2);
+            switch (kind) {
+            case 16:
+                func_1513B0F8(arg0, &position.x, &hit, arg1, arg2);
+                return;
+            case 17:
+                func_151036B4(&position.x, arg1, arg2);
+                return;
+            case 0:
+            case 7:
+                func_1513A6E0(arg0, &position.x, &hit, arg1, arg2);
+                return;
+            case 3:
+                func_15138E98(arg0, &position.x, 1, &hit, arg1, arg2);
+                return;
+            case 5:
+            case 6:
+                func_15138E98(arg0, &position.x, 0, &hit, arg1, arg2);
+                return;
+            case 15:
+                func_15139768(arg0, &position.x, 0.6f, &hit, arg1, arg2);
+                return;
+            case 2:
+                func_15139768(arg0, &position.x, 1.0f, &hit, arg1, arg2);
+                return;
+            case 4:
+                func_1513A594(arg0, (s32)&position.x, (s32)&hit, arg1, arg2);
+                return;
+            case 8:
+            case 9:
+                func_1513ABB8(arg0, &position.x, kind == 9, &hit, arg1, arg2);
+                return;
+            case 10:
+            case 11:
+            case 14:
+            case 18:
+            case 19:
+                return;
+            case 1:
+            case 12:
+            case 13:
+            default:
+                func_15139D74(arg0, &position.x, &hit, arg1, arg2);
+                break;
+            }
+        }
+    }
+}
+
+typedef struct BloodParticlePacket {
+    f32 field0, field4, field8, fieldC;
+    Vec3f_36C3C angles, scale, position, velocity, field40;
+    f32 field4C;
+    s32 field50;
+    s16 field54, field56;
+    u8 field58, pad59[3];
+    s32 field5C;
+    u8 field60, field61, field62, field63;
+    u8 field64, field65, field66, field67;
+    u8 field68, pad69, field6A, pad6B;
+    void *owner;
+    u8 field70, pad71;
+    s16 field72, field74;
+    u8 pad76[2];
+    s32 field78;
+} BloodParticlePacket;
+
+extern u8 D_800A4160[];
+extern s32 D_800A4168[];
+extern s32 D_800A4178[];
+extern Vec3f_36C3C D_800A4188[];
+extern Vec3f_36C3C D_800A41B8;
+void func_1513A5E0(s32 arg0, s32 arg1, s32 arg2);
+
+void func_15138E98(Blood1380B4State *arg0, f32 *arg1, u8 arg2, void *arg3, u8 arg4, s32 arg5) {
+    u8 index;
+    Vec3f_36C3C position;
+
+    index = func_150ADA20() % 6U;
+    {
+        BloodParticlePacket burst;
+        u8 tag[1];
+        s32 result;
+        u8 i;
+        u8 mask;
+
+        tag[0] = 0xC;
+        burst.field0 = 1.0f;
+        burst.field4 = 1.0f;
+        burst.field8 = burst.fieldC = (arg0->field_14C + arg0->field_150) * 0.5f;
+        burst.angles.x = 0.0f;
+        burst.angles.y = 0.0f;
+        burst.angles.z = 0.0f;
+        burst.scale.x = 1.0f;
+        burst.scale.y = 1.0f;
+        burst.scale.z = 1.0f;
+        burst.position.x = 0.0f;
+        burst.position.y = 0.0f;
+        burst.position.z = 0.0f;
+        burst.velocity.x = 0.0f;
+        burst.velocity.y = 0.0f;
+        burst.velocity.z = 0.0f;
+        burst.field40.x = 0.0f;
+        burst.field40.y = 0.0f;
+        burst.field40.z = 0.0f;
+        burst.field4C = 0.0f;
+        burst.field50 = 0x101900;
+        burst.field54 = 100;
+        burst.field58 = 5;
+        burst.field5C = 0;
+        burst.field60 = 0xFF;
+        burst.field61 = 0;
+        burst.field62 = 0;
+        burst.field63 = 0;
+        burst.field64 = 0;
+        burst.field65 = 0;
+        burst.field66 = 0;
+        burst.field67 = 0;
+        burst.field68 = 5;
+        burst.field6A = 1;
+        burst.owner = arg0;
+        burst.field70 = arg0->field_3B;
+        burst.field72 = 0xC;
+        burst.field74 = 0x15;
+        for (i = 0, mask = 1; i < 4; i++, mask <<= 1) {
+            if (!(D_800A4160[index] & mask)) {
+                continue;
+            }
+            burst.field56 = D_800A4168[i];
+            result = func_15132A4C(&burst, 3, 0xFF, 1, arg4, arg5);
+            if (result != 0) {
+                memcpy((u8 *)result + 0x170, tag, 1);
+            }
+        }
+    }
+    if (arg0->field_1D4 == NULL) {
+        return;
+    }
+    if ((arg0->field_74 & 0xF) == 0xF) {
+        return;
+    }
+    func_1513A5E0((s32)arg1, arg4 & 0xFF, arg5);
+    {
+        f32 first[3];
+        f32 second[3];
+        BloodParticlePacket packet;
+        u8 j;
+        u8 bit;
+        BloodParticlePacket spray;
+        u32 yaw;
+        u32 pitch;
+
+        func_1503F404((s32)(arg0->field_1D4 + 0x300), &first[0], &first[1], &first[2],
+                      &position.x, &position.y, &position.z,
+                      &second[0], &second[1], &second[2]);
+        packet.field0 = 1.0f;
+        packet.field4 = 0.64900005f;
+        packet.field8 = packet.fieldC = (arg0->field_14C + arg0->field_150) * 0.5f;
+        packet.angles = position;
+        packet.scale.x = 1.0f;
+        packet.scale.y = 0.0f;
+        packet.scale.z = 1.0f;
+        packet.field40.y = 0.0f;
+        packet.field58 = 0;
+        packet.field5C = 0;
+        packet.field60 = 0xFF;
+        packet.field62 = 0;
+        packet.field64 = 0;
+        packet.field65 = 0;
+        packet.field66 = 0;
+        packet.field67 = 0;
+        packet.field6A = 1;
+        packet.owner = arg0;
+        packet.field70 = arg0->field_3B;
+        packet.field72 = 0xC;
+        packet.field74 = 0x15;
+        packet.field50 = 0x1039E9;
+        packet.field61 = 0xD;
+        packet.field68 = 2;
+        packet.field63 = 9;
+        for (j = 0, bit = 1; j < 4; j++, bit <<= 1) {
+            if (!(D_800A4160[index] & bit)) {
+                packet.field56 = D_800A4178[j];
+                func_15143134(&D_800A4188[j].x, (s32)&packet.position.x, (s32)(arg0->field_1D4 + 0x300));
+                yaw = func_150ADA20();
+                pitch = func_150ADA20();
+                func_15143794((u8)yaw, (s16)(pitch % 35U - 0x54), func_150ADA68() * 6.12f + 3.0f,
+                              &packet.velocity.x);
+                packet.field40.x = func_150ADA68() * 30.746002f + -15.373001f;
+                packet.field40.z = func_150ADA68() * 30.746002f + -15.373001f;
+                packet.field4C = func_150ADA68() * 0.208f + -0.708f;
+                packet.field54 = func_150ADA20() % 101U + 60;
+                func_1513264C(&packet, 3, 0xFF, (s32)arg3, 0, arg4, arg5);
+            }
+        }
+        if (arg2 == 0) {
+            return;
+        }
+        spray.field0 = 1.0f;
+        spray.field4 = 0.64900005f;
+        spray.field8 = spray.fieldC = (arg0->field_14C + arg0->field_150) * 0.5f;
+        spray.angles = position;
+        spray.scale.x = 1.0f;
+        spray.scale.y = 1.0f;
+        spray.scale.z = 1.0f;
+        spray.field40.y = 0.0f;
+        spray.field58 = 0;
+        spray.field5C = 0;
+        spray.field60 = 0xFF;
+        spray.field62 = 0;
+        spray.field64 = 0;
+        spray.field65 = 0;
+        spray.field66 = 0;
+        spray.field67 = 0;
+        spray.field6A = 1;
+        spray.owner = arg0;
+        spray.field70 = arg0->field_3B;
+        spray.field72 = 0xC;
+        spray.field74 = 0x15;
+        spray.field50 = 0x1039E9;
+        spray.field61 = 0xD;
+        spray.field68 = 2;
+        spray.field63 = 0xB;
+        spray.field56 = 0x48;
+        func_15143134(&D_800A41B8.x, (s32)&spray.position.x, (s32)(arg0->field_1D4 + 0x300));
+        yaw = func_150ADA20();
+        pitch = func_150ADA20();
+        func_15143794((u8)yaw, (s16)(pitch % 16U - 0x3C), func_150ADA68() * 7.1499996f + 10.889999f,
+                      &spray.velocity.x);
+        spray.field40.x = func_150ADA68() * 48.158f + -24.079f;
+        spray.field40.z = func_150ADA68() * 48.158f + -24.079f;
+        spray.field4C = func_150ADA68() * 0.323f + -1.4210001f;
+        spray.field54 = func_150ADA20() % 61U + 100;
+        func_1513264C(&spray, 3, 0xFF, (s32)arg3, 0, arg4, arg5);
+    }
+}
 
 typedef struct {
     u8 pad0;
@@ -1643,7 +2513,7 @@ s32 func_15139578(Struct15139578 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, 
     return 1;
 }
 
-typedef struct {
+typedef struct Obj15139768 {
     u8 pad0[0x3B];
     u8 unk3B;
     u8 pad3C[0x74 - 0x3C];
@@ -1661,7 +2531,7 @@ extern s32 D_800A41D8[];
 extern struct17 D_800A41E8[];
 extern void func_151C5F44(s32, f32 *, f32, f32, s32, s32, f32, s32, s32, u8, s32);
 
-void func_15139768(Obj15139768 *arg0, s32 arg1, f32 arg2, s32 arg3, u8 arg4, s32 arg5) {
+void func_15139768(Obj15139768 *arg0, f32 *arg1, f32 arg2, void *arg3, u8 arg4, s32 arg5) {
     u8 idx;
     u8 i;
     u8 mask;
@@ -1730,9 +2600,9 @@ void func_15139768(Obj15139768 *arg0, s32 arg1, f32 arg2, s32 arg3, u8 arg4, s32
         Spawn138424 spawn2;
         for (count = (func_150ADA20() & 3) + 5; count > 0; count--) {
             func_15143794((s16)(func_150ADA20() & 0xFF), (s16)(func_150ADA20() % 71U - 60), func_150ADA68() * 6.0f + 6.0f, &dir.unk0);
-            func_151C5F44(arg1, &dir.unk0, func_150ADA68() * 0.1170000061f + -0.1970000118f, 0.9508649707f,
+            func_151C5F44((s32)arg1, &dir.unk0, func_150ADA68() * 0.1170000061f + -0.1970000118f, 0.9508649707f,
                           func_150ADA20() % 66U + 0xBE, func_150ADA20() % 45U + 0x2C, func_150ADA68() * 20.0f + 50.0f,
-                          0, arg3, arg4, arg5);
+                          0, (s32)arg3, arg4, arg5);
         }
         {
             s32 q;
@@ -1772,13 +2642,139 @@ void func_15139768(Obj15139768 *arg0, s32 arg1, f32 arg2, s32 arg3, u8 arg4, s32
                 spawn2.unk48 = func_150ADA68() * 30.7460022f + -15.3730011f;
                 spawn2.unk4C = func_150ADA68() * 0.2080000043f + -0.7080000043f;
                 spawn2.unk54 = func_150ADA20() % 101U + 0x3C;
-                func_1513264C(&spawn2, 3, 0xFF, arg3, 0, arg4, arg5);
+                func_1513264C(&spawn2, 3, 0xFF, (s32)arg3, 0, arg4, arg5);
             }
         }
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15139D74.s")
+extern u8 D_800A4218[];
+extern s32 D_800A421C[];
+extern s32 D_800A4228[];
+extern Vec3f_36C3C D_800A4234[];
+
+void func_15139D74(Blood1380B4State *arg0, f32 *arg1, void *arg2, u8 arg3, s32 arg4) {
+    u8 index;
+    Vec3f_36C3C position;
+
+    index = func_150ADA20() % 3U;
+    {
+        BloodParticlePacket burst;
+        u8 tag[1];
+        s32 result;
+        u8 i;
+        u8 mask;
+
+        tag[0] = 0xC;
+        burst.field0 = 1.0f;
+        burst.field4 = 1.0f;
+        burst.field8 = burst.fieldC = (arg0->field_14C + arg0->field_150) * 0.5f;
+        burst.angles.x = 0.0f;
+        burst.angles.y = 0.0f;
+        burst.angles.z = 0.0f;
+        burst.scale.x = 1.0f;
+        burst.scale.y = 1.0f;
+        burst.scale.z = 1.0f;
+        burst.position.x = 0.0f;
+        burst.position.y = 0.0f;
+        burst.position.z = 0.0f;
+        burst.velocity.x = 0.0f;
+        burst.velocity.y = 0.0f;
+        burst.velocity.z = 0.0f;
+        burst.field40.x = 0.0f;
+        burst.field40.y = 0.0f;
+        burst.field40.z = 0.0f;
+        burst.field4C = 0.0f;
+        burst.field50 = 0x101900;
+        burst.field54 = 0x190;
+        burst.field58 = 5;
+        burst.field5C = 0;
+        burst.field60 = 0xFF;
+        burst.field61 = 0;
+        burst.field62 = 0;
+        burst.field63 = 0;
+        burst.field64 = 0;
+        burst.field65 = 0;
+        burst.field66 = 0;
+        burst.field67 = 0;
+        burst.field68 = 5;
+        burst.field6A = 1;
+        burst.owner = arg0;
+        burst.field70 = arg0->field_3B;
+        burst.field72 = 0xC;
+        burst.field74 = 0x15;
+        for (i = 0, mask = 1; i < 3; i++, mask <<= 1) {
+            if (!(D_800A4218[index] & mask)) {
+                continue;
+            }
+            burst.field56 = D_800A421C[i];
+            result = func_15132A4C(&burst, 3, 0xFF, 1, arg3, arg4);
+            if (result != 0) {
+                memcpy((u8 *)result + 0x170, tag, 1);
+            }
+        }
+    }
+    if (arg0->field_1D4 == NULL) {
+        return;
+    }
+    if ((arg0->field_74 & 0xF) == 0xF) {
+        return;
+    }
+    func_1513A5E0((s32)arg1, arg3 & 0xFF, arg4);
+    {
+        f32 first[3];
+        f32 second[3];
+        BloodParticlePacket packet;
+        u32 yaw;
+        u32 pitch;
+        u8 j;
+        u8 bit;
+
+        func_1503F404((s32)(arg0->field_1D4 + 0x300), &first[0], &first[1], &first[2],
+                      &position.x, &position.y, &position.z,
+                      &second[0], &second[1], &second[2]);
+        packet.field0 = 1.0f;
+        packet.field4 = 0.64900005f;
+        packet.field8 = packet.fieldC = (arg0->field_14C + arg0->field_150) * 0.5f;
+        packet.angles = position;
+        packet.scale.x = 1.0f;
+        packet.scale.y = 0.0f;
+        packet.scale.z = 1.0f;
+        packet.field40.y = 0.0f;
+        packet.field58 = 0;
+        packet.field5C = 0;
+        packet.field60 = 0xFF;
+        packet.field62 = 0;
+        packet.field64 = 0;
+        packet.field65 = 0;
+        packet.field66 = 0;
+        packet.field67 = 0;
+        packet.field6A = 1;
+        packet.owner = arg0;
+        packet.field70 = arg0->field_3B;
+        packet.field72 = 0xC;
+        packet.field74 = 0x15;
+        packet.field50 = 0x1039E9;
+        packet.field61 = 0xD;
+        packet.field68 = 2;
+        packet.field63 = 9;
+        for (j = 0, bit = 1; j < 3; j++, bit <<= 1) {
+            if (!(D_800A4218[index] & bit)) {
+                packet.field56 = D_800A4228[j];
+                func_15143134(&D_800A4234[j].x, (s32)&packet.position.x, (s32)(arg0->field_1D4 + 0x300));
+                yaw = func_150ADA20();
+                pitch = func_150ADA20();
+                func_15143794((u8)yaw, (s16)(pitch % 35U - 0x54), func_150ADA68() * 6.12f + 3.0f,
+                              &packet.velocity.x);
+                packet.field40.x = func_150ADA68() * 30.746002f + -15.373001f;
+                packet.field40.z = func_150ADA68() * 30.746002f + -15.373001f;
+                packet.field4C = func_150ADA68() * 0.208f + -0.708f;
+                packet.field54 = func_150ADA20() % 101U + 60;
+                func_1513264C(&packet, 3, 0xFF, (s32)arg2, 0, arg3, arg4);
+            }
+        }
+    }
+}
 
 typedef struct {
     /* 0x00 */ s32 unk0;
@@ -2013,7 +3009,7 @@ typedef struct {
     s32 unk78;
 } SpawnA6E0;
 
-typedef struct {
+typedef struct ObjA6E0 {
     u8 pad0[0x3B];
     u8 unk3B;
     u8 pad3C[0x74 - 0x3C];
@@ -2035,7 +3031,7 @@ extern s32 func_1513264C(void *, s32, s32, s32, s32, u8, s32);
 extern void func_15143794(s16, s16, f32, f32 *);
 f32 func_150ADA68(void);
 
-void func_1513A6E0(ObjA6E0 *arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4) {
+void func_1513A6E0(ObjA6E0 *arg0, f32 *arg1, void *arg2, u8 arg3, s32 arg4) {
     u8 idx;
     u8 i;
     u8 mask;
@@ -2102,7 +3098,7 @@ void func_1513A6E0(ObjA6E0 *arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4) {
         u8 mask2;
         u32 r1;
         u32 r2;
-        func_1513A5E0(arg1, arg3 & 0xFF, arg4);
+        func_1513A5E0((s32)arg1, arg3 & 0xFF, arg4);
         {
         s32 q;
         func_1503F404(arg0->unk1D4 + 0x300, &a.unk0, &a.unk4, &a.unk8, &v.unk0, &v.unk4, &v.unk8, &b.unk0, &b.unk4, &b.unk8);
@@ -2143,13 +3139,139 @@ void func_1513A6E0(ObjA6E0 *arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4) {
                 spawn2.unk48 = func_150ADA68() * 30.7460022f + -15.3730011f;
                 spawn2.unk4C = func_150ADA68() * 0.2080000043f + -0.7080000043f;
                 spawn2.unk54 = func_150ADA20() % 101U + 60;
-                func_1513264C(&spawn2, 3, 0xFF, arg2, 0, arg3, arg4);
+                func_1513264C(&spawn2, 3, 0xFF, (s32)arg2, 0, arg3, arg4);
             }
         }
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_1513ABB8.s")
+extern u8 D_800A42D0[];
+extern s32 D_800A42D4[][2];
+extern s32 D_800A42E4[][2];
+extern Vec3f_36C3C D_800A42F4[][2];
+
+void func_1513ABB8(Blood1380B4State *arg0, f32 *arg1, u8 arg2, void *arg3, u8 arg4, s32 arg5) {
+    u8 index;
+    Vec3f_36C3C position;
+
+    index = func_150ADA20() % 3U;
+    {
+        BloodParticlePacket burst;
+        u8 tag[1];
+        s32 result;
+        u8 i;
+        u8 mask;
+
+        tag[0] = 0xC;
+        burst.field0 = 1.0f;
+        burst.field4 = 1.0f;
+        burst.field8 = burst.fieldC = (arg0->field_14C + arg0->field_150) * 0.5f;
+        burst.angles.x = 0.0f;
+        burst.angles.y = 0.0f;
+        burst.angles.z = 0.0f;
+        burst.scale.x = 1.0f;
+        burst.scale.y = 1.0f;
+        burst.scale.z = 1.0f;
+        burst.position.x = 0.0f;
+        burst.position.y = 0.0f;
+        burst.position.z = 0.0f;
+        burst.velocity.x = 0.0f;
+        burst.velocity.y = 0.0f;
+        burst.velocity.z = 0.0f;
+        burst.field40.x = 0.0f;
+        burst.field40.y = 0.0f;
+        burst.field40.z = 0.0f;
+        burst.field4C = 0.0f;
+        burst.field50 = 0x101900;
+        burst.field54 = 0x64;
+        burst.field58 = 5;
+        burst.field5C = 0;
+        burst.field60 = 0xFF;
+        burst.field61 = 0;
+        burst.field62 = 0;
+        burst.field63 = 0;
+        burst.field64 = 0;
+        burst.field65 = 0;
+        burst.field66 = 0;
+        burst.field67 = 0;
+        burst.field68 = 5;
+        burst.field6A = 1;
+        burst.owner = arg0;
+        burst.field70 = arg0->field_3B;
+        burst.field72 = 0xC;
+        burst.field74 = 0x15;
+        for (i = 0, mask = 1; i < 2; i++, mask <<= 1) {
+            if (!(D_800A42D0[index] & mask)) {
+                continue;
+            }
+            burst.field56 = D_800A42D4[arg2][i];
+            result = func_15132A4C(&burst, 3, 0xFF, 1, arg4, arg5);
+            if (result != 0) {
+                memcpy((u8 *)result + 0x170, tag, 1);
+            }
+        }
+    }
+    if (arg0->field_1D4 == NULL) {
+        return;
+    }
+    if ((arg0->field_74 & 0xF) == 0xF) {
+        return;
+    }
+    func_1513A5E0((s32)arg1, arg4 & 0xFF, arg5);
+    {
+        f32 first[3];
+        f32 second[3];
+        BloodParticlePacket packet;
+        u32 yaw;
+        u32 pitch;
+        u8 j;
+        u8 bit;
+
+        func_1503F404((s32)(arg0->field_1D4 + 0x300), &first[0], &first[1], &first[2],
+                      &position.x, &position.y, &position.z,
+                      &second[0], &second[1], &second[2]);
+        packet.field0 = 1.0f;
+        packet.field4 = 0.64900005f;
+        packet.field8 = packet.fieldC = (arg0->field_14C + arg0->field_150) * 0.5f;
+        packet.angles = position;
+        packet.scale.x = 1.0f;
+        packet.scale.y = 0.0f;
+        packet.scale.z = 1.0f;
+        packet.field40.y = 0.0f;
+        packet.field58 = 0;
+        packet.field5C = 0;
+        packet.field60 = 0xFF;
+        packet.field62 = 0;
+        packet.field64 = 0;
+        packet.field65 = 0;
+        packet.field66 = 0;
+        packet.field67 = 0;
+        packet.field6A = 1;
+        packet.owner = arg0;
+        packet.field70 = arg0->field_3B;
+        packet.field72 = 0xC;
+        packet.field74 = 0x15;
+        packet.field50 = 0x1039E9;
+        packet.field61 = 0xD;
+        packet.field68 = 2;
+        packet.field63 = 9;
+        for (j = 0, bit = 1; j < 2; j++, bit <<= 1) {
+            if (!(D_800A42D0[index] & bit)) {
+                packet.field56 = D_800A42E4[arg2][j];
+                func_15143134(&D_800A42F4[arg2][j].x, (s32)&packet.position.x, (s32)(arg0->field_1D4 + 0x300));
+                yaw = func_150ADA20();
+                pitch = func_150ADA20();
+                func_15143794((u8)yaw, (s16)(pitch % 35U - 0x54), func_150ADA68() * 6.12f + 3.0f,
+                              &packet.velocity.x);
+                packet.field40.x = func_150ADA68() * 30.746002f + -15.373001f;
+                packet.field40.z = func_150ADA68() * 30.746002f + -15.373001f;
+                packet.field4C = func_150ADA68() * 0.208f + -0.708f;
+                packet.field54 = func_150ADA20() % 101U + 60;
+                func_1513264C(&packet, 3, 0xFF, (s32)arg3, 0, arg4, arg5);
+            }
+        }
+    }
+}
 
 void func_1513B0B8(void *arg0, s32 arg1, u8 arg2) {
     s32 *temp_v0 = (s32 *)((s32)arg0 + 0x170);
@@ -2161,4 +3283,129 @@ void func_1513B0B8(void *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_1513B0F8.s")
+void func_151036B4(void *, u8, s32);
+extern u8 D_800A4324[];
+extern s32 D_800A4328[];
+extern s32 D_800A4330[];
+extern f32 D_800A4338[][3];
+void func_1513B0F8(Blood1380B4State *arg0, f32 *arg1, void *arg2, u8 arg3, s32 arg4) {
+    u8 index;
+    Vec3f_36C3C rotation;
+    BloodParticlePacket spawn;
+    u8 i;
+    u8 mask;
+    u8 bit;
+    u8 tag;
+    u32 yaw;
+    u32 pitch;
+    f32 first[3];
+    f32 second[3];
+    BloodParticlePacket drop;
+
+    func_151036B4(arg1, arg3, arg4);
+    {
+        u32 random = func_150ADA20();
+
+        index = random % 3;
+    }
+    tag = 0xC;
+    spawn.field0 = 1.0f;
+    spawn.field4 = 1.0f;
+    spawn.field8 = spawn.fieldC = (arg0->field_14C + arg0->field_150) * 0.5f;
+    spawn.angles.x = 0.0f;
+    spawn.angles.y = 0.0f;
+    spawn.angles.z = 0.0f;
+    spawn.scale.x = 1.0f;
+    spawn.scale.y = 1.0f;
+    spawn.scale.z = 1.0f;
+    spawn.position.x = 0.0f;
+    spawn.position.y = 0.0f;
+    spawn.position.z = 0.0f;
+    spawn.velocity.x = 0.0f;
+    spawn.velocity.y = 0.0f;
+    spawn.velocity.z = 0.0f;
+    spawn.field40.x = 0.0f;
+    spawn.field40.y = 0.0f;
+    spawn.field40.z = 0.0f;
+    spawn.field4C = 0.0f;
+    spawn.field50 = 0x101900;
+    spawn.field54 = 100;
+    spawn.field58 = 5;
+    spawn.field5C = 0;
+    spawn.field60 = 0xFF;
+    spawn.field61 = 0;
+    spawn.field62 = 0;
+    spawn.field63 = 0;
+    spawn.field64 = 0;
+    spawn.field65 = 0;
+    spawn.field66 = 0;
+    spawn.field67 = 0;
+    spawn.field68 = 5;
+    spawn.field6A = 1;
+    spawn.owner = arg0;
+    spawn.field70 = arg0->field_3B;
+    spawn.field72 = 0xC;
+    spawn.field74 = 0x15;
+    for (i = 0, mask = 1; i < 2; i++, mask <<= 1) {
+        if (D_800A4324[index] & mask) {
+            void *particle;
+
+            spawn.field56 = D_800A4328[i];
+            particle = (void *)func_15132A4C(&spawn, 3, 0xFF, 1, arg3, arg4);
+            if (particle != NULL) {
+                memcpy((u8 *)particle + 0x170, &tag, 1);
+            }
+        }
+    }
+    if (arg0->field_1D4 == NULL) {
+        return;
+    }
+    if ((arg0->field_74 & 0xF) == 0xF) {
+        return;
+    }
+    func_1503F404((s32)(arg0->field_1D4 + 0x300), &first[0], &first[1], &first[2],
+                  &rotation.x, &rotation.y, &rotation.z,
+                  &second[0], &second[1], &second[2]);
+    drop.field0 = 1.0f;
+    drop.field4 = 0.64900005f;
+    drop.field8 = drop.fieldC = (arg0->field_14C + arg0->field_150) * 0.5f;
+    drop.angles = rotation;
+    drop.scale.x = 1.0f;
+    drop.scale.y = 2.0f;
+    drop.scale.z = 1.0f;
+    drop.field40.y = 0.0f;
+    drop.field58 = 0;
+    drop.field5C = 0;
+    drop.field60 = 0xFF;
+    drop.field62 = 0;
+    drop.field64 = 0;
+    drop.field65 = 0;
+    drop.field66 = 0;
+    drop.field67 = 0;
+    drop.field6A = 1;
+    drop.owner = arg0;
+    drop.field70 = arg0->field_3B;
+    drop.field72 = 0xC;
+    drop.field74 = 0x15;
+    drop.field50 = 0x1039E9;
+    drop.field61 = 0xD;
+    drop.field68 = 2;
+    drop.field63 = 9;
+    for (i = 0, bit = 1; i < 2; i++, bit <<= 1) {
+        if (!(D_800A4324[index] & bit)) {
+            u32 random;
+
+            drop.field56 = D_800A4330[i];
+            func_15143134(D_800A4338[i], (s32)&drop.position.x, (s32)(arg0->field_1D4 + 0x300));
+            yaw = func_150ADA20();
+            pitch = func_150ADA20();
+            func_15143794((u8)yaw, (pitch % 35U) - 0x54, (func_150ADA68() * 6.12f) + 3.0f, &drop.velocity.x);
+            drop.field40.x = (func_150ADA68() * 30.746002f) + -15.373001f;
+            drop.field40.z = (func_150ADA68() * 30.746002f) + -15.373001f;
+            drop.field4C = (func_150ADA68() * 0.208f) + -0.708f;
+            random = func_150ADA20();
+            drop.field54 = (random % 101U) + 0x3C;
+            func_1513264C(&drop, 3, 0xFF, (s32)arg2, 0, arg3, arg4);
+        }
+    }
+}

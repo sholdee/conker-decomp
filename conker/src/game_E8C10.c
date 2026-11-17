@@ -396,7 +396,189 @@ s32 func_150BBB5C(u8 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_E8C10/func_150BC488.s")
+s32 func_150BC488(u8 *arg0) {
+    f32 width;
+    s32 count;
+    s32 ok;
+    s32 total;
+    s32 n;
+    GameE8C10Particle particle;
+
+    if (arg0[4] != 0x20) {
+        return 1;
+    }
+    if (arg0 != NULL && *(s32 *)arg0 != 0) {
+        width = *(s16 *)(arg0 + 0xE4);
+        count = (func_150ADA20() & 3) + 6;
+        particle.field56 = 1;
+        particle.field50 = 0x29E9;
+        particle.field58 = 0;
+        particle.field5C = 0;
+        particle.field60 = 0xFF;
+        particle.field61 = 1;
+        particle.field62 = 0;
+        particle.field63 = 2;
+        particle.field64 = 0;
+        particle.field65 = 0;
+        particle.field66 = 0;
+        particle.field67 = 0;
+        particle.field68 = 0;
+        particle.field6A = 0;
+        particle.field6C = 0;
+        particle.field70 = 0;
+        particle.field72 = 0x20;
+        particle.field74 = 7;
+        ok = 1;
+        particle.field1C = 1.0f;
+        particle.field20 = 1.0f;
+        particle.field24 = 1.0f;
+        particle.field4 = 0.4f;
+        particle.field48 = 0.0f;
+        particle.field4C = -1.5f;
+        while (count != 0 && ok != 0) {
+            u8 angle;
+            f32 spreadSine;
+            f32 spreadCosine;
+            f32 distance;
+            f32 spreadX;
+            f32 spreadZ;
+            u8 heading;
+            f32 headingSine;
+            f32 headingCosine;
+            f32 speed;
+            f32 velocityX;
+            f32 velocityZ;
+            f32 velocityY;
+            f32 sizeA;
+            f32 sizeB;
+
+            angle = func_150ADA20();
+            spreadSine = func_151423D8(angle);
+            spreadCosine = func_151423D8(angle - 0x40);
+            distance = func_150ADA68() * width;
+            spreadX = spreadSine * distance;
+            spreadZ = -spreadCosine * distance;
+            heading = func_150ADA20();
+            headingSine = func_151423D8(heading);
+            headingCosine = func_151423D8(heading - 0x40);
+            speed = func_150ADA68() * 4.0f + 4.0f;
+            velocityX = headingCosine * speed;
+            velocityZ = headingSine * speed;
+            velocityY = *(f32 *)(arg0 + 0x20) * 0.05f;
+            sizeA = func_150ADA68() * 0.04f + 0.02f;
+            sizeB = func_150ADA68() * 0.04f + 0.02f;
+            particle.field8 = sizeA;
+            particle.fieldC = sizeB;
+            particle.field0 = (sizeA + sizeB) * 0.5f;
+            particle.field10 = func_150ADA68() * 360.0f;
+            particle.field14 = func_150ADA68() * 360.0f;
+            particle.field18 = func_150ADA68() * 360.0f;
+            particle.field28 = *(f32 *)(arg0 + 0x14) + spreadX;
+            particle.field2C = *(f32 *)(arg0 + 0x18);
+            particle.field30 = *(f32 *)(arg0 + 0x1C) + spreadZ;
+            particle.field34 = velocityX;
+            particle.field38 = velocityY;
+            particle.field3C = velocityZ;
+            particle.field40 = 25.0f - func_150ADA68() * 50.0f;
+            particle.field44 = 25.0f - func_150ADA68() * 50.0f;
+            particle.field54 = (func_150ADA20() & 0x3F) + 0x64;
+            if (func_15132A4C(&particle, 3, 0xFF, 0, 0xFF, 0) == NULL) {
+                ok = 0;
+            }
+            count--;
+        }
+        {
+            n = (func_150ADA20() & 3) + 2;
+            for (; n > 0; n--) {
+                f32 position[3];
+                f32 velocity[3];
+                f32 speed;
+                s16 angle;
+                f32 sine;
+                f32 cosine;
+
+                speed = func_150ADA68() * 7.0f + 7.0f;
+                angle = func_150ADA20() & 0xFF;
+                sine = func_151423D8(angle);
+                cosine = func_151423D8(angle - 0x40);
+                position[0] = *(f32 *)(arg0 + 0x14);
+                position[1] = *(f32 *)(arg0 + 0x18) + func_150ADA68() * 5.0f;
+                position[2] = *(f32 *)(arg0 + 0x1C);
+                velocity[0] = cosine * speed;
+                velocity[1] = 0.0f;
+                velocity[2] = sine * speed;
+                func_151DA6F8(position, velocity, 1.6f, (func_150ADA20() & 7) + 0x19,
+                              (func_150ADA20() & 0x7F) + 0x80,
+                              func_150ADA68() * 0.2f * width + 5.0f, (func_150ADA20() & 1) + 2, 0,
+                              1.0f, 1.0f, 1, 1, 0, 0x10, 0xF, 0, 0xFF, 0);
+            }
+        }
+        total = (func_150ADA20() & 1) + (func_150ADA20() & 1);
+        if (total != 0) {
+            s8 j;
+
+            particle.field56 = 0;
+            particle.field54 = (func_150ADA20() & 0xF) + 0x10;
+            particle.field4 = 0.6f;
+            particle.field10 = *(f32 *)(arg0 + 0xB8);
+            particle.field14 = *(f32 *)(arg0 + 0x40);
+            particle.field18 = *(f32 *)(arg0 + 0xC4);
+            particle.field50 = 0x39E8;
+            particle.field1C = 1.0f;
+            particle.field20 = 1.0f;
+            particle.field24 = 1.0f;
+            particle.field48 = 0.0f;
+            particle.field4C = -1.6f;
+            particle.field28 = *(f32 *)(arg0 + 0x14);
+            particle.field2C = *(f32 *)(arg0 + 0x18);
+            particle.field30 = *(f32 *)(arg0 + 0x1C);
+            particle.field0 = *(f32 *)(arg0 + 0x14C) * 20.0f;
+            particle.field8 = *(f32 *)(arg0 + 0x14C) * 2.0f;
+            particle.field58 = 0;
+            particle.field5C = 0;
+            particle.field60 = 0xFF;
+            particle.field61 = 1;
+            particle.field62 = 0;
+            particle.fieldC = particle.field8;
+            particle.field63 = 0;
+            particle.field64 = 0;
+            particle.field65 = 0;
+            particle.field66 = 0;
+            particle.field67 = 0;
+            particle.field68 = 0;
+            particle.field6A = 0;
+            particle.field6C = 0;
+            particle.field70 = 0;
+            particle.field72 = 0x10;
+            particle.field74 = 0xF;
+            for (j = 0; j < total; j++) {
+                f32 speed;
+                s16 heading;
+                s16 pitch;
+                f32 headingSine;
+                f32 headingCosine;
+                f32 pitchSine;
+                f32 pitchCosine;
+                f32 horizontal;
+
+                speed = func_150ADA68() * 5.0f + 8.0f;
+                heading = func_150ADA20() & 0x7F;
+                pitch = 0x20 - ((u32)func_150ADA20() & 0x3F);
+                headingSine = func_151423D8(heading);
+                headingCosine = func_151423D8(heading - 0x40);
+                pitchSine = func_151423D8(pitch);
+                pitchCosine = func_151423D8(pitch - 0x40);
+                horizontal = speed * pitchSine;
+                particle.field34 = horizontal * headingCosine;
+                particle.field38 = -speed * pitchCosine;
+                particle.field3C = horizontal * headingSine;
+                particle.field40 = 30.0f - func_150ADA68() * 60.0f;
+                particle.field44 = 30.0f - func_150ADA68() * 60.0f;
+                func_15132A4C(&particle, 3, 0xFF, 0, 0xFF, 0);
+            }
+        }
+    }
+}
 
 s32 func_150BCBBC(u8 *arg0) {
     f32 width;
@@ -530,7 +712,217 @@ s32 func_150BCFB8(struct Obj150BCFB8 *arg0, s32 a1, s32 a2, s32 a3, f32 arg5) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_E8C10/func_150BD070.s")
+typedef struct {
+    f32 f0;
+    f32 f4;
+    f32 f8;
+    f32 fC;
+    f32 f10;
+    f32 f14;
+    f32 f18;
+    f32 f1C;
+    f32 f20;
+    f32 f24;
+    struct17 pos;
+    struct17 vel;
+    f32 f40;
+    f32 f44;
+    f32 f48;
+    f32 f4C;
+    s32 f50;
+    s16 f54;
+    s16 f56;
+    u8 f58;
+    u8 pad59[0x3];
+    s32 f5C;
+    u8 f60;
+    u8 f61;
+    u8 f62;
+    u8 f63;
+    u8 f64;
+    u8 f65;
+    u8 f66;
+    u8 f67;
+    u8 f68;
+    s8 f69;
+    u8 f6A;
+    u8 pad6B[0x1];
+    s32 f6C;
+    u8 f70;
+    u8 pad71[0x1];
+    s16 f72;
+    s16 f74;
+    u8 pad76[0x2];
+    s32 f78;
+} Particle_BD070; /* 0x7C */
+
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s16 unk8;
+    s16 unkA;
+    s32 unkC;
+    s32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 unk16;
+    u8 unk17;
+    u8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+    u8 unk1C;
+    u8 unk1D;
+    s16 unk1E;
+    s16 unk20;
+    s16 unk22;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    struct17 pos;
+    struct17 unk3C;
+    struct17 vel;
+    f32 unk54;
+    u32 unk58;
+    s32 unk5C;
+    u8 unk60;
+    u8 unk61;
+    s8 unk62;
+    s8 unk63;
+    s8 unk64;
+    u8 unk65;
+    u8 unk66;
+    u8 pad67;
+    s16 unk68;
+    u8 pad6A[2];
+    f32 unk6C;
+} Spawn_BD070; /* 0x70 */
+
+void func_1514470C(struct178 *, struct17 *);
+void func_15143794(s16, s16, f32, struct17 *);
+s32 func_1513264C(void *, s32, s32, s32, s32, u8, s32);
+void *func_15130280(void *, u8, s32, s32, u8, s32);
+void func_151D5334(f32 *, f32, f32, f32, s32, u8, s32);
+
+void func_150BD070(u8 arg0, s32 arg1) {
+    struct178 *players[2];
+    const u8 idx[2] = {0x4C, 0x4D};
+    s16 count;
+
+    players[0] = &(*(struct178 **)&D_800D3098)[idx[0]];
+    players[1] = &(*(struct178 **)&D_800D3098)[idx[1]];
+    {
+        Particle_BD070 particle;
+        s32 r1;
+
+        count = func_150ADA20() % 9U + 0xD;
+        particle.f50 = 0x12DE8;
+        particle.f56 = 1;
+        particle.f58 = 0;
+        particle.f5C = 0;
+        particle.f60 = 0xFF;
+        particle.f61 = 8;
+        particle.f62 = 0;
+        particle.f63 = 0;
+        particle.f64 = 0;
+        particle.f65 = 0;
+        particle.f66 = 0;
+        particle.f67 = 0;
+        particle.f68 = 2;
+        particle.f69 = -1;
+        particle.f6A = 2;
+        particle.f6C = 0;
+        particle.f70 = 0;
+        particle.f72 = 0xC;
+        particle.f74 = 0x15;
+        particle.f78 = 0;
+        particle.f0 = 1.0f;
+        particle.f4 = 1.0f;
+        particle.f1C = 1.0f;
+        particle.f20 = 1.0f;
+        particle.f24 = 1.0f;
+        particle.f44 = 0.0f;
+        while (count > 0) {
+            particle.f54 = func_150ADA20() % 26U + 0x28;
+            particle.f8 = particle.fC = func_150ADA68() * 0.2470000088f + 0.2030000091f;
+            particle.f10 = func_150ADA68() * 360.0f;
+            particle.f14 = func_150ADA68() * 360.0f;
+            particle.f18 = func_150ADA68() * 360.0f;
+            particle.f40 = func_150ADA68() * 45.46600342f + -22.73300171f;
+            particle.f48 = func_150ADA68() * 45.46600342f + -22.73300171f;
+            func_1514470C(players[func_150ADA20() & 1], &particle.pos);
+            r1 = func_150ADA20();
+            func_15143794((u32)r1 % 31U - 0x54, func_150ADA20() % 26U - 0x2D, func_150ADA68() * 21.80000114f + 30.20000076f, &particle.vel);
+            particle.f4C = func_150ADA68() * 1.129000068f + -1.909000039f;
+            func_1513264C(&particle, 3, 0xFF, 0, 0, arg0, arg1);
+            count--;
+        }
+    }
+    {
+        Spawn_BD070 spawn;
+        f32 scale;
+        s32 r1;
+        f32 pos[3];
+        f32 pos2[3];
+
+        count = func_150ADA20() % 9U + 0x11;
+        spawn.unk0 = 0x200005;
+        spawn.unk8 = 0x5103;
+        spawn.unk4 = 0;
+        spawn.unkC = 0;
+        spawn.unk10 = 0;
+        spawn.unk14 = 0xD4;
+        spawn.unk15 = 0xAA;
+        spawn.unk16 = 8;
+        spawn.unk17 = 0xFF;
+        spawn.unk18 = 0x15;
+        spawn.unk19 = 4;
+        spawn.unk1A = 0;
+        spawn.unk1C = 0xFF;
+        spawn.unk1D = 0x6C;
+        spawn.unk1E = 0x23;
+        spawn.unk20 = 7;
+        spawn.unk24 = 1.012537003f;
+        spawn.unk3C = *(struct17 *)&D_800A5480;
+        r1 = (func_150ADA20() & 1) ? 0x40 : 0;
+        spawn.unk58 = ((func_150ADA20() & 1) ? 0x80 : 0) | 7 | r1 | 0x8000 | 0x4000 | 0x800 | 0x400 | 0x200 | 0x20000 | 0x800000;
+        spawn.unk5C = 0;
+        spawn.unk60 = 8;
+        spawn.unk61 = 6;
+        spawn.unk62 = 0x10;
+        spawn.unk63 = -1;
+        spawn.unk64 = -1;
+        spawn.unk65 = 0;
+        spawn.unk66 = 0xFF;
+        spawn.unk68 = 0;
+        spawn.unk6C = 0.0f;
+        scale = 0.9170150161f;
+        while (count > 0) {
+            void *ret;
+
+            spawn.unk22 = spawn.unkA = func_150ADA20() % 31U + 0x1E;
+            spawn.unk1B = func_150ADA20() % 101U + 0x9B;
+            spawn.unk28 = spawn.unk2C = func_150ADA68() * 755.0f + 1262.0f;
+            func_1514470C(players[func_150ADA20() & 1], &spawn.pos);
+            r1 = func_150ADA20();
+            func_15143794((u32)r1 % 41U - 0x59, func_150ADA20() % 51U - 0x40, func_150ADA68() * 45.60000229f + 18.80000114f, &spawn.vel);
+            spawn.unk54 = func_150ADA68() * 0.5590000153f + -0.77700001f;
+            ret = func_15130280(&spawn, 1, 0, 4, arg0, arg1);
+            if (ret != NULL) {
+                memcpy((u8 *)ret + 0xA8, &scale, 4);
+            }
+            count--;
+        }
+        pos[0] = players[0]->unk0;
+        pos[1] = players[0]->pad2;
+        pos[2] = players[0]->unk4;
+        func_151D5334(pos, 0.0f, 1000.0f, 0.001f, 5, arg0, arg1);
+        pos2[0] = players[0]->unk0;
+        pos2[1] = players[0]->pad2;
+        pos2[2] = players[0]->unk4;
+        func_151D5404((struct17 *)pos2, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, arg0, arg1);
+    }
+}
 
 typedef struct { f32 x, y, z; } Vec3f_BD740;
 extern Vec3f_BD740 D_8009FF40[4];

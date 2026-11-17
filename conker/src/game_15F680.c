@@ -963,7 +963,39 @@ s32 func_151337C0(f32 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_15F680/func_15133894.s")
+typedef struct {
+    f32 x, y, z;
+} Vec3f15133894;
+
+s32 func_15133894(Func15132DDCArg0 *arg0) {
+    s8 ret;
+    Vec3f15133894 oldPos;
+    Vec3f15133894 checkPos;
+    u8 *temp;
+    s32 blocked;
+
+    ret = 1;
+    oldPos = *(Vec3f15133894 *)&arg0->field_0x38;
+    func_151337C0((f32 *)arg0);
+    if ((arg0->field_0x60 & 1) && (arg0->field_0x73 != 0) && (arg0->field_0x3C < oldPos.y)) {
+        checkPos.x = arg0->field_0x38;
+        checkPos.y = arg0->field_0x10 + oldPos.y;
+        checkPos.z = arg0->field_0x40;
+        if (func_15046C80(&checkPos.x, 0, arg0->field_0x3C - arg0->field_0x10, &arg0->field_0x110) != 0) {
+            blocked = 0;
+            if ((*(u8 **)((u8 *)arg0 + 0x130)) != NULL) {
+                temp = (*(u8 **)((u8 *)arg0 + 0x130));
+                if ((temp[0x4F] & 0x60) == 0x40) {
+                    blocked = 1;
+                }
+            }
+            if (blocked == 0) {
+                ret = D_80089934[arg0->field_0x73](arg0, oldPos.x, oldPos.y, oldPos.z, arg0->field_0x110, &arg0->field_0x114);
+            }
+        }
+    }
+    return ret;
+}
 
 s32 func_151339D4(MotionFields15133 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4) {
     f32 temp;

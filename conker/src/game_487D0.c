@@ -68,5 +68,3 @@ void func_1501B320(s32 arg0) {
 void func_1501B640(s32 arg0) {
     func_1501B320(arg0);
 }
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_487D0/func_1501B660.s")

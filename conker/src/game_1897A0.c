@@ -42,7 +42,95 @@ void *func_1515C2F0(Struct1515C2F0Arg0 *arg0, s32 arg1, void *arg2, s32 arg3, u8
 //     return sp3C;
 // }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1897A0/func_1515C388.s")
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec1515C388;
+
+typedef struct {
+    Vec1515C388 pos;
+    f32 w;
+} Ent1515C388;
+
+typedef struct {
+    u8 pad0[0x4];
+    f32 unk4;
+    u8 pad8[0xC - 0x8];
+    f32 unkC;
+    f32 unk10;
+    u8 pad14[0x38 - 0x14];
+    s8 unk38;
+} Set1515C388;
+
+typedef struct {
+    u8 pad0[0x25];
+    u8 unk25;
+    u8 pad26[0x2C - 0x26];
+    s8 unk2C;
+    s8 unk2D;
+    s8 unk2E;
+    u8 pad2F[0x54 - 0x2F];
+    Vec1515C388 unk54;
+    u8 pad60[0x94 - 0x60];
+    Ent1515C388 *unk94;
+    Set1515C388 *unk98;
+} Obj1515C388;
+
+typedef s32 (*Game1897A0Callback)(void *, void *);
+extern Game1897A0Callback D_8008B080[];
+
+s32 func_1515C388(Obj1515C388 *arg0)
+{
+  Set1515C388 *settings;
+  s32 callbackFailed;
+  Ent1515C388 *ents;
+  Vec1515C388 start;
+  s32 i;
+  Game1897A0Callback cb;
+  settings = arg0->unk98;
+  callbackFailed = 0;
+  ents = arg0->unk94;
+  if (arg0->unk2C)
+  {
+    start = ents[arg0->unk2D].pos;
+    i = arg0->unk2D;
+    while (i != arg0->unk2E)
+    {
+      ents[i].pos.x += settings->unk4 * D_800BE9A4;
+      ents[i].pos.y += (ents[i].w * D_800BE9A4) + (((settings->unk10 * D_800BE9A4) * D_800BE9A4) * 0.5f);
+      ents[i].pos.z += settings->unkC * D_800BE9A4;
+      ents[i].w += settings->unk10 * D_800BE9A4;
+      i++;
+      if (i == arg0->unk25)
+      {
+        i = 0;
+      }
+    }
+
+  }
+  if (settings->unk38 != (-1))
+  {
+    {
+    callbackFailed = (D_8008B080[settings->unk38](arg0, settings) == 0) & 0xFF;
+    }
+  }
+  if (arg0->unk2C > 0)
+  {
+    arg0->unk54 = ents[arg0->unk2D].pos;
+  }
+  else
+  {
+    arg0->unk54.x = 0.0f;
+    arg0->unk54.y = 0.0f;
+    arg0->unk54.z = 0.0f;
+  }
+  if (callbackFailed != 0)
+  {
+    return 0;
+  }
+  return 1;
+}
 typedef s32 (*Game1897A0ActionCallback)(void *, void *);
 extern Game1897A0ActionCallback D_8008B084[];
 

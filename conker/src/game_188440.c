@@ -3,7 +3,108 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_188440/func_1515AF90.s")
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3f_1515AF90;
+
+typedef struct {
+    Vec3f_1515AF90 position;
+    f32 scale;
+    f32 zero;
+    f32 ground;
+} GameAF90Packet;
+
+typedef struct {
+    f32 height;
+    s16 points[9];
+    s32 object;
+    u8 flags;
+    u8 active;
+    u8 pad1E[2];
+    s32 field20;
+} Game71820Hit_1515AF90;
+
+s32 func_1504697C(Vec3f_1515AF90 *, u16, f32, Game71820Hit_1515AF90 *);
+extern f32 D_800A6420;
+extern f32 D_800A6424;
+extern f32 D_800A6428;
+extern f32 D_800A642C;
+extern f32 D_800A6430;
+extern f32 D_800A6434;
+
+void func_1515AF90(s16 arg0) {
+    if (!(func_150ADA20() & 0xF)) {
+        void *result;
+        GameAF90Packet packet;
+        Vec3f_1515AF90 *base;
+        s32 offset;
+        u8 valid;
+        s16 angle;
+        f32 radius;
+        f32 cosine;
+        f32 sine;
+        Game71820Hit_1515AF90 hit;
+        Vec3f_1515AF90 query;
+        Game71820Hit_1515AF90 lowerHit;
+        Vec3f_1515AF90 lowerQuery;
+        f32 lowerHeight;
+
+        valid = 1;
+        base = (Vec3f_1515AF90 *)&D_800DBFF0[arg0].unk2F8;
+        offset = D_800DBFF0[arg0].unk380 * D_800A6420;
+        {
+            u32 roll = func_150ADA20();
+
+            angle = (roll % 41U) + offset - 0x14;
+            radius = func_150ADA68() * D_800A6424 + 107.0f;
+            cosine = func_151423D8(angle);
+            sine = func_151423D8(angle - 0x40);
+            packet.position.x = base->x - radius * sine;
+            packet.position.z = base->z - radius * cosine;
+        }
+        query.x = packet.position.x;
+        hit.object = 0;
+        hit.flags = 0;
+        hit.active = 0;
+        hit.field20 = 0;
+        query.y = D_800A6428;
+        query.z = packet.position.z;
+        hit.height = D_800A642C;
+        if (func_1504697C(&query, 0, base->y, &hit) != 0) {
+            packet.ground = hit.height;
+        } else {
+            valid = 0;
+        }
+        if (valid) {
+            lowerHeight = base->y + -250.0f;
+            lowerHit.field20 = 0;
+            lowerHit.active = 0;
+            lowerHit.flags = 0;
+            lowerHit.object = 0;
+            lowerHit.height = D_800A6430;
+            lowerQuery.x = packet.position.x;
+            lowerQuery.y = base->y;
+            lowerQuery.z = packet.position.z;
+            if (func_1504697C(&lowerQuery, 0, lowerHeight, &lowerHit) != 0) {
+                packet.position.y = lowerHit.height;
+            } else {
+                packet.position.y = lowerHeight;
+            }
+        }
+        func_150ADA68();
+        packet.scale = 195.0f * D_800A6434;
+        packet.zero = 0.0f;
+        if (valid) {
+            angle = (func_150ADA20() % 61U) + 5;
+            result = func_151491F4(angle, -1, 0xC, 1, 7, 0x18, 0xFF, 0);
+            if (result != NULL) {
+                memcpy((u8 *)result + 0x28, &packet, sizeof(packet));
+            }
+        }
+    }
+}
 
 typedef struct {
     /* 0x00 */ f32 x;

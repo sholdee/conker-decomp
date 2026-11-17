@@ -610,7 +610,138 @@ s32 func_15167D84(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
 //         func_1516972C((struct102 *)arg0);
 //     }
 // }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_15167E0C.s")
+typedef struct {
+    char pad_0[0x10];
+    struct Some15171F04 *unk10;
+    char pad_14[0x8];
+    s16 unk1C;
+    s16 unk1E;
+    s16 unk20;
+    s16 unk22;
+    s16 unk24;
+    s16 unk26;
+    s16 unk28;
+    char pad_2A[0x2];
+    u8 unk2C;
+    u8 unk2D;
+    u8 unk2E;
+    s8 unk2F;
+    s16 unk30;
+    s16 unk32;
+    char pad_34[0x4];
+    s16 unk38;
+    s8 unk3A;
+    char pad_3B[0x4];
+    u8 unk3F;
+    char pad_40[0x4];
+    u16 unk44;
+    char pad_46[0x2];
+    s8 unk48;
+} GameSpriteObject;
+
+void func_15167E0C(GameSpriteObject *arg0) {
+    void (*func)(struct102 *);
+    u8 finished;
+    s32 limit;
+
+    finished = 0;
+    if (arg0->unk38 != 0x7FFF) {
+        arg0->unk38 -= D_800BE9E4;
+        if (arg0->unk38 < 0) {
+            arg0->unk38 = 0;
+            finished = 1;
+        }
+    }
+
+    if (arg0->unk3A > 0) {
+        if (arg0->unk3A < arg0->unk3F) {
+            arg0->unk3F -= arg0->unk3A;
+        } else {
+            arg0->unk38 = 0;
+            finished = 1;
+        }
+    }
+
+    if (arg0->unk2F != -1) {
+        func = D_8008C9C8[arg0->unk2F];
+        if (func != NULL) {
+            func((struct102 *)arg0);
+        }
+    }
+
+    if (arg0->unk38 != 0) {
+        s32 p1;
+        s32 p2;
+        s32 p3;
+        s32 prod;
+
+        arg0->unk30 += arg0->unk32;
+
+        p1 = arg0->unk22;
+        p1 = (p1 << 8) | arg0->unk2E;
+        prod = arg0->unk30 * D_800BE9E4;
+        p1 += prod;
+        arg0->unk22 = p1 >> 8;
+        p1 = (u8)p1;
+        arg0->unk2E = p1;
+        p2 = arg0->unk20;
+        p2 = (p2 << 8) | arg0->unk2C;
+        prod = arg0->unk26 * D_800BE9E4;
+        p2 += prod;
+        arg0->unk20 = p2 >> 8;
+        p2 = (u8)p2;
+        arg0->unk2C = p2;
+        p3 = arg0->unk24;
+        p3 = (p3 << 8) | arg0->unk2D;
+        prod = arg0->unk28 * D_800BE9E4;
+        p3 += prod;
+        arg0->unk24 = p3 >> 8;
+        p3 = (u8)p3;
+        arg0->unk2D = p3;
+        if (arg0->unk1E != 0) {
+            limit = (arg0->unk10->unk4 << 8) - 1;
+            arg0->unk1C += arg0->unk1E * D_800BE9E4;
+            if (limit < arg0->unk1C) {
+                if (arg0->unk44 & 0x20) {
+                    arg0->unk38 = 0;
+                    finished = 1;
+                } else {
+                    arg0->unk44 |= 0x80;
+                    if (arg0->unk44 & 2) {
+                        arg0->unk1C = limit - (arg0->unk1C % limit);
+                        arg0->unk1E = -arg0->unk1E;
+                    } else {
+                        do {
+                            arg0->unk1C -= limit;
+                        } while (limit < arg0->unk1C);
+                    }
+                }
+            } else if (arg0->unk1C < 0) {
+                if (arg0->unk44 & 0x40) {
+                    arg0->unk38 = 0;
+                    finished = 1;
+                } else if (arg0->unk44 & 2) {
+                    arg0->unk1C = -arg0->unk1C % limit;
+                    arg0->unk1E = -arg0->unk1E;
+                } else {
+                    do {
+                        arg0->unk1C += limit;
+                    } while (arg0->unk1C < 0);
+                }
+            }
+        }
+    } else {
+        finished = 1;
+    }
+
+    if (finished != 0) {
+        if (arg0->unk48 != -1) {
+            D_8008CA20[arg0->unk48]((struct102 *)arg0);
+        }
+        func_1516972C((struct102 *)arg0);
+    }
+}
+
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_15168118.s")
 typedef struct {
     Vtx vtx[8];
@@ -1004,7 +1135,17 @@ typedef struct { s8 unk0; s8 unk1; s8 unk2; u8 unk3; u32 unk4; } Struct15168F08;
 // a0=&p->unk4 in the first beq slot + distributes i++ into the bnel slots) that drives a whole-
 // function saved-register rotation (base s1 vs s4). Not steerable from C. Best reconstruction:
 // permuter NO ZERO, best 360 (improved from 717)
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_15168E54.s")
+void func_15168E54(s8 *arg0, s32 arg1) {
+    s32 i;
+    s8 *p;
+
+    for (i = 0; arg0[i << 3] != -0x21; i++) {
+        p = arg0 + (i << 3);
+        if ((*p == 1) || ((*p == -0x24) && (*(u8 *)(p + 3) == 0xE))) {
+            func_15168E34((s32 *)(p + 4), arg1);
+        }
+    }
+}
 // void func_15168E54(Struct15168F08 *arg0, s32 arg1) {
 //     s32 i; Struct15168F08 *p; s8 tag;
 //     i = 0; p = arg0;

@@ -47,3 +47,15 @@ cp <rom> baserom.us.z64                                  # sha1 4cbadd3c…
 podman exec -w ~/conker conker-tc bash -c 'make extract && make -C conker extract && make -C conker -j32 && make -C conker replace && make -j16'
 mkdir -p conker/expected && cp -r conker/build conker/expected/   # golden objects for asm-differ
 ```
+
+## Translation-unit splits (tools/split_tu.py)
+IDO carries state across a file, so a function can be unmatchable only because it shares a file
+with code that was really in another TU. To split `src/game_X.c` at ROM offsets A, B…:
+1. add `- [0xA, c, game_A]` (…) after the file's entry in `conker/conker.us.yaml`;
+2. run splat in the container (`python3 ../tools/n64splat/split.py conker.us.yaml` from `conker/`;
+   keep main's `undefined_*_auto.txt`) — it writes the new asm dirs and `conker.ld` (both gitignored);
+3. `python3 tools/split_tu.py apply game_X A,B` — every new file keeps all top-level declarations,
+   gets its own functions, and a prototype in place of each moved definition (what later callers saw);
+4. delete `conker/build/conker.us.bin`, rebuild, and check the sha1 (a stale bin passes silently).
+`split_tu.py transplant FUNC OLDFILE NEWFILE` moves an attempt written against the old layout.
+DevOldSchool/conkers-bfd-decomp's yaml was the source for the first 39 files (2026-11-16).

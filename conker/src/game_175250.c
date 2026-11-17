@@ -146,7 +146,234 @@ s8 func_15147EB8(Obj15147EB8 *arg0) {
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_175250/func_1514803C.s")
+typedef struct {
+    struct17 pos;
+    f32 unkC;
+    u16 unk10;
+    u8 pad12[2];
+} Entry1514803C;
+
+typedef struct {
+    f32 unk0;
+    u8 pad4[0x14];
+    u8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    u8 unk1B;
+    u8 pad1C[0xC];
+    s32 unk28;
+    s32 unk2C;
+    s32 unk30;
+    s32 unk34;
+    u8 pad38[3];
+    u8 unk3B;
+    s32 unk3C;
+    s32 unk40;
+    s8 unk44;
+    s8 unk45;
+} Data1514803C;
+
+typedef struct {
+    u8 pad0[0x25];
+    u8 unk25;
+    u8 pad26[6];
+    s8 unk2C;
+    s8 unk2D;
+    s8 unk2E;
+    u8 pad2F[0x55];
+    u8 buffers[0x10];
+    Entry1514803C *entries;
+    Data1514803C *data;
+} Actor1514803C;
+
+void func_151D5D60(void *, s16, s32, void **, u8 *);
+extern struct17 *func_15144B34(s32);
+s32 func_1514306C(s32, s32, s32, s32);
+extern Gfx *func_150950D4(Gfx *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
+void func_151441A4(s16 *, s16 *, s16 *, s16 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+void func_151442FC(s16 *, s16 *, s16 *, s16 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
+Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
+Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
+Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
+Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
+extern s32 D_80091564[];
+extern s32 D_800915A4;
+extern s32 D_800DD1B0;
+extern s32 D_800D2C9C;
+extern struct {
+    s32 unk0;
+    s32 unk4;
+} D_800A4AC8[];
+
+Gfx *func_1514803C(Actor1514803C *arg0, Gfx *gfx, s16 arg2) {
+    Data1514803C *data;
+    Vtx *vtx;
+    u8 update;
+    struct17 b;
+    struct17 a;
+    s32 i;
+    s32 j;
+    struct17 *cam;
+    Entry1514803C *entries;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    f32 ex;
+    f32 ey;
+    f32 ez;
+    f32 cx;
+    f32 cy;
+    f32 cz;
+    f32 len;
+    s16 envR;
+    s16 envG;
+    s16 envB;
+    s16 envA;
+    s16 primR;
+    s16 primG;
+    s16 primB;
+    s16 primA;
+    s32 tex;
+
+    data = arg0->data;
+    if (arg0->unk2C >= 2) {
+        func_151D5D60(arg0->buffers, arg2, (arg0->unk25 - 1) * 2 * sizeof(Vtx), (void **)&vtx, 0);
+        if (vtx == NULL) {
+            return gfx;
+        }
+        if (vtx != NULL) {
+            if (D_800BE9C0 != 0) {
+                vtx += (arg0->unk25 - 1) * 2;
+            }
+            update = 1;
+            cam = func_15144B34(arg2);
+            entries = arg0->entries;
+            tex = func_1514306C(0, data->unk19, 0, 2);
+            if (tex != D_800DD1B0) {
+                D_800915A4 = D_80091564[data->unk19];
+                gfx = func_150950D4(gfx, &D_800915A4, 0, 0, 0, 0, 2, 0x100, 0x100, (data->unk18 & 0x80) ? 0x3E : 3);
+                D_800DD1B0 = tex;
+            }
+            func_151441A4(&envR, &envG, &envB, &envA, 0, 0, 0, 0, 0, 0, 0, data->unk1B, data->unk1A, data->unk44);
+            func_151442FC(&primR, &primG, &primB, &primA, 0, 0, 0, 0, 0, 0, 0, data->unk1B, data->unk1A, data->unk45);
+            gfx = func_15142B7C(gfx, data->unk2C, data->unk30);
+            gfx = func_15142C10(gfx, primR, primG, primB, primA, &update);
+            gfx = func_15142CF0(gfx, 0, 0, envR, envG, envB, envA, &update);
+            gfx = func_1513F4E4(gfx, data->unk3B, &update);
+            gfx = func_15142FBC(gfx, data->unk28 | G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | data->unk3C | data->unk40, D_800A4AC8[data->unk34].unk0 | D_800A4AC8[data->unk34].unk4, &update);
+            i = arg0->unk2E - 1;
+            if (i < 0) {
+                i = arg0->unk25 - 1;
+            }
+            j = i - 1;
+            if (j < 0) {
+                j = arg0->unk25 - 1;
+            }
+            a = entries[i].pos;
+            b = entries[j].pos;
+            ex = a.unk0 - b.unk0;
+            ey = a.unk4 - b.unk4;
+            ez = a.unk8 - b.unk8;
+            dx = a.unk0 - cam->unk0;
+            dy = a.unk4 - cam->unk4;
+            dz = a.unk8 - cam->unk8;
+            cx = (ey * dz) - (dy * ez);
+            cy = (ez * dx) - (dz * ex);
+            cz = (ex * dy) - (dx * ey);
+            len = sqrtf((cx * cx) + (cy * cy) + (cz * cz));
+            if (len == 0.0f) {
+                cx = 0.0f;
+                cy = 0.0f;
+                cz = 0.0f;
+            } else {
+                f32 scale;
+                scale = data->unk0 / len;
+                cx = cx * scale;
+                cy = cy * scale;
+                cz = cz * scale;
+            }
+            vtx->v.ob[0] = a.unk0 + cx;
+            vtx->v.ob[1] = a.unk4 + cy;
+            vtx->v.ob[2] = a.unk8 + cz;
+            vtx->v.tc[1] = entries[i].unk10 + 0x4000;
+            vtx->v.tc[0] = 0x43C0;
+            vtx->v.cn[0] = 0xFF;
+            vtx->v.cn[1] = 0xFF;
+            vtx->v.cn[2] = 0xFF;
+            vtx->v.cn[3] = 0xFF;
+            vtx->v.flag = 0;
+            vtx++;
+            vtx->v.ob[0] = a.unk0 - cx;
+            vtx->v.ob[1] = a.unk4 - cy;
+            vtx->v.ob[2] = a.unk8 - cz;
+            vtx->v.tc[1] = entries[i].unk10 + 0x4000;
+            vtx->v.tc[0] = 0x4000;
+            vtx->v.cn[0] = 0xFF;
+            vtx->v.cn[1] = 0xFF;
+            vtx->v.cn[2] = 0xFF;
+            vtx->v.cn[3] = 0xFF;
+            vtx->v.flag = 0;
+            vtx++;
+            do {
+                ex = a.unk0 - b.unk0;
+                ey = a.unk4 - b.unk4;
+                ez = a.unk8 - b.unk8;
+                dx = b.unk0 - cam->unk0;
+                dy = b.unk4 - cam->unk4;
+                dz = b.unk8 - cam->unk8;
+                cx = (ey * dz) - (dy * ez);
+                cy = (ez * dx) - (dz * ex);
+                cz = (ex * dy) - (dx * ey);
+                len = sqrtf((cx * cx) + (cy * cy) + (cz * cz));
+                if (len == 0.0f) {
+                    cx = 0.0f;
+                    cy = 0.0f;
+                    cz = 0.0f;
+                } else {
+                    f32 scale;
+                    scale = data->unk0 / len;
+                    cx = cx * scale;
+                    cy = cy * scale;
+                    cz = cz * scale;
+                }
+                vtx->v.ob[0] = b.unk0 + cx;
+                vtx->v.ob[1] = b.unk4 + cy;
+                vtx->v.ob[2] = b.unk8 + cz;
+                vtx->v.tc[1] = entries[j].unk10 + 0x4000;
+                vtx->v.tc[0] = 0x43C0;
+                vtx->v.cn[0] = 0xFF;
+                vtx->v.cn[1] = 0xFF;
+                vtx->v.cn[2] = 0xFF;
+                vtx->v.cn[3] = 0xFF;
+                vtx->v.flag = 0;
+                vtx++;
+                vtx->v.ob[0] = b.unk0 - cx;
+                vtx->v.ob[1] = b.unk4 - cy;
+                vtx->v.ob[2] = b.unk8 - cz;
+                vtx->v.tc[1] = entries[j].unk10 + 0x4000;
+                vtx->v.tc[0] = 0x4000;
+                vtx->v.cn[0] = 0xFF;
+                vtx->v.cn[1] = 0xFF;
+                vtx->v.cn[2] = 0xFF;
+                vtx->v.cn[3] = 0xFF;
+                vtx->v.flag = 0;
+                vtx++;
+                gSPVertex(gfx++, vtx - 4, 4, 0);
+                gSP1Triangle(gfx++, 0, 1, 2, 0);
+                gSP1Triangle(gfx++, 1, 3, 2, 0);
+                i = j;
+                j--;
+                if (j < 0) {
+                    j = arg0->unk25 - 1;
+                }
+                a = entries[i].pos;
+                b = entries[j].pos;
+            } while (i != arg0->unk2D);
+        }
+    }
+    return gfx;
+}
 
 typedef struct {
     s32 x;

@@ -1339,7 +1339,52 @@ void func_15150D1C(struct Local15150D1CArg *arg0, u8 arg1, s32 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_17CAF0/func_15150F90.s")
+typedef struct {
+    s32 countBase, countRange;
+    f32 position[3];
+    f32 speedBase, speedRange;
+    s16 angleBase, angleRange, pitchBase, pitchRange;
+    f32 directionBase, directionRange, jitter;
+    f32 sizeBase, sizeRange, scale;
+    u8 kind, pad3D;
+    s16 lifeBase, lifeRange;
+} Game150F90Config;
+
+void *func_1518A3C0(f32 *, f32 *, f32, f32 *, f32 *, f32, f32, u8, s16, u8, s32, u8, s32);
+
+void func_15150F90(Game150F90Config *arg0, u8 arg1, u8 arg2, s32 arg3) {
+    f32 jitter[3];
+    f32 width;
+    s32 count;
+    f32 angles[3];
+    f32 direction[3];
+
+    width = arg0->jitter + arg0->jitter;
+    jitter[1] = 0.0f;
+    count = (func_150ADA20() % (u32)(arg0->countRange + 1)) + arg0->countBase;
+    if (count != 0) {
+        do {
+            angles[0] = func_150ADA68() * 360.0f;
+            angles[1] = func_150ADA68() * 360.0f;
+            angles[2] = func_150ADA68() * 360.0f;
+            func_15143794(
+                (s16)((func_150ADA20() % (u32)(arg0->angleRange + 1)) + arg0->angleBase),
+                (s16)((func_150ADA20() % (u32)(arg0->pitchRange + 1)) + arg0->pitchBase),
+                func_150ADA68() * arg0->directionRange + arg0->directionBase,
+                direction);
+            jitter[0] = func_150ADA68() * width - arg0->jitter;
+            jitter[2] = func_150ADA68() * width - arg0->jitter;
+            func_1518A3C0(arg0->position, angles,
+                func_150ADA68() * arg0->speedRange + arg0->speedBase,
+                direction, jitter,
+                func_150ADA68() * arg0->sizeRange + arg0->sizeBase,
+                arg0->scale, arg0->kind,
+                (func_150ADA20() % (u32)(arg0->lifeRange + 1)) + arg0->lifeBase,
+                arg1, 0, arg2, arg3);
+            count--;
+        } while (count != 0);
+    }
+}
 
 typedef struct {
     s16 countBase;
@@ -2907,46 +2952,7 @@ typedef struct {
     u8 pad2F[0x39];
     u8 unk68;
 } Struct15154C90;
-
-void func_15154C90(Struct15154C90 *arg0) {
-    s32 temp;
-    s8 failed;
-
-    failed = 0;
-    if (arg0->unk24 & 1) {
-        arg0->unk22 -= D_800BE9E4;
-        if (arg0->unk22 < 0) {
-            failed = 1;
-        }
-    }
-    temp = arg0->unk68 & 0xF;
-    if (temp != 0) {
-        if (failed == 0) {
-            s32 ret;
-
-            ret = D_8008ACC8[temp](arg0);
-            if (ret == 0) {
-                failed = 1;
-            }
-        }
-    }
-    if (arg0->unk24 & 8) {
-        s16 temp_v1;
-
-        temp_v1 = arg0->unk22;
-        if (temp_v1 < arg0->unk26) {
-            temp = (s16)(temp_v1 * (u32)arg0->unk28);
-            if (temp < arg0->unk2E) {
-                arg0->unk2E = temp;
-            }
-        }
-    }
-    if (failed) {
-        func_1516972C((struct102 *) arg0);
-    }
-}
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_17CAF0/func_15154D80.s")
+void func_15154C90(Struct15154C90 *arg0);
 
 struct Arg1515548C {
     u8 pad0[8];
@@ -2959,36 +2965,11 @@ struct Arg1515548C {
 
 extern s32 func_151555AC();
 extern u8 *func_15167A68(s32, s32, s32, s32, u8, s32);
-
-u8 *func_1515548C(struct Arg1515548C *arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6) {
-    u8 *ret;
-    f32 pos[2];
-
-    if ((arg2 != 0) && (arg3 > 0)) {
-        pos[0] = arg0->unk8;
-        pos[1] = arg0->unkC;
-        if (func_151555AC(arg0, pos) != 0) {
-            return 0;
-        }
-    }
-    ret = func_15167A68((arg0->unk14 & 0x20) ? 0x57 : 0x5D, arg6, arg4 + 0x70, 1, arg5, 1);
-    if (ret == 0) {
-        return 0;
-    }
-    memcpy(ret + 0x10, arg0, 0x58);
-    ret[0x68] = 0;
-    ret[0x68] |= arg1;
-    return ret;
-}
+u8 *func_1515548C(struct Arg1515548C *arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
 
 struct Local15155564 { u8 pad[0x2A]; u8 unk2A; };
 extern void (*D_8008AD04[])(struct Local15155564 *, s32, u8);
-
-void func_15155564(struct Local15155564 *arg0, s32 arg1, u8 arg2) {
-    if (D_8008AD04[arg0->unk2A] != NULL) {
-        D_8008AD04[arg0->unk2A](arg0, arg1, arg2);
-    }
-}
+void func_15155564(struct Local15155564 *arg0, s32 arg1, u8 arg2);
 
 struct Node151555AC {
     u8 pad0[8];
@@ -3002,53 +2983,5 @@ struct Node151555AC {
 struct Ids151555AC { s32 id[2]; };
 extern struct Ids151555AC D_800A6030;
 extern u8 D_800DCE50[];
-
-s32 func_151555AC(f32 *arg0, f32 *arg1, s32 *arg2, s32 arg3) {
-    s32 j;
-    struct Ids151555AC ids;
-    u8 i;
-    struct Node151555AC *node;
-    struct Node151555AC *next;
-    s32 found;
-    s32 k;
-    f32 w;
-    f32 h;
-    i = 0;
-    for (j = 0; j < 2; j++) {
-        ids = D_800A6030;
-        i &= 0;
-        do {
-            node = ((struct Node151555AC *(*)[0x68])D_800DCE50)[j][ids.id[i]];
-            while (node != NULL) {
-                next = node->next;
-                k = arg3;
-                found = 0;
-                while (k > 0 && !found) {
-                    if (node->unk2A == arg2[k - 1]) {
-                        found = 1;
-                    } else {
-                        k--;
-                    }
-                }
-                if (found) {
-                    w = arg1[0] + node->size[0];
-                    h = arg1[1] + node->size[1];
-                    if (arg0[0] - w <= node->pos[0] && node->pos[0] <= arg0[0] + w &&
-                        arg0[1] - h <= node->pos[1] && node->pos[1] <= arg0[1] + h) {
-                        return 1;
-                    }
-                }
-                node = next;
-            }
-lbl:
-            i++;
-        } while (i < 2);
-        i = 0;
-    }
-}
-void func_1515572C(s32 arg0, u8 arg1) {
-    struct Local1515572CData sp18;
-
-    sp18 = D_800A6038;
-    func_15169260(&sp18, 2, arg0, arg1);
-}
+s32 func_151555AC(f32 *arg0, f32 *arg1, s32 *arg2, s32 arg3);
+void func_1515572C(s32 arg0, u8 arg1);

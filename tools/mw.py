@@ -44,8 +44,8 @@ CONTAINER = os.environ.get("CONKER_CONTAINER", "conker-tc")
 INNER_SHA = (MAIN / "conker.us.sha1").read_text().split()[0]
 LOCK = REPO / ".mw_land.lock"
 RAM_ROOT = Path(os.environ.get("CONKER_RAM", "/dev/shm/conker-build"))
-RAM_BUDGET_MB = int(os.environ.get("CONKER_RAM_MB", "12000"))
-BUILD_MB = 180                       # one build/ copy
+RAM_BUDGET_MB = int(os.environ.get("CONKER_RAM_MB", "10000"))
+BUILD_MB = 230                       # one build/ copy (~200 MB after the TU split; leave headroom)
 SHARED_DIRS = {"asm", "expected", "assets"}   # read-only: symlinked to main, never copied
 PRAGMA_RE = re.compile(r'^\s*#pragma\s+GLOBAL_ASM\("([^"]+)"\)', re.M)
 WORD_RE = re.compile(r"^\s*/\* [0-9A-F]+ ([0-9A-F]{8}) ([0-9A-F]{8}) \*/", re.M)
@@ -844,11 +844,18 @@ def cmd_note(a):
 
 # ---------------------------------------------------------------- pick / rm
 
+def skip_list():
+    """Functions in tools/skip.txt: known to be impossible from C (hand-written asm etc.)."""
+    p = MAIN.parent / "tools" / "skip.txt"
+    return {l.split()[0] for l in p.read_text().splitlines() if l.strip() and not l.startswith("#")} if p.exists() else set()
+
+
 def cmd_pick(a):
     rows = []
+    skip = skip_list()
     for asm, cfile in stubbed_asm(MAIN).items():
         p = MAIN / asm
-        if not p.exists():
+        if not p.exists() or Path(asm).stem in skip:
             continue
         text = p.read_text()
         n = len(WORD_RE.findall(text))

@@ -42,7 +42,7 @@ void func_151D5148(struct127 *arg0);
 s32 func_15145EA4(void *arg0, void *arg1, s32 arg2, s32 arg3);
 void func_151D3F14(struct17 *arg0, u8 arg1, s32 arg2);
 void func_151D4408(struct17 *, struct17 *, s32, struct127 *, f32, u8, s32);
-void func_151C6D70(struct127 *, u8, struct17 *, s32, s32, s32);
+void func_151C6D70(struct127 *, u8, struct17 *, s16, u8, s32);
 
 s32 func_151C62D0(struct127 *arg0, u8 arg1, u8 arg2, s32 arg3, s16 arg4, s32 arg5, s32 arg6) {
     struct17 sp154;
@@ -206,7 +206,7 @@ void func_151D5148(struct127 *arg0);
 extern s32 func_15145EA4(void *arg0, void *arg1, s32 arg2, s32 arg3);
 void func_151D3F14(struct17 *arg0, u8 arg1, s32 arg2);
 void func_151D4408(struct17 *, struct17 *, s32, struct127 *, f32, u8, s32);
-void func_151C6D70(struct127 *, u8, struct17 *, s32, s32, s32);
+void func_151C6D70(struct127 *, u8, struct17 *, s16, u8, s32);
 s32 func_1514ECE0(s32, s16, void *);
 void func_150F7470(struct17 *, s32, s32, s32, s32, Func151C6A28Big *, f32, f32, f32, struct127 *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
@@ -293,7 +293,31 @@ void func_151C6A28(struct127 *arg0, u8 arg1, u8 arg2, s32 arg3) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1F3780/func_151C6D70.s")
+void *func_15102B38(s32, u8, s32, s32, f32 *, s16, u8, f32, s32, u8, s32, s16, u8, s32);
+extern f32 D_800AAC10;
+extern f32 D_800AAC14;
+extern f32 D_800AAC18;
+extern f32 D_800AAC1C;
+extern f32 D_800AAC20;
+
+void func_151C6D70(struct127 *arg0, u8 arg1, struct17 *arg2, s16 arg3, u8 arg4,
+                   s32 arg5) {
+    f32 values[2];
+    f32 angle;
+    u32 random1;
+    u32 random0;
+
+    values[1] = (func_150ADA68() * D_800AAC10) + D_800AAC14;
+    values[0] = (func_150ADA68() * D_800AAC18) + D_800AAC1C;
+    random0 = func_150ADA20();
+    random1 = func_150ADA20();
+    angle = func_150ADA68();
+    func_15102B38((s32)arg0, (u32)D_800AAB00[arg1] >> 6,
+                  (s32)((u8 *)D_800AAB08 + arg1 * 0xC), (s32)((u8 *)D_800AAB20 + arg1 * 0xC), values,
+                  (random0 % 4U) + 6,
+                  (random1 % 1U) + 0xFF, (angle * 270.0f) + D_800AAC20,
+                  (s32)arg2, 0xFF, 0, arg3, arg4, arg5);
+}
 
 struct blk12_C6EA0 { s32 a; s32 b; s32 c; };
 

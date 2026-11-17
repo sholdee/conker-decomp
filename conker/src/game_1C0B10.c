@@ -3,7 +3,97 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1C0B10/func_15193660.s")
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8[3];
+    s16 unk14;
+    s16 unk16;
+    s16 unk18;
+    s16 unk1A;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    s16 unk30;
+    s16 unk32;
+    s32 unk34;
+    s32 unk38;
+    s32 unk3C;
+    f32 unk40;
+    f32 unk44;
+    f32 unk48;
+    f32 unk4C;
+    f32 unk50;
+    f32 unk54;
+    f32 unk58;
+    f32 unk5C;
+    f32 unk60;
+    f32 unk64;
+    u8 unk68[4];
+    u8 unk6C[4];
+    u8 unk70;
+    u8 unk71;
+    s16 unk72;
+    s16 unk74;
+} Arg15152520_15193660;
+
+void func_15142314(s32, s32, s32 *);
+void func_15152520(Arg15152520_15193660 *, u8, s32);
+
+typedef struct { s32 unk0; u8 pad[0x1D0]; s32 unk1D4; } S15193660;
+void func_15193660(S15193660 *arg0, u8 arg1, s32 arg2)
+{
+  Arg15152520_15193660 sp20;
+  s32 temp;
+  if ((arg0 != 0) && (arg0->unk0 != 0))
+  {
+    temp = arg0->unk1D4;
+    if (arg0->unk1D4 == 0)
+    {
+      return;
+    }
+    func_15142314(temp, 10, sp20.unk8);
+    sp20.unk0 = 8;
+    sp20.unk4 = 7;
+    sp20.unk14 = 0;
+    sp20.unk16 = 0xFF;
+    sp20.unk18 = -0x21;
+    sp20.unk1A = 0x18;
+    sp20.unk1C = 12.40300083f;
+    sp20.unk20 = 5.039000034f;
+    sp20.unk24 = 0.908870995f;
+    sp20.unk28 = -0.7070000172f;
+    sp20.unk2C = 0.2610000074f;
+    sp20.unk30 = 0x28;
+    sp20.unk32 = 0x23;
+    sp20.unk34 = 0xA0;
+    sp20.unk38 = 0x13;
+    sp20.unk3C = 0;
+    sp20.unk40 = 0.0f;
+    sp20.unk44 = 1.960000038f;
+    sp20.unk48 = 0.3070000112f;
+    sp20.unk4C = 0.0f;
+    sp20.unk50 = sp20.unk58 = -12.85999966f;
+    sp20.unk54 = 0;
+    sp20.unk5C = sp20.unk64 = 25.37999916f;
+    sp20.unk60 = 0;
+    sp20.unk70 = 0x21;
+    sp20.unk68[0] = 0xFF;
+    sp20.unk68[1] = 0xFF;
+    sp20.unk68[2] = 0xFF;
+    sp20.unk68[3] = 0xFF;
+    sp20.unk6C[0] = 0xFF;
+    sp20.unk6C[1] = 0xFF;
+    sp20.unk6C[2] = 0xFF;
+    sp20.unk6C[3] = 0xFF;
+    sp20.unk71 = 0xF;
+    sp20.unk72 = 0x19;
+    sp20.unk74 = 0xA;
+    func_15152520(&sp20, arg1, arg2);
+  }
+}
 
 typedef struct {
     /* 0x00 */ u8  unk0;

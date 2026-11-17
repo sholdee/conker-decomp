@@ -680,7 +680,264 @@ void func_150829D8(State150829D8 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_AEB40/func_15082A44.s")
+typedef struct {
+    u16 flags;      /* 0x00 */
+    u8  unk2;
+    u8  unk3;
+    u8  type;       /* 0x04 */
+    u8  unk5;
+    s16 x;          /* 0x06 */
+    s16 y;          /* 0x08 */
+    s16 z;          /* 0x0A */
+    u8  angle;      /* 0x0C */
+    u8  unkD;
+    u8  unkE;
+    u8  unkF;
+    u8  unk10;
+    u8  unk11;
+    u8  unk12;
+    u8  unk13;
+    s16 unk14;
+    s16 pad16;
+    s32 unk18;
+    u8  unk1C;
+    u8  unk1D;
+    u8  pad1E[2];
+    f32 unk20;
+    f32 unk24;
+    u8  unk28;
+    u8  unk29;
+    u8  pad2A[4];
+    u8  unk2E;
+    u8  pad2F;
+} Spawn82A44;
+
+typedef struct {
+    f32 unk0;
+    f32 unk4;
+    u8  unk8;
+    u8  unk9;
+} Alloc82A44;
+
+extern void func_1505F188(struct127 *arg0);
+extern struct127 *func_1505ED34(void);
+extern s32 func_151E5F64(s32 arg0);
+extern s32 func_1503DA9C(struct127 *, s32, s32, s32);
+extern s32 func_1514D15C(struct127 *arg0);
+extern void func_15084488(u8 *arg0, s32 arg1, s32 arg2);
+extern void func_150839B8(struct127 *arg0, s32 arg1, void *arg2);
+extern void func_150837D4(s32 arg0, s32 arg1, s32 arg2);
+extern s32 func_150838EC(struct127 *arg0, s32 arg1, s32 arg2, f32 arg3);
+extern s32 func_15084CB0(s32 arg0);
+struct GameAEB40Struct_s;
+extern u8 func_150849A0();
+extern void func_15084C30(struct127 *arg0);
+struct127 *func_15083568(struct127 *arg0, s32 arg1, f32 arg2, s32 arg3);
+extern void func_150832AC(struct127 *arg0);
+extern void func_15083384(struct127 *arg0, s32 arg1);
+extern s32 allocate_memory(s32, s32, s32, s32);
+extern s8 D_8008FE44[];
+extern s8 D_800D2130;
+extern u8 D_800A7230[][8];
+
+#define SPAWN ((Spawn82A44 *)arg0)
+#define OBJ(T, off) (*(T *)((u8 *)obj + (off)))
+
+s32 func_15082A44(GameAEB40Spawn *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+    s32 type;
+    struct127 *obj;
+    s32 idx;
+    s32 ret;
+    s32 t;
+    s32 i;
+    s32 found;
+    u32 r;
+    Alloc82A44 *mem;
+    u16 a;
+
+    if (D_800D210C[arg1] & ~0x80) {
+        return 0;
+    }
+    type = SPAWN->type;
+    if (arg4 != 0) {
+        obj = &D_800CC2D0[arg4 - 1];
+        func_1505F188(obj);
+    } else if ((arg1 != -1) && (arg1 < D_8008FD8C)) {
+        obj = &D_800CC2D0[arg1];
+        func_1505F188(obj);
+    } else {
+        obj = func_1505ED34();
+    }
+    idx = obj - D_800CC2D0;
+    if (idx == 0x19) {
+        return 0;
+    }
+    if (arg1 != -1) {
+        if (SPAWN->flags & 0x21) {
+            D_800D210C[arg1] = idx + 1;
+        } else {
+            D_800D210C[arg1] = idx + 0x81;
+        }
+        obj->unk13F = arg1;
+        if (arg1 < D_8008FD8C) {
+            obj->unk127 = arg1;
+        } else {
+            obj->unk127 = 0xFF;
+        }
+    }
+    obj->unk144 = (struct129 *)arg0;
+    ret = idx + 1;
+    func_15084488((u8 *)arg0, obj->unk13F, arg3);
+    if ((idx < D_8008FD8C) || (type == 0x98) || (type == 0x28)) {
+        obj->unk31C = (struct126 *)allocate_memory(0x1C0, 1, 0, 0);
+        bzero(obj->unk31C, 0x1C0);
+        *(f32 *)((u8 *)obj->unk31C + 0x1B8) = 5.0f;
+    }
+    obj->unique_id = SPAWN->unk28;
+    obj->unk1D0 = 2;
+    obj->xz_scale = SPAWN->unk20;
+    obj->y_scale = SPAWN->unk24;
+    obj->unk154 = SPAWN->unk20;
+    obj->unk158 = SPAWN->unk24;
+    obj->interaction_state = SPAWN->unk3;
+    obj->x_position = SPAWN->x;
+    obj->y_position = SPAWN->y;
+    obj->z_position = SPAWN->z;
+    obj->unk212[0] = 0xFF;
+    obj->unk20F = 0xFF;
+    obj->pad210 = 0xFF;
+    obj->unk211 = 0xFF;
+    OBJ(u8, 0x128) = 0xFF;
+    obj->old_x_position = obj->x_position;
+    obj->old_y_position = obj->y_position;
+    obj->unk1CC = obj->y_position;
+    obj->old_z_position = obj->z_position;
+    if ((SPAWN->flags & 6) || (SPAWN->flags & 4) || (SPAWN->flags & 2)) {
+        func_1506160C(obj, 4, 0, 0, 0);
+    }
+    obj->unk232 = SPAWN->unkD;
+    if ((arg1 < D_8008FD8C) && (D_8008FE44[arg1] == -2)) {
+        *((u8 *)obj->unk31C + 0x84) = 1;
+        obj->unk232 = 1;
+    }
+    {
+    u8 pad;
+    if (obj->unk127 != 0xFF) {
+        OBJ(u8, 0x128) = func_151E5F64(obj->unk127);
+        *((s8 *)obj->unk31C + 0x19A) = D_800D2130;
+        *((u8 *)obj->unk31C + 0x1AF) = 0x40;
+        *((s8 *)obj->unk31C + 0x1B0) = -1;
+    }
+    }
+    obj->health = SPAWN->unkE & 0xF;
+    obj->unk1E5 = SPAWN->unkF;
+    obj->unk1E6 = obj->unk1E5;
+    obj->unk221 = 1;
+    obj->pad23C = SPAWN->unk1C;
+    obj->unk23D = SPAWN->unk1D;
+    obj->unk76 = SPAWN->angle << 8;
+    a = obj->unk76;
+    obj->unk7A = a;
+    obj->unk78 = a;
+    obj->unk40 = (a + 0x4000) * 0.0054931640625f;
+    OBJ(u8, 0x140) = arg2;
+    obj->gravity = 6.0f;
+    obj->unkF8 = SPAWN->unk18;
+    if (obj->unkF8 & 0x200000) {
+        OBJ(s16, 0x224) = obj->y_position;
+    }
+    if (obj->unkF8 & 0x10000000) {
+        OBJ(s16, 0x38) = obj->y_position - 500.0f;
+    }
+    if (obj->unkF8 & 0x800000) {
+        D_800C67F0 = 1;
+    }
+    obj->unk1E4 = SPAWN->unk11;
+    obj->pad66 = SPAWN->unk10;
+    OBJ(u8, 0x1DD) = 0x78;
+    OBJ(u8, 0x1DE) = 0x78;
+    OBJ(u8, 0x1DF) = 0x78;
+    OBJ(u8, 0x1E0) = 0xFF;
+    OBJ(u8, 0x1E1) = 0xFF;
+    OBJ(u8, 0x1E2) = 0xFF;
+    obj->unk23E = 4;
+    obj->unk246 = 1;
+    obj->unk247 = 0x64;
+    obj->unk248 = 0x64;
+    obj->unk1FC |= 2;
+    func_150839B8(obj, type, arg0);
+    t = SPAWN->unk13 & 0x7F;
+    obj->unk92 = ((SPAWN->unk13 & 0x80) << 8) | t;
+    obj->unk90 = SPAWN->unk14;
+    func_150837D4(idx, type, 1);
+    if (type != 0xFF) {
+        func_150838EC(obj, 0, 0, 1.0f);
+    } else {
+        obj->unk5 = 3;
+    }
+    if (obj->unkF8 & 0x4000) {
+        func_1503DA9C(obj, obj->id, 0, 0);
+    }
+    if (SPAWN->unk29) {
+        func_15083568(obj, SPAWN->unk29, 1.0f, 0);
+    }
+    if (obj->unk127 != 0xFF) {
+        obj->health = func_150859AC(obj->unk127, 4);
+        obj->unkB2 = *(s16 *)&D_800D2132;
+        func_150829D8((State150829D8 *)obj);
+        func_15083384(obj, func_150859AC(idx, 1));
+    }
+    if (((obj->pad66 & 0xC) == 8) || ((obj->pad66 & 0xC) == 0xC)) {
+        func_150832AC(obj);
+    } else {
+        OBJ(s32, 0x314) = 0;
+    }
+    obj->pad288[0] = func_15084CB0(type);
+    if (D_800BE616 != 0) {
+        t = func_151E5F64(obj->unk127);
+        if (t >= 4) {
+            t = 3;
+        }
+        if (type == 0x3B) {
+            OBJ(u8, 0x68) = t + 1;
+        } else if (type == 0x77) {
+            OBJ(u8, 0x68) = t + 0x10;
+        }
+    }
+    if ((D_80038080 == 0) && (D_800BE9F0 != 0x1D) && (SPAWN->unk2E == 0xFF)) {
+        found = obj->unk2C9;
+        if (found == 0) {
+            found = 1;
+        }
+        for (i = 0; i < found; i++) {
+            ((u8 *)D_800D2040)[(*(u8 **)((u8 *)obj + 0x2C4))[i]] = 0xFF;
+        }
+    }
+    if (D_800BE9F0 == 0x1D) {
+        obj->pad66 &= ~0x20;
+    }
+    func_1514D15C(obj);
+    r = func_150849A0((struct GameAEB40Struct_s *)obj);
+    found = 0;
+    for (i = 0; i < 2; i++) {
+        if (r == D_800A7230[i][0]) {
+            found = 1;
+            break;
+        }
+    }
+    if (found) {
+        mem = (Alloc82A44 *)allocate_memory(0xC, 1, 0, 2);
+        OBJ(Alloc82A44 *, 0x260) = mem;
+        if (mem != NULL) {
+            mem->unk8 = 0;
+            mem->unk9 = 0xFF;
+            mem->unk0 = 0.0f;
+            mem->unk4 = 1.0f;
+        }
+    }
+    func_15084C30(obj);
+    return ret;
+}
 
 void func_150832AC(struct127 *arg0) {
     GameAEB40AnimationData *temp_v1;

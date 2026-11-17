@@ -1,5 +1,7 @@
 #include <ultra64.h>
+#define func_1000E770 func_1000E770_2args
 #include "functions.h"
+#undef func_1000E770
 #include "variables.h"
 
 s32 func_151149AC(u32);
@@ -1433,7 +1435,49 @@ struct225 *func_15162FAC(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, s8 arg5,
 }
 
 // big one
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_151630F4.s")
+extern s32 func_151EF610(void);
+s32 func_1000E770();
+
+s32 func_151630F4(struct225 *arg0) {
+    struct241 *s;
+    s32 r;
+    s32 sp20[2];
+    s32 n;
+
+    s = (struct241 *)&arg0->unk18;
+    if (arg0->unk14->unk9 == 1) {
+        return 1;
+    }
+    arg0->unk14->unk2F = s->unk0;
+    {
+        s32 i;
+        for (i = D_800BE9E4; i != 0; i--) {
+            s->unk0 -= s->unk0 * s->unk4;
+        }
+    }
+    if (s->unk14 > 0) {
+        s->unk20 -= D_800BE9A4;
+        if (s->unk20 < 0.0f) {
+            s->unk0 = func_150ADA68() * s->unk30 + s->unk2C;
+            s->unk20 = func_150ADA68() * s->unk28 + s->unk24;
+lab2:
+            r = func_151EF610() % 1200 + s->unk14 * 800 - 2400;
+            n = 60 - s->unk14 * 10;
+            sp20[0] = n;
+            sp20[1] = r;
+            func_1000E770(NULL, NULL, n, r);
+            s->unk14--;
+        }
+    } else {
+        s->unk8 -= D_800BE9A4;
+        if (s->unk8 < 0.0f) {
+            s->unk14 = func_150ADA20() % (u32)(s->unk1C + 1) + s->unk18;
+            s->unk20 = 0.0f;
+            s->unk8 = func_150ADA68() * s->unk10 + s->unkC;
+        }
+    }
+    return 1;
+}
 
 struct225 *func_15163414(Header *header, f32* arg1, f32* arg2, f32* arg3, s8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, u8 argB, s32 argC, u8 argD, s32 argE) {
     struct225 *temp_v0;

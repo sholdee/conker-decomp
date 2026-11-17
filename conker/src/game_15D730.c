@@ -318,7 +318,236 @@ void func_151303EC(Obj151303EC *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_15D730/func_15130A9C.s")
+typedef struct Vec3f_15130A9C {
+    f32 x, y, z;
+} Vec3f_15130A9C;
+
+typedef struct Mask15130A9C {
+    s16 unk0;
+    s16 unk2;
+} Mask15130A9C;
+
+typedef struct Part15130A9C {
+    u8 pad0[0x10];
+    s32 unk10;
+    s32 unk14;
+    u16 unk18;
+    u8 pad1A[2];
+    s32 unk1C;
+    u8 pad20[0xB];
+    u8 unk2B;
+    u8 pad2C;
+    u8 unk2D;
+    u8 pad2E[0xA];
+    f32 unk38;
+    f32 unk3C;
+    Vec3f_15130A9C pos;
+    Vec3f_15130A9C off;
+    u8 pad58[0x10];
+    s32 unk68;
+    Mask15130A9C *unk6C;
+    u8 pad70[4];
+    s8 unk74;
+    u8 pad75;
+    u8 unk76;
+    u8 pad77;
+    s16 unk78;
+    u8 pad7A[2];
+    f32 unk7C;
+} Part15130A9C;
+
+typedef struct Vp15130A9C {
+    s16 vscale[4];
+    s16 vtrans[4];
+} Vp15130A9C;
+
+typedef struct View15130A9C {
+    u8 pad0[0x1C];
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    f32 unk30;
+    u8 pad34[0xC];
+    Vp15130A9C vp[(0x180 - 0x40) / 0x10];
+} View15130A9C;
+
+typedef struct Tex15130A9C {
+    u8 pad0[6];
+    u16 unk6;
+    u16 unk8;
+    u8 padA[2];
+} Tex15130A9C;
+
+typedef struct Mode15130A9C {
+    s32 unk0;
+    s32 unk4;
+} Mode15130A9C;
+
+struct Game15D730ColorState;
+extern s32 (*D_80089804[])(Part15130A9C *, s16);
+extern Tex15130A9C D_80090B60[];
+extern Mode15130A9C D_800A4AC8[];
+extern s32 D_800D2C9C;
+s32 func_15144CEC(Vec3f_15130A9C *, f32 *, f32 *, f32 *, f32 *, s32);
+void func_1513137C(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, struct Game15D730ColorState *arg4);
+void func_1513164C(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7, s32 a8);
+void func_1515E888(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5, u8 *arg6, u8 *arg7);
+Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
+Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
+Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
+Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
+Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
+Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
+
+Gfx *func_15130A9C(Gfx *gfx, Part15130A9C *p, s16 arg2) {
+    s32 pad0;
+    Vec3f_15130A9C pos;
+    u8 update;
+    u8 mode;
+    u8 shade;
+    s16 primR;
+    s16 primG;
+    s16 primB;
+    s16 primA;
+    s16 envR;
+    s16 envG;
+    s16 envB;
+    s16 envA;
+    f32 screen[2];
+    f32 depth;
+    f32 w;
+    f32 scale;
+    f32 sizeX;
+    f32 sizeY;
+    f32 ulx;
+    f32 uly;
+    f32 lrx;
+    f32 lry;
+
+    if ((p->unk68 & 0x40000) && !(p->unk76 & (1 << arg2))) {
+        return gfx;
+    }
+    update = 1;
+    mode = p->unk18 & 0xFF;
+    shade = (p->unk18 & 0xFF00) >> 8;
+    if (p->unk68 & 0x8000) {
+        if (p->unk74 != -1 && D_80089804[p->unk74](p, arg2) == 0) {
+            return gfx;
+        }
+    }
+    if (p->unk68 & 0x20000) {
+        if (p->unk6C != NULL && !(p->unk6C->unk2 & (1 << arg2))) {
+            return gfx;
+        }
+    }
+    if (p->unk68 & 0x1000) {
+        pos.x = p->pos.x + p->off.x;
+        pos.y = p->pos.y + p->off.y;
+        pos.z = p->pos.z + p->off.z;
+    } else {
+        pos = p->pos;
+    }
+    if (func_15144CEC(&pos, screen, &depth, &w, &scale, arg2)) {
+        View15130A9C *view;
+        Tex15130A9C *tex;
+        f32 fw;
+        f32 fh;
+        f32 dy;
+        s32 s;
+        s32 t;
+        s32 dsdx;
+
+        view = (View15130A9C *)(D_800BE628 + arg2 * 0x180);
+        sizeX = p->unk38 * scale * view->unk1C * 16.94900131f;
+        sizeY = p->unk3C * scale * view->unk20 * 16.94900131f;
+        if (p->unk68 & 0x200000) {
+            if (p->unk7C < sizeX) {
+                sizeX = p->unk7C;
+            }
+            if (p->unk7C < sizeY) {
+                sizeY = p->unk7C;
+            }
+        }
+        if (p->unk68 & 0x400000) {
+            if (sizeX < p->unk78) {
+                sizeX = p->unk78;
+            }
+            if (sizeY < p->unk78) {
+                sizeY = p->unk78;
+            }
+        }
+        ulx = screen[0] - sizeX;
+        lrx = screen[0] + sizeX;
+        uly = screen[1] - sizeY;
+        lry = screen[1] + sizeY;
+        if (view->unk2C <= lrx) {
+        if (ulx <= view->unk30) {
+        if (view->unk24 <= lry) {
+        if (uly <= view->unk28) {
+            s32 dtdy;
+
+            ulx *= 4.0f;
+            uly *= 4.0f;
+            lrx *= 4.0f;
+            lry *= 4.0f;
+            if (update) {
+                gDPPipeSync(gfx++);
+                update = 0;
+            }
+            gDPSetPrimDepth(gfx++, (s32)((depth * scale * ((View15130A9C *)D_800BE628)[arg2].vp[D_800BE9C0].vscale[2] + ((View15130A9C *)D_800BE628)[arg2].vp[D_800BE9C0].vtrans[2]) * 32.0f), 0);
+            tex = &D_80090B60[p->unk2D];
+            fw = (u32)tex->unk6;
+            fh = (u32)tex->unk8;
+            dy = lry - uly;
+            if (ulx < lrx) {
+                dsdx = (4096.0f * fw) / (lrx - ulx);
+            } else {
+                dsdx = 0;
+            }
+            if (dy > 0.0f) {
+                dtdy = (4096.0f * fh) / dy;
+            } else {
+                dtdy = 0;
+            }
+            s = 0;
+            t = 0;
+            if (p->unk68 & 0x40) {
+                s = (tex->unk6 - 1) << 5;
+                dsdx = -dsdx & 0xFFFF;
+            }
+            if (p->unk68 & 0x80) {
+                t = (tex->unk8 - 1) << 5;
+                dtdy = -dtdy & 0xFFFF;
+            }
+            if (p->unk68 & 0x10000) {
+                u8 color[4];
+
+                func_1513137C(&primR, &primG, &primB, &primA, (struct Game15D730ColorState *)p);
+                func_1515E888(arg2, (s32)pos.x, (s32)pos.y, (s32)pos.z, 0xFF, color, 0, 0);
+                envR = color[0];
+                envG = color[1];
+                envB = color[2];
+                envA = p->unk2B;
+            } else {
+                func_1513164C((s32)&primR, (s32)&primG, (s32)&primB, (s32)&primA, (s32)&envR, (s32)&envG, (s32)&envB, (s32)&envA, (s32)p);
+            }
+            gfx = func_1513F4E4(gfx, shade, &update);
+            gfx = func_15142B7C(gfx, p->unk10, p->unk14 | 0x10000 | 0x100000);
+            gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &update);
+            gfx = func_15142C10(gfx, envR, envG, envB, envA, &update);
+            gfx = func_15142E24(gfx, (s32)&D_80090B60[p->unk2D], p->unk1C, 2, 0, 0, p->unk2D, 0, 0, &update, (p->unk68 & 0x800000) ? 0x3E : 3);
+            gfx = func_15142FBC(gfx, ((p->unk68 & 0x100) ? 0x100000 : 0) | D_800D2C9C | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[mode].unk0 | D_800A4AC8[mode].unk4 | 4, &update);
+            gSPScisTextureRectangle(gfx++, (s32)ulx, (s32)uly, (s32)lrx, (s32)lry, 0, s, t, dsdx, dtdy);
+        }
+        }
+        }
+        }
+    }
+end:
+    return gfx;
+}
 
 typedef struct Game15D730ColorState {
     u8 pad0[0x24];

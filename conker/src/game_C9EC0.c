@@ -751,4 +751,64 @@ s32 func_1509D8FC(s32 arg0, s32 arg1, Func1509D8FCArg *arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C9EC0/func_1509DBBC.s")
+typedef struct Node1509DBBC {
+    u8 pad0[8];
+    struct Node1509DBBC *next;
+    u8 padC[0x3C];
+    u8 type;
+} Node1509DBBC;
+
+extern s32 D_800A6060[];
+extern Node1509DBBC *D_800DCE50[][0x68];
+void func_150E36BC(s32 arg0, s32 *arg1, s32 *arg2, s32 *arg3);
+
+s32 func_1509DBBC(s32 arg0, s32 arg1, s32 arg2) {
+    s32 sp3C;
+    s32 sp38;
+    s32 sp34;
+    s32 id;
+
+    sp3C = 0;
+    sp38 = 0;
+    sp34 = 0;
+    switch (arg0) {
+    case 0x19:
+        if (arg1 == 4) {
+            u8 i;
+            s8 j;
+            Node1509DBBC *node;
+
+            i = 0;
+            do {
+                for (j = 0; j < 3; j++) {
+                    node = D_800DCE50[i][D_800A6060[j]];
+                    while (node != NULL) {
+                        Node1509DBBC *nx;
+                        nx = node->next;
+                        if (node->type == 2) {
+                            return 0;
+                        }
+                        node = nx;
+                    }
+                }
+                i++;
+            } while (i < 2);
+            return 1;
+        }
+        break;
+    case 4:
+    case 5:
+    case 6:
+        if (arg1 == 0 || arg1 == 1) {
+            id = arg0 >> 6;
+            if (id != 0) {
+                func_150E36BC(id, &sp3C, &sp38, &sp34);
+                if (arg1 == 0) {
+                    sp38 = (sp3C << 16) | (sp34 & 0xFFFF);
+                }
+                return sp38;
+            }
+        }
+        break;
+    }
+}

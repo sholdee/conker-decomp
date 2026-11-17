@@ -167,4 +167,36 @@ s32 func_151DD710(OSMesgQueue *mq, OSContStatus *data) {
     return data->errno;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_20A990/func_151DD8C0.s")
+extern u8 *D_800E0A70;
+extern s32 D_800E0A74;
+extern s8 D_800E0BD2;
+
+void func_151DD8C0(void) {
+    typedef struct { s8 x; s8 y; u16 time; u16 buttons; } Entry;
+    typedef struct { u16 buttons; s8 x; s8 y; } Input;
+    Input *input = (Input *)D_800BE748;
+    Entry *e;
+    s32 idx;
+    s32 next;
+    s32 time;
+    u16 held;
+    held = input->buttons & 0x1000;
+    idx = D_800E0A74;
+    e = (Entry *)D_800E0A70 + idx;
+    input->x = e->x;
+    input->y = e->y;
+    input->buttons = e->buttons | held;
+    D_800E0BD2 = 0;
+    if (idx < 0x1F3) {
+        next = e[1].time;
+        if (D_800BE9E4 < next) {
+            D_800E0BD2 = next - D_800BE9E4;
+        }
+    }
+    time = e->time;
+    D_800BE9E4 = time;
+    D_800E0A74 = idx + 1;
+    if (D_800E0A74 >= 0x1F3) {
+        D_800E0A74 = 0x1F3;
+    }
+}

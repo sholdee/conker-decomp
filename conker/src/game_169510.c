@@ -372,7 +372,103 @@ void func_1513CBA4(struct210 *arg0) {
     D_80089F2C[idx]();
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513CBF0.s")
+typedef struct {
+    u8 pad0[0x10];
+    s32 unk10;
+    u8 pad14[4];
+    u32 unk18;
+    u8 pad1C[2];
+    u8 unk1E;
+    u8 pad1F;
+    s32 unk20;
+    u8 pad24[4];
+    u8 unk28;
+    u8 unk29;
+    u8 unk2A;
+    u8 unk2B;
+    u8 unk2C;
+    u8 unk2D;
+    u8 unk2E;
+    u8 unk2F;
+    u32 unk30;
+    s32 unk34;
+    u8 unk38;
+    u8 pad39[7];
+    Vtx unk40[4];
+    u8 unk80[4];
+    u8 unk84[0x20];
+    u8 unkA4[4];
+} Obj1513CBF0;
+
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+} Mode1513DB00;
+extern Mode1513DB00 D_800A4AC8[];
+extern u32 D_800D2C9C;
+Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
+Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
+Gfx *func_15142CF0(Gfx *, s32, s32, s32, s32, s32, s32, u8 *);
+Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
+Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
+void func_151441A4(s16 *, s16 *, s16 *, s16 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+void func_151442FC(s16 *, s16 *, s16 *, s16 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+Gfx *func_151462C8(Gfx *, void *, s32, s32, s32, s16, void *, s32, s32);
+Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
+
+Gfx *func_1513CBF0(Gfx *gfx, Obj1513CBF0 *arg1, s16 arg2) {
+    s32 v1;
+    u8 sp7B;
+    u8 sp7A;
+    u8 sp79;
+    s16 sp76;
+    s32 mode;
+    s16 sp6E;
+    s16 sp6C;
+    s16 sp6A;
+    s16 sp68;
+    s16 sp66;
+    s16 sp64;
+    s16 sp62;
+    s16 sp60;
+
+    if (arg1->unk10 & 1) {
+    if ((arg1->unk18 & 0x2000) && !(arg1->unk38 & (1 << arg2))) {
+        return gfx;
+    }
+    sp7B = 1;
+    sp7A = arg1->unk30 & 0xFF;
+    sp79 = (arg1->unk30 & 0xFFFF0000) >> 16;
+    sp76 = arg1->unk18 & 0x30;
+    gfx = func_151462C8(gfx, arg1->unk84, 0, 0, 0, arg2, arg1->unkA4, 2,
+                        (arg1->unk18 & 0x4000) ? arg1->unk34 : 0);
+    func_151441A4(&sp6E, &sp6C, &sp6A, &sp68, arg1->unk2A, arg1->unk2B, arg1->unk2C, arg1->unk2D,
+                  0xFF, 0xFF, 0xFF, arg1->unk28, arg1->unk29, (arg1->unk18 & 0x100) ? arg1->unk2E : 3);
+    func_151442FC(&sp66, &sp64, &sp62, &sp60, arg1->unk2A, arg1->unk2B, arg1->unk2C, arg1->unk2D,
+                  0xFF, 0xFF, 0xFF, arg1->unk28, arg1->unk29, (arg1->unk18 & 0x200) ? arg1->unk2F : 4);
+    v1 = 0;
+    if (sp76 & 0x10) {
+        v1 = 0x200;
+    }
+    if (sp76 & 0x20) {
+        v1 |= 0x400;
+    }
+    gfx = func_15142B7C(gfx, ((arg1->unk18 & 0x400) ? 0x20000 : 0) | v1 | 1, 0x600);
+    if (arg1->unk1E != 0xFF) {
+        gfx = func_15142E24(gfx, &D_80090B60[arg1->unk1E], arg1->unk20, 2, 0, 0, arg1->unk1E, 0, 0, &sp7B,
+                            (arg1->unk18 & 0x20000) ? 0x3E : 3);
+    }
+    gfx = func_15142C10(gfx, sp66, sp64, sp62, sp60, &sp7B);
+    gfx = func_15142CF0(gfx, 0, 0, sp6E, sp6C, sp6A, sp68, &sp7B);
+    gfx = func_1513F4E4(gfx, sp79, &sp7B);
+    gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | ((arg1->unk1E == 0xFF) ? 0 : D_800D2C9C) | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[sp7A].unk0 | D_800A4AC8[sp7A].unk4, &sp7B);
+
+    gSPVertex(gfx++, arg1->unk40, 4, 0);
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    gSP1Triangle(gfx++, 0, 2, 3, 0);
+    }
+    return gfx;
+}
 
 void func_1513CF9C(s32 arg0, s32 arg1, u8 arg2) {
     D_80089F60[0](arg0, arg1, arg2);
@@ -705,7 +801,113 @@ void func_1513D668(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s16 a
 //     return 1;
 // }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513DB00.s")
+typedef struct {
+    u8 pad0[0x10];
+    s32 unk10;
+    u8 pad14[0x4];
+    u8 unk18;
+    u8 pad19;
+    u16 unk1A;
+    u8 pad1C[0x4];
+    s32 unk20;
+    u8 pad24[0x4];
+    u8 unk28;
+    u8 unk29;
+    u8 unk2A;
+    u8 unk2B;
+    u8 pad2C[0x8];
+    u8 unk34[0x24];
+    s32 unk58;
+    u8 unk5C;
+    u8 unk5D;
+    u8 unk5E;
+    u8 unk5F;
+    s16 *unk60;
+    u8 unk64;
+    u8 pad65[0x3];
+    s32 unk68;
+    u8 pad6C[0x7];
+    u8 unk73;
+    u8 pad74[0x28];
+    u8 unk9C[0x64];
+    s32 unk100[4];
+} Obj1513DB00;
+
+
+extern s32 (*D_80089E1C[])(Obj1513DB00 *, s16);
+
+Gfx *func_1513DB00(Gfx *arg0, Obj1513DB00 *arg1, s16 arg2) {
+    s32 pad8C;
+    u8 flag;
+    s16 r1;
+    s16 g1;
+    s16 b1;
+    s16 a1;
+    s16 r2;
+    s16 g2;
+    s16 b2;
+    s16 a2;
+    u8 mode;
+    u8 hi;
+    s16 bits;
+    s32 cyc;
+    s32 vtx;
+
+    if (arg1->unk10 & 1) {
+        flag = 1;
+        if ((arg1->unk58 & 8) && !(arg1->unk64 & (1 << arg2))) {
+            if (arg1->unk100[arg2]) {
+                func_100043B4((s32 *)arg1->unk100[arg2], 2);
+                arg1->unk100[arg2] = 0;
+            }
+            return arg0;
+        }
+        mode = arg1->unk1A & 0xFF;
+        hi = (arg1->unk1A & 0xFF00) >> 8;
+        bits = arg1->unk58 & 0xC000;
+        if ((arg1->unk58 & 0x01000000) && arg1->unk60 != NULL && !(arg1->unk60[1] & (1 << arg2))) {
+            if (arg1->unk100[arg2]) {
+                func_100043B4((s32 *)arg1->unk100[arg2], 2);
+                arg1->unk100[arg2] = 0;
+            }
+            return arg0;
+        }
+        vtx = D_80089E1C[arg1->unk73](arg1, arg2);
+        if (vtx == 0) {
+            if (arg1->unk100[arg2]) {
+                func_100043B4((s32 *)arg1->unk100[arg2], 2);
+                arg1->unk100[arg2] = 0;
+            }
+            return arg0;
+        }
+        arg0 = func_151462C8(arg0, arg1->unk9C, 0, 0, 0, arg2, arg1->unk34, 2, (arg1->unk58 & 0x04000000) ? arg1->unk68 : 0);
+        func_151441A4(&r1, &g1, &b1, &a1, arg1->unk28, arg1->unk29, arg1->unk2A, arg1->unk2B, 0xFF, 0xFF, 0xFF, arg1->unk5C, arg1->unk5D, (arg1->unk58 & 0x40000) ? arg1->unk5E : 4);
+        func_151442FC(&r2, &g2, &b2, &a2, arg1->unk28, arg1->unk29, arg1->unk2A, arg1->unk2B, 0xFF, 0xFF, 0xFF, arg1->unk5C, arg1->unk5D, (arg1->unk58 & 0x80000) ? arg1->unk5F : 5);
+        cyc = 0;
+        if (bits & 0x4000) {
+            cyc = 0x200;
+        }
+        if (bits & 0x8000) {
+            cyc |= 0x400;
+        }
+        if (arg1->unk58 & 0x100000) {
+            cyc |= 0x20000;
+        }
+        arg0 = func_15142B7C(arg0, cyc | 1, 0x600);
+        if (arg1->unk18 != 0xFF) {
+            s32 wrap;
+            wrap = (arg1->unk58 & 0x200000) ? 0 : 2;
+            arg0 = func_15142E24(arg0, (s32)&D_80090B60[arg1->unk18], arg1->unk20, wrap, 0, 0, arg1->unk18, 0, 0, &flag, (arg1->unk58 & 0x40000000) ? 0x3E : 3);
+        }
+        arg0 = func_15142C10(arg0, r2, g2, b2, a2, &flag);
+        arg0 = func_15142CF0(arg0, 0xF2, 0, r1, g1, b1, a1, &flag);
+        arg0 = func_1513F4E4(arg0, hi, &flag);
+        arg0 = func_15142FBC(arg0, G_PM_NPRIMITIVE | ((arg1->unk58 & 0x20000000) ? G_CYC_2CYCLE : G_CYC_1CYCLE) | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | ((arg1->unk18 == 0xFF) ? 0 : D_800D2C9C) | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[mode].unk0 | D_800A4AC8[mode].unk4, &flag);
+        gSPVertex(arg0++, vtx, 4, 0);
+        gSP2Triangles(arg0++, 0, 1, 2, 0, 0, 2, 3, 0);
+    }
+    return arg0;
+}
 
 // jump table
 extern void (*D_80089F64[])(void *, s32, u8);
@@ -1090,6 +1292,8 @@ void *func_1513EE14(void *arg0, s16 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513F114.s")
 
+s32 func_15140410(s32, s32, s32, s16);
+
 void func_1513F4B0(struct210 *arg0, s16 arg1) {
     func_15140410(arg0, &arg0->unk110, &arg0->unk11C, arg1);
 }
@@ -1157,7 +1361,55 @@ s32 func_1513F6E8(ScaleUpdateState *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513F728.s")
+typedef struct {
+    struct17 unk0;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+} Struct1513F728Sub;
+
+typedef struct {
+    char pad0[0x34];
+    struct17 unk34;
+    f32 unk40;
+    f32 unk44;
+    f32 unk48;
+    char pad4C[0xC4];
+    Struct1513F728Sub unk110;
+} Struct1513F728Obj;
+
+s32 func_1513F728(Struct1513F728Obj *arg0) {
+    Struct1513F728Sub *sub;
+    struct17 old;
+    s32 i;
+
+    sub = (Struct1513F728Sub *)((u8 *)arg0 + 0x110);
+    old = sub->unk0;
+    for (i = D_800BE9E4; i != 0; i--) {
+        sub->unk0.unk0 *= sub->unk10;
+        sub->unk0.unk4 *= sub->unk10;
+        sub->unk0.unk8 *= sub->unk10;
+    }
+    {
+        f32 ax;
+        f32 ay;
+        f32 az;
+
+        sub->unk0.unk4 += sub->unkC * D_800BE9A4;
+        ax = (sub->unk0.unk0 - old.unk0) * D_800BE9A8;
+        ay = (sub->unk0.unk4 - old.unk4) * D_800BE9A8;
+        az = (sub->unk0.unk8 - old.unk8) * D_800BE9A8;
+        arg0->unk34.unk0 += (old.unk0 + 0.5f * ax * D_800BE9A4) * D_800BE9A4;
+        arg0->unk34.unk4 += (old.unk4 + 0.5f * ay * D_800BE9A4) * D_800BE9A4;
+        arg0->unk34.unk8 += (old.unk8 + 0.5f * az * D_800BE9A4) * D_800BE9A4;
+    }
+    arg0->unk40 += sub->unk14 * D_800BE9A4;
+    arg0->unk44 += sub->unk18 * D_800BE9A4;
+    arg0->unk48 += sub->unk1C * D_800BE9A4;
+    return 1;
+}
 
 void func_1513FA2C(void *arg0, s16 arg1) {
     f32 stack_vals[2];
@@ -1311,7 +1563,49 @@ void func_151403DC(s32 arg0, u8 arg1) {
     func_15169260(&D_800A5178, 3, arg0, arg1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_15140410.s")
+s32 func_15140410(s32 arg0, s32 arg1, s32 arg2, s16 arg3) {
+    Game169510ScaledVertex *vertices;
+    Game169510ScaledVertex *result;
+    f32 ax, ay, az, bx, by, bz;
+
+    {
+        u8 fresh;
+
+        func_151D5D60((u8 *)arg0 + 0x100, arg3, 0x40, (void **)&vertices, &fresh);
+        result = vertices;
+        if (vertices != 0) {
+            if (fresh != 0) {
+                memcpy(*(u8 **)((u8 *)arg0 + arg3 * 4 + 0x100), (u8 *)arg0 + 0xC0, 0x40);
+                memcpy(*(u8 **)((u8 *)arg0 + arg3 * 4 + 0x100) + 0x40, (u8 *)arg0 + 0xC0, 0x40);
+            }
+        } else {
+            return 0;
+        }
+    }
+    ax = ((f32 *)arg1)[0] * ((Game169510ScaledOwner *)arg0)->width;
+    ay = ((f32 *)arg1)[1] * ((Game169510ScaledOwner *)arg0)->width;
+    az = ((f32 *)arg1)[2] * ((Game169510ScaledOwner *)arg0)->width;
+    bx = ((f32 *)arg2)[0] * ((Game169510ScaledOwner *)arg0)->height;
+    by = ((f32 *)arg2)[1] * ((Game169510ScaledOwner *)arg0)->height;
+    bz = ((f32 *)arg2)[2] * ((Game169510ScaledOwner *)arg0)->height;
+    vertices[0].x = (s32)(((Game169510ScaledOwner *)arg0)->x + ax + bx);
+    vertices[0].y = (s32)(((Game169510ScaledOwner *)arg0)->y + ay + by);
+    vertices[0].z = (s32)(((Game169510ScaledOwner *)arg0)->z + az + bz);
+    vertices[0].flag = 0;
+    vertices[1].x = (s32)(((Game169510ScaledOwner *)arg0)->x - ax + bx);
+    vertices[1].y = (s32)(((Game169510ScaledOwner *)arg0)->y - ay + by);
+    vertices[1].z = (s32)(((Game169510ScaledOwner *)arg0)->z - az + bz);
+    vertices[1].flag = 0;
+    vertices[2].x = (s32)(((Game169510ScaledOwner *)arg0)->x - ax - bx);
+    vertices[2].y = (s32)(((Game169510ScaledOwner *)arg0)->y - ay - by);
+    vertices[2].z = (s32)(((Game169510ScaledOwner *)arg0)->z - az - bz);
+    vertices[2].flag = 0;
+    vertices[3].x = (s32)(((Game169510ScaledOwner *)arg0)->x + ax - bx);
+    vertices[3].y = (s32)(((Game169510ScaledOwner *)arg0)->y + ay - by);
+    vertices[3].z = (s32)(((Game169510ScaledOwner *)arg0)->z + az - bz);
+    vertices[3].flag = 0;
+    return (s32)result;
+}
 
 /* Sort-list node (0x110 bytes); func_151406AC insertion-sorts one D_800DCE50 bucket by key. */
 typedef struct Node151406AC {

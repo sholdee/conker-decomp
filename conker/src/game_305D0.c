@@ -172,7 +172,40 @@ s32 func_150034B4(void) {
       }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_305D0/func_15003570.s")
+extern void func_10004074(void *);
+extern u8 D_1A37E0[];
+
+void func_15003570(void)
+{
+  s32 addr;
+  s32 odd;
+  u8 *buf;
+  s32 i;
+  u8 *b;
+  s32 val;
+  s32 len;
+  buf = allocate_memory(16, 1, 2, 0);
+  addr = (s32) D_1A37E0;
+  for (i = 0; i < 7762; i++)
+  {
+    if (addr & 1)
+    {
+      addr--;
+      odd = 1;
+    }
+    else
+    {
+      odd = ((u16 *) D_80091D20)[i] * 0;
+    }
+    func_10004514(addr, buf, 16, 1);
+    b = odd + buf;
+    val = (((b[0] << 24) + (b[1] << 16)) + (b[2] << 8)) + b[3];
+    ((u16 *) D_800B87A0)[i] = val;
+    addr += (u32) (((u16 *) D_80091D20)[i] + odd);
+  }
+
+  func_10004074(buf);
+}
 // NON-MATCHING: something along these lines
 // void func_15003570(void) {
 //     s32 temp_s4;

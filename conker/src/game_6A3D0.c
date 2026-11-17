@@ -53,7 +53,7 @@ extern u16 D_800C4778[];
 extern u16 D_800C5628[];
 extern u16 D_800C4ED0[];
 extern void func_1503D438(s32 *arg0, s32 arg1);
-extern void func_1503D368(s32, s32);
+extern void func_1503D368(s8 *, s32);
 extern s32 func_1503DC3C(s32);
 extern void func_1510CE60(s32, s32, s32, s32, s32 *);
 extern void func_1503D984(s32 arg0);
@@ -102,12 +102,12 @@ s32 func_1503CF20(s32 arg0, s32 arg1, void *arg2, s32 arg3, s32 arg4) {
     D_800C4778[arg0] = hdr->unkC >> 2;
     for (i = 0; i < D_800C4778[arg0]; i++) {
         func_1503D438((s32 *)&D_800C4488[arg0][i], (s32)hdr);
-        func_1503D368((s32)D_800C4488[arg0][i], (s32)hdr);
+        func_1503D368((s8 *)D_800C4488[arg0][i], (s32)hdr);
     }
     n = hdr->unk2C >> 2;
     for (i = 0; i < n; i++) {
         func_1503D438(&((s32 **)D_800C48F0)[arg0][i], (s32)hdr);
-        func_1503D368(((s32 **)D_800C48F0)[arg0][i], (s32)hdr);
+        func_1503D368((s8 *)((s32 **)D_800C48F0)[arg0][i], (s32)hdr);
     }
     D_800C5628[arg0] = hdr->unk1C / 12;
     D_800C4ED0[arg0] = hdr->unk14 >> 4;
@@ -155,7 +155,26 @@ s32 func_1503CF20(s32 arg0, s32 arg1, void *arg2, s32 arg3, s32 arg4) {
     return ret;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_6A3D0/func_1503D368.s")
+void func_1503D368(s8 *arg0, s32 arg1) {
+    s32 i;
+    s8 *entry;
+
+    if (arg0 != NULL) {
+        for (i = 0; arg0[i << 3] != -0x21; i++) {
+            entry = &arg0[i << 3];
+            switch (entry[0]) {
+            case 1:
+                func_1503D438((s32 *)&entry[4], arg1);
+                break;
+            case -0x24:
+                if ((u8)entry[3] == 0xE) {
+                    func_1503D438((s32 *)&entry[4], arg1);
+                }
+                break;
+            }
+        }
+    }
+}
 
 void func_1503D438(s32 *arg0, s32 arg1) {
     s32 temp = *arg0;

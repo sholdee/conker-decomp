@@ -53,6 +53,11 @@ function is right but something ELSE in the bin changed — e.g. a new literal i
   Use `extern` only for genuine globals/tables the function indexes or that are not literals.
   Write floats at FULL precision (`0.1290000081f`, not `0.129f`) — recover the decimal from the
   ROM word. `check` prints `LITERALS:` when a literal differs from the original rodata word.
+- Statics are fine: a function-local or file-level `static` (e.g. `static u8 D_800900D4;`) links —
+  the build retargets references into the object's own .data/.bss to the ROM's original address
+  (tools/rodata_extern.py). Name each static `D_<ADDR>` with its original address (read it off the
+  target's %hi/%lo); an unnamed one is placed from the original instruction pair only once the
+  function matches. Use a static only where the target shows one (e.g. a lui on every access).
 - Switches are fine: write a normal `switch`. The build retargets the compiler's jump table to
   the ROM's original table (tools/rodata_extern.py), so case order/density must make IDO
   emit the same table (same first case and length — read them off the target's `sltiu`/`addiu`).

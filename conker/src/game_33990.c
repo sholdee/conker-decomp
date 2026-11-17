@@ -280,26 +280,29 @@ void func_15006BEC(s32 arg0) {
         ret = func_151DCEF0(&D_800BE900, (u8)((slot << 4) + 4), D_800BE358, 0x80);
     }
 }
-// PERMUTER CANDIDATE best 1532: structure byte-exact; only diff is the target keeps the (dead)
-// return of the first func_151DD4E0 call live in a saved reg (s1) -> 8 saved regs. My build DCEs
-// it (no -g3 dead-local slotting here) -> 7 saved regs, shifting all s-reg numbers & stack offsets.
-// Likely the original uses that return value. Reconstruction:
-// void func_1500707C(s32 arg0) {
-//     s32 i; u8 *p358 = D_800BE358; s8 *p3D8 = &D_800BE3D8;
-//     for (i = 0; i < 8; i++) { p358[i] = 0xFF; }
-//     osWritebackDCacheAll();
-//     if (D_8002AC5C == 0) {
-//         for (i = 0; i < 4; i++) {
-//             if (arg0 == *p3D8) {
-//                 s32 idx = (i << 4) + 4;
-//                 s32 ret = func_151DD4E0(&D_800BE900, (u8)idx, p358);
-//                 func_151DD4E0(&D_800BE900, (u8)(idx + 1), p358);
-//             }
-//             p3D8++;
-//         }
-//     }
-// }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_33990/func_1500707C.s")
+void func_1500707C(s32 arg0) {
+    s32 i;
+    s32 ret;
+    s32 idx;
+    s32 idx2;
+    u8 *p358 = D_800BE358;
+    s8 *p3D8;
+    for (i = 0; i < 8; i++) { p358[i] = 0xFF; }
+    osWritebackDCacheAll();
+    p3D8 = &D_800BE3D8;
+    if (D_8002AC5C == 0) {
+        for (i = 0; i < 4; i++) {
+            if (arg0 == *p3D8) {
+                idx = i * 16 + 4;
+                ret = func_151DD4E0(&D_800BE900, idx, p358);
+                idx2 = idx + 1;
+                ret = func_151DD4E0(&D_800BE900, idx2, p358) + ret - ret;
+                if (ret) {}
+            }
+            p3D8++;
+        }
+    }
+}
 void func_15007168(void) {
     s32 i;
 
@@ -353,7 +356,21 @@ void func_15007168(void) {
 //         func_15007168();
 //     }
 // }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_33990/func_1500727C.s")
+void func_1500727C(void) {
+    s32 i;
+    u16 sum;
+
+    func_151DD3A0(&D_800BE900, 0x44, (s16 *)D_800BE2F0, 0x70);
+    sum = 0xCC;
+    i = 2;
+    do {
+        sum += D_800BE2F0[i] << (i & 3);
+        i++;
+    } while (i < 0x68);
+    if (*(u16 *)D_800BE2F0 != sum) {
+        func_15007168();
+    }
+}
 // PERMUTER CANDIDATE best 1265: same unrolled-checksum 3-register rotation {sum,i,p}->{v0,v1,a0}
 // as func_1500727C, plus target keeps the (dead) func_151DCEF0 return in a stack slot (frame -0x20
 // vs my -0x18) which my build DCEs. Reconstruction:
@@ -365,7 +382,18 @@ void func_15007168(void) {
 //     D_800BE2F0 = sum;
 //     if (D_8002AC5C == 0) { ret = func_151DCEF0(&D_800BE900, 0x44, &D_800BE2F0, 0x70); }
 // }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_33990/func_15007360.s")
+void func_15007360(void) {
+    u16 sum;
+    volatile s32 ret;
+    s32 i;
+
+    sum = 0xCC;
+    for (i = 2; i < 0x68; i++) { sum += D_800BE2F0[i] << (i & 3); }
+    *(u16 *)D_800BE2F0 = sum;
+    if (D_8002AC5C == 0) {
+        ret = func_151DCEF0(&D_800BE900, 0x44, D_800BE2F0, 0x70);
+    }
+}
 /* Keep each loop body on one line: under -g3 the line table changes the unrolled store order. */
 void func_15007440(void) {
     u16 sum;
@@ -387,21 +415,20 @@ void func_15007440(void) {
     D_8008FE30 = 1;
 }
 
-// PERMUTER CANDIDATE best 610: checksum loop byte-exact. Two residual blockers:
-// (1) the dead func_151DCEF0 return -> target keeps `sw v0,0x18(sp)` (frame 0x20); my build DCEs it
-//     (a `volatile s32 ret` restores the store but overshoots frame to 0x30). Same blocker as
-//     func_15007360. (2) copy-loop v0/v1 swap: IDO CSEs &D_800BE358 into a saved reg across the loop
-//     (move v0,dst) instead of the target's rematerialize-at-bottom, swapping dst/src regs.
-// void func_15007558(void) {
-//     u16 sum; s32 i; s8 *src; u8 *dst; u8 *p;
-//     src = D_800E0BE0; dst = D_800BE358;
-//     do { dst++; dst[1] = *src++; } while (src < (s8 *)&D_800E0BFC);
-//     sum = 0xCC; p = D_800BE35A; i = 2;
-//     do { sum += *p++ << (i & 3); i++; } while (i != 0x1E);
-//     *(u16 *)D_800BE358 = sum;
-//     if (D_8002AC5C == 0) { func_151DCEF0(&D_800BE900, 0, D_800BE358, 0x20); }
-// }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_33990/func_15007558.s")
+/* The dead func_151DCEF0 result is kept on the stack via a volatile local (sw v0,0x18(sp)). */
+void func_15007558(void) {
+    u16 sum;
+    volatile s32 ret;
+    s32 i;
+
+    for (i = 0; i < 0x1C; i++) { D_800BE358[i + 2] = D_800E0BE0[i]; }
+    sum = 0xCC;
+    for (i = 2; i < 0x1E; i++) { sum += D_800BE358[i] << (i & 3); }
+    *(u16 *)D_800BE358 = sum;
+    if (D_8002AC5C == 0) {
+        ret = func_151DCEF0(&D_800BE900, 0, D_800BE358, 0x20);
+    }
+}
 
 void func_15007644(void) {
 }

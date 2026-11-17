@@ -275,7 +275,35 @@ void func_151B8DB0(s32 arg0, u8 arg1, u8 arg2, s32 arg3) {
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E6260/func_151B9214.s")
+typedef struct {
+    f32 out;
+    f32 amp;
+    f32 phase;
+    f32 speed;
+    f32 targetAmp;
+    f32 targetSpeed;
+    f32 timer;
+    f32 ampRate;
+    f32 speedRate;
+} Osc151B9214;
+
+s32 func_151B9214(u8 *arg0) {
+    Osc151B9214 *s;
+
+    s = (Osc151B9214 *)(arg0 + 0x170);
+    s->phase += s->speed * D_800BE9A4;
+    s->phase = func_15144B68(s->phase);
+    s->out = sinf(s->phase) * s->amp;
+    if (s->timer > 0.0f) {
+        s->timer -= D_800BE9A4;
+        s->speed += s->speedRate * D_800BE9A4;
+        s->amp = s->amp + s->ampRate * D_800BE9A4;
+    } else {
+        s->speed += (s->targetSpeed - s->speed) * 0.0234f;
+        s->amp += (s->targetAmp - s->amp) * 0.0234f;
+    }
+    return 1;
+}
 
 void func_150A8050(f32 (*)[4], f32, f32, f32);
 

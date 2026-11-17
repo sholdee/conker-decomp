@@ -28,7 +28,111 @@ void func_1501BB20(void) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_48FD0/func_1501BBB8.s")
+extern u16 D_800BE700[];
+extern u16 D_800BE708[];
+extern u16 D_800BE718[];
+extern u8 D_800BE740;
+extern OSContPad D_800BE918[];
+extern u16 D_800BE930[];
+extern u8 D_800E0B95;
+extern OSMesg D_800BE990;
+void func_1501C57C(void);
+void func_151DD8C0(void);
+
+#define PADS ((OSContPad *)D_800BE748)
+
+struct14 *func_1501BBB8(void) {
+    s32 unused;
+    s32 j;
+    s32 demo;
+    s32 count;
+    OSContPad pads[4];
+    s32 i;
+    s32 x;
+    s32 y;
+
+    for (i = 0; i < 4; i++) {
+        D_800BE718[i] = PADS[i].button;
+    }
+    osRecvMesg(&D_800BE900, &D_800BE990, 1);
+    osContGetReadData(pads);
+    func_1501C57C();
+    D_80084064 = 1;
+    D_800BE740 = 0;
+    for (i = 0; i < 4; i++) {
+        if (pads[i].errno != 0) {
+            pads[i].button = 0;
+            pads[i].stick_x = 0;
+            pads[i].stick_y = 0;
+        } else {
+            D_800BE740 |= 1 << i;
+        }
+    }
+    if (D_800BE9F0 != 0x1D) {
+        count = D_8008FD90;
+    } else {
+        count = 4;
+    }
+    for (j = 0; j < 4; j++) {
+        i = D_80084060[j];
+        if (i < 4 && j < count) {
+            PADS[j].button = pads[i].button;
+            PADS[j].stick_x = pads[i].stick_x;
+            PADS[j].stick_y = pads[i].stick_y;
+            PADS[j].button |= D_800BE720[i];
+            D_800BE720[i] = 0;
+        } else {
+            PADS[j].button = 0;
+            PADS[j].stick_x = 0;
+            PADS[j].stick_y = 0;
+        }
+    }
+    for (i = 0; i < 4; i++) {
+        y = PADS[i].button;
+        D_800BE930[i] = y & ~D_800BE708[i];
+        D_800BE918[i].button = y;
+        D_800BE708[i] = y;
+        x = PADS[i].stick_x;
+        if (((x < 0) ? -x : x) >= 8) {
+            D_800BE918[i].stick_x = x - ((x < 0) ? -1 : 1) * 7;
+        } else {
+            D_800BE918[i].stick_x = 0;
+        }
+        y = PADS[i].stick_y;
+        if (((y < 0) ? -y : y) >= 8) {
+            D_800BE918[i].stick_y = y - ((y < 0) ? -1 : 1) * 7;
+        } else {
+            D_800BE918[i].stick_y = 0;
+        }
+    }
+    if (D_800E0B94 == 2 || D_800E0B95 == 2) {
+        demo = 1;
+        func_151DD8C0();
+    } else {
+        demo = 0;
+    }
+    for (i = 0; i < 4; i++) {
+        y = PADS[i].button;
+        D_800BE710[i] = y & ~D_800BE700[i];
+        D_800BE700[i] = y;
+        if (!demo) {
+            x = PADS[i].stick_x;
+            if (((x < 0) ? -x : x) >= 8) {
+                PADS[i].stick_x = x - ((x < 0) ? -1 : 1) * 7;
+            } else {
+                PADS[i].stick_x = 0;
+            }
+            y = PADS[i].stick_y;
+            if (((y < 0) ? -y : y) >= 8) {
+                PADS[i].stick_y = y - ((y < 0) ? -1 : 1) * 7;
+            } else {
+                PADS[i].stick_y = 0;
+            }
+        }
+    }
+    return &D_800BE730;
+}
+
 
 void func_1501C010(u8 arg0, u8 arg1) {
     f32 temp_f0;

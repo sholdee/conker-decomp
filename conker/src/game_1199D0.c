@@ -3,7 +3,45 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1199D0/func_150EC520.s")
+void func_151432BC(void *, f32 *, f32 *, f32 *, f32 *);
+void *memcpy(void *, const void *, u32);
+u8 func_151464B8(s16 *);
+
+typedef struct Game1199D0Point {
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 w;
+} Game1199D0Point;
+typedef struct Game1199D0Spawner {
+    void *shape;
+    f32 rate;
+    s16 *owner;
+    f32 accumulator;
+} Game1199D0Spawner;
+
+void func_150EC520(u8 *arg0) {
+    Game1199D0Spawner *state;
+    Game1199D0Point point;
+    f32 upper;
+
+    if (func_151464B8(*(s16 **)(arg0 + 0x30)) == 0) {
+        state = (Game1199D0Spawner *)(arg0 + 0x28);
+        state->accumulator += (9.04e-08f + func_150ADA68() * 9.87e-08f) * state->rate * D_800BE9A4;
+        if (state->accumulator > 1.0f) {
+            point.w = 0.0f;
+            do {
+                void *spawned;
+                func_151432BC(state->shape, &point.x, &point.z, &upper, &point.y);
+                spawned = func_15149130(func_150ADA20() % 131U + 0x50, -1, 0x5A, -1, 1, 0, (struct37 *)0x10, arg0[0xC], arg0[1]);
+                if (spawned != NULL) {
+                    memcpy((u8 *)spawned + 0x28, &point, 0x10);
+                }
+                state->accumulator -= 1.0f;
+            } while (state->accumulator > 1.0f);
+        }
+    }
+}
 
 typedef struct {
     s32 unk0;

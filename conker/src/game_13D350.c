@@ -1,9 +1,13 @@
 #include <ultra64.h>
 #define func_1502B7F0 func_1502B7F0__proto
 #define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
+#define func_1511FC2C func_1511FC2C__proto
+#define func_1511FC44 func_1511FC44__proto
 #include "functions.h"
 #undef func_1502B7F0
 #undef func_150ADA20
+#undef func_1511FC2C
+#undef func_1511FC44
 #include "variables.h"
 
 u32 func_150ADA20(void);
@@ -331,33 +335,7 @@ void func_15111858(void) {
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_13D350/func_15111AF4.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_13D350/func_15112520.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_13D350/func_15112A80.s")
-
-void func_15113180(void) {
-    s32 i;
-    s32 offset;
-    struct131 *temp_a0;
-
-    i = 0;
-    offset = 0;
-    if (D_800DBEF0 > 0) {
-        do {
-            temp_a0 = (struct131 *)((u8 *)D_800DBEF4 + offset);
-            temp_a0->unk6F &= ~0x40;
-            temp_a0 = (struct131 *)((u8 *)D_800DBEF4 + offset);
-            if (((temp_a0->unk6F & 0xF) != 0) || ((((u8 *)temp_a0)[0x70] & 4) == 4)) {
-                if (*(s32 *)((u8 *)temp_a0 + 0x38) != 0) {
-                    temp_a0->unk6F |= 0x40;
-                }
-            }
-            i++;
-            offset += 0xA0;
-        } while (i < D_800DBEF0);
-    }
-}
+void func_15113180(void);
 
 typedef struct Game13D350Entry {
     u16 index;
@@ -406,68 +384,7 @@ extern u8 **D_80089240;
 extern u8 **D_80089250[];
 extern u16 D_800DBEE8[];
 extern f32 D_800DBF08[][4][4];
-
-void func_15113218(void) {
-    Struct15113218Obj *obj;
-    Struct15113218Actor *actor;
-    Struct15113218Sub *sub;
-    f32 mf[4][4];
-    s32 j;
-    s32 i;
-    u16 idx;
-    s32 pad1;
-    f32 rot[3];
-    s32 pad2;
-    s32 pad3;
-    s32 pad4;
-
-    for (i = 0; i <= D_80082FA0; i++) {
-        if (func_150859AC(i, 0) == 0) {
-            continue;
-        }
-        {
-            for (j = 0; j < D_800DBEE8[i]; j++) {
-                obj = (Struct15113218Obj *)&D_800DBEF4[((Game13D350Entry *)*(&D_80089240)[i])[j].index];
-                if ((obj->unk70 & 1) == 1) {
-                    func_150A7B80(*D_80089250[D_800BE9C0] + (((Game13D350Entry *)*(&D_80089240)[i])[j].index << 6));
-                    continue;
-                }
-                if (obj->unk4E == 3) {
-                    continue;
-                }
-                if (obj->unk4E < 3) {
-                    func_1511490C(mf, (struct Struct1511490C *)obj);
-                    guMtxF2L(mf, (Mtx *)(*D_80089250[D_800BE9C0] + (((Game13D350Entry *)*(&D_80089240)[i])[j].index << 6)));
-                } else if (obj->unk4E > 100 && obj->unk4E < 125) {
-                    actor = &((Struct15113218Actor *)D_800CC2D0)[obj->unk4E - 100];
-                    if (actor->unk1D4 == NULL) {
-                        func_150A7CB0(mf, obj->unk2C, obj->unk30, obj->unk34);
-                        mf[3][0] = actor->x;
-                        mf[3][1] = actor->y;
-                        mf[3][2] = actor->z;
-                        guMtxF2L(mf, (Mtx *)(*D_80089250[D_800BE9C0] + (((Game13D350Entry *)*(&D_80089240)[i])[j].index << 6)));
-                    } else {
-                        rot[2] = 0.0f;
-                        rot[0] = rot[2];
-                        rot[1] = actor->unk90;
-                        sub = actor->unk1D4;
-                        func_150A7CB0(mf, obj->unk2C, obj->unk30, obj->unk34);
-                        mf[3][0] = sub->x;
-                        mf[3][1] = sub->y;
-                        mf[3][2] = sub->z;
-                        func_150442C0(mf, rot[0], rot[1], rot[2]);
-                        obj->unk10 = mf[3][0];
-                        obj->unk12 = mf[3][1];
-                        obj->unk14 = mf[3][2];
-                        guMtxF2L(mf, (Mtx *)(*D_80089250[D_800BE9C0] + (((Game13D350Entry *)*(&D_80089240)[i])[j].index << 6)));
-                    }
-                } else {
-                    guMtxF2L(D_800DBF08[D_800BE9C0], (Mtx *)(*D_80089250[D_800BE9C0] + (((Game13D350Entry *)*(&D_80089240)[i])[j].index << 6)));
-                }
-            }
-        }
-    }
-}
+void func_15113218(void);
 
 typedef struct Game13D350Cmd {
     u32 word0;
@@ -480,41 +397,52 @@ typedef struct Game13D350DrawEntry {
 } Game13D350DrawEntry;
 
 void *func_151733D8(void *, s32);
-s32 func_151137D4(s32, void *, s32, s32, s32, s32);
+struct Game13D350Model;
+s32 func_151137D4(s32, struct Game13D350Model *, s32, s32, s32, s32);
 s32 func_1515E544(s32, s32, s32, s32, void *);
 extern u8 **D_80089240;
 extern u8 **D_80089250[];
 extern u8 D_80089470;
 extern u8 D_800D9E21;
 extern u16 D_800DBEE8[];
+Game13D350Cmd *func_151135C4(Game13D350Cmd *arg0, s32 arg1, s16 arg2);
 
-Game13D350Cmd *func_151135C4(Game13D350Cmd *arg0, s32 arg1, s16 arg2) {
-    s32 viewOffset;
-    s32 flags;
-    s32 index;
-    u8 ***table;
+typedef struct Game13D350Model {
+    u8 pad0[4];
+    f32 scale;
+    u8 pad8[8];
+    s16 x;
+    s16 y;
+    s16 z;
+    u8 pad16[2];
+    f32 yOffset;
+    s32 displayList;
+    s32 matrices[2];
+    u8 pad28[0x27];
+    u8 renderFlags;
+    u8 pad50[0x1C];
+    u16 effectFlags;
+    u8 pad6E[2];
+    u8 displayFlags;
+    u8 pad71[0xB];
+    s32 effectScale;
+    u8 pad80[0xA];
+    u8 alpha;
+    u8 alphas[1];
+} Game13D350Model;
 
-    if (arg1 == 0) {
-        flags = 0;
-    } else {
-        flags = 0x10;
-    }
-    arg0 = func_151733D8(arg0, 0);
-    { Game13D350Cmd *command = arg0++; command->word0 = 0xD9A3FFFF; command->word1 = 0; }
-    { Game13D350Cmd *command = arg0++; command->word0 = 0xD9FFFFFF; command->word1 = 0x20000; }
-    viewOffset = arg2 * 4;
-    table = (u8 ***)((u8 *)&D_80089240 + viewOffset);
-    arg0 = (Game13D350Cmd *)func_1515E544((s32)arg0, *(s32 *)((u8 *)D_800D9E10 + viewOffset), D_800D9E20, D_800D9E21, (u8 *)D_800D9BD0 + arg2 * 0x10 + D_800BE9C0 * 8);
-    for (index = 0; index < D_800DBEE8[arg2]; index++) {
-        arg0 = (Game13D350Cmd *)func_151137D4((s32)arg0, ((Game13D350DrawEntry *)(**table + index * 4))->index * 0xA0 + (u8 *)D_800DBEF4, (s32)(*D_80089250[D_800BE9C0] + (((Game13D350DrawEntry *)(**table + index * 4))->index << 6)), arg2, ((Game13D350DrawEntry *)(**table + index * 4))->value, flags);
-    }
-    { Game13D350Cmd *command = arg0++; command->word0 = 0xDA380003; command->word1 = (u32)&D_80089470; }
-    { Game13D350Cmd *command = arg0++; command->word0 = 0xD9AFFDFF; command->word1 = 0; }
-    { Game13D350Cmd *command = arg0++; command->word0 = 0xD9FFFFFF; command->word1 = 0x20000; }
-    return arg0;
-}
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_13D350/func_151137D4.s")
+s32 func_1511FC2C(s32, f32, f32, f32, f32, s32);
+s32 func_1511FC44(s32, f32, f32, f32, s32);
+s32 func_1510CDB8(s32, s32, s32, s32);
+s32 func_1510D8C0(s32, Game13D350Model *);
+s32 func_150CF5E8(s32);
+s32 func_150A50C0(s32, s32, u8 *, s32, s32, s32);
+extern u8 D_80083D40[];
+extern u8 D_80083EC0[];
+extern s32 D_800BE9C8[];
+extern s32 D_800BEBA4;
+extern u8 D_800D9C10[];
+s32 func_151137D4(s32 arg0, Game13D350Model *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 
 typedef struct Struct15113C88 {
     u8 pad0[0x4C];
@@ -532,48 +460,7 @@ typedef struct Struct15113C88 {
 extern s32 func_15022B08(s32, s32);
 extern struct102 *func_1510D970(s32, void *, s32, s32, s32);
 extern u8 D_800C3658;
-
-void func_15113C88(void) {
-    s32 i;
-    s32 offset;
-    s32 j;
-    s32 found;
-    s32 show;
-    Struct15113C88 *obj;
-
-    i = 0;
-    offset = 0;
-    if (D_800DBEF0 > 0) {
-        do {
-            found = 0;
-            obj = (Struct15113C88 *)((u8 *)offset + (s32)D_800DBEF4);
-            for (j = 0; j < D_80082FA0; j++) {
-                if (func_150859AC(j, 0) != 0 && obj->unk8B[j] == 0) {
-                    found = 1;
-                    break;
-                }
-            }
-            do {
-                if ((obj->unk70 & 8) || obj->unk4C == 0 || (obj->unk4F & 0x10) == 0x10 || found ||
-                    (D_800C3658 == 0 && D_800C35EA == 1 && func_15022B08(i, 0) == 0) || !(obj->unk4F & 1)) {
-                    show = 0;
-                } else {
-                    show = 1;
-                }
-            } while (0);
-            if (show) {
-                if (obj->unk94 == NULL) {
-                    obj->unk94 = func_1510D970(1, obj, 0, 1, 0);
-                }
-            } else if (obj->unk94 != NULL) {
-                func_1516972C(obj->unk94);
-                obj->unk94 = NULL;
-            }
-            i++;
-            offset += 0xA0;
-        } while (i < D_800DBEF0);
-    }
-}
+void func_15113C88(void);
 
 
 extern s32 D_800DBF98;
@@ -603,92 +490,11 @@ typedef struct {
 } Struct150174C0; /* size 0x18 */
 
 #define RECORDS (*(Struct150174C0 **)&D_800D23C0)
-
-void func_15113E54(s32 arg0) {
-    s16 x;
-    s16 y;
-    s16 z;
-    s32 flags;
-    s32 i;
-    s32 j;
-    s32 count;
-    s32 offset;
-    s32 entry;
-    Struct15113E54 *obj;
-
-    arg0 = arg0;
-    x = 0;
-    y = 0;
-    z = 0;
-    flags = 0;
-    i = 0;
-    count = D_800DBEF0 - D_800DBF98;
-    if (count > 0) {
-        offset = 0;
-        do {
-            obj = (Struct15113E54 *)((u8 *)offset + (s32)D_800DBEF4);
-            if (((obj->unk6F & 0x40) == 0x40) && (obj->unk6E == 0)) {
-                obj->unk38(obj);
-            }
-            i++;
-            offset += 0xA0;
-        } while (i != count);
-    }
-
-    for (i = 0; i < (s32)D_80087380; i++) {
-        if ((RECORDS[i].unk8[0] >> 12) == 2) {
-            for (j = 0; j < RECORDS[i].unk2; j++) {
-                entry = RECORDS[i].unk8[j];
-                if ((entry >> 12) == 2) {
-                    obj = (Struct15113E54 *)(((entry & 0xFFF) * 0xA0) + (s32)D_800DBEF4);
-                    if (((obj->unk6F & 0x40) == 0x40) && (obj->unk6E == 0)) {
-                        if (j != 0) {
-                            obj->unk5A = x;
-                            obj->unk5C = y;
-                            obj->unk5E = z;
-                            obj->unk80 = flags;
-                        }
-                        obj->unk38(obj);
-                    }
-                    if (j == 0) {
-                        x = obj->unk5A;
-                        y = obj->unk5C;
-                        z = obj->unk5E;
-                        flags = obj->unk80;
-                    }
-                }
-            }
-        }
-    }
-}
+void func_15113E54(s32 arg0);
 
 extern s32 *D_800DBF94;
-
-s32 func_15114050(struct131 *arg0, s32 arg1) {
-    if (((u8 *)arg0)[0x4F] & 0x80) {
-        if (arg1 == -1) {
-            return 1;
-        }
-        if (D_800DBF94[arg0 - D_800DBEF4] & (1 << arg1)) {
-            return 1;
-        }
-    }
-    return 0;
-}
-
-s32 func_151140C4(struct131 *arg0) {
-    s32 i;
-
-    i = 0;
-    if (((u8 *)arg0)[0x4F] & 0x80) {
-        for (; i != 32; i++) {
-            if (D_800DBF94[arg0 - D_800DBEF4] & (1 << i)) {
-                return i;
-            }
-        }
-    }
-    return 0;
-}
+s32 func_15114050(struct131 *arg0, s32 arg1);
+s32 func_151140C4(struct131 *arg0);
 
 typedef struct Struct15114188 {
     u8  pad0[0x4F];
@@ -704,28 +510,7 @@ struct Game13F9D0MovingActor;
 void func_1511473C(struct Game13F9D0MovingActor *arg0, s32 arg1);
 
 #define OBJS ((Struct15114188 *)D_800DBEF4)
-
-void func_15114188(void) {
-    s32 i;
-    s32 j;
-
-    for (i = 0; i < D_800DBEF0; i++) {
-        if (D_800DBF94[i] != 0) {
-            for (j = 0; j < 25 && D_800DBF94[i] != 0; j++) {
-                if (D_800DBF94[i] & (1 << j)) {
-                    D_800DBF94[i] ^= (1 << j);
-                    if (OBJS[i].unk78 != NULL && (OBJS[i].unk92 != 0 || D_800CC2D0[j].unk127 != 0xFF)) {
-                        OBJS[i].unk78((Struct15114188 *)(i * 0xA0 + (u8 *)D_800DBEF4), &D_800CC2D0[j]);
-                    }
-                    if ((OBJS[i].unk4F & 4) == 4 && !(OBJS[i].unk4F & 8)) {
-                        func_1511473C((struct Game13F9D0MovingActor *)&D_800CC2D0[j], i);
-                    }
-                }
-            }
-            OBJS[i].unk4F &= ~0x8C;
-        }
-    }
-}
+void func_15114188(void);
 
 typedef struct {
     /* 0x00 */ f32 rotX;
@@ -746,60 +531,7 @@ typedef struct {
 } Struct15114348;
 
 void func_150A7960(f32 m[4][4], f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
-
-void func_15114348(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
-    f32 dx;
-    f32 dy;
-    f32 dz;
-    f32 rx;
-    f32 ry;
-    f32 rz;
-    f32 m[4][4];
-    f32 m2[4][4];
-    f32 zaxis[3];
-    f32 yaxis[3];
-    f32 xaxis[3];
-
-    xaxis[0] = 1.0f;
-    xaxis[1] = 0.0f;
-    xaxis[2] = 0.0f;
-    yaxis[0] = 0.0f;
-    yaxis[1] = 1.0f;
-    yaxis[2] = 0.0f;
-    zaxis[0] = 0.0f;
-    zaxis[1] = 0.0f;
-    zaxis[2] = 1.0f;
-    dx = *arg1 - ((Struct15114348 *)D_800DBEF4)[arg0].x;
-    dy = *arg2 - ((Struct15114348 *)D_800DBEF4)[arg0].y;
-    dz = *arg3 - ((Struct15114348 *)D_800DBEF4)[arg0].z;
-    if (((Struct15114348 *)D_800DBEF4)[arg0].rotX != 0.0f) {
-        guRotateF(m, ((Struct15114348 *)D_800DBEF4)[arg0].rotX, 1, 0, 0);
-        func_150A7960(m, yaxis[0], yaxis[1], yaxis[2], &yaxis[0], &yaxis[1], &yaxis[2]);
-        func_150A7960(m, zaxis[0], zaxis[1], zaxis[2], &zaxis[0], &zaxis[1], &zaxis[2]);
-    }
-    if (((Struct15114348 *)D_800DBEF4)[arg0].rotZ != 0.0f) {
-        guRotateF(m, ((Struct15114348 *)D_800DBEF4)[arg0].rotZ, zaxis[0], zaxis[1], zaxis[2]);
-        func_150A7960(m, yaxis[0], yaxis[1], yaxis[2], &yaxis[0], &yaxis[1], &yaxis[2]);
-        func_150A7960(m, xaxis[0], xaxis[1], xaxis[2], &xaxis[0], &xaxis[1], &xaxis[2]);
-    }
-    if (((Struct15114348 *)D_800DBEF4)[arg0].rotY != 0.0f) {
-        guRotateF(m, ((Struct15114348 *)D_800DBEF4)[arg0].rotY, yaxis[0], yaxis[1], yaxis[2]);
-        func_150A7960(m, xaxis[0], xaxis[1], xaxis[2], &xaxis[0], &xaxis[1], &xaxis[2]);
-        func_150A7960(m, zaxis[0], zaxis[1], zaxis[2], &zaxis[0], &zaxis[1], &zaxis[2]);
-    }
-    guRotateF(m, ((Struct15114348 *)D_800DBEF4)[arg0].a, xaxis[0], xaxis[1], xaxis[2]);
-    guRotateF(m2, ((Struct15114348 *)D_800DBEF4)[arg0].c, zaxis[0], zaxis[1], zaxis[2]);
-    func_150A7A48(m, m2, m);
-    guRotateF(m2, ((Struct15114348 *)D_800DBEF4)[arg0].b, yaxis[0], yaxis[1], yaxis[2]);
-    func_150A7A48(m, m2, m);
-    func_150A7960(m, dx, dy, dz, &rx, &ry, &rz);
-    rx = ((Struct15114348 *)D_800DBEF4)[arg0].ox + (rx - dx);
-    ry = ((Struct15114348 *)D_800DBEF4)[arg0].oy + (ry - dy);
-    rz = ((Struct15114348 *)D_800DBEF4)[arg0].oz + (rz - dz);
-    *arg1 += rx;
-    *arg2 += ry;
-    *arg3 += rz;
-}
+void func_15114348(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3);
 
 typedef struct Game13F9D0MovingActor {
     u8 pad0[0x14];
@@ -814,17 +546,7 @@ typedef struct Game13F9D0MovingActor {
 
 extern f32 D_800A2F60;
 extern u16 D_800CBDA0[];
-
-void func_1511473C(Game13F9D0MovingActor *arg0, s32 arg1) {
-    if (arg0 == 0 || arg1 >= D_800DBEF0) {
-        return;
-    }
-    func_15114348(arg1, &arg0->xyz[0], &arg0->xyz[1], &arg0->xyz[2]);
-    arg0->angle += *(f32 *)((u8 *)D_800DBEF4 + (arg1 * 0xA0) + 0x64) * D_800A2F60;
-    if ((arg0->active != 0) && ((arg1 + 1) == D_800CBDA0[((s32)((u8 *)arg0 - (u8 *)D_800CC2D0) / 0x32C)])) {
-        arg0->angleCopy = arg0->angle;
-    }
-}
+void func_1511473C(Game13F9D0MovingActor *arg0, s32 arg1);
 
 void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
 
@@ -833,14 +555,7 @@ struct Struct151148A8 {
     f32 unk4;
     f32 unk8;
 };
-
-void func_151148A8(f32 arg0[4][4], struct Struct151148A8 *arg1) {
-    f32 sp18[4][4];
-
-    func_150A8050(arg0, 0.0f, arg1->unk4, 0.0f);
-    func_150A8050(sp18, arg1->unk0, 0.0f, arg1->unk8);
-    func_150A7A48(sp18, arg0, arg0);
-}
+void func_151148A8(f32 arg0[4][4], struct Struct151148A8 *arg1);
 
 struct Struct1511490C {
     char pad0[0x10];
@@ -856,61 +571,25 @@ struct Struct1511490C {
 };
 
 void func_150A7CB0(f32 mtx[4][4], s32 x, s32 y, s32 z);
+void func_1511490C(f32 arg0[4][4], struct Struct1511490C *arg1);
+struct131 *func_151149AC(u8 id);
 
-void func_1511490C(f32 arg0[4][4], struct Struct1511490C *arg1) {
-    f32 sp20[4][4];
-
-    func_151148A8(arg0, arg1);
-    arg0[3][0] = arg1->unk10;
-    arg0[3][1] = arg1->unk12 + arg1->unk18;
-    arg0[3][2] = arg1->unk14;
-    func_150A7CB0(sp20, arg1->unk2C, arg1->unk30, arg1->unk34);
-    func_150A7A48(sp20, arg0, arg0);
-}
-
-struct131 *func_151149AC(u8 id) {
-    s32 i;
-    s32 offset;
-    struct131 *base;
-    struct131 *ptr;
-
-    if (id == 0) {
-        return NULL;
-    }
-
-    i = 0;
-    if (D_800DBEF0 > 0) {
-        base = D_800DBEF4;
-        offset = 0;
-        ptr = base;
-        do {
-            i++;
-            if (((u8 *)ptr)[0x72] == id) {
-                return (struct131 *)((u8 *)offset + (s32)base);
-            }
-            offset += sizeof(struct131);
-            ptr++;
-        } while (i < D_800DBEF0);
-    }
-    return NULL;
-}
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_13D350/func_15114A1C.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_13D350/func_15114B94.s")
-
-s32 func_15114CC4(void *a0, s32 a1, s32 *a2, s32 a3) {
-    s16 *v1 = *(s16 **)((u8 *)a0 + 0x18);
-
-    if (v1 != 0 && (*a2 != 0 || *(s32 *)((u8 *)a0 + 0x1C) == 0)) {
-        *(s32 *)((u8 *)a0 + 0x1C) = 1;
-        *(s16 *)((u8 *)a0 + 0x2) = v1[8];
-        *(s16 *)((u8 *)a0 + 0x4) = v1[9];
-        *(s16 *)((u8 *)a0 + 0x6) = v1[10];
-        return 0;
-    }
-    return 1;
-}
+typedef struct Struct15114B94 {
+    u8 pad0[0x4C];
+    u8 enabled;
+    u8 pad4D[2];
+    u8 flags;
+    u8 pad50[0x1E];
+    u8 unk6E;
+    u8 pad6F;
+    u8 state;
+    u8 pad71[0x1A];
+    u8 players[9];
+    struct102 *callback;
+    u8 pad98[8];
+} Struct15114B94;
+void func_15114B94(u32 arg0);
+s32 func_15114CC4(void *a0, s32 a1, s32 *a2, s32 a3);
 
 typedef struct {
     char pad0[0x10];
@@ -923,83 +602,10 @@ typedef struct {
 
 s32 func_10010E78(u16 arg0, s32 arg1, u16 arg2, s16 arg3, u8 arg4, s32 arg5,
                   s16 arg6, s16 arg7, s16 arg8, s16 arg9, s16 argA);
-
-void func_15114D24(Struct15114D24 *arg0, s32 arg1, s32 arg2, s16 arg3, s16 arg4, s32 arg5) {
-    u16 sfx;
-
-    if (arg5 & 1) {
-        if (arg0->unk74 != 0) {
-            if (func_1001147C(arg0->unk74) == arg1) {
-                return;
-            }
-        }
-    }
-
-    if (arg1 == -1) {
-        if (arg0->unk74 != 0) {
-            func_100111C8(arg0->unk74);
-            arg0->unk74 = 0;
-        }
-        return;
-    }
-
-    if (arg5 & 8) {
-        sfx = 0;
-    } else {
-        sfx = arg0->unk74;
-    }
-
-    if (arg5 & 4) {
-        func_10010E78(sfx, arg1, arg2, 0, 0, -1, arg0->unk10, arg0->unk12,
-                      arg0->unk14, arg3, arg4);
-        if ((arg5 & 8) == 0) {
-            arg0->unk74 = 0;
-        }
-    } else if (arg5 & 2) {
-        if (sfx != 0) {
-            func_1001123C(sfx);
-            sfx = 0;
-        }
-        arg0->unk74 = func_10010E78(sfx, arg1, arg2, 0, 0, -1, arg0->unk10,
-                                    arg0->unk12, arg0->unk14, arg3, arg4);
-    } else {
-        if (sfx != 0) {
-            func_1001123C(sfx);
-        }
-        arg0->unk74 = func_1000FA64(arg1, arg0->unk10, arg0->unk12, arg0->unk14,
-                                    arg2, arg4, arg3, (s32)func_15114CC4, arg0,
-                                    0, 0, 0);
-    }
-}
-
-void func_15114F04(s32 arg0, s32 arg1, s32 arg2) {
-    func_1001001C(func_15114CC4, arg0, 0, arg1, arg2);
-}
+void func_15114D24(Struct15114D24 *arg0, s32 arg1, s32 arg2, s16 arg3, s16 arg4, s32 arg5);
+void func_15114F04(s32 arg0, s32 arg1, s32 arg2);
 
 extern s32 D_800DBF9C;
 extern s32 D_800DBFA0;
 extern s32 D_800DBFA4;
-
-void func_15114F44(s32 arg0, s32 arg1, s32 arg2) {
-    s32 j;
-    s32 i;
-    u32 (*list)[3];
-
-    if ((D_800BE9F0 == 0x12) || (D_800BE9F0 == 0x36) || (D_800BE9F0 == 0x13)) {
-        for (j = 0; j < 2; j++) {
-            list = (u32 (*)[3])D_800DBDD8[j];
-            for (i = 0; i < D_800DBE18[j]; i++) {
-                /* every command word must be a KSEG0 address, 4-byte aligned */
-                if (((list[i][0] & 0xF0000000) != 0x80000000) || ((list[i][1] & 0xF0000000) != 0x80000000) ||
-                    ((list[i][2] & 0xF0000000) != 0x80000000) ||
-                    (list[i][0] & 3) || (list[i][1] & 3) || (list[i][2] & 3)) {
-                    D_8003C8E0 = 0xC00005A;
-                    func_150AD770();
-                }
-            }
-        }
-        D_800DBF9C = arg0;
-        D_800DBFA0 = arg1;
-        D_800DBFA4 = arg2;
-    }
-}
+void func_15114F44(s32 arg0, s32 arg1, s32 arg2);

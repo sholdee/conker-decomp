@@ -1144,68 +1144,11 @@ struct Obj151A4FD0 {
 };
 
 extern struct Obj151A4FD0 *func_15167A68(s32, s32, s32, s32, s32, s32);
-
-struct Obj151A4FD0 *func_151A4FD0(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, u8 a6, s32 a7) {
-    struct Obj151A4FD0 *ret = func_15167A68(0x5A, 0, a7 + 0x20, 0, 0xFF, 1);
-    if (ret == 0) {
-        return NULL;
-    }
-    ret->unk14 = a0;
-    ret->unk10 = a1;
-    ret->unk15 = a2;
-    ret->unk16 = a3;
-    ret->unk17 = a4;
-    ret->unk19 = a6;
-    ret->unk18 = 0;
-    ret->unk1A = a5;
-    return ret;
-}
-
-void func_151A5070(struct Obj151A4FD0 *arg0) {
-    struct Obj151A4FD0 *temp_a1;
-    s32 temp_v0;
-    s32 temp_t8;
-    s32 var_v0;
-
-    temp_a1 = arg0;
-    temp_v0 = temp_a1->unk10;
-    if (temp_v0 != 0) {
-        temp_v0 -= D_800BE9E4;
-        if (temp_v0 <= 0) {
-            func_1516972C((struct102 *)temp_a1);
-            return;
-        }
-        temp_a1->unk10 = temp_v0;
-    }
-
-    if (temp_a1->unk19 == 0) {
-        func_10011FA0((s32 *)2);
-    }
-
-    var_v0 = temp_a1->unk15;
-    temp_t8 = D_800BE9E4 * 2;
-    if (temp_a1->unk18 == 0) {
-        var_v0 -= temp_t8;
-        if (var_v0 < 0x90) {
-            var_v0 = 0x90;
-            temp_a1->unk18 = 1;
-        }
-    } else {
-        var_v0 += temp_t8;
-        if (var_v0 >= 0x100) {
-            var_v0 = 0xFF;
-            temp_a1->unk18 = 0;
-        }
-    }
-    temp_a1->unk15 = var_v0;
-}
+struct Obj151A4FD0 *func_151A4FD0(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, u8 a6, s32 a7);
+void func_151A5070(struct Obj151A4FD0 *arg0);
 
 extern void (*D_8008F900[])(void *, void *, s16);
-
-void func_151A5130(void *arg0, void *arg1, s16 arg2)
-{
-  D_8008F900[*((u8 *) (((u8 *) arg1) + 0x14))](arg0, arg1, arg2);
-}
+void func_151A5130(void *arg0, void *arg1, s16 arg2);
 
 /* Viewport/screen descriptor: D_800BE628 is an array of these, 0x180 bytes each. */
 struct Scr151A5170 {
@@ -1222,93 +1165,8 @@ struct Scr151A5170 {
 Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 
 #define SCR151A5170(obj) (&((struct Scr151A5170 *)D_800BE628)[(obj)->unk1A])
-
-Gfx *func_151A5170(Gfx *gfx, struct Obj151A4FD0 *arg1, s32 arg2) {
-    s32 x0;
-    s32 i;
-    s32 y0;
-    s32 w;
-    s32 h;
-    s32 sw;
-    s32 sh;
-    u8 update;
-
-    gDPPipeSync(gfx++);
-    gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
-    gDPSetPrimColor(gfx++, 1, 0, arg1->unk15, arg1->unk16, arg1->unk17, 255);
-    func_1501A490((s32)gfx, arg2, 0, 0, 0, 3);
-    update = 0;
-    gfx = func_15142FBC(gfx, 0xC00, 0x0F0A4004, &update);
-
-    sw = (s32)SCR151A5170(arg1)->unk4;
-    sh = (s32)SCR151A5170(arg1)->unk8;
-
-    for (i = 0; i < 2; i++) {
-        if (i == 0) {
-            x0 = (s32)SCR151A5170(arg1)->unk2C;
-            h = 8;
-            if (sw > 256) {
-                w = 256;
-            } else {
-                w = sw;
-            }
-        } else {
-            if (sw <= 256) {
-                break;
-            }
-            x0 = (s32)(SCR151A5170(arg1)->unk2C + 256.0f);
-            w = sw - 256;
-            h = 0x36;
-        }
-
-        y0 = (s32)SCR151A5170(arg1)->unk24;
-
-        while ((f32)y0 < SCR151A5170(arg1)->unk24 + (f32)sh) {
-            if (SCR151A5170(arg1)->unk24 + (f32)sh < (f32)(y0 + h)) {
-                h = (s32)(SCR151A5170(arg1)->unk24 + (f32)sh - (f32)y0);
-            }
-
-            gDPPipeSync(gfx++);
-            gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, D_800BE620,
-                               D_8002AAE8[D_800BE9C0]);
-            gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b,
-                       ((w * G_IM_SIZ_16b_LINE_BYTES) + 7) >> 3, 0, G_TX_LOADTILE, 0,
-                       G_TX_CLAMP, G_TX_NOMASK, G_TX_NOLOD, G_TX_CLAMP, G_TX_NOMASK, G_TX_NOLOD);
-            gDPLoadTile(gfx++, G_TX_LOADTILE, x0 << G_TEXTURE_IMAGE_FRAC,
-                        y0 << G_TEXTURE_IMAGE_FRAC, (x0 + w - 1) << G_TEXTURE_IMAGE_FRAC,
-                        (y0 + h - 1) << G_TEXTURE_IMAGE_FRAC);
-            gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b,
-                       ((w * G_IM_SIZ_16b_LINE_BYTES) + 7) >> 3, 0, G_TX_RENDERTILE, 0,
-                       G_TX_CLAMP, G_TX_NOMASK, G_TX_NOLOD, G_TX_CLAMP, G_TX_NOMASK, G_TX_NOLOD);
-            gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, w << G_TEXTURE_IMAGE_FRAC,
-                           h << G_TEXTURE_IMAGE_FRAC);
-            gSPTextureRectangle(gfx++, x0 << G_TEXTURE_IMAGE_FRAC, y0 << G_TEXTURE_IMAGE_FRAC,
-                                (x0 + w) << G_TEXTURE_IMAGE_FRAC,
-                                (y0 + h) << G_TEXTURE_IMAGE_FRAC,
-                                G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
-
-            y0 += h;
-        }
-    }
-
-    gDPPipeSync(gfx++);
-    return func_15142FBC(gfx, 0x2C00, 0x0F0A4004, &update);
-}
+Gfx *func_151A5170(Gfx *gfx, struct Obj151A4FD0 *arg1, s32 arg2);
 
 extern void (*D_8008F904[])(void *, void *, u8);
-
-void func_151A55D4(void *arg0, void *arg1, u8 arg2)
-{
-  void (*f)(void *, void *, u8);
-  f = D_8008F904[*((u8 *) (((u8 *) arg0) + 0x19))];
-  if (f != NULL) {
-    f(arg0, arg1, arg2);
-  }
-}
-
-void func_151A561C(s32 arg0, u8 arg1) {
-    struct Data151A561C sp1C;
-
-    sp1C = D_800A8D70;
-    func_15169260(&sp1C, 1, arg0, arg1);
-}
+void func_151A55D4(void *arg0, void *arg1, u8 arg2);
+void func_151A561C(s32 arg0, u8 arg1);
