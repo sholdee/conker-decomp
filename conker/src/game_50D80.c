@@ -210,8 +210,73 @@ loop2:
     arr[idx].unk4 = arg5;
     (*count)++;
 }
+extern s32 D_800C35B8[];
+extern u8 D_800C35C0[];
+extern u8 D_800C3C8C;
+extern u8 D_800C363A[];
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_50D80/func_150242F8.s")
+void func_150242F8(s32 arg0, s32 arg1) {
+    s32 i;
+    Elem15023DE0 *p;
+    s32 time;
+    s32 count;
+
+    if ((D_800C3C8C != 2) && ((&D_800C35EA)[arg1] == 1) && (D_800C3C9A != 0)) {
+        D_800C3638 = 0;
+        count = 0;
+        for (i = 0; i < D_800C363A[arg1]; i++) {
+            if (D_800C3688[arg1][i] != NULL) {
+                extern s32 D_800C35B8[];
+                if (D_800C35B8[arg1] != D_800C35B0[arg1]) {
+                    p = D_800C3688[arg1][i] + 4;
+                    time = D_800C3688[arg1][i]->unk2;
+                    while ((u32) (p - D_800C3688[arg1][i]) < D_800C35D8[arg1][i]) {
+                        if ((p->unk1 == 0) && (p->unk0 == 0)) {
+                            time = p->unk2;
+                        } else {
+                            if ((time <= D_800C35B0[arg1]) && (time > D_800C35B8[arg1])) {
+                                for (;;) {
+                                    if ((u32) (p - D_800C3688[arg1][i]) >= D_800C35D8[arg1][i]) {
+                                        break;
+                                    }
+                                    if (((arg0 == 0) && (p->unk0 != 0x11)) || ((arg0 == 1) && (p->unk0 == 0x11))) {
+                                        func_150241B4(D_800C3D50, &count, (s32) p, i, (u32) (p - D_800C3688[arg1][i]), time, arg1);
+                                    }
+                                    if ((p->unk1 != 0) || ((p->unk1 == 0) && (p->unk0 == 0))) {
+                                        break;
+                                    } else {
+                                        p++;
+                                        continue;
+                                    }
+                                }
+                            }
+                            if (time > D_800C35B0[arg1]) {
+                                break;
+                            }
+                            while (p->unk1 == 0) {
+                                if (p->unk0 == 0) {
+                                    time = p->unk2;
+                                    break;
+                                }
+                                p++;
+                                if ((u32) (p - D_800C3688[arg1][i]) >= D_800C35D8[arg1][i]) {
+                                    break;
+                                }
+                            }
+                            time += p->unk1;
+                        }
+                        p++;
+                    }
+                }
+            }
+        }
+        func_15024130(count, arg1);
+        D_800C3638 = 1;
+        if (arg0 == 0) {
+            D_800C35C0[arg1] = 1;
+        }
+    }
+}
 
 typedef struct {
     s16 active;
