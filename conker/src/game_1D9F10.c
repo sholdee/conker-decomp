@@ -3,9 +3,12 @@
  * (dsra32 v0), and func_151AF388 spills the result as a word. File-local prototype. */
 #define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #define func_151D9B8C func_151D9B8C_s32_decl_in_functions_h
+#define func_15048A40 func_15048A40_void_decl_in_functions_h
 #include "functions.h"
 #undef func_150ADA20
 #undef func_151D9B8C
+#undef func_15048A40
+f32 func_15048A40(u8);
 void func_151D9B8C(u8, f32, u8, void *, struct17 *, s16, u8, u8, u8, u8, s32);
 u32 func_150ADA20(void);
 #include "variables.h"
@@ -445,7 +448,207 @@ Obj151ACBD4 *func_151ACBD4(void *arg0, s32 arg1)
   return obj;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1D9F10/func_151AD174.s")
+typedef struct {
+    /* 0x00 */ f32 pos[3];
+    /* 0x0C */ f32 vel[3];
+} RopeNode151AD174;
+
+typedef struct {
+    /* 0x000 */ char pad0[0xA8];
+    /* 0x0A8 */ f32 unkA8;
+    /* 0x0AC */ u8 unkAC;
+    /* 0x0AD */ u8 unkAD;
+    /* 0x0AE */ u8 unkAE;
+} RopeCtl151AD174;
+
+typedef struct {
+    /* 0x000 */ char pad0[0x3C];
+    /* 0x03C */ f32 unk3C;
+    /* 0x040 */ char pad40[0x36];
+    /* 0x076 */ u16 unk76;
+    /* 0x078 */ char pad78[0x31C - 0x78];
+    /* 0x31C */ RopeCtl151AD174 *unk31C;
+} RopeActor151AD174;
+
+typedef struct {
+    /* 0x00 */ char pad0[0x38];
+    /* 0x38 */ RopeNode151AD174 *nodes;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ char pad40[2];
+    /* 0x42 */ u8 count;
+    /* 0x43 */ char pad43;
+    /* 0x44 */ RopeActor151AD174 *unk44;
+    /* 0x48 */ char pad48[4];
+    /* 0x4C */ f32 unk4C;
+    /* 0x50 */ u8 unk50;
+    /* 0x51 */ u8 unk51;
+    /* 0x52 */ s16 unk52;
+    /* 0x54 */ u16 unk54;
+} Rope151AD174;
+
+f32 func_150489B0(u8);
+u16 func_10010E78(u16 arg0, s32 arg1, u16 arg2, s32 arg3, s32 arg4,
+                   s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9,
+                   s32 argA);
+
+void func_151AD174(Rope151AD174 *arg0)
+{
+  s32 angle;
+  f32 force;
+  s32 cnt;
+  s32 n;
+  s32 idx;
+  f32 pos[3];
+  f32 vel[3];
+  f32 oldPos[20][3];
+  f32 oldVel[20][3];
+  s32 i;
+  s32 j;
+  f32 mid[3];
+  f32 dir[3];
+  f32 total;
+  f32 dist;
+  f32 hdist;
+  f32 t;
+  f32 h;
+  f32 len;
+  f32 zero;
+  f32 scale;
+  f32 pad;
+  total = 0.0f;
+  if (arg0->unk52 != 0)
+  {
+    arg0->unk52 -= D_800BE9E4;
+    if (arg0->unk52 < 0)
+    {
+      arg0->unk52 = 0;
+    }
+  }
+  n = arg0->count - 1;
+  if (arg0->unk44 != 0)
+  {
+    idx = arg0->unk44->unk31C->unkAE;
+    angle = (arg0->unk44->unk31C->unkAC + (arg0->unk44->unk76 >> 8)) & 0xFF;
+    force = arg0->unk44->unk31C->unkA8 * 1.899999976f;
+    arg0->nodes[idx].vel[0] += force * func_150489B0(angle);
+    arg0->nodes[idx].vel[2] -= force * func_15048A40(angle);
+    angle = arg0->unk44->unk76 >> 8;
+    force = arg0->unk44->unk3C * 19.0f;
+    arg0->nodes[idx].vel[0] += force * func_150489B0(angle);
+    arg0->nodes[idx].vel[2] -= force * func_15048A40(angle);
+    arg0->nodes[idx].vel[1] -= 1000.0f;
+    cnt = arg0->unk44->unk31C->unkAD - 1;
+    if (cnt <= 0)
+    {
+      arg0->unk44->unk31C->unkA8 = 0.0f;
+      cnt = 0;
+    }
+    arg0->unk44->unk31C->unkAD = cnt;
+  }
+  if (arg0->unk4C != 0.0f)
+  {
+    arg0->nodes[arg0->unk51].vel[0] -= arg0->unk4C * func_150489B0(arg0->unk50);
+    arg0->nodes[arg0->unk51].vel[2] += arg0->unk4C * func_15048A40(arg0->unk50);
+    arg0->unk4C *= 0.8999999762f;
+  }
+  for (i = 0; i < (n + 1); i++)
+  {
+    for (j = 0; j < 3; j++)
+    {
+      oldPos[i][j] = arg0->nodes[i].pos[j];
+      oldVel[i][j] = arg0->nodes[i].vel[j];
+    }
+
+  }
+
+  len = 9.0f;
+  zero = 0.0f;
+  for (i = n - 1; i >= 0; i--)
+  {
+    for (j = 0; j < 3; j++)
+    {
+      pos[j] = oldPos[i][j];
+      vel[j] = arg0->nodes[i].vel[j];
+      dir[j] = pos[j] - oldPos[i + 1][j];
+    }
+
+    {
+      f32 dx;
+      f32 dy;
+      f32 dz;
+      dx = pos[0] - oldPos[i + 1][0];
+      dy = pos[1] - oldPos[i + 1][1];
+      dz = pos[2] - oldPos[i + 1][2];
+      dist = sqrtf(((dx * dx) + (dy * dy)) + (dz * dz));
+      if (dist == 0.0f)
+      {
+        dist = 1.0f;
+      }
+      len = 9.0f;
+      t = sqrtf((dx * dx) + (dz * dz)) / dist;
+      t = len * t;
+      h = t * t;
+      t = (len * len) - h;
+      if (h <= (len * len))
+      {
+        t = sqrtf(t);
+      }
+      else
+      {
+        t = 0.0f;
+      }
+      h = len * len;
+      dist = t / dist;
+      dir[0] = dx * dist;
+      dir[1] = dy * dist;
+      dir[2] = dz * dist;
+      dir[0] = zero - dir[0];
+      dir[1] = (-len) - dir[1];
+      dir[2] = zero - dir[2];
+    }
+    for (j = 0; j < 3; j++)
+    {
+      vel[j] += dir[j];
+      vel[j] *= 0.9599999785f;
+      if (i != 0)
+      {
+        mid[j] = ((oldPos[i - 1][j] + oldPos[i + 1][j]) * 0.5f) - pos[j];
+        vel[j] += mid[j] * 1.24;
+      }
+      pos[j] += vel[j];
+      if ((D_800BE9F0 == 0x39) && (pos[0] > 1150.0f))
+      {
+        pos[0] = 1150.0f;
+      }
+    }
+
+    h = pos[2] - arg0->nodes[i + 1].pos[2];
+    pad = pos[0] - arg0->nodes[i + 1].pos[0];
+    hdist = pos[1] - arg0->nodes[i + 1].pos[1];
+    total += fabsf(vel[0]);
+    total += fabsf(vel[2]);
+    t = sqrtf((h * h) + ((pad * pad) + (hdist * hdist)));
+    if (t != 0.0f)
+    {
+      scale = arg0->unk3C / t;
+    }
+    else
+    {
+      scale = 1.0f;
+    }
+    for (j = 0; j < 3; j++)
+    {
+      arg0->nodes[i].pos[j] = arg0->nodes[i + 1].pos[j] + ((pos[j] - arg0->nodes[i + 1].pos[j]) * scale);
+      arg0->nodes[i].vel[j] = arg0->nodes[i].pos[j] - oldPos[i][j];
+    }
+
+  }
+
+  if ((total > 250.0f) && ((arg0->unk54 == 0) || (func_1000F3D0(arg0->unk54) == 0)))
+  {
+    arg0->unk54 = func_10010E78(0, (func_150ADA20() % 9) + 0x507, 0x7530, 0, 0, 0, (s32) pos[0], (s32) pos[1], (s32) pos[2], 0xFA, -0x7E0C);
+  }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1D9F10/func_151AD92C.s")
 

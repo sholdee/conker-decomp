@@ -13,7 +13,142 @@ typedef struct {
     s32 field_0xDC[1];
 } CollisionPairRecord;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_10EF60/func_150E1AB0.s")
+typedef struct {
+    s16 ob[3];
+    u16 flag;
+    s16 tc[2];
+    u8 cn[4];
+} Vtx150E1AB0;
+
+typedef struct {
+    u8 pad0[0x10];
+    Vtx150E1AB0 v[2][4];
+    s16 unk90;
+    u8 pad92[2];
+    f32 unk94;
+    f32 unk98;
+    f32 unk9C;
+    f32 unkA0;
+    f32 unkA4;
+    f32 unkA8;
+    f32 unkAC;
+    f32 unkB0;
+    f32 unkB4;
+    f32 unkB8;
+    f32 unkBC;
+    f32 unkC0;
+    f32 unkC4;
+    f32 unkC8;
+    f32 unkCC;
+    s8 unkD0;
+    u8 padD1;
+    s16 unkD2;
+    s16 unkD4;
+    s16 unkD6;
+    s16 unkD8;
+    u8 unkDA;
+    u8 unkDB;
+    s32 unkDC;
+    s16 unkE0;
+    u8 unkE2;
+    u8 unkE3;
+    f32 unkE4;
+    f32 unkE8;
+    f32 unkEC;
+    f32 unkF0;
+    f32 unkF4;
+    f32 unkF8;
+    u8 unkFC;
+    u8 unkFD;
+    u8 unkFE;
+} Obj150E1AB0;
+
+struct Tex150E1AB0 {
+    u8 pad0[6];
+    u16 unk6;
+    u16 unk8;
+};
+
+extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
+typedef struct {
+    u8 pad0[6];
+    u16 width;
+    u16 height;
+} Game10EF60Texture;
+
+extern Game10EF60Texture *D_8008CA4C[];
+
+void func_150E1AB0(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 argA, s16 argB, u16 argC, s8 argD, s16 argE, s16 argF, s32 arg10, u8 arg11, u8 arg12, s32 arg13, u8 arg14, u8 arg15, f32 arg16, f32 arg17, f32 arg18, f32 arg19, f32 arg1A, f32 arg1B) {
+    Obj150E1AB0 *obj;
+    s32 i;
+    s32 s;
+    s32 t;
+
+    obj = func_15167A68(0xB, 0, 0x100, 1, 0xFF, 1);
+    if (obj != NULL) {
+        obj->unk90 = argB;
+        obj->unk94 = arg1;
+        obj->unk98 = arg2;
+        obj->unk9C = arg3;
+        obj->unkA4 = func_150484A0(-(arg4 - arg1), -(arg6 - arg3));
+        obj->unkA0 = func_150484A0(arg5 - arg2, sqrtf((arg4 - arg1) * (arg4 - arg1) + (arg6 - arg3) * (arg6 - arg3)));
+        obj->unkC4 = 0.0f;
+        obj->unkC8 = 0.0f;
+        obj->unkCC = 0.0f;
+        obj->unkB0 = arg4;
+        obj->unkB4 = arg5;
+        obj->unkB8 = arg6;
+        obj->unkAC = arg8;
+        obj->unkA8 = arg7;
+        obj->unkBC = arg9;
+        obj->unkC0 = argA;
+        obj->unkE3 = 0;
+        obj->unkFC = arg14;
+        obj->unkFD = 0;
+        obj->unkFE = arg15;
+        obj->unkDC = arg10;
+        obj->unkD8 = argC;
+        obj->unkD0 = argD;
+        if (obj->unkD0 != 0) {
+            if (arg10 == 0) {
+                func_1516979C((struct102 *)obj);
+                return;
+            }
+            obj->unkD2 = argE;
+            obj->unkD6 = -argF;
+            obj->unkD4 = argF;
+            obj->unkDA = arg11;
+            obj->unkE2 = arg12;
+            obj->unkE0 = arg13;
+            obj->unkE4 = arg16;
+            obj->unkE8 = arg17;
+            obj->unkEC = arg18;
+            obj->unkF0 = arg19;
+            obj->unkF4 = arg1A;
+            obj->unkF8 = arg1B;
+        } else {
+            obj->unkD6 = 1;
+            obj->unkE0 = -1;
+        }
+        for (i = 0; i < 2; i++) {
+            s = D_8008CA4C[obj->unkD8]->width - 1;
+            t = D_8008CA4C[obj->unkD8]->height - 1;
+            obj->v[i][2].tc[0] = 0x2000;
+            obj->v[i][2].tc[1] = 0x2000;
+            obj->v[i][2].flag = 0;
+            obj->v[i][0].tc[0] = (u16)(s << 5) + 0x2000;
+            obj->v[i][0].tc[1] = 0x2000;
+            obj->v[i][0].flag = 0;
+            obj->v[i][3].tc[0] = 0x2000;
+            obj->v[i][3].tc[1] = (u16)(t << 5) + 0x2000;
+            obj->v[i][3].flag = 0;
+            obj->v[i][1].tc[0] = (u16)(s << 5) + 0x2000;
+            obj->v[i][1].tc[1] = (u16)(t << 5) + 0x2000;
+            obj->v[i][1].flag = 0;
+        }
+        obj->unkDB = 0;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_10EF60/func_150E1D14.s")
 
@@ -48,13 +183,6 @@ typedef struct {
     u8 fieldFC, fieldFD, fieldFE, padFF;
 } Game10EF60Effect;
 
-typedef struct {
-    u8 pad0[6];
-    u16 width;
-    u16 height;
-} Game10EF60Texture;
-
-extern Game10EF60Texture *D_8008CA4C[];
 typedef struct {
     f32 x;
     f32 y;
@@ -157,7 +285,7 @@ s32 func_150E2DA4(s32 arg0, s32 arg1) {
     return arg0;
 }
 
-void func_150E1AB0(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, u16, s32, s32, s16, s16, s32, u8, s16, s32, s32, u8, f32, f32, f32, f32, f32, f32);
+void func_150E1AB0(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, s16, u16, s8, s16, s16, s32, u8, u8, s32, u8, u8, f32, f32, f32, f32, f32, f32);
 
 void func_150E2DB4(s32 a0, u8 a1, s16 a2, s32 a3, f32 a4, f32 a5, f32 a6, f32 a7, f32 a8, f32 a9, s16 a10, s16 a11, u16 a12, u8 a13) {
     func_150E1AB0(0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 40.0f, 400.0f, a12, 39, 1, a10, a11, a0, a1, a2, a3, 0, a13, a4, a5, a6, a7, a8, a9);

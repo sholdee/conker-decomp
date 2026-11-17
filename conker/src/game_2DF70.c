@@ -757,7 +757,170 @@ s32 func_15002878(void) {
 }
 
 // 12 loops!
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2DF70/func_150028BC.s")
+typedef struct F28BC_Ent {
+    u32 addr;
+    s32 count;
+    u32 extra;
+} F28BC_Ent;
+
+typedef struct F28BC_Tri {
+    s32 v[3];
+} F28BC_Tri;
+
+extern u16 D_800C5918[];
+extern u16 D_800C5EF8[];
+extern s8 **D_800C4488[];
+
+#define CMD (ncmd + (j << 3))
+
+#define PE ((F28BC_Ent **)&D_800C5C08[arg0])
+#define PT ((F28BC_Tri **)&D_800C6070[arg0])
+s32 func_150028BC(s32 arg0) {
+    F28BC_Ent *e;
+    s32 vaddr;
+    s32 n;
+    u32 c;
+    s32 i;
+    s32 j;
+    s32 k;
+    s32 m;
+    s32 cnt;
+    s32 nent;
+    s32 nout;
+    u32 attr;
+    s8 *ncmd;
+    s32 base;
+    s32 verts[32];
+    s8 *cmd;
+    s32 x;
+    s32 start;
+    s32 idx[3];
+    F28BC_Ent tmp;
+
+    attr = 0;
+    if (*PE != NULL) {
+        return 0;
+    }
+    n = 1;
+    cnt = 0;
+    for (i = 0; i < n; i++) {
+        cmd = D_800C4488[arg0][i];
+        j = 0;
+        while (cmd[j << 3] != -0x21) {
+            if (cmd[j << 3] == 1) {
+                cnt++;
+            }
+            j++;
+        }
+    }
+    *PE = (F28BC_Ent *)allocate_memory(cnt * sizeof(F28BC_Ent), 1, 0, 2);
+    if (*PE == NULL) {
+        return 1;
+    }
+    *PT = (F28BC_Tri *)allocate_memory(D_800C5918[arg0] * sizeof(F28BC_Tri), 1, 0, 2);
+    if (*PT == NULL) {
+        func_10004074((s32)*PE);
+        *PE = NULL;
+        return 1;
+    }
+    nent = 0;
+    nout = 0;
+    base = (&D_800D19A0)[arg0];
+    for (i = 0; i < n; i++) {
+        ncmd = D_800C4488[arg0][i];
+        j = 0;
+        while (*CMD != -0x21) {
+            x = *(u8 *)CMD;
+            k = 0;
+            if (x == 1) {
+                {
+                    extern u16 D_800C5918[];
+
+                    cnt = (*(s32 *)CMD >> 12) & 0xFF;
+                    start = (*(s32 *)CMD >> 1) & 0x7F;
+                    start -= cnt;
+                    vaddr = (*(s32 *)(CMD + 4) & 0xFFFFFF) - 0x38;
+                    c = (u32)((*(s32 *)(CMD + 4) - 0x38) & 0xFFFFFF) >> 4;
+                    for (k = 0; k < cnt; k++) {
+                        verts[k + start] = (k << 4) + vaddr;
+                    }
+                    if (nent != 0 && base + c * 16 == (*PE)[nent - 1].addr + (*PE)[nent - 1].count * 16 &&
+                        attr == (*PE)[nent - 1].extra) {
+                        (*PE)[nent - 1].count += cnt;
+                    } else {
+                        (*PE)[nent].addr = c * 16 + base;
+                        (*PE)[nent].extra = attr;
+                        (*PE)[nent].count = cnt;
+                        nent++;
+                    }
+                }
+            } else if (x == 0xDA) {
+                attr = *(u32 *)(CMD + 4) & 0xFFFFFF;
+                attr >>= 6;
+            } else if (x == 5) {
+                for (k = 0; k < 3; k++) {
+                    vaddr = *(u8 *)(CMD + k + 1);
+                    (*PT)[nout].v[k] = verts[vaddr >> 1];
+                }
+                nout++;
+            } else if (x == 6) {
+                for (m = 0; m < 2; m++) {
+                    for (k = 0; k < 3; k++) {
+                        vaddr = *(u8 *)(CMD + m * 4 + k + 1);
+                        (*PT)[nout].v[k] = verts[vaddr >> 1];
+                    }
+                    nout++;
+                }
+            } else if ((x >> 4) == 1) {
+                for (m = 0; m < 4; m++) {
+                    if (m == 0) {
+                        idx[0] = (*(s32 *)(CMD + 4) >> 25) & 0x1F;
+                        idx[1] = (*(s32 *)(CMD + 4) >> 20) & 0x1F;
+                        idx[2] = (*(s32 *)(CMD + 4) >> 15) & 0x1F;
+                    } else if (m == 1) {
+                        idx[0] = (*(s32 *)(CMD + 4) >> 10) & 0x1F;
+                        idx[1] = (*(s32 *)(CMD + 4) >> 5) & 0x1F;
+                        idx[2] = *(s32 *)(CMD + 4) & 0x1F;
+                    } else if (m == 2) {
+                        idx[0] = (*(s32 *)CMD >> 10) & 0x1F;
+                        idx[1] = (*(s32 *)CMD >> 5) & 0x1F;
+                        idx[2] = *(s32 *)CMD & 0x1F;
+                    } else {
+                        idx[0] = (*(s32 *)CMD >> 23) & 0x1F;
+                        idx[1] = (*(s32 *)CMD >> 18) & 0x1F;
+                        idx[2] = ((*(s32 *)CMD >> 13) & 0x1C) | ((*(s32 *)(CMD + 4) >> 30) & 3);
+                    }
+                    for (k = 0; k < 3; k++) {
+                        (*PT)[nout].v[k] = verts[idx[k]];
+                    }
+                    nout++;
+                }
+            }
+            j++;
+        }
+    }
+    D_800C5EF8[arg0] = nent;
+    j = 1;
+loop:
+    if (j < D_800C5EF8[arg0]) {
+        e = &(*PE)[j];
+        if (e->addr < e[-1].addr) {
+            tmp = *e;
+            *e = e[-1];
+            (*PE)[j - 1] = tmp;
+            if (j >= 2) {
+                j--;
+            }
+        } else {
+            j++;
+        }
+        goto loop;
+    }
+    return 0;
+}
+#undef PE
+#undef PT
+#undef CMD
 
 void func_15002F40(s32 arg0) {
     if (arg0 == 50 || arg0 == 51) {

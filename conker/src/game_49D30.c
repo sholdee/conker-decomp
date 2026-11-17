@@ -1299,7 +1299,91 @@ void func_15020388(s32 arg0, s32 arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_49D30/func_15020878.s")
+typedef struct {
+    f32 unk0;
+    f32 *unk4;
+    f32 unk8[3];
+    f32 unk14[3];
+    f32 unk20[3];
+    f32 unk2C[3];
+    f32 *unk38;
+    u8 unk3C;
+} Spline15020878;
+
+f32 sqrtf(f32);
+#pragma intrinsic(sqrtf)
+extern f32 D_800969EC;
+
+void func_15020878(s32 arg0, s32 arg1, s32 arg2) {
+    s32 i;
+    s32 k;
+    f32 points[12];
+    f32 pos[2][3];
+    u8 j;
+    f32 d[3];
+    f32 c[3];
+    f32 b[3];
+    f32 a[3];
+    f32 total;
+    f32 t;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    s32 interp;
+
+    if (arg1 >= D_800C35C8[arg2][arg0] - 1) {
+        return;
+    }
+    {
+        j = 0;
+        total = ((Spline15020878 *)D_800C3A50[arg2])[arg0].unk4[arg1];
+        interp = D_800C3868[arg2][arg0][arg1].unk6;
+        func_1501FFE8(points, D_800C3868[arg2][arg0], arg1, D_800C35C8[arg2][arg0]);
+        if (interp == 0) {
+            for (i = 0; i < 3; i++) {
+                a[i] = -0.5f * points[i] + 1.5f * points[i + 3] + -1.5f * points[i + 6] + points[i + 9] * 0.5f;
+                b[i] = points[i] + -2.5f * points[i + 3] + (points[i + 6] + points[i + 6]) + points[i + 9] * -0.5f;
+                c[i] = -0.5f * points[i] + points[i + 6] * 0.5f;
+                d[i] = points[i + 3];
+                ((Spline15020878 *)D_800C3A50[arg2])[arg0].unk8[i] = d[i];
+                ((Spline15020878 *)D_800C3A50[arg2])[arg0].unk14[i] = c[i];
+                ((Spline15020878 *)D_800C3A50[arg2])[arg0].unk20[i] = b[i];
+                ((Spline15020878 *)D_800C3A50[arg2])[arg0].unk2C[i] = a[i];
+            }
+            ((Spline15020878 *)D_800C3A50[arg2])[arg0].unk38[0] = total;
+            for (i = 0; i != 3; i++) {
+                pos[!j][i] = d[i];
+            }
+            i = 1;
+            t = 0.009999999776f;
+            while (t <= 1.0f) {
+                pos[j][0] = ((a[0] * t + b[0]) * t + c[0]) * t + d[0];
+                pos[j][1] = ((a[1] * t + b[1]) * t + c[1]) * t + d[1];
+                pos[j][2] = ((a[2] * t + b[2]) * t + c[2]) * t + d[2];
+                dx = pos[j][0] - pos[!j][0];
+                dx *= dx;
+                dy = pos[j][1] - pos[!j][1];
+                dy *= dy;
+                t += 0.009999999776f;
+                dz = pos[j][2] - pos[!j][2];
+                dz *= dz;
+                dx += dy + dz;
+                if (dx != 0.0f) {
+                    total += sqrtf(dx);
+                }
+                ((Spline15020878 *)D_800C3A50[arg2])[arg0].unk38[i] = total;
+                i++;
+                j ^= 1;
+            }
+        } else {
+            total = ((Spline15020878 *)D_800C3A50[arg2])[arg0].unk4[arg1 + 1] - total;
+            for (k = 0; k < 101; k++) {
+                ((Spline15020878 *)D_800C3A50[arg2])[arg0].unk38[k] = (f32)k * total / 101.0f;
+            }
+        }
+        ((Spline15020878 *)D_800C3A50[arg2])[arg0].unk3C = arg1;
+    }
+}
 
 typedef struct {
     f32 unk0;
@@ -2018,7 +2102,56 @@ void func_15022998(s32 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_49D30/func_150229E4.s")
+s32 func_150229E4(struct127 *arg0)
+{
+  s32 i;
+  s32 idx;
+  s32 slot;
+  s32 id;
+  idx = 0;
+  idx = 0;
+  if (arg0 == 0)
+  {
+    return 0;
+  }
+  if (arg0->interaction_state == 0)
+  {
+    return 0;
+  }
+  if (D_800C35C8[idx] == 0)
+  {
+    return 0;
+  }
+  if (arg0->unk5 == 4)
+  {
+    idx = 1;
+  }
+  slot = arg0->unk65;
+  if (slot != 0)
+  {
+    id = D_800CC2D0[slot - 1].unique_id;
+  }
+  else
+  {
+    id = arg0->unique_id;
+  }
+  for (i = 0; i < D_800C363A[idx]; i++)
+  {
+    if (D_800C35C8[idx][i] != 0)
+    {
+      if (((*((u16 *) (&D_800C35F0[idx][i * 8]))) == 2) && (id == D_800C35F0[idx][(i * 8) + 2]))
+      {
+        if (slot == 0)
+        {
+          return 1;
+        }
+        return 2;
+      }
+    }
+  }
+
+  return 0;
+}
 
 s32 func_15022B08(s32 arg0, s32 arg1) {
     s32 i;

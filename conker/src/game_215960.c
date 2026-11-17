@@ -135,7 +135,256 @@ Gfx *func_151E86E4(Gfx *gfx, s32 xl, s32 yl, s32 xh, s32 yh, s32 tile, s32 s, s3
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_215960/func_151E89A0.s")
+typedef struct {
+    /* 0x000 */ char pad0[0x75];
+    /* 0x075 */ u8 unk75;
+    /* 0x076 */ char pad76[0xB2];
+    /* 0x128 */ u8 unk128;
+} ScoreObjSub;
+
+typedef struct {
+    /* 0x000 */ char pad0[0x14];
+    /* 0x014 */ f32 unk14;
+    /* 0x018 */ f32 unk18;
+    /* 0x01C */ f32 unk1C;
+    /* 0x020 */ char pad20[0x108];
+    /* 0x128 */ u8 unk128;
+    /* 0x129 */ char pad129[0x13];
+    /* 0x13C */ u8 unk13C;
+    /* 0x13D */ char pad13D[0x1A7];
+    /* 0x2E4 */ s32 unk2E4;
+    /* 0x2E8 */ char pad2E8[0x34];
+    /* 0x31C */ ScoreObjSub *unk31C;
+    /* 0x320 */ char pad320[0xC];
+} ScoreObj; /* size 0x32C */
+
+extern ScoreObj D_800CC2D0[];
+extern u8 D_800ABA90[][4];
+extern s8 D_800E0BB0;
+extern u8 D_D10;
+extern u8 D_D14;
+extern u8 D_D16;
+extern u16 D_8008FDC0;
+extern u16 D_800E0BCC;
+extern s32 D_800BE9AC;
+extern u8 D_8009006C[];
+extern u8 D_80090070[];
+extern s32 func_15086D48(s32, s32);
+extern void func_15086CBC(s32, f32 *, f32 *, f32 *);
+Gfx *func_151E966C(Gfx *gfx, s32 arg1, s32 arg2, s8 arg3, u8 arg4);
+Gfx *func_151E9D18(Gfx *, s32, s32);
+
+Gfx *func_151E89A0(Gfx *gfx, s32 arg1, s32 arg2) {
+    s32 zero;
+    s32 x;
+    s32 y;
+    s32 i;
+    s32 image;
+    s32 v;
+    s32 div;
+    s32 step;
+    s32 q;
+    s32 xp;
+    s32 team;
+    s32 width;
+    s32 kind;
+    ScoreObjSub *sub;
+    ScoreObj *obj;
+    u8 near;
+    u8 flags;
+    s8 started;
+    s8 done;
+    s32 off;
+    s32 t;
+    f32 px;
+    f32 py;
+    f32 pz;
+    s32 s;
+
+    flags = 0;
+    D_8008FDBC &= ~0x10;
+    gSPDisplayList(gfx++, &D_80090028);
+    gDPSetCombine(gfx++, 0x12FE25, 0xFFFFF3F9);
+    if (D_80082FA0 == 0) {
+        y = 0x320;
+    } else {
+        y = 0x198;
+    }
+    step = 0x124;
+    if (D_800E0BB0 > 0) { step = 0x124 / D_800E0BB0; }
+    zero = 0;
+    D_800E0BCC = 0;
+    near = 0;
+    team = -1;
+    for (i = 0; i < D_8008FD8C; i++) {
+        obj = &D_800CC2D0[i];
+        sub = obj->unk31C;
+        kind = sub->unk75 & 0x7F;
+        if ((obj->unk13C != 0) || (sub->unk128 & 0x20)) {
+            team = obj->unk128;
+            (&D_800E0BCC)[zero] = D_800E0BCC | (1 << i);
+        }
+        if ((team != -1) && (D_8008FDC0 & 0x8000)) {
+            if (team == 0) {
+                flags |= 2;
+            } else {
+                flags |= 1;
+            }
+            team = -1;
+        }
+        if ((obj->unk128 == 1) && (obj->unk2E4 != 0) && (D_8008FDC0 & 0x4000)) {
+            flags |= 4;
+        }
+        if (kind == 0x25) {
+            func_15086CBC(func_15086D48(0x49, i), &px, &py, &pz);
+            px = px - obj->unk14;
+            pz = pz - obj->unk1C;
+            pz = px * px + pz * pz;
+            if (pz < 6250000.0f) {
+                D_8008FDBC |= 0x10;
+                near = 1;
+            }
+            {
+                s32 bit = 1 << i;
+                (&D_800E0BCC)[zero] = D_800E0BCC | bit;
+            }
+        }
+    }
+    if ((D_800BE9AC & 0x1F) < 0xB) {
+        D_800E0BCC = 0;
+        near = 0;
+        team = -1;
+        flags = 0;
+    }
+    image = 0;
+    if (D_8008FDC0 & 9) {
+        image = func_1510D0EC(&D_D14, 0, 3, 0);
+        if (image != (s32)0x80000000) {
+            gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, 1, image);
+            gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, 0, 0, G_TX_LOADTILE, 0, G_TX_CLAMP, 5, 0, G_TX_CLAMP, 5, 0);
+            gDPLoadSync(gfx++);
+            gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, 0x3FF, 0);
+            gDPPipeSync(gfx++);
+            gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, 8, 0, G_TX_RENDERTILE, 0, G_TX_CLAMP, 5, 0, G_TX_CLAMP, 5, 0);
+            gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, 0x7C, 0x7C);
+            gDPSetOtherMode(gfx++, 0x002C3F, 0x504244);
+        } else {
+            image = 0;
+        }
+    }
+    if ((D_8008FDC0 & 8) && (image != 0)) {
+        x = step >> 1;
+        for (i = 0; i < D_800E0BB0; i++) {
+            v = func_150859AC(i, 6);
+            started = 0;
+            done = 0;
+            gDPPipeSync(gfx++);
+            {
+                u8 *col = (u8 *)D_800ABA90 + (i << 2);
+                gDPSetEnvColor(gfx++, col[0], col[1], col[2], arg2);
+            }
+            gfx = func_151E86E4(gfx, (x + 3) << 2, y, (x + 10) << 2, y + 0x1C, 0, 0x1C0, 0x200, 0x400, 0x400);
+            xp = (x + 10) << 2;
+            div = 10000;
+            do {
+                q = v / div;
+                if ((q != 0) || started || (div == 1)) {
+                    started = 1;
+                    s = D_8009006C[q & 3] << 5;
+                    t = D_80090070[q >> 2] << 5;
+                    gfx = func_151E86E4(gfx, xp, y, xp + 0x14, y + 0x1C, 0, s, t, 0x400, 0x400);
+                    xp += 0x18;
+                }
+                v -= q * div;
+                if (div == 1) {
+                    done = 1;
+                }
+                div /= 10;
+            } while (!done);
+            x += step;
+        }
+    }
+    if (D_8008FDC0 & 1) {
+        gfx = func_151E966C(gfx, y, team, 0, 1);
+    }
+    if (near || (team != -1)) {
+        if (D_8008FDC0 & 0x4000) {
+            i = (s32)(&D_D16 + 1);
+        } else {
+            i = (s32)&D_D16;
+        }
+        image = func_1510D0EC(i, 0, 3, 0);
+        if (image != (s32)0x80000000) {
+            gDPSetTextureImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_16b, 1, image);
+            gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, G_TX_CLAMP, 6, 0, G_TX_CLAMP, 6, 0);
+            gDPLoadSync(gfx++);
+            gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, 0x3FF, 0);
+            gDPPipeSync(gfx++);
+            gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_4b, 4, 0, G_TX_RENDERTILE, 0, G_TX_CLAMP, 6, 0, G_TX_CLAMP, 6, 0);
+            gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, 0xFC, 0xFC);
+            gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, image + 0x800);
+            gDPLoadSync(gfx++);
+            gDPLoadTLUTCmd(gfx++, 6, 15);
+            gDPSetOtherMode(gfx++, 0x00AC3F, 0x504244);
+            gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, arg2);
+            if (near) {
+                gfx = func_151E86E4(gfx, 0x238, 0xC, 0x268, 0x48, 0, 0x640, 0x660, 0x400, 0x400);
+            }
+            if (team != -1) {
+                if (D_8008FDC0 & 0x4000) {
+                    gfx = func_151E86E4(gfx, 0x220, 0xC, 0x250, 0x48, 0, 0x600, 0x540, 0x400, 0x400);
+                } else {
+                    off = 0;
+                    if (D_8008FDC0 & 1) {
+                        t = 0x1A;
+                    } else {
+                        t = 0x26;
+                        off = 0xB;
+                    }
+                    gfx = func_151E86E4(gfx, 0x238, (off + 3) << 2, 0x268, (off + 0xE) << 2, 0, 0x640, t << 5, 0x400, 0x400);
+                }
+            }
+        }
+    }
+    width = 0x20;
+    if (flags) {
+        if (flags & 4) {
+            i = (s32)(&D_D10 + 1);
+            width = 0x10;
+        } else {
+            i = (s32)&D_D10;
+        }
+        image = func_1510D0EC(i, 0, 3, 0);
+        if (image != (s32)0x80000000) {
+            gDPPipeSync(gfx++);
+            gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, 1, image);
+            gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, 0, 0, G_TX_LOADTILE, 0, G_TX_CLAMP, 5, 0, G_TX_CLAMP, 5, 0);
+            gDPLoadSync(gfx++);
+            gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, (width * 32) - 1, 0);
+            gDPPipeSync(gfx++);
+            gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, ((width * 2) + 7) >> 3, 0, G_TX_RENDERTILE, 0,
+                       G_TX_CLAMP, 5, 0, G_TX_CLAMP, 5, 0);
+            gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, (width - 1) << 2, 0x7C);
+            gDPSetOtherMode(gfx++, 0x000C3F, 0x504244);
+            gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFF);
+            if (flags & 1) {
+                x = y - 0x10U;
+                gfx = func_151E86E4(gfx, 0xA0, x, 0xE0, x + 0x40, 0, 0, 0x200, 0x400, 0x400);
+            }
+            if (flags & 2) {
+                s32 yy = y - 0x10U;
+                gfx = func_151E86E4(gfx, 0x3B0, yy, 0x3F0, yy + 0x40, 0, 0x200, 0x200, 0x400, 0x400);
+            }
+            if (flags & 4) {
+                gfx = func_151E86E4(gfx, 0x250, 0xC, 0x280, 0x48, 0, 0, 0x200, 0x400, 0x400);
+            }
+        }
+    }
+    if (D_8008FDC0 & 0x6340) {
+        gfx = func_151E9D18(gfx, y, 1);
+    }
+    return gfx;
+}
 
 extern u8 D_800ABA90[][4];
 extern s8 D_800E0BB0;
@@ -300,13 +549,6 @@ extern u8 D_888;
 Gfx *func_151E9D18(Gfx *, s32, s32);
 
 
-typedef struct {
-    /* 0x000 */ char pad0[0x128];
-    /* 0x128 */ u8 unk128;
-    /* 0x129 */ char pad129[0x203];
-} ScoreObj; /* size 0x32C */
-
-extern ScoreObj D_800CC2D0[];
 extern u8 D_D10;
 extern u8 D_800ABAA0;
 extern u8 D_800ABAA4;

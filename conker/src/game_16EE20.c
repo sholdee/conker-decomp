@@ -1944,7 +1944,57 @@ s32 func_1514563C(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15145740.s")
+void func_15145740(struct127 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, f32 arg4) {
+    s16 phi_t0;
+    s16 phi_v1;
+    volatile f32 angle;
+    f32 spC;
+    f32 sp8[1];
+    f32 cpy;
+    f32 temp;
+    f32 sp4[1];
+    f32 sp0[1];
+
+    if ((arg0->id == 0x96) && (arg0->unk31C->matrix_physics != 0)) {
+        phi_t0 = arg0->unk7A + arg0->unk31C->unk80;
+    } else if (arg0->unk31C != NULL) {
+        phi_t0 = arg0->unk7A - arg0->unk31C->unk12;
+    } else {
+        phi_t0 = arg0->unk7A;
+    }
+    if ((arg0->id == 0x96) && (arg0->unk31C->matrix_physics != 0)) {
+        phi_v1 = arg0->unk31C->unk82 + 1024;
+    } else {
+        phi_v1 = arg0->unk1D1 * 200;
+    }
+    /* -g3 scope = uopt block boundary; the dead phi_v1 store keeps cpy from being copy-propagated */
+    {
+        s32 pad0;
+
+        cpy = phi_v1 * 0.005493164f;
+        phi_v1 = 0;
+    }
+    angle = cpy;
+    temp = angle;
+    cpy = temp;
+    temp = temp * 0.01745329238f;
+    sp0[0] = temp;
+    func_1505A184(phi_t0, 2000.0f, cpy, &arg1->unk0, &arg1->unk8, &arg1->unk4);
+    if (arg2 != NULL) {
+        arg2->unk4 = cosf(sp0[0]) * 1000.0f;
+        sp8[0] = sinf(sp0[0]) * 1000.0f;
+        sp4[0] = phi_t0 * 9.587380191e-05f;
+        arg2->unk0 = sp8[0] * cosf(sp4[0]);
+        arg2->unk8 = -sp8[0] * sinf(sp4[0]);
+        if (arg3 != NULL) {
+            spC = sp0[0] + arg4;
+            arg3->unk4 = cosf(spC) * 1000.0f;
+            sp8[0] = sinf(spC) * 1000.0f;
+            arg3->unk0 = sp8[0] * cosf(sp4[0]);
+            arg3->unk8 = -sp8[0] * sinf(sp4[0]);
+        }
+    }
+}
 // NON-MATCHING: 90% there
 // void func_15145740(struct127 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, f32 arg4) {
 //     struct194 tmp;

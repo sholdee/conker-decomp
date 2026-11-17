@@ -347,7 +347,260 @@ void func_15101350(Field124Owner *arg0) {
     func_1513175C((struct210 *)arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_12E540/func_15101378.s")
+typedef struct { f32 x, y, z; } F3_15101378;
+#pragma pack(1)
+typedef struct { s32 a, b, c, d; } Pq_15101378;
+#pragma pack()
+typedef struct { Pq_15101378 q; u16 h; } Pk_15101378;
+#pragma pack()
+typedef struct { u8 flag; u8 pad1; Pk_15101378 data; } XS_15101378;
+typedef struct { u8 pad0[0x34]; F3_15101378 p34; u8 pad1[0x110 - 0x40]; XS_15101378 s; } X_15101378;
+typedef struct { u8 pad0[0x9]; u8 f9; u8 pad1[4]; s16 sE; s16 s10; s16 s12; } P_15101378;
+typedef struct { u8 pad0[0x14]; P_15101378 *p14; } Y_15101378;
+typedef struct { u8 pad[4]; u8 flag; } VS_15101378;
+typedef struct { u8 pad0[0x40]; F3_15101378 p40; u8 pad1[0xA8 - 0x4C]; VS_15101378 s; } V_15101378;
+typedef struct { u8 pad0[0x38]; f32 f38; f32 f3C; F3_15101378 p40; u8 pad1[0xA8 - 0x4C]; f32 fA8; f32 fAC; u8 pad2[0xD4 - 0xB0]; u8 flagD4; } Z_15101378;
+typedef struct { u8 pad0[0x34]; F3_15101378 p34; F3_15101378 p40; u8 pad1[0x58 - 0x4C]; s32 s58; u8 pad2[0x174 - 0x5C]; u8 flag174; } W_15101378;
+typedef struct { u8 pad0[0xB4]; f32 fB4; F3_15101378 pB8; u8 padC4[0xE8 - 0xC4]; F3_15101378 pE8; Pk_15101378 pF4; u8 pad2[3]; u8 u109; } C_15101378;
+typedef struct { s32 s0; u8 pad4[0x3B - 4]; u8 u3B; u8 pad3C[0x74 - 0x3C]; u8 u74; u8 pad75[0x1D4 - 0x75]; u8 *p1D4; u8 pad1D8[0x31C - 0x1D8]; C_15101378 *c; } O_15101378;
+typedef struct {
+    O_15101378 *owner;
+    u8 u4;
+    u8 pad5[3];
+    f32 at8[3];
+    f32 at14[3];
+    u8 u20; u8 pad21[2]; u8 u23;
+    Z_15101378 *z24;
+    X_15101378 *x28;
+    Y_15101378 *y2C;
+    W_15101378 *w30;
+    V_15101378 *v34;
+    f32 f38;
+    u8 pad3C[8];
+    f32 f44;
+} B_15101378;
+typedef struct {
+    u8 pad0[0x34];
+    F3_15101378 p34;
+    F3_15101378 p40;
+    u8 pad4C[0x110 - 0x4C];
+    B_15101378 b;
+} A_15101378;
+extern void func_15143134(void *, void *, void *);
+extern f32 func_15143E64(void *);
+extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, void *, void *, void *, s32, s32, s32, f32);
+
+s8 func_15101378(A_15101378 *arg0)
+{
+  s8 ret;
+  C_15101378 *c;
+  O_15101378 *owner;
+  u8 hit;
+  Pk_15101378 pk;
+  F3_15101378 d;
+  u8 ok;
+  u8 *a2;
+  F3_15101378 e;
+  s32 tmp;
+  s32 mode;
+  s32 pad2;
+  B_15101378 *b;
+  u8 *ptr;
+  ret = 1;
+  owner = arg0->b.owner;
+  b = &arg0->b;
+  if ((owner->s0 == 0) || (owner->u3B != b->u4))
+  {
+    ret = 0;
+  }
+  else
+  {
+    ok = 1;
+    ptr = owner->p1D4;
+    if ((ptr != 0) && ((D_800C35EA != 1) || ((owner->u74 & 0xF) != 0xF)))
+    {
+      a2 = ((u8 (*)[0x40]) ptr)[b->u20];
+      func_15143134(b->at8, &arg0->p34, a2);
+      if (b->u23 & 2)
+      {
+        c = owner->c;
+        mode = c->u109;
+        if (mode != 0)
+        {
+          arg0->p40 = owner->c->pB8;
+          b->f44 = owner->c->fB4;
+          pk = owner->c->pF4;
+          d.x = arg0->p40.x - arg0->p34.x;
+          d.y = arg0->p40.y - arg0->p34.y;
+          d.z = arg0->p40.z - arg0->p34.z;
+        }
+        else
+        {
+          ok = 0;
+          mode = 2;
+          b->f44 = 2000.0f;
+          d.x = owner->c->pE8.x * 2000.0f;
+          d.y = owner->c->pE8.y * 2000.0f;
+          d.z = owner->c->pE8.z * 2000.0f;
+          arg0->p40.x = arg0->p34.x + d.x;
+          arg0->p40.y = arg0->p34.y + d.y;
+          arg0->p40.z = arg0->p34.z + d.z;
+        }
+      }
+      else
+      {
+        func_15143134(b->at14, &e, a2);
+        e.x = e.x - arg0->p34.x;
+        e.y = e.y - arg0->p34.y;
+        e.z = e.z - arg0->p34.z;
+        if (func_150AC9C0(arg0->p34.x, arg0->p34.y, arg0->p34.z, e.x, e.y, e.z, &tmp, &pk, &arg0->p40.x, &arg0->p40.y, &arg0->p40.z, 0, 0, 0, 0.0f) != (hit * 0))
+        {
+          d.x = arg0->p40.x - arg0->p34.x;
+          d.y = arg0->p40.y - arg0->p34.y;
+          d.z = arg0->p40.z - arg0->p34.z;
+          hit = 1;
+          b->f44 = func_15143E64(&d);
+        }
+        else
+        {
+          hit = 0;
+        }
+        mode = hit;
+        lbl1:
+        ;
+
+        ;
+      }
+    }
+    else
+    {
+      mode = 0;
+    }
+    if (mode != 0)
+    {
+      X_15101378 *x;
+      XS_15101378 *xs;
+      VS_15101378 *vs;
+      V_15101378 *v;
+      Y_15101378 *y;
+      Z_15101378 *z;
+      W_15101378 *w;
+      b->u23 |= 1;
+      if (b->x28 != 0)
+      {
+        x = b->x28;
+        xs = &x->s;
+        if ((mode == 1) && (ok != 0))
+        {
+          if (b->f44 > 40.0f)
+          {
+            f32 inv = 1.0f / b->f44;
+            x->p34.x = arg0->p40.x - ((d.x * inv) * 20.0f);
+            x->p34.y = arg0->p40.y - ((d.y * inv) * 20.0f);
+            x->p34.z = arg0->p40.z - ((d.z * inv) * 20.0f);
+          }
+          else
+          {
+            x->p34 = arg0->p40;
+          }
+          xs->data = pk;
+          xs->flag |= 1;
+        }
+        else
+        {
+          xs->flag &= ~1;
+        }
+      }
+      if (b->v34 != 0)
+      {
+        v = b->v34;
+        vs = &v->s;
+        if (((mode == 2) || (mode == 3)) && (ok != 0))
+        {
+          v->p40 = arg0->p40;
+          vs->flag |= 1;
+        }
+        else
+        {
+          vs->flag &= ~1;
+        }
+      }
+      if (b->y2C != 0)
+      {
+        y = b->y2C;
+        do {} while (0);
+        y->p14->sE = (s32) arg0->p40.x;
+        y->p14->s10 = (s32) arg0->p40.y;
+        y->p14->s12 = (s32) arg0->p40.z;
+        if (ok != 0)
+        {
+          y->p14->f9 = 0;
+        }
+        else
+        {
+          y->p14->f9 = 1;
+        }
+      }
+      if (b->z24 != 0)
+      {
+        z = b->z24;
+        z->p40 = arg0->p34;
+        z->f38 = z->fA8 * b->f38;
+        z->f3C = z->fAC * b->f38;
+        z->flagD4 |= 1;
+      }
+      if (b->w30 != 0)
+      {
+        w = b->w30;
+        w->p34 = arg0->p34;
+        w->p40 = arg0->p40;
+        w->s58 &= ~4;
+        w->flag174 |= 1;
+      }
+    }
+    else
+    {
+      X_15101378 *x;
+      XS_15101378 *xs;
+      VS_15101378 *vs;
+      V_15101378 *v;
+      Y_15101378 *y;
+      Z_15101378 *z;
+      W_15101378 *w;
+      lbl2:
+      ;
+
+      ;
+      b->u23 &= ~1;
+      if (b->x28 != 0)
+      {
+        x = b->x28;
+        x->s.flag &= ~1;
+      }
+      if (b->y2C != 0)
+      {
+        y = b->y2C;
+        y->p14->f9 = 1;
+      }
+      if (b->z24 != 0)
+      {
+        z = b->z24;
+        z->flagD4 &= ~1;
+      }
+      if (b->w30 != 0)
+      {
+        w = b->w30;
+        w->flag174 &= ~1;
+      }
+      if (b->v34 != 0)
+      {
+        v = b->v34;
+        v->s.flag &= ~1;
+      }
+    }
+  }
+  return ret;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_12E540/func_151019C4.s")
 s16 *func_15101F50(Struct15101F50 *arg0, s16 arg1);

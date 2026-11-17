@@ -1,6 +1,9 @@
+#define func_1513D2F0 func_1513D2F0_hdr
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#undef func_1513D2F0
+void *func_1513D2F0(void *arg0, void *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, u8 argA, s32 argB);
 
 extern f32 sinf(f32);
 
@@ -90,7 +93,143 @@ void func_150D278C(s32 arg0, void *arg1, u8 arg2, s32 arg3) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_FFBA0/func_150D2924.s")
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    s16 unk2;
+    s16 unk4;
+    s32 unk8;
+    s32 unkC;
+    u8 unk10;
+    u8 unk11;
+    u8 unk12;
+    u8 unk13;
+    f32 unk14;
+    f32 unk18;
+    struct17 unk1C;
+    struct17 unk28;
+    f32 unk34;
+    f32 unk38;
+    f32 unk3C;
+    s32 unk40;
+    u8 unk44;
+    u8 unk45;
+    u8 unk46;
+    u8 unk47;
+    s32 unk48;
+    u8 unk4C;
+    u8 pad4D[3];
+    s32 unk50;
+} Func150D2924Spawn;
+
+typedef struct {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+} Func150D2924Extra;
+
+typedef struct {
+    s16 *unk0;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C[16];
+    u8 unk5C;
+    u8 unk5D;
+    u8 unk5E;
+} Func150D2924Sub;
+
+typedef struct {
+    u8 pad0;
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD[0x1B];
+    Func150D2924Sub unk28;
+} Func150D2924Obj;
+
+extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
+extern void func_1514373C(f32 arg0, f32 arg1, f32 *arg2, f32 *arg3);
+extern s32 D_800A4AA0;
+
+void func_150D2924(Func150D2924Obj *arg0) {
+    Func150D2924Sub *sub;
+    s16 *src;
+
+    sub = &arg0->unk28;
+    sub->unk14 += sub->unk8 * D_800BE9A4;
+    sub->unk18 += D_800BE9A4;
+    if (sub->unk14 > 1.0f) {
+        Func150D2924Spawn spawn;
+        void *ret;
+        Func150D2924Extra extra;
+
+        src = sub->unk0;
+        extra.unk2C = 9.0f;
+        extra.unk18 = 0.0f;
+        extra.unk1C = 0.0f;
+        spawn.unk0 = 0x59;
+        spawn.unk1 = 0;
+        spawn.unk2 = 0x5A03;
+        spawn.unk4 = 0x16;
+        spawn.unk8 = 0;
+        spawn.unkC = 0;
+        spawn.unk10 = sub->unk5C;
+        spawn.unk11 = sub->unk5D;
+        spawn.unk12 = sub->unk5E;
+        spawn.unk13 = 0xFF;
+        spawn.unk18 = 1.0f;
+        spawn.unk1C.unk0 = src[0];
+        spawn.unk1C.unk4 = src[1];
+        spawn.unk1C.unk8 = src[2];
+        spawn.unk34 = 1.0f;
+        spawn.unk38 = 1.0f;
+        spawn.unk3C = 1.0f;
+        spawn.unk40 = 0x026C0000;
+        spawn.unk45 = 0xFF;
+        spawn.unk46 = 0;
+        spawn.unk47 = 6;
+        spawn.unk48 = 0;
+        spawn.unk4C = 0xFF;
+        do {
+            extra.unk28 = 22.0f - sub->unk18;
+            if (extra.unk28 > 0.0f) {
+                struct17 pos;
+
+                func_1514373C(sub->unk4, src[3], &pos.unk0, &pos.unk8);
+                pos.unk4 = src[4];
+                func_150A7960(sub->unk1C, pos.unk0, pos.unk4, pos.unk8, &spawn.unk28.unk0, &spawn.unk28.unk4, &spawn.unk28.unk8);
+                spawn.unk14 = func_150ADA68() * 25.0f + 50.0f;
+                extra.unk0 = extra.unk8 = func_150ADA68() * 1024.0f + -2560.0f + 2048.0f;
+                extra.unk4 = extra.unkC = func_150ADA68() * 1024.0f + 1536.0f + 2048.0f;
+                extra.unk10 = func_150ADA68() * 768.0f + 768.0f;
+                extra.unk14 = func_150ADA68() * 768.0f + 768.0f;
+                extra.unk20 = (func_150ADA68() * 80.0f + 50.0f) * 0.001000000047f;
+                extra.unk24 = (func_150ADA68() * 80.0f + 50.0f) * 0.001000000047f;
+                spawn.unk44 = extra.unk2C * extra.unk28;
+                ret = func_1513D2F0(&spawn, &D_800A4AA0, 0, 0x26, 0, 0x1F, 0, 0, 0, 0x30, arg0->unkC, arg0->unk1);
+                if (ret != NULL) {
+                    memcpy((u8 *)ret + 0x110, &extra, sizeof(extra));
+                }
+            }
+            sub->unk4 += sub->unk10;
+            sub->unk18 -= sub->unkC;
+            sub->unk14 -= 1.0f;
+        } while (sub->unk14 > 1.0f);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_FFBA0/func_150D2D6C.s")
 

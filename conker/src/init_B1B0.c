@@ -916,7 +916,99 @@ s32 func_1000CDA0(u8 arg0, SequenceRecordState *record) {
     }
     return arg0 == 0;
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000CEAC.s")
+extern s32 D_80041880[];
+extern s32 D_80041890[];
+extern s32 D_800418A0[];
+extern s32 D_800417C0[3][16];
+extern u8 D_80041970[3][16];
+#define VOL ((s32 (*)[16])D_800418B0)
+extern void func_1507E7E4(struct127 *, u8, u8, u16, s32);
+
+void func_1000CEAC(s32 arg0) {
+    s32 msg;
+    s32 *types;
+    s32 duration;
+    u32 channel;
+    u16 bits;
+    u16 *masks;
+    s32 i;
+
+    if (D_800417B0[arg0] != NULL) {
+        types = (s32 *)D_800417B0[arg0]->unk8;
+        masks = (u16 *)D_800417B0[arg0]->unkC;
+        D_800418AC[arg0] = 0;
+        while (osRecvMesg(&D_80041E58[arg0], (OSMesg *)&msg, 0) == 0) {
+            channel = msg & 7;
+            if (msg & 0x10) {
+                if (channel < 2) {
+                    duration = 0x514;
+                    msg >>= 5;
+                    if (D_80041890[arg0] != 0) {
+                        D_800418A0[arg0] = msg - D_80041890[arg0];
+                    }
+                    D_80041890[arg0] = msg;
+                    D_80041880[arg0] = msg;
+                }
+                if (masks[channel] != 0) {
+                    bits = masks[channel];
+                    D_800418AC[arg0] |= bits & 0x7F;
+                    for (i = 0; i < 16 && bits; i++, bits >>= 1) {
+                        if (bits & 1) {
+                            switch (types[i]) {
+                            case 0:
+                                D_80041970[arg0][i] ^= 1;
+                                VOL[arg0][i] = 0x8000;
+                                D_800417C0[arg0][i] = duration;
+                                break;
+                            case 1:
+                                D_80041970[arg0][i] ^= 1;
+                                duration >>= 1;
+                                if (D_80041970[arg0][i] == 0) {
+                                    VOL[arg0][i] = duration * D_800BE9E4 + 0x8000;
+                                }
+                                D_800417C0[arg0][i] = duration;
+                                break;
+                            case 2:
+                                D_80041970[arg0][i & 7] ^= 1;
+                                D_80041970[arg0][i | 8] = D_80041970[arg0][i & 7] ^ 1;
+                                VOL[arg0][(i & 7)] = 0x8000;
+                                VOL[arg0][(i | 8)] = 0x8000;
+                                D_800417C0[arg0][i] = 0;
+                                break;
+                            default:
+                                D_80041970[arg0][i] |= 1;
+                                VOL[arg0][i] = duration * D_800BE9E4;
+                                D_800417C0[arg0][i] = duration;
+                                break;
+                            }
+                        }
+                    }
+                }
+                D_800419A0 = arg0;
+            } else if (D_80041F04 & 1) {
+                func_1507E7E4(D_800CC2D0, 0x44, 1, 0x12, 5);
+            }
+        }
+        if (D_800417B0[arg0]->unk30 == 0) {
+            D_800418AC[arg0] |= 0x80;
+            if (D_800417B0[arg0]->unk15 == 0) {
+                func_10008F58(arg0);
+                D_800417B0[arg0]->unk15 = 1;
+            }
+        } else if (D_800417B0[arg0]->unk15 == 1) {
+            func_100084D8(arg0);
+            D_800417B0[arg0]->unk15 = 0;
+        }
+        for (i = 0; i < 16; i++) {
+            if (VOL[arg0][i] != 0) {
+                VOL[arg0][i] -= D_800417C0[arg0][i] * D_800BE9E4;
+                if (VOL[arg0][i] < 0) {
+                    VOL[arg0][i] = 0;
+                }
+            }
+        }
+    }
+}
 
 
 typedef s32 (*SequenceCallback)(s32, s32, f32, f32, f32);

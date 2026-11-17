@@ -231,7 +231,234 @@ void func_150C8A68(Struct150C8A68 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_F5D80/func_150C8DB8.s")
+typedef struct {
+    f32 x;
+    f32 z;
+} Dir150C8DB8;
+
+typedef struct {
+    f32 r;
+    f32 y;
+} Pt150C8DB8;
+
+typedef struct {
+    s32 count;
+    Pt150C8DB8 *pts;
+} Ring150C8DB8;
+
+typedef struct {
+    u8 pad0[0x10];
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    u8 pad1C[0x8];
+    s32 unk24;
+    u8 pad28[0x18];
+    f32 unk40;
+    f32 unk44;
+    u8 pad48[0xC];
+    Vtx *unk54[(0x360 - 0x54) / 4];
+    Dir150C8DB8 *unk360;
+} Obj150C8DB8;
+
+void func_150CCD90(f32, f32 *, f32 *, f32 *);
+extern Ring150C8DB8 D_80088820;
+extern s32 *D_80090E84;
+extern struct { s32 unk0; s32 unk4; } D_800A4AC8[];
+Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
+Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
+Gfx *func_15142CF0(Gfx *, s32, s32, s32, s32, s32, s32, u8 *);
+Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
+Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
+
+#define W150C8DB8(pkt, a, b)        \
+{                                   \
+    Gfx *_g = (Gfx *)(pkt);         \
+    _g->words.w0 = (u32)(a);        \
+    _g->words.w1 = (u32)(b);        \
+}
+
+Gfx *func_150C8DB8(Gfx *gdl, Obj150C8DB8 *arg1, s32 arg2) {
+    Obj150C8DB8 *obj;
+
+    obj = arg1;
+    {
+    s32 palOffset;
+    u8 flag;
+    s32 count;
+    s32 i;
+    s32 j;
+    s32 n;
+    s32 pad1;
+
+    flag = 1;
+    count = 0;
+    gdl = func_15142B7C(gdl, 0x200205, 0x70400);
+    gdl = func_15142C10(gdl, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
+    gdl = func_15142CF0(gdl, 0xF2, 0, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
+    gdl = func_1513F4E4(gdl, 0x21, &flag);
+    gdl = func_15142FBC(gdl, 0x1DACA0, D_800A4AC8[14].unk0 | D_800A4AC8[14].unk4, &flag);
+    {
+    s32 tex;
+    tex = func_1510D0EC(*D_80090E84, &palOffset, 3, 0);
+    W150C8DB8(gdl++, 0xD7000002, 0xFFFFFFFF);
+    W150C8DB8(gdl++, 0xFD500000, tex);
+    W150C8DB8(gdl++, 0xF5500000, 0x07000000);
+    W150C8DB8(gdl++, 0xF3000000, 0x073EF000);
+    W150C8DB8(gdl++, 0xF5400400, 0x01018050);
+    W150C8DB8(gdl++, 0xF2402402, 0x0147E4FE);
+    W150C8DB8(gdl++, 0xF5400280, 0x02014441);
+    W150C8DB8(gdl++, 0xF2202202, 0x0223E27E);
+    W150C8DB8(gdl++, 0xF54002A0, 0x03010832);
+    W150C8DB8(gdl++, 0xF2102102, 0x0311E13E);
+    W150C8DB8(gdl++, 0xF54002B0, 0x0400CC23);
+    W150C8DB8(gdl++, 0xF2082082, 0x0408E09E);
+    W150C8DB8(gdl++, 0xF54002B8, 0x05009014);
+    W150C8DB8(gdl++, 0xF2042042, 0x0504604E);
+    W150C8DB8(gdl++, 0xF56004BC, 0x00017C5F);
+    W150C8DB8(gdl++, 0xF2802802, 0x0087E87E);
+    W150C8DB8(gdl++, 0xFD100000, palOffset + tex - 0x20);
+    W150C8DB8(gdl++, 0xF5600100, 0x06000000);
+    W150C8DB8(gdl++, 0xE6000000, 0);
+    W150C8DB8(gdl++, 0xF0000000, 0x0603C000);
+    W150C8DB8(gdl++, 0xD7002002, 0xFFFFFFFF);
+    }
+    {
+        Vtx *vtxBase;
+
+        {
+            f32 dx;
+            f32 dz;
+
+            j = 0;
+            dx = obj->unk360[0].x;
+            dz = obj->unk360[0].z;
+            vtxBase = arg1->unk54[D_800BE9C0];
+            {
+                s32 inside;
+                f32 cx;
+                f32 cz;
+                s32 padA[6];
+
+                cx = obj->unk10 + obj->unk44 * dx;
+                cz = obj->unk18 + obj->unk44 * dz;
+                if (cx * cx + cz * cz < 10894295.0f) {
+                    inside = 1;
+                } else {
+                    inside = 0;
+                }
+                for (i = 0; i < D_80088820.count; i++) {
+                    f32 rad;
+                    f32 h;
+                    f32 y;
+                    f32 x;
+                    f32 z;
+
+                    rad = (D_80088820.pts + i)->r * arg1->unk40;
+                    h = (D_80088820.pts + i)->y * arg1->unk40;
+                    x = cx;
+                    x += rad * dx;
+                    h = (inside ? h : 0.0f) + arg1->unk14;
+                    z = cz;
+                    z += rad * dz;
+                    vtxBase[count].v.ob[0] = x;
+                    vtxBase[count].v.ob[1] = h;
+                    vtxBase[count].v.ob[2] = z;
+                    vtxBase[count].v.tc[0] = -((x * 0.0398866199f + z * 0.03713737056f + 110.2300644f) * 32.0f);
+                    vtxBase[count].v.tc[1] = -((x * 0.05412395298f + z * -0.05814454332f + 50.14429092f) * 32.0f);
+                    {
+                        f32 r;
+                        f32 g;
+                        f32 b;
+
+                        func_150CCD90(z, &r, &g, &b);
+                        vtxBase[count].v.cn[0] = r;
+                        vtxBase[count].v.cn[1] = g;
+                        vtxBase[count].v.cn[2] = b;
+                    }
+                    if (inside) {
+                        vtxBase[count].v.cn[3] = 0xFF;
+                    } else {
+                        vtxBase[count].v.cn[3] = 0;
+                    }
+                    count++;
+                }
+            }
+        }
+
+        for (; j < obj->unk24; j++) {
+            s32 k;
+            f32 dx2;
+            f32 dz2;
+
+            i = 0;
+            k = (j + 1 == arg1->unk24) ? 0 : j + 1;
+            dx2 = arg1->unk360[k].x;
+            dz2 = arg1->unk360[k].z;
+            {
+                s32 inside2;
+                f32 cx2;
+                f32 cz2;
+                s32 padV2;
+
+                cx2 = arg1->unk10 + arg1->unk44 * dx2;
+                cz2 = arg1->unk18 + arg1->unk44 * dz2;
+                if (cx2 * cx2 + cz2 * cz2 < 10894295.0f) {
+                    inside2 = 1;
+                } else {
+                    inside2 = 0;
+                }
+                for (; i < D_80088820.count; i++) {
+                    f32 rad2;
+                    f32 h2;
+                    f32 y2;
+                    f32 x2;
+                    f32 z2;
+
+                    rad2 = (D_80088820.pts + i)->r * arg1->unk40;
+                    h2 = (D_80088820.pts + i)->y * arg1->unk40;
+                    x2 = cx2;
+                    x2 += rad2 * dx2;
+                    h2 = (inside2 ? h2 : 0.0f) + arg1->unk14;
+                    z2 = cz2;
+                    z2 += rad2 * dz2;
+                    vtxBase[count].v.ob[0] = x2;
+                    vtxBase[count].v.ob[1] = h2;
+                    vtxBase[count].v.ob[2] = z2;
+                    vtxBase[count].v.tc[0] = -((x2 * 0.0398866199f + z2 * 0.03713737056f + 110.2300644f) * 32.0f);
+                    vtxBase[count].v.tc[1] = -((x2 * 0.05412395298f + z2 * -0.05814454332f + 50.14429092f) * 32.0f);
+                    {
+                        f32 r2;
+                        f32 g2;
+                        f32 b2;
+
+                        func_150CCD90(z2, &r2, &g2, &b2);
+                        vtxBase[count].v.cn[0] = r2;
+                        vtxBase[count].v.cn[1] = g2;
+                        vtxBase[count].v.cn[2] = b2;
+                    }
+                    if (inside2) {
+                        vtxBase[count].v.cn[3] = 0xFF;
+                    } else {
+                        vtxBase[count].v.cn[3] = 0;
+                    }
+                    count++;
+                }
+            }
+            {
+                s32 padB;
+                n = D_80088820.count * 2;
+                gSPVertex(gdl++, &arg1->unk54[D_800BE9C0][count - n], n, 0);
+                for (i = 0; i < D_80088820.count - 1; i++) {
+                    gSP1Triangle(gdl++, i, i + 1, i + D_80088820.count + 1, 0);
+                    gSP1Triangle(gdl++, i, i + D_80088820.count + 1, i + D_80088820.count, 0);
+                }
+            }
+        }
+    }
+    }
+    return gdl;
+}
 
 typedef struct {
     u8 pad0[1];

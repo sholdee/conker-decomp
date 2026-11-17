@@ -164,7 +164,241 @@ fence_15013000:
     }
 }
 // requires jump table
-#pragma GLOBAL_ASM("asm/nonmatchings/game_40490/func_150130B4.s")
+typedef struct {
+    s16 unk0;
+    s16 unk2;
+    s16 unk4;
+    s16 unk6;
+    s16 unk8;
+    s16 padA;
+    f32 unkC;
+    f32 unk10;
+    u8 pad14[2];
+    u8 unk16;
+    u8 pad17;
+    u32 unk18;
+    s32 unk1C;
+    u32 unk20;
+} Arg_150130B4;
+
+typedef struct {
+    u8 unk00;
+    u8 unk01;
+    s16 unk02;
+    s16 unk04;
+    u8 pad06[2];
+    s32 unk08;
+    s32 unk0C;
+    u8 unk10;
+    u8 unk11;
+    u8 unk12;
+    u8 unk13;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    f32 unk30;
+    f32 unk34;
+    f32 unk38;
+    f32 unk3C;
+    s32 unk40;
+    u8 unk44;
+    u8 unk45;
+    u8 unk46;
+    u8 unk47;
+    s32 unk48;
+    u8 pad4C[0xC];
+} Struct54_150130B4;
+
+typedef struct {
+    f32 unk00;
+    f32 unk04;
+    f32 unk08;
+    f32 unk0C;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    u8 pad24[0x24];
+    f32 unk48;
+    u8 pad4C[0x8];
+    u8 unk54;
+    u8 unk55;
+    u8 unk56;
+    u8 unk57;
+    u8 unk58;
+    u8 pad59[3];
+} StructAC_150130B4;
+
+typedef struct { s32 v[3]; } S32x3_150130B4;
+typedef struct { u8 v[6]; } U8x6_150130B4;
+
+typedef struct {
+    f32 unk0;
+    f32 unk4;
+    void *unk8;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+} Payload18_150130B4;
+
+extern S32x3_150130B4 D_80096580;
+extern s32 D_8009658C[];
+extern s32 D_800965A0[];
+extern s32 D_800965B0[];
+extern U8x6_150130B4 D_80082E98;
+void *func_151407D0(void *, s32, void *, s32, s32, s32, s32, s32, s32, s32);
+extern void *func_151149AC(u8);
+
+s32 func_150130B4(Arg_150130B4 *arg0) {
+    StructAC_150130B4 spAC;
+    Struct54_150130B4 sp54;
+    s32 type;
+    s32 idx;
+    u8 flag;
+    f32 mtx[4][4];
+
+    arg0->unk16 |= 4;
+    flag = (arg0->unk20 >> 24) & 0xFF;
+    type = arg0->unk1C;
+lbl3:
+    sp54.unk1C = arg0->unk0;
+    sp54.unk20 = arg0->unk2;
+    sp54.unk24 = arg0->unk4;
+    func_150A8050(mtx, arg0->unkC, arg0->unk10, 0.0f);
+    func_150A7960((f32 *)mtx, 0.0f, 0.0f, -500.0f, &sp54.unk28, &sp54.unk2C, &sp54.unk30);
+    sp54.unk28 += sp54.unk1C;
+    sp54.unk2C += sp54.unk20;
+    sp54.unk30 += sp54.unk24;
+    {
+    typedef s32 PadT;
+    spAC.unk04 = arg0->unk6;
+    spAC.unk00 = spAC.unk04;
+    spAC.unk0C = arg0->unk8;
+    spAC.unk08 = spAC.unk0C;
+    spAC.unk18 = ((arg0->unk20 >> 8) & 0xFF) * 0.003921568859f;
+    }
+    spAC.unk1C = (arg0->unk20 & 0xFF) * 0.003921568859f;
+    idx = (arg0->unk18 >> 24) & 0xFF;
+    sp54.unk00 = D_8009658C[idx];
+    sp54.unk02 = D_800965A0[idx] + 3;
+    sp54.unk04 = 0x12C;
+    sp54.unk08 = 0;
+    sp54.unk0C = 0;
+    sp54.unk10 = arg0->unk18 & 0xFF;
+    sp54.unk11 = (arg0->unk18 >> 8) & 0xFF;
+    sp54.unk12 = (arg0->unk18 >> 16) & 0xFF;
+    sp54.unk13 = 0xFF;
+    sp54.unk14 = 0.0f;
+    sp54.unk18 = 0.0f;
+    sp54.unk34 = 1.0f;
+    sp54.unk38 = 1.0f;
+    sp54.unk3C = 1.0f;
+    sp54.unk45 = 0xFF;
+    sp54.unk44 = 0xFF;
+    sp54.unk46 = 0;
+    sp54.unk47 = 6;
+    sp54.unk01 = 3;
+    spAC.unk54 = 0;
+    spAC.unk55 = 0;
+    spAC.unk56 = 0;
+    spAC.unk57 = 0;
+    spAC.unk48 = 1.0f;
+    spAC.unk10 = 0.4099999964f;
+    spAC.unk14 = 0.200000003f;
+    spAC.unk20 = 9.999999975e-07f;
+    if (flag) {
+lblx43:
+        func_1510F800(0);
+        sp54.unk48 = func_1510FD20((s32)sp54.unk1C, (s32)sp54.unk24);
+    } else {
+        sp54.unk48 = 0;
+        flag = 0;
+    }
+    spAC.unk58 = 0;
+    sp54.unk40 = 0x2006 | (((arg0->unk20 >> 16) & 0xFF) ? 0x10 : 0) | (flag ? 0x01000000 : 0) | 0x40000 | 0x80000 | 0x10000 | 0x400000;
+    switch (type) {
+    case 8: {
+        f32 sp80[4];
+        void *temp_v0;
+        sp80[0] = 0.9750000238f;
+        sp80[1] = 0.3249999881f;
+        sp80[2] = 0.0f;
+        sp80[3] = 0.05959999934f;
+        temp_v0 = func_151407D0(&spAC, 0x70, &sp54, 0, 0x29, 0, 0, -1, 0xFF, 1);
+        if (temp_v0 != NULL) {
+            memcpy((u8 *)temp_v0 + 0x170, sp80, 0x10);
+        }
+        break;
+    }
+    case 1:
+    case 2:
+    case 3:
+    case 4: {
+        void *temp;
+        spAC.unk58 = D_800965B0[type];
+        temp = func_151407D0(&spAC, 0x60, &sp54, 0, 0, 0, 0, -1, 0xFF, 1);
+        return 1;
+    }
+    case 9:
+    case 10:
+    case 11:
+    case 12: {
+        void *temp;
+        spAC.unk58 = D_800965A0[type];
+        temp = func_151407D0(&spAC, 0x60, &sp54, 0, 0, 0, 0, -1, 0xFF, 1);
+        return 1;
+    }
+    case 5:
+    case 6:
+    case 7: {
+        S32x3_150130B4 sp68;
+        sp68 = D_80096580;
+        spAC.unk58 = sp68.v[type - 5];
+        func_151407D0(&spAC, 0x60, &sp54, 0, 0, 0, 0, -1, 0xFF, 1);
+        return 1;
+    }
+    case 13:
+    case 14:
+    case 15:
+    case 16:
+    case 17:
+    case 18: {
+        void *temp_v0;
+        Payload18_150130B4 sp4C;
+        U8x6_150130B4 sp44;
+        sp44 = D_80082E98;
+        sp4C.unk8 = func_151149AC(sp44.v[type - 13]);
+        if (sp4C.unk8 == NULL) {
+            return 1;
+        }
+        sp4C.unk0 = -80.0f;
+        sp4C.unk4 = fabsf(-0.01250000019f);
+        sp4C.unkC = ((s16 *)sp4C.unk8)[8];
+        sp4C.unk10 = ((s16 *)sp4C.unk8)[9];
+        sp4C.unk14 = ((s16 *)sp4C.unk8)[10];
+        spAC.unk58 = 0;
+        temp_v0 = func_151407D0(&spAC, 0x78, &sp54, 0x25, 0, 0, 0, -1, 0xFF, 1);
+        if (temp_v0 != NULL) {
+            memcpy((u8 *)temp_v0 + 0x170, &sp4C, 0x18);
+        }
+        break;
+    }
+    case 19:
+        spAC.unk58 = 0x11;
+        sp54.unk40 &= ~2;
+        func_151407D0(&spAC, 0x60, &sp54, 0, 0, 0, 0, -1, 0xFF, 1);
+        return 1;
+    default:
+        func_151407D0(&spAC, 0x60, &sp54, 0, 0, 0, 0, -1, 0xFF, 1);
+        break;
+    }
+    return 1;
+}
 
 s32 func_1501370C(struct16 *arg0) {
     u8 idx = arg0->unk17;

@@ -360,7 +360,224 @@ s32 func_1519D240(Arg1519D240 *arg0)
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1CA420/func_1519D454.s")
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3fD454;
+
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+    Vec3fD454 vel;
+    f32 w;
+    s16 unk1C;
+    s16 unk1E;
+    u8 unk20;
+    u8 unk21;
+    u8 pad22[2];
+} TrailD454;
+
+typedef struct {
+    struct127 *unk0;
+    u8 unk4;
+    u8 unk5;
+    u8 unk6;
+    u8 unk7;
+    Vec3fD454 unk8;
+    Vec3fD454 unk14;
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    f32 unk30;
+    f32 unk34;
+    f32 unk38;
+    f32 unk3C;
+    u8 unk40;
+    u8 pad41;
+    s16 unk42;
+    s16 unk44;
+    s16 unk46;
+    s16 unk48;
+    s16 unk4A;
+    u8 unk4C;
+    u8 pad4D[3];
+    f32 unk50;
+    f32 unk54;
+    f32 unk58;
+} PayloadD454;
+
+typedef struct {
+    u8 pad0[0x10];
+    Vec3fD454 unk10;
+    s16 unk1C;
+    u16 unk1E;
+    u8 pad20[5];
+    u8 unk25;
+    u8 pad26[6];
+    s8 unk2C;
+    s8 unk2D;
+    s8 unk2E;
+    u8 pad2F[0x65];
+    TrailD454 *unk94;
+    PayloadD454 *unk98;
+} ArgD454;
+
+typedef struct {
+    struct127 *obj;
+    u8 id;
+    s32 type;
+} InfoD454;
+
+s32 func_1519D454(ArgD454 *arg0) {
+    PayloadD454 *payload;
+    TrailD454 *entries;
+    s32 done;
+    f32 prevX;
+    f32 prevZ;
+    InfoD454 info;
+    struct260 *spawned;
+    f32 inv;
+    f32 t;
+    f32 step;
+    f32 dz;
+    f32 dy;
+    f32 dx;
+    f32 dw;
+    Vec3fD454 pos;
+    f32 width;
+    s32 idx;
+    f32 mx;
+    f32 my;
+    f32 mz;
+    Vec3fD454 vel;
+    f32 incY;
+    f32 incZ;
+    f32 incW;
+
+    payload = arg0->unk98;
+    entries = arg0->unk94;
+    if (payload->unk0->interaction_state == 0) {
+        return 0;
+    }
+    if (payload->unk0->unique_id != payload->unk4) {
+        return 0;
+    }
+    done = 0;
+    if (!(arg0->unk1E & 4)) {
+        if (func_1519E304(payload, &arg0->unk10, 0.0f, 0.0f, 0.0f, 1.0f) != 0) {
+            done = 1;
+            payload->unk14 = arg0->unk10;
+            arg0->unk1E |= 4;
+        } else {
+            return 1;
+        }
+    }
+    prevX = arg0->unk10.x;
+    prevZ = arg0->unk10.z;
+    if (done == 0 && func_1519E304(payload, &arg0->unk10, arg0->unk10.x, arg0->unk10.y, arg0->unk10.z, payload->unk3C) == 0) {
+        func_1519CFA0((struct s_1519CFA0 *)arg0);
+        info.obj = payload->unk0;
+        info.id = payload->unk0->unique_id;
+        info.type = payload->unk4C;
+        spawned = func_151491F4(arg0->unk1C, -1, 8, (arg0->unk1E & 1) ? 1 : 0, 2, 0xC, 0xFF, 0);
+        if (spawned != NULL) {
+            memcpy((u8 *)spawned + 0x28, &info, 0xC);
+            if (func_1514ED3C(*(s32 *)((u8 *)payload->unk0 + 0x2F4), (s32)arg0, NULL) != 0) {
+                func_1514EC1C((s32)spawned, (s32)payload->unk0, 0x11);
+            }
+        }
+        return 1;
+    }
+    payload->unk2C += payload->unk28 * D_800BE9A4;
+    if (payload->unk2C > 1.0f) {
+        t = payload->unk20 + D_800BE9A4;
+        inv = 1.0f / payload->unk2C;
+        pos = payload->unk14;
+        step = t * inv;
+        width = payload->unk38 + payload->unk34 * t;
+        dx = arg0->unk10.x - payload->unk14.x;
+        dy = arg0->unk10.y - payload->unk14.y;
+        dz = arg0->unk10.z - payload->unk14.z;
+        dw = payload->unk38 - width;
+        if (0) {} /* splits uopt basic blocks: needed for the original register allocation */
+        vel.x = (arg0->unk10.x - prevX) * D_800BE9A8;
+        vel.y = 0.0f;
+        vel.z = (arg0->unk10.z - prevZ) * D_800BE9A8;
+        mx = dx * inv;
+        incY = dy * inv;
+        incZ = dz * inv;
+        incW = dw * inv;
+        /* dead expressions: shift IDO's TU-wide state so func_1519D9F4 compiles as in the ROM */
+        dx * t;
+        dy * t;
+        dz * t;
+        do {
+            TrailD454 *entry;
+            entry = &entries[arg0->unk2E];
+            entry->x = pos.x;
+            entry->y = pos.y;
+            entry->z = pos.z;
+            entry->vel = vel;
+            entry->unk21 = payload->unk7;
+            entry->w = width;
+            entry->unk1C = payload->unk42;
+            entry->unk1E = payload->unk44;
+            payload->unk7 += payload->unk48 + ((u32)func_150ADA20() % (payload->unk4A + 1));
+            entry->unk20 = 0xFF;
+            entry->vel.y += payload->unk24 * t;
+            entry->x += entry->vel.x * t;
+            entry->y += entry->vel.y * t;
+            entry->z += entry->vel.z * t;
+            t -= step;
+            arg0->unk2E++;
+            if (arg0->unk2E == arg0->unk25) {
+                arg0->unk2E = 0;
+            }
+            arg0->unk2C++;
+            if (arg0->unk2E == arg0->unk2D) {
+                arg0->unk2D++;
+                if (arg0->unk2D == arg0->unk25) {
+                    arg0->unk2D = 0;
+                }
+                arg0->unk2C--;
+            }
+            pos.x += mx;
+            pos.y += incY;
+            pos.z += incZ;
+            width += incW;
+            payload->unk2C -= 1.0f;
+        } while (payload->unk2C > 1.0f);
+        payload->unk14 = pos;
+        payload->unk20 = t;
+    }
+    {
+    TrailD454 *entry;
+
+    idx = arg0->unk2E;
+    mx = payload->unk0->x_position - payload->unk50;
+    my = payload->unk0->y_position - payload->unk54;
+    mz = payload->unk0->z_position - payload->unk58;
+    if (idx != arg0->unk2D) {
+        do {
+            idx--;
+            if (idx < 0) {
+                idx = arg0->unk25 - 1;
+            }
+            entry = &entries[idx];
+            entry->x += mx;
+            entry->y += my;
+            entry->z += mz;
+        } while (idx != arg0->unk2D);
+    }
+    payload->unk50 = payload->unk0->x_position;
+    payload->unk54 = payload->unk0->y_position;
+    payload->unk58 = payload->unk0->z_position;
+    }
+    return 1;
+}
 
 typedef struct {
     f32 x, y, z;

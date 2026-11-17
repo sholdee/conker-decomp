@@ -103,21 +103,6 @@ typedef struct {
     /* 0x94 */ s16  unk94;
 } StreamVoice;
 
-/*
- * NOTE (optimisation-level scan, wave 48): the two functions below are NOT part of this
- * translation unit.  They are `__osContAddressCrc` / `__osContDataCrc`, i.e. the tail of the
- * object that conker.us.yaml splits as `libultra/io/contramread2` at 0x21F530, and they are
- * -O1 output, not the -g this directory is compiled at (measured: an honest reconstruction of
- * func_151F27E0 scores 59 at -g and 32 at -O1, with the -O1 build reproducing the instruction
- * COUNT exactly, 43 vs 44, while -g cannot -- at -g IDO always emits the `b <epilogue>` pair
- * that golden does not have).  They cannot be matched while they live in this file.
- * The fix is a one-line conker.us.yaml change moving this segment's start from 0x21fc90 to
- * 0x21fe10, which is where func_151F2960 -- the first real function of this module -- begins.
- */
-#pragma GLOBAL_ASM("asm/nonmatchings/libultra/audio/game_21FC90/func_151F27E0.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/libultra/audio/game_21FC90/func_151F2890.s")
-
 void func_151F2960(s32 arg0, s32 arg1) {
     if (D_800E0DFC == 0) {
         return;

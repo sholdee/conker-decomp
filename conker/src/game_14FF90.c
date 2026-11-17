@@ -1780,7 +1780,268 @@ void func_1512623C(struct127 *arg0, struct_1512623C_arg1 *arg1, s32 arg2, f32 *a
     }
 }
 // ooh mama
-#pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_15126378.s")
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3_15126378;
+
+typedef struct {
+    u8 pad0[0x114];
+    s16 unk114;
+    u8 pad116[0x11A - 0x116];
+    u8 unk11A;
+    u8 pad11B[0x130 - 0x11B];
+    Vec3_15126378 unk130;
+    Vec3_15126378 unk13C;
+    Vec3_15126378 unk148;
+    u8 pad154[0x160 - 0x154];
+    Vec3_15126378 unk160;
+    f32 unk16C;
+    f32 unk170;
+    f32 unk174;
+    f32 unk178;
+    f32 unk17C;
+    f32 unk180;
+    f32 unk184;
+    f32 unk188;
+    f32 unk18C;
+    s32 unk190;
+    u8 unk194;
+    u8 pad195[0x197 - 0x195];
+    u8 unk197;
+    u8 unk198;
+    u8 pad199[0x1AC - 0x199];
+    u8 unk1AC;
+} struct_15126378;
+
+typedef struct {
+    u8 pad0[0x6C];
+    f32 unk6C;
+    f32 unk70;
+    u8 pad74[0x84 - 0x74];
+    f32 unk84;
+    u8 pad88[0xF8];
+} struct_15126378_D_800BE628;
+
+void func_151C9BA0(struct108 *arg0, s32 arg1);
+s32 func_15127520();
+s32 func_151277B0();
+
+s32 func_15126378(struct108 *arg0) {
+    struct_15126378 *s0;
+    struct127 *target;
+    f32 ratio;
+    f32 aspect;
+    f32 minDist;
+    f32 step;
+    s32 type;
+    f32 scale;
+    f32 angle;
+    f32 f;
+    f32 rad;
+    f32 lo;
+    f32 tmp;
+    s32 buttons;
+    Vec3_15126378 dir;
+    f32 t;
+    f32 hi;
+    f32 dx;
+    f32 dy;
+    s32 valid;
+    s32 ret;
+
+    scale = 0.01999999955f;
+    s0 = (struct_15126378 *)arg0->unk3D4;
+    aspect = ((struct_15126378_D_800BE628 *)D_800BE628)[arg0->unk23D].unk70 / ((struct_15126378_D_800BE628 *)D_800BE628)[arg0->unk23D].unk6C;
+    minDist = -(((struct_15126378_D_800BE628 *)D_800BE628)[arg0->unk23D].unk6C - 5.0f);
+    step = ((struct_15126378_D_800BE628 *)D_800BE628)[arg0->unk23D].unk6C * scale;
+    type = arg0->unk23E;
+    if (((type == 0xC) && (arg0->unk3D0->unk84.uh != 0x76)) || (type == 0x1B)) {
+        arg0->unk36A |= 0x10;
+        ((OSContPad *)arg0->unk36C)->button |= 0x10;
+    }
+    if ((s0->unk197 == 0) && ((((OSContPad *)arg0->unk36C)->stick_x != 0) || (((OSContPad *)arg0->unk36C)->stick_y != 0))) {
+        s0->unk194 = 1;
+    }
+    target = (arg0->unk3D0->unk65 != 0) ? &D_800CC2D0[arg0->unk3D0->unk65] - 1 : arg0->unk3D0;
+    valid = (s0->unk11A == 2) || (type == 0x1B) || (type == 0x1F) || (type == 0x29);
+    if (((type == 0x23) || (type == 0x24) || (type == 0x16) || (type == 0x18) || (type == 0x41) ||
+         (type == 0xC) || (type == 0x14) || (type == 0x3F) || (type == 0x1B) || (type == 0x1F) ||
+         (type == 0x29)) &&
+        (((OSContPad *)arg0->unk36C)->button & 0x10) && valid &&
+        (((s32)arg0->unk3D0->unk28 == 0) || ((s32)target->unk28 == 0)) &&
+        (arg0->unk3D0->stunned == 0) && (s0->unk197 == 0)) {
+        ((struct_15126378 *)arg0->unk3D4)->unk198 = 0;
+        arg0->unk73C = 0;
+        if (((type == 0x1F) || (type == 0x29)) && !(arg0->unk5F0 & 4)) {
+            f = *(s16 *)&target->unk2E4 * scale;
+            angle = (target->unk40 - 90.0f) - f;
+            s0->unk194 = 1;
+        } else {
+            angle = arg0->unk3D0->unk40 - 90.0f;
+        }
+        func_15048758(&angle);
+        rad = angle * 0.01745329238f;
+        func_151239CC(arg0, 1);
+        s0->unk197 = 2;
+        func_151C9BA0(arg0, type);
+        func_1512623C(target, (struct_1512623C_arg1 *)arg0->unk3D4, type, &((Vec3_15126378 *)&arg0->unk2F8)->x, &arg0->unk2FC, &arg0->unk300, arg0->unk5F0 & 0x10);
+        arg0->unk2BC = (sinf(rad) * 100.0f) + arg0->unk2F8;
+        arg0->unk2C0 = arg0->unk3D0->y_position + (((struct_15126378 *)arg0->unk3D4)->unk114 * 0.75f);
+        arg0->unk2C4 = (cosf(rad) * 100.0f) + arg0->unk300;
+        s0->unk13C = *((Vec3_15126378 *)&arg0->unk2F8);
+        s0->unk18C = arg0->unk37C;
+        s0->unk160 = *((Vec3_15126378 *)&arg0->unk2F8);
+        if (type != s0->unk190) {
+            if (type == 0x1B) {
+                f = 1.0f;
+            } else if (type == 0x16) {
+                f = 0.75f;
+            } else {
+                f = 0.5f;
+            }
+            if ((type == 0x18) || (type == 0x41) || (type == 0x3F) || (type == 0x14) || (type == 0x12)) {
+                f = (f < 0.0f) ? 0.0f : ((f > 0.6000000238f) ? 0.6000000238f : f);
+            }
+            s0->unk184 = ((0.0f - minDist) * f) + minDist;
+            s0->unk194 = 1;
+            s0->unk190 = type;
+        }
+        if (s0->unk194 != 0) {
+            s0->unk174 = angle;
+            s0->unk178 = 0.0f;
+            s0->unk170 = 0.0f;
+            s0->unk17C = 0.0f;
+            s0->unk180 = 0.0f;
+            s0->unk194 = 0;
+            s0->unk16C = s0->unk174;
+        }
+        s0->unk188 = s0->unk184 * aspect;
+        arg0->unk19C = s0->unk184;
+        arg0->unk1A0 = s0->unk188;
+        arg0->unk1A4 = s0->unk184;
+        arg0->unk1A8 = s0->unk188;
+        func_1510B32C(arg0->unk23D, arg0->unk19C, arg0->unk1A0, 1.0f);
+        ((struct_15126378_D_800BE628 *)D_800BE628)[arg0->unk23D].unk84 = 1.0f;
+        func_150627D4(arg0->unk3D0);
+        D_800DBFF4[arg0->unk23D] = 2;
+        if ((type == 0x24) || (type == 0x23)) {
+            func_1000FA64(0x605, 0, 0, 0, 0x6590, 0x12C, 0x12B, (s32)func_15127520, arg0, (u32)(-arg0->unk1A4 * 10000.0f), 0, 0);
+        } else if ((type == 0x1B) || (type == 0x1F) || (type == 0x29)) {
+            tmp = s0->unk174 * s0->unk178;
+            func_1000FA64(0x622, 0, 0, 0, 0x6590, 0x12C, 0x12B, (s32)func_15127520, arg0, (u32)(-arg0->unk1A4 * 10000.0f) | 0x80000000, 0x100, 0);
+            func_1000FA64(0x622, 0, 0, 0, 0x3E80, 0x12C, 0x12B, (s32)func_151277B0, arg0, *(s32 *)&tmp, 0x100, 0);
+        }
+        target->pad2FC[0] |= 1 << arg0->unk23D;
+        target->unk74 |= 1 << arg0->unk23D;
+        { typedef s32 T_pad; }
+    }
+    ret = s0->unk197;
+    if (ret == 0) {
+        return 0;
+    }
+    if (ret == 2) {
+        buttons = ((OSContPad *)arg0->unk36C)->button;
+        func_1512623C(target, (struct_1512623C_arg1 *)arg0->unk3D4, type, &((Vec3_15126378 *)&arg0->unk2F8)->x, &arg0->unk2FC, &arg0->unk300, arg0->unk5F0 & 0x10);
+        ratio = arg0->unk19C / minDist;
+        ratio = (ratio < 0.0f) ? 0.0f : ((ratio > 1.0f) ? 1.0f : ratio);
+        if (!(buttons & 0x10) || (type == 0) || (s0->unk1AC != 0) ||
+            ((arg0->unk3D0->health == 0) && (type != 0x29)) ||
+            ((arg0->unk3D0->stunned != 0) && (arg0->unk3D0->unk65 == 0) && ((s32)arg0->unk3D0->unk28 != 0) &&
+             (type != 0x1F) && (type != 0x29))) {
+            func_15127EB8(arg0);
+            return 0;
+        }
+        if ((type == 0x1B)) {
+            lo = 19.0f;
+            hi = 31.0f;
+        } else {
+            lo = 25.0f;
+            hi = 90.0f;
+        }
+        if (((OSContPad *)arg0->unk36C)->stick_x < 0) {
+            valid = -1;
+        } else {
+            valid = 1;
+        }
+        f = 1.0f / (((hi - lo) * ratio) + lo);
+        dx = valid * ((f32)((OSContPad *)arg0->unk36C)->stick_x * (f32)((OSContPad *)arg0->unk36C)->stick_x * (f * f));
+        if (((OSContPad *)arg0->unk36C)->stick_y < 0) {
+            valid = -1;
+        } else {
+            valid = 1;
+        }
+        dy = valid * ((f32)((OSContPad *)arg0->unk36C)->stick_y * (f32)((OSContPad *)arg0->unk36C)->stick_y * (f * f));
+        if ((type == 0x1B)) {
+            dx *= 0.25f;
+            dy *= 0.5f;
+            dx = (dx < -3.0f) ? -3.0f : ((dx > 3.0f) ? 3.0f : dx);
+            dy = (dy < -3.0f) ? -3.0f : ((dy > 3.0f) ? 3.0f : dy);
+        } else if (type == 0xC) {
+            dx *= 1.5f;
+            dy *= 1.5f;
+        }
+        s0->unk174 -= dx;
+        s0->unk178 += dy;
+        func_15048758(&s0->unk174);
+        if ((type == 0x1F) || (type == 0x29)) {
+            s0->unk178 = (s0->unk178 < -80.0f) ? -80.0f : ((s0->unk178 > 30.0f) ? 30.0f : s0->unk178);
+        } else if ((type == 0x1B)) {
+            s0->unk178 = (s0->unk178 < -60.0f) ? -60.0f : ((s0->unk178 > 50.0f) ? 50.0f : s0->unk178);
+        } else {
+            s0->unk178 = (s0->unk178 < -80.0f) ? -80.0f : ((s0->unk178 > 80.0f) ? 80.0f : s0->unk178);
+        }
+        func_15049688(&s0->unk16C, s0->unk174, &s0->unk17C, 6.0f, 8.0f, arg0->unk7B4);
+        func_15049688(&s0->unk170, s0->unk178, &s0->unk180, 6.0f, 8.0f, arg0->unk7B4);
+        if ((type != 0x16) && (type != 0xC) && ((type != 0x29) || (type != 0x1F) || (D_800BE616 != 0)) &&
+            ((buttons & 0xC) != 0xC)) {
+            if ((buttons & 8) && (minDist < arg0->unk1A4) && (type != 0xC)) {
+                arg0->unk1A4 -= step;
+                arg0->unk1A8 -= step * aspect;
+            } else if ((buttons & 4) && (arg0->unk1A4 < 0.0f)) {
+                arg0->unk1A4 += step;
+                arg0->unk1A8 += step * aspect;
+            }
+        }
+        if (type == 0x24) {
+            arg0->unk1A4 = (arg0->unk1A4 < minDist) ? minDist : ((arg0->unk1A4 > 0.0f) ? 0.0f : arg0->unk1A4);
+            arg0->unk1A8 = (arg0->unk1A8 < minDist * aspect) ? minDist * aspect : ((arg0->unk1A8 > 0.0f) ? 0.0f : arg0->unk1A8);
+        } else if ((type == 0x1B)) {
+            f = minDist * 0.5f;
+            arg0->unk1A4 = (arg0->unk1A4 < f) ? f : ((arg0->unk1A4 > 0.0f) ? 0.0f : arg0->unk1A4);
+            arg0->unk1A8 = (arg0->unk1A8 < f * aspect) ? f * aspect : ((arg0->unk1A8 > 0.0f) ? 0.0f : arg0->unk1A8);
+        } else {
+            f = minDist * 0.75f;
+            arg0->unk1A4 = (arg0->unk1A4 < f) ? f : ((arg0->unk1A4 > 0.0f) ? 0.0f : arg0->unk1A4);
+            arg0->unk1A8 = (arg0->unk1A8 < f * aspect) ? f * aspect : ((arg0->unk1A8 > 0.0f) ? 0.0f : arg0->unk1A8);
+        }
+        arg0->unk19C = arg0->unk1A4;
+        arg0->unk1A0 = arg0->unk1A8;
+        s0->unk184 = arg0->unk1A4;
+        s0->unk188 = arg0->unk1A8;
+        dir.x = 1.0f;
+        t = cosf(s0->unk170 * -0.01745329238f) * dir.x;
+        dir.y = sinf(s0->unk170 * -0.01745329238f) * dir.x;
+        dir.x = t;
+        t = cosf(s0->unk16C * -0.01745329238f) * dir.x;
+        dir.z = sinf(s0->unk16C * -0.01745329238f) * dir.x;
+        dir.x = t;
+        arg0->unk2BC = arg0->unk2F8 + dir.x;
+        arg0->unk2C0 = arg0->unk2FC + dir.y;
+        arg0->unk2C4 = arg0->unk300 + dir.z;
+        arg0->unk2A4 = arg0->unk3D0->x_position;
+        arg0->unk2A8 = arg0->unk3D0->y_position;
+        *(f32 *)&arg0->unk2AC = arg0->unk3D0->z_position;
+        s0->unk148 = *(Vec3_15126378 *)&arg0->unk2BC;
+        *(&s0->unk13C) = *((Vec3_15126378 *)&arg0->unk2F8);
+        s0->unk130 = dir;
+        func_15048F90((struct17 *)(&s0->unk13C), (struct17 *)&s0->unk148, (struct17 *)&s0->unk130);
+        ((struct_15126378_D_800BE628 *)D_800BE628)[arg0->unk23D].unk84 = (-0.9399999976f * ratio) + 1.0f;
+        func_1510B128(arg0->unk23D, arg0->unk19C, arg0->unk1A0, ((struct_15126378_D_800BE628 *)D_800BE628)[arg0->unk23D].unk84, (71.0f * ratio) + 54.0f);
+        return 1;
+    }
+}
 typedef struct {
     /* 0x00 */ u16 unk0;
     /* 0x02 */ s16 unk2;
