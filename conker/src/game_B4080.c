@@ -2537,7 +2537,55 @@ s32 func_1508CA88(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_B4080/func_1508CAD8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_B4080/func_1508D850.s")
+extern s16 D_80087320[][3];
+void func_1508EB90(s32 arg0, s32 arg1, s32 arg2);
+extern f32 D_8009DA8C;
+
+s32 func_1508D850(s32 arg0) {
+    s8 *timers;
+    s8 *targets;
+    s32 *target;
+    f32 dx;
+    struct127 *obj;
+    f32 dz;
+    f32 dist;
+    s32 range;
+    s32 limit;
+    s32 off;
+
+    targets = (s8 *)(D_800D23B0 + 0x11C);
+    timers = (s8 *)(D_800D23B0 + 0x29C);
+    obj = &D_800CC2D0[arg0];
+    off = arg0 * 4;
+    target = (s32 *)(targets + off);
+    obj->unk31C->pad129[0] = *target;
+    if (*target < 0) {
+        return 0;
+    }
+    dx = D_800CC2D0[*target].x_position - obj->x_position;
+    dz = D_800CC2D0[*target].z_position - obj->z_position;
+    dist = sqrtf((dx * dx) + (dz * dz));
+    if (5000.0f < dist) {
+        range = 0;
+    } else if (dist > 2000.0f) {
+        range = 1;
+    } else {
+        range = 2;
+    }
+    limit = ((s16 *)D_80087320)[D_800E0BD0 * 3 + range];
+    if (limit < *(s32 *)(timers + off)) {
+        *(s32 *)(timers + off) = 0;
+        if (*(s32 *)(D_800D23B0 + off + 0x16C0) & (0x10000 << *target)) {
+            func_1508EB90(arg0, 0x61, 0x2000);
+        }
+    }
+    if (*(s32 *)(timers + off) == 0) {
+        obj->unk31C->pad129[1] = 0;
+        if (D_800872E8[D_800E0BD0] < (s32)(func_150ADA68() * 100.0f)) {
+            obj->unk31C->pad129[1] = 1;
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_B4080/func_1508DA1C.s")
 
