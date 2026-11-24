@@ -246,7 +246,101 @@ void func_1516D678(struct Obj1516D4E8 *arg0)
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_19A8B0/func_1516D738.s")
+#define WGFX1516D738(pkt, a, b) { Gfx *_g = (Gfx *)(pkt); _g->words.w0 = (u32)(a); _g->words.w1 = (u32)(b); }
+struct Arg1516D738 {
+    s16 x;
+    s16 y;
+    s16 z;
+    s16 unk6;
+    s16 unk8;
+    u8 unkA;
+    u8 unkB;
+    u8 unkC;
+    u8 unkD;
+    u8 unkE;
+    u8 unkF;
+    s32 unk10;
+};
+struct Ent1516D738 {
+    u8 pad0[0xA];
+    u8 unkA;
+};
+extern struct Ent1516D738 *D_8008CA4C[];
+extern s32 D_800D2C9C;
+extern u8 D_800D2DA8;
+extern u8 D_800D2DA9;
+extern u8 D_800D2DAA;
+extern s16 D_800DD1BC;
+extern s16 D_800DD1C8;
+extern s16 D_800DD1CA;
+extern s16 D_800DD1CC;
+Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
+Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
+Gfx *func_15095760(Gfx *arg0, struct Arg1516D738 *arg1);
+
+Gfx *func_1516D738(Gfx *gfx, struct Obj1516D4E8 *arg1, s32 arg2) {
+    struct Arg1516D738 pos;
+    s32 pad80;
+    struct Ent1516D738 *entry;
+    s32 update;
+    s32 r;
+    s32 g;
+    s32 b;
+    s32 mode;
+    s32 x;
+    u8 y;
+    s32 othermodeH;
+
+    update = 0;
+    D_800D2DAB = 0;
+    entry = D_8008CA4C[arg1->unk1A];
+    x = arg1->unk1B;
+    y = x++;
+    gfx = func_15142E24(gfx, (s32)D_8008CA4C[arg1->unk1A], y << 8, 2, 0x100, 0x100, 0, 6, (s32)&pos, (u8 *)&update, 3);
+    if (entry->unkA == 5) {
+        mode = 2;
+    } else {
+        mode = 1;
+    }
+    if (mode != D_800DD1BC) {
+        if (!update) {
+            gDPPipeSync(gfx++);
+            update = 1;
+        }
+        D_800DD1BC = mode;
+        if (mode == 1) {
+            othermodeH = 0;
+            WGFX1516D738(gfx++, 0xFC30B261, 0x5566FF7F);
+        } else {
+            othermodeH = 0x100000;
+            WGFX1516D738(gfx++, 0xFC30B5FF, 0x5FFEFE38);
+        }
+    }
+    gfx = func_15142FBC(gfx, othermodeH | D_800D2C9C | G_TF_BILERP | G_TC_FILT, 0x5049DC, (u8 *)&update);
+    pos.x = arg1->unkE;
+    pos.y = arg1->unk10;
+    pos.z = arg1->unk12;
+    pos.unk6 = arg1->unk14;
+    pos.unk8 = arg1->unk16;
+    pos.unkA = arg1->unk1F;
+    pos.unkD = 0;
+    D_800D2DA8 = arg1->unk1C;
+    D_800D2DA9 = arg1->unk1D;
+    D_800D2DAA = arg1->unk1E;
+    r = arg1->unk20;
+    g = arg1->unk21;
+    b = arg1->unk22;
+    if (r != D_800DD1C8 || g != D_800DD1CA || b != D_800DD1CC) {
+        D_800DD1C8 = r;
+        D_800DD1CA = g;
+        D_800DD1CC = b;
+        if (!update) {
+            gDPPipeSync(gfx++);
+        }
+        gDPSetEnvColor(gfx++, r, g, b, 0);
+    }
+    return func_15095760(gfx, &pos);
+}
 
 void func_1516D99C(
     s16 arg0, s16 arg1, s16 arg2, s32 arg3,
