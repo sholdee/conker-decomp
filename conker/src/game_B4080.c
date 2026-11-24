@@ -195,7 +195,7 @@ extern u8 *D_800872A0;
 extern s8 D_800D23A8;
 extern s32 D_800D2394;
 extern void *allocate_memory(s32, s32, s32, s32);
-u8 func_150888A8(u8, u8, s32);
+u8 func_150888A8(u8, u8, s8);
 void func_15088824();
 
 typedef struct {
@@ -549,7 +549,7 @@ void func_15087CC0(void) {
 }
 
 extern u8 *D_800872A0;
-u8 func_150888A8(u8, u8, s32);
+u8 func_150888A8(u8, u8, s8);
 
 struct Struct15087DCC {
     char pad0[0x2B];
@@ -1072,7 +1072,48 @@ void func_15088824(Struct15088824 *arg0) {
     arg0->unk10 = 1.0f;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_B4080/func_150888A8.s")
+typedef struct {
+    u8 pad0[9];
+    u8 links[5];
+    u8 unkE;
+    u8 unkF;
+} Struct150888A8;
+
+u8 func_150888A8(u8 arg0, u8 arg1, s8 arg2) {
+    s32 i;
+    Struct150888A8 *rec;
+    Struct150888A8 *e;
+    u8 best;
+    u8 back;
+    s32 mode;
+
+    best = 0xFF;
+    back = 0xFF;
+    if (arg2 != 0) {
+        mode = 1;
+    } else {
+        mode = 2;
+    }
+    rec = (Struct150888A8 *)&D_800D2350[arg1];
+    for (i = 0; i < 5; i++) {
+        if (rec->links[i] != 0xFF && rec->links[i] != arg0) {
+            e = (Struct150888A8 *)&D_800D2350[rec->links[i]];
+            if (e->unkE == 0) {
+                if (mode != e->unkF) {
+                    if (best == 0xFF || e->unkF != 0) {
+                        best = rec->links[i];
+                    }
+                } else {
+                    back = rec->links[i];
+                }
+            }
+        }
+    }
+    if (best == 0xFF) {
+        best = back;
+    }
+    return best;
+}
 
 struct Struct15088A08 {
     char pad0[0x8];
