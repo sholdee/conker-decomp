@@ -192,7 +192,80 @@ s32 func_1510D374(s32 arg0) {
     return sum;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_139FC0/func_1510D404.s")
+typedef struct {
+    u8 *data;
+    s32 size;
+} Entry1510D404;
+
+extern u8 D_800DBDBA;
+
+extern void func_10006240(u8 *, Entry1510D404 *, u32);
+extern s32 func_10004074(s16 *);
+
+#define FL(i) (*(s8 *)&D_800BC448[i])
+
+void func_1510D404(void) {
+    static s32 D_800DBDBC;
+    s32 start;
+    s32 end;
+    s32 i;
+    u8 *data;
+    s32 size;
+
+    if (D_800D9F5C == -1) {
+        return;
+    }
+    if (D_800DBDBA == 0 && D_800D9F60 != 0) {
+        return;
+    }
+    if (D_800DBDBA != 0) {
+        D_800DBDBA -= 1;
+    }
+    start = D_800D9F58;
+    end = D_800D9F5C;
+    D_800D9F58 = 0xFFFF;
+    D_800D9F5C = -1;
+    if (start < 0 || end >= 0x1E53) {
+        D_8003C8E0 = 0x0C000046;
+        func_150AD770();
+    }
+    D_800DBDBC = -1;
+    for (i = start; i <= end; i++) {
+        if (FL(i) != 0) {
+            if (FL(i) < 4) {
+                FL(i)--;
+                if (FL(i) == 0) {
+                    D_800DBDBC = i;
+                    if (func_10004074((s16 *)D_800B0E58[i]) == -1) {
+                        /* empty error branch: the dead compare still weights -1 for register allocation */
+                    }
+                    D_800B0E58[i] = -1;
+                    continue;
+                } else {
+                    if (i < D_800D9F58) {
+                        D_800D9F58 = i;
+                    }
+                    if (D_800D9F5C < i) {
+                        D_800D9F5C = i;
+                    }
+                }
+            } else if (FL(i) & 0x40) {
+                data = ((Entry1510D404 *)D_800B0E58[i])->data;
+                size = ((Entry1510D404 *)D_800B0E58[i])->size;
+                func_10006240(data + size, (Entry1510D404 *)D_800B0E58[i], D_8003809C);
+                func_10004074((s16 *)data);
+                FL(i) &= ~0x40;
+                if (i < D_800D9F58) {
+                    D_800D9F58 = i;
+                }
+                if (D_800D9F5C < i) {
+                    D_800D9F5C = i;
+                }
+            }
+        }
+    }
+    D_800DBDBC = -2;
+}
 
 void func_1510D608(s32 arg0, s32 arg1) {
     s8 *p = (s8 *)&D_800BC448[arg0];
