@@ -252,7 +252,205 @@ s32 func_150B89E0(Obj150B89E0 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, s32
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_E5E90/func_150B8F44.s")
+typedef struct {
+    f32 x, y, z;
+} Vec3_150B8F44;
+
+typedef struct {
+    s16 data[9];
+} Surface150B8F44;
+
+typedef struct {
+    u8 kind;
+    u8 field01;
+    s16 mode;
+    s16 lifetime;
+    u8 pad06[2];
+    s32 field08;
+    s32 field0C;
+    u8 color[4];
+    f32 scale14;
+    f32 scale18;
+    Vec3_150B8F44 position;
+    Vec3_150B8F44 velocity;
+    Vec3_150B8F44 acceleration;
+    s32 flags;
+    u8 field44;
+    u8 field45;
+    u8 field46;
+    u8 field47;
+    u8 pad48[8];
+    s32 field50;
+    s16 field54;
+    s16 field56;
+} Desc150B8F44;
+
+typedef struct {
+    u8 pad000[0x128];
+    f32 field128[2];
+} Particle150B8F44;
+
+typedef struct {
+    Vec3_150B8F44 position;
+    Vec3_150B8F44 normal;
+    Surface150B8F44 surface;
+    u8 pad2A[2];
+    f32 spread;
+    f32 sizeBase, sizeRange, growthBase, growthRange, speedBase, speedRange;
+    s16 countBase, countRange, fadeBase, fadeRange, lifeBase, lifeRange;
+    u8 green, enabled, red, pad57;
+    s32 callbacks[6];
+    u8 blue, alphaBase, alphaRange, pad73;
+    s32 field74, field78;
+    s32 flags[7];
+    u8 field98, field99, pad9A[2];
+    s16 field9C, field9E;
+    s32 fieldA0;
+} SBurst150B8F44;
+
+typedef struct {
+    u8 pad00[0x14];
+    Vec3_150B8F44 position;
+} Target150B8F44;
+
+s32 func_150A3058(s32, s16, s16, s16);
+s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, s16 *, f32 *, f32 *, f32 *, f32 *,
+                  s32 *, void *, f32);
+s32 func_15145C90(s32);
+void func_15151670(SBurst150B8F44 *, u8, s32);
+
+s32 func_150B8F44(Obj150B89E0 *arg0, Target150B8F44 *arg1, f32 arg2, f32 arg3, f32 arg4) {
+    f32 height;
+
+    height = arg0->unk140 - fabsf(arg0->unk48);
+    if (height > 6.0f) {
+        if (func_150A3058(1, arg1->position.x, arg1->position.y, arg1->position.z) == 0) {
+            Vec3_150B8F44 delta;
+            Vec3_150B8F44 hit;
+            Surface150B8F44 surface;
+            s32 id;
+            Desc150B8F44 descriptor;
+            Particle150B8F44 *object;
+            f32 rate;
+
+            delta.x = arg0->unk38 - arg2;
+            delta.y = arg0->unk3C - arg3;
+            delta.z = arg0->unk40 - arg4;
+            if (func_150AC9C0(arg2, arg3, arg4, delta.x, delta.y, delta.z, NULL, surface.data,
+                              &hit.x, &hit.y, &hit.z, NULL, &id, NULL, 0.0f) != 0) {
+                switch (func_15145C90(id)) {
+                case 0:
+                    break;
+                default:
+                    descriptor.field54 = 0x19;
+                    descriptor.field56 = 0xA;
+                    descriptor.kind = 4;
+                    descriptor.field01 = 0;
+                    descriptor.mode = 0x3B02;
+                    descriptor.lifetime = (func_150ADA20() % 31U) + 0x28;
+                    descriptor.field08 = 0;
+                    descriptor.field0C = 0;
+                    descriptor.color[0] = 0xFF;
+                    descriptor.color[1] = 0xFF;
+                    descriptor.color[2] = 0xFF;
+                    descriptor.color[3] = 0xFF;
+                    descriptor.scale14 = descriptor.scale18 =
+                        (func_150ADA68() * 25.0f + 25.0f) * 0.001000000047f;
+                    descriptor.position = hit;
+                    descriptor.flags = 0x0C5C0001;
+                    descriptor.field44 = 0xFF;
+                    descriptor.field45 = 0xFF;
+                    descriptor.field46 = 0;
+                    descriptor.field47 = 7;
+                    descriptor.velocity.x = 0.0f;
+                    descriptor.velocity.y = 0.0f;
+                    descriptor.velocity.z = 0.0f;
+                    descriptor.acceleration.x = 0.0f;
+                    descriptor.acceleration.y = 0.0f;
+                    descriptor.acceleration.z = 0.0f;
+                    rate = (func_150ADA68() * 80.0f + 50.0f) * 9.999999747e-06f;
+                    descriptor.field50 = arg0->unk128;
+                    object = (Particle150B8F44 *)func_1513D594((s32)&descriptor, (s32)&D_800A4AA0, 0x18, 0, 0,
+                                           (func_150ADA20() & 1) * 2 + (func_150ADA20() & 1),
+                                           func_150ADA20() & 0xFF, 500.0f, 500.0f, 0,
+                                           (s32)&surface, arg0->unk14C, arg0->unk168, 0, 8,
+                                           arg0->unkC, arg0->unk1);
+                    if (object != NULL) {
+                        memcpy(object->field128, &rate, 8);
+                    }
+                    break;
+                }
+                {
+                    SBurst150B8F44 burst;
+
+                    burst.normal.x = -delta.x;
+                    burst.normal.y = -delta.y;
+                    burst.normal.z = -delta.z;
+                    burst.surface = surface;
+                    burst.spread = 502.0f;
+                    burst.position = hit;
+                    burst.sizeBase = 3.0f;
+                    burst.sizeRange = 3.0f;
+                    burst.growthBase = 0.2650000155f;
+                    burst.growthRange = 0.1610000134f;
+                    burst.speedBase = 0.005399999674f;
+                    burst.speedRange = 0.01349999942f;
+                    burst.countBase = 6;
+                    burst.countRange = 6;
+                    burst.fadeBase = 3;
+                    burst.fadeRange = 3;
+                    burst.lifeBase = 0x32;
+                    burst.lifeRange = 0x14;
+                    burst.green = 1;
+                    burst.enabled = 0x21;
+                    burst.red = 0x48;
+                    burst.callbacks[0] = 1;
+                    burst.callbacks[1] = 0;
+                    burst.callbacks[2] = 0;
+                    burst.callbacks[3] = 0;
+                    burst.callbacks[4] = 0;
+                    burst.callbacks[5] = 0;
+                    burst.blue = 0;
+                    burst.alphaBase = 0x9B;
+                    burst.alphaRange = 0x64;
+                    burst.field74 = arg0->unk14C;
+                    burst.field78 = arg0->unk168;
+                    burst.flags[0] = 0;
+                    burst.flags[1] = 0x220005;
+                    burst.flags[2] = 0x1D0600;
+                    burst.flags[3] = 1;
+                    burst.flags[4] = 0x3B;
+                    burst.flags[5] = 0x80;
+                    burst.flags[6] = 0x20;
+                    burst.field98 = 0;
+                    burst.field99 = 7;
+                    burst.field9C = 0xA;
+                    burst.field9E = 0x19;
+                    burst.fieldA0 = arg0->unk128;
+                    func_15151670(&burst, arg0->unkC, arg0->unk1);
+                }
+            }
+        }
+        func_10010F88(D_80088734[func_150ADA20() & 1], 0x7D00, 0, 0, 0,
+                      arg0->unk38, arg0->unk3C, arg0->unk40, 1000, 4000);
+        return 0;
+    }
+    arg0->unk44 = 0.0f;
+    arg0->unk4C = 0.0f;
+    if (arg0->unk48 > 0.0f) {
+        arg0->unk48 *= arg0->unk14;
+    }
+    arg0->unk38 = arg1->position.x;
+    arg0->unk3C = arg1->position.y;
+    arg0->unk40 = arg1->position.z;
+    arg0->unk50 *= arg0->unk14;
+    arg0->unk54 *= arg0->unk14;
+    arg0->unk58 *= arg0->unk14;
+    func_10010F88(D_8008873C, 0xFA00, 0, 0, 0, arg1->position.x, arg1->position.y,
+                  arg1->position.z, 1000, 4000);
+    return 1;
+}
+
 s32 func_150B9560(void *arg0);
 s32 func_150B95FC(void *arg0);
 s32 func_150B961C(void *arg0);
