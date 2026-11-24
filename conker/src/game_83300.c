@@ -53,7 +53,8 @@ s32 func_15065A5C(struct127 *arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4, s32 a
 void func_1505B9C4(void *arg0, struct127 *arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5, u8 arg6);
 extern void (*D_80086694[])(void *, struct127 *, u8 *);
 s32 func_1506E46C(struct127 *, s32 *, s32);
-s32 func_1505C1E4(void *arg0, struct127 *arg1, void *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
+struct Entry1505C1E4;
+s32 func_1505C1E4(struct127 *arg0, struct127 *arg1, struct Entry1505C1E4 *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 extern struct255 *D_800CC4A4;
 void func_1505F188(struct127 *arg0);
 s32 func_1505C7D8(struct127 *arg0, s32 arg1);
@@ -3018,7 +3019,193 @@ struct252 *func_1505C1A4(struct127 *arg0) {
     return ret;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505C1E4.s")
+struct Entry1505C1E4;
+struct Entry1505C1E4;
+
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    u8 unk2;
+    u8 unk3;
+} Rule1505C1E4;
+
+typedef struct Entry1505C1E4 {
+    u8 unk0;
+    u8 pad1[3];
+    s32 unk4;
+    u8 unk8;
+    u8 pad9[6];
+    u8 unkF;
+    u8 pad10[0x18];
+} Entry1505C1E4; /* size 0x28 */
+
+extern u8 D_8009A6A0[];
+extern Rule1505C1E4 *D_80086AA0[];
+s32 func_1506E46C(struct127 *arg0, s32 *arg1, s32 arg2);
+void func_15060B04(s32 arg0, struct127 *arg1, s32 arg2);
+
+s32 func_1505C1E4(struct127 *arg0, struct127 *arg1, Entry1505C1E4 *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6) {
+    s32 i;
+    u8 done;
+    u8 kind;
+    u8 count;
+    u8 flags;
+    Entry1505C1E4 *entry;
+    Rule1505C1E4 *rules;
+    s32 angle;
+    u8 type;
+    u8 idx;
+
+    done = FALSE;
+    kind = arg2[arg3].unk0 & 0x7F;
+    entry = arg2;
+    if (((u8)arg1->unk239 & 0x7F) != 0) {
+        count = D_8009A6A0[((u8)arg1->unk239 & 0x7F)];
+        rules = D_80086AA0[((u8)arg1->unk239 & 0x7F)];
+        for (i = 0; i < count; i++) {
+            type = rules[i].unk2;
+            if (((type & 0x80) == 0 && kind == rules[i].unk1) || ((type & 0x80) != 0 && kind != rules[i].unk1)) {
+                type &= 0x7F;
+                if (rules[i].unk0 == 1) {
+                    if (func_1505C140(arg0, arg1) > 0x4000) {
+                        type = 0xFF;
+                    }
+                }
+                if (rules[i].unk0 == 2) {
+                    if (func_1505C140(arg0, arg1) < 0x4000) {
+                        type = 0xFF;
+                    }
+                }
+                if (rules[i].unk0 == 3 && arg1->stunned == 0) {
+                    type = 0xFF;
+                }
+                if (rules[i].unk0 == 4 && arg1->stunned != 0) {
+                    type = 0xFF;
+                }
+                if (type < 2) {
+                    angle = func_1505A630(arg0->x_position - arg1->x_position, arg1->z_position - arg0->z_position, 0) - arg1->unk7A + 0x4000;
+                    if ((u16)(angle >> 15) == type) {
+                        arg3 = rules[i].unk3;
+                    }
+                    break;
+                }
+                if (type == 2) {
+                    arg3 = rules[i].unk3;
+                    break;
+                }
+                if (type == 3) {
+                    done = TRUE;
+                    break;
+                }
+                if (type == 4) {
+                    if (rules[i].unk3 != 0xFF) {
+                        arg3 = rules[i].unk3;
+                    }
+                    arg6 = 0;
+                    break;
+                }
+                if (type == 5) {
+                    u8 next;
+                    next = rules[i].unk3;
+                    entry = (Entry1505C1E4 *)&D_8009A6D8[next - arg3];
+                    break;
+                }
+                if (type == 6) {
+                    u8 next;
+                    next = rules[i].unk3;
+                    arg6 = 0;
+                    entry = (Entry1505C1E4 *)&D_8009A6D8[next - arg3];
+                    break;
+                }
+                if (type == 7) {
+                    if ((arg2[arg3].unkF & arg6) >= arg1->health) {
+                        idx = rules[i].unk3;
+                        entry = (Entry1505C1E4 *)&D_8009A6D8[idx - arg3];
+                        arg1->health = 0;
+                        break;
+                    }
+                } else if (type == 8) {
+                    done = TRUE;
+                    arg1->unkF4 &= ~0x40040;
+                    arg5 |= 1 << (arg4 + 0x1F);
+                    arg0->pad108 = arg4 + 0x7F;
+                    arg0->unk107 = 0x3C;
+                    arg1->pad1C4 = 0;
+                    arg1->unk232 = rules[i].unk3;
+                    arg1->unk218 = NULL;
+                    arg1->disable_run = 1;
+                    arg1->unkD0 = 0;
+                    D_800D1580 = arg2[arg3].unk4;
+                    if (D_800D1580 != 0) {
+                        func_1506E5FC();
+                    }
+                    if (arg1->interaction_state == 1) {
+                        if ((((u8 *)arg1->unk31C)[0x4E] == 2) && (((u8 *)arg1->unk31C)[0x84] == 0)) {
+                            ((u8 *)arg1->unk31C)[0x50] = 0x1E;
+                            arg1->unk81 = 0;
+                            arg1->y_velocity = 50.0f;
+                            arg1->gravity = 2.0f;
+                            break;
+                        }
+                    }
+                    break;
+                } else if (type == 9) {
+                    break;
+                } else if (type == 0xA) {
+                    if (arg1->unk84.uh == 0x283) {
+                        arg1->unk76 = arg0->unk7A;
+                        arg1->xz_velocity = 25.0f;
+                        D_800D1580 = 0xFF0102E2;
+                        func_1506E5FC();
+                        arg0->unkD0 = 0;
+                        arg0->unk232 = 0xD;
+                        arg0->unk218 = NULL;
+                        done = TRUE;
+                    }
+                    break;
+                } else if (type == 0xB) {
+                    if (arg1->unk28 > 8.0f) {
+                        done = TRUE;
+                    }
+                    break;
+                } else if (type == 0xC) {
+                    if (arg1->unk28 == 0.0f) {
+                        arg0->unk2EC = 100;
+                        arg0->unkD0 = 0;
+                    }
+                    done = TRUE;
+                    break;
+                } else if (type == 0xD) {
+                    s32 buf;
+                    u8 snd2;
+                    s32 obj;
+                    snd2 = arg2[arg3].unk8;
+                    D_800D1580 = arg2[arg3].unk4;
+                    if (D_800D1580 != 0) {
+                        func_1506E5FC();
+                    }
+                    D_80086694[snd2](arg0, arg1, (u8 *)&buf);
+                    if (arg1->unkFC != 0) {
+                        obj = arg1->unkFC;
+                        if (func_1506E46C(arg0, &obj, 1) != 0) {
+                            func_15060B04(obj, arg1, 0x5DC0);
+                        }
+                    }
+                    arg5 |= 1 << (arg4 + 0x1F);
+                    done = TRUE;
+                    break;
+                }
+            }
+        }
+    }
+    if (done) {
+        return arg5;
+    }
+    i = arg4;
+    func_1505B9C4(arg0, arg1, (s32)arg2, (s32)entry, arg3, i, arg6);
+    arg5 |= 1 << (i + 0x1F);
+    return arg5;
+}
 s32 func_1505C7D8(struct127 *arg0, s32 arg1);
 typedef struct {
     u8 pad0[9];
