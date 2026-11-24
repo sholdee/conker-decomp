@@ -3,12 +3,17 @@
 #define func_15048A40 func_15048A40_hdr
 #define func_150ADA20 func_150ADA20_hdr
 #define func_150A7CB0 func_150A7CB0_hdr
+#define func_1502B7F0 func_1502B7F0_hdr
 #include "functions.h"
 #undef func_15048A40
 #undef func_150ADA20
 #undef func_150A7CB0
+#undef func_1502B7F0
+void func_1509093C(void);
 void func_150A7CB0(f32 mtx[4][4], f32 x, f32 y, f32 z);
+#define D_800D24C8 D_800D24C8_hdr
 #include "variables.h"
+#undef D_800D24C8
 extern s32 func_150ADA20(void);
 void func_1508F9F4(void);
 void func_1508F0D4(void);
@@ -603,7 +608,252 @@ GameBC510Command *func_15090630(GameBC510Command *gfx) {
     } while (i != 6);
     return gfx;
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_1509093C.s")
+typedef struct WaterVtx {
+    s16 ob[3];
+    u16 flag;
+    s16 tc[2];
+    u8 cn[4];
+} WaterVtx;
+
+typedef struct WaterBase {
+    s16 ob[3];
+    u8 cn[4];
+} WaterBase;
+
+typedef struct WaterStage {
+    Mtx mtx[2];
+    s32 dl;
+    WaterVtx *vtx[2];
+    WaterBase *base;
+    WaterBase *target;
+    f32 unk94;
+    f32 unk98;
+    f32 unk9C;
+    f32 unkA0;
+    f32 unkA4;
+    f32 unkA8;
+    f32 unkAC;
+    u16 tex[4];
+    s16 timer;
+    u8 alpha;
+    u8 count;
+} WaterStage;
+
+extern WaterStage D_800D24C8;
+#define WATER D_800D24C8
+extern s32 func_1502FE10(s32 arg0, s32 *arg1, u8 *arg2, s32 *arg3, s32 *arg4, s32 *arg5, s32 *arg6);
+extern s32 func_1502B7F0(s32 *, s32, s32, s32);
+extern s32 D_800D2558[];
+extern u16 D_800CC382;
+extern u16 D_8009025A;
+extern u16 D_80090262;
+extern u16 D_80090266;
+extern u16 D_8009026E;
+extern u16 D_80090272;
+
+void func_1509093C(void) {
+    WaterVtx *dst;
+    WaterBase *base;
+    WaterBase *target;
+    s32 i;
+    f32 t;
+    s32 from;
+    s32 level;
+    f32 lo;
+    f32 hi;
+    s32 v;
+    s32 *end;
+    u8 sp73;
+    WaterVtx *start;
+    s32 sp68;
+    s32 sp64;
+    s32 sp60;
+    s32 a;
+    s32 r;
+    s32 g;
+    u16 b;
+    f32 dt;
+    s32 r2;
+    s32 g2;
+    s32 b2;
+    s32 cb;
+
+    if (D_800CC2D0->in_water) {
+        level = D_800CC2D0->unkB2;
+    } else {
+        level = 0;
+    }
+    if (level > 0x5A) {
+        if (WATER.alpha == 0) {
+            WATER.alpha = 0xFF;
+            WATER.unk94 = 0.0f;
+            WATER.unk98 = 0.01999999955f;
+            WATER.unkA0 = 0;
+            WATER.unkA4 = 3.200000048f;
+            WATER.unkA8 = 0;
+            WATER.unkAC = 0;
+            WATER.timer = (func_150ADA20() & 0x3F) + 0x3C;
+        }
+        from = D_800CC382;
+    } else {
+        WATER.alpha = 0;
+        return;
+    }
+    {
+        WATER.unk9C = (f32)(u32)from / 720.0f;
+        if (WATER.unk9C > 1.0f) {
+            WATER.unk9C = 1.0f;
+        }
+        if (level < 0x5A1) {
+            WATER.unk94 += WATER.unk98 * D_800BE9E4;
+            lo = WATER.unk9C - 0.200000003f;
+            if (lo < 0.0f) {
+                lo = 0.0f;
+            }
+            if (WATER.unk94 <= lo) {
+                WATER.unk94 = (lo + lo) - WATER.unk94;
+                WATER.unk98 = -WATER.unk98;
+            } else {
+                hi = WATER.unk9C + 0.200000003f;
+                if (hi > 1.0f) {
+                    hi = 1.0f;
+                }
+                if (hi <= WATER.unk94) {
+                    WATER.unk94 = (hi + hi) - WATER.unk94;
+                    WATER.unk98 = -WATER.unk98;
+                }
+            }
+        }
+        if (WATER.dl == 0) {
+            func_1502FE10(0xB9, (s32 *)&end, &sp73, (s32 *)&start, &sp68, &sp64, &sp60);
+            WATER.dl = *end;
+            WATER.count = ((u32)end - (u32)start) >> 4;
+            WATER.vtx[0] = start;
+            WATER.vtx[1] = (WaterVtx *)allocate_memory(WATER.count * 16, 1, 2, 0);
+            bcopy(start, WATER.vtx[1], WATER.count * 16);
+            WATER.base = (WaterBase *)allocate_memory(WATER.count * sizeof(WaterBase), 1, 0, 0);
+            target = WATER.base;
+            for (i = 0; i < WATER.count; i++) {
+                target[i].ob[0] = start[i].ob[0];
+                target[i].ob[1] = start[i].ob[1];
+                target[i].ob[2] = start[i].ob[2];
+                target[i].cn[0] = start[i].cn[0];
+                target[i].cn[1] = start[i].cn[1];
+                target[i].cn[2] = start[i].cn[2];
+                target[i].cn[3] = start[i].cn[3];
+            }
+            for (i = 1; i < 2; i++) {
+                func_1502B7F0(&D_800D2558[i - 1], 2, 0x18, i - 1);
+            }
+        }
+        base = WATER.base;
+        dst = WATER.vtx[D_800BE9C0];
+        target = WATER.target;
+        t = WATER.unk94;
+        for (i = 0; i < WATER.count; i++) {
+            dst[i].ob[0] = (f32)base[i].ob[0] + ((f32)target[i].ob[0] - (f32)base[i].ob[0]) * t;
+            dst[i].ob[1] = (f32)base[i].ob[1] + ((f32)target[i].ob[1] - (f32)base[i].ob[1]) * t;
+            dst[i].ob[2] = (f32)base[i].ob[2] + ((f32)target[i].ob[2] - (f32)base[i].ob[2]) * t;
+        }
+        if (level < 480) {
+            b = D_8009026E;
+            WATER.tex[3] = b;
+            WATER.tex[2] = b;
+            b = D_8009025A;
+            WATER.tex[1] = b;
+            WATER.tex[0] = b;
+        } else if (level < 960) {
+            b = D_80090272;
+            WATER.tex[3] = b;
+            WATER.tex[2] = b;
+            b = D_8009025A;
+            WATER.tex[1] = b;
+            WATER.tex[0] = b;
+        } else if (level < 1200) {
+            b = D_80090272;
+            WATER.tex[3] = b;
+            WATER.tex[2] = b;
+            b = D_80090266;
+            WATER.tex[1] = b;
+            WATER.tex[0] = b;
+        } else {
+            b = D_80090272;
+            WATER.tex[3] = b;
+            WATER.tex[2] = b;
+            b = D_80090262;
+            WATER.tex[1] = b;
+            WATER.tex[0] = b;
+        }
+        v = (level - 720) * 255;
+        a = v / 480;
+        if (a < 0) {
+            a = 0;
+        } else if (a >= 256) {
+            a = 255;
+        }
+        r = ((a * -151) >> 8) + 255;
+        g = ((a * -164) >> 8) + 255;
+        cb = 255;
+        r2 = ((a * -97) >> 8) + 255;
+        g2 = ((a * -94) >> 8) + 255;
+        b2 = ((a * -91) >> 8) + 255;
+        a = 0;
+        i = 0;
+        if (i < WATER.count) {
+            r |= 0;
+            g |= 0;
+            cb |= 0;
+            do {
+                if (i < 0xD0) {
+                    dst[i].cn[0] = (base[i].cn[0] * r) >> 8;
+                    dst[i].cn[1] = (base[i].cn[1] * g) >> 8;
+                    dst[i].cn[2] = (base[i].cn[2] * cb) >> 8;
+                } else if (i >= 0xDC) {
+                    dst[i].cn[0] = r;
+                    dst[i].cn[1] = g;
+                    dst[i].cn[2] = cb;
+                } else {
+                    dst[i].cn[0] = r2;
+                    dst[i].cn[1] = g2;
+                    dst[i].cn[2] = b2;
+                }
+                i++;
+            } while (i < WATER.count);
+        }
+        dt = D_800BE9E4;
+        if (v > 0x2CE2E) {
+            WATER.unkAC = 0.0f;
+        } else if (v > 0x1DF1E) {
+            if (fabsf(WATER.unkAC) < 0.6000000238f) {
+                WATER.unkAC = 0.6000000238f;
+            }
+        } else if (WATER.timer != 0) {
+            from = WATER.timer - D_800BE9E4;
+            if (from <= 0) {
+                from = 0;
+                WATER.unkAC = 0.200000003f;
+                WATER.unkA8 = dt * WATER.unkAC;
+            }
+            WATER.timer = from;
+        }
+        WATER.unkA8 += WATER.unkAC * dt;
+        if (WATER.unkA8 > 2.0f) {
+            WATER.unkA8 = 4.0f - WATER.unkA8;
+            WATER.unkAC = -WATER.unkAC;
+        } else if (WATER.unkA8 < -2.0f) {
+            WATER.unkA8 = -4.0f - WATER.unkA8;
+            WATER.unkAC = -WATER.unkAC;
+        } else if (WATER.timer == 0 && v < 0x1DE20 && WATER.unkA8 >= 0 && WATER.unkA8 < WATER.unkAC * dt) {
+            WATER.timer = (func_150ADA20() & 0x3F) + 0x3C;
+            WATER.unkA8 = 0.0f;
+            WATER.unkAC = 0.0f;
+        }
+        if (v >= 0x2CD30 && WATER.unkA0 > -22.0f) {
+            WATER.unkA4 -= 0.25f * D_800BE9E4;
+            WATER.unkA0 += WATER.unkA4;
+        }
+    }
+}
 
 typedef struct BC510Stage {
     Mtx mtx[2];
