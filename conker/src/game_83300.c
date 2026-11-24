@@ -260,8 +260,172 @@ void func_15056258(struct127 *arg0) {
         }
     }
 }
+typedef struct Game83300AnimRate {
+    u16 anim;
+    u8 rate;
+    u8 pad;
+} Game83300AnimRate;
+typedef struct Game83300AnimSet {
+    u8 pad0[0xA];
+    Game83300AnimRate e[3];
+    u8 pad16[2];
+} Game83300AnimSet;
+void func_150649A0(s32, s32);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_150562FC.s")
+void func_150562FC(struct127 *arg0) {
+    s32 *animPtr;
+    Game83300AnimSet *anims;
+    s16 *sub;
+    u32 animIdx;
+    f32 temp_f0;
+    f32 sp70;
+    f32 sp6C;
+    f32 sp68;
+    s32 temp_v0_8;
+    u8 sp63;
+    f32 lerp;
+    s32 variant;
+    s32 sp54;
+    s32 a2;
+    f32 sp4C;
+    f32 tx;
+    f32 tz;
+
+    sp63 = arg0->unk13D - 100;
+    sp54 = 0;
+    sp4C = 5.0f;
+    arg0->immune = 30;
+    variant = 0;
+    a2 = 13;
+    arg0->unk180 = D_800CC2D0[sp63].unk180;
+    arg0->unk1CC = arg0->y_position;
+    arg0->gravity = 4.5f;
+    arg0->y_velocity = 0.0;
+    temp_v0_8 = arg0->unk21C;
+    if (temp_v0_8 < 30) {
+        arg0->unk21C = (u32)temp_v0_8 + D_800BE9A0;
+    }
+    if (arg0->id == 0x57) {
+        arg0->unk5C = 9;
+        if (arg0->unk21C < 10) {
+            return;
+        }
+        sp54 = 1;
+        if (D_800CC2D0[sp63].unk84.uh == 0x114) {
+            a2 = 0x24;
+        }
+        if (D_800CC2D0[sp63].unk84.uh == 0x116) {
+            variant = 1;
+        }
+        if (D_800CC2D0[sp63].unk84.uh == 0x117) {
+            variant = 2;
+        }
+        func_150649A0(sp63, D_800C3E78);
+    } else if (arg0->id == 0x8C) {
+        arg0->unk5C = 4;
+        if (arg0->unk21C < 10) {
+            return;
+        }
+        sp54 = 1;
+        if (D_800CC2D0[sp63].unk84.uh == 0x1A6) {
+            variant = 1;
+        }
+        if (D_800CC2D0[sp63].unk84.uh == 0x1A7) {
+            variant = 2;
+        }
+        func_150649A0(sp63, D_800C3E78);
+    } else if ((arg0->id == 0xA8) || (arg0->id == 0xA9)) {
+        arg0->unk5C = 9;
+        sp54 = 1;
+        if (D_800CC2D0[sp63].unk84.uh == 0x1B0) {
+            variant = 1;
+        }
+        if (D_800CC2D0[sp63].unk84.uh == 0x1B1) {
+            variant = 2;
+        }
+    } else if (arg0->id == 0x5E) {
+        arg0->unk5C = 9;
+        sp4C = 16.0f;
+        sp54 = 1;
+        if (D_800CC2D0[sp63].unk84.uh == 0x286) {
+            variant = 2;
+        }
+        if (D_800CC2D0[sp63].unk84.uh == 0x27E) {
+            variant = 1;
+        }
+    }
+    animIdx = func_1505E7CC(a2, arg0);
+    animPtr = (s32 *)D_800D1588[arg0->id];
+    anims = (Game83300AnimSet *)animPtr[-2];
+    if ((D_800CC2D0[sp63].interaction_state == 1) && (D_800CC2D0[sp63].in_water != 0)) {
+        arg0->unk5C = 4;
+        sp54 = 1; if (anims[animIdx].e[1].anim != 0) {
+            variant = 1;
+        }
+    }
+    if (arg0->unk21C < 20) {
+        temp_v0_8 = arg0->unk21C;
+        lerp = (u32)temp_v0_8 / 50.0f;
+        if (D_800BE9B4 != 0) {
+            lerp = 1.0f;
+        }
+    } else {
+        lerp = 0.8000000119f;
+    }
+    sp70 = (u32)arg0->unk10F;
+    func_150599C8(arg0, 0x10, D_800CC2D0[sp63].unk7A + (arg0->unk13E << 8));
+    if (D_800CC2D0[sp63].unk1D4 != NULL) {
+        temp_f0 = arg0->unk10C / 100;
+        if (D_800CC2D0[sp63].interaction_state != 0x15) {
+            sub = (s16 *)((u8 *)D_800CC2D0[sp63].unk1D4 + 0x240);
+            if (arg0->unk21C >= 7) {
+                arg0->y_position = sub[0xD];
+                if (arg0->unk21C < 14) {
+                    temp_f0 = ((u32)(s32)arg0->unk21C / 14.0f) * temp_f0;
+                }
+                arg0->y_position += temp_f0;
+            }
+            if (arg0->id == 0xE) {
+                arg0->unkC4 = 0.0;
+            } else if (arg0->id == 0x13) {
+                sp70 = 204.0f;
+                arg0->unkC4 = 0.0;
+            }
+        }
+    }
+    if (D_800CC2D0[sp63].interaction_state == 0x15) {
+        animIdx = func_1505E7CC(0x39, arg0);
+        arg0->unk7A = D_800CC2D0[sp63].unk7A;
+        arg0->y_position = D_800CC2D0[sp63].y_position - 10.0f;
+        if ((arg0->unk28 > 100.0f) && (arg0->unk21C >= 21)) {
+            variant = 1;
+        } else {
+            sp4C = 0.0;
+        }
+        sp70 = 0.0f;
+        arg0->unkC4 += (D_800CC2D0[sp63].unkC4 - arg0->unkC4) * 0.1199999973f;
+        arg0->xz_velocity = 0.0f;
+    }
+    func_1505A184(D_800CC2D0[sp63].unk7A, sp70, 0.0, &sp70, &sp6C, &sp68);
+    tx = D_800CC2D0[sp63].x_position + sp70;
+    tz = D_800CC2D0[sp63].z_position + sp6C;
+    arg0->x_position += (tx - arg0->x_position) * lerp;
+    arg0->z_position += (tz - arg0->z_position) * lerp;
+    {
+        f32 rate;
+
+        rate = (u32)anims[animIdx].e[variant].rate;
+lbl:
+        rate = rate / 100.0f;
+        func_1505E650(arg0, anims[animIdx].e[variant].anim, rate, sp4C, 0.0, 0, 0);
+    }
+    if (sp54 != 0) {
+        arg0->unk65 = sp63 + 1;
+        arg0->unk101 |= 4;
+    } else {
+        arg0->unk65 = 0;
+    }
+}
 // NON-MATCHING: 10% of the way there...
 // void func_150562FC(struct127 *arg0) {
 //     f32 sp70;
