@@ -176,7 +176,199 @@ s32 func_1515D6D0(s32 arg0, s32 arg1) {
     return arg0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18A8F0/func_1515D914.s")
+/*MWSTART*/
+#ifndef CMDDEF
+#define CMD(a, b) { Gfx *_g = arg0++; _g->words.w0 = (a); _g->words.w1 = (b); }
+#endif
+struct Obj1515EC78;
+struct Light1515EC78;
+void func_1515E43C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4, u8 *arg5, u8 *arg6, u8 *arg7);
+void func_1515E278(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4, u8 *arg5, u8 *arg6);
+void func_1515EC78(struct Obj1515EC78 *arg0, s32 arg1, struct Light1515EC78 *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
+struct Node1515D914 {
+    struct Node1515D914 *next;
+    u8 unk4;
+    u8 pad5[3];
+    u8 unk8;
+    u8 unk9;
+    u8 unkA;
+    u8 padB;
+    u8 unkC;
+    u8 padD;
+    s16 unkE;
+    s16 unk10;
+    s16 unk12;
+    u8 pad14[0x1B];
+    u8 unk2F;
+};
+
+Gfx *func_1515D914(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5, u8 *arg6, s32 arg7, u8 *arg8, s8 *arg9, s32 argA, u8 *argB, s32 argC, s32 *argD) {
+    s32 i;
+    s32 j;
+    s32 cnt;
+    s32 special;
+    u8 *ent;
+    s16 pos[3];
+    u8 colA[3];
+    u8 colB[3];
+    struct Node1515D914 *node;
+    struct Node1515D914 *lights[11];
+    s32 dists[11];
+    s32 dist;
+    u8 spB0[3];
+    u8 spAC[3];
+    u8 spAB;
+    u8 spAA;
+    f32 d;
+    f32 vec[3];
+    s32 lpos[3];
+    f32 *fp;
+
+    func_1515E278(arg2, arg3, arg4, argA, colA, arg5, (u8 *)argC);
+    j = 1 << arg1;
+    if (argC & 2) {
+        func_1515E43C(arg2, arg3, arg4, argA, spB0, spAC, &spAB, &spAA);
+        for (i = 0; i < 3; i++) {
+            s32 k;
+            k = (u8)((((0xFF - colA[i]) * spAB) >> 8) + colA[i]);
+            colB[i] = (spB0[i] * k) >> 8;
+            k = (u8)((((0xFF - colA[i]) * spAA) >> 8) + colA[i]);
+            colA[i] = (spAC[i] * k) >> 8;
+        }
+    }
+    for (i = 0; i < 3; i++) {
+        if (argB != 0) {
+            if (!(argC & 8)) {
+                colA[i] = (colA[i] + argB[i] * 3) >> 2;
+            }
+            argB[i] = colA[i];
+        }
+        arg8[i] = arg8[i + 4] = colA[i];
+        continue;
+    }
+    for (i = 0; i < arg7; i++) {
+        dists[i] = 0x7FFFFFFF;
+    }
+    if (!(argC & 1)) {
+        pos[0] = arg2;
+        pos[1] = arg3;
+        pos[2] = arg4;
+    } else {
+        vec[0] = D_800DBFF0[arg1].unk2BC - D_800DBFF0[arg1].unk2F8;
+        vec[1] = D_800DBFF0[arg1].unk2C0 - D_800DBFF0[arg1].unk2FC;
+        vec[2] = D_800DBFF0[arg1].unk2C4 - D_800DBFF0[arg1].unk300;
+        d = sqrtf(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2]);
+        if (d != 0.0f) {
+            d = 1000.0f / d;
+            pos[0] = vec[0] * d + (f32)arg2;
+            pos[1] = vec[1] * d + (f32)arg3;
+            pos[2] = vec[2] * d + (f32)arg4;
+        } else {
+            pos[0] = arg2;
+            pos[1] = arg3;
+            pos[2] = arg4;
+        }
+    }
+    node = (struct Node1515D914 *)D_800DCD78;
+    cnt = 0;
+    if (node != 0) {
+        do {
+            if (((node->unkC & (1 << arg1)) || (argC & 0x20) || !(node->unk8 & 1)) && (node->unk8 & argA) && (node->unk9 == 0) && !(node->unkA & (1 << arg1))) {
+                if (node->unk4 == 0) {
+                G:
+                    lpos[0] = node->unkE;
+                    if (lpos[0] != -0x8000) {
+                        lpos[1] = node->unk10;
+                        lpos[2] = node->unk12;
+                    } else {
+                        fp = (f32 *)((node->unk12 & 0xFFFF) | (node->unk10 << 16));
+                        lpos[0] = fp[0];
+                        lpos[1] = fp[1];
+                        lpos[2] = fp[2];
+                    }
+                    dist = (pos[0] - lpos[0]) * (pos[0] - lpos[0]) + (pos[1] - lpos[1]) * (pos[1] - lpos[1]) + (pos[2] - lpos[2]) * (pos[2] - lpos[2]);
+                    if (!(argC & 4) && ((node->unk2F << 17) < dist)) {
+                        dist = 0x7FFFFFFF;
+                    }
+                }
+                for (i = 0; i < arg7 - 1; i++) {
+                    if (dist < dists[i]) {
+                        for (j = arg7 - 2; j > i; j--) {
+                            dists[j] = dists[j - 1];
+                            lights[j] = lights[j - 1];
+                        }
+                        dists[i] = dist;
+                        lights[i] = node;
+                        if (cnt != arg7 - 1) {
+                            cnt++;
+                        }
+                        goto found;
+                    }
+                }
+            found:;
+            }
+            node = node->next;
+        } while (node != 0);
+    }
+    if (arg7 != 0) {
+        if (cnt & 1) {
+            special = 1;
+            if (argD != 0) {
+                argD[cnt] = 0;
+            }
+        } else {
+            special = 0;
+        }
+        if (arg9 != 0) {
+            if (special != 0) {
+                *arg9 = (cnt + special + 1) | 0x80;
+            } else {
+                *arg9 = cnt + special + 1;
+            }
+        }
+        CMD(0xDB020000, (cnt + special) * 0x30 + 0x30);
+    } else {
+        if (arg9 != 0) {
+            *arg9 = cnt;
+        }
+        CMD(0xDB020000, cnt * 0x30);
+    }
+    if (arg7 != 0) {
+        u8 *p;
+        p = arg6 + (D_800BE9C0 * arg7 + cnt) * 0x30;
+        p[8] = ((s8 *)&D_800DCD30)[arg1 * 3];
+        p[9] = ((s8 *)&D_800DCD30)[arg1 * 3 + 1];
+        p[0xA] = ((s8 *)&D_800DCD30)[arg1 * 3 + 2];
+        if (argC & 2) {
+            p[0] = p[4] = colB[0];
+            p[1] = p[5] = colB[1];
+            p[2] = p[6] = colB[2];
+        } else {
+            p[0] = p[4] = 0;
+            p[1] = p[5] = 0;
+            p[2] = p[6] = 0;
+        }
+        p -= cnt * 0x30;
+        for (i = 0; i < cnt; i++, p += 0x30) {
+            node = lights[i];
+            if (argD != 0) {
+                argD[i] = (s32)node;
+            }
+            if (argC & 0x20) {
+                node->unkC |= 1 << arg1;
+            }
+            if (node->unk4 == 0) {
+                func_1515EC78((struct Obj1515EC78 *)node, arg1, (struct Light1515EC78 *)p, arg2, arg3, arg4, argC);
+            }
+            CMD(((((u32)(i * 0x30 + 0x60) >> 3) & 0xFF) << 8) | 0xDC280000 | 0xA, (u32)p);
+            continue;
+        }
+        if (special != 0) CMD(((((u32)(i * 0x30 + 0x60) >> 3) & 0xFF) << 8) | 0xDC280000 | 0xA, (u32)&D_800DCD40);
+        CMD(((((u32)((i + special + 1) * 0x30U + 0x30) >> 3) & 0xFF) << 8) | 0xDC280000 | 0xA, ((D_800BE9C0 * arg7 + i) * 0x30) + (s32)arg6);
+        CMD(((((u32)((i + special + 2) * 0x30U + 0x30) >> 3) & 0xFF) << 8) | 0xDC280000 | 0xA, (u32)arg8);
+    }
+    return arg0;
+}
 
 
 struct Node1515E43C {
