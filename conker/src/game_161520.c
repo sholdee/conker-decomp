@@ -3075,7 +3075,13 @@ void func_1513A48C(void *arg0, u8 arg1, s32 arg2) {
                   (s32)arg1, arg2);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_1513A594.s")
+void func_1513A594(void *arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4) {
+    func_1513A5E0(arg1, arg3 & 0xFF, arg4);
+    if (*(s32 *)((u8 *)arg0 + 0x1D4) != 0) {
+        if (arg0) {
+        }
+    }
+}
 
 typedef struct {
     s32 x;
