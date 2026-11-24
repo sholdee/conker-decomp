@@ -179,6 +179,10 @@ $(foreach s,$(filter libc/% gu/%,$(ULTRALIB_SRCS)),$(eval $(BUILD_DIR)/$(SRC_DIR
 # functions of the same file - bind to the init copy: their own definitions are weak, and the
 # game names of their entry points are address aliases in undefined_syms.
 $(foreach s,$(filter %2,$(ULTRALIB_SRCS)),$(eval $(BUILD_DIR)/$(SRC_DIR)/libultra/$(s).c.o: RODATA_EXTERN_FLAGS := --weak-text))
+# Game copies that game code calls by its own names (and that call each other): definitions
+# renamed onto the game names, sources untouched.
+$(BUILD_DIR)/$(SRC_DIR)/libultra/gu/mtxutil.c.o: CFLAGS += -DguMtxF2L=guMtxF2L2 -DguMtxIdentF=func_151EFE00 -DguMtxIdent=func_151EFE88
+$(BUILD_DIR)/$(SRC_DIR)/libultra/gu/ortho.c.o: CFLAGS += -DguMtxF2L=guMtxF2L2 -DguMtxIdentF=func_151EFE00 -DguOrthoF=func_151EF800 -DguOrtho=func_151EF954
 # libc/ll.c is the SDK's 64-bit helper file: -O1 -mips3 -32
 $(BUILD_DIR)/$(SRC_DIR)/libultra/libc/ll.c.o: OPT_FLAGS := -O1
 $(BUILD_DIR)/$(SRC_DIR)/libultra/libc/ll.c.o: MIPSBIT := -mips3 -32

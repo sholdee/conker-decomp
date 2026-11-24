@@ -112,3 +112,4 @@ __osContRamRead2 = 0x151F2080;
 __osPackRamReadData2 = 0x151F22C4;
 __osContRamWrite2 = 0x151F2430;
 __osPackRamWriteData2 = 0x151F2660;
+func_151EF9C0 = 0x151EF9C0; /* osSetTimer, game copy */

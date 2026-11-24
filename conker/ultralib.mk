@@ -1,5 +1,7 @@
 # libultra/<dir>/<file> stems built from ultralib 2.0G source (see Makefile)
 ULTRALIB_SRCS += \
+    gu/mtxutil \
+    gu/ortho \
     gu/sinf_init \
     io/contpfs \
     io/contpfs2 \
@@ -61,6 +63,7 @@ ULTRALIB_SRCS += \
     os/sethwinterrupt \
     os/setthreadpri \
     os/settimer \
+    os/settimer2 \
     os/startthread \
     os/stopthread \
     os/thread \
