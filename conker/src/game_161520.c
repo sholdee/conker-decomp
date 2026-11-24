@@ -549,7 +549,165 @@ void *func_15134DAC(void *arg0, s32 arg1) {
     return temp_v1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15134E48.s")
+typedef struct {
+    f32 x, y, z;
+} Vec3_15134E48;
+
+typedef struct {
+    s32 unk0;
+    u8 pad4[0x37];
+    u8 unk3B;
+    u8 pad3C[0x38];
+    u8 unk74;
+    u8 pad75[0x15F];
+    s32 unk1D4;
+} Owner_15134E48;
+
+typedef struct {
+    u8 pad0[0x10];
+    s32 unk10;
+    u8 pad14[4];
+    u8 unk18;
+    u8 pad19[3];
+    Owner_15134E48 *unk1C;
+    u8 unk20;
+    u8 pad21[3];
+    Vec3_15134E48 unk24;
+    Vec3_15134E48 unk30;
+    u8 unk3C;
+    u8 pad3D;
+    s16 unk3E;
+    s16 unk40;
+    s16 unk42;
+    u8 pad44[2];
+    s8 unk46;
+    s8 unk47;
+    s8 unk48;
+    u8 pad49[3];
+    f32 unk4C;
+    u8 pad50;
+    s8 unk51;
+    u8 pad52[2];
+    s16 unk54;
+    u8 pad56[2];
+    Vec3_15134E48 unk58;
+    Vec3_15134E48 unk64;
+    f32 unk70;
+    f32 unk74;
+    f32 unk78;
+} Obj_15134E48;
+
+
+extern s32 (*D_80089B1C[])(Obj_15134E48 *);
+extern void (*D_80089B38[])(Vec3_15134E48 *, Vec3_15134E48 *, Vec3_15134E48 *, Vec3_15134E48 *, f32, Obj_15134E48 *);
+extern f32 (*D_80089B5C[])(Obj_15134E48 *);
+extern s32 (*D_80089B6C[])(Obj_15134E48 *);
+void func_15135424(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+
+void func_15134E48(Obj_15134E48 *arg0) {
+    Obj_15134E48 *p = arg0;
+    u8 kill;
+    s32 base;
+
+    kill = 0;
+    if (p->unk1C->unk0 == 0 || p->unk1C->unk3B != p->unk18) {
+        kill = 1;
+    }
+    if (p->unk10 & 1) {
+        if (!kill && p->unk1C->unk1D4 != 0 && (p->unk1C->unk74 & 0xF) != 0xF) {
+            base = p->unk1C->unk1D4;
+            base += p->unk20 << 6;
+            p->unk54 -= D_800BE9E4;
+            if (p->unk54 < -p->unk40) {
+                p->unk54 = p->unk3E;
+                func_15135424(base, (s32)&p->unk24, (s32)&p->unk30, (s32)&p->unk58, (s32)&p->unk64);
+                if (p->unk46 != -1 && D_80089B1C[p->unk46](p) == 0) {
+                    kill = 1;
+                    p->unk54 = -1;
+                }
+            }
+            if (p->unk54 > 0) {
+                if (p->unk48 != -1) {
+                    p->unk74 = D_80089B5C[p->unk48](p);
+                }
+                p->unk70 += p->unk4C * D_800BE9A4;
+                if (p->unk70 > 1.0f) {
+                    Vec3_15134E48 end1;
+                    Vec3_15134E48 end2;
+                    Vec3_15134E48 vel1;
+                    Vec3_15134E48 vel2;
+                    f32 inv;
+                    f32 t;
+                    f32 step;
+                    Vec3_15134E48 cur1;
+                    Vec3_15134E48 cur2;
+                    f32 dz;
+                    f32 dy;
+                    f32 dx;
+                    Vec3_15134E48 d2;
+                    f32 ix;
+                    f32 iy;
+                    f32 iz;
+                    f32 jx;
+                    f32 jy;
+                    f32 jz;
+                    inv = 1.0f / p->unk70;
+                    t = p->unk78 + D_800BE9A4;
+                    step = t * inv;
+                    cur1 = p->unk58;
+                    cur2 = p->unk64;
+                    func_15135424(base, (s32)&p->unk24, (s32)&p->unk30, (s32)&end1, (s32)&end2);
+                    dx = end1.x - p->unk58.x;
+                    dy = end1.y - p->unk58.y;
+                    dz = end1.z - p->unk58.z;
+                    d2.x = end2.x - p->unk64.x;
+                    d2.y = end2.y - p->unk64.y;
+                    d2.z = end2.z - p->unk64.z;
+                    ix = dx * inv;
+                    iy = dy * inv;
+                    iz = dz * inv;
+                    jx = d2.x * inv;
+                    jy = d2.y * inv;
+                    jz = d2.z * inv;
+                    vel1.x = dx * D_800BE9A8;
+                    vel1.y = dy * D_800BE9A8;
+                    vel1.z = dz * D_800BE9A8;
+                    vel2.x = d2.x * D_800BE9A8;
+                    vel2.y = d2.y * D_800BE9A8;
+                    vel2.z = d2.z * D_800BE9A8;
+                    do {
+                        if (p->unk47 != -1) {
+                            D_80089B38[p->unk47](&cur1, &cur2, &vel1, &vel2, t, p);
+                        }
+                        cur1.x += ix;
+                        cur1.y += iy;
+                        cur1.z += iz;
+                        cur2.x += jx;
+                        cur2.y += jy;
+                        cur2.z += jz;
+                        t -= step;
+                        p->unk70 -= 1.0f;
+                    } while (p->unk70 > 1.0f);
+                    p->unk58 = cur1;
+                    p->unk64 = cur2;
+                    p->unk78 = t;
+                }
+            }
+        }
+        if (p->unk51 != -1 && D_80089B6C[p->unk51](p) == 0) {
+            kill = 1;
+        }
+        if (p->unk3C & 2) {
+            p->unk42 -= D_800BE9E4;
+            if (p->unk42 < 0) {
+                kill = 1;
+            }
+        }
+    }
+    if (kill) {
+        func_1516972C((struct102 *)p);
+    }
+}
 
 void func_151352EC(struct102 *arg0) {
     func_15169804(arg0);
