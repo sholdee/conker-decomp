@@ -164,6 +164,18 @@ $(BUILD_DIR)/$(SRC_DIR)/game_21D5F0.c.o: OPT_FLAGS := -O2
 
 # $(BUILD_DIR)/$(SRC_DIR)/game_14FF90.o: OPT_FLAGS := -O3
 
+# libultra 2.0G from the ultralib decompilation (lib/ultralib/include is its header tree), built
+# with ultralib's own flags for that version: os/ and io/ at -O1, libc/ and gu/ at -O3.
+ULTRA_CFLAGS := -G 0 -nostdinc -non_shared -Xcpluscomm -fullwarn -woff 516,649,838,712 -Wab,-r4300_mul \
+                -D_MIPS_SZLONG=32 -D_FINALROM -DNDEBUG -DBUILD_VERSION=VERSION_G -DBUILD_VERSION_STRING=\"2.0G\" \
+                -I lib/ultralib/include -I lib/ultralib/include/compiler/ido -I lib/ultralib/include/PR \
+                -I lib/ultralib/src/gu -I lib/ultralib/src/libc -I lib/ultralib/src/os
+ULTRALIB_SRCS :=
+include ultralib.mk
+$(foreach s,$(ULTRALIB_SRCS),$(eval $(BUILD_DIR)/$(SRC_DIR)/libultra/$(s).c.o: CFLAGS := $(ULTRA_CFLAGS)))
+$(foreach s,$(filter os/% io/%,$(ULTRALIB_SRCS)),$(eval $(BUILD_DIR)/$(SRC_DIR)/libultra/$(s).c.o: OPT_FLAGS := -O1))
+$(foreach s,$(filter libc/% gu/%,$(ULTRALIB_SRCS)),$(eval $(BUILD_DIR)/$(SRC_DIR)/libultra/$(s).c.o: OPT_FLAGS := -O3))
+
 ### Non-matching
 ifeq ($(NON_MATCHING),1)
 VERIFY :=

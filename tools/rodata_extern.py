@@ -32,7 +32,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent / "asm-processor"))
 from asm_processor import ElfFile, Symbol, SHT_REL  # noqa: E402
 
 R_MIPS_32, R_MIPS_HI16, R_MIPS_LO16 = 2, 5, 6
-STT_SECTION, STB_GLOBAL, SHN_ABS = 3, 1, 0xFFF1
+STT_SECTION, STB_GLOBAL, STB_WEAK, SHN_ABS = 3, 1, 2, 0xFFF1
 OP_LUI, OP_LDC1, OP_SDC1 = 0x0F, 0x35, 0x3D
 
 
@@ -164,6 +164,7 @@ def main():
     rodata = elf.find_section(".rodata")
     if rodata is not None and not owns_rodata(yaml_path, obj):
         changed |= retarget_rodata(elf, text, rodata, get_rom, obj, notes)
+    changed |= weaken_data_defs(elf, yaml_path, obj)
     if changed:
         rel_tx = [s for s in text.relocated_by if s.sh_type == SHT_REL]
         for rs in rel_tx:
@@ -171,6 +172,26 @@ def main():
         elf.write(obj)
     if notes:
         Path(obj + ".notes").write_text("\n".join(notes) + "\n")
+
+
+def weaken_data_defs(elf, yaml_path, obj):
+    """Globals this object defines in data sections the link discards (its .data/.bss/.rodata
+    are assembled from asm/data instead) become weak, so the asm's definition wins instead of
+    clashing: ported library code (ultralib) defines its own globals, e.g. osViClock."""
+    idx = set()
+    for name in DATA_SECTIONS + (".rodata",):
+        sec = elf.find_section(name)
+        owned = owns_rodata(yaml_path, obj) if name == ".rodata" else owns_section(yaml_path, obj, name)
+        if sec is not None and not owned:
+            idx.add(sec.index)
+    changed = False
+    for s in elf.symbol_entries[1:]:
+        if s.st_shndx in idx and s.st_bind == STB_GLOBAL:
+            s.st_bind = STB_WEAK
+            changed = True
+    if changed:
+        elf.symtab.data = b"".join(s.to_bin() for s in elf.symbol_entries)
+    return changed
 
 
 def pair_refs(text, rel_tx, wanted, ins_at):
