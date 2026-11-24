@@ -284,7 +284,74 @@ void func_15187978(Obj_15187978 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1B4A90/func_15187A98.s")
+typedef struct {
+    Mtx mtx[2];
+    f32 unk80;
+    f32 unk84;
+    f32 unk88;
+    f32 unk8C;
+    f32 unk90;
+    s16 unk94;
+    s16 unk96;
+    u8 unk98;
+    u8 pad99[7];
+} Elem_15187A98;
+
+typedef struct {
+    u8 pad0[0x10];
+    Mtx mtx[2];
+    f32 unk90;
+    f32 unk94;
+    f32 unk98;
+    f32 unk9C;
+    f32 unkA0;
+    Elem_15187A98 *unkA4;
+    s16 unkA8;
+    s16 unkAA;
+} Obj_15187A98;
+
+extern void func_150A7DA0(f32 mtx[4][4], f32 x, f32 y, f32 z);
+extern void guMtxF2L2(f32 mf[4][4], Mtx *m);
+extern Vtx D_8008D538[];
+void func_15187D6C(f32 *arg0, f32 arg1, f32 arg2, f32 arg3);
+
+Gfx *func_15187A98(Gfx *gdl, Obj_15187A98 *arg1, s32 arg2) {
+    s32 i;
+    s32 alpha;
+    f32 spB8[4][4];
+    f32 sp78[4][4];
+    Gfx *g2;
+    Gfx *g3;
+
+    /* dead stores: give g2/g3 their uopt bit positions before the alpha expression (register coloring order) */
+    g2 = NULL; g3 = NULL;
+    if (arg1->unkA8 >= 0) {
+    func_150A7DA0(spB8, arg1->unk90, arg1->unk94, arg1->unk98);
+    guMtxF2L2(spB8, &arg1->mtx[D_800BE9C0]);
+    for (i = 0; i < 12; i++) {
+        gSPMatrix(gdl++, &arg1->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+        func_150A7DA0(spB8, arg1->unkA4[i].unk90, 0.0f, 0.0f);
+        spB8[0][0] *= arg1->unkA0;
+        spB8[1][1] *= arg1->unk9C;
+        spB8[2][2] *= arg1->unk9C;
+        if (arg1->unkA4[i].unk98 == 0) {
+            func_150A8050(sp78, arg1->unkA4[i].unk80, arg1->unkA4[i].unk84, arg1->unkA4[i].unk88);
+        } else {
+            func_15187D6C(sp78, arg1->unkA4[i].unk80, arg1->unkA4[i].unk84, arg1->unkA4[i].unk88);
+        }
+        func_150A7A48(spB8, sp78, spB8);
+        guMtxF2L(spB8, &arg1->unkA4[i].mtx[D_800BE9C0]);
+        alpha = (arg1->unkA4[i].unk96 - arg1->unkA4[i].unk94) * 0xFF / arg1->unkA4[i].unk96;
+        { s32 pad; g2 = gdl++; g2->words.w0 = (_SHIFTL(G_SETPRIMCOLOR, 24, 8) | _SHIFTL(1, 8, 8) | _SHIFTL(0, 0, 8)); g2->words.w1 = (_SHIFTL(0xFF, 24, 8) | _SHIFTL(0xFF, 16, 8) | _SHIFTL(0xFF, 8, 8) | _SHIFTL(alpha, 0, 8)); }
+        { s32 pad; g3 = gdl++; g3->words.w0 = (_SHIFTL((G_MTX),24,8)|_SHIFTL(((sizeof(Mtx))-1)/8,19,5)|_SHIFTL((0)/8,8,8)|_SHIFTL(((G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW)^G_MTX_PUSH),0,8)); g3->words.w1 = (unsigned int)(&arg1->unkA4[i].mtx[D_800BE9C0]); }
+        gSPVertex(gdl++, D_8008D538, 4, 0);
+        gSP1Triangle(gdl++, 0, 1, 2, 0);
+        gSP1Triangle(gdl++, 0, 1, 3, 0);
+        gSP1Triangle(gdl++, 0, 2, 3, 0);
+    }
+    }
+    return gdl;
+}
 
 extern void func_151EFE00(f32 *);
 
