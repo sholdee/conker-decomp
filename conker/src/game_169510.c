@@ -1565,7 +1565,7 @@ Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2) {
 //     s16 temp_v0 = func_15143044(arg1, 0);
 //     if (temp_v0 != D_800DD1BE) {
 //         CombineEntry *e; Gfx *g2;
-//         if (arg2[0] == 1) { gDPPipeSync(gfx++); arg2[0] = 0; }
+//         if (arg2->w == 1) { gDPPipeSync(gfx++); arg2->w = 0; }
 //         e = &D_800A4BA8[arg1];
 //         g2 = gfx++;
 //         g2->words.w0 = (((e->unkA & 0x1F) | ((e->unk8 & 0xF) << 5) | ((e->unk0 & 0xF) << 20)
@@ -1647,6 +1647,32 @@ s32 func_1513F728(Struct1513F728Obj *arg0) {
     return 1;
 }
 
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3f1513FAB4;
+
+typedef struct {
+    u8 pad0[0x2C];
+    f32 width;
+    f32 length;
+    Vec3f1513FAB4 start;
+    Vec3f1513FAB4 end;
+} Beam1513FAB4;
+
+typedef struct {
+    s16 x, y, z, flag;
+    u8 other[8];
+} BeamVtx1513FAB4;
+
+typedef struct { f32 w; f32 l; } Scale1513FAB4;
+
+extern f32 *func_15144B34(s32);
+extern void func_150AD8B0(f32 *, f32 *, f32 *);
+
+void *func_1513FAB4(Beam1513FAB4 *arg0, u8 arg1, Scale1513FAB4 *arg2, s16 arg3);
+
 void func_1513FA2C(void *arg0, s16 arg1) {
     f32 stack_vals[2];
     stack_vals[0] = 1.0f;
@@ -1662,7 +1688,109 @@ void func_1513FA70(s32 arg0, s16 arg1) {
     func_1513FAB4(arg0, 1, sp18, arg1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513FAB4.s")
+
+
+void *func_1513FAB4(Beam1513FAB4 *arg0, u8 arg1, Scale1513FAB4 *arg2, s16 arg3) {
+    BeamVtx1513FAB4 *vertices;
+    void *result;
+    Vec3f1513FAB4 *camera;
+    Vec3f1513FAB4 delta;
+    Vec3f1513FAB4 end;
+    Vec3f1513FAB4 middle;
+    Vec3f1513FAB4 view;
+    Vec3f1513FAB4 side;
+    f32 lengthSquared;
+    f32 length;
+    f32 width;
+    u8 fresh;
+
+    func_151D5D60((u8 *)arg0 + 0x100, arg3, 0x40, (void **)&vertices, &fresh);
+    result = vertices;
+    if (vertices != 0) {
+        if (fresh != 0) {
+            memcpy(*(u8 **)((u8 *)arg0 + arg3 * 4 + 0x100), (u8 *)arg0 + 0xC0, 0x40);
+            memcpy(*(u8 **)((u8 *)arg0 + arg3 * 4 + 0x100) + 0x40, (u8 *)arg0 + 0xC0, 0x40);
+        }
+    } else {
+        return 0;
+    }
+    camera = (Vec3f1513FAB4 *)func_15144B34(arg3);
+    width = arg0->width * arg2->w;
+    length = arg0->length * arg2->l;
+    delta.x = arg0->end.x - arg0->start.x;
+    delta.y = arg0->end.y - arg0->start.y;
+    delta.z = arg0->end.z - arg0->start.z;
+    delta.x *= length;
+    delta.y *= length;
+    delta.z *= length;
+    end.x = arg0->start.x + delta.x;
+    end.y = arg0->start.y + delta.y;
+    end.z = arg0->start.z + delta.z;
+    middle.x = arg0->start.x + delta.x * 0.5f;
+    middle.y = arg0->start.y + delta.y * 0.5f;
+    middle.z = arg0->start.z + delta.z * 0.5f;
+    view.x = middle.x - camera->x;
+    view.y = middle.y - camera->y;
+    view.z = middle.z - camera->z;
+    func_150AD8B0(&delta.x, &view.x, &side.x);
+    lengthSquared = side.x * side.x + side.y * side.y + side.z * side.z;
+    if (lengthSquared != 0.0f) {
+        f32 scale = width / sqrtf(lengthSquared);
+
+        side.x = side.x * scale;
+        side.y = side.y * scale;
+        side.z = side.z * scale;
+    } else {
+        side.x = 0;
+        side.y = 0;
+        side.z = 0;
+    }
+    if (arg1 != 0) {
+        vertices->x = arg0->start.x + side.x;
+        vertices->y = arg0->start.y + side.y;
+        vertices->z = arg0->start.z + side.z;
+        vertices->flag = 0;
+        vertices++;
+        vertices->x = arg0->start.x - side.x;
+        vertices->y = arg0->start.y - side.y;
+        vertices->z = arg0->start.z - side.z;
+        vertices->flag = 0;
+        /* IDO ugen reads stale tree-node memory left by earlier functions in this file;
+           these empty statements pad the node count so that state lines up. */
+        ;;;;;;;;;;;;;;;;;;;;
+        vertices++;
+        vertices->x = end.x - side.x;
+        vertices->y = end.y - side.y;
+        vertices->z = end.z - side.z;
+        vertices->flag = 0;
+        vertices++;
+        vertices->x = end.x + side.x;
+        vertices->y = end.y + side.y;
+        vertices->z = end.z + side.z;
+        vertices->flag = 0;
+    } else {
+        vertices->x = arg0->start.x - side.x;
+        vertices->y = arg0->start.y - side.y;
+        vertices->z = arg0->start.z - side.z;
+        vertices->flag = 0;
+        vertices++;
+        vertices->x = end.x - side.x;
+        vertices->y = end.y - side.y;
+        vertices->z = end.z - side.z;
+        vertices->flag = 0;
+        vertices++;
+        vertices->x = end.x + side.x;
+        vertices->y = end.y + side.y;
+        vertices->z = end.z + side.z;
+        vertices->flag = 0;
+        vertices++;
+        vertices->x = arg0->start.x + side.x;
+        vertices->y = arg0->start.y + side.y;
+        vertices->z = arg0->start.z + side.z;
+        vertices->flag = 0;
+    }
+    return result;
+}
 
 void func_1513FFF4(struct1513FFF4 *arg0, u8 arg1, u8 arg2) {
     struct1513FFF4_80090B60 *temp_v0;
