@@ -119,7 +119,44 @@ void func_150045C4(s32 arg0) {
         }
     }
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_30E90/func_150049A4.s")
+typedef struct {
+    s8 cmd;
+    u8 b1;
+    u8 b2;
+    u8 b3;
+    s32 w1;
+} Struct_150049A4;
+
+void func_150049A4(Struct_150049A4 *gfx, s32 arg1, s32 arg2) {
+    s32 i;
+    Struct_150049A4 *p;
+    s8 cmd;
+
+    i = 0;
+    if ((s8)*(u8*)&gfx[i] != -0x21) {
+        p = &gfx[i];
+        cmd = p->cmd;
+        do {
+            i++;
+            switch (cmd) {
+                case 0xDE:
+                    p->w1 += arg1;
+                    break;
+                case 1:
+                    p->w1 += arg1;
+                    break;
+                case -0x24:
+                    if (p->b3 == 0xE) {
+                        p->w1 += arg2;
+                    }
+                    break;
+            }
+            p = &gfx[i];
+            cmd = p->cmd;
+        } while (-0x21 - cmd);
+    }
+}
+
 void func_15004A4C(void) {
     s32 i;
     for (i = 0; i < D_800DBEF0; i++) {
