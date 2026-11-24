@@ -408,7 +408,44 @@ s32 func_1514A4EC(struct Foo1514A4EC *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_177480/func_1514A594.s")
+struct Foo1514A594 {
+    char pad0[0x34];
+    Struct1514A4ECVec unk34;
+    Struct1514A4ECVec unk40;
+    char pad4C[0x8];
+    f32 unk54;
+    char pad58[0xD8];
+    f32 unk130;
+    f32 unk134;
+    f32 unk138;
+    f32 unk13C;
+    f32 unk140;
+};
+
+s32 func_1514A594(struct Foo1514A594 *arg0)
+{
+  f32 vx;
+  f32 vy;
+  f32 vz;
+  struct Foo1514A594 *new_var;
+  arg0->unk130 = arg0->unk130 * arg0->unk140;
+  new_var = arg0;
+  new_var->unk134 = arg0->unk134 + (new_var->unk13C * D_800BE9A4);
+  arg0->unk138 = arg0->unk138 * new_var->unk140;
+  vx = new_var->unk130 * D_800BE9A4;
+  vy = new_var->unk134 * D_800BE9A4;
+  vz = new_var->unk138 * D_800BE9A4;
+  new_var->unk34.unk0 = arg0->unk34.unk0 + vx;
+  arg0->unk34.unk4 = new_var->unk34.unk4 + vy;
+  arg0->unk34.unk8 = arg0->unk34.unk8 + vz;
+  new_var->unk40.unk0 = new_var->unk40.unk0 + vx;
+  new_var->unk40.unk4 = arg0->unk40.unk4 + vy;
+  arg0->unk40.unk8 = new_var->unk40.unk8 + vz;
+  new_var->unk40.unk0 = new_var->unk34.unk0 + ((new_var->unk40.unk0 - arg0->unk34.unk0) * new_var->unk54);
+  new_var->unk40.unk4 = arg0->unk34.unk4 + ((new_var->unk40.unk4 - arg0->unk34.unk4) * new_var->unk54);
+  new_var->unk40.unk8 = arg0->unk34.unk8 + ((new_var->unk40.unk8 - arg0->unk34.unk8) * new_var->unk54);
+  return 1;
+}
 void func_1514AB5C(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, s16 arg9, s16 arg10, u8 arg11);
 
 u8 func_150ADA20(void);
