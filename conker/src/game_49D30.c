@@ -1032,7 +1032,271 @@ void func_1501EA18(s32 arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_49D30/func_1501EC38.s")
+typedef struct {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    f32 unk30;
+    f32 unk34;
+    f32 unk38;
+    f32 unk3C;
+    f32 unk40;
+} Out1501EC38;
+
+typedef struct {
+    f32 value;
+    u8 interp;
+    u8 channel;
+    s16 time;
+} Key1501EC38;
+extern f32 func_150497E0(f32 *, s32, f32);
+void func_1501FC8C(s32 arg0, f32 arg1, f32 *arg2, f32 *arg3, f32 *arg4, s32 arg5);
+void func_1501FE68(s32 arg0, f32 arg1, f32 *arg2, s32 arg3);
+
+void func_1501EC38(s32 arg0) {
+    s32 lo[15];
+    s32 hi[15];
+    s32 idx[15];
+    s32 flag[15];
+    f32 first[15];
+    f32 last[15];
+    s32 cnt[15];
+    f32 r[15];
+    s32 j;
+    s32 k;
+    s32 i;
+    f32 t;
+    s32 mask;
+    s32 found;
+    s32 n;
+    f32 pts[4];
+    s32 start;
+    s32 remaining;
+    s32 m;
+    s32 ch;
+    s32 q;
+    s32 next;
+    Key1501EC38 *key;
+
+    if ((&D_800C35EA)[arg0] == 1) {
+        D_800C3638 = 0;
+        for (i = 0; i < D_800C363A[arg0]; i++) {
+            if (D_800C35C8[arg0][i] != 0) {
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk0 = D_800C3868[arg0][i]->unk0;
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk4 = D_800C3868[arg0][i]->unk2;
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk8 = D_800C3868[arg0][i]->unk4;
+            } else {
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk0 = 0.0f;
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk4 = 0.0f;
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk8 = 0.0f;
+            }
+            if (*(u16 *)&D_800C35F0[arg0][i * 8] == 4) {
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unkC = 64.0f;
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk10 = 0.0f;
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk14 = 20.0f;
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk18 = 255.0f;
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk1C = 62.5f;
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk20 = 50.0f;
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk24 = 0.0f;
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk28 = 0.0f;
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk2C = 0.0f;
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk34 = 0.0f;
+            } else {
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unkC = 0.0f;
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk10 = D_800C35A4;
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk14 = 0.0f;
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk18 = -9999.0f;
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk1C = -9999.0f;
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk20 = -9999.0f;
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk24 = 0.0f;
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk28 = 0.0f;
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk2C = 0.0f;
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk3C = -9999.0f;
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk40 = -9999.0f;
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk30 = -9999.0f;
+            }
+            ((Out1501EC38 **)&D_800C3958)[arg0][i].unk38 = 0.0f;
+            if (*(u16 *)&D_800C35F0[arg0][i * 8] == 1) {
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk34 = -9999.0f;
+            } else if (*(u16 *)&D_800C35F0[arg0][i * 8] == 2) {
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk34 = 255.0f;
+            } else if (*(u16 *)&D_800C35F0[arg0][i * 8] == 5) {
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk18 = 32.0f;
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk1C = 32.0f;
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk34 = 1.0f;
+            } else if (*(u16 *)&D_800C35F0[arg0][i * 8] == 3) {
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk18 = -9999.0f;
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk1C = -9999.0f;
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk20 = -9999.0f;
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk34 = 255.0f;
+            }
+            if (((Key1501EC38 *(*)[30])D_800C3778)[arg0][i] != NULL) {
+                for (j = 0; j < 15; j++) {
+                    hi[j] = -9999;
+                    lo[j] = -9999;
+                    idx[j] = -9999;
+                    flag[j] = 1;
+                    cnt[j] = 0;
+                    first[j] = -9999.0f;
+                    last[j] = -9999.0f;
+                }
+                for (j = 0; j < ((u16 **)&D_800C35D0)[arg0][i]; j++) {
+                    key = &((Key1501EC38 *(*)[30])D_800C3778)[arg0][i][j];
+                    ch = key->channel;
+                    if (idx[ch] == -9999) {
+                        if (key->time >= D_800C35B0[arg0]) {
+                            idx[ch] = cnt[ch];
+                            hi[ch] = key->time;
+                        } else {
+                            flag[ch] = key->interp;
+                            lo[ch] = key->time;
+                        }
+                    }
+                    last[ch] = key->value;
+                    if (first[ch] == -9999.0f) {
+                        first[ch] = key->value;
+                    }
+                    cnt[ch]++;
+                }
+                for (j = 0; j < 15; j++) {
+                    r[j] = -9999.0f;
+                    if (lo[j] == -9999 && hi[j] == -9999) {
+                        continue;
+                    }
+                    if (lo[j] == -9999) {
+                        r[j] = first[j];
+                    } else if (hi[j] == -9999) {
+                        r[j] = last[j];
+                    } else {
+                        t = (f32)(D_800C35B0[arg0] - lo[j]) / (f32)(hi[j] - lo[j]);
+                        mask = 6;
+                        found = -1;
+                        if (flag[j] == 0) {
+                            s32 skip;
+                            if (idx[j] - 2 >= 0) {
+                                mask = 7;
+                                start = idx[j] - 2;
+                                remaining = 3;
+                                q = 0;
+                            } else {
+                                start = idx[j] - 1;
+                                remaining = 2;
+                                q = 1;
+                            }
+                            if (idx[j] + 1 < cnt[j]) {
+                                mask |= 8;
+                                remaining++;
+                            }
+                            skip = 0;
+                            for (m = 0; m < ((u16 **)&D_800C35D0)[arg0][i]; m++) {
+                                if (remaining == 0) {
+                                    break;
+                                }
+                                key = &((Key1501EC38 *(*)[30])D_800C3778)[arg0][i][m];
+                                if (j == key->channel) {
+                                    if (skip == start) {
+                                        pts[q++] = key->value;
+                                        remaining--;
+                                    } else {
+                                        skip++;
+                                    }
+                                }
+                            }
+                            if (!(mask & 1)) {
+                                pts[0] = pts[1];
+                            }
+                            if (!(mask & 8)) {
+                                pts[3] = pts[2];
+                            }
+                            r[j] = func_150497E0(pts, 0, t);
+                        } else {
+                            n = 0;
+                            k = 0;
+                            for (; k < ((u16 **)&D_800C35D0)[arg0][i]; k++) {
+                                key = &((Key1501EC38 *(*)[30])D_800C3778)[arg0][i][k];
+                                if (j == key->channel) {
+                                    if (found == -1) {
+                                        if (n == idx[j] - 1) {
+                                            found = k;
+                                        } else {
+                                            n++;
+                                        }
+                                    } else {
+                                        next = k;
+                                        break;
+                                    }
+                                }
+                            }
+                            r[j] = ((Key1501EC38 *(*)[30])D_800C3778)[arg0][i][next].value - ((Key1501EC38 *(*)[30])D_800C3778)[arg0][i][found].value;
+                            r[j] *= t;
+                            r[j] += ((Key1501EC38 *(*)[30])D_800C3778)[arg0][i][found].value;
+                        }
+                    }
+                }
+                if (r[10] == -9999.0f) {
+                    r[10] = 0.0f;
+                }
+                if (*((u8 *(*)[30])D_800C3960)[arg0][i] != 0xFF) {
+                    func_1501FE68(i, r[10], &((Out1501EC38 **)&D_800C3958)[arg0][i].unk10, arg0);
+                } else if (r[7] != -9999.0f) {
+                    ((Out1501EC38 **)&D_800C3958)[arg0][i].unk10 = r[7];
+                }
+                if (r[8] != -9999.0f) {
+                    ((Out1501EC38 **)&D_800C3958)[arg0][i].unkC = r[8];
+                }
+                if (r[6] != -9999.0f) {
+                    ((Out1501EC38 **)&D_800C3958)[arg0][i].unk14 = r[6];
+                }
+                if (r[5] != -9999.0f) {
+                    ((Out1501EC38 **)&D_800C3958)[arg0][i].unk18 = r[5];
+                }
+                if (r[4] != -9999.0f) {
+                    ((Out1501EC38 **)&D_800C3958)[arg0][i].unk1C = r[4];
+                }
+                if (r[3] != -9999.0f) {
+                    ((Out1501EC38 **)&D_800C3958)[arg0][i].unk20 = r[3];
+                }
+                if (r[1] != -9999.0f) {
+                    ((Out1501EC38 **)&D_800C3958)[arg0][i].unk24 = r[1];
+                }
+                if (r[2] != -9999.0f) {
+                    ((Out1501EC38 **)&D_800C3958)[arg0][i].unk28 = r[2];
+                }
+                if (r[0] != -9999.0f) {
+                    ((Out1501EC38 **)&D_800C3958)[arg0][i].unk2C = r[0];
+                }
+                if (r[14] != -9999.0f) {
+                    ((Out1501EC38 **)&D_800C3958)[arg0][i].unk30 = r[14];
+                }
+                if (r[9] != -9999.0f) {
+                    ((Out1501EC38 **)&D_800C3958)[arg0][i].unk34 = r[9];
+                }
+                if (r[11] != -9999.0f) {
+                    ((Out1501EC38 **)&D_800C3958)[arg0][i].unk38 = r[11];
+                }
+                if (r[13] != -9999.0f) {
+                    ((Out1501EC38 **)&D_800C3958)[arg0][i].unk3C = r[13];
+                }
+                if (r[12] != -9999.0f) {
+                    ((Out1501EC38 **)&D_800C3958)[arg0][i].unk40 = r[12];
+                }
+                func_1501FC8C(i, r[10], &((Out1501EC38 **)&D_800C3958)[arg0][i].unk0,
+                              &((Out1501EC38 **)&D_800C3958)[arg0][i].unk4,
+                              &((Out1501EC38 **)&D_800C3958)[arg0][i].unk8, arg0);
+            }
+        }
+        D_800C3638 = 1;
+    }
+}
 
 typedef struct {
     f32 x;
