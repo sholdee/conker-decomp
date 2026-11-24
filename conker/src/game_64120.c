@@ -18,6 +18,20 @@ extern u8 D_80098050[];
 void func_15039A78(f32 *, f32 *, f32 *, f32 *, f32, f32, s32);
 
 typedef struct {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+} GameStruct_15039A54;
+
+extern GameStruct_15039A54 D_80098068[];
+void func_1503B708(void *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4,
+                   s32 arg5, f32 *arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10);
+
+
+typedef struct {
     u8 pad0[0x324];
     f32 *unk324;
 } GameStruct_15036C70;
@@ -111,7 +125,364 @@ void func_15036CE8(void) {
     D_800C3FFA++;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_64120/func_15036F34.s")
+void func_15036F34(void) {
+    s32 type;
+    s32 sub;
+    s32 d;
+    s32 c;
+    s32 e;
+    s32 g2;
+    f32 range;
+    f32 yoff;
+    s32 f;
+    s32 sp78;
+    s32 ra;
+    s32 sp70;
+    s32 reset;
+    s32 force;
+    s32 pad;
+    s32 sp60;
+    s32 i;
+
+    sp78 = 0x100;
+    sp60 = 1;
+    range = 1600000000.0f;
+    d = 1;
+    c = 2;
+    e = 3;
+    force = 0;
+    f = 0;
+    g2 = 0;
+    sp70 = 0;
+    ra = 0;
+    i = 0;
+    yoff = 0.0f;
+    do {} while (0);
+    reset = 0;
+    switch (D_800CC2D0[D_800C3E78].id) {
+    case 130:
+        type = 12;
+        sub = 1;
+        break;
+    case 162:
+        type = 4;
+        sub = 3;
+        break;
+    case 164:
+        type = 4;
+        sub = 3;
+        break;
+    case 94:
+        type = 4;
+        sub = 3;
+        break;
+    case 151:
+        type = 4;
+        sub = 3;
+        break;
+    case 49:
+        type = 5;
+        sub = 4;
+        break;
+    case 139:
+        type = 0x21;
+        sub = 0x20;
+        break;
+    case 135:
+    case 181:
+        type = 4;
+        sub = 3;
+        break;
+    case 134:
+        sub = 3;
+        type = 5;
+        if (D_800C3FFA == 0) {
+            type = 4;
+            d = 10;
+        } else {
+            sub = 4;
+        }
+        break;
+    case 153:
+        sub = 3;
+        type = 5;
+        if (D_800C3FFA == 0) {
+            type = 4;
+            d = 10;
+        } else {
+            sub = 4;
+        }
+        break;
+    case 17:
+        sub = 3;
+        type = 5;
+        if (D_800C3FFA == 0) {
+            type = 4;
+            d = 10;
+        } else {
+            sub = 4;
+        }
+        break;
+    case 20:
+        sub = 3;
+        type = 5;
+        if (D_800C3FFA == 0) {
+            type = 4;
+            d = 10;
+        } else {
+            sub = 4;
+        }
+        break;
+    case 121:
+        type = 0x1B;
+        sub = 0x1A;
+        break;
+    case 33:
+        type = 0x19;
+        sub = 0x18;
+        break;
+    case 123:
+        type = 3;
+        sub = 2;
+        if (D_800C3FFA == 0) {
+            ra = 1;
+            break;
+        }
+        yoff = -165.0f;
+        c = 10;
+        d = 7;
+        switch (D_800CC2D0[D_800C3E78].unk84.uh) {
+        case 7:
+        case 9:
+            g2 = 1;
+            break;
+        case 20:
+            sp78 = 0x7E;
+            yoff = 0.0f;
+            d = 9;
+            c = 11;
+            break;
+        default:
+            reset = 1;
+        }
+        if (D_800C3FFA == 1) {
+            type = 0x16;
+            sub = 0x16;
+            i = 2;
+            force = 1;
+        } else {
+            type = 0x1A;
+            sub = 0x1A;
+            i = 1;
+        }
+        goto setra;
+    case 124:
+        type = 1;
+        sub = 0;
+        g2 = 1;
+        i = 3;
+        break;
+    case 108:
+        type = 0x11;
+        sub = 0x10;
+        break;
+    case 52:
+        type = 4;
+        sub = 3;
+        break;
+    case 118:
+        type = 4;
+        sub = 3;
+        break;
+    case 105:
+        type = 4;
+        sub = 3;
+        break;
+    case 138:
+        if (D_800BE616 != 0) {
+            return;
+        }
+        type = 4;
+        sub = 0;
+        if (D_800CC2D0[D_800C3E78].unk2E8 == 1) {
+            return;
+        }
+        yoff = -100.0f;
+        e = 2;
+        c = 12;
+        break;
+    case 90:
+    case 95:
+    case 116:
+    case 122:
+    case 141:
+        type = 3;
+        sub = 2;
+        break;
+    case 88:
+        type = 4;
+        sub = 3;
+        break;
+    case 91:
+        type = 4;
+        sub = 3;
+        break;
+    case 84:
+        type = 0x1D;
+        sub = 0x1C;
+        g2 = 1;
+        break;
+    case 41:
+        type = 2;
+        sub = 1;
+        break;
+    case 75:
+        if (D_800C3FFA == 0) {
+            type = 0x2B;
+            sub = 4;
+            d = 6;
+            sp60 = 0;
+            g2 = 1;
+        } else {
+            type = 0x2C;
+            sub = 4;
+            g2 = 1;
+        }
+    setra:
+        ra = 1;
+        break;
+    case 80:
+    case 154:
+    case 155:
+        type = 0xD;
+        sub = 2;
+        break;
+    case 74:
+        type = 1;
+        sub = 0;
+        e = 1;
+        f = 1;
+        break;
+    case 71:
+        type = 1;
+        sub = 0;
+        e = 1;
+        f = 1;
+        break;
+    case 68:
+        type = 3;
+        sub = 3;
+        break;
+    case 40:
+        if (D_800C3FFA == 0) {
+            type = 2;
+            sub = 0;
+            e = 1;
+            f = 1;
+            d = 4;
+            sp70 = 1;
+        } else {
+            type = 3;
+            sub = 2;
+            e = 2;
+            f = 1;
+            d = 4;
+            sp70 = 1;
+        }
+        break;
+    case 43:
+        type = 1;
+        sub = 0;
+        c = 3;
+        d = 3;
+        e = 1;
+        f = 1;
+        g2 = 1;
+        break;
+    case 58:
+    case 61:
+        type = 5;
+        sub = 4;
+        c = 5;
+        break;
+    case 83:
+    case 165:
+        type = 5;
+        sub = 0;
+        c = 7;
+        break;
+    case 54:
+        type = 4;
+        sub = 3;
+        c = 4;
+        break;
+    case 45:
+        type = 5;
+        sub = 4;
+        g2 = 1;
+        break;
+    case 12:
+    case 22:
+    case 34:
+    case 179:
+        type = 4;
+        sub = 3;
+        break;
+    case 125:
+        type = 4;
+        sub = 3;
+        break;
+    case 32:
+    case 140:
+    case 147:
+        type = 2;
+        sub = 1;
+        break;
+    case 5:
+    case 173:
+    case 174:
+    case 175:
+        sub = 0;
+        type = 0x10;
+        if (D_800C3FFA == 0) {
+            type = 1;
+            d = 2;
+            sp60 = 0;
+        } else {
+            sub = 1;
+        }
+        break;
+    case 18:
+        e = 2;
+        c = 8;
+        ra = 1;
+        if (D_800C3FFA == 0) {
+            type = 1;
+            sub = 0;
+        } else if (D_800C3FFA == 1) {
+            type = 3;
+            sub = 0;
+        } else {
+            type = 5;
+            sub = 0;
+        }
+        g2 = 1;
+        break;
+    default:
+        return;
+    }
+    if (reset) {
+        D_800C3FE8[0] = -99999.0f;
+        D_800C3FE8[1] = -99999.0f;
+        D_800C3FE8[2] = -99999.0f;
+    } else if (D_800C3FFA == 0 || force) {
+        func_1503B708(D_800C3FE8, type, sub, D_800C3E78,
+                      D_80098068[c - 1].unk0 + D_80098068[c - 1].unk10, sp78, &range, f, g2, ra, i);
+        D_800C3FE8[1] += yoff;
+    }
+    func_15038620(type, sub, D_800C3FE8, D_800C3E78, c, d, D_800C3FFA, e, f, sp70, 0, sp60, i);
+    D_800C3FFA++;
+}
 
 void func_15038468(f32 *arg0, f32 *arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5);
 
@@ -330,17 +701,6 @@ void func_15038468(f32 *arg0, f32 *arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5)
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_64120/func_15038620.s")
-
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-} GameStruct_15039A54;
-
-extern GameStruct_15039A54 D_80098068[];
 
 typedef struct {
     struct108 *unk0;
