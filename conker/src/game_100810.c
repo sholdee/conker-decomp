@@ -438,7 +438,126 @@ s32 func_150D3A68(Actor150D3A68 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_100810/func_150D3FD4.s")
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 len;
+    f32 unk10;
+} TrailPt_150D3FD4;
+
+typedef struct {
+    u8 pad0[0x25];
+    u8 count;
+    u8 pad26[6];
+    s8 unk2C;
+    s8 unk2D;
+    s8 unk2E;
+    u8 pad2F[0x94 - 0x2F];
+    TrailPt_150D3FD4 *pts;
+    s32 *unk98;
+} Trail_150D3FD4;
+
+s32 func_150D3FD4(Trail_150D3FD4 *arg0) {
+    s32 *sp8C;
+    TrailPt_150D3FD4 *pts;
+    f32 acc;
+    f32 inv;
+    struct17 *sp7C;
+    f32 dist;
+    f32 maxLen;
+    f32 t;
+    s32 i;
+    s32 prev;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    f32 scale;
+    f32 rem;
+    s32 j;
+
+    sp8C = arg0->unk98;
+    pts = arg0->pts;
+    if (D_800C35EA != 1) {
+        if (func_1515C0F8(*sp8C, &sp7C) != 0) {
+            dist = func_15143E64(sp7C);
+        } else {
+            dist = 0.0f;
+        }
+    } else if (D_800DBFF0->unk5F0 & 4) {
+        dist = 0.0f;
+    } else {
+        dist = 128.0f;
+    }
+    if (dist < 10.0f) {
+        maxLen = 0.0f;
+    } else if (dist > 70.0f) {
+        maxLen = 600.0f;
+    } else {
+        maxLen = (dist - 10.0f) * 0.01666666754f * 600.0f;
+    }
+    if (arg0->unk2C >= 2) {
+        acc = 0.0f;
+        i = arg0->unk2E - 1;
+        if (i < 0) {
+            i = arg0->count - 1;
+        }
+        while (i != arg0->unk2D) {
+            prev = i;
+            i--;
+            if (i < 0) {
+                i = arg0->count - 1;
+            }
+            acc += (prev + pts)->len;
+            if (maxLen < acc) {
+                if ((prev + pts)->len) {
+                    TrailPt_150D3FD4 *q;
+
+                    q = pts + i;
+                    rem = q->x;
+                    t = (acc - maxLen) / (prev + pts)->len;
+                    dx = rem - (prev + pts)->x;
+                    dy = q->y - (prev + pts)->y;
+                    dz = q->z - (prev + pts)->z;
+                    q->x = rem - dx * t;
+                    q->y = q->y - dy * t;
+                    q->z = q->z - dz * t;
+                    (prev + pts)->len = (prev + pts)->len * (1.0f - t);
+                }
+                while (i != arg0->unk2D) {
+                    arg0->unk2D++;
+                    if (arg0->unk2D == arg0->count) {
+                        arg0->unk2D = 0;
+                    }
+                    arg0->unk2C--;
+                }
+                acc = maxLen;
+            }
+        }
+        if (acc != 0.0f) {
+            inv = 1.0f / acc;
+        } else {
+            inv = 0.0f;
+        }
+        acc = acc;
+    }
+    if (arg0->unk2C >= 2) {
+        scale = *(f32 *)((u8 *)sp8C + 0x14) * inv;
+        j = arg0->unk2E;
+        rem = acc;
+        do {
+            TrailPt_150D3FD4 *pt;
+            j--;
+            if (j < 0) {
+                j = arg0->count - 1;
+            }
+            pt = &pts[j];
+            pt->unk10 = rem * scale;
+            rem -= pt->len;
+        } while (j != arg0->unk2D);
+    }
+    return 1;
+}
 
 typedef struct {
     u8 pad0[0x25];
