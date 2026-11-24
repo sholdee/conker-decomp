@@ -110,7 +110,137 @@ void *func_151B9F00(struct127 *arg0, u8 arg1, s32 arg2) {
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E73B0/func_151BA084.s")
+typedef struct {
+    s16 x;
+    s16 y;
+    s16 z;
+    s16 pad6;
+    s16 unk8;
+    s16 unkA;
+    s32 padC;
+} Pt151BA084;
+
+typedef struct {
+    u8 pad0[0x50];
+    s32 unk50;
+    u8 pad54[4];
+    Pt151BA084 *unk58[1][4];
+    u8 pad68[0x78 - 0x68];
+    Mtx mtx[1];
+} Obj151BA084;
+
+typedef struct {
+    u8 pad0[0x197];
+    u8 unk197;
+    u8 pad198[0x23D - 0x198];
+    u8 unk23D;
+} Ent151BA084;
+
+typedef struct {
+    s32 unk0;
+    u8 pad4[0x3B - 4];
+    u8 unk3B;
+    u8 pad3C[0x74 - 0x3C];
+    u8 unk74;
+    u8 pad75[0x1D4 - 0x75];
+    u8 *unk1D4;
+    u8 pad1D8[0x318 - 0x1D8];
+    Ent151BA084 *unk318;
+    Ent151BA084 *unk31C;
+} Player151BA084;
+
+typedef struct {
+    Player151BA084 *unk0;
+    u8 unk4;
+} Sub151BA084;
+
+extern u8 D_800C3E90;
+extern Ent151BA084 *D_800CC5E8;
+extern Ent151BA084 *D_800CC5EC;
+void func_150A7960(f32 m[4][4], f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
+
+
+s32 func_151BA084(Obj151BA084 *arg0, s16 arg1) {
+    Sub151BA084 *sub;
+    Player151BA084 *pl;
+    u8 *src;
+    f32 mtx[4][4];
+    Player151BA084 *p0;
+    f32 m2[4][4];
+    s32 i;
+    f32 offx;
+    f32 o[3];
+    f32 b[3];
+    f32 offy;
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 t[3];
+    f32 r[3];
+
+    sub = (Sub151BA084 *)((s32)arg0 + arg0->unk50 + 0xF8);
+    pl = sub->unk0;
+    if (pl->unk0 == 0 || pl->unk3B != sub->unk4) {
+        func_1516972C((struct102 *)arg0);
+    }
+    src = pl->unk1D4;
+    if (src == NULL) {
+        return 0;
+    }
+    if ((pl->unk74 & 0xF) == 0xF) {
+        return 0;
+    }
+    if (D_800BE616 != 0) {
+        if (pl->unk318 != NULL && pl->unk31C != NULL && pl->unk31C->unk197 != 0 && arg1 == pl->unk318->unk23D) {
+            return 0;
+        }
+    } else {
+        p0 = (Player151BA084 *)D_800CC2D0;
+        if (p0->unk318 != NULL && p0->unk31C != NULL && p0->unk31C->unk197 != 0 && arg1 == p0->unk318->unk23D) {
+            return 0;
+        }
+    }
+    if (D_800C3E90 != 0) {
+    lbl2:
+        guMtxL2F(mtx, (Mtx *)(src + 0x40));
+    } else {
+    lbl0:
+        memcpy(mtx, src + 0x40, 0x40);
+    }
+    mtx[0][3] = 0.0f;
+    mtx[1][3] = 0.0f;
+    mtx[2][3] = 0.0f;
+    mtx[3][3] = 1.0f;
+    guMtxF2L(mtx, &arg0->mtx[D_800BE9C0]);
+    memcpy(m2, &((f32 (*)[4][4])D_800D9D10)[arg1], 0x40);
+    m2[0][3] = 0.0f;
+    m2[1][3] = 0.0f;
+    m2[2][3] = 0.0f;
+    m2[3][3] = 1.0f;
+label:
+    func_150A7960(mtx, 0.0f, 67.0f, 159.0f, &b[0], &b[1], &b[2]);
+    func_150A7960(m2, b[0], b[1], b[2], &o[0], &o[1], &o[2]);
+    o[0] *= 2.002000093f;
+    o[1] *= 2.002000093f;
+    offx = (s32)(o[0] / 1024.0f) * 1024.0f;
+    offy = (s32)(o[1] / 1024.0f) * 1024.0f;
+    { s32 pad2;
+    for (i = 0; i < 20; i++) {
+        Pt151BA084 *q;
+        q = &arg0->unk58[D_800BE9C0][arg1][i];
+        x = q->x;
+        y = q->y;
+        z = q->z;
+        func_150A7960(mtx, x, y, z, &t[0], &t[1], &t[2]);
+        func_150A7960(m2, t[0], t[1], t[2], &r[0], &r[1], &r[2]);
+        r[0] *= 2.002000093f;
+        r[1] *= 2.002000093f;
+        q->unk8 = r[0] - offx;
+        q->unkA = r[1] - offy;
+    }
+    }
+    return 1;
+}
 
 typedef struct {
     s32 unk0;
