@@ -59,3 +59,23 @@ with code that was really in another TU. To split `src/game_X.c` at ROM offsets 
 4. delete `conker/build/conker.us.bin`, rebuild, and check the sha1 (a stale bin passes silently).
 `split_tu.py transplant FUNC OLDFILE NEWFILE` moves an attempt written against the old layout.
 DevOldSchool/conkers-bfd-decomp's yaml was the source for the first 39 files (2026-11-16).
+
+## libultra from ultralib (conker/ultralib.mk)
+
+libultra files whose SDK source is C are built from ultralib's 2.0G sources, unmodified
+(`conker/lib/ultralib` holds its headers; pinned commit in its README). To port another segment:
+1. Find the source: same stem under ultralib `src/` (watch for mislabeled yaml segments - check what
+   the code does; e.g. 0x24400 was vigetcurrcontext, not pigettype). Test flags offline first:
+   2.0G is `os/ io/` -O1, `libc/ gu/` -O3, `libc/ll.c` -O1 -mips3 -32; Rare rebuilt some files with the
+   game's -O2 -g3 (io/vimgr). Compare the object's .text with the ROM range, relocations masked.
+2. yaml: segment `asm` -> `c`; copy the source to `src/libultra/<stem>.c`; add the stem to
+   `ultralib.mk` (it gets `ULTRA_CFLAGS` and the directory's -O level; per-file overrides follow in the
+   Makefile). Run splat, then restore `undefined_*_auto.txt` (splat drops entries; they are gitignored).
+3. Link: ultralib names that our asm knows only by address go in `undefined_syms.us.txt`, at the address
+   the original instruction references; so do old `func_` names other asm still calls. Globals the C
+   defines in data sections are made weak by rodata_extern, so the asm's data wins.
+4. The game's private copies (`*2` stems) call the init copy for everything, even within their own
+   file: rodata_extern `--weak-text` (set per file) makes their definitions weak and their game entry
+   names are address aliases. Game copies that call each other (gu/ortho, gu/mtxutil) instead get
+   their definitions renamed onto the game names with per-file `-D` flags.
+5. Gate: tools/verify_rom.sh (clean build). A stale object can hide a missing ultralib.mk entry.

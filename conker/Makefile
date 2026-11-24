@@ -164,6 +164,31 @@ $(BUILD_DIR)/$(SRC_DIR)/game_21D5F0.c.o: OPT_FLAGS := -O2
 
 # $(BUILD_DIR)/$(SRC_DIR)/game_14FF90.o: OPT_FLAGS := -O3
 
+# libultra 2.0G from the ultralib decompilation (lib/ultralib/include is its header tree), built
+# with ultralib's own flags for that version: os/ and io/ at -O1, libc/ and gu/ at -O3.
+ULTRA_CFLAGS := -G 0 -nostdinc -non_shared -Xcpluscomm -fullwarn -woff 516,649,838,712 -Wab,-r4300_mul \
+                -D_MIPS_SZLONG=32 -D_FINALROM -DNDEBUG -DBUILD_VERSION=VERSION_G -DBUILD_VERSION_STRING=\"2.0G\" \
+                -I lib/ultralib/include -I lib/ultralib/include/compiler/ido -I lib/ultralib/include/PR \
+                -I lib/ultralib/src/gu -I lib/ultralib/src/libc -I lib/ultralib/src/os
+ULTRALIB_SRCS :=
+include ultralib.mk
+$(foreach s,$(ULTRALIB_SRCS),$(eval $(BUILD_DIR)/$(SRC_DIR)/libultra/$(s).c.o: CFLAGS := $(ULTRA_CFLAGS)))
+$(foreach s,$(filter os/% io/%,$(ULTRALIB_SRCS)),$(eval $(BUILD_DIR)/$(SRC_DIR)/libultra/$(s).c.o: OPT_FLAGS := -O1))
+$(foreach s,$(filter libc/% gu/%,$(ULTRALIB_SRCS)),$(eval $(BUILD_DIR)/$(SRC_DIR)/libultra/$(s).c.o: OPT_FLAGS := -O3))
+# The game links its own copy of some libultra files (stems ending in 2) whose calls - even to
+# functions of the same file - bind to the init copy: their own definitions are weak, and the
+# game names of their entry points are address aliases in undefined_syms.
+$(foreach s,$(filter %2,$(ULTRALIB_SRCS)),$(eval $(BUILD_DIR)/$(SRC_DIR)/libultra/$(s).c.o: RODATA_EXTERN_FLAGS := --weak-text))
+# Game copies that game code calls by its own names (and that call each other): definitions
+# renamed onto the game names, sources untouched.
+$(BUILD_DIR)/$(SRC_DIR)/libultra/gu/mtxutil.c.o: CFLAGS += -DguMtxF2L=guMtxF2L2 -DguMtxIdentF=func_151EFE00 -DguMtxIdent=func_151EFE88
+$(BUILD_DIR)/$(SRC_DIR)/libultra/gu/ortho.c.o: CFLAGS += -DguMtxF2L=guMtxF2L2 -DguMtxIdentF=func_151EFE00 -DguOrthoF=func_151EF800 -DguOrtho=func_151EF954
+# io/vimgr.c was rebuilt with the game's own flags
+$(BUILD_DIR)/$(SRC_DIR)/libultra/io/vimgr.c.o: OPT_FLAGS := -O2 -g3
+# libc/ll.c is the SDK's 64-bit helper file: -O1 -mips3 -32
+$(BUILD_DIR)/$(SRC_DIR)/libultra/libc/ll.c.o: OPT_FLAGS := -O1
+$(BUILD_DIR)/$(SRC_DIR)/libultra/libc/ll.c.o: MIPSBIT := -mips3 -32
+
 ### Non-matching
 ifeq ($(NON_MATCHING),1)
 VERIFY :=
@@ -224,12 +249,12 @@ $(GLOBAL_ASM_O_FILES): $(BUILD_DIR)/%.c.o: %.c include/variables.h include/struc
 	$(CC) -c -32 $(CFLAGS) $(OPT_FLAGS) $(OLIMIT) $(LOOP_UNROLL) $(MIPSBIT) -o $@ $(BUILD_DIR)/$<
 	$(PYTHON) $(ASM_PROCESSOR_DIR)/asm_processor.py $(OPT_FLAGS) $< --post-process $@ \
 		--assembler "$(AS) $(ASFLAGS)" --asm-prelude $(ASM_PROCESSOR_DIR)/prelude.inc
-	$(RODATA_EXTERN) $@
+	$(RODATA_EXTERN) $@ $(RODATA_EXTERN_FLAGS)
 endif
 
 $(BUILD_DIR)/%.c.o: %.c
 	$(CC) -c -32 $(CFLAGS) $(OPT_FLAGS) $(OLIMIT) $(MIPSBIT) -o $@ $<
-	$(RODATA_EXTERN) $@
+	$(RODATA_EXTERN) $@ $(RODATA_EXTERN_FLAGS)
 
 $(BUILD_DIR)/%.s.o: %.s
 	$(AS) $(ASFLAGS) -o $@ $<

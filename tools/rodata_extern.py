@@ -32,7 +32,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent / "asm-processor"))
 from asm_processor import ElfFile, Symbol, SHT_REL  # noqa: E402
 
 R_MIPS_32, R_MIPS_HI16, R_MIPS_LO16 = 2, 5, 6
-STT_SECTION, STB_GLOBAL, SHN_ABS = 3, 1, 0xFFF1
+STT_SECTION, STB_GLOBAL, STB_WEAK, SHN_ABS = 3, 1, 2, 0xFFF1
 OP_LUI, OP_LDC1, OP_SDC1 = 0x0F, 0x35, 0x3D
 
 
@@ -148,7 +148,9 @@ def main():
     if sys.argv[1] == "--labels":
         return write_labels(sys.argv[2], sys.argv[3])
     basebin, yaml_path, obj = sys.argv[1:4]
+    weak_text = "--weak-text" in sys.argv[4:]
     Path(obj + ".notes").unlink(missing_ok=True)
+    set_o32_abi(obj)
     elf = ElfFile(Path(obj).read_bytes())
     text = elf.find_section(".text")
     if text is None:
@@ -164,6 +166,9 @@ def main():
     rodata = elf.find_section(".rodata")
     if rodata is not None and not owns_rodata(yaml_path, obj):
         changed |= retarget_rodata(elf, text, rodata, get_rom, obj, notes)
+    changed |= weaken_data_defs(elf, yaml_path, obj)
+    if weak_text:
+        changed |= weaken_section_defs(elf, {text.index})
     if changed:
         rel_tx = [s for s in text.relocated_by if s.sh_type == SHT_REL]
         for rs in rel_tx:
@@ -171,6 +176,41 @@ def main():
         elf.write(obj)
     if notes:
         Path(obj + ".notes").write_text("\n".join(notes) + "\n")
+
+
+def set_o32_abi(obj):
+    """A -mips3 -32 object (the SDK's libc/ll.c) is flagged 64-bit; mark it EF_MIPS_ABI_O32 so a
+    modern ld links it with the -mips2 objects (ultralib's tools/set_o32abi_bit.py does the same)."""
+    with open(obj, "r+b") as f:
+        f.seek(36)
+        flags = struct.unpack(">I", f.read(4))[0]
+        if flags >> 28 == 2 and not flags & 0x0000F000:  # EF_MIPS_ARCH_3, no ABI bits
+            f.seek(36)
+            f.write(struct.pack(">I", flags | 0x00001000))
+
+
+def weaken_section_defs(elf, idx):
+    changed = False
+    for s in elf.symbol_entries[1:]:
+        if s.st_shndx in idx and s.st_bind == STB_GLOBAL:
+            s.st_bind = STB_WEAK
+            changed = True
+    if changed:
+        elf.symtab.data = b"".join(s.to_bin() for s in elf.symbol_entries)
+    return changed
+
+
+def weaken_data_defs(elf, yaml_path, obj):
+    """Globals this object defines in data sections the link discards (its .data/.bss/.rodata
+    are assembled from asm/data instead) become weak, so the asm's definition wins instead of
+    clashing: ported library code (ultralib) defines its own globals, e.g. osViClock."""
+    idx = set()
+    for name in DATA_SECTIONS + (".rodata",):
+        sec = elf.find_section(name)
+        owned = owns_rodata(yaml_path, obj) if name == ".rodata" else owns_section(yaml_path, obj, name)
+        if sec is not None and not owned:
+            idx.add(sec.index)
+    return weaken_section_defs(elf, idx)
 
 
 def pair_refs(text, rel_tx, wanted, ins_at):

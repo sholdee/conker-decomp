@@ -1453,8 +1453,6 @@ void func_1502F264(s32 arg0) {
 
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502F3C8.s")
-
 typedef struct {
     u32 start;
     s32 count;
@@ -1468,6 +1466,46 @@ typedef struct {
     u8 *unk1D4;
     u8 *unk1D8;
 } Obj1502F490;
+
+typedef struct {
+    /* 0x000 */ s32 active;
+    /* 0x004 */ u8 pad4[0x10];
+    /* 0x014 */ f32 field_14;
+    /* 0x018 */ f32 field_18;
+    /* 0x01C */ f32 field_1C;
+    /* 0x020 */ u8 pad20[0x180 - 0x20];
+    /* 0x180 */ f32 field_180;
+    /* 0x184 */ u8 pad184[0x19E - 0x184];
+    /* 0x19E */ u16 field_19E;
+    /* 0x1A0 */ u8 pad1A0[0x274 - 0x1A0];
+    /* 0x274 */ u8 field_274;
+    /* 0x275 */ u8 pad275[0x32C - 0x275];
+} Actor1502F3C8;
+
+#define ACTORS_1502F3C8 (*(Actor1502F3C8 (*)[25])&D_800CC2D0)
+
+void func_1502F490(Obj1502F490 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, s32 arg4);
+
+void func_1502F3C8(void) {
+    s32 i;
+
+    for (i = 0; i < 25; i++) {
+        if (ACTORS_1502F3C8[i].active == 0) {
+            continue;
+        }
+        if (ACTORS_1502F3C8[i].field_274 == 0) {
+            continue;
+        }
+        ACTORS_1502F3C8[i].field_18 = ACTORS_1502F3C8[i].field_180;
+        func_1502F490((Obj1502F490 *)&ACTORS_1502F3C8[ACTORS_1502F3C8[i].field_274 - 1], &ACTORS_1502F3C8[i].field_14, &ACTORS_1502F3C8[i].field_18, &ACTORS_1502F3C8[i].field_1C, ACTORS_1502F3C8[i].field_19E);
+        if (ACTORS_1502F3C8[i].field_18 < ACTORS_1502F3C8[i].field_180) {
+            ACTORS_1502F3C8[i].field_18 = ACTORS_1502F3C8[i].field_180;
+        } else {
+            ACTORS_1502F3C8[i].field_180 = ACTORS_1502F3C8[i].field_18;
+        }
+    }
+}
+
 
 extern u16 D_800C5EF8[];
 void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
