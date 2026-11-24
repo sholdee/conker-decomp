@@ -213,7 +213,8 @@ void func_150D2924(Func150D2924Obj *arg0) {
                 func_150A7960(sub->unk1C, pos.unk0, pos.unk4, pos.unk8, &spawn.unk28.unk0, &spawn.unk28.unk4, &spawn.unk28.unk8);
                 spawn.unk14 = func_150ADA68() * 25.0f + 50.0f;
                 extra.unk0 = extra.unk8 = func_150ADA68() * 1024.0f + -2560.0f + 2048.0f;
-                extra.unk4 = extra.unkC = func_150ADA68() * 1024.0f + 1536.0f + 2048.0f;
+                extra.unkC = func_150ADA68() * 1024.0f + 1536.0f + 2048.0f;
+                extra.unk4 = extra.unkC;
                 extra.unk10 = func_150ADA68() * 768.0f + 768.0f;
                 extra.unk14 = func_150ADA68() * 768.0f + 768.0f;
                 extra.unk20 = (func_150ADA68() * 80.0f + 50.0f) * 0.001000000047f;
@@ -231,7 +232,113 @@ void func_150D2924(Func150D2924Obj *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_FFBA0/func_150D2D6C.s")
+typedef struct GameFFBA0BeamVertex {
+    s16 x;
+    s16 y;
+    s16 z;
+    s16 flag;
+    s16 s;
+    s16 t;
+    u8 color[4];
+} GameFFBA0BeamVertex;
+
+typedef struct Vec3f_150D2D6C {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3f_150D2D6C;
+
+void func_150AD8B0(f32 *, f32 *, f32 *);
+s32 func_15144B34(s32);
+void func_151D5D60(void *, s16, s32, void **, u8 *);
+
+typedef struct GameFFBA0Beam {
+    u8 pad0[0x2C];
+    f32 width;
+    u8 pad30[4];
+    Vec3f_150D2D6C start;
+    Vec3f_150D2D6C end;
+    u8 pad4C[0x74];
+    u8 vertexTemplate[0x40];
+    u8 *buffers[4];
+    f32 texture[2];
+} GameFFBA0Beam;
+
+void *func_150D2D6C(GameFFBA0Beam *arg0, s16 arg1) {
+    GameFFBA0BeamVertex *vertices;
+    void *result;
+    Vec3f_150D2D6C *camera;
+    Vec3f_150D2D6C delta;
+    Vec3f_150D2D6C end;
+    Vec3f_150D2D6C middle;
+    Vec3f_150D2D6C view;
+    Vec3f_150D2D6C side;
+    f32 lengthSquared;
+    f32 *texture;
+    u8 fresh;
+
+    func_151D5D60(arg0->buffers, arg1, 0x40, (void **)&vertices, &fresh);
+    result = vertices;
+    if (vertices != NULL) {
+        if (fresh != 0) {
+            memcpy(arg0->buffers[arg1], arg0->vertexTemplate, 0x40);
+            memcpy(arg0->buffers[arg1] + 0x40, arg0->vertexTemplate, 0x40);
+        }
+    } else {
+        return NULL;
+    }
+    texture = arg0->texture;
+    camera = (Vec3f_150D2D6C *)func_15144B34(arg1);
+    delta.x = arg0->end.x - arg0->start.x;
+    delta.y = arg0->end.y - arg0->start.y;
+    delta.z = arg0->end.z - arg0->start.z;
+    end.x = arg0->start.x + delta.x;
+    end.y = arg0->start.y + delta.y;
+    end.z = arg0->start.z + delta.z;
+    middle.x = arg0->start.x + delta.x * 0.5f;
+    middle.y = arg0->start.y + delta.y * 0.5f;
+    middle.z = arg0->start.z + delta.z * 0.5f;
+    view.x = middle.x - camera->x;
+    view.y = middle.y - camera->y;
+    view.z = middle.z - camera->z;
+    func_150AD8B0(&delta.x, &view.x, &side.x);
+    lengthSquared = side.x * side.x + side.y * side.y + side.z * side.z;
+    if (lengthSquared != 0.0f) {
+        f32 scale = arg0->width / sqrtf(lengthSquared);
+
+        side.x = side.x * scale;
+        side.y = side.y * scale;
+        side.z = side.z * scale;
+    } else {
+        side.x = 0;
+        side.y = 0;
+        side.z = 0;
+    }
+    vertices->x = arg0->start.x - side.x;
+    vertices->y = arg0->start.y - side.y;
+    vertices->z = arg0->start.z - side.z;
+    vertices->s = texture[1];
+    vertices->flag = 0;
+    vertices++;
+    vertices->x = end.x - side.x;
+    vertices->y = end.y - side.y;
+    vertices->z = end.z - side.z;
+    vertices->s = texture[0];
+    vertices->flag = 0;
+    vertices++;
+    vertices->x = end.x + side.x;
+    vertices->y = end.y + side.y;
+    vertices->z = end.z + side.z;
+    vertices->s = texture[0];
+    vertices->flag = 0;
+    vertices++;
+    vertices->x = arg0->start.x + side.x;
+    vertices->y = arg0->start.y + side.y;
+    vertices->z = arg0->start.z + side.z;
+    vertices->s = texture[1];
+    vertices->flag = 0;
+    return result;
+}
 
 s32 func_150D317C(struct Func150D317CObj *arg0) {
     struct Func150D317CSub *sub;
