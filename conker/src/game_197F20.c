@@ -71,7 +71,263 @@ extern void func_150428D4(u8 *, s32 *, s32 *, s32 *);
 u8 *func_1516C878(struct_game_197C20_1 *arg0, s32 arg1, s16 arg2);
 Struct1516A7B0 *func_1516A7B0(u32 arg0, s32 arg1, s32 arg2, s32 arg3, Struct1516A7B0_Data *arg4, s32 arg5);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_197F20/func_1516AA70.s")
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    u8 unk8;
+    u8 unk9;
+    char padA[0x26 - 0xA];
+    u16 unk26;
+    char pad28[3];
+    u8 unk2B;
+    void (*unk2C)(void *, s32, s32);
+} Struct1516AA70_Data;
+
+typedef struct {
+    char pad0[0xD];
+    u8 unkD;
+    u8 unkE;
+    u8 unkF;
+    Struct1516AA70_Data *unk10;
+    u8 unk14;
+    u8 unk15;
+    s16 unk16;
+    s16 unk18;
+    u8 unk1A;
+    u8 unk1B[3];
+    u8 unk1E;
+    u8 unk1F;
+    s8 unk20;
+    char pad21[3];
+    u8 *unk24;
+    f32 unk28;
+    f32 unk2C;
+    f32 unk30;
+    f32 unk34;
+    char pad38[8];
+    f32 unk40;
+    f32 unk44;
+    char pad48[0x14];
+    f32 unk5C;
+    f32 unk60;
+    char pad64[0xC];
+    f32 unk70;
+} Struct1516AA70;
+
+extern u8 D_800CC4B3[][0x32C];
+s32 func_151F2CDC(void);
+void func_1516CC58();
+
+void func_1516AA70(Struct1516AA70 *arg0) {
+    Struct1516AA70_Data *data;
+    struct108 *sp48;
+    s32 sp44;
+    s32 sp40;
+    s32 sp3C;
+    s32 flag;
+    s32 done;
+
+    sp48 = D_800DBFF0;
+    flag = arg0->unk10->unk0 & 0x400;
+    if (arg0->unk10->unk2B != 0 && D_800C35EA != 1) {
+        arg0->unk10->unk8 = 0;
+        func_1516972C((struct102 *)arg0);
+        return;
+    }
+    arg0->unk40 = arg0->unk5C;
+    arg0->unk44 = arg0->unk60;
+    switch (arg0->unk15) {
+    case 0x1:
+        arg0->unk16 = 0;
+        arg0->unk18 = 0;
+        if (flag) {
+            arg0->unk2C = 1.0f;
+        } else {
+            arg0->unk2C = 0.3333333433f;
+        }
+        if (arg0->unk10->unk0 & 2) {
+            arg0->unk1B[2] = 0;
+            arg0->unk1B[1] = 0;
+            arg0->unk1B[0] = 0;
+            arg0->unk1E = 2;
+            arg0->unk16 = 4;
+            arg0->unk18 = 10;
+            arg0->unk15 = 8;
+            arg0->unk28 = 1.0f;
+            func_1516CC58(arg0);
+            arg0->unkE = 1;
+            arg0->unk70 = arg0->unk5C;
+        } else {
+            arg0->unk15 = 2;
+        }
+        arg0->unk30 = 1.0f;
+        arg0->unk34 = 1.0f;
+        arg0->unk1A = 0;
+        break;
+    case 0x2:
+        func_150428D4(arg0->unk24, &sp44, &sp40, &sp3C);
+        arg0->unk30 = sp44 >> 1;
+        arg0->unk34 = sp40 >> 1;
+        arg0->unk28 += arg0->unk2C * D_800BE9A4;
+        if (flag) {
+            arg0->unk18 = 0;
+        }
+        if (arg0->unk28 > 0.75f && arg0->unk18 == 0) {
+            arg0->unk18 = 10;
+        }
+        if (arg0->unk18 != 0) {
+            arg0->unk18 -= D_800BE9A0;
+            arg0->unk18 = (arg0->unk18 < 0) ? 0 : arg0->unk18;
+            arg0->unk1A = (10.0f - arg0->unk18) / 10.0f * 255.0f;
+        }
+        if (arg0->unk28 > 1.0f) {
+            arg0->unk28 = 1.0f;
+            arg0->unk15 = 4;
+            arg0->unk16 = 180;
+        }
+        arg0->unkE = 1;
+        break;
+    case 0x4:
+        if (flag) {
+            arg0->unk16 = 0;
+        }
+        arg0->unk16 -= D_800BE9A0 * 45;
+        arg0->unk16 = (arg0->unk16 < 0) ? 0 : arg0->unk16;
+        arg0->unk18 -= D_800BE9A0;
+        arg0->unk18 = (arg0->unk18 < 0) ? 0 : arg0->unk18;
+        arg0->unk1A = (10.0f - arg0->unk18) / 10.0f * 255.0f;
+        if (arg0->unk16 == 0) {
+            arg0->unk15 = 0x10;
+        }
+        break;
+    case 0x8:
+        arg0->unk16 -= D_800BE9A0;
+        arg0->unk16 = (arg0->unk16 < 0) ? 0 : arg0->unk16;
+        arg0->unk1B[arg0->unk1E] = (4 - (f32)arg0->unk16) / 4 * 170.0f;
+        if (arg0->unk16 == 0) {
+            if (--arg0->unk1E > 100) {
+                arg0->unk15 = 0x10;
+                arg0->unk18 = 10;
+            } else {
+                arg0->unk16 = 4;
+            }
+        }
+        break;
+    case 0x40:
+        arg0->unk16 -= D_800BE9A0;
+        arg0->unk16 = (arg0->unk16 < 0) ? 0 : arg0->unk16;
+        if (flag) {
+            arg0->unk16 = 0;
+        }
+        arg0->unk1A = arg0->unk16 / 10.0f * 255.0f;
+        if (arg0->unk16 == 0) {
+            arg0->unk20++;
+            if (arg0->unk20 < arg0->unk10->unk8) {
+                arg0->unk24 = func_1516C878((struct_game_197C20_1 *)arg0->unk10, arg0->unk20, arg0->unkD);
+                arg0->unk18 = 10;
+                arg0->unk15 = 0x10;
+                arg0->unk10->unk0 |= 0x2000;
+                if (arg0->unk10->unk2C != NULL) {
+                    arg0->unk10->unk2C(arg0->unk10, arg0->unk20 - 1, arg0->unk15);
+                }
+                arg0->unk10->unk0 &= ~0x2000;
+            } else {
+                arg0->unk18 = 5;
+                arg0->unk15 = 0x80;
+                arg0->unk28 = 1.0f;
+                arg0->unk2C = 0.25f;
+            }
+        }
+        if (!flag) {
+            break;
+        }
+    case 0x10:
+        func_150428D4(arg0->unk24, &sp44, &sp40, &sp3C);
+        arg0->unk30 = sp44 >> 1;
+        arg0->unk34 = sp40 >> 1;
+        arg0->unk18 -= D_800BE9A0;
+        arg0->unk18 = (arg0->unk18 < 0) ? 0 : arg0->unk18;
+        if (flag) {
+            arg0->unk18 = 0;
+        }
+        arg0->unk1A = (10.0f - arg0->unk18) / 10.0f * 255.0f;
+        if (arg0->unk18 == 0) {
+            arg0->unk16 = arg0->unk10->unk26;
+            arg0->unk15 = 0x20;
+            arg0->unk10->unk0 |= 0x4000;
+        }
+        if (!flag) {
+            break;
+        }
+    case 0x20: {
+        s32 bits;
+        done = 0;
+        if ((u16)(arg0->unk10->unk0 & 0x4000)) {
+            if (arg0->unk10->unk2C != NULL) {
+                arg0->unk10->unk2C(arg0->unk10, arg0->unk20, arg0->unk15);
+            }
+            arg0->unk10->unk0 &= ~0x4000;
+        }
+        arg0->unk16 -= D_800BE9A0;
+        arg0->unk16 = (arg0->unk16 < 0) ? 0 : arg0->unk16;
+        if ((u16)(arg0->unk10->unk0 & 0x10) && arg0->unk14 == 0) {
+            if (!(arg0->unk10->unk0 & 0x20) || func_151F2CDC() == 0) {
+                if ((arg0->unk10->unk0 & 0x80) && arg0->unk20 + 1 == arg0->unk10->unk8) {
+                    if (D_800BE710[0] & 0x4000) {
+                        arg0->unk20 = -1;
+                        done = 1;
+                        D_800D1994 = 0;
+                    } else if (D_800BE710[0] & 0x8000) {
+                        done = 1;
+                    }
+                } else if (D_800BE710[0] & 0x8000) {
+                    done = 1;
+                } else if (!(arg0->unk10->unk0 & 0x40) && (D_800BE710[0] & 0x4000)) {
+                    done = 1;
+                    arg0->unk20 = arg0->unk10->unk8;
+                }
+            }
+        }
+        bits = arg0->unk10->unk0 & 0xF00;
+        if (bits & 0x100) {
+            arg0->unk10->unk0 &= ~0x100;
+            done = 1;
+            bits = arg0->unk10->unk0 & 0xF00;
+        }
+        if (!(bits & 0x200) && done) {
+            arg0->unk16 = 10;
+            arg0->unk15 = 0x40;
+        }
+    }
+        break;
+    case 0x80:
+        if (arg0->unk10->unk0 & 2) {
+            arg0->unk18 -= D_800BE9A0;
+            arg0->unk18 = (arg0->unk18 < 0) ? 0 : arg0->unk18;
+            arg0->unk1B[0] = arg0->unk18 / 5.0f * 85.0f;
+            arg0->unk1B[1] = arg0->unk1B[0];
+            arg0->unk1B[2] = arg0->unk1B[0];
+        } else {
+            arg0->unk28 -= arg0->unk2C * D_800BE9A4;
+        }
+        if (arg0->unk28 < 0.0f || arg0->unk18 == 0) {
+            arg0->unk28 = 0.0f;
+            arg0->unk15 = 0;
+            arg0->unk20 = 0;
+            arg0->unk10->unk0 |= 0x1000;
+            if (arg0->unk10->unk2C != NULL) {
+                arg0->unk10->unk2C(arg0->unk10, arg0->unk20, arg0->unk15);
+            }
+            arg0->unk10->unk0 &= ~0x1000;
+            D_800CC4B3[arg0->unk10->unk9][0] = 0;
+            *(s16 *)((u8 *)sp48 + 0x6CC) = 0;
+            arg0->unk10->unk8 = 0;
+            func_1516972C((struct102 *)arg0);
+        }
+        break;
+    }
+    func_1516CC58(arg0);
+}
 
 typedef struct {
     u8 pad0[6];
