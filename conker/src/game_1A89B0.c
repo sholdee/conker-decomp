@@ -128,9 +128,13 @@ typedef struct {
     s16 unk0;
     s16 unk2;
     s16 unk4;
-    u8 pad6[2];
+    u8 unk6;
+    u8 unk7;
     u8 unk8;
-    u8 pad9[4];
+    u8 pad9;
+    u8 unkA;
+    u8 unkB;
+    s8 unkC;
     s8 unkD;
 } Game1A89B0Position;
 
@@ -177,7 +181,353 @@ void func_1517B89C(s32 first, s32 last) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1A89B0/func_1517BBAC.s")
+typedef struct {
+    s32 (*fn)(Game1A89B0Position *, Vtx *, s32 *, u8 *);
+    s32 unk4;
+    s32 unk8;
+} Game1A89B0Anim;
+
+typedef struct {
+    s16 idx;
+    s16 unk2;
+} Game1A89B0AnimRef;
+
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    u16 unk2;
+    u8 pad4[6];
+} Game1A89B0TexInfo;
+
+typedef struct {
+    s32 devAddr;
+    s32 size;
+    s32 buf;
+    u8 loaded;
+    u8 padD[3];
+} Game1A89B0TexFile;
+
+typedef struct {
+    s16 unk0;
+    s16 unk2;
+} Game1A89B0TexSize;
+
+extern Game1A89B0Anim D_8008CEBC[];
+extern Game1A89B0AnimRef D_8008CF00[][8];
+extern Game1A89B0TexInfo D_80095CE0[];
+extern u32 D_800DDC40[15];
+extern s16 D_800DDC90[];
+extern Game1A89B0TexSize D_800DDB80[];
+extern u8 D_800DDBC0[];
+extern u8 D_800DDBD0[];
+extern u8 D_800DDBE0[];
+extern u8 D_800DDBF0[];
+extern u8 D_800DDC10[];
+extern u8 D_800DDC80[];
+extern void *allocate_memory(s32, s32, s32, s32);
+extern s32 func_150AD9A0(s32, s32, s32);
+extern void func_15170500(s32, s32, s32, s32, s32, s32, s32);
+
+extern struct { s16 unk0; s16 unk2; s16 unk4; } D_800DD470;
+extern void func_10004074(s32);
+
+#define VTX(n) (((Vtx *) D_800DDD10[D_800BE9C0])[n])
+
+void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 px, s32 py, s32 pz) {
+    s32 i;
+    s32 lo;
+    s32 hi;
+    s32 mid;
+    s32 dist;
+    s16 n;
+    s16 dz;
+    s32 phase;
+    s32 dir = 1;
+    s32 axis = 1;
+    s32 type;
+    s16 maxX;
+    s16 minX;
+    s16 maxZ;
+    s16 minZ;
+    s32 d2;
+    s32 j;
+    s32 limit;
+    s32 bit;
+    s16 m;
+    s16 dx;
+    s32 step;
+    u32 *p;
+    Vtx *vtx;
+    s32 size;
+    f32 s;
+    s16 c;
+
+    D_800DDD58 = 0;
+    maxX = x + radius; minX = x - radius;
+    maxZ = z + radius; minZ = z - radius;
+    dist = D_800DDD20 - 1; hi = dist;
+    lo = 0;
+    mid = 0;
+    if ((angle > 45.0f && angle < 135.0f) || (angle > 225.0f && angle < 315.0f)) {
+        axis = 0;
+        if (angle > 180.0f) {
+            dir = -1;
+        }
+    } else if (angle > 90.0f && angle < 270.0f) {
+        dir = -1;
+    }
+    if (axis != D_8008CEB4) {
+        D_8008CEB4 = axis;
+        dist = D_800DDD20 - 1;
+        func_1517B89C(0, dist);
+    }
+    while (lo <= hi) {
+        mid = (lo + hi) / 2;
+        if (axis == 0) {
+            if (dir == 1) {
+                if (minX < D_800DDD18[mid].unk0) {
+                    hi = mid - 1;
+                } else if (D_800DDD18[mid].unk0 < minX) {
+                    lo = mid + 1;
+                } else if (minX == D_800DDD18[mid].unk0) {
+                    break;
+                }
+            } else {
+                if (maxX < D_800DDD18[mid].unk0) {
+                    hi = mid - 1;
+                } else if (D_800DDD18[mid].unk0 < maxX) {
+                    lo = mid + 1;
+                } else if (maxX == D_800DDD18[mid].unk0) {
+                    break;
+                }
+            }
+        } else {
+            if (dir == 1) {
+                if (minZ < D_800DDD18[mid].unk4) {
+                    hi = mid - 1;
+                } else if (D_800DDD18[mid].unk4 < minZ) {
+                    lo = mid + 1;
+                } else if (minZ == D_800DDD18[mid].unk4) {
+                    break;
+                }
+            } else {
+                if (maxZ < D_800DDD18[mid].unk4) {
+                    hi = mid - 1;
+                } else if (D_800DDD18[mid].unk4 < maxZ) {
+                    lo = mid + 1;
+                } else if (maxZ == D_800DDD18[mid].unk4) {
+                    break;
+                }
+            }
+        }
+    }
+    for (p = D_800DDC40; p < &D_800DDC40[15]; p++) {
+        *p = 0x7FFF;
+    }
+    i = mid;
+    if ((axis == 0 && ((dir == 1 && mid < D_800DDD20 && D_800DDD18[mid].unk0 < maxX) ||
+                       (dir == -1 && mid >= 0 && minX < D_800DDD18[mid].unk0))) ||
+        (axis != 0 && ((dir == 1 && mid < D_800DDD20 && D_800DDD18[mid].unk4 < maxZ) ||
+                       (dir == -1 && mid >= 0 && minZ < D_800DDD18[mid].unk4)))) {
+        j = ((u32) D_800DDD20 < (u32) D_800DDD0C) ? D_800DDD20 : D_800DDD0C;
+        D_800DDD10[D_800BE9C0] = (s32) allocate_memory(j << 6, 4, 2, 0);
+        if (D_800DDD10[D_800BE9C0] == 0) {
+            return;
+        }
+    } else {
+        D_800DDD10[D_800BE9C0] = 0;
+        return;
+    }
+    {
+        j = 0;
+        while ((u32) j < (u32) D_800DDD0C &&
+               ((axis == 0 && ((dir == 1 && i < D_800DDD20 && D_800DDD18[i].unk0 < maxX) ||
+                               (dir == -1 && i >= 0 && minX < D_800DDD18[i].unk0))) ||
+                (axis != 0 && ((dir == 1 && i < D_800DDD20 && D_800DDD18[i].unk4 < maxZ) ||
+                               (dir == -1 && i >= 0 && minZ < D_800DDD18[i].unk4))))) {
+            dist = func_150AD9A0(D_800DDD18[i].unk0 - x, D_800DDD18[i].unk2 - y, D_800DDD18[i].unk4 - z);
+            if (dist < radius) {
+                type = D_800DDD18[i].unk6 & 0xF;
+                if ((u32) dist < D_800DDC40[type]) {
+                    D_800DDC40[type] = dist;
+                }
+                limit = func_150AD9A0(D_800DDD18[i].unk0 - px, D_800DDD18[i].unk2 - py, D_800DDD18[i].unk4 - pz);
+                if (limit > 0x8C) {
+                    if (limit < 0xF0) {
+                        dist = radius - ((radius - dist) * (limit - 0x8C)) / 100;
+                    }
+                    if ((&D_800DD478)[type * 26] == 0) {
+                        if (((Game1A89B0TexFile *) &D_800DDA90)[type].devAddr != 0) {
+                            hi = D_80095CE0[D_800DDBC0[type]].unk2 * D_80095CE0[D_800DDBC0[type]].unk1;
+                            ((Game1A89B0TexFile *) &D_800DDA90)[type].buf = func_10003C6C(((Game1A89B0TexFile *) &D_800DDA90)[type].size, 1, 2, 1, 0);
+                            if (((Game1A89B0TexFile *) &D_800DDA90)[type].buf != 0) {
+                                (&D_800DD478)[type * 26] = func_10003C6C(hi, 4, 1, 0, 0);
+                                if ((&D_800DD478)[type * 26] != 0) {
+                                    func_10004514(((Game1A89B0TexFile *) &D_800DDA90)[type].devAddr, (void *) ((Game1A89B0TexFile *) &D_800DDA90)[type].buf, ((Game1A89B0TexFile *) &D_800DDA90)[type].size, 1);
+                                    ((Game1A89B0TexFile *) &D_800DDA90)[type].loaded = 1;
+                                    hi = D_80095CE0[D_800DDBC0[type]].unk2;
+                                    for (size = 1; size < 26; size++) {
+                                        (&D_800DD478)[type * 26 + size] = (&D_800DD478)[type * 26 + size - 1] + hi;
+                                    }
+                                } else {
+                                    func_10004074(((Game1A89B0TexFile *) &D_800DDA90)[type].buf);
+                                }
+                            }
+                        }
+                    texdone:;
+                    } else {
+                        if (((Game1A89B0TexFile *) &D_800DDA90)[type].loaded == 0) {
+                            ((Game1A89B0TexFile *) &D_800DDA90)[type].loaded = 1;
+                            func_100043B4((s32 *) (&D_800DD478)[type * 26], 4);
+                        }
+                    }
+                    vtx = &VTX(j << 2);
+                    phase = D_800DDC90[D_800DDD18[i].unk7];
+                    if (phase < 0) {
+                        phase = 0;
+                    }
+                    if (D_800DD470.unk0 != 0) {
+                        if (func_150AD9A0(D_800DDD18[i].unk0 - D_800DD470.unk0, D_800DDD18[i].unk2 - D_800DD470.unk2,
+                                          D_800DDD18[i].unk4 - D_800DD470.unk4) < 0x50 &&
+                            D_800DDBC0[type] == 0) {
+                            if (D_800DDD18[i].unkB != 0x21) {
+                                D_800DDD18[i].unkB = 0x21;
+                                func_15170500(D_800DDD18[i].unk0, D_800DDD18[i].unk2 + 0x44, D_800DDD18[i].unk4, 0, 0, 0xFF, 0);
+                            }
+                        }
+                    }
+                    if (D_800DDD18[i].unkB >= 0x21) {
+                        if (D_800DDD18[i].unkB >= 0x22) {
+                            D_800DDD18[i].unkB--;
+                        }
+                        vtx[3].v.flag = D_800DDD18[i].unkD;
+                    } else {
+                        if (dist < 0x30 && D_800DDBC0[type] == 0) {
+                            D_800DDD18[i].unkB = 0x22;
+                            func_15170500(D_800DDD18[i].unk0, D_800DDD18[i].unk2 + 0x44, D_800DDD18[i].unk4, 0, 0, 0xFF, 0);
+                        }
+                        vtx[3].v.flag = D_800DDD18[i].unkD;
+                    }
+                    vtx[2].v.flag = D_800DDD18[i].unkC;
+                    dist = (u32) (radius - dist) >> 1;
+                    if (dist >= 0x100) {
+                        dist = 0xFF;
+                    }
+                    vtx[0].v.cn[3] = dist;
+                    if (D_8008CEBC[D_8008CF00[D_800DDC80[type]][D_800DDD18[i].unkA].idx].fn != NULL) {
+                        if (D_8008CEBC[D_8008CF00[D_800DDC80[type]][D_800DDD18[i].unkA].idx].fn(&D_800DDD18[i], vtx, &phase, &vtx[0].v.cn[3]) != 0) {
+                            goto next;
+                        }
+                    } else {
+                        vtx[0].v.ob[0] = D_800DDD18[i].unk0;
+                        vtx[0].v.ob[1] = D_800DDD18[i].unk2;
+                        vtx[0].v.ob[2] = D_800DDD18[i].unk4;
+                    }
+                    bit = D_800DDD18[i].unk6 | 0x9F;
+                    limit = vtx[0].v.cn[3] & 0xFF;
+                    vtx[0].v.cn[0] = vtx[0].v.cn[1] = vtx[0].v.cn[2] = bit;
+                    vtx[1].v.cn[0] = vtx[1].v.cn[1] = vtx[1].v.cn[2] = bit;
+                    vtx[2].v.cn[0] = vtx[2].v.cn[1] = vtx[2].v.cn[2] = bit;
+                    vtx[3].v.cn[0] = vtx[3].v.cn[1] = vtx[3].v.cn[2] = bit;
+                    vtx[1].v.cn[3] = vtx[2].v.cn[3] = vtx[3].v.cn[3] = limit;
+                    if (D_800DDD18[i].unkB >= 0x21) {
+                        vtx[0].v.flag = D_800DDBE0[type] + type * 26;
+                    } else {
+                        vtx[0].v.flag = type * 26 + (phase >> 8);
+                    }
+                    vtx++;
+                    vtx->v.flag = D_800DDBF0[type];
+                    VTX((j << 2) + 1).v.tc[0] =
+                        VTX((j << 2) + 2).v.tc[0] = D_800DDB80[type].unk0;
+                    VTX((j << 2) + 2).v.tc[1] =
+                        VTX((j << 2) + 3).v.tc[1] = D_800DDB80[type].unk2;
+                    j++;
+                }
+            }
+        next:
+            i += dir;
+        }
+        D_800DDD58 = j;
+        if (D_800BEAC0 == 0) {
+            for (i = 0; i != 15; i++) {
+                hi = (D_800DDBD0[i] << 8) - 1;
+                if (hi > 0x100) {
+                    y = 1 << i;
+                    if (y & D_800DDC04) {
+                        if (y & D_800DDC08) {
+                            step = func_151EF610() % 10;
+                            if (step == 0) {
+                                D_800DDC10[i] |= func_151EF610() % 16;
+                            } else if (step == 1) {
+                                D_800DDC10[i] &= func_151EF610() % 16;
+                            } else {
+                                step = D_800BE9E4 << 5;
+                            }
+                        } else {
+                            step = D_800BE9E4 << 6;
+                        }
+                        limit = i << 2;
+                        for (j = 0; j != 4; j++, limit++) {
+                            d2 = D_800DDC10[i];
+                            y = 1 << j;
+                            if (d2 & y) {
+                                D_800DDC90[limit] -= step;
+                                if (D_800DDC90[limit] <= 0) {
+                                    D_800DDC90[limit] = -D_800DDC90[limit];
+                                    D_800DDC10[i] = d2 ^ y;
+                                }
+                            } else {
+                                D_800DDC90[limit] += step;
+                                if (D_800DDC90[limit] >= hi) {
+                                    D_800DDC90[limit] = hi * 2 - D_800DDC90[limit];
+                                    D_800DDC10[i] = d2 ^ y;
+                                }
+                            }
+                        }
+                    } else {
+                        d2 = D_800BE9E4 * 48;
+                        limit = i << 2;
+                        for (j = 0; j != 4; j++, limit++) {
+                            D_800DDC90[limit] += d2;
+                            if (D_800DDC90[limit] >= hi) {
+                                D_800DDC90[limit] -= hi;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        i = (u32) func_151EF610() % (u32) D_800DDD0C;
+        if ((u32) i < (u32) D_800DDD58) {
+            i *= 4;
+            j = VTX(i).v.flag;
+            if (j % 26 == 0 && D_800DDBC0[j / 26] == 0) {
+                func_15170500(VTX(i).v.ob[0], VTX(i).v.ob[1] + 0x44, VTX(i).v.ob[2], 0, 1, 0xFF, 0);
+            }
+        }
+        angle *= 0.01745329238f;
+        c = cosf(angle) * 128.0f;
+        s = sinf(angle);
+        for (i = 0; (u32) i < (u32) D_800DDD58; i++) {
+            m = (s16) VTX((i << 2) + 2).v.flag;
+            x = VTX((i << 2)).v.ob[0];
+            n = VTX((i << 2) + 3).v.flag * 4;
+            y = VTX((i << 2)).v.ob[1];
+            z = VTX((i << 2)).v.ob[2];
+            dx = (m * c) >> 5;
+            VTX((i << 2)).v.ob[0] = VTX((i << 2) + 3).v.ob[0] = dx + x;
+            VTX((i << 2)).v.ob[1] = VTX((i << 2) + 1).v.ob[1] = y;
+            dz = (m * (s16) (s * 128.0f)) >> 5;
+            VTX((i << 2)).v.ob[2] = VTX((i << 2) + 3).v.ob[2] = z - dz;
+            VTX((i << 2) + 1).v.ob[0] = VTX((i << 2) + 2).v.ob[0] = x - dx;
+            VTX((i << 2) + 2).v.ob[1] = VTX((i << 2) + 3).v.ob[1] = n + y;
+            VTX((i << 2) + 1).v.ob[2] = VTX((i << 2) + 2).v.ob[2] = dz + z;
+            VTX((i << 2)).v.tc[0] = VTX((i << 2)).v.tc[1] = 0;
+            VTX((i << 2) + 1).v.tc[1] = VTX((i << 2) + 3).v.tc[0] = 0;
+        }
+        D_800DD470.unk0 = 0;
+    }
+}
 
 extern void func_10006240(s32, s32, s32);
 extern void func_10004074(s32);
@@ -408,7 +758,6 @@ void func_1517DE5C(void) {
     }
 }
 
-extern struct { s16 unk0; s16 unk2; s16 unk4; } D_800DD470;
 
 void func_1517E05C(s32 arg0, s32 arg1, s32 arg2) {
     D_800DD470.unk0 = arg0;
