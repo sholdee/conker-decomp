@@ -554,7 +554,139 @@ void func_150A11C4(struct127 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_CDE80/func_150A1DA0.s")
+typedef struct {
+    /* 0x00 */ s16 x;
+    /* 0x02 */ s16 y;
+    /* 0x04 */ s16 z;
+    /* 0x06 */ s16 radius;
+    /* 0x08 */ s16 height;
+    /* 0x0A */ s16 depth;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ u8  unk14;
+    /* 0x15 */ u8  unk15;
+    /* 0x16 */ u8  unk16;
+    /* 0x17 */ u8  unk17;
+    /* 0x18 */ u8  pad18[0xC];
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+} Func150A1DA0Vol;
+
+s32 func_150AD960(s32, s32, s32, s32);
+
+#define VOL ((Func150A1DA0Vol *)arg1)
+#define OBJF(off) (*(f32 *)(arg0 + (off)))
+
+s32 func_150A1DA0(u8 *arg0, struct178 *arg1, s32 arg2) {
+    s16 dx;
+    s16 dy;
+    s16 dz;
+    s16 extra;
+    s16 ox;
+    s16 oy;
+    s16 oz;
+    s16 w;
+    f32 c;
+    f32 s;
+    f32 a;
+    f32 b;
+    f32 r;
+    f32 a2;
+    f32 b2;
+
+    if (VOL->unk14 == 1 || arg0 == NULL || arg1 == NULL) {
+        return 1;
+    }
+    dx = *(f32 *)(arg0 + 0x14) - VOL->x;
+    dy = *(f32 *)(arg0 + 0x18) - VOL->y;
+    dz = *(f32 *)(arg0 + 0x1C) - VOL->z;
+    extra = arg2 ? *(s16 *)(arg0 + 0xE4) : 0;
+    if (!(VOL->unk16 & 1) || ((f32)(s32)*(f32 *)(arg0 + 0x18) - *(f32 *)(arg0 + 0x180) <= 5.0f)) {
+        switch (VOL->unk15 & 3) {
+        case 0:
+            if (0.009999999776f < VOL->unkC || 0.009999999776f < VOL->unk10) {
+                s = VOL->unk2C;
+                c = VOL->unk30;
+                a = dx;
+                b = dz;
+                dx = a * c - b * s;
+                r = b * c + a * s;
+                c = VOL->unk28;
+                s = VOL->unk24;
+                a = dy;
+                dz = r * c - a * s;
+                dy = a * c + r * s;
+            }
+            if (func_150AD960(dx, dz, 0, 0) < VOL->radius + extra && dy > 0 && dy < VOL->height) {
+                return 0;
+            }
+            break;
+        case 1:
+            if (func_150AD9A0(dx, dy, dz) < VOL->radius + extra) {
+                return 0;
+            }
+            break;
+        case 2:
+            c = VOL->unk30;
+            s = VOL->unk2C;
+            a = dx;
+            b = dz;
+            dx = a * c - b * s;
+            if (dx < VOL->radius + extra && -VOL->radius - extra < dx) {
+                r = b * c + a * s;
+                c = VOL->unk28;
+                s = VOL->unk24;
+                a = dy;
+                w = r * c - a * s;
+                if (w < VOL->depth + extra && -VOL->depth - extra < w) {
+                    dy = a * c + r * s;
+                    if (dy < VOL->height && dy > 0) {
+                        return 0;
+                    }
+                }
+            }
+            break;
+        case 3:
+            ox = *(f32 *)(arg0 + 0x2C) - VOL->x;
+            oy = *(f32 *)(arg0 + 0x30) - VOL->y;
+            oz = *(f32 *)(arg0 + 0x34) - VOL->z;
+            c = VOL->unk30;
+            s = VOL->unk2C;
+            a = dx;
+            b = dz;
+            dx = a * c - b * s;
+            a2 = ox;
+            b2 = oz;
+            ox = a2 * c - b2 * s;
+            b = b * c + a * s;
+            b2 = b2 * c + a2 * s;
+            c = VOL->unk28;
+            s = VOL->unk24;
+            a = dy;
+            dz = b * c - a * s;
+            a2 = oy;
+            oz = b2 * c - a2 * s;
+            if (oz < 0 && dz >= 0) {
+                c = VOL->unk28;
+                s = VOL->unk24;
+                dy = a * c + b * s;
+                b = (f32)oz / (f32)(oz - dz);
+                if (fabsf(ox + b * (dx - ox)) < VOL->radius) {
+                    oy = a2 * c + b2 * s;
+                    if (oy + b * (dy - oy) >= 0.0f && oy + b * (dy - oy) < VOL->height) {
+                        return 0;
+                    }
+                }
+            }
+            break;
+        default:
+            break;
+        }
+    }
+    return 1;
+}
 
 void func_150A23E4(struct178 *arg0) {
     s32 var_t0;
