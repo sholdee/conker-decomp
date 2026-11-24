@@ -72,7 +72,7 @@ s32 func_1510E670(s32 arg0) {
     return 0;
 }
 
-void func_1510E950(s32, s32, s32, s32, s32, s32, s32, f32, f32, f32, f32, u16, s32, f32, f32, s32);
+void func_1510E950(s32 *arg0, s16 (*arg1)[3], s16 (*arg2)[3], f32 *arg3, f32 *arg4, s32 *arg5, s16 *arg6, f32 x, f32 y, f32 z, f32 argA, u16 argB, struct127 *argC, f32 argD, f32 argE, s32 argF);
 
 void func_1510E7A4(s32 a0, s32 a1, s32 a2, s32 a3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 arg10, s32 arg11, f32 arg12, f32 arg13) {
     func_1510E950(a0, a1, 0, a2, a3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, 0);
@@ -86,14 +86,369 @@ void func_1510E8BC(s32 a0, s32 a1, s32 a2, s32 a3, s32 arg4, s32 arg5, f32 arg6,
     func_1510E950(a0, a1, 0, a2, a3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, D_800A2D58, D_800A2D5C, arg14);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_13BB20/func_1510E950.s")
+typedef struct Obj1510E950 {
+    u8 pad0[0xF8];
+    s32 unkF8;
+    u8 padFC[0x17C - 0xFC];
+    f32 unk17C;
+    u8 pad180[0x19E - 0x180];
+    s16 unk19E;
+    u16 unk1A0;
+    u8 pad1A2[0x274 - 0x1A2];
+    u8 unk274;
+} Obj1510E950;
 
+typedef struct Ent1510E950 {
+    u8 pad0[0x40];
+    s32 unk40;
+    s32 *unk44;
+    u8 pad48[0x4F - 0x48];
+    u8 unk4F;
+    u8 pad50[0x58 - 0x50];
+    u16 unk58;
+    u8 pad5A[0xA0 - 0x5A];
+} Ent1510E950;
 extern void func_1510F800();
 extern void func_150A64C8(s32, s32, s32 *, s32);
 extern void func_150A44F0(s32, s32 *, s32);
 extern s32 func_150A43E0(s32, s32, s32, s32 *);
 extern f32 D_800A2D98;
 extern s32 D_800D3830;
+extern s32 func_150A4FA0(s32, s32);
+extern s32 func_150A6568(s16, s16, s32 *, u16, s32, s32, s32, s32);
+extern s32 D_800D37E0;
+extern u8 D_80089120[];
+extern f32 D_800DBE54;
+extern f32 D_800DBE58;
+extern u16 D_800DBE60;
+extern f32 D_800DBE68;
+extern f32 D_800DBE6C;
+extern f32 D_800DBE70;
+extern s32 *D_800DBF94;
+
+#define ENTS ((unkfunc_1510F8D8 *)&D_800D3300)
+#define obj ((Obj1510E950 *)argC)
+#define OBJS2 ((Ent1510E950 *)D_800DBEF4)
+
+void func_1510E950(s32 *arg0, s16 (*arg1)[3], s16 (*arg2)[3], f32 *arg3, f32 *arg4, s32 *arg5, s16 *arg6, f32 x, f32 y, f32 z, f32 argA, u16 argB, struct127 *argC, f32 argD, f32 argE, s32 argF) {
+    s32 i;
+    s32 chosen;
+    s32 hit;
+    s32 first;
+    s32 type;
+    s32 flags;
+    s32 chosenType;
+    s32 count;
+    s32 total;
+    s32 ix;
+    f32 lastY;
+    s32 iz;
+    s32 tri;
+    s32 found;
+    s32 base;
+    s32 numTypes;
+    f32 h;
+    f32 lo;
+    f32 maxY;
+    f32 none;
+    s32 typeFlag;
+    s32 dummy;
+    s32 idx;
+    s32 id;
+    unkfunc_1510F8D8 *e;
+    s32 *t;
+    s16 *v;
+    s32 b2;
+    s32 altIdx;
+    s32 altType;
+    s32 alt;
+    s32 canAlt;
+    s32 vi;
+    volatile f32 range;
+
+    none = -10000.0f;
+    total = 0;
+    tri = 0;
+    flags = 0;
+    hit = 0;
+    if (arg0 != 0) {
+        *arg0 = 0;
+    }
+    if (obj != NULL) {
+        range = D_800DBE64;
+    } else {
+        range = 50.0f;
+    }
+    D_800DBE68 = x;
+    D_800DBE6C = y;
+    alt = 0;
+    D_800DBE70 = z;
+    *arg3 = none;
+    if (arg5 == 0) {
+        dummy = 0;
+        arg5 = &dummy;
+    }
+    maxY = 20000.0f;
+    D_800DBE54 = none;
+    typeFlag = 0;
+    D_800DBE60 = 0;
+    if (obj != NULL) {
+        obj->unk19E = 0;
+    }
+    numTypes = 4;
+    first = 1;
+    canAlt = 1;
+    if (arg4 != 0) {
+        *arg4 = none;
+    }
+    for (type = 0; type < numTypes; type++) {
+        if (D_80089120[type] == 1) {
+        if (type == 3 && obj != NULL && (obj->unkF8 & 0x200)) continue;
+                ix = (s32)x;
+                iz = (s32)z;
+                i = 0;
+                func_1510F800(type);
+                found = 0;
+                if (type == 2) {
+                    s32 spBC;
+                    s32 spB8;
+                    s32 bestIdx;
+                    f32 best;
+                    s32 off;
+                    s16 *vp;
+
+                    spBC = func_150A6568((s16)ix, (s16)iz, &spB8, argB, ix, iz, (s32)argD, (s32)argE);
+                    func_150A44F0(spBC, &D_800D37E0, 0);
+                    if (arg4 != 0) {
+                        func_150A44F0(spB8, &D_800D3830, 0);
+                        bestIdx = 0;
+                        count = func_150A43E0(ix, iz, spB8, &D_800D3830);
+                        if (count != 0) {
+                            best = none;
+                            for (i = 0; i < count; i++) {
+                                h = ENTS[i].unk0 * 0.00390625f;
+                                if (best < h && h < maxY) {
+                                    bestIdx = i;
+                                    best = h;
+                                }
+                            }
+                            *arg4 = best;
+                        }
+                        if (*arg4 != none && arg2 != 0) {
+                            t = (s32 *)ENTS[bestIdx].unk4;
+                            off = ENTS[bestIdx].unk8;
+                            for (i = 0; i < 3; i++) {
+                                vp = (s16 *)(t[i] + off);
+                                arg2[i][0] = vp[0];
+                                arg2[i][1] = vp[1];
+                                arg2[i][2] = vp[2];
+                            }
+                        }
+                    }
+                    count = func_150A43E0(ix, iz, spBC, &D_800D37E0);
+                } else if (type == 3) {
+                    count = func_150A4FA0(ix, iz);
+                } else {
+                    count = func_150A3A70(ix, iz);
+                }
+                total += count;
+                if (first) {
+                    lastY = none;
+                    chosen = -1;
+                    chosenType = type;
+                    first = 0;
+                }
+                for (i = 0; i < count; i++) {
+                    f32 rg;
+                    h = ENTS[i].unk0 / 256.0f;
+                    if (argF == 0 && canAlt != 0 && *arg3 == none && (none == none || h < none)) {
+                        s32 padM;
+                        if (func_1510E670(i)) {
+                            alt = 1;
+                            altIdx = i;
+                            altType = type;
+                        }
+                    }
+                    rg = range;
+                    if ((u32)i < 0U) {
+                        if (h < argA) {
+                            continue;
+                        }
+                    }
+                    if (D_800DBE54 < h) {
+                        D_800DBE54 = h;
+                    }
+                    if (y < argA) {
+                        if (h < argA + rg && lastY < h) {
+                            hit = 1;
+                        }
+                    } else if (h < y + rg) {
+                        if (h < argA) {
+                            if (lastY < h) {
+                                hit = 1;
+                            }
+                        } else if (lastY < argA) {
+                            hit = 1;
+                        } else if (h < lastY) {
+                            hit = 1;
+                        }
+                    }
+                    if (hit) {
+                        hit = 0;
+                        if (func_1510E670(i)) {
+                            chosenType = type;
+                            found = 1;
+                            lastY = h;
+                            chosen = i;
+                        }
+                    }
+                }
+                if (found || alt) {
+                    if (!found && alt) {
+                        chosen = altIdx;
+                        chosenType = altType;
+                    }
+                    alt = 0;
+                    if (arg6 != 0) {
+                        *arg6 = chosenType;
+                    }
+                    if (chosen != -1) {
+                        e = &ENTS[chosen];
+                        canAlt = 0;
+                        *arg3 = e->unk0 / 256.0f;
+                        if (*arg3 < none) {
+                            *arg3 = none;
+                        }
+                        vi = e->unk4;
+                        tri = vi;
+                        b2 = e->unk8;
+                        if (type != 3) {
+                            if (obj != NULL && b2 == 0) {
+                                obj->unk19E = (vi - D_800DBE3C) / 12;
+                            }
+                        } else if (obj != NULL) {
+                            obj->unk19E = (vi - D_800C6070[D_800CC2D4[e->unkC * 0x32C]]) / 12;
+                        }
+                        if (b2 == 0 && arg0 != 0) {
+                            *arg0 = e->unk4;
+                        }
+                        base = b2;
+                    } else {
+                        *arg3 = none;
+                        base = 0;
+                        if (arg0 != 0) {
+                            *arg0 = D_800DBE3C;
+                        }
+                        tri = D_800DBE3C;
+                    }
+                    idx = (tri - D_800DBE3C) / 12;
+                    if (type == 0 && arg5 != 0) {
+                        if (*(s32 **)&D_800DBE5C != NULL) {
+                            *arg5 = (*(s32 **)&D_800DBE5C)[idx];
+                        } else {
+                            *arg5 = 0;
+                        }
+                    } else if (type == 2 && arg5 != 0) {
+                        D_800DBE60 = ENTS[chosen].unkC + 1;
+                        if (OBJS2[D_800DBE60 - 1].unk44 != NULL) {
+                            *arg5 = OBJS2[D_800DBE60 - 1].unk44[idx - OBJS2[D_800DBE60 - 1].unk58];
+                        } else {
+                            *arg5 = OBJS2[D_800DBE60 - 1].unk40;
+                        }
+                    } else if (arg5 != 0) {
+                        *arg5 = 0;
+                    }
+                    if (type == 3) {
+                        typeFlag = ENTS[chosen].unkC + 1;
+                    }
+                }
+                if (count >= 2) {
+                    i = 0;
+                    if (*arg3 < y) {
+                        lo = y;
+                    } else {
+                        lo = *arg3;
+                    }
+                    e = ENTS;
+                    if (count > 0) {
+                    do {
+                        h = e->unk0 / 256.0f;
+                        if (lo < h && h < maxY) {
+                            if (!func_1510E670(i)) {
+                                s32 vt;
+                                maxY = h;
+                                vt = e->unk4;
+                                idx = (vt - D_800DBE3C) / 12;
+                                if (type == 0) {
+                                    if (*(s32 **)&D_800DBE5C != NULL) {
+                                        flags = (*(s32 **)&D_800DBE5C)[idx];
+                                    } else {
+                                        flags = 0;
+                                    }
+                                } else if (type == 2) {
+                                    s32 padQ;
+                                    id = e->unkC + 1;
+                                    if (OBJS2[id - 1].unk44 != NULL) {
+                                        flags = OBJS2[id - 1].unk44[idx - OBJS2[id - 1].unk58];
+                                    } else {
+                                        flags = OBJS2[id - 1].unk40;
+                                    }
+                                } else {
+                                    flags = 0;
+                                }
+                            }
+                        }
+                        i++;
+                        e++;
+                    } while (i != count);
+                    }
+                }
+        }
+    }
+    if (arg4 != 0) {
+        if (maxY != 10000.0f && (flags & 0x1F) == 8) {
+            *arg4 = 10000.0f;
+        }
+        if (*arg4 == none && (*arg5 & 0x1F) == 8) {
+            *arg4 = *arg3;
+        }
+    }
+    if (tri != 0 && arg1 != 0) {
+        extern s32 D_800DBE3C;
+        for (i = 0; i < 3; i++) {
+            v = (s16 *)(((s32 *)tri)[i] + base);
+            arg1[i][0] = v[0];
+            arg1[i][1] = v[1];
+            arg1[i][2] = v[2];
+        }
+        if (arg0 != 0) {
+            *arg0 = 0;
+        }
+    }
+    if (obj != NULL) {
+        obj->unk1A0 = D_800DBE60;
+        if (D_800DBE60 != 0 && (y - *arg3) < 10.0f) {
+            OBJS2[D_800DBE60 - 1].unk4F |= 0x84;
+            D_800DBF94[D_800DBE60 - 1] |= 1 << (argC - D_800CC2D0);
+        }
+        if (typeFlag != 0 && (y - *arg3) < 10.0f) {
+            obj->unk274 = typeFlag;
+        } else {
+            obj->unk274 = 0;
+        }
+    }
+    if (total == 0) {
+        *arg3 = none;
+        if (arg5 != 0) {
+            *arg5 = 0;
+        }
+    }
+    if (obj != NULL) {
+        obj->unk17C = maxY;
+    }
+    D_800DBE58 = maxY;
+}
+
 
 f32 func_1510F648(f32 arg0, f32 arg1, f32 arg2) {
     f32 ret;
