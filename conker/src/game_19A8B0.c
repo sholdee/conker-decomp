@@ -1191,7 +1191,84 @@ void func_15170034(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
     *arg3 = sp20 * sp24;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_19A8B0/func_151700D8.s")
+struct Vec3f151700D8 { f32 v[3]; };
+struct Col151700D8 { u8 c[3][3]; };
+extern struct Vec3f151700D8 D_8008CBF4;
+extern struct Vec3f151700D8 D_8008CC00;
+extern struct Col151700D8 D_8008CC0C;
+
+void func_151700D8(f32 (*verts)[3], f32 x, f32 z, u8 alpha, f32 scale, s32 type, s32 n0, s32 n1, u8 arg8, s32 arg9) {
+    s32 i;
+    s32 j;
+    s32 next;
+    s32 life;
+    s32 size;
+    u8 *col;
+    f32 t;
+    f32 px;
+    f32 py;
+    f32 pz;
+    s32 dx;
+    s32 dz;
+    f32 *p1;
+    s32 sizeMin;
+    s32 sizeVar;
+    s32 sizeRange;
+    s32 lifeMin;
+    s32 life2;
+    f32 *p0;
+    s32 a;
+    s32 pad7;
+    s32 count;
+    struct Vec3f151700D8 unused;
+    struct Vec3f151700D8 sizes;
+    struct Col151700D8 colors;
+
+    unused = D_8008CBF4;
+    sizes = D_8008CC00;
+    colors = D_8008CC0C;
+    sizeRange = sizes.v[type] * scale;
+    sizeMin = 731.0f * scale;
+    sizeVar = 836.0f * scale;
+    lifeMin = 143.0f * scale;
+    p0 = verts[0];
+    for (i = 0; i < 4; i++) {
+        if (i != 3) {
+            next = i + 1;
+        } else {
+            next = 0;
+        }
+        if (i == 0 || i == 2) {
+            count = n0;
+        } else {
+            count = n1;
+        }
+        p1 = verts[next];
+        dx = (((p0[0] + p1[0]) * 0.5f) - x) * 2.0f;
+        px = (p0[1] + p1[1]) * 0.5f;
+        dz = (((p0[2] + p1[2]) * 0.5f) - z) * 2.0f;
+        for (j = 0; j < count; j++) {
+            t = j * (1.0f / (count - 1));
+            col = colors.c[type];
+            a = alpha;
+            px = p0[0] + (p1[0] - p0[0]) * t;
+            py = p0[1] + (p1[1] - p0[1]) * t;
+            pz = p0[2] + (p1[2] - p0[2]) * t;
+            if (i) {
+            }
+            life = (func_150ADA20() & 0x1F) + 0xF;
+            size = (func_150ADA20() % (u32)sizeVar) + sizeMin;
+            life2 = (func_150ADA20() % (u32)sizeRange) + lifeMin;
+            func_1516D4E8((s16)(s32)px, (s16)(s32)py, (s16)(s32)pz, 0xD, 0,
+                col[0], col[1], col[2], 0, 0, 0, 0, 2,
+                (u8)((dx >> 8) & 0xFF), (u8)(dx & 0xFF), (u8)((dz >> 8) & 0xFF), (u8)(dz & 0xFF), 0, 0, a, 0, 0, 0,
+                (s16)size, (s16)size, life,
+                life2,
+                0, 0, arg8, arg9);
+        }
+        p0 += 3;
+    }
+}
 
 extern s32 func_151EF610(void);
 
