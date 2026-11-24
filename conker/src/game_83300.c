@@ -41,7 +41,7 @@ void func_1505A250(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4);
 void func_150611E8(struct127 *arg0, s32 arg1);
 void func_1505A770(void *arg0);
 void func_15059C84(void *arg0);
-f32  func_1505A3A8(f32 arg0, void *arg1, f32 arg2, f32 arg3, u8 arg4);
+void func_1505A3A8(f32 arg0, void *arg1, f32 arg2, f32 arg3, u8 arg4);
 
 s32 func_15080738(s32 arg0);
 void func_150642AC(struct127 *arg0, s32 arg1, f32 arg2, s32 arg3, s32 arg4);
@@ -2075,7 +2075,67 @@ void func_1505A250(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4) {
 //         if (arg0 < obj->xz_velocity) obj->xz_velocity = arg0;
 //     }
 // }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505A3A8.s")
+void func_1505A3A8(f32 arg0, void *arg1, f32 arg2, f32 arg3, u8 arg4) {
+    struct127 *obj = (struct127 *)arg1;
+
+    arg2 *= D_800D1550;
+    arg3 *= D_800D1550;
+    if (D_800CC27C != 0 && obj->unk28 < 5.0f && obj->interaction_state != 0x1E) {
+        arg2 = 0.0f;
+    }
+    if (obj->interaction_state == 1) {
+        if (obj->in_water != 0) {
+            arg3 *= 0.400000006f;
+            arg2 = 2.0f;
+        }
+        if (obj->unkA8 != 0) {
+            arg3 *= 0.25f;
+        }
+        if (obj->unk81 != 0) {
+            if (obj->unk81 & 0x40) {
+                if (obj->unk81 & 0x20) {
+                    arg3 = 0.0f;
+                } else {
+                    arg3 = 1.299999952f;
+                }
+            } else {
+                arg3 *= 0.349999994f;
+                if (arg4 >= 0x2E) {
+                    arg2 *= 0.5f;
+                }
+                if (arg4 >= 0x5B) {
+                    arg0 *= 0.5f;
+                }
+            }
+        }
+        if (obj->unkAE != 0) {
+            arg3 *= 0.200000003f;
+        }
+    }
+    if (arg0 < 0.0f) {
+        if (0.0f < obj->xz_velocity) {
+            arg3 += arg2;
+        } else {
+            arg3 = arg2;
+        }
+    } else if (obj->xz_velocity < 0.0f) {
+        arg2 += arg3;
+    }
+    if (arg0 < obj->xz_velocity) {
+        obj->xz_velocity -= arg3;
+        if (obj->xz_velocity < arg0) {
+            obj->xz_velocity = arg0;
+        }
+    } else {
+        if ((arg0 - 1.0f) < obj->xz_velocity) {
+            arg2 *= 0.009999999776f;
+        }
+        obj->xz_velocity += arg2;
+        if (arg0 < obj->xz_velocity) {
+            obj->xz_velocity = arg0;
+        }
+    }
+}
 
 f32 func_1505A5CC(struct49 *arg0) {
     f32 x, y;
