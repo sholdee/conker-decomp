@@ -465,7 +465,71 @@ void func_15167B44(struct102 *arg0) {
 //         (D_800A4AC8[*(s32*)((u8*)&mode-4)].unk4 | D_800A4AC8[*(s32*)((u8*)&mode-4)].unk0) | 4, (u8*)&sp50);
 //     return (Gfx *)func_15095760(gfx, &sp5C);
 // }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_15167C58.s")
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+} Mode15168118;
+extern Mode15168118 D_800A4AC8[];
+typedef struct {
+    u8 pad0[0x10];
+    s32 **unk10;
+    s16 unk14;
+    s16 unk16;
+    s16 unk18;
+    s16 unk1A;
+    s16 unk1C;
+    s16 unk1E;
+    s16 unk20;
+    s8 unk22;
+    u8 unk23;
+} ObjC58;
+typedef struct {
+    s16 unk0;
+    s16 unk2;
+    s16 unk4;
+    s16 unk6;
+    s16 unk8;
+    u8 unkA;
+    u8 unkB;
+    u8 unkC;
+    u8 unkD;
+} StructC58a;
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8;
+} StructC58b;
+Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
+s32 func_15095760(Gfx *arg0, void *arg1);
+Gfx *func_15167C58(Gfx *arg0, ObjC58 *arg1, u8 arg2) {
+    Gfx *gfx;
+    StructC58a sp5C;
+    StructC58b sp50;
+    s32 **tbl;
+    s32 mode;
+    s16 idx;
+
+    if (arg2) {}
+    sp50.unk0 = 1;
+    idx = arg1->unk14;
+    tbl = arg1->unk10;
+    gfx = func_15142E24(arg0, (s32)tbl, idx << 8, 2, 0x100, 0x100,
+                        (*tbl)[idx >> 8], 5, (s32)&sp5C, (u8 *)&sp50, 3);
+    sp5C.unk0 = arg1->unk18;
+    sp5C.unk2 = arg1->unk1A;
+    sp5C.unk4 = arg1->unk1C;
+    sp5C.unk6 = arg1->unk1E;
+    sp5C.unk8 = arg1->unk20;
+    sp5C.unkA = arg1->unk23;
+    sp5C.unkD = 0;
+    if (arg1->unk22 != 0xFF) {
+        mode = 3;
+    } else if (arg1->unk22 == 0xFF) {
+        mode = 9;
+    }
+    gfx = func_15142FBC(gfx, 0x2C00, D_800A4AC8[mode].unk0 | D_800A4AC8[mode].unk4 | 4, (u8 *)&sp50);
+    return (Gfx *)func_15095760(gfx, &sp5C);
+}
 s32 func_15167D84(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     GameObjectHeader *temp;
 
@@ -790,11 +854,6 @@ Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
 Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
 Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
 Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-} Mode15168118;
-extern Mode15168118 D_800A4AC8[];
 extern s32 D_800D2C9C;
 s32 func_15095760(Gfx *arg0, void *arg1);
 
