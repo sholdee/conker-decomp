@@ -990,7 +990,47 @@ void func_1513E084(struct210 *arg0, struct212 *arg1, u8 arg2) {
 void func_1513E134(void) {
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513E13C.s")
+void func_1513E13C(struct210 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 arg6)
+{
+  f32 s;
+  f32 c[1];
+  f32 xs;
+  f32 xc;
+  f32 zs;
+  f32 zc;
+  f32 x0;
+  f32 t[1];
+  f32 p0;
+  f32 p1;
+  f32 p2;
+  f32 p3;
+  f32 u[1];
+  c[0] = func_151423D8(arg6 - 0x40);
+  s = func_151423D8(arg6);
+  xs = (&arg4)[0] * s;
+  x0 = (&arg1)[0] + xs;
+  xc = c[0] * (&arg5)[0];
+  if (((!t) && (!t)) && (!t))
+  {
+  }
+  arg0->unk40 = x0 - xc;
+  arg0->unk42 = arg2;
+  zs = (&arg5)[0] * s;
+  u[0] = arg3 + zs;
+  zc = c[0] * (&arg4)[0];
+  arg0->unk44 = u[0] + zc;
+  t[0] = arg1 - xs;
+  arg0->unk50 = t[0] - xc;
+  arg0->unk52 = arg2;
+  arg0->unk54 = u[0] - zc;
+  arg0->unk60 = t[0] + xc;
+  arg0->unk62 = arg2;
+  t[0] = arg3 - zs;
+  arg0->unk64 = t[0] - zc;
+  arg0->unk70 = x0 + xc;
+  arg0->unk72 = arg2;
+  arg0->unk74 = t[0] + zc;
+}
 // PERMUTER CANDIDATE best 3348 — reconstruction below is semantically close (first 12 instrs match)
 // but FP store scheduling + a +4 stack-slot shift on sp48/sp1C/sp30 differ.
 // void func_1513E13C(struct210 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 arg6) {
