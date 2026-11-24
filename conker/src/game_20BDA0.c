@@ -157,7 +157,7 @@ extern s8 D_8008FD84;
  */
 extern s8 D_8008FEF0;
 extern s8 D_8008FEF4;
-extern u8 D_8008FF08;
+extern u8 D_8008FF08[];
 #define TIMER_ALIAS(sym, off) (*(s16 *)((u8 *)&(sym) + (off)))
 extern f32 D_8008FE38;
 extern f32 D_8008FE3C;
