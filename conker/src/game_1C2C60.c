@@ -71,7 +71,51 @@ void func_1519582C(void) {
     D_800E08F0 = -2;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1C2C60/func_15195868.s")
+typedef struct {
+    s8 type;
+    char pad[3];
+    s32 val;
+} Struct15195868;
+
+extern s32 D_800B0E58[];
+
+#define TYPE(n) (*(s8 *)(arg0 + ((n) << 3)))
+#define VAL(n) (((Struct15195868 *)arg0)[n].val)
+
+s32 func_15195868(s32 arg0, s32 arg1, s32 arg2, s32 *arg3) {
+    s32 i;
+    s32 c;
+    s8 d;
+    s8 e;
+
+    *arg3 = 0;
+    i = -1;
+loop:
+    i++;
+    while (TYPE(i) != -3 && TYPE(i) != -0x21) {
+        i++;
+    }
+    if (TYPE(i) == -0x21) {
+        return -1;
+    }
+    if ((VAL(i) == D_800B0E58[arg1] || arg1 == 0) && arg2-- < 1) {
+        goto found;
+    }
+    goto loop;
+found:
+    d = TYPE(i);
+    while (d != -0xE) {
+        i++;
+        d = TYPE(i);
+    }
+    c = i;
+    do {
+        (*arg3)++;
+        d = TYPE(++c);
+        e = TYPE(++c);
+    } while (d == -0xB && e == -0xE);
+    return i;
+}
 
 extern void *func_151957B0(s32, void *, void *);
 extern s32 D_800E08E0;
