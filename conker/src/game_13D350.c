@@ -241,7 +241,108 @@ Gfx *func_151106A8(Gfx *arg0) {
     return arg0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_13D350/func_151108C4.s")
+extern u8 D_800C35E8;
+
+s32 func_151108C4(f32 x, f32 y, f32 z, f32 pitch, f32 yaw) {
+    s32 ret;
+    s32 flag;
+
+    switch (D_800BE9F0) {
+    case 0x6:
+    case 0x3B:
+        ret = y * 40.0f / 1800.0f + 200.0f;
+        break;
+    case 0x14:
+        ret = y * 22.0f / 1800.0f + 113.0f;
+        break;
+    case 0xC:
+        ret = y * 90.0f / 1800.0f + 150.0f;
+        break;
+    case 0x0:
+        if (y < 1600.0f && 26.0f < pitch) {
+            ret = 0;
+        } else {
+            ret = y * 51.0f / 1800.0f + 134.0f;
+        }
+        break;
+    case 0x7:
+        if (z < -1100.0f) {
+            ret = 0x140;
+        } else if (20.0f < pitch) {
+            ret = 0;
+        } else {
+            ret = y * 54.0f / 1800.0f + 167.0f;
+        }
+        break;
+    case 0x41:
+        ret = 0x89;
+        break;
+    case 0x3C:
+        if (z < -1650.0f || (3495.0f < x && x < 4578.0f && z < 2960.0f)) {
+            ret = 0x140;
+        } else {
+            ret = 0;
+        }
+        break;
+    case 0xB:
+        flag = 0;
+        if (func_150A29C8(0, 0x18) == 1) {
+            if (func_150A29C8(0, 0x2E) == 0) {
+                if (0.0f < pitch) {
+                    ret = 0;
+                } else {
+                    flag = 1;
+                }
+            } else {
+                ret = 0;
+            }
+        } else {
+            flag = 1;
+        }
+        if (flag) {
+            if (y < 1218.0f) {
+                ret = 0x1E;
+            } else {
+                s32 lim = 0x140;
+
+                if (y < 2000.0f) {
+                    ret = 0xA0;
+                } else {
+                    ret = lim;
+                }
+            }
+        }
+        break;
+    case 0x13:
+        if (D_800C35EA == 1 && (D_800C35E8 == 2 || D_800C35E8 == 1)) {
+            ret = 0x140;
+        } else if (y < 1900.0f) {
+            ret = 0x10E;
+        } else {
+            ret = 0x140;
+        }
+        break;
+    case 0x1C:
+        ret = y * 34.0f / 1800.0f + 130.0f;
+        break;
+    case 0xE:
+        ret = 0xA5;
+        break;
+    case 0x39:
+        ret = 0x54;
+        break;
+    case 0x2D:
+        ret = y * 53.0f / 1800.0f + 139.0f;
+        break;
+    case 0x30:
+        ret = y * 53.0f / 1800.0f + 139.0f;
+        break;
+    default:
+        ret = 0x140;
+        break;
+    }
+    return ret;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_13D350/func_15110CFC.s")
 
