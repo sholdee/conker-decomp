@@ -148,6 +148,7 @@ def main():
     if sys.argv[1] == "--labels":
         return write_labels(sys.argv[2], sys.argv[3])
     basebin, yaml_path, obj = sys.argv[1:4]
+    weak_text = "--weak-text" in sys.argv[4:]
     Path(obj + ".notes").unlink(missing_ok=True)
     set_o32_abi(obj)
     elf = ElfFile(Path(obj).read_bytes())
@@ -166,6 +167,8 @@ def main():
     if rodata is not None and not owns_rodata(yaml_path, obj):
         changed |= retarget_rodata(elf, text, rodata, get_rom, obj, notes)
     changed |= weaken_data_defs(elf, yaml_path, obj)
+    if weak_text:
+        changed |= weaken_section_defs(elf, {text.index})
     if changed:
         rel_tx = [s for s in text.relocated_by if s.sh_type == SHT_REL]
         for rs in rel_tx:
@@ -186,6 +189,17 @@ def set_o32_abi(obj):
             f.write(struct.pack(">I", flags | 0x00001000))
 
 
+def weaken_section_defs(elf, idx):
+    changed = False
+    for s in elf.symbol_entries[1:]:
+        if s.st_shndx in idx and s.st_bind == STB_GLOBAL:
+            s.st_bind = STB_WEAK
+            changed = True
+    if changed:
+        elf.symtab.data = b"".join(s.to_bin() for s in elf.symbol_entries)
+    return changed
+
+
 def weaken_data_defs(elf, yaml_path, obj):
     """Globals this object defines in data sections the link discards (its .data/.bss/.rodata
     are assembled from asm/data instead) become weak, so the asm's definition wins instead of
@@ -196,14 +210,7 @@ def weaken_data_defs(elf, yaml_path, obj):
         owned = owns_rodata(yaml_path, obj) if name == ".rodata" else owns_section(yaml_path, obj, name)
         if sec is not None and not owned:
             idx.add(sec.index)
-    changed = False
-    for s in elf.symbol_entries[1:]:
-        if s.st_shndx in idx and s.st_bind == STB_GLOBAL:
-            s.st_bind = STB_WEAK
-            changed = True
-    if changed:
-        elf.symtab.data = b"".join(s.to_bin() for s in elf.symbol_entries)
-    return changed
+    return weaken_section_defs(elf, idx)
 
 
 def pair_refs(text, rel_tx, wanted, ins_at):

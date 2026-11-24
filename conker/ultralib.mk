@@ -2,15 +2,20 @@
 ULTRALIB_SRCS += \
     gu/sinf_init \
     io/contpfs \
+    io/contpfs2 \
     io/contramread \
+    io/contramread2 \
     io/contramwrite \
+    io/contramwrite2 \
     io/contreaddata \
+    io/contreaddata2 \
     io/controller \
     io/epirawdma \
     io/leodiskinit \
     io/leointerrupt \
     io/pfschecker \
     io/pfsinit \
+    io/pfsinit2 \
     io/pfsisplug \
     io/pidma \
     io/pigetcmdq \
@@ -19,7 +24,9 @@ ULTRALIB_SRCS += \
     io/pirawread \
     io/si \
     io/siacs \
+    io/siacs2 \
     io/sirawdma \
+    io/sirawdma2 \
     io/sirawread \
     io/sirawwrite \
     io/sp \
@@ -45,6 +52,7 @@ ULTRALIB_SRCS += \
     os/createmesgqueue \
     os/destroythread \
     os/gettime \
+    os/gettime2 \
     os/jammesg \
     os/piacs \
     os/recvmesg \

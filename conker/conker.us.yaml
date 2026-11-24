@@ -864,25 +864,25 @@ segments:
       - [0x215960, c, game_215960]
       - [0x21C4F0, c, game_21C4F0]
       - [0x21C540, c, game_21C540]
-      - [0x21C900, asm, libultra/io/pfsinit2] # dupe of libultra/io/pfsinit
+      - [0x21C900, c, libultra/io/pfsinit2] # dupe of libultra/io/pfsinit
       - [0x21CAC0, c, game_21CAC0]
       - [0x21CAF0, c, game_21CAF0]
       - [0x21ccb0, asm] # gu function
       - [0x21ce70, asm] # modified osSetTimer ?
-      - [0x21cf50, asm, libultra/io/contreaddata2]
+      - [0x21cf50, c, libultra/io/contreaddata2]
       - [0x21d1b0, asm] # more matrix funcs
       - [0x21D420, c, game_21D420]
       - [0x21d4a0, c, libultra/gu/guNormalize]
       - [0x21d530, c, libultra/gu/mtxcatl]
       - [0x21D5F0, c, game_21D5F0]
-      - [0x21d800, asm, libultra/io/siacs2]          # dupe of libultra/io/siacs
-      - [0x21D8C0, asm, libultra/io/sirawdma2]       # dupe of libultra/io/sirawdma
-      - [0x21d970, asm, libultra/os/gettime2]        # dupe of libultra/os/gettime
-      - [0x21da00, asm, libultra/io/contpfs2]        # dupe of libultra/io/contpfs
+      - [0x21d800, c, libultra/io/siacs2]          # dupe of libultra/io/siacs
+      - [0x21D8C0, c, libultra/io/sirawdma2]       # dupe of libultra/io/sirawdma
+      - [0x21d970, c, libultra/os/gettime2]        # dupe of libultra/os/gettime
+      - [0x21da00, c, libultra/io/contpfs2]        # dupe of libultra/io/contpfs
       - [0x21e760, c,   libultra/io/pfschecker2]     # dupe of libultra/io/pfschecker
       - [0x21F1C0, c,   libultra/io/pfsisplug2]      # dupe of libultra/io/pfsisplug
-      - [0x21F530, asm, libultra/io/contramread2]    # dupe of libultra/io/contramread
-      - [0x21f8e0, asm, libultra/io/contramwrite2]   # dupe of libultra/io/contramwrite
+      - [0x21F530, c, libultra/io/contramread2]    # dupe of libultra/io/contramread
+      - [0x21f8e0, c, libultra/io/contramwrite2]   # dupe of libultra/io/contramwrite
       - [0x21fc90, c,   libultra/io/crc2]            # dupe of libultra/io/crc; -O1
       - [0x21fe10, c,   libultra/audio/game_21FC90]  # -g
       - [0x221290, c, game_221290]

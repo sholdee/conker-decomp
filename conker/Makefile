@@ -175,6 +175,10 @@ include ultralib.mk
 $(foreach s,$(ULTRALIB_SRCS),$(eval $(BUILD_DIR)/$(SRC_DIR)/libultra/$(s).c.o: CFLAGS := $(ULTRA_CFLAGS)))
 $(foreach s,$(filter os/% io/%,$(ULTRALIB_SRCS)),$(eval $(BUILD_DIR)/$(SRC_DIR)/libultra/$(s).c.o: OPT_FLAGS := -O1))
 $(foreach s,$(filter libc/% gu/%,$(ULTRALIB_SRCS)),$(eval $(BUILD_DIR)/$(SRC_DIR)/libultra/$(s).c.o: OPT_FLAGS := -O3))
+# The game links its own copy of some libultra files (stems ending in 2) whose calls - even to
+# functions of the same file - bind to the init copy: their own definitions are weak, and the
+# game names of their entry points are address aliases in undefined_syms.
+$(foreach s,$(filter %2,$(ULTRALIB_SRCS)),$(eval $(BUILD_DIR)/$(SRC_DIR)/libultra/$(s).c.o: RODATA_EXTERN_FLAGS := --weak-text))
 # libc/ll.c is the SDK's 64-bit helper file: -O1 -mips3 -32
 $(BUILD_DIR)/$(SRC_DIR)/libultra/libc/ll.c.o: OPT_FLAGS := -O1
 $(BUILD_DIR)/$(SRC_DIR)/libultra/libc/ll.c.o: MIPSBIT := -mips3 -32
@@ -239,12 +243,12 @@ $(GLOBAL_ASM_O_FILES): $(BUILD_DIR)/%.c.o: %.c include/variables.h include/struc
 	$(CC) -c -32 $(CFLAGS) $(OPT_FLAGS) $(OLIMIT) $(LOOP_UNROLL) $(MIPSBIT) -o $@ $(BUILD_DIR)/$<
 	$(PYTHON) $(ASM_PROCESSOR_DIR)/asm_processor.py $(OPT_FLAGS) $< --post-process $@ \
 		--assembler "$(AS) $(ASFLAGS)" --asm-prelude $(ASM_PROCESSOR_DIR)/prelude.inc
-	$(RODATA_EXTERN) $@
+	$(RODATA_EXTERN) $@ $(RODATA_EXTERN_FLAGS)
 endif
 
 $(BUILD_DIR)/%.c.o: %.c
 	$(CC) -c -32 $(CFLAGS) $(OPT_FLAGS) $(OLIMIT) $(MIPSBIT) -o $@ $<
-	$(RODATA_EXTERN) $@
+	$(RODATA_EXTERN) $@ $(RODATA_EXTERN_FLAGS)
 
 $(BUILD_DIR)/%.s.o: %.s
 	$(AS) $(ASFLAGS) -o $@ $<

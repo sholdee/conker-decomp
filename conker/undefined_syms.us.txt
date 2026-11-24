@@ -88,3 +88,27 @@ __osTimerList = 0x8002BD70;
 __osViIntrCount = 0x800429BC;
 func_10024400 = 0x10024400;
 __libm_qnan_f = 0x8002C920;
+
+/* entry points of the game's private libultra copies (their C definitions are weak) */
+osPfsInit2 = 0x151EF450;
+func_151EF504 = 0x151EF504;
+osContStartReadData2 = 0x151EFAA0;
+osContGetReadData2 = 0x151EFB64;
+__osPackReadData2 = 0x151EFC0C;
+__osSiCreateAccessQueue2 = 0x151F0350;
+__osSiGetAccess2 = 0x151F03A0;
+__osSiRelAccess2 = 0x151F03E4;
+__osSiRawStartDma2 = 0x151F0410;
+getTime2 = 0x151F04C0;
+__osSumcalc2 = 0x151F0550;
+__osIdCheckSum2 = 0x151F05AC;
+__osRepairPackId2 = 0x151F0614;
+__osCheckPackId2 = 0x151F0A2C;
+__osGetId2 = 0x151F0BC4;
+__osCheckId2 = 0x151F0E20;
+__osPfsRWInode2 = 0x151F0F1C;
+__osPfsSelectBank2 = 0x151F123C;
+__osContRamRead2 = 0x151F2080;
+__osPackRamReadData2 = 0x151F22C4;
+__osContRamWrite2 = 0x151F2430;
+__osPackRamWriteData2 = 0x151F2660;
