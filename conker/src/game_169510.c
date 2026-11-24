@@ -1290,7 +1290,87 @@ void *func_1513EE14(void *arg0, s16 arg1) {
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513F114.s")
+void *func_1513F114(void *arg0, s16 arg1)
+{
+  Game169510ScaledVertex *vertices;
+  Game169510ScaledVertex *result;
+  f32 sinDir;
+  f32 cosDir;
+  f32 bottom;
+  f32 top;
+  f32 s;
+  f32 c;
+  f32 wc;
+  f32 ws;
+  f32 dist;
+  f32 sign;
+  f32 bs;
+  f32 bc;
+  f32 ts;
+  f32 tc;
+  f32 angle;
+  u8 fresh;
+  func_151D5D60(((u8 *) arg0) + 0x100, arg1, 0x40, (void **) (&vertices), &fresh);
+  result = vertices;
+  if (vertices != 0)
+  {
+    if (fresh != 0)
+    {
+      memcpy(*(u8 **)((u8 *)arg0 + arg1 * 4 + 0x100), (u8 *)arg0 + 0xC0, 0x40);
+      memcpy(*(u8 **)((u8 *)arg0 + arg1 * 4 + 0x100) + 0x40, (u8 *)arg0 + 0xC0, 0x40);
+    }
+  }
+  else
+  {
+    return 0;
+  }
+  {
+    sinDir = D_800DD1D8[arg1];
+    cosDir = D_800DD1E8[arg1];
+    bottom = -(((Game169510ScaledOwner *) arg0)->sy * ((Game169510ScaledOwner *) arg0)->height);
+    top = ((Game169510ScaledOwner *) arg0)->height + bottom;
+    dist = (((((Game169510ScaledOwner *) arg0)->rx - ((Game169510ScaledOwner *) arg0)->x) * cosDir) - (sinDir * (((Game169510ScaledOwner *) arg0)->rz - ((Game169510ScaledOwner *) arg0)->z))) * D_800BE9A8;
+    sign = -1.0f;
+    if (dist < 0.0f)
+    {
+      sign = 1.0f;
+      dist = -dist;
+    }
+    angle = sqrtf(dist) * ((Game169510ScaledOwner *) arg0)->sx;
+    if (angle > 1.57079637050628662109375f)
+    {
+      angle = 1.57079637050628662109375f;
+    }
+    angle *= sign;
+    s = sinf(angle);
+    c = cosf(angle);
+    wc = ((Game169510ScaledOwner *) arg0)->width * c;
+    ws = ((Game169510ScaledOwner *) arg0)->width * s;
+    ts = top * s;
+    tc = top * c;
+    bs = bottom * s;
+    bc = bottom * c;
+    vertices[0].x = ((Game169510ScaledOwner *) arg0)->x + ((wc - bs) * cosDir);
+    vertices[0].y = (((Game169510ScaledOwner *) arg0)->y + bc) + ws;
+    vertices[0].z = ((Game169510ScaledOwner *) arg0)->z - ((wc - bs) * sinDir);
+    vertices[0].flag = 0;
+    dist = -(wc + bs);
+    vertices[1].x = ((Game169510ScaledOwner *) arg0)->x + (dist * cosDir);
+    vertices[1].y = (((Game169510ScaledOwner *) arg0)->y + bc) - ws;
+    vertices[1].z = ((Game169510ScaledOwner *) arg0)->z - (dist * sinDir);
+    vertices[1].flag = 0;
+    vertices[2].x = ((Game169510ScaledOwner *) arg0)->x + ((-(wc + ts)) * cosDir);
+    vertices[2].y = (((Game169510ScaledOwner *) arg0)->y + tc) - ws;
+    vertices[2].z = ((Game169510ScaledOwner *) arg0)->z - ((-(wc + ts)) * sinDir);
+    vertices[2].flag = 0;
+    dist = wc - ts;
+    vertices[3].x = ((Game169510ScaledOwner *) arg0)->x + (dist * cosDir);
+    vertices[3].y = (((Game169510ScaledOwner *) arg0)->y + tc) + ws;
+    vertices[3].z = ((Game169510ScaledOwner *) arg0)->z - (dist * sinDir);
+    vertices[3].flag = 0;
+  }
+  return result;
+}
 
 s32 func_15140410(s32, s32, s32, s16);
 
