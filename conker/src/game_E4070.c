@@ -46,7 +46,22 @@ void func_150B6BC0(s32 arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_E4070/func_150B6C90.s")
+extern s32 *D_800D9894;
+static s32 *D_800D9898[10];
+struct Obj151A4FD0 *func_151A4FD0(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, u8 a6, s32 a7);
+
+void func_150B6C90(void) {
+    s32 i;
+
+    if (D_800D9894 != 0) {
+        func_1516972C((struct102 *)D_800D9894);
+    }
+    D_800D9894 = (s32 *)func_151A4FD0(0, 0, 0xFF, 0, 0, D_800BE9E8, 0, 0);
+    D_800D9890 = 3;
+    for (i = 0; i < 10; i++) {
+        D_800D9898[i] = 0;
+    }
+}
 
 extern s32 *D_800D9898[];
 extern s32 *D_800D98A4[];
