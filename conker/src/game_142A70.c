@@ -391,7 +391,29 @@ void func_15115F68(struct S_15115F68 *arg0) {
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_142A70/func_15116058.s")
+struct Obj15116058 {
+    u8 pad0[0x16];
+    u16 unk16;
+    u8 pad18[0x8];
+    Vtx *unk20[2];
+    u8 pad28[0x14];
+    s32 unk3C;
+};
+
+extern u8 D_800BE9C0;
+
+void func_15116058(struct Obj15116058 *arg0) {
+    s16 dx;
+    s16 dy;
+    s32 i;
+
+    dx = (((arg0->unk3C >> 16) & 0xFFFF) << 16) >> 16;
+    dy = ((arg0->unk3C & 0xFFFF) << 16) >> 16;
+    for (i = 0; i < arg0->unk16; i++) {
+        arg0->unk20[D_800BE9C0][i].v.tc[0] = arg0->unk20[!D_800BE9C0][i].v.tc[0] + dx;
+        arg0->unk20[D_800BE9C0][i].v.tc[1] = arg0->unk20[!D_800BE9C0][i].v.tc[1] + dy;
+    }
+}
 
 struct Obj1511617C {
     u8 pad0[0x10];
