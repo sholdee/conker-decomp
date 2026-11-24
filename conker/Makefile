@@ -183,6 +183,8 @@ $(foreach s,$(filter %2,$(ULTRALIB_SRCS)),$(eval $(BUILD_DIR)/$(SRC_DIR)/libultr
 # renamed onto the game names, sources untouched.
 $(BUILD_DIR)/$(SRC_DIR)/libultra/gu/mtxutil.c.o: CFLAGS += -DguMtxF2L=guMtxF2L2 -DguMtxIdentF=func_151EFE00 -DguMtxIdent=func_151EFE88
 $(BUILD_DIR)/$(SRC_DIR)/libultra/gu/ortho.c.o: CFLAGS += -DguMtxF2L=guMtxF2L2 -DguMtxIdentF=func_151EFE00 -DguOrthoF=func_151EF800 -DguOrtho=func_151EF954
+# io/vimgr.c was rebuilt with the game's own flags
+$(BUILD_DIR)/$(SRC_DIR)/libultra/io/vimgr.c.o: OPT_FLAGS := -O2 -g3
 # libc/ll.c is the SDK's 64-bit helper file: -O1 -mips3 -32
 $(BUILD_DIR)/$(SRC_DIR)/libultra/libc/ll.c.o: OPT_FLAGS := -O1
 $(BUILD_DIR)/$(SRC_DIR)/libultra/libc/ll.c.o: MIPSBIT := -mips3 -32

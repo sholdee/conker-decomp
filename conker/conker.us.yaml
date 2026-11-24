@@ -39,7 +39,7 @@ segments:
       - [0x2E50, c, init_2E50]
       - [0x30A0, c, libultra/io/pimgr]
       - [0x3220, c,   libultra/io/sptask]
-      - [0x34E0, asm, libultra/io/vimgr]
+      - [0x34E0, c, libultra/io/vimgr]
       - [0x37F0, c,   libultra/os/createthread]
       - [0x38C0, c, init_38C0]
       - [0x38E0, c, init_38E0]

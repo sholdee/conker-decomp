@@ -43,6 +43,7 @@ ULTRALIB_SRCS += \
     io/vigetcurrcontext \
     io/vigetcurrframebuf \
     io/vigetnextframebuf \
+    io/vimgr \
     io/visetevent \
     io/visetmode \
     io/viswapbuf \
