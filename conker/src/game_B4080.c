@@ -2648,7 +2648,26 @@ s32 func_1508D850(s32 arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_B4080/func_1508DA1C.s")
+s32 func_1508DA1C(void) {
+    s32 i;
+    s32 *a = (s32 *)((u8 *)D_800D23B0 + 0xEB0);
+    s32 *b = (s32 *)((u8 *)D_800D23B0 + 0xF70);
+    s32 *c = (s32 *)((u8 *)D_800D23B0 + 0xFF0);
+    s32 *d = (s32 *)((u8 *)D_800D23B0 + 0x1070);
+    s32 *e = (s32 *)((u8 *)D_800D23B0 + 0x10F0);
+    s32 *f = (s32 *)((u8 *)D_800D23B0 + 0x12F4);
+
+    for (i = 0; i < *(s32 *)((u8 *)D_800D23B0 + 0x10); i++) {
+        a[i] = -1;
+    }
+    for (i = 0; i < *(s32 *)((u8 *)D_800D23B0 + 0xEA4); i++) {
+        b[i] = -1;
+        c[i] = 0;
+        e[i] = -1;
+        d[i] = 1;
+        f[i] = 0;
+    }
+}
 
 extern struct127 D_800CC2D0[26];
 extern s8 *D_800D23B0;
