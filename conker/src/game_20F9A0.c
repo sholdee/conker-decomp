@@ -1852,7 +1852,15 @@ void func_151E7F60(s32 arg0, s32 arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_20F9A0/func_151E81EC.s")
+extern s8 D_8008FD84[];
+void func_151E81EC(void) {
+    static struct127 *D_800E0BA0[4];
+    s32 i;
+    for (i = 0; i < 4; i++) {
+        D_800E0BA0[i] = NULL;
+    }
+    D_8008FD84[0] = 0;
+}
 
 void func_151E8214(void) {
     if (D_800E0B94 != 8) {
