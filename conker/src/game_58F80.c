@@ -854,7 +854,7 @@ extern u8 D_800C3FFA;
 extern s32 func_1503CF20(s32, s32, void *, s32, s32);
 extern s32 func_150838EC(struct127 *arg0, s32 arg1, s32 arg2, f32 arg3);
 extern void func_15033FE0(void *, s32);
-extern void func_1502D824(s32, struct127 *, void *);
+extern void func_1502D824();
 extern void func_150A81D0(s32 *, s32, struct197 *, s32, s32, void *, u8 *, s32);
 extern void bzero(void *, int);
 
