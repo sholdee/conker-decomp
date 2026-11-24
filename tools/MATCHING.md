@@ -6,6 +6,9 @@ mips2) to the EXACT original bytes. The verdict is the whole code bin's sha1 —
 **First, claim the function:** `mkdir ~/conker-ws/.claims/FUNC`. If that fails because the
 directory exists, another agent owns FUNC: do nothing else and stop at once with status
 BLOCKED and note "claimed". (A coordinator running two fleets over one list relies on this.)
+Exception — stale claims: if nothing in `~/conker-ws/FUNC/` (checks.jsonl, the workspace C file, my/)
+has changed in the last 30 minutes (`find ~/conker-ws/FUNC -newermt "-30 min" | head`), the owner
+died (e.g. a usage-limit pause); `touch` the claim dir and continue as the new owner.
 
 ## Loop
 ```
