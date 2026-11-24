@@ -975,7 +975,133 @@ void func_150774B4(void) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_15077508.s")
+typedef struct {
+    u8 pad0[0x8];
+    u8 unk8;
+    u8 unk9[5];
+    u8 padE[2];
+} Path15077508;
+
+typedef struct {
+    u8 pad0[0x8];
+    s16 unk8;
+    s16 unkA;
+    s16 unkC;
+} Pos15077508;
+
+extern Path15077508 *D_800D2350;
+extern s32 D_800D2354;
+s32 func_15086098(f32 x, f32 y, f32 z, s8 arg3, s8 arg4, u8 *arg5, u8 *arg6);
+s32 func_15086364(s32 arg0, s8 arg1, s8 arg2, u8 *arg3, u8 *arg4);
+s32 func_15086CBC(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3);
+
+#define UNK216(p) (*(s16 *)((u8 *)(p) + 0x216))
+
+void func_15077508(void) {
+    s32 target;
+    f32 x;
+    f32 y;
+    f32 z;
+    s8 flagA;
+    s8 flagB;
+    s32 i;
+    s32 best;
+    u8 *q;
+    u8 cur;
+    s32 tmp;
+    Path15077508 *entry;
+    f32 bestDist;
+    f32 rnd;
+    f32 width;
+
+    target = 0xFF;
+    if (D_800D1890 != 1) {
+        if (D_800D154C->unk20F == D_800D154C->unk211) {
+            UNK216(D_800D154C) = 0;
+            D_800D154C->unk25C |= 0x800;
+            return;
+        }
+        if (D_800D154C->unk211 == 0xFF) {
+            UNK216(D_800D154C) = 0;
+        }
+    }
+    D_800D154C->unk25C &= ~0x800;
+    if ((*(u8 **)&D_800D2108)[0, D_800D154C->unk13F] - 1 > 0) {
+        flagB = 0;
+        flagA = 0;
+        if (D_800D154C->unk211 != 0xFF) {
+            flagA = 1;
+        }
+        if (D_800D154C->unk212[0] != 0xFF) {
+            flagB = 1;
+        }
+        cur = D_800D154C->unk20F;
+        if (cur == 0xFF) {
+            if (D_800D1890 == 1) {
+                flagB = 0;
+                flagA = 0;
+                target = D_800D154C->pad210;
+            }
+            if (target == 0xFF) {
+                target = func_15086098(D_800D154C->x_position, D_800D154C->y_position, D_800D154C->z_position,
+                                       flagA, flagB, &D_800D154C->unk211, D_800D154C->unk212);
+            }
+        } else if (cur != 0xFF) {
+            if (D_800D1890 == 1) {
+                best = 0xFF;
+                entry = &D_800D2350[cur];
+                if (D_800D154C->pad210 != 0xFF) {
+                    tmp = 0; for (i = 0, q = (u8 *)D_800D2350; i < 4; i++, q++) { tmp += q[9] == D_800D154C->pad210; } tmp += (s32)entry; tmp ^= (s32)entry; tmp -= (s32)entry; tmp |= (s32)entry;
+                }
+                bestDist = 10.0f;
+                for (i = 0; i < 5; i++) {
+                    if (entry->unk9[i] != 0xFF && D_800D154C->pad210 != entry->unk9[i]) {
+                        rnd = func_150ADA68();
+                        if (rnd < bestDist) {
+                            bestDist = rnd;
+                            best = entry->unk9[i];
+                        }
+                    }
+                }
+                target = best;
+                if (target == 0xFF) {
+                    D_800D154C->unk25C |= 0x800;
+                    target = D_800D154C->pad210;
+                }
+            } else {
+                target = func_15086364(cur, flagA, flagB, &D_800D154C->unk211, D_800D154C->unk212);
+            }
+        }
+        if (target != 0xFF) {
+            D_800D154C->unk21E = 0;
+            if (func_15086CBC(target, &x, &y, &z)) {
+                UNK216(D_800D154C) = D_800D2354;
+                D_800D154C->pad210 = D_800D154C->unk20F;
+                D_800D154C->unk20F = target;
+                {
+                    f32 twoW;
+                    f32 dx;
+                    f32 dz;
+                    f32 dist;
+                twoW = (f32)(u32)D_800D2350[target].unk8 + (f32)(u32)D_800D2350[target].unk8;
+                dx = x - D_800D154C->x_position;
+                dz = z - D_800D154C->z_position;
+                dist = sqrtf(dx * dx + dz * dz);
+                if (dist > 1.0f) {
+                    dist = func_150ADA68() * twoW / dist;
+                    x -= dz * dist;
+                    z += dx * dist;
+                }
+                }
+{
+                ((Pos15077508 **)D_800D2104)[D_800D154C->unk13F]->unk8 = x;
+                ((Pos15077508 **)D_800D2104)[D_800D154C->unk13F]->unkA = y;
+                ((Pos15077508 **)D_800D2104)[D_800D154C->unk13F]->unkC = z;
+}
+            }
+        }
+    }
+}
 
 extern struct127 *D_800D154C;
 extern u8 *D_800D2108;
