@@ -403,6 +403,7 @@ typedef struct {
 
 void func_1510F820(void *, void *, f32 *, f32 *, f32 *, f32 *, f32 *);
 f32 func_1505210C(struct127 *arg0, f32 arg1, f32 arg2, f32 *arg3, f32 arg4);
+void func_1505A250(f32, f32, f32, f32 *, f32 *);
 void func_15060A30(s32, void *);
 void func_1507CD64(void *, s32);
 f32 func_1504B0FC(Obj1504B0FC *arg0, f32 arg1);
@@ -481,7 +482,92 @@ void func_1504CA60(struct127 *arg0) {
     arg0->unk80 = 1;
 }
 #pragma GLOBAL_ASM("asm/nonmatchings/game_79F10/func_1504CB98.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_79F10/func_150511E8.s")
+
+void func_150511E8(struct127 *arg0) {
+    f32 sp6C;
+    f32 sp68;
+    f32 sp64;
+    f32 sp60;
+    f32 sp5C;
+
+    if (arg0->unk28 <= 0.0f) {
+        s32 flag;
+        f32 a;
+        f32 b;
+        f32 c;
+        f32 d;
+        f32 ret;
+
+        a = 0.6999999881f;
+        b = 0.3000000119f;
+        c = 35.0f;
+        d = 0.69999998807907104f;
+        if ((arg0->id == 0x28) || (arg0->id == 0x77)) {
+            a = 0.8999999762f;
+            b = 0.200000003f;
+            c = 7.0f;
+            d = 0.6000000238f;
+        }
+        func_1510F820(arg0->pad188, &arg0->unk18C, &sp64, &sp60, &sp5C, &sp6C, &sp68);
+        if (arg0->unkF8 & 0x100000) {
+            f32 sp40;
+
+            func_1510F820(arg0->pad188, &arg0->unk18C, &sp64, &sp60, &sp5C, &sp6C, &sp68);
+            ret = func_1505210C(arg0, sp6C, sp68, &sp40, 50.0f);
+            sp40 *= a;
+            arg0->unkB8 += (sp40 - arg0->unkB8) * b;
+            arg0->unkC4 += (ret * a - arg0->unkC4) * b;
+        }
+        if (!(arg0->unkF8 & 0x80000)) {
+            return;
+        }
+        if (arg0->unk226 != 0) {
+            c = (u32)arg0->unk226;
+        }
+        if ((fabsf(sp6C) < 0.09000000358f) && (fabsf(sp68) < 0.09000000358f)) {
+            sp6C = 0.0f;
+            sp5C = 0.20000000298f;
+            sp68 = 0.0f;
+        } else {
+            f32 len;
+
+            flag = 0;
+            if (fabsf(sp6C) > 1.0f) {
+                if (sp6C < 0.0f) {
+                    sp6C = -1.00000000f;
+                } else {
+                    sp6C = 1.00000000f;
+                }
+                flag = 1;
+            }
+            if (fabsf(sp68) > 1.0f) {
+                if (sp68 < 0.0f) {
+                    sp68 = -1.00000000f;
+                } else {
+                    sp68 = 1.00000000f;
+                }
+                flag = 1;
+            }
+            if (flag && (arg0->id == 0x77)) {
+                if (arg0->xz_velocity > 15.0f) {
+                    arg0->xz_velocity *= 0.8000000119f;
+                }
+                if (arg0->disable_run < 8) {
+                    arg0->disable_run = 6;
+                }
+            }
+            len = sqrtf(sp6C * sp6C + sp68 * sp68);
+            sp6C *= c;
+            sp68 *= c;
+            sp5C = len * d + 0.05000000075f;
+        }
+    } else {
+        sp68 = 0.0f;
+        sp6C = 0.0f;
+        sp5C = 0.1000000015f;
+    }
+    func_1505A250(-sp6C, -sp68, sp5C, &arg0->unk164, &arg0->unk168);
+}
 typedef struct {
     /* 0x000 */ f32 unk0;
     /* 0x004 */ s32 unk4;
