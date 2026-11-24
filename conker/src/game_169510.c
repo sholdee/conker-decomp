@@ -673,7 +673,123 @@ void func_1513D668(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s16 a
     func_1513D594(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA, 0, 0, argB, argC, argD, argE);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513D6FC.s")
+/*FUNCSTART*/
+typedef struct { f32 x, y, z; } Vec1513D6FC;
+s32 func_1510E388(s32, s32, f32 *, f32 *);
+s32 func_15144E80(s32, Vec1513D6FC *, Vec1513D6FC *, Vec1513D6FC *);
+s32 func_15145128(Vec1513D6FC *, Vec1513D6FC *, f32 *, f32 *);
+
+s32 func_1513D6FC(struct211 *arg0, s16 arg1, f32 arg2, f32 arg3, s32 arg4, s32 arg5, u8 arg6) {
+    f32 bx;
+    f32 bz;
+    f32 c;
+    f32 s;
+    f32 xs;
+    f32 t;
+    f32 zs;
+    f32 a;
+    f32 kx;
+    f32 p2;
+    f32 q2;
+    f32 r2;
+    Vec1513D6FC v;
+    f32 k2;
+    f32 c2;
+    f32 s2;
+    Vec1513D6FC v1;
+    Vec1513D6FC v2;
+    Vec1513D6FC v3;
+    f32 len;
+    f32 unused;
+    f32 w;
+
+
+    if (arg6 != 0) {
+        c = func_151423D8(arg1 - 0x40);
+        s = func_151423D8(arg1);
+        xs = arg2 * s;
+        zs = arg3 * s;
+        if (func_1510E388(arg4, arg5, &bx, &bz) == 0) {
+            return 0;
+        }
+        {
+            f32 p;
+            f32 q;
+            f32 r;
+
+            a = arg3 * c;
+            t = zs * bz;
+            p = fabsf(zs);
+            q = sqrtf((zs * zs) + (t * t));
+            if (0 != a) {
+                w = a * bx;
+                v.z = w;
+                v.y = fabsf(a) / sqrtf((a * a) + (w * w));
+            } else {
+                v.z = 0.0f;
+                v.y = 0.0f;
+            }
+            if (zs != 0) {
+                v.x = t;
+                k2 = fabsf(zs) / sqrtf((zs * zs) + (t * t));
+            } else {
+                v.x = 0.0f;
+                k2 = 0.0f;
+            }
+            arg0->unk0 = v.y * a;
+            arg0->unk4 = (v.y * v.z) + (k2 * v.x) + 0.5f;
+            arg0->unk8 = k2 * zs;
+            t = -(arg2 * c);
+            p2 = t * bz;
+            q2 = fabsf(t);
+            r2 = sqrtf((t * t) + (p2 * p2));
+            if (xs != 0) {
+                w = xs * bx; v.z = w; v.y = fabsf(xs) / sqrtf((xs * xs) + (w * w));
+            } else {
+                v.z = 0.0f; v.y = 0.0f;
+            }
+            if (t != 0) {
+                v.x = t * bz;
+                k2 = fabsf(t) / sqrtf((t * t) + ((t * bz) * (t * bz)));
+            } else {
+                v.x = 0.0f;
+                k2 = 0.0f;
+            }
+            arg0->unkC = v.y * xs;
+            arg0->unk10 = (v.y * v.z) + (k2 * v.x) + 0.5f;
+            arg0->unk14 = k2 * t;
+        }
+    } else {
+        c2 = func_151423D8(arg1 - 0x40);
+        s2 = func_151423D8(arg1);
+        if (func_15144E80(arg5, &v1, &v2, &v3) == 0) {
+            return 0;
+        }
+        if (func_15145128(&v1, &v1, &len, &unused) == 0) {
+            return 0;
+        }
+        if (func_15145128(&v2, &v2, &len, &unused) == 0) {
+            return 0;
+        }
+        {
+            extern s32 D_1513D6FC_dummy;
+
+            s = arg2 * s2;
+            t = arg2 * c2;
+            arg0->unk0 = (s * v1.x) + (t * v2.x);
+            arg0->unk4 = (s * v1.y) + (t * v2.y);
+            arg0->unk8 = (s * v1.z) + (t * v2.z);
+            s = -arg3 * c2;
+            t = arg3 * s2;
+            arg0->unkC = (s * v1.x) + (t * v2.x);
+            arg0->unk10 = (s * v1.y) + (t * v2.y);
+            arg0->unk14 = (s * v1.z) + (t * v2.z);
+        }
+        return 1;
+    }
+end:
+    return 1;
+}
 // s32 func_1513D6FC(struct211 *arg0, s16 arg1, f32 arg2, f32 arg3, s32 arg4, s32 arg5, u8 arg6) {
 //     f32 spBC;
 //     f32 spB8;
