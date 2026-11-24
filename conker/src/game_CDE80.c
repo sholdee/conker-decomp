@@ -836,7 +836,35 @@ s32 func_150A2D84(s32 a0, s32 a1) {
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_CDE80/func_150A2E4C.s")
+/* Plane-side test against a struct178 (Cylinder-like: s16 pos at 0x0, sin/cos pairs at 0x24..0x30).
+ * The dead u/z computations are needed: they reproduce the original's register allocation
+ * (u reserves $f16 so t lands in $f18) and block IDO's (a - b <= 0) -> (a <= b) fold. */
+#define F(o) (*(f32 *)((u8 *)arg0 + (o)))
+s32 func_150A2E4C(struct178 *arg0, f32 x, f32 y, f32 z) {
+    f32 s;
+    f32 c;
+    f32 t;
+    f32 u;
+    f32 w;
+    x -= arg0->unk0;
+    y -= arg0->pad2;
+    z = y - arg0->unk4;
+    s = F(0x2C);
+    c = F(0x30);
+    u = z * s;
+    t = z * c + x * s;
+    s = F(0x24);
+    c = F(0x28);
+    u = u + t;
+    w = t * c - y * s;
+    z = y * c + t * s;
+    u = u * u;
+    if (w <= 0.0f) {
+        return 1;
+    }
+    return 0;
+}
+#undef F
 
 s32 func_150A2E4C(struct178 *arg0, f32 x, f32 y, f32 z);
 
