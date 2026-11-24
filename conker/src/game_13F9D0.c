@@ -762,7 +762,42 @@ struct131 *func_151149AC(u8 id) {
     return NULL;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_13F9D0/func_15114A1C.s")
+#define EF8 (*(s32 **)&D_800DBEF8)
+#define EFC (*(u8 **)&D_800DBEFC)
+#define O ((struct131 *)((u8 *)D_800DBEF4 + offset))
+#define EF8 (*(s32 **)&D_800DBEF8)
+#define EFC (*(u8 **)&D_800DBEFC)
+#define O ((struct131 *)((u8 *)D_800DBEF4 + offset))
+void func_15114A1C(void) {
+    s32 i;
+    s32 offset;
+    s32 p;
+    i = 0; offset = 0;
+    if (D_800DBEF0 > 0) { do {
+        
+        if ((((u8 *)O)[0x70] & 1) != 1) {
+            p = EF8[i]; if (&D_800DBEF8) {}
+            if (EF8[i] != 0) {
+                
+                if (O->unk4E != 3 && !(O->unk6F & 0x80)) {
+                    { s32 j; j = i; if (j) {} func_10004074(EF8[j]); if (p) {} EF8[j] = 0; }
+                } else if (EFC[i] != 0) {
+                    EFC[i]--; 
+                } else {
+                    { s32 j; j = i; if (j) {} func_10004074(EF8[j]); EF8[j] = 0; }
+                }
+                
+            }
+            
+        } else if (!(O->unk6F & 0x80)) {
+            EF8[i] = 0;
+        }
+        
+    i++; offset += 0xA0; } while (i < D_800DBEF0); }
+}
+#undef EF8
+#undef EFC
+#undef O
 
 typedef struct Struct15114B94 {
     u8 pad0[0x4C];
