@@ -134,6 +134,17 @@ function is right but something ELSE in the bin changed — e.g. a new literal i
 - **Look at the compiler's own view.** `cc -K` keeps IDO's intermediate files (e.g. the binasm
   before the assembler's scheduling pass) — compare pre- and post-scheduling order to tell a
   code-generation difference from a scheduling one. Offline compiles don't count as checks.
+- **Offline variant sweeps land near-misses in 2-3 checks.** Agents who closed register,
+  stack-slot and scheduling residues fastest wrote a small script in `my/`. It runs the
+  workspace's `../ido/ido5.3_recomp/cc` through `mw.run(cmd, cwd)`, using the same flags
+  the Makefile gives this file (game files add `-Olimit 3000`). The script compiles dozens of
+  generated variants, disassembles each with `mips-linux-gnu-objdump -dr`, and scores it
+  against `target.s`. Only the winner goes through `mw.py check`. If `-K` crashes ugen,
+  run `as1` by hand on the `.G` file instead. Levers found this way:
+  - the order in which values are first defined (IDO hands out FP registers and spill
+    slots in that order, so a dead `d = 0.0f;` up front can do it);
+  - copying a param into a local;
+  - same-line `if (++k == n) k = 0;` (the -g3 line numbers steer as1).
 - **Local widths:** widening an m2c `u8` temporary to `s32` can fix allocation; when only byte
   stack offsets differ, reorder named locals or change their widths. Declaring a loop
   pointer inside the loop body opens a -g3 scope that keeps stores before the increments.
