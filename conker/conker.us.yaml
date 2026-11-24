@@ -180,11 +180,11 @@ segments:
       - [0x26310, asm, libultra/os/maptlb]
       - [0x263D0, c,   libultra/io/aisetfreq] # -O1
       - [0x26530, asm, libultra/gu/sqrtf]
-      - [0x26540, asm, libultra/gu/sinf]
+      - [0x26540, c, libultra/gu/sinf_init]        # ultralib gu/sinf.c (the game has its own sinf)
       - [0x26700, c, libultra/io/sirawread]
       - [0x26750, c, libultra/io/sirawwrite]
       - [0x267A0, c, libultra/io/pirawread]
-      - [0x26800, asm, libultra/libc/__ull_rshift]
+      - [0x26800, c, libultra/libc/ll]
       - [0x26AC0, c, libultra/os/sethwinterrupt]
       - [0x26B10, c, libultra/io/leointerrupt]
       - [0x273D0, asm, libultra/os/probetlb]

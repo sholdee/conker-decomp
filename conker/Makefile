@@ -175,6 +175,9 @@ include ultralib.mk
 $(foreach s,$(ULTRALIB_SRCS),$(eval $(BUILD_DIR)/$(SRC_DIR)/libultra/$(s).c.o: CFLAGS := $(ULTRA_CFLAGS)))
 $(foreach s,$(filter os/% io/%,$(ULTRALIB_SRCS)),$(eval $(BUILD_DIR)/$(SRC_DIR)/libultra/$(s).c.o: OPT_FLAGS := -O1))
 $(foreach s,$(filter libc/% gu/%,$(ULTRALIB_SRCS)),$(eval $(BUILD_DIR)/$(SRC_DIR)/libultra/$(s).c.o: OPT_FLAGS := -O3))
+# libc/ll.c is the SDK's 64-bit helper file: -O1 -mips3 -32
+$(BUILD_DIR)/$(SRC_DIR)/libultra/libc/ll.c.o: OPT_FLAGS := -O1
+$(BUILD_DIR)/$(SRC_DIR)/libultra/libc/ll.c.o: MIPSBIT := -mips3 -32
 
 ### Non-matching
 ifeq ($(NON_MATCHING),1)

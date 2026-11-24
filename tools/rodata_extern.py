@@ -149,6 +149,7 @@ def main():
         return write_labels(sys.argv[2], sys.argv[3])
     basebin, yaml_path, obj = sys.argv[1:4]
     Path(obj + ".notes").unlink(missing_ok=True)
+    set_o32_abi(obj)
     elf = ElfFile(Path(obj).read_bytes())
     text = elf.find_section(".text")
     if text is None:
@@ -172,6 +173,17 @@ def main():
         elf.write(obj)
     if notes:
         Path(obj + ".notes").write_text("\n".join(notes) + "\n")
+
+
+def set_o32_abi(obj):
+    """A -mips3 -32 object (the SDK's libc/ll.c) is flagged 64-bit; mark it EF_MIPS_ABI_O32 so a
+    modern ld links it with the -mips2 objects (ultralib's tools/set_o32abi_bit.py does the same)."""
+    with open(obj, "r+b") as f:
+        f.seek(36)
+        flags = struct.unpack(">I", f.read(4))[0]
+        if flags >> 28 == 2 and not flags & 0x0000F000:  # EF_MIPS_ARCH_3, no ABI bits
+            f.seek(36)
+            f.write(struct.pack(">I", flags | 0x00001000))
 
 
 def weaken_data_defs(elf, yaml_path, obj):

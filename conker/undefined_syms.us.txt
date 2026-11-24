@@ -87,3 +87,4 @@ __osCurrentTime = 0x800429B0;
 __osTimerList = 0x8002BD70;
 __osViIntrCount = 0x800429BC;
 func_10024400 = 0x10024400;
+__libm_qnan_f = 0x8002C920;

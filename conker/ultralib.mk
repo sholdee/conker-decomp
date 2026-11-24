@@ -1,5 +1,6 @@
 # libultra/<dir>/<file> stems built from ultralib 2.0G source (see Makefile)
 ULTRALIB_SRCS += \
+    gu/sinf_init \
     io/contpfs \
     io/contramread \
     io/contramwrite \
@@ -38,6 +39,7 @@ ULTRALIB_SRCS += \
     io/viswapbuf \
     io/viswapcontext \
     libc/ldiv \
+    libc/ll \
     libc/string \
     libc/xlitob \
     os/createmesgqueue \
