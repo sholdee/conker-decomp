@@ -562,7 +562,217 @@ s32 func_15037880(s32 arg0, f32 *arg1) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_64120/func_150379DC.s")
+typedef struct {
+    f32 x, y, z;
+} Vec3_150379DC;
+
+typedef struct {
+    s32 v[8];
+} Ids_150379DC;
+
+typedef struct Node_150379DC {
+    u8 pad0[8];
+    struct Node_150379DC *next;
+    u8 padC[0x2C];
+    f32 unk38;
+    f32 unk3C;
+    f32 unk40;
+    u8 pad44[0x22];
+    u16 unk66;
+    u8 pad68[0x30];
+    f32 unk98;
+    f32 unk9C;
+    f32 unkA0;
+} Node_150379DC;
+
+typedef struct {
+    u8 unk0;
+    u8 pad1[0x47];
+    u8 *unk48;
+} S150319CC_150379DC;
+
+extern Ids_150379DC D_800843E0;
+extern u32 D_80084400;
+extern u8 D_80084404[];
+extern Node_150379DC *D_800DCE50[2][104];
+S150319CC_150379DC *func_150319CC(s32, struct127 *);
+void func_1507E9E8(struct127 *, s32);
+
+void func_150379DC(f32 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5, s32 arg6) {
+    struct127 *obj;
+    s32 result;
+    s32 found;
+    s16 x;
+    u32 idx;
+    struct160 *e;
+    f32 maxDist;
+    f32 ex;
+    f32 ey;
+    s32 p;
+    s32 i;
+    u32 bestIdx;
+    f32 bestDist;
+    f32 ez;
+    f32 d;
+    static u32 D_80084400;
+
+    arg0[0] = -99999.0f;
+    arg0[1] = -99999.0f;
+    arg0[2] = -99999.0f;
+    D_800C3FD0[0] = -99999.0f;
+    D_800C3FD0[1] = -99999.0f;
+    D_800C3FD0[2] = -99999.0f;
+    if ((&D_800C35EA)[0] == 1 || (&D_800C35EA)[1] == 1) {
+        return;
+    }
+    obj = &D_800CC2D0[arg3];
+    if (obj->camera != NULL && obj->camera->unk2C == 0x100 && obj->camera->unk73C != 0) {
+        Vec3_150379DC camPos;
+
+        camPos = *(Vec3_150379DC *)((u8 *)obj->camera + 0x740);
+        arg0[0] = camPos.x;
+        arg0[1] = camPos.y;
+        arg0[2] = camPos.z;
+        return;
+    }
+    if (func_15037880(arg3, arg0) != 0) {
+        return;
+    }
+    if (arg3 == 0 && obj->unk84.uh == 0x81) {
+        S150319CC_150379DC *s;
+        u8 *sub;
+        struct113 *v;
+        Vec3_150379DC tgt;
+        struct127 *o;
+
+        if ((s = func_150319CC(0x1F, obj)) != NULL && (sub = s->unk48) != NULL && sub[0x3F6] != 0 &&
+            (v = ((struct113 **)(sub + 0x3E8))[D_800BE9C0]) != NULL &&
+            (o = func_15083E90(s->unk0)) != NULL) {
+            if (o->unk5 == 5) {
+                tgt.x = o->x_position;
+                tgt.y = o->y_position;
+                tgt.z = o->z_position;
+            } else {
+                func_15043FF0((vertex *)&tgt, v);
+            }
+            if (func_15037698(arg3, arg1, arg2, tgt.x, tgt.y, tgt.z, arg0, arg4, 0, arg6) != 0) {
+                return;
+            }
+        }
+    }
+    found = 0;
+    x = (s32)D_800CC2D0[arg3].x_position;
+    bestDist = 1600000000.0f;
+    result = func_150380C0(arg0, arg1, arg2, arg3, arg4, arg5, &bestDist, 0, 0, 0, arg6);
+    if (result != 0 && bestDist != 1600000000.0f) {
+        found = 1;
+    }
+    {
+        f32 pos[3];
+        f32 range;
+        Ids_150379DC ids;
+        s32 ok;
+        s32 type;
+        Node_150379DC *node;
+        f32 dx;
+        f32 dy;
+        f32 dz;
+
+    if (D_80084400 >= D_800C6654) {
+        D_80084400 = 0;
+    }
+    if (D_800C6654 != 0) {
+        idx = D_80084400;
+        bestIdx = -1;
+        do {
+            e = &(*(struct160 **)D_800C6650)[idx];
+            if (x < e->unkE && e->unk10 < x && (u16)e->unk6 == 0) {
+                maxDist = e->unk8;
+                ex = e->unk0;
+                ey = e->unk2;
+                ez = e->unk4;
+                dz = obj->z_position - ez;
+                dy = obj->y_position - ey;
+                dz *= dz;
+                dx = x - ex;
+                dy *= dy;
+                d = dx * dx + dz + dy;
+                if (d < maxDist && d < bestDist &&
+                    func_15037698(arg3, arg1, arg2, ex, ey + 50.0f, ez, arg0, arg4, 0, arg6) != 0) {
+                    bestIdx = idx;
+                    bestDist = d;
+                }
+            }
+            idx++;
+            if (idx == D_800C6654) {
+                idx = 0;
+            }
+        } while (idx != D_80084400);
+        if (bestIdx != -1) {
+            D_80084400 = bestIdx;
+            found = 2;
+        }
+    }
+
+    ids = D_800843E0;
+    for (p = 0; p < 2; p++) {
+        for (i = 0; i < 8; i++) {
+            type = ids.v[i];
+            node = D_800DCE50[p][type];
+            while (node != NULL) {
+                if (type == 25 || type == 72) {
+                    extern s32 D_800C6654;
+                    if (node->unk66 == 0) {
+                        range = 250000.0f;
+                        ok = 1;
+                        pos[0] = node->unk38;
+                        pos[1] = node->unk3C;
+                        pos[2] = node->unk40;
+                    } else {
+                        ok = 0;
+                    }
+                } else {
+                    range = 250000.0f;
+                    ok = 1;
+                    pos[0] = node->unk98;
+                    pos[1] = node->unk9C;
+                    pos[2] = node->unkA0;
+                }
+                if (ok) {
+                    ez = pos[2];
+                    ey = pos[1];
+                    ex = pos[0];
+                    dz = obj->z_position - ez;
+                    dy = obj->y_position - ey;
+                    dz *= dz;
+                    dx = x - ex;
+                    dy *= dy;
+                    d = dx * dx + dz + dy;
+                    if (d < range) {
+                        dx = x - pos[0];
+                        if (dx * dx + dz + dy < bestDist &&
+                            func_15037698(arg3, arg1, arg2, ex, ey, ez, arg0, arg4, 0, arg6) != 0) {
+                            found = 3;
+                            bestDist = d;
+                        }
+                    }
+                }
+                node = node->next;
+            }
+        }
+    }
+    }
+    if (found == 1) {
+        func_1507E9E8(obj, result - 1);
+        return;
+    }
+    if (found == 2) {
+        if ((*(struct160 **)D_800C6650)[bestIdx].unk12 != 0) {
+            func_1507E9E8(obj, (*(struct160 **)D_800C6650)[bestIdx].unk12 - 1);
+        }
+    } else if (found == 3) {
+    }
+}
 
 s32 func_150380C0(f32 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5, f32 *arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA) {
     s32 i;
