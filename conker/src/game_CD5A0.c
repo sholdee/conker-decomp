@@ -22,16 +22,19 @@ typedef struct Src150A0264 {
     s32 unk8;
 } Src150A0264;
 
-extern Rec150A0264 D_800D3010[];
+static Rec150A0264 D_800D3010[10];
 
-/* NEAR MISS, mism=65 n=46/43 (THREE OVER). The shape is certainly
-       for (i = 0; i < 10; i++) { D_800D3010[i].unk0_b0 = 0; .unk4 = 0; .unk8 = 0; }
-   -- golden PEELS records 0 and 1 and then runs a 4-records-per-iteration unrolled loop
-   from &D_800D3010[2] to &D_800D3010[10], which is what IDO does to this loop; we get the
-   same shape but three instructions long. Try a pointer walk instead of the index, and
-   check whether the peel wants the two records written out explicitly.
-#pragma GLOBAL_ASM removed only when it reaches 0. */
-#pragma GLOBAL_ASM("asm/nonmatchings/game_CD5A0/func_150A00F0.s")
+/* Defined here (not extern): as1 then knows the array's alignment and shares one `lui at`
+   between stores in the same 8-byte window of the peeled records. */
+void func_150A00F0(void) {
+    s32 i;
+
+    for (i = 0; i < 10; i++) {
+        D_800D3010[i].unk0_b0 = 0;
+        D_800D3010[i].unk4 = 0;
+        D_800D3010[i].unk8 = 0;
+    }
+}
 
 extern u16 D_80088510[];
 extern u16 D_8008851C[];
