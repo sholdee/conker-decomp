@@ -291,7 +291,234 @@ void func_150870D0(s32 arg0, s32 arg1, s32 arg2)
   D_800D239A = 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_B4080/func_15087350.s")
+typedef struct Entry15087350 {
+    /* 0x00 */ f32 t;
+    /* 0x04 */ f32 unk4;
+    /* 0x08 */ f32 unk8;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ s32 unk1C;
+    /* 0x20 */ s32 unk20;
+    /* 0x24 */ s16 unk24;
+    /* 0x26 */ s8 unk26;
+    /* 0x27 */ s8 unk27;
+    /* 0x28 */ s8 unk28;
+    /* 0x29 */ s8 unk29;
+    /* 0x2A */ s8 unk2A;
+    /* 0x2B */ u8 pad2B[5];
+    /* 0x30 */ s8 unk30;
+    /* 0x31 */ s8 unk31;
+    /* 0x32 */ s8 unk32;
+    /* 0x33 */ s8 unk33;
+    /* 0x34 */ u8 pad34[0x14];
+    /* 0x48 */ u8 unk48;
+    /* 0x49 */ u8 pad49[0x3B];
+} Entry15087350;
+typedef struct { s16 pad[4]; s16 unk8; s16 unkA; s16 unkC; } Vec3s15087350;
+f32 sinf(f32);
+f32 cosf(f32);
+extern f32 D_800CC310;
+extern f32 D_800D239C;
+extern f32 D_800D23A0;
+extern f32 D_800D23A4;
+extern u8 D_800D2390;
+void func_15088F30();
+f32 func_150497E0(f32 *, s32, f32);
+f32 func_150498A4(f32 *, s32, f32, f32 *);
+struct Struct15088A08;
+s32 func_15088A08(struct Struct15088A08 *arg0, f32 arg1);
+
+void func_15087350(s32 arg0, s32 arg1, f32 arg2) {
+    f32 f;
+    f32 g;
+    f32 posX;
+    f32 posZ;
+    f32 dx;
+    f32 dz;
+    f32 d;
+    f32 dist;
+    f32 r;
+    f32 prev;
+    f32 len;
+    f32 adist;
+    s32 j;
+    f32 xs[4];
+    f32 ys[4];
+    f32 zs[4];
+    Entry15087350 *p;
+    struct127 *obj;
+    s8 iter;
+    s8 ok;
+    Entry15087350 copy;
+    f32 scale;
+    s32 off;
+    f32 inv;
+    s32 again;
+    s32 i;
+    s32 sorted;
+    f32 ftmp;
+    s8 order[4];
+    s32 itmp;
+    f32 vals[16];
+
+    iter = 0;
+    if (D_800872A0 != 0) {
+        p = (Entry15087350 *)(arg0 * 0x84 + (s32)D_800872A0);
+        obj = &D_800CC2D0[p->unk31];
+        posX = obj->x_position;
+        posZ = obj->z_position;
+        D_800D2390 = 0;
+        if (p->unk30 == 0) {
+            p->t = 0.5f;
+        } else {
+            f = (p->unk4 - p->t) * 0.125f;
+            if (f > 0.05999999866f) {
+                f = 0.05999999866f;
+            }
+            if (f < -0.05999999866f) {
+                f = -0.05999999866f;
+            }
+            p->t += f;
+        }
+        prev = 10000.0f;
+        scale = 0.75f;
+        ok = 1;
+        do {
+            again = 0;
+            if (ok) {
+                func_15088F30(p, xs, ys, zs);
+                dx = xs[2] - xs[1];
+                dz = zs[2] - zs[1];
+                len = sqrtf(dx * dx + dz * dz);
+            }
+            f = func_150498A4(xs, 0, p->unk8, &dx);
+            g = func_150498A4(zs, 0, p->unk8, &dz);
+            inv = -1.0f / sqrtf(dx * dx + dz * dz);
+            dx *= inv;
+            dz *= inv;
+            p->unkC = dx;
+            p->unk10 = dz;
+            d = -(f * dx + g * dz);
+            dist = dx * posX + dz * posZ + d;
+            r = dist;
+            if (r < -50.0f || r > 50.0f) {
+                adist = r;
+                if (r < 0.0f) {
+                    adist = -r;
+                }
+                if (prev < adist) {
+                    scale *= 0.5f;
+                }
+                prev = adist;
+                again = 1;
+                inv = (r * scale) / len;
+                if (inv < -0.5f) {
+                    inv = -0.5f;
+                }
+                if (inv > 0.5f) {
+                    inv = 0.5f;
+                }
+                ok = func_15088A08((struct Struct15088A08 *)p, -inv);
+            }
+            iter++;
+            if (iter >= 11) {
+                again = 0;
+            }
+        } while (again);
+        func_15042D78(0x80);
+        p->unk32 = p->unk33;
+        p->unk33 = D_800BE9E4;
+        adist = (obj->old_x_position * dx + dz * obj->old_z_position + d) - dist;
+        p->unk14 = (adist * 4.0f) / p->unk32;
+        if (p->unk30 != 0) {
+            bcopy(p, &copy, 0x84);
+            func_15088A08((struct Struct15088A08 *)&copy, arg2 + arg2);
+            func_15088F30(&copy, xs, ys, zs);
+            D_800D239C = func_150497E0(xs, 0, copy.unk8);
+            D_800D23A0 = func_150497E0(ys, 0, copy.unk8);
+            D_800D23A4 = func_150497E0(zs, 0, copy.unk8);
+            if (arg0 < D_800D2398) {
+                if (arg1 == 0) {
+                    f = D_800CC310 * 0.01745;
+                    D_800D239C = sinf(f) * 300.0f + obj->x_position;
+                    D_800D23A0 = obj->y_position;
+                    D_800D23A4 = cosf(f) * 300.0f + obj->z_position;
+                }
+                ((s16 **)D_800D2104)[obj->unk13F][4] = D_800D239C;
+                ((s16 **)D_800D2104)[obj->unk13F][5] = D_800D23A0;
+                ((s16 **)D_800D2104)[obj->unk13F][6] = D_800D23A4;
+                obj->unk44 = arg1;
+                if (*(s8 *)&D_800D2390 == 1) {
+                    obj->y_velocity = 75.0f;
+                } else if (*(s8 *)&D_800D2390 == 2) {
+                    obj->y_velocity = 55.0f;
+                } else if (*(s8 *)&D_800D2390 == 3) {
+                    obj->y_velocity = 65.0f;
+                }
+                obj->unk21E = 0;
+            lbl:;
+            }
+        } else {
+            p->t = 0.0f;
+            func_15088F30(p, xs, ys, zs);
+            f = func_150497E0(xs, 0, p->unk8);
+            g = func_150497E0(zs, 0, p->unk8);
+            p->t = 1.0f;
+            func_15088F30(p, xs, ys, zs);
+            dx = func_150497E0(xs, 0, p->unk8) - f;
+            dz = func_150497E0(zs, 0, p->unk8) - g;
+            dist = sqrtf(dx * dx + dz * dz);
+            if (dist > 1.0f) {
+                dist = 1.0f / dist;
+                dx *= dist;
+                dz *= dist;
+                p->t = ((dx * posX + dz * posZ) - (dx * f + dz * g)) * dist;
+            } else {
+                p->t = 0.0f;
+            }
+        }
+        p->unk48 = arg1;
+        D_800D23A9 = 1;
+        if (p->unk30 == 0 && p->unk48 > 0 && !(D_800D18A0 & (1 << p->unk31))) {
+            p->unk1C += D_800BE9E4;
+        }
+        if (p->unk30 >= 2 && obj->unk31C->unk84 == 0) {
+            func_1508802C(p, obj, 0xD);
+        }
+        if (arg0 * 0x84 == 0) {
+            for (i = 0; i < D_800D2398; i++) {
+                order[i] = i;
+                vals[i] = ((Entry15087350 *)(D_800872A0 + i * 0x84))->unk8 + ((Entry15087350 *)(D_800872A0 + i * 0x84))->unk24;
+                if (((Entry15087350 *)(D_800872A0 + i * 0x84))->unk2A != 0x7F) {
+                    vals[i] += 30000.0f - ((Entry15087350 *)(D_800872A0 + i * 0x84))->unk2A * 1000.0f;
+                }
+                j = ((Entry15087350 *)(D_800872A0 + i * 0x84))->unk31;
+                if (D_800D18A0 & (1 << j)) {
+                    vals[i] -= 10000.0f;
+                }
+            }
+            do {
+                sorted = 1;
+                for (i = 0; i < D_800D2398 - 1; i++) {
+                    j = i + 1;
+                    if (vals[i] < vals[j]) {
+                        ftmp = vals[i];
+                        itmp = order[i];
+                        order[i] = order[j]; vals[i] = vals[j];
+                        sorted = 0;
+                        vals[j] = ftmp;
+                        order[j] = itmp;
+                    }
+                }
+            } while (!sorted);
+            for (i = 0; i < D_800D2398; i++) {
+                ((Entry15087350 *)D_800872A0)[order[i]].unk29 = i + 1;
+            }
+        }
+    }
+}
 
 extern u8 *D_800872A0;
 void func_150891E8(s8 *, struct127 *);
