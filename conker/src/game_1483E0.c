@@ -852,7 +852,90 @@ void func_1511B07C(struct Obj1511B07C *arg0) {
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1483E0/func_1511B51C.s")
+struct Obj1511B51C {
+    u8 pad0[0x8];
+    f32 unk8;
+    u8 padC[0x30];
+    s32 unk3C;
+    u8 pad40[0x33];
+    u8 unk73;
+    u8 pad74[0x8];
+    f32 unk7C;
+    f32 unk80;
+    f32 unk84;
+};
+
+void func_1511B51C(struct Obj1511B51C *arg0) {
+    f32 vel;
+    f32 target;
+    f32 angle;
+    f32 diff;
+    f32 damp;
+    f32 maxv;
+    s32 mode;
+    s32 idx;
+    s32 raw;
+    f32 ratio;
+
+    raw = ((s16 *)arg0)[0x3E / 2];
+    mode = arg0->unk73 & 3;
+    target = raw;
+    angle = arg0->unk8;
+    vel = arg0->unk84;
+    if (mode == 0 || mode == 1) {
+        target = 0.0f;
+    }
+    if (mode == 0 || mode == 3) {
+        angle = target;
+        vel = 0.0f;
+    }
+    if (angle != target || vel != 0.0f) {
+        damp = arg0->unk7C;
+        if (damp == 0.0f) {
+            damp = 0.4499999881f;
+        }
+        maxv = arg0->unk80;
+        if (maxv == 0.0f) {
+            maxv = 0.5f;
+        }
+        angle += vel;
+        if (angle != 0.0f) {}
+        diff = func_15048A70(angle, target);
+        if (fabsf(diff) < fabsf(vel)) {
+            vel = -vel * damp;
+            if (fabsf(vel) < maxv * 0.05000000075f) {
+                vel = 0.0f;
+                angle = target;
+                if (target == 0.0f) {
+                    mode = 0;
+                } else {
+                    mode = 3;
+                }
+            }
+        } else if (diff > 0.0f) {
+            vel += (maxv - vel) * 0.009999999776f;
+        } else {
+            vel -= (maxv + vel) * 0.009999999776f;
+        }
+        if (angle < 0.0f) {
+            angle += 360.0f;
+        } else if (angle >= 360.0f) {
+            angle -= 360.0f;
+        }
+        arg0->unk73 &= ~3;
+        arg0->unk73 |= mode;
+    }
+    arg0->unk84 = vel;
+    if (D_800BE9B4 != 0 || angle != arg0->unk8) {
+        arg0->unk8 = angle;
+        idx = (arg0->unk3C >> 24) & 0xFF;
+        if (idx != 0 && raw != 0) {
+            ratio = fabsf((angle - raw) / raw);
+            func_1518804C(idx - 1, ratio);
+            func_15173C60((s32)((1.0f - ratio) * 255.0f), idx - 1);
+        }
+    }
+}
 
 struct Vtx1511B7D4 {
     s16 x;
