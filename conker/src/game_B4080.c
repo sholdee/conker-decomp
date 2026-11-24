@@ -610,7 +610,68 @@ s32 func_150882E4(s32 arg0, s32 arg1) {
     return 0x10;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_B4080/func_150883B0.s")
+extern f32 D_8009DA00;
+
+struct Struct150883B0 {
+    f32 unk0;
+    char pad4[0xC - 4];
+    f32 unkC;
+    f32 unk10;
+    char pad14[0x2F - 0x14];
+    s8 unk2F;
+    char pad30[1];
+    s8 unk31;
+    char pad32[0x84 - 0x32];
+};
+
+struct127 *func_150883B0(s32 arg0, s32 arg1, f32 *arg2, s32 *arg3) {
+    struct Struct150883B0 *p;
+    struct127 *ret;
+    f32 sign;
+    f32 dx;
+    f32 dz;
+    f32 x;
+    f32 z;
+    f32 base;
+    f32 best;
+    f32 d;
+    s32 i;
+    s8 self;
+
+    if (D_800872A0 == 0) {
+        return NULL;
+    }
+    p = (struct Struct150883B0 *)(arg0 * sizeof(struct Struct150883B0) + (s32)D_800872A0);
+    if (arg1 >= 0) {
+        sign = -1.0f;
+    } else {
+        sign = 1.0f;
+    }
+    arg1 = p->unk2F;
+    x = D_800CC2D0[p->unk31].x_position;
+    z = D_800CC2D0[p->unk31].z_position;
+    dx = p->unkC * sign;
+    dz = p->unk10 * sign;
+    self = D_800CC2D0[p->unk31].unk124 - 1;
+    base = -((dx * x) + (dz * z));
+    ret = NULL;
+    best = D_8009DA00;
+    for (i = 0; i < D_800D2398; i++) {
+        p = (struct Struct150883B0 *)(i * sizeof(struct Struct150883B0) + (s32)D_800872A0);
+        if (self != p->unk31 && (arg1 == 0 || arg1 == p->unk2F)) {
+            x = D_800CC2D0[p->unk31].x_position;
+            z = D_800CC2D0[p->unk31].z_position;
+            d = (dx * x) + (dz * z) + base;
+            if (d > 0.0f && d < best) {
+                best = d;
+                *arg2 = p->unk0;
+                *arg3 = p->unk2F;
+                ret = &D_800CC2D0[p->unk31];
+            }
+        }
+    }
+    return ret;
+}
 
 struct Struct1508855C {
     char pad0[0x31];

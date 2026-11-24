@@ -850,7 +850,199 @@ s32 func_15196748(Emitter15196748 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1C2C60/func_15196B4C.s")
+typedef struct {
+    /* 0x00 */ Vec3f15196438 pos;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ s16 unk1C;
+    /* 0x1E */ u8 unk1E;
+    /* 0x1F */ u8 unk1F;
+    /* 0x20 */ u8 unk20;
+    /* 0x21 */ u8 unk21;
+    /* 0x22 */ u8 pad22[0x2];
+} Particle15196B4C;
+
+typedef struct {
+    /* 0x00 */ u8 *unk0;
+    /* 0x04 */ u8 unk4;
+    /* 0x05 */ u8 unk5;
+    /* 0x06 */ s8 unk6;
+    /* 0x07 */ s8 unk7;
+    /* 0x08 */ Vec15196438 unk8;
+    /* 0x14 */ Vec15196438 unk14;
+    /* 0x20 */ Vec3f15196438 unk20;
+    /* 0x2C */ Vec3f15196438 unk2C;
+    /* 0x38 */ f32 unk38;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ f32 unk40;
+    /* 0x44 */ f32 unk44;
+    /* 0x48 */ f32 unk48;
+    /* 0x4C */ f32 unk4C;
+    /* 0x50 */ u8 unk50;
+    /* 0x51 */ u8 unk51;
+    /* 0x52 */ u8 unk52;
+    /* 0x53 */ u8 unk53;
+    /* 0x54 */ u8 unk54;
+    /* 0x58 */ f32 unk58;
+    /* 0x5C */ f32 unk5C;
+    /* 0x60 */ u8 pad60[0x78 - 0x60];
+    /* 0x78 */ f32 unk78;
+    /* 0x7C */ f32 unk7C;
+    /* 0x80 */ u8 unk80;
+    /* 0x84 */ f32 unk84;
+    /* 0x88 */ f32 unk88;
+} Desc15196B4C;
+
+typedef struct {
+    /* 0x00 */ u8 pad0[0x10];
+    /* 0x10 */ Vec3f15196438 pos;
+    /* 0x1C */ u8 pad1C[0x25 - 0x1C];
+    /* 0x25 */ u8 unk25;
+    /* 0x26 */ u8 pad26[0x2C - 0x26];
+    /* 0x2C */ s8 unk2C;
+    /* 0x2D */ s8 unk2D;
+    /* 0x2E */ s8 unk2E;
+    /* 0x2F */ u8 pad2F[0x94 - 0x2F];
+    /* 0x94 */ Particle15196B4C *unk94;
+    /* 0x98 */ Desc15196B4C *unk98;
+} Emitter15196B4C;
+
+void func_15198D88();
+void func_151990AC();
+
+s32 func_15196B4C(Emitter15196B4C *arg0, s32 arg1)
+{
+  Desc15196B4C *desc;
+  Particle15196B4C *arr;
+  Vec3f15196438 pos;
+  s32 base;
+  s32 mtx;
+  f32 inv;
+  f32 tstep;
+  f32 dz;
+  f32 dy;
+  f32 dx;
+  f32 dz2;
+  f32 dy2;
+  f32 dx2;
+  f32 dscale;
+  f32 dalpha;
+  Vec3f15196438 cur;
+  Vec3f15196438 cur2;
+  f32 t;
+  f32 alpha;
+  f32 scale;
+  f32 fq;
+  s32 head;
+  s32 tail;
+  f32 pad4;
+  f32 pad5;
+  f32 pad6;
+  f32 pad7;
+  desc = arg0->unk98;
+  arr = arg0->unk94;
+  if ((*((s32 *) (desc->unk0 + 0x1D4))) == 0)
+  {
+    return 0;
+  }
+  if (desc->unk7 != (-1))
+  {
+    desc->unk44 = D_8008F870[desc->unk7](arg0, arg1);
+  }
+  mtx = (*((s32 *) (desc->unk0 + 0x1D4))) + (desc->unk5 << 6);
+  func_15143134(&desc->unk8, &arg0->pos, mtx);
+  func_15143134(&desc->unk14, &pos, mtx);
+  desc->unk4C += desc->unk48 * D_800BE9A4;
+  if (desc->unk4C > 1.0f)
+  {
+    do
+    {
+      inv = 1.0f / desc->unk4C;
+      t = desc->unk3C + D_800BE9A4;
+      fq = t;
+      cur = desc->unk20;
+      cur2 = desc->unk2C;
+      tstep = t * inv;
+      scale = desc->unk5C + (desc->unk58 * t);
+      alpha = desc->unk38;
+      dx = arg0->pos.x - desc->unk20.x;
+      dy = arg0->pos.y - desc->unk20.y;
+      dz = arg0->pos.z - desc->unk20.z;
+      dx2 = pos.x - desc->unk2C.x;
+      dy2 = pos.y - desc->unk2C.y;
+      dz2 = pos.z - desc->unk2C.z;
+      dscale = desc->unk5C - scale;
+      dalpha = desc->unk44 - alpha;
+    }
+    while (0);
+    t = fq;
+    do
+    {
+      desc->unk7C += desc->unk78;
+      if (desc->unk7C > 1.0f)
+      {
+        func_15198D88(arg0, &pos);
+      }
+      desc->unk88 += desc->unk84;
+      if (desc->unk88 > 1.0f)
+      {
+        func_151990AC(arg0, &pos);
+      }
+      arr[arg0->unk2E].unk21 = 0;
+      arr[arg0->unk2E].pos.x = cur.x;
+      arr[arg0->unk2E].pos.y = cur.y;
+      arr[arg0->unk2E].pos.z = cur.z;
+      arr[arg0->unk2E].unkC = (cur2.x - cur.x) * alpha;
+      arr[arg0->unk2E].unk10 = (cur2.y - cur.y) * alpha;
+      arr[arg0->unk2E].unk14 = (cur2.z - cur.z) * alpha;
+      arr[arg0->unk2E].unk18 = scale;
+      arr[arg0->unk2E].unk1C = desc->unk53;
+      arr[arg0->unk2E].unk1E = desc->unk54;
+      arr[arg0->unk2E].unk1F = 0xFF;
+      arr[arg0->unk2E].unk20 = desc->unk50;
+      desc->unk50 += (func_150ADA20() % 6) + 3;
+      arr[arg0->unk2E].unk10 += desc->unk40 * t;
+      arr[arg0->unk2E].pos.x += arr[arg0->unk2E].unkC * t;
+      arr[arg0->unk2E].pos.y += arr[arg0->unk2E].unk10 * t;
+      arr[arg0->unk2E].pos.z += arr[arg0->unk2E].unk14 * t;
+      t -= tstep;
+      head = ++arg0->unk2E;
+      if ((head & 0xFFFFFFFF) == arg0->unk25)
+      {
+        head = (arg0->unk2E = 0);
+      }
+      arg0->unk2C++;
+      tail = arg0->unk2D;
+      if (tail == head)
+      {
+        arg0->unk2D = tail + 1;
+        if (arg0->unk2D == arg0->unk25)
+        {
+          arg0->unk2D = 0;
+        }
+        arg0->unk2C--;
+      }
+      cur.x += dx * inv;
+      cur.y += dy * inv;
+      cur.z += dz * inv;
+      cur2.x += dx2 * inv;
+      cur2.y += dy2 * inv;
+      cur2.z += dz2 * inv;
+      fq = dscale * inv;
+      alpha += dalpha * inv;
+      scale += fq;
+      desc->unk4C -= 1.0f;
+    }
+    while (desc->unk4C > 1.0f);
+    desc->unk20 = cur;
+    desc->unk2C = cur2;
+    desc->unk38 = alpha;
+    desc->unk3C = t;
+  }
+  return 1;
+}
 
 typedef struct Vec3f_15197C10 {
     f32 x;

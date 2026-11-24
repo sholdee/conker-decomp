@@ -314,7 +314,164 @@ void func_15000AD0(s32 arg0) {
     }
 }
 // loops!
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2DF70/func_15001460.s")
+typedef struct XZRange {
+    s16 minx;
+    s16 minz;
+    s16 maxx;
+    s16 maxz;
+} XZRange;
+
+typedef struct GfxW {
+    u32 w0;
+    u32 w1;
+} GfxW;
+
+extern s32 D_800DBE40;
+
+void func_15001460(GfxW *arg0)
+{
+  s32 i;
+  GfxW *gfx;
+  s32 cmd;
+  s32 cnt;
+  s32 s;
+  s32 n;
+  s32 j;
+  s32 k;
+  u32 addr;
+  s32 m;
+  Point16 *vtx[31];
+  s16 num;
+  s16 start;
+  s16 tris[4][3];
+  s16 min[3];
+  s16 max[3];
+  if (arg0 == 0)
+  {
+    return;
+  }
+  {
+    cnt = D_800DBE38;
+    for (i = 0; (*((s8 *) (&arg0[i]))) != (-0x21); i++)
+    {
+      gfx = &arg0[i];
+      n = 0;
+      cmd = *((s8 *) gfx);
+      s = 0;
+      if ((cmd >> 4) == 1)
+      {
+        tris[0][0] = (gfx->w1 >> 25) & 0x1F;
+        tris[0][1] = (gfx->w1 >> 20) & 0x1F;
+        tris[0][2] = (gfx->w1 >> 15) & 0x1F;
+        tris[1][0] = (gfx->w1 >> 10) & 0x1F;
+        tris[1][1] = (gfx->w1 >> 5) & 0x1F;
+        tris[1][2] = gfx->w1 & 0x1F;
+        tris[2][0] = (gfx->w0 >> 10) & 0x1F;
+        tris[2][1] = (gfx->w0 >> 5) & 0x1F;
+        tris[2][2] = gfx->w0 & 0x1F;
+        tris[3][0] = (gfx->w0 >> 23) & 0x1F;
+        tris[3][1] = (gfx->w0 >> 18) & 0x1F;
+        tris[3][2] = ((gfx->w1 >> 30) & 3) | ((gfx->w0 >> 13) & 0x1C);
+        n = 4;
+      }
+      else
+        if (cmd == 6)
+      {
+        tris[0][0] = (gfx->w0 >> 17) & 0x1F;
+        tris[0][1] = (gfx->w0 >> 9) & 0x1F;
+        tris[0][2] = (gfx->w0 >> 1) & 0x1F;
+        tris[1][0] = (gfx->w1 >> 17) & 0x1F;
+        tris[1][1] = (gfx->w1 >> 9) & 0x1F;
+        tris[1][2] = (gfx->w1 >> 1) & 0x1F;
+        n = 2;
+      }
+      else
+        if (cmd == 1)
+      {
+        addr = gfx->w1;
+        if ((addr >> 24) & 0xF)
+        {
+          addr = ((&D_800D2C28)[(addr >> 24) & 0xF] + addr) - (D_800D2C68 << 24);
+        }
+        num = (((s32) gfx->w0) >> 12) & 0xFF;
+        start = (((s32) gfx->w0) >> 1) & 0x7F;
+        start -= num;
+        for (m = start; m < num; m++)
+        {
+          vtx[m] = (Point16 *) addr;
+          addr += 16;
+        }
+
+      }
+      else
+        if (cmd == 5)
+      {
+        for (k = 0; k < 3; k++)
+        {
+          tris[0][k] = ((u8 *) gfx)[k + 1] >> 1;
+        }
+
+        n = 1;
+      }
+      for (s = 0; s < n; s++)
+      {
+        if (((u32) vtx[0]) > 0x100000)
+        {
+          for (cmd = 0; cmd < 3; cmd++)
+          {
+            if (D_800DBE63 == 0)
+            {
+              min[cmd] = (max[cmd] = (&vtx[tris[s][0]]->x)[cmd]);
+              for (k = 1; k < 3; k++)
+              {
+                if ((&vtx[tris[s][k]]->x)[cmd] < min[cmd])
+                {
+                  min[cmd] = (&vtx[tris[s][k]]->x)[cmd];
+                }
+                else
+                  if (max[cmd] < (&vtx[tris[s][k]]->x)[cmd])
+                {
+                  max[cmd] = (&vtx[tris[s][k]]->x)[cmd];
+                }
+                if ((&vtx[tris[s][k]]->x)[cmd] < min[cmd])
+                {
+                  min[cmd] = (&vtx[tris[s][k]]->x)[cmd];
+                }
+                else
+                  if (max[cmd] < (&vtx[tris[s][k]]->x)[cmd])
+                {
+                  max[cmd] = (&vtx[tris[s][k]]->x)[cmd];
+                }
+              }
+
+            }
+            else
+            {
+              min[cmd] = -0x8000;
+              max[cmd] = 0x7FFF;
+            }
+          }
+
+        }
+        for (j = 0; j < 3; j++)
+        {
+          ((Face16 *) D_800DBE3C)[cnt].pts[j] = vtx[tris[s][j]];
+        }
+
+        ((XZRange *) D_800DBE40)[cnt].minx = min[0];
+        ((XZRange *) D_800DBE40)[cnt].maxx = max[0];
+        ((XZRange *) D_800DBE40)[cnt].minz = min[2];
+        ((XZRange *) D_800DBE40)[cnt].maxz = max[2];
+        ((YRange *) D_800DBE44)[cnt].min = min[1];
+        ((YRange *) D_800DBE44)[cnt].max = max[1];
+        cnt++;
+      }
+
+    }
+
+    D_800DBE38 = cnt;
+  }
+}
 
 void func_15001970(void) {
     s32 pad;

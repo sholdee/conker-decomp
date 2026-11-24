@@ -94,7 +94,80 @@ void func_150B6DFC(void *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_E4070/func_150B6E3C.s")
+typedef struct {
+    u8 pad0[0x10];
+    void *unk10;
+    u8 pad14[4];
+    s32 unk18;
+    s32 unk1C;
+    s32 unk20;
+    u8 pad24[2];
+    s16 unk26;
+    u8 pad28[8];
+    f32 unk30;
+    u8 pad34[8];
+    s16 unk3C;
+    s16 unk3E;
+    u8 unk40;
+    u8 unk41;
+    u8 pad42[3];
+    u8 unk45;
+} Struct150B6E3C;
+
+extern u8 D_80091918[];
+
+void func_150B6E3C(Struct150B6E3C *arg0) {
+    u32 three;
+    f32 d;
+    s32 v;
+
+    d = 0.0f;
+    three = 3;
+    if (arg0->unk20 == 0 || arg0->unk26 != arg0->unk18 ||
+        (d = (arg0->unk30 < (f32)arg0->unk1C) ? -(arg0->unk30 - (f32)arg0->unk1C) : (arg0->unk30 - (f32)arg0->unk1C),
+         (f32)(s32)(D_800BE9E4 * three) < d)) {
+        arg0->unk30 -= (f32)(s32)(D_800BE9E4 * three);
+        if (arg0->unk30 <= 140.0f) {
+            arg0->unk26 += 0x100;
+            if (arg0->unk26 >= (arg0->unk41 << 8)) {
+                arg0->unk26 = 0;
+            }
+            arg0->unk30 = 200.0f - (140.0f - arg0->unk30);
+        }
+        v = 0xFF - (((arg0->unk30 < 170.0f) ? (s32)-(arg0->unk30 - 170.0f) : (s32)(arg0->unk30 - 170.0f)) * 8);
+        if (v < 0) {
+            v = 0;
+        }
+        arg0->unk45 = v;
+        return;
+    }
+    arg0->unk30 = arg0->unk1C;
+    if (arg0->unk1C == 0xAA) {
+        v = arg0->unk45;
+        v += D_800BE9E4 * 8;
+        if (v >= 0x100) {
+            arg0->unk20++;
+            if (arg0->unk20 == three) {
+                arg0->unk10 = D_80091918;
+                arg0->unk40 = 8;
+                arg0->unk45 = 0xFF;
+                arg0->unk3C = 0x80;
+                arg0->unk3E = 0x10;
+                arg0->unk26 = 0;
+                arg0->unk18 = 0;
+                return;
+            }
+            v = 0;
+        }
+        arg0->unk45 = v;
+        return;
+    }
+    v = 0xFF - (((arg0->unk30 < 170.0f) ? (s32)-(arg0->unk30 - 170.0f) : (s32)(arg0->unk30 - 170.0f)) * 9);
+    if (v < 0) {
+        v = 0;
+    }
+    arg0->unk45 = v;
+}
 
 typedef struct {
     u8 pad0[0x18];
