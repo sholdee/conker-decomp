@@ -999,4 +999,685 @@ s32 func_15097A8C(s32 arg0, s32 arg1, ScriptCmd *cmd) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C4DC0/func_15099C14.s")
+extern s32 func_15084000(s32);
+extern u8 func_15085420(struct127 *);
+extern u8 func_15085DA8(f32);
+extern s32 func_15086098(f32, f32, f32, s32, s32, s8 *, s8 *);
+extern void func_15086364(s32, s8, s8, s8 *, s8 *);
+extern s32 func_15086CBC(s32, f32 *, f32 *, f32 *);
+extern s32 func_15086D48(s32);
+extern f32 func_15086D94(f32, f32, f32, f32, f32);
+extern s32 func_150A2AEC(u32, s32, s32 *);
+extern struct178 *func_150A3194(s32, s32, s32, s32, s32);
+extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
+extern f32 func_15144BC8(f32);
+extern s8 func_151E564C(void);
+extern s8 func_151E565C(void);
+extern u8 D_80087298;
+extern u8 D_8008729C;
+extern u8 D_800D18A9;
+typedef struct { u8 pad0[7]; u8 unk7; u8 pad8[8]; } C4DC0_2350;
+extern C4DC0_2350 *D_800D2350;
+extern s8 D_800E0AC0[];
+extern u8 D_800E0BB8[];
+
+#define F_U8(p, o) (*(u8 *)((u8 *)(p) + (o)))
+#define F_S8(p, o) (*(s8 *)((u8 *)(p) + (o)))
+#define F_S16(p, o) (*(s16 *)((u8 *)(p) + (o)))
+#define F_U16(p, o) (*(u16 *)((u8 *)(p) + (o)))
+#define F_S32(p, o) (*(s32 *)((u8 *)(p) + (o)))
+
+typedef struct {
+    s16 x;
+    s16 y;
+    s16 z;
+    s16 pad;
+} C4DC0_point;
+
+s32 func_15099C14(s32 arg0, s32 arg1, s32 *arg2) {
+    struct127 *obj;
+    struct127 *other;
+    s32 ret;
+    s32 ix;
+    s32 iz;
+    f32 dx;
+    f32 dz;
+
+    if (arg1 == 0xB7) {
+        return func_15083E0C(arg0);
+    }
+    obj = func_1505EEF4(arg0);
+    if (arg1 == 0xB0) {
+        if (obj == NULL) {
+            return 1;
+        }
+        return 0;
+    }
+    if (arg1 == 0xB1) {
+        if (obj == NULL) {
+            return 1;
+        }
+        if (obj->interaction_state == 8 || obj->interaction_state == 0x27) {
+            return 1;
+        }
+        return 0;
+    }
+    if (obj == NULL) {
+        return 0;
+    }
+    switch (arg1) {
+    case 0xA5:
+        return func_150859AC(arg0, ((s16 *)arg2)[5]);
+    case 0x91:
+        return obj->unk232;
+    case 0x92:
+        return obj->unk21C;
+    case 0x93:
+        return obj->health;
+    case 0xA8:
+        if (obj->stunned != 0) {
+            return 1;
+        }
+        break;
+    case 0x94:
+        if (obj->unk13D != 0) {
+            return 1;
+        }
+        break;
+    case 0x95:
+        if (obj->unk13C != 0 && func_15084000(arg2[2] & 0xFFFF0FFF) + 100 == obj->unk13C) {
+            return 1;
+        }
+        break;
+    case 0x96:
+        if (obj->in_water == 1) {
+            return 1;
+        }
+        break;
+    case 0x97:
+        ix = obj->x_position;
+        iz = obj->z_position;
+        return (ix << 16) | (iz & 0xFFFF);
+    case 0x98:
+        return (s16)(s32)obj->y_position;
+    case 0x99: {
+        other = func_1505EEF4(arg2[2] & 0xFFFF0FFF);
+        dx = obj->x_position - other->x_position;
+        dz = obj->z_position - other->z_position;
+        if (dx * dx + dz * dz < (f32)(arg2[3] * arg2[3])) {
+            return 1;
+        }
+        return 0;
+    }
+    case 0x9A: {
+        s32 pdx;
+        s32 pdz;
+        other = func_1505EEF4(arg2[2] & 0xFFFF0FFF);
+        if (other == NULL) {
+            return 32000;
+        }
+        dx = obj->x_position - other->x_position;
+        dz = obj->z_position - other->z_position;
+        return sqrtf(dx * dx + dz * dz);
+    }
+    case 0x9B: {
+        f32 dx;
+        f32 dz;
+        dz = obj->z_position - (f32)arg2[3];
+        dx = obj->x_position - (f32)arg2[2];
+        return sqrtf(dz * dz + dx * dx);
+    }
+    case 0x9C:
+        other = func_1505EEF4(arg2[2] & 0xFFFF0FFF);
+        return (f32)(func_1505A630(other->x_position - obj->x_position, obj->z_position - other->z_position, 0) + 0x4000) * 0.0054931640625f * 65536.0f;
+    case 0x9D:
+        return (f32)(u32)(u16)(func_1505A630((f32)arg2[2] - obj->x_position, obj->z_position - (f32)arg2[3], 0) - 0x4000) * 0.0054931640625f * 65536.0f;
+    case 0x9E: {
+        s32 r;
+        s32 dx;
+        s32 dz;
+        r = arg2[4];
+        dx = (s32)obj->x_position - arg2[2];
+        dz = (s32)obj->z_position - arg2[3];
+        if (dx * dx + dz * dz < r * r) {
+            return 1;
+        }
+        return 0;
+    }
+    case 0x9F:
+        return obj->unk48;
+    case 0xA0:
+        return obj->unk223;
+    case 0xA1:
+        return obj->unk234;
+    case 0xB3:
+        return obj->unk40 * 65536.0f;
+    case 0xA4:
+        return obj->unk7A;
+    case 0xA2: {
+        ret = 0;
+        if (obj->unk31C->unk57 != 0) {
+            ret = 1;
+        }
+        return ret;
+    }
+    case 0xA3:
+        return obj->unk25C & 0x40;
+    case 0xA6:
+        return (obj->unk1CC - obj->y_position) > 150.0f;
+    case 0xA7:
+        return func_15085420(obj) | 0xD000;
+    case 0xA9:
+        return F_U8(obj->unk31C, 0x77);
+    case 0xAA:
+        return F_U8(obj->unk31C, 0x78);
+    case 0xAB:
+        return F_U8(obj->unk31C, 0x79);
+    case 0xAC: {
+        ret = func_150A2AEC(obj - D_800CC2D0, D_800D3840 - 2, &arg2[2]);
+        if (ret != -1) {
+            return ret | 0x4000;
+        }
+        return 0;
+    }
+    case 0xAD:
+        return obj->unk251;
+    case 0xAE:
+        return obj->xz_velocity;
+    case 0xAF:
+        if (F_U8(obj->unk31C, 0x16) != 0) {
+            return 2;
+        }
+        if (F_S16(obj->unk31C, 0x8) != 0) {
+            return 1;
+        }
+        return 0;
+    case 0xB2:
+        return (&obj->unk2E4)[arg2[2]];
+    case 0xB4:
+        return obj->pad10A;
+    case 0xB5: {
+        u8 v;
+        v = obj->pad10A;
+        if (v & 0x80) {
+            return D_800CC2D0[v & ~0x80].interaction_state;
+        }
+        return 0xFFFF;
+    }
+    case 0xB6: {
+        u8 *p;
+        s32 v;
+        p = &D_800E0BB8[obj - D_800CC2D0];
+        v = *p;
+        *p &= 0x7F;
+        return v;
+    }
+    case 0xB8:
+        return obj->unk2CA;
+    case 0xB9: {
+        s32 x;
+        s32 z;
+        x = ((C4DC0_point **)D_800D2104)[obj->unk13F][arg2[2]].x;
+        z = ((C4DC0_point **)D_800D2104)[obj->unk13F][arg2[2]].z;
+        return (x << 16) | (z & 0xFFFF);
+    }
+    case 0xBA:
+        return ((C4DC0_point **)D_800D2104)[obj->unk13F][arg2[2]].y;
+    case 0xBB:
+        if (obj->unk65 != 0) {
+            return D_800CC2D0[obj->unk65 - 1].unk13F;
+        }
+        return -1;
+    case 0xBC:
+        return obj->unk13C;
+    case 0xBE:
+        return obj->y_velocity;
+    case 0xBD: {
+        s32 pdx;
+        s32 pdz;
+        other = func_1505EEF4(arg2[2] & 0xFFFF0FFF);
+        dx = obj->x_position - other->x_position;
+        dz = obj->z_position - other->z_position;
+        return sqrtf(dx * dx + dz * dz);
+    }
+    case 0xBF:
+        return (f32)(s32)obj->unk28 * 65536.0f;
+    case 0xC0:
+        return F_U8(obj->unk31C, 0x1B);
+    case 0xC1:
+        return F_U8(obj->unk31C, 0x4E);
+    case 0xC2:
+        return obj->unique_id;
+    case 0xC3:
+        return obj->unkF4;
+    case 0xC4:
+        return obj->unk25C;
+    case 0xC5:
+        return obj->disable_run;
+    case 0xC7:
+        if (obj->unk211 == 0xFF) {
+            return 1;
+        }
+        return obj->unk25C & 0x800;
+    case 0xDB:
+        if (arg2[2] == 1) {
+            if (obj->unk20F == 0xFF) {
+                return 0xFF;
+            }
+            return D_800D2350[obj->unk20F].unk7;
+        }
+        if (obj->unk211 == 0xFF) {
+            return 0xFF;
+        }
+        return D_800D2350[obj->unk211].unk7;
+    case 0xC8: {
+        f32 x;
+        f32 y;
+        f32 z;
+        s32 dist2;
+        s32 dist;
+        s32 found;
+        if (obj->unk20F == 0xFF || obj->unk211 == 0xFF) {
+            return 0;
+        }
+        found = func_15086CBC(obj->unk20F, &x, &y, &z);
+        dist = -1;
+        if (found != 0) {
+            x -= obj->x_position;
+            y -= obj->y_position;
+            z -= obj->z_position;
+            dist = F_S16(obj, 0x216) + (s32)sqrtf(x * x + y * y + z * z);
+            if (obj->unk20F != obj->unk211) {
+                if (func_15086CBC(obj->unk211, &x, &y, &z) != 0) {
+                    x -= obj->x_position;
+                    y -= obj->y_position;
+                    z -= obj->z_position;
+                    dist2 = sqrtf(x * x + y * y + z * z);
+                    if (dist < dist2) {
+                        return dist2 | 0;
+                    }
+                }
+            }
+        }
+        return dist;
+    }
+    case 0xC9:
+        return func_15085DA8(obj->y_position);
+    case 0xCA: {
+        u8 b;
+        b = 0xFF;
+        if (obj->unk20F != 0xFF) {
+            return D_800D2350[obj->unk20F].unk7;
+        }
+        D_8008729C = obj->unk212[1];
+        ret = func_15086098(obj->x_position, obj->y_position, obj->z_position, 0, 0, &b, &b);
+        obj->unk212[1] = ret;
+        if (0xFF != ret) {
+            return D_800D2350[ret].unk7;
+        }
+        return 0xFF;
+    }
+    case 0xCB: {
+        f32 dx;
+        f32 dy;
+        f32 dz;
+        f32 hx;
+        f32 hy;
+        f32 hz;
+        f32 hd;
+        f32 dist;
+        other = func_1505EEF4(arg2[2] & 0xFFFF0FFF);
+        if (other == NULL) {
+            return 0;
+        }
+        dx = other->x_position - obj->x_position;
+        dy = other->y_position - obj->y_position;
+        dz = other->z_position - obj->z_position;
+        dist = sqrtf(dx * dx + dy * dy + dz * dz);
+        if (func_150AC9C0(obj->x_position, obj->y_position + 100.0f, obj->z_position, dx, dy, dz, 0, 0, &hx, &hy, &hz, &hd, 0, 0, 0.0f) == 0) {
+            return dist;
+        }
+        if (dist < hd) {
+            if (func_15086D94(obj->x_position, obj->y_position, obj->z_position, dx, dz) > 0.0f) {
+                return 0;
+            }
+            return dist;
+        }
+        return 0;
+    }
+    case 0xCC: {
+        struct178 *p;
+        p = func_150A3194(3, 11, obj->x_position, obj->y_position, obj->z_position);
+        if (p == NULL) {
+            return -1;
+        }
+        ret = p - *(struct178 **)&D_800D3098;
+        return ret;
+    }
+    case 0xCF: {
+        s32 t;
+        u8 r;
+        s32 i;
+        s32 ret;
+        s8 n;
+        s8 n2;
+        s8 arr[18];
+        n2 = 0;
+        ret = arg2[2];
+        n = 0;
+        for (i = 0; i < ret; i++) {
+            arr[n] = func_15086D48(arg2[3 + i]);
+            if ((u8)arr[n] != 0xFF) {
+                n++;
+            }
+        }
+        ret = -1;
+        if (n != 0) {
+            t = func_15086098(obj->x_position, obj->y_position, obj->z_position, n, n2, arr, &n2);
+            r = t;
+            D_80087298 = 0xFF;
+            if ((u8)t != 0xFF) {
+                func_15086364(r, n, n2, arr, &n2);
+            }
+            if (D_80087298 != 0xFF) {
+                ret = D_800D2350[D_80087298].unk7;
+            }
+        }
+        return ret;
+    }
+    case 0xD0: {
+        s32 id;
+        f32 x;
+        f32 y;
+        f32 z;
+        id = func_15086D48(arg2[2]);
+        if (func_15086CBC(id, &x, &y, &z) != 0) {
+            x -= obj->x_position;
+            z -= obj->z_position;
+            ret = sqrtf(x * x + z * z);
+        } else {
+            ret = 30000;
+        }
+        return ret;
+    }
+    case 0xCD: {
+        s32 temp;
+        s32 pad1;
+        s32 pad2;
+        f32 a;
+        f32 b;
+        f32 c;
+        other = func_1505EEF4(arg2[2] & 0xFFFF0FFF);
+        temp = func_1505A630(other->x_position - obj->x_position, obj->z_position - other->z_position, 0) + 0x4000;
+        a = (f32)temp * 0.0054931640625f;
+        b = obj->unk40;
+        a = func_15144BC8(a);
+        c = func_15144BC8(func_15144BC8(b) - a);
+        if (c > 180.0f) {
+            c = -360.0f + c;
+        }
+        if (arg2[3] == 1 && c < 0.0f) {
+            c = -c;
+        }
+        return c;
+    }
+    case 0xCE: {
+        f32 dx;
+        f32 dz;
+        f32 c;
+        other = func_1505EEF4(arg2[2] & 0xFFFF0FFF);
+        dx = other->x_position - obj->x_position;
+        dz = other->z_position - obj->z_position;
+        c = (u32)func_1505A630(sqrtf(dx * dx + dz * dz), other->y_position - obj->y_position, 0) * 0.0054931640625f;
+        c = func_15144BC8(c);
+        if (c > 180.0f) {
+            c = -360.0f + c;
+        }
+        if (arg2[3] == 1 && c < 0.0f) {
+            c = -c;
+        }
+        return c;
+    }
+    case 0xD1: {
+        ret = obj->unk22C;
+        obj->unk22C = ret & ~0x100;
+        return ret & 0x100;
+    }
+    case 0xD2: {
+        ret = obj->unk22C;
+        obj->unk22C = ret & ~0x200;
+        return ret & 0x200;
+    }
+    case 0xD4: {
+        struct126 *p;
+        s32 v;
+        p = obj->unk31C;
+        v = 0;
+        if (p != NULL) {
+            v = p->unk78;
+        }
+        return v;
+    }
+    case 0xD3: {
+        struct126 *p;
+        s32 v;
+        p = obj->unk31C;
+        v = 0;
+        if (p != NULL) {
+            switch (p->unk75 & 0x7F) {
+            case 3:
+            case 9:
+            case 21:
+                return 2;
+            case 33:
+            case 34:
+                return 3;
+            case 20:
+            case 22:
+            case 24:
+            case 35:
+            case 36:
+            case 55:
+            case 56:
+            case 57:
+            case 63:
+            case 65:
+                v = 1;
+                break;
+            }
+        }
+        return v;
+    }
+    case 0xD5:
+        return func_151E564C();
+    case 0xD6:
+        return func_151E565C();
+    case 0xD7:
+        if ((obj->unk1CC - obj->y_position) > 600.0f && -10000.0f == obj->unk118) {
+            return 1;
+        }
+        return 0;
+    case 0xD8:
+        return obj->in_water;
+    case 0xD9:
+        if (obj->unkA9 == 2) {
+            return 1;
+        }
+        return 0;
+    case 0xDA:
+        return obj->unk180;
+    case 0xDC:
+        if (F_S8(obj->unk31C, 0x195) != 0) {
+            return F_S8(obj->unk31C, 0x196) | 0x80;
+        }
+        return 0;
+    case 0xDD:
+        if (obj->unk31C != NULL) {
+            return F_S8(obj->unk31C, 0x23);
+        }
+        return 0;
+    case 0xDE:
+        return obj - D_800CC2D0;
+    case 0xC6: {
+        ret = obj - D_800CC2D0;
+        if (ret >= 0 && ret < D_8008FD8C) {
+            return func_150859AC(obj - D_800CC2D0, 6);
+        }
+        break;
+    }
+    case 0xDF:
+        if (obj->unk31C != NULL) {
+            return F_S8(obj->unk31C, 0x1AE);
+        }
+        return 0;
+    case 0xE0:
+        return obj->y_scale * 65536.0f;
+    case 0xE1:
+        return obj->immune;
+    case 0xE2:
+        return obj->unk31C->matrix_physics;
+    case 0xE3:
+        return D_800D18A9;
+    case 0xE4:
+        return D_800D18A8;
+    case 0xE5:
+        return obj->pad275;
+    case 0xE6: {
+        u8 v;
+        struct127 *p;
+        if (obj->pad275 != 0) {
+            p = &D_800CC2D0[obj->pad275 - 1];
+            obj->pad275 = 0;
+            if (p->id == arg2[2]) {
+                return 1;
+            }
+            return 0;
+        }
+        return 0;
+    }
+    case 0xE7: {
+        u8 idx;
+        C4DC0_point *pts;
+        s32 n;
+        s32 best;
+        s32 x;
+        s32 z;
+        s32 maxd;
+        s32 mind;
+        s32 i;
+        s32 dx;
+        s32 dz;
+        idx = obj->unk13F;
+        pts = ((C4DC0_point **)D_800D2104)[idx];
+        n = D_800D2108[idx];
+        best = -1;
+        if (pts != NULL && n != 0) {
+            other = func_1505EEF4(arg2[2] & 0xFFFF0FFF);
+            x = other->x_position;
+            z = other->z_position;
+            maxd = 100000000;
+            mind = -1;
+            if (D_800D3840 >= 4) {
+                ret = arg2[3];
+                mind = ret * ret;
+                if (D_800D3840 >= 5) {
+                    ret = arg2[4];
+                    maxd = ret * ret;
+                }
+            }
+            for (i = 0; i < n; i++, pts++) {
+                dx = pts->x - x;
+                dz = pts->z - z;
+                dx = dz * dz + dx * dx;
+                if (dx < maxd && mind < dx) {
+                    best = i;
+                    maxd = dx;
+                }
+            }
+        }
+        return best;
+    }
+    case 0xE8:
+        return obj->unk84.uh;
+    case 0xE9:
+        return F_U8(obj->unk31C, 0x51);
+    case 0xEA: {
+        struct126 *p;
+        s32 a;
+        s32 b;
+        a = arg2[2];
+        b = arg2[3];
+        p = func_1503195C(obj, a, b);
+        if (p != NULL) {
+            return p->unk38;
+        }
+        return 0;
+    }
+    case 0xEB: {
+        f32 r;
+        f32 s;
+        s32 pad2;
+        s32 pad3;
+        s32 pad4;
+        s32 pad5;
+        f32 *pp;
+        f32 dz;
+        f32 dy;
+        f32 dx;
+        f32 dist;
+        pp = &dz;
+        pp = &dy;
+        pp = &dx;
+        pp = &dist;
+        ix = arg2[2];
+        iz = arg2[3];
+        r = arg2[4];
+        dx = obj->x_position - (f32)ix;
+        dy = 0.0f;
+        dz = obj->z_position - (f32)iz;
+        dist = dz * dz + dx * dx;
+        if (dist <= r * r) {
+            ret = obj->x_position;
+            iz = obj->z_position;
+        } else {
+            s = r / sqrtf(dist);
+            ret = (dx *= s) + (f32)ix;
+            iz = (dz *= s) + (f32)iz;
+        }
+        return (ret << 16) | (iz & 0xFFFF);
+    }
+    case 0xEC:
+        return F_U8(obj->unk31C, 0x95);
+    case 0xED:
+        return D_800BE710[arg0];
+    case 0xEE: {
+        s16 t;
+        f32 x;
+        f32 y;
+        f32 z;
+        func_1505A184(obj->unk7A + 0x8000, arg2[2], 0.0f, &x, &z, &y);
+        t = (s16)(s32)obj->x_position + x;
+        iz = ((s16)((s16)(s32)obj->z_position + z));
+        return (t << 16) | (iz & 0xFFFF);
+    }
+    case 0xEF:
+        return obj->interaction_state;
+    case 0xF0:
+        return D_800E0AC0[F_U8(obj, 0x128)];
+    case 0xF1:
+        return (obj->unk74 & 0xF) == 0xF;
+    case 0xF2:
+        if (obj->unk13C != 0) {
+            return D_800CC2D0[obj->unk13C].unk13F | 0x2000;
+        }
+        return 0;
+    case 0xF3:
+        if (obj->unkA9 == 2) {
+            return 1;
+        }
+        return 0;
+    default:
+        return 0;
+    }
+    return 0;
+}
