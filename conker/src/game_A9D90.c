@@ -686,7 +686,57 @@ void func_1507DB44(s32 arg0, s32 arg1) {
 void func_1507DB64(void) {
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A9D90/func_1507DB6C.s")
+typedef struct { u32 first, second; } GameA9D90Command;
+
+s32 func_1510D0EC(s32, s32 *, s32, s32);
+extern u8 D_80086B80[];
+extern u8 D_D0F;
+#define D_800D18A4_u8 ((u8 *)&D_800D18A4)
+
+GameA9D90Command *func_1507DB6C(GameA9D90Command *arg0, s32 arg1) {
+    s32 texture;
+    s32 size;
+    u8 *viewport;
+    s32 right, left, bottom, top;
+    s32 scale;
+
+    { GameA9D90Command *command = arg0++; command->first = 0xDE000000; command->second = (u32)D_80086B80; }
+    texture = func_1510D0EC((s32)&D_D0F, 0, 3, 0);
+    { GameA9D90Command *command = arg0++; command->first = 0xFD180000; command->second = texture; }
+    { GameA9D90Command *command = arg0++; command->first = 0xF5180000; command->second = 0x07080200; }
+    { GameA9D90Command *command = arg0++; command->first = 0xE6000000; command->second = 0; }
+    { GameA9D90Command *command = arg0++; command->first = 0xF3000000; command->second = 0x073FF000; }
+    { GameA9D90Command *command = arg0++; command->first = 0xE7000000; command->second = 0; }
+    { GameA9D90Command *command = arg0++; command->first = 0xF5181000; command->second = 0x00080200; }
+    { GameA9D90Command *command = arg0++; command->first = 0xF2000000; command->second = 0x0007C07C; }
+    { GameA9D90Command *command = arg0++; command->first = 0xEF002C3F; command->second = 0x0F0A4004; }
+    if (D_800D18A2 & (1 << arg1)) {
+        if (D_800D18A4_u8[arg1] >= 4) {
+            D_800D18A4_u8[arg1] -= 4;
+        } else {
+            D_800D18A2 &= ~(1 << arg1);
+            func_15181DC8(arg1);
+            func_1517EE40(0, 0, 0, 120, 0, arg1);
+            return arg0;
+        }
+    } else {
+        D_800D18A4_u8[arg1] += 4;
+        if (D_800D18A4_u8[arg1] > 60) {
+            D_800D18A4_u8[arg1] = 60;
+        }
+    }
+    size = D_800D18A4_u8[arg1] + 4;
+    viewport = (u8 *)D_800BE628 + arg1 * 0x180;
+    left = right = (s32)(*(f32 *)(viewport + 0x2C) + *(f32 *)(viewport + 0x30)) * 2;
+    top = bottom = (s32)(*(f32 *)(viewport + 0x24) + *(f32 *)(viewport + 0x28)) * 2;
+    left -= size;
+    right += size;
+    top -= size;
+    bottom += size;
+    scale = 0x20000 / (right - left);
+    gSPTextureRectangle(arg0++, left, top, right, bottom, 0, 0, 0, scale, scale);
+    return arg0;
+}
 
 void func_1507DE4C(struct127 *arg0) {
 
