@@ -8,7 +8,180 @@ s32 allocate_memory(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     return func_10003C6C(arg0, arg1, arg2, 0, arg3);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_3C40/func_10003C6C.s")
+typedef struct MemBlock {
+    struct MemBlock *next;
+    struct MemBlock *prev;
+    u32 size;
+    struct MemBlock *nextFree;
+    struct MemBlock *prevFree;
+} MemBlock;
+
+extern s32 D_800380D0;
+struct S10 { s16 v[5]; };
+extern struct S10 D_8002AC34;
+extern struct S10 D_8002AC40;
+
+s32 func_10003C6C(s32 size, s32 tag, s32 align, s32 fromEnd, s32 arg4) {
+    MemBlock *blk;
+    MemBlock *cur;
+    u32 pad;
+    u32 sz;
+    MemBlock *newFree;
+    u32 rem;
+    MemBlock *prev;
+    MemBlock *nf;
+    MemBlock *pf;
+    s32 off;
+    s32 mask;
+    struct S10 offs;
+    struct S10 masks;
+    OSIntMask intMask;
+
+    offs = D_8002AC34;
+    masks = D_8002AC40;
+    D_800380C0 = size;
+    D_800380C4 = tag;
+    D_800380C8 = align;
+    D_800380CC = fromEnd;
+    D_800380D0 = arg4;
+    if (align == 2) {
+        size = (size + 0xF) & ~0xF;
+    }
+    if (size < 8) {
+        size = 8;
+    }
+    size = (size + 3) & ~3;
+    off = offs.v[align];
+    mask = masks.v[align];
+    if ((arg4 == 1) && (D_8002AC30 < 0x7800)) {
+        return 0;
+    }
+    intMask = osSetIntMask(1);
+    if (fromEnd == 0) {
+        cur = (MemBlock *)D_800380B8;
+    } else {
+        cur = (MemBlock *)D_800380BC;
+    }
+    while (1) {
+        if (cur == NULL) {
+            osSetIntMask(intMask);
+            if (arg4 == 0) {
+                D_8003C8E0 = 0x0C000042;
+                func_150AD770();
+            }
+            return 0;
+        }
+        blk = (MemBlock *)((u32)((u8 *)cur + off + 0xC) & mask);
+        sz = cur->size;
+        if ((u32)((u8 *)cur + sz + 0xC) >= (u32)blk + size) {
+            break;
+        }
+        if (fromEnd == 0) {
+            cur = cur->nextFree;
+        } else {
+            cur = cur->prevFree;
+        }
+    }
+    if (fromEnd == 0) {
+        blk = (MemBlock *)((u32)blk - 0xC);
+        newFree = (MemBlock *)((u32)blk + size + 0xC);
+        rem = ((u32)cur + sz) - ((u32)blk + size);
+    } else {
+        blk = (MemBlock *)(((((u32)cur + sz) - size + 0xC) & mask) - 0xC);
+        newFree = cur->next;
+        rem = (u32)blk - (u32)cur;
+    }
+    prev = cur->prev;
+    nf = cur->nextFree;
+    pf = cur->prevFree;
+    if (fromEnd == 0) {
+        if (rem >= 0x14) {
+            newFree->next = cur->next;
+            newFree->size = rem - 0xC;
+            if (newFree->next != NULL) {
+                newFree->next->prev = newFree;
+            }
+            rem = 0;
+            newFree->nextFree = nf;
+            newFree->prevFree = pf;
+            if (nf != NULL) {
+                nf->prevFree = newFree;
+            } else {
+                D_800380BC = (s32 *)newFree;
+            }
+            if (pf != NULL) {
+                pf->nextFree = newFree;
+            } else {
+                D_800380B8 = (struct54 *)newFree;
+            }
+        } else {
+            newFree = cur->next;
+            if (nf != NULL) {
+                nf->prevFree = pf;
+            } else {
+                D_800380BC = (s32 *)pf;
+            }
+            if (pf != NULL) {
+                pf->nextFree = nf;
+            } else {
+                D_800380B8 = (struct54 *)nf;
+            }
+        }
+        if (prev == NULL) {
+            D_800380B4 = (struct54 *)blk;
+        } else {
+            prev->next = blk;
+            prev->size = (prev->size & 0xFF000000) | ((u32)blk - (u32)prev - 0xC);
+        }
+        blk->next = newFree;
+        blk->prev = prev;
+        blk->size = (tag << 24) | (rem + size);
+        if (newFree != NULL) {
+            newFree->prev = blk;
+        }
+    } else if (rem >= 0x14) {
+        blk->next = cur->next;
+        blk->prev = cur;
+        blk->size = (tag << 24) | ((u32)((u8 *)cur + sz + 0xC) - (u32)blk - 0xC);
+        if (blk->next != NULL) {
+            blk->next->prev = blk;
+        }
+        cur->next = blk;
+        cur->size = rem - 0xC;
+    } else {
+        blk = (MemBlock *)((((u32)cur + off + 0xC) & mask) - 0xC);
+        blk->next = newFree;
+        blk->prev = prev;
+        blk->size = (tag << 24) | ((u32)((u8 *)cur + sz + 0xC) - (u32)blk - 0xC);
+        if (nf != NULL) {
+            nf->prevFree = pf;
+        } else {
+            D_800380BC = (s32 *)pf;
+        }
+        if (pf != NULL) {
+            pf->nextFree = nf;
+        } else {
+            D_800380B8 = (struct54 *)nf;
+        }
+        if (prev == NULL) {
+            D_800380B4 = (struct54 *)blk;
+        } else {
+            prev->next = blk;
+            prev->size = (prev->size & 0xFF000000) | ((u32)blk - (u32)prev - 0xC);
+        }
+        if (blk->next != NULL) {
+            blk->next->prev = blk;
+        }
+        if (blk->prev != NULL) {
+            blk->prev->next = blk;
+        }
+    }
+    if ((struct54 *)cur == D_800380B0) {
+        func_1000440C();
+    }
+    osSetIntMask(intMask);
+    return (s32)blk + 0xC;
+}
 typedef struct AllocatorBlock {
     struct AllocatorBlock *next;
     struct AllocatorBlock *prev;
