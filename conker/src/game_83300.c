@@ -4413,7 +4413,70 @@ void func_150627D4(struct127 *arg0) {
     func_15039CC8(arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_15062800.s")
+void func_15033EC4(s32 arg0, s32 arg1);
+
+#define OBJ_INDEX(obj) ((u32)((obj) - D_800CC2D0))
+
+void func_15062800(struct127 *arg0, struct127 *arg1) {
+    s32 idx0;
+    s32 cam;
+    struct127 tmp;
+    struct129 *t;
+    s32 i;
+    s32 u;
+
+    func_15146508(arg0, arg1);
+    bcopy(arg1, &tmp, sizeof(struct127));
+    bcopy(arg0, arg1, sizeof(struct127));
+    bcopy(&tmp, arg0, sizeof(struct127));
+    idx0 = OBJ_INDEX(arg0);
+    cam = (s32)&D_800DBFF0[OBJ_INDEX(arg1)];
+    arg1->unk127 = OBJ_INDEX(arg1);
+    arg1->unique_id = OBJ_INDEX(arg1) + 1;
+    arg1->unk13F = OBJ_INDEX(arg1);
+    arg1->camera = &D_800DBFF0[OBJ_INDEX(arg1)];
+    arg0->unk127 = OBJ_INDEX(arg0);
+    arg0->unique_id = OBJ_INDEX(arg0) + 1;
+    arg0->unk13F = OBJ_INDEX(arg0);
+    arg0->camera = NULL;
+    u = (s32)arg0->unk144;
+    arg0->unk144 = arg1->unk144;
+    arg1->unk144 = (struct129 *)u;
+    D_800DBFF0[OBJ_INDEX(arg1)].unk3D4 = (struct127 *) arg1->unk31C;
+    arg1->unk31C->pad196[1] = 0;
+    func_15033EC4(arg1->unique_id, arg0->unique_id);
+    if (*(struct102 **)arg1->pad2D4 != NULL) {
+        func_1516972C(*(struct102 **)arg1->pad2D4);
+        *(struct102 **)arg1->pad2D4 = NULL;
+    }
+    if (*(struct102 **)arg0->pad2D4 != NULL) {
+        func_1516972C(*(struct102 **)arg0->pad2D4);
+        *(struct102 **)arg0->pad2D4 = NULL;
+    }
+    func_150615DC(arg1);
+    for (i = 0; i < 25; i++) {
+        if (i == OBJ_INDEX(arg1) || i == OBJ_INDEX(arg0)) {
+            continue;
+        }
+        if (D_800CC2D0[i].interaction_state == 0) {
+            continue;
+        }
+        u = D_800CC2D0[i].unk65;
+        if (u != 0) {
+            u--;
+            if (u == OBJ_INDEX(arg1)) {
+                D_800CC2D0[i].unk65 = OBJ_INDEX(arg0) + 1;
+            } else if (u == OBJ_INDEX(arg0)) {
+                D_800CC2D0[i].unk65 = OBJ_INDEX(arg1) + 1;
+            }
+        }
+    }
+    if (arg1->unk13C >= 100) {
+        u8 x = arg1->unk13C - 100;
+        D_800CC2D0[x].unk13D = OBJ_INDEX(arg1) + 100;
+    }
+    func_150627D4(arg1);
+}
 
 void func_15062AC4(struct127 *arg0) {
     if (arg0->unkE6 && arg0->unkE4) {
