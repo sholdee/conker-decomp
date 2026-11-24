@@ -625,7 +625,104 @@ u8 *func_1516C878(struct_game_197C20_1 *arg0, s32 arg1, s16 arg2) {
     return temp_v1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_197F20/func_1516C934.s")
+typedef struct {
+    u32 flags;
+} Struct1516C934Font;
+
+typedef struct {
+    u8 pad0[0x10];
+    Struct1516C934Font *unk10;
+    u8 pad14[0x10];
+    u8 *unk24;
+    u8 pad28[0x8];
+    f32 unk30;
+    f32 unk34;
+    u8 pad38[0x18];
+    f32 unk50;
+    f32 unk54;
+} Struct1516C934;
+
+Gfx *func_150417AC(Gfx *, f32, f32, u8 *, u8, u8, u8, u8, f32, f32, s32);
+extern u8 D_800859A0[];
+
+Gfx *func_1516C934(gfx, arg1, r, g, b, a)
+    Gfx *gfx;
+    Obj_1516B6BC *arg1;
+    u8 r;
+    u8 g;
+    u8 b;
+    u8 a;
+{
+#define ARG1 ((Struct1516C934 *)arg1)
+    Gfx *original;
+    u8 line[84];
+    Struct1516C934 *text;
+    f32 offset;
+    s32 i;
+    s32 n;
+    s32 first;
+
+    i = 0;
+    n = 0;
+    text = ARG1;
+    original = gfx;
+lbl:
+    {
+        f32 x;
+        f32 y;
+
+        x = ARG1->unk50 - ARG1->unk30;
+        y = ARG1->unk54 - ARG1->unk34;
+        gSPDisplayList(gfx++, D_800859A0);
+        first = 1;
+        while (text->unk24[i] == '\n') {
+            i++;
+        }
+        do {
+            if ((D_800BEBA4 < (((s32)gfx - D_800BE9C8[D_800BE9C0]) >> 3) ? 1 : 0) != 0) {
+                return original;
+            }
+            if (1) {
+            }
+            line[n] = text->unk24[i];
+            if (line[n] == '\n') {
+                line[n] = 0;
+            }
+            if (line[n] == 0) {
+                s32 width;
+                s32 height;
+                s32 advance;
+
+                func_150428D4(line, &width, &height, &advance);
+                if (!first) {
+                    y += (f32)height;
+                } else {
+                    first = 0;
+                }
+                if (text->unk10->flags & 0x20000) {
+                    offset = ARG1->unk30 - (f32)(width >> 1) - 1.0f;
+                } else {
+                    offset = 0.0f;
+                }
+                if (text->unk10->flags & 0x40000) {
+                    gfx = func_150417AC(gfx, x + offset + 1.0f, y, line, 0xFF, 0xFF, 0xFF, a, 4096.0f, 4096.0f, n);
+                    n = 0;
+                } else if (!(text->unk10->flags & 4)) {
+                    gfx = func_150417AC(gfx, x + offset + 1.0f, y, line, 0, 0, 0, a, 4096.0f, 4096.0f, n);
+                    n = 0;
+                } else {
+                    gfx = func_150417AC(gfx, x + offset, y, line, r, g, b, a, 4096.0f, 4096.0f, n);
+                    n = 0;
+                }
+                y += (f32)advance;
+            } else {
+                n++;
+            }
+        } while (ARG1->unk24[i++] != 0);
+    }
+    return gfx;
+#undef ARG1
+}
 
 typedef struct {
     s32 unk0;
