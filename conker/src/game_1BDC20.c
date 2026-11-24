@@ -834,7 +834,311 @@ void func_1519086C(void *arg0) {
     func_15169824(arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1BDC20/func_15190898.s")
+typedef struct F898Owner {
+    s32 unk0;
+    u8 pad4[0x37];
+    u8 unk3B;
+    u8 pad3C[0xDC];
+    f32 unk118;
+    u8 pad11C[0xB8];
+    u8 (*unk1D4)[0x40];
+} F898Owner;
+
+typedef struct F898V2 {
+    s32 a, b;
+} F898V2;
+
+typedef struct F898V3 {
+    s32 a, b, c;
+} F898V3;
+
+typedef struct F898Sub {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    s16 unk14;
+    s16 unk16;
+    f32 unk18;
+    f32 unk1C;
+    u8 unk20;
+    u8 unk21;
+    u8 unk22;
+    u8 unk23;
+    u8 unk24;
+    u8 pad25[3];
+    s32 unk28[2];
+    s32 unk30[2];
+    u8 unk38[0x24];
+    u8 unk5C;
+    u8 pad5D[3];
+} F898Sub;
+
+typedef struct F898Obj {
+    u8 pad0[0x1C];
+    s16 unk1C;
+    u8 pad1E[0x16];
+    f32 unk34;
+    f32 unk38;
+    f32 unk3C;
+    f32 unk40;
+    f32 unk44;
+    f32 unk48;
+    u8 pad4C[0xC];
+    u32 unk58;
+    u8 pad5C[0xB4];
+    F898Sub sub;
+} F898Obj;
+
+typedef struct F898Slot {
+    F898Obj *obj;
+    s32 timer;
+    struct F898Slot *next;
+} F898Slot;
+
+typedef struct F898Sk {
+    u8 pad0[0xC];
+    u8 unkC;
+    u8 padD[3];
+} F898Sk;
+
+typedef struct F898Entry {
+    u8 unk0;
+    u8 pad1[3];
+    s32 unk4;
+    F898Sk *unk8;
+    f32 unkC;
+    s32 unk10;
+    s16 unk14;
+    s16 unk16;
+} F898Entry;
+
+struct Struct15191400Range {
+    s16 unk0;
+    s16 unk2;
+    s32 unk4[2];
+    s32 unkC[2];
+};
+typedef struct Struct15191400Range F898Range;
+extern struct Struct15191400Range D_800A9D40[];
+
+typedef struct F898Arg {
+    u8 pad0[0x10];
+    F898Owner *unk10;
+    u8 unk14;
+    u8 pad15;
+    s16 unk16;
+    u8 unk18;
+    u8 pad19;
+    u8 unk1A;
+    u8 pad1B;
+    f32 unk1C;
+    s32 unk20;
+    F898Slot *unk24;
+    u8 pad28[4];
+    u8 unk2C;
+} F898Arg;
+
+typedef struct F898Spawn {
+    u8 unk0;
+    u8 pad1;
+    s16 unk2;
+    s16 unk4;
+    u8 pad6[2];
+    s32 unk8;
+    s32 unkC;
+    u8 unk10;
+    u8 unk11;
+    u8 unk12;
+    u8 unk13;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C[3];
+    f32 unk28[3];
+    f32 unk34[3];
+    s32 unk40;
+    u8 unk44;
+    u8 unk45;
+    u8 pad46[2];
+} F898Spawn;
+
+extern F898Entry D_8008FA70[];
+extern u8 D_800AB310[];
+extern u8 D_800AB404[];
+extern f32 D_800A8014;
+extern void func_1504715C(void *, void *);
+
+void func_15190898(F898Arg *arg0) {
+    F898Arg *self;
+    volatile u8 done;
+    F898Entry *ent;
+    F898Slot *slot;
+    F898Slot *head;
+    F898Slot *tail;
+    s32 count;
+    s32 i;
+    s32 keep;
+    F898Obj *o;
+    F898Sub *sub;
+    F898Range *rng;
+    f32 dx;
+    f32 dz;
+    s32 idx;
+    s32 n;
+    F898Obj *res;
+    s32 kz;
+    s32 flag;
+    F898Spawn b;
+    F898Sub a;
+    s16 va0;
+    u8 va3;
+    s32 pad5;
+
+    self = arg0;
+    done = 0;
+    if (arg0->unk18 & 1) {
+        arg0->unk16 = arg0->unk16 - D_800BE9E4;
+        if (arg0->unk16 < 0) {
+            done = 1;
+        }
+    }
+    if (done == 0 && (arg0->unk10->unk0 == 0 || arg0->unk10->unk3B != arg0->unk14)) {
+        done = 1;
+    }
+    if (done == 0) {
+        if (arg0->unk10->unk1D4 != NULL) {
+            ent = &D_8008FA70[arg0->unk1A];
+            head = NULL;
+            tail = NULL;
+            count = 0;
+            i = 0;
+            slot = arg0->unk24;
+            for (; i < ent->unk4; i++, slot++) {
+                if (slot->obj != NULL) {
+                    *(F898V3 *)&slot->obj->unk40 = *(F898V3 *)&slot->obj->unk34;
+                    func_15143134(ent->unk8 + i, &slot->obj->unk34, arg0->unk10->unk1D4 + ent->unk8[i].unkC);
+                    slot->timer = slot->timer - D_800BE9E4;
+                    if (slot->timer < 0) {
+                        F898Obj *o2 = slot->obj;
+                        F898Sub *sub2 = &slot->obj->sub;
+
+                        rng = &D_800A9D40[sub2->unk20];
+                        dx = (o2->unk34 - o2->unk40) * D_800BE9A8;
+                        dz = (o2->unk3C - o2->unk48) * D_800BE9A8;
+                        sub2->unk4 = 0.0f;
+                        sub2->unk0 = dx;
+                        sub2->unk8 = dz;
+                        func_1513F680(slot->obj, 0xD, 0x12, 0, 0xD);
+                        keep = 1;
+                        slot->obj->unk1C = func_150ADA20() % (u32)(rng->unk2 + 1) + rng->unk0;
+                        slot->obj->unk58 |= 1;
+                        slot->obj = NULL;
+                        arg0->unk20 = arg0->unk20 - 1;
+                    } else {
+                        keep = 0;
+                    }
+                } else {
+                    keep = 1;
+                }
+                if (keep != 0) {
+                    count += 1;
+                    if (tail == NULL) {
+                        tail = slot;
+                    }
+                    slot->next = head;
+                    head = slot;
+                }
+            }
+            if (count != 0) {
+                arg0->unk1C = arg0->unk1C + ent->unkC * D_800BE9A4;
+                if (arg0->unk1C > 1.0f) {
+                    F898Range *rng2;
+
+                    rng2 = &D_800A9D40[ent->unk0];
+                    tail->next = head;
+                    a.unk0 = 0.0f;
+                    a.unk4 = 0.0f;
+                    a.unk8 = 0.0f;
+                    a.unk10 = 0.2f;
+                    a.unk14 = 0xF;
+                    a.unk16 = 0x11;
+                    a.unk18 = 0.0f;
+                    a.unk1C = 0.2f;
+                    a.unkC = -1.0f;
+                    a.unk20 = ent->unk0;
+                    func_1504715C(a.unk38, arg0->unk10);
+                    a.unk5C = arg0->unk2C;
+                    b.unk0 = D_800AB310[arg0->unk2C];
+                    b.unk2 = 0x1001;
+                    b.unk4 = 0x12C;
+                    b.unk8 = 0;
+                    b.unkC = 0;
+                    b.unk10 = 0;
+                    b.unk11 = 0;
+                    b.unk12 = 0;
+                    b.unk13 = 0xFF;
+                    b.unk28[0] = 0.0f;
+                    b.unk28[1] = 0.0f;
+                    b.unk28[2] = 0.0f;
+                    b.unk40 = 0;
+                    b.unk45 = 0xFF;
+                    b.unk34[0] = 1.0f;
+                    b.unk34[1] = 1.0f;
+                    b.unk34[2] = 1.0f;
+                    a.unk21 = 0;
+                    a.unk22 = 0;
+                    do {
+                        idx = func_150ADA20() % (u32)count;
+                        while (idx--) {
+                            tail = head;
+                            head = head->next;
+                        }
+                        n = head - arg0->unk24;
+                        b.unk44 = func_150ADA20() % 101U + 100;
+                        b.unk14 = 0.0f;
+                        b.unk18 = 0.0f;
+                        *(F898V2 *)a.unk28 = *(F898V2 *)rng2->unk4;
+                        *(F898V2 *)a.unk30 = *(F898V2 *)rng2->unkC;
+                        a.unk23 = func_150ADA20() % 5U + 4;
+                        a.unk24 = func_150ADA20() % 5U + 4;
+                        func_15143134(ent->unk8 + n, b.unk1C, arg0->unk10->unk1D4 + ent->unk8[n].unkC);
+                        *(F898V3 *)b.unk28 = *(F898V3 *)b.unk1C;
+                        if (arg0->unk10->unk118 < b.unk1C[1] - *(f32 *)&a.unk28[1] - *(f32 *)&a.unk30[1]) {
+                            res = func_1513D524(&b, 12, 0, 0, 0xD, ((func_150ADA20() % 1) ? 1 : 0) | (D_800AB404[arg0->unk2C] ? 0 : 2), 0x60, 0xFF, 0);
+                            head->obj = res;
+                            if (res != NULL) {
+                                memcpy(&res->sub, &a, sizeof(a));
+                                head->timer = func_150ADA20() % (u32)(ent->unk16 + 1) + ent->unk14;
+                                count -= 1;
+                                head = head->next;
+                                tail->next = head;
+                                arg0->unk20 = arg0->unk20 + 1;
+                            }
+                        }
+                        arg0->unk1C = arg0->unk1C - 1.0f;
+                    } while (arg0->unk1C > 1.0f && count != 0 && self->unk20 < ent->unk10);
+                }
+            }
+        } else {
+            done = 1;
+            if (arg0->unk18 & 1) {
+                va3 = 1;
+                va0 = arg0->unk16;
+            } else {
+                va3 = 0;
+                va0 = 0x12C;
+            }
+            res = (F898Obj *)func_151491F4(va0, -1, 0xD, va3, 8, 0xC, 0xFF, 0);
+            if (res != NULL) {
+                memcpy((u8 *)res + 0x28, &arg0->unk10, 0xC);
+            }
+        }
+    }
+    if (done != 0) {
+        func_1516972C((void *)arg0);
+    }
+}
 
 struct OscillatorMotionState {
     u8 pad_0x0[0x21];
@@ -980,11 +1284,6 @@ struct Struct15191400Slot {
     struct Struct15191400Obj *unk0;
     s32 unk4;
     s32 unk8;
-};
-struct Struct15191400Range {
-    s16 unk0;
-    s16 unk2;
-    u8 pad4[0x10];
 };
 struct Struct15191400Arg {
     u8 pad0[0x1C];
