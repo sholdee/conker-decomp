@@ -4404,31 +4404,29 @@ void func_15062BDC(struct127 *arg0, f32 arg1, f32 arg2) {
     }
 }
 
-// PERMUTER CANDIDATE best 180 (EVERY instruction matches; remaining diff is a coherent 5-register
-// cycle a0->a1->a3->v1->t0 rooted in the base pointer landing in a0 vs the target's a1 â€” an IDO
-// free-list coin-flip. Hand-fixes: *(s32*)&arg1 homes arg1 at prologue; explicit `base` local; the
-// nested default-then-adjust wrap shape; flag=arg5. Progression 3331->900->395->360->180.)
-// typedef struct { s32 unk0; s32 unk4; } Entry62D10;
-// extern Entry62D10 **D_800C4488[];
-// void func_15062D10(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
-//     Entry62D10 *base, *entry; s32 packed, modX, modY, newX, newY, tmp, flag;
-//     if ((&D_800D19A0)[arg0] == 0) return;
-//     flag = arg5;
-//     base = D_800C4488[arg0][arg4];
-//     entry = &base[*(s32 *)&arg1];
-//     packed = entry->unk4;
-//     modX = ((packed >> 12) & 0xFFF) + 2;
-//     modY = (packed & 0xFFF) + 2;
-//     packed = entry->unk0;
-//     if (flag != 0) newX = arg2 & 0xFFF;
-//     else { tmp = ((packed >> 12) & 0xFFF) + arg2; newX = tmp;
-//            if (modX < tmp) newX = tmp - modX; else if (tmp < 0) newX = tmp + modX; }
-//     if (flag != 0) newY = arg3 & 0xFFF;
-//     else { tmp = (packed & 0xFFF) + arg3; newY = tmp;
-//            if (modY < tmp) newY = tmp - modY; else if (tmp < 0) newY = tmp + modY; }
-//     entry->unk0 = (packed & 0xFF000000) | (newY & 0xFFF) | ((newX & 0xFFF) << 12);
-// }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_15062D10.s")
+typedef struct { s32 unk0; s32 unk4; } Entry62D10;
+extern Entry62D10 **D_800C4488[];
+extern s32 D_800D19A0;
+void func_15062D10(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
+    Entry62D10 *base, *entry; s32 packed, modX, modY, newX, newY, tmp, flag;
+    newX = 0; modX = 0; modY = 0;
+    if ((&D_800D19A0)[arg0] == 0) return;
+    base = D_800C4488[arg0][arg4];
+    packed = ((Entry62D10 *)((u8 *)base + arg1 * 8))->unk4;
+    modX = ((packed >> 12) & 0xFFF) + 2;
+    modY = (packed & 0xFFF) + 2;
+    entry = ((Entry62D10 *)((u8 *)base + arg1 * 8));
+    packed = entry->unk0;
+    flag = arg5;
+    if (flag != 0) newX = arg2 & 0xFFF;
+    else { tmp = ((packed >> 12) & 0xFFF) + arg2; newX = tmp;
+           if (modX < tmp) newX = tmp - modX; else if (tmp < 0) newX = tmp + modX; }
+    if (flag != 0) newY = arg3 & 0xFFF;
+    else { tmp = (packed & 0xFFF) + arg3; newY = tmp;
+           if (modY < tmp) newY = tmp - modY; else if (tmp < 0) newY = tmp + modY; }
+    packed = (packed & 0xFF000000) | (newY & 0xFFF) | ((newX & 0xFFF) << 12);
+    entry->unk0 = packed;
+}
 typedef struct Entry62E24 {
     u8 pad0[8];
     u16 unk8;
