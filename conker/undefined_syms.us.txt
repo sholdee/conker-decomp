@@ -113,3 +113,7 @@ __osPackRamReadData2 = 0x151F22C4;
 __osContRamWrite2 = 0x151F2430;
 __osPackRamWriteData2 = 0x151F2660;
 func_151EF9C0 = 0x151EF9C0; /* osSetTimer, game copy */
+
+/* local labels referenced across the hasm/C split boundaries */
+.L10007760 = 0x10007760;
+.L150A43D8 = 0x150A43D8;

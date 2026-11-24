@@ -151,6 +151,7 @@ def main():
     weak_text = "--weak-text" in sys.argv[4:]
     Path(obj + ".notes").unlink(missing_ok=True)
     set_o32_abi(obj)
+    trim_text_padding(obj, yaml_path)
     elf = ElfFile(Path(obj).read_bytes())
     text = elf.find_section(".text")
     if text is None:
@@ -176,6 +177,37 @@ def main():
         elf.write(obj)
     if notes:
         Path(obj + ".notes").write_text("\n".join(notes) + "\n")
+
+
+def trim_text_padding(obj, yaml_path):
+    """IDO pads .text to a multiple of 16. When a C segment ends on a 4-byte boundary (hand-written
+    asm split out next to it), cut that zero padding so the next object links at its ROM address."""
+    name = obj_name(obj)
+    flat = flat_segments(yaml_path)
+    seglen = None
+    for (start, typ, nm, _), (end, _, _, _) in zip(flat, flat[1:]):
+        if typ == "c" and nm == name:
+            seglen = end - start
+            break
+    if not seglen or seglen % 16 == 0:
+        return
+    with open(obj, "r+b") as f:
+        data = f.read()
+        shoff, = struct.unpack(">I", data[32:36])
+        shentsize, shnum, shstrndx = struct.unpack(">HHH", data[46:52])
+        def sh(i):
+            return shoff + i * shentsize
+        stroff = struct.unpack(">I", data[sh(shstrndx) + 16:sh(shstrndx) + 20])[0]
+        for i in range(shnum):
+            nameoff, = struct.unpack(">I", data[sh(i):sh(i) + 4])
+            secname = data[stroff + nameoff:data.index(b"\0", stroff + nameoff)]
+            if secname != b".text":
+                continue
+            off, size = struct.unpack(">II", data[sh(i) + 16:sh(i) + 24])
+            if size > seglen and size - seglen < 16 and not any(data[off + seglen:off + size]):
+                f.seek(sh(i) + 20)
+                f.write(struct.pack(">I", seglen))
+            return
 
 
 def set_o32_abi(obj):

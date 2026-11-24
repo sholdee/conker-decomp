@@ -51,7 +51,8 @@ SRC_DIRS := $(SRC_DIR) \
 						$(LIBULTRA_SRC_DIRS)
 
 
-S_FILES   = $(foreach dir,$(ASM_DIRS),$(wildcard $(dir)/*.s))
+S_FILES   = $(foreach dir,$(ASM_DIRS),$(wildcard $(dir)/*.s)) \
+            $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.s))   # hand-written asm (hasm) sources
 C_FILES   = $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))
 H_FILES   = $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.h))
 BIN_FILES = $(foreach dir,$(BIN_DIRS),$(wildcard $(dir)/*.bin))
@@ -101,7 +102,7 @@ GLOBAL_ASM_O_FILES := $(foreach file,$(GLOBAL_ASM_C_FILES),$(BUILD_DIR)/$(file:.
 
 INCLUDE_CFLAGS := -I . -I include -I include/2.0L -I include/2.0L/PR -I include/libc -I src/libultra/os -I src/libultra/audio -I src/libultra/io
 
-ASFLAGS = -EB -mtune=vr4300 -march=vr4300 -mabi=32 -I include
+ASFLAGS = -EB -mtune=vr4300 -march=vr4300 -mabi=32 -no-pad-sections -I include
 
 CFLAGS := -G 0 -Xfullwarn -Xcpluscomm -signed -nostdinc -non_shared -Wab,-r4300_mul
 CFLAGS += -D_LANGUAGE_C -D_FINALROM -DF3DEX_GBI_2 -D_MIPS_SZLONG=32

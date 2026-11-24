@@ -79,3 +79,20 @@ libultra files whose SDK source is C are built from ultralib's 2.0G sources, unm
    names are address aliases. Game copies that call each other (gu/ortho, gu/mtxutil) instead get
    their definitions renamed onto the game names with per-file `-D` flags.
 5. Gate: tools/verify_rom.sh (clean build). A stale object can hide a missing ultralib.mk entry.
+
+## Hand-written asm (hasm segments, conker/src/*.s)
+Functions proven hand-written live as committed `conker/src/<name>.s` files, from yaml `hasm` segments
+(`hasm_in_src_path: True`). splat writes each file once and never overwrites it. Proof rule, which is strict:
+a function becomes hasm only if (a) a hand-written SDK `.s` reproduces its bytes exactly, or (b) it contains an
+instruction IDO 5.3 -mips2 cannot emit (cop0/TLB/cache ops, 64-bit `d*`/`ld`/`sd`, trapping
+`add`/`addi`/`sub`), or (c) a dataflow check shows it reads a register that is neither an ABI input nor
+written first. The 2026-11-24 audit (`~/conker-ws/asmproof/tiers.json`) converted 94 functions. The
+unproven ones stay GLOBAL_ASM stubs or plain `asm` segments. They are listed in tools/skip.txt and kept
+out of fleets.
+Layout notes:
+- The init and game code segments use `subalign: 4`: hasm splits put object boundaries on 4-byte addresses.
+- ASFLAGS has `-no-pad-sections`.
+- `tools/rodata_extern.py` trims IDO's 16-byte `.text` padding from C segments that end on a 4-byte boundary.
+- A local `.L` label referenced across a split boundary is pinned in `undefined_syms.us.txt`.
+- `game_DAFA0` keeps `func_150ADAF0` as a stub: its inline-asm neighbour `func_150AE280` branches into
+  `func_150ADAF0`'s body.
