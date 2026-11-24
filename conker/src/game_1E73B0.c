@@ -540,8 +540,124 @@ void func_151BB044(struct127 *arg0) {
                   (s16)(s32)arg0->z_position, 0x2000, 0x320, 0xC8,
                   (s32)func_151BB0E0, arg0, 0, 8, 0);
 }
+s32 func_1000F568(s32, s32);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1E73B0/func_151BB0E0.s")
+typedef struct {
+    /* 0x00 */ u16 unk0;
+    /* 0x02 */ s16 unk2;
+    /* 0x04 */ s16 unk4;
+    /* 0x06 */ s16 unk6;
+    /* 0x08 */ u8 pad8[0x10 - 0x8];
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ u8 pad14[0x18 - 0x14];
+    /* 0x18 */ struct127 *unk18;
+    /* 0x1C */ u32 unk1C;
+    /* 0x20 */ u8 pad20[0x24 - 0x20];
+    /* 0x24 */ u16 unk24;
+} Snd151BB0E0;
+
+s32 func_151BB0E0(Snd151BB0E0 *arg0, s32 arg1, u32 *arg2, s32 arg3, s32 *arg4,
+                  s32 arg5, u16 *arg6) {
+    struct127 *obj;
+    s32 state;
+    s32 prev;
+    s32 sound;
+    s32 param;
+    s32 vol;
+    s32 timer;
+    s32 flag;
+
+    obj = arg0->unk18;
+    if ((obj != NULL) && (obj->health != 0)) {
+        state = 0;
+        sound = 0;
+        prev = arg0->unk1C & 0x7F;
+        vol = (arg0->unk1C >> 8) & 0xFF;
+        timer = (arg0->unk1C >> 16) & 0xFFF;
+        flag = (arg0->unk1C >> 7) & 1;
+        arg0->unk2 = obj->x_position;
+        arg0->unk4 = obj->y_position;
+        arg0->unk6 = obj->z_position;
+        if (((obj->xz_velocity > 1.0f) && (obj->unk44 > 0.0f)) ||
+            ((obj->xz_velocity < -1.0f) && (obj->unk44 < 0.0f))) {
+            state = 1;
+        } else if (((obj->xz_velocity > 5.0f) && (obj->unk44 <= 0.0f)) ||
+                   ((obj->xz_velocity < -5.0f) && (obj->unk44 >= 0.0f))) {
+            state = 2;
+        }
+        /* Emits no code. The four extra reads of state raise its uopt register
+           priority above sound's, which puts state in v1 and sound in t0. */
+        if (state + state + state + state) {}
+        if ((state ^ prev) & 0x7F) {
+            if ((((state ^ prev) & 0x7F) & 2) && (state & 2)) {
+                sound = 0x4A5;
+            } else {
+                sound = func_1000F568(0x4A3, 4);
+            }
+            if (!func_10010894(obj)) {
+                func_10010154(sound, obj, 0x6D60, 0x12C, 0x708);
+            }
+            sound = 0;
+        }
+        if ((state != 0) && (*arg6 == 0x4A7)) {
+            sound = 0x4A8;
+            param = 0x2EE0;
+        } else if ((state == 0) && ((*arg6 == 0x4A9) || (*arg6 == 0x4A8))) {
+            if (*arg6 == 0x4A9) {
+                return 1;
+            }
+            sound = 0x4A7;
+            param = 0x2000;
+        }
+        if (sound != 0) {
+            func_1000FA64(sound, obj->x_position, obj->y_position, obj->z_position, param, 0x320, 0xC8,
+                          (s32)func_151BB0E0, obj, state | 0x12CFF00, 8, 0);
+            goto end;
+        }
+        if (*arg6 != 0x4A7) {
+            if (timer == 0) {
+                *arg2 = (*arg2 * vol) >> 8;
+                if (flag) {
+                    vol += 8;
+                    if (vol >= 0x100) {
+                        vol = 0xFF;
+                        timer = (func_150ADA20() & 0x200) + 0x12C;
+                        flag = 0;
+                    }
+                } else {
+                    vol -= 8;
+                    if (vol <= 0) {
+                        return 1;
+                    }
+                }
+            } else {
+                timer -= D_800BE9E4;
+                if (timer <= 0) {
+                    timer = 0;
+                    if (*arg6 == 0x4A8) {
+                        func_1000FA64(0x4A9, obj->x_position, obj->y_position, obj->z_position, 0x2EE0, 0x320,
+                                      0xC8, (s32)func_151BB0E0, obj, state | 0x880, 8, 0);
+                        timer = (func_150ADA20() & 0x200) + 0x384;
+                    }
+                }
+            }
+            *arg4 = fabsf(obj->xz_velocity) * obj->unkB8 * 0.5f;
+        }
+        arg0->unk1C = (flag << 7) | state | (vol << 8) | (timer << 16);
+        if ((*arg2 == 0) || (arg0->unk10 & 0x80)) {
+            if (arg0->unk24 != 0) {
+                func_100111C8(arg0->unk24);
+                arg0->unk24 = 0;
+            }
+            *arg6 = 0;
+            arg0->unk10 &= ~0x80;
+            *arg2 = 0;
+        }
+        return 0;
+    }
+end:
+    return 1;
+}
 
 typedef struct { f32 x, y, z; } Vec3_151BB61C;
 typedef struct { s16 v[9]; } Surf_151BB61C;
