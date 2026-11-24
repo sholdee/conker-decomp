@@ -69,7 +69,252 @@ store_done_151407D0:
     return ret;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16DC80/func_151408A4.s")
+typedef struct {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    s32 x[4];
+    s32 y[4];
+    u8 *unk44;
+    f32 unk48;
+    u16 depth[4];
+    u8 alpha[4];
+    u8 pad58;
+    s8 unk59;
+} Sub151408A4;
+
+typedef struct {
+    u8 pad0[0x2B];
+    u8 unk2B;
+    u8 pad2C[8];
+    f32 unk34;
+    f32 unk38;
+    f32 unk3C;
+    f32 unk40;
+    f32 unk44;
+    f32 unk48;
+    u8 pad4C[0xC];
+    s32 unk58;
+    u8 unk5C;
+    u8 pad5D[0x63];
+    u8 tmpl[0x40];
+    u8 *buffers[4];
+    Sub151408A4 sub;
+} Obj151408A4;
+
+typedef struct {
+    s16 x;
+    s16 y;
+    s16 z;
+    s16 flag;
+    u8 pad8[8];
+} Vtx_151408A4;
+
+typedef struct {
+    u8 pad0[0x44];
+    s16 unk44;
+    u8 pad46[6];
+    s16 unk4C;
+} View151408A4;
+
+typedef struct {
+    u8 pad0[0x24];
+    f32 minY;
+    f32 maxY;
+    f32 minX;
+    f32 maxX;
+    u8 pad34[0x14C];
+} Cam151408A4;
+
+typedef struct {
+    s32 shift;
+    u32 base;
+} DepthDec151408A4;
+extern DepthDec151408A4 D_80089630[];
+extern s32 (*D_80089F90[])(void *, s16);
+extern struct17 *func_15144B34(s32);
+extern s32 func_15144CEC(void *, f32 *, f32 *, f32 *, f32 *, s32);
+void func_151D5D60(void *, s16, s32, void **, u8 *);
+f32 sqrtf(f32);
+#pragma intrinsic(sqrtf)
+
+void *func_151408A4(Obj151408A4 *arg0, s16 arg1) {
+    Vtx_151408A4 *vertices;
+    void *result;
+    Sub151408A4 *sub;
+    struct17 v;
+    f32 dirZ, dirY, dirX;
+    f32 cx, cy, cz;
+    struct17 *pos;
+    f32 dot;
+    f32 dist;
+    f32 w;
+    f32 h;
+    Cam151408A4 *cam;
+    f32 fade;
+    f32 invDist;
+    f32 horiz;
+    f32 invH;
+    f32 size;
+    f32 b;
+    f32 p;
+    f32 q;
+    f32 r;
+    f32 s;
+    f32 u;
+    f32 a;
+    f32 screen[2];
+    f32 scale1;
+    f32 unused;
+    f32 scale2;
+    s32 onScreen;
+    u8 fresh;
+    s16 alpha;
+
+    sub = &arg0->sub;
+    if (sub->unk59 != -1 && D_80089F90[sub->unk59](arg0, arg1) == 0) {
+        return NULL;
+    }
+    sub->y[arg1] = -1;
+    sub->x[arg1] = -1;
+    if (arg0->unk58 & 2) {
+        onScreen = func_15144CEC(&arg0->unk34, screen, &scale1, &unused, &scale2, arg1);
+        if (onScreen == 0 || screen[0] < ((Cam151408A4 *)D_800BE628)[arg1].minX || ((Cam151408A4 *)D_800BE628)[arg1].maxX < screen[0] || screen[1] < ((Cam151408A4 *)D_800BE628)[arg1].minY || ((Cam151408A4 *)D_800BE628)[arg1].maxY < screen[1]) {
+            return NULL;
+        }
+        pos = func_15144B34(arg1);
+        {
+        f32 dz, dy, dx;
+        f32 lenSq;
+        f32 scale;
+        s32 visible;
+        s32 depth;
+        View151408A4 *view;
+        s32 alphaPad;
+        s16 zval;
+        u16 zraw;
+        func_151D5D60(arg0->buffers, arg1, 0x40, (void **)&vertices, &fresh);
+        result = vertices;
+        if (vertices != NULL) {
+            if (fresh) {
+                memcpy(arg0->buffers[arg1], arg0->tmpl, 0x40);
+                memcpy(arg0->buffers[arg1] + 0x40, arg0->tmpl, 0x40);
+            }
+        } else {
+            return NULL;
+        }
+        if (!(arg0->unk58 & 4)) {
+            dx = arg0->unk40 - arg0->unk34;
+            dy = arg0->unk44 - arg0->unk38;
+            dz = arg0->unk48 - arg0->unk3C;
+            lenSq = dx * dx + dy * dy + dz * dz;
+            if (lenSq == 0.0f) {
+                arg0->unk48 = arg0->unk3C + 500.0f;
+            } else {
+                scale = 500.0f / sqrtf(lenSq);
+                arg0->unk40 = arg0->unk34 + dx * scale;
+                arg0->unk44 = arg0->unk38 + dy * scale;
+                arg0->unk48 = arg0->unk3C + dz * scale;
+            }
+            arg0->unk58 |= 4;
+        }
+        v.unk0 = pos->unk0 - arg0->unk34;
+        v.unk4 = pos->unk4 - arg0->unk38;
+        v.unk8 = pos->unk8 - arg0->unk3C;
+        dirX = arg0->unk40 - arg0->unk34;
+        dirY = arg0->unk44 - arg0->unk38;
+        dirZ = arg0->unk48 - arg0->unk3C;
+        dot = dirX * v.unk0 + dirY * v.unk4 + dirZ * v.unk8;
+        if (dot < 0.0f) {
+            dot = 0.0f;
+        }
+        if (dot == 0.0f && !(arg0->unk58 & 0x10000)) {
+            return NULL;
+        }
+        if (fabsf(v.unk0) > 0.0001f || fabsf(v.unk8) > 0.0001f) {
+            dist = sqrtf(v.unk0 * v.unk0 + v.unk4 * v.unk4 + v.unk8 * v.unk8);
+            fade = 1.0f - sub->unk20 * dist;
+            if (fade > 0.0f) {
+                zraw = sub->depth[arg1];
+                depth = ((((zraw >> 2) & 0x7FF) << D_80089630[zraw >> 13].shift) + D_80089630[zraw >> 13].base) >> 3;
+                visible = 1;
+                if (arg0->unk58 & 0x10) {
+                    if (onScreen != 0) {
+                        sub->x[arg1] = screen[0];
+                        sub->y[arg1] = screen[1];
+                        view = (View151408A4 *)((u8 *)D_800BE628 + arg1 * sizeof(Cam151408A4) + D_800BE9C0 * 0x10);
+                        zval = (view->unk4C + scale1 * scale2 * view->unk44) * 32.0f;
+                    } else {
+                        sub->x[arg1] = -1;
+                        sub->y[arg1] = -1;
+                        visible = 0;
+                    }
+                    if (zval - depth >= 31) {
+                        visible = 0;
+                    }
+                    if (visible) {
+                        s32 pad;
+                        sub->alpha[arg1] += (u16)(0xFF - sub->alpha[arg1]) >> 3;
+                    } else {
+                        sub->alpha[arg1] -= sub->alpha[arg1] >> 3;
+                    }
+                } else {
+                    sub->alpha[arg1] = 0xFF;
+                }
+                horiz = sqrtf(v.unk0 * v.unk0 + v.unk8 * v.unk8);
+                invH = 1.0f / horiz;
+                size = 1.0f / dist; invDist = size;
+                dot *= fade * invDist * 0.002000000095f;
+                b = (sub->unk14 + (sub->unk10 - sub->unk14) * dot);
+                cx = arg0->unk34 + b * v.unk0;
+                cy = arg0->unk38 + b * v.unk4;
+                cz = arg0->unk3C + b * v.unk8;
+                w = (sub->unk8 + (sub->unk0 - sub->unk8) * dot) * sub->unk48;
+                h = (sub->unkC + (sub->unk4 - sub->unkC) * dot) * sub->unk48;
+                dz = invH * size; dz = h * dz;
+                p = -v.unk0 * v.unk4 * dz;
+                a = w * invH;
+                s = -v.unk8 * v.unk4 * dz;
+                r = h * horiz * invDist;
+                q = -v.unk8 * a;
+                u = -v.unk0 * a;
+                vertices->x = p + q + cx;
+                vertices->y = r + cy;
+                vertices->z = s - u + cz;
+                vertices->flag = 0;
+                vertices++;
+                vertices->x = p - q + cx;
+                vertices->y = r + cy;
+                vertices->z = s + u + cz;
+                vertices->flag = 0;
+                vertices++;
+                vertices->x = -p - q + cx;
+                vertices->y = cy - r;
+                vertices->z = -s + u + cz;
+                vertices->flag = 0;
+                vertices++;
+                vertices->x = -p + q + cx;
+                vertices->y = cy - r;
+                vertices->z = -s - u + cz;
+                vertices->flag = 0;
+                alpha = (sub->unk1C + (sub->unk18 - sub->unk1C) * dot) * 255.0f;
+                arg0->unk5C = (sub->alpha[arg1] * alpha) >> 8;
+                if (sub->unk44 != NULL) {
+                    sub->unk44[0x30] = (arg0->unk5C * arg0->unk2B) >> 8;
+                }
+                return result;
+            }
+        }
+        }
+    }
+    return NULL;
+}
 
 void func_151411A4(struct210 *arg0) {
     func_1513CA6C(arg0);
