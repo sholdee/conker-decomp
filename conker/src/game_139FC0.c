@@ -87,7 +87,96 @@ Gfx *func_1510CDB8(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3) {
     return arg0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_139FC0/func_1510CE60.s")
+extern void *allocate_memory(s32, s32, s32, s32);
+extern s32 func_1510D0EC(s32, s32 *, s32, s32);
+
+s32 func_1510CE60(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s16 **arg4) {
+    s32 seg;
+    s32 i;
+    s32 out;
+    s32 flags;
+    s32 w1;
+    s32 failed;
+    s32 addr;
+    s32 v;
+    s32 count;
+    s16 *list;
+    s32 bit;
+    s32 j;
+    Gfx *gfx;
+    u8 used[971];
+
+    if (1) {}
+    if (1) {}
+    if (&arg4 == NULL) {}
+    failed = 0;
+    if (arg4 != NULL) {
+        for (i = 0; i < 971; i++) {
+            used[i] = 0;
+        }
+        count = 0;
+    }
+    for (i = 0; *(s8 *)&arg0[i] != (s8)G_ENDDL; i++) {
+        gfx = &arg0[i];
+        if (*(s8 *)&arg0[i] == (s8)G_SETTIMG) {
+            w1 = gfx->words.w1;
+            if ((arg1 == 0 || !(w1 & 0xFF000000)) && (u32)(w1 & 0xFF000000) < 0x06000000) {
+                flags = w1 >> 22;
+                seg = w1 & 0x0F000000;
+                w1 &= 0xF03FFFFF;
+                if (seg == 0) {
+                    addr = func_1510D0EC(w1, &out, arg3, arg2);
+                    gfx->words.w1 = addr;
+                    if (arg4 != NULL) {
+                        v = 1 << (w1 & 7);
+                        if (!(used[w1 >> 3] & v)) {
+                            used[w1 >> 3] |= v;
+                            count++;
+                        }
+                    }
+                } else {
+                    flags = 0;
+                }
+                if (addr == 0x80000000) {
+                    failed = 1;
+                }
+                if (flags != 0) {
+                    if (flags & 1) {
+                        gfx->words.w1 += out - 0x200;
+                    } else if (flags & 2) {
+                        gfx->words.w1 += out - 0x20;
+                    }
+                    gfx->words.w1 |= (flags & 0x3C) << 22;
+                }
+            }
+        }
+    }
+    if (arg4 != NULL) {
+        list = allocate_memory((count + 1) << 1, 1, 0, 2);
+        *arg4 = list;
+        if (list != NULL) {
+            *list++ = count;
+            bit = 1;
+            i = 0;
+            v = 0;
+            j = 0;
+            while (i != count) {
+                if (used[j] & bit) {
+                    list[i] = v;
+                    i++;
+                }
+                if (bit != 0x80) {
+                    bit <<= 1;
+                } else {
+                    bit = 1;
+                    j++;
+                }
+                v++;
+            }
+        }
+    }
+    return failed == 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_139FC0/func_1510D0EC.s")
 
