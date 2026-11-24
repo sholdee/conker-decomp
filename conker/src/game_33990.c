@@ -11,6 +11,7 @@ extern u8 D_800BE35A[];
 extern s8 D_800E0BE0[0x1C];
 extern u8 D_800E0BFC;
 extern u8 D_800D2E69;
+static s8 D_800BE3D8[4];
 extern void *D_80082BBC;
 extern u8 D_8008FE30;
 
@@ -150,7 +151,7 @@ void func_15006590(s32 arg0) {
             }
         }
         if (D_80082BC0 != 0 && sp7F < 3) {
-            (&D_800BE3D8)[arg0] = sp7F;
+            D_800BE3D8[arg0] = sp7F;
             if (((LoadSlot33990 *)&D_800BE3F8)[sp7F].unk8 < sp78) {
                 cnt = 0;
                 for (i = 0; i < 27; i++) {
@@ -289,7 +290,7 @@ void func_1500707C(s32 arg0) {
     s8 *p3D8;
     for (i = 0; i < 8; i++) { p358[i] = 0xFF; }
     osWritebackDCacheAll();
-    p3D8 = &D_800BE3D8;
+    p3D8 = D_800BE3D8;
     if (D_8002AC5C == 0) {
         for (i = 0; i < 4; i++) {
             if (arg0 == *p3D8) {
@@ -477,20 +478,19 @@ void func_15007750(s32 arg0) {
     }
 }
 
-// PERMUTER CANDIDATE best 3600: struct stores + loop2 (D_800D2E60 clear) match; blocker is IDO
-// unrolling the 27-iter D_800D2E4C byte-clear (target leaves it rolled, reloading the pointer each
-// iter) + the final four -1 stores materialize fresh regs in target. Reconstruction:
-// void func_15007778(void) {
-//     u8 *q; s32 i;
-//     ((struct162 *)&D_800BE3F8)->unk8 = -1;
-//     ((struct162 *)&D_800BE3F8)->unk18 = -1;
-//     ((struct162 *)&D_800BE3F8)->unk28 = -1;
-//     ((struct162 *)&D_800BE3F8)->unkE = -1;
-//     ((struct162 *)&D_800BE3F8)->unk1E = -1;
-//     ((struct162 *)&D_800BE3F8)->unk2E = -1;
-//     D_800BE3DC = -1; D_800BE3DE = 0; D_80082BC0 = 1;
-//     i = 0; do { ((u8 *)D_800D2E4C)[i] = 0; i++; } while (i < 27);
-//     q = D_800D2E60; do { *q++ = 0; } while (q < &D_800D2E69);
-//     D_800BE3DB = -1; D_800BE3DA = -1; D_800BE3D9 = -1; D_800BE3D8 = -1;
-// }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_33990/func_15007778.s")
+void func_15007778(void) {
+    s32 i;
+    ((struct162 *)&D_800BE3F8)->unk8 = -1;
+    ((struct162 *)&D_800BE3F8)->unk18 = -1;
+    ((struct162 *)&D_800BE3F8)->unk28 = -1;
+    ((struct162 *)&D_800BE3F8)->unkE = -1;
+    ((struct162 *)&D_800BE3F8)->unk1E = -1;
+    ((struct162 *)&D_800BE3F8)->unk2E = -1;
+    D_800BE3DC = -1;
+    D_800BE3DE = 0;
+    D_80082BC0 = 1;
+    for (i = 0; i < 27; i++) { ((u8 *)D_800D2E4C)[i] = 0; }
+    for (i = 0; i < 9; i++) { D_800D2E60[i] = 0; }
+    for (i = 0; i < 4; i++) { D_800BE3D8[i] = -1; }
+}
+

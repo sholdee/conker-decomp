@@ -833,7 +833,6 @@ extern s32 D_800BE9F0;
 extern s32  D_800BE2B0[]; // type?
 extern OSMesg  D_800BE2D0;
 extern u8   D_800BE358[8];
-extern s8   D_800BE3D8;
 extern s8   D_800BE3D9;
 extern s8   D_800BE3DA;
 extern s8   D_800BE3DB;
