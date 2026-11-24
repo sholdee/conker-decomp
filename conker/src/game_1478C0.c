@@ -560,7 +560,24 @@ extern void func_1508EE0C(s32, s32);
 extern void func_151D69B4(void *, void *);
 void func_15119FC0(Obj15119FC0 *arg0);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1478C0/func_1511A410.s")
+s32 func_1511A410(s32 arg0, s32 *arg1) {
+    s32 count;
+    s32 found[2];
+    s32 i;
+
+    found[0] = 0;
+    found[1] = 0;
+    count = 0;
+    for (i = 0; *(s8 *)((i << 3) + arg0) != -0x21 && count < 2; i++) {
+        switch (*(s8 *)((i << 3) + arg0)) {
+        case -3:
+            found[count++] = i;
+            break;
+        }
+    }
+    *arg1 = found[1];
+    return found[0];
+}
 
 typedef struct {
     s32 *unk0;
