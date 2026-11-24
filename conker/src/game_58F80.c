@@ -845,7 +845,114 @@ s32 func_1502DB20(s32 arg0) {
     return D_800C4ED0[arg0];
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502DB84.s")
+extern s32 D_800C4BE0[];
+extern u8 *D_8008422C[];
+extern s32 D_80088554;
+extern s32 D_80088558;
+extern s32 D_8008857C;
+extern u8 D_800C3FFA;
+extern s32 func_1503CF20(s32, s32, void *, s32, s32);
+extern s32 func_150838EC(struct127 *arg0, s32 arg1, s32 arg2, f32 arg3);
+extern void func_15033FE0(void *, s32);
+extern void func_1502D824(s32, struct127 *, void *);
+extern void func_150A81D0(s32 *, s32, struct197 *, s32, s32, void *, u8 *, s32);
+extern void bzero(void *, int);
+
+void func_1502DB84(f32 arg0[4][4], s32 arg1) {
+    s16 cmd[42];
+    s32 id;
+    u8 *ptr;
+    struct127 *obj;
+    s32 count;
+    s32 v;
+    u8 buf98[0x320];
+    u8 buf54[0x44];
+    struct129 *u144;
+
+    obj = &D_800CC2D0[arg1];
+    id = obj->id;
+    ptr = NULL;
+    if ((&D_800D19A0)[id] == 0) {
+        u144 = obj->unk144;
+        if (func_1503CF20(id, 0, u144, 1, obj->padAC) != 0) {
+            obj->unk1D4 = NULL;
+            return;
+        }
+        if ((&D_800D19A0)[id] == 0) {
+            obj->unk1D4 = NULL;
+            return;
+        }
+    }
+    if (obj->unk2D0 != NULL) goto ok;
+    L2:
+    if (func_150838EC(obj, 0, 0, 1.0f) == 0) {
+    ok:
+        if (D_800C4ED0[id] < 2 || obj->unk2D0 != NULL) {
+            count = func_1502DB20(id);
+            if ((u32)(D_800C3E7C << 6) < (u32)(D_800C3E88 + (count << 6) - D_800C3E8C)) {
+                obj->unk1D4 = NULL;
+                return;
+            }
+            func_1502FD70(obj);
+            obj->unk1D4 = (struct255 *)D_800C3E88;
+            {
+            s32 k;
+            if (D_800D1C90[id]->data.i.unk1 != 0) {
+                u8 *p;
+
+                D_800C3FFA = 0;
+                bzero(buf54, D_800C4ED0[id]);
+                p = D_8008422C[D_800D1C90[id]->data.i.unk1];
+                while (*p != 0xFF) {
+                    k = p[0];
+                    buf54[k] = p[1];
+                    p += 2;
+                }
+                ptr = buf54;
+            }
+            }
+            func_15033FE0(cmd, arg1);
+            func_1502D824(0, obj, buf98);
+            {
+                s16 scale;
+
+                if (D_800C35EA != 1) {
+                    scale = obj->y_scale * obj->unkCC;
+                } else {
+                    scale = 0;
+                }
+                func_150A81D0(&D_800C3E88, (s32)arg0, obj->unk2D0, D_800C4BE0[id], count, cmd, ptr, scale);
+            }
+            obj->unk7C = D_8008857C;
+            v = D_80088558;
+            if (v != 0) {
+                f32 f0;
+
+                f0 = D_80088554 / 32768.0f;
+                if (obj->unk1FC & 4) {
+                    *(f32 *)&obj->pad1F8 -= v * 0.03125f;
+                }
+                *(f32 *)&obj->unk1F4 = f0 - *(f32 *)&obj->pad1F8;
+                *(f32 *)&obj->pad1F8 = f0;
+                if (obj->unk1FC & 2) {
+                    obj->unk1FC &= 0xFFFC;
+                    *(f32 *)&obj->unk1F4 = obj->xz_velocity;
+                } else {
+                    obj->unk1FC |= 1;
+                }
+                if (obj->unk246 & 0x40) {
+                    f0 = v * 0.03125f;
+                    if (1) {}
+                    f0 = obj->xz_scale * f0;
+                    f0 = f0 / obj->unk2D0->unk18;
+                    f0 = *(volatile f32 *)&obj->xz_velocity / f0;
+                    obj->unk2D0->unk10 = f0 * 0.5f;
+                }
+            }
+            D_800C3E7A += count;
+        }
+    }
+}
 
 extern void func_1502DB84(f32 mtx[4][4], s32 arg1);
 typedef struct {
