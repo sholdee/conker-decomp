@@ -419,7 +419,125 @@ void func_151563B8(void *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_183640/func_151564F8.s")
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3f_151564F8;
+
+typedef struct {
+    s16 x, y, z, flag;
+    u8 other[8];
+} Vtx_151564F8;
+
+typedef struct {
+    u8 pad0[0x10];
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    u8 pad1C[0xC];
+    f32 unk28;
+    f32 unk2C;
+    f32 unk30;
+    u8 pad34[0xC];
+    u8 unk40;
+    u8 pad41[3];
+    u16 unk44;
+    u8 pad46[2];
+    f32 unk48;
+    u8 unk4C;
+    u8 pad4D[0xB];
+    u8 vertexTemplate[0x30];
+    u8 *buffers[1];
+} Obj_151564F8;
+
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+} Struct15157420_mode;
+
+Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
+Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
+Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
+Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
+Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
+extern Struct15157420_mode D_800A4AC8[];
+void func_151D5D60(void *, s16, s32, void **, u8 *);
+f32 sqrtf(f32);
+#pragma intrinsic(sqrtf)
+
+Gfx *func_151564F8(Gfx *gfx, Obj_151564F8 *arg1, s16 arg2) {
+    Obj_151564F8 *p;
+    Vec3f_151564F8 d;
+    Vec3f_151564F8 v;
+    Vec3f_151564F8 n;
+    Vec3f_151564F8 *eye;
+    f32 lengthSquared;
+    u8 update;
+    s16 flags;
+    s32 modeFlags;
+    Vtx_151564F8 *vtx;
+    u8 mode;
+    u8 cyc;
+    u8 fresh;
+    f32 scale;
+
+    p = arg1;
+    func_151D5D60(arg1->buffers, arg2, 0x30, (void **)&vtx, &fresh);
+    if (fresh != 0) {
+        memcpy(arg1->buffers[arg2], arg1->vertexTemplate, 0x30);
+        memcpy(arg1->buffers[arg2] + 0x30, arg1->vertexTemplate, 0x30);
+    }
+    eye = (Vec3f_151564F8 *)&D_800DBFF0[arg2].unk2F8;
+    update = 1;
+    flags = arg1->unk40 & 6;
+    mode = arg1->unk44 & 0xFF;
+    cyc = (arg1->unk44 & 0xFF00) >> 8;
+    modeFlags = 0;
+    if (flags & 2) {
+        modeFlags = 0x200;
+    }
+    if (flags & 4) {
+        modeFlags |= 0x400;
+    }
+    gfx = func_15142B7C(gfx, modeFlags | 1 | 4 | 0x200000, 0x1F0600);
+    gfx = func_15142C10(gfx, 0, 0, 0, arg1->unk4C, &update);
+    gfx = func_15142CF0(gfx, 0, 0, 0, 0, 0, 0, &update);
+    gfx = func_1513F4E4(gfx, cyc, &update);
+    gfx = func_15142FBC(gfx, 0x82CA0, D_800A4AC8[mode].unk0 | D_800A4AC8[mode].unk4, &update);
+    d.x = p->unk10 - p->unk28;
+    d.y = p->unk14 - p->unk2C;
+    d.z = p->unk18 - p->unk30;
+    v.x = p->unk10 - eye->x;
+    v.y = p->unk14 - eye->y;
+    v.z = p->unk18 - eye->z;
+    n.x = d.y * v.z - v.y * d.z;
+    n.y = d.z * v.x - v.z * d.x;
+    n.z = d.x * v.y - v.x * d.y;
+    lengthSquared = n.x * n.x + n.y * n.y + n.z * n.z;
+    if (lengthSquared == 0.0f) {
+        n.x = 0.0f;
+        n.y = 0.0f;
+        n.z = 0.0f;
+    } else {
+        scale = p->unk48 / sqrtf(lengthSquared);
+        n.x *= scale;
+        n.y *= scale;
+        n.z *= scale;
+    }
+    vtx[0].x = p->unk28;
+    vtx[0].y = p->unk2C;
+    vtx[0].z = p->unk30;
+    vtx[1].x = p->unk10 + n.x;
+    vtx[1].y = p->unk14 + n.y;
+    vtx[1].z = p->unk18 + n.z;
+    vtx[2].x = p->unk10 - n.x;
+    vtx[2].y = p->unk14 - n.y;
+    vtx[2].z = p->unk18 - n.z;
+    gSPVertex(gfx++, vtx, 3, 0);
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    return gfx;
+}
 
 void func_151568F8(struct151568F8_src *arg0, s32 arg1) {
     struct151568F8_first first;
@@ -718,11 +836,6 @@ typedef struct {
 } Struct15157420_60;
 
 typedef struct {
-    s32 unk0;
-    s32 unk4;
-} Struct15157420_mode;
-
-typedef struct {
     u8 pad0[0x10];
     u8 unk10;
     u8 pad11[0x2];
@@ -767,18 +880,12 @@ typedef struct {
 
 extern Gfx *(*D_8008ADBC[])(Gfx *, Struct15157420 *, s16, u8 *, u8 *);
 extern Gfx *(*D_8008ADCC[])(Gfx *, Struct15157420 *, s16, u8 *);
-extern Struct15157420_mode D_800A4AC8[];
 extern u8 D_80083740[];
 extern u8 D_800838C0[];
 extern u8 D_80083A40[];
 extern u8 D_80083BC0[];
 extern u8 D_800BE9C0;
 
-Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
-Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
-Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
 void func_151441A4(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, u8 arg9, u8 arg10, u8 arg11, u8 arg12, u8 arg13);
 void func_151442FC(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 arg10, u8 arg11, u8 arg12, u8 arg13);
 void *func_151462C8(void *arg0, void *arg1, u8 arg2, void *arg3, u8 arg4, s16 arg5, void *arg6, u8 arg7, s32 arg8);
