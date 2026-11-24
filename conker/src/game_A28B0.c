@@ -2295,7 +2295,48 @@ void func_1507A984(void) {
 }
 
 // requires jump table
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_1507AA48.s")
+typedef struct { s16 x, y, z, w; } E;
+void func_1507AA48(void) {
+    u16 val;
+    E *tbl;
+    s32 ang;
+
+    val = (D_800D1890 << 8) | D_800D1891;
+    switch (D_800D1892) {
+    case 0:
+        D_800D154C->unk78 = D_800D154C->unk76 + val;
+        break;
+    case 1:
+        D_800D154C->unk78 = D_800D154C->unk76 - val;
+        break;
+    case 2:
+        D_800D154C->unk78 = val;
+        break;
+    case 3:
+        do {
+            D_800D154C->unk76 = D_800D154C->unk78;
+            D_800D154C->unk7A = D_800D154C->unk78;
+        } while (0);
+        break;
+    case 4:
+        tbl = (E *)D_800D2104[D_800D154C->unk13F];
+        ang = (u16)(func_150484A0(tbl[D_800D1891 + 1].x - tbl[D_800D1890 + 1].x, tbl[D_800D1891 + 1].z - tbl[D_800D1890 + 1].z) * 10430.37793f) + (D_800D1893 << 8);
+        D_800D154C->unk78 = ang + 0x4000;
+        break;
+    case 5:
+        D_800D154C->unk78 = func_150ADA20();
+        break;
+    case 6:
+        D_800D154C->unk78 = D_800D154C->unk76;
+        break;
+    case 7:
+        D_800D154C->unk76 = D_800CC2D0[D_800D154C->unk222].unk7A + val;
+        break;
+    case 8:
+        D_800D154C->unk76 = D_800D154C->unk7A;
+        break;
+    }
+}
 
 void func_1507ACB0(void) {
     D_800D154C->unk220 = D_800D1890;
