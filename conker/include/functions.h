@@ -1100,7 +1100,7 @@ struct210 *func_1513C350(struct210 *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, s
 void *func_1513D2F0(void *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, u8 argA, s32 argB);
 s32  func_1513D6FC(struct211 *arg0, s16 arg1, f32 arg2, f32 arg3, s32 arg4, s32 arg5, u8 arg6);
 void  func_1513E13C(struct210 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 arg6);
-s32  func_1513E2AC(s32, s32, s32, f32, f32, f32, f32, f32, s32);
+s32  func_1513E2AC(s32, s32, s32, f32, f32, f32, f32, f32, u8);
 f32  func_151423D8(u8);
 f32  func_15144598(struct134 *arg0);
 f32  func_1514462C(s32 arg0);

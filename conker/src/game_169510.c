@@ -1180,7 +1180,118 @@ void func_1513E13C(struct210 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 
 void func_1513E2A4(void) {
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513E2AC.s")
+typedef struct {
+    u8 pad0[0x40];
+    Vtx_t v[4];
+} Quad1513E2AC;
+
+s32 func_1513E2AC(s32 arg0, s32 arg1, s32 arg2, f32 x, f32 y, f32 z, f32 w, f32 h, u8 angle) {
+    Vtx_t *vtx;
+    f32 s;
+    f32 c;
+    f32 ux;
+    f32 uy;
+    f32 uz;
+    f32 vx;
+    f32 vy;
+    f32 vz;
+    Vec1513D6FC a;
+    Vec1513D6FC b;
+    f32 wc;
+    f32 ws;
+    f32 hs;
+    f32 hc;
+    f32 outA;
+    f32 outB;
+    s16 i;
+    f32 pts[4][2];
+    f32 bx;
+    f32 by;
+    f32 ky;
+    f32 kx;
+    f32 x0;
+    Vtx_t *v;
+
+    vtx = ((Quad1513E2AC *)arg0)->v;
+    s = func_151423D8(angle - 0x40);
+    c = func_151423D8(angle);
+    if (arg2 != 0) {
+        v = vtx;
+        if (func_15144E80(arg2, &a, &b, 0) == 0) {
+            return 0;
+        }
+        func_15145128(&a, &a, 0, 0);
+        func_15145128(&b, &b, 0, 0);
+        {
+            f32 pad;
+
+            wc = w * c;
+            ws = w * s;
+            ux = wc * a.x + ws * b.x;
+            uy = wc * a.y + ws * b.y;
+            uz = wc * a.z + ws * b.z;
+            hs = -h * s;
+            hc = h * c;
+            vx = hs * a.x + hc * b.x;
+            vy = hs * a.y + hc * b.y;
+            vz = hs * a.z + hc * b.z;
+        }
+        v[0].ob[0] = x - ux + vx;
+        v[0].ob[1] = y - uy + vy;
+        v[0].ob[2] = z - uz + vz;
+        v[1].ob[0] = x + ux + vx;
+        v[1].ob[1] = y + uy + vy;
+        v[1].ob[2] = z + uz + vz;
+        v[2].ob[0] = x + ux - vx;
+        v[2].ob[1] = y + uy - vy;
+        v[2].ob[2] = z + uz - vz;
+        v[3].ob[0] = x - ux - vx;
+        v[3].ob[1] = y - uy - vy;
+        v[3].ob[2] = z - uz - vz;
+        return 1;
+    }
+    if (func_1510E388(arg1, arg2, &outA, &outB) == 0) {
+        return 0;
+    }
+    hc = h * c;
+    wc = w * c;
+    hs = h * s;
+    ws = w * s;
+    pts[0][0] = wc - hs;
+    pts[0][1] = hc + ws;
+    pts[1][0] = -wc - hs;
+    pts[1][1] = hc - ws;
+    pts[2][0] = -wc + hs;
+    pts[2][1] = -hc - ws;
+    pts[3][0] = wc + hs;
+    pts[3][1] = -hc + ws;
+    for (i = 0; i < 4; i++) {
+        f32 pad2;
+
+        by = pts[i][1] * outB;
+        ky = fabsf(pts[i][1]);
+        ky = fabsf(pts[i][1] * pts[i][1]);
+        ky = fabsf(by); ky = fabsf(by - 1.0f);
+        if (pts[i][0] != 0) {
+            bx = pts[i][0] * outA;
+            kx = fabsf(pts[i][0]) / sqrtf(pts[i][0] * pts[i][0] + bx * bx);
+        } else {
+            bx = 0.0f;
+            kx = 0.0f;
+        }
+        if (pts[i][1] != 0) {
+            ky = fabsf(pts[i][1]) / sqrtf(pts[i][1] * pts[i][1] + by * by);
+        } else {
+            by = 0.0f;
+            ky = 0.0f;
+        }
+        vtx->ob[0] = pts[i][0] * kx + x;
+        vtx->ob[1] = kx * bx + y + ky * by + 0.5f;
+        vtx->ob[2] = pts[i][1] * ky + z;
+        vtx++;
+    }
+    return 1;
+}
 
 typedef struct {
     f32 unk0;
@@ -1757,7 +1868,7 @@ void *func_1513FAB4(Beam1513FAB4 *arg0, u8 arg1, Scale1513FAB4 *arg2, s16 arg3) 
         vertices->flag = 0;
         /* IDO ugen reads stale tree-node memory left by earlier functions in this file;
            these empty statements pad the node count so that state lines up. */
-        ;;;;;;;;;;;;;;;;;;;;
+        ;
         vertices++;
         vertices->x = end.x - side.x;
         vertices->y = end.y - side.y;
@@ -1773,6 +1884,7 @@ void *func_1513FAB4(Beam1513FAB4 *arg0, u8 arg1, Scale1513FAB4 *arg2, s16 arg3) 
         vertices->y = arg0->start.y - side.y;
         vertices->z = arg0->start.z - side.z;
         vertices->flag = 0;
+        ;;;;;;;;
         vertices++;
         vertices->x = end.x - side.x;
         vertices->y = end.y - side.y;
