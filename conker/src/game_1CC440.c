@@ -693,7 +693,307 @@ s32 func_1519F7F0(struct Obj1519F7F0 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1CC440/func_1519FE6C.s")
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3f_1519FE6C;
+
+typedef struct {
+    f32 x;
+    f32 z;
+    f32 y;
+    f32 width;
+    s16 unk10;
+    s16 unk12;
+    s16 unk14;
+    s16 unk16;
+    u8 pad18[0xC];
+} Elem1519FE6C;
+
+typedef struct {
+    u8 pad0[4];
+    u8 unk4;
+    u8 pad5[0x25];
+    u8 unk2A;
+    u8 unk2B;
+    u8 unk2C;
+    u8 pad2D[0xB];
+    f32 unk38;
+    u8 pad3C[4];
+    u8 unk40;
+    u8 unk41;
+    u8 unk42;
+    u8 unk43;
+    u8 pad44[2];
+    s16 unk46;
+    u8 pad48[2];
+    s16 unk4A;
+} Params1519FE6C;
+
+typedef struct {
+    u8 pad0[0x10];
+    Vec3f_1519FE6C unk10;
+    u8 pad1C[2];
+    u16 unk1E;
+    s32 unk20;
+    u8 pad24;
+    u8 unk25;
+    u8 pad26[6];
+    s8 unk2C;
+    s8 unk2D;
+    s8 unk2E;
+    u8 pad2F[0x55];
+    u8 unk84[0x10];
+    Elem1519FE6C *unk94;
+    Params1519FE6C *unk98;
+} Obj1519FE6C;
+
+extern u8 D_80090E0C[];
+extern s32 D_800D2C9C;
+void func_151D5D60(void *, s16, s32, void **, u8 *);
+Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
+Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
+Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
+Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
+Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
+Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
+
+#define EL(n) ((Elem1519FE6C *)((u8 *)elems + (n) * sizeof(Elem1519FE6C)))
+Gfx *func_1519FE6C(Obj1519FE6C *arg0, Gfx *gfx, s16 arg2) {
+    Vtx *vtx;
+    Params1519FE6C *params;
+    Elem1519FE6C *elems;
+    Vec3f_1519FE6C cur;
+    Vec3f_1519FE6C prev;
+    s32 i;
+    s32 j;
+    f32 nx;
+    s16 cnt1;
+    s16 cnt2;
+    s16 prevColor;
+    s16 curColor;
+    s32 prevAlpha;
+    s32 curAlpha;
+    f32 dx;
+    f32 dz;
+    f32 prevWidth;
+    s32 a;
+    s32 b;
+    s16 tc[3];
+    u8 alpha1;
+    u8 alpha2;
+    u8 update;
+    f32 curWidth;
+    f32 invlen;
+    f32 nz;
+    s32 k;
+
+    if (arg0->unk2C >= 2) {
+        func_151D5D60(arg0->unk84, arg2, (arg0->unk25 * 3 << 4) + 0x120, (void **)&vtx, 0);
+        if (vtx != NULL) {
+            params = arg0->unk98;
+            elems = arg0->unk94;
+            update = 1;
+            if (params->unk4 & 2) {
+                alpha1 = 0;
+                cnt1 = params->unk40;
+                j = arg0->unk2D;
+                do {
+                    elems[j].unk14 = alpha1;
+                    j++;
+                    alpha1 += params->unk41;
+                    if (j == arg0->unk25) {
+                        j = 0;
+                    }
+                    cnt1--;
+                } while (cnt1 != 0 && j != arg0->unk2E);
+                do { } while (0);
+            }
+            if (params->unk4 & 4) {
+                alpha2 = 0;
+                cnt2 = params->unk42;
+                j = arg0->unk2E - 1;
+                if (j < 0) {
+                    j = arg0->unk25 - 1;
+                }
+                do {
+                    elems[j].unk14 = (elems[j].unk14 * alpha2) >> 8;
+                    j--;
+                    alpha2 += params->unk43;
+                    cnt2--;
+                    if (j < 0) {
+                        j = arg0->unk25 - 1;
+                    }
+                } while (cnt2 != 0 && j != arg0->unk2E);
+            }
+            gfx = func_15142E24(gfx, (s32)D_80090E0C, 0, 0, 0, 0, 0x39, 0, 0, &update, 0x3E);
+            gfx = func_15142B7C(gfx, 1, 0x160600);
+            gfx = func_15142C10(gfx, params->unk2A, params->unk2B, params->unk2C, 0xFF, &update);
+            gfx = func_15142CF0(gfx, 0, 0, 0xFF, 0xFF, 0xFF, 0, &update);
+            gfx = func_1513F4E4(gfx, 7, &update);
+            gfx = func_15142FBC(gfx, G_TP_PERSP | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, 0x5049D8, &update);
+            if (arg0->unk1E & 2) {
+                i = arg0->unk2E - 1;
+                if (i < 0) {
+                    i = arg0->unk25 - 1;
+                }
+                prev = arg0->unk10;
+                prevAlpha = (EL(i)->unk14 * EL(i)->unk10) >> 8;
+                prevColor = EL(i)->unk16;
+                prevWidth = params->unk38;
+            } else {
+                k = arg0->unk2E - 1;
+                if (k < 0) {
+                    k = arg0->unk25 - 1;
+                }
+                i = k - 1;
+                if (i < 0) {
+                    i = arg0->unk25 - 1;
+                }
+                prev.x = EL(k)->x;
+                prev.y = EL(k)->y;
+                prev.z = EL(k)->z;
+                prevAlpha = (EL(k)->unk14 * EL(k)->unk10) >> 8;
+                prevWidth = EL(k)->width;
+                prevColor = EL(k)->unk16;
+            }
+            cur.x = EL(i)->x;
+            cur.y = EL(i)->y;
+            cur.z = EL(i)->z;
+            b = 2;
+            curColor = EL(i)->unk16;
+            curWidth = EL(i)->width;
+            curAlpha = (EL(i)->unk14 * EL(i)->unk10) >> 8;
+            dx = cur.x - prev.x;
+            dz = cur.z - prev.z;
+            if (0.0001f < fabsf(dx) || 0.0001f < fabsf(dz)) {
+                invlen = 1.0f / sqrtf(dx * dx + dz * dz);
+            } else {
+                invlen = 1.0f;
+            }
+            tc[0] = params->unk46;
+            tc[2] = params->unk46 + params->unk4A;
+            if (tc[2] < tc[0]) {
+                tc[0] = tc[0] % 1024;
+                params->unk46 = tc[0];
+                tc[2] = params->unk46 + params->unk4A;
+            }
+            tc[1] = (tc[0] + tc[2]) >> 1;
+            if (arg0->unk20 == 6) {
+                a = 0;
+            } else if (arg0->unk20 == 7) {
+                a = 2;
+                b = 0;
+            } else {
+                b = 0;
+                a = 2;
+            }
+            nx = -dz * invlen * prevWidth;
+            nz = dx * invlen * prevWidth;
+            vtx->v.ob[0] = prev.x + nx;
+            vtx->v.ob[1] = prev.y;
+            vtx->v.ob[2] = prev.z + nz;
+            vtx->v.tc[0] = prevColor;
+            vtx->v.tc[1] = tc[a];
+            vtx->v.cn[0] = 0xFF;
+            vtx->v.cn[1] = 0xFF;
+            vtx->v.cn[2] = 0xFF;
+            vtx->v.cn[3] = 0;
+            vtx->v.flag = 0;
+            vtx++;
+            vtx->v.ob[0] = prev.x;
+            vtx->v.ob[1] = prev.y;
+            vtx->v.ob[2] = prev.z;
+            vtx->v.tc[0] = prevColor;
+            vtx->v.tc[1] = tc[1];
+            vtx->v.cn[0] = 0xFF;
+            vtx->v.cn[1] = 0xFF;
+            vtx->v.cn[2] = 0xFF;
+            vtx->v.cn[3] = prevAlpha;
+            vtx->v.flag = 0;
+            vtx++;
+            vtx->v.ob[0] = prev.x - nx;
+            vtx->v.ob[1] = prev.y;
+            vtx->v.ob[2] = prev.z - nz;
+            vtx->v.tc[0] = prevColor;
+            vtx->v.tc[1] = tc[b];
+            vtx->v.cn[0] = 0xFF;
+            vtx->v.cn[1] = 0xFF;
+            vtx->v.cn[2] = 0xFF;
+            vtx->v.cn[3] = 0;
+            vtx->v.flag = 0;
+            vtx++;
+            do {
+                nx = -dz * invlen * curWidth;
+                nz = dx * invlen * curWidth;
+                vtx->v.ob[0] = cur.x + nx;
+                vtx->v.ob[1] = cur.y;
+                vtx->v.ob[2] = cur.z + nz;
+                vtx->v.tc[0] = curColor;
+                vtx->v.tc[1] = tc[a];
+                vtx->v.cn[0] = 0xFF;
+                vtx->v.cn[1] = 0xFF;
+                vtx->v.cn[2] = 0xFF;
+                vtx->v.cn[3] = 0;
+                vtx->v.flag = 0;
+                vtx++;
+                vtx->v.ob[0] = cur.x;
+                vtx->v.ob[1] = cur.y;
+                vtx->v.ob[2] = cur.z;
+                vtx->v.tc[0] = curColor;
+                vtx->v.tc[1] = tc[1];
+                vtx->v.cn[0] = 0xFF;
+                vtx->v.cn[1] = 0xFF;
+                vtx->v.cn[2] = 0xFF;
+                vtx->v.cn[3] = curAlpha;
+                vtx->v.flag = 0;
+                vtx++;
+                vtx->v.ob[0] = cur.x - nx;
+                vtx->v.ob[1] = cur.y;
+                vtx->v.ob[2] = cur.z - nz;
+                vtx->v.tc[0] = curColor;
+                vtx->v.tc[1] = tc[b];
+                vtx->v.cn[0] = 0xFF;
+                vtx->v.cn[1] = 0xFF;
+                vtx->v.cn[2] = 0xFF;
+                vtx->v.cn[3] = 0;
+                vtx->v.flag = 0;
+                vtx++;
+                gSPVertex(gfx++, vtx - 6, 6, 0);
+                gSP1Triangle(gfx++, 0, 3, 4, 0);
+                gSP1Triangle(gfx++, 0, 4, 1, 0);
+                gSP1Triangle(gfx++, 1, 4, 5, 0);
+                gSP1Triangle(gfx++, 1, 5, 2, 0);
+                if (prevColor != curColor) {
+                }
+                k = i--;
+                if (i < 0) {
+                    i = arg0->unk25 - 1;
+                }
+                if (k != arg0->unk2D) {
+                    prev = cur;
+                    cur.x = EL(i)->x;
+                    cur.y = EL(i)->y;
+                    cur.z = EL(i)->z;
+                    dx = cur.x - prev.x;
+                    dz = cur.z - prev.z;
+                    prevColor = curColor;
+                    curColor = EL(i)->unk16;
+                    curAlpha = (EL(i)->unk14 * EL(i)->unk10) >> 8;
+                    if (dx != 0.0f || dz != 0.0f) {
+                        invlen = 1.0f / sqrtf(dx * dx + dz * dz);
+                    } else {
+                        invlen = 1.0f;
+                    }
+                    curWidth = EL(i)->width;
+                }
+            } while (k != arg0->unk2D);
+        }
+    }
+    return gfx;
+}
+
 
 typedef struct Node151A084CData {
     s32 field0;
