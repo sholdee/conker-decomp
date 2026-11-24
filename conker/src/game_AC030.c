@@ -353,18 +353,247 @@ void func_1507F54C(struct127 *arg0) {
     func_1505E650(arg0, 0xF, 1.0f, 3.0f, 0.0f, 0.0f, 0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_AC030/func_1507F640.s")
+typedef struct {
+    u16 anim;
+    u8 speed;
+    u8 blend;
+    u8 time;
+    u8 pad5;
+    u8 unk6;
+    u8 unk7;
+} MoveFlags;
+typedef MoveFlags AnimEntry_1507F640;
+extern MoveFlags D_8009B8B0[];
+void func_1507CD64(struct127 *arg0, s32 arg1);
+
+void func_1507F640(void) {
+    s32 type;
+    AnimEntry_1507F640 *entry;
+    u8 *state;
+    u8 *s;
+    f32 speed;
+    f32 blend;
+    s32 anim;
+    s32 anim2;
+    s32 pose;
+    s32 k;
+
+    speed = 1.0f;
+    blend = 4.0f;
+    if (D_800C35EA == 1) {
+        return;
+    }
+    if (D_800D154C->unk5 == 4) {
+        return;
+    }
+    if (D_800C3E78 >= D_8008FD8C) {
+        return;
+    }
+    state = (u8 *)D_800D154C->unk31C + 0x58;
+    state[0] = 1;
+    if (D_800D154C->unk2F8 & 0x20) {
+        return;
+    }
+    if (((u8 *)D_800D154C->unk31C)[0x120]) {
+        return;
+    }
+    if (state[1] > 0) {
+        state[1]--;
+        *(s16 *)(state + 2) = 0;
+        return;
+    }
+    if (D_800D154C->health == 0) {
+        func_1507CD64(D_800D154C, 0);
+        return;
+    }
+    anim = 0x4F;
+    if (D_800D154C->disable_run >= 0xFA) {
+        D_800D154C->disable_run = 0;
+    }
+    if (D_800D154C->disable_jump == 0xFF) {
+        D_800D154C->disable_jump = 0;
+    }
+    D_800D154C->unk83 = 0;
+    D_800D154C->unkAA = 0;
+    D_800D154C->unk76 = D_800D154C->unk7A;
+    D_800D154C->unk100 &= 0xFE;
+    D_800D154C->unk2F8 &= 0xFFF8;
+    D_800D154C->unk2F8 |= 0;
+    s = (u8 *)D_800D154C->unk31C;
+    if (s[0x17]) {
+        s32 pad;
+        if (func_150ADA20() & 3) {
+            anim = 0x4D;
+        }
+        func_1505E650(D_800D154C, anim, 1.0f, 4.0f, 0.0f, 0.0f, 0);
+        return;
+    }
+    type = s[0x78];
+    anim2 = -1;
+    switch (type) {
+    case 2:
+    case 19:
+        anim2 = 0x3E;
+        break;
+    case 56:
+        anim2 = 0x1DF;
+        break;
+    case 57:
+        anim2 = 0x1EA;
+        break;
+    case 55:
+        anim2 = 0x1F3;
+        break;
+    case 59:
+        anim2 = 0x221;
+        break;
+    case 38:
+        anim2 = 0x177;
+        break;
+    case 58:
+        anim2 = 0x1FA;
+        break;
+    case 37:
+        anim2 = 0xD8;
+        break;
+    case 45:
+    case 46:
+        anim2 = 0x1AF;
+        break;
+    case 21:
+        anim2 = 0xE2;
+        break;
+    case 12:
+        anim2 = 0xBD;
+        break;
+    case 20:
+    case 63:
+        anim2 = 0xF9;
+        break;
+    case 34:
+        anim2 = 0x15A;
+        break;
+    case 33:
+        anim2 = 0x122;
+        break;
+    case 25:
+    case 64:
+        anim2 = 0x10F;
+        break;
+    case 18:
+        anim2 = 0x10A;
+        break;
+    case 24:
+    case 65:
+        anim2 = 0xC5;
+        break;
+    case 36:
+        anim2 = 0x153;
+        break;
+    }
+    if (s[0x1B2]) {
+        if (type == 0x16) {
+            anim2 = 0x2C5;
+        }
+    }
+    if (s[0x4E] == 2) {
+        anim2 = 5;
+    }
+    if (*(s16 *)(s + 8)) {
+        blend = 8.0f;
+        speed = 1.5f;
+        anim2 = 0xAB;
+    }
+    if (s[0x1A]) {
+        anim2 = 0x63;
+        blend = 8.0f;
+    }
+    if (*(u16 *)(s + 0x32) & 2) {
+        anim2 = 0x6B;
+        blend = 8.0f;
+    } else {
+        if (*(u16 *)(s + 0x32) & 1) {
+            anim2 = 0xAF;
+            blend = 8.0f;
+        }
+    }
+    if (anim2 != -1) {
+        func_1505E650(D_800D154C, anim2, speed, blend, 0.0f, 0.0f, 0);
+        return;
+    }
+    if (D_800D154C->unk13C >= 100) {
+        func_1507F54C(D_800D154C);
+        return;
+    }
+    if (D_800BE616 && type != 0x23 && type != 0x16 && type != 9) {
+        func_1505E650(D_800D154C, 0xF, 1.0f, 3.0f, 0.0f, 0.0f, 0);
+        return;
+    }
+    if (func_1507F454()) {
+        s = (u8 *)D_800D154C->unk31C;
+        if (s[0x198] && state[4] == 0) {
+            switch (s[0x78]) {
+            case 3:
+                anim2 = 0x2C;
+                break;
+            case 0x16:
+                anim2 = 0xBD;
+                break;
+            case 9:
+                anim2 = 0x7F;
+                break;
+            case 0x23:
+                anim2 = 0x165;
+                break;
+            default:
+                func_1507F54C(D_800D154C);
+                return;
+            }
+            if (anim2 != -1) {
+                func_1505E650(D_800D154C, anim2, 1.0f, 4.0f, 0.0f, 0.0f, 0);
+                return;
+            }
+        }
+        func_1507EFD0();
+    }
+    k = state[4];
+    pose = state[5];
+    anim2 = D_80086BA0[k][pose];
+    entry = &D_8009B8B0[anim2];
+    if (anim2 == 0) {
+        s = (u8 *)D_800D154C->unk31C;
+        k = -1;
+        switch (s[0x78]) {
+        case 9:
+            k = 0x3A;
+            break;
+        case 0x23:
+            k = 0x42;
+            break;
+        case 0x16:
+            k = 0x44;
+            break;
+        default:
+            if (D_800D154C->health == 1) {
+                k = 0xE;
+            } else if (s[0x1A]) {
+                k = 0x25;
+            }
+            break;
+        }
+        if (k != -1) {
+            entry = &D_8009B8B0[k];
+        }
+    }
+    func_1505E650(D_800D154C, entry->anim, (u32)entry->speed * 0.009999999776f,
+                  (u32)entry->blend * 0.1000000015f, 0.0f, 0.0f, 0);
+    state[1] = entry->time;
+    state[0] = 1;
+}
 
 extern u8 *D_80086BA0[];
 extern s32 D_800D18C4;
 
-typedef struct {
-    u8 pad0[0x6];
-    u8 unk6;
-    u8 unk7;
-} MoveFlags;
-
-extern MoveFlags D_8009B8B0[];
 
 /* D_800418B0 is really an array of 0x40-byte records; variables.h types it as s32[]. */
 typedef struct {
