@@ -290,7 +290,131 @@ struct Foo1514A4EC {
 };
 s32 func_1514A4EC(struct Foo1514A4EC *arg0);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_177B50/func_1514A6A0.s")
+typedef struct Vec3f1514A6A0 {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3f1514A6A0;
+
+typedef struct Vtx1514A6A0 {
+    s16 x, y, z, flag;
+    u8 other[8];
+} Vtx1514A6A0;
+
+typedef struct Beam1514A6A0 {
+    u8 unknown0[0x2C];
+    f32 width;
+    f32 progress;
+    Vec3f1514A6A0 start;
+    Vec3f1514A6A0 end;
+    f32 radius;
+    u8 unknown50[0x70];
+    u8 vertexTemplate[0x40];
+    u8 *buffers[1];
+} Beam1514A6A0;
+
+void *func_1514A6A0(Beam1514A6A0 *arg0, s16 arg1) {
+    Vtx1514A6A0 *vertices;
+    void *result;
+    f32 distanceSquared;
+    Vec3f1514A6A0 tip;
+    f32 dx, dy, dz;
+    f32 vx, vy, vz;
+    f32 nx, ny, nz;
+    f32 lengthSquared;
+    Vec3f1514A6A0 *eye;
+    f32 radiusSquared;
+    u8 fresh;
+
+    func_151D5D60(arg0->buffers, arg1, 0x40, (void **)&vertices, &fresh);
+    result = vertices;
+    if (vertices != NULL) {
+        if (fresh != 0) {
+            memcpy(arg0->buffers[arg1], arg0->vertexTemplate, 0x40);
+            memcpy(arg0->buffers[arg1] + 0x40, arg0->vertexTemplate, 0x40);
+        }
+    } else {
+        return NULL;
+    }
+    dx = arg0->end.x - arg0->start.x;
+    dy = arg0->end.y - arg0->start.y;
+    dz = arg0->end.z - arg0->start.z;
+    tip.x = arg0->start.x + dx * arg0->progress;
+    tip.y = arg0->start.y + dy * arg0->progress;
+    tip.z = arg0->start.z + dz * arg0->progress;
+    eye = (Vec3f1514A6A0 *)&D_800DBFF0[arg1].unk2F8;
+    dx = tip.x - arg0->start.x;
+    dy = tip.y - arg0->start.y;
+    dz = tip.z - arg0->start.z;
+    distanceSquared = dx * dx + dy * dy + dz * dz;
+    radiusSquared = arg0->radius * arg0->radius;
+    if (distanceSquared < radiusSquared) {
+        f32 factor = 1.0f - sqrtf(distanceSquared) / arg0->radius;
+
+        dx += dx * factor;
+        dy += dy * factor;
+        dz += dz * factor;
+    }
+    vx = arg0->start.x - eye->x;
+    vy = arg0->start.y - eye->y;
+    vz = arg0->start.z - eye->z;
+    nx = dy * vz - vy * dz;
+    ny = dz * vx - vz * dx;
+    nz = dx * vy - vx * dy;
+    lengthSquared = nx * nx + ny * ny + nz * nz;
+    if (lengthSquared == 0.0f) {
+        nx = 0.0f;
+        ny = 0.0f;
+        nz = 0.0f;
+    } else {
+        f32 scale = arg0->width / sqrtf(lengthSquared);
+
+        nx *= scale;
+        ny *= scale;
+        nz *= scale;
+    }
+    vertices->x = arg0->start.x + nx;
+    vertices->y = arg0->start.y + ny;
+    vertices->z = arg0->start.z + nz;
+    vertices->flag = 0;
+    vertices++;
+    vertices->x = arg0->start.x - nx;
+    vertices->y = arg0->start.y - ny;
+    vertices->z = arg0->start.z - nz;
+    vertices->flag = 0;
+    vertices++;
+    dx = -dx;
+    dy = -dy;
+    dz = -dz;
+    vx = tip.x - eye->x;
+    vy = tip.y - eye->y;
+    vz = tip.z - eye->z;
+    nx = dy * vz - vy * dz;
+    ny = dz * vx - vz * dx;
+    nz = dx * vy - vx * dy;
+    lengthSquared = nx * nx + ny * ny + nz * nz;
+    if (lengthSquared == 0.0f) {
+        nx = 0.0f;
+        ny = 0.0f;
+        nz = 0.0f;
+    } else {
+        f32 scale = arg0->width / sqrtf(lengthSquared);
+
+        nx *= scale;
+        ny *= scale;
+        nz *= scale;
+    }
+    vertices->x = tip.x + nx;
+    vertices->y = tip.y + ny;
+    vertices->z = tip.z + nz;
+    vertices->flag = 0;
+    vertices++;
+    vertices->x = tip.x - nx;
+    vertices->y = tip.y - ny;
+    vertices->z = tip.z - nz;
+    vertices->flag = 0;
+    return result;
+}
 
 
 void func_1514AB5C(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, s16 arg9, s16 arg10, u8 arg11) {
