@@ -777,7 +777,200 @@ s32 func_1518652C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1B1600/func_15186794.s")
+struct vtx151873E4 {
+    f32 x;      /* 0x00 */
+    f32 y;      /* 0x04 */
+    f32 z;      /* 0x08 */
+    s32 unkC;   /* 0x0C */
+    s32 unk10;  /* 0x10 */
+};              /* size 0x14 */
+s32 func_151873E4(s32 arg0, s32 arg1, s32 arg2, struct vtx151873E4 *arg3, f32 *arg4, struct vtx151873E4 *arg5, s32 arg6);
+
+extern s32 D_8008D3E0;
+typedef struct { u8 pad0[0x40]; Vp vp[20]; } S180_15186794;
+extern Gfx D_8008D410[];
+extern s32 D_800C48F0[];
+extern Gfx *D_800BE9C8[];
+extern s32 D_800BEBA4;
+extern Vp D_800DF090[];
+extern u8 D_800DF0E0;
+extern s32 func_150849CC(struct127 *, s32 *);
+extern void *allocate_memory(s32, s32, s32, s32);
+extern s32 func_10004074(void *);
+extern void func_1503DA9C(struct127 *, s32, s32, s32);
+
+Gfx *func_15186794(Gfx *gfx, s32 arg1) {
+    struct vtx151873E4 *buf;
+    s32 count;
+    Vtx *verts;
+    u32 total;
+    u32 idx;
+    s32 flag;
+    u32 j;
+    s32 cnt;
+    s32 k;
+    s32 nv;
+    s32 arr[5];
+    s32 i;
+    s32 n;
+    s32 base;
+    f32 *mtx;
+    Gfx *saved;
+    s32 v;
+    s32 sub;
+    f32 f;
+    f32 sx;
+    f32 sy;
+    f32 sz;
+    Gfx *vtxcmd;
+    Gfx *start;
+    s32 id;
+
+    n = 0;
+    start = gfx;
+    if (arg1 != 0) {
+        return gfx;
+    }
+    if (D_800DE01C < D_8008D3E0) {
+        D_8008D3E0 = D_800DE01C;
+        D_800DE028 *= 0.8000000119f;
+    } else {
+        if ((*(u16 *)&D_800B0DF0->pad1C[2]) == 0) {
+            (*(u16 *)&D_800B0DF0->pad1C[2]) = 400;
+        }
+        if (D_8008D3E0 < D_800DE020) {
+            D_800DE028 += ((f32)(u32)(*(u16 *)&D_800B0DF0->pad1C[2]) - D_800DE028) * 0.9499999881f;
+        }
+        if (D_8008D3E0 < D_800DE024) {
+            D_8008D3E0 = D_800DE024;
+        }
+    }
+    verts = allocate_memory(D_8008D3E0 * 0x10 + 0x1C0, 3, 1, 1);
+    if (verts == NULL) {
+        return gfx;
+    }
+    buf = allocate_memory(D_8008D3E0 * sizeof(struct vtx151873E4), 2, 1, 1);
+    if (buf == NULL) {
+        func_10004074(verts);
+        return gfx;
+    }
+    memcpy(&D_800DF090[arg1], &((S180_15186794 *)D_800BE628)[D_80082FA4].vp[D_800BE9C0], sizeof(Vp));
+    D_800DF090[arg1].vp.vtrans[2] = (s32)(D_800DF090[arg1].vp.vtrans[2] * (u32)D_800DE030) >> 10;
+    saved = gfx;
+    total = 0;
+    for (i = 0; i < 25; i++) {
+        if (D_800CC2D0[i].interaction_state == 0 || D_800CC2D0[i].unk1D4 == NULL ||
+            ((v = D_800CC2D0[i].unk74) & (1 << arg1)) || D_800CC2D0[i].unk5 != 0 ||
+            (D_800CC2D0[i].pad66 & 0x10) != 0x10 ||
+            (u32)(D_800CC2D0[i].unk74 & (1 << arg1)) == (u32)(1 << arg1) ||
+            D_800CC2D0[i].unk84.uh == 0x2D8 ||
+            (D_800CC2D0[i].unk31C != NULL && ((u8)D_800CC2D0[i].unk31C->unk95 != 0 || D_800CC2D0[i].unk31C->pad98[0] != 0)) ||
+            (D_800DF0E0 & (1 << i))) {
+            continue;
+        }
+        if (D_800CC2D0[i].unk65 != 0 && D_800CC2D0[i].id != 0x62) {
+            continue;
+        }
+        if (D_800CC2D0[i].pad288[0x40] != 0) {
+            id = func_150849CC(&D_800CC2D0[i], &sub);
+            func_1503DA9C(&D_800CC2D0[i], id, sub, 0);
+        } else {
+            id = D_800CC2D0[i].id;
+            sub = 0;
+        }
+        if (D_800C48F0[id] == 0) {
+            continue;
+        }
+        if (func_15184DF0(i, arg1, &sx, &sy, &sz) == 0) {
+            continue;
+        }
+        f = 0.0f;
+        for (j = 0; j < D_800DE038 && n < 8 && total < D_8008D3E0; j++) {
+            f = func_15184368(i, n, sx, sy, sz, f);
+            if (f == 0.0f) {
+                break;
+            }
+            mtx = (f32 *)D_800DF0F8[n];
+            count = func_151873E4(D_800CC2D0[i].x_position, D_800CC2D0[i].z_position, 0xE6, buf, mtx, &buf[D_8008D3E0 - 2],
+                                  func_1518652C(D_800CC2D0[i].x_position, D_800CC2D0[i].z_position, 0xE6, (s32)buf, (s32)mtx, (s32)&buf[D_8008D3E0 - 2]));
+            if (count != 0) {
+                idx = 0;
+                gfx = func_15184FA4(gfx, i, n, arg1);
+                cnt = 0;
+                if (D_800CC2D0[i].unk127 != 0xFF && D_800CC2D0[i].pad1C8 < 2) {
+                    flag = 1;
+                } else {
+                    if (i + 1 == D_800CC2D0[D_800CC2D0[i].unk124].unk65 && D_800CC2D0[D_800CC2D0[i].unk124].unk127 != 0xFF && D_800CC2D0[i].id == 0x53) {
+                        flag = 1;
+                    } else {
+                        flag = 0;
+                    }
+                }
+                gSPDisplayList(gfx++, D_8008D410);
+                gSPViewport(gfx++, &D_800DF090[arg1]);
+                gDPSetOtherMode(gfx++, 0x082C3F, 0x5049D8);
+                gDPLoadTextureBlock(gfx++, D_800DF088, G_IM_FMT_I, G_IM_SIZ_8b, 64, 64, 0, G_TX_CLAMP, G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+                vtxcmd = gfx++;
+                for (idx = 0; idx < count && total < D_8008D3E0; idx++) {
+                    if ((s32)idx % 3 == 2) {
+                        func_15185F24(&buf[idx - 2], 3, 0x1A, verts, arr, flag);
+                        for (k = 0; k < 4; k++) {
+                            nv = arr[k + 1] - arr[k];
+                            cnt += nv;
+                            verts += nv;
+                            total += nv;
+                            if (cnt > 16) {
+                                gSPVertex(vtxcmd, &verts[-cnt], cnt - nv, 0);
+                                vtxcmd = gfx++;
+                                cnt = nv;
+                            }
+                            base = cnt - nv;
+                            nv -= 2;
+                            while (nv > 0) {
+                                
+                                if (nv >= 4) {
+                                    { Gfx *_g = gfx++; _g->words.w0 = _SHIFTL(base, 23, 5) | 0x10000000 | _SHIFTL((base + nv) - 3, 18, 5) | _SHIFTL(((base + nv) - 2) >> 2, 15, 3) | _SHIFTL(base, 10, 5) | _SHIFTL((base + nv) - 2, 5, 5) | _SHIFTL((base + nv) - 1, 0, 5); _g->words.w1 = _SHIFTL(((base + nv) - 2), 30, 2) | _SHIFTL(base, 25, 5) | _SHIFTL((base + nv), 20, 5) | _SHIFTL((base + nv) + 1, 15, 5) | _SHIFTL(base, 10, 5) | _SHIFTL((base + nv) - 1, 5, 5) | _SHIFTL((base + nv), 0, 5); }
+                                    nv -= 4;
+                                } else if (nv >= 2) {
+                                    gSP2Triangles(gfx++, base, (base + nv), (base + nv) + 1, 0, base, (base + nv) - 1, (base + nv), 0);
+                                    nv -= 2;
+                                } else {
+                                    gSP1Triangle(gfx++, base, (base + nv), (base + nv) + 1, 0);
+                                    nv -= 1;
+                                }
+                            }
+                        }
+                    }
+                }
+                if (cnt != 0) {
+                    gSPVertex(vtxcmd, &verts[-cnt], cnt, 0);
+                } else {
+                    gfx = vtxcmd;
+                }
+                gDPPipeSync(gfx++);
+                n++;
+            }
+        }
+    }
+    if (n != 0) {
+        gfx = func_1510B7B4(gfx, arg1);
+        gSPViewport(gfx++, &((S180_15186794 *)D_800BE628)[D_80082FA4].vp[D_800BE9C0]);
+    } else {
+        gfx = saved;
+    }
+    if (total >= D_8008D3E0) {
+        D_8008D3E0 = total + 0x30;
+    } else {
+        D_8008D3E0 = total;
+    }
+    D_800DF0E0 = 0;
+    D_800DF0E1 = 0;
+    func_10004074(buf);
+    if ((D_800BEBA4 < gfx - D_800BE9C8[D_800BE9C0]) ? 1 : 0) {
+        return start;
+    }
+    return gfx;
+}
 
 void func_151872B0(s32 arg0) {
     D_800DE01C = 0x258;
@@ -818,13 +1011,6 @@ void func_151872B0(s32 arg0) {
     }
 }
 
-struct vtx151873E4 {
-    f32 x;      /* 0x00 */
-    f32 y;      /* 0x04 */
-    f32 z;      /* 0x08 */
-    s32 unkC;   /* 0x0C */
-    s32 unk10;  /* 0x10 */
-};              /* size 0x14 */
 
 typedef struct {
     u8  pad0[0x10];
