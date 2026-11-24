@@ -2211,7 +2211,337 @@ void func_1505A770(void *arg0) {
     }
 }
 // a big one, but could be ok
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505A9AC.s")
+void func_15055C88(struct127 *);
+void func_1513783C(struct127 *, u8, s32);
+void func_1507CD64(struct127 *arg0, s32 arg1);
+void func_15060A9C(s32 arg0, struct127 *arg1);
+
+void func_1505A9AC(struct127 *arg0, f32 arg1) {
+    f32 dist;
+    f32 thresh;
+    u8 sp6F;
+    u8 sp6E;
+    s32 health;
+    s32 temp;
+    u8 sp63;
+    s32 killed;
+    s32 anim;
+    s32 flags;
+    f32 speed;
+    s32 hurt;
+    u8 found;
+    u8 d;
+
+    sp6F = 0;
+    sp6E = 1;
+    dist = arg0->y_position - arg1;
+    if (arg0->unk31C->pad4F[0] != 0) {
+        if (dist < 0.0f) {
+            arg0->unk1CC = arg1;
+            dist = 0.0f;
+        }
+        arg0->unk28 = dist;
+        dist = arg0->y_position - (arg0->unk118 - 34.0f);
+        if (dist < 70.0f && arg0->y_velocity < 18.0f) {
+            if (arg0->y_velocity > -25.0f) {
+                arg0->unk31C->pad4F[0] = 2;
+            }
+            if (dist < 0.0f) {
+                if (arg0->y_velocity < -12.0f) {
+                    arg0->unk81 = 0;
+                    if (arg0->y_velocity < -25.0f) {
+                        arg0->xz_velocity *= 0.400000006f;
+                        arg0->y_velocity = -30.0f;
+                    }
+                    arg0->y_velocity *= 0.8500000238f;
+                }
+                arg0->gravity = -1.899999976f;
+            } else {
+                if ((arg0->y_velocity > 10.0f) && (arg0->y_velocity < 25.0f)) {
+                    arg0->y_velocity = 10.0f;
+                }
+                arg0->gravity = 2.200000048f;
+            }
+        }
+    } else if (arg0->unk65 != 0) {
+        if (dist < 0.0f) {
+            arg0->unk1CC = arg1;
+            dist = 0.0f;
+            arg0->y_position = arg1;
+        }
+        arg0->unk28 = dist;
+    } else {
+        if (dist < 0.0f) {
+            f32 fall;
+            
+            sp63 = 0;
+            if (arg0->in_water == 0) {
+                *((u8 *)arg0 + 0x137) = 0;
+                arg0->gravity = 5.0f;
+            }
+            if (arg0->in_water == 0) {
+                arg0->unk31C->unk55 = 4;
+            }
+            if (arg0->unk28 > 0.0f) {
+                arg0->unk31C->pad4F[2] = 1;
+                arg0->unk31C->unk31 = 0;
+            }
+            arg0->unk100 &= 0xFD;
+            if ((((u32)arg0->unk184 >> 12) & 0xF) == 1) {
+                if (D_800BE9F0 == 0x14) {
+                    func_1513783C(arg0, 0xFF, 1);
+                    func_1507CD64(arg0, 8);
+                    return;
+                }
+                func_15055C88(arg0);
+                return;
+            }
+            fall = 600.0f;
+            if (D_800BE9F0 == 0x43) {
+                thresh = 1000.0f;
+            } else {
+                thresh = fall * 3.0f;
+            }
+            if ((arg0->unk1CC - arg0->y_position) > fall && arg0->unk31C->unk120 == 0 &&
+                arg0->unk31C->unk78 != 1) {
+                speed = 1.299999952f;
+                do { arg0->unk31C->unk95 = 0; } while (0);
+                do { arg0->unk31C->pad4F[2] = 2; } while (0);
+                killed = 0;
+                flags = 0;
+                hurt = 0;
+                anim = 0x30;
+                if (D_800BE9F0 != 0x29) {
+                    temp = arg0->unk184;
+                    if (((((u32)temp >> 12) & 0xF) == 2) || ((temp == 0x13) & 0x1F)) {
+                        anim = 0xC8;
+                        func_15060B70(0x1B8, arg0);
+                        speed = 1.0f;
+                    } else {
+                        health = arg0->health;
+                        if (health != 0) {
+                            if (arg0->unk31C->unk78 == 0x21) {
+                                flags = 1;
+                            }
+                            if (arg0->id == 0x75) {
+                                flags |= 2;
+                            }
+                        }
+                        if ((arg0->unk1CC < 90000.0f) && (thresh < (arg0->unk1CC - arg0->y_position))) {
+                            if (!(flags & 2)) {
+                                arg0->health = 0;
+                                if ((temp & 0x1F) != 0xE) {
+                                    func_1513783C(arg0, 0xFF, 1);
+                                    killed = 1;
+                                }
+                            } else {
+                                hurt = 1;
+                                if (health != 0) {
+                                    arg0->health = health - 1;
+                                }
+                            }
+                        }
+                        if (flags == 0) {
+                            health = arg0->health;
+                            arg0->stunned = 8;
+                            if (health != 0) {
+                                arg0->health = health - 1;
+                            }
+                        }
+                        if (flags & 1) {
+                            speed = 1.0f;
+                            anim = 0x19D;
+                        } else if (flags & 2) {
+                            if (hurt) {
+                                anim = 0x27;
+                            } else {
+                                anim = 9;
+                            }
+                        } else if (arg0->health != 0) {
+                            anim = 0x27;
+                        }
+                        if ((anim == 0x27) && (arg0->unk31C->unk78 == 0x25)) {
+                            anim = 0x1AA;
+                        }
+                    }
+                }
+                if (killed == 0) {
+                    func_1505E650(arg0, anim, speed, 2.0f, 6.0f, 0.0f, 0);
+                }
+                arg0->stunned = 0;
+                arg0->unk83 = 0xFF;
+                arg0->disable_run = 0xFE;
+                if (flags != 0) {
+                    arg0->unk228 = 10;
+                } else {
+                    arg0->unk228 = 30;
+                }
+                arg0->unk28 = 0.0f;
+                arg0->unk76 = arg0->unk7A;
+                arg0->unk100 &= 0x8B;
+                arg0->y_position = arg1;
+                arg0->unkA9 = 0;
+                arg0->y_velocity = -4.0f;
+                arg0->unk1CC = arg1;
+                if (killed == 0) {
+                    func_15174690(D_800C3E78, 0, 0x1F, 0, 0x199, 4, 0xAA, 0xFF, 0);
+                } else {
+                    func_1507CD64(arg0, 8);
+                }
+                return;
+            }
+            arg0->unk1CC = arg1;
+            if (arg0->in_water != 0) {
+                arg0->y_position = arg1;
+                arg0->unk28 = 0.0f;
+                return;
+            }
+            if (arg0->stunned == 0) {
+                if ((arg0->unk7F == 0) && (arg0->xz_velocity < 9.0f)) {
+                    arg0->unk76 = arg0->unk7A;
+                }
+                d = (arg0->unk76 - arg0->unk7A) >> 8;
+                if (d > 0x80) {
+                    d = -d;
+                }
+                if (!arg0->unk7F && (d < 0x50)) {
+                    arg0->unk7F = 10;
+                }
+                if (arg0->unkA9 == 2) {
+                    struct127 *obj;
+                    found = 0;
+                    if (arg0->unk274 != 0) {
+                        obj = &D_800CC2D0[arg0->unk274 - 1];
+                        if (obj->unk24C != 0) {
+                            found = 1;
+                            obj->unk218 = 0;
+                            obj->unk232 = obj->unk24C;
+                        }
+                    }
+                    arg0->xz_velocity = 0.0f;
+                    arg0->unk83 = 0xFF;
+                    sp63 = 0xFF;
+                    func_1505E650(arg0, 0x4B, 1.0f, 2.0f, 0.0f, 0.0f, 0);
+                    if (D_800C3E78 < 4) {
+                        arg0->unk31C->unk57 = 1;
+                    }
+                    if (found == 0) {
+                        func_15060A9C(0x19, arg0);
+                    }
+                } else {
+                    s32 anim2;
+                    anim2 = 0;
+                    if ((s32)arg0->unk28 > 0) {
+                        struct126 *s = arg0->unk31C;
+                        if ((s->unk11A != 1) && (s->unk11A != 3) && (s->unk4E == 0)) {
+                            if ((arg0->unk100 & 0x10) || (!(arg0->unk100 & 8) && (((arg0->unk44 == 0.0f) && (arg0->unkA8 == 0)) || (arg0->unk100 & 4)))) {
+                                if (arg0->unk100 & 0x10) {
+                                    arg0->unk83 = 8;
+                                    if (!(arg0->unk100 & 0x40)) {
+                                        arg0->xz_velocity = 0.0f;
+                                        arg0->unk83 = 0xD;
+                                        sp63 = 5;
+                                    }
+                                } else if (arg0->unk100 & 4) {
+                                    arg0->xz_velocity *= 0.6999999881f;
+                                    arg0->unk83 = 0x14;
+                                } else {
+                                    arg0->xz_velocity = 0.0f;
+                                    arg0->unk83 = 0x10;
+                                }
+                                if (arg0->unk31C->unk78 == 0x21) {
+                                    anim2 = 0x19D;
+                                } else if (arg0->unk31C->unk78 == 0x25) {
+                                    anim2 = 0xD8;
+                                } else {
+                                    anim2 = 0x36;
+                                }
+                            }
+                        }
+                    }
+                    if ((arg0->unk84.uh == 0x3B) || (arg0->unk84.uh == 0x3C)) {
+                        u32 t;
+                        t = arg0->unk184 & 0x1F;
+                        sp63 = 0xFE;
+                        sp6E = 0;
+                        arg0->unk83 = 0xFF;
+                        if ((t == 0xA) || (t == 0xB) || (t == 0xC) || (t == 0xF) || (t == 0x13)) {
+                            anim2 = 0xC8;
+                            func_15060B70(0x1B8, arg0);
+                        } else if ((t == 1) || (t == 2) || (t == 7) || (t == 0x11)) {
+                            anim2 = 0xC8;
+                            func_15060B70(0xA7, arg0);
+                        } else {
+                            anim2 = 0x27;
+                            func_15060B70(0xA7, arg0);
+                        }
+                    }
+                    if ((anim2 != 0) && !(arg0->unk100 & 0x20)) {
+                        func_1505E650(arg0, anim2, 1.0f, 2.0f, 0.0f, 0.0f, 0);
+                    }
+                    if (!(arg0->unk100 & 0x80)) {
+                        arg0->unk100 = 1;
+                    }
+                    if (sp6E == 0) {
+                        arg0->unk100 = 0x90;
+                    }
+                }
+                if ((arg0->unk28 > 0.0f) && !(arg0->unk100 & 8)) {
+                    if (D_800CC27C != 0) {
+                        if (arg0->xz_velocity > 20.0f) {
+                            arg0->xz_velocity = 20.0f;
+                        }
+                    } else if (*((u8 *)arg0 + 0x110) == 0) {
+                        arg0->unk164 = 0.0f;
+                        arg0->unk168 = 0.0f;
+                    }
+                    arg0->disable_run = sp63;
+                    if ((arg0->unk31C->unk4E == 1) && (arg0->y_velocity < -10.0f)) {
+                        sp6F = 2;
+                    }
+                }
+                arg0->unkA9 = 0;
+            }
+            if (!(arg0->unk100 & 8)) {
+                dist = 0.0f;
+            } else {
+                dist = 0.1000000015f;
+            }
+            arg0->y_position = arg1;
+            if ((arg0->stunned == 0) && !(sp6F & 2)) {
+                arg0->y_velocity = -4.0f;
+            } else {
+                if (arg0->unkF4 & 0x80) {
+                    arg0->y_velocity = -20.0f;
+                } else if (arg0->y_velocity > -10.0f) {
+                    arg0->y_velocity = 0.0f;
+                } else {
+                    arg0->y_velocity = arg0->y_velocity * -0.5f;
+                    if (arg0->y_velocity > 28.0f) {
+                        arg0->y_velocity = 28.0f;
+                    }
+                }
+                if (arg0->unk109 != 0) {
+                    arg0->xz_velocity *= 0.6000000238f;
+                }
+            }
+            arg0->unk81 = 0;
+            if (arg0->unk7F < 0xFA) {
+                arg0->unk7F++;
+            }
+            arg0->unk100 &= 0x9F;
+        } else if ((dist < 1.0f) && (arg0->unk28 > 0.0f)) {
+            dist = 1.0f;
+        }
+        if (dist > 20.0f) {
+            arg0->unk7F = 0;
+        }
+        if (arg0->in_water != 0) {
+            arg0->unk1CC = arg0->y_position;
+        }
+        arg0->unk28 = dist;
+    }
+}
 
 #define arg0 ((u8 *)arg0_s)
 void func_1505B5F8(struct127 *arg0_s, f32 arg1) {
