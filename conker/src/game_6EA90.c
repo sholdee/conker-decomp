@@ -499,7 +499,99 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
     return gfx;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_6EA90/func_150428D4.s")
+typedef struct {
+    u8 width;
+    u8 height;
+    u8 unk2;
+    u8 unk3;
+} Glyph150428D4;
+
+void func_150428D4(u8 *str, s32 *width, s32 *height, s32 *depth) {
+    s32 maxWidth;
+    s32 lineHeight;
+    s32 i;
+    u8 c;
+    u8 font;
+    s32 tmp;
+    s32 isGlyph;
+
+    if (str != NULL) {
+        *width = 0;
+        *height = 0;
+        *depth = 0;
+        maxWidth = 0;
+        lineHeight = 0;
+        i = 0;
+        font = 0;
+        if (*str == 0) {
+            *height += 0xC;
+        }
+        while (str[i] != 0) {
+            if (str[i] == 0xBC) {
+                i += 2;
+                continue;
+            }
+            c = func_15042C40(str[i]);
+            if (font != 1) {
+                isGlyph = 0;
+                if (c == 0x60) {
+                    *width += 4;
+                    if (lineHeight < 0xC) {
+                        lineHeight = 0xC;
+                    }
+                } else if (c > 0xA0 && c < 0xA8) {
+                } else if (c >= 0xA8 && c < 0x100) {
+                    s32 w;
+                    s32 h;
+                    f32 off;
+                    s32 unused;
+                    f32 scale;
+                    s32 tmp2;
+                    func_150415E0(c, &w, &h, &off, &unused, &scale);
+                    *width = *width + w * scale;
+                    tmp2 = (s32)((s32)(h * scale) - off) + 1;
+                    if (lineHeight < tmp2) {
+                        lineHeight = tmp2;
+                    }
+                    if (*depth < off) {
+                        *depth = off;
+                    }
+                } else if (c < 0xA1) {
+                    if (str[i] == '\n') {
+                        if (maxWidth < *width) {
+                            maxWidth = *width;
+                        }
+                        *width = 0;
+                        if (lineHeight < 0xC) {
+                            lineHeight = 0xC;
+                        }
+                        *height += lineHeight;
+                        lineHeight = 0;
+                    } else {
+                        isGlyph = 1;
+                    }
+                }
+            } else {
+                isGlyph = 1;
+            }
+            if (isGlyph) {
+                *width += D_80085994[font][c].w + D_80085994[font][c].x - 1;
+                tmp = D_80085994[font][c].h + D_80085994[font][c].y;
+                if (lineHeight <= tmp) {
+                    lineHeight = tmp;
+                }
+            }
+            i++;
+        }
+        if (*width < maxWidth) {
+            *width = maxWidth;
+        }
+        *height += lineHeight;
+        *width = *width * D_800380A0;
+        *height = *height * D_800380A4;
+        *depth = *depth * D_800380A0;
+    }
+}
 
 s32 func_15042C40(u8 arg0) {
     s32 i;
