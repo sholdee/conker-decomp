@@ -503,7 +503,9 @@ typedef struct {
     /* 0x04 */ char pad4[4];
     /* 0x08 */ f32 unk8;
     /* 0x0C */ f32 unkC;
-    /* 0x10 */ char pad10[0x1C];
+    /* 0x10 */ char pad10[0x10];
+    /* 0x20 */ u16 unk20;
+    /* 0x22 */ char pad22[0xA];
     /* 0x2C */ s8 unk2C;
     /* 0x2D */ char pad2D[0x11];
     /* 0x3E */ s8 unk3E;
@@ -2014,11 +2016,11 @@ typedef struct {
 
 extern Struct151EDF4C *D_80090138;
 extern u8 *D_800E0C7C;
-extern u8 D_800E0C80;
-extern u8 D_800E0C81;
-extern u8 D_800E0C82;
-extern u8 D_800E0C83;
-extern u8 D_800E0C84;
+extern s8 D_800E0C80;
+extern s8 D_800E0C81;
+extern s8 D_800E0C82;
+extern s8 D_800E0C83;
+extern s8 D_800E0C84;
 s32 *func_1502B6BC(s32, s32, s32, s32, s32, s32);
 s32 func_1510CE60(Gfx *, s32, u32, s32, s32 *);
 
@@ -2078,7 +2080,251 @@ void func_151EDF4C(void) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_215960/func_151EE184.s")
+extern u8 D_800ABAD4;
+extern void func_150428D4(u8 *, s32 *, s32 *, s32 *);
+extern void func_150A7D00(void *, f32, f32, f32);
+extern struct216 *func_1507BB28(s32, s32);
+
+Gfx *func_151EE184(Gfx *gfx) {
+    s32 sfx;
+    s32 changed;
+    s32 ncols;
+    s32 i;
+    s32 key;
+    struct127 *obj;
+    Mtx *mtx;
+    s32 j;
+    u32 mask;
+    u16 perspNorm;
+    s32 temp;
+    s32 cheatType;
+    u8 c;
+    s32 width;
+    s32 height;
+    s32 unused;
+    u8 *p;
+    u8 *q;
+
+    sfx = 0;
+    if (D_80090138 == NULL) {
+        return gfx;
+    }
+    changed = 0;
+    if (D_8008FDD4->unk20 & 1) {
+        changed = 1;
+        D_800E0C81--;
+    }
+    if (D_8008FDD4->unk20 & 2) {
+        D_800E0C81++;
+        if (D_800E0C81 == 4 && D_800E0C80 >= 5) {
+            D_800E0C80 = 4;
+        }
+        changed = 1;
+    }
+    if (D_800E0C81 < 0) {
+        D_800E0C81 = 5;
+    }
+    if (D_800E0C81 >= 6) {
+        D_800E0C81 = 0;
+    }
+    if (D_8008FDD4->unk20 & 8) {
+        D_800E0C80++;
+        changed = 1;
+    }
+    if (D_8008FDD4->unk20 & 4) {
+        D_800E0C80--;
+        changed = 1;
+    }
+    if (D_800E0C81 == 4) {
+        ncols = 5;
+    } else if (D_800E0C81 == 5) {
+        ncols = 1;
+    } else {
+        ncols = 6;
+    }
+    if (D_800E0C80 < 0) {
+        D_800E0C80 = ncols - 1;
+    }
+    if (D_800E0C80 >= ncols) {
+        D_800E0C80 = 0;
+    }
+    if (changed) {
+        func_10010F30(0x62D, 0x4650, 0x40, 0, 0);
+    }
+    key = D_800E0C81 * 6 + D_800E0C80;
+    if (D_800E0C81 == 5) {
+        key--;
+    }
+    mtx = allocate_memory(0x80, 4, 2, 0);
+    if (D_800BE748[0] & 0x8000) {
+        D_800E0C82 += 8;
+    } else {
+        D_800E0C82 -= 8;
+    }
+    if (D_800E0C82 < 0) {
+        D_800E0C82 = 0;
+    }
+    if (D_800E0C82 >= 13) {
+        D_800E0C82 = 12;
+    }
+    if (D_8008FDD4->unk20 & 0x10) {
+        i = key + 'A';
+
+        func_10010F30(0x500, 0x7D00, 0x40, 0, 0);
+        if (D_800E0C81 == 5) {
+            i = ' ';
+        } else if (D_800E0C81 == 4) {
+            if (D_800E0C80 == 0) {
+                if (D_800E0C83 > 0) {
+                    D_800E0C83--;
+                }
+                i = 0;
+                D_800E0C7C[D_800E0C83] = 0;
+            } else if (D_800E0C80 == 1) {
+                i = '.';
+            } else if (D_800E0C80 == 4) {
+                mask = 0xFFC3FFFE;
+                for (i = 0x90; i < 0xA3; i++) {
+                    p = ((u8 **)D_800E0BD8)[i];
+                    temp = i - 0x90;
+                    if (temp < D_800E0C83) {
+                        c = D_800E0C7C[temp];
+                    } else {
+                        c = ' ';
+                    }
+                    for (j = 0; j < 32; j++) {
+                        if (c != p[j]) {
+                            mask &= ~(1 << j);
+                        }
+                    }
+                }
+                j = -1;
+                for (i = 0; i < 33; i++) {
+                    if (mask & 1) {
+                        j = i;
+                    }
+                    mask >>= 1;
+                }
+                if (j >= 0) {
+                    temp = 1 << j;
+                    D_800E9D00 |= temp;
+                    if (temp == 0x400) {
+                        D_800E9D00 &= ~0x800;
+                    } else if (temp == 0x800) {
+                        D_800E9D00 &= ~0x400;
+                    }
+                    cheatType = 0x10;
+                    sfx = (func_150ADA20() & 1) + 0xC3;
+                lbl1:;
+                } else {
+                    cheatType = 0x11;
+                    for (i = 0xA3; i < 0xC8 && sfx == 0; i++) {
+                        p = D_800E0C7C;
+                        while (p != NULL && (q = ((u8 **)D_800E0BD8)[i]) != NULL) {
+                            j = 0;
+                            while (q[j] == *p && *p != 0 && q[j] != 0) {
+                                p++;
+                                j++;
+                            }
+                            if (q[j] == 0 && (*p == ' ' || *p == 0)) {
+                                p = NULL;
+                                sfx = (func_150ADA20() & 1) + 0xC1;
+                            } else if (*p == ' ') {
+                                p++;
+                            } else {
+                                while (*p && *p != ' ') {
+                                    p++;
+                                }
+                                if (*p == 0) {
+                                    p = NULL;
+                                }
+                            }
+                        }
+                    }
+                    if (sfx == 0) {
+                        sfx = (func_150ADA20() & 1) + 0xC5;
+                        i = 0;
+                        while (D_800E0C7C[i + 0x20] && D_800E0C7C[i] && D_800E0C7C[i + 0x20] == D_800E0C7C[i]) {
+                            i++;
+                        }
+                        if (D_800E0C7C[i + 0x20] == 0 && D_800E0C7C[i] == 0) {
+                            D_800E0C84++;
+                            if (D_800E0C84 == 1) {
+                                sfx = 0xC7;
+                            }
+                        } else {
+                            D_800E0C84 = 0;
+                        }
+                    } else {
+                        D_800E0C84 = 0;
+                    lbl2:;
+                    }
+                }
+                for (i = 0; D_800E0C7C[i] != 0; i++) {
+                    D_800E0C7C[i + 0x20] = D_800E0C7C[i];
+                }
+                D_800E0C7C[i + 0x20] = 0;
+                i = 0;
+                if (sfx != 0) {
+                    func_1001263C(sfx, 0x7D00, 0x40);
+                }
+                obj = func_15083E90(9);
+                if (obj != NULL) {
+                    obj->unk232 = cheatType;
+                    D_800D154C = obj;
+                    D_800C3E78 = D_800D154C - D_800CC2D0;
+                    obj->unk218 = func_1507BB28(0, obj->unk232);
+                    obj->unk21C = 0;
+                }
+                D_800E0C83 = 0;
+                D_800E0C7C[D_800E0C83] = 0;
+            } else {
+                i -= 2;
+            }
+        }
+        if (i > 0) {
+            D_800E0C7C[D_800E0C83] = i;
+            if (D_800E0C83 < 19) {
+                D_800E0C83++;
+            }
+            D_800E0C7C[D_800E0C83] = 0;
+        }
+    }
+    func_15043E68(mtx, -30.0f, -10.0f, 0.0f, -115.0f, 10.0f, -530.0f);
+    func_150A7D00(mtx + 1, 0.0f, 0.0f, -(f32)D_800E0C82);
+    guPerspective(&D_800E0C38, &perspNorm, 50.0f, 60.6f, 53.0f, 20000.0f, 1.0f);
+    gSPPerspNormalize(gfx++, perspNorm);
+    gSPMatrix(gfx++, &D_800E0C38, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPLoadGeometryMode(gfx++, 0);
+    gSPSetGeometryMode(gfx++, G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
+    gSPMatrix(gfx++, mtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    for (i = 0; i < 30; i++) {
+        gDPPipeSync(gfx++);
+        if (i == key) {
+            gDPSetEnvColor(gfx++, 0xFF, 0x00, 0xFF, D_800E0A95);
+            gSPMatrix(gfx++, mtx + 1, G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
+        } else {
+            gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, D_800E0A95);
+        }
+        gSPDisplayList(gfx++, D_80090138[i].dl);
+        if (i == key) {
+            gSPMatrix(gfx++, mtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+        }
+    }
+    func_1504332C(0xFF, 0xB1, 0x1E, D_800E0A95);
+    func_150428D4(D_800E0C7C, &width, &height, &unused);
+    i = 0x4B - (width >> 1);
+    if (i < 10) {
+        i = 10;
+    }
+    func_15042D94(i, 0xB4, 0x80, D_800E0C7C);
+    if ((D_800BE9AC & 0x1F) >= 10) {
+        width = i + width + 2;
+        func_1504332C(0xFF, 0xFF, 0xFF, 0xFF);
+        func_15042D94(width, 0xB4, 0x80, &D_800ABAD4);
+    }
+    return gfx;
+}
 
 Gfx *func_151EEBE8(Gfx *gfx, s32 arg1) {
     s32 image;
