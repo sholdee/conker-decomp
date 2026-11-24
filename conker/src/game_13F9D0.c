@@ -96,7 +96,178 @@ typedef struct Star15111858 {
 } Star15111858;
 void func_15111858(void);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_13F9D0/func_15112520.s")
+typedef struct Turret15112520Cfg {
+    /* 0x00 */ f32 speedNear;
+    /* 0x04 */ f32 speedFar;
+    /* 0x08 */ f32 maxStep;
+    /* 0x0C */ f32 yawMax;
+    /* 0x10 */ f32 yawMin;
+    /* 0x14 */ f32 yawMargin;
+    /* 0x18 */ f32 pitchMax;
+    /* 0x1C */ f32 pitchMin;
+    /* 0x20 */ f32 pitchMargin;
+    /* 0x24 */ f32 baseYaw;
+    /* 0x28 */ f32 basePitch;
+    /* 0x2C */ f32 range;
+    /* 0x30 */ u16 sfx;
+    /* 0x32 */ u16 timer;
+} Turret15112520Cfg;
+
+typedef struct Turret15112520 {
+    /* 0x00 */ f32 pitch;
+    /* 0x04 */ f32 yaw;
+    /* 0x08 */ u8 pad8[8];
+    /* 0x10 */ s16 x;
+    /* 0x12 */ s16 y;
+    /* 0x14 */ s16 z;
+    /* 0x16 */ u8 pad16[0x26];
+    /* 0x3C */ Turret15112520Cfg *cfg;
+} Turret15112520;
+
+
+extern f32 D_800DBEC0;
+
+void func_15112520(Turret15112520 *arg0)
+{
+  f32 dx;
+  f32 dy;
+  f32 dz;
+  f32 yaw;
+  f32 pitch;
+  f32 d;
+  s32 vol;
+  f32 speed;
+  Turret15112520Cfg *cfg;
+  s32 pad;
+  static s16 D_80089234;
+  cfg = arg0->cfg;
+  dx = D_800CC2D0[0].x_position - arg0->x;
+  dy = (D_800CC2D0[0].y_position + 65.0f) - arg0->y;
+  dz = D_800CC2D0[0].z_position - arg0->z;
+  D_800DBEC0 = ((dx * dx) + (dy * dy)) + (dz * dz);
+  if ((cfg->range * cfg->range) < D_800DBEC0)
+  {
+    pitch = cfg->basePitch;
+    yaw = cfg->baseYaw;
+    if (pitch < 0.0f)
+    {
+      pitch += 360.0f;
+    }
+    speed = cfg->speedFar;
+  }
+  else
+  {
+    yaw = func_150484A0(dx, dz);
+    pitch = func_150484A0(dy, sqrtf((dx * dx) + (dz * dz)));
+    yaw *= 57.29577637f;
+    pitch *= 57.29577637f;
+    if (pitch < 0.0f)
+    {
+      pitch += 360.0f;
+    }
+    else
+      if (pitch >= 360.0f)
+    {
+      pitch -= 360.0f;
+    }
+    if (yaw < 0.0f)
+    {
+      yaw += 360.0f;
+    }
+    else
+      if (yaw >= 360.0f)
+    {
+      yaw -= 360.0f;
+    }
+    d = func_15048A70(cfg->baseYaw, yaw);
+    if (pitch > 180.0f)
+    {
+      pitch -= 360.0f;
+    }
+    if (((cfg->yawMax + cfg->yawMargin) < d) || (d < (cfg->yawMin - cfg->yawMargin)))
+    {
+      yaw = cfg->baseYaw;
+      pitch = cfg->basePitch;
+      speed = cfg->speedFar;
+    }
+    else
+    {
+      speed = cfg->speedNear;
+      d = (d < cfg->yawMin) ? (cfg->yawMin) : ((cfg->yawMax < d) ? (cfg->yawMax) : (d));
+      yaw = cfg->baseYaw + d;
+      if (yaw < 0.0f)
+      {
+        yaw += 360.0f;
+      }
+      else
+        if (yaw >= 360.0f)
+      {
+        yaw -= 360.0f;
+      }
+      if (((cfg->pitchMax + cfg->pitchMargin) < pitch) || (pitch < (cfg->pitchMin - cfg->pitchMargin)))
+      {
+        pitch = 0.0f;
+      }
+      else
+      {
+        pitch = (pitch < cfg->pitchMin) ? (cfg->pitchMin) : ((cfg->pitchMax < pitch) ? (cfg->pitchMax) : (pitch));
+      }
+    }
+    if (pitch < 0.0f)
+    {
+      pitch += 360.0f;
+    }
+  }
+  d = func_15048A70(arg0->yaw, yaw);
+  yaw = fabsf(d);
+  if (cfg->maxStep < yaw)
+  {
+    d = ((d < 0.0f) ? (-1.0f) : (1.0f)) * cfg->maxStep;
+  }
+  arg0->yaw += d * speed;
+  if ((D_80089234 == 0) && (yaw > 4.0f))
+  {
+    D_80089234 = -1;
+  }
+  if (arg0->yaw < 0.0f)
+  {
+    arg0->yaw += 360.0f;
+  }
+  else if (arg0->yaw >= 360.0f)
+  {
+    arg0->yaw -= 360.0f;
+  }
+  d = func_15048A70(arg0->pitch, 360.0f - pitch);
+  arg0->pitch += d * speed;
+  if ((D_80089234 == 0) && (fabsf(d) > 4.0f))
+  {
+    D_80089234 = -1;
+  }
+  if (arg0->pitch < 0.0f)
+  {
+    arg0->pitch += 360.0f;
+  }
+  else if (arg0->pitch >= 360.0f)
+  {
+    arg0->pitch -= 360.0f;
+  }
+  if ((D_80089234 == (-1)) && (cfg->timer != 0))
+  {
+    vol = 32000.0f - (D_800DBEC0 * 0.1000000015f);
+    D_80089234 = cfg->timer;
+    if (vol > 0)
+    {
+      func_10010F30(cfg->sfx, 0x7D00, 0x40, 0, 0);
+    }
+  }
+  else
+  {
+    if (D_80089234 > 0)
+    {
+      D_80089234--;
+    }
+  }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_13F9D0/func_15112A80.s")
 
