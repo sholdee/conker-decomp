@@ -1616,7 +1616,53 @@ void func_1502F948(ActorInteractionFields *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502F9FC.s")
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    u16 unk8;
+    u16 unkA;
+} Fn1502F9FCTex;
+Gfx *func_150C3160(Gfx *, void *);
+
+Gfx *func_1502F9FC(Gfx *gdl, s32 arg1) {
+    s32 id;
+    s32 idx;
+    s32 i;
+    Fn1502F9FCTex *tex;
+    s32 uls;
+    s32 ult;
+    s32 lrs;
+    s32 lrt;
+    s32 tile;
+
+    id = D_800CC2D0[arg1].id;
+    if (id == 0x89 || id == 0xBA) {
+        return func_150C3160(gdl, &D_800CC2D0[arg1]);
+    }
+    if (id == 0) {
+        idx = 14;
+    } else if (id == 0x96) {
+        idx = 7;
+    } else if (id == 0x28) {
+        idx = 4;
+    } else if (id == 1 || id == 2 || id == 3 || id == 4) {
+        idx = 5;
+    } else {
+        idx = 0;
+    }
+    if (D_800C5338[id] != NULL) {
+        for (i = 0; i < 2; i++) {
+            tex = &((Fn1502F9FCTex *)D_800C5338[id])[idx];
+            uls = (u16)(((s16 *)((u8 *)&D_800CC2D0[arg1] + 0x27A))[i] + 2);
+            ult = (u16)(((s16 *)((u8 *)&D_800CC2D0[arg1] + 0x27E))[i] + 2);
+            lrs = (u16)(tex->unk8 * 4 - 2);
+            lrt = (u16)(tex->unkA * 4 - 2);
+            tile = 5 - i;
+            gDPSetTileSize(gdl++, tile, (u16)uls, (u16)ult, (u16)lrs, (u16)lrt);
+        }
+    }
+    return gdl;
+}
 
 extern void func_1507EABC(void *);
 
