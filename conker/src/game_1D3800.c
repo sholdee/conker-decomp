@@ -130,7 +130,9 @@ typedef struct {
 extern s32 func_1516284C(Header *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
 void func_151A6068(Obj151A6068 *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1D3800/func_151A6350.s")
+/* func_151A6350 is defined at the end of game_1D3420.c: it only matches when it is compiled in the
+ * same translation unit as func_151A6068 (IDO's ugen leaves per-function heap state behind that
+ * decides which of this function's `vertices` reloads are emitted). */
 
 typedef struct {
     s32 unk0;
