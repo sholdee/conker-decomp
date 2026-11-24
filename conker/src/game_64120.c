@@ -910,7 +910,18 @@ void func_15038468(f32 *arg0, f32 *arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5)
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_64120/func_15038620.s")
+typedef struct {
+    /* 0x00 */ f32 yaw[3];
+    /* 0x0C */ f32 pitch[3];
+    /* 0x18 */ f32 yawVel[3];
+    /* 0x24 */ f32 pitchVel[3];
+    /* 0x30 */ u8 timer[3];
+    /* 0x33 */ u8 blend[3];
+    /* 0x36 */ u8 flag[3];
+    /* 0x39 */ u8 pad39;
+    /* 0x3A */ s16 offYaw[3];
+    /* 0x40 */ s16 offPitch[3];
+} CamData;
 
 typedef struct {
     struct108 *unk0;
@@ -918,6 +929,417 @@ typedef struct {
 } GameStruct_800CC5E8;
 
 extern GameStruct_800CC5E8 D_800CC5E8[];
+
+/* D_800BE9B4 and D_800BE9E4 are members of one object: IDO shares a single address candidate */
+typedef struct {
+    /* 0x00 */ u8 unk0;
+    /* 0x01 */ u8 pad1[0x2F];
+    /* 0x30 */ s32 unk30;
+} GameStruct_800BE9B4;
+
+void func_15039ED0(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 *arg4, f32 arg5, f32 arg6, s32 arg7, s32 arg8);
+void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
+extern u8 D_800BEA0C;
+extern u8 D_800C3FDC;
+extern f32 D_800C3FE0;
+extern f32 D_800C3FE4;
+extern f32 D_800981A0[][4];
+s32 func_15021DB8(f32 *, f32 *, f32 *, f32 *, s32, s32);
+void func_15049C40(f32 *arg0, f32 *arg1);
+void func_15049CB8(f32 m[4][4], f32 *q);
+void func_15049EDC(f32 *a, f32 *b, f32 t, f32 *out);
+void func_1504A140(f32 *q, f32 m[4][4]);
+
+void func_15038620(s32 arg0, s32 arg1, f32 *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC) {
+    struct127 *obj;
+    f32 (*m1)[4];
+    f32 result[4][4];
+    f32 scale[3];
+    f32 vec[3];
+    f32 rx;
+    f32 ry;
+    f32 rz;
+    f32 yaw;
+    f32 pitch;
+    f32 roll;
+    f32 mtxC[4][4];
+    f32 mtxA[4][4];
+    f32 mtxB[4][4];
+    f32 v[3];
+    f32 origYaw;
+    f32 origPitch;
+    f32 sp118;
+    f32 sp114;
+    f32 dYaw;
+    f32 dPitch;
+    s32 found;
+    f32 (*m0)[4];
+    s32 timerDone;
+    s32 blendMode;
+    f32 blendT;
+    f32 rateYaw;
+    f32 ratePitch;
+    f32 maxYaw;
+    f32 maxPitch;
+    s32 noTarget;
+    s32 locked;
+    f32 saved[2];
+    f32 fyaw;
+    f32 fpitch;
+    s32 step;
+    CamData *data;
+
+
+
+
+
+    obj = &D_800CC2D0[arg3];
+    data = *(CamData **)((u8 *)obj + 0x324);
+    if (data == NULL) {
+        return;
+    }
+    yaw = 0.0f;
+    pitch = 0.0f;
+    roll = 0.0f;
+    if (D_800C3FFA == 0) {
+        obj->unk2CA = 0;
+    }
+    found = func_15021DB8(&yaw, &pitch, &roll, arg2, arg3, 0);
+    if (found) {
+        saved[0] = yaw;
+        saved[1] = pitch;
+    }
+    blendMode = 0;
+    D_800C3FDC = 0;
+    sp114 = 0.0;
+    sp118 = 0.0;
+    if (arg2[0] == -99999.0f && arg2[1] == -99999.0f && arg2[2] == -99999.0f) {
+        noTarget = 1;
+    } else {
+        noTarget = 0;
+    }
+    if (noTarget && !found) {
+        if (data->timer[arg6] == 0) {
+            data->yawVel[arg6] = 0.0f;
+            data->pitchVel[arg6] = 0.0f;
+            data->blend[arg6] = 10;
+            data->yaw[arg6] = -99999.0f;
+            data->pitch[arg6] = -99999.0f;
+            data->offYaw[arg6] = 0;
+            data->offPitch[arg6] = 0;
+            return;
+        }
+    }
+    locked = obj->unk2FB & 4;
+    if (!found && locked) {
+        if (data->flag[arg6] == 0) {
+            data->blend[arg6] = 10;
+        }
+        if (data->blend[arg6] == 0) {
+            data->yawVel[arg6] = 0.0f;
+            data->pitchVel[arg6] = 0.0f;
+            data->yaw[arg6] = -99999.0f;
+            data->pitch[arg6] = -99999.0f;
+            data->offYaw[arg6] = 0;
+            data->offPitch[arg6] = 0;
+            return;
+        }
+    }
+    timerDone = 0;
+    data->flag[arg6] = locked;
+    if (data->blend[arg6] < 2) {
+        if (data->timer[arg6] > 0) {
+            if (D_800BEAC0 == 0 && D_800BEA0C == 0) {
+                --data->timer[arg6];
+            }
+            if (data->timer[arg6] == 0) {
+                timerDone = 1;
+            }
+        }
+    }
+    if (!noTarget) {
+        step = data->timer[arg6];
+        if (step != 0 && step < 10) {
+            data->blend[arg6] = ((10 - step) * 10) / 10.0f;
+            data->timer[arg6] = 0;
+        }
+    }
+    v[1] = 0.0f;
+    switch (argC) {
+    case 0:
+        v[0] = 0.0f;
+        v[2] = 1.0f;
+        break;
+    case 1:
+        v[2] = 0.0f;
+        v[0] = 1.0f;
+        break;
+    case 2:
+        v[2] = 0.0f;
+        v[0] = -1.0f;
+        break;
+    case 3:
+        v[0] = 0.0f;
+        v[2] = 0.0f;
+        v[1] = -1.0f;
+        break;
+    }
+    m0 = ((f32 (*)[4][4])obj->unk1D4)[arg0];
+    m1 = ((f32 (*)[4][4])obj->unk1D4)[arg1];
+    m0[0][3] = m0[1][3] = m0[2][3] = m1[0][3] = m1[1][3] = m1[2][3] = 0.0f;
+    m0[3][3] = m1[3][3] = 1.0f;
+    if (!found) {
+        vec[0] = v[0] * m0[0][0] + v[1] * m0[1][0] + v[2] * m0[2][0];
+        vec[1] = v[0] * m0[0][1] + v[1] * m0[1][1] + v[2] * m0[2][1];
+        vec[2] = v[0] * m0[0][2] + v[1] * m0[1][2] + v[2] * m0[2][2];
+        rx = vec[0] * m1[0][0] + vec[1] * m1[0][1] + vec[2] * m1[0][2];
+        ry = vec[0] * m1[1][0] + vec[1] * m1[1][1] + vec[2] * m1[1][2];
+        rz = vec[0] * m1[2][0] + vec[1] * m1[2][1] + vec[2] * m1[2][2];
+        func_15038468(&yaw, &pitch, rx, ry, rz, argC);
+    }
+    if (yaw > 180.0f) {
+        yaw -= 360.0f;
+    }
+    if (pitch > 180.0f) {
+        pitch -= 360.0f;
+    }
+    if (-99999.0f == data->yaw[arg6]) {
+        data->yaw[arg6] = yaw;
+        data->pitch[arg6] = pitch;
+        data->yawVel[arg6] = 0.0f;
+        data->pitchVel[arg6] = 0.0f;
+    }
+    if (D_800C3FFA == 0) {
+        obj->unk2CA = yaw * 0.7111111283f;
+    }
+    origYaw = yaw;
+    origPitch = pitch;
+    if ((timerDone && !found) || D_800BE9B4) {
+        func_15039ED0(arg4, &yaw, &pitch, &sp118, &sp114, origYaw, origPitch, arg3, arg6);
+        data->yawVel[arg6] = 0.0f;
+        data->pitchVel[arg6] = 0.0f;
+        *(volatile f32 *)&data->yaw[arg6] = yaw;
+        data->blend[arg6] = 10;
+        data->yaw[arg6] = -99999.0f;
+        data->pitch[arg6] = -99999.0f;
+        return;
+    }
+    vec[0] = arg2[0] - m0[3][0];
+    vec[1] = arg2[1] - m0[3][1];
+    vec[2] = arg2[2] - m0[3][2];
+    if (!noTarget || found) {
+        if (!found) {
+            rx = vec[0] * m1[0][0] + vec[1] * m1[0][1] + vec[2] * m1[0][2];
+            ry = vec[0] * m1[1][0] + vec[1] * m1[1][1] + vec[2] * m1[1][2];
+            rz = vec[0] * m1[2][0] + vec[1] * m1[2][1] + vec[2] * m1[2][2];
+            func_15038468(&yaw, &pitch, rx, ry, rz, argC);
+            if (yaw > 0.0f) {
+                yaw -= argA;
+            } else if (yaw < 0.0f) {
+                yaw += argA;
+            }
+        } else {
+            D_800C3FDC = 1;
+            D_800C3FE0 = yaw;
+            D_800C3FE4 = pitch;
+        }
+        if (D_800CC5E8[D_800C3E78].unk0 != NULL && D_800CC5E8[D_800C3E78].unk0->unk2C == 0x100 && (yaw > 100.0f || yaw < -100.0f)) {
+            vec[0] = -vec[0];
+            vec[1] = 20.0f - vec[1];
+            vec[2] = -vec[2];
+            rx = vec[0] * m1[0][0] + vec[1] * m1[0][1] + vec[2] * m1[0][2];
+            ry = vec[0] * m1[1][0] + vec[1] * m1[1][1] + vec[2] * m1[1][2];
+            rz = vec[0] * m1[2][0] + vec[1] * m1[2][1] + vec[2] * m1[2][2];
+            func_15038468(&yaw, &pitch, rx, ry, rz, argC);
+        }
+        D_800C3FD0[0] = m0[3][0] + vec[0] * 100.0f;
+        D_800C3FD0[1] = m0[3][1] + vec[1] * 100.0f;
+        D_800C3FD0[2] = m0[3][2] + vec[2] * 100.0f;
+        if (arg8 == 0) {
+            func_15039ED0(arg4, &yaw, &pitch, &sp118, &sp114, origYaw, origPitch, arg3, arg6);
+        }
+    } else {
+        yaw = origYaw;
+        pitch = origPitch;
+    }
+    if (D_800BEAC0 == 0 && D_800BEA0C == 0) {
+        rateYaw = D_800981A0[arg5][0];
+        ratePitch = D_800981A0[arg5][1];
+        maxYaw = D_800981A0[arg5][2];
+        maxPitch = D_800981A0[arg5][3];
+        if (D_800C35EA == 1) {
+            rateYaw = 1.0f;
+            ratePitch = 1.0f;
+            maxYaw = 5.0f;
+            maxPitch = 5.0f;
+            if (1) {}
+        }
+        if (data->blend[arg6] > 0) {
+            blendMode = 2;
+            blendT = 10 - data->blend[arg6];
+            blendT = blendT / 10.0f;
+            if (locked == 0) {
+                blendT = 1.0f - blendT;
+            }
+        } else {
+            if (data->timer[arg6] && data->timer[arg6] < 10) {
+                blendMode = 1;
+                blendT = 10 - data->timer[arg6];
+                blendT = blendT / 10.0f;
+            }
+        }
+        if (blendMode == 1) {
+            rateYaw += (1.0f - rateYaw) * blendT;
+            ratePitch += (1.0f - ratePitch) * blendT;
+        }
+        if (arg8 != 0) {
+            if (yaw > 90.0f && data->yaw[arg6] < -90.0f) {
+                data->yaw[arg6] += 360.0f;
+            } else if (yaw < -90.0f && data->yaw[arg6] > 90.0f) {
+                data->yaw[arg6] -= 360.0f;
+            }
+        }
+        dYaw = (yaw - data->yaw[arg6]) * rateYaw;
+        dPitch = (pitch - data->pitch[arg6]) * ratePitch;
+        if (blendMode != 0) {
+            yaw = data->yaw[arg6] + dYaw;
+            pitch = data->pitch[arg6] + dPitch;
+        } else {
+            if (fabsf(dYaw) < fabsf(data->yawVel[arg6]) + maxYaw) {
+                data->yawVel[arg6] = dYaw;
+            } else {
+                data->yawVel[arg6] += maxYaw * ((dYaw < 0) ? -1 : 1);
+            }
+            if (fabsf(dPitch) < fabsf(data->pitchVel[arg6]) + maxPitch) {
+                data->pitchVel[arg6] = dPitch;
+            } else {
+                data->pitchVel[arg6] += maxPitch * ((dPitch < 0) ? -1 : 1);
+            }
+            yaw = data->yaw[arg6] + data->yawVel[arg6];
+            pitch = data->pitch[arg6] + data->pitchVel[arg6];
+        }
+        if (arg8 == 0) {
+            func_15039ED0(arg4, &yaw, &pitch, NULL, NULL, origYaw, origPitch, arg3, arg6);
+        }
+    } else {
+        yaw = data->yaw[arg6];
+        pitch = data->pitch[arg6];
+    }
+    if (!(arg7 & 1)) {
+        yaw = origYaw;
+    }
+    if (!(arg7 & 2)) {
+        pitch = origPitch;
+    }
+    if (found) {
+        blendMode = 0;
+        yaw = saved[0];
+        pitch = saved[1];
+    }
+    if (D_800C3FFA == 0) {
+        obj->unk2CA = yaw * 0.7111111283f;
+    }
+    fyaw = data->offYaw[arg6] + yaw;
+    fpitch = data->offPitch[arg6] + pitch;
+    switch (argC) {
+    case 0:
+        func_150A8050(mtxA, 0.0f, 0.0f, roll);
+        func_150A8050(mtxB, -fpitch, fyaw, 0.0f);
+        break;
+    case 2:
+        func_150A8050(mtxA, 0.0f, 0.0f, -fpitch);
+        func_150A8050(mtxB, roll, fyaw, 0.0f);
+        break;
+    case 1:
+        func_150A8050(mtxA, 0.0f, 0.0f, fpitch);
+        func_150A8050(mtxB, roll, fyaw, 0.0f);
+        break;
+    case 3:
+        func_150A8050(mtxA, 0.0f, 0.0f, -fpitch);
+        func_150A8050(mtxB, -fyaw, roll, 0.0f);
+        break;
+    }
+    func_150A7A48(mtxA, mtxB, mtxC);
+    func_150A7A48(mtxC, m1, result);
+    result[3][0] = m0[3][0];
+    result[3][1] = m0[3][1];
+    result[3][2] = m0[3][2];
+    if (blendMode != 0) {
+        f32 qB[4];
+        f32 qA[4];
+        f32 qOut[4];
+        s32 i;
+        s32 j;
+        bcopy(m0, mtxA, 0x40);
+        bcopy(result, mtxB, 0x40);
+        for (i = 0; i < 3; i++) {
+            scale[i] = sqrtf(m0[i][0] * m0[i][0] + m0[i][1] * m0[i][1] + m0[i][2] * m0[i][2]);
+            ry = 1.0f / scale[i];
+            for (j = 0; j < 3; j++) {
+                mtxA[j][i] = m0[j][i] * ry;
+            }
+            ry = 1.0f / sqrtf(result[i][0] * result[i][0] + result[i][1] * result[i][1] + result[i][2] * result[i][2]);
+            for (j = 0; j < 3; j++) {
+                mtxB[j][i] = result[j][i] * ry;
+            }
+        }
+        func_15049CB8(mtxB, qB);
+        func_15049CB8(mtxA, qA);
+        func_15049C40(qB, qA);
+        func_15049EDC(qB, qA, blendT, qOut);
+        func_1504A140(qOut, result);
+    } else {
+        scale[0] = 1.0f;
+        scale[1] = 1.0f;
+        scale[2] = 1.0f;
+    }
+    if (arg9 != 0) {
+        func_150A7A48(mtxC, m0, mtxA);
+        bcopy(mtxA, m0, 0x40);
+    } else {
+        bcopy(result, m0, 0x40);
+        if (blendMode != 0) {
+            if (scale[0] != 1.0f) {
+                m0[0][0] *= scale[0];
+                m0[1][0] *= scale[0];
+                m0[2][0] *= scale[0];
+            }
+            if (scale[1] != 1.0f) {
+                m0[0][1] *= scale[1];
+                m0[1][1] *= scale[1];
+                m0[2][1] *= scale[1];
+            }
+            if (scale[2] != 1.0f) {
+                m0[0][2] *= scale[2];
+                m0[1][2] *= scale[2];
+                m0[2][2] *= scale[2];
+            }
+        }
+    }
+    data->yaw[arg6] = yaw;
+    data->pitch[arg6] = pitch;
+    if (D_800BEAC0 == 0 && D_800BEA0C == 0) {
+        if (data->blend[arg6] > 0) {
+            data->blend[arg6]--;
+        }
+    }
+    if (!noTarget) {
+        data->timer[arg6] = 40;
+    }
+
+    step = ((GameStruct_800BE9B4 *)&D_800BE9B4)->unk30 * 10;
+    if (step < ((data->offYaw[arg6] < 0) ? -data->offYaw[arg6] : data->offYaw[arg6])) {
+        data->offYaw[arg6] -= step * ((data->offYaw[arg6] < 0) ? -1 : 1);
+    } else {
+        data->offYaw[arg6] = 0;
+    }
+    if (step < ((data->offPitch[arg6] < 0) ? -data->offPitch[arg6] : data->offPitch[arg6])) {
+        data->offPitch[arg6] -= step * ((data->offPitch[arg6] < 0) ? -1 : 1);
+    } else {
+        data->offPitch[arg6] = 0;
+    }
+}
+
 
 GameStruct_15039A54 *func_15039A54(s32 arg0, s32 arg1) {
     return &D_80098068[arg1];
@@ -1070,7 +1492,7 @@ void func_15039CC8(struct127 *arg0) {
     }
 }
 
-void func_15039ED0(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 *arg4, f32 arg5, f32 arg6, s32 arg7) {
+void func_15039ED0(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 *arg4, f32 arg5, f32 arg6, s32 arg7, s32 arg8) {
     GameStruct_15039A54 *temp_v0;
     f32 temp_f0;
     f32 temp_f0_2;
