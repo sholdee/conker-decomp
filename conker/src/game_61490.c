@@ -137,7 +137,21 @@ s16 *func_150343B0(s16 *arg0, s32 arg1) {
     return arg0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_61490/func_15034420.s")
+extern f32 D_80097D18;
+
+GameCommand *func_15034420(GameCommand *arg0, s32 arg1) {
+    s16 part;
+    s16 value;
+
+    value = (f32)D_800CC2D0[arg1].unk2E4 * D_80097D18;
+    part = value >> 4;
+    value -= part;
+    arg0[0].value = part;
+    arg0[1].value = value;
+    arg0[0].opcode = 0;
+    arg0[1].opcode = 0x18;
+    return arg0 + 2;
+}
 s16 *func_150344A0(s16 *arg0, s32 arg1);
 
 void func_1503B9BC(void);
