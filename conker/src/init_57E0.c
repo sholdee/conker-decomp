@@ -3,11 +3,58 @@
 #define osMotorInit osMotorInit_os_motor_h
 #include <ultra64.h>
 #include "functions.h"
+/* variables.h declares these as scalar s32; they are motor buffers. */
+#define D_8003BC30 D_8003BC30_vh
+#define D_8003BD30 D_8003BD30_vh
+#define D_8003BE30 D_8003BE30_vh
 #include "variables.h"
+#undef D_8003BC30
+#undef D_8003BD30
+#undef D_8003BE30
 #undef osMotorInit
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_57E0/_MakeMotorData.s")
+void osMotorInit(s32 channel, u16 address, u8 *data, u8 *command);
+extern s32 __osContRamRead(OSMesgQueue *, s32, u16, u8 *);
+extern s32 __osContRamWrite(OSMesgQueue *, s32, u16, u8 *, s32);
+extern u8 D_8003BC30[][64];
+extern u8 D_8003BD30[][64];
+extern u8 D_8003BE30[32];
+
+s32 _MakeMotorData(OSMesgQueue *queue, OSPfs *device, s32 channel) {
+    s32 i;
+    s32 result;
+    u8 data[32];
+
+    device->queue = queue;
+    device->channel = channel;
+    device->status = 0;
+    device->activebank = 0x80;
+    for (i = 0; i < 32; i++) {
+        data[i] = 0x80;
+    }
+    result = __osContRamWrite(queue, channel, 0x400, data, 0);
+    if (result == 2) {
+        result = __osContRamWrite(queue, channel, 0x400, data, 0);
+    }
+    if (result != 0) {
+        return result;
+    }
+    result = __osContRamRead(queue, channel, 0x400, data);
+    if (result != 0) {
+        return result;
+    }
+    if (data[31] != 0x80) {
+        return 0xB;
+    }
+    for (i = 0; i < 32; i++) {
+        D_8003BE50[i] = 1;
+        D_8003BE30[i] = 0;
+    }
+    osMotorInit(channel, 0x600, D_8003BE50, D_8003BD30[channel]);
+    osMotorInit(channel, 0x600, D_8003BE30, D_8003BC30[channel]);
+    return 0;
+}
 
 typedef struct PakReply {
     u8 dummy;
