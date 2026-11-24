@@ -357,7 +357,7 @@ extern u8 D_800DBEAC;
 extern s32 *D_800DBE80;
 
 Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 texBase, s32 arg3, s32 arg4, u32 width, u32 height,
-                   u32 tileW, u32 tileH, f32 x, f32 y, f32 z, u8 axis, s32 arg13, s32 limit,
+                   u32 tileW, u32 tileH, f32 x, f32 y, f32 z, u8 axis, f32 (*arg13)[4], s32 limit,
                    s32 *vtxCountPtr, s32 *vtxIdxPtr, TexEntry15110CFC *entries, s32 *lastIdxPtr,
                    u8 *sizes, u8 *shifts, s16 *palOffs, u8 *tlutCounts, u8 *tiles, s32 mode) {
     Vtx *vtxBuf;
@@ -473,7 +473,7 @@ Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 texBase, s32 arg3, s32 arg4, u
                     y3 = curV + h8;
                     break;
             }
-            if (func_150A6210(arg13, (x0 + x1) >> 1, (y0 + y1) >> 1, (z0 + z1) >> 1, (s32)w8,
+            if (func_150A6210((s32)arg13, (x0 + x1) >> 1, (y0 + y1) >> 1, (z0 + z1) >> 1, (s32)w8,
                               (s32)h8, 20000.0f) &&
                 (D_800DBEAB || rowIdx < limit)) {
                 tex = colIdx * nRows + texBase + rowIdx;
@@ -650,7 +650,195 @@ void func_15111858(void) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_13D350/func_15111AF4.s")
+typedef struct Game13D350Face {
+    u16 unk0;
+    u16 unk2;
+    s16 unk4;
+    s16 unk6;
+    s16 unk8;
+    s16 unkA;
+    s16 unkC;
+    s16 unkE;
+} Game13D350Face;
+
+typedef struct Game13D350Tex {
+    s32 addr;
+    s32 idx;
+} Game13D350Tex;
+
+typedef struct Game13D350Color {
+    u8 r;
+    u8 g;
+    u8 b;
+} Game13D350Color;
+
+struct Game13D350U8x2 { u8 v[2]; };
+struct Game13D350S16x2 { s16 v[2]; };
+extern struct Game13D350U8x2 D_800891EC;
+extern struct Game13D350U8x2 D_800891F0;
+extern struct Game13D350S16x2 D_800891F4;
+extern struct Game13D350U8x2 D_800891F8;
+extern struct Game13D350U8x2 D_800891FC;
+extern Game13D350Face D_800A2DA0[];
+extern Mtx *D_800DBEB0;
+extern s32 D_800DBE88[][2];
+extern u8 D_80089470;
+
+
+Gfx *func_15111AF4(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, f32 pitch, f32 yaw, f32 roll, s32 dist);
+/* Last entry of the D_800891D8 draw table (still asm data). The original file defined that table
+ * before this function; the `.word func_15111AF4` it emits makes as1 treat the function's entry
+ * label as address-taken, so the switch's `jr` gets an edge back to it. That turns everything up
+ * to the switch into a "loop" for as1's cross-block scheduler (candidate limit 100 instead of
+ * 10), which is what hoists `lwc1 yaw` above the 0x41 test and the else-arm `move v0,s0` into the
+ * colour branch's delay slot. Without this word the function cannot match. */
+static void *D_800891E8[] = { func_15111AF4 };
+
+Gfx *func_15111AF4(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, f32 pitch, f32 yaw, f32 roll, s32 dist) {
+    s32 i;
+    s32 end;
+    s32 start;
+    s32 j;
+    s32 fmt;
+    s32 idx;
+    s32 *texList;
+    f32 mtx[4][4];
+    f32 mtx2[4][4];
+    s32 vtx;
+    s32 count;
+    s32 vtxBase;
+    Game13D350Tex texs[4];
+    Gfx *t;
+    s32 lastIdx;
+    f32 fov;
+    u8 color[3];
+    struct Game13D350U8x2 sp104;
+    struct Game13D350U8x2 sp100;
+    struct Game13D350S16x2 spFC;
+    struct Game13D350U8x2 spF8;
+    struct Game13D350U8x2 spF4;
+
+    sp104 = D_800891EC;
+    sp100 = D_800891F0;
+    spFC = D_800891F4;
+    spF8 = D_800891F8;
+    spF4 = D_800891FC;
+    { Gfx *command = gfx++; command->words.w0 = 0xD7000002; command->words.w1 = 0xFFFFFFFF; }
+    gfx = func_1501A680((Gfx *)func_1501A490((s32)gfx, D_80082FA6, 0, 0, 0, 0));
+    fov = (D_80082FA0 != 1) ? 80.0f : 95.0f;
+    if (D_800BE9F0 == 0x41) {
+        yaw -= 119.0f;
+        if (yaw < 0.0f) {
+            yaw += 360.0f;
+        }
+    } else if (D_800BE9F0 == 0x3C ||
+               (D_800BE9F0 == 0x13 && D_800C35EA == 1 && (D_800C35E8 == 2 || D_800C35E8 == 1))) {
+        gfx = func_15110544(gfx, (s32)((Struct151103C8 *)((struct259 *)D_800BE628 + D_80082FA4))->unk2C,
+                            (s32)((Struct151103C8 *)((struct259 *)D_800BE628 + D_80082FA4))->unk24,
+                            (s32)(((Struct151103C8 *)((struct259 *)D_800BE628 + D_80082FA4))->unk30 - 1.0f),
+                            (s32)((Struct151103C8 *)((struct259 *)D_800BE628 + D_80082FA4))->unk28, 0, 0, 0);
+    }
+    color[0] = ((u8 *)D_800B0DF0)[5];
+    color[1] = ((u8 *)D_800B0DF0)[6];
+    color[2] = ((u8 *)D_800B0DF0)[7];
+    { Gfx *command = gfx++; command->words.w0 = 0xE7000000; command->words.w1 = 0; }
+    if (color[0] + color[1] + color[2] == 0x2FD) {
+        { Gfx *command = gfx++; command->words.w0 = 0xFCFFFFFF; command->words.w1 = 0xFFFCF279; }
+    } else {
+        gDPSetEnvColor(gfx++, color[0], color[1], color[2], 0xFF);
+        { Gfx *command = gfx++; command->words.w0 = 0xFC129A25; command->words.w1 = 0xFF37FFFF; }
+    }
+    { Gfx *command = gfx++; command->words.w0 = 0xEF08AC0F; command->words.w1 = 0x0F0A4004; }
+    { Gfx *command = gfx++; command->words.w0 = 0xF5500000; command->words.w1 = 0x07000000; }
+    { Gfx *command = gfx++; command->words.w0 = 0xF5481000; command->words.w1 = 0x00080200; }
+    { Gfx *command = gfx++; command->words.w0 = 0xF2000000; command->words.w1 = 0x000F407C; }
+    { Gfx *command = gfx++; command->words.w0 = 0xF5400800; command->words.w1 = 0x01080200; }
+    { Gfx *command = gfx++; command->words.w0 = 0xF2000000; command->words.w1 = 0x010F407C; }
+    { Gfx *command = gfx++; command->words.w0 = 0xF5000100; command->words.w1 = 0x06000000; }
+    func_151102CC(mtx, pitch, yaw, roll);
+    func_150A7A48(mtx, (f32 (*)[4])((u8 *)((struct259 *)D_800BE628 + D_80082FA4) + 0xBC), mtx2);
+    guMtxF2L(mtx2, &D_800DBEB0[D_80082FA4 * 2 + D_800BE9C0]);
+    { Gfx *command = gfx++; command->words.w0 = 0xDA380007; command->words.w1 = (u32)&D_800DBEB0[D_80082FA4 * 2 + D_800BE9C0]; }
+    { Gfx *command = gfx++; command->words.w0 = 0xDA380003; command->words.w1 = (u32)&D_80089470; }
+    { Gfx *command = gfx++; command->words.w0 = 0xDB0E0000; command->words.w1 = *(u16 *)((u8 *)((struct259 *)D_800BE628 + D_80082FA4) + 0xB8); }
+    texList = D_800891BC[D_800B0DF0->unk9];
+    count = 0;
+    vtx = D_800DBE88[D_80082FA4][D_800BE9C0];
+    vtxBase = 0;
+    lastIdx = -1;
+    if (dist < 0) {
+        dist = 0;
+    }
+    end = (D_800BE9F0 == 0xC) ? 6 : 5;
+    start = (D_800BE9F0 != 0x19) ? 0 : 4;
+    for (i = start; i < end; i++) {
+        switch (i) {
+            case 0:
+                if ((yaw <= 180.0f && fov < yaw) || (180.0f < yaw && yaw < 360.0f - fov)) {
+                    continue;
+                }
+                break;
+            case 1:
+                if (270.0f + fov < yaw || yaw < 270.0f - fov) {
+                    continue;
+                }
+                break;
+            case 2:
+                if (180.0f + fov < yaw || yaw < 180.0f - fov) {
+                    continue;
+                }
+                break;
+            case 3:
+                if (90.0f + fov < yaw || yaw < 90.0f - fov) {
+                    continue;
+                }
+                break;
+            case 4:
+                if (-90.0f + fov < pitch || pitch < -90.0f - fov) {
+                    continue;
+                }
+                break;
+            case 5:
+                if (90.0f + fov < pitch || pitch < 90.0f - fov) {
+                    continue;
+                }
+                if (dist < 300) {
+                    continue;
+                }
+                break;
+        }
+        if (D_800A2DA0[i].unk4 == D_800A2DA0[i].unkA) {
+            fmt = 0x78;
+        } else if (D_800A2DA0[i].unk6 == D_800A2DA0[i].unkC) {
+            fmt = 0x79;
+        } else {
+            fmt = 0x7A;
+        }
+        idx = (i == 5) ? 0 : i;
+        gfx = func_15110CFC(gfx, (Vtx **)&vtx, texList[idx], 0, 2, D_800A2DA0[i].unk0, D_800A2DA0[i].unk2, 0x3C, 0x1E,
+                            D_800A2DA0[i].unk4, D_800A2DA0[i].unk6, D_800A2DA0[i].unk8, fmt, mtx, dist, &count, &vtxBase,
+                            (TexEntry15110CFC *)texs, &lastIdx, sp104.v, sp100.v, spFC.v, spF8.v, spF4.v, idx);
+    }
+    if (count != 0) {
+        gSPVertex(gfx++, vtxBase * 16 + vtx, count, 0);
+        for (j = 0; j < count; j += 4) {
+            idx = texs[j >> 2].idx;
+            gDPPipeSync(gfx++);
+            { Gfx *command = gfx++; command->words.w0 = 0xFD100000; command->words.w1 = texs[j >> 2].addr; }
+            { Gfx *command = gfx++; command->words.w0 = 0xF3000000; command->words.w1 = 0x077FF000; }
+            { Gfx *command = gfx++; command->words.w0 = 0xFD100000; command->words.w1 = texs[j >> 2].addr + spFC.v[idx]; }
+            gDPLoadSync(gfx++);
+            gDPLoadTLUTCmd(gfx++, 6, spF8.v[idx]);
+            if (idx != lastIdx) {
+                lastIdx = idx;
+                gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, spF4.v[idx], G_ON);
+            }
+            gSP1Triangle(gfx++, j + 2, j, j + 1, 0);
+            gSP1Triangle(gfx++, j + 3, j, j + 2, 0);
+        }
+    }
+    return gfx;
+}
 void func_15113180(void);
 
 typedef struct Game13D350Entry {
