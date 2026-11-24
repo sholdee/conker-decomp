@@ -3,6 +3,10 @@
 Goal: replace one `#pragma GLOBAL_ASM(...)` stub with C that compiles (IDO 5.3, `-O2 -g3`,
 mips2) to the EXACT original bytes. The verdict is the whole code bin's sha1 — nothing else.
 
+**First, claim the function:** `mkdir ~/conker-ws/.claims/FUNC`. If that fails because the
+directory exists, another agent owns FUNC: do nothing else and stop at once with status
+BLOCKED and note "claimed". (A coordinator running two fleets over one list relies on this.)
+
 ## Loop
 ```
 python3 ~/conker/tools/mw.py new FUNC        # private workspace ~/conker-ws/FUNC (main tree is never touched)
