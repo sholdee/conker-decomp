@@ -1,9 +1,12 @@
 #include <ultra64.h>
 #define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #define func_151D9B8C func_151D9B8C_decl_in_functions_h
+#define func_1513D524 func_1513D524_decl_in_functions_h
 #include "functions.h"
 #undef func_150ADA20
 #undef func_151D9B8C
+#undef func_1513D524
+void *func_1513D524(void *, u8, u8, u8, u8, u8, s32, u8, s32);
 void func_151D9B8C(u8, f32, u8, void *, struct17 *, s16, u8, u8, u8, u8, s32);
 u32 func_150ADA20(void);
 #include "variables.h"
@@ -316,7 +319,227 @@ struct260 *func_151B09BC(void *arg0, void *arg1, s16 arg2, u8 arg3, s32 arg4) {
     return obj;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1DD500/func_151B0B88.s")
+typedef struct { f32 x, y, z; } Vec3f_151B0B88;
+
+typedef struct Game1DD500Owner {
+    s32 active;
+    u8 kind;
+    u8 pad5[0x36];
+    u8 id;
+    u8 pad3C[0x38];
+    u8 flags74;
+    u8 pad75[0x15F];
+    s32 transform;
+} Game1DD500Owner;
+
+typedef struct Game1DD500Particle {
+    u8 pad0[0x34];
+    Vec3f_151B0B88 position;
+    Vec3f_151B0B88 previous;
+    u8 pad4C[0xC];
+    s32 flags;
+    u8 pad5C[0xB4];
+    Vec3f_151B0B88 velocity;
+} Game1DD500Particle;
+
+typedef struct Game1DD500Node {
+    Game1DD500Particle *object;
+    s32 state;
+    struct Game1DD500Node *next;
+} Game1DD500Node;
+
+typedef struct Game1DD500Packet {
+    Game1DD500Owner *owner;
+    u8 id;
+    s32 count;
+    Game1DD500Node nodes[11];
+    f32 time;
+    u8 kind;
+} Game1DD500Packet;
+
+typedef struct Game1DD500Mount {
+    u8 joint;
+    u8 pad1[3];
+    Vec3f_151B0B88 offset;
+} Game1DD500Mount;
+
+typedef struct Game1DD500SparkPacket {
+    u8 kind;
+    u8 pad1;
+    s16 flags;
+    s16 life;
+    u8 pad6[2];
+    s32 field8;
+    s32 fieldC;
+    u8 color[4];
+    f32 range[2];
+    Vec3f_151B0B88 position;
+    Vec3f_151B0B88 direction;
+    Vec3f_151B0B88 scale;
+    s32 mode;
+    u8 field44;
+    u8 field45;
+    u8 pad46[0x12];
+} Game1DD500SparkPacket;
+
+typedef struct Game1DD500SparkMotion {
+    u8 pad0[0xC];
+    f32 fieldC;
+    u8 field10;
+    u8 field11;
+    u8 field12;
+    u8 field13;
+    f32 field14;
+    f32 field18;
+    f32 field1C;
+    f32 field20;
+    u8 field24;
+    u8 field25;
+    u8 pad26[2];
+} Game1DD500SparkMotion;
+
+void func_1513F680(void *, u8, u8, u8, u8);
+extern Game1DD500Mount D_800AA12C[];
+extern Game1DD500Mount D_800AA1DC[];
+extern f32 D_800AA2E0;
+extern f32 D_800AA2E4;
+extern f32 D_800AA2E8;
+extern f32 D_800AA2EC;
+extern u8 D_800AB310[];
+
+void func_151B0B88(u8 *arg0) {
+    Game1DD500Packet *list = (Game1DD500Packet *)(arg0 + 0x28);
+    u8 failed;
+
+    failed = 0;
+    if (list->owner->active == 0 || list->owner->id != list->id) {
+        failed = 1;
+    }
+    if (!failed) {
+        Game1DD500Node *head;
+        Game1DD500Node *last;
+        s32 i;
+        u32 count;
+
+        if (list->owner->transform == 0) {
+            goto clear;
+        }
+        head = NULL;
+        last = NULL;
+        if ((list->owner->flags74 & 0xF) != 0xF) {
+            count = 0;
+            for (i = 0; i < 11; i++) {
+                Game1DD500Node *node = &list->nodes[i];
+                s32 keep;
+
+                if (node->object != NULL) {
+                    node->object->previous = node->object->position;
+                    func_15143134(list->owner->kind == 0x36 ? &D_800AA1DC[i].offset.x : &D_800AA12C[i].offset.x,
+                                  &node->object->position.x,
+                                  list->owner->kind == 0x36 ? (D_800AA1DC[i].joint << 6) + list->owner->transform : (D_800AA12C[i].joint << 6) + list->owner->transform);
+                    node->state -= D_800BE9E4;
+                    if (node->state < 0) {
+                        Vec3f_151B0B88 *velocity = &node->object->velocity;
+
+                        velocity->x = (node->object->position.x - node->object->previous.x) * D_800BE9A8;
+                        velocity->y = 0.0f;
+                        velocity->z = (node->object->position.z - node->object->previous.z) * D_800BE9A8;
+                        func_1513F680(node->object, 0x10, 0x1B, 0, 0x10);
+                        node->object->flags |= 1;
+                        node->object = NULL;
+                        list->count--;
+                        keep = 1;
+                    } else {
+                        keep = 0;
+                    }
+                } else {
+                    keep = 1;
+                }
+                if (keep) {
+                    if (last == NULL) {
+                        last = node;
+                    }
+                    node->next = head;
+                    head = node;
+                    count++;
+                }
+            }
+            if (count != 0) {
+                list->time += func_150ADA68() * D_800AA2E0 * D_800AA2E4 * D_800BE9A4;
+                if (list->time > 1.0f) {
+                    Game1DD500SparkPacket packet;
+                    Game1DD500SparkMotion motion;
+
+                    last->next = head;
+                    packet.kind = D_800AB310[list->kind];
+                    packet.flags = 0x1001;
+                    packet.life = func_150ADA20() % 51 + 0x34;
+                    packet.field8 = 0;
+                    packet.fieldC = 0;
+                    packet.color[0] = 0;
+                    packet.color[1] = 0;
+                    packet.color[2] = 0;
+                    packet.color[3] = 0xFF;
+                    packet.mode = 0;
+                    packet.scale.x = 1.0f;
+                    packet.scale.y = 1.0f;
+                    packet.scale.z = 1.0f;
+                    motion.field10 = 0;
+                    motion.field11 = 0;
+                    packet.direction.x = 0.0f;
+                    packet.direction.y = 0.0f;
+                    packet.direction.z = 0.0f;
+                    motion.field25 = list->kind;
+                    motion.field24 = func_150ADA20() & 1;
+                    packet.range[0] = 0.0f;
+                    packet.range[1] = 0.0f;
+                    motion.field14 = 5.0f;
+                    motion.field18 = 25.0f;
+                    motion.field1C = 2.0f;
+                    motion.field20 = 8.0f;
+                    do {
+                        u32 skip;
+                        s32 index;
+                        void *result;
+
+                        skip = func_150ADA20() % count;
+                        while (skip--) {
+                            last = head;
+                            head = head->next;
+                        }
+                        index = head - list->nodes;
+                        packet.field45 = func_150ADA20() % 101 + 100;
+                        packet.field44 = func_150ADA20() % 101 + 0x9B;
+                        motion.field12 = func_150ADA20() % 5 + 4;
+                        motion.field13 = func_150ADA20() % 5 + 4;
+                        motion.fieldC = (func_150ADA68() * 506.0f + D_800AA2E8) * D_800AA2EC;
+                        func_15143134(&D_800AA12C[index].offset.x, &packet.position.x, (D_800AA12C[index].joint << 6) + list->owner->transform);
+                        packet.direction = packet.position;
+                        result = func_1513D524(&packet, 0x11, 0, 0, 0x10, ((func_150ADA20() % 1) ? 1 : 0) | 2, 0x28, arg0[0xC], arg0[1]);
+                        head->object = result;
+                        if (result != NULL) {
+                            memcpy((u8 *)result + 0x110, &motion, sizeof(motion));
+                            head->state = func_150ADA20() % 31 + 20;
+                            head = head->next;
+                            count--;
+                            last->next = head;
+                            list->count++;
+                        }
+                        list->time -= 1.0f;
+                    } while (list->time > 1.0f && count != 0);
+                }
+            }
+        } else {
+        clear:
+            if (list->count != 0) {
+                func_151B1918((struct260 *)arg0);
+            }
+        }
+    }
+    if (failed) {
+        *(s16 *)(arg0 + 0xE) = -1;
+    }
+}
 
 typedef struct {
     f32 vx;
