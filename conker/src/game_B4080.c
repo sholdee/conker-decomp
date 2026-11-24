@@ -2823,7 +2823,342 @@ s32 func_1508CA88(void) {
     return temp;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_B4080/func_1508CAD8.s")
+typedef struct {
+    u8 pad0[0x78];
+    u8 unk78;
+    u8 pad79[0xC];
+    u8 unk85;
+    u8 unk86;
+    u8 pad87[3];
+    u16 unk8A;
+    u16 unk8C;
+    s8 unk8E;
+    s8 unk8F;
+    f32 unk90;
+    u8 pad94[0xAC];
+    f32 unk140;
+    u8 pad144[0x28];
+    f32 unk16C;
+    f32 unk170;
+    f32 unk174;
+    f32 unk178;
+} CAD8Inner;
+
+typedef struct {
+    s32 unk0;
+    u8 pad4[0x10];
+    f32 x;
+    f32 y;
+    f32 z;
+    u8 pad20[0xC];
+    f32 oldX;
+    f32 oldY;
+    f32 oldZ;
+    u8 pad38[0x16C];
+    s16 unk1A4;
+    s16 unk1A6;
+    s16 unk1A8;
+} CAD8Def;
+
+extern s32 D_800BE9AC;
+extern s8 D_800872D8[];
+void func_150DA5EC(struct127 *, f32);
+
+#define INNER(o) ((CAD8Inner *)(o)->unk31C)
+#define OBJ obj
+
+
+s32 func_1508CAD8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
+    CAD8Def *def;
+    f32 dz;
+    f32 dx;
+    f32 dy;
+    f32 V;
+    f32 scale;
+    f32 ang;
+    f32 curYaw;
+    f32 diff;
+    f32 roll;
+    f32 h;
+    f32 dist;
+    f32 mag;
+    f32 yaw;
+    f32 *ptr;
+    f32 ratio;
+    f32 height;
+    s32 flagA;
+    s32 doInner;
+    s32 mode;
+    f32 cur;
+    struct127 *obj;
+    s32 type;
+    s32 hasCam;
+    s32 result;
+    struct108 *cam;
+    s32 pad;
+
+    doInner = 1;
+    result = 0;
+    obj = &D_800CC2D0[arg0];
+    ratio = ((f32 *)D_800BE628)[0x70 / 4] / ((f32 *)D_800BE628)[0x6C / 4];
+    if (arg1 != -1) {
+        cam = OBJ->camera;
+        if (cam != NULL) {
+            hasCam = 1;
+        } else {
+            hasCam = 0;
+        }
+        type = INNER(OBJ)->unk78;
+        if ((type == 9) || (type == 0x38) || (type == 0x15)) {
+            hasCam = 0;
+        }
+        def = func_1505EEF4(arg1 & 0xFFFF0FFF);
+        if (def == NULL) {
+            return 1;
+        }
+        flagA = 0;
+        mode = 0;
+        if ((type == 0x24) || (type == 0x18) || (type == 0x23) || (type == 0x41)) {
+            flagA = 1;
+        } else if (type == 9) {
+            mode = 1;
+        } else if ((type == 0x15) || (type == 0x1B) || (type == 3)) {
+            mode = 1;
+            if (type != 0x1B) {
+                mode = 3;
+            }
+            doInner = 0;
+        } else if (type == 0x38) {
+            mode = 2;
+        }
+        if (type == 3) {
+            arg3 = 0;
+        }
+        height = 40.0f;
+        if (def->unk0 == 0x1F) {
+            arg3 = 0;
+            height = 80.0f;
+        }
+        dx = 0.0f;
+        dz = 0.0f;
+        if ((*(s16 *)(D_800D23B0 + 0x16BC) == 0xB9) || (D_800E0BD0 >= 3)) {
+            switch (INNER(OBJ)->unk78) {
+                case 0x18:
+                case 0x41:
+                    V = 0.01600000076f;
+                    break;
+                case 0x14:
+                case 0x3F:
+                    V = 0.02476780117f;
+                    break;
+                case 0x1B:
+                    V = 0.01600000076f;
+                    break;
+                case 0x16:
+                    V = 0.03200000152f;
+                    break;
+                default:
+                    V = 0.0f;
+                    break;
+            }
+            if (V != 0.0f) {
+                dx = def->x - OBJ->x_position;
+                dz = def->z - OBJ->z_position;
+                dy = def->y - OBJ->y_position;
+                dy = sqrtf((dx * dx) + (dy * dy) + (dz * dz));
+                V = (dy * V) / *(f32 *)(D_800D23B0 + 0x16B4);
+                dx = (def->x - def->oldX) * V;
+                dz = (def->z - def->oldZ) * V;
+            }
+        }
+        if (arg3 == 0) {
+            dx = (def->x + dx) - ((f32 *)(D_800D23B0 + 0x17A8))[arg0];
+            dz = (def->z + dz) - ((f32 *)(D_800D23B0 + 0x1828))[arg0];
+        } else {
+            dx = ((f32)def->unk1A4 + dx) - ((f32 *)(D_800D23B0 + 0x17A8))[arg0];
+            dz = ((f32)def->unk1A8 + dz) - ((f32 *)(D_800D23B0 + 0x1828))[arg0];
+        }
+        scale = ((f32 *)(D_800D23B0 + 0x1868))[arg0] * (f32)D_800BE9E4;
+        if (type == 3) {
+            scale = 1.0f;
+            arg5 = 0;
+            arg4 = 0;
+        }
+        if (scale > 1.0f) {
+            scale = 1.0f;
+        }
+        ((f32 *)(D_800D23B0 + 0x17A8))[arg0] += dx * scale;
+        ((f32 *)(D_800D23B0 + 0x1828))[arg0] += dz * scale;
+        dx = ((f32 *)(D_800D23B0 + 0x17A8))[arg0] - OBJ->x_position;
+        dz = ((f32 *)(D_800D23B0 + 0x1828))[arg0] - OBJ->z_position;
+        dist = sqrtf((dx * dx) + (dz * dz));
+        if (dist < 1.0f) {
+            dist = 1.0f;
+        } else {
+            f32 tx;
+
+            if (((dist < 100.0f) || (type == 3)) && (arg5 != 0)) {
+                arg5 = 0;
+                if (arg4 == 0) {
+                    arg4 = 50;
+                }
+            }
+            mag = arg4;
+            if (type == 9) {
+                mag = arg4 * 1.25f;
+            }
+            mag = mag / dist;
+            tx = dx;
+            dx -= dz * mag;
+            dz += tx * mag;
+        }
+        ang = (f32)func_1505A630(dx, -dz, 0) * 0.005493164f;
+        if (type != 3) {
+            curYaw = INNER(OBJ)->unk16C;
+        } else {
+            curYaw = OBJ->unk40 - 90.0f;
+        }
+        ang = func_15144BC8(ang);
+        curYaw = func_15144BC8(curYaw);
+        diff = func_15144BC8(curYaw - ang);
+        if (diff > 180.0f) {
+            diff = -360.0f + diff;
+        }
+        if ((diff > 45.0f) || (diff < -45.0f)) {
+            result = 1;
+        }
+        if (arg3 == 0) {
+            cur = ((def->y + height) - (f32)arg5) - ((f32 *)(D_800D23B0 + 0x17E8))[arg0];
+        } else {
+            cur = ((f32)def->unk1A6 - (f32)arg5) - ((f32 *)(D_800D23B0 + 0x17E8))[arg0];
+        }
+        ((f32 *)(D_800D23B0 + 0x17E8))[arg0] += cur * scale;
+        cur = INNER(OBJ)->unk140 - ((f32 *)(D_800D23B0 + 0x17E8))[arg0];
+        ang = (f32)func_1505A630(dist, cur, 0) * 0.005493164f;
+        curYaw = INNER(OBJ)->unk170;
+        while (ang > 180.0f) {
+            ang -= 360.0f;
+        }
+        while (curYaw > 180.0f) {
+            curYaw -= 360.0f;
+        }
+        V = func_15144BC8(curYaw - ang);
+        while (V > 180.0f) {
+            V -= 360.0f;
+        }
+        yaw = diff * 8.0f;
+        roll = V * 8.0f;
+        if (yaw < -90.0f) {
+            yaw = -90.0f;
+        }
+        if (yaw > 90.0f) {
+            yaw = 90.0f;
+        }
+        if (roll < -30.0f) {
+            roll = -30.0f;
+        }
+        if (roll > 30.0f) {
+            roll = 30.0f;
+        }
+        V = sqrtf((yaw * yaw) + (roll * roll)) * 1.5f;
+        h = V - 20.0f;
+        if (V < 20.0f) {
+            h = 0.0f;
+        }
+        h = -80.0f + h;
+        if (type == 3) {
+            h = 35.0f;
+            roll = 0.0f;
+        }
+        if (doInner != 0) {
+            ptr = &INNER(OBJ)->unk90;
+            INNER(OBJ)->unk16C = INNER(OBJ)->unk16C - diff;
+            INNER(OBJ)->unk170 = ang;
+            func_15048758(&INNER(OBJ)->unk16C);
+            INNER(OBJ)->unk174 = INNER(OBJ)->unk16C;
+            INNER(OBJ)->unk178 = INNER(OBJ)->unk170;
+            INNER(OBJ)->unk85 = 0;
+            INNER(OBJ)->unk86 = 0;
+        } else if (hasCam != 0) {
+            ptr = &cam->unk1A4;
+            ((s8 *)cam->unk36C)[2] = (s32)yaw;
+            ((s8 *)cam->unk36C)[3] = (s32)-roll;
+        } else {
+            ptr = &INNER(OBJ)->unk90;
+            INNER(OBJ)->unk85 = (s32)yaw;
+            INNER(OBJ)->unk86 = (s32)-roll;
+        }
+        if (mode != 0) {
+            if (type == 0x1B) {
+                if ((h < -50.0f) && (((s32 *)(D_800D23B0 + 0x16C0))[arg0] & (0x10001 << arg1))) {
+                    INNER(OBJ)->unk8A |= 0x2000;
+                    INNER(OBJ)->unk8E = 2;
+                }
+            } else if (type == 3) {
+                f32 f;
+
+                f = (dist - 136.0f) / 664.0f;
+                if (f < 0.0f) {
+                    f = 0.0f;
+                }
+                f = (sinf((f32)(D_800BE9AC & 0x3F) * 0.09815625101f) * 0.174999997f) + f;
+                if (f > 1.0f) {
+                    f = 1.0f;
+                }
+                f = (f * 0.02569000237f) + 0.01724099927f;
+                INNER(OBJ)->unk86 = 0;
+                INNER(OBJ)->unk85 = 0;
+                OBJ->unk76 -= (s32)(yaw * 16.0f);
+                OBJ->unk7A = OBJ->unk76;
+                OBJ->unk40 = (f32)(s16)(OBJ->unk7A + 0x4000) * 0.005493164f;
+                func_150DA5EC(OBJ, f);
+            } else if (((s32 *)(D_800D23B0 + 0x29C))[arg0] >= 0) {
+                INNER(OBJ)->unk8A = 0x2000;
+                if (mode == 1) {
+                    INNER(OBJ)->unk8E = 2;
+                    if (D_800872D8[D_800E0BD0] < ((s32 *)(D_800D23B0 + 0x29C))[arg0]) {
+                        INNER(OBJ)->unk8A &= 0xDFFF;
+                        INNER(OBJ)->unk8E = 0;
+                    }
+                } else if (mode == 2) {
+                    if (arg2 != 0) {
+                        INNER(OBJ)->unk8E = 0xA;
+                    } else {
+                        INNER(OBJ)->unk8A &= 0xDFFF;
+                    }
+                } else {
+                    INNER(OBJ)->unk8E = 2;
+                }
+            }
+        } else if (arg2 != 0) {
+            if (flagA != 0) {
+                INNER(OBJ)->unk8C = 0;
+                INNER(OBJ)->unk8A = 0;
+            } else {
+                INNER(OBJ)->unk8C = 0x2000;
+                INNER(OBJ)->unk8F = 1;
+            }
+        } else if (flagA != 0) {
+            if (cam != NULL) {
+                *cam->unk36C |= 0x2000;
+            }
+            INNER(OBJ)->unk8A = 0x2000;
+            INNER(OBJ)->unk8E = 2;
+        }
+        INNER(OBJ)->unk8A |= 0x10;
+        INNER(OBJ)->unk8E = 1;
+        *ptr += (h - *ptr) * 0.125f;
+        if (hasCam != 0) {
+            cam->unk1A8 = cam->unk1A4 * ratio;
+        }
+        if (cam != NULL) {
+            *cam->unk36C |= 0x10;
+        }
+    }
+    return result;
+}
+#undef OBJ
+#undef INNER
 
 extern s16 D_80087320[][3];
 void func_1508EB90(s32 arg0, s32 arg1, s32 arg2);
