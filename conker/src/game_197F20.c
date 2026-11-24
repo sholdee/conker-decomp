@@ -73,7 +73,257 @@ Struct1516A7B0 *func_1516A7B0(u32 arg0, s32 arg1, s32 arg2, s32 arg3, Struct1516
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_197F20/func_1516AA70.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_197F20/func_1516B6BC.s")
+typedef struct {
+    u8 pad0[6];
+    s16 w;
+    s16 h;
+    u8 alpha;
+    u8 r;
+    u8 g;
+    u8 flags;
+    u8 padE[2];
+    void *tex;
+} Sprite_1516B6BC;
+
+typedef struct {
+    s32 unk0;
+    char pad4[0x24];
+    u8 unk28;
+    u8 unk29;
+    u8 unk2A;
+} Data_1516B6BC;
+
+typedef struct {
+    char pad0[0xE];
+    u8 unkE;
+    char padF;
+    Data_1516B6BC *unk10;
+    char pad14;
+    u8 unk15;
+    char pad16[4];
+    u8 unk1A;
+    u8 unk1B;
+    u8 unk1C;
+    u8 unk1D;
+    char pad1E[0xA];
+    f32 unk28;
+    char pad2C[0xC];
+    f32 unk38;
+    f32 unk3C;
+    f32 unk40;
+    f32 unk44;
+    f32 unk48;
+    f32 unk4C;
+    char pad50[8];
+    f32 unk58;
+    f32 unk5C;
+    char pad60[0x10];
+    f32 unk70;
+} Obj_1516B6BC;
+typedef struct {
+    char pad0[6];
+    u16 unk6;
+    u16 unk8;
+} Struct1516CC58_Vp;
+
+extern Struct1516CC58_Vp D_8009055C;
+extern Struct1516CC58_Vp D_8009057C;
+#define WGFX1516B6BC(pkt, a, b) { Gfx *_g = (Gfx *)(pkt); _g->words.w0 = (u32)(a); _g->words.w1 = (u32)(b); }
+extern Struct1516CC58_Vp D_8009056C;
+extern Struct1516CC58_Vp D_8009058C;
+extern Struct1516CC58_Vp D_8009059C;
+extern u16 D_80090564;
+extern s32 D_800A4AC8[][2];
+extern s32 D_800A4B90;
+extern s32 D_800A4B94;
+extern s32 D_800BE9C8[];
+extern s32 D_800BEBA4;
+extern u8 D_800D2DA8;
+extern u8 D_800D2DA9;
+extern u8 D_800D2DAA;
+extern u8 D_800E0BDC;
+Gfx *func_15094F70(Gfx *, Struct1516CC58_Vp *, s32, Sprite_1516B6BC *, s32, s32, s32, s32, s32);
+Gfx *func_15095A48(Gfx *, Sprite_1516B6BC *, f32, f32);
+Gfx *func_1516C934(Gfx *, Obj_1516B6BC *, s32, s32, s32, s32);
+
+Gfx *func_1516B6BC(Gfx *gfx, Obj_1516B6BC *obj, s32 arg2) {
+    Sprite_1516B6BC sprite;
+    s32 pad80;
+    f32 xoff;
+    f32 yoff;
+    s32 flag;
+    s32 scale;
+    s32 overflow;
+    Gfx *start;
+    f32 tw;
+    f32 th;
+
+    start = gfx;
+    if (obj->unk10->unk0 & 4) {
+        flag = 1;
+    } else {
+        flag = 0;
+    }
+    if (obj->unkE == 0) {
+        return gfx;
+    }
+    if (D_800E0BDC == 0) {
+        return gfx;
+    }
+    D_800D2DAA = 0;
+    D_800D2DA9 = D_800D2DAA;
+    D_800D2DA8 = D_800D2DA9;
+    scale = D_800E0BDC + 1;
+    sprite.flags = 0;
+    sprite.alpha = (64 * scale) >> 8;
+    tw = (f32)D_8009055C.unk6;
+    th = (f32)D_8009055C.unk8;
+    sprite.w = (2.0f * obj->unk38 + 1.0f) / (f32)D_8009055C.unk6 * 2355.19995117f * obj->unk28;
+    sprite.h = (obj->unk3C + 1.0f) / (f32)D_8009055C.unk8 * 4259.83984375f * obj->unk28;
+    xoff = obj->unk38 / (f32)D_8009055C.unk6 * (f32)D_8009057C.unk6 * 0.25f * obj->unk28;
+    yoff = obj->unk3C / (f32)D_8009055C.unk8 * (f32)D_8009057C.unk8 * 0.5f * obj->unk28;
+    obj->unk48 = cosf(obj->unk58 + 3.14159274101f) * (obj->unk38 * 0.5f) * 1.14999997616f * obj->unk28 + obj->unk40 - xoff;
+    obj->unk4C = sinf(obj->unk58 + 3.14159274101f) * (obj->unk3C * 0.5f) * 1.03999996185f * obj->unk28 + obj->unk44 - yoff;
+    WGFX1516B6BC(gfx++, 0xE7000000, 0);
+    WGFX1516B6BC(gfx++, 0xFC30B261, 0xFF67FFFF);
+    WGFX1516B6BC(gfx++, 0xEF002C0F, D_800A4AC8[25][0] | D_800A4AC8[25][1] | 4);
+    if (obj->unk10->unk0 & 2) {
+        sprite.alpha = (f32)obj->unk1B * 64.0f / 255.0f;
+        sprite.alpha = (sprite.alpha * scale) >> 8;
+        gfx = func_15094F70(gfx, &D_8009056C, 0, &sprite, 0, 0, 0, 2, 3);
+    } else {
+        gfx = func_15094F70(gfx, &D_8009055C, 0, &sprite, 0, 0, 0, 2, 3);
+    }
+    if (!flag) {
+        gfx = func_15095A48(gfx, &sprite, obj->unk48 + 5.0f, obj->unk4C + -5.0f);
+    }
+    if (obj->unk58 > 0.0f && obj->unk58 < 3.14159274101f) {
+        sprite.flags &= ~2;
+    } else {
+        sprite.flags |= 2;
+    }
+    if (obj->unk58 > 1.5707963705f && obj->unk58 < 4.71238899231f) {
+        sprite.flags |= 1;
+    } else {
+        sprite.flags &= ~1;
+    }
+    overflow = (D_800BEBA4 < (((s32)gfx - D_800BE9C8[D_800BE9C0]) >> 3)) ? 1 : 0;
+    if (overflow != 0) {
+        return start;
+    }
+    if (obj->unk10->unk0 & 2) {
+        if (obj->unk15 == 1) {
+            obj->unk70 = obj->unk5C;
+        }
+        gfx = func_15094F70(gfx, &D_8009058C, 0, &sprite, 0, 0, 0, 2, 3);
+        sprite.alpha = (f32)obj->unk1C * 64.0f / 255.0f;
+        sprite.alpha = (sprite.alpha * scale) >> 8;
+        if (obj->unk58 > 1.5707963705f) {
+            obj->unk70 = obj->unk70 + ((obj->unk40 + xoff) - obj->unk70) * 0.300000011921f;
+            gfx = func_15095A48(gfx, &sprite, obj->unk70, obj->unk44 - yoff);
+        } else {
+            obj->unk70 = obj->unk70 + ((obj->unk40 - xoff) - obj->unk70) * 0.300000011921f;
+            gfx = func_15095A48(gfx, &sprite, obj->unk70, obj->unk44 - yoff);
+        }
+        sprite.w /= 2;
+        sprite.h /= 2;
+        sprite.alpha = (f32)obj->unk1D * 64.0f / 255.0f;
+        sprite.alpha = (sprite.alpha * scale) >> 8;
+        gfx = func_15094F70(gfx, &D_8009058C, 0, &sprite, 0, 0, 0, 2, 3);
+        if (obj->unk58 > 1.5707963705f) {
+            gfx = func_15095A48(gfx, &sprite, obj->unk40 - 2.5f, obj->unk44 + -2.5f);
+        } else {
+            gfx = func_15095A48(gfx, &sprite, obj->unk40 + 2.5f, obj->unk44 + -2.5f);
+        }
+    } else {
+        gfx = func_15094F70(gfx, &D_8009057C, 0, &sprite, 0, 0, 0, 2, 3);
+        if (!flag) {
+            if (obj->unk58 > 1.5707963705f) {
+                gfx = func_15095A48(gfx, &sprite, obj->unk40 + xoff - 2.5f, obj->unk44 - yoff + -2.5f);
+            } else {
+                gfx = func_15095A48(gfx, &sprite, obj->unk40 - xoff + 2.5f, obj->unk44 - yoff + -2.5f);
+            }
+        }
+    }
+    overflow = (D_800BEBA4 < (((s32)gfx - D_800BE9C8[D_800BE9C0]) >> 3)) ? 1 : 0;
+    if (overflow != 0) {
+        return start;
+    }
+    if (flag) {
+        D_800D2DA8 = D_800D2DA9 = D_800D2DAA = 0;
+    } else {
+        D_800D2DA8 = obj->unk10->unk28;
+        D_800D2DA9 = obj->unk10->unk29;
+        D_800D2DAA = obj->unk10->unk2A;
+    }
+    sprite.flags = 0;
+    if (flag) {
+        sprite.alpha = 0x55;
+    } else {
+        sprite.alpha = 0xFF;
+    }
+    sprite.alpha = (sprite.alpha * scale) >> 8;
+    WGFX1516B6BC(gfx++, 0xE7000000, 0);
+    WGFX1516B6BC(gfx++, 0xFC30B261, 0xFF67FFFF);
+    WGFX1516B6BC(gfx++, 0xEF002C0F, D_800A4AC8[25][0] | D_800A4AC8[25][1] | 4);
+    if (obj->unk58 > 0.0f && obj->unk58 < 3.14159274101f) {
+        sprite.flags &= ~2;
+    } else {
+        sprite.flags |= 2;
+    }
+    if (obj->unk58 > 1.5707963705f && obj->unk58 < 4.71238899231f) {
+        sprite.flags |= 1;
+    } else {
+        sprite.flags &= ~1;
+    }
+    sprite.w = obj->unk38 / (f32)D_8009055C.unk6 * 2355.19995117f * obj->unk28;
+    sprite.h = obj->unk3C / (f32)D_8009055C.unk8 * 4259.83984375f * obj->unk28;
+    if (obj->unk10->unk0 & 2) {
+        gfx = func_15094F70(gfx, &D_8009058C, 0, &sprite, 0, 0, 0, 2, 3);
+        sprite.alpha = obj->unk1C;
+        sprite.alpha = (sprite.alpha * scale) >> 8;
+        gfx = func_15095A48(gfx, &sprite, obj->unk70, obj->unk44 - yoff);
+        sprite.w /= 2;
+        sprite.h /= 2;
+        gfx = func_15094F70(gfx, &D_8009058C, 0, &sprite, 0, 0, 0, 2, 3);
+        sprite.alpha = obj->unk1D;
+        sprite.alpha = (sprite.alpha * scale) >> 8;
+        if (obj->unk58 > 1.5707963705f) {
+            gfx = func_15095A48(gfx, &sprite, obj->unk40, obj->unk44);
+        } else {
+            gfx = func_15095A48(gfx, &sprite, obj->unk40, obj->unk44);
+        }
+    } else if (obj->unk10->unk0 & 8) {
+        gfx = func_15094F70(gfx, &D_8009059C, 0, &sprite, 0, 0, 0, 2, 3);
+        if (obj->unk58 > 1.5707963705f) {
+            gfx = func_15095A48(gfx, &sprite, obj->unk40 + xoff, obj->unk44 - yoff);
+        } else {
+            gfx = func_15095A48(gfx, &sprite, obj->unk40 - xoff, obj->unk44 - yoff);
+        }
+    } else {
+        gfx = func_15094F70(gfx, &D_8009057C, 0, &sprite, 0, 0, 0, 2, 3);
+        if (obj->unk58 > 1.5707963705f) {
+            gfx = func_15095A48(gfx, &sprite, obj->unk40 + xoff, obj->unk44 - yoff);
+        } else {
+            gfx = func_15095A48(gfx, &sprite, obj->unk40 - xoff, obj->unk44 - yoff);
+        }
+    }
+    sprite.w = 2.0f * obj->unk38 / (f32)D_8009055C.unk6 * 2355.19995117f * obj->unk28;
+    sprite.h = obj->unk3C / (f32)D_8009055C.unk8 * 4259.83984375f * obj->unk28;
+    if (obj->unk10->unk0 & 2) {
+        sprite.alpha = obj->unk1B;
+        sprite.alpha = (sprite.alpha * scale) >> 8;
+        gfx = func_15094F70(gfx, &D_8009056C, 0, &sprite, 0, 0, 0, 2, 3);
+    } else {
+        gfx = func_15094F70(gfx, &D_8009055C, 0, &sprite, 0, 0, 0, 2, 3);
+    }
+    gfx = func_15095A48(gfx, &sprite, (s32)obj->unk48, (s32)obj->unk4C);
+    overflow = (D_800BEBA4 < (((s32)gfx - D_800BE9C8[D_800BE9C0]) >> 3)) ? 1 : 0;
+    if (overflow != 0) {
+        return start;
+    }
+    return func_1516C934(gfx, obj, 0, 0, 0, (obj->unk1A * scale) >> 8);
+}
 
 u8 *func_1516C878(struct_game_197C20_1 *arg0, s32 arg1, s16 arg2) {
     u8 *temp_v1;
@@ -169,14 +419,6 @@ typedef struct {
     char pad4[0x328];
 } Struct1516CC58_CC310;
 
-typedef struct {
-    char pad0[6];
-    u16 unk6;
-    u16 unk8;
-} Struct1516CC58_Vp;
-
-extern Struct1516CC58_Vp D_8009055C;
-extern Struct1516CC58_Vp D_8009057C;
 extern Struct1516CC58_CC310 D_800CC310[];
 extern f32 cosf(f32);
 extern u16 D_80090562;
