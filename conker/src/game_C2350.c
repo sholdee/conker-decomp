@@ -83,9 +83,9 @@ extern void func_15095060(struct15095060_arg0 *, s32, struct15095060_arg2 *);
 extern Gfx *func_150950D4(Gfx *, struct15095060_d *, s32, s32, s32, s32, s32, s32, s32, s32);
 extern struct15095060_d D_800D2C90;
 
-void func_15094F70(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8) {
-    func_15095060((struct15095060_arg0 *)arg1, arg2, (struct15095060_arg2 *)arg3);
-    func_150950D4((Gfx *)arg0, &D_800D2C90, arg4, arg5, 0, arg6, arg7, 0x100, 0x100, arg8);
+Gfx *func_15094F70(Gfx *arg0, struct15095060_arg0 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8) {
+    func_15095060(arg1, arg2, (struct15095060_arg2 *)arg3);
+    return func_150950D4((Gfx *)arg0, &D_800D2C90, arg4, arg5, 0, arg6, arg7, 0x100, 0x100, arg8);
 }
 
 void func_15094FE8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10) {
@@ -484,7 +484,120 @@ Gfx *func_15095D34(Gfx *arg0, Struct15095D34_obj *arg1, s32 arg2, s32 arg3, s32 
     return arg0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C2350/func_1509629C.s")
+Gfx *func_1509629C(Gfx *gfx, struct15095060_arg0 *tex, f32 scaleX, f32 scaleY, f32 x, f32 y, s32 width, s32 height, s32 flags, s32 sOff, s32 xPad, s32 frame) {
+    s32 w;
+    s32 h;
+    s32 tileW;
+    s32 lastH;
+    s32 tileH;
+    s32 i;
+    s32 j;
+    s32 s;
+    s32 tt;
+    s32 iy;
+    f32 y2;
+    f32 hf;
+    f32 cy;
+    s32 dsdx;
+    s32 dtdy;
+    s32 nx;
+    s32 ny;
+    f32 cx;
+    s32 dx;
+    s32 sBase;
+    s32 tBase;
+    s32 xl;
+    s32 xh;
+    f32 x2;
+    s32 yl;
+    s32 yh;
+    s32 dy;
+    struct15095060_arg0 t;
+
+    dtdy = 0;
+    w = tex->unk6;
+    h = tex->unk8;
+    if (flags & 1) {
+        w -= 2;
+        h -= 2;
+    }
+    tileW = w;
+    tileH = h;
+    if (flags & 2) {
+        dsdx = (s32)(-4194304.0f / scaleX) & 0xFFFF;
+        sBase = (tex->unk6 + 0xFF) << 5;
+    } else {
+        dsdx = (s32)(4194304.0f / scaleX);
+        sBase = 0x2000;
+    }
+    if (flags & 4) {
+        dtdy = (s32)(-4194304.0f / scaleY) & 0xFFFF;
+        tBase = (tex->unk8 + 0xFF) << 5;
+    } else {
+        dtdy = (s32)(4194304.0f / scaleY);
+        tBase = 0x2000;
+    }
+    nx = (width + w - 1) / w;
+    ny = (height + h - 1) / h;
+    t.unk0 = tex->unk0;
+    x -= (width * scaleX) / 8192;
+    t.unk0 += frame * nx * ny;
+    y -= (height * scaleY) / 8192;
+    t.unk6 = tex->unk6;
+    t.unkA = tex->unkA;
+    t.unkB = tex->unkB;
+    t.unk4 = 1;
+    lastH = height - (ny - 1) * h;
+    cx = x;
+    for (i = 0; i < nx; i++) {
+        xh = i + 1;
+        h = lastH;
+        hf = (h * scaleY) / 4096;
+        t.unk8 = h;
+        cy = y;
+        if (i == nx - 1) {
+            w = width - (nx - 1) * tileW;
+            t.unk6 = w;
+            if (flags & 1) {
+                t.unk6 += 2;
+            }
+        }
+        s = sBase;
+        x2 = cx;
+        x2 += (w * scaleX) / 4096;
+        if (flags & 1) {
+            s += (s32)(32 - (cx - (s32)cx) * 32.0f * (4096 / scaleX));
+        }
+        s += sOff;
+        if (flags & 1) {
+            t.unk8 += 2;
+        }
+    lbl_unused:;
+        for (j = 0; j < ny; j++) {
+            y2 = cy + hf;
+            tt = tBase;
+            if (flags & 1) {
+                tt += (s32)(32 - (cy - (s32)cy) * 32.0f * (4096 / scaleY));
+            }
+            iy = (s32)cy;
+            gfx = func_15094F70(gfx, &t, 0, 0, 0, 0, 0, 2, 3);
+            t.unk0++;
+            dx = (s32)x2 - (s32)cx;
+            dy = (s32)y2 - iy;
+            xl = (s32)cx * 4;
+            gSPScisTextureRectangle(gfx++, xl, iy * 4, ((s32)cx + dx + xPad) * 4,
+                                    (iy + dy) * 4, 0, s, tt, dsdx, dtdy);
+            if (j == 0) {
+                t.unk8 = tex->unk8;
+                h = tileH;
+                hf = (h * scaleY) / 4096;
+            }
+            cy = y2;
+        }
+        cx = x2;
+    }
+    return gfx;
+}
 
 extern Gfx D_80087408[];
 
