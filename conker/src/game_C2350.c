@@ -221,7 +221,7 @@ s32 func_1509563C(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4, f32 *arg5,
 s32 func_1509563C(f32, f32, f32, f32 *, f32 *, f32 *, f32 *, f32);
 void func_15095B08(s32, f32, f32, f32, s32, s32 *);
 s32 func_15095A90(s32, s32, f32, f32, f32, s32, s32, s32, s32);
-s32 func_15095D34(s32, s32, s32, s32, s32);
+Gfx *func_15095D34();
 
 struct Pt15095760 {
     s16 x;
@@ -373,13 +373,116 @@ void func_15095B08(s32 arg0, f32 arg1, f32 arg2, f32 arg3, s32 arg4, s32 *arg5) 
     }
 }
 
-s32 func_15095D34(s32, s32, s32, s32, s32);
+Gfx *func_15095D34();
 
 void func_15095D0C(s32 arg0, s32 arg1) {
     func_15095D34(arg0, arg1, 0, 0, 0);
 }
+typedef struct {
+    u8 pad0[4];
+    u16 unk4;
+    u16 unk6;
+    u8 pad8[2];
+    u8 unkA;
+} Struct15095D34_sub;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C2350/func_15095D34.s")
+typedef struct {
+    u8 pad0[0xA];
+    u8 unkA;
+    u8 unkB;
+    u8 unkC;
+    u8 unkD;
+    u8 padE[2];
+    Struct15095D34_sub *unk10;
+} Struct15095D34_obj;
+
+extern u8 D_800D2DA8;
+extern u8 D_800D2DA9;
+extern u8 D_800D2DAA;
+
+Gfx *func_15095D34(Gfx *arg0, Struct15095D34_obj *arg1, s32 arg2, s32 arg3, s32 arg4) {
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 w;
+    f32 h;
+    s32 isx;
+    s32 isy;
+    s32 iy;
+    s32 dsdx;
+    s32 dtdy;
+    s32 s;
+    s32 t;
+    s32 tfrac;
+    s32 flags;
+    s32 step;
+    s32 iz;
+    s32 pad;
+
+
+    isx = D_800D2C70;
+    isy = D_800D2C74;
+    x = D_800D2C78;
+    y = D_800D2C7C;
+    z = D_800D2C80;
+    if (arg3 != 0) {
+        D_800D2C84 -= (D_800D2C70 + D_800D2C70) / D_800D2C80;
+        D_800D2C88 -= (D_800D2C74 + D_800D2C74) / D_800D2C80;
+        x += D_800D2C70 / D_800D2C80;
+        y += D_800D2C74 / D_800D2C80;
+    }
+    w = D_800D2C84;
+    h = D_800D2C88;
+    iy = y;
+    iz = z;
+    if (w < 2.0f) {
+        w = 2.0f;
+    }
+    dsdx = (iz << 10) / isx;
+    dtdy = (iz << 10) / isy;
+    pad = ((s32)z << 10) / isx;
+    if (D_800D2DAB == 0) {
+        gDPSetPrimColor(arg0++, 1, 0, D_800D2DA8, D_800D2DA9, D_800D2DAA, arg1->unkA);
+    }
+    tfrac = (s32)(((32.0f - (y - (f32)(s32)y) * 32) * z) / isy);
+    s = (s32)(((32.0f - (x - (f32)(s32)x) * 32) * z) / isx) + arg2 + 0x2000;
+    t = tfrac + arg3 + 0x2000;
+    if (arg1->unkD != 0) {
+        flags = arg1->unkD;
+        if (flags & 1) {
+            s = (arg1->unk10->unk4 + 0xFF) << 5;
+            dsdx = -dsdx & 0xFFFF;
+        }
+        if (flags & 2) {
+            t = ((arg1->unk10->unk6 + 0xFF) << 5) - tfrac;
+            dtdy = -dtdy & 0xFFFF;
+        }
+    }
+    gSPScisTextureRectangle(arg0++, (s32)x << 2, (s32)y << 2, ((s32)(arg4 + w - 1.0f) + (s32)x) << 2,
+                            ((s32)(h - 1.0f) + iy) << 2, 0, s, t, dsdx, dtdy);
+    if (arg1->unk10->unkA != 0) {
+        step = arg1->unkB * D_800BE9A0;
+        if (arg1->unk10->unkA & 0x80) {
+            if (arg1->unkC & 0x80) {
+                arg1->unkC -= step;
+                if (!(arg1->unkC & 0x80)) {
+                    arg1->unkC = (arg1->unkC + step) & 0x7F;
+                }
+            } else {
+                arg1->unkC += step;
+                if (arg1->unkC >= (arg1->unk10->unkA & 0x7F) * 8) {
+                    arg1->unkC = (arg1->unkC - step) | 0x80;
+                }
+            }
+        } else {
+            arg1->unkC += step;
+            if (arg1->unkC >= arg1->unk10->unkA * 8) {
+                arg1->unkC -= arg1->unk10->unkA * 8;
+            }
+        }
+    }
+    return arg0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_C2350/func_1509629C.s")
 
