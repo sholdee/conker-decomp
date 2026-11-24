@@ -3808,7 +3808,57 @@ void func_1505E0C4(struct127 *arg0, u16 *arg1, u8 *arg2, s32 arg3, s32 arg4, s32
         func_150627D4(arg0);
     }
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505E650.s")
+void func_1505E650(struct127 *arg0, u16 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6) {
+    u16 (*anim)[4];
+    s32 idx;
+    u16 *entry;
+    u8 *data;
+
+    idx = arg0->id;
+    if ((D_800C3638 != 0) && ((*(u8 *)&D_800C3654 == 0) || (func_150229E4(arg0) != 0))) {
+        return;
+    }
+    if (arg0->id == 0xFF) {
+        return;
+    }
+    if ((u16)D_800C5A90[arg0->id] == 0) {
+        return;
+    }
+    data = (u8 *)arg0->unk2D0;
+    if (data == NULL) {
+        return;
+    }
+    if ((u16)D_800C5A90[arg0->id] != 0) {
+        if (arg1 >= (u16)D_800C5A90[arg0->id]) {
+            return;
+        }
+    } else {
+        return;
+    }
+    anim = (u16 (*)[4])D_800D1588[idx];
+    if (anim == NULL) {
+        func_1505DFDC((AnimPlaybackOwner *)arg0);
+        return;
+    }
+    if (arg1 < (u16)D_800C5A90[idx]) {
+        if (anim[0][0] != 999) {
+            entry = anim[arg1];
+            anim = NULL;
+            do {
+                if (entry[0] != 999) {
+                    if (entry[0] >= 30000) {
+                        func_1505DFDC((AnimPlaybackOwner *)arg0);
+                        return;
+                    }
+                    if (arg0->unk2FF == 0) {
+                        arg3 = 0.0f;
+                    }
+                    func_1505E0C4(arg0, entry, data, 0, 0, arg1, 0, arg2, arg3, arg4, arg5, arg6);
+                }
+            } while (0);
+        }
+    }
+}
 u32 func_1505E7CC(s32 arg0, struct127 *arg1) {
     s32 idx;
     s32 *ptr;
