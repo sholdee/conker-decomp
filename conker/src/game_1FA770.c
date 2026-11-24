@@ -453,7 +453,164 @@ s32 func_151CDB94(u8 *actor) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1FA770/func_151CDE20.s")
+typedef struct {
+    f32 x, y, z;
+} Vec3_151CDE20;
+
+typedef struct {
+    Vec3_151CDE20 pos;
+    f32 unkC;
+    f32 width;
+    s16 alpha;
+    s16 pad16;
+    f32 tc;
+} Seg151CDE20;
+
+typedef struct {
+    char pad0[0x4C];
+    u8 unk4C;
+} Sub151CDE20;
+
+typedef struct {
+    char pad0[0x10];
+    Vec3_151CDE20 pos;
+    char pad1C[2];
+    u16 flags;
+    char pad20[5];
+    u8 count;
+    char pad26[6];
+    s8 unk2C;
+    s8 last;
+    s8 first;
+    char pad2F[0x84 - 0x2F];
+    char buffers[0x10];
+    Seg151CDE20 *segs;
+    Sub151CDE20 *sub;
+} Obj151CDE20;
+
+extern s32 D_800AAEE0[];
+extern u8 D_80090B60[][12];
+extern s32 D_800D2C9C;
+extern struct {
+    s32 unk0;
+    s32 unk4;
+} D_800A4AC8[];
+Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
+Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
+Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
+Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
+void func_151D5D60(void *, s16, s32, void **, u8 *);
+
+Gfx *func_151CDE20(Obj151CDE20 *arg0, Gfx *gfx, s16 arg2) {
+    Vtx *vtx;
+    Seg151CDE20 *segs;
+    Sub151CDE20 *sub;
+    u8 update;
+    s32 i;
+    s32 k;
+    Vec3_151CDE20 b;
+    Vec3_151CDE20 a;
+    f32 dx;
+    f32 dz;
+
+    if (arg0->unk2C >= 2) {
+        func_151D5D60(arg0->buffers, arg2, (arg0->count * 2 + 10) * sizeof(Vtx), (void **)&vtx, 0);
+        if (vtx != NULL) {
+            sub = arg0->sub;
+            segs = arg0->segs;
+            update = 1;
+            gfx = func_15142E24(gfx, (s32)D_80090B60[D_800AAEE0[sub->unk4C]], 0, 0, 0, 0, D_800AAEE0[sub->unk4C], 0, 0, &update, 3);
+            gfx = func_1513F4E4(gfx, 0x4E, &update);
+            gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
+            gfx = func_15142FBC(gfx, D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4, &update);
+            if (arg0->flags & 2) {
+                i = arg0->first - 1;
+                if (i < 0) i = arg0->count - 1;
+                a = arg0->pos;
+                k = i;
+            } else {
+                k = arg0->first - 1;
+                if (k < 0) {
+                    k = arg0->count - 1;
+                }
+                i = k - 1;
+                if (i < 0) {
+                    i = arg0->count - 1;
+                }
+                a = segs[k].pos;
+            }
+            b = segs[i].pos;
+            dx = D_800DD1D8[arg2] * segs[k].width;
+            dz = D_800DD1E8[arg2] * segs[k].width;
+            vtx->v.ob[0] = a.x + dz;
+            vtx->v.ob[1] = a.y;
+            vtx->v.ob[2] = a.z - dx;
+            vtx->v.tc[0] = 0;
+            vtx->v.tc[1] = segs[k].tc;
+            vtx->v.cn[0] = 0xFF;
+            vtx->v.cn[1] = 0xFF;
+            vtx->v.cn[2] = 0xFF;
+            vtx->v.cn[3] = segs[k].alpha;
+            vtx->v.flag = 0;
+            vtx++;
+            vtx->v.ob[0] = a.x - dz;
+            vtx->v.ob[1] = a.y;
+            vtx->v.ob[2] = a.z + dx;
+            vtx->v.tc[0] = 0x7FF;
+            vtx->v.tc[1] = segs[k].tc;
+            vtx->v.cn[0] = 0xFF;
+            vtx->v.cn[1] = 0xFF;
+            vtx->v.cn[2] = 0xFF;
+            vtx->v.cn[3] = segs[k].alpha;
+            vtx->v.flag = 0;
+            vtx++;
+            do {
+                dx = D_800DD1D8[arg2] * segs[i].width;
+                dz = D_800DD1E8[arg2] * segs[i].width;
+                vtx->v.ob[0] = b.x + dz;
+                vtx->v.ob[1] = b.y;
+                vtx->v.ob[2] = b.z - dx;
+                vtx->v.tc[0] = 0;
+                vtx->v.tc[1] = segs[i].tc;
+                vtx->v.cn[0] = 0xFF;
+                vtx->v.cn[1] = 0xFF;
+                vtx->v.cn[2] = 0xFF;
+                vtx->v.cn[3] = segs[i].alpha;
+                vtx->v.flag = 0;
+                vtx++;
+                vtx->v.ob[0] = b.x - dz;
+                vtx->v.ob[1] = b.y;
+                vtx->v.ob[2] = b.z + dx;
+                vtx->v.tc[0] = 0x7FF;
+                vtx->v.tc[1] = segs[i].tc;
+                vtx->v.cn[0] = 0xFF;
+                vtx->v.cn[1] = 0xFF;
+                vtx->v.cn[2] = 0xFF;
+                vtx->v.cn[3] = segs[i].alpha;
+                vtx->v.flag = 0;
+                vtx++;
+                gSPVertex(gfx++, vtx - 4, 4, 0);
+                gSP1Triangle(gfx++, 0, 1, 2, 0);
+                gSP1Triangle(gfx++, 1, 3, 2, 0);
+                if (segs[k].tc < segs[i].tc) {
+                    memcpy(vtx, vtx - 2, 0x20);
+                    vtx[-2].v.tc[1] -= 0x4000;
+                    vtx++;
+                    vtx[-2].v.tc[1] -= 0x4000;
+                    vtx++;
+                }
+                k = i;
+                i--;
+                if (i < 0) {
+                    i = arg0->count - 1;
+                }
+                a = segs[k].pos;
+                b = segs[i].pos;
+            } while (k != arg0->last);
+        }
+    }
+    return gfx;
+}
 
 typedef struct {
     char pad0[0x1E];
