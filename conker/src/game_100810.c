@@ -440,7 +440,215 @@ s32 func_150D3A68(Actor150D3A68 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_100810/func_150D3FD4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_100810/func_150D4300.s")
+typedef struct {
+    u8 pad0[0x25];
+    u8 unk25;
+    u8 pad26[6];
+    s8 unk2C;
+    s8 unk2D;
+    s8 unk2E;
+    u8 pad2F[0x84 - 0x2F];
+    Vtx *unk84[4];
+    Entry150D3A68 *unk94;
+    State150D3A68 *unk98;
+} Actor150D4300;
+
+typedef struct {
+    Vtx v[3];
+} Vtx3_150D4300;
+
+void func_151D5D60(void *, s16, s32, void **, u8 *);
+extern struct17 *func_15144B34(s32);
+Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
+extern u8 D_80091100[];
+extern s32 D_800D2C9C;
+extern struct {
+    s32 unk0;
+    s32 unk4;
+} D_800A4AC8[];
+
+Gfx *func_150D4300(Actor150D4300 *arg0, Gfx *gfx, s16 arg2) {
+    Entry150D3A68 *table;
+    struct17 b;
+    struct17 a;
+    State150D3A68 *state;
+    struct127 *obj;
+    struct17 *pos;
+    Vtx3_150D4300 *v;
+    s32 i;
+    s32 idxA;
+    s32 idxB;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    f32 ex;
+    f32 ey;
+    f32 ez;
+    f32 len;
+    u8 update;
+    f32 wB;
+    f32 wA;
+    f32 cx;
+    Vtx *vtx;
+    u8 fresh;
+    f32 cy;
+    f32 cz;
+    f32 scale;
+    s32 ix;
+    s32 iy;
+    s32 iz;
+    s32 nx;
+    s32 ny;
+    s32 nz;
+    s32 pad1;
+    s32 pad2;
+    s32 pad3;
+
+    if (arg0->unk2C < 2) {
+        return gfx;
+    }
+    state = arg0->unk98;
+    table = arg0->unk94;
+    obj = state->unk0;
+    if (*(s32 *)((u8 *)obj + 0x1D4) == 0 || (obj->unk74 & 0xF) == 0xF) {
+        return gfx;
+    }
+    func_151D5D60(arg0->unk84, arg2, (arg0->unk25 * 3 * sizeof(Vtx)) + (5 * 3 * sizeof(Vtx)), (void **)&vtx, &fresh);
+    if (fresh != 0) {
+        v = (Vtx3_150D4300 *)arg0->unk84[arg2];
+        for (i = 0; i < arg0->unk25 * 2 + 10; i++) {
+            v->v[0].v.tc[0] = 5;
+            v->v[0].v.tc[1] = 0;
+            v->v[0].v.flag = 0;
+            v->v[1].v.tc[0] = 0xFFA;
+            v->v[1].v.tc[1] = 0;
+            v->v[1].v.flag = 0;
+            v->v[2].v.tc[0] = 0x1FA4;
+            v->v[2].v.tc[1] = 0;
+            v->v[2].v.flag = 0;
+            v++;
+        }
+    }
+    pos = func_15144B34(arg2);
+    update = 1;
+    gfx = func_15142E24(gfx, (s32)D_80091100, 0, 0, 0, 0, 0x78, 0, 0, &update, 0x3E);
+    gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &update);
+    gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
+    gfx = func_1513F4E4(gfx, 0x55, &update);
+    gfx = func_15142FBC(gfx, G_TP_PERSP | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4, &update);
+    idxA = arg0->unk2E - 1;
+    if (idxA < 0) {
+        idxA = arg0->unk25 - 1;
+    }
+    idxB = idxA - 1;
+    if (idxB < 0) {
+        idxB = arg0->unk25 - 1;
+    }
+    a = table[idxA].pos;
+    wA = table[idxA].unk10;
+    b = table[idxB].pos;
+    wB = table[idxB].unk10;
+
+    ex = a.unk0 - b.unk0;
+    ey = a.unk4 - b.unk4;
+    ez = a.unk8 - b.unk8;
+    dx = a.unk0 - pos->unk0;
+    dy = a.unk4 - pos->unk4;
+    dz = a.unk8 - pos->unk8;
+    cx = ey * dz - dy * ez;
+    cy = ez * dx - dz * ex;
+    cz = ex * dy - dx * ey;
+    len = cx * cx + cy * cy + cz * cz;
+    if (len != 0.0f) {
+        f32 sc;
+
+        sc = wA / sqrtf(len);
+        scale = sc;
+        cx = cx * scale;
+        cy = cy * scale;
+        cz = cz * scale;
+    } else {
+        cx = 0.0f; cy = 0.0f; cz = 0.0f;
+    }
+    {
+        s32 ix;
+
+        ix = a.unk0;
+        iy = a.unk4;
+        iz = a.unk8;
+        nx = cx;
+        ny = cy;
+        nz = cz;
+        vtx->v.ob[0] = ix + nx;
+        vtx->v.ob[1] = iy + ny;
+        vtx->v.ob[2] = iz + nz;
+        vtx++;
+        vtx->v.ob[0] = ix;
+        vtx->v.ob[1] = iy;
+        vtx->v.ob[2] = iz;
+        vtx++;
+        vtx->v.ob[0] = ix - nx;
+        vtx->v.ob[1] = iy - ny;
+        vtx->v.ob[2] = iz - nz;
+        vtx++;
+    }
+loop:
+        ex = a.unk0 - b.unk0;
+        ey = a.unk4 - b.unk4;
+        ez = a.unk8 - b.unk8;
+        dx = b.unk0 - pos->unk0;
+        dy = b.unk4 - pos->unk4;
+        dz = b.unk8 - pos->unk8;
+        cx = ey * dz - dy * ez;
+        cy = ez * dx - dz * ex;
+        cz = ex * dy - dx * ey;
+        len = cx * cx + cy * cy + cz * cz;
+        if (len != 0.0f) {
+            s32 pad;
+
+            scale = wB / sqrtf(len);
+            cx = cx * scale;
+            cy = cy * scale;
+            cz = cz * scale;
+        } else {
+            cx = 0.0f; cy = 0.0f; cz = 0.0f;
+        }
+        {
+            ix = b.unk0;
+            iy = b.unk4;
+            iz = b.unk8;
+            nx = cx;
+            ny = cy;
+            nz = cz;
+            vtx->v.ob[0] = ix + nx;
+            vtx->v.ob[1] = iy + ny;
+            vtx->v.ob[2] = iz + nz;
+            vtx++;
+            vtx->v.ob[0] = ix;
+            vtx->v.ob[1] = iy;
+            vtx->v.ob[2] = iz;
+            vtx++;
+            vtx->v.ob[0] = ix - nx;
+            vtx->v.ob[1] = iy - ny;
+            vtx->v.ob[2] = iz - nz;
+            vtx++;
+        }
+        gSPVertex(gfx++, vtx - 6, 6, 0);
+        gSP2Triangles(gfx++, 0, 1, 3, 0, 1, 4, 3, 0);
+        gSP2Triangles(gfx++, 2, 1, 5, 0, 1, 4, 5, 0);
+        idxA = idxB;
+        idxB--;
+        if (idxB < 0) {
+            idxB = arg0->unk25 - 1;
+        }
+        if (idxA != arg0->unk2D) {
+            a = table[idxA].pos;
+            b = table[idxB].pos;
+            wB = table[idxB].unk10;
+        }
+        if (idxA != arg0->unk2D) goto loop;
+    return gfx;
+}
 
 typedef struct {
     struct127 *unk0;
