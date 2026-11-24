@@ -51,6 +51,7 @@ u8  func_1505B9C4(void *arg0, struct127 *arg1, s32 arg2, s32 arg3, u8 arg4, s32 
 s32 func_1505C1E4(void *arg0, struct127 *arg1, void *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 extern struct255 *D_800CC4A4;
 void func_1505F188(struct127 *arg0);
+s32 func_1505C7D8(struct127 *arg0, s32 arg1);
 extern f32 D_8009962C;
 extern f32 D_80099630;
 extern f32 D_800994C0;
@@ -2328,7 +2329,230 @@ struct252 *func_1505C1A4(struct127 *arg0) {
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505C1E4.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505C7D8.s")
+s32 func_1505C7D8(struct127 *arg0, s32 arg1);
+typedef struct {
+    u8 pad0[9];
+    u8 unk9;
+    u8 unkA;
+    u8 padB;
+    s16 unkC;
+    u8 unkE;
+    u8 padF[0x24 - 0xF];
+    u16 unk24;
+    u8 pad26[2];
+} Hit1505C7D8; /* size 0x28 */
+
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec1505C7D8;
+
+extern s32 D_800B2CD0;
+extern f32 D_8009951C;
+s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, void *, void *, void *, f32 *, s32, s32, f32);
+void func_1507C3E0(struct127 *, s16 *, s32, s32);
+f32 func_15143E64(f32 *);
+
+s32 func_1505C7D8(struct127 *arg0, s32 arg1) {
+    s32 i;
+    s32 n;
+    s32 idx;
+    s32 ret;
+    struct127 *obj;
+    Hit1505C7D8 *hits;
+    f32 dz2;
+    Hit1505C7D8 *hit;
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 radius;
+    f32 dx;
+    f32 dz;
+    f32 dy;
+    f32 dist;
+    f32 maxDist;
+    f32 s;
+    f32 c;
+    f32 rx;
+    f32 rz;
+    f32 hx;
+    f32 hy;
+    f32 hz;
+    f32 h;
+    f32 r;
+    f32 t;
+    f32 offZ;
+    f32 height;
+    f32 pad1;
+    f32 pad2;
+    f32 pad3;
+    f32 offZ2;
+    f32 pad4;
+    f32 pad5;
+    Vec1505C7D8 pos;
+    f32 sp_E4;
+    f32 sp_E0;
+    f32 sp_DC;
+    f32 d[3];
+    f32 padCC;
+    f32 hitDist;
+    f32 padC4;
+    f32 padC0;
+    f32 padBC;
+    s16 sp_BA;
+
+    arg1 = (arg1 & 0x7F) + 1;
+    ret = 0;
+    if (arg0->unk114 < 254.0f) {
+        arg0->unk114 -= D_800D1550;
+    }
+    if (arg0->unk114 < 0.0f) {
+        arg0->unkD0 = 0;
+        return 0;
+    }
+    if (D_800C35EA == 1) {
+        return 0;
+    }
+    idx = arg0->unkD0 - 1;
+    hits = (Hit1505C7D8 *)func_1505C1A4(arg0);
+    if (hits[idx].unk24 & 0x80) {
+        hit = (Hit1505C7D8 *)((u8 *)hits + idx * sizeof(Hit1505C7D8));
+        y = arg0->y_position;
+    } else {
+        hit = (Hit1505C7D8 *)((u8 *)hits + idx * sizeof(Hit1505C7D8));
+        dist = (u32)hit->unkA;
+        dist *= arg0->xz_scale / 0.125f;
+        func_1505A184((hit->unk9 << 8) + arg0->unk7A, dist, 0.0f, &x, &z, &y);
+        x += arg0->x_position;
+        y += arg0->y_position;
+        z += arg0->z_position;
+        radius = (u32)hit->unkE;
+        radius = arg0->xz_scale * 4.0f * radius;
+    }
+    dist = hit->unkC;
+    y += dist * (arg0->y_scale / 0.25f);
+    if (arg0->unkF8 & 0x100) {
+        n = 4;
+    } else {
+        n = 26;
+    }
+    for (i = 1; i < n; i++) {
+        obj = &D_800CC2D0[i - 1];
+        if (obj->interaction_state == 0) {
+            continue;
+        }
+        if (i == arg1 || obj->health == 0 || obj->immune != 0) {
+            continue;
+        }
+        hit = (Hit1505C7D8 *)((u8 *)hits + idx * sizeof(Hit1505C7D8));
+        if (i == arg0->unk124 && !(hit->unk24 & 0x1000)) {
+            continue;
+        }
+        if (hit->unk24 & 0x80) {
+            s16 ox;
+
+            dist = 2.0f;
+            maxDist = 1.0f;
+            dx = obj->x_position - arg0->x_position;
+            dz = obj->z_position - arg0->z_position;
+            if (obj->unkD8 != 0 || obj->unkDA != 0) {
+                dx += func_1505D34C(obj->unk40, obj->unkDA, obj->unkD8, 1.0f, &offZ);
+                dz += offZ;
+            }
+            rx = (arg0->unk40 - 90.0f) * 0.01745329238f;
+            s = func_150AD780(-rx);
+            c = func_150AD78C(-rx);
+            rx = dx * s + dz * c;
+            dz = -dx * c + dz * s;
+            hx = hit->unk9 * 5;
+            dz2 = hit->unkA * 5;
+            ox = (s8)hit->unkE * 5;
+            dy = ox * arg0->xz_scale;
+            dx = rx - dy;
+            hx *= arg0->xz_scale;
+            dz2 *= arg0->xz_scale;
+            dy = y - (obj->y_position + obj->unkD6);
+            hx += obj->unkD2;
+            dz2 += obj->unkD2;
+            hy = obj->unkD4;
+            hy += 25.0f;
+            if (-hy < dy && dy < hy && -hx < dx && dx < hx && -dz2 < dz && dz < dz2) {
+                dist = 0.0f;
+            }
+        } else {
+            dx = x - obj->x_position;
+            dz2 = z - obj->z_position;
+            if (obj->unkD8 != 0 || obj->unkDA != 0) {
+                dx -= func_1505D34C(obj->unk40, obj->unkDA, obj->unkD8, 1.0f, &offZ2);
+                dz2 -= offZ2;
+            }
+            {
+                typedef s32 T1505C7D8;
+
+                dy = y - (obj->y_position + obj->unkD6);
+                r = obj->unkD2;
+                h = obj->unkD4;
+                if (h == 0.0f) {
+                    continue;
+                }
+            }
+            t = h / (radius + h);
+            maxDist = (r + radius) * (r + radius);
+            dy *= (r / h) * t + (1.0f - t);
+            dist = dx * dx + dy * dy + dz2 * dz2;
+        }
+        if (dist < maxDist) {
+            if ((hit->unk24 & 0x2000) && i != arg0->unk13D) {
+                if (*(Vec1505C7D8 **)((u8 *)arg0 + 0x2F4) != NULL) {
+                    pos = **(Vec1505C7D8 **)((u8 *)arg0 + 0x2F4);
+                } else {
+                    func_1507C3E0(arg0, &sp_BA, 0, 0);
+                    pos.x = arg0->x_position;
+                    pos.y = arg0->y_position + (sp_BA >> 1);
+                    pos.z = arg0->z_position;
+                }
+                rx = obj->x_position;
+                if (obj->unk31C != NULL) {
+                    height = *(s16 *)((u8 *)obj->unk31C + 0x114) * 0.5f;
+                } else {
+                    height = 20.0f;
+                }
+                t = height;
+                t += obj->y_position;
+                rz = obj->z_position;
+                d[0] = rx - pos.x;
+                d[1] = t - pos.y;
+                d[2] = rz - pos.z;
+                if (func_150AC9C0(pos.x, pos.y, pos.z, d[0], d[1], d[2], NULL, NULL, &sp_DC, &sp_E0, &sp_E4, &hitDist, 0, 0, 0.0f) != 0 &&
+                    hitDist < func_15143E64(d)) {
+                    continue;
+                }
+            }
+            D_800CC2C0 = x;
+            D_800CC2C4 = y;
+            D_800CC2C8 = z;
+            ret = func_1505C1E4(arg0, obj, hits, idx, i, ret, 0xF);
+            idx = arg0->unkD0 - 1;
+        }
+    }
+    if (ret != 0) {
+        hit = (Hit1505C7D8 *)((u8 *)hits + idx * sizeof(Hit1505C7D8));
+        if (((s32 (*)[0x32C / 4])&D_800B2CD0)[arg0->pad108][0] == 1) {
+            if (arg0->unk254 != 0) {
+                arg0->unk232 = arg0->unk254;
+                arg0->unk218 = NULL;
+            }
+        }
+        if (!(hit->unk24 & 4)) {
+            arg0->unk21C = 0;
+        }
+        if (!(hit->unk24 & 0x800)) {
+            arg0->unkD0 = 0;
+        }
+    }
+    return ret;
+}
 
 s32 func_1505D024(struct127 *arg0, s32 arg1, u16 arg2, s32 arg3) {
     s32 pad;
