@@ -36,7 +36,91 @@ extern void func_1502A8A0(s32, s32, s32, s32, s32);
 void func_150238D0(void) {
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_50D80/func_150238D8.s")
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    u8 unk2;
+    u8 pad3;
+    u16 unk4;
+    u16 unk6;
+    u16 unk8;
+    u16 unkA;
+    u16 unkC;
+    u8 unkE;
+} Snd150238D8;
+
+typedef struct {
+    u8 pad0[2];
+    s16 unk2;
+    s16 unk4;
+    s16 unk6;
+    u8 pad8[8];
+    s32 unk10;
+    u8 pad14[4];
+    Snd150238D8 *unk18;
+} Obj150238D8;
+
+extern u8 D_800C3C89;
+extern void func_10004074(void *);
+extern s32 D_800C35B0[];
+extern s32 D_800C3640[];
+
+s32 func_150238D8(Obj150238D8 *arg0, s32 arg1, u32 *arg2, s32 arg3, s32 arg4, s32 arg5, s16 *arg6) {
+    Snd150238D8 *s;
+    struct233 *p;
+    struct233 *q;
+    s32 a;
+
+    s = arg0->unk18;
+    if ((s->unk2 != 0 && D_800C35B0[s->unk0] >= D_800C3640[s->unk0]) || (arg0->unk10 & 0x80)) {
+        *arg2 = 0;
+        *arg6 = 0;
+        func_10004074(s);
+        return 1;
+    }
+    if (s->unkE == D_800C35E8[s->unk0]) {
+        p = (&D_800C3958)[s->unk0];
+        if (p != NULL) {
+            arg0->unk2 = p[s->unk1].unk0;
+            q = &(&D_800C3958)[s->unk0][s->unk1];
+            arg0->unk4 = *(f32 *)((u8 *)q + 0x38) + q->unk4;
+            arg0->unk6 = (&D_800C3958)[s->unk0][s->unk1].unk8;
+        }
+    }
+    if (s->unk4 != 0xFFFF) {
+        if (D_800BE9E4 < s->unk4) {
+            s->unk4 -= D_800BE9E4;
+        } else {
+            *arg2 = 0;
+            *arg6 = 0;
+            func_10004074(s);
+            return 1;
+        }
+    }
+    *arg2 = s->unkC;
+    a = s->unkA;
+    if (s->unk4 < a) {
+        if (s->unk4 != 0) {
+            *arg2 = *arg2 * (u32)s->unk4 / a;
+        }
+    } else {
+        if ((u32)s->unk8 != 0) {
+            if ((s->unk6 - s->unk8) < s->unk4) {
+                *arg2 = *arg2 * (s->unk6 - s->unk4) / s->unk8;
+            }
+        }
+    }
+    if (s->unk4 != 0xFFFF && D_800C3C88 != 0) {
+        *arg2 = *arg2 * D_800C3C89 / 30;
+        if (D_800BE9E4 >= D_800C3C89) {
+            *arg2 = 0;
+            *arg6 = 0;
+            func_10004074(s);
+            return 1;
+        }
+    }
+    return 0;
+}
 
 typedef struct {
     s8 unk0;
@@ -2528,7 +2612,7 @@ extern void func_15188810(struct127 *, s32, s32);
 extern void func_1518894C(struct131 *, s32, s32);
 extern void func_15188AD0(struct127 *);
 extern void func_151D66F0(s32, s32);
-extern void func_150238D8();
+extern s32 func_150238D8();
 
 typedef struct {
     u8 unk0;
