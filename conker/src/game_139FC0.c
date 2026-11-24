@@ -178,7 +178,85 @@ s32 func_1510CE60(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s16 **arg4) {
     return failed == 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_139FC0/func_1510D0EC.s")
+typedef struct {
+    u8 *data;
+    s32 size;
+} Entry1510D404;
+
+extern u8 D_800DBDBA;
+extern void func_10006240(u8 *, Entry1510D404 *, u32);
+extern s32 func_10004074(s16 *);
+s32 func_1510D374(s32 arg0);
+
+s32 func_1510D0EC(s32 arg0, s32 *arg1, s32 arg2, s32 arg3) {
+    s32 size;
+    s32 offset;
+    s32 dst;
+    s32 odd;
+    s32 buf;
+    s32 len;
+
+    if (arg0 < D_800D9F58) {
+        D_800D9F58 = arg0;
+    }
+    if (D_800D9F5C < arg0) {
+        D_800D9F5C = arg0;
+    }
+    if (arg0 >= 0x1E52 || arg0 < 0) {
+        return 0x80000000;
+    }
+    size = ((u16 *)D_80091D20)[arg0];
+    if (size == 0) {
+        D_800B0E58[arg0] = 0x80000000;
+    } else if (D_800B0E58[arg0] == -1) {
+        D_800DBDBA = 5;
+        if (arg2 == 0x3F) {
+            arg2 = 0x3E;
+        }
+        offset = func_1510D374(arg0);
+        len = size;
+        if (offset & 1) {
+            offset--;
+            odd = 1;
+        } else {
+            odd = 0;
+        }
+        size = len + odd;
+        if (size & 1) {
+            len++;
+        }
+        buf = func_10003C6C((len + odd + 0xF) & ~0xF, 1, 2, 1, 2);
+        if (buf == 0) {
+            return 0x80000000;
+        }
+        func_10004514(offset, (void *)buf, (len + odd + 0xF) & ~0xF, 1);
+        len = ((u16 *)D_800B87A0)[arg0];
+        dst = func_10003C6C(len, 1, 1, 0, 2);
+        if (dst == 0) {
+            func_10004074((s16 *)buf);
+            return 0x80000000;
+        }
+        func_10006240((u8 *)(buf + odd), (Entry1510D404 *)dst, D_8003809C);
+        func_10004074((s16 *)buf);
+        D_800B0E58[arg0] = dst;
+        D_800D9F68[arg0] = 0;
+    }
+    if (arg1 != NULL) {
+        len = ((u16 *)D_800B87A0)[arg0];
+        *arg1 = len;
+    }
+    len = D_800B0E58[arg0];
+    if (((s8 *)D_800BC448)[arg0] < arg2) {
+        ((s8 *)D_800BC448)[arg0] = arg2;
+    }
+    if (arg3 != 0) {
+        if (D_800D9F68[arg0] < 0xFF) {
+            D_800D9F68[arg0]++;
+        }
+    }
+    if (0) { func_10004074((s16 *)&dst); }
+    return len;
+}
 
 s32 func_1510D374(s32 arg0) {
     s32 sum;
@@ -191,11 +269,6 @@ s32 func_1510D374(s32 arg0) {
 
     return sum;
 }
-
-typedef struct {
-    u8 *data;
-    s32 size;
-} Entry1510D404;
 
 extern u8 D_800DBDBA;
 
