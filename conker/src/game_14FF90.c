@@ -531,7 +531,41 @@ void func_15123508(struct108 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_15123568.s")
+void func_15123568(struct108 *arg0) {
+    s32 cycle;
+
+    if ((*((u8 *)arg0->unk3D4 + 0x120) == 4) && (arg0->unk2C != 0x40) && (*((u8 *)arg0 + 0x92C) == 0)) {
+        *(f32 *)((u8 *)arg0 + 0x7C0) = D_800A34D8;
+        arg0->unk1B4 = 1;
+        func_15124B18(arg0);
+        arg0->unk198 = 0.0f;
+        arg0->unk190 = 0.0f;
+        return;
+    }
+    if (*(s32 *)((u8 *)arg0 + 0x7B8) > 0) {
+        *(s32 *)((u8 *)arg0 + 0x7B8) -= D_800BE9E4;
+        if (*(s32 *)((u8 *)arg0 + 0x7B8) < 0) {
+            *(s32 *)((u8 *)arg0 + 0x7B8) = 0;
+        }
+    } else if ((arg0->unk84 & 4) && (arg0->unk36A & 8) && (arg0->unkDC != 4) &&
+               ((arg0->unk6C8 == 0) || (arg0->unk6FC == 4U)) &&
+               ((arg0->unk3D0->in_water != 1) || (arg0->unk1B4 != 1))) {
+        cycle = arg0->unk1B4 != 1;
+        while (cycle) {
+            if (--arg0->unk1B4 <= 0) {
+                arg0->unk1B4 = 3;
+            }
+            if ((1 << arg0->unk1B4) & arg0->unk1E0) {
+                func_15124B18(arg0);
+                func_15125608(arg0);
+                *(s32 *)((u8 *)arg0 + 0x7B8) = 20;
+                return;
+            }
+            cycle = TRUE;
+        }
+    }
+}
+
 void func_151236D0(struct108 *arg0) {
     s32 oldState;
 
