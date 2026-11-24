@@ -22,6 +22,14 @@ python3 ~/conker/tools/mw.py reset FUNC [--all]     # restore the file(s) from t
 python3 ~/conker/tools/mw.py similar FUNC    # matched TWINS (same code modulo symbols/regs/imms) — check FIRST
 python3 ~/conker/tools/mw.py note FUNC "…"   # ledger: record each hypothesis tried and its result
 ```
+**If `land` prints LAND-FAIL after your check said MATCH**, look at the cfe errors it prints. They are
+almost always a declaration that another function landed into the same file after your workspace
+was made (a `redeclaration of X`, `Incompatible type`, a typedef that now exists twice). Your MATCH is
+real, so do not stop: copy main's current file (`~/conker/conker/<file>`) over your workspace file,
+put your function back in place of its GLOBAL_ASM stub, make the declarations agree (prefer the
+type the definition uses; keep main's existing declarations if they are compatible), re-run
+`check` until MATCH, then `land` again. Never leave a matched function unlanded.
+
 Before writing anything, run `similar`: a matched twin's C is the fastest start (copy it,
 adapt names/constants, declare this function's own data). Read `mw.py note FUNC` (the ledger)
 when resuming, and append one line per hypothesis family you try (what, result) so the next
