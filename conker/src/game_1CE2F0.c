@@ -275,7 +275,32 @@ void func_151A0F28(f32 arg0, f32 arg1, f32 arg2, u8 arg3, s32 arg4) {
         0x42, 0x41F, 0x4F6, 7, 0x41, 4, 1, arg3, arg4);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1CE2F0/func_151A1010.s")
+extern f32 D_800A8D28;
+
+void func_151A1010(f32 arg0, f32 arg1, f32 arg2, s16 arg3, f32 arg4, f32 arg5, u8 arg6, s32 arg7) {
+    s16 var;
+    s32 tmp;
+    s16 a;
+    s16 b;
+    s16 c;
+    s16 d;
+    s32 x;
+    s32 y;
+    s32 z;
+    s32 w;
+
+    var = arg3 - 0x20;
+    tmp = (s16)(arg3 - 0x20);
+    if (tmp <= 0) {
+        var = 1;
+    }
+    func_151A11CC(arg0, arg1, arg2, 250.0f * arg4, 1.0f,
+                  a = x = (s32)(70.0f * arg5) | (D_800A8D28 == 0 & 0), b = y = (s32)(30.0f * arg5) | (D_800A8D28 == 0 & 0), c = z = D_800A8D28 * arg4, d = w = (s32)(100.0f * arg4) | (D_800A8D28 == 0 & 0), 0x12, 1.0f,
+                  90.0f * arg5, 20.0f * arg5, c, d,
+                  var, 0x10, 1.0f,
+                  a, b, c, d,
+                  15.0f * arg4, 10.0f * arg4, 0x12, tmp + 0x10, arg6, arg7);
+}
 
 void func_151A11CC(f32 arg0, f32 arg1, f32 arg2, f32 arg3,
                   f32 arg4, s32 arg5, s32 arg6, s32 arg7,
