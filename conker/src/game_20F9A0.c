@@ -25,6 +25,8 @@ struct Struct151E5034 {
     char pad42;
     s8 unk43;
     s8 unk44;
+    char pad45;
+    s16 unk46[16];
 };
 
 struct Struct151E4314 {
@@ -1131,7 +1133,194 @@ s8 func_151E564C(void) {
     return D_8008FDC8;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_20F9A0/func_151E565C.s")
+extern u8 *D_800872A0;
+
+struct Struct151E565C {
+    char pad0[0x29];
+    s8 unk29;
+    s8 unk2A;
+    char pad2B[0x84 - 0x2B];
+};
+
+s32 func_151E565C(void) {
+    s32 i;
+    s32 j;
+    s32 *pi;
+    s32 k;
+    s32 team;
+    s32 hits;
+    s16 best;
+    s16 score;
+    s16 other;
+    s8 mask;
+    s32 result;
+    s32 stats[16];
+    s32 cat;
+    s32 *pj;
+
+    result = 0;
+    if (*(s8 *)&D_800E0C20 != 0) {
+        return 1;
+    }
+    if (D_800E0BE0[3] >= 3 && D_8008FD78 <= 0) {
+        D_800E0AAA = -1;
+        result = 1;
+    }
+    if (D_8008FDC8 != 0) {
+        best = -1;
+        for (i = 0; i < D_8008FD8C; i++) {
+            if (D_800E0BE0[6] != 0 && D_8008FDD4->unk46[i] >= D_800E0BE0[6]) {
+                result = 1;
+                best = D_800E0BE0[6];
+            }
+            if (D_800D18A0 & (1 << i)) {
+                if (D_800E0AB0[i] == -1) {
+                    D_800E0AB0[i] = D_800E0AA9--;
+                }
+            }
+        }
+        if (D_800BE618 - D_8008FD70 < 2 || *(s8 *)&D_8008FD94 - D_8008FD70 <= 0) {
+            result = 1;
+        }
+        D_800E0AAA = -1;
+        if (D_8008FDC0 & 0x80) {
+            for (i = 0; i < D_8008FD90; i++) {
+                if (D_800E0AB0[i] != -1) {
+                    D_800E0AC0[i] = D_800E0AB0[i];
+                } else {
+                    if (((struct Struct151E565C *)D_800872A0)[i].unk2A == 0x7F) {
+                        D_800E0AC0[i] = ((struct Struct151E565C *)D_800872A0)[i].unk29;
+                    } else {
+                        D_800E0AC0[i] = ((struct Struct151E565C *)D_800872A0)[i].unk2A;
+                    }
+                }
+            }
+        } else {
+            for (i = 0; i < D_8008FD90; i++) {
+                if (D_80087270[i] != 10) {
+                    if (D_800E0AB0[i] != -1) {
+                        D_800E0AC0[i] = D_800E0AB0[i];
+                    } else {
+                        D_800E0AC0[i] = 1;
+                        score = D_8008FDD4->unk46[i];
+                        if (score >= best) {
+                            score += 1000;
+                        }
+                        score -= ((s16 *)D_800E0AD0)[i];
+                        for (j = 0; j < D_8008FD8C; j++) {
+                            if (j != i && D_800E0AB0[j] == -1 && D_80087270[j] != 10) {
+                                other = D_8008FDD4->unk46[j];
+                                if (other >= best) {
+                                    other += 1000;
+                                }
+                                other -= ((s16 *)D_800E0AD0)[j];
+                                if (score < other) {
+                                    D_800E0AC0[i]++;
+                                } else if (score == other) {
+                                    if (D_800CC2D0[j].unk31C->unk1AA < D_800CC2D0[i].unk31C->unk1AA) {
+                                        D_800E0AC0[i]++;
+                                    } else if (D_800CC2D0[i].unk31C->unk1AA == D_800CC2D0[j].unk31C->unk1AA) {
+                                        if (j < i && D_80082FA0 < j) {
+                                            D_800E0AC0[i]++;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        *(s8 *)&D_800E0C20 = result;
+        return result;
+    }
+
+    for (k = 0; k < 16; k++) {
+        stats[k] = 0;
+    }
+    k = 0;
+    for (i = 0; i < D_8008FD8C; i++) {
+        team = *(u8 *)&D_800CC2D0[i].pad128;
+        stats[team] += D_8008FDD4->unk46[i];
+        stats[team + 4] += func_150859AC(i, 3) * 6 + func_150859AC(i, 4);
+        stats[team + 8] = func_150859AC(team, 6);
+        stats[team + 12] += D_800CC2D0[i].unk31C->unk1AA;
+    }
+    cat = 8;
+    team = -1;
+    switch (D_8008FDD4->pad42) {
+        case 0:
+            team = D_800E0BE0[4];
+            break;
+        case 2:
+        case 8:
+        case 10:
+            team = D_800E0BE0[0x12];
+            break;
+        case 9:
+            cat = (D_800E0BE0[3] < 3) ? 4 : 0;
+            break;
+    }
+    if (team > 0) {
+        for (i = 0; i < D_800E0BB0; i++) {
+            j = stats[i + cat];
+            if (j >= team) {
+                result = 1;
+                D_800E0AAA = i;
+            }
+        }
+    }
+    func_150432FC(0x14, 0x14);
+    for (i = 0; i < D_800E0BB0; i++) {
+        if (D_800E0AB0[i] != -1) {
+            D_800E0AC0[i] = D_800E0AB0[i];
+            continue;
+        }
+        D_800E0AC0[i] = 1;
+        for (j = 0; j < D_800E0BB0; j++) {
+            if (j != i && D_800E0AB0[j] == -1) {
+                if (stats[i + cat] < stats[j + cat]) {
+                    D_800E0AC0[i]++;
+                } else if (stats[i + cat] == stats[j + cat]) {
+                    if (stats[i + k] < stats[j + k]) {
+                        D_800E0AC0[i]++;
+                    } else if (stats[i + k] == stats[j + k]) {
+                        if (stats[j + 12] < stats[i + 12]) {
+                            D_800E0AC0[i]++;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    mask = 0;
+    j = 0;
+    for (i = 0; i < D_8008FD8C; i++) {
+        if (D_80087270[i] != 10) {
+            team = *(u8 *)&D_800CC2D0[i].pad128;
+            if (!(D_800D18A0 & (1 << i))) {
+                mask |= 1 << team;
+            }
+        }
+    }
+    hits = 0;
+    for (i = 0; i < 4; i++) {
+        if (mask & (1 << i)) {
+            j++;
+            if (D_800E0AA8 & (1 << i)) {
+                hits++;
+            }
+        } else if (D_800E0AB0[i] == -1) {
+            D_800E0AB0[i] = D_800E0AA9--;
+        }
+    }
+    if (hits == 0 || j < 2) {
+        result = 1;
+        D_800E0AAA = -1;
+    }
+    *(s8 *)&D_800E0C20 = result;
+    return result;
+}
 
 extern u8 D_800BE616;
 extern u8 D_800E0B94;
