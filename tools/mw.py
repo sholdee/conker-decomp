@@ -563,6 +563,8 @@ def changed_files(ws):
             if not p.is_file() or p.suffix not in (".c", ".h", ".inc", ".s"):
                 continue  # build artifacts (stray .o etc.) must never reach main
             rel = p.relative_to(ws / "conker")
+            if not (ws / "base" / rel.parent).is_dir():
+                continue  # agent scratch dirs (e.g. src/offtmp/) are not source
             b = ws / "base" / rel
             if not b.exists() or not filecmp.cmp(p, b, shallow=False):
                 out.append(rel)
