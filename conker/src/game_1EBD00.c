@@ -857,7 +857,130 @@ extern void func_151411A4(struct210 *);
 void func_151BE7F8(struct210 *arg0);
 void func_151BE824(struct210 *arg0);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1EBD00/func_151BE850.s")
+typedef struct {
+    /* 0x00 */ u8 unk00;
+    /* 0x01 */ s8 unk01;
+    /* 0x02 */ u8 unk02;
+    /* 0x03 */ s8 unk03;
+    /* 0x04 */ s8 unk04;
+    /* 0x05 */ u8 pad05;
+    /* 0x06 */ s16 unk06;
+    /* 0x08 */ s32 unk08;
+    /* 0x0C */ s32 unk0C;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ s32 unk1C;
+    /* 0x20 */ s32 unk20;
+    /* 0x24 */ s32 unk24;
+    /* 0x28 */ s32 unk28;
+    /* 0x2C */ u8 unk2C;
+    /* 0x2D */ u8 unk2D;
+    /* 0x2E */ u8 pad2E[2];
+    /* 0x30 */ u8 unk30;
+    /* 0x31 */ u8 unk31;
+    /* 0x32 */ u8 unk32;
+    /* 0x33 */ u8 unk33;
+    /* 0x34 */ u8 unk34;
+    /* 0x35 */ u8 unk35;
+    /* 0x36 */ u8 unk36;
+    /* 0x37 */ u8 unk37;
+    /* 0x38 */ u8 unk38;
+    /* 0x39 */ u8 pad39[3];
+    /* 0x3C */ s32 unk3C;
+    /* 0x40 */ u8 unk40;
+    /* 0x41 */ u8 unk41;
+    /* 0x42 */ u8 pad42[2];
+    /* 0x44 */ struct17 unk44;
+    /* 0x50 */ s32 unk50;
+    /* 0x54 */ s16 unk54;
+    /* 0x56 */ s16 unk56;
+} Spawn151BE850;
+
+typedef struct {
+    /* 0x00 */ f32 unk0;
+    /* 0x04 */ struct17 unk4;
+    /* 0x10 */ u8 unk10;
+} Params151BE850;
+
+typedef struct { u8 b[3]; } U8x3_151BE850;
+extern U8x3_151BE850 D_800AA8B0;
+extern void func_1510F800(s32);
+extern void func_151436B4(f32, f32, f32, f32 *);
+void *func_151BEEE0(f32 arg0, struct17 *arg1, s32 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8);
+extern void *func_15157010(void *, s32, f32, s32, s32, s32, u8, s32);
+
+void *func_151BE850(struct17 *arg0, f32 arg1, u8 arg2, u8 arg3, u8 arg4) {
+    void *obj;
+    s32 tmp;
+    Spawn151BE850 spawn;
+    Params151BE850 params;
+
+    func_1510F800(0);
+    tmp = func_1510FD20((s32)arg0->unk0, (s32)arg0->unk8);
+    if (arg4 >= 3) {
+        return NULL;
+    }
+    if ((D_800D2E4C->unk19 & 4) || (arg4 == 2)) {
+        u8 table[3] = { 3, 1, 2 };
+        struct17 offset;
+        s32 flag;
+
+        params.unk0 = arg1;
+        spawn.unk3C = 0;
+        spawn.unk40 = 0;
+        spawn.unk41 = 0;
+        spawn.unk44 = *arg0;
+        params.unk10 = arg2;
+        {
+            s32 pad;
+
+            func_151436B4(arg1 * 0.01745329238f, 0.0f, 39.0f, (f32 *)&offset);
+            params.unk4.unk0 = arg0->unk0 + offset.unk0;
+            params.unk4.unk4 = (arg0->unk4 + offset.unk4) - 40.0f;
+            params.unk4.unk8 = arg0->unk8 + offset.unk8;
+        }
+        spawn.unk38 = table[arg4];
+        flag = arg3 ? 0x10 : 0;
+        spawn.unk00 = (u8)flag | 0xE;
+        spawn.unk01 = 1;
+        if (D_800BE9F0 == 7) {
+            spawn.unk02 = 6;
+        } else {
+            spawn.unk02 = 2;
+        }
+        spawn.unk03 = 0;
+        spawn.unk04 = -1;
+        spawn.unk06 = 0x12C;
+        spawn.unk08 = 0xA2;
+        spawn.unk0C = 8;
+        spawn.unk10 = 0;
+        spawn.unk14 = 0x620405;
+        spawn.unk18 = 0x40200;
+        spawn.unk1C = 0x14;
+        spawn.unk20 = 0x37;
+        spawn.unk24 = 0x80;
+        spawn.unk28 = 0x20;
+        spawn.unk2C = 0;
+        spawn.unk2D = 8;
+        spawn.unk30 = 0xFF;
+        spawn.unk31 = 0xFF;
+        spawn.unk32 = 0xFF;
+        spawn.unk33 = 0xFF;
+        spawn.unk34 = 0xFF;
+        spawn.unk35 = 0xFF;
+        spawn.unk36 = 0xFF;
+        spawn.unk37 = 0xFF;
+        spawn.unk50 = tmp;
+        obj = func_15157010(&spawn, 0, 1.0f, 3, 0xFF, 0x18, 0xFF, 1);
+        if (obj != NULL) {
+            memcpy((u8 *)obj + 0x120, &params, 0x18);
+        }
+    } else {
+        obj = func_151BEEE0(arg1, arg0, 3, 0xFF, arg4, arg3, tmp, 0xFF, 1);
+    }
+    return obj;
+}
 
 struct S151BEB20 {
     u8 pad0[0x54];

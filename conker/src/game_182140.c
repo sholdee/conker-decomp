@@ -1340,7 +1340,169 @@ void func_15154C90(Struct15154C90 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_182140/func_15154D80.s")
+typedef struct {
+    u8 pad0[0x6];
+    u16 unk6;
+    u16 unk8;
+    u8 padA[0x2];
+} Tex15154D80;
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+} Mode15154D80;
+typedef struct {
+    u8 pad0[0x14];
+    f32 unk14;
+    f32 unk18;
+    u8 pad1C[0x18];
+    f32 unk34;
+    f32 unk38;
+} Cam15154D80;
+typedef struct {
+    u8 pad0[0x10];
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    u8 unk20;
+    u8 pad21[3];
+    u16 unk24;
+    u8 pad26[5];
+    u8 unk2B;
+    u8 unk2C;
+    u8 unk2D;
+    u8 unk2E;
+    u8 unk2F;
+    u8 unk30;
+    u8 unk31;
+    u8 unk32;
+    u8 unk33;
+    s32 unk34;
+    s32 unk38;
+    s32 unk3C;
+    s32 unk40;
+    u8 pad44[3];
+    u8 unk47;
+    s32 unk48;
+    s32 unk4C;
+    s8 unk50;
+    s8 unk51;
+    u8 pad52[2];
+    u8 unk54;
+    u8 pad55[3];
+    f32 unk58;
+    f32 unk5C;
+    f32 unk60;
+    f32 unk64;
+} Arg15154D80;
+extern Tex15154D80 D_80090B60[];
+extern Mode15154D80 D_800A4AC8[];
+extern s32 D_800D2C9C;
+extern s32 func_15181CC8(s32);
+extern s32 func_1517EF00(s32);
+Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
+Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
+Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
+Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
+Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
+Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
+void func_151441A4(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, u8 arg9, u8 arg10, u8 arg11, u8 arg12, u8 arg13);
+void func_151442FC(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 arg10, u8 arg11, u8 arg12, u8 arg13);
+
+Gfx *func_15154D80(Gfx *gfx, Arg15154D80 *arg1, s16 arg2) {
+    s32 s;
+    u8 update;
+    u16 texW;
+    s32 t;
+    s32 dsdx;
+    s32 dtdy;
+    u32 pad_texH;
+    f32 x;
+    f32 y;
+    f32 hw;
+    f32 sw;
+    f32 sh;
+    f32 xl;
+    f32 yl;
+    f32 hh;
+    f32 texWf;
+    f32 texHf;
+    f32 xh;
+    f32 yh;
+    s16 primR, primG, primB, primA;
+    s16 envR, envG, envB, envA;
+    Cam15154D80 *cam;
+
+    update = 1;
+    cam = (Cam15154D80 *)(D_800BE628 + D_80082FA4 * 0x180);
+    if ((arg1->unk24 & 0x10) && (arg2 != arg1->unk54)) {
+        return gfx;
+    }
+    if ((arg1->unk24 & 0x40) && (D_800C35EA == 1)) {
+        return gfx;
+    }
+    if ((arg1->unk24 & (1 << (arg2 + 11))) && ((func_15181CC8(arg2) == 0) || (func_1517EF00(arg2) > 200))) {
+        return gfx;
+    }
+    if (arg1->unk20 != 0xFF) {
+        gfx = func_15142E24(gfx, (s32)&D_80090B60[arg1->unk20], 0, (arg1->unk24 & 0x200) ? 0 : 2, 0, 0, arg1->unk20, 0, 0, &update, (arg1->unk24 & 0x400) ? 0x3E : 3);
+    }
+    gfx = func_15142B7C(gfx, arg1->unk38, arg1->unk3C);
+    func_151441A4(&primR, &primG, &primB, &primA, arg1->unk2F, arg1->unk30, arg1->unk31, arg1->unk32,
+                  arg1->unk2B, arg1->unk2C, arg1->unk2D, arg1->unk2E, arg1->unk33, arg1->unk50);
+    func_151442FC(&envR, &envG, &envB, &envA, arg1->unk2F, arg1->unk30, arg1->unk31, arg1->unk32,
+                  arg1->unk2B, arg1->unk2C, arg1->unk2D, arg1->unk2E, arg1->unk33, arg1->unk51);
+    gfx = func_15142C10(gfx, envR, envG, envB, envA, &update);
+    gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &update);
+    gfx = func_1513F4E4(gfx, arg1->unk47, &update);
+    gfx = func_15142FBC(gfx, arg1->unk34 | D_800D2C9C | 0x2000 | 0xC00 | arg1->unk48 | arg1->unk4C,
+                        D_800A4AC8[arg1->unk40].unk0 | D_800A4AC8[arg1->unk40].unk4, &update);
+    x = cam->unk34 + arg1->unk10 * cam->unk14;
+    y = cam->unk38 + arg1->unk14 * cam->unk18;
+    while (0) {}
+    hw = arg1->unk18 * cam->unk14;
+    hh = arg1->unk1C * cam->unk18;
+    xl = (x - hw) * 4.0f;
+    yl = (y - hh) * 4.0f;
+    xh = (x + hw) * 4.0f;
+    yh = (y + hh) * 4.0f;
+    texW = D_80090B60[arg1->unk20].unk6;
+    texWf = (u32)D_80090B60[arg1->unk20].unk6;
+    while (0) {}
+    texHf = (u32)D_80090B60[arg1->unk20].unk8;
+    sw = (xh - xl) + 1.0f;
+    sh = (yh - yl) + 1.0f;
+    if (arg1->unk24 & 0x80) {
+        sw *= arg1->unk58;
+        sh *= arg1->unk5C;
+    }
+    if (sw != 0.0f) {
+        dsdx = (4096.0f * texWf) / sw;
+    } else {
+        dsdx = 0;
+    }
+    if (sh != 0.0f) {
+        dtdy = (4096.0f * texHf) / sh;
+    } else {
+        dtdy = 0;
+    }
+    s = 0;
+    t = 0;
+    if (arg1->unk24 & 2) {
+        s = (texW - 1) << 5;
+        dsdx = -dsdx & 0xFFFF;
+    }
+    if (arg1->unk24 & 4) {
+        t = (D_80090B60[arg1->unk20].unk8 - 1) << 5;
+        dtdy = -dtdy & 0xFFFF;
+    }
+    if (arg1->unk24 & 0x100) {
+        s = s + arg1->unk60;
+        t = t + arg1->unk64;
+    }
+    gSPScisTextureRectangle(gfx++, (s32)xl, (s32)yl, (s32)xh, (s32)yh, 0, s, t, dsdx, dtdy);
+    return gfx;
+}
 
 struct Arg1515548C {
     u8 pad0[8];

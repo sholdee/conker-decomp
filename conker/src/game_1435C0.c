@@ -162,7 +162,21 @@ struct Obj151163C0 {
 void func_15115E0C(struct B_15115E0C *arg0, struct C_15115E0C *arg1);
 void func_15115EDC(struct S_15115EDC *arg0, struct A_15115EDC *arg1);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1435C0/func_15116110.s")
+extern s32 func_15195FB0(void *, s32, s32, s32, s32, s32, s32);
+
+void func_15116110(void *arg0) {
+    s32 *p = (s32 *)arg0;
+    s32 v;
+    s32 id, hi;
+    if (p[0x1F] == 0) {
+        v = p[0xF];
+        id = (u16)v & 0x7FFF;
+        hi = v >> 15;
+        v >>= 0;
+        p[0x1F] = func_15195FB0(arg0, id, hi, -1, 0, (s8)(v >> 24) & 0xFF, (s8)(v >> 16) & 0xFF);
+        p[0xF] = 0;
+    }
+}
 
 struct Obj1511617C {
     u8 pad0[0x10];

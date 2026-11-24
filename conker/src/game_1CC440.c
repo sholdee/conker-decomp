@@ -28,7 +28,11 @@ f32 sqrtf(f32);
 f32 fabsf(f32);
 #pragma intrinsic(fabsf)
 
-s32 func_1519EF90(u8 *arg0, u8 arg1, u8 *arg2) {
+s32 func_1519EF90(arg0, arg1, arg2)
+    u8 *arg0;
+    u8 arg1;
+    u8 *arg2;
+{
     f32 *state;
     f32 *data;
     f32 dx;
@@ -211,7 +215,7 @@ s32 *func_1519F1C8(arg0, arg1)
     payload.unk4C = 1.5f;
     payload.unk20 = obj[5];
     payload.unk24 = obj[7];
-    if (func_1519EF90((u8 *)&payload, mode, (u8 *)&header) != 0) {
+    if (func_1519EF90((u8 *)&payload, (u8)mode, (u8 *)&header) != 0) {
         payload.unk10 = header.unk0;
         header.unkE |= 4;
     }
@@ -429,7 +433,265 @@ s32 func_1519F4F0(u8 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1CC440/func_1519F7F0.s")
+typedef struct {
+    f32 x, y, z;
+} Vec3_1519F7F0;
+
+typedef struct {
+    f32 x, z;
+} Vec2_1519F7F0;
+
+struct Big1519F7F0 {
+    s32 unk0;
+    u8 pad4[0x10];
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    u8 pad20[0x1B];
+    u8 unk3B;
+    u8 pad3C[0xDC];
+    f32 unk118;
+    u8 pad11C[0xB8];
+    s32 unk1D4;
+};
+
+struct Sub1519F7F0 {
+    u8 pad0[0x18];
+    struct Big1519F7F0 *unk18;
+    u8 unk1C;
+    u8 pad1D[0x3B];
+    s32 unk58[4];
+};
+
+struct Ref1519F7F0 {
+    struct Sub1519F7F0 *unk0;
+    u8 unk4;
+    f32 unk8;
+    f32 unkC;
+    Vec3_1519F7F0 unk10;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    s16 unk28;
+    s16 pad2A[2];
+    s16 unk2E;
+    s16 unk30;
+    s16 unk32;
+    u8 pad34[4];
+    f32 unk38;
+    f32 unk3C;
+    u8 pad40[4];
+    u8 unk44;
+    u8 unk45;
+    u8 pad46[6];
+    f32 unk4C;
+};
+
+struct Elem1519F7F0 {
+    f32 x;
+    f32 z;
+    f32 unk8;
+    f32 unkC;
+    s16 unk10;
+    s16 unk12;
+    s16 unk14;
+    s16 unk16;
+    s16 unk18;
+    Vec2_1519F7F0 vel;
+};
+
+struct Obj1519F7F0 {
+    u8 pad0[0x10];
+    Vec3_1519F7F0 unk10;
+    u8 pad1C[2];
+    u16 unk1E;
+    s32 unk20;
+    u8 pad24;
+    u8 unk25;
+    u8 pad26[6];
+    s8 unk2C;
+    s8 unk2D;
+    s8 unk2E;
+    u8 pad2F[0x31];
+    f32 unk60;
+    u8 pad64[0x30];
+    struct Elem1519F7F0 *unk94;
+    struct Ref1519F7F0 *unk98;
+};
+
+typedef struct {
+    struct Sub1519F7F0 *sub;
+    s8 type;
+} FxData1519F7F0;
+
+s32 func_1519F7F0(struct Obj1519F7F0 *arg0) {
+    struct Ref1519F7F0 *ref;
+    struct Elem1519F7F0 *elems;
+    struct Big1519F7F0 *big;
+    s32 padE;
+    s32 found;
+    f32 stepH;
+    s32 i;
+    s32 j;
+    f32 invDist;
+    FxData1519F7F0 data;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    f32 dist;
+    f32 speedStep;
+    f32 inv;
+    Vec3_1519F7F0 cur;
+    f32 speed;
+    f32 y;
+    f32 dyy;
+    s32 *slots;
+    struct260 *fx;
+    f32 stepX;
+    Vec2_1519F7F0 vel;
+    f32 stepY;
+    f32 stepZ;
+
+    ref = arg0->unk98;
+    elems = arg0->unk94;
+    big = ref->unk0->unk18;
+    if (big->unk0 == 0) {
+        return 0;
+    }
+    if (big->unk1D4 == 0) {
+        return 0;
+    }
+    if (big->unk3B != ref->unk0->unk1C) {
+        return 0;
+    }
+    found = 0;
+    if (!(arg0->unk1E & 4)) {
+        if (func_1519EF90(ref, (u8)arg0->unk20, &arg0->unk10, elems) != 0) {
+            found = 1;
+            ref->unk10 = arg0->unk10;
+            arg0->unk1E |= 4;
+        } else {
+            return 1;
+        }
+    }
+    if (!found && func_1519EF90(ref, (u8)arg0->unk20, &arg0->unk10, elems) == 0) {
+        func_1519F48C(arg0);
+        slots = ref->unk0->unk58;
+        data.sub = ref->unk0;
+        data.type = arg0->unk20;
+        fx = func_151491F4(0x12C, -1, 0xB, 0, 6, 8, 0xFF, 0);
+        if (fx != NULL) {
+            memcpy((u8 *)fx + 0x28, &data, 8);
+        }
+        if (arg0->unk20 == 6) {
+            slots[1] = (s32)fx;
+        } else {
+            slots[3] = (s32)fx;
+        }
+        return 1;
+    }
+    ref->unk20 = big->unk14;
+    ref->unk24 = big->unk1C;
+    dx = arg0->unk10.x - ref->unk10.x;
+    dy = arg0->unk10.y - ref->unk10.y;
+    dz = arg0->unk10.z - ref->unk10.z;
+    if (9.999999747e-05f < fabsf(dx) || 9.999999747e-05f < fabsf(dy) || 9.999999747e-05f < fabsf(dz)) {
+        dist = sqrtf(dx * dx + dy * dy + dz * dz);
+        ref->unkC += dist * ref->unk8;
+        invDist = 1.0f / dist;
+    }
+    if (ref->unkC > 1.0f) {
+        inv = 1.0f / ref->unkC;
+        speed = ref->unk1C + D_800BE9A4;
+        speedStep = speed * inv;
+        cur = ref->unk10;
+        y = ref->unk38 + ref->unk3C * speed;
+        dyy = ref->unk38 - y;
+        if (arg0->unk20 == 7) {
+            vel.x = -dz * invDist * ref->unk4C;
+            vel.z = dx * invDist * ref->unk4C;
+        } else {
+            vel.x = dz * invDist * ref->unk4C;
+            vel.z = -dx * invDist * ref->unk4C;
+        }
+        i = arg0->unk2E - 1;
+        if (i < 0) {
+            i = arg0->unk25 - 1;
+        }
+        stepX = dx * inv;
+        stepY = dy * inv;
+        stepZ = dz * inv;
+        stepH = dyy * inv;
+        if (i != arg0->unk2D && arg0->unk2C != 0) {
+            j = i - 1;
+            if (j < 0) {
+                j = arg0->unk25 - 1;
+            }
+            (elems + j)->vel.x = ((elems + j)->vel.x + vel.x) * 0.5f;
+            (elems + j)->vel.z = ((elems + j)->vel.z + vel.z) * 0.5f;
+        }
+        do {
+            s32 ok;
+            struct Elem1519F7F0 *e;
+
+            ok = 1;
+            e = &elems[arg0->unk2E];
+            e->vel = vel;
+            e->x = cur.x;
+            e->z = cur.z;
+            e->unk18 = ref->unk2E;
+            e->unkC = y;
+            e->unk10 = ref->unk30;
+            e->unk12 = ref->unk32;
+            e->unk14 = 0xFF;
+            e->unk16 = ref->unk28;
+            ref->unk28 += ref->unk44 + (u32)func_150ADA20() % (ref->unk45 + 1);
+            e->x += e->vel.x * speed;
+            e->z += e->vel.z * speed;
+            {
+            f32 probe[3];
+
+            probe[0] = e->x;
+            if (big->unk118 < -9500.0f) {
+                probe[1] = big->unk18 + 100.0f;
+            } else {
+                probe[1] = big->unk118 + 100.0f;
+            }
+            probe[2] = e->z;
+            if (fabsf(probe[0]) > 20000.0f || fabsf(probe[2]) > 20000.0f) {
+                ok = 0;
+            } else if (func_15045800(probe, 0, probe[1] - 200.0f, &arg0->unk60) != 0) {
+                e->unk8 = arg0->unk60;
+            } else {
+                ok = 0;
+            }
+            }
+            if (ok) {
+                arg0->unk2E++;
+                if (arg0->unk2E == arg0->unk25) {
+                    arg0->unk2E = 0;
+                }
+                arg0->unk2C++;
+                if (arg0->unk2E == arg0->unk2D) {
+                    arg0->unk2D++;
+                    if (arg0->unk2D == arg0->unk25) {
+                        arg0->unk2D = 0;
+                    }
+                    arg0->unk2C--;
+                }
+            }
+            cur.x += stepX;
+            cur.y += stepY;
+            cur.z += stepZ;
+            y += stepH;
+            speed -= speedStep;
+            ref->unkC -= 1.0f;
+        } while (ref->unkC > 1.0f);
+        ref->unk10 = cur;
+        ref->unk1C = speed;
+    }
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1CC440/func_1519FE6C.s")
 

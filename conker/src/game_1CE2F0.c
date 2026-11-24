@@ -275,7 +275,32 @@ void func_151A0F28(f32 arg0, f32 arg1, f32 arg2, u8 arg3, s32 arg4) {
         0x42, 0x41F, 0x4F6, 7, 0x41, 4, 1, arg3, arg4);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1CE2F0/func_151A1010.s")
+extern f32 D_800A8D28;
+
+void func_151A1010(f32 arg0, f32 arg1, f32 arg2, s16 arg3, f32 arg4, f32 arg5, u8 arg6, s32 arg7) {
+    s16 var;
+    s32 tmp;
+    s16 a;
+    s16 b;
+    s16 c;
+    s16 d;
+    s32 x;
+    s32 y;
+    s32 z;
+    s32 w;
+
+    var = arg3 - 0x20;
+    tmp = (s16)(arg3 - 0x20);
+    if (tmp <= 0) {
+        var = 1;
+    }
+    func_151A11CC(arg0, arg1, arg2, 250.0f * arg4, 1.0f,
+                  a = x = (s32)(70.0f * arg5) | (D_800A8D28 == 0 & 0), b = y = (s32)(30.0f * arg5) | (D_800A8D28 == 0 & 0), c = z = D_800A8D28 * arg4, d = w = (s32)(100.0f * arg4) | (D_800A8D28 == 0 & 0), 0x12, 1.0f,
+                  90.0f * arg5, 20.0f * arg5, c, d,
+                  var, 0x10, 1.0f,
+                  a, b, c, d,
+                  15.0f * arg4, 10.0f * arg4, 0x12, tmp + 0x10, arg6, arg7);
+}
 
 void func_151A11CC(f32 arg0, f32 arg1, f32 arg2, f32 arg3,
                   f32 arg4, s32 arg5, s32 arg6, s32 arg7,
@@ -286,7 +311,189 @@ void func_151A11CC(f32 arg0, f32 arg1, f32 arg2, f32 arg3,
                   s32 arg24, s32 arg25, s32 arg26, s32 arg27) {
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1CE2F0/func_151A11E4.s")
+/*BEGIN151A11E4*/
+typedef struct {
+    void *unk0;
+    s32 unk4;
+    u8 pad8[4];
+    s16 unkC;
+    s16 unkE;
+    s16 unk10;
+    s16 unk12;
+    s16 unk14;
+    s16 unk16;
+    s16 unk18;
+    u8 pad1A[2];
+    u8 unk1C;
+    u8 unk1D;
+    u8 unk1E;
+    s8 unk1F;
+    s16 unk20;
+    s16 unk22;
+    s16 unk24;
+    s16 unk26;
+    s16 unk28;
+    s8 unk2A;
+    u8 pad2B;
+    u8 unk2C;
+    u8 unk2D;
+    u8 unk2E;
+    u8 unk2F;
+    u8 unk30;
+    u8 unk31;
+    u8 unk32;
+    u8 pad33;
+    u16 unk34;
+    u8 pad36[2];
+} Packet151A11E4;
+
+typedef struct {
+    s16 unk0;
+    s16 unk2;
+    s16 unk4;
+    s16 unk6;
+    s16 unk8;
+    s16 unkA;
+    s16 unkC;
+    s16 unkE;
+    s16 unk10;
+    s16 unk12;
+    s16 unk14;
+    s16 unk16;
+    s16 unk18;
+    s16 unk1A;
+    s16 unk1C;
+    s16 unk1E;
+    s16 unk20;
+} Extra151A11E4;
+
+struct Sub151A11E4 {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    s16 unk18;
+    s16 unk1A;
+    s16 unk1C;
+    s16 unk1E;
+};
+
+struct Obj151A11E4 {
+    u8 pad0;
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD[0x28 - 0xD];
+    struct Sub151A11E4 unk28;
+};
+
+extern u8 D_80090B60[];
+extern u8 D_80090D34;
+extern s32 func_15167D84(void *, s32, s32, s32, s32, s32);
+
+void func_151A11E4(struct Obj151A11E4 *arg0) {
+    struct Sub151A11E4 *p;
+    Packet151A11E4 packet;
+    Extra151A11E4 extra;
+    u8 r1;
+    u8 r2;
+    f32 cos1;
+    f32 sin1;
+    f32 cos2;
+    f32 sin2;
+    f32 speed;
+    f32 horiz;
+    f32 tz;
+    f32 ty;
+    f32 tx;
+    s16 fade;
+    s16 life;
+    f32 inv;
+    f32 vx;
+    void *ret;
+
+    arg0->unk28.unk10 += arg0->unk28.unk14 * D_800BE9A4;
+    p = &arg0->unk28;
+    if (1.0f < arg0->unk28.unk10) {
+        packet.unk2C = 0xFF;
+        packet.unk2D = 0xFF;
+        packet.unk2E = 0xFF;
+        packet.unk30 = 0;
+        packet.unk31 = 0;
+        packet.unk32 = 0;
+        packet.unk1F = 0x10;
+        packet.unk34 = 0x120;
+        packet.unk4 = 0xC0001;
+        packet.unkC = 0;
+        packet.unk0 = &D_80090D34;
+        packet.unk16 = 0;
+        packet.unk20 = 0;
+        packet.unk18 = 0;
+        packet.unk22 = 0;
+        packet.unk2A = 0;
+        packet.unk2F = 0;
+        packet.unk26 = 0x7D0;
+        packet.unk24 = 0x7D0;
+        do {
+            r1 = func_150ADA20() & 0xFF;
+            r2 = func_150ADA20() & 0xFF;
+            cos1 = func_151423D8(r1 - 0x40);
+            sin1 = func_151423D8(r1);
+            cos2 = func_151423D8(r2 - 0x40);
+            sin2 = func_151423D8(r2);
+            speed = func_150ADA68() * p->unkC;
+            horiz = speed * sin2;
+            tx = p->unk0 + horiz * cos1;
+            ty = p->unk4 - speed * cos2;
+            tz = p->unk8 + horiz * sin1;
+            if (func_150ADA20() & 1) {
+                packet.unk34 |= 4;
+            }
+            if (func_150ADA20() & 1) {
+                packet.unk34 |= 8;
+            }
+            packet.unkE = func_150ADA20() % (u32)(p->unk1A + 1) + p->unk18;
+            fade = func_150ADA20() % (u32)(p->unk1E + 1) + p->unk1C;
+            packet.unk28 = D_80090B60[0x1D8] * (0x100 / packet.unkE);
+            life = packet.unk28;
+            extra.unk8 = extra.unk2 = life;
+            extra.unk4 = life - (life >> 2);
+            extra.unkA = life >> 1;
+            extra.unk0 = 0xFF / (extra.unk2 - extra.unk4);
+            extra.unk6 = fade / (extra.unk8 - extra.unkA);
+            extra.unk1A = life >> 2;
+            extra.unk1C = 0xFF / extra.unk1A;
+            extra.unk1E = life >> 1;
+            extra.unk20 = fade / extra.unk1E;
+            packet.unk10 = p->unk0;
+            packet.unk12 = p->unk4;
+            packet.unk14 = p->unk8;
+            packet.unk1C = (s32)(p->unk0 * 256.0f) & 0xFF;
+            packet.unk1E = (s32)(p->unk4 * 256.0f) & 0xFF;
+            packet.unk1D = (s32)(p->unk8 * 256.0f) & 0xFF;
+            extra.unkC = life >> 1;
+            inv = 1.0f / extra.unkC;
+            vx = (tx - p->unk0) * inv;
+            do { } while (0);
+            horiz = (ty - p->unk4) * inv;
+            speed = (tz - p->unk8) * inv;
+            extra.unkE = (s32)vx;
+            extra.unk10 = (s32)horiz;
+            extra.unk12 = (s32)speed;
+            extra.unk14 = (u8)(s32)(vx * 256.0f);
+            extra.unk16 = (u8)(s32)(horiz * 256.0f);
+            extra.unk18 = (u8)(s32)(speed * 256.0f);
+            ret = (void *)func_15167D84(&packet, 0, 0x22, -1, arg0->unkC, arg0->unk1);
+            if (ret != NULL) {
+                memcpy((u8 *)ret + 0x50, &extra, 0x22);
+            }
+            p->unk10 -= 1.0f;
+            { s32 q; }
+        } while (1.0f < p->unk10);
+    }
+}
 
 typedef struct {
     s16 unk0;

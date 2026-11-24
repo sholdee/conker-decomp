@@ -1135,7 +1135,17 @@ s32 func_151D10C4(void *arg0, s32 arg1) {
     return func_151D10E4(arg0, arg1, 1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1FC830/func_151D10E4.s")
+extern struct17 D_800AAF9C[];
+
+s32 func_151D10E4(void *arg0, s32 arg1, u8 arg2) {
+    s32 temp = (s32)((struct127 *)arg0)->unk1D4;
+
+    if (temp == 0) {
+        return 0;
+    }
+    func_15143134(&D_800AAF9C[arg2], (struct17 *)arg1, (struct255 *)(temp | 0));
+    return 1;
+}
 
 typedef struct {
     struct127 *unk0;

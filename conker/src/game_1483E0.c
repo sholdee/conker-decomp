@@ -852,7 +852,90 @@ void func_1511B07C(struct Obj1511B07C *arg0) {
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1483E0/func_1511B51C.s")
+struct Obj1511B51C {
+    u8 pad0[0x8];
+    f32 unk8;
+    u8 padC[0x30];
+    s32 unk3C;
+    u8 pad40[0x33];
+    u8 unk73;
+    u8 pad74[0x8];
+    f32 unk7C;
+    f32 unk80;
+    f32 unk84;
+};
+
+void func_1511B51C(struct Obj1511B51C *arg0) {
+    f32 vel;
+    f32 target;
+    f32 angle;
+    f32 diff;
+    f32 damp;
+    f32 maxv;
+    s32 mode;
+    s32 idx;
+    s32 raw;
+    f32 ratio;
+
+    raw = ((s16 *)arg0)[0x3E / 2];
+    mode = arg0->unk73 & 3;
+    target = raw;
+    angle = arg0->unk8;
+    vel = arg0->unk84;
+    if (mode == 0 || mode == 1) {
+        target = 0.0f;
+    }
+    if (mode == 0 || mode == 3) {
+        angle = target;
+        vel = 0.0f;
+    }
+    if (angle != target || vel != 0.0f) {
+        damp = arg0->unk7C;
+        if (damp == 0.0f) {
+            damp = 0.4499999881f;
+        }
+        maxv = arg0->unk80;
+        if (maxv == 0.0f) {
+            maxv = 0.5f;
+        }
+        angle += vel;
+        if (angle != 0.0f) {}
+        diff = func_15048A70(angle, target);
+        if (fabsf(diff) < fabsf(vel)) {
+            vel = -vel * damp;
+            if (fabsf(vel) < maxv * 0.05000000075f) {
+                vel = 0.0f;
+                angle = target;
+                if (target == 0.0f) {
+                    mode = 0;
+                } else {
+                    mode = 3;
+                }
+            }
+        } else if (diff > 0.0f) {
+            vel += (maxv - vel) * 0.009999999776f;
+        } else {
+            vel -= (maxv + vel) * 0.009999999776f;
+        }
+        if (angle < 0.0f) {
+            angle += 360.0f;
+        } else if (angle >= 360.0f) {
+            angle -= 360.0f;
+        }
+        arg0->unk73 &= ~3;
+        arg0->unk73 |= mode;
+    }
+    arg0->unk84 = vel;
+    if (D_800BE9B4 != 0 || angle != arg0->unk8) {
+        arg0->unk8 = angle;
+        idx = (arg0->unk3C >> 24) & 0xFF;
+        if (idx != 0 && raw != 0) {
+            ratio = fabsf((angle - raw) / raw);
+            func_1518804C(idx - 1, ratio);
+            func_15173C60((s32)((1.0f - ratio) * 255.0f), idx - 1);
+        }
+    }
+}
 
 struct Vtx1511B7D4 {
     s16 x;
@@ -1076,7 +1159,204 @@ void func_1511BE5C(struct Obj1511BE5C *arg0) {
     arg0->unk4 = func_150484A0((f32)arg0->unk10 - D_800DBFF0->unk2F8, (f32)arg0->unk14 - D_800DBFF0->unk300) * D_800A31E0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1483E0/func_1511BEBC.s")
+struct Obj1511BEBC {
+    u8 pad0[0x10];
+    s16 unk10;
+    s16 unk12;
+    s16 unk14;
+    u8 pad16[0x1E];
+    f32 unk34;
+    u8 pad38[0x3B];
+    u8 unk73;
+    u8 pad74[0x8];
+    s32 unk7C;
+    s32 unk80;
+    f32 unk84;
+};
+
+struct Pl1511BEBC {
+    u8 pad0[0x3D0];
+    struct F7Tg *unk3D0;
+    struct F7Cw *unk3D4;
+    u8 pad3D8[0x9A0 - 0x3D8];
+};
+
+extern void func_150DDED0(void *);
+
+void func_1511BEBC(struct Obj1511BEBC *o) {
+    f32 pos[3];
+    s16 limit;
+    struct F7Tg *target;
+    struct F7Tg *p;
+    struct Pl1511BEBC *e;
+    s32 i;
+    s32 mode;
+    s32 flag8;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    s32 timer;
+    f32 thr;
+    s32 flag4;
+    s32 t1;
+    f32 f84;
+    struct F7Cw *w;
+    f32 dist;
+    void (*cb)(void *);
+
+    cb = func_150DDED0;
+    func_1511BE5C((struct Obj1511BE5C *)o);
+    mode = o->unk73 & 3;
+    flag4 = o->unk73 & 4;
+    flag8 = o->unk73 & 8;
+    t1 = o->unk80;
+    f84 = o->unk84;
+    if (D_800BE9F0 == 10) {
+        thr = (o->unk34 * 100.0f) * (o->unk34 * 100.0f);
+        if (o->unk7C == 0) {
+            if (o->unk12 == 0) {
+                o->unk12 = 1;
+            }
+            o->unk7C = (u16)o->unk12;
+            limit = o->unk12;
+            if (mode == 3) {
+                o->unk12 = limit;
+            }
+        }
+        limit = (s16)(o->unk7C & 0xFFFF);
+        timer = o->unk7C >> 16;
+        target = 0;
+        pos[0] = o->unk10;
+        pos[1] = o->unk12 + -729.0f;
+        pos[2] = o->unk14;
+        if (mode != 3 && mode != 1) {
+            for (i = 0; i < D_8008FD8C; i++) {
+                e = &((struct Pl1511BEBC *)D_800DBFF0)[i];
+                if (e->unk3D4->unk6B >= 4) {
+                    continue;
+                }
+                p = e->unk3D0;
+                if (p->y + 40.0f < pos[1]) {
+                    dy = (p->y + (f32)p->unkE6) - pos[1];
+                    dz = p->z - pos[2];
+                    dx = p->x - pos[0];
+                    dist = dz * dz + (dx * dx + dy * dy);
+                    if (dist != dist) {
+                    }
+                    if (dist < thr) {
+                        target = p;
+                        break;
+                    }
+                }
+            }
+        }
+        if (target == 0 && (mode == 2 || mode == 1)) {
+            for (i = 0; i < D_8008FD8C; i++) {
+                p = &((struct F7Tg *)D_800CC2D0)[i];
+                if (p->w->unk6B != 0) {
+                    target = p;
+                    break;
+                }
+            }
+        }
+        if (target != 0 || mode == 2) {
+            if (target != 0 && t1 == 0) {
+                func_15060A30(0x16B, target);
+            }
+            if (flag4 == 0) {
+                mode = 2;
+                if (t1 == 0) {
+                    timer = 0x32;
+                    t1++;
+                    if (cb != 0) {
+                        cb(o);
+                    }
+                }
+                if (target != 0) {
+                    if (timer != 0) {
+                        target->w->unk6B = 1;
+                    } else {
+                        target->w->unk6B = 2;
+                    }
+                }
+                if (timer != 0) {
+                    if (D_800BE9E4 < timer) {
+                        timer -= D_800BE9E4;
+                    } else {
+                        timer = 0;
+                        func_10010F88(0x1A4, 0x7FFF, 0, 0, 0, o->unk10, o->unk12, o->unk14, 0x5DC, 0xDAC);
+                    }
+                } else {
+                    f84 += 1.0f;
+                    o->unk12 = o->unk12 - f84;
+                    if (o->unk12 <= limit - 300.0f) {
+                        o->unk12 = limit - 300.0f;
+                        mode = 3;
+                        t1 = 0;
+                        f84 = 0.0f;
+                        if (target != 0) {
+                            target->w->unk6B = 0;
+                        }
+                        func_10010F88(0x1A5, 0x7FFF, 0, 0, 0, o->unk10, o->unk12, o->unk14, 0x5DC, 0xDAC);
+                    }
+                }
+                if (target != 0) {
+                    target->w->unk6C = pos[0];
+                    target->w->unk6E = pos[1];
+                    target->w->unk70 = pos[2];
+                }
+            } else if (target != 0) {
+                if (t1 == 0 && target->w->unk6B == 0) {
+                    timer = 0x32;
+                    t1++;
+                }
+                w = target->w;
+                if (timer != 0) {
+                    w->unk6B = 3;
+                } else if (w->unk6B == 3) {
+                    w->unk6B = 4;
+                    t1 = 0;
+                }
+                if (timer != 0) {
+                    if (D_800BE9E4 < timer) {
+                        timer -= D_800BE9E4;
+                    } else {
+                        timer = 0;
+                    }
+                }
+            }
+            if (target != 0) {
+                target->w->unk6C = pos[0];
+                target->w->unk6E = pos[1];
+                target->w->unk70 = pos[2];
+            }
+        } else if (flag8 == 0 || mode == 1) {
+            if (o->unk12 < limit) {
+                if (t1 == 0) {
+                    t1++;
+                }
+                mode = 1;
+                f84 += 1.299999952f;
+                o->unk12 = o->unk12 + f84;
+                if (o->unk12 >= limit) {
+                    o->unk12 = limit;
+                    t1 = 0;
+                    mode = 0;
+                    f84 = 0.0f;
+                }
+            }
+            if (target != 0) {
+                target->w->unk6B = 0;
+            }
+        }
+        o->unk80 = t1;
+        o->unk73 &= ~3;
+        o->unk73 |= mode;
+        o->unk7C &= 0xFFFF;
+        o->unk7C |= timer << 16;
+        o->unk84 = f84;
+    }
+}
 
 void func_1511C540(void) {
 }

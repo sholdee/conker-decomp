@@ -387,7 +387,74 @@ Gfx *func_1517F9F4(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 arg5) {
     return gfx;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1AC2F0/func_1517FB9C.s")
+typedef struct {
+    char pad0[0xC];
+    f32 unkC;
+    f32 unk10;
+    char pad14[0x16C];
+} Struct1517FB9C;
+
+Gfx *func_1517FB9C(Gfx *gfx, s32 size, s32 tex, f32 dx, f32 dy, s32 arg5) {
+    s32 va;
+    s32 vb;
+    f32 cx;
+    f32 cy;
+    f32 y0;
+    f32 x1;
+    f32 y1;
+    f32 fsize;
+    s32 f[2];
+
+    cx = D_800DDDE8[arg5][0] + ((Struct1517FB9C *)D_800BE628)[arg5].unkC;
+    cy = D_800DDDE8[arg5][1] + ((Struct1517FB9C *)D_800BE628)[arg5].unk10;
+    y0 = cy + dy;
+    fsize = size;
+    va = (s32)(cx + dx) << 2;
+    vb = (s32)((cx + dx) * 32.0f) & 0x1F;
+    gSPScisTextureRectangle(gfx++,
+        va, (s32)y0 << 2,
+        (s32)((cx + dx) + fsize) << 2, (s32)(y0 + fsize) << 2,
+        G_TX_RENDERTILE,
+        ((s32)((cx + dx) * 32.0f) & 0x1F) + (tex << 5),
+        ((s32)(y0 * 32.0f) & 0x1F) + (tex << 5),
+        -(u16)((f32)tex / fsize * 1024.0f), -(u16)((f32)tex / fsize * 1024.0f));
+    y1 = cy - dy;
+    x1 = cx - dx;
+    va = (s32)((cy - dy) - (f32)size);
+    vb = (s32)((cx - dx) - (f32)size);
+    f[1] = (s32)((x1 - fsize) * 32.0f) & 0x1F;
+    f[0] = (s32)((y1 - fsize) * 32.0f) & 0x1F;
+    gSPScisTextureRectangle(gfx++,
+        (s32)(x1 - fsize) << 2, (s32)(y1 - fsize) << 2,
+        (s32)(cx - dx) << 2, (s32)y1 << 2,
+        G_TX_RENDERTILE,
+        0x1F - f[1],
+        0x1F - f[0],
+        (u16)((f32)tex / fsize * 1024.0f), (u16)((f32)tex / fsize * 1024.0f));
+    y1 = (cy - dy) - (f32)size;
+    f[1] = (s32)((cx + dx) * 32.0f) & 0x1F;
+    va = (s32)(cx + dx) << 2;
+    vb = (s32)((cy - dy) - fsize) << 2;
+    arg5 = (s32)(cy - dy) << 2;
+    gSPScisTextureRectangle(gfx++,
+        va, vb,
+        (s32)((cx + dx) + fsize) << 2, arg5,
+        G_TX_RENDERTILE,
+        f[1] + (tex << 5),
+        0x1F - f[0],
+        -(u16)((f32)tex / fsize * 1024.0f), (u16)((f32)tex / fsize * 1024.0f));
+    arg5 = 0x1F - ((s32)(((cx - dx) - fsize) * 32.0f) & 0x1F);
+    vb = (s32)(cx - dx) << 2;
+    va = (s32)((cx - dx) - (f32)size) << 2;
+    gSPScisTextureRectangle(gfx++,
+        va, (s32)y0 << 2,
+        vb, (s32)(y0 + fsize) << 2,
+        G_TX_RENDERTILE,
+        arg5,
+        ((s32)(y0 * 32.0f) & 0x1F) + (tex << 5),
+        (u16)((f32)tex / fsize * 1024.0f), -(u16)((f32)tex / fsize * 1024.0f));
+    return gfx;
+}
 
 typedef struct {
     char pad0[0x4];

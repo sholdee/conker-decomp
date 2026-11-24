@@ -326,3 +326,85 @@ typedef struct Func151A6BD8Obj
 } Func151A6BD8Obj;
 Func151A6BD8Obj *func_151A6BD8(s32 arg0);
 void func_151A6C90(void *arg0, u8 arg1, s32 arg2);
+
+/* --- func_151A6350 (ROM 0x1D3800): kept in this file, see the note in game_1D3800.c --- */
+typedef struct Game1D2B10QuadOwner {
+    u8 unknown0[0x2C];
+    f32 width;
+    f32 height;
+    f32 x, y, z;
+    u8 unknown40[0x80];
+    u8 vertexTemplate[0x40];
+    u8 *buffers[5];
+    f32 unk114;
+    f32 unk118;
+    f32 unk11C;
+    u8 unknown120[6];
+    u8 unk126;
+} Game1D2B10QuadOwner;
+
+typedef struct Game1D2B10QuadVertex {
+    s16 x, y, z, flag;
+    s16 s, t;
+    u8 r, g, b, a;
+} Game1D2B10QuadVertex;
+
+void func_151D5D60(void *, s16, s32, void **, u8 *);
+
+void *func_151A6350(Game1D2B10QuadOwner *arg0, s16 arg1) {
+    Game1D2B10QuadVertex *vertices;
+    void *result;
+    f32 dz;
+    f32 dx;
+    s16 s0;
+    s16 s1;
+    s32 pad;
+    u8 fresh;
+
+    func_151D5D60(arg0->buffers, arg1, 0x40, (void **)&vertices, &fresh);
+    result = vertices;
+    if (vertices != NULL) {
+        if (fresh != 0) {
+            memcpy(arg0->buffers[arg1], arg0->vertexTemplate, 0x40);
+            memcpy(arg0->buffers[arg1] + 0x40, arg0->vertexTemplate, 0x40);
+        }
+    } else {
+        return NULL;
+    }
+    {
+    s16 t = 0x7C0;
+    s0 = arg0->unk114;
+    s1 = arg0->unk114 + arg0->unk11C;
+    dz = D_800DD1D8[arg1] * arg0->width;
+    dx = D_800DD1E8[arg1] * arg0->width;
+    vertices->x = arg0->x + dx;
+    vertices->y = arg0->y;
+    vertices->z = arg0->z - dz;
+    vertices->s = s0;
+    vertices->t = t;
+    vertices->a = arg0->unk126;
+    vertices->flag = 0;
+    vertices++;
+    vertices->x = arg0->x - dx;
+    vertices->y = arg0->y;
+    vertices->z = arg0->z + dz;
+    vertices->s = s0, vertices->t = 0;
+    vertices->a = arg0->unk126;
+    vertices->flag = 0;
+    vertices++;
+    vertices->x = arg0->x - dx;
+    vertices->y = arg0->y + arg0->height;
+    vertices->z = arg0->z + dz;
+    vertices->s = s1;
+    vertices->t = 0, vertices->a = 0, vertices->flag = 0;
+    vertices++;
+    vertices->x = arg0->x + dx;
+    vertices->y = arg0->y + arg0->height;
+    vertices->z = arg0->z - dz;
+    vertices->s = s1;
+    vertices->t = t;
+    vertices->a = 0;
+    vertices->flag = 0;
+    }
+    return result;
+}

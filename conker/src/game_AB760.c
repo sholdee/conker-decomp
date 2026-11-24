@@ -8,7 +8,8 @@ void func_1507E5C8(u8 *, s32);
 void *func_1507E9F8(void *, s32 *);
 s32 func_150302F0(void *, s32);
 void func_1507EA44(void *, s32, s32);
-void func_1507E2B0(void *);
+struct Actor1507E2B0_s;
+void func_1507E2B0(struct Actor1507E2B0_s *);
 void func_1507EABC(void *);
 extern struct124 *D_800D1C90[];
 extern f32 D_8009B8A0;
@@ -23,7 +24,50 @@ typedef struct {
     u16 field_0x72;
 } GameAB760ActorState;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_AB760/func_1507E2B0.s")
+typedef struct Actor1507E2B0_s {
+    u8 pad0[4];
+    u8 unk4;
+    u8 pad5[0x65];
+    u8 unk6A;
+    u8 unk6B;
+    u8 unk6C;
+    u8 pad6D;
+    u8 unk6E;
+    u8 pad6F[0xB8];
+    u8 unk127;
+    u8 pad128[0x1F4];
+    u8 *unk31C;
+} Actor1507E2B0;
+
+void func_1507E2B0(Actor1507E2B0 *arg0) {
+    if ((arg0->unk4 != 0x2B) && (D_800C35EA != 1)) {
+        if ((arg0->unk127 != 0xFF) && (arg0->unk31C[0x120] != 0)) {
+            arg0->unk6A = 1;
+            arg0->unk6B = 1;
+            return;
+        }
+        if (arg0->unk6A >= 3) {
+            arg0->unk6A = 0;
+        }
+        if (arg0->unk6B >= 3) {
+            arg0->unk6B = 0;
+        }
+        if ((arg0->unk6E >= D_800BE9E4) | (0 * (arg0->unk6E == 1U))) {
+            arg0->unk6E -= D_800BE9E4;
+            return;
+        }
+        arg0->unk6E = 0;
+        if (arg0->unk6C != 1) {
+            arg0->unk6A ^= 1;
+            arg0->unk6B ^= 1;
+            if (arg0->unk6A == 0) {
+                arg0->unk6E = (func_150ADA20() % 140U) + 10;
+                return;
+            }
+            arg0->unk6E = 1;
+        }
+    }
+}
 
 typedef struct {
     u8 pad0[4];
@@ -167,7 +211,7 @@ void func_1507E73C(GameAB760ActorState *arg0) {
             }
         }
         if (func_1507E6B8((u8 *)arg0) != 0) {
-            func_1507E2B0(arg0);
+            func_1507E2B0((void *)arg0);
         }
         if (arg0->field_0x72 == 0) {
             if (arg0->field_0x6F != arg0->field_0x70) {

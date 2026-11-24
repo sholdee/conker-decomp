@@ -96,9 +96,329 @@ typedef struct Star15111858 {
 } Star15111858;
 void func_15111858(void);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_13F9D0/func_15112520.s")
+typedef struct Turret15112520Cfg {
+    /* 0x00 */ f32 speedNear;
+    /* 0x04 */ f32 speedFar;
+    /* 0x08 */ f32 maxStep;
+    /* 0x0C */ f32 yawMax;
+    /* 0x10 */ f32 yawMin;
+    /* 0x14 */ f32 yawMargin;
+    /* 0x18 */ f32 pitchMax;
+    /* 0x1C */ f32 pitchMin;
+    /* 0x20 */ f32 pitchMargin;
+    /* 0x24 */ f32 baseYaw;
+    /* 0x28 */ f32 basePitch;
+    /* 0x2C */ f32 range;
+    /* 0x30 */ u16 sfx;
+    /* 0x32 */ u16 timer;
+} Turret15112520Cfg;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_13F9D0/func_15112A80.s")
+typedef struct Turret15112520 {
+    /* 0x00 */ f32 pitch;
+    /* 0x04 */ f32 yaw;
+    /* 0x08 */ u8 pad8[8];
+    /* 0x10 */ s16 x;
+    /* 0x12 */ s16 y;
+    /* 0x14 */ s16 z;
+    /* 0x16 */ u8 pad16[0x26];
+    /* 0x3C */ Turret15112520Cfg *cfg;
+} Turret15112520;
+
+
+extern f32 D_800DBEC0;
+
+void func_15112520(Turret15112520 *arg0)
+{
+  f32 dx;
+  f32 dy;
+  f32 dz;
+  f32 yaw;
+  f32 pitch;
+  f32 d;
+  s32 vol;
+  f32 speed;
+  Turret15112520Cfg *cfg;
+  s32 pad;
+  static s16 D_80089234;
+  cfg = arg0->cfg;
+  dx = D_800CC2D0[0].x_position - arg0->x;
+  dy = (D_800CC2D0[0].y_position + 65.0f) - arg0->y;
+  dz = D_800CC2D0[0].z_position - arg0->z;
+  D_800DBEC0 = ((dx * dx) + (dy * dy)) + (dz * dz);
+  if ((cfg->range * cfg->range) < D_800DBEC0)
+  {
+    pitch = cfg->basePitch;
+    yaw = cfg->baseYaw;
+    if (pitch < 0.0f)
+    {
+      pitch += 360.0f;
+    }
+    speed = cfg->speedFar;
+  }
+  else
+  {
+    yaw = func_150484A0(dx, dz);
+    pitch = func_150484A0(dy, sqrtf((dx * dx) + (dz * dz)));
+    yaw *= 57.29577637f;
+    pitch *= 57.29577637f;
+    if (pitch < 0.0f)
+    {
+      pitch += 360.0f;
+    }
+    else
+      if (pitch >= 360.0f)
+    {
+      pitch -= 360.0f;
+    }
+    if (yaw < 0.0f)
+    {
+      yaw += 360.0f;
+    }
+    else
+      if (yaw >= 360.0f)
+    {
+      yaw -= 360.0f;
+    }
+    d = func_15048A70(cfg->baseYaw, yaw);
+    if (pitch > 180.0f)
+    {
+      pitch -= 360.0f;
+    }
+    if (((cfg->yawMax + cfg->yawMargin) < d) || (d < (cfg->yawMin - cfg->yawMargin)))
+    {
+      yaw = cfg->baseYaw;
+      pitch = cfg->basePitch;
+      speed = cfg->speedFar;
+    }
+    else
+    {
+      speed = cfg->speedNear;
+      d = (d < cfg->yawMin) ? (cfg->yawMin) : ((cfg->yawMax < d) ? (cfg->yawMax) : (d));
+      yaw = cfg->baseYaw + d;
+      if (yaw < 0.0f)
+      {
+        yaw += 360.0f;
+      }
+      else
+        if (yaw >= 360.0f)
+      {
+        yaw -= 360.0f;
+      }
+      if (((cfg->pitchMax + cfg->pitchMargin) < pitch) || (pitch < (cfg->pitchMin - cfg->pitchMargin)))
+      {
+        pitch = 0.0f;
+      }
+      else
+      {
+        pitch = (pitch < cfg->pitchMin) ? (cfg->pitchMin) : ((cfg->pitchMax < pitch) ? (cfg->pitchMax) : (pitch));
+      }
+    }
+    if (pitch < 0.0f)
+    {
+      pitch += 360.0f;
+    }
+  }
+  d = func_15048A70(arg0->yaw, yaw);
+  yaw = fabsf(d);
+  if (cfg->maxStep < yaw)
+  {
+    d = ((d < 0.0f) ? (-1.0f) : (1.0f)) * cfg->maxStep;
+  }
+  arg0->yaw += d * speed;
+  if ((D_80089234 == 0) && (yaw > 4.0f))
+  {
+    D_80089234 = -1;
+  }
+  if (arg0->yaw < 0.0f)
+  {
+    arg0->yaw += 360.0f;
+  }
+  else if (arg0->yaw >= 360.0f)
+  {
+    arg0->yaw -= 360.0f;
+  }
+  d = func_15048A70(arg0->pitch, 360.0f - pitch);
+  arg0->pitch += d * speed;
+  if ((D_80089234 == 0) && (fabsf(d) > 4.0f))
+  {
+    D_80089234 = -1;
+  }
+  if (arg0->pitch < 0.0f)
+  {
+    arg0->pitch += 360.0f;
+  }
+  else if (arg0->pitch >= 360.0f)
+  {
+    arg0->pitch -= 360.0f;
+  }
+  if ((D_80089234 == (-1)) && (cfg->timer != 0))
+  {
+    vol = 32000.0f - (D_800DBEC0 * 0.1000000015f);
+    D_80089234 = cfg->timer;
+    if (vol > 0)
+    {
+      func_10010F30(cfg->sfx, 0x7D00, 0x40, 0, 0);
+    }
+  }
+  else
+  {
+    if (D_80089234 > 0)
+    {
+      D_80089234--;
+    }
+  }
+}
+
+typedef struct Struct15112A80 {
+    u8  pad0[0x10];
+    /* 0x10 */ s16 unk10;
+    /* 0x12 */ s16 unk12;
+    /* 0x14 */ s16 unk14;
+    u8  pad16[2];
+    /* 0x18 */ f32 unk18;
+    u8  pad1C[0x33];
+    /* 0x4F */ u8  unk4F;
+    /* 0x50 */ u16 unk50;
+    /* 0x52 */ u16 unk52;
+    u8  pad54[0x18];
+    /* 0x6C */ u16 unk6C;
+    /* 0x6E */ u8  unk6E;
+    /* 0x6F */ u8  unk6F;
+    /* 0x70 */ u8  unk70;
+    u8  pad71[0x17];
+    /* 0x88 */ u16 unk88;
+    /* 0x8A */ u8  unk8A;
+    /* 0x8B */ u8  unk8B[5];
+    /* 0x90 */ u16 unk90;
+    u8  pad92[6];
+    /* 0x98 */ u8  unk98[8];
+} Struct15112A80; /* size 0xA0 */
+
+typedef struct {
+    /* 0x0 */ s16 index;
+    /* 0x2 */ s16 value;
+} Struct15112A80Entry;
+extern s32 func_15022B08(s32, s32);
+extern s32 func_1503F800(u8 *, s16, s16, s32, s32);
+extern s32 func_150A6360(s32, void *, f32, f32, f32, f32, f32, f32);
+extern u8 D_800D9C10[];
+extern u8 D_800C3658;
+extern u16 D_800DBEE8[];
+extern u8 **D_80089240;
+#define OBJS15112A80 ((Struct15112A80 *)D_800DBEF4)
+
+void func_15112A80(s32 arg0) {
+    s32 d;
+    s32 a;
+    Struct15112A80 *obj;
+    s32 i;
+    s32 dist[16];
+    s32 dec;
+    s32 mask;
+    s32 end;
+    s32 start;
+    s32 view;
+    u16 *cnt;
+    s32 tmp;
+    s32 *dp;
+
+    for (view = 0; view <= D_80082FA0; view++) {
+        s32 recp;
+
+        cnt = &D_800DBEE8[view];
+        recp = view * 0x180 + D_800BE628;
+        if (func_150859AC(view, 0) != 0) {
+            D_800DBEE8[view] = 0;
+            i = 0;
+            if (D_800DBEF0 > 0) {
+                do {
+                    tmp = OBJS15112A80[i].unk70 >> 4;
+                    end = i + tmp;
+                    mask = 0;
+                    start = i;
+                    if (end >= i) {
+                        do {
+                            obj = i + OBJS15112A80;
+                            obj->unk6F &= ~(1 << view);
+                            if (!(obj->unk6E != 1 && !(obj->unk70 & 8) && (obj->unk4F & 1) && obj->unk8A != 0 &&
+                                ((&D_800C3658)[arg0] != 0 || (&D_800C35EA)[arg0] != 1 || func_15022B08(i, arg0) != 0) &&
+                                (((&D_800C35EA)[arg0] == 1 && func_15022B08(i, arg0) != 0) || !(obj->unk6C & 0x100) ||
+                                 func_1503F800(obj->unk98, obj->unk10, obj->unk14, view, 0) == 0))) {
+                            } else {
+                                u8 *mtx;
+
+                                mtx = D_800D9C10 + (view << 6);
+                                dp = (s32 *)((u8 *)dist + (i - start) * 4);
+                                if (D_800DBFF0[view].unk3D4->unk197 != 0) {
+                                    d = D_800D9B1C;
+                                } else {
+                                    if (obj->unk90 == 0) {
+                                        d = D_800D9B1C;
+                                    } else if (obj->unk90 == 1) {
+                                        d = 0x9C40;
+                                    } else {
+                                        d = obj->unk90;
+                                    }
+                                }
+                                *dp = func_150A6360(recp, mtx, (f32)obj->unk10, (f32)obj->unk12 + obj->unk18, (f32)obj->unk14, (f32)(u32)obj->unk50, (f32)(u32)obj->unk52, (f32)d);
+                                if (*dp < 0) {
+                                    *dp = -*dp;
+                                }
+                                if (*dp == 0) {
+                                    obj->unk8B[view] = 0;
+                                } else if (d < *dp) {
+                                    obj->unk8B[view] = 0;
+                                } else {
+                                    if (*dp < d - 0xC8) {
+                                        dec = D_800BE9E4 * 10;
+                                        if (obj->unk88 != 0) {
+                                            if (*dp < obj->unk88) {
+                                                if (dec < obj->unk8B[view]) {
+                                                    obj->unk8B[view] -= dec;
+                                                } else {
+                                                    obj->unk8B[view] = 0;
+                                                }
+                                            } else {
+                                                if (obj->unk8B[view] < 0xFF - dec) {
+                                                    obj->unk8B[view] += dec;
+                                                } else {
+                                                    obj->unk8B[view] = 0xFF;
+                                                }
+                                            }
+                                            if (obj->unk8B[view] == 0) {
+                                                goto next;
+                                            }
+                                        } else {
+                                            obj->unk8B[view] = 0xFF;
+                                        fence:;
+                                        }
+                                    } else {
+                                        a = ((d - *dp) * 0xFF) / 200;
+                                        if (a >= 0x100) {
+                                            a = 0xFF;
+                                        }
+                                        obj->unk8B[view] = a;
+                                    }
+                                    mask |= 1 << view;
+                                }
+                            }
+next:
+                            i++;
+                        } while (end >= i);
+                    }
+                    if (mask != 0) {
+                                                for (i = start; i <= end; i++) {
+                            OBJS15112A80[i].unk6F |= 1 << view;
+                            ((Struct15112A80Entry *)*(&D_80089240)[view])[*cnt].index = i;
+                            ((Struct15112A80Entry *)*(&D_80089240)[view])[*cnt].value = *(s32 *)((u8 *)dist + (i - start) * 4);
+                            (*cnt)++;
+                        }
+                    }
+                } while (i < D_800DBEF0);
+            }
+        }
+    }
+}
 
 void func_15113180(void) {
     s32 i;
@@ -762,7 +1082,42 @@ struct131 *func_151149AC(u8 id) {
     return NULL;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_13F9D0/func_15114A1C.s")
+#define EF8 (*(s32 **)&D_800DBEF8)
+#define EFC (*(u8 **)&D_800DBEFC)
+#define O ((struct131 *)((u8 *)D_800DBEF4 + offset))
+#define EF8 (*(s32 **)&D_800DBEF8)
+#define EFC (*(u8 **)&D_800DBEFC)
+#define O ((struct131 *)((u8 *)D_800DBEF4 + offset))
+void func_15114A1C(void) {
+    s32 i;
+    s32 offset;
+    s32 p;
+    i = 0; offset = 0;
+    if (D_800DBEF0 > 0) { do {
+        
+        if ((((u8 *)O)[0x70] & 1) != 1) {
+            p = EF8[i]; if (&D_800DBEF8) {}
+            if (EF8[i] != 0) {
+                
+                if (O->unk4E != 3 && !(O->unk6F & 0x80)) {
+                    { s32 j; j = i; if (j) {} func_10004074(EF8[j]); if (p) {} EF8[j] = 0; }
+                } else if (EFC[i] != 0) {
+                    EFC[i]--; 
+                } else {
+                    { s32 j; j = i; if (j) {} func_10004074(EF8[j]); EF8[j] = 0; }
+                }
+                
+            }
+            
+        } else if (!(O->unk6F & 0x80)) {
+            EF8[i] = 0;
+        }
+        
+    i++; offset += 0xA0; } while (i < D_800DBEF0); }
+}
+#undef EF8
+#undef EFC
+#undef O
 
 typedef struct Struct15114B94 {
     u8 pad0[0x4C];

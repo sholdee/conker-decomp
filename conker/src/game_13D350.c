@@ -241,9 +241,325 @@ Gfx *func_151106A8(Gfx *arg0) {
     return arg0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_13D350/func_151108C4.s")
+extern u8 D_800C35E8;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_13D350/func_15110CFC.s")
+s32 func_151108C4(f32 x, f32 y, f32 z, f32 pitch, f32 yaw) {
+    s32 ret;
+    s32 flag;
+
+    switch (D_800BE9F0) {
+    case 0x6:
+    case 0x3B:
+        ret = y * 40.0f / 1800.0f + 200.0f;
+        break;
+    case 0x14:
+        ret = y * 22.0f / 1800.0f + 113.0f;
+        break;
+    case 0xC:
+        ret = y * 90.0f / 1800.0f + 150.0f;
+        break;
+    case 0x0:
+        if (y < 1600.0f && 26.0f < pitch) {
+            ret = 0;
+        } else {
+            ret = y * 51.0f / 1800.0f + 134.0f;
+        }
+        break;
+    case 0x7:
+        if (z < -1100.0f) {
+            ret = 0x140;
+        } else if (20.0f < pitch) {
+            ret = 0;
+        } else {
+            ret = y * 54.0f / 1800.0f + 167.0f;
+        }
+        break;
+    case 0x41:
+        ret = 0x89;
+        break;
+    case 0x3C:
+        if (z < -1650.0f || (3495.0f < x && x < 4578.0f && z < 2960.0f)) {
+            ret = 0x140;
+        } else {
+            ret = 0;
+        }
+        break;
+    case 0xB:
+        flag = 0;
+        if (func_150A29C8(0, 0x18) == 1) {
+            if (func_150A29C8(0, 0x2E) == 0) {
+                if (0.0f < pitch) {
+                    ret = 0;
+                } else {
+                    flag = 1;
+                }
+            } else {
+                ret = 0;
+            }
+        } else {
+            flag = 1;
+        }
+        if (flag) {
+            if (y < 1218.0f) {
+                ret = 0x1E;
+            } else {
+                s32 lim = 0x140;
+
+                if (y < 2000.0f) {
+                    ret = 0xA0;
+                } else {
+                    ret = lim;
+                }
+            }
+        }
+        break;
+    case 0x13:
+        if (D_800C35EA == 1 && (D_800C35E8 == 2 || D_800C35E8 == 1)) {
+            ret = 0x140;
+        } else if (y < 1900.0f) {
+            ret = 0x10E;
+        } else {
+            ret = 0x140;
+        }
+        break;
+    case 0x1C:
+        ret = y * 34.0f / 1800.0f + 130.0f;
+        break;
+    case 0xE:
+        ret = 0xA5;
+        break;
+    case 0x39:
+        ret = 0x54;
+        break;
+    case 0x2D:
+        ret = y * 53.0f / 1800.0f + 139.0f;
+        break;
+    case 0x30:
+        ret = y * 53.0f / 1800.0f + 139.0f;
+        break;
+    default:
+        ret = 0x140;
+        break;
+    }
+    return ret;
+}
+
+typedef struct {
+    s32 tex;
+    s32 idx;
+} TexEntry15110CFC;
+
+extern s32 func_150A6210(s32, f32, f32, f32, f32, f32, f32);
+extern s32 func_1510D0EC(s32, s32, s32, s32);
+extern u8 D_1673[];
+extern u8 D_800DBEAB;
+extern u8 D_800DBEAC;
+extern s32 *D_800DBE80;
+
+Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 texBase, s32 arg3, s32 arg4, u32 width, u32 height,
+                   u32 tileW, u32 tileH, f32 x, f32 y, f32 z, u8 axis, s32 arg13, s32 limit,
+                   s32 *vtxCountPtr, s32 *vtxIdxPtr, TexEntry15110CFC *entries, s32 *lastIdxPtr,
+                   u8 *sizes, u8 *shifts, s16 *palOffs, u8 *tlutCounts, u8 *tiles, s32 mode) {
+    Vtx *vtxBuf;
+    s32 row;
+    s32 col;
+    s32 u;
+    s32 curV;
+    s32 startU;
+    s32 startV;
+    s32 x0;
+    s32 y0;
+    s32 z0;
+    s32 x1;
+    s32 y1;
+    s32 z1;
+    s32 x2;
+    s32 y2;
+    s32 z2;
+    s32 x3;
+    s32 y3;
+    s32 z3;
+    s32 tex;
+    s32 texAddr;
+    Vtx *v;
+    s32 tcS;
+    s32 tcT;
+    s32 i;
+    s32 padE;
+    s32 padM[1];
+    s32 nCols;
+    s32 nRows;
+    s32 w8;
+    s32 h8;
+    s32 colIdx;
+    s32 rowIdx;
+    s32 idx;
+    s32 lastIdx;
+    s32 padR;
+    s32 vtxCount;
+    s32 vtxIdx;
+
+    w8 = tileW * 8;
+    h8 = tileH * 8;
+    vtxBuf = *vtxBufPtr;
+    vtxCount = *vtxCountPtr;
+    vtxIdx = *vtxIdxPtr;
+    lastIdx = *lastIdxPtr;
+    x *= 8.0f;
+    y *= 8.0f;
+    z *= 8.0f;
+    if (axis == 'x') {
+        startU = z;
+        startV = y;
+    } else if (axis == 'y') {
+        startU = x;
+        startV = z;
+    } else if (axis == 'z') {
+        startU = x;
+        startV = y;
+    }
+    nRows = height / tileH;
+    nCols = width / tileW;
+    rowIdx = 0;
+    if (mode < 4) {
+        if (limit > 320) {
+            limit = 320;
+        }
+        limit = (s32)(limit * nRows + 319) / 320;
+    } else {
+        limit = 0x7FFF;
+    }
+    curV = startV - h8;
+    for (row = 0; row < height; row += tileH, curV -= h8, rowIdx++) {
+        colIdx = 0;
+        col = 0;
+        u = startU;
+        while (col < width) {
+            switch (axis) {
+                case 'X':
+                case 'x':
+                    x0 = x1 = x2 = x3 = x;
+                    y0 = curV;
+                    z0 = u;
+                    y1 = curV + h8;
+                    z1 = u + w8;
+                    y2 = curV;
+                    z2 = u + w8;
+                    y3 = curV + h8;
+                    z3 = u;
+                    break;
+                case 'Y':
+                case 'y':
+                    y0 = y1 = y2 = y3 = y;
+                    x0 = u;
+                    z0 = curV;
+                    x1 = u + w8;
+                    z1 = curV + h8;
+                    x2 = u + w8;
+                    z2 = curV;
+                    x3 = u;
+                    z3 = curV + h8;
+                    break;
+                case 'Z':
+                case 'z':
+                    z0 = z1 = z2 = z3 = z;
+                    x0 = u;
+                    y0 = curV;
+                    x1 = u + w8;
+                    y1 = curV + h8;
+                    x2 = u + w8;
+                    y2 = curV;
+                    x3 = u;
+                    y3 = curV + h8;
+                    break;
+            }
+            if (func_150A6210(arg13, (x0 + x1) >> 1, (y0 + y1) >> 1, (z0 + z1) >> 1, (s32)w8,
+                              (s32)h8, 20000.0f) &&
+                (D_800DBEAB || rowIdx < limit)) {
+                tex = colIdx * nRows + texBase + rowIdx;
+                if (D_800DBEAC && D_800B0DF0->unk9 == 1 && mode == 2 && rowIdx >= 4 && rowIdx < 7 &&
+                    colIdx >= 2 && colIdx < 4) {
+                    tex = (s32)&D_1673[colIdx * 3 + rowIdx - 10];
+                }
+                texAddr = func_1510D0EC(tex, 0, 3, 0);
+                if (!D_800DBEAB || rowIdx < limit) {
+                    tcT = (u16)(s32)((tileH + 0.5f) * 32.0f);
+                    tcS = (u16)(s32)((tileW + 0.5f) * 32.0f);
+                    arg3 = (s32)vtxBuf + vtxIdx * 16 + vtxCount * 16;
+                    if (axis == 'y' && (col == 0 || col == width - tileW)) {
+                        x0 -= 3;
+                        x3 -= 3;
+                        x1 += 3;
+                        x2 += 3;
+                        z0 -= 3;
+                        z1 += 3;
+                        z2 -= 3;
+                        z3 += 3;
+                    }
+                    ((Vtx *)arg3)[0].v.ob[0] = x0;
+                    ((Vtx *)arg3)[0].v.ob[1] = y0;
+                    ((Vtx *)arg3)[0].v.ob[2] = z0;
+                    ((Vtx *)arg3)[0].v.tc[1] = 16;
+                    ((Vtx *)arg3)[0].v.tc[0] = 16;
+                    ((Vtx *)arg3)[0].v.flag = 0;
+                    ((Vtx *)arg3)[1].v.ob[0] = x2;
+                    ((Vtx *)arg3)[1].v.ob[1] = y2;
+                    ((Vtx *)arg3)[1].v.ob[2] = z2;
+                    ((Vtx *)arg3)[1].v.tc[1] = 16;
+                    ((Vtx *)arg3)[1].v.tc[0] = tcS;
+                    ((Vtx *)arg3)[1].v.flag = 0;
+                    ((Vtx *)arg3)[2].v.ob[0] = x1;
+                    ((Vtx *)arg3)[2].v.ob[1] = y1;
+                    ((Vtx *)arg3)[2].v.ob[2] = z1;
+                    ((Vtx *)arg3)[2].v.tc[1] = tcT;
+                    ((Vtx *)arg3)[2].v.tc[0] = tcS;
+                    ((Vtx *)arg3)[2].v.flag = 0;
+                    ((Vtx *)arg3)[3].v.ob[0] = x3;
+                    ((Vtx *)arg3)[3].v.ob[1] = y3;
+                    ((Vtx *)arg3)[3].v.ob[2] = z3;
+                    ((Vtx *)arg3)[3].v.tc[1] = tcT;
+                    ((Vtx *)arg3)[3].v.tc[0] = 16;
+                    ((Vtx *)arg3)[3].v.flag = 0;
+                    nCols = width / tileW;
+                    entries[vtxCount >> 2].tex = texAddr;
+                    entries[vtxCount >> 2].idx =
+                        *((colIdx * nRows + rowIdx + mode * nCols * nRows) + (u8 *)D_800DBE80);
+                    vtxCount += 4;
+                    if (vtxCount == 16) {
+                        s32 padB[2];
+                        gSPVertex(gfx++, &vtxBuf[vtxIdx], 16, 0);
+                        for (i = 0; i < 16; i += 4) {
+                            idx = entries[i >> 2].idx;
+                            gDPPipeSync(gfx++);
+                            gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, entries[i >> 2].tex);
+                            gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, ((sizes[idx] + 0x800) >> shifts[idx]) - 1, 0);
+                            gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, entries[i >> 2].tex + palOffs[idx]);
+                            gDPLoadSync(gfx++);
+                            gDPLoadTLUTCmd(gfx++, G_TX_LOADTILE - 1, tlutCounts[idx]);
+                            if (idx != lastIdx) {
+                                lastIdx = idx;
+                                gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, tiles[idx], G_ON);
+                            }
+                            gSP1Triangle(gfx++, i + 2, i, i + 1, 0);
+                            gSP1Triangle(gfx++, i + 3, i, i + 2, 0);
+                        }
+                        vtxCount = 0;
+                        vtxIdx += 16;
+                    }
+                } else {
+                }
+            } else {
+            }
+            col += tileW;
+            colIdx++;
+            u += w8;
+        }
+    }
+    *vtxCountPtr = vtxCount;
+    *vtxIdxPtr = vtxIdx;
+    *vtxBufPtr = vtxBuf;
+    return gfx;
+}
 
 extern s32 *D_800DBE80;
 extern s32 *D_800891BC[];

@@ -3,6 +3,13 @@
 Goal: replace one `#pragma GLOBAL_ASM(...)` stub with C that compiles (IDO 5.3, `-O2 -g3`,
 mips2) to the EXACT original bytes. The verdict is the whole code bin's sha1 — nothing else.
 
+**First, claim the function:** `mkdir ~/conker-ws/.claims/FUNC`. If that fails because the
+directory exists, another agent owns FUNC: do nothing else and stop at once with status
+BLOCKED and note "claimed". (A coordinator running two fleets over one list relies on this.)
+Exception — stale claims: if nothing in `~/conker-ws/FUNC/` (checks.jsonl, the workspace C file, my/)
+has changed in the last 30 minutes (`find ~/conker-ws/FUNC -newermt "-30 min" | head`), the owner
+died (e.g. a usage-limit pause); `touch` the claim dir and continue as the new owner.
+
 ## Loop
 ```
 python3 ~/conker/tools/mw.py new FUNC        # private workspace ~/conker-ws/FUNC (main tree is never touched)
@@ -18,6 +25,14 @@ python3 ~/conker/tools/mw.py reset FUNC [--all]     # restore the file(s) from t
 python3 ~/conker/tools/mw.py similar FUNC    # matched TWINS (same code modulo symbols/regs/imms) — check FIRST
 python3 ~/conker/tools/mw.py note FUNC "…"   # ledger: record each hypothesis tried and its result
 ```
+**If `land` prints LAND-FAIL after your check said MATCH**, look at the cfe errors it prints. They are
+almost always a declaration that another function landed into the same file after your workspace
+was made (a `redeclaration of X`, `Incompatible type`, a typedef that now exists twice). Your MATCH is
+real, so do not stop: copy main's current file (`~/conker/conker/<file>`) over your workspace file,
+put your function back in place of its GLOBAL_ASM stub, make the declarations agree (prefer the
+type the definition uses; keep main's existing declarations if they are compatible), re-run
+`check` until MATCH, then `land` again. Never leave a matched function unlanded.
+
 Before writing anything, run `similar`: a matched twin's C is the fastest start (copy it,
 adapt names/constants, declare this function's own data). Read `mw.py note FUNC` (the ledger)
 when resuming, and append one line per hypothesis family you try (what, result) so the next
@@ -134,6 +149,17 @@ function is right but something ELSE in the bin changed — e.g. a new literal i
 - **Look at the compiler's own view.** `cc -K` keeps IDO's intermediate files (e.g. the binasm
   before the assembler's scheduling pass) — compare pre- and post-scheduling order to tell a
   code-generation difference from a scheduling one. Offline compiles don't count as checks.
+- **Offline variant sweeps land near-misses in 2-3 checks.** Agents who closed register,
+  stack-slot and scheduling residues fastest wrote a small script in `my/`. It runs the
+  workspace's `../ido/ido5.3_recomp/cc` through `mw.run(cmd, cwd)`, using the same flags
+  the Makefile gives this file (game files add `-Olimit 3000`). The script compiles dozens of
+  generated variants, disassembles each with `mips-linux-gnu-objdump -dr`, and scores it
+  against `target.s`. Only the winner goes through `mw.py check`. If `-K` crashes ugen,
+  run `as1` by hand on the `.G` file instead. Levers found this way:
+  - the order in which values are first defined (IDO hands out FP registers and spill
+    slots in that order, so a dead `d = 0.0f;` up front can do it);
+  - copying a param into a local;
+  - same-line `if (++k == n) k = 0;` (the -g3 line numbers steer as1).
 - **Local widths:** widening an m2c `u8` temporary to `s32` can fix allocation; when only byte
   stack offsets differ, reorder named locals or change their widths. Declaring a loop
   pointer inside the loop body opens a -g3 scope that keeps stores before the increments.

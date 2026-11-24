@@ -174,7 +174,7 @@ s32 func_15085DF8(f32 arg0, f32 arg1, f32 arg2, s8 arg3, s8 arg4) {
 
 s32 func_15086C70(s32 arg0);
 s32 func_150A32B4(void *arg0, s32 arg1, s32 arg2, s32 arg3);
-s32 func_15086364(s32 arg0, s8 arg1, s8 arg2, s32 arg3, s32 arg4);
+s32 func_15086364(s32 arg0, s8 arg1, s8 arg2, u8 *arg3, u8 *arg4);
 
 s32 func_15086098(f32 x, f32 y, f32 z, s8 arg3, s8 arg4, s32 arg5, s32 arg6) {
     s32 idx;
@@ -254,7 +254,204 @@ s32 func_15086098(f32 x, f32 y, f32 z, s8 arg3, s8 arg4, s32 arg5, s32 arg6) {
     return idx;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_B3020/func_15086364.s")
+typedef struct {
+    s16 x;
+    s16 y;
+    s16 z;
+    u8 pad6[3];
+    u8 nb[5];
+    u8 padE[2];
+} PathNode;
+
+extern u8 D_80087298;
+f32 func_15086BD0(s32 arg0, s32 arg1);
+
+s32 func_15086364(s32 start, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoid) {
+    s32 i;
+    s32 j;
+    s32 k;
+    s32 count;
+    s32 pathLen;
+    s32 found;
+    s32 penalty;
+    s32 best;
+    s32 slot;
+    s32 d;
+    s32 n;
+    f32 total;
+    s32 curDist;
+    s32 doneFirst;
+    s32 cur;
+    u8 nb2;
+    u8 result;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    PathNode *node;
+    PathNode *other;
+    s32 dist[200];
+    u8 open[200];
+    u8 prev[200];
+    u8 path[64];
+    u8 flags[64];
+
+    D_80087298 = -1;
+    D_800D2354 = 0;
+    if (nGoals <= 0) {
+        return 0xFF;
+    }
+    if (start < 0 || start >= D_80087290) {
+        return 0xFF;
+    }
+    found = 1;
+    for (j = 0; j < nGoals; j++) {
+        if (start == goals[j]) {
+            found = 0;
+        }
+    }
+    count = 0;
+    if (!found) {
+        D_80087298 = start;
+        return start;
+    }
+    for (i = 0; i < D_80087290; i++) {
+        dist[i] = 1000000;
+    }
+    node = (PathNode *)&D_800D2350[start];
+    for (i = 0; i < 5; i++) {
+        nb2 = node->nb[i];
+        if (nb2 != 0xFF) {
+            penalty = 0;
+            for (j = 0; j < nAvoid; j++) {
+                if (nb2 == avoid[j]) {
+                    penalty = 5000;
+                }
+            }
+            other = (PathNode *)&D_800D2350[nb2];
+            open[count] = nb2;
+            prev[node->nb[i]] = start;
+            dx = node->x - other->x;
+            dy = node->y - other->y;
+            dz = node->z - other->z;
+            dist[node->nb[i]] = (s16)(s32)sqrtf(dx * dx + dy * dy + dz * dz) + penalty;
+            count++;
+        }
+    }
+    pathLen = 0;
+    do {
+        best = 1000000;
+        k = 0xFF;
+        for (n = 0; n < count; n++) {
+            if (open[n] != 0xFF) {
+                if (dist[open[n]] < best) {
+                    best = dist[open[n]];
+                    k = n;
+                }
+            }
+        }
+        if (k != 0xFF) {
+            if (k == count - 1) {
+                count--;
+            }
+            i = open[k];
+            open[k] = 0xFF;
+            found = 0;
+            for (j = 0; j < nGoals; j++) {
+                if (i == goals[j]) {
+                    found = 1;
+                }
+            }
+            if (found) {
+                D_80087298 = i;
+                n = i;
+                if (&path[pathLen] == 0) {} /* no code; gives uopt a real &path use in this loop (register order in the tail) */
+                while (n != start) {
+                    path[pathLen++] = n;
+                    n = prev[n];
+                }
+                path[pathLen++] = n;
+                k = 0xFF;
+            } else {
+                curDist = dist[i];
+                node = (PathNode *)&D_800D2350[i];
+                cur = i;
+                for (i = 0; i < 5; i++) {
+                    n = node->nb[i];
+                    if (n != 0xFF && n != start) {
+                        penalty = 0;
+                        for (j = 0; j < nAvoid; j++) {
+                            if (node->nb[i] == avoid[j]) {
+                                penalty = 5000;
+                            }
+                        }
+                        other = (PathNode *)&D_800D2350[n];
+                        dx = node->x - other->x;
+                        dy = node->y - other->y;
+                        dz = node->z - other->z;
+                        d = (s32)sqrtf(dx * dx + dy * dy + dz * dz) + curDist + penalty;
+                        if (d < dist[n]) {
+                            slot = 0xFF;
+                            for (k = 0; k < count; k++) {
+                                if (slot == 0xFF && open[k] == 0xFF) {
+                                    slot = k;
+                                }
+                                if (n == open[k]) {
+                                    dist[n] = d;
+                                    prev[n] = cur;
+                                    k = count + 10;
+                                }
+                            }
+                            if (k == count) {
+                                prev[n] = cur;
+                                dist[n] = d;
+                                if (slot == 0xFF) {
+                                    slot = count;
+                                    count++;
+                                }
+                                open[slot] = n;
+                            }
+                        }
+                    }
+                }
+                k = 0;
+            }
+        }
+    } while (k != 0xFF);
+    if (pathLen < 2) {
+        return 0xFF;
+    }
+    pathLen -= 2;
+    result = path[pathLen];
+    for (i = 0; i <= pathLen + 1; ) {
+        flags[i] = func_15086C70(path[i]) != 0;
+        i++;
+    }
+    total = 0.0f;
+    doneFirst = 0;
+    if (flags[pathLen] && (!flags[pathLen + 1] || (pathLen > 0 && !flags[pathLen - 1]))) {
+        doneFirst = 1;
+    }
+    while (pathLen > 0) {
+        i = pathLen - 1;
+        d = path[pathLen];
+        if (flags[pathLen - 1]) {
+            while (i >= 0 && flags[i]) {
+                i--;
+            }
+            i++;
+        }
+        total += func_15086BD0(d, path[i]);
+        if (!doneFirst) {
+            doneFirst = 1;
+            if (flags[pathLen]) {
+                result = path[i];
+            }
+        }
+        pathLen = i;
+    }
+    D_800D2354 = (s32)total;
+    return result;
+}
 
 #pragma intrinsic(sqrtf)
 f32 func_15086BD0(s32 arg0, s32 arg1);

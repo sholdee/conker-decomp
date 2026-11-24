@@ -602,7 +602,164 @@ s8 func_15101378(A_15101378 *arg0)
   return ret;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_12E540/func_151019C4.s")
+typedef struct {
+    ObjectWithState197 *unk0;
+    char pad4[0x1E];
+    u8 unk22;
+    u8 unk23;
+    char pad24[0x14];
+    f32 unk38;
+    char pad3C[0x8];
+    f32 unk44;
+    f32 unk48;
+    f32 unk4C;
+    f32 unk50;
+    char pad54[0x4];
+    f32 unk58;
+} Sub151019C4;
+
+typedef struct {
+    char pad0[0x34];
+    struct17 unk34;
+    struct17 unk40;
+    char pad4C[0x74];
+    char unkC0[0x40];
+    char unk100[0x10];
+    Sub151019C4 unk110;
+} Obj151019C4;
+
+typedef struct {
+    s16 x, y, z;
+    u16 flag;
+    s16 tc0, tc1;
+    u8 color[4];
+} Vtx151019C4;
+
+extern f32 D_800A2288;
+extern f32 *func_15144B34(s32);
+extern void func_15145548(struct17 *, struct17 *, f32 *, struct17 *, s32);
+
+void *func_151019C4(Obj151019C4 *arg0, s16 arg1) {
+    Sub151019C4 *sub = &arg0->unk110;
+    Vtx151019C4 *vtx;
+    void *result;
+    f32 *pos;
+    struct17 dir;
+    struct17 out;
+    f32 dx, dy, dz;
+    f32 pz, py, px;
+    f32 lenSq;
+    f32 scale;
+    f32 sn;
+    struct17 start;
+    struct17 end;
+    f32 len;
+    u8 fresh;
+    s32 t0, t1, diff;
+    f32 maxLen;
+
+    if (arg1 == sub->unk22 && (sub->unk0 == NULL || sub->unk0->field_0x31C->field_0x197 != 0)) {
+        return 0;
+    }
+    if (sub->unk23 & 1) {
+        func_151D5D60(arg0->unk100, arg1, 0x40, (void **)&vtx, &fresh);
+        result = vtx;
+        if (vtx != 0) {
+            if (fresh != 0) {
+                memcpy(*(u8 **)((u8 *)arg0 + arg1 * 4 + 0x100), arg0->unkC0, 0x40);
+                memcpy(*(u8 **)((u8 *)arg0 + arg1 * 4 + 0x100) + 0x40, arg0->unkC0, 0x40);
+            }
+        } else {
+            return 0;
+        }
+        pos = func_15144B34(arg1);
+        maxLen = D_800A2288;
+        start = arg0->unk34;
+        scale = sub->unk44;
+        if (maxLen < scale) {
+            f32 s = maxLen / scale;
+
+            dir.unk0 = (arg0->unk40.unk0 - start.unk0) * s;
+            dir.unk4 = (arg0->unk40.unk4 - start.unk4) * s;
+            dir.unk8 = (arg0->unk40.unk8 - start.unk8) * s;
+            end.unk0 = start.unk0 + dir.unk0;
+            end.unk4 = start.unk4 + dir.unk4;
+            end.unk8 = start.unk8 + dir.unk8;
+            len = maxLen;
+        } else {
+            end = arg0->unk40;
+            dir.unk0 = end.unk0 - start.unk0;
+            dir.unk4 = end.unk4 - start.unk4;
+            dir.unk8 = end.unk8 - start.unk8;
+            len = sub->unk44;
+        }
+        func_15145548(&start, &dir, pos, &out, 0);
+        dx = out.unk0 - pos[0];
+        dy = out.unk4 - pos[1];
+        dz = out.unk8 - pos[2];
+        px = dir.unk4 * dz - dy * dir.unk8;
+        py = dir.unk8 * dx - dz * dir.unk0;
+        pz = dir.unk0 * dy - dx * dir.unk4;
+        lenSq = px * px + py * py + pz * pz;
+        if (lenSq == 0.0f) {
+            pz = py = px = 0.0f;
+        } else {
+            scale = sub->unk38 / sqrtf(lenSq);
+            px *= scale;
+            py *= scale;
+            pz *= scale;
+        }
+        sn = sinf(sub->unk50);
+        sn = sub->unk48 + sub->unk4C * sn;
+        t0 = sub->unk58;
+        t1 = sub->unk58 + len * sn;
+        diff = t1 - t0;
+        {
+        s32 t;
+        if (t1 >= 0x8000 || t0 < -0x8000) {
+            t = t0;
+            while (t > 0x2000) {
+                t -= 0x2000;
+            }
+            while (t < 0) {
+                t += 0x2000;
+            }
+            t0 = t - 0x8000;
+            t1 = t0 + diff;
+        }
+        }
+        vtx->x = end.unk0 + px;
+        vtx->y = end.unk4 + py;
+        vtx->z = end.unk8 + pz;
+        vtx->tc1 = 0;
+        vtx->tc0 = t1;
+        vtx->flag = 0;
+        vtx++;
+        vtx->x = end.unk0 - px;
+        vtx->y = end.unk4 - py;
+        vtx->z = end.unk8 - pz;
+        vtx->tc1 = 0x7C0;
+        vtx->tc0 = t1;
+        vtx->flag = 0;
+        vtx++;
+        vtx->x = start.unk0 - px;
+        vtx->y = start.unk4 - py;
+        vtx->z = start.unk8 - pz;
+        vtx->tc1 = 0x7C0;
+        vtx->tc0 = t0;
+        vtx->flag = 0;
+        vtx++;
+        vtx->x = start.unk0 + px;
+        vtx->y = start.unk4 + py;
+        vtx->z = start.unk8 + pz;
+        vtx->tc1 = 0;
+        vtx->tc0 = t0;
+        vtx->flag = 0;
+        return result;
+    }
+end:
+    return 0;
+}
 s16 *func_15101F50(Struct15101F50 *arg0, s16 arg1);
 
 extern f32 D_800BE9A4;

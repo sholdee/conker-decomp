@@ -150,7 +150,21 @@ void func_150E1AB0(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_10EF60/func_150E1D14.s")
+typedef struct {
+    s16 unk0;
+    s8 unk2;
+    u8 unk3;
+    f32 x, y, z;
+    f32 dir[3];
+} Game10EF60Impact;
+
+extern Game10EF60Impact D_800D9960[];
+void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
+s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, u32 *, s32, f32 *, f32 *, f32 *, s32, s32, s32, f32);
+s32 func_150E1570(struct127 *, f32, f32, f32, f32, f32, f32, s32, s32);
+void func_150E4550(f32, f32, f32, s32, s32, s32, s32);
+s32 func_1510F8CC(s32);
+s32 func_151EF610(void);
 
 typedef struct {
     s16 pos[3];
@@ -176,12 +190,206 @@ typedef struct {
     s16 fieldD2, fieldD4, fieldD6;
     volatile s16 material;
     u8 fieldDA, fieldDB;
-    s32 owner;
+    struct127 *owner;
     s16 timeout;
     u8 fieldE2, fieldE3;
     f32 fieldE4, fieldE8, fieldEC, fieldF0, fieldF4, fieldF8;
     u8 fieldFC, fieldFD, fieldFE, padFF;
 } Game10EF60Effect;
+
+void func_150E1D14(Game10EF60Effect *arg0) {
+    f32 vx;
+    f32 vy;
+    f32 vz;
+    f32 a;
+    f32 b;
+    f32 c;
+    f32 sn;
+    f32 cs;
+    f32 hit;
+    f32 dist;
+    f32 speed;
+    f32 *bone;
+    s32 idx;
+    s32 type;
+    s32 fire;
+    s32 surf;
+    s16 p;
+    f32 dir[3];
+    struct17 out;
+    f32 y0;
+    f32 z0;
+    f32 hx;
+    f32 hy;
+    f32 hz;
+    f32 s;
+    u32 tri;
+    s32 ang;
+    s32 i;
+
+    surf = (s32)D_800D9960[idx].dir;
+    fire = arg0->owner->unk76 - arg0->owner->unk31C->unk12;
+    i = (s32)&arg0->target_x;
+    bone = &arg0->target_z;
+    type = 0x23;
+    dist = 0.0f;
+    arg0->lifetime -= D_800BE9E4;
+    if (arg0->lifetime < 0 || (arg0->owner != NULL && arg0->timeout != -1 && arg0->owner->unk84.uh != arg0->timeout)) {
+        func_1516972C((struct102 *)arg0);
+        return;
+    }
+    if (arg0->mode != 0) {
+        if (arg0->fieldE3 == 0) {
+            if (arg0->owner != NULL && arg0->owner->unk1D4 != NULL && arg0->owner->unique_id == arg0->fieldDA && (idx = arg0->owner->unk127) != 0xFF) {
+                bone = (f32 *)((u8 *)arg0->owner->unk1D4 + (arg0->fieldE2 << 6));
+                func_150A7960(bone, arg0->fieldE4, arg0->fieldE8, arg0->fieldEC, &arg0->x, &arg0->y, &arg0->z);
+                func_150A7960(bone, arg0->fieldF0, arg0->fieldF4, arg0->fieldF8, &arg0->target_x, &arg0->target_y, &arg0->target_z);
+                arg0->fieldE3 = 3;
+            }
+        } else {
+            arg0->fieldE3--;
+        }
+        arg0->fieldD6 -= D_800BE9E4;
+        if (arg0->fieldD6 < -arg0->fieldD4) {
+            arg0->fieldD6 = arg0->fieldD2;
+            if (arg0->owner != NULL && arg0->owner->unk1D4 != NULL && arg0->owner->unique_id == arg0->fieldDA) {
+                bone = (f32 *)((u8 *)arg0->owner->unk1D4 + (arg0->fieldE2 << 6));
+                func_150A7960(bone, arg0->fieldE4, arg0->fieldE8, arg0->fieldEC, &arg0->x, &arg0->y, &arg0->z);
+                idx = arg0->owner->unk127;
+                func_150A7960(bone, arg0->fieldF0, arg0->fieldF4, arg0->fieldF8, &arg0->target_x, &arg0->target_y, &arg0->target_z);
+                hit = 0.0f;
+                if (arg0->fieldFD-- == 0) {
+                    arg0->fieldFD = 2;
+                    fire = 1;
+                } else {
+                    fire = 0;
+                }
+                if (arg0->scale == 0.0f) {
+                    speed = (f32)(func_151EF610() % 70) + 40.0f;
+                } else {
+                    speed = arg0->scale;
+                }
+                surf = 0;
+                if (idx != 0xFF) {
+                    if ((arg0->owner->unk76 - arg0->owner->unk31C->unk12) == D_800D9960[idx].unk0 && arg0->owner->unk1D1 == D_800D9960[idx].unk2) {
+                        arg0->target_x = D_800D9960[idx].x;
+                        arg0->target_y = D_800D9960[idx].y;
+                        arg0->target_z = D_800D9960[idx].z;
+                        if (D_800BE616 == 0) {
+                            if (func_151EF610() % 100 < D_800D9960[idx].unk3) {
+                                dir[0] = arg0->target_x - arg0->x;
+                                dir[1] = arg0->target_y - arg0->y;
+                                dir[2] = arg0->target_z - arg0->z;
+                                func_15049148((struct17 *)D_800D9960[idx].dir, 2.0f * func_150AD900(D_800D9960[idx].dir, dir), &out);
+                                func_15048F58((struct17 *)dir, &out, &out);
+                                out.unk0 += arg0->target_x;
+                                out.unk4 += arg0->target_y;
+                                out.unk8 += arg0->target_z;
+                                func_150E1AB0(0, arg0->target_x, arg0->target_y, arg0->target_z, out.unk0, out.unk4, out.unk8, (f32)(func_151EF610() % 35) + 20.0f, 0.0f, 8.0f, 320.0f, 30, 0x23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+                                func_10010F88(func_151EF610() % 6 + 0x2B, 10000, 0, 0, idx, arg0->target_x, arg0->target_y, arg0->target_z, 500, 2000);
+                            }
+                        }
+                        hit = 1.0f;
+                    } else {
+                        p = arg0->owner->unk1D1 * 200;
+                        func_1505A184((arg0->owner->unk76 - arg0->owner->unk31C->unk12), 2000.0f, (f32)p * 0.005493164f, &arg0->target_x, &arg0->target_z, &arg0->target_y);
+                        arg0->target_x += arg0->x;
+                        arg0->target_y += arg0->y;
+                        arg0->target_z += arg0->z;
+                    }
+                    arg0->rate = (f32)(func_151EF610() % 3) * 80.0f + 80.0f;
+                } else {
+                    if (fire) {
+                        hx = arg0->target_x - arg0->x;
+                        hy = arg0->target_y - arg0->y;
+                        hz = arg0->target_z - arg0->z;
+                        s = (75.0f * speed) / sqrtf(hx * hx + hy * hy + hz * hz);
+                        if (func_150AC9C0(arg0->x, arg0->y, arg0->z, hx * s, hy * s, hz * s, &tri, 0, &hx, &hy, &hz, 0, 0, 0, 0.0f)) {
+                            arg0->target_x = hx;
+                            arg0->target_y = hy;
+                            arg0->target_z = hz;
+                            hit = 1.0f;
+                            i = (tri - D_800DBE3C) / 12;
+                            if (i >= 0 && i < D_800DBE4C && D_800DBE5C != 0) {
+                                surf = func_1510F8CC(((s32 *)D_800DBE5C)[i]);
+                            }
+                        }
+                    }
+                    type = 0x43;
+                }
+                arg0->yaw = func_150484A0(-(arg0->target_x - arg0->x), -(arg0->target_z - arg0->z));
+                arg0->pitch = func_150484A0(arg0->target_y - arg0->y, sqrtf((arg0->target_x - arg0->x) * (arg0->target_x - arg0->x) + (arg0->target_z - arg0->z) * (arg0->target_z - arg0->z)));
+                arg0->dx = 0.0f;
+                arg0->dy = 0.0f;
+                arg0->dz = 0.0f;
+                if (fire) {
+                    func_150E1AB0(0, arg0->x, arg0->y, arg0->z, arg0->target_x, arg0->target_y, arg0->target_z, speed, hit, 15.0f, 820.0f, 75, type, 0, 0, 0, (s32)arg0->owner, 0, 0, 0, surf, arg0->fieldFE, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+                }
+            } else {
+                func_1516972C((struct102 *)arg0);
+                return;
+            }
+        }
+    } else {
+    }
+    if (arg0->fieldD6 > 0) {
+        y0 = 0.0f;
+        z0 = -1.0f;
+        sn = func_150AD78C(arg0->pitch);
+        cs = func_150AD780(arg0->pitch);
+        a = y0 * cs;
+        b = y0 * cs - sn * z0;
+        c = y0 * sn + cs * z0;
+        sn = func_150AD78C(arg0->yaw);
+        cs = func_150AD780(arg0->yaw);
+        vx = cs * a + sn * c;
+        vy = b;
+        vz = -sn * a + cs * c;
+        if (arg0->speed != 0.0f) {
+            dist = sqrtf((arg0->target_x - arg0->x) * (arg0->target_x - arg0->x) + (arg0->target_y - arg0->y) * (arg0->target_y - arg0->y) + (arg0->target_z - arg0->z) * (arg0->target_z - arg0->z));
+        }
+        if (arg0->fieldDB == 0) {
+            vx *= 0.5f;
+            vy *= 0.5f;
+            vz *= 0.5f;
+        }
+        arg0->dx = vx;
+        arg0->dy = vy;
+        arg0->dz = vz;
+        s = arg0->scale * D_800BE9E4;
+        if (dist < s && arg0->speed != 0.0f) {
+            vx *= dist;
+            vy *= dist;
+            vz *= dist;
+            arg0->rate = dist;
+        } else {
+            vx *= s;
+            vy *= s;
+            vz *= s;
+        }
+        if (arg0->fieldFE == 1) {
+            i = arg0->owner != NULL ? arg0->owner - D_800CC2D0 : 0;
+            func_150E1570(arg0->owner, arg0->x, arg0->y, arg0->z, arg0->x + vx, arg0->y + vy, arg0->z + vz, i, 0);
+        }
+        arg0->x += vx;
+        arg0->y += vy;
+        arg0->z += vz;
+        if (arg0->speed != 0.0f) {
+            s = sqrtf((arg0->target_x - arg0->x) * (arg0->target_x - arg0->x) + (arg0->target_y - arg0->y) * (arg0->target_y - arg0->y) + (arg0->target_z - arg0->z) * (arg0->target_z - arg0->z));
+            if (s < arg0->speed || dist < s) {
+                if (arg0->fieldFC != 0) {
+                    func_150E4550(arg0->target_x, arg0->target_y, arg0->target_z, 1, arg0->fieldFC, 0, 0xFF);
+                }
+                func_1516972C((struct102 *)arg0);
+                return;
+            }
+            if (s < arg0->rate) {
+                arg0->rate = s;
+            }
+        }
+    }
+}
+
 
 typedef struct {
     f32 x;

@@ -673,7 +673,123 @@ void func_1513D668(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s16 a
     func_1513D594(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA, 0, 0, argB, argC, argD, argE);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513D6FC.s")
+/*FUNCSTART*/
+typedef struct { f32 x, y, z; } Vec1513D6FC;
+s32 func_1510E388(s32, s32, f32 *, f32 *);
+s32 func_15144E80(s32, Vec1513D6FC *, Vec1513D6FC *, Vec1513D6FC *);
+s32 func_15145128(Vec1513D6FC *, Vec1513D6FC *, f32 *, f32 *);
+
+s32 func_1513D6FC(struct211 *arg0, s16 arg1, f32 arg2, f32 arg3, s32 arg4, s32 arg5, u8 arg6) {
+    f32 bx;
+    f32 bz;
+    f32 c;
+    f32 s;
+    f32 xs;
+    f32 t;
+    f32 zs;
+    f32 a;
+    f32 kx;
+    f32 p2;
+    f32 q2;
+    f32 r2;
+    Vec1513D6FC v;
+    f32 k2;
+    f32 c2;
+    f32 s2;
+    Vec1513D6FC v1;
+    Vec1513D6FC v2;
+    Vec1513D6FC v3;
+    f32 len;
+    f32 unused;
+    f32 w;
+
+
+    if (arg6 != 0) {
+        c = func_151423D8(arg1 - 0x40);
+        s = func_151423D8(arg1);
+        xs = arg2 * s;
+        zs = arg3 * s;
+        if (func_1510E388(arg4, arg5, &bx, &bz) == 0) {
+            return 0;
+        }
+        {
+            f32 p;
+            f32 q;
+            f32 r;
+
+            a = arg3 * c;
+            t = zs * bz;
+            p = fabsf(zs);
+            q = sqrtf((zs * zs) + (t * t));
+            if (0 != a) {
+                w = a * bx;
+                v.z = w;
+                v.y = fabsf(a) / sqrtf((a * a) + (w * w));
+            } else {
+                v.z = 0.0f;
+                v.y = 0.0f;
+            }
+            if (zs != 0) {
+                v.x = t;
+                k2 = fabsf(zs) / sqrtf((zs * zs) + (t * t));
+            } else {
+                v.x = 0.0f;
+                k2 = 0.0f;
+            }
+            arg0->unk0 = v.y * a;
+            arg0->unk4 = (v.y * v.z) + (k2 * v.x) + 0.5f;
+            arg0->unk8 = k2 * zs;
+            t = -(arg2 * c);
+            p2 = t * bz;
+            q2 = fabsf(t);
+            r2 = sqrtf((t * t) + (p2 * p2));
+            if (xs != 0) {
+                w = xs * bx; v.z = w; v.y = fabsf(xs) / sqrtf((xs * xs) + (w * w));
+            } else {
+                v.z = 0.0f; v.y = 0.0f;
+            }
+            if (t != 0) {
+                v.x = t * bz;
+                k2 = fabsf(t) / sqrtf((t * t) + ((t * bz) * (t * bz)));
+            } else {
+                v.x = 0.0f;
+                k2 = 0.0f;
+            }
+            arg0->unkC = v.y * xs;
+            arg0->unk10 = (v.y * v.z) + (k2 * v.x) + 0.5f;
+            arg0->unk14 = k2 * t;
+        }
+    } else {
+        c2 = func_151423D8(arg1 - 0x40);
+        s2 = func_151423D8(arg1);
+        if (func_15144E80(arg5, &v1, &v2, &v3) == 0) {
+            return 0;
+        }
+        if (func_15145128(&v1, &v1, &len, &unused) == 0) {
+            return 0;
+        }
+        if (func_15145128(&v2, &v2, &len, &unused) == 0) {
+            return 0;
+        }
+        {
+            extern s32 D_1513D6FC_dummy;
+
+            s = arg2 * s2;
+            t = arg2 * c2;
+            arg0->unk0 = (s * v1.x) + (t * v2.x);
+            arg0->unk4 = (s * v1.y) + (t * v2.y);
+            arg0->unk8 = (s * v1.z) + (t * v2.z);
+            s = -arg3 * c2;
+            t = arg3 * s2;
+            arg0->unkC = (s * v1.x) + (t * v2.x);
+            arg0->unk10 = (s * v1.y) + (t * v2.y);
+            arg0->unk14 = (s * v1.z) + (t * v2.z);
+        }
+        return 1;
+    }
+end:
+    return 1;
+}
 // s32 func_1513D6FC(struct211 *arg0, s16 arg1, f32 arg2, f32 arg3, s32 arg4, s32 arg5, u8 arg6) {
 //     f32 spBC;
 //     f32 spB8;
@@ -990,7 +1106,47 @@ void func_1513E084(struct210 *arg0, struct212 *arg1, u8 arg2) {
 void func_1513E134(void) {
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513E13C.s")
+void func_1513E13C(struct210 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 arg6)
+{
+  f32 s;
+  f32 c[1];
+  f32 xs;
+  f32 xc;
+  f32 zs;
+  f32 zc;
+  f32 x0;
+  f32 t[1];
+  f32 p0;
+  f32 p1;
+  f32 p2;
+  f32 p3;
+  f32 u[1];
+  c[0] = func_151423D8(arg6 - 0x40);
+  s = func_151423D8(arg6);
+  xs = (&arg4)[0] * s;
+  x0 = (&arg1)[0] + xs;
+  xc = c[0] * (&arg5)[0];
+  if (((!t) && (!t)) && (!t))
+  {
+  }
+  arg0->unk40 = x0 - xc;
+  arg0->unk42 = arg2;
+  zs = (&arg5)[0] * s;
+  u[0] = arg3 + zs;
+  zc = c[0] * (&arg4)[0];
+  arg0->unk44 = u[0] + zc;
+  t[0] = arg1 - xs;
+  arg0->unk50 = t[0] - xc;
+  arg0->unk52 = arg2;
+  arg0->unk54 = u[0] - zc;
+  arg0->unk60 = t[0] + xc;
+  arg0->unk62 = arg2;
+  t[0] = arg3 - zs;
+  arg0->unk64 = t[0] - zc;
+  arg0->unk70 = x0 + xc;
+  arg0->unk72 = arg2;
+  arg0->unk74 = t[0] + zc;
+}
 // PERMUTER CANDIDATE best 3348 — reconstruction below is semantically close (first 12 instrs match)
 // but FP store scheduling + a +4 stack-slot shift on sp48/sp1C/sp30 differ.
 // void func_1513E13C(struct210 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 arg6) {
@@ -1024,7 +1180,118 @@ void func_1513E134(void) {
 void func_1513E2A4(void) {
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513E2AC.s")
+typedef struct {
+    u8 pad0[0x40];
+    Vtx_t v[4];
+} Quad1513E2AC;
+
+s32 func_1513E2AC(s32 arg0, s32 arg1, s32 arg2, f32 x, f32 y, f32 z, f32 w, f32 h, u8 angle) {
+    Vtx_t *vtx;
+    f32 s;
+    f32 c;
+    f32 ux;
+    f32 uy;
+    f32 uz;
+    f32 vx;
+    f32 vy;
+    f32 vz;
+    Vec1513D6FC a;
+    Vec1513D6FC b;
+    f32 wc;
+    f32 ws;
+    f32 hs;
+    f32 hc;
+    f32 outA;
+    f32 outB;
+    s16 i;
+    f32 pts[4][2];
+    f32 bx;
+    f32 by;
+    f32 ky;
+    f32 kx;
+    f32 x0;
+    Vtx_t *v;
+
+    vtx = ((Quad1513E2AC *)arg0)->v;
+    s = func_151423D8(angle - 0x40);
+    c = func_151423D8(angle);
+    if (arg2 != 0) {
+        v = vtx;
+        if (func_15144E80(arg2, &a, &b, 0) == 0) {
+            return 0;
+        }
+        func_15145128(&a, &a, 0, 0);
+        func_15145128(&b, &b, 0, 0);
+        {
+            f32 pad;
+
+            wc = w * c;
+            ws = w * s;
+            ux = wc * a.x + ws * b.x;
+            uy = wc * a.y + ws * b.y;
+            uz = wc * a.z + ws * b.z;
+            hs = -h * s;
+            hc = h * c;
+            vx = hs * a.x + hc * b.x;
+            vy = hs * a.y + hc * b.y;
+            vz = hs * a.z + hc * b.z;
+        }
+        v[0].ob[0] = x - ux + vx;
+        v[0].ob[1] = y - uy + vy;
+        v[0].ob[2] = z - uz + vz;
+        v[1].ob[0] = x + ux + vx;
+        v[1].ob[1] = y + uy + vy;
+        v[1].ob[2] = z + uz + vz;
+        v[2].ob[0] = x + ux - vx;
+        v[2].ob[1] = y + uy - vy;
+        v[2].ob[2] = z + uz - vz;
+        v[3].ob[0] = x - ux - vx;
+        v[3].ob[1] = y - uy - vy;
+        v[3].ob[2] = z - uz - vz;
+        return 1;
+    }
+    if (func_1510E388(arg1, arg2, &outA, &outB) == 0) {
+        return 0;
+    }
+    hc = h * c;
+    wc = w * c;
+    hs = h * s;
+    ws = w * s;
+    pts[0][0] = wc - hs;
+    pts[0][1] = hc + ws;
+    pts[1][0] = -wc - hs;
+    pts[1][1] = hc - ws;
+    pts[2][0] = -wc + hs;
+    pts[2][1] = -hc - ws;
+    pts[3][0] = wc + hs;
+    pts[3][1] = -hc + ws;
+    for (i = 0; i < 4; i++) {
+        f32 pad2;
+
+        by = pts[i][1] * outB;
+        ky = fabsf(pts[i][1]);
+        ky = fabsf(pts[i][1] * pts[i][1]);
+        ky = fabsf(by); ky = fabsf(by - 1.0f);
+        if (pts[i][0] != 0) {
+            bx = pts[i][0] * outA;
+            kx = fabsf(pts[i][0]) / sqrtf(pts[i][0] * pts[i][0] + bx * bx);
+        } else {
+            bx = 0.0f;
+            kx = 0.0f;
+        }
+        if (pts[i][1] != 0) {
+            ky = fabsf(pts[i][1]) / sqrtf(pts[i][1] * pts[i][1] + by * by);
+        } else {
+            by = 0.0f;
+            ky = 0.0f;
+        }
+        vtx->ob[0] = pts[i][0] * kx + x;
+        vtx->ob[1] = kx * bx + y + ky * by + 0.5f;
+        vtx->ob[2] = pts[i][1] * ky + z;
+        vtx++;
+    }
+    return 1;
+}
 
 typedef struct {
     f32 unk0;
@@ -1409,7 +1676,7 @@ Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2) {
 //     s16 temp_v0 = func_15143044(arg1, 0);
 //     if (temp_v0 != D_800DD1BE) {
 //         CombineEntry *e; Gfx *g2;
-//         if (arg2[0] == 1) { gDPPipeSync(gfx++); arg2[0] = 0; }
+//         if (arg2->w == 1) { gDPPipeSync(gfx++); arg2->w = 0; }
 //         e = &D_800A4BA8[arg1];
 //         g2 = gfx++;
 //         g2->words.w0 = (((e->unkA & 0x1F) | ((e->unk8 & 0xF) << 5) | ((e->unk0 & 0xF) << 20)
@@ -1491,6 +1758,32 @@ s32 func_1513F728(Struct1513F728Obj *arg0) {
     return 1;
 }
 
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3f1513FAB4;
+
+typedef struct {
+    u8 pad0[0x2C];
+    f32 width;
+    f32 length;
+    Vec3f1513FAB4 start;
+    Vec3f1513FAB4 end;
+} Beam1513FAB4;
+
+typedef struct {
+    s16 x, y, z, flag;
+    u8 other[8];
+} BeamVtx1513FAB4;
+
+typedef struct { f32 w; f32 l; } Scale1513FAB4;
+
+extern f32 *func_15144B34(s32);
+extern void func_150AD8B0(f32 *, f32 *, f32 *);
+
+void *func_1513FAB4(Beam1513FAB4 *arg0, u8 arg1, Scale1513FAB4 *arg2, s16 arg3);
+
 void func_1513FA2C(void *arg0, s16 arg1) {
     f32 stack_vals[2];
     stack_vals[0] = 1.0f;
@@ -1506,7 +1799,110 @@ void func_1513FA70(s32 arg0, s16 arg1) {
     func_1513FAB4(arg0, 1, sp18, arg1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513FAB4.s")
+
+
+void *func_1513FAB4(Beam1513FAB4 *arg0, u8 arg1, Scale1513FAB4 *arg2, s16 arg3) {
+    BeamVtx1513FAB4 *vertices;
+    void *result;
+    Vec3f1513FAB4 *camera;
+    Vec3f1513FAB4 delta;
+    Vec3f1513FAB4 end;
+    Vec3f1513FAB4 middle;
+    Vec3f1513FAB4 view;
+    Vec3f1513FAB4 side;
+    f32 lengthSquared;
+    f32 length;
+    f32 width;
+    u8 fresh;
+
+    func_151D5D60((u8 *)arg0 + 0x100, arg3, 0x40, (void **)&vertices, &fresh);
+    result = vertices;
+    if (vertices != 0) {
+        if (fresh != 0) {
+            memcpy(*(u8 **)((u8 *)arg0 + arg3 * 4 + 0x100), (u8 *)arg0 + 0xC0, 0x40);
+            memcpy(*(u8 **)((u8 *)arg0 + arg3 * 4 + 0x100) + 0x40, (u8 *)arg0 + 0xC0, 0x40);
+        }
+    } else {
+        return 0;
+    }
+    camera = (Vec3f1513FAB4 *)func_15144B34(arg3);
+    width = arg0->width * arg2->w;
+    length = arg0->length * arg2->l;
+    delta.x = arg0->end.x - arg0->start.x;
+    delta.y = arg0->end.y - arg0->start.y;
+    delta.z = arg0->end.z - arg0->start.z;
+    delta.x *= length;
+    delta.y *= length;
+    delta.z *= length;
+    end.x = arg0->start.x + delta.x;
+    end.y = arg0->start.y + delta.y;
+    end.z = arg0->start.z + delta.z;
+    middle.x = arg0->start.x + delta.x * 0.5f;
+    middle.y = arg0->start.y + delta.y * 0.5f;
+    middle.z = arg0->start.z + delta.z * 0.5f;
+    view.x = middle.x - camera->x;
+    view.y = middle.y - camera->y;
+    view.z = middle.z - camera->z;
+    func_150AD8B0(&delta.x, &view.x, &side.x);
+    lengthSquared = side.x * side.x + side.y * side.y + side.z * side.z;
+    if (lengthSquared != 0.0f) {
+        f32 scale = width / sqrtf(lengthSquared);
+
+        side.x = side.x * scale;
+        side.y = side.y * scale;
+        side.z = side.z * scale;
+    } else {
+        side.x = 0;
+        side.y = 0;
+        side.z = 0;
+    }
+    if (arg1 != 0) {
+        vertices->x = arg0->start.x + side.x;
+        vertices->y = arg0->start.y + side.y;
+        vertices->z = arg0->start.z + side.z;
+        vertices->flag = 0;
+        vertices++;
+        vertices->x = arg0->start.x - side.x;
+        vertices->y = arg0->start.y - side.y;
+        vertices->z = arg0->start.z - side.z;
+        vertices->flag = 0;
+        /* IDO ugen reads stale tree-node memory left by earlier functions in this file;
+           these empty statements pad the node count so that state lines up. */
+        ;
+        vertices++;
+        vertices->x = end.x - side.x;
+        vertices->y = end.y - side.y;
+        vertices->z = end.z - side.z;
+        vertices->flag = 0;
+        vertices++;
+        vertices->x = end.x + side.x;
+        vertices->y = end.y + side.y;
+        vertices->z = end.z + side.z;
+        vertices->flag = 0;
+    } else {
+        vertices->x = arg0->start.x - side.x;
+        vertices->y = arg0->start.y - side.y;
+        vertices->z = arg0->start.z - side.z;
+        vertices->flag = 0;
+        ;;;;;;;;
+        vertices++;
+        vertices->x = end.x - side.x;
+        vertices->y = end.y - side.y;
+        vertices->z = end.z - side.z;
+        vertices->flag = 0;
+        vertices++;
+        vertices->x = end.x + side.x;
+        vertices->y = end.y + side.y;
+        vertices->z = end.z + side.z;
+        vertices->flag = 0;
+        vertices++;
+        vertices->x = arg0->start.x + side.x;
+        vertices->y = arg0->start.y + side.y;
+        vertices->z = arg0->start.z + side.z;
+        vertices->flag = 0;
+    }
+    return result;
+}
 
 void func_1513FFF4(struct1513FFF4 *arg0, u8 arg1, u8 arg2) {
     struct1513FFF4_80090B60 *temp_v0;

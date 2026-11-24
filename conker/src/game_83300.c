@@ -5,12 +5,15 @@
 #define func_1000F85C func_1000F85C_hdr
 #define func_1000F91C func_1000F91C_hdr
 #define func_10010BE8 func_10010BE8_hdr
+#define func_1505E874 func_1505E874_hdr
 #include "functions.h"
 #undef func_1506160C
 #undef func_1505841C
 #undef func_1000F85C
 #undef func_1000F91C
 #undef func_10010BE8
+#undef func_1505E874
+void func_1505E874(s32, struct127 *);
 void func_1000F85C(u16, s32, s32);
 void func_1000F91C(u16, s32, s16, s32, s32, s32, s32, s32, s32, s32);
 u16 func_10010E78(u16, s32, u16, s32, s32, s32, s32, s32, s32, s32, s32);
@@ -41,16 +44,20 @@ void func_1505A250(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4);
 void func_150611E8(struct127 *arg0, s32 arg1);
 void func_1505A770(void *arg0);
 void func_15059C84(void *arg0);
-f32  func_1505A3A8(f32 arg0, void *arg1, f32 arg2, f32 arg3, u8 arg4);
+void func_1505A3A8(f32 arg0, void *arg1, f32 arg2, f32 arg3, u8 arg4);
 
 s32 func_15080738(s32 arg0);
 void func_150642AC(struct127 *arg0, s32 arg1, f32 arg2, s32 arg3, s32 arg4);
 s32 func_15065A5C(struct127 *arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
 
-u8  func_1505B9C4(void *arg0, struct127 *arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5, u8 arg6);
-s32 func_1505C1E4(void *arg0, struct127 *arg1, void *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
+void func_1505B9C4(void *arg0, struct127 *arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5, u8 arg6);
+extern void (*D_80086694[])(void *, struct127 *, u8 *);
+s32 func_1506E46C(struct127 *, s32 *, s32);
+struct Entry1505C1E4;
+s32 func_1505C1E4(struct127 *arg0, struct127 *arg1, struct Entry1505C1E4 *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 extern struct255 *D_800CC4A4;
 void func_1505F188(struct127 *arg0);
+s32 func_1505C7D8(struct127 *arg0, s32 arg1);
 extern f32 D_8009962C;
 extern f32 D_80099630;
 extern f32 D_800994C0;
@@ -254,8 +261,172 @@ void func_15056258(struct127 *arg0) {
         }
     }
 }
+typedef struct Game83300AnimRate {
+    u16 anim;
+    u8 rate;
+    u8 pad;
+} Game83300AnimRate;
+typedef struct Game83300AnimSet {
+    u8 pad0[0xA];
+    Game83300AnimRate e[3];
+    u8 pad16[2];
+} Game83300AnimSet;
+void func_150649A0(s32, s32);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_150562FC.s")
+void func_150562FC(struct127 *arg0) {
+    s32 *animPtr;
+    Game83300AnimSet *anims;
+    s16 *sub;
+    u32 animIdx;
+    f32 temp_f0;
+    f32 sp70;
+    f32 sp6C;
+    f32 sp68;
+    s32 temp_v0_8;
+    u8 sp63;
+    f32 lerp;
+    s32 variant;
+    s32 sp54;
+    s32 a2;
+    f32 sp4C;
+    f32 tx;
+    f32 tz;
+
+    sp63 = arg0->unk13D - 100;
+    sp54 = 0;
+    sp4C = 5.0f;
+    arg0->immune = 30;
+    variant = 0;
+    a2 = 13;
+    arg0->unk180 = D_800CC2D0[sp63].unk180;
+    arg0->unk1CC = arg0->y_position;
+    arg0->gravity = 4.5f;
+    arg0->y_velocity = 0.0;
+    temp_v0_8 = arg0->unk21C;
+    if (temp_v0_8 < 30) {
+        arg0->unk21C = (u32)temp_v0_8 + D_800BE9A0;
+    }
+    if (arg0->id == 0x57) {
+        arg0->unk5C = 9;
+        if (arg0->unk21C < 10) {
+            return;
+        }
+        sp54 = 1;
+        if (D_800CC2D0[sp63].unk84.uh == 0x114) {
+            a2 = 0x24;
+        }
+        if (D_800CC2D0[sp63].unk84.uh == 0x116) {
+            variant = 1;
+        }
+        if (D_800CC2D0[sp63].unk84.uh == 0x117) {
+            variant = 2;
+        }
+        func_150649A0(sp63, D_800C3E78);
+    } else if (arg0->id == 0x8C) {
+        arg0->unk5C = 4;
+        if (arg0->unk21C < 10) {
+            return;
+        }
+        sp54 = 1;
+        if (D_800CC2D0[sp63].unk84.uh == 0x1A6) {
+            variant = 1;
+        }
+        if (D_800CC2D0[sp63].unk84.uh == 0x1A7) {
+            variant = 2;
+        }
+        func_150649A0(sp63, D_800C3E78);
+    } else if ((arg0->id == 0xA8) || (arg0->id == 0xA9)) {
+        arg0->unk5C = 9;
+        sp54 = 1;
+        if (D_800CC2D0[sp63].unk84.uh == 0x1B0) {
+            variant = 1;
+        }
+        if (D_800CC2D0[sp63].unk84.uh == 0x1B1) {
+            variant = 2;
+        }
+    } else if (arg0->id == 0x5E) {
+        arg0->unk5C = 9;
+        sp4C = 16.0f;
+        sp54 = 1;
+        if (D_800CC2D0[sp63].unk84.uh == 0x286) {
+            variant = 2;
+        }
+        if (D_800CC2D0[sp63].unk84.uh == 0x27E) {
+            variant = 1;
+        }
+    }
+    animIdx = func_1505E7CC(a2, arg0);
+    animPtr = (s32 *)D_800D1588[arg0->id];
+    anims = (Game83300AnimSet *)animPtr[-2];
+    if ((D_800CC2D0[sp63].interaction_state == 1) && (D_800CC2D0[sp63].in_water != 0)) {
+        arg0->unk5C = 4;
+        sp54 = 1; if (anims[animIdx].e[1].anim != 0) {
+            variant = 1;
+        }
+    }
+    if (arg0->unk21C < 20) {
+        temp_v0_8 = arg0->unk21C;
+        lerp = (u32)temp_v0_8 / 50.0f;
+        if (D_800BE9B4 != 0) {
+            lerp = 1.0f;
+        }
+    } else {
+        lerp = 0.8000000119f;
+    }
+    sp70 = (u32)arg0->unk10F;
+    func_150599C8(arg0, 0x10, D_800CC2D0[sp63].unk7A + (arg0->unk13E << 8));
+    if (D_800CC2D0[sp63].unk1D4 != NULL) {
+        temp_f0 = arg0->unk10C / 100;
+        if (D_800CC2D0[sp63].interaction_state != 0x15) {
+            sub = (s16 *)((u8 *)D_800CC2D0[sp63].unk1D4 + 0x240);
+            if (arg0->unk21C >= 7) {
+                arg0->y_position = sub[0xD];
+                if (arg0->unk21C < 14) {
+                    temp_f0 = ((u32)(s32)arg0->unk21C / 14.0f) * temp_f0;
+                }
+                arg0->y_position += temp_f0;
+            }
+            if (arg0->id == 0xE) {
+                arg0->unkC4 = 0.0;
+            } else if (arg0->id == 0x13) {
+                sp70 = 204.0f;
+                arg0->unkC4 = 0.0;
+            }
+        }
+    }
+    if (D_800CC2D0[sp63].interaction_state == 0x15) {
+        animIdx = func_1505E7CC(0x39, arg0);
+        arg0->unk7A = D_800CC2D0[sp63].unk7A;
+        arg0->y_position = D_800CC2D0[sp63].y_position - 10.0f;
+        if ((arg0->unk28 > 100.0f) && (arg0->unk21C >= 21)) {
+            variant = 1;
+        } else {
+            sp4C = 0.0;
+        }
+        sp70 = 0.0f;
+        arg0->unkC4 += (D_800CC2D0[sp63].unkC4 - arg0->unkC4) * 0.1199999973f;
+        arg0->xz_velocity = 0.0f;
+    }
+    func_1505A184(D_800CC2D0[sp63].unk7A, sp70, 0.0, &sp70, &sp6C, &sp68);
+    tx = D_800CC2D0[sp63].x_position + sp70;
+    tz = D_800CC2D0[sp63].z_position + sp6C;
+    arg0->x_position += (tx - arg0->x_position) * lerp;
+    arg0->z_position += (tz - arg0->z_position) * lerp;
+    {
+        f32 rate;
+
+        rate = (u32)anims[animIdx].e[variant].rate;
+lbl:
+        rate = rate / 100.0f;
+        func_1505E650(arg0, anims[animIdx].e[variant].anim, rate, sp4C, 0.0, 0, 0);
+    }
+    if (sp54 != 0) {
+        arg0->unk65 = sp63 + 1;
+        arg0->unk101 |= 4;
+    } else {
+        arg0->unk65 = 0;
+    }
+}
 // NON-MATCHING: 10% of the way there...
 // void func_150562FC(struct127 *arg0) {
 //     f32 sp70;
@@ -2074,7 +2245,67 @@ void func_1505A250(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4) {
 //         if (arg0 < obj->xz_velocity) obj->xz_velocity = arg0;
 //     }
 // }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505A3A8.s")
+void func_1505A3A8(f32 arg0, void *arg1, f32 arg2, f32 arg3, u8 arg4) {
+    struct127 *obj = (struct127 *)arg1;
+
+    arg2 *= D_800D1550;
+    arg3 *= D_800D1550;
+    if (D_800CC27C != 0 && obj->unk28 < 5.0f && obj->interaction_state != 0x1E) {
+        arg2 = 0.0f;
+    }
+    if (obj->interaction_state == 1) {
+        if (obj->in_water != 0) {
+            arg3 *= 0.400000006f;
+            arg2 = 2.0f;
+        }
+        if (obj->unkA8 != 0) {
+            arg3 *= 0.25f;
+        }
+        if (obj->unk81 != 0) {
+            if (obj->unk81 & 0x40) {
+                if (obj->unk81 & 0x20) {
+                    arg3 = 0.0f;
+                } else {
+                    arg3 = 1.299999952f;
+                }
+            } else {
+                arg3 *= 0.349999994f;
+                if (arg4 >= 0x2E) {
+                    arg2 *= 0.5f;
+                }
+                if (arg4 >= 0x5B) {
+                    arg0 *= 0.5f;
+                }
+            }
+        }
+        if (obj->unkAE != 0) {
+            arg3 *= 0.200000003f;
+        }
+    }
+    if (arg0 < 0.0f) {
+        if (0.0f < obj->xz_velocity) {
+            arg3 += arg2;
+        } else {
+            arg3 = arg2;
+        }
+    } else if (obj->xz_velocity < 0.0f) {
+        arg2 += arg3;
+    }
+    if (arg0 < obj->xz_velocity) {
+        obj->xz_velocity -= arg3;
+        if (obj->xz_velocity < arg0) {
+            obj->xz_velocity = arg0;
+        }
+    } else {
+        if ((arg0 - 1.0f) < obj->xz_velocity) {
+            arg2 *= 0.009999999776f;
+        }
+        obj->xz_velocity += arg2;
+        if (arg0 < obj->xz_velocity) {
+            obj->xz_velocity = arg0;
+        }
+    }
+}
 
 f32 func_1505A5CC(struct49 *arg0) {
     f32 x, y;
@@ -2150,7 +2381,337 @@ void func_1505A770(void *arg0) {
     }
 }
 // a big one, but could be ok
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505A9AC.s")
+void func_15055C88(struct127 *);
+void func_1513783C(struct127 *, u8, s32);
+void func_1507CD64(struct127 *arg0, s32 arg1);
+void func_15060A9C(s32 arg0, struct127 *arg1);
+
+void func_1505A9AC(struct127 *arg0, f32 arg1) {
+    f32 dist;
+    f32 thresh;
+    u8 sp6F;
+    u8 sp6E;
+    s32 health;
+    s32 temp;
+    u8 sp63;
+    s32 killed;
+    s32 anim;
+    s32 flags;
+    f32 speed;
+    s32 hurt;
+    u8 found;
+    u8 d;
+
+    sp6F = 0;
+    sp6E = 1;
+    dist = arg0->y_position - arg1;
+    if (arg0->unk31C->pad4F[0] != 0) {
+        if (dist < 0.0f) {
+            arg0->unk1CC = arg1;
+            dist = 0.0f;
+        }
+        arg0->unk28 = dist;
+        dist = arg0->y_position - (arg0->unk118 - 34.0f);
+        if (dist < 70.0f && arg0->y_velocity < 18.0f) {
+            if (arg0->y_velocity > -25.0f) {
+                arg0->unk31C->pad4F[0] = 2;
+            }
+            if (dist < 0.0f) {
+                if (arg0->y_velocity < -12.0f) {
+                    arg0->unk81 = 0;
+                    if (arg0->y_velocity < -25.0f) {
+                        arg0->xz_velocity *= 0.400000006f;
+                        arg0->y_velocity = -30.0f;
+                    }
+                    arg0->y_velocity *= 0.8500000238f;
+                }
+                arg0->gravity = -1.899999976f;
+            } else {
+                if ((arg0->y_velocity > 10.0f) && (arg0->y_velocity < 25.0f)) {
+                    arg0->y_velocity = 10.0f;
+                }
+                arg0->gravity = 2.200000048f;
+            }
+        }
+    } else if (arg0->unk65 != 0) {
+        if (dist < 0.0f) {
+            arg0->unk1CC = arg1;
+            dist = 0.0f;
+            arg0->y_position = arg1;
+        }
+        arg0->unk28 = dist;
+    } else {
+        if (dist < 0.0f) {
+            f32 fall;
+            
+            sp63 = 0;
+            if (arg0->in_water == 0) {
+                *((u8 *)arg0 + 0x137) = 0;
+                arg0->gravity = 5.0f;
+            }
+            if (arg0->in_water == 0) {
+                arg0->unk31C->unk55 = 4;
+            }
+            if (arg0->unk28 > 0.0f) {
+                arg0->unk31C->pad4F[2] = 1;
+                arg0->unk31C->unk31 = 0;
+            }
+            arg0->unk100 &= 0xFD;
+            if ((((u32)arg0->unk184 >> 12) & 0xF) == 1) {
+                if (D_800BE9F0 == 0x14) {
+                    func_1513783C(arg0, 0xFF, 1);
+                    func_1507CD64(arg0, 8);
+                    return;
+                }
+                func_15055C88(arg0);
+                return;
+            }
+            fall = 600.0f;
+            if (D_800BE9F0 == 0x43) {
+                thresh = 1000.0f;
+            } else {
+                thresh = fall * 3.0f;
+            }
+            if ((arg0->unk1CC - arg0->y_position) > fall && arg0->unk31C->unk120 == 0 &&
+                arg0->unk31C->unk78 != 1) {
+                speed = 1.299999952f;
+                do { arg0->unk31C->unk95 = 0; } while (0);
+                do { arg0->unk31C->pad4F[2] = 2; } while (0);
+                killed = 0;
+                flags = 0;
+                hurt = 0;
+                anim = 0x30;
+                if (D_800BE9F0 != 0x29) {
+                    temp = arg0->unk184;
+                    if (((((u32)temp >> 12) & 0xF) == 2) || ((temp == 0x13) & 0x1F)) {
+                        anim = 0xC8;
+                        func_15060B70(0x1B8, arg0);
+                        speed = 1.0f;
+                    } else {
+                        health = arg0->health;
+                        if (health != 0) {
+                            if (arg0->unk31C->unk78 == 0x21) {
+                                flags = 1;
+                            }
+                            if (arg0->id == 0x75) {
+                                flags |= 2;
+                            }
+                        }
+                        if ((arg0->unk1CC < 90000.0f) && (thresh < (arg0->unk1CC - arg0->y_position))) {
+                            if (!(flags & 2)) {
+                                arg0->health = 0;
+                                if ((temp & 0x1F) != 0xE) {
+                                    func_1513783C(arg0, 0xFF, 1);
+                                    killed = 1;
+                                }
+                            } else {
+                                hurt = 1;
+                                if (health != 0) {
+                                    arg0->health = health - 1;
+                                }
+                            }
+                        }
+                        if (flags == 0) {
+                            health = arg0->health;
+                            arg0->stunned = 8;
+                            if (health != 0) {
+                                arg0->health = health - 1;
+                            }
+                        }
+                        if (flags & 1) {
+                            speed = 1.0f;
+                            anim = 0x19D;
+                        } else if (flags & 2) {
+                            if (hurt) {
+                                anim = 0x27;
+                            } else {
+                                anim = 9;
+                            }
+                        } else if (arg0->health != 0) {
+                            anim = 0x27;
+                        }
+                        if ((anim == 0x27) && (arg0->unk31C->unk78 == 0x25)) {
+                            anim = 0x1AA;
+                        }
+                    }
+                }
+                if (killed == 0) {
+                    func_1505E650(arg0, anim, speed, 2.0f, 6.0f, 0.0f, 0);
+                }
+                arg0->stunned = 0;
+                arg0->unk83 = 0xFF;
+                arg0->disable_run = 0xFE;
+                if (flags != 0) {
+                    arg0->unk228 = 10;
+                } else {
+                    arg0->unk228 = 30;
+                }
+                arg0->unk28 = 0.0f;
+                arg0->unk76 = arg0->unk7A;
+                arg0->unk100 &= 0x8B;
+                arg0->y_position = arg1;
+                arg0->unkA9 = 0;
+                arg0->y_velocity = -4.0f;
+                arg0->unk1CC = arg1;
+                if (killed == 0) {
+                    func_15174690(D_800C3E78, 0, 0x1F, 0, 0x199, 4, 0xAA, 0xFF, 0);
+                } else {
+                    func_1507CD64(arg0, 8);
+                }
+                return;
+            }
+            arg0->unk1CC = arg1;
+            if (arg0->in_water != 0) {
+                arg0->y_position = arg1;
+                arg0->unk28 = 0.0f;
+                return;
+            }
+            if (arg0->stunned == 0) {
+                if ((arg0->unk7F == 0) && (arg0->xz_velocity < 9.0f)) {
+                    arg0->unk76 = arg0->unk7A;
+                }
+                d = (arg0->unk76 - arg0->unk7A) >> 8;
+                if (d > 0x80) {
+                    d = -d;
+                }
+                if (!arg0->unk7F && (d < 0x50)) {
+                    arg0->unk7F = 10;
+                }
+                if (arg0->unkA9 == 2) {
+                    struct127 *obj;
+                    found = 0;
+                    if (arg0->unk274 != 0) {
+                        obj = &D_800CC2D0[arg0->unk274 - 1];
+                        if (obj->unk24C != 0) {
+                            found = 1;
+                            obj->unk218 = 0;
+                            obj->unk232 = obj->unk24C;
+                        }
+                    }
+                    arg0->xz_velocity = 0.0f;
+                    arg0->unk83 = 0xFF;
+                    sp63 = 0xFF;
+                    func_1505E650(arg0, 0x4B, 1.0f, 2.0f, 0.0f, 0.0f, 0);
+                    if (D_800C3E78 < 4) {
+                        arg0->unk31C->unk57 = 1;
+                    }
+                    if (found == 0) {
+                        func_15060A9C(0x19, arg0);
+                    }
+                } else {
+                    s32 anim2;
+                    anim2 = 0;
+                    if ((s32)arg0->unk28 > 0) {
+                        struct126 *s = arg0->unk31C;
+                        if ((s->unk11A != 1) && (s->unk11A != 3) && (s->unk4E == 0)) {
+                            if ((arg0->unk100 & 0x10) || (!(arg0->unk100 & 8) && (((arg0->unk44 == 0.0f) && (arg0->unkA8 == 0)) || (arg0->unk100 & 4)))) {
+                                if (arg0->unk100 & 0x10) {
+                                    arg0->unk83 = 8;
+                                    if (!(arg0->unk100 & 0x40)) {
+                                        arg0->xz_velocity = 0.0f;
+                                        arg0->unk83 = 0xD;
+                                        sp63 = 5;
+                                    }
+                                } else if (arg0->unk100 & 4) {
+                                    arg0->xz_velocity *= 0.6999999881f;
+                                    arg0->unk83 = 0x14;
+                                } else {
+                                    arg0->xz_velocity = 0.0f;
+                                    arg0->unk83 = 0x10;
+                                }
+                                if (arg0->unk31C->unk78 == 0x21) {
+                                    anim2 = 0x19D;
+                                } else if (arg0->unk31C->unk78 == 0x25) {
+                                    anim2 = 0xD8;
+                                } else {
+                                    anim2 = 0x36;
+                                }
+                            }
+                        }
+                    }
+                    if ((arg0->unk84.uh == 0x3B) || (arg0->unk84.uh == 0x3C)) {
+                        u32 t;
+                        t = arg0->unk184 & 0x1F;
+                        sp63 = 0xFE;
+                        sp6E = 0;
+                        arg0->unk83 = 0xFF;
+                        if ((t == 0xA) || (t == 0xB) || (t == 0xC) || (t == 0xF) || (t == 0x13)) {
+                            anim2 = 0xC8;
+                            func_15060B70(0x1B8, arg0);
+                        } else if ((t == 1) || (t == 2) || (t == 7) || (t == 0x11)) {
+                            anim2 = 0xC8;
+                            func_15060B70(0xA7, arg0);
+                        } else {
+                            anim2 = 0x27;
+                            func_15060B70(0xA7, arg0);
+                        }
+                    }
+                    if ((anim2 != 0) && !(arg0->unk100 & 0x20)) {
+                        func_1505E650(arg0, anim2, 1.0f, 2.0f, 0.0f, 0.0f, 0);
+                    }
+                    if (!(arg0->unk100 & 0x80)) {
+                        arg0->unk100 = 1;
+                    }
+                    if (sp6E == 0) {
+                        arg0->unk100 = 0x90;
+                    }
+                }
+                if ((arg0->unk28 > 0.0f) && !(arg0->unk100 & 8)) {
+                    if (D_800CC27C != 0) {
+                        if (arg0->xz_velocity > 20.0f) {
+                            arg0->xz_velocity = 20.0f;
+                        }
+                    } else if (*((u8 *)arg0 + 0x110) == 0) {
+                        arg0->unk164 = 0.0f;
+                        arg0->unk168 = 0.0f;
+                    }
+                    arg0->disable_run = sp63;
+                    if ((arg0->unk31C->unk4E == 1) && (arg0->y_velocity < -10.0f)) {
+                        sp6F = 2;
+                    }
+                }
+                arg0->unkA9 = 0;
+            }
+            if (!(arg0->unk100 & 8)) {
+                dist = 0.0f;
+            } else {
+                dist = 0.1000000015f;
+            }
+            arg0->y_position = arg1;
+            if ((arg0->stunned == 0) && !(sp6F & 2)) {
+                arg0->y_velocity = -4.0f;
+            } else {
+                if (arg0->unkF4 & 0x80) {
+                    arg0->y_velocity = -20.0f;
+                } else if (arg0->y_velocity > -10.0f) {
+                    arg0->y_velocity = 0.0f;
+                } else {
+                    arg0->y_velocity = arg0->y_velocity * -0.5f;
+                    if (arg0->y_velocity > 28.0f) {
+                        arg0->y_velocity = 28.0f;
+                    }
+                }
+                if (arg0->unk109 != 0) {
+                    arg0->xz_velocity *= 0.6000000238f;
+                }
+            }
+            arg0->unk81 = 0;
+            if (arg0->unk7F < 0xFA) {
+                arg0->unk7F++;
+            }
+            arg0->unk100 &= 0x9F;
+        } else if ((dist < 1.0f) && (arg0->unk28 > 0.0f)) {
+            dist = 1.0f;
+        }
+        if (dist > 20.0f) {
+            arg0->unk7F = 0;
+        }
+        if (arg0->in_water != 0) {
+            arg0->unk1CC = arg0->y_position;
+        }
+        arg0->unk28 = dist;
+    }
+}
 
 #define arg0 ((u8 *)arg0_s)
 void func_1505B5F8(struct127 *arg0_s, f32 arg1) {
@@ -2233,76 +2794,207 @@ void func_1505B5F8(struct127 *arg0_s, f32 arg1) {
     }
 }
 #undef arg0
-// void func_1505B5F8(struct127 *arg0, f32 arg1) {
-//     f32 tmp;
-//     u8 temp_v0_2;
-//
-//     if ((arg0->unkF8 & 0x8000) == 0) {
-//         if (arg0->unk252 != 0) {
-//             if ((arg0->unk253 * 8) < (arg0->unk1CC - arg0->y_position)) {
-//                 if (arg0->stunned == 0) {
-//                     arg0->stunned = (u8)0xFEU;
-//                     arg0->unk105 = (u8)0;
-//                     arg0->unk106 = func_1505E7CC(arg0->unk252, arg0);
-//                     arg0->unk84.uh = (u16)0xFF;
-//                     func_1505E874(D_800C3E78, arg0);
-//                     arg0->y_position = (f32) arg0->old_y_position;
-//                 }
-//             }
-//         }
-//         arg0->unk28 = arg0->y_position - arg1;
-//         if (arg0->y_position <= arg1) {
-//             arg0->unkF4 |= 0x8000;
-//             temp_v0_2 = D_800B0DF0->unk13;
-//             if (temp_v0_2 != 0) {
-//                 if (arg0->unk28 != 0.0f) {
-//                     func_15174690(D_800C3E78, 0, 0x1000 / (s32) temp_v0_2, 0, 0x199, 4, 0xAA, 0xFF, 0); // 0.0f, arg1,
-//                 }
-//             }
-//             arg0->y_position = arg1;
-//             tmp = arg0->unk28;
-//             arg0->unk28 = 0.0f;
-//             if ((arg0->stunned != 0) || ((arg0->unkF8 << 0xF) >= 0)) {
-//                 if (arg0->interaction_state == 1) {
-//                     if (arg0->y_velocity < -6.0f) {
-//                         arg0->y_velocity = -6.0f;
-//                     }
-//                 } else {
-//                     if ((arg0->unk1CC - arg0->y_position) > 450.0f) {
-//                         if (arg0->health > 0) {
-//                             if ((arg0->unk144 != 0) && ((arg0->unk144->unkE & 0x80) == 0)) {
-//                                 arg0->health = (u8) (arg0->health - 1);
-//                             }
-//                         }
-//                     }
-//                     arg0->unk1CC = arg1;
-//                     if ((arg0->stunned == 0) && (arg0->gravity > 0.5f)) {
-//                         if (((arg0->unkF8 & 0x800) != 0) && (tmp != 0.0f) && ((arg0->y_velocity < (-4.0f * arg0->gravity * D_800D1550)))) {
-//                             arg0->y_velocity = ((0.0f - arg0->y_velocity) * ((f32) arg0->unk2CB * D_8009950C));
-//                             if ((arg0->unk2CC != 0) && (arg0->y_velocity > 5.0f)) {
-//                                 D_800D1580 = arg0->unk2CC;
-//                                 func_1506E5FC();
-//                             }
-//                         } else if (arg0->interaction_state != 7) {
-//                             arg0->y_velocity = -4.0f * D_800D1550;
-//                         }
-//                     } else {
-//                         if ((arg0->unkF4 & 0x80) != 0) {
-//                             arg0->y_velocity = -4.0f;
-//                         } else if ((tmp == 0.0f) || (((-1.5f * arg0->gravity * D_800D1550) < arg0->y_velocity))) {
-//                             arg0->y_velocity = 0.0f;
-//                         } else {
-//                             arg0->y_velocity = (0.0f - arg0->y_velocity) * ((f32) arg0->unk2CB * D_80099510);
-//                         }
-//                         arg0->xz_velocity *= D_80099514;
-//                     }
-//                 }
-//             }
-//         }
-//     }
-// }
+extern f32 D_80099518;
+extern f32 D_800CC270, D_800CC274, D_800CC278;
+extern u8 D_800BE616;
+extern s16 D_800D1582;
+f32 func_1506AD30(struct127 *, f32, s32, s32);
+void func_151AE264(struct127 *);
+void func_151E5FF4(void *, struct127 *, u8);
+void func_15169070(s32, s32, void *, s32);
+#define B(p, o) (*(u8 *)((u8 *)(p) + (o)))
+#define H(p, o) (*(u16 *)((u8 *)(p) + (o)))
+#define ENT3 ((u8 *)arg3 + arg4 * 0x28)
+#define ENT2 ((u8 *)arg2 + arg4 * 0x28)
+#define W(p, o) (*(s32 *)((u8 *)(p) + (o)))
+#define F(p, o) (*(f32 *)((u8 *)(p) + (o)))
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505B9C4.s")
+void func_1505B9C4(void *arg0, struct127 *arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5, u8 arg6) {
+    u8 sp67;
+    s32 temp_a2;
+    struct127 *temp_v1_3;
+    s32 temp_a3;
+    s16 id;
+    u8 tu;
+    s32 v;
+    u8 *pv;
+    u8 *a1;
+    struct S { void *a; u8 b; } sp40;
+
+    if (B(ENT3, 0) & 0x80) {
+        sp67 = B(ENT3, 0) & 0x7F;
+    } else {
+        sp67 = B(ENT2, 0) & 0x7F;
+    }
+    arg1->unk10B = 0;
+    if ((H(ENT2, 0x24) & 1) && (arg1->stunned != 0)) {
+        arg6 = 0;
+    }
+    if (!(B(ENT3, 0xF) & 0x40)) {
+        arg1->unk76 = H(arg0, 0x76) + (B(ENT3, 0x10) << 8);
+        if (H(ENT2, 0x24) & 0x10) {
+            arg1->unk76 = func_1505A630(arg1->x_position - F(arg0, 0x14), F(arg0, 0x1C) - arg1->z_position, 0);
+        }
+        if (B(arg0, 4) == 0x44) {
+            arg1->unk76 = 0;
+        }
+    }
+    if ((B(ENT2, 0xF) | B(ENT3, 0xF)) & 0x20) {
+        arg1->unk10B |= 2;
+    }
+    arg1->unk3A = 0;
+    arg1->unk109 = B(ENT3, 0x20);
+    arg1->y_velocity = F(ENT3, 0x18);
+    arg1->xz_velocity = F(ENT3, 0x14);
+    arg1->gravity = F(ENT3, 0x1C);
+    arg1->unk100 &= 0xD6;
+    v = B(ENT3, 0xF) & arg6;
+    if (v < arg1->health) {
+        arg1->health -= v;
+    } else {
+        arg1->health = 0;
+    }
+    if (arg1->interaction_state == 1) {
+        {
+            extern s32 D_800ZZZZ;
+            temp_v1_3 = D_800D154C;
+            temp_a3 = D_800C3E78;
+            D_800D154C = arg1;
+            D_800C3E78 = (arg1 - D_800CC2D0);
+            pv = (u8 *)D_800CC2D0[D_800C3E78].unk31C;
+            if (B(pv, 0x4E) != 2) {
+                B(pv, 0x4E) = 0;
+            }
+        }
+        func_1506AD30(arg1, 800.0f, 1, temp_a3);
+        D_800D154C = temp_v1_3;
+        D_800C3E78 = temp_a3;
+        arg1->unkF8 &= 0xFEFF7FFF;
+        B(arg1->unk31C, 0x95) = 0;
+        B(arg1->unk31C, 0x6B) = 0;
+        if (B(arg1->unk31C, 0x98) != 0) {
+            func_151AE264(arg1);
+        }
+        B(arg1->unk31C, 0x54) = 0;
+        tu = arg1->unk65;
+        B(arg1, 0x137) = 0;
+        if (tu != 0) {
+            extern s32 D_800ZZZZ;
+            v = tu - 1;
+            a1 = (u8 *)&D_800CC2D0[(u8)v];
+
+            if (((0x8A != B(a1, 4)) && (0x23 != B(a1, 4))) || (arg1->health == 0) || ((D_800BE616 != 0) && (arg1->y_velocity > 30.0f))) {
+                if (v) {}
+                v = 0;
+                if (0x8A == B(a1, 4)) {
+                    v = 1;
+                }
+                if (B(a1, 4) == 0x23) {
+                    v = 0xA;
+                }
+                if (B(a1, 4) == 0xC) {
+                    v = 0xF;
+                }
+                if (v != 0) {
+                    B(a1, 0x232) = v;
+                    W(a1, 0x218) = 0;
+                }
+                B(a1, 0x2FC) = 0;
+                B(a1, 0x13C) = 0;
+                arg1->unk239 = 0;
+                arg1->unk65 = 0;
+            }
+        }
+    }
+    v = B(ENT3, 8);
+    if (v == 0) {
+        v = B(ENT2, 8);
+    }
+    if (sp67 != 0x27) {
+        D_80086694[v](arg0, arg1, &sp67);
+    }
+    if (D_800BE616 != 0) {
+        tu = sp67;
+        v = B(arg0, 0x124);
+        a1 = v != 0 ? (u8 *)&D_800CC2D0[v - 1] : arg0;
+        func_151E5FF4(a1, arg1, tu);
+    }
+    {
+        extern s32 D_800ZZZZ;
+        sp40.a = arg0;
+        sp40.b = B(arg0, 0x3B);
+        func_15169070(0, 0x68, (void *)(s32)&sp40, 2);
+        sp40.a = arg1;
+        sp40.b = arg1->unique_id;
+        func_15169070(0, 0x68, (void *)(s32)&sp40, 2);
+    }
+    if (W(ENT2, 4) != 0) {
+        D_800D1580 = W(ENT2, 4);
+        if (func_1506E46C(arg1, &D_800D1580, 0) != 0) {
+            func_10010630(D_800D1582, arg1, 0x6D60, 0x12C, 0x708);
+        }
+    } else {
+        if (W(ENT3, 4) != 0) {
+            D_800D1580 = W(ENT3, 4);
+            if (func_1506E46C(arg1, &D_800D1580, 0) != 0) {
+                func_10010630(D_800D1582, arg1, 0x6D60, 0x12C, 0x708);
+            }
+        }
+    }
+    B(arg0, 0x107) = 0x3C;
+    if ((D_800BE616 == 0) || (arg1->interaction_state != 1)) {
+        arg1->unk21C = 0;
+        if (H(ENT2, 0x24) & 0x100) {
+            arg1->unk218 = NULL;
+        }
+    }
+    temp_a2 = arg5 - 1;
+    arg1->unkD0 = 0;
+    v = B(arg0, 0x124);
+    if (v) {
+        arg1->pad10A = v + 0x7F;
+    } else {
+        arg1->pad10A = D_800C3E78 | 0x80;
+    }
+    B(arg0, 0x108) = temp_a2 | 0x80;
+    if (sp67 != 0x27) {
+        if ((H(ENT2, 0x24) & 0x40) && (arg1->interaction_state == 1)) {
+            *(s16 *)((u8 *)D_800CC2D0[temp_a2].unk31C + 0x46) = 0x1F40;
+        } else {
+            v = arg1->unk23B;
+            if (v != 0) {
+                sp67 = v;
+            }
+            arg1->stunned = 0xFE;
+            arg1->unk105 = 0;
+            arg1->unk106 = func_1505E7CC(sp67, arg1);
+            arg1->unk84.uh = 0xFFFF;
+            func_1505E874(temp_a2, arg1);
+            if (H(ENT2, 0x24) & 0x200) {
+                arg1->unk10B |= 0x20;
+            }
+            if (arg1->y_velocity > 0.0f) {
+                arg1->unk28 += D_80099518;
+            }
+            if (H(ENT2, 0x24) & 8) {
+                arg1->unk10B |= 0x40;
+                D_800CC270 = F(arg0, 0x14);
+                D_800CC274 = F(arg0, 0x1C);
+                D_800CC278 = F(arg0, 0x18);
+            }
+        }
+        if (H(ENT2, 0x24) & 2) {
+            arg1->unk10B |= 0x80;
+        }
+    }
+    if ((H(ENT2, 0x24) & 0x400) || (H(ENT3, 0x24) & 0x400)) {
+        arg1->unk10B |= 4;
+    }
+    v = B(ENT2, 0x22);
+    if (v & 0x80) {
+        arg1->immune = v & 0x3F;
+    }
+}
 
 s16 func_1505C140(struct127 *arg0, struct127 *arg1) {
     s16 ret = func_1505A630(arg0->x_position - arg1->x_position, arg1->z_position - arg0->z_position, 0);
@@ -2327,8 +3019,417 @@ struct252 *func_1505C1A4(struct127 *arg0) {
     return ret;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505C1E4.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505C7D8.s")
+struct Entry1505C1E4;
+struct Entry1505C1E4;
+
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    u8 unk2;
+    u8 unk3;
+} Rule1505C1E4;
+
+typedef struct Entry1505C1E4 {
+    u8 unk0;
+    u8 pad1[3];
+    s32 unk4;
+    u8 unk8;
+    u8 pad9[6];
+    u8 unkF;
+    u8 pad10[0x18];
+} Entry1505C1E4; /* size 0x28 */
+
+extern u8 D_8009A6A0[];
+extern Rule1505C1E4 *D_80086AA0[];
+s32 func_1506E46C(struct127 *arg0, s32 *arg1, s32 arg2);
+void func_15060B04(s32 arg0, struct127 *arg1, s32 arg2);
+
+s32 func_1505C1E4(struct127 *arg0, struct127 *arg1, Entry1505C1E4 *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6) {
+    s32 i;
+    u8 done;
+    u8 kind;
+    u8 count;
+    u8 flags;
+    Entry1505C1E4 *entry;
+    Rule1505C1E4 *rules;
+    s32 angle;
+    u8 type;
+    u8 idx;
+
+    done = FALSE;
+    kind = arg2[arg3].unk0 & 0x7F;
+    entry = arg2;
+    if (((u8)arg1->unk239 & 0x7F) != 0) {
+        count = D_8009A6A0[((u8)arg1->unk239 & 0x7F)];
+        rules = D_80086AA0[((u8)arg1->unk239 & 0x7F)];
+        for (i = 0; i < count; i++) {
+            type = rules[i].unk2;
+            if (((type & 0x80) == 0 && kind == rules[i].unk1) || ((type & 0x80) != 0 && kind != rules[i].unk1)) {
+                type &= 0x7F;
+                if (rules[i].unk0 == 1) {
+                    if (func_1505C140(arg0, arg1) > 0x4000) {
+                        type = 0xFF;
+                    }
+                }
+                if (rules[i].unk0 == 2) {
+                    if (func_1505C140(arg0, arg1) < 0x4000) {
+                        type = 0xFF;
+                    }
+                }
+                if (rules[i].unk0 == 3 && arg1->stunned == 0) {
+                    type = 0xFF;
+                }
+                if (rules[i].unk0 == 4 && arg1->stunned != 0) {
+                    type = 0xFF;
+                }
+                if (type < 2) {
+                    angle = func_1505A630(arg0->x_position - arg1->x_position, arg1->z_position - arg0->z_position, 0) - arg1->unk7A + 0x4000;
+                    if ((u16)(angle >> 15) == type) {
+                        arg3 = rules[i].unk3;
+                    }
+                    break;
+                }
+                if (type == 2) {
+                    arg3 = rules[i].unk3;
+                    break;
+                }
+                if (type == 3) {
+                    done = TRUE;
+                    break;
+                }
+                if (type == 4) {
+                    if (rules[i].unk3 != 0xFF) {
+                        arg3 = rules[i].unk3;
+                    }
+                    arg6 = 0;
+                    break;
+                }
+                if (type == 5) {
+                    u8 next;
+                    next = rules[i].unk3;
+                    entry = (Entry1505C1E4 *)&D_8009A6D8[next - arg3];
+                    break;
+                }
+                if (type == 6) {
+                    u8 next;
+                    next = rules[i].unk3;
+                    arg6 = 0;
+                    entry = (Entry1505C1E4 *)&D_8009A6D8[next - arg3];
+                    break;
+                }
+                if (type == 7) {
+                    if ((arg2[arg3].unkF & arg6) >= arg1->health) {
+                        idx = rules[i].unk3;
+                        entry = (Entry1505C1E4 *)&D_8009A6D8[idx - arg3];
+                        arg1->health = 0;
+                        break;
+                    }
+                } else if (type == 8) {
+                    done = TRUE;
+                    arg1->unkF4 &= ~0x40040;
+                    arg5 |= 1 << (arg4 + 0x1F);
+                    arg0->pad108 = arg4 + 0x7F;
+                    arg0->unk107 = 0x3C;
+                    arg1->pad1C4 = 0;
+                    arg1->unk232 = rules[i].unk3;
+                    arg1->unk218 = NULL;
+                    arg1->disable_run = 1;
+                    arg1->unkD0 = 0;
+                    D_800D1580 = arg2[arg3].unk4;
+                    if (D_800D1580 != 0) {
+                        func_1506E5FC();
+                    }
+                    if (arg1->interaction_state == 1) {
+                        if ((((u8 *)arg1->unk31C)[0x4E] == 2) && (((u8 *)arg1->unk31C)[0x84] == 0)) {
+                            ((u8 *)arg1->unk31C)[0x50] = 0x1E;
+                            arg1->unk81 = 0;
+                            arg1->y_velocity = 50.0f;
+                            arg1->gravity = 2.0f;
+                            break;
+                        }
+                    }
+                    break;
+                } else if (type == 9) {
+                    break;
+                } else if (type == 0xA) {
+                    if (arg1->unk84.uh == 0x283) {
+                        arg1->unk76 = arg0->unk7A;
+                        arg1->xz_velocity = 25.0f;
+                        D_800D1580 = 0xFF0102E2;
+                        func_1506E5FC();
+                        arg0->unkD0 = 0;
+                        arg0->unk232 = 0xD;
+                        arg0->unk218 = NULL;
+                        done = TRUE;
+                    }
+                    break;
+                } else if (type == 0xB) {
+                    if (arg1->unk28 > 8.0f) {
+                        done = TRUE;
+                    }
+                    break;
+                } else if (type == 0xC) {
+                    if (arg1->unk28 == 0.0f) {
+                        arg0->unk2EC = 100;
+                        arg0->unkD0 = 0;
+                    }
+                    done = TRUE;
+                    break;
+                } else if (type == 0xD) {
+                    s32 buf;
+                    u8 snd2;
+                    s32 obj;
+                    snd2 = arg2[arg3].unk8;
+                    D_800D1580 = arg2[arg3].unk4;
+                    if (D_800D1580 != 0) {
+                        func_1506E5FC();
+                    }
+                    D_80086694[snd2](arg0, arg1, (u8 *)&buf);
+                    if (arg1->unkFC != 0) {
+                        obj = arg1->unkFC;
+                        if (func_1506E46C(arg0, &obj, 1) != 0) {
+                            func_15060B04(obj, arg1, 0x5DC0);
+                        }
+                    }
+                    arg5 |= 1 << (arg4 + 0x1F);
+                    done = TRUE;
+                    break;
+                }
+            }
+        }
+    }
+    if (done) {
+        return arg5;
+    }
+    i = arg4;
+    func_1505B9C4(arg0, arg1, (s32)arg2, (s32)entry, arg3, i, arg6);
+    arg5 |= 1 << (i + 0x1F);
+    return arg5;
+}
+s32 func_1505C7D8(struct127 *arg0, s32 arg1);
+typedef struct {
+    u8 pad0[9];
+    u8 unk9;
+    u8 unkA;
+    u8 padB;
+    s16 unkC;
+    u8 unkE;
+    u8 padF[0x24 - 0xF];
+    u16 unk24;
+    u8 pad26[2];
+} Hit1505C7D8; /* size 0x28 */
+
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec1505C7D8;
+
+extern s32 D_800B2CD0;
+extern f32 D_8009951C;
+s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, void *, void *, void *, f32 *, s32, s32, f32);
+void func_1507C3E0(struct127 *, s16 *, s32, s32);
+f32 func_15143E64(f32 *);
+
+s32 func_1505C7D8(struct127 *arg0, s32 arg1) {
+    s32 i;
+    s32 n;
+    s32 idx;
+    s32 ret;
+    struct127 *obj;
+    Hit1505C7D8 *hits;
+    f32 dz2;
+    Hit1505C7D8 *hit;
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 radius;
+    f32 dx;
+    f32 dz;
+    f32 dy;
+    f32 dist;
+    f32 maxDist;
+    f32 s;
+    f32 c;
+    f32 rx;
+    f32 rz;
+    f32 hx;
+    f32 hy;
+    f32 hz;
+    f32 h;
+    f32 r;
+    f32 t;
+    f32 offZ;
+    f32 height;
+    f32 pad1;
+    f32 pad2;
+    f32 pad3;
+    f32 offZ2;
+    f32 pad4;
+    f32 pad5;
+    Vec1505C7D8 pos;
+    f32 sp_E4;
+    f32 sp_E0;
+    f32 sp_DC;
+    f32 d[3];
+    f32 padCC;
+    f32 hitDist;
+    f32 padC4;
+    f32 padC0;
+    f32 padBC;
+    s16 sp_BA;
+
+    arg1 = (arg1 & 0x7F) + 1;
+    ret = 0;
+    if (arg0->unk114 < 254.0f) {
+        arg0->unk114 -= D_800D1550;
+    }
+    if (arg0->unk114 < 0.0f) {
+        arg0->unkD0 = 0;
+        return 0;
+    }
+    if (D_800C35EA == 1) {
+        return 0;
+    }
+    idx = arg0->unkD0 - 1;
+    hits = (Hit1505C7D8 *)func_1505C1A4(arg0);
+    if (hits[idx].unk24 & 0x80) {
+        hit = (Hit1505C7D8 *)((u8 *)hits + idx * sizeof(Hit1505C7D8));
+        y = arg0->y_position;
+    } else {
+        hit = (Hit1505C7D8 *)((u8 *)hits + idx * sizeof(Hit1505C7D8));
+        dist = (u32)hit->unkA;
+        dist *= arg0->xz_scale / 0.125f;
+        func_1505A184((hit->unk9 << 8) + arg0->unk7A, dist, 0.0f, &x, &z, &y);
+        x += arg0->x_position;
+        y += arg0->y_position;
+        z += arg0->z_position;
+        radius = (u32)hit->unkE;
+        radius = arg0->xz_scale * 4.0f * radius;
+    }
+    dist = hit->unkC;
+    y += dist * (arg0->y_scale / 0.25f);
+    if (arg0->unkF8 & 0x100) {
+        n = 4;
+    } else {
+        n = 26;
+    }
+    for (i = 1; i < n; i++) {
+        obj = &D_800CC2D0[i - 1];
+        if (obj->interaction_state == 0) {
+            continue;
+        }
+        if (i == arg1 || obj->health == 0 || obj->immune != 0) {
+            continue;
+        }
+        hit = (Hit1505C7D8 *)((u8 *)hits + idx * sizeof(Hit1505C7D8));
+        if (i == arg0->unk124 && !(hit->unk24 & 0x1000)) {
+            continue;
+        }
+        if (hit->unk24 & 0x80) {
+            s16 ox;
+
+            dist = 2.0f;
+            maxDist = 1.0f;
+            dx = obj->x_position - arg0->x_position;
+            dz = obj->z_position - arg0->z_position;
+            if (obj->unkD8 != 0 || obj->unkDA != 0) {
+                dx += func_1505D34C(obj->unk40, obj->unkDA, obj->unkD8, 1.0f, &offZ);
+                dz += offZ;
+            }
+            rx = (arg0->unk40 - 90.0f) * 0.01745329238f;
+            s = func_150AD780(-rx);
+            c = func_150AD78C(-rx);
+            rx = dx * s + dz * c;
+            dz = -dx * c + dz * s;
+            hx = hit->unk9 * 5;
+            dz2 = hit->unkA * 5;
+            ox = (s8)hit->unkE * 5;
+            dy = ox * arg0->xz_scale;
+            dx = rx - dy;
+            hx *= arg0->xz_scale;
+            dz2 *= arg0->xz_scale;
+            dy = y - (obj->y_position + obj->unkD6);
+            hx += obj->unkD2;
+            dz2 += obj->unkD2;
+            hy = obj->unkD4;
+            hy += 25.0f;
+            if (-hy < dy && dy < hy && -hx < dx && dx < hx && -dz2 < dz && dz < dz2) {
+                dist = 0.0f;
+            }
+        } else {
+            dx = x - obj->x_position;
+            dz2 = z - obj->z_position;
+            if (obj->unkD8 != 0 || obj->unkDA != 0) {
+                dx -= func_1505D34C(obj->unk40, obj->unkDA, obj->unkD8, 1.0f, &offZ2);
+                dz2 -= offZ2;
+            }
+            {
+                typedef s32 T1505C7D8;
+
+                dy = y - (obj->y_position + obj->unkD6);
+                r = obj->unkD2;
+                h = obj->unkD4;
+                if (h == 0.0f) {
+                    continue;
+                }
+            }
+            t = h / (radius + h);
+            maxDist = (r + radius) * (r + radius);
+            dy *= (r / h) * t + (1.0f - t);
+            dist = dx * dx + dy * dy + dz2 * dz2;
+        }
+        if (dist < maxDist) {
+            if ((hit->unk24 & 0x2000) && i != arg0->unk13D) {
+                if (*(Vec1505C7D8 **)((u8 *)arg0 + 0x2F4) != NULL) {
+                    pos = **(Vec1505C7D8 **)((u8 *)arg0 + 0x2F4);
+                } else {
+                    func_1507C3E0(arg0, &sp_BA, 0, 0);
+                    pos.x = arg0->x_position;
+                    pos.y = arg0->y_position + (sp_BA >> 1);
+                    pos.z = arg0->z_position;
+                }
+                rx = obj->x_position;
+                if (obj->unk31C != NULL) {
+                    height = *(s16 *)((u8 *)obj->unk31C + 0x114) * 0.5f;
+                } else {
+                    height = 20.0f;
+                }
+                t = height;
+                t += obj->y_position;
+                rz = obj->z_position;
+                d[0] = rx - pos.x;
+                d[1] = t - pos.y;
+                d[2] = rz - pos.z;
+                if (func_150AC9C0(pos.x, pos.y, pos.z, d[0], d[1], d[2], NULL, NULL, &sp_DC, &sp_E0, &sp_E4, &hitDist, 0, 0, 0.0f) != 0 &&
+                    hitDist < func_15143E64(d)) {
+                    continue;
+                }
+            }
+            D_800CC2C0 = x;
+            D_800CC2C4 = y;
+            D_800CC2C8 = z;
+            ret = func_1505C1E4(arg0, obj, hits, idx, i, ret, 0xF);
+            idx = arg0->unkD0 - 1;
+        }
+    }
+    if (ret != 0) {
+        hit = (Hit1505C7D8 *)((u8 *)hits + idx * sizeof(Hit1505C7D8));
+        if (((s32 (*)[0x32C / 4])&D_800B2CD0)[arg0->pad108][0] == 1) {
+            if (arg0->unk254 != 0) {
+                arg0->unk232 = arg0->unk254;
+                arg0->unk218 = NULL;
+            }
+        }
+        if (!(hit->unk24 & 4)) {
+            arg0->unk21C = 0;
+        }
+        if (!(hit->unk24 & 0x800)) {
+            arg0->unkD0 = 0;
+        }
+    }
+    return ret;
+}
 
 s32 func_1505D024(struct127 *arg0, s32 arg1, u16 arg2, s32 arg3) {
     s32 pad;
@@ -2894,7 +3995,57 @@ void func_1505E0C4(struct127 *arg0, u16 *arg1, u8 *arg2, s32 arg3, s32 arg4, s32
         func_150627D4(arg0);
     }
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505E650.s")
+void func_1505E650(struct127 *arg0, u16 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6) {
+    u16 (*anim)[4];
+    s32 idx;
+    u16 *entry;
+    u8 *data;
+
+    idx = arg0->id;
+    if ((D_800C3638 != 0) && ((*(u8 *)&D_800C3654 == 0) || (func_150229E4(arg0) != 0))) {
+        return;
+    }
+    if (arg0->id == 0xFF) {
+        return;
+    }
+    if ((u16)D_800C5A90[arg0->id] == 0) {
+        return;
+    }
+    data = (u8 *)arg0->unk2D0;
+    if (data == NULL) {
+        return;
+    }
+    if ((u16)D_800C5A90[arg0->id] != 0) {
+        if (arg1 >= (u16)D_800C5A90[arg0->id]) {
+            return;
+        }
+    } else {
+        return;
+    }
+    anim = (u16 (*)[4])D_800D1588[idx];
+    if (anim == NULL) {
+        func_1505DFDC((AnimPlaybackOwner *)arg0);
+        return;
+    }
+    if (arg1 < (u16)D_800C5A90[idx]) {
+        if (anim[0][0] != 999) {
+            entry = anim[arg1];
+            anim = NULL;
+            do {
+                if (entry[0] != 999) {
+                    if (entry[0] >= 30000) {
+                        func_1505DFDC((AnimPlaybackOwner *)arg0);
+                        return;
+                    }
+                    if (arg0->unk2FF == 0) {
+                        arg3 = 0.0f;
+                    }
+                    func_1505E0C4(arg0, entry, data, 0, 0, arg1, 0, arg2, arg3, arg4, arg5, arg6);
+                }
+            } while (0);
+        }
+    }
+}
 u32 func_1505E7CC(s32 arg0, struct127 *arg1) {
     s32 idx;
     s32 *ptr;
@@ -2955,7 +4106,7 @@ void func_15060B04(s32 arg0, struct127 *arg1, s32 arg2);
 void func_1507CD64(struct127 *arg0, s32 arg1);
 void func_1517F488(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 
-void func_1505E874(u8 arg0, struct127 *arg1) {
+void func_1505E874(s32 arg0, struct127 *arg1) {
     s32 *ptr;
     Game83300AnimEntry *table;
     f32 scale;
@@ -3271,7 +4422,426 @@ void func_1505F188(struct127 *argp) {
     *(s16 *)((u8 *)arg0 + 0x19C) = 0;
 #undef arg0
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505F298.s")
+extern u8 D_80099428[];
+void func_1000EFB4();
+void func_151AE264(struct127 *arg0);
+void func_151C6EA0(struct127 *arg0, s32 arg1, s32 arg2);
+void func_1506160C(struct127 *arg0, u8 arg1, u8 arg2, u8 arg3, s32 arg4);
+void func_1506045C(struct127 *arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4);
+#define F298_P(off, T) (*(T *)((u8 *)arg0->unk31C + (off)))
+#define F298_A(off, T) (*(T *)((u8 *)arg0 + (off)))
+void func_1505F298(struct127 *arg0, OSContPad *arg1) {
+    s32 anim;
+    s32 sp88;
+    f32 speed;
+    f32 sp80;
+    f32 rate;
+    s32 id;
+    u8 sp77;
+    f32 height;
+    s32 pad6C;
+    s32 buttons;
+    s32 flag;
+    s32 jumpType;
+    s32 idx;
+    u8 jumped;
+    u8 v;
+    f32 xz;
+
+    sp77 = F298_P(0x31, u8);
+    sp88 = 0;
+    speed = 1.0f;
+    rate = 0.0f;
+    pad6C = 0;
+    if ((arg0->stunned != 0) || (arg0->health == 0)) {
+        arg0->target_speed = 0.0f;
+        return;
+    }
+    if ((F298_P(0x46, s16) > 0) || (F298_P(0x36, u8) >= 0x64) || (F298_P(0x6B, u8) != 0)) {
+        return;
+    }
+    height = arg0->unk28;
+    if (F298_P(0x4E, u8) == 2) {
+        height = arg0->unk28 - 150.0f;
+    } else if (F298_P(0x4F, u8) == 2) {
+        height = 0.0f;
+    } else if (arg0->y_velocity > 0.0f) {
+        height += 50.0f;
+    }
+    if (F298_A(0x110, u8) != 0) {
+        buttons = arg1->button & ~0x2000;
+    } else {
+        buttons = arg1->button;
+    }
+    if ((arg0->in_water != 0) && (F298_P(0x95, u8) == 0) && (arg0->unk84.uh != 0x262)) {
+        if (arg0->in_water == 1) {
+            rate = 2.0f;
+            anim = 0;
+            if ((D_800CC288 & 0x8000) && ((D_800BE9F0 != 0x29) || (F298_P(0x8, s16) <= 0)) &&
+                (((arg0->unk118 - 60.0f) - 30.0f) < arg0->y_position)) {
+                func_15052408(arg0);
+                F298_P(0x31, u8) = 0;
+                rate = 0.0f;
+                if ((F298_P(0x7B, u8) != 7) && (F298_P(0x7B, u8) != 8)) {
+                    F298_P(0x31, u8) = 1;
+                }
+                arg0->unk76 = arg0->unk7A = arg0->unk78 = F298_P(0x4C, u16);
+                if ((F298_P(0x68, u16) != 0) && ((arg0->unk76 - F298_P(0x68, u16) + 0x4000) & 0x8000)) {
+                    arg0->xz_velocity = 0.0f;
+                    arg0->disable_run = 0xFF;
+                }
+                arg0->unkAE = 0xC;
+                arg0->y_velocity = 46.0f;
+                arg0->gravity = 3.299999952f;
+                arg0->unk81 = 2;
+                arg0->unk83 = 0;
+                anim = 0x32;
+            }
+            arg0->target_speed = 0.0f;
+            if ((D_800CC288 & 0x4000) && !(arg1->button & 0x10)) {
+                if (F298_P(0x22, s8) < 0x69) {
+                    F298_P(0x22, s8) = 0xF;
+                }
+            }
+            if (((arg0->xz_velocity > 2.0f) && (F298_P(0x21, u8) != 0)) ||
+                ((F298_P(0x21, u8) == 0) && ((F298_P(0x22, s8) > 0) || (!(arg1->button & 0x10) && (arg1->button & 0x4000))))) {
+                if (anim != 0x32) {
+                    rate = 9.0f;
+                    arg0->unk83 = 0;
+                    if ((arg0->unk118 - 60.0f) < arg0->y_position) {
+                        speed = 1.200000048f;
+                        anim = 0x22;
+                        arg0->target_speed = 15.0f;
+                    } else {
+                        speed = 1.200000048f;
+                        anim = 0xCE;
+                        arg0->target_speed = 23.0f;
+                    }
+                }
+            }
+        }
+        if (anim == 0) {
+            rate = 10.0f;
+            speed = 1.200000048f;
+            anim = 0xD1;
+            if ((arg0->unk118 - arg0->y_position) < 70.0f) {
+                anim = 0xCC;
+                speed = 0.8999999762f;
+            }
+            arg0->target_speed -= 0.200000003f;
+            if (arg0->target_speed < 0.0f) {
+                arg0->target_speed = 0.0f;
+            }
+        }
+        if ((arg0->in_water != 0) && (arg0->unk13C != 0)) {
+            rate = 7.0f;
+            anim = 0xCB;
+        }
+        if ((F298_P(0x11A, u8) != 0) || ((F298_P(0x78, u8) != 0) && (F298_P(0x78, u8) != 0x27))) {
+            func_1506045C(arg0, 0, 0, height, 1);
+        }
+        if (anim != 0) {
+            func_1505E650(arg0, anim, speed, rate, 0.0f, 0.0f, 0);
+        }
+        return;
+    }
+    if (F298_A(0x137, u8) == 1) {
+        anim = 0;
+        if (F298_P(0x53, u8) == 0) {
+            if (arg1->stick_y >= 0x33) {
+                speed = 2.200000048f;
+                F298_P(0x54, u8) = 0xC;
+                anim = 0xEA;
+                F298_A(0x137, u8) = 0;
+                arg0->disable_run = 0x10;
+                arg0->unk81 = 1;
+                arg0->gravity = 5.0f;
+                arg0->y_velocity = 48.0f;
+            } else if (arg1->stick_y < -0x32) {
+                anim = 0x38;
+                F298_A(0x137, u8) = 0;
+                arg0->gravity = 3.5f;
+            }
+        }
+        if ((D_800CC288 & 0x8000) || (F298_P(0x84, u8) != 0)) {
+            F298_A(0x137, u8) = 2;
+            anim = 0x40;
+            speed = 3.0f;
+        }
+        if (anim != 0) {
+            func_1505E650(arg0, anim, speed, 4.0f, 0.0f, 0.0f, 0);
+            return;
+        }
+    }
+    idx = arg0->unk65;
+    jumpType = 0;
+    flag = 0;
+    anim = 0;
+    if (idx != 0) {
+        id = D_800CC2D0[idx - 1].id;
+        if (((id == 0x28) && (D_800BE9F0 != 0x23)) || (id == 0x8A) || (id == 0x23)) {
+            jumpType = id + 1;
+            flag = 1;
+        }
+    }
+    if ((jumpType != 0) || (height <= 0.0f) || (F298_P(0x55, s8) != 0)) {
+        F298_A(0x137, u8) = 0;
+        jumped = 0;
+        sp80 = 0.0f;
+        if (D_800CC288 & 0x8000) {
+            if ((F298_P(0x11A, u8) != 1) && (F298_P(0x11A, u8) != 3) &&
+                ((jumpType != 0) || ((arg0->unk13C < 0x64) && (arg0->disable_jump == 0) && (arg0->disable_run != 0xFF)))) {
+                jumped = 1;
+                sp80 = 15.0f;
+                arg0->unk100 &= 0xFE;
+                if (flag != 0) {
+                    func_1506160C(arg0, 1, 0xFF, 0, 0);
+                }
+                if (F298_P(0x17, u8) != 0) {
+                    sp80 = 0.0f;
+                    anim = 0x279;
+                    speed = 1.25f;
+                    arg0->unk84.uh = 0;
+                    arg0->disable_jump = 0xA;
+                    arg0->disable_run = 0xFF;
+                    arg0->unk83 = 0xFF;
+                } else if (F298_P(0x8, s16) != 0) {
+                    arg0->unk83 = 0xFF;
+                    arg0->disable_run = 0xFF;
+                    jumped = 0;
+                    func_1505E650(arg0, 0x43, 1.299999952f, 2.0f, 0.0f, 0.0f, 0);
+                } else {
+                    if (F298_P(0x1A, u8) != 0) {
+                        anim = 0x32;
+                        sp80 = 0.0f;
+                        arg0->disable_run = 0xFF;
+                        arg0->unk81 = 1;
+                        arg0->y_velocity = 47.0f;
+                        arg0->gravity = 6.0f;
+                    } else if (!(buttons & 0x2000) || (F298_P(0x7B, u8) == 7) || (F298_P(0x7B, u8) == 8)) {
+                        if (arg0->disable_run != 0) {
+                            arg0->disable_run = 0;
+                            arg0->unk7A = arg0->unk76 = F298_P(0x4C, u16);
+                        }
+                        anim = 0x32;
+                        if (arg0->xz_velocity < 9.0f) {
+                            sp80 = 0.0f;
+                            F298_P(0x31, u8) = 1;
+                        } else {
+                            speed = 0.8000000119f;
+                            F298_P(0x31, u8) = 2;
+                            anim = 0x37;
+                            if (F298_P(0x78, u8) == 0x21) {
+                                anim = 0x19E;
+                                speed = 1.399999976f;
+                            }
+                        }
+                        if ((F298_P(0x7B, u8) == 7) || (F298_P(0x7B, u8) == 8)) {
+                            F298_P(0x31, u8) = 0;
+                        }
+                        if (F298_P(0x4E, u8) == 1) {
+                            arg0->y_velocity = 40.0f;
+                        } else {
+                            arg0->y_velocity = 59.0f;
+                        }
+                        if (F298_P(0x4E, u8) == 2) {
+                            arg0->y_velocity = 80.0f;
+                            sp88 = 0x7E2;
+                        }
+                        arg0->gravity = 4.0f;
+                        if ((arg0->unk184 & 0x1F) == 0xC) {
+                            arg0->y_velocity *= 0.6999999881f;
+                        }
+                        if ((arg0->unk184 & 0x1F) == 0x13) {
+                            anim = 0x32;
+                            arg0->y_velocity *= 0.5500000119f;
+                        }
+                        if (D_800CC27C) {
+                            arg0->unk81 = 0x82;
+                            /* never taken: pad6C is always 0 (the compiler folds this away) */
+                            if (pad6C) {
+                                arg0->unk83 = 0x82;
+                            }
+                        } else {
+                            arg0->unk81 = 2;
+                        }
+                    } else {
+                        xz = arg0->xz_velocity;
+                        if (D_800CC27C == 0) {
+                            arg0->unk81 = 1;
+                        } else {
+                            arg0->unk81 = 0x81;
+                        }
+                        sp80 = 0.0f;
+                        speed = 1.080000043f;
+                        arg0->disable_run = 0x17;
+                        arg0->unk83 = 0x64;
+                        anim = 0xEB;
+                        if (D_800CC27C != 0) {
+                            arg0->xz_velocity = xz;
+                            arg0->y_velocity *= 1.399999976f;
+                            arg0->gravity = 3.799999952f;
+                        }
+                    }
+                }
+            }
+        }
+        if (jumped != 0) {
+            if (sp88 != 0) {
+                if (func_1506E46C(arg0, &sp88, 1) != 0) {
+                    func_15060A30(sp88, arg0);
+                }
+            }
+            sp77 = 0;
+            if (jumpType != 0) {
+                arg0->xz_velocity = 20.0f;
+                if (jumpType == 0x29) {
+                    func_15052F58(arg0->unk65 - 1, 0xE);
+                } else if (jumpType == 0x8B) {
+                    func_15052F58(arg0->unk65 - 1, 5);
+                    arg0->xz_velocity = 30.0f;
+                    if (D_800BE616 != 0) {
+                        arg0->unk7A = 0x3000;
+                        if (arg0->z_position > 0.0f) {
+                            arg0->unk7A = 0xB000;
+                        }
+                    }
+                } else if (jumpType == 0x24) {
+                    func_15052F58(arg0->unk65 - 1, 0xE);
+                    arg0->xz_velocity = 27.0f;
+                }
+                F298_P(0x30, u8) = 0;
+                arg0->immune = 0x14;
+                arg0->unk76 = arg0->unk7A + 0x1200;
+                arg0->unk65 = 0;
+                arg0->disable_run = 0xFF;
+                arg0->y_velocity = 30.0f;
+                F298_P(0x31, u8) = 0;
+            }
+            sp88 = 0;
+            F298_P(0x55, s8) = 0;
+            if (F298_P(0x4E, u8) != 0) {
+                arg0->unkA9 = 5;
+            }
+            if ((anim != 0xEB) && (anim != 0x279)) {
+                arg0->unk83 = 0;
+                arg0->unk28 = 80.0f;
+            }
+            if (F298_P(0x4E, u8) != 2) {
+                func_1505E650(arg0, anim, speed, 2.0f, sp80, 0.0f, 0);
+            }
+            height = 25.0f;
+            arg0->unkB8 = 0.0f;
+            F298_A(0x110, u8) = 0;
+            arg0->unk100 &= 0x53;
+        }
+        anim = 0;
+    }
+    func_1506045C(arg0, buttons, D_800CC288, height, 0);
+    {
+    s32 pad;
+    rate = 2.0f;
+    if (((F298_P(0x98, u8) != 0) || (F298_P(0x95, u8) != 0)) && (arg0->disable_jump == 0) && (D_800CC288 & 0x8000)) {
+        arg0->unk76 = arg0->unk7A = F298_P(0x4C, u16);
+        F298_P(0x31, u8) = 1;
+        arg0->unk80 = 0xA;
+        arg0->unk83 = 0;
+        arg0->unk100 |= 8;
+        arg0->disable_run = 0;
+        arg0->unk100 &= 0xDE;
+        anim = 0x37;
+        speed = 1.299999952f;
+        if (arg0->in_water == 0) {
+            arg0->y_velocity = 40.0f;
+            arg0->gravity = 3.200000048f;
+        }
+        arg0->xz_velocity = (arg0->unk44 * 0.6000000238f) + 15.0f;
+        if (arg0->unk44 < 4.0f) {
+            arg0->unk76 = arg0->unk7A = arg0->unk76 + 0x8000;
+        }
+        F298_P(0x95, u8) = 0;
+        F298_P(0x97, u8) = 0;
+        if (F298_P(0x98, u8) != 0) {
+            func_151AE264(arg0);
+        }
+        F298_P(0x54, u8) = 0;
+    } else if ((D_800CC288 & 0x8000) && (F298_P(0x4E, u8) == 0)) {
+        if ((arg0->unk84.uh != 0x3B) && (arg0->unk84.uh != 0x3C) && (F298_A(0x137, u8) == 0) && (arg0->unk13C == 0) &&
+            (F298_P(0x95, u8) == 0) && (F298_P(0x31, u8) == 0) && (height > 55.0f)) {
+            if ((arg0->unk118 != -10000.0f) && ((arg0->unk118 - arg0->unk180) > 100.0f)) {
+                arg0->gravity = 6.0f;
+                arg0->unk81 = 1;
+                arg0->disable_run = 0x78;
+                F298_A(0x137, u8) = 0;
+                anim = 0x3B;
+                arg0->unk1CC = arg0->y_position;
+            }
+        }
+    }
+    }
+    if ((D_800BE616 == 0) && (sp77 != 0) && (arg0->in_water == 0) && (arg0->unk13C < 0x65) && (arg0->id != 0x96)) {
+        v = F298_P(0x31, u8);
+        if ((v != 0) && (F298_P(0x4E, u8) == 0)) {
+            if (F298_P(0x31, u8) < 3) {
+                if ((D_800CC288 & 0x8000) && (arg0->unk28 > 1.0f)) {
+                    arg0->xz_velocity *= 0.3000000119f;
+                    F298_P(0x31, u8) = 3;
+                    rate = 6.0f;
+                    anim = 0xE9;
+                    arg0->y_velocity = 0.0f;
+                    arg0->unk81 = 1;
+                    arg0->unk1CC = arg0->y_position;
+                    arg0->gravity = 1.0f;
+                    if (arg0->unk84.uh != 0xE9) {
+                        func_100109D0(arg0);
+                        func_1000FA64(0x61E, (s16)(s32)arg0->x_position, (s16)(s32)arg0->y_position, (s16)(s32)arg0->z_position,
+                                      0x7FFF, 0x1F4, 0xC8, (s32)func_1000EFB4, arg0, (s32)D_80099428, 0, 0);
+                        func_151C6EA0(arg0, 0xFF, 1);
+                    }
+                }
+            } else {
+                F298_P(0x31, u8) += D_800BE9A0;
+                if (F298_P(0x31, u8) < 0xD) {
+                    arg0->y_velocity = 8.0f;
+                }
+                if (F298_P(0x31, u8) < 0x11) {
+                    arg0->animation_speed += 0.25f;
+                } else {
+                    arg0->animation_speed += (0.6000000238f - arg0->animation_speed) * 0.1000000015f;
+                }
+                anim = 0xE9;
+                speed = arg0->animation_speed;
+                F298_P(0x3C, u8) = 6;
+                if ((!(arg1->button & 0x8000) && (F298_P(0x31, u8) >= 0x13)) || (F298_P(0x31, u8) >= 0x3E)) {
+                    arg0->disable_run = 0xFF;
+                    arg0->unk100 = 0x55;
+                    F298_P(0x31, u8) = 0;
+                    arg0->gravity = 4.5f;
+                    func_1506AF74();
+                    anim = 0;
+                } else {
+                    arg0->unk80 = 1;
+                    arg0->unkAA = 0x4B;
+                    arg0->unk83 = 1;
+                    if (arg0->y_velocity < -8.0f) {
+                        arg0->y_velocity = -8.0f;
+                    }
+                }
+            }
+        }
+    }
+    if (anim != 0) {
+        func_1505E650(arg0, anim, speed, rate, 0.0f, 0.0f, 0);
+    }
+    if (sp88 != 0) {
+        func_15060A30(sp88, arg0);
+    }
+    id = arg0->unk81;
+    if (((id & 7) == 2) && !(arg1->button & 0x8000)) {
+        arg0->unk81 = id - 1;
+        arg0->gravity = 6.199999809f;
+    }
+}
 void func_1506045C(struct127 *arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4) {
     s32 stunned;
     s32 state;
@@ -4129,7 +5699,70 @@ void func_150627D4(struct127 *arg0) {
     func_15039CC8(arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_15062800.s")
+void func_15033EC4(s32 arg0, s32 arg1);
+
+#define OBJ_INDEX(obj) ((u32)((obj) - D_800CC2D0))
+
+void func_15062800(struct127 *arg0, struct127 *arg1) {
+    s32 idx0;
+    s32 cam;
+    struct127 tmp;
+    struct129 *t;
+    s32 i;
+    s32 u;
+
+    func_15146508(arg0, arg1);
+    bcopy(arg1, &tmp, sizeof(struct127));
+    bcopy(arg0, arg1, sizeof(struct127));
+    bcopy(&tmp, arg0, sizeof(struct127));
+    idx0 = OBJ_INDEX(arg0);
+    cam = (s32)&D_800DBFF0[OBJ_INDEX(arg1)];
+    arg1->unk127 = OBJ_INDEX(arg1);
+    arg1->unique_id = OBJ_INDEX(arg1) + 1;
+    arg1->unk13F = OBJ_INDEX(arg1);
+    arg1->camera = &D_800DBFF0[OBJ_INDEX(arg1)];
+    arg0->unk127 = OBJ_INDEX(arg0);
+    arg0->unique_id = OBJ_INDEX(arg0) + 1;
+    arg0->unk13F = OBJ_INDEX(arg0);
+    arg0->camera = NULL;
+    u = (s32)arg0->unk144;
+    arg0->unk144 = arg1->unk144;
+    arg1->unk144 = (struct129 *)u;
+    D_800DBFF0[OBJ_INDEX(arg1)].unk3D4 = (struct127 *) arg1->unk31C;
+    arg1->unk31C->pad196[1] = 0;
+    func_15033EC4(arg1->unique_id, arg0->unique_id);
+    if (*(struct102 **)arg1->pad2D4 != NULL) {
+        func_1516972C(*(struct102 **)arg1->pad2D4);
+        *(struct102 **)arg1->pad2D4 = NULL;
+    }
+    if (*(struct102 **)arg0->pad2D4 != NULL) {
+        func_1516972C(*(struct102 **)arg0->pad2D4);
+        *(struct102 **)arg0->pad2D4 = NULL;
+    }
+    func_150615DC(arg1);
+    for (i = 0; i < 25; i++) {
+        if (i == OBJ_INDEX(arg1) || i == OBJ_INDEX(arg0)) {
+            continue;
+        }
+        if (D_800CC2D0[i].interaction_state == 0) {
+            continue;
+        }
+        u = D_800CC2D0[i].unk65;
+        if (u != 0) {
+            u--;
+            if (u == OBJ_INDEX(arg1)) {
+                D_800CC2D0[i].unk65 = OBJ_INDEX(arg0) + 1;
+            } else if (u == OBJ_INDEX(arg0)) {
+                D_800CC2D0[i].unk65 = OBJ_INDEX(arg1) + 1;
+            }
+        }
+    }
+    if (arg1->unk13C >= 100) {
+        u8 x = arg1->unk13C - 100;
+        D_800CC2D0[x].unk13D = OBJ_INDEX(arg1) + 100;
+    }
+    func_150627D4(arg1);
+}
 
 void func_15062AC4(struct127 *arg0) {
     if (arg0->unkE6 && arg0->unkE4) {
@@ -4180,31 +5813,29 @@ void func_15062BDC(struct127 *arg0, f32 arg1, f32 arg2) {
     }
 }
 
-// PERMUTER CANDIDATE best 180 (EVERY instruction matches; remaining diff is a coherent 5-register
-// cycle a0->a1->a3->v1->t0 rooted in the base pointer landing in a0 vs the target's a1 â€” an IDO
-// free-list coin-flip. Hand-fixes: *(s32*)&arg1 homes arg1 at prologue; explicit `base` local; the
-// nested default-then-adjust wrap shape; flag=arg5. Progression 3331->900->395->360->180.)
-// typedef struct { s32 unk0; s32 unk4; } Entry62D10;
-// extern Entry62D10 **D_800C4488[];
-// void func_15062D10(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
-//     Entry62D10 *base, *entry; s32 packed, modX, modY, newX, newY, tmp, flag;
-//     if ((&D_800D19A0)[arg0] == 0) return;
-//     flag = arg5;
-//     base = D_800C4488[arg0][arg4];
-//     entry = &base[*(s32 *)&arg1];
-//     packed = entry->unk4;
-//     modX = ((packed >> 12) & 0xFFF) + 2;
-//     modY = (packed & 0xFFF) + 2;
-//     packed = entry->unk0;
-//     if (flag != 0) newX = arg2 & 0xFFF;
-//     else { tmp = ((packed >> 12) & 0xFFF) + arg2; newX = tmp;
-//            if (modX < tmp) newX = tmp - modX; else if (tmp < 0) newX = tmp + modX; }
-//     if (flag != 0) newY = arg3 & 0xFFF;
-//     else { tmp = (packed & 0xFFF) + arg3; newY = tmp;
-//            if (modY < tmp) newY = tmp - modY; else if (tmp < 0) newY = tmp + modY; }
-//     entry->unk0 = (packed & 0xFF000000) | (newY & 0xFFF) | ((newX & 0xFFF) << 12);
-// }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_15062D10.s")
+typedef struct { s32 unk0; s32 unk4; } Entry62D10;
+extern Entry62D10 **D_800C4488[];
+extern s32 D_800D19A0;
+void func_15062D10(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
+    Entry62D10 *base, *entry; s32 packed, modX, modY, newX, newY, tmp, flag;
+    newX = 0; modX = 0; modY = 0;
+    if ((&D_800D19A0)[arg0] == 0) return;
+    base = D_800C4488[arg0][arg4];
+    packed = ((Entry62D10 *)((u8 *)base + arg1 * 8))->unk4;
+    modX = ((packed >> 12) & 0xFFF) + 2;
+    modY = (packed & 0xFFF) + 2;
+    entry = ((Entry62D10 *)((u8 *)base + arg1 * 8));
+    packed = entry->unk0;
+    flag = arg5;
+    if (flag != 0) newX = arg2 & 0xFFF;
+    else { tmp = ((packed >> 12) & 0xFFF) + arg2; newX = tmp;
+           if (modX < tmp) newX = tmp - modX; else if (tmp < 0) newX = tmp + modX; }
+    if (flag != 0) newY = arg3 & 0xFFF;
+    else { tmp = (packed & 0xFFF) + arg3; newY = tmp;
+           if (modY < tmp) newY = tmp - modY; else if (tmp < 0) newY = tmp + modY; }
+    packed = (packed & 0xFF000000) | (newY & 0xFFF) | ((newX & 0xFFF) << 12);
+    entry->unk0 = packed;
+}
 typedef struct Entry62E24 {
     u8 pad0[8];
     u16 unk8;

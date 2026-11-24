@@ -650,7 +650,129 @@ void func_151AD174(Rope151AD174 *arg0)
   }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1D9F10/func_151AD92C.s")
+
+typedef struct {
+    /* 0x00 */ u8 pad0[6];
+    /* 0x06 */ u16 unk6;
+    /* 0x08 */ u16 unk8;
+    /* 0x0A */ u8 padA[2];
+} Tex151AD92C;
+
+typedef struct {
+    /* 0x00 */ u8 pad0[0x38];
+    /* 0x38 */ f32 (*unk38)[6];
+    /* 0x3C */ u8 pad3C[4];
+    /* 0x40 */ u16 unk40;
+    /* 0x42 */ u8 unk42;
+    /* 0x43 */ u8 pad43[5];
+    /* 0x48 */ Vtx *unk48;
+} Obj151AD92C;
+extern s32 D_800D2C9C;
+Gfx *func_15094FE8(Gfx *, Tex151AD92C *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+
+Gfx *func_151AD92C(Gfx *dl, Obj151AD92C *obj, s32 arg2) {
+    s32 pad0;
+    s32 i;
+    s32 n;
+    u16 w;
+    s32 stride;
+    s32 shift;
+    f32 ax, ay, nx;
+    f32 x, y, z;
+    f32 dx, dy, dz;
+    f32 len, inv;
+    f32 pad;
+
+    dy = 0.0f;
+    n = obj->unk42;
+    w = D_80090B60[obj->unk40].unk6;
+    stride = D_80090B60[obj->unk40].unk8 - 1;
+    if (obj->unk40 == 0x36) {
+        shift = 5;
+    } else {
+        shift = 4;
+    }
+    for (i = 0; i < n; i++) {
+        f32 *pt = obj->unk38[i];
+        x = pt[0];
+        y = pt[1];
+        z = pt[2];
+        if (i != n - 1) {
+            dx = pt[6] - pt[0];
+            dy = pt[7] - pt[1];
+            dz = pt[8] - pt[2];
+        } else {
+            dy = 1.0f;
+            dx = 0.0f;
+            dz = 0.0f;
+        }
+        len = sqrtf(dz * dz + (-dy) * (-dy));
+        if (len != 0.0f) {
+            ax = 0.0f;
+            inv = 1.0f / len;
+            ay = dz * inv;
+            nx = (-dy) * inv;
+        } else {
+            ax = 100.0f;
+            ay = 0.0f;
+            nx = 0.0f;
+        }
+        ax *= 4.0f;
+        ay *= 4.0f;
+        nx *= 4.0f;
+        obj->unk48[(D_800BE9C0 * n + i) * 4 + 0].v.ob[0] = x + ax;
+        obj->unk48[(D_800BE9C0 * n + i) * 4 + 0].v.ob[1] = y + ay;
+        obj->unk48[(D_800BE9C0 * n + i) * 4 + 0].v.ob[2] = z + nx;
+        obj->unk48[(D_800BE9C0 * n + i) * 4 + 2].v.ob[0] = x - ax;
+        obj->unk48[(D_800BE9C0 * n + i) * 4 + 2].v.ob[1] = y - ay;
+        obj->unk48[(D_800BE9C0 * n + i) * 4 + 2].v.ob[2] = z - nx;
+        len = sqrtf((-dy) * (-dy) + dx * dx);
+        if (len != 0.0f) {
+            nx = 0.0f;
+            inv = 1.0f / len;
+            ax = (-dy) * inv;
+            ay = dx * inv;
+        } else {
+            ax = 1.0f;
+            nx = 1.0f;
+            ay = 0.0f;
+        }
+        ax *= 4.0f;
+        ay *= 4.0f;
+        nx *= 4.0f;
+        obj->unk48[(D_800BE9C0 * n + i) * 4 + 1].v.ob[0] = x + ax;
+        obj->unk48[(D_800BE9C0 * n + i) * 4 + 1].v.ob[1] = y + ay;
+        obj->unk48[(D_800BE9C0 * n + i) * 4 + 1].v.ob[2] = z + nx;
+        obj->unk48[(D_800BE9C0 * n + i) * 4 + 3].v.ob[0] = x - ax;
+        obj->unk48[(D_800BE9C0 * n + i) * 4 + 3].v.ob[1] = y - ay;
+        obj->unk48[(D_800BE9C0 * n + i) * 4 + 3].v.ob[2] = z - nx;
+    }
+    gSPSetGeometryMode(dl++, G_CULL_BACK);
+    gSPClearGeometryMode(dl++, G_CULL_FRONT);
+    gSPTexture(dl++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(dl++);
+    dl = func_15094FE8(dl, &D_80090B60[obj->unk40], 0, 0, 0, 0, 0, 0, 0x100, 0x100, 0x3E);
+    gDPSetCombineMode(dl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
+    gDPSetOtherMode(dl++, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | 0xF, 0x552078);
+    for (i = 0; i < n - 1; i++) {
+        gSPVertex(dl++, &obj->unk48[(D_800BE9C0 * n + i) * 4], 8, 0);
+        gSP1Triangle(dl++, 0, 1, 4, 0);
+        gSP1Triangle(dl++, 1, 5, 4, 0);
+        gSP1Triangle(dl++, 1, 2, 5, 0);
+        gSP1Triangle(dl++, 2, 6, 5, 0);
+        gSP1Triangle(dl++, 2, 3, 7, 0);
+        gSP1Triangle(dl++, 2, 7, 6, 0);
+        gSPModifyVertex(dl++, 0, G_MWO_POINT_ST, (((w + 0x100) & 0x7FF) << 21) | ((i * stride + 0x100) << shift));
+        gSPModifyVertex(dl++, 4, G_MWO_POINT_ST, (((w + 0x100) & 0x7FF) << 21) | (((i + 1) * stride + 0x100) << shift));
+        gSP1Triangle(dl++, 3, 0, 7, 0);
+        gSP1Triangle(dl++, 0, 4, 7, 0);
+        if (i == 0) {
+            gSP1Triangle(dl++, 2, 1, 0, 0);
+            gSP1Triangle(dl++, 3, 2, 0, 0);
+        }
+    }
+    return dl;
+}
 
 void func_151AE0E4(u8 *arg0, u8 arg1);
 void func_151AE264(GameObjectFxOwner *arg0);

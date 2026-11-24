@@ -36,7 +36,91 @@ extern void func_1502A8A0(s32, s32, s32, s32, s32);
 void func_150238D0(void) {
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_50D80/func_150238D8.s")
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    u8 unk2;
+    u8 pad3;
+    u16 unk4;
+    u16 unk6;
+    u16 unk8;
+    u16 unkA;
+    u16 unkC;
+    u8 unkE;
+} Snd150238D8;
+
+typedef struct {
+    u8 pad0[2];
+    s16 unk2;
+    s16 unk4;
+    s16 unk6;
+    u8 pad8[8];
+    s32 unk10;
+    u8 pad14[4];
+    Snd150238D8 *unk18;
+} Obj150238D8;
+
+extern u8 D_800C3C89;
+extern void func_10004074(void *);
+extern s32 D_800C35B0[];
+extern s32 D_800C3640[];
+
+s32 func_150238D8(Obj150238D8 *arg0, s32 arg1, u32 *arg2, s32 arg3, s32 arg4, s32 arg5, s16 *arg6) {
+    Snd150238D8 *s;
+    struct233 *p;
+    struct233 *q;
+    s32 a;
+
+    s = arg0->unk18;
+    if ((s->unk2 != 0 && D_800C35B0[s->unk0] >= D_800C3640[s->unk0]) || (arg0->unk10 & 0x80)) {
+        *arg2 = 0;
+        *arg6 = 0;
+        func_10004074(s);
+        return 1;
+    }
+    if (s->unkE == D_800C35E8[s->unk0]) {
+        p = (&D_800C3958)[s->unk0];
+        if (p != NULL) {
+            arg0->unk2 = p[s->unk1].unk0;
+            q = &(&D_800C3958)[s->unk0][s->unk1];
+            arg0->unk4 = *(f32 *)((u8 *)q + 0x38) + q->unk4;
+            arg0->unk6 = (&D_800C3958)[s->unk0][s->unk1].unk8;
+        }
+    }
+    if (s->unk4 != 0xFFFF) {
+        if (D_800BE9E4 < s->unk4) {
+            s->unk4 -= D_800BE9E4;
+        } else {
+            *arg2 = 0;
+            *arg6 = 0;
+            func_10004074(s);
+            return 1;
+        }
+    }
+    *arg2 = s->unkC;
+    a = s->unkA;
+    if (s->unk4 < a) {
+        if (s->unk4 != 0) {
+            *arg2 = *arg2 * (u32)s->unk4 / a;
+        }
+    } else {
+        if ((u32)s->unk8 != 0) {
+            if ((s->unk6 - s->unk8) < s->unk4) {
+                *arg2 = *arg2 * (s->unk6 - s->unk4) / s->unk8;
+            }
+        }
+    }
+    if (s->unk4 != 0xFFFF && D_800C3C88 != 0) {
+        *arg2 = *arg2 * D_800C3C89 / 30;
+        if (D_800BE9E4 >= D_800C3C89) {
+            *arg2 = 0;
+            *arg6 = 0;
+            func_10004074(s);
+            return 1;
+        }
+    }
+    return 0;
+}
 
 typedef struct {
     s8 unk0;
@@ -2501,7 +2585,317 @@ s32 func_150265CC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_50D80/func_15029BB8.s")
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    u8 unk2;
+    u8 pad3;
+    s16 unk4;
+    s16 unk6;
+    s16 unk8;
+    s16 unkA;
+    u16 unkC;
+    u8 unkE;
+    u8 padF;
+} Snd15029BB8;
+
+extern void *allocate_memory(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+extern void func_1000D96C(s32, s32, s32);
+extern void func_1000DE1C(s32, s32);
+extern s32 func_1000E134(s32);
+extern void func_1503DE70(struct127 *, s32, s32);
+extern void func_151557FC(s32, s32, f32);
+extern void func_15155F90(void);
+extern void func_15178EFC(s32);
+extern void func_1517EE40(s32, s32, s32, s32, s32, s32);
+extern void func_15188810(struct127 *, s32, s32);
+extern void func_1518894C(struct131 *, s32, s32);
+extern void func_15188AD0(struct127 *);
+extern void func_151D66F0(s32, s32);
+extern s32 func_150238D8();
+
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    u8 unk2;
+} Color15029BB8;
+
+extern Color15029BB8 D_80084110[];
+extern s8 D_800C3C8A;
+extern u16 D_800C3C8E;
+
+s32 func_15029BB8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *obj, struct131 *actor, f32 *pos, s32 flags, s32 arg9) {
+    if ((EV->unk0 == 6) || (EV->unk0 == 10)) {
+        {
+            s32 vol;
+            s32 time;
+            s32 t;
+            s32 pad;
+            Elem15023DE0 *found;
+            s32 fade;
+            s32 fadeOut;
+            s32 fadeIn;
+            s32 sflags;
+            Snd15029BB8 *snd;
+
+            found = NULL;
+            sflags = 0;
+            if ((EV->unk4 == 0) || (EV->unk0 == 6)) {
+                if (EV->unk6 == 0) {
+                    vol = 0xFF;
+                } else {
+                    vol = EV->unk6 & 0xFF;
+                    if (vol < 0) {
+                        vol = 0;
+                    } else {
+                        pad = (vol > 0xFF) ? 0xFF : vol;
+                        vol = pad;
+                    }
+                }
+                time = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 1, 1, 0, 0, arg4) - arg3;
+                if (EV->unk0 == 6) {
+                    time = 0xFFFF;
+                } else if (found == NULL) {
+                    time = 0xFFFF;
+                }
+                if ((arg9 != 0) && ((EV->unk0 != 10) || (found != NULL))) {
+                    return 1;
+                }
+                fade = EV->unk5 * 50;
+                fadeOut = 0;
+                fadeIn = 0;
+                if (EV->unk0 == 10) {
+                    t = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 1, 2, 0, 0, arg4);
+                    if (found != NULL) {
+                        t -= arg3;
+                        if (t < time) {
+                            fadeIn = t;
+                        }
+                    }
+                    t = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 1, 3, 0, 0, arg4);
+                    if (found != NULL) {
+                        t -= arg3;
+                        if (t < time) {
+                            fadeOut = time - t;
+                        }
+                    }
+                } else if (EV->unk4 == 2) {
+                    sflags = 0x800;
+                } else {
+                    sflags = 0x400;
+                }
+                snd = allocate_memory(0x10, 1, 0, 0);
+                if (snd != NULL) {
+                    snd->unkE = D_800C35E8[arg4];
+                    snd->unk0 = arg4;
+                    snd->unk1 = arg1;
+                    snd->unk4 = time;
+                    snd->unk6 = time;
+                    snd->unk8 = fadeIn;
+                    snd->unkA = fadeOut;
+                    snd->unkC = (vol * 0x7FFF) >> 8;
+                    snd->unk2 = EV->unk0 == 10;
+                    func_1000FA64(EV->unk2, (s16)pos[0], (s16)pos[1], (s16)pos[2], snd->unkC, 0x7D00, 0x7918, (s32)func_150238D8, snd, 0, sflags, fade);
+                }
+            }
+        }
+    } else if (EV->unk0 == 8) {
+        {
+            s32 time;
+            Elem15023DE0 *found;
+
+            if (EV->unk4 == 0) {
+                if ((arg9 != 0) && (func_1000E134(EV->unk2) != 0)) {
+                    return 1;
+                }
+                func_1000D96C(EV->unk2, 0, 0);
+                if (EV->unk6 != 0) {
+                }
+            } else if (EV->unk4 == 1) {
+                func_1000E588(EV->unk2, EV->unk6 * 100, 1 << (EV->unk5 + 31));
+            } else if (EV->unk4 == 2) {
+                func_1000DF68(EV->unk2, EV->unk6 * 328, 1);
+            } else if (EV->unk4 == 3) {
+            } else if (EV->unk4 == 4) {
+                time = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 1, 5, 1, EV->unk5, arg4) - arg3;
+                if (arg9 != 0) {
+                    func_1000E588(EV->unk2, EV->unk6, 1 << (EV->unk5 + 31));
+                } else {
+                    func_1000E46C(EV->unk2, EV->unk6, 1 << (EV->unk5 + 31), time);
+                }
+            } else if (EV->unk4 == 6) {
+                time = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 1, 7, 0, 0, arg4) - arg3;
+                if (time < 2) {
+                    time = 1;
+                }
+                func_1000DF68(EV->unk2, EV->unk6 * 328, time);
+            } else if (EV->unk4 == 8) {
+                func_1000E654(EV->unk2, EV->unk6 + 1, 0, -1);
+            } else if (EV->unk4 == 9) {
+                func_1000DE1C(EV->unk2, 0);
+            }
+        }
+    } else if (EV->unk0 == 2) {
+        {
+            f32 speed;
+            f32 rate;
+            f32 time;
+            Elem15023DE0 *found;
+            s32 loop;
+            s32 id;
+
+            if (obj == NULL) {
+                return 1;
+            }
+            time = func_15023BB0(EV, EV->unk0, arg1, &found, 0, 0, 0, 0, 0, 0, arg4) - arg3;
+            if (EV->unk4 == 0) {
+                if (obj->unk2D0 == NULL) {
+                    return 1;
+                }
+                rate = 5.0f;
+                id = EV->unk2;
+                if (EV->unk6 > 0) {
+                    rate = EV->unk6 - 1;
+                }
+                if (arg3 == D_800C3C8E) {
+                    rate = 0.0f;
+                }
+                if (arg9 != 0) {
+                    rate = 0.0f;
+                }
+                if (found != NULL) {
+                    loop = !found->unk4;
+                    if ((found->unk4 == 1) && (found->unk5 == 1)) {
+                        loop = 1;
+                    }
+                } else {
+                    loop = 1;
+                }
+                if (id != obj->unk84.uh) {
+                    func_1505E650(obj, id, 1.0f, rate, 0.0f, 0.0f, loop);
+                }
+                if (time > 0.0f) {
+                    speed = obj->unk2D0->unk18 / time * 2.0f;
+                } else {
+                    speed = 0.0f;
+                }
+                if (EV->unk5 != 0) {
+                    speed = 0.0f;
+                }
+                func_1505E650(obj, id, speed, rate, 0.0f, 0.0f, loop);
+            }
+        }
+    } else if (EV->unk0 == 5) {
+            if (EV->unk2 == 1) {
+                Elem15023DE0 *found;
+                s32 time;
+                Elem15023DE0 *prev;
+                s32 prevTime;
+
+                if (EV->unk4 == 0) {
+                    time = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 0, 0, 0, 0, arg4) - arg3;
+                    if (arg9 != 0) {
+                        time = 0;
+                    }
+                    func_1517EE40(D_80084110[EV->unk5].unk0, D_80084110[EV->unk5].unk1, D_80084110[EV->unk5].unk2, time, !EV->unk6, 0);
+                    D_800C3C8A = !EV->unk6;
+                } else if (arg9 != 0) {
+                    func_15023DE0(&prev, &found, NULL, &prevTime, arg1, EV->unk0, 1, EV->unk2, 1, 0, D_800C35B0[arg4], arg4);
+                    if (prev != NULL) {
+                        func_1517EE40(D_80084110[prev->unk5].unk0, D_80084110[prev->unk5].unk1, D_80084110[prev->unk5].unk2, 0, !prev->unk6, 0);
+                        D_800C3C8A = !prev->unk6;
+                    }
+                }
+            } else if (EV->unk2 == 4) {
+                s32 a;
+
+                if (obj != NULL) {
+                    if (arg9 == 0) {
+                        a = (obj->id == 0x4B) ? 2 : -1;
+                        if (a != -1) {
+                            arg2 = (EV->unk4 == 0) ? -1 : EV->unk4 - 1;
+                            func_1503DE70(obj, a, arg2);
+                        }
+                    } else {
+                        func_15060F28(obj, 1);
+                    }
+                }
+            } else if (EV->unk2 == 0x5C) {
+                Elem15023DE0 *found;
+                s32 fadeIn;
+                s32 fadeOut;
+                s32 start;
+
+                if (EV->unk4 == 0) {
+                    if (arg9 == 0) {
+                        start = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 1, 1, 1, EV->unk5, arg4);
+                        fadeIn = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 1, 2, 1, EV->unk5, arg4) - arg3;
+                        if (found == NULL) {
+                            fadeIn = 0;
+                        }
+                        fadeOut = start - func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 1, 3, 1, EV->unk5, arg4);
+                        if (found == NULL) {
+                            fadeOut = 0;
+                        }
+                        func_150F5420(fadeIn, start - arg3 - fadeOut - fadeIn, fadeOut, EV->unk5);
+                    }
+                }
+            } else if (EV->unk2 == 0x56) {
+                if (EV->unk4 == 0) {
+                    if (arg9 == 0) {
+                        func_15178EFC(3);
+                    }
+                } else if (arg9 != 0) {
+                    func_15178EFC(2);
+                } else if (EV->unk5 == 0) {
+                    func_15178EFC(0);
+                } else {
+                    func_15178EFC(1);
+                }
+            } else if (EV->unk2 == 0x76) {
+                s32 mode;
+
+                if (EV->unk4 == 1) {
+                    mode = 0;
+                } else if (EV->unk5 == 1) {
+                    mode = 2;
+                } else {
+                    mode = 1;
+                }
+                func_151D66F0(EV->unk6, mode);
+            } else if (EV->unk2 == 0x2D) {
+                s32 time;
+                Elem15023DE0 *found;
+
+                time = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 0, 0, 0, 0, arg4) - arg3;
+                if (actor != NULL) {
+                    if (EV->unk4 == 0) {
+                        func_1518894C(actor, time, EV->unk5);
+                    } else if (arg9 != 0) {
+                    }
+                } else if (obj != NULL) {
+                    if (EV->unk4 == 0) {
+                        func_15188810(obj, time, EV->unk5);
+                    } else if (arg9 != 0) {
+                        func_15188AD0(obj);
+                    }
+                }
+            } else if (EV->unk2 == 0x57) {
+                s32 time;
+                Elem15023DE0 *found;
+
+                if (EV->unk4 == 0) {
+                    func_151557FC(0, func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 0, 0, 0, 0, arg4) - arg3, 0.0f);
+                } else if (arg9 != 0) {
+                    D_800C3E78 = 0;
+                    func_15155F90();
+                }
+            }
+    } else {
+        return 0;
+    }
+    return 1;
+}
 
 void func_1502A8A0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     struct127 *obj;

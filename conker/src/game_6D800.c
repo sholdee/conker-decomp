@@ -331,7 +331,105 @@ void func_15040A6C(s32 arg0) {
 }
 
 // contains delay slot
-#pragma GLOBAL_ASM("asm/nonmatchings/game_6D800/func_15040A78.s")
+typedef struct { u32 pad:4; u32 seg:4; u32 off:24; } SegAddr;
+void func_15040A78(u32 *arg0, u32 *arg1, u32 *arg2) {
+    s32 i;
+    u32 *dl;
+    u32 w0;
+    u32 w1;
+    s32 n;
+    u32 *stack[16];
+    u8 cmd;
+    u8 active;
+    u32 seg;
+    u32 idx;
+    u32 off;
+    u32 data;
+    u32 mtx;
+    s32 depth;
+    s32 pada;
+    s32 padb;
+    s32 padc;
+    s32 padd;
+
+    depth = 0;
+    i = 0;
+    do {
+        D_800C6860[i] = -1;
+        i++;
+    } while (i < 16);
+    D_800C6860[0] = 0;
+    active = 0;
+    dl = arg0;
+    while (dl <= arg2 || depth > 0) {
+        if (dl == arg1) {
+            active = 1;
+        }
+        cmd = *(u8 *)dl;
+        if (active) {
+        }
+        if (active) {
+            D_800844B0[cmd]((s32)dl);
+        }
+        if (dl == arg2) {
+            active = 0;
+        }
+        switch (cmd) {
+            case 0xDF:
+                depth--;
+                dl = stack[depth];
+                break;
+            case 0xDE:
+                stack[depth] = dl + 2;
+                w1 = dl[1];
+                if (active) {
+                }
+                depth++;
+                if (active) {
+                }
+                seg = (w1 >> 24) & 0xF;
+                if (D_800C6860[seg] != -1) {
+                    w1 &= 0xFFFFFF;
+                    w1 += D_800C6860[seg];
+                    dl = (u32 *)(w1 | 0x80000000);
+                } else {
+                    dl += 2;
+                    depth--;
+                }
+                break;
+            case 0xDB:
+                w0 = dl[0];
+                data = dl[1];
+                if ((w0 & 0xFFFF) == (w0 >> 16)) {
+                }
+                if (((w0 >> 16) & 0xFF) == 6) {
+                    D_800C6860[(s32)(w0 & 0xFFFF) >> 2] = data;
+                }
+                dl += 2;
+                break;
+            case 1:
+                if (active) {
+                    n = (dl[0] >> 12) & 0xFF;
+                    for (i = 0; i < n; i++) {
+                    }
+                }
+                dl += 2;
+                break;
+            case 0xDA:
+                mtx = (D_800C6860[(dl[1] >> 24) & 0xF] + (dl[1] & 0xFFFFFF)) | 0x80000000;
+                if (mtx == 0) {
+                }
+                dl += 2;
+                break;
+            case 0xDC:
+                dl += 2;
+                break;
+            default:
+                dl += 2;
+                break;
+        }
+    }
+}
 
 void func_15040CC8(u8 *arg0) {
     s32 i;

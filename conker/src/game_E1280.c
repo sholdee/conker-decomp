@@ -181,7 +181,129 @@ s32 func_150B40E8(void *arg0, s32 var_a1) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_E1280/func_150B4294.s")
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3f_B4294;
+
+typedef struct {
+    Vec3f_B4294 unk0;
+    f32 unkC;
+    u8 unk10;
+    u8 pad11[3];
+    f32 unk14;
+    f32 unk18;
+    u8 pad1C[4];
+    f32 unk20;
+    u8 pad24[8];
+    f32 unk2C;
+    u8 unk30;
+    u8 unk31;
+    u8 pad32[4];
+    s16 unk36;
+    u8 pad38[4];
+    f32 unk3C;
+    f32 unk40;
+    f32 unk44;
+    u8 unk48;
+    u8 pad49[3];
+    f32 unk4C;
+    u8 unk50;
+    u8 pad51[3];
+    f32 unk54;
+} SplatOwner_B4294;
+
+typedef struct {
+    Vec3f_B4294 unk0;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    s16 unk1C;
+    s16 unk1E;
+    u8 unk20;
+    u8 pad21[3];
+} SplatTrail_B4294;
+
+typedef struct {
+    u8 pad0[0x10];
+    Vec3f_B4294 unk10;
+    u8 pad1C[9];
+    u8 unk25;
+    u8 pad26[6];
+    s8 unk2C;
+    s8 unk2D;
+    s8 unk2E;
+    u8 pad2F[0x65];
+    SplatTrail_B4294 *unk94;
+    SplatOwner_B4294 *unk98;
+} SplatActor_B4294;
+
+void func_150B5088();
+
+s32 func_150B4294(SplatActor_B4294 *arg0) {
+    f32 inv;
+    f32 dt;
+    f32 scale;
+    SplatOwner_B4294 *owner;
+    SplatTrail_B4294 *trail;
+    Vec3f_B4294 sp80;
+    f32 diff;
+    f32 dtStep;
+    f32 scaleStep;
+
+    owner = arg0->unk98;
+    trail = arg0->unk94;
+    owner->unk50 += (func_150ADA20() % (u32)(owner->unk10 + 1)) * D_800BE9E4;
+    owner->unk4C = func_151423D8(owner->unk50 - 0x40) * owner->unk18 + owner->unk14;
+    owner->unk44 += owner->unk20 * D_800BE9A4;
+    if (owner->unk44 > 1.0f) {
+        dt = D_800BE9A4;
+        inv = 1.0f / owner->unk44;
+        sp80 = owner->unk0;
+        dtStep = D_800BE9A4 * inv;
+        scale = owner->unk40;
+        diff = owner->unk4C - owner->unk40;
+        scaleStep = diff * inv;
+        do {
+            owner->unk54 += owner->unk3C;
+            if (owner->unk54 > 1.0f) {
+                func_150B5088(arg0);
+            }
+            trail[arg0->unk2E].unk0 = arg0->unk10;
+            trail[arg0->unk2E].unkC = sp80.x * scale;
+            trail[arg0->unk2E].unk10 = sp80.y * scale;
+            trail[arg0->unk2E].unk14 = sp80.z * scale;
+            trail[arg0->unk2E].unk18 = owner->unk2C;
+            trail[arg0->unk2E].unk1C = 0xFF;
+            trail[arg0->unk2E].unk1E = owner->unk36;
+            trail[arg0->unk2E].unk20 = owner->unk48;
+            owner->unk48 += owner->unk30 + func_150ADA68() * owner->unk31;
+            trail[arg0->unk2E].unk10 += owner->unkC * dt;
+            trail[arg0->unk2E].unk0.x += trail[arg0->unk2E].unkC * dt;
+            trail[arg0->unk2E].unk0.y += trail[arg0->unk2E].unk10 * dt;
+            trail[arg0->unk2E].unk0.z += trail[arg0->unk2E].unk14 * dt;
+            arg0->unk2E++;
+            if (arg0->unk2E == arg0->unk25) {
+                arg0->unk2E = 0;
+            }
+            arg0->unk2C++;
+            if (arg0->unk2E == arg0->unk2D) {
+                arg0->unk2D++;
+                if (arg0->unk2D == arg0->unk25) {
+                    arg0->unk2D = 0;
+                }
+                arg0->unk2C--;
+            }
+            scale += scaleStep;
+            dt -= dtStep;
+            owner->unk44 -= 1.0f;
+        } while (owner->unk44 > 1.0f);
+        owner->unk40 = scale;
+    }
+    return 1;
+}
 
 typedef struct {
     f32 x, y, z;

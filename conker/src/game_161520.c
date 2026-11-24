@@ -775,12 +775,52 @@ void func_15135424(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     func_15145EA4(sp20, sp18, arg0, 2);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15135480.s")
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    u8 unk8;
+    u8 unk9;
+} Arg15135480;
 
 struct arg1_1513555C {
     s32 unk0;
     u8 unk4;
 };
+
+void func_1513555C(struct102 *arg0, struct arg1_1513555C *arg1, u8 arg2);
+void func_151355B8(struct102 *arg0, struct arg1_1513555C *arg1, u8 arg2);
+
+void func_15135480(struct102 *arg0, struct arg1_1513555C *arg1, u8 arg2) {
+    s32 incoming;
+    s32 current;
+
+    if (arg2 == 0x2D) {
+        incoming = arg1->unk0;
+        current = *(s32 *)&arg0->unk1C;
+        if (incoming == current) {
+            *(s32 *)&arg0->unk1C = ((Arg15135480 *)arg1)->unk4;
+            arg0->unk18 = ((Arg15135480 *)arg1)->unk9;
+        } else if ((current | 0) == ((Arg15135480 *)arg1)->unk4) {
+            *(s32 *)&arg0->unk1C = incoming;
+            arg0->unk18 = ((Arg15135480 *)arg1)->unk8;
+        }
+    }
+    switch (*((u8 *)arg0 + 0x50)) {
+    case 1:
+        func_151355B8(arg0, arg1, arg2);
+        break;
+    case 2:
+        func_1513555C(arg0, arg1, arg2);
+        break;
+    default:
+        if (arg2 == 0) {
+            if (arg1->unk0 == ((current = *(s32 *)&arg0->unk1C) | 0) || arg0->unk18 == arg1->unk4) {
+                func_1516972C(arg0);
+            }
+        }
+        break;
+    }
+}
 
 void func_1513555C(struct102 *arg0, struct arg1_1513555C *arg1, u8 arg2) {
     s32 a = arg2;
@@ -3075,7 +3115,13 @@ void func_1513A48C(void *arg0, u8 arg1, s32 arg2) {
                   (s32)arg1, arg2);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_1513A594.s")
+void func_1513A594(void *arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4) {
+    func_1513A5E0(arg1, arg3 & 0xFF, arg4);
+    if (*(s32 *)((u8 *)arg0 + 0x1D4) != 0) {
+        if (arg0) {
+        }
+    }
+}
 
 typedef struct {
     s32 x;

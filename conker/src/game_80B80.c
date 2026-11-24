@@ -1,6 +1,9 @@
 #include <ultra64.h>
 
+#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
+#undef func_150ADA20
+s32 func_150ADA20(void);
 #include "variables.h"
 
 
@@ -668,7 +671,402 @@ void func_15053894(struct127 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_80B80/func_150538CC.s")
+s32 func_1505C7D8(struct127 *, u8);
+void func_15059C84(struct127 *);
+
+typedef struct {
+    f32 unk0;
+    u8 pad4[0x2B];
+    s8 unk2F;
+    u8 pad30[0x54];
+} Struct800872A0;
+
+extern Struct800872A0 *D_800872A0;
+extern f32 D_800D239C;
+extern f32 D_800D23A0;
+extern f32 D_800D23A4;
+extern f32 D_800CC254;
+extern f32 D_800CC258;
+extern f32 D_800CC25C;
+extern s32 D_800CC260;
+s32 func_1508855C(struct127 *arg0);
+void func_15087350(s32, s32, f32);
+struct127 *func_150883B0(s32, s32, f32 *, s32 *);
+s32 func_15104634(f32, f32, f32, f32 *);
+u8 func_15059B54(struct127 *arg0, u16 arg1);
+s32 func_151EF610(void);
+s8 func_1505DDA8(struct127 *arg0, s32 arg1, u16 arg2, f32 arg3);
+void func_15081690(struct127 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, void *arg7, f32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, s32 argE);
+s32 func_15081E78(struct127 *, void *, s32);
+void func_1505A3A8(f32 arg0, struct127 *arg1, f32 arg2, f32 arg3, u8 arg4);
+void func_1505D6F0(struct127 *arg0, s32 arg1);
+void func_150D7120(f32 *arg0, u8 arg1, s32 arg2);
+s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
+void func_150D728C(void *arg0, f32 *arg1, f32 *arg2, u8 arg3, s32 arg4);
+void func_15088780(struct127 *);
+
+void func_150538CC(struct127 *arg0) {
+    s8 spF7;
+    s32 left;
+    f32 spEC;
+    s32 spE8;
+    s32 spE4;
+    s32 spE0;
+    s32 spDC;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    f32 dist;
+    f32 spC8;
+    f32 spC4;
+    s32 spC0;
+    s32 spBC;
+    struct127 *target;
+
+    spF7 = 0;
+    spE8 = (u16)arg0->unk278;
+    spE0 = (s8)arg0->unk284;
+    spE4 = 0;
+    if (((spE8 == 2) || (spE8 == 0x12)) && *(u16 *)&arg0->unk282) {
+        if (D_800BE9E4 < *(u16 *)&arg0->unk282) {
+            arg0->unk282 = *(u16 *)&arg0->unk282 - D_800BE9E4;
+        } else {
+            /* Dead leftover (stripped debug check?): the value is computed and never used, which is
+               what keeps the target's dead `move a0,v0` above (as1 drops the subu but not the copy). */
+            left = *(u16 *)&arg0->unk282 - D_800BE9E4;
+            if (left + left) {
+            }
+            arg0->unk282 = 0;
+            arg0->gravity = 1.0f;
+        }
+    }
+    if ((spE8 == 0xD) || (spE8 == 0xE)) {
+        spDC = func_1508855C(arg0);
+        if (spDC != -1) {
+            if (spE8 == 0xD) {
+                dist = 0.200000003f;
+                spC0 = 1;
+                spC8 = 200.0f;
+            } else {
+                dist = 0.0f;
+                spC0 = -1;
+                spC8 = 30.0f;
+            }
+            func_15087350(spDC, 0, dist);
+            arg0->pad320[8] = 1;
+            if (arg0->unk221 == -1) {
+                target = func_150883B0(spDC, spC0, &spC4, &spBC);
+                if ((arg0->unk124 != 0) && (target + 1 == &D_800CC2D0[arg0->unk124])) {
+                    target = NULL;
+                }
+            } else {
+                target = &D_800CC2D0[arg0->unk221];
+            }
+            if ((target != NULL) && ((target->unk31C->unk120 != 0) || (target->immune > 0))) {
+                target = NULL;
+                arg0->unk221 = -1;
+            }
+            if (target != NULL) {
+                dx = target->x_position - arg0->x_position;
+                dy = target->y_position - arg0->y_position;
+                dz = target->z_position - arg0->z_position;
+                dist = (dx * dx) + (dz * dz);
+            } else {
+                spBC = (D_8008FDBC & 0x40) != 0;
+                spC4 = 0.5f;
+            }
+            if (arg0->unk81 < 0xA) {
+                target = NULL;
+            }
+            if ((target == NULL) || (dist > 1000000.0f) || (spE8 == 0xE)) {
+                dx = D_800D239C - arg0->x_position;
+                dy = (D_800D23A0 + 100.0f) - arg0->y_position;
+                dz = D_800D23A4 - arg0->z_position;
+                D_800872A0[spDC].unk0 += (spC4 - D_800872A0[spDC].unk0) * 0.125f;
+                D_800872A0[spDC].unk2F = spBC;
+            } else {
+                arg0->unk221 = target - D_800CC2D0;
+            }
+            dist = sqrtf((dx * dx) + (dy * dy) + (dz * dz));
+            if (dist > 1.0f) {
+                if (dist < spC8) {
+                    spC8 = dist;
+                }
+                dist = spC8 / dist;
+                dx *= dist;
+                dy *= dist;
+                dz *= dist;
+                arg0->unk76 = func_1505A630(-dx, dz, 0);
+            }
+            arg0->x_position += dx;
+            arg0->y_position += dy;
+            arg0->z_position += dz;
+            {
+                f32 spB4;
+
+                if (func_15104634(arg0->x_position, arg0->z_position, arg0->y_position + 50.0f, &spB4) > 0) {
+                    if (arg0->y_position < spB4 + 50.0f) {
+                        arg0->y_position = spB4 + 50.0f;
+                    }
+                }
+            }
+            arg0->disable_run = 1;
+            arg0->unk103 = 1;
+            arg0->xz_velocity = 0.0f;
+        }
+        arg0->unkB2++;
+        arg0->unkB2 &= 1;
+        if (arg0->unkB2 != 0) {
+            arg0->unk83++;
+        }
+        if ((*(s8 *)&D_800E0C20 != 0) || (D_800E0B94 != 0)) {
+            arg0->unk83 = 1;
+            spF7 = 1;
+        }
+        if (arg0->unk81 < 0xA) {
+            arg0->unk81++;
+        }
+    }
+    if (arg0->unk80 < 0x64) {
+        u16 angle;
+        struct127 *p;
+        f32 spA8;
+        f32 spA4;
+
+        if (arg0->unk102 != 0) {
+            arg0->unk82 = 0x28;
+        }
+        arg0->unk78 = func_1505A630(D_800CC2D0[arg0->pad126].x_position - arg0->x_position, arg0->z_position - D_800CC2D0[arg0->pad126].z_position, 0);
+        if ((u8)(((s32)(arg0->unk78 - arg0->unk76) >> 8) + arg0->unk82) < (arg0->unk82 * 2)) {
+            spA4 = ((D_800CC2D0[arg0->pad126].y_position + (s16)arg0->unk224) - arg0->y_position) * 0.1800000072f;
+            spA8 = func_1505A72C(&D_800CC2D0[arg0->pad126], arg0);
+            func_15059B54(arg0, 0x300);
+            if ((arg0->unk102 != 0) && (spA8 < (arg0->xz_velocity * 16.0f))) {
+                if (spA4 > 90.0f) {
+                    spA4 = 90.0f;
+                } else if (spA4 < -90.0f) {
+                    spA4 = -90.0f;
+                }
+                arg0->y_velocity += (spA4 - arg0->y_velocity) * 0.1800000072f;
+            }
+        }
+    }
+    if (arg0->unk82 >= 9) {
+        arg0->unk82--;
+    }
+    if (arg0->unk103 != 0) {
+        func_15059C84(arg0);
+    }
+    switch (spE8) {
+    case 2:
+    case 12:
+    case 18:
+        if (arg0->xz_velocity != 0.0f) {
+            arg0->unkB8 += 15.0f * (f32)D_800BE9E4;
+            if (func_100107F8(arg0) == 0) {
+                func_10010154((func_151EF610() % 2) + 0x22F, arg0, 0x7530, 0x1F4, 0x3E8);
+            }
+        }
+        break;
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+    case 9:
+    case 10:
+    case 11:
+    case 13:
+    case 15:
+    case 17:
+        arg0->unkB8 = -func_150484A0(arg0->y_velocity, arg0->xz_velocity) * 57.29577637f;
+        switch (spE8) {
+        case 4:
+        case 5:
+        case 9:
+        case 10:
+        case 13:
+            if (arg0->unkA8 < 0x1E) {
+                arg0->unkA8 += D_800BE9E4;
+            } else if (func_100107F8(arg0) == 0) {
+                func_10010154((func_150ADA20() % 3U) + 0x2EE, arg0, 0x7530, 0x1F4, 0x3E8);
+            }
+            break;
+        case 3:
+        case 6:
+        case 11:
+        case 17:
+            if ((func_1505DDA8(arg0, arg0->unk124, 0x200, 15.0f) != -1) && (arg0->unkA9 == 0)) {
+                func_10010154((func_150ADA20() & 3) + 0x43E, arg0, 0x7530, 0x7D0, 0x834);
+                arg0->unkA9 = 1;
+            }
+            break;
+        }
+        break;
+    }
+    arg0->stunned = 1;
+    if (arg0->unk103 != 0) {
+        func_1505A770(arg0);
+    }
+    D_800CC254 = arg0->x_position;
+    D_800CC258 = arg0->y_position;
+    D_800CC25C = arg0->z_position;
+    spEC = arg0->y_position;
+    func_15058898(arg0, arg0->old_y_position);
+    func_1505B5F8(arg0, arg0->unk180);
+    if (spE0 != 0) {
+        f32 dir[3];
+        f32 len;
+        f32 inv;
+        s32 hit;
+        struct127 *other;
+
+        dir[0] = arg0->x_position - arg0->old_x_position;
+        dir[1] = arg0->y_position - arg0->old_y_position;
+        dir[2] = arg0->z_position - arg0->old_z_position;
+        len = (dir[0] * dir[0]) + (dir[1] * dir[1]) + (dir[2] * dir[2]);
+        len = sqrtf(len);
+        if (len != 0.0f) {
+            inv = 1.0f / len;
+        } else {
+            inv = 9.999999747e-05f;
+        }
+        dir[0] *= inv;
+        dir[1] *= inv;
+        dir[2] *= inv;
+        func_15081690(arg0, arg0->old_x_position, arg0->old_y_position, arg0->old_z_position, dir[0], dir[1], dir[2], &arg0->unk31C->pad98[0x18], len, 0, 0, 0, -1, 0, 0);
+        hit = func_15081E78(arg0, &arg0->unk31C->pad98[0x18], spE8);
+        if (hit != 0) {
+            spF7 = 1;
+            if ((hit == 1) && (arg0->unk124 > 0)) {
+                other = &D_800CC2D0[arg0->unk124 - 1];
+                if ((other->unk31C != NULL) && (other->unk31C->pad98[0x17] != 0)) {
+                    if (func_10010894(other) == 0) {
+                        func_15060A30((func_150ADA20() % 3U) + 0x53B, other);
+                    }
+                }
+            }
+        }
+    } else {
+        if ((arg0->unk103 != 0) && ((arg0->unkF4 & 0x18000) || (spEC != arg0->y_position))) {
+            if (arg0->xz_velocity > 0.0f) {
+                spE4 = 1;
+                arg0->xz_velocity *= 0.5f;
+                if ((spE8 == 0) && (arg0->xz_velocity > 20.0f) && (arg0->unkF4 & 0x10000)) {
+                    s32 r;
+
+                    r = func_150ADA20() % 9U;
+                    func_15060778((r < 2) ? r + 0x18 : r + 0x29, arg0, 0x7530, 0, 0x1F4, 0x5DC, 5);
+                    func_15174690(D_800C3E78, 0, 0x14, 0, 0x199, 4, 0xAA, 0xFF, 0);
+                }
+            }
+        }
+        if (arg0->unkD0 != 0) {
+            s32 v;
+
+            v = func_1505C7D8(arg0, D_800C3E78);
+            if (v != 0) {
+                D_800CC260 = v;
+                arg0->disable_run = 1;
+                spE4 |= 8;
+                arg0->xz_velocity *= 0.3000000119f;
+                if (spE8 == 0xF) {
+                    struct127 *o;
+
+                    o = func_15083E90(6);
+                    if (o != NULL) {
+                        if (o->stunned != 0) {
+                            arg0->unkF8 |= 0x01000000;
+                            arg0->unk83 = 6;
+                        }
+                        arg0->unk76 = func_1505A630(o->x_position - arg0->x_position, arg0->z_position - o->z_position, 0);
+                        arg0->y_velocity *= 0.400000006f;
+                    }
+                } else {
+                    s32 t;
+
+                    t = arg0->pad108 & 0x7F;
+                    if (t < 0x19) {
+                        arg0->unk76 = func_1505A630(arg0->old_x_position - D_800CC2D0[t].x_position, D_800CC2D0[t].z_position - arg0->old_z_position, 0);
+                    }
+                    arg0->y_velocity = 35.0f;
+                    arg0->gravity = 6.0f;
+                }
+            }
+        }
+        if (spE8 == 0xF) {
+            func_1505A3A8(0.0f, arg0, 1.0f, 1.0f, 0);
+            func_1505D6F0(arg0, D_800C3E78);
+            if ((D_800CC268 >> 1) != 0) {
+                struct127 *o;
+
+                o = func_15083E90(6);
+                if (D_800CC268 & (1U << (o - D_800CC2D0))) {
+                    D_800D1580 = 0xFF0100A7;
+                    func_1506E6FC();
+                    if (o != NULL) {
+                        arg0->unk76 = func_1505A630(arg0->x_position - o->x_position, o->z_position - arg0->z_position, 0);
+                    }
+                    arg0->y_velocity = 38.0f;
+                    arg0->gravity = 5.0f;
+                    arg0->xz_velocity = 40.0f;
+                }
+            }
+        }
+        if ((arg0->unk103 != 0) && (arg0->unk28 == 0.0f)) {
+            spE4 |= 2;
+        }
+        if (spE4 != 0) {
+            if (spE8 == 0x11) {
+                arg0->health = 0;
+            }
+            if (D_800BE616 != 0) {
+                arg0->health = 0;
+            }
+        }
+        arg0->unk40 = (arg0->unk76 + 0x4000) * 0.005493164f;
+        if (arg0->unk28 == 0.0f) {
+            arg0->unk7F++;
+            if (arg0->unk232 != 0) {
+                arg0->y_position = arg0->old_y_position;
+                spF7 = 1;
+            }
+        }
+    }
+    if (arg0->unk7F >= 0x1F) {
+        spF7 = 1;
+    }
+    if (--arg0->unk83 == 0) {
+        spF7 = 1;
+    }
+    if (arg0->health == 0) {
+        spF7 = 1;
+    }
+    if (spF7 != 0) {
+        switch (spE8) {
+        case 13:
+            if (spE4 & 8) {
+                func_150D7120(&arg0->x_position, 0xFF, 1);
+            } else {
+                f32 vec[3];
+
+                vec[0] = D_800CC254 - arg0->old_x_position;
+                vec[1] = D_800CC258 - arg0->old_y_position;
+                vec[2] = D_800CC25C - arg0->old_z_position;
+                if (func_15145128(vec, vec, NULL, NULL) != 0) {
+                    func_150D728C(NULL, &arg0->x_position, vec, 0xFF, 1);
+                }
+            }
+            func_15088780(arg0);
+            break;
+        case 14:
+            func_15088780(arg0);
+            break;
+        }
+        func_15060F28(arg0, 1);
+        return;
+    }
+    arg0->unk103 = 1;
+}
 
 void func_150548D8(s32 arg0) {
 }

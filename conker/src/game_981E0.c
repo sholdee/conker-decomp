@@ -859,7 +859,259 @@ void func_1506C43C(void) {
 }
 
 // requires jump table
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506C460.s")
+extern struct127 *func_1505EEB0(s32 state, s32 *arg1);
+extern u8 func_1505DADC(struct127 *arg0, s16 *arg1, s32 arg2, u8 arg3, s32 arg4);
+extern void *allocate_memory(s32, s32, s32, s32);
+extern s16 D_80099AD8[][4];
+extern void func_1506AC8C(struct127 *, s32, s32);
+extern struct127 *func_1505ED34(void);
+extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
+extern s32 func_1515D480(s32);
+extern s32 *func_1515D440(void);
+extern s32 func_15158BD0(struct127 *, s32, s32);
+extern void func_1514EC1C(s32, struct127 *, s32);
+extern u8 D_800C3E90;
+extern u8 D_80099AC4[];
+
+#define OBJ_U8(o, off) (*(u8 *)((u8 *)(o) + (off)))
+#define OBJ_S16(o, off) (*(s16 *)((u8 *)(o) + (off)))
+#define OBJ_S32(o, off) (*(s32 *)((u8 *)(o) + (off)))
+
+u8 *func_1506C460(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, s32 arg8, s32 arg9, s32 arg10) {
+    struct127 *obj;
+    s16 spFA;
+    s16 angle;
+    s32 spF4;
+    s32 anim;
+    s32 count;
+    s32 i;
+    f32 *mtx;
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 mf[4][4];
+
+    count = 0;
+    for (i = 0; i < 25; i++) {
+        if (D_800CC2D0[i].interaction_state == 4) {
+            count++;
+        }
+    }
+    if (count >= 5) {
+        obj = func_1505EEB0(4, &spF4);
+        func_15060F28(obj, 0);
+    } else {
+        obj = func_1505ED34();
+        if ((u32)(obj - D_800CC2D0) >= 25 && count > 0) {
+            obj = func_1505EEB0(4, &spF4);
+            func_15060F28(obj, 0);
+        }
+    }
+    OBJ_U8(obj, 0x136) = 0xB;
+    obj->interaction_state = 4;
+    obj->health = 1;
+    obj->unk7A = D_800D154C->unk7A;
+    if (arg8 != 0) {
+        obj->x_position = ((f32 *)arg8)[0];
+        obj->y_position = ((f32 *)arg8)[1];
+        obj->z_position = ((f32 *)arg8)[2];
+    } else if (D_800D154C->unk1D4 == NULL) {
+        obj->x_position = D_800D154C->x_position;
+        obj->y_position = D_800D154C->y_position + 50.0f;
+        obj->z_position = D_800D154C->z_position;
+    } else {
+        mtx = (f32 *)D_800D154C->unk1D4;
+        if (D_800C3E90) {
+            guMtxL2F(mf, (Mtx *)((u8 *)mtx + (D_80099AD8[arg5][3] << 6)));
+            mtx = (f32 *)mf;
+        } else {
+            mtx = (f32 *)((u8 *)mtx + (D_80099AD8[arg5][3] << 6));
+        }
+        func_150A7960(mtx, D_80099AD8[arg5][0], D_80099AD8[arg5][1], D_80099AD8[arg5][2], &x, &y, &z);
+        obj->x_position = x;
+        obj->y_position = y;
+        obj->z_position = z;
+    }
+    if (arg6 != 0.0f) {
+        if (obj->y_position < D_800D154C->y_position + arg6) {
+            obj->y_position = D_800D154C->y_position + arg6;
+        }
+    }
+    OBJ_S16(obj, 0x160) = 0x6E;
+    obj->unique_id = 0xFF - (obj - D_800CC2D0);
+    if (arg5 == 0 || arg5 == 1) {
+        obj->unk5 = 2;
+        obj->unk103 = 1;
+    } else {
+        obj->unk5 = 5;
+        for (i = 0; i <= D_80082FA0; i++) {
+            OBJ_S32(obj, 0x304 + i * 4) = func_1515D480(1);
+        }
+        if (OBJ_S32(obj, 0x300 + i * 4) != 0) {
+            obj->unk301[0] = 1;
+        }
+        OBJ_S32(obj, 0x314) = func_1515D440();
+        switch (arg5) {
+        case 2:
+            obj->unkB8 = 260.0f;
+            anim = 0x2A;
+            obj->unk103 = 1;
+            break;
+        case 18:
+            obj->unkB8 = 260.0f;
+            anim = 0x22;
+            obj->unk103 = 1;
+            break;
+        case 11:
+            anim = 0x6D;
+            break;
+        case 12:
+            anim = 0x6B;
+            break;
+        case 3:
+            anim = 0x39;
+            break;
+        case 6:
+            anim = 0x51;
+            break;
+        case 15:
+            anim = 0x93;
+            break;
+        case 17:
+            anim = 0x39;
+            break;
+        default:
+            anim = 0x50;
+            break;
+        }
+        func_15083568(obj, anim, 1.0f, 0);
+    }
+    angle = (s16)(arg0 * 182.0444489f) - 0x4000;
+    if (D_800BE616 && !(arg9 & 1) && arg5 != 5 && arg5 != 9 && arg5 != 10 && arg5 != 4) {
+        u8 ret;
+        f32 dist;
+        u16 tmp;
+        f32 targetY;
+
+        spFA = tmp = func_1505A630(arg1, arg2, 0);
+        ret = func_1505DADC(obj, &spFA, (tmp >> 8) & 0xFF, 0xFF, 20);
+        if (ret != 0xFF) {
+            targetY = D_800CC2D0[ret].y_position;
+            dist = func_1505A6F8(D_800D154C, &D_800CC2D0[ret]);
+            angle = spFA;
+            if (arg5 == 2 || arg5 == 18) {
+                targetY -= 30.0f;
+            }
+            arg2 = (targetY - D_800D154C->y_position) / (dist / arg1);
+            arg3 = 0.0f;
+        }
+    }
+    if (arg9 & 2) {
+        angle = func_1505A630(D_800CC2D0[0].x_position - obj->x_position, obj->z_position - D_800CC2D0[0].z_position, 0);
+    }
+    if (arg9 & 4) {
+        arg2 = ((D_800CC2D0[0].y_position + 60.0f) - obj->y_position) / (func_1505A6F8(obj, D_800CC2D0) / arg1);
+    }
+    if (arg9 & 8) {
+        angle += (u16)(func_150ADA20() % 0x1200U) - 0x900;
+    }
+    if (arg9 & 0x10) {
+        f32 pad1;
+        f32 pad2;
+        f32 pad3;
+        f32 tx;
+        f32 ty;
+        f32 tz;
+        f32 dx;
+        f32 dy;
+        f32 dz;
+        f32 offx;
+        f32 offz;
+        f32 offy;
+        struct127 *target;
+        f32 hdist;
+        f32 pitch;
+        f32 dummy;
+
+        target = &D_800CC2D0[D_800D154C->unk222];
+        func_1505A184(target->unk76, target->xz_velocity * 4.0f, 0.0f, &offx, &offz, &offy);
+        tx = target->x_position + offx;
+        tz = target->z_position + offz;
+        ty = (target->y_position + 30.0f) + target->y_velocity * 4.0f;
+        dx = tx - obj->x_position;
+        dy = ty - obj->y_position;
+        dz = tz - obj->z_position;
+        hdist = sqrtf(dx * dx + dz * dz);
+        pitch = func_150484A0(dy, hdist) * 10430.37793f;
+        angle = func_1505A630(dx, -dz, 0);
+        func_1505A184((s16)pitch, arg1, 0.0f, &arg1, &arg2, &dummy);
+        arg2 = -arg2;
+    }
+    obj->unk7A = angle;
+    obj->unk76 = angle;
+    obj->unk40 = (s16)((u16)angle + 0x4000) * 0.0054931640625f;
+    obj->gravity = arg3;
+    obj->y_velocity = arg2;
+    obj->xz_velocity = arg1;
+    obj->unk83 = *((u8 *)&arg4 + 3);
+    obj->unk81 = 0;
+    obj->unk7F = 0;
+    obj->unk80 = 0xFF;
+    if (arg9 & 0x20) {
+        obj->pad126 = obj->unk80 = D_800D154C->unk222;
+    }
+    obj->unk82 = 0x26;
+    if (arg10 == 0) {
+        obj->unkD0 = D_80099AC4[arg5] + 1;
+    }
+    obj->unk28 = 100.0f;
+    obj->unk114 = 255.0f;
+    obj->unkE4 = 5;
+    obj->unkE6 = 5;
+    obj->unkEC = 1.0f;
+    obj->unkF0 = 1.0f;
+    obj->unkDC = 1.0f;
+    obj->unkE0 = 1.0f;
+    obj->unk124 = D_800C3E78 + 1;
+    obj->unk122 = 0x11;
+    obj->unk232 = 0;
+    obj->immune = obj->unk232 * 0 + 0xFF;
+    obj->unkF8 = 0x100E;
+    if (arg10) {
+        obj->unkF8 |= 0x8000;
+        bzero(obj->unk31C = allocate_memory(0x1C0, 1, 0, 0), 0x1C0);
+        obj->unk103 = 1;
+    }
+    obj->xz_scale = arg7;
+    obj->y_scale = arg7;
+    obj->pad66 = D_800D154C->pad66 & 0xC;
+    obj->unk278 = arg5;
+    obj->unk284 = arg10;
+    if (arg5 == 2 || arg5 == 18) {
+        obj->unk282 = 0x3C;
+    }
+    switch (arg5) {
+    case 1:
+        func_1506AC8C(obj, 1, 0);
+        func_1514EC1C(func_15158BD0(obj, 1, 0), obj, 0x13);
+        break;
+    case 15:
+        func_1506AC8C(obj, 0xD, 0);
+        break;
+    case 13:
+        func_10010154(0x237, obj, 0x7530, 0x1F4, 0x7D0);
+    case 5:
+    case 9:
+    case 10:
+        func_1506AC8C(obj, 0xC, 0);
+        break;
+    case 0:
+        func_1506AC8C(obj, 8, 0);
+        func_1514EC1C(func_15158BD0(obj, 1, 0), obj, 0x13);
+        break;
+    }
+    return (u8 *)obj;
+}
 // requires jump table
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 extern void func_15145974(void *, f32 *, f32 *);
@@ -1459,7 +1711,66 @@ void func_1506E2CC(void) {
 //     *arg1 = cmd;
 //     return 1;
 // }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506E46C.s")
+s32 func_151F2CDC(void);
+extern s32 *D_800BE5A8[];
+s32 func_1506E46C(struct127 *arg0, s32 *arg1, s32 arg2) {
+    volatile s32 pad0;
+    u32 cmd;
+    s32 pad[3];
+    u32 v1;
+    u32 v0;
+    u32 hi;
+
+    cmd = *arg1;
+    v1 = *arg1 & 0x7FFF;
+    if (cmd & 0x200000) {
+        switch (arg2) {
+        case 0:
+            if (func_100107F8(arg0) != 0) {
+                return 0;
+            }
+            break;
+        case 1:
+            if (func_10010894(arg0) != 0) {
+                return 0;
+            }
+            break;
+        case 2:
+            if (func_151F2CDC() == 1) {
+                return 0;
+            }
+            break;
+        }
+    }
+    if (v1 >= 2000) {
+        v0 = D_800BE5A8[((u8 *)arg0)[0x288]][v1 - 2000];
+        if (v0 == 0) {
+            return 0;
+        }
+        cmd &= 0xFF200000;
+        if (cmd != 0) {
+            cmd |= v0 & 0xFFFFFF;
+        } else {
+            cmd |= v0;
+        }
+    }
+    v1 = cmd >> 16;
+    if (v1 != 0) {
+    lab:
+        if ((cmd >> 24) >= (func_150ADA20() & 0xFF)) {
+            v1 &= 0x1F;
+            cmd &= 0x7FFF;
+            if (v1) {
+                s32 pad;
+                cmd = func_1000F568(cmd, v1 | 0);
+            }
+        } else {
+            return 0;
+        }
+    }
+    *arg1 = cmd;
+    return 1;
+}
 
 void func_1506E5FC(void) {
     if (func_1506E46C(D_800D154C, &D_800D1580, 0) != 0) {
@@ -3245,13 +3556,6 @@ void func_150730D0(void) {
       }
 }
 
-extern struct127 *func_1505ED34(void);
-extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-extern s32 func_1515D480(s32);
-extern s32 *func_1515D440(void);
-extern s32 func_15158BD0(struct127 *, s32, s32);
-extern void func_1514EC1C(s32, struct127 *, s32);
-extern u8 D_800C3E90;
 
 typedef struct {
     u8 pad_0[0x300];

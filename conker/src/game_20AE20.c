@@ -91,10 +91,16 @@ extern s8 D_800E0B99;
 extern s8 D_800E0BB1;
 extern u8 D_800E0BD1;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_20AE20/func_151DD970.s")
+static s8 D_800E0BE0[0x17];
+extern s8 D_8008FE54[0x17];
 
-extern s8 D_800E0BE0[];
-extern s8 D_8008FE54[];
+void func_151DD970(void) {
+    s32 i;
+
+    for (i = 0; i < 23; i++) {
+        D_800E0BE0[i] = D_8008FE54[i];
+    }
+}
 extern s8 D_8008FE6C[];
 extern s8 D_8008FE84[];
 

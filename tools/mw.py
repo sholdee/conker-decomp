@@ -560,9 +560,11 @@ def changed_files(ws):
     out = []
     for d in ("src", "include"):
         for p in (ws / "conker" / d).rglob("*"):
-            if not p.is_file():
-                continue
+            if not p.is_file() or p.suffix not in (".c", ".h", ".inc", ".s"):
+                continue  # build artifacts (stray .o etc.) must never reach main
             rel = p.relative_to(ws / "conker")
+            if not (ws / "base" / rel.parent).is_dir():
+                continue  # agent scratch dirs (e.g. src/offtmp/) are not source
             b = ws / "base" / rel
             if not b.exists() or not filecmp.cmp(p, b, shallow=False):
                 out.append(rel)
@@ -591,6 +593,17 @@ def cmd_land(a):
         sys.exit("no changes in workspace")
     with open(LOCK, "a") as lk:
         fcntl.flock(lk, fcntl.LOCK_EX)
+        # Only a land (holding this lock) edits main's sources, so uncommitted source edits seen
+        # here are a land that died mid-way (killed agent, usage limit): restore and rebuild main.
+        crashed = git("status", "--porcelain", "--", "conker/src", "conker/include").strip()
+        if crashed or not (MAIN / BIN).exists():
+            if crashed:
+                print(f"recovering from an interrupted land: restoring {crashed}")
+                git("checkout", "--", "conker/src", "conker/include")
+                git("clean", "-fdq", "--", "conker/src", "conker/include")
+            run("make -j16 2>&1", MAIN)
+            if sha1(MAIN / BIN) != INNER_SHA:
+                sys.exit("main does not build to the target sha even after recovery - fix main by hand")
         sizes = stub_sizes(targets)
         if not sizes:
             sys.exit(f"{', '.join(targets)}: no longer stubs in main (already landed?)")

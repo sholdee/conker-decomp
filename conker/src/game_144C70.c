@@ -355,7 +355,90 @@ struct Obj15117DA4 {
 };
 void func_15117798(struct Obj15117798 *arg0);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_144C70/func_151177C0.s")
+struct Obj151177C0 {
+    u8 pad0[0x12];
+    s16 unk12;
+    u8 pad14[0x3B];
+    u8 unk4F;
+    u8 pad50[0x4];
+    u16 unk54;
+    u8 pad56[0x1D];
+    u8 unk73;
+    u8 pad74[0x8];
+    s32 unk7C;
+};
+extern void func_15104A80(struct Obj151177C0 *);
+
+void func_151177C0(struct Obj151177C0 *arg0) {
+    s32 type;
+    s32 offset;
+    s32 step;
+    s32 enable;
+    s32 state;
+    void (*cb)(struct Obj151177C0 *);
+    s32 bit4;
+    s16 dest;
+
+    state = arg0->unk73 & 3;
+    bit4 = arg0->unk73 & 4;
+    type = arg0->unk54;
+    offset = 0x28;
+    step = 3;
+    enable = 0;
+    cb = NULL;
+    if (type == 0x800B && D_800BE9F0 == 0xC) {
+        offset = 0x22;
+    } else if (D_800BE9F0 == 0x31) {
+        offset = 0x14;
+        enable = 1;
+    } else if (D_800BE9F0 == 0xA) {
+        offset = 0x14;
+        enable = 1;
+    } else if (D_800BE9F0 == 0x34) {
+        offset = 0xA;
+        enable = 1;
+        step = 6;
+        cb = func_15104A80;
+    } else if (type == 4) {
+        offset = 0xF;
+    }
+    if (arg0->unk7C == 0) {
+        arg0->unk7C = arg0->unk12 | 0x80000000;
+    }
+    type = (s16)(arg0->unk7C & 0xFFFF);
+    if (state == 3) {
+        dest = type - offset;
+        if (arg0->unk12 != dest) {
+            arg0->unk12 = dest;
+        }
+        if (enable && !(arg0->unk4F & 4) && !bit4) {
+            state = 1;
+        }
+    } else if (state == 0) {
+        dest = type - offset;
+        if (arg0->unk12 != dest) {
+            arg0->unk12 = type;
+        }
+    } else if (state == 2) {
+        dest = type - offset;
+        arg0->unk12 -= step;
+        if (dest >= arg0->unk12) {
+            arg0->unk12 = dest;
+            state = 3;
+            if (cb != NULL) {
+                cb(arg0);
+            }
+        }
+    } else if (state == 1) {
+        arg0->unk12 += 3;
+        if (arg0->unk12 >= type) {
+            arg0->unk12 = type;
+            state = 0;
+        }
+    }
+    arg0->unk73 &= ~3;
+    arg0->unk73 |= state;
+}
 
 s32 func_150AD9A0(s32, s32, s32);
 extern f32 D_800A2FDC;

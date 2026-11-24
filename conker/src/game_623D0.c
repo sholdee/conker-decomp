@@ -193,7 +193,172 @@ s32 func_15035714(s32 arg0, u8 *arg1, u8 *arg2, f32 arg3) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_623D0/func_15035808.s")
+struct List15035808 {
+    u8 unk0;
+    u8 pad1[2];
+    u8 unk3;
+    u8 pad4[2];
+    u8 unk6;
+    u8 pad7[0x2D];
+    s32 unk34;
+    u8 pad38[0x10];
+    u8 *unk48;
+    u32 unk4C[2];
+    struct List15035808 *unk54;
+};
+
+extern u16 D_800C3E7A;
+extern u32 D_800C3E88;
+extern u32 D_800C3E8C;
+extern void *allocate_memory(s32, s32, s32, s32);
+void func_1502D54C(s32, s32 *);
+s32 func_1502DB20(u8);
+s32 func_15031070(struct List15035808 *, struct127 *, struct255 **, s32 *);
+s32 func_150AD9A0(s32, s32, s32);
+
+void func_15035808(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9)
+{
+  struct Entry150356C8 *e;
+  u32 mem;
+  s32 col[3];
+  struct255 *sp;
+  s32 buf[4];
+  struct List15035808 *node;
+  struct List15035808 *next;
+  s32 range;
+  s32 n;
+  s32 scale;
+  s32 count;
+  u8 a;
+  u8 flag;
+  f32 dist;
+  s32 scale2;
+  range = 0x578;
+  if (D_800C3F00 == 15)
+  {
+    return;
+  }
+  if ((arg0 == 0) && (D_800CC2D0[arg1].interaction_state != 1))
+  {
+    return;
+  }
+  if (D_800CC2D0[arg1].unk1D4 == 0)
+  {
+    return;
+  }
+  if ((D_800CC2D0[arg1].unk74 & 0xF) == 15)
+  {
+    return;
+  }
+ goto dummy_label_68452; dummy_label_68452: ;
+  a = D_800CC2D0[arg1].unk7;
+  if (a == 0)
+  {
+    return;
+  }
+  n = func_1502DB20(D_800CC2D0[arg1].id);
+  if (((u32) (D_800C3E7C << 6)) < ((D_800C3E88 + (n << 6)) - D_800C3E8C))
+  {
+    return;
+  }
+  if (D_800C35EA == 1)
+  {
+    range = 10000;
+  }
+  dist = func_150AD9A0(D_800DBFF0->unk2F8 - D_800CC2D0[arg1].x_position, D_800DBFF0->unk2FC - D_800CC2D0[arg1].y_position, D_800DBFF0->unk300 - D_800CC2D0[arg1].z_position);
+  if (((f32) range) < dist)
+  {
+    return;
+  }
+  if (((f32) (range - 200)) < dist)
+  {
+    scale = ((((f32) range) - dist) * 256.0f) / ((f32) (range - 200));
+  }
+  else
+  {
+    scale = 0x100;
+  }
+  if (a != 0xFF)
+  {
+    scale *= a;
+    scale >>= 8;
+  }
+  e = func_150356C8();
+  if (e == 0)
+  {
+    return;
+  }
+  e->unk0 = D_800C3E88;
+  func_1502D54C(arg1, col);
+  e->pad5[0] = col[0];
+  e->pad5[1] = col[1];
+  e->pad5[2] = col[2];
+  e->pad5[3] = arg1;
+  e->unkB = 0;
+  e->unk9 = D_800CC2D0[arg1].unique_id;
+  sp = D_800CC2D0[arg1].unk1D4;
+  mem = e->unk0;
+  func_15034F30(&D_800CC2D0[arg1], e, arg0, sp, mem, n, arg2, arg3, arg4, arg5, arg6, D_800CC2D0[arg1].x_position, D_800CC2D0[arg1].y_position, D_800CC2D0[arg1].z_position, arg7, arg8, arg9, 0, 0);
+  e->unk4 = (e->unk4 * scale) >> 8;
+  if (func_15035714(arg0, (u8 *) (&D_800CC2D0[arg1]), (u8 *) sp, arg3) != 0)
+  {
+    D_800C3F00--;
+    return;
+  }
+  D_800C3E88 += (n << 3) << 3;
+  D_800C3E7A += n;
+  node = (struct List15035808 *) D_800C3EE0;
+  while (node != 0)
+  {
+    next = node->unk54;
+    if ((D_800CC2D0[arg1].unique_id != node->unk0) || (node->unk3 == 0))
+    {
+      node = next;
+      continue;
+    }
+    e = func_150356C8();
+    if (e == 0)
+    {
+      return;
+    }
+    e->pad5[0] = col[0];
+    e->pad5[1] = col[1];
+    e->pad5[2] = col[2];
+    e->pad5[3] = arg1;
+    e->unkB = 1;
+    e->unk9 = D_800CC2D0[arg1].unique_id;
+    e->unkA = node->unk6;
+    if (func_15031070(node, &D_800CC2D0[arg1], &sp, buf) == 0)
+    {
+      node = next;
+      continue;
+    }
+    count = 1;
+    if (node->unk48 != 0)
+    {
+      count = node->unk48[0x3F4];
+    }
+    if (node->unk4C[D_800BE9C0] == 0)
+    {
+      node->unk4C[D_800BE9C0] = (u32) allocate_memory(count << 6, 1, 2, 0);
+    }
+    e->unk0 = node->unk4C[D_800BE9C0];
+    mem = e->unk0;
+    scale2 = (((s32) arg9) * node->unk3) >> 8;
+    if ((node->unk34 == 0) && (node->unk48 == 0))
+    {
+      flag = 0;
+    }
+    else
+    {
+      flag = 1;
+    }
+    func_15034F30(0, e, arg0, sp, mem, count, arg2, arg3, arg4, arg5, arg6, D_800CC2D0[arg1].x_position, D_800CC2D0[arg1].y_position, D_800CC2D0[arg1].z_position, arg7, arg8, scale2, flag, 1);
+    node = next;
+    e->unk4 = (e->unk4 * scale) >> 8;
+  }
+
+}
 
 extern u8 D_80082FC0[];
 extern u8 D_80083140[];
