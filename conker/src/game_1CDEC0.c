@@ -296,7 +296,80 @@ void func_151A0AF8(struct Obj151A0AF8 *arg0) {
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1CDEC0/func_151A0C0C.s")
+typedef struct {
+    void *unk00;
+    u8 pad04[8];
+    s16 unk0C, unk0E;
+    s16 x, y, z, velX, velZ;
+    u8 pad1A[2];
+    s8 fracX, fracY, fracZ, mode;
+    s16 velY, size, unk24, unk26, life;
+    s8 fade;
+    u8 pad2B;
+    u8 r, g, b, a;
+    s8 unk30, unk31, unk32;
+    u8 pad33;
+    s16 kind;
+} Packet151A0C0C;
+
+extern u8 D_8008F8D0[];
+extern u8 D_8009187C[];
+extern u8 D_800918A0[];
+extern void *func_15167D84(void *, s32, s32, s8, u8, s32);
+
+s32 func_151A0C0C(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7,
+                  s32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
+    Packet151A0C0C packet;
+    s16 yaw;
+    f32 sinYaw;
+    f32 cosYaw;
+    f32 sinPitch;
+    f32 cosPitch;
+    f32 speed;
+    s32 t;
+
+    yaw = func_150ADA20() % 15U - 0x3F;
+    sinYaw = func_151423D8(yaw);
+    cosYaw = func_151423D8(yaw - 64);
+    sinPitch = func_151423D8(arg8);
+    cosPitch = func_151423D8(arg8 - 64);
+    speed = func_150ADA68() * 503.0f + 801.0f;
+    packet.velX = (s32)(speed * sinYaw * cosPitch);
+    packet.velY = (s32)(-speed * cosYaw);
+    packet.velZ = (s32)(speed * sinYaw * sinPitch);
+    packet.size = func_150ADA20() % 41U - 0x82;
+    packet.fade = func_150ADA20() % 3U + 6;
+    t = func_150ADA20();
+    packet.unk24 = packet.unk26 = t % 451U + 0xFA;
+    packet.x = (s32)arg2;
+    packet.y = (s32)arg3;
+    packet.z = (s32)arg4;
+    packet.fracX = (u16)(s32)(arg2 * 256.0f);
+    packet.fracY = (u16)(s32)(arg2 * 256.0f);
+    packet.fracZ = (u16)(s32)(arg2 * 256.0f);
+    packet.unk30 = 0;
+    packet.unk31 = 0;
+    packet.unk32 = 0;
+    packet.a = 0xFF;
+    packet.mode = -1;
+    packet.kind = 0;
+    packet.unk0C = 0;
+    packet.unk0E = 0;
+    packet.r = D_8008F8D0[argB];
+    packet.g = D_8008F8D0[argB];
+    packet.b = D_8008F8D0[argB];
+    switch (argB) {
+    case 0:
+        packet.unk00 = D_800918A0;
+        break;
+    case 1:
+        packet.unk00 = D_8009187C;
+        break;
+    }
+    packet.life = 0xC8;
+    func_15167D84(&packet, 0, 0, -1, argE, 1);
+    return 1;
+}
 
 void func_151A11CC(f32 arg0, f32 arg1, f32 arg2, f32 arg3,
                   f32 arg4, s32 arg5, s32 arg6, s32 arg7,
