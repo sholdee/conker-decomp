@@ -820,7 +820,114 @@ void func_1502D630(struct127 *arg0, s32 *arg1, s32 arg2) {
     arg1[3] = (1.0f - amount) * 255.0f;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_58F80/func_1502D824.s")
+extern void func_1505DFDC(void *);
+
+typedef struct {
+    u8 pad0[0x8];
+    f32 pos[2];
+    u8 pad10[0x8];
+    f32 len[2];
+    u8 pad20[0x8];
+    u8 *src[2];
+    u8 *dst[2];
+    u8 off[2];
+    u8 pad3A[2];
+    s16 unk3C;
+    u8 pad3E[7];
+    u8 unk45;
+    u8 pad46[2];
+    u8 unk48;
+    u8 pad49[0x1D0 - 0x49];
+} Struct1502D824;
+
+void func_1502D824(Struct1502D824 *arg0, u8 *arg1, u8 *arg2) {
+    s32 n;
+    u32 size;
+    u8 *src;
+    s32 twice;
+    s32 frame;
+    f32 pos;
+    f32 len;
+    s32 count;
+    s32 frames;
+    s32 i;
+    u8 off;
+    u8 offa;
+
+    count = 1;
+    offa = 0;
+    if (arg1 != NULL) {
+        if (*(u16 *)(arg1 + 0x84) == 0xFFFF) {
+            func_1505DFDC(arg1);
+        }
+        arg0 = *(Struct1502D824 **)(arg1 + 0x2D0);
+    }
+    if (arg0 == NULL) {
+        return;
+    }
+    if (arg0->unk3C > 0) {
+        count = 2;
+    }
+    for (i = 0; i < count; i++) {
+        n = arg0[i].unk45;
+        twice = 0;
+        if (!n) {
+            arg0->off[i] = 0;
+            continue;
+        }
+        if (arg0->src[i] == NULL) {
+            continue;
+        }
+        pos = arg0->pos[i];
+        len = arg0->len[i];
+        size = n * 2;
+        frame = pos;
+        if (len <= frame) {
+            frame = len - 1.0f;
+        }
+        frames = arg0[i].unk48 + 1;
+        if (frames >= 2) {
+            if (len - 1.0f <= frame) {
+                frame = (len - 1.0f + (frames - 1)) / frames;
+            } else {
+                frame = frame / frames;
+            }
+        }
+        src = arg0->src[i] + n * frame;
+        offa = (u32)src & 3;
+        src -= offa;
+        if (len <= pos + 1) {
+            twice = 1;
+            size = n;
+        } else {
+            arg0->off[i] = n;
+        }
+        arg2 = (u8 *)((((u32)arg2 + 0xF) >> 4) << 4);
+        size += offa;
+        arg0->dst[i] = (u8 *)(offa + (u32)arg2);
+        off = (u8)(s32)offa;
+        if (size < 0xC8) {
+            func_1000480C((u32)src, arg2, size);
+        } else {
+            func_10004514((s32)src, arg2, (size + 0xF) & ~0xF, 1);
+        }
+        arg2 += size + (off * 0);
+        if (twice) {
+            src = arg0->src[i];
+            arg2 = (u8 *)((((u32)arg2 + 0xF) >> 4) << 4);
+            off = (u32)src & 1;
+            src -= off;
+            size = off + n;
+            if (size < 0xC8) {
+                func_1000480C((u32)src, arg2, size);
+            } else {
+                func_10004514((s32)src, arg2, (size + 0xF) & ~0xF, 1);
+            }
+            arg0->off[i] = (arg2 + off) - arg0->dst[i];
+            arg2 += size;
+        }
+    }
+}
 
 extern u16 D_800C4ED0[];
 
