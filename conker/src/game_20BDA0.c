@@ -1401,9 +1401,71 @@ void func_151E2284(void) {
     D_8008FD80 = 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_20BDA0/func_151E22BC.s")
+typedef struct {
+    s8 unk0;
+    s8 unk1;
+    s8 unk2;
+    u8 unk3;
+    u8 unk4;
+    u8 unk5;
+    u8 unk6;
+    u8 unk7;
+    u8 unk8;
+    u8 unk9;
+} Struct151E22BC;
 
 extern s8 *D_80082BBC;
+
+void func_151E22BC(void) {
+    s32 idx;
+    Struct151E22BC *p;
+
+    idx = D_800AB690[*(s8 *)&D_8008FDD4->pad42 * 10];
+    p = (Struct151E22BC *)(D_80082BBC + idx * 10);
+    if (p->unk3 >= 5) {
+        p->unk3 = 4;
+    }
+    if (p->unk3 < 0) {
+        p->unk3 = 0;
+    }
+    if (p->unk1 <= 0) {
+        p->unk1 = 1;
+    }
+    D_800E0BE0[2] = p->unk1;
+    D_800E0BE0[3] = p->unk2;
+    D_800E0BE0[11] = 0;
+    D_800E0BE0[16] = p->unk3;
+    D_800E0BE0[17] = p->unk4;
+    switch (idx) {
+        case 0:
+            D_800E0BE0[4] = p->unk5;
+            break;
+        case 1:
+        case 2:
+            D_800E0BE0[13] = p->unk5;
+            D_800E0BE0[14] = p->unk6;
+            break;
+        case 7:
+            D_800E0BE0[18] = p->unk5;
+            break;
+        case 5:
+            D_800E0BE0[17] = 0;
+            D_800E0BE0[18] = p->unk5;
+            break;
+        case 8:
+        case 9:
+            D_800E0BE0[7] = p->unk5;
+            D_800E0BE0[19] = p->unk6;
+            D_800E0BE0[17] = 1;
+            D_800E0BE0[3] = 2;
+            break;
+        default:
+            break;
+    }
+    D_800E0BE0[22] = p->unk8;
+    D_800E0BE0[6] = p->unk9;
+    func_151DD9E4();
+}
 
 void func_151E2404(void) {
     s8 *record;
