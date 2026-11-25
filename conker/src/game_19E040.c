@@ -7,7 +7,10 @@
 #undef func_15048A40
 #include "variables.h"
 
-/* Template for a type 0x10 model effect (same layout as ModelFxData in game_1944C0.c); func_15168BE4 copies it. */
+/*
+ * Template for a type 0x10 model effect; func_15168BE4 copies it into the object's data (ModelFxData in
+ * game_1944C0.c; the callback-2 update, func_15169C70, reads it as Debris in game_197120.c).
+ */
 typedef struct {
     /* 0x00 */ f32 position[3];
     /* 0x0C */ f32 rotation[3];
@@ -17,15 +20,17 @@ typedef struct {
     /* 0x3C */ s32 life;
     /* 0x40 */ void *displayList;
     /* 0x44 */ u32 pad44;
-    /* 0x48 */ f32 unk48[3];
-    /* 0x54 */ u8 callback;
+    /* 0x48 */ f32 friction;
+    /* 0x4C */ f32 bounce;
+    /* 0x50 */ f32 spinDamp;
+    /* 0x54 */ u8 callback;     /* index into D_8008CA20 */
     /* 0x55 */ u8 primA;
     /* 0x56 */ u8 tileUlt;
-    /* 0x57 */ u8 unk57;
-    /* 0x58 */ u8 unk58;
-    /* 0x59 */ u8 unk59;
-    /* 0x5A */ u8 modelId;
-    /* 0x5B */ u8 unk5B;
+    /* 0x57 */ u8 phase;
+    /* 0x58 */ u8 flags;
+    /* 0x59 */ u8 floorOffset;
+    /* 0x5A */ u8 modelId;      /* the func_1518C900 resource displayList came from */
+    /* 0x5B */ u8 kind;
     /* 0x5C */ u8 renderMode;
     /* 0x5D */ u8 combineMode;
     /* 0x5E */ u8 pad5E[2];
@@ -67,7 +72,7 @@ void func_1516D4E8(s16, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s
                    s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Spawns six models bursting up and out of the actor, plus a ring of dust particles around its feet. */
-void func_15170B90(EffectActor *actor, s32 modelId, s32 arg2, s32 mode, u8 owner, s32 list) {
+void func_15170B90(EffectActor *actor, s32 modelId, s32 kind, s32 mode, u8 owner, s32 list) {
     s32 i;
     ModelFxTemplate fx;
     f32 x;
@@ -87,16 +92,16 @@ void func_15170B90(EffectActor *actor, s32 modelId, s32 arg2, s32 mode, u8 owner
     fx.scale[1] = 1.0f;
     fx.scale[2] = 1.0f;
     fx.life = 60;
-    fx.unk48[0] = 0.3f;
-    fx.unk48[1] = -0.7f;
+    fx.friction = 0.3f;
+    fx.bounce = -0.7f;
     fx.callback = 2;
-    fx.unk48[2] = -0.2f;
+    fx.spinDamp = -0.2f;
     fx.primA = 255;
     fx.tileUlt = 0;
-    fx.unk57 = 0;
-    fx.unk58 = 0;
-    fx.unk59 = 60;
-    fx.unk5B = arg2;
+    fx.phase = 0;
+    fx.flags = 0;
+    fx.floorOffset = 60;
+    fx.kind = kind;
     fx.renderMode = 0;
     fx.combineMode = 0;
     for (i = 0; i < 6; i++) {
@@ -159,8 +164,8 @@ void func_15170F4C(EffectActor *actor, u8 owner, s32 list) {
     piece = D_800A6ED8;
     fx.renderMode = 2;
     fx.combineMode = 1;
-    fx.unk5B = 6;
-    fx.unk59 = 0;
+    fx.kind = 6;
+    fx.floorOffset = 0;
     x = actor->x;
     y = actor->y;
     z = actor->z;
@@ -174,11 +179,11 @@ void func_15170F4C(EffectActor *actor, u8 owner, s32 list) {
     fx.callback = 2;
     fx.primA = 255;
     fx.tileUlt = 0;
-    fx.unk57 = 0;
-    fx.unk58 = 0;
-    fx.unk48[0] = 0.3f;
-    fx.unk48[1] = -0.7f;
-    fx.unk48[2] = -0.2f;
+    fx.phase = 0;
+    fx.flags = 0;
+    fx.friction = 0.3f;
+    fx.bounce = -0.7f;
+    fx.spinDamp = -0.2f;
     for (i = 0; i < count; i++) {
         displayList = func_1518C900(piece->modelId);
         fx.modelId = piece->modelId;
@@ -213,10 +218,11 @@ void func_151711C4(struct127 *obj) {
 
 /*
  * Spawns `count` models scattered within +-radius/2 of (x, y, z), rising at 0.8-1.2 x `speed`
- * with a random drift and spin and a random scale between minScale and maxScale.
+ * with a random drift and spin and a random scale between minScale and maxScale; they bounce
+ * off the floor with `bounce` (friction is -0.75 x bounce).
  */
 void func_15171200(s32 count, s32 modelId, f32 x, f32 y, f32 z, f32 speed, f32 minScale, f32 maxScale,
-                   f32 radius, s32 arg9, s32 life, f32 arg11, u8 owner, s32 list) {
+                   f32 radius, s32 kind, s32 life, f32 bounce, u8 owner, s32 list) {
     s32 i;
     ModelFxTemplate fx;
     f32 scaleRange;
@@ -232,19 +238,19 @@ void func_15171200(s32 count, s32 modelId, f32 x, f32 y, f32 z, f32 speed, f32 m
     fx.rotation[0] = 0.0f;
     fx.rotation[1] = 0.0f;
     fx.rotation[2] = 0.0f;
-    fx.unk48[0] = arg11 * -0.75f;
-    fx.unk48[1] = arg11;
+    fx.friction = bounce * -0.75f;
+    fx.bounce = bounce;
     fx.callback = 2;
     fx.primA = 255;
     fx.tileUlt = 0;
-    fx.unk57 = 0;
-    fx.unk58 = 0;
+    fx.phase = 0;
+    fx.flags = 0;
     fx.modelId = modelId;
-    fx.unk5B = arg9;
+    fx.kind = kind;
     fx.renderMode = 1;
     fx.combineMode = 1;
     radius *= 1.0f / 65536;
-    fx.unk48[2] = -0.2f;
+    fx.spinDamp = -0.2f;
     liftRange = speed * 6.103515716e-06f;
     speed *= 0.8f;
     for (i = 0; i < count; i++) {
@@ -265,7 +271,7 @@ void func_15171200(s32 count, s32 modelId, f32 x, f32 y, f32 z, f32 speed, f32 m
         fx.scale[0] = (f32)(func_150ADA20() & 0xFFFF) * (1.0f / 65536) * scaleRange + minScale;
         fx.scale[1] = (f32)(func_150ADA20() & 0xFFFF) * (1.0f / 65536) * scaleRange + minScale;
         scaleZ = (f32)(func_150ADA20() & 0xFFFF) * (1.0f / 65536) * scaleRange + minScale;
-        fx.unk59 = (fx.scale[1] + fx.scale[0] + scaleZ) * 6.666667f + 20.0f;
+        fx.floorOffset = (fx.scale[1] + fx.scale[0] + scaleZ) * 6.666667f + 20.0f;
         fx.scale[2] = scaleZ;
         func_15168BE4(&fx, owner, list);
     }
