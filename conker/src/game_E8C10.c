@@ -98,8 +98,6 @@ s32 func_150BB760(Actor *actor) {
     }
 }
 
-void func_1516865C(QuadFxData *request, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-s32 func_15168800(QuadFxData *request, s32 arg1, s32 arg2);
 void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32,
                   s32, s32, s32, s32, s32, s32, s32, s32);
 

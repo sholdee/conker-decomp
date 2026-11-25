@@ -6,7 +6,6 @@
 /* matching: the joint owner is passed as s32; a pointer parameter changes register allocation */
 void func_1504715C(CollisionHit *, Actor *);
 s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
-s32 func_1518ABD0(s32, QuadSprite *, u8);
 
 /*
  * Spawns the effects for one of obj's joints (side 0: joint 0x11, side 1: joint 0x1A): a sound,

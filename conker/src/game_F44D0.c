@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_1516962C(s32, Actor *, s32);
-
 /*
  * Attaches two mirrored func_15134DAC effects (unk8 13 and 12) to `owner`, lasting `duration`,
  * or 300 when `duration` is 0.

@@ -9,8 +9,6 @@ extern s32 D_800902BC[];
 extern void func_150A7A48(MtxF a, MtxF b, MtxF out);
 
 
-void func_15168E54(Gfx *, AttachModelHeader *);
-
 /* Loads (or reuses) attachment model `model` and returns its display lists and vertex data. */
 s32 func_1502FE10(s32 model, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *arg4, s32 *arg5, s32 *arg6) {
     AttachModelHeader *header;

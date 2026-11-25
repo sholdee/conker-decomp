@@ -46,8 +46,6 @@ s32 func_150D8A20(s32 arg0, s32 arg1) {
     return 8;
 }
 
-void func_151875E0(f32, f32, f32, s32, s32, s32, f32, f32);
-
 /* Spawns two effects at bone point `point` of the actor (see func_150D88E0), if it has bones. */
 void func_150D8A34(Actor *actor, s32 point, s32 arg2) {
     Vec3f pos;

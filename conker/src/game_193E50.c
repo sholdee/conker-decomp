@@ -39,7 +39,6 @@ void func_151669A0(s32 x, s32 y, s32 z, f32 scale, u8 arg4, s32 arg5) {
 
 extern void *D_8008CA4C[];
 extern void func_150A7960(void *, f32, f32, f32, f32 *, f32 *, f32 *);
-extern s32 func_15167D84(void *, s32, s32, s32, s32, s32);
 
 /* Per-frame update: halfway through, spawns a particle from each quad; frees the object when done. */
 void func_15166B50(void *self) {

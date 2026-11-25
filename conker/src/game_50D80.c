@@ -387,7 +387,6 @@ extern void func_1510A930(s32, s32, s32);
 extern void func_1515F170(s32, u8);
 extern void light_sendEvent(u8, u8, s32);
 extern void func_151645C4(u8);
-extern void func_15169040(s32, u8);
 extern s32 func_1518D1C0(Actor *, s16, s16, s32, u8, s32, char *);
 extern void func_1518F45C(s32, u8);
 extern s32 func_1518F51C(void *, u8, s16, s8, s8, s8, u8, s32, s32, s32);
@@ -1155,7 +1154,6 @@ extern void func_151F2C4C(void);
 extern void func_151F2D6C(s32, s32);
 extern void func_1516D99C(s16, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_151B9BF0(s32, s32, s16, s16, s16, s16, s16, s16, s16, s16, s16, s16, s16, f32 *, s32, s32);
-extern void func_15167AD8(Ev15167AD8 *, u8, s32);
 extern void func_150E1AB0(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, f32, f32, f32, f32, f32, f32);
 extern void func_150E2DB4(Actor *, u8, s16, s32, f32, f32, f32, f32, f32, f32, s32, s32, s32, s32);
 extern void func_1516E778(f32 *, s32, s8, u8, s32);
@@ -1192,16 +1190,11 @@ extern void func_15107B78(Actor *, s16, s16, u8, s32);
 extern void func_1519EA78(f32 *, u16, f32, u8, s32);
 extern void func_15107700(Actor *, s16, s16, s16, s32, f32, f32, s32, s32, u8 *, s32, s32);
 extern void func_150F16DC(Actor *, u8, u8, u8, s32);
-extern void func_15170B90(void *, s32, s32, s32, s32, s32);
 extern void func_15193660(Actor *, u8, s32);
 extern void func_151A0A10(Actor *, s32, u8, s32);
 extern void func_151DBAA8(f32 *, s32, u8, u8, s32);
 extern void func_150DAE70(Actor *, s32, u8, s32);
 extern void func_15148F1C(u8, f32, f32, f32, s32, s32, s32, f32, s16, f32, f32, s32);
-extern void func_15171600(WorldObject *, u8, s32);
-extern void func_15171BF4(Actor *, u8);
-extern void func_15170EC4(WorldObject *, u8, s32);
-extern void func_151711C4(Actor *);
 extern void func_1516ED68(s32, s32, u8, s32);
 
 /*
@@ -2362,7 +2355,6 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
     return 1;
 }
 
-extern void func_15178EFC(s32);
 extern void func_15188810(Actor *, s32, s32);
 extern void func_1518894C(WorldObject *, s32, s32);
 extern void func_15188AD0(Actor *);

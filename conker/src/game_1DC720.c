@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_1516962C(s32 type, Actor *actor, u8 eventType);
 void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
 
 /* Attaches emitter 10 (func_151AF338) to bone 1 of `actor` for 320 frames. */

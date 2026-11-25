@@ -31,8 +31,6 @@ s32 func_150DF8C0(s32 index) {
     return 0;
 }
 
-extern void func_151749A0(s32, s32);
-
 /* Points slots 3 and 4 (func_150A2864/func_150A3444) 200 units above actors 6 and 7, or
  * disables them when the actor is missing, then scrolls the texture of each of the three
  * materials in the D_800B0E00 display list that loads its image from segment 2 + i. */

@@ -54,7 +54,6 @@ struct AttachedEffect {
 
 extern s32 D_8008CB14;
 extern s32 func_15147DA0(EffectTemplate18 *, TrailMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32, TrailRender *, s32, s32, s32);
-s32 func_15167D84(void *, s32, s32, s32, s32, s32);
 
 /* Bursts 12-20 particles plus one emission from the owner's bone, when the owner is still the same actor. */
 void func_150AE790(AttachedEffect *effect) {

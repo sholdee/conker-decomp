@@ -10,7 +10,6 @@ u8 func_150ADA20(void);
 
 
 extern void *D_8008CA4C[];
-void *func_15167D84(void *, s32, s32, s32, s32, s32);
 
 /* A random offset in [-range / 2, range / 2). */
 #define RAND_SPREAD(range) ((s32)((func_150ADA20() % (u32)(range)) - ((range) >> 1)))

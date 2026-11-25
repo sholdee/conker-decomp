@@ -6,7 +6,6 @@
 
 extern s32 D_800A3880[];
 extern s32 D_800DC640[];
-void func_15168E54(s32 arg0, s32 arg1);
 
 s32 func_15046C80(f32 *pos, s32 arg1, f32 bottom, CollisionHit *floor);
 s32 func_15044380(f32 x, f32 y, f32 z, Actor *probe, s32 arg4, s32 arg5);
@@ -165,7 +164,6 @@ void func_151325C8(ModelParticle *particle) {
     }
 }
 
-extern void func_15168A9C(void *);
 extern s32 func_1515D480(s32);
 extern s32 func_1515D440(void);
 

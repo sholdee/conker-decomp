@@ -415,6 +415,7 @@ struct Obj150BCFB8;
 struct Obj150BCFB8;
 struct Obj150BCFB8;
 struct Obj150BCFB8;
+struct Obj150BCFB8;
 s32 func_150BB760(Actor *actor);
 s32 func_150BBB5C(Actor *actor);
 s32 func_150BC488(Actor *actor);
@@ -423,6 +424,7 @@ s32 func_150BCFB8(struct Obj150BCFB8 *obj, s32 arg1, s32 arg2, s32 arg3, f32 flo
 void func_150BD070(u8 arg0, s32 arg1);
 
 /* game_EABF0.c */
+struct Obj150BDB3C;
 struct Obj150BDB3C;
 struct Obj150BDB3C;
 struct Obj150BDB3C;
@@ -1140,5 +1142,131 @@ void func_15166118(s32 angleA, s32 angleB, s32 x, s32 y, s32 z, s32 growthRate, 
 void func_15166204(QuadEffect *effect);
 Gfx *func_15166268(Gfx *gdl, QuadEffect *effect, s32 arg2);
 Gfx *func_151668B8(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3);
+
+/* game_1944C0.c */
+typedef struct SpriteFx SpriteFx;
+typedef struct ModelFxData ModelFxData;
+typedef struct ModelFx ModelFx;
+typedef struct DLCommand DLCommand;
+void func_15167010(void);
+void func_1516706C(void);
+void func_151670C0(void);
+void func_151671E8(void);
+void func_15167310(void);
+Gfx *func_151674F8(Gfx *gfx, s32 group, s16 arg2, s32 list);
+void *func_15167A68(s32 type, s32 list, s32 size, s32 arg3, s32 owner, s32 arg5);
+void func_15167AD8(SpriteFx *src, u8 owner, s32 list);
+void func_15167B44(SpriteFx *fx);
+Gfx *func_15167C58(Gfx *gdl, SpriteFx *fx, u8 arg2);
+BillboardParticle *func_15167D84(BillboardTemplate *src, s32 altType, s32 extra, s8 onDeath, u8 owner, s32 list);
+void func_15167E0C(BillboardParticle *p);
+s32 func_15168118(Gfx *gfx, BillboardParticle *p, s16 viewIndex);
+void func_1516865C(QuadFxData *q, u8 r, u8 g, u8 b, u8 a);
+QuadFx *func_15168800(QuadFxData *src, s32 owner, s32 list);
+void func_15168870(QuadFx *fx);
+void func_15168A2C(EffectHeader *obj);
+void func_15168A4C(EffectHeader *obj, s32 type);
+void func_15168A9C(EffectHeader *obj);
+void func_15168B10(EffectHeader *obj, s32 type);
+void func_15168B44(void *arg0);
+void func_15168BAC(ModelFx *fx);
+void func_15168BE4(ModelFxData *src, u8 owner, s32 list);
+Gfx *func_15168C4C(Gfx *gfx, ModelFx *fx, s32 arg2);
+void func_15168E34(s32 *addr, s32 offset);
+void func_15168E54(s8 *dl, s32 offset);
+void func_15168F08(DLCommand *dl, s32 base);
+void func_15168F84(s32 group, s32 *first, s32 *last);
+void func_15169040(s32 event, u8 eventType);
+void func_15169070(s32 first, s32 last, s32 event, u8 eventType);
+void func_15169260(void *types, s32 count, s32 event, u8 eventType);
+void func_1516944C(s32 type, s32 event, u8 eventType);
+void func_151695F0(Actor *actor, u8 eventType);
+void func_1516962C(s32 type, Actor *actor, u8 eventType);
+s32 func_15169668(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+void func_1516968C(EffectHeader *obj, u8 *event, u8 eventType);
+void func_151696DC(EffectHeader *obj);
+void func_1516972C(EffectHeader *obj);
+void func_1516979C(EffectHeader *obj);
+void func_15169804(EffectHeader *obj);
+void func_15169824(EffectHeader *obj);
+void func_15169850(s32 event, u8 eventType, Actor **owner, u8 *ownerId, void *obj);
+
+/* game_19E040.c */
+typedef struct ModelBurstPiece ModelBurstPiece;
+void func_15170B90(WorldObject *actor, s32 modelId, s32 kind, s32 mode, u8 owner, s32 list);
+void func_15170EC4(WorldObject *actor, u8 owner, s32 list);
+void func_15170F4C(WorldObject *actor, u8 owner, s32 list);
+void func_151711C4(Actor *obj);
+void func_15171200(s32 count, s32 modelId, f32 x, f32 y, f32 z, f32 speed, f32 minScale, f32 maxScale, f32 radius,
+                   s32 kind, s32 life, f32 bounce, u8 owner, s32 list);
+void func_15171600(WorldObject *actor, u8 owner, s32 list);
+void func_151717FC(WorldObject *actor, f32 halfX, f32 halfZ, f32 offsetX, f32 offsetY, f32 offsetZ, s32 type, s32 style,
+                   s32 countA, s32 countB, f32 scale, u8 owner, s32 list);
+void func_151718F0(f32 x, f32 y, f32 z, f32 radius, s32 baseSize, f32 sizeScale, s32 color, s32 count, u8 owner,
+                   s32 list);
+void func_15171BF4(Actor *obj, u8 owner);
+extern const f32 D_800A6E90[6][3];
+extern const ModelBurstPiece D_800A6ED8[6];
+
+/* game_1A1E50.c */
+void func_151749A0(s32 arg0, s32 arg1);
+void func_151749F8(s32 arg0, s32 arg1);
+Gfx *func_15174AA4(Gfx *gfx, s32 arg1, s32 arg2);
+Gfx *func_15174B48(Gfx *gfx, s32 arg1, s32 arg2);
+
+/* game_1A6360.c */
+void func_15178EB0(void);
+void func_15178EFC(s32 state);
+void func_15179008(s32 player);
+void func_151794C8(void);
+void func_15179600(s32 scatterY, s32 dropFlags);
+void func_151797B0(QuadFx *drop);
+void func_15179AB8(void);
+void func_15179B14(s32 count);
+void func_15179CB0(QuadFx *splash);
+
+/* game_1B4A90.c */
+typedef struct FadeBurstEffect FadeBurstEffect;
+void func_151875E0(f32 x, f32 y, f32 z, s32 speed, s32 duration, s32 durationJitter, f32 scaleYZ, f32 scaleX);
+void func_15187978(FadeBurstEffect *burst);
+Gfx *func_15187A98(Gfx *gdl, FadeBurstEffect *burst, s32 arg2);
+void func_15187D6C(MtxF mtx, f32 rx, f32 ry, f32 rz);
+
+/* game_1B5370.c */
+s32 func_15187EC0(s32 type, f32 rate, u8 fromR, u8 fromG, u8 fromB, u8 toR, u8 toG, u8 toB);
+void func_15187F90(void);
+void func_15187FC0(s32 index, s32 *rgb);
+void func_15188010(s32 index, f32 *blend);
+void func_1518804C(s32 index, f32 blend);
+void func_151880C0(void);
+
+/* game_1B7870.c */
+EffectActor *func_1518A3C0(Vec3f *position, Vec3f *angle, f32 scale, Vec3f *velocity, Vec3f *angularVelocity,
+                           f32 gravity, f32 damping, u8 flags, s16 lifetime, u8 altDisplayList, s32 extraSize, u8 arg11,
+                           s32 arg12);
+s32 func_1518A5F4(EffectActor *actor);
+s32 func_1518A914(Mtx *mtx, EffectActor *actor);
+
+/* game_1B7EC0.c */
+typedef struct QueueNode QueueNode;
+typedef struct Queue Queue;
+void func_1518AA10(Queue *arg);
+Queue *func_1518AADC(s32 capacity, s16 lifetime, u8 flags);
+QueueNode *func_1518AB60(s32 value, u8 releaseFunc);
+s32 func_1518ABD0(Queue *queue, s32 value, u8 releaseFunc);
+
+/* game_1BD8B0.c */
+typedef struct Game1BD8B0Object Game1BD8B0Object;
+typedef struct BoundEffect BoundEffect;
+void func_15190400(BoundEffect *effect, ActorRef *msg, u8 type);
+void func_15190454(Game1BD8B0Object *obj);
+void func_15190464(Game1BD8B0Object *obj);
+
+/* game_1BDA00.c */
+typedef struct PeriodicObject PeriodicObject;
+typedef struct HandlerObject HandlerObject;
+void func_15190550(HandlerObject *obj, s32 arg1, u8 event);
+s32 func_151905BC(PeriodicObject *obj);
+void func_151906C4(PeriodicObject *obj);
 
 #endif

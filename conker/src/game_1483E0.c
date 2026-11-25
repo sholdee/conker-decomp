@@ -8,9 +8,7 @@
  * (Work1483E0, one member per routine).
  */
 
-extern void func_15188010(s32, f32 *);
 extern s32 func_15022B08(s32, s32);
-extern void func_1518804C(s32, f32);
 
 struct Wave1511CB44;
 struct Swing1511DBC4;
@@ -686,8 +684,6 @@ void func_1511C548(WorldObject *obj) {
     }
 }
 
-
-extern void func_15170F4C(WorldObject *, u8, s32);
 
 /* The three sound ids func_1511C638 picks from: { 0x2B6, 0x2BD, 0x2BE }. The original local
  * initializer lies in the rodata of the larger original compilation unit (before game_142560's

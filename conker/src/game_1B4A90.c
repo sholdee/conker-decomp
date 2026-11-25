@@ -19,7 +19,7 @@ typedef struct {
 } FadeBurstPiece; /* size 0xA0 */
 
 /* Burst effect object: 12 pieces flying outwards from a point and fading. */
-typedef struct {
+struct FadeBurstEffect {
     EffectHeader header;
     Mtx mtx[2];          /* 0x10 */
     f32 x;               /* 0x90 */
@@ -30,13 +30,12 @@ typedef struct {
     FadeBurstPiece *pieces;  /* 0xA4 */
     s16 timer;           /* 0xA8 */
     s16 duration;        /* 0xAA */
-} FadeBurstEffect; /* size 0xB0 */
+}; /* size 0xB0 */
 
 extern void func_150A7DA0(MtxF mtx, f32 x, f32 y, f32 z);
 extern void func_150A7A48(MtxF a, MtxF b, MtxF c);
 extern void func_151EFE00(MtxF mtx); /* identity matrix */
 extern Vtx D_8008D538[];
-void func_15187D6C(MtxF mtx, f32 rx, f32 ry, f32 rz);
 
 /* Spawns a burst effect at (x, y, z) with 12 pieces in three rings of four. */
 void func_151875E0(f32 x, f32 y, f32 z, s32 speed, s32 duration, s32 durationJitter, f32 scaleYZ, f32 scaleX) {

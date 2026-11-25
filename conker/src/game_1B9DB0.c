@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_15168E54(Gfx *, AttachModelHeader *);
-
 // NEAR-MISS 16 -> MATCH (wave 61). The parked candidate carried a `u8 c` local that the
 // original never had. Frame-layout law measured here (game_1B9DB0, -O2 -g3):
 //

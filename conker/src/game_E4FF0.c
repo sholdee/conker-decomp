@@ -219,8 +219,6 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
     }
 }
 
-void *func_1518A3C0(f32 *, f32 *, f32, f32 *, f32 *, f32, f32, u8, s16, u8, s32, u8, s32);
-
 /*
  * Spawns 35-60 tumbling pieces at random directions around `center`, at distance `radius`
  * with the vertical offset scaled by `yScale`, each flying outwards.

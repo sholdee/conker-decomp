@@ -6,8 +6,6 @@
 #undef func_1000E770
 #include "variables.h"
 
-void func_15187FC0(s32 arg0, s32 *arg1);
-void func_15188010(s32 arg0, f32 *arg1);
 void func_1515F170(s32 arg0, u8 arg1);
 
 extern u8 D_800886F0[];

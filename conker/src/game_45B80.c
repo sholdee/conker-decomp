@@ -27,9 +27,6 @@ extern s32 D_800BE9D0;
 
 
 
-Gfx *func_151674F8(Gfx *gfx, s32 group, s16 player, s32 list);
-Gfx *func_15174AA4(Gfx *gfx, s32 arg1, s32 player);
-Gfx *func_15174B48(Gfx *gfx, s32 arg1, s32 player);
 void func_1517D7B0(Gfx **gfx, s32 arg1);
 Gfx *func_15188D00(Gfx *gfx, s32 arg1, s16 player);
 
@@ -83,7 +80,6 @@ void func_150186D0(void) {
 
 void func_151E51EC(void);
 void func_1515D69C(void);
-void func_15167310(void);
 void func_15189118(s32);
 void func_15084A18(void);
 void func_15125628(void);
@@ -317,12 +313,8 @@ void func_1501E2F8(s32);
 void func_15087CC0(void);
 void func_1510FC34(s32);
 void func_15094EA0(s32);
-void func_151749F8(s32, s32);
 void func_15188B74(s32);
-void func_151670C0(void);
 void func_1515D6C8(void);
-void func_1516706C(void);
-void func_151671E8(void);
 
 // D_80043B40 is the 508-entry TLB slot table (see the handwritten miss handler at 0x10006138,
 // which uses the same {page, age} layout); this pass ages every slot by one frame.

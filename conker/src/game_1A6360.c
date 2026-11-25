@@ -24,14 +24,7 @@ extern s32 D_800DD440;
 extern s8 D_800DD446;       /* rain state */
 
 extern f32 sqrtf(f32);
-void func_1516865C(QuadFxData *q, s32 r, s32 g, s32 b, s32 a);
-QuadFx *func_15168800(QuadFxData *src, s32 owner, s32 list);
 s32 func_1510F8D8(s32 x, s32 y, s32 z, s32 arg3);
-
-void func_151794C8(void);
-void func_15179600(s32 scatterY, s32 dropFlags);
-void func_15179AB8(void);
-void func_15179B14(s32 count);
 
 /* Resets the rain state. */
 void func_15178EB0(void) {

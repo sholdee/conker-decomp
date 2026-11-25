@@ -4,7 +4,6 @@
 
 /* A fixed-capacity FIFO of values with optional per-value release callbacks. */
 
-typedef struct QueueNode QueueNode;
 
 struct QueueNode {
     EffectHeader header;
@@ -14,7 +13,7 @@ struct QueueNode {
     u8 releaseFunc;       /* index into D_8008D5C0, 0 = none */
 };
 
-typedef struct {
+struct Queue {
     EffectHeader header;
     QueueNode *head;      /* newest node */
     QueueNode *tail;      /* oldest node */
@@ -23,7 +22,7 @@ typedef struct {
     s16 lifetime;         /* timer reload value on each push */
     s16 timer;
     u8 flags;             /* bit 0: timer counts down */
-} Queue;
+};
 
 extern void (*D_8008D5C0[])(s32);
 

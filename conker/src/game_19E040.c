@@ -33,11 +33,11 @@ typedef struct {
 } ModelFxTemplate;
 
 /* One piece of the func_15170F4C burst. */
-typedef struct {
+struct ModelBurstPiece {
     /* 0x00 */ u16 modelId;
     /* 0x04 */ f32 offset[3];
     /* 0x10 */ f32 rotation[3];
-} ModelBurstPiece;
+};
 
 /* Start offsets of the six burst models of func_15170B90. */
 const f32 D_800A6E90[6][3] = {
@@ -59,10 +59,6 @@ const ModelBurstPiece D_800A6ED8[6] = {
     { 338, { -92.0f, -66.0f, 55.0f }, { 36.0f, 300.0f, 0.0f } },
 };
 
-void func_15168BE4(ModelFxTemplate *, u8, s32);
-void func_15170B90(WorldObject *, s32, s32, s32, u8, s32);
-void func_151717FC(WorldObject *, f32, f32, f32, f32, f32, s32, s32, s32, s32, f32, u8, s32);
-void func_151718F0(f32, f32, f32, f32, s32, f32, s32, s32, u8, s32);
 void func_151700D8(f32 (*)[3], f32, f32, s32, f32, s32, s32, s32, s32, s32);
 void func_1516D4E8(s16, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
                    s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);

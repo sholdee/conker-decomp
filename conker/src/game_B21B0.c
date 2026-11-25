@@ -178,7 +178,6 @@ u8 func_15085420(Actor *obj) {
 }
 
 extern void func_15005818(Camera *, Actor *, f32 *);
-extern void func_15169040(void *, u8);
 
 /* Moves obj to spawn point `spawnIndex` (see func_15084D70): sets its position and angles,
  * clears its motion, places its camera and passes {obj, unique_id} to func_15169040. */

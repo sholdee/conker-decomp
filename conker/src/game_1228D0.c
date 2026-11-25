@@ -100,8 +100,6 @@ void func_150F55C8(Sprite2D *sprite) {
     }
 }
 
-void func_15179008(s32);
-
 void func_150F568C(s32 arg0) {
     func_15179008(0);
 }

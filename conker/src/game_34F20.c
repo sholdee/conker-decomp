@@ -43,7 +43,6 @@ void func_15044370(void);
 void func_1509BBA0(s32);
 s32 func_1509C2A4(void);
 void func_1509C3A0(void);
-void func_15187F90(void);
 void func_151E562C(void);
 s8 func_151E5FAC(void);
 void func_15000AD0(s32);

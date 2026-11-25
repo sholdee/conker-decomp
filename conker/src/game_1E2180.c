@@ -4,7 +4,6 @@
 
 #define BLOOD_PROFILE_NONE 99
 
-void func_1516962C(s32, Actor *, s32);
 void func_151D9014(f32 *position, f32 *velocity, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, u8,
                    s32);
 

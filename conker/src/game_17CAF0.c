@@ -414,8 +414,6 @@ void func_15150D1C(DecalSpray *config, u8 arg1, s32 arg2) {
     }
 }
 
-void *func_1518A3C0(Vec3f *, Vec3f *, f32, Vec3f *, Vec3f *, f32, f32, u8, s16, u8, s32, u8, s32);
-
 /* Spawns a random number of randomly rotated pieces (func_1518A3C0) flying out of config->pos. */
 void func_15150F90(PieceSpray *config, u8 arg1, u8 arg2, s32 arg3) {
     Vec3f jitter;
@@ -994,8 +992,6 @@ void func_15152F70(SimplePuffSpray *config, u8 arg1) {
     }
 }
 
-
-extern void *func_15167D84(void *, s32, s32, s8, u8, s32);
 
 /* Spawns a random number of particles (func_15167D84) at config->position, each moving at a random
  * yaw and pitch. Positions are integer units plus a 1/256 fraction. */

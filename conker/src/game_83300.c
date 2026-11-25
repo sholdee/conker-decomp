@@ -2243,7 +2243,6 @@ void func_1505B5F8(Actor *actor, f32 floorY) {
 }
 
 void func_151E5FF4(void *, Actor *, u8);
-void func_15169070(s32, s32, void *, s32);
 
 /*
  * Applies a hit to `victim`: base[index] holds the attack's defaults and hit[index] the reaction chosen
@@ -4491,7 +4490,6 @@ void func_15060D54(Actor *actor) {
         }
     }
 }
-extern void func_151695F0(Actor *, s32);
 extern void func_15084558(Actor *);
 extern void func_15188AD0(Actor *);
 

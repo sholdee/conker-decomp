@@ -254,11 +254,6 @@ void func_1512D380(s32 arg0);
 struct DefParticleHead;
 
 /* Actor attachment lists (Actor.attachments, game_179F30): `handle` is the attached effect or object. */
-void *func_15167A68(s32 type, s32 list, s32 size, s32 arg3, s32 owner, s32 arg5);
-void func_1516972C(EffectHeader *obj);
-void func_1516979C(EffectHeader *obj);
-void func_15169804(EffectHeader *obj);
-void func_15169824(EffectHeader *obj);
 void func_1519EF70(Actor *arg0, s32 arg1, s32 arg2);
 
 void func_151DB004(struct ParticleDesc *desc);
@@ -385,11 +380,7 @@ void func_15127EB8(Camera *arg0);
 void func_1512D748(Camera*, s32, s32);
 Gfx *func_1515D6D0(Gfx *gfx, s32 player);
 void func_1515D4D4(s32 r, s32 g, s32 b, u8 priority);
-void func_15169260(void *types, s32 count, s32 event, u8 eventType);
-void func_1516944C(s32, s32, u8);
-void func_15169850(s32 event, u8 eventType, Actor **owner, u8 *ownerId, void *obj);
 void func_15174690(s32, s32, s32, s32, s32, s32, s32, s32, s32);
-s32  func_15187EC0(s32 arg0, f32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7);
 void func_151B8DB0(s32 arg0, u8 arg1, u8 arg2, s32 arg3);
 void func_151D5404(Vec3f*, f32, f32, f32, s32, s32, s32, s32);
 void func_151D5714(Actor *obj, Vec3f *from, Vec3f *to, u8 bone, f32 scale, u8 arg5, s32 arg6);
@@ -400,7 +391,6 @@ void func_151EF954(Mtx *m, f32 left, f32 right, f32 bottom, f32 top, f32 near, f
 s32 func_151F3C4C(s32 arg0, void *dst, s32 len, s32 offset);
 void func_151FA130(void);
 void func_1019EA88(void);
-void func_15168B10(EffectHeader *obj, s32 type);
 #include "subsystems.h"
 
 #endif

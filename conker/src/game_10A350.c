@@ -3,8 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-void *func_15167D84(void *, s32, s32, s8, u8, s32);
-
 /* One point of the trail ring buffer. */
 typedef struct Game10A350Record {
     /* 0x00 */ Vec3f pos;

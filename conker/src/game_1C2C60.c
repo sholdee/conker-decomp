@@ -1791,8 +1791,6 @@ void func_15198D88(CharacterFlamethrowerActor *actor, Vec3f *end) {
 }
 
 
-void *func_15167D84(void *, s32, s32, s8, u8, s32);
-
 /* Emits spriteAccum sprites (func_15167D84) flying from the actor towards random points around `end`. */
 void func_151990AC(CharacterFlamethrowerActor *actor, Vec3f *end) {
     f32 speed;

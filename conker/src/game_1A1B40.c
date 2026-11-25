@@ -23,7 +23,6 @@ typedef struct {
 } PuffParticle;
 
 extern void *D_8008CA4C[];
-extern s32 func_15167D84(void *, s32, s32, s32, s32, s32);
 
 /*
  * Spawns a white, growing and fading puff (particle callback 5) 10 units behind object `objIndex`, unless it is in water.
@@ -84,7 +83,8 @@ void func_15174690(s32 objIndex, s32 spread, s32 growth, s32 growthRange, s32 si
         template.primB = 0xFF;
         template.primA = 0xFF;
         template.flags = 0;
-        func_15167D84(&template, 0, 0, -1, (u8)owner, list);
+        // matching: the original read the low byte of owner (lbu) and passed it on without a further u8 conversion
+        func_15167D84(&template, 0, 0, -1, (s32)(u8)owner, list);
     }
 }
 

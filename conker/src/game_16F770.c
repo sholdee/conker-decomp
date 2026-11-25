@@ -2,9 +2,13 @@
 
 // matching: one call below passes no argument (the id is still in a0), so this file keeps an unprototyped view
 #define func_15083E90 func_15083E90_functions_h
+// matching: func_15146508 passes the two actors after the message as well; func_15169040 takes two parameters
+#define func_15169040 func_15169040_effect_h
 #include "functions.h"
 #undef func_15083E90
+#undef func_15169040
 Actor *func_15083E90();
+void func_15169040();
 #include "variables.h"
 #include "effects.h"
 

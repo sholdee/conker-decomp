@@ -825,7 +825,6 @@ void func_1501E73C(s32 scene) {
     }
 }
 
-extern void func_15169040(u8 *, u8);
 void func_1501EA18(s32 scene);
 void func_150233E4(void);
 s32 func_150235DC(s32 scene);

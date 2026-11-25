@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-extern void func_151749A0(s32, s32);
 extern f32 D_800A0830;
 extern f32 D_800A0834;
 

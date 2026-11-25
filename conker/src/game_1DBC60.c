@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_1516962C(s32 type, Actor *actor, u8 eventType);
-
 /* Attaches emitter 6 to bone 1 of `actor`; a nonzero `lifetime` ends it after that many frames. */
 void *func_151AE7B0(Actor *actor, f32 rate, s16 lifetime, u8 arg3, s32 arg4) {
     void *effect; // matching: the named result keeps IDO's 80-byte frame (direct return: 72)

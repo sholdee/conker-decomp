@@ -4,7 +4,6 @@
 #include "effects.h"
 
 extern void *D_8008CA4C[];
-s32 func_15167D84(void *, s32, s32, s32, s32, s32);
 
 /*
  * Spawns a growing billboard particle (callback 9, func_1518CCA8) from `effect`. With mode 1 the

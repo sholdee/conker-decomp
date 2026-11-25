@@ -5,7 +5,6 @@
 void func_1502178C(Actor *arg0, s32 arg1, s32 arg2);
 void func_1510F800(s32);
 s32 func_1510F8D8(s16, s16, s16, s32);
-s32 func_15167D84(void *, s32, s32, s32, s32, s32);
 
 extern s32 D_8008CAE0;
 extern u8 D_800B86A4[][0x32C];

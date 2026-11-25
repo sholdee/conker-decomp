@@ -15,7 +15,7 @@ extern void (*D_8008C9C8[])(EffectHeader *);
 extern void (*D_8008CB64[3])(void);
 
 /* Template / payload of a type 0x10 object. */
-typedef struct {
+struct ModelFxData {
     /* 0x00 */ f32 x;
     /* 0x04 */ f32 y;
     /* 0x08 */ f32 z;
@@ -35,17 +35,17 @@ typedef struct {
     /* 0x57 */ u8 pad57[5];
     /* 0x5C */ u8 renderMode;
     /* 0x5D */ u8 combineMode;
-} ModelFxData;
+};
 
 /* Type 0x10 object (0xF0 bytes): a display list drawn with a per-frame matrix (created by func_15168BE4). */
-typedef struct {
+struct ModelFx {
     /* 0x00 */ EffectHeader link;
     /* 0x10 */ Mtx mtx[2];      /* double-buffered by D_800BE9C0 */
     /* 0x90 */ ModelFxData data;
-} ModelFx;
+};
 
 /* Type 3 object (0x28 bytes): a fading, animated billboard sprite. */
-typedef struct {
+struct SpriteFx {
     /* 0x00 */ EffectHeader link;
     /* 0x10 */ EffectTexture *anim;
     /* 0x14 */ s16 frame;       /* 8.8 fixed point index into anim->frames */
@@ -58,7 +58,7 @@ typedef struct {
     /* 0x22 */ s8 fadeStep;     /* > 0: fade out by this per frame; < 0: fade on the last frame */
     /* 0x23 */ u8 alpha;
     /* 0x24 */ u8 callback;     /* index into D_8008CA20, 0 = none */
-} SpriteFx;
+};
 
 /* Sprite placement passed to func_15095760. */
 typedef struct {
@@ -74,8 +74,6 @@ typedef struct {
 } SpriteParams;
 
 extern EffectTexture *D_8008CA4C[];
-
-void func_15169070(s32 first, s32 last, s32 event, u8 eventType);
 
 /* Calls every object type's per-frame global hook (D_8008B4A8[i].unk18). */
 void func_15167010(void) {
@@ -194,7 +192,6 @@ void func_15167310(void) {
 }
 
 extern s16 D_800DD1F8;
-void func_15168F84(s32 group, s32 *first, s32 *last);
 
 /*
  * Draws every object of list `list` whose type is in group `group` (see func_15168F84). Draw mode 1 types
@@ -307,8 +304,6 @@ Gfx *func_151674F8(Gfx *gfx, s32 group, s16 arg2, s32 list) {
     gSPSetGeometryMode(gfx++, G_ZBUFFER);
     return gfx;
 }
-
-void func_15168A4C(EffectHeader *obj, s32 type);
 
 /* Allocates a `size`-byte object (func_10003C6C) and links it into D_800DCE50[list][type]. */
 void *func_15167A68(type, list, size, arg3, owner, arg5)
@@ -991,13 +986,13 @@ void func_15168E34(s32 *addr, s32 offset) {
 }
 
 /* One display list command seen as bytes: opcode, two parameter bytes, a third (G_MOVEMEM index), w1. */
-typedef struct {
+struct DLCommand {
     /* 0x0 */ s8 opcode;
     /* 0x1 */ s8 unk1;
     /* 0x2 */ s8 unk2;
     /* 0x3 */ u8 index;
     /* 0x4 */ u32 addr;
-} DLCommand;
+};
 
 #define IS_RELOCATABLE(cmd) \
     ((cmd)->opcode == G_VTX || ((cmd)->opcode == (s8)G_MOVEMEM && (cmd)->index == G_MV_MATRIX))
@@ -1073,7 +1068,6 @@ void func_15168F84(s32 group, s32 *first, s32 *last) {
 void func_15169040(s32 event, u8 eventType) {
     func_15169070(0, OBJ_TYPE_COUNT, event, eventType);
 }
-void func_1516968C(EffectHeader *obj, u8 *event, u8 eventType);
 
 /* Sends an event to every object of types [first, last) (clamped by func_15143D18). */
 void func_15169070(s32 first, s32 last, s32 event, u8 eventType) {

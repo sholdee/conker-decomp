@@ -560,7 +560,6 @@ void func_1511898C(WorldObject *prop) {
 }
 
 
-extern void func_1518804C(s32, f32);
 extern s32 func_15022B08(s32, s32);
 
 /*

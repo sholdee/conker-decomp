@@ -5,9 +5,7 @@
 
 extern s32 func_1510F800(s32);
 extern s32 func_1510F8D8(s32, s32, s32, s32);
-void func_15171200(s32, s32, f32, f32, f32, f32, f32, f32, f32, s32, s32, f32, s32, s32);
 void func_151709B4(s32, s32, s32, s32, f32, s32, s32);
-void func_151718F0(f32, f32, f32, f32, s32, f32, s32, s32, s32, s32);
 
 /* Per-frame update of a bouncing debris particle: integrate motion, land/bounce on the floor, fade out. */
 void func_15169C70(Debris *debris) {
@@ -148,7 +146,6 @@ typedef struct {
     /* 0x15 */ u8 unk15;
 } SpriteFxTemplate;
 
-extern void func_15167AD8(SpriteFxTemplate *, s32, s32);
 extern void *D_8008CADC;
 
 /* Drop callback: once it reaches the floor it dies and leaves a splash sprite; in the air, x/z drag. */

@@ -3,8 +3,6 @@
 #include "variables.h"
 
 
-void func_15179008(s32);
-
 /* Behaviour scratch state (WorldObject.touch) of the swinging object. */
 typedef struct {
     /* 0x7C */ s32 secondHalf; // phase has passed pi

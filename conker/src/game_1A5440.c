@@ -3,7 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s32 func_15168118();
 extern f32 sqrtf(f32);
 
 extern s32 D_8008CA64;
@@ -298,7 +297,7 @@ s32 func_15178750(s32 arg0, SwarmMember *member, s16 view) {
 
     swarm = member->s.swarm;
     if (swarm->viewMask & (1 << view)) {
-        return func_15168118();
+        return func_15168118((Gfx *)arg0, (BillboardParticle *)member, view);
     }
     return arg0;
 }

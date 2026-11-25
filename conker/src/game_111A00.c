@@ -73,8 +73,6 @@ const f32 D_800A111C[] = { 0.33f, 1.0f, 2.0f };
 extern void func_15171D4C(f32, f32, f32, s32, s32, s32, f32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_15171F04(f32, f32, f32, s16 **, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_151C329C(f32 *, s32, s32);
-extern void func_1516865C(void *, s32, s32, s32, s32);
-extern void func_15168800(void *, s32, s32);
 
 /*
  * Spawns the impact effects of `material` at (x, y, z): a particle burst, debris (func_150E4E04),
@@ -277,7 +275,6 @@ void func_150E4CBC(Struct150E4CBC *fx) {
 
 extern u8 D_800918AC[];
 extern u8 D_80090520[];
-extern s32 func_15167D84(void *, s32, s32, s32, s32, s32);
 
 /*
  * Sprays debris particles of `kind` from (x, y, z). With a hit triangle `tri` the spray follows the

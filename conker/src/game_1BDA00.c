@@ -2,10 +2,10 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct HandlerObject {
+struct HandlerObject {
     /* 0x00 */ u8 pad0[0x8A];
     /* 0x8A */ u8 handlerIndex;
-} HandlerObject;
+};
 
 typedef void (*HandlerFunc)(HandlerObject *, s32, u8);
 
@@ -31,12 +31,12 @@ typedef struct PeriodicTrigger {
     /* 0x8 */ Actor *target;
 } PeriodicTrigger;
 
-typedef struct PeriodicObject {
+struct PeriodicObject {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ Actor *linked;
     /* 0x14 */ u8 pad14[0x7C];
     /* 0x90 */ PeriodicTrigger trigger;
-} PeriodicObject;
+};
 
 /*
  * Advances the trigger timer by D_800BE9E4 and calls func_1505D024 (with the target's index in

@@ -3,9 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-void func_1516865C(void *spawn, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-void func_15168800(void *spawn, s32 arg1, s32 arg2);
-
 /*
  * Spawns a QuadFx (animation 0x45, callback 15) at the emitter's position, resting on its floor height (or 200 units
  * below it, clearing pos.unk8, when it has none), then rearms the emitter's cooldown to 100..227.
