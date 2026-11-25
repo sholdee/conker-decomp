@@ -27,17 +27,6 @@ extern void func_1515572C(s32, s32);
 extern void func_151A561C(s32, s32);
 extern void (*D_8008FC10[])(struct102 *, void **, u8);
 typedef struct {
-    u8 pad0[0x14];
-    f32 unk14;
-    u8 pad18[0x4];
-    f32 unk1C;
-    u8 pad20[0x160];
-    f32 unk180;
-} struct_func_151C9AC0_arg0;
-typedef struct {
-    u8 unk0[0x24];
-} struct_func_151C9AC0_sp20;
-typedef struct {
     s32 field_0x0;
     u8 pad_0x4[0x8];
     u8 field_0xC;
@@ -61,32 +50,40 @@ typedef struct {
     u8 pad_0x1[0x3];
     s32 field_0x4;
 } Game1F4650EffectTriggerEvent;
-typedef struct {
-    u8 pad_0x0[0x9];
-    u8 field_0x9;
-} Game1F4650ByteFlagTarget;
-typedef struct {
-    u8 pad_0x0[0x6F];
-    u8 field_0x6F;
-} Game1F4650StatusFlagBlock;
-typedef struct {
-    u8 pad_0x00[0x14];
-    Game1F4650ByteFlagTarget *field_0x14;
-    Game1F4650StatusFlagBlock *field_0x18;
-} Game1F4650StatusFlagOwner;
-typedef struct {
-    u8 pad_0x00[0x58];
-    s32 field_0x58;
-    u8 pad_0x5C[0x12C];
-    Game1F4650StatusFlagBlock *field_0x188;
-} Game1F4650StatusFlagObject;
-extern void func_1504715C(struct_func_151C9AC0_sp20 *, struct_func_151C9AC0_arg0 *);
-extern s32 func_151ABE40(f32 *, struct_func_151C9AC0_sp20 *, s32, u8, s32);
 
 /* Copy of the 9 s16 words that func_150AC9C0 reports for the surface triangle a ray hit. */
 typedef struct {
     s16 v[9];
 } SightTriangle;
+
+/* Generic actor fields used here; kind indexes D_800D1C90. */
+typedef struct SightActor {
+    u8 pad0[4];
+    u8 kind;
+    u8 pad5[0xF];
+    f32 x;
+    f32 y;
+    f32 z;
+    u8 pad20[0x12C];
+    f32 scale;
+    u8 pad150[0x30];
+    f32 unk180;
+    u8 pad184[0x154];
+    f32 unk2D8;
+    u8 pad2DC[0x3C];
+    u8 *unk318;
+} SightActor;
+
+/* Collision query context: set up from an actor by func_1504715C, filled in by func_15046C80. */
+typedef struct {
+    f32 hitY;
+    SightTriangle triangle;
+    u8 pad16[6];
+    u8 surfaceFlags;
+    u8 pad1D[7];
+} SightCollision;
+extern void func_1504715C(SightCollision *, SightActor *);
+extern s32 func_151ABE40(f32 *, SightCollision *, s32, u8, s32);
 
 /* Placement parameters for a sight beam (laser tripwire) between two surfaces. */
 typedef struct {
@@ -182,11 +179,24 @@ typedef struct {
     u8 hidden;
 } SightModel;
 
+typedef struct {
+    u8 pad0[0x6F];
+    u8 unk6F;
+} SightStatusBlock;
+
 /* An effect object whose model can be hidden. */
 typedef struct {
     u8 pad0[0x14];
     SightModel *model;
+    SightStatusBlock *status;
 } SightModelOwner;
+
+typedef struct {
+    u8 pad0[0x58];
+    s32 flags;
+    u8 pad5C[0x12C];
+    SightStatusBlock *status;
+} SightStatusObject;
 
 /* Animation parameters copied into an emitter part by func_151C9198. */
 typedef struct {
@@ -209,20 +219,6 @@ typedef struct {
     u8 pad110[0x60];
     SightEmitterAnim anim;
 } SightEmitter;
-
-/* Generic actor fields used here; kind indexes D_800D1C90. */
-typedef struct SightActor {
-    u8 pad0[4];
-    u8 kind;
-    u8 pad5[0xF];
-    f32 x;
-    f32 y;
-    f32 z;
-    u8 pad20[0x12C];
-    f32 scale;
-    u8 pad150[0x1C8];
-    u8 *unk318;
-} SightActor;
 
 /* Message 0x20 (see func_151C8674). */
 typedef struct {
@@ -1217,91 +1213,87 @@ extern void *func_151541B8(void *, f32, f32, f32, f32, u8, s32);
 extern void func_151D5334(void *, f32, f32, f32, u8, u8, s32);
 extern void func_151D5514(void *, u8, s32);
 extern void func_151D3FF4(f32 *, u8, s32);
-void func_151C9AC0(struct_func_151C9AC0_arg0 *arg0, u8 arg1, s32 arg2);
+void func_151C9AC0(SightActor *actor, u8 arg1, s32 arg2);
 
-void func_151C9740(struct_func_151C9AC0_arg0 *arg0, u8 arg1, s32 arg2) {
-    struct17 origin;
-    struct17 impact;
+/* Explosion at an actor's position: ground scorch, smoke, debris and sound. */
+void func_151C9740(SightActor *actor, u8 arg1, s32 arg2) {
+    vertex origin;
+    vertex impact;
     u8 hit;
     u8 airborne;
-    struct17 query;
-    union {
-        struct_func_151C9AC0_sp20 transform;
-        f32 values[9];
-    } collision;
+    vertex query;
+    SightCollision collision;
 
-    if (arg0 == NULL) {
+    if (actor == NULL) {
         return;
     }
-    origin.unk0 = arg0->unk14;
-    origin.unk4 = *(f32 *)((u8 *)arg0 + 0x18) + 135.0f;
-    origin.unk8 = arg0->unk1C;
+    origin.x = actor->x;
+    origin.y = actor->y + 135.0f;
+    origin.z = actor->z;
     hit = 0;
-    airborne = *(f32 *)((u8 *)arg0 + 0x2D8) != 0.0f;
+    airborne = actor->unk2D8 != 0.0f;
     if (!airborne) {
-        query.unk0 = origin.unk0;
-        query.unk4 = origin.unk4;
-        query.unk8 = origin.unk8;
-        func_1504715C(&collision.transform, arg0);
-        if (func_15046C80(&query.unk0, 0, origin.unk4 - 200.0f, &collision.transform) != 0 &&
-            (collision.transform.unk0[0x1C] & 1)) {
-            impact.unk0 = query.unk0;
+        query.x = origin.x;
+        query.y = origin.y;
+        query.z = origin.z;
+        func_1504715C(&collision, actor);
+        if (func_15046C80(&query.x, 0, origin.y - 200.0f, &collision) != 0 && (collision.surfaceFlags & 1)) {
+            impact.x = query.x;
             hit = 1;
-            impact.unk4 = collision.values[0];
-            impact.unk8 = query.unk8;
-            {
-            func_150E7FEC(func_150ADA68() * 125.0f + 204.0f,
-                (func_150ADA20() % 101U + 0x9B) & 0xFF,
-                &collision.values[1], &impact,
-                func_150ADA20() % 302U + 0x1F4, 0, 1, 0, 0, 0, arg1, 0);
-            }
+            impact.y = collision.hitY;
+            impact.z = query.z;
+            func_150E7FEC(func_150ADA68() * 125.0f + 204.0f, (func_150ADA20() % 101U + 155) & 0xFF,
+                          &collision.triangle, &impact, func_150ADA20() % 302U + 500, 0, 1, 0, 0, 0, arg1, 0);
         }
     }
-    func_151D5404(&origin, 506.0f, 1013.0f, 0.000987166888f, 0xF, 0x14, arg1, arg2);
+    func_151D5404(&origin, 506.0f, 1013.0f, 0.000987166888f, 15, 20, arg1, arg2);
     func_151D5334(&origin, 506.0f, 1013.0f, 0.000987166888f, 5, arg1, arg2);
     func_151D5514(&origin, arg1, arg2);
-    func_151D3FF4(&origin.unk0, arg1, arg2);
-    func_150E83AC(hit ? &impact.unk0 : &origin.unk0, (s16)(func_150ADA20() % 62U + 0x78), arg1, arg2);
+    func_151D3FF4(&origin.x, arg1, arg2);
+    func_150E83AC(hit ? &impact.x : &origin.x, (s16)(func_150ADA20() % 62U + 120), arg1, arg2);
     func_151541B8(&origin, 2.0f * func_150ADA68() + 8.0f, 2.4641099f,
-        (f32)(func_150ADA20() % 56U + 0xC8), 0.0f, arg1, arg2);
+        (f32)(func_150ADA20() % 56U + 200), 0.0f, arg1, arg2);
     if (!airborne) {
-        func_15136C3C(arg0, 0, 0, 1, 0, 0, arg1, arg2);
+        func_15136C3C(actor, 0, 0, 1, 0, 0, arg1, arg2);
     }
-    func_10010F88(0x60D, 0x7D00, 0, 0, 0, (s32)origin.unk0,
-        (s32)origin.unk4, (s32)origin.unk8, 0x1F4, 0x3E8);
+    func_10010F88(0x60D, 0x7D00, 0, 0, 0, (s32)origin.x,
+        (s32)origin.y, (s32)origin.z, 500, 1000);
     if (airborne) {
-        func_151C9AC0(arg0, arg1, arg2);
+        func_151C9AC0(actor, arg1, arg2);
     }
 }
 
-void func_151C9AC0(struct_func_151C9AC0_arg0 *arg0, u8 arg1, s32 arg2) {
-    f32 sp44[3];
-    struct_func_151C9AC0_sp20 sp20;
+/* Spawns func_151ABE40's effect (type 2) just above the actor's unk180 height. */
+void func_151C9AC0(SightActor *actor, u8 arg1, s32 arg2) {
+    f32 pos[3];
+    SightCollision collision;
 
-    sp44[0] = arg0->unk14;
-    sp44[1] = arg0->unk180 + 2.0f;
-    sp44[2] = arg0->unk1C;
-    func_1504715C(&sp20, arg0);
-    func_151ABE40(sp44, &sp20, 2, arg1, arg2);
+    pos[0] = actor->x;
+    pos[1] = actor->unk180 + 2.0f;
+    pos[2] = actor->z;
+    func_1504715C(&collision, actor);
+    func_151ABE40(pos, &collision, 2, arg1, arg2);
 }
 
-s32 func_151C9B30(Game1F4650StatusFlagOwner *arg0) {
-    Game1F4650StatusFlagBlock *temp = arg0->field_0x18;
-    if (temp->field_0x6F == 0) {
-        arg0->field_0x14->field_0x9 = 0;
+/* Hides the object's model while its status block's unk6F is set. */
+s32 func_151C9B30(SightModelOwner *obj) {
+    SightStatusBlock *status = obj->status;
+    if (status->unk6F == 0) {
+        obj->model->hidden = 0;
     } else {
-        arg0->field_0x14->field_0x9 = 1;
+        obj->model->hidden = 1;
     }
     return 1;
 }
 
-s32 func_151C9B64(Game1F4650StatusFlagObject *arg0, u8 *arg1) {
-    Game1F4650StatusFlagBlock *temp = arg0->field_0x188;
-    if (temp->field_0x6F == 0) {
-        *arg1 = 1;
+/* Reports through `visible` whether the status block's unk6F is clear; clears flag 2 otherwise. */
+s32 func_151C9B64(SightStatusObject *obj, u8 *visible) {
+    SightStatusBlock *status = obj->status;
+    if (status->unk6F == 0) {
+        *visible = 1;
     } else {
-        arg0->field_0x58 &= ~0x2;
-        *arg1 = 0;
+        obj->flags &= ~2;
+        *visible = 0;
     }
     return 1;
 }
