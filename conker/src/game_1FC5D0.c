@@ -26,14 +26,19 @@ typedef struct {
     Game1FC5D0Config *config;
 } Game1FC5D0Actor;
 
-s32 func_151CF120(Game1FC5D0Actor *arg0) {
+/*
+ * Updates a ring buffer of trail points: trims the oldest points so the summed segment
+ * distance stays within config->limit, then gives each point a sine wave offset that
+ * grows in amplitude along the trail.
+ */
+s32 func_151CF120(Game1FC5D0Actor *actor) {
     Game1FC5D0Config *config;
     Game1FC5D0Point *points;
     s32 count;
 
-    count = arg0->count;
-    config = arg0->config;
-    points = arg0->points;
+    count = actor->count;
+    config = actor->config;
+    points = actor->points;
     if (count >= 2) {
         f32 total;
         f32 limit;
@@ -42,14 +47,14 @@ s32 func_151CF120(Game1FC5D0Actor *arg0) {
         Game1FC5D0Point *point;
 
         total = 0.0f;
-        index = arg0->tail - 1;
-        if (index < 0) index = arg0->capacity - 1;
-        if (index != arg0->head) {
+        index = actor->tail - 1;
+        if (index < 0) index = actor->capacity - 1;
+        if (index != actor->head) {
             limit = config->limit;
             do {
                 current = index;
                 index--;
-                if (index < 0) index = arg0->capacity - 1;
+                if (index < 0) index = actor->capacity - 1;
                 point = &points[current];
                 total += point->distance;
                 if (limit < total) {
@@ -61,27 +66,29 @@ s32 func_151CF120(Game1FC5D0Actor *arg0) {
 
                         ratio = (total - limit) / point->distance;
                         previous = &points[index];
-                        px = previous->x; py = previous->y; pz = previous->z;
-                        dx = px - point->x; dy = py - point->y; dz = pz - point->z;
+                        px = previous->x;
+                        py = previous->y;
+                        pz = previous->z;
+                        dx = px - point->x;
+                        dy = py - point->y;
+                        dz = pz - point->z;
                         previous->x = px - dx * ratio;
                         previous->y = py - dy * ratio;
                         previous->z = pz - dz * ratio;
                         point->distance *= 1.0f - ratio;
                     }
-                    if (index != arg0->head) {
-                        do {
-                            arg0->head++;
-                            if (arg0->head == arg0->capacity) {
-                                arg0->head = 0;
-                            }
-                            arg0->count--;
-                        } while (index != arg0->head);
+                    while (index != actor->head) {
+                        actor->head++;
+                        if (actor->head == actor->capacity) {
+                            actor->head = 0;
+                        }
+                        actor->count--;
                     }
                     limit = config->limit;
                     total = limit;
                 }
-            } while (index != arg0->head);
-            count = arg0->count;
+            } while (index != actor->head);
+            count = actor->count;
         }
     }
     if (count >= 2) {
@@ -90,22 +97,20 @@ s32 func_151CF120(Game1FC5D0Actor *arg0) {
         s32 index;
 
         amplitude = 0.0f;
-        index = arg0->tail;
+        index = actor->tail;
         phase = config->phase;
         do {
             Game1FC5D0Point *point;
-            f32 result;
             f32 distance;
 
             index--;
-            if (index < 0) index = arg0->capacity - 1;
+            if (index < 0) index = actor->capacity - 1;
             point = &points[index];
-            result = sinf(phase);
-            point->wave = result * amplitude;
+            point->wave = sinf(phase) * amplitude;
             distance = point->distance;
             amplitude += distance * 0.037499998f;
             phase += distance * 0.0122f;
-        } while (index != arg0->head);
+        } while (index != actor->head);
     }
     config->phase += -0.70900005f * D_800BE9A4;
     return 1;
