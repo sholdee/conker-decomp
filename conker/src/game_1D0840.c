@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern f32 D_800A8D60;
 
 typedef struct {
     f32 x, y, z;
@@ -613,183 +612,197 @@ void func_151A4590(struct127 *owner, u8 arg1) {
     }
 }
 
-void func_151A4638(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, void *arg6) {
-    struct260 *ret;
-    struct {
-        s16 sp28[6];
-        u8 pad34[4];
-        struct {
-            s32 unk00;
-            s32 unk04;
-            s16 unk08;
-            s16 unk0A;
-            s32 unk0C;
-            s32 unk10;
-            u8 unk14;
-            u8 unk15;
-            u8 unk16;
-            u8 unk17;
-            u8 unk18;
-            u8 unk19;
-            u8 unk1A;
-            u8 unk1B;
-            u8 unk1C;
-            u8 unk1D;
-            s16 unk1E;
-            s16 unk20;
-            s16 unk22;
-            f32 unk24;
-            f32 unk28;
-            f32 unk2C;
-            f32 unk30;
-            f32 unk34;
-            f32 unk38;
-            u8 pad3C[0xC];
-            f32 unk48;
-            f32 unk4C;
-            f32 unk50;
-            f32 unk54;
-            s32 unk58;
-            u8 pad5C[4];
-            u8 unk60;
-            u8 unk61;
-            u8 unk62;
-            s8 unk63;
-        } sp38;
-        u8 pad9C[8];
-    } stack;
+/* Leading fields shared by the effect and task objects in this file. */
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 unkD;
+    /* 0x0E */ s16 unkE;
+} EffectHeader;
 
-    stack.sp38.unk1D = 0x27;
-    stack.sp38.unk08 = 0x1401;
-    stack.sp38.unk00 = 0x200005;
-    stack.sp38.unk04 = 0;
-    stack.sp38.unk0A = (func_150ADA20() % 5U) + 0xF;
-    stack.sp38.unk0C = 0;
-    stack.sp38.unk10 = 0;
-    stack.sp38.unk14 = 0x8A;
-    stack.sp38.unk15 = 0;
-    stack.sp38.unk16 = 0;
-    stack.sp38.unk17 = 0xFF;
-    stack.sp38.unk18 = 0;
-    stack.sp38.unk19 = 0;
-    stack.sp38.unk1A = 0;
-    stack.sp38.unk1E = 1;
-    stack.sp38.unk20 = 0xFF;
-    stack.sp38.unk22 = 1;
-    stack.sp38.unk24 = 1.0f;
+/* Particle emitter description passed to func_15130374. */
+typedef struct {
+    /* 0x00 */ s32 unk00;
+    /* 0x04 */ s32 unk04;
+    /* 0x08 */ s16 unk08;
+    /* 0x0A */ s16 unk0A;
+    /* 0x0C */ s32 unk0C;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 unk16;
+    /* 0x17 */ u8 unk17;
+    /* 0x18 */ u8 unk18;
+    /* 0x19 */ u8 unk19;
+    /* 0x1A */ u8 unk1A;
+    /* 0x1B */ u8 unk1B;
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 unk1D;
+    /* 0x1E */ s16 unk1E;
+    /* 0x20 */ s16 unk20;
+    /* 0x22 */ s16 unk22;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ Vec3f pos;
+    /* 0x3C */ u8 pad3C[0xC];
+    /* 0x48 */ Vec3f vel;
+    /* 0x54 */ f32 unk54;
+    /* 0x58 */ s32 flags;
+    /* 0x5C */ u8 pad5C[4];
+    /* 0x60 */ u8 unk60;
+    /* 0x61 */ u8 unk61;
+    /* 0x62 */ u8 unk62;
+    /* 0x63 */ s8 unk63;
+    /* 0x64 */ u8 pad64[0xC];
+} ParticleSpawn151A4638;
 
-    stack.sp38.unk28 = stack.sp38.unk2C = (func_150ADA68() * 50.0f) + 500.0f;
-    stack.sp38.unk30 = arg0;
-    stack.sp38.unk34 = arg1;
-    stack.sp38.unk38 = arg2;
-    stack.sp38.unk48 = -arg3 * (D_800A8D60 * D_800BE9A8);
-    stack.sp38.unk4C = -arg4 * (D_800A8D60 * D_800BE9A8);
-    stack.sp38.unk50 = -arg5 * (D_800A8D60 * D_800BE9A8);
-    stack.sp38.unk58 = 0xD;
-    stack.sp38.unk60 = 1;
-    stack.sp38.unk61 = 1;
-    stack.sp38.unk54 = 0.0f;
+/* Emits a particle burst at (x, y, z), moving against the given direction. */
+void func_151A4638(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, EffectHeader *parent) {
+    ParticleSpawn151A4638 spawn;
+    f32 scale;
+    s16 params[6];
+    struct260 *particles;
+
+    spawn.unk1D = 0x27;
+    spawn.unk08 = 0x1401;
+    spawn.unk00 = 0x200005;
+    spawn.unk04 = 0;
+    spawn.unk0A = (func_150ADA20() % 5U) + 15;
+    spawn.unk0C = 0;
+    spawn.unk10 = 0;
+    spawn.unk14 = 0x8A;
+    spawn.unk15 = 0;
+    spawn.unk16 = 0;
+    spawn.unk17 = 0xFF;
+    spawn.unk18 = 0;
+    spawn.unk19 = 0;
+    spawn.unk1A = 0;
+    spawn.unk1E = 1;
+    spawn.unk20 = 0xFF;
+    spawn.unk22 = 1;
+    spawn.unk24 = 1.0f;
+
+    spawn.unk28 = spawn.unk2C = func_150ADA68() * 50.0f + 500.0f;
+    spawn.pos.x = x;
+    spawn.pos.y = y;
+    spawn.pos.z = z;
+    scale = 0.0869999975f * D_800BE9A8;
+    spawn.vel.x = -dirX * scale;
+    spawn.vel.y = -dirY * scale;
+    spawn.vel.z = -dirZ * scale;
+    spawn.flags = 0xD;
+    spawn.unk60 = 1;
+    spawn.unk61 = 1;
+    spawn.unk54 = 0.0f;
 
     if (func_150ADA20() & 1) {
-        stack.sp38.unk58 |= 0x40;
+        spawn.flags |= 0x40;
     }
 
     if (func_150ADA20() & 1) {
-        stack.sp38.unk58 |= 0x80;
+        spawn.flags |= 0x80;
     }
 
-    stack.sp38.unk1B = 0xFF;
-    stack.sp38.unk1C = 0xFF;
-    stack.sp38.unk62 = 0;
-    stack.sp38.unk63 = -1;
-    stack.sp28[0] = 0x10;
-    stack.sp28[1] = 0xF;
-    stack.sp28[2] = 0xD;
-    stack.sp28[3] = 0x13;
-    stack.sp28[4] = 0x11;
-    stack.sp28[5] = -0x18;
+    spawn.unk1B = 0xFF;
+    spawn.unk1C = 0xFF;
+    spawn.unk62 = 0;
+    spawn.unk63 = -1;
+    params[0] = 16;
+    params[1] = 15;
+    params[2] = 13;
+    params[3] = 19;
+    params[4] = 17;
+    params[5] = -24;
 
-    ret = func_15130374(&stack.sp38, 0, 0xC, *((u8 *)arg6 + 0xC), 1);
-    if (ret != 0) {
-        memcpy((u8 *)ret + 0xA8, stack.sp28, 0xC);
+    particles = func_15130374(&spawn, 0, 12, parent->unkC, 1);
+    if (particles != NULL) {
+        memcpy((u8 *)particles + 0xA8, params, sizeof(params));
     }
 }
 
-struct Sub151A483C {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    s16 unk6;
-    s16 unk8;
-    s16 unkA;
-};
+/* Per-particle parameters copied in by func_151A4638: (age limit, factor) pairs. */
+typedef struct {
+    /* 0x0 */ s16 limit2C;          /* below this age, unk2C = age * mul2C */
+    /* 0x2 */ s16 mul2C;
+    /* 0x4 */ s16 limit2B;          /* below this age, unk2B = age * mul2B */
+    /* 0x6 */ s16 mul2B;
+    /* 0x8 */ s16 limitSize;        /* below this age, sizes change by sizeRate per tick */
+    /* 0xA */ s16 sizeRate;
+} ParticleAgeParams;
 
-struct Obj151A483C {
-    u8 pad0[0x18];
-    s16 unk18;
-    s16 unk1A;
-    u8 pad1C[0x2B - 0x1C];
-    u8 unk2B;
-    u8 unk2C;
-    u8 pad2D[0x38 - 0x2D];
-    f32 unk38;
-    f32 unk3C;
-    u8 pad40[0x70 - 0x40];
-    u8 unk70;
-    u8 unk71;
-    u8 unk72;
-    u8 pad73[0xA8 - 0x73];
-    struct Sub151A483C unkA8;
-};
+/* A particle created by func_15130374. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x18];
+    /* 0x18 */ s16 unk18;
+    /* 0x1A */ s16 age;             /* counts down */
+    /* 0x1C */ u8 pad1C[0xF];
+    /* 0x2B */ u8 unk2B;
+    /* 0x2C */ u8 unk2C;
+    /* 0x2D */ u8 pad2D[0xB];
+    /* 0x38 */ f32 unk38;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ u8 pad40[0x30];
+    /* 0x70 */ u8 unk70;
+    /* 0x71 */ u8 unk71;
+    /* 0x72 */ u8 unk72;
+    /* 0x73 */ u8 pad73[0x35];
+    /* 0xA8 */ ParticleAgeParams ageParams;
+} Particle;
 
-s32 func_151A483C(struct Obj151A483C *arg0, u8 arg1) {
-    s16 temp_v1;
-    struct Sub151A483C *temp_v0;
-    f32 temp_f0;
+/* Particle update for func_151A4638's bursts: fades and resizes by age. */
+s32 func_151A483C(Particle *particle, u8 arg1) {
+    s16 age;
+    ParticleAgeParams *params;
 
-    temp_v0 = &arg0->unkA8;
-    temp_v1 = arg0->unk1A;
-    if (temp_v1 < temp_v0->unk4) {
-        arg0->unk2B = (u32)temp_v1 * (u32)temp_v0->unk6;
+    params = &particle->ageParams;
+    age = particle->age;
+    if (age < params->limit2B) {
+        particle->unk2B = age * params->mul2B;
     }
-    if (temp_v1 < temp_v0->unk8) {
-        temp_f0 = (f32)(temp_v0->unkA * D_800BE9E4);
-        *(volatile f32 *)&arg0->unk38 = arg0->unk38 + temp_f0;
-        *(volatile f32 *)&arg0->unk3C = arg0->unk3C + temp_f0;
-        temp_v1 = *(volatile s16 *)&arg0->unk1A;
-    }
-    if (temp_v1 < temp_v0->unk0) {
-        arg0->unk72 = 1;
-        arg0->unk70 = 2;
-        arg0->unk71 = 2;
-        arg0->unk2C = (u32)temp_v1 * (u32)temp_v0->unk2;
-        arg0->unk18 = 0x5203;
-    }
-    return 1;
-}
-
-s32 func_151A4900(struct Obj151A483C *arg0, u8 arg1) {
-    s16 temp_v1;
-    struct Sub151A483C *temp_v0;
-
-    temp_v0 = &arg0->unkA8;
-    temp_v1 = arg0->unk1A;
-    if (temp_v1 < temp_v0->unk4) {
-        arg0->unk2B = (u32)temp_v1 * (u32)temp_v0->unk6;
-    }
-    if (temp_v1 < temp_v0->unk8) {
+    if (age < params->limitSize) {
         {
-            f32 temp_f0 = (f32)(temp_v0->unkA * D_800BE9E4);
+            f32 sizeStep = params->sizeRate * D_800BE9E4;
 
-            arg0->unk38 = arg0->unk38 + temp_f0;
-            arg0->unk3C = arg0->unk3C + temp_f0;
+            particle->unk38 += sizeStep;
+            particle->unk3C += sizeStep;
         }
-        temp_v1 = arg0->unk1A;
+        age = particle->age;
     }
-    arg0->unk2C = (u32)temp_v1 * (u32)temp_v0->unk2;
+    if (age < params->limit2C) {
+        particle->unk72 = 1;
+        particle->unk70 = 2;
+        particle->unk71 = 2;
+        particle->unk2C = age * params->mul2C;
+        particle->unk18 = 0x5203;
+    }
     return 1;
 }
 
+/* Like func_151A483C, but always sets unk2C from the age. */
+s32 func_151A4900(Particle *particle, u8 arg1) {
+    s16 age;
+    ParticleAgeParams *params;
+
+    params = &particle->ageParams;
+    age = particle->age;
+    if (age < params->limit2B) {
+        particle->unk2B = age * params->mul2B;
+    }
+    if (age < params->limitSize) {
+        {
+            f32 sizeStep = params->sizeRate * D_800BE9E4;
+
+            particle->unk38 += sizeStep;
+            particle->unk3C += sizeStep;
+        }
+        age = particle->age;
+    }
+    particle->unk2C = age * params->mul2C;
+    return 1;
+}
 
 extern f32 D_800A8D64;
 
