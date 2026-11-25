@@ -4976,10 +4976,9 @@ typedef struct Game83300Step4 {
 } Game83300Step4;
 extern Game83300Step4 D_800860F0;
 
-struct Game83300MorphObject;
 void func_15062D10(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 void func_15062E24(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
-void func_15062FC0(struct Game83300MorphObject *arg0, s32 arg1, u8 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7);
+void func_15062FC0(struct127 *actor, s32 group, u8 arg2, s32 wrapS, s32 wrapT, s32 count, s32 ds, s32 dt);
 void func_1501B660(struct127 *arg0, f32 *arg1, s32 arg2);
 f32 func_150489B0(u8 arg0);
 void func_150F1CB0(struct127 *arg0);
@@ -5135,7 +5134,7 @@ void func_15061B4C(void) {
                 } else {
                     delta = 0;
                 }
-                func_15062FC0((struct Game83300MorphObject *)&D_800CC2D0[i], 0, 0, 0x1000, 0x1000, 0xC, 0, delta);
+                func_15062FC0(&D_800CC2D0[i], 0, 0, 0x1000, 0x1000, 0xC, 0, delta);
             }
         } else if (id == 0x42) {
             if ((D_800CC2D0[i].unk84.uh == 2) || (D_800CC2D0[i].unk84.uh == 1)) {
@@ -5438,7 +5437,8 @@ typedef struct Entry62E24 {
 extern Entry62E24 *D_800C5338[];
 void func_15094AB8(Vtx *arg0, s16 (*arg1)[2], s32 arg2, f32 arg3, s32 arg4, s32 arg5);
 
-void func_15062E24(s32 type, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6) {
+/* Rewrites texture coordinates in the current vertex buffer of every visible actor of `type`. */
+void func_15062E24(s32 type, s32 firstVtx, s32 arg2, s32 arg3, s32 arg4, s32 set, s32 doubleSize) {
     s32 i;
     s32 w;
     s32 h;
@@ -5449,84 +5449,73 @@ void func_15062E24(s32 type, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
             if (D_800CC2D0[i].interaction_state == 0) continue;
             if (type != D_800CC2D0[i].id) continue;
             if (D_800CC2D0[i].unk2FA == 0) continue;
-                w = D_800C5338[type][arg5].unk8;
-                h = D_800C5338[type][arg5].unkA;
-                if (arg6 != 0) {
-                    w *= 2;
-                    h *= 2;
-                }
-                vtx = ((Vtx **)&D_800CC2D0[i].pad288[4])[D_800BE9C0];
-                if (vtx != NULL) {
-                    vtx += arg1;
-                    func_15094AB8(vtx, (s16 (*)[2])D_800C6360[type] + arg3, arg2, arg4, h, w);
-                }
+            w = D_800C5338[type][set].unk8;
+            h = D_800C5338[type][set].unkA;
+            if (doubleSize != 0) {
+                w *= 2;
+                h *= 2;
+            }
+            vtx = ((Vtx **)&D_800CC2D0[i].pad288[4])[D_800BE9C0];
+            if (vtx != NULL) {
+                vtx += firstVtx;
+                func_15094AB8(vtx, (s16 (*)[2])D_800C6360[type] + arg3, arg2, arg4, h, w);
+            }
         }
     }
 }
-typedef struct Game83300MorphVertex {
-    u8 pad0[8];
-    s16 x;
-    s16 y;
-    u8 padC[4];
-} Game83300MorphVertex;
-
-typedef struct Game83300MorphObject {
-    u8 pad0[4];
-    u8 modelIndex;
-    u8 pad5[0x1C3];
-    u8 channel;
-    u8 pad1C9[0xC3];
-    Game83300MorphVertex *buffers[4];
-} Game83300MorphObject;
-
 extern s32 *D_800C4020[];
 
-void func_15062FC0(Game83300MorphObject *arg0, s32 arg1, u8 arg2,
-                   s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
+/*
+ * Scrolls the texture coordinates of `count` vertices (vertex group `group`, or from the start) in the
+ * actor's current vertex buffer, copying from the other buffer and wrapping at (wrapS, wrapT).
+ */
+void func_15062FC0(struct127 *actor, s32 group, u8 arg2, s32 wrapS, s32 wrapT, s32 count, s32 ds, s32 dt) {
     u8 *channelBase;
-    Game83300MorphVertex *source;
-    Game83300MorphVertex *target;
+    Vtx *source;
+    Vtx *target;
     s32 offset;
     s32 i;
 
-    channelBase = (u8 *)arg0 + (arg0->channel * 8);
-    target = ((Game83300MorphVertex **)(channelBase + 0x28C))[D_800BE9C0];
-    source = ((Game83300MorphVertex **)(channelBase + 0x28C))[!D_800BE9C0];
-    if (target == 0) {
+    /* two vertex buffers per channel at 0x28C (double-buffered by D_800BE9C0) */
+    channelBase = (u8 *)actor + (actor->pad1C8 * 8);
+    target = ((Vtx **)(channelBase + 0x28C))[D_800BE9C0];
+    source = ((Vtx **)(channelBase + 0x28C))[!D_800BE9C0];
+    if (target == NULL) {
         return;
     }
-    if (arg1 != -1) {
-        offset = D_800C4020[arg0->modelIndex][arg1] * 0x10;
-        target = (Game83300MorphVertex *)((u8 *)target + offset);
-        source = (Game83300MorphVertex *)((u8 *)source + offset);
+    if (group != -1) {
+        offset = D_800C4020[actor->id][group] * sizeof(Vtx);
+        target = (Vtx *)((u8 *)target + offset);
+        source = (Vtx *)((u8 *)source + offset);
     }
-    if (arg6 != 0) {
-        if (arg3 < target->x) {
-            arg6 -= arg3;
-        } else if (target->x < 0) {
-            arg6 += arg3;
+    if (ds != 0) {
+        if (wrapS < target->v.tc[0]) {
+            ds -= wrapS;
+        } else if (target->v.tc[0] < 0) {
+            ds += wrapS;
         }
     }
-    if (arg7 != 0) {
-        if (arg4 < target->y) {
-            arg7 -= arg4;
-        } else if (target->y < 0) {
-            arg7 += arg4;
+    if (dt != 0) {
+        if (wrapT < target->v.tc[1]) {
+            dt -= wrapT;
+        } else if (target->v.tc[1] < 0) {
+            dt += wrapT;
         }
     }
-    for (i = 0; i < arg5; i++) {
-        target[i].x = source[i].x + arg6;
-        target[i].y = source[i].y + arg7;
+    for (i = 0; i < count; i++) {
+        target[i].v.tc[0] = source[i].v.tc[0] + ds;
+        target[i].v.tc[1] = source[i].v.tc[1] + dt;
     }
 }
 void func_15194FF4(struct127 *, struct127 *, s32);
 
-void func_15063168(struct127 *arg0) {
+/* Calls func_15194FF4 for every other player touching the actor this frame (D_800CC268 mask). */
+void func_15063168(struct127 *actor) {
     s32 i;
     s32 self;
-    struct127 *obj;
+    struct126 *movement;
 
-    self = ((s32)arg0 - (s32)D_800CC2D0) / (s32)sizeof(struct127);
+    self = ((s32)actor - (s32)D_800CC2D0) / (s32)sizeof(struct127);
     for (i = 0; i < D_8008FD8C; i++) {
         if (i == self) {
             continue;
@@ -5534,61 +5523,62 @@ void func_15063168(struct127 *arg0) {
         if (((1 << i) & D_800CC268) == 0) {
             continue;
         }
-        obj = (struct127 *)D_800CC2D0[i].unk31C;
-        if (obj == 0) {
+        movement = D_800CC2D0[i].unk31C;
+        if (movement == NULL) {
             continue;
         }
-        if (((u8 *)obj)[0x1AC] != 0) {
+        if (((u8 *)movement)[0x1AC] != 0) {
             continue;
         }
-        func_15194FF4(arg0, &D_800CC2D0[i], 1);
+        func_15194FF4(actor, &D_800CC2D0[i], 1);
     }
 }
 
 void func_15082A44(void *, s32, s32, s32, s32);
-void func_15063254(struct127 *arg0, s32 arg1, s32 arg2, f32 arg3) {
-    struct129 *ptr;
-    s32 sp50;
+/* Respawns the actor in place: rebuilds its slot from its spawn entry (unk144), keeping position, angles and camera. */
+void func_15063254(struct127 *actor, s32 unk4Value, s32 unk3Value, f32 scale) {
+    struct129 *spawn;
+    s32 pathIdx;
     s32 index;
-    struct108 *saved;
+    struct108 *camera;
     f32 x;
     f32 y;
     f32 z;
-    f32 b8;
-    f32 f40;
-    f32 c4;
-    s32 rot;
+    f32 pitch;
+    f32 unk40;
+    f32 unkC4;
+    s32 angle;
 
-    sp50 = arg0->unk13F;
-    ptr = arg0->unk144;
-    ptr->unk4 = arg1;
-    ptr->unk3 = arg2;
-    ptr->unk20 = arg3;
-    ptr->unk24 = arg3;
-    ptr->unk2 = 0;
-    saved = arg0->camera;
-    x = arg0->x_position;
-    y = arg0->y_position;
-    z = arg0->z_position;
-    b8 = arg0->unkB8;
-    f40 = arg0->unk40;
-    c4 = arg0->unkC4;
-    rot = arg0->unk76;
-    index = ((s32)arg0 - (s32)&D_800CC2D0) / 812;
-    func_15060F28(arg0, 0);
-    func_15082A44(ptr, sp50, 0, 0, index + 1);
-    arg0->camera = saved;
-    arg0->x_position = x;
-    arg0->y_position = y;
-    arg0->z_position = z;
-    arg0->unkB8 = b8;
-    arg0->unk40 = f40;
-    arg0->unkC4 = c4;
-    arg0->unk76 = rot;
-    arg0->unk7A = rot;
-    arg0->old_x_position = x;
-    arg0->old_y_position = y;
-    arg0->old_z_position = arg0->z_position;
-    arg0->unk1CC = arg0->y_position;
-    arg0->camera->unk3D4 = (struct127 *)arg0->unk31C;
+    pathIdx = actor->unk13F;
+    spawn = actor->unk144;
+    spawn->unk4 = unk4Value;
+    spawn->unk3 = unk3Value;
+    spawn->unk20 = scale;
+    spawn->unk24 = scale;
+    spawn->unk2 = 0;
+    camera = actor->camera;
+    x = actor->x_position;
+    y = actor->y_position;
+    z = actor->z_position;
+    pitch = actor->unkB8;
+    unk40 = actor->unk40;
+    unkC4 = actor->unkC4;
+    angle = actor->unk76;
+    index = ((s32)actor - (s32)&D_800CC2D0) / 812;
+    func_15060F28(actor, 0);
+    func_15082A44(spawn, pathIdx, 0, 0, index + 1);
+    actor->camera = camera;
+    actor->x_position = x;
+    actor->y_position = y;
+    actor->z_position = z;
+    actor->unkB8 = pitch;
+    actor->unk40 = unk40;
+    actor->unkC4 = unkC4;
+    actor->unk76 = angle;
+    actor->unk7A = angle;
+    actor->old_x_position = x;
+    actor->old_y_position = y;
+    actor->old_z_position = actor->z_position;
+    actor->unk1CC = actor->y_position;
+    actor->camera->unk3D4 = (struct127 *)actor->unk31C;
 }
