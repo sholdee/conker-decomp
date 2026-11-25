@@ -5,9 +5,9 @@
 #undef func_150ADA20
 #include "variables.h"
 
-
+/* Per-frame input handling for a player-controlled struct108 (button queries via func_1509BE40). */
 void func_150AE5B0(struct108 *arg0) {
-    if ((D_800D2E4C->unk4 & 0x80) == 0) {
+    if (!(D_800D2E4C->unk4 & 0x80)) {
         if (func_1509BE40(0, 0x2000, 0xBB) != -1) {
             if (func_15123934(arg0, arg0->unk2C, 0, arg0->unk134, 8) != 0) {
                 arg0->unk84 |= 0x1000000;
@@ -17,52 +17,55 @@ void func_150AE5B0(struct108 *arg0) {
             func_151254F4(arg0, 0);
         }
     }
-    arg0->unk84 &= -0x4001;
-    if ((D_800D2E4C->unk1 & 4) == 0) {
+    arg0->unk84 &= ~0x4000;
+    if (!(D_800D2E4C->unk1 & 4)) {
         if (func_1509BE40(1, 0x2000, 0x95, func_1509BE40(0, 0x2014, 0xB7) | 0x2000) != 0) {
             arg0->unk84 |= 0x1000000;
-            if (((arg0->unk2C & 1) != 0) && (func_15123934(arg0, arg0->unk2C, 0, arg0->unk134, 0) != 0)) {
+            if ((arg0->unk2C & 1) && func_15123934(arg0, arg0->unk2C, 0, arg0->unk134, 0) != 0) {
                 arg0->unk1B4 = 3;
-                arg0->unk84 &= -5;
+                arg0->unk84 &= ~4;
                 func_15124B18(arg0);
             }
         } else if (func_151239CC(arg0, 0) != 0) {
             func_15124B18(arg0);
-            arg0->unk84 &= 0xFEFFFFFF;
+            arg0->unk84 &= ~0x1000000;
         }
     }
     if (func_1509BE40(1, 0x4082, 6, 0x9000) != 0) {
         arg0->unk84 |= 0x10000;
     } else {
-        arg0->unk84 &= 0xFFFEFFFF;
+        arg0->unk84 &= ~0x10000;
     }
 }
 
 
+/* Spawn parameters for func_15147DA0. */
 typedef struct {
-    f32 pos[3];
-    s16 unkC;
-    s16 unkE;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 pad16[2];
+    /* 0x00 */ f32 pos[3];
+    /* 0x0C */ s16 lifetime;
+    /* 0x0E */ s16 unkE;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 pad16[2];
 } Spawn150AE790;
 
+/* Motion parameters for func_15147DA0. */
 typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 pad1C[4];
-} Part150AE790;
+    /* 0x00 */ f32 size;
+    /* 0x04 */ f32 velX;
+    /* 0x08 */ f32 velY;
+    /* 0x0C */ f32 velZ;
+    /* 0x10 */ f32 scale;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ u8 unk18;
+    /* 0x19 */ u8 unk19;
+    /* 0x1A */ u8 unk1A;
+    /* 0x1B */ u8 alpha;
+    /* 0x1C */ u8 pad1C[4];
+} Motion150AE790;
 
+/* Render options for func_15147DA0. */
 typedef struct {
     s32 unk0;
     s32 unk4;
@@ -76,177 +79,162 @@ typedef struct {
     u8 pad1E[2];
 } Style150AE790;
 
+/* Emission request for func_15167D84 (field names as in game_109220.c's Game150DC558Emission). */
 typedef struct {
-    s32 unk00;
-    s32 unk04;
-    s32 unk08;
-    s16 unk0C;
-    s16 unk0E;
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    s16 unk16;
-    s16 unk18;
-    s16 unk1A;
-    u8 unk1C;
-    u8 unk1D;
-    u8 unk1E;
-    s8 unk1F;
-    s16 unk20;
-    s16 unk22;
-    s16 unk24;
-    s16 unk26;
-    s16 unk28;
-    s8 unk2A;
-    u8 unk2B;
-    u8 unk2C;
-    u8 unk2D;
-    u8 unk2E;
-    u8 unk2F;
-    s8 unk30;
-    s8 unk31;
-    s8 unk32;
-    s16 unk34;
-} Packet150AE790;
+    /* 0x00 */ s32 texture;
+    /* 0x04 */ s32 unk04;
+    /* 0x08 */ s32 unk08;
+    /* 0x0C */ s16 frame;
+    /* 0x0E */ s16 frame_rate;
+    /* 0x10 */ s16 position[3];
+    /* 0x16 */ s16 velocity_x;
+    /* 0x18 */ s16 velocity_z;
+    /* 0x1A */ s16 unk1A;
+    /* 0x1C */ u8 fraction_x;
+    /* 0x1D */ u8 fraction_y;
+    /* 0x1E */ u8 fraction_z;
+    /* 0x1F */ s8 callback;
+    /* 0x20 */ s16 velocity_y;
+    /* 0x22 */ s16 acceleration;
+    /* 0x24 */ s16 width;
+    /* 0x26 */ s16 height;
+    /* 0x28 */ s16 lifetime;
+    /* 0x2A */ s8 fade;
+    /* 0x2B */ u8 unk2B;
+    /* 0x2C */ u8 red;
+    /* 0x2D */ u8 green;
+    /* 0x2E */ u8 blue;
+    /* 0x2F */ u8 alpha;
+    /* 0x30 */ s8 environment[3];
+    /* 0x34 */ s16 flags;
+} Emission150AE790;
 
+/* Link from an effect to the actor it is attached to. */
 typedef struct {
-    s32 unk0;
-    u8 pad4[0x37];
-    u8 unk3B;
-    u8 pad3C[0x180 - 0x3C];
-    f32 unk180;
-    u32 unk184;
-    u8 pad188[0x1D4 - 0x188];
-    s32 unk1D4;
-} Obj150AE790;
+    /* 0x00 */ struct127 *owner;
+    /* 0x04 */ u8 ownerId; /* owner->unique_id when the link was made */
+    /* 0x05 */ u8 bone;
+} OwnerLink;
 
+/* Effect object attached to an actor (created by func_150AEB9C). */
 typedef struct {
-    Obj150AE790 *obj;
-    u8 unk4;
-    u8 unk5;
-} Sub150AE790;
-
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0x1B];
-    Sub150AE790 sub;
-} Arg150AE790;
+    /* 0x00 */ u8 unk0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD[0x1B];
+    /* 0x28 */ OwnerLink link;
+} AttachedEffect;
 
 extern s32 D_8008CB14;
 extern s32 func_150ADA20(void);
-void func_15142314(s32, s32, f32 *);
-extern s32 func_15147DA0(Spawn150AE790 *, Part150AE790 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, Style150AE790 *, s32, s32, s32);
+void func_15142314(struct255 *bones, s32 bone, f32 *out);
+extern s32 func_15147DA0(Spawn150AE790 *, Motion150AE790 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, Style150AE790 *, s32, s32, s32);
 s32 func_15167D84(void *, s32, s32, s32, s32, s32);
 
-void func_150AE790(Arg150AE790 *arg0)
-{
-  Sub150AE790 *sub;
-  Obj150AE790 *obj;
-  Spawn150AE790 spawn;
-  Part150AE790 part;
-  s32 pad0;
-  Style150AE790 style;
-  f32 sinA;
-  f32 cosA;
-  f32 speed;
-  f32 t;
-  f32 sinB;
-  f32 cosB;
-  Packet150AE790 pkt;
-  s32 count;
-  u8 a;
-  u8 b;
-  s32 h;
-  f32 f;
-  f32 g;
-  sub = &arg0->sub;
-  if (arg0->sub.obj == 0)
-  {
-    return;
-  }
-  obj = sub->obj;
-  if (sub->obj->unk0 == 0)
-  {
-    return;
-  }
-  h = obj->unk1D4;
-  if ((h != 0) && (sub->obj->unk3B == sub->unk4))
-  {
-    func_15142314(sub->obj->unk1D4, sub->unk5, spawn.pos);
-    spawn.unk10 = 1;
-    spawn.unkE = 1;
-    part.unk19 = 0;
-    part.unk1A = 0xFF - (((u8) (sub->obj->unk184 >> 5)) << 6);
-    part.unk14 = sub->obj->unk180;
-    part.unk18 = 8;
-    part.unk1B = 0xFF;
-    count = (func_150ADA20() % 9U) + 0xC;
-    style.unk0 = 0;
-    style.unk4 = 1;
-    style.unk8 = 0x160600;
-    style.unkC = 3;
-    style.unk10 = 0x10;
-    style.unk14 = 0x80;
-    style.unk18 = 0x20;
-    style.unk1C = 0;
-    style.unk1D = 9;
-    for (; count != 0; count--)
-    {
-      a = func_150ADA20() & 0xFF;
-      b = func_150ADA20() % 51U;
-      sinA = func_151423D8(a);
-      cosA = func_151423D8(a - 0x40);
-      sinB = func_151423D8(b);
-      cosB = func_151423D8(b - 0x40);
-      speed = (func_150ADA68() * 0.5f) + 18.79999924f;
-      spawn.unk15 = 4;
-      spawn.unkC = (func_150ADA20() & 0xF) + 0x23;
-      part.unk0 = (func_150ADA68() * 2.299999952f) + 2.900000095f;
-      part.unk10 = (func_150ADA68() * 0.1000000015f) + 0.6999999881f;
-      t = speed * sinB;
-      part.unk4 = t * cosA;
-      part.unk8 = (-speed) * cosB;
-      part.unkC = t * sinA;
-      func_15147DA0(&spawn, &part, 0, 1, 2, 0, 0, 0, 0, 0, 0, &style, 0, arg0->unkC, arg0->unk1);
-    }
+/* Bursts 12-20 particles plus one emission from the owner's bone, when the owner is still the same actor. */
+void func_150AE790(AttachedEffect *effect) {
+    OwnerLink *link;
+    struct127 *owner;
+    Spawn150AE790 spawn;
+    Motion150AE790 motion;
+    s32 pad; // matching: unused stack slot
+    Style150AE790 style;
+    f32 sinYaw;
+    f32 cosYaw;
+    f32 speed;
+    f32 horizontal;
+    f32 sinPitch;
+    f32 cosPitch;
+    Emission150AE790 emission;
+    s32 count;
+    u8 yaw;
+    u8 pitch;
+    struct255 *bones;
+    f32 duration;
+    f32 distance;
 
-    f = func_150ADA68() + 2.5f;
-    g = (func_150ADA68() * 200.0f) + 600.0f;
-    pkt.unk1A = g;
-    pkt.unk04 = g / f;
-    pkt.unk26 = 0;
-    pkt.unk24 = 0;
-    pkt.unk2C = 0xFF;
-    pkt.unk30 = 0;
-    pkt.unk31 = 0;
-    pkt.unk32 = 0;
-    pkt.unk2D = 0xFF;
-    pkt.unk2E = 0xFF;
-    pkt.unk28 = 0x64;
-    pkt.unk2F = 0xFF;
-    pkt.unk2A = 0;
-    pkt.unk0C = 0;
-    pkt.unk0E = 0;
-    pkt.unk1C = 0;
-    pkt.unk1E = 0;
-    pkt.unk1D = 0;
-    pkt.unk16 = 0;
-    pkt.unk18 = 0;
-    pkt.unk22 = 0;
-    pkt.unk20 = 0;
-    pkt.unk00 = D_8008CB14;
-    pkt.unk10 = spawn.pos[0];
-    pkt.unk12 = spawn.pos[1];
-    pkt.unk14 = spawn.pos[2];
-    pkt.unk1F = 0xB;
-    pkt.unk34 = 0;
-    pkt.unk2B = 0;
-    pkt.unk08 = 0;
-    func_15167D84(&pkt, 0, 0, -1, arg0->unkC, arg0->unk1);
-  }
+    link = &effect->link;
+    if (effect->link.owner == NULL) {
+        return;
+    }
+    owner = link->owner;
+    if (link->owner->interaction_state == 0) {
+        return;
+    }
+    bones = owner->unk1D4;
+    if (bones != NULL && link->owner->unique_id == link->ownerId) {
+        func_15142314(link->owner->unk1D4, link->bone, spawn.pos);
+        spawn.unk10 = 1;
+        spawn.unkE = 1;
+        motion.unk19 = 0;
+        motion.unk1A = 0xFF - (((u32)link->owner->unk184 >> 5) & 3) * 64;
+        motion.unk14 = link->owner->unk180;
+        motion.unk18 = 8;
+        motion.alpha = 0xFF;
+        count = func_150ADA20() % 9U + 12;
+        style.unk0 = 0;
+        style.unk4 = 1;
+        style.unk8 = 0x160600;
+        style.unkC = 3;
+        style.unk10 = 0x10;
+        style.unk14 = 0x80;
+        style.unk18 = 0x20;
+        style.unk1C = 0;
+        style.unk1D = 9;
+        for (; count != 0; count--) {
+            yaw = func_150ADA20() & 0xFF;
+            pitch = func_150ADA20() % 51U;
+            sinYaw = func_151423D8(yaw);
+            cosYaw = func_151423D8(yaw - 0x40);
+            sinPitch = func_151423D8(pitch);
+            cosPitch = func_151423D8(pitch - 0x40);
+            speed = func_150ADA68() * 0.5f + 18.79999924f;
+            spawn.unk15 = 4;
+            spawn.lifetime = (func_150ADA20() & 0xF) + 35;
+            motion.size = func_150ADA68() * 2.299999952f + 2.900000095f;
+            motion.scale = func_150ADA68() * 0.1000000015f + 0.6999999881f;
+            horizontal = speed * sinPitch;
+            motion.velX = horizontal * cosYaw;
+            motion.velY = -speed * cosPitch;
+            motion.velZ = horizontal * sinYaw;
+            func_15147DA0(&spawn, &motion, 0, 1, 2, 0, 0, 0, 0, 0, 0, &style, 0, effect->unkC, effect->unk1);
+        }
+
+        duration = func_150ADA68() + 2.5f;
+        distance = func_150ADA68() * 200.0f + 600.0f;
+        emission.unk1A = distance;
+        emission.unk04 = distance / duration;
+        emission.height = 0;
+        emission.width = 0;
+        emission.red = 0xFF;
+        emission.environment[0] = 0;
+        emission.environment[1] = 0;
+        emission.environment[2] = 0;
+        emission.green = 0xFF;
+        emission.blue = 0xFF;
+        emission.lifetime = 100;
+        emission.alpha = 0xFF;
+        emission.fade = 0;
+        emission.frame = 0;
+        emission.frame_rate = 0;
+        emission.fraction_x = 0;
+        emission.fraction_z = 0;
+        emission.fraction_y = 0;
+        emission.velocity_x = 0;
+        emission.velocity_z = 0;
+        emission.acceleration = 0;
+        emission.velocity_y = 0;
+        emission.texture = D_8008CB14;
+        emission.position[0] = spawn.pos[0];
+        emission.position[1] = spawn.pos[1];
+        emission.position[2] = spawn.pos[2];
+        emission.callback = 0xB;
+        emission.flags = 0;
+        emission.unk2B = 0;
+        emission.unk08 = 0;
+        func_15167D84(&emission, 0, 0, -1, effect->unkC, effect->unk1);
+    }
 }
 // some funky xor going on
 typedef struct {
