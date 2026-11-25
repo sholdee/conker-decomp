@@ -965,16 +965,17 @@ s32 func_15196B4C(CharacterFlamethrowerActor *actor, s32 arg1) {
     return 1;
 }
 
-typedef struct CharacterFlamethrowerBeamCamera {
+/* Per-view camera (D_800DBFF0[view]). */
+typedef struct ViewCamera {
     u8 unknown0[0x2F8];
     Vec3f position;
     u8 unknown304[0x69C];
-} CharacterFlamethrowerBeamCamera;
+} ViewCamera;
 
 void func_151D5D60(void *, s16, s32, void **, u8 *);
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
-extern CharacterFlamethrowerBeamCamera *D_800DBFF0;
+extern ViewCamera *D_800DBFF0;
 
 typedef struct {
     s32 id;
@@ -997,7 +998,6 @@ typedef struct {
 
 extern TextureSource D_800915B0;
 extern s32 D_800D2C9C;
-s32 func_15142E24(s32, s32, s32, s32, s32, s32, s32, u8, s32, u8 *, s32);
 Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
 Gfx *func_1513F4E4(Gfx *, u8, u8 *);
 Gfx *func_15142B7C(Gfx *, s32, s32);
@@ -1859,9 +1859,7 @@ typedef struct {
 
 typedef struct {
     f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
+    Vec3f vel;
     f32 unk10;
     f32 unk14;
     u8 unk18;
@@ -1940,9 +1938,9 @@ void func_15198D88(CharacterFlamethrowerActor *actor, Vec3f *end) {
         spawn.unkC = (func_150ADA20() % (u32)(preset->unk1E + 1)) + preset->unk1C;
         motion.unk0 = (func_150ADA68() * preset->unk10) + preset->unkC;
         motion.unk10 = (func_150ADA68() * preset->unk18) + preset->unk14;
-        motion.unk4 = (px - actor->pos.x) * speed;
-        motion.unk8 = (py - actor->pos.y) * speed;
-        motion.unkC = (pz - actor->pos.z) * speed;
+        motion.vel.x = (px - actor->pos.x) * speed;
+        motion.vel.y = (py - actor->pos.y) * speed;
+        motion.vel.z = (pz - actor->pos.z) * speed;
         func_15147DA0(&spawn, &motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &style, 0, actor->unkC, actor->unk1);
         jet->scatterAccum -= 1.0f;
     } while (jet->scatterAccum > 1.0f);
@@ -2364,7 +2362,6 @@ void func_15199834(struct127 *owner) {
     }
 }
 
-void func_1516972C();
 
 /* Message handler: dies when its owner is killed (0, 2, 0x26); follows an owner swap (0x2D). */
 void func_1519986C(CharacterFlamethrowerActor *actor, EffectMessage *msg, u8 kind) {
@@ -2372,7 +2369,7 @@ void func_1519986C(CharacterFlamethrowerActor *actor, EffectMessage *msg, u8 kin
 
     if (kind == 0 || kind == 2 || kind == 0x26) {
         if (msg->owner == ref->owner || msg->u4.id == ref->ownerId) {
-            func_1516972C(actor);
+            func_1516972C((struct102 *)actor);
         }
     } else if (kind == 0x2D) {
         if (ref->owner == msg->owner) {
@@ -2715,9 +2712,9 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
                 if (func_15146078(&delta, &axisA, &axisB) != 0) {
                     speed = func_150ADA68() * flame->scatter.speedRange + flame->scatter.speedMin;
                     func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * flame->scatter.spread, &s, &c);
-                    motion.unk4 = (axisA.x * s + axisB.x * c + delta.x) * speed;
-                    motion.unk8 = (axisA.y * s + axisB.y * c + delta.y) * speed;
-                    motion.unkC = (axisA.z * s + axisB.z * c + delta.z) * speed;
+                    motion.vel.x = (axisA.x * s + axisB.x * c + delta.x) * speed;
+                    motion.vel.y = (axisA.y * s + axisB.y * c + delta.y) * speed;
+                    motion.vel.z = (axisA.z * s + axisB.z * c + delta.z) * speed;
                     motion.unk10 = func_150ADA68() * flame->scatter.unk38 + flame->scatter.unk34;
                     motion.unk1B = func_150ADA68() * flame->scatter.unk3E + flame->scatter.unk3C;
                     func_15147DA0(&spawn, &motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &style, 0, actor->unkC, actor->unk1);
@@ -3157,14 +3154,9 @@ typedef struct RenderView {
 
 s32 func_15144B34(s32);
 s32 func_150A6360(void *, void *, f32, f32, f32, f32, f32, f32);
-s32 func_15142E24(s32, s32, s32, s32, s32, s32, s32, u8, s32, u8 *, s32);
-Gfx *func_1513F4E4(Gfx *, u8, u8 *);
-Gfx *func_15142B7C(Gfx *, s32, s32);
-Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
 extern u8 D_800D9C10[];
 extern u8 D_80091064[];
 extern s32 D_800A4AC8[][2];
-extern s32 D_800D2C9C;
 extern RenderView *D_800BE628;
 
 /* Draws a flame as a camera-facing ribbon through its points (culled when off screen). */
