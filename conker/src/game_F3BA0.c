@@ -20,16 +20,9 @@ typedef struct {
     /* 0x18 */ struct Emitter *volatile emitter;
 } WatcherEffects;
 
-/* A character watcher (see game_185560.c's CharacterWatcher) with WatcherEffects as extra data. */
+/* A character watcher with WatcherEffects as extra data. */
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0xB];
-    /* 0x18 */ Actor *character;
-    /* 0x1C */ u8 pad1C[0x18];
-    /* 0x34 */ CollisionHit floor;
+    /* 0x00 */ CharacterWatcher watcher;
     /* 0x58 */ WatcherEffects effects;
 } Watcher;
 
@@ -135,7 +128,7 @@ s32 func_150C682C(FlickerSprite *sprite) {
 
 /* Watcher action: keeps the rising-particle emitter alive, creating it on first use. */
 void func_150C6870(Watcher *watcher) {
-    Actor *character = watcher->character;
+    Actor *character = watcher->watcher.character;
 
     if (watcher->effects.emitter != NULL) {
         EmitterLink *link = &watcher->effects.emitter->link;
@@ -163,8 +156,8 @@ Emitter *func_150C68C4(Actor *character, Watcher *watcher) {
         pos[0] = character->x_position;
         pos[1] = character->y_position + D_800A0450;
         pos[2] = character->z_position;
-        if (func_15045800(pos, 0, character->y_position - 100.0f, &watcher->floor) != 0) {
-            link.ceiling = watcher->floor.height;
+        if (func_15045800(pos, 0, character->y_position - 100.0f, &watcher->watcher.hit) != 0) {
+            link.ceiling = watcher->watcher.hit.height;
         } else {
             link.ceiling = character->y_position + D_800A0454;
         }
@@ -290,7 +283,7 @@ FlickerSprite *func_150C6D90(Watcher *watcher) {
     Actor *character;
 
     sprite = NULL;
-    character = watcher->character;
+    character = watcher->watcher.character;
     if (character->unk1D4) {
         Vec3f origin = D_800887E0;
 
@@ -306,7 +299,7 @@ FlickerSprite *func_150C6D90(Watcher *watcher) {
         probe.x = pos.x;
         probe.y = pos.y + 200.0f;
         probe.z = pos.z;
-        if (func_15045800(&probe.x, 0, pos.y - 200.0f, &watcher->floor) != 0) {
+        if (func_15045800(&probe.x, 0, pos.y - 200.0f, &watcher->watcher.hit) != 0) {
             SpriteDef def;
             FlickerState flicker;
             f32 size;
@@ -316,7 +309,7 @@ FlickerSprite *func_150C6D90(Watcher *watcher) {
             s32 rand0;
 
             color = func_151D8E20();
-            probe.y = watcher->floor.height;
+            probe.y = watcher->watcher.hit.height;
             size = func_150ADA68() * 100.0f + 200.0f;
             flicker.owner = watcher;
             flicker.keepAlive = 1;
@@ -345,10 +338,10 @@ FlickerSprite *func_150C6D90(Watcher *watcher) {
             rand1 = func_150ADA20();
             rand2 = func_150ADA20();
             // matching: IDO needs the redundant `& 0xFF` on the u8 argument (the bytes change without it)
-            sprite = (FlickerSprite *)func_1513C73C(&def, 9, 3, (s32)&watcher->floor.tri,
+            sprite = (FlickerSprite *)func_1513C73C(&def, 9, 3, (s32)&watcher->watcher.hit.tri,
                                                     probe.x, probe.y, probe.z, size, size, rand0 & 0xFF,
-                                                    (rand2 & 1) * 2 + (rand1 & 1), 0x20, watcher->unkC,
-                                                    watcher->unk1);
+                                                    (rand2 & 1) * 2 + (rand1 & 1), 0x20, watcher->watcher.header.owner,
+                                                    watcher->watcher.header.kind);
             if (sprite != NULL) {
                 memcpy(&sprite->flicker, &flicker, sizeof(FlickerState));
             }

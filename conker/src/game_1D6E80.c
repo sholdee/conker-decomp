@@ -90,11 +90,7 @@ typedef struct {
 
 /* Callback block attached to an actor; the callbacks below drop effects onto the ground under it. */
 typedef struct ActorTask {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x8];
-    /* 0x18 */ Actor *actor;
-    /* 0x1C */ u8 pad1C[0x18];
-    /* 0x34 */ CollisionHit hit;
+    /* 0x00 */ CharacterWatcher watcher;
     /* 0x58 */ ActorTaskFx fx;
 } ActorTask;
 
@@ -105,7 +101,7 @@ extern s32 func_151ABE40(f32 *pos, CollisionHit *hit, s32 kind, s32 arg3, s32 ar
 
 /* Probes the ground under the task's actor and spawns ground effect 3 there. */
 void func_151A99D0(ActorTask *task) {
-    Actor *actor = task->actor;
+    Actor *actor = task->watcher.character;
 
     {
         f32 pos[3];
@@ -117,16 +113,16 @@ void func_151A99D0(ActorTask *task) {
             pos[1] = actor->y_position + 150.0f;
         }
         pos[2] = actor->z_position;
-        if (func_15045800(pos, 0, pos[1] - 300.0f, &task->hit) != 0) {
-            pos[1] = task->hit.height;
-            func_151ABE40(pos, &task->hit, 3, task->header.owner, task->header.kind);
+        if (func_15045800(pos, 0, pos[1] - 300.0f, &task->watcher.hit) != 0) {
+            pos[1] = task->watcher.hit.height;
+            func_151ABE40(pos, &task->watcher.hit, 3, task->watcher.header.owner, task->watcher.header.kind);
         }
     }
 }
 
 /* Ground effect 3 under the actor (with sound 0x5208), then func_151ABE00. */
 void func_151A9AA4(ActorTask *task) {
-    Actor *actor = task->actor;
+    Actor *actor = task->watcher.character;
 
     {
         f32 pos[3];
@@ -139,10 +135,10 @@ void func_151A9AA4(ActorTask *task) {
             pos[1] = actor->y_position + 150.0f;
         }
         pos[2] = actor->z_position;
-        hit = &task->hit;
+        hit = &task->watcher.hit;
         if (func_15045800(pos, 0, pos[1] - 300.0f, hit) != 0) {
-            pos[1] = task->hit.height;
-            func_151ABE40(pos, hit, 3, task->header.owner, task->header.kind);
+            pos[1] = task->watcher.hit.height;
+            func_151ABE40(pos, hit, 3, task->watcher.header.owner, task->watcher.header.kind);
             func_10010FFC(0, 0x11, 0x5208, 0, 0, actor);
         }
     }
@@ -151,7 +147,7 @@ void func_151A9AA4(ActorTask *task) {
 
 /* Ground effect 1 under the actor, with sound 0x5208. */
 void func_151A9BA0(ActorTask *task) {
-    Actor *actor = task->actor;
+    Actor *actor = task->watcher.character;
 
     {
         f32 pos[3];
@@ -164,10 +160,10 @@ void func_151A9BA0(ActorTask *task) {
             pos[1] = actor->y_position + 150.0f;
         }
         pos[2] = actor->z_position;
-        hit = &task->hit;
+        hit = &task->watcher.hit;
         if (func_15045800(pos, 0, pos[1] - 300.0f, hit) != 0) {
-            pos[1] = task->hit.height;
-            func_151ABE40(pos, hit, 1, task->header.owner, task->header.kind);
+            pos[1] = task->watcher.hit.height;
+            func_151ABE40(pos, hit, 1, task->watcher.header.owner, task->watcher.header.kind);
             func_10010FFC(0, 0x11, 0x5208, 0, 0, actor);
         }
     }
@@ -176,7 +172,7 @@ void func_151A9BA0(ActorTask *task) {
 
 /* Unless the actor's unk31C->unk95 is set: ground effect 1 (sound 0x6978), func_151AA264, func_151ABE00. */
 void func_151A9CA0(ActorTask *task) {
-    Actor *actor = task->actor;
+    Actor *actor = task->watcher.character;
     f32 pos[3];
 
     // matching: structs.h types unk95 as s8, but this read is unsigned (lbu)
@@ -190,18 +186,18 @@ void func_151A9CA0(ActorTask *task) {
         pos[1] = actor->y_position + 150.0f;
     }
     pos[2] = actor->z_position;
-    if (func_15045800(pos, 0, pos[1] - 300.0f, &task->hit) != 0) {
-        pos[1] = task->hit.height;
-        func_151ABE40(pos, &task->hit, 1, task->header.owner, task->header.kind);
+    if (func_15045800(pos, 0, pos[1] - 300.0f, &task->watcher.hit) != 0) {
+        pos[1] = task->watcher.hit.height;
+        func_151ABE40(pos, &task->watcher.hit, 1, task->watcher.header.owner, task->watcher.header.kind);
         func_10010FFC(0, 8, 0x6978, 0, 0, actor);
     }
-    func_151AA264(actor, &task->hit);
+    func_151AA264(actor, &task->watcher.hit);
     func_151ABE00(actor);
 }
 
 /* Ground effect 2 under the actor, with sound 0x5208. */
 void func_151A9DC0(ActorTask *task) {
-    Actor *actor = task->actor;
+    Actor *actor = task->watcher.character;
 
     {
         f32 pos[3];
@@ -214,10 +210,10 @@ void func_151A9DC0(ActorTask *task) {
             pos[1] = actor->y_position + 150.0f;
         }
         pos[2] = actor->z_position;
-        hit = &task->hit;
+        hit = &task->watcher.hit;
         if (func_15045800(pos, 0, pos[1] - 300.0f, hit) != 0) {
-            pos[1] = task->hit.height;
-            func_151ABE40(pos, hit, 2, task->header.owner, task->header.kind);
+            pos[1] = task->watcher.hit.height;
+            func_151ABE40(pos, hit, 2, task->watcher.header.owner, task->watcher.header.kind);
             func_10010FFC(0, 0x11, 0x5208, 0, 0, actor);
         }
     }
@@ -225,7 +221,7 @@ void func_151A9DC0(ActorTask *task) {
 
 /* Ground effect 2 (sound 0x6978), then func_151AA264 and func_151ABE00. */
 void func_151A9EC0(ActorTask *task) {
-    Actor *actor = task->actor;
+    Actor *actor = task->watcher.character;
 
     {
         f32 pos[3];
@@ -238,20 +234,20 @@ void func_151A9EC0(ActorTask *task) {
             pos[1] = actor->y_position + 150.0f;
         }
         pos[2] = actor->z_position;
-        hit = &task->hit;
+        hit = &task->watcher.hit;
         if (func_15045800(pos, 0, pos[1] - 300.0f, hit) != 0) {
-            pos[1] = task->hit.height;
-            func_151ABE40(pos, hit, 2, task->header.owner, task->header.kind);
+            pos[1] = task->watcher.hit.height;
+            func_151ABE40(pos, hit, 2, task->watcher.header.owner, task->watcher.header.kind);
             func_10010FFC(0, 8, 0x6978, 0, 0, actor);
         }
     }
-    func_151AA264(actor, &task->hit);
+    func_151AA264(actor, &task->watcher.hit);
     func_151ABE00(actor);
 }
 
 /* Ground effect 4 under the actor. */
 void func_151A9FC8(ActorTask *task) {
-    Actor *actor = task->actor;
+    Actor *actor = task->watcher.character;
 
     {
         f32 pos[3];
@@ -263,16 +259,16 @@ void func_151A9FC8(ActorTask *task) {
             pos[1] = actor->y_position + 150.0f;
         }
         pos[2] = actor->z_position;
-        if (func_15045800(pos, 0, pos[1] - 300.0f, &task->hit) != 0) {
-            pos[1] = task->hit.height;
-            func_151ABE40(pos, &task->hit, 4, task->header.owner, task->header.kind);
+        if (func_15045800(pos, 0, pos[1] - 300.0f, &task->watcher.hit) != 0) {
+            pos[1] = task->watcher.hit.height;
+            func_151ABE40(pos, &task->watcher.hit, 4, task->watcher.header.owner, task->watcher.header.kind);
         }
     }
 }
 
 /* Ground effect 4 under the actor. */
 void func_151AA09C(ActorTask *task) {
-    Actor *actor = task->actor;
+    Actor *actor = task->watcher.character;
 
     {
         f32 pos[3];
@@ -284,9 +280,9 @@ void func_151AA09C(ActorTask *task) {
             pos[1] = actor->y_position + 150.0f;
         }
         pos[2] = actor->z_position;
-        if (func_15045800(pos, 0, pos[1] - 300.0f, &task->hit) != 0) {
-            pos[1] = task->hit.height;
-            func_151ABE40(pos, &task->hit, 4, task->header.owner, task->header.kind);
+        if (func_15045800(pos, 0, pos[1] - 300.0f, &task->watcher.hit) != 0) {
+            pos[1] = task->watcher.hit.height;
+            func_151ABE40(pos, &task->watcher.hit, 4, task->watcher.header.owner, task->watcher.header.kind);
         }
     }
 }
@@ -557,7 +553,7 @@ void func_151AAABC(ActorTask *task) {
     Actor *actor;
     ActorTaskFx *fx;
 
-    actor = task->actor;
+    actor = task->watcher.character;
     fx = &task->fx;
     if (fx->pulse != NULL) {
         PulseFxPayload *pulse;
@@ -708,7 +704,7 @@ void func_151AADF8(ActorTask *task) {
     f32 size;
     u8 color;
 
-    actor = task->actor;
+    actor = task->watcher.character;
     fx = &task->fx;
     if (fx->flicker != NULL) {
         keep = &fx->flicker->payload;
@@ -724,9 +720,9 @@ void func_151AADF8(ActorTask *task) {
         pos[1] = actor->y_position + 150.0f;
     }
     pos[2] = actor->z_position;
-    if (func_15045800(pos, 0, pos[1] - 300.0f, &task->hit) != 0) {
+    if (func_15045800(pos, 0, pos[1] - 300.0f, &task->watcher.hit) != 0) {
         color = func_151D8E20();
-        pos[1] = task->hit.height;
+        pos[1] = task->watcher.hit.height;
         size = (func_150ADA68() * 30.0f) + 50.0f;
         payload.owner = task;
         payload.keepAlive = 1;
@@ -751,7 +747,7 @@ void func_151AADF8(ActorTask *task) {
         part.renderModes = 0x440001;
         part.unk16 = 0;
         part.unk17 = 6;
-        fx->flicker = (FlickerFx *)func_1513C73C(&part, 7, 1, (s32)&task->hit.tri, pos[0], pos[1], pos[2],
+        fx->flicker = (FlickerFx *)func_1513C73C(&part, 7, 1, (s32)&task->watcher.hit.tri, pos[0], pos[1], pos[2],
                                                  size, size, func_150ADA20() & 0xFF,
                                                  (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2), 0x20, 0xFF, 1);
         if (fx->flicker != NULL) {
@@ -794,7 +790,7 @@ s32 func_151AB180(FlickerFx *fx) {
 
 /* Ground effect 3 (sound 0x5208), then func_151AA264. */
 void func_151AB1C4(ActorTask *task) {
-    Actor *actor = task->actor;
+    Actor *actor = task->watcher.character;
 
     {
         f32 pos[3];
@@ -807,14 +803,14 @@ void func_151AB1C4(ActorTask *task) {
             pos[1] = actor->y_position + 150.0f;
         }
         pos[2] = actor->z_position;
-        hit = &task->hit;
+        hit = &task->watcher.hit;
         if (func_15045800(pos, 0, pos[1] - 300.0f, hit) != 0) {
-            pos[1] = task->hit.height;
-            func_151ABE40(pos, hit, 3, task->header.owner, task->header.kind);
+            pos[1] = task->watcher.hit.height;
+            func_151ABE40(pos, hit, 3, task->watcher.header.owner, task->watcher.header.kind);
             func_10010FFC(0, 0x11, 0x5208, 0, 0, actor);
         }
     }
-    func_151AA264(actor, &task->hit);
+    func_151AA264(actor, &task->watcher.hit);
 }
 
 /* Spawns the looping-sound effect owned by `task`. */
@@ -970,7 +966,7 @@ void func_151AB7D8(LoopSoundFx *fx) {
 
 /* func_15141DA4(actor, 0, 4). */
 void func_151AB828(ActorTask *task) {
-    func_15141DA4(task->actor, 0, 4);
+    func_15141DA4(task->watcher.character, 0, 4);
 }
 
 extern void *func_15190770(struct185 *desc, s32 arg1, s32 arg2, s32 arg3);
@@ -980,7 +976,7 @@ void func_151AB854(ActorTask *task) {
     Actor *actor;
     struct185 desc;
 
-    actor = task->actor;
+    actor = task->watcher.character;
     if ((actor->id == 0) || (actor->id == 1) || (actor->id == 2) || (actor->id == 3) || (actor->id == 4) ||
         (actor->id == 150)) {
         desc.unk0 = actor;
@@ -996,7 +992,7 @@ void func_151AB854(ActorTask *task) {
         if (actor->unk127 != 0xFF) {
             actor->unk31C->idle.delay = 500;
         }
-        func_15190770(&desc, 0, task->header.owner, task->header.kind);
+        func_15190770(&desc, 0, task->watcher.header.owner, task->watcher.header.kind);
     }
 }
 

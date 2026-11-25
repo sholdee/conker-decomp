@@ -294,29 +294,6 @@ void func_15158B3C(EffectActor *actor, ActorMsg *msg, u8 msgId) {
     }
 }
 
-/*
- * Tracks a character's state (five small fields packed by STATE_BITS) and runs the
- * actions of D_8008B02C[mode] when it changes as described by D_800A6200.
- */
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ Actor *character;
-    /* 0x1C */ u8 characterId;
-    /* 0x1D */ u8 mode; /* from func_15159370 */
-    /* 0x1E */ u8 pad1E[2];
-    /* 0x20 */ Vec3f lastPosition;
-    /* 0x2C */ u8 state0; /* func_15159084 */
-    /* 0x2D */ u8 state1; /* func_15159120 */
-    /* 0x2E */ u8 state2; /* func_15159184 */
-    /* 0x2F */ u8 moveState; /* func_15159230 */
-    /* 0x30 */ u8 surfaceState; /* func_151592B8 */
-    /* 0x31 */ u8 flags; /* 1: run state-change actions */
-    /* 0x32 */ u8 pad32[2];
-    /* 0x34 */ CollisionHit hit; /* floor under the character, probed by the watcher's effects */
-} CharacterWatcher;
-
 s32 func_15159370(Actor *chr, u8 *mode);
 
 /* Creates a watcher for chr; returns NULL when chr is NULL or has no watchable mode. */

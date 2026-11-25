@@ -2273,4 +2273,29 @@ typedef struct ActorEmitterParams {
     /* 0xB */ u8 padB;
 } ActorEmitterParams; /* size 0xC */
 
+/*
+ * Character watcher (object type 0x2E, func_15158BD0 in game_185560.c; attached to the character as
+ * attachment 0x13): tracks a character's state (five small fields packed by game_185560.c's STATE_BITS)
+ * and runs the actions of D_8008B02C[mode] when it changes as described by D_800A6200. The creator's
+ * extra data (e.g. the effects the watcher keeps alive) follows at 0x58.
+ */
+typedef struct CharacterWatcher {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ Actor *character;
+    /* 0x1C */ u8 characterId;
+    /* 0x1D */ u8 mode; /* from func_15159370 */
+    /* 0x1E */ u8 pad1E[2];
+    /* 0x20 */ Vec3f lastPosition;
+    /* 0x2C */ u8 state0; /* func_15159084 */
+    /* 0x2D */ u8 state1; /* func_15159120 */
+    /* 0x2E */ u8 state2; /* func_15159184 */
+    /* 0x2F */ u8 moveState; /* func_15159230 */
+    /* 0x30 */ u8 surfaceState; /* func_151592B8 */
+    /* 0x31 */ u8 flags; /* 1: run state-change actions */
+    /* 0x32 */ u8 pad32[2];
+    /* 0x34 */ CollisionHit hit; /* floor under the character, probed by the watcher's effects */
+} CharacterWatcher; /* size 0x58 */
+
 #endif
