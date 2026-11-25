@@ -130,8 +130,6 @@ typedef struct {
     /* 0x3F */ u8 primA;
 } FallingParticle;
 
-extern void func_15171D4C(f32, f32, f32, s32, s32, s32, f32, s32, s32, s32, s32, s32, s32, s32);
-
 /*
  * Particle callback 0 (D_8008C9C8[0]) for func_151B9690's particles. Kind 1 pulses in size while the base
  * size decays; other kinds shrink towards their minimum size. On reaching the floor the particle dies

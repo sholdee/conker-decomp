@@ -2,8 +2,12 @@
 // matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
 // prototype (callers use the low byte without masking it), so it keeps that view.
 #define func_150ADA20 func_150ADA20_functions_h
+#define func_15171D4C func_15171D4C_header // matching: this file keeps its own declarations of these
+#define func_15171F04 func_15171F04_header
 #include "functions.h"
 #undef func_150ADA20
+#undef func_15171D4C
+#undef func_15171F04
 u8 func_150ADA20(void);
 #include "variables.h"
 #include "effects.h"
@@ -69,7 +73,9 @@ const u16 D_800A1110[][2] = { { 128, 96 }, { 256, 256 }, { 384, 384 } };
 
 /* Particle count multiplier per `size`. */
 const f32 D_800A111C[] = { 0.33f, 1.0f, 2.0f };
+// matching: s32 where the definition has s16 (arg 4), u16 (arg 5), u8 (args 6, 13)
 extern void func_15171D4C(f32, f32, f32, s32, s32, s32, f32, s32, s32, s32, s32, s32, s32, s32);
+// matching: a pointer where the definition has s32 (arg 4); s32 where the definition has s16 (arg 5)
 extern void func_15171F04(f32, f32, f32, s16 **, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /*

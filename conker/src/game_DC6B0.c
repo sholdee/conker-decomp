@@ -254,11 +254,6 @@ s32 func_150AFBF4(Obj150AFBF4 *obj) {
     return 1;
 }
 
-/* Defined (K&R) in game_19A8B0.c; this is the int-argument prototype callers use. */
-extern void func_1516D99C(s16, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
-    s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
-    s32, s32, s32, s32, s32, u8, s32, s32, s32, s32, s32, u8, s32);
-
 /* Spawns a func_1516D99C particle emitter (texture 0xD, kind 4) on `object`'s `bone`. */
 void func_150AFC68(s32 object, s32 bone, s32 timer, s32 radiusXZ, u8 arg4, s32 arg5) {
     func_1516D99C(1, 0, 0, 0xD,                 /* x, y, z, texture */

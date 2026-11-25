@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 
 /* u8 tables indexed by a particle style */
@@ -14,140 +13,6 @@ extern struct StyleTable D_8008CBD0;
 extern struct StyleTable D_8008CBDC;
 extern struct StyleTable D_8008CBE8;
 
-typedef struct ParticleLink {
-    u8 pad0[4];
-    s16 status;
-} ParticleLink;
-
-/* A 0x34-byte sprite particle, spawned by func_1516D4E8 and updated every frame by the
- * handler that D_8008CBA0 holds for its kind. The bytes from 0x26 on depend on the kind. */
-typedef struct StyleParticle {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 x;
-    /* 0x10 */ s16 y;
-    /* 0x12 */ s16 z;
-    /* 0x14 */ s16 scaleX;
-    /* 0x16 */ s16 scaleY;
-    /* 0x18 */ s16 velocityY;
-    /* 0x1A */ u8 texture; /* index into D_8008CA4C */
-    /* 0x1B */ u8 frame;
-    /* 0x1C */ u8 r;
-    /* 0x1D */ u8 g;
-    /* 0x1E */ u8 b;
-    /* 0x1F */ u8 alpha;
-    /* 0x20 */ u8 envR;
-    /* 0x21 */ u8 envG;
-    /* 0x22 */ u8 envB;
-    /* 0x23 */ u8 kind; /* index into D_8008CBA0 */
-    /* 0x24 */ u8 lifetime; /* fades in while nonzero, out once it runs down */
-    /* 0x25 */ u8 yFraction;
-    union {
-        /* kinds that drift sideways with func_1516F864 */
-        struct {
-            /* 0x26 */ s8 velocityXHigh;
-            /* 0x27 */ u8 velocityXLow;
-            /* 0x28 */ s8 velocityZHigh;
-            /* 0x29 */ u8 velocityZLow;
-            /* 0x2A */ u8 xFraction;
-            /* 0x2B */ u8 zFraction;
-            /* 0x2C */ u8 unk2C;
-            /* 0x2D */ u8 unk2D;
-            /* 0x2E */ u8 unk2E;
-            /* 0x2F */ u8 unk2F;
-        } drift;
-        /* func_1516FBCC: blends its colour from rgb0 to rgb1 while it grows */
-        struct {
-            /* 0x26 */ u8 r0;
-            /* 0x27 */ u8 g0;
-            /* 0x28 */ u8 b0;
-            /* 0x29 */ u8 r1;
-            /* 0x2A */ u8 g1;
-            /* 0x2B */ u8 b1;
-            /* 0x2C */ u8 blend;
-            /* 0x2D */ s8 growX;
-            /* 0x2E */ s8 growY;
-            /* 0x2F */ u8 fadeShift;
-        } tint;
-        /* func_1516ECAC: scaled to size * alpha / 128 */
-        struct {
-            /* 0x26 */ u8 fadeRate;
-            /* 0x27 */ u8 unk27[5];
-            /* 0x2C */ u8 sizeHigh;
-            /* 0x2D */ u8 sizeLow;
-        } pulse;
-        /* func_1516E8CC: colour from an 8-step ramp in D_800A6E0C */
-        struct {
-            /* 0x26 */ u8 start;
-        } ramp;
-    } u;
-    /* 0x30 */ ParticleLink *link;
-} StyleParticle;
-
-/* A 0x4C-byte particle emitter, spawned by func_1516D99C and run by func_1516DB90. Most of
- * its bytes are the template that func_1516D4E8 gets for each particle it spawns. */
-typedef struct SpriteEmitter {
-    /* 0x00 */ u8 unk0; /* 0x11, or 0x66 for an emitter whose particles are 0x67s */
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 x; /* also a pointer's high half (flags 0x30) or a D_800A6E30 row */
-    /* 0x10 */ s16 y; /* also a pointer's low half (flags 0x30) */
-    /* 0x12 */ s16 z;
-    /* 0x14 */ s16 scaleX;
-    /* 0x16 */ s16 scaleY;
-    /* 0x18 */ s16 scaleXRandom;
-    /* 0x1A */ s16 scaleYRandom;
-    /* 0x1C */ s16 velocityY;
-    /* 0x1E */ u16 velocityYRandom;
-    /* 0x20 */ u16 timer; /* frames left; 0xFFFF runs forever */
-    /* 0x22 */ u16 flags;
-    /* 0x24 */ u8 texture;
-    /* 0x25 */ u8 frame;
-    /* 0x26 */ u8 r;
-    /* 0x27 */ u8 g;
-    /* 0x28 */ u8 b;
-    /* 0x29 */ u8 alpha;
-    /* 0x2A */ u8 envR;
-    /* 0x2B */ u8 envG;
-    /* 0x2C */ u8 envB;
-    /* 0x2D */ u8 kind;
-    /* 0x2E */ u8 velocityXHigh;
-    /* 0x2F */ u8 velocityXLow;
-    /* 0x30 */ u8 velocityZHigh;
-    /* 0x31 */ u8 velocityZLow;
-    /* 0x32 */ u8 unk32;
-    /* 0x33 */ u8 unk33;
-    /* 0x34 */ u8 unk34;
-    /* 0x35 */ u8 unk35;
-    /* 0x36 */ u8 unk36;
-    /* 0x37 */ u8 unk37;
-    /* 0x38 */ u8 velocityXHighRandom;
-    /* 0x39 */ u8 velocityXLowRandom;
-    /* 0x3A */ u8 velocityZHighRandom;
-    /* 0x3B */ u8 velocityZLowRandom;
-    /* 0x3C */ u8 initialTimer;
-    /* 0x3D */ u8 radiusXZ;
-    /* 0x3E */ u8 radiusY;
-    /* 0x3F */ u8 object; /* movement_obj index whose bone it follows; 0xFF for none */
-    /* 0x40 */ u8 particleLifetime;
-    /* 0x41 */ u8 interval;
-    /* 0x42 */ u8 countdown;
-    /* 0x43 */ u8 chance; /* out of 256 per particle; 0 always spawns */
-    /* 0x44 */ u8 burst; /* particles per spawn */
-    /* 0x45 */ u8 speed;
-    /* 0x46 */ u8 startOffset;
-    /* 0x47 */ u8 bone;
-    /* 0x48 */ u8 particleLink;
-    /* 0x49 */ u8 pad49[3];
-} SpriteEmitter;
-
-void func_1516F864(StyleParticle *particle);
-void func_1516F94C(StyleParticle *particle, s32 factor);
 
 
 void func_1516D400(void) {
@@ -214,9 +79,6 @@ void func_1516D4E8(x, y, z, texture, frame, r, g, b, alpha, envR, envG, envB, ki
     }
 }
 
-/* The int-argument prototype that callers use (game_19E040.c declares the same one). */
-void func_1516D4E8(s16, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
-    s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 extern s32 (*D_8008CBA0[])(StyleParticle *);
 
 void func_1516D678(StyleParticle *particle) {
@@ -406,15 +268,10 @@ void func_1516D99C(x, y, z, texture, frame, r, g, b, alpha, envR, envG, envB, ki
         emitter->particleLink = particleLink;
     }
 }
-/* The int-argument prototype that callers use. */
-void func_1516D99C(s16, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
-    s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
-    s32, s32, s32, s32, u8, s32, s32, s32, s32, s32, u8, s32);
 
 
 extern s16 D_800A6E30[][7];
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-void func_15170034(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3);
 
 
 void func_1516DB90(SpriteEmitter *arg0) {

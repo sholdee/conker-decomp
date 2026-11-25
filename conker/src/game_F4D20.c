@@ -75,8 +75,6 @@ void func_150C7968(WorldObject *obj) {
     }
 }
 
-extern void func_15179FE0(u8 texture, s16 x, s16 y, s16 z, s8 velY, u16 timer, u16 unkAC, u8 speedRange,
-                          u8 spinRange, u8 dragRange, s32 type);
 extern s32 D_800887F4; /* set while the camera is inside the zone below */
 
 /* For camera `view`: switches func_1000D96C ids 0xF <-> 0x5F as the camera enters or leaves a cylinder of

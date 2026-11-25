@@ -1116,7 +1116,7 @@ void func_15153634(SpriteBurst *config, u8 arg1, u8 arg2, s32 arg3) {
 }
 
 /* First argument of func_15156190. */
-// matching: u8 for argument 4 (the definition has s32); returns void here (the definition returns StreakParticle *)
+// matching: u8 where the definition has s32 (arg 4); returns void (the definition: StreakParticle *)
 extern void func_15156190(StreakParticleDesc *, u8, s32, u8, s32);
 
 /* Spawns a random number of particles (func_15156190) at config->position, each pointing at a random

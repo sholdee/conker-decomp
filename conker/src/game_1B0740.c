@@ -34,7 +34,6 @@ typedef struct Game1B0740Wave {
     u8 pad34[4];
 } Game1B0740Wave;
 
-void func_1517AA20(f32, s32, s32, s32, s32);
 
 extern u8 D_800A72D0[];
 extern s32 D_800DDF20;

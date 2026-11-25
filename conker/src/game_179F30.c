@@ -39,10 +39,7 @@ void *func_150C5370(void *desc, s32 payloadSize);
 void func_1515F10C(void *);
 void *func_15160A58(Actor *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_15160CDC(Actor *, s32, void *, void *, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-void *func_15189FF0(ParticleDef *spawn, GlowShape *emitter, EmitterAttach *attach, s32, s32, s32, s32);
 void *func_1515D5F8(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-void *func_1518D1C0(Actor *obj, s32, s32, s32, s32, s32, char *name);
-void func_1518E308(void *);
 void func_151B9F00(Actor *obj, s32, s32);
 void func_151BB044(Actor *obj);
 void func_151BC074(Actor *obj);
@@ -1223,8 +1220,6 @@ struct ModeTarget {
     /* 0x00 */ u8 pad0[0x22];
     /* 0x22 */ u8 mode;                 // set through func_1518E37C
 };
-
-void func_1518E37C(ModeTarget *, u8 mode);
 
 /** Messages 3..12 switch the target between mode 2 and modes 3, 5 and 6. */
 s32 func_1514EA1C(ModeTarget *target, s32 msg, s32 arg) {

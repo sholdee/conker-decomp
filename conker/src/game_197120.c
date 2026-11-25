@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-void func_151709B4(s32, s32, s32, s32, f32, s32, s32);
 
 /* Per-frame update of a bouncing debris particle: integrate motion, land/bounce on the floor, fade out. */
 void func_15169C70(Debris *debris) {
@@ -184,8 +183,6 @@ void func_1516A3F4(DropParticle *drop) {
     }
 }
 
-extern void func_15171D4C(f32, f32, f32, s32, s32, s32, f32, s32, s32, s32, s32, s32, s32, s32);
-
 /* Splash callback: from frame 3 on, spawns a sprite with a random texture (0x20-0x22) and angle each frame. */
 void func_1516A538(SplashFx *fx) {
     u32 angle;
@@ -200,9 +197,6 @@ void func_1516A538(SplashFx *fx) {
                       (intensity * 25) / 255 + 25, 0, 0x100, 0, fx->owner, fx->list);
     }
 }
-
-void func_1516F864(BounceParticle *particle);
-void func_1516F94C(BounceParticle *particle, s32 factor);
 
 /* Particle kind handler: fades the particle in or out, applies gravity and drift, and bounces it
  * off the floor. Returns 1 once it has faded out completely. */

@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-extern void func_1518CA80(void *, u8); // matching: takes a BillboardSpawn; this caller passes a BillboardSpawn38
 
 void func_1518B6B0(f32 arg0, f32 arg1, f32 arg2, u8 arg3, s32 arg4) {
     s32 i;

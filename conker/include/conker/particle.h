@@ -1852,8 +1852,283 @@ void func_1516A3F4(DropParticle *drop);
 void func_1516A538(SplashFx *fx);
 s32 func_1516A648(BounceParticle *particle);
 
+/* game_19A8B0.c */
+typedef struct ParticleLink {
+    u8 pad0[4];
+    s16 status;
+} ParticleLink;
+
+/* A 0x34-byte sprite particle, spawned by func_1516D4E8 and updated every frame by the
+ * handler that D_8008CBA0 holds for its kind. The bytes from 0x26 on depend on the kind. */
+typedef struct StyleParticle {
+    /* 0x00 */ u8 unk0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD;
+    /* 0x0E */ s16 x;
+    /* 0x10 */ s16 y;
+    /* 0x12 */ s16 z;
+    /* 0x14 */ s16 scaleX;
+    /* 0x16 */ s16 scaleY;
+    /* 0x18 */ s16 velocityY;
+    /* 0x1A */ u8 texture; /* index into D_8008CA4C */
+    /* 0x1B */ u8 frame;
+    /* 0x1C */ u8 r;
+    /* 0x1D */ u8 g;
+    /* 0x1E */ u8 b;
+    /* 0x1F */ u8 alpha;
+    /* 0x20 */ u8 envR;
+    /* 0x21 */ u8 envG;
+    /* 0x22 */ u8 envB;
+    /* 0x23 */ u8 kind; /* index into D_8008CBA0 */
+    /* 0x24 */ u8 lifetime; /* fades in while nonzero, out once it runs down */
+    /* 0x25 */ u8 yFraction;
+    union {
+        /* kinds that drift sideways with func_1516F864 */
+        struct {
+            /* 0x26 */ s8 velocityXHigh;
+            /* 0x27 */ u8 velocityXLow;
+            /* 0x28 */ s8 velocityZHigh;
+            /* 0x29 */ u8 velocityZLow;
+            /* 0x2A */ u8 xFraction;
+            /* 0x2B */ u8 zFraction;
+            /* 0x2C */ u8 unk2C;
+            /* 0x2D */ u8 unk2D;
+            /* 0x2E */ u8 unk2E;
+            /* 0x2F */ u8 unk2F;
+        } drift;
+        /* func_1516FBCC: blends its colour from rgb0 to rgb1 while it grows */
+        struct {
+            /* 0x26 */ u8 r0;
+            /* 0x27 */ u8 g0;
+            /* 0x28 */ u8 b0;
+            /* 0x29 */ u8 r1;
+            /* 0x2A */ u8 g1;
+            /* 0x2B */ u8 b1;
+            /* 0x2C */ u8 blend;
+            /* 0x2D */ s8 growX;
+            /* 0x2E */ s8 growY;
+            /* 0x2F */ u8 fadeShift;
+        } tint;
+        /* func_1516ECAC: scaled to size * alpha / 128 */
+        struct {
+            /* 0x26 */ u8 fadeRate;
+            /* 0x27 */ u8 unk27[5];
+            /* 0x2C */ u8 sizeHigh;
+            /* 0x2D */ u8 sizeLow;
+        } pulse;
+        /* func_1516E8CC: colour from an 8-step ramp in D_800A6E0C */
+        struct {
+            /* 0x26 */ u8 start;
+        } ramp;
+    } u;
+    /* 0x30 */ ParticleLink *link;
+} StyleParticle;
+
+/* A 0x4C-byte particle emitter, spawned by func_1516D99C and run by func_1516DB90. Most of
+ * its bytes are the template that func_1516D4E8 gets for each particle it spawns. */
+typedef struct SpriteEmitter {
+    /* 0x00 */ u8 unk0; /* 0x11, or 0x66 for an emitter whose particles are 0x67s */
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD;
+    /* 0x0E */ s16 x; /* also a pointer's high half (flags 0x30) or a D_800A6E30 row */
+    /* 0x10 */ s16 y; /* also a pointer's low half (flags 0x30) */
+    /* 0x12 */ s16 z;
+    /* 0x14 */ s16 scaleX;
+    /* 0x16 */ s16 scaleY;
+    /* 0x18 */ s16 scaleXRandom;
+    /* 0x1A */ s16 scaleYRandom;
+    /* 0x1C */ s16 velocityY;
+    /* 0x1E */ u16 velocityYRandom;
+    /* 0x20 */ u16 timer; /* frames left; 0xFFFF runs forever */
+    /* 0x22 */ u16 flags;
+    /* 0x24 */ u8 texture;
+    /* 0x25 */ u8 frame;
+    /* 0x26 */ u8 r;
+    /* 0x27 */ u8 g;
+    /* 0x28 */ u8 b;
+    /* 0x29 */ u8 alpha;
+    /* 0x2A */ u8 envR;
+    /* 0x2B */ u8 envG;
+    /* 0x2C */ u8 envB;
+    /* 0x2D */ u8 kind;
+    /* 0x2E */ u8 velocityXHigh;
+    /* 0x2F */ u8 velocityXLow;
+    /* 0x30 */ u8 velocityZHigh;
+    /* 0x31 */ u8 velocityZLow;
+    /* 0x32 */ u8 unk32;
+    /* 0x33 */ u8 unk33;
+    /* 0x34 */ u8 unk34;
+    /* 0x35 */ u8 unk35;
+    /* 0x36 */ u8 unk36;
+    /* 0x37 */ u8 unk37;
+    /* 0x38 */ u8 velocityXHighRandom;
+    /* 0x39 */ u8 velocityXLowRandom;
+    /* 0x3A */ u8 velocityZHighRandom;
+    /* 0x3B */ u8 velocityZLowRandom;
+    /* 0x3C */ u8 initialTimer;
+    /* 0x3D */ u8 radiusXZ;
+    /* 0x3E */ u8 radiusY;
+    /* 0x3F */ u8 object; /* movement_obj index whose bone it follows; 0xFF for none */
+    /* 0x40 */ u8 particleLifetime;
+    /* 0x41 */ u8 interval;
+    /* 0x42 */ u8 countdown;
+    /* 0x43 */ u8 chance; /* out of 256 per particle; 0 always spawns */
+    /* 0x44 */ u8 burst; /* particles per spawn */
+    /* 0x45 */ u8 speed;
+    /* 0x46 */ u8 startOffset;
+    /* 0x47 */ u8 bone;
+    /* 0x48 */ u8 particleLink;
+    /* 0x49 */ u8 pad49[3];
+} SpriteEmitter;
+
+void func_1516D400(void);
+/* K&R definition: the int-argument prototype that callers use. */
+void func_1516D4E8(s16, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
+                   s32, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
+void func_1516D678(StyleParticle *particle);
+Gfx *func_1516D738(Gfx *gfx, StyleParticle *particle, s32 arg2);
+/* K&R definition: the int-argument prototype that callers use */
+void func_1516D99C(s16, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
+                   s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
+                   s32, u8, s32, s32, s32, s32, s32, u8, s32);
+void func_1516DB90(SpriteEmitter *arg0);
+void func_1516E778(f32 *position, s32 duration, u8 texture, u8 arg3, s32 arg4);
+s32 func_1516E8CC(StyleParticle *particle);
+s32 func_1516ECAC(StyleParticle *particle);
+void func_1516ED68(s32 object, s32 duration, u8 arg2, s32 arg3);
+void func_1516EED4(s32 object, s32 threshold, u8 arg2, s32 arg3);
+s32 func_1516F024(StyleParticle *particle);
+void func_1516F1C0(s32 object, s32 duration, u8 arg2, s32 arg3);
+void func_1516F2F8(u8 object, s32 duration, s32 particleLifetime, s32 speed, u8 arg4, s32 arg5);
+void func_1516F548(s32 x, s32 y, s32 z, s32 arg3, s32 velocityXHigh, s32 velocityY, s32 velocityZHigh, s32 scale,
+                   s32 scaleRandom, s32 radius, s32 style0, s32 style1, s32 arg12, s32 arg13, s32 arg14, u8 arg15,
+                   s32 arg16);
+void func_1516F864(StyleParticle *particle);
+void func_1516F8EC(StyleParticle *particle, s32 factor);
+void func_1516F91C(StyleParticle *particle, s32 factor);
+void func_1516F94C(StyleParticle *particle, s32 factor);
+void func_1516F984(StyleParticle *particle, s32 factor);
+s32 func_1516F9C4(StyleParticle *particle);
+void func_1516FA88(s16 x, s16 y, s16 z, s32 isAlt, u8 arg4, s32 arg5);
+s32 func_1516FBCC(StyleParticle *particle);
+s32 func_1516FD50(StyleParticle *particle);
+void func_1516FE1C(s32 object, s32 duration, u8 arg2, s32 arg3);
+void func_15170034(s32 flags, f32 *outX, f32 *outY, f32 *outZ);
+void func_151700D8(f32 (*verts)[3], f32 x, f32 z, u8 style, f32 scale, s32 type, s32 countA, s32 countB, u8 arg8,
+                   s32 arg9);
+void func_15170500(s16 x, s16 y, s16 z, s32 angle, s32 isParticle, u8 arg5, s32 arg6);
+s32 func_151707E0(StyleParticle *particle);
+void func_151709B4(s32 x, s32 y, s32 z, s32 count, f32 speed, u8 arg5, s32 arg6);
+
+/* game_19F150.c */
+/* A textured sprite particle: one quad, drawn by func_151720C4. */
+typedef struct {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ Vtx vtx[4];
+    /* 0x50 */ s16 lifetime;  // drawn while >= 2; 0 starts the -3 -> -1 removal countdown
+    /* 0x52 */ s16 animFrame; // 8.8 fixed point frame index
+    /* 0x54 */ s16 animSpeed;
+    /* 0x56 */ u16 color;     // RGBA5551
+    /* 0x58 */ u8 animIndex;  // index into D_8008CA4C
+    /* 0x59 */ u8 flags;      // 1: cloud blend, 2: flat quad, 4: play animation once, 8: texture-only combine
+} Particle19F150;
+
+Particle19F150 *func_15171CA0(s16 lifetime, u16 color, u8 animIndex, s32 flags, s32 animSpeed, s32 arg5, u8 arg6,
+                              s32 arg7);
+void func_15171D4C(f32 x, f32 y, f32 z, s16 lifetime, u16 color, u8 animIndex, f32 angle, s32 dist, s32 size, s32 flags,
+                   s32 animSpeed, s32 arg11, u8 arg12, s32 arg13);
+void func_15171F04(f32 x, f32 y, f32 z, s32 tri, s16 lifetime, u16 color, u8 animIndex, s32 size, s32 flags,
+                   s32 animSpeed, s32 arg10, u8 arg11, s32 arg12);
+void func_15171FC0(Particle19F150 *particle);
+Gfx *func_151720C4(Gfx *gfx, Particle19F150 *particle, s32 arg2);
+s32 func_151725FC(Vtx *vtx, s32 tri, f32 x, f32 y, f32 z, f32 angle, s32 size, u8 width);
+s32 func_15172B20(Vtx *vtx, f32 x, f32 y, f32 z, f32 angle, s32 dist, s32 size, u8 width);
+
+/* game_1A1B40.c */
+/* The parts of a spawned particle that func_15174920 uses (layout as Particle in game_1944C0.c). */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x14];
+    /* 0x14 */ s32 growth;          /* copied from BillboardTemplate.unk4 */
+    /* 0x18 */ s32 fadeRate;        /* copied from BillboardTemplate.unk8 */
+    /* 0x1C */ u8 pad1C[0x18];
+    /* 0x34 */ s16 width;
+    /* 0x36 */ s16 height;
+    /* 0x38 */ s16 life;
+    /* 0x3A */ u8 pad3A[5];
+    /* 0x3F */ u8 primA;
+} PuffParticle;
+
+void func_15174690(s32 objIndex, s32 spread, s32 growth, s32 growthRange, s32 size, s32 fadeRate, s32 velY, s32 owner,
+                   s32 list);
+void func_15174920(PuffParticle *particle);
+
 /* game_1A7260.c */
 void func_15179DB0(u8 slot);
+
+/* game_1A7490.c */
+/*
+ * Small spinning, fading debris particles. They are allocated with func_15167A68 (0xB8 bytes) and driven by
+ * the object-type handler table in .rodata (D_8008B648 etc.): an update callback (func_1517A1EC or
+ * func_1517A84C), the draw callback func_1517A3A0 and the begin-draw hook func_1517A958.
+ */
+typedef struct SpinDebrisParticle {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ Mtx mtx[2];   // model matrix, double-buffered by D_800BE9C0
+    /* 0x90 */ s16 x;
+    /* 0x92 */ s16 y;
+    /* 0x94 */ s16 z;
+    /* 0x96 */ s16 rotX;
+    /* 0x98 */ s16 rotY;
+    /* 0x9A */ s16 rotZ;
+    /* 0x9C */ s8 spinX;
+    /* 0x9D */ s8 spinY;
+    /* 0x9E */ s8 spinZ;
+    /* 0x9F */ u8 texture;   // passed to func_1517A9A8
+    /* 0xA0 */ s16 velX;
+    /* 0xA2 */ s16 velY;
+    /* 0xA4 */ s16 velZ;
+    /* 0xA6 */ u16 timer;
+    /* 0xA8 */ f32 scale;
+    /* 0xAC */ u16 unkAC;    // 5 selects falling motion; also the timer value below which drag applies
+    /* 0xAE */ u16 dragRange; // the horizontal speed drops by up to this much per frame
+    /* 0xB0 */ s16 groundY;
+    /* 0xB2 */ u8 viewFlags; // bit n: drawn in view n; bit n+4: left view n afterwards
+    /* 0xB3 */ u8 alpha;
+} SpinDebrisParticle; // size 0xB8
+
+void func_15179FE0(u8 texture, s16 x, s16 y, s16 z, s8 velY, u16 timer, u16 unkAC, u8 speedRange, u8 spinRange,
+                   u8 dragRange, s32 type);
+void func_1517A1EC(SpinDebrisParticle *particle);
+Gfx *func_1517A394(Gfx *gfx);
+Gfx *func_1517A3A0(Gfx *gfx, SpinDebrisParticle *particle, s16 view);
+void func_1517A644(f32 size, u8 texture, s16 x, s16 y, s16 z);
+void func_1517A84C(SpinDebrisParticle *particle);
+Gfx *func_1517A958(Gfx *gfx, s32 type, s32 arg2, s32 arg3);
+Gfx *func_1517A9A8(Gfx *gfx, s32 texture);
+void func_1517AA20(f32 size, s32 x, s32 y, s32 z, s32 count);
+Gfx *func_1517AB7C(Gfx *gfx, s32 arg1, s16 player);
+
+/* game_1B74A0.c */
+/* The object func_151407D0 spawns for func_15189FF0. head.def.pos / rot are the world-space attach
+ * points, updated by func_1518A094. */
+typedef struct BoneGlow {
+    /* 0x000 */ DefParticleHead head;
+    /* 0x110 */ GlowShape params;
+    /* 0x16C */ u8 pad16C[4];
+    /* 0x170 */ EmitterAttach attach;
+} BoneGlow;
+
+BoneGlow *func_15189FF0(ParticleDef *spawn, GlowShape *params, EmitterAttach *attach, u8 arg3, u8 arg4, u8 arg5,
+                        u8 arg6);
+s32 func_1518A094(BoneGlow *emitter);
+s32 func_1518A214(BoneGlow *emitter, u8 *follow);
+s32 func_1518A2E8(BoneGlow *emitter, u8 *follow);
+s32 func_1518A324(BoneGlow *emitter, u8 *follow);
+void func_1518A360(BoneGlow *emitter, ActorSwapMsg *msg, u8 msgId);
 
 /* game_1B81D0.c */
 s32 func_1518AD20(FloorParticle *particle);
@@ -1865,8 +2140,41 @@ void func_1518B2A8(Vec3f *pos, f32 radius, f32 size, s32 count, u16 model, s32 a
 /* game_1B8B60.c */
 void func_1518B6B0(f32 arg0, f32 arg1, f32 arg2, u8 arg3, s32 arg4);
 
+/* game_1B9F30.c */
+/* The parts of a spawned particle that func_1518CCA8 uses (layout as Particle in game_1944C0.c). */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x14];
+    /* 0x14 */ s32 sizeSteps;    /* copied from BillboardTemplate.unk4 */
+    /* 0x18 */ u8 pad18[0x1C];
+    /* 0x34 */ s16 width;
+    /* 0x36 */ s16 height;
+    /* 0x38 */ s16 life;
+    /* 0x3A */ s8 fadeStep;
+    /* 0x3B */ u8 onExpire;
+} GrowingParticle;
+
+void func_1518CA80(BillboardSpawn *effect, u8 mode);
+void func_1518CCA8(GrowingParticle *particle);
+
 /* game_1BA1D0.c */
 void func_1518CD20(WorldObject *placement, u8 arg1, s32 arg2);
+
+/* game_1BA670.c */
+typedef struct {
+    /* 0x00 */ u8 pad0[2];
+    /* 0x02 */ s16 x;
+    /* 0x04 */ s16 y;
+    /* 0x06 */ s16 z;
+    /* 0x08 */ u8 pad8[0x14];
+    /* 0x1C */ Actor *target;
+} Struct1518E298;
+
+ActorEmitterProcess *func_1518D1C0(Actor *owner, s16 kind, s16 lifetime, u8 killExisting, u8 arg4, u8 arg5, void *arg6);
+void func_1518D6E0(ActorEmitterProcess *emitter);
+s32 func_1518E298(Struct1518E298 *tracker, s32 arg1, s32 arg2, s32 arg3);
+void func_1518E308(ActorEmitterProcess *emitter);
+void func_1518E37C(ActorEmitterProcess *emitter, u8 table);
+ActorEmitterProcess *func_1518E3C4(ActorEmitterParams *params, u8 arg1);
 
 /* game_1BB950.c */
 void func_1518E4A0(ActorEmitterProcess *emitter);
@@ -1877,6 +2185,77 @@ void func_1518E5D8(u8 *texture, u8 *flip, u8 *r, u8 *g, u8 *b, u8 *alpha, s16 *r
 s32 func_1518E66C(ActorEmitterProcess *emitter);
 s32 func_1518E6D4(ActorEmitterProcess *emitter);
 Vtx *func_1518E73C(ActorEmitterParticle *p, s16 vp);
+
+/* game_1BC650.c */
+/* Per-type state of a sprite effect, at sprite + 0x110. */
+typedef struct {
+    /* 0x00 */ f32 hi0;
+    /* 0x04 */ f32 lo0;
+    /* 0x08 */ f32 target0;
+    /* 0x0C */ f32 hi1;
+    /* 0x10 */ f32 lo1;
+    /* 0x14 */ f32 peak1;
+    /* 0x18 */ f32 target1;
+    /* 0x1C */ s16 timer0;
+    /* 0x1E */ s16 timer1;
+    /* 0x20 */ f32 hi2;
+    /* 0x24 */ f32 lo2;
+    /* 0x28 */ f32 target2;
+    /* 0x2C */ s16 timer2;
+} SpriteWobble;
+
+typedef struct {
+    /* 0x00 */ u8 pad0[0x38];
+    /* 0x38 */ Vec3f velocity;
+    /* 0x44 */ f32 unk44;
+    /* 0x48 */ f32 unk48;
+} SpriteMotion;
+
+typedef struct {
+    /* 0x00 */ DefParticleHead head;
+    /* 0x110 */ union {
+        SpriteWobble wobble;
+        SpriteMotion motion;
+    } data;
+} EffectSprite;
+
+/* Particle created by func_151D2BA4 from an EmitterParticleDesc. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x2C];
+    /* 0x2C */ EffectSprite *sprite;
+    /* 0x30 */ AnchorEmitter *parent;
+    /* 0x34 */ Vec3f pos;
+} EmitterParticle;
+
+typedef struct {
+    s32 unk0;
+    u8 unk4;
+} ContactKey;
+
+typedef struct {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x8];
+    /* 0x18 */ ContactKey key;
+} ContactObj;
+
+s32 func_1518F1A0(EffectSprite *sprite);
+s32 func_1518F384(EffectSprite *sprite);
+void func_1518F45C(s32 arg0, u8 arg1);
+void func_1518F49C(ContactObj *self, ContactKey *other, u8 arg2);
+AnchorEmitter *func_1518F51C(Actor *owner, u8 index, s16 duration, s8 updateFunc, s8 unk59Func, s8 childKind, u8 unk5A,
+                             s32 arg7, u8 arg8, s32 arg9);
+AnchorEmitter *func_1518F5D0(Actor *owner, AnchorEmitterTemplate *tmpl, s16 duration, s8 updateFunc, s8 unk59Func,
+                             s8 childKind, u8 unk5A, s32 arg7, u8 arg8, s32 arg9);
+s32 func_1518F7C4(AnchorEmitter *emitter);
+void func_1518F858(AnchorEmitter *emitter);
+void func_1518F89C(AnchorEmitter *emitter);
+void func_1518F8E0(AnchorEmitter *emitter);
+s32 func_1518FC04(EmitterParticle *particle, Vec3f *target);
+s32 func_1518FC44(EmitterParticle *particle, Vec3f *target);
+void func_1518FC84(EmitterParticle *particle, Vec3f *dest);
+s32 func_1518FDC4(Actor *obj, u8 *kind, u8 variant);
+u8 *func_1519003C(Actor *obj, s32 *found);
+LightEffect *func_1519021C(AnchorEmitter *emitter, Actor *owner, u8 kind, s16 duration, u8 arg4, s32 arg5);
 
 /* game_1BFC70.c */
 void func_151927C0(BillboardParticle *p);

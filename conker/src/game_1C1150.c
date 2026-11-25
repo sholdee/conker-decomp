@@ -4,7 +4,6 @@
 #include "effects.h"
 
 
-extern s32 func_1518D1C0(Actor *obj, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5, u8 *arg6);
 extern u8 D_800A8244[];
 
 extern void func_151DC260(f32 *pos, CollisionHit *ground, s32 type, u8 arg3, s32 arg4);
@@ -448,7 +447,6 @@ typedef struct {
     Actor *source;
 } Struct15194FF4;
 
-extern u8 *func_1518F51C(Actor *obj, u8 arg1, s16 arg2, s8 arg3, s8 arg4, s8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
 extern void func_15190518(Actor *obj);
 
 void func_15194FF4(self, other, arg2)

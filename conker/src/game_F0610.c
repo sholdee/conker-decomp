@@ -5,18 +5,6 @@
 void func_151B9BF0(s32 arg0, s32 arg1, s16 arg2, s16 arg3, s32 arg4, s32 arg5,
                    s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, s32 arg11,
                    s32 arg12, s32 arg13, s32 arg14, s32 arg15);
-void func_151709B4(s32 arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5,
-                   s32 arg6);
-void func_1516D99C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
-                   s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, s32 arg11,
-                   s32 arg12, s32 arg13, s32 arg14, s32 arg15, s32 arg16,
-                   s32 arg17, s32 arg18, s32 arg19, s32 arg20, s32 arg21,
-                   s32 arg22, s32 arg23, s32 arg24, s32 arg25, s32 arg26,
-                   s32 arg27, s32 arg28, s32 arg29, s32 arg30, s32 arg31,
-                   s32 arg32, s32 arg33, s32 arg34, s32 arg35, s32 arg36,
-                   s32 arg37, s32 arg38, s32 arg39, s32 arg40, s32 arg41,
-                   s32 arg42, s32 arg43, s32 arg44, s32 arg45, s32 arg46,
-                   s32 arg47, s32 arg48);
 LightEffect *func_151602C0(LightEffectHeader *header, Vec3i *header2, s32 arg2, s32 arg3,
                          s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 offset,
                          s32 arg9, s32 argA);

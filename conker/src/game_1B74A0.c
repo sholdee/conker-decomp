@@ -1,16 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-/* The object func_151407D0 spawns for func_15189FF0. head.def.pos / rot are the world-space attach
- * points, updated by func_1518A094. */
-typedef struct BoneGlow {
-    /* 0x000 */ DefParticleHead head;
-    /* 0x110 */ GlowShape params;
-    /* 0x16C */ u8 pad16C[4];
-    /* 0x170 */ EmitterAttach attach;
-} BoneGlow;
 
 void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 

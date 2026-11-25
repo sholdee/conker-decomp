@@ -1,7 +1,11 @@
 #include <ultra64.h>
-#define func_1510A344 func_1510A344_header // matching: this file keeps its own declaration of func_1510A344
+#define func_1510A344 func_1510A344_header // matching: this file keeps its own declarations of these
+#define func_1516E778 func_1516E778_header
+#define func_1516F2F8 func_1516F2F8_header
 #include "functions.h"
 #undef func_1510A344
+#undef func_1516E778
+#undef func_1516F2F8
 #include "effects.h"
 #include "variables.h"
 
@@ -385,10 +389,6 @@ extern void func_1510A930(s32, s32, s32);
 extern void func_1515F170(s32, u8);
 extern void light_sendEvent(u8, u8, s32);
 extern void func_151645C4(u8);
-extern s32 func_1518D1C0(Actor *, s16, s16, s32, u8, s32, char *);
-extern void func_1518F45C(s32, u8);
-extern s32 func_1518F51C(void *, u8, s16, s8, s8, s8, u8, s32, s32, s32);
-extern u8 *func_1519003C(Actor *, s32 *);
 extern void func_15190518(void *);
 extern void func_15191B8C(ActorRef *, u8);
 extern void func_151937F4(Actor *, s32, s32);
@@ -1150,12 +1150,10 @@ extern void func_151F2BA8(void);
 extern void func_151F2BE8(void);
 extern void func_151F2C4C(void);
 extern void func_151F2D6C(s32, s32);
-extern void func_1516D99C(s16, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_151B9BF0(s32, s32, s16, s16, s16, s16, s16, s16, s16, s16, s16, s16, s16, f32 *, s32, s32);
 extern void func_150E1AB0(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, f32, f32, f32, f32, f32, f32);
 extern void func_150E2DB4(Actor *, u8, s16, s32, f32, f32, f32, f32, f32, f32, s32, s32, s32, s32);
-extern void func_1516E778(f32 *, s32, s8, u8, s32);
-extern void func_1516F548(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
+extern void func_1516E778(f32 *, s32, s8, u8, s32); // matching: s8 where the definition has u8 (arg 3)
 extern void func_151DC8BC(f32 *, s16, s32, s32, s32, s32);
 extern void func_151A3390(Actor *, u8);
 // matching: an s16 duration where the definition has s32 (the call truncates it)
@@ -1173,8 +1171,7 @@ extern void func_15192D48(Actor *, s16, u8, s32);
 extern void func_151B09BC(Actor *, s32, s16, u8, s32);
 extern void func_150DB518(f32 *, f32 *, f32 *, f32 *, f32 *, s32, s32, s32);
 extern s32 func_1519E970(s16, EvNodeData *, s32, f32 *, f32 *, s32, s32);
-extern void func_1516F2F8(s32, s32, s32, s32, s32, s32);
-extern void func_1516F1C0(s32, s32, u8, s32);
+extern void func_1516F2F8(s32, s32, s32, s32, s32, s32); // matching: s32 where the definition has u8 (args 1, 5)
 extern void func_151090DC(void);
 extern void func_151CFA4C(Actor *, u8, s32);
 extern void func_151D5648(f32 *, u8, s32);
@@ -1187,7 +1184,6 @@ extern void func_151A0A10(Actor *, s32, u8, s32);
 extern void func_151DBAA8(f32 *, s32, u8, u8, s32);
 extern void func_150DAE70(Actor *, s32, u8, s32);
 extern void func_15148F1C(u8, f32, f32, f32, s32, s32, s32, f32, s16, f32, f32, s32);
-extern void func_1516ED68(s32, s32, u8, s32);
 
 /*
  * Second cutscene event handler: types 0xB (func_1001263C / func_151F2xxx) and

@@ -2,39 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/*
- * Small spinning, fading debris particles. They are allocated with func_15167A68 (0xB8 bytes) and driven by
- * the object-type handler table in .rodata (D_8008B648 etc.): an update callback (func_1517A1EC or
- * func_1517A84C), the draw callback func_1517A3A0 and the begin-draw hook func_1517A958.
- */
-typedef struct SpinDebrisParticle {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ Mtx mtx[2];   // model matrix, double-buffered by D_800BE9C0
-    /* 0x90 */ s16 x;
-    /* 0x92 */ s16 y;
-    /* 0x94 */ s16 z;
-    /* 0x96 */ s16 rotX;
-    /* 0x98 */ s16 rotY;
-    /* 0x9A */ s16 rotZ;
-    /* 0x9C */ s8 spinX;
-    /* 0x9D */ s8 spinY;
-    /* 0x9E */ s8 spinZ;
-    /* 0x9F */ u8 texture;   // passed to func_1517A9A8
-    /* 0xA0 */ s16 velX;
-    /* 0xA2 */ s16 velY;
-    /* 0xA4 */ s16 velZ;
-    /* 0xA6 */ u16 timer;
-    /* 0xA8 */ f32 scale;
-    /* 0xAC */ u16 unkAC;    // 5 selects falling motion; also the timer value below which drag applies
-    /* 0xAE */ u16 dragRange; // the horizontal speed drops by up to this much per frame
-    /* 0xB0 */ s16 groundY;
-    /* 0xB2 */ u8 viewFlags; // bit n: drawn in view n; bit n+4: left view n afterwards
-    /* 0xB3 */ u8 alpha;
-} SpinDebrisParticle; // size 0xB8
-
 Gfx *func_15094F70(Gfx *, void *, s32, void *, s32, s32, s32, s32, s32);
-Gfx *func_1517A9A8(Gfx *gfx, s32 texture);
-void func_1517A644(f32 size, u8 texture, s16 x, s16 y, s16 z);
 
 /* Spawns one particle of object type `type` at (x, y, z) with random horizontal speed and spin. */
 void func_15179FE0(u8 texture, s16 x, s16 y, s16 z, s8 velY, u16 timer, u16 unkAC, u8 speedRange,

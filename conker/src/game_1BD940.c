@@ -7,7 +7,6 @@
 typedef struct Game1BD8B0Object Game1BD8B0Object;
 
 void func_151617E4(Game1BD8B0Object *obj);
-s32 func_1518E298();
 void func_151D2B4C(s32);
 
 void func_15190490(Game1BD8B0Object *obj) {

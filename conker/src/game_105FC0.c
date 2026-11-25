@@ -760,9 +760,9 @@ typedef struct {
     u8 unk0[0x24];
 } ImpactOrigin;
 
-// matching: a pointer for argument 3 (the definition has s32)
+// matching: a pointer where the definition has s32 (arg 3)
 extern void func_15153CCC(ConeBasis *, SplashSpray *, ImpactOrigin *, u8, s32);
-// matching: a pointer for argument 3 (the definition has s32)
+// matching: a pointer where the definition has s32 (arg 3)
 extern void func_15153C84(TriangleSource *, SplashSpray *, ImpactOrigin *, u8, s32);
 
 /* Spawns the impact effects of a trail segment hitting something (hit from func_15081690). */

@@ -114,11 +114,11 @@ GameCommand *func_150BE438(GameCommand *cmd, s32 id) {
 
 
 void func_1515C244(Actor *, Vec3f *, f32 *, f32 *);
-// matching: s32 for argument 5 (the definition has a pointer); s32 for argument 7 (the definition has u8); s32 for argument 8 (the definition has u8); s32 for argument 9 (the definition has s8); a pointer for argument 10 (the definition has s32); s32 for argument 12 (the definition has u8); s32 for argument 13 (the definition has u8)
+// matching: s32 where the definition has a pointer (arg 5); a pointer where the definition has s32 (arg 10)
 void func_1515080C(DebrisSpray *, const s32 *, const f32 *, s32, s32, s32, s32, s32, s32, CollisionHit *, f32, s32, s32, u8, s32);
-// matching: s32 for argument 4 (the definition has u32); s32 for argument 6 (the definition has u8)
+// matching: s32 where the definition has u32 (arg 4), u8 (arg 6)
 void func_15152190(DebrisBurst *, const s32 *, const f32 *, s32, f32, s32, u8, s32);
-// matching: a pointer for argument 3 (the definition has s32)
+// matching: a pointer where the definition has s32 (arg 3)
 void func_15153F18(AngleRange *, SplashSpray *, CollisionHit *, u8, s32);
 
 /* Spawns the burst of effects at `obj`'s centre: one func_1515080C, one func_15152190

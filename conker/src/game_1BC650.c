@@ -1,39 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-/* Per-type state of a sprite effect, at sprite + 0x110. */
-typedef struct {
-    /* 0x00 */ f32 hi0;
-    /* 0x04 */ f32 lo0;
-    /* 0x08 */ f32 target0;
-    /* 0x0C */ f32 hi1;
-    /* 0x10 */ f32 lo1;
-    /* 0x14 */ f32 peak1;
-    /* 0x18 */ f32 target1;
-    /* 0x1C */ s16 timer0;
-    /* 0x1E */ s16 timer1;
-    /* 0x20 */ f32 hi2;
-    /* 0x24 */ f32 lo2;
-    /* 0x28 */ f32 target2;
-    /* 0x2C */ s16 timer2;
-} SpriteWobble;
-
-typedef struct {
-    /* 0x00 */ u8 pad0[0x38];
-    /* 0x38 */ Vec3f velocity;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 unk48;
-} SpriteMotion;
-
-typedef struct {
-    /* 0x00 */ DefParticleHead head;
-    /* 0x110 */ union {
-        SpriteWobble wobble;
-        SpriteMotion motion;
-    } data;
-} EffectSprite;
 
 /* What func_151D2F00 (game_1FFF60.c) copies to ActorFollowerGroup.actor: the group's fields 0x10-0x1F. */
 typedef struct {
@@ -69,29 +36,10 @@ typedef struct {
     /* 0x20 */ AnchorEmitter *parent;
 } EmitterParticleDesc;
 
-/* Particle created by func_151D2BA4 from an EmitterParticleDesc. */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x2C];
-    /* 0x2C */ EffectSprite *sprite;
-    /* 0x30 */ AnchorEmitter *parent;
-    /* 0x34 */ Vec3f pos;
-} EmitterParticle;
-
 typedef struct {
     f32 x;
     f32 y;
 } SpriteSize;
-
-typedef struct {
-    s32 unk0;
-    u8 unk4;
-} ContactKey;
-
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x8];
-    /* 0x18 */ ContactKey key;
-} ContactObj;
 
 typedef struct {
     s32 unk0;
@@ -106,17 +54,10 @@ typedef struct {
 } ChildDesc;
 
 void *memcpy(void *, const void *, u32);
-s32 func_1518E298();
 LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 void func_151D2AB0(s32);
 void func_151D2BA4(EmitterParticleDesc *, Vec3f *, s32, u8, s32);
 AnchorEmitter *func_151D2F00(FollowerGroupDesc *, s32, u8, s32);
-
-s32 func_1518FDC4(Actor *obj, u8 *kind, u8 variant);
-AnchorEmitter *func_1518F5D0(Actor *owner, AnchorEmitterTemplate *tmpl, s16 duration, s8 updateFunc, s8 unk59Func,
-                       s8 childKind, u8 unk5A, s32 arg7, u8 arg8, s32 arg9);
-void func_1518F8E0(AnchorEmitter *emitter);
-LightEffect *func_1519021C(AnchorEmitter *emitter, Actor *owner, u8 kind, s16 duration, u8 arg4, s32 arg5);
 
 extern AnchorEmitterTemplate *D_8008D630[];
 extern s32 (*D_8008D67C[])(AnchorEmitter *);

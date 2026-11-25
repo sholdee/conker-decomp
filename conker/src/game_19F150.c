@@ -1,22 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 
 extern EffectTexture *D_8008CA4C[];
-
-/* A textured sprite particle: one quad, drawn by func_151720C4. */
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ Vtx vtx[4];
-    /* 0x50 */ s16 lifetime;  // drawn while >= 2; 0 starts the -3 -> -1 removal countdown
-    /* 0x52 */ s16 animFrame; // 8.8 fixed point frame index
-    /* 0x54 */ s16 animSpeed;
-    /* 0x56 */ u16 color;     // RGBA5551
-    /* 0x58 */ u8 animIndex;  // index into D_8008CA4C
-    /* 0x59 */ u8 flags;      // 1: cloud blend, 2: flat quad, 4: play animation once, 8: texture-only combine
-} Particle19F150;
 
 
 /* Allocates a particle and initialises its animation state. */
@@ -39,8 +26,6 @@ Particle19F150 *func_15171CA0(s16 lifetime, u16 color, u8 animIndex, s32 flags, 
     particle->vtx[3].v.flag = 0;
     return particle;
 }
-
-s32 func_15172B20(Vtx *vtx, f32 x, f32 y, f32 z, f32 angle, s32 dist, s32 size, u8 width);
 
 /*
  * Spawns a sprite particle at (x, y, z). Normally the quad is laid on the floor below a point `dist` away along
@@ -69,8 +54,6 @@ void func_15171D4C(f32 x, f32 y, f32 z, s16 lifetime, u16 color, u8 animIndex, f
         }
     }
 }
-
-s32 func_151725FC(Vtx *vtx, s32 tri, f32 x, f32 y, f32 z, f32 angle, s32 size, u8 width);
 
 /* Spawns a sprite particle laid on collision triangle `tri` at (x, y, z). */
 void func_15171F04(f32 x, f32 y, f32 z, s32 tri, s16 lifetime, u16 color, u8 animIndex, s32 size, s32 flags,

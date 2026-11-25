@@ -6,21 +6,7 @@
 #undef func_150ADA20
 u8 func_150ADA20(void);
 #include "variables.h"
-#include "effects.h"
 
-
-/* The parts of a spawned particle that func_15174920 uses (layout as Particle in game_1944C0.c). */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x14];
-    /* 0x14 */ s32 growth;          /* copied from BillboardTemplate.unk4 */
-    /* 0x18 */ s32 fadeRate;        /* copied from BillboardTemplate.unk8 */
-    /* 0x1C */ u8 pad1C[0x18];
-    /* 0x34 */ s16 width;
-    /* 0x36 */ s16 height;
-    /* 0x38 */ s16 life;
-    /* 0x3A */ u8 pad3A[5];
-    /* 0x3F */ u8 primA;
-} PuffParticle;
 
 extern void *D_8008CA4C[];
 

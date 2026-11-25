@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Particle template, referenced by an EmitterInfo. */
 typedef struct ParticleTemplate {
@@ -80,8 +79,6 @@ extern s32 (*D_8008D628[])(ActorEmitterProcess *);
 
 void *memcpy(void *, const void *, u32);
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-void func_1518E308(ActorEmitterProcess *emitter);
-ActorEmitterProcess *func_1518E3C4(ActorEmitterParams *params, u8 arg1);
 
 /* Creates an emitter of the given kind on owner, optionally killing the owner's existing emitters first. */
 ActorEmitterProcess *func_1518D1C0(Actor *owner, s16 kind, s16 lifetime, u8 killExisting, u8 arg4, u8 arg5,
@@ -499,15 +496,6 @@ void func_1518D6E0(ActorEmitterProcess *emitter) {
         func_1516972C(self);
     }
 }
-
-typedef struct {
-    /* 0x00 */ u8 pad0[2];
-    /* 0x02 */ s16 x;
-    /* 0x04 */ s16 y;
-    /* 0x06 */ s16 z;
-    /* 0x08 */ u8 pad8[0x14];
-    /* 0x1C */ Actor *target;
-} Struct1518E298;
 
 /* Copies the target's position into the tracker (as s16); returns 1 when there is no live target. */
 s32 func_1518E298(Struct1518E298 *tracker, s32 arg1, s32 arg2, s32 arg3) {

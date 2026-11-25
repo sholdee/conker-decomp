@@ -110,7 +110,6 @@ void func_150C1A40(Actor *actor, s32 side, s32 arg2) {
     }
 }
 
-void func_1518CA80(BillboardSpawn *effect, u8 mode);
 
 /*
  * Spawns a growing billboard particle of size `size` at (x, y, z), moving horizontally away from

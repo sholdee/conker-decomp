@@ -20,7 +20,6 @@ struct TimedSoundObject {
 };
 
 extern void func_151D343C(ActorRef *, s32);
-extern void func_1518F45C(ActorRef *, u8);
 
 /* Message 0x2D: swap the trigger's target between the two objects in the message. */
 void func_151906E0(struct TimedSoundObject *self, ObjectPair *pair, u8 msg) {

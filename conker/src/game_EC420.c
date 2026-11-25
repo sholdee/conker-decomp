@@ -4,12 +4,8 @@
 #undef func_15133B98
 #include "variables.h"
 
-
 void func_150BEF70(s32 arg0) {
 }
-
-/* K&R definition in game_19A8B0.c; callers pass all 49 arguments as ints. */
-extern void func_1516D99C();
 
 /* Starts two mirrored particle emitters at (0x1FDB, 0x25, +/-0x17C) whose timer is the low half of arg0. */
 void func_150BEF7C(s32 arg0) {
@@ -82,7 +78,6 @@ s32 func_150BF0F4(Struct150BF0F4 *entry) {
     entry->age = age;
     return 0;
 }
-
 
 /*
  * Behaviour scratch state (WorldObject.touch) of func_150BF21C: an object whose mesh is translated toward a

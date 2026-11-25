@@ -1489,7 +1489,6 @@ void func_15198110(CharacterFlamethrowerActor *actor, s32 index) {
     }
 }
 
-extern s32 func_1518D1C0(Actor *, s32, s32, s32, s32, s32, const char *);
 
 /* Jet update callback: a point inside object 0's (the player's) cylinder hits it and retires the older points. */
 s32 func_15198570(CharacterFlamethrowerActor *actor) {

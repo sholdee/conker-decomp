@@ -2585,7 +2585,7 @@ void func_1513A24C(Vec3f *position, s32 *table, f32 *arg2, s32 count, f32 scale,
     func_15133E3C(0, 0x45);
 }
 
-// matching: s32 for argument 4 (the definition has u32); s32 for argument 6 (the definition has u8); s32 for argument 7 (the definition has u8)
+// matching: s32 where the definition has u32 (arg 4), u8 (args 6-7)
 void func_15152190(DebrisBurst *, void *, void *, s32, f32, s32, s32, s32);
 const s32 D_800A4260[1] = { 0x39 };
 const f32 D_800A4264[1] = { 1.0f };

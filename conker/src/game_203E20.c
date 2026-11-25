@@ -28,9 +28,9 @@ void func_151D6970(Actor *character, void *obj) {
     }
 }
 
-// matching: a pointer for argument 3 (the definition has s32); s32 for argument 4 (the definition has u8)
+// matching: a pointer where the definition has s32 (arg 3); s32 where the definition has u8 (arg 4)
 extern void func_15153F18(AngleRange *angles, SplashSpray *spray, CollisionHit *ground, s32 arg3, s32 arg4);
-// matching: a pointer for argument 3 (the definition has s32); s32 for argument 4 (the definition has u8)
+// matching: a pointer where the definition has s32 (arg 3); s32 where the definition has u8 (arg 4)
 extern void func_15150178(AngleRange *angles, DropSpray *spray, CollisionHit *ground, s32 arg3, s32 arg4);
 
 /* Spawns the func_15153F18 and func_15150178 bursts at `pickup`, on the ground under `player`. */

@@ -7,9 +7,6 @@ f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 
 void func_151D5D60(Vtx **buffers, s16 viewport, s32 size, Vtx **out, u8 *fresh);
-ActorEmitterProcess *func_1518D1C0(Actor *owner, s16 kind, s16 lifetime, u8 killExisting, u8 arg4, u8 arg5,
-                       char *name);
-void func_1518E308(ActorEmitterProcess *emitter);
 
 extern char D_800A7460[];
 extern char D_800A749C[];

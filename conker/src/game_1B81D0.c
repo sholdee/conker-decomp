@@ -4,7 +4,6 @@
 
 
 
-extern void func_1518CA80(BillboardSpawn *, u8);
 
 /*
  * Particle callback: once the particle is below its floor height, spawns 4-7 splash droplets and
