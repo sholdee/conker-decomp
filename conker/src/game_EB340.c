@@ -187,7 +187,7 @@ typedef struct {
 
 extern void func_1511650C(EB340Turner *arg0, s32, s32, f32);
 
-/* Until finished: plays sound 0x62C, advances unk84 by unk64 (or clamps it to 270),
+/* Until finished: calls func_1511650C(1, 0x62C, 500), advances unk84 by unk64 (or clamps it to 270),
  * and once unk84 passes 360 marks itself finished and stops its sound. */
 void func_150BE210(EB340Turner *arg0) {
     if ((arg0->unk73 & 3) == 3) {
@@ -196,10 +196,10 @@ void func_150BE210(EB340Turner *arg0) {
     func_1511650C(arg0, 1, 0x62C, 500.0f);
     if (arg0->unk4F & 4) {
         arg0->unk84 += arg0->unk64;
-    } else if (270.0f < arg0->unk84) {
+    } else if (arg0->unk84 > 270.0f) {
         arg0->unk84 = 270.0f;
     }
-    if (360.0f < arg0->unk84) {
+    if (arg0->unk84 > 360.0f) {
         arg0->unk73 &= ~3;
         arg0->unk73 |= 3;
         arg0->unk64 = 0.0f;
@@ -247,7 +247,7 @@ void func_150BE2E8(EB340Mover *mover) {
     mover->pos[0] = (toX - fromX) * progress + fromX;
     mover->pos[1] = (toY - fromY) * progress + fromY;
     mover->pos[2] = (toZ - fromZ) * progress + fromZ;
-    if (1.0f < progress) {
+    if (progress > 1.0f) {
         progress = 1.0; // matching: a 1.0f literal here gets CSE'd with the compare's 1.0f
     }
 
