@@ -2,6 +2,18 @@
 #include "functions.h"
 #include "variables.h"
 
+// Ground info for an object, as filled in by func_1504715C.
+typedef struct GroundInfo {
+    /* 0x00 */ f32 unk0;
+    /* 0x04 */ u8 unk4[0x20];
+} GroundInfo;
+
+extern void func_1504715C(GroundInfo *ground, struct127 *obj);
+
+typedef struct Vec3f {
+    f32 x, y, z;
+} Vec3f;
+
 typedef struct {
     /* 0x0 */ u8 unk0;
     /* 0x1 */ u8 unk1;
@@ -15,389 +27,313 @@ typedef struct {
 extern void func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
 extern void func_151C0098(f32 *arg0, struct127 *arg1, s32 arg2, s32 arg3, s32 arg4);
 extern void func_1507CD64(struct127 *arg0, s32 arg1);
-extern void func_1504715C(f32 *arg0, struct127 *arg1);
-extern void func_1514B364(f32 *arg0, f32 *arg1, s32 arg2, s32 arg3);
 extern s32 func_1518D1C0(struct127 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 *arg6);
 extern u8 D_800A8244[];
 
 
 extern void func_151C329C(f32 *arg0, s32 arg1, s32 arg2);
-extern void func_151DC260(f32 *arg0, f32 *arg1, s32 arg2, s32 arg3, s32 arg4);
-extern void func_151DC484(f32 *arg0, f32 *arg1, s32 arg2, s32 arg3, s32 arg4);
+extern void func_151DC260(f32 *pos, GroundInfo *ground, s32 type, u8 arg3, s32 arg4);
+extern void func_151DC484(f32 *pos, GroundInfo *ground, s32 type, u8 arg3, s32 arg4);
 extern s32 func_150A11C4;
 extern s32 func_150A1DA0;
 
-void func_15193CA0(struct127 *arg0, u8 arg1, u8 arg2, s32 arg3) {
+void func_15193CA0(struct127 *obj, u8 arg1, u8 arg2, s32 arg3) {
     f32 pos[3];
-    f32 scratch[9];
+    GroundInfo ground;
     s32 type;
 
-    func_1504715C(scratch, arg0);
+    func_1504715C(&ground, obj);
     pos[0] = D_800CC2C0;
     pos[1] = D_800CC2C4;
     pos[2] = D_800CC2C8;
     {
-        u32 start;
+        // Anti-tamper: checksum a code range and corrupt memory if it was modified.
+        u32 addr;
         u32 sum;
         u32 end;
-        s32 pad;
+        s32 pad; // matching: IDO needs the extra stack slot
 
-        start = (u32)&func_150A11C4;
+        addr = (u32)&func_150A11C4;
         end = (u32)&func_150A1DA0;
         sum = 0;
-        for (; start < end; start += 4) {
-            sum ^= *(u32 *)start;
+        for (; addr < end; addr += 4) {
+            sum ^= *(u32 *)addr;
         }
         if (sum != 0xA3C35D52) {
-            start = (u32)&((s32 *)&D_80043B40)[(osGetCount() & 0xFF) * 8];
-            *(s32 *)start = osGetCount() & 0x3FFFF7;
+            addr = (u32)&((s32 *)&D_80043B40)[(osGetCount() & 0xFF) * 8]; // matching: reuses addr's register
+            *(s32 *)addr = osGetCount() & 0x3FFFF7;
         }
     }
-    if (arg0->id == 6 || arg0->id == 6 || arg0->id == 9 || arg0->id == 0xC || arg0->id == 0xF || arg0->id == 0x10 || arg0->id == 0x12 || arg0->id == 0x17 || arg0->id == 0x1B || arg0->id == 0x1E || arg0->id == 0x28 || arg0->id == 0x29 || arg0->id == 0x2A || arg0->id == 0x2B || arg0->id == 0x2C || arg0->id == 0x2D || arg0->id == 0x2E || arg0->id == 0x30 || arg0->id == 0x34 || arg0->id == 0x38 || arg0->id == 0x3A || arg0->id == 0x41 || arg0->id == 0x42 || arg0->id == 0x4B || arg0->id == 0x46 || arg0->id == 0x47 || arg0->id == 0x49 || arg0->id == 0x4A || arg0->id == 0x4C || arg0->id == 0x4D || arg0->id == 0x4E || arg0->id == 0x4F || arg0->id == 0x51 || arg0->id == 0x52 || arg0->id == 0x55 || arg0->id == 0x56 || arg0->id == 0x5D || arg0->id == 0x60 || arg0->id == 0x61 || arg0->id == 0x62 || arg0->id == 0x63 || arg0->id == 0x66 || arg0->id == 0x67 || arg0->id == 0x6F || arg0->id == 0x70 || arg0->id == 0x73 || arg0->id == 0x77 || arg0->id == 0x7B || arg0->id == 0x7D || arg0->id == 0x7E || arg0->id == 0x7F || arg0->id == 0x82 || arg0->id == 0x83 || arg0->id == 0x84 || arg0->id == 0x89 || arg0->id == 0x8C || arg0->id == 0x8E || arg0->id == 0x8F || arg0->id == 0x91 || arg0->id == 0x94 || arg0->id == 0x9E || arg0->id == 0xA1 || arg0->id == 0xA6 || arg0->id == 0xAB || arg0->id == 0xAC || arg0->id == 0xB2 || arg0->id == 0xB4 || arg0->id == 0xB7 || arg0->id == 0xB8 || arg0->id == 0xB9) {
+    if (obj->id == 6 || obj->id == 6 || obj->id == 9 || obj->id == 0xC || obj->id == 0xF || obj->id == 0x10 || obj->id == 0x12 || obj->id == 0x17 || obj->id == 0x1B || obj->id == 0x1E || obj->id == 0x28 || obj->id == 0x29 || obj->id == 0x2A || obj->id == 0x2B || obj->id == 0x2C || obj->id == 0x2D || obj->id == 0x2E || obj->id == 0x30 || obj->id == 0x34 || obj->id == 0x38 || obj->id == 0x3A || obj->id == 0x41 || obj->id == 0x42 || obj->id == 0x4B || obj->id == 0x46 || obj->id == 0x47 || obj->id == 0x49 || obj->id == 0x4A || obj->id == 0x4C || obj->id == 0x4D || obj->id == 0x4E || obj->id == 0x4F || obj->id == 0x51 || obj->id == 0x52 || obj->id == 0x55 || obj->id == 0x56 || obj->id == 0x5D || obj->id == 0x60 || obj->id == 0x61 || obj->id == 0x62 || obj->id == 0x63 || obj->id == 0x66 || obj->id == 0x67 || obj->id == 0x6F || obj->id == 0x70 || obj->id == 0x73 || obj->id == 0x77 || obj->id == 0x7B || obj->id == 0x7D || obj->id == 0x7E || obj->id == 0x7F || obj->id == 0x82 || obj->id == 0x83 || obj->id == 0x84 || obj->id == 0x89 || obj->id == 0x8C || obj->id == 0x8E || obj->id == 0x8F || obj->id == 0x91 || obj->id == 0x94 || obj->id == 0x9E || obj->id == 0xA1 || obj->id == 0xA6 || obj->id == 0xAB || obj->id == 0xAC || obj->id == 0xB2 || obj->id == 0xB4 || obj->id == 0xB7 || obj->id == 0xB8 || obj->id == 0xB9) { // matching: the repeated first id test is in the original
         func_151C329C(pos, arg2, arg3);
         return;
     }
-    if (arg0->id == 5 || arg0->id == 5 || arg0->id == 7 || arg0->id == 0x13 || arg0->id == 0x20 || arg0->id == 0x23 || arg0->id == 0x44 || arg0->id == 0x5A || arg0->id == 0x5C || arg0->id == 0x5E || arg0->id == 0x5F || arg0->id == 0x6D || arg0->id == 0x74 || arg0->id == 0x75 || arg0->id == 0x78 || arg0->id == 0x7A || arg0->id == 0x8A || arg0->id == 0x8D || arg0->id == 0xAD || arg0->id == 0xAE || arg0->id == 0xAF || arg0->id == 0xB1) {
+    if (obj->id == 5 || obj->id == 5 || obj->id == 7 || obj->id == 0x13 || obj->id == 0x20 || obj->id == 0x23 || obj->id == 0x44 || obj->id == 0x5A || obj->id == 0x5C || obj->id == 0x5E || obj->id == 0x5F || obj->id == 0x6D || obj->id == 0x74 || obj->id == 0x75 || obj->id == 0x78 || obj->id == 0x7A || obj->id == 0x8A || obj->id == 0x8D || obj->id == 0xAD || obj->id == 0xAE || obj->id == 0xAF || obj->id == 0xB1) { // matching: repeated first test, as above
         type = 1;
-    } else if (arg0->id == 0 || arg0->id == 1 || arg0->id == 2 || arg0->id == 3 || arg0->id == 4 || arg0->id == 0x96 || arg0->id == 8 || arg0->id == 0xA || arg0->id == 0x11 || arg0->id == 0x14 || arg0->id == 0x16 || arg0->id == 0x1A || arg0->id == 0x21 || arg0->id == 0x22 || arg0->id == 0x26 || arg0->id == 0x27 || arg0->id == 0x31 || arg0->id == 0x36 || arg0->id == 0x3B || arg0->id == 0x3E || arg0->id == 0x50 || arg0->id == 0x53 || arg0->id == 0x54 || arg0->id == 0x58 || arg0->id == 0x5B || arg0->id == 0x64 || arg0->id == 0x69 || arg0->id == 0x71 || arg0->id == 0x6B || arg0->id == 0x72 || arg0->id == 0x76 || arg0->id == 0x79 || arg0->id == 0x80 || arg0->id == 0x86 || arg0->id == 0x87 || arg0->id == 0x88 || arg0->id == 0x90 || arg0->id == 0x97 || arg0->id == 0x98 || arg0->id == 0x9A || arg0->id == 0x9B || arg0->id == 0x9C || arg0->id == 0x9D || arg0->id == 0x9F || arg0->id == 0xA0 || arg0->id == 0xA2 || arg0->id == 0xA4 || arg0->id == 0xA5 || arg0->id == 0xA7 || arg0->id == 0xB0 || arg0->id == 0xB3 || arg0->id == 0xB5 || arg0->id == 0xB6) {
+    } else if (obj->id == 0 || obj->id == 1 || obj->id == 2 || obj->id == 3 || obj->id == 4 || obj->id == 0x96 || obj->id == 8 || obj->id == 0xA || obj->id == 0x11 || obj->id == 0x14 || obj->id == 0x16 || obj->id == 0x1A || obj->id == 0x21 || obj->id == 0x22 || obj->id == 0x26 || obj->id == 0x27 || obj->id == 0x31 || obj->id == 0x36 || obj->id == 0x3B || obj->id == 0x3E || obj->id == 0x50 || obj->id == 0x53 || obj->id == 0x54 || obj->id == 0x58 || obj->id == 0x5B || obj->id == 0x64 || obj->id == 0x69 || obj->id == 0x71 || obj->id == 0x6B || obj->id == 0x72 || obj->id == 0x76 || obj->id == 0x79 || obj->id == 0x80 || obj->id == 0x86 || obj->id == 0x87 || obj->id == 0x88 || obj->id == 0x90 || obj->id == 0x97 || obj->id == 0x98 || obj->id == 0x9A || obj->id == 0x9B || obj->id == 0x9C || obj->id == 0x9D || obj->id == 0x9F || obj->id == 0xA0 || obj->id == 0xA2 || obj->id == 0xA4 || obj->id == 0xA5 || obj->id == 0xA7 || obj->id == 0xB0 || obj->id == 0xB3 || obj->id == 0xB5 || obj->id == 0xB6) {
         type = 0;
-    } else if (arg0->id == 0x25 || arg0->id == 0x25 || arg0->id == 0x92 || arg0->id == 0x95) {
+    } else if (obj->id == 0x25 || obj->id == 0x25 || obj->id == 0x92 || obj->id == 0x95) {
         type = 2;
-    } else if (arg0->id == 0x3F) {
+    } else if (obj->id == 0x3F) {
         type = 6;
-    } else if (arg0->id == 0x93) {
+    } else if (obj->id == 0x93) {
         type = 5;
     } else {
         return;
     }
     if (arg1) {
-        func_151DC484(pos, scratch, type, arg2, arg3);
+        func_151DC484(pos, &ground, type, arg2, arg3);
         return;
     }
-    func_151DC260(pos, scratch, type, arg2, arg3);
+    func_151DC260(pos, &ground, type, arg2, arg3);
 }
 
 
-void func_151942B0(s32 arg0, s32 arg1, s32 arg2) {
-    func_15193CA0((struct127 *)arg1, 0, 0xFF, 1);
+void func_151942B0(struct127 *self, struct127 *other, u8 *arg2) {
+    func_15193CA0(other, FALSE, 0xFF, 1);
 }
 
-void func_151942E8(s32 arg0, s32 arg1, s32 arg2) {
-    func_15193CA0((struct127 *)arg1, 1, 0xFF, 1);
+void func_151942E8(struct127 *self, struct127 *other, u8 *arg2) {
+    func_15193CA0(other, TRUE, 0xFF, 1);
 }
-
-typedef struct Game1C1150Event {
-    u8 pad0[4];
-    u8 type;
-} Game1C1150Event;
 
 extern u8 D_800A8210;
 
-void func_15194320(void *arg0, Game1C1150Event *arg1, s32 arg2) {
-    switch (arg1->type) {
-        case 0:
-        case 1:
-        case 2:
-        case 3:
-        case 4:
-            func_1518D1C0((struct127 *)arg1, 0xA, 0, 1, 0xFF, 1, &D_800A8210);
-            break;
+void func_15194320(struct127 *self, struct127 *other, u8 *arg2) {
+    switch (other->id) {
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+        func_1518D1C0(other, 10, 0, 1, 0xFF, 1, &D_800A8210);
+        break;
     }
 }
 
 extern u8 D_800A822C;
 
-void func_15194394(void *arg0, Game1C1150Event *arg1, s32 arg2) {
-    switch (arg1->type) {
-        case 0:
-        case 1:
-        case 2:
-        case 3:
-        case 4:
-            func_1518D1C0((struct127 *)arg1, 0xC, 0, 1, 0xFF, 1, &D_800A822C);
-            break;
+void func_15194394(struct127 *self, struct127 *other, u8 *arg2) {
+    switch (other->id) {
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+        func_1518D1C0(other, 12, 0, 1, 0xFF, 1, &D_800A822C);
+        break;
     }
 }
 
-typedef struct Game194408Packet {
-    s16 field00;
-    s16 field02;
-    s16 field04;
-    s16 field06;
-    f32 position[3];
-    f32 field14;
-    f32 field18;
-    f32 field1C;
-    f32 field20;
-    f32 field24;
-    f32 field28;
-    s16 field2C;
-    s16 field2E;
-    s16 field30;
-    s16 field32;
-    s16 field34;
-    s16 field36;
-    s16 field38;
-    s16 field3A;
-    u8 field3C;
-    u8 pad3D[3];
-    f32 field40;
-    s16 field44;
-    s16 field46;
-    s32 field48;
-} Game194408Packet;
+// Parameters for func_15153F18, which spawns a random number of particles flying out from a point.
+// Each xxxMin/xxxRange pair is picked as min + rand() % (range + 1) (or min + randf() * range).
+typedef struct BurstParams {
+    /* 0x00 */ s16 yawMin;
+    /* 0x02 */ s16 yawRange;
+    /* 0x04 */ s16 pitchMin;
+    /* 0x06 */ s16 pitchRange;
+    /* 0x08 */ Vec3f position;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 speedMin;
+    /* 0x28 */ f32 speedRange;
+    /* 0x2C */ s16 countMin;
+    /* 0x2E */ s16 countRange;
+    /* 0x30 */ s16 unk30;
+    /* 0x32 */ s16 unk32;
+    /* 0x34 */ s16 unk34;
+    /* 0x36 */ s16 unk36;
+    /* 0x38 */ s16 unk38;
+    /* 0x3A */ s16 unk3A;
+    /* 0x3C */ u8 unk3C;
+    /* 0x40 */ f32 unk40Chance;
+    /* 0x44 */ s16 unk44;
+    /* 0x46 */ s16 unk46;
+    /* 0x48 */ s32 unk48;
+} BurstParams;
 
-extern void func_15153F18(s16 *, void *, s32, s32, s32);
-extern void *func_151AE7B0(void *, f32, s16, u8, s32);
 
-void func_15194408(s32 arg0, Game1C1150Event *arg1) {
+extern void func_15153F18(BurstParams *params, Vec3f *position, GroundInfo *ground, u8 arg3, s32 arg4);
+extern void *func_151AE7B0(struct127 *obj, f32 arg1, s16 arg2, u8 arg3, s32 arg4);
+
+void func_15194408(struct127 *self, struct127 *other) {
     struct {
-        u8 scratch[0x24];
-        Game194408Packet packet;
+        GroundInfo ground;
+        BurstParams burst;
     } locals;
 
-    switch (arg1->type) {
+    switch (other->id) {
     case 0:
-        goto spawn;
     case 1:
-        goto spawn;
     case 2:
-        goto spawn;
     case 3:
-        goto spawn;
     case 4:
-        goto spawn;
+        break;
+    default:
+        return;
     }
-    return;
 
-spawn:
-    func_151AE7B0(arg1, 0.6f, 0x5A, 0xFF, 1);
-    func_1504715C((f32 *)locals.scratch, (struct127 *)arg1);
-    locals.packet.position[0] = *(f32 *)((u8 *)arg1 + 0x14);
-    locals.packet.position[1] = *(f32 *)((u8 *)arg1 + 0x18) + 50.0f;
-    locals.packet.position[2] = *(f32 *)((u8 *)arg1 + 0x1C);
-    locals.packet.field14 = 6.0f;
-    locals.packet.field2C = 0xC;
-    locals.packet.field2E = 5;
-    locals.packet.field02 = 0xFF;
-    locals.packet.field04 = -0x3F;
-    locals.packet.field00 = 0;
-    locals.packet.field06 = 0x23;
-    locals.packet.field30 = 3;
-    locals.packet.field32 = 2;
-    locals.packet.field34 = 0x1E;
-    locals.packet.field36 = 0x1E;
-    locals.packet.field38 = 0x64;
-    locals.packet.field3A = 0x64;
-    locals.packet.field44 = 0x10;
-    locals.packet.field46 = 0xF;
-    locals.packet.field48 = 0;
-    locals.packet.field3C = 0;
-    locals.packet.field18 = 3.0f;
-    locals.packet.field1C = 0.21f;
-    locals.packet.field20 = 0.406f;
-    locals.packet.field24 = 13.0f;
-    locals.packet.field28 = 8.0f;
-    locals.packet.field40 = 0.3f;
-    func_15153F18(&locals.packet.field00, &locals.packet.position,
-                   (s32)locals.scratch, 0xFF, 1);
+    func_151AE7B0(other, 0.6f, 90, 0xFF, 1);
+    func_1504715C(&locals.ground, other);
+    locals.burst.position.x = other->x_position;
+    locals.burst.position.y = other->y_position + 50.0f;
+    locals.burst.position.z = other->z_position;
+    locals.burst.unk14 = 6.0f;
+    locals.burst.countMin = 12;
+    locals.burst.countRange = 5;
+    locals.burst.yawRange = 0xFF;
+    locals.burst.pitchMin = -0x3F;
+    locals.burst.yawMin = 0;
+    locals.burst.pitchRange = 0x23;
+    locals.burst.unk30 = 3;
+    locals.burst.unk32 = 2;
+    locals.burst.unk34 = 30;
+    locals.burst.unk36 = 30;
+    locals.burst.unk38 = 100;
+    locals.burst.unk3A = 100;
+    locals.burst.unk44 = 16;
+    locals.burst.unk46 = 15;
+    locals.burst.unk48 = 0;
+    locals.burst.unk3C = 0;
+    locals.burst.unk18 = 3.0f;
+    locals.burst.unk1C = 0.21f;
+    locals.burst.unk20 = 0.406f;
+    locals.burst.speedMin = 13.0f;
+    locals.burst.speedRange = 8.0f;
+    locals.burst.unk40Chance = 0.3f;
+    func_15153F18(&locals.burst, &locals.burst.position, &locals.ground, 0xFF, 1);
 }
 
-extern void func_150C7020(s32, s32, s32, s32);
-extern void func_15194408(s32, Game1C1150Event *);
+extern void func_150C7020(struct127 *obj, s32 arg1, u8 arg2, s32 arg3);
 
-void func_15194588(s32 arg0, s32 arg1, s32 arg2) {
-    func_150C7020(arg0, 0x1F4, 0xFF, 1);
-    func_15194408(arg0, (Game1C1150Event *)arg1);
+void func_15194588(struct127 *self, struct127 *other, u8 *arg2) {
+    func_150C7020(self, 500, 0xFF, 1);
+    func_15194408(self, other);
 }
-
-typedef struct Game1945CCVec {
-    f32 x;
-    f32 y;
-    f32 z;
-} Game1945CCVec;
-
-typedef struct Game1945CCPacket {
-    s16 field00;
-    s16 field02;
-    s16 field04;
-    s16 field06;
-    Game1945CCVec position;
-    f32 field14;
-    f32 field18;
-    f32 field1C;
-    f32 field20;
-    f32 field24;
-    f32 field28;
-    s16 field2C;
-    s16 field2E;
-    s16 field30;
-    s16 field32;
-    s16 field34;
-    s16 field36;
-    s16 field38;
-    s16 field3A;
-    u8 field3C;
-    u8 pad3D[3];
-    f32 field40;
-    s16 field44;
-    s16 field46;
-    s32 field48;
-} Game1945CCPacket;
 
 extern u8 D_800A3FE6[];
 extern s32 func_15134070(struct127 *);
-extern void func_151B4CD0(void *, s32, s32);
+extern void func_151B4CD0(struct127 *obj, u8 arg1, s32 arg2);
 
-void func_151945CC(void *arg0, void *arg1, s32 arg2) {
-    Game1945CCVec pos;
+void func_151945CC(struct127 *self, struct127 *other, u8 *arg2) {
+    Vec3f pos;
     s16 shade;
-    Game1945CCPacket packet;
-    u8 scratch[0x24];
+    BurstParams burst;
+    GroundInfo ground;
 
-    shade = ((s32) *(u16 *)((u8 *)arg0 + 0x7A) >> 8) - 0x40;
-    pos.x = *(f32 *)((u8 *)arg1 + 0x14);
-    pos.y = *(f32 *)((u8 *)arg1 + 0x18) + 270.0;
-    pos.z = *(f32 *)((u8 *)arg1 + 0x1C);
+    shade = ((s32)self->unk7A >> 8) - 0x40;
+    pos.x = other->x_position;
+    pos.y = other->y_position + 270.0;
+    pos.z = other->z_position;
     {
-    s32 kind;
-    s32 profile;
+        s32 kind;
+        s32 profile;
 
-    func_1504715C((f32 *)scratch, (struct127 *)arg1);
-    kind = func_15134070((struct127 *)arg1);
-    if (kind != 0x63) {
-        profile = D_800A3FE6[kind << 4];
-        if (profile != 2) {
-            packet.position = pos;
-            packet.field14 = 6.699999809f;
-            packet.field18 = 2.329999924f;
-            packet.field1C = 0.6800000072f;
-            packet.field20 = 0.0f;
-            packet.field24 = 4.400000095f;
-            packet.field2C = 0xF;
-            packet.field2E = 0xC;
-            packet.field00 = shade - 0x40;
-            packet.field02 = 0x80;
-            packet.field04 = -0xA0;
-            packet.field06 = 0x20;
-            packet.field30 = 3;
-            packet.field32 = 1;
-            packet.field34 = 0x1F;
-            packet.field36 = 0x13;
-            packet.field38 = 0x9B;
-            packet.field3A = 0x64;
-            packet.field44 = 0x10;
-            packet.field46 = 0xF;
-            packet.field48 = 0;
-            packet.field28 = 5.300000191f;
-            packet.field40 = 0.5f;
-            if (profile == 1) {
-                packet.field3C = 1;
-            } else {
-                packet.field3C = 0;
+        func_1504715C(&ground, other);
+        kind = func_15134070(other);
+        if (kind != 0x63) {
+            profile = D_800A3FE6[kind << 4];
+            if (profile != 2) {
+                burst.position = pos;
+                burst.unk14 = 6.699999809f;
+                burst.unk18 = 2.329999924f;
+                burst.unk1C = 0.6800000072f;
+                burst.unk20 = 0.0f;
+                burst.speedMin = 4.400000095f;
+                burst.countMin = 15;
+                burst.countRange = 12;
+                burst.yawMin = shade - 0x40;
+                burst.yawRange = 0x80;
+                burst.pitchMin = -0xA0;
+                burst.pitchRange = 0x20;
+                burst.unk30 = 3;
+                burst.unk32 = 1;
+                burst.unk34 = 31;
+                burst.unk36 = 19;
+                burst.unk38 = 155;
+                burst.unk3A = 100;
+                burst.unk44 = 16;
+                burst.unk46 = 15;
+                burst.unk48 = 0;
+                burst.speedRange = 5.300000191f;
+                burst.unk40Chance = 0.5f;
+                if (profile == 1) {
+                    burst.unk3C = 1;
+                } else {
+                    burst.unk3C = 0;
+                }
+                func_15153F18(&burst, &burst.position, &ground, 0xFF, 1);
+                func_151B4CD0(other, 0xFF, 1);
             }
-            func_15153F18(&packet.field00, &packet.position, (s32)scratch, 0xFF, 1);
-            func_151B4CD0(arg1, 0xFF, 1);
         }
     }
+}
+
+void func_151B01B8(struct127 *self, struct127 *other);
+void func_151B09BC(struct127 *self, struct127 *other, s16 arg2, u8 arg3, s32 arg4);
+void *func_151AF270(struct127 *obj, u8 arg1, s32 arg2);
+
+void func_15194794(struct127 *self, struct127 *other, u8 *arg2) {
+    func_151B01B8(self, other);
+    func_151B09BC(self, other, 1000, 0xFF, 0);
+    switch (other->id) {
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+        func_151AF270(other, 0xFF, 1);
+        break;
     }
 }
 
-void func_151B01B8(s32, s32);
-void func_151B09BC(s32, s32, s32, s32, s32);
-void *func_151AF270();
-
-void func_15194794(s32 arg0, Game1C1150Event *arg1, s8 *arg2) {
-    func_151B01B8(arg0, (s32)arg1);
-    func_151B09BC(arg0, (s32)arg1, 0x3E8, 0xFF, 0);
-    switch (arg1->type) {
-        case 0:
-        case 1:
-        case 2:
-        case 3:
-        case 4:
-            func_151AF270(arg1, 0xFF, 1);
-            break;
-    }
-}
-
-typedef struct Vec3_15194810 {
-    f32 x, y, z;
-} Vec3_15194810;
-
-typedef struct Game194810Packet {
-    s16 field00;
-    s16 field02;
-    s16 field04;
-    s16 field06;
-    Vec3_15194810 position;
-    f32 field14;
-    f32 field18;
-    f32 field1C;
-    f32 field20;
-    f32 field24;
-    f32 field28;
-    s16 field2C;
-    s16 field2E;
-    s16 field30;
-    s16 field32;
-    s16 field34;
-    s16 field36;
-    s16 field38;
-    s16 field3A;
-    u8 field3C;
-    u8 pad3D[3];
-    f32 field40;
-    s16 field44;
-    s16 field46;
-    s32 field48;
-} Game194810Packet;
-
-void func_15194810(s32 arg0, Game1C1150Event *arg1, s32 arg2) {
-    Vec3_15194810 pos;
-    Game194810Packet packet;
-    u8 scratch[0x24];
+void func_15194810(struct127 *self, struct127 *other, u8 *arg2) {
+    Vec3f pos;
+    BurstParams burst;
+    GroundInfo ground;
     Struct15195738Small small;
 
-    switch (arg1->type) {
+    switch (other->id) {
     case 0:
     case 1:
     case 2:
     case 3:
     case 4:
     case 0x53:
-        pos.x = *(f32 *)((u8 *)arg1 + 0x14);
-        pos.y = *(f32 *)((u8 *)arg1 + 0x18) + 95.0f;
-        pos.z = *(f32 *)((u8 *)arg1 + 0x1C);
-    fence:
-        func_1504715C((f32 *)scratch, (struct127 *)arg1);
-        packet.position = pos;
-        packet.field14 = 10.0f;
-        packet.field2C = 0xF;
-        packet.field2E = 0xA;
-        packet.field02 = 0xFF;
-        packet.field04 = -0x3F;
-        packet.field00 = 0;
-        packet.field06 = 0x39;
-        packet.field30 = 3;
-        packet.field32 = 2;
-        packet.field34 = 0x46;
-        packet.field36 = 0x16;
-        packet.field38 = 0x9B;
-        packet.field3A = 0x64;
-        packet.field44 = 0x10;
-        packet.field46 = 0xF;
-        packet.field48 = 0;
-        packet.field3C = 0;
-        packet.field18 = 5.0f;
-        packet.field1C = 0.6750000119f;
-        packet.field20 = 0.2310000062f;
-        packet.field24 = 5.0f;
-        packet.field28 = 25.10000038f;
-        packet.field40 = 0.5f;
-        func_15153F18(&packet.field00, &packet.position, (s32)scratch, 0xFF, 1);
+        pos.x = other->x_position;
+        pos.y = other->y_position + 95.0f;
+        pos.z = other->z_position;
+    fence: // matching: this basic-block boundary keeps as1 from scheduling across it
+        func_1504715C(&ground, other);
+        burst.position = pos;
+        burst.unk14 = 10.0f;
+        burst.countMin = 15;
+        burst.countRange = 10;
+        burst.yawRange = 0xFF;
+        burst.pitchMin = -0x3F;
+        burst.yawMin = 0;
+        burst.pitchRange = 0x39;
+        burst.unk30 = 3;
+        burst.unk32 = 2;
+        burst.unk34 = 70;
+        burst.unk36 = 22;
+        burst.unk38 = 155;
+        burst.unk3A = 100;
+        burst.unk44 = 16;
+        burst.unk46 = 15;
+        burst.unk48 = 0;
+        burst.unk3C = 0;
+        burst.unk18 = 5.0f;
+        burst.unk1C = 0.6750000119f;
+        burst.unk20 = 0.2310000062f;
+        burst.speedMin = 5.0f;
+        burst.speedRange = 25.10000038f;
+        burst.unk40Chance = 0.5f;
+        func_15153F18(&burst, &burst.position, &ground, 0xFF, 1);
         small.unk0 = 1;
-        small.unk2 = (func_150ADA20() % 0xBU) + 0x14;
+        small.unk2 = (func_150ADA20() % 11U) + 20;
         small.unk4 = 8;
         small.unk6 = -1;
         small.unk5 = 1;
@@ -578,16 +514,18 @@ s32 arg3;
     func_15194FF4(arg0, arg1, 1, arg3);
 }
 
+extern void func_1514B364(f32 *pos, GroundInfo *ground, u8 arg2, s32 arg3);
+
 void func_15194DC8(s32 arg0, struct127 *arg1, s32 arg2) {
-    f32 sp2C[9];
+    GroundInfo ground;
 
     if (D_800BE616 != 0) {
         func_15194DA4(arg0, (s32)arg1, arg2);
     } else {
         func_1518D1C0(arg1, 0xB, 0, 1, 0xFF, 1, D_800A8244);
     }
-    func_1504715C(sp2C, arg1);
-    func_1514B364(&arg1->x_position, sp2C, 0xFF, 1);
+    func_1504715C(&ground, arg1);
+    func_1514B364(&arg1->x_position, &ground, 0xFF, 1);
 }
 
 extern void func_150B06B0(s32, s32, s32, s32);
@@ -760,12 +698,9 @@ void func_15195528(struct127 *arg0, struct127 *arg1, s32 arg2) {
     func_15137610(arg1, from, to, dir, 0xFF, 1);
 }
 
-void func_151B01B8(s32, s32);
-void func_151B09BC(s32, s32, s32, s32, s32);
-
-void func_15195650(s32 arg0, s32 arg1, s32 arg2) {
-    func_151B01B8(arg0, arg1);
-    func_151B09BC(arg0, arg1, 0x3E8, 0xFF, 0);
+void func_15195650(struct127 *self, struct127 *other, u8 *arg2) {
+    func_151B01B8(self, other);
+    func_151B09BC(self, other, 1000, 0xFF, 0);
 }
 
 extern void func_15145A50(struct127 *arg0);
