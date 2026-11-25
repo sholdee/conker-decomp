@@ -121,7 +121,7 @@ s32 func_1501878C(void) {
     s16 i;
 
     message = NULL;
-    osRecvMesg(&D_800BEA10, (OSMesg *)&message, 1);
+    osRecvMesg(&D_800BEA10, (OSMesg *)&message, OS_MESG_BLOCK);
     D_8002AC60 = 0;
     D_8002AC64 = 800;
     switch (*message) {
@@ -556,7 +556,7 @@ Gfx *func_15096934(Gfx *gfx);
 
 /* Full-screen pass drawn once after every player's main pass. */
 Gfx *func_150198FC(Gfx *gfx) {
-    static s8 D_80082F90;
+    static s8 D_80082F90; // frames drawn since D_800BEAC0 was set, counting up to 5
 
     if (D_800BE575 == 1) {
         gfx = func_151D6778(gfx);
@@ -576,7 +576,7 @@ Gfx *func_150198FC(Gfx *gfx) {
             gfx = func_1501A680(gfx);
             D_80082F90 = 1;
         } else if (D_80082F90 < 5) {
-            D_80082F90 = D_80082F90 + 1;
+            D_80082F90++;
             func_151D61B0(D_800BE9C4);
         }
         gfx = func_151D5E90(gfx, D_800BE9C4, 0, 1);
@@ -622,11 +622,11 @@ Gfx *func_15019BB8(Gfx *gfx, s32 player) {
 /* Loads player's viewport and projection, then draws group 5 display lists. */
 Gfx *func_15019CC8(Gfx *gfx, s32 player) {
     gSPViewport(gfx++, &VIEWS[player].vp[D_800BE9C0]);
-    gfx = (Gfx *)func_1501A490((s32)gfx, (s16)player, 0, 0, 0, 0);
+    gfx = (Gfx *)func_1501A490((s32)gfx, player, 0, 0, 0, 0);
     gSPMatrix(gfx++, &D_80089470, G_MTX_LOAD);
     gSPMatrix(gfx++, &VIEWS[player].proj[D_800BE9C0], G_MTX_PROJECTION | G_MTX_LOAD);
     if (D_800BE9F0 == 0x1D) {
-        gfx = func_1502BAD0(gfx, 6, (s16)player);
+        gfx = func_1502BAD0(gfx, 6, player);
     }
     gfx = func_151674F8(gfx, 5, 0, 0);
     gfx = func_151674F8(gfx, 5, 0, 1);
