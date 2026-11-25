@@ -12,6 +12,13 @@
 #undef D_800C5A90
 #undef D_800C6360
 
+/* Entries of the D_800C5338[id] texture tables. */
+typedef struct ObjTexture {
+    /* 0x0 */ s32 addr; // loaded address, or 0x80000000 if the load failed
+    /* 0x4 */ s32 id;   // texture id passed to func_1510D0EC
+    /* 0x8 */ s32 unk8;
+} ObjTexture;
+
 /*
  * A model file, as loaded by func_1503CF20: seven (data, byte size) sections whose offsets
  * func_1502B6BC has already relocated, followed by the model data proper (its vertices first),
@@ -24,7 +31,7 @@ typedef struct ModelHeader {
     /* 0x0C */ u32 dlistsSize;
     /* 0x10 */ void *bones; // 16-byte entries (D_800C4BE0)
     /* 0x14 */ u32 bonesSize;
-    /* 0x18 */ struct ObjTexture *textures; // D_800C5338
+    /* 0x18 */ ObjTexture *textures; // D_800C5338
     /* 0x1C */ u32 texturesSize;
     /* 0x20 */ void *unk20; // D_800C5048
     /* 0x24 */ u32 unk24;
@@ -41,13 +48,6 @@ typedef struct GfxBytes {
     /* 0x3 */ u8 index; // G_MOVEMEM: what is moved
     /* 0x4 */ s32 addr;
 } GfxBytes;
-
-/* Entries of the D_800C5338[id] texture tables. */
-typedef struct ObjTexture {
-    /* 0x0 */ s32 addr; // loaded address, or 0x80000000 if the load failed
-    /* 0x4 */ s32 id;   // texture id passed to func_1510D0EC
-    /* 0x8 */ s32 unk8;
-} ObjTexture;
 
 /* The texture coordinates of one vertex (Vtx.v.tc). */
 typedef struct TexCoord {
@@ -69,10 +69,11 @@ extern u16 D_800C4778[];      // display-list parts
 extern u16 D_800C5628[];      // textures count
 extern u16 D_800C4ED0[];      // bone count
 extern s16 D_800C5918[];      // triangle weight, see func_1503D984
-extern s32 D_800D1588[];      // relocated header block, see func_1503D660
-extern u16 D_800C5A90[];      // route count, see func_1503D484
+extern s32 D_800D1588[];      // animation table (ActorAnim *), see func_1503D660
+extern u16 D_800C5A90[];      // animation count, see func_1503D484
 extern TexCoord *D_800C6360[]; // saved texture coordinates, see func_1503D804
-extern struct124 *D_800D1C90[];
+extern struct124 *D_800D1C90[]; // see func_1503D774
+// D_800C5C08 / D_800C6070 (vertex runs / triangle list, built by func_150028BC) keep variables.h's s32.
 
 extern void *allocate_memory(s32 size, s32, s32, s32);
 extern void func_10004074(void *ptr); // frees an allocate_memory() buffer
@@ -102,7 +103,7 @@ s32 func_1503CF20(s32 id, s32 arg1, struct129 *def, s32 loadTextures, s32 flags)
     s32 ret;
     ModelHeader *hdr;
     u32 size;
-    u32 n;
+    u32 n; // matching: one variable for the vertex end and the dlists2 count (splitting it changes regalloc)
     s32 i;
 
     if (id == 0xFF) {
@@ -127,7 +128,7 @@ s32 func_1503CF20(s32 id, s32 arg1, struct129 *def, s32 loadTextures, s32 flags)
     D_800C5338[id] = hdr->textures;
     D_800C5048[id] = hdr->unk20;
     D_800C4310[id] = hdr->vtxIndicesSize / sizeof(s32);
-    // the vertices run up to the next section
+    // the vertices run up to the next section present
     if (D_800C4020[id] != NULL) {
         n = (u32)D_800C4020[id];
     } else {
