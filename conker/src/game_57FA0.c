@@ -180,137 +180,140 @@ RomTableEntry *func_1502B110(u8 *table, s32 count, u8 *buf, u32 depth, ...) {
 
     return entries;
 }
-s32 func_1502B224(s32 arg0, void *arg1, u32 arg2, u32 arg3) {
+/*
+ * Loads the ROM data at `romAddr` described by the table info word `info` into `dst`, decompressing
+ * it if compressed. A nonzero `maxSize` caps the size read. Returns the size loaded (0 if out of memory).
+ */
+s32 func_1502B224(u8 *romAddr, void *dst, u32 info, u32 maxSize) {
     u32 size;
-    void *buf;
-    s32 expected;
+    void *packed;
+    s32 unpackedSize;
 
-    size = ((arg2 & 0x0FFFFFFF) + 1) & ~1;
-    if (arg3 != 0) {
-        if (arg3 < size) {
-            size = arg3;
-        }
+    size = ((info & 0x0FFFFFFF) + 1) & ~1;
+    if (maxSize != 0 && maxSize < size) {
+        size = maxSize;
     }
 
-    if ((arg2 & 0x70000000) == 0x10000000) {
-        buf = allocate_memory(size, 1, 2, 2);
-        if (buf == 0) {
+    if ((info & 0x70000000) == 0x10000000) {
+        packed = allocate_memory(size, 1, 2, 2);
+        if (packed == NULL) {
             return 0;
         }
 
-        func_10004514(arg0, buf, (size + 0xF) & ~0xF, 1);
-        expected = *(s32 *)buf & 0x7FFFFFFF;
-        if ((size = func_10006240(buf, arg1, D_8003809C)) == expected) {
-        } else {
+        func_10004514((s32)romAddr, packed, (size + 0xF) & ~0xF, 1);
+        /* The first word of compressed data is its unpacked size. */
+        unpackedSize = *(s32 *)packed & 0x7FFFFFFF;
+        if ((size = func_10006240(packed, dst, D_8003809C)) != unpackedSize) {
             D_8003C8E0 = 0x0C000036;
             func_150AD770();
         }
-        func_10004074(buf);
+        func_10004074(packed);
         return size;
     }
 
-    func_10004514(arg0, arg1, (size + 0xF) & ~0xF, 1);
+    func_10004514((s32)romAddr, dst, (size + 0xF) & ~0xF, 1);
     return size;
 }
-s32 func_1502B350(u8 *arg0, s32 arg1, s32 *arg2) {
-    u32 size;
-    void *buf;
-    void *out;
+/*
+ * Allocates a buffer and loads the ROM data at `romAddr` described by `info` into it, decompressing
+ * it into a second buffer if compressed. Stores the size loaded in *size and returns the buffer, or
+ * NULL on failure.
+ */
+void *func_1502B350(u8 *romAddr, s32 info, u32 *size) {
+    u32 loadSize;
+    void *packed;
+    void *data;
 
-    size = ((arg1 & 0x0FFFFFFF) + 1) & ~1;
-    out = buf = allocate_memory(size, 1, 2, 2);
-    if (buf == NULL) {
-        return 0;
+    loadSize = ((info & 0x0FFFFFFF) + 1) & ~1;
+    data = packed = allocate_memory(loadSize, 1, 2, 2);
+    if (packed == NULL) {
+        return NULL;
     }
-    func_10004514((s32)arg0, buf, (size + 0xF) & ~0xF, 1);
-    if ((arg1 & 0x70000000) == 0x10000000) {
-        *arg2 = *(s32 *)buf & 0x7FFFFFFF;
-        if (*arg2 != 0) {
-            out = NULL;
-            if ((u32)*arg2 < 1000000) {
-                out = allocate_memory((u32)*arg2, 1, 2, 2);
-                if (out != NULL) {
-                    size = func_10006240(buf, out, D_8003809C);
+    func_10004514((s32)romAddr, packed, (loadSize + 0xF) & ~0xF, 1);
+    if ((info & 0x70000000) == 0x10000000) {
+        *size = *(s32 *)packed & 0x7FFFFFFF;
+        if (*size != 0) {
+            data = NULL;
+            if (*size < 1000000) {
+                data = allocate_memory(*size, 1, 2, 2);
+                if (data != NULL) {
+                    loadSize = func_10006240(packed, data, D_8003809C);
                 } else {
-                    size = 0;
+                    loadSize = 0;
                 }
             } else {
-                size = 0;
+                loadSize = 0;
             }
         } else {
-            out = NULL;
-            size = 0;
+            data = NULL;
+            loadSize = 0;
         }
-        func_10004074(buf);
+        func_10004074(packed);
     }
-    *arg2 = size;
-    return (s32)out;
+    *size = loadSize;
+    return data;
 }
-/* Offset-table entry: unk0 is rebased onto the table (-1 = none); bit 31 of unk4 ends the table. */
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-} Pair1502B4A8;
-
-s32 func_1502B4A8(Pair1502B4A8 *arg0, s32 arg1) {
+/*
+ * Turns a table of `count` entries loaded into RAM into pointers: masks each info word down to its
+ * size and rebases each offset onto the table (missing entries become NULL). A `count` of 0 means the
+ * table ends at the first entry with bit 31 of its info set. Returns the entry count.
+ */
+s32 func_1502B4A8(RomTableEntry *table, s32 count) {
     s32 i;
 
-    if (arg1 == 0) {
-        while ((arg0[arg1++].unk4 & 0x80000000) == 0) {
+    if (count == 0) {
+        while ((table[count++].info & 0x80000000) == 0) {
         }
     }
-    for (i = 0; i < arg1; i++) {
-        arg0[i].unk4 &= 0x0FFFFFFF;
-        if (arg0[i].unk0 == -1 || arg0[i].unk4 == 0) {
-            arg0[i].unk0 = 0;
+    for (i = 0; i < count; i++) {
+        table[i].info &= 0x0FFFFFFF;
+        if (table[i].offset == -1 || table[i].info == 0) {
+            table[i].offset = 0;
         } else {
-            arg0[i].unk0 += (s32)arg0;
+            table[i].offset += (s32)table;
         }
     }
-    return arg1;
+    return count;
 }
-s32 func_1502AC88(u8 *arg0, s32 arg1, s32 *arg2);
-s32 func_1502B350(u8 *arg0, s32 arg1, s32 *arg2);
 
-s32 func_1502B5C8(s32 *arg0, s32 arg1, s32 arg2, s32 arg3) {
-    s32 *more;
-    u8 *offset;
-    s32 *tmp;
-    s32 sp40;
-    s32 ret;
-    s32 sp38;
-    s32 n;
+/*
+ * Follows `depth` table indices from the root ROM table and loads the data reached into a new buffer
+ * (see func_1502B350). Stores the size loaded in *size if non-NULL; returns the buffer or NULL.
+ */
+void *func_1502B5C8(u32 *size, s32 depth, ...) {
+    u32 *found;
+    u8 *addr;
+    va_list args;
+    u32 localSize;
+    void *data;
+    s32 info;
+    s32 index;
 
-    more = &sp40;
-    if (arg0 != 0) {
-        more = arg0;
+    found = &localSize;
+    if (size != NULL) {
+        found = size;
     }
 
-    *more = 1;
-    offset = D_AB1950;
-    tmp = &arg1 + 1;
+    *found = 1;
+    addr = D_AB1950;
+    va_start(args, depth);
 
-    if (arg1 != 0) {
-        do {
-            tmp = (s32 *)(((s32)tmp + 3) & -4) + 1;
-            n = *(tmp - 1);
-            if (*more != 0) {
-                offset += func_1502AC88(offset, n, &sp38);
-            }
-            *more = sp38 & 0xFFFFFFF;
-        } while (--arg1 != 0);
+    for (; depth != 0; depth--) {
+        index = va_arg(args, s32);
+        if (*found != 0) {
+            addr += func_1502AC88(addr, index, &info);
+        }
+        *found = info & 0xFFFFFFF;
     }
 
-    if (*more != 0) {
-        ret = func_1502B350(offset, sp38, more);
+    if (*found != 0) {
+        data = func_1502B350(addr, info, found);
     } else {
-        ret = 0;
+        data = NULL;
     }
 
-    return ret;
+    return data;
 }
-s32 func_1502B4A8(Pair1502B4A8 *arg0, s32 arg1);
-
 s32 func_1502B6BC(s32 *arg0, s32 arg1, s32 *arg2, s32 arg3) {
     s32 *more;
     u8 *offset;
@@ -341,7 +344,7 @@ s32 func_1502B6BC(s32 *arg0, s32 arg1, s32 *arg2, s32 arg3) {
     }
 
     if (*more != 0) {
-        ret = func_1502B350(offset, sp38, more);
+        ret = (s32)func_1502B350(offset, sp38, (u32 *)more);
         if (*more != 0 && ret != 0) {
             arg1 = func_1502B4A8(ret, arg1);
         } else {
@@ -377,7 +380,7 @@ s32 func_1502B7F0(s32 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     }
 
     if (sp38 != 0) {
-        *arg0 = func_1502B350(offset, sp34, &sp38);
+        *arg0 = (s32)func_1502B350(offset, sp34, (u32 *)&sp38);
     } else {
         *arg0 = 0;
     }
