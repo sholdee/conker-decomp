@@ -18,6 +18,7 @@
 #define D_80041F68 D_80041F68_hdr
 #define D_80041FE0 D_80041FE0_hdr
 #define D_8002C240 D_8002C240_hdr
+#define D_80041F5C D_80041F5C_hdr
 #include "functions.h"
 #include "variables.h"
 #undef func_1000F85C
@@ -37,6 +38,7 @@
 #undef D_80041F68
 #undef D_80041FE0
 #undef D_8002C240
+#undef D_80041F5C
 
 typedef struct SoundRecord SoundRecord;
 
@@ -98,6 +100,7 @@ extern s32 D_80041F50;
 extern SoundSpatialRecord D_80041F68[];
 extern SoundRecord D_80041FE0[];
 extern SoundVariant D_8002C240[][5];
+extern u8 *D_80041F5C; // per-sound variant history for func_1000F568
 
 s32 func_10010344(u16 sound, void *owner, u32 volume, s16 nearDistance, u16 farDistance);
 void func_10010F30(s32, s32, s32, s32, s32);
@@ -106,7 +109,7 @@ u16 func_10010E78(u16 arg0, s32 arg1, u16 arg2, s32 arg3, s32 arg4,
                    s32 argA);
 void func_10011624(SoundRecord *records, s32 *count, s32 start, s32 end);
 s32 func_1510F8CC(s32 arg0);
-s32 func_1000F568(s32 arg0, s32 arg1);
+s32 func_1000F568(s32 base, s32 count);
 s32 func_1000A420(s32 dx, s32 dy, s32 dz, f32 arg3, s32 arg4, s32 arg5, s32 arg6,
                   s32 farDistance, s32 nearDistance, s32 *pan, s32 *volume, s32 *distance);
 
@@ -311,65 +314,52 @@ s32 func_1000EF40(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *
     return 0;
 }
 
+// func_1000EFB4: the key word points to a 0-terminated list of the owner's animation
+// ids (struct127.unk84) for which the sound keeps following the owner.
 typedef struct {
-    u32 field0;
-    u8 field4;
-    u8 pad5[0xF];
-    f32 field14;
-    f32 field18;
-    f32 field1C;
-    u8 pad20[0x64];
-    u16 field84;
-    u8 pad86[0xFE];
-    u32 field184;
-} EFB4OwnerState;
-
-typedef struct {
-    u16 field0;
-    s16 x;
-    s16 y;
-    s16 z;
-    u8 pad8[8];
-    u32 flags;
-    u8 pad14[4];
-    EFB4OwnerState *owner;
-    u16 *ids;
-} EFB4SoundListRecord;
+    /* 0x00 */ u16 sound;
+    /* 0x02 */ s16 x;
+    /* 0x04 */ s16 y;
+    /* 0x06 */ s16 z;
+    /* 0x08 */ u8 pad8[8];
+    /* 0x10 */ u32 flags;
+    /* 0x14 */ u8 pad14[4];
+    /* 0x18 */ struct127 *owner;
+    /* 0x1C */ u16 *ids;
+} OwnerListSoundRecord;
 
 
 
-s32 func_1000EFB4(EFB4SoundListRecord *record, s32 arg1, s32 *active,
-                  u8 *arg3, s32 arg4, s32 *output, u16 *sound) {
-    EFB4OwnerState *owner = record->owner;
-    s32 value;
+s32 func_1000EFB4(OwnerListSoundRecord *record, s32 *active, u32 *volume, s32 *pan,
+                  s32 *cents, s32 *mix, u16 *sound) {
+    struct127 *owner = record->owner;
+    s32 level;
     u16 *id;
     s32 soundId;
 
-    if (owner != 0) {
-        value = *active;
-        if (value != 0) {
-            if (owner->field0 != 0) {
+    if (owner != NULL) {
+        level = *volume;
+        if (level != 0) {
+            if (owner->interaction_state != 0) {
                 for (id = record->ids; *id != 0; id++) {
-                    if ((owner->field84 == *id) || !(record->flags & 1)) {
-                        *output = ((owner->field184 >> 3) & 0x30) * 2;
-                        record->x = (s32)owner->field14;
-                        record->y = (s32)owner->field18;
-                        record->z = (s32)owner->field1C;
+                    if ((owner->unk84.uh == *id) || !(record->flags & 1)) {
+                        *mix = (((u32)owner->unk184 >> 3) & 0x30) * 2;
+                        record->x = owner->x_position;
+                        record->y = owner->y_position;
+                        record->z = owner->z_position;
                         return 0;
                     }
                 }
             }
             soundId = *sound;
             if (soundId == 0xCA) {
-                func_10010F30(0xCB, value & 0xFFFF, arg3[3], 0, *output);
+                func_10010F30(0xCB, level & 0xFFFF, (u8)*pan, 0, *mix);
             } else if (soundId == 0x2CF) {
-                func_10010F30(0x2D7, value & 0xFFFF, arg3[3], 0, *output);
-                func_10010F30((func_150ADA20() % 3U) + 0x2EB,
-                             0x3E80, arg3[3], 0, *output);
+                func_10010F30(0x2D7, level & 0xFFFF, (u8)*pan, 0, *mix);
+                func_10010F30((func_150ADA20() % 3U) + 0x2EB, 16000, (u8)*pan, 0, *mix);
             } else if (soundId == 0x2D2) {
-                func_10010F30(0x2DA, value & 0xFFFF, arg3[3], 0, *output);
-                func_10010F30((func_150ADA20() % 3U) + 0x2EB,
-                             0x3E80, arg3[3], 0, *output);
+                func_10010F30(0x2DA, level & 0xFFFF, (u8)*pan, 0, *mix);
+                func_10010F30((func_150ADA20() % 3U) + 0x2EB, 16000, (u8)*pan, 0, *mix);
             }
         }
     }
@@ -381,10 +371,10 @@ void func_1000F1A8(void) {
     D_80042760 = 0;
     D_80041FD9 = 1;
     D_80041FD8 = 0;
-    bzero(D_800425E0, 0x180);
+    bzero(D_800425E0, 0x180); // also clears D_800426A0, the table after it
 
-    for (i = 0; i < 0x10; i++) {
-        D_800425E0[i].unk2 = i + 0x10;
+    for (i = 0; i < 16; i++) {
+        D_800425E0[i].unk2 = i + 16;
     }
 
     D_80041F50 = 0;
@@ -394,58 +384,58 @@ void func_1000F1A8(void) {
 
 void func_10017780(u8 arg0, u16 arg1);
 s32* allocate_memory(s32, s32, s32, s32);
-void func_1000F248(s32 arg0) {
-    u16 tmp;
-
+void func_1000F248(s32 mode) {
     func_1000F1A8();
-    if (arg0 == 4) {
+    if (mode == 4) {
         D_80041F54 = 0;
-        D_80041F58 = D_8002C3F8; // 0.009999999776482582
+        D_80041F58 = D_8002C3F8; // 0.01f
     } else {
         D_80041F54 = 23000;
-        D_80041F58 = D_8002C3FC; // 0.10000000149011612
+        D_80041F58 = D_8002C3FC; // 0.1f
     }
 
-    if (arg0 == 0x35) {
+    if (mode == 0x35) {
         D_80041FD9 = 0;
-    } else if (arg0 == 0x36) {
+    } else if (mode == 0x36) {
         D_80041FD9 = 0;
-    } else if (arg0 == 0x3C) {
+    } else if (mode == 0x3C) {
         D_80041FD9 = 0;
-        D_80041FD8 = 0x3C;
-    } else if (arg0 == 0x27) {
+        D_80041FD8 = 60;
+    } else if (mode == 0x27) {
         D_80041FD9 = 0;
-        D_80041FD8 = 0x28;
-    } else if ((arg0 == 0x3A) || (arg0 == 0x40)) {
+        D_80041FD8 = 40;
+    } else if ((mode == 0x3A) || (mode == 0x40)) {
         D_80041FD9 = 0;
-        D_80041FD8 = 0x3C;
+        D_80041FD8 = 60;
     }
 
-    D_80041F5C = allocate_memory(1762, 1, 0, 0);
+    D_80041F5C = (u8 *)allocate_memory(1762, 1, 0, 0);
 
     bzero(D_80041F5C, 1762);
 
-    if (arg0 == 0x31) {
+    if (mode == 0x31) {
         D_80041FDC = 14000;
     } else {
         D_80041FDC = 23000;
     }
-    func_10011E88(arg0);
+    func_10011E88(mode);
     D_80041F60 = D_80041F61 = 0;
     func_10017780(0, D_80041F56);
     func_10017780(1, D_80041F56);
     func_10017780(2, 23000);
-    // fakematch
-    if (arg0) {}
+    if (mode) {} // matching: stops IDO caching &D_80041F56 in s0 across the calls above
 }
 
-s32 func_1000F3D0(u16 arg0) {
-    struct120 *temp_v1;
 
-    temp_v1 = &D_800425E0[arg0 & 0xF];
-    if (temp_v1->unk8 != 0) {
-        if ((temp_v1->unk0 == arg0) || (arg0 == (arg0 & 0xF))) {
-            if (func_100173C4(&temp_v1->unk8) != 0) {
+// Is the voice behind this handle still playing? A bare slot number (< 16) matches any
+// handle in that slot.
+s32 func_1000F3D0(u16 handle) {
+    struct120 *slot;
+
+    slot = &D_800425E0[handle & 0xF];
+    if (slot->unk8 != NULL) {
+        if ((slot->unk0 == handle) || (handle == (handle & 0xF))) {
+            if (func_100173C4(&slot->unk8) != 0) {
                 return 1;
             }
         }
@@ -453,15 +443,15 @@ s32 func_1000F3D0(u16 arg0) {
     return 0;
 }
 
-s32 func_1000F44C(u16 arg0) {
+s32 func_1000F44C(u16 handle) {
     u32 mask;
-    struct120 *temp_a1;
-    struct31 *temp_a2;
+    struct120 *slot;
+    struct31 *voice;
 
     mask = __osDisableInt();
-    temp_a1 = &D_800425E0[arg0 & 0xF];
-    temp_a2 = temp_a1->unk8;
-    if ((temp_a2 != 0) && (temp_a1->unk0 == arg0) && ((temp_a2->unk53 & 2) != 0)) {
+    slot = &D_800425E0[handle & 0xF];
+    voice = slot->unk8;
+    if ((voice != NULL) && (slot->unk0 == handle) && (voice->unk53 & 2)) {
         __osRestoreInt(mask);
         return 1;
     }
@@ -469,61 +459,64 @@ s32 func_1000F44C(u16 arg0) {
     return 0;
 }
 
+
 s32 func_100173C4(struct31 **arg0);
 extern struct120 D_800425E0[];
 extern struct120 D_800426A0[];
-s32 func_1000F4D8(u16 arg0)
-{
-  struct120 *temp_s0;
-  arg0 &= 0x7FFF;
- temp_s0 = D_800425E0; do { if (temp_s0->unk8 != 0) { if ((temp_s0->unk4 & 0x7FFF) == arg0) {
-        if (func_100173C4(&temp_s0->unk8) != 0)
-        {
-          return 1;
+// Is any voice playing this sound id?
+s32 func_1000F4D8(u16 sound) {
+    s32 i;
+
+    sound &= 0x7FFF;
+    for (i = 0; i < 16; i++) {
+        if (D_800425E0[i].unk8 != NULL) {
+            if ((D_800425E0[i].unk4 & 0x7FFF) == sound) {
+                if (func_100173C4(&D_800425E0[i].unk8) != 0) {
+                    return 1;
+                }
+            }
         }
-      }
     }
-    temp_s0++;
-  }
-  while (temp_s0 != D_800426A0);
-  return 0;
+    return 0;
 }
 
-s32 func_1000F568(s32 arg0, s32 arg1) {
-    s32 r;
-    s32 i;
-    u8 bits;
-    u8 cur;
+// Picks one of the `count` consecutive sound ids starting at `base` at random. For fewer
+s32 func_1000F568(s32 base, s32 count) {
+    s32 roll;
+    s32 pick;
+    u8 unplayed;
+    u8 left;
     s32 mask;
 
-    r = func_150ADA20() % (u32)arg1;
-    i = r;
-    if (arg0 >= 0x6E2) {
+    roll = func_150ADA20() % (u32)count;
+    pick = roll;
+    if (base >= 1762) {
         return 1;
     }
-    if (arg1 < 2) {
-        return arg0;
+    if (count < 2) {
+        return base;
     }
     if (D_80041F5C != NULL) {
-        bits = ((u8 *)D_80041F5C)[arg0];
-        if (arg1 < 8) {
-            mask = (1 << arg1) - 1;
-            if (!(bits & 0x80) || !(bits & mask)) {
-                bits = 0xFF;
+        unplayed = D_80041F5C[base];
+        if (count < 8) {
+            mask = (1 << count) - 1;
+            if (!(unplayed & 0x80) || !(unplayed & mask)) {
+                unplayed = 0xFF;
             }
-            while (!(bits & (1 << i))) {
-                i = (i + 1) % arg1;
+            while (!(unplayed & (1 << pick))) {
+                pick = (pick + 1) % count;
             }
-            cur = bits ^ (1 << i);
-            ((u8 *)D_80041F5C)[arg0] = cur;
-            if (!(cur & mask)) {
-                ((u8 *)D_80041F5C)[arg0] = bits ^ mask;
+            left = unplayed ^ (1 << pick);
+            D_80041F5C[base] = left;
+            if (!(left & mask)) {
+                // all played: start over, but not with the one just picked
+                D_80041F5C[base] = unplayed ^ mask;
             }
         } else {
-            ((u8 *)D_80041F5C)[arg0] = r + 1;
+            D_80041F5C[base] = roll + 1;
         }
     }
-    return arg0 + i;
+    return base + pick;
 }
 
 s32 func_1000F6B8(s32 arg0, s16 x, s16 y, s16 z, s32 *pan, s32 nearDistance, s32 farDistance) {
@@ -566,44 +559,41 @@ s32 func_1000F6B8(s32 arg0, s16 x, s16 y, s16 z, s32 *pan, s32 nearDistance, s32
                   (s16)farDistance, (s16)nearDistance, pan, &volume, NULL);
     return volume;
 }
-typedef struct {
-    struct31 *unk0;
-    u8 pad4[8];
-} struct_init_EB00_425E8;
-extern struct_init_EB00_425E8 D_800425E8[];
 
-void func_1000F85C(u16 arg0, s16 arg1, s32 arg2) {
-    if (arg0 < 0x10) {
+void func_1000F85C(u16 handle, s16 param, s32 value) {
+    if (handle < 16) {
         return;
     }
-    if (func_1000F3D0(arg0) != 0) {
-        if (arg1 == 0x10) {
-            f32 sp1C = alCents2Ratio(arg2);
-            arg2 = *(s32 *)&sp1C;
-        } else if (arg1 == 0x11) {
-            arg1 = 0x10;
+    if (func_1000F3D0(handle) != 0) {
+        if (param == 0x10) {
+            // value is in cents; pass the voice its pitch ratio as raw f32 bits
+            f32 ratio = alCents2Ratio(value);
+            value = *(s32 *)&ratio;
+        } else if (param == 0x11) {
+            // value already holds a ratio's f32 bits
+            param = 0x10;
         }
-        func_10017714((s32) D_800425E8[arg0 & 0xF].unk0, arg1, arg2);
+        func_10017714((s32)D_800425E0[handle & 0xF].unk8, param, value);
     }
 }
 
-void func_1000F91C(u16 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4,
-                   s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9) {
-    s32 sp2C;
-    s32 tmp = func_1000F6B8(arg4, arg5, arg6, arg7, &sp2C, (s32) arg8, (s32) arg9);
+void func_1000F91C(u16 handle, u16 volume, s16 cents, u8 mix, s32 arg4,
+                   s16 x, s16 y, s16 z, s16 nearDistance, s16 farDistance) {
+    s32 pan;
+    s32 scale = func_1000F6B8(arg4, x, y, z, &pan, nearDistance, farDistance);
 
-    func_1000F85C(arg0, 8, (u32) (tmp * arg1) >> 0xF);
-    func_1000F85C(arg0, 4, sp2C & 0x7F);
-    func_1000F85C(arg0, 256, (sp2C & 0x80) | arg3);
-    func_1000F85C(arg0, 16, arg2);
+    func_1000F85C(handle, 8, (u32)(scale * volume) >> 15);
+    func_1000F85C(handle, 4, pan & 0x7F);
+    func_1000F85C(handle, 0x100, (pan & 0x80) | mix);
+    func_1000F85C(handle, 0x10, cents);
 }
 
-void func_1000F9D4(u16 arg0, s16 arg1, s16 arg2, s16 arg3) {
-    u32 tmp;
+void func_1000F9D4(u16 handle, s16 x, s16 y, s16 z) {
+    u32 pan;
 
-    func_1000F6B8(-1, arg1, arg2, arg3, &tmp, 32760, 32765);
-    func_1000F85C(arg0, 4, tmp & 0x7F);
-    func_1000F85C(arg0, 256, tmp & 0x80);
+    func_1000F6B8(-1, x, y, z, &pan, 32760, 32765);
+    func_1000F85C(handle, 4, pan & 0x7F);
+    func_1000F85C(handle, 0x100, pan & 0x80);
 }
 
 u16 func_1000FA64(u16 sound, s16 x, s16 y, s16 z, s32 volume, u16 farDistance,
