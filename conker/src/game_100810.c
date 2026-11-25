@@ -163,152 +163,154 @@ void func_150D3360(struct127 *owner, u8 arg1, s32 arg2) {
     init.owner = owner;
     init.ownerId = owner->unique_id;
     s126 = func_1503195C(owner, (owner->id == 0x48) ? 0x7A : 0x79, 0);
-    if (s126 != NULL) {
-        // matching: the store to init.unk8 must be scheduled inside the call's argument setup
-        if (func_150D4AE0(&spawn.pos, &end, owner, (init.unk8 = s126)) != 0) {
-            spawn.flags |= 4;
-        } else {
-            spawn.pos.unk0 = 0.0f;
-            spawn.pos.unk4 = 0.0f;
-            spawn.pos.unk8 = 0.0f;
-            end.unk0 = 0.0f;
-            end.unk8 = 0.0f;
-            end.unk4 = 500.0f;
-        }
-        // matching: one local holds the actor and then its state (a separate actor local adds a stack slot)
-        state = (TrailState *)func_15147A80(&spawn, 0x20, 0x14, 0, 0xD, 0xD, 0, 0, 0, arg1, arg2);
-        if (state != NULL) {
-            state = ((TrailActor *)state)->state;
-            memcpy(state, &init, sizeof(TrailState));
-            if (D_8008FD8C < 5) {
-                func_1000FA64(0x5B3, state->owner->x_position, state->owner->y_position, state->owner->z_position, 1000, 1000, 200, (s32)func_150D5124, state, 0x5B3, 12, 0);
-            }
-            func_1000FA64(0x5B4, state->owner->x_position, state->owner->y_position, state->owner->z_position, 1000, 1000, 200, (s32)func_150D5124, state, 0x5B4, 12, 0);
-            if (D_8008FD8C < 7 || owner->camera != NULL) {
-                func_1000FA64(0x5BC, state->owner->x_position, state->owner->y_position, state->owner->z_position, 1000, 1000, 200, (s32)func_150D5124, state, 0x5BC, 12, 0);
-            }
-            {
-                ParticleParams params;
-                ParticleDesc desc;
+    if (s126 == NULL) {
+        return;
+    }
+    // matching: the store to init.unk8 must be scheduled inside the call's argument setup
+    if (func_150D4AE0(&spawn.pos, &end, owner, (init.unk8 = s126)) != 0) {
+        spawn.flags |= 4;
+    } else {
+        spawn.pos.unk0 = 0.0f;
+        spawn.pos.unk4 = 0.0f;
+        spawn.pos.unk8 = 0.0f;
+        end.unk0 = 0.0f;
+        end.unk8 = 0.0f;
+        end.unk4 = 500.0f;
+    }
+    // matching: one local holds the actor and then its state (a separate actor local adds a stack slot)
+    state = (TrailState *)func_15147A80(&spawn, 0x20, 0x14, 0, 0xD, 0xD, 0, 0, 0, arg1, arg2);
+    if (state == NULL) {
+        return;
+    }
+    state = ((TrailActor *)state)->state;
+    memcpy(state, &init, sizeof(TrailState));
+    if (D_8008FD8C < 5) {
+        func_1000FA64(0x5B3, state->owner->x_position, state->owner->y_position, state->owner->z_position, 1000, 1000, 200, (s32)func_150D5124, state, 0x5B3, 12, 0);
+    }
+    func_1000FA64(0x5B4, state->owner->x_position, state->owner->y_position, state->owner->z_position, 1000, 1000, 200, (s32)func_150D5124, state, 0x5B4, 12, 0);
+    if (D_8008FD8C < 7 || owner->camera != NULL) {
+        func_1000FA64(0x5BC, state->owner->x_position, state->owner->y_position, state->owner->z_position, 1000, 1000, 200, (s32)func_150D5124, state, 0x5BC, 12, 0);
+    }
+    {
+        ParticleParams params;
+        ParticleDesc desc;
 
-                params.unk0 = 200.0f;
-                params.unk4 = 40.0f;
-                params.unk8 = 40.0f;
-                params.unkC = 40.0f;
-                params.unk10 = 0.05000000075f;
-                params.unk14 = 0.05000000075f;
-                params.unk18 = 0.4499999881f;
-                params.unk1C = 0.3000000119f;
-                params.unk20 = 9.999999975e-07f;
-                params.unk24 = -1;
-                params.unk34 = -1;
-                params.unk28 = -1;
-                params.unk38 = -1;
-                params.unk2C = -1;
-                params.unk3C = -1;
-                params.unk30 = -1;
-                params.unk40 = -1;
-                params.unk44 = 0;
-                params.unk48 = 1.0f;
-                params.unk4C = 0;
-                params.unk4E = 0;
-                params.unk50 = 0;
-                params.unk52 = 0;
-                params.unk54 = 0;
-                params.unk55 = 0;
-                params.unk56 = 0;
-                params.unk57 = 0;
-                params.unk58 = 0;
-                params.unk59 = -1;
-                desc.kind = 0x15;
-                desc.unk1 = 3;
-                desc.unk2 = 0x5503;
-                desc.unk4 = 300;
-                desc.unk8 = 0;
-                desc.unkC = 0;
-                desc.color[0] = 0xFF;
-                desc.color[1] = 0xFF;
-                desc.color[2] = 0xFF;
-                desc.color[3] = 0xFF;
-                desc.unk14 = 100.0f;
-                desc.unk18 = 100.0f;
-                desc.pos = spawn.pos;
-                desc.end = end;
-                desc.scale[0] = 1.0f;
-                desc.scale[1] = 1.0f;
-                desc.scale[2] = 1.0f;
-                desc.flags = 0xCD2006;
-                desc.unk44 = 0xFF;
-                desc.unk45 = 0xFF;
-                desc.unk46 = 0;
-                desc.unk47 = 6;
-                desc.unk48 = 0;
-                desc.unk4C = 0xFF;
-                state->effects[0] = func_151407D0(&params, 0x60, &desc, 0, 0, 0, 0, -1, arg1, arg2);
-            }
-            {
-                ParticleParams params;
-                ParticleDesc desc;
-                ParticleTail tail;
+        params.unk0 = 200.0f;
+        params.unk4 = 40.0f;
+        params.unk8 = 40.0f;
+        params.unkC = 40.0f;
+        params.unk10 = 0.05000000075f;
+        params.unk14 = 0.05000000075f;
+        params.unk18 = 0.4499999881f;
+        params.unk1C = 0.3000000119f;
+        params.unk20 = 9.999999975e-07f;
+        params.unk24 = -1;
+        params.unk34 = -1;
+        params.unk28 = -1;
+        params.unk38 = -1;
+        params.unk2C = -1;
+        params.unk3C = -1;
+        params.unk30 = -1;
+        params.unk40 = -1;
+        params.unk44 = 0;
+        params.unk48 = 1.0f;
+        params.unk4C = 0;
+        params.unk4E = 0;
+        params.unk50 = 0;
+        params.unk52 = 0;
+        params.unk54 = 0;
+        params.unk55 = 0;
+        params.unk56 = 0;
+        params.unk57 = 0;
+        params.unk58 = 0;
+        params.unk59 = -1;
+        desc.kind = 0x15;
+        desc.unk1 = 3;
+        desc.unk2 = 0x5503;
+        desc.unk4 = 300;
+        desc.unk8 = 0;
+        desc.unkC = 0;
+        desc.color[0] = 0xFF;
+        desc.color[1] = 0xFF;
+        desc.color[2] = 0xFF;
+        desc.color[3] = 0xFF;
+        desc.unk14 = 100.0f;
+        desc.unk18 = 100.0f;
+        desc.pos = spawn.pos;
+        desc.end = end;
+        desc.scale[0] = 1.0f;
+        desc.scale[1] = 1.0f;
+        desc.scale[2] = 1.0f;
+        desc.flags = 0xCD2006;
+        desc.unk44 = 0xFF;
+        desc.unk45 = 0xFF;
+        desc.unk46 = 0;
+        desc.unk47 = 6;
+        desc.unk48 = 0;
+        desc.unk4C = 0xFF;
+        state->effects[0] = func_151407D0(&params, 0x60, &desc, 0, 0, 0, 0, -1, arg1, arg2);
+    }
+    {
+        ParticleParams params;
+        ParticleDesc desc;
+        ParticleTail tail;
 
-                tail.timer = 0;
-                tail.targetScale = 1.0f;
-                params.unk0 = params.unk4 = 45.0f;
-                params.unk8 = params.unkC = 25.5f;
-                params.unk14 = params.unk10 = 0.1000000015f;
-                params.unk18 = 1.0f;
-                params.unk24 = -1;
-                params.unk34 = -1;
-                params.unk28 = -1;
-                params.unk38 = -1;
-                params.unk2C = -1;
-                params.unk3C = -1;
-                params.unk30 = -1;
-                params.unk40 = -1;
-                params.unk44 = 0;
-                params.unk48 = 1.0f;
-                params.unk4C = 0;
-                params.unk4E = 0;
-                params.unk50 = 0;
-                params.unk52 = 0;
-                params.unk54 = 0;
-                params.unk55 = 0;
-                params.unk56 = 0;
-                params.unk57 = 0;
-                params.unk58 = 0;
-                params.unk59 = -1;
-                params.unk1C = 0.8000000119f;
-                params.unk20 = 9.999999975e-07f;
-                // matching: indexing D_800A09C0[...] costs IDO an extra 8-byte stack slot
-                desc.kind = *(D_800A09C0 + (func_150ADA20() & 3));
-                desc.unk1 = 3;
-                desc.unk2 = 0x2203;
-                desc.unk4 = 300;
-                desc.unk8 = 0;
-                desc.unkC = 0;
-                desc.color[0] = 0xFF;
-                desc.color[1] = 0xFF;
-                desc.color[2] = 0xFF;
-                desc.color[3] = 0xFF;
-                desc.unk14 = 100.0f;
-                desc.unk18 = 100.0f;
-                desc.pos = spawn.pos;
-                desc.end = end;
-                desc.flags = 0xCD2006;
-                desc.unk44 = 0xFF;
-                desc.unk45 = 0xFF;
-                desc.unk46 = 0;
-                desc.unk47 = 7;
-                desc.unk48 = 0;
-                desc.unk4C = 0xFF;
-                desc.scale[0] = 1.0f;
-                desc.scale[1] = 1.0f;
-                desc.scale[2] = 1.0f;
-                state->effects[1] = func_151407D0(&params, 0x68, &desc, 0, 0x27, 0, 0, -1, arg1, arg2);
-                if (state->effects[1] != NULL) {
-                    memcpy(&state->effects[1]->tail, &tail, sizeof(ParticleTail));
-                }
-            }
+        tail.timer = 0;
+        tail.targetScale = 1.0f;
+        params.unk0 = params.unk4 = 45.0f;
+        params.unk8 = params.unkC = 25.5f;
+        params.unk14 = params.unk10 = 0.1000000015f;
+        params.unk18 = 1.0f;
+        params.unk24 = -1;
+        params.unk34 = -1;
+        params.unk28 = -1;
+        params.unk38 = -1;
+        params.unk2C = -1;
+        params.unk3C = -1;
+        params.unk30 = -1;
+        params.unk40 = -1;
+        params.unk44 = 0;
+        params.unk48 = 1.0f;
+        params.unk4C = 0;
+        params.unk4E = 0;
+        params.unk50 = 0;
+        params.unk52 = 0;
+        params.unk54 = 0;
+        params.unk55 = 0;
+        params.unk56 = 0;
+        params.unk57 = 0;
+        params.unk58 = 0;
+        params.unk59 = -1;
+        params.unk1C = 0.8000000119f;
+        params.unk20 = 9.999999975e-07f;
+        // matching: indexing D_800A09C0[...] costs IDO an extra 8-byte stack slot
+        desc.kind = *(D_800A09C0 + (func_150ADA20() & 3));
+        desc.unk1 = 3;
+        desc.unk2 = 0x2203;
+        desc.unk4 = 300;
+        desc.unk8 = 0;
+        desc.unkC = 0;
+        desc.color[0] = 0xFF;
+        desc.color[1] = 0xFF;
+        desc.color[2] = 0xFF;
+        desc.color[3] = 0xFF;
+        desc.unk14 = 100.0f;
+        desc.unk18 = 100.0f;
+        desc.pos = spawn.pos;
+        desc.end = end;
+        desc.flags = 0xCD2006;
+        desc.unk44 = 0xFF;
+        desc.unk45 = 0xFF;
+        desc.unk46 = 0;
+        desc.unk47 = 7;
+        desc.unk48 = 0;
+        desc.unk4C = 0xFF;
+        desc.scale[0] = 1.0f;
+        desc.scale[1] = 1.0f;
+        desc.scale[2] = 1.0f;
+        state->effects[1] = func_151407D0(&params, 0x68, &desc, 0, 0x27, 0, 0, -1, arg1, arg2);
+        if (state->effects[1] != NULL) {
+            memcpy(&state->effects[1]->tail, &tail, sizeof(ParticleTail));
         }
     }
 }
