@@ -253,31 +253,36 @@ Gfx *func_15142CF0(Gfx *, s32, s32, s32, s32, s32, s32, u8 *);
 Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
 Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 
-Gfx *func_150C8DB8(Gfx *gdl, RadialEffect *arg1, s32 arg2) {
-    RadialEffect *obj;
+/*
+ * Draws a ring effect as a strip of quads: for every segment direction, the ring profile
+ * D_80088820 is swept out at the current radius into this frame's vertex buffer.
+ */
+Gfx *func_150C8DB8(Gfx *gdl, RadialEffect *effect, s32 arg2) {
+    RadialEffect *first; // matching: a second, stack-homed copy of effect
 
-    obj = arg1;
+    first = effect;
     {
     s32 palOffset;
     u8 flag;
-    s32 count;
-    s32 i;
-    s32 j;
-    s32 n;
-    s32 pad1;
+    s32 vtxCount;
+    s32 pt;
+    s32 seg;
+    s32 stripLen;
+    s32 pad1; // matching: frame padding
 
     flag = 1;
-    count = 0;
+    vtxCount = 0;
     gdl = func_15142B7C(gdl, 0x200205, 0x70400);
     gdl = func_15142C10(gdl, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
     gdl = func_15142CF0(gdl, 0xF2, 0, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
     gdl = func_1513F4E4(gdl, 0x21, &flag);
     gdl = func_15142FBC(gdl, 0x1DACA0, D_800A4AC8[14].unk0 | D_800A4AC8[14].unk4, &flag);
     {
-    s32 tex;
-    tex = func_1510D0EC(*D_80090E84, &palOffset, 3, 0);
+    s32 texAddr = func_1510D0EC(*D_80090E84, &palOffset, 3, 0);
+
+
     gSPTexture(gdl++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
-    gDPSetTextureImage(gdl++, G_IM_FMT_CI, G_IM_SIZ_16b, 1, tex);
+    gDPSetTextureImage(gdl++, G_IM_FMT_CI, G_IM_SIZ_16b, 1, texAddr);
     gDPSetTile(gdl++, G_IM_FMT_CI, G_IM_SIZ_16b, 0, 0x0, G_TX_LOADTILE, 0, G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
     gDPLoadBlock(gdl++, G_TX_LOADTILE, 0, 0, 0x3EF, 0);
     gDPSetTile(gdl++, G_IM_FMT_CI, G_IM_SIZ_4b, 2, 0x0, 1, 0, G_TX_WRAP, 6, G_TX_NOLOD, G_TX_WRAP, 5, G_TX_NOLOD);
@@ -292,7 +297,7 @@ Gfx *func_150C8DB8(Gfx *gdl, RadialEffect *arg1, s32 arg2) {
     gDPSetTileSize(gdl++, 5, 0x42, 0x42, 0x46, 0x4E);
     gDPSetTile(gdl++, G_IM_FMT_IA, G_IM_SIZ_4b, 2, 0xBC, G_TX_RENDERTILE, 0, G_TX_WRAP, 5, 15, G_TX_WRAP, 5, 15);
     gDPSetTileSize(gdl++, G_TX_RENDERTILE, 0x802, 0x802, 0x87E, 0x87E);
-    gDPSetTextureImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, palOffset + tex - 0x20);
+    gDPSetTextureImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, palOffset + texAddr - 0x20);
     gDPSetTile(gdl++, G_IM_FMT_IA, G_IM_SIZ_4b, 0, 0x100, 6, 0, G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
     gDPLoadSync(gdl++);
     gDPLoadTLUTCmd(gdl++, 6, 15);
@@ -302,131 +307,125 @@ Gfx *func_150C8DB8(Gfx *gdl, RadialEffect *arg1, s32 arg2) {
         Vtx *vtxBase;
 
         {
-            f32 dx;
-            f32 dz;
+            f32 dirX;
+            f32 dirZ;
 
-            j = 0;
-            dx = obj->dirs[0].x;
-            dz = obj->dirs[0].z;
-            vtxBase = arg1->vtx[D_800BE9C0];
+            seg = 0;
+            dirX = first->dirs[0].x;
+            dirZ = first->dirs[0].z;
+            vtxBase = effect->vtx[D_800BE9C0];
             {
-                s32 inside;
-                f32 cx;
-                f32 cz;
-                s32 padA[6];
+                s32 inRange;
+                f32 centerX;
+                f32 centerZ;
+                s32 pad[6]; // matching: frame padding
 
-                cx = obj->def.pos.x + obj->radius * dx;
-                cz = obj->def.pos.z + obj->radius * dz;
-                if (cx * cx + cz * cz < 10894295.0f) {
-                    inside = 1;
+                centerX = first->def.pos.x + first->radius * dirX;
+                centerZ = first->def.pos.z + first->radius * dirZ;
+                if (centerX * centerX + centerZ * centerZ < 10894295.0f) {
+                    inRange = 1;
                 } else {
-                    inside = 0;
+                    inRange = 0;
                 }
-                for (i = 0; i < D_80088820.count; i++) {
-                    f32 rad;
-                    f32 h;
+                for (pt = 0; pt < D_80088820.count; pt++) {
+                    f32 dist;
                     f32 y;
+                    f32 pad; // matching: unused local keeps the frame layout
                     f32 x;
                     f32 z;
 
-                    rad = (D_80088820.pts + i)->r * arg1->size;
-                    h = (D_80088820.pts + i)->y * arg1->size;
-                    x = cx;
-                    x += rad * dx;
-                    h = (inside ? h : 0.0f) + arg1->def.pos.y;
-                    z = cz;
-                    z += rad * dz;
-                    vtxBase[count].v.ob[0] = x;
-                    vtxBase[count].v.ob[1] = h;
-                    vtxBase[count].v.ob[2] = z;
-                    vtxBase[count].v.tc[0] = -((x * 0.0398866199f + z * 0.03713737056f + 110.2300644f) * 32.0f);
-                    vtxBase[count].v.tc[1] = -((x * 0.05412395298f + z * -0.05814454332f + 50.14429092f) * 32.0f);
+                    dist = (D_80088820.pts + pt)->r * effect->size;
+                    y = (D_80088820.pts + pt)->y * effect->size;
+                    // matching: x and z are built in two steps
+                    x = centerX;
+                    x += dist * dirX;
+                    y = (inRange ? y : 0.0f) + effect->def.pos.y;
+                    z = centerZ;
+                    z += dist * dirZ;
+                    vtxBase[vtxCount].v.ob[0] = x;
+                    vtxBase[vtxCount].v.ob[1] = y;
+                    vtxBase[vtxCount].v.ob[2] = z;
+                    vtxBase[vtxCount].v.tc[0] = -((x * 0.0398866199f + z * 0.03713737056f + 110.2300644f) * 32.0f);
+                    vtxBase[vtxCount].v.tc[1] = -((x * 0.05412395298f + z * -0.05814454332f + 50.14429092f) * 32.0f);
                     {
                         f32 r;
                         f32 g;
                         f32 b;
 
                         func_150CCD90(z, &r, &g, &b);
-                        vtxBase[count].v.cn[0] = r;
-                        vtxBase[count].v.cn[1] = g;
-                        vtxBase[count].v.cn[2] = b;
+                        vtxBase[vtxCount].v.cn[0] = r;
+                        vtxBase[vtxCount].v.cn[1] = g;
+                        vtxBase[vtxCount].v.cn[2] = b;
                     }
-                    if (inside) {
-                        vtxBase[count].v.cn[3] = 0xFF;
-                    } else {
-                        vtxBase[count].v.cn[3] = 0;
-                    }
-                    count++;
+                    vtxBase[vtxCount].v.cn[3] = inRange ? 0xFF : 0;
+                    vtxCount++;
                 }
             }
         }
 
-        for (; j < obj->def.count; j++) {
-            s32 k;
-            f32 dx2;
-            f32 dz2;
+        for (; seg < first->def.count; seg++) {
+            s32 next;
+            f32 dirX;
+            f32 dirZ;
 
-            i = 0;
-            k = (j + 1 == arg1->def.count) ? 0 : j + 1;
-            dx2 = arg1->dirs[k].x;
-            dz2 = arg1->dirs[k].z;
+            pt = 0;
+            next = (seg + 1 == effect->def.count) ? 0 : seg + 1;
+            dirX = effect->dirs[next].x;
+            dirZ = effect->dirs[next].z;
             {
-                s32 inside2;
-                f32 cx2;
-                f32 cz2;
-                s32 padV2;
+                s32 inRange;
+                f32 centerX;
+                f32 centerZ;
+                s32 pad; // matching: frame padding
 
-                cx2 = arg1->def.pos.x + arg1->radius * dx2;
-                cz2 = arg1->def.pos.z + arg1->radius * dz2;
-                if (cx2 * cx2 + cz2 * cz2 < 10894295.0f) {
-                    inside2 = 1;
+                centerX = effect->def.pos.x + effect->radius * dirX;
+                centerZ = effect->def.pos.z + effect->radius * dirZ;
+                if (centerX * centerX + centerZ * centerZ < 10894295.0f) {
+                    inRange = 1;
                 } else {
-                    inside2 = 0;
+                    inRange = 0;
                 }
-                for (; i < D_80088820.count; i++) {
-                    f32 rad2;
-                    f32 h2;
-                    f32 y2;
-                    f32 x2;
-                    f32 z2;
+                for (; pt < D_80088820.count; pt++) {
+                    f32 dist;
+                    f32 y;
+                    f32 pad; // matching: unused local keeps the frame layout
+                    f32 x;
+                    f32 z;
 
-                    rad2 = (D_80088820.pts + i)->r * arg1->size;
-                    h2 = (D_80088820.pts + i)->y * arg1->size;
-                    x2 = cx2;
-                    x2 += rad2 * dx2;
-                    h2 = (inside2 ? h2 : 0.0f) + arg1->def.pos.y;
-                    z2 = cz2;
-                    z2 += rad2 * dz2;
-                    vtxBase[count].v.ob[0] = x2;
-                    vtxBase[count].v.ob[1] = h2;
-                    vtxBase[count].v.ob[2] = z2;
-                    vtxBase[count].v.tc[0] = -((x2 * 0.0398866199f + z2 * 0.03713737056f + 110.2300644f) * 32.0f);
-                    vtxBase[count].v.tc[1] = -((x2 * 0.05412395298f + z2 * -0.05814454332f + 50.14429092f) * 32.0f);
+                    dist = (D_80088820.pts + pt)->r * effect->size;
+                    y = (D_80088820.pts + pt)->y * effect->size;
+                    // matching: x and z are built in two steps
+                    x = centerX;
+                    x += dist * dirX;
+                    y = (inRange ? y : 0.0f) + effect->def.pos.y;
+                    z = centerZ;
+                    z += dist * dirZ;
+                    vtxBase[vtxCount].v.ob[0] = x;
+                    vtxBase[vtxCount].v.ob[1] = y;
+                    vtxBase[vtxCount].v.ob[2] = z;
+                    vtxBase[vtxCount].v.tc[0] = -((x * 0.0398866199f + z * 0.03713737056f + 110.2300644f) * 32.0f);
+                    vtxBase[vtxCount].v.tc[1] = -((x * 0.05412395298f + z * -0.05814454332f + 50.14429092f) * 32.0f);
                     {
-                        f32 r2;
-                        f32 g2;
-                        f32 b2;
+                        f32 r;
+                        f32 g;
+                        f32 b;
 
-                        func_150CCD90(z2, &r2, &g2, &b2);
-                        vtxBase[count].v.cn[0] = r2;
-                        vtxBase[count].v.cn[1] = g2;
-                        vtxBase[count].v.cn[2] = b2;
+                        func_150CCD90(z, &r, &g, &b);
+                        vtxBase[vtxCount].v.cn[0] = r;
+                        vtxBase[vtxCount].v.cn[1] = g;
+                        vtxBase[vtxCount].v.cn[2] = b;
                     }
-                    if (inside2) {
-                        vtxBase[count].v.cn[3] = 0xFF;
-                    } else {
-                        vtxBase[count].v.cn[3] = 0;
-                    }
-                    count++;
+                    vtxBase[vtxCount].v.cn[3] = inRange ? 0xFF : 0;
+                    vtxCount++;
                 }
             }
             {
-                s32 padB;
-                n = D_80088820.count * 2;
-                gSPVertex(gdl++, &arg1->vtx[D_800BE9C0][count - n], n, 0);
-                for (i = 0; i < D_80088820.count - 1; i++) {
-                    gSP1Triangle(gdl++, i, i + 1, i + D_80088820.count + 1, 0);
-                    gSP1Triangle(gdl++, i, i + D_80088820.count + 1, i + D_80088820.count, 0);
+                s32 pad; // matching: frame padding
+                stripLen = D_80088820.count * 2;
+                gSPVertex(gdl++, &effect->vtx[D_800BE9C0][vtxCount - stripLen], stripLen, 0);
+                for (pt = 0; pt < D_80088820.count - 1; pt++) {
+                    gSP1Triangle(gdl++, pt, pt + 1, pt + D_80088820.count + 1, 0);
+                    gSP1Triangle(gdl++, pt, pt + D_80088820.count + 1, pt + D_80088820.count, 0);
                 }
             }
         }
