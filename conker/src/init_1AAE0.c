@@ -2,14 +2,71 @@
 
 void __n_resetPerfChanState(N_ALSeqPlayer *seqp, s32 chan);
 
-// File-local view of the audio driver object (the N_ALSynth the players hang off
-// of) passed to func_1001BD34/func_1001BE1C. It exposes a resource-release
-// callback at 0x30 that is handed an ALInstrument or one of its ALSounds, and a
-// loader-proc getter at 0x28 (see BankScanObj). Not typed in the shared headers yet.
+/*
+ * Conker's synthesis driver (seqp->drvr) carries bank-loading hooks where the
+ * shared N_ALSynth still has dma/heap/pad; this file-local view spells them out.
+ */
+typedef void *(*BankLoadProc)(void *slot, s32 isInst);
+typedef BankLoadProc (*BankLoadProcGetter)(void);
+
 typedef struct {
-    u8   pad0[0x30];
-    void (*releaseProc)(void *);
-} InitBankCallbacks;
+    /* 0x00 */ u8                 pad0[0x28];
+    /* 0x28 */ BankLoadProcGetter getLoadProc;
+    /* 0x2C */ u8                 pad2C[0x4];
+    /* 0x30 */ void             (*releaseProc)(void *instOrSound);
+    /* 0x34 */ void             (*releaseInstProc)(ALInstrument *inst);
+    /* 0x38 */ s32                waveTableBase; /* base handed to func_10012C5C */
+} SynthX;
+
+#define SYNX(drvr) ((SynthX *)(drvr))
+
+/*
+ * Conker's channel state: libaudio.h's ALChanState with the Rare extras it
+ * still lumps into pad1C[] spelled out (same 0x3C layout as n_csplayer.c's).
+ */
+typedef struct {
+    /* 0x00 */ ALInstrument *instrument;
+    /* 0x04 */ s16           bendRange;
+    /* 0x06 */ ALPan         pan;
+    /* 0x07 */ u8            priority;
+    /* 0x08 */ u8            unk8;
+    /* 0x09 */ u8            vol;
+    /* 0x0A */ u8            fxmix;
+    /* 0x0B */ u8            unkB;
+    /* 0x0C */ u8            sustain;
+    /* 0x0D */ u8            unkD;
+    /* 0x0E */ u8            unkE;
+    /* 0x0F */ u8            unkF;
+    /* 0x10 */ f32           unk10;
+    /* 0x14 */ u8            unk14;
+    /* 0x15 */ u8            unk15;
+    /* 0x16 */ u8            unk16;
+    /* 0x17 */ u8            unk17;
+    /* 0x18 */ f32           pitchBend;
+    /* 0x1C */ ALMicroTime   attackTime;   /* envelope cached from the */
+    /* 0x20 */ ALMicroTime   decayTime;    /* instrument's first sound */
+    /* 0x24 */ ALMicroTime   releaseTime;
+    /* 0x28 */ u8            useEnv;
+    /* 0x29 */ u8            attackVolume;
+    /* 0x2A */ u8            decayVolume;
+    /* 0x2B */ s8            detune;
+    /* 0x2C */ u8            tremType;
+    /* 0x2D */ u8            tremRate;
+    /* 0x2E */ u8            tremDepth;
+    /* 0x2F */ u8            tremDelay;
+    /* 0x30 */ u8            vibType;
+    /* 0x31 */ u8            vibRate;
+    /* 0x32 */ u8            vibDepth;
+    /* 0x33 */ u8            vibDelay;
+    /* 0x34 */ u8            unk34;
+    /* 0x35 */ u8            unk35;
+    /* 0x36 */ u8            instMissing;  /* set when the program failed to load */
+    /* 0x37 */ u8            unk37;
+    /* 0x38 */ s16           instNum;      /* bank program the channel holds */
+    /* 0x3A */ u8            pad3A[0x2];
+} ChanStateX;
+
+#define CHANX(seqp, chan) ((ChanStateX *)&(seqp)->chanState[chan])
 
 /* Unlinks the voice state that owns `voice` from the allocated list and returns it to the free list. */
 void func_1001AAE0(N_ALSeqPlayer *seqp, N_ALVoice *voice) {
@@ -244,41 +301,37 @@ u8 func_1001B310(N_ALVoiceState *vs, N_ALCSPlayer *seqp) {
 }
 
 ALMicroTime __n_vsDelta(N_ALVoiceState *vs, ALMicroTime t) {
-  /*
-   * If we are interrupting a previously set envelope segment, we
-   * need to recalculate the segment end time given the current
-   * time. Note: this routine assumes that the voice is currently
-   * playing.
-   */
+    /*
+     * If we are interrupting a previously set envelope segment, we
+     * need to recalculate the segment end time given the current
+     * time. Note: this routine assumes that the voice is currently
+     * playing.
+     */
+    s32 delta = vs->envEndTime - t;
 
-  s32 delta = vs->envEndTime - t;
-
-  if (delta >= 0) {
-      return delta;
-  } else {
-      return AL_GAIN_CHANGE_TIME;
-  }
+    if (delta >= 0) {
+        return delta;
+    } else {
+        return AL_GAIN_CHANGE_TIME;
+    }
 }
 
-ALPan __n_vsPan(N_ALVoiceState *vs, N_ALSeqPlayer *seqp)
-{
+ALPan __n_vsPan(N_ALVoiceState *vs, N_ALSeqPlayer *seqp) {
     s32 tmp;
 
-    tmp = seqp->chanState[vs->channel].pan - AL_PAN_CENTER +
-        vs->sound->samplePan;
+    tmp = seqp->chanState[vs->channel].pan - AL_PAN_CENTER + vs->sound->samplePan;
     tmp = MAX(tmp, AL_PAN_LEFT);
     tmp = MIN(tmp, AL_PAN_RIGHT);
 
-    return (ALPan) tmp;
+    return (ALPan)tmp;
 }
 
-// not vanilla
-void __n_initFromBank(N_ALSeqPlayer *seqp, ALBank *b)
-{
+/* Unlike the SDK version, this only resets the channels' performance state. */
+void __n_initFromBank(N_ALSeqPlayer *seqp, ALBank *b) {
     s32 i;
-    ALInstrument *inst;
+    ALInstrument *inst = NULL;
 
-    inst = NULL;
+    /* set to the first available instrument (left unused here). */
     for (i = 1; inst == NULL; i++) {
         inst = b->instArray[i];
     }
@@ -292,19 +345,17 @@ void __n_initFromBank(N_ALSeqPlayer *seqp, ALBank *b)
     }
 }
 
-void __n_initChanState(N_ALSeqPlayer *seqp)
-{
+void __n_initChanState(N_ALSeqPlayer *seqp) {
     int i;
 
-    for (i = 0; i < seqp->maxChannels; i++)
-    {
-        seqp->chanState[i].instrument = 0;
-        __n_resetPerfChanState (seqp, i);
+    for (i = 0; i < seqp->maxChannels; i++) {
+        seqp->chanState[i].instrument = NULL;
+        __n_resetPerfChanState(seqp, i);
     }
 }
 
 void __n_resetPerfChanState(N_ALSeqPlayer *seqp, s32 chan) {
-    seqp->chanState[chan].fxmix = 0;
+    seqp->chanState[chan].fxmix = AL_DEFAULT_FXMIX;
     seqp->chanState[chan].pan = AL_PAN_CENTER;
     seqp->chanState[chan].vol = AL_VOL_FULL;
     seqp->chanState[chan].priority = AL_DEFAULT_PRIORITY;
@@ -322,222 +373,139 @@ void __n_resetPerfChanState(N_ALSeqPlayer *seqp, s32 chan) {
     seqp->chanState[chan].unk8 = 0;
 }
 
-s32 func_1001BD34();
-void func_10012C5C(void *arg0, s32 arg1, s32 arg2);
+void *func_1001BD34(N_ALSynth *drvr, ALInstrument **instSlot, s32 soundIdx);
+void func_10012C5C(ALSound *sound, void *base, s32 waveTableBase);
 
-// ALChanState (0x3C bytes) with Rare's pad1C[0x20] tail broken out: the tail
-// caches the selected instrument's envelope and its tremolo/vibrato settings,
-// plus the bank instrument index the channel is currently holding.
-typedef struct {
-    void *instrument;
-    s16   bendRange;
-    u8    pan;
-    u8    priority;
-    u8    unk8;
-    u8    vol;
-    u8    padA[0x12];
-    s32   attackTime;
-    s32   decayTime;
-    s32   releaseTime;
-    u8    unk28;
-    u8    attackVolume;
-    u8    decayVolume;
-    u8    unk2B;
-    u8    tremType;
-    u8    tremRate;
-    u8    tremDepth;
-    u8    tremDelay;
-    u8    vibType;
-    u8    vibRate;
-    u8    vibDepth;
-    u8    vibDelay;
-    u8    unk34;
-    u8    unk35;
-    u8    instMissing;
-    u8    unk37;
-    s16   instNum;
-    u8    pad3A[0x2];
-} B7DChanState;
-
-// Same driver object as InitBankCallbacks/BankScanObj, seen from func_1001B7D0.
-typedef struct {
-    u8    pad0[0x34];
-    void (*releaseProc)(void *);
-    s32   unk38;
-} B7DBankCb;
-
-// N_ALSeqPlayer view: drvr at 0x14, ALBank at 0x20, chanState at 0x60.
-typedef struct {
-    u8            pad0[0x14];
-    B7DBankCb    *drvr;
-    u8            pad18[0x8];
-    ALBank       *bank;
-    u8            pad24[0x3C];
-    B7DChanState *chanState;
-} B7DSeqp;
-
-s32 func_1001B7D0(B7DSeqp *seqp, s32 instNum, s32 chan) {
+/*
+ * Loads bank program `instNum` onto channel `chan`, releasing the instrument
+ * the channel held before and copying the new one's settings into the channel.
+ * Returns 1 if the program could not be loaded.
+ */
+s32 func_1001B7D0(N_ALSeqPlayer *seqp, s32 instNum, s32 chan) {
     ALSound *sound;
     ALInstrument *inst;
     s32 i;
 
-    inst = (ALInstrument *)func_1001BD34(seqp->drvr, &seqp->bank->instArray[instNum], -1);
-    if (seqp->chanState[chan].instrument != 0) {
-        seqp->drvr->releaseProc(seqp->bank->instArray[seqp->chanState[chan].instNum]);
-        seqp->chanState[chan].instrument = 0;
+    inst = func_1001BD34(seqp->drvr, &seqp->bank->instArray[instNum], -1);
+    if (CHANX(seqp, chan)->instrument != NULL) {
+        SYNX(seqp->drvr)->releaseInstProc(seqp->bank->instArray[CHANX(seqp, chan)->instNum]);
+        CHANX(seqp, chan)->instrument = NULL;
     }
-    if (inst != 0) {
+    if (inst != NULL) {
         for (i = 0; i < inst->soundCount; i++) {
             sound = inst->soundArray[i];
-            if ((u32) sound->envelope < 0x100000) {
-                func_10012C5C(sound, (s32) inst, seqp->drvr->unk38);
+            /* a small envelope "pointer" is still an offset from the instrument */
+            if ((u32)sound->envelope < 0x100000) {
+                func_10012C5C(sound, inst, SYNX(seqp->drvr)->waveTableBase);
             }
         }
         sound = inst->soundArray[0];
     }
-    if (inst != 0) {
+    if (inst != NULL) {
         if (inst->soundCount == 0) {
             return 0;
         }
-        if (sound != 0) {
-            seqp->chanState[chan].attackTime = sound->envelope->attackTime;
-            seqp->chanState[chan].decayTime = sound->envelope->decayTime;
-            seqp->chanState[chan].releaseTime = sound->envelope->releaseTime;
-            seqp->chanState[chan].attackVolume = sound->envelope->attackVolume;
-            seqp->chanState[chan].decayVolume = sound->envelope->decayVolume;
+        if (sound != NULL) {
+            CHANX(seqp, chan)->attackTime = sound->envelope->attackTime;
+            CHANX(seqp, chan)->decayTime = sound->envelope->decayTime;
+            CHANX(seqp, chan)->releaseTime = sound->envelope->releaseTime;
+            CHANX(seqp, chan)->attackVolume = sound->envelope->attackVolume;
+            CHANX(seqp, chan)->decayVolume = sound->envelope->decayVolume;
         }
-        seqp->chanState[chan].pan = inst->pan;
-        seqp->chanState[chan].vol = inst->volume;
-        seqp->chanState[chan].priority = inst->priority;
-        seqp->chanState[chan].bendRange = inst->bendRange;
-        seqp->chanState[chan].tremType = inst->tremType;
-        seqp->chanState[chan].tremRate = inst->tremRate;
-        seqp->chanState[chan].tremDepth = inst->tremDepth;
-        seqp->chanState[chan].tremDelay = inst->tremDelay;
-        seqp->chanState[chan].vibType = inst->vibType;
-        seqp->chanState[chan].vibRate = inst->vibRate;
-        seqp->chanState[chan].vibDepth = inst->vibDepth;
-        seqp->chanState[chan].vibDelay = inst->vibDelay;
-        seqp->chanState[chan].instMissing = 0;
-        seqp->chanState[chan].instrument = inst;
+        CHANX(seqp, chan)->pan = inst->pan;
+        CHANX(seqp, chan)->vol = inst->volume;
+        CHANX(seqp, chan)->priority = inst->priority;
+        CHANX(seqp, chan)->bendRange = inst->bendRange;
+        CHANX(seqp, chan)->tremType = inst->tremType;
+        CHANX(seqp, chan)->tremRate = inst->tremRate;
+        CHANX(seqp, chan)->tremDepth = inst->tremDepth;
+        CHANX(seqp, chan)->tremDelay = inst->tremDelay;
+        CHANX(seqp, chan)->vibType = inst->vibType;
+        CHANX(seqp, chan)->vibRate = inst->vibRate;
+        CHANX(seqp, chan)->vibDepth = inst->vibDepth;
+        CHANX(seqp, chan)->vibDelay = inst->vibDelay;
+        CHANX(seqp, chan)->instMissing = FALSE;
+        CHANX(seqp, chan)->instrument = inst;
     } else {
-        seqp->chanState[chan].instMissing = 1;
+        CHANX(seqp, chan)->instMissing = TRUE;
     }
-    seqp->chanState[chan].unk2B = 0;
-    seqp->chanState[chan].unk28 = 0;
-    seqp->chanState[chan].unk35 = 0;
-    seqp->chanState[chan].instNum = instNum;
-    if (inst == 0) {
+    CHANX(seqp, chan)->detune = 0;
+    CHANX(seqp, chan)->useEnv = 0;
+    CHANX(seqp, chan)->unk35 = 0;
+    CHANX(seqp, chan)->instNum = instNum;
+    if (inst == NULL) {
         return 1;
     }
     return 0;
 }
-// The loader proc resolves the pointer whose address it is handed (an
-// instArray[] or soundArray[] slot) and returns its RAM address.
-typedef s32 (*BankScanCb)(void *, s32);
-typedef BankScanCb (*BankScanGetter)(void);
 
-// Same driver object again, seen from func_1001BD34.
-typedef struct {
-    u8             pad0[0x28];
-    BankScanGetter getLoadProc;
-} BankScanObj;
+/*
+ * Asks the driver's loader to resolve an instrument slot (soundIdx == -1) or
+ * one of the instrument's soundArray[] slots, returning the loaded object's
+ * RAM address, or NULL if there is no loader or the result is not a
+ * word-aligned KSEG0 address.
+ */
+void *func_1001BD34(N_ALSynth *drvr, ALInstrument **instSlot, s32 soundIdx) {
+    BankLoadProc loadProc;
+    void *addr = NULL;
 
-s32 func_1001BD34(BankScanObj *drvr, void **ptrRef, s32 idx) {
-    BankScanCb loadProc;
-    s32 addr;
-
-    addr = 0;
-    loadProc = drvr->getLoadProc();
-    if (loadProc != 0) {
-        if (idx == -1) {
-            addr = loadProc(ptrRef, 1);
+    loadProc = SYNX(drvr)->getLoadProc();
+    if (loadProc != NULL) {
+        if (soundIdx == -1) {
+            addr = loadProc(instSlot, TRUE);
         } else {
-            addr = loadProc((u8 *)*ptrRef + idx * 4 + 0x10, 0);
+            addr = loadProc(&(*instSlot)->soundArray[soundIdx], FALSE);
         }
-        if (addr != 0 && (addr & 0xFF000003) != 0x80000000) {
-            return 0;
+        if (addr != NULL && ((u32)addr & 0xFF000003) != 0x80000000) {
+            return NULL;
         }
     } else {
-        return 0;
+        return NULL;
     }
     return addr;
 }
 
-void func_1001BE1C(InitBankCallbacks *drvr, ALInstrument *inst, s32 idx) {
-    if (idx == -1) {
-        drvr->releaseProc(inst);
+/* Releases an instrument (soundIdx == -1) or one of its sounds through the driver. */
+void func_1001BE1C(N_ALSynth *drvr, ALInstrument *inst, s32 soundIdx) {
+    if (soundIdx == -1) {
+        SYNX(drvr)->releaseProc(inst);
     } else {
-        drvr->releaseProc(inst->soundArray[idx]);
+        SYNX(drvr)->releaseProc(inst->soundArray[soundIdx]);
     }
 }
 
-// N_ALEventListItem again; here the event payload is an ALOscEvent, whose first
-// two members are the voice state and the oscillator state.
-typedef struct OscNode {
-    struct OscNode *next;
-    struct OscNode *prev;
-    s32             delta;
-    s16             type;
-    u8              padE[0x2];
-    void           *vs;
-    void           *oscState;
-} OscNode;
+/* Conker's event numbering puts the oscillator events one past libaudio.h's enum ALMsg. */
+#define TREM_OSC_EVT 23
+#define VIB_OSC_EVT  24
 
-typedef struct {
-    u8       pad0[0x48];
-    OscNode *evtqFreeList;
-    u8       pad4C[0x4];
-    OscNode *evtqAllocList;
-    u8       pad54[0x24];
-    void   (*stopOsc)(void *);
-} OscSeqp;
+/* Stops and removes the pending tremolo/vibrato oscillator events of voice state vs. */
+void __n_seqpStopOsc(N_ALSeqPlayer *seqp, N_ALVoiceState *vs) {
+    N_ALEventListItem *thisNode;
+    N_ALEventListItem *nextNode;
+    s16 evtType;
 
-void __n_seqpStopOsc(OscSeqp *seqp, N_ALVoiceState *vs) {
-    OscNode *thisNode;
-    OscNode *nextNode;
-    s16 type;
-    OscNode *unlinkMe;
-    OscNode *relinkMe;
-    OscNode **freeList;
-
-    thisNode = seqp->evtqAllocList;
-    if (thisNode != 0) {
-        do {
-            nextNode = thisNode->next;
-            type = thisNode->type;
-            if (type == 0x17 || type == 0x18) {
-                if (thisNode->vs == vs) {
-                    seqp->stopOsc(thisNode->oscState);
-                    unlinkMe = thisNode;
-                    if (unlinkMe->next != 0) {
-                        unlinkMe->next->prev = unlinkMe->prev;
-                    }
-                    if (unlinkMe->prev != 0) {
-                        unlinkMe->prev->next = unlinkMe->next;
-                    }
-                    if (nextNode != 0) {
-                        nextNode->delta += thisNode->delta;
-                    }
-                    relinkMe = thisNode;
-                    freeList = &seqp->evtqFreeList;
-                    relinkMe->next = *freeList;
-                    relinkMe->prev = (OscNode *)freeList;
-                    if (*freeList != 0) {
-                        (*freeList)->prev = relinkMe;
-                    }
-                    *freeList = relinkMe;
-                    if (type == 0x17) {
-                        vs->flags &= 0xFE;
-                    } else {
-                        vs->flags &= 0xFD;
-                    }
-                    if (vs->flags == 0) {
-                        return;
-                    }
+    thisNode = (N_ALEventListItem *)seqp->evtq.allocList.next;
+    while (thisNode != NULL) {
+        nextNode = (N_ALEventListItem *)thisNode->node.next;
+        evtType = thisNode->evt.type;
+        if (evtType == TREM_OSC_EVT || evtType == VIB_OSC_EVT) {
+            if (thisNode->evt.msg.osc.vs == vs) {
+                (*seqp->stopOsc)(thisNode->evt.msg.osc.oscState);
+                AL_UNLINK((ALLink *)thisNode);
+                if (nextNode != NULL) {
+                    nextNode->delta += thisNode->delta;
+                }
+                AL_LINK((ALLink *)thisNode, &seqp->evtq.freeList);
+                if (evtType == TREM_OSC_EVT) {
+                    vs->flags &= 0xFE; /* tremolo off */
+                } else {
+                    vs->flags &= 0xFD; /* vibrato off */
+                }
+                if (vs->flags == 0) {
+                    return; /* there should be no more events */
                 }
             }
-            thisNode = nextNode;
-        } while (thisNode != 0);
+        }
+        thisNode = nextNode;
     }
 }
