@@ -378,13 +378,13 @@ void func_150F6138(BoneSparkEffect *effect, s32 arg1, u8 arg2) {
     func_15149514(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
-typedef struct BeamEffect BeamEffect;
+typedef struct ModelBeamEffect ModelBeamEffect;
 
 typedef struct {
     /* 0x00 */ u8 pad0[0x48];
     /* 0x48 */ f32 unk48;
     /* 0x4C */ f32 unk4C;
-    /* 0x50 */ BeamEffect *effect; /* the beam effect that drives this beam */
+    /* 0x50 */ ModelBeamEffect *effect; /* the beam effect that drives this beam */
     /* 0x54 */ u8 pad54[0x58 - 0x54];
     /* 0x58 */ u8 flags; /* bit 0 = shown */
 } BeamPart;
@@ -393,19 +393,20 @@ typedef struct {
 typedef struct {
     DefParticleHead head; /* head.def.pos / rot: the two end points */
     BeamPart part;
-} Beam;
+} ModelBeam;
 
+/* ModelBeamEffect.data: the owner, and the beam and flash it drives. */
 typedef struct {
     Actor *owner;
     u8 ownerId;
     u8 pad5[3];
-    Beam *beam;
+    ModelBeam *beam;
     LightEffect *flash; /* created by func_151602C0 */
-} BeamData;
+} ModelBeamData;
 
-struct BeamEffect {
+struct ModelBeamEffect {
     TimedEffect base;
-    BeamData data;
+    ModelBeamData data;
 };
 
 extern f32 D_800A1B18[3];
@@ -413,8 +414,8 @@ extern f32 D_800A1B24[3];
 
 /* Beam effect: while the owner lives and has a model (and unk94 bit 1 is clear), stretches the
  * beam between two points of the model and puts the flash at the first; otherwise hides both. */
-void func_150F6178(BeamEffect *effect) {
-    BeamData *data;
+void func_150F6178(ModelBeamEffect *effect) {
+    ModelBeamData *data;
     Actor *owner;
     Vec3f start;
     Vec3f end;
@@ -428,7 +429,7 @@ void func_150F6178(BeamEffect *effect) {
         return;
     }
     if (owner->ob_matrix_ptr != NULL && !(owner->unk94 & 2)) {
-        Beam *beam;
+        ModelBeam *beam;
         LightEffect *flash;
         PointLight *light;
 
@@ -472,8 +473,8 @@ void func_150F6178(BeamEffect *effect) {
 }
 
 /* Frees the beam effect's beam and flash. */
-void func_150F631C(BeamEffect *effect) {
-    BeamData *data = &effect->data;
+void func_150F631C(ModelBeamEffect *effect) {
+    ModelBeamData *data = &effect->data;
 
     if (data->beam != NULL) {
         func_1516972C(&data->beam->head.header);
@@ -484,40 +485,40 @@ void func_150F631C(BeamEffect *effect) {
 }
 
 /* Beam effect destructors: free the beam and flash, then the effect. */
-void func_150F6368(BeamEffect *effect) {
+void func_150F6368(ModelBeamEffect *effect) {
     func_150F631C(effect);
     func_1514933C(&effect->base);
 }
 
 
-void func_150F6394(BeamEffect *effect) {
+void func_150F6394(ModelBeamEffect *effect) {
     func_150F631C(effect);
     func_15149368(&effect->base);
 }
 
 /* Effect callback for the beam effect: hands func_15169850 the owner reference. */
-void func_150F63C0(BeamEffect *effect, s32 arg1, u8 arg2) {
+void func_150F63C0(ModelBeamEffect *effect, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
 /* Clears the beam effect's reference to this beam. */
-void func_150F6400(Beam *beam) {
+void func_150F6400(ModelBeam *beam) {
     BeamPart *part = &beam->part;
 
     if (part->effect != NULL) {
-        BeamData *data = &part->effect->data;
+        ModelBeamData *data = &part->effect->data;
 
         data->beam = NULL;
     }
 }
 
 /* Beam destructors: unlink the beam from its effect, then free it. */
-void func_150F6420(Beam *beam) {
+void func_150F6420(ModelBeam *beam) {
     func_150F6400(beam);
     func_1513CA6C(&beam->head);
 }
 
-void func_150F644C(Beam *beam) {
+void func_150F644C(ModelBeam *beam) {
     func_150F6400(beam);
     func_1513CAA0(&beam->head);
 }

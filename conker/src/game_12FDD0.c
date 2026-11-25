@@ -14,12 +14,12 @@ typedef struct {
     /* 0x14 */ u8 flags;       /* bit 0: start/end are valid this frame */
     /* 0x18 */ Vec3f start; /* def.pos and def.rot transformed to world space */
     /* 0x24 */ Vec3f end;
-} BeamData; /* size 0x30 */
+} BoneBeamData; /* size 0x30 */
 
 /* A particle spawned by func_1513D2F0 (a DefParticleHead followed by its data). */
 typedef struct {
     /* 0x000 */ DefParticleHead head;
-    /* 0x110 */ BeamData beam;
+    /* 0x110 */ BoneBeamData beam;
 } BoneBeamParticle;
 
 void func_15103254(s16 lifetime, u8 alpha, f32 size, Vec3f *pos, u8 views, u8 arg5, s32 arg6);
@@ -90,7 +90,7 @@ BoneBeamParticle *func_15102B38(Actor *target, u8 bone, Vec3f *start, Vec3f *end
                   s32 arg13) {
     BoneBeamParticle *particle;
     ParticleDef def;
-    BeamData beam;
+    BoneBeamData beam;
     s32 flip;
 
     if (target == NULL) {
@@ -135,9 +135,9 @@ BoneBeamParticle *func_15102B38(Actor *target, u8 bone, Vec3f *start, Vec3f *end
     }
 
     particle = func_1513D2F0(&def, &D_800A4AA0, 0x29, 0, 0, 0x16, flip + 1, 0, 0,
-                                  extraSize + sizeof(BeamData), arg12, arg13);
+                                  extraSize + sizeof(BoneBeamData), arg12, arg13);
     if (particle != NULL) {
-        memcpy(&particle->beam, &beam, sizeof(BeamData));
+        memcpy(&particle->beam, &beam, sizeof(BoneBeamData));
     }
 
     func_15103254(lifetime, alpha, flashSize, flashPos, viewMask, arg12, arg13);
@@ -156,7 +156,7 @@ extern void func_15145EA4(Vec3f **src, Vec3f **dst, Mtx *matrix, s32 count);
  * Returns 0 when the beam should die (target gone or node missing). */
 s32 func_15102D90(BoneBeamParticle *particle) {
     Actor *target;
-    BeamData *beam;
+    BoneBeamData *beam;
     Vec3f *src[2];
     Vec3f *dst[2];
 
@@ -200,7 +200,7 @@ Vtx *func_15102EB8(BoneBeamParticle *particle, s16 viewport) {
     Vec3f *camera;
     Vec3f mid;
     Vec3f dir;
-    BeamData *beam;
+    BoneBeamData *beam;
     Vec3f closest;
     f32 dx, dy, dz;
     f32 nx, ny, nz;

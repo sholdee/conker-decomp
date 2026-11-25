@@ -53,7 +53,7 @@ LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32
 s32 func_15160A58(s32, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_150F0A24(f32 *);
 
-struct Beam *func_150EEF80(Actor *, u8, u8, s32);
+struct AimedBeam *func_150EEF80(Actor *, u8, u8, s32);
 
 /* Fires beam slot `slot` (0 or 1) of `actor`: spawns its beam, a spark burst and an effect
  * at the muzzle. */
@@ -123,12 +123,12 @@ typedef struct {
     /* 0x30 */ Vec3f direction;
     /* 0x3C */ f32 distance;
     /* 0x40 */ f32 inverse;
-} BeamLink; /* 0x44 */
+} AimedBeamState; /* 0x44 */
 
-typedef struct Beam {
+typedef struct AimedBeam {
     /* 0x000 */ DefParticleHead head;
-    /* 0x110 */ BeamLink link;
-} Beam;
+    /* 0x110 */ AimedBeamState link;
+} AimedBeam;
 
 typedef struct {
     /* 0x00 */ s16 unk0;
@@ -153,13 +153,13 @@ typedef struct {
 typedef struct {
     /* 0x00 */ Actor *actor;
     /* 0x04 */ u8 actorId;
-    /* 0x08 */ Beam *beam;
+    /* 0x08 */ AimedBeam *beam;
     /* 0x0C */ u8 index;               /* which beam->link.sparks[] entry */
 } SparkLink; /* 0x10 */
 
 /* Back-reference a beam's emitter carries at +0x28. */
 typedef struct {
-    /* 0x00 */ Beam *beam;
+    /* 0x00 */ AimedBeam *beam;
     /* 0x04 */ f32 accum;              /* particles owed, spawned one per 1.0 */
 } EmitterLink; /* 0x8 */
 
@@ -184,15 +184,15 @@ typedef struct BeamSpark {
 } BeamSpark;
 
 extern void *func_151A7950(void *, s32, u8, s32);
-struct Glow *func_150EFEC8(Actor *, u8, u8, u8, u8, Beam *, u8, s32);
-LightEffect *func_150F0198(u8, u8, u8, u8, Beam *, u8, s32);
+struct Glow *func_150EFEC8(Actor *, u8, u8, u8, u8, AimedBeam *, u8, s32);
+LightEffect *func_150F0198(u8, u8, u8, u8, AimedBeam *, u8, s32);
 
 /* Spawns the beam of slot `slot` of `actor`, with its sparks, emitter, glow and flash. */
-Beam *func_150EEF80(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
-    Beam *beam;
+AimedBeam *func_150EEF80(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
+    AimedBeam *beam;
     ParticleDef spawn;
-    BeamLink init;
-    BeamLink *link;
+    AimedBeamState init;
+    AimedBeamState *link;
 
     if (actor == NULL) {
         return NULL;
@@ -301,8 +301,8 @@ s32 func_1505D024(void *, s32, s32, s32);
 void func_1502EA98(void *, s32, s32, s32, s32, s32, s32);
 
 /* Per-frame update of a beam: aims it from the muzzle to the target, pulses it and applies its hit. */
-s32 func_150EF38C(Beam *beam) {
-    BeamLink *link;
+s32 func_150EF38C(AimedBeam *beam) {
+    AimedBeamState *link;
     Actor *actor;
     Actor *target;
     s16 *position;
@@ -374,10 +374,10 @@ s32 func_150EF784(Actor *actor, s32 arg1, s32 arg2) {
 }
 
 /* Releases a beam's sparks, emitter, glow and flash (func_1516972C), then the beam itself. */
-void func_150EF7B0(Beam *beam) {
+void func_150EF7B0(AimedBeam *beam) {
     s32 i;
     void *part;
-    BeamLink *link = &beam->link;
+    AimedBeamState *link = &beam->link;
 
     for (i = 0; i < 2; i++) {
         part = link->sparks[i];
@@ -401,10 +401,10 @@ void func_150EF7B0(Beam *beam) {
 }
 
 /* Like func_150EF7B0, through the func_1516979C / func_1513CAA0 variants. */
-void func_150EF860(Beam *beam) {
+void func_150EF860(AimedBeam *beam) {
     s32 i;
     void *part;
-    BeamLink *link = &beam->link;
+    AimedBeamState *link = &beam->link;
 
     for (i = 0; i < 2; i++) {
         part = link->sparks[i];
@@ -429,8 +429,8 @@ void func_150EF860(Beam *beam) {
 
 /* Message handler of a beam: releases it when its actor goes away (types 0 and 0x43)
  * and follows its actor and target through an identity swap (type 0x2D). */
-void func_150EF910(Beam *beam, BeamMsg *msg, u8 type) {
-    BeamLink *link = &beam->link;
+void func_150EF910(AimedBeam *beam, BeamMsg *msg, u8 type) {
+    AimedBeamState *link = &beam->link;
     Actor *actor;
     Actor *msgActor;
     u8 actorId;
@@ -476,8 +476,8 @@ void func_150EF910(Beam *beam, BeamMsg *msg, u8 type) {
 
 /* Per-frame update of a beam spark: follows the beam while it is aimed, hides otherwise. */
 s32 func_150EFA4C(BeamSpark *spark) {
-    Beam *beam;
-    BeamLink *link;
+    AimedBeam *beam;
+    AimedBeamState *link;
     SparkLink *sparkLink;
 
     sparkLink = spark->link;
@@ -515,7 +515,7 @@ extern void func_1515C2F0(EffectTemplate18 *, s32, TrailBurstParams *, s32, s32,
 /* Per-frame update of a beam's emitter: spawns about 0.36-0.66 particles per frame at the beam's end. */
 void func_150EFB80(BeamEmitter *emitter) {
     EmitterLink *link;
-    Beam *beam;
+    AimedBeam *beam;
     u32 yaw;
     u32 pitch;
     EffectTemplate18 spawn;
@@ -577,7 +577,7 @@ typedef struct {
     Actor *actor;
     u8 actorId;
     u8 slot;
-    Beam *beam;
+    AimedBeam *beam;
 } GlowLink;
 
 typedef struct Glow {
@@ -588,7 +588,7 @@ typedef struct Glow {
 } Glow;
 
 /* Spawns the glow sprite of `beam` (slot `slot` of `actor`), tinted (r, g, b). */
-Glow *func_150EFEC8(Actor *actor, u8 slot, u8 r, u8 g, u8 b, Beam *beam, u8 arg6, s32 arg7) {
+Glow *func_150EFEC8(Actor *actor, u8 slot, u8 r, u8 g, u8 b, AimedBeam *beam, u8 arg6, s32 arg7) {
     Glow *glow;
     GlowShape sprite;
     ParticleDef spawn;
@@ -666,8 +666,8 @@ Glow *func_150EFEC8(Actor *actor, u8 slot, u8 r, u8 g, u8 b, Beam *beam, u8 arg6
 
 /* Per-frame update of a beam's glow: spans 500 units from the beam's start along its direction. */
 s32 func_150F00EC(Glow *glow) {
-    Beam *beam;
-    BeamLink *link;
+    AimedBeam *beam;
+    AimedBeamState *link;
 
     beam = glow->link.beam;
     link = &beam->link;
@@ -685,11 +685,11 @@ s32 func_150F00EC(Glow *glow) {
 }
 
 /* Spawns the muzzle flash of `beam`, colored (r, g, b, a). */
-LightEffect *func_150F0198(u8 r, u8 g, u8 b, u8 a, Beam *beam, u8 arg5, s32 arg6) {
+LightEffect *func_150F0198(u8 r, u8 g, u8 b, u8 a, AimedBeam *beam, u8 arg5, s32 arg6) {
     LightEffect *flash;
     LightEffectHeader header;
     Vec3i origin;
-    Beam *link;
+    AimedBeam *link;
 
     link = beam; // matching: the payload is copied from a stack local, not the arg slot
     header.flags = 2;
@@ -720,7 +720,7 @@ void func_150F0280(BeamSpark *spark) {
 /* Clears the beam's reference to this spark. */
 void func_150F02A0(BeamSpark *spark) {
     SparkLink *link = spark->link;
-    Beam *beam = link->beam;
+    AimedBeam *beam = link->beam;
 
     beam->link.sparks[link->index] = NULL;
 }
@@ -739,7 +739,7 @@ void func_150F02EC(BeamEmitter *emitter) {
 
 /* Clears the beam's reference to this emitter. */
 void func_150F0318(BeamEmitter *emitter) {
-    Beam *beam = emitter->link.beam;
+    AimedBeam *beam = emitter->link.beam;
 
     beam->link.emitter = NULL;
 }
@@ -759,7 +759,7 @@ void func_150F0354(Glow *glow) {
 
 /* Clears the beam's reference to this glow. */
 void func_150F0380(Glow *glow) {
-    Beam *beam = glow->link.beam;
+    AimedBeam *beam = glow->link.beam;
 
     beam->link.glow = NULL;
 }
@@ -781,7 +781,7 @@ void func_150F03BC(LightEffect *flash) {
 
 /* Clears the beam's reference to this flash. */
 void func_150F03E8(LightEffect *flash) {
-    Beam *beam = flash->data.object;
+    AimedBeam *beam = flash->data.object;
 
     beam->link.flash = NULL;
 }

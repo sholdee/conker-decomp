@@ -18,17 +18,18 @@ typedef struct {
     /* 0x59C */ f32 fadeScale;          // 1 / (fadeEnd - fadeStart)
     /* 0x5A0 */ f32 fadeMax;            // wave amplitude, as a fraction of width
     /* 0x5A4 */ u8 unk5A4[4];
-} BeamData; // size 0x5A8
+} WavyBeamData; // size 0x5A8
 
+/* The wavy beam effect (func_151B5240). */
 typedef struct {
     /* 0x00 */ TimedEffect base;
-    /* 0x28 */ BeamData data;
-} BeamEffect;
+    /* 0x28 */ WavyBeamData data;
+} WavyBeamEffect;
 
 /* Spawns a beam effect between actors 0x17 and 0x16. */
-BeamEffect *func_151B5240(s16 duration, u8 arg1, s32 arg2) {
-    BeamEffect *effect;
-    BeamData data;
+WavyBeamEffect *func_151B5240(s16 duration, u8 arg1, s32 arg2) {
+    WavyBeamEffect *effect;
+    WavyBeamData data;
 
     data.firstId = 0x17;
     data.secondId = 0x16;
@@ -40,7 +41,7 @@ BeamEffect *func_151B5240(s16 duration, u8 arg1, s32 arg2) {
     data.fadeMax = 0.9f;
     data.fadeScale = 1.0f / data.fadeEnd;
 
-    effect = (BeamEffect *)func_15149130(duration, -1, -1, 1, 1, 0x15, sizeof(data), arg1, arg2);
+    effect = (WavyBeamEffect *)func_15149130(duration, -1, -1, 1, 1, 0x15, sizeof(data), arg1, arg2);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
@@ -69,8 +70,8 @@ static const f32 D_800AA40C[3] = { 0.0f, -5.0f, -7.0f };   // beam end, in secon
  * point on second's bone D_8008FB84, facing the eye of view viewIdx. Once the beam is longer than
  * fadeStart, its width ripples along a sine wave. Kills the effect when either actor is gone.
  */
-Gfx *func_151B5328(Gfx *gdl, BeamEffect *effect, s16 viewIdx) {
-    BeamData *data;
+Gfx *func_151B5328(Gfx *gdl, WavyBeamEffect *effect, s16 viewIdx) {
+    WavyBeamData *data;
     u8 failed;
     u8 flag;
     s32 i;
@@ -207,8 +208,8 @@ Gfx *func_151B5328(Gfx *gdl, BeamEffect *effect, s16 viewIdx) {
 }
 
 /* Effect message handler: follows actor slot swaps (message 0x2D) and dies with either actor (message 0). */
-void func_151B5A9C(BeamEffect *effect, void *msg, u8 type) {
-    BeamData *data = &effect->data;
+void func_151B5A9C(WavyBeamEffect *effect, void *msg, u8 type) {
+    WavyBeamData *data = &effect->data;
 
     if (type == 0x2D) {
         ActorSwapMsg *swap = msg;
