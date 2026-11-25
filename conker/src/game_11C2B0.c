@@ -1606,100 +1606,87 @@ typedef struct {
     u16 v[3];
 } Rates150F1A00;
 
+/* D_800CC298 is typed s32 in variables.h; this file sees it as a record of s16 angles. */
 typedef struct {
-    u8 pad0[0x14];
-    s16 unk14;
-} Timer150F1A00;
+    /* 0x00 */ u8 pad0[0x12];
+    /* 0x12 */ s16 tilt;
+    /* 0x14 */ s16 pulse;
+} Struct800CC298;
 
-typedef struct {
-    u8 pad0[0xF80];
-    f32 m[4][4];
-} Model150F1A00;
+#define D_800CC298_REC ((Struct800CC298 *)&D_800CC298)
 
-typedef struct {
-    u8 pad0[0x1D4];
-    Model150F1A00 *unk1D4;
-    u8 pad1D8[0x10C];
-    s32 unk2E4;
-} Actor150F1A00;
+typedef f32 MtxF[4][4];
 
 extern Rates150F1A00 D_80088B00;
-extern f32 D_800A18E8;
-extern f32 D_800A18EC;
-extern f32 D_800A18F0;
 f32 cosf(f32);
 
-void func_150F1A00(Actor150F1A00 *arg0) {
-    Model150F1A00 *model;
+/* Pulses the scale of bone matrix 62 of `actor`, faster as bit pairs of actor->unk2E4 are set. */
+void func_150F1A00(struct127 *actor) {
+    f32 (*mtx)[4];
     Rates150F1A00 rates;
     s32 idx;
-    Timer150F1A00 *timer;
+    Struct800CC298 *rec;
     u16 rate;
     f32 scale;
     s32 i;
     s32 j;
-    f32 *row;
 
     rates = D_80088B00;
     idx = 0;
-    if ((arg0->unk2E4 & 3) == 3) {
+    if ((actor->unk2E4 & 3) == 3) {
         idx = 1;
     }
-    if ((arg0->unk2E4 & 0xC) == 0xC) {
+    if ((actor->unk2E4 & 0xC) == 0xC) {
         idx = 2;
     }
     rate = rates.v[idx];
-    timer = (Timer150F1A00 *)&D_800CC298;
-    timer->unk14 += rate * D_800BE9E4;
-    scale = (((cosf(timer->unk14 * D_800A18E8) + 1.0f) * 0.5f) * D_800A18EC) + D_800A18F0;
-    model = arg0->unk1D4;
-    for (i = 0, row = model->m[0]; i < 3; i++, row += 4) {
+    rec = D_800CC298_REC;
+    rec->pulse += rate * D_800BE9E4;
+    scale = (((cosf(rec->pulse * 9.587380191e-05f) + 1.0f) * 0.5f) * 0.3500000238f) + 0.8999999762f;
+    mtx = ((MtxF *)actor->unk1D4)[62];
+    for (i = 0; i < 3; i++) {
         for (j = 0; j < 3; j++) {
-            row[j] *= scale;
+            mtx[i][j] *= scale;
         }
     }
 }
 
-typedef struct {
-    u8 pad0[0x12];
-    s16 unk12;
-} Tilt150F1B48;
+typedef struct GameCommand {
+    s16 opcode;
+    s16 value;
+} GameCommand;
 
-/* D_800CC298 is typed s32 in variables.h; this function sees it as a tilt record. */
-#define TILT ((Tilt150F1B48 *)&D_800CC298)
-
-extern f32 D_800A18F4;
-extern f32 D_800A18F8;
-
-s16 *func_150F1B48(s16 *arg0, s32 arg1) {
+/* Eases D_800CC298's tilt toward its lower limit while actor `index` is in state 0x21 and toward
+ * its upper limit otherwise, then emits it as commands 0xB2, 0xB8, ... 0xD0 at `cmd`. */
+GameCommand *func_150F1B48(GameCommand *cmd, s32 index) {
     s32 down;
     s32 step;
-    s32 v;
+    s32 tilt;
     s32 i;
 
-    down = (D_800CC2D0[arg1].unk84.uh == 0x21) ? 1 : 0;
+    down = (D_800CC2D0[index].unk84.uh == 0x21) ? 1 : 0;
     step = D_800BE9E4 * 0x222;
     if (down) {
-        v = TILT->unk12 - step;
-        if (D_800A18F4 < v) {
-            TILT->unk12 = v;
+        tilt = D_800CC298_REC->tilt - step;
+        if (-6553.600098f < tilt) {
+            D_800CC298_REC->tilt = tilt;
         } else {
-            TILT->unk12 = -0x1999;
+            D_800CC298_REC->tilt = -0x1999;
         }
     } else {
-        v = TILT->unk12 + step;
-        if (v < D_800A18F8) {
-            TILT->unk12 = v;
+        tilt = D_800CC298_REC->tilt + step;
+        if (tilt < 5461.333496f) {
+            D_800CC298_REC->tilt = tilt;
         } else {
-            TILT->unk12 = 0x1555;
+            D_800CC298_REC->tilt = 0x1555;
         }
     }
     for (i = 0; i < 6; i++) {
-        *arg0++ = 0xB2 + i * 6;
-        *arg0++ = TILT->unk12;
+        cmd->opcode = 0xB2 + i * 6;
+        cmd->value = D_800CC298_REC->tilt;
+        cmd++;
     }
-    return arg0;
-
+    return cmd;
 }
 
 void func_150F1CB0(ActorStateFields *arg0) {
