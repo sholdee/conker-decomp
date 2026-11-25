@@ -1252,13 +1252,13 @@ typedef struct {
     f32 unk38;
     f32 unk3C;
     s32 hasLifetime;
-    u8 unk44;
+    u8 alpha;
     u8 unk45;
     u8 pad46[0x12];
 } Struct15136698Local;
 
 /* Spawns a blood particle of the given size with one of the four D_80089BAC textures. */
-s32 func_15136698(f32 size, f32 arg1, u8 arg2, u8 arg3, s16 lifetime, s32 arg5, Vec3f *arg6, u8 arg7, u8 arg8, u8 arg9, s32 arg10) {
+s32 func_15136698(f32 size, f32 arg1, u8 alpha, u8 arg3, s16 lifetime, s32 arg5, Vec3f *arg6, u8 arg7, u8 arg8, u8 arg9, s32 arg10) {
     s32 particle;
     Struct15136698Local desc;
     f32 extra;
@@ -1300,7 +1300,7 @@ s32 func_15136698(f32 size, f32 arg1, u8 arg2, u8 arg3, s16 lifetime, s32 arg5, 
         desc.lifetime = lifetime + 32;
         desc.hasLifetime = 1;
     }
-    desc.unk44 = arg2;
+    desc.alpha = alpha;
     desc.unk45 = arg3;
     if (arg8 != 0) {
         sp64 = 3;
@@ -1322,18 +1322,32 @@ s32 func_15136698(f32 size, f32 arg1, u8 arg2, u8 arg3, s16 lifetime, s32 arg5, 
 
 extern f32 D_800BE9A4;
 
-s32 func_151368A8(struct102 *arg0) {
-    s32 v0 = *(s16 *)((u8 *)arg0 + 0x1C);
-    f32 *v1 = (f32 *)((u8 *)arg0 + 0x128);
+/* The particle func_15136698 spawns; its desc is copied to +0x18 and `extra` to growth. */
+typedef struct {
+    u8 pad0[0x1C];
+    s16 timer;
+    u8 pad1E[0xE];
+    f32 width;
+    f32 height;
+    u8 pad34[0x28];
+    u8 alpha;
+    u8 pad5D[0xCB];
+    f32 growth;
+} GrowingBloodParticle;
 
-    if (v0 < 0x20) {
-        s32 sv = v0 << 3;
-        if (sv < *(u8 *)((u8 *)arg0 + 0x5C)) {
-            *(u8 *)((u8 *)arg0 + 0x5C) = sv;
+/* GrowingBloodParticle callback: fades out over the last 32 frames and grows by `growth`. */
+s32 func_151368A8(GrowingBloodParticle *particle) {
+    s32 timer = particle->timer;
+    f32 *growth = &particle->growth; // matching: IDO forms this address before the fade test
+
+    if (timer < 32) {
+        s32 alpha = timer << 3;
+        if (alpha < particle->alpha) {
+            particle->alpha = alpha;
         }
     }
-    *(f32 *)((u8 *)arg0 + 0x2C) += *v1 * D_800BE9A4;
-    *(f32 *)((u8 *)arg0 + 0x30) += *v1 * D_800BE9A4;
+    particle->width += *growth * D_800BE9A4;
+    particle->height += *growth * D_800BE9A4;
     return 1;
 }
 
@@ -1358,41 +1372,43 @@ struct LocalDef15136918 {
     s32 unk24;
 };
 
-void func_15136918(f32 arg0, u8 arg1, u8 arg2, s16 arg3, s16 arg4, s32 arg5, f32 *arg6, u8 arg7, s32 arg8) {
-    struct LocalDef15136918 tmp;
-    f64 spPad;
+/* Spawns a func_1513C73C particle (type 0xD) of the given size at position. */
+void func_15136918(f32 size, u8 arg1, u8 arg2, s16 lifetime, s16 arg4, s32 arg5, f32 *position, u8 arg7, s32 arg8) {
+    struct LocalDef15136918 desc;
+    f64 pad; // matching: an unused 8-byte stack slot
 
-    spPad = arg0;
-    tmp.unk6 = 0x55;
-    tmp.unk0 = 0x300;
-    tmp.unk8 = 0;
-    tmp.unkC = 0;
-    tmp.unk10 = arg1;
-    tmp.unk11 = arg2;
-    tmp.unk12 = 0;
-    tmp.unk13 = 0;
-    tmp.unk14 = 0;
-    tmp.unk15 = 0;
-    tmp.unk18 = 0x280001;
-    tmp.unk16 = 1;
-    tmp.unk17 = 1;
-    if (arg3 == -1) {
-        tmp.unk4 = 0x12C;
+    pad = size;
+    desc.unk6 = 0x55;
+    desc.unk0 = 0x300;
+    desc.unk8 = 0;
+    desc.unkC = 0;
+    desc.unk10 = arg1;
+    desc.unk11 = arg2;
+    desc.unk12 = 0;
+    desc.unk13 = 0;
+    desc.unk14 = 0;
+    desc.unk15 = 0;
+    desc.unk18 = 0x280001;
+    desc.unk16 = 1;
+    desc.unk17 = 1;
+    if (lifetime == -1) {
+        desc.unk4 = 300;
     } else {
-        tmp.unk0 = 0x301;
-        tmp.unk4 = arg3 + 0x20;
+        desc.unk0 = 0x301;
+        desc.unk4 = lifetime + 32;
     }
-    func_1513C73C((s32)&tmp, 0xD, 0, arg5, arg6[0], arg6[1], arg6[2], arg0, arg0, arg4, 0, 0, arg7, arg8);
+    func_1513C73C((s32)&desc, 0xD, 0, arg5, position[0], position[1], position[2], size, size, arg4, 0, 0, arg7, arg8);
 }
 
-s32 func_15136A1C(struct102 *arg0) {
-    s16 temp_v0 = arg0->unk1C;
-    s32 temp_v1;
+/* Particle callback: fades unk28 out over the last 32 frames. */
+s32 func_15136A1C(struct102 *effect) {
+    s16 timer = effect->unk1C;
+    s32 alpha;
 
-    if (temp_v0 < 0x20) {
-        temp_v1 = temp_v0 << 3;
-        if (temp_v1 < arg0->unk28) {
-            arg0->unk28 = temp_v1;
+    if (timer < 32) {
+        alpha = timer << 3;
+        if (alpha < effect->unk28) {
+            effect->unk28 = alpha;
         }
     }
     return 1;
@@ -1415,33 +1431,38 @@ void func_15136A50(f32 *x, f32 *y, f32 *z, s16 lifetime, s32 arg4, s32 arg5) {
     func_15134908(&desc, 0, arg4, arg5);
 }
 
-extern f32 D_800A4624;
-extern f32 D_800A4628;
-extern f32 D_800A462C;
 void func_151D9014(void *a0, void *a1, s32 a2, f32 a3, s32 sp10, s32 sp14,
                      f32 sp18, s32 sp1C, f32 sp20, f32 sp24, s32 sp28, s32 sp2C,
                      s32 sp30, s32 sp34, s32 sp38, s32 sp3C);
 
-void func_15136AE4(f32 a0, f32 a1, f32 a2, f32 a3, f32 a4, f32 a5, u8 *a6) {
-    f32 sp6C[3];
-    f32 sp60[3];
-    f32 r;
-    struct { f32 c; s32 a; u32 b; s32 pad; } sp4C;
+extern f32 D_800A4624; // matching: 0.001f as a literal grows the stack frame by 8
 
-    sp6C[0] = a0;
-    sp6C[1] = a1;
-    sp6C[2] = a2;
-    r = (func_150ADA68() * 112.0f + 247.0f) * D_800A4624;
-    sp60[0] = -a3 * r;
-    sp60[1] = -a4 * r;
-    sp60[2] = -a5 * r;
-    sp4C.c = func_150ADA68();
-    sp4C.a = func_150ADA20();
-    sp4C.b = func_150ADA20();
-    func_151D9014(sp6C, sp60, 0, sp4C.c * D_800A4628 + D_800A462C,
-                    (sp4C.a & 0xF) + 25, (sp4C.b % 101) + 155,
+/* Sprays blood from (x, y, z) against the direction (dirX, dirY, dirZ). */
+void func_15136AE4(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, u8 *arg6) {
+    f32 position[3];
+    f32 velocity[3];
+    f32 speed;
+    struct {
+        f32 size;
+        s32 random0;
+        u32 random1;
+        s32 pad;
+    } r; // matching: IDO places these three locals in this order on the stack
+
+    position[0] = x;
+    position[1] = y;
+    position[2] = z;
+    speed = (func_150ADA68() * 112.0f + 247.0f) * D_800A4624;
+    velocity[0] = -dirX * speed;
+    velocity[1] = -dirY * speed;
+    velocity[2] = -dirZ * speed;
+    r.size = func_150ADA68();
+    r.random0 = func_150ADA20();
+    r.random1 = func_150ADA20();
+    func_151D9014(position, velocity, 0, r.size * 0.2700000107f + -0.3100000024f,
+                    (r.random0 & 0xF) + 25, (r.random1 % 101) + 155,
                     func_150ADA68() * 119.0f + 129.0f, 0, 1.0f, 1.0f, 1, 0, 1, 0,
-                    a6[0xC], a6[1]);
+                    arg6[0xC], arg6[1]);
 }
 
 typedef struct Blood36C3CActor {
