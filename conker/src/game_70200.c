@@ -411,122 +411,131 @@ Gfx *func_15043384(Gfx *gfx) {
     return gfx;
 }
 
-void func_15043A00(struct105 *arg0, s32 arg1, s32 arg2) {
-    if (arg0 != 0) {
-        arg0->unk0 = arg1; // are these structs?
-        arg0->unk4 = arg2;
-        arg0->unkC = 0;
-        arg0->unk8 = 0;
+/*
+ * Ring buffer of length-prefixed messages (struct105):
+ *   unk0 = buffer, unk4 = capacity, unk8 = read offset, unkC = write offset.
+ */
+
+/** Initialise a ring buffer over `buffer` of `capacity` bytes. */
+void func_15043A00(struct105 *ring, s32 buffer, s32 capacity) {
+    if (ring != NULL) {
+        ring->unk0 = buffer;
+        ring->unk4 = capacity;
+        ring->unkC = 0;
+        ring->unk8 = 0;
     }
 }
 
-// something with memcpy
-s32 func_15043A20(u8 *arg0, s32 arg1, s32 arg2, u8 *arg3, s32 arg4) {
-    s32 n;
+/** Copy `size` bytes from `src` into the ring at `offset`, wrapping; returns the new offset. */
+s32 func_15043A20(u8 *buffer, s32 capacity, s32 offset, u8 *src, s32 size) {
+    s32 chunk;
 
-    while (arg4 != 0) {
-        if (arg1 < arg2 + arg4) {
-            n = arg1 - arg2;
+    while (size != 0) {
+        if (capacity < offset + size) {
+            chunk = capacity - offset;
         } else {
-            n = arg4;
+            chunk = size;
         }
-        memcpy(arg0 + arg2, arg3, n);
-        arg2 += n;
-        arg3 += n;
-        arg4 -= n;
-        if (arg2 < arg1) {
-        } else {
-            arg2 = 0;
+        memcpy(buffer + offset, src, chunk);
+        offset += chunk;
+        src += chunk;
+        size -= chunk;
+        if (offset >= capacity) {
+            offset = 0;
         }
     }
-    return arg2;
+    return offset;
 }
-s32 func_15043AC8(u8 *arg0, s32 arg1, s32 arg2, u8 *arg3, s32 arg4) {
-    s32 n;
 
-    while (arg4 != 0) {
-        if (arg1 < arg2 + arg4) {
-            n = arg1 - arg2;
+/** Copy `size` bytes out of the ring at `offset` into `dst`, wrapping; returns the new offset. */
+s32 func_15043AC8(u8 *buffer, s32 capacity, s32 offset, u8 *dst, s32 size) {
+    s32 chunk;
+
+    while (size != 0) {
+        if (capacity < offset + size) {
+            chunk = capacity - offset;
         } else {
-            n = arg4;
+            chunk = size;
         }
-        memcpy(arg3, arg0 + arg2, n);
-        arg2 += n;
-        arg3 += n;
-        arg4 -= n;
-        if (arg2 < arg1) {
-        } else {
-            arg2 = 0;
+        memcpy(dst, buffer + offset, chunk);
+        offset += chunk;
+        dst += chunk;
+        size -= chunk;
+        if (offset >= capacity) {
+            offset = 0;
         }
     }
-    return arg2;
+    return offset;
 }
 
-s32 func_15043B70(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
-    s32 n;
+/** Advance `offset` past `size` bytes of the ring, wrapping; returns the new offset. */
+s32 func_15043B70(u8 *buffer, s32 capacity, s32 offset, s32 size) {
+    s32 chunk;
 
-    while (arg3 != 0) {
-        if (arg1 < arg2 + arg3) {
-            n = arg1 - arg2;
+    while (size != 0) {
+        if (capacity < offset + size) {
+            chunk = capacity - offset;
         } else {
-            n = arg3;
+            chunk = size;
         }
-        arg2 += n;
-        arg3 -= n;
-        if (arg2 < arg1) {
-        } else {
-            arg2 = 0;
+        offset += chunk;
+        size -= chunk;
+        if (offset >= capacity) {
+            offset = 0;
         }
     }
-    return arg2;
+    return offset;
 }
-s32 func_15043BB8(struct105 *arg0, u8 *arg1, s32 arg2) {
-    s32 head;
-    s32 tail;
 
-    if (arg2 != 0) {
-        if (arg1 != 0) {
-            arg2 += 4;
-            arg2 = (arg2 + 3) & ~3;
-            tail = arg0->unkC;
-            head = arg0->unk8;
-            if (tail < head) {
-                if (tail + arg2 >= head) {
-                    return 1;
-                }
-            } else if ((tail + arg2) - arg0->unk4 >= head) {
+/** Push a `size`-byte message; returns 1 if it does not fit, 0 otherwise. */
+s32 func_15043BB8(struct105 *ring, u8 *message, s32 size) {
+    s32 writeOffset;
+    s32 readOffset;
+
+    if (size != 0 && message != NULL) {
+        size += 4;
+        size = (size + 3) & ~3;
+        writeOffset = ring->unkC;
+        readOffset = ring->unk8;
+        if (writeOffset < readOffset) {
+            if (writeOffset + size >= readOffset) {
                 return 1;
             }
-            arg2 -= 4;
-            arg0->unkC = func_15043A20((u8 *)arg0->unk0, arg0->unk4, func_15043A20((u8 *)arg0->unk0, arg0->unk4, tail, (u8 *)&arg2, 4), arg1, arg2);
+        } else if (writeOffset + size - ring->unk4 >= readOffset) {
+            return 1;
         }
+        size -= 4;
+        writeOffset = func_15043A20((u8 *)ring->unk0, ring->unk4, writeOffset, (u8 *)&size, 4);
+        ring->unkC = func_15043A20((u8 *)ring->unk0, ring->unk4, writeOffset, message, size);
     }
     return 0;
 }
 
-s32 func_15043B70(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
+/**
+ * Pop the next message into `dst` (at most `dstSize` bytes; a longer message is truncated and
+ * NUL-terminated). Returns the message's stored size, or 0 if the ring is empty.
+ */
+s32 func_15043CA4(struct105 *ring, u8 *dst, s32 dstSize) {
+    s32 size; // matching: the length is compared from a register copy, not reloaded
+    s32 messageSize;
+    s32 readOffset;
+    s32 offset;
 
-s32 func_15043CA4(struct105 *arg0, u8 *arg1, s32 arg2) {
-    s32 v1;
-    s32 sp30;
-    s32 head;
-    s32 ret;
-
-    sp30 = 0;
-    head = arg0->unk8;
-    if (head == arg0->unkC) {
+    messageSize = 0;
+    readOffset = ring->unk8;
+    if (readOffset == ring->unkC) {
         return 0;
     }
-    ret = func_15043AC8((u8 *)arg0->unk0, arg0->unk4, head, (u8 *)&sp30, 4);
-    v1 = sp30;
-    if (arg2 < v1) {
-        arg2 -= 1;
-        ret = func_15043AC8((u8 *)arg0->unk0, arg0->unk4, ret, arg1, arg2);
-        arg1[arg2] = 0;
-        ret = func_15043B70((u8 *)arg0->unk0, arg0->unk4, ret, sp30 - arg2);
-    } else if (v1 != 0) {
-        ret = func_15043AC8((u8 *)arg0->unk0, arg0->unk4, ret, arg1, sp30);
+    offset = func_15043AC8((u8 *)ring->unk0, ring->unk4, readOffset, (u8 *)&messageSize, 4);
+    size = messageSize;
+    if (dstSize < size) {
+        dstSize -= 1;
+        offset = func_15043AC8((u8 *)ring->unk0, ring->unk4, offset, dst, dstSize);
+        dst[dstSize] = 0;
+        offset = func_15043B70((u8 *)ring->unk0, ring->unk4, offset, messageSize - dstSize);
+    } else if (size != 0) {
+        offset = func_15043AC8((u8 *)ring->unk0, ring->unk4, offset, dst, messageSize);
     }
-    arg0->unk8 = ret;
-    return sp30;
+    ring->unk8 = offset;
+    return messageSize;
 }
