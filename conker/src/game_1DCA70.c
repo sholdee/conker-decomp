@@ -8,7 +8,6 @@
 extern f32 D_800AA0F0[];
 extern f32 D_800AA0FC[];
 
-
 /* Growth applied by func_151AFC08, stored in the spray particle at 0x128. */
 typedef struct {
     /* 0x00 */ s16 growEndTimer; // grows while desc.life is above this
@@ -128,7 +127,10 @@ SprayParticle *func_1513D668(SprayDesc *desc, SprayColor *colors, u8 updateFn1, 
                              u8 flip, s16 angle, f32 width, f32 height, s32 arg9, f32 *argA, u8 argB,
                              s32 motionSize, u8 argD, s32 argE);
 
-/* Spawns a spray particle and a puff at the emission point on the actor's `side`. */
+/*
+ * Spawns a spray particle on the ground below the emission point on the actor's `side`, plus a
+ * func_1514C678 puff there. The colour is tinted by func_150CCD90 when D_800BE9F0 is 20.
+ */
 void func_151AF6D4(struct127 *actor, s32 side, s32 arg2) {
     f32 pos[3];
     GroundHit ground;
@@ -276,7 +278,7 @@ typedef struct {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ s32 unk4;
     /* 0x08 */ s16 unk8;
-    /* 0x0A */ s16 life;
+    /* 0x0A */ s16 unkA;
     /* 0x0C */ s32 unkC;
     /* 0x10 */ s32 unk10;
     /* 0x14 */ u8 unk14;
@@ -336,7 +338,7 @@ s32 func_151AFC88(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     desc.unk8 = 0xE03;
     desc.unk0 = 0x200005;
     desc.unk4 = 0;
-    desc.life = (func_150ADA20() & 0xF) + 25;
+    desc.unkA = (func_150ADA20() & 0xF) + 25;
     desc.unkC = 0;
     desc.unk10 = 0;
     desc.unk18 = 0xB0;
