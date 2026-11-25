@@ -368,6 +368,12 @@ typedef struct CamView {
 
 #define CAM_VIEWS ((CamView *)D_800BE628)
 
+/* variables.h declares D_800BE728 as s32[]; it holds a pointer to the per-controller OSContPad pointers. */
+#define CONT_PADS (*(OSContPad ***)&D_800BE728)
+
+/* struct127 has only pad134 over this byte. */
+#define PLAYER_UNK137(obj) (((u8 *)(obj))[0x137])
+
 /* The functions keep the struct108 * signature callers use; CAM views that `camera` parameter
    through the full layout (an inline cast: a Camera * local would cost IDO a stack slot). */
 #define CAM ((Camera *)camera)
@@ -567,104 +573,102 @@ void func_151284C4(struct108 *arg0);
 s32 func_15128540(struct108 *arg0);
 void func_151287E0(struct108 *arg0, f32 *arg1, f32 *arg2);
 
-void func_15122C5C(struct108 *arg0) {
-    V3_15122C5C *temp_a0;
-    V3_15122C5C *temp_a1;
-    struct127 *temp_v0;
-    s16 temp_v1;
-    u8 idx;
-    f32 var_f0;
+void func_15122C5C(struct108 *camera) {
+    CamVec3f *target;
+    CamVec3f *eye;
+    u8 index;
+    f32 fov;
 
-    if (arg0->unk23C) {
-        *(V3_15122C5C *)&arg0->unk2E0 = *(V3_15122C5C *)&arg0->unk2BC;
-        *(V3_15122C5C *)&arg0->unk2EC = *(V3_15122C5C *)&arg0->unk2F8;
+    if (CAM->snap) {
+        CAM->savedTarget = CAM->target;
+        CAM->savedEye = CAM->eye;
     }
-    temp_v0 = arg0->unk3D4;
-    temp_a0 = (V3_15122C5C *)&arg0->unk2BC;
-    temp_a1 = (V3_15122C5C *)&arg0->unk2F8;
-    if ((arg0->unk3D4 != NULL) && (arg0->unk73C != 3) && ((arg0->unk2C != 0x100) || (arg0->unk73C != 0))) {
-            arg0->unk23E = *(u8 *)&arg0->unk3D4->unk78;
+    target = &CAM->target;
+    eye = &CAM->eye;
+    if ((CAM->playerExt != NULL) && (CAM->unk73C != 3) && ((CAM->mode != 0x100) || (CAM->unk73C != 0))) {
+        CAM->zone = CAM->playerExt->cameraZone;
     }
-    if (D_800DBFF4[arg0->unk23D] != 4) {
-        arg0->unk5F0 &= ~4;
+    if (D_800DBFF4[CAM->playerIndex] != 4) {
+        CAM->status &= ~4;
     }
-    if (!(arg0->unk2C & 0x400000)) {
-        *temp_a0 = *(V3_15122C5C *)&arg0->unk2E0;
-        *temp_a1 = *(V3_15122C5C *)&arg0->unk2EC;
+    if (!(CAM->mode & 0x400000)) {
+        *target = CAM->savedTarget;
+        *eye = CAM->savedEye;
     }
-    idx = arg0->unk23D;
-    arg0->unk36C = (*(u16 ***)&D_800BE728)[idx];
-    arg0->unk36A = D_800BE710[idx];
-    *(V3_15122C5C *)&arg0->unk304 = *temp_a1;
-    arg0->unk358 = arg0->unk35C;
-    *(V3_15122C5C *)&arg0->unk2C8 = *temp_a0;
-    if (arg0->unk23C != 0) {
-        arg0->unk19C = arg0->unk1A4;
-        arg0->unk1A0 = arg0->unk1A8;
+    index = CAM->playerIndex;
+    CAM->contPad = CONT_PADS[index];
+    CAM->buttonsPressed = D_800BE710[index];
+    CAM->prevEye = *eye;
+    CAM->unk358 = CAM->unk35C;
+    CAM->prevTarget = *target;
+    if (CAM->snap != 0) {
+        CAM->unk19C = CAM->unk1A4;
+        CAM->unk1A0 = CAM->unk1A8;
     } else {
-        arg0->unk19C += (arg0->unk1A4 - arg0->unk19C) * 0.10000000149011612f;
-        arg0->unk1A0 += (arg0->unk1A8 - arg0->unk1A0) * 0.10000000149011612f;
+        CAM->unk19C += (CAM->unk1A4 - CAM->unk19C) * 0.1f;
+        CAM->unk1A0 += (CAM->unk1A8 - CAM->unk1A0) * 0.1f;
     }
-    if (arg0->unk2C & 0x100) {
-        var_f0 = 16.0f;
+    if (CAM->mode & 0x100) {
+        fov = 16.0f;
     } else {
-        var_f0 = 0.0f;
+        fov = 0.0f;
     }
-    func_1510B128(idx = arg0->unk23D, arg0->unk19C, arg0->unk1A0, *(f32 *)((*(u8 **)&D_800BE628) + idx * 0x180 + 0x84), var_f0);
-    func_15097798(arg0->unk23D);
-    func_15125A6C(arg0);
-    func_15128CB0(arg0);
-    func_15125DB4(arg0);
-    if ((arg0->unk3D4->unk120 != 0) && (arg0->unk3D4->unk197 != 0)) {
-        func_15127EB8(arg0);
+    // matching: the playerIndex reload is assigned inside the call (a separate statement reorders it)
+    func_1510B128(index = CAM->playerIndex, CAM->unk19C, CAM->unk1A0, CAM_VIEWS[index].unk84, fov);
+    func_15097798(CAM->playerIndex);
+    func_15125A6C(camera);
+    func_15128CB0(camera);
+    func_15125DB4(camera);
+    if ((CAM->playerExt->unk120 != 0) && (CAM->playerExt->aimState != 0)) {
+        func_15127EB8(camera);
     }
-    if (func_15128540(arg0) == 0) {
-        if ((arg0->unk84 & 0x08000000) && !(arg0->unk84 & 0x400)) {
-            func_1512E8E0(arg0);
+    if (func_15128540(camera) == 0) {
+        if ((CAM->unk84 & 0x08000000) && !(CAM->unk84 & 0x400)) {
+            func_1512E8E0(camera);
         }
-        func_15130230(arg0, D_800BE9F0);
-        func_15126138(arg0);
-        func_15125C40(arg0);
-        func_15128680(arg0);
-        func_1512317C(arg0);
-        func_15125394(arg0);
-        if (!(arg0->unk84 & 0x08000000) && !(arg0->unk84 & 0x400)) {
-            func_1512E8E0(arg0);
+        func_15130230(camera, D_800BE9F0);
+        func_15126138(camera);
+        func_15125C40(camera);
+        func_15128680(camera);
+        func_1512317C(camera);
+        func_15125394(camera);
+        if (!(CAM->unk84 & 0x08000000) && !(CAM->unk84 & 0x400)) {
+            func_1512E8E0(camera);
         }
-        func_15123568(arg0);
-        func_1512C200(arg0);
-        func_15125924(arg0);
-        func_151283B8(arg0);
-        if (arg0->unk23C != 0) {
-            func_15125594(arg0);
-            func_15123070(arg0);
-            func_151283B8(arg0);
-            func_151283B8(arg0);
+        func_15123568(camera);
+        func_1512C200(camera);
+        func_15125924(camera);
+        func_151283B8(camera);
+        if (CAM->snap != 0) {
+            func_15125594(camera);
+            func_15123070(camera);
+            func_151283B8(camera);
+            func_151283B8(camera);
         }
-        func_15123508(arg0);
-        if ((arg0->unk84 & 2) && (arg0->unk3D4->unk120 == 0)) {
-            func_1512D390(arg0);
+        func_15123508(camera);
+        if ((CAM->unk84 & 2) && (CAM->playerExt->unk120 == 0)) {
+            func_1512D390(camera);
         }
-        func_15125594(arg0);
-        func_151256BC(arg0);
-        func_1512D980(arg0);
-        func_1512C068(arg0);
-        func_1512B100(arg0);
-        func_1512C20C(arg0);
-        func_1512BB10(arg0);
-        if (arg0->unk23C != 0) {
-            func_1512C068(arg0);
-            func_1512B100(arg0);
-            func_1512C20C(arg0);
-            func_1512BB10(arg0);
+        func_15125594(camera);
+        func_151256BC(camera);
+        func_1512D980(camera);
+        func_1512C068(camera);
+        func_1512B100(camera);
+        func_1512C20C(camera);
+        func_1512BB10(camera);
+        if (CAM->snap != 0) {
+            func_1512C068(camera);
+            func_1512B100(camera);
+            func_1512C20C(camera);
+            func_1512BB10(camera);
         }
-        func_15125594(arg0);
-        func_15123070(arg0);
-        if (arg0->unk7F4 == 0) {
-            func_151287E0(arg0, 0, 0);
+        func_15125594(camera);
+        func_15123070(camera);
+        if (CAM->transition.state == 0) {
+            func_151287E0(camera, NULL, NULL);
         }
-        func_1512C150(arg0);
-        func_151284C4(arg0);
+        func_1512C150(camera);
+        func_151284C4(camera);
     }
 }
 // NON-MATCHING: 80% there
@@ -811,66 +815,64 @@ void func_1511FC60(struct108 *arg0);
 void func_150495B0(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
 s32 func_15125490(struct108 *arg0);
 
-void func_1512317C(struct108 *arg0) {
-    s32 cond1;
-    s32 bit100;
-    s32 bit200;
-    s32 flag;
+/* Whether the R-trigger camera is allowed this frame; pressing R then pushes mode 0x100 (slot 1). */
+void func_1512317C(struct108 *camera) {
+    s32 stunned;
+    s32 status100;
+    s32 status200;
+    s32 blocked;
 
-    bit100 = arg0->unk5F0 & 0x100;
-    bit200 = arg0->unk5F0 & 0x200;
-    cond1 = (arg0->unk3D0->stunned != 0) && (arg0->unk23E != 9) && (arg0->unk23E != 0x38) &&
-            (arg0->unk23E != 0x39) && (arg0->unk23E != 0x3B) && (arg0->unk23E != 0x37) &&
-            (arg0->unk23E != 0x15) && (arg0->unk23E != 0x26) && (arg0->unk23E != 0x3A);
+    status100 = CAM->status & 0x100;
+    status200 = CAM->status & 0x200;
+    stunned = (CAM->player->stunned != 0) && (CAM->zone != 9) && (CAM->zone != 0x38) &&
+              (CAM->zone != 0x39) && (CAM->zone != 0x3B) && (CAM->zone != 0x37) &&
+              (CAM->zone != 0x15) && (CAM->zone != 0x26) && (CAM->zone != 0x3A);
 
-    flag = ((arg0->unk2C & 0x80) != 0) ||
-           ((arg0->unk84 & 0x1000000) != 0) ||
-           ((arg0->unk3D0->unk28 != 0.0f) && (arg0->unk3D0->in_water == 0) &&
-            (arg0->unk3D4->unk9C == 0) && (bit100 == 0) && (bit200 == 0) &&
-            (arg0->unk23E != 3)) ||
-           ((arg0->unk3D0->unk65 != 0) && (bit100 == 0) && (bit200 == 0)) ||
-           (cond1 != 0) ||
-           (func_15125490(arg0) != 0) ||
-           (arg0->unk3D0->health == 0) ||
-           (((*(u8 *)((u8 *)arg0->unk3D4 + 0x4E) & 0xF) == 1) &&
-            (arg0->unk3D0->xz_velocity > 15.0f)) ||
-           (*(u8 *)((u8 *)arg0->unk3D4 + 0x1AC) != 0);
+    blocked = ((CAM->mode & 0x80) != 0) ||
+              ((CAM->unk84 & 0x1000000) != 0) ||
+              ((CAM->player->unk28 != 0.0f) && (CAM->player->in_water == 0) &&
+               (CAM->playerExt->unk9C == 0) && (status100 == 0) && (status200 == 0) &&
+               (CAM->zone != 3)) ||
+              ((CAM->player->unk65 != 0) && (status100 == 0) && (status200 == 0)) ||
+              (stunned != 0) ||
+              (func_15125490(camera) != 0) ||
+              (CAM->player->health == 0) ||
+              (((CAM->playerExt->unk4E & 0xF) == 1) && (CAM->player->xz_velocity > 15.0f)) ||
+              (CAM->playerExt->unk1AC != 0);
 
-    if (((*arg0->unk36C & 0x10) != 0) && (flag == 0)) {
-        if ((arg0->unk36A & 0x10) == 0) {
+    if ((CAM->contPad->button & R_TRIG) && !blocked) {
+        if (!(CAM->buttonsPressed & R_TRIG)) {
             return;
         }
-        if (func_15123934(arg0, 0x100, 4, arg0->unk134, 1) != 0) {
-            func_1511FC60(arg0);
+        if (func_15123934(camera, 0x100, 4, CAM->unk134, 1) != 0) {
+            func_1511FC60(camera);
         }
         return;
     }
 
-    if ((arg0->unk2C == 0x100) && (arg0->unk73C == 0)) {
-        func_151239CC(arg0, 1);
-        arg0->unk3D4->unk198 = 0;
-        arg0->unk3D4->unk197 = 0;
-        *(s16 *)((u8 *)arg0 + 0x5F8) = 1;
-        arg0->unk5FC = 2;
-        arg0->unk36A &= ~0x10;
-        *arg0->unk36C &= ~0x10;
+    if ((CAM->mode == 0x100) && (CAM->unk73C == 0)) {
+        func_151239CC(camera, 1);
+        CAM->playerExt->unk198 = 0;
+        CAM->playerExt->aimState = 0;
+        CAM->unk5F8 = 1;
+        CAM->unk5FC = 2;
+        CAM->buttonsPressed &= ~R_TRIG;
+        CAM->contPad->button &= ~R_TRIG;
     }
 
-    if ((arg0->unk2C == 0x100) || (arg0->unk73C != 0)) {
-        arg0->unk36A &= ~0x10;
-        *arg0->unk36C &= ~0x10;
+    if ((CAM->mode == 0x100) || (CAM->unk73C != 0)) {
+        CAM->buttonsPressed &= ~R_TRIG;
+        CAM->contPad->button &= ~R_TRIG;
     }
-    arg0->unk3D4->unk198 = arg0->unk73C;
+    CAM->playerExt->unk198 = CAM->unk73C;
 
-    if ((arg0->unk73C != 0) || (arg0->unk73C == 3)) {
-        func_150495B0((f32 *)((u8 *)arg0 + 0x74C), 0.0f, (f32 *)((u8 *)arg0 + 0x79C), 4.0f, 9.0f,
-                      arg0->unk7B4);
-        func_150495B0((f32 *)((u8 *)arg0 + 0x754), 0.0f, (f32 *)((u8 *)arg0 + 0x7A0), 4.0f, 9.0f,
-                      arg0->unk7B4);
+    if ((CAM->unk73C != 0) || (CAM->unk73C == 3)) {
+        func_150495B0(&CAM->unk74C, 0.0f, &CAM->unk79C, 4.0f, 9.0f, CAM->dt);
+        func_150495B0(&CAM->unk754, 0.0f, &CAM->unk7A0, 4.0f, 9.0f, CAM->dt);
     }
 
-    if ((arg0->unk2C != 0x100) && (arg0->unk73C != 0)) {
-        arg0->unk73C = 0;
+    if ((CAM->mode != 0x100) && (CAM->unk73C != 0)) {
+        CAM->unk73C = 0;
     }
 }
 
@@ -886,34 +888,36 @@ void func_15123508(struct108 *camera) {
     }
 }
 
-void func_15123568(struct108 *arg0) {
+/* C-up steps to the previous allowed distance preset (with a 20-frame cooldown). */
+void func_15123568(struct108 *camera) {
     s32 cycle;
 
-    if ((*((u8 *)arg0->unk3D4 + 0x120) == 4) && (arg0->unk2C != 0x40) && (*((u8 *)arg0 + 0x92C) == 0)) {
-        *(f32 *)((u8 *)arg0 + 0x7C0) = D_800A34D8;
-        arg0->unk1B4 = 1;
-        func_15124B18(arg0);
-        arg0->unk198 = 0.0f;
-        arg0->unk190 = 0.0f;
+    if ((CAM->playerExt->unk120 == 4) && (CAM->mode != 0x40) && (CAM->unk92C == 0)) {
+        CAM->unk7C0 = 999.0f;
+        CAM->preset = 1;
+        func_15124B18(camera);
+        CAM->unk198 = 0.0f;
+        CAM->unk190 = 0.0f;
         return;
     }
-    if (*(s32 *)((u8 *)arg0 + 0x7B8) > 0) {
-        *(s32 *)((u8 *)arg0 + 0x7B8) -= D_800BE9E4;
-        if (*(s32 *)((u8 *)arg0 + 0x7B8) < 0) {
-            *(s32 *)((u8 *)arg0 + 0x7B8) = 0;
+    if (CAM->presetCooldown > 0) {
+        CAM->presetCooldown -= D_800BE9E4;
+        if (CAM->presetCooldown < 0) {
+            CAM->presetCooldown = 0;
         }
-    } else if ((arg0->unk84 & 4) && (arg0->unk36A & 8) && (arg0->unkDC != 4) &&
-               ((arg0->unk6C8 == 0) || (arg0->unk6FC == 4U)) &&
-               ((arg0->unk3D0->in_water != 1) || (arg0->unk1B4 != 1))) {
-        cycle = arg0->unk1B4 != 1;
+    } else if ((CAM->unk84 & 4) && (CAM->buttonsPressed & U_CBUTTONS) && (CAM->unkDC != 4) &&
+               ((CAM->unk6C8 == 0) || (CAM->unk6FC == 4)) &&
+               ((CAM->player->in_water != 1) || (CAM->preset != 1))) {
+        // matching: the loop flag (not an if around for (;;)) keeps the constant 1 in a1
+        cycle = CAM->preset != 1;
         while (cycle) {
-            if (--arg0->unk1B4 <= 0) {
-                arg0->unk1B4 = 3;
+            if (--CAM->preset <= 0) {
+                CAM->preset = 3;
             }
-            if ((1 << arg0->unk1B4) & arg0->unk1E0) {
-                func_15124B18(arg0);
-                func_15125608(arg0);
-                *(s32 *)((u8 *)arg0 + 0x7B8) = 20;
+            if ((1 << CAM->preset) & CAM->presetMask) {
+                func_15124B18(camera);
+                func_15125608(camera);
+                CAM->presetCooldown = 20;
                 return;
             }
             cycle = TRUE;
@@ -921,61 +925,61 @@ void func_15123568(struct108 *arg0) {
     }
 }
 
-void func_151236D0(struct108 *arg0) {
-    s32 oldState;
+void func_151236D0(struct108 *camera) {
+    s32 wasBelow;
 
-    oldState = arg0->unk5F0 & 1;
-    if (arg0->unk3D4 != NULL) {
-        if ((arg0->unk3D4->unk9C != 0) ||
-            ((*((u8 *)arg0->unk3D4 + 0x95) != 0) && (*((u8 *)arg0->unk3D0 + 0x137) == 0))) {
-            arg0->unk5F0 |= 0x40;
+    wasBelow = CAM->status & 1;
+    if (CAM->playerExt != NULL) {
+        if ((CAM->playerExt->unk9C != 0) ||
+            ((CAM->playerExt->unk95 != 0) && (PLAYER_UNK137(CAM->player) == 0))) {
+            CAM->status |= 0x40;
         } else {
-            arg0->unk5F0 &= ~0x40;
+            CAM->status &= ~0x40;
         }
-        if (arg0->unk3D0->unk28 == 0.0f) {
-            arg0->unk5F0 &= ~0x400;
+        if (CAM->player->unk28 == 0.0f) {
+            CAM->status &= ~0x400;
         }
-        if ((*(s16 *)((u8 *)arg0->unk3D4 + 0x8) != 0) && (*((u8 *)arg0->unk3D4 + 0x16) == 0)) {
-            arg0->unk5F0 |= 8;
+        if ((CAM->playerExt->unk8 != 0) && (CAM->playerExt->unk16 == 0)) {
+            CAM->status |= 8;
         } else {
-            arg0->unk5F0 &= ~8;
+            CAM->status &= ~8;
         }
-        if (*((u8 *)arg0->unk3D4 + 0x4E) == 2) {
-            arg0->unk5F0 |= 0x80;
+        if (CAM->playerExt->unk4E == 2) {
+            CAM->status |= 0x80;
         } else {
-            arg0->unk5F0 &= ~0x80;
+            CAM->status &= ~0x80;
         }
     }
-    if ((arg0->unk2FC <= *(f32 *)((u8 *)arg0 + 0x360)) && (arg0->unk2C != 0x100)) {
-        arg0->unk5F0 |= 1;
+    if ((CAM->eye.y <= CAM->unk360) && (CAM->mode != 0x100)) {
+        CAM->status |= 1;
     } else {
-        arg0->unk5F0 &= ~1;
+        CAM->status &= ~1;
     }
-    if (arg0->unk23C != 0) {
-        if ((arg0->unk5F0 & 1) != 0) {
-            func_1515BA80(arg0->unk23D);
+    if (CAM->snap != 0) {
+        if (CAM->status & 1) {
+            func_1515BA80(CAM->playerIndex);
         } else {
-            func_1515BA48(arg0->unk23D);
-            *(f32 *)((u8 *)arg0 + 0x7B0) = 0.0f;
+            func_1515BA48(CAM->playerIndex);
+            CAM->unk7B0 = 0.0f;
         }
-    } else if ((oldState == 0) && ((arg0->unk5F0 & 1) != 0)) {
-        if (((arg0->unk5F0 & 4) != 0) || ((arg0->unk2C & 0x40000) != 0)) {
-            func_1515BA80(arg0->unk23D);
+    } else if (!wasBelow && (CAM->status & 1)) {
+        if ((CAM->status & 4) || (CAM->mode & 0x40000)) {
+            func_1515BA80(CAM->playerIndex);
         } else {
-            func_1515BAAC(arg0->unk23D);
+            func_1515BAAC(CAM->playerIndex);
         }
-    } else if ((oldState != 0) && ((arg0->unk5F0 & 1) == 0)) {
-        if (((arg0->unk5F0 & 4) != 0) || ((arg0->unk2C & 0x40000) != 0)) {
-            func_1515BA48(arg0->unk23D);
-            *(f32 *)((u8 *)arg0 + 0x7B0) = 0.0f;
+    } else if (wasBelow && !(CAM->status & 1)) {
+        if ((CAM->status & 4) || (CAM->mode & 0x40000)) {
+            func_1515BA48(CAM->playerIndex);
+            CAM->unk7B0 = 0.0f;
         } else {
-            func_1515BA54(arg0->unk23D);
-            func_15124B18(arg0);
+            func_1515BA54(CAM->playerIndex);
+            func_15124B18(camera);
         }
-    } else if ((arg0->unk5F0 & 1) != 0) {
-        func_1515BA1C(arg0->unk23D);
+    } else if (CAM->status & 1) {
+        func_1515BA1C(CAM->playerIndex);
     } else {
-        func_1515BA10(arg0->unk23D);
+        func_1515BA10(CAM->playerIndex);
     }
 }
 /* Saves the mode state in stack slot `slot` and switches to newMode. Returns 0 if the slot is taken. */
