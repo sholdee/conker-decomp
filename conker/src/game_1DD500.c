@@ -6,7 +6,6 @@
 #undef func_151D9B8C
 void func_151D9B8C(u8, f32, u8, void *, f32 *, s16, u8, u8, u8, u8, s32);
 #include "variables.h"
-#include "effects.h"
 
 /* One row of the per-actor-type effect profile table. */
 typedef struct Game1DD500Profile {

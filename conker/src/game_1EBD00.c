@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Extension block copied into the spawned effect at 0x120. */
 typedef struct {

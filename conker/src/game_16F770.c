@@ -9,7 +9,6 @@
 #undef func_15169040
 void func_15169040();
 #include "variables.h"
-#include "effects.h"
 
 /* Cached RDP state (prim/env colour, geometry and other modes, last texture) for func_15142B7C..func_15142FBC. */
 extern u8 D_8008A160[]; /* palettes of four RGB triples */

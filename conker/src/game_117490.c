@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 #include "libc/math.h"
 
 /* A sine oscillator: value = base + amplitude * sin(phase); phase advances by phaseStep per frame. */

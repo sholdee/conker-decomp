@@ -5,7 +5,6 @@
 #undef func_15152190
 #undef func_15153F18
 #include "variables.h"
-#include "effects.h"
 
 
 // matching: s32 where the definition has u32 (arg 4), u8 (arg 6)

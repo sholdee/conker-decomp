@@ -6,7 +6,6 @@
 #undef func_150ADA20
 u8 func_150ADA20(void);
 #include "variables.h"
-#include "effects.h"
 
 /* Integer world position chosen by func_150E41C0 as the centre of func_150E42F8's scatter. */
 extern Vec3s D_800D99F0;

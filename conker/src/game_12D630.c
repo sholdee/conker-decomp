@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Sends message 0x48 (func_151494E0) for `owner`; effects it owns destroy themselves on it. */
 void func_15100180(Actor *owner) {

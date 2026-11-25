@@ -3,7 +3,6 @@
  * included and declare the real ones below. */
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 extern s32 D_80090204[][2];
 

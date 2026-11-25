@@ -2,7 +2,6 @@
 
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 #include <libc/stddef.h>
 
 /* User data of the model spawned by func_1513BAE8. */

@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 #include "libc/string.h"
 
 /* Per-particle data of a beam attached to an actor's bone, stored at BoneBeamParticle.beam. */

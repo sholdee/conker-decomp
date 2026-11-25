@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 #include "libc/math.h"
 
 /* Motion state of a ground-hugging flash, kept at +0x18 of the object func_151602C0 returns. */

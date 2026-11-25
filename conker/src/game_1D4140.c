@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 
 extern void func_151D5334(Vec3f *, f32, f32, f32, s32, u8, s32);

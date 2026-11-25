@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* An object that can trigger a one-shot effect at its position. */
 struct Game1D3420Emitter {

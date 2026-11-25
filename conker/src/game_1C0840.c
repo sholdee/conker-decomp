@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /*
  * Spawns a QuadFx (animation 0x45, callback 15) at the emitter's position, resting on its floor height (or 200 units

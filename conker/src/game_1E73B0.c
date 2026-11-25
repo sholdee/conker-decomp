@@ -3,7 +3,6 @@
 #include "functions.h"
 #undef func_150E7FEC
 #include "variables.h"
-#include "effects.h"
 
 void func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 

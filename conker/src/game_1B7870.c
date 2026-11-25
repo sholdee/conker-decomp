@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 extern s32 D_8008D5B0[];
 extern s32 D_8008D5B8[];

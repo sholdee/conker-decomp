@@ -6,7 +6,6 @@
 #undef func_151D9B8C
 void func_151D9B8C(u8, f32, u8, void *, f32 *, s16, u8, u8, u8, u8, s32);
 #include "variables.h"
-#include "effects.h"
 
 void func_151DAB58(u8, f32, u8, f32 *, s32, u8, s32);
 

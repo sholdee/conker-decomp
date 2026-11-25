@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /*
  * A falling stream: a ring buffer of points that fall under gravity and, where they reach the

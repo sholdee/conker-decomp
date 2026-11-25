@@ -9,7 +9,6 @@ s32 func_151D710C(s32, s32, s32, s32, s32);
 #undef func_15150178
 #undef func_15153F18
 #include "variables.h"
-#include "effects.h"
 
 static const f32 D_800A1CC0[3] = { 0.0f, -8.0f, -85.0f };
 static const Vec3f D_800A1CCC = { 24.0f, -8.0f, -85.0f };

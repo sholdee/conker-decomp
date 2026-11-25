@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /*
  * Callbacks of the burst effect's sparks and glows (spawned by func_151BD828 in game_1E9A30.c), and the

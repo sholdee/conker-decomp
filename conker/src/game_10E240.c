@@ -6,7 +6,6 @@
 #undef func_1509BFB0
 s32 func_1509BFB0(s32 num, s32, s32, ...);
 #include "variables.h"
-#include "effects.h"
 
 /* What func_1510FD20 returns for an x/z position. */
 typedef struct {

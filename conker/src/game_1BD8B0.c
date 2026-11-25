@@ -1,6 +1,5 @@
 #include <ultra64.h>
 #include "functions.h"
-#include "effects.h"
 
 /* An effect bound to an actor. */
 struct BoundEffect {

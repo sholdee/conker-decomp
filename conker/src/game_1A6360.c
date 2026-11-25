@@ -7,7 +7,6 @@
 #undef func_150ADA20
 u8 func_150ADA20(void);
 #include "variables.h"
-#include "effects.h"
 
 #define RAIN_MAX_DROPS 300
 

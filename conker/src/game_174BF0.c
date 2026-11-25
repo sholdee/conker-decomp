@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 extern s32 func_1515D480(s32);
 extern s32 func_1515D440(void);

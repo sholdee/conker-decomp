@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 
 /* Per-object state of the projectile spawned by func_150F7470 (updated by func_150F78B4). */

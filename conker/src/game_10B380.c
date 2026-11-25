@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* The trap object func_1511BEBC passes to its trigger callback. */
 struct TrapTrigger {

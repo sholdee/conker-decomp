@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Data of an object that emits particles around an actor while that actor has bones. */
 typedef struct {

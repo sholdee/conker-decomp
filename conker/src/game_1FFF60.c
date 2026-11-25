@@ -2,7 +2,6 @@
 
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 
 /* Object type 0x3D: a point on one bone of an actor, re-transformed every frame. */

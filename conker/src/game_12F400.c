@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 extern void func_151D5D60(Vtx **buffers, s16 viewport, s32 size, Vtx **out, u8 *isNew);
 

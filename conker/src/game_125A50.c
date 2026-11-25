@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Read by game_3F1F0.c. */
 const u8 D_800A1C00[8][8] = {

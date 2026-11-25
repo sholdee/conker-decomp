@@ -6,7 +6,6 @@
 #undef func_150ADA20
 u8 func_150ADA20(void);
 #include "variables.h"
-#include "effects.h"
 
 /* Bone whose matrix places the effect points below. */
 extern u8 D_80088B94;

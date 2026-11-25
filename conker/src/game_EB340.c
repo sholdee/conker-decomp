@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Creates the spawner object for `owner`, with its spawn timer at 0. */
 void func_150BDE90(Camera *owner, u8 arg1, s32 arg2) {

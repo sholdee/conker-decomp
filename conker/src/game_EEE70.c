@@ -6,7 +6,6 @@
 #undef func_150ADA20
 u8 func_150ADA20(void);
 #include "variables.h"
-#include "effects.h"
 
 
 /* Gets the position of the actor's bone 0x18 (side 1) or 0x15 (side 2). */

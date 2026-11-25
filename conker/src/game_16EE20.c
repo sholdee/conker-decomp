@@ -5,7 +5,6 @@
 #include "functions.h"
 #undef func_150A2AEC
 #include "variables.h"
-#include "effects.h"
 
 struct Msg151419D0 {
     /* 0x00 */ s32 unk0;

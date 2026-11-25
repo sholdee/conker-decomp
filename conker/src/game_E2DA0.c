@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Effect instance whose per-type data (from 0x28) tracks a game object. */
 struct ObjBurstEffect {

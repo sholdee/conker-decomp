@@ -2,7 +2,6 @@
 // functions.h declares these two with other signatures; this file uses its own prototypes
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 typedef struct Struct1514F5CCArg {
     /* 0x00 */ s32 unk00;

@@ -5,7 +5,6 @@
 #include "functions.h"
 #undef func_15142314
 #include "variables.h"
-#include "effects.h"
 
 extern u8 func_151D8E20(void);
 

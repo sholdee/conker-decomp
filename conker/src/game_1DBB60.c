@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* ActorTask callback (see game_1D6E80.c; only the task's CharacterWatcher is read here): ground effect 5
  * under the task's actor, with sound 0x5208. */

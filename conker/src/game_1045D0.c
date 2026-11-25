@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Hit effects at pos plus a burst of debris particles. */
 void func_150D7120(Vec3f *pos, u8 fxOwner, s32 fxList) {

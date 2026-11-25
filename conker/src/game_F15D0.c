@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Data of the effect spawned by func_150C4120 (at +0x28 of the effect object). */
 typedef struct {

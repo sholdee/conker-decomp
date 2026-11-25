@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 
 /* The timer task func_151491F4 creates; func_150DBC60 is its tick callback. */

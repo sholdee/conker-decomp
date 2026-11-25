@@ -2,7 +2,6 @@
 #include "functions.h"
 // matching: callers here treat the random number as u32 (functions.h declares it u8)
 #include "variables.h"
-#include "effects.h"
 
 extern s32 D_800A2430;
 extern f32 D_800A2434;

@@ -2,7 +2,6 @@
 
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Updates flag bits in unk84 (0x4, 0x4000, 0x10000, 0x1000000) from func_1509BE40 queries; the first two
    checks are skipped when D_800D2E4C[0x4] bit 0x80 / unk1 bit 4 are set. */

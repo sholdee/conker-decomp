@@ -10,7 +10,6 @@
 #undef func_15171F04
 u8 func_150ADA20(void);
 #include "variables.h"
-#include "effects.h"
 
 
 

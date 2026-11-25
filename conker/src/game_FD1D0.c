@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Returns the end of the line at str: its 0xBD line break or the string's terminating 0. */
 u8 *func_150CFD20(u8 *str) {

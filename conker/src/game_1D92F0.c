@@ -3,7 +3,6 @@
 #include "functions.h"
 #undef func_1514C678
 #include "variables.h"
-#include "effects.h"
 
 /* Per-impact-type effect selection: indices into the tables below, -1 for none. */
 typedef struct {

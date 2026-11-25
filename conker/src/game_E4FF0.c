@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 extern f32 D_8009FD30[3];
 extern f32 D_8009FD3C[3];

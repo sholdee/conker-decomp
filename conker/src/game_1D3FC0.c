@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 void func_151A6B10(struct DefParticleHead *obj) {
     func_151A6AB8(obj);

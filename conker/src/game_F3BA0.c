@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /*
  * Two effects that character-watcher actions (D_8008AFD0) keep alive around a character:

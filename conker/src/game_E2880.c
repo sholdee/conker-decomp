@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Per-effect data (at 0x28) of the spark effect that follows an object. */
 typedef struct {

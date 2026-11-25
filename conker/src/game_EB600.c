@@ -7,7 +7,6 @@
 #undef func_15152190
 #undef func_15153F18
 #include "variables.h"
-#include "effects.h"
 
 extern void *func_1515548C(ScreenSpriteInfo *, s32, s32, s32, s32, u8, s32);
 

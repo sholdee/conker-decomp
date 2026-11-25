@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* One display-list command, with the opcode byte of its first word addressable. */
 typedef struct {
