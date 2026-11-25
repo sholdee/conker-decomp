@@ -94,15 +94,17 @@ typedef struct {
     /* 0x0E */ u8 padE[2];
 } GlyphSprite;
 
-extern u8 D_800CBD50; // control/icon code of the current character, 0xFF if none
-extern u8 D_800CBD57; // current primitive colour r, g, b, a (D_800CBD57-5A)
-extern u8 D_800CBD58;
+// text state: this file's .bss (0x800CBD50-0x800CBD5F), in the original order
+static u8 D_800CBD50; // control/icon code of the current character, 0xFF if none
+static u8 D_800CBD51, D_800CBD52, D_800CBD53, D_800CBD54, D_800CBD55, D_800CBD56; // not referenced by any code
+static u8 D_800CBD57; // current primitive colour r, g, b, a (D_800CBD57-5A)
+static u8 D_800CBD58;
 static u8 D_800CBD59;
 static u8 D_800CBD5A;
 static u8 D_800CBD5B; // flashing text on
-extern u8 D_800CBD5C; // flash phase
-extern u8 D_800CBD5D; // waving text on
-extern u8 D_800CBD5E; // wave phase
+static u8 D_800CBD5C; // flash phase
+static u8 D_800CBD5D; // waving text on
+static u8 D_800CBD5E; // wave phase
 extern u8 D_800915DC[];
 extern u8 D_800915EC[];
 extern u8 D_800915FC[];

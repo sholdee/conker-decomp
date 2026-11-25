@@ -14,6 +14,13 @@ void func_150B77A8(void);
 void func_150B768C(void);
 void func_150B791C(void);
 
+// This file's .bss (0x800D9890-0x800D98BF), in the original order. IDO places the variables that
+// a header declares after the ones the .c file declares first, so these are declared only here.
+u8 D_800D9890; // queued command for func_150B6BC0
+EffectHeader *D_800D9894;
+// matching: defined in-file so as1 shares one lui across the unrolled stores in func_150B6C90
+static EffectHeader *D_800D9898[10];
+
 /* Runs the command queued in D_800D9890 (each handler resets it to 3). */
 void func_150B6BC0(s32 unused) {
     switch (D_800D9890) {
@@ -48,8 +55,6 @@ void func_150B6BC0(s32 unused) {
     }
 }
 
-// matching: defined in-file so as1 shares one lui across the unrolled stores in func_150B6C90
-static EffectHeader *D_800D9898[10];
 struct Obj151A4FD0 *func_151A4FD0(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, u8 a6, s32 a7);
 
 /* Recreates the func_151A4FD0 effect and clears every sprite slot (without freeing the sprites). */

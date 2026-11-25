@@ -1115,11 +1115,9 @@ extern u16 D_800D3830[]; // second grid-query triangle index buffer
 extern s32 D_800D3840;
 extern s32 D_800D3858;
 
-extern EffectHeader *D_800D9894;
 extern EffectHeader *D_800D98D0[4];
 extern s32 D_800D98E0;
 extern u8  D_800D987C;
-extern u8  D_800D9890;
 
 extern u8 D_800D98F0;
 extern u8 D_800D9900;

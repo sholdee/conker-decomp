@@ -370,6 +370,7 @@ void func_150242F8(s32 mode, s32 scene) {
 #define FPTR(p, o) (*(void **) ((u8 *) (p) + (o)))
 
 extern s8 D_800E0BF4;
+extern u8 D_800D9890; // game_E4070.c
 extern s32 D_80090214[];
 
 extern void func_1501C730(s32, s32, s32, s32, s32);

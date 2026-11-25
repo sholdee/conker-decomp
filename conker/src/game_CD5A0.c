@@ -85,17 +85,9 @@ s32 func_150A02D0(s32 arg0, s32 arg1, Src150A0264 *arg2) {
     return 0;
 }
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-} D3014Struct;
-
-extern D3014Struct D_800D3014[];
-
 s32 func_150A0374(s32 arg0, s32 arg1, s32 arg2) {
     if (arg1 == 3) {
-        return D_800D3014[arg0].unk0;
+        return D_800D3010[arg0].unk4;
     }
     return 0;
 }
