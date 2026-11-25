@@ -66,9 +66,10 @@ typedef struct {
     struct127 *player;
 } Msg35;
 
-/* Sends message 0x35 (selection list for kinds 0xF7-0xF9) or 0x38 (kinds 0xF6) about the
- * first active player in this object's player mask. */
-void func_15104A80(struct131 *arg0) {
+/* Arrival callback of a level prop (D_800DBEF4 entry): finds the first active player in the prop's
+ * player mask and sends message 0x35 with a 9-entry list chosen by the prop's byte 0x72 (0xF7-0xF9),
+ * or message 0x38 for 0xF6. struct131 has no field at 0x72 yet, hence the byte reads. */
+void func_15104A80(struct131 *prop) {
     struct127 *player;
 
     player = NULL;
@@ -77,7 +78,7 @@ void func_15104A80(struct131 *arg0) {
         s32 i;
         struct127 *candidate;
 
-        i = arg0 - D_800DBEF4;
+        i = prop - D_800DBEF4;
         mask = D_800DBF94[i];
         if (mask != 0) {
             for (i = 0; i < 25 && player == NULL; i++) {
@@ -88,28 +89,28 @@ void func_15104A80(struct131 *arg0) {
             }
         }
     }
-    if (((u8 *)arg0)[0x72] == 0xF9 || ((u8 *)arg0)[0x72] == 0xF8 || ((u8 *)arg0)[0x72] == 0xF7) {
+    if (((u8 *)prop)[0x72] == 0xF9 || ((u8 *)prop)[0x72] == 0xF8 || ((u8 *)prop)[0x72] == 0xF7) {
         Msg35 msg;
 
         msg.player = player;
-        if (((u8 *)arg0)[0x72] == 0xF9) {
+        if (((u8 *)prop)[0x72] == 0xF9) {
             const u8 list[9] = { 0, 1, 2, 3, 4, 5, 15, 16, 17 };
 
             msg.count = 9;
             msg.list = list;
-        } else if (((u8 *)arg0)[0x72] == 0xF8) {
+        } else if (((u8 *)prop)[0x72] == 0xF8) {
             const u8 list[9] = { 6, 7, 8, 24, 25, 26, 18, 19, 20 };
 
             msg.count = 9;
             msg.list = list;
-        } else if (((u8 *)arg0)[0x72] == 0xF7) {
+        } else if (((u8 *)prop)[0x72] == 0xF7) {
             const u8 list[9] = { 9, 10, 11, 12, 13, 14, 21, 22, 23 };
 
             msg.count = 9;
             msg.list = list;
         }
         func_151494E0((s32)&msg, 0x35);
-    } else if (((u8 *)arg0)[0x72] == 0xF6) {
+    } else if (((u8 *)prop)[0x72] == 0xF6) {
         Msg35 msg;
 
         msg.player = player;
@@ -332,7 +333,7 @@ void func_151050B0(BoltArcObj *obj) {
     }
 }
 
-/* Message handler: 0x4B releases the object. */
+/* Message handler: 0x4B (sent when the bolt arcs stop) calls func_1516972C on the object. */
 void func_1510550C(struct102 *obj, s32 arg1, u8 msg) {
     if (msg == 0x4B) {
         func_1516972C(obj);
