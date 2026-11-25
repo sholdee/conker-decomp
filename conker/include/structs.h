@@ -2159,23 +2159,69 @@ typedef struct {
     s32 unk8;
 } struct177;
 
-/* A level placement record (trigger zones, gates, markers, light points): D_800D3098 points at the table. */
+/* Zone types: TriggerZone.kind >> 2. Original names (Oct 2000 debugger table); the US spawn table
+ * D_80082E30 has the same 26 entries, and the users agree (0 camera, 2 sound, 7 music channel, 8 warp,
+ * 17 glow particles, 24 local directional light). */
+enum ZoneType {
+    ZONE_TYPE_CAMERA,                  /* 0x00 */
+    ZONE_TYPE_CHAR_FLAGS,              /* 0x01 */
+    ZONE_TYPE_SOUND,                   /* 0x02 */
+    ZONE_TYPE_NEUTRAL,                 /* 0x03 */
+    ZONE_TYPE_MINI_SHAPE,              /* 0x04 */
+    ZONE_TYPE_BADDY_GROUP,             /* 0x05 */
+    ZONE_TYPE_REFLECTION,              /* 0x06 */
+    ZONE_TYPE_TUNE_CHANNEL,            /* 0x07 */
+    ZONE_TYPE_WARP,                    /* 0x08 */
+    ZONE_TYPE_LIGHT_SETUP,             /* 0x09 */
+    ZONE_TYPE_LIGHT_CONTROL,           /* 0x0A */
+    ZONE_TYPE_CONTEXT,                 /* 0x0B */
+    ZONE_TYPE_EFFECT,                  /* 0x0C */
+    ZONE_TYPE_CUTSCENE,                /* 0x0D */
+    ZONE_TYPE_TUNE,                    /* 0x0E */
+    ZONE_TYPE_LIGHT_AMBIENT_LOCAL,     /* 0x0F */
+    ZONE_TYPE_LIGHT_DIRECTIONAL,       /* 0x10 */
+    ZONE_TYPE_POINTGLOW,               /* 0x11 */
+    ZONE_TYPE_FIRE,                    /* 0x12 */
+    ZONE_TYPE_FLACK,                   /* 0x13 */
+    ZONE_TYPE_BULLET,                  /* 0x14 */
+    ZONE_TYPE_MISSILE,                 /* 0x15 */
+    ZONE_TYPE_DISCO_BALL,              /* 0x16 */
+    ZONE_TYPE_LASER_TUBE,              /* 0x17 */
+    ZONE_TYPE_LIGHT_DIRECTIONAL_LOCAL, /* 0x18 */
+    ZONE_TYPE_AUDIO_CONTROL,           /* 0x19 */
+    ZONE_TYPE_COUNT
+};
+
+/* Zone area types (original "zone area type"): TriggerZone.kind & 3. Names are ours, from the
+ * containment test func_150A1DA0. */
+enum ZoneAreaType {
+    ZONE_AREA_CYLINDER, /* xSize radius, ySize height above the base; tilted by pitch/yaw */
+    ZONE_AREA_SPHERE,   /* xSize radius */
+    ZONE_AREA_BOX,      /* half extents xSize/zSize, ySize height above the base */
+    ZONE_AREA_GATE      /* a rectangle the actor must cross from behind (xSize half width, ySize height) */
+};
+
+#define ZONE_TYPE(zone)      ((zone)->kind >> 2)
+#define ZONE_AREA_TYPE(zone) ((zone)->kind & 3)
+
+/* A level placement record (trigger zones, gates, markers, light points): D_800D3098 (original `zones`)
+ * points at the table. original: struct zone (rom_debug_struct.c) */
 typedef struct TriggerZone {
     /* 0x00 */ s16 x;
     /* 0x02 */ s16 y;
     /* 0x04 */ s16 z;
-    /* 0x06 */ s16 radius; // or the x extent
-    /* 0x08 */ s16 height; // or the y extent
-    /* 0x0A */ s16 depth;  // or the z extent
-    /* 0x0C */ f32 pitch;  // degrees
-    /* 0x10 */ f32 yaw;    // degrees
-    /* 0x14 */ u8  disabled;
-    /* 0x15 */ u8  kind;   // (type << 2) | shape
-    /* 0x16 */ u8  flags;  // bit 0: only triggers near the ground
-    /* 0x17 */ u8  subtype;
-    /* 0x18 */ u32 unk18;  // per-type parameter (a colour for light points)
-    /* 0x1C */ u32 unk1C;
-    /* 0x20 */ u32 unk20;
+    /* 0x06 */ s16 xSize;   // radius, or the x half extent
+    /* 0x08 */ s16 ySize;   // height
+    /* 0x0A */ s16 zSize;   // the z half extent
+    /* 0x0C */ f32 pitch;   // degrees
+    /* 0x10 */ f32 yaw;     // degrees
+    /* 0x14 */ u8  inactive;
+    /* 0x15 */ u8  kind;    // original "zone type" (bits 7-2, enum ZoneType) and "zone area type" (bits 1-0, enum ZoneAreaType)
+    /* 0x16 */ u8  flags;   // bit 0: only triggers near the ground
+    /* 0x17 */ u8  subTypeData;
+    /* 0x18 */ u32 data1;   // per-type parameters (a colour for light points)
+    /* 0x1C */ u32 data2;
+    /* 0x20 */ u32 data3;
     /* 0x24 */ f32 sinPitch;
     /* 0x28 */ f32 cosPitch;
     /* 0x2C */ f32 sinYaw;

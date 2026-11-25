@@ -28,7 +28,7 @@ void func_150EB430(Vec3f *start, Vec3f *delta, Vec3f *hit) {
  * a hit on one of the four D_80088AA0 cylinders disables it (func_150A2864(id, 1)), stores
  * which one (1-4) in the object's taskint[1] and plays func_150EBC80's effect at it; the eight
  * D_80088AB0 cylinders are only tested. Otherwise only cylinder 76 is tested, and a hit sets
- * its unk18. Returns TRUE when object 9 exists and the segment hit one of the twelve.
+ * its data1. Returns TRUE when object 9 exists and the segment hit one of the twelve.
  */
 s32 func_150EB484(Vec3f *start, Vec3f *end, Vec3f *hit) {
     s32 i;
@@ -54,7 +54,7 @@ s32 func_150EB484(Vec3f *start, Vec3f *end, Vec3f *hit) {
         return FALSE;
     }
     if (func_150A34B0(&D_800D3098[76], start, end, hit)) {
-        D_800D3098[76].unk18 = 1;
+        D_800D3098[76].data1 = 1;
     }
     return FALSE;
 }
@@ -251,7 +251,7 @@ void func_150EBC80(TriggerZone *gate, u8 owner, s32 kind) {
     position.x = gate->x;
     position.y = gate->y;
     position.z = gate->z;
-    step = gate->height * 0.5f;
+    step = gate->ySize * 0.5f;
     func_150E83AC(&position, func_150ADA20() % 101U + 300, owner, kind);
     event.flags = 1;
     event.duration = func_150ADA20() % 21U + 15;

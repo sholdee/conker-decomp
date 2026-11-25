@@ -3,8 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-#define OBJ_TYPE(obj) ((obj)->kind >> 2)
-#define OBJ_SHAPE(obj) ((obj)->kind & 3)
 
 extern void *allocate_memory(s32, s32, s32, s32);
 
@@ -49,7 +47,7 @@ void func_15017868(void) {
 
 void func_15017B20(TriggerZone *objects, s32 count);
 
-/* Loads the level's object table and builds the list of type-1 objects in modes 0, 2 and 6. */
+/* Loads the level's object table and builds the list D_800D3270 of the ZONE_TYPE_CHAR_FLAGS zones with subTypeData 0, 2 or 6. */
 void func_15017930(s32 arg0) {
     u32 i;
     u32 count;
@@ -62,13 +60,13 @@ void func_15017930(s32 arg0) {
     D_800D3274 = 0;
     D_800D3270 = NULL;
     for (i = 0; i < D_800D3094; i++) {
-        if (OBJ_TYPE(&D_800D3098[i]) == 1 &&
-            (D_800D3098[i].subtype == 2 || D_800D3098[i].subtype == 0 || D_800D3098[i].subtype == 6)) {
+        if (ZONE_TYPE(&D_800D3098[i]) == ZONE_TYPE_CHAR_FLAGS &&
+            (D_800D3098[i].subTypeData == 2 || D_800D3098[i].subTypeData == 0 || D_800D3098[i].subTypeData == 6)) {
             D_800D3274++;
         }
-        type = OBJ_TYPE(&D_800D3098[i]);
-        if (type == 2 || type == 7) {
-            D_800D3098[i].unk20 = 0;
+        type = ZONE_TYPE(&D_800D3098[i]);
+        if (type == ZONE_TYPE_SOUND || type == ZONE_TYPE_TUNE_CHANNEL) {
+            D_800D3098[i].data3 = 0;
         }
     }
     if (D_800D3274 != 0) {
@@ -77,8 +75,8 @@ void func_15017930(s32 arg0) {
             TriggerZone **out = D_800D3270;
 
             for (i = 0; i < D_800D3094; i++) {
-                if (OBJ_TYPE(&D_800D3098[i]) == 1 &&
-                    (D_800D3098[i].subtype == 2 || D_800D3098[i].subtype == 0 || D_800D3098[i].subtype == 6)) {
+                if (ZONE_TYPE(&D_800D3098[i]) == ZONE_TYPE_CHAR_FLAGS &&
+                    (D_800D3098[i].subTypeData == 2 || D_800D3098[i].subTypeData == 0 || D_800D3098[i].subTypeData == 6)) {
                     *out++ = &D_800D3098[i];
                 }
             }
@@ -116,7 +114,7 @@ void func_15017B20(TriggerZone *objects, s32 count) {
     }
     bzero(D_800D30A0, sizeof(D_800D30A0));
     for (i = 0; i < count; i++) {
-        if ((OBJ_SHAPE(&objects[i]) == 3) || (objects[i].flags & 8)) {
+        if ((ZONE_AREA_TYPE(&objects[i]) == ZONE_AREA_GATE) || (objects[i].flags & 8)) {
             if (!(objects[i].flags & 4)) {
                 D_800D30A0[i >> 6] |= (u64)1 << (i & 63);
             }
@@ -124,7 +122,7 @@ void func_15017B20(TriggerZone *objects, s32 count) {
     }
     bzero(D_800D30B8, sizeof(D_800D30B8));
     for (i = 0; i < count; i++) {
-        if (OBJ_SHAPE(&objects[i]) != 3) {
+        if (ZONE_AREA_TYPE(&objects[i]) != ZONE_AREA_GATE) {
             if (!(objects[i].flags & 8) && !(objects[i].flags & 4)) {
                 D_800D30B8[i >> 6] |= (u64)1 << (i & 63);
             }
@@ -184,24 +182,24 @@ void func_15017FA4(TriggerZone *obj, ZoneBounds *bounds) {
     f32 x, y, z;
 
     invalid = 0;
-    shape = OBJ_SHAPE(obj);
+    shape = ZONE_AREA_TYPE(obj);
     switch (shape) {
     default:
         invalid = 1;
         break;
-    case 0:
+    case ZONE_AREA_CYLINDER:
         func_150A7DA0(rotation, 0.0f, 1.0f, 0.0f);
-        func_150A7CB0(transform, obj->radius, obj->height * 0.5f, obj->radius);
+        func_150A7CB0(transform, obj->xSize, obj->ySize * 0.5f, obj->xSize);
         func_150A7A48(rotation, transform, transform);
         func_150A8050(rotation, obj->pitch, obj->yaw, 0.0f);
         func_150A7A48(transform, rotation, transform);
         break;
-    case 1:
-        func_150A7CB0(transform, obj->radius, obj->radius, obj->radius);
+    case ZONE_AREA_SPHERE:
+        func_150A7CB0(transform, obj->xSize, obj->xSize, obj->xSize);
         break;
-    case 2:
+    case ZONE_AREA_BOX:
         func_150A7DA0(rotation, 0.0f, 1.0f, 0.0f);
-        func_150A7CB0(transform, obj->radius, obj->height * 0.5f, obj->depth);
+        func_150A7CB0(transform, obj->xSize, obj->ySize * 0.5f, obj->zSize);
         func_150A7A48(rotation, transform, transform);
         func_150A8050(rotation, obj->pitch, obj->yaw, 0.0f);
         func_150A7A48(transform, rotation, transform);

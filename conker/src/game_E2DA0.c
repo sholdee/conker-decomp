@@ -292,8 +292,8 @@ void func_150B6110(BoltRingEffect *effect) {
 
     emitter = effect->data.emitter;
     prevState = effect->data.emitterState;
-    effect->data.emitterState = emitter->disabled;
-    if (emitter->disabled == 1) {
+    effect->data.emitterState = emitter->inactive;
+    if (emitter->inactive == 1) {
         if (effect->data.emitterState != prevState) {
             func_151494E0(0, 0x4A);
         }
@@ -325,15 +325,15 @@ void func_150B6110(BoltRingEffect *effect) {
         config.alphaBase = 0x7F;
         config.alphaRange = 0x80;
         spread = 0.4350000322f;
-        start.y = emitter->y + emitter->height;
-        end.y = emitter->y + emitter->height;
+        start.y = emitter->y + emitter->ySize;
+        end.y = emitter->y + emitter->ySize;
         do {
             angle = func_150ADA20();
-            func_1514373C((u32)angle, emitter->radius, &start.x, &start.z); // matching: (u32) selects IDO's unsigned int-to-float sequence
+            func_1514373C((u32)angle, emitter->xSize, &start.x, &start.z); // matching: (u32) selects IDO's unsigned int-to-float sequence
             start.x += emitter->x;
             start.z += emitter->z;
             angle += func_150ADA20() % 129 + 64;
-            func_1514373C((u32)angle, emitter->radius, &end.x, &end.z);
+            func_1514373C((u32)angle, emitter->xSize, &end.x, &end.z);
             end.x += emitter->x;
             end.z += emitter->z;
             func_15106F98(&start, &end, 4, &config, spread, 1, effect->owner, effect->kind);

@@ -1870,7 +1870,7 @@ void func_151993B4(CharacterFlamethrowerActor *actor) {
 /* unique_ids of the 6 characters that have a flamethrower zone (D_800E0900). */
 extern u8 D_800A8A9C[];
 
-/* Jet init callback (D_8008F87C): clears the owner's flamethrower zone's `disabled` flag. */
+/* Jet init callback (D_8008F87C): clears the owner's flamethrower zone's `inactive` flag. */
 void func_151993E4(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerJet *jet;
     Actor *owner;
@@ -1890,11 +1890,11 @@ void func_151993E4(CharacterFlamethrowerActor *actor) {
     } while (!found && i < 6);
 
     if (found) {
-        D_800E0900[i]->disabled = FALSE;
+        D_800E0900[i]->inactive = FALSE;
     }
 }
 
-/* Jet destroy callback (D_8008F88C): sets the owner's flamethrower zone's `disabled` flag again. */
+/* Jet destroy callback (D_8008F88C): sets the owner's flamethrower zone's `inactive` flag again. */
 void func_1519944C(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerJet *jet;
     Actor *owner;
@@ -1914,7 +1914,7 @@ void func_1519944C(CharacterFlamethrowerActor *actor) {
     } while (!found && i < 6);
 
     if (found) {
-        D_800E0900[i]->disabled = TRUE;
+        D_800E0900[i]->inactive = TRUE;
     }
 }
 
@@ -3087,7 +3087,7 @@ void func_1519BE1C(Vec3f *pos, Vec3f *vel, f32 gravity, f32 dt) {
     pos->z += v.z * dt;
 }
 
-/* Flame init callback (D_8008F8A4): clears the owner's flamethrower zone's `disabled` flag. */
+/* Flame init callback (D_8008F8A4): clears the owner's flamethrower zone's `inactive` flag. */
 void func_1519BEB8(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerFlame *flame;
     Actor *owner;
@@ -3107,11 +3107,11 @@ void func_1519BEB8(CharacterFlamethrowerActor *actor) {
     } while (!found && i < 6);
 
     if (found) {
-        D_800E0900[i]->disabled = FALSE;
+        D_800E0900[i]->inactive = FALSE;
     }
 }
 
-/* Flame destroy callback (D_8008F8B4): sets the owner's flamethrower zone's `disabled` flag again. */
+/* Flame destroy callback (D_8008F8B4): sets the owner's flamethrower zone's `inactive` flag again. */
 void func_1519BF20(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerFlame *flame;
     Actor *owner;
@@ -3131,7 +3131,7 @@ void func_1519BF20(CharacterFlamethrowerActor *actor) {
     } while (!found && i < 6);
 
     if (found) {
-        D_800E0900[i]->disabled = TRUE;
+        D_800E0900[i]->inactive = TRUE;
     }
 }
 

@@ -25,7 +25,7 @@ extern Game10CD70Indices D_80088984;
 s32 func_150DF8C0(s32 index) {
     Game10CD70Indices indices = D_80088984;
 
-    if (D_800D3098[indices.values[index]].disabled != 0) {
+    if (D_800D3098[indices.values[index]].inactive != 0) {
         return 1;
     }
     return 0;

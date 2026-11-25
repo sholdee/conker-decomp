@@ -1275,7 +1275,7 @@ void func_1504CB98(Actor *actor) {
                     if (actor->mv->unk96 != 0) {
                         climbInput = 60.0f;
                     }
-                    climbTop = (climb->y + climb->height);
+                    climbTop = (climb->y + climb->ySize);
                     animSpeed = (climbInput * 0.025f);
                     actor->unk1CC = actor->ypos;
                     if (actor->mv->unk97 != 0) {

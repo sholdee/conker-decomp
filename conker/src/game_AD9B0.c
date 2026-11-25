@@ -211,7 +211,7 @@ void func_15080C64(void) {
             D_800D2E60[8] |= 0x10;
         }
         if (D_800D199C != NULL) {
-            D_800D199C->disabled = TRUE;
+            D_800D199C->inactive = TRUE;
             D_800D199C = NULL;
         }
     }

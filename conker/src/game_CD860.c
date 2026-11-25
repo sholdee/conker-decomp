@@ -141,7 +141,7 @@ s32 func_150A04D8(s32 slot, s32 query, Msg_CD860 *msg) {
             return 0;
         }
     case 7:
-        return D_800D3098[slot].disabled;
+        return D_800D3098[slot].inactive;
     case 13:
         {
             s32 pad; // matching: unused stack slot; removing it shifts the frame layout
@@ -195,13 +195,13 @@ s32 func_150A04D8(s32 slot, s32 query, Msg_CD860 *msg) {
 
             which = msg->params[0];
             if (which == 0) {
-                return D_800D3098[slot].subtype;
+                return D_800D3098[slot].subTypeData;
             } else if (which == 1) {
-                return D_800D3098[slot].unk18;
+                return D_800D3098[slot].data1;
             } else if (which == 2) {
-                return D_800D3098[slot].unk1C;
+                return D_800D3098[slot].data2;
             } else if (which == 3) {
-                return D_800D3098[slot].unk20;
+                return D_800D3098[slot].data3;
             }
             break;
         }

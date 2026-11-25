@@ -60,7 +60,7 @@ void func_150FCBC0(u8 index) {
         return;
     }
     pos.x = area->x;
-    pos.y = area->y + area->height * 0.5f;
+    pos.y = area->y + area->ySize * 0.5f;
     pos.z = area->z;
     randFrac = func_150ADA68();
     func_151541B8(&pos, randFrac * 4.0f + 12.0f, 6.6943097f, (f32)(func_150ADA20() % 56U + 200), 2.6090002f, 0xFF, 1);
@@ -95,10 +95,10 @@ void func_150FCBC0(u8 index) {
             randInt = func_150ADA20();
             angle = range[0] + randInt % (range[1] + 1);
             desc.angles.yawBase = angle - 40;
-            func_15143874((s16)angle, area->radius, &desc.spray.pos.x, &desc.spray.pos.z);
+            func_15143874((s16)angle, area->xSize, &desc.spray.pos.x, &desc.spray.pos.z);
             desc.spray.pos.x += area->x;
             desc.spray.pos.z += area->z;
-            desc.spray.pos.y = func_150ADA68() * area->height + area->y;
+            desc.spray.pos.y = func_150ADA68() * area->ySize + area->y;
             func_1514FCE8(&desc, 0xFF, 1);
             count--;
         } while (count > 0);

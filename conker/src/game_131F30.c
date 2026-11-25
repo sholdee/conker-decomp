@@ -164,7 +164,7 @@ void func_15104C44(BoltRainObj *obj) {
 void func_15104FF8(BoltRainObj *obj, s32 arg1, u8 msg) {
     BoltRainState *state = &obj->state;
 
-    if (msg == 0x38 && state->region->disabled == 1) {
+    if (msg == 0x38 && state->region->inactive == 1) {
         state->timer = 300;
         // matching: the (s32) copy keeps IDO from sharing one register for region across the call
         func_1000FD38(func_1000EF40, (s32)state->region, 0);
@@ -204,10 +204,10 @@ void func_151050B0(BoltArcObj *obj) {
 
     state = &obj->state;
     if (state->timer < 0) {
-        state->region->disabled = 1;
+        state->region->inactive = 1;
         return;
     }
-    state->region->disabled = 0;
+    state->region->inactive = 0;
     state->timer -= D_800BE9E4;
     if (state->timer < 0) {
         func_151494E0(0, 0x39);
@@ -267,7 +267,7 @@ void func_1510550C(EffectHeader *obj, s32 arg1, u8 msg) {
 void func_15105548(BoltArcObj *obj, s32 *arg1, u8 msg) {
     BoltArcState *state = &obj->state;
 
-    if (msg == 0x38 && state->region->disabled == 1) {
+    if (msg == 0x38 && state->region->inactive == 1) {
         state->unk70 = *arg1;
         state->timer = 300;
     }

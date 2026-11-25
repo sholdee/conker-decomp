@@ -409,7 +409,7 @@ s32 func_1509F4E8(s32 first, s32 last, s32 volume, s32 index, u32 nearDistance) 
     s32 farDistance;
 
     point = &D_800D3098[index];
-    farDistance = point->radius;
+    farDistance = point->xSize;
     if (nearDistance >= farDistance) {
         nearDistance = farDistance - 1;
     }

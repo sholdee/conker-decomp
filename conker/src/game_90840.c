@@ -2509,7 +2509,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
             ok = 1;
             if (arg0->mv->cont_zone_ind != 0) {
                 angle = func_15048A70(D_800D3098[arg0->mv->cont_zone_ind].yaw, arg0->theta);
-                if ((D_800D3098[arg0->mv->cont_zone_ind].unk18 != 0) && ((angle < -90.0f) || (angle > 90.0f))) {
+                if ((D_800D3098[arg0->mv->cont_zone_ind].data1 != 0) && ((angle < -90.0f) || (angle > 90.0f))) {
                     ok = 0;
                 }
             }

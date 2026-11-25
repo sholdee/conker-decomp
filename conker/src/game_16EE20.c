@@ -780,14 +780,14 @@ void func_15143134(Vec3f *offset, f32 *out, Mtx *mtx) {
 
 /* Picks a random (x, z) in the region's footprint, with the region's top and bottom heights. */
 void func_151432BC(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
-    switch (region->kind & 3) {
+    switch (ZONE_AREA_TYPE(region)) {
     default:
         *x = region->x;
         *z = region->z;
-        *top = region->y + region->height;
-        *bottom = region->y - region->height;
+        *top = region->y + region->ySize;
+        *bottom = region->y - region->ySize;
         return;
-    case 2:
+    case ZONE_AREA_BOX:
         /* rotated box */
         {
             u8 angle;
@@ -799,15 +799,15 @@ void func_151432BC(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
             angle = region->yaw * (256.0f / 360.0f);
             sine = func_151423D8(angle - 0x40);
             cosine = func_151423D8(angle);
-            offsetX = func_150ADA68() * (2.0f * region->radius) + -region->radius;
-            offsetZ = func_150ADA68() * (2.0f * region->depth) + -region->depth;
+            offsetX = func_150ADA68() * (2.0f * region->xSize) + -region->xSize;
+            offsetZ = func_150ADA68() * (2.0f * region->zSize) + -region->zSize;
             *x = region->x + (offsetX * cosine + offsetZ * sine);
             *z = region->z + (offsetZ * cosine - offsetX * sine);
-            *top = region->y + region->height;
+            *top = region->y + region->ySize;
             *bottom = region->y;
         }
         return;
-    case 0:
+    case ZONE_AREA_CYLINDER:
         /* disc, from the base up */
         {
             u8 angle;
@@ -818,14 +818,14 @@ void func_151432BC(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
             angle = func_150ADA20() & 0xFF;
             sine = func_151423D8(angle - 0x40);
             cosine = func_151423D8(angle);
-            radius = func_150ADA68() * region->radius;
+            radius = func_150ADA68() * region->xSize;
             *x = region->x + radius * cosine;
             *z = region->z - radius * sine;
-            *top = region->y + region->height;
+            *top = region->y + region->ySize;
             *bottom = region->y;
         }
         return;
-    case 1:
+    case ZONE_AREA_SPHERE:
         /* disc, centred vertically */
         {
             u8 angle;
@@ -836,11 +836,11 @@ void func_151432BC(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
             angle = func_150ADA20() & 0xFF;
             sine = func_151423D8(angle - 0x40);
             cosine = func_151423D8(angle);
-            radius = func_150ADA68() * region->radius;
+            radius = func_150ADA68() * region->xSize;
             *x = region->x + radius * cosine;
             *z = region->z - radius * sine;
-            *top = region->y + region->height;
-            *bottom = region->y - region->height;
+            *top = region->y + region->ySize;
+            *bottom = region->y - region->ySize;
         }
         return;
     }
@@ -943,7 +943,7 @@ TriggerZone *func_151438D8(s32 start, s32 end, u16 fields, TriggerZone *key) {
             checked |= 1;
         }
         if (fields & 0x2) {
-            if ((key->radius == D_800D3098[i].radius) && (key->height == D_800D3098[i].height) && (key->depth == D_800D3098[i].depth)) {
+            if ((key->xSize == D_800D3098[i].xSize) && (key->ySize == D_800D3098[i].ySize) && (key->zSize == D_800D3098[i].zSize)) {
                 checked |= 0x2;
                 matched |= 0x2;
             }
@@ -967,7 +967,7 @@ TriggerZone *func_151438D8(s32 start, s32 end, u16 fields, TriggerZone *key) {
             checked |= 0x8;
         }
         if (fields & 0x10) {
-            if (key->disabled == D_800D3098[i].disabled) {
+            if (key->inactive == D_800D3098[i].inactive) {
                 checked |= 0x10;
                 matched |= 0x10;
             }
@@ -975,7 +975,7 @@ TriggerZone *func_151438D8(s32 start, s32 end, u16 fields, TriggerZone *key) {
             checked |= 0x10;
         }
         if (fields & 0x20) {
-            if (key->kind == (D_800D3098[i].kind >> 2)) {
+            if (key->kind == ZONE_TYPE(&D_800D3098[i])) {
                 checked |= 0x20;
                 matched |= 0x20;
             }
@@ -991,7 +991,7 @@ TriggerZone *func_151438D8(s32 start, s32 end, u16 fields, TriggerZone *key) {
             checked |= 0x40;
         }
         if (fields & 0x80) {
-            if (key->subtype == D_800D3098[i].subtype) {
+            if (key->subTypeData == D_800D3098[i].subTypeData) {
                 checked |= 0x80;
                 matched |= 0x80;
             }
@@ -999,7 +999,7 @@ TriggerZone *func_151438D8(s32 start, s32 end, u16 fields, TriggerZone *key) {
             checked |= 0x80;
         }
         if (fields & 0x100) {
-            if (key->unk18 == D_800D3098[i].unk18) {
+            if (key->data1 == D_800D3098[i].data1) {
                 checked |= 0x100;
                 matched |= 0x100;
             }
@@ -1007,7 +1007,7 @@ TriggerZone *func_151438D8(s32 start, s32 end, u16 fields, TriggerZone *key) {
             checked |= 0x100;
         }
         if (fields & 0x200) {
-            if (key->unk1C == D_800D3098[i].unk1C) {
+            if (key->data2 == D_800D3098[i].data2) {
                 checked |= 0x200;
                 matched |= 0x200;
             }
@@ -1015,7 +1015,7 @@ TriggerZone *func_151438D8(s32 start, s32 end, u16 fields, TriggerZone *key) {
             checked |= 0x200;
         }
         if (fields & 0x400) {
-            if (key->unk20 == D_800D3098[i].unk20) {
+            if (key->data3 == D_800D3098[i].data3) {
                 checked |= 0x400;
                 matched |= 0x400;
             }
@@ -1357,16 +1357,16 @@ f32 func_15144598(TriggerZone *region) {
     f32 area;
     s16 radius;
 
-    switch (region->kind & 3) {
+    switch (ZONE_AREA_TYPE(region)) {
     default:
         area = 1.0f;
         break;
-    case 2:
-        area = (f32)(region->radius * region->depth) * 4.0f;
+    case ZONE_AREA_BOX:
+        area = (f32)(region->xSize * region->zSize) * 4.0f;
         break;
-    case 0:
-    case 1:
-        radius = region->radius;
+    case ZONE_AREA_CYLINDER:
+    case ZONE_AREA_SPHERE:
+        radius = region->xSize;
         area = (f32)(radius * radius) * 3.1415927f;
         break;
     }
@@ -1379,18 +1379,18 @@ f32 func_1514462C(s32 arg0) {
     f32 volume;
     f32 radius;
 
-    switch (region->kind & 3) {
+    switch (ZONE_AREA_TYPE(region)) {
     default:
         volume = 1.0f;
         break;
-    case 2:
-        volume = (f32)(region->radius * region->height * region->depth);
+    case ZONE_AREA_BOX:
+        volume = (f32)(region->xSize * region->ySize * region->zSize);
         break;
-    case 0:
-        volume = (f32)(region->radius * region->radius) * 3.1415927f * (f32)region->height;
+    case ZONE_AREA_CYLINDER:
+        volume = (f32)(region->xSize * region->xSize) * 3.1415927f * (f32)region->ySize;
         break;
-    case 1:
-        radius = (f32)region->radius;
+    case ZONE_AREA_SPHERE:
+        radius = (f32)region->xSize;
         volume = ((radius * 1.0471976f) * radius) * radius;
         break;
     }
@@ -1408,21 +1408,21 @@ void func_1514470C(TriggerZone *region, f32 *out) {
     f32 cosYaw;
     s32 mode;
 
-    radiusX = region->radius;
-    height = region->height;
-    radiusZ = region->depth;
+    radiusX = region->xSize;
+    height = region->ySize;
+    radiusZ = region->zSize;
     sinPitch = region->sinPitch;
     cosPitch = region->cosPitch;
     sinYaw = region->sinYaw;
     cosYaw = region->cosYaw;
-    mode = region->kind & 3;
+    mode = ZONE_AREA_TYPE(region);
     switch (mode) {
     default:
         out[0] = region->x;
         out[1] = region->y;
         out[2] = region->z;
         return;
-    case 2:
+    case ZONE_AREA_BOX:
         {
             f32 y;
             f32 x;
@@ -1444,7 +1444,7 @@ void func_1514470C(TriggerZone *region, f32 *out) {
             out[2] = region->z + rotatedZ;
         }
         return;
-    case 0:
+    case ZONE_AREA_CYLINDER:
         {
             f32 y;
             f32 x;
@@ -1468,7 +1468,7 @@ void func_1514470C(TriggerZone *region, f32 *out) {
             out[2] = region->z + (mixed * cosYaw - savedX * sinYaw);
         }
         return;
-    case 1:
+    case ZONE_AREA_SPHERE:
         {
             Vec3f offset;
 

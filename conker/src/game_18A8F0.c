@@ -350,9 +350,9 @@ void func_1515E278(s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg5, s32 flags
 
     zone = func_1515EB84(x, y, z, mask, D_800DCD80);
     if (zone != NULL) {
-        color[0] = zone->unk18 & 0xFF;
-        color[1] = (zone->unk18 >> 8) & 0xFF;
-        color[2] = (zone->unk18 >> 16) & 0xFF;
+        color[0] = zone->data1 & 0xFF;
+        color[1] = (zone->data1 >> 8) & 0xFF;
+        color[2] = (zone->data1 >> 16) & 0xFF;
     } else {
         scale = 0x100 - ((arg5 >> 5) & 3) * 0x40;
         out = color;
@@ -385,14 +385,14 @@ void func_1515E43C(s32 x, s32 y, s32 z, s32 arg3, u8 *colorA, u8 *colorB, u8 *am
 
     zone = func_1515EB84(x, y, z, 0, D_800DCD84);
     if (zone != NULL) {
-        colorA[0] = zone->unk18 & 0xFF;
-        colorA[1] = (zone->unk18 >> 8) & 0xFF;
-        colorA[2] = (zone->unk18 >> 16) & 0xFF;
-        colorB[0] = zone->unk1C & 0xFF;
-        colorB[1] = (zone->unk1C >> 8) & 0xFF;
-        colorB[2] = (zone->unk1C >> 16) & 0xFF;
-        *amountA = (zone->unk1C >> 24) & 0xFF;
-        *amountB = (zone->unk18 >> 24) & 0xFF;
+        colorA[0] = zone->data1 & 0xFF;
+        colorA[1] = (zone->data1 >> 8) & 0xFF;
+        colorA[2] = (zone->data1 >> 16) & 0xFF;
+        colorB[0] = zone->data2 & 0xFF;
+        colorB[1] = (zone->data2 >> 8) & 0xFF;
+        colorB[2] = (zone->data2 >> 16) & 0xFF;
+        *amountA = (zone->data2 >> 24) & 0xFF;
+        *amountB = (zone->data1 >> 24) & 0xFF;
     } else {
         colorA[0] = D_800DCD24[0];
         colorA[1] = D_800DCD24[1];
@@ -518,8 +518,8 @@ TriggerZone *func_1515EB84(s32 x, s32 y, s32 z, s32 mask, ZoneLink *node) {
 
     for (; node != NULL; node = node->next) {
         zone = node->zone;
-        if (zone->disabled == 0 && (mask == 0 || ((zone->unk18 >> 24) & mask)) &&
-            ((zone->kind >> 2) == 0x18 || !(zone->unk18 >> 31)) && func_150A1DA0(&probe, zone, 0) == 0) {
+        if (zone->inactive == 0 && (mask == 0 || ((zone->data1 >> 24) & mask)) &&
+            (ZONE_TYPE(zone) == ZONE_TYPE_LIGHT_DIRECTIONAL_LOCAL || !(zone->data1 >> 31)) && func_150A1DA0(&probe, zone, 0) == 0) {
             return node->zone;
         }
     }
@@ -700,9 +700,9 @@ typedef void (*ZoneHandler)(Actor *obj, TriggerZone *zone);
 
 extern ZoneHandler D_8008B090[12];
 
-/* Runs zone handler zone->unk18 for `obj`. */
+/* Runs zone handler zone->data1 for `obj`. */
 void func_1515F270(Actor *obj, TriggerZone *zone) {
-    s32 idx = zone->unk18;
+    s32 idx = zone->data1;
 
     if (idx >= 0 && idx < 12) {
         if (D_8008B090[idx] != NULL) {
@@ -719,12 +719,12 @@ void func_1515F2B8(Actor *obj, TriggerZone *zone) {
 
 extern ZoneHandler D_8008B0C0[3];
 
-/* TriggerZone handler: when the player (unique id 1) is in the zone, runs ambient effect zone->unk1C. */
+/* TriggerZone handler: when the player (unique id 1) is in the zone, runs ambient effect zone->data2. */
 void func_1515F2E8(Actor *obj, TriggerZone *zone) {
     s32 idx;
 
     if (obj->unique_id == 1) {
-        idx = zone->unk1C;
+        idx = zone->data2;
         if (idx >= 0 && idx < 3) {
             D_8008B0C0[idx](obj, zone);
         }
@@ -816,7 +816,7 @@ void func_1515FB70(Actor *obj, TriggerZone *zone) {
     s32 idx;
 
     if (obj->unique_id == 1) {
-        idx = zone->unk1C;
+        idx = zone->data2;
         if (idx >= 0 && idx < 0) {
         }
     }
@@ -854,7 +854,7 @@ void func_15136C3C(Actor *, s32, s32, s32, s32, s32, s32, s32);
 void func_1507CD64(Actor *, s32);
 
 /*
- * TriggerZone handler: unless the zone has a range (unk1C, in hundredths of its radius) that `obj`
+ * TriggerZone handler: unless the zone has a range (data2, in hundredths of its radius) that `obj`
  * is outside of, fires event 0x2F on `obj`.
  */
 void func_1515FC60(Actor *obj, TriggerZone *zone) {
@@ -864,11 +864,11 @@ void func_1515FC60(Actor *obj, TriggerZone *zone) {
     s32 value;
 
     if (obj->mv != NULL && obj->mv->death_State == 0) {
-        value = zone->unk1C;
+        value = zone->data2;
         if (value != 0) {
             scale = (f32)(u32)value * 0.009999999776f;
             value = func_150AD960(zone->x, zone->z, obj->xpos, obj->zpos);
-            limit = (zone->radius * scale) - obj->bodyRadius;
+            limit = (zone->xSize * scale) - obj->bodyRadius;
             if (limit > value) {
                 return;
             }

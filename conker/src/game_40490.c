@@ -87,7 +87,7 @@ void func_15013000(void) {
     // matching: the label ends the block, so IDO cannot hoist the D_800D3094 load above the stores
 start:
     for (i = 0; i < D_800D3094; i++) {
-        u8 type = D_800D3098[i].kind >> 2;
+        u8 type = ZONE_TYPE(&D_800D3098[i]);
         s32 (*handler)(TriggerZone *) = D_80082E30[type];
 
         if (handler != NULL) {
@@ -112,7 +112,7 @@ extern s32 D_800965B0[];
 void *func_151407D0(GlowShape *, s32, ParticleDef *, s32, s32, s32, s32, s32, s32, s32);
 extern WorldObject *func_151149AC(u8);
 
-/** Spawns the particle emitter a level object describes; unk1C selects the kind of emitter. */
+/** Spawns the particle emitter a level object describes; data2 selects the kind of emitter. */
 s32 func_150130B4(TriggerZone *obj) {
     GlowShape emit;
     ParticleDef spawn;
@@ -122,8 +122,8 @@ s32 func_150130B4(TriggerZone *obj) {
     MtxF mtx;
 
     obj->flags |= 4;
-    onGround = (obj->unk20 >> 24) & 0xFF;
-    kind = obj->unk1C;
+    onGround = (obj->data3 >> 24) & 0xFF;
+    kind = obj->data2;
     // matching: the labels split basic blocks, which as1 schedules separately
 start:
     spawn.pos.x = obj->x;
@@ -138,22 +138,22 @@ start:
     {
         typedef s32 PadT;
 
-        emit.height1 = obj->radius;
+        emit.height1 = obj->xSize;
         emit.width1 = emit.height1;
-        emit.height0 = obj->height;
+        emit.height0 = obj->ySize;
         emit.width0 = emit.height0;
-        emit.alpha1 = ((obj->unk20 >> 8) & 0xFF) * 0.003921568859f;
+        emit.alpha1 = ((obj->data3 >> 8) & 0xFF) * 0.003921568859f;
     }
-    emit.alpha0 = (obj->unk20 & 0xFF) * 0.003921568859f;
-    index = (obj->unk18 >> 24) & 0xFF;
+    emit.alpha0 = (obj->data3 & 0xFF) * 0.003921568859f;
+    index = (obj->data1 >> 24) & 0xFF;
     spawn.texture = D_8009658C[index];
     spawn.renderModes = D_800965A0[index] + 3;
     spawn.lifetime = 300;
     spawn.frame = 0;
     spawn.frameSpeed = 0;
-    spawn.rgba[0] = obj->unk18 & 0xFF;
-    spawn.rgba[1] = (obj->unk18 >> 8) & 0xFF;
-    spawn.rgba[2] = (obj->unk18 >> 16) & 0xFF;
+    spawn.rgba[0] = obj->data1 & 0xFF;
+    spawn.rgba[1] = (obj->data1 >> 8) & 0xFF;
+    spawn.rgba[2] = (obj->data1 >> 16) & 0xFF;
     spawn.rgba[3] = 0xFF;
     spawn.width = 0.0f;
     spawn.height = 0.0f;
@@ -182,7 +182,7 @@ ground:
         onGround = FALSE; // matching: redundant store, but IDO's allocation needs it
     }
     emit.type = 0;
-    spawn.flags = 0x2006 | (((obj->unk20 >> 16) & 0xFF) ? 0x10 : 0) | (onGround ? 0x01000000 : 0) | 0x40000 | 0x80000 | 0x10000 | 0x400000;
+    spawn.flags = 0x2006 | (((obj->data3 >> 16) & 0xFF) ? 0x10 : 0) | (onGround ? 0x01000000 : 0) | 0x40000 | 0x80000 | 0x10000 | 0x400000;
     switch (kind) {
     case 8: {
         f32 extra[4];
@@ -267,7 +267,7 @@ ground:
 
 /** Runs the object's handler from D_80082EA0, chosen by unk17. */
 s32 func_1501370C(TriggerZone *obj) {
-    u8 index = obj->subtype;
+    u8 index = obj->subTypeData;
     void (*handler)(void) = D_80082EA0[index];
 
     if (handler != NULL) {
@@ -299,13 +299,13 @@ s32 func_15013778(TriggerZone *obj) {
     Game40490BeamPacket packet;
     MtxF matrix;
 
-    if (obj->height != 0) {
+    if (obj->ySize != 0) {
         f32 inverse;
         s16 height;
 
-        packet.height = 2.0f * obj->height;
+        packet.height = 2.0f * obj->ySize;
         inverse = 1.0f / packet.height;
-        packet.width = obj->radius;
+        packet.width = obj->xSize;
         packet.rotation[0] = obj->pitch;
         packet.rotation[1] = obj->yaw;
         packet.zero = 0.0f;
@@ -324,7 +324,7 @@ s32 func_15013778(TriggerZone *obj) {
         if (effect != NULL) {
             memcpy((u8 *)effect + 0x28, &packet, sizeof(packet));
         }
-        height = obj->height;
+        height = obj->ySize;
         func_1000FA64(0x67C, obj->x, (s16)(obj->y + height), obj->z,
                       12000, height * 2, height / 2, func_1000EF40, 0, 0, 8, 0);
     }
@@ -333,7 +333,7 @@ s32 func_15013778(TriggerZone *obj) {
 
 /** Runs the object's handler from D_80082ECC, chosen by unk17. */
 s32 func_1501396C(TriggerZone *obj) {
-    u8 index = obj->subtype;
+    u8 index = obj->subTypeData;
     void (*handler)(void) = D_80082ECC[index];
 
     if (handler != NULL) {
@@ -342,33 +342,33 @@ s32 func_1501396C(TriggerZone *obj) {
     return 1;
 }
 
-/** Spawns the area effect described by entry unk18 of D_80095FA0 over the object's footprint. */
+/** Spawns the area effect described by entry data1 of D_80095FA0 over the object's footprint. */
 // matching: index lives in the (unused) second argument register
 s32 func_150139AC(TriggerZone *obj, s32 index) {
     Struct150139ACLocal data;
     Struct150139ACEntry *entry;
     TimedEffect *effect;
 
-    index = obj->unk18;
+    index = obj->data1;
     obj->flags |= 4;
     data.unk0 = obj;
     data.unkC = 0.0f;
 
-    switch (obj->kind & 3) {
+    switch (ZONE_AREA_TYPE(obj)) {
     default:
         data.unk4 = 1.0f;
         data.unk10 = 1000.0f;
         break;
-    case 2:
+    case ZONE_AREA_BOX:
         /* box: area of the footprint */
-        data.unk4 = (f32)(obj->radius * obj->depth) * 4.0f;
-        data.unk10 = (f32)(obj->y + obj->height);
+        data.unk4 = (f32)(obj->xSize * obj->zSize) * 4.0f;
+        data.unk10 = (f32)(obj->y + obj->ySize);
         break;
-    case 0:
-    case 1:
+    case ZONE_AREA_CYLINDER:
+    case ZONE_AREA_SPHERE:
         /* cylinder: area of the circle */
-        data.unk4 = (f32)(obj->radius * obj->radius) * 3.141592741f;
-        data.unk10 = (f32)(obj->y + obj->height);
+        data.unk4 = (f32)(obj->xSize * obj->xSize) * 3.141592741f;
+        data.unk10 = (f32)(obj->y + obj->ySize);
         break;
     }
 
@@ -415,14 +415,14 @@ s32 func_150139AC(TriggerZone *obj, s32 index) {
     return 1;
 }
 
-/** Runs the object's handler from D_80082F28 (chosen by unk18) with unk1C / 1000 as argument. */
+/** Runs the object's handler from D_80082F28 (chosen by data1) with data2 / 1000 as argument. */
 s32 func_15013C38(TriggerZone *obj) {
     s32 index;
     f32 value;
     void (*handler)(TriggerZone *, f32);
 
     obj->flags |= 4;
-    index = obj->unk18;
+    index = obj->data1;
 
     if ((D_800D2E4C[0x11] & 4) && (D_800BE9F0 == 0x13)) { // low byte of D_800D2E4C[0x10]
         return 1;
@@ -440,14 +440,14 @@ s32 func_15013C38(TriggerZone *obj) {
 
     handler = D_80082F28[index];
     if (handler != NULL) {
-        value = (f32)obj->unk1C * 0.001000000047f;
+        value = (f32)obj->data2 * 0.001000000047f;
         handler(obj, value);
     }
 
     return 1;
 }
 
-/** Calls func_151BE850 at the object's position, with a count of unk18 (at least 1). */
+/** Calls func_151BE850 at the object's position, with a count of data1 (at least 1). */
 s32 func_15013D38(TriggerZone *obj) {
     Vec3f pos;
     s32 count;
@@ -457,8 +457,8 @@ s32 func_15013D38(TriggerZone *obj) {
     pos.y = obj->y;
     pos.z = obj->z;
 
-    count = obj->unk18;
-    func_151BE850(&pos, obj->yaw, count ? count : 1, (u8)obj->unk1C, 1, 0xFF, 1);
+    count = obj->data1;
+    func_151BE850(&pos, obj->yaw, count ? count : 1, (u8)obj->data2, 1, 0xFF, 1);
     return 1;
 }
 
@@ -470,8 +470,8 @@ s32 func_15013DE8(TriggerZone *obj) {
 
     obj->flags |= 4;
 
-    scaleX = obj->radius * 0.05000000075f;
-    scaleY = obj->height * 0.01999999955f;
+    scaleX = obj->xSize * 0.05000000075f;
+    scaleY = obj->ySize * 0.01999999955f;
 
     params.maxC = 0x6231; params.minC = 0x1A4D; // matching: on one line, as1 keeps these stores in this order
     params.color[0] = 0;
@@ -502,7 +502,7 @@ s32 func_15013DE8(TriggerZone *obj) {
     params.maxB = 57.96900177f * scaleY; params.minB = 42.7140007f * scaleY; // matching: on one line, as1 keeps these stores in this order
     params.altB = 118.7630005f * scaleY;
 
-    func_15149550(&params, 10, 1, obj->unk18 ? 2 : 1, 0xFF, 1);
+    func_15149550(&params, 10, 1, obj->data1 ? 2 : 1, 0xFF, 1);
     return 1;
 }
 
@@ -511,9 +511,9 @@ s32 func_15013F9C(TriggerZone *obj) {
     return 1;
 }
 
-/** Runs the object's handler from D_80082F40, chosen by the low byte of unk18. */
+/** Runs the object's handler from D_80082F40, chosen by the low byte of data1. */
 s32 func_15013FC4(TriggerZone *obj) {
-    u8 index = obj->unk18;
+    u8 index = obj->data1;
     void (*handler)(void) = D_80082F40[index];
 
     if (handler != NULL) {
@@ -522,9 +522,9 @@ s32 func_15013FC4(TriggerZone *obj) {
     return 1;
 }
 
-/** Registers the object in slot unk1C (0-5) of D_800E0900. */
+/** Registers the object in slot data2 (0-5) of D_800E0900. */
 s32 func_15014004(TriggerZone *obj) {
-    s32 slot = obj->unk1C;
+    s32 slot = obj->data2;
 
     if (slot < 0) {
         return 1;
@@ -536,9 +536,9 @@ s32 func_15014004(TriggerZone *obj) {
     return 1;
 }
 
-/** Registers the object as D_800D9A20[unk18] (unk18 0 or 1). */
+/** Registers the object as D_800D9A20[data1] (data1 0 or 1). */
 s32 func_15014040(TriggerZone *obj) {
-    s32 which = obj->unk18;
+    s32 which = obj->data1;
 
     obj->flags |= 4;
     if (which == 0) {
@@ -582,7 +582,7 @@ s32 func_15014094(TriggerZone *obj) {
     }
 }
 
-/** Calls func_151A9390 for the object with option bits taken from unk18 (bit 1 inverted). */
+/** Calls func_151A9390 for the object with option bits taken from data1 (bit 1 inverted). */
 s32 func_15014144(TriggerZone *obj) {
     s32 flags;
     s32 bit8;
@@ -591,14 +591,14 @@ s32 func_15014144(TriggerZone *obj) {
     s32 bit1;
     s32 bit16;
 
-    flags = obj->unk18;
+    flags = obj->data1;
     bit8 = (flags & 8) ? 8 : 0;
     bit4 = (flags & 4) ? 4 : 0;
     bit2 = (flags & 2) ? 0 : 2;
     bit1 = (flags & 1) ? 1 : 0;
     bit16 = (flags & 0x10) ? 0x10 : 0;
 
-    func_151A9390((u8)(bit16 | bit1 | bit2 | bit4 | bit8), (u8)obj->unk1C, obj, 0, -10000.0f, 100.0f, -1, 0xFF, 1);
+    func_151A9390((u8)(bit16 | bit1 | bit2 | bit4 | bit8), (u8)obj->data2, obj, 0, -10000.0f, 100.0f, -1, 0xFF, 1);
     return 1;
 }
 
@@ -622,11 +622,11 @@ s32 func_15014220(TriggerZone *obj) {
     return 1;
 }
 
-/** Registers the object in slot (low byte of unk18, 0-2) of D_800D9AA0. */
+/** Registers the object in slot (low byte of data1, 0-2) of D_800D9AA0. */
 s32 func_150142AC(TriggerZone *obj) {
     s32 slot;
 
-    slot = (u8)obj->unk18;
+    slot = (u8)obj->data1;
     obj->flags |= 4;
     if ((slot < 0) || (slot >= 3)) {
         return 1;
@@ -661,10 +661,10 @@ s32 func_150142EC(TriggerZone *obj) {
     }
 
     /* four 16-bit values, in thousandths */
-    a = (f32)(obj->unk1C & 0xFFFF) * 0.001000000047f;
-    b = (f32)((obj->unk1C >> 16) & 0xFFFF) * 0.001000000047f;
-    c = (f32)(obj->unk20 & 0xFFFF) * 0.001000000047f;
-    d = (f32)((obj->unk20 >> 16) & 0xFFFF) * 0.001000000047f;
+    a = (f32)(obj->data2 & 0xFFFF) * 0.001000000047f;
+    b = (f32)((obj->data2 >> 16) & 0xFFFF) * 0.001000000047f;
+    c = (f32)(obj->data3 & 0xFFFF) * 0.001000000047f;
+    d = (f32)((obj->data3 >> 16) & 0xFFFF) * 0.001000000047f;
 
     scale = func_1514462C((s32)obj);
 
@@ -684,7 +684,7 @@ s32 func_150142EC(TriggerZone *obj) {
 
 void func_15145974(void *, f32 *, f32 *);
 
-/** Spawns a StreamEmitter aimed along the object's rotation, configured by the bytes of unk18 and unk1C. */
+/** Spawns a StreamEmitter aimed along the object's rotation, configured by the bytes of data1 and data2. */
 s32 func_150144B8(TriggerZone *obj) {
     StreamEmitter emitter;
     u32 value; // matching: holds the random number, then the effect address; two locals grow the frame
@@ -702,20 +702,20 @@ s32 func_150144B8(TriggerZone *obj) {
     func_15145974(scratch.direction, &emitter.angleX, &emitter.angleY);
     emitter.angleX *= 0.017453292f;
     emitter.angleY *= 0.017453292f;
-    emitter.minDelay = obj->unk18 & 0xFF;
-    emitter.delayRange = (obj->unk18 >> 8) & 0xFF;
+    emitter.minDelay = obj->data1 & 0xFF;
+    emitter.delayRange = (obj->data1 >> 8) & 0xFF;
     value = func_150ADA20();
     emitter.position = &obj->x;
     emitter.timer = value % (u32)(emitter.delayRange + 1) + emitter.minDelay;
-    emitter.minLife = (obj->unk18 >> 16) & 0xFF;
-    emitter.lifeRange = (obj->unk18 >> 24) & 0xFF;
-    emitter.rateBase = (f32)(obj->unk1C & 0xFF) * 0.015625f;
-    emitter.rateRange = (f32)((obj->unk1C >> 8) & 0xFF) * 0.015625f;
-    emitter.speed = (f32)((obj->unk1C >> 24) & 0xFF);
+    emitter.minLife = (obj->data1 >> 16) & 0xFF;
+    emitter.lifeRange = (obj->data1 >> 24) & 0xFF;
+    emitter.rateBase = (f32)(obj->data2 & 0xFF) * 0.015625f;
+    emitter.rateRange = (f32)((obj->data2 >> 8) & 0xFF) * 0.015625f;
+    emitter.speed = (f32)((obj->data2 >> 24) & 0xFF);
     emitter.unk30 = 1.0f / emitter.speed;
-    emitter.unk34 = (f32)obj->height * emitter.unk30;
-    emitter.spread = func_150484A0(obj->radius, obj->height);
-    emitter.wobbleSpeed = (f32)((obj->unk1C >> 16) & 0xFF) * 0.00390625f * 0.7853982f;
+    emitter.unk34 = (f32)obj->ySize * emitter.unk30;
+    emitter.spread = func_150484A0(obj->xSize, obj->ySize);
+    emitter.wobbleSpeed = (f32)((obj->data2 >> 16) & 0xFF) * 0.00390625f * 0.7853982f;
     value = (u32)func_15149130(300, -1, 0x2A, -1, 0, 0, sizeof(emitter), 0xFF, 0);
     if (value != 0) {
         memcpy((void *)((u32)value + 0x28U), &emitter, sizeof(emitter));
@@ -758,31 +758,31 @@ s32 func_1501474C(TriggerZone *obj) {
     z = obj->z;
     s = sinf(obj->yaw * 0.01745329238f);
     c = cosf(obj->yaw * 0.01745329238f);
-    corners[0].x = obj->radius * c + x + obj->depth * s;
-    corners[0].z = obj->depth * c + z - obj->radius * s;
-    corners[1].x = obj->radius * c + x + -obj->depth * s;
-    corners[1].z = -obj->depth * c + z - obj->radius * s;
-    corners[2].x = -obj->radius * c + x + -obj->depth * s;
-    corners[2].z = -obj->depth * c + z - -obj->radius * s;
-    corners[3].x = -obj->radius * c + x + obj->depth * s;
-    corners[3].z = obj->depth * c + z - -obj->radius * s;
+    corners[0].x = obj->xSize * c + x + obj->zSize * s;
+    corners[0].z = obj->zSize * c + z - obj->xSize * s;
+    corners[1].x = obj->xSize * c + x + -obj->zSize * s;
+    corners[1].z = -obj->zSize * c + z - obj->xSize * s;
+    corners[2].x = -obj->xSize * c + x + -obj->zSize * s;
+    corners[2].z = -obj->zSize * c + z - -obj->xSize * s;
+    corners[3].x = -obj->xSize * c + x + obj->zSize * s;
+    corners[3].z = obj->zSize * c + z - -obj->xSize * s;
     packet.start = corners[1];
     packet.end = corners[2];
     packet.edge[0] = corners[0].x - corners[1].x;
     packet.edge[1] = corners[0].z - corners[1].z;
     packet.edge[2] = corners[3].x - corners[2].x;
     packet.edge[3] = corners[3].z - corners[2].z;
-    packet.top = obj->y + obj->height;
+    packet.top = obj->y + obj->ySize;
     packet.bottom = obj->y;
-    packet.scaleX = (f32)(obj->unk1C & 0xFF) * 0.00390625f * 0.5f;
-    packet.scaleZ = (f32)((obj->unk1C >> 8) & 0xFF) * 0.00390625f * 0.5f;
+    packet.scaleX = (f32)(obj->data2 & 0xFF) * 0.00390625f * 0.5f;
+    packet.scaleZ = (f32)((obj->data2 >> 8) & 0xFF) * 0.00390625f * 0.5f;
     packet.unk30 = 0.0f;
-    packet.unk34 = (f32)((obj->unk1C >> 16) & 0xFF) * 0.00390625f * 250.0f;
-    packet.unk38 = (f32)((obj->unk1C >> 24) & 0xFF) * 0.00390625f * 250.0f;
-    packet.bytes[0] = obj->unk18 & 0xFF;
-    packet.bytes[1] = (obj->unk18 >> 8) & 0xFF;
-    packet.bytes[2] = (obj->unk18 >> 16) & 0xFF;
-    packet.bytes[3] = (obj->unk18 >> 24) & 0xFF;
+    packet.unk34 = (f32)((obj->data2 >> 16) & 0xFF) * 0.00390625f * 250.0f;
+    packet.unk38 = (f32)((obj->data2 >> 24) & 0xFF) * 0.00390625f * 250.0f;
+    packet.bytes[0] = obj->data1 & 0xFF;
+    packet.bytes[1] = (obj->data1 >> 8) & 0xFF;
+    packet.bytes[2] = (obj->data1 >> 16) & 0xFF;
+    packet.bytes[3] = (obj->data1 >> 24) & 0xFF;
     effect = func_15149130(300, -1, 0x2C, -1, 0, 0, sizeof(packet), 0xFF, 0);
     if (effect != NULL) {
         memcpy((u8 *)effect + 0x28, &packet, sizeof(packet));
@@ -826,10 +826,10 @@ s32 func_15014B60(TriggerZone *obj) {
     packet.rot[1] = (f32)((func_150ADA20() * count) & 0xFFFF) * 1.525902189e-05f * 360.0f;
     count = osGetCount();
     packet.rot[2] = (f32)((func_150ADA20() * count) & 0xFFFF) * 1.525902189e-05f * 360.0f;
-    packet.unk18 = (f32)(obj->unk18 & 0xFFFF) * 0.152587890625f * 0.001000000047f;
-    packet.unk1C = (f32)((obj->unk18 >> 16) & 0xFFFF) * 0.152587890625f * 0.001000000047f;
-    packet.unk20 = (f32)(obj->unk1C & 0xFFFF) * 0.152587890625f * 0.001000000047f;
-    packet.unk3C = (f32)((obj->unk1C >> 16) & 0xFFFF) * 0.457763671875f * 9.999999975e-07f;
+    packet.unk18 = (f32)(obj->data1 & 0xFFFF) * 0.152587890625f * 0.001000000047f;
+    packet.unk1C = (f32)((obj->data1 >> 16) & 0xFFFF) * 0.152587890625f * 0.001000000047f;
+    packet.unk20 = (f32)(obj->data2 & 0xFFFF) * 0.152587890625f * 0.001000000047f;
+    packet.unk3C = (f32)((obj->data2 >> 16) & 0xFFFF) * 0.457763671875f * 9.999999975e-07f;
     pos.x = obj->x;
     pos.y = obj->y;
     pos.z = obj->z;
@@ -873,13 +873,13 @@ s32 func_15014F6C(TriggerZone *obj) {
     s32 flag;
 
     obj->flags |= 4;
-    data.unk51 = obj->unk20;
-    flag = (obj->unk1C & 1) ? 1 : 0;
+    data.unk51 = obj->data3;
+    flag = (obj->data2 & 1) ? 1 : 0;
     data.unk50 = flag;
     data.unk0 = obj;
-    /* unk18 holds a minimum and a range: unkC is random in [min, min + range] */
-    data.unk4 = obj->unk18 & 0xFFFF;
-    data.unk8 = (obj->unk18 >> 16) & 0xFFFF;
+    /* data1 holds a minimum and a range: unkC is random in [min, min + range] */
+    data.unk4 = obj->data1 & 0xFFFF;
+    data.unk8 = (obj->data1 >> 16) & 0xFFFF;
     data.unkC = (func_150ADA20() % (u32)(data.unk8 + 1)) + data.unk4;
     func_150A8050(data.mtx, obj->pitch, obj->yaw, 0.0f);
 
@@ -921,14 +921,14 @@ s32 func_15015104(TriggerZone *obj) {
     s32 bit2;
     u32 value;
 
-    obj->disabled = 1;
+    obj->inactive = 1;
     data.unk0 = obj;
-    data.unk4 = obj->unk1C;
+    data.unk4 = obj->data2;
 
     func_1510F800(0);
     data.unk8 = func_1510FD20(obj->x, obj->z);
 
-    value = obj->unk20;
+    value = obj->data3;
     bit1 = (value != 0) ? 1 : 0;
     bit2 = (value != 0) ? 2 : 0;
     data.unkC = bit2 | bit1;
@@ -961,7 +961,7 @@ s32 func_150151D4(TriggerZone *obj) {
     TimedEffect *effect;
 
     obj->flags |= 4;
-    obj->disabled = 1;
+    obj->inactive = 1;
 
     data.unk0 = obj;
     data.unk4 = 0.0f;
@@ -969,8 +969,8 @@ s32 func_150151D4(TriggerZone *obj) {
     data.unkC = obj->x;
     data.unk10 = obj->y;
     data.unk14 = obj->z;
-    data.unk18 = obj->radius;
-    data.unk1C = obj->height;
+    data.unk18 = obj->xSize;
+    data.unk1C = obj->ySize;
     data.unk20 = -10000.0f;
     data.unk40 = 0;
     data.unk3D = 0;
@@ -987,10 +987,10 @@ s32 func_150151D4(TriggerZone *obj) {
     return 1;
 }
 
-/** Runs the object's handler from D_80082F70, chosen by unk1C (0 or 1). */
+/** Runs the object's handler from D_80082F70, chosen by data2 (0 or 1). */
 s32 func_15015300(TriggerZone *obj) {
     void (*handler)(void);
-    s32 index = obj->unk1C;
+    s32 index = obj->data2;
 
     if ((index < 0) || (index >= 2)) {
         return 1;
@@ -1027,23 +1027,23 @@ void func_15015354(TriggerZone *obj) {
     data.unk0 = obj;
     data.unk4 = -1;
     data.unk8 = 0.0f;
-    obj->disabled = 1;
+    obj->inactive = 1;
     x = obj->x;
     y = obj->y;
     z = obj->z;
 
-    corners[0][0] = obj->radius;
+    corners[0][0] = obj->xSize;
     corners[0][1] = 0.0f;
-    corners[0][2] = obj->depth;
-    corners[1][0] = obj->radius;
+    corners[0][2] = obj->zSize;
+    corners[1][0] = obj->xSize;
     corners[1][1] = 0.0f;
-    corners[1][2] = -obj->depth;
-    corners[2][0] = -obj->radius;
+    corners[1][2] = -obj->zSize;
+    corners[2][0] = -obj->xSize;
     corners[2][1] = 0.0f;
-    corners[2][2] = -obj->depth;
-    corners[3][0] = -obj->radius;
+    corners[2][2] = -obj->zSize;
+    corners[3][0] = -obj->xSize;
     corners[3][1] = 0.0f;
-    corners[3][2] = obj->depth;
+    corners[3][2] = obj->zSize;
 
     func_150A8050(mtx, obj->pitch, obj->yaw, 0.0f);
 
@@ -1089,7 +1089,7 @@ s32 func_15015644(TriggerZone *obj) {
     TimedEffect *effect;
 
     obj->flags |= 4;
-    obj->disabled = 1;
+    obj->inactive = 1;
 
     data.unk0 = obj;
     data.unk4 = func_15144598(obj);
@@ -1105,22 +1105,22 @@ s32 func_15015644(TriggerZone *obj) {
 }
 
 /** Passes the object's two end points (its position, and sizeY along its rotation from there) to
- * func_151ACBD4, higher end first. In levels 0xB, 0x2C and 0x26 only objects with a large enough unk18 do. */
+ * func_151ACBD4, higher end first. In levels 0xB, 0x2C and 0x26 only objects with a large enough data1 do. */
 s32 func_150156F4(TriggerZone *obj) {
     Vec3f points[2];
     MtxF mtx;
     RopeSpawn payload;
 
     if (D_800BE9F0 == 0xB) {
-        if (obj->unk18 < 6U) {
+        if (obj->data1 < 6U) {
             return 1;
         }
     } else if (D_800BE9F0 == 0x2C) {
-        if (obj->unk18 < 7U) {
+        if (obj->data1 < 7U) {
             return 1;
         }
     } else if (D_800BE9F0 == 0x26) {
-        if (obj->unk18 < 2U) {
+        if (obj->data1 < 2U) {
             return 1;
         }
     }
@@ -1130,12 +1130,12 @@ s32 func_150156F4(TriggerZone *obj) {
     mtx[3][1] = obj->y;
     mtx[3][2] = obj->z;
 
-    func_150A7960(mtx[0], 0.0f, obj->height, 0.0f, &points[1].x, &points[1].y, &points[1].z);
+    func_150A7960(mtx[0], 0.0f, obj->ySize, 0.0f, &points[1].x, &points[1].y, &points[1].z);
 
     points[0].x = obj->x;
     points[0].y = obj->y;
     points[0].z = obj->z;
-    payload.id = obj->unk18;
+    payload.id = obj->data1;
 
     /* the higher end is the top */
     payload.ends.top = points[points[0].y < points[1].y];
