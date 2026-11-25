@@ -84,7 +84,7 @@ s32 func_151B8C54(BobEffect *effect) {
     return 1;
 }
 
-/* Bob state that follows a game_169510.c particle (another member of its ParticleMotion union). */
+/* Bob state that follows a game_169510.c particle (another member of its DefParticleMotion union). */
 typedef struct {
     /* 0x00 */ f32 center;
     /* 0x04 */ f32 amplitude;

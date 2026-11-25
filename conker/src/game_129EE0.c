@@ -128,7 +128,7 @@ void func_150FCFB0(s32 arg0) {
 
 typedef struct Actor150FD514 Actor150FD514;
 
-/* State that follows the particle (its ParticleMotion slot at 0x110). */
+/* State that follows the particle (its DefParticleMotion slot at 0x110). */
 typedef struct {
     /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;      /* owner->unique_id when the link was made */
