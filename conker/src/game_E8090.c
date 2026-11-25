@@ -13,28 +13,6 @@ typedef struct {
     /* 0x20 */ s32 unk20;
 } Ground_150BABE0;
 
-/* Spawn descriptor passed to func_1513C73C. */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s16 unk4;
-    /* 0x06 */ u8 unk6;
-    /* 0x07 */ u8 unk7;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ u8 unk10;
-    /* 0x11 */ u8 unk11;
-    /* 0x12 */ u8 unk12;
-    /* 0x13 */ u8 unk13;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ u8 unk20;
-    /* 0x21 */ u8 pad21[7];
-} DecalDesc_150BABE0;
-
 /* matching: the joint owner is passed as s32; a pointer parameter changes register allocation */
 void func_15143E94(s32 arg0, s32 arg1);
 void func_15165F80(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
@@ -54,7 +32,7 @@ void func_150BABE0(Actor *obj, u8 side, u8 arg2) {
     s32 yaw;
     Ground_150BABE0 ground;
     Vec3f probe;
-    DecalDesc_150BABE0 desc;
+    SpriteDef desc;
     struct210 *decal;
     f32 size;
 
@@ -90,23 +68,23 @@ void func_150BABE0(Actor *obj, u8 side, u8 arg2) {
     probe.z = pos.z;
     if (func_15046C80(&probe, 0, pos.y - 100.0f, &ground) != 0) {
         size = func_150ADA68() * 200.0f + 200.0f;
-        desc.unk6 = 0x2A;
+        desc.texture = 0x2A;
         desc.unk7 = 0;
-        desc.unk0 = 0x7340;
-        desc.unk4 = 300;
-        desc.unk8 = 0;
-        desc.unkC = func_150ADA20() % 2001U + 2000;
+        desc.flags = 0x7340;
+        desc.lifetime = 300;
+        desc.frame = 0;
+        desc.frameSpeed = func_150ADA20() % 2001U + 2000;
         desc.unk10 = 0xFF;
         desc.unk11 = 0xFF;
-        desc.unk12 = 0;
-        desc.unk13 = 0;
-        desc.unk14 = 0;
-        desc.unk15 = 0xFF;
+        desc.rgba[0] = 0;
+        desc.rgba[1] = 0;
+        desc.rgba[2] = 0;
+        desc.rgba[3] = 0xFF;
         desc.unk16 = 0;
         desc.unk17 = 0xD;
-        desc.unk20 = 0xFF;
+        desc.viewportMask = 0xFF;
         desc.unk1C = 0;
-        desc.unk18 = 0x170002;
+        desc.renderModes = 0x170002;
         decal = func_1513C73C(&desc, 0, 0, (s32)ground.points, pos.x, ground.height, pos.z, size, size,
                               func_150ADA20() & 0xFF, (func_150ADA20() & 1) * 2 + (func_150ADA20() & 1), 4, *(u8 *)&arg2, 0);
         if (decal != NULL && func_1518ABD0(D_80088750, decal, 1) == 0) {

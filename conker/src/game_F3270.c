@@ -293,27 +293,6 @@ void func_150C6438(GameF3270LinkedObject *obj) {
     func_1513470C(obj);
 }
 
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s16 unk4;
-    /* 0x06 */ u8 unk6;
-    /* 0x07 */ u8 unk7;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ u8 unk10;
-    /* 0x11 */ u8 unk11;
-    /* 0x12 */ u8 r;
-    /* 0x13 */ u8 g;
-    /* 0x14 */ u8 b;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ u8 unk20;
-    /* 0x21 */ u8 pad21[7];
-} GameF3270ParticleDesc; // size 0x28
-
 extern Vec3f D_800887D0;
 extern u8 D_800AB414[][3]; // RGB colours
 void func_15143134(Vec3f *in, Vec3f *out, MtxF *mtx);
@@ -344,7 +323,7 @@ GameF3270Particle *func_150C6460(GameF3270Emitter *emitter) {
         probe.y = pos.y + 200.0f;
         probe.z = pos.z;
         if (func_15045800(&probe, 0, pos.y - 200.0f, &emitter->surfaceY) != 0) {
-            GameF3270ParticleDesc desc;
+            SpriteDef desc;
             GameF3270Wobble wobble;
             f32 size;
             u8 colorIndex;
@@ -364,18 +343,18 @@ GameF3270Particle *func_150C6460(GameF3270Emitter *emitter) {
             wobble.periodMin = 10;
             wobble.periodRange = 10;
             wobble.rate = 0.231f;
-            desc.unkC = (s32)(wobble.range * 0.5f + wobble.base);
-            desc.unk6 = 56;
-            desc.unk0 = 0x20300;
-            desc.unk4 = 300;
+            desc.frameSpeed = (s32)(wobble.range * 0.5f + wobble.base);
+            desc.texture = 56;
+            desc.flags = 0x20300;
+            desc.lifetime = 300;
             desc.unk10 = 150;
-            desc.unk8 = 0;
+            desc.frame = 0;
             desc.unk11 = 0xFF;
-            desc.r = D_800AB414[colorIndex][0];
-            desc.g = D_800AB414[colorIndex][1];
-            desc.b = D_800AB414[colorIndex][2];
-            desc.unk15 = 0xFF;
-            desc.unk18 = 0x440001;
+            desc.rgba[0] = D_800AB414[colorIndex][0];
+            desc.rgba[1] = D_800AB414[colorIndex][1];
+            desc.rgba[2] = D_800AB414[colorIndex][2];
+            desc.rgba[3] = 0xFF;
+            desc.renderModes = 0x440001;
             desc.unk16 = 0;
             desc.unk17 = 6;
             rand0 = func_150ADA20();

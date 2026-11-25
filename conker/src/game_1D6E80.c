@@ -735,27 +735,6 @@ s32 func_151AADBC(Obj151AADBC *obj) {
     return 1;
 }
 
-typedef struct {
-    s32 unk0;
-    s16 unk4;
-    u8 unk6;
-    u8 unk7;
-    s32 unk8;
-    s32 unkC;
-    u8 unk10;
-    u8 unk11;
-    u8 unk12;
-    u8 unk13;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    s32 unk18;
-    s32 unk1C;
-    u8 unk20;
-    u8 pad21[7];
-} Particle_151AADF8;
-
 extern u8 D_800AB414[];
 
 /* Keeps the task's flicker effect alive, or spawns it on the ground under the actor. */
@@ -764,7 +743,7 @@ void func_151AADF8(ActorTask *task) {
     ActorTaskFx *fx;
     FlickerFxPayload *keep;
     f32 pos[3];
-    Particle_151AADF8 part;
+    SpriteDef part;
     FlickerFxPayload payload;
     f32 size;
     u8 color;
@@ -798,18 +777,18 @@ void func_151AADF8(ActorTask *task) {
         payload.target = 0.0f;
         payload.timer = 0;
         payload.easing = 0.2310000062f;
-        part.unkC = (s32)(payload.targetRange * 0.5f + payload.minTarget);
-        part.unk6 = 0x38;
-        part.unk0 = 0x60300;
-        part.unk4 = 300;
+        part.frameSpeed = (s32)(payload.targetRange * 0.5f + payload.minTarget);
+        part.texture = 0x38;
+        part.flags = 0x60300;
+        part.lifetime = 300;
         part.unk10 = 150;
-        part.unk8 = 0;
+        part.frame = 0;
         part.unk11 = 0xFF;
-        part.unk12 = D_800AB414[color * 3];
-        part.unk13 = D_800AB414[color * 3 + 1];
-        part.unk14 = D_800AB414[color * 3 + 2];
-        part.unk15 = 0xFF;
-        part.unk18 = 0x440001;
+        part.rgba[0] = D_800AB414[color * 3];
+        part.rgba[1] = D_800AB414[color * 3 + 1];
+        part.rgba[2] = D_800AB414[color * 3 + 2];
+        part.rgba[3] = 0xFF;
+        part.renderModes = 0x440001;
         part.unk16 = 0;
         part.unk17 = 6;
         fx->flicker = (FlickerFx *)func_1513C73C(&part, 7, 1, (s32)task->hit.points, pos[0], pos[1], pos[2],
