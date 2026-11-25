@@ -36,8 +36,8 @@ typedef struct {
 extern Vtx *D_800B0E10;                 // level mesh vertices
 extern VtxColorGroup **D_800B0E30;      // groups of each color set
 extern u8 *D_800B0E34;                  // group count of each color set
-extern Color24 *D_800BE510;             // base color of each vertex
-extern Color24 ***D_800BE520;           // [set][group][i] base color of each group vertex
+extern u8 (*D_800BE510)[3];             // base RGB of each vertex
+extern u8 (***D_800BE520)[3];           // [set][group][i]: base RGB of each group vertex
 extern u16 *D_800BE524;                 // first D_800BE510 entry of each prop
 extern PropVtxView *func_151149AC(u8);
 
@@ -53,7 +53,7 @@ void func_151739B0(s32 colorSet, s32 isProp, s32 blend, s32 group, s32 propIndex
     VtxColorGroup *groups;
     Color24 *targets;
     u16 *indices;
-    Color24 *base;
+    u8 *base; // RGB
     u16 index;
     Vtx *v;
 
@@ -86,18 +86,20 @@ void func_151739B0(s32 colorSet, s32 isProp, s32 blend, s32 group, s32 propIndex
         for (j = 0; j < groups[i].count; j++) {
             index = indices[j];
             if (!(sVtxColorFlags & 4)) {
+                // matching: the byte offset index * 3 from the start row; IDO multiplies it (multu)
+                // where D_800BE510[start + index] would be shift-scaled
                 if (isProp == 0) {
-                    base = (Color24 *)((u8 *)D_800BE510 + index * 3);
+                    base = &D_800BE510[0][index * 3];
                 } else {
-                    base = (Color24 *)(&((u8 (*)[3])D_800BE510)[D_800BE524[propIndex]][index * 3]);
+                    base = &D_800BE510[D_800BE524[propIndex]][index * 3];
                 }
             } else {
-                base = &D_800BE520[colorSet][i][j];
+                base = D_800BE520[colorSet][i][j];
             }
             v = &vertices[index];
-            v->v.cn[0] = (((targets[j].r - base->r) * blend) >> 8) + base->r;
-            v->v.cn[1] = (((targets[j].g - base->g) * blend) >> 8) + base->g;
-            v->v.cn[2] = (((targets[j].b - base->b) * blend) >> 8) + base->b;
+            v->v.cn[0] = base[0] + (((targets[j].r - base[0]) * blend) >> 8);
+            v->v.cn[1] = base[1] + (((targets[j].g - base[1]) * blend) >> 8);
+            v->v.cn[2] = base[2] + (((targets[j].b - base[2]) * blend) >> 8);
         }
     }
 }
