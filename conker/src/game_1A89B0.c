@@ -247,8 +247,8 @@ extern void func_10004074(s32);
  * fills four vertices (alpha falls off with distance; sprites within 140 of (fadeX, fadeY, fadeZ) are
  * skipped, fading in up to 240). Then steps the per-type animation phases and turns every quad to face
  * `angle`.
- * Several locals are reused for unrelated values (hi, camDist, j, y); IDO's register allocation depends on it.
  */
+// matching: hi, fadeDist, j and y are reused for unrelated values; separate locals change IDO's allocation
 void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fadeY, s32 fadeZ) {
     s32 i;
     s32 lo;
@@ -267,7 +267,7 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fa
     s16 minZ;
     s32 bits;
     s32 j; /* sprites emitted so far */
-    s32 camDist; /* also the alpha, then the phase slot */
+    s32 fadeDist; /* also the alpha, then the phase slot */
     s32 shade;
     s16 halfWidth;
     s16 dx;
@@ -281,7 +281,7 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fa
     D_800DDD58 = 0;
     maxX = x + radius; minX = x - radius;
     maxZ = z + radius; minZ = z - radius;
-    dist = D_800DDD20 - 1; hi = dist;
+    dist = D_800DDD20 - 1; hi = dist; // matching: routing through dist (and below) steers IDO's allocation
     lo = 0;
     mid = 0;
     if ((angle > 45.0f && angle < 135.0f) || (angle > 225.0f && angle < 315.0f)) {
@@ -359,10 +359,10 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fa
             if ((u32) dist < D_800DDC40[type]) {
                 D_800DDC40[type] = dist;
             }
-            camDist = func_150AD9A0(D_800DDD18[i].x - fadeX, D_800DDD18[i].y - fadeY, D_800DDD18[i].z - fadeZ);
-            if (camDist > 140) {
-                if (camDist < 240) {
-                    dist = radius - ((radius - dist) * (camDist - 140)) / 100;
+            fadeDist = func_150AD9A0(D_800DDD18[i].x - fadeX, D_800DDD18[i].y - fadeY, D_800DDD18[i].z - fadeZ);
+            if (fadeDist > 140) {
+                if (fadeDist < 240) {
+                    dist = radius - ((radius - dist) * (fadeDist - 140)) / 100;
                 }
                 if (sFrames[type * FRAMES_PER_TYPE] == 0) {
                     if (sTexFiles[type].devAddr != 0) {
@@ -432,12 +432,12 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fa
                     vtx[0].v.ob[2] = D_800DDD18[i].z;
                 }
                 shade = D_800DDD18[i].unk6 | 0x9F;
-                camDist = vtx[0].v.cn[3] & 0xFF;
+                fadeDist = vtx[0].v.cn[3] & 0xFF;
                 vtx[0].v.cn[0] = vtx[0].v.cn[1] = vtx[0].v.cn[2] = shade;
                 vtx[1].v.cn[0] = vtx[1].v.cn[1] = vtx[1].v.cn[2] = shade;
                 vtx[2].v.cn[0] = vtx[2].v.cn[1] = vtx[2].v.cn[2] = shade;
                 vtx[3].v.cn[0] = vtx[3].v.cn[1] = vtx[3].v.cn[2] = shade;
-                vtx[1].v.cn[3] = vtx[2].v.cn[3] = vtx[3].v.cn[3] = camDist;
+                vtx[1].v.cn[3] = vtx[2].v.cn[3] = vtx[3].v.cn[3] = fadeDist;
                 if (D_800DDD18[i].unkB >= 0x21) {
                     vtx[0].v.flag = D_800DDBE0[type] + type * FRAMES_PER_TYPE;
                 } else {
@@ -473,31 +473,31 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fa
                     } else {
                         step = D_800BE9E4 << 6;
                     }
-                    camDist = i << 2;
-                    for (j = 0; j != 4; j++, camDist++) {
+                    fadeDist = i << 2;
+                    for (j = 0; j != 4; j++, fadeDist++) {
                         bits = D_800DDC10[i];
                         y = 1 << j;
                         if (bits & y) {
-                            D_800DDC90[camDist] -= step;
-                            if (D_800DDC90[camDist] <= 0) {
-                                D_800DDC90[camDist] = -D_800DDC90[camDist];
+                            D_800DDC90[fadeDist] -= step;
+                            if (D_800DDC90[fadeDist] <= 0) {
+                                D_800DDC90[fadeDist] = -D_800DDC90[fadeDist];
                                 D_800DDC10[i] = bits ^ y;
                             }
                         } else {
-                            D_800DDC90[camDist] += step;
-                            if (D_800DDC90[camDist] >= hi) {
-                                D_800DDC90[camDist] = hi * 2 - D_800DDC90[camDist];
+                            D_800DDC90[fadeDist] += step;
+                            if (D_800DDC90[fadeDist] >= hi) {
+                                D_800DDC90[fadeDist] = hi * 2 - D_800DDC90[fadeDist];
                                 D_800DDC10[i] = bits ^ y;
                             }
                         }
                     }
                 } else {
                     bits = D_800BE9E4 * 48;
-                    camDist = i << 2;
-                    for (j = 0; j != 4; j++, camDist++) {
-                        D_800DDC90[camDist] += bits;
-                        if (D_800DDC90[camDist] >= hi) {
-                            D_800DDC90[camDist] -= hi;
+                    fadeDist = i << 2;
+                    for (j = 0; j != 4; j++, fadeDist++) {
+                        D_800DDC90[fadeDist] += bits;
+                        if (D_800DDC90[fadeDist] >= hi) {
+                            D_800DDC90[fadeDist] -= hi;
                         }
                     }
                 }
