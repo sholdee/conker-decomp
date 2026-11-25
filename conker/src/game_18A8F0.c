@@ -2,20 +2,11 @@
 #include "functions.h"
 #include "variables.h"
 
-
 void *allocate_memory(s32 size, s32, s32, s32);
 f32 func_1515F008(s16 *, s32);
 void func_1515F040(f32, s32);
 void func_1515F0AC(f32, s32);
 extern void func_10004074(void *);
-
-/* The type-0x2E object func_15105C24 finds by owner (Func15105C24Obj in game_131F30.c). */
-struct ZoneLinkObj {
-    u8 pad0[0x98];
-    Actor *unk98;
-};
-
-struct ZoneLinkObj *func_15105C24(s32 owner);
 
 /* Allocates a zeroed 0x10-byte block. */
 void *func_1515D440(void) {
@@ -182,11 +173,11 @@ Gfx *func_1515D914(Gfx *gfx, s32 player, s32 x, s32 y, s32 z, u32 arg5, PointLig
     if (flags & 2) {
         func_1515E43C(x, y, z, mask, colorA, colorB, &amountA, &amountB);
         for (i = 0; i < 3; i++) {
-            s32 level;
-            level = (u8)((((0xFF - color[i]) * amountA) >> 8) + color[i]);
-            dirColor[i] = (colorA[i] * level) >> 8;
-            level = (u8)((((0xFF - color[i]) * amountB) >> 8) + color[i]);
-            color[i] = (colorB[i] * level) >> 8;
+            s32 intensity;
+            intensity = (u8)((((0xFF - color[i]) * amountA) >> 8) + color[i]);
+            dirColor[i] = (colorA[i] * intensity) >> 8;
+            intensity = (u8)((((0xFF - color[i]) * amountB) >> 8) + color[i]);
+            color[i] = (colorB[i] * intensity) >> 8;
         }
     }
     for (i = 0; i < 3; i++) {
@@ -208,9 +199,9 @@ Gfx *func_1515D914(Gfx *gfx, s32 player, s32 x, s32 y, s32 z, u32 arg5, PointLig
         pos[2] = z;
     } else {
         // sample 1000 units along the camera's view direction instead
-        dir[0] = D_800DBFF0[player].target.x - D_800DBFF0[player].eye.x;
-        dir[1] = D_800DBFF0[player].target.y - D_800DBFF0[player].eye.y;
-        dir[2] = D_800DBFF0[player].target.z - D_800DBFF0[player].eye.z;
+        dir[0] = camera_global_Cameras[player].target.x - camera_global_Cameras[player].eye.x;
+        dir[1] = camera_global_Cameras[player].target.y - camera_global_Cameras[player].eye.y;
+        dir[2] = camera_global_Cameras[player].target.z - camera_global_Cameras[player].eye.z;
         scale = sqrtf(dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2]);
         if (scale != 0.0f) {
             scale = 1000.0f / scale;
@@ -327,7 +318,6 @@ Gfx *func_1515D914(Gfx *gfx, s32 player, s32 x, s32 y, s32 z, u32 arg5, PointLig
     return gfx;
 }
 
-
 TriggerZone *func_1515EB84(s32 x, s32 y, s32 z, s32 mask, ZoneLink *node);
 
 /*
@@ -344,15 +334,15 @@ void func_1515E278(s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg5, s32 flags
     u8 colorB[3];
     u8 amountA;
     u8 amountB;
-    s32 level;
+    s32 intensity;
     u8 *out;
     s32 scale;
 
     zone = func_1515EB84(x, y, z, mask, D_800DCD80);
     if (zone != NULL) {
-        color[0] = zone->unk18 & 0xFF;
-        color[1] = (zone->unk18 >> 8) & 0xFF;
-        color[2] = (zone->unk18 >> 16) & 0xFF;
+        color[0] = zone->data1 & 0xFF;
+        color[1] = (zone->data1 >> 8) & 0xFF;
+        color[2] = (zone->data1 >> 16) & 0xFF;
     } else {
         scale = 0x100 - ((arg5 >> 5) & 3) * 0x40;
         out = color;
@@ -364,10 +354,10 @@ void func_1515E278(s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg5, s32 flags
         func_1515E43C(x, y, z, mask, colorA, colorB, &amountA, &amountB);
         out = color;
         for (i = 0; i < 3; i++) {
-            level = (u8)((((0xFF - *out) * amountA) >> 8) + *out);
-            tint[i] = (colorA[i] * level) >> 8;
-            level = (u8)((((0xFF - *out) * amountB) >> 8) + *out);
-            *out = (colorB[i] * level) >> 8;
+            intensity = (u8)((((0xFF - *out) * amountA) >> 8) + *out);
+            tint[i] = (colorA[i] * intensity) >> 8;
+            intensity = (u8)((((0xFF - *out) * amountB) >> 8) + *out);
+            *out = (colorB[i] * intensity) >> 8;
             sum = *out + ((tint[i] * 7) >> 3);
             if (sum > 0xFF) {
                 sum = 255;
@@ -378,21 +368,20 @@ void func_1515E278(s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg5, s32 flags
     }
 }
 
-
 /* Tint colours and amounts at (x, y, z), from the first D_800DCD84 zone containing it or the defaults. */
 void func_1515E43C(s32 x, s32 y, s32 z, s32 arg3, u8 *colorA, u8 *colorB, u8 *amountA, u8 *amountB) {
     TriggerZone *zone;
 
     zone = func_1515EB84(x, y, z, 0, D_800DCD84);
     if (zone != NULL) {
-        colorA[0] = zone->unk18 & 0xFF;
-        colorA[1] = (zone->unk18 >> 8) & 0xFF;
-        colorA[2] = (zone->unk18 >> 16) & 0xFF;
-        colorB[0] = zone->unk1C & 0xFF;
-        colorB[1] = (zone->unk1C >> 8) & 0xFF;
-        colorB[2] = (zone->unk1C >> 16) & 0xFF;
-        *amountA = (zone->unk1C >> 24) & 0xFF;
-        *amountB = (zone->unk18 >> 24) & 0xFF;
+        colorA[0] = zone->data1 & 0xFF;
+        colorA[1] = (zone->data1 >> 8) & 0xFF;
+        colorA[2] = (zone->data1 >> 16) & 0xFF;
+        colorB[0] = zone->data2 & 0xFF;
+        colorB[1] = (zone->data2 >> 8) & 0xFF;
+        colorB[2] = (zone->data2 >> 16) & 0xFF;
+        *amountA = (zone->data2 >> 24) & 0xFF;
+        *amountB = (zone->data1 >> 24) & 0xFF;
     } else {
         colorA[0] = D_800DCD24[0];
         colorA[1] = D_800DCD24[1];
@@ -431,7 +420,6 @@ Gfx *func_1515E544(Gfx *gfx, PointLightGfx *lightBuf, u8 maxLights, u8 countByte
     gSPPointLight(gfx++, ambient, (u32)((i + padLight + 2) * 0x30U + 0x30));
     return gfx;
 }
-
 
 /*
  * Lit colour at (x, y, z): the zone ambient colour (func_1515E278) plus the contribution of
@@ -501,25 +489,25 @@ void func_1515E888(s32 player, s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg
     color[2] = v;
 }
 
-s32 func_150A1DA0(Actor *obj, TriggerZone *zone, s32);
+s32 zone_isOutside(Actor *obj, TriggerZone *zone, s32);
 
 /* First zone in the list whose type matches `mask` (0 = any) and that contains (x, y, z). */
 TriggerZone *func_1515EB84(s32 x, s32 y, s32 z, s32 mask, ZoneLink *node) {
     Actor probe;
     TriggerZone *zone;
 
-    probe.x_position = x;
-    probe.y_position = y;
+    probe.xpos = x;
+    probe.ypos = y;
     probe.floorY = y;
-    probe.old_x_position = x;
-    probe.old_y_position = y;
-    probe.z_position = z;
-    probe.old_z_position = z;
+    probe.old_xpos = x;
+    probe.old_ypos = y;
+    probe.zpos = z;
+    probe.old_zpos = z;
 
     for (; node != NULL; node = node->next) {
         zone = node->zone;
-        if (zone->disabled == 0 && (mask == 0 || ((zone->unk18 >> 24) & mask)) &&
-            ((zone->kind >> 2) == 0x18 || !(zone->unk18 >> 31)) && func_150A1DA0(&probe, zone, 0) == 0) {
+        if (zone->inactive == 0 && (mask == 0 || ((zone->data1 >> 24) & mask)) &&
+            (ZONE_TYPE(zone) == ZONE_TYPE_LIGHT_DIRECTIONAL_LOCAL || !(zone->data1 >> 31)) && zone_isOutside(&probe, zone, 0) == 0) {
             return node->zone;
         }
     }
@@ -664,218 +652,5 @@ void func_1515F170(s32 group, u8 disabled) {
         if (group == light->group) {
             light->disabled = disabled;
         }
-    }
-}
-
-/* A node of a list of spawn regions with their cached volume and area. */
-RegionNode *func_1515F1B0(TriggerZone *region) {
-    RegionNode *node;
-
-    node = (RegionNode *)func_10003C6C(sizeof(RegionNode), 1, 2, 0, 1);
-    if (node == NULL) {
-        return NULL;
-    }
-    node->region = region;
-    if (region != NULL) {
-        node->volume = func_1514462C((s32)region);
-    } else {
-        node->volume = 0.0f;
-    }
-    if (region != NULL) {
-        node->area = func_15144598(region);
-    } else {
-        node->area = 0.0f;
-    }
-    node->next = NULL;
-    return node;
-}
-
-/* Pushes `node` onto the front of `list`. */
-void func_1515F25C(RegionNode **list, RegionNode *node) {
-    node->next = *list;
-    *list = node;
-}
-
-typedef void (*ZoneHandler)(Actor *obj, TriggerZone *zone);
-
-extern ZoneHandler D_8008B090[12];
-
-/* Runs zone handler zone->unk18 for `obj`. */
-void func_1515F270(Actor *obj, TriggerZone *zone) {
-    s32 idx = zone->unk18;
-
-    if (idx >= 0 && idx < 12) {
-        if (D_8008B090[idx] != NULL) {
-            D_8008B090[idx](obj, zone);
-        }
-    }
-}
-
-s32 func_1505D024(Actor *obj, s32 arg1, u16 arg2, s32 arg3);
-
-void func_1515F2B8(Actor *obj, TriggerZone *zone) {
-    func_1505D024(obj, 0x6001D, obj->unk7A, -1);
-}
-
-extern ZoneHandler D_8008B0C0[3];
-
-/* TriggerZone handler: when the player (unique id 1) is in the zone, runs ambient effect zone->unk1C. */
-void func_1515F2E8(Actor *obj, TriggerZone *zone) {
-    s32 idx;
-
-    if (obj->unique_id == 1) {
-        idx = zone->unk1C;
-        if (idx >= 0 && idx < 3) {
-            D_8008B0C0[idx](obj, zone);
-        }
-    }
-}
-
-/* Ambient effect 0: eases the ambient colour halfway towards (97, 96, 98) each frame. */
-void func_1515F338(Actor *obj, TriggerZone *zone) {
-    u8 red;
-    u8 green;
-    u8 blue;
-
-    red = D_800DCD20[0];
-    green = D_800DCD20[1];
-    blue = D_800DCD20[2];
-    if (D_800DCD94 != 97.0f) {
-        D_800DCD94 += (97.0f - D_800DCD94) * 0.5f;
-        red = (u32)D_800DCD94;
-    }
-    if (D_800DCD98 != 96.0f) {
-        D_800DCD98 += (96.0f - D_800DCD98) * 0.5f;
-        green = (u32)D_800DCD98;
-    }
-    if (D_800DCD9C != 98.0f) {
-        D_800DCD9C += (98.0f - D_800DCD9C) * 0.5f;
-        blue = (u32)D_800DCD9C;
-    }
-    func_1515D4D4(red, green, blue, 0);
-}
-
-/* Ambient effect 1: eases the ambient colour halfway towards (229, 253, 160) each frame. */
-void func_1515F5C4(Actor *obj, TriggerZone *zone) {
-    u8 red;
-    u8 green;
-    u8 blue;
-
-    red = D_800DCD20[0];
-    green = D_800DCD20[1];
-    blue = D_800DCD20[2];
-    if (D_800DCD94 != 229.0f) {
-        D_800DCD94 += (229.0f - D_800DCD94) * 0.5f;
-        red = (u32)D_800DCD94;
-    }
-    if (D_800DCD98 != 253.0f) {
-        D_800DCD98 += (253.0f - D_800DCD98) * 0.5f;
-        green = (u32)D_800DCD98;
-    }
-    if (D_800DCD9C != 160.0f) {
-        D_800DCD9C += (160.0f - D_800DCD9C) * 0.5f;
-        blue = (u32)D_800DCD9C;
-    }
-    func_1515D4D4(red, green, blue, 0);
-}
-
-/* Ambient effect 2: eases the ambient colour towards a colour pulsing with sin(D_800DCDA0). */
-void func_1515F850(Actor *obj, TriggerZone *zone) {
-    f32 s;
-    f32 targetR;
-    f32 targetG;
-    f32 targetB;
-    u8 color[3];
-
-    color[0] = D_800DCD20[0];
-    color[1] = D_800DCD20[1];
-    color[2] = D_800DCD20[2];
-    s = sinf(D_800DCDA0);
-    targetR = (s * 29.5f) + 127.5f;
-    targetG = (s * 71.0f) + 109.0f;
-    targetB = (s * 26.0f) + 26.0f;
-    D_800DCDA0 += 0.07100000232f * D_800BE9A4;
-    D_800DCDA0 = func_15144B68(D_800DCDA0);
-    if (targetR != D_800DCD94) {
-        D_800DCD94 += (targetR - D_800DCD94) * 0.5f;
-        color[0] = (u32)D_800DCD94;
-    }
-    if (targetG != D_800DCD98) {
-        D_800DCD98 += (targetG - D_800DCD98) * 0.5f;
-        color[1] = (u32)D_800DCD98;
-    }
-    if (targetB != D_800DCD9C) {
-        D_800DCD9C += (targetB - D_800DCD9C) * 0.5f;
-        color[2] = (u32)D_800DCD9C;
-    }
-    func_1515D4D4(color[0], color[1], color[2], 0);
-}
-
-/* TriggerZone handler: func_1515F2E8 for a handler table that is empty in this build. */
-void func_1515FB70(Actor *obj, TriggerZone *zone) {
-    s32 idx;
-
-    if (obj->unique_id == 1) {
-        idx = zone->unk1C;
-        if (idx >= 0 && idx < 0) {
-        }
-    }
-}
-
-void func_1515FB94(Actor *obj, TriggerZone *zone) {
-    func_1505D024(obj, 0x6002D, obj->unk7A, -1);
-}
-
-/* TriggerZone handler: like func_1515FB94, also passing the index of the object linked to this zone (or -1). */
-void func_1515FBC4(Actor *obj, TriggerZone *zone) {
-    struct ZoneLinkObj *link;
-    Actor *target;
-    s32 targetIndex;
-
-    target = NULL;
-    link = func_15105C24((s32)zone);
-    if (link != NULL) {
-        target = link->unk98;
-    }
-    if (target != NULL) {
-        targetIndex = target - D_800CC2D0;
-    } else {
-        targetIndex = -1;
-    }
-    func_1505D024(obj, 0x6002E, obj->unk7A, targetIndex);
-}
-
-void func_1515FC34(Actor *obj, TriggerZone *zone) {
-    func_1505D024(obj, 0x33, 0xC000, -1);
-}
-
-s32 func_150AD960(s32, s32, s32, s32);
-void func_15136C3C(Actor *, s32, s32, s32, s32, s32, s32, s32);
-void func_1507CD64(Actor *, s32);
-
-/*
- * TriggerZone handler: unless the zone has a range (unk1C, in hundredths of its radius) that `obj`
- * is outside of, fires event 0x2F on `obj`.
- */
-void func_1515FC60(Actor *obj, TriggerZone *zone) {
-    s32 pad; // matching: stack slot
-    f32 limit;
-    f32 scale;
-    s32 value;
-
-    if (obj->unk31C != NULL && obj->unk31C->unk120 == 0) {
-        value = zone->unk1C;
-        if (value != 0) {
-            scale = (f32)(u32)value * 0.009999999776f;
-            value = func_150AD960(zone->x, zone->z, obj->x_position, obj->z_position);
-            limit = (zone->radius * scale) - obj->bodyRadius;
-            if (limit > value) {
-                return;
-            }
-        }
-        func_1505D024(obj, 0x2F, 0, -1);
-        func_15136C3C(obj, 1, 1, 1, 1, 0, 0xFF, 1);
-        func_15145A50(obj);
-        func_1507CD64(obj, 6);
     }
 }

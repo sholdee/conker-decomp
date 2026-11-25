@@ -41,8 +41,8 @@ extern s32 func_150049A4(Gfx *dl, s32 arg1, s32 arg2);
 extern s32 func_1510CE60(Gfx *dl, s32 strict, s32 countUse, s32 keepLevel, s32 *usedOut);
 extern s32 func_1510D0EC(s32 id, s32 *size, s32 arg2, s32 arg3);
 
-/* Loads level `level`'s models, rebases them and sets up the first four as the level's display lists. */
-void func_150031EC(s32 level) {
+/* Loads level `levelId`'s models, rebases them and sets up the first four as the level's display lists. */
+void func_150031EC(s32 levelId) {
     LevelModelEntry *models;
     ModelAsset *model;
     s32 count;
@@ -53,10 +53,10 @@ void func_150031EC(s32 level) {
     s32 size;
     s32 id;
 
-    if (level >= 69) {
-        level = 0;
+    if (levelId >= 69) {
+        levelId = 0;
     }
-    models = func_1502B6BC(&loaded, 0, &count, 2, 4, level);
+    models = func_1502B6BC(&loaded, 0, &count, 2, 4, levelId);
     D_800B0E50 = models;
     for (k = 1; k < 4; k++) {
         D_800B0E00[k] = 0;
@@ -122,7 +122,7 @@ s32 func_150034B4(void) {
     D_800D9F58 = 0xFFFF;
     D_800D9F5C = -1;
 
-    if (D_800BE9F0 != 1 && D_800BE9F0 != 50) {
+    if (level != 1 && level != 50) {
         D_800D9F60 = 0;
     } else {
         D_800D9F60 = 1;
@@ -167,7 +167,7 @@ extern void func_1510F800(s32 type);
 
 /*
  * Builds the collision triangle tables of the three maps: map 0 from level display list 0, map 1
- * from display list 3 and map 2 from the D_800DBEF4 objects, recording each object's triangle range.
+ * from display list 3 and map 2 from the db_Object_array objects, recording each object's triangle range.
  */
 void func_15003668(s32 unused) {
     s32 firstTri;
@@ -191,25 +191,25 @@ void func_15003668(s32 unused) {
     func_150026E8(1);
 
     func_150026C4(2);
-    for (i = 0; i < D_800DBEF0; i++) {
-        if ((D_800DBEF4[i].flags & 0x60) != 0x20) {
-            func_15002724(D_800DBEF4[i].displayList);
+    for (i = 0; i < gWorldObjectCount; i++) {
+        if ((db_Object_array[i].object_status & 0x60) != 0x20) {
+            func_15002724(db_Object_array[i].displayList);
         }
     }
     func_15002754();
 
     D_800D2C68 = 1;
     D_800D2C28[1] = 0;
-    for (i = 0; i < D_800DBEF0; i++) {
-        if ((D_800DBEF4[i].flags & 0x60) != 0x20) {
+    for (i = 0; i < gWorldObjectCount; i++) {
+        if ((db_Object_array[i].object_status & 0x60) != 0x20) {
             // matching: storing D_800DBE38 rather than firstTri keeps firstTri at two references (regalloc)
             firstTri = D_800DBE38;
-            D_800DBEF4[i].firstTri = D_800DBE38;
-            func_15001460(D_800DBEF4[i].displayList);
-            D_800DBEF4[i].numTris = D_800DBE38 - firstTri;
+            db_Object_array[i].firstTri = D_800DBE38;
+            func_15001460(db_Object_array[i].displayList);
+            db_Object_array[i].numTris = D_800DBE38 - firstTri;
         } else {
-            D_800DBEF4[i].firstTri = 0;
-            D_800DBEF4[i].numTris = 0;
+            db_Object_array[i].firstTri = 0;
+            db_Object_array[i].numTris = 0;
         }
     }
     func_150026E8(2);

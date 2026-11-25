@@ -5,7 +5,7 @@
 /*
  * Per-player pending warps: a warp zone fades the player's view out, and once the fade has run its course
  * the player is respawned at the zone's spawn point (or the zone's level is requested, when it is not the
- * current level D_800BE9F0).
+ * current level level).
  */
 
 extern s8 D_800DD2B0[]; // per player: level of the pending warp, -1 when none
@@ -41,8 +41,8 @@ void func_15172CA8(s32 player) {
 void func_15172D28(Actor *actor, s32 spawnIndex) {
     func_15085430(actor, spawnIndex, 1);
     actor->unk2F8 &= ~0x10;
-    if (D_800BE9B4 == 0 && actor->unk31C != NULL) {
-        actor->unk31C->unk56 = 3;
+    if (D_800BE9B4 == 0 && actor->mv != NULL) {
+        actor->mv->unk56 = 3;
     }
 }
 
@@ -52,37 +52,37 @@ void func_15172D80(s32 player) {
     if (D_800DD2B0[player] == -1) {
         return;
     }
-    if (D_800CC2D0[player].health == 0) {
+    if (movement_obj[player].energy == 0) {
         D_800DD2B0[player] = -1;
         func_1517EE40(0, 0, 0, 50, 0, player);
     }
     if (func_1517F40C(player)) {
-        if (D_800BE9F0 != D_800DD2B0[player]) {
+        if (level != D_800DD2B0[player]) {
             func_1501C730(1, D_800DD2B0[player], 0, 0, 0);
         } else {
             func_15172CA8(player);
-            func_15172D28(&D_800CC2D0[player], D_800DD2C0[player]);
+            func_15172D28(&movement_obj[player], D_800DD2C0[player]);
         }
     }
 }
 
 /*
- * Warp zone touched by `actor`, leading to spawn point `spawnIndex` of `level`. A player (an actor with a
+ * Warp zone touched by `actor`, leading to spawn point `spawnIndex` of `levelId`. A player (an actor with a
  * camera) with no warp pending starts a 10-frame fade-out and records the warp; any other actor is
- * respawned at once when `level` is the current one.
+ * respawned at once when `levelId` is the current one.
  */
-void func_15172E7C(Actor *actor, s32 level, s32 spawnIndex) {
-    s32 player = actor->unk127;
+void func_15172E7C(Actor *actor, s32 levelId, s32 spawnIndex) {
+    s32 player = actor->playernumber;
 
-    if (actor->health != 0 && (actor->unk31C == NULL || actor->unk31C->unk23 <= 0)) {
-        if (actor->camera != NULL) {
+    if (actor->energy != 0 && (actor->mv == NULL || actor->mv->door_walkf_time <= 0)) {
+        if (actor->CameraPtr != NULL) {
             if (D_800DD2B0[player] == -1) {
                 func_1517EE40(0, 0, 0, 10, 1, player);
                 actor->unk2F8 |= 0x10;
-                D_800DD2B0[player] = level;
+                D_800DD2B0[player] = levelId;
                 D_800DD2C0[player] = spawnIndex;
             }
-        } else if (level == D_800BE9F0) {
+        } else if (levelId == level) {
             func_15172D28(actor, spawnIndex);
         }
     }

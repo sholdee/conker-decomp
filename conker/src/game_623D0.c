@@ -7,7 +7,7 @@ typedef struct ReflectionEntry {
     /* 0x00 */ u32 mtx;        // segment address of the mirrored matrices
     /* 0x04 */ u8 alpha;
     /* 0x05 */ u8 color[3];
-    /* 0x08 */ u8 objIndex;    // index into D_800CC2D0
+    /* 0x08 */ u8 objIndex;    // index into movement_obj
     /* 0x09 */ u8 ownerId;     // unique_id of that object
     /* 0x0A */ u8 setId;       // attachment set id (attachment reflections only)
     /* 0x0B */ u8 isAttachment;
@@ -131,10 +131,10 @@ void func_15034F30(Actor *obj, ReflectionEntry *entry, s32 mode, MtxF *srcMtx,
         return;
     }
     if (obj != NULL && obj->unk9C != 0) {
-        savedMtx = obj->unk1D4;
-        obj->unk1D4 = (MtxF *)dstMtx;
+        savedMtx = obj->ob_matrix_ptr;
+        obj->ob_matrix_ptr = (MtxF *)dstMtx;
         func_15034728(obj);
-        obj->unk1D4 = savedMtx;
+        obj->ob_matrix_ptr = savedMtx;
     }
 }
 
@@ -167,19 +167,19 @@ s32 func_15035714(s32 mode, Actor *obj, f32 (*mtx)[4], f32 planeY) {
     f32 delta;
 
     recp = (s32)D_800BE628;
-    id = obj->id;
+    id = obj->character_type;
     bounds = D_800D1C90[id];
     radius = bounds->bodyRadius;
     radiusXZ = radius;
     radiusY = radius;
-    radiusXZ *= obj->xz_scale;
-    radiusY *= obj->y_scale;
-    height = bounds->bodyHeight * obj->y_scale;
+    radiusXZ *= obj->scale_xz;
+    radiusY *= obj->scale_y;
+    height = bounds->bodyHeight * obj->scale_y;
     if (mode == 1 || mode == 0) {
-        delta = (obj->y_position + height) - planeY;
+        delta = (obj->ypos + height) - planeY;
         y = planeY - delta;
     } else {
-        y = obj->y_position + height;
+        y = obj->ypos + height;
     }
     if (func_150A6360(recp, D_800D9C10, mtx[3][0], y, mtx[3][2], radiusXZ, radiusY, 20000.0f) == 0) {
         return 1;
@@ -219,31 +219,31 @@ void func_15035808(s32 mode, s32 objIndex, f32 planeX, f32 planeY, f32 planeZ, f
     if (D_800C3F00 == 15) {
         return;
     }
-    if (mode == 0 && D_800CC2D0[objIndex].interaction_state != 1) {
+    if (mode == 0 && movement_obj[objIndex].type != 1) {
         return;
     }
-    if (D_800CC2D0[objIndex].unk1D4 == NULL) {
+    if (movement_obj[objIndex].ob_matrix_ptr == NULL) {
         return;
     }
-    if ((D_800CC2D0[objIndex].unk74 & 0xF) == 15) {
+    if ((movement_obj[objIndex].unk74 & 0xF) == 15) {
         return;
     }
 // matching: an unused label here swaps IDO's s0/s1 choice for range and alpha
 visible:;
-    alpha = D_800CC2D0[objIndex].unk7;
+    alpha = movement_obj[objIndex].unk7;
     if (alpha == 0) {
         return;
     }
-    numBones = func_1502DB20(D_800CC2D0[objIndex].id);
+    numBones = func_1502DB20(movement_obj[objIndex].character_type);
     if (D_800C3E7C * sizeof(Mtx) < D_800C3E88 + numBones * sizeof(Mtx) - D_800C3E8C) {
         return;
     }
     if (D_800C35EA[0] == 1) {
         range = 10000;
     }
-    dist = math_distance3D(D_800DBFF0->eye.x - D_800CC2D0[objIndex].x_position,
-                         D_800DBFF0->eye.y - D_800CC2D0[objIndex].y_position,
-                         D_800DBFF0->eye.z - D_800CC2D0[objIndex].z_position);
+    dist = math_distance3D(camera_global_Cameras->eye.x - movement_obj[objIndex].xpos,
+                         camera_global_Cameras->eye.y - movement_obj[objIndex].ypos,
+                         camera_global_Cameras->eye.z - movement_obj[objIndex].zpos);
     if ((f32)range < dist) {
         return;
     }
@@ -267,14 +267,14 @@ visible:;
     entry->color[2] = color[2];
     entry->objIndex = objIndex;
     entry->isAttachment = FALSE;
-    entry->ownerId = D_800CC2D0[objIndex].unique_id;
-    srcMtx = D_800CC2D0[objIndex].unk1D4;
+    entry->ownerId = movement_obj[objIndex].unique_id;
+    srcMtx = movement_obj[objIndex].ob_matrix_ptr;
     mtx = entry->mtx;
-    func_15034F30(&D_800CC2D0[objIndex], entry, mode, srcMtx, mtx, numBones, planeX, planeY, planeZ, unused,
-                  angle, D_800CC2D0[objIndex].x_position, D_800CC2D0[objIndex].y_position,
-                  D_800CC2D0[objIndex].z_position, fadeStart, fadeEnd, maxAlpha, 0, 0);
+    func_15034F30(&movement_obj[objIndex], entry, mode, srcMtx, mtx, numBones, planeX, planeY, planeZ, unused,
+                  angle, movement_obj[objIndex].xpos, movement_obj[objIndex].ypos,
+                  movement_obj[objIndex].zpos, fadeStart, fadeEnd, maxAlpha, 0, 0);
     entry->alpha = (entry->alpha * fade) >> 8;
-    if (func_15035714(mode, &D_800CC2D0[objIndex], (f32 (*)[4])srcMtx, planeY) != 0) {
+    if (func_15035714(mode, &movement_obj[objIndex], (f32 (*)[4])srcMtx, planeY) != 0) {
         D_800C3F00--;
         return;
     }
@@ -284,7 +284,7 @@ visible:;
     att = D_800C3EE0;
     while (att != NULL) {
         next = att->next;
-        if (D_800CC2D0[objIndex].unique_id != att->ownerId || att->alpha == 0) {
+        if (movement_obj[objIndex].unique_id != att->ownerId || att->alpha == 0) {
             att = next;
             continue;
         }
@@ -297,9 +297,9 @@ visible:;
         entry->color[2] = color[2];
         entry->objIndex = objIndex;
         entry->isAttachment = TRUE;
-        entry->ownerId = D_800CC2D0[objIndex].unique_id;
+        entry->ownerId = movement_obj[objIndex].unique_id;
         entry->setId = att->setId;
-        if (func_15031070(att, &D_800CC2D0[objIndex], &srcMtx, partCount) == 0) {
+        if (func_15031070(att, &movement_obj[objIndex], &srcMtx, partCount) == 0) {
             att = next;
             continue;
         }
@@ -319,8 +319,8 @@ visible:;
             srcIsFixed = TRUE;
         }
         func_15034F30(NULL, entry, mode, srcMtx, mtx, numMtx, planeX, planeY, planeZ, unused, angle,
-                      D_800CC2D0[objIndex].x_position, D_800CC2D0[objIndex].y_position,
-                      D_800CC2D0[objIndex].z_position, fadeStart, fadeEnd, attAlpha, srcIsFixed, TRUE);
+                      movement_obj[objIndex].xpos, movement_obj[objIndex].ypos,
+                      movement_obj[objIndex].zpos, fadeStart, fadeEnd, attAlpha, srcIsFixed, TRUE);
         att = next;
         entry->alpha = (entry->alpha * fade) >> 8;
     }
@@ -421,15 +421,15 @@ void func_15036148(void) {
     s16 unusedB;
     s32 i;
 
-    if (!(D_800DBFF0->status & 1)) {
+    if (!(camera_global_Cameras->SpecialFlags & 1)) {
         for (i = 0; i < 25; i++) {
-            if (D_800CC2D0[i].interaction_state != 0 && (D_800CC2D0[i].unk5 == 0 || D_800CC2D0[i].unk5 == 1)) {
-                if (D_800CC2D0[i].unk118 != -10000.0f && D_800CC2D0[i].unk118 < D_800CC2D0[i].y_position &&
-                    D_800CC2D0[i].floorY < D_800CC2D0[i].unk118 && D_800CC2D0[i].unk28 > 5.0f) {
-                    func_1507C3E0(&D_800CC2D0[i], &height, &unusedA, &unusedB);
-                    if ((f32)height < D_800CC2D0[i].unk118 - D_800CC2D0[i].floorY) {
-                        func_15035808(1, i, D_800CC2D0[i].x_position, D_800CC2D0[i].unk118,
-                                      D_800CC2D0[i].z_position, 0.0f, 0.0f, 100.0f, 150.0f, 127.0f);
+            if (movement_obj[i].type != 0 && (movement_obj[i].drawtype == 0 || movement_obj[i].drawtype == 1)) {
+                if (movement_obj[i].unk118 != -10000.0f && movement_obj[i].unk118 < movement_obj[i].ypos &&
+                    movement_obj[i].floorY < movement_obj[i].unk118 && movement_obj[i].shad > 5.0f) {
+                    func_1507C3E0(&movement_obj[i], &height, &unusedA, &unusedB);
+                    if ((f32)height < movement_obj[i].unk118 - movement_obj[i].floorY) {
+                        func_15035808(1, i, movement_obj[i].xpos, movement_obj[i].unk118,
+                                      movement_obj[i].zpos, 0.0f, 0.0f, 100.0f, 150.0f, 127.0f);
                     }
                 }
             }

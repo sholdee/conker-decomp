@@ -52,9 +52,9 @@ extern void func_15131958(void *, f32, void *);
 
 /* Trail anchor point: 20 units above the actor. */
 void func_150D8B10(Actor *actor, Vec3f *out) {
-    out->x = actor->x_position;
-    out->y = actor->y_position + 20.0f;
-    out->z = actor->z_position;
+    out->x = actor->xpos;
+    out->y = actor->ypos + 20.0f;
+    out->z = actor->zpos;
 }
 
 void func_15145740(Actor *actor, Vec3f *target, Vec3f *dir, Vec3f *offsetDir, f32 pitchOffset);
@@ -76,8 +76,8 @@ void func_150D8B88(Actor *actor) {
     Trail *trail;
     s32 variant;
 
-    if (actor->unk31C != NULL) {
-        if (D_800BE9F0 == 10) {
+    if (actor->mv != NULL) {
+        if (level == 10) {
             func_1000D96C(10, 55, 0);
         }
 
@@ -101,8 +101,8 @@ void func_150D8B88(Actor *actor) {
         data.sparkAccum = 0.0f;
         data.texScroll = -16384.0f;
 
-        if (actor->unk31C != NULL) {
-            if (actor->unk31C->unk84 != 0) {
+        if (actor->mv != NULL) {
+            if (actor->mv->bot != 0) {
                 data.flags &= ~1;
             }
         }
@@ -171,8 +171,8 @@ s32 func_150D8E4C(Trail *trail) {
 
     data->timer += D_800BE9E4;
     if (data->timer >= 61) {
-        if (data->owner != NULL && data->owner->unk31C != NULL) {
-            data->owner->unk31C->unk1AA++;
+        if (data->owner != NULL && data->owner->mv != NULL) {
+            data->owner->mv->shotsfired++;
         }
         data->timer = 0;
     }
@@ -197,17 +197,17 @@ s32 func_150D8FAC(Trail *trail) {
     data = trail->data;
     points = trail->points;
     actor = data->owner;
-    if ((actor->unk31C->unk78 != 3) || (actor->health <= 0)) {
+    if ((actor->mv->rt_context_b != 3) || (actor->energy <= 0)) {
         func_150D8E1C(trail);
     }
-    if ((actor->interaction_state == 0) || (actor->unique_id != data->ownerId)) {
+    if ((actor->type == 0) || (actor->unique_id != data->ownerId)) {
         return 0;
     }
     func_150D8B10(actor, &pos);
     func_150D8B3C(actor, &vel);
     trail->head.tmpl.pos = pos;
     if (data->flags & 1) {
-        flags = actor->unk31C->buttons;
+        flags = actor->mv->buttons;
         if (flags & 0x2000) {
             data->speedScale += 0.001379000023f * D_800BE9A4;
             if (data->speedScale > 0.04293100163f) {
@@ -395,39 +395,39 @@ s32 func_150D942C(Trail *trail) {
                     func_150DA67C(trail, &hit, dir);
                     if (hit.hitType >= 2) {
                         target = hit.obj;
-                        target->unk2EC = 1;
-                        if (target->id == 0x3A) {
-                            target->unk232 = 10;
-                            target->unk218 = NULL;
-                        } else if (target->id == 0x10 && target->unk251 == 1) {
-                            func_1505A250(target->x_position - hit.pos.x, target->z_position - hit.pos.z,
+                        target->taskint[2] = 1;
+                        if (target->character_type == 0x3A) {
+                            target->intelwalk = 10;
+                            target->scriptCmd = NULL;
+                        } else if (target->character_type == 0x10 && target->unk251 == 1) {
+                            func_1505A250(target->xpos - hit.pos.x, target->zpos - hit.pos.z,
                                           ((1.0f - (totalLen - 50.0f) * 0.001052631531f) * 0.4550000131f) + 0.2010000050f,
-                                          &target->unk164, &target->unk168);
-                            if (target->unk232 == 15) {
+                                          &target->ob_slopex, &target->ob_slopey);
+                            if (target->intelwalk == 15) {
                                 s32 pad; // matching: -g3 block scope
-                                target->unk218 = NULL;
+                                target->scriptCmd = NULL;
                             }
-                        } else if (target->id == 0x10) {
-                            dx = cur->pos.x - owner->x_position;
-                            dz = cur->pos.z - owner->z_position;
-                            if (target->unk232 == 16) {
-                                target->xz_velocity *= 0.7200000286f;
+                        } else if (target->character_type == 0x10) {
+                            dx = cur->pos.x - owner->xpos;
+                            dz = cur->pos.z - owner->zpos;
+                            if (target->intelwalk == 16) {
+                                target->speed *= 0.7200000286f;
                                 excess = 1.0f / (sqrtf(dx * dx + dz * dz) * -0.07000000030f);
-                                func_1505A250(dx * excess, dz * excess, 0.7f, &target->unk164, &target->unk168);
+                                func_1505A250(dx * excess, dz * excess, 0.7f, &target->ob_slopex, &target->ob_slopey);
                             }
-                            if (target->immune == 0) {
+                            if (target->imune == 0) {
                                 s32 pad; // matching: -g3 block scope
-                                target->unk232 = 15;
-                                target->unk218 = NULL;
+                                target->intelwalk = 15;
+                                target->scriptCmd = NULL;
                             }
-                        } else if (target->id == 0x91) {
-                            target->unk232 = 3;
-                            target->unk218 = NULL;
-                        } else if (target->id == 0x90) {
-                            target->unk232 = 44;
-                            target->unk218 = NULL;
+                        } else if (target->character_type == 0x91) {
+                            target->intelwalk = 3;
+                            target->scriptCmd = NULL;
+                        } else if (target->character_type == 0x90) {
+                            target->intelwalk = 44;
+                            target->scriptCmd = NULL;
                         } else {
-                            ownerIndex = owner - D_800CC2D0;
+                            ownerIndex = owner - movement_obj;
                             func_1505D024(target, 0xE0036, ((u16)(func_150484A0(dir[0], dir[2]) * 10430.37793f) - 0x4000) | 1, ownerIndex);
                         }
                     }
@@ -789,7 +789,7 @@ void func_150DA67C(Trail *trail, RayHit *hit, f32 *dir) {
     data = trail->data;
     target = hit->obj;
     if (hit->hitType != 0) {
-        if (hit->hitType >= 2 && (target->id == 0x33 || target->id == 0x3A)) {
+        if (hit->hitType >= 2 && (target->character_type == 0x33 || target->character_type == 0x3A)) {
             data->sparkAccum += (0.1990000159f + func_150ADA68() * 0.1540000141f) * D_800BE9A4;
             if (data->sparkAccum > 1.0f) {
                 ParticleDesc spawn;

@@ -132,7 +132,7 @@ typedef struct Emitter {
     /* 0x3C */ u8 initialTimer;
     /* 0x3D */ u8 radiusXZ;
     /* 0x3E */ u8 radiusY;
-    /* 0x3F */ u8 object; /* D_800CC2D0 index whose bone it follows; 0xFF for none */
+    /* 0x3F */ u8 object; /* movement_obj index whose bone it follows; 0xFF for none */
     /* 0x40 */ u8 particleLifetime;
     /* 0x41 */ u8 interval;
     /* 0x42 */ u8 countdown;
@@ -152,15 +152,15 @@ extern ParticleLink *func_150448D0(s32, s32, s32, s32, s32, s32, s32, s16 *, s16
 
 void func_1516D400(void) {
     s32 i;
-    s32 level;
+    s32 intensity;
 
     for (i = 0; i < 4; i++) {
         if (D_800DD2A0[i] < 0xFF) {
-            level = D_800DD2A0[i] + D_800BE9A0;
-            if (level > 0xFF) {
-                level = 0xFF;
+            intensity = D_800DD2A0[i] + D_800BE9A0;
+            if (intensity > 0xFF) {
+                intensity = 0xFF;
             }
-            D_800DD2A0[i] = level;
+            D_800DD2A0[i] = intensity;
         }
     }
 }
@@ -512,7 +512,7 @@ void func_1516DB90(Emitter *arg0) {
                         z = emitter->z;
                     }
                 } else {
-                    if (D_800CC2D0[emitter->object].unk1D4 == NULL) {
+                    if (movement_obj[emitter->object].ob_matrix_ptr == NULL) {
                         continue;
                     }
                     fromX = D_800A6E30[emitter->x][0];
@@ -524,15 +524,15 @@ void func_1516DB90(Emitter *arg0) {
                     if (D_800A6E30[emitter->x][6] != 0) {
                         toZ += (u32)(func_150ADA20() & D_800A6E30[emitter->x][6]);
                     }
-                    func_150A7960(((f32 (*)[16])D_800CC2D0[emitter->object].unk1D4)[emitter->bone], fromX, fromY, fromZ, &fromX, &fromY, &fromZ);
-                    func_150A7960(((f32 (*)[16])D_800CC2D0[emitter->object].unk1D4)[emitter->bone], toX, toY, toZ, &toX, &toY, &toZ);
+                    func_150A7960(((f32 (*)[16])movement_obj[emitter->object].ob_matrix_ptr)[emitter->bone], fromX, fromY, fromZ, &fromX, &fromY, &fromZ);
+                    func_150A7960(((f32 (*)[16])movement_obj[emitter->object].ob_matrix_ptr)[emitter->bone], toX, toY, toZ, &toX, &toY, &toZ);
                     velX = (toX - fromX) * 8.0f;
                     velY = (toY - fromY) * 8.0f;
                     velZ = (toZ - fromZ) * 8.0f;
                     velocityY = velY;
-                    angle = 0x40 - D_800CC2D0[emitter->object].unk76;
-                    velX -= D_800CC2D0[emitter->object].xz_velocity * func_15048A40(angle) * 64.0f;
-                    velZ -= D_800CC2D0[emitter->object].xz_velocity * func_150489B0(angle) * 64.0f;
+                    angle = 0x40 - movement_obj[emitter->object].angle;
+                    velX -= movement_obj[emitter->object].speed * func_15048A40(angle) * 64.0f;
+                    velZ -= movement_obj[emitter->object].speed * func_150489B0(angle) * 64.0f;
                     fixed.word = velX;
                     velXHigh = fixed.bytes[2];
                     velXLow = fixed.bytes[3];
@@ -668,7 +668,7 @@ extern u8 D_800A6E0C[][3];
 
 s32 func_1516E8CC(Particle *particle) {
     s32 alpha;
-    s32 level;
+    s32 intensity;
     s32 scale;
     s32 i;
     f32 t;
@@ -700,20 +700,20 @@ s32 func_1516E8CC(Particle *particle) {
     }
 
     scale = particle->scaleX;
-    level = particle->lifetime;
+    intensity = particle->lifetime;
     scale += D_800BE9E4 * 10;
     particle->scaleY = scale;
     particle->scaleX = scale;
 
     if (particle->lifetime == 0) {
-        level += particle->alpha >> 5;
+        intensity += particle->alpha >> 5;
     } else {
-        level = level + 8;
+        intensity = intensity + 8;
     }
 
     for (i = p->u.ramp.start; i < p->u.ramp.start + 8; i++) {
-        if (level >= D_800A6E00[i]) {
-            t = (f32)(level - D_800A6E00[i]) / (f32)(D_800A6E00[i - 1] - D_800A6E00[i]);
+        if (intensity >= D_800A6E00[i]) {
+            t = (f32)(intensity - D_800A6E00[i]) / (f32)(D_800A6E00[i - 1] - D_800A6E00[i]);
             u = 1.0f - t;
             particle->r = D_800A6E0C[i][0] * u + D_800A6E0C[i - 1][0] * t;
             particle->g = D_800A6E0C[i][1] * u + D_800A6E0C[i - 1][1] * t;
@@ -774,7 +774,7 @@ s32 func_1516ECAC(Particle *particle) {
 void func_1516ED68(s32 object, s32 duration, u8 arg2, s32 arg3) {
     u8 id;
 
-    id = D_800CC2D0[object].id;
+    id = movement_obj[object].character_type;
     if (id != 0x3A) {
         return;
     }
@@ -1130,7 +1130,7 @@ void func_1516FE1C(s32 object, s32 duration, u8 arg2, s32 arg3) {
     s32 position;
 
     velocityXHigh = 0;
-    if (D_800CC2D0[object].interaction_state == 1) {
+    if (movement_obj[object].type == 1) {
         /* follow the object's bone, D_800A6E30 row 4 */
         posHigh = 4;
         posLow = 0;
@@ -1138,7 +1138,7 @@ void func_1516FE1C(s32 object, s32 duration, u8 arg2, s32 arg3) {
         flags = 1;
     } else {
         /* follow the object's position vector; bone is left unset (unused without an object) */
-        position = (s32)&D_800CC2D0[object].x_position;
+        position = (s32)&movement_obj[object].xpos;
         posHigh = position >> 16;
         posLow = position & 0xFFFF;
         object = 0xFF;
@@ -1272,7 +1272,7 @@ void func_15170500(s16 x, s16 y, s16 z, s32 angle, s32 isParticle, u8 arg5, s32 
 
     rise = 0.0f;
     if (isParticle == 0) {
-        angle = D_800CC2D0[0].unk7A;
+        angle = movement_obj[0].langle;
     }
     tilt = func_151EF610() % 50;
     dirX = func_150489B0((u8)angle);

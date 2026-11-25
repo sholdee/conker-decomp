@@ -11,10 +11,43 @@ extern f32 fabsf(f32);
 /* Positional sound records (init_EB00.c). A record callback runs each update with the values about to be
  * applied and may change them; returning nonzero stops the record. */
 typedef struct SoundRecord SoundRecord;
-typedef struct TimedSoundRecord TimedSoundRecord;
-typedef struct DelayedSoundRecord DelayedSoundRecord;
 typedef s32 (*SoundRecordCallback)(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix,
                                    u16 *sound);
+
+/* A positional sound being tracked by func_10011624 (dynamicSounds, up to 32).
+ * original: struct AlSSound (rom_debug_struct.c); field names are Rare's labels with spaces as underscores,
+ * except mix and the members of the two callback parameter unions. */
+struct SoundRecord {
+    /* 0x00 */ u16 sample;
+    /* 0x02 */ s16 x;
+    /* 0x04 */ s16 y;
+    /* 0x06 */ s16 z;
+    /* 0x08 */ u16 distance_max;
+    /* 0x0A */ s16 distance_loudest;
+    /* 0x0C */ s32 max_volume;
+    /* 0x10 */ u32 flags; /* see init_EB00.c */
+    /* 0x14 */ SoundRecordCallback callback_ptr;
+    /* 0x18 */ union {
+        void *ptr;
+        Actor *owner;   /* the object the sound follows (func_1000EE70, func_1000EFB4) */
+        s32 timer;      /* countdown (func_1000EB00, func_1000EBC4) */
+        s32 delay;      /* low half: countdown; high half: the sound held back meanwhile */
+        u16 half[2];
+    } callback_param1;
+    /* 0x1C */ union {
+        s32 val;        /* func_1000EE70: the owner's unique_id in the low byte */
+        Actor *obj;     /* the object the delayed sound plays on (func_1000ECCC, game_130CB0.c) */
+        u16 *ids;       /* func_1000EFB4: 0-terminated list of the owner's animation ids (Actor.unk84) */
+    } callback_param2;
+    /* 0x20 */ s16 pitch_shift_cent;
+    /* 0x22 */ u8 pan;     /* last pan sent to the voice; bit 7 is the fx-mix bit */
+    /* 0x23 */ u8 mix;
+    /* 0x24 */ u16 sound_id; /* voice handle */
+    /* 0x26 */ s16 current_volume;
+    /* 0x28 */ s16 distance_current;
+    /* 0x2A */ u8 pad2A[2];
+    /* 0x2C */ f32 pitch;
+}; /* size 0x30 */
 
 /* Sound bank loader (init_8F90.c): a bank fetch proc takes an owner slot (a ROM reference, or a record
  * once loading has started) and returns the bank's data, loading it on demand. */
@@ -50,7 +83,7 @@ void func_10005218(void);
 void func_10005298(void);
 void func_100084D8(u8 arg0);
 s32  func_1000853C(u8 arg0);
-void func_10008570(u8 arg0, s32 arg1);
+void func_10008570(u8 player, OSMesgQueue *queue);
 void func_100085A4(s32 arg0, s32 arg1, s32 arg2);
 void func_100085B8(u8 arg0, s32 arg1, u8 arg2);
 void func_100085F8(u8 arg0, s32 arg1);
@@ -92,8 +125,8 @@ s32  func_1000E704(s32 arg0, s32 arg1, s32 arg2);
 void func_1000E75C(s32 arg0);
 s32  func_1000E770(s32 *arg0, s32 *arg1);
 u16  func_1000EA94(s32 arg0);
-s32 func_1000EB00(TimedSoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
-s32 func_1000EBC4(TimedSoundRecord *record, s32 *active, u32 *volume, s32 *pan);
+s32 func_1000EB00(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
+s32 func_1000EBC4(SoundRecord *record, s32 *active, u32 *volume, s32 *pan);
 s32 func_1000EF40(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
 void func_1000F248(s32 arg0);
 s32  func_1000F3D0(u16 arg0);
@@ -124,19 +157,18 @@ void func_1001263C(s32 arg0, s32 arg1, s32 arg2);
 s32  func_100126E8(u8 *dst, s32 dstSize);
 s32  func_10012718(u16 arg0, Actor *arg1, s32 arg2, s16 arg3, u16 arg4);
 s32  func_100127D0(void);
-void func_10012A28(struct121 *arg0, s32 arg1, s32 arg2, s32 arg3);
-void func_10012B84(struct11 *arg0, s32 arg1);
-void func_10012BD0(struct11 *arg0, s32 arg1);
-void func_10012C5C(struct9 *arg0, s32 arg1, s32 arg2);
-void func_10012CFC(struct12 *arg0, s32 arg1, s32 arg2);
+void func_10012A28(ALBank *bank, s32 offset, s32 table, s32 arg3);
+void func_10012B84(ALInstrument *inst, s32 arg1);
+void func_10012BD0(ALInstrument *inst, s32 arg1);
+void func_10012C5C(ALSound *sound, s32 offset, s32 table);
+void func_10012CFC(WaveTable *wave, s32 offset, s32 table);
 f32  func_10012D80(u8 arg0);
 s32  func_10012E04(s32 *arg0, f32 *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5);
-s32  func_10012F94(struct124 *arg0, f32 *arg1);
+s32  func_10012F94(struct OscState *osc, f32 *value);
 void func_100131D8(s32 *arg0);
-void func_100131FC(struct13 *arg0, s32 arg1);
-s32  func_10015878(struct04 *arg0);
+void func_100131FC(ALSeqpConfig *config, s32 arg1);
 void func_10016E90(SndState *arg0);
-void func_10016F00(struct154 *arg0);
+void func_10016F00(SndState *state);
 SndState *func_10017100(s32 arg0, s16 arg1);
 void func_10017298(SndState *arg0);
 s32  func_100173C4(SndState **arg0);
@@ -148,22 +180,17 @@ void func_10017870(u8 arg0);
 void func_10017944(s32 arg0, u32 arg1);
 
 
-void n_alInit(struct07 *arg0, s32 arg1);
+void n_alInit(void *globals, void *config);
 void n_alClose(s32 arg0);
 s32  _n_timeToSamplesNoRound(s32 micros);
 s32  _n_timeToSamples(s32 micros);
 f32  alCents2Ratio(s32 arg0);
-void func_1001A3E0(struct24 *arg0, s32 arg1, s32 arg2, s32 arg3);
-s32  __n_vsDelta(struct07 *arg0, s32 arg1);
 void func_1001CBF0(f32 arg0, f32 arg1, f32 arg2, f32 arg3[3], f32 arg4[3]);
-void func_1001CD54(struct125 *arg0);
 f32  func_1001CEA4(s32 arg0);
-void func_1001D6E8(struct42 *arg0, s32 (*arg1)(s32 arg), struct15 *arg2);
 s32  func_1001D9B0(s16 arg0);
 s32  func_1001DA28(s16 arg0);
 void func_1001DAA0(s32 arg0, s16 arg1, s32 arg2);
 void func_1001DAE4(ALVoiceConfig *arg0, s16 arg1, s32 *arg2);
-// void func_1001E170(struct22 *arg0, s32 *w, f32 pitch, s16 vol, u8 pan, u8 fxmix, u8 arg6, f32 arg7, u8 arg8, s32 arg9);
 s32  func_1001E4A0(s16 arg0, s32 arg1, s32 arg2);
 f32  func_1001FA78(MtxF arg0, s32 arg1);
 /* chunk0 */
@@ -307,7 +334,7 @@ void func_1500EB30(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 void func_1500EBC4(void);
 void func_1500ED80(void);
 void func_1500EE18(Actor *arg0, s32 arg1, s32 arg2);
-void func_1500EE94(struct16 *arg0);
+void func_1500EE94(TriggerZone *zone);
 void func_1500EF20(void);
 
 void func_15010240(void);
@@ -318,7 +345,7 @@ void func_15010538(Actor *arg0);
 void func_15010680(void);
 void func_150106A0(void);
 void func_150106B0(void);
-s32  func_150106D0(struct39 *arg0);
+s32  func_150106D0(TriggerZone *zone);
 void func_15010780(void);
 void func_15010FB0(void);
 void func_150110F0(void);
@@ -351,7 +378,7 @@ void func_1501C870(void);
 
 void func_15040350(void *arg0, u32 arg1);
 s32  func_1504082C(u32 *arg0);
-s32 func_150408CC(struct148 *arg0);
+s32 func_150408CC(Gfx *gfx);
 void func_15042D50(void);
 void func_15042D78(u8 arg0);
 void func_150432BC(f32 arg0);
@@ -362,7 +389,7 @@ void func_15043A00(MsgRing *ring, u8 *buffer, s32 capacity);
 void func_15043D90(Mtx *m, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9);
 void func_15043E68(Mtx *m, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);
 void func_15043EC8(MtxF mtx, f32 x, f32 y, f32 z, f32 arg4, f32 arg5, f32 arg6);
-void func_15043FF0(Vec3f *arg0, struct113 *arg1);
+void math_mtxGetTranslation(Vec3f *out, Mtx *mtx);
 void func_150442C0(MtxF arg0, f32 x, f32 y, f32 z);
 void func_15047F00(MtxF mtx, u16 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);
 void func_15048134(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);
@@ -697,7 +724,7 @@ void func_15093878(void);
 void func_1509B4A0(s32 arg0, s32 arg1);
 void func_1509BFB0(s32 num, s32, s32, ...);
 void func_150AECCC(struct42 *arg0);
-void func_150AED4C(struct114 *arg0);
+void func_150AED4C(struct BillboardParticle *p);
 s32  func_150C3D48(s32 arg0);
 void func_150CEF10(Camera *arg0);
 
@@ -764,7 +791,7 @@ void *func_1513D524(void *def, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 verte
 void *func_1513D594(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 flip, s16 angle, f32 width, f32 height, s32 arg9, s32 argA, s32 model, s32 argC, u8 argD, s32 motionSize, u8 argF, s32 arg10);
 void *func_1513D668(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 flip, s16 angle, f32 width, f32 height, s32 arg9, s32 argA, u8 argB, s32 motionSize, u8 argD, s32 argE);
 void func_1513E070(s32 arg0, s32 arg1, s32 arg2);
-void func_1513E084(struct DefParticleHead *particle, struct212 *arg1, u8 arg2);
+void func_1513E084(struct DefParticleHead *particle, union ActorMsg *msg, u8 eventId);
 void func_1513E134(void);
 void func_1513E2A4(void);
 Vtx *func_1513EDB4(void *particle, s16 viewport);
@@ -858,15 +885,12 @@ void func_10001194(s32 arg0);
 void func_10001420(void);
 void func_100014C4(s32 arg0);
 void func_10001550(void *arg0, u8 arg1);
-// s16  func_100019F0(s16 *arg0, struct05 *arg1);
 //func_10001AA8
 // s32  func_100020D0(s32 *arg0, s32 arg1, s32 *arg2, s32 arg3);
 //func_10002718
 // s32  func_10002DB0(s32 arg0, s32 arg1);
 //func_10002E50
 void func_100030A0(OSPri priority, OSMesgQueue *mesgQueue, OSMesg *arg2, s32 arg3);
-struct00* func_10003220(struct00 *arg0);
-void func_10003330(struct00 *arg0);
 //func_100034E0
 //func_10003658
 // void func_100038C0(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
@@ -955,7 +979,7 @@ s32 func_1000E588(s32 arg0, s32 arg1, s32 arg2);
 //func_1000E934
 //func_1000EC24
 //func_1000ECCC
-s32 func_1000EDA0(DelayedSoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
+s32 func_1000EDA0(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
 s32 func_1000EE70(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
 //func_1000EFB4
 //func_1000F1A8
@@ -1032,7 +1056,7 @@ Acmd *func_1001E530(s16 *outp, Acmd *p, s32 bus);
 //func_101A04F4
 //func_101A0538
 void func_1001C224(void *arg0, s32 arg1, s32 arg2, s32 arg3);
-void func_1001CF38(struct139 *arg0, f32 arg1);
+void func_1001CF38(void *lowpass, f32 rate);
 
 u16 *func_15001DE0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 void func_1501748C(s16 arg0);
@@ -1089,13 +1113,13 @@ void func_1510B32C(s32 arg0, f32 arg1, f32 arg2, f32 arg3);
 void func_1510B958(s32 arg0);
 Gfx *func_1510B9D0(Gfx *gfx, s16 view);
 s32  func_1510FD20(s32 arg0, s32 arg1);
-s32  func_15123934(Camera *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-s32  func_151239CC(Camera *arg0, s32 arg1);
+s32  func_15123934(Camera *camera, s32 newMode, s32 newMotion, s32 newTightness, CameraMode slot);
+s32  func_151239CC(Camera *camera, CameraMode slot);
 void func_15127EB8(Camera *arg0);
 void func_1512D748(Camera*, s32, s32);
-struct QuadSprite *func_1513C350(void *def, void *colors, u8 arg2, u8 arg3, u8 arg4, s32 arg5, s32 arg6, struct167 *arg7, s32 arg8, u8 arg9, s32 argA);
+struct QuadSprite *func_1513C350(void *def, void *colors, u8 arg2, u8 arg3, u8 arg4, s32 arg5, s32 arg6, Vec3f *arg7, s32 arg8, u8 arg9, s32 argA);
 void *func_1513D2F0(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip, s32 model, s32 arg8, s32 motionSize, u8 argA, s32 argB);
-s32  func_1513D6FC(struct211 *arg0, s16 arg1, f32 arg2, f32 arg3, s32 arg4, s32 arg5, u8 arg6);
+s32  func_1513D6FC(ParticleAxes *axes, s16 angle, f32 width, f32 height, s32 arg4, s32 arg5, u8 onSlope);
 void  func_1513E13C(struct QuadSprite *sprite, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 arg6);
 s32  func_1513E2AC(s32, s32, s32, f32, f32, f32, f32, f32, u8);
 f32  func_151423D8(u8);
@@ -1110,12 +1134,14 @@ void func_1516944C(s32, s32, u8);
 void func_15169850(s32 event, u8 eventType, Actor **owner, u8 *ownerId, void *obj);
 void func_15174690(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_15177410(u8 arg0, u8 arg1, s16 arg2, s16 arg3, s16 arg4, f32 arg5, u16 arg6, f32 arg7, s8 arg8, s8 arg9, u8 argA, u8 argB, u8 argC, u8 argD, u8 argE, u8 argF);
+struct LensFlare *func_1517E080(s32 type, s32 alpha);
 s32  func_1517EFAC(s32 arg0);
 void func_15178E14(u8 tag);
 s32  func_15187EC0(s32 arg0, f32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7);
 typedef struct TexScroll TexScroll; /* game_1C2C60.c */
 TexScroll *func_15195AA8(Gfx *dl, s32 texture, s32 doubled, s32 occurrence, s32 isNew, s32 which, s32 speedS,
                          s32 speedT);
+void func_15196318(TexScroll *scroll, s32 speedS, s32 speedT);
 void func_151B8DB0(s32 arg0, u8 arg1, u8 arg2, s32 arg3);
 void func_151D5404(Vec3f*, f32, f32, f32, s32, s32, s32, s32);
 void func_151D5714(Actor *obj, Vec3f *from, Vec3f *to, u8 bone, f32 scale, u8 arg5, s32 arg6);

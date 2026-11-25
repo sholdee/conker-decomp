@@ -32,7 +32,7 @@ s32 func_1509C440(s32 id, s32 event, Struct_1509C440 *params) {
     switch (event) {
     case 1:
         if (D_800C35EA[0] == 0) {
-            value = D_800BE9F0;
+            value = level;
             if (D_800D3840 == 6) {
                 func_15022190(params->args[0], params->args[1], params->args[2], params->args[3] * FIX16_TO_F32);
             } else if (D_800D3840 == 3) {
@@ -52,11 +52,11 @@ s32 func_1509C440(s32 id, s32 event, Struct_1509C440 *params) {
             if (D_800D3840 == 6) {
                 func_15022190(params->args[0], params->args[1], params->args[2], params->args[3] * FIX16_TO_F32);
             }
-            savedValue = D_800BE9F0;
-            D_800BE9F0 = 0x25;
+            savedValue = level;
+            level = 0x25;
             // matching: passing 0x25 directly reschedules the switch
-            func_1501D348(D_800BE9F0, id, 0, 0, 0);
-            D_800BE9F0 = savedValue;
+            func_1501D348(level, id, 0, 0, 0);
+            level = savedValue;
             return 1;
         }
         return 0;
@@ -64,7 +64,7 @@ s32 func_1509C440(s32 id, s32 event, Struct_1509C440 *params) {
         if (D_800C35EA[0] == 0) {
             extra0 = params->args[0];
             extra1 = params->args[1];
-            value2 = D_800BE9F0;
+            value2 = level;
             if (D_800D3840 == 8) {
                 func_15022190(params->args[2], params->args[3], params->args[4], params->args[5] * FIX16_TO_F32);
             } else if (D_800D3840 == 5) {
@@ -75,7 +75,7 @@ s32 func_1509C440(s32 id, s32 event, Struct_1509C440 *params) {
         }
         return 0;
     case 2: {
-        s32 current = D_800BE9F0;
+        s32 current = level;
 
         D_800C35C2 = id + 1;
         D_800C35C3 = current;
@@ -143,7 +143,7 @@ s32 func_1509C7C8(s32 id, s32 event, s32 unused) {
 
 /*
  * Looks up the object whose id is the low 12 bits of `ref` and passes its position, with the
- * player's (D_800DBFF0) angle turned by 180 degrees, to func_150221E8 if `alt` else func_15022190.
+ * player's (camera_global_Cameras) angle turned by 180 degrees, to func_150221E8 if `alt` else func_15022190.
  */
 void func_1509C8FC(s32 ref, s32 alt) {
     Actor *obj;
@@ -152,18 +152,18 @@ void func_1509C8FC(s32 ref, s32 alt) {
 
     obj = func_1505EEF4(ref & 0xFFF);
     if (obj != NULL) {
-        player = D_800DBFF0;
-        if (player->mode & 0x100) {
+        player = camera_global_Cameras;
+        if (player->Mode & 0x100) {
             // Camera (include/structs.h) has no field at 0x760; it lies inside pad73E.
             angle = *(f32 *)((u8 *)player + 0x760);
         } else {
-            angle = player->yaw;
+            angle = player->CameraAngle;
         }
 
         if (alt) {
-            func_150221E8(obj->x_position, obj->y_position, obj->z_position, angle + 180.0f);
+            func_150221E8(obj->xpos, obj->ypos, obj->zpos, angle + 180.0f);
         } else {
-            func_15022190(obj->x_position, obj->y_position, obj->z_position, angle + 180.0f);
+            func_15022190(obj->xpos, obj->ypos, obj->zpos, angle + 180.0f);
         }
     }
 }

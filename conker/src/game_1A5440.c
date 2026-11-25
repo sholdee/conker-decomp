@@ -160,7 +160,7 @@ void func_15177F90(u8 memberCount, f32 *targetPos, u8 tag, s32 x, s32 y, s32 z, 
 s32 func_150490A8(f32 *);
 extern s32 D_8008CA4C[];
 
-/* Member update: steer towards the swarm, bob up and down, and pick a sprite from its velocity relative to D_800DBFF0->unk380. */
+/* Member update: steer towards the swarm, bob up and down, and pick a sprite from its velocity relative to camera_global_Cameras->TrueCameraAngle. */
 void func_15178268(SwarmMember *member) {
     s32 timer;
     s32 turn;
@@ -267,8 +267,8 @@ void func_15178268(SwarmMember *member) {
     } else if (member->s.unk20 < -0x400) {
         member->s.unk20 = -0x400;
     }
-    gp = D_800DBFF0;
-    yaw = gp->unk380 * (256.0f / 360.0f);
+    gp = camera_global_Cameras;
+    yaw = gp->TrueCameraAngle * (256.0f / 360.0f);
     s = func_15048A40(yaw);
     c = func_150489B0(yaw);
     v = member->s.velX * c - member->s.velZ * s;
@@ -462,7 +462,7 @@ void func_15178C34(u8 tag, s32 x, s32 y, s32 z, s16 yOffset) {
     }
 }
 
-/* Returns the distance from the swarm with the given tag to D_800CC2D0[index], or 1 if there is none. */
+/* Returns the distance from the swarm with the given tag to movement_obj[index], or 1 if there is none. */
 s32 func_15178C9C(u8 tag, s32 index) {
     Swarm *swarm;
     s32 dx;
@@ -472,9 +472,9 @@ s32 func_15178C9C(u8 tag, s32 index) {
 
     swarm = func_15178B98(tag);
     if (swarm != NULL) {
-        dx = D_800CC2D0[index].x_position - swarm->x;
-        dy = D_800CC2D0[index].y_position - swarm->y;
-        dz = D_800CC2D0[index].z_position - swarm->z;
+        dx = movement_obj[index].xpos - swarm->x;
+        dy = movement_obj[index].ypos - swarm->y;
+        dz = movement_obj[index].zpos - swarm->z;
         dx = dx * dx;
         dy = dy * dy;
         dz = dz * dz;

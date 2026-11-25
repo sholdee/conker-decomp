@@ -37,8 +37,8 @@ void func_150C1260(Actor *actor, u8 foot) {
     u8 angle;
     Particle *particle;
 
-    size = (actor->xz_scale + actor->y_scale) * 0.5f;
-    if (actor != NULL && actor->unk1D4 != NULL) {
+    size = (actor->scale_xz + actor->scale_y) * 0.5f;
+    if (actor != NULL && actor->ob_matrix_ptr != NULL) {
         switch (foot) {
         case 0:
             bone = 13;
@@ -47,8 +47,8 @@ void func_150C1260(Actor *actor, u8 foot) {
             bone = 17;
             break;
         }
-        // matching: an integer cast keeps unk1D4 in v1 (a pointer argument is loaded straight into a0)
-        func_15142314((s32)actor->unk1D4, bone, &footPos);
+        // matching: an integer cast keeps ob_matrix_ptr in v1 (a pointer argument is loaded straight into a0)
+        func_15142314((s32)actor->ob_matrix_ptr, bone, &footPos);
         radius = size * 80.0f;
         func_1514C2F0(footPos.x, actor->floorY, footPos.z, radius, 0, 16, 16, 0, 0, radius * 4.0f, 0, 0xFF);
         func_15165F80(-1, footPos.x, (s32)actor->floorY + 2.0f, footPos.z, 11, 19, 0, 0xFF, 0);

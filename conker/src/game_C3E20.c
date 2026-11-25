@@ -5,7 +5,7 @@
 /* A scripted actor move: actor `actor` is sent to pose `poseIndex` until `timer` runs out. */
 typedef struct {
     /* 0x00 */ u8 state; // 0 = idle, 1 = start pending, 2 = running
-    /* 0x01 */ u8 actor; // index into D_800DBFF0
+    /* 0x01 */ u8 actor; // index into camera_global_Cameras
     /* 0x02 */ u8 poseIndex; // index into the D_800DC020 pose table
     /* 0x03 */ u8 pad3;
     /* 0x04 */ s16 timer;
@@ -20,7 +20,7 @@ extern C3E20Command D_800D2DC0[3];
 extern s32 D_800D2E30[];
 extern f32 D_800D2DB8; // actor->unk2C0 saved while a command runs
 
-void func_1512D560(Camera *, s32, struct168 *);
+void func_1512D560(Camera *, s32, CamShot *);
 
 /* Clears all command slots. */
 void func_15096970(void) {
@@ -53,27 +53,27 @@ s32 func_15096A68(s32 slot) {
         Camera *actor;
 
         actorIndex = D_800D2DC0[slot].actor;
-        actor = &D_800DBFF0[actorIndex];
+        actor = &camera_global_Cameras[actorIndex];
         pose = D_800DC020;
         // matching: the redundant mask on the u8 index steers IDO's register allocation
         pose = &pose[D_800D2DC0[slot].poseIndex & 0xFF];
         D_800D2DB8 = actor->target.y;
         D_800D2DB4 = 1;
         D_800DBFF4[actorIndex] = 3;
-        D_800C3600.unk0 = 1;
-        D_800C3600.unk4 = 0;
-        D_800C3600.unk14 = pose->x;
-        D_800C3600.unk18 = pose->y;
-        D_800C3600.unk1C = pose->z;
-        D_800C3600.unk20 = pose->unk14;
-        D_800C3600.unk24 = pose->unkC;
-        D_800C3600.unk28 = pose->unk10;
-        D_800C3600.unk8 = 0.0f;
+        gCamShot.mode = 1;
+        gCamShot.unk4 = 0;
+        gCamShot.eye.x = pose->x;
+        gCamShot.eye.y = pose->y;
+        gCamShot.eye.z = pose->z;
+        gCamShot.at.angles.sway = pose->unk14;
+        gCamShot.at.angles.pitch = pose->unkC;
+        gCamShot.at.angles.yaw = pose->unk10;
+        gCamShot.unk8 = 0.0f;
         func_1512D560(actor, 5, NULL);
-        func_1512D560(actor, 7, &D_800C3600);
+        func_1512D560(actor, 7, &gCamShot);
         if (!(D_800D2DC0[slot].flags & 1)) {
-            actor->player->unk7 = 0;
-            actor->player->unk25C |= 0x200;
+            actor->CharPtr->unk7 = 0;
+            actor->CharPtr->task_attrib |= 0x200;
         }
         D_800D2E30[slot] = D_800D2DC0[slot].scale;
         D_800D2DC0[slot].state = 2;
@@ -82,20 +82,20 @@ s32 func_15096A68(s32 slot) {
     case 2: {
         Camera *actor;
 
-        actor = &D_800DBFF0[D_800D2DC0[slot].actor];
+        actor = &camera_global_Cameras[D_800D2DC0[slot].actor];
         D_800D2DC0[slot].timer -= D_800BE9A0;
-        if (actor->player->health == 0) {
+        if (actor->CharPtr->energy == 0) {
             D_800D2DC0[slot].timer = 0;
         }
         if (D_800D2DC0[slot].timer <= 0) {
-            actor->unk3A4 = D_800D2DC0[slot].unk20;
+            actor->CutbackAngle = D_800D2DC0[slot].unk20;
             if (!(D_800D2DC0[slot].flags & 2)) {
                 func_1512D560(actor, 6, NULL);
             }
             D_800D2DB4 = 0;
             if (!(D_800D2DC0[slot].flags & 1)) {
-                actor->player->unk25C &= ~0x200;
-                actor->player->unk7 = 0xFF;
+                actor->CharPtr->task_attrib &= ~0x200;
+                actor->CharPtr->unk7 = 0xFF;
             }
             D_800D2DC0[slot].timer = 0;
             D_800D2DC0[slot].state = 0;
@@ -133,13 +133,13 @@ void func_1512A390(Camera *actor);
 s32 func_15096D78(s32 actorIndex, s32 command, s32 *args) {
     Camera *actor;
 
-    actor = &D_800DBFF0[actorIndex];
+    actor = &camera_global_Cameras[actorIndex];
     if (actorIndex > D_80082FA0) {
         return 0;
     }
     switch (command) {
     case 12:
-        D_800D2DC0[args[2]].unk20 = actor->yaw;
+        D_800D2DC0[args[2]].unk20 = actor->CameraAngle;
         D_800D2DC0[args[2]].actor = actorIndex;
         D_800D2DC0[args[2]].poseIndex = args[3];
         D_800D2DC0[args[2]].timer = args[4];
@@ -159,31 +159,31 @@ s32 func_15096D78(s32 actorIndex, s32 command, s32 *args) {
         }
         break;
     case 4:
-        func_15123934(actor, args[2], args[3], args[4], 0x11);
+        func_15123934(actor, args[2], args[3], args[4], CAMERA_MODE_TASK);
         return 1;
     case 5:
-        func_151239CC(actor, 0x11);
+        func_151239CC(actor, CAMERA_MODE_TASK);
         return 1;
     case 6:
         if (args[2] != 0) {
-            actor->flags |= args[3];
+            actor->AvailableModes |= args[3];
         } else {
-            actor->flags &= ~args[3];
+            actor->AvailableModes &= ~args[3];
         }
         return 1;
     case 8:
-        if (actor->playerExt->unk120 == 0) {
-            actor->targetDistance = args[2];
+        if (actor->mv->death_State == 0) {
+            actor->IdealTripodMagnitude = args[2];
             actor->unk34C = args[3];
             actor->height = args[3];
         }
         return 1;
     case 7:
-        actor->presetMask = args[2];
-        actor->preset = args[3];
+        actor->DistMask = args[2];
+        actor->DistIndex = args[3];
         return 1;
     case 9:
-        actor->unk134 = args[2];
+        actor->Tightness = args[2];
         return 1;
     case 10: {
         CamPose *pose;
@@ -192,25 +192,25 @@ s32 func_15096D78(s32 actorIndex, s32 command, s32 *args) {
         pose = &pose[args[2] & 0xFFF];
         D_800D2DB4 = 1;
         D_800DBFF4[actorIndex] = 3;
-        D_800C3600.unk0 = 1;
-        D_800C3600.unk4 = 0;
-        D_800C3600.unk14 = pose->x;
-        D_800C3600.unk18 = pose->y;
-        D_800C3600.unk1C = pose->z;
-        D_800C3600.unk20 = pose->unk14;
-        D_800C3600.unk24 = pose->unkC;
-        D_800C3600.unk28 = pose->unk10;
-        D_800C3600.unk8 = 0.0f;
+        gCamShot.mode = 1;
+        gCamShot.unk4 = 0;
+        gCamShot.eye.x = pose->x;
+        gCamShot.eye.y = pose->y;
+        gCamShot.eye.z = pose->z;
+        gCamShot.at.angles.sway = pose->unk14;
+        gCamShot.at.angles.pitch = pose->unkC;
+        gCamShot.at.angles.yaw = pose->unk10;
+        gCamShot.unk8 = 0.0f;
         D_800C365C[0] = 0;
         func_1512D560(actor, 5, NULL);
-        func_1512D560(actor, 7, &D_800C3600);
-        D_800CC2D0[0].unk25C |= 0x200;
+        func_1512D560(actor, 7, &gCamShot);
+        movement_obj[0].task_attrib |= 0x200;
     }
         break;
     case 11:
         func_1512D560(actor, 6, NULL);
         D_800D2DB4 = 0;
-        D_800CC2D0[0].unk25C &= ~0x200;
+        movement_obj[0].task_attrib &= ~0x200;
         break;
     case 14:
         actor->focus.x = args[2];
@@ -238,15 +238,15 @@ s32 func_15096D78(s32 actorIndex, s32 command, s32 *args) {
         *(f32 *)&actor->focus.z = args[4];
         break;
     case 15:
-        actor->sideTarget = args[2];
+        actor->XZOffsetTget = args[2];
         if (D_800D3840 == 4) {
-            actor->side = args[3];
+            actor->XZOffset = args[3];
         }
         break;
     case 16:
-        actor->liftTarget = args[2];
+        actor->YOffsetTget = args[2];
         if (D_800D3840 == 4) {
-            actor->lift = args[3];
+            actor->YOffset = args[3];
         }
         break;
     case 17:
@@ -266,11 +266,11 @@ s32 func_15096D78(s32 actorIndex, s32 command, s32 *args) {
         func_15124770(actor, func_15084000(args[2] & 0xFFF));
         break;
     case 20:
-        actor->unk1A4 = args[2] * (1.0f / 65536.0f);
-        actor->unk1A8 = args[3] * (1.0f / 65536.0f);
+        actor->TgetFOVX = args[2] * (1.0f / 65536.0f);
+        actor->TgetFOVY = args[3] * (1.0f / 65536.0f);
         if (D_800D3840 == 5 && args[4] != 0) {
-            actor->unk19C = actor->unk1A4;
-            actor->unk1A0 = actor->unk1A8;
+            actor->FOVX = actor->TgetFOVX;
+            actor->FOVY = actor->TgetFOVY;
         }
         break;
     case 21: {
@@ -284,10 +284,10 @@ s32 func_15096D78(s32 actorIndex, s32 command, s32 *args) {
     }
         break;
     case 22:
-        actor->snap = 1;
+        actor->Snap = 1;
         break;
     case 23:
-        actor->unk7C0 = args[2] * (1.0f / 65536.0f);
+        actor->CentreBiasTarget = args[2] * (1.0f / 65536.0f);
         break;
     case 24:
         if (D_800D3840 == 5) {
@@ -300,8 +300,8 @@ s32 func_15096D78(s32 actorIndex, s32 command, s32 *args) {
         }
         break;
     case 25:
-        actor->unk3A4 = args[2] * (1.0f / 65536.0f);
-        D_800D2DB0 = actor->unk3A4;
+        actor->CutbackAngle = args[2] * (1.0f / 65536.0f);
+        D_800D2DB0 = actor->CutbackAngle;
         break;
     case 26:
         func_1512868C(actor);
@@ -335,15 +335,15 @@ s32 func_1509759C(s32 actorIndex, s32 query, s32 *args) {
     f32 dx;
     f32 dz;
 
-    actor = &D_800DBFF0[actorIndex];
+    actor = &camera_global_Cameras[actorIndex];
     if (actorIndex > D_80082FA0) {
         return 0;
     }
     switch (query) {
     case 31:
-        return actor->unk390 * 65536.0f;
+        return actor->CharRelAngle * 65536.0f;
     case 30:
-        return actor->yaw * 65536.0f;
+        return actor->CameraAngle * 65536.0f;
     case 29:
         return D_800D2DC0[args[2]].state;
     case 32:
@@ -359,11 +359,11 @@ s32 func_1509759C(s32 actorIndex, s32 query, s32 *args) {
         if (target == NULL) {
             return -1;
         }
-        angle = actor->yawRad + 1.570796371f;
+        angle = actor->CameraAngleRad + 1.570796371f;
         facing.x = sinf(angle);
         facing.y = 0.0f;
         facing.z = cosf(angle);
-        func_15048F90(&actor->eye, (Vec3f *)&target->x_position, &toTarget);
+        func_15048F90(&actor->eye, (Vec3f *)&target->xpos, &toTarget);
         toTarget.y = 0.0f;
         if (func_150AD900((f32 *)&facing, (f32 *)&toTarget) >= 0.0f) {
             side = -1;
@@ -384,7 +384,7 @@ void func_15097798(s32 actorIndex) {
     Camera *actor;
     Vec3f dir;
 
-    actor = &D_800DBFF0[actorIndex];
+    actor = &camera_global_Cameras[actorIndex];
     if (D_800D2DB4 != 0) {
         func_15048F90(&actor->focus, &actor->eye, &dir);
         func_1504917C(&dir, &dir);

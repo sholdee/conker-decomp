@@ -59,9 +59,9 @@ void func_15174BF0(s32 count, s32 group, s32 x, s32 y, s32 z, s32 player,
     s32 surface;
 
     height = (f32)y;
-    diff.x = x - D_800DBFF0[player].eye.x;
-    diff.y = height - D_800DBFF0[player].eye.y;
-    diff.z = z - D_800DBFF0[player].eye.z;
+    diff.x = x - camera_global_Cameras[player].eye.x;
+    diff.y = height - camera_global_Cameras[player].eye.y;
+    diff.z = z - camera_global_Cameras[player].eye.z;
     angle = func_15048FC8(&diff);
     for (i = 0; i < count; i++) {
         actor = func_15167A68(10, 0, 0xF8, 1, 0xFF, 1);
@@ -221,9 +221,9 @@ void func_15175390(s32 count, s32 group, s32 x, s32 y, s32 z, s32 maxRadius,
         return;
     }
     if (flags & 0x10000) {
-        diff.x = x - D_800DBFF0[player].eye.x;
-        diff.y = y - D_800DBFF0[player].eye.y;
-        diff.z = z - D_800DBFF0[player].eye.z;
+        diff.x = x - camera_global_Cameras[player].eye.x;
+        diff.y = y - camera_global_Cameras[player].eye.y;
+        diff.z = z - camera_global_Cameras[player].eye.z;
         angle = func_15048FC8(&diff);
     }
     for (i = 0; i < count; i++) {
@@ -385,7 +385,7 @@ void func_15175958(SwarmActor *actor) {
         return;
     }
     alpha = actor->alpha;
-    if ((actor->modelIndex == 8 || actor->modelIndex == 9) && D_800BE9F0 == 6 && D_800C35EA[0] != 0 && D_800C35E8[0] == 0xF) {
+    if ((actor->modelIndex == 8 || actor->modelIndex == 9) && level == 6 && D_800C35EA[0] != 0 && D_800C35E8[0] == 0xF) {
         actor->flags &= ~8;
         if (D_800C35EA[0] == 0 || D_800C35E8[0] != 0xF) {
             func_1516972C(&actor->header);
@@ -632,7 +632,7 @@ void func_1517685C(SwarmActor *actor) {
         D_800DDF68[actor->modelIndex] = 1;
         switch (actor->state) {
         case 0:
-            if (func_150AD960((s32)D_800CC2D0->x_position, (s32)D_800CC2D0->z_position, (s32)actor->x, (s32)actor->z) < 400) {
+            if (func_150AD960((s32)movement_obj->xpos, (s32)movement_obj->zpos, (s32)actor->x, (s32)actor->z) < 400) {
                 actor->state = 1;
                 actor->pitchStep = -1 - (s32)(func_150ADA20() & 3);
                 actor->pitch = -8.0f;
@@ -738,7 +738,7 @@ void func_15176B84(SwarmActor *actor) {
 
     switch (actor->state) {
         case 0:
-            if (func_150AD960((s32)D_800CC2D0[0].x_position, (s32)D_800CC2D0[0].z_position, (s32)actor->x,
+            if (func_150AD960((s32)movement_obj[0].xpos, (s32)movement_obj[0].zpos, (s32)actor->x,
                               (s32)actor->z) < 200) {
                 actor->state = 2;
                 actor->targetY = (f32)(func_150ADA20() % actor->heightRange) + actor->originY;

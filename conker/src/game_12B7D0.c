@@ -66,16 +66,16 @@ void func_150FE49C(Actor *obj, u8 arg1, s32 arg2, Vec3f *outPosition, Vec3f *out
     Vec3f *dst[2];
 
     if (obj != NULL) {
-        if (obj->unk1D4 != NULL) {
+        if (obj->ob_matrix_ptr != NULL) {
             src[0] = &D_800A1FC8;
             src[1] = &D_800A1FD4;
             dst[0] = &position;
             dst[1] = &origin;
-            func_15145EA4(src, dst, (Mtx *)obj->unk1D4 + D_80088B94, 2);
+            func_15145EA4(src, dst, (Mtx *)obj->ob_matrix_ptr + D_80088B94, 2);
         } else {
-            position.x = obj->x_position;
-            position.y = obj->y_position + 70.0f;
-            position.z = obj->z_position;
+            position.x = obj->xpos;
+            position.y = obj->ypos + 70.0f;
+            position.z = obj->zpos;
             origin = position;
         }
         func_151D3E6C(obj, &position, &origin, 0x23);
@@ -102,13 +102,13 @@ void func_150FE604(Actor *obj, Vec3f *position, u8 arg2, s32 arg3) {
     s32 random1;
     s32 random0;
 
-    if (obj->unk1D4 != NULL) {
+    if (obj->ob_matrix_ptr != NULL) {
         if ((obj->unk74 & 0xF) != 0xF) {
             motion[1] = func_150ADA68() * (1.0f + 1.0f) + 3.7099998f; // matching: a plain 2.0f literal mismatches
             motion[0] = func_150ADA68() * 15.0f + 35.0f;
 
-            if ((obj->unk31C != NULL) && (obj->unk31C->aimState != 0) && (obj->camera != NULL)) {
-                mask = ~(1 << obj->camera->playerIndex) & 0xFF;
+            if ((obj->mv != NULL) && (obj->mv->SniperState != 0) && (obj->CameraPtr != NULL)) {
+                mask = ~(1 << obj->CameraPtr->CNumber) & 0xFF;
             } else {
                 mask = 0xFF;
             }
@@ -136,10 +136,10 @@ void func_151D8868(RumbleParams *event, s32 arg1, s32 arg2, s32 arg3);
 void func_150FE7D4(Actor *obj) {
     RumbleParams event;
 
-    if (obj->camera != NULL) {
+    if (obj->CameraPtr != NULL) {
         event.flags = 1;
         event.duration = (func_150ADA20() % 13U) + 20;
-        event.playerMask = 1 << obj->camera->playerIndex;
+        event.playerMask = 1 << obj->CameraPtr->CNumber;
         func_150ADA20(); // draws a random number that is never used
         event.strength = 8;
         event.updateKind = -1;

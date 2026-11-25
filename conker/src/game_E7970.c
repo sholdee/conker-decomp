@@ -2,11 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern f32 D_8009FE64; // 256/360 (degrees to 256-step angle); matching: the literal 0.7111111283f changes regalloc
-void func_15143E94(s32 arg0, s32 arg1);
-void func_15165F80(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
-void func_1514C678(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, f32 arg9, s32 argA, s32 argB);
-
 /* Per-effect data: the object the effect is attached to and a spawn accumulator. */
 typedef struct {
     /* 0x0 */ Actor *owner;
@@ -57,15 +52,15 @@ void func_150BA55C(EffectE7970 *effect) {
 
     owner = effect->data.owner;
     data = &effect->data;
-    if ((owner->interaction_state == 0) || (owner->unique_id != data->ownerId)) {
+    if ((owner->type == 0) || (owner->unique_id != data->ownerId)) {
         effect->base.header.state = -1;
         return;
     }
-    if (owner->unk1D4 != NULL) {
+    if (owner->ob_matrix_ptr != NULL) {
         data->spawnAccum += (0.3143000007f + (func_150ADA68() * 0.58100003f)) * D_800BE9A4;
         if (data->spawnAccum > 1.0f) {
-            size = (owner->xz_scale + owner->y_scale) * 0.5f;
-            heading = (owner->unk76 >> 8) - 64;
+            size = (owner->scale_xz + owner->scale_y) * 0.5f;
+            heading = (owner->angle >> 8) - 64;
             func_1515C244(owner, ownerPos, &radius, &unused);
             growth[1] = 0.0f;
             do {
@@ -97,57 +92,3 @@ void func_150BA8F0(EffectE7970 *effect, s32 arg1, u8 arg2) {
     func_15149514(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
-void func_1504715C(CollisionHit *hit, Actor *obj);
-s32 func_15046C80(Vec3f *pos, s32 arg1, f32 minY, CollisionHit *hit);
-
-/* Copies obj's position into pos (using unk180 as the height when set); with a hit buffer, also probes the ground below. */
-s32 func_150BA930(Vec3f *pos, Actor *obj, CollisionHit *hit, s32 arg3) {
-    Vec3f probe;
-
-    pos->x = obj->x_position;
-    if (-9500.0f < obj->floorY) {
-        pos->y = obj->floorY;
-    } else {
-        pos->y = obj->y_position;
-    }
-    pos->z = obj->z_position;
-    if (hit == NULL) {
-        return 1;
-    }
-    probe.x = pos->x;
-    probe.y = pos->y + 100.0f;
-    probe.z = pos->z;
-    func_1504715C(hit, obj);
-    return func_15046C80(&probe, 0, pos->y - 100.0f, hit);
-}
-
-/* Constant handler; always returns 9. */
-s32 func_150BAA00(s32 arg0, s32 arg1) {
-    return 9;
-}
-
-/* Spawns effects at obj; when the ground probe hits, also a burst aimed by D_800DBFF0[D_80082FA4].unk380 (degrees). */
-void func_150BAA14(Actor *obj, s32 arg1, s32 arg2) {
-    Vec3f pos;
-    CollisionHit hit;
-    s32 angle;
-    u8 onGround;
-    s16 pad; // matching: unused slot moves IDO's spill of func_150ADA68()'s result to sp38
-
-    if (obj->unk1D4 == NULL) {
-        return;
-    }
-
-    onGround = func_150BA930(&pos, obj, &hit, (u8)arg1);
-    func_151D5404(&pos, 1307.0f, 2000.0f, 0.0005f, 0xC, 0xF, 0xFF, 0);
-    func_15143E94(5, 0x4022);
-
-    if (onGround) {
-        angle = (s32)(D_800DBFF0[D_80082FA4].unk380 * D_8009FE64);
-        func_15165F80(-1, (s32)pos.x, (s32)(pos.y + 6.0f), (s32)pos.z,
-                      0x19, 0x12, 0, 0xFF, 1);
-        func_1514C678(pos.x, pos.y, pos.z,
-                      (func_150ADA68() * 50.0f) + 40.0f, angle + 60, angle - 60,
-                      (func_150ADA20() % 11U) + 30, 5, 0, 0.0f, 0, 0xFF);
-    }
-}

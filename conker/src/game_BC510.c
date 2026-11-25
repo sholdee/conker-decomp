@@ -196,8 +196,8 @@ void func_1508F9F4(void) {
         }
         D_800D24C0 = air;
     }
-    if (D_800CC2D0[0].in_water) {
-        air = D_800CC2D0[0].unkB2;
+    if (movement_obj[0].inwater) {
+        air = movement_obj[0].unkB2;
     } else {
         air = 0;
     }
@@ -311,7 +311,7 @@ Gfx *func_1508FD38(register Gfx *gfx) {
     s16 scaled[33]; /* scaled[i]: i pixels at the HUD scale D_8008FE1C */
 
     start = gfx;
-    if (D_800BE9F0 == 0x1D) {
+    if (level == 0x1D) {
         return gfx;
     }
     gSPPerspNormalize(gfx++, D_800D2454);
@@ -561,7 +561,7 @@ void func_1509093C(void) {
     s32 i;
     f32 blend;
     s32 tmp;
-    s32 level;
+    s32 intensity;
     f32 lo;
     f32 hi;
     s32 fadeRaw;
@@ -581,12 +581,12 @@ void func_1509093C(void) {
     s32 b2;
     s32 b;
 
-    if (D_800CC2D0->in_water) {
-        level = D_800CC2D0->unkB2;
+    if (movement_obj->inwater) {
+        intensity = movement_obj->unkB2;
     } else {
-        level = 0;
+        intensity = 0;
     }
-    if (level > 90) {
+    if (intensity > 90) {
         if (D_800D24C8.alpha == 0) {
             D_800D24C8.alpha = 255;
             D_800D24C8.unk94 = 0.0f;
@@ -607,7 +607,7 @@ void func_1509093C(void) {
         if (D_800D24C8.unk9C > 1.0f) {
             D_800D24C8.unk9C = 1.0f;
         }
-        if (level < 1441) {
+        if (intensity < 1441) {
             D_800D24C8.unk94 += D_800D24C8.unk98 * D_800BE9E4;
             lo = D_800D24C8.unk9C - 0.2f;
             if (lo < 0.0f) {
@@ -659,21 +659,21 @@ void func_1509093C(void) {
             dst[i].ob[1] = (f32)base[i].ob[1] + ((f32)target[i].ob[1] - (f32)base[i].ob[1]) * blend;
             dst[i].ob[2] = (f32)base[i].ob[2] + ((f32)target[i].ob[2] - (f32)base[i].ob[2]) * blend;
         }
-        if (level < 480) {
+        if (intensity < 480) {
             tex = D_8009026E;
             D_800D24C8.tex[3] = tex;
             D_800D24C8.tex[2] = tex;
             tex = D_8009025A;
             D_800D24C8.tex[1] = tex;
             D_800D24C8.tex[0] = tex;
-        } else if (level < 960) {
+        } else if (intensity < 960) {
             tex = D_80090272;
             D_800D24C8.tex[3] = tex;
             D_800D24C8.tex[2] = tex;
             tex = D_8009025A;
             D_800D24C8.tex[1] = tex;
             D_800D24C8.tex[0] = tex;
-        } else if (level < 1200) {
+        } else if (intensity < 1200) {
             tex = D_80090272;
             D_800D24C8.tex[3] = tex;
             D_800D24C8.tex[2] = tex;
@@ -688,7 +688,7 @@ void func_1509093C(void) {
             D_800D24C8.tex[1] = tex;
             D_800D24C8.tex[0] = tex;
         }
-        fadeRaw = (level - 720) * 255;
+        fadeRaw = (intensity - 720) * 255;
         fade = fadeRaw / 480;
         if (fade < 0) {
             fade = 0;
@@ -1001,11 +1001,11 @@ Gfx *func_150918EC(Gfx *gfx) {
                 vpRight = D_800BE628[i].right - scaled[5];
                 y = D_800BE628[i].top + scaled[5];
                 if (D_8008FDC0 & 4) {
-                    player = &D_800CC2D0[i];
+                    player = &movement_obj[i];
                     n = 1;
-                    h = player->unk31C->unk75;
+                    h = player->mv->context_b;
                     h &= 0x7F;
-                    if (player->interaction_state == 0x1F) {
+                    if (player->type == 0x1F) {
                         h = 0;
                     }
                     switch (h) {
@@ -1047,7 +1047,7 @@ Gfx *func_150918EC(Gfx *gfx) {
                     case 0x26:
                     case 0x3A:
                         icon = -1;
-                        if (player->health != 0) {
+                        if (player->energy != 0) {
                             grenades = 1;
                         }
                         break;
@@ -1056,7 +1056,7 @@ Gfx *func_150918EC(Gfx *gfx) {
                         break;
                     case 0x32:
                     case 0x33:
-                        n = player->unk31C->unk1AE;
+                        n = player->mv->ammo_count;
                         icon = 11;
                         break;
                     case 0x40:
@@ -1064,7 +1064,7 @@ Gfx *func_150918EC(Gfx *gfx) {
                         cellShift = -3;
                         break;
                     default:
-                        if (D_800BE9F0 == 0x1A) {
+                        if (level == 0x1A) {
                             icon = 4;
                             cellShift = 4;
                         } else {
@@ -1072,7 +1072,7 @@ Gfx *func_150918EC(Gfx *gfx) {
                         }
                         break;
                     }
-                    if (player->unk13C != 0) {
+                    if (player->lifting != 0) {
                         icon = -1;
                     }
                     if (icon >= 0) {
@@ -1133,8 +1133,8 @@ Gfx *func_150918EC(Gfx *gfx) {
                 n = 1;
                 icon = -1;
                 cellOffset = 0;
-                if (D_800CC2D0[i].interaction_state == 0x1E) {
-                    j = D_800CC2D0[i].unk31C->unk128;
+                if (movement_obj[i].type == 0x1E) {
+                    j = movement_obj[i].mv->unk128;
                     if (j & 1) {
                         icon = 6;
                         barShift = 4;
@@ -1149,15 +1149,15 @@ Gfx *func_150918EC(Gfx *gfx) {
                     }
                     if (icon >= 0 && icon != 3) {
                         if (barShift > 0) {
-                            barLen.b[i] = D_800CC2D0[i].unk31C->unk12C >> barShift;
+                            barLen.b[i] = movement_obj[i].mv->unk12C >> barShift;
                         } else {
-                            barLen.b[i] = D_800CC2D0[i].unk31C->unk12C << -barShift;
+                            barLen.b[i] = movement_obj[i].mv->unk12C << -barShift;
                         }
                         barMode = 1;
                     }
                 } else {
                     cellOffset = 3;
-                    switch (D_800CC2D0[i].unk31C->unk75 & 0x7F) {
+                    switch (movement_obj[i].mv->context_b & 0x7F) {
                     case 0x37:
                         icon = 7;
                         break;
@@ -1169,11 +1169,11 @@ Gfx *func_150918EC(Gfx *gfx) {
                         break;
                     case 0x30:
                     case 0x31:
-                        n = D_800CC2D0[i].unk31C->unk1AE;
+                        n = movement_obj[i].mv->ammo_count;
                         icon = 6;
                         break;
                     case 0x3E:
-                        barLen.b[i] = D_800CC2D0[i].unk31C->unk12C >> 4;
+                        barLen.b[i] = movement_obj[i].mv->unk12C >> 4;
                         barMode = 2;
                         break;
                     }
@@ -1238,24 +1238,24 @@ Gfx *func_150918EC(Gfx *gfx) {
         { Gfx *g = gfx++; g->words.w0 = cellW; g->words.w1 = 0; } /* gDPPipeSync */
         gDPSetOtherMode(gfx++, 0x002C3F, 0x00504244);
         for (i = 0; i <= D_80082FA0; i++) {
-            j = D_800CC2D0[i].unk31C->unk75;
+            j = movement_obj[i].mv->context_b;
             if ((j &= 0x7F) == 0x26 || j == 0x3A) {
                 x = (s32)D_800BE628[i].right - 15;
                 x *= 4;
                 rowY = (s32)D_800BE628[i].top + 5;
                 rowY *= 4;
                 // matching: constant-first operands; the swapped form changes the code
-                if (0x1A == D_800BE9F0 || 0x3F == D_800BE9F0) {
+                if (0x1A == level || 0x3F == level) {
                     cellW = 11;
                     cellH = 14;
                     texS = 0x200;
                     v = 0x1E0;
-                } else if (D_800CC2D0[i].id == 0x75 || D_800CC2D0[i].id == 0xB1) {
+                } else if (movement_obj[i].character_type == 0x75 || movement_obj[i].character_type == 0xB1) {
                     cellW = 5;
                     cellH = 20;
                     texS = 0xC0;
                     v = 0x100;
-                } else if (D_800CC2D0[i].id == 0x3B) {
+                } else if (movement_obj[i].character_type == 0x3B) {
                     cellW = 11;
                     cellH = 14;
                     texS = 0x200;
@@ -1266,7 +1266,7 @@ Gfx *func_150918EC(Gfx *gfx) {
                     texS = 0x240;
                     v = 0x60;
                 }
-                for (j = 0; j < D_800CC2D0[i].unk31C->grenade_count; j++) {
+                for (j = 0; j < movement_obj[i].mv->numGrenades; j++) {
                     gSPScisTextureRectangle(gfx++, x, rowY, scaled[cellW] * 4 + x, scaled[cellH] * 4 + rowY, 0, texS, v, 0x400, step);
                     x -= 44;
                 }
@@ -1333,7 +1333,7 @@ Gfx *func_150918EC(Gfx *gfx) {
                 gSPScisTextureRectangle(gfx++, s, mapTop, size * 4 + s, size * 4 + mapTop, 0, 0, 0, step, step);
                 gDPPipeSync(gfx++);
                 gDPSetCombine(gfx++, 0x62FEC5, 0xFFFFFBFD);
-                for (k = 0, player = D_800CC2D0; k != 25; k++, player++) {
+                for (k = 0, player = movement_obj; k != 25; k++, player++) {
                     if (k == i || (k < D_8008FD8C && func_150859AC(k, 3) > 0) || player->unk328 != 0) {
                         gDPPipeSync(gfx++);
                         if (k == i) {
@@ -1343,8 +1343,8 @@ Gfx *func_150918EC(Gfx *gfx) {
                         } else {
                             gDPSetEnvColor(gfx++, 255, 255, 255, 255);
                         }
-                        ax = player->x_position * scale;
-                        az = player->z_position * scale;
+                        ax = player->xpos * scale;
+                        az = player->zpos * scale;
                         v = (rowY + 3.4f) + (s32)az;
                         n = (x + 3.6f) + (s32)ax;
                         gSPScisTextureRectangle(gfx++, n - shift, v - shift, n + shift, v + shift, 0, 0, 0, 0x400, 0x400);
@@ -1480,7 +1480,7 @@ Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large) {
 
             x = (((s32)D_800BE628[i].right - scaled[7]) - radius) * 4;
             y = ((s32)D_800BE628[i].top + scaled[21] + radius) * 4;
-            obj = &D_800CC2D0[i];
+            obj = &movement_obj[i];
             if (large) {
                 x -= 454;
                 y -= 70;
@@ -1500,32 +1500,32 @@ Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large) {
             gDPPipeSync(gfx++);
             gDPSetCombine(gfx++, 0x62FEC5, 0xFFFFFBFD);
             gDPSetEnvColor(gfx++, 255, 0, 0, 255);
-            cam = &D_800DBFF0[i];
-            angle = cam->yaw * 0.01745327935f;
+            cam = &camera_global_Cameras[i];
+            angle = cam->CameraAngle * 0.01745327935f;
             sinv = sinf(angle);
             cosv = cosf(angle);
-            if (obj->interaction_state != 0x25) {
+            if (obj->type != 0x25) {
                 /* matching: as1 (-g3) orders equally ranked instructions of a block by source line, lowest
                  * first. The target schedule (li; lwc1; lwc1; sw) needs the px/pz loads emitted
                  * before `skip = -1` while that statement carries the lower line number. The
                  * numbers only have to exceed every real line of this file with
                  * line(skip = -1) < line(px/pz); the lines after them stay monotonic. */
 #line 20002
-                px = obj->x_position; pz = obj->z_position;
+                px = obj->xpos; pz = obj->zpos;
 #line 20000
                 skip = -1;
-                floor = func_15085DA8(obj->y_position);
+                floor = func_15085DA8(obj->ypos);
             } else {
-                cam2 = obj->camera;
-                obj = D_800CC2D0;
+                cam2 = obj->CameraPtr;
+                obj = movement_obj;
                 skip = 0;
-                if (cam2 != NULL && cam2->playerIndex == 3) {
+                if (cam2 != NULL && cam2->CNumber == 3) {
                     skip = 1;
                 }
                 obj += skip;
-                px = obj->x_position;
-                pz = obj->z_position;
-                floor = func_15085DA8(obj->y_position);
+                px = obj->xpos;
+                pz = obj->zpos;
+                floor = func_15085DA8(obj->ypos);
             }
             for (j = 0; j != 25; j++) {
                 s32 color;
@@ -1541,8 +1541,8 @@ Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large) {
                 if (j == i || j == skip) {
                     continue;
                 }
-                other = &D_800CC2D0[j];
-                if (other->interaction_state != 0) {
+                other = &movement_obj[j];
+                if (other->type != 0) {
                     if (other->unk328 != 0) {
                         color = other->unk328 - 1;
                         if (j < D_8008FD8C) {
@@ -1552,15 +1552,15 @@ Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large) {
                                 color = -1;
                             } else if (D_800E0BCC & (1 << j)) {
                                 color = -1;
-                            } else if (other->health == 0) {
+                            } else if (other->energy == 0) {
                                 color = -1;
-                            } else if ((other->unk31C->unk75 & 0x7F) == 0x21) {
+                            } else if ((other->mv->context_b & 0x7F) == 0x21) {
                                 color = -1;
                             }
                         }
                         if (color != -1) {
-                            dx = (other->x_position - px) * scale;
-                            dz = (other->z_position - pz) * scale;
+                            dx = (other->xpos - px) * scale;
+                            dz = (other->zpos - pz) * scale;
                             // matching: the tripled index plus a row-0 pointer, not D_800AB62C[color]
                             color = color + color + color;
                             rgb = D_800AB62C[0] + color;
@@ -1574,7 +1574,7 @@ Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large) {
                                 yh = ry + dotSize;
                                 yl = ry - dotSize;
                                 gSPScisTextureRectangle(gfx++, xl, yl, xh, yh, G_TX_RENDERTILE, 0, 0, 0x400, 0x400);
-                                otherFloor = func_15085DA8(other->y_position);
+                                otherFloor = func_15085DA8(other->ypos);
                                 if (floor != otherFloor) {
                                     gDPPipeSync(gfx++);
                                     gDPSetEnvColor(gfx++, 0, 0, 0, 255);

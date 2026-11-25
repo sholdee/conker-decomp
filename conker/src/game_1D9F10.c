@@ -53,7 +53,7 @@ typedef struct {
     /* 0x1C */ Actor *owner;
     /* 0x20 */ u8 ownerId;             // owner->unique_id
     /* 0x21 */ u8 pad21[3];
-    /* 0x24 */ s32 ownerIndex;         // owner - D_800CC2D0
+    /* 0x24 */ s32 ownerIndex;         // owner - movement_obj
     /* 0x28 */ f32 radius;             // horizontal offset of the owner from the rope
 } RopeRider;
 
@@ -89,7 +89,7 @@ RopeRider *func_151ACA60(Actor *obj, f32 radius, s32 extraSize) {
     }
     rider->owner = obj;
     rider->ownerId = obj->unique_id;
-    rider->ownerIndex = obj - D_800CC2D0;
+    rider->ownerIndex = obj - movement_obj;
     rider->radius = radius;
     rider->unk10 = 1;
     rider->unk14 = 0;
@@ -110,7 +110,7 @@ s32 func_151ACB38(Actor *obj, u8 *out) {
 /** RopeRider update: moves the owner along its rope while it is riding one. */
 s32 func_151ACB60(RopeRider *rider) {
     s32 result;
-    Rope *rope = rider->owner->unk31C->rope;
+    Rope *rope = rider->owner->mv->ropePtr;
 
     if (rope != NULL) {
         result = func_151AE3A8(rider);
@@ -147,7 +147,7 @@ Rope *func_151ACBD4(void *spawn, s32 extraSize) {
     s32 texS2;
     s32 texS3;
 
-    rope = func_15167A68((D_800BE9F0 == 0x2C) ? 0x4E : 0x2F, 0, extraSize + 0x58, 1, 0xFF, 1);
+    rope = func_15167A68((level == 0x2C) ? 0x4E : 0x2F, 0, extraSize + 0x58, 1, 0xFF, 1);
     if (rope == NULL) {
         return NULL;
     }
@@ -172,7 +172,7 @@ Rope *func_151ACBD4(void *spawn, s32 extraSize) {
     }
     rope->segmentLength = (f32)(topY - bottomY) / (f32)segments;
     rope->vertices = allocate_memory(2 * 20 * 4 * sizeof(Vtx), 1, 2, 0);
-    if (D_800BE9F0 == 0xB) {
+    if (level == 0xB) {
         rope->textureId = 0x37;
         shift = 4;
     } else {
@@ -181,7 +181,7 @@ Rope *func_151ACBD4(void *spawn, s32 extraSize) {
     }
     r = 0xFF;
     g = 0xFF;
-    if (D_800BE9F0 == 0x39) {
+    if (level == 0x39) {
         r = 0x58;
         g = 0x4B;
         b = 0x2C;
@@ -269,22 +269,22 @@ void func_151AD174(Rope *rope) {
     }
     last = rope->nodeCount - 1;
     if (rope->rider != NULL) {
-        node = rope->rider->unk31C->ropeNode;
-        angle = (rope->rider->unk31C->ropeSwingAngle + (rope->rider->unk76 >> 8)) & 0xFF;
-        force = rope->rider->unk31C->ropeSwingForce * 1.899999976f;
+        node = rope->rider->mv->ropeNode;
+        angle = (rope->rider->mv->ropeSwingAngle + (rope->rider->angle >> 8)) & 0xFF;
+        force = rope->rider->mv->ropeSwingForce * 1.899999976f;
         rope->nodes[node].vel[0] += force * func_150489B0(angle);
         rope->nodes[node].vel[2] -= force * func_15048A40(angle);
-        angle = rope->rider->unk76 >> 8;
-        force = rope->rider->xz_velocity * 19.0f;
+        angle = rope->rider->angle >> 8;
+        force = rope->rider->speed * 19.0f;
         rope->nodes[node].vel[0] += force * func_150489B0(angle);
         rope->nodes[node].vel[2] -= force * func_15048A40(angle);
         rope->nodes[node].vel[1] -= 1000.0f;
-        timer = rope->rider->unk31C->ropeSwingTimer - 1;
+        timer = rope->rider->mv->ropeSwingTimer - 1;
         if (timer <= 0) {
-            rope->rider->unk31C->ropeSwingForce = 0.0f;
+            rope->rider->mv->ropeSwingForce = 0.0f;
             timer = 0;
         }
-        rope->rider->unk31C->ropeSwingTimer = timer;
+        rope->rider->mv->ropeSwingTimer = timer;
     }
     if (rope->releaseForce != 0.0f) {
         rope->nodes[rope->releaseNode].vel[0] -= rope->releaseForce * func_150489B0(rope->releaseAngle);
@@ -346,7 +346,7 @@ void func_151AD174(Rope *rope) {
                 vel[j] += mid[j] * 1.24;
             }
             pos[j] += vel[j];
-            if (D_800BE9F0 == 0x39 && pos[0] > 1150.0f) {
+            if (level == 0x39 && pos[0] > 1150.0f) {
                 pos[0] = 1150.0f;
             }
         }
@@ -482,16 +482,16 @@ Gfx *func_151AD92C(Gfx *dl, Rope *rope, s32 arg2) {
     return dl;
 }
 
-/** obj touched rope msg->unk1B: grab it, or let go of the current rope and grab this one. */
-void func_151AE06C(Actor *obj, struct133 *msg) {
+/** obj touched the rope zone `zone` (rope id: data1): grab it, or let go of the current rope and grab this one. */
+void func_151AE06C(Actor *obj, TriggerZone *zone) {
     u8 canRide;
     u8 ropeId;
 
     if (func_151ACB38(obj, &canRide) != 0) {
-        ropeId = msg->unk1B;
-        if (obj->unk31C->ropeId == 0) {
+        ropeId = zone->data1;
+        if (obj->mv->rope == 0) {
             func_151AE0E4(obj, ropeId);
-        } else if (obj->unk31C->ropeId != ropeId) {
+        } else if (obj->mv->rope != ropeId) {
             func_151AE264(obj);
             func_151AE0E4(obj, ropeId);
         }
@@ -511,39 +511,39 @@ void func_151AE0E4(Actor *obj, u8 ropeId) {
         while (TRUE) {
         }
     }
-    if (rope->regrabTimer != 0 || obj->health == 0 || obj->stunned != 0) {
+    if (rope->regrabTimer != 0 || obj->energy == 0 || obj->stunned != 0) {
         return;
     }
-    func_151AE2BC(&obj->unk31C->ropeProgress, rope, obj->x_position, obj->y_position, obj->z_position);
+    func_151AE2BC(&obj->mv->ropeProgress, rope, obj->xpos, obj->ypos, obj->zpos);
     endNodes = 140.0f / rope->segmentLength;
-    i = (f32)(rope->nodeCount - endNodes - 1) * obj->unk31C->ropeProgress;
+    i = (f32)(rope->nodeCount - endNodes - 1) * obj->mv->ropeProgress;
     pos[0] = rope->nodes[i].pos[0];
     pos[1] = rope->nodes[i].pos[1];
     pos[2] = rope->nodes[i].pos[2];
-    dist = (pos[0] - obj->x_position) * (pos[0] - obj->x_position) +
-           (pos[1] - obj->y_position) * (pos[1] - obj->y_position) +
-           (pos[2] - obj->z_position) * (pos[2] - obj->z_position);
+    dist = (pos[0] - obj->xpos) * (pos[0] - obj->xpos) +
+           (pos[1] - obj->ypos) * (pos[1] - obj->ypos) +
+           (pos[2] - obj->zpos) * (pos[2] - obj->zpos);
     if (dist > 10000.0f) {
         return;
     }
-    obj->unk31C->ropeId = ropeId;
-    obj->disable_jump = 18;
-    obj->unk31C->rope = rope;
+    obj->mv->rope = ropeId;
+    obj->nojump = 18;
+    obj->mv->ropePtr = rope;
     rope->rider = obj;
 }
 
 /** Lets go of the current rope, giving it a swing impulse from obj's horizontal speed. */
 void func_151AE264(Actor *obj) {
-    f32 force = obj->xz_velocity * 0.8899999857f;
-    Rope *rope = obj->unk31C->rope;
+    f32 force = obj->speed * 0.8899999857f;
+    Rope *rope = obj->mv->ropePtr;
 
     rope->releaseForce = force;
-    rope->releaseAngle = obj->unk76 >> 8;
-    rope->releaseNode = obj->unk31C->ropeNode;
+    rope->releaseAngle = obj->angle >> 8;
+    rope->releaseNode = obj->mv->ropeNode;
     rope->regrabTimer = 20;
     rope->rider = NULL;
-    obj->unk31C->ropeId = 0;
-    obj->unk31C->rope = NULL;
+    obj->mv->rope = 0;
+    obj->mv->ropePtr = NULL;
 }
 
 /** Sets *progress to how far up the rope height y is (0.0f bottom, 1.0f top). */
@@ -600,16 +600,16 @@ s32 func_151AE3A8(RopeRider *rider) {
     f32 b[3];
 
     obj = rider->owner;
-    rope = obj->unk31C->rope;
+    rope = obj->mv->ropePtr;
     angle = func_15143E08(obj) - 0x80;
     dirX = func_151423D8(angle - 0x40);
     dirZ = func_151423D8(angle);
-    ride = obj->unk31C;
+    ride = obj->mv;
     progress = ride->ropeProgress;
     radius = rider->radius;
-    ox = obj->x_position;
-    oy = obj->y_position;
-    oz = obj->z_position;
+    ox = obj->xpos;
+    oy = obj->ypos;
+    oz = obj->zpos;
     endNodes = 140.0f / rope->segmentLength;
     {
         s32 pad3; // matching: block scope shifts IDO's lbu scheduling
@@ -634,9 +634,9 @@ s32 func_151AE3A8(RopeRider *rider) {
         nz += radius * dirZ;
     }
     // matching: "(new - old) + old" rather than a plain store of the new position
-    obj->x_position = (nx - ox) + ox;
-    obj->y_position = (ny - oy) + oy;
-    obj->z_position = (nz - oz) + oz;
+    obj->xpos = (nx - ox) + ox;
+    obj->ypos = (ny - oy) + oy;
+    obj->zpos = (nz - oz) + oz;
 }
 
 /** Finds the rope with the given id in either rope object list; NULL if there is none. */

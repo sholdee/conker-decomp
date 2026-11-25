@@ -195,8 +195,8 @@ void func_15177A94(void) {
         if (func_151149AC(deformer->objectId)->viewFlags & 0xF) {
             if (!deformer->sharesObject) {
                 obj = func_151149AC(deformer->objectId);
-                if (obj->rotX == 0.0f && obj->rotY == 0.0f && obj->rotZ == 0.0f &&
-                    obj->scaleX == 1.0f && obj->scaleY == 1.0f && obj->scaleZ == 1.0f) {
+                if (obj->t == 0.0f && obj->u == 0.0f && obj->v == 0.0f &&
+                    obj->xScale == 1.0f && obj->yScale == 1.0f && obj->zScale == 1.0f) {
                     // no rotation or scale: just translate (y already holds the wave offset)
                     for (j = 0; j < obj->numVertices; j++) {
                         obj->vertices[D_800BE9C0][j].v.ob[0] = obj->srcVertices[j].v.ob[0] + obj->x;

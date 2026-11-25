@@ -10,10 +10,14 @@ this after every splat run so that every checkout links the same symbol set.
 import re
 from pathlib import Path
 
-M = Path(__file__).resolve().parent.parent / "conker"
+import sys
+M = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else Path(__file__).resolve().parent.parent / "conker"
 defs = set()
-for p in (M / "src").rglob("*.s"):
-    defs |= set(re.findall(r"^\s*glabel (\w+)", p.read_text(errors="replace"), re.M))
+# labels in committed hand-written asm and in splat's generated data/bss files (both are linked)
+ld = (M / "conker.ld").read_text() if (M / "conker.ld").exists() else ""
+linked = [M / "asm" / "data" / f for f in set(re.findall(r"build/asm/data/([\w.]+\.s)\.o", ld))]
+for p in list((M / "src").rglob("*.s")) + [q for q in linked if q.exists()]:
+    defs |= set(re.findall(r"^\s*(?:glabel|dlabel|jlabel) (\w+)", p.read_text(errors="replace"), re.M))
 for p in (M / "src").rglob("*.c"):  # C function definitions
     defs |= set(re.findall(r"^[A-Za-z_][\w \*]*?\b(\w+)\s*\([^;{]*\)\s*\{", p.read_text(errors="replace"), re.M))
 for name in ("undefined_funcs_auto.txt", "undefined_syms_auto.txt"):

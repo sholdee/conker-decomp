@@ -40,12 +40,12 @@ void func_15174690(s32 objIndex, s32 spread, s32 growth, s32 growthRange, s32 si
     Actor *obj;
     BillboardTemplate template;
 
-    obj = &D_800CC2D0[objIndex];
-    if ((obj->in_water == 0) && (-10000.0f == obj->unk118)) {
-        y = obj->y_position + 5.0f;
-        angle = obj->unk40 * 0.01745329238f;
-        x = obj->x_position;
-        z = obj->z_position;
+    obj = &movement_obj[objIndex];
+    if ((obj->inwater == 0) && (-10000.0f == obj->unk118)) {
+        y = obj->ypos + 5.0f;
+        angle = obj->theta * 0.01745329238f;
+        x = obj->xpos;
+        z = obj->zpos;
         x -= 10.0f * sinf(angle);
         z -= 10.0f * cosf(angle);
         if (spread != 0) {

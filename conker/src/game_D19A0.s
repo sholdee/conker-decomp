@@ -48,8 +48,8 @@ glabel func_150A44F0
     /* D1A2C 150A457C 8ED6BE3C */  lw         $s6, %lo(D_800DBE3C)($s6)
     /* D1A30 150A4580 3C17800E */  lui        $s7, %hi(D_800DBEF8)
     /* D1A34 150A4584 8EF7BEF8 */  lw         $s7, %lo(D_800DBEF8)($s7)
-    /* D1A38 150A4588 3C1E800E */  lui        $fp, %hi(D_800DBEF4)
-    /* D1A3C 150A458C 8FDEBEF4 */  lw         $fp, %lo(D_800DBEF4)($fp)
+    /* D1A38 150A4588 3C1E800E */  lui        $fp, %hi(db_Object_array)
+    /* D1A3C 150A458C 8FDEBEF4 */  lw         $fp, %lo(db_Object_array)($fp)
     /* D1A40 150A4590 3C08800E */  lui        $t0, %hi(D_800DBEFC)
     /* D1A44 150A4594 8D08BEFC */  lw         $t0, %lo(D_800DBEFC)($t0)
     /* D1A48 150A4598 4488B800 */  mtc1       $t0, $f23

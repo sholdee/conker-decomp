@@ -280,12 +280,12 @@ Gfx *func_15018E88(Gfx *gfx, s16 player) {
     }
     gfx = func_151674F8(gfx, 0, player, 0);
     gfx = func_151674F8(gfx, 0, player, 1);
-    return func_15174AA4(gfx, D_800BE9F0, player);
+    return func_15174AA4(gfx, level, player);
 }
 
 /* Counterpart of func_15018E88: func_15174B48, then group 1 of player's display lists. */
 Gfx *func_15018F08(Gfx *gfx, s16 player) {
-    gfx = func_15174B48(gfx, D_800BE9F0, player);
+    gfx = func_15174B48(gfx, level, player);
     gfx = func_151674F8(gfx, 1, player, 0);
     gfx = func_151674F8(gfx, 1, player, 1);
 
@@ -294,15 +294,15 @@ Gfx *func_15018F08(Gfx *gfx, s16 player) {
     return gfx;
 }
 
-/* Per-player setup before drawing player's view (D_800D3674 follows the sign of camera->pitch). */
+/* Per-player setup before drawing player's view (D_800D3674 follows the sign of camera->CameraPitch). */
 void func_15018F80(s16 player) {
-    Camera *camera = &D_800DBFF0[player];
+    Camera *camera = &camera_global_Cameras[player];
     D_8003C8E0 = 0xA000000;
     if ((func_1517F40C(player) == 0) && (D_800BEAC0 == 0)) {
         func_1517F448(player);
     }
     func_1501B640(player);
-    D_800D3674 = (camera->pitch < 0.0f) ? -1000 : 5000;
+    D_800D3674 = (camera->CameraPitch < 0.0f) ? -1000 : 5000;
     func_15172D80(player);
     D_8003C8E0 = 0;
 }
@@ -318,9 +318,9 @@ void func_1501905C(void) {
     func_1501C1B0();
     func_1501BB20();
     func_1502C380();
-    if (0) {} // matching: IDO picks v0 (not v1) for the D_800DBFF0 load only with this
+    if (0) {} // matching: IDO picks v0 (not v1) for the camera_global_Cameras load only with this
     // matching: callers pass z as raw bits (lw into a2); functions.h declares the third parameter s32
-    func_1000D758(D_800DBFF0->focus.x, D_800DBFF0->focus.y, *(s32 *)&D_800DBFF0->focus.z);
+    func_1000D758(camera_global_Cameras->focus.x, camera_global_Cameras->focus.y, *(s32 *)&camera_global_Cameras->focus.z);
     func_10011BB8();
     if (D_800E0B94 == 2) {
         func_150ADACC(0x81280783);
@@ -419,7 +419,7 @@ s32 func_15019130(void) {
         func_15094EA0(player);
     }
     func_15112A80(0);
-    func_151749F8(D_800BE9F0, 0);
+    func_151749F8(level, 0);
     func_1501C860();
     func_1511FC20(D_800BE9C0);
     func_15188B74(0);
@@ -433,7 +433,7 @@ s32 func_15019130(void) {
     }
     func_15113218();
     func_15188B74(1);
-    func_151738C4(D_800BE9F0);
+    func_151738C4(level);
     func_1502C1A4();
     func_15113C88();
     if (D_800CC2B0 != 0) {
@@ -480,7 +480,7 @@ Gfx *func_15019464(Gfx *gfx, s16 player) {
     if (D_80084480 != 0) {
         return gfx;
     }
-    gfx = func_1510FEA0(gfx, D_800BE9F0);
+    gfx = func_1510FEA0(gfx, level);
     if ((func_1517EFAC(player) != 0) || (D_800D18A0 & (1 << player))) {
         return gfx;
     }
@@ -490,7 +490,7 @@ Gfx *func_15019464(Gfx *gfx, s16 player) {
 
 /* Draws the main pass of player's scene. */
 Gfx *func_150195A0(Gfx *gfx, s16 player) {
-    Camera *camera = &D_800DBFF0[player];
+    Camera *camera = &camera_global_Cameras[player];
 
     if (D_800BEAC0 != 0) {
         return gfx;
@@ -518,7 +518,7 @@ Gfx *func_150195A0(Gfx *gfx, s16 player) {
     gfx = func_1502BAD0(gfx, 1, player);
     gfx = func_15035FE8(gfx, player);
     gSPMatrix(gfx++, &D_80089470, G_MTX_LOAD);
-    if (camera->status & 1) {
+    if (camera->SpecialFlags & 1) {
         gfx = func_15018E88(gfx, player);
         gfx = func_151135C4(gfx, 0, player);
         gfx = func_15018F08(gfx, player);
@@ -573,7 +573,7 @@ Gfx *func_150198FC(Gfx *gfx) {
         D_80082F90 = 0;
     }
     if (func_1517EFAC(0) == 0) {
-        gfx = func_1517E28C(gfx, D_800BE9F0);
+        gfx = func_1517E28C(gfx, level);
         gfx = func_15172F70(gfx);
         gfx = func_15181EE0(gfx);
     }
@@ -614,7 +614,7 @@ Gfx *func_15019CC8(Gfx *gfx, s32 player) {
     gfx = func_1501A490(gfx, player, 0, 0, 0, 0);
     gSPMatrix(gfx++, &D_80089470, G_MTX_LOAD);
     gSPMatrix(gfx++, &D_800BE628[player].projectionMtx[D_800BE9C0], G_MTX_PROJECTION | G_MTX_LOAD);
-    if (D_800BE9F0 == 0x1D) {
+    if (level == 0x1D) {
         gfx = func_1502BAD0(gfx, 6, player);
     }
     gfx = func_151674F8(gfx, 5, 0, 0);

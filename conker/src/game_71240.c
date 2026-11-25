@@ -66,14 +66,15 @@ void func_15043F6C(MtxF mtx, f32 rotX, f32 rotY, f32 rotZ, f32 scaleX, f32 scale
     mtx[3][3] = 1.0f;
 }
 
-/* Converts a 16.16 fixed-point position (integer parts at unk18, fractions at unk38) to floats. */
-void func_15043FF0(Vec3f *out, struct113 *src) {
-    out->x = src->unk18;
-    out->y = src->unk1A;
-    out->z = src->unk1C;
-    out->x += src->unk38 * (1.0f / 65536.0f);
-    out->y += src->unk3A * (1.0f / 65536.0f);
-    out->z += src->unk3C * (1.0f / 65536.0f);
+/* Reads the translation of a fixed-point matrix: the integer halves of row 3 (s16 12..14), plus their
+ * fractions (s16 28..30). */
+void math_mtxGetTranslation(Vec3f *out, Mtx *mtx) {
+    out->x = ((s16 *)mtx)[12];
+    out->y = ((s16 *)mtx)[13];
+    out->z = ((s16 *)mtx)[14];
+    out->x += ((s16 *)mtx)[28] * (1.0f / 65536.0f);
+    out->y += ((s16 *)mtx)[29] * (1.0f / 65536.0f);
+    out->z += ((s16 *)mtx)[30] * (1.0f / 65536.0f);
 }
 
 /*

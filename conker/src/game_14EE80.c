@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /**
- * Frames the first D_8008FD8C objects of D_800CC2D0: the camera looks at their max X, mean Y (+150) and
+ * Frames the first D_8008FD8C objects of movement_obj: the camera looks at their max X, mean Y (+150) and
  * mid Z, and backs off along +X/+Y by the largest Z spread from the middle (at least 300, plus 100).
  * unk2BC..unk2C4 is the look-at point, unk2F8..unk300 the eye position.
  */
@@ -20,15 +20,15 @@ void func_151219D0(Camera *camera) {
     maxX = -10000.0f;
     sumY = 0.0f;
     for (i = 0; i < D_8008FD8C; i++) {
-        x = D_800CC2D0[i].x_position;
+        x = movement_obj[i].xpos;
         if (x < minX) {
             minX = x;
         }
         if (maxX < x) {
             maxX = x;
         }
-        z = D_800CC2D0[i].z_position;
-        sumY += D_800CC2D0[i].y_position;
+        z = movement_obj[i].zpos;
+        sumY += movement_obj[i].ypos;
         if (z < minZ) {
             minZ = z;
         }
@@ -43,11 +43,11 @@ void func_151219D0(Camera *camera) {
     midZ = (minZ + maxZ) * 0.5f;
     camera->target.z = midZ;
     for (i = 0; i < D_8008FD8C; i++) {
-        dx = (D_800CC2D0[i].x_position - maxX) * 0.5f;
+        dx = (movement_obj[i].xpos - maxX) * 0.5f;
         if (dx < 0.0f) {
             dx = 0.0f;
         }
-        dz = D_800CC2D0[i].z_position - midZ;
+        dz = movement_obj[i].zpos - midZ;
         if (dz < 0.0f) {
             dz = -dz;
         }
@@ -66,16 +66,5 @@ void func_151219D0(Camera *camera) {
     camera->eye.y = camera->target.y + (maxDist * 0.5f);
     camera->eye.z = camera->target.z;
 }
-
-/**
- * Springs the camera yaw (degrees) towards targetYaw with func_15049688, using yawSpringVel as its
- * velocity, then stores the yaw in radians in yawRad.
- */
-void func_15121C00(Camera *camera, f32 targetYaw, s32 unused, f32 speedGain, f32 accelGain) {
-    func_15049688(&camera->yaw, targetYaw, &camera->yawSpringVel, speedGain, accelGain, camera->dt);
-    camera->yawRad = camera->yaw * 0.01745329238f; // degrees to radians
-}
-
-/** Empty stub. */
-void func_15121C64(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-}
+void func_15121C00(Camera *camera, f32 targetYaw, s32 unused, f32 speedGain, f32 accelGain);
+void func_15121C64(s32 arg0, s32 arg1, s32 arg2, s32 arg3);

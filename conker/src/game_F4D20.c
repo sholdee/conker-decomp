@@ -18,13 +18,13 @@ typedef struct {
     /* 0x13 */ s8 unk13;
 } LinkedObj;
 
-/* Behaviour scratch state of the objects in this file (WorldObject.work). */
+/* Behaviour scratch state of the objects in this file (WorldObject.touch). */
 typedef union {
     s32 count;        // func_150C7C90
     LinkedObj *link;  // func_150C7968
 } F4D20Work;
 
-#define WORK(obj) ((F4D20Work *)&(obj)->work)
+#define WORK(obj) ((F4D20Work *)&(obj)->touch)
 
 extern void func_1511650C(WorldObject *obj, s32 arg1, s32 soundId, f32 pitchScale);
 extern WorldObject *func_151149AC(u8);
@@ -35,7 +35,7 @@ extern s32 func_15116110(WorldObject *obj);
  * bit 3 of byte 0xA of the 27-byte flag record at D_800D2E4C is set. */
 void func_150C7870(WorldObject *obj) {
     if (!(D_800D2E4C[0xA] & 8)) {
-        if (!(D_800DBEF4[0].behaviorState & 4)) {
+        if (!(db_Object_array[0].task_flag & TASK_FLAG_LOCKED)) {
             func_1511650C(obj, 1, 0x353, 1000.0f);
         } else {
             func_1511650C(obj, 1, 0x43, 400.0f);
@@ -47,9 +47,9 @@ void func_150C7870(WorldObject *obj) {
 void func_150C78E0(WorldObject *obj) {
     WorldObject *obj3;
 
-    if (!(obj->behaviorState & 4)) {
-        obj3 = &D_800DBEF4[3];
-        obj->param.word = -(obj3->param.word & 0xFFFF0000) & 0xFFFF0000;
+    if (!(obj->task_flag & TASK_FLAG_LOCKED)) {
+        obj3 = &db_Object_array[3];
+        obj->moveData.word = -(obj3->moveData.word & 0xFFFF0000) & 0xFFFF0000;
         func_151150BC(obj);
     }
 }
@@ -58,8 +58,8 @@ void func_150C78E0(WorldObject *obj) {
 void func_150C7930(WorldObject *obj) {
     WorldObject *obj3;
 
-    obj3 = &D_800DBEF4[3];
-    obj->param.word = obj3->param.word & 0xFFFF0000;
+    obj3 = &db_Object_array[3];
+    obj->moveData.word = obj3->moveData.word & 0xFFFF0000;
     func_151150BC(obj);
 }
 
@@ -70,10 +70,10 @@ void func_150C7968(WorldObject *obj) {
     s32 speed;
 
     func_15116110(obj);
-    if (!(obj->behaviorState & 4)) {
-        obj3 = &D_800DBEF4[3];
+    if (!(obj->task_flag & TASK_FLAG_LOCKED)) {
+        obj3 = &db_Object_array[3];
         link = WORK(obj)->link;
-        speed = obj3->param.half.hi >> 4;
+        speed = obj3->moveData.half.hi >> 4;
         if (link != NULL) {
             link->unk13 = speed;
         }
@@ -98,9 +98,9 @@ void func_150C79BC(s32 view) {
     s32 radius;
     u8 angle;
 
-    dx = (s32)D_800DBFF0[view].eye.x + 2418;
-    dy = (s32)D_800DBFF0[view].eye.y - 2500;
-    dz = (s32)D_800DBFF0[view].eye.z - 1775;
+    dx = (s32)camera_global_Cameras[view].eye.x + 2418;
+    dy = (s32)camera_global_Cameras[view].eye.y - 2500;
+    dz = (s32)camera_global_Cameras[view].eye.z - 1775;
     if (dy > -200 && dx * dx + dz * dz < 1200 * 1200) {
         if (D_800887F4 == 0) {
             func_1000D96C(0x5F, 0xF, 6);
@@ -112,7 +112,7 @@ void func_150C79BC(s32 view) {
         func_1000D96C(0x10, 0, 3);
         D_800887F4 = 0;
     }
-    dy = (s32)D_800DBFF0[view].eye.y - 1583;
+    dy = (s32)camera_global_Cameras[view].eye.y - 1583;
     if (dy < 0 && dx * dx + dz * dz < 900 * 900 && (func_150ADA20() & 0xFFFF) < 0x2000) {
         radius = func_150ADA20() % 900U;
         angle = func_150ADA20();
@@ -144,8 +144,8 @@ void func_150C7C90(WorldObject *obj) {
         index = count;
     }
     last = &((F4D20Entry *)obj->displayList)[index];
-    angle = -669 - func_151149AC(obj->param.word & 0xFF)->y;
-    if (obj->param.word & 0x8000) {
+    angle = -669 - func_151149AC(obj->moveData.word & 0xFF)->y;
+    if (obj->moveData.word & 0x8000) {
         angle = 836 - angle;
     }
     while (angle < 0) {
@@ -163,7 +163,7 @@ void func_150C7D7C(WorldObject *obj) {
     Actor *target;
 
     target = func_15083E90(0xC);
-    obj->x = target->x_position - 30.0f;
-    obj->y = target->y_position + 50.0f;
-    obj->z = target->z_position + 30.0f;
+    obj->x = target->xpos - 30.0f;
+    obj->y = target->ypos + 50.0f;
+    obj->z = target->zpos + 30.0f;
 }

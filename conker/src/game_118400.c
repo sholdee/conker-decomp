@@ -24,7 +24,7 @@ s32 func_150EAF50(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side) {
         bone = 0x1D;
     }
 
-    func_15142314(actor->unk1D4, bone, pos);
+    func_15142314(actor->ob_matrix_ptr, bone, pos);
     if (hit == NULL) {
         return 1;
     }
@@ -36,11 +36,11 @@ s32 func_150EAF50(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side) {
     return func_15046C80(&probe, 0, pos->y - 50.0f, hit);
 }
 
-/* Effect id for an actor's effect kind: kind 1 in world 4 (D_800BE9F0) is 6 when func_151420F8
+/* Effect id for an actor's effect kind: kind 1 in world 4 (level) is 6 when func_151420F8
    accepts the actor and 3 otherwise; everything else is unmapped (-1). */
 s32 func_150EB030(s32 kind, Actor *actor) {
     if (kind == 1) {
-        if (D_800BE9F0 == 4) {
+        if (level == 4) {
             if (func_151420F8(actor) != 0) {
                 return 6;
             }
@@ -58,10 +58,10 @@ void func_150EB090(s32 actor, s32 side, s32 strength) {
     Vec3f pos;
     CollisionHit hit;
 
-    if (((Actor *)actor)->unk1D4 != NULL) {
+    if (((Actor *)actor)->ob_matrix_ptr != NULL) {
         if (func_150EAF50(&pos, (Actor *)actor, &hit, side) != 0) {
             func_15141F78(0xA, &hit, strength * (1.0f / 85.0f),
-                          (u32)(((Actor *)actor)->unk40 * (256.0f / 360.0f)), &pos, side);
+                          (u32)(((Actor *)actor)->theta * (256.0f / 360.0f)), &pos, side);
         }
     }
 }

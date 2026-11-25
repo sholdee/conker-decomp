@@ -11,8 +11,8 @@ typedef union {
     s32 i;
 } FloatOrWord;
 
-/* Script-set scratch words of an object (its WorldObject.work), each a float or a raw value. */
-#define WORK(obj) ((FloatOrWord *)(obj)->work.words)
+/* Script-set scratch words of an object (its WorldObject.touch), each a float or a raw value. */
+#define WORK(obj) ((FloatOrWord *)&(obj)->touch)
 
 extern WorldObject *func_151149AC(u8 id);
 extern s32 func_15086D48(s32);
@@ -36,7 +36,7 @@ s32 func_1509E900(s32 id, s32 op, s32 *cmd) {
     switch (op) {
     case 0:
         obj->inactive = 0;
-        if (obj->update != NULL) {
+        if (obj->moveProc != NULL) {
             obj->viewFlags |= 0xF;
         }
         return 1;
@@ -88,37 +88,37 @@ s32 func_1509E900(s32 id, s32 op, s32 *cmd) {
         }
         return 1;
     case 5:
-        obj->param.word = cmd[2];
+        obj->moveData.word = cmd[2];
         return 1;
     case 6:
-        obj->behaviorState &= ~3;
-        obj->behaviorState |= cmd[2] & 3;
+        obj->task_flag &= ~TASK_FLAG_STATE;
+        obj->task_flag |= cmd[2] & TASK_FLAG_STATE;
         return 1;
     case 7:
         if (cmd[2] != 0) {
-            obj->behaviorState |= 4;
+            obj->task_flag |= TASK_FLAG_LOCKED;
         } else {
-            obj->behaviorState &= ~4;
+            obj->task_flag &= ~TASK_FLAG_LOCKED;
         }
         return 1;
     case 8:
-        obj->param.word &= 0xFFFF;
-        obj->param.word |= cmd[2] << 16;
+        obj->moveData.word &= 0xFFFF;
+        obj->moveData.word |= cmd[2] << 16;
         WORK(obj)[0].i = cmd[3];
         return 1;
     case 9:
         func_150E4928(obj);
         break;
     case 10:
-        obj->update = D_80088C90[cmd[2]].update;
+        obj->moveProc = D_80088C90[cmd[2]].moveProc;
         obj->onContact = D_80088C90[cmd[2]].onContact;
-        obj->unk92 = D_80088C90[cmd[2]].unk8;
+        obj->contactNonPlayers = D_80088C90[cmd[2]].contactNonPlayers;
         break;
     case 11:
-        func_15173C90(cmd[2], cmd[3], obj->id);
+        func_15173C90(cmd[2], cmd[3], obj->unique_id);
         break;
     case 13:
-        obj->flags = (obj->flags & ~cmd[3]) | cmd[2];
+        obj->object_status = (obj->object_status & ~cmd[3]) | cmd[2];
         break;
     case 14:
         if (cmd[2] != ARG_KEEP) {
@@ -144,13 +144,13 @@ s32 func_1509E900(s32 id, s32 op, s32 *cmd) {
         break;
     case 16:
         if (cmd[2] != ARG_KEEP) {
-            obj->rotX = cmd[2];
+            obj->t = cmd[2];
         }
         if (cmd[3] != ARG_KEEP) {
-            obj->rotY = cmd[3];
+            obj->u = cmd[3];
         }
         if (cmd[4] != ARG_KEEP) {
-            obj->rotZ = cmd[4];
+            obj->v = cmd[4];
         }
         break;
     case 17:
@@ -184,13 +184,13 @@ s32 func_1509ED74(s32 id, s32 op, s32 *cmd) {
         return func_15114050(obj, func_15084000(cmd[2] & 0xFFFF0FFF));
     case 21:
         for (i = 0; i < 25; i++) {
-            if (D_800CC2D0[i].interaction_state == cmd[2] && func_15114050(obj, i)) {
+            if (movement_obj[i].type == cmd[2] && func_15114050(obj, i)) {
                 return 1;
             }
         }
         return 0;
     case 22:
-        if ((obj->flags & 4) == 4) {
+        if ((obj->object_status & 4) == 4) {
             return 1;
         }
         return 0;
@@ -201,16 +201,16 @@ s32 func_1509ED74(s32 id, s32 op, s32 *cmd) {
         }
         return result | 0x2000;
     case 24:
-        return obj->flags;
+        return obj->object_status;
     case 25:
         if (WORK(obj)[2].i == WORK(obj)[0].i) {
             return 1;
         }
         return 0;
     case 26:
-        return obj->param.word;
+        return obj->moveData.word;
     case 27:
-        return obj->behaviorState & 3;
+        return obj->task_flag & TASK_FLAG_STATE;
     case 28:
         return obj->inactive == 0;
     case 29:
@@ -220,7 +220,7 @@ s32 func_1509ED74(s32 id, s32 op, s32 *cmd) {
     case 31:
         return obj->z;
     case 32:
-        return obj->rotZ;
+        return obj->v;
     case 33:
         if (cmd[2] == 0) {
             return WORK(obj)[0].i;
@@ -244,7 +244,7 @@ s32 func_1509ED74(s32 id, s32 op, s32 *cmd) {
         }
         break;
     case 35:
-        return (obj->behaviorState & 4) != 0;
+        return (obj->task_flag & TASK_FLAG_LOCKED) != 0;
     }
     return 0;
 }
@@ -402,14 +402,14 @@ void func_1509F47C(first, last, volume, objId, nearDistance, farDistance)
     func_15114D24(obj, func_1000F568(first, (u8)(last - first + 1)), volume, nearDistance, farDistance, 0);
 }
 
-/* Plays a random sound from first..last at point `index` of the D_800D3098 table, whose halfword at
+/* Plays a random sound from first..last at point `index` of the zones table, whose halfword at
  * 0x6 is the far distance (nearDistance is kept below it). */
 s32 func_1509F4E8(s32 first, s32 last, s32 volume, s32 index, u32 nearDistance) {
     TriggerZone *point;
     s32 farDistance;
 
-    point = &D_800D3098[index];
-    farDistance = point->radius;
+    point = &zones[index];
+    farDistance = point->xSize;
     if (nearDistance >= farDistance) {
         nearDistance = farDistance - 1;
     }
@@ -466,9 +466,9 @@ s32 func_1509F6E8(s32 sound, s32 path, s32 volume, s32 nearDistance, s32 farDist
     if (actor == NULL) {
         return 0;
     }
-    x = actor->x_position;
-    y = actor->y_position;
-    z = actor->z_position;
+    x = actor->xpos;
+    y = actor->ypos;
+    z = actor->zpos;
     return func_10010F88(sound, volume, 0, 0, 0, x, y, z, nearDistance, farDistance);
 }
 
@@ -480,9 +480,9 @@ void func_1509F77C(s32 handle, s32 path, s32 cents, s32 nearDistance, s32 farDis
     s32 z;
 
     actor = func_1505EEF4(path);
-    x = actor->x_position;
-    y = actor->y_position;
-    z = actor->z_position;
+    x = actor->xpos;
+    y = actor->ypos;
+    z = actor->zpos;
     func_1000F91C(handle, 0x7FFF, cents, 0, 0, x, y, z, nearDistance, farDistance);
 }
 

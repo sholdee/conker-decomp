@@ -10,7 +10,7 @@ extern f32 func_1510F648(f32 x, f32 y, f32 z);
 extern u16 D_800CC354;
 
 /*
- * Behaviour scratch state (WorldObject.work) of the objects in this file:
+ * Behaviour scratch state (WorldObject.touch) of the objects in this file:
  * func_15116110 keeps its texture scroll, func_1511617C the ground height, func_151162D4 its bob phase.
  */
 typedef union {
@@ -19,7 +19,7 @@ typedef union {
     s32 phase; /* scaled by 360/65536 before cosf */
 } Work1435C0;
 
-#define WORK(obj) ((Work1435C0 *)&(obj)->work)
+#define WORK(obj) ((Work1435C0 *)&(obj)->touch)
 
 /* Registers the object's texture scroll once, from the packed scroll word in param (bits 0-14 texture,
  * >> 15 doubled, bits 16-23 speedT, 24-31 speedS), then clears the word. */
@@ -28,12 +28,12 @@ void func_15116110(WorldObject *obj) {
     s32 texture, doubled;
 
     if (WORK(obj)->texScroll == NULL) {
-        info = obj->param.word;
+        info = obj->moveData.word;
         texture = (u16)info & 0x7FFF; // matching: the (u16) and (s8) casts pick IDO's register assignment
         doubled = info >> 15;
         info >>= 0; // matching: keeps the speed shifts below the texture/doubled setup (as1 orders by -g3 line)
         WORK(obj)->texScroll = func_15195FB0(obj, texture, doubled, -1, 0, (s8)(info >> 24) & 0xFF, (s8)(info >> 16) & 0xFF);
-        obj->param.word = 0;
+        obj->moveData.word = 0;
     }
 }
 
@@ -46,20 +46,20 @@ void func_1511617C(WorldObject *obj) {
     oldY = obj->y;
     WORK(obj)->groundY = func_1510F648(obj->x, obj->y, obj->z);
     if (fabsf(WORK(obj)->groundY - obj->y) > 200.0f) {
-        obj->param.word = 0;
+        obj->moveData.word = 0;
     }
-    if (!(obj->flags & 4)) {
-        delta = -obj->param.word;
-        obj->param.word += delta * 0.2f;
+    if (!(obj->object_status & 4)) {
+        delta = -obj->moveData.word;
+        obj->moveData.word += delta * 0.2f;
     } else {
         target = -20;
         if (D_800CC354 == 75) {
             target = -40;
         }
-        delta = target - obj->param.word;
-        obj->param.word += delta * 0.3f;
+        delta = target - obj->moveData.word;
+        obj->moveData.word += delta * 0.3f;
     }
-    obj->y = WORK(obj)->groundY + obj->param.word;
+    obj->y = WORK(obj)->groundY + obj->moveData.word;
     obj->moveY = obj->y - oldY;
 }
 
@@ -72,8 +72,8 @@ void func_151162D4(WorldObject *obj) {
     f32 offset;
 
     prevY = obj->y + obj->yOffset;
-    amplitude = (s16)(obj->param.word & 0xFFFF);
-    speed = (obj->param.word >> 16) & 0xFFFF;
+    amplitude = (s16)(obj->moveData.word & 0xFFFF);
+    speed = (obj->moveData.word >> 16) & 0xFFFF;
     offset = cosf(WORK(obj)->phase * (360.0f / 65536.0f)) * amplitude;
     obj->yOffset = offset;
     WORK(obj)->phase += speed * D_800BE9E4;

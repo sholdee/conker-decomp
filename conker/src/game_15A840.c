@@ -21,19 +21,19 @@ void func_1512D390(Camera *camera) {
     f32 clamped;
     u16 input;
 
-    input = camera->contPad->button;
+    input = camera->PadPtr->button;
     orbit = (CamOrbitState *)camera->pad69C;
-    if ((input & 3) && !(camera->flags & 0x200000)) {
+    if ((input & 3) && !(camera->AvailableModes & 0x200000)) {
         if (camera->unk698 != 0) {
             return;
         }
         if (input & 1) {
-            camera->unk6B0 = 1; /* orbit direction */
+            camera->orbitDir = 1;
         } else {
-            camera->unk6B0 = -1;
+            camera->orbitDir = -1;
         }
         orbit->counter++;
-        orbit->orbitSpeed += (f32)camera->unk6B0 * 0.5f * D_800BE9A4;
+        orbit->orbitSpeed += (f32)camera->orbitDir * 0.5f * D_800BE9A4;
         speed = orbit->orbitSpeed;
         if (speed < -10.0f) {
             orbit->orbitSpeed = -10.0f;
@@ -45,7 +45,7 @@ void func_1512D390(Camera *camera) {
             }
             orbit->orbitSpeed = clamped;
         }
-        if (camera->mode & 0x400) {
+        if (camera->Mode & 0x400) {
             orbit->counter = 20;
             return;
         }

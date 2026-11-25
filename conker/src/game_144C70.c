@@ -22,7 +22,7 @@ typedef struct PropVtx {
     /* 0xC */ u8 cn[4];
 } PropVtx;
 
-/* Behaviour scratch state of the props in this file (WorldObject.work). */
+/* Behaviour scratch state of the props in this file (WorldObject.touch). */
 typedef union {
     struct {
         s32 homeY; /* y | 0x80000000 once saved */
@@ -54,16 +54,10 @@ typedef union {
     } sway;
 } PropWork;
 
-#define WORK(prop) ((PropWork *)&(prop)->work)
-
-/* Motion states kept in bits 0-1 of WorldObject.behaviorState. */
-#define PROP_REST 0
-#define PROP_RETURNING 1
-#define PROP_MOVING 2
-#define PROP_ARRIVED 3
+#define WORK(prop) ((PropWork *)&(prop)->touch)
 
 #define PROP_SET_MOTION(prop, motion) \
-    ((prop)->behaviorState &= ~3, (prop)->behaviorState |= (motion))
+    ((prop)->task_flag &= ~TASK_FLAG_STATE, (prop)->task_flag |= (motion))
 
 extern void func_15104A80(WorldObject *prop);
 
@@ -82,22 +76,22 @@ void func_151177C0(WorldObject *prop) {
     s16 lowered;
     s32 homeY;
 
-    motion = prop->behaviorState & 3;
-    flag4 = prop->behaviorState & 4;
+    motion = prop->task_flag & TASK_FLAG_STATE;
+    flag4 = prop->task_flag & TASK_FLAG_LOCKED;
     kind = prop->modelId;
     travel = 40;
     step = 3;
     autoReturn = FALSE;
     onArrive = NULL;
-    if (kind == 0x800B && D_800BE9F0 == 12) {
+    if (kind == 0x800B && level == 12) {
         travel = 34;
-    } else if (D_800BE9F0 == 49) {
+    } else if (level == 49) {
         travel = 20;
         autoReturn = TRUE;
-    } else if (D_800BE9F0 == 10) {
+    } else if (level == 10) {
         travel = 20;
         autoReturn = TRUE;
-    } else if (D_800BE9F0 == 52) {
+    } else if (level == 52) {
         travel = 10;
         autoReturn = TRUE;
         step = 6;
@@ -109,34 +103,34 @@ void func_151177C0(WorldObject *prop) {
         WORK(prop)->lift.homeY = prop->y | 0x80000000;
     }
     homeY = (s16)(WORK(prop)->lift.homeY & 0xFFFF);
-    if (motion == PROP_ARRIVED) {
+    if (motion == TASK_FLAG_ON) {
         lowered = homeY - travel;
         if (prop->y != lowered) {
             prop->y = lowered;
         }
-        if (autoReturn && !(prop->flags & 4) && !flag4) {
-            motion = PROP_RETURNING;
+        if (autoReturn && !(prop->object_status & 4) && !flag4) {
+            motion = TASK_FLAG_GOING_OFF;
         }
-    } else if (motion == PROP_REST) {
+    } else if (motion == TASK_FLAG_OFF) {
         lowered = homeY - travel;
         if (prop->y != lowered) {
             prop->y = homeY;
         }
-    } else if (motion == PROP_MOVING) {
+    } else if (motion == TASK_FLAG_GOING_ON) {
         lowered = homeY - travel;
         prop->y -= step;
         if (lowered >= prop->y) {
             prop->y = lowered;
-            motion = PROP_ARRIVED;
+            motion = TASK_FLAG_ON;
             if (onArrive != NULL) {
                 onArrive(prop);
             }
         }
-    } else if (motion == PROP_RETURNING) {
+    } else if (motion == TASK_FLAG_GOING_OFF) {
         prop->y += 3;
         if (prop->y >= homeY) {
             prop->y = homeY;
-            motion = PROP_REST;
+            motion = TASK_FLAG_OFF;
         }
     }
     PROP_SET_MOTION(prop, motion);
@@ -166,9 +160,9 @@ void func_151179BC(WorldObject *prop) {
     f32 cz;
     f32 sz;
 
-    motion = prop->behaviorState & 3;
-    distance = (prop->param.word >> 16) & 0xFFFF;
-    delay = prop->param.word & 0xFFFF;
+    motion = prop->task_flag & TASK_FLAG_STATE;
+    distance = (prop->moveData.word >> 16) & 0xFFFF;
+    delay = prop->moveData.word & 0xFFFF;
     if (WORK(prop)->slide.homeZ == 0) {
         WORK(prop)->slide.homeXY = (prop->x & 0xFFFF) | (prop->y << 16);
         WORK(prop)->slide.homeZ = prop->z | 0x80000000;
@@ -176,32 +170,32 @@ void func_151179BC(WorldObject *prop) {
     homeX = WORK(prop)->slide.homeXY & 0xFFFF;
     homeY = WORK(prop)->slide.homeXY >> 16;
     homeZ = WORK(prop)->slide.homeZ & 0xFFFF;
-    if (motion == PROP_REST) {
+    if (motion == TASK_FLAG_OFF) {
         prop->x = homeX;
         prop->y = homeY;
         prop->z = homeZ;
         return;
     }
     current = math_distance3D(homeX - prop->x, homeY - prop->y, homeZ - prop->z);
-    if (motion == PROP_ARRIVED) {
+    if (motion == TASK_FLAG_ON) {
         if (distance < 0) {
             offset = -distance;
         } else {
             offset = distance;
         }
-        if (delay != 0 && !(prop->flags & 4) && !(prop->behaviorState & 4)) {
+        if (delay != 0 && !(prop->object_status & 4) && !(prop->task_flag & TASK_FLAG_LOCKED)) {
             if (D_800BE9E4 < WORK(prop)->slide.timer) {
                 WORK(prop)->slide.timer -= D_800BE9E4;
             } else {
-                motion = PROP_RETURNING;
+                motion = TASK_FLAG_GOING_OFF;
             }
         } else {
             WORK(prop)->slide.timer = delay;
         }
-    } else if (motion == PROP_MOVING) {
+    } else if (motion == TASK_FLAG_GOING_ON) {
         offset = current + 6;
         if (offset >= ((distance < 0) ? -distance : distance)) {
-            motion = PROP_ARRIVED;
+            motion = TASK_FLAG_ON;
             if (distance < 0) {
                 offset = -distance;
             } else {
@@ -209,21 +203,21 @@ void func_151179BC(WorldObject *prop) {
             }
             WORK(prop)->slide.timer = delay;
         }
-    } else if (motion == PROP_RETURNING) {
+    } else if (motion == TASK_FLAG_GOING_OFF) {
         if (current < 3) {
             offset = 0;
-            motion = PROP_REST;
+            motion = TASK_FLAG_OFF;
         } else {
             offset = current - 3;
         }
     }
     if (current != offset) {
-        cx = cosf(prop->rotX * 0.01745329238f);
-        sx = sinf(prop->rotX * 0.01745329238f);
-        cy = cosf(prop->rotY * 0.01745329238f);
-        sy = sinf(prop->rotY * 0.01745329238f);
-        cz = cosf(prop->rotZ * 0.01745329238f);
-        sz = sinf(prop->rotZ * 0.01745329238f);
+        cx = cosf(prop->t * 0.01745329238f);
+        sx = sinf(prop->t * 0.01745329238f);
+        cy = cosf(prop->u * 0.01745329238f);
+        sy = sinf(prop->u * 0.01745329238f);
+        cz = cosf(prop->v * 0.01745329238f);
+        sz = sinf(prop->v * 0.01745329238f);
         if (distance < 0) {
             offset = -offset;
         }
@@ -236,13 +230,13 @@ void func_151179BC(WorldObject *prop) {
     PROP_SET_MOTION(prop, motion);
 }
 
-/* Starts the prop moving when an object with interaction_state 1 triggers it while it is at rest. */
+/* Starts the prop moving when an object with type 1 triggers it while it is at rest. */
 void func_15117D3C(WorldObject *prop, Actor *obj) {
-    s32 delay = prop->param.word & 0xFFFF;
+    s32 delay = prop->moveData.word & 0xFFFF;
 
-    if (obj->interaction_state == 1 && (prop->flags & 4) && !(prop->behaviorState & 3) && !(prop->behaviorState & 4) &&
-        (delay == 0 || obj->unk31C->unk57 == 1)) {
-        PROP_SET_MOTION(prop, PROP_MOVING);
+    if (obj->type == 1 && (prop->object_status & 4) && !(prop->task_flag & TASK_FLAG_STATE) && !(prop->task_flag & TASK_FLAG_LOCKED) &&
+        (delay == 0 || obj->mv->unk57 == 1)) {
+        PROP_SET_MOTION(prop, TASK_FLAG_GOING_ON);
     }
 }
 
@@ -256,7 +250,7 @@ void func_15117DA4(WorldObject *prop, f32 x, f32 y, f32 z, f32 *out) {
     f32 c;
     f32 rotatedX;
 
-    if (prop->modelId == 0x8006 && D_800BE9F0 == 53) {
+    if (prop->modelId == 0x8006 && level == 53) {
         prop = func_151149AC(0xFD);
         func_1511F31C(prop);
         y = -555.0f;
@@ -264,14 +258,14 @@ void func_15117DA4(WorldObject *prop, f32 x, f32 y, f32 z, f32 *out) {
         z = 0.0f;
     }
 
-    angle = prop->rotX * 0.01745329238f;
+    angle = prop->t * 0.01745329238f;
     s = sinf(angle);
     c = cosf(angle);
     out[0] = x;
     out[1] = (y * c) - (z * s);
     out[2] = (y * s) + (z * c);
 
-    angle = prop->rotY * 0.01745329238f;
+    angle = prop->u * 0.01745329238f;
     s = sinf(angle);
     c = cosf(angle);
     rotatedX = out[0];
@@ -322,10 +316,10 @@ void func_15117F3C(WorldObject *prop) {
     maxAngle = 40.0; // matching: a double literal; 40.0f loads the constant differently
     rangeSq = 40000.0f;
     sound = 0x4B8;
-    motion = prop->behaviorState & 3;
-    flag4 = prop->behaviorState & 4;
-    stayOpen = prop->behaviorState & 8;
-    switch (D_800BE9F0) {
+    motion = prop->task_flag & TASK_FLAG_STATE;
+    flag4 = prop->task_flag & TASK_FLAG_LOCKED;
+    stayOpen = prop->task_flag & 8;
+    switch (level) {
     case 1:
     case 41:
         anchorX = -13.0f;
@@ -395,14 +389,14 @@ void func_15117F3C(WorldObject *prop) {
     default:
         return;
     }
-    anchorX *= prop->scaleX;
-    anchorY *= prop->scaleY;
-    anchorZ *= prop->scaleZ;
-    rangeSq *= prop->scaleZ * prop->scaleZ;
+    anchorX *= prop->xScale;
+    anchorY *= prop->yScale;
+    anchorZ *= prop->zScale;
+    rangeSq *= prop->zScale * prop->zScale;
     if (WORK(prop)->hatch.counters == 0) {
         WORK(prop)->hatch.counters = 2;
-        if (motion == PROP_ARRIVED) {
-            prop->rotX = maxAngle;
+        if (motion == TASK_FLAG_ON) {
+            prop->t = maxAngle;
         }
     }
     timer = (WORK(prop)->hatch.counters >> 8) & 0xFF;
@@ -412,29 +406,29 @@ void func_15117F3C(WorldObject *prop) {
     if (started) {} // matching: keeps the early read of started
     func_15117DA4(prop, anchorX, anchorY, anchorZ, anchor);
     target = NULL;
-    if (motion != PROP_ARRIVED && motion != PROP_RETURNING) {
+    if (motion != TASK_FLAG_ON && motion != TASK_FLAG_GOING_OFF) {
         for (i = 0; i < D_8008FD8C; i++) {
-            obj = &D_800CC2D0[i];
-            if (obj->unk65) {
+            obj = &movement_obj[i];
+            if (obj->attach_char) {
                 continue;
             }
             if (obj->stunned) {
                 continue;
             }
-            control = obj->unk31C;
-            if (control->unk17) {
+            control = obj->mv;
+            if (control->env_suit) {
                 continue;
             }
-            if (control->unk27) {
+            if (control->jump_on_char) {
                 continue;
             }
             if (control->unk6B >= 4) {
                 continue;
             }
-            if (obj->y_position + 40.0f < anchor[1]) {
-                dy = (obj->y_position + (f32)obj->bodyHeight) - anchor[1];
-                dz = obj->z_position - anchor[2];
-                dx = obj->x_position - anchor[0];
+            if (obj->ypos + 40.0f < anchor[1]) {
+                dy = (obj->ypos + (f32)obj->bodyHeight) - anchor[1];
+                dz = obj->zpos - anchor[2];
+                dx = obj->xpos - anchor[0];
                 distSq = dz * dz + (dx * dx + dy * dy);
                 if (distSq) {} // matching: keeps distSq in its own register
                 if (distSq < rangeSq) {
@@ -444,21 +438,21 @@ void func_15117F3C(WorldObject *prop) {
             }
         }
     }
-    if (target == NULL && motion == PROP_MOVING) {
+    if (target == NULL && motion == TASK_FLAG_GOING_ON) {
         for (i = 0; i < D_8008FD8C; i++) {
-            obj = &D_800CC2D0[i];
-            if (obj->unk31C->unk6B != 0) {
+            obj = &movement_obj[i];
+            if (obj->mv->unk6B != 0) {
                 target = obj;
                 break;
             }
         }
     }
-    if (target != NULL || motion == PROP_MOVING) {
+    if (target != NULL || motion == TASK_FLAG_GOING_ON) {
         if (target != NULL && started == 0) {
             func_15060A30(0x16B, target);
         }
         if (flag4 == 0) {
-            motion = PROP_MOVING;
+            motion = TASK_FLAG_GOING_ON;
             if (started == 0) {
                 timer = 50;
                 started++;
@@ -466,9 +460,9 @@ void func_15117F3C(WorldObject *prop) {
             }
             if (target != NULL) {
                 if (timer != 0) {
-                    target->unk31C->unk6B = 1;
+                    target->mv->unk6B = 1;
                 } else {
-                    target->unk31C->unk6B = 2;
+                    target->mv->unk6B = 2;
                 }
             }
             if (timer != 0) {
@@ -484,31 +478,31 @@ void func_15117F3C(WorldObject *prop) {
                 }
                 accel += 0.02999999933f;
                 if (0.200000003f < accel) {
-                    if (prop->sound == 0) {
+                    if (prop->sound_id == 0) {
                         func_15114D24(prop, sound, 0x7D00, 0x5DC, 0xDAC, 0);
                     }
                 }
-                prop->rotX += speed;
-                if (maxAngle <= prop->rotX) {
-                    prop->rotX = maxAngle;
+                prop->t += speed;
+                if (maxAngle <= prop->t) {
+                    prop->t = maxAngle;
                     speed = 0.0f;
                     accel = 0.0f;
-                    motion = PROP_ARRIVED;
+                    motion = TASK_FLAG_ON;
                     started = 0;
                     func_15114D24(prop, 0x14, 0x7D00, 0x5DC, 0xDAC, 4);
                     if (target != NULL) {
-                        target->unk31C->unk6B = 0;
+                        target->mv->unk6B = 0;
                     }
                 }
             }
             if (target != NULL) {
                 func_15117DA4(prop, anchorX, anchorY, anchorZ, anchor);
-                target->unk31C->holdX = anchor[0];
-                target->unk31C->holdY = anchor[1];
-                target->unk31C->holdZ = anchor[2];
+                target->mv->holdX = anchor[0];
+                target->mv->holdY = anchor[1];
+                target->mv->holdZ = anchor[2];
             }
         } else {
-            if (target != NULL && (control = target->unk31C) != NULL) {
+            if (target != NULL && (control = target->mv) != NULL) {
                 if (started == 0 && control->unk6B == 0) {
                     timer = 50;
                     started++;
@@ -529,36 +523,36 @@ void func_15117F3C(WorldObject *prop) {
             }
         }
         if (target != NULL) {
-            if (target->unk31C != NULL) {
+            if (target->mv != NULL) {
                 func_15117DA4(prop, anchorX, anchorY, anchorZ, anchor);
-                target->unk31C->holdX = anchor[0];
-                target->unk31C->holdY = anchor[1];
-                target->unk31C->holdZ = anchor[2];
+                target->mv->holdX = anchor[0];
+                target->mv->holdY = anchor[1];
+                target->mv->holdZ = anchor[2];
             }
         }
-    } else if (stayOpen == 0 || motion == PROP_RETURNING) {
-        if (0.0f < prop->rotX) {
+    } else if (stayOpen == 0 || motion == TASK_FLAG_GOING_OFF) {
+        if (0.0f < prop->t) {
             if (started == 0) {
                 accel = 0.1000000015f;
                 started++;
             }
-            motion = PROP_RETURNING;
+            motion = TASK_FLAG_GOING_OFF;
             speed += 0.1000000015f;
             if (30.0f < speed) {
                 speed = 30.0f;
             }
             accel += 0.05000000075f;
-            prop->rotX -= speed;
-            if (prop->rotX <= 0.0f) {
-                prop->rotX = 0.0f;
+            prop->t -= speed;
+            if (prop->t <= 0.0f) {
+                prop->t = 0.0f;
                 started = 0;
-                motion = PROP_REST;
+                motion = TASK_FLAG_OFF;
                 accel = 0.0f;
                 speed = 0.0f;
             }
         }
         if (target != NULL) {
-            target->unk31C->unk6B = 0;
+            target->mv->unk6B = 0;
         }
     }
     PROP_SET_MOTION(prop, motion);
@@ -567,11 +561,11 @@ void func_15117F3C(WorldObject *prop) {
     WORK(prop)->hatch.counters |= started;
     WORK(prop)->hatch.accel = accel;
     WORK(prop)->hatch.speed = speed;
-    prop->flags &= ~0x60;
-    if (motion == PROP_MOVING || (motion == PROP_REST && timer != 0)) {
-        prop->flags |= 0x20;
+    prop->object_status &= ~0x60;
+    if (motion == TASK_FLAG_GOING_ON || (motion == TASK_FLAG_OFF && timer != 0)) {
+        prop->object_status |= 0x20;
     } else {
-        prop->flags |= 0; // matching: the no-op OR still emits a load/store pair
+        prop->object_status |= 0; // matching: the no-op OR still emits a load/store pair
     }
 }
 
@@ -615,19 +609,19 @@ void func_151189AC(WorldObject *prop, s32 arg1) {
     sound = 0;
     slow = FALSE;
     func_1511F990(prop, arg1);
-    row = (prop->param.word & 0xFC00) >> 10;
-    openAngle = (prop->param.word << 22) >> 22;
-    motion = prop->behaviorState & 3;
+    row = (prop->moveData.word & 0xFC00) >> 10;
+    openAngle = (prop->moveData.word << 22) >> 22;
+    motion = prop->task_flag & TASK_FLAG_STATE;
     target = openAngle;
-    angle = prop->rotY;
+    angle = prop->u;
     speed = WORK(prop)->swing.speed;
-    if (motion == PROP_REST || motion == PROP_RETURNING) {
+    if (motion == TASK_FLAG_OFF || motion == TASK_FLAG_GOING_OFF) {
         target = 0.0f;
-        if (motion == PROP_RETURNING && (prop->behaviorState & 4)) {
+        if (motion == TASK_FLAG_GOING_OFF && (prop->task_flag & TASK_FLAG_LOCKED)) {
             slow = TRUE;
         }
     }
-    if (motion == PROP_REST || motion == PROP_ARRIVED) {
+    if (motion == TASK_FLAG_OFF || motion == TASK_FLAG_ON) {
         speed = 0.0f;
         angle = target;
     }
@@ -664,10 +658,10 @@ void func_151189AC(WorldObject *prop, s32 arg1) {
                 speed = 0.0f;
                 angle = target;
                 if (target == 0.0f) {
-                    motion = PROP_REST;
+                    motion = TASK_FLAG_OFF;
                     sound = D_80089260[row].closed;
                 } else {
-                    motion = PROP_ARRIVED;
+                    motion = TASK_FLAG_ON;
                     sound = D_80089260[row].opened;
                 }
             } else {
@@ -699,14 +693,14 @@ void func_151189AC(WorldObject *prop, s32 arg1) {
         }
     }
     WORK(prop)->swing.speed = speed;
-    if (D_800BE9B4 != 0 || angle != prop->rotY) {
-        if (D_800C35EA[0] == 1 && func_15022B08(prop - D_800DBEF4, 0) != 0) {
-            angle = prop->rotY;
+    if (D_800BE9B4 != 0 || angle != prop->u) {
+        if (D_800C35EA[0] == 1 && func_15022B08(prop - db_Object_array, 0) != 0) {
+            angle = prop->u;
         } else {
-            prop->rotY = angle;
+            prop->u = angle;
         }
-        index = (prop->param.word >> 24) & 0xFF;
-        if (D_800BE9F0 == 2) {
+        index = (prop->moveData.word >> 24) & 0xFF;
+        if (level == 2) {
             func_1000E75C(255.0f - fabsf(((angle - (f32)openAngle) * 255.0f) / (f32)openAngle));
             return;
         }
@@ -714,7 +708,7 @@ void func_151189AC(WorldObject *prop, s32 arg1) {
             scale = 1.0f - fabsf((fabsf(angle) - (openAngle < 0 ? -openAngle : openAngle)) / (f32)openAngle);
             func_1518804C(index - 1, scale);
             func_15173C60(scale * 255.0f, index - 1);
-            if (D_800BE9F0 == 1 && index - 1 == 0) {
+            if (level == 1 && index - 1 == 0) {
                 func_15173C90(scale * 255.0f, 0, 0xF8);
             }
         }
@@ -740,15 +734,15 @@ void func_15118F24(WorldObject *prop) {
     f32 scale;
 
     func_1511F990(prop, 1);
-    motion = prop->behaviorState & 3;
-    openAngle = prop->param.half.lo;
+    motion = prop->task_flag & TASK_FLAG_STATE;
+    openAngle = prop->moveData.half.lo;
     target = openAngle;
-    angle = prop->rotZ;
+    angle = prop->v;
     speed = WORK(prop)->swing.speed;
-    if (motion == PROP_REST || motion == PROP_RETURNING) {
+    if (motion == TASK_FLAG_OFF || motion == TASK_FLAG_GOING_OFF) {
         target = 0.0f;
     }
-    if (motion == PROP_REST || motion == PROP_ARRIVED) {
+    if (motion == TASK_FLAG_OFF || motion == TASK_FLAG_ON) {
         speed = 0.0f;
         angle = target;
     }
@@ -781,9 +775,9 @@ void func_15118F24(WorldObject *prop) {
                 speed = 0.0f;
                 angle = target;
                 if (target == 0.0f) {
-                    motion = PROP_REST;
+                    motion = TASK_FLAG_OFF;
                 } else {
-                    motion = PROP_ARRIVED;
+                    motion = TASK_FLAG_ON;
                     func_10010F88(0x4BB, 0x5DC0, 0, 0, 0, prop->x, prop->y, prop->z, 200, 0x9C4);
                 }
             } else {
@@ -809,9 +803,9 @@ void func_15118F24(WorldObject *prop) {
         PROP_SET_MOTION(prop, motion);
     }
     WORK(prop)->swing.speed = speed;
-    if (D_800BE9B4 != 0 || angle != prop->rotZ) {
-        prop->rotZ = angle;
-        index = (prop->param.word >> 24) & 0xFF;
+    if (D_800BE9B4 != 0 || angle != prop->v) {
+        prop->v = angle;
+        index = (prop->moveData.word >> 24) & 0xFF;
         if (index != 0 && openAngle != 0) {
             scale = 1.0f - fabsf((angle - (f32)openAngle) / (f32)openAngle);
             func_1518804C(index - 1, scale);
@@ -820,10 +814,10 @@ void func_15118F24(WorldObject *prop) {
     }
 }
 
-/* Starts the prop moving when an object with interaction_state 1 (and unk65 clear) triggers it at rest. */
+/* Starts the prop moving when an object with type 1 (and unk65 clear) triggers it at rest. */
 void func_151193AC(WorldObject *prop, Actor *obj) {
-    if (obj->interaction_state == 1 && obj->unk65 == 0 && !(prop->behaviorState & 3) && !(prop->behaviorState & 4)) {
-        PROP_SET_MOTION(prop, PROP_MOVING);
+    if (obj->type == 1 && obj->attach_char == 0 && !(prop->task_flag & TASK_FLAG_STATE) && !(prop->task_flag & TASK_FLAG_LOCKED)) {
+        PROP_SET_MOTION(prop, TASK_FLAG_GOING_ON);
     }
 }
 
@@ -846,9 +840,9 @@ void func_151193F4(WorldObject *prop) {
     if (speed != 0) {
         position = WORK(prop)->follow.position;
         homeY = (s16)(WORK(prop)->follow.homeY & 0xFFFF);
-        range = (u16)(prop->param.word >> 16);
+        range = (u16)(prop->moveData.word >> 16);
         targetY = (s32)(range * position) / 256 + homeY;
-        prop->behaviorState &= ~3;
+        prop->task_flag &= ~TASK_FLAG_STATE;
         if (targetY != prop->y) {
             diff = prop->y - targetY;
             if (diff < 0) {
@@ -864,9 +858,9 @@ void func_151193F4(WorldObject *prop) {
                     prop->y -= speed;
                 }
             }
-            prop->behaviorState |= PROP_REST; // matching: the no-op OR still emits the original lbu/sb
+            prop->task_flag |= TASK_FLAG_OFF; // matching: the no-op OR still emits the original lbu/sb
         } else {
-            prop->behaviorState |= PROP_ARRIVED;
+            prop->task_flag |= TASK_FLAG_ON;
         }
     }
 }
@@ -1032,10 +1026,10 @@ void func_15119938(WorldObject *prop) {
     posX = prop->x;
     posY = prop->y;
     posZ = prop->z;
-    scaleX = prop->scaleX;
-    scaleY = prop->scaleY;
-    scaleZ = prop->scaleZ;
-    yaw = prop->rotY * 0.7111111283f; /* 256 / 360 */
+    scaleX = prop->xScale;
+    scaleY = prop->yScale;
+    scaleZ = prop->zScale;
+    yaw = prop->u * 0.7111111283f; /* 256 / 360 */
     if (WORK(prop)->sway.ready == FALSE) {
         func_151196D4(prop);
     }
@@ -1074,12 +1068,12 @@ void func_15119938(WorldObject *prop) {
     if (WORK(prop)->sway.timer != 0x420) {
         player = func_1505EFD0(0);
         if (player != NULL) {
-            x = player->x_position - prop->x;
-            y = player->y_position - prop->y;
-            z = player->z_position - prop->z;
+            x = player->xpos - prop->x;
+            y = player->ypos - prop->y;
+            z = player->zpos - prop->z;
             distSq = x * x + y * y + z * z;
             if (distSq < 3072.0f) {
-                if (player->unk31C->unk57 == 1) {
+                if (player->mv->unk57 == 1) {
                     WORK(prop)->sway.timer = 0x420;
                 } else {
                     WORK(prop)->sway.timer = 0x41F;

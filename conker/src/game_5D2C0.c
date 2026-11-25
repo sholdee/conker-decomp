@@ -295,7 +295,7 @@ void func_15030468(void) {
                 continue;
             }
             if (att->mtx != NULL || att->anim != NULL) {
-                if (owner->unk1D4 != NULL) {
+                if (owner->ob_matrix_ptr != NULL) {
                     i = att->parentSet;
                     if (att->parentSet != 0) {
                         ret = (s32)func_1503195C(owner, i, 0); // matching: the parent pointer reuses ret
@@ -318,7 +318,7 @@ void func_15030468(void) {
                             guMtxL2F(boneMtx, parentMtx);
                         }
                     } else {
-                        boneMtx = (f32 (*)[4])((Mtx *)owner->unk1D4 + att->bone);
+                        boneMtx = (f32 (*)[4])((Mtx *)owner->ob_matrix_ptr + att->bone);
                     }
                     if (att->mtx != NULL) {
                         mtx = att->mtx;
@@ -400,7 +400,7 @@ void func_15030468(void) {
             if (att->ownerStates[0] != 0) {
                 remove = TRUE;
                 for (i = 0; i < 3; i++) {
-                    if (att->ownerStates[i] != 0 && owner->unk84.uh == att->ownerStates[i]) {
+                    if (att->ownerStates[i] != 0 && owner->animseq.uh == att->ownerStates[i]) {
                         remove = FALSE;
                         break;
                     }
@@ -555,23 +555,23 @@ Gfx *func_15030E08(Gfx *gdl, s32 view, s32 pass) {
             continue;
         }
         owner = func_15083E90(att->ownerId);
-        if ((owner == NULL) || (owner->unk1D4 == NULL) || ((owner->unk74 & (1 << view)) == (1 << view))) {
+        if ((owner == NULL) || (owner->ob_matrix_ptr == NULL) || ((owner->unk74 & (1 << view)) == (1 << view))) {
             att = next;
             continue;
         }
         if (pass == 2) {
-            if (owner->unk5 != 7) {
+            if (owner->drawtype != 7) {
                 att = next;
                 continue;
             }
         } else {
             alpha = func_1506196C(owner, view);
             if (pass == 1) {
-                if (!(att->flags & 2) && (alpha == 0xFF) && (owner->unk5 != 1)) {
+                if (!(att->flags & 2) && (alpha == 0xFF) && (owner->drawtype != 1)) {
                     att = next;
                     continue;
                 }
-            } else if ((att->flags & 2) || (alpha < 0xFF) || (owner->unk5 == 1)) {
+            } else if ((att->flags & 2) || (alpha < 0xFF) || (owner->drawtype == 1)) {
                 att = next;
                 continue;
             }
@@ -587,7 +587,7 @@ Gfx *func_15030F94(Gfx *gdl, Actor *owner, s32 view, s32 arg3) {
     ModelAttachment *att;
     ModelAttachment *next;
 
-    if ((owner == NULL) || (owner->unk1D4 == NULL) || (owner->unique_id == 0)) {
+    if ((owner == NULL) || (owner->ob_matrix_ptr == NULL) || (owner->unique_id == 0)) {
         return gdl;
     }
     att = D_800C3EE0;
@@ -616,7 +616,7 @@ s32 func_15031070(ModelAttachment *att, Actor *owner, Mtx **mtx, Mtx **boneMtx) 
         *boneMtx = (Mtx *)att->anim->matrices[D_800BE9C0];
     } else if (att->mtx != NULL) {
         *mtx = &att->mtx[D_800BE9C0];
-        *boneMtx = (Mtx *)owner->unk1D4 + att->bone;
+        *boneMtx = (Mtx *)owner->ob_matrix_ptr + att->bone;
     } else if (att->parentSet) {
         parent = func_1503195C(owner, att->parentSet, 0);
         if (parent == NULL) {
@@ -631,7 +631,7 @@ s32 func_15031070(ModelAttachment *att, Actor *owner, Mtx **mtx, Mtx **boneMtx) 
         }
         return 1;
     } else {
-        *mtx = (Mtx *)owner->unk1D4;
+        *mtx = (Mtx *)owner->ob_matrix_ptr;
         *mtx += att->bone;
         *boneMtx = *mtx;
     }
@@ -693,9 +693,9 @@ Gfx *func_150311C4(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 a
     if (func_15031070(att, owner, &mtx, &boneMtx) == 0) {
         return gdl;
     }
-    func_1502D54C(owner - D_800CC2D0, light);
+    func_1502D54C(owner - movement_obj, light);
     if (D_800B0DF0->unk3E != 0) {
-        func_1502D630(&D_800CC2D0[owner - D_800CC2D0], light, view, owner - D_800CC2D0);
+        func_1502D630(&movement_obj[owner - movement_obj], light, view, owner - movement_obj);
     } else {
         light[3] = 0xFF;
     }
@@ -728,12 +728,12 @@ Gfx *func_150311C4(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 a
             } else {
                 v = 2;
             }
-            if ((owner->unk5 != 5) && (owner->unk302 != 0) && (owner->unk66 & 0xC) && !i) {
+            if ((owner->drawtype != 5) && (owner->unk302 != 0) && (owner->unk66 & 0xC) && !i) {
                 gdl = func_1515E544(gdl, owner->unk304[view], owner->unk301, owner->unk302,
                                     owner->unk314[D_800BE9C0]);
             } else {
-                gdl = func_1515D914(gdl, view, (s32)owner->x_position, (s32)owner->y_position, (s32)owner->z_position,
-                                    owner->unk184, owner->unk304[view], owner->unk301,
+                gdl = func_1515D914(gdl, view, (s32)owner->xpos, (s32)owner->ypos, (s32)owner->zpos,
+                                    owner->floorMaterial, owner->unk304[view], owner->unk301,
                                     owner->unk314[D_800BE9C0], &owner->unk302, 2,
                                     owner->unk1DD, v, D_800D9E28);
             }
@@ -867,7 +867,7 @@ void func_15031A50(ModelAttachment *att, Actor *owner) {
         func_151001B4(owner);
         break;
     case 0x5A:
-        unk = owner->unk31C;
+        unk = owner->mv;
         if (unk != NULL) {
             unk->unk1A6 += 0xAA;
         }
@@ -909,7 +909,7 @@ void func_15031A50(ModelAttachment *att, Actor *owner) {
 }
 
 void func_15100180(Actor *);
-void func_151616D0(u8, u8, ActorRef *);
+void light_sendEvent(u8, u8, ActorRef *);
 void func_15147D64(ActorRef *, s32);
 void func_151BD7F4(Actor *);
 void func_151D4668(Actor *);
@@ -928,7 +928,7 @@ void func_15031C14(ModelAttachment *att) {
     if (owner != NULL) {
         switch (att->model) {
         case 0x5A:
-            unk = owner->unk31C;
+            unk = owner->mv;
             if (unk != NULL) {
                 unk->unk1A6 -= 0xAA;
             }
@@ -950,7 +950,7 @@ void func_15031C14(ModelAttachment *att) {
         case 0x49:
             ref49.actor = owner;
             ref49.uniqueId = owner->unique_id;
-            func_151616D0(0x10, 0x29, &ref49);
+            light_sendEvent(0x10, 0x29, &ref49);
             break;
         case 0x5D:
             ref5D.actor = owner;
@@ -1026,9 +1026,9 @@ s32 func_15031E7C(ModelAttachment *att, Actor *owner) {
         return 0;
     }
 
-    if (owner->unk84.uh == 0x55) {
+    if (owner->animseq.uh == 0x55) {
         t = 1.0f;
-    } else if (owner->unk84.uh == 0x56) {
+    } else if (owner->animseq.uh == 0x56) {
         t = 0.0f;
     } else if ((0.0f <= anim->frame) && (anim->frame <= 120.0f)) {
         t = anim->frame * 0.008333333768f;
@@ -1077,9 +1077,9 @@ s32 func_15031FC8(ModelAttachment *att, Actor *owner) {
         return 0;
     }
     curAnimId = anim->anim & ~0x8000;
-    state = owner->unk84.uh;
+    state = owner->animseq.uh;
     syncAll = TRUE;
-    switch (owner->id) {
+    switch (owner->character_type) {
     case 0x58:
         if (att->model == 0x9B) {
             att->bone = 0x12;
@@ -1111,7 +1111,7 @@ s32 func_15031FC8(ModelAttachment *att, Actor *owner) {
     case 0x5A:
     case 0x74:
     case 0x7A:
-        if (owner->unk2E8 != 0) {
+        if (owner->taskint[1] != 0) {
             att->seg6Id = D_800902D4;
         } else {
             att->seg6Id = D_800902D0;
@@ -1209,9 +1209,9 @@ s32 func_15031FC8(ModelAttachment *att, Actor *owner) {
             break;
         case 0x9B:
             animId = 0;
-            if (owner->unk5 == 5) {
+            if (owner->drawtype == 5) {
                 att->bone = 0;
-            } else if (owner->id == 0x8B) {
+            } else if (owner->character_type == 0x8B) {
                 att->bone = 6;
                 switch (state) {
                 case 12:
@@ -1238,9 +1238,9 @@ s32 func_15031FC8(ModelAttachment *att, Actor *owner) {
             break;
         case 0x9F:
             animId = 0;
-            if (owner->unk5 == 5) {
+            if (owner->drawtype == 5) {
                 att->bone = 0;
-            } else if (owner->id == 0xB5) {
+            } else if (owner->character_type == 0xB5) {
                 att->bone = 0x12;
                 switch (state) {
                 case 0x34:
@@ -1265,9 +1265,9 @@ s32 func_15031FC8(ModelAttachment *att, Actor *owner) {
             break;
         case 0x9D:
             animId = 0;
-            if (owner->unk5 == 5) {
+            if (owner->drawtype == 5) {
                 att->bone = 0;
-            } else if (owner->id == 0x8B) {
+            } else if (owner->character_type == 0x8B) {
                 att->bone = 6;
                 switch (state) {
                 case 19:
@@ -1291,7 +1291,7 @@ s32 func_15031FC8(ModelAttachment *att, Actor *owner) {
             }
             break;
         case 0x9A:
-            switch (owner->id) {
+            switch (owner->character_type) {
             case 0x87:
                 att->bone = 0x12;
                 switch (state) {
@@ -2137,7 +2137,7 @@ s32 func_15031FC8(ModelAttachment *att, Actor *owner) {
                 animId = 4;
             } else if (state == 0x7C) {
                 animId = 2;
-            } else if (owner->xz_velocity > 0.0f) {
+            } else if (owner->speed > 0.0f) {
                 animId = 1;
             } else {
                 animId = 0;
@@ -2157,7 +2157,7 @@ s32 func_15031FC8(ModelAttachment *att, Actor *owner) {
             }
             break;
         case 0x98:
-            if (owner->id == 0x8B) {
+            if (owner->character_type == 0x8B) {
                 att->bone = 6;
                 animId = 5;
                 break;
@@ -2203,7 +2203,7 @@ s32 func_15031FC8(ModelAttachment *att, Actor *owner) {
             }
             break;
         case 0x89:
-            if (owner->unk5 == 5) {
+            if (owner->drawtype == 5) {
                 animId = 3;
                 att->bone = 0;
                 break;
@@ -2226,9 +2226,9 @@ s32 func_15031FC8(ModelAttachment *att, Actor *owner) {
             }
             break;
         case 0x91:
-            if (owner->unk5 == 5) {
+            if (owner->drawtype == 5) {
                 att->bone = 0;
-                if (owner->gravity == 0.0f) {
+                if (owner->ygrav == 0.0f) {
                     animId = 3;
                 } else {
                     animId = 0;
@@ -2285,7 +2285,7 @@ s32 func_15031FC8(ModelAttachment *att, Actor *owner) {
 static AttachmentHook const D_800841D4_entry[] = { func_15031FC8 };
 
 
-/* Hook: plays the owner's unk2E4 animation on the attachment and keeps it in step with the owner's frame. */
+/* Hook: plays the owner's taskint[0] animation on the attachment and keeps it in step with the owner's frame. */
 s32 func_150331B8(ModelAttachment *att, Actor *owner) {
     AnimInstance *ownerAnim;
     AnimInstance *anim;
@@ -2295,8 +2295,8 @@ s32 func_150331B8(ModelAttachment *att, Actor *owner) {
     if (anim == NULL) {
         return 0;
     }
-    if ((owner->unk2E4 & 0xFF) != 0xFF) {
-        func_1503F5B8(anim, 0, owner->unk2E4 & 0xFF, 1.0f, 0.0f, 1);
+    if ((owner->taskint[0] & 0xFF) != 0xFF) {
+        func_1503F5B8(anim, 0, owner->taskint[0] & 0xFF, 1.0f, 0.0f, 1);
     }
     if (ownerAnim != NULL) {
         att->anim->frame = ownerAnim->frame;
@@ -2333,7 +2333,7 @@ s32 func_15033328(ModelAttachment *att, Actor *owner) {
     if (D_800C35EA[0] == 1) {
         return 0;
     }
-    if (owner->in_water == 0) {
+    if (owner->inwater == 0) {
         if (owner->unk118 < owner->floorY) {
             delta = D_800BE9E4;
             if (delta < att->unk38) {
@@ -2355,14 +2355,14 @@ s32 func_150333A8(ModelAttachment *att, Actor *owner) {
     if (D_800C35EA[0] == 1) {
         return 0;
     }
-    if (owner->in_water != 0) {
-        unk = owner->unk31C;
+    if (owner->inwater != 0) {
+        unk = owner->mv;
         if (unk != NULL) {
-            unk->unk11A = 0;
+            unk->weapon_status = 0;
         }
         return 1;
     }
-    if ((owner->unk118 != -10000.0f) && (owner->y_position < owner->unk118 + 300.0f)) {
+    if ((owner->unk118 != -10000.0f) && (owner->ypos < owner->unk118 + 300.0f)) {
         att->alpha = 0;
     } else {
         att->alpha = 0xFF;
@@ -2375,13 +2375,13 @@ s32 func_15033440(ModelAttachment *att, Actor *owner) {
     switch (att->model) {
     case 0x27:
     case 0x35:
-        if (owner->unk5 == 5) {
+        if (owner->drawtype == 5) {
             att->bone = 0;
             att->rotZ += D_800BE9E4 * 0xAAA;
         }
         break;
     case 0x29:
-        if (owner->unk5 == 5) {
+        if (owner->drawtype == 5) {
             att->bone = 0;
         }
         break;
@@ -2464,14 +2464,14 @@ ModelAttachment *func_150335C8(Actor *obj, Actor *target, s32 setId, s32 bone, s
     f32 rotZ;
     f32 scale;
 
-    if (target->unk1D4 == NULL) {
+    if (target->ob_matrix_ptr == NULL) {
         return NULL;
     }
 
     att = func_15083568(target, setId, 1.0f, 0);
     if (att != NULL) {
         att->bone = bone;
-        att->scale = obj->xz_scale;
+        att->scale = obj->scale_xz;
 
         if (arg4 != 0) {
             att->unk16 &= ~4;
@@ -2479,15 +2479,15 @@ ModelAttachment *func_150335C8(Actor *obj, Actor *target, s32 setId, s32 bone, s
             att->unk16 |= 4;
         }
 
-        guMtxL2F(boneMtx, (Mtx *)target->unk1D4 + bone);
+        guMtxL2F(boneMtx, (Mtx *)target->ob_matrix_ptr + bone);
         func_15048B10((s32)boneMtx, (s32)invBoneMtx);
 
-        scale = obj->xz_scale;
-        func_150A9B0C(objMtx, obj->unkB8, obj->unk40, obj->unkC4, scale, obj->y_scale, scale);
+        scale = obj->scale_xz;
+        func_150A9B0C(objMtx, obj->vtilt, obj->theta, obj->lean_angle, scale, obj->scale_y, scale);
 
-        objMtx[3][0] = obj->x_position;
-        objMtx[3][1] = obj->y_position;
-        objMtx[3][2] = obj->z_position;
+        objMtx[3][0] = obj->xpos;
+        objMtx[3][1] = obj->ypos;
+        objMtx[3][2] = obj->zpos;
         objMtx[0][3] = 0.0f;
         objMtx[1][3] = 0.0f;
         objMtx[2][3] = 0.0f;
@@ -2511,7 +2511,7 @@ ModelAttachment *func_150335C8(Actor *obj, Actor *target, s32 setId, s32 bone, s
 
 /* Hook: model 0x11 is removed unless its owner is in one of a few states. */
 s32 func_1503378C(ModelAttachment *att, Actor *owner) {
-    u16 state = owner->unk84.uh;
+    u16 state = owner->animseq.uh;
 
     if (att->model == 0x11) {
         if ((state == 0x3E) || (state == 0x3D) || (state == 0x41) || (state == 0xD9) || (state == 0x138) ||
@@ -2538,7 +2538,7 @@ s32 func_150337E4(ModelAttachment *att, Actor *owner) {
 void func_151026BC(Actor *, s32, s32, s32, s32, s32);
 
 /* Hook: starts func_151026BC effect `kind` while the owner is in the set's trigger state (and
- * unk31C allows it), and stops it with func_151027E8 when that no longer holds. */
+ * mv allows it), and stops it with func_151027E8 when that no longer holds. */
 s32 func_15033838(ModelAttachment *att, Actor *owner) {
     s32 kind;
     s32 triggered;
@@ -2547,40 +2547,40 @@ s32 func_15033838(ModelAttachment *att, Actor *owner) {
     triggered = 0;
     if (att->setId == 0x16) {
         kind = 4;
-        if (owner->unk84.uh == 0x165) {
+        if (owner->animseq.uh == 0x165) {
             triggered = 1;
         }
     } else if (att->setId == 0x89) {
         kind = 6;
-        switch (owner->unk84.uh) {
+        switch (owner->animseq.uh) {
         case 0x221:
         case 0x223:
         case 0x31B:
-            if (owner->unk31C->unk198 == 2) {
+            if (owner->mv->AimState == 2) {
                 triggered = 1;
             }
             break;
         }
     } else {
         kind = 5;
-        if (owner->unk84.uh == 0x157) {
+        if (owner->animseq.uh == 0x157) {
             triggered = 1;
         }
     }
     if (att->unk38 == 0) {
         if (triggered) {
-            unk = owner->unk31C;
-            if ((unk->aimState != 0) || (kind == 6)) {
+            unk = owner->mv;
+            if ((unk->SniperState != 0) || (kind == 6)) {
                 if ((unk->buttons & 0x2000) == 0x2000) {
-                    if (unk->unk19E == 0) {
+                    if (unk->ReloadTimer == 0) {
                         att->unk38 = 1;
                         func_151026BC(owner, -1, kind, 1, 0xFF, 1);
                     }
                 }
             }
         }
-    } else if (!triggered || (unk = owner->unk31C, (unk->buttons & 0x2000) == 0) ||
-               ((unk->aimState == 0) && (kind != 6))) {
+    } else if (!triggered || (unk = owner->mv, (unk->buttons & 0x2000) == 0) ||
+               ((unk->SniperState == 0) && (kind != 6))) {
         att->unk38 = 0;
         func_151027E8(owner);
     }
@@ -2598,7 +2598,7 @@ s32 func_150339C8(ModelAttachment *att, Actor *owner) {
             }
             att->unk3C = 0;
         } else if (att->unk3C == 0) {
-            att->unk3C = func_1000FA64(0x448, owner->x_position, owner->y_position, owner->z_position, 32000, 1000,
+            att->unk3C = func_1000FA64(0x448, owner->xpos, owner->ypos, owner->zpos, 32000, 1000,
                                        500, (SoundRecordCallback)func_15033BDC, att, (s32)owner, 0, 0) |
                          0x80000000;
         }
@@ -2609,13 +2609,13 @@ s32 func_150339C8(ModelAttachment *att, Actor *owner) {
 /* Hook: after a 30-tick delay, starts sound 0x513 at the owner (func_15033BDC follows it up). */
 s32 func_15033AD8(ModelAttachment *att, Actor *owner) {
     if (D_800BE616 != 0) {
-        func_1508B20C(owner->x_position, owner->y_position, owner->z_position, 900.0f);
+        func_1508B20C(owner->xpos, owner->ypos, owner->zpos, 900.0f);
     }
     if (att->unk38 == 0) {
         if (att->unk3C < 30) {
             att->unk3C += D_800BE9E4;
         } else {
-            att->unk3C = func_1000FA64(0x513, owner->x_position, owner->y_position, owner->z_position, 32000, 1000,
+            att->unk3C = func_1000FA64(0x513, owner->xpos, owner->ypos, owner->zpos, 32000, 1000,
                                        500, (SoundRecordCallback)func_15033BDC, att, (s32)owner, 0, 0);
             att->unk38 = 0x513;
         }
@@ -2647,33 +2647,33 @@ s32 func_15033BDC(AttachmentSound *sound, s32 arg1, s32 *arg2, s32 arg3, s32 arg
 
     att = sound->att;
     owner = sound->owner;
-    if ((att != NULL) && (owner != NULL) && (owner->interaction_state != 0)) {
-        sound->x = owner->x_position;
-        sound->y = owner->y_position;
-        sound->z = owner->z_position;
+    if ((att != NULL) && (owner != NULL) && (owner->type != 0)) {
+        sound->x = owner->xpos;
+        sound->y = owner->ypos;
+        sound->z = owner->zpos;
 
         if (*arg2 != 0) {
             if (att->model == 0x37) {
                 s32 lastState = att->unk38;
                 s32 sfxId = -1;
 
-                if (owner->unk84.uh != (lastState & 0xFFFF)) {
-                    if (owner->unk84.uh == 0x15F) {
+                if (owner->animseq.uh != (lastState & 0xFFFF)) {
+                    if (owner->animseq.uh == 0x15F) {
                         sfxId = (func_150ADA20() & 3) + 0x444;
                     }
                 }
                 if (sfxId != -1) {
                     func_10010FFC(0, sfxId, 24000, 0, 0, owner);
                 }
-                att->unk38 = owner->unk84.uh;
+                att->unk38 = owner->animseq.uh;
             } else {
-                unk = owner->unk31C;
+                unk = owner->mv;
                 if (unk != NULL) {
-                    if (unk->unk19C < 120) {
+                    if (unk->GrenadeTimer < 120) {
                         if (att->unk38 == 0x513) {
                             att->unk38 = 0x3A1;
-                            att->unk3C = func_1000FA64(0x3A1, owner->x_position, owner->y_position,
-                                                       owner->z_position, 32000, 1000, 500, (SoundRecordCallback)func_15033BDC, att,
+                            att->unk3C = func_1000FA64(0x3A1, owner->xpos, owner->ypos,
+                                                       owner->zpos, 32000, 1000, 500, (SoundRecordCallback)func_15033BDC, att,
                                                        (s32)owner, 0, 0);
                             return 1;
                         }
@@ -2697,7 +2697,7 @@ s32 func_15033BDC(AttachmentSound *sound, s32 arg1, s32 *arg2, s32 arg3, s32 arg
 
 /* Hook: removes the attachment once its owner's unk5 becomes 3. */
 s32 func_15033E00(ModelAttachment *att, Actor *owner) {
-    if (owner->unk5 == 3) {
+    if (owner->drawtype == 3) {
         return 1;
     }
     return 0;
@@ -2768,18 +2768,18 @@ void func_15033EC4(s32 a, s32 b) {
     }
 }
 
-/* Hook: removes the attachment (clearing unk31C->unk11A) unless unk31C->unk78 is 9 or unk11A is 3. */
+/* Hook: removes the attachment (clearing mv->weapon_status) unless mv->rt_context_b is 9 or weapon_status is 3. */
 s32 func_15033F0C(ModelAttachment *att, Actor *owner) {
     ActorCtl *unk;
 
     if (D_800C35EA[0] == 1) {
         return 0;
     }
-    unk = owner->unk31C;
+    unk = owner->mv;
     if (unk != NULL) {
-        if (unk->unk78 != 9) {
-            if (unk->unk11A != 3) {
-                unk->unk11A = 0;
+        if (unk->rt_context_b != 9) {
+            if (unk->weapon_status != 3) {
+                unk->weapon_status = 0;
                 return 1;
             }
         }
@@ -2787,18 +2787,18 @@ s32 func_15033F0C(ModelAttachment *att, Actor *owner) {
     return 0;
 }
 
-/* Hook: like func_15033F0C, but keeps the attachment while unk31C->unk78 is 0xC or 0x16. */
+/* Hook: like func_15033F0C, but keeps the attachment while mv->rt_context_b is 0xC or 0x16. */
 s32 func_15033F70(ModelAttachment *att, Actor *owner) {
     ActorCtl *unk;
 
     if (D_800C35EA[0] == 1) {
         return 0;
     }
-    unk = owner->unk31C;
+    unk = owner->mv;
     if (unk != NULL) {
-        if ((unk->unk78 != 0xC) && (unk->unk78 != 0x16)) {
-            if (unk->unk11A != 3) {
-                unk->unk11A = 0;
+        if ((unk->rt_context_b != 0xC) && (unk->rt_context_b != 0x16)) {
+            if (unk->weapon_status != 3) {
+                unk->weapon_status = 0;
                 return 1;
             }
         }

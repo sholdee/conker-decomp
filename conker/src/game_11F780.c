@@ -37,7 +37,7 @@ s32 func_150F22D0(f32 *out, Actor *owner, u8 slot) {
     default:
         return 0;
     }
-    func_15143134(D_800A1920, out, &owner->unk1D4[bone]);
+    func_15143134(D_800A1920, out, &owner->ob_matrix_ptr[bone]);
     return 1;
 }
 
@@ -49,7 +49,7 @@ s32 func_150F237C(s32 arg0, s32 arg1) {
 void func_150F2390(Actor *owner, s32 slot, s32 arg2) {
     f32 pos[3];
 
-    if (owner->unk1D4 != NULL) {
+    if (owner->ob_matrix_ptr != NULL) {
         func_150F22D0(pos, owner, slot);
         func_151C329C(pos, 0xFF, 0);
     }
@@ -147,71 +147,71 @@ void func_150F26A0(Camera *actor) {
     Actor *state;
     s32 mode;
 
-    state = actor->player;
+    state = actor->CharPtr;
     if (state->unk102 != 0 && state->stunned == 0) {
         func_150F2994(actor, TRUE);
-        if (actor->mode != 0x100 && actor->cmdRunning == 0) {
-            if (func_15123934(actor, 0x80, 0, 0, 3) != 0) {
-                actor->flags |= 0x300400;
-                actor->flags &= ~6;
-                actor->preset = 1;
-                actor->presetMask = 3;
+        if (actor->Mode != 0x100 && actor->cmdRunning == 0) {
+            if (func_15123934(actor, 0x80, 0, 0, CAMERA_MODE_TRANSPORT) != 0) {
+                actor->AvailableModes |= 0x300400;
+                actor->AvailableModes &= ~6;
+                actor->DistIndex = 1;
+                actor->DistMask = 3;
                 func_15124B18(actor);
             }
             actor->height = 29.0f;
             actor->unk34C = 29.0f;
-            actor->targetDistance = 200.0f;
-            actor->liftTarget = -19.0f;
-            if (actor->unk3E8 == 0) {
+            actor->IdealTripodMagnitude = 200.0f;
+            actor->YOffsetTget = -19.0f;
+            if (actor->TonyHitsClear == 0) {
                 // matching: the no-op (f32 *) cast changes how IDO schedules the distance load
-                if (0.5f * actor->targetDistance < *(f32 *)&actor->distance - actor->targetDistance) {
-                    func_15128774(actor, actor->player);
+                if (0.5f * actor->IdealTripodMagnitude < *(f32 *)&actor->TripodMagnitude - actor->IdealTripodMagnitude) {
+                    func_15128774(actor, actor->CharPtr);
                 }
             }
         }
     } else {
         state->unk7 = 0xFF;
-        if (actor->zone == 59) {
+        if (actor->CharContext == 59) {
             func_150F2994(actor, TRUE);
-            if (actor->mode != 0x100 && actor->cmdRunning == 0) {
-                if (func_15123934(actor, 8, 0, 0, 3) != 0) {
-                    actor->flags |= 0x300000;
-                    actor->flags &= ~4;
-                    actor->preset = 1;
-                    actor->presetMask = 3;
+            if (actor->Mode != 0x100 && actor->cmdRunning == 0) {
+                if (func_15123934(actor, 8, 0, 0, CAMERA_MODE_TRANSPORT) != 0) {
+                    actor->AvailableModes |= 0x300000;
+                    actor->AvailableModes &= ~4;
+                    actor->DistIndex = 1;
+                    actor->DistMask = 3;
                 }
-                actor->unk134 = 0;
+                actor->Tightness = 0;
                 actor->height = 125.0f;
                 actor->unk34C = 125.0f;
-                actor->targetDistance = 220.0f;
-                actor->liftTarget = 30.0f;
+                actor->IdealTripodMagnitude = 220.0f;
+                actor->YOffsetTget = 30.0f;
             }
         } else {
-            mode = actor->mode;
+            mode = actor->Mode;
             if ((mode == 8 || mode == 0x80) && actor->cmdRunning == 0) {
-                func_151239CC(actor, 3);
+                func_151239CC(actor, CAMERA_MODE_TRANSPORT);
             }
-            if (actor->preset == 1) {
-                actor->preset = 2;
+            if (actor->DistIndex == 1) {
+                actor->DistIndex = 2;
                 func_15124B18(actor);
             }
             func_150F2994(actor, FALSE);
         }
     }
     if (func_1509BE40(1, 0x405A, 6, 0x9000) != 0) {
-        actor->flags |= 0x80000000;
+        actor->AvailableModes |= 0x80000000;
     } else {
-        actor->flags &= ~0x80000000;
+        actor->AvailableModes &= ~0x80000000;
     }
     if (func_1509BE40(1, 0x405E, 6, 0x9000) != 0) {
-        actor->flags |= 0x10000;
+        actor->AvailableModes |= 0x10000;
     } else {
-        actor->flags &= ~0x10000;
+        actor->AvailableModes &= ~0x10000;
     }
     if (func_1509BE40(1, 0x405F, 6, 0x2000) != 0) {
-        actor->flags |= 0x10;
+        actor->AvailableModes |= 0x10;
     } else {
-        actor->flags &= ~0x10;
+        actor->AvailableModes &= ~0x10;
     }
 }
 

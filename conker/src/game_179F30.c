@@ -28,15 +28,10 @@ extern void (*D_8008AB58[])(s32);
 extern s32 (*D_8008AB64[])(s32, s32, s32);
 
 /* Emitter offsets. */
-extern Vec3f D_800A58A0;
-extern Vec3f D_800A58AC;
-extern Vec3f D_800A58B8;
-extern Vec3f D_800A58C4;
-extern Vec3f D_800A5934;
-extern Vec3f D_800A5940;
-extern Vec3f D_800A594C;
-extern Vec3f D_800A5958;
-extern Vec3f D_800A5964;
+const Vec3f D_800A58A0 = { 0.0f, 75.0f, 96.0f };
+const Vec3f D_800A58AC = { 0.0f, 66.0f, 50.0f };
+const Vec3f D_800A58B8 = { 0.0f, 66.0f, 274.0f };
+const Vec3f D_800A58C4 = { 0.0f, 31.0f, 73.0f };
 
 /* This file. */
 s32 func_1514CA80(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s32 *idSlot);
@@ -73,13 +68,13 @@ void func_151D74B0(Actor *obj, s32, s32, s32, s32);
 
 /**
  * Finds which spawn-callback slots apply to `obj`: one chosen by its object id (*idSlot, flag 4),
- * one chosen by D_800BE9F0 (*globalSlot, flag 2) and, inside that, one chosen by its unique_id
+ * one chosen by level (*globalSlot, flag 2) and, inside that, one chosen by its unique_id
  * (*uniqueSlot, flag 1). Returns the OR of the flags that were set.
  */
 s32 func_1514CA80(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s32 *idSlot) {
     u8 found = 0;
 
-    switch (obj->id) {
+    switch (obj->character_type) {
     case 94:
         *idSlot = 25;
         found = 4;
@@ -199,11 +194,11 @@ s32 func_1514CA80(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s32 *idSlot) {
         break;
     }
 
-    switch (D_800BE9F0) {
+    switch (level) {
     case 43:
         *globalSlot = 21;
         found |= 2;
-        if (obj->id == 156 || obj->id == 157) {
+        if (obj->character_type == 156 || obj->character_type == 157) {
             *uniqueSlot = 0;
             found |= 1;
         }
@@ -446,7 +441,7 @@ s32 func_1514D15C(Actor *obj) {
     uniqueSlot = -1;
     globalSlot = -1;
     idSlot = -1;
-    slot = obj - D_800CC2D0;
+    slot = obj - movement_obj;
     if (obj->attachments != NULL) {
         return 0;
     }
@@ -586,9 +581,9 @@ void func_1514D564(Actor *obj) {
     desc.p0.z = 2244.0f;
     payload.unk5 = 6;
     desc.unk18 = 1;
-    desc.p1.x = obj->x_position;
-    desc.p1.y = obj->y_position;
-    desc.p1.z = obj->z_position;
+    desc.p1.x = obj->xpos;
+    desc.p1.y = obj->ypos;
+    desc.p1.z = obj->zpos;
     desc.unk20 = 1;
     desc.unk1C = 0.3199999928f;
     spawned = func_150C5370(&desc, sizeof(payload));
@@ -800,7 +795,7 @@ void func_1514DB58(Actor *obj) {
 }
 
 void func_1514DB64(Actor *obj) {
-    if (D_800BE9F0 == 20) {
+    if (level == 20) {
         func_151B2060(obj);
     }
 }
@@ -837,8 +832,8 @@ void func_1514DCAC(Actor *obj) {
 }
 
 void func_1514DCF4(Actor *obj) {
-    if (obj->unk31C != NULL) {
-        obj->unk31C->unk94 = 1;
+    if (obj->mv != NULL) {
+        obj->mv->unk94 = 1;
     }
     func_15083568(obj, 0x17, 1.0f, 0);
 }
@@ -907,7 +902,7 @@ void func_1514DE94(Actor *obj) {
 
 /** Links `obj` to the object whose unique_id is 9 (unk65 holds that object's slot + 1). */
 void func_1514DFD0(Actor *obj) {
-    obj->unk65 = func_15083FB0(9) + 1;
+    obj->attach_char = func_15083FB0(9) + 1;
     obj->unk101 |= 0x34;
 }
 
@@ -1088,7 +1083,7 @@ void func_1514E508(Actor *obj) {
 
     handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, "Charactereffect 0");
     func_1514EC1C(handle, obj, 0xD);
-    pos = (s32)&obj->x_position; // passed as two 16-bit halves
+    pos = (s32)&obj->xpos; // passed as two 16-bit halves
     handle = func_1515D5F8(-0x8000, pos >> 16, pos & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
     func_1514EC1C(handle, obj, 0x18);
 }
@@ -1099,7 +1094,7 @@ void func_1514E5B8(Actor *obj) {
 
     handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, "Charactereffect -1");
     func_1514EC1C(handle, obj, 0xD);
-    pos = (s32)&obj->x_position; // passed as two 16-bit halves
+    pos = (s32)&obj->xpos; // passed as two 16-bit halves
     handle = func_1515D5F8(-0x8000, pos >> 16, pos & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
     func_1514EC1C(handle, obj, 0x18);
 }
@@ -1110,7 +1105,7 @@ void func_1514E668(Actor *obj) {
 
     handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, "Charactereffect 1");
     func_1514EC1C(handle, obj, 0xD);
-    pos = (s32)&obj->x_position; // passed as two 16-bit halves
+    pos = (s32)&obj->xpos; // passed as two 16-bit halves
     handle = func_1515D5F8(-0x8000, pos >> 16, pos & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
     func_1514EC1C(handle, obj, 0x18);
 }
@@ -1121,7 +1116,7 @@ void func_1514E718(Actor *obj) {
 
     handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, "Charactereffect 2");
     func_1514EC1C(handle, obj, 0xE);
-    pos = (s32)&obj->x_position; // passed as two 16-bit halves
+    pos = (s32)&obj->xpos; // passed as two 16-bit halves
     handle = func_1515D5F8(-0x8000, pos >> 16, pos & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
     func_1514EC1C(handle, obj, 0x18);
 }
@@ -1134,6 +1129,13 @@ void func_1514E7C8(Actor *obj) {
 }
 
 /* Attachment destroy handlers (D_8008AB58 entries): release an attachment's handle. */
+
+/* Emitter offsets of func_1514EECC and func_1514F194. */
+const Vec3f D_800A5934 = { 0.0f, 90.0f, 0.0f };
+const Vec3f D_800A5940 = { 0.0f, 70.0f, 0.0f };
+const Vec3f D_800A594C = { 0.0f, 120.0f, 0.0f };
+const Vec3f D_800A5958 = { 0.0f, 112.0f, 151.0f };
+const Vec3f D_800A5964 = { 0.0f, 74.0f, -161.0f };
 
 void func_1514E824(s32 handle) {
 }
@@ -1554,8 +1556,8 @@ void func_1514F194(Actor *obj) {
 }
 
 void func_1514F308(Actor *obj) {
-    Vec3f pointA = { 52.0f, 0.0f, 80.0f };
-    Vec3f pointB = { 52.0f, 0.0f, 353.0f };
+    const Vec3f pointA = { 52.0f, 0.0f, 80.0f };
+    const Vec3f pointB = { 52.0f, 0.0f, 353.0f };
 
     func_15160CDC(obj, 5, &pointA, &pointB, 0.02350199968f, 2, 300,
                   0xFF, 0xFF, 0xFF, 0xFF, 1, 0, 0, 0xFF, 1);

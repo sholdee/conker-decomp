@@ -181,9 +181,9 @@ Trail *func_1519D030(Actor *owner, s32 specIndex, s16 lifetime, u8 arg3, u8 arg4
     }
 
     data.time = 0.0f;
-    data.ownerPos.x = owner->x_position;
-    data.ownerPos.y = owner->y_position;
-    data.ownerPos.z = owner->z_position;
+    data.ownerPos.x = owner->xpos;
+    data.ownerPos.y = owner->ypos;
+    data.ownerPos.z = owner->zpos;
     data.owner = owner;
     data.ownerId = owner->unique_id;
     data.flags = 2;
@@ -323,7 +323,7 @@ s32 func_1519D454(Trail *trail) {
 
     data = trail->data;
     points = trail->points;
-    if (data->owner->interaction_state == 0) {
+    if (data->owner->type == 0) {
         return 0;
     }
     if (data->owner->unique_id != data->ownerId) {
@@ -425,9 +425,9 @@ s32 func_1519D454(Trail *trail) {
         TrailPoint *point;
 
         i = trail->head.end;
-        moveX = data->owner->x_position - data->ownerPos.x;
-        moveY = data->owner->y_position - data->ownerPos.y;
-        moveZ = data->owner->z_position - data->ownerPos.z;
+        moveX = data->owner->xpos - data->ownerPos.x;
+        moveY = data->owner->ypos - data->ownerPos.y;
+        moveZ = data->owner->zpos - data->ownerPos.z;
         while (i != trail->head.start) {
             i--;
             if (i < 0) {
@@ -438,9 +438,9 @@ s32 func_1519D454(Trail *trail) {
             point->pos.y += moveY;
             point->pos.z += moveZ;
         }
-        data->ownerPos.x = data->owner->x_position;
-        data->ownerPos.y = data->owner->y_position;
-        data->ownerPos.z = data->owner->z_position;
+        data->ownerPos.x = data->owner->xpos;
+        data->ownerPos.y = data->owner->ypos;
+        data->ownerPos.z = data->owner->zpos;
     }
     return 1;
 }
@@ -665,11 +665,11 @@ extern void func_15143134(Vec3f *in, Vec3f *out, void *mtx);
 s32 func_1519E304(TrailData *data, Vec3f *out, f32 x, f32 y, f32 z, f32 t) {
     Vec3f pos;
 
-    if (data->owner->unk1D4 == NULL) {
+    if (data->owner->ob_matrix_ptr == NULL) {
         return 0;
     }
     /* 64-byte matrices */
-    func_15143134(&data->offset, &pos, (u8 *)data->owner->unk1D4 + (data->matrixIndex << 6));
+    func_15143134(&data->offset, &pos, (u8 *)data->owner->ob_matrix_ptr + (data->matrixIndex << 6));
     out->x = (pos.x - x) * t + x;
     out->y = (pos.y - y) * t + y;
     out->z = (pos.z - z) * t + z;
@@ -692,14 +692,14 @@ void func_1519E464(TrailTask *task) {
 
     finished = FALSE;
     data = &task->data;
-    if (task->data.owner->interaction_state == 0) {
+    if (task->data.owner->type == 0) {
         finished = TRUE;
     }
     if (data->owner->unique_id != data->ownerId) {
         finished = TRUE;
     }
     if (!finished) {
-        if (data->owner->unk1D4 != NULL) {
+        if (data->owner->ob_matrix_ptr != NULL) {
             finished = TRUE;
             trail = func_1519D030(data->owner, data->unk8, task->base.header.state, task->base.header.flags & 1, task->base.header.owner, task->base.header.kind);
             if (trail != NULL) {
@@ -775,7 +775,7 @@ void func_1519E754(TrailTask *task) {
 
     finished = FALSE;
     data = &task->data;
-    if (task->data.owner->interaction_state == 0) {
+    if (task->data.owner->type == 0) {
         finished = TRUE;
     }
     if (data->owner->unique_id != data->ownerId) {
@@ -783,7 +783,7 @@ void func_1519E754(TrailTask *task) {
     }
     if (!finished) {
         data->unk8 += D_800BE9E4;
-        if (data->owner->unk84.uh != 0x7C) {
+        if (data->owner->animseq.uh != 0x7C) {
             finished = TRUE;
             if (data->unk8 > 200) {
                 func_1519E3BC(data->owner, 300, task->base.header.owner, task->base.header.kind);

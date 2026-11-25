@@ -26,14 +26,14 @@ s32 func_1511A410(Gfx *dl, s32 *second) {
     return found[0];
 }
 
-/* Behaviour scratch state (WorldObject.work) of an object whose display list textures func_1511A494 animates. */
+/* Behaviour scratch state (WorldObject.touch) of an object whose display list textures func_1511A494 animates. */
 typedef struct {
     /* 0x7C */ s32 unk7C;
     /* 0x80 */ s32 texIndices;
     /* 0x84 */ s32 animState;
 } TexAnimWork;
 
-#define WORK(obj) ((TexAnimWork *)&(obj)->work)
+#define WORK(obj) ((TexAnimWork *)&(obj)->touch)
 
 /* One texture animation: a sequence of texture assets, optionally restricted to one world. */
 typedef struct {
@@ -74,7 +74,7 @@ void func_1511A494(WorldObject *obj, s32 *texIndices, s32 *animState) {
     for (i = 0; i < 24; i++) {
         kind = D_80089324[i].kind;
         if (D_80089324[i].world != -1) {
-            if (D_800BE9F0 != D_80089324[i].world) {
+            if (level != D_80089324[i].world) {
                 continue;
             }
             if (kind != 0xFF) {
@@ -113,7 +113,7 @@ void func_1511A494(WorldObject *obj, s32 *texIndices, s32 *animState) {
         }
         value = anim->frames[tick / anim->ticksPerFrame];
         paletteAddr = 0;
-        if (D_800BE9F0 == 6 || D_800BE9F0 == 0x3B) {
+        if (level == 6 || level == 0x3B) {
             flags = 3;
         } else {
             flags = 0x3E;
@@ -131,7 +131,7 @@ extern void func_15116110(WorldObject *);
 
 /* Runs func_15116110 while unk3C is set, then advances the texture animation. */
 void func_1511A6FC(WorldObject *obj) {
-    if (obj->param.word != 0) {
+    if (obj->moveData.word != 0) {
         func_15116110(obj);
     }
     func_1511A494(obj, &WORK(obj)->texIndices, &WORK(obj)->animState);
@@ -143,7 +143,7 @@ extern void func_151162D4(WorldObject *);
 /* When D_800C35EA is 1 and func_15022B08 accepts this object's index, clears unk7C and unk18;
  * then runs func_151162D4 and advances the texture animation. */
 void func_1511A738(WorldObject *obj) {
-    if (D_800C35EA[0] == 1 && func_15022B08(obj - D_800DBEF4, 0) != 0) {
+    if (D_800C35EA[0] == 1 && func_15022B08(obj - db_Object_array, 0) != 0) {
         WORK(obj)->unk7C = 0;
         obj->yOffset = 0.0f;
     }

@@ -54,7 +54,7 @@ void *func_1514A6A0(Beam1514A6A0 *beam, s16 cam) {
     tip.x = beam->start.x + dx * beam->progress;
     tip.y = beam->start.y + dy * beam->progress;
     tip.z = beam->start.z + dz * beam->progress;
-    eye = &D_800DBFF0[cam].eye;
+    eye = &camera_global_Cameras[cam].eye;
     dx = tip.x - beam->start.x;
     dy = tip.y - beam->start.y;
     dz = tip.z - beam->start.z;

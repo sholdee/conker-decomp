@@ -7,7 +7,7 @@ void func_151254F4(Camera *arg0, s32 arg1);
 void func_15123070(Camera *arg0);
 
 // While the values queried through func_1509BE40 allow it, sets 0x400E to 1 and resets the
-// actor's unk348/unk34C/unk374; otherwise sets 0x400E back to 0 once func_151239CC(actor, 3) succeeds.
+// actor's unk348/unk34C/unk374; otherwise sets 0x400E back to 0 once func_151239CC(actor, CAMERA_MODE_TRANSPORT) succeeds.
 void func_150BE850(Camera *actor) {
     s32 flagValue;
     s32 flagSet;
@@ -16,24 +16,24 @@ void func_150BE850(Camera *actor) {
     flagValue = func_1509BE40(0, 0x2000, 0xBB);
     if (flagSet && flagValue != -1) {
         func_1509BFB0(0, 0x400E, 1);
-        if (actor->mode != 8) {
+        if (actor->Mode != 8) {
             func_1512868C(actor);
         }
-        if (func_15123934(actor, 8, 0, actor->unk134, 3)) {
+        if (func_15123934(actor, 8, 0, actor->Tightness, CAMERA_MODE_TRANSPORT)) {
             func_151254F4(actor, D_800CC335 - 1);
-            actor->flags |= 0x1000200;
-            actor->aimState = 0;
-            actor->flags &= ~4;
-            actor->followRateTarget = 0.0f;
+            actor->AvailableModes |= 0x1000200;
+            actor->DoingAim = 0;
+            actor->AvailableModes &= ~4;
+            actor->CharTrackingSpeedTarget = 0.0f;
         }
-        actor->targetDistance = 778.0f;
+        actor->IdealTripodMagnitude = 778.0f;
         actor->height = 575.0f;
         actor->unk34C = 575.0f;
-        actor->liftTarget = 0.0f;
+        actor->YOffsetTget = 0.0f;
         func_15123070(actor);
-    } else if (func_151239CC(actor, 3)) {
+    } else if (func_151239CC(actor, CAMERA_MODE_TRANSPORT)) {
         func_151254F4(actor, 0);
-        actor->followRateTarget = 0.0f;
+        actor->CharTrackingSpeedTarget = 0.0f;
         func_1509BFB0(0, 0x400E, 0);
     }
 }

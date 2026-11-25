@@ -3,8 +3,8 @@
 #include "variables.h"
 #include "effects.h"
 
-/* An entry of the object table at D_800D3098 (TriggerZone, a blob in structs.h): a collision
-   cylinder at (x, y, z); see CollisionCylinder in game_D0960.c. */
+/* The zones TriggerZones used here are collision cylinders (ZONE_AREA_CYLINDER, tested by
+   func_150A34B0 in game_D0960.c). */
 
 extern s32 D_80088AA0[4];
 extern s32 D_80088AB0[8];
@@ -24,11 +24,11 @@ void func_150EB430(Vec3f *start, Vec3f *delta, Vec3f *hit) {
 }
 
 /*
- * Tests the segment from start to end against the D_800D3098 cylinders. While object 9 exists,
+ * Tests the segment from start to end against the zones cylinders. While object 9 exists,
  * a hit on one of the four D_80088AA0 cylinders disables it (func_150A2864(id, 1)), stores
- * which one (1-4) in the object's unk2E8 and plays func_150EBC80's effect at it; the eight
+ * which one (1-4) in the object's taskint[1] and plays func_150EBC80's effect at it; the eight
  * D_80088AB0 cylinders are only tested. Otherwise only cylinder 76 is tested, and a hit sets
- * its unk18. Returns TRUE when object 9 exists and the segment hit one of the twelve.
+ * its data1. Returns TRUE when object 9 exists and the segment hit one of the twelve.
  */
 s32 func_150EB484(Vec3f *start, Vec3f *end, Vec3f *hit) {
     s32 i;
@@ -39,27 +39,27 @@ s32 func_150EB484(Vec3f *start, Vec3f *end, Vec3f *hit) {
     if (obj != NULL) {
         for (i = 0; i < 4; i++) {
             id = D_80088AA0[i];
-            if (func_150A34B0(&D_800D3098[id], start, end, hit)) {
+            if (func_150A34B0(&zones[id], start, end, hit)) {
                 func_150A2864(id, 1);
-                obj->unk2E8 = i + 1;
-                func_150EBC80(&D_800D3098[id], 0xFF, 1);
+                obj->taskint[1] = i + 1;
+                func_150EBC80(&zones[id], 0xFF, 1);
                 return TRUE;
             }
         }
         for (i = 0; i < 8; i++) {
-            if (func_150A34B0(&D_800D3098[D_80088AB0[i]], start, end, hit)) {
+            if (func_150A34B0(&zones[D_80088AB0[i]], start, end, hit)) {
                 return TRUE;
             }
         }
         return FALSE;
     }
-    if (func_150A34B0(&D_800D3098[76], start, end, hit)) {
-        D_800D3098[76].unk18 = 1;
+    if (func_150A34B0(&zones[76], start, end, hit)) {
+        zones[76].data1 = 1;
     }
     return FALSE;
 }
 
-/* Behaviour scratch state (WorldObject.work): a damped swing or a bounce. */
+/* Behaviour scratch state (WorldObject.touch): a damped swing or a bounce. */
 typedef union MoverWork {
     struct {
         /* 0x7C */ f32 damping;
@@ -73,14 +73,14 @@ typedef union MoverWork {
     } bounce;
 } MoverWork;
 
-#define WORK(obj) ((MoverWork *)&(obj)->work)
+#define WORK(obj) ((MoverWork *)&(obj)->touch)
 
 void func_15117770(WorldObject *obj);
 
 /*
  * Mover handler. In states 0-1 it swings rotX on a damped spring toward an angle set by the
  * player's distance (with flags & 4: -40 degrees at the player rising to -32 at 740 units;
- * otherwise -40). Once the player's unk31C->unk57 is set it switches to state 2, which bounces
+ * otherwise -40). Once the player's mv->unk57 is set it switches to state 2, which bounces
  * rotX back to 0 with func_15117770 until it stops; then state 3 keeps it at 0.
  */
 void func_150EB614(WorldObject *obj) {
@@ -97,22 +97,22 @@ void func_150EB614(WorldObject *obj) {
     f32 delta;
     f32 magnitude;
 
-    if ((obj->behaviorState & 3) == 3) {
+    if ((obj->task_flag & TASK_FLAG_STATE) == TASK_FLAG_ON) {
         return;
     }
-    if ((obj->behaviorState & 3) != 2) {
-        if (obj->flags & 4) {
-            if (D_800CC2D0->unk31C->unk57 != 0) {
-                obj->behaviorState &= ~3;
-                obj->behaviorState |= 2;
-                obj->param.word = 0;
+    if ((obj->task_flag & TASK_FLAG_STATE) != TASK_FLAG_GOING_ON) {
+        if (obj->object_status & 4) {
+            if (movement_obj->mv->unk57 != 0) {
+                obj->task_flag &= ~TASK_FLAG_STATE;
+                obj->task_flag |= TASK_FLAG_GOING_ON;
+                obj->moveData.word = 0;
                 WORK(obj)->bounce.rebound = 0.5f;
                 WORK(obj)->bounce.acceleration = 0.3000000119f;
                 WORK(obj)->bounce.velocity = 0.0f;
             }
-            dz = obj->z - D_800CC2D0->z_position;
-            dx = obj->x - D_800CC2D0->x_position;
-            dy = obj->y - D_800CC2D0->y_position;
+            dz = obj->z - movement_obj->zpos;
+            dx = obj->x - movement_obj->xpos;
+            dy = obj->y - movement_obj->ypos;
             distance = sqrtf(dz * dz + (dx * dx + dy * dy));
             if (distance > 740.0f) {
                 distance = 740.0f;
@@ -121,7 +121,7 @@ void func_150EB614(WorldObject *obj) {
         } else {
             target = -40.0f;
         }
-        angle = obj->rotX;
+        angle = obj->t;
         damping = WORK(obj)->swing.damping;
         acceleration = WORK(obj)->swing.acceleration;
         velocity = WORK(obj)->swing.velocity;
@@ -145,14 +145,14 @@ void func_150EB614(WorldObject *obj) {
             }
             WORK(obj)->swing.velocity = velocity;
         }
-        obj->rotX = angle;
+        obj->t = angle;
     } else {
-        before = obj->rotX;
+        before = obj->t;
         func_15117770(obj);
-        if (before == obj->rotX) {
-            obj->behaviorState &= ~3;
-            obj->behaviorState |= 3;
-            obj->rotX = 0.0f;
+        if (before == obj->t) {
+            obj->task_flag &= ~TASK_FLAG_STATE;
+            obj->task_flag |= TASK_FLAG_ON;
+            obj->t = 0.0f;
         }
     }
 }
@@ -251,7 +251,7 @@ void func_150EBC80(TriggerZone *gate, u8 owner, s32 kind) {
     position.x = gate->x;
     position.y = gate->y;
     position.z = gate->z;
-    step = gate->height * 0.5f;
+    step = gate->ySize * 0.5f;
     func_150E83AC(&position, func_150ADA20() % 101U + 300, owner, kind);
     event.flags = 1;
     event.duration = func_150ADA20() % 21U + 15;

@@ -1,10 +1,10 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
+#include "n_libaudio.h"
+#include "libultra/audio/n_synthInternals.h"
 
-
-s32 func_1001E4A0(s16 arg0, s32 arg1, s32 arg2) {
-    n_alFxNew(&D_8002BA44->unk48[arg0].unk20, arg1, arg0, arg2);
-    return D_8002BA44->unk48[arg0].unk20;
+/* Creates the effect of aux bus `bus` (n_alSynNew) and returns it. */
+ALFx *func_1001E4A0(s16 bus, ALSynConfig *config, ALHeap *heap) {
+    n_alFxNew(&n_syn->auxBus[bus].fx, config, bus, heap);
+    return n_syn->auxBus[bus].fx;
 }

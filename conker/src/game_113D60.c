@@ -242,21 +242,21 @@ void func_150E6FAC(Vec3f *out, Actor *actor) {
         cosine = func_151423D8(angle - 0x40);
         sine = func_151423D8(angle);
         bone = node->handle;
-        out->x = actor->x_position + (bone->unk38.x * -80.0f) + (cosine * radius);
-        out->y = actor->y_position + (bone->unk38.y * -80.0f) + 100.0f;
-        out->z = actor->z_position + (bone->unk38.z * -80.0f) + (sine * radius);
+        out->x = actor->xpos + (bone->unk38.x * -80.0f) + (cosine * radius);
+        out->y = actor->ypos + (bone->unk38.y * -80.0f) + 100.0f;
+        out->z = actor->zpos + (bone->unk38.z * -80.0f) + (sine * radius);
     } else {
-        out->x = actor->x_position;
-        out->y = actor->y_position;
-        out->z = actor->z_position;
+        out->x = actor->xpos;
+        out->y = actor->ypos;
+        out->z = actor->zpos;
     }
 }
 
 /* End callback: the actor's position. */
 void func_150E70CC(Vec3f *out, Actor *actor) {
-    out->x = actor->x_position;
-    out->y = actor->y_position;
-    out->z = actor->z_position;
+    out->x = actor->xpos;
+    out->y = actor->ypos;
+    out->z = actor->zpos;
 }
 
 /* Motion callback: aims the emission along `delta` with a random wobble. */
@@ -499,7 +499,7 @@ TimedEffect *func_150E7994(s16 count, f32 rate, u8 owner, s32 kind) {
         return NULL;
     }
 
-    func_1512D748(&D_800DBFF0[D_800BE9E8], 0, 1);
+    func_1512D748(&camera_global_Cameras[D_800BE9E8], 0, 1);
 
     event.flags = 1;
     event.duration = (func_150ADA20() % 11) + 30;

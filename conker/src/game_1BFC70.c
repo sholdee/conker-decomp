@@ -1,13 +1,16 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 
-void func_151927C0(struct114 *arg0) {
-    s16 tmp0;
-    tmp0 = (arg0->unk14 & 0xFF) >> 1;
-    arg0->unk38 = 300;
-    arg0->unk3A = 10;
-    arg0->unk14 = (tmp0 << 16) + tmp0;
-    arg0->unk3B = 0;
+/* Billboard expiry hook D_8008D5D0[1]: gives the particle 300 more frames, a fade of 10 and half its size
+   step, packed into both halves of tmpl.unk4 (width and height steps). */
+void func_151927C0(BillboardParticle *p) {
+    s16 step;
+    step = (p->tmpl.unk4 & 0xFF) >> 1;
+    p->tmpl.life = 300;
+    p->tmpl.fadeStep = 10;
+    p->tmpl.unk4 = (step << 16) + step;
+    p->tmpl.unk2B = 0;
 }

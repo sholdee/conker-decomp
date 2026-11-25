@@ -32,7 +32,7 @@ s32 func_15146890(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side) {
         bone = 0x17;
     }
 
-    func_15142314(actor->unk1D4, bone, pos);
+    func_15142314(actor->ob_matrix_ptr, bone, pos);
     if (hit == NULL) {
         return 1;
     }
@@ -48,9 +48,9 @@ s32 func_151420F8(Actor *actor);
 s32 func_150A2AEC(s32 index, s32 count, const s32 *list, Actor *actor);
 
 /* Map an actor's damage/effect kind onto the particle-effect id used for it.  Most kinds are a
-   fixed id; kind 1 depends on the current world (D_800BE9F0) and, in world 4, on whether
+   fixed id; kind 1 depends on the current world (level) and, in world 4, on whether
    func_151420F8 accepts the actor; kind 6 first has to register a five-entry effect list against
-   the actor's index in D_800CC2D0, and reports -1 if that fails.  Anything from 9 up is unmapped. */
+   the actor's index in movement_obj, and reports -1 if that fails.  Anything from 9 up is unmapped. */
 s32 func_15146970(s32 kind, Actor *actor) {
     switch (kind) {
     case 8: return 0x10;
@@ -59,7 +59,7 @@ s32 func_15146970(s32 kind, Actor *actor) {
     case 2: return 2;
     case 0: return 0;
     case 1:
-        if (D_800BE9F0 == 4) {
+        if (level == 4) {
             if (func_151420F8(actor) != 0) {
                 return 6;
             }
@@ -72,7 +72,7 @@ s32 func_15146970(s32 kind, Actor *actor) {
         {
             const s32 list[5] = { 0x401D, 0x401E, 0x401F, 0x4020, 0x4021 };
 
-            if (func_150A2AEC(actor - D_800CC2D0, 5, list, actor) == -1) {
+            if (func_150A2AEC(actor - movement_obj, 5, list, actor) == -1) {
                 return -1;
             }
         }
@@ -92,7 +92,7 @@ void func_15146A98(s32 actor, s32 side, s32 strength) {
     Vec3f pos;
     PieceSpray burst;
 
-    if (((Actor *)actor)->unk1D4 != NULL) {
+    if (((Actor *)actor)->ob_matrix_ptr != NULL) {
         func_15146890(&pos, (Actor *)actor, NULL, side);
         burst.countBase = 5;
         burst.countRange = 22;
@@ -132,10 +132,10 @@ void func_15146BF8(s32 actor, s32 side, s32 strength, s32 alt) {
     Vec3f pos;
     CollisionHit hit;
 
-    if (((Actor *)actor)->unk1D4 != NULL) {
+    if (((Actor *)actor)->ob_matrix_ptr != NULL) {
         if (func_15146890(&pos, (Actor *)actor, &hit, side) != 0) {
             func_15141F78((u8)alt != 0 ? 0xC : 0xB, &hit, strength * (1.0f / 130.0f),
-                          (u32)(((Actor *)actor)->unk40 * (256.0f / 360.0f)), &pos, side);
+                          (u32)(((Actor *)actor)->theta * (256.0f / 360.0f)), &pos, side);
             if (strength >= 115) {
                 func_15142180(2, &pos, hit.material, 1.0f, 1.0f);
             }
@@ -148,10 +148,10 @@ void func_15146D60(s32 actor, s32 side, s32 strength) {
     Vec3f pos;
     CollisionHit hit;
 
-    if (((Actor *)actor)->unk1D4 != NULL) {
+    if (((Actor *)actor)->ob_matrix_ptr != NULL) {
         if (func_15146890(&pos, (Actor *)actor, &hit, side) != 0) {
             func_15141F78(0xA, &hit, strength * (1.0f / 85.0f),
-                          (u32)(((Actor *)actor)->unk40 * (256.0f / 360.0f)), &pos, side);
+                          (u32)(((Actor *)actor)->theta * (256.0f / 360.0f)), &pos, side);
         }
     }
 }
@@ -167,7 +167,7 @@ void func_15146E84(s32 actor, s32 side, s32 strength) {
     s32 random;
     f32 size;
 
-    if (((Actor *)actor)->unk1D4 != NULL) {
+    if (((Actor *)actor)->ob_matrix_ptr != NULL) {
         if (func_15146890(&pos, (Actor *)actor, &hit, side) != 0) {
             kind = func_151D8E20();
             if (strength >= 71) {
@@ -200,7 +200,7 @@ void func_15147040(s32 actor, s32 side, s32 strength) {
     Vec3f pos;
     s16 roll;
 
-    if (((Actor *)actor)->unk1D4 != NULL) {
+    if (((Actor *)actor)->ob_matrix_ptr != NULL) {
         func_15146890(&pos, (Actor *)actor, NULL, side);
         roll = (func_150ADA20() % 11U) + 5;
         func_1514C678(pos.x, pos.y, pos.z, func_150ADA68() * 11.0f, 0, 0xFF, roll, 0x16, 0, 0.0f, 0,
@@ -275,13 +275,13 @@ void func_15147318(s32 actor, s32 side, s32 strength) {
     Vec3f pos;
     CollisionHit hit;
 
-    if (((Actor *)actor)->unk1D4 != NULL) {
+    if (((Actor *)actor)->ob_matrix_ptr != NULL) {
         if (func_15146890(&pos, (Actor *)actor, &hit, side) != 0) {
             if (strength >= 115) {
                 func_15142180(0, &pos, hit.material, 1.0f, 1.0f);
             }
             func_15141F78(D_8008FD04[0](), &hit, strength * (1.0f / 130.0f),
-                          (u32)(((Actor *)actor)->unk40 * (256.0f / 360.0f)), &pos, side);
+                          (u32)(((Actor *)actor)->theta * (256.0f / 360.0f)), &pos, side);
         }
     }
 }
@@ -292,10 +292,10 @@ void func_15147478(s32 actor, s32 side, s32 strength) {
     Vec3f pos;
     CollisionHit hit;
 
-    if (((Actor *)actor)->unk1D4 != NULL) {
+    if (((Actor *)actor)->ob_matrix_ptr != NULL) {
         if (func_15146890(&pos, (Actor *)actor, &hit, side) != 0) {
             func_15141F78(D_8008FD1C(), &hit, strength * (1.0f / 130.0f),
-                          (u32)(((Actor *)actor)->unk40 * (256.0f / 360.0f)), &pos, side);
+                          (u32)(((Actor *)actor)->theta * (256.0f / 360.0f)), &pos, side);
             if (strength >= 115) {
                 func_15142180(6, &pos, hit.material, 1.0f, 1.0f);
             }
@@ -309,10 +309,10 @@ void func_151475D8(s32 actor, s32 side, s32 strength) {
     Vec3f pos;
     CollisionHit hit;
 
-    if (((Actor *)actor)->unk1D4 != NULL) {
+    if (((Actor *)actor)->ob_matrix_ptr != NULL) {
         if (func_15146890(&pos, (Actor *)actor, &hit, side) != 0) {
             func_15141F78(D_8008FD30(), &hit, strength * (1.0f / 130.0f),
-                          (u32)(((Actor *)actor)->unk40 * (256.0f / 360.0f)), &pos, side);
+                          (u32)(((Actor *)actor)->theta * (256.0f / 360.0f)), &pos, side);
             if (strength >= 115) {
                 func_15142180(0xB, &pos, hit.material, 1.0f, 1.0f);
             }

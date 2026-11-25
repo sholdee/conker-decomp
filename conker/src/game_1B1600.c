@@ -41,23 +41,23 @@ s32 func_15184150(s32 objIndex, f32 *halfX, f32 *halfY, f32 *halfZ) {
     f32 dz;
     MtxF *bones;
 
-    obj = &D_800CC2D0[objIndex];
-    id = obj->id;
+    obj = &movement_obj[objIndex];
+    id = obj->character_type;
     *halfZ = 0.0f;
     *halfY = 0.0f;
     *halfX = 0.0f;
-    if (obj->unk1D4 == NULL || D_800C3E90 != 0) {
+    if (obj->ob_matrix_ptr == NULL || D_800C3E90 != 0) {
         return 0;
     }
     count = func_1502DB20(id);
     for (i = 0; i < count; i++) {
-        bones = obj->unk1D4;
+        bones = obj->ob_matrix_ptr;
         dx = bones[i][3][0];
         dy = bones[i][3][1];
         dz = bones[i][3][2];
-        dx -= obj->x_position;
-        dy -= obj->y_position;
-        dz -= obj->z_position;
+        dx -= obj->xpos;
+        dy -= obj->ypos;
+        dz -= obj->zpos;
         if (dx < 0.0f) {
             dx = -dx;
         }
@@ -79,12 +79,12 @@ s32 func_15184150(s32 objIndex, f32 *halfX, f32 *halfY, f32 *halfZ) {
     }
 
     if (*halfX == 0.0f || *halfY == 0.0f || *halfZ == 0.0f) {
-        dx = D_800D1C90[obj->id]->unk1A;
-        dy = obj->xz_scale * dx;
+        dx = D_800D1C90[obj->character_type]->unk1A;
+        dy = obj->scale_xz * dx;
         *halfZ = dy;
         *halfX = dy;
-        dx = D_800D1C90[obj->id]->unk1C + D_800D1C90[obj->id]->unk1E;
-        *halfY = obj->y_scale * dx;
+        dx = D_800D1C90[obj->character_type]->unk1C + D_800D1C90[obj->character_type]->unk1E;
+        *halfY = obj->scale_y * dx;
     }
 }
 
@@ -138,14 +138,14 @@ f32 func_15184368(s32 objIndex, s32 slot, f32 halfX, f32 halfY, f32 halfZ, f32 m
     Actor *obj;
     Vec3f *eye;
 
-    obj = &D_800CC2D0[objIndex];
+    obj = &movement_obj[objIndex];
     done = 0;
     dist = 5000.0f;
-    objPos.x = obj->x_position;
+    objPos.x = obj->xpos;
     perspScale = 2.0f;
-    objPos.y = obj->y_position;
+    objPos.y = obj->ypos;
     found = 0;
-    objPos.z = obj->z_position;
+    objPos.z = obj->zpos;
     if (D_800DE034 == 0) {
         node = D_800DCD78;
         while (node != NULL) {
@@ -308,12 +308,12 @@ f32 func_15184368(s32 objIndex, s32 slot, f32 halfX, f32 halfY, f32 halfZ, f32 m
     }
     /* The shadow texture lives in D_800DE048, 64-byte aligned. */
     D_800DF088 = ((s32)D_800DE048 + 0x3F) & ~0x3F;
-    D_800DE02C = 0xFF - (D_800CC2D0[objIndex].unk1DD[0] >> 1);
+    D_800DE02C = 0xFF - (movement_obj[objIndex].unk1DD[0] >> 1);
     if (D_800DE02C > 185.0f) {
         D_800DE02C = 185.0f;
     }
-    if (D_800CC2D0[objIndex].unkCC < -10.0f) {
-        D_800DE02C += D_800DE02C * (D_800CC2D0[objIndex].unkCC + 10.0f) * 0.02f;
+    if (movement_obj[objIndex].unkCC < -10.0f) {
+        D_800DE02C += D_800DE02C * (movement_obj[objIndex].unkCC + 10.0f) * 0.02f;
         if (D_800DE02C <= 5.0f) {
             return 0.0f;
         }
@@ -331,12 +331,12 @@ s32 func_15184DF0(s32 objIndex, s32 view, f32 *halfX, f32 *halfY, f32 *halfZ) {
     f32 z;
     s32 dist;
 
-    x = D_800CC2D0[objIndex].x_position;
-    y = D_800CC2D0[objIndex].y_position;
-    z = D_800CC2D0[objIndex].z_position;
-    dist = math_distance3D(x - D_800DBFF0[view].eye.x,
-                         y - D_800DBFF0[view].eye.y,
-                         z - D_800DBFF0[view].eye.z);
+    x = movement_obj[objIndex].xpos;
+    y = movement_obj[objIndex].ypos;
+    z = movement_obj[objIndex].zpos;
+    dist = math_distance3D(x - camera_global_Cameras[view].eye.x,
+                         y - camera_global_Cameras[view].eye.y,
+                         z - camera_global_Cameras[view].eye.z);
     if (dist > 2000) {
         D_800D3688 = 0.0f;
         D_800D368C = D_800D3688;
@@ -370,10 +370,10 @@ Gfx *func_15184FA4(Gfx *gfx, s32 objIndex, s32 slot, s32 view) {
     s32 lod;
     s32 col[3];
 
-    if (D_800CC2D0[objIndex].unk127 == 0xFF) {
-        lod = D_800CC2D0[objIndex].lod + 1;
+    if (movement_obj[objIndex].playernumber == 0xFF) {
+        lod = movement_obj[objIndex].current_lod + 1;
     } else {
-        lod = D_800CC2D0[objIndex].lod;
+        lod = movement_obj[objIndex].current_lod;
     }
     gDPPipeSync(gfx++);
     gDPSetColorImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_8b, 64, D_800DF088);
@@ -383,7 +383,7 @@ Gfx *func_15184FA4(Gfx *gfx, s32 objIndex, s32 slot, s32 view) {
     gSPMatrix(gfx++, &D_800DF2F8[slot][D_800BE9C0], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPMatrix(gfx++, &D_89470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     col[0] = col[1] = col[2] = 0;
-    gfx = func_1502CCFC(gfx, objIndex, view, D_800CC2D0[objIndex].unk1D4, func_1506196C(&D_800CC2D0[objIndex], view), col, 3, 1);
+    gfx = func_1502CCFC(gfx, objIndex, view, movement_obj[objIndex].ob_matrix_ptr, func_1506196C(&movement_obj[objIndex], view), col, 3, 1);
     gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
     gDPPipeSync(gfx++);
     if (lod < 2) {
@@ -402,7 +402,7 @@ Gfx *func_15184FA4(Gfx *gfx, s32 objIndex, s32 slot, s32 view) {
     gSPSetGeometryMode(gfx++, G_SHADING_SMOOTH | G_ZBUFFER);
     gfx = func_1501A490(func_1501A680(gfx), D_80082FA6, 0, 0, 0, 0);
     gfx = func_1510B7B4(gfx, view);
-    D_800CC2D0[objIndex].unk123 = 1;
+    movement_obj[objIndex].unk123 = 1;
     return gfx;
 }
 
@@ -852,23 +852,23 @@ Gfx *func_15186794(Gfx *gfx, s32 view) {
     vtxTotal = 0;
     for (i = 0; i < 25; i++) {
         // matching: the dead store to v and the repeated unk74 test (as u32) steer IDO's register allocation
-        if (D_800CC2D0[i].interaction_state == 0 || D_800CC2D0[i].unk1D4 == NULL ||
-            ((v = D_800CC2D0[i].unk74) & (1 << view)) || D_800CC2D0[i].unk5 != 0 ||
-            (D_800CC2D0[i].unk66 & 0x10) != 0x10 ||
-            (u32)(D_800CC2D0[i].unk74 & (1 << view)) == (u32)(1 << view) ||
-            D_800CC2D0[i].unk84.uh == 0x2D8 ||
-            (D_800CC2D0[i].unk31C != NULL && (D_800CC2D0[i].unk31C->unk95 != 0 || D_800CC2D0[i].unk31C->ropeId != 0)) ||
+        if (movement_obj[i].type == 0 || movement_obj[i].ob_matrix_ptr == NULL ||
+            ((v = movement_obj[i].unk74) & (1 << view)) || movement_obj[i].drawtype != 0 ||
+            (movement_obj[i].unk66 & 0x10) != 0x10 ||
+            (u32)(movement_obj[i].unk74 & (1 << view)) == (u32)(1 << view) ||
+            movement_obj[i].animseq.uh == 0x2D8 ||
+            (movement_obj[i].mv != NULL && (movement_obj[i].mv->ladder != 0 || movement_obj[i].mv->rope != 0)) ||
             (D_800DF0E0 & (1 << i))) {
             continue;
         }
-        if (D_800CC2D0[i].unk65 != 0 && D_800CC2D0[i].id != 0x62) {
+        if (movement_obj[i].attach_char != 0 && movement_obj[i].character_type != 0x62) {
             continue;
         }
-        if (D_800CC2D0[i].lodCount != 0) {
-            modelId = func_150849CC(&D_800CC2D0[i], &modelSub);
-            func_1503DA9C(&D_800CC2D0[i], modelId, modelSub, 0);
+        if (movement_obj[i].lodCount != 0) {
+            modelId = func_150849CC(&movement_obj[i], &modelSub);
+            func_1503DA9C(&movement_obj[i], modelId, modelSub, 0);
         } else {
-            modelId = D_800CC2D0[i].id;
+            modelId = movement_obj[i].character_type;
             modelSub = 0;
         }
         if (D_800C48F0[modelId] == NULL) {
@@ -884,16 +884,16 @@ Gfx *func_15186794(Gfx *gfx, s32 view) {
                 break;
             }
             mtx = (f32 *)D_800DF0F8[slot];
-            recvCount = func_151873E4(D_800CC2D0[i].x_position, D_800CC2D0[i].z_position, 230, recv, mtx, &recv[D_8008D3E0 - 2],
-                                  func_1518652C(D_800CC2D0[i].x_position, D_800CC2D0[i].z_position, 230, recv, mtx, &recv[D_8008D3E0 - 2]));
+            recvCount = func_151873E4(movement_obj[i].xpos, movement_obj[i].zpos, 230, recv, mtx, &recv[D_8008D3E0 - 2],
+                                  func_1518652C(movement_obj[i].xpos, movement_obj[i].zpos, 230, recv, mtx, &recv[D_8008D3E0 - 2]));
             if (recvCount != 0) {
                 idx = 0;
                 gfx = func_15184FA4(gfx, i, slot, view);
                 batch = 0;
-                if (D_800CC2D0[i].unk127 != 0xFF && D_800CC2D0[i].lod < 2) {
+                if (movement_obj[i].playernumber != 0xFF && movement_obj[i].current_lod < 2) {
                     split = 1;
-                } else if (i + 1 == D_800CC2D0[D_800CC2D0[i].unk124].unk65 &&
-                           D_800CC2D0[D_800CC2D0[i].unk124].unk127 != 0xFF && D_800CC2D0[i].id == 0x53) {
+                } else if (i + 1 == movement_obj[movement_obj[i].owner].attach_char &&
+                           movement_obj[movement_obj[i].owner].playernumber != 0xFF && movement_obj[i].character_type == 0x53) {
                     split = 1;
                 } else {
                     split = 0;
@@ -965,7 +965,7 @@ Gfx *func_15186794(Gfx *gfx, s32 view) {
 }
 
 /* Per-level shadow settings: vertex budget, viewport depth scale, light selection and face filtering. */
-void func_151872B0(s32 level) {
+void func_151872B0(s32 levelId) {
     D_800DE01C = 600;
     D_800DE020 = 180;
     D_800DE024 = 90;
@@ -976,7 +976,7 @@ void func_151872B0(s32 level) {
     D_800DE040 = 1;
     D_800DE041 = 1;
 
-    switch (level) {
+    switch (levelId) {
     case 0x21:
         D_800DE01C = 4800;
         D_800DE020 = D_800DE01C - 1;
@@ -1011,7 +1011,7 @@ extern ShadowVtx *func_150A5E44(u16 *, ShadowVtx *, f32 *, ShadowVtx *);
 extern s32 D_800DF0E4;
 
 /*
- * Appends to out[count..] the shadow-receiving geometry of every D_800DBEF4 entry whose bounds overlap
+ * Appends to out[count..] the shadow-receiving geometry of every db_Object_array entry whose bounds overlap
  * the square of half-size `range` around (x, z). Returns the new vertex count.
  */
 s32 func_151873E4(s32 x, s32 z, s32 range, ShadowVtx *out, f32 *mtx, ShadowVtx *end, s32 count) {
@@ -1020,7 +1020,7 @@ s32 func_151873E4(s32 x, s32 z, s32 range, ShadowVtx *out, f32 *mtx, ShadowVtx *
     s32 i;
     s32 extent;
 
-    if (D_800DBEF0 == 0) {
+    if (gWorldObjectCount == 0) {
         return count;
     }
 
@@ -1033,15 +1033,15 @@ s32 func_151873E4(s32 x, s32 z, s32 range, ShadowVtx *out, f32 *mtx, ShadowVtx *
     D_800DF0F4 = z + range;
 
     found = 0;
-    for (i = 0; i < D_800DBEF0; i++) {
-        entry = &D_800DBEF4[i];
+    for (i = 0; i < gWorldObjectCount; i++) {
+        entry = &db_Object_array[i];
         if (entry->inactive != 0) {
             continue;
         }
-        if (entry->flags & 0x60) {
+        if (entry->object_status & 0x60) {
             continue;
         }
-        extent = (entry->unk52 < entry->unk50) ? entry->unk50 : entry->unk52;
+        extent = (entry->cullRadiusY < entry->cullRadiusXZ) ? entry->cullRadiusXZ : entry->cullRadiusY;
         if (D_800DF0EC < entry->x - extent) {
             continue;
         }

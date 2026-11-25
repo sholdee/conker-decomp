@@ -4,7 +4,30 @@
 #include "effects.h"
 
 /* Local point of the gun's muzzle in its attachment's space. */
-extern Vec3f D_800A2050;
+const Vec3f D_800A2050 = { 9.574001f, -124.071396f, 91.0238f };
+
+/* Muzzle-relative points in the gun's attachment space. */
+const Vec3f D_800A205C = { 9.679999f, -7.0199966f, 24.842f };
+const Vec3f D_800A2068 = { 1.4242005f, -6.4357996f, 24.477999f };
+const Vec3f D_800A2074 = { -14.875598f, -6.4357996f, 24.477999f };
+const Vec3f D_800A2080[2][6] = { /* two random sets of flash points */
+    {
+        { 18.3144f, -117.26579f, 118.493004f },
+        { 37.2402f, -128.4044f, 100.6656f },
+        { 28.5f, -142.65921f, 77.855f },
+        { 0.83379984f, -145.7742f, 72.8662f },
+        { -18.092197f, -134.63681f, 90.691605f },
+        { -9.351802f, -120.382f, 113.504f },
+    },
+    {
+        { 26.1992f, -119.3948f, 115.084f },
+        { 37.7034f, -133.0874f, 93.1714f },
+        { 21.0788f, -145.2132f, 73.766f },
+        { -7.0510006f, -143.6464f, 76.2732f },
+        { -18.555199f, -129.954f, 98.186005f },
+        { -1.9301987f, -117.827995f, 117.5914f },
+    },
+};
 
 ModelAttachment *func_150FF288(Actor *obj);
 /* Fills `direction`, `axis0` and `axis1` for `obj` through func_15145740. */
@@ -49,7 +72,7 @@ void func_150FED30(Actor *obj, s32 arg1, s32 arg2) {
         func_151D5148(obj);
         func_150FF2AC(obj, &direction, &axis0, &axis1);
 
-        if ((obj->unk1D4 != NULL) && ((obj->unk74 & 0xF) != 0xF)) {
+        if ((obj->ob_matrix_ptr != NULL) && ((obj->unk74 & 0xF) != 0xF)) {
             valid = TRUE;
         } else {
             valid = FALSE;
@@ -68,7 +91,7 @@ void func_150FED30(Actor *obj, s32 arg1, s32 arg2) {
             kind = 0x1A;
         }
 
-        if (obj->id == 0x98) {
+        if (obj->character_type == 0x98) {
             directionSign = 1;
         } else {
             directionSign = -1;
@@ -84,7 +107,7 @@ void func_150FED30(Actor *obj, s32 arg1, s32 arg2) {
         if (valid) {
             func_151D3F14(&position, ((u8 *)&arg1)[3], arg2);
             /* byte 2 of an attachment is the owner bone it follows */
-            func_151D4408(&hit, &normal, obj->unk1D4[gun->bone], obj, 1.0f,
+            func_151D4408(&hit, &normal, obj->ob_matrix_ptr[gun->bone], obj, 1.0f,
                           ((u8 *)&arg1)[3], arg2);
             func_150FF474(&position, points, ((u8 *)&arg1)[3], arg2);
         }
@@ -98,15 +121,15 @@ void func_150FEFD0(Actor *obj, s16 setId, Vec3f *out) {
     ModelAttachment *attachment;
 
     if (setId == -1) {
-        out->x = obj->x_position;
-        out->y = obj->y_position;
-        out->z = obj->z_position;
+        out->x = obj->xpos;
+        out->y = obj->ypos;
+        out->z = obj->zpos;
     } else {
         attachment = func_1503195C(obj, setId, 0);
         if (attachment == NULL) {
-            out->x = obj->x_position;
-            out->y = obj->y_position;
-            out->z = obj->z_position;
+            out->x = obj->xpos;
+            out->y = obj->ypos;
+            out->z = obj->zpos;
         } else {
             src = &D_800A2050;
             dst = out;
@@ -139,7 +162,7 @@ void func_150FF084(Actor *obj, u8 arg1, s32 arg2) {
         func_151D5148(obj);
         func_150FF2AC(obj, &direction, &axis0, &axis1);
 
-        if (obj->unk1D4 != NULL) {
+        if (obj->ob_matrix_ptr != NULL) {
             valid = TRUE;
         } else {
             valid = FALSE;
@@ -160,7 +183,7 @@ void func_150FF084(Actor *obj, u8 arg1, s32 arg2) {
 
         if (valid) {
             func_151D3F14(&position, arg1, arg2);
-            func_151D4408(&hit, &normal, obj->unk1D4[gun->bone], obj, 1.0f,
+            func_151D4408(&hit, &normal, obj->ob_matrix_ptr[gun->bone], obj, 1.0f,
                           arg1, arg2);
             func_150FF474(&position, points, arg1, arg2);
         }
@@ -210,9 +233,9 @@ void func_150FF2D4(u8 *valid, Vec3f *points, Vec3f *position, Vec3f *hit, Vec3f 
             sideZ = 1.0f;
             sideX = 0.0f;
         }
-        position->x = obj->x_position + (34.0f * sideX);
-        position->y = obj->y_position + 49.0f;
-        position->z = obj->z_position + (34.0f * sideZ);
+        position->x = obj->xpos + (34.0f * sideX);
+        position->y = obj->ypos + 49.0f;
+        position->z = obj->zpos + (34.0f * sideZ);
         *endpoint = *position;
     }
     func_151D5174(obj, position, direction, axis0, axis1, output0, output1, value0, value1, endpoint);
@@ -280,17 +303,11 @@ void func_150FF474(Vec3f *position, Vec3f *points, u8 arg2, s32 arg3) {
 
 /* Returns FALSE for object id 0x98, TRUE otherwise. */
 s32 func_150FF6B4(Actor *obj, s32 arg1, s32 arg2) {
-    if (obj->id == 0x98) {
+    if (obj->character_type == 0x98) {
         return FALSE;
     }
     return TRUE;
 }
-
-/* Muzzle-relative points in the gun's attachment space. */
-extern Vec3f D_800A205C;
-extern Vec3f D_800A2068;
-extern Vec3f D_800A2074;
-extern Vec3f D_800A2080[2][6]; /* two random sets of flash points */
 
 /*
  * Transforms the gun's muzzle points by its bone into world space. `normal` ends up relative to `hit`.
@@ -324,218 +341,4 @@ u8 func_150FF6E0(Vec3f *points, Vec3f *position, Vec3f *hit, Vec3f *normal, Vec3
         return FALSE;
     }
     return TRUE;
-}
-
-void func_150FFCC8(Actor *obj, Vec3f *position, Vec3f *direction, Vec3f *axis0, Vec3f *axis1);
-void func_150FFD84(Vec3f *position, Vec3f *direction, u8 arg2, s32 arg3);
-void func_150FFB6C(Vec3f *position, Vec3f *origin, Actor *obj, s32 type);
-void func_150FFC3C(Actor *obj);
-void func_15102B38(Actor *obj, u8 bone, Vec3f *arg2, Vec3f *arg3, f32 *arg4, s32 arg5, s32 arg6, f32 arg7,
-                   Vec3f *position, s32 arg9, s32 arg10, s32 arg11, u8 arg12, s32 arg13);
-void func_15081690(Actor *obj, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, void *arg7, f32 arg8, s32 arg9,
-                   s32 arg10, s32 arg11, s32 arg12, s32 arg13, s32 arg14);
-s32 func_15081E78(Actor *obj, void *arg1, s32 arg2);
-extern Vec3f D_800A2130;
-extern Vec3f D_800A213C;
-
-/*
- * Shot effects for `obj`: a muzzle effect and particles when it has bones, three func_1505D1C4
- * spawns along `direction` if `arg1`, a func_15081690 call if `arg2`, then a camera event.
- */
-void func_150FF840(Actor *obj, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
-    Vec3f position;
-    Vec3f direction;
-    Vec3f axis0;
-    Vec3f axis1;
-    f32 motion[2];
-    Vec3f trail[3];
-    u8 scratch[0x64];
-    void *buffer;
-    ActorCtl *state;
-    s32 random1;
-    s32 random0;
-
-    func_150FFCC8(obj, &position, &direction, &axis0, &axis1);
-    func_151D5148(obj);
-    if ((obj->unk1D4 != NULL) && ((obj->unk74 & 0xF) != 0xF)) {
-        func_151D3F14(&position, arg3, arg4);
-        motion[1] = ((func_150ADA68() * 3400.0f) + 4800.0f) * 0.001000000047f;
-        motion[0] = ((func_150ADA68() * 220.0f) + 320.0f) * 0.1000000015f;
-        random0 = func_150ADA20();
-        random1 = func_150ADA20();
-        func_15102B38(obj, D_80088BB0, &D_800A2130, &D_800A213C, motion,
-                      (random0 % 3U) + 4, (random1 & 0x7F) + 0x80,
-                      (func_150ADA68() * 450.0f) + 780.0f, &position, 0xFF,
-                      0, -1, arg3, arg4);
-        func_150FFD84(&position, &direction, arg3, arg4);
-    }
-    if (arg1) {
-        s32 pad; // matching: unused stack slot
-        trail[0].x = (direction.x * 0.08800000697f) + position.x;
-        trail[0].y = (direction.y * 0.08800000697f) + position.y;
-        trail[0].z = (direction.z * 0.08800000697f) + position.z;
-        trail[1].x = (direction.x * 0.3830000162f) + position.x;
-        trail[1].y = (direction.y * 0.3830000162f) + position.y;
-        trail[1].z = (direction.z * 0.3830000162f) + position.z;
-        trail[2].x = (direction.x * 0.810000062f) + position.x;
-        trail[2].y = (direction.y * 0.810000062f) + position.y;
-        trail[2].z = (direction.z * 0.810000062f) + position.z;
-        func_150FFB6C(&trail[0], &position, obj, 0x32);
-        func_150FFB6C(&trail[1], &position, obj, 0x30);
-        func_150FFB6C(&trail[2], &position, obj, 0x31);
-    }
-    if (arg2) {
-        state = obj->unk31C;
-        if (state != NULL) {
-            buffer = (u8 *)state + 0xB0;
-        } else {
-            buffer = scratch;
-        }
-        func_15081690(obj, position.x, position.y, position.z,
-                      direction.x * 0.001000000047f, direction.y * 0.001000000047f,
-                      direction.z * 0.001000000047f, buffer, 2000.0f, 0, 0, 0, -1, 0, 0);
-        func_15081E78(obj, buffer, 0x10);
-    }
-    func_150FFC3C(obj);
-}
-
-/* Spawns func_1505D1C4 effect `type` at `position`, owned by `obj`. */
-void func_150FFB6C(Vec3f *position, Vec3f *origin, Actor *obj, s32 type) {
-    s32 flags;
-    s32 index;
-    u16 angle;
-
-    flags = type | 0x60000;
-    index = obj - D_800CC2D0;
-    angle = obj->unk7A;
-    func_1505D1C4(position->x, position->y, position->z, flags, index, angle, 0, origin);
-}
-
-s32 func_15145EA4(Vec3f **src, Vec3f **dst, void *mtx, s32 count);
-
-/* Writes the world position of the muzzle point D_800A2130 on bone D_80088BB0 of `obj` to `out`. */
-void func_150FFBDC(Actor *obj, s32 arg1, Vec3f *out) {
-    Vec3f *src;
-    Vec3f *dst;
-
-    src = &D_800A2130;
-    dst = out;
-    func_15145EA4(&src, &dst, obj->unk1D4[D_80088BB0], 1);
-}
-
-void func_151D8868(RumbleParams *event, s32 arg1, s32 arg2, s32 arg3);
-
-/* Sends a func_151D8868 event (kind 1, 20-30 long) to `obj`'s camera, if it has one. */
-void func_150FFC3C(Actor *obj) {
-    RumbleParams event;
-
-    if (obj->camera != NULL) {
-        event.flags = 1;
-        event.duration = (func_150ADA20() % 11U) + 20;
-        event.playerMask = 1 << obj->camera->playerIndex;
-        event.strength = (func_150ADA20() & 1) + 7;
-        event.updateKind = -1;
-        func_151D8868(&event, 0, 0xFF, 1);
-    }
-}
-
-void func_151D5A18(Actor *obj, Vec3f *position, Vec3f *direction, Vec3f *axis0, Vec3f *axis1,
-                   Vec3f *arg5, u8 arg6);
-void func_151D3E6C(Actor *obj, Vec3f *arg1, Vec3f *arg2, s32 arg3);
-
-/* Gets the shot `position` and `direction` (and two axes) of `obj`. */
-void func_150FFCC8(Actor *obj, Vec3f *position, Vec3f *direction, Vec3f *axis0, Vec3f *axis1) {
-    func_151D5A18(obj, position, direction, axis0, axis1, D_8008FC8C[0], *D_8008FC94[0]);
-    func_151D3E6C(obj, position, position, 0x8003A);
-}
-
-void func_15081E0C(Actor *obj, s32 arg1, s32 arg2);
-
-/* Calls func_15081E0C(other, 4, 0) when `other` is a 0x9F/0xA0 object without flag 0x80 in unk94. */
-void func_150FFD2C(Actor *obj, Actor *other, s32 arg2) {
-    if (other->id == 0x9F || other->id == 0xA0) {
-        if (!(other->unk94 & 0x80)) {
-            func_15081E0C(other, 4, 0);
-        }
-    }
-}
-
-typedef struct {
-    s32 id[4];
-} Unk1DChoices;
-
-void *func_15130280(ParticleDesc *spawn, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
-void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out);
-void func_15145974(Vec3f *direction, f32 *yaw, f32 *pitch);
-extern Unk1DChoices D_800A2160;
-
-/* Spawns 10-18 particles at `position`, fanned out around the yaw of `direction`. */
-void func_150FFD84(Vec3f *position, Vec3f *direction, u8 arg2, s32 arg3) {
-    ParticleDesc spawn;
-    s32 count;
-    s16 baseYaw;
-    s16 basePitch;
-    s32 random0;
-    f32 yaw;
-    f32 pitch;
-
-    count = func_150ADA20() % 9U + 10;
-    spawn.renderMode = 0x2203;
-    spawn.unk0 = 0x200005;
-    spawn.unk4 = 0;
-    spawn.frame = 0;
-    spawn.frameRate = 0;
-    spawn.r = 0xFF;
-    spawn.g = 0xFF;
-    spawn.b = 0xFF;
-    spawn.a = 0xFF;
-    spawn.r2 = 0xFF;
-    spawn.g2 = 0xFF;
-    spawn.b2 = 0xFF;
-    spawn.brightness = 0xFF;
-    spawn.pos = *position;
-    spawn.offset = D_800A5480;
-    spawn.fadeStart = 7;
-    spawn.fadeRate = 36;
-    spawn.scaleStart = 1;
-    spawn.flags = 0x4C207;
-    spawn.primColorMode = 0;
-    spawn.envColorMode = 7;
-    spawn.updateFunc = -1;
-    spawn.deathFunc = -1;
-    spawn.drawFunc = -1;
-    spawn.handlerSet = 0;
-    spawn.viewMask = 0;
-    spawn.views = 0xFF;
-    spawn.scaleRate = 1.0f;
-    func_15145974(direction, &yaw, &pitch);
-    pitch = 0.0f;
-    /* degrees to a 16-bit binary angle, then to 1/256 turns */
-    baseYaw = yaw * 182.0444489f;
-    baseYaw >>= 8;
-    baseYaw -= 138;
-    basePitch = pitch * 182.0444489f;
-    basePitch >>= 8;
-    basePitch -= 138;
-    do {
-        Unk1DChoices ids;
-        s32 random1;
-
-        ids = D_800A2160;
-        spawn.texture = ids.id[func_150ADA20() & 3];
-        spawn.timer = func_150ADA20() % 13U + 10;
-        spawn.alpha = func_150ADA20() % 101U + 155;
-        spawn.width = spawn.height = func_150ADA68() * 155.0f + 75.0f;
-        random0 = func_150ADA20();
-        random1 = func_150ADA20();
-        func_15143794(random0 % 21U + baseYaw, random1 % 21U + basePitch, func_150ADA68() * 20.0f + 20.0f,
-                      &spawn.vel);
-        spawn.gravity = func_150ADA68() * 0.6210000515f + -0.6570000052f;
-        spawn.flags &= ~0xC0;
-        random0 = (func_150ADA20() & 1) ? 0x80 : 0;
-        random1 = (func_150ADA20() & 1) ? 0x40 : 0;
-        spawn.flags |= random1 | random0;
-        func_15130280(&spawn, 1, 0, 0, arg2, arg3);
-        count--;
-    } while (count > 0);
 }

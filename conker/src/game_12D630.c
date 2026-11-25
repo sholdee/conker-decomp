@@ -61,11 +61,11 @@ void func_151002BC(OwnerEffect *effect) {
     OwnerEffectData *data = &effect->data;
     Actor *owner = data->owner;
 
-    if (owner->interaction_state == 0 || owner->id == 0xFF || owner->unique_id != data->ownerId) {
+    if (owner->type == 0 || owner->character_type == 0xFF || owner->unique_id != data->ownerId) {
         effect->base.header.state = -1;
         return;
     }
-    if (owner->camera != NULL) {
+    if (owner->CameraPtr != NULL) {
         data->timer -= D_800BE9E4;
     }
 }

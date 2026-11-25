@@ -37,7 +37,7 @@ extern MainSelectorPair D_8002BA18;
 
 /*
  * Per-frame audio mix update. Picks the active selector (override > fallback > one-shot request,
- * forced to 1 by D_800DBFF0->status bit 0 unless D_800B0DF0 byte 0x2A bit 0), eases the volume, gain and frequency
+ * forced to 1 by camera_global_Cameras->SpecialFlags bit 0 unless D_800B0DF0 byte 0x2A bit 0), eases the volume, gain and frequency
  * targets for it, and sends any values that changed to the audio channels.
  */
 void func_10012020(void) {
@@ -49,7 +49,7 @@ void func_10012020(void) {
     f32 scale;
 
     selector = D_80042770;
-    if ((D_800DBFF0->status & 1) && !(D_800B0DF0->flags & 1)) {
+    if ((camera_global_Cameras->SpecialFlags & 1) && !(D_800B0DF0->flags & 1)) {
         selector = 1;
     }
     if (D_80042774 != 0) {

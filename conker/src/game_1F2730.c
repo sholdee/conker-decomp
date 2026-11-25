@@ -15,7 +15,7 @@ void func_151C56A4(f32 *pos, u8 arg1, s32 arg2);
 extern Vec3f D_800AAAA8;
 
 /* Spawns a func_151C229C effect along a segment at `obj`: offset along func_15145740's `dir` from its
- * position, or, when it has unk1D4, between two points of model part 0x46, plus func_151C56A4 and
+ * position, or, when it has ob_matrix_ptr, between two points of model part 0x46, plus func_151C56A4 and
  * (half the time) func_151C5588 effects at the segment start. */
 void func_151C5280(Actor *obj, u8 arg1, s32 arg2) {
     f32 start[3];
@@ -36,7 +36,7 @@ void func_151C5280(Actor *obj, u8 arg1, s32 arg2) {
         dir[0] *= 0.001f;
         dir[1] *= 0.001f;
         dir[2] *= 0.001f;
-        if (obj->unk1D4 != NULL) {
+        if (obj->ob_matrix_ptr != NULL) {
             modelPoints[0] = &D_800AAA90;
             modelPoints[1] = &D_800AAAA8;
             worldPoints[0] = start;
@@ -53,9 +53,9 @@ void func_151C5280(Actor *obj, u8 arg1, s32 arg2) {
                 func_151C5588(obj, start, 0x46, arg1, arg2);
             }
         } else {
-            start[0] = obj->x_position;
-            start[1] = obj->y_position + 106.0f;
-            start[2] = obj->z_position;
+            start[0] = obj->xpos;
+            start[1] = obj->ypos + 106.0f;
+            start[2] = obj->zpos;
             end[0] = start[0] + (dir[0] * -82.0f);
             end[1] = start[1] + (dir[1] * -82.0f);
             end[2] = start[2] + (dir[2] * -82.0f);
@@ -66,7 +66,7 @@ void func_151C5280(Actor *obj, u8 arg1, s32 arg2) {
         randA = func_150ADA68();
         randB = func_150ADA68();
         randInt = func_150ADA20();
-        if (obj->unk1D4 != NULL) {
+        if (obj->ob_matrix_ptr != NULL) {
             arg16 = 255;
         } else {
             arg16 = 128;
@@ -383,7 +383,7 @@ void func_151C61A0(Vec3f *arg0, Vec3f *arg1, u8 arg2, s32 arg3) {
 
 /* D_80086C90 object filter: rejects objects with id 0x5A, 0x74 or 0x7A. */
 s32 func_151C6290(Actor *obj, Actor *self, s32 arg2) {
-    if (obj->id == 0x5A || obj->id == 0x74 || obj->id == 0x7A) {
+    if (obj->character_type == 0x5A || obj->character_type == 0x74 || obj->character_type == 0x7A) {
         return FALSE;
     }
     return TRUE;

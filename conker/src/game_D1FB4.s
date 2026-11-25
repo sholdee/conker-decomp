@@ -48,8 +48,8 @@ glabel func_150A4B04
     /* D2044 150A4B94 025E9021 */  addu       $s2, $s2, $fp
     /* D2048 150A4B98 8E520000 */  lw         $s2, 0x0($s2)
     /* D204C 150A4B9C 124000EF */  beqz       $s2, func_150A4F5C
-    /* D2050 150A4BA0 3C08800D */   lui       $t0, %hi(D_800CC2D0)
-    /* D2054 150A4BA4 2508C2D0 */  addiu      $t0, $t0, %lo(D_800CC2D0)
+    /* D2050 150A4BA0 3C08800D */   lui       $t0, %hi(movement_obj)
+    /* D2054 150A4BA4 2508C2D0 */  addiu      $t0, $t0, %lo(movement_obj)
     /* D2058 150A4BA8 25094F4C */  addiu      $t1, $t0, 0x4F4C
     /* D205C 150A4BAC C60C0014 */  lwc1       $f12, 0x14($s0)
     /* D2060 150A4BB0 C60D0018 */  lwc1       $f13, 0x18($s0)

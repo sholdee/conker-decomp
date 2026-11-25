@@ -1,5 +1,4 @@
 #include <ultra64.h>
-/* functions.h declares this with a signature that doesn't match its real one; rename it out of the way. */
 #include "functions.h"
 #include "variables.h"
 
@@ -27,8 +26,8 @@ s32 func_1509DD40(s32 arg0) {
 }
 
 /* Script handler: spawns a swarm described by the command. */
-s32 func_1509DD50(s32 arg0, struct214 *cmd) {
-    func_15177F90(cmd->unk7, NULL, cmd->unkB, cmd->unkC, cmd->unk10, cmd->unk14, cmd->unk18, 0x7FFF, 0xFF, cmd->unk1C,
+s32 func_1509DD50(s32 arg0, SwarmSpawnCmd *cmd) {
+    func_15177F90(cmd->memberCount, NULL, cmd->tag, cmd->x, cmd->y, cmd->z, cmd->unk18, 0x7FFF, 0xFF, cmd->playSfx,
                   0);
     return 1;
 }
@@ -41,25 +40,25 @@ s32 func_1509DDC4(s32 tag, u16 arg1) {
 }
 
 /* Script handler: makes the swarm with the given tag follow an object (op 0) or head for a fixed point (op 1). */
-s32 func_1509DDFC(s32 tag, s32 op, struct215 *cmd) {
+s32 func_1509DDFC(s32 tag, s32 op, SwarmTargetCmd *cmd) {
     switch (op) {
     case 0: {
         s32 mask = ~0x2000; // matching: the inline constant schedules differently
-        func_15178BE4(tag & 0xFF, &D_800CC2D0[func_15084000(cmd->unk8 & mask)].x_position, cmd->unkC.s.unk2);
+        func_15178BE4(tag & 0xFF, &movement_obj[func_15084000(cmd->target & mask)].xpos, cmd->argC.follow.yOffset);
         return 1;
     }
     case 1:
-        func_15178C34(tag & 0xFF, cmd->unk8, cmd->unkC.i.unk0, cmd->unk10, cmd->unk14);
+        func_15178C34(tag & 0xFF, cmd->target, cmd->argC.y, cmd->z, cmd->yOffset);
         return 1;
     }
     return 0;
 }
 
 /* Script query: returns the distance from the swarm with the given tag to the command's object (op 0). */
-s32 func_1509DEC4(s32 tag, s32 op, struct215 *cmd) {
+s32 func_1509DEC4(s32 tag, s32 op, SwarmTargetCmd *cmd) {
     if (op == 0) {
         s32 mask = ~0x2000; // matching: the inline constant schedules differently
-        return func_15178C9C(tag & 0xFF, func_15084000(cmd->unk8 & mask));
+        return func_15178C9C(tag & 0xFF, func_15084000(cmd->target & mask));
     }
     return 0;
 }

@@ -242,7 +242,7 @@ void func_150CD7F8(BurstEmitter *emitter) {
             yaws = D_80088874;
             index = func_150ADA20() % 5U;
             yaw = yaws.yaw[index] + func_150ADA68() * 0.59999996f;
-            heading = D_800DBFF0[D_80082FA4].unk380 - 180.0f;
+            heading = camera_global_Cameras[D_80082FA4].TrueCameraAngle - 180.0f;
             while (heading > 360.0f) {
                 heading -= 360.0f;
             }

@@ -59,7 +59,7 @@ OSContPad **func_1501BBB8(void) {
             D_800BE740 |= 1 << i;
         }
     }
-    if (D_800BE9F0 != 0x1D) {
+    if (level != 0x1D) {
         numPlayers = D_8008FD90;
     } else {
         numPlayers = 4;

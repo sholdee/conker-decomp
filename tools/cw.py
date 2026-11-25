@@ -10,7 +10,7 @@
 NAME is the workspace name printed by `new` (clean.game_79F10). Same lock, RAM builds, crash recovery and
 sha gate as mw.py. The verdict is the whole code bin's sha1: a cleanup lands only if the ROM is unchanged.
 """
-import argparse, fcntl, json, re, subprocess, sys, time
+import argparse, fcntl, filecmp, json, re, shutil, subprocess, sys, time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -101,6 +101,8 @@ def cmd_new(a):
         (ws / "base").mkdir()
         for d in ("src", "include"):
             subprocess.run(["cp", "-a", "--reflink=auto", str(MAIN / d), str(ws / "base" / d)], check=True)
+        for n in SPLAT_INPUTS:
+            shutil.copy(MAIN / n, ws / "base" / n)
         head = git("rev-parse", "HEAD").strip()
     for n in ("ido", "tools"):
         (ws / n).symlink_to(REPO / n)
@@ -135,6 +137,8 @@ def new_tree(a):
         (ws / "base").mkdir()
         for d in ("src", "include"):
             subprocess.run(["cp", "-a", "--reflink=auto", str(MAIN / d), str(ws / "base" / d)], check=True)
+        for n in SPLAT_INPUTS:
+            shutil.copy(MAIN / n, ws / "base" / n)
         head = git("rev-parse", "HEAD").strip()
     for n in ("ido", "tools"):
         (ws / n).symlink_to(REPO / n)
@@ -145,10 +149,52 @@ def new_tree(a):
     print(f"land      : python3 {REPO}/tools/cw.py land {name}")
 
 
+YAML = "conker.us.yaml"
+# splat's inputs: a workspace may change them (e.g. to link a file's own .rodata, or to label bss)
+SPLAT_INPUTS = (YAML, "symbol_addrs.us.txt", "undefined_syms.us.txt", "undefined_funcs.us.txt")
+SPLAT = "python3 ../tools/n64splat/split.py conker.us.yaml >/dev/null 2>&1 && python3 ../tools/filter_auto_syms.py . >/dev/null"
+
+
+def splat_changes(ws):
+    """The splat inputs the workspace changed (empty for workspaces made before this support)."""
+    out = []
+    for n in SPLAT_INPUTS:
+        b = ws / "base" / n
+        if b.exists() and not filecmp.cmp(b, ws / "conker" / n, shallow=False):
+            out.append(n)
+    return out
+
+
+def yaml_changed(ws):
+    return bool(splat_changes(ws))
+
+
 def build(ws):
     wc = ws / "conker"
     ensure_build(wc)
     (wc / BIN).unlink(missing_ok=True)
+    stamp = ws / ".splat_yaml"
+    if not yaml_changed(ws) and not stamp.exists() and (wc / "asm").is_symlink():
+        # this workspace does not change splat's inputs, but main may have (another land): its asm/ is
+        # main's through the symlink, so take main's matching splat outputs too, then rebuild fully
+        stale = [n for n in SPLAT_INPUTS + ("conker.ld", "undefined_syms_auto.txt", "undefined_funcs_auto.txt", "jtbl_labels.us.txt")
+                 if (MAIN / n).exists() and (not (wc / n).exists() or not filecmp.cmp(MAIN / n, wc / n, shallow=False))]
+        if stale:
+            for n in stale:
+                shutil.copy(MAIN / n, wc / n)
+                if n in SPLAT_INPUTS:
+                    shutil.copy(MAIN / n, ws / "base" / n)
+            return wc, run("make -B -j8 2>&1", wc, timeout=1800)
+    if yaml_changed(ws) or stamp.exists():
+        cur = b"".join((wc / n).read_bytes() for n in SPLAT_INPUTS)
+        if not stamp.exists() or stamp.read_bytes() != cur:
+            # asm/ is a symlink to main's in a lean workspace: splat must never write through it
+            if (wc / "asm").is_symlink():
+                (wc / "asm").unlink()
+                subprocess.run(["cp", "-a", "--reflink=auto", str(MAIN / "asm"), str(wc / "asm")], check=True)
+            run(SPLAT, wc, timeout=1800)  # the yaml changed: regenerate asm/ and the linker script
+            stamp.write_bytes(cur)
+            return wc, run("make -B -j8 2>&1", wc, timeout=1800)
     # The Makefile has no header dependencies: after any include/ change, rebuild everything (~15 s),
     # or stale objects would hide breakage in files that use the changed header.
     # Workspaces created from a Makefile with generated header deps (cpp -MM) rebuild exactly the users.
@@ -205,10 +251,21 @@ def log(ws, res, n=None):
         f.write(json.dumps({"t": time.time(), "result": res, "funcs_differ": n}) + "\n")
 
 
+def refresh_accounting():
+    """Regenerate tools/accounting.tsv (committed with every land); False if the accounting fails."""
+    r = subprocess.run([sys.executable, str(REPO / "tools" / "accounting.py")], capture_output=True, text=True)
+    if r.returncode:
+        print(r.stdout[-1500:])
+    return r.returncode == 0
+
+
 def cmd_land(a):
     ws, m = ws_of(a.name)
     files = changed_files(ws)
-    if not files:
+    # files the workspace deleted (present in base, gone from the workspace), e.g. after merging files
+    deleted = [p.relative_to(ws / "base") for d in ("src", "include") for p in (ws / "base" / d).rglob("*")
+               if p.is_file() and p.suffix in (".c", ".h", ".s") and not (ws / "conker" / p.relative_to(ws / "base")).exists()]
+    if not files and not splat_changes(ws) and not deleted:
         sys.exit("no changes in workspace")
     with open(LOCK, "a") as lk:
         fcntl.flock(lk, fcntl.LOCK_EX)
@@ -237,9 +294,25 @@ def cmd_land(a):
                 sys.exit(f"{f}: merge conflict with main — rebase: copy main's file into the workspace, "
                          f"re-apply your edits, update base/{f} from main, check, land again")
             merged[f] = p.stdout
+        ychanged = yaml_changed(ws)
+        for n in splat_changes(ws):
+            p = subprocess.run(["git", "merge-file", "-p", str(MAIN / n), str(ws / "base" / n), str(ws / "conker" / n)],
+                               capture_output=True)
+            if p.returncode != 0:
+                sys.exit(f"{n}: merge conflict with main — copy main's file into the workspace and base/, re-apply, check, land")
+            merged[Path(n)] = p.stdout
+            files = files + [Path(n)]
+            rels.append(str(Path("conker") / n))
+        if ychanged:
+            autos = {n: (MAIN / n).read_bytes() for n in ("undefined_funcs_auto.txt", "undefined_syms_auto.txt")}
         backup = {f: (MAIN / f).read_bytes() if (MAIN / f).exists() else None for f in files}
         for f, data in merged.items():
             (MAIN / f).write_bytes(data)
+        for f in deleted:
+            backup.setdefault(f, (MAIN / f).read_bytes() if (MAIN / f).exists() else None)
+            (MAIN / f).unlink(missing_ok=True)
+        if ychanged:
+            run(SPLAT, MAIN, timeout=1800)
         (MAIN / BIN).unlink(missing_ok=True)
         r = run("make -B -j16 2>&1", MAIN)  # full rebuild: no header deps in the Makefile
         if not (MAIN / BIN).exists() or sha1(MAIN / BIN) != INNER_SHA:
@@ -248,10 +321,18 @@ def cmd_land(a):
                     (MAIN / f).unlink(missing_ok=True)
                 else:
                     (MAIN / f).write_bytes(data)
-            run("make -j16 2>&1", MAIN)
+            if ychanged:
+                run(SPLAT, MAIN, timeout=1800)
+                for n, data in autos.items():
+                    (MAIN / n).write_bytes(data)
+            run("make -B -j16 2>&1", MAIN)
             print(r.stdout[-2500:])
             sys.exit("LAND-FAIL: main build does not match after merge; reverted")
-        git("add", *rels)
+        if not refresh_accounting():
+            sys.exit("LAND-FAIL: tools/accounting.py fails after this change (main is matching but uncommitted: fix and land again)")
+        git("add", *rels, "tools/accounting.tsv")
+        for f in deleted:
+            git("rm", "-q", "--cached", "--ignore-unmatch", str(Path("conker") / f))
         msg = f"cleanup: {m['file'] or m.get('tree')} [cw]"
         if a.message:
             msg += "\n\n" + a.message

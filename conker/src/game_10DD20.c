@@ -27,9 +27,9 @@ void func_150E0870(Actor *obj, u8 arg1, s32 arg2) {
         func_10010630(0x2BB, obj, 0x7FFF, 1000, 2000);
         func_10010630(0x2BA, obj, 0x7FFF, 1000, 2000);
     }
-    origin.x = obj->x_position;
-    origin.y = obj->y_position + 20.0f;
-    origin.z = obj->z_position;
+    origin.x = obj->xpos;
+    origin.y = obj->ypos + 20.0f;
+    origin.z = obj->zpos;
     hitGround = FALSE;
     {
         Vec3f top;
@@ -72,40 +72,40 @@ void func_150E0BE0(Actor *obj) {
     s32 counter;
 
     obj->unkB0 = 15;
-    obj->unk80 = 10;
+    obj->count2 = 10;
 
     if (obj->unk87 != 0) {
-        counter = obj->unk83;
+        counter = obj->count5;
         if (counter < 100) {
-            counter = obj->unk83 = counter + (u32)D_800BE9A0;
+            counter = obj->count5 = counter + (u32)D_800BE9A0;
             counter &= 0xFF; // matching: u32 add + explicit wrap orders the sb before the andi
         }
         if (counter >= 5) {
             counter = obj->unk251; // matching: reusing counter keeps both in v0
             if (counter != 3) {
-                obj->unk78 = D_800CC346;
-                obj->unk218 = NULL;
-                obj->unk232 = 4;
+                obj->fangle = D_800CC346;
+                obj->scriptCmd = NULL;
+                obj->intelwalk = 4;
                 if (counter == 2) {
-                    obj->unk232 = 2;
+                    obj->intelwalk = 2;
                 }
             }
         }
     } else {
-        if (obj->unk83 > 60) {
+        if (obj->count5 > 60) {
             D_800D1580 = 0xFF020133;
-            D_800D154C = D_800CC2D0;
+            D_800D154C = movement_obj;
             func_1506E8D8();
             D_800D154C = obj;
         }
-        obj->unk83 = 0;
+        obj->count5 = 0;
     }
 
-    if (obj->unk232 == 4) {
-        if (obj->unk83 == 0) {
-            obj->unk78 = obj->unk76;
+    if (obj->intelwalk == 4) {
+        if (obj->count5 == 0) {
+            obj->fangle = obj->angle;
         }
-        func_150599C8(obj, 3, obj->unk78);
+        func_150599C8(obj, 3, obj->fangle);
     }
 
     obj->unk87 = 0;
@@ -116,10 +116,10 @@ void func_150E0BE0(Actor *obj) {
     }
 
     /* facing angle (0x10000 units per turn) rotated a quarter turn, in degrees */
-    obj->unk40 = (s16)(obj->unk7A + 0x4000) * (360.0f / 0x10000);
+    obj->theta = (s16)(obj->langle + 0x4000) * (360.0f / 0x10000);
     func_15059140(obj);
-    obj->unkBC = obj->x_position - obj->old_x_position; // 0xBC is an f32 that structs.h still calls padBC
-    obj->unk148 = obj->z_position - obj->old_z_position;
+    obj->unkBC = obj->xpos - obj->old_xpos; // 0xBC is an f32 that structs.h still calls padBC
+    obj->unk148 = obj->zpos - obj->old_zpos;
     if (func_150535F4(obj) == 0) {
         func_1502178C(obj, 0, -1);
     }

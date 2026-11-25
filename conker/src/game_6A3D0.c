@@ -417,7 +417,7 @@ s32 func_1503DA9C(Actor *obj, s32 id, s32 model, s32 loadTextures) {
     s32 ret;
     s32 i;
 
-    def = obj->spawn;
+    def = obj->listpos_ptr;
     if (D_800D19A0[id] == NULL) {
         ret = func_1503CF20(id, 0, def, loadTextures, obj->unkAC);
     } else {

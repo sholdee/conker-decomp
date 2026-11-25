@@ -3,8 +3,8 @@
 #include "variables.h"
 
 /*
- * Per-type update routines for world objects (WorldObject, the D_800DBEF4 array). The mode is in the low
- * two bits of behaviorState (0 closed, 1 closing, 2 opening, 3 open); per-type state lives in work
+ * Per-type update routines for world objects (WorldObject, the db_Object_array array). The mode is in the low
+ * two bits of task_flag (TASK_FLAG_OFF closed, GOING_OFF closing, GOING_ON opening, ON open); per-type state lives in work
  * (Work1483E0, one member per routine).
  */
 
@@ -24,7 +24,7 @@ struct Wave1511CB44;
 struct Swing1511DBC4;
 struct Pulse1511DF6C;
 
-/* Behaviour scratch state (WorldObject.work) of the objects in this file, one member per routine. */
+/* Behaviour scratch state (WorldObject.touch) of the objects in this file, one member per routine. */
 typedef union {
     struct {
         /* 0x7C */ f32 tilt;
@@ -81,18 +81,18 @@ typedef union {
     } w1511DF6C;
 } Work1483E0;
 
-#define WORK(obj) ((Work1483E0 *)&(obj)->work)
+#define WORK(obj) ((Work1483E0 *)&(obj)->touch)
 
 
 /* Eases the tilt toward 0.75 degrees per level, then wobbles randomly around it. */
 void func_1511AF30(WorldObject *obj) {
-    f32 level;
+    f32 intensity;
     f32 target;
     f32 diff;
     s32 roll;
 
-    level = obj->param.word;
-    target = 75.0f * level * 0.009999999776f;
+    intensity = obj->moveData.word;
+    target = 75.0f * intensity * 0.009999999776f;
     if (target != WORK(obj)->w1511AF30.tilt) {
         diff = target - WORK(obj)->w1511AF30.tilt;
         if (fabsf(diff) < 1.0f) {
@@ -104,12 +104,12 @@ void func_1511AF30(WorldObject *obj) {
     } else {
         roll = func_150ADA20() % 1000;
         if (roll < 500) {
-            WORK(obj)->w1511AF30.wobbleTarget = roll * 5.0f * level * 0.002000000095f * 0.009999999776f;
+            WORK(obj)->w1511AF30.wobbleTarget = roll * 5.0f * intensity * 0.002000000095f * 0.009999999776f;
         }
         diff = WORK(obj)->w1511AF30.wobbleTarget - WORK(obj)->w1511AF30.wobble;
         WORK(obj)->w1511AF30.wobble += diff * 0.400000006f;
     }
-    obj->rotX = WORK(obj)->w1511AF30.tilt + WORK(obj)->w1511AF30.wobble;
+    obj->t = WORK(obj)->w1511AF30.tilt + WORK(obj)->w1511AF30.wobble;
 }
 
 /* Slides the object between fixed waypoints chosen by its param, with movement sounds. */
@@ -130,7 +130,7 @@ void func_1511B07C(WorldObject *obj) {
     moveZ = 0;
     sound = 0;
     if (D_800C35EA[0] == 1) {
-        if (func_15022B08(obj - D_800DBEF4, 0) != 0) {
+        if (func_15022B08(obj - db_Object_array, 0) != 0) {
             return;
         }
     }
@@ -140,17 +140,17 @@ void func_1511B07C(WorldObject *obj) {
     }
     targetX = (s16)WORK(obj)->w1511B07C.homeX;
     targetZ = WORK(obj)->w1511B07C.homeZ;
-    state = obj->param.word & 0x3FF;
+    state = obj->moveData.word & 0x3FF;
     if (state >= 4 && state < 7) {
         func_1511F990(obj, 1);
     }
-    mode = obj->behaviorState & 3;
-    if (mode == 3 || mode == 2) {
+    mode = obj->task_flag & TASK_FLAG_STATE;
+    if (mode == TASK_FLAG_ON || mode == TASK_FLAG_GOING_ON) {
         switch (state) {
         case 0:
             targetX = -69;
             targetZ = -120;
-            if (mode == 2) {
+            if (mode == TASK_FLAG_GOING_ON) {
                 sound = 0x4E;
             }
             moveX = 1;
@@ -162,7 +162,7 @@ void func_1511B07C(WorldObject *obj) {
             break;
         case 2:
             targetX = 100;
-            if (mode == 2) {
+            if (mode == TASK_FLAG_GOING_ON) {
                 sound = 0x4E;
             }
             break;
@@ -174,13 +174,13 @@ void func_1511B07C(WorldObject *obj) {
             targetX = 270;
             targetZ = -1878;
             moveZ = 1;
-            if (mode == 2) {
+            if (mode == TASK_FLAG_GOING_ON) {
                 sound = 0x4E;
             }
             break;
         case 5:
             targetZ = 140;
-            if (mode == 2) {
+            if (mode == TASK_FLAG_GOING_ON) {
                 sound = 0x4C1;
             }
             break;
@@ -192,7 +192,7 @@ void func_1511B07C(WorldObject *obj) {
             targetX = -4100;
             targetZ = 422;
             moveX = 1;
-            if (mode == 2) {
+            if (mode == TASK_FLAG_GOING_ON) {
                 sound = 0x4E;
             }
             break;
@@ -202,14 +202,14 @@ void func_1511B07C(WorldObject *obj) {
         case 4:
             maxSpeed = 15.0f;
             moveX = 1;
-            if (mode == 1) {
+            if (mode == TASK_FLAG_GOING_OFF) {
                 sound = 0x4E;
             }
             break;
         case 7:
             maxSpeed = 15.0f;
             moveZ = 1;
-            if (mode == 1) {
+            if (mode == TASK_FLAG_GOING_OFF) {
                 sound = 0x4E;
             }
             break;
@@ -219,7 +219,7 @@ void func_1511B07C(WorldObject *obj) {
         func_15114D24(obj, sound, 0x7D00, 100, 2500, 1);
     }
     speed = WORK(obj)->w1511B07C.speed;
-    if (mode == 0 || mode == 3) {
+    if (mode == TASK_FLAG_OFF || mode == TASK_FLAG_ON) {
         speed = 0.0f;
         obj->x = targetX;
         obj->z = targetZ;
@@ -249,12 +249,12 @@ void func_1511B07C(WorldObject *obj) {
             step = speed;
         }
         obj->z += step;
-    } else if (mode == 2 || mode == 1) {
+    } else if (mode == TASK_FLAG_GOING_ON || mode == TASK_FLAG_GOING_OFF) {
         // matching: the embedded &= makes IDO store the cleared flags before merging
-        obj->behaviorState = ((mode == 2) ? 3 : 0) | (obj->behaviorState &= ~3);
-        if (obj->sound != 0) {
-            func_100111C8(obj->sound);
-            obj->sound = 0;
+        obj->task_flag = ((mode == TASK_FLAG_GOING_ON) ? TASK_FLAG_ON : TASK_FLAG_OFF) | (obj->task_flag &= ~TASK_FLAG_STATE);
+        if (obj->sound_id != 0) {
+            func_100111C8(obj->sound_id);
+            obj->sound_id = 0;
             func_15114D24(obj, 0x4C8, 0x7D00, 100, 2500, 1);
         }
     }
@@ -275,15 +275,15 @@ void func_1511B51C(WorldObject *obj) {
     s32 openAngle;
     f32 ratio;
 
-    openAngle = obj->param.half.lo;
-    mode = obj->behaviorState & 3;
+    openAngle = obj->moveData.half.lo;
+    mode = obj->task_flag & TASK_FLAG_STATE;
     target = openAngle;
-    angle = obj->rotZ;
+    angle = obj->v;
     velocity = WORK(obj)->w1511B51C.velocity;
-    if (mode == 0 || mode == 1) {
+    if (mode == TASK_FLAG_OFF || mode == TASK_FLAG_GOING_OFF) {
         target = 0.0f;
     }
-    if (mode == 0 || mode == 3) {
+    if (mode == TASK_FLAG_OFF || mode == TASK_FLAG_ON) {
         angle = target;
         velocity = 0.0f;
     }
@@ -305,9 +305,9 @@ void func_1511B51C(WorldObject *obj) {
                 velocity = 0.0f;
                 angle = target;
                 if (target == 0.0f) {
-                    mode = 0;
+                    mode = TASK_FLAG_OFF;
                 } else {
-                    mode = 3;
+                    mode = TASK_FLAG_ON;
                 }
             }
         } else if (diff > 0.0f) {
@@ -320,13 +320,13 @@ void func_1511B51C(WorldObject *obj) {
         } else if (angle >= 360.0f) {
             angle -= 360.0f;
         }
-        obj->behaviorState &= ~3;
-        obj->behaviorState |= mode;
+        obj->task_flag &= ~TASK_FLAG_STATE;
+        obj->task_flag |= mode;
     }
     WORK(obj)->w1511B51C.velocity = velocity;
-    if (D_800BE9B4 != 0 || angle != obj->rotZ) {
-        obj->rotZ = angle;
-        sound = (obj->param.word >> 24) & 0xFF;
+    if (D_800BE9B4 != 0 || angle != obj->v) {
+        obj->v = angle;
+        sound = (obj->moveData.word >> 24) & 0xFF;
         if (sound != 0 && openAngle != 0) {
             ratio = fabsf((angle - openAngle) / openAngle);
             func_1518804C(sound - 1, ratio);
@@ -355,22 +355,22 @@ void func_1511B7D4(WorldObject *obj) {
     WorldObject *pivots[2];
 
     count = 0;
-    if (obj->param.word == 0) {
+    if (obj->moveData.word == 0) {
         pair = D_800A2F71;
         count = D_800A2F70;
         pivots[0] = obj - 1;
         pivots[1] = obj - 2;
     }
-    if (WORK(obj)->w1511B7D4.prevAngle[0] != pivots[0]->rotZ || WORK(obj)->w1511B7D4.prevAngle[1] != pivots[1]->rotZ) {
-        WORK(obj)->w1511B7D4.prevAngle[0] = pivots[0]->rotZ;
-        WORK(obj)->w1511B7D4.prevAngle[1] = pivots[1]->rotZ;
+    if (WORK(obj)->w1511B7D4.prevAngle[0] != pivots[0]->v || WORK(obj)->w1511B7D4.prevAngle[1] != pivots[1]->v) {
+        WORK(obj)->w1511B7D4.prevAngle[0] = pivots[0]->v;
+        WORK(obj)->w1511B7D4.prevAngle[1] = pivots[1]->v;
         WORK(obj)->w1511B7D4.updates = 2;
     }
     if (WORK(obj)->w1511B7D4.updates != 0) {
         WORK(obj)->w1511B7D4.updates--;
         while (count--) {
             dx = pivots[pair[1]]->x - obj->x;
-            angle = -pivots[pair[1]]->rotZ * 0.01745329238f;
+            angle = -pivots[pair[1]]->v * 0.01745329238f;
             dy = pivots[pair[1]]->y - obj->y;
             sine = sinf(angle);
             cosine = cosf(angle);
@@ -398,11 +398,11 @@ void func_1511B7D4(WorldObject *obj) {
 
 /* Sets the alpha from a 0..1 level looked up by the param, never fully transparent. */
 void func_1511BA24(WorldObject *obj) {
-    f32 level;
+    f32 intensity;
 
-    level = 0.0f;
-    func_15188010(obj->param.word, &level);
-    obj->alpha = level * 255.0f;
+    intensity = 0.0f;
+    func_15188010(obj->moveData.word, &intensity);
+    obj->alpha = intensity * 255.0f;
     if (obj->alpha == 0) {
         obj->alpha = 1;
     }
@@ -432,9 +432,6 @@ typedef struct Game1483E0State {
     Game1483E0UvPair *coords;
     Actor *reference;
 } Game1483E0State;
-
-extern f32 D_800A31D0;
-extern f32 D_800A31D4;
 
 /*
  * Scrolls the mesh's texture coordinates so the texture stays fixed in world space under
@@ -466,8 +463,8 @@ void func_1511BB04(Game1483E0State *obj, f32 refX, f32 refZ, f32 scaleS, f32 sca
     }
 
     coords = obj->coords;
-    s_offset = refX - ((f32)obj->x + D_800A31D0);
-    t_offset = refZ - ((f32)obj->z + D_800A31D4);
+    s_offset = refX - ((f32)obj->x + 3128.0f);
+    t_offset = refZ - ((f32)obj->z + -2341.0f);
     s_offset = -s_offset;
     s_offset *= 4.300000191f;
     t_offset *= 4.300000191f;
@@ -497,13 +494,13 @@ void func_1511BDF4(Game1483E0State *obj) {
         reference = func_15083E90(obj->reference_id);
     }
     if (reference != NULL) {
-        func_1511BB04(obj, reference->x_position, reference->z_position, 1.0f, 1.0f);
+        func_1511BB04(obj, reference->xpos, reference->zpos, 1.0f, 1.0f);
     }
 }
 
 /* Turns the object to face the camera (yaw in degrees). */
 void func_1511BE5C(WorldObject *obj) {
-    obj->rotY = func_150484A0((f32)obj->x - D_800DBFF0->eye.x, (f32)obj->z - D_800DBFF0->eye.z) * 57.29577637f;
+    obj->u = func_150484A0((f32)obj->x - camera_global_Cameras->eye.x, (f32)obj->z - camera_global_Cameras->eye.z) * 57.29577637f;
 }
 
 extern void func_150DDED0(void *);
@@ -532,20 +529,20 @@ void func_1511BEBC(WorldObject *obj) {
 
     onTrigger = func_150DDED0;
     func_1511BE5C(obj);
-    mode = obj->behaviorState & 3;
-    flag4 = obj->behaviorState & 4;
-    flag8 = obj->behaviorState & 8;
+    mode = obj->task_flag & TASK_FLAG_STATE;
+    flag4 = obj->task_flag & TASK_FLAG_LOCKED;
+    flag8 = obj->task_flag & 8;
     triggered = WORK(obj)->w1511BEBC.triggered;
     velocity = WORK(obj)->w1511BEBC.velocity;
-    if (D_800BE9F0 == 10) {
-        radiusSq = (obj->scaleZ * 100.0f) * (obj->scaleZ * 100.0f);
+    if (level == 10) {
+        radiusSq = (obj->zScale * 100.0f) * (obj->zScale * 100.0f);
         if (WORK(obj)->w1511BEBC.restAndTimer == 0) {
             if (obj->y == 0) {
                 obj->y = 1;
             }
             WORK(obj)->w1511BEBC.restAndTimer = (u16)obj->y;
             restY = obj->y;
-            if (mode == 3) {
+            if (mode == TASK_FLAG_ON) {
                 obj->y = restY;
             }
         }
@@ -555,17 +552,17 @@ void func_1511BEBC(WorldObject *obj) {
         pos[0] = obj->x;
         pos[1] = obj->y + -729.0f; // matching: "- 729.0f" emits sub.s instead of add.s
         pos[2] = obj->z;
-        if (mode != 3 && mode != 1) {
+        if (mode != TASK_FLAG_ON && mode != TASK_FLAG_GOING_OFF) {
             for (i = 0; i < D_8008FD8C; i++) {
-                player = &D_800DBFF0[i];
-                if (player->playerExt->unk6B >= 4) {
+                player = &camera_global_Cameras[i];
+                if (player->mv->unk6B >= 4) {
                     continue;
                 }
-                character = player->player;
-                if (character->y_position + 40.0f < pos[1]) {
-                    dy = (character->y_position + (f32)character->bodyHeight) - pos[1];
-                    dz = character->z_position - pos[2];
-                    dx = character->x_position - pos[0];
+                character = player->CharPtr;
+                if (character->ypos + 40.0f < pos[1]) {
+                    dy = (character->ypos + (f32)character->bodyHeight) - pos[1];
+                    dz = character->zpos - pos[2];
+                    dx = character->xpos - pos[0];
                     dist = dz * dz + (dx * dx + dy * dy);
                     if (dist != dist) {} // matching: no-op NaN self-test steers IDO's FP scheduling
                     if (dist < radiusSq) {
@@ -575,21 +572,21 @@ void func_1511BEBC(WorldObject *obj) {
                 }
             }
         }
-        if (target == NULL && (mode == 2 || mode == 1)) {
+        if (target == NULL && (mode == TASK_FLAG_GOING_ON || mode == TASK_FLAG_GOING_OFF)) {
             for (i = 0; i < D_8008FD8C; i++) {
-                character = &D_800CC2D0[i];
-                if (character->unk31C->unk6B != 0) {
+                character = &movement_obj[i];
+                if (character->mv->unk6B != 0) {
                     target = character;
                     break;
                 }
             }
         }
-        if (target != NULL || mode == 2) {
+        if (target != NULL || mode == TASK_FLAG_GOING_ON) {
             if (target != NULL && triggered == 0) {
                 func_15060A30(0x16B, target);
             }
             if (flag4 == 0) {
-                mode = 2;
+                mode = TASK_FLAG_GOING_ON;
                 if (triggered == 0) {
                     timer = 50;
                     triggered++;
@@ -599,9 +596,9 @@ void func_1511BEBC(WorldObject *obj) {
                 }
                 if (target != NULL) {
                     if (timer != 0) {
-                        target->unk31C->unk6B = 1;
+                        target->mv->unk6B = 1;
                     } else {
-                        target->unk31C->unk6B = 2;
+                        target->mv->unk6B = 2;
                     }
                 }
                 if (timer != 0) {
@@ -616,26 +613,26 @@ void func_1511BEBC(WorldObject *obj) {
                     obj->y = obj->y - velocity;
                     if (obj->y <= restY - 300.0f) {
                         obj->y = restY - 300.0f;
-                        mode = 3;
+                        mode = TASK_FLAG_ON;
                         triggered = 0;
                         velocity = 0.0f;
                         if (target != NULL) {
-                            target->unk31C->unk6B = 0;
+                            target->mv->unk6B = 0;
                         }
                         func_10010F88(0x1A5, 0x7FFF, 0, 0, 0, obj->x, obj->y, obj->z, 1500, 3500);
                     }
                 }
                 if (target != NULL) {
-                    target->unk31C->holdX = pos[0];
-                    target->unk31C->holdY = pos[1];
-                    target->unk31C->holdZ = pos[2];
+                    target->mv->holdX = pos[0];
+                    target->mv->holdY = pos[1];
+                    target->mv->holdZ = pos[2];
                 }
             } else if (target != NULL) {
-                if (triggered == 0 && target->unk31C->unk6B == 0) {
+                if (triggered == 0 && target->mv->unk6B == 0) {
                     timer = 50;
                     triggered++;
                 }
-                trap = target->unk31C;
+                trap = target->mv;
                 if (timer != 0) {
                     trap->unk6B = 3;
                 } else if (trap->unk6B == 3) {
@@ -651,32 +648,32 @@ void func_1511BEBC(WorldObject *obj) {
                 }
             }
             if (target != NULL) {
-                target->unk31C->holdX = pos[0];
-                target->unk31C->holdY = pos[1];
-                target->unk31C->holdZ = pos[2];
+                target->mv->holdX = pos[0];
+                target->mv->holdY = pos[1];
+                target->mv->holdZ = pos[2];
             }
-        } else if (flag8 == 0 || mode == 1) {
+        } else if (flag8 == 0 || mode == TASK_FLAG_GOING_OFF) {
             if (obj->y < restY) {
                 if (triggered == 0) {
                     triggered++;
                 }
-                mode = 1;
+                mode = TASK_FLAG_GOING_OFF;
                 velocity += 1.299999952f;
                 obj->y = obj->y + velocity;
                 if (obj->y >= restY) {
                     obj->y = restY;
                     triggered = 0;
-                    mode = 0;
+                    mode = TASK_FLAG_OFF;
                     velocity = 0.0f;
                 }
             }
             if (target != NULL) {
-                target->unk31C->unk6B = 0;
+                target->mv->unk6B = 0;
             }
         }
         WORK(obj)->w1511BEBC.triggered = triggered;
-        obj->behaviorState &= ~3;
-        obj->behaviorState |= mode;
+        obj->task_flag &= ~TASK_FLAG_STATE;
+        obj->task_flag |= mode;
         WORK(obj)->w1511BEBC.restAndTimer &= 0xFFFF;
         WORK(obj)->w1511BEBC.restAndTimer |= timer << 16;
         WORK(obj)->w1511BEBC.velocity = velocity;
@@ -694,8 +691,8 @@ void func_1511C548(WorldObject *obj) {
 
     swayX = sinf(WORK(obj)->w1511C548.phaseX);
     swayZ = sinf(WORK(obj)->w1511C548.phaseZ);
-    obj->rotX = swayX * 16.0f;
-    obj->rotZ = swayZ * 16.0f;
+    obj->t = swayX * 16.0f;
+    obj->v = swayZ * 16.0f;
     WORK(obj)->w1511C548.phaseX += 0.07299999893f * D_800BE9A4;
     WORK(obj)->w1511C548.phaseZ += 0.06499999762f * D_800BE9A4;
     WORK(obj)->w1511C548.phaseX = func_15144B68(WORK(obj)->w1511C548.phaseX);
@@ -704,9 +701,9 @@ void func_1511C548(WorldObject *obj) {
 
         WORK(obj)->w1511C548.phaseZ = wrapped;
     }
-    if (obj->rotZ == 0.0f && WORK(obj)->w1511C548.phaseZ == 0.0f) {
-        obj->rotX = 7.5f;
-        obj->rotZ = 8.0f;
+    if (obj->v == 0.0f && WORK(obj)->w1511C548.phaseZ == 0.0f) {
+        obj->t = 7.5f;
+        obj->v = 8.0f;
     }
 }
 
@@ -714,6 +711,12 @@ void func_1511C548(WorldObject *obj) {
 extern void func_15170F4C(WorldObject *, u8, s32);
 extern void func_150B2740(u8, u8);
 extern s32 func_1000EC24();
+
+/* The three sound ids func_1511C638 picks from: { 0x2B6, 0x2BD, 0x2BE }. The original local
+ * initializer lies in the rodata of the larger original compilation unit (before game_142560's
+ * slice), so it is copied from there. */
+typedef struct { u16 ids[3]; } SoundTriple;
+extern const SoundTriple D_800A2F84;
 
 /*
  * Fades the object (and the one or two objects after it) in when triggered, playing the
@@ -725,25 +728,25 @@ void func_1511C638(WorldObject *obj) {
     WorldObject *third;
 
     next = &obj[1];
-    mode = obj->behaviorState & 3;
-    if (D_800BE9F0 == 4) {
+    mode = obj->task_flag & TASK_FLAG_STATE;
+    if (level == 4) {
         third = &obj[2];
     } else {
         third = NULL;
     }
-    if (mode == 1) {
-        mode = 0;
+    if (mode == TASK_FLAG_GOING_OFF) {
+        mode = TASK_FLAG_OFF;
         obj->alpha = 0;
         next->inactive = 0;
         if (third != NULL) {
             third->inactive = 0;
         }
-        if (obj->param.word != 0xFF) {
-            func_15173C60(0, obj->param.word);
+        if (obj->moveData.word != 0xFF) {
+            func_15173C60(0, obj->moveData.word);
         }
     }
     if (D_800BE9B4 != 0) {
-        if (mode == 3) {
+        if (mode == TASK_FLAG_ON) {
             obj->alpha = 0xFF;
             next->inactive = 1;
             if (third != NULL) {
@@ -757,12 +760,12 @@ void func_1511C638(WorldObject *obj) {
             }
         }
     }
-    if (mode == 2) {
+    if (mode == TASK_FLAG_GOING_ON) {
         if (WORK(obj)->w1511C638.delay < 0) {
             WORK(obj)->w1511C638.delay += D_800BE9E4;
         } else {
             if (WORK(obj)->w1511C638.fade == 0) {
-                switch (next->param.word & 0xFF) {
+                switch (next->moveData.word & 0xFF) {
                 case 1:
                     func_15170F4C(next, 0xFF, 0);
                     func_10010F30(0x2BE, 0x7FFF, 64, 0, 0);
@@ -770,11 +773,11 @@ void func_1511C638(WorldObject *obj) {
                 case 0: {
                     u16 first = func_150ADA20() % 3U;
                     u16 second;
-                    const u16 sounds[3] = { 0x2B6, 0x2BD, 0x2BE };
+                    SoundTriple sounds = D_800A2F84;
 
                     second = ((func_150ADA20() & 1) + first + 1) % 3U;
-                    first = sounds[first];
-                    second = sounds[second];
+                    first = sounds.ids[first];
+                    second = sounds.ids[second];
                     func_10010F30(0x2B7, 0x7FFF, 64, 0, 0);
                     func_10010F30(first, 0x7FFF, 10, 0, 0);
                     func_10010F30(second, 0x7FFF, 54, 0, 0);
@@ -791,7 +794,7 @@ void func_1511C638(WorldObject *obj) {
                 case 2:
                     break;
                 case 3:
-                    func_150B2740(next->param.word >> 8, 0xFF);
+                    func_150B2740(next->moveData.word >> 8, 0xFF);
                     break;
                 }
             }
@@ -803,26 +806,24 @@ void func_1511C638(WorldObject *obj) {
             WORK(obj)->w1511C638.fade += D_800BE9E4 * 30;
             if (WORK(obj)->w1511C638.fade >= 0xFF) {
                 WORK(obj)->w1511C638.fade = 0xFF;
-                mode = 3;
+                mode = TASK_FLAG_ON;
             }
-            if (obj->param.word != 0xFF) {
-                func_15173C60(WORK(obj)->w1511C638.fade, obj->param.word);
+            if (obj->moveData.word != 0xFF) {
+                func_15173C60(WORK(obj)->w1511C638.fade, obj->moveData.word);
             }
-            if (mode == 3) {
+            if (mode == TASK_FLAG_ON) {
                 WORK(obj)->w1511C638.delay = 0;
                 WORK(obj)->w1511C638.fade = 0;
             }
         }
     }
-    obj->behaviorState &= ~3;
-    obj->behaviorState |= mode;
+    obj->task_flag &= ~TASK_FLAG_STATE;
+    obj->task_flag |= mode;
 }
-
-extern f32 D_800A31F4;
 
 /* Gives the fixed wave origin Z (22000) used by func_1511CB44. */
 void func_1511CB2C(s32 obj, f32 *originZ) {
-    *originZ = D_800A31F4;
+    *originZ = 22000.0f;
 }
 
 struct Wave1511CB44 {
@@ -874,11 +875,11 @@ void func_1511CB44(WorldObject *obj) {
     s32 uvArg5;
 
     uvRate = 0.0f;
-    if (D_800BE9F0 == 4) {
+    if (level == 4) {
         mode = 0;
-    } else if (D_800BE9F0 == 19) {
+    } else if (level == 19) {
         mode = 1;
-        if (obj->id == 0xFE) {
+        if (obj->unique_id == 0xFE) {
             uvRate = 0.4530000091f;
             uvArg4 = 32;
             uvArg5 = 32;
@@ -930,9 +931,9 @@ void func_1511CB44(WorldObject *obj) {
         }
         wave->pulseAlpha = 0;
         wave->alphaPhase = 0;
-        if (D_800BE9F0 == 4) {
-            if (obj->id != 0xF2) {
-                if (obj->id == 0xF1) {
+        if (level == 4) {
+            if (obj->unique_id != 0xF2) {
+                if (obj->unique_id == 0xF1) {
                     wave->alphaPhaseOffset = 0;
                 } else {
                     wave->alphaPhaseOffset = 0x80;
@@ -1036,7 +1037,7 @@ void func_1511D394(WorldObject *obj) {
     f32 accel;
     s32 wavePhase;
 
-    id = obj->param.word & 0xFF;
+    id = obj->moveData.word & 0xFF;
     owner = func_151149AC((u8)id);
     if (owner == NULL) {
         return;
@@ -1045,7 +1046,7 @@ void func_1511D394(WorldObject *obj) {
     if (ownerWave == NULL) {
         return;
     }
-    entry = &D_80089444[(obj->param.word >> 8) & 0xFF];
+    entry = &D_80089444[(obj->moveData.word >> 8) & 0xFF];
     rangeS = entry->rangeS;
     baseS = entry->baseS;
     phaseOffset = entry->phaseOffset;
@@ -1187,9 +1188,9 @@ void func_1511D9E4(WorldObject *obj) {
     } else {
         uv = WORK(obj)->w1511D9E4.uv;
     }
-    uvArg4 = obj->param.word >> 24;
-    uvArg5 = (obj->param.word >> 16) & 0xFF;
-    speed = (f32)(s16)(obj->param.word & 0xFFFF) * 0.01;
+    uvArg4 = obj->moveData.word >> 24;
+    uvArg5 = (obj->moveData.word >> 16) & 0xFF;
+    speed = (f32)(s16)(obj->moveData.word & 0xFFFF) * 0.01;
     WORK(obj)->w1511D9E4.uvAngle += speed * D_800BE9E4;
     func_15094AB8(obj->vertices[D_800BE9C0], uv, obj->numVertices, WORK(obj)->w1511D9E4.uvAngle, uvArg4, uvArg5);
 }
@@ -1221,38 +1222,38 @@ void func_1511DBC4(WorldObject *obj) {
         swing = WORK(obj)->w1511DBC4.swing;
     }
 
-    mode = obj->behaviorState & 3;
-    if (mode == 0) {
-        obj->rotZ = 0.0f;
-    } else if (mode == 3) {
-        obj->rotZ = 90.0f;
+    mode = obj->task_flag & TASK_FLAG_STATE;
+    if (mode == TASK_FLAG_OFF) {
+        obj->v = 0.0f;
+    } else if (mode == TASK_FLAG_ON) {
+        obj->v = 90.0f;
         wobble = cosf(swing->time * 0.01745329238f);
         wobble *= 0.5f;
-        obj->rotZ += wobble;
+        obj->v += wobble;
         swing->time += 3.0f * (f32)D_800BE9E4;
-    } else if (mode == 2) {
-        if (obj->rotZ == 0.0f) {
+    } else if (mode == TASK_FLAG_GOING_ON) {
+        if (obj->v == 0.0f) {
             swing->velocity = 0.0f;
             swing->accel = 0.0f;
         }
         swing->accel += swing->jerk;
         swing->velocity += swing->accel;
-        obj->rotZ += swing->velocity;
-        if (obj->rotZ >= 90.0f) {
-            mode = 3;
-            obj->rotZ = 90.0f;
+        obj->v += swing->velocity;
+        if (obj->v >= 90.0f) {
+            mode = TASK_FLAG_ON;
+            obj->v = 90.0f;
         }
     } else {
-        if ((f32)D_800BE9E4 < obj->rotZ) {
-            obj->rotZ -= (f32)D_800BE9E4;
+        if ((f32)D_800BE9E4 < obj->v) {
+            obj->v -= (f32)D_800BE9E4;
         } else {
-            obj->rotZ = 0.0f;
-            mode = 0;
+            obj->v = 0.0f;
+            mode = TASK_FLAG_OFF;
         }
     }
 
-    obj->behaviorState &= ~3;
-    obj->behaviorState |= mode;
+    obj->task_flag &= ~TASK_FLAG_STATE;
+    obj->task_flag |= mode;
 }
 
 struct Pulse1511DF6C {
@@ -1283,8 +1284,8 @@ void func_1511DD98(WorldObject *obj, Actor *character) {
     s32 isChar80;
 
     volume = 26000;
-    isChar3B = character->id == 0x3B;
-    isChar80 = character->id == 0x80;
+    isChar3B = character->character_type == 0x3B;
+    isChar80 = character->character_type == 0x80;
     sound = 0;
     switch (obj->modelId) {
     case 0x39:
@@ -1389,10 +1390,10 @@ void func_1511DF6C(WorldObject *obj) {
         WORK(obj)->w1511DF6C.pulse = allocate_memory(sizeof(struct Pulse1511DF6C), 1, 0, 0);
         pulse = WORK(obj)->w1511DF6C.pulse;
         bzero(pulse, sizeof(struct Pulse1511DF6C));
-        pulse->fullScale = obj->scaleX;
-        obj->scaleZ = 0.0f;
-        obj->scaleY = 0.0f;
-        obj->scaleX = 0.0f;
+        pulse->fullScale = obj->xScale;
+        obj->zScale = 0.0f;
+        obj->yScale = 0.0f;
+        obj->xScale = 0.0f;
     } else {
         pulse = WORK(obj)->w1511DF6C.pulse;
     }
@@ -1404,7 +1405,7 @@ void func_1511DF6C(WorldObject *obj) {
         break;
     case 0x54:
         anim = 0x17;
-        if (D_800BE9F0 == 45) {
+        if (level == 45) {
             data = func_1509B570(0xBA);
             if (data != NULL && (hp = ((struct Owner1511DF6C *)data)->unk1FE4) <= 0) {
                 skip = TRUE;
@@ -1412,9 +1413,9 @@ void func_1511DF6C(WorldObject *obj) {
         }
         /* fallthrough */
     default:
-        obj->rotY += (f32)D_800BE9E4 * 1.519999981f;
+        obj->u += (f32)D_800BE9E4 * 1.519999981f;
         dist = cosf(pulse->phaseX * 9.587380191e-05f);
-        obj->rotX = 8.0f * dist;
+        obj->t = 8.0f * dist;
         dist = cosf(pulse->phaseZ * 9.587380191e-05f);
         obj->yOffset = 12.0f * dist;
         pulse->phaseX += (f32)D_800BE9E4 * 507.0f;
@@ -1423,8 +1424,8 @@ void func_1511DF6C(WorldObject *obj) {
     }
     if (pulse->state < 3 && !skip) {
         for (i = 0; i < D_8008FD8C; i++) {
-            character = &D_800CC2D0[i];
-            if (character->interaction_state == 0 || character->health <= 0 || character->unk127 == 0xFF) {
+            character = &movement_obj[i];
+            if (character->type == 0 || character->energy <= 0 || character->playernumber == 0xFF) {
                 continue;
             }
             if (character->unk300 == 0) {
@@ -1436,18 +1437,18 @@ void func_1511DF6C(WorldObject *obj) {
             if (anim != -1 && func_1503195C(character, anim, 0) != NULL) {
                 continue;
             }
-            dist = ((f32)obj->x - character->x_position) * ((f32)obj->x - character->x_position) + ((f32)obj->z - character->z_position) * ((f32)obj->z - character->z_position);
-            data = (u8 *)character->unk31C;
+            dist = ((f32)obj->x - character->xpos) * ((f32)obj->x - character->xpos) + ((f32)obj->z - character->zpos) * ((f32)obj->z - character->zpos);
+            data = (u8 *)character->mv;
             radius = 100.0f;
             scale = (f32)(((ActorCtl *)data)->unk1AF & 0xFF) * 0.015625f;
-            if (((ActorCtl *)data)->unk84 != 0) {
+            if (((ActorCtl *)data)->bot != 0) {
                 scale *= 1.399999976f;
             }
             radius *= scale;
             if (dist < radius * radius) {
                 func_1507C3E0(character, &height, &unused1, &unused2);
                 y = (f32)obj->y;
-                if (y < character->ceilingY && character->y_position < y + radius && y - radius < character->y_position + height) {
+                if (y < character->ceilingY && character->ypos < y + radius && y - radius < character->ypos + height) {
                     WORK(obj)->w1511DF6C.lastCharacter = character->unique_id;
                     pulse->state = 3;
                     func_1511DD98(obj, character);
@@ -1458,33 +1459,33 @@ void func_1511DF6C(WorldObject *obj) {
         }
     }
     if (pulse->state == 0) {
-        obj->scaleZ += 0.2599999905f * pulse->fullScale;
-        if (pulse->fullScale <= obj->scaleZ) {
-            obj->scaleZ = pulse->fullScale;
+        obj->zScale += 0.2599999905f * pulse->fullScale;
+        if (pulse->fullScale <= obj->zScale) {
+            obj->zScale = pulse->fullScale;
             pulse->bouncePhase = 0;
             pulse->state++;
             pulse->bounce = 0.3000000119f;
         }
-        obj->scaleY = obj->scaleZ;
-        obj->scaleX = obj->scaleZ;
+        obj->yScale = obj->zScale;
+        obj->xScale = obj->zScale;
     } else if (pulse->state == 1) {
         pulse->bounce -= 0.01999999955f * pulse->fullScale;
         if (pulse->bounce <= 0.0f) {
             pulse->state++;
             pulse->bounce = 0.0f;
         }
-        obj->scaleZ = cosf(pulse->bouncePhase * 9.587380191e-05f) * pulse->bounce + pulse->fullScale;
-        obj->scaleX = obj->scaleY = obj->scaleZ;
+        obj->zScale = cosf(pulse->bouncePhase * 9.587380191e-05f) * pulse->bounce + pulse->fullScale;
+        obj->xScale = obj->yScale = obj->zScale;
         pulse->bouncePhase += D_800BE9E4 * 0x1613;
     } else if (pulse->state == 2) {
     } else if (pulse->state == 3) {
-        obj->scaleZ -= 0.2599999905f * pulse->fullScale;
-        if (obj->scaleZ <= 0.0f) {
+        obj->zScale -= 0.2599999905f * pulse->fullScale;
+        if (obj->zScale <= 0.0f) {
             pulse->state = 0;
             obj->inactive = 1;
-            obj->scaleZ = 0.0f;
+            obj->zScale = 0.0f;
         }
-        obj->scaleY = obj->scaleZ;
-        obj->scaleX = obj->scaleZ;
+        obj->yScale = obj->zScale;
+        obj->xScale = obj->zScale;
     }
 }

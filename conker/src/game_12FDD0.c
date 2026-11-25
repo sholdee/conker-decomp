@@ -8,7 +8,7 @@
 typedef struct {
     /* 0x00 */ Actor *target;
     /* 0x04 */ u8 targetId;
-    /* 0x08 */ s32 boneOffset; /* byte offset of the bone's matrix in target->unk1D4 */
+    /* 0x08 */ s32 boneOffset; /* byte offset of the bone's matrix in target->ob_matrix_ptr */
     /* 0x0C */ s16 node;       /* func_1503195C node, -1: use the bone matrix */
     /* 0x10 */ s32 bone;
     /* 0x14 */ u8 flags;       /* bit 0: start/end are valid this frame */
@@ -38,7 +38,7 @@ QuadSprite *func_15102920(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 dura
     arg.fadeRate = 25;
     material = func_1510F8CC(surfaceFlags);
     arg.texture = 0x5C;
-    switch (D_800BE9F0) {
+    switch (level) {
     case 0x36:
         if (material == 9) {
             return NULL;
@@ -57,7 +57,7 @@ QuadSprite *func_15102920(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 dura
     arg.lifetime = (duration == -1) ? 300 : duration;
     arg.frame = 0;
     arg.frameSpeed = 0;
-    if (D_800BE9F0 == 0x36) {
+    if (level == 0x36) {
         arg.unk10 = arg1 >> 1;
     } else {
         arg.unk10 = arg1;
@@ -163,10 +163,10 @@ s32 func_15102D90(Particle *particle) {
     beam = &particle->beam;
     beam->flags &= ~1;
     target = beam->target;
-    if (target->unique_id != beam->targetId || target->interaction_state == 0) {
+    if (target->unique_id != beam->targetId || target->type == 0) {
         return 0;
     }
-    if (target->unk1D4 == NULL || (target->unk74 & 0xF) == 0xF) {
+    if (target->ob_matrix_ptr == NULL || (target->unk74 & 0xF) == 0xF) {
         return 1;
     }
     src[0] = &particle->head.def.pos;
@@ -184,7 +184,7 @@ s32 func_15102D90(Particle *particle) {
             return 0;
         }
     } else {
-        func_15145EA4(src, dst, (Mtx *)((u8 *)target->unk1D4 + beam->boneOffset), 2);
+        func_15145EA4(src, dst, (Mtx *)((u8 *)target->ob_matrix_ptr + beam->boneOffset), 2);
     }
     beam->flags |= 1;
     return 1;

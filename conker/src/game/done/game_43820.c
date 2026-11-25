@@ -9,9 +9,9 @@ void func_15016370(void) {
     s32 i;
 
     for (i = 0; i < D_8008FD8C; i++) {
-        tmp = &D_800CC2D0[i];
-        tmp->unk31C->height = 180;
-        tmp->unk31C->width = 60;
-        tmp->unk31C->depth = 60;
+        tmp = &movement_obj[i];
+        tmp->mv->height = 180;
+        tmp->mv->width = 60;
+        tmp->mv->depth = 60;
     }
 }

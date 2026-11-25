@@ -5,7 +5,7 @@
 void func_150A7A48(MtxF a, MtxF b, MtxF c);
 void func_10004074();
 
-/* Turret settings (WorldObject.param.data); angles in degrees. */
+/* Turret settings (WorldObject.moveData.data); angles in degrees. */
 typedef struct Turret15112520Cfg {
     /* 0x00 */ f32 speedNear;
     /* 0x04 */ f32 speedFar;
@@ -39,10 +39,10 @@ void func_15112520(WorldObject *turret) {
     s32 pad; // matching: unused stack slot
     static s16 D_80089234; // sound timer: 0 idle, -1 start the sound, >0 cooldown frames
 
-    cfg = turret->param.data;
-    dx = D_800CC2D0[0].x_position - turret->x;
-    dy = (D_800CC2D0[0].y_position + 65.0f) - turret->y;
-    dz = D_800CC2D0[0].z_position - turret->z;
+    cfg = turret->moveData.data;
+    dx = movement_obj[0].xpos - turret->x;
+    dy = (movement_obj[0].ypos + 65.0f) - turret->y;
+    dz = movement_obj[0].zpos - turret->z;
     D_800DBEC0 = dx * dx + dy * dy + dz * dz;
     if (cfg->range * cfg->range < D_800DBEC0) {
         pitch = cfg->basePitch;
@@ -93,29 +93,29 @@ void func_15112520(WorldObject *turret) {
             pitch += 360.0f;
         }
     }
-    delta = func_15048A70(turret->rotY, yaw);
+    delta = func_15048A70(turret->u, yaw);
     yaw = fabsf(delta);
     if (cfg->maxStep < yaw) {
         delta = ((delta < 0.0f) ? -1.0f : 1.0f) * cfg->maxStep;
     }
-    turret->rotY += delta * speed;
+    turret->u += delta * speed;
     if (D_80089234 == 0 && yaw > 4.0f) {
         D_80089234 = -1;
     }
-    if (turret->rotY < 0.0f) {
-        turret->rotY += 360.0f;
-    } else if (turret->rotY >= 360.0f) {
-        turret->rotY -= 360.0f;
+    if (turret->u < 0.0f) {
+        turret->u += 360.0f;
+    } else if (turret->u >= 360.0f) {
+        turret->u -= 360.0f;
     }
-    delta = func_15048A70(turret->rotX, 360.0f - pitch);
-    turret->rotX += delta * speed;
+    delta = func_15048A70(turret->t, 360.0f - pitch);
+    turret->t += delta * speed;
     if (D_80089234 == 0 && fabsf(delta) > 4.0f) {
         D_80089234 = -1;
     }
-    if (turret->rotX < 0.0f) {
-        turret->rotX += 360.0f;
-    } else if (turret->rotX >= 360.0f) {
-        turret->rotX -= 360.0f;
+    if (turret->t < 0.0f) {
+        turret->t += 360.0f;
+    } else if (turret->t >= 360.0f) {
+        turret->t -= 360.0f;
     }
     if (D_80089234 == -1 && cfg->sfxCooldown != 0) {
         volume = 32000.0f - D_800DBEC0 * 0.1000000015f;
@@ -156,16 +156,16 @@ void func_15112A80(s32 player) {
         recp = (s32)&D_800BE628[view];
         if (func_150859AC(view, 0) != 0) {
             D_800DBEE8[view] = 0;
-            for (i = 0; i < D_800DBEF0;) {
-                groupSize = D_800DBEF4[i].state >> 4;
+            for (i = 0; i < gWorldObjectCount;) {
+                groupSize = db_Object_array[i].state >> 4;
                 end = i + groupSize;
                 mask = 0;
                 start = i;
                 for (; i <= end; i++) {
-                    obj = i + D_800DBEF4; // matching: &D_800DBEF4[i] swaps the addu operands
+                    obj = i + db_Object_array; // matching: &db_Object_array[i] swaps the addu operands
                     obj->viewFlags &= ~(1 << view);
                     // matching: empty then-branch orders uopt's live ranges (see func_15112A80 notes)
-                    if (!(obj->inactive != 1 && !(obj->state & 8) && (obj->flags & 1) && obj->alpha != 0 &&
+                    if (!(obj->inactive != 1 && !(obj->state & 8) && (obj->object_status & 1) && obj->alpha != 0 &&
                           (D_800C3658[player] != 0 || D_800C35EA[player] != 1 || func_15022B08(i, player) != 0) &&
                           ((D_800C35EA[player] == 1 && func_15022B08(i, player) != 0) ||
                            !(obj->effectFlags & 0x100) || func_1503F800(&obj->unk98, obj->x, obj->z, view, 0) == 0))) {
@@ -174,7 +174,7 @@ void func_15112A80(s32 player) {
 
                         mtx = D_800D9C10[view];
                         dp = (s32 *)((u8 *)dist + (i - start) * 4); // matching: &dist[i - start] scales i and start separately
-                        if (D_800DBFF0[view].playerExt->aimState != 0) {
+                        if (camera_global_Cameras[view].mv->SniperState != 0) {
                             drawDist = D_800D9B1C;
                         } else if (obj->drawDistance == 0) {
                             drawDist = D_800D9B1C;
@@ -184,36 +184,36 @@ void func_15112A80(s32 player) {
                             drawDist = obj->drawDistance;
                         }
                         *dp = func_150A6360(recp, mtx, obj->x, obj->y + obj->yOffset, obj->z,
-                                            (f32)(u32)obj->unk50, (f32)(u32)obj->unk52, drawDist);
+                                            (f32)(u32)obj->cullRadiusXZ, (f32)(u32)obj->cullRadiusY, drawDist);
                         if (*dp < 0) {
                             *dp = -*dp;
                         }
                         if (*dp == 0) {
-                            obj->viewAlpha[view] = 0;
+                            obj->dst_fade_alpha[view] = 0;
                         } else if (drawDist < *dp) {
-                            obj->viewAlpha[view] = 0;
+                            obj->dst_fade_alpha[view] = 0;
                         } else {
                             if (*dp < drawDist - 200) {
                                 step = D_800BE9E4 * 10;
                                 if (obj->fadeDistance != 0) {
                                     if (*dp < obj->fadeDistance) {
-                                        if (step < obj->viewAlpha[view]) {
-                                            obj->viewAlpha[view] -= step;
+                                        if (step < obj->dst_fade_alpha[view]) {
+                                            obj->dst_fade_alpha[view] -= step;
                                         } else {
-                                            obj->viewAlpha[view] = 0;
+                                            obj->dst_fade_alpha[view] = 0;
                                         }
                                     } else {
-                                        if (obj->viewAlpha[view] < 255 - step) {
-                                            obj->viewAlpha[view] += step;
+                                        if (obj->dst_fade_alpha[view] < 255 - step) {
+                                            obj->dst_fade_alpha[view] += step;
                                         } else {
-                                            obj->viewAlpha[view] = 255;
+                                            obj->dst_fade_alpha[view] = 255;
                                         }
                                     }
-                                    if (obj->viewAlpha[view] == 0) {
+                                    if (obj->dst_fade_alpha[view] == 0) {
                                         continue;
                                     }
                                 } else {
-                                    obj->viewAlpha[view] = 255;
+                                    obj->dst_fade_alpha[view] = 255;
                                 // matching: this label splits the basic block, changing as1's scheduling
                                 fence:;
                                 }
@@ -222,7 +222,7 @@ void func_15112A80(s32 player) {
                                 if (alpha >= 256) {
                                     alpha = 255;
                                 }
-                                obj->viewAlpha[view] = alpha;
+                                obj->dst_fade_alpha[view] = alpha;
                             }
                             mask |= 1 << view;
                         }
@@ -230,7 +230,7 @@ void func_15112A80(s32 player) {
                 }
                 if (mask != 0) {
                     for (i = start; i <= end; i++) {
-                        D_800DBEF4[i].viewFlags |= 1 << view;
+                        db_Object_array[i].viewFlags |= 1 << view;
                         (*D_80089240[view])[*count].index = i;
                         (*D_80089240[view])[*count].distance = *(s32 *)((u8 *)dist + (i - start) * 4); // matching: as above
                         (*count)++;
@@ -245,10 +245,10 @@ void func_15112A80(s32 player) {
 void func_15113180(void) {
     s32 i;
 
-    for (i = 0; i < D_800DBEF0; i++) {
-        D_800DBEF4[i].viewFlags &= ~0x40;
-        if (((D_800DBEF4[i].viewFlags & 0xF) != 0 || (D_800DBEF4[i].state & 4) == 4) && D_800DBEF4[i].update != NULL) {
-            D_800DBEF4[i].viewFlags |= 0x40;
+    for (i = 0; i < gWorldObjectCount; i++) {
+        db_Object_array[i].viewFlags &= ~0x40;
+        if (((db_Object_array[i].viewFlags & 0xF) != 0 || (db_Object_array[i].state & 4) == 4) && db_Object_array[i].moveProc != NULL) {
+            db_Object_array[i].viewFlags |= 0x40;
         }
     }
 }
@@ -273,7 +273,7 @@ void func_15113218(void) {
             continue;
         }
         for (j = 0; j < D_800DBEE8[view]; j++) {
-                obj = &D_800DBEF4[(*D_80089240[view])[j].index];
+                obj = &db_Object_array[(*D_80089240[view])[j].index];
                 if ((obj->state & 1) == 1) {
                     func_150A7B80(&(*D_80089250[D_800BE9C0])[(*D_80089240[view])[j].index]);
                     continue;
@@ -285,19 +285,19 @@ void func_15113218(void) {
                     func_1511490C(mf, obj);
                     guMtxF2L(mf, &(*D_80089250[D_800BE9C0])[(*D_80089240[view])[j].index]);
                 } else if (obj->attach > 100 && obj->attach < 125) {
-                    actor = &D_800CC2D0[obj->attach - 100];
-                    if (actor->unk1D4 == NULL) {
-                        func_150A7CB0(mf, obj->scaleX, obj->scaleY, obj->scaleZ);
-                        mf[3][0] = actor->x_position;
-                        mf[3][1] = actor->y_position;
-                        mf[3][2] = actor->z_position;
+                    actor = &movement_obj[obj->attach - 100];
+                    if (actor->ob_matrix_ptr == NULL) {
+                        func_150A7CB0(mf, obj->xScale, obj->yScale, obj->zScale);
+                        mf[3][0] = actor->xpos;
+                        mf[3][1] = actor->ypos;
+                        mf[3][2] = actor->zpos;
                         guMtxF2L(mf, &(*D_80089250[D_800BE9C0])[(*D_80089240[view])[j].index]);
                     } else {
                         rot[2] = 0.0f;
                         rot[0] = rot[2];
                         rot[1] = actor->unk90;
-                        parent = actor->unk1D4[0];
-                        func_150A7CB0(mf, obj->scaleX, obj->scaleY, obj->scaleZ);
+                        parent = actor->ob_matrix_ptr[0];
+                        func_150A7CB0(mf, obj->xScale, obj->yScale, obj->zScale);
                         mf[3][0] = parent[3][0];
                         mf[3][1] = parent[3][1];
                         mf[3][2] = parent[3][2];
@@ -338,7 +338,7 @@ Gfx *func_151135C4(Gfx *gfx, s32 translucent, s16 view) {
     gfx = func_1515E544(gfx, *(s32 *)((u8 *)D_800D9E10 + viewOffset), D_800D9E20, D_800D9E21,
                         D_800D9BD0[view][D_800BE9C0]);
     for (i = 0; i < D_800DBEE8[view]; i++) {
-        gfx = func_151137D4(gfx, &D_800DBEF4[(**list)[i].index], &(*D_80089250[D_800BE9C0])[(**list)[i].index], view,
+        gfx = func_151137D4(gfx, &db_Object_array[(**list)[i].index], &(*D_80089250[D_800BE9C0])[(**list)[i].index], view,
                             (**list)[i].distance, pass);
     }
     gSPMatrix(gfx++, &D_80089470, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
@@ -365,16 +365,16 @@ Gfx *func_151137D4(Gfx *gfx, WorldObject *obj, Mtx *mtx, s32 view, s32 distance,
     u16 effects;
 
     start = gfx;
-    if (obj->viewAlpha[view] == 255 && obj->alpha == 255) {
+    if (obj->dst_fade_alpha[view] == 255 && obj->alpha == 255) {
         alpha = 255;
     } else {
-        alpha = (obj->viewAlpha[view] * obj->alpha) / 255;
+        alpha = (obj->dst_fade_alpha[view] * obj->alpha) / 255;
         if (alpha == 0) {
             return gfx;
         }
     }
     if (alpha == 255) {
-        if (pass == (obj->flags & 0x10)) {
+        if (pass == (obj->object_status & 0x10)) {
             return gfx;
         }
     } else if (pass != 0) {
@@ -383,9 +383,9 @@ Gfx *func_151137D4(Gfx *gfx, WorldObject *obj, Mtx *mtx, s32 view, s32 distance,
     effects = obj->effectFlags;
     if (obj->effectFlags != 0) {
         if (effects & 1) {
-            gfx = func_1511FC2C(gfx, obj->x, obj->y + obj->yOffset, obj->z, obj->rotY, view);
+            gfx = func_1511FC2C(gfx, obj->x, obj->y + obj->yOffset, obj->z, obj->u, view);
         } else if (effects & 0x10) {
-            gfx = func_1511FC2C(gfx, obj->x, obj->y + obj->yOffset, obj->z, obj->work.floor.unk7C, view);
+            gfx = func_1511FC2C(gfx, obj->x, obj->y + obj->yOffset, obj->z, obj->touch.floor.unk7C, view);
         } else if (effects & 0x20) {
             gfx = func_1511FC44(gfx, obj->x, obj->y + obj->yOffset, obj->z, view);
         }
@@ -396,7 +396,7 @@ Gfx *func_151137D4(Gfx *gfx, WorldObject *obj, Mtx *mtx, s32 view, s32 distance,
     } else {
         gSPSegment(gfx++, 8, D_80083EC0);
     }
-    if ((obj->flags & 2) == 2) {
+    if ((obj->object_status & 2) == 2) {
         gSPSetGeometryMode(gfx++, 0x400000);
     } else {
         gSPClearGeometryMode(gfx++, 0x400000);
@@ -438,18 +438,18 @@ void func_15113C88(void) {
     s32 show;
     WorldObject *obj;
 
-    for (i = 0; i < D_800DBEF0; i++) {
+    for (i = 0; i < gWorldObjectCount; i++) {
         hidden = FALSE;
-        obj = i + D_800DBEF4; // matching: &D_800DBEF4[i] swaps the addu operands
+        obj = i + db_Object_array; // matching: &db_Object_array[i] swaps the addu operands
         for (j = 0; j < D_80082FA0; j++) {
-            if (func_150859AC(j, 0) != 0 && obj->viewAlpha[j] == 0) {
+            if (func_150859AC(j, 0) != 0 && obj->dst_fade_alpha[j] == 0) {
                 hidden = TRUE;
                 break;
             }
         }
         do { // matching: without this wrapper uopt stops keeping &D_800C3658 in a saved register
-            if ((obj->state & 8) || obj->unk4C == 0 || (obj->flags & 0x10) == 0x10 || hidden ||
-                (D_800C3658[0] == 0 && D_800C35EA[0] == 1 && func_15022B08(i, 0) == 0) || !(obj->flags & 1)) {
+            if ((obj->state & 8) || obj->unk4C == 0 || (obj->object_status & 0x10) == 0x10 || hidden ||
+                (D_800C3658[0] == 0 && D_800C35EA[0] == 1 && func_15022B08(i, 0) == 0) || !(obj->object_status & 1)) {
                 show = FALSE;
             } else {
                 show = TRUE;
@@ -485,11 +485,11 @@ void func_15113E54(s32 arg0) {
     moveY = 0;
     moveZ = 0;
     leaderFloorTri = 0;
-    count = D_800DBEF0 - D_800DBF98;
+    count = gWorldObjectCount - D_800DBF98;
     for (i = 0; i < count; i++) {
-        obj = i + D_800DBEF4; // matching: operand order of the addu
+        obj = i + db_Object_array; // matching: operand order of the addu
         if ((obj->viewFlags & 0x40) == 0x40 && obj->inactive == 0) {
-            obj->update(obj);
+            obj->moveProc(obj);
         }
     }
 
@@ -498,21 +498,21 @@ void func_15113E54(s32 arg0) {
             for (j = 0; j < D_800D23C0[i].count; j++) {
                 member = D_800D23C0[i].members[j];
                 if ((member >> 12) == 2) {
-                    obj = (member & 0xFFF) + D_800DBEF4; // matching: operand order of the addu
+                    obj = (member & 0xFFF) + db_Object_array; // matching: operand order of the addu
                     if ((obj->viewFlags & 0x40) == 0x40 && obj->inactive == 0) {
                         if (j != 0) {
                             obj->moveX = moveX;
                             obj->moveY = moveY;
                             obj->moveZ = moveZ;
-                            obj->work.floor.tri = leaderFloorTri;
+                            obj->touch.floor.tri = leaderFloorTri;
                         }
-                        obj->update(obj);
+                        obj->moveProc(obj);
                     }
                     if (j == 0) {
                         moveX = obj->moveX;
                         moveY = obj->moveY;
                         moveZ = obj->moveZ;
-                        leaderFloorTri = obj->work.floor.tri;
+                        leaderFloorTri = obj->touch.floor.tri;
                     }
                 }
             }
@@ -522,11 +522,11 @@ void func_15113E54(s32 arg0) {
 
 /* Whether actor `actor` (any actor if -1) touches obj; only objects with flags bit 0x80 track contacts. */
 s32 func_15114050(WorldObject *obj, s32 actor) {
-    if (obj->flags & 0x80) {
+    if (obj->object_status & 0x80) {
         if (actor == -1) {
             return TRUE;
         }
-        if (D_800DBF94[obj - D_800DBEF4] & (1 << actor)) {
+        if (gWorldObjectContacts[obj - db_Object_array] & (1 << actor)) {
             return TRUE;
         }
     }
@@ -538,9 +538,9 @@ s32 func_151140C4(WorldObject *obj) {
     s32 i;
 
     i = 0;
-    if (obj->flags & 0x80) {
+    if (obj->object_status & 0x80) {
         for (; i != 32; i++) {
-            if (D_800DBF94[obj - D_800DBEF4] & (1 << i)) {
+            if (gWorldObjectContacts[obj - db_Object_array] & (1 << i)) {
                 return i;
             }
         }
@@ -555,20 +555,20 @@ void func_15114188(void) {
     s32 i;
     s32 j;
 
-    for (i = 0; i < D_800DBEF0; i++) {
-        if (D_800DBF94[i] != 0) {
-            for (j = 0; j < 25 && D_800DBF94[i] != 0; j++) {
-                if (D_800DBF94[i] & (1 << j)) {
-                    D_800DBF94[i] ^= 1 << j;
-                    if (D_800DBEF4[i].onContact != NULL && (D_800DBEF4[i].unk92 != 0 || D_800CC2D0[j].unk127 != 0xFF)) {
-                        D_800DBEF4[i].onContact(i + D_800DBEF4, &D_800CC2D0[j]); // matching: addu operand order
+    for (i = 0; i < gWorldObjectCount; i++) {
+        if (gWorldObjectContacts[i] != 0) {
+            for (j = 0; j < 25 && gWorldObjectContacts[i] != 0; j++) {
+                if (gWorldObjectContacts[i] & (1 << j)) {
+                    gWorldObjectContacts[i] ^= 1 << j;
+                    if (db_Object_array[i].onContact != NULL && (db_Object_array[i].contactNonPlayers != 0 || movement_obj[j].playernumber != 0xFF)) {
+                        db_Object_array[i].onContact(i + db_Object_array, &movement_obj[j]); // matching: addu operand order
                     }
-                    if ((D_800DBEF4[i].flags & 4) == 4 && !(D_800DBEF4[i].flags & 8)) {
-                        func_1511473C(&D_800CC2D0[j], i);
+                    if ((db_Object_array[i].object_status & 4) == 4 && !(db_Object_array[i].object_status & 8)) {
+                        func_1511473C(&movement_obj[j], i);
                     }
                 }
             }
-            D_800DBEF4[i].flags &= ~0x8C;
+            db_Object_array[i].object_status &= ~0x8C;
         }
     }
 }
@@ -601,33 +601,33 @@ void func_15114348(s32 objIndex, f32 *x, f32 *y, f32 *z) {
     zaxis[0] = 0.0f;
     zaxis[1] = 0.0f;
     zaxis[2] = 1.0f;
-    dx = *x - D_800DBEF4[objIndex].x;
-    dy = *y - D_800DBEF4[objIndex].y;
-    dz = *z - D_800DBEF4[objIndex].z;
-    if (D_800DBEF4[objIndex].rotX != 0.0f) {
-        guRotateF(m, D_800DBEF4[objIndex].rotX, 1, 0, 0);
+    dx = *x - db_Object_array[objIndex].x;
+    dy = *y - db_Object_array[objIndex].y;
+    dz = *z - db_Object_array[objIndex].z;
+    if (db_Object_array[objIndex].t != 0.0f) {
+        guRotateF(m, db_Object_array[objIndex].t, 1, 0, 0);
         func_150A7960(m, yaxis[0], yaxis[1], yaxis[2], &yaxis[0], &yaxis[1], &yaxis[2]);
         func_150A7960(m, zaxis[0], zaxis[1], zaxis[2], &zaxis[0], &zaxis[1], &zaxis[2]);
     }
-    if (D_800DBEF4[objIndex].rotZ != 0.0f) {
-        guRotateF(m, D_800DBEF4[objIndex].rotZ, zaxis[0], zaxis[1], zaxis[2]);
+    if (db_Object_array[objIndex].v != 0.0f) {
+        guRotateF(m, db_Object_array[objIndex].v, zaxis[0], zaxis[1], zaxis[2]);
         func_150A7960(m, yaxis[0], yaxis[1], yaxis[2], &yaxis[0], &yaxis[1], &yaxis[2]);
         func_150A7960(m, xaxis[0], xaxis[1], xaxis[2], &xaxis[0], &xaxis[1], &xaxis[2]);
     }
-    if (D_800DBEF4[objIndex].rotY != 0.0f) {
-        guRotateF(m, D_800DBEF4[objIndex].rotY, yaxis[0], yaxis[1], yaxis[2]);
+    if (db_Object_array[objIndex].u != 0.0f) {
+        guRotateF(m, db_Object_array[objIndex].u, yaxis[0], yaxis[1], yaxis[2]);
         func_150A7960(m, xaxis[0], xaxis[1], xaxis[2], &xaxis[0], &xaxis[1], &xaxis[2]);
         func_150A7960(m, zaxis[0], zaxis[1], zaxis[2], &zaxis[0], &zaxis[1], &zaxis[2]);
     }
-    guRotateF(m, D_800DBEF4[objIndex].spinX, xaxis[0], xaxis[1], xaxis[2]);
-    guRotateF(m2, D_800DBEF4[objIndex].spinZ, zaxis[0], zaxis[1], zaxis[2]);
+    guRotateF(m, db_Object_array[objIndex].spinX, xaxis[0], xaxis[1], xaxis[2]);
+    guRotateF(m2, db_Object_array[objIndex].spinZ, zaxis[0], zaxis[1], zaxis[2]);
     func_150A7A48(m, m2, m);
-    guRotateF(m2, D_800DBEF4[objIndex].spinY, yaxis[0], yaxis[1], yaxis[2]);
+    guRotateF(m2, db_Object_array[objIndex].spinY, yaxis[0], yaxis[1], yaxis[2]);
     func_150A7A48(m, m2, m);
     func_150A7960(m, dx, dy, dz, &rx, &ry, &rz);
-    rx = D_800DBEF4[objIndex].moveX + (rx - dx);
-    ry = D_800DBEF4[objIndex].moveY + (ry - dy);
-    rz = D_800DBEF4[objIndex].moveZ + (rz - dz);
+    rx = db_Object_array[objIndex].moveX + (rx - dx);
+    ry = db_Object_array[objIndex].moveY + (ry - dy);
+    rz = db_Object_array[objIndex].moveZ + (rz - dz);
     *x += rx;
     *y += ry;
     *z += rz;
@@ -637,13 +637,13 @@ extern f32 D_800A2F60;
 
 /* Carries an actor standing on object objIndex: moves it with the object and turns it by the object's yaw spin. */
 void func_1511473C(Actor *actor, s32 objIndex) {
-    if (actor == NULL || objIndex >= D_800DBEF0) {
+    if (actor == NULL || objIndex >= gWorldObjectCount) {
         return;
     }
-    func_15114348(objIndex, &actor->x_position, &actor->y_position, &actor->z_position);
-    actor->unk76 += D_800DBEF4[objIndex].spinY * D_800A2F60;
-    if (actor->unk137 != 0 && objIndex + 1 == D_800CBDA0[actor - D_800CC2D0]) {
-        actor->unk7A = actor->unk76;
+    func_15114348(objIndex, &actor->xpos, &actor->ypos, &actor->zpos);
+    actor->angle += db_Object_array[objIndex].spinY * D_800A2F60;
+    if (actor->unk137 != 0 && objIndex + 1 == D_800CBDA0[actor - movement_obj]) {
+        actor->langle = actor->angle;
     }
 }
 
@@ -651,8 +651,8 @@ void func_1511473C(Actor *actor, s32 objIndex) {
 void func_151148A8(MtxF mtx, WorldObject *obj) {
     MtxF pitchRoll;
 
-    func_150A8050(mtx, 0.0f, obj->rotY, 0.0f);
-    func_150A8050(pitchRoll, obj->rotX, 0.0f, obj->rotZ);
+    func_150A8050(mtx, 0.0f, obj->u, 0.0f);
+    func_150A8050(pitchRoll, obj->t, 0.0f, obj->v);
     func_150A7A48(pitchRoll, mtx, mtx);
 }
 
@@ -664,7 +664,7 @@ void func_1511490C(MtxF mtx, WorldObject *obj) {
     mtx[3][0] = obj->x;
     mtx[3][1] = obj->y + obj->yOffset;
     mtx[3][2] = obj->z;
-    func_150A7CB0(scale, obj->scaleX, obj->scaleY, obj->scaleZ);
+    func_150A7CB0(scale, obj->xScale, obj->yScale, obj->zScale);
     func_150A7A48(scale, mtx, mtx);
 }
 
@@ -675,9 +675,9 @@ WorldObject *func_151149AC(u8 id) {
     if (id == 0) {
         return NULL;
     }
-    for (i = 0; i < D_800DBEF0; i++) {
-        if (D_800DBEF4[i].id == id) {
-            return i + D_800DBEF4;
+    for (i = 0; i < gWorldObjectCount; i++) {
+        if (db_Object_array[i].unique_id == id) {
+            return i + db_Object_array;
         }
     }
     return NULL;
@@ -688,13 +688,13 @@ void func_15114A1C(void) {
     s32 i;
     s32 handle;
 
-    for (i = 0; i < D_800DBEF0; i++) {
-        if ((D_800DBEF4[i].state & 1) != 1) {
+    for (i = 0; i < gWorldObjectCount; i++) {
+        if ((db_Object_array[i].state & 1) != 1) {
             // matching: the dead copies (handle, j) and empty ifs steer uopt's register choices (see notes)
             handle = D_800DBEF8[i];
             if (&D_800DBEF8) {}
             if (D_800DBEF8[i] != 0) {
-                if (D_800DBEF4[i].attach != 3 && !(D_800DBEF4[i].viewFlags & 0x80)) {
+                if (db_Object_array[i].attach != 3 && !(db_Object_array[i].viewFlags & 0x80)) {
                     s32 j;
 
                     j = i;
@@ -713,7 +713,7 @@ void func_15114A1C(void) {
                     D_800DBEF8[j] = 0;
                 }
             }
-        } else if (!(D_800DBEF4[i].viewFlags & 0x80)) {
+        } else if (!(db_Object_array[i].viewFlags & 0x80)) {
             D_800DBEF8[i] = 0;
         }
     }
@@ -723,23 +723,23 @@ void func_15114A1C(void) {
 void func_15114B94(u32 index) {
     u32 ungrouped;
 
-    if (index < D_800DBEF0) {
-        if (D_800DBEF4[index].shadow != NULL) {
-            func_1516972C((EffectHeader *)D_800DBEF4[index].shadow);
-            D_800DBEF4[index].shadow = NULL;
+    if (index < gWorldObjectCount) {
+        if (db_Object_array[index].shadow != NULL) {
+            func_1516972C((EffectHeader *)db_Object_array[index].shadow);
+            db_Object_array[index].shadow = NULL;
         }
-        D_800DBEF4[index].state |= 8;
-        D_800DBEF4[index].inactive = 1;
+        db_Object_array[index].state |= 8;
+        db_Object_array[index].inactive = 1;
     }
-    index = D_800DBEF0 - 1;
-    ungrouped = D_800DBEF0 - D_800DBF98;
-    while (D_800DBEF0 != 0 && (D_800DBEF4[index].state & 8)) {
+    index = gWorldObjectCount - 1;
+    ungrouped = gWorldObjectCount - D_800DBF98;
+    while (gWorldObjectCount != 0 && (db_Object_array[index].state & 8)) {
         if (index >= ungrouped && D_800DBF98 != 0) {
             D_800DBF98--;
         } else {
             ungrouped--;
         }
-        D_800DBEF0--;
+        gWorldObjectCount--;
         index--;
     }
 }
@@ -781,17 +781,17 @@ void func_15114D24(WorldObject *obj, s32 sfx, s32 arg2, s16 arg3, s16 arg4, s32 
     u16 handle;
 
     if (flags & 1) {
-        if (obj->sound != 0) {
-            if (func_1001147C(obj->sound) == sfx) {
+        if (obj->sound_id != 0) {
+            if (func_1001147C(obj->sound_id) == sfx) {
                 return;
             }
         }
     }
 
     if (sfx == -1) {
-        if (obj->sound != 0) {
-            func_100111C8(obj->sound);
-            obj->sound = 0;
+        if (obj->sound_id != 0) {
+            func_100111C8(obj->sound_id);
+            obj->sound_id = 0;
         }
         return;
     }
@@ -799,25 +799,25 @@ void func_15114D24(WorldObject *obj, s32 sfx, s32 arg2, s16 arg3, s16 arg4, s32 
     if (flags & 8) {
         handle = 0;
     } else {
-        handle = obj->sound;
+        handle = obj->sound_id;
     }
 
     if (flags & 4) {
         func_10010E78(handle, sfx, arg2, 0, 0, -1, obj->x, obj->y, obj->z, arg3, arg4);
         if ((flags & 8) == 0) {
-            obj->sound = 0;
+            obj->sound_id = 0;
         }
     } else if (flags & 2) {
         if (handle != 0) {
             func_1001123C(handle);
             handle = 0;
         }
-        obj->sound = func_10010E78(handle, sfx, arg2, 0, 0, -1, obj->x, obj->y, obj->z, arg3, arg4);
+        obj->sound_id = func_10010E78(handle, sfx, arg2, 0, 0, -1, obj->x, obj->y, obj->z, arg3, arg4);
     } else {
         if (handle != 0) {
             func_1001123C(handle);
         }
-        obj->sound = func_1000FA64(sfx, obj->x, obj->y, obj->z, arg2, arg4, arg3, (SoundRecordCallback)func_15114CC4, obj, 0, 0, 0);
+        obj->sound_id = func_1000FA64(sfx, obj->x, obj->y, obj->z, arg2, arg4, arg3, (SoundRecordCallback)func_15114CC4, obj, 0, 0, 0);
     }
 }
 
@@ -831,7 +831,7 @@ extern s32 D_800DBFA0;
 extern s32 D_800DBFA4;
 
 /*
- * On D_800BE9F0 0x12, 0x13 and 0x36 only: checks both D_800DBDD8 lists (stops with error 0xC00005A on a bad
+ * On level 0x12, 0x13 and 0x36 only: checks both D_800DBDD8 lists (stops with error 0xC00005A on a bad
  * entry), then stores the three arguments in D_800DBF9C..D_800DBFA4.
  */
 void func_15114F44(s32 arg0, s32 arg1, s32 arg2) {
@@ -839,7 +839,7 @@ void func_15114F44(s32 arg0, s32 arg1, s32 arg2) {
     s32 i;
     u32 (*list)[3];
 
-    if ((D_800BE9F0 == 0x12) || (D_800BE9F0 == 0x36) || (D_800BE9F0 == 0x13)) {
+    if ((level == 0x12) || (level == 0x36) || (level == 0x13)) {
         for (j = 0; j < 2; j++) {
             list = (u32 (*)[3])D_800DBDD8[j];
             for (i = 0; i < D_800DBE18[j]; i++) {

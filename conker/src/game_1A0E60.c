@@ -44,7 +44,7 @@ void func_151739B0(s32 colorSet, s32 isProp, s32 blend, s32 group, s32 propIndex
     if (isProp == 0) {
         vertices = D_800B0E10[0];
     } else {
-        vertices = D_800DBEF4[propIndex].vertices[D_800BE9C0];
+        vertices = db_Object_array[propIndex].vertices[D_800BE9C0];
     }
     groups = D_800B0E30[colorSet];
     for (i = start; i < end; i++) {
@@ -84,6 +84,6 @@ void func_15173C90(s32 blend, s32 group, s32 propId) {
     if (prop != NULL) {
         s32 colorSet = prop->modelId & ~0x8000;
 
-        func_151739B0(colorSet, 1, blend, group, prop - D_800DBEF4);
+        func_151739B0(colorSet, 1, blend, group, prop - db_Object_array);
     }
 }

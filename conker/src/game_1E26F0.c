@@ -96,18 +96,18 @@ Gfx *func_151B5328(Gfx *gdl, BeamEffect *effect, s16 viewIdx) {
 
     failed = 0;
     data = &effect->data;
-    if (data->first->interaction_state == 0 || data->first->unique_id != data->firstId) {
+    if (data->first->type == 0 || data->first->unique_id != data->firstId) {
         failed = 1;
     }
-    if (data->second->interaction_state == 0 || data->second->unique_id != data->secondId) {
+    if (data->second->type == 0 || data->second->unique_id != data->secondId) {
         failed = 1;
     }
-    if (!failed && data->first->unk1D4 != NULL && data->second->unk1D4 != NULL) {
-        func_15143134(D_800AA400, &start, &data->first->unk1D4[D_8008FB80]);
-        func_15143134(D_800AA40C, &end, &data->second->unk1D4[D_8008FB84]);
+    if (!failed && data->first->ob_matrix_ptr != NULL && data->second->ob_matrix_ptr != NULL) {
+        func_15143134(D_800AA400, &start, &data->first->ob_matrix_ptr[D_8008FB80]);
+        func_15143134(D_800AA40C, &end, &data->second->ob_matrix_ptr[D_8008FB84]);
         flag = 1;
         vtx = data->vertices[D_800BE9C0];
-        eye = &D_800DBFF0[viewIdx].eye;
+        eye = &camera_global_Cameras[viewIdx].eye;
         gdl = func_15142B7C(gdl, 0x200005, 0x60600);
         gdl = func_15142E24(gdl, D_80090F68, 0, 0, 0, 0, 0x56, 0, 0, &flag, 3);
         gdl = func_15142C10(gdl, 0xFF, 0xFF, 0xFF, 0xFF, &flag);

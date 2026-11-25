@@ -24,8 +24,8 @@ glabel func_150A4FA0
     /* D2480 150A4FD0 27FF5070 */  addiu      $ra, $ra, %lo(D_150A5070)
     /* D2484 150A4FD4 3C0A800D */  lui        $t2, %hi(D_800D3300)
     /* D2488 150A4FD8 254A3300 */  addiu      $t2, $t2, %lo(D_800D3300)
-    /* D248C 150A4FDC 3C06800D */  lui        $a2, %hi(D_800CC2D0)
-    /* D2490 150A4FE0 24C6C2D0 */  addiu      $a2, $a2, %lo(D_800CC2D0)
+    /* D248C 150A4FDC 3C06800D */  lui        $a2, %hi(movement_obj)
+    /* D2490 150A4FE0 24C6C2D0 */  addiu      $a2, $a2, %lo(movement_obj)
     /* D2494 150A4FE4 24C74F4C */  addiu      $a3, $a2, 0x4F4C
     /* D2498 150A4FE8 00001025 */  or         $v0, $zero, $zero
     /* D249C 150A4FEC 241CFFFF */  addiu      $gp, $zero, -0x1

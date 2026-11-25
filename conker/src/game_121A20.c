@@ -3,6 +3,17 @@
 #include "variables.h"
 #include "effects.h"
 
+/* Spawn-variant tables, reached through D_80088B20 (VariantList: count, ids, scales). */
+const s16 D_800A19F0[3] = { 9, 10, 11 };
+const f32 D_800A19F8[3] = { 1.0f, 1.0f, 1.0f };
+const s16 D_800A1A04[16] = {
+    0x06, 0x07, 0x08, 0x23, 0x24, 0x25, 0x2D, 0x2E, 0x52, 0xA8, 0xA9, 0xAA, 0xAB, 0xBE, 0xBF, 0x95,
+};
+const f32 D_800A1A24[16] = {
+    0.2f, 0.1f, 0.1f, 0.025f, 0.025f, 0.08f, 0.2f, 0.2f,
+    0.1f, 0.25f, 0.25f, 0.25f, 0.25f, 0.25f, 0.35f, 0.2f,
+};
+
 /* Flags of SpiralState. */
 #define SPIRAL_FADE_NEAR 1 /* fade out as the camera gets close */
 #define SPIRAL_SOUND 2     /* plays a positional sound */
@@ -254,9 +265,9 @@ void func_150F4DEC(CameraEmitter *emitter) {
     }
     data->pending += (0.05100000277f + func_150ADA68() * 0.153000012f) * D_800BE9A4;
     if (data->pending > 1.0f) {
-        eye = func_15144B34(data->camera->playerIndex);
+        eye = func_15144B34(data->camera->CNumber);
         /* degrees to 256-step binary angle */
-        yaw = (data->camera->unk380 + 180.0f) * 0.7111111283f;
+        yaw = (data->camera->TrueCameraAngle + 180.0f) * 0.7111111283f;
         do {
             func_15143874(yaw + 21, func_150ADA68() * 381.0f + 254.0f, &from.x, &from.z);
             from.y = func_150ADA68() * 212.0f + -133.0f;

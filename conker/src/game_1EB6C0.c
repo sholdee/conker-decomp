@@ -54,7 +54,7 @@ Vtx *func_151BE4B8(BurstSpark *spark, s16 viewport) {
     Actor *owner = data->owner;
     BeamScale scale;
 
-    if (owner->unique_id != data->ownerId || owner->interaction_state == 0) {
+    if (owner->unique_id != data->ownerId || owner->type == 0) {
         func_1516972C(&spark->head.header);
         return NULL;
     }

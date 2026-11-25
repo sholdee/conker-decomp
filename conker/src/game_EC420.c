@@ -73,31 +73,31 @@ void func_150BEF7C(s32 arg0) {
 
 /* Steps the entry by D_800BE9E4 frames; returns 1 once it has faded out or shrunk to nothing. */
 s32 func_150BF0F4(Struct150BF0F4 *entry) {
-    s32 level;
+    s32 intensity;
     s32 limit;
     s32 delta;
     s32 size;
     s32 age;
 
-    level = entry->level;
+    intensity = entry->level;
     limit = entry->maxLevel;
     if (entry->rising) {
-        if (level != limit) {
-            level += D_800BE9E4 * entry->riseRate;
-            if (level > limit) {
-                level = limit;
+        if (intensity != limit) {
+            intensity += D_800BE9E4 * entry->riseRate;
+            if (intensity > limit) {
+                intensity = limit;
             }
-            entry->level = level;
+            entry->level = intensity;
         }
-    } else if (level != 0) {
-        level -= D_800BE9E4 * entry->fallRate;
-        if (level < 0) {
-            level = 0;
+    } else if (intensity != 0) {
+        intensity -= D_800BE9E4 * entry->fallRate;
+        if (intensity < 0) {
+            intensity = 0;
         }
-        entry->level = level;
+        entry->level = intensity;
     }
 
-    if (!entry->rising && level == 0) {
+    if (!entry->rising && intensity == 0) {
         return 1;
     }
 
@@ -125,7 +125,7 @@ s32 func_150BF0F4(Struct150BF0F4 *entry) {
 
 
 /*
- * Behaviour scratch state (WorldObject.work) of func_150BF21C: an object whose mesh is translated toward a
+ * Behaviour scratch state (WorldObject.touch) of func_150BF21C: an object whose mesh is translated toward a
  * target height (param) and bobs (rotX-rotZ) while it is at rest.
  */
 typedef struct {
@@ -134,7 +134,7 @@ typedef struct {
     /* 0x84 */ f32 speed;
 } BobWork;
 
-#define BOB_WORK(obj) ((BobWork *)&(obj)->work)
+#define BOB_WORK(obj) ((BobWork *)&(obj)->touch)
 
 extern void func_15114D24(WorldObject *, s32, s32, s16, s16, s32);
 extern void func_15114F04(WorldObject *, s32, s32);
@@ -172,11 +172,11 @@ void func_150BF21C(WorldObject *obj) {
         paused = TRUE;
     }
     if (D_800BE9B4 != 0) {
-        height = obj->param.word;
+        height = obj->moveData.word;
         BOB_WORK(obj)->height = height;
     }
     if (!paused) {
-        diff = obj->param.word - height;
+        diff = obj->moveData.word - height;
         if (diff == 0.0f) {
             BOB_WORK(obj)->speed = 0.0f;
             BOB_WORK(obj)->bobPhase += 0.05f;
@@ -207,20 +207,20 @@ void func_150BF21C(WorldObject *obj) {
                 } else {
                     BOB_WORK(&obj[1])->speed = speed * 0.4000000060f;
                 }
-                obj[1].param.word = 0x7D00;
-                obj->behaviorState &= ~3;
-                obj->behaviorState |= 2;
-                if (obj->sound == 0) {
+                obj[1].moveData.word = 0x7D00;
+                obj->task_flag &= ~TASK_FLAG_STATE;
+                obj->task_flag |= TASK_FLAG_GOING_ON;
+                if (obj->sound_id == 0) {
                     func_15114D24(obj, 0xB9, 0x3E80, 1000, 4000, 0);
                 }
                 func_15114F04(obj, 0x3E80, speed * 500.0f);
             } else {
-                height = obj->param.word;
+                height = obj->moveData.word;
                 if (speed < 0.0f) {
-                    obj[1].param.word = 0x80;
+                    obj[1].moveData.word = 0x80;
                 }
-                obj->behaviorState &= ~3;
-                obj->behaviorState |= 3;
+                obj->task_flag &= ~TASK_FLAG_STATE;
+                obj->task_flag |= TASK_FLAG_ON;
                 BOB_WORK(&obj[1])->speed = 0.0f;
                 func_15114D24(obj, -1, 0, 0, 0, 0);
             }
@@ -228,14 +228,14 @@ void func_150BF21C(WorldObject *obj) {
             BOB_WORK(obj)->speed = speed;
         }
         bobXZ = bob * 3.0f;
-        obj->rotX += ((bobXZ * sinf(BOB_WORK(obj)->bobPhase)) - obj->rotX) * rate;
-        obj->rotY += (((bob * 4.0f) * sinf(BOB_WORK(obj)->bobPhase * 1.100000024f)) - obj->rotY) * rate;
-        obj->rotZ += ((bobXZ * cosf(BOB_WORK(obj)->bobPhase)) - obj->rotZ) * rate;
+        obj->t += ((bobXZ * sinf(BOB_WORK(obj)->bobPhase)) - obj->t) * rate;
+        obj->u += (((bob * 4.0f) * sinf(BOB_WORK(obj)->bobPhase * 1.100000024f)) - obj->u) * rate;
+        obj->v += ((bobXZ * cosf(BOB_WORK(obj)->bobPhase)) - obj->v) * rate;
     } else {
         height = 0.0f;
     }
     func_150A7DA0(translate, 0.0f, height, 0.0f);
-    func_15043F6C(model, obj->rotX, obj->rotY, obj->rotZ, obj->scaleX, obj->scaleY, obj->scaleZ, obj->x, obj->y, obj->z);
+    func_15043F6C(model, obj->t, obj->u, obj->v, obj->xScale, obj->yScale, obj->zScale, obj->x, obj->y, obj->z);
     func_150A7A48(translate, model, translate);
     dst = obj->vertices[D_800BE9C0];
     src = obj->srcVertices;
@@ -253,16 +253,16 @@ void func_1511B51C(WorldObject *);
 void *func_15195FB0(WorldObject *, s32, s32, s32, s32, s32, s32);
 void func_150825C0(s32, s32);
 
-/* Behaviour scratch state (WorldObject.work) of the entry after func_150BF760's object. */
+/* Behaviour scratch state (WorldObject.touch) of the entry after func_150BF760's object. */
 typedef struct {
     /* 0x7C */ s32 unk7C;
     /* 0x80 */ s32 unk80;
     /* 0x84 */ void *texScroll; // from func_15195FB0
 } ScrollWork;
 
-#define SCROLL_WORK(obj) ((ScrollWork *)&(obj)->work)
+#define SCROLL_WORK(obj) ((ScrollWork *)&(obj)->touch)
 
-/* Drives object 0x14 according to the mode in obj->behaviorState, spawning it first when a mode needs it,
+/* Drives object 0x14 according to the mode in obj->task_flag, spawning it first when a mode needs it,
  * and sets obj[1].rotZ to a sine of the object's animation progress. */
 void func_150BF760(WorldObject *obj) {
     Actor *actor;
@@ -277,15 +277,15 @@ void func_150BF760(WorldObject *obj) {
             SCROLL_WORK(&obj[1])->texScroll = func_15195FB0(obj, D_800902B8, 1, -1, 0, 0, -8);
         }
         actor = func_15083E90(0x14);
-        mode = obj->behaviorState & 3;
+        mode = obj->task_flag & TASK_FLAG_STATE;
         if (actor != NULL) {
             anim = actor->unk2D0;
             progress = anim->frame / (anim->numFrames - 2.0f);
         }
-        obj[1].rotZ = 0.0f;
-        if (mode == 2) {
+        obj[1].v = 0.0f;
+        if (mode == TASK_FLAG_GOING_ON) {
             if (progress <= 0.75f) {
-                obj[1].rotZ = -sinf(progress * 3.141592741f * 1.333333254f) * 10.0f;
+                obj[1].v = -sinf(progress * 3.141592741f * 1.333333254f) * 10.0f;
             }
             if (actor == NULL) {
                 slot = func_15083E0C(0x14);
@@ -293,24 +293,24 @@ void func_150BF760(WorldObject *obj) {
                 func_150825C0(slot, 0);
                 actor = func_15083E90(0x14);
             }
-            if (actor->unk232 != 2) {
-                actor->unk232 = 2;
-                actor->unk218 = NULL;
+            if (actor->intelwalk != 2) {
+                actor->intelwalk = 2;
+                actor->scriptCmd = NULL;
             }
-        } else if (mode == 3) {
+        } else if (mode == TASK_FLAG_ON) {
             if (actor != NULL && progress >= 1.0f) {
                 func_15060F28(actor, 0);
             }
-        } else if (mode == 0) {
+        } else if (mode == TASK_FLAG_OFF) {
             if (progress >= 0.25f) {
-                obj[1].rotZ = sinf(progress * 4.188789368f - 4.188789368f) * 10.0f;
+                obj[1].v = sinf(progress * 4.188789368f - 4.188789368f) * 10.0f;
             }
             if (actor != NULL && progress >= 1.0f) {
                 func_15060F28(actor, 0);
             }
-        } else if (mode == 1) {
+        } else if (mode == TASK_FLAG_GOING_OFF) {
             if (progress >= 0.25f) {
-                obj[1].rotZ = sinf(progress * 4.188789368f - 4.188789368f) * 10.0f;
+                obj[1].v = sinf(progress * 4.188789368f - 4.188789368f) * 10.0f;
             }
             if (actor == NULL) {
                 slot = func_15083E0C(0x14);
@@ -318,17 +318,17 @@ void func_150BF760(WorldObject *obj) {
                 func_150825C0(slot, 0);
                 actor = func_15083E90(0x14);
             }
-            if (actor == NULL && actor->unk232 != 3) { /* sic: the original tests actor == NULL */
-                actor->unk232 = 3;
-                actor->unk218 = NULL;
+            if (actor == NULL && actor->intelwalk != 3) { /* sic: the original tests actor == NULL */
+                actor->intelwalk = 3;
+                actor->scriptCmd = NULL;
             }
         }
     }
 }
 
 /*
- * Behaviour scratch state (WorldObject.work) of a platform that shakes (rotX/rotZ) and sinks, one of a
- * pair whose partner entry follows it. param high half: kind; behaviorState bits 0-1: state, bit 2: held down.
+ * Behaviour scratch state (WorldObject.touch) of a platform that shakes (t/v) and sinks, one of a
+ * pair whose partner entry follows it. moveData high half: kind; task_flag bits 0-1: state, bit 2: held down.
  */
 typedef struct {
     /* 0x7C */ s32 home;  /* low half: rest height; bit 31: initialised */
@@ -336,7 +336,7 @@ typedef struct {
     /* 0x84 */ s32 unk84;
 } PlatformWork;
 
-#define WORK(obj) ((PlatformWork *)&(obj)->work)
+#define WORK(obj) ((PlatformWork *)&(obj)->touch)
 
 extern void func_1508EE0C(s32, s32);
 extern void func_15164F0C(u8, u8, void *, u8, s32);
@@ -360,8 +360,8 @@ void func_150BFA7C(WorldObject *platform) {
     RumbleParams fx;
 
     step = 0x10;
-    kind = (platform->param.word >> 16) & 0xFFFF;
-    state = platform->behaviorState & 3;
+    kind = (platform->moveData.word >> 16) & 0xFFFF;
+    state = platform->task_flag & TASK_FLAG_STATE;
     travel = 0;
     if (kind == 0) {
         travel = 0x82;
@@ -382,9 +382,9 @@ void func_150BFA7C(WorldObject *platform) {
         }
         return;
     }
-    if ((platform->flags & 4) && D_800CC2D0[0].unk31C->unk57 == 1) {
-        func_1518B6B0(D_800CC2D0[0].x_position, D_800CC2D0[0].y_position, D_800CC2D0[0].z_position, 0xFF, 0);
-        if (state == 0) {
+    if ((platform->object_status & 4) && movement_obj[0].mv->unk57 == 1) {
+        func_1518B6B0(movement_obj[0].xpos, movement_obj[0].ypos, movement_obj[0].zpos, 0xFF, 0);
+        if (state == TASK_FLAG_OFF) {
             func_15164F0C(3, D_800BE9EB, NULL, 0xFF, 0);
             fx.flags = 1;
             fx.duration = 60;
@@ -394,29 +394,29 @@ void func_150BFA7C(WorldObject *platform) {
             func_151D8868(&fx, 0, 0xFF, 0);
         }
     }
-    if (state == 3) {
+    if (state == TASK_FLAG_ON) {
         if (lowered != platform->y) {
             platform->y = lowered;
         }
-        if (!(platform->flags & 4) && !(platform->behaviorState & 4)) {
-            state = 1;
+        if (!(platform->object_status & 4) && !(platform->task_flag & TASK_FLAG_LOCKED)) {
+            state = TASK_FLAG_GOING_OFF;
         }
-    } else if (state == 0) {
+    } else if (state == TASK_FLAG_OFF) {
         if (top != platform->y) {
             platform->y = top;
         }
-    } else if (state == 2) {
+    } else if (state == TASK_FLAG_GOING_ON) {
         WORK(platform)->unk80 += D_800BE9E4;
         if (WORK(platform)->unk80 < 0) {
-            platform->rotX = ((f32)(func_151EF610() % 5) - 2.0f) * 0.125f;
-            platform->rotZ = ((f32)(func_151EF610() % 5) - 2.0f) * 0.125f;
+            platform->t = ((f32)(func_151EF610() % 5) - 2.0f) * 0.125f;
+            platform->v = ((f32)(func_151EF610() % 5) - 2.0f) * 0.125f;
         } else {
             if (WORK(platform)->unk80 < 40) {
-                platform->rotX = ((f32)(func_151EF610() % 5) - 2.0f) / 12.0f;
-                platform->rotZ = ((f32)(func_151EF610() % 5) - 2.0f) / 12.0f;
+                platform->t = ((f32)(func_151EF610() % 5) - 2.0f) / 12.0f;
+                platform->v = ((f32)(func_151EF610() % 5) - 2.0f) / 12.0f;
             } else {
-                platform->rotZ = 0.0f;
-                platform->rotX = 0.0f;
+                platform->v = 0.0f;
+                platform->t = 0.0f;
             }
             if (platform->y < lowered) {
                 if (kind == 0) {
@@ -442,30 +442,30 @@ void func_150BFA7C(WorldObject *platform) {
                 WORK(&platform[1])->home += diff;
                 WORK(&platform[1])->home |= 0x80000000;
                 WORK(&platform[1])->unk80 = 0;
-                if (kind == 4 && state != 3) {
+                if (kind == 4 && state != TASK_FLAG_ON) {
                     func_1518CD20(platform, 0xFF, 0);
                 }
-                state = 3;
-                platform->rotZ = 0.0f;
-                platform->rotX = 0.0f;
+                state = TASK_FLAG_ON;
+                platform->v = 0.0f;
+                platform->t = 0.0f;
                 if (kind == 2) {
                     platform->inactive = 1;
                     platform[1].inactive = 1;
-                    func_1508EE0C(2, (u16)(platform - D_800DBEF4));
-                    func_1508EE0C(2, (u16)(&platform[1] - D_800DBEF4));
+                    func_1508EE0C(2, (u16)(platform - db_Object_array));
+                    func_1508EE0C(2, (u16)(&platform[1] - db_Object_array));
                 }
             }
         }
-    } else if (state == 1) {
-        state = 1; // matching: redundant store steers register allocation
+    } else if (state == TASK_FLAG_GOING_OFF) {
+        state = TASK_FLAG_GOING_OFF; // matching: redundant store steers register allocation
         platform->y += 3;
         if (platform->y >= top) {
             platform->y = top;
-            state = 0;
+            state = TASK_FLAG_OFF;
         }
     }
-    platform->behaviorState &= ~3;
-    platform->behaviorState |= state;
+    platform->task_flag &= ~TASK_FLAG_STATE;
+    platform->task_flag |= state;
 }
 
 void func_15136C3C(Actor *, s32, s32, s32, s32, s32, s32, s32);
@@ -475,9 +475,9 @@ void func_150BFFE0(Actor *obj) {
     Vec3f pos;
     SpriteBurst spawn;
 
-    pos.x = obj->x_position;
+    pos.x = obj->xpos;
     pos.y = obj->floorY + 70.0f;
-    pos.z = obj->z_position;
+    pos.z = obj->zpos;
     func_15136C3C(obj, 0, 0, 1, 0, 0, 0xFF, 1);
     spawn.countBase = 0x11;
     spawn.countRange = 7;

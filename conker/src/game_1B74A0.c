@@ -47,7 +47,7 @@ s32 func_1518A094(Emitter *emitter) {
             return 0;
         }
     }
-    if ((attach->target->interaction_state != 0) && (attach->target->unique_id == attach->targetId)) {
+    if ((attach->target->type != 0) && (attach->target->unique_id == attach->targetId)) {
         if (attach->handler != -1) {
             u8 follow;
 
@@ -59,11 +59,11 @@ s32 func_1518A094(Emitter *emitter) {
                 return 0;
             }
         }
-        if (attach->target->unk1D4 != NULL) {
+        if (attach->target->ob_matrix_ptr != NULL) {
             f32 (*mtx)[4];
             Vec3f *out;
 
-            mtx = attach->target->unk1D4[attach->bone];
+            mtx = attach->target->ob_matrix_ptr[attach->bone];
             out = &emitter->head.def.pos;
             func_150A7960(mtx, attach->p0.x, attach->p0.y, attach->p0.z, &out->x, &out->y, &out->z);
             out = &emitter->head.def.rot;

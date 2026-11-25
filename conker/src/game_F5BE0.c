@@ -37,7 +37,7 @@ s32 func_150C8730(ModelAttachment *att, Actor *actor) {
         return 0;
     }
 
-    state = actor->unk84.uh;
+    state = actor->animseq.uh;
     if ((state == 0x14 && 10.0f < anim->frame) || state == 0x23) {
         frame = D_800BE9C0;
         mtx = att->mtx;
@@ -50,15 +50,15 @@ s32 func_150C8730(ModelAttachment *att, Actor *actor) {
         func_1503E5F8(mf, &x, &y, &z, &rotX, &rotY, &rotZ, &scaleX, &scaleY, &scaleZ);
 
         obj = func_15073118(actor, -1, 0x4E, 0.0f, 0.0f, 0.0f, 0.0f, 42.79999924f, 49.90000153f, 2.900000095f, 200);
-        obj->x_position = x;
-        obj->y_position = y;
-        obj->z_position = z;
-        obj->unkB8 = rotX;
-        obj->unk40 = rotY;
-        obj->unkC4 = rotZ;
-        yaw = (obj->unk40 - 90.0f) * 182.0444489f;
-        obj->unk76 = yaw;
-        obj->unk7A = yaw;
+        obj->xpos = x;
+        obj->ypos = y;
+        obj->zpos = z;
+        obj->vtilt = rotX;
+        obj->theta = rotY;
+        obj->lean_angle = rotZ;
+        yaw = (obj->theta - 90.0f) * 182.0444489f;
+        obj->angle = yaw;
+        obj->langle = yaw;
         return 1;
     }
 

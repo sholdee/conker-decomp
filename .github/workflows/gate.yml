@@ -13,7 +13,8 @@
 #   `--network none`, so it can neither reach the credentials nor send the ROM anywhere.
 # - The container image is built from the trusted checkout's Containerfile, never from the code
 #   under test, and only pushes save it to the cache.
-# - The expected sha1s, the sha1 check and tools/accounting.py come from the trusted checkout.
+# - The expected sha1s, the sha1 check, tools/accounting.py and tools/linkcheck.py come from the trusted
+#   checkout. linkcheck fails if an address-named symbol is not at its address (the sha1 cannot see .bss).
 # - Nothing is uploaded: build outputs contain game data.
 name: Matching gate
 
@@ -103,6 +104,7 @@ jobs:
         run: |
           cp "$RUNNER_TEMP/baserom.us.z64" test/baserom.us.z64
           cp trusted/tools/accounting.py test/tools/accounting.py
+          cp trusted/tools/linkcheck.py test/tools/linkcheck.py
           docker run --rm --network none --user "$(id -u):$(id -g)" \
             --volume "$GITHUB_WORKSPACE/test:/conker" --workdir /conker "$IMAGE" \
             bash -euo pipefail -c '
@@ -112,7 +114,8 @@ jobs:
               make -C conker -j"$(nproc)"
               make -C conker replace
               make -j"$(nproc)"
-              python3 tools/accounting.py'
+              python3 tools/accounting.py
+              python3 tools/linkcheck.py'
 
       - name: Check the ROM sha1s
         run: |

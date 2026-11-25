@@ -60,7 +60,7 @@ void func_150FCBC0(u8 index) {
         return;
     }
     pos.x = area->x;
-    pos.y = area->y + area->height * 0.5f;
+    pos.y = area->y + area->ySize * 0.5f;
     pos.z = area->z;
     randFrac = func_150ADA68();
     func_151541B8(&pos, randFrac * 4.0f + 12.0f, 6.6943097f, (f32)(func_150ADA20() % 56U + 200), 2.6090002f, 0xFF, 1);
@@ -95,10 +95,10 @@ void func_150FCBC0(u8 index) {
             randInt = func_150ADA20();
             angle = range[0] + randInt % (range[1] + 1);
             desc.angles.yawBase = angle - 40;
-            func_15143874((s16)angle, area->radius, &desc.spray.pos.x, &desc.spray.pos.z);
+            func_15143874((s16)angle, area->xSize, &desc.spray.pos.x, &desc.spray.pos.z);
             desc.spray.pos.x += area->x;
             desc.spray.pos.z += area->z;
-            desc.spray.pos.y = func_150ADA68() * area->height + area->y;
+            desc.spray.pos.y = func_150ADA68() * area->ySize + area->y;
             func_1514FCE8(&desc, 0xFF, 1);
             count--;
         } while (count > 0);
@@ -182,20 +182,20 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
     if (obj->unk7 < 0xFF) {
         return;
     }
-    pos.x = obj->x_position;
+    pos.x = obj->xpos;
     probe.x = pos.x;
-    probe.y = obj->y_position + 100.0f;
-    pos.z = obj->z_position;
+    probe.y = obj->ypos + 100.0f;
+    pos.z = obj->zpos;
     probe.z = pos.z;
     func_1504715C(&ground, obj);
     if (func_15046C80(&probe, 0, -10000.0f, &ground)) {
         pos.y = ground.height;
         onGround = 1;
     } else {
-        pos.y = obj->y_position;
+        pos.y = obj->ypos;
         onGround = 0;
     }
-    func_1505D024(obj, 0x39, obj->unk7A, -1);
+    func_1505D024(obj, 0x39, obj->langle, -1);
     ext.owner = obj;
     ext.ownerId = obj->unique_id;
     ext.maxWidth = 60.0f;
@@ -258,7 +258,7 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
             extern s32 D_800A4AA0; // matching: a declaration here opens a -g3 scope block (scheduling)
 
             if (onGround) {
-                extern Vec3f D_800A5480; // matching: a declaration here opens a -g3 scope block (scheduling)
+                extern const Vec3f D_800A5480; // matching: a declaration here opens a -g3 scope block (scheduling)
 
                 groundDef.texture = 3;
                 groundDef.type = 0;
@@ -317,13 +317,13 @@ s32 func_150FD514(Actor150FD514 *particle) {
     ext = &particle->ext;
     owner = ext->owner;
     if (owner != NULL) {
-        if (owner->interaction_state == 0 || owner->unique_id != ext->ownerId) {
+        if (owner->type == 0 || owner->unique_id != ext->ownerId) {
             ext->owner = NULL;
             owner = NULL;
         }
         /* BUG (original game): owner may have just been set to NULL above, and is dereferenced anyway */
-        x = owner->x_position;
-        z = owner->z_position;
+        x = owner->xpos;
+        z = owner->zpos;
     } else {
         x = particle->head.def.pos.x;
         z = particle->head.def.pos.z;
@@ -344,7 +344,7 @@ s32 func_150FD514(Actor150FD514 *particle) {
         particle->head.def.width = ext->timer * 0.1f * ext->maxWidth;
         if (ext->burstDone == 0) {
             if (owner != NULL) {
-                func_1505D024(owner, 0x16, owner->unk7A, -1);
+                func_1505D024(owner, 0x16, owner->langle, -1);
                 func_10010F88(0x69D, 32000, 0, 0, 0, particle->head.def.pos.x, particle->head.def.pos.y, particle->head.def.pos.z, 500, 3000);
             }
             ext->burstDone = 1;
@@ -385,25 +385,25 @@ s32 func_150FD514(Actor150FD514 *particle) {
 }
 
 
-/* Event handler: retargets (0x2D) or drops (0) the owner link {owner, unique_id} at the start of ext. */
-void func_150FDB0C(Actor150FD514 *actor, struct212 *event, u8 eventId) {
-    struct212 *link = (struct212 *)&actor->ext;
+/* Message handler: retargets (0x2D, an actor swap) or drops (0, the actor went away) the owner link. */
+void func_150FDB0C(Actor150FD514 *actor, ActorMsg *msg, u8 eventId) {
+    Ext150FCFD4 *link = &actor->ext;
 
     if (eventId == 0x2D) {
-        if (link->unk0 == event->unk0) {
-            link->unk0 = event->unk4.i.unk0;
-            link->unk4.b.unk0 = event->unk9;
-        } else if (link->unk0 == event->unk4.i.unk0) {
-            struct212 *dst = link; // matching: the aliased scope keeps IDO from filling the jr delay slot
+        if (link->owner == msg->swap.actorA) {
+            link->owner = msg->swap.actorB;
+            link->ownerId = msg->swap.idB;
+        } else if (link->owner == msg->swap.actorB) {
+            Ext150FCFD4 *dst = link; // matching: the aliased scope keeps IDO from filling the jr delay slot
 
-            dst->unk0 = event->unk0;
-            dst->unk4.b.unk0 = event->unk8;
+            dst->owner = msg->swap.actorA;
+            dst->ownerId = msg->swap.idA;
         }
     } else if (eventId == 0) {
-        s32 owner = event->unk0;
+        Actor *owner = msg->ref.actor;
 
-        if (owner == link->unk0 || event->unk4.b.unk0 == link->unk4.b.unk0) {
-            link->unk0 = 0;
+        if (owner == link->owner || msg->ref.uniqueId == link->ownerId) {
+            link->owner = NULL;
         }
     }
 }

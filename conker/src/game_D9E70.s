@@ -372,12 +372,12 @@ glabel func_150AC9C0
   .L150ACECC:
     /* DA37C 150ACECC 0D443E00 */  jal        func_1510F800
     /* DA380 150ACED0 24040002 */   addiu     $a0, $zero, 0x2
-    /* DA384 150ACED4 3C0B800E */  lui        $t3, %hi(D_800DBEF0)
-    /* DA388 150ACED8 8D6BBEF0 */  lw         $t3, %lo(D_800DBEF0)($t3)
+    /* DA384 150ACED4 3C0B800E */  lui        $t3, %hi(gWorldObjectCount)
+    /* DA388 150ACED8 8D6BBEF0 */  lw         $t3, %lo(gWorldObjectCount)($t3)
     /* DA38C 150ACEDC 240800A0 */  addiu      $t0, $zero, 0xA0
     /* DA390 150ACEE0 01680018 */  mult       $t3, $t0
-    /* DA394 150ACEE4 3C0A800E */  lui        $t2, %hi(D_800DBEF4)
-    /* DA398 150ACEE8 8D4ABEF4 */  lw         $t2, %lo(D_800DBEF4)($t2)
+    /* DA394 150ACEE4 3C0A800E */  lui        $t2, %hi(db_Object_array)
+    /* DA398 150ACEE8 8D4ABEF4 */  lw         $t2, %lo(db_Object_array)($t2)
     /* DA39C 150ACEEC 44800000 */  mtc1       $zero, $f0
     /* DA3A0 150ACEF0 00005812 */  mflo       $t3
     /* DA3A4 150ACEF4 016A5820 */  add        $t3, $t3, $t2 /* handwritten instruction */
@@ -495,8 +495,8 @@ glabel func_150AC9C0
     /* DA550 150AD0A0 03C9F021 */  addu       $fp, $fp, $t1
     /* DA554 150AD0A4 8FDE0000 */  lw         $fp, 0x0($fp)
     /* DA558 150AD0A8 01480018 */  mult       $t2, $t0
-    /* DA55C 150AD0AC 3C08800E */  lui        $t0, %hi(D_800DBEF4)
-    /* DA560 150AD0B0 8D08BEF4 */  lw         $t0, %lo(D_800DBEF4)($t0)
+    /* DA55C 150AD0AC 3C08800E */  lui        $t0, %hi(db_Object_array)
+    /* DA560 150AD0B0 8D08BEF4 */  lw         $t0, %lo(db_Object_array)($t0)
     /* DA564 150AD0B4 00009012 */  mflo       $s2
     /* DA568 150AD0B8 02489021 */  addu       $s2, $s2, $t0
     /* DA56C 150AD0BC 964A0058 */  lhu        $t2, 0x58($s2)
@@ -609,8 +609,8 @@ glabel func_150AC9C0
   .L150AD230:
     /* DA6E0 150AD230 240800A0 */  addiu      $t0, $zero, 0xA0
     /* DA6E4 150AD234 01160018 */  mult       $t0, $s6
-    /* DA6E8 150AD238 3C0D800E */  lui        $t5, %hi(D_800DBEF4)
-    /* DA6EC 150AD23C 8DADBEF4 */  lw         $t5, %lo(D_800DBEF4)($t5)
+    /* DA6E8 150AD238 3C0D800E */  lui        $t5, %hi(db_Object_array)
+    /* DA6EC 150AD23C 8DADBEF4 */  lw         $t5, %lo(db_Object_array)($t5)
     /* DA6F0 150AD240 00004012 */  mflo       $t0
     /* DA6F4 150AD244 01A8E021 */  addu       $gp, $t5, $t0
     /* DA6F8 150AD248 3C0D800E */  lui        $t5, %hi(D_800DBEF8)

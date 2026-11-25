@@ -59,8 +59,8 @@ MosaicEffect *func_150CE150(Actor *owner, s16 lifetime, u8 arg2, s32 arg3) {
     // matching: the original falls off the end here without returning effect
 }
 
-
-extern f32 D_800A07F0[3];
+/* Offset that func_150CE200 transforms by the owner's bone matrix to centre the mosaic rectangle. */
+const f32 D_800A07F0[3] = { 0.0f, -49.0f, -2.0f };
 void func_15143134(f32 *in, f32 *out, Mtx *mtx);
 s32 func_15144CEC(f32 *pos, f32 *screen, f32 *arg2, f32 *arg3, f32 *scale, s32 arg5);
 
@@ -75,16 +75,16 @@ s32 func_150CE200(MosaicEffect *effect) {
     f32 projectedW;
     f32 scale;
 
-    if (mosaic->owner->interaction_state == 0) {
+    if (mosaic->owner->type == 0) {
         return 0;
     }
     if (mosaic->owner->unique_id != mosaic->ownerId) {
         return 0;
     }
-    if (mosaic->owner->unk1D4 == NULL) {
+    if (mosaic->owner->ob_matrix_ptr == NULL) {
         mosaic->flags &= ~1;
     } else {
-        func_15143134(D_800A07F0, pos, (Mtx *)mosaic->owner->unk1D4 + 52);
+        func_15143134(D_800A07F0, pos, (Mtx *)mosaic->owner->ob_matrix_ptr + 52);
         if (func_15144CEC(pos, mosaic->center, &projectedZ, &projectedW, &scale, D_80082FA4)) {
             f32 dx;
             f32 dy;
@@ -207,167 +207,6 @@ void func_150CE694(MosaicEffect *effect, ActorMsg *msg, u8 type) {
         object = msg->ref.actor;
         if (object == mosaic->owner || msg->ref.uniqueId == mosaic->ownerId) {
             func_1516972C(&effect->header);
-        }
-    }
-}
-
-extern u16 D_800BE648[];
-extern u8 D_800A080F[];
-extern u8 D_800A0818[];
-void func_15052590(Actor *arg0);
-void func_15052F9C(Actor *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
-void func_1505327C(Actor *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
-void func_15063168(Actor *arg0);
-
-/*
- * Per-frame control update: picks an action (unk232) from the button word D_800CC288, sets the
- * target speed (unk44) and heading (unk78), then eases unkC4 toward the clamped turn. Objects
- * with id 0x21 use their own tables and a random wandering heading.
- */
-void func_150CE740(Actor *obj) {
-    ActorCtl *owner;
-    u16 heading;
-    u16 prevFacing;
-    u8 isType21;
-    u8 action;
-    s16 turn;
-    s16 v; // matching: one s16 for both the control index and the 3/4 anim value merges their registers
-
-    isType21 = 0;
-    prevFacing = obj->unk7A;
-    if (obj->id == 0x21) {
-        isType21 = 1;
-    }
-    v = obj->unk13C;
-    if ((v == 0) && (D_800BE616 == 0)) {
-        goto control_done; // matching: a goto (not an if block) lets IDO keep D_800BE616 in a register
-    }
-    action = 0;
-    if (D_800BE616 != 0) {
-        if (obj->unk31C->unk84 != 0) {
-            func_1504C854(obj);
-        } else {
-            D_800CC288 = D_800BE710[D_800C3E78];
-        }
-    } else {
-        D_800CC288 = D_800BE648[v];
-    }
-    if ((D_800CC288 & 0x8000) && (obj->disable_jump == 0) && (obj->unk28 == 0.0f)) {
-        action = 1;
-    }
-    if ((D_800CC288 & 0x6000) && (obj->unk28 == 0.0f) &&
-        ((isType21 && (obj->disable_run != 0xFF)) || (obj->disable_run == 0))) {
-        action = 2;
-    }
-    if (action) {
-        if (isType21) {
-            action += 4;
-        }
-        if (D_800BE616 != 0) {
-            action += 2;
-        }
-        obj->disable_run = 180;
-        obj->unk232 = D_800A080F[action];
-        obj->unk218 = NULL;
-        if ((obj->unk232 == 0x22) && (obj->unk2E4 == 0)) {
-            obj->unk31C->unk1AA++;
-        }
-    }
-    obj->unk124 = 0;
-    if ((obj->disable_run == 0) && ((D_800BE616 == 0) || (obj->unk31C->unk84 == 0))) {
-        if (D_800BE616 != 0) {
-            /* camera yaw in degrees -> 16-bit binary angle (65536 / 360) */
-            D_800CC280 = D_800DBFF0[D_800C3E78].yaw * 182.0444488525390625f;
-            heading = func_1505A630(D_800CC284->stick_x, D_800CC284->stick_y, 0) + D_800CC280;
-            obj->unk44 = func_1505A5CC(D_800CC284);
-        } else {
-            obj->unk44 = D_800CC2D0[obj->unk124].unk44 * 1.75f;
-            heading = D_800CC2D0[obj->unk124].unk31C->unk4C;
-        }
-        if (obj->unk223 == 13) {
-            obj->unk44 = 0.0f;
-        }
-        if (isType21) {
-            if (obj->unk44 < 5.0f) {
-                heading = func_150ADA20();
-                obj->unk44 = (func_150ADA20() % 60U) + 20.0f;
-            }
-            obj->unk78 = ((func_150ADA20() % 10000U) + heading) - 5000;
-            obj->unk44 = (obj->unk44 * 0.5f) + 22.0f;
-            if ((u8)(((s32)(obj->unk76 - obj->unk78) >> 8) - 0x50) < 0x60) {
-                obj->unk218 = NULL;
-                obj->unk232 = 0x10;
-            }
-        } else if (obj->unk44 < 5.0f) {
-            obj->unk44 = 0.0f;
-            if (obj->unk232 != 5) {
-                obj->unk78 = obj->unk76;
-            }
-        } else {
-            obj->unk78 = heading;
-            if (obj->unk223 == 1) {
-                v = 3;
-                if (obj->xz_velocity < 35.0f) {
-                    v = 4;
-                }
-                obj->unk1E6 = v;
-                obj->unk1E5 = v;
-                if ((u8)(((s32)(obj->unk76 - obj->unk78) >> 8) - 0x50) < 0x60) {
-                    if (obj->xz_velocity > 35.0f) {
-                        obj->unk232 = 4;
-                    } else {
-                        obj->unk232 = 5;
-                    }
-                } else {
-                    obj->unk232 = 3;
-                }
-                obj->unk218 = NULL;
-            }
-        }
-    }
-control_done:
-    if ((D_800BE616 == 0) || (D_800C3E78 >= D_8008FD8C) || (obj->unk31C->unk120 == 0)) {
-        func_15052590(obj);
-    }
-    if ((D_800CC2D0[0].unk31C->unk27 != 0) && ((obj->unk232 != D_800A0818[isType21]) || (obj->stunned != 0))) {
-        D_800CC2D0[0].unk31C->unk27 = 0;
-        D_800CC2D0[0].disable_run = 0;
-        D_800CC2D0[0].unk83 = 0;
-        D_800CC2D0[0].immune = 0;
-        obj->unk232 = 0x11;
-    }
-    if (D_800BE616 == 0) {
-        /* D_800A0818 holds three 2-entry tables indexed by isType21 */
-        // matching: (&table[i])[n] adds n after i; table[i + n] folds n into the address
-        if (obj->unk232 == D_800A0818[isType21]) {
-            func_15052F9C(obj, 156.0f, (&D_800A0818[isType21])[4], 4, 0, (&D_800A0818[isType21])[2], 0xFF, 0, 0, 0);
-        } else if ((D_800CC268 & 1) && (D_800CC2D0[obj->unk124].unk65 == 0) && (obj->unk25C & 0x400)) {
-            obj->unk124 = 0;
-            func_1505327C(obj, 50.0f, 3.0f, D_800A0818[isType21], (&D_800A0818[isType21])[4]);
-        }
-    }
-    turn = 0;
-    if ((isType21 && (obj->xz_velocity > 5.0f)) || (!isType21 && (obj->unk84.uh == 10))) {
-        turn = obj->unk76 - obj->unk78;
-        if (turn > 0x3000) {
-            turn = 0x3000;
-        }
-        if (turn < -0x3000) {
-            turn = -0x3000;
-        }
-        if (isType21 && (obj->unk13C == 0)) {
-            turn >>= 1;
-        }
-    }
-    obj->unkC4 += ((turn * 0.005f) - obj->unkC4) * 0.15f;
-    if (isType21) {
-        obj->unk2E4 += ((s16)((prevFacing - obj->unk7A) * 4) - (s16)obj->unk2E4) / 8;
-        obj->unk2E8 += (-turn - obj->unk2E8) / 8;
-    }
-    if ((D_800BE616 != 0) && (D_800CC268 != 0)) {
-        owner = obj->unk31C;
-        if ((owner != NULL) && (((u8 *)owner)[0x1AC] != 0)) { /* past the end of ActorCtl as declared */
-            func_15063168(obj);
         }
     }
 }

@@ -589,7 +589,52 @@ void func_151963B4(CharacterFlamethrowerActor *actor) {
     func_15147928(actor);
 }
 
-extern CharacterFlamethrowerJetTemplate D_800A87A0[];
+/* Preset in D_800A8710 for the child particles a jet point spawns (func_15198110). */
+typedef struct JetChildPreset {
+    /* 0x0 */ f32 sizeScale;
+    /* 0x4 */ f32 unk4;
+    /* 0x8 */ s16 lifeMin;
+    /* 0xA */ s16 lifeRange;
+} JetChildPreset;
+
+/* Sprite preset in D_800A8770 (func_151990AC). */
+typedef struct {
+    f32 radius;
+    f32 speed;
+    f32 speed_range;
+    s16 acceleration;
+    s16 acceleration_range;
+    s16 fade;
+    s16 fade_range;
+    s16 size;
+    s16 size_range;
+} JetSpritePreset;
+
+const JetChildPreset D_800A8710[] = {
+    { 1.0f, 1.0f, 9, 12 },
+    { 0.656f, 1.3f, 5, 12 },
+};
+
+const ScatterPreset D_800A8728[] = {
+    { 20.0f, 0.114f, 0.506f, 5.0f, 12.0f, 0.0f, 0.47f, 55, 10, 3, 7 },
+    { 20.0f, 0.5f, 0.8f, 5.0f, 5.0f, 1.0f, 1.0f, 17, 10, 3, 2 },
+};
+
+const JetSpritePreset D_800A8770[] = {
+    { 45.19f, 40.0f, 25.0f, -314, 186, 8, 11, 385, 386 },
+    { 40.0f, 30.0f, 20.0f, -100, 70, 10, 20, 200, 150 },
+};
+
+const CharacterFlamethrowerJetTemplate D_800A87A0[] = {
+    { 600, 1.141f, 1.04f, 255, 20, 12, { 0.0f, 0.0f, 80.0f }, { 0.0f, -2.0f, 102.0f }, 0, 30, 155, 20, 4.8f, 17.0f, -1, 0, -1, -1, -1, -1, 0, 2, 0, 127, 0.726f, 0, 0.226f, 0, 0.135f, 6, 42, 6, 42 },
+    { 30, 0.1f, 0.49f, 255, 24, 0, { 0.0f, 40.0f, 8.0f }, { 0.0f, 40.0f, 10.0f }, 2, 192, 255, 8, 1.2f, 0.9f, -1, -1, -1, -1, -1, -1, -1, 3, 0, 127, 0.726f, 0, 0.226f, 0, 0.135f, 6, 42, 6, 42 },
+    { 30, 0.1f, 0.49f, 255, 24, 0, { 0.0f, 40.0f, 8.0f }, { 0.0f, 40.0f, 10.0f }, 2, 192, 255, 8, 1.2f, 0.9f, -1, -1, -1, -1, -1, -1, -1, 3, 0, 127, 0.726f, 0, 0.226f, 0, 0.135f, 6, 42, 6, 42 },
+    { 600, 1.141f, 1.04f, 255, 20, 13, { 22.0f, 22.0f, 165.0f }, { 22.0f, 22.0f, 180.0f }, 0, 40, 255, 19, 4.8f, 17.0f, 0, -1, 0, 0, 0, 0, -1, 2, 0, 127, 0.726f, 0, 0.226f, 0, 0.135f, 6, 42, 6, 42 },
+    { 600, 0.0f, 2.14f, 255, 20, 9, { -4.734001f, -111.957596f, 33.473396f }, { -8.837997f, -159.75f, 33.473396f }, 0, 12, 200, 0, 4.0f, 9.0f, -1, -1, -1, -1, -1, -1, 0, 2, 1, 100, 0.8f, 1, 0.15f, 1, 0.2f, 6, 42, 6, 42 },
+    { 600, 0.0f, 2.14f, 255, 20, 9, { -4.734001f, -111.957596f, 33.473396f }, { -8.837997f, -159.75f, 33.473396f }, 0, 12, 200, 0, 4.0f, 9.0f, -1, 1, -1, -1, -1, -1, 0, 2, 1, 100, 0.8f, 1, 0.15f, 1, 0.2f, 6, 42, 6, 42 },
+    { 600, 0.0f, 2.14f, 255, 20, 9, { 12.0f, -44.0f, 136.0f }, { 12.0f, -54.0f, 175.0f }, 0, 12, 200, 0, 4.0f, 9.0f, -1, 2, -1, 0, 0, 0, 0, 2, 1, 100, 0.8f, 1, 0.15f, 1, 0.2f, 6, 42, 6, 42 },
+};
+
 extern s16 (*D_8008F890[])(void);
 extern f32 (*D_8008F870[])(void *, s32);
 extern void (*D_8008F87C[])(void *);
@@ -608,7 +653,7 @@ CharacterFlamethrowerActor *func_15196438(Actor *owner, s32 preset, u8 arg2, s32
     if (owner == NULL) {
         return NULL;
     }
-    if (owner->unk1D4 == NULL) {
+    if (owner->ob_matrix_ptr == NULL) {
         return NULL;
     }
     entry = &D_800A87A0[preset];
@@ -658,7 +703,7 @@ CharacterFlamethrowerActor *func_15196438(Actor *owner, s32 preset, u8 arg2, s32
     } else {
         jet.sound = 0;
     }
-    matrix = (s32)jet.owner->unk1D4 + (jet.bone << 6);
+    matrix = (s32)jet.owner->ob_matrix_ptr + (jet.bone << 6);
     func_15143134(&jet.startOffset, &jet.start, matrix);
     func_15143134(&jet.endOffset, &jet.end, matrix);
     spawn.kind = 3;
@@ -824,13 +869,13 @@ s32 func_15196B4C(CharacterFlamethrowerActor *actor, s32 arg1) {
 
     jet = actor->state;
     points = actor->points;
-    if (jet->owner->unk1D4 == NULL) {
+    if (jet->owner->ob_matrix_ptr == NULL) {
         return 0;
     }
     if (jet->speedFn != -1) {
         jet->targetSpeed = D_8008F870[jet->speedFn](actor, arg1);
     }
-    matrix = (s32)jet->owner->unk1D4 + (jet->bone << 6);
+    matrix = (s32)jet->owner->ob_matrix_ptr + (jet->bone << 6);
     func_15143134(&jet->startOffset, &actor->head.tmpl.pos, matrix);
     func_15143134(&jet->endOffset, &end, matrix);
     jet->emitAccum += jet->emitRate * D_800BE9A4;
@@ -966,7 +1011,7 @@ Gfx *func_15197148(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
     if (actor->head.count >= 2) {
         func_151D5D60(actor->buffers, view, (actor->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), (void **)&vtx, NULL);
         if (vtx != NULL) {
-            eye = &D_800DBFF0[view].eye;
+            eye = &camera_global_Cameras[view].eye;
             jet = actor->state;
             points = actor->points;
             flag = 1;
@@ -1268,7 +1313,7 @@ void *func_15197C10(SceneParticle *beam, s16 view) {
     tip.x = beam->head.def.pos.x + dx * progress;
     tip.y = beam->head.def.pos.y + dy * progress;
     tip.z = beam->head.def.pos.z + dz * progress;
-    eye = &D_800DBFF0[view].eye;
+    eye = &camera_global_Cameras[view].eye;
     dx = tip.x - beam->head.def.pos.x;
     dy = tip.y - beam->head.def.pos.y;
     dz = tip.z - beam->head.def.pos.z;
@@ -1352,15 +1397,6 @@ void func_15198054(CharacterFlamethrowerActor *actor, ActorMsg *msg, u8 kind) {
     }
 }
 
-/* Preset in D_800A8710 for the child particles a jet point spawns (func_15198110). */
-typedef struct JetChildPreset {
-    /* 0x0 */ f32 sizeScale;
-    /* 0x4 */ f32 unk4;
-    /* 0x8 */ s16 lifeMin;
-    /* 0xA */ s16 lifeRange;
-} JetChildPreset;
-
-extern JetChildPreset D_800A8710[];
 
 /*
  * Called when jet point `index` fades below childLife: spawns line particles (moved and faded by
@@ -1495,7 +1531,7 @@ s32 func_15198570(CharacterFlamethrowerActor *actor) {
 
     jet = actor->state;
     points = actor->points;
-    obj = &D_800CC2D0[0];
+    obj = &movement_obj[0];
     i = actor->head.end;
     while (i != actor->head.start) {
         i--;
@@ -1505,13 +1541,13 @@ s32 func_15198570(CharacterFlamethrowerActor *actor) {
         pos = points[i].pos;
         r = obj->bodyRadius;
         h = obj->bodyHeight;
-        dx = pos.x - obj->x_position;
-        dz = pos.z - obj->z_position;
-        dy = pos.y - (obj->y_position + obj->bodyOffsetY);
+        dx = pos.x - obj->xpos;
+        dz = pos.z - obj->zpos;
+        dy = pos.y - (obj->ypos + obj->bodyOffsetY);
         dy *= (1.0f + r / h) * 0.5f;
         d = dx * dx + dy * dy + dz * dz;
         if (d < r * r) {
-            func_1505D024(obj, 0x60006, obj->unk7A, jet->owner - D_800CC2D0);
+            func_1505D024(obj, 0x60006, obj->langle, jet->owner - movement_obj);
             func_1518D1C0(obj, 0xB, 0, 1, actor->head.header.owner, actor->head.header.kind, "Characterflamethrower");
             while (i != actor->head.start) {
                 actor->head.start = actor->head.start + 1;
@@ -1545,8 +1581,8 @@ s32 func_151987CC(CharacterFlamethrowerActor *actor) {
     jet = actor->state;
     points = actor->points;
     for (j = 0; j < 25; j++) {
-        obj = &D_800CC2D0[j];
-        if (obj->interaction_state == 0 || obj->unk65 != 0 || jet->owner->unique_id == obj->unique_id) {
+        obj = &movement_obj[j];
+        if (obj->type == 0 || obj->attach_char != 0 || jet->owner->unique_id == obj->unique_id) {
             continue;
         }
         {
@@ -1559,9 +1595,9 @@ s32 func_151987CC(CharacterFlamethrowerActor *actor) {
                 pos = points[i].pos;
                 r = obj->bodyRadius;
                 h = obj->bodyHeight;
-                dx = pos.x - obj->x_position;
-                dz = pos.z - obj->z_position;
-                dy = pos.y - (obj->y_position + obj->bodyOffsetY);
+                dx = pos.x - obj->xpos;
+                dz = pos.z - obj->zpos;
+                dy = pos.y - (obj->ypos + obj->bodyOffsetY);
                 dy *= (1.0f + r / h) * 0.5f;
                 if (dx * dx + dy * dy + dz * dz < r * r + 2500.0f) {
                     while (i != actor->head.start) {
@@ -1601,7 +1637,7 @@ void func_15183ACC(s32);
 s32 func_1510F8D8(s32, s32, s32, s32);
 
 /*
- * Jet update callback, active while the owner's unk31C->unk58 is 1: objects in lists 0x15-0x17 that a
+ * Jet update callback, active while the owner's mv->unk58 is 1: objects in lists 0x15-0x17 that a
  * point touches are hit (func_15168B10 message 0x18) and put into state 5.
  */
 s32 func_1519897C(CharacterFlamethrowerActor *actor) {
@@ -1624,7 +1660,7 @@ s32 func_1519897C(CharacterFlamethrowerActor *actor) {
     Vec3f pos;
 
     owner = jet->owner;
-    sub = owner->unk31C;
+    sub = owner->mv;
     if (sub == NULL) {
         return 0;
     }
@@ -1716,7 +1752,6 @@ void func_15198D40(CharacterFlamethrowerActor *actor) {
 void func_15198D7C(CharacterFlamethrowerActor *actor) {
 }
 
-extern ScatterPreset D_800A8728[];
 extern s32 func_15147DA0(EffectTemplate18 *, TrailMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32, TrailRender *, s32, s32, s32);
 
 /* Spawns scatterAccum particles (func_15147DA0) flying from the actor towards random points around `end`. */
@@ -1779,20 +1814,8 @@ void func_15198D88(CharacterFlamethrowerActor *actor, Vec3f *end) {
     } while (jet->scatterAccum > 1.0f);
 }
 
-typedef struct {
-    f32 radius;
-    f32 speed;
-    f32 speed_range;
-    s16 acceleration;
-    s16 acceleration_range;
-    s16 fade;
-    s16 fade_range;
-    s16 size;
-    s16 size_range;
-} JetSpritePreset;
 
 void *func_15167D84(void *, s32, s32, s8, u8, s32);
-extern JetSpritePreset D_800A8770[];
 
 /* Emits spriteAccum sprites (func_15167D84) flying from the actor towards random points around `end`. */
 void func_151990AC(CharacterFlamethrowerActor *actor, Vec3f *end) {
@@ -1868,9 +1891,9 @@ void func_151993B4(CharacterFlamethrowerActor *actor) {
 }
 
 /* unique_ids of the 6 characters that have a flamethrower zone (D_800E0900). */
-extern u8 D_800A8A9C[];
+const u8 D_800A8A9C[] = { 6, 7, 8, 9, 10, 11 };
 
-/* Jet init callback (D_8008F87C): clears the owner's flamethrower zone's `disabled` flag. */
+/* Jet init callback (D_8008F87C): clears the owner's flamethrower zone's `inactive` flag. */
 void func_151993E4(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerJet *jet;
     Actor *owner;
@@ -1890,11 +1913,11 @@ void func_151993E4(CharacterFlamethrowerActor *actor) {
     } while (!found && i < 6);
 
     if (found) {
-        D_800E0900[i]->disabled = FALSE;
+        D_800E0900[i]->inactive = FALSE;
     }
 }
 
-/* Jet destroy callback (D_8008F88C): sets the owner's flamethrower zone's `disabled` flag again. */
+/* Jet destroy callback (D_8008F88C): sets the owner's flamethrower zone's `inactive` flag again. */
 void func_1519944C(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerJet *jet;
     Actor *owner;
@@ -1914,7 +1937,7 @@ void func_1519944C(CharacterFlamethrowerActor *actor) {
     } while (!found && i < 6);
 
     if (found) {
-        D_800E0900[i]->disabled = TRUE;
+        D_800E0900[i]->inactive = TRUE;
     }
 }
 
@@ -2081,7 +2104,7 @@ CharacterFlamethrowerActor *func_151994B8(s32 extraSize, CharacterFlamethrowerSe
     CharacterFlamethrowerFlame *state;
 
     owner = setup->seed.owner;
-    if (owner->unk1D4 == NULL) {
+    if (owner->ob_matrix_ptr == NULL) {
         return NULL;
     }
     spawn.itemCount = setup->kind;
@@ -2094,7 +2117,7 @@ CharacterFlamethrowerActor *func_151994B8(s32 extraSize, CharacterFlamethrowerSe
     inputs[1] = &initial.seed.endOffset;
     outputs[0] = &initial.start;
     outputs[1] = &initial.end;
-    func_15145EA4(inputs, outputs, (s32)owner->unk1D4 + (initial.seed.bone << 6), 2);
+    func_15145EA4(inputs, outputs, (s32)owner->ob_matrix_ptr + (initial.seed.bone << 6), 2);
     {
         s32 flag8;
         s32 flag4;
@@ -2297,7 +2320,7 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
     flame = actor->state;
     points = actor->points;
     obj = flame->seed.owner;
-    if (obj->interaction_state == 0 || obj->unique_id != flame->seed.ownerId) {
+    if (obj->type == 0 || obj->unique_id != flame->seed.ownerId) {
         return 0;
     }
     if ((obj->unk74 & 0xF) == 0xF) {
@@ -2305,7 +2328,7 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
     } else {
         flame->flags &= ~0x10;
     }
-    if (obj->unk1D4 != NULL) {
+    if (obj->ob_matrix_ptr != NULL) {
         Vec3f *inputs[4];
         Vec3f *outputs[4];
 
@@ -2317,16 +2340,16 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
         outputs[1] = &pos1;
         outputs[2] = &pos2;
         outputs[3] = &pos3;
-        func_15145EA4(inputs, outputs, (s32)obj->unk1D4 + (flame->seed.bone << 6), 4);
+        func_15145EA4(inputs, outputs, (s32)obj->ob_matrix_ptr + (flame->seed.bone << 6), 4);
         flame->flags &= ~1;
     } else {
         Vec3f dir;
         Vec3f up;
 
         func_15145740(obj, &dir, &up, 0, 0.0f);
-        pos0.x = obj->x_position;
-        pos0.y = obj->y_position + 33.0f;
-        pos0.z = obj->z_position;
+        pos0.x = obj->xpos;
+        pos0.y = obj->ypos + 33.0f;
+        pos0.z = obj->zpos;
         pos1.x = dir.x * 0.03200000152f + pos0.x;
         pos1.y = dir.y * 0.03200000152f + pos0.y;
         pos1.z = dir.z * 0.03200000152f + pos0.z;
@@ -2405,7 +2428,7 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
         flame->end = cur1;
         flame->timeCarry = t;
     }
-    if (obj->unk1D4 != NULL && (obj->unk74 & 0xF) != 0xF) {
+    if (obj->ob_matrix_ptr != NULL && (obj->unk74 & 0xF) != 0xF) {
         flame->scatterAccum += (flame->scatter.rate + func_150ADA68() * flame->scatter.rateRange) * D_800BE9A4;
         if (flame->scatterAccum > 1.0f) {
             s32 pad; // matching: unused stack slot (also pad2 below)
@@ -2464,7 +2487,7 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
             } while (flame->scatterAccum > 1.0f);
         }
     }
-    if (obj->unk1D4 != NULL && (obj->unk74 & 0xF) != 0xF) {
+    if (obj->ob_matrix_ptr != NULL && (obj->unk74 & 0xF) != 0xF) {
         flame->particleAccum += (flame->emit.rate + func_150ADA68() * flame->emit.rateRange) * D_800BE9A4;
         if (flame->particleAccum > 1.0f) {
             ParticleDesc part;
@@ -2530,12 +2553,12 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
     }
     flame->timer151 += D_800BE9E4;
     if (flame->timer151 >= 0x3D) {
-        if (flame->seed.owner != NULL && flame->seed.owner->unk31C != NULL) {
-            flame->seed.owner->unk31C->unk1AA++;
+        if (flame->seed.owner != NULL && flame->seed.owner->mv != NULL) {
+            flame->seed.owner->mv->shotsfired++;
         }
         flame->timer151 = 0;
     }
-    if ((flame->flags & 8) && obj->camera != NULL) {
+    if ((flame->flags & 8) && obj->CameraPtr != NULL) {
         flame->sparkTimer -= D_800BE9E4;
         if (flame->sparkTimer < 0) {
             s32 pad2;
@@ -2543,7 +2566,7 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
 
             spark.flags = 1;
             spark.duration = func_150ADA20() % 21U + 0x14;
-            spark.playerMask = 1 << obj->camera->playerIndex;
+            spark.playerMask = 1 << obj->CameraPtr->CNumber;
             spark.strength = func_150ADA20() % 7U + 2;
             spark.updateKind = -1;
             func_151D8868(&spark, 0, actor->head.header.owner, actor->head.header.kind);
@@ -2597,9 +2620,9 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
             }
             end = &points[i].pos;
         }
-        x = obj->x_position;
-        y = obj->y_position + 48.0f;
-        z = obj->z_position;
+        x = obj->xpos;
+        y = obj->ypos + 48.0f;
+        z = obj->zpos;
         dx = end->x - x;
         dy = end->y - y;
         dz = end->z - z;
@@ -3087,7 +3110,7 @@ void func_1519BE1C(Vec3f *pos, Vec3f *vel, f32 gravity, f32 dt) {
     pos->z += v.z * dt;
 }
 
-/* Flame init callback (D_8008F8A4): clears the owner's flamethrower zone's `disabled` flag. */
+/* Flame init callback (D_8008F8A4): clears the owner's flamethrower zone's `inactive` flag. */
 void func_1519BEB8(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerFlame *flame;
     Actor *owner;
@@ -3107,11 +3130,11 @@ void func_1519BEB8(CharacterFlamethrowerActor *actor) {
     } while (!found && i < 6);
 
     if (found) {
-        D_800E0900[i]->disabled = FALSE;
+        D_800E0900[i]->inactive = FALSE;
     }
 }
 
-/* Flame destroy callback (D_8008F8B4): sets the owner's flamethrower zone's `disabled` flag again. */
+/* Flame destroy callback (D_8008F8B4): sets the owner's flamethrower zone's `inactive` flag again. */
 void func_1519BF20(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerFlame *flame;
     Actor *owner;
@@ -3131,7 +3154,7 @@ void func_1519BF20(CharacterFlamethrowerActor *actor) {
     } while (!found && i < 6);
 
     if (found) {
-        D_800E0900[i]->disabled = TRUE;
+        D_800E0900[i]->inactive = TRUE;
     }
 }
 
@@ -3378,7 +3401,7 @@ typedef struct CharacterFlamethrowerFlameEx {
 s32 func_1519C910(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerFlameEx *state = actor->state;
     Actor *owner = state->flame.seed.owner;
-    u16 v = owner->unk84.uh;
+    u16 v = owner->animseq.uh;
 
     if (v != state->aliveState) {
         if (v != state->aliveState2) {
@@ -3521,7 +3544,7 @@ void func_1519C9C4(FlamethrowerController *ctrl) {
 void func_1519CD64(FlamethrowerController *ctrl) {
     Actor *owner = ctrl->owner;
 
-    if (owner->interaction_state != 0 && owner->id != 0xFF && owner->unique_id == ctrl->ownerId) {
+    if (owner->type != 0 && owner->character_type != 0xFF && owner->unique_id == ctrl->ownerId) {
         return;
     }
     ctrl->base.header.state = -1;
@@ -3569,8 +3592,8 @@ void func_1519CDB0(CharacterFlamethrowerActor *actor, f32 fraction, s32 kind) {
                 func_1505D1C4(point->pos.x + ((previous->x - point->pos.x) * factor),
                     point->pos.y + ((previous->y - point->pos.y) * factor),
                     (interpolated_z = point->pos.z + ((previous->z - point->pos.z) * factor)), kind,
-                    owner - D_800CC2D0,
-                    owner->unk76, 0, 0);
+                    owner - movement_obj,
+                    owner->angle, 0, 0);
                 next += spacing;
             }
             previous = &point->pos;

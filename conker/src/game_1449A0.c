@@ -5,7 +5,7 @@
 /*
  * Behaviour handlers for scenery objects (WorldObject) that swing one rotation axis toward a target angle.
  */
-/* Behaviour scratch state (WorldObject.work): a damped swing or a bounce. */
+/* Behaviour scratch state (WorldObject.touch): a damped swing or a bounce. */
 typedef union MoverWork {
     struct {
         /* 0x7C */ f32 damping;
@@ -19,7 +19,7 @@ typedef union MoverWork {
     } bounce;
 } MoverWork;
 
-#define WORK(obj) ((MoverWork *)&(obj)->work)
+#define WORK(obj) ((MoverWork *)&(obj)->touch)
 
 
 extern void func_15114D24(WorldObject *obj, s32 sound, s32 arg2, s16 arg3, s16 arg4, s32 flags);
@@ -28,7 +28,7 @@ f32 func_15117518(WorldObject *obj, f32 angle);
 
 /* Swings rotX toward the target angle with func_151172D8's damped spring. */
 void func_151174F0(WorldObject *obj) {
-    obj->rotX = func_151172D8(obj, obj->rotX);
+    obj->t = func_151172D8(obj, obj->t);
 }
 
 /*
@@ -48,9 +48,9 @@ f32 func_15117518(WorldObject *obj, f32 angle) {
     rebound = WORK(obj)->bounce.rebound;
     acceleration = WORK(obj)->bounce.acceleration * D_800BE9E4;
     velocity = WORK(obj)->bounce.velocity;
-    target = (obj->param.word << 22) >> 22;
+    target = (obj->moveData.word << 22) >> 22;
     if (angle != target || velocity != 0.0f) {
-        soundIndex = obj->param.word >> 10;
+        soundIndex = obj->moveData.word >> 10;
         if (velocity == 0.0f && soundIndex != 0 && D_80089260[soundIndex].open != 0) {
             func_15114D24(obj, D_80089260[soundIndex].open, 24000, 200, 2500, 0);
         }
@@ -81,10 +81,10 @@ f32 func_15117518(WorldObject *obj, f32 angle) {
 
 /* Bounces rotX toward the target angle (func_15117518). */
 void func_15117770(WorldObject *obj) {
-    obj->rotX = func_15117518(obj, obj->rotX);
+    obj->t = func_15117518(obj, obj->t);
 }
 
 /* Bounces rotZ toward the target angle (func_15117518). */
 void func_15117798(WorldObject *obj) {
-    obj->rotZ = func_15117518(obj, obj->rotZ);
+    obj->v = func_15117518(obj, obj->v);
 }

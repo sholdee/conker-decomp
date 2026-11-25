@@ -40,7 +40,7 @@ void func_150091D0(void) {
 void func_150092DC(void) {
     u32 i;
 
-    for (i = 0; i < D_800D3094; i++) {
+    for (i = 0; i < gZoneCount; i++) {
         func_15009334(i);
     }
 }
@@ -69,58 +69,58 @@ void func_15009334(s32 index) {
     ZoneLink *link;
     s32 type;
 
-    type = D_800D3098[index].kind >> 2;
+    type = ZONE_TYPE(&zones[index]);
     switch (type) {
-        case 9:
-        case 10:
-        case 16:
-            red = D_800D3098[index].unk18 & 0xFF;
-            green = (D_800D3098[index].unk18 >> 8) & 0xFF;
-            blue = (D_800D3098[index].unk18 >> 16) & 0xFF;
-            D_800D3098[index].flags |= 4;
+        case ZONE_TYPE_LIGHT_SETUP:
+        case ZONE_TYPE_LIGHT_CONTROL:
+        case ZONE_TYPE_LIGHT_DIRECTIONAL:
+            red = zones[index].data1 & 0xFF;
+            green = (zones[index].data1 >> 8) & 0xFF;
+            blue = (zones[index].data1 >> 16) & 0xFF;
+            zones[index].flags |= 4;
             switch (type) {
-                case 10:
+                case ZONE_TYPE_LIGHT_CONTROL:
                     func_1515D4D4(red, green, blue, 0);
-                    if (D_800D3098[index].unk20 != 0) {
-                        func_1500AB5C(D_800D3098[index].unk20);
+                    if (zones[index].data3 != 0) {
+                        func_1500AB5C(zones[index].data3);
                     }
                     break;
-                case 9:
-                    x = D_800D3098[index].x;
-                    y = D_800D3098[index].y;
-                    z = D_800D3098[index].z;
-                    settings = (D_800D3098[index].unk1C >> 8) & 0xFF;
-                    strength = (D_800D3098[index].unk18 >> 24) & 0x7F;
-                    enabled = (D_800D3098[index].unk18 >> 31) & 1;
-                    callback = D_800D3098[index].unk20 & 0xFFFF;
-                    duration = (D_800D3098[index].unk20 >> 16) & 0xFFFF;
+                case ZONE_TYPE_LIGHT_SETUP:
+                    x = zones[index].x;
+                    y = zones[index].y;
+                    z = zones[index].z;
+                    settings = (zones[index].data2 >> 8) & 0xFF;
+                    strength = (zones[index].data1 >> 24) & 0x7F;
+                    enabled = (zones[index].data1 >> 31) & 1;
+                    callback = zones[index].data3 & 0xFFFF;
+                    duration = (zones[index].data3 >> 16) & 0xFFFF;
                     light = func_1515D5AC(x, y, z, settings, red, green, blue, strength, enabled, duration);
                     if (light != 0 && callback != 0) {
                         func_1500A94C(light, callback);
                     }
                     break;
-                case 16:
+                case ZONE_TYPE_LIGHT_DIRECTIONAL:
                     D_800DCD24[0] = red;
                     D_800DCD24[1] = green;
                     D_800DCD24[2] = blue;
-                    D_800DCD28[0] = D_800D3098[index].unk1C & 0xFF;
-                    D_800DCD28[1] = (D_800D3098[index].unk1C >> 8) & 0xFF;
-                    D_800DCD28[2] = (D_800D3098[index].unk1C >> 16) & 0xFF;
-                    D_800DCD3C = (D_800D3098[index].unk1C >> 24) & 0xFF;
-                    D_800DCD3D = (D_800D3098[index].unk18 >> 24) & 0xFF;
+                    D_800DCD28[0] = zones[index].data2 & 0xFF;
+                    D_800DCD28[1] = (zones[index].data2 >> 8) & 0xFF;
+                    D_800DCD28[2] = (zones[index].data2 >> 16) & 0xFF;
+                    D_800DCD3C = (zones[index].data2 >> 24) & 0xFF;
+                    D_800DCD3D = (zones[index].data1 >> 24) & 0xFF;
                     break;
             }
             break;
-        case 15:
+        case ZONE_TYPE_LIGHT_AMBIENT_LOCAL:
             link = allocate_memory(sizeof(ZoneLink), 1, 0, 0);
-            link->zone = &D_800D3098[index];
+            link->zone = &zones[index];
             link->next = D_800DCD80;
             D_800DCD80 = link;
         unused_label: // matching: an unused label keeps IDO from threading this break to the epilogue
             break;
-        case 24:
+        case ZONE_TYPE_LIGHT_DIRECTIONAL_LOCAL:
             link = allocate_memory(sizeof(ZoneLink), 1, 0, 0);
-            link->zone = &D_800D3098[index];
+            link->zone = &zones[index];
             link->next = D_800DCD84;
             D_800DCD84 = link;
             break;
@@ -219,12 +219,18 @@ void func_15009944(s32 light, s32 id) {
     func_15162740(light, 1, 6, 0, 300, 2, 255, 1);
 }
 
+/* Per-light parameters of func_15009990 and func_15009A38, indexed by the light id. */
+static const u8 sCycleArg1[4] = { 1, 2, 3, 4 };
+static const u8 sCycleArg2[4] = { 23, 24, 25, 26 };
+static const u8 sCycleObjectIds[4] = { 0xF6, 0xF3, 0xED, 0xF0 };
+static const u8 sLightTypes[4] = { 27, 28, 29, 30 };
+
 void func_15009990(s32 light, s32 id) {
     LightEffect *effect;
     u8 extra[1];
 
-    extra[0] = D_80095B50[id];
-    effect = func_1516295C(light, D_80095B48[id], D_80095B4C[id], 2, 300, 12, -1, 0, -1, 1, 1, 255, 1);
+    extra[0] = sCycleObjectIds[id - 24];
+    effect = func_1516295C(light, sCycleArg1[id - 24], sCycleArg2[id - 24], 2, 300, 12, -1, 0, -1, 1, 1, 255, 1);
     if (effect != NULL) {
         memcpy(&effect->data.objectCycle.objectId, extra, 1);
     }
@@ -236,7 +242,7 @@ void func_15009A38(s32 light, s32 id) {
     header.flags = 2;
     header.update = -1;
     header.lifetime = 300;
-    header.lightType = D_80095B27[id];
+    header.lightType = sLightTypes[id - 69];
     func_1516037C(&header, light, 0, 255, 1);
 }
 
@@ -368,13 +374,13 @@ void func_1500A260(s32 light, s32 id) {
 }
 
 void func_1500A2AC(s32 light, s32 id) {
-    u8 kinds[4] = D_80095B70;
+    const u8 kinds[4] = { 2, 3, 4, 5 };
 
     func_151B8DB0(light, kinds[id - 51], 255, 1);
 }
 
 void func_1500A2F4(s32 light, s32 id) {
-    u8 kinds[2] = D_80095B74;
+    const u8 kinds[2] = { 0, 1 };
 
     func_15164208(light, kinds[id - 56], 255, 1);
 }
@@ -434,7 +440,7 @@ void func_1500A68C(s32 light, s32 id) {
 extern u8 D_80082BEC[2][3];
 s32 func_150B060C(u8, void *, s32);
 
-/** Attaches the light to the level object picked by `id` (and by whether D_800BE9F0 is 6). */
+/** Attaches the light to the level object picked by `id` (and by whether level is 6). */
 void func_1500A6D8(s32 light, s32 id) {
     LightEffectHeader header;
     LightSwing attachment;
@@ -442,7 +448,7 @@ void func_1500A6D8(s32 light, s32 id) {
     u8 objects[2][3] = D_80082BEC;
     LightEffect *effect;
 
-    variant = (D_800BE9F0 == 6) ? 1 : 0;
+    variant = (level == 6) ? 1 : 0;
     if (func_150B060C(objects[variant][id - 73], &attachment, id) != 0) {
         header.flags = 0;
         header.update = 23;
@@ -957,10 +963,10 @@ void func_1500BEC0(void) {
     if (D_800B0DF0->maxParticles == 0) {
         return;
     }
-    if ((D_800BE9F0 == 6) && (D_80038080 == 0)) {
+    if ((level == 6) && (D_80038080 == 0)) {
         return;
     }
-    if (D_800BE9F0 == 0x1D) {
+    if (level == 0x1D) {
         return;
     }
 

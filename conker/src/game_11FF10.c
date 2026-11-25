@@ -3,7 +3,8 @@
 #include "variables.h"
 #include "effects.h"
 
-extern f32 D_800A1950[];
+static const f32 D_800A1950[3] = { 0.0f, 24.0f, 11.0f };
+static const f32 D_800A195C[3] = { 0.0f, 71.0f, 9.0f };
 
 s32 func_1509BE40();
 void func_15143134(f32 *, f32 *, Mtx *);
@@ -42,7 +43,7 @@ typedef struct {
     /* 0x110 */ ParticleState state;
 } Particle;
 
-// matching: D_800CC5EC is D_800CC2D0[0].unk31C; func_150F2A60 tests it through the array and reads through
+// matching: D_800CC5EC is movement_obj[0].mv; func_150F2A60 tests it through the array and reads through
 // this alias so IDO reloads it (as the original does) instead of reusing the first load
 extern struct {
     u8 pad0[0x120];
@@ -52,11 +53,10 @@ extern u8 D_800CC40C;
 WorldObject *func_151149AC(s32);
 void func_15136C3C(Actor *, s32, s32, s32, s32, s32, s32, s32);
 void func_1507CD64(Actor *, s32);
-void func_15196318(s32, s32, s32);
 
-/* While D_800CC2D0[0] has unk31C: if entry 0xFA or 0xF9 of D_800DBEF4 has its D_800DBF94 bit 0 set, runs
- * D_800CC2D0[0] through func_15136C3C .. func_1507CD64(6) once; then offsets the four D_800BE4F0 entries
- * by object 0xE's unk2E4. */
+/* While movement_obj[0] has mv: if entry 0xFA or 0xF9 of db_Object_array has its gWorldObjectContacts bit 0 set, runs
+ * movement_obj[0] through func_15136C3C .. func_1507CD64(6) once; then offsets the four D_800BE4F0 entries
+ * by object 0xE's taskint[0]. */
 void func_150F2A60(s32 arg0) {
     s32 i;
     s32 scroll;
@@ -64,34 +64,34 @@ void func_150F2A60(s32 arg0) {
     WorldObject *entry;
     s32 entryIndex;
 
-    if (D_800CC2D0->unk31C != NULL) {
+    if (movement_obj->mv != NULL) {
         if (D_800CC5EC->unk120 == 0) {
             // matching: `| 0` hides the induction variable, so IDO keeps `slti` instead of testing i != 2
             for (i = 0; i < 2; i = (i + 1) | 0) {
                 entry = func_151149AC((0xFA - i) & 0xFF);
-                entryIndex = entry - D_800DBEF4;
-                if (D_800DBF94[entryIndex] & 1) {
+                entryIndex = entry - db_Object_array;
+                if (gWorldObjectContacts[entryIndex] & 1) {
                     if (D_800CC40C != 0) {
-                        func_15060F28(&D_800CC2D0[D_800CC40C - 100], 0);
+                        func_15060F28(&movement_obj[D_800CC40C - 100], 0);
                     }
                     D_800CC49A = 0;
-                    func_15136C3C(D_800CC2D0, 0, 0, 1, 1, 0, 0xFF, 1);
-                    func_10010630(0x627, D_800CC2D0, 0x6D60, 500, 1000);
-                    func_15145A50(D_800CC2D0);
-                    func_1507CD64(D_800CC2D0, 6);
+                    func_15136C3C(movement_obj, 0, 0, 1, 1, 0, 0xFF, 1);
+                    func_10010630(0x627, movement_obj, 0x6D60, 500, 1000);
+                    func_15145A50(movement_obj);
+                    func_1507CD64(movement_obj, 6);
                     break;
                 }
             }
             obj = func_15083E90(0xE);
             if (obj != NULL) {
-                scroll = obj->unk2E4;
+                scroll = obj->taskint[0];
             } else {
                 scroll = 0;
             }
-            func_15196318(D_800BE4F0->unk0, scroll, 0);
-            func_15196318(D_800BE4F0->unk4, 0, -scroll);
-            func_15196318(D_800BE4F0->unk8, scroll, 0);
-            func_15196318(D_800BE4F0->unkC, -scroll, 0);
+            func_15196318(D_800BE4F0[0], scroll, 0);
+            func_15196318(D_800BE4F0[1], 0, -scroll);
+            func_15196318(D_800BE4F0[2], scroll, 0);
+            func_15196318(D_800BE4F0[3], -scroll, 0);
         }
     }
 }
@@ -113,7 +113,6 @@ void func_150F2C8C(Actor *target) {
     }
 }
 
-extern f32 D_800A195C[];
 void func_1502EA98(Actor *, s32, s32, s32, s32, s32, s32);
 void func_15145EA4(f32 **, f32 **, Mtx *, s32);
 extern s32 func_15146078(Vec3f *, Vec3f *, Vec3f *);
@@ -132,7 +131,7 @@ void func_150F2D14(Emitter *emitter) {
         return;
     }
     target = state->target;
-    if (target->interaction_state == 0 || target->unique_id != state->targetId) {
+    if (target->type == 0 || target->unique_id != state->targetId) {
         emitter->base.header.state = -1;
         return;
     }
@@ -142,9 +141,9 @@ void func_150F2D14(Emitter *emitter) {
     }
     state->prevUnk222 = target->unk222;
     if (target->unk222 != 0) {
-        func_1502EA98(&D_800CC2D0[target->unk222], 0xFF, 0, 0, 0x50, 0, 0xF);
+        func_1502EA98(&movement_obj[target->unk222], 0xFF, 0, 0, 0x50, 0, 0xF);
     }
-    if (target->unk1D4 != NULL && state->count > 0) {
+    if (target->ob_matrix_ptr != NULL && state->count > 0) {
         state->timer += 0.148f * D_800BE9A4;
         if (state->timer > 1.0f) {
             do {
@@ -164,7 +163,7 @@ void func_150F2D14(Emitter *emitter) {
                     src[1] = D_800A195C;
                     dst[0] = &def.pos.x;
                     dst[1] = &dir.x;
-                    func_15145EA4(src, dst, (Mtx *)target->unk1D4 + 15, 2);
+                    func_15145EA4(src, dst, (Mtx *)target->ob_matrix_ptr + 15, 2);
                     dir.x -= def.pos.x;
                     dir.y -= def.pos.y;
                     dir.z -= def.pos.z;
@@ -228,11 +227,11 @@ s32 func_150F3214(Particle *particle) {
     state = &particle->state;
     target = state->target;
 
-    if (target->interaction_state == 0 || target->unique_id != state->targetId || target->unk1D4 == NULL) {
+    if (target->type == 0 || target->unique_id != state->targetId || target->ob_matrix_ptr == NULL) {
         return 0;
     }
 
-    func_15143134(D_800A1950, &particle->head.def.pos.x, (Mtx *)target->unk1D4 + 15);
+    func_15143134(D_800A1950, &particle->head.def.pos.x, (Mtx *)target->ob_matrix_ptr + 15);
 
     size = sqrtf(state->age) * state->growth;
     particle->head.def.height = size;
@@ -252,394 +251,22 @@ void func_150F337C(Particle *particle, s16 viewport) {
     func_15140410(particle, &particle->state.axisU, &particle->state.axisV, viewport);
 }
 
-/* Sets bit 0 of obj->flags unless D_800DBFF0->eye.z is below -2000. */
+/* Sets bit 0 of obj->flags unless camera_global_Cameras->eye.z is below -2000. */
 void func_150F33B0(WorldObject *obj) {
-    if (D_800DBFF0->eye.z < -2000.0f) {
-        obj->flags &= ~1;
+    if (camera_global_Cameras->eye.z < -2000.0f) {
+        obj->object_status &= ~1;
         return;
     }
-    obj->flags = (obj->flags & ~1) | 1; // matching: a bitfield-style insert; a plain |= 1 allocates other temps
+    obj->object_status = (obj->object_status & ~1) | 1; // matching: a bitfield-style insert; a plain |= 1 allocates other temps
 }
 
-/* While D_800DBFF0[player].eye.z is below -2100, mirrors (unk2FC > 840) into bit `player` of *D_800D9A40. */
+/* While camera_global_Cameras[player].eye.z is below -2100, mirrors (unk2FC > 840) into bit `player` of *D_800D9A40. */
 void func_150F33F8(s32 player) {
-    if (D_800DBFF0[player].eye.z < -2100.0f) {
-        if (D_800DBFF0[player].eye.y > 840.0f) {
+    if (camera_global_Cameras[player].eye.z < -2100.0f) {
+        if (camera_global_Cameras[player].eye.y > 840.0f) {
             *D_800D9A40 |= 1 << player;
             return;
         }
         *D_800D9A40 &= ~(1 << player);
-    }
-}
-
-/* Animation speed for `pitch`: 0.75, or faster the further it is below -5. */
-f32 func_150F34A0(Actor *obj, f32 pitch) {
-    f32 speed;
-
-    if (pitch < -5.0f) {
-        speed = pitch * -0.01f + 0.7f;
-    } else {
-        speed = 0.75f;
-    }
-
-    return speed;
-}
-
-void func_150585F0(Actor *arg0, f32 arg1);
-void func_15052590(Actor *arg0);
-u8 func_150599C8(Actor *arg0, u8 arg1, u16 arg2);
-f32 func_1505A3A8(f32 arg0, void *arg1, f32 arg2, f32 arg3, u8 arg4);
-void func_15073FA0(void);
-
-
-/* Per-frame control of a flying mode: the stick steers and pitches, B thrusts, A reverses, R holds altitude,
- * Z fires (only when D_800BE9F0 is 0x3C and fewer than 5 id-0x25 objects exist). Also picks up the
- * D_800CC26D object into unk13C and drops it again when unk25C bit 1 is set. */
-void func_150F34F4(Actor *actor) {
-    u16 angle;
-    f32 mag;
-    f32 accel;
-    f32 temp; // matching: one local for stick_x and the climb limit (split locals move FP registers)
-    f32 pitch;
-    f32 speed; // capped xz speed, then the func_1505A3A8 rate, then the old y_velocity (IDO's allocation)
-    f32 animSpeed;
-    s32 anim;
-    s32 count;
-    f32 floorLevel;
-    s32 rHeld;
-    s32 i;
-    f32 dist;
-    f32 minDist;
-    Actor *obj;
-    s32 idx;
-
-    floorLevel = 0.0f;
-    actor->unkAB = 1;
-    actor->unk80 = 1;
-    actor->unk222 = 0;
-    D_800CC288 = D_800BE710[0];
-    D_800CC284 = D_800BE728[0];
-    if ((D_800C3E78 <= D_80082FA0) && (D_800DDE3C[D_800C3E78] != 0) && (D_800DDDC8[D_800C3E78] > 0.75f) && (D_800E0B94 != 2)) {
-        D_800CC284->stick_x = 0;
-        D_800CC284->stick_y = 0;
-        D_800CC284->button = 0;
-        D_800CC288 = 0;
-    }
-    actor->unkF8 |= 0x40;
-    actor->unk1CC = actor->y_position;
-    if (actor->unk103 != 0) {
-        actor->unk103--;
-    }
-    if (actor->stunned != 0) {
-        func_150585F0(actor, 0.25f);
-        func_15059140(actor);
-        actor->unk40 = ((s16)actor->unk7A + 0x4000) * (360.0f / 65536.0f);
-        if (actor->unk13C != 0) {
-            Actor *rider;
-
-            idx = actor->unk13C - 100;
-            rider = &D_800CC2D0[idx];
-            rider->unk13D = 0;
-            rider->xz_velocity = actor->xz_velocity;
-            rider->unk232 = 0x21;
-            rider->unk218 = 0;
-            rider->stunned = 0;
-            rider->unkF8 &= ~0x400;
-            actor->unk13C = 0;
-        }
-        return;
-    }
-    if (actor->unk102 == 0) {
-        actor->in_water = 0;
-        angle = func_1505A630(D_800CC284->stick_x, D_800CC284->stick_y, 0);
-        mag = func_1505A5CC(D_800CC284);
-        if (D_800CC284->button & R_TRIG) {
-            mag = 0.0f;
-        }
-        angle += D_800CC280;
-        actor->unk78 = actor->unk7A;
-        if (mag > 1.0f) {
-            actor->unk78 = angle;
-        }
-        actor->unk44 = mag * 0.35f;
-        actor->unk232 = 7;
-        actor->unk218 = 0;
-        if ((D_800CC288 & (A_BUTTON | B_BUTTON)) || (actor->unk28 > 100.0f)) {
-            actor->unk232 = 8;
-            actor->unk102 = 1;
-        }
-        func_15052590(actor);
-        if (D_800CC26D != 0) {
-            if (actor->unk28 > 30.0f) {
-                D_800D1580 = 0xFF010074;
-                func_1506E8D8();
-                func_1505959C(&D_800CC2D0[D_800CC26D - 100], D_800C3E78);
-                actor->unk13C = D_800CC26D;
-                actor->unk102 = 1;
-            }
-            actor->y_velocity = 23.0f;
-        }
-        if (actor->y_position < actor->unk118) {
-            actor->unk102 = 1;
-            actor->unk86 = 1;
-            actor->y_velocity = -6.0f;
-        }
-        return;
-    }
-    speed = actor->xz_velocity;
-    if (speed > 60.0f) {
-        speed = 60.0f;
-    }
-    pitch = D_800CC284->stick_y * 1.25f;
-    rHeld = D_800CC284->button & R_TRIG;
-    if (rHeld) {
-        pitch = 0.0f;
-    }
-    if (actor->unk13C != 0) {
-        if (!rHeld) {
-            actor->y_position -= 16.0f * D_800D1550;
-        }
-    } else {
-        minDist = 1000.0f;
-        for (i = 0; i < 25; i++) {
-            if ((D_800CC2D0[i].interaction_state != 0) && (D_800CC2D0[i].health != 0) &&
-                (D_800CC2D0[i].unk28 == 0.0f) && (D_800CC2D0[i].unk232 != 0x21) &&
-                ((D_800CC2D0[i].id == 0x9C) || (D_800CC2D0[i].id == 0x9D))) {
-                dist = func_1505A6F8(D_800D154C, &D_800CC2D0[i]);
-                if (dist < minDist) {
-                    actor->unk222 = i;
-                    minDist = dist;
-                }
-            }
-        }
-    }
-    if (pitch < -90.0f) {
-        pitch = -90.0f;
-    }
-    if (pitch > 90.0f) {
-        pitch = 90.0f;
-    }
-    if (actor->y_position > 2100.0f) {
-        if (actor->y_velocity > -30.0f) {
-            actor->y_velocity -= 1.5f;
-        }
-        pitch = 40.0f;
-    }
-    temp = D_800CC284->stick_x;
-    actor->unkC4 += (temp - actor->unkC4) * (0.2f * D_800D1550);
-    actor->unk76 -= (s16)(actor->unkC4 * D_800D1550 * 0.04f * ((100.0f - speed) * 0.015f) * 220.0f);
-    actor->unk7E = 0x19;
-    func_150599C8(actor, 8, actor->unk76);
-    actor->target_speed = 0.0f;
-    speed = 0.0f;
-    accel = 1.3f;
-    if (actor->y_position < actor->unk118) {
-        if (actor->unk86 == 0) {
-            actor->unk86 = 1;
-            actor->xz_velocity = 0.0f;
-            actor->y_velocity = -6.0f;
-        }
-    } else if (actor->unk86 != 0) {
-        actor->unk86 = 0;
-        actor->y_velocity = 9.0f;
-    }
-    if (!(D_800CC284->button & R_TRIG)) {
-        if (D_800CC284->button & A_BUTTON) {
-            actor->target_speed = -22.0f;
-            speed = 1.0f;
-            accel = 1.8f;
-        }
-        if (D_800CC284->button & B_BUTTON) {
-            actor->target_speed = 30.0f;
-            if (actor->y_velocity < 0.0f) {
-                actor->target_speed -= actor->y_velocity * 0.6f;
-            }
-            speed = 1.5f;
-            accel = 0.3f;
-        }
-    }
-    func_1505A3A8(actor->target_speed, actor, speed, accel, 1);
-    actor->unk40 = ((s16)actor->unk7A + 0x4000) * (360.0f / 65536.0f);
-    actor->gravity = pitch * 0.000125f * (200.0f - actor->xz_velocity);
-    if (actor->unk13C == 0) {
-        if (actor->y_velocity > 26.0f) {
-            actor->y_velocity = 26.0f;
-        }
-        if (actor->y_velocity < -34.0f) {
-            actor->y_velocity = -34.0f;
-        }
-    }
-    temp = fabsf(pitch * 0.5f);
-    if (actor->unk86 != 0) {
-        temp = temp * 0.4f;
-        actor->gravity *= 0.6f;
-    }
-    if (actor->gravity == 0.0f) {
-        if (fabsf(actor->y_velocity) < 1.5f) {
-            actor->y_velocity = 0.0f;
-        } else if (actor->y_velocity > 0.0f) {
-            actor->gravity = 1.6f;
-        } else {
-            actor->gravity = -1.6f;
-        }
-    } else if ((actor->y_velocity > temp * 1.2f) && (actor->gravity < 0.0f)) {
-        actor->gravity = 0.0f;
-    } else if ((actor->y_velocity < -temp * 1.5f) && (actor->gravity > 0.0f)) {
-        actor->gravity = 0.0f;
-    }
-    actor->in_water = 10;
-    if (D_800CC284->button & R_TRIG) {
-        actor->unkB8 += (D_800CC284->stick_y - actor->unkB8) * 0.2f;
-        actor->y_velocity = 0.0f;
-        actor->gravity = 0.0f;
-    } else {
-        actor->unkB8 = (actor->y_velocity - floorLevel) * -2.0f;
-        if (actor->unkB8 > 40.0f) {
-            actor->unkB8 = 40.0f;
-        } else if (actor->unkB8 < -55.0f) {
-            actor->unkB8 = -55.0f;
-        }
-    }
-    speed = actor->y_velocity;
-    D_800CBDD3 = 1;
-    func_15059140(actor);
-    D_800CBDD3 = 0;
-    if ((actor->unk13C != 0) && (actor->unk28 < 50.0f)) {
-        floorLevel = 50.0f;
-    }
-    if (!(D_800CC284->button & R_TRIG)) {
-        if ((D_800CC26D != 0) && (actor->unk13C == 0) && (D_800CC2D0[D_800CC26D - 100].unk28 == 0.0f)) {
-            actor->y_position = D_800CC2D0[D_800CC26D - 100].y_position + 70.0f;
-            actor->y_velocity = 20.0f;
-            func_1505959C(&D_800CC2D0[D_800CC26D - 100], D_800C3E78);
-            actor->unk13C = D_800CC26D;
-            D_800D1580 = 0xFF010074;
-            func_1506E8D8();
-        }
-        if (actor->unk13C != 0) {
-            if (actor->unk25C & 2) {
-                Actor *rider;
-
-                actor->unk25C &= ~2;
-                idx = actor->unk13C - 100;
-                rider = &D_800CC2D0[idx];
-                rider->unk13D = 0;
-                rider->xz_velocity = actor->xz_velocity;
-                rider->unk232 = 0x21;
-                rider->unk218 = 0;
-                rider->stunned = 0;
-                rider->unkF8 &= ~0x400;
-                actor->unk13C = 0;
-                actor->y_velocity = 0.0f;
-                D_800D1580 = 0x76;
-                func_1506E8D8();
-            }
-        } else if ((D_800CC288 & Z_TRIG) && (actor->unk103 == 0)) {
-            count = 0;
-            if (D_800BE9F0 == 0x3C) {
-                // matching: init on the do's line keeps as1's order for the two address loads
-                obj = &D_800CC2D0[1]; do {
-                    if ((obj->interaction_state != 0) && (obj->id == 0x25)) {
-                        count++;
-                    }
-                    obj++;
-                } while (obj != &D_800D121C);
-                if (count < 5) {
-                    D_800D1580 = 6;
-                    actor->unk103 = 4;
-                    func_15073FA0();
-                }
-            }
-        }
-    }
-    if (actor->unk28 <= floorLevel) {
-        actor->xz_velocity *= 0.6f;
-        if ((D_800CC284->button & B_BUTTON) || (actor->unk86 != 0) || (actor->unk13C != 0)) {
-            if (actor->unk13C != 0) {
-                if (actor->y_velocity < -10.0f) {
-                    D_800D1580 = 0xFF0100A7;
-                    func_1506E5FC();
-                    D_800D1580 = 0xFF060372;
-                    func_1506E8D8();
-                }
-            } else if (actor->y_position < 0.0f) {
-                D_800D1580 = 0xFF010072;
-                func_1506E8D8();
-            }
-            if (actor->unk13C == 0) {
-                actor->y_velocity = 20.0f;
-            } else if (actor->unk86 == 0) {
-                actor->y_velocity = 38.0f;
-            }
-            pitch = -80.0f;
-        } else {
-            actor->y_velocity = speed * -1.0f;
-            actor->unk102 = 0;
-            actor->unk28 = 0.1f;
-            actor->unkB8 = 0.0f;
-        }
-    }
-    if (!(D_800CC284->button & R_TRIG)) {
-        actor->unkB8 += 20.0f;
-    } else {
-        actor->y_velocity = actor->unkB8 * -0.35f;
-    }
-    if (actor->unk86 != 0) {
-        actor->unk83 = 0;
-        if ((fabsf(pitch) > 8.0f) || (actor->target_speed > 7.0f)) {
-            animSpeed = 1.0f;
-        } else {
-            animSpeed = 0.5f;
-        }
-    } else {
-        animSpeed = func_150F34A0(actor, pitch);
-    }
-    anim = 0xF;
-    if ((actor->unkB8 > 40.0f) && (pitch > 20.0f)) {
-        anim = 0x11;
-    }
-    if ((actor->xz_velocity < 20.0f) && (actor->target_speed <= 0.0f) && (pitch == 0.0f)) {
-        anim = 0x18;
-    }
-    if (actor->xz_velocity < 0) {
-        anim = 0x1F;
-    }
-    if (actor->unk13C != 0) {
-        anim = 0x17;
-        animSpeed += 0.2f;
-    }
-    func_1505E650(actor, anim, animSpeed, 9.0f, 0.0f, 0.0f, 0);
-}
-
-void func_150F43F0(Camera *actor) {
-    if (actor->zone == 0x3B) {
-        func_1509BFB0(0, 0x405C, 1);
-        if (actor->mode != 0x100 && actor->cmdRunning == 0) {
-            if (func_15123934(actor, 8, 0, 0, 0) != 0) {
-                actor->flags |= 0x300000;
-                actor->flags &= ~4;
-                actor->preset = 1;
-                actor->presetMask = 3;
-                func_15124B18(actor);
-            }
-            actor->unk134 = 0;
-            actor->height = 125.0f;
-            actor->unk34C = 125.0f;
-            actor->targetDistance = 220.0f;
-            actor->liftTarget = 30.0f;
-        } else {
-            actor->liftTarget = 0.0f;
-        }
-    } else if (actor->mode == 8) {
-        if (actor->cmdRunning == 0) {
-            func_151239CC(actor, 0);
-            func_1509BFB0(0, 0x405C, 0);
-        }
-    }
-
-    if (func_1509BE40(1, 0x4054, 6, 0x9000) != 0 && func_1509BE40(1, 0x405E, 6, 0x9000) == 0) {
-        actor->flags |= 0x80000000;
-    } else {
-        actor->flags &= ~0x80000000;
     }
 }

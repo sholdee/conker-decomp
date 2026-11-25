@@ -16,38 +16,40 @@ typedef struct {
     /* 0xD */ u8 padD[3];
 } MusicInfo; /* size 0x10 */
 
-/* A volume that steps from current toward target by rate per frame (func_1000CD40). */
+/* A volume that steps from current toward intended by rate per frame (func_1000CD40). */
 typedef struct {
     u16 current;
-    u16 target;
+    u16 intended;
     u16 rate;
 } VolumeRamp;
 
-/* One music sequence instance, from the pool D_800419A8. */
+/* One music sequence instance, from the pool tuneArray.
+ * original: struct tune (rom_debug_struct.c); all field names but eventTypes, eventMasks, channelVolumes
+ * and VolumeRamp.rate are Rare's. */
 struct MusicTrack {
-    /* 0x00 */ s32 channel;          /* index into D_800417B0, -1 while not on a channel */
-    /* 0x04 */ s32 id;               /* sequence id; -1 marks a free pool entry */
-    /* 0x08 */ s32 *eventTypes;      /* how each of the 16 event bits behaves (func_1000CEAC) */
-    /* 0x0C */ u16 *eventMasks;      /* event bits raised by a marker on each marker channel */
-    /* 0x10 */ MusicTrack *syncTo;   /* track whose markers the wait masks refer to */
-    /* 0x14 */ u8 followSync;
-    /* 0x15 */ u8 pauseState;        /* 0 playing, 1 paused while silent, 2 paused on request */
+    /* 0x00 */ s32 player;            /* index into D_800417B0, -1 while not on a channel */
+    /* 0x04 */ s32 seq_number;        /* sequence id; -1 marks a free pool entry (original: "seq number") */
+    /* 0x08 */ s32 *eventTypes;       /* how each of the 16 event bits behaves (func_1000CEAC) */
+    /* 0x0C */ u16 *eventMasks;       /* event bits raised by a marker on each marker channel */
+    /* 0x10 */ MusicTrack *syncTune;  /* track whose markers the sync masks refer to */
+    /* 0x14 */ u8 syncTogether;
+    /* 0x15 */ u8 internallyPaused;   /* 0 playing, 1 paused while silent, 2 paused on request */
     /* 0x16 */ u8 pad16[2];
-    /* 0x18 */ s32 startWait;        /* marker bits to wait for before replacing the old track */
-    /* 0x1C */ s32 rampWait;         /* marker bits to wait for before stepping the ramps */
-    /* 0x20 */ s32 jumpWait;         /* marker bits to wait for before the pending jump */
-    /* 0x24 */ s32 pendingJump;      /* marker + 1 to jump to, 0 for none */
-    /* 0x28 */ s32 pendingVolume;
-    /* 0x2C */ s32 baseVolume;
-    /* 0x30 */ s32 volume;           /* volume last sent to the channel */
-    /* 0x34 */ s32 callbackState;
-    /* 0x38 */ s32 mutedChannels;
+    /* 0x18 */ s32 startSync;         /* marker bits to wait for before replacing the old track */
+    /* 0x1C */ s32 volumeSlideSync;   /* marker bits to wait for before stepping the ramps */
+    /* 0x20 */ s32 jumpSync;          /* marker bits to wait for before the pending jump */
+    /* 0x24 */ s32 jumpPoint;         /* marker + 1 to jump to, 0 for none */
+    /* 0x28 */ s32 jumpVolume;
+    /* 0x2C */ s32 fullVolume;
+    /* 0x30 */ s32 currentVolume;     /* volume last sent to the channel */
+    /* 0x34 */ s32 tuneStatus;        /* private state word of the sequence's update callback */
+    /* 0x38 */ s32 tuneOffChannels;   /* muted MIDI channels */
     /* 0x3C */ u8 channelVolumes[16];
-    /* 0x4C */ VolumeRamp fade;
-    /* 0x52 */ VolumeRamp crossfade;
-    /* 0x58 */ VolumeRamp duck;
+    /* 0x4C */ VolumeRamp vol0;       /* fade */
+    /* 0x52 */ VolumeRamp vol1;       /* crossfade */
+    /* 0x58 */ VolumeRamp vol2;       /* duck */
     /* 0x5E */ u8 pad5E[2];
-    /* 0x60 */ MusicTrack *next;     /* queued to take over this track's channel */
+    /* 0x60 */ MusicTrack *waitingTune; /* queued to take over this track's channel */
 }; /* size 0x64 */
 
 extern MusicInfo D_8002B074[];        /* indexed by sequence id (< 150) */
@@ -57,7 +59,7 @@ extern s32 D_80041880[3];
 extern s32 D_80041890[3];             /* last marker position */
 extern s32 D_800418A0[3];             /* distance between the last two marker positions */
 extern u8 D_80041970[3][16];          /* per-event toggle */
-extern MusicTrack D_800419A8[12];     /* track pool */
+extern MusicTrack tuneArray[12];     /* track pool */
 
 void func_1000D96C(s32 newId, s32 oldId, s32 transition);
 void func_1000DEC4(void);
@@ -72,7 +74,7 @@ MusicTrack *func_1000B1B0(s32 id) {
     s32 i;
 
     for (i = 0; i < 3; i++) {
-        if (D_800417B0[i] != NULL && id == D_800417B0[i]->id) {
+        if (D_800417B0[i] != NULL && id == D_800417B0[i]->seq_number) {
             return D_800417B0[i];
         }
     }
@@ -85,14 +87,14 @@ MusicTrack *func_1000B1FC(s32 id) {
     MusicTrack *next;
 
     for (i = 0; i < 3; i++) {
-        if (D_800417B0[i] != NULL && id == D_800417B0[i]->id) {
+        if (D_800417B0[i] != NULL && id == D_800417B0[i]->seq_number) {
             return D_800417B0[i];
         }
     }
     for (i = 0; i < 3; i++) {
         if (D_800417B0[i] != NULL) {
-            next = D_800417B0[i]->next;
-            if (next != NULL && id == next->id) {
+            next = D_800417B0[i]->waitingTune;
+            if (next != NULL && id == next->seq_number) {
                 return next;
             }
         }
@@ -107,12 +109,12 @@ void func_1000B294(MusicTrack *track) {
 
     for (i = 0; i < 3; i++) {
         if (D_800417B0[i] != NULL) {
-            if (track == D_800417B0[i]->syncTo) {
-                D_800417B0[i]->syncTo = D_800417B0[i];
+            if (track == D_800417B0[i]->syncTune) {
+                D_800417B0[i]->syncTune = D_800417B0[i];
             }
-            next = D_800417B0[i]->next;
-            if (next != NULL && track == next->syncTo) {
-                next->syncTo = next;
+            next = D_800417B0[i]->waitingTune;
+            if (next != NULL && track == next->syncTune) {
+                next->syncTune = next;
             }
         }
     }
@@ -123,22 +125,22 @@ MusicTrack *func_1000B2F4(s32 id) {
     s32 i;
 
     for (i = 0; i < 12; i++) {
-        if (D_800419A8[i].id == -1) {
-            bzero(&D_800419A8[i], sizeof(MusicTrack));
-            D_800419A8[i].channel = -1;
+        if (tuneArray[i].seq_number == -1) {
+            bzero(&tuneArray[i], sizeof(MusicTrack));
+            tuneArray[i].player = -1;
             if (id < 150) {
-                D_800419A8[i].baseVolume = D_8002B074[id].volume;
+                tuneArray[i].fullVolume = D_8002B074[id].volume;
             } else {
-                D_800419A8[i].baseVolume = 26000;
+                tuneArray[i].fullVolume = 26000;
             }
-            D_800419A8[i].volume = D_800419A8[i].baseVolume;
-            D_800419A8[i].fade.target = D_800419A8[i].fade.current = D_800419A8[i].crossfade.current =
-                D_800419A8[i].crossfade.target = D_800419A8[i].duck.current = D_800419A8[i].duck.target = 0x8000;
-            D_800419A8[i].id = id;
-            D_800419A8[i].eventTypes = D_8002B9D4;
-            D_800419A8[i].eventMasks = D_8002B9F4;
-            D_800419A8[i].syncTo = &D_800419A8[i];
-            return &D_800419A8[i];
+            tuneArray[i].currentVolume = tuneArray[i].fullVolume;
+            tuneArray[i].vol0.intended = tuneArray[i].vol0.current = tuneArray[i].vol1.current =
+                tuneArray[i].vol1.intended = tuneArray[i].vol2.current = tuneArray[i].vol2.intended = 0x8000;
+            tuneArray[i].seq_number = id;
+            tuneArray[i].eventTypes = D_8002B9D4;
+            tuneArray[i].eventMasks = D_8002B9F4;
+            tuneArray[i].syncTune = &tuneArray[i];
+            return &tuneArray[i];
         }
     }
     return NULL;
@@ -156,15 +158,15 @@ void func_1000B3D4(MusicTrack *track, MusicTrack *current) {
     placeholder = NULL;
     // matching: taking current's address makes IDO reload it from its arg slot
     if ((&current)[0] != NULL) {
-        entry = current->next;
+        entry = current->waitingTune;
         if (entry != NULL && track != entry) {
-            if (entry->id == track->id) {
-                track->id = -1;
+            if (entry->seq_number == track->seq_number) {
+                track->seq_number = -1;
                 return;
             }
-            entry->id = -1;
+            entry->seq_number = -1;
         }
-        current->next = track;
+        current->waitingTune = track;
         return;
     }
 
@@ -172,16 +174,16 @@ void func_1000B3D4(MusicTrack *track, MusicTrack *current) {
         if (placeholder == NULL) {
             slot = &D_800417B0[i];
             entry = *slot;
-            if (entry == NULL || (entry->id <= 0 && entry->next == NULL)) {
+            if (entry == NULL || (entry->seq_number <= 0 && entry->waitingTune == NULL)) {
                 entry = func_1000B2F4(0);
                 placeholder = entry;
                 if (entry != NULL) {
-                    entry->channel = i;
-                    entry->next = track;
+                    entry->player = i;
+                    entry->waitingTune = track;
                     *slot = entry;
                     continue;
                 } else {
-                    track->id = -1;
+                    track->seq_number = -1;
                     return;
                 }
             }
@@ -190,13 +192,13 @@ void func_1000B3D4(MusicTrack *track, MusicTrack *current) {
             slot = &D_800417B0[i];
             entry = *slot;
             if (entry != NULL) {
-                next = entry->next;
-                if (next != NULL && next->id == 0) {
+                next = entry->waitingTune;
+                if (next != NULL && next->seq_number == 0) {
                     placeholder = (MusicTrack *)-1; /* any non-NULL value ends the search */
                     func_1000B294(next);
-                    (*slot)->next->id = -1;
-                    (*slot)->next->channel = -1;
-                    (*slot)->next = track;
+                    (*slot)->waitingTune->seq_number = -1;
+                    (*slot)->waitingTune->player = -1;
+                    (*slot)->waitingTune = track;
                 }
             }
         }
@@ -209,9 +211,9 @@ s32 func_1000B548(s32 *ids) {
     s32 i;
 
     for (i = 0; i < 12; i++) {
-        if (D_800419A8[i].id != -1 && D_800419A8[i].channel != -1) {
+        if (tuneArray[i].seq_number != -1 && tuneArray[i].player != -1) {
             if (count < 3) {
-                *ids++ = D_800419A8[i].id;
+                *ids++ = tuneArray[i].seq_number;
                 count++;
             }
         }
@@ -227,16 +229,16 @@ s32 func_1000B638(s32 state, u8 channel, s32 arg2, s32 arg3) {
     bit1 = state & 2;
     state &= 1;
     track = D_800417B0[channel];
-    if (track == NULL || track->volume < 500) {
+    if (track == NULL || track->currentVolume < 500) {
         D_80041F04 &= ~1;
     }
 
     if (D_80041F04 & 1) {
         if (state == 0) {
             func_100088F0(channel, 0x8000, 1);
-            if (D_800BE9F0 == 1 || D_800BE9F0 == 12) {
+            if (level == 1 || level == 12) {
                 func_10008790(channel, 0x7000, 0, 0);
-            } else if (D_800BE9F0 != 7) {
+            } else if (level != 7) {
                 func_10008790(channel, 0xCA, 0, 0);
             }
             func_100085B8(channel, 15, 1);
@@ -244,16 +246,16 @@ s32 func_1000B638(s32 state, u8 channel, s32 arg2, s32 arg3) {
         state = 1;
     } else if (state != 0) {
         func_100088F0(channel, 0x8000, 0);
-        if (D_800BE9F0 == 1 || D_800BE9F0 == 12) {
+        if (level == 1 || level == 12) {
             func_10008790(channel, 0x7000, 255, 0);
-        } else if (D_800BE9F0 != 7) {
+        } else if (level != 7) {
             func_10008790(channel, 0xCA, 255, 0);
         }
         func_100085B8(channel, 15, 0);
         state = 0;
     }
 
-    if (D_800BE9F0 == 39) {
+    if (level == 39) {
         func_10011FA0((s32 *)4);
         if (bit1 == 0) {
             bit1 = 2;
@@ -269,7 +271,7 @@ s32 func_1000B638(s32 state, u8 channel, s32 arg2, s32 arg3) {
 
 /* Update callback (MusicInfo.update) of sequence 16. */
 s32 func_1000B830(s32 state, s32 channel, s32 arg2, s32 arg3) {
-    s32 flag = D_800DBFF0->status & 1;
+    s32 flag = camera_global_Cameras->SpecialFlags & 1;
 
     if (flag != 0 && state == 0) {
         state = 1;
@@ -283,19 +285,19 @@ s32 func_1000B830(s32 state, s32 channel, s32 arg2, s32 arg3) {
 
 /* Update callback (MusicInfo.update) of sequence 19. */
 s32 func_1000B8B8(s32 state, u8 channel, f32 x, f32 y, f32 z) {
-    s32 level;
+    s32 volume;
 
-    if (D_800BE9F0 == 4) {
+    if (level == 4) {
         if ((state & 1) && D_80041F0C == 0) {
             func_1000E46C(19, 0, 0x1000, 0);
             state &= ~1;
         } else if (D_80041F0C != 0) {
             /* D_80041F08 / D_80041F0C: average of the values func_1000E7A0 reported */
-            level = D_80041F08 / D_80041F0C / 80;
-            if (level > 100) {
-                level = 100;
+            volume = D_80041F08 / D_80041F0C / 80;
+            if (volume > 100) {
+                volume = 100;
             }
-            func_1000E588(19, level, 0x1000);
+            func_1000E588(19, volume, 0x1000);
             state |= 1;
         }
         D_80041F08 = 0;
@@ -362,16 +364,16 @@ s32 func_1000BBE8(s32 state, s32 channel, s32 arg2, s32 arg3) {
 
 /* Update callback (MusicInfo.update) of sequence 25. */
 s32 func_1000BC28(s32 state, u8 channel, s32 arg2, s32 arg3) {
-    s32 level = func_10008A4C(channel, 0) + func_10008A4C(channel, 6) + 1;
+    s32 volume = func_10008A4C(channel, 0) + func_10008A4C(channel, 6) + 1;
 
-    if (level >= 256) {
-        level = 255;
-    } else if (level < 16) {
-        level = 1;
+    if (volume >= 256) {
+        volume = 255;
+    } else if (volume < 16) {
+        volume = 1;
     }
-    if (level != state) {
-        func_150C851C(level - 1);
-        state = level;
+    if (volume != state) {
+        func_150C851C(volume - 1);
+        state = volume;
     }
     return state;
 }
@@ -386,7 +388,7 @@ s32 func_1000BCBC(s32 state, u8 channel, f32 x, f32 y, f32 z) {
         func_10008790(*&channel, 3, 16, 0);
         func_1000886C(channel, 4, 0);
         state = 1;
-    } else if (D_800BE9F0 == 19) {
+    } else if (level == 19) {
         x -= 24.0f;
         z -= 3015.0f;
         distance = x * x + z * z;
@@ -444,7 +446,7 @@ u32 func_1000BF60(u32 state, u8 channel, f32 x, f32 y, f32 z) {
         started = 1;
     }
 
-    if (D_800BE9F0 != 29) {
+    if (level != 29) {
         func_10008F24(channel);
         return state;
     }
@@ -550,7 +552,7 @@ s32 func_1000C350(s32 state, u8 channel, f32 x, f32 y, f32 z) {
         }
         return state;
     }
-    if (D_800BE9F0 != 29) {
+    if (level != 29) {
         func_10008F24(channel);
     } else if (D_80041F08 != (state & 0x7FU)) {
         switch (D_80041F08) {
@@ -647,7 +649,7 @@ s32 func_1000C530(s32 state, u8 channel, f32 x, f32 y, f32 z) {
 s32 func_1000C7E8(s32 state, s32 channel, f32 x, f32 y, f32 z) {
     f32 volume;
 
-    if (D_800BE9F0 == 49) {
+    if (level == 49) {
         if (state != 2) {
             if (func_1000B1B0(9) == NULL) {
                 func_1000E704(62, 0, 0xFFFF);
@@ -682,13 +684,13 @@ s32 func_1000C934(s32 state, s32 channel, s32 arg2, s32 arg3) {
     s32 flag;
 
     volume = 0;
-    flag = D_800DBFF0->status & 1;
+    flag = camera_global_Cameras->SpecialFlags & 1;
     if (flag != 0) {
         maxVolume = 0x7FFF;
     } else {
         maxVolume = 12000;
     }
-    if (D_800BE9F0 == 55 && flag == 0) {
+    if (level == 55 && flag == 0) {
         func_100114D0(2200, 1066, -1600, maxVolume, 3000, 1500, NULL, &volume, NULL);
         volume &= 0xFF00;
         volume = maxVolume - volume;
@@ -704,8 +706,8 @@ s32 func_1000C934(s32 state, s32 channel, s32 arg2, s32 arg3) {
 s32 func_1000CA18(s32 state, s32 channel, s32 arg2, s32 arg3) {
     s32 volume;
 
-    if (D_800BE9F0 == 55) {
-        if (D_800DBFF0->status & 1) {
+    if (level == 55) {
+        if (camera_global_Cameras->SpecialFlags & 1) {
             volume = 0;
         } else {
             func_100114D0(2200, 1066, -1600, 24000, 3000, 1500, NULL, &volume, NULL);
@@ -728,7 +730,7 @@ s32 func_1000CAE4(s32 state, u8 channel, f32 x, f32 y, f32 z) {
 
     bit1 = state & 2;
     state &= 1;
-    if (D_800BE9F0 == 66) {
+    if (level == 66) {
         func_10011FA0((s32 *)4);
         if (state == 0) {
             state = 1;
@@ -749,12 +751,12 @@ s32 func_1000CAE4(s32 state, u8 channel, f32 x, f32 y, f32 z) {
 /* Starts fading the first two channels to `volume`. */
 void func_1000CBA8(s32 volume) {
     if (D_800417B0[0] != NULL) {
-        D_800417B0[0]->fade.target = volume;
-        D_800417B0[0]->fade.rate = 0x500;
+        D_800417B0[0]->vol0.intended = volume;
+        D_800417B0[0]->vol0.rate = 0x500;
     }
     if (D_800417B0[1] != NULL) {
-        D_800417B0[1]->fade.target = volume;
-        D_800417B0[1]->fade.rate = 0x500;
+        D_800417B0[1]->vol0.intended = volume;
+        D_800417B0[1]->vol0.rate = 0x500;
     }
 }
 
@@ -765,10 +767,10 @@ void func_1000CBF0(s32 target, s32 rate, s32 channelMask) {
     for (i = 0; i < 3; i++) {
         if ((1 << i) & channelMask) {
             if (D_800417B0[i] != NULL) {
-                D_800417B0[i]->duck.target = target;
-                D_800417B0[i]->duck.rate = rate;
+                D_800417B0[i]->vol2.intended = target;
+                D_800417B0[i]->vol2.rate = rate;
                 if (rate == 0) {
-                    D_800417B0[i]->duck.current = target;
+                    D_800417B0[i]->vol2.current = target;
                 }
             }
         }
@@ -782,15 +784,15 @@ void func_1000CC54(s32 channel) {
 
     track = D_800417B0[channel];
     if (track != NULL) {
-        volume = (((u32)(track->duck.current * ((u32)(track->fade.current * track->crossfade.current) >> 15)) >> 15) *
-                  track->baseVolume) >> 15;
-        if (volume != track->volume) {
-            if (track->volume == 0) {
-                func_10008988(channel, track->mutedChannels ^ 0xFFFF, 1);
+        volume = (((u32)(track->vol2.current * ((u32)(track->vol0.current * track->vol1.current) >> 15)) >> 15) *
+                  track->fullVolume) >> 15;
+        if (volume != track->currentVolume) {
+            if (track->currentVolume == 0) {
+                func_10008988(channel, track->tuneOffChannels ^ 0xFFFF, 1);
             } else if (volume == 0) {
-                func_10008988(channel, track->mutedChannels ^ 0xFFFF, 0);
+                func_10008988(channel, track->tuneOffChannels ^ 0xFFFF, 0);
             }
-            track->volume = volume;
+            track->currentVolume = volume;
             func_10008EE0(channel, volume);
         }
     }
@@ -822,17 +824,17 @@ s32 func_1000CDA0(u8 waitMask, MusicTrack *syncTo) {
         return TRUE;
     }
     if (syncTo != NULL) {
-        if (syncTo->channel >= 0) {
-            if (D_800417B0[syncTo->channel] == NULL || syncTo->id <= 0) {
+        if (syncTo->player >= 0) {
+            if (D_800417B0[syncTo->player] == NULL || syncTo->seq_number <= 0) {
                 return TRUE;
             }
-            if (func_1000853C(syncTo->channel) == 3) {
+            if (func_1000853C(syncTo->player) == 3) {
                 return TRUE;
             }
-            if (!(D_8002B074[syncTo->id].flags & 0x20)) {
-                D_800418AC[syncTo->channel] |= 3;
+            if (!(D_8002B074[syncTo->seq_number].flags & 0x20)) {
+                D_800418AC[syncTo->player] |= 3;
             }
-            waitMask &= ~D_800418AC[syncTo->channel];
+            waitMask &= ~D_800418AC[syncTo->player];
         } else {
             return TRUE;
         }
@@ -906,18 +908,18 @@ void func_1000CEAC(s32 channel) {
                 }
                 D_800419A0 = channel;
             } else if (D_80041F04 & 1) {
-                func_1507E7E4(D_800CC2D0, 0x44, 1, 0x12, 5);
+                func_1507E7E4(movement_obj, 0x44, 1, 0x12, 5);
             }
         }
-        if (D_800417B0[channel]->volume == 0) {
+        if (D_800417B0[channel]->currentVolume == 0) {
             D_800418AC[channel] |= 0x80;
-            if (D_800417B0[channel]->pauseState == 0) {
+            if (D_800417B0[channel]->internallyPaused == 0) {
                 func_10008F58(channel);
-                D_800417B0[channel]->pauseState = 1;
+                D_800417B0[channel]->internallyPaused = 1;
             }
-        } else if (D_800417B0[channel]->pauseState == 1) {
+        } else if (D_800417B0[channel]->internallyPaused == 1) {
             func_100084D8(channel);
-            D_800417B0[channel]->pauseState = 0;
+            D_800417B0[channel]->internallyPaused = 0;
         }
         for (i = 0; i < 16; i++) {
             if (D_800418B0[channel][i] != 0) {
@@ -951,62 +953,62 @@ void func_1000D2F8(s32 index, f32 x, f32 y, f32 z) {
     slot = (MusicTrack **)&(*(u8 (*)[])D_800417B0)[offset];
     track = *slot;
     if (track != NULL) {
-        if (track->pendingJump != 0 && func_1000CDA0(track->jumpWait, track->syncTo)) {
-            func_10008C6C(((u8 *)&channel)[3], (*slot)->pendingJump - 1);
+        if (track->jumpPoint != 0 && func_1000CDA0(track->jumpSync, track->syncTune)) {
+            func_10008C6C(((u8 *)&channel)[3], (*slot)->jumpPoint - 1);
             track = *slot;
             // matching: the u32 casts steer IDO's register choice for the pending volume
-            if (track->pendingVolume != 0) {
-                track->volume = (u32)track->pendingVolume;
-                (*slot)->baseVolume = (u32)track->pendingVolume;
+            if (track->jumpVolume != 0) {
+                track->currentVolume = (u32)track->jumpVolume;
+                (*slot)->fullVolume = (u32)track->jumpVolume;
                 track = *slot;
             }
-            track->fade.current = 0x7FFF;
-            (*slot)->fade.target = 0x7FFF;
+            track->vol0.current = 0x7FFF;
+            (*slot)->vol0.intended = 0x7FFF;
             func_1000CC54(((u32 *)&index)[0]);
-            (*slot)->pendingJump = 0;
-            (*slot)->jumpWait = 0;
+            (*slot)->jumpPoint = 0;
+            (*slot)->jumpSync = 0;
         }
         track = *slot;
         if (status == 0) {
-            track->id = 0;
+            track->seq_number = 0;
             track = *slot;
         }
-        next = track->next;
+        next = track->waitingTune;
         if (next != NULL) {
-            if (track->id == 0) {
-                if (func_1000CDA0(next->startWait, next->syncTo)) {
-                    (*slot)->id = -1;
+            if (track->seq_number == 0) {
+                if (func_1000CDA0(next->startSync, next->syncTune)) {
+                    (*slot)->seq_number = -1;
                     func_1000B294(*slot);
-                    next = (*slot)->next;
-                    if (next->id > 0) {
-                        if (func_10008CE8(channel, next->id) == -1) {
-                            (*slot)->next->syncTo = NULL;
-                            (*slot)->next->startWait = 0;
-                            func_1000B3D4((*slot)->next, NULL);
-                            (*slot)->next = NULL;
+                    next = (*slot)->waitingTune;
+                    if (next->seq_number > 0) {
+                        if (func_10008CE8(channel, next->seq_number) == -1) {
+                            (*slot)->waitingTune->syncTune = NULL;
+                            (*slot)->waitingTune->startSync = 0;
+                            func_1000B3D4((*slot)->waitingTune, NULL);
+                            (*slot)->waitingTune = NULL;
                             *slot = NULL;
                         } else {
-                            *slot = (*slot)->next;
-                            (*slot)->channel = ((u32 *)&index)[0];
-                            (*slot)->startWait = 0;
+                            *slot = (*slot)->waitingTune;
+                            (*slot)->player = ((u32 *)&index)[0];
+                            (*slot)->startSync = 0;
                             *(s32 *)((u8 *)D_800418A0 + offset) = 0;
                             *(s32 *)((u8 *)D_80041890 + offset) = 0;
                             *(s32 *)((u8 *)D_80041880 + offset) = 0;
                             track = *slot;
-                            if (D_8002B074[track->id].unkC != 0) {
-                                func_10008C04(channel, D_8002B074[track->id].unkC, 100);
+                            if (D_8002B074[track->seq_number].unkC != 0) {
+                                func_10008C04(channel, D_8002B074[track->seq_number].unkC, 100);
                                 track = *slot;
                             }
-                            if (track->pendingJump != 0) {
-                                func_10008C6C(channel, track->pendingJump - 1);
-                                (*slot)->pendingJump = 0;
+                            if (track->jumpPoint != 0) {
+                                func_10008C6C(channel, track->jumpPoint - 1);
+                                (*slot)->jumpPoint = 0;
                                 track = *slot;
                             }
-                            track->volume = 0;
+                            track->currentVolume = 0;
                             func_1000CC54(((u32 *)&index)[0]);
                             func_100084D8(channel);
-                            if ((*slot)->mutedChannels != 0) {
-                                func_100088F0(channel, (*slot)->mutedChannels, 0);
+                            if ((*slot)->tuneOffChannels != 0) {
+                                func_100088F0(channel, (*slot)->tuneOffChannels, 0);
                             }
                             for (i = 0; i < 16; i++) {
                                 if ((*slot)->channelVolumes[i] != 0) {
@@ -1016,51 +1018,51 @@ void func_1000D2F8(s32 index, f32 x, f32 y, f32 z) {
                             }
                         }
                     } else {
-                        next->id = -1;
-                        (*slot)->next->syncTo = NULL;
-                        (*slot)->next->startWait = 0;
-                        (*slot)->channel = -1;
+                        next->seq_number = -1;
+                        (*slot)->waitingTune->syncTune = NULL;
+                        (*slot)->waitingTune->startSync = 0;
+                        (*slot)->player = -1;
                         *slot = NULL;
                     }
                 }
-            } else if (func_1000CDA0(next->startWait, next->syncTo)) {
-                (*slot)->pauseState = 0;
+            } else if (func_1000CDA0(next->startSync, next->syncTune)) {
+                (*slot)->internallyPaused = 0;
                 func_10008F24(channel);
             }
             track = *slot;
-        } else if (track->id == 0) {
+        } else if (track->seq_number == 0) {
             func_1000B294(track);
             track = NULL;
-            (*slot)->id = -1;
-            (*slot)->channel = -1;
+            (*slot)->seq_number = -1;
+            (*slot)->player = -1;
             *slot = NULL;
         }
         if (track != NULL) {
-            if (track->id > 0) {
-                callback = D_8002B074[track->id].update;
+            if (track->seq_number > 0) {
+                callback = D_8002B074[track->seq_number].update;
                 if (callback != NULL) {
-                    (*slot)->callbackState = callback(track->callbackState, (u8)channel, x, y, z);
+                    (*slot)->tuneStatus = callback(track->tuneStatus, (u8)channel, x, y, z);
                     track = *slot;
                 }
             }
-            if (func_1000CDA0(track->rampWait, track->syncTo)) {
+            if (func_1000CDA0(track->volumeSlideSync, track->syncTune)) {
                 track = *slot;
-                (*slot)->fade.current = func_1000CD40(track->fade.current, track->fade.target, track->fade.rate);
+                (*slot)->vol0.current = func_1000CD40(track->vol0.current, track->vol0.intended, track->vol0.rate);
                 track = *slot;
-                (*slot)->crossfade.current =
-                    func_1000CD40(track->crossfade.current, track->crossfade.target, track->crossfade.rate);
+                (*slot)->vol1.current =
+                    func_1000CD40(track->vol1.current, track->vol1.intended, track->vol1.rate);
                 track = *slot;
-                (*slot)->duck.current = func_1000CD40(track->duck.current, track->duck.target, track->duck.rate);
-                (*slot)->rampWait = 0;
+                (*slot)->vol2.current = func_1000CD40(track->vol2.current, track->vol2.intended, track->vol2.rate);
+                (*slot)->volumeSlideSync = 0;
             }
             func_1000CC54(((u32 *)&index)[0]);
             track = *slot;
-            if (track->followSync != 0 &&
-                ((syncTo = track->syncTo) == NULL || syncTo == track || syncTo->id <= 0 ||
-                 track->id <= 0 || syncTo->channel < 0)) {
-                track->followSync = 0;
+            if (track->syncTogether != 0 &&
+                ((syncTo = track->syncTune) == NULL || syncTo == track || syncTo->seq_number <= 0 ||
+                 track->seq_number <= 0 || syncTo->player < 0)) {
+                track->syncTogether = 0;
                 track = *slot;
-                track->syncTo = track;
+                track->syncTune = track;
             }
         }
     }
@@ -1089,7 +1091,7 @@ void func_1000D758(f32 x, f32 y, f32 z) {
         for (i = 0; i < 3; i++) {
             track = D_800417B0[i];
             if (track != NULL) {
-                id = track->id;
+                id = track->seq_number;
                 if (id > 0) {
                     flags = infos[id].flags;
                     kind = flags & ~0xF0;
@@ -1149,14 +1151,14 @@ void func_1000D96C(s32 newId, s32 oldId, s32 transition) {
         if (track == NULL) {
             return;
         }
-        next = track->next;
+        next = track->waitingTune;
         if (next != NULL) {
-            if (next->channel == -1) {
-                track->crossfade.target = 0x8000;
-                track->crossfade.rate = 0x400;
-                next->id = -1;
-                track->next->channel = -1;
-                track->next = NULL;
+            if (next->player == -1) {
+                track->vol1.intended = 0x8000;
+                track->vol1.rate = 0x400;
+                next->seq_number = -1;
+                track->waitingTune->player = -1;
+                track->waitingTune = NULL;
             }
             newId = 0;
             if (oldId == 0) {
@@ -1164,10 +1166,10 @@ void func_1000D96C(s32 newId, s32 oldId, s32 transition) {
             }
             // matching: IDO shares this tail with the next branch only through the goto
             goto lookup_outgoing;
-        } else if (track->pauseState != 0 || track->crossfade.target == 0) {
-            track->crossfade.target = 0x8000;
-            track->crossfade.current = 0;
-            track->crossfade.rate = 0x400;
+        } else if (track->internallyPaused != 0 || track->vol1.intended == 0) {
+            track->vol1.intended = 0x8000;
+            track->vol1.current = 0;
+            track->vol1.rate = 0x400;
             newId = 0;
             if (oldId == 0) {
                 return;
@@ -1183,7 +1185,7 @@ lookup_outgoing:
     }
     if (outgoing != NULL) {
         // matching: the redundant NULL check and the dead `if` keep IDO's branch layout
-        if (outgoing != NULL && outgoing->next != NULL) {
+        if (outgoing != NULL && outgoing->waitingTune != NULL) {
             if (newId != 0) {
                 return;
             }
@@ -1201,49 +1203,49 @@ lookup_outgoing:
                     if ((info->flags & 0x20) && (D_8002B074[oldId].flags & 0x20)) {
                         sync = 1;
                     }
-                    incoming->followSync = sync;
+                    incoming->syncTogether = sync;
                     if (info->flags & 8) {
-                        incoming->crossfade.target = 0x8000;
-                        incoming->crossfade.current = 0;
-                        incoming->crossfade.rate = 60;
+                        incoming->vol1.intended = 0x8000;
+                        incoming->vol1.current = 0;
+                        incoming->vol1.rate = 60;
                     } else if (sync != 0) {
-                        incoming->crossfade.target = 0x8000;
-                        incoming->crossfade.current = 0;
-                        incoming->crossfade.rate = 0x100;
+                        incoming->vol1.intended = 0x8000;
+                        incoming->vol1.current = 0;
+                        incoming->vol1.rate = 0x100;
                     }
-                    incoming->syncTo = outgoing;
-                    incoming->startWait = 2;
+                    incoming->syncTune = outgoing;
+                    incoming->startSync = 2;
                     func_1000B3D4(incoming, NULL);
                 }
                 if (transition == 6) {
                     if (newId != 0) {
-                        outgoing->rampWait = 2;
+                        outgoing->volumeSlideSync = 2;
                     }
-                    outgoing->followSync = 0;
-                    outgoing->syncTo = outgoing;
-                    outgoing->crossfade.target = 0;
+                    outgoing->syncTogether = 0;
+                    outgoing->syncTune = outgoing;
+                    outgoing->vol1.intended = 0;
                     if (D_8002B074[oldId].flags & 8) {
-                        outgoing->crossfade.rate = 40;
+                        outgoing->vol1.rate = 40;
                         return;
                     }
-                    outgoing->crossfade.rate = 160;
+                    outgoing->vol1.rate = 160;
                     return;
                 }
                 incoming = func_1000B2F4(0);
                 if (incoming != NULL) {
                     if (newId != 0) {
-                        outgoing->rampWait = 2;
+                        outgoing->volumeSlideSync = 2;
                     }
-                    outgoing->followSync = 0;
-                    outgoing->syncTo = outgoing;
-                    outgoing->crossfade.target = 0;
+                    outgoing->syncTogether = 0;
+                    outgoing->syncTune = outgoing;
+                    outgoing->vol1.intended = 0;
                     if (sync != 0) {
-                        outgoing->crossfade.rate = 0x80;
+                        outgoing->vol1.rate = 0x80;
                     } else {
-                        outgoing->crossfade.rate = 0x200;
+                        outgoing->vol1.rate = 0x200;
                     }
-                    incoming->startWait = 0x80;
-                    incoming->syncTo = outgoing;
+                    incoming->startSync = 0x80;
+                    incoming->syncTune = outgoing;
                     func_1000B3D4(incoming, outgoing);
                 }
             }
@@ -1254,22 +1256,22 @@ lookup_outgoing:
         if (outgoing != NULL) {
             if (newId != 0) {
                 bzero(outgoing, sizeof(MusicTrack));
-                outgoing->channel = -1;
+                outgoing->player = -1;
                 if (newId < 150) {
-                    outgoing->baseVolume = D_8002B074[newId].volume;
+                    outgoing->fullVolume = D_8002B074[newId].volume;
                 } else {
-                    outgoing->baseVolume = 26000;
+                    outgoing->fullVolume = 26000;
                 }
-                outgoing->volume = outgoing->baseVolume;
-                outgoing->fade.target = outgoing->fade.current = outgoing->crossfade.current =
-                    outgoing->crossfade.target = outgoing->duck.current = outgoing->duck.target = 0x8000;
+                outgoing->currentVolume = outgoing->fullVolume;
+                outgoing->vol0.intended = outgoing->vol0.current = outgoing->vol1.current =
+                    outgoing->vol1.intended = outgoing->vol2.current = outgoing->vol2.intended = 0x8000;
                 outgoing->eventTypes = D_8002B9D4;
                 outgoing->eventMasks = D_8002B9F4;
-                outgoing->syncTo = outgoing;
+                outgoing->syncTune = outgoing;
             } else {
-                outgoing->startWait = 0x80;
+                outgoing->startSync = 0x80;
             }
-            outgoing->id = newId;
+            outgoing->seq_number = newId;
             return;
         }
     }
@@ -1278,21 +1280,21 @@ lookup_outgoing:
     }
     if (incoming != NULL) {
         if (transition == 3) {
-            incoming->crossfade.target = 0x8000;
-            incoming->crossfade.current = 0;
-            incoming->crossfade.rate = 0x400;
+            incoming->vol1.intended = 0x8000;
+            incoming->vol1.current = 0;
+            incoming->vol1.rate = 0x400;
         } else if (transition == 2) {
-            incoming->startWait = 1;
-            incoming->syncTo = outgoing;
+            incoming->startSync = 1;
+            incoming->syncTune = outgoing;
         } else if (transition == 1) {
-            incoming->startWait = 2;
-            incoming->syncTo = outgoing;
+            incoming->startSync = 2;
+            incoming->syncTune = outgoing;
         } else if (transition == 5) {
-            incoming->startWait = 0x80;
-            incoming->syncTo = outgoing;
+            incoming->startSync = 0x80;
+            incoming->syncTune = outgoing;
             if (outgoing != NULL) {
-                outgoing->crossfade.target = 0;
-                outgoing->crossfade.rate = 0x200;
+                outgoing->vol1.intended = 0;
+                outgoing->vol1.rate = 0x200;
             }
         }
         func_1000B3D4(incoming, outgoing);
@@ -1328,17 +1330,17 @@ void func_1000DEC4(void) {
     s32 channel;
 
     for (i = 0; i < 12; i++) {
-        channel = D_800419A8[i].channel;
+        channel = tuneArray[i].player;
         if (invalid == channel) {
-            if (D_800419A8[i].id != invalid) {
-                D_800419A8[i].id = invalid;
+            if (tuneArray[i].seq_number != invalid) {
+                tuneArray[i].seq_number = invalid;
             }
         } else if (func_1000853C(channel) == 0) {
-            D_800417B0[D_800419A8[i].channel] = NULL;
-            D_800419A8[i].channel = invalid;
-            D_800419A8[i].id = invalid;
+            D_800417B0[tuneArray[i].player] = NULL;
+            tuneArray[i].player = invalid;
+            tuneArray[i].seq_number = invalid;
         }
-        D_800419A8[i].next = NULL;
+        tuneArray[i].waitingTune = NULL;
     }
 }
 
@@ -1349,17 +1351,17 @@ void func_1000DF68(s32 id, s32 volume, s32 frames) {
 
     track = func_1000B1FC(id);
     if (track != NULL) {
-        track->fade.target = volume;
+        track->vol0.intended = volume;
         if (frames == 1) {
-            track->fade.current = volume;
-            if (track->channel >= 0) {
-                func_1000CC54(track->channel);
+            track->vol0.current = volume;
+            if (track->player >= 0) {
+                func_1000CC54(track->player);
             }
         }
         if (frames >= 2) {
             s32 rate;
 
-            rate = track->fade.current - volume;
+            rate = track->vol0.current - volume;
             if (rate < 0) {
                 rate = -rate;
             }
@@ -1369,9 +1371,9 @@ void func_1000DF68(s32 id, s32 volume, s32 frames) {
             } else if (rate >= 0x8000) {
                 rate = 0x7FFF;
             }
-            track->fade.rate = rate;
+            track->vol0.rate = rate;
         } else {
-            track->fade.rate = 0x200;
+            track->vol0.rate = 0x200;
         }
     }
 }
@@ -1382,18 +1384,18 @@ void func_1000E054(s32 id, s32 pause) {
 
     track = func_1000B1B0(id);
     if (track != NULL) {
-        if (2 == track->pauseState && pause == 0) {
-            func_100084D8(track->channel);
-            track->pauseState = 0;
-            track->volume = -1;
-            func_1000CC54(track->channel);
+        if (2 == track->internallyPaused && pause == 0) {
+            func_100084D8(track->player);
+            track->internallyPaused = 0;
+            track->currentVolume = -1;
+            func_1000CC54(track->player);
             return;
         }
-        if (2 != track->pauseState && pause != 0) {
-            if (track->pauseState != 1) {
-                func_10008F58(track->channel);
+        if (2 != track->internallyPaused && pause != 0) {
+            if (track->internallyPaused != 1) {
+                func_10008F58(track->player);
             }
-            track->pauseState = 2;
+            track->internallyPaused = 2;
         }
     }
 }
@@ -1405,7 +1407,7 @@ s32 func_1000E0F8(s32 id) {
     id &= 0xFFF;
     track = func_1000B1FC(id);
 
-    if (track != NULL && track->next == NULL) {
+    if (track != NULL && track->waitingTune == NULL) {
         return TRUE;
     } else {
         return FALSE;
@@ -1425,36 +1427,36 @@ s32 func_1000E134(s32 id) {
     return FALSE;
 }
 
-#define MUSIC_KIND(track) (D_8002B074[(track)->id].flags & ~0xF0)
+#define MUSIC_KIND(track) (D_8002B074[(track)->seq_number].flags & ~0xF0)
 
 void func_1000E17C(void) {
     s32 i;
     MusicTrack *track;
 
     for (i = 0; i < 12; i++) {
-        track = &D_800419A8[i];
-        if (track->id > 0) {
-            if ((1 == MUSIC_KIND(track) || 3 == MUSIC_KIND(track)) && track->channel == -1) {
-                track->id = -1;
+        track = &tuneArray[i];
+        if (track->seq_number > 0) {
+            if ((1 == MUSIC_KIND(track) || 3 == MUSIC_KIND(track)) && track->player == -1) {
+                track->seq_number = -1;
             }
         }
     }
     for (i = 0; i < 12; i++) {
-        track = &D_800419A8[i];
-        if (track->id > 0) {
-            if (track->next != NULL && track->next->id == -1) {
-                track->next = NULL;
+        track = &tuneArray[i];
+        if (track->seq_number > 0) {
+            if (track->waitingTune != NULL && track->waitingTune->seq_number == -1) {
+                track->waitingTune = NULL;
             }
-            if (track->syncTo != NULL && track->syncTo->id == -1) {
-                track->syncTo = NULL;
+            if (track->syncTune != NULL && track->syncTune->seq_number == -1) {
+                track->syncTune = NULL;
             }
         }
     }
     for (i = 0; i < 12; i++) {
-        track = &D_800419A8[i];
-        if (track->id > 0) {
-            if ((1 == MUSIC_KIND(track) || 3 == MUSIC_KIND(track)) && track->channel != -1) {
-                func_1000DE1C(track->id, 4);
+        track = &tuneArray[i];
+        if (track->seq_number > 0) {
+            if ((1 == MUSIC_KIND(track) || 3 == MUSIC_KIND(track)) && track->player != -1) {
+                func_1000DE1C(track->seq_number, 4);
             }
         }
     }
@@ -1470,24 +1472,24 @@ void func_1000E2F4(s32 pause) {
         if (track == NULL) {
             continue;
         }
-        if (track->id <= 0) {
+        if (track->seq_number <= 0) {
             continue;
         }
-        if (track->pauseState != 0) {
+        if (track->internallyPaused != 0) {
             continue;
         }
         if (pause != 0) {
             func_10008EE0(i, 0);
-            if (D_8002B074[D_800417B0[i]->id].flags & 0x10) {
+            if (D_8002B074[D_800417B0[i]->seq_number].flags & 0x10) {
                 continue;
             }
             func_10008F58(i);
         } else {
-            if (!(D_8002B074[track->id].flags & 0x10)) {
+            if (!(D_8002B074[track->seq_number].flags & 0x10)) {
                 func_100084D8(i);
                 track = D_800417B0[i];
             }
-            track->volume = -1;
+            track->currentVolume = -1;
             func_1000CC54(i);
         }
     }
@@ -1505,10 +1507,10 @@ void func_1000E40C(s32 id, s32 volume) {
     }
     track = func_1000B1FC(id);
     if (track != NULL) {
-        if (track->channel < 0) {
-            track->volume = volume;
+        if (track->player < 0) {
+            track->currentVolume = volume;
         }
-        track->baseVolume = volume;
+        track->fullVolume = volume;
     }
 }
 
@@ -1526,18 +1528,18 @@ s32 func_1000E46C(s32 id, s32 percent, s32 channelMask, s32 frames) {
         percent = 0;
     }
     if (track != NULL) {
-        if (track->channel >= 0) {
+        if (track->player >= 0) {
             if (frames < 0) {
-                func_1000886C(track->channel, channelMask, percent);
+                func_1000886C(track->player, channelMask, percent);
                 return TRUE;
             }
-            func_10008790(track->channel, channelMask, percent, frames);
+            func_10008790(track->player, channelMask, percent, frames);
             return TRUE;
         }
         if (percent == 0) {
-            track->mutedChannels |= channelMask;
+            track->tuneOffChannels |= channelMask;
         } else if (percent > 0) {
-            track->mutedChannels &= ~channelMask;
+            track->tuneOffChannels &= ~channelMask;
         }
         for (i = 0; channelMask != 0; i++, channelMask >>= 1) {
             if (channelMask & 1) {
@@ -1555,21 +1557,21 @@ s32 func_1000E588(s32 id, s32 percent, s32 channelMask) {
 
     track = func_1000B1FC(id);
     if (track != NULL) {
-        if (track->channel >= 0) {
+        if (track->player >= 0) {
             if (percent > 100) {
                 percent = 100;
             } else if (percent < 0) {
                 percent = 0;
             }
-            func_1000886C(track->channel, channelMask, (percent * 255) / 100);
+            func_1000886C(track->player, channelMask, (percent * 255) / 100);
             return TRUE;
         }
         if (percent <= 0) {
-            track->mutedChannels |= channelMask;
+            track->tuneOffChannels |= channelMask;
             return TRUE;
         }
         if (percent > 0) {
-            track->mutedChannels &= ~channelMask;
+            track->tuneOffChannels &= ~channelMask;
             return TRUE;
         }
     }
@@ -1590,15 +1592,15 @@ s32 func_1000E654(s32 id, s32 marker, s32 waitMask, s32 syncId) {
 
     if (track != NULL) {
         if (waitMask == 0) {
-            if (track->channel >= 0) {
-                func_10008C6C(track->channel, marker - 1);
+            if (track->player >= 0) {
+                func_10008C6C(track->player, marker - 1);
                 return TRUE;
             }
         }
-        track->pendingJump = marker;
-        track->jumpWait = waitMask;
+        track->jumpPoint = marker;
+        track->jumpSync = waitMask;
         if (syncTo != NULL) {
-            track->syncTo = syncTo;
+            track->syncTune = syncTo;
         }
         return TRUE;
     }
@@ -1608,8 +1610,8 @@ s32 func_1000E654(s32 id, s32 marker, s32 waitMask, s32 syncId) {
 s32 func_1000E704(s32 id, s32 arg1, s32 arg2) {
     MusicTrack *track = func_1000B1B0(id);
 
-    if (track != NULL && track->channel >= 0) {
-        func_10008A94(track->channel, arg2, arg1);
+    if (track != NULL && track->player >= 0) {
+        func_10008A94(track->player, arg2, arg1);
         return TRUE;
     }
     return FALSE;
@@ -1676,8 +1678,8 @@ void func_1000E8C4(s32 event) {
 u8 func_1000E8F0(s32 id) {
     MusicTrack *track = func_1000B1B0(id);
 
-    if (track != NULL && track->channel >= 0) {
-        return D_800418AC[track->channel];
+    if (track != NULL && track->player >= 0) {
+        return D_800418AC[track->player];
     } else {
         return 0;
     }
@@ -1700,10 +1702,10 @@ void func_1000E934(void) {
         D_80041890[i] = 0;
         D_80041880[i] = 0;
     }
-    bzero(D_800419A8, sizeof(D_800419A8));
+    bzero(tuneArray, sizeof(tuneArray));
     D_800419A0 = 0;
     for (k = 0; k < 12; k++) {
-        D_800419A8[k].id = -1;
+        tuneArray[k].seq_number = -1;
     }
 }
 

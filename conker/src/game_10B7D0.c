@@ -15,19 +15,19 @@ extern void func_1510D874(WorldObject *, s32, s32, s32, s32);
 void func_150DE320(s32 arg0) {
 }
 
-/* For each of eight D_800D3098 records that func_150A32B4 accepts, sets the moving state of the
+/* For each of eight zones records that func_150A32B4 accepts, sets the moving state of the
  * matching func_151149AC object, or (for records without one) calls func_150A2864(id, 1). */
 void func_150DE32C(s32 arg0, s32 arg1, s32 arg2) {
     s32 i;
     WorldObject *prop;
-    const u8 ids[8] = { 0x18, 0x19, 0x1A, 0x1B, 0x0D, 0x30, 0x31, 0x32 };
-    const u8 propIds[8] = { 0xF6, 0xF3, 0xF0, 0xED, 0, 0, 0, 0 };
+    u8 ids[8] = { 0x18, 0x19, 0x1A, 0x1B, 0x0D, 0x30, 0x31, 0x32 };
+    u8 propIds[8] = { 0xF6, 0xF3, 0xF0, 0xED, 0, 0, 0, 0 };
 
     for (i = 0; i < 8; i++) {
-        if (func_150A32B4(&D_800D3098[ids[i]], arg0, arg1, arg2) != 0) {
+        if (func_150A32B4(&zones[ids[i]], arg0, arg1, arg2) != 0) {
             if (propIds[i] != 0) {
                 prop = func_151149AC(propIds[i]);
-                prop->behaviorState = (prop->behaviorState & ~3) | 3;
+                prop->task_flag = (prop->task_flag & ~TASK_FLAG_STATE) | TASK_FLAG_ON;
             } else {
                 func_150A2864(ids[i], 1);
             }
@@ -37,7 +37,7 @@ void func_150DE32C(s32 arg0, s32 arg1, s32 arg2) {
 
 /* Per-frame update: while moving, spins the rotation (wrapping each angle), applies gravity and
  * velocity (moveX..moveZ, gravity in param) to the position and counts alpha down as a lifetime
- * until inactive; kind 0xC props also get two assets of D_80090204 row work.words[0] passed to func_1510D874. */
+ * until inactive; kind 0xC props also get two assets of D_80090204 row touch.i.a passed to func_1510D874. */
 void func_150DE458(WorldObject *prop) {
     s32 pad[4]; // matching: unused frame space above size
     s32 size;
@@ -49,35 +49,35 @@ void func_150DE458(WorldObject *prop) {
     s32 slot;
     s32 nextSlot;
 
-    if ((prop->behaviorState & 3) == 3) {
+    if ((prop->task_flag & TASK_FLAG_STATE) == TASK_FLAG_ON) {
         frames = D_800BE9E4;
 
-        prop->rotX += prop->spinX * frames;
-        angle = prop->rotX;
+        prop->t += prop->spinX * frames;
+        angle = prop->t;
         if (angle < 0.0f) {
-            prop->rotX = angle + 360.0f;
+            prop->t = angle + 360.0f;
         } else if (angle >= 360.0f) {
-            prop->rotX = angle - 360.0f;
+            prop->t = angle - 360.0f;
         }
 
-        prop->rotY += prop->spinY * frames;
-        angle = prop->rotY;
+        prop->u += prop->spinY * frames;
+        angle = prop->u;
         if (angle < 0.0f) {
-            prop->rotY = angle + 360.0f;
+            prop->u = angle + 360.0f;
         } else if (angle >= 360.0f) {
-            prop->rotY = angle - 360.0f;
+            prop->u = angle - 360.0f;
         }
 
-        prop->rotZ += prop->spinZ * frames;
-        angle = prop->rotZ;
+        prop->v += prop->spinZ * frames;
+        angle = prop->v;
         if (angle < 0.0f) {
-            prop->rotZ = angle + 360.0f;
+            prop->v = angle + 360.0f;
         } else if (angle >= 360.0f) {
-            prop->rotZ = angle - 360.0f;
+            prop->v = angle - 360.0f;
         }
 
         timer = prop->alpha;
-        prop->moveY -= prop->param.word * D_800BE9E4;
+        prop->moveY -= prop->moveData.word * D_800BE9E4;
         prop->x += prop->moveX * D_800BE9E4;
         prop->y += prop->moveY * D_800BE9E4;
         prop->z += prop->moveZ * D_800BE9E4;
@@ -93,7 +93,7 @@ void func_150DE458(WorldObject *prop) {
     if ((prop->modelId & ~0x8000) == 0xC) {
         // matching: a for (i = 0; i < 2; i++) form (slots i * 2 + 4, i * 2 + 5) grows the frame by 8;
         // the original steps the asset pointer and both slot numbers separately
-        asset = D_80090204[prop->work.words[0]];
+        asset = D_80090204[prop->touch.i.a];
         slot = 4;
         nextSlot = 5;
         do {
@@ -107,14 +107,14 @@ void func_150DE458(WorldObject *prop) {
 }
 
 /* Sways the object: y bobs around 1130 and rotX / rotZ rock, each driven by func_15048A40 of its own
- * phase (work.words[0..2], in 1/8 steps of its angle); the phases advance 12, 16 and 24 per frame. */
+ * phase (touch.i.a/b/c, in 1/8 steps of its angle); the phases advance 12, 16 and 24 per frame. */
 void func_150DE6D8(WorldObject *prop) {
-    prop->y = func_15048A40(prop->work.words[0] >> 3) * 10.19999981f + 1130.0f;
-    prop->rotX = func_15048A40(prop->work.words[1] >> 3) * 1.100000024f;
-    prop->rotZ = func_15048A40(prop->work.words[2] >> 3) * 1.100000024f;
-    prop->work.words[0] += D_800BE9E4 * 12;
-    prop->work.words[1] += D_800BE9E4 * 16;
-    prop->work.words[2] += D_800BE9E4 * 24;
+    prop->y = func_15048A40(prop->touch.i.a >> 3) * 10.19999981f + 1130.0f;
+    prop->t = func_15048A40(prop->touch.i.b >> 3) * 1.100000024f;
+    prop->v = func_15048A40(prop->touch.i.c >> 3) * 1.100000024f;
+    prop->touch.i.a += D_800BE9E4 * 12;
+    prop->touch.i.b += D_800BE9E4 * 16;
+    prop->touch.i.c += D_800BE9E4 * 24;
 }
 
 /* State func_150DE7C0 stores after each particle it spawns. */
@@ -135,13 +135,6 @@ typedef struct {
     s32 ids[2];
 } TexturePair;
 
-/* Emitter state at +0x28 of func_150DE7C0's object. */
-typedef struct {
-    /* 0x00 */ s16 timer; // frames until the next particle
-    /* 0x02 */ u8 pad2[2];
-    /* 0x04 */ s32 source;
-    /* 0x08 */ s32 target;
-} EmitterLink;
 
 typedef struct {
     /* 0x00 */ u8 pad0;
@@ -149,19 +142,20 @@ typedef struct {
     /* 0x02 */ u8 pad2[0xA];
     /* 0x0C */ u8 unkC;
     /* 0x0D */ u8 padD[0x1B];
-    /* 0x28 */ EmitterLink link;
+    /* 0x28 */ ZonePairEmitter link;
 } Emitter;
 
 void *memcpy(void *, const void *, u32);
 void func_1514470C(s32, Vec3f *);
 s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
 s32 func_15140410(Particle *, Vec3f *, Vec3f *, s16);
-extern TexturePair D_800A0D00;
+/* Particle textures: 0xBE, or 0xBF for the slower ones. */
+const TexturePair D_800A0D00 = { { 0xBE, 0xBF } };
 
 /* Every 200-400 frames, spawns a particle (texture 0xBE or 0xBF) at the link's source position that
  * travels to its target position at a random speed of 25-55 (0xBF ones at 0.18 of that). */
 void func_150DE7C0(Emitter *emitter) {
-    EmitterLink *link;
+    ZonePairEmitter *link;
     Vec3f target;
     Vec3f delta;
     f32 length;
@@ -249,24 +243,19 @@ s32 func_150DEACC(Particle *particle) {
     return 1;
 }
 
-/* Calls func_15140410 with the particle's side / forward axes, unless D_800DBFF0[D_80082FA0].pitch is
+/* Calls func_15140410 with the particle's side / forward axes, unless camera_global_Cameras[D_80082FA0].CameraPitch is
  * below 5. */
 s32 func_150DEB58(Particle *particle, s16 arg1) {
-    if (D_800DBFF0[D_80082FA0].pitch < 5.0f) {
+    if (camera_global_Cameras[D_80082FA0].CameraPitch < 5.0f) {
         return 0;
     }
     return func_15140410(particle, &particle->travel.side, &particle->travel.forward, arg1);
 }
 
 /* An s32 table entry read through its low byte (the symbols point at byte 3 of each word). */
-typedef struct {
-    u8 value;
-    u8 pad1[3];
-} LowByte;
-
-extern LowByte D_800A0D0B[];
-extern LowByte D_800A0D2B[];
-extern void func_151616D0(u8, u8, s32);
+static const s32 D_800A0D08[8] = { 0x17, 0x18, 0x1A, 0x19, 0x1B, 0x1C, 0x1E, 0x1D };
+static const s32 D_800A0D28[8] = { 2, 3, 5, 4, 6, 7, 9, 8 };
+extern void light_sendEvent(u8, u8, s32);
 extern void func_151417C4(u8, s32);
 void func_150DEC28(u8 index, s32 arg1);
 
@@ -279,10 +268,10 @@ void func_150DEBE0(s32 arg0) {
     }
 }
 
-/* Passes entry `index` of the D_800A0D0B and D_800A0D2B byte tables to func_151616D0 and func_151417C4. */
+/* Passes entry `index` of the D_800A0D08 and D_800A0D28 tables to light_sendEvent and func_151417C4. */
 void func_150DEC28(u8 index, s32 arg1) {
     s32 i = index; // matching: without this copy IDO spills the scaled index to another slot
 
-    func_151616D0(D_800A0D0B[i].value, 0x22, 0);
-    func_151417C4(D_800A0D2B[i].value, 0x22);
+    light_sendEvent(D_800A0D08[i], 0x22, 0);
+    func_151417C4(D_800A0D28[i], 0x22);
 }

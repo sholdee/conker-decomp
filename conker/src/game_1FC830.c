@@ -72,7 +72,7 @@ Gfx *func_151CF380(RibbonActor *ribbon, Gfx *gfx, s16 cameraIdx) {
     }
     info = ribbon->info;
     points = ribbon->points;
-    if (info->owner != NULL && info->owner->unk1D4 == NULL) {
+    if (info->owner != NULL && info->owner->ob_matrix_ptr == NULL) {
         return gfx;
     }
     func_151D5D60(ribbon->vtxBuffer, cameraIdx, (ribbon->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), (void **)&vtx, NULL);
@@ -175,11 +175,11 @@ void func_151CF898(Actor *obj, f32 probeY, f32 arg2) {
     GroundEffectData data;
     GroundEffect *effect;
 
-    player = obj->camera;
+    player = obj->CameraPtr;
     if (player != NULL) {
         if (func_150ADA68() < 0.2220000178f) {
-            camPos = func_15144B34(player->playerIndex);
-            yaw = func_15144AA8(player->playerIndex);
+            camPos = func_15144B34(player->CNumber);
+            yaw = func_15144AA8(player->CNumber);
             angle = ((func_150ADA68() * 80.0f) + (yaw - 40.0f)) * 0.01745329238f;
             distance = func_150ADA68() * 2000.0f;
 
@@ -222,11 +222,11 @@ void func_151CFA4C(Actor *obj, u8 arg1, s32 arg2) {
     Vec3f vecC;
     u8 i;
 
-    pos.x = obj->x_position;
-    pos.y = obj->y_position + 200.0f;
-    pos.z = obj->z_position;
-    if (obj->unk1D4) {
-        func_1503F404((s32)obj->unk1D4, &vecA.x, &vecA.y, &vecA.z, &vecB.x, &vecB.y, &vecB.z,
+    pos.x = obj->xpos;
+    pos.y = obj->ypos + 200.0f;
+    pos.z = obj->zpos;
+    if (obj->ob_matrix_ptr) {
+        func_1503F404((s32)obj->ob_matrix_ptr, &vecA.x, &vecA.y, &vecA.z, &vecB.x, &vecB.y, &vecB.z,
                       &vecC.x, &vecC.y, &vecC.z);
         {
             ParticleSpawn78 piece;
@@ -234,7 +234,7 @@ void func_151CFA4C(Actor *obj, u8 arg1, s32 arg2) {
 
             piece.radius = 1.0f;
             piece.elasticity = 0.6490000486f;
-            piece.sizeXZ = piece.sizeY = (obj->xz_scale + obj->y_scale) * 0.5f;
+            piece.sizeXZ = piece.sizeY = (obj->scale_xz + obj->scale_y) * 0.5f;
             piece.rot = vecB;
             piece.scale.x = 1.0f;
             piece.scale.y = 0.0f;
@@ -262,7 +262,7 @@ void func_151CFA4C(Actor *obj, u8 arg1, s32 arg2) {
                 u32 pitch;
 
                 piece.model = models[i];
-                func_15143134(&D_800AAEEC[i], &piece.pos, (Mtx *)obj->unk1D4);
+                func_15143134(&D_800AAEEC[i], &piece.pos, (Mtx *)obj->ob_matrix_ptr);
                 yaw = func_150ADA20();
                 pitch = func_150ADA20();
                 func_15143794(yaw & 0xFF, (pitch % 25U) - 64, (func_150ADA68() * 11.44999981f) + 16.93000031f, &piece.vel);
@@ -383,10 +383,10 @@ void func_151D0058(Actor *obj, u8 variant, u8 arg2, s32 arg3) {
 
     data.owner = obj;
     data.ownerId = obj->unique_id;
-    data.scale = (obj->xz_scale + obj->y_scale) * 0.5f;
+    data.scale = (obj->scale_xz + obj->scale_y) * 0.5f;
     data.variant = variant;
     data.alpha = (func_150ADA20() % 56U) + 200;
-    data.ownerUnk84 = obj->unk84.uh;
+    data.ownerUnk84 = obj->animseq.uh;
 
     effect = (StripEffect *)func_15149130(300, -1, 0x61, 4, 0, 0x31, sizeof(data), arg2, arg3);
     if (effect != NULL) {
@@ -398,7 +398,7 @@ void func_151D0058(Actor *obj, u8 variant, u8 arg2, s32 arg3) {
 void func_151D0128(StripEffect *effect) {
     Actor *owner = effect->data.owner;
 
-    if (effect->data.ownerUnk84 != owner->unk84.uh) {
+    if (effect->data.ownerUnk84 != owner->animseq.uh) {
         effect->base.header.state = -1;
     }
 }
@@ -442,11 +442,11 @@ Gfx *func_151D014C(Gfx *gfx, StripEffect *effect, s16 cameraIdx) {
 
     owner = effect->data.owner;
     data = &effect->data;
-    if (owner->interaction_state == 0 || owner->unique_id != data->ownerId) {
+    if (owner->type == 0 || owner->unique_id != data->ownerId) {
         effect->base.header.state = -1;
         return gfx;
     }
-    if (owner->unk1D4 == NULL) {
+    if (owner->ob_matrix_ptr == NULL) {
         return gfx;
     }
     func_151D5D60(effect->base.buffers, cameraIdx, 0x1C0, (void **)&vtx, NULL);
@@ -454,8 +454,8 @@ Gfx *func_151D014C(Gfx *gfx, StripEffect *effect, s16 cameraIdx) {
         return gfx;
     }
     update = 1;
-    func_15143134(&D_800AAF5C[data->variant], &from, (Mtx *)owner->unk1D4 + 2);
-    func_15143134(&D_800AAF74, &to, (Mtx *)owner->unk1D4 + D_800AAF80[data->variant]);
+    func_15143134(&D_800AAF5C[data->variant], &from, (Mtx *)owner->ob_matrix_ptr + 2);
+    func_15143134(&D_800AAF74, &to, (Mtx *)owner->ob_matrix_ptr + D_800AAF80[data->variant]);
     camPos = func_15144B34(cameraIdx);
     gfx = func_15142B7C(gfx, 0x200005, 0x60600);
     gfx = func_15142E24(gfx, (s32)D_80091154, 0, 0, 0, 0, 0x7F, 0, 0, &update, 3);
@@ -609,7 +609,7 @@ void func_151D09A8(Actor *obj, u8 arg1, s32 arg2) {
     CollisionHit floor;
     ConeBasis shape;
 
-    if (obj->unk1D4 != NULL) {
+    if (obj->ob_matrix_ptr != NULL) {
         {
             f32 *srcs[2];
             Vec3f *dsts[2];
@@ -618,7 +618,7 @@ void func_151D09A8(Actor *obj, u8 arg1, s32 arg2) {
             srcs[1] = D_800AAF90;
             dsts[0] = &pos;
             dsts[1] = &dir;
-            func_15145EA4(srcs, dsts, (Mtx *)obj->unk1D4 + 2, 2);
+            func_15145EA4(srcs, dsts, (Mtx *)obj->ob_matrix_ptr + 2, 2);
             dir.x -= pos.x;
             dir.y -= pos.y;
             dir.z -= pos.z;
@@ -786,9 +786,9 @@ void func_151D0F60(Actor *obj, u8 pointFn, u8 arg2, s32 arg3) {
 
 /* Point function: 8 units above the object's unk180 height, at its x/z. */
 s32 func_151D1074(Actor *obj, Vec3f *out) {
-    out->x = obj->x_position;
+    out->x = obj->xpos;
     out->y = obj->floorY + 8.0f;
-    out->z = obj->z_position;
+    out->z = obj->zpos;
     return TRUE;
 }
 
@@ -808,7 +808,7 @@ extern Vec3f D_800AAF9C[];
 
 /* Writes model point D_800AAF9C[which] of the object, in world space, to out. */
 s32 func_151D10E4(Actor *obj, Vec3f *out, u8 which) {
-    s32 joints = (s32)obj->unk1D4;
+    s32 joints = (s32)obj->ob_matrix_ptr;
 
     if (joints == 0) {
         return FALSE;
@@ -833,7 +833,7 @@ void func_151D1138(TrackerEffect *effect) {
     data = &effect->data;
     owner = data->owner;
 
-    if (owner->interaction_state == 0 || owner->unique_id != data->ownerId) {
+    if (owner->type == 0 || owner->unique_id != data->ownerId) {
         effect->base.header.state = -1;
         return;
     }
@@ -849,8 +849,8 @@ void func_151D1138(TrackerEffect *effect) {
     data->delta.z = data->pos.z - data->prevPos.z;
     data->dist = func_15143E64(&data->delta);
 
-    state = func_1510F8CC(owner->unk184);
-    if (data->dist > 300.0f || data->dist <= 0.0f || owner->unk28 != 0.0f || owner->in_water != 0 ||
+    state = func_1510F8CC(owner->floorMaterial);
+    if (data->dist > 300.0f || data->dist <= 0.0f || owner->shad != 0.0f || owner->inwater != 0 ||
         state == 5 || state == 6 || state == 9 || state == 13 || state == 14) {
         finished = TRUE;
     }
@@ -916,7 +916,7 @@ void func_151D1448(TrackerEffect *effect) {
     req.data.owner = effect;
     req.data.alpha = 0xFF;
     req.data.texture = 0.0f;
-    if (owner->id == 0x25) {
+    if (owner->character_type == 0x25) {
         req.data.maxLength = 800.0f;
         req.data.widthBase = 36.0f;
         req.data.widthScale = 50.0f;
@@ -931,7 +931,7 @@ void func_151D1448(TrackerEffect *effect) {
         req.data.widthScale = 40.0f;
         req.data.alphaScale = 180.0f;
     }
-    req.data.ownerScale = data->owner->xz_scale;
+    req.data.ownerScale = data->owner->scale_xz;
     req.spawn.itemCount = 25;
     req.spawn.pos = data->pos;
     req.spawn.life = 300;

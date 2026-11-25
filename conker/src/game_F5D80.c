@@ -101,7 +101,7 @@ void func_150C8A68(RadialEffect *effect) {
         if (effect->def.emitCallback != -1) {
             effect->pending += effect->def.emitRate * D_800BE9A4 * (6.283185482f * effect->radius);
             while (effect->pending > 1.0f) {
-                bias = D_800DBFF0[D_80082FA4].unk380 * 0.7111111283f;
+                bias = camera_global_Cameras[D_80082FA4].TrueCameraAngle * 0.7111111283f;
                 angle = (func_150ADA20() % 81U) + bias - 40;
                 cosine = func_151423D8(angle - 64);
                 sine = func_151423D8(angle);
@@ -400,26 +400,26 @@ void func_150C9BDC(RadialEffect *effect, f32 oldRadius) {
     f32 behind;
 
     for (i = 0; i < 25; i++) {
-        actor = &D_800CC2D0[i];
-        if ((actor->interaction_state != 0) && (actor->unk28 < 20.0f) && (actor->immune == 0) &&
-            ((actor->id == 0x53) || (actor->interaction_state == 1))) {
-            dx = actor->x_position - effect->def.pos.x;
-            dz = actor->z_position - effect->def.pos.z;
+        actor = &movement_obj[i];
+        if ((actor->type != 0) && (actor->shad < 20.0f) && (actor->imune == 0) &&
+            ((actor->character_type == 0x53) || (actor->type == 1))) {
+            dx = actor->xpos - effect->def.pos.x;
+            dz = actor->zpos - effect->def.pos.z;
             dist = sqrtf((dx * dx) + (dz * dz)) - 100.0f;
-            if ((actor->id == 0x53) && (actor->unk13C == 0)) {
+            if ((actor->character_type == 0x53) && (actor->lifting == 0)) {
                 dist -= 150.0f;
             }
             behind = effect->radius - dist;
             if ((behind >= 0.0f) && (behind < 250.0f)) {
-                if (actor->id == 0x53) {
-                    actor->disable_run = 10;
-                    actor->unk218 = NULL;
-                    actor->unk232 = 0x13;
-                    if (D_800CC2D0[actor->unk124].unk65 != 0) {
-                        actor->unk232 = 0x14;
+                if (actor->character_type == 0x53) {
+                    actor->norun = 10;
+                    actor->scriptCmd = NULL;
+                    actor->intelwalk = 0x13;
+                    if (movement_obj[actor->owner].attach_char != 0) {
+                        actor->intelwalk = 0x14;
                     }
                 } else {
-                    func_1505D024(actor, 0x6000E, actor->unk7A, -1);
+                    func_1505D024(actor, 0x6000E, actor->langle, -1);
                 }
             }
         }
@@ -539,11 +539,11 @@ void func_150CA150(Actor *actor) {
     onGround = 0;
     if (actor != NULL) {
         func_1504715C(&floorInfo, actor);
-        func_1512D748(&D_800DBFF0[D_800BE9E8], 7, 1);
-        pos.x = actor->x_position;
-        pos.y = actor->y_position + 100.0f;
-        pos.z = actor->z_position;
-        if (func_15046C80(&pos, 0, actor->y_position - 300.0f, &floorInfo) != 0) {
+        func_1512D748(&camera_global_Cameras[D_800BE9E8], 7, 1);
+        pos.x = actor->xpos;
+        pos.y = actor->ypos + 100.0f;
+        pos.z = actor->zpos;
+        if (func_15046C80(&pos, 0, actor->ypos - 300.0f, &floorInfo) != 0) {
             onGround = 1;
             pos.y = floorInfo.height;
         } else {
@@ -594,7 +594,7 @@ void func_150CA150(Actor *actor) {
             s16 randomArg;
             u8 spark[3];
 
-            heading = -0x40 - (actor->unk7A >> 8);
+            heading = -0x40 - (actor->langle >> 8);
             cosH = func_151423D8(heading);
             sinH = func_151423D8(heading - 0x40);
             size = extent = (func_150ADA68() * 96.0f + 352.0f) * 0.5f;

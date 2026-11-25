@@ -89,7 +89,7 @@ Emitter *func_150C0AC0(EmitterDesc *desc, s32 arg1, s32 arg2) {
         if (desc->target == NULL) {
             return NULL;
         }
-        if (desc->target->interaction_state == 0) {
+        if (desc->target->type == 0) {
             return NULL;
         }
     }
@@ -105,8 +105,8 @@ Emitter *func_150C0AC0(EmitterDesc *desc, s32 arg1, s32 arg2) {
         emitter->lastX = emitter->desc.source->x;
         emitter->lastZ = emitter->desc.source->z;
     } else {
-        emitter->lastX = emitter->desc.target->x_position;
-        emitter->lastZ = emitter->desc.target->z_position;
+        emitter->lastX = emitter->desc.target->xpos;
+        emitter->lastZ = emitter->desc.target->zpos;
     }
     emitter->spawnAccum = 0.0f;
     emitter->activeHead = -1;
@@ -137,15 +137,15 @@ void func_150C0C38(Emitter *emitter) {
     kill = FALSE;
     if (!(emitter->desc.flags & 2)) {
         target = emitter->desc.target;
-        if (target->interaction_state == 0) {
+        if (target->type == 0) {
             kill = TRUE;
         }
         if (target->unique_id != emitter->desc.targetId) {
             kill = TRUE;
         }
-        pos.x = target->x_position;
+        pos.x = target->xpos;
         pos.y = emitter->desc.target->floorY;
-        pos.z = emitter->desc.target->z_position;
+        pos.z = emitter->desc.target->zpos;
     } else {
         memcpy(&pos, emitter->desc.source, sizeof(Vec3f));
         pos.y -= 65.0f;
@@ -158,11 +158,11 @@ void func_150C0C38(Emitter *emitter) {
             emitter->slots[i].particle->anchor = pos;
         }
         if (emitter->desc.flags & 4) {
-            if (emitter->desc.target->unk84.uh != 0x1D && emitter->desc.target->unk84.uh != 0x1E) {
+            if (emitter->desc.target->animseq.uh != 0x1D && emitter->desc.target->animseq.uh != 0x1E) {
                 active = FALSE;
             }
         }
-        if (emitter->desc.target->xz_velocity < 3.0f) {
+        if (emitter->desc.target->speed < 3.0f) {
             active = FALSE;
         }
         if ((pos.x != emitter->lastX || pos.z != emitter->lastZ) && active) {

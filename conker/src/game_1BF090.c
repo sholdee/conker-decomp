@@ -33,7 +33,7 @@ typedef struct DustEmitterData {
     /* 0x04 */ u8 ownerId; /* owner->unique_id at spawn; a mismatch means the owner died */
     /* 0x05 */ u8 pad5[3];
     /* 0x08 */ Vec3f offset;      /* emitter position in the bone's space */
-    /* 0x14 */ s32 matrixOffset;   /* byte offset of the bone's 0x40-byte matrix in owner->unk1D4 */
+    /* 0x14 */ s32 matrixOffset;   /* byte offset of the bone's 0x40-byte matrix in owner->ob_matrix_ptr */
     /* 0x18 */ f32 accum;          /* particles owed; one is spawned per whole unit */
     /* 0x1C */ f32 rateBase;
     /* 0x20 */ f32 rateRandom;
@@ -121,14 +121,14 @@ void func_15191D54(DustEmitter *effect) {
 
     owner = effect->data.owner;
     data = &effect->data;
-    if (owner->interaction_state == 0 || owner->unique_id != data->ownerId) {
+    if (owner->type == 0 || owner->unique_id != data->ownerId) {
         effect->base.header.state = -1;
         return;
     }
     data->accum += (data->rateBase + func_150ADA68() * data->rateRandom) * D_800BE9A4;
     if (data->accum > 1.0f) {
-        if (owner->unk1D4 != NULL) {
-            func_15143134(&data->offset, &position, (u8 *)owner->unk1D4 + data->matrixOffset);
+        if (owner->ob_matrix_ptr != NULL) {
+            func_15143134(&data->offset, &position, (u8 *)owner->ob_matrix_ptr + data->matrixOffset);
             if (data->unk60 > 0.0f) {
                 if (func_1514672C(&position) == 0) {
                     floorY = -9500.0f;
@@ -329,7 +329,7 @@ DustEmitter *func_151925C4(Actor *obj, s16 duration, u8 arg2, s32 arg3) {
     }
     kind = -1;
     effect = NULL;
-    switch (obj->id) {
+    switch (obj->character_type) {
     case 0:
     case 1:
     case 2:

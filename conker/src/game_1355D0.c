@@ -17,12 +17,12 @@ void func_15108120(Actor *obj, u8 arg1, s32 arg2) {
     Vec3f pos;
     Vec3f debrisOrigin;
 
-    pos.x = obj->x_position;
-    pos.y = obj->y_position;
-    pos.z = obj->z_position;
-    debrisOrigin.x = obj->x_position;
-    debrisOrigin.y = obj->y_position + 30.0f;
-    debrisOrigin.z = obj->z_position;
+    pos.x = obj->xpos;
+    pos.y = obj->ypos;
+    pos.z = obj->zpos;
+    debrisOrigin.x = obj->xpos;
+    debrisOrigin.y = obj->ypos + 30.0f;
+    debrisOrigin.z = obj->zpos;
     func_150E83AC(&pos, (func_150ADA20() % 201) + 500, arg1, arg2);
     {
         DebrisBurst debris;

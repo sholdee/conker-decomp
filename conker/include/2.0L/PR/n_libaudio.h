@@ -256,8 +256,8 @@ typedef struct {
     /* 0x80 */  ALSeqMarker        *loopEnd;
     /* 0x84 */  s32                 loopCount;      /* -1 = loop forever, 0 = no loop   */
     /* 0x88 */  u8 pad88[0x4];
-    /* 0x8C */  u8 maxVoices;
-    /* 0x8D */  u8 usedVoices;
+    /* 0x8C */  u8 voiceLimit;     /* same bytes as N_ALCSPlayer.voiceLimit */
+    /* 0x8D */  u8 voiceCount;
 } N_ALSeqPlayer;
 
 typedef struct {
@@ -273,6 +273,8 @@ typedef struct {
     /* 0x32 */  s16                 vol;            /* overall sequence volume          */
     /* 0x34 */  u8                  maxChannels;    /* number of MIDI channels          */
     /* 0x35 */  u8                  debugFlags;     /* control which error get reported */
+    /* 0x36 */  u8                  mpegBank;       /* Rare: the Oct 2000 debugger's name; set by func_1001A3E0 */
+    /* 0x37 */  u8                  pad37;
     /* 0x38 */  N_ALEvent           nextEvent;
     /* 0x48 */  ALEventQueue        evtq;
     /* 0x5C */  ALMicroTime         frameTime;
@@ -283,13 +285,13 @@ typedef struct {
     /* 0x70 */  ALOscInit           initOsc;
     /* 0x74 */  ALOscUpdate         updateOsc;
     /* 0x78 */  ALOscStop           stopOsc;
-    /* RARE CUSTOM */
-    /* 0x7C */  f32 unk7C;
-    /* 0x80 */  f32 unk80;
-    /* 0x84 */  s32 unk84;
-    /* 0x88 */  u8  unk88[0x4];
-    /* 0x8C */  u8  unk8C;
-    /* 0x8D */  u8  unk8D;
+    /* RARE CUSTOM (mpegBank, voiceLimit and voiceCount are the Oct 2000 debugger's names) */
+    /* 0x7C */  f32          fxMixOffset;     /* fxmix = ((chan fxmix & 0x7F) + fxMixOffset * 127) * fxMixScale */
+    /* 0x80 */  f32          fxMixScale;      /* both set by event 25 (func_10017DF0) */
+    /* 0x84 */  struct OSMesgQueue_s *msgQueue; /* receives marker and note messages (func_10017AF0) */
+    /* 0x88 */  s32          pausedDelta;     /* ticks to the next sequence event, saved on pause (state 3) */
+    /* 0x8C */  u8           voiceLimit;      /* Oct 2000 had these two at 0x88/0x89, before pausedDelta */
+    /* 0x8D */  u8           voiceCount;
 } N_ALCSPlayer;
 
 

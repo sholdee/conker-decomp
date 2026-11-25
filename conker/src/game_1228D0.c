@@ -122,7 +122,7 @@ s32 func_150F56B0(ModelAttachment *att, Actor *actor) {
     }
     frame = 6;
     two = 2.0f;
-    if (actor->unk84.uh == 0xAE) {
+    if (actor->animseq.uh == 0xAE) {
         if ((anim->frame >= 36.0f) && (anim->frame <= 51.0f)) {
             t = anim->frame - 36.0f;
             t *= 0.0625f;
@@ -175,7 +175,7 @@ s32 func_150F5A54(ModelAttachment *att, Actor *actor) {
     Gfx *gfx;
     s32 count;
     s32 notStarted;
-    f32 level;
+    f32 intensity;
     s32 ult;
     s32 i;
 
@@ -189,30 +189,30 @@ s32 func_150F5A54(ModelAttachment *att, Actor *actor) {
     notStarted = FALSE;
     switch (att->unk38) {
     case 0:
-        if (actor->unk84.uh == 5) {
-            level = 1.0f;
+        if (actor->animseq.uh == 5) {
+            intensity = 1.0f;
             att->unk38 = 1;
         } else {
             notStarted = TRUE;
         }
         break;
     case 1:
-        level = 1.0f;
+        intensity = 1.0f;
         break;
     case 2:
-        level = 0.0f;
+        intensity = 0.0f;
         break;
     }
 
-    if (actor->unk84.uh == 5) {
+    if (actor->animseq.uh == 5) {
         if (anim->frame < 69.0f) {
-            level = 1.0f;
+            intensity = 1.0f;
         } else if (84.0f < anim->frame) {
-            level = 0.0f;
+            intensity = 0.0f;
             att->unk38 = 2;
         } else {
-            level = (anim->frame - 69.0f) / 15;
-            level = 1.0f - level;
+            intensity = (anim->frame - 69.0f) / 15;
+            intensity = 1.0f - intensity;
         }
     }
 
@@ -231,7 +231,7 @@ s32 func_150F5A54(ModelAttachment *att, Actor *actor) {
     if (notStarted) {
         ult = 2;
     } else {
-        ult = (s32)((58.0f * level) + 44.0f);
+        ult = (s32)((58.0f * intensity) + 44.0f);
     }
     gfx[i].words.w0 = (G_SETTILESIZE << 24) | (2 << 12) | (ult & 0xFFF);
     return 0;
@@ -293,11 +293,11 @@ void func_150F5C98(SparkEffect *effect) {
 
     owner = effect->data.owner;
     data = &effect->data;
-    if (owner->interaction_state == 0 || owner->unique_id != data->ownerId) {
+    if (owner->type == 0 || owner->unique_id != data->ownerId) {
         effect->base.header.state = -1;
         return;
     }
-    if (owner->unk1D4 != NULL) {
+    if (owner->ob_matrix_ptr != NULL) {
         data->accum += (0.2600000203f + func_150ADA68() * 0.1950000077f) * D_800BE9A4;
         if (data->accum > 1.0f) {
             spawn.r = 0xFF;
@@ -310,7 +310,7 @@ void func_150F5C98(SparkEffect *effect) {
             srcs[1] = D_800A1B0C;
             dsts[0] = &start.x;
             dsts[1] = &end.x;
-            func_15145EA4(srcs, dsts, (Mtx *)owner->unk1D4 + 5, 2);
+            func_15145EA4(srcs, dsts, (Mtx *)owner->ob_matrix_ptr + 5, 2);
             spawn.texture = 0x6C;
             spawn.renderMode = 0x5103;
             spawn.unk0 = 0x200005;
@@ -435,11 +435,11 @@ void func_150F6178(BeamEffect *effect) {
 
     data = &effect->data;
     owner = data->owner;
-    if (owner->interaction_state == 0 || owner->unique_id != data->ownerId) {
+    if (owner->type == 0 || owner->unique_id != data->ownerId) {
         effect->base.header.state = -1;
         return;
     }
-    if (owner->unk1D4 != NULL && !(owner->unk94 & 2)) {
+    if (owner->ob_matrix_ptr != NULL && !(owner->unk94 & 2)) {
         Beam *beam;
         Flash *flash;
         FlashSprite *sprite;
@@ -448,7 +448,7 @@ void func_150F6178(BeamEffect *effect) {
         srcs[1] = D_800A1B24;
         dsts[0] = &start.x;
         dsts[1] = &end.x;
-        func_15145EA4(srcs, dsts, (Mtx *)owner->unk1D4, 2);
+        func_15145EA4(srcs, dsts, (Mtx *)owner->ob_matrix_ptr, 2);
         if (data->beam != NULL) {
             beam = data->beam;
             beam->part.flags |= 1;
@@ -548,13 +548,6 @@ void func_150F64B0(DefParticleHead *obj) {
     func_151411C4(obj);
 }
 
-/* Data of the effect run by func_150F64DC. */
-typedef struct {
-    /* 0x00 */ Actor *owner;
-    /* 0x04 */ u8 ownerId;
-    /* 0x05 */ u8 pad5;
-    /* 0x06 */ s16 timer; /* frames until the next burst */
-} FlashBurstData;
 
 typedef struct {
     TimedEffect base;
@@ -576,14 +569,14 @@ void func_150F64DC(FlashBurstEffect *effect) {
 
     owner = effect->data.owner;
     data = &effect->data;
-    if ((owner->interaction_state == 0) || (owner->unique_id != data->ownerId)) {
+    if ((owner->type == 0) || (owner->unique_id != data->ownerId)) {
         effect->base.header.state = -1;
         return;
     }
-    if ((owner->unk1D4 != NULL) && !(owner->unk94 & 2)) {
+    if ((owner->ob_matrix_ptr != NULL) && !(owner->unk94 & 2)) {
         data->timer -= D_800BE9E4;
         if (data->timer < 0) {
-            func_10010F88(0x679, 0x18CE, 0, 0, 0, owner->x_position, owner->y_position, owner->z_position,
+            func_10010F88(0x679, 0x18CE, 0, 0, 0, owner->xpos, owner->ypos, owner->zpos,
                           0x7918, 0x7D00);
             count = (func_150ADA20() & 1) + 2;
             {
@@ -595,7 +588,7 @@ void func_150F64DC(FlashBurstEffect *effect) {
                 s32 rand2;
                 s32 rand3;
 
-                func_15143134(D_800A1B30, pos, (Mtx *)owner->unk1D4);
+                func_15143134(D_800A1B30, pos, (Mtx *)owner->ob_matrix_ptr);
                 header.flags = 3;
                 header.update = -1;
                 header.lifetime = (func_150ADA20() % 9U) + 10;

@@ -100,7 +100,7 @@ void func_1512DEA4(Camera *camera) {
     rail->eyeGoal.x += offset[0];
     rail->eyeGoal.y += offset[1];
     rail->eyeGoal.z += offset[2];
-    if (camera->snap) {
+    if (camera->Snap) {
         camera->eye.x = rail->eyeGoal.x;
         camera->eye.y = rail->eyeGoal.y;
         camera->eye.z = rail->eyeGoal.z;
@@ -108,9 +108,9 @@ void func_1512DEA4(Camera *camera) {
         rail->eyeEaseB = 40.0f;
         return;
     }
-    func_150495B0(&rail->eyeEaseA, 10.0f, &rail->eyeEaseAVel, 0.6f, 1.4f, camera->dt);
-    func_150495B0(&rail->eyeEaseB, 10.0f, &rail->eyeEaseBVel, 0.6f, 1.4f, camera->dt);
-    func_150495B0(&camera->eye.x, rail->eyeGoal.x, &camera->eyeVel.x, rail->eyeEaseA, rail->eyeEaseB, camera->dt);
-    func_150495B0(&camera->eye.y, rail->eyeGoal.y, &camera->eyeVel.y, rail->eyeEaseA, rail->eyeEaseB, camera->dt);
-    func_150495B0(&camera->eye.z, rail->eyeGoal.z, &camera->eyeVel.z, rail->eyeEaseA, rail->eyeEaseB, camera->dt);
+    func_150495B0(&rail->eyeEaseA, 10.0f, &rail->eyeEaseAVel, 0.6f, 1.4f, camera->SpringTime);
+    func_150495B0(&rail->eyeEaseB, 10.0f, &rail->eyeEaseBVel, 0.6f, 1.4f, camera->SpringTime);
+    func_150495B0(&camera->eye.x, rail->eyeGoal.x, &camera->CurrentVelX, rail->eyeEaseA, rail->eyeEaseB, camera->SpringTime);
+    func_150495B0(&camera->eye.y, rail->eyeGoal.y, &camera->CurrentVelY, rail->eyeEaseA, rail->eyeEaseB, camera->SpringTime);
+    func_150495B0(&camera->eye.z, rail->eyeGoal.z, &camera->CurrentVelZ, rail->eyeEaseA, rail->eyeEaseB, camera->SpringTime);
 }

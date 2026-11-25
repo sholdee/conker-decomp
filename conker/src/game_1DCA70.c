@@ -37,9 +37,9 @@ s32 func_151AF5C0(f32 *pos, Actor *actor, CollisionHit *ground, u8 side) {
     }
 
     if (side == 1) {
-        bone = (Mtx *)actor->unk1D4 + 32;
+        bone = (Mtx *)actor->ob_matrix_ptr + 32;
     } else {
-        bone = (Mtx *)actor->unk1D4 + 25;
+        bone = (Mtx *)actor->ob_matrix_ptr + 25;
     }
 
     func_15143134(offset, pos, bone);
@@ -80,7 +80,7 @@ void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16 arg4, s16 arg5, s16 arg6
 
 /*
  * Spawns a spray particle on the ground below the emission point on the actor's `side`, plus a
- * func_1514C678 puff there. The colour is tinted by func_150CCD90 when D_800BE9F0 is 20.
+ * func_1514C678 puff there. The colour is tinted by func_150CCD90 when level is 20.
  */
 void func_151AF6D4(Actor *actor, s32 side, s32 arg2) {
     f32 pos[3];
@@ -101,13 +101,13 @@ void func_151AF6D4(Actor *actor, s32 side, s32 arg2) {
     if (actor == NULL) {
         return;
     }
-    if (actor->unk1D4 == NULL) {
+    if (actor->ob_matrix_ptr == NULL) {
         return;
     }
     if (func_151AF5C0(pos, actor, &ground, side) == 0) {
         return;
     }
-    if (D_800BE9F0 == 20) {
+    if (level == 20) {
         func_150CCD90(pos[2], &fr, &fg, &fb);
         r = fr;
         g = fg;
@@ -162,7 +162,7 @@ void func_151AF6D4(Actor *actor, s32 side, s32 arg2) {
     growth.growRate = (((func_150ADA68() * 40.0f) + 51.0f) * desc.width) * 0.001f;
     desc.unk46 = 0;
     desc.unk47 = 6;
-    particle = func_1513D668(&desc, colors, 0, 0x16, 0, 0, (actor->unk7A >> 8) - ((side == 1) ? -10 : 10),
+    particle = func_1513D668(&desc, colors, 0, 0x16, 0, 0, (actor->langle >> 8) - ((side == 1) ? -10 : 10),
                              500.0f, 500.0f, 0, (s32)&ground.tri, 1, 8, 0xFF, 0);
     if (particle != NULL) {
         memcpy(&particle->growth, &growth, sizeof(growth));

@@ -48,7 +48,7 @@ void func_150C4120(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
     data.unk14 = -1;
     data.flags = 0;
     data.unk18 = 0;
-    if (owner->id == 0x34) {
+    if (owner->character_type == 0x34) {
         data.unk14 = 0x54;
         data.flags = 1;
     }
@@ -117,10 +117,19 @@ extern void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out);
 extern s32 func_1515C0F8(Actor *, Vec3f **);
 extern void func_151C36D8(Vec3f *, s32, s32);
 extern void func_151D9014(Vec3f *, Vec3f *, s32, f32, s32, s32, f32, s32, f32, f32, s32, void *, s32, s32, s32, s32);
-extern Vec3f D_800A0350[];
-extern u8 D_800A0374[];
-extern Vec3f D_800A0378[];
-extern u8 D_800A03A8[];
+const Vec3f D_800A0350[3] = {
+    { 0.0f, 16.0f, 0.0f },
+    { 0.0f, 16.0f, 0.0f },
+    { 0.0f, 13.0f, 0.0f },
+};
+const u8 D_800A0374[4] = { 1, 2, 3, 0 };
+const Vec3f D_800A0378[4] = {
+    { 0.0f, 37.44779587f, 32.76682281f },
+    { 0.0f, 31.68659782f, 29.16607285f },
+    { 0.0f, 34.56719589f, 30.96644783f },
+    { 0.0f, 29.10982704f, 25.31375504f },
+};
+const u8 D_800A03A8[4] = { 1, 2, 3, 4 };
 
 /* Per-frame update of the func_150C4120 effect: keeps its particle at a point on the owner and emits
  * smaller particles from there. Frees the effect once the owner is gone. */
@@ -146,11 +155,11 @@ void func_150C44A4(Effect *effect) {
 
     owner = effect->data.owner;
     data = &effect->data;
-    if ((owner->interaction_state == 0) || (owner->unique_id != data->ownerId)) {
+    if ((owner->type == 0) || (owner->unique_id != data->ownerId)) {
         effect->base.header.state = -1;
         return;
     }
-    if ((owner->unk1D4 == NULL) || (data->flags & 2)) {
+    if ((owner->ob_matrix_ptr == NULL) || (data->flags & 2)) {
         if (data->particle != NULL) {
             data->particle->desc.drawFunc = 3;
         }
@@ -165,7 +174,7 @@ void func_150C44A4(Effect *effect) {
         if (attachment == NULL) {
             return;
         }
-        if (owner->unk2EC != 0) { // fade active: timer unk2D8[0] times rate unk2D8[1]
+        if (owner->taskint[2] != 0) { // fade active: timer unk2D8[0] times rate unk2D8[1]
             progress = owner->unk2D8[0] * owner->unk2D8[1];
         } else {
             progress = 0.0f;
@@ -181,13 +190,13 @@ void func_150C44A4(Effect *effect) {
         offsetPtr = &offset;
         posPtr = &pos;
         if (func_1514654C(owner, attachment, D_800A03A8[i], &offsetPtr, &posPtr, 1) == 0) {
-            pos.x = owner->x_position;
-            pos.y = owner->y_position + 800.0f;
-            pos.z = owner->z_position;
+            pos.x = owner->xpos;
+            pos.y = owner->ypos + 800.0f;
+            pos.z = owner->zpos;
         }
     } else {
-        if (owner->unk2E8 != 0) {
-            progress = (f32)owner->unk2E4 / (f32)owner->unk2E8;
+        if (owner->taskint[1] != 0) {
+            progress = (f32)owner->taskint[0] / (f32)owner->taskint[1];
         } else {
             progress = 1.0f;
         }
@@ -199,14 +208,14 @@ void func_150C44A4(Effect *effect) {
         offset.x = D_800A0350[i].x * t;
         offset.y = D_800A0350[i].y * t;
         offset.z = D_800A0350[i].z * t;
-        func_15143134(&offset, &pos, (Mtx *)owner->unk1D4 + D_800A0374[i]);
+        func_15143134(&offset, &pos, (Mtx *)owner->ob_matrix_ptr + D_800A0374[i]);
     }
     if (data->particle != NULL) {
         data->particle->desc.drawFunc = -1;
         data->particle->desc.pos = pos;
     }
     emit = TRUE;
-    if ((D_800BE9F0 == 2) && (func_150A29C8(owner - D_800CC2D0, 0x4065) == 0)) {
+    if ((level == 2) && (func_150A29C8(owner - movement_obj, 0x4065) == 0)) {
         emit = FALSE;
     }
     if (emit) {

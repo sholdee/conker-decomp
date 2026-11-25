@@ -37,7 +37,7 @@ s32 func_1503F800(void *unused, s16 x, s16 z, s32 bit, s32 unused2) {
 
 /* func_1503F800 at the object's x/z position. */
 s32 func_1503F904(Actor *obj, s32 bit, s32 unused) {
-    return func_1503F800(&obj->unk320, obj->x_position, obj->z_position, bit, 1);
+    return func_1503F800(&obj->unk320, obj->xpos, obj->zpos, bit, 1);
 }
 
 /* Advances D_800C67F1 to the next of the first 25 objects (wrapping) with flag 0x800000 in unkF8. */
@@ -52,7 +52,7 @@ void func_1503F964(void) {
             i = 0;
         }
         while (i != start) {
-            if (D_800CC2D0[i].unkF8 & 0x800000) {
+            if (movement_obj[i].noshove & 0x800000) {
                 D_800C67F1 = i;
                 return;
             }

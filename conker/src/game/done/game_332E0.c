@@ -5,9 +5,9 @@
 
 
 void func_15005E30(Camera *arg0) {
-    if (D_800BE9F0 == 50) {
-        arg0->preset = 2;
-        arg0->presetMask = 4;
+    if (level == 50) {
+        arg0->DistIndex = 2;
+        arg0->DistMask = 4;
         func_15124B18(arg0);
     }
 }

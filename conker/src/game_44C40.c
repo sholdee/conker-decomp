@@ -3,8 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-#define OBJ_TYPE(obj) ((obj)->kind >> 2)
-#define OBJ_SHAPE(obj) ((obj)->kind & 3)
 
 extern void *allocate_memory(s32, s32, s32, s32);
 
@@ -18,10 +16,10 @@ void func_15017790(void) {
     D_800D2E44 = 0;
 }
 
-/* Resets the per-id record list (D_800D2F48) and related state. */
+/* Resets the per-id record list (gTaskWorkingSet) and related state. */
 void func_150177F8(void) {
     func_1509BA04(1);
-    bzero(&D_800D2F48, 0xC);
+    bzero(&gTaskWorkingSet, 0xC);
     func_150A00F0();
     D_800D2DB0 = 999.0f;
     D_800D2E41 = 10;
@@ -32,43 +30,43 @@ void func_150177F8(void) {
 
 IdRecord *func_1509B704(s16 id);
 
-/* Stamps every listed record that has flag 0x1000 with D_800BE9F0, then reloads the records. */
+/* Moves every listed PURGE_BETWEEN_SECTIONS task to the current level (LoadSection), then reloads the tasks. */
 void func_15017868(void) {
     IdRecord *node;
     s32 i;
 
     for (i = 0; i < D_800D2F3C; i++) {
         node = func_1509B704(D_800D2F40[i]);
-        if (node != NULL && (node->key & 0x1000)) {
-            node->unk2 = D_800BE9F0;
+        if (node != NULL && (node->TaskID & PURGE_BETWEEN_SECTIONS)) {
+            node->LoadSection = level;
         }
     }
     func_1509BA04(0);
-    func_1509B4A0((s16)D_800BE9F0, 1);
+    func_1509B4A0((s16)level, 1);
 }
 
 void func_15017B20(TriggerZone *objects, s32 count);
 
-/* Loads the level's object table and builds the list of type-1 objects in modes 0, 2 and 6. */
+/* Loads the level's object table and builds the list D_800D3270 of the ZONE_TYPE_CHAR_FLAGS TriggerZones with subTypeData 0, 2 or 6. */
 void func_15017930(s32 arg0) {
     u32 i;
     u32 count;
     s32 type;
 
-    D_800D3094 = func_1502B7F0((void **)&D_800D3098, 3, 0xC, arg0, 5);
-    count = D_800D3094 / sizeof(TriggerZone);
-    D_800D3094 = count;
-    func_15017B20(D_800D3098, count);
+    gZoneCount = func_1502B7F0((void **)&zones, 3, 0xC, arg0, 5);
+    count = gZoneCount / sizeof(TriggerZone);
+    gZoneCount = count;
+    func_15017B20(zones, count);
     D_800D3274 = 0;
     D_800D3270 = NULL;
-    for (i = 0; i < D_800D3094; i++) {
-        if (OBJ_TYPE(&D_800D3098[i]) == 1 &&
-            (D_800D3098[i].subtype == 2 || D_800D3098[i].subtype == 0 || D_800D3098[i].subtype == 6)) {
+    for (i = 0; i < gZoneCount; i++) {
+        if (ZONE_TYPE(&zones[i]) == ZONE_TYPE_CHAR_FLAGS &&
+            (zones[i].subTypeData == 2 || zones[i].subTypeData == 0 || zones[i].subTypeData == 6)) {
             D_800D3274++;
         }
-        type = OBJ_TYPE(&D_800D3098[i]);
-        if (type == 2 || type == 7) {
-            D_800D3098[i].unk20 = 0;
+        type = ZONE_TYPE(&zones[i]);
+        if (type == ZONE_TYPE_SOUND || type == ZONE_TYPE_TUNE_CHANNEL) {
+            zones[i].data3 = 0;
         }
     }
     if (D_800D3274 != 0) {
@@ -76,10 +74,10 @@ void func_15017930(s32 arg0) {
         if (D_800D3270 != NULL) {
             TriggerZone **out = D_800D3270;
 
-            for (i = 0; i < D_800D3094; i++) {
-                if (OBJ_TYPE(&D_800D3098[i]) == 1 &&
-                    (D_800D3098[i].subtype == 2 || D_800D3098[i].subtype == 0 || D_800D3098[i].subtype == 6)) {
-                    *out++ = &D_800D3098[i];
+            for (i = 0; i < gZoneCount; i++) {
+                if (ZONE_TYPE(&zones[i]) == ZONE_TYPE_CHAR_FLAGS &&
+                    (zones[i].subTypeData == 2 || zones[i].subTypeData == 0 || zones[i].subTypeData == 6)) {
+                    *out++ = &zones[i];
                 }
             }
         }
@@ -88,7 +86,7 @@ void func_15017930(s32 arg0) {
     bzero(D_800D30D0, sizeof(D_800D30D0));
 }
 
-extern void func_150A0D14(TriggerZone *obj);
+extern void zone_cacheAngles(TriggerZone *obj);
 void func_15017FA4(TriggerZone *obj, ZoneBounds *bounds);
 
 /* Whether the ranges [a0, a1) and [b0, b1) overlap. */
@@ -111,12 +109,12 @@ void func_15017B20(TriggerZone *objects, s32 count) {
 
     D_800D309C = allocate_memory(count * sizeof(ZoneBounds), 1, 1, 0);
     for (i = 0; i < count; i++) {
-        func_150A0D14(&objects[i]);
+        zone_cacheAngles(&objects[i]);
         func_15017FA4(&objects[i], &D_800D309C[i]);
     }
     bzero(D_800D30A0, sizeof(D_800D30A0));
     for (i = 0; i < count; i++) {
-        if ((OBJ_SHAPE(&objects[i]) == 3) || (objects[i].flags & 8)) {
+        if ((ZONE_AREA_TYPE(&objects[i]) == ZONE_AREA_GATE) || (objects[i].flags & 8)) {
             if (!(objects[i].flags & 4)) {
                 D_800D30A0[i >> 6] |= (u64)1 << (i & 63);
             }
@@ -124,7 +122,7 @@ void func_15017B20(TriggerZone *objects, s32 count) {
     }
     bzero(D_800D30B8, sizeof(D_800D30B8));
     for (i = 0; i < count; i++) {
-        if (OBJ_SHAPE(&objects[i]) != 3) {
+        if (ZONE_AREA_TYPE(&objects[i]) != ZONE_AREA_GATE) {
             if (!(objects[i].flags & 8) && !(objects[i].flags & 4)) {
                 D_800D30B8[i >> 6] |= (u64)1 << (i & 63);
             }
@@ -184,24 +182,24 @@ void func_15017FA4(TriggerZone *obj, ZoneBounds *bounds) {
     f32 x, y, z;
 
     invalid = 0;
-    shape = OBJ_SHAPE(obj);
+    shape = ZONE_AREA_TYPE(obj);
     switch (shape) {
     default:
         invalid = 1;
         break;
-    case 0:
+    case ZONE_AREA_CYLINDER:
         func_150A7DA0(rotation, 0.0f, 1.0f, 0.0f);
-        func_150A7CB0(transform, obj->radius, obj->height * 0.5f, obj->radius);
+        func_150A7CB0(transform, obj->xSize, obj->ySize * 0.5f, obj->xSize);
         func_150A7A48(rotation, transform, transform);
         func_150A8050(rotation, obj->pitch, obj->yaw, 0.0f);
         func_150A7A48(transform, rotation, transform);
         break;
-    case 1:
-        func_150A7CB0(transform, obj->radius, obj->radius, obj->radius);
+    case ZONE_AREA_SPHERE:
+        func_150A7CB0(transform, obj->xSize, obj->xSize, obj->xSize);
         break;
-    case 2:
+    case ZONE_AREA_BOX:
         func_150A7DA0(rotation, 0.0f, 1.0f, 0.0f);
-        func_150A7CB0(transform, obj->radius, obj->height * 0.5f, obj->depth);
+        func_150A7CB0(transform, obj->xSize, obj->ySize * 0.5f, obj->zSize);
         func_150A7A48(rotation, transform, transform);
         func_150A8050(rotation, obj->pitch, obj->yaw, 0.0f);
         func_150A7A48(transform, rotation, transform);

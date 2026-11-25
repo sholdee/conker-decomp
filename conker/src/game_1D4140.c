@@ -15,9 +15,9 @@ void func_151A6C90(Actor *obj, u8 arg1, s32 arg2) {
     Vec3f pos;
     DebrisEmitter emitter;
 
-    pos.x = obj->x_position;
-    pos.y = obj->y_position;
-    pos.z = obj->z_position;
+    pos.x = obj->xpos;
+    pos.y = obj->ypos;
+    pos.z = obj->zpos;
 
     if (obj != NULL) {
         emitter.count = (func_150ADA20() & 3) + 6;

@@ -81,7 +81,7 @@ s32 func_15183290(s32 x, s32 y, s32 z, s32 count, s32 type, s32 radius, s32 play
     maxRadius *= 16;
     heightRange *= 16;
     minRadius *= 16;
-    target = D_800DBFF0[player].player;
+    target = camera_global_Cameras[player].CharPtr;
     switch (type) {
         case 0:
             func_15177F90(count, NULL, 0xFE, x, y, z, 0, 0x7FFF, 0xFF, 1, 0);
@@ -137,7 +137,7 @@ s32 func_15183290(s32 x, s32 y, s32 z, s32 count, s32 type, s32 radius, s32 play
                           0.03999999911f, 0.02500000037f, spawnFlags);
             break;
         case 9:
-            func_1517AA20(target->xz_velocity, target->x_position, target->y_position, target->z_position, count);
+            func_1517AA20(target->speed, target->xpos, target->ypos, target->zpos, count);
             break;
     }
     if (type != 9) {
@@ -317,9 +317,9 @@ void func_15183D28(void) {
     }
 }
 
-/* Returns whether `obj`'s unk31C data has unk57 set. */
+/* Returns whether `obj`'s mv data has unk57 set. */
 s32 func_15184118(Actor *obj) {
-    if (obj->unk31C != NULL && obj->unk31C->unk57 != 0) {
+    if (obj->mv != NULL && obj->mv->unk57 != 0) {
         return 1;
     }
     return 0;

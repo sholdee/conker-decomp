@@ -138,18 +138,18 @@ s32 func_1509DFC4(s32 arg0, s32 cmd, struct CB3D0_arg2 *args) {
         // matching: a function-scope scale plus a nested block makes IDO hoist the constant load
         scale = 1.0f / 65536.0f;
         {
-        Camera *cam = D_800DBFF0;
+        Camera *cam = camera_global_Cameras;
         func_150495B0(&D_800D2FD8[args->params[0]], args->params[1] * scale, &D_800D2FC0[args->params[0]],
-                      args->params[2] * scale, args->params[3] * scale, cam->dt);
+                      args->params[2] * scale, args->params[3] * scale, cam->SpringTime);
         return D_800D2FD8[args->params[0]] * 65536.0f;
         }
     case 26:
         // matching: a function-scope scale plus a nested block makes IDO hoist the constant load
         scale = 1.0f / 65536.0f;
         {
-        Camera *cam = D_800DBFF0;
+        Camera *cam = camera_global_Cameras;
         func_15049688(&D_800D2FD8[args->params[0]], args->params[1] * scale, &D_800D2FC0[args->params[0]],
-                      args->params[2] * scale, args->params[3] * scale, cam->dt);
+                      args->params[2] * scale, args->params[3] * scale, cam->SpringTime);
         return D_800D2FD8[args->params[0]] * 65536.0f;
         }
     case 24:
@@ -230,15 +230,15 @@ s32 func_1509E3DC(s32 arg0, s32 cmd, struct CB3D0_arg2 *args) {
     case 18:
         obj = func_15083E90((u8)args->params[0]);
         if (obj != NULL) {
-            x = obj->x_position;
-            z = obj->z_position;
+            x = obj->xpos;
+            z = obj->zpos;
             return (x << 16) | (z & 0xFFFF);
         }
         return 0;
     case 19:
         obj = func_15083E90((u8)args->params[0]);
         if (obj != NULL) {
-            return (s16)obj->y_position;
+            return (s16)obj->ypos;
         }
         return 0;
     }

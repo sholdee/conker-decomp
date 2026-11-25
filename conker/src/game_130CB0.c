@@ -3,30 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct ObjSoundRecord ObjSoundRecord;
-
-typedef s32 (*ObjSoundCallback)(ObjSoundRecord *record, s32 *active, u32 *volume, s32 *pan,
-                                s32 *cents, s32 *mix, u16 *sound);
-
-// The SoundRecord layout of init_EB00.c (D_80041FE0), as func_15103C14 fills it in: the
-// owner word is a delay word and the key word is the object the sound follows.
-struct ObjSoundRecord {
-    /* 0x00 */ s16 sound;
-    /* 0x02 */ s16 x;
-    /* 0x04 */ s16 y;
-    /* 0x06 */ s16 z;
-    /* 0x08 */ u16 farDistance;
-    /* 0x0A */ s16 nearDistance;
-    /* 0x0C */ s32 volume;
-    /* 0x10 */ s32 flags; // 0x80: finished
-    /* 0x14 */ ObjSoundCallback callback;
-    /* 0x18 */ s32 delay; // low half: countdown (bit 15: skip the fade, func_15103AA0 only);
-                          // high half: the sound id held back while counting down
-    /* 0x1C */ Actor *obj;
-    /* 0x20 */ u8 pad20[4];
-    /* 0x24 */ u16 handle;
-};
-
 Actor *func_1505EEF4(s32 id);
 
 // Clear the per-slot cooldowns of func_15103C14.
@@ -49,93 +25,97 @@ void func_15103828(void) {
     }
 }
 
+// The two callbacks below (records started by func_15103C14) use callback_param1.delay as a
+// countdown in the low half (bit 15: skip the fade, func_15103AA0 only) with the held-back sound
+// id in the high half, and callback_param2.obj as the object the sound follows.
+
 // Callback for an object with a camera: follow the object; while the delay runs, hold back
 // the record's sound and play 0x5B0 instead. Once playing, the object owns the voice.
-s32 func_15103910(ObjSoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents,
+s32 func_15103910(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents,
                   s32 *mix, u16 *sound) {
     s16 remaining;
     Actor *obj;
 
-    obj = record->obj;
-    remaining = record->delay;
-    record->x = obj->x_position;
-    record->y = obj->y_position;
-    record->z = obj->z_position;
+    obj = record->callback_param2.obj;
+    remaining = record->callback_param1.delay;
+    record->x = obj->xpos;
+    record->y = obj->ypos;
+    record->z = obj->zpos;
     if (remaining != 0) {
         if (*sound != 0) {
-            record->delay = (*sound << 16) | (record->delay & 0xFFFF);
-            record->sound = 0;
+            record->callback_param1.delay = (*sound << 16) | (record->callback_param1.delay & 0xFFFF);
+            record->sample = 0;
             *sound = 0;
             func_10010344(0x5B0, obj, 25000, 100, 120);
             return 0;
         }
         remaining -= D_800BE9E4;
         if (remaining <= 0) {
-            *sound = record->delay >> 16;
-            record->sound = *sound;
-            *volume = record->volume;
+            *sound = record->callback_param1.delay >> 16;
+            record->sample = *sound;
+            *volume = record->max_volume;
             *active = 1;
-            record->delay = 0;
+            record->callback_param1.delay = 0;
             return 0;
         }
     } else {
-        *volume = record->volume;
+        *volume = record->max_volume;
         *active = 1;
-        if (record->handle == 0) {
-            func_10010344(0x5B1, obj, record->volume, record->nearDistance, record->farDistance);
+        if (record->sound_id == 0) {
+            func_10010344(0x5B1, obj, record->max_volume, record->distance_loudest, record->distance_max);
             return 1;
         }
-        if (obj->unk8C != record->handle) {
+        if (obj->unk8C != record->sound_id) {
             func_100111C8(obj->unk8C);
-            obj->unk8C = record->handle;
+            obj->unk8C = record->sound_id;
         }
         record->flags &= ~0x80;
     }
-    record->delay = (record->delay & 0xFFFF0000) | remaining;
+    record->callback_param1.delay = (record->callback_param1.delay & 0xFFFF0000) | remaining;
     return 0;
 }
 
 // Callback for an object without a camera: like func_15103910, but with a 15-bit countdown,
 // and once playing it sends the voice param 0x8000 unless delay bit 15 is set.
-s32 func_15103AA0(ObjSoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents,
+s32 func_15103AA0(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents,
                   s32 *mix, u16 *sound) {
     u32 remaining;
     Actor *obj;
 
-    obj = record->obj;
-    remaining = record->delay & 0x7FFF;
-    record->x = obj->x_position;
-    record->y = obj->y_position;
-    record->z = obj->z_position;
+    obj = record->callback_param2.obj;
+    remaining = record->callback_param1.delay & 0x7FFF;
+    record->x = obj->xpos;
+    record->y = obj->ypos;
+    record->z = obj->zpos;
     if (remaining != 0) {
         if (*sound != 0) {
-            record->delay = (*sound << 16) | (record->delay & 0xFFFF);
-            record->sound = 0;
+            record->callback_param1.delay = (*sound << 16) | (record->callback_param1.delay & 0xFFFF);
+            record->sample = 0;
             *sound = 0;
-            func_10010344(0x5B0, obj, -25000, record->nearDistance, record->farDistance);
+            func_10010344(0x5B0, obj, -25000, record->distance_loudest, record->distance_max);
             return 0;
         }
         if (remaining <= D_800BE9E4) {
-            *sound = record->delay >> 16;
-            record->sound = *sound;
-            record->delay &= ~0x7FFF;
+            *sound = record->callback_param1.delay >> 16;
+            record->sample = *sound;
+            record->callback_param1.delay &= ~0x7FFF;
             return 0;
         }
         remaining -= D_800BE9E4;
     } else {
-        if (record->handle == 0) {
-            func_10010344(0x5B1, obj, -25000, record->nearDistance, record->farDistance);
+        if (record->sound_id == 0) {
+            func_10010344(0x5B1, obj, -25000, record->distance_loudest, record->distance_max);
             return 1;
         }
-        if (record->delay != 0) {
-            if (!(record->delay & 0x8000)) {
-                func_1000F85C(record->handle, 0x8000, 2);
+        if (record->callback_param1.delay != 0) {
+            if (!(record->callback_param1.delay & 0x8000)) {
+                func_1000F85C(record->sound_id, 0x8000, 2);
             }
-            record->delay = 0;
+            record->callback_param1.delay = 0;
         }
         record->flags &= ~0x80;
     }
-    record->delay = (record->delay & ~0x7FFF) | remaining;
+    record->callback_param1.delay = (record->callback_param1.delay & ~0x7FFF) | remaining;
     return 0;
 }
 
@@ -169,17 +149,17 @@ void func_15103C14(s32 sound, s32 objId, u32 variantCount, s32 slot, s32 pairVar
         }
     }
 
-    if (obj->camera != NULL) {
+    if (obj->CameraPtr != NULL) {
         hasCamera = TRUE;
     } else if (pairVariants) {
         sound += 1;
     }
 
     if (hasCamera) {
-        func_1000FA64(sound, obj->x_position, obj->y_position, obj->z_position, 30000, 0x7FFF,
+        func_1000FA64(sound, obj->xpos, obj->ypos, obj->zpos, 30000, 0x7FFF,
                       0x7FFE, func_15103910, 20, obj, 0x100, 0);
     } else {
-        func_1000FA64(sound, obj->x_position, obj->y_position, obj->z_position, 32700, 0x7FFF,
+        func_1000FA64(sound, obj->xpos, obj->ypos, obj->zpos, 32700, 0x7FFF,
                       0x7FFE, func_15103AA0, (pairVariants << 15) | 20, obj, 0x100, 0);
     }
 

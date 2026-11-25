@@ -60,7 +60,7 @@ s32 func_1509F850(s32 id, s32 cmd, CommandArgs *args) {
         if (node2 == NULL) {
             return 0;
         }
-        node2->key |= 0x8000;
+        node2->TaskID |= TASK_FINISHED;
         return 1;
     case 1:
         if (D_80087410.unk1) {
@@ -80,7 +80,7 @@ s32 func_1509F850(s32 id, s32 cmd, CommandArgs *args) {
         if (node3 == NULL) {
             return 0;
         }
-        node3->key |= 0x8000;
+        node3->TaskID |= TASK_FINISHED;
         if (id == D_800D2E48) {
             func_150AE280();
             return 0;
@@ -91,12 +91,12 @@ s32 func_1509F850(s32 id, s32 cmd, CommandArgs *args) {
         if (node5 == NULL) {
             return 0;
         }
-        bzero((u8 *)node5 + node5->dataOffset, node5->dataSize);
+        bzero((u8 *)node5 + node5->BssOffset, node5->BSSSize);
         return 0;
     case 4:
         node4 = func_1509B704(id);
         if (node4 != NULL) {
-            node4->key |= 0x4000;
+            node4->TaskID |= TASK_INIT_PENDING;
             return 1;
         }
         break;
@@ -111,7 +111,7 @@ s32 func_1509F850(s32 id, s32 cmd, CommandArgs *args) {
         break;
     case 8:
         if (D_800D3840 == 4) {
-            func_15172E7C(D_800CC2D0, args->unk8 & 0xFFF, args->unkC & 0xFFF);
+            func_15172E7C(movement_obj, args->unk8 & 0xFFF, args->unkC & 0xFFF);
             return 0;
         }
         break;
@@ -135,7 +135,7 @@ s32 func_1509F850(s32 id, s32 cmd, CommandArgs *args) {
         if (node11 == NULL) {
             return 0;
         }
-        node11->key |= 0x8000;
+        node11->TaskID |= TASK_FINISHED;
         func_151E53E8(0);
         func_150AE280();
         return 0;
@@ -230,9 +230,9 @@ s32 func_1509FE0C(s32 id, s32 query, QueryArgs *args) {
     case 26:
         return ID_FLAG_BYTE(id) & ID_FLAG_BIT(id);
     case 27:
-        return func_1509B704(id)->unk2;
+        return func_1509B704(id)->LoadSection;
     case 28:
-        return D_800BE9F0;
+        return level;
     case 29:
         mask = 0;
         for (j = 0; j < D_8008FD8C; j++) {
@@ -284,7 +284,7 @@ s32 func_1509FE0C(s32 id, s32 query, QueryArgs *args) {
     case 43:
         node = func_1509B704(id);
         if (node != NULL) {
-            return (node->key & 0x2000) == 0;
+            return (node->TaskID & SUSPEND_BETWEEN_SECTIONS) == 0;
         }
         return 0;
     case 44:

@@ -21,11 +21,11 @@ typedef struct {
 
 extern Game10CD70Indices D_80088984;
 
-/* Returns whether the D_800D3098 record selected by D_80088984[index] is active. */
+/* Returns whether the zones record selected by D_80088984[index] is active. */
 s32 func_150DF8C0(s32 index) {
     Game10CD70Indices indices = D_80088984;
 
-    if (D_800D3098[indices.values[index]].disabled != 0) {
+    if (zones[indices.values[index]].inactive != 0) {
         return 1;
     }
     return 0;
@@ -66,9 +66,9 @@ void func_150DF920(s32 arg0) {
         id = 7;
         if (obj != NULL) {
             func_150A2864(slot, 0);
-            x = obj->x_position;
-            y = obj->y_position + 200.0f;
-            z = obj->z_position;
+            x = obj->xpos;
+            y = obj->ypos + 200.0f;
+            z = obj->zpos;
             func_150A3444(slot, x, y, z);
         } else {
             func_150A2864(slot, 1);
@@ -152,9 +152,6 @@ Gfx *func_150DFBD0(Gfx *gdl) {
     return gdl;
 }
 
-/* matching: 0.55f, kept in rodata; a literal folds the negation into a -0.55f constant */
-extern f32 D_800A0FA4;
-
 /* The object func_150DFCA8 animates (a handler in the 0x80088xxx object table). */
 typedef struct {
     /* 0x00 */ u8 pad0[0x4];
@@ -170,6 +167,7 @@ typedef struct {
 void func_150DFCA8(SwingObject *obj) {
     f32 pos;
     f32 target;
+    f32 maxSpeed = 0.55f; // matching: -0.55f as a literal folds; IDO negates the variable at run time
 
     // matching: the step shares target's register
     target = obj->speed * D_800BE9E4;
@@ -178,8 +176,7 @@ void func_150DFCA8(SwingObject *obj) {
     if (pos < 11.0f) {
         obj->targetSpeed = target = 0.55f;
     } else if (obj->pos > 55.0f) {
-        pos = D_800A0FA4; // matching: the negated constant goes through pos's register
-        obj->targetSpeed = target = -pos;
+        obj->targetSpeed = target = -maxSpeed;
     } else {
         target = obj->targetSpeed;
     }
@@ -198,14 +195,14 @@ void func_150DFCA8(SwingObject *obj) {
 
 /* Moves bone 1 of the actor to its x/z position at a fixed height of 2706. */
 void func_150DFDA4(Actor *actor) {
-    f32 (*bone)[4] = actor->unk1D4[1];
+    f32 (*bone)[4] = actor->ob_matrix_ptr[1];
 
-    bone[3][0] = actor->x_position;
+    bone[3][0] = actor->xpos;
     bone[3][1] = 2706.0f;
-    bone[3][2] = actor->z_position;
+    bone[3][2] = actor->zpos;
 }
 
-/* Model attachment hook 12 (D_800841C0[12]). While the owner's fade is active (unk2EC), counts
+/* Model attachment hook 12 (D_800841C0[12]). While the owner's fade is active (taskint[2]), counts
  * its timer (unk2D8[0]) down, returning 1 once it expires, and rewrites the G_SETTILESIZE of the
  * attachment's display list: uls follows the fade, ult steps back by a third of the old uls. */
 s32 func_150DFDD0(ModelAttachment *att, Actor *owner) {
@@ -215,11 +212,11 @@ s32 func_150DFDD0(ModelAttachment *att, Actor *owner) {
     s32 j;
     s32 ult;
 
-    if (owner->unk2EC != 0) {
+    if (owner->taskint[2] != 0) {
         att->hiddenDLists = 2;
         owner->unk2D8[0] -= D_800BE9A4;
         if (owner->unk2D8[0] < 0.0f) {
-            owner->unk2EC = 0;
+            owner->taskint[2] = 0;
             return 1;
         }
         fade = 1.0f - (owner->unk2D8[0] * owner->unk2D8[1]);
@@ -245,17 +242,6 @@ s32 func_150DFDD0(ModelAttachment *att, Actor *owner) {
     return 0;
 }
 
-/* The 12-byte record at +0x28 that func_150E02C0 also hands to func_15149514 as
- * (arg0 + 0x28, arg0 + 0x2C): the source actor (with its unique_id, to detect a reused slot)
- * plus three independent countdowns. */
-typedef struct {
-    /* 0x00 */ Actor *obj;
-    /* 0x04 */ u8  id;
-    /* 0x05 */ u8  pad5;
-    /* 0x06 */ s16 flashTimer;
-    /* 0x08 */ s16 boltTimer;
-    /* 0x0A */ s16 timer2;
-} BoltSource; /* size 0xC */
 
 typedef struct {
     /* 0x00 */ TimedEffect base;
@@ -278,15 +264,15 @@ void func_150DFEFC(BoltEmitter *emitter) {
 
     obj = emitter->src.obj;
     src = &emitter->src;
-    if (obj->interaction_state == 0 || obj->unique_id != src->id) {
+    if (obj->type == 0 || obj->unique_id != src->id) {
         emitter->base.header.state = -1;
         return;
     }
     src->flashTimer -= D_800BE9E4;
     if (src->flashTimer < 0) {
-        pos.x = obj->x_position;
-        pos.y = obj->y_position;
-        pos.z = obj->z_position;
+        pos.x = obj->xpos;
+        pos.y = obj->ypos;
+        pos.z = obj->zpos;
         header.flags = 3;
         header.update = -1;
         header.lifetime = func_150ADA20() % 11U + 5;
@@ -400,35 +386,34 @@ void func_150E03F8(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *ef
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 
-/* matching: 3850.0f; as a literal IDO folds 1 / (3850 - 2570) to a constant */
-extern f32 D_800A0FD4;
-
-/* Sets alpha from the distance to D_800DBFF0's unk2F8 point: opaque within 2570, fading out
- * linearly to transparent at 3850 (D_800A0FD4). */
+/* Sets alpha from the distance to camera_global_Cameras's unk2F8 point: opaque within 2570, fading out
+ * linearly to transparent at 3850. */
 void func_150E05F8(WorldObject *obj) {
     f32 dx;
     f32 dy;
     f32 dz;
     f32 dist;
     s32 alpha;
+    f32 far = 3850.0f; // matching: with the literal inline, IDO folds 1 / (3850 - 2570) to a constant
 
-    dz = D_800DBFF0->eye.z - obj->z;
-    dx = D_800DBFF0->eye.x - obj->x;
-    dy = D_800DBFF0->eye.y - obj->y;
+    dz = camera_global_Cameras->eye.z - obj->z;
+    dx = camera_global_Cameras->eye.x - obj->x;
+    dy = camera_global_Cameras->eye.y - obj->y;
     dist = sqrtf(dz * dz + (dx * dx + dy * dy));
     if (dist <= 2570.0f) {
         alpha = 255;
-    } else if (dist >= D_800A0FD4) {
+    } else if (dist >= far) {
         alpha = 0;
     } else {
-        alpha = 255 - (dist - 2570.0f) * (1 / (D_800A0FD4 - 2570.0f)) * 255.0f;
+        alpha = 255 - (dist - 2570.0f) * (1 / (far - 2570.0f)) * 255.0f;
     }
     obj->alpha = alpha;
 }
 
 extern u8 D_80088988;
-extern f32 D_800A0F70[][3];
-extern f32 D_800A0F88[][3];
+/* Effect start and end points (bone space) of the two slots. */
+static const f32 D_800A0F70[2][3] = { { 17.0f, 0.0f, 90.0f }, { -17.0f, 0.0f, 90.0f } };
+static const f32 D_800A0F88[2][3] = { { 17.0f, 0.0f, 150.0f }, { -17.0f, 0.0f, 150.0f } };
 extern s32 func_15145EA4(f32 **src, f32 **dst, Mtx *mtx, s32 count);
 extern void func_15102B38(Actor *, u8, f32 *, f32 *, f32 *, s32, s32, f32, Vec3f *, s32, s32, s32, u8,
                           s32);
@@ -445,12 +430,12 @@ void func_150E06D8(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     s32 randB;
     s32 randA;
 
-    if (actor->unk1D4 == NULL) {
+    if (actor->ob_matrix_ptr == NULL) {
         return;
     }
     src[0] = D_800A0F70[slot];
     dst[0] = &start.x;
-    func_15145EA4(src, dst, (Mtx *)actor->unk1D4 + D_80088988, 1);
+    func_15145EA4(src, dst, (Mtx *)actor->ob_matrix_ptr + D_80088988, 1);
     scale = 1.0f; // matching: IDO keeps the multiply by 1.0 only through a variable
     params[1] = func_150ADA68() * scale + 2.0f;
     params[0] = func_150ADA68() * 14.0f + 28.0f;

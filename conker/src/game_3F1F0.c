@@ -88,7 +88,7 @@ s32 func_15011D60(Arg11D60 *arg0) {
     obj.unk15 = 3;
     obj.unk17 = 0x15;
     obj.unk18 = tmp.unk4;
-    found = func_151438D8(0, D_800D3094, 0x11A0, &obj);
+    found = func_151438D8(0, gZoneCount, 0x11A0, &obj);
     if (found != NULL) {
         tmp.unk40 = found->unk0;
         tmp.unk44 = found->unk4;

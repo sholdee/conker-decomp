@@ -3,14 +3,14 @@
 #include "variables.h"
 
 
-extern void func_151616D0(u8, u8, s32);
+extern void light_sendEvent(u8, u8, s32);
 
 /*
  * Model attachment hook 8 (D_800841C0[8]): per-frame update for a flashing light. Flickers
  * randomly for the last 60 frames, ramps brightness over frames 60..300, pulses until 330 and
  * eases toward full above that. While lit it hides display list 1, plays a random sound
- * (0x44B..0x452) on first lighting and toggles func_151616D0(0x11, 0x40/0x41), keeping the
- * owner's unk2E4 at 1 while that is in effect; when dark it hides display lists 2 and 3.
+ * (0x44B..0x452) on first lighting and toggles light_sendEvent(0x11, 0x40/0x41), keeping the
+ * owner's taskint[0] at 1 while that is in effect; when dark it hides display lists 2 and 3.
  * light->unk38: frames left in the flash sequence; light->unk3C: brightness 0..255.
  */
 s32 func_150C73E0(ModelAttachment *light, Actor *owner) {
@@ -23,9 +23,9 @@ s32 func_150C73E0(ModelAttachment *light, Actor *owner) {
 
     if (light->unk38 == 0) {
         light->hiddenDLists = 12;
-        if (owner->unk2E4 != 0) {
-            func_151616D0(0x11, 0x41, 0);
-            owner->unk2E4 = 0;
+        if (owner->taskint[0] != 0) {
+            light_sendEvent(0x11, 0x41, 0);
+            owner->taskint[0] = 0;
         }
         return 0;
     }
@@ -59,15 +59,15 @@ s32 func_150C73E0(ModelAttachment *light, Actor *owner) {
             func_10010F30((func_150ADA20() & 7) + 0x44B, 0x7D00, 0x40, 0, 0);
         }
         light->hiddenDLists = 2;
-        if (owner->unk2E4 != 1) {
-            func_151616D0(0x11, 0x40, 0);
-            owner->unk2E4 = 1;
+        if (owner->taskint[0] != 1) {
+            light_sendEvent(0x11, 0x40, 0);
+            owner->taskint[0] = 1;
         }
     } else {
         light->hiddenDLists = 12;
-        if (owner->unk2E4 != 0) {
-            func_151616D0(0x11, 0x41, 0);
-            owner->unk2E4 = 0;
+        if (owner->taskint[0] != 0) {
+            light_sendEvent(0x11, 0x41, 0);
+            owner->taskint[0] = 0;
         }
     }
 

@@ -31,19 +31,19 @@ GameCommand *func_15034860(GameCommand *cmd, Actor *actor, s32 channel, s32 chan
     s8 step;
     s16 sum;
 
-    if (actor->id == 0x70) {
+    if (actor->character_type == 0x70) {
         skipChannel = TRUE;
     } else {
         skipChannel = FALSE;
     }
-    if (actor->id == 0x7C) {
+    if (actor->character_type == 0x7C) {
         levelOp = 4;
         maxStep = 0;
     } else {
         levelOp = 0;
         maxStep = 2;
     }
-    switch (actor->id) {
+    switch (actor->character_type) {
     case 0x69:
     case 0x7C:
     case 0x87:
@@ -73,7 +73,7 @@ GameCommand *func_15034860(GameCommand *cmd, Actor *actor, s32 channel, s32 chan
             cmd->value = value;
             cmd++;
         }
-        if (actor->id == 0x42) {
+        if (actor->character_type == 0x42) {
             minStep = 80;
             maxStep = 120;
         } else {
@@ -190,14 +190,14 @@ GameCommand *func_15034860(GameCommand *cmd, Actor *actor, s32 channel, s32 chan
     return cmd;
 }
 
-/* Element of the array that Actor::unk1D4 points to here (0x40 bytes). */
+/* Element of the array that Actor::ob_matrix_ptr points to here (0x40 bytes). */
 typedef struct {
     u8 pad0[0x34];
     f32 unk34;
     u8 pad38[0x8];
 } Entry15034EB4;
 
-/* Subtracts the last value stored in D_800C3EF0, scaled by the actor's xz_scale, from unk34 of one or two entries. */
+/* Subtracts the last value stored in D_800C3EF0, scaled by the actor's scale_xz, from unk34 of one or two entries. */
 void func_15034EB4(Actor *actor, s32 first, s32 second) {
     f32 amount;
     Entry15034EB4 *entry;
@@ -205,8 +205,8 @@ void func_15034EB4(Actor *actor, s32 first, s32 second) {
     Entry15034EB4 *entries;
 
     if (D_800C3EF0 != 0) {
-        entries = (Entry15034EB4 *)actor->unk1D4;
-        amount = ((f32)D_800C3EF0 * 0.0007629627362f) * actor->xz_scale;
+        entries = (Entry15034EB4 *)actor->ob_matrix_ptr;
+        amount = ((f32)D_800C3EF0 * 0.0007629627362f) * actor->scale_xz;
         entry = &entries[first];
         entry->unk34 -= amount;
         if (second != -1) {

@@ -74,7 +74,7 @@ extern void func_1515548C(ScreenSpriteInfo *, s32, s32, s32, s32, s32, s32);
 extern void func_1515572C(CameraArg_150FB8C0 *, s32);
 
 /* Spawns the effect for one side (0 or 1) of `obj`. The side's points are transformed by one of obj's
- * unk1D4 matrices; when the target found by func_1507515C has unk197 set, the effect is aimed at the point
+ * ob_matrix_ptr matrices; when the target found by func_1507515C has unk197 set, the effect is aimed at the point
  * where the target's line meets the plane through the transformed points. Also spawns occasional sparks
  * and trails, and a camera effect for the target's camera. */
 void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, s32 arg5) {
@@ -117,19 +117,19 @@ void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, 
         if (target == NULL) {
             return;
         }
-        if (target->unk31C == NULL) {
+        if (target->mv == NULL) {
             return;
         }
-        if (target->unk31C->aimState != 0) {
+        if (target->mv->SniperState != 0) {
             useTarget = 1;
         } else {
             useTarget = 0;
         }
     }
-    if (obj->unk1D4 == NULL) {
+    if (obj->ob_matrix_ptr == NULL) {
         return;
     }
-    if (obj->id == 0x23) {
+    if (obj->character_type == 0x23) {
         srcPoints[0] = D_800A1E38[side];
         if (useTarget) {
             srcPoints[1] = D_800A1E68[side];
@@ -137,7 +137,7 @@ void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, 
             srcPoints[1] = D_800A1E50[side];
         }
         srcPoints[2] = D_800A1E80[side];
-        matrix = (D_800A1E34[side] << 6) + (s32)obj->unk1D4;
+        matrix = (D_800A1E34[side] << 6) + (s32)obj->ob_matrix_ptr;
     } else {
         localPoint[0] = (13.0f - (1.0f + func_150ADA68() * 6.0f)) * (side ? -1 : 1);
         localPoint[1] = D_800A1DEC[side][1];
@@ -145,7 +145,7 @@ void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, 
         srcPoints[0] = D_800A1DD4[side];
         srcPoints[1] = useTarget ? D_800A1E04[side] : localPoint;
         srcPoints[2] = D_800A1E1C[side];
-        matrix = (D_800A1DD0[side] << 6) + (s32)obj->unk1D4;
+        matrix = (D_800A1DD0[side] << 6) + (s32)obj->ob_matrix_ptr;
     }
     dstPoints[0] = origin;
     if (useTarget) {
@@ -159,7 +159,7 @@ void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, 
         // matching: this block-scope redeclaration of the callee is needed; removing it mismatches
         extern void func_151450B4(Vec3f *, Vec3f *, Vec3f *);
 
-        linePoint = &target->unk31C->aimEye;
+        linePoint = &target->mv->aimEye;
         edgeA[0] -= origin[0];
         edgeA[1] -= origin[1];
         edgeA[2] -= origin[2];
@@ -171,24 +171,24 @@ void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, 
         dy = origin[1] - linePoint->y;
         dz = origin[2] - linePoint->z;
         t = ((normal.x * dx) + (normal.y * dy) + (normal.z * dz)) /
-            ((normal.x * target->unk31C->aimDir.x) + (normal.y * target->unk31C->aimDir.y) + (normal.z * target->unk31C->aimDir.z));
-        hitPoint[0] = linePoint->x + (t * target->unk31C->aimDir.x);
-        hitPoint[1] = linePoint->y + (t * target->unk31C->aimDir.y);
-        hitPoint[2] = linePoint->z + (t * target->unk31C->aimDir.z);
-        lineDir[0] = target->unk31C->aimDir.x;
-        lineDir[1] = target->unk31C->aimDir.y;
-        lineDir[2] = target->unk31C->aimDir.z;
+            ((normal.x * target->mv->aimDir.x) + (normal.y * target->mv->aimDir.y) + (normal.z * target->mv->aimDir.z));
+        hitPoint[0] = linePoint->x + (t * target->mv->aimDir.x);
+        hitPoint[1] = linePoint->y + (t * target->mv->aimDir.y);
+        hitPoint[2] = linePoint->z + (t * target->mv->aimDir.z);
+        lineDir[0] = target->mv->aimDir.x;
+        lineDir[1] = target->mv->aimDir.y;
+        lineDir[2] = target->mv->aimDir.z;
     } else {
         dir[0] -= origin[0];
         dir[1] -= origin[1];
         dir[2] -= origin[2];
     }
-    if (!useTarget || target->camera == NULL) {
+    if (!useTarget || target->CameraPtr == NULL) {
         cameraMask = 0xFF;
     } else {
-        cameraMask = ~(1 << target->camera->playerIndex) & 0xFF;
+        cameraMask = ~(1 << target->CameraPtr->CNumber) & 0xFF;
     }
-    if (D_800BE9F0 == 0x34 || D_800BE9F0 == 0x26) {
+    if (level == 0x34 || level == 0x26) {
         variant = 5;
     } else {
         variant = 4;
@@ -211,18 +211,18 @@ void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, 
         if (!(func_150ADA20() & 1)) {
             trailParams[1] = (func_150ADA68() * 2.435000181f) + 3.534000158f;
             trailParams[0] = (func_150ADA68() * 43.40000153f) + 48.40000153f;
-            if (!useTarget || target->camera == NULL) {
+            if (!useTarget || target->CameraPtr == NULL) {
                 trailCameraMask = 0xFF;
             } else {
-                trailCameraMask = ~(1 << target->camera->playerIndex) & 0xFF;
+                trailCameraMask = ~(1 << target->CameraPtr->CNumber) & 0xFF;
             }
-            func_15102B38(obj, (obj->id == 0x23) ? D_800A1E34[side] : D_800A1DD0[side], (obj->id == 0x23) ? D_800A1E38[side] : D_800A1DD4[side],
-                          (obj->id == 0x23) ? D_800A1E50[side] : D_800A1DEC[side], trailParams,
+            func_15102B38(obj, (obj->character_type == 0x23) ? D_800A1E34[side] : D_800A1DD0[side], (obj->character_type == 0x23) ? D_800A1E38[side] : D_800A1DD4[side],
+                          (obj->character_type == 0x23) ? D_800A1E50[side] : D_800A1DEC[side], trailParams,
                           (func_150ADA20() % 3U) + 4, (func_150ADA20() % 101U) + 155, (func_150ADA68() * 1012.0f) + 1497.0f, origin,
                           trailCameraMask, 0, -1, arg4, arg5);
         }
     }
-    if (useTarget && target->camera != NULL) {
+    if (useTarget && target->CameraPtr != NULL) {
         if (side) {
             effect.x = -59.0f;
         } else {
@@ -256,10 +256,10 @@ void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, 
         effect.unk3C = 0x20;
         effect.unk40 = 0;
         effect.unk41 = 7;
-        effect.viewport = target->camera->playerIndex;
+        effect.viewport = target->CameraPtr->CNumber;
         func_1515548C(&effect, 0, 0, 0, 0, 0, arg5);
         cameraArg.side = side;
-        cameraArg.camera = target->camera;
+        cameraArg.camera = target->CameraPtr;
         func_1515572C(&cameraArg, 0x37);
     }
 }
@@ -280,12 +280,12 @@ void func_150FC368(Particle_150FC368 *particle) {
     Actor *owner;
 
     owner = particle->owner;
-    if ((owner == NULL) || (owner->interaction_state == 0) || (owner->id == 0xFF) ||
-        (owner->unique_id != particle->ownerUniqueId) || (owner->unk31C == NULL) ||
-        (owner->unk31C->unk84 != 0) || (owner->unk127 == 0xFF) || (owner->camera == NULL)) {
+    if ((owner == NULL) || (owner->type == 0) || (owner->character_type == 0xFF) ||
+        (owner->unique_id != particle->ownerUniqueId) || (owner->mv == NULL) ||
+        (owner->mv->bot != 0) || (owner->playernumber == 0xFF) || (owner->CameraPtr == NULL)) {
         cameraMask = 0xFF;
     } else {
-        cameraMask = ~(1U << owner->camera->playerIndex) & 0xFF;
+        cameraMask = ~(1U << owner->CameraPtr->CNumber) & 0xFF;
     }
     func_151C3B0C(particle, 1.0f, 1.0f, 0.6f, 0.0f, 0xFF, 0xFF, cameraMask);
 }
@@ -306,8 +306,8 @@ void func_150FC438(Actor *owner, Actor *other, u8 arg2, u8 arg3) {
     state.unk10 = NULL;
     state.unk14 = 0;
     state.unk1D = arg3;
-    if (other != NULL && other->camera != NULL) {
-        state.unk16 = other->camera->playerIndex;
+    if (other != NULL && other->CameraPtr != NULL) {
+        state.unk16 = other->CameraPtr->CNumber;
     } else {
         state.unk16 = -1;
     }
@@ -322,12 +322,12 @@ void func_150FC438(Actor *owner, Actor *other, u8 arg2, u8 arg3) {
     if (obj != NULL) {
         dest = &obj->state;
         memcpy(dest, &state, sizeof(state));
-        if (other != NULL && other->camera != NULL) {
+        if (other != NULL && other->CameraPtr != NULL) {
             effect.unk0 = 4;
             effect.unk1 = -1;
             effect.unk2 = -1;
             effect.unk4 = 300;
-            effect.unk6 = other->camera->playerIndex;
+            effect.unk6 = other->CameraPtr->CNumber;
             effect.unk8 = 12.0f;
             effect.unkC = 20.0f;
             effect.unk10 = 19.0f;
@@ -356,11 +356,11 @@ void func_150FC614(EmitterObj *obj) {
 
     state = &obj->state;
     owner = state->owner;
-    if ((owner->interaction_state == 0) || (owner->id == 0xFF) || (owner->unique_id != state->ownerUniqueId) || (D_800C35EA[0] == 1)) {
+    if ((owner->type == 0) || (owner->character_type == 0xFF) || (owner->unique_id != state->ownerUniqueId) || (D_800C35EA[0] == 1)) {
         obj->base.header.state = -1;
         return;
     }
-    if (owner->unk84.uh != state->unk1D) {
+    if (owner->animseq.uh != state->unk1D) {
         obj->base.header.state = -1;
         return;
     }
@@ -370,8 +370,8 @@ void func_150FC614(EmitterObj *obj) {
         func_150FB8C0(owner, state->side, -state->spawnTimer, state->unkD, obj->base.header.owner, obj->base.header.kind);
         state->side ^= 1;
         if (state->other != NULL) {
-            if (state->other->unk31C != NULL) {
-                state->other->unk31C->unk1AA++;
+            if (state->other->mv != NULL) {
+                state->other->mv->shotsfired++;
             }
         }
         state->spawnTimer += 4.0f + (func_150ADA68() * 4.0f);

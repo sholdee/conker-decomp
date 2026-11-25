@@ -6,27 +6,6 @@
 
 /* defined */
 
-// 0x0002C200
-extern f32 D_8002C200;
-extern f32 D_8002C204;
-extern f64 D_8002C208;
-
-// 0x0002C210
-extern f32 D_8002C210;
-extern f32 D_8002C214;
-extern f64 D_8002C218;
-
-// 0x0002C220
-extern f32 D_8002C220;
-extern f32 D_8002C224;
-extern f32 D_8002C228;
-extern f32 D_8002C22C;
-// 0x0002C230
-extern f32 D_8002C230;
-extern f32 D_8002C234;
-extern f32 D_8002C238;
-
-
 extern f32 D_8002C3F8;
 extern f32 D_8002C3FC;
 
@@ -42,8 +21,6 @@ extern f32 D_8002C77C;
 extern f32 D_8002C780;
 extern f32 D_8002C784;
 
-// 0x0002C810
-extern f32 D_8002C814;
 // 0x0002C820
 extern f32 D_8002C820;
 // 0x0002C830
@@ -59,8 +36,6 @@ extern f32 D_8002C920;
 extern s32 D_8003E384;
 extern u32 D_80042450[512]; // chunk0 offsets
 
-extern char D_8002C6B0[];
-extern char D_8002C6DC[];
 
 /* undefined */
 
@@ -78,9 +53,6 @@ extern s32  D_80000004;
 extern s32  D_80000008;
 extern s32  D_8000000C;
 
-extern struct14 *D_80000080;
-extern struct14 *D_80000100;
-extern struct14 *D_80000180;
 
 extern s32  D_80000300;
 extern s32  D_80000308;
@@ -116,8 +88,6 @@ extern u16  D_8002B9F4[]; /* default music eventMasks */
 
 extern s16  D_8002BA30;
 
-extern struct07  *D_8002BA40;
-extern struct07  *D_8002BA44;
 
 extern s16  D_8002BC10[];
 extern s16  D_8002BD0E[];
@@ -126,7 +96,6 @@ extern s32  D_8002BD14; // low word of osClockRate (D_8002BD10)
 extern s32  D_8002BD18;
 extern s32  D_8002BD20; // init ok?
 extern s32  D_8002BD60;
-extern u8   D_8002BF70[];
 
 /* DATA section from D_8002C080 to D_8002D4B0 */
 
@@ -283,7 +252,6 @@ extern u8   D_80041F61;
 extern s8   D_80041FD8;
 extern u8   D_80041FD9;
 extern s32  D_80041FDC;
-// extern struct15 **D_80041FEC[]; // struct size 0x30 ?
 extern s32 D_80041FEC[][12];
 
 extern OSMesgQueue D_80041298;
@@ -297,7 +265,7 @@ extern s32 D_800418B0[3][16]; /* per-channel music event level */
 
 extern u8 D_800419A0;
 extern OSMesgQueue D_80041E58[3];
-extern struct117 D_80041EA0[3];
+extern OSMesg      D_80041EA0[3][8]; /* message buffers of the D_80041E58 queues */
 
 extern s32  D_80042760;
 extern s32  D_80042770;
@@ -314,7 +282,7 @@ extern MsgRing D_800427A0;
 extern u8   D_800427B0[64]; // D_800427A0's buffer
 extern u16  D_800427F4;
 extern SoundSlot D_800425E0[];
-extern struct124 *D_80042800;
+extern struct OscState *gFreeOscStates; /* free oscillator states */
 extern s32  D_80042804;
 extern u16 *D_800428B8;
 extern u8   D_800428C0;
@@ -454,7 +422,7 @@ extern f32 D_800895B0;
 extern ZDecode D_80089630[8]; // z-buffer decompression table
 extern s32 * D_80089A20[];
 extern IdList2 D_8008A074; // effect-object kinds (game_16DC80)
-extern struct32 D_8008A0B4[];
+extern ActorEffectDef D_8008A0B4[];
 extern s32  D_8008A084[];
 extern void (*D_8008A4E8[])(TimedEffect*);
 extern void (*D_8008A4C0[])(TimedEffect*);
@@ -559,56 +527,6 @@ extern u16 D_80091D20[]; // per texture: compressed size
 // this chunk0 data
 // D_800959E0 is 0x80082B20 + 0x00012ec0
 
-extern f32 D_80095B10;
-extern f32 D_80095B14;
-extern f32 D_80095B18;
-extern f32 D_80095B1C;
-extern f32 D_80095B20;
-extern f32 D_80095B24;
-extern u8  D_80095B27[];
-extern f32 D_80095B28;
-extern f32 D_80095B2C;
-extern f32 D_80095B30;
-extern f32 D_80095B40;
-extern f32 D_80095B44;
-// func_15009990 suggests they are u8, but they look like floats!
-extern u8 D_80095B48[]; // 0.002188183832913637
-extern u8 D_80095B4C[]; // 20.100000381469727
-extern u8 D_80095B50[]; // 0.4000000059604645
-
-extern f32 D_80095B54;
-extern u8  D_80095B70[4];
-extern u8  D_80095B74[2];
-extern f32 D_80095BB8;
-extern f32 D_80095BBC;
-extern f32 D_80095BC0;
-extern f32 D_80095BC4;
-extern f32 D_80095BC8;
-extern f32 D_80095BCC;
-extern f32 D_80095BD0;
-extern f32 D_80095BD4;
-extern f32 D_80095BD8;
-
-extern f32 D_8009616C;
-extern f32 D_80096170;
-extern f32 D_80096174;
-extern f32 D_80096178;
-extern f32 D_8009617C;
-extern f32 D_80096180;
-extern f32 D_80096184;
-
-extern f32 D_800961A8;
-extern f32 D_800961AC;
-extern f32 D_800961B0;
-extern f32 D_800961B4;
-extern f32 D_800961B8;
-extern f32 D_800961BC;
-extern f32 D_800961C0;
-
-extern s32 D_80096210;
-extern f32 D_80096214;
-extern f32 D_80096218;
-extern f32 D_8009621C;
 extern f32 D_80096220;
 extern f32 D_80096224;
 extern f32 D_80096228;
@@ -629,97 +547,16 @@ extern f32 D_80096534;
 extern f32 D_80096540;
 
 extern f32 D_80096560;
-extern f32 D_80096570;
-extern u32 D_8009667C;
 extern f32 D_800968B0;
-extern f32 D_800968C0;
 extern s32 D_800968E0;
-extern f32 D_80096900;
-extern f32 D_80096904;
 
 extern f32 D_80098D90[]; /* sinf: [1]..[4] odd-power polynomial coefficients */
-extern f32 D_80098DB0; // 0.008726646192371845
-extern f32 D_80098DB4; // 0.008726646192371845
 
-extern f32 D_800990B0; // 0.6931471824645996f
-extern f32 D_800990B4; // 0.6931471824645996f
-extern u16 D_8009919C[6];
-extern f32 D_800991A8;
-extern f32 D_800991AC;
-extern f32 D_800991B0;
-extern f32 D_800991D4; // 0.10000000149011612f
-extern f32 D_80099408;
-extern f32 D_8009940C;
-extern f32 D_80099410;
-extern f32 D_80099414;
-extern f32 D_80099418;
-extern f32 D_8009941C; // 0.949999988079071
+extern const u16 D_8009919C[6];
 
-extern f32 D_80099440; // 0.10000000149011612f
-extern f32 D_80099444;
-extern f32 D_80099448;
-extern f32 D_8009944C;
-extern f32 D_80099468;
-extern f32 D_8009946C;
-extern f32 D_80099470;
-extern f32 D_80099474;
-extern f32 D_80099478;
-extern f32 D_8009947C;
-extern f32 D_80099480;
-extern f32 D_80099484;
-extern f32 D_800994A4;
-extern f32 D_800994A8;
-extern f32 D_800994AC;
-extern f32 D_800994B0;
-extern f32 D_800994B4;
-extern f32 D_800994B8;
-extern f32 D_800994BC;
-extern f32 D_800994D4; // 0.6000000238418579f
-extern f32 D_800994D8; // 10430.3779296875f
-extern f32 D_8009950C;
-extern f32 D_80099510;
-extern f32 D_80099514;
-extern f32 D_80099520;
-extern u8 D_80099A3C[][10]; // turn-angle thresholds per row (D_80099A3E is [0][2])
-extern u8 D_80099A3E;
-extern u8  D_80099A43;
-extern u8 D_80099AB4[];
-extern u8 D_80099ABC[];
-
-extern u8 D_80099AC4[];
-extern f32 D_80099C1C;
-extern f32 D_80099C34;
-extern f32 D_80099C38;
-extern f32 D_80099C3C;
-extern f32 D_80099C40;
-extern f32 D_80099C44;
-
-extern f32 D_80099D44;
-extern f32 D_80099D4C;
-extern f32 D_80099DA0;
-extern f32 D_80099DA4;
-extern f32 D_80099DA8;
-
-extern f32 D_80099E98;
-extern f32 D_80099E9C;
-
-extern f32 D_80099F30;
-extern f32 D_80099F4C;
-
-extern f32 D_8009A020[];
-extern f32 D_8009A0E8;
-extern f32 D_8009A0EC;
-extern f32 D_8009A0F0;
-extern f32 D_8009A0F4;
-extern f32 D_8009A0F8;
-extern f32 D_8009A0FC;
-extern f32 D_8009A100;
+extern const u8 D_80099A3C[][10]; // turn-angle thresholds per row (defined in game_981E0.c)
+extern const u8 D_80099AC4[];
 // code_75400.c
-extern f32 D_8009A13C; // 1.399999976158142
-extern f32 D_8009A140;
-extern f32 D_8009A144;
-extern f32 D_8009A148;
-extern f32 D_8009A1E4;
 
 extern f32 D_8009A220[];
 extern f32 D_8009A420[];
@@ -744,30 +581,18 @@ extern f32 D_8009F6C0; // 0.01745329238474369f
 
 /* 800A0000 */
 extern PipeSpot D_8009F920[3]; // the three exploding pipes
-extern f32 D_800A028C;
-extern f32 D_800A0288;
-extern f32 D_800A0290;
-extern f32 D_800A0310;
-extern f32 D_800A0314;
 extern Vec3f D_800A1B80;
 extern Vec3f D_800A1B8C;
-extern f32 D_800A1B98;
-extern f32 D_800A1B9C;
-extern f32 D_800A1BA0;
 extern f32 D_800A1FB0;
 extern f32 D_800A1FBC;
-extern f32 D_800A2148;
-extern f32 D_800A2154;
-// extern struct201 D_800A2CD0[];
+extern const Vec3f D_800A2148;
+extern const Vec3f D_800A2154;
 extern u8  D_800A2CD0[][3];
 
 extern s32 D_800A3F14[];
-extern u8 D_800A3FB4[]; // "power"
-extern u8 D_800A3FBC[]; // "../Effects/Blood/blood.c"
 extern s32 D_800A4AA0; //?
 extern s32 D_800A5168[4]; // object list indices (game_16DC80)
 extern s32 D_800A5178[3]; // effect-object kinds (game_169510)
-extern f32 D_800A45B4;
 extern f32 D_800A5624;
 extern f32 D_800A5628;
 extern f32 D_800A5644;
@@ -784,53 +609,10 @@ extern s32 D_800A5770[];
 
 // in game_18D770.c
 extern s32 D_800A6060[3]; /* { 0x36, 0x4C, 0x5B }: the model effect types */
-extern u8  D_800A6690[5];  // "scale"
-extern u8  D_800A6698[24]; // "../Effects/Light/light.c"
-extern f32 D_800A66B4[3];  // { 0.0f, -415.0f, 0.0f }
-extern f32 D_800A66C0[9];  // { 70.0f, 38.0f, 70.0f, 55.0f, 50.0f, 80.0f, 140.0f, 70.0f, 34.0f };
-extern s32 D_800A66E4[10]; // { 1099, 1100, 1101, 1102, 1103, 1104, 1105, 1106, 1107, 1108 }
-extern Vec3f D_800A6A0C;
-extern f32 D_800A6AD4;     // 0.005000000353902578f
-extern f32 D_800A6AD8;     // 6.2831854820251465f
-extern f32 D_800A6ADC;     // 0.10209999978542328f
-extern f32 D_800A6AE0;     // 0.24889999628067017f
-extern f32 D_800A6AE4;     // 0.07999999821186066f
-extern f32 D_800A6AE8;     // 6.2831854820251465f
-extern f32 D_800A6AEC;     // 0.07660000026226044f
-extern f32 D_800A6AF0;
-extern f32 D_800A6AF4;
-extern f32 D_800A6AF8;
-extern f32 D_800A6AFC;
-extern Vec3f D_800A670C[]; // { {128.0f, 59.5f, 59.5f}, {187.0f, 59.5f, 59.5f}, {128.0f, 17.5f, 0.0f} }
-extern Vec3f D_800A6730[];
-extern f32 D_800A6754[];
-extern f32 D_800A6760[24];
-extern f32 D_800A67C0[24];
-extern f32 D_800A6820[24];
-extern f32 D_800A6880[];
-extern f32 D_800A6894[];
-extern f32 D_800A68A8[];
-extern f32 D_800A68BC[];
-extern f32 D_800A68D0[];
-extern f32 D_800A68E4[];
-extern f32 D_800A68F8[3];
-extern f32 D_800A6904[3];
-extern f32 D_800A6910[3];
-extern s32 D_800A691C[3];
-extern s32 D_800A6928[3];
-extern f32 D_800A6934[3];
-extern f32 D_800A6940[3];
-extern f32 D_800A694C[3];
-extern f32 D_800A6958[3];
-extern f32 D_800A6964[14];
-extern f32 D_800A699C[14];
-extern f32 D_800A69D4[14];
+extern const f32 D_800A6760[24];
+extern const f32 D_800A67C0[24];
+extern const f32 D_800A6820[24];
 
-extern f32 D_800A6B00; // 6.2831854820251465f
-extern f32 D_800A6B04; // 3.1415927410125732f
-extern f32 D_800A6B08;
-extern f32 D_800A6B0C;
-extern f32 D_800A6B10;
 
 extern VtxMorphGroup D_800A7230[2]; // vertex morph groups
 extern Vec3f D_800AAA90; // bone-attachment offset (zero point)
@@ -838,43 +620,13 @@ extern Vec3f D_800AAA9C;
 extern u16 D_800AB140[];
 extern IdList1 D_800AB168; // effect-object kinds (game_1FFF60)
 // game_2062D0.c
-extern u8 D_800AB310[];
-extern u8  D_800AB340[3]; // 88, 64, 62
-extern u8  D_800AB344[5]; // 46, 48, 45, 51, 52
-extern u8  D_800AB34C[4]; // 96, 97, 98, 99
-extern s32 D_800AB350[7]; // 0, 1, 2, 58, 59, 60, 61
-extern s32 D_800AB36C[3]; // 15, 16, 17
-extern s32 D_800AB384[2]; // 28, 29
-extern s32 D_800AB378[3]; // 143, 144, 145
-extern s32 D_800AB38C[2]; // 8, 9
-extern s32 D_800AB394[5]; // 49, 50, 51, 13, 14
-extern s32 D_800AB3A8[3]; // 150, 151, 152
-extern s32 D_800AB3B4[2]; // 27, 28
-extern s32 D_800AB3BC[3]; // 160, 161, 162
-extern s32 D_800AB3C8[1]; // 179
-extern s32 D_800AB3CC[3]; // 185, 186, 187
-extern s32 D_800AB3D8[4]; // 96, 97, 98, 99
-extern Vec3f D_800AB3E8; // zero vector
-extern f32 D_800AB3EC; //-1.0f
+extern const u8 D_800AB310[13]; // texture id per effect kind
+extern const u8 D_800AB3F4[13]; // particle texture id per effect kind
+extern const u8 D_800AB404[13]; // flag per effect kind
+extern const Color24 D_800AB414[13]; // effect colours (RGB per colour index / effect kind)
 
-extern u8 D_800AB3F4[];
-extern u8 D_800AB404[];
-extern Color24 D_800AB414[]; // effect colours (RGB per colour index / effect kind)
-extern f32 D_800AB464;
-extern f32 D_800AB468;
-extern f32 D_800AB46C; // 0.0003000000142492354f
-extern f32 D_800AB4C0;
-extern f32 D_800AB4C4;
-extern f32 D_800AB4C8;
-extern f32 D_800AB4CC;
-extern f32 D_800AB4E4;
-extern f32 D_800AB4E8;
-extern f32 D_800AB4EC;
-extern f32 D_800AB4F0;
-extern f32 D_800AB4F4;
-
-extern Vec3f D_800A5480; // zero vector
-extern f32 D_800A548C[];
+extern const Vec3f D_800A5480; // zero vector
+extern const f32 D_800A548C[];
 
 // end of data D_800B0DBC
 
@@ -913,7 +665,7 @@ extern s8  D_800BC448[]; // per texture: frames left before it is freed (0 = not
 extern u32 D_800BE3E4; // saved clock (seconds)
 extern u8 * D_800BE3F0; /* bit width of each of the 69 D_800C3A60 entries in a save file */
 extern ParticleResource D_800BE4A0[15];
-extern struct14 *D_800BE4F0;
+extern struct TexScroll **D_800BE4F0; /* four texture scrolls (func_15010FB0) */
 extern BounceRecord *D_800BE4E0;
 extern u8  D_800BE500[5]; // might be a struct?
 extern u8 (*D_800BE510)[3]; // base RGB of every level vertex, then the props'; (&D_800BE510)[i] for i < 4 is level model i's first vertex (no symbols of their own)
@@ -941,7 +693,7 @@ extern f32 D_800BE9A4;
 extern f32 D_800BE9A8;
 extern s32 D_800BE9AC;
 extern u8 D_800BE9EB;
-extern s32 D_800BE9F0;
+extern s32 level;
 
 
 extern s32  D_800BE2B0[]; // type?
@@ -1043,7 +795,7 @@ extern u8 D_800C35E8[2]; // per scene: changes with each run of the scene
 extern u8  D_800C35EA[2]; // per cutscene scene slot (0/1): cutscene state, 1 = playing
 extern SeqTrackInfo *D_800C35F0[]; // per scene: what each track drives
 extern u8 D_800C35F8;
-extern struct168 D_800C3600; // scripted camera shot
+extern CamShot gCamShot; // scripted camera shot
 extern u8  D_800C3638;
 extern u8 D_800C363A[]; /* track count */
 extern s32 D_800C3640[]; /* end time */
@@ -1091,7 +843,7 @@ extern u8 D_800C3C9D;
 extern s16 D_800C3C9E;
 extern SeqSubtitle D_800C3CA0[3];
 extern struct SeqQueueEntry *D_800C3D50; // dispatch queue, D_800C3C9A entries (type in 50D80)
-extern u8  D_800C3E78;
+extern u8  dc_glbl_CharNum;
 extern u16 D_800C3E7A; // bone matrices used this frame
 extern u16 D_800C3E7C;
 extern s32 D_800C3E80[2]; // bone-matrix pool per frame buffer
@@ -1124,8 +876,8 @@ extern u16 D_800C5EF8[];
 extern VtxTri *D_800C6070[187]; // per model id: triangles
 extern TexCoord *D_800C6360[187]; // per model id: saved texture coordinates (func_1503D804)
 
-extern struct160 *D_800C6650; // aim points (D_800C6654 of them)
-extern s32 D_800C6654;
+extern AimPoint *gAimPoints; // aim points (gAimPointCount of them)
+extern s32 gAimPointCount;
 extern ObjPartsState D_800C6660[];
 extern u8  D_800C67F0;
 extern u8  D_800C67F1;
@@ -1199,7 +951,7 @@ extern u8  D_800CC2B0;
 extern u8  D_800CC2B8;
 extern u16 D_800CC2BA; // frame step of the actor being updated
 extern s32 D_800CC2BC;
-extern Actor D_800CC2D0[26]; // objects
+extern Actor movement_obj[26]; // objects
 extern u8  D_800CC2D4[];
 extern f32 D_800CC2E4;
 extern f32 D_800CC2E8[];
@@ -1214,7 +966,7 @@ extern s8  D_800CC3D7;
 extern u8  D_800CC3F5[] ; // ??
 
 extern u8 D_800CC49A;
-extern u8 D_800CC4B3[][0x32C]; /* byte 0x1E3 of each D_800CC2D0 object */
+extern u8 D_800CC4B3[][0x32C]; /* byte 0x1E3 of each movement_obj object */
 extern Actor  D_800CC5A0[];
 extern u8  D_800CC521[]; // ??
 
@@ -1222,7 +974,7 @@ extern Actor *D_800CE370;
 
 /* 800D0000 */
 
-extern Actor D_800D121C; // == &D_800CC2D0[25]: dummy attacker for scripted hits; also the end of the 25 live actors
+extern Actor D_800D121C; // == &movement_obj[25]: dummy attacker for scripted hits; also the end of the 25 live actors
 extern f32 D_800D1230;
 extern f32 D_800D1234;
 extern f32 D_800D1238;
@@ -1355,18 +1107,18 @@ extern u8 *D_800D2E4C; // 0x1B-byte bit array of per-id flags (saved with the ga
 
 extern u8  D_800D2F3C;
 extern u16 *D_800D2F40;
-extern IdRecordList D_800D2F48;
+extern IdRecordList gTaskWorkingSet;
 extern f32 D_800D2DB0;
 extern s32 D_800D2DB4;
 
 extern s32 D_800D2F58;
-extern u32 D_800D3094; // number of trigger zones in D_800D3098
-extern TriggerZone *D_800D3098; // level placement / marker table (0x34-byte records)
-extern ZoneBounds *D_800D309C; // bounds of each trigger zone (D_800D3098)
-extern u64 D_800D30A0[3]; /* zones that are always tested */
-extern u64 D_800D30B8[3]; /* default candidate zones */
+extern u32 gZoneCount; // number of TriggerZones in zones
+extern TriggerZone *zones; // level placement / marker table (0x34-byte records)
+extern ZoneBounds *D_800D309C; // bounds of each trigger zone (zones)
+extern u64 D_800D30A0[3]; /* TriggerZones that are always tested */
+extern u64 D_800D30B8[3]; /* default candidate TriggerZones */
 extern u16 D_800D30D0[16]; /* per actor: 1 + index of the last zone box it was found in, 0 for none */
-extern u64 D_800D30F0[16][3]; /* per actor: zones it was inside last time */
+extern u64 D_800D30F0[16][3]; /* per actor: TriggerZones it was inside last time */
 extern TriggerZone ** D_800D3270;
 extern s32 D_800D3274;
 extern GroundCandidate D_800D3300[]; // ground-probe hits
@@ -1410,7 +1162,7 @@ extern TriggerZone *D_800D9AA0[3];
 extern u16 D_800D9AB0[4];
 extern Vec3f D_800D9AC0[];
 extern u8 D_800D9AF0;
-extern struct200 D_800D9AF8[];
+extern ViewClip gViewClips[];
 
 extern u8  D_800D9B18;
 extern f32 D_800D9B1C;
@@ -1488,8 +1240,8 @@ extern u8 D_800DBEAB;
 extern u8 D_800DBEAC;
 extern Mtx *D_800DBEB0; // sky projection matrices, 2 per view
 extern u16 D_800DBEE8[]; // per view: entries in D_80089240
-extern s32 D_800DBEF0;
-extern WorldObject *D_800DBEF4; // D_800DBEF0 entries
+extern s32 gWorldObjectCount; // number of db_Object_array entries
+extern WorldObject *db_Object_array; // original name (Oct 2000 debugger); gWorldObjectCount entries
 extern s32 *D_800DBEF8; // per object: handle released with func_10004074
 extern u8 *D_800DBEFC; // per object: frames to keep the handle once hidden
 extern u8  D_800DBF00;
@@ -1497,9 +1249,9 @@ extern MtxF D_800DBF08[]; // per-frame
 extern u8  D_800DBF88;
 extern s32 D_800DBF8C;
 extern s32 D_800DBF90;
-extern s32 * D_800DBF94; // per object: bit N set when actor D_800CC2D0[N] touches it
-extern s32 D_800DBF98; // grouped objects, kept at the end of D_800DBEF4
-extern Camera *D_800DBFF0;
+extern s32 * gWorldObjectContacts; // per object: bit N set when actor movement_obj[N] touches it
+extern s32 D_800DBF98; // grouped objects, kept at the end of db_Object_array
+extern Camera *camera_global_Cameras;
 extern u8  D_800DBFF4[4]; // per-player camera hold timers; *(s32 *)D_800DBFF4 tests all four at once
 extern u8  D_800DBFF5;
 extern u8  D_800DBFF6;
@@ -1539,8 +1291,8 @@ extern u8  D_800DCD3D;
 extern PointLightGfx D_800DCD40; // padding light for odd light counts
 extern PointLight *D_800DCD78; // list of all point lights
 extern s32 D_800DCD7C;
-extern ZoneLink *D_800DCD80; // ambient colour zones
-extern ZoneLink *D_800DCD84; // tint zones
+extern ZoneLink *D_800DCD80; // ambient colour TriggerZones
+extern ZoneLink *D_800DCD84; // tint TriggerZones
 extern f32 D_800DCD90;
 extern f32 D_800DCD94;
 extern f32 D_800DCD98;
@@ -1548,8 +1300,6 @@ extern f32 D_800DCD9C;
 extern f32 D_800DCDA0;
 
 extern u8 D_800DCD20[3]; // ambient light colour
-// extern struct100 *D_800DCD24;
-// extern struct100 *D_800DCD28;
 
 extern u8 D_800DCD24[3]; // tint colour
 extern u8 D_800DCD28[3];

@@ -25,11 +25,11 @@ void func_150C7E00(Camera *camera)
   {
     if ((globalBB != -1) && (queryBC == 0))
     {
-      if (func_15123934(camera, camera->mode, 0, camera->unk134, 3) != 0)
+      if (func_15123934(camera, camera->Mode, 0, camera->Tightness, CAMERA_MODE_TRANSPORT) != 0)
       {
-        camera->flags |= 0x01000000;
+        camera->AvailableModes |= 0x01000000;
         func_151254F4(camera, D_800CC335 - 1);
-        camera->followRateTarget = 0.0f;
+        camera->CharTrackingSpeedTarget = 0.0f;
       }
     }
     else
@@ -39,33 +39,33 @@ void func_150C7E00(Camera *camera)
       }
       if ((globalBB != -1) && (queryBC != 0))
       {
-        func_151239CC(camera, 2);
-        if (func_15123934(camera, 8, 0, camera->unk134, 3) != 0)
+        func_151239CC(camera, CAMERA_MODE_ZONES);
+        if (func_15123934(camera, 8, 0, camera->Tightness, CAMERA_MODE_TRANSPORT) != 0)
         {
           func_151254F4(camera, D_800CC335 - 1);
-          camera->flags &= ~4;
-          camera->followRateTarget = 0.0f;
+          camera->AvailableModes &= ~4;
+          camera->CharTrackingSpeedTarget = 0.0f;
           func_15123070(camera);
         }
-        camera->status |= 0x200;
+        camera->SpecialFlags |= 0x200;
         camera->height = 500.0f;
         camera->unk34C = 500.0f;
-        camera->targetDistance = 800.0f;
+        camera->IdealTripodMagnitude = 800.0f;
       }
       else
       {
-        if (func_151239CC(camera, 3) != 0)
+        if (func_151239CC(camera, CAMERA_MODE_TRANSPORT) != 0)
         {
           func_151254F4(camera, 0);
-          camera->flags &= ~0x01000000;
-          camera->playerExt->unk198 = 0;
-          camera->aimState = 0;
+          camera->AvailableModes &= ~0x01000000;
+          camera->mv->AimState = 0;
+          camera->DoingAim = 0;
           if (camera->cmdRunning == 0)
           {
-            camera->followRateTarget = 0.0f;
+            camera->CharTrackingSpeedTarget = 0.0f;
           }
         }
-        camera->status &= ~0x200;
+        camera->SpecialFlags &= ~0x200;
       }
     }
   }
@@ -73,13 +73,13 @@ void func_150C7E00(Camera *camera)
   {
     if (func_1509BE40(0, 0x5072, 0x1A) == 0)
     {
-      if (camera->contPad->button & 4)
+      if (camera->PadPtr->button & 4)
       {
-        camera->liftTarget = 20.0f;
+        camera->YOffsetTget = 20.0f;
       }
       if (func_1509BE40(0, 0x2000, 0x93) == 0)
       {
-        camera->liftTarget = 0.0f;
+        camera->YOffsetTget = 0.0f;
         return;
       }
       func_1509BFB0(1, 0x9000, 0x17, func_1509BE40(1, func_1509BE40(0, 0x2011, 0xB7) | 0x2000, 0x9C, 0x2000));
@@ -88,67 +88,67 @@ void func_150C7E00(Camera *camera)
       if (queryBC == 0)
       {
         camera->height = camera->unk34C = 200.0f;
-        camera->liftTarget = 100.0f;
+        camera->YOffsetTget = 100.0f;
       }
       else
       {
-        camera->liftTarget = (103.0f * blend) + 287.0f;
-        camera->targetDistance = (224.0f * blend) + 750.0f;
+        camera->YOffsetTget = (103.0f * blend) + 287.0f;
+        camera->IdealTripodMagnitude = (224.0f * blend) + 750.0f;
         camera->height = camera->unk34C = 231.0f * blend;
       }
       func_1509BFB0(2, 0x9000, 6, 1, 0x20000);
       func_1509BFB0(2, 0x9000, 6, 0, 4);
       if (queryBB != -1)
       {
-        camera->followRate = 0.0f;
+        camera->CharTrackingSpeed = 0.0f;
       }
       D_80088800 = 0;
-      if (camera->status & 4)
+      if (camera->SpecialFlags & 4)
       {
         target = func_15083E90(0x10);
         if (target != NULL)
         {
-          actor = camera->player;
-          if (actor->unk65 != 0)
+          actor = camera->CharPtr;
+          if (actor->attach_char != 0)
           {
-            actor->x_position = target->x_position;
-            camera->player->y_position = target->y_position;
-            camera->player->z_position = target->z_position;
+            actor->xpos = target->xpos;
+            camera->CharPtr->ypos = target->ypos;
+            camera->CharPtr->zpos = target->zpos;
           }
         }
       }
-      if (func_151239CC(camera, 3) != 0)
+      if (func_151239CC(camera, CAMERA_MODE_TRANSPORT) != 0)
       {
-        camera->status &= ~0x200;
+        camera->SpecialFlags &= ~0x200;
         func_151254F4(camera, 0);
-        camera->flags &= ~0x01000000;
-        camera->playerExt->unk198 = 0;
-        camera->aimState = 0;
+        camera->AvailableModes &= ~0x01000000;
+        camera->mv->AimState = 0;
+        camera->DoingAim = 0;
         if (camera->cmdRunning == 0)
         {
           s32 pad; // matching: block-scope decl keeps as1 from moving this store into the branch delay slot
-          camera->followRateTarget = 0.0f;
+          camera->CharTrackingSpeedTarget = 0.0f;
         }
       }
     }
-    else if ((func_151239CC(camera, 3) != 0) || (D_80088800 == 0))
+    else if ((func_151239CC(camera, CAMERA_MODE_TRANSPORT) != 0) || (D_80088800 == 0))
     {
-      camera->flags |= 4;
+      camera->AvailableModes |= 4;
       D_80088800 = 1;
       func_151254F4(camera, 0);
-      camera->playerExt->unk198 = 0;
-      camera->aimState = 0;
-      camera->preset = 3;
+      camera->mv->AimState = 0;
+      camera->DoingAim = 0;
+      camera->DistIndex = 3;
       func_15124B18(camera);
-      camera->liftTarget = 0.0f;
+      camera->YOffsetTget = 0.0f;
       if (camera->cmdRunning == 0)
       {
-        camera->followRateTarget = 0.0f;
+        camera->CharTrackingSpeedTarget = 0.0f;
       }
     }
-    if (camera->contPad->button & 4)
+    if (camera->PadPtr->button & 4)
     {
-      camera->liftTarget = 0.0f;
+      camera->YOffsetTget = 0.0f;
     }
   }
 }

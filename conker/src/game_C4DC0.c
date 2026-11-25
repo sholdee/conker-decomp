@@ -27,7 +27,7 @@ s32 func_15097910(s32 scriptId, s32 unused) {
             }
             ret = func_15083E0C((u8)scriptId);
         } else {
-            ret = obj->unk13F;
+            ret = obj->listpos;
         }
     }
     if (ret != 0) {
@@ -71,8 +71,8 @@ typedef struct {
 
 /* Raw field access for bytes of Actor that structs.h declares only as padding or with
  * another width (the shared headers are not edited in this pass). */
-/* Index of an object in the D_800CC2D0 object table. */
-#define OBJ_INDEX(o) ((o) - D_800CC2D0)
+/* Index of an object in the movement_obj object table. */
+#define OBJ_INDEX(o) ((o) - movement_obj)
 
 
 extern void func_1503DE70(Actor *, s32, s32);
@@ -113,7 +113,7 @@ extern s32 func_15086098(f32, f32, f32, s32, s32, s8 *, s8 *);
 extern void func_15086364(s32, s8, s8, s8 *, s8 *);
 extern f32 func_15086D94(f32, f32, f32, f32, f32);
 extern s32 func_150A2AEC(u32, s32, s32 *);
-extern TriggerZone *func_150A3194(s32, s32, s32, s32, s32);
+extern TriggerZone *zone_findAt(s32, s32, s32, s32, s32);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
 extern f32 func_15144BC8(f32);
 extern s8 func_151E564C(void);
@@ -135,9 +135,9 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
     switch (opcode) {
     case 1:
         if (cmd->a[0] != 0) {
-            obj->unk25C |= cmd->a[1];
+            obj->task_attrib |= cmd->a[1];
         } else {
-            obj->unk25C &= ~cmd->a[1];
+            obj->task_attrib &= ~cmd->a[1];
         }
         return 1;
     case 0x52:
@@ -148,33 +148,33 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         func_1504BAF0(D_800D154C);
         break;
     case 2:
-        obj->unk25C |= 8;
+        obj->task_attrib |= 8;
         return 1;
     case 3:
-        obj->unk25C &= ~8;
+        obj->task_attrib &= ~8;
         return 1;
     case 4:
-        obj->unk25C |= 0x10;
+        obj->task_attrib |= 0x10;
         return 1;
     case 0xA:
-        obj->unk25C &= ~4;
+        obj->task_attrib &= ~4;
         break;
     case 6:
-        obj->unk25C |= 4;
-        obj->unk25C &= ~1;
+        obj->task_attrib |= 4;
+        obj->task_attrib &= ~1;
         return 1;
     case 5:
-        obj->unk25C |= 1;
+        obj->task_attrib |= 1;
         return 1;
     case 8:
         if (cmd->a[0] != 0x7FFFFFFF) {
-            obj->x_position = cmd->a[0];
+            obj->xpos = cmd->a[0];
         }
         if (cmd->a[1] != 0x7FFFFFFF) {
-            obj->y_position = cmd->a[1];
+            obj->ypos = cmd->a[1];
         }
         if (cmd->a[2] != 0x7FFFFFFF) {
-            obj->z_position = cmd->a[2];
+            obj->zpos = cmd->a[2];
         }
         break;
     case 9: {
@@ -182,55 +182,55 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
 
         node = func_15086D48(cmd->a[0]);
         if (node != -1) {
-            func_15086CBC(node, &obj->x_position, &obj->y_position, &obj->z_position);
+            func_15086CBC(node, &obj->xpos, &obj->ypos, &obj->zpos);
         }
         return 1;
     }
     case 0xC:
     case 0xD:
-        obj->xz_velocity = cmd->a[0] * 1.52587890625e-05f;
+        obj->speed = cmd->a[0] * 1.52587890625e-05f;
         break;
     case 0xE:
-        obj->y_velocity = cmd->a[0] * 1.52587890625e-05f;
+        obj->yspd = cmd->a[0] * 1.52587890625e-05f;
         break;
     case 0xF:
-        obj->gravity = cmd->a[0] * 1.52587890625e-05f;
+        obj->ygrav = cmd->a[0] * 1.52587890625e-05f;
         break;
     case 0x10:
-        obj->unk76 = obj->unk7A = (u16)(cmd->a[0] * 1.52587890625e-05f * 182.04444885f) - 0x4000;
+        obj->angle = obj->langle = (u16)(cmd->a[0] * 1.52587890625e-05f * 182.04444885f) - 0x4000;
         break;
     case 0x11:
-        obj->unk76 = obj->unk7A = cmd->a[0] * 0.00390625f;
+        obj->angle = obj->langle = cmd->a[0] * 0.00390625f;
         break;
     case 0x12:
-        obj->unk78 = cmd->a[0] * 0.00390625f;
+        obj->fangle = cmd->a[0] * 0.00390625f;
         break;
     case 0x13:
-        obj->immune = cmd->a[0];
+        obj->imune = cmd->a[0];
         break;
     case 0x14:
-        obj->unk232 = cmd->a[0];
+        obj->intelwalk = cmd->a[0];
         D_800D154C = obj;
-        D_800C3E78 = OBJ_INDEX(D_800D154C);
-        obj->unk218 = func_1507BB28(0, obj->unk232);
+        dc_glbl_CharNum = OBJ_INDEX(D_800D154C);
+        obj->scriptCmd = func_1507BB28(0, obj->intelwalk);
         obj->unk21C = 0;
         break;
     case 0x61: {
         s32 v;
 
         v = cmd->a[0];
-        if (obj->unk31C != NULL) {
+        if (obj->mv != NULL) {
             if (v == -1) {
                 v = 0x8000;
             }
-            obj->unk31C->unk8C = v;
-            obj->unk31C->unk8F = 0;
+            obj->mv->pressedButtons = v;
+            obj->mv->pressedButtonsTimer = 0;
             switch (cmd->a[0]) {
             case -1:
             case 4:
             case 0x2000:
-                obj->unk31C->buttons = v;
-                obj->unk31C->unk8E = 2;
+                obj->mv->buttons = v;
+                obj->mv->buttonsTimer = 2;
                 break;
             }
         }
@@ -288,8 +288,8 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         }
         break;
     case 0x5F:
-        if (cmd->a[0] < obj->unk44) {
-            obj->unk44 = cmd->a[0];
+        if (cmd->a[0] < obj->stickspeed) {
+            obj->stickspeed = cmd->a[0];
         }
         break;
     case 0x60:
@@ -299,11 +299,11 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
             obj->unk211 = func_15086D48(cmd->a[0]);
         }
         obj->unk20F = 0xFF;
-        obj->unk25C &= ~0x800;
-        obj->unk232 = cmd->a[1];
+        obj->task_attrib &= ~0x800;
+        obj->intelwalk = cmd->a[1];
         D_800D154C = obj;
-        D_800C3E78 = OBJ_INDEX(D_800D154C);
-        obj->unk218 = func_1507BB28(0, obj->unk232);
+        dc_glbl_CharNum = OBJ_INDEX(D_800D154C);
+        obj->scriptCmd = func_1507BB28(0, obj->intelwalk);
         obj->unk21C = 0;
         break;
     case 0x5B:
@@ -328,13 +328,13 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         }
         break;
     case 0xB:
-        obj->unk13D = cmd->a[0];
+        obj->carried = cmd->a[0];
         break;
     case 0x15:
-        obj->unkB8 = cmd->a[0] * 1.52587890625e-05f;
+        obj->vtilt = cmd->a[0] * 1.52587890625e-05f;
         break;
     case 0x16:
-        obj->unk48 = cmd->a[0] * 1.52587890625e-05f;
+        obj->speedup = cmd->a[0] * 1.52587890625e-05f;
         break;
     case 0x17:
         if (cmd->a[0] != 0) {
@@ -344,14 +344,14 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         }
         break;
     case 0x72:
-        if (obj->unk31C != NULL) {
-            obj->unk31C->unk129 = cmd->a[0];
+        if (obj->mv != NULL) {
+            obj->mv->unk129 = cmd->a[0];
         } else {
             obj->unk222 = cmd->a[0];
         }
         break;
     case 0x18:
-        obj->unk247 = cmd->a[0];
+        obj->intel_accel = cmd->a[0];
         break;
     case 0x19:
         if (cmd->a[0] < 0) {
@@ -389,25 +389,25 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         func_15172D28(obj, -1);
         break;
     case 0x20:
-        obj->health = cmd->a[0];
+        obj->energy = cmd->a[0];
         if (D_800D3840 == 4) {
-            D_800D2456 = obj->health;
+            D_800D2456 = obj->energy;
             D_800D2457 = D_800D2456;
         }
         break;
     case 0x1D:
         if (cmd->a[0] != 0) {
-            obj->disable_run = 0xFF;
-            obj->disable_jump = 0xFF;
-            obj->unk83 = 0xFF;
+            obj->norun = 0xFF;
+            obj->nojump = 0xFF;
+            obj->count5 = 0xFF;
         } else {
-            obj->disable_run = 0;
-            obj->disable_jump = 0;
-            obj->unk83 = 0;
+            obj->norun = 0;
+            obj->nojump = 0;
+            obj->count5 = 0;
         }
         break;
     case 0x53:
-        obj->disable_run = cmd->a[0];
+        obj->norun = cmd->a[0];
         break;
     case 0x21:
         func_15085710(objId, cmd->a[0], cmd->a[1]);
@@ -427,27 +427,27 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
 
         for (j = 0; j < D_800D3840 - 2; j++) {
             if (cmd->a[j] != 0x7FFFFFFF) {
-                (&obj->unk2E4)[j] = cmd->a[j];
+                (&obj->taskint[0])[j] = cmd->a[j];
             }
         }
         break;
     }
     case 0x25:
-        obj->unk31C->unk8 = cmd->a[0];
-        obj->unk31C->unkE = 0xA6;
+        obj->mv->pissed_up = cmd->a[0];
+        obj->mv->pissed_walk = 0xA6;
         break;
     case 0x24:
         if (cmd->a[0] == 0) {
             func_1507EB2C(obj);
-            obj->unk31C->unk8 = 0;
-            obj->unk31C->unk16 = 0;
+            obj->mv->pissed_up = 0;
+            obj->mv->pissed_hangover = 0;
         } else {
-            obj->unk31C->unk8 = 1;
+            obj->mv->pissed_up = 1;
             if (cmd->a[0] == 1) {
                 func_1507EB4C(obj, 0x15);
             } else if (cmd->a[0] == 2) {
                 func_1507EB4C(obj, 0x2A);
-                obj->unk31C->unk16 = 0xFF;
+                obj->mv->pissed_hangover = 0xFF;
             }
         }
         break;
@@ -457,18 +457,18 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0x27:
         func_15080620(objId, 1, cmd->a[0], 0);
         if (D_800D3840 == 3 && cmd->a[0] == 0) {
-            obj->unk31C->unk78 = 0;
+            obj->mv->rt_context_b = 0;
         }
         break;
     case 0x70:
         if (cmd->a[1] == 0) {
-            obj->unk31C->unk128 &= ~cmd->a[0];
+            obj->mv->unk128 &= ~cmd->a[0];
         } else {
-            obj->unk31C->unk128 |= cmd->a[0];
+            obj->mv->unk128 |= cmd->a[0];
         }
         break;
     case 0x28:
-        obj->unk31C->unk76 = cmd->a[0];
+        obj->mv->context_z = cmd->a[0];
         break;
     case 0x29:
         obj->unk251 = cmd->a[0];
@@ -490,7 +490,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         D_800BE728[cmd->a[0]]->button = cmd->a[1];
         break;
     case 0x56:
-        obj->unk65 = cmd->a[0];
+        obj->attach_char = cmd->a[0];
         break;
     case 0x2F: {
         Actor *other;
@@ -505,8 +505,8 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
                 func_1505E650(other, cmd->a[2], cmd->a[3] * 1.52587890625e-05f, cmd->a[4] * 1.52587890625e-05f, 0.0f, 0.0f, 0);
                 break;
             case 2:
-                other->unk218 = NULL;
-                other->unk232 = cmd->a[2];
+                other->scriptCmd = NULL;
+                other->intelwalk = cmd->a[2];
                 break;
             }
         }
@@ -516,7 +516,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->stunned = cmd->a[0];
         break;
     case 0x31:
-        obj->unk239 = cmd->a[0];
+        obj->intelhitroute = cmd->a[0];
         break;
     case 0x32:
         obj->unk10A = cmd->a[0];
@@ -529,10 +529,10 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         s32 z;
         f32 y;
 
-        x = D_800DBFF0->eye.x;
-        z = D_800DBFF0->eye.z;
-        x = x - sinf(D_800DBFF0->unk3A0) * 1800.0f;
-        z = z - cosf(D_800DBFF0->unk3A0) * 1800.0f;
+        x = camera_global_Cameras->eye.x;
+        z = camera_global_Cameras->eye.z;
+        x = x - sinf(camera_global_Cameras->TrueCameraAngleRad) * 1800.0f;
+        z = z - cosf(camera_global_Cameras->TrueCameraAngleRad) * 1800.0f;
         x += func_150ADA20() % 800U - 400;
         z += func_150ADA20() % 800U - 400;
         if (x < cmd->a[0]) {
@@ -545,31 +545,31 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         } else if (z > cmd->a[3]) {
             z = cmd->a[3] + (cmd->a[3] - z);
         }
-        y = D_800DBFF0->eye.y;
+        y = camera_global_Cameras->eye.y;
         func_1510E7A4(0, 0, &y, 0, 0, 0, x, y, z, y, 0, 0, -10000.0f, 20000.0f);
-        obj->x_position = x;
-        obj->y_position = cmd->a[4] + y;
-        obj->z_position = z;
+        obj->xpos = x;
+        obj->ypos = cmd->a[4] + y;
+        obj->zpos = z;
     }
         break;
     case 0x35:
         D_800D154C = obj;
-        D_800C3E78 = OBJ_INDEX(D_800D154C);
-        obj->unk218 = func_1507BB28(0, cmd->a[0]);
+        dc_glbl_CharNum = OBJ_INDEX(D_800D154C);
+        obj->scriptCmd = func_1507BB28(0, cmd->a[0]);
         obj->unk21C = 0;
         break;
     case 0x36:
         if (cmd->a[0] != 0) {
-            obj->unk31C->unk20 |= cmd->a[1];
+            obj->mv->water_attribs |= cmd->a[1];
         } else {
-            obj->unk31C->unk20 &= ~cmd->a[1];
+            obj->mv->water_attribs &= ~cmd->a[1];
         }
         break;
     case 0x37:
-        obj->unk1E4 = cmd->a[0];
+        obj->family = cmd->a[0];
         break;
     case 0x38:
-        obj->unk232 = cmd->a[0];
+        obj->intelwalk = cmd->a[0];
         break;
     case 0x39:
         obj->unk221 = cmd->a[0];
@@ -582,16 +582,16 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     }
     case 0x3B:
-        obj->unk31C->unk32 |= cmd->a[0];
+        obj->mv->walk_attrib |= cmd->a[0];
         if (D_800D3840 == 4) {
-            obj->unk31C->unk34 = cmd->a[1];
+            obj->mv->unk34 = cmd->a[1];
         }
         break;
     case 0x3C:
         if (cmd->a[0] != 0) {
-            obj->unk31C->unk1A = 1;
+            obj->mv->injured = 1;
         } else {
-            obj->unk31C->unk1A = 0;
+            obj->mv->injured = 0;
         }
         break;
     case 0x3D:
@@ -607,26 +607,26 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         func_1503DE70(obj, cmd->a[0], cmd->a[1]);
         break;
     case 0x3F:
-        obj->disable_jump = cmd->a[0];
+        obj->nojump = cmd->a[0];
         break;
     case 0x40:
         if (cmd->a[0] != 0) {
-            obj->unkF8 |= cmd->a[1];
+            obj->noshove |= cmd->a[1];
         } else {
-            obj->unkF8 &= ~cmd->a[1];
+            obj->noshove &= ~cmd->a[1];
         }
         break;
     case 0x41:
         obj->unk1CC = cmd->a[0];
         break;
     case 0x42:
-        obj->unk246 = cmd->a[0] >> 8;
+        obj->intel_animspd = cmd->a[0] >> 8;
         obj->unk249 = cmd->a[0] & 0xFF;
         break;
     case 0x43:
-        D_800D2104[obj->unk13F][cmd->a[0] + 1].x = cmd->a[1];
-        D_800D2104[obj->unk13F][cmd->a[0] + 1].y = cmd->a[2];
-        D_800D2104[obj->unk13F][cmd->a[0] + 1].z = cmd->a[3];
+        D_800D2104[obj->listpos][cmd->a[0] + 1].x = cmd->a[1];
+        D_800D2104[obj->listpos][cmd->a[0] + 1].y = cmd->a[2];
+        D_800D2104[obj->listpos][cmd->a[0] + 1].z = cmd->a[3];
         break;
     case 0x44: {
         f32 px;
@@ -636,14 +636,14 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         node = func_15086D48(cmd->a[1]);
         if (node != -1) {
             func_15086CBC(node, &px, &py, &pz);
-            D_800D2104[obj->unk13F][cmd->a[0] + 1].x = px;
-            D_800D2104[obj->unk13F][cmd->a[0] + 1].y = py;
-            D_800D2104[obj->unk13F][cmd->a[0] + 1].z = pz;
+            D_800D2104[obj->listpos][cmd->a[0] + 1].x = px;
+            D_800D2104[obj->listpos][cmd->a[0] + 1].y = py;
+            D_800D2104[obj->listpos][cmd->a[0] + 1].z = pz;
         }
         break;
     }
     case 0x45:
-        obj->unk31C->unk7B = cmd->a[0];
+        obj->mv->inst_context = cmd->a[0];
         break;
     case 0x46:
         obj->unk234 = cmd->a[0];
@@ -651,14 +651,14 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->unk237 = cmd->a[2];
         break;
     case 0x47:
-        obj->unk31C->unk1B = cmd->a[0];
+        obj->mv->ind_cnt = cmd->a[0];
         break;
     case 0x48:
-        obj->unkD0 = cmd->a[0];
+        obj->doing_hit = cmd->a[0];
         obj->unk114 = cmd->a[1];
         break;
     case 0x49:
-        obj->lodRequest = cmd->a[0];
+        obj->forced_lod = cmd->a[0];
         break;
     case 0x4A:
         func_1507EB4C(obj, cmd->a[0]);
@@ -700,8 +700,8 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
             if (cmd->a[2] == 0) {
                 obj->unk101 |= 4;
             }
-            obj->unk65 = OBJ_INDEX(other) + 1;
-            obj->unk5C = cmd->a[1];
+            obj->attach_char = OBJ_INDEX(other) + 1;
+            obj->basemtx = cmd->a[1];
         }
         break;
     }
@@ -712,7 +712,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->unk74 = (obj->unk74 & ~cmd->a[1]) | cmd->a[0];
         break;
     case 0x51:
-        obj->unk31C->chased = cmd->a[0];
+        obj->mv->chased = cmd->a[0];
         break;
     case 0x54: {
         s32 a;
@@ -751,7 +751,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->unk20B[cmd->a[1]] = cmd->a[0];
         break;
     case 0x68:
-        obj->unk10 = cmd->a[0];
+        obj->cullDistance = cmd->a[0];
         break;
     case 0x69:
         D_800D18C0 |= cmd->a[0];
@@ -822,15 +822,15 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         angle = func_15048AD0((f32)cmd->a[4], (f32)cmd->a[5]);
         angle = cmd->a[4] + func_150ADA20() % angle;
         dist = cmd->a[2] + func_150ADA20() % (cmd->a[3] - cmd->a[2]);
-        obj->x_position = cmd->a[0] + sinf(angle * 0.01745329238f) * -(f32)dist;
-        obj->z_position = cmd->a[1] + cosf(angle * 0.01745329238f) * -(f32)dist;
+        obj->xpos = cmd->a[0] + sinf(angle * 0.01745329238f) * -(f32)dist;
+        obj->zpos = cmd->a[1] + cosf(angle * 0.01745329238f) * -(f32)dist;
     }
         break;
     case 0x73:
-        obj->interaction_state = cmd->a[0];
+        obj->type = cmd->a[0];
         break;
     case 0x74:
-        obj->unk31C->unk31 = cmd->a[0];
+        obj->mv->prop = cmd->a[0];
         break;
     case 0x75:
         if (cmd->a[0] != 0) {
@@ -840,8 +840,8 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         }
         break;
     case 0x76:
-        if (obj->unk31C != NULL) {
-            obj->unk31C->unk1AE = cmd->a[0];
+        if (obj->mv != NULL) {
+            obj->mv->ammo_count = cmd->a[0];
         }
         break;
     case 0x77:
@@ -857,7 +857,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
             v = 0x79;
             func_15083568(obj, v, 0.0f, 0);
             if (OBJ_INDEX(obj) < D_8008FD90) {
-                obj->unk31C->unk4E = 2;
+                obj->mv->transport = 2;
                 func_1505E650(obj, 5, 1.0f, 0.0f, 0.0f, 0.0f, 0);
             }
         }
@@ -866,15 +866,15 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
             func_1514DE94(obj);
             break;
         case 2:
-            obj->unk31C->unk17 = 1;
-            obj->lodRequest = 6;
+            obj->mv->env_suit = 1;
+            obj->forced_lod = 6;
             break;
         case 3: {
             Actor *other;
 
             other = func_1505EEF4(cmd->a[1] & 0xFFFF0FFF);
             if (other != NULL) {
-                obj->unk31C->unk4E = 1;
+                obj->mv->transport = 1;
                 func_15052F9C(other, 50.0f, 0x17, 4, 0, 1, 0, 0, 1, 0);
             }
             break;
@@ -891,9 +891,9 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     case 0x79:
         if (cmd->a[0] != 0) {
-            obj->unk31C->matrix_physics = 1;
+            obj->mv->matrix_physics = 1;
         } else {
-            obj->unk31C->matrix_physics = 0;
+            obj->mv->matrix_physics = 0;
         }
         break;
     case 0x7A: {
@@ -902,14 +902,14 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
 
         other = func_15083E90(cmd->a[0] & 0xFF);
         if (other != NULL) {
-            obj->unk13C = OBJ_INDEX(other) + 100;
-            obj->xz_velocity = 0.0f;
+            obj->lifting = OBJ_INDEX(other) + 100;
+            obj->speed = 0.0f;
             func_1505959C(other, OBJ_INDEX(obj));
         }
         break;
     }
     case 0x7B:
-        obj->unk31C->unk1AF = cmd->a[0];
+        obj->mv->unk1AF = cmd->a[0];
         break;
     case 0x7C:
         obj->unk23E = cmd->a[0];
@@ -918,10 +918,10 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->unk328 = cmd->a[0] + 1;
         break;
     case 0x7E:
-        obj->unk31C->unk7C = cmd->a[0];
+        obj->mv->unk7C = cmd->a[0];
         break;
     case 0x7F:
-        obj->spawn->flags = cmd->a[0];
+        obj->listpos_ptr->flags = cmd->a[0];
         break;
     case 0x80:
         {
@@ -932,7 +932,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         }
         break;
     case 0x81:
-        obj->unk275 = cmd->a[0];
+        obj->touching_char = cmd->a[0];
         break;
     case 0x82: {
         u16 saved;
@@ -947,7 +947,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->unk238 = cmd->a[0];
         break;
     case 0x84:
-        obj->unk31C->unk4E = cmd->a[0];
+        obj->mv->transport = cmd->a[0];
         break;
     case 0x85:
         func_1507D4F8(OBJ_INDEX(obj));
@@ -972,7 +972,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->fogFade = cmd->a[4];
         break;
     case 0x8C:
-        obj->unk31C->unk11A = cmd->a[0];
+        obj->mv->weapon_status = cmd->a[0];
         break;
     case 0x8B:
         if (OBJ_INDEX(obj) <= D_80082FA0) {
@@ -981,9 +981,9 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     case 0x8D:
         for (i = 0; i < 25; i++) {
-            if (D_800CC2D0[i].interaction_state != 0 && OBJ_INDEX(obj) + 1 == D_800CC2D0[i].unk124 &&
-                D_800CC2D0[i].unk5 == 5) {
-                func_15060F28(&D_800CC2D0[i], 0);
+            if (movement_obj[i].type != 0 && OBJ_INDEX(obj) + 1 == movement_obj[i].owner &&
+                movement_obj[i].drawtype == 5) {
+                func_15060F28(&movement_obj[i], 0);
             }
         }
         break;
@@ -1024,7 +1024,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         if (obj == NULL) {
             return 1;
         }
-        if (obj->interaction_state == 8 || obj->interaction_state == 0x27) {
+        if (obj->type == 8 || obj->type == 0x27) {
             return 1;
         }
         return 0;
@@ -1036,41 +1036,41 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xA5:
         return func_150859AC(objId, ((s16 *)&cmd->a[0])[1]);
     case 0x91:
-        return obj->unk232;
+        return obj->intelwalk;
     case 0x92:
         return obj->unk21C;
     case 0x93:
-        return obj->health;
+        return obj->energy;
     case 0xA8:
         if (obj->stunned != 0) {
             return 1;
         }
         break;
     case 0x94:
-        if (obj->unk13D != 0) {
+        if (obj->carried != 0) {
             return 1;
         }
         break;
     case 0x95:
-        if (obj->unk13C != 0 && func_15084000(cmd->a[0] & 0xFFFF0FFF) + 100 == obj->unk13C) {
+        if (obj->lifting != 0 && func_15084000(cmd->a[0] & 0xFFFF0FFF) + 100 == obj->lifting) {
             return 1;
         }
         break;
     case 0x96:
-        if (obj->in_water == 1) {
+        if (obj->inwater == 1) {
             return 1;
         }
         break;
     case 0x97:
-        ix = obj->x_position;
-        iz = obj->z_position;
+        ix = obj->xpos;
+        iz = obj->zpos;
         return (ix << 16) | (iz & 0xFFFF);
     case 0x98:
-        return (s16)(s32)obj->y_position;
+        return (s16)(s32)obj->ypos;
     case 0x99:
         other = func_1505EEF4(cmd->a[0] & 0xFFFF0FFF);
-        dx = obj->x_position - other->x_position;
-        dz = obj->z_position - other->z_position;
+        dx = obj->xpos - other->xpos;
+        dz = obj->zpos - other->zpos;
         if (dx * dx + dz * dz < (f32)(cmd->a[1] * cmd->a[1])) {
             return 1;
         }
@@ -1082,62 +1082,62 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         if (other == NULL) {
             return 32000;
         }
-        dx = obj->x_position - other->x_position;
-        dz = obj->z_position - other->z_position;
+        dx = obj->xpos - other->xpos;
+        dz = obj->zpos - other->zpos;
         return sqrtf(dx * dx + dz * dz);
     }
     case 0x9B: {
         f32 dx;
         f32 dz;
-        dz = obj->z_position - (f32)cmd->a[1];
-        dx = obj->x_position - (f32)cmd->a[0];
+        dz = obj->zpos - (f32)cmd->a[1];
+        dx = obj->xpos - (f32)cmd->a[0];
         return sqrtf(dz * dz + dx * dx);
     }
     case 0x9C:
         other = func_1505EEF4(cmd->a[0] & 0xFFFF0FFF);
-        return (f32)(func_1505A630(other->x_position - obj->x_position, obj->z_position - other->z_position, 0) + 0x4000) * 0.0054931640625f * 65536.0f;
+        return (f32)(func_1505A630(other->xpos - obj->xpos, obj->zpos - other->zpos, 0) + 0x4000) * 0.0054931640625f * 65536.0f;
     case 0x9D:
-        return (f32)(u32)(u16)(func_1505A630((f32)cmd->a[0] - obj->x_position, obj->z_position - (f32)cmd->a[1], 0) - 0x4000) * 0.0054931640625f * 65536.0f;
+        return (f32)(u32)(u16)(func_1505A630((f32)cmd->a[0] - obj->xpos, obj->zpos - (f32)cmd->a[1], 0) - 0x4000) * 0.0054931640625f * 65536.0f;
     case 0x9E: {
         s32 r;
         s32 dx;
         s32 dz;
         r = cmd->a[2];
-        dx = (s32)obj->x_position - cmd->a[0];
-        dz = (s32)obj->z_position - cmd->a[1];
+        dx = (s32)obj->xpos - cmd->a[0];
+        dz = (s32)obj->zpos - cmd->a[1];
         if (dx * dx + dz * dz < r * r) {
             return 1;
         }
         return 0;
     }
     case 0x9F:
-        return obj->unk48;
+        return obj->speedup;
     case 0xA0:
         return obj->unk223;
     case 0xA1:
         return obj->unk234;
     case 0xB3:
-        return obj->unk40 * 65536.0f;
+        return obj->theta * 65536.0f;
     case 0xA4:
-        return obj->unk7A;
+        return obj->langle;
     case 0xA2:
         ret = 0;
-        if (obj->unk31C->unk57 != 0) {
+        if (obj->mv->unk57 != 0) {
             ret = 1;
         }
         return ret;
     case 0xA3:
-        return obj->unk25C & 0x40;
+        return obj->task_attrib & 0x40;
     case 0xA6:
-        return (obj->unk1CC - obj->y_position) > 150.0f;
+        return (obj->unk1CC - obj->ypos) > 150.0f;
     case 0xA7:
         return func_15085420(obj) | 0xD000;
     case 0xA9:
-        return obj->unk31C->unk77;
+        return obj->mv->rt_context_a;
     case 0xAA:
-        return obj->unk31C->unk78;
+        return obj->mv->rt_context_b;
     case 0xAB:
-        return obj->unk31C->unk79;
+        return obj->mv->rt_context_z;
     case 0xAC:
         ret = func_150A2AEC(OBJ_INDEX(obj), D_800D3840 - 2, cmd->a);
         if (ret != -1) {
@@ -1147,24 +1147,24 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xAD:
         return obj->unk251;
     case 0xAE:
-        return obj->xz_velocity;
+        return obj->speed;
     case 0xAF:
-        if (obj->unk31C->unk16 != 0) {
+        if (obj->mv->pissed_hangover != 0) {
             return 2;
         }
-        if (obj->unk31C->unk8 != 0) {
+        if (obj->mv->pissed_up != 0) {
             return 1;
         }
         return 0;
     case 0xB2:
-        return (&obj->unk2E4)[cmd->a[0]];
+        return (&obj->taskint[0])[cmd->a[0]];
     case 0xB4:
         return obj->unk10A;
     case 0xB5: {
         u8 v;
         v = obj->unk10A;
         if (v & 0x80) {
-            return D_800CC2D0[v & ~0x80].interaction_state;
+            return movement_obj[v & ~0x80].type;
         }
         return 0xFFFF;
     }
@@ -1181,48 +1181,48 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xB9: {
         s32 x;
         s32 z;
-        x = D_800D2104[obj->unk13F][cmd->a[0]].x;
-        z = D_800D2104[obj->unk13F][cmd->a[0]].z;
+        x = D_800D2104[obj->listpos][cmd->a[0]].x;
+        z = D_800D2104[obj->listpos][cmd->a[0]].z;
         return (x << 16) | (z & 0xFFFF);
     }
     case 0xBA:
-        return D_800D2104[obj->unk13F][cmd->a[0]].y;
+        return D_800D2104[obj->listpos][cmd->a[0]].y;
     case 0xBB:
-        if (obj->unk65 != 0) {
-            return D_800CC2D0[obj->unk65 - 1].unk13F;
+        if (obj->attach_char != 0) {
+            return movement_obj[obj->attach_char - 1].listpos;
         }
         return -1;
     case 0xBC:
-        return obj->unk13C;
+        return obj->lifting;
     case 0xBE:
-        return obj->y_velocity;
+        return obj->yspd;
     case 0xBD: {
         s32 pad1;
         s32 pad2;
         other = func_1505EEF4(cmd->a[0] & 0xFFFF0FFF);
-        dx = obj->x_position - other->x_position;
-        dz = obj->z_position - other->z_position;
+        dx = obj->xpos - other->xpos;
+        dz = obj->zpos - other->zpos;
         return sqrtf(dx * dx + dz * dz);
     }
     case 0xBF:
-        return (f32)(s32)obj->unk28 * 65536.0f;
+        return (f32)(s32)obj->shad * 65536.0f;
     case 0xC0:
-        return obj->unk31C->unk1B;
+        return obj->mv->ind_cnt;
     case 0xC1:
-        return obj->unk31C->unk4E;
+        return obj->mv->transport;
     case 0xC2:
         return obj->unique_id;
     case 0xC3:
-        return obj->unkF4;
+        return obj->mvmt_control;
     case 0xC4:
-        return obj->unk25C;
+        return obj->task_attrib;
     case 0xC5:
-        return obj->disable_run;
+        return obj->norun;
     case 0xC7:
         if (obj->unk211 == 0xFF) {
             return 1;
         }
-        return obj->unk25C & 0x800;
+        return obj->task_attrib & 0x800;
     case 0xDB:
         if (cmd->a[0] == 1) {
             if (obj->unk20F == 0xFF) {
@@ -1247,15 +1247,15 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         found = func_15086CBC(obj->unk20F, &x, &y, &z);
         dist = -1;
         if (found != 0) {
-            x -= obj->x_position;
-            y -= obj->y_position;
-            z -= obj->z_position;
+            x -= obj->xpos;
+            y -= obj->ypos;
+            z -= obj->zpos;
             dist = obj->unk216 + (s32)sqrtf(x * x + y * y + z * z);
             if (obj->unk20F != obj->unk211) {
                 if (func_15086CBC(obj->unk211, &x, &y, &z) != 0) {
-                    x -= obj->x_position;
-                    y -= obj->y_position;
-                    z -= obj->z_position;
+                    x -= obj->xpos;
+                    y -= obj->ypos;
+                    z -= obj->zpos;
                     dist2 = sqrtf(x * x + y * y + z * z);
                     if (dist < dist2) {
                         return dist2 | 0;
@@ -1266,7 +1266,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         return dist;
     }
     case 0xC9:
-        return func_15085DA8(obj->y_position);
+        return func_15085DA8(obj->ypos);
     case 0xCA: {
         u8 b;
         b = 0xFF;
@@ -1274,7 +1274,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
             return D_800D2350[obj->unk20F].unk7;
         }
         D_8008729C = obj->unk212[1];
-        ret = func_15086098(obj->x_position, obj->y_position, obj->z_position, 0, 0, &b, &b);
+        ret = func_15086098(obj->xpos, obj->ypos, obj->zpos, 0, 0, &b, &b);
         obj->unk212[1] = ret;
         if (ret != 0xFF) {
             return D_800D2350[ret].unk7;
@@ -1294,15 +1294,15 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         if (other == NULL) {
             return 0;
         }
-        dx = other->x_position - obj->x_position;
-        dy = other->y_position - obj->y_position;
-        dz = other->z_position - obj->z_position;
+        dx = other->xpos - obj->xpos;
+        dy = other->ypos - obj->ypos;
+        dz = other->zpos - obj->zpos;
         dist = sqrtf(dx * dx + dy * dy + dz * dz);
-        if (func_150AC9C0(obj->x_position, obj->y_position + 100.0f, obj->z_position, dx, dy, dz, 0, 0, &hx, &hy, &hz, &hd, 0, 0, 0.0f) == 0) {
+        if (func_150AC9C0(obj->xpos, obj->ypos + 100.0f, obj->zpos, dx, dy, dz, 0, 0, &hx, &hy, &hz, &hd, 0, 0, 0.0f) == 0) {
             return dist;
         }
         if (dist < hd) {
-            if (func_15086D94(obj->x_position, obj->y_position, obj->z_position, dx, dz) > 0.0f) {
+            if (func_15086D94(obj->xpos, obj->ypos, obj->zpos, dx, dz) > 0.0f) {
                 return 0;
             }
             return dist;
@@ -1311,11 +1311,11 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     }
     case 0xCC: {
         TriggerZone *p;
-        p = func_150A3194(3, 11, obj->x_position, obj->y_position, obj->z_position);
+        p = zone_findAt(3, 11, obj->xpos, obj->ypos, obj->zpos);
         if (p == NULL) {
             return -1;
         }
-        ret = p - D_800D3098;
+        ret = p - zones;
         return ret;
     }
     case 0xCF: {
@@ -1340,7 +1340,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         }
         ret = -1;
         if (count != 0) {
-            found = func_15086098(obj->x_position, obj->y_position, obj->z_position, count, n2, nodes, &n2);
+            found = func_15086098(obj->xpos, obj->ypos, obj->zpos, count, n2, nodes, &n2);
             foundNode = found;
             D_80087298 = 0xFF;
             if ((u8)found != 0xFF) {
@@ -1359,8 +1359,8 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         f32 z;
         id = func_15086D48(cmd->a[0]);
         if (func_15086CBC(id, &x, &y, &z) != 0) {
-            x -= obj->x_position;
-            z -= obj->z_position;
+            x -= obj->xpos;
+            z -= obj->zpos;
             ret = sqrtf(x * x + z * z);
         } else {
             ret = 30000;
@@ -1375,9 +1375,9 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         f32 b;
         f32 c;
         other = func_1505EEF4(cmd->a[0] & 0xFFFF0FFF);
-        temp = func_1505A630(other->x_position - obj->x_position, obj->z_position - other->z_position, 0) + 0x4000;
+        temp = func_1505A630(other->xpos - obj->xpos, obj->zpos - other->zpos, 0) + 0x4000;
         a = (f32)temp * 0.0054931640625f;
-        b = obj->unk40;
+        b = obj->theta;
         a = func_15144BC8(a);
         c = func_15144BC8(func_15144BC8(b) - a);
         if (c > 180.0f) {
@@ -1393,9 +1393,9 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         f32 dz;
         f32 c;
         other = func_1505EEF4(cmd->a[0] & 0xFFFF0FFF);
-        dx = other->x_position - obj->x_position;
-        dz = other->z_position - obj->z_position;
-        c = (u32)func_1505A630(sqrtf(dx * dx + dz * dz), other->y_position - obj->y_position, 0) * 0.0054931640625f;
+        dx = other->xpos - obj->xpos;
+        dz = other->zpos - obj->zpos;
+        c = (u32)func_1505A630(sqrtf(dx * dx + dz * dz), other->ypos - obj->ypos, 0) * 0.0054931640625f;
         c = func_15144BC8(c);
         if (c > 180.0f) {
             c = -360.0f + c;
@@ -1416,20 +1416,20 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xD4: {
         ActorCtl *p;
         s32 v;
-        p = obj->unk31C;
+        p = obj->mv;
         v = 0;
         if (p != NULL) {
-            v = p->unk78;
+            v = p->rt_context_b;
         }
         return v;
     }
     case 0xD3: {
         ActorCtl *p;
         s32 v;
-        p = obj->unk31C;
+        p = obj->mv;
         v = 0;
         if (p != NULL) {
-            switch (p->unk75 & 0x7F) {
+            switch (p->context_b & 0x7F) {
             case 3:
             case 9:
             case 21:
@@ -1458,12 +1458,12 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xD6:
         return func_151E565C();
     case 0xD7:
-        if ((obj->unk1CC - obj->y_position) > 600.0f && obj->unk118 == -10000.0f) {
+        if ((obj->unk1CC - obj->ypos) > 600.0f && obj->unk118 == -10000.0f) {
             return 1;
         }
         return 0;
     case 0xD8:
-        return obj->in_water;
+        return obj->inwater;
     case 0xD9:
         if (obj->unkA9 == 2) {
             return 1;
@@ -1472,13 +1472,13 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xDA:
         return obj->floorY;
     case 0xDC:
-        if (obj->unk31C->unk195 != 0) {
-            return obj->unk31C->unk196 | 0x80;
+        if (obj->mv->being_sniped != 0) {
+            return obj->mv->being_s_char | 0x80;
         }
         return 0;
     case 0xDD:
-        if (obj->unk31C != NULL) {
-            return obj->unk31C->unk23;
+        if (obj->mv != NULL) {
+            return obj->mv->door_walkf_time;
         }
         return 0;
     case 0xDE:
@@ -1490,29 +1490,29 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         }
         break;
     case 0xDF:
-        if (obj->unk31C != NULL) {
-            return obj->unk31C->unk1AE;
+        if (obj->mv != NULL) {
+            return obj->mv->ammo_count;
         }
         return 0;
     case 0xE0:
-        return obj->y_scale * 65536.0f;
+        return obj->scale_y * 65536.0f;
     case 0xE1:
-        return obj->immune;
+        return obj->imune;
     case 0xE2:
-        return obj->unk31C->matrix_physics;
+        return obj->mv->matrix_physics;
     case 0xE3:
         return D_800D18A9;
     case 0xE4:
         return D_800D18A8;
     case 0xE5:
-        return obj->unk275;
+        return obj->touching_char;
     case 0xE6: {
         u8 v;
         Actor *p;
-        if (obj->unk275 != 0) {
-            p = &D_800CC2D0[obj->unk275 - 1];
-            obj->unk275 = 0;
-            if (p->id == cmd->a[0]) {
+        if (obj->touching_char != 0) {
+            p = &movement_obj[obj->touching_char - 1];
+            obj->touching_char = 0;
+            if (p->character_type == cmd->a[0]) {
                 return 1;
             }
             return 0;
@@ -1531,14 +1531,14 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         s32 i;
         s32 dx;
         s32 dz;
-        idx = obj->unk13F;
+        idx = obj->listpos;
         pts = D_800D2104[idx];
         n = D_800D2108[idx];
         best = -1;
         if (pts != NULL && n != 0) {
             other = func_1505EEF4(cmd->a[0] & 0xFFFF0FFF);
-            x = other->x_position;
-            z = other->z_position;
+            x = other->xpos;
+            z = other->zpos;
             maxd = 100000000;
             mind = -1;
             if (D_800D3840 >= 4) {
@@ -1562,9 +1562,9 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         return best;
     }
     case 0xE8:
-        return obj->unk84.uh;
+        return obj->animseq.uh;
     case 0xE9:
-        return obj->unk31C->unk51;
+        return obj->mv->land_floor;
     case 0xEA: {
         ModelAttachment *p;
         s32 a;
@@ -1596,13 +1596,13 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         ix = cmd->a[0];
         iz = cmd->a[1];
         r = cmd->a[2];
-        dx = obj->x_position - (f32)ix;
+        dx = obj->xpos - (f32)ix;
         dy = 0.0f;
-        dz = obj->z_position - (f32)iz;
+        dz = obj->zpos - (f32)iz;
         dist = dz * dz + dx * dx;
         if (dist <= r * r) {
-            ret = obj->x_position;
-            iz = obj->z_position;
+            ret = obj->xpos;
+            iz = obj->zpos;
         } else {
             s = r / sqrtf(dist);
             ret = (dx *= s) + (f32)ix;
@@ -1611,7 +1611,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         return (ret << 16) | (iz & 0xFFFF);
     }
     case 0xEC:
-        return obj->unk31C->unk95;
+        return obj->mv->ladder;
     case 0xED:
         return D_800BE710[objId];
     case 0xEE: {
@@ -1621,20 +1621,20 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         f32 z;
 
         /* Offset cmd->a[0] along the reverse of facing angle unk7A, packed as (x << 16) | (z & 0xFFFF). */
-        func_1505A184(obj->unk7A + 0x8000, cmd->a[0], 0.0f, &x, &z, &y);
-        px = (s16)(s32)obj->x_position + x;
-        iz = (s16)((s16)(s32)obj->z_position + z);
+        func_1505A184(obj->langle + 0x8000, cmd->a[0], 0.0f, &x, &z, &y);
+        px = (s16)(s32)obj->xpos + x;
+        iz = (s16)((s16)(s32)obj->zpos + z);
         return (px << 16) | (iz & 0xFFFF);
     }
     case 0xEF:
-        return obj->interaction_state;
+        return obj->type;
     case 0xF0:
         return D_800E0AC0[obj->team];
     case 0xF1:
         return (obj->unk74 & 0xF) == 0xF;
     case 0xF2:
-        if (obj->unk13C != 0) {
-            return D_800CC2D0[obj->unk13C].unk13F | 0x2000;
+        if (obj->lifting != 0) {
+            return movement_obj[obj->lifting].listpos | 0x2000;
         }
         return 0;
     case 0xF3:

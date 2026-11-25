@@ -25,9 +25,9 @@ typedef struct {
     /* 0x24 */ f32 scaleY;
     /* 0x28 */ f32 scaleZ;
     /* 0x2C */ u8 unk4C;
-    /* 0x2D */ u8 unk4D;
-    /* 0x2E */ u16 unk50;
-    /* 0x30 */ u16 unk52;
+    /* 0x2D */ u8 shadowSize;
+    /* 0x2E */ u16 cullRadiusXZ;
+    /* 0x30 */ u16 cullRadiusY;
     /* 0x32 */ u8 flags;
     /* 0x33 */ u8 id;            // 0: assign a free one
     /* 0x34 */ u8 inactive;
@@ -44,9 +44,9 @@ typedef struct {
 /* Defaults for objects of the second (grouped) list, indexed by model id (D_800A26C0). */
 typedef struct {
     /* 0x0 */ u8 unk4C;
-    /* 0x1 */ u8 unk4D;
-    /* 0x2 */ s16 unk52;
-    /* 0x4 */ s16 unk50;
+    /* 0x1 */ u8 shadowSize;
+    /* 0x2 */ s16 cullRadiusY;
+    /* 0x4 */ s16 cullRadiusXZ;
     /* 0x6 */ u16 drawDistance;
     /* 0x8 */ u8 flags;
     /* 0x9 */ u8 state;
@@ -76,8 +76,8 @@ void func_15004AAC(WorldObject *obj, ObjectSpawn *spawn);
 s32 func_15004BF0(s32 fromTop);
 void func_15004CE0(DlCommand *dl, u32 base);
 
-/* Creates the level's objects (D_800DBEF4) from its two placement lists and allocates per-object buffers. */
-void func_150039E0(s32 level, s32 arg1) {
+/* Creates the level's objects (db_Object_array) from its two placement lists and allocates per-object buffers. */
+void func_150039E0(s32 levelId, s32 arg1) {
     s32 i;
     s32 found;
     s32 id;
@@ -99,41 +99,41 @@ void func_150039E0(s32 level, s32 arg1) {
     groupedSpawns = NULL;
     setStateBit2 = FALSE;
     D_800BE2A0 = D_800BE2A2 = D_800BE2A4 = 0;
-    i = func_1502B7F0(&spawns, 2, 0xB, level);
+    i = func_1502B7F0(&spawns, 2, 0xB, levelId);
     D_800DBF00 = i / sizeof(ObjectSpawn);
-    D_800DBEF0 = D_800DBF00;
-    D_800DBF98 = func_1502B7F0(&groupedSpawns, 3, 0xC, level, 2) / sizeof(ObjectSpawn);
-    D_800DBEF0 += D_800DBF98;
-    D_800DBEF4 = allocate_memory(D_800DBEF0 * sizeof(WorldObject), 1, 2, 0);
-    if (D_800DBEF4 == NULL) {
-        D_800DBEF0 = 0;
+    gWorldObjectCount = D_800DBF00;
+    D_800DBF98 = func_1502B7F0(&groupedSpawns, 3, 0xC, levelId, 2) / sizeof(ObjectSpawn);
+    gWorldObjectCount += D_800DBF98;
+    db_Object_array = allocate_memory(gWorldObjectCount * sizeof(WorldObject), 1, 2, 0);
+    if (db_Object_array == NULL) {
+        gWorldObjectCount = 0;
         D_800DBF98 = 0;
         D_800DBF00 = 0;
         return;
     }
     // base[i] is object i's spawn: the first list, then the grouped list
     base = spawns;
-    for (i = 0; i < D_800DBEF0; i++) {
+    for (i = 0; i < gWorldObjectCount; i++) {
         if (i == D_800DBF00) {
             base = &groupedSpawns[-i]; // so that base[i] is groupedSpawns[0]
         }
         found = 0;
         isBehavior22 = FALSE;
-        obj = &D_800DBEF4[i];
+        obj = &db_Object_array[i];
         obj->x = base[i].x;
         obj->y = base[i].y;
         obj->z = base[i].z;
-        obj->rotX = base[i].rotX;
-        obj->rotY = base[i].rotY;
-        obj->rotZ = base[i].rotZ;
-        obj->scaleX = base[i].scaleX;
-        obj->scaleY = base[i].scaleY;
-        obj->scaleZ = base[i].scaleZ;
+        obj->t = base[i].rotX;
+        obj->u = base[i].rotY;
+        obj->v = base[i].rotZ;
+        obj->xScale = base[i].scaleX;
+        obj->yScale = base[i].scaleY;
+        obj->zScale = base[i].scaleZ;
         obj->displayList = base[i].displayList;
         obj->state = base[i].state & ~8;
         obj->fadeDistance = 0;
         obj->inactive = base[i].inactive;
-        obj->param.data = base[i].data;
+        obj->moveData.data = base[i].data;
         behavior = base[i].behavior.func;
         if (base[i].behavior.index < 0xFFFF) {
             // matching: the (s32) casts keep the compares on a copy of the loaded word
@@ -141,37 +141,37 @@ void func_150039E0(s32 level, s32 arg1) {
                 obj->state |= 4;
                 setStateBit2 = TRUE;
             }
-            obj->update = D_80088C90[base[i].behavior.index].update;
+            obj->moveProc = D_80088C90[base[i].behavior.index].moveProc;
             obj->onContact = D_80088C90[base[i].behavior.index].onContact;
-            obj->unk92 = D_80088C90[base[i].behavior.index].unk8;
+            obj->contactNonPlayers = D_80088C90[base[i].behavior.index].contactNonPlayers;
             if (base[i].behavior.index == 22) {
                 isBehavior22 = TRUE;
             }
         } else {
-            obj->update = behavior;
+            obj->moveProc = behavior;
             obj->onContact = NULL;
         }
-        obj->material = base[i].material;
-        obj->work.floor.unk7C = 0;
-        obj->work.floor.tri = 0;
-        *(s32 *)&obj->work.floor.y = 0; // matching: an integer zero store, not 0.0f
-        obj->sound = 0;
+        obj->floorHitAttrib = base[i].material;
+        obj->touch.floor.unk7C = 0;
+        obj->touch.floor.tri = 0;
+        *(s32 *)&obj->touch.floor.y = 0; // matching: an integer zero store, not 0.0f
+        obj->sound_id = 0;
         obj->attach = 0;
         obj->effectFlags = 0;
-        obj->behaviorState = 4;
+        obj->task_flag = TASK_FLAG_LOCKED;
         obj->spinX = obj->spinY = obj->spinZ = 0.0f;
         obj->moveX = obj->moveY = obj->moveZ = obj->spinZ; // matching: 0 via spinZ, not a literal
         obj->yOffset = 0;
         obj->alpha = 0xFF;
-        obj->viewAlpha[0] = obj->viewAlpha[1] = obj->viewAlpha[2] = obj->viewAlpha[3] = 0xFF;
-        obj->index = i;
+        obj->dst_fade_alpha[0] = obj->dst_fade_alpha[1] = obj->dst_fade_alpha[2] = obj->dst_fade_alpha[3] = 0xFF;
+        obj->object_num = i;
         obj->shadow = NULL;
         obj->unk98 = 0;
         if (obj->displayList == NULL) {
             id = base[i].modelId;
             for (j = D_800DBF00; j < i; j++) {
                 if (base[j].displayList == base[i].displayList && base[j].modelId == base[i].modelId
-                    && D_800DBEF4[j].displayList != NULL) {
+                    && db_Object_array[j].displayList != NULL) {
                     found = j + 1;
                     break;
                 }
@@ -181,11 +181,11 @@ void func_150039E0(s32 level, s32 arg1) {
                 obj->model = model;
             }
             if (found) {
-                obj->srcVertices = D_800DBEF4[found - 1].srcVertices;
-                obj->displayList = D_800DBEF4[found - 1].displayList;
-                obj->unk9C = D_800DBEF4[found - 1].unk9C;
-                obj->numVertices = D_800DBEF4[found - 1].numVertices;
-                obj->materials = D_800DBEF4[found - 1].materials;
+                obj->srcVertices = db_Object_array[found - 1].srcVertices;
+                obj->displayList = db_Object_array[found - 1].displayList;
+                obj->unk9C = db_Object_array[found - 1].unk9C;
+                obj->numVertices = db_Object_array[found - 1].numVertices;
+                obj->materials = db_Object_array[found - 1].materials;
             } else {
                 obj->srcVertices = model->vertices;
                 obj->displayList = model->displayList;
@@ -195,34 +195,34 @@ void func_150039E0(s32 level, s32 arg1) {
             }
             if (i >= D_800DBF00) {
                 obj->unk4C = D_800A26C0[id].unk4C;
-                obj->unk4D = D_800A26C0[id].unk4D;
-                obj->unk50 = D_800A26C0[id].unk50;
-                obj->unk52 = D_800A26C0[id].unk52;
-                obj->flags = D_800A26C0[id].flags;
+                obj->shadowSize = D_800A26C0[id].shadowSize;
+                obj->cullRadiusXZ = D_800A26C0[id].cullRadiusXZ;
+                obj->cullRadiusY = D_800A26C0[id].cullRadiusY;
+                obj->object_status = D_800A26C0[id].flags;
                 obj->state = D_800A26C0[id].state & ~8;
                 obj->effectFlags = D_800A26C0[id].effectFlags;
                 if (setStateBit2) {
                     obj->state |= 4;
                 }
                 obj->drawDistance = D_800A26C0[id].drawDistance;
-                obj->id = base[i].id;
+                obj->unique_id = base[i].id;
             } else {
-                obj->unk50 = base[i].unk50;
-                obj->unk52 = base[i].unk52;
-                obj->flags = base[i].flags;
+                obj->cullRadiusXZ = base[i].cullRadiusXZ;
+                obj->cullRadiusY = base[i].cullRadiusY;
+                obj->object_status = base[i].flags;
                 obj->unk4C = base[i].unk4C;
-                obj->unk4D = base[i].unk4D;
+                obj->shadowSize = base[i].shadowSize;
                 obj->drawDistance = base[i].drawDistance;
                 if (base[i].id != 0) {
-                    obj->id = base[i].id;
+                    obj->unique_id = base[i].id;
                 } else {
-                    obj->id = func_15004BF0(TRUE);
+                    obj->unique_id = func_15004BF0(TRUE);
                 }
             }
             if (id == 0x71) {
-                obj->material = 0xE;
+                obj->floorHitAttrib = 0xE;
             }
-            if (obj->update != NULL || isBehavior22) {
+            if (obj->moveProc != NULL || isBehavior22) {
                 if (obj->inactive == 0) {
                     obj->viewFlags = 0xF;
                 } else {
@@ -237,7 +237,7 @@ void func_150039E0(s32 level, s32 arg1) {
             if ((s32)obj->displayList == 1 || (s32)obj->displayList == 2) {
                 for (j = 0; j < i; j++) {
                     if (base[j].displayList == base[i].displayList && base[j].modelId == base[i].modelId
-                        && D_800DBEF4[j].displayList != NULL) {
+                        && db_Object_array[j].displayList != NULL) {
                         found = j + 1;
                         break;
                     }
@@ -250,10 +250,10 @@ void func_150039E0(s32 level, s32 arg1) {
                     obj->materials = levelModel->materials;
                     obj->unk9C = levelModel->unk8;
                 } else {
-                    obj->numVertices = D_800DBEF4[found - 1].numVertices;
-                    obj->srcVertices = D_800DBEF4[found - 1].srcVertices;
-                    obj->materials = D_800DBEF4[found - 1].materials;
-                    obj->unk9C = D_800DBEF4[found - 1].unk9C;
+                    obj->numVertices = db_Object_array[found - 1].numVertices;
+                    obj->srcVertices = db_Object_array[found - 1].srcVertices;
+                    obj->materials = db_Object_array[found - 1].materials;
+                    obj->unk9C = db_Object_array[found - 1].unk9C;
                 }
                 if ((s32)obj->displayList == 2) {
                     obj->viewFlags = 0;
@@ -263,25 +263,25 @@ void func_150039E0(s32 level, s32 arg1) {
                 if (!found) {
                     obj->displayList = levelModel->displayList;
                 } else {
-                    obj->displayList = D_800DBEF4[found - 1].displayList;
+                    obj->displayList = db_Object_array[found - 1].displayList;
                 }
                 obj->effectFlags = base[i].effectFlags;
                 obj->model = NULL;
             }
-            obj->unk50 = base[i].unk50;
-            obj->unk52 = base[i].unk52;
-            obj->flags = base[i].flags;
+            obj->cullRadiusXZ = base[i].cullRadiusXZ;
+            obj->cullRadiusY = base[i].cullRadiusY;
+            obj->object_status = base[i].flags;
             obj->unk4C = base[i].unk4C;
-            obj->unk4D = base[i].unk4D;
+            obj->shadowSize = base[i].shadowSize;
             obj->drawDistance = base[i].drawDistance;
             if (base[i].id != 0) {
-                obj->id = base[i].id;
+                obj->unique_id = base[i].id;
             } else {
-                obj->id = func_15004BF0(TRUE);
+                obj->unique_id = func_15004BF0(TRUE);
             }
         }
         func_15004AAC(obj, &base[i]);
-        if (obj->update == NULL && !isBehavior22) {
+        if (obj->moveProc == NULL && !isBehavior22) {
             obj->viewFlags |= 0x20;
         }
         if (!found) {
@@ -289,8 +289,8 @@ void func_150039E0(s32 level, s32 arg1) {
             func_15004CE0((DlCommand *)obj->displayList, (u32)model);
         }
     }
-    for (i = 0; i < D_800DBEF0; i++) {
-        obj = &D_800DBEF4[i];
+    for (i = 0; i < gWorldObjectCount; i++) {
+        obj = &db_Object_array[i];
         if (obj->srcVertices == NULL) {
             continue;
         }
@@ -311,20 +311,20 @@ void func_150039E0(s32 level, s32 arg1) {
             }
         }
     }
-    D_800DBEE0 = allocate_memory(D_800DBEF0 * 0x40, 1, 2, 0);
-    D_800DBEE4 = allocate_memory(D_800DBEF0 * 0x40, 1, 2, 0);
-    D_800DBEF8 = allocate_memory(D_800DBEF0 * sizeof(s32), 1, 0, 0);
-    D_800DBEFC = allocate_memory(D_800DBEF0, 1, 0, 0);
+    D_800DBEE0 = allocate_memory(gWorldObjectCount * 0x40, 1, 2, 0);
+    D_800DBEE4 = allocate_memory(gWorldObjectCount * 0x40, 1, 2, 0);
+    D_800DBEF8 = allocate_memory(gWorldObjectCount * sizeof(s32), 1, 0, 0);
+    D_800DBEFC = allocate_memory(gWorldObjectCount, 1, 0, 0);
     for (i = 0; i < 4; i++) {
-        D_800DBED0[i] = allocate_memory(D_800DBEF0 * 4, 1, 0, 0);
+        D_800DBED0[i] = allocate_memory(gWorldObjectCount * 4, 1, 0, 0);
     }
-    D_800DBF94 = allocate_memory(D_800DBEF0 * sizeof(s32), 1, 0, 0);
-    for (i = 0; i < D_800DBEF0; i++) {
-        D_800DBF94[i] = 0;
+    gWorldObjectContacts = allocate_memory(gWorldObjectCount * sizeof(s32), 1, 0, 0);
+    for (i = 0; i < gWorldObjectCount; i++) {
+        gWorldObjectContacts[i] = 0;
     }
-    for (i = D_800DBF00; i < D_800DBEF0; i++) {
-        if (D_800DBEF4[i].id == 0) {
-            D_800DBEF4[i].id = func_15004BF0(FALSE);
+    for (i = D_800DBF00; i < gWorldObjectCount; i++) {
+        if (db_Object_array[i].unique_id == 0) {
+            db_Object_array[i].unique_id = func_15004BF0(FALSE);
         }
     }
 }
@@ -332,8 +332,8 @@ void func_150039E0(s32 level, s32 arg1) {
 /* Saves the display list and source vertices of object D_800DBF88, unless it is 0xFF (none). */
 void func_15004574(void) {
     if (D_800DBF88 != 0xFF) {
-        D_800DBF8C = (s32)D_800DBEF4[D_800DBF88].displayList;
-        D_800DBF90 = (s32)D_800DBEF4[D_800DBF88].srcVertices;
+        D_800DBF8C = (s32)db_Object_array[D_800DBF88].displayList;
+        D_800DBF90 = (s32)db_Object_array[D_800DBF88].srcVertices;
     }
 }
 
@@ -373,9 +373,9 @@ void func_150045C4(s32 arg0) {
     func_15004A4C();
     guMtxIdentF(D_800DBF08[0]);
     guMtxIdentF(D_800DBF48);
-    for (i = 0; i < D_800DBEF0; i++) {
-        obj = &D_800DBEF4[i];
-        if (obj->update == NULL || obj->update == func_15116058 || obj->update == func_15116110) {
+    for (i = 0; i < gWorldObjectCount; i++) {
+        obj = &db_Object_array[i];
+        if (obj->moveProc == NULL || obj->moveProc == func_15116058 || obj->moveProc == func_15116110) {
             obj->attach = 3;
         }
         if (!(obj->state & 1)) {
@@ -383,8 +383,8 @@ void func_150045C4(s32 arg0) {
             guMtxF2L(mtx, &(*D_80089250[D_800BE9C0])[i]);
             bcopy(&(*D_80089250[D_800BE9C0])[i], &(*D_80089250[!D_800BE9C0])[i], sizeof(Mtx));
         }
-        if (obj->update == func_151150B0) {
-            obj->update = NULL;
+        if (obj->moveProc == func_151150B0) {
+            obj->moveProc = NULL;
         }
         if ((obj->state & 1) == 1) {
             func_1511490C(mtx, obj);
@@ -398,21 +398,21 @@ void func_150045C4(s32 arg0) {
             bcopy(obj->vertices[0], obj->vertices[1], obj->numVertices * sizeof(Vtx));
         }
         func_1510F800(2);
-        if ((obj->viewFlags & 0x80) == 0x80 && (obj->flags & 0x60) != 0x20) {
+        if ((obj->viewFlags & 0x80) == 0x80 && (obj->object_status & 0x60) != 0x20) {
             D_800D37E0[0] = i;
             func_150A44F0(1, D_800D37E0, 1);
         }
     }
-    for (i = 0; i < D_800DBEF0; i++) {
-        obj = &D_800DBEF4[i];
+    for (i = 0; i < gWorldObjectCount; i++) {
+        obj = &db_Object_array[i];
         if (obj->inactive == 1) {
             continue;
         }
         if ((obj->viewFlags & 0x20) == 0x20) {
             func_1510E7A4(&floorTri, NULL, &floorY, NULL, &floorFlags, NULL, obj->x, obj->y, obj->z, obj->y,
                           i + 1, NULL, -10000.0f, 20000.0f);
-            obj->work.floor.tri = floorTri;
-            obj->work.floor.y = floorY;
+            obj->touch.floor.tri = floorTri;
+            obj->touch.floor.y = floorY;
         }
     }
 }
@@ -455,7 +455,7 @@ void func_150049A4(DlCommand *dl, s32 offset, s32 matrixOffset) {
 void func_15004A4C(void) {
     s32 i;
 
-    for (i = 0; i < D_800DBEF0; i++) {
+    for (i = 0; i < gWorldObjectCount; i++) {
         D_800DBEF8[i] = 0;
         D_800DBEFC[i] = 0;
     }
@@ -465,7 +465,7 @@ f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 
 /*
- * Sets the object's bounding radius (unk50, unk52) from its farthest scaled vertex if it has none,
+ * Sets the object's bounding radius (cullRadiusXZ, cullRadiusY) from its farthest scaled vertex if it has none,
  * and counts in D_800BE2A0/2/4 whether a preset radius is too small, was computed, or is large enough.
  */
 void func_15004AAC(WorldObject *obj, ObjectSpawn *spawn) {
@@ -484,11 +484,11 @@ void func_15004AAC(WorldObject *obj, ObjectSpawn *spawn) {
     i = 0;
     if (obj->numVertices > 0) {
         vtx = obj->srcVertices;
-        scaleZ = obj->scaleZ;
+        scaleZ = obj->zScale;
         z = 0.0f; // matching: these dead stores of z and x set IDO's FP register order
-        scaleX = obj->scaleX;
+        scaleX = obj->xScale;
         x = 0.0f;
-        scaleY = obj->scaleY;
+        scaleY = obj->yScale;
         do {
             z = vtx[i].v.ob[2] * scaleZ;
             x = vtx[i].v.ob[0] * scaleX;
@@ -503,14 +503,14 @@ void func_15004AAC(WorldObject *obj, ObjectSpawn *spawn) {
     if (maxDistSq != 0) {
         f32 root = sqrtf(maxDistSq);
 
-        if (obj->unk50 == 0) {
+        if (obj->cullRadiusXZ == 0) {
             radius = root;
-            obj->unk50 = radius;
-            obj->unk52 = radius;
+            obj->cullRadiusXZ = radius;
+            obj->cullRadiusY = radius;
             D_800BE2A2++;
         } else {
             radius = root;
-            if (obj->unk50 < radius || obj->unk52 < radius) {
+            if (obj->cullRadiusXZ < radius || obj->cullRadiusY < radius) {
                 D_800BE2A0++;
             } else {
                 D_800BE2A4++;
@@ -530,8 +530,8 @@ s32 func_15004BF0(s32 fromTop) {
     // matching: the parameter doubles as the start value so that IDO keeps it in a0
     if (fromTop == 0) {
         id = 1;
-        for (i = fromTop = D_800DBF00; i < D_800DBEF0; i++) {
-            if (id == D_800DBEF4[i].id) {
+        for (i = fromTop = D_800DBF00; i < gWorldObjectCount; i++) {
+            if (id == db_Object_array[i].unique_id) {
                 id++;
                 i = fromTop - 1; // rescan with the next id
             }
@@ -543,8 +543,8 @@ s32 func_15004BF0(s32 fromTop) {
     } else {
         fromTop = 0xFF - D_800DBF00;
         id = fromTop;
-        for (i = 0; i < D_800DBEF0; i++) {
-            if (id == D_800DBEF4[i].id) {
+        for (i = 0; i < gWorldObjectCount; i++) {
+            if (id == db_Object_array[i].unique_id) {
                 id--;
                 i = -1; // rescan with the next id
             }

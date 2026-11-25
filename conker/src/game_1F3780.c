@@ -3,7 +3,7 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Per-side (0, 1) tables: byte offset of the side's joint matrix in Actor.unk1D4, and model-space points
+/* Per-side (0, 1) tables: byte offset of the side's joint matrix in Actor.ob_matrix_ptr, and model-space points
  * that func_15145EA4 transforms by it. */
 extern s32 D_800AAB00[];
 extern Vec3f D_800AAB08[];
@@ -66,7 +66,7 @@ s32 func_151C62D0(Actor *arg0, u8 side, u8 arg2, ModelAttachment *attachment, s1
     if (!arg2) {
         func_15145740(arg0, &aim, &sp118, &spE4, 0.8110000491f);
     }
-    joints = arg0->unk1D4;
+    joints = arg0->ob_matrix_ptr;
     if (joints != NULL) {
         // matching: a block-scope declaration; its -g3 scope steers the schedule
         extern Vec3f D_800AAB68[];
@@ -116,22 +116,22 @@ s32 func_151C62D0(Actor *arg0, u8 side, u8 arg2, ModelAttachment *attachment, s1
             dx = 0.0f;
         }
         offset = side ? 34.0f : -34.0f;
-        origin.x = arg0->x_position + (offset * dx);
-        origin.y = arg0->y_position + 49.0f;
-        origin.z = arg0->z_position + (offset * dz);
+        origin.x = arg0->xpos + (offset * dx);
+        origin.y = arg0->ypos + 49.0f;
+        origin.z = arg0->zpos + (offset * dz);
         shotPos = origin;
     }
     func_151D5174(arg0, &origin, &aim, &sp118, &spE4, &sp130, &sp124, &spF4, &spF0, &shotPos);
-    if (arg0->camera != NULL) {
+    if (arg0->CameraPtr != NULL) {
         event.flags = 1;
         event.duration = (func_150ADA20() % 11U) + 11;
-        event.playerMask = 1 << arg0->camera->playerIndex;
+        event.playerMask = 1 << arg0->CameraPtr->CNumber;
         func_150ADA20();
         event.strength = 8;
         event.updateKind = -1;
         func_151D8868(&event, 0, 0xFF, 1);
     }
-    if ((arg0->unk1D4 != NULL) && ((arg0->unk74 & 0xF) != 0xF)) {
+    if ((arg0->ob_matrix_ptr != NULL) && ((arg0->unk74 & 0xF) != 0xF)) {
         if (arg2 || ((D_80082FA0 < 2) && (func_150ADA20() & 1))) {
             func_151D3F14(&origin, arg5, arg6);
         }
@@ -165,9 +165,9 @@ void func_151C69A0(Actor *arg0, s32 arg1, Vec3f *out) {
     func_151C69CC(arg0, out, 1);
 }
 
-/* Transforms this side's D_800AAB08 point by its joint matrix (D_800AAB00 bytes into arg0->unk1D4) into *out. */
+/* Transforms this side's D_800AAB08 point by its joint matrix (D_800AAB00 bytes into arg0->ob_matrix_ptr) into *out. */
 void func_151C69CC(Actor *arg0, Vec3f *out, u8 side) {
-    s32 matrix = (s32)arg0->unk1D4 + D_800AAB00[side];
+    s32 matrix = (s32)arg0->ob_matrix_ptr + D_800AAB00[side];
 
     func_15143134(&D_800AAB08[side], out, matrix);
 }
@@ -208,12 +208,12 @@ void func_151C6A28(Actor *arg0, u8 side, u8 arg2, s32 arg3) {
 
     if ((arg0 != NULL) && (side < 2) && (func_15142A5C(arg0) == 0)) {
         func_151D5148(arg0);
-        if (arg0->unk1D4 != NULL) {
+        if (arg0->ob_matrix_ptr != NULL) {
             {
                 Vec3f *points[3];
                 Vec3f *results[3];
 
-                matrix = (s32)arg0->unk1D4 + D_800AAB00[side];
+                matrix = (s32)arg0->ob_matrix_ptr + D_800AAB00[side];
                 points[0] = &D_800AAB08[side];
                 points[1] = &D_800AAB38[side];
                 points[2] = &D_800AAB50[side];
@@ -367,7 +367,7 @@ s32 func_151C7038(Func151C7038Arg *arg0) {
     f32 speed;
 
     owner = arg0->unk7C;
-    if (owner->unk84.uh != 0xE9) {
+    if (owner->animseq.uh != 0xE9) {
         return 0;
     }
     if (func_15142A5C(owner) != 0) {
@@ -375,7 +375,7 @@ s32 func_151C7038(Func151C7038Arg *arg0) {
     } else {
         arg0->unk60 &= ~0x20000;
     }
-    speed = owner->animation_speed * 35.0f;
+    speed = owner->animsp * 35.0f;
     if (speed > 255.0f) {
         speed = 255; // matching: 255.0f schedules the clamp differently
     } else if (speed < 0.0f) {

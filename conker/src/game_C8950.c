@@ -3,9 +3,7 @@
 #include "functions.h"
 #include "variables.h"
 
-#define NODE_FLAGS 0xFC00
-
-/* Bit `id` of the 0x1B-byte bit array at D_800D2E4C. */
+/* Bit `id` of the 0x1B-byte bit array at D_800D2E4C: the task is done. */
 // matching: offset + base operand order (indexing puts the base first and swaps registers)
 #define ID_FLAG(id) (*(((id) >> 3) + D_800D2E4C) & (1 << ((id) & 7)))
 
@@ -18,7 +16,7 @@ void func_1509C120(void);
 void func_1509C3A0(void);
 void func_150ADAF0(IdRecord *node, s32 mode);
 
-/* Gets (and, if needed, creates) the record of every id listed in D_800D2F40 that func_1509CBD4 accepts. */
+/* Gets (and, if needed, creates) the task of every id listed in D_800D2F40 that func_1509CBD4 accepts. */
 void func_1509B4A0(s32 unused, s32 reload) {
     s32 i;
 
@@ -37,18 +35,18 @@ void func_1509B4A0(s32 unused, s32 reload) {
     D_8003C8E0 = 0;
 }
 
-/* Returns the payload of the record for `id`, or NULL if none is loaded. */
+/* Returns the BSS of the task `id`, or NULL if it is not loaded. */
 void *func_1509B570(s32 id) {
     IdRecord *node;
 
     node = func_1509B704(id);
     if (node != NULL) {
-        return (u8 *)node + node->dataOffset;
+        return (u8 *)node + node->BssOffset;
     }
     return NULL;
 }
 
-/* Returns the record for `id`, creating it if needed; NULL if `reload` is 0 and the id's flag is set. */
+/* Returns the task `id`, creating it if needed; NULL if `reload` is 0 and the task is done. */
 IdRecord *func_1509B5AC(s32 id, s32 reload) {
     IdRecord *node;
 
@@ -60,34 +58,34 @@ IdRecord *func_1509B5AC(s32 id, s32 reload) {
     if (node == NULL) {
         node = func_1509B8FC(id);
         func_1509B810(node);
-        if (!ID_FLAG(node->key & ~NODE_FLAGS)) {
+        if (!ID_FLAG(TASK_ID(node))) {
             D_8003C8E0 = 0x6000000;
-            func_150ADAF0(node, 0);
+            func_150ADAF0(node, TASK_ENTRY_START);
             D_8003C8E0 = 0;
         }
-        if (!reload || (node->key & 0x400)) {
-            node->key |= 0x4000;
+        if (!reload || (node->TaskID & RUN_INIT_ONCE_ONLY)) {
+            node->TaskID |= TASK_INIT_PENDING;
         }
     } else if (reload) {
-        if ((node->key & 0x1000) && !(node->key & 0x800)) {
-            bzero((u8 *)node + node->dataOffset, node->dataSize);
+        if ((node->TaskID & PURGE_BETWEEN_SECTIONS) && !(node->TaskID & DO_NOT_CLEAR_BSS)) {
+            bzero((u8 *)node + node->BssOffset, node->BSSSize);
         }
     }
 
     return node;
 }
 
-/* Returns the loaded record for `id`, or NULL. */
+/* Returns the loaded task `id`, or NULL. */
 IdRecord *func_1509B704(s16 id) {
     IdRecord *node;
     s32 i;
 
-    node = D_800D2F48.head;
-    for (i = 0; i < D_800D2F48.count; i++) {
-        if (id == (node->key & ~NODE_FLAGS)) {
+    node = gTaskWorkingSet.head;
+    for (i = 0; i < gTaskWorkingSet.count; i++) {
+        if (id == TASK_ID(node)) {
             return node;
         }
-        node = node->next;
+        node = node->NextTaskPtr;
     }
     return NULL;
 }
@@ -95,105 +93,105 @@ IdRecord *func_1509B704(s16 id) {
 void func_10004074(void *ptr);
 void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
 
-/* Unlinks `node` from the record list and frees it. */
+/* Unlinks `node` from the task working set and frees it. */
 void func_1509B764(IdRecord *node) {
-    if (D_800D2F48.count == 1) {
-        D_800D2F48.head = NULL;
-        D_800D2F48.tail = NULL;
+    if (gTaskWorkingSet.count == 1) {
+        gTaskWorkingSet.head = NULL;
+        gTaskWorkingSet.tail = NULL;
     } else {
-        if (node == D_800D2F48.head) {
-            D_800D2F48.head = node->next;
-            node->next->prev = NULL;
+        if (node == gTaskWorkingSet.head) {
+            gTaskWorkingSet.head = node->NextTaskPtr;
+            node->NextTaskPtr->PrevTaskPtr = NULL;
         } else {
-            node->prev->next = node->next;
+            node->PrevTaskPtr->NextTaskPtr = node->NextTaskPtr;
         }
-        if (node == D_800D2F48.tail) {
-            D_800D2F48.tail = node->prev;
-            node->prev->next = NULL;
+        if (node == gTaskWorkingSet.tail) {
+            gTaskWorkingSet.tail = node->PrevTaskPtr;
+            node->PrevTaskPtr->NextTaskPtr = NULL;
         } else {
-            node->next->prev = node->prev;
+            node->NextTaskPtr->PrevTaskPtr = node->PrevTaskPtr;
         }
     }
     func_10004074(node);
-    D_800D2F48.count--;
+    gTaskWorkingSet.count--;
 }
 
-/* Inserts `node` into the record list, keeping it sorted by id. */
+/* Inserts `node` into the task working set, keeping it sorted by task id. */
 void func_1509B810(IdRecord *node) {
     IdRecord *cur;
     IdRecord *head;
     s32 id;
     s32 i;
 
-    cur = D_800D2F48.tail;
-    id = node->key & ~NODE_FLAGS;
-    if (D_800D2F48.count == 0) {
-        D_800D2F48.head = node;
-        D_800D2F48.tail = node;
-        node->next = NULL;
-        node->prev = NULL;
-        D_800D2F48.count += 1;
+    cur = gTaskWorkingSet.tail;
+    id = TASK_ID(node);
+    if (gTaskWorkingSet.count == 0) {
+        gTaskWorkingSet.head = node;
+        gTaskWorkingSet.tail = node;
+        node->NextTaskPtr = NULL;
+        node->PrevTaskPtr = NULL;
+        gTaskWorkingSet.count += 1;
         return;
     }
 
-    for (i = 0; i < D_800D2F48.count; i++) {
-        if ((cur->key & ~NODE_FLAGS) < id) {
-            if (cur == D_800D2F48.tail) {
-                node->prev = cur;
-                node->next = NULL;
-                cur->next = node;
-                D_800D2F48.tail = node;
-                D_800D2F48.count += 1;
+    for (i = 0; i < gTaskWorkingSet.count; i++) {
+        if (TASK_ID(cur) < id) {
+            if (cur == gTaskWorkingSet.tail) {
+                node->PrevTaskPtr = cur;
+                node->NextTaskPtr = NULL;
+                cur->NextTaskPtr = node;
+                gTaskWorkingSet.tail = node;
+                gTaskWorkingSet.count += 1;
                 return;
             }
-            node->prev = cur;
-            node->next = cur->next;
-            cur->next->prev = node;
-            cur->next = node;
-            D_800D2F48.count += 1;
+            node->PrevTaskPtr = cur;
+            node->NextTaskPtr = cur->NextTaskPtr;
+            cur->NextTaskPtr->PrevTaskPtr = node;
+            cur->NextTaskPtr = node;
+            gTaskWorkingSet.count += 1;
             return;
         }
-        cur = cur->prev;
+        cur = cur->PrevTaskPtr;
     }
 
-    head = D_800D2F48.head;
-    D_800D2F48.head = node;
-    node->prev = NULL;
-    node->next = head;
-    head->prev = node;
-    D_800D2F48.count += 1;
+    head = gTaskWorkingSet.head;
+    gTaskWorkingSet.head = node;
+    node->PrevTaskPtr = NULL;
+    node->NextTaskPtr = head;
+    head->PrevTaskPtr = node;
+    gTaskWorkingSet.count += 1;
 }
 
 void *func_1502B5C8(s32 *size, s32 arg1, s32 arg2, s32 arg3);
 
-/* Loads a new record for `id` (via func_1502B5C8) and tags it with D_800BE9F0. */
+/* Loads task `id` (via func_1502B5C8) and sets its LoadSection to the current level level. */
 IdRecord *func_1509B8FC(s16 id) {
     IdRecord *node;
     s32 size;
 
     node = func_1502B5C8(&size, 2, 20, id);
-    node->key |= id;
-    node->unk2 = D_800BE9F0;
+    node->TaskID |= id;
+    node->LoadSection = level;
     return func_1509B950(node);
 }
 
-/* Reallocates `node` with its payload 8-byte aligned and zeroed, and frees the original. */
+/* Reallocates `node` with its BSS appended, 8-byte aligned and zeroed, and frees the original. */
 IdRecord *func_1509B950(IdRecord *node) {
     IdRecord *copy;
     s32 padding;
 
-    padding = 8 - (((s32)node + node->size) & 7);
-    node->dataOffset = node->size + padding;
-    node->size = node->dataOffset + node->dataSize;
-    node->size = (node->size - (((s32)node + node->size) & 7)) + 8;
+    padding = 8 - (((s32)node + node->TaskSize) & 7);
+    node->BssOffset = node->TaskSize + padding;
+    node->TaskSize = node->BssOffset + node->BSSSize;
+    node->TaskSize = (node->TaskSize - (((s32)node + node->TaskSize) & 7)) + 8;
 
-    copy = allocate_memory(node->size, 0xFF, 2, 0);
+    copy = allocate_memory(node->TaskSize, 0xFF, 2, 0);
     if (copy == NULL) {
         while (1) {}
     }
 
-    bcopy(node, copy, node->size);
-    bzero((u8 *)copy + copy->dataOffset, copy->dataSize);
+    bcopy(node, copy, node->TaskSize);
+    bzero((u8 *)copy + copy->BssOffset, copy->BSSSize);
     func_10004074(node);
     return copy;
 }
@@ -201,9 +199,9 @@ IdRecord *func_1509B950(IdRecord *node) {
 void func_1509C228(void);
 
 /*
- * Frees records. With `unloadAll` every record runs its mode-3 handler and is freed. Otherwise records
- * whose id flag is set are freed silently (state 3), and records with flag 0x8000, or with flag 0x1000
- * and an unk2 other than D_800BE9F0, run the mode-3 handler and are freed.
+ * Frees tasks. With `unloadAll` every task runs its purge entry and is freed. Otherwise done tasks are
+ * freed silently (state 3), and TASK_FINISHED tasks, or PURGE_BETWEEN_SECTIONS tasks whose LoadSection
+ * is not the current level, run the purge entry and are freed.
  */
 void func_1509BA04(s32 unloadAll) {
     IdRecord *node;
@@ -211,8 +209,8 @@ void func_1509BA04(s32 unloadAll) {
     s32 count;
     s32 i;
 
-    count = D_800D2F48.count;
-    node = D_800D2F48.head;
+    count = gTaskWorkingSet.count;
+    node = gTaskWorkingSet.head;
     if (D_800D2E69 != 0) {
         func_1509C228();
         D_800D2E69 = 0;
@@ -221,15 +219,15 @@ void func_1509BA04(s32 unloadAll) {
         s32 id;
         s32 key;
 
-        key = node->key;
-        id = key & ~NODE_FLAGS;
-        next = node->next;
+        key = node->TaskID;
+        id = key & ~TASK_FLAGS;
+        next = node->NextTaskPtr;
         if (ID_FLAG(id) && !unloadAll) {
             func_1509B764(node);
             D_800D2E70[id] = 3;
-        } else if (unloadAll || (key & 0x8000) || ((key & 0x1000) && D_800BE9F0 != node->unk2)) {
+        } else if (unloadAll || (key & TASK_FINISHED) || ((key & PURGE_BETWEEN_SECTIONS) && level != node->LoadSection)) {
             D_8003C8E0 = 0x6000001;
-            func_150ADAF0(node, 3);
+            func_150ADAF0(node, TASK_ENTRY_PURGE);
             D_8003C8E0 = 0;
             func_1509B764(node);
             if (!ID_FLAG(id)) {
@@ -244,55 +242,55 @@ void func_1509BA04(s32 unloadAll) {
 void func_15096D08(void);
 s32 func_1509BE40(s32, s32, s32, ...);
 
-/* Runs every record's handler for `mode` (1, 2 or 4) and updates the per-id state bytes. */
+/* Runs entry `mode` (TASK_ENTRY_INIT, _RUN or _DONE) of every task and updates the per-id state bytes. */
 void func_1509BBA0(s32 mode) {
     IdRecord *node;
     s32 i;
     u16 id;
     s32 key;
 
-    node = D_800D2F48.head;
+    node = gTaskWorkingSet.head;
     func_15096D08();
-    if (!D_800BE616 && D_800BE9F0 != 50 && !func_1509BE40(0, 0x2000, 0x93) && mode == 2) {
+    if (!D_800BE616 && level != 50 && !func_1509BE40(0, 0x2000, 0x93) && mode == TASK_ENTRY_RUN) {
         return;
     }
     func_1509C228();
-    for (i = 0; i < D_800D2F48.count; i++) {
-        id = node->key & 0x3FF;
+    for (i = 0; i < gTaskWorkingSet.count; i++) {
+        id = node->TaskID & TASK_ID_MASK;
         D_800D2E48 = id;
-        key = node->key;
-        if (key & 0x8000) {
-            node = node->next;
+        key = node->TaskID;
+        if (key & TASK_FINISHED) {
+            node = node->NextTaskPtr;
             continue;
         }
-        if (mode == 4) {
+        if (mode == TASK_ENTRY_DONE) {
             if (ID_FLAG(id)) {
                 D_8003C8E0 = 0x6000002;
-                func_150ADAF0(node, 4);
+                func_150ADAF0(node, TASK_ENTRY_DONE);
                 D_8003C8E0 = 0;
                 D_800D2E70[id] = 3;
-                node->key |= 0x8000;
-                node = node->next;
+                node->TaskID |= TASK_FINISHED;
+                node = node->NextTaskPtr;
                 continue;
             }
         } else if (!ID_FLAG(id)) {
-            if (key & 0x4000) {
+            if (key & TASK_INIT_PENDING) {
                 D_8003C8E0 = 0x6000003;
-                func_150ADAF0(node, 1);
+                func_150ADAF0(node, TASK_ENTRY_INIT);
                 D_8003C8E0 = 0;
-                key = node->key &= ~0x4000;
+                key = node->TaskID &= ~TASK_INIT_PENDING;
             }
-            if (key & 0x8000) {
-                node = node->next;
+            if (key & TASK_FINISHED) {
+                node = node->NextTaskPtr;
                 continue;
             }
-            if (!(key & 0x2000) || D_800BE9F0 == node->unk2) {
-                if (mode == 2 || (mode == 1 && !(key & 0x400))) {
+            if (!(key & SUSPEND_BETWEEN_SECTIONS) || level == node->LoadSection) {
+                if (mode == TASK_ENTRY_RUN || (mode == TASK_ENTRY_INIT && !(key & RUN_INIT_ONCE_ONLY))) {
                     D_8003C8E0 = 0x6000004;
                     func_150ADAF0(node, mode);
                     D_8003C8E0 = 0;
                 }
-                if (mode == 2) {
+                if (mode == TASK_ENTRY_RUN) {
                     D_800D2E70[id] = 1;
                 }
             } else {
@@ -301,7 +299,7 @@ void func_1509BBA0(s32 mode) {
         } else {
             D_800D2E70[id] = 3;
         }
-        node = node->next;
+        node = node->NextTaskPtr;
     }
     if (D_800D2F58 != 0) {
         D_800D2F58 = 0;
@@ -411,9 +409,9 @@ void func_1509C228(void) {
     func_1509BFB0(2, 0x2000, 0x36, 1, 1);
 }
 
-/* Returns 0 when D_800BE9F0 is one of the listed values or D_800D2E44 is set, else 1. */
+/* Returns 0 when level is one of the listed values or D_800D2E44 is set, else 1. */
 s32 func_1509C2A4(void) {
-    s32 value = D_800BE9F0;
+    s32 value = level;
     if ((value == 3) ||
         (value == 5) ||
         (value == 9) ||

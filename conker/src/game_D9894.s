@@ -32,8 +32,8 @@ glabel func_150AC3E4
     /* D98E0 150AC430 44810000 */  mtc1       $at, $f0
     /* D98E4 150AC434 00000000 */  nop
     /* D98E8 150AC438 E7A00208 */  swc1       $f0, 0x208($sp)
-    /* D98EC 150AC43C 3C08800D */  lui        $t0, %hi(D_800CC2D0)
-    /* D98F0 150AC440 2508C2D0 */  addiu      $t0, $t0, %lo(D_800CC2D0)
+    /* D98EC 150AC43C 3C08800D */  lui        $t0, %hi(movement_obj)
+    /* D98F0 150AC440 2508C2D0 */  addiu      $t0, $t0, %lo(movement_obj)
     /* D98F4 150AC444 00E84023 */  subu       $t0, $a3, $t0
     /* D98F8 150AC448 2409032C */  addiu      $t1, $zero, 0x32C
     /* D98FC 150AC44C 0109001A */  div        $zero, $t0, $t1
@@ -391,8 +391,8 @@ glabel func_150AC480
     /* D9E1C 150AC96C 8FAA0148 */  lw         $t2, 0x148($sp)
     /* D9E20 150AC970 254A0001 */  addiu      $t2, $t2, 0x1
   .L150AC974:
-    /* D9E24 150AC974 3C08800D */  lui        $t0, %hi(D_800CC2D0)
-    /* D9E28 150AC978 2508C2D0 */  addiu      $t0, $t0, %lo(D_800CC2D0)
+    /* D9E24 150AC974 3C08800D */  lui        $t0, %hi(movement_obj)
+    /* D9E28 150AC978 2508C2D0 */  addiu      $t0, $t0, %lo(movement_obj)
     /* D9E2C 150AC97C 8FA90140 */  lw         $t1, 0x140($sp)
     /* D9E30 150AC980 01284023 */  subu       $t0, $t1, $t0
     /* D9E34 150AC984 2409032C */  addiu      $t1, $zero, 0x32C

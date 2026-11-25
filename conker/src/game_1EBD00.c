@@ -55,7 +55,7 @@ void *func_151BE850(Vec3f *pos, f32 angle, u8 count, u8 arg3, u8 variant) {
         flag = arg3 ? 0x10 : 0;
         params.flags = (u8)flag | 0xE;
         params.updateFunc = 1;
-        if (D_800BE9F0 == 7) {
+        if (level == 7) {
             params.updateFunc2 = 6;
         } else {
             params.updateFunc2 = 2;

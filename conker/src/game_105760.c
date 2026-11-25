@@ -3,7 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-void func_150A7960(MtxF, f32, f32, f32, f32 *, f32 *, f32 *);
 
 void func_150D82B0(s32 arg0) {
 }
@@ -27,7 +26,7 @@ s32 func_150D82BC(ModelAttachment *att, Actor *actor) {
         return 0;
     }
     att->seg6Id = D_80090298[6];
-    if (actor->unk84.uh == 13) {
+    if (actor->animseq.uh == 13) {
         if (23.0f <= anim->frame && anim->frame <= 40.0f) {
             att->seg6Id = D_80090298[7];
             t = anim->frame - 23.0f;
@@ -59,7 +58,7 @@ s32 func_150D83D8(ModelAttachment *att, Actor *actor) {
         case 0:
             att->unk3C = 50;
             att->seg6Id = D_80090298[27];
-            if (actor->unk84.uh == 0x18D && 46.0f <= actor->unk2D0->frame) {
+            if (actor->animseq.uh == 0x18D && 46.0f <= actor->unk2D0->frame) {
                 att->unk38 = 1;
                 att->seg6Id = D_80090298[28];
             }
@@ -72,7 +71,7 @@ s32 func_150D83D8(ModelAttachment *att, Actor *actor) {
             }
             break;
         case 2:
-            if (actor->unk84.uh == 0x18E && 34.0f <= actor->unk2D0->frame) {
+            if (actor->animseq.uh == 0x18E && 34.0f <= actor->unk2D0->frame) {
                 att->unk38 = 3;
             }
             break;
@@ -110,9 +109,9 @@ void func_15153634(SpriteBurst *, u8, u8, s32);
 void func_150D85AC(Actor *actor) {
     Vec3f pos;
 
-    pos.x = actor->x_position;
+    pos.x = actor->xpos;
     pos.y = actor->floorY;
-    pos.z = actor->z_position;
+    pos.z = actor->zpos;
     {
         Vec3f probe;
         CollisionHit ground;
@@ -202,60 +201,4 @@ s32 func_150D88AC(struct S150D88AC *arg0) {
         arg0->unk14[9] = 1;
     }
     return 1;
-}
-
-/* Writes to *out the world position of a fixed offset from one of the actor's bones, chosen by
- * point (3..6). */
-s32 func_150D88E0(Vec3f *out, Actor *actor, u8 point) {
-    s32 bone;
-    f32 x;
-    f32 y;
-    f32 z;
-
-    switch (point) {
-        case 3:
-            bone = 18;
-            x = -7.0f;
-            z = 30.0f;
-            break;
-        case 4:
-            bone = 21;
-            x = -4.0f;
-            z = 35.0f;
-            break;
-        case 5:
-            bone = 15;
-            x = 5.0f;
-            z = 20.0f;
-            break;
-        case 6:
-            bone = 24;
-            x = 5.0f;
-            z = 31.0f;
-            break;
-    }
-    y = 0.0f;
-    func_150A7960(actor->unk1D4[bone], x, y, z, &x, &y, &z);
-    out->x = x;
-    out->y = y;
-    out->z = z;
-    return 1;
-}
-
-s32 func_150D8A20(s32 arg0, s32 arg1) {
-    return 8;
-}
-
-void func_151875E0(f32, f32, f32, s32, s32, s32, f32, f32);
-void func_15165F80(s32, s32, s32, s32, s32, s32, s32, s32, s32);
-
-/* Spawns two effects at bone point `point` of the actor (see func_150D88E0), if it has bones. */
-void func_150D8A34(Actor *actor, s32 point, s32 arg2) {
-    Vec3f pos;
-
-    if (actor->unk1D4 != NULL) {
-        func_150D88E0(&pos, actor, point);
-        func_151875E0(pos.x, pos.y, pos.z, 30, 15, 7, 0.1000000015f, 0.02999999933f);
-        func_15165F80(-1, pos.x, actor->floorY + 4.0f, pos.z, 4, 50, 0, 255, 0);
-    }
 }

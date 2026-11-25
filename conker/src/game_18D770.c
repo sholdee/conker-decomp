@@ -38,7 +38,7 @@ s32 func_15160600(LightEffect *effect);
 s32 func_1516065C(LightEffect *effect);
 s32 func_15160684(LightEffect *effect);
 s32 func_151607A4(LightEffect *effect);
-void func_15160954(f32 *level, f32 *peak, f32 *rate, f32 *delay, LightEffect *effect);
+void func_15160954(f32 *intensity, f32 *peak, f32 *rate, f32 *delay, LightEffect *effect);
 s32 func_15161238(Actor *actor, Actor *exclude);
 LightEffect *func_1516127C(PointLight *light, u8 arg1, s32 arg2);
 LightEffect *func_15161334(PointLight *light, u8 arg1, s32 arg2);
@@ -46,7 +46,7 @@ LightEffect *func_15161408(PointLight *light, u8 arg1, s32 arg2);
 LightEffect *func_15161494(PointLight *light, u8 arg1, s32 arg2);
 LightEffect *func_15161540(PointLight *light, u8 arg1, s32 arg2);
 LightEffect *func_151615F8(PointLight *light, u8 sound, u8 kind, u8 type, u8 arg4, s32 arg5);
-void func_151616D0(u8 arg0, u8 event, s32 arg2);
+void light_sendEvent(u8 arg0, u8 event, s32 arg2);
 void func_15161714(LightEffect *effect);
 void func_15161740(LightEffect *effect);
 void func_1516176C(LightEffect *effect);
@@ -194,6 +194,60 @@ s32 func_15160600(LightEffect *effect) {
     return 1;
 }
 
+/*
+ * Light effect parameter tables, indexed by effect kind (declared in variables.h; game_1BC650.c reads the
+ * jitter colour tables D_800A6760/67C0/6820 too).
+ */
+static const f32 D_800A66B4[3] = { 0.0f, -415.0f, 0.0f };
+static const f32 D_800A66C0[9] = { 70.0f, 38.0f, 70.0f, 55.0f, 50.0f, 80.0f, 140.0f, 70.0f, 34.0f };
+static const s32 D_800A66E4[10] = { 1099, 1100, 1101, 1102, 1103, 1104, 1105, 1106, 1107, 1108 };
+static const Vec3f D_800A670C[3] = { { 128.0f, 59.5f, 59.5f }, { 187.0f, 59.5f, 59.5f }, { 128.0f, 17.5f, 0.0f } };
+static const Vec3f D_800A6730[3] = { { 128.0f, 128.0f, 128.0f }, { 68.0f, 59.5f, 59.5f }, { 127.0f, 17.5f, 0.0f } };
+static const f32 D_800A6754[3] = { 0.0f, 0.1273f, 0.1273f };
+const f32 D_800A6760[24] = {
+    0.0f, 1.0f, 3.0f, 20.0f, 10.0f, 10.0f, 35.0f, 2.0f,
+    0.0f, 1.0f, 5.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    0.0f, 30.0f, 30.0f, 10.0f, 3.0f, 0.0f, 0.0f, 0.0f,
+};
+const f32 D_800A67C0[24] = {
+    0.0f, 12.0f, 10.0f, 30.0f, 25.0f, 18.0f, 55.0f, 25.0f,
+    14.0f, 8.0f, 30.0f, 70.0f, 10.0f, 15.0f, 80.0f, 18.0f,
+    8.0f, 110.0f, 90.0f, 30.0f, 10.0f, 25.0f, 30.0f, 35.0f,
+};
+const f32 D_800A6820[24] = {
+    0.0f, 20.0f, 18.0f, 65.0f, 48.0f, 30.0f, 100.0f, 62.0f,
+    60.0f, 19.0f, 60.0f, 255.0f, 50.0f, 40.0f, 255.0f, 44.0f,
+    15.0f, 210.0f, 170.0f, 100.0f, 18.0f, 45.0f, 60.0f, 70.0f,
+};
+static const f32 D_800A6880[5] = { 0.0f, 50.0f, 50.0f, 50.0f, 50.0f };
+static const f32 D_800A6894[5] = { 0.0f, 15.0f, 15.0f, 15.0f, 15.0f };
+static const f32 D_800A68A8[5] = { 0.0f, 0.0f, 15.5f, 31.0f, 46.5f };
+static const f32 D_800A68BC[5] = { 10.0f, 12.0f, 12.0f, 12.0f, 12.0f };
+static const f32 D_800A68D0[5] = { 10.0f, 25.0f, 25.0f, 25.0f, 25.0f };
+static const f32 D_800A68E4[5] = { 10.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+static const f32 D_800A68F8[3] = { 1.0f, 0.165333f, 0.165333f };
+static const f32 D_800A6904[3] = { 1.0f, 102.0f, 102.0f };
+static const f32 D_800A6910[3] = { 0.0f, 105.0f, 105.0f };
+static const s32 D_800A691C[3] = { 5, 1, 1 };
+static const s32 D_800A6928[3] = { 0, 4, 4 };
+static const f32 D_800A6934[3] = { 1.0f, 6.0f, 6.0f };
+static const f32 D_800A6940[3] = { 0.0f, 9.0f, 9.0f };
+static const f32 D_800A694C[3] = { 255.0f, 155.0f, 255.0f };
+static const f32 D_800A6958[3] = { 0.0f, 100.0f, 0.0f };
+static const f32 D_800A6964[14] = {
+    127.0f, 25.0f, 40.0f, 80.0f, 85.0f, 90.0f, 60.0f, 87.0f,
+    21.0f, 35.0f, 40.0f, 120.0f, 25.0f, 17.5f,
+};
+static const f32 D_800A699C[14] = {
+    126.0f, 24.0f, 40.0f, 40.0f, 55.0f, 60.0f, 30.0f, 43.0f,
+    20.0f, 35.0f, 30.0f, 50.0f, 15.0f, 12.5f,
+};
+static const f32 D_800A69D4[14] = {
+    0.1021f, 0.1021f, 0.1021f, 0.1021f, 0.1021f, 0.1021f, 0.2021f, 0.1021f,
+    0.1021f, 0.39999998f, 0.1021f, 0.1021f, 0.1021f, 0.19999999f,
+};
+static const Vec3f D_800A6A0C = { 0.0f, 35.0f, 73.0f };
+
 s32 func_1516065C(LightEffect *effect) {
     func_15163CF8(&effect->data.pulse, effect);
     return 1;
@@ -218,7 +272,7 @@ s32 func_151606A8(LightEffect *effect) {
     f32 x;
 
     mount = &effect->data.mount;
-    func_150A8050(mtx.mf, (*mount)->rotX, (*mount)->rotY, (*mount)->rotZ);
+    func_150A8050(mtx.mf, (*mount)->t, (*mount)->u, (*mount)->v);
     mtx.mf[3][0] = (*mount)->x;
     mtx.mf[3][1] = (*mount)->y;
     mtx.mf[3][2] = (*mount)->z;
@@ -254,12 +308,12 @@ s32 func_151607A4(LightEffect *effect) {
 }
 
 /* Starts one flicker: drops to dark, picks a ramp rate and delay, and optionally plays a sound at the light. */
-void func_15160954(f32 *level, f32 *peak, f32 *rate, f32 *delay, LightEffect *effect) {
+void func_15160954(f32 *intensity, f32 *peak, f32 *rate, f32 *delay, LightEffect *effect) {
     s32 pad0; // matching: unused stack slot
     Vec3f position;
     s32 pad1; // matching: unused stack slot
 
-    *level = 0.0f;
+    *intensity = 0.0f;
     *rate = *peak / ((func_150ADA68() * 12.0f) + 8.0f);
     *delay = (func_150ADA68() * 28.0f) + 1.0f;
 
@@ -319,23 +373,23 @@ u8 func_15160B74(LightEffect *effect) {
     actor = effect->data.attach.actor;
     result = 1;
     attach = &effect->data.attach;
-    if (actor->interaction_state == 0) {
+    if (actor->type == 0) {
         return 0;
     }
     if (actor->unique_id != attach->actorId) {
         return 0;
     }
-    if (actor->unk1D4 != NULL && (actor->unk74 & 0xF) != 0xF) {
+    if (actor->ob_matrix_ptr != NULL && (actor->unk74 & 0xF) != 0xF) {
         f32 position[3];
 
-        func_15143134(&attach->offset.x, position, actor->unk1D4[attach->bone]);
+        func_15143134(&attach->offset.x, position, actor->ob_matrix_ptr[attach->bone]);
         effect->light->x = position[0];
         effect->light->y = position[1];
         effect->light->z = position[2];
     } else {
-        effect->light->x = actor->x_position;
-        effect->light->y = actor->y_position;
-        effect->light->z = actor->z_position;
+        effect->light->x = actor->xpos;
+        effect->light->y = actor->ypos;
+        effect->light->z = actor->zpos;
     }
     callback = attach->callback;
     if (callback != -1) {
@@ -397,13 +451,13 @@ s32 func_15160E30(LightEffect *effect) {
 
     actor = effect->data.beam.actor;
     beam = &effect->data.beam;
-    if (actor->interaction_state == 0) {
+    if (actor->type == 0) {
         return 0;
     }
     if (actor->unique_id != beam->actorId) {
         return 0;
     }
-    if (actor->unk1D4 != NULL && (beam->flags & 1) && (actor->unk74 & 0xF) != 0xF) {
+    if (actor->ob_matrix_ptr != NULL && (beam->flags & 1) && (actor->unk74 & 0xF) != 0xF) {
         f32 start[3];
         f32 dir[3];
         RayHit ray;
@@ -414,7 +468,7 @@ s32 func_15160E30(LightEffect *effect) {
         in[1] = &beam->end.x;
         out[0] = start;
         out[1] = dir;
-        func_15145EA4(in, out, actor->unk1D4[beam->bone], 2);
+        func_15145EA4(in, out, actor->ob_matrix_ptr[beam->bone], 2);
         {
             f32 length;
 
@@ -425,9 +479,9 @@ s32 func_15160E30(LightEffect *effect) {
                 f32 invLength;
 
                 if (func_15145128(dir, dir, &length, &invLength) == 0) {
-                    effect->light->x = actor->x_position;
-                    effect->light->y = actor->y_position;
-                    effect->light->z = actor->z_position;
+                    effect->light->x = actor->xpos;
+                    effect->light->y = actor->ypos;
+                    effect->light->z = actor->zpos;
                     effect->light->radius = 0;
                     effect->light->disabled = 1;
                     return 1;
@@ -437,9 +491,9 @@ s32 func_15160E30(LightEffect *effect) {
         func_15081690(actor, start[0], start[1], start[2], dir[0], dir[1], dir[2], &ray, 0.0f, 0, 0, 1, -1, 0, 0);
         hitType = ray.hitType;
         if (hitType == 0) {
-            effect->light->x = actor->x_position;
-            effect->light->y = actor->y_position;
-            effect->light->z = actor->z_position;
+            effect->light->x = actor->xpos;
+            effect->light->y = actor->ypos;
+            effect->light->z = actor->zpos;
             effect->light->radius = 0;
             effect->light->disabled = 1;
             return 1;
@@ -448,8 +502,8 @@ s32 func_15160E30(LightEffect *effect) {
             Actor *hit;
 
             hit = ray.obj;
-            if (hit->id == 0x9E) {
-                hit->unk2E4 = 1;
+            if (hit->character_type == 0x9E) {
+                hit->taskint[0] = 1;
             }
         }
         effect->light->x = ray.pos.x;
@@ -469,9 +523,9 @@ s32 func_15160E30(LightEffect *effect) {
         }
         effect->light->disabled = 0;
     } else {
-        effect->light->x = actor->x_position;
-        effect->light->y = actor->y_position;
-        effect->light->z = actor->z_position;
+        effect->light->x = actor->xpos;
+        effect->light->y = actor->ypos;
+        effect->light->z = actor->zpos;
         effect->light->radius = 0;
         effect->light->disabled = 1;
     }
@@ -480,10 +534,10 @@ s32 func_15160E30(LightEffect *effect) {
 
 /* Returns whether `actor` is live and is not `exclude`. */
 s32 func_15161238(Actor *actor, Actor *exclude) {
-    if (actor->interaction_state == 0) {
+    if (actor->type == 0) {
         return 0;
     }
-    if (actor->id == 0xFF) {
+    if (actor->character_type == 0xFF) {
         return 0;
     }
     if (actor == exclude) {
@@ -639,12 +693,12 @@ LightEffect *func_151615F8(PointLight *light, u8 sound, u8 kind, u8 type, u8 arg
     return effect;
 }
 
-/* Sends event `event` to every light effect. */
-void func_151616D0(u8 arg0, u8 event, s32 arg2) {
-    struct234 message;
+/* Sends event `event` to every light effect (of type lightType, for the addressed events). */
+void light_sendEvent(u8 lightType, u8 event, s32 arg2) {
+    LightEventMsg message;
 
-    message.unk0 = arg0;
-    message.unk4 = arg2;
+    message.lightType = lightType;
+    message.arg = arg2;
 
     func_1516944C(53, &message, event);
 }
@@ -777,9 +831,9 @@ LightEffect *func_15161E24(Actor *actor, u8 eventHandler, u8 arg2, s16 lifetime,
     ref.actorId = actor->unique_id;
     ref.eventHandler = eventHandler;
 
-    position.x = actor->x_position;
-    position.y = actor->y_position;
-    position.z = actor->z_position;
+    position.x = actor->xpos;
+    position.y = actor->ypos;
+    position.z = actor->zpos;
 
     effect = func_151602C0(&header, &position, arg4, arg5, arg6, arg7, 0xFF, 0, sizeof(ref), arg8, arg9);
     if (effect != NULL) {
@@ -1099,27 +1153,27 @@ s32 func_15162B28(LightEffect *effect) {
     return 1;
 }
 
-/* Cycle callback: sets bit 0 of work.words[0] on the payload's object and sends event 36. */
+/* Cycle callback: sets bit 0 of touch.i.a on the payload's object and sends event 36. */
 void func_15162EF8(LightEffect *effect) {
     s8 message[9];
     WorldObject *object;
 
     object = func_151149AC(effect->data.objectCycle.objectId);
     if (object != NULL) {
-        object->work.words[0] |= 1;
+        object->touch.i.a |= 1;
     }
     message[0] = effect->lightType - 21;
     func_151403A8(&message, 36);
 }
 
-/* Cycle callback: clears bit 0 of work.words[0] on the payload's object and sends event 37. */
+/* Cycle callback: clears bit 0 of touch.i.a on the payload's object and sends event 37. */
 void func_15162F50(LightEffect *effect) {
     s8 message[9];
     WorldObject *object;
 
     object = func_151149AC(effect->data.objectCycle.objectId);
     if (object != NULL) {
-        object->work.words[0] &= ~1;
+        object->touch.i.a &= ~1;
     }
     message[0] = effect->lightType - 21;
     func_151403A8(&message, 37);
@@ -1457,18 +1511,18 @@ s32 func_15163F50(LightEffect *effect, LightActorRef *ref) {
     Actor *actor;
 
     actor = ref->actor;
-    if (actor->interaction_state == 0) {
+    if (actor->type == 0) {
         return 0;
     }
-    if (actor->id == 0xFF) {
+    if (actor->character_type == 0xFF) {
         return 0;
     }
     if (actor->unique_id != ref->actorId) {
         return 0;
     }
-    effect->light->x = actor->x_position;
-    effect->light->y = actor->y_position;
-    effect->light->z = actor->z_position;
+    effect->light->x = actor->xpos;
+    effect->light->y = actor->ypos;
+    effect->light->z = actor->zpos;
     return 1;
 }
 
@@ -1637,7 +1691,7 @@ s32 func_151644A8(LightEffect *effect) {
 
     object = swing->object;
     scale = swing->scale;
-    func_151644F4(effect, &swing->pivot, swing->offset, object->rotX * scale, object->rotZ * scale);
+    func_151644F4(effect, &swing->pivot, swing->offset, object->t * scale, object->v * scale);
     return 1;
 }
 
@@ -1658,11 +1712,11 @@ void func_151644F4(LightEffect *effect, Vec3f *pivot, f32 offset, f32 angleX, f3
     effect->light->z = z;
 }
 
-/* Turns the special lighting for the current D_800BE9F0 setting on or off, setting the colours in D_800DCD20 and D_800B0DF0. */
+/* Turns the special lighting for the current level setting on or off, setting the colours in D_800DCD20 and D_800B0DF0. */
 void func_151645C4(u8 enable) {
     D_800DCDD0 = enable;
     if (enable) {
-        switch (D_800BE9F0) {
+        switch (level) {
         case 11:
             func_1511172C(4);
             break;
@@ -1683,7 +1737,7 @@ void func_151645C4(u8 enable) {
             break;
         }
     } else {
-        switch (D_800BE9F0) {
+        switch (level) {
         case 6:
             func_1515F170(10, 0);
             // fallthrough

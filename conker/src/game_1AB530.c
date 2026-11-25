@@ -171,7 +171,7 @@ extern Gfx *func_1517EA4C(Gfx *gfx);
  * `count` sprites stepping from the flare towards (and past) the screen centre.
  */
 Gfx *func_1517E4A8(Gfx *gfx, LensFlare *flare, s32 sizeRow, s32 count, s32 falloff, s32 strength, u8 *flash) {
-    s32 level;
+    s32 intensity;
     s32 i;
     f32 dx;
     f32 dy;
@@ -197,29 +197,29 @@ Gfx *func_1517E4A8(Gfx *gfx, LensFlare *flare, s32 sizeRow, s32 count, s32 fallo
             }
         }
         step = D_800BE9E4 * 5;
-        level = *flash;
-        if (ABS(target - level) < step) {
-            level = target;
-        } else if (level < target) {
-            level += step;
+        intensity = *flash;
+        if (ABS(target - intensity) < step) {
+            intensity = target;
+        } else if (intensity < target) {
+            intensity += step;
         } else {
-            level -= step;
+            intensity -= step;
         }
-        *flash = level;
+        *flash = intensity;
     }
     dist = ((s32)dx * (s32)dx + (s32)dy * (s32)dy) * falloff / 10;
     if (flare->screenX < 2.0f || (f32)(D_800BE620 - 2) <= flare->screenX || flare->screenY < 0.0f ||
         (f32)D_800BE624 <= flare->screenY) {
-        level = 0;
+        intensity = 0;
     } else if (strength == -1) {
-        level = 0;
+        intensity = 0;
     } else {
-        level = (0x1ADB00 / (dist + 10000)) * strength / 256;
+        intensity = (0x1ADB00 / (dist + 10000)) * strength / 256;
     }
     step = D_800BE9E4 * 10;
-    if (ABS(level - flare->brightness) < step) {
-        flare->brightness = level;
-    } else if (level < flare->brightness) {
+    if (ABS(intensity - flare->brightness) < step) {
+        flare->brightness = intensity;
+    } else if (intensity < flare->brightness) {
         flare->brightness = flare->brightness - step;
     } else {
         flare->brightness = flare->brightness + step;
@@ -237,14 +237,14 @@ Gfx *func_1517E4A8(Gfx *gfx, LensFlare *flare, s32 sizeRow, s32 count, s32 fallo
             gfx = func_150950D4(func_1517EA4C(gfx), &D_800903AC, 0, 0, 0, 0, 2, 0x100, 0x100, 3);
             D_800DDD60 = TRUE;
         }
-        level = flare->alpha;
-        level = (flare->brightness * level) >> 8;
+        intensity = flare->alpha;
+        intensity = (flare->brightness * intensity) >> 8;
         for (i = 0; i < count; i++) {
             x = flare->screenX - dx * ((i + 1) * 2) / 5.0f;
             y = flare->screenY - dy * ((i + 1) * 2) / 5.0f;
             size = D_800A7250[sizeRow][i];
             y += size / 64.0f;
-            sprite.alpha = level;
+            sprite.alpha = intensity;
             sprite.width = (f32)(size << 12) * D_800380A0 / 255.0f;
             sprite.height = (f32)(size << 12) * D_800380A4 / 255.0f;
             D_800D2DAB = 0;
@@ -299,11 +299,11 @@ s32 func_1517EAAC(f32 x, f32 y, f32 z, f32 *outX, f32 *outY) {
     f32 cy;
     f32 scale;
 
-    // matching: IDO adds base + offset in this order only for explicit byte arithmetic, not &D_800DBFF0[i]
-    player = (Camera *)((u8 *)D_800DBFF0 + D_80082FA4 * sizeof(Camera));
-    pitch = -player->pitch;
-    yaw = -player->unk380;
-    roll = player->swayAmount;
+    // matching: IDO adds base + offset in this order only for explicit byte arithmetic, not &camera_global_Cameras[i]
+    player = (Camera *)((u8 *)camera_global_Cameras + D_80082FA4 * sizeof(Camera));
+    pitch = -player->CameraPitch;
+    yaw = -player->TrueCameraAngle;
+    roll = player->Roll;
     func_15110360(D_80082FA4, mtx, pitch, yaw, roll);
     cx = D_800BE628[D_80082FA4].halfWidth;
     cy = D_800BE628[D_80082FA4].halfHeight;
@@ -351,9 +351,9 @@ s32 func_1517EC1C(LensFlare *flare, s32 *outZbufDepth) {
     if (func_1509563C(flare->pos[0], flare->pos[1], flare->pos[2], &flare->screenX, &flare->screenY, &clip.f.z,
                       &clip.f.w, 4000.0f) == 1) {
         if (flare->flags & FLARE_DIRECTED) {
-            dx = flare->pos[0] - D_800DBFF0->eye.x;
-            dy = flare->pos[1] - D_800DBFF0->eye.y;
-            dz = flare->pos[2] - D_800DBFF0->eye.z;
+            dx = flare->pos[0] - camera_global_Cameras->eye.x;
+            dy = flare->pos[1] - camera_global_Cameras->eye.y;
+            dz = flare->pos[2] - camera_global_Cameras->eye.z;
 
             // matching: the facing cosine reuses dx's register
             dx = (dx * flare->dir[0] + dy * flare->dir[1] + dz * flare->dir[2]) /

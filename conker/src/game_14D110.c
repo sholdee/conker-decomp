@@ -4,7 +4,7 @@
 
 /*
  * Aim camera: the camera mode that swings behind the player (func_1511FC60 enters it, func_15120158
- * runs it each frame, func_151218C4 leaves it). Camera.aimState is the state machine:
+ * runs it each frame, func_151218C4 leaves it). Camera.DoingAim is the state machine:
  *   1 = swinging round to the aim view, 2 = aiming with the stick, 3 = swinging back, 0 = off.
  */
 
@@ -31,36 +31,36 @@ void func_1511FC60(Camera *camera) {
     s32 zone;
 
     aim = &camera->aim;
-    zone = camera->zone;
-    camera->aimTimer = 60;
-    if ((camera->status & 2) || (camera->zone == 9) || (camera->zone == 0x38) || (camera->zone == 0x39) ||
-        (camera->zone == 0x37) || (camera->zone == 0x3B)) {
+    zone = camera->CharContext;
+    camera->AimTimeOuts = 60;
+    if ((camera->SpecialFlags & 2) || (camera->CharContext == 9) || (camera->CharContext == 0x38) || (camera->CharContext == 0x39) ||
+        (camera->CharContext == 0x37) || (camera->CharContext == 0x3B)) {
         // matching: the original stores 0 then 1; IDO drops the dead store unless it is volatile
         *(volatile u8 *)&aim->unk4D = 0;
         aim->unk4D = 1;
     } else {
         aim->unk4D = 1;
     }
-    camera->zoneHookActive = FALSE;
-    if (camera->savedMode[1] == 0x40) {
-        aim->targetYaw = camera->yaw;
+    camera->AimTargetOn = FALSE;
+    if (camera->MCache[CAMERA_MODE_AIM] == 0x40) {
+        aim->targetYaw = camera->CameraAngle;
     } else if (aim->unk4D) {
-        if (IS_FACING_ZONE(camera->zone)) {
-            aim->targetYaw = (f32)((camera->player->unk7A - camera->playerExt->unk12) + 0xC000) * BAM2DEG;
+        if (IS_FACING_ZONE(camera->CharContext)) {
+            aim->targetYaw = (f32)((camera->CharPtr->langle - camera->mv->pssd_waist_tilt) + 0xC000) * BAM2DEG;
         } else if ((D_800D1940 == 0x42) && (zone == 0x1A)) {
-            aim->targetYaw = camera->player->unk40;
+            aim->targetYaw = camera->CharPtr->theta;
         } else {
-            aim->targetYaw = camera->player->unk40 - 180.0f;
+            aim->targetYaw = camera->CharPtr->theta - 180.0f;
         }
     } else {
-        aim->targetYaw = camera->yaw;
-        camera->flags &= ~0x280;
+        aim->targetYaw = camera->CameraAngle;
+        camera->AvailableModes &= ~0x280;
     }
     if (IS_FACING_ZONE(zone)) {
         aim->targetPitch = 0.0f;
         aim->pitch = 0.0f;
         func_151C9BA0(camera, zone);
-        camera->zoneHookActive = TRUE;
+        camera->AimTargetOn = TRUE;
     } else if ((zone == 2) || (zone == 0x13)) {
         aim->targetPitch = 0.0f;
         aim->pitch = 0.0f;
@@ -71,7 +71,7 @@ void func_1511FC60(Camera *camera) {
     } else if (zone == 0xF) {
         aim->targetPitch = 27.0f;
         aim->pitch = 27.0f;
-        aim->targetYaw = camera->player->unk40 + 225.0f;
+        aim->targetYaw = camera->CharPtr->theta + 225.0f;
     } else {
         aim->targetPitch = 0.0f;
         aim->pitch = 0.0f;
@@ -84,15 +84,15 @@ void func_1511FC60(Camera *camera) {
         aim->distance = aim->overrideDistance;
         aim->targetYaw += aim->overrideYawOffset;
     }
-    aim->savedYaw = camera->yaw;
-    aim->savedUnk134 = camera->unk134;
-    if (camera->unk92C) {
+    aim->savedYaw = camera->CameraAngle;
+    aim->savedTightness = camera->Tightness;
+    if (camera->DoingRail) {
         aim->savedTargetDistance = sqrtf((camera->target.x - camera->eye.x) * (camera->target.x - camera->eye.x) +
                                           (camera->target.z - camera->eye.z) * (camera->target.z - camera->eye.z));
         aim->savedHeight = camera->unk344;
         aim->savedUnk354 = camera->unk354;
     } else {
-        aim->savedTargetDistance = camera->targetDistance;
+        aim->savedTargetDistance = camera->IdealTripodMagnitude;
         aim->savedHeight = camera->height;
         aim->savedUnk354 = camera->unk354;
     }
@@ -100,20 +100,20 @@ void func_1511FC60(Camera *camera) {
     camera->unk354 = camera->target.y;
     aim->distance = 110.0f;
     camera->height = 30.0f;
-    camera->playerExt->aimYaw = aim->targetYaw;
+    camera->mv->aimYaw = aim->targetYaw;
     if ((zone == 0) || (zone == 0xC) || IS_FACING_ZONE(zone)) {
         camera->height += 30.0f;
     }
     aim->stickLock = 0;
-    camera->aimState = 1;
-    if (camera->snap) {
-        aim->targetYaw = camera->player->unk40 - 180.0f;
-        camera->yaw = aim->targetYaw;
-        camera->yawRad = camera->yaw * DEG2RAD;
-        camera->side = camera->sideTarget;
-        camera->lift = camera->liftTarget;
+    camera->DoingAim = 1;
+    if (camera->Snap) {
+        aim->targetYaw = camera->CharPtr->theta - 180.0f;
+        camera->CameraAngle = aim->targetYaw;
+        camera->CameraAngleRad = camera->CameraAngle * DEG2RAD;
+        camera->XZOffset = camera->XZOffsetTget;
+        camera->YOffset = camera->YOffsetTget;
     }
-    if (aim->distance < camera->distance) {
+    if (aim->distance < camera->TripodMagnitude) {
         aim->turnDistance = aim->distance * 1.2f;
         aim->approachDir = -1;
     } else {
@@ -121,11 +121,11 @@ void func_1511FC60(Camera *camera) {
         aim->approachDir = 1;
     }
     if ((zone == 0xA) || (zone == 2) || (zone == 0x12) || (zone == 3) || (zone == 0x34)) {
-        aim->turnDistance = camera->targetDistance;
+        aim->turnDistance = camera->IdealTripodMagnitude;
         aim->approachDir = -1;
     }
-    camera->flags &= ~0x280;
-    camera->targetDistance = aim->distance;
+    camera->AvailableModes &= ~0x280;
+    camera->IdealTripodMagnitude = aim->distance;
 }
 
 /* Per-frame update of the aim camera (see the state machine at the top of the file). */
@@ -138,104 +138,104 @@ void func_15120158(Camera *camera) {
     f32 yawDelta;
 
     aim = &camera->aim;
-    zone = camera->zone;
+    zone = camera->CharContext;
     inMap42Zone1A = (D_800D1940 == 0x42) && (zone == 0x1A);
-    func_1510E7A4(0, 0, &probeY, &camera->unk360, 0, 0,
+    func_1510E7A4(0, 0, &probeY, &camera->waterY, 0, 0,
                  camera->eye.x, camera->eye.y, camera->eye.z, camera->eye.y, 0, 0, -10000.0f, camera->eye.y);
-    camera->playerExt->unk198 = camera->aimState;
-    camera->distance = sqrtf((camera->eye.x - camera->target.x) * (camera->eye.x - camera->target.x) +
+    camera->mv->AimState = camera->DoingAim;
+    camera->TripodMagnitude = sqrtf((camera->eye.x - camera->target.x) * (camera->eye.x - camera->target.x) +
                              (camera->eye.z - camera->target.z) * (camera->eye.z - camera->target.z));
-    if (camera->snap) {
+    if (camera->Snap) {
         aim->savedUnk354 = probeY;
     }
-    if ((zone != 0x2A) && (camera->aimState != 3)) {
+    if ((zone != 0x2A) && (camera->DoingAim != 3)) {
         if (zone == 0xD) {
-            camera->liftTarget = 100.0f;
+            camera->YOffsetTget = 100.0f;
         } else if (zone == 3) {
             aim->targetPitch = 15.0f;
-            camera->sideTarget = 0.0f;
+            camera->XZOffsetTget = 0.0f;
             aim->distance = 350.0f;
             if (camera->blocked) {
                 aim->pitch *= camera->blockedDistance * 0.002857142827f;
                 aim->pitch = (aim->pitch < 0.0f) ? 0.0f : aim->pitch;
             }
         } else if (inMap42Zone1A) {
-            camera->liftTarget = 18.0f;
-            camera->sideTarget = 60.0f;
+            camera->YOffsetTget = 18.0f;
+            camera->XZOffsetTget = 60.0f;
             aim->distance = 250.0f;
-            aim->targetYaw = camera->player->unk40;
+            aim->targetYaw = camera->CharPtr->theta;
         } else if (zone == 0x1A) {
-            camera->liftTarget = 35.0f;
-            camera->sideTarget = 100.0f;
+            camera->YOffsetTget = 35.0f;
+            camera->XZOffsetTget = 100.0f;
             aim->distance = 250.0f;
         } else {
-            camera->liftTarget = 20.0f;
-            camera->sideTarget = 0.0f;
+            camera->YOffsetTget = 20.0f;
+            camera->XZOffsetTget = 0.0f;
             func_151216F8(camera);
         }
     }
     camera->unk35C = camera->unk354 = camera->target.y;
-    func_1506160C(camera->player, 2, 0xFF, 0x20, camera->playerIndex);
+    func_1506160C(camera->CharPtr, 2, 0xFF, 0x20, camera->CNumber);
     dist = aim->distance;
-    if (camera->aimState == 1) {
+    if (camera->DoingAim == 1) {
         s32 horizontal;
         f32 sinPitch;
         s32 passed;
 
-        if (camera->aimTimer != 0) {
-            camera->aimTimer -= D_800BE9E4;
-            if (camera->aimTimer <= 0) {
-                camera->playerExt->unk198 = 1;
-                camera->aimState = 2;
-                aim->targetYaw = camera->yaw;
+        if (camera->AimTimeOuts != 0) {
+            camera->AimTimeOuts -= D_800BE9E4;
+            if (camera->AimTimeOuts <= 0) {
+                camera->mv->AimState = 1;
+                camera->DoingAim = 2;
+                aim->targetYaw = camera->CameraAngle;
                 return;
             }
         }
-        camera->unk134 = 1;
+        camera->Tightness = 1;
         horizontal = cosf(aim->pitch * DEG2RAD) * dist;
         sinPitch = sinf(aim->pitch * DEG2RAD);
-        camera->targetDistance = horizontal;
+        camera->IdealTripodMagnitude = horizontal;
         camera->height = (s32)(sinPitch * dist);
-        if (camera->snap) {
+        if (camera->Snap) {
             if (inMap42Zone1A) {
-                aim->targetYaw = camera->player->unk40;
+                aim->targetYaw = camera->CharPtr->theta;
             } else {
-                aim->targetYaw = camera->player->unk40 - 180.0f;
+                aim->targetYaw = camera->CharPtr->theta - 180.0f;
             }
-            camera->yaw = aim->targetYaw;
-            camera->yawRad = camera->yaw * DEG2RAD;
-            camera->side = camera->sideTarget;
-            camera->lift = camera->liftTarget;
+            camera->CameraAngle = aim->targetYaw;
+            camera->CameraAngleRad = camera->CameraAngle * DEG2RAD;
+            camera->XZOffset = camera->XZOffsetTget;
+            camera->YOffset = camera->YOffsetTget;
         }
         // matching: a goto to the end of this branch makes IDO duplicate the yawRad store; break does not
         do {
             if (aim->unk4D) {
                 // matching: the original compares the yaw error and does nothing with the result
-                if (fabsf(func_15048A70(camera->yaw, aim->targetYaw)) < 0.009999999776f) {
+                if (fabsf(func_15048A70(camera->CameraAngle, aim->targetYaw)) < 0.009999999776f) {
                 }
             } else {
-                camera->playerExt->unk198 = 1;
-                camera->aimState = 2;
+                camera->mv->AimState = 1;
+                camera->DoingAim = 2;
                 break;
             }
             if (aim->approachDir == -1) {
-                passed = camera->distance < aim->turnDistance;
+                passed = camera->TripodMagnitude < aim->turnDistance;
             } else {
-                passed = aim->turnDistance < camera->distance;
+                passed = aim->turnDistance < camera->TripodMagnitude;
             }
             // matching: the redundant & 0xFF uses up one ugen temp, which fixes the t-register rotation
             if (passed || (aim->useOverride & 0xFF)) {
                 if (camera->blocked) {
-                    func_15049688(&camera->yaw, aim->targetYaw, &aim->yawVel, 10.0f, 18.0f, camera->dt);
+                    func_15049688(&camera->CameraAngle, aim->targetYaw, &aim->yawVel, 10.0f, 18.0f, camera->SpringTime);
                 } else {
-                    func_15049688(&camera->yaw, aim->targetYaw, &aim->yawVel, 5.0f, 9.0f, camera->dt);
+                    func_15049688(&camera->CameraAngle, aim->targetYaw, &aim->yawVel, 5.0f, 9.0f, camera->SpringTime);
                 }
-                func_150495B0(&camera->side, camera->sideTarget, &camera->sideVel, 5.0f, 9.0f, camera->dt);
-                func_150495B0(&camera->lift, camera->liftTarget, &camera->liftVel, 5.0f, 9.0f, camera->dt);
-                camera->yawRad = camera->yaw * DEG2RAD;
+                func_150495B0(&camera->XZOffset, camera->XZOffsetTget, &camera->OffsetXZVel, 5.0f, 9.0f, camera->SpringTime);
+                func_150495B0(&camera->YOffset, camera->YOffsetTget, &camera->OffsetYVel, 5.0f, 9.0f, camera->SpringTime);
+                camera->CameraAngleRad = camera->CameraAngle * DEG2RAD;
             }
         } while (0);
-    } else if (camera->aimState == 2) {
+    } else if (camera->DoingAim == 2) {
         f32 horizontal;
         f32 sinPitch;
         f32 rate;
@@ -248,73 +248,73 @@ void func_15120158(Camera *camera) {
         } else {
             rate = 0.02500000037f;
         }
-        if (camera->snap) {
+        if (camera->Snap) {
             if (inMap42Zone1A) {
-                aim->targetYaw = camera->player->unk40;
+                aim->targetYaw = camera->CharPtr->theta;
             } else {
-                aim->targetYaw = camera->player->unk40 - 180.0f;
+                aim->targetYaw = camera->CharPtr->theta - 180.0f;
             }
-            camera->yaw = aim->targetYaw;
-            camera->yawRad = camera->yaw * DEG2RAD;
-            camera->side = camera->sideTarget;
-            camera->lift = camera->liftTarget;
+            camera->CameraAngle = aim->targetYaw;
+            camera->CameraAngleRad = camera->CameraAngle * DEG2RAD;
+            camera->XZOffset = camera->XZOffsetTget;
+            camera->YOffset = camera->YOffsetTget;
         }
         if (IS_FACING_ZONE(zone)) {
-            if (!camera->zoneHookActive) {
+            if (!camera->AimTargetOn) {
                 func_151C9BA0(camera, zone);
-                camera->zoneHookActive = TRUE;
+                camera->AimTargetOn = TRUE;
             }
-        } else if (camera->zoneHookActive) {
+        } else if (camera->AimTargetOn) {
             func_151C9ED4(camera);
-            camera->zoneHookActive = FALSE;
+            camera->AimTargetOn = FALSE;
         }
         if (zone != 0xD) {
             // matching: the negated copy in a local fixes the register allocation of this block
-            notUnk3E8 = !camera->unk3E8;
+            notUnk3E8 = !camera->TonyHitsClear;
             if (!aim->unk4D) {
                 if (!notUnk3E8) {
                     aim->stickLock = 0;
                 } else {
                     if (aim->stickLock == 0) {
-                        stickX = camera->contPad->stick_x;
+                        stickX = camera->PadPtr->stick_x;
                         aim->stickLock |= (stickX > 0) ? 1 : ((stickX < 0) ? 2 : 0);
                     }
                     camera->eye = camera->prevEye;
                     if (aim->stickLock & 1) {
-                        pad = camera->contPad;
+                        pad = camera->PadPtr;
                         pad->stick_x = (pad->stick_x > 0) ? 0 : pad->stick_x;
                     } else if (aim->stickLock & 2) {
-                        pad = camera->contPad;
+                        pad = camera->PadPtr;
                         pad->stick_x = (pad->stick_x < 0) ? 0 : pad->stick_x;
                     }
                 }
             }
             if (IS_FACING_ZONE(zone)) {
-                aim->targetYaw = (f32)((camera->player->unk7A - camera->playerExt->unk12) + 0xC000) * BAM2DEG;
+                aim->targetYaw = (f32)((camera->CharPtr->langle - camera->mv->pssd_waist_tilt) + 0xC000) * BAM2DEG;
             } else if (inMap42Zone1A) {
-                aim->targetYaw = camera->player->unk40;
+                aim->targetYaw = camera->CharPtr->theta;
             } else if (zone != 0xF) {
-                if (camera->status & 2) {
-                    aim->targetYaw = (((f32)camera->player->unk7A - (f32)camera->playerExt->unk12 * 0.349999994f) + 49152.0f) * BAM2DEG;
+                if (camera->SpecialFlags & 2) {
+                    aim->targetYaw = (((f32)camera->CharPtr->langle - (f32)camera->mv->pssd_waist_tilt * 0.349999994f) + 49152.0f) * BAM2DEG;
                 } else {
                     if (zone == 0x34) {
-                        aim->targetYaw -= (f32)camera->contPad->stick_x * rate * (f32)D_800BE9E4;
+                        aim->targetYaw -= (f32)camera->PadPtr->stick_x * rate * (f32)D_800BE9E4;
                     }
-                    aim->targetYaw -= (f32)camera->contPad->stick_x * rate * (f32)D_800BE9E4;
+                    aim->targetYaw -= (f32)camera->PadPtr->stick_x * rate * (f32)D_800BE9E4;
                 }
             }
             if ((zone != 3) && (zone != 0x1A) && !inMap42Zone1A && (zone != 0xF)) {
-                aim->targetPitch += (f32)camera->contPad->stick_y * rate * (f32)D_800BE9E4;
+                aim->targetPitch += (f32)camera->PadPtr->stick_y * rate * (f32)D_800BE9E4;
             }
             if (zone == 0x38) {
                 // matching: sinPitch doubles as the pitch adjustment; a separate local changes the frame
-                if (camera->contPad->button & Z_TRIG) {
-                    sinPitch = camera->unk8B4 - (f32)(camera->player->unk31C->unk1A2 >> 8) * 1.098632812f;
+                if (camera->PadPtr->button & Z_TRIG) {
+                    sinPitch = camera->LastGunRecoil - (f32)(camera->CharPtr->mv->gunRecoil >> 8) * 1.098632812f;
                 } else {
                     sinPitch = 0.0f;
                 }
                 aim->targetPitch += sinPitch;
-                camera->unk8B4 = (f32)(camera->player->unk31C->unk1A2 >> 8) * 1.098632812f;
+                camera->LastGunRecoil = (f32)(camera->CharPtr->mv->gunRecoil >> 8) * 1.098632812f;
             }
             func_15048758(&aim->targetYaw);
             if (zone == 0x34) {
@@ -329,108 +329,108 @@ void func_15120158(Camera *camera) {
             if ((D_800BE616 == 0) && IS_FACING_ZONE(zone)) {
                 aim->targetPitch = (aim->targetPitch < -20.0f) ? -20.0f : aim->targetPitch;
             }
-            if (camera->snap) {
-                camera->yaw = aim->targetYaw;
+            if (camera->Snap) {
+                camera->CameraAngle = aim->targetYaw;
                 aim->pitch = aim->targetPitch;
-                camera->side = camera->sideTarget;
-                camera->lift = camera->liftTarget;
+                camera->XZOffset = camera->XZOffsetTget;
+                camera->YOffset = camera->YOffsetTget;
             } else if (zone || inMap42Zone1A) {
-                func_15049688(&camera->yaw, aim->targetYaw, &aim->yawVel, 3.91f, 8.210000038f, camera->dt);
-                func_15049688(&aim->pitch, aim->targetPitch, &aim->pitchVel, 3.91f, 8.210000038f, camera->dt);
-                func_150495B0(&camera->side, camera->sideTarget, &camera->sideVel, 3.91f, 8.210000038f, camera->dt);
-                func_150495B0(&camera->lift, camera->liftTarget, &camera->liftVel, 3.91f, 8.210000038f, camera->dt);
+                func_15049688(&camera->CameraAngle, aim->targetYaw, &aim->yawVel, 3.91f, 8.210000038f, camera->SpringTime);
+                func_15049688(&aim->pitch, aim->targetPitch, &aim->pitchVel, 3.91f, 8.210000038f, camera->SpringTime);
+                func_150495B0(&camera->XZOffset, camera->XZOffsetTget, &camera->OffsetXZVel, 3.91f, 8.210000038f, camera->SpringTime);
+                func_150495B0(&camera->YOffset, camera->YOffsetTget, &camera->OffsetYVel, 3.91f, 8.210000038f, camera->SpringTime);
             } else {
-                func_15049688(&camera->yaw, aim->targetYaw, &aim->yawVel, 4.3f, 7.300000191f, camera->dt);
-                func_15049688(&aim->pitch, aim->targetPitch, &aim->pitchVel, 4.3f, 7.300000191f, camera->dt);
+                func_15049688(&camera->CameraAngle, aim->targetYaw, &aim->yawVel, 4.3f, 7.300000191f, camera->SpringTime);
+                func_15049688(&aim->pitch, aim->targetPitch, &aim->pitchVel, 4.3f, 7.300000191f, camera->SpringTime);
             }
         }
-        camera->playerExt->aimYaw = camera->yaw;
-        camera->playerExt->aimPitch = aim->pitch;
-        camera->playerExt->aimTarget = camera->target;
-        camera->playerExt->aimEye = camera->eye;
-        while (camera->playerExt->aimPitch > 180.0f) {
-            camera->playerExt->aimPitch -= 360.0f;
+        camera->mv->aimYaw = camera->CameraAngle;
+        camera->mv->aimPitch = aim->pitch;
+        camera->mv->aimTarget = camera->target;
+        camera->mv->aimEye = camera->eye;
+        while (camera->mv->aimPitch > 180.0f) {
+            camera->mv->aimPitch -= 360.0f;
         }
-        while (camera->playerExt->aimPitch < -180.0f) {
-            camera->playerExt->aimPitch += 360.0f;
+        while (camera->mv->aimPitch < -180.0f) {
+            camera->mv->aimPitch += 360.0f;
         }
         horizontal = cosf(aim->pitch * DEG2RAD) * dist;
         sinPitch = sinf(aim->pitch * DEG2RAD);
-        camera->targetDistance = horizontal;
+        camera->IdealTripodMagnitude = horizontal;
         camera->height = sinPitch * dist;
-        aim->orbitPos.x = sinf(camera->yaw * DEG2RAD + 3.141592741f) * dist + camera->target.x;
+        aim->orbitPos.x = sinf(camera->CameraAngle * DEG2RAD + 3.141592741f) * dist + camera->target.x;
         aim->orbitPos.y = sinf(aim->pitch * DEG2RAD + 3.141592741f) * dist + camera->target.y;
-        aim->orbitPos.z = cosf(camera->yaw * DEG2RAD + 3.141592741f) * dist + camera->target.z;
+        aim->orbitPos.z = cosf(camera->CameraAngle * DEG2RAD + 3.141592741f) * dist + camera->target.z;
         if (aim->pitch >= 180.0f) {
             aim->signedPitch = aim->pitch - 360.0f;
         } else {
             aim->signedPitch = aim->pitch;
         }
         func_151218C4(camera);
-    } else if (camera->aimState == 3) {
-        yawDelta = fabsf(func_15048A70(camera->yaw, aim->savedYaw));
-        camera->unk134 = camera->savedUnk134[1];
-        if (camera->aimTimer != 0) {
-            camera->aimTimer -= D_800BE9E4;
-            if (camera->aimTimer <= 0) {
-                camera->playerExt->unk198 = 0;
-                camera->aimState = 0;
+    } else if (camera->DoingAim == 3) {
+        yawDelta = fabsf(func_15048A70(camera->CameraAngle, aim->savedYaw));
+        camera->Tightness = camera->savedTightness[1];
+        if (camera->AimTimeOuts != 0) {
+            camera->AimTimeOuts -= D_800BE9E4;
+            if (camera->AimTimeOuts <= 0) {
+                camera->mv->AimState = 0;
+                camera->DoingAim = 0;
                 return;
             }
         }
-        if ((camera->flags & 0x200000) || IS_FACING_ZONE(camera->zone)) {
+        if ((camera->AvailableModes & 0x200000) || IS_FACING_ZONE(camera->CharContext)) {
             aim->unk4D = 0;
         }
         if (!aim->unk4D || (yawDelta < 45.0f)) {
-            camera->targetDistance = aim->savedTargetDistance;
+            camera->IdealTripodMagnitude = aim->savedTargetDistance;
             camera->height = aim->savedHeight;
-            if ((camera->status & 0x40) || (camera->unk360 != 0.0f)) {
+            if ((camera->SpecialFlags & 0x40) || (camera->waterY != 0.0f)) {
                 camera->unk35C = aim->savedUnk354;
                 camera->unk354 = aim->savedUnk354;
             } else {
-                camera->unk35C = camera->player->floorY;
-                camera->unk354 = camera->player->floorY;
+                camera->unk35C = camera->CharPtr->floorY;
+                camera->unk354 = camera->CharPtr->floorY;
             }
         }
         if (!aim->unk4D || (yawDelta < 0.05000000075f)) {
-            camera->playerExt->unk198 = 0;
-            camera->aimState = 0;
+            camera->mv->AimState = 0;
+            camera->DoingAim = 0;
         } else {
-            func_15049688(&camera->yaw, aim->savedYaw, &aim->yawVel, 5.0f, 9.0f, camera->dt);
+            func_15049688(&camera->CameraAngle, aim->savedYaw, &aim->yawVel, 5.0f, 9.0f, camera->SpringTime);
         }
     }
-    camera->yawRad = camera->yaw * DEG2RAD;
+    camera->CameraAngleRad = camera->CameraAngle * DEG2RAD;
     if (((zone == 2) || (zone == 0x13) || (zone == 0x12) || (zone == 0xA) || (zone == 0x34)) && (zone != 0xD)) {
         f32 offsetZ;
         f32 pad4; // matching: unused stack slot
         f32 offsetX;
         f32 shift;
 
-        if (camera->status & 2) {
+        if (camera->SpecialFlags & 2) {
             shift = aim->targetYaw * -3.0f;
         } else {
             shift = -35.0f;
         }
-        offsetX = sinf(camera->yawRad - 1.570796371f) * shift;
-        offsetZ = cosf(camera->yawRad - 1.570796371f) * shift;
-        if (camera->snap) {
+        offsetX = sinf(camera->CameraAngleRad - 1.570796371f) * shift;
+        offsetZ = cosf(camera->CameraAngleRad - 1.570796371f) * shift;
+        if (camera->Snap) {
             aim->offset.x = offsetX;
             aim->offset.z = offsetZ;
             aim->offsetXVel = 0.0f;
         } else {
-            func_150495B0(&aim->offset.x, offsetX, &aim->offsetXVel, 4.0f, 9.0f, camera->dt);
-            func_150495B0(&aim->offset.z, offsetZ, &aim->offsetZVel, 4.0f, 9.0f, camera->dt);
+            func_150495B0(&aim->offset.x, offsetX, &aim->offsetXVel, 4.0f, 9.0f, camera->SpringTime);
+            func_150495B0(&aim->offset.z, offsetZ, &aim->offsetZVel, 4.0f, 9.0f, camera->SpringTime);
         }
     } else {
-        func_150495B0(&aim->offset.x, 0.0f, &aim->offsetXVel, 4.0f, 9.0f, camera->dt);
-        func_150495B0(&aim->offset.z, 0.0f, &aim->offsetZVel, 4.0f, 9.0f, camera->dt);
+        func_150495B0(&aim->offset.x, 0.0f, &aim->offsetXVel, 4.0f, 9.0f, camera->SpringTime);
+        func_150495B0(&aim->offset.z, 0.0f, &aim->offsetZVel, 4.0f, 9.0f, camera->SpringTime);
     }
-    camera->playerExt->aimTarget.x += aim->offset.x;
-    camera->playerExt->aimTarget.z += aim->offset.z;
-    camera->playerExt->aimEye.x += aim->offset.x;
-    camera->playerExt->aimEye.z += aim->offset.z;
-    func_150491EC(&camera->playerExt->aimEye, &camera->playerExt->aimTarget,
-                  &camera->playerExt->aimDir);
+    camera->mv->aimTarget.x += aim->offset.x;
+    camera->mv->aimTarget.z += aim->offset.z;
+    camera->mv->aimEye.x += aim->offset.x;
+    camera->mv->aimEye.z += aim->offset.z;
+    func_150491EC(&camera->mv->aimEye, &camera->mv->aimTarget,
+                  &camera->mv->aimDir);
     func_15123A54(camera);
     func_1512E140(camera);
     func_15125594(camera);
@@ -447,23 +447,23 @@ void func_15121490(Actor *player, OSContPad *pad) {
     Vec3f dir;
     f32 temp;
 
-    player->unk31C->unk198 = 0;
+    player->mv->AimState = 0;
     if (pad->button & R_TRIG) {
-        zone = player->unk31C->unk78;
+        zone = player->mv->rt_context_b;
         if (IS_FACING_ZONE(zone)) {
-            ext = player->unk31C;
-            angle = (player->unk40 - 90.0f) * DEG2RAD;
-            target.x = player->x_position;
-            target.y = player->y_position + ((f32)ext->height * 0.75f);
-            target.z = player->z_position;
+            ext = player->mv;
+            angle = (player->theta - 90.0f) * DEG2RAD;
+            target.x = player->xpos;
+            target.y = player->ypos + ((f32)ext->height * 0.75f);
+            target.z = player->zpos;
             eye = target;
             target.x = (sinf(angle) * 100.0f) + eye.x;
             target.y = eye.y;
             target.z = (cosf(angle) * 100.0f) + eye.z;
-            eye.y += player->y_position - player->old_y_position;
+            eye.y += player->ypos - player->old_ypos;
             ext->aimEye = eye;
             ext->aimTarget = target;
-            ext->unk198 = 1;
+            ext->AimState = 1;
             dir.x = 1.0f;
             temp = dir.x * cosf(ext->aimPitch * -DEG2RAD);
             dir.y = dir.x * sinf(ext->aimPitch * -DEG2RAD);
@@ -480,57 +480,57 @@ void func_15121490(Actor *player, OSContPad *pad) {
 void func_151216F8(Camera *camera) {
     s32 zone;
 
-    zone = camera->zone;
+    zone = camera->CharContext;
     if (zone) {
         if (zone == 0x34) {
-            camera->liftTarget = 80.0f;
+            camera->YOffsetTget = 80.0f;
             camera->aim.distance = 350.0f;
             return;
         }
-        if ((zone == 0x3B) && ((D_800BE9F0 == 0x41) || (D_800BE9F0 == 0x3C))) {
-            camera->liftTarget = -12.0f;
+        if ((zone == 0x3B) && ((level == 0x41) || (level == 0x3C))) {
+            camera->YOffsetTget = -12.0f;
             camera->sideOffsetTarget = -28.0f;
             camera->aim.distance = 106.0f;
             return;
         }
         if ((zone == 2) || (zone == 0xA) || (zone == 0x13)) {
-            camera->liftTarget = 10.0f;
-            camera->flags |= 0x80;
+            camera->YOffsetTget = 10.0f;
+            camera->AvailableModes |= 0x80;
             camera->aim.distance = 135.0f;
             camera->sideOffsetTarget = 0.0f;
             return;
         }
-        if ((zone == 0x12) && (D_800BE9F0 == 0x3C)) {
-            camera->liftTarget = 10.0f;
+        if ((zone == 0x12) && (level == 0x3C)) {
+            camera->YOffsetTget = 10.0f;
             camera->aim.distance = 180.0f;
             camera->sideOffsetTarget = 0.0f;
             return;
         }
         if (zone == 0xF) {
-            camera->liftTarget = 10.0f;
+            camera->YOffsetTget = 10.0f;
             camera->aim.distance = 480.0f;
             camera->sideOffsetTarget = 0.0f;
             return;
         }
         if (zone == 0x38) {
             camera->aim.distance = 110.0f;
-            camera->liftTarget = 5.0f;
+            camera->YOffsetTget = 5.0f;
             camera->sideOffsetTarget = 0.0f;
             return;
         }
         if (zone == 0x15) {
             camera->aim.distance = 110.0f;
-            camera->liftTarget = 25.0f;
+            camera->YOffsetTget = 25.0f;
             camera->sideOffsetTarget = 0.0f;
             return;
         }
-        camera->liftTarget = 5.0f;
+        camera->YOffsetTget = 5.0f;
         camera->aim.distance = 75.0f;
         camera->sideOffsetTarget = 0.0f;
         return;
     }
     camera->aim.distance = 90.0f;
-    camera->liftTarget = 25.0f;
+    camera->YOffsetTget = 25.0f;
     camera->sideOffsetTarget = 0.0f;
 }
 
@@ -539,31 +539,31 @@ void func_151216F8(Camera *camera) {
 void func_151218C4(Camera *camera) {
     CamAim *aim = &camera->aim;
 
-    if (camera->contPad->button & R_TRIG) {
+    if (camera->PadPtr->button & R_TRIG) {
         return;
     }
-    if (camera->savedMode[1] == 0x40) {
+    if (camera->MCache[CAMERA_MODE_AIM] == 0x40) {
         if (camera->cmd.type == 0xF) {
             camera->rail.eyeEaseA = 0.0f;
             camera->rail.eyeEaseB = 0.0f;
         }
-        camera->playerExt->unk198 = 0;
-        camera->aimState = 0;
-        camera->aimTimer = 60;
+        camera->mv->AimState = 0;
+        camera->DoingAim = 0;
+        camera->AimTimeOuts = 60;
     } else {
-        camera->aimTimer = 60;
-        camera->aimState = 3;
+        camera->AimTimeOuts = 60;
+        camera->DoingAim = 3;
     }
-    camera->targetDistance = 200.0f;
+    camera->IdealTripodMagnitude = 200.0f;
     camera->height = 100.0f;
-    camera->unk134 = aim->savedUnk134;
+    camera->Tightness = aim->savedTightness;
     aim->useOverride = FALSE;
-    camera->liftTarget = 0.0f;
+    camera->YOffsetTget = 0.0f;
     camera->sideOffsetTarget = 0.0f;
-    camera->sideTarget = 0.0f;
-    func_1506160C(camera->player, 2, 0xFF, 0x20, camera->playerIndex);
-    if (camera->zoneHookActive) {
+    camera->XZOffsetTget = 0.0f;
+    func_1506160C(camera->CharPtr, 2, 0xFF, 0x20, camera->CNumber);
+    if (camera->AimTargetOn) {
         func_151C9ED4(camera);
-        camera->zoneHookActive = FALSE;
+        camera->AimTargetOn = FALSE;
     }
 }

@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /*
- * Type 0x50 object: a marker over player D_800CC2D0[playerId], made of a white point light and a sprite
+ * Type 0x50 object: a marker over player movement_obj[playerId], made of a white point light and a sprite
  * (*D_800E03E0) that bob 160 units above the player.
  * The link header (type, kind, prev, next) is shared with every object (EffectHeader in effects.h).
  */
@@ -49,7 +49,7 @@ void func_151557FC(s32 playerId, s32 duration, f32 heightOffset) {
     }
     if (marker != NULL) {
         marker->heightOffset = heightOffset;
-        if (D_800CC2D0[playerId].in_water) {
+        if (movement_obj[playerId].inwater) {
             marker->header.state = 0;
             marker->state = 0;
         } else {
@@ -64,7 +64,7 @@ PointLight *func_1515D5F8(s32 x, s32 y, s32 z, s32 radius, s32 r, s32 g, s32 b, 
 void func_1515F10C();
 
 /*
- * Per-frame update. State 0 waits until the player's unk31C->unk75 allows a marker and the player is out of
+ * Per-frame update. State 0 waits until the player's mv->context_b allows a marker and the player is out of
  * water, then plays sound 0x1EB and shows it for 120 frames (state 1). State 2 (finished) waits for unk75 to
  * drop to 0 before re-arming. State 3 is a timed marker set by func_151557FC. While shown, the light follows
  * the player and bobs; otherwise it is freed.
@@ -77,14 +77,14 @@ void func_1515589C(PlayerMarker *marker) {
     ActorCtl *info;
 
     playerId = marker->playerId;
-    // matching: indexing with marker->playerId here and D_800CC2D0[playerId] below (not player->) orders the loads
-    player = &D_800CC2D0[marker->playerId];
+    // matching: indexing with marker->playerId here and movement_obj[playerId] below (not player->) orders the loads
+    player = &movement_obj[marker->playerId];
     switch (marker->state) {
     case 0:
-        info = D_800CC2D0[playerId].unk31C;
-        kind = (info != NULL) ? info->unk75 : 0;
+        info = movement_obj[playerId].mv;
+        kind = (info != NULL) ? info->context_b : 0;
         if (!(kind & 0x80) && (kind != 0x2A) && (kind != 0x2B) && ((kind != 0x42) || !(D_800D2E68 & 4)) &&
-            (kind != 0x2C) && (info->aimState == 0) && (kind != 0) && (kind != 0x1F) && !player->in_water) {
+            (kind != 0x2C) && (info->SniperState == 0) && (kind != 0) && (kind != 0x1F) && !player->inwater) {
             marker->state = 1;
             marker->header.state = 120;
             func_10010F30(0x1EB, 0x7FFF, 0x40, 0, 0);
@@ -96,7 +96,7 @@ void func_1515589C(PlayerMarker *marker) {
     case 1:
         timer = marker->header.state;
         timer -= D_800BE9E4; // matching: a single `timer = marker->header.state - D_800BE9E4;` schedules differently
-        if ((timer <= 0) || (D_800CC2D0[playerId].unk31C->unk75 == 0)) {
+        if ((timer <= 0) || (movement_obj[playerId].mv->context_b == 0)) {
             marker->state = 2;
             timer = 0;
         }
@@ -105,21 +105,21 @@ void func_1515589C(PlayerMarker *marker) {
         if (marker->light != NULL) {
             f32 extraHeight;
 
-            if (D_800CC2D0[playerId].unk31C->unk75 == 5) {
+            if (movement_obj[playerId].mv->context_b == 5) {
                 extraHeight = 85.0f;
             } else {
                 extraHeight = 0.0f;
             }
-            marker->light->x = player->x_position;
+            marker->light->x = player->xpos;
             marker->light->y = func_15048A40(marker->bobPhase) * 15.0f +
-                                   (player->y_position + 160.0f + marker->heightOffset + extraHeight);
-            marker->light->z = player->z_position;
+                                   (player->ypos + 160.0f + marker->heightOffset + extraHeight);
+            marker->light->z = player->zpos;
         } else {
             marker->light = func_1515D5F8(0, 0, 0, 2, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
         }
         break;
     case 2:
-        if (D_800CC2D0[playerId].unk31C->unk75 == 0) {
+        if (movement_obj[playerId].mv->context_b == 0) {
             marker->state = 0;
         }
         if (marker->light != NULL) {
@@ -138,9 +138,9 @@ void func_1515589C(PlayerMarker *marker) {
         marker->header.state = timer;
         marker->bobPhase += D_800BE9E4 * 2;
         if (marker->light != NULL) {
-            marker->light->x = player->x_position;
-            marker->light->y = func_15048A40(marker->bobPhase) * 15.0f + (player->y_position + 160.0f);
-            marker->light->z = player->z_position;
+            marker->light->x = player->xpos;
+            marker->light->y = func_15048A40(marker->bobPhase) * 15.0f + (player->ypos + 160.0f);
+            marker->light->z = player->zpos;
         } else {
             marker->light = func_1515D5F8(0, 0, 0, 2, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
         }
@@ -151,7 +151,7 @@ void func_1515589C(PlayerMarker *marker) {
 extern Gfx *func_15096934(Gfx *);
 extern Gfx **D_800E03E0;
 
-/* Draws the marker sprite (2.25x scale, rotated by D_800DBFF0[view].unk380) while the marker is shown. */
+/* Draws the marker sprite (2.25x scale, rotated by camera_global_Cameras[view].TrueCameraAngle) while the marker is shown. */
 Gfx *func_15155CFC(Gfx *gfx, PlayerMarker *marker, s16 view) {
     s32 state;
     s32 playerId;
@@ -162,18 +162,18 @@ Gfx *func_15155CFC(Gfx *gfx, PlayerMarker *marker, s16 view) {
     state = marker->state;
     playerId = marker->playerId;
     if ((state == 1) || (state == 3)) {
-        player = &D_800CC2D0[playerId];
-        if (player->unk31C->unk75 == 5) {
+        player = &movement_obj[playerId];
+        if (player->mv->context_b == 5) {
             extraHeight = 85.0f;
         } else {
             extraHeight = 0.0f;
         }
-        yaw = D_800DBFF0[view].unk380;
+        yaw = camera_global_Cameras[view].TrueCameraAngle;
         gfx = func_15096934(gfx);
-        func_15043D90(&marker->mtx[D_800BE9C0], 0.0f, yaw, 0.0f, 2.25f, 2.25f, 2.25f, player->x_position,
+        func_15043D90(&marker->mtx[D_800BE9C0], 0.0f, yaw, 0.0f, 2.25f, 2.25f, 2.25f, player->xpos,
                       func_15048A40(marker->bobPhase) * 15.0f +
-                          (player->y_position + 160.0f + extraHeight + marker->heightOffset),
-                      player->z_position);
+                          (player->ypos + 160.0f + extraHeight + marker->heightOffset),
+                      player->zpos);
         gSPMatrix(gfx++, &marker->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
         gSPClearGeometryMode(gfx++, G_ZBUFFER);
         gSPDisplayList(gfx++, *D_800E03E0);
@@ -197,7 +197,7 @@ void func_15155EF8(PlayerMarker *arg0) {
 
 /* For the current player: re-arms a finished marker (state 2 -> 0) or ends a timed one (state 3 -> 2). */
 void func_15155F3C(void) {
-    PlayerMarker *marker = func_15155FD4(D_800C3E78);
+    PlayerMarker *marker = func_15155FD4(dc_glbl_CharNum);
 
     if (marker != NULL) {
         if (marker->state == 2) {
@@ -210,7 +210,7 @@ void func_15155F3C(void) {
 
 /* Turns the current player's timed marker (state 3) into a normal shown one (state 1). */
 void func_15155F90(void) {
-    PlayerMarker *marker = func_15155FD4(D_800C3E78);
+    PlayerMarker *marker = func_15155FD4(dc_glbl_CharNum);
 
     if ((marker != NULL) && (marker->state == 3)) {
         marker->state = 1;
@@ -238,14 +238,14 @@ PlayerMarker *func_15155FD4(s32 playerId) {
  */
 void func_15156028(PlayerMarker *marker, Actor **actors, u8 eventType) {
     if (eventType == 0) {
-        s32 player = actors[0] - D_800CC2D0;
+        s32 player = actors[0] - movement_obj;
 
         if ((player >= 0) && (player < 25) && (player == marker->playerId)) {
             func_1516972C(&marker->header);
         }
     } else if (eventType == 0x2D) {
-        s32 from = actors[0] - D_800CC2D0;
-        s32 to = actors[1] - D_800CC2D0;
+        s32 from = actors[0] - movement_obj;
+        s32 to = actors[1] - movement_obj;
 
         if ((from >= 0) && (from < 25) && (to >= 0) && (to < 25)) {
             if (from == marker->playerId) {

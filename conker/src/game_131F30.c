@@ -21,7 +21,7 @@ typedef struct {
     Actor *player;
 } Msg35;
 
-/* Arrival callback of a level prop (D_800DBEF4 entry): finds the first active player in the prop's
+/* Arrival callback of a level prop (db_Object_array entry): finds the first active player in the prop's
  * player mask and sends message 0x35 with a 9-entry list chosen by the prop's id (0xF7-0xF9),
  * or message 0x38 for 0xF6. */
 void func_15104A80(WorldObject *prop) {
@@ -33,39 +33,39 @@ void func_15104A80(WorldObject *prop) {
         s32 i;
         Actor *candidate;
 
-        i = prop - D_800DBEF4;
-        mask = D_800DBF94[i];
+        i = prop - db_Object_array;
+        mask = gWorldObjectContacts[i];
         if (mask != 0) {
             for (i = 0; i < 25 && player == NULL; i++) {
-                candidate = &D_800CC2D0[i];
-                if (candidate->interaction_state != 0 && (mask & (1U << i))) {
+                candidate = &movement_obj[i];
+                if (candidate->type != 0 && (mask & (1U << i))) {
                     player = candidate;
                 }
             }
         }
     }
-    if (prop->id == 0xF9 || prop->id == 0xF8 || prop->id == 0xF7) {
+    if (prop->unique_id == 0xF9 || prop->unique_id == 0xF8 || prop->unique_id == 0xF7) {
         Msg35 msg;
 
         msg.player = player;
-        if (prop->id == 0xF9) {
+        if (prop->unique_id == 0xF9) {
             const u8 list[9] = { 0, 1, 2, 3, 4, 5, 15, 16, 17 };
 
             msg.count = 9;
             msg.list = list;
-        } else if (prop->id == 0xF8) {
+        } else if (prop->unique_id == 0xF8) {
             const u8 list[9] = { 6, 7, 8, 24, 25, 26, 18, 19, 20 };
 
             msg.count = 9;
             msg.list = list;
-        } else if (prop->id == 0xF7) {
+        } else if (prop->unique_id == 0xF7) {
             const u8 list[9] = { 9, 10, 11, 12, 13, 14, 21, 22, 23 };
 
             msg.count = 9;
             msg.list = list;
         }
         func_151494E0((s32)&msg, 0x35);
-    } else if (prop->id == 0xF6) {
+    } else if (prop->unique_id == 0xF6) {
         Msg35 msg;
 
         msg.player = player;
@@ -164,7 +164,7 @@ void func_15104C44(BoltRainObj *obj) {
 void func_15104FF8(BoltRainObj *obj, s32 arg1, u8 msg) {
     BoltRainState *state = &obj->state;
 
-    if (msg == 0x38 && state->region->disabled == 1) {
+    if (msg == 0x38 && state->region->inactive == 1) {
         state->timer = 300;
         // matching: the (s32) copy keeps IDO from sharing one register for region across the call
         func_1000FD38(func_1000EF40, (s32)state->region, 0);
@@ -204,10 +204,10 @@ void func_151050B0(BoltArcObj *obj) {
 
     state = &obj->state;
     if (state->timer < 0) {
-        state->region->disabled = 1;
+        state->region->inactive = 1;
         return;
     }
-    state->region->disabled = 0;
+    state->region->inactive = 0;
     state->timer -= D_800BE9E4;
     if (state->timer < 0) {
         func_151494E0(0, 0x39);
@@ -267,7 +267,7 @@ void func_1510550C(EffectHeader *obj, s32 arg1, u8 msg) {
 void func_15105548(BoltArcObj *obj, s32 *arg1, u8 msg) {
     BoltArcState *state = &obj->state;
 
-    if (msg == 0x38 && state->region->disabled == 1) {
+    if (msg == 0x38 && state->region->inactive == 1) {
         state->unk70 = *arg1;
         state->timer = 300;
     }
@@ -297,8 +297,8 @@ void func_151C329C(Vec3f *pos, u8, s32);
 /* One-entry variant lists for func_15151D6C, copied from rodata. */
 typedef struct { s32 v[1]; } S32x1;
 typedef struct { f32 v[1]; } F32x1;
-extern S32x1 D_800A23A4; /* { 0x85 } */
-extern F32x1 D_800A23A8; /* { 0.1f } */
+static const S32x1 D_800A23A4 = { { 0x85 } };
+static const F32x1 D_800A23A8 = { { 0.1f } };
 void func_15151D6C(SurfaceDebrisBurst *desc, s32 *variantIds, f32 *variantScales, s32 variantCount, u8, s32);
 
 /* Spawns the effects of an impact: a func_15102920 effect, func_151C329C by chance and, except on

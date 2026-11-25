@@ -19,14 +19,14 @@ f32 cosf(f32);
  */
 void func_15008340(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
     // matching: each case's `break` sits after its block (with -g3 its line steers the dispatch scheduling)
-    switch (region->kind & 3) {
+    switch (ZONE_AREA_TYPE(region)) {
     default:
         *x = region->x;
         *z = region->z;
-        *top = (f32)region->y + (f32)region->height;
-        *bottom = (f32)region->y - (f32)region->height;
+        *top = (f32)region->y + (f32)region->ySize;
+        *bottom = (f32)region->y - (f32)region->ySize;
         break;
-    case 2: {
+    case ZONE_AREA_BOX: {
         f32 angle;
         f32 s;
         f32 c;
@@ -36,14 +36,14 @@ void func_15008340(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
         angle = region->yaw * DEG_TO_RAD;
         s = sinf(angle);
         c = cosf(angle);
-        dx = RAND_UNIT() * (2.0f * region->radius) + -region->radius;
-        dz = RAND_UNIT() * (2.0f * region->depth) + -region->depth;
+        dx = RAND_UNIT() * (2.0f * region->xSize) + -region->xSize;
+        dz = RAND_UNIT() * (2.0f * region->zSize) + -region->zSize;
         *x = region->x + (dx * c + dz * s);
         *z = region->z + (dz * c - dx * s);
-        *top = (f32)region->y + (f32)region->height;
+        *top = (f32)region->y + (f32)region->ySize;
         *bottom = region->y;
     } break;
-    case 0: {
+    case ZONE_AREA_CYLINDER: {
         f32 angle;
         f32 s;
         f32 c;
@@ -52,13 +52,13 @@ void func_15008340(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
         angle = RAND_UNIT() * 2.0f * (f32)M_PI;
         s = sinf(angle);
         c = cosf(angle);
-        dist = RAND_UNIT() * region->radius;
+        dist = RAND_UNIT() * region->xSize;
         *x = region->x + dist * c;
         *z = region->z - dist * s;
-        *top = (f32)region->y + (f32)region->height;
+        *top = (f32)region->y + (f32)region->ySize;
         *bottom = region->y;
     } break;
-    case 1: {
+    case ZONE_AREA_SPHERE: {
         f32 angle;
         f32 s;
         f32 c;
@@ -67,11 +67,11 @@ void func_15008340(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
         angle = RAND_UNIT() * 2.0f * (f32)M_PI;
         s = sinf(angle);
         c = cosf(angle);
-        dist = RAND_UNIT() * region->radius;
+        dist = RAND_UNIT() * region->xSize;
         *x = region->x + dist * c;
         *z = region->z - dist * s;
-        *top = (f32)region->y + (f32)region->radius;
-        *bottom = (f32)region->y - (f32)region->radius;
+        *top = (f32)region->y + (f32)region->xSize;
+        *bottom = (f32)region->y - (f32)region->xSize;
     } break;
     }
 }

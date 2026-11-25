@@ -42,7 +42,7 @@ extern s32 func_1505D024(void *, s32, u16, s32);
 
 /*
  * Advances the trigger timer by D_800BE9E4 and calls func_1505D024 (with the target's index in
- * D_800CC2D0) once per elapsed interval; then sets the linked state's unk46 to 1000 if unk84 is clear.
+ * movement_obj) once per elapsed interval; then sets the linked state's unk46 to 1000 if unk84 is clear.
  */
 s32 func_151905BC(PeriodicObject *obj) {
     PeriodicTrigger *trigger;
@@ -51,21 +51,21 @@ s32 func_151905BC(PeriodicObject *obj) {
     obj->trigger.elapsed += D_800BE9E4;
     trigger = &obj->trigger;
     while (trigger->elapsed >= trigger->interval) {
-        func_1505D024(obj->linked, 0x60021, 0, trigger->target - D_800CC2D0);
+        func_1505D024(obj->linked, 0x60021, 0, trigger->target - movement_obj);
         trigger->elapsed -= trigger->interval;
     }
-    state = obj->linked->unk31C;
-    if (state != NULL && state->unk84 == 0) {
-        state->unk46 = 1000;
+    state = obj->linked->mv;
+    if (state != NULL && state->bot == 0) {
+        state->bitten = 1000;
     }
     return TRUE;
 }
 
 /* Clears unk1AC of the linked object's state, if it has one. */
 void func_151906C4(PeriodicObject *obj) {
-    ActorCtl *state = obj->linked->unk31C;
+    ActorCtl *state = obj->linked->mv;
 
     if (state != NULL) {
-        state->unk1AC = 0;
+        state->on_fire = 0;
     }
 }

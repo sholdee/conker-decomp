@@ -61,14 +61,14 @@ void func_151B1B34(Task151B1AB0 *task) {
     data = &task->data;
     data->timer += (697.0f + (func_150ADA68() * 342.0f)) * 0.001000000047f * D_800BE9A4;
     if (data->timer > 1.0f) {
-        if (data->owner->unk1D4 != NULL) {
+        if (data->owner->ob_matrix_ptr != NULL) {
             {
                 Vec3f offset = {19.0f, 0.0f, 25.0f};
-                func_15143134(&offset, &emitPointA, &data->owner->unk1D4[32]);
+                func_15143134(&offset, &emitPointA, &data->owner->ob_matrix_ptr[32]);
             }
             {
                 Vec3f offset = {19.0f, 0.0f, 25.0f};
-                func_15143134(&offset, &emitPointB, &data->owner->unk1D4[25]);
+                func_15143134(&offset, &emitPointB, &data->owner->ob_matrix_ptr[25]);
             }
             zero = 0.0f;
             spawn.texture = 0x29;
@@ -106,7 +106,7 @@ void func_151B1B34(Task151B1AB0 *task) {
                     size = (func_150ADA68() * 104.0f) + 199.0f;
                     spawn.height = spawn.width = size;
                     origin = (func_150ADA20() & 1) ? &emitPointA : &emitPointB;
-                    baseAngle = (data->owner->unk7A >> 8) + 0x40;
+                    baseAngle = (data->owner->langle >> 8) + 0x40;
                     angle = (func_150ADA20() % 100U) + baseAngle - 49;
                     func_15143874(angle, 36.0f, &spawn.pos.x, &spawn.pos.z);
                     spawn.pos.y = zero; // matching: dead store steers the scheduler

@@ -16,9 +16,9 @@ void func_15192800(Actor *obj, s32 arg1) {
 
     groupPtr = &group;
     if (obj != NULL && func_151928B0(obj, groupPtr)) {
-        switch (func_1510F8CC(obj->unk184)) {
+        switch (func_1510F8CC(obj->floorMaterial)) {
         case 5:
-            if (D_800BE9F0 == 20) {
+            if (level == 20) {
                 slot = 2;
             } else {
                 slot = 1;
@@ -41,7 +41,7 @@ void func_15192800(Actor *obj, s32 arg1) {
 s32 func_151928B0(Actor *obj, s32 *group) {
     s32 found;
 
-    switch (obj->id) {
+    switch (obj->character_type) {
     case 0:
     case 1:
     case 2:

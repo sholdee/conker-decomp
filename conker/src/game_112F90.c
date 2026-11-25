@@ -67,12 +67,12 @@ void func_150E5AE0(void) {
                 ang2 = b * 0.01745329238f;
                 x2 = sinf(ang2) * 3000.0f;
                 z2 = cosf(ang2) * 3000.0f;
-                x1 += D_800DBFF0->eye.x;
-                h1 += D_800DBFF0->eye.y;
-                z1 += D_800DBFF0->eye.z;
-                x2 += D_800DBFF0->eye.x;
-                h2 += D_800DBFF0->eye.y;
-                z2 += D_800DBFF0->eye.z;
+                x1 += camera_global_Cameras->eye.x;
+                h1 += camera_global_Cameras->eye.y;
+                z1 += camera_global_Cameras->eye.z;
+                x2 += camera_global_Cameras->eye.x;
+                h2 += camera_global_Cameras->eye.y;
+                z2 += camera_global_Cameras->eye.z;
                 func_150E1AB0(0, x1, h1, z1, x2, h2, z2,
                               160.0f, 10.0f, 4.0f, 360.0f, 0xF, 0x43, 0, 0, 0, 0, 0, 0, -1, 0, 0,
                               0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);

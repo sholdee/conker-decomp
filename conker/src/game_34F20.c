@@ -8,7 +8,7 @@ void func_15007A70(s16 arg0, s16 arg1, s16 arg2) {
 
     D_800BE9B4 = 2;
     func_1503FB08();
-    D_800BE9F0 = D_800BE9F4 = arg2;
+    level = D_800BE9F4 = arg2;
 
     func_15172C50(D_800DD2C0[0]);
     func_15008230();
@@ -147,8 +147,8 @@ void func_15007B3C(void) {
     if (D_800E0B94 == 2) {
         resource = D_800E0BD1;
     }
-    D_800BE9F8 = D_800BE9F0;
-    D_800BE9F0 = D_800BE9F4;
+    D_800BE9F8 = level;
+    level = D_800BE9F4;
     func_150091D0();
     func_15187F90();
     D_800BE619 = 0;
@@ -165,11 +165,11 @@ void func_15007B3C(void) {
         D_800D2457 = D_800D2456 = 3;
         func_15085710(0, 5, 3);
     }
-    func_15002F40(D_800BE9F0);
+    func_15002F40(level);
     func_1501C53C();
     func_15015E80();
     func_150162B0();
-    func_15017930(D_800BE9F0);
+    func_15017930(level);
     func_15016500();
     func_1501A220(D_800BE9E8, 1);
     func_15012F90();
@@ -182,45 +182,45 @@ void func_15007B3C(void) {
     func_15004F00();
     func_15004E80();
     func_15017868();
-    func_151732E0(D_800BE9F0);
+    func_151732E0(level);
     func_1502AAF0();
-    func_1502AAF8(D_800BE9F0);
-    func_150031EC(D_800BE9F0);
-    func_150039E0(D_800BE9F0, 1);
+    func_1502AAF8(level);
+    func_150031EC(level);
+    func_150039E0(level, 1);
     func_15004574();
     func_1511F980();
-    func_15003668(D_800BE9F0);
+    func_15003668(level);
     func_150038A0();
-    func_150039B0(D_800BE9F0);
-    func_15017578(D_800BE9F0);
-    func_150045C4(D_800BE9F0);
-    func_15008248(D_800BE9F0);
+    func_150039B0(level);
+    func_15017578(level);
+    func_150045C4(level);
+    func_15008248(level);
     func_150000B0();
-    func_1000F248(D_800BE9F0);
-    func_100125CC(D_800BE9F0);
+    func_1000F248(level);
+    func_100125CC(level);
     func_10011FEC();
     func_1501BB20();
     func_15008870(1);
     func_15008930(1);
-    func_15016690(D_800BE9F0);
-    func_150169A0(D_800BE9F0);
-    func_15005290(D_800BE9F0, resource);
+    func_15016690(level);
+    func_150169A0(level);
+    func_15005290(level, resource);
     func_15016370();
-    func_150006E0(D_800BE9F0);
+    func_150006E0(level);
     func_1510B070(0);
     for (i = 0; i <= D_80082FA0; i++) {
-        func_15125690(&D_800DBFF0[i], 1);
+        func_15125690(&camera_global_Cameras[i], 1);
     }
-    func_1500E70C(D_800BE9F0);
-    func_150163D0(D_800BE9F0);
+    func_1500E70C(level);
+    func_150163D0(level);
     func_150092DC();
-    func_15000AD0(D_800BE9F0);
-    if (D_800BE9F0 == 0x1D) {
+    func_15000AD0(level);
+    if (level == 0x1D) {
         func_151E81EC();
     }
-    func_1500E470(D_800BE9F0);
-    func_15009150(D_800BE9F0);
-    func_15085B70((void *)D_800BE9F0);
+    func_1500E470(level);
+    func_15009150(level);
+    func_15085B70((void *)level);
     func_15008DD0();
     func_1501B640(0);
     func_15080200();
@@ -263,16 +263,16 @@ void func_15007B3C(void) {
     func_15017640();
     func_1501CC3C();
     for (i = 0; i < 25; i++) {
-        if ((D_800CC2D0[i].interaction_state != 0) && (D_800CC2D0[i].unk127 != 0xFF)) {
-            func_150A11C4(&D_800CC2D0[i]);
+        if ((movement_obj[i].type != 0) && (movement_obj[i].playernumber != 0xFF)) {
+            func_150A11C4(&movement_obj[i]);
         }
     }
-    if ((D_800D18A8 != 0) && (D_800BE9F0 != 0x22)) {
+    if ((D_800D18A8 != 0) && (level != 0x22)) {
         D_800D18A8 = 0;
         func_151BF340(0xFF, 1);
     }
     func_1509C3A0();
-    D_800BE9F4 = D_800BE9F0;
+    D_800BE9F4 = level;
     func_151D8DE8();
 }
 
@@ -327,6 +327,6 @@ void func_150082CC(void) {
             D_800C35EA[0] = 2;
         }
         D_800C35C4 = 0;
-        func_1501D348(D_800BE9F0, tmp, 0, D_800C3C90, D_800C3C94);
+        func_1501D348(level, tmp, 0, D_800C3C90, D_800C3C94);
     }
 }

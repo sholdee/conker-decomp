@@ -5,13 +5,13 @@
 
 typedef struct SwingMotion SwingMotion;
 
-/* Behaviour scratch state of the props in this file (WorldObject.work). */
+/* Behaviour scratch state of the props in this file (WorldObject.touch). */
 typedef union {
     s32 words[3];
     struct {
         SwingMotion *motion;
         s32 state;
-        s32 character; /* index into D_800CC2D0 and D_800DBFF0 */
+        s32 character; /* index into movement_obj and camera_global_Cameras */
     } swing;
     struct {
         s32 started;
@@ -30,13 +30,7 @@ typedef union {
     } bob;
 } PropWork;
 
-#define WORK(prop) ((PropWork *)&(prop)->work)
-
-/* Motion states kept in bits 0-1 of WorldObject.behaviorState. */
-#define PROP_REST 0
-#define PROP_RETURNING 1
-#define PROP_MOVING 2
-#define PROP_ARRIVED 3
+#define WORK(prop) ((PropWork *)&(prop)->touch)
 
 extern void *allocate_memory(s32, s32, s32, s32);
 extern WorldObject *func_151149AC(u8 id); /* the prop whose id is `id`, or NULL */
@@ -81,23 +75,23 @@ void func_1511EF40(WorldObject *prop) {
     if (motion->timer > 0) {
         motion->timer -= D_800BE9E4;
         if (motion->timer <= 0) {
-            actor = &D_800DBFF0[WORK(prop)->swing.character];
-            func_151239CC(actor, 10);
+            actor = &camera_global_Cameras[WORK(prop)->swing.character];
+            func_151239CC(actor, CAMERA_MODE_CUTSCENE);
         }
     }
     if (WORK(prop)->swing.state == 1) {
-        character = &D_800CC2D0[WORK(prop)->swing.character];
-        prop->x = character->x_position;
-        prop->y = (s16)character->y_position + 100;
-        prop->z = character->z_position;
+        character = &movement_obj[WORK(prop)->swing.character];
+        prop->x = character->xpos;
+        prop->y = (s16)character->ypos + 100;
+        prop->z = character->zpos;
         func_15086CBC(func_15086D48(0x28), &x, &y, &z);
-        motion->dx = (x - character->x_position) * 0.5f;
+        motion->dx = (x - character->xpos) * 0.5f;
         dx = motion->dx;
-        motion->dz = (z - character->z_position) * 0.5f;
+        motion->dz = (z - character->zpos) * 0.5f;
         angle = motion->dz; // matching: angle doubles as dz; a separate local changes the frame
-        motion->x = character->x_position + dx;
-        motion->y = character->y_position + 100.0f;
-        motion->z = character->z_position + angle;
+        motion->x = character->xpos + dx;
+        motion->y = character->ypos + 100.0f;
+        motion->z = character->zpos + angle;
         motion->radius = sqrtf(dx * dx + angle * angle);
         motion->angle = -90.0f;
         WORK(prop)->swing.state = 2;
@@ -105,9 +99,9 @@ void func_1511EF40(WorldObject *prop) {
     }
     if (WORK(prop)->swing.state == 2) {
         if (D_80082FA0 >= WORK(prop)->swing.character) {
-            actor = &D_800DBFF0[WORK(prop)->swing.character];
-            if (actor->mode != 0x400000) {
-                func_15123934(actor, 0x400000, 0, actor->unk134, 10);
+            actor = &camera_global_Cameras[WORK(prop)->swing.character];
+            if (actor->Mode != 0x400000) {
+                func_15123934(actor, 0x400000, 0, actor->Tightness, CAMERA_MODE_CUTSCENE);
             }
             actor->target.x = prop->x;
             actor->target.y = prop->y;
@@ -129,7 +123,7 @@ void func_1511EF40(WorldObject *prop) {
             WORK(prop)->swing.state = 0;
             prop->inactive = TRUE;
             if (D_80082FA0 >= WORK(prop)->swing.character) {
-                func_151239CC(actor, 10);
+                func_151239CC(actor, CAMERA_MODE_CUTSCENE);
             }
         }
     }
@@ -145,8 +139,8 @@ void func_1511F31C(WorldObject *prop) {
     WorldObject *parent;
     u16 id;
 
-    id = prop->param.uhalf.lo;
-    if (prop->modelId == 0x8005 && D_800BE9F0 == 0x35) {
+    id = prop->moveData.uhalf.lo;
+    if (prop->modelId == 0x8005 && level == 0x35) {
         parent = func_151149AC(id);
         if (parent != NULL) {
             func_1511490C(mtx, parent);
@@ -166,11 +160,11 @@ void func_1511F3E8(WorldObject *prop) {
     s32 fadeTime;
 
     if (!WORK(prop)->fade.started) {
-        fadeTime = prop->param.word;
+        fadeTime = prop->moveData.word;
         WORK(prop)->fade.delay = ((fadeTime >> 16) & 0xFFFF) * 60;
         WORK(prop)->fade.started = TRUE;
     }
-    fadeTime = (prop->param.word & 0xFFFF) * 60;
+    fadeTime = (prop->moveData.word & 0xFFFF) * 60;
     if (WORK(prop)->fade.delay != 0) {
         if (D_800BE9E4 < WORK(prop)->fade.delay) {
             WORK(prop)->fade.delay -= D_800BE9E4;
@@ -201,23 +195,23 @@ void func_1511F4D0(WorldObject *prop) {
     s32 next;
     s32 home[4]; // matching: home x/y live in a stack array ([1] and [2]) in the original
 
-    motion = prop->behaviorState & 3;
-    openY = prop->behaviorState & 4; // matching: the flag test reuses openY's register
+    motion = prop->task_flag & TASK_FLAG_STATE;
+    openY = prop->task_flag & TASK_FLAG_LOCKED; // matching: the flag test reuses openY's register
     if (openY == 4) {
-        if (motion == PROP_MOVING) {
-            motion = PROP_REST;
-        } else if (motion == PROP_RETURNING) {
-            motion = PROP_ARRIVED;
+        if (motion == TASK_FLAG_GOING_ON) {
+            motion = TASK_FLAG_OFF;
+        } else if (motion == TASK_FLAG_GOING_OFF) {
+            motion = TASK_FLAG_ON;
         }
     }
-    span = prop->param.word; // matching: loaded into span before the conversion
-    span = span * prop->scaleY;
+    span = prop->moveData.word; // matching: loaded into span before the conversion
+    span = span * prop->yScale;
     next = WORK(prop)->opening.open;
     openX = (next >> 16) & 0xFFFF;
     openY = next & 0xFFFF;
     if (WORK(prop)->opening.home == 0) {
         WORK(prop)->opening.home = (prop->x & 0xFFFF) | ((prop->y & 0xFFFF) << 16);
-        if (motion == PROP_ARRIVED) {
+        if (motion == TASK_FLAG_ON) {
             openY = 13;
             openX = 13;
         } else {
@@ -227,7 +221,7 @@ void func_1511F4D0(WorldObject *prop) {
     }
     home[1] = (s16)(WORK(prop)->opening.home & 0xFFFF);
     home[2] = (s16)((WORK(prop)->opening.home >> 16) & 0xFFFF);
-    if (motion == PROP_MOVING) {
+    if (motion == TASK_FLAG_GOING_ON) {
         next = openY + D_800BE9E4;
         if (next < 13) {
             openY = next;
@@ -240,10 +234,10 @@ void func_1511F4D0(WorldObject *prop) {
                 openX = next;
             } else {
                 openX = 13;
-                motion = PROP_ARRIVED;
+                motion = TASK_FLAG_ON;
             }
         }
-    } else if (motion == PROP_RETURNING) {
+    } else if (motion == TASK_FLAG_GOING_OFF) {
         next = openX - D_800BE9E4;
         if (next > 0) {
             openX = next;
@@ -256,7 +250,7 @@ void func_1511F4D0(WorldObject *prop) {
                 openY = next;
             } else {
                 openY = 0;
-                motion = PROP_REST;
+                motion = TASK_FLAG_OFF;
             }
         }
     }
@@ -266,8 +260,8 @@ void func_1511F4D0(WorldObject *prop) {
     prop[2].x = home[1] - next;
     prop[3].x = home[1] + next;
     WORK(prop)->opening.open = (openY & 0xFFFF) | ((openX & 0xFFFF) << 16);
-    prop->behaviorState &= ~3;
-    prop->behaviorState |= motion;
+    prop->task_flag &= ~TASK_FLAG_STATE;
+    prop->task_flag |= motion;
 }
 
 /* Starts the prop's behaviour: moves it from state 0 to state 1. */
@@ -290,7 +284,7 @@ void func_1511F788(WorldObject *prop) {
     s32 state;
 
     startY = prop->y + prop->yOffset;
-    waitTime = prop->param.word; // matching: params goes through waitTime first
+    waitTime = prop->moveData.word; // matching: params goes through waitTime first
     waitTime = waitTime * 60 / 60;
     if (D_800BE9B4 != 0) {
         WORK(prop)->bob.phase = func_150ADA20() & 0xFFFF;
@@ -319,7 +313,7 @@ void func_1511F788(WorldObject *prop) {
 void func_1511F92C(WorldObject *prop) {
     WorldObject *parent;
 
-    parent = func_151149AC(prop->param.bytes[3]);
+    parent = func_151149AC(prop->moveData.bytes[3]);
     if (parent != NULL) {
         prop->x = parent->x;
         prop->y = parent->y;

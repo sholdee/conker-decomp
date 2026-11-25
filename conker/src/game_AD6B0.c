@@ -37,7 +37,7 @@ void func_15080228(void) {
             if (morphDuration == 0) {
                 morphDuration = 20;
             }
-            func_15080430(&D_800CC2D0[D_800D18D0], message[3] - 1, morphDuration);
+            func_15080430(&movement_obj[D_800D18D0], message[3] - 1, morphDuration);
         }
     }
 }

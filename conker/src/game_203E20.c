@@ -43,9 +43,9 @@ typedef struct {
 } AmountTextStyle;
 
 /* Called when `character` touches a pulse object (game_1483E0.c): spawns func_150D6730's particles on it
-   while D_800BE9F0 is 0x32 or 0x33. */
+   while level is 0x32 or 0x33. */
 void func_151D6970(Actor *character, void *obj) {
-    if ((D_800BE9F0 == 0x32) || (D_800BE9F0 == 0x33)) {
+    if ((level == 0x32) || (level == 0x33)) {
         func_150D6730(character, 0xFF, 1);
     }
 }
@@ -222,9 +222,9 @@ s32 func_151D6E60(ModelEffect *fx) {
     func_150A8050(fx->mtx[D_800BE9C0], 0.0f, func_15144AA8(0) + 25.0f, 0.0f);
 
     scale = 0.5509999990f;
-    fx->mtx[D_800BE9C0][3][0] = fx->params.owner->x_position;
-    fx->mtx[D_800BE9C0][3][1] = fx->params.owner->y_position + 120.0f;
-    fx->mtx[D_800BE9C0][3][2] = fx->params.owner->z_position;
+    fx->mtx[D_800BE9C0][3][0] = fx->params.owner->xpos;
+    fx->mtx[D_800BE9C0][3][1] = fx->params.owner->ypos + 120.0f;
+    fx->mtx[D_800BE9C0][3][2] = fx->params.owner->zpos;
 
     fx->mtx[D_800BE9C0][0][0] *= scale;
     fx->mtx[D_800BE9C0][0][1] *= scale;
@@ -252,7 +252,7 @@ s32 func_151D7000(TextObj *obj) {
 
     style = obj->text.style;
     owner = style->owner;
-    if ((owner->interaction_state == 0) || (owner->unique_id != style->ownerId)) {
+    if ((owner->type == 0) || (owner->unique_id != style->ownerId)) {
         return 0;
     }
 

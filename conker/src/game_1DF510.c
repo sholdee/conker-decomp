@@ -27,7 +27,7 @@ typedef struct {
 typedef struct {
     /* 0x00 */ Actor *target;
     /* 0x04 */ u8 targetId; // target->unique_id when attached
-    /* 0x05 */ u8 bone;     // index into the Mtx array at target->unk1D4
+    /* 0x05 */ u8 bone;     // index into the Mtx array at target->ob_matrix_ptr
     /* 0x08 */ Vec3f offset;
 } RopeAnchor;
 
@@ -123,8 +123,8 @@ void func_151B2100(RopeTie *self) {
     obj0 = self->tie.obj0;
     obj1 = self->tie.obj1;
     tie = &self->tie;
-    if ((obj0->interaction_state == 0) || (obj0->id == 0xFF) || (obj0->unique_id != tie->obj0Id) ||
-        (obj1->interaction_state == 0) || (obj1->id == 0xFF) || (obj1->unique_id != tie->obj1Id)) {
+    if ((obj0->type == 0) || (obj0->character_type == 0xFF) || (obj0->unique_id != tie->obj0Id) ||
+        (obj1->type == 0) || (obj1->character_type == 0xFF) || (obj1->unique_id != tie->obj1Id)) {
         self->base.header.state = -1;
         return;
     }
@@ -175,12 +175,12 @@ void func_151B22C8(RopeTie *self) {
     func_15149368(&self->base);
 }
 
-/* Returns 1 when obj1->unk65 holds obj0's 1-based index in D_800CC2D0 and obj1->unk5C is 1, else 2. */
+/* Returns 1 when obj1->unk65 holds obj0's 1-based index in movement_obj and obj1->unk5C is 1, else 2. */
 s32 func_151B22F4(RopeTie *self) {
     Actor *obj0 = self->tie.obj0;
 
-    if (self->tie.obj1->unk65 == (obj0 - D_800CC2D0) + 1) {
-        if (self->tie.obj1->unk5C == 1) {
+    if (self->tie.obj1->attach_char == (obj0 - movement_obj) + 1) {
+        if (self->tie.obj1->basemtx == 1) {
             return 1;
         }
     }
@@ -211,12 +211,12 @@ void func_151B2348(RopeTie *self) {
     desc.type = 0;
     desc.flags = 0;
     desc.timer = 1000;
-    desc.start.x = obj1->x_position;
-    desc.start.y = obj1->y_position;
-    desc.start.z = obj1->z_position;
-    desc.end.x = obj1->x_position;
-    desc.end.y = obj1->y_position;
-    desc.end.z = obj1->z_position;
+    desc.start.x = obj1->xpos;
+    desc.start.y = obj1->ypos;
+    desc.start.z = obj1->zpos;
+    desc.end.x = obj1->xpos;
+    desc.end.y = obj1->ypos;
+    desc.end.z = obj1->zpos;
     desc.startCallback = 1;
     desc.endCallback = 1;
     desc.drawStyle = 0;
@@ -240,12 +240,12 @@ void func_151B2348(RopeTie *self) {
     link.end.targetId = obj1->unique_id;
     link.end.bone = 5;
     link.end.offset = D_800AA338;
-    desc.start.x = obj0->x_position;
-    desc.start.y = obj0->y_position;
-    desc.start.z = obj0->z_position;
-    desc.end.x = obj1->x_position;
-    desc.end.y = obj1->y_position;
-    desc.end.z = obj1->z_position;
+    desc.start.x = obj0->xpos;
+    desc.start.y = obj0->ypos;
+    desc.start.z = obj0->zpos;
+    desc.end.x = obj1->xpos;
+    desc.end.y = obj1->ypos;
+    desc.end.z = obj1->zpos;
     desc.drawStyle = 0;
     desc.length = 170.0f;
     tie->ropes[1] = func_151B30B0(&desc, 0.0015f, sizeof(RopeTieLink), 0xFF, 0);
@@ -262,12 +262,12 @@ void func_151B2348(RopeTie *self) {
     link.end.targetId = obj1->unique_id;
     link.end.bone = 10;
     link.end.offset = D_800AA344;
-    desc.start.x = obj0->x_position;
-    desc.start.y = obj0->y_position;
-    desc.start.z = obj0->z_position;
-    desc.end.x = obj1->x_position;
-    desc.end.y = obj1->y_position;
-    desc.end.z = obj1->z_position;
+    desc.start.x = obj0->xpos;
+    desc.start.y = obj0->ypos;
+    desc.start.z = obj0->zpos;
+    desc.end.x = obj1->xpos;
+    desc.end.y = obj1->ypos;
+    desc.end.z = obj1->zpos;
     desc.drawStyle = 0;
     tie->ropes[0] = func_151B30B0(&desc, 0.0015f, sizeof(RopeTieLink), 0xFF, 0);
     if (tie->ropes[0] != NULL) {
@@ -298,12 +298,12 @@ void func_151B2690(RopeTie *self) {
     desc.type = 0;
     desc.flags = 0;
     desc.timer = 100;
-    desc.start.x = obj->x_position;
-    desc.start.y = obj->y_position;
-    desc.start.z = obj->z_position;
-    desc.end.x = obj->x_position;
-    desc.end.y = obj->y_position;
-    desc.end.z = obj->z_position;
+    desc.start.x = obj->xpos;
+    desc.start.y = obj->ypos;
+    desc.start.z = obj->zpos;
+    desc.end.x = obj->xpos;
+    desc.end.y = obj->ypos;
+    desc.end.z = obj->zpos;
     desc.startCallback = 1;
     desc.endCallback = 1;
     desc.drawStyle = 1;
@@ -388,19 +388,19 @@ Gfx *func_151B2974(Gfx *gfx, RopeLine *self, s16 view) {
 
     dead = 0;
     line = &self->line;
-    if ((line->anchor.target->interaction_state == 0) || (line->anchor.target->unique_id != line->anchor.targetId)) {
+    if ((line->anchor.target->type == 0) || (line->anchor.target->unique_id != line->anchor.targetId)) {
         dead = 1;
     }
-    if ((dead == 0) && (line->anchor.target->unk1D4 != NULL)) {
+    if ((dead == 0) && (line->anchor.target->ob_matrix_ptr != NULL)) {
         func_151D5D60(self->base.buffers, view, 4 * sizeof(Vtx), (void **)&vtx, NULL);
         if (vtx == NULL) {
             return gfx;
         }
-        boneMtx = &((Mtx *)line->anchor.target->unk1D4)[line->anchor.bone];
+        boneMtx = &((Mtx *)line->anchor.target->ob_matrix_ptr)[line->anchor.bone];
         func_15143134(&line->anchor.offset, &start, boneMtx);
         func_15143134(&line->endOffset, &end, boneMtx);
         update = 1;
-        camera = &D_800DBFF0[view].eye.x;
+        camera = &camera_global_Cameras[view].eye.x;
         gfx = func_15142B7C(gfx, 0x200005, 0x60600);
         gfx = func_15142E24(gfx, (s32)D_80090DE8, 0, 0, 0, 0, 0x36, 0, 0, &update, 3);
         gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &update);

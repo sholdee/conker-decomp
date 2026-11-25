@@ -119,9 +119,9 @@ extern struct {
 
 extern void func_151D5D60(void *, s16, s32, Vtx **, u8 *);
 extern void func_151441A4(s16 *outR, s16 *outG, s16 *outB, s16 *outA, s32 r0, s32 g0, s32 b0, s32 a0, s32 r1, s32 g1,
-                          s32 b1, s32 a1, s32 level, s32 mode);
+                          s32 b1, s32 a1, s32 weight, s32 mode);
 extern void func_151442FC(s16 *outR, s16 *outG, s16 *outB, s16 *outA, s32 r0, s32 g0, s32 b0, s32 a0, s32 r1, s32 g1,
-                          s32 b1, s32 a1, s32 level, s32 mode);
+                          s32 b1, s32 a1, s32 weight, s32 mode);
 extern Gfx *func_15142E24(Gfx *gfx, u8 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8,
                           u8 *update, s32 argA);
 extern Gfx *func_1513F4E4(Gfx *, s32, u8 *);
@@ -172,7 +172,7 @@ Gfx *func_1515C6F4(Trail *trail, Gfx *gfx, s16 view) {
         if (vtx != NULL) {
             data = trail->data;
             update = 1;
-            camPos = &D_800DBFF0[view].eye.x;
+            camPos = &camera_global_Cameras[view].eye.x;
             points = trail->points;
             func_151441A4(&primR, &primG, &primB, &primA, data->color2.red, data->color2.green, data->color2.blue, data->color2.alpha,
                           data->color.red, data->color.green, data->color.blue, data->color.alpha, data->colorLevel, data->primMode);

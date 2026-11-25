@@ -36,8 +36,8 @@ void func_1515AF90(s16 player) {
         f32 bottom;
 
         valid = TRUE;
-        eye = &D_800DBFF0[player].eye;
-        yaw = D_800DBFF0[player].unk380 * 0.7111111283f;
+        eye = &camera_global_Cameras[player].eye;
+        yaw = camera_global_Cameras[player].TrueCameraAngle * 0.7111111283f;
         {
             u32 roll = func_150ADA20();
 

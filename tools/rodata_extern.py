@@ -185,6 +185,8 @@ def main():
     Path(obj + ".notes").unlink(missing_ok=True)
     set_o32_abi(obj)
     trim_text_padding(obj, yaml_path)
+    if owns_rodata(yaml_path, obj):
+        trim_text_padding(obj, yaml_path, ".rodata", b".rodata")
     elf = ElfFile(Path(obj).read_bytes())
     text = elf.find_section(".text")
     if text is None:
@@ -212,14 +214,15 @@ def main():
         Path(obj + ".notes").write_text("\n".join(notes) + "\n")
 
 
-def trim_text_padding(obj, yaml_path):
-    """IDO pads .text to a multiple of 16. When a C segment ends on a 4-byte boundary (hand-written
-    asm split out next to it), cut that zero padding so the next object links at its ROM address."""
+def trim_text_padding(obj, yaml_path, typ_wanted="c", section=b".text"):
+    """IDO pads .text (and .rodata) to a multiple of 16. When the object's yaml slice ends on a 4-byte
+    boundary (hand-written asm or another file's constant data next to it), cut that zero padding so the
+    next object links at its ROM address."""
     name = obj_name(obj)
     flat = flat_segments(yaml_path)
     seglen = None
     for (start, typ, nm, _), (end, _, _, _) in zip(flat, flat[1:]):
-        if typ == "c" and nm == name:
+        if typ == typ_wanted and nm == name:
             seglen = end - start
             break
     if not seglen or seglen % 16 == 0:
@@ -234,7 +237,7 @@ def trim_text_padding(obj, yaml_path):
         for i in range(shnum):
             nameoff, = struct.unpack(">I", data[sh(i):sh(i) + 4])
             secname = data[stroff + nameoff:data.index(b"\0", stroff + nameoff)]
-            if secname != b".text":
+            if secname != section:
                 continue
             off, size = struct.unpack(">II", data[sh(i) + 16:sh(i) + 24])
             if size > seglen and size - seglen < 16 and not any(data[off + seglen:off + size]):

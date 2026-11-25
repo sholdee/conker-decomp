@@ -7,7 +7,7 @@
 extern s32 func_1000B060(f32, f32, u32);
 extern void func_1000E7A0(u32, s32);
 extern s32 func_1510F8CC(s32);
-extern f32 D_800AAA30; /* 0.1f */
+extern f32 D_800AAA30; /* 0.1f; ROM 0x24F4F0, just before this file's .rodata slice */
 
 /* Queues a positional sound event (func_1000E7A0 kind 8) for soundId, only in a few specific levels. */
 void func_151C2050(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 distance) {
@@ -15,14 +15,14 @@ void func_151C2050(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 distance
     s32 volume;
     Camera *camera;
     s32 direction;
-    s16 level;
+    s16 song;
     f32 volumeLevel; // matching: separate spill slot for the value kept across func_1000B060
     f32 intensity;
 
     if (obj != NULL) {
-        if (D_800BE616 || (camera = obj->camera) == NULL) {
-            level = D_800B0DF0->music.song;
-            if (level == 0x24 || level == 0x13 || level == 0x4D || level == 0x85 || level == 0x93) {
+        if (D_800BE616 || (camera = obj->CameraPtr) == NULL) {
+            song = D_800B0DF0->music.song;
+            if (song == 0x24 || song == 0x13 || song == 0x4D || song == 0x85 || song == 0x93) {
                 func_100114D0((s32)pos->x, (s32)pos->y, (s32)pos->z, 0x7FFF, 1000, 100, &pan, &volume, NULL);
                 if ((u32)volume > 0x1000) {
                     volume = (u32)volume >> 7;
@@ -30,14 +30,14 @@ void func_151C2050(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 distance
                 }
             }
         } else {
-            level = D_800B0DF0->music.song;
-            if (level == 0x24 || level == 0x13) {
+            song = D_800B0DF0->music.song;
+            if (song == 0x24 || song == 0x13) {
                 // matching: the 0.1f literal (vs this rodata load) shifts the stack frame
                 intensity = 255.0f - distance * D_800AAA30;
                 if (intensity > 16.0f) {
                     volumeLevel = intensity;
                     /* 40.74 = 256 / 2pi: radians to a 256-step angle */
-                    direction = func_1000B060(dir->x, dir->z, (u32)(camera->unk3A0 * 40.74366379f));
+                    direction = func_1000B060(dir->x, dir->z, (u32)(camera->TrueCameraAngleRad * 40.74366379f));
                     func_1000E7A0(8, (func_1510F8CC(soundId) + 1) | ((s32)volumeLevel << 8) | (direction << 16));
                 }
             }
@@ -62,7 +62,7 @@ typedef struct Game1EF500TrailExt {
     /* 0x9D */ u8 pad9D;
     /* 0x9E */ u16 sound;
     /* 0xA0 */ u8 soundEnabled;
-    /* 0xA1 */ u8 listener; /* index into D_800DBFF0 of the player the sound follows */
+    /* 0xA1 */ u8 listener; /* index into camera_global_Cameras of the player the sound follows */
     /* 0xA2 */ u8 padA2[2];
     /* 0xA4 */ s32 fieldA4;
     /* 0xA8 */ s8 fieldA8;
@@ -263,7 +263,7 @@ s8 func_151C2734(Game1EF500Trail *trail) {
         if (ext->sound == 0) {
             sfxIndex = func_150ADA20() & 7;
             for (i = 0; i <= D_80082FA0; i++) {
-                player = &D_800DBFF0[i];
+                player = &camera_global_Cameras[i];
                 dx = player->eye.x - trail->head.def.pos.x;
                 dy = player->eye.y - trail->head.def.pos.y;
                 dz = player->eye.z - trail->head.def.pos.z;
@@ -284,14 +284,14 @@ s8 func_151C2734(Game1EF500Trail *trail) {
                 player = NULL;
             }
         } else if (func_1000F3D0(ext->sound)) {
-            player = &D_800DBFF0[ext->listener];
+            player = &camera_global_Cameras[ext->listener];
         } else {
             ext->soundEnabled = FALSE;
         }
         if (player != NULL) {
             volume = 0x40;
             func_1000A420(trail->head.def.pos.x - player->eye.x, trail->head.def.pos.y - player->eye.y,
-                          trail->head.def.pos.z - player->eye.z, player->unk380,
+                          trail->head.def.pos.z - player->eye.z, player->TrueCameraAngle,
                           trail->head.def.pos.x - player->eye.x, trail->head.def.pos.y - player->eye.y,
                           trail->head.def.pos.z - player->eye.z, 10000, 9999, &volume, &pan, 0);
             if (sound != 0) {
@@ -396,10 +396,10 @@ s32 func_151C2E4C(Actor *obj, Actor *self) {
     if (obj == self) {
         return FALSE;
     }
-    if (obj->interaction_state == 0) {
+    if (obj->type == 0) {
         return FALSE;
     }
-    if (obj->id == 0xFF) {
+    if (obj->character_type == 0xFF) {
         return FALSE;
     }
     return TRUE;
@@ -410,13 +410,13 @@ s32 func_151C2E94(Actor *obj, Actor *self) {
     if (obj == self) {
         return FALSE;
     }
-    if (obj->interaction_state == 0) {
+    if (obj->type == 0) {
         return FALSE;
     }
-    if (obj->id == 0xFF) {
+    if (obj->character_type == 0xFF) {
         return FALSE;
     }
-    if (obj->unk127 == 0xFF) {
+    if (obj->playernumber == 0xFF) {
         return FALSE;
     }
     return TRUE;
@@ -739,7 +739,7 @@ void func_15153634(SpriteBurst *, u8, u8, s32);
 
 /*
  * Impact effects where the projectile hit: with the given chances, debris, a spark, a smoke burst
- * and a flash. Their look depends on the hit surface's material and on the level (D_800BE9F0).
+ * and a flash. Their look depends on the hit surface's material and on the level (level).
  */
 void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f32 smokeChance, f32 flashChance,
                    u8 debrisArg, u8 smokeArg, u8 sparkArg) {
@@ -748,7 +748,7 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
     s32 type;
 
     material = trail->trail.path.material & 0x1F;
-    if ((D_800BE9F0 == 0x2B) || (D_800BE9F0 == 0x30)) {
+    if ((level == 0x2B) || (level == 0x30)) {
         switch (material) {
         case 1:
             type = 3;
@@ -759,13 +759,13 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
             type = 4;
             break;
         }
-    } else if ((material == 0xB) && (D_800BE9F0 == 4)) {
+    } else if ((material == 0xB) && (level == 4)) {
         type = 1;
-    } else if ((material == 1 || material == 0xA) && (D_800BE9F0 == 0xE)) {
+    } else if ((material == 1 || material == 0xA) && (level == 0xE)) {
         type = 2;
-    } else if (D_800BE9F0 == 0x34) {
+    } else if (level == 0x34) {
         type = 3;
-    } else if (D_800BE9F0 == 0x27) {
+    } else if (level == 0x27) {
         type = 5;
     } else {
         type = 0;
@@ -774,7 +774,8 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
     if (func_150ADA68() < debrisChance) {
         SpriteDef debris;
         f32 scale;
-        const s32 shade[6] = { 0x6F, 0x6F, 0x70, 0x70, 0x4F, 0x76 };
+        // not const (here and below): the ROM keeps these tables ahead of D_800AAA30, outside the .rodata slice
+        s32 shade[6] = { 0x6F, 0x6F, 0x70, 0x70, 0x4F, 0x76 };
         u8 big;
 
         scale = (func_150ADA68() * 15.0f) + 15.0f;
@@ -803,7 +804,7 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
     }
     if (func_150ADA68() < sparkChance) {
         ParticleDef spark;
-        const s32 shade[6] = { 0x6D, 0x6D, 0x6E, 0x6E, 0x6D, 0x6D };
+        s32 shade[6] = { 0x6D, 0x6D, 0x6E, 0x6E, 0x6D, 0x6D };
 
         ext = &trail->trail;
         spark.texture = shade[type];
@@ -838,10 +839,10 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
     }
     if (func_150ADA68() < smokeChance) {
         SpriteBurst smoke;
-        const u8 colorA[6][3] = { { 0xB7, 0x77, 0x34 }, { 0xB7, 0x77, 0x34 }, { 0xAA, 0x52, 0x1E },
+        u8 colorA[6][3] = { { 0xB7, 0x77, 0x34 }, { 0xB7, 0x77, 0x34 }, { 0xAA, 0x52, 0x1E },
                             { 0xAA, 0x52, 0x1E }, { 0x98, 0x92, 0x79 }, { 0xFF, 0xC0, 0x00 } };
-        const u8 colorB[6][3] = { { 0x5C, 0x30, 0x00 }, { 0x5C, 0x30, 0x00 }, { 0x00, 0x00, 0x00 },
-                            { 0x00, 0x00, 0x00 }, { 0x00, 0x00, 0x8D }, { 0x8D, 0x00, 0x00 } };
+        u8 colorB[6][3] = { { 0x5C, 0x30, 0x00 }, { 0x5C, 0x30, 0x00 }, { 0x00, 0x00, 0x00 },
+                            { 0x00, 0x00, 0x00 }, { 0x00, 0x00, 0x00 }, { 0x8D, 0x8D, 0x00 } };
 
         smoke.countBase = 5;
         smoke.countRange = 15;
@@ -890,7 +891,7 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
     if (func_150ADA68() < flashChance) {
         LightEffectHeader header;
         Vec3i header2;
-        const u8 color[2][3] = { { 0xFF, 0xFF, 0xFF }, { 0xFF, 0xA7, 0xA7 } };
+        u8 color[2][3] = { { 0xFF, 0xFF, 0xFF }, { 0xFF, 0xA7, 0xA7 } };
         u8 sel;
 
         header.flags = 3;
@@ -974,7 +975,7 @@ s32 func_151C455C(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt) {
         if (callback != NULL && (ext->flags & TRAIL_HIT_CALLBACK)) {
             target = ext->path.surface;
             if (target != NULL) {
-                callback(&ext->path.pos, target - D_800DBEF4);
+                callback(&ext->path.pos, target - db_Object_array);
             }
         }
         if (ext->flags & TRAIL_EXPIRE_HANDLER) {

@@ -55,7 +55,7 @@ void func_150B54A8(SparkEffect *effect) {
 
     owner = effect->data.owner;
     data = &effect->data;
-    if ((owner->interaction_state == 0) || (owner->unique_id != data->ownerId) || (owner->id == 0xFF)) {
+    if ((owner->type == 0) || (owner->unique_id != data->ownerId) || (owner->character_type == 0xFF)) {
         effect->base.header.state = -1;
         return;
     }

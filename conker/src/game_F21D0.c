@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /*
- * Behaviour scratch state (WorldObject.work) of the two behaviours here: the pendulum's push phase
+ * Behaviour scratch state (WorldObject.touch) of the two behaviours here: the pendulum's push phase
  * (func_150C4D20) and the texture scroll state (func_150C4E9C).
  */
 typedef union {
@@ -15,7 +15,7 @@ typedef union {
     } scroll;
 } WorkF21D0;
 
-#define WORK(obj) ((WorkF21D0 *)&(obj)->work)
+#define WORK(obj) ((WorkF21D0 *)&(obj)->touch)
 
 /*
  * Swings the object like a pendulum on rotX (degrees, spinX its velocity): a spring pulls it back toward
@@ -28,7 +28,7 @@ void func_150C4D20(WorldObject *pendulum) {
     f32 push;
     s32 phase;
 
-    angle = pendulum->rotX;
+    angle = pendulum->t;
     velocity = pendulum->spinX;
     if (angle > 180.0f) {
         angle -= 360.0f;
@@ -43,16 +43,16 @@ void func_150C4D20(WorldObject *pendulum) {
     WORK(pendulum)->pendulum.phase = phase;
     push = func_15048A40(phase);
     velocity += push * 0.1f;
-    if ((pendulum->flags & 4) == 4) {
+    if ((pendulum->object_status & 4) == 4) {
         velocity += 0.1f;
     }
     velocity *= 0.8f;
     pendulum->spinX = velocity;
-    pendulum->rotX += velocity;
-    if (pendulum->rotX < 0.0f) {
-        pendulum->rotX += 360.0f;
-    } else if (pendulum->rotX >= 360.0f) {
-        pendulum->rotX -= 360.0f;
+    pendulum->t += velocity;
+    if (pendulum->t < 0.0f) {
+        pendulum->t += 360.0f;
+    } else if (pendulum->t >= 360.0f) {
+        pendulum->t -= 360.0f;
     }
 }
 
@@ -74,7 +74,7 @@ typedef struct ScrollState {
 } ScrollState;
 
 /*
- * Scrolls the t texture coordinate of the object's vertices. Scroll mode (behaviorState & 3): 0 and 3 stand still,
+ * Scrolls the t texture coordinate of the object's vertices. Scroll mode (task_flag & 3): 0 and 3 stand still,
  * 2 speeds up to 300 per frame, 1 slows to 100 and then stops (switching to mode 3) once the scroll lines up
  * with the start position again. Binds texture 0x2C1 (modes 0, 2) or 0x1C0 (modes 1, 3) to segment 4 and,
  * when the dl has a second G_SETTIMG, the texture's last 0x200 bytes to segment 5.
@@ -88,7 +88,7 @@ void func_150C4E9C(WorldObject *obj) {
     s32 mode;
     s32 i;
 
-    mode = obj->behaviorState & 3;
+    mode = obj->task_flag & TASK_FLAG_STATE;
     if (WORK(obj)->scroll.state == NULL) {
         scroll = WORK(obj)->scroll.state = allocate_memory(sizeof(ScrollState), 1, 0, 0);
         func_1511A410(obj->displayList, &scroll->secondSetTImg);
@@ -99,21 +99,21 @@ void func_150C4E9C(WorldObject *obj) {
         scroll = WORK(obj)->scroll.state;
     }
     // matching: the texture index is loaded as a symbol address (lui/addiu), not as a literal
-    if (mode == 0 || mode == 2) {
+    if (mode == TASK_FLAG_OFF || mode == TASK_FLAG_GOING_ON) {
         texture = (s32)&D_2C1;
     } else {
         texture = (s32)&D_1C0;
     }
-    if (mode == 0 || mode == 3) {
+    if (mode == TASK_FLAG_OFF || mode == TASK_FLAG_ON) {
         scroll->speed = 0.0f;
         scroll->unkC = 0.0f;
-    } else if (mode == 2) {
+    } else if (mode == TASK_FLAG_GOING_ON) {
         if (scroll->speed < 300.0f) {
             scroll->speed += 25.0f * D_800BE9E4;
         } else {
             scroll->speed = 300.0f;
         }
-    } else if (mode == 1) {
+    } else if (mode == TASK_FLAG_GOING_OFF) {
         s32 t;
         s32 startT;
 
@@ -131,8 +131,8 @@ void func_150C4E9C(WorldObject *obj) {
             }
             if (t >= startT && t - scroll->speed <= startT) {
                 scroll->speed = t - startT;
-                obj->behaviorState &= ~3;
-                obj->behaviorState |= 3; // mode 3: stopped
+                obj->task_flag &= ~TASK_FLAG_STATE;
+                obj->task_flag |= TASK_FLAG_ON; // mode 3: stopped
             }
         }
     }

@@ -35,16 +35,16 @@ s32 func_150E1570(Actor *source, f32 fromX, f32 fromY, f32 fromZ, f32 toX, f32 t
     length = sqrtf((dx * dx) + (dy * dy) + (dz * dz));
 
     if (source != NULL) {
-        sourceIndex = source->unk124 - 1;
+        sourceIndex = source->owner - 1;
     } else {
         sourceIndex = -1;
     }
 
     best = -1;
-    obj = D_800CC2D0;
+    obj = movement_obj;
     for (i = 0; i < 25; i++, obj++) {
-        if (obj->interaction_state != 0 && i != skipIndex && obj->health != 0 && !obj->immune && i != sourceIndex) {
-            hit = func_15049440(view, obj->x_position, obj->y_position + (f32)obj->unkD6, obj->z_position,
+        if (obj->type != 0 && i != skipIndex && obj->energy != 0 && !obj->imune && i != sourceIndex) {
+            hit = func_15049440(view, obj->xpos, obj->ypos + (f32)obj->unkD6, obj->zpos,
                                 (f32)obj->unkD2, (f32)obj->unkD4, 0.0f, length, 10.0f, 10.0f);
             if (hit != 0 && (best == -1 || hit < bestHit)) {
                 best = i;
@@ -54,10 +54,10 @@ s32 func_150E1570(Actor *source, f32 fromX, f32 fromY, f32 fromZ, f32 toX, f32 t
     }
 
     if (best != -1) {
-        obj = &D_800CC2D0[best];
-        result = func_1505D1C4(obj->x_position, (f32)obj->unkD6 + obj->y_position, obj->z_position, effect,
-                               D_800C3E78, 0, 0, 0);
-        obj->unk76 = source->unk76;
+        obj = &movement_obj[best];
+        result = func_1505D1C4(obj->xpos, (f32)obj->unkD6 + obj->ypos, obj->zpos, effect,
+                               dc_glbl_CharNum, 0, 0, 0);
+        obj->angle = source->angle;
     }
     return result;
 }

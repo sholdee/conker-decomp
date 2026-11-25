@@ -42,14 +42,14 @@ extern u8 D_1A37E0[];
 extern s32 func_1502B9B4(s32, s32, ...);
 extern u32 func_1502B8E0(void *, s32, s32, s32, ...);
 extern void *allocate_memory(s32, s32, s32, s32);
-extern void func_15017114(s32 level);
+extern void func_15017114(s32 levelId);
 extern u8 func_15083DA0(void);
 extern void func_1508295C(s32 arg0, s32 arg1, s32 arg2);
 extern void func_15172CA8(s32 arg0);
 
-/* Loads the spawn table for `level` (base entries from ROM plus the level's own), then fills in one
+/* Loads the spawn table for `levelId` (base entries from ROM plus the level's own), then fills in one
  * entry per player slot (the first D_8008FD8C) from the type func_150859AC reports and the slot's object. */
-void func_150169A0(s32 level) {
+void func_150169A0(s32 levelId) {
     s32 j;
     u8 *romEnd;
     u8 *romStart;
@@ -59,7 +59,7 @@ void func_150169A0(s32 level) {
     s32 i;
 
     func_15004F30();
-    switch (level) {
+    switch (levelId) {
     case 26:
     case 36:
     case 43:
@@ -77,12 +77,12 @@ void func_150169A0(s32 level) {
         break;
     }
     size = romEnd - romStart;
-    D_800D20FC = allocate_memory(func_1502B9B4(2, 0xE, level) + size, 1, 2, 0);
+    D_800D20FC = allocate_memory(func_1502B9B4(2, 0xE, levelId) + size, 1, 2, 0);
     func_10004514((s32)romStart, D_800D20FC, size, 1);
     D_800D2100 = size / sizeof(SpawnRecord);
     D_800D2101 = D_800D2100;
-    D_800D2100 += func_1502B8E0(&D_800D20FC[D_800D2100], 0, 2, 0xE, level) / sizeof(SpawnRecord);
-    func_15017114(level);
+    D_800D2100 += func_1502B8E0(&D_800D20FC[D_800D2100], 0, 2, 0xE, levelId) / sizeof(SpawnRecord);
+    func_15017114(levelId);
     count = D_800D2100;
     D_800D210C = allocate_memory(count, 1, 0, 0);
     size = count * sizeof(s16);
@@ -98,7 +98,7 @@ players: // matching: unused label splits the basic block; IDO schedules the loo
             D_800D20FC[i].unk2 = 0;
             switch (type) {
             case 0:
-                if (D_800BE9F0 == 0x36 || D_800BE9F0 == 0x3A || D_800BE9F0 == 0x40) {
+                if (level == 0x36 || level == 0x3A || level == 0x40) {
                     D_800D20FC[i].type = 0x96;
                 } else {
                     D_800D20FC[i].type = 0;
@@ -212,15 +212,15 @@ players: // matching: unused label splits the basic block; IDO schedules the loo
                 D_800D20FC[i].objFlags |= 1;
                 break;
             }
-            if (D_800BE9F0 == 0x33 || D_800BE9F0 == 0x32) {
+            if (level == 0x33 || level == 0x32) {
                 D_800D20FC[i].objFlags |= 0x4000000;
             }
-            obj = D_800CC2D0;
-            obj += i | 0; // matching: `| 0` keeps IDO from strength-reducing &D_800CC2D0[i] into a loop pointer
-            D_800D20FC[i].x = obj->x_position;
-            D_800D20FC[i].y = obj->y_position;
-            D_800D20FC[i].z = obj->z_position;
-            D_800D20FC[i].angle = obj->unk76 >> 8;
+            obj = movement_obj;
+            obj += i | 0; // matching: `| 0` keeps IDO from strength-reducing &movement_obj[i] into a loop pointer
+            D_800D20FC[i].x = obj->xpos;
+            D_800D20FC[i].y = obj->ypos;
+            D_800D20FC[i].z = obj->zpos;
+            D_800D20FC[i].angle = obj->angle >> 8;
             continue;
         }
         D_800D20FC[i].unk2 = 1;
@@ -231,9 +231,9 @@ players: // matching: unused label splits the basic block; IDO schedules the loo
             D_800D20FC[j].unique_id = func_15083DA0();
         }
     }
-    func_1508295C(level, 1, 1);
+    func_1508295C(levelId, 1, 1);
     func_15172CA8(0);
-    func_1508295C(level, 1, 0);
+    func_1508295C(levelId, 1, 0);
 }
 
 /* An entry of the level's path table: the path's byte offset from the table start and its point count. */
@@ -244,7 +244,7 @@ typedef struct {
 
 /* Allocates one path per spawn entry: an empty two-point path for each player slot, and the level's own
  * paths for the level-specific spawn entries. */
-void func_15017114(s32 level) {
+void func_15017114(s32 levelId) {
     s16 count;
     PathTableEntry *table;
     s32 i;
@@ -262,7 +262,7 @@ void func_15017114(s32 level) {
         bzero(D_800D2104[i], 2 * sizeof(PathPoint));
         D_800D2108[i] = 2;
     }
-    if (func_1502B7F0((void **)&table, 2, 0x10, level) != 0) {
+    if (func_1502B7F0((void **)&table, 2, 0x10, levelId) != 0) {
         for (i = D_800D2101; i < D_800D2100; i++) {
             if (table[i - D_800D2101].offset != 0) {
                 D_800D2108[i] = table[i - D_800D2101].count;

@@ -14,8 +14,8 @@ extern void func_150E2DB4(Actor *owner, u8 ownerId, s16 bone, s32 ownerTag, f32 
                           f32 startZ, f32 endX, f32 endY, f32 endZ, s16 onTime, s16 offTime, u16 lifetime, u8);
 extern void func_15179008(s32);
 
-/* If object idA (else idB) has bit 0 of its D_800DBF94 flag word set, calls func_1505D024 on
- * D_800CC2D0[0] with 0x6E00 (else 0xEE00). Does nothing while D_800CC3D4[0] is set. */
+/* If object idA (else idB) has bit 0 of its gWorldObjectContacts flag word set, calls func_1505D024 on
+ * movement_obj[0] with 0x6E00 (else 0xEE00). Does nothing while D_800CC3D4[0] is set. */
 void func_150AF200(s32 idA, s32 idB) {
     WorldObject *obj;
     s32 index;
@@ -25,16 +25,16 @@ void func_150AF200(s32 idA, s32 idB) {
     }
 
     obj = func_151149AC(idA);
-    index = obj - D_800DBEF4;
-    if (D_800DBF94[index] & 1) {
-        func_1505D024(&D_800CC2D0[0], 0x3F, 0x6E00, -1);
+    index = obj - db_Object_array;
+    if (gWorldObjectContacts[index] & 1) {
+        func_1505D024(&movement_obj[0], 0x3F, 0x6E00, -1);
         return;
     }
 
     obj = func_151149AC(idB);
-    index = obj - D_800DBEF4;
-    if (D_800DBF94[index] & 1) {
-        func_1505D024(&D_800CC2D0[0], 0x3F, 0xEE00, -1);
+    index = obj - db_Object_array;
+    if (gWorldObjectContacts[index] & 1) {
+        func_1505D024(&movement_obj[0], 0x3F, 0xEE00, -1);
     }
 }
 
@@ -343,7 +343,7 @@ typedef struct Node150AFDB0 {
 
 extern Node150AFDB0 *D_800DCE94;
 
-/* Releases (func_1516972C) every node of the D_800DCE94 list whose unk3F is D_800C3E78. Each
+/* Releases (func_1516972C) every node of the D_800DCE94 list whose unk3F is dc_glbl_CharNum. Each
  * node's successor is saved on the D_800DD198 iteration stack first, so releasing it is safe. */
 void func_150AFDB0(void) {
     Node150AFDB0 *node;
@@ -351,7 +351,7 @@ void func_150AFDB0(void) {
     D_800DD190++;
     for (node = D_800DCE94; node != NULL; node = D_800DD198[D_800DD190]) {
         D_800DD198[D_800DD190] = node->header.next;
-        if (node->unk3F == D_800C3E78) {
+        if (node->unk3F == dc_glbl_CharNum) {
             func_1516972C(&node->header);
         }
     }
@@ -370,14 +370,14 @@ void func_150AFE64(s32 altBone) {
     s32 bone;
     f32 (*mtx)[4];
 
-    if (D_800D154C->unk1D4 != NULL) {
+    if (D_800D154C->ob_matrix_ptr != NULL) {
         if (altBone == 0) {
             bone = 3;
         } else {
             bone = 2;
         }
 
-        mtx = D_800D154C->unk1D4[bone];
+        mtx = D_800D154C->ob_matrix_ptr[bone];
         startX = 0.0f;
         startY = 0.0f;
         startZ = -20.0f;
@@ -395,9 +395,9 @@ void func_150AFE64(s32 altBone) {
     }
 }
 
-/* Runs func_150AF200 on objects 0xE2/0xE1 (after func_15179008(0)) when D_800BE9F0 is 6, else on 0xDF/0xDE. */
+/* Runs func_150AF200 on objects 0xE2/0xE1 (after func_15179008(0)) when level is 6, else on 0xDF/0xDE. */
 void func_150B003C(s32 arg0) {
-    if (D_800BE9F0 == 6) {
+    if (level == 6) {
         func_15179008(0);
         func_150AF200(0xE2, 0xE1);
         return;
@@ -515,9 +515,9 @@ extern const f32 D_8009F7A4[5];
 void func_150B0348(Actor *obj, u8 arg1, s32 arg2) {
     Vec3f pos;
 
-    pos.x = obj->x_position;
-    pos.y = obj->y_position + 30.0f;
-    pos.z = obj->z_position;
+    pos.x = obj->xpos;
+    pos.y = obj->ypos + 30.0f;
+    pos.z = obj->zpos;
     {
         SpriteBurst burst;
 

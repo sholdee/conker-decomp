@@ -102,17 +102,17 @@ void func_1510DA84(Shadow *shadow) {
     switch (shadow->ownerType) {
         case 0:
             obj = (Actor *)shadow->owner;
-            x = obj->x_position;
-            ownerY = obj->y_position;
-            z = obj->z_position;
+            x = obj->xpos;
+            ownerY = obj->ypos;
+            z = obj->zpos;
             floorY = obj->floorY;
-            if (obj->id == 0x25) {
+            if (obj->character_type == 0x25) {
                 ownerY = floorY;
             }
-            triPtrs = obj->unk188;
+            triPtrs = obj->floorTriVerts;
             tri = obj->floorTri.v;
-            scale = (f32)(u32)obj->unk160 * obj->xz_scale; // matching: the (u32) gives the unsigned-convert fixup
-            angle = (obj->unk7A >> 8) + 0x20;
+            scale = (f32)(u32)obj->shadow_size * obj->scale_xz; // matching: the (u32) gives the unsigned-convert fixup
+            angle = (obj->langle >> 8) + 0x20;
             break;
         case 1:
             prop = (WorldObject *)shadow->owner;
@@ -122,13 +122,13 @@ void func_1510DA84(Shadow *shadow) {
             tri = prop->shadow->floorTri;
             if (func_150A3FC4(prop->x, prop->z, 0, tri, &floorY) == 0) {
                 func_1510E7A4(0, tri, &floorY, 0, 0, 0, prop->x, prop->y, prop->z, prop->y,
-                              prop->index + 1, 0, -10000.0f, prop->y);
+                              prop->object_num + 1, 0, -10000.0f, prop->y);
             }
             triPtrs = NULL;
             x = prop->x;
             ownerY = prop->y;
             z = prop->z;
-            scale = (f32)(prop->unk4D * 4) * prop->scaleX;
+            scale = (f32)(prop->shadowSize * 4) * prop->xScale;
             angle = 0;
             break;
     }
@@ -247,7 +247,7 @@ Gfx *func_1510E120(Gfx *gfx, Shadow *shadow, s16 view) {
             case 1: {
                 WorldObject *prop = (WorldObject *)shadow->owner;
 
-                ownerAlpha = (prop->alpha * prop->viewAlpha[view] + 0xFF) >> 8;
+                ownerAlpha = (prop->alpha * prop->dst_fade_alpha[view] + 0xFF) >> 8;
                 break;
             }
         }

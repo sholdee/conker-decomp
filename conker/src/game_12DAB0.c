@@ -13,8 +13,8 @@ typedef struct {
     /* 0x08 */ Vec3f unk8;
     /* 0x14 */ Vec3f unk14;
     /* 0x20 */ u8 unk20;
-    /* 0x21 */ s8 ownerSlot;        /* owner's index in D_800CC2D0 */
-    /* 0x22 */ u8 unk22;            /* owner->camera->playerIndex, 0xFF without a camera */
+    /* 0x21 */ s8 ownerSlot;        /* owner's index in movement_obj */
+    /* 0x22 */ u8 unk22;            /* owner->camera->CNumber, 0xFF without a camera */
     /* 0x23 */ u8 unk23;
     /* 0x24 */ u8 *particleA;       /* func_15130374 particle */
     /* 0x28 */ u8 *subParticle;     /* func_1513D4B8 particle */
@@ -106,9 +106,9 @@ EffectParticle *func_15100600(Actor *owner, Vec3f *vec1, Vec3f *vec2, u8 arg3, s
     } else {
         hasLifetime = TRUE;
     }
-    data.ownerSlot = owner - D_800CC2D0;
-    if (owner->camera != NULL) {
-        data.unk22 = owner->camera->playerIndex;
+    data.ownerSlot = owner - movement_obj;
+    if (owner->CameraPtr != NULL) {
+        data.unk22 = owner->CameraPtr->CNumber;
     } else {
         data.unk22 = 0xFF;
     }
@@ -139,7 +139,7 @@ EffectParticle *func_15100600(Actor *owner, Vec3f *vec1, Vec3f *vec2, u8 arg3, s
     data.unk80 = 127.0f;
     data.unk88 = 20.0f;
     data.unk8C = 0.400000006f;
-    if (owner->camera != NULL) {
+    if (owner->CameraPtr != NULL) {
         data.sound = func_10010F30(0x4D0, 2000, 0x40, 0, 0);
     } else {
         data.sound = 0;

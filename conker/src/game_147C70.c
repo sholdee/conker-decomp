@@ -23,14 +23,14 @@ typedef struct {
     s32 unk24;
 } Game147C70Ripple;
 
-/* Behaviour scratch state (WorldObject.work) of the rippling mesh. param bits 0-7: wobble size, 16-31: ripple radius. */
+/* Behaviour scratch state (WorldObject.touch) of the rippling mesh. param bits 0-7: wobble size, 16-31: ripple radius. */
 typedef struct {
     /* 0x7C */ s32 unk7C;
     /* 0x80 */ Game147C70Ripple *ripple;
     /* 0x84 */ s32 wobblePhases; /* four packed u8 phases */
 } Game147C70Work;
 
-#define WORK(obj) ((Game147C70Work *)&(obj)->work)
+#define WORK(obj) ((Game147C70Work *)&(obj)->touch)
 
 /* Starts a ripple: full amplitude, phase reset and all vertex heights cleared. */
 void func_1511A7C0(WorldObject *mesh) {
@@ -87,7 +87,7 @@ void func_1511A838(WorldObject *mesh) {
     f32 dz;
 
     base = &mesh->srcVertices->v;
-    wobbleSize = mesh->param.word & 0xFF;
+    wobbleSize = mesh->moveData.word & 0xFF;
     if (WORK(mesh)->ripple == NULL) {
         WORK(mesh)->ripple = allocate_memory(sizeof(Game147C70Ripple), 1, 0, 0);
         ripple = WORK(mesh)->ripple;
@@ -96,7 +96,7 @@ void func_1511A838(WorldObject *mesh) {
         heights = ripple->heights; // matching: IDO reloads heights from the struct only with this split form
         ripple->followRates = followRates = allocate_memory(mesh->numVertices * sizeof(f32), 1, 0, 0);
         ripple->falloffs = falloffs = allocate_memory(mesh->numVertices * sizeof(f32), 1, 0, 0);
-        radius = (mesh->param.word >> 16) & 0xFFFF;
+        radius = (mesh->moveData.word >> 16) & 0xFFFF;
         if (radius == 0.0f) {
             invRadius = 1.0f;
         } else {
@@ -137,9 +137,9 @@ void func_1511A838(WorldObject *mesh) {
     heights = ripple->heights;
     followRates = ripple->followRates;
     falloffs = ripple->falloffs;
-    if ((mesh->behaviorState & 3) == 3) {
+    if ((mesh->task_flag & TASK_FLAG_STATE) == TASK_FLAG_ON) {
         func_1511A7C0(mesh);
-        mesh->behaviorState &= ~3;
+        mesh->task_flag &= ~TASK_FLAG_STATE;
     }
     if (ripple->active) {
         prevPhase = ripple->phase;

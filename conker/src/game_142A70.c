@@ -10,7 +10,7 @@
 extern s32 func_10010E78(u16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /*
- * Behaviour scratch state (WorldObject.work) of the objects in this file. The param word packs each
+ * Behaviour scratch state (WorldObject.touch) of the objects in this file. The param word packs each
  * behaviour's settings (see each function).
  */
 typedef union {
@@ -29,7 +29,7 @@ typedef union {
     } seesaw;
 } Work142A70;
 
-#define WORK(obj) ((Work142A70 *)&(obj)->work)
+#define WORK(obj) ((Work142A70 *)&(obj)->touch)
 
 /* Moves the object vertically to a target height while triggered, waits, then returns home.
  * param: s16 target y | u8 steps << 16 | u8 (wait frames - 1) << 24. */
@@ -43,13 +43,13 @@ void func_151155C0(WorldObject *obj) {
     s32 step;
     s16 next;
 
-    steps = (u8)(obj->param.word >> 16);
-    waitFrames = (u8)(obj->param.word >> 24) + 1;
-    target = (s16)obj->param.word;
+    steps = (u8)(obj->moveData.word >> 16);
+    waitFrames = (u8)(obj->moveData.word >> 24) + 1;
+    target = (s16)obj->moveData.word;
     triggered = FALSE;
     moving = FALSE;
     startY = obj->y;
-    if ((obj->flags & 4) == 4) {
+    if ((obj->object_status & 4) == 4) {
         triggered = TRUE;
     }
     if (WORK(obj)->liftY.homeY == 0) {
@@ -127,17 +127,17 @@ void func_1511575C(WorldObject *obj) {
     s32 triggered;
     u16 soundId;
 
-    frames = obj->param.word >> 16;
-    dx = (s8)obj->param.word << 6;
-    dy = (s8)(obj->param.word >> 24) << 6;
-    dz = (s16)((s8)(obj->param.word >> 8) << 6);
+    frames = obj->moveData.word >> 16;
+    dx = (s8)obj->moveData.word << 6;
+    dy = (s8)(obj->moveData.word >> 24) << 6;
+    dz = (s16)((s8)(obj->moveData.word >> 8) << 6);
     triggered = FALSE;
     soundId = WORK(obj)->liftXYZ.sound;
     startX = obj->x;
     startY = obj->y;
     startZ = obj->z;
     handle = (u16)(WORK(obj)->liftXYZ.sound >> 16);
-    if ((obj->flags & 4) == 4) {
+    if ((obj->object_status & 4) == 4) {
         triggered = TRUE;
     }
     if (WORK(obj)->liftXYZ.homeXY == 0) {
@@ -217,11 +217,11 @@ void func_15115E0C(WorldObject *obj, Actor *player) {
     f32 dx;
     f32 dz;
 
-    sinYaw = func_150AD780(obj->rotY * 0.01745329238f);
-    cosYaw = func_150AD78C(obj->rotY * 0.01745329238f);
-    dx = player->x_position - (f32)obj->x;
-    dz = player->z_position - (f32)obj->z;
-    if ((obj->flags & 4) == 4) {
+    sinYaw = func_150AD780(obj->u * 0.01745329238f);
+    cosYaw = func_150AD78C(obj->u * 0.01745329238f);
+    dx = player->xpos - (f32)obj->x;
+    dz = player->zpos - (f32)obj->z;
+    if ((obj->object_status & 4) == 4) {
         WORK(obj)->seesaw.weightX += (cosYaw * dx + sinYaw * dz);
         WORK(obj)->seesaw.weightZ -= (cosYaw * dz + sinYaw * dx);
     }
@@ -235,7 +235,7 @@ void func_15115EDC(WorldObject *obj, Actor *player) {
     oldX = WORK(obj)->seesaw.weightX;
     oldZ = WORK(obj)->seesaw.weightZ;
     func_15115E0C(obj, player);
-    if (player->unk84.uh == 0x4B) {
+    if (player->animseq.uh == 0x4B) {
         // matching: the old values are reused to hold this frame's extra gain
         oldX = (WORK(obj)->seesaw.weightX - oldX) * 4.0f;
         oldZ = (WORK(obj)->seesaw.weightZ - oldZ) * 4.0f;
@@ -252,17 +252,17 @@ void func_15115F68(WorldObject *obj) {
     s8 minTilt;
 
     // matching: two assignments per line steer as1's -g3 scheduling
-    divisor = obj->param.word; bias = obj->param.word >> 16;
-    maxTilt = obj->param.word >> 8; minTilt = obj->param.word >> 24;
+    divisor = obj->moveData.word; bias = obj->moveData.word >> 16;
+    maxTilt = obj->moveData.word >> 8; minTilt = obj->moveData.word >> 24;
     if (divisor) {
-        obj->rotX += (WORK(obj)->seesaw.weightX / divisor) + bias;
+        obj->t += (WORK(obj)->seesaw.weightX / divisor) + bias;
     } else {
-        obj->rotX += (s32)(bias * D_800BE9E4);
+        obj->t += (s32)(bias * D_800BE9E4);
     }
-    if (maxTilt < obj->rotX) {
-        obj->rotX = maxTilt;
-    } else if (obj->rotX < minTilt) {
-        obj->rotX = minTilt;
+    if (maxTilt < obj->t) {
+        obj->t = maxTilt;
+    } else if (obj->t < minTilt) {
+        obj->t = minTilt;
     }
     WORK(obj)->seesaw.weightZ = 0.0f;
     WORK(obj)->seesaw.weightX = 0.0f;
@@ -276,8 +276,8 @@ void func_15116058(WorldObject *obj) {
     s32 i;
 
     // matching: IDO only emits this register order for the explicit sign-extension shifts
-    ds = (((obj->param.word >> 16) & 0xFFFF) << 16) >> 16;
-    dt = ((obj->param.word & 0xFFFF) << 16) >> 16;
+    ds = (((obj->moveData.word >> 16) & 0xFFFF) << 16) >> 16;
+    dt = ((obj->moveData.word & 0xFFFF) << 16) >> 16;
     for (i = 0; i < obj->numVertices; i++) {
         obj->vertices[D_800BE9C0][i].v.tc[0] = obj->vertices[!D_800BE9C0][i].v.tc[0] + ds;
         obj->vertices[D_800BE9C0][i].v.tc[1] = obj->vertices[!D_800BE9C0][i].v.tc[1] + dt;

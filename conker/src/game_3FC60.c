@@ -36,8 +36,8 @@ void func_150127B0(void) {
             }
         }
         if (D_800B0DF0->vtxColorFlags & 2) {
-            for (i = 0; i < D_800DBEF0; i++) {
-                total += D_800DBEF4[i].numVertices;
+            for (i = 0; i < gWorldObjectCount; i++) {
+                total += db_Object_array[i].numVertices;
             }
         }
         if ((D_800BE510 = allocate_memory(total * 3, 1, 0, 0)) == NULL) {
@@ -57,11 +57,11 @@ void func_150127B0(void) {
             }
         }
         if (D_800B0DF0->vtxColorFlags & 2) {
-            D_800BE524 = allocate_memory(D_800DBEF0 * 2, 1, 0, 0);
-            for (i = 0; i < D_800DBEF0; i++) {
-                if (D_800DBEF4[i].numVertices != 0) {
+            D_800BE524 = allocate_memory(gWorldObjectCount * 2, 1, 0, 0);
+            for (i = 0; i < gWorldObjectCount; i++) {
+                if (db_Object_array[i].numVertices != 0) {
                     D_800BE524[i] = D_800BE528;
-                    func_15012C84(D_800DBEF4[i].srcVertices, D_800DBEF4[i].numVertices);
+                    func_15012C84(db_Object_array[i].srcVertices, db_Object_array[i].numVertices);
                 } else {
                     D_800BE524[i] = 0xFFFF;
                 }
@@ -79,7 +79,7 @@ void func_150127B0(void) {
                         if (i < 4) {
                             src = D_800B0E10[i];
                         } else {
-                            src = D_800DBEF4[i - 4].srcVertices;
+                            src = db_Object_array[i - 4].srcVertices;
                         }
                         for (k = 0; k < b[j].count; k++) {
                             D_800BE520[i][j][k][0] = src[b[j].vertexIndices[k]].v.cn[0];

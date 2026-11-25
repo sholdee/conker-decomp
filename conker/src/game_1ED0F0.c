@@ -175,10 +175,10 @@ s32 func_151C02E4(Actor *obj, Actor *self, s32 ignoreCount, Actor **ignore) {
     if (obj == self) {
         return FALSE;
     }
-    if (obj->interaction_state == 0) {
+    if (obj->type == 0) {
         return FALSE;
     }
-    if (obj->id == 0xFF) {
+    if (obj->character_type == 0xFF) {
         return FALSE;
     }
     return TRUE;
@@ -243,11 +243,6 @@ void func_151C0644(Vec3f *pos, u8 fxOwner, s32 fxList) {
     func_150E83AC(pos, func_150ADA20() % 62 + 120, fxOwner, fxList);
 }
 
-/* Objects the bullet trace ignores (see func_151C1940). */
-typedef struct {
-    /* 0x00 */ s32 count;
-    /* 0x04 */ Actor *objs[3];
-} IgnoreList;
 
 typedef struct {
     /* 0x00 */ EffectHeader header;
@@ -349,56 +344,56 @@ void func_151C0698(Actor *shooter, Actor *aimer, IgnoreList *ignore, u8 impactTy
 
     passDist = 0.0f;
     if (D_800BE616 != 0) {
-        if (shooter->unk1D4 != NULL) {
+        if (shooter->ob_matrix_ptr != NULL) {
             func_151C1798(shooter, &pos);
         } else {
-            pos.x = shooter->x_position;
-            pos.y = shooter->y_position + 65.0f;
-            pos.z = shooter->z_position;
+            pos.x = shooter->xpos;
+            pos.y = shooter->ypos + 65.0f;
+            pos.z = shooter->zpos;
         }
     } else {
-        src = &shooter->unk31C->aimEye;
-        obj = shooter->camera;
+        src = &shooter->mv->aimEye;
+        obj = shooter->CameraPtr;
         if (obj != NULL) {
-            if (shooter->unk65 != 0) {
+            if (shooter->attach_char != 0) {
 lbl1: // matching: an unused label splits IDO's basic block here (register choice)
                 pos.x = src->x;
                 pos.y = src->y + -13.0f;
                 pos.z = src->z;
-            } else if (shooter->unk31C->aimState != 0) {
+            } else if (shooter->mv->SniperState != 0) {
                 extern u8 D_800BE616; // matching: a declaration makes this an IDO scope block (register choice)
 
-                angle = func_15144AA8(((Camera *)obj)->playerIndex, obj) * 0.01745329238f;
+                angle = func_15144AA8(((Camera *)obj)->CNumber, obj) * 0.01745329238f;
                 pos.x = cosf(angle) * 25.0f + src->x;
                 pos.y = src->y;
                 pos.z = src->z - sinf(angle) * 25.0f;
-            } else if (shooter->unk1D4 != NULL) {
+            } else if (shooter->ob_matrix_ptr != NULL) {
                 func_151C1798(shooter, &pos);
             } else {
-                pos.x = shooter->x_position;
-                pos.y = shooter->y_position + 65.0f;
-                pos.z = shooter->z_position;
+                pos.x = shooter->xpos;
+                pos.y = shooter->ypos + 65.0f;
+                pos.z = shooter->zpos;
             }
-        } else if (shooter->unk1D4 != NULL) {
+        } else if (shooter->ob_matrix_ptr != NULL) {
             func_151C1798(shooter, &pos);
         } else {
-            pos.x = shooter->x_position;
-            pos.y = shooter->y_position + 65.0f;
-            pos.z = shooter->z_position;
+            pos.x = shooter->xpos;
+            pos.y = shooter->ypos + 65.0f;
+            pos.z = shooter->zpos;
         }
     }
 
-    if ((shooter->unk31C != NULL && shooter->unk31C->aimState != 0) || aimer != NULL) {
+    if ((shooter->mv != NULL && shooter->mv->SniperState != 0) || aimer != NULL) {
         extern u8 D_800BE616; // matching: a declaration makes this an IDO scope block (register choice)
 
         who = (aimer != NULL) ? aimer : shooter;
 
         useAim = TRUE;
-        src = &who->unk31C->aimEye;
+        src = &who->mv->aimEye;
         aimPos = *src;
-        aimDir.x = who->unk31C->aimDir.x;
-        aimDir.y = who->unk31C->aimDir.y;
-        aimDir.z = who->unk31C->aimDir.z;
+        aimDir.x = who->mv->aimDir.x;
+        aimDir.y = who->mv->aimDir.y;
+        aimDir.z = who->mv->aimDir.z;
     } else {
         func_15145740(shooter, &dir, scratch, 0, 0.0f);
         useAim = FALSE;
@@ -407,7 +402,7 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
         dir.z *= 0.001000000047f;
     }
 
-    if (D_800BE9F0 == 36) {
+    if (level == 36) {
         mode = 0;
     } else {
         mode = func_151D5B6C(useAim ? &aimPos : &pos, useAim ? &aimDir : &dir, shooter, 3, ignore);
@@ -501,8 +496,8 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
                 func_1516972C(&state.follow->header);
             }
         }
-        if (shooter->unk1D4 != NULL && (shooter->unk74 & 0xF) != 0xF) {
-            if (shooter->id != 0x77 && shooter->id != 0x28) {
+        if (shooter->ob_matrix_ptr != NULL && (shooter->unk74 & 0xF) != 0xF) {
+            if (shooter->character_type != 0x77 && shooter->character_type != 0x28) {
                 const Vec3f a = { 3.0f, 125.0f, 35.0f };
                 const Vec3f b = { 6.0f, -50.0f, 35.0f };
                 const Vec3f c = { 3.0f, 200.0f, 35.0f };
@@ -518,7 +513,7 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
                 in[1] = &b;
                 out[0] = &outA;
                 out[1] = &outB;
-                func_15145EA4(in, out, &shooter->unk1D4[9], 2);
+                func_15145EA4(in, out, &shooter->ob_matrix_ptr[9], 2);
                 func_15102B38(shooter, 9, &a, &c, scale, func_150ADA20() % 3 + 8,
                               func_150ADA20() % 56 + 200, func_150ADA68() * 204.0f + 601.0f,
                               &outA, 0xFF, 0, -1, fxOwner, fxList);
@@ -693,14 +688,20 @@ void func_151C1654(Vec3f *pos, Vec3f *dir, Actor *owner, u8 impactType, Collisio
 }
 
 void func_15143134(Vec3f *, Vec3f *, MtxF *);
-extern u8 D_800AA954[];      /* bone index per muzzle */
-extern Vec3f D_800AA958[];  /* muzzle offset in bone space */
+/* Bone index per muzzle. */
+const u8 D_800AA954[3] = { 9, 4, 4 };
+/* Muzzle offset in bone space. */
+const Vec3f D_800AA958[3] = {
+    { 5.0f, 29.0f, 37.0f },
+    { 0.0f, 0.0f, 70.0f },
+    { 0.0f, 0.0f, 70.0f },
+};
 
 /* World position of obj's gun muzzle, from its bone matrices. */
 void func_151C1798(Actor *obj, Vec3f *pos) {
     s32 index;
 
-    switch (obj->id) {
+    switch (obj->character_type) {
     case 0x77:
         index = 1;
         break;
@@ -711,7 +712,7 @@ void func_151C1798(Actor *obj, Vec3f *pos) {
         index = 0;
         break;
     }
-    func_15143134(&D_800AA958[index], pos, &obj->unk1D4[D_800AA954[index]]);
+    func_15143134(&D_800AA958[index], pos, &obj->ob_matrix_ptr[D_800AA954[index]]);
 }
 
 /* Event handler: event 0x2D hands the bullet's ownership between the two objects in pair. */
@@ -852,7 +853,7 @@ void func_151C1D5C(Actor *shooter, Vec3f *start, Vec3f *dir, RayHit *ray, f32 ar
         if (ray->surface != NULL) {
             WorldObject *p = ray->surface;
 
-            if ((p->flags & 0x60) == 0x40) {
+            if ((p->object_status & 0x60) == 0x40) {
                 pos.x = ray->pos.x + ray->dir.x * 0.1f;
                 part = p;
                 pos.y = ray->pos.y + ray->dir.y * 0.1f;
@@ -884,10 +885,10 @@ void func_151D8868(RumbleParams *, s32, s32, s32);
 void func_151C1FB8(Actor *obj) {
     RumbleParams event;
 
-    if (obj->camera != NULL) {
+    if (obj->CameraPtr != NULL) {
         event.flags = 1;
         event.duration = (func_150ADA20() & 7) + 13;
-        event.playerMask = 1 << obj->camera->playerIndex;
+        event.playerMask = 1 << obj->CameraPtr->CNumber;
         event.strength = func_150ADA20() % 3 + 6;
         event.updateKind = -1;
         func_151D8868(&event, 0, 0xFF, 1);

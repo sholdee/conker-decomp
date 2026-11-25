@@ -6,7 +6,7 @@ void func_150440A0(MtxF mtx, f32 eyeX, f32 eyeY, f32 eyeZ, f32 atX, f32 atY, f32
 
 /*
  * Rebuilds bone matrix `bone` of actor `actorIndex` as a look-at (func_150440A0) along the line
- * from the bone's position to D_800DBFF0's position (turned 90 degrees about Y when `quarterTurn`
+ * from the bone's position to camera_global_Cameras's position (turned 90 degrees about Y when `quarterTurn`
  * is set), keeping the bone's translation, then reapplies the actor's XZ and Y scale.
  */
 void func_15036310(s32 unused, s32 actorIndex, s32 bone, s32 quarterTurn) {
@@ -18,15 +18,15 @@ void func_15036310(s32 unused, s32 actorIndex, s32 bone, s32 quarterTurn) {
     Actor *actor;
     f32 swap;
 
-    actor = &D_800CC2D0[actorIndex];
-    if (actor->unk1D4 != NULL) {
-        mtx = actor->unk1D4[bone];
+    actor = &movement_obj[actorIndex];
+    if (actor->ob_matrix_ptr != NULL) {
+        mtx = actor->ob_matrix_ptr[bone];
         position[0] = mtx[3][0];
         position[1] = mtx[3][1];
         position[2] = mtx[3][2];
-        dir[0] = D_800DBFF0->eye.x - position[0];
-        dir[1] = D_800DBFF0->eye.y - position[1];
-        dir[2] = D_800DBFF0->eye.z - position[2];
+        dir[0] = camera_global_Cameras->eye.x - position[0];
+        dir[1] = camera_global_Cameras->eye.y - position[1];
+        dir[2] = camera_global_Cameras->eye.z - position[2];
         if (quarterTurn) {
             swap = dir[0];
             dir[0] = dir[2];
@@ -45,18 +45,18 @@ void func_15036310(s32 unused, s32 actorIndex, s32 bone, s32 quarterTurn) {
         func_150440A0(mtx, position[0], position[1], position[2],
                       position[0] - dir[0], position[1] - dir[1], position[2] - dir[2],
                       up[0], up[1], up[2]);
-        if (actor->xz_scale != 1.0f) {
-            mtx[0][0] *= actor->xz_scale;
-            mtx[1][0] *= actor->xz_scale;
-            mtx[2][0] *= actor->xz_scale;
-            mtx[0][2] *= actor->xz_scale;
-            mtx[1][2] *= actor->xz_scale;
-            mtx[2][2] *= actor->xz_scale;
+        if (actor->scale_xz != 1.0f) {
+            mtx[0][0] *= actor->scale_xz;
+            mtx[1][0] *= actor->scale_xz;
+            mtx[2][0] *= actor->scale_xz;
+            mtx[0][2] *= actor->scale_xz;
+            mtx[1][2] *= actor->scale_xz;
+            mtx[2][2] *= actor->scale_xz;
         }
-        if (actor->y_scale != 1.0f) {
-            mtx[0][1] *= actor->y_scale;
-            mtx[1][1] *= actor->y_scale;
-            mtx[2][1] *= actor->y_scale;
+        if (actor->scale_y != 1.0f) {
+            mtx[0][1] *= actor->scale_y;
+            mtx[1][1] *= actor->scale_y;
+            mtx[2][1] *= actor->scale_y;
         }
     }
 }

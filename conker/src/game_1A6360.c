@@ -211,7 +211,7 @@ void func_15179008(s32 player) {
     }
 }
 
-/* Centres the rain volume 500 units ahead of the camera (D_800DBFF0). */
+/* Centres the rain volume 500 units ahead of the camera (camera_global_Cameras). */
 void func_151794C8(void) {
     s32 x;
     s32 y;
@@ -223,19 +223,19 @@ void func_151794C8(void) {
     f32 s;
     f32 vx;
 
-    x = (s32)D_800DBFF0->eye.x;
-    y = (s32)D_800DBFF0->eye.y;
-    z = (s32)D_800DBFF0->eye.z;
+    x = (s32)camera_global_Cameras->eye.x;
+    y = (s32)camera_global_Cameras->eye.y;
+    z = (s32)camera_global_Cameras->eye.z;
 
     /* offset (0, 500, 0) rotated by unk398, then by unk3A0 */
-    angle = D_800DBFF0->pitchRad;
+    angle = camera_global_Cameras->CameraPitchRad;
     c = func_150AD78C(angle);
     s = func_150AD780(angle);
     vy = 500.0f * c;
     vz = -500.0f * s;
     vx = 0.0f;
 
-    angle = D_800DBFF0->unk3A0;
+    angle = camera_global_Cameras->TrueCameraAngleRad;
     c = func_150AD78C(angle);
     s = func_150AD780(angle);
     x += vx * s + vz * c;
@@ -265,9 +265,9 @@ void func_15179600(s32 scatterY, s32 dropFlags) {
     packet.flags = 0;
     func_1516865C(&packet, 0xFF, 0xFF, 0xFF, 0x50);
 
-    baseX = (s32)D_800DBFF0->eye.x;
-    baseY = (s32)D_800DBFF0->eye.y;
-    baseZ = (s32)D_800DBFF0->eye.z;
+    baseX = (s32)camera_global_Cameras->eye.x;
+    baseY = (s32)camera_global_Cameras->eye.y;
+    baseZ = (s32)camera_global_Cameras->eye.z;
 
     x = (func_150ADA20() % 500) + baseX;
     z = (func_150ADA20() % 500) + baseZ;
@@ -314,8 +314,8 @@ void func_151797B0(QuadFx *drop) {
     s16 cy;
     s16 cz;
 
-    dx = (f32)drop->data.z - D_800DBFF0->eye.z;
-    dz = (f32)drop->data.x - D_800DBFF0->eye.x;
+    dx = (f32)drop->data.z - camera_global_Cameras->eye.z;
+    dz = (f32)drop->data.x - camera_global_Cameras->eye.x;
     dist = sqrtf(dx * dx + dz * dz);
     alpha = 80.0f - (80.0f * dist) / 1000.0f;
     if (alpha < 0) {
@@ -442,8 +442,8 @@ void func_15179CB0(QuadFx *splash) {
     f32 dz;
     f32 dist;
 
-    dx = (f32)splash->data.z - D_800DBFF0->eye.z;
-    dz = (f32)splash->data.x - D_800DBFF0->eye.x;
+    dx = (f32)splash->data.z - camera_global_Cameras->eye.z;
+    dz = (f32)splash->data.x - camera_global_Cameras->eye.x;
     dist = sqrtf((dx * dx) + (dz * dz));
     splash->data.unkA4 = 255.0f - (160.0f * dist) / 1000.0f;
 }

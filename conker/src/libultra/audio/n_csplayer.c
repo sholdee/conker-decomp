@@ -134,11 +134,11 @@ void n_alCSPNew(N_ALCSPlayer *seqp, ALSeqpConfig *c)
     seqp->stopOsc       = c->stopOsc;
 
 #if 1
-    seqp->unk7C = 0.0f;
-    seqp->unk80 = 1.0f;
-    seqp->unk84 = 0;
-    seqp->unk8D = 0;
-    seqp->unk8C = c->maxVoices;
+    seqp->fxMixOffset = 0.0f;
+    seqp->fxMixScale = 1.0f;
+    seqp->msgQueue = 0;
+    seqp->voiceCount = 0;
+    seqp->voiceLimit = c->maxVoices;
 #endif
 
     seqp->nextEvent.type = AL_SEQP_API_EVT;  /* this will start the voice handler "spinning" */
@@ -284,8 +284,8 @@ ALMicroTime __n_CSPVoiceHandler(void *node)
                 break;
 
             case 25:
-                seqp->unk7C = seqp->nextEvent.msg.unknown0.unk0;
-                seqp->unk80 = seqp->nextEvent.msg.unknown0.unk4;
+                seqp->fxMixOffset = seqp->nextEvent.msg.unknown0.unk0;
+                seqp->fxMixScale = seqp->nextEvent.msg.unknown0.unk4;
                 for (vs = seqp->vAllocHead; vs != 0; ) {
                     if (vs->envPhase != 3) {
                         n_alSynSetFXMix(&vs->voice, func_1001B310(vs, seqp));
@@ -320,7 +320,7 @@ ALMicroTime __n_CSPVoiceHandler(void *node)
                         if (__alCSeqNextDelta(seqp->target, &deltaTicks)) {
                             evt.type = 0; /* AL_SEQ_REF_EVT */
                             if (oldState == 3)
-                                deltaTicks = *(s32 *)seqp->unk88;
+                                deltaTicks = seqp->pausedDelta;
                             n_alEvtqPostEvent(&seqp->evtq, &evt, deltaTicks, 0);
                         }
                     }
@@ -330,7 +330,7 @@ ALMicroTime __n_CSPVoiceHandler(void *node)
             case 16:
                 if (seqp->state == AL_PLAYING) {
                     seqp->state = 3;
-                    *(s32 *)seqp->unk88 = func_1001C4F0(&seqp->evtq, 0);
+                    seqp->pausedDelta = func_1001C4F0(&seqp->evtq, 0);
                 }
                 break;
 
@@ -663,8 +663,8 @@ static void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
                     D_80042810[chan] = deltaTime;
                     n_alEvtqPostEvent(&seqp->evtq, &evt, deltaTime, 0);
                 }
-                if ((cs->unk17 & 1) && seqp->unk84) {
-                    osSendMesg(seqp->unk84, (D_80042810[chan] & ~0xFF) | (cs->unk17 >> 2), 0);
+                if ((cs->unk17 & 1) && seqp->msgQueue) {
+                    osSendMesg(seqp->msgQueue, (D_80042810[chan] & ~0xFF) | (cs->unk17 >> 2), 0);
                 }
                 break;
             }
@@ -692,8 +692,8 @@ static void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
                                          vs->sound->envelope->releaseTime);
                 }
             }
-            if ((cs->unk17 & 2) && seqp->unk84) {
-                osSendMesg(seqp->unk84, (key << 16) | 8 | (cs->unk17 >> 2), 0);
+            if ((cs->unk17 & 2) && seqp->msgQueue) {
+                osSendMesg(seqp->msgQueue, (key << 16) | 8 | (cs->unk17 >> 2), 0);
             }
             break;
 

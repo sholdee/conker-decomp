@@ -1,24 +1,6 @@
 #include <n_libaudio.h>
 
 
-typedef struct {
-    s32 pad0;
-    u8  unk4;
-    s8  unk5; // used
-} struct152;
-
-typedef struct {
-    s32 pad0;
-    struct152 *unk4;
-} struct153;
-
-typedef struct {
-    u8  pad0[0xC];
-    struct153 *unkC;
-    u8  pad10[0x24];
-    f32 unk34;  // used
-} struct154;
-
 extern N_ALUnknownStruct1 *D_8002BA20;
 extern N_ALUnknownStruct1 *D_8002BA24;
 extern N_ALUnknownStruct1 *D_8002BA28;
@@ -188,7 +170,7 @@ void     func_10012C5C(ALSound *snd, s32 arg1, s32 waveRom);
 void     func_1001E2A0(N_ALVoice *v, u8 pan);
 void     func_1001E350(N_ALVoice *v, u8 fxmix);
 void     func_10016E90(N_ALUnknownStruct1 *arg0);
-void     func_10016F00(struct154 *arg0);
+void     func_10016F00(SndState *state);
 SndState *func_10017438(s32 arg0, s16 arg1, u16 arg2, u8 arg3, f32 arg4, u8 arg5, u8 arg6,
                          SndState **arg7);
 
@@ -345,7 +327,7 @@ void _n_handleEvent(SndEvent *event) {
                             evt.state = state;
                             n_alEvtqPostEvent(&D_8002BA2C->evtq, (N_ALEvent *)&evt, delta, 2);
                             if (state->unk53 & 0x20) {
-                                func_10016F00((struct154 *)state);
+                                func_10016F00(state);
                             }
                         } else {
                             evt.type = 0x40;
@@ -414,7 +396,7 @@ void _n_handleEvent(SndEvent *event) {
                     if (state->unk54 == 1) {
                         n_alSynSetPitch(&state->voice, state->pitch * state->ratio);
                         if (state->unk53 & 0x20) {
-                            func_10016F00((struct154 *)state);
+                            func_10016F00(state);
                         }
                     }
                     break;
@@ -487,7 +469,7 @@ void _n_handleEvent(SndEvent *event) {
                         evt.state = state;
                         n_alEvtqPostEvent(&D_8002BA2C->evtq, (N_ALEvent *)&evt, delta, 2);
                         if (state->unk53 & 0x20) {
-                            func_10016F00((struct154 *)state);
+                            func_10016F00(state);
                         }
                     }
                     break;
@@ -531,15 +513,15 @@ void func_10016E90(N_ALUnknownStruct1 *arg0) {
     func_10016F80(&D_8002BA2C->evtq, arg0, 0xFFFF);
 }
 
-void func_10016F00(struct154 *arg0) {
+/* Posts a pitch event (type 16) for `state`: its requested pitch times the key map's detune ratio. */
+void func_10016F00(SndState *state) {
     N_ALEvent event;
     f32 res;
 
-    res = alCents2Ratio(arg0->unkC->unk4->unk5) * arg0->unk34;
+    res = alCents2Ratio(state->snd->keyMap->detune) * state->pitch;
 
     event.type = 16;
-    /* TODO: check if this is the right struct */
-    event.msg.vol.voice = arg0;
+    event.msg.vol.voice = (N_ALVoice *)state; // the event carries the state, not a voice
     event.msg.vol.delta = *(s32*)&res;
 
     n_alEvtqPostEvent(&D_8002BA2C->evtq, &event, 33333, 2);
@@ -827,18 +809,6 @@ void func_10017714(s32 arg0, s16 type, s32 arg2) {
     }
 }
 
-/* The chan-config record hanging off N_ALUnknownStruct1.unkC (declared s32 in
- * the header); unk2's low 5 bits are the MIDI channel. */
-typedef struct {
-    /* 0x0 */ u8 pad0[0x2];
-    /* 0x2 */ u8 unk2;
-} struct155;
-
-typedef struct {
-    /* 0x0 */ s32 pad0;
-    /* 0x4 */ struct155 *unk4;
-} struct156;
-
 void func_10017780(u8 arg0, u16 arg1) {
     s32 mask;
     N_ALUnknownStruct1 *ptr;
@@ -849,7 +819,9 @@ void func_10017780(u8 arg0, u16 arg1) {
     ptr = D_8002BA20;
     D_800428B8[arg0] = arg1;
     for (count = 0; ptr != 0; count++, ptr = ptr->node.next) {
-        if ((ptr->unkC != 0) && ((((struct156 *)ptr->unkC)->unk4->unk2 & 0x1F) == arg0)) {
+        // N_ALUnknownStruct1.unkC (declared s32 in the header) is SndState.snd; the low 5 bits of its
+        // key map's keyMin select the sound's group, which indexes D_800428B8.
+        if ((ptr->unkC != 0) && ((((ALSound *)ptr->unkC)->keyMap->keyMin & 0x1F) == arg0)) {
             event.type = 0x800;
             event.msg.unknown1.unk0 = ptr;
             n_alEvtqPostEvent(&D_8002BA2C->evtq, &event, 0, 2);

@@ -25,7 +25,7 @@ void func_150CEF60(s32 arg0) {
     cx = -1.0f;
     cy = 44.0f;
     temp_v0 = func_151149AC(4);
-    angle = temp_v0->rotZ * D_800A0830;
+    angle = temp_v0->v * D_800A0830;
     c.c = func_150AD78C(angle);
     s = func_150AD780(angle);
     func_150A3444(2,

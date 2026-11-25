@@ -19,6 +19,7 @@ import mw  # noqa: E402
 M, REPO = mw.MAIN, mw.REPO
 SYMS = M / "symbol_addrs.us.txt"
 ID = re.compile(r"^[A-Za-z_]\w*$")
+ALLOW_USED = set()
 TEXT_GLOBS = ["src/**/*.c", "src/**/*.h", "src/**/*.s", "include/**/*.h",
               "undefined_syms.us.txt", "undefined_funcs.us.txt", "jtbl_labels.us.txt",
               "undefined_syms_auto.txt", "undefined_funcs_auto.txt"]
@@ -79,8 +80,8 @@ def validate(pairs):
             errs.append(f"{o}: no address (not func_/D_<hex> and not in symbol_addrs)")
     body = "\n".join(p.read_text(errors="replace") for p in files())
     used_new = set(word_re(news).findall(body)) if news else set()
-    for n in sorted(used_new):
-        errs.append(f"{n}: already used somewhere in the tree")
+    for n in sorted(used_new - ALLOW_USED):
+        errs.append(f"{n}: already used somewhere in the tree (if only as a struct field or in comments, pass --allow-used {n})")
     seen_old = set(word_re(olds).findall(body)) if olds else set()
     missing = [o for o in olds if o not in seen_old]
     return errs, missing, table
@@ -117,7 +118,11 @@ def main():
     ap.add_argument("pairs")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("-m", "--message", default="")
+    ap.add_argument("--allow-used", action="append", default=[],
+                    help="accept a new name that already occurs (struct fields and comments are separate from globals; "
+                         "a local that would capture the global changes the bytes, which the sha1 gate rejects)")
     a = ap.parse_args()
+    ALLOW_USED.update(a.allow_used)
     pairs = load_pairs(a.pairs)
     with open(mw.LOCK, "a") as lk:
         fcntl.flock(lk, fcntl.LOCK_EX)
@@ -156,8 +161,12 @@ def main():
             mw.run("make -B -j16 2>&1", M, timeout=3600)
             print("\n".join(errs) or r.stdout[-2000:])
             sys.exit("RENAME-FAIL: ROM mismatch or build error; everything restored")
-        rels = [str(p.relative_to(REPO)) for p in changed]
-        mw.git("add", *rels)
+        rels = [str(p.relative_to(REPO)) for p in changed if p.name not in AUTO]  # the auto files are gitignored
+        r = subprocess.run([sys.executable, str(REPO / "tools" / "accounting.py")], capture_output=True, text=True)
+        if r.returncode:
+            print(r.stdout[-1500:])
+            sys.exit("RENAME-FAIL: tools/accounting.py fails after the rename (tree left as is: inspect)")
+        mw.git("add", *rels, "tools/accounting.tsv")
         msg = f"rename: {len(pairs)} symbols" + (f" ({a.message})" if a.message else "")
         body = "\n".join(f"{o} -> {n}" for o, n in pairs)
         mw.git("commit", "-q", "-m", msg + "\n\n" + body + "\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>")

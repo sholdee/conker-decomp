@@ -23,8 +23,8 @@ void func_150F6B00(Camera *actor) {
     f32 projection;
     f32 clamped;
 
-    if (func_1509BE40(1, 0x4003, 6, 0x2000) && actor->player->health) {
-        actor->flags |= 0xC0001000;
+    if (func_1509BE40(1, 0x4003, 6, 0x2000) && actor->CharPtr->energy) {
+        actor->AvailableModes |= 0xC0001000;
         func_15048F90(&D_800A1B80, &actor->focus, &offset);
         func_15048F90(&D_800A1B80, &D_800A1B8C, &direction);
         inverseLength = 1.0f / func_150AD930(&direction.x);
@@ -39,19 +39,19 @@ void func_150F6B00(Camera *actor) {
         }
         if (func_1509BE40(4, 0x2000, 0xAC, 0x4040, 0x4041, 0x4042, 0x4043)) {
             lateral = LERP(-900.0f, -900.0f, blend);
-            actor->targetDistance = 220.0f;
+            actor->IdealTripodMagnitude = 220.0f;
         } else if (func_1509BE40(4, 0x2000, 0xAC, 0x4047, 0x4046, 0x4045, 0x4044)) {
             lateral = LERP(900.0f, 900.0f, blend);
-            actor->targetDistance = 220.0f;
+            actor->IdealTripodMagnitude = 220.0f;
         } else {
-            actor->targetDistance = 294.0f;
+            actor->IdealTripodMagnitude = 294.0f;
             lateral = LERP(0.0f, 0.0f, blend);
         }
         vertical = -20.0f;
         func_1509BFB0(3, 0x4003, 3, (s32)lateral, (s32)vertical, (s32)LERP(-5530.0f, 1198.0f, blend)); // z of the segment ends
-        func_15049688(&actor->yaw, func_15048FC8(&D_800D9A50) - 180.0f, &actor->yawEaseVel, 8.0f, 10.0f, actor->dt);
-        actor->yawRad = actor->yaw * 0.01745329238f; // degrees to radians
+        func_15049688(&actor->CameraAngle, func_15048FC8(&D_800D9A50) - 180.0f, &actor->AutoBehindAngleVel, 8.0f, 10.0f, actor->SpringTime);
+        actor->CameraAngleRad = actor->CameraAngle * 0.01745329238f; // degrees to radians
     } else {
-        actor->flags &= 0x3FFFEFFF;
+        actor->AvailableModes &= 0x3FFFEFFF;
     }
 }

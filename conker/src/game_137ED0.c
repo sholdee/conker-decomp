@@ -6,21 +6,21 @@
 void func_15179008(s32);
 extern void func_15114D24(void *obj, s32 sfx, s32 volume, s16 nearDistance, s32 farDistance, s32 flags);
 
-/* Behaviour scratch state (WorldObject.work) of the swinging object. */
+/* Behaviour scratch state (WorldObject.touch) of the swinging object. */
 typedef struct {
     /* 0x7C */ s32 secondHalf; // phase has passed pi
     /* 0x80 */ f32 phase;      // radians, 0 .. 2pi
 } SwingWork;
 
-/* Behaviour scratch state (WorldObject.work) of the clock's minute hand; its param word is the time. */
+/* Behaviour scratch state (WorldObject.touch) of the clock's minute hand; its param word is the time. */
 typedef struct {
     /* 0x7C */ s32 chimesLeft;
     /* 0x80 */ s32 lastChimeSecond;
     /* 0x84 */ s32 synced; // time has been set from D_800BE3E4
 } ClockWork;
 
-#define SWING_WORK(obj) ((SwingWork *)&(obj)->work)
-#define CLOCK_WORK(obj) ((ClockWork *)&(obj)->work)
+#define SWING_WORK(obj) ((SwingWork *)&(obj)->touch)
+#define CLOCK_WORK(obj) ((ClockWork *)&(obj)->touch)
 
 void func_1510AA20(s32 arg0) {
     func_15179008(0);
@@ -36,25 +36,25 @@ void func_1510AA44(WorldObject *minuteHand) {
     s32 second;
     f32 hourAngle;
 
-    oldMinute = minuteHand->param.word / 3600 % 60;
+    oldMinute = minuteHand->moveData.word / 3600 % 60;
     if (!CLOCK_WORK(minuteHand)->synced && D_800BE3E4 != 0) {
         CLOCK_WORK(minuteHand)->synced = 1;
-        minuteHand->param.word = D_800BE3E4 * 180 % (12 * 60 * 60);
-        minuteHand->param.word *= 60; // matching: a separate statement (one expression mismatches)
-        oldMinute = minuteHand->param.word / 3600 % 60;
+        minuteHand->moveData.word = D_800BE3E4 * 180 % (12 * 60 * 60);
+        minuteHand->moveData.word *= 60; // matching: a separate statement (one expression mismatches)
+        oldMinute = minuteHand->moveData.word / 3600 % 60;
     }
     if (oldMinute < 0) {
         oldMinute += 60;
     }
-    minuteHand->param.word += D_800BE9E4;
-    if (minuteHand->param.word >= 12 * 60 * 60 * 60) {
-        minuteHand->param.word -= 12 * 60 * 60 * 60;
+    minuteHand->moveData.word += D_800BE9E4;
+    if (minuteHand->moveData.word >= 12 * 60 * 60 * 60) {
+        minuteHand->moveData.word -= 12 * 60 * 60 * 60;
     }
-    second = minuteHand->param.word / 60;
+    second = minuteHand->moveData.word / 60;
     minute = second / 60;
     hourAngle = (second / 300) * 2.5f;
     if (hourAngle > 360.0f) {
-        minuteHand->param.word -= 12 * 60 * 60 * 60;
+        minuteHand->moveData.word -= 12 * 60 * 60 * 60;
     }
     minute = minute % 60;
     if (minute < 0) {
@@ -78,18 +78,18 @@ void func_1510AA44(WorldObject *minuteHand) {
     }
     minuteHand[0].spinZ = 5.0f;
     minuteHand[1].spinZ = 5.0f;
-    minuteHand[0].rotZ = -(minute * 6.0f);
-    minuteHand[1].rotZ = -hourAngle;
+    minuteHand[0].v = -(minute * 6.0f);
+    minuteHand[1].v = -hourAngle;
 }
 
-/* Swings obj->rotX by +-10 with a 2 second period, playing sound 0x4CA / 0x4CB at each end of the swing. */
+/* Swings obj->t (x rotation) by +-10 with a 2 second period, playing sound 0x4CA / 0x4CB at each end of the swing. */
 void func_1510ADD8(WorldObject *obj) {
     f32 rot;
 
     SWING_WORK(obj)->phase += (3.1415927f * D_800BE9E4) / 60.0f;
     rot = cosf(SWING_WORK(obj)->phase) * 10.0f;
-    obj->spinX = obj->rotX - rot;
-    obj->rotX = rot;
+    obj->spinX = obj->t - rot;
+    obj->t = rot;
     if (SWING_WORK(obj)->secondHalf == 0) {
         if (3.1415927f <= SWING_WORK(obj)->phase) {
             SWING_WORK(obj)->secondHalf = 1;

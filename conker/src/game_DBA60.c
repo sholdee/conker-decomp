@@ -9,32 +9,32 @@
 void func_150AE5B0(Camera *arg0) {
     if (!(D_800D2E4C[0x4] & 0x80)) {
         if (func_1509BE40(0, 0x2000, 0xBB) != -1) {
-            if (func_15123934(arg0, arg0->mode, 0, arg0->unk134, 8) != 0) {
-                arg0->flags |= 0x1000000;
+            if (func_15123934(arg0, arg0->Mode, 0, arg0->Tightness, CAMERA_MODE_PICKED_UP) != 0) {
+                arg0->AvailableModes |= 0x1000000;
                 func_151254F4(arg0, D_800CC335 - 1);
             }
-        } else if (func_151239CC(arg0, 8) != 0) {
+        } else if (func_151239CC(arg0, CAMERA_MODE_PICKED_UP) != 0) {
             func_151254F4(arg0, 0);
         }
     }
-    arg0->flags &= ~0x4000;
+    arg0->AvailableModes &= ~0x4000;
     if (!(D_800D2E4C[0x1] & 4)) {
         if (func_1509BE40(1, 0x2000, 0x95, func_1509BE40(0, 0x2014, 0xB7) | 0x2000) != 0) {
-            arg0->flags |= 0x1000000;
-            if ((arg0->mode & 1) && func_15123934(arg0, arg0->mode, 0, arg0->unk134, 0) != 0) {
-                arg0->preset = 3;
-                arg0->flags &= ~4;
+            arg0->AvailableModes |= 0x1000000;
+            if ((arg0->Mode & 1) && func_15123934(arg0, arg0->Mode, 0, arg0->Tightness, CAMERA_MODE_NORMAL) != 0) {
+                arg0->DistIndex = 3;
+                arg0->AvailableModes &= ~4;
                 func_15124B18(arg0);
             }
-        } else if (func_151239CC(arg0, 0) != 0) {
+        } else if (func_151239CC(arg0, CAMERA_MODE_NORMAL) != 0) {
             func_15124B18(arg0);
-            arg0->flags &= ~0x1000000;
+            arg0->AvailableModes &= ~0x1000000;
         }
     }
     if (func_1509BE40(1, 0x4082, 6, 0x9000) != 0) {
-        arg0->flags |= 0x10000;
+        arg0->AvailableModes |= 0x10000;
     } else {
-        arg0->flags &= ~0x10000;
+        arg0->AvailableModes &= ~0x10000;
     }
 }
 
@@ -83,16 +83,16 @@ void func_150AE790(AttachedEffect *effect) {
         return;
     }
     owner = link->owner;
-    if (link->owner->interaction_state == 0) {
+    if (link->owner->type == 0) {
         return;
     }
-    bones = owner->unk1D4;
+    bones = owner->ob_matrix_ptr;
     if (bones != NULL && link->owner->unique_id == link->ownerId) {
-        func_15142314(link->owner->unk1D4, link->bone, &spawn.pos);
+        func_15142314(link->owner->ob_matrix_ptr, link->bone, &spawn.pos);
         spawn.kind = 1;
         spawn.flags = 1;
         motion.texture = 0;
-        motion.shade = 0xFF - (((u32)link->owner->unk184 >> 5) & 3) * 64;
+        motion.shade = 0xFF - (((u32)link->owner->floorMaterial >> 5) & 3) * 64;
         motion.unk14 = link->owner->floorY;
         motion.flags = 8;
         motion.alpha = 0xFF;
@@ -227,14 +227,15 @@ void func_150AECCC(struct42 *arg0) {
     }
 }
 
-/* Raises unk34 by unk14 per elapsed frame; on passing the limit unk2A it is clamped and unk3A set to 70. */
-void func_150AED4C(struct114 *arg0) {
-    arg0->unk34 += arg0->unk14 * D_800BE9E4;
-    if (arg0->unk2A < arg0->unk34) {
-        arg0->unk3A = 70;
-        arg0->unk34 = arg0->unk2A;
+/* Particle callback 11 (D_8008C9C8[11]): grows the billboard square by tmpl.unk4 per elapsed frame up to the
+   size tmpl.unk1A, then starts its fade (fadeStep 70). */
+void func_150AED4C(BillboardParticle *p) {
+    p->tmpl.width += p->tmpl.unk4 * D_800BE9E4;
+    if (p->tmpl.unk1A < p->tmpl.width) {
+        p->tmpl.fadeStep = 70;
+        p->tmpl.width = p->tmpl.unk1A;
     }
-    arg0->unk36 = arg0->unk34;
+    p->tmpl.height = p->tmpl.width;
 }
 
 typedef struct {
@@ -264,10 +265,10 @@ s32 func_150AED9C(Particle150AED9C *particle) {
     return 1;
 }
 
-/* Sets unk28 to unk1C * 8 while unk1C is below 32. Always returns 1. */
-s32 func_150AEDD8(struct202 *arg0) {
-    if (arg0->unk1C < 0x20) {
-        arg0->unk28 = arg0->unk1C * 8;
+/* Sprite update D_80089C70[4]: over the last 32 frames of its lifetime, def.unk10 falls with it (lifetime * 8). */
+s32 func_150AEDD8(QuadSprite *sprite) {
+    if (sprite->def.lifetime < 32) {
+        sprite->def.unk10 = sprite->def.lifetime * 8;
     }
     return 1;
 }

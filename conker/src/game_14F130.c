@@ -8,7 +8,6 @@ void func_150495B0(f32 *value, f32 goal, f32 *velocity, f32 arg3, f32 arg4, f32 
 void func_1512E140(Camera *camera);
 void func_15123A54(Camera *camera);
 void func_1512A390(Camera *camera);
-extern f32 D_800A3448; // 999.0f, "no saved yaw" sentinel; matching: a literal becomes lui+mtc1 instead of this load
 
 /**
  * Eases the camera yaw toward the yaw behind its actor (or straight to the saved target yaw when the camera
@@ -22,56 +21,53 @@ void func_15121C80(Camera *camera, f32 yawOffset) {
     s32 active;
     Vec3f position;
 
-    active = (camera->status & 0x10) != 0;
+    active = (camera->SpecialFlags & 0x10) != 0;
     if (active) {
-        active = (camera->contPad->button & 0x10) != 0;
+        active = (camera->PadPtr->button & 0x10) != 0;
     }
-    if (!active && (D_800BE616 || camera->zone == 9 || camera->zone == 59) && camera->playerExt->unk1B3) {
+    if (!active && (D_800BE616 || camera->CharContext == 9 || camera->CharContext == 59) && camera->mv->unk1B3) {
         if (D_800BE616) {
             camera->targetSpeed = 5.0f;
             camera->targetLimit = 8.0f;
-            func_150495B0(&camera->speed, 5.0f, &camera->speedVel, 1.0f, 2.0f, camera->dt);
-            func_150495B0(&camera->limit, camera->targetLimit, &camera->limitVel, 1.0f, 2.0f, camera->dt);
-            func_15049688(&camera->yaw, camera->player->unk40 - 180.0f, &camera->yawEaseVel, camera->speed, camera->limit, camera->dt);
+            func_150495B0(&camera->speed, 5.0f, &camera->speedVel, 1.0f, 2.0f, camera->SpringTime);
+            func_150495B0(&camera->limit, camera->targetLimit, &camera->limitVel, 1.0f, 2.0f, camera->SpringTime);
+            func_15049688(&camera->CameraAngle, camera->CharPtr->theta - 180.0f, &camera->AutoBehindAngleVel, camera->speed, camera->limit, camera->SpringTime);
         } else {
-            func_15049688(&camera->yaw, camera->player->unk40 - 180.0f, &camera->yawEaseVel, 5.0f, 8.0f, camera->dt);
+            func_15049688(&camera->CameraAngle, camera->CharPtr->theta - 180.0f, &camera->AutoBehindAngleVel, 5.0f, 8.0f, camera->SpringTime);
         }
-        camera->yawRad = camera->yaw * (3.1415927f / 180.0f);
+        camera->CameraAngleRad = camera->CameraAngle * (3.1415927f / 180.0f);
     } else if (!camera->unk698) {
-        angle = ((camera->player->unk40 + (f32) camera->player->unk7C * (360.0f / 65536)) - 180.0f) - yawOffset;
-        if (active && camera->zone != 28) {
-            angle -= (f32) (camera->player->unk2E4 >> 16) * 0.02f;
+        angle = ((camera->CharPtr->theta + (f32) camera->CharPtr->mod_angle * (360.0f / 65536)) - 180.0f) - yawOffset;
+        if (active && camera->CharContext != 28) {
+            angle -= (f32) (camera->CharPtr->taskint[0] >> 16) * 0.02f;
         }
-        if (camera->zone == 9 || camera->zone == 56 || camera->zone == 57 || camera->zone == 55 ||
-            camera->zone == 59 || camera->zone == 18) {
-            angle -= (f32) camera->playerExt->unk12 * (360.0f / 65536);
+        if (camera->CharContext == 9 || camera->CharContext == 56 || camera->CharContext == 57 || camera->CharContext == 55 ||
+            camera->CharContext == 59 || camera->CharContext == 18) {
+            angle -= (f32) camera->mv->pssd_waist_tilt * (360.0f / 65536);
         }
         func_15048758(&angle);
-        if (camera->snap) {
-            // matching: reusing speed/limit as temporaries keeps the original stack frame
-            speed = camera->playerExt->unk18C;
-            limit = D_800A3448;
-            if (limit != speed) {
-                camera->yaw = speed;
-                position = camera->playerExt->unk160;
+        if (camera->Snap) {
+            if (camera->mv->unk18C != 999.0f) { // 999.0f: "no saved yaw" sentinel
+                camera->CameraAngle = camera->mv->unk18C;
+                position = camera->mv->unk160;
                 camera->eye = position;
                 camera->prevEye = position;
-                camera->playerExt->unk18C = limit;
+                camera->mv->unk18C = 999.0f;
             } else {
-                camera->yaw = angle;
+                camera->CameraAngle = angle;
             }
-            camera->yawEaseVel = 0.0f;
+            camera->AutoBehindAngleVel = 0.0f;
         } else {
             if (active || camera->blocked) {
                 speed = 4.0f;
                 limit = 6.0f;
             } else {
-                mode = camera->zone;
+                mode = camera->CharContext;
                 if ((mode == 9 && D_800BE616) || mode == 56 || mode == 57 || mode == 55 || mode == 59 ||
                     mode == 18) {
                     speed = 2.0f;
                     limit = 6.0f;
-                } else if (camera->flags & 0x200000) {
+                } else if (camera->AvailableModes & 0x200000) {
                     speed = 1.0f;
                     limit = 2.8f;
                 } else {
@@ -80,10 +76,10 @@ void func_15121C80(Camera *camera, f32 yawOffset) {
                 }
             }
             if (!D_800BEA0C) {
-                func_15049688(&camera->yaw, angle, &camera->yawEaseVel, speed, limit, camera->dt);
+                func_15049688(&camera->CameraAngle, angle, &camera->AutoBehindAngleVel, speed, limit, camera->SpringTime);
             }
         }
-        camera->yawRad = camera->yaw * (3.1415927f / 180.0f);
+        camera->CameraAngleRad = camera->CameraAngle * (3.1415927f / 180.0f);
     }
     func_1512A390(camera);
     func_15123A54(camera);

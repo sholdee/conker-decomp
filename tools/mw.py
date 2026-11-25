@@ -655,7 +655,11 @@ def cmd_land(a):
             print(r.stdout[-3000:])
             sys.exit(f"LAND-FAIL: {', '.join(targets)} — main build does not match after merge; reverted")
         total = sum(sizes[f] for f in landed)
-        git("add", *rels)
+        acc = subprocess.run([sys.executable, str(REPO / "tools" / "accounting.py")], capture_output=True, text=True)
+        if acc.returncode:
+            print(acc.stdout[-1500:])
+            sys.exit("LAND-FAIL: tools/accounting.py fails after this change")
+        git("add", *rels, "tools/accounting.tsv")
         if len(landed) == 1:
             msg = f"game: match {landed[0]} ({total} bytes) [mw]"
         else:

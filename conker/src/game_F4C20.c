@@ -10,14 +10,14 @@ void func_150C7770(Camera *arg0) {
         func_1509BFB0(1, 0x2000, 0x3B, 2);
     }
     if (func_1509BE40(1, 0x4006, 6, 0x2000) != 0) {
-        arg0->flags |= 0x400000;
+        arg0->AvailableModes |= 0x400000;
     } else {
-        arg0->flags &= 0xFFBFFFFF;
+        arg0->AvailableModes &= 0xFFBFFFFF;
     }
-    arg0->flags |= 0x400000;
+    arg0->AvailableModes |= 0x400000;
     if (func_1509BE40(1, 0x4030, 6, 0x2000) != 0) {
-        arg0->flags |= 0x1000000;
+        arg0->AvailableModes |= 0x1000000;
     } else {
-        arg0->flags &= 0xFEFFFFFF;
+        arg0->AvailableModes &= 0xFEFFFFFF;
     }
 }

@@ -90,13 +90,13 @@ WatcherEmitter *func_150C5F94(Actor *actor, GameF3270Emitter *emitter) {
     {
         Vec3f from;
 
-        from.x = actor->x_position;
-        from.y = actor->y_position + 5000.0f;
-        from.z = actor->z_position;
-        if (func_15045800(&from, 0, actor->y_position - 100.0f, &emitter->watcher.hit) != 0) {
+        from.x = actor->xpos;
+        from.y = actor->ypos + 5000.0f;
+        from.z = actor->zpos;
+        if (func_15045800(&from, 0, actor->ypos - 100.0f, &emitter->watcher.hit) != 0) {
             link.ceiling = emitter->watcher.hit.height;
         } else {
-            link.ceiling = actor->y_position + 5000.0f;
+            link.ceiling = actor->ypos + 5000.0f;
         }
     }
     desc.target[0] = 0;
@@ -231,15 +231,15 @@ FlickerSprite *func_150C6460(GameF3270Emitter *emitter) {
 
     particle = NULL;
     actor = emitter->watcher.character;
-    if (actor->unk1D4) {
+    if (actor->ob_matrix_ptr) {
         Vec3f origin;
 
         origin = D_800887D0;
-        func_15143134(&origin, &pos, actor->unk1D4);
+        func_15143134(&origin, &pos, actor->ob_matrix_ptr);
     } else {
-        pos.x = actor->x_position;
-        pos.y = actor->y_position;
-        pos.z = actor->z_position;
+        pos.x = actor->xpos;
+        pos.y = actor->ypos;
+        pos.z = actor->zpos;
     }
     {
         Vec3f probe;

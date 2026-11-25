@@ -20,7 +20,7 @@ void func_151102CC(MtxF mtx, f32 pitch, f32 yaw, f32 roll);
 void guMtxF2L(MtxF mf, Mtx *m);
 
 /* Draws the current view's sky quad (D_800DBE88) with the 4x256 RGBA32 gradient texture D_800DBE80, rolled by `roll` and with its
- * t window (rows top..bottom, chosen by D_800BE9F0) scrolled by tScroll. */
+ * t window (rows top..bottom, chosen by level) scrolled by tScroll. */
 Gfx *func_150D1810(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, f32 tScroll, s32 arg5, f32 roll) {
     MtxF rotation;
     MtxF viewProj;
@@ -31,7 +31,7 @@ Gfx *func_150D1810(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, f32 tScroll, s32 arg5
     Texture tex;
 
     tOffset = (s32)(tScroll * 81.0f);
-    if ((D_800BE9F0 == 0x33) || (D_800BE9F0 == 0x32) || (D_800BE9F0 == 0x3F)) {
+    if ((level == 0x33) || (level == 0x32) || (level == 0x3F)) {
         top = -98;
         bottom = 39;
     } else {

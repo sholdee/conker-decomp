@@ -84,7 +84,7 @@ void func_1510B3B0(void) {
 }
 
 /* Rebuilds a view's projection with new near/far planes (0.0f picks the defaults D_800D9B20/D_800D9B1C) and
- * remembers them in D_800D9AF8 for func_1510B51C. */
+ * remembers them in gViewClips for func_1510B51C. */
 void func_1510B458(s32 viewIndex, f32 near, f32 far) {
     if (near == 0.0f) {
         near = D_800D9B20;
@@ -94,8 +94,8 @@ void func_1510B458(s32 viewIndex, f32 near, f32 far) {
     }
     func_1510B5F8(viewIndex, &D_800BE628[viewIndex].perspNorm, D_800BE628[viewIndex].frustumFovY,
                   D_800BE628[viewIndex].frustumFovX, near, far, D_800BE628[viewIndex].perspScale);
-    D_800D9AF8[viewIndex].unk0 = near;
-    D_800D9AF8[viewIndex].unk4 = far;
+    gViewClips[viewIndex].near = near;
+    gViewClips[viewIndex].far = far;
     D_800D9B18 = TRUE;
 }
 
@@ -104,10 +104,10 @@ void func_1510B51C(void) {
     s32 i;
 
     for (i = 0; i <= D_80082FA0; i++) {
-        if (D_800D9AF8[i].unk0 != -1.0f) {
+        if (gViewClips[i].near != -1.0f) {
             func_1510B5F8(i, &D_800BE628[i].perspNorm, D_800BE628[i].frustumFovY, D_800BE628[i].frustumFovX,
-                          D_800D9AF8[i].unk0, D_800D9AF8[i].unk4, D_800BE628[i].perspScale);
-            D_800D9AF8[i].unk0 = -1.0f;
+                          gViewClips[i].near, gViewClips[i].far, D_800BE628[i].perspScale);
+            gViewClips[i].near = -1.0f;
         }
     }
     D_800D9B18 = FALSE;

@@ -53,39 +53,39 @@ s32 func_15080D20(Actor *self, Actor *obj, s32 type, f32 dist, f32 radius, s32 a
     HitSphere *spheres;
     s32 id;
 
-    scale = self->xz_scale;
+    scale = self->scale_xz;
     dist *= scale;
     radius *= scale;
-    angle = self->unkB8 * 0.01745329238f;
+    angle = self->vtilt * 0.01745329238f;
     s = sinf(angle);
     c = cosf(angle);
     pos[0] = 0.0f;
     pos[1] = -dist * s;
     pos[2] = dist * c;
-    angle = self->unk40 * 0.01745329238f;
+    angle = self->theta * 0.01745329238f;
     s = sinf(angle);
     c = cosf(angle);
     x = pos[0] * c + pos[2] * s;
     pos[2] = -pos[0] * s + pos[2] * c;
     pos[0] = x;
-    pos[0] += self->x_position;
-    pos[1] += self->y_position;
-    pos[2] += self->z_position;
-    id = obj->id;
+    pos[0] += self->xpos;
+    pos[1] += self->ypos;
+    pos[2] += self->zpos;
+    id = obj->character_type;
     bounds = D_800D1C90[id];
     // matching: the body radius reuses `angle`; a separate local shifts IDO's register allocation
-    angle = bounds->bodyRadius * obj->xz_scale;
-    height = bounds->bodyHeight * obj->y_scale;
-    dx = pos[0] - obj->x_position;
-    dy = pos[1] - (obj->y_position + height);
-    dz = pos[2] - obj->z_position;
+    angle = bounds->bodyRadius * obj->scale_xz;
+    height = bounds->bodyHeight * obj->scale_y;
+    dx = pos[0] - obj->xpos;
+    dy = pos[1] - (obj->ypos + height);
+    dz = pos[2] - obj->zpos;
     if (angle * angle < dx * dx + dy * dy + dz * dz) {
         return 0;
     }
     spheres = D_80086C60[type];
     count = D_8009CBCC[type];
     i = 0;
-    bones = obj->unk1D4;
+    bones = obj->ob_matrix_ptr;
     if (count > 0) {
         // matching: p = spheres in its own block; a plain assignment changes IDO's s-register allocation
         do { p = spheres; } while (0);
@@ -99,10 +99,10 @@ s32 func_15080D20(Actor *self, Actor *obj, s32 type, f32 dist, f32 radius, s32 a
             dy = pos[1] - world.y;
             dz = pos[2] - world.z;
             i++;
-            r = p->radius * obj->xz_scale + radius;
+            r = p->radius * obj->scale_xz + radius;
             if (!(r * r < dx * dx + dy * dy + dz * dz)) {
-                if (obj->immune == 0) {
-                    func_1505D1C4(obj->x_position, obj->y_position, obj->z_position, arg5, self - D_800CC2D0, 0, 0, 0);
+                if (obj->imune == 0) {
+                    func_1505D1C4(obj->xpos, obj->ypos, obj->zpos, arg5, self - movement_obj, 0, 0, 0);
                 }
                 return p->bone + 1;
             }
@@ -117,7 +117,7 @@ s32 func_1508108C(Actor *obj) {
     s32 i;
 
     for (i = 0; i < 23; i++) {
-        if (obj->id == D_8009BD30[i].model) {
+        if (obj->character_type == D_8009BD30[i].model) {
             return i;
         }
     }
@@ -157,7 +157,7 @@ s32 func_1508114C(Actor *obj, Vec3f *rayOrigin, Vec3f *rayDir, Vec3f *outNear, V
     MtxF *bones;
     f32 radius;
 
-    if (obj->unk1D4 == NULL) {
+    if (obj->ob_matrix_ptr == NULL) {
         return -1;
     }
     idx = func_1508108C(obj);
@@ -168,10 +168,10 @@ s32 func_1508114C(Actor *obj, Vec3f *rayOrigin, Vec3f *rayDir, Vec3f *outNear, V
     spheres = D_80086C60[type];
     count = D_8009CBCC[type];
     *outDist = -1.0f;
-    centre.x = obj->x_position;
-    centre.y = D_800D1C90[obj->id]->bodyHeight * obj->y_scale + obj->y_position;
-    centre.z = obj->z_position;
-    radius = D_800D1C90[obj->id]->bodyRadius * obj->y_scale;
+    centre.x = obj->xpos;
+    centre.y = D_800D1C90[obj->character_type]->bodyHeight * obj->scale_y + obj->ypos;
+    centre.z = obj->zpos;
+    radius = D_800D1C90[obj->character_type]->bodyRadius * obj->scale_y;
     if (func_151452C4(rayOrigin, rayDir, &centre, radius, &near, &far, &tNear, &tFar) == 0) {
         return 0;
     }
@@ -184,13 +184,13 @@ s32 func_1508114C(Actor *obj, Vec3f *rayOrigin, Vec3f *rayDir, Vec3f *outNear, V
             if ((1 << p->bone) & obj->unk9C) {
                 /* bone masked off in obj->unk9C */
             } else {
-                bones = obj->unk1D4;
+                bones = obj->ob_matrix_ptr;
                 local.x = p->x;
                 local.y = p->y;
                 local.z = p->z;
                 // matching: byte offset keeps IDO's base+offset addu order (&bones[i] emits offset+base)
                 func_15143134(&local, &centre, (MtxF *)((u8 *)bones + p->bone * sizeof(MtxF)));
-                if (func_151452C4(rayOrigin, rayDir, &centre, p->radius * obj->xz_scale, &near, &far, &tNear, &tFar) != 0) {
+                if (func_151452C4(rayOrigin, rayDir, &centre, p->radius * obj->scale_xz, &near, &far, &tNear, &tFar) != 0) {
                     if (*outDist == -1.0f || (tNear < *outDist && p->part >= bestPart)) {
                         *outDist = tNear;
                         bestNear = near;
@@ -236,8 +236,8 @@ s32 func_15081574(s32 self, f32 dist, f32 radius, s32 outTarget, s32 arg4, s32 m
 
     *(Actor **)outTarget = NULL;
     for (i = 0; i < 25; i++) {
-        obj = &D_800CC2D0[i];
-        if (obj->interaction_state == 0 || obj->unk1D4 == NULL || model != obj->id) {
+        obj = &movement_obj[i];
+        if (obj->type == 0 || obj->ob_matrix_ptr == NULL || model != obj->character_type) {
             continue;
         }
         idx = func_1508108C(obj);

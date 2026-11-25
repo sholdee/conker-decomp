@@ -181,14 +181,14 @@ s32 func_151D75C4(TrailEmitter *emitter) {
     anchor = &emitter->anchor;
     link = &emitter->link;
     actor = link->actor;
-    if ((actor->interaction_state == 0) || (actor->unique_id != link->actorId)) {
+    if ((actor->type == 0) || (actor->unique_id != link->actorId)) {
         return 0;
     }
-    if (actor->unk1D4 == NULL) {
+    if (actor->ob_matrix_ptr == NULL) {
         anchor->flags &= ~1;
         return 1;
     }
-    if ((actor->unk31C != NULL) && (actor->unk31C->aimState != 0) && (actor->camera != NULL)) {
+    if ((actor->mv != NULL) && (actor->mv->SniperState != 0) && (actor->CameraPtr != NULL)) {
         anchor->flags &= ~1;
         return 1;
     }
@@ -196,7 +196,7 @@ s32 func_151D75C4(TrailEmitter *emitter) {
         anchor->flags &= ~1;
         return 1;
     }
-    func_15143134(&D_800AB280[link->bone], &anchor->pos.x, (Mtx *)actor->unk1D4 + D_800AB2D4[link->bone]);
+    func_15143134(&D_800AB280[link->bone], &anchor->pos.x, (Mtx *)actor->ob_matrix_ptr + D_800AB2D4[link->bone]);
     anchor->flags |= 1;
     if (link->condition != -1) {
         return D_8008FCA8[link->condition](emitter);
@@ -209,7 +209,7 @@ s32 func_151D7724(TrailEmitter *emitter) {
     Actor *actor = emitter->link.actor;
     TrailAnchor *anchor = &emitter->anchor;
 
-    if ((actor->unk94 & 2) || actor->unk84.uh == 4 || actor->unk84.uh == 10 || actor->unk84.uh == 12) {
+    if ((actor->unk94 & 2) || actor->animseq.uh == 4 || actor->animseq.uh == 10 || actor->animseq.uh == 12) {
         anchor->flags &= ~1;
     }
     return 1;
@@ -220,7 +220,7 @@ s32 func_151D7770(TrailEmitter *emitter) {
     TrailAnchor *anchor = &emitter->anchor;
     Actor *actor = emitter->link.actor;
 
-    if (actor->unk84.uh == 0) {
+    if (actor->animseq.uh == 0) {
         anchor->flags &= ~1;
     }
     return 1;
@@ -231,7 +231,7 @@ s32 func_151D779C(TrailEmitter *emitter) {
     TrailAnchor *anchor = &emitter->anchor;
     Actor *actor = emitter->link.actor;
 
-    if (actor->in_water) {
+    if (actor->inwater) {
         anchor->flags &= ~1;
     }
     return 1;

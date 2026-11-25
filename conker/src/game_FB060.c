@@ -3,8 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-extern f32 D_800A07B4; // matching: 401.0f; as a literal IDO allocates the FP temps in a different order
-
 void func_15143794(s16 yaw, s16 pitch, f32 distance, f32 *out);
 
 void func_1504715C(CollisionHit *hit, Actor *actor);
@@ -23,10 +21,10 @@ void func_150CDBB0(Actor *actor, u8 owner, s32 arg2) {
         CollisionHit hit;
 
         func_1504715C(&hit, actor);
-        pos.x = actor->x_position;
-        pos.y = actor->y_position + 1000.0f;
-        pos.z = actor->z_position;
-        if (!func_15046C80(&pos, 0, actor->y_position - 3000.0f, &hit)) {
+        pos.x = actor->xpos;
+        pos.y = actor->ypos + 1000.0f;
+        pos.z = actor->zpos;
+        if (!func_15046C80(&pos, 0, actor->ypos - 3000.0f, &hit)) {
             return;
         }
         pos.y = hit.height;
@@ -73,12 +71,12 @@ s32 func_150CDCF4(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     desc.brightness = 255;
     desc.primColorMode = 3;
     desc.envColorMode = 3;
-    size = (func_150ADA68() * D_800A07B4) + 404.0f;
+    size = (func_150ADA68() * 401.0f) + 404.0f;
+    desc.width = size;
+    desc.height = size;
     desc.pos.x = x;
     desc.pos.y = y;
     desc.pos.z = z;
-    desc.width = size;
-    desc.height = size;
     random = func_150ADA20();
     speed = func_150ADA68();
     func_15143794(yaw, (random % 20U) - 19, ((speed * 150.0f) + 150.0f) * 0.1f, &desc.vel.x);

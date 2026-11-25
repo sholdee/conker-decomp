@@ -35,7 +35,7 @@ void func_15188810(Actor *object, s32 duration, s32 maxDist) {
 
     trail = allocate_memory(sizeof(BoneTrail), 1, 0, 0);
     if (trail != NULL) {
-        numBones = func_1502DB20(object->id);
+        numBones = func_1502DB20(object->character_type);
         if (numBones == 0) {
             func_10004074(trail);
             return;
@@ -243,13 +243,13 @@ void func_15188E48(BoneTrail *trail) {
     s32 size;
 
     numFrames = trail->numFrames;
-    numBones = func_1502DB20(trail->owner.object->id);
+    numBones = func_1502DB20(trail->owner.object->character_type);
     curBase = D_800BE9C0 * (numBones * numFrames);
     prevBase = (D_800BE9C0 ^ 1) * (numBones * numFrames);
     for (i = 0; i < numFrames; i++) {
         size = numBones * sizeof(Mtx);
         if (i == numFrames - 1) {
-            dst = (MtxS16 *)trail->owner.object->unk1D4;
+            dst = (MtxS16 *)trail->owner.object->ob_matrix_ptr;
             if (dst == NULL) {
                 trail->numFilled = 0;
                 return;
@@ -289,7 +289,7 @@ void func_15188F84(BoneTrail *arg) {
     curBase = D_800BE9C0 * numFrames;
     prevBase = (D_800BE9C0 ^ 1) * numFrames;
     for (i = 0; i < D_800DBEE8[view]; i++) {
-        objects = D_800DBEF4;
+        objects = db_Object_array;
         if (trail->owner.worldObj == &objects[(*D_80089240[0])[i].index]) {
             break;
         }
@@ -344,13 +344,13 @@ void func_15189118(s32 listIndex) {
     for (trail = D_800DF7C8[listIndex]; trail != NULL; trail = trail->next) {
         if (trail->maxDist != 0) {
             numFrames = trail->numFrames;
-            numBones = func_1502DB20(trail->owner.object->id);
+            numBones = func_1502DB20(trail->owner.object->character_type);
             base = D_800BE9C0 * numBones * numFrames;
             maxDist = trail->maxDist;
             for (i = trail->numFilled - 1; i >= 0; i--) {
                 cur = &trail->frames[i * numBones + base];
                 if (i + 1 == trail->numFilled) {
-                    bones = (MtxS16 *)trail->owner.object->unk1D4;
+                    bones = (MtxS16 *)trail->owner.object->ob_matrix_ptr;
                     if (bones == NULL) {
                         trail->numFilled = 0;
                         break;
@@ -430,10 +430,10 @@ Gfx *func_151895F4(Gfx *gfx, BoneTrail *trail, s16 player) {
     func_1503DA9C(trail->owner.object, func_150849CC(trail->owner.object, &lod), lod, 1);
     numFrames = trail->numFrames;
     alpha = trail->alpha;
-    numBones = func_1502DB20(trail->owner.object->id);
+    numBones = func_1502DB20(trail->owner.object->character_type);
     numFilled = trail->numFilled;
     base = D_800BE9C0 * numBones * numFrames;
-    index = trail->owner.object - D_800CC2D0;
+    index = trail->owner.object - movement_obj;
     if (index < 0 || index >= 25) {
         return gfx;
     }

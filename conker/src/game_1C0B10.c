@@ -11,9 +11,9 @@ void func_15193660(Actor *actor, u8 arg1, s32 arg2) {
     ModelBurst burst;
     MtxF *bones;
 
-    if ((actor != NULL) && (actor->interaction_state != 0)) {
-        bones = actor->unk1D4;
-        if (actor->unk1D4 == NULL) { // matching: the original reloads the field rather than testing bones
+    if ((actor != NULL) && (actor->type != 0)) {
+        bones = actor->ob_matrix_ptr;
+        if (actor->ob_matrix_ptr == NULL) { // matching: the original reloads the field rather than testing bones
             return;
         }
         func_15142314(bones, 10, &burst.position);
@@ -63,7 +63,7 @@ void *func_15134DAC(BloodStripDesc *desc, s32 arg1);
 void func_151937F4(Actor *owner, s32 arg1, s32 arg2) {
     BloodStripDesc desc;
 
-    if ((owner != NULL) && (owner->interaction_state != 0)) {
+    if ((owner != NULL) && (owner->type != 0)) {
         desc.ownerId = owner->unique_id;
         desc.owner = owner;
         desc.bone = 0;
@@ -105,8 +105,6 @@ s32 func_151938E4(Emitter *emitter) {
     return TRUE;
 }
 
-extern f32 D_800A81F0;
-
 s32 func_1515C0F8(Actor *actor, Vec3f **motion);
 void func_15157898(EffectParams *params, EffectMotion *motion, s32, f32, s32, s32, s32, u8, s32);
 
@@ -126,7 +124,7 @@ void func_151938FC(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, Emitter *e
     if (!func_1515C0F8(emitter->owner, &ownerMotion)) {
         return;
     }
-    if (emitter->owner->in_water) {
+    if (emitter->owner->inwater) {
         return;
     }
 
@@ -176,8 +174,7 @@ void func_151938FC(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, Emitter *e
     motion.rot.x = func_150ADA68() * 360.0f;
     motion.rot.y = func_150ADA68() * 360.0f;
     motion.rot.z = func_150ADA68() * 360.0f;
-    func_150ADA68();
-    motion.scale = 340.0f * D_800A81F0; // matching: the original multiplies at run time; a literal 0.001f would be constant-folded
+    motion.scale = ((func_150ADA68() * 0.0f) + 340.0f) * 0.001000000047f;
     motion.rotVel.x = ((func_150ADA68() * 1000.0f) + -500.0f) * 0.009999999776f;
     motion.rotVel.y = 0.0f;
     motion.rotVel.z = ((func_150ADA68() * 1000.0f) + -500.0f) * 0.009999999776f;

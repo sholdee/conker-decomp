@@ -29,7 +29,7 @@ GameCommand *func_150B58F0(GameCommand *cmd, s32 objIndex) {
         return cmd;
     }
     cmd->opcode = 0x1A;
-    cmd->value = D_800CC2D0[objIndex].unk7A;
+    cmd->value = movement_obj[objIndex].langle;
     return cmd + 1;
 }
 
@@ -41,16 +41,16 @@ void func_150B5950(ObjBurstEffect *effect) {
 
     obj = effect->obj;
     posp = &pos; // matching: IDO keeps &pos in a saved register only via a named pointer
-    if ((obj->interaction_state == 0) || (obj->unique_id != effect->objUniqueId)) {
+    if ((obj->type == 0) || (obj->unique_id != effect->objUniqueId)) {
         effect->base.header.state = -1;
         return;
     }
 
-    if (obj->unk1D4 != NULL) {
+    if (obj->ob_matrix_ptr != NULL) {
         if (func_150ADA68() < 0.10824f) {
-            pos.x = obj->x_position;
-            pos.y = obj->y_position;
-            pos.z = obj->z_position;
+            pos.x = obj->xpos;
+            pos.y = obj->ypos;
+            pos.z = obj->zpos;
             func_150B5A3C(posp, effect->base.header.owner, effect->base.header.kind);
         }
 
@@ -256,16 +256,11 @@ void func_150B6000(Vec3f *pos, u8 owner, s32 kind) {
 extern void func_15143134(Vec3f *in, Vec3f *out, void *mtx);
 extern Vec3f D_8009FC30;
 
-/** Transforms the fixed point D_8009FC30 by the matrix at obj->unk1D4 + 0x140 into out. */
+/** Transforms the fixed point D_8009FC30 by the matrix at obj->ob_matrix_ptr + 0x140 into out. */
 void func_150B60E0(Actor *obj, Vec3f *out) {
-    func_15143134(&D_8009FC30, out, (u8 *)obj->unk1D4 + 0x140);
+    func_15143134(&D_8009FC30, out, (u8 *)obj->ob_matrix_ptr + 0x140);
 }
 
-typedef struct {
-    /* 0x00 */ TriggerZone *emitter;
-    /* 0x04 */ f32 spawnAccum;
-    /* 0x08 */ u8 emitterState;
-} BoltRingData;
 
 /* Effect instance whose per-type data (from 0x28) is a BoltRingData. */
 typedef struct {
@@ -292,8 +287,8 @@ void func_150B6110(BoltRingEffect *effect) {
 
     emitter = effect->data.emitter;
     prevState = effect->data.emitterState;
-    effect->data.emitterState = emitter->disabled;
-    if (emitter->disabled == 1) {
+    effect->data.emitterState = emitter->inactive;
+    if (emitter->inactive == 1) {
         if (effect->data.emitterState != prevState) {
             func_151494E0(0, 0x4A);
         }
@@ -325,15 +320,15 @@ void func_150B6110(BoltRingEffect *effect) {
         config.alphaBase = 0x7F;
         config.alphaRange = 0x80;
         spread = 0.4350000322f;
-        start.y = emitter->y + emitter->height;
-        end.y = emitter->y + emitter->height;
+        start.y = emitter->y + emitter->ySize;
+        end.y = emitter->y + emitter->ySize;
         do {
             angle = func_150ADA20();
-            func_1514373C((u32)angle, emitter->radius, &start.x, &start.z); // matching: (u32) selects IDO's unsigned int-to-float sequence
+            func_1514373C((u32)angle, emitter->xSize, &start.x, &start.z); // matching: (u32) selects IDO's unsigned int-to-float sequence
             start.x += emitter->x;
             start.z += emitter->z;
             angle += func_150ADA20() % 129 + 64;
-            func_1514373C((u32)angle, emitter->radius, &end.x, &end.z);
+            func_1514373C((u32)angle, emitter->xSize, &end.x, &end.z);
             end.x += emitter->x;
             end.z += emitter->z;
             func_15106F98(&start, &end, 4, &config, spread, 1, effect->owner, effect->kind);

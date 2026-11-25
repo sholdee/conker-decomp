@@ -265,8 +265,8 @@ glabel func_150A5E44
     /* D340C 150A5F5C 01E8E021 */  addu       $gp, $t7, $t0
     /* D3410 150A5F60 8F9C0000 */  lw         $gp, 0x0($gp)
     /* D3414 150A5F64 00004012 */  mflo       $t0
-    /* D3418 150A5F68 3C09800E */  lui        $t1, %hi(D_800DBEF4)
-    /* D341C 150A5F6C 8D29BEF4 */  lw         $t1, %lo(D_800DBEF4)($t1)
+    /* D3418 150A5F68 3C09800E */  lui        $t1, %hi(db_Object_array)
+    /* D341C 150A5F6C 8D29BEF4 */  lw         $t1, %lo(db_Object_array)($t1)
     /* D3420 150A5F70 01094020 */  add        $t0, $t0, $t1 /* handwritten instruction */
     /* D3424 150A5F74 950E0058 */  lhu        $t6, 0x58($t0)
     /* D3428 150A5F78 95190056 */  lhu        $t9, 0x56($t0)

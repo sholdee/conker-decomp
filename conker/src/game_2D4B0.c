@@ -10,7 +10,7 @@ void func_15000000(void) {
     for (i = 0; i < 3; i++)
     {
         msgQueue = &D_80041E58[i];
-        osCreateMesgQueue(msgQueue, &D_80041EA0[i], 8);
+        osCreateMesgQueue(msgQueue, D_80041EA0[i], 8);
         func_10008570(i, msgQueue);
     }
 
@@ -236,7 +236,7 @@ void func_150006E0(void) {
 
     D_800D9AF0 = 0;
     for (i = 0; i <= D_80082FA0; i++) {
-        D_800D9AF8[i].unk0 = -1.0f;
+        gViewClips[i].near = -1.0f;
     }
     D_800D9B18 = 0;
 }
@@ -289,7 +289,7 @@ void func_150006E0(void) {
 //
 //     D_800D9AF0 = 0;
 //     for (i = 0; i <= D_80082FA0; i++) {
-//         D_800D9AF8[i].unk0 = -1.0f;
+//         gViewClips[i].near = -1.0f;
 //     }
 //     D_800D9B18 = 0;
 // }

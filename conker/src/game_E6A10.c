@@ -114,28 +114,28 @@ s32 func_150B963C(PhysicsParticle *particle) {
     f32 dirZ;
     Vec3f pos;
 
-    if ((D_80088730 == NULL) || (D_80088730->interaction_state == 0) || (D_80088730->unique_id != 1)) {
+    if ((D_80088730 == NULL) || (D_80088730->type == 0) || (D_80088730->unique_id != 1)) {
         D_80088730 = func_15083E90(1);
     }
     if (D_80088730 != NULL) {
-        playerPos.x = D_80088730->x_position;
-        playerPos.y = D_80088730->y_position;
-        playerPos.z = D_80088730->z_position;
+        playerPos.x = D_80088730->xpos;
+        playerPos.y = D_80088730->ypos;
+        playerPos.z = D_80088730->zpos;
         distSq = (particle->pos.x - playerPos.x) * (particle->pos.x - playerPos.x) +
                  (particle->pos.y - playerPos.y) * (particle->pos.y - playerPos.y) +
                  (particle->pos.z - playerPos.z) * (particle->pos.z - playerPos.z);
         if (distSq < ((particle->radius * particle->radius) + 2500.0f)) {
-            if ((D_80088730->xz_velocity > 15.0f) && (func_150ADA20() & 1)) {
-                dirX = func_151423D8(D_80088730->unk76 >> 8);
-                dirZ = func_151423D8((D_80088730->unk76 >> 8) + 0x40);
+            if ((D_80088730->speed > 15.0f) && (func_150ADA20() & 1)) {
+                dirX = func_151423D8(D_80088730->angle >> 8);
+                dirZ = func_151423D8((D_80088730->angle >> 8) + 0x40);
                 particle->updateFn = 1;
                 particle->flags |= 0x7D;
                 particle->floorHitFn = 1;
                 particle->wallHitFn = 1;
                 particle->matrixFn = 0;
-                particle->vel.x = D_80088730->xz_velocity * dirX * 1.3f;
+                particle->vel.x = D_80088730->speed * dirX * 1.3f;
                 particle->vel.y = (func_150ADA68() * 15.0f) + 10.0f;
-                particle->vel.z = D_80088730->xz_velocity * dirZ * 1.3f;
+                particle->vel.z = D_80088730->speed * dirZ * 1.3f;
                 particle->lifetime = 300;
                 particle->flags |= 0x80;
                 particle->rot.x = 0.0f;
@@ -242,13 +242,13 @@ s32 func_150B963C(PhysicsParticle *particle) {
             return 0;
         }
     }
-    if ((D_80088720 == NULL) || (D_80088720->interaction_state == 0) || (D_80088720->unique_id != 1)) {
+    if ((D_80088720 == NULL) || (D_80088720->type == 0) || (D_80088720->unique_id != 1)) {
         D_80088720 = func_15083E90(1);
     }
     if (D_80088720 != NULL) {
-        D_80088724.x = D_80088720->x_position;
-        D_80088724.y = D_80088720->y_position + 50.0f;
-        D_80088724.z = D_80088720->z_position;
+        D_80088724.x = D_80088720->xpos;
+        D_80088724.y = D_80088720->ypos + 50.0f;
+        D_80088724.z = D_80088720->zpos;
     }
     particle->rot.x += 0.2f * (D_80088724.x - particle->rot.x);
     particle->rot.y += 0.2f * (D_80088724.y - particle->rot.y);

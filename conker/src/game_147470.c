@@ -10,9 +10,9 @@ typedef struct {
     /* 0x7C */ f32 phase;
     /* 0x80 */ s32 baseHeight;
     /* 0x84 */ s32 respawnTimer;
-} PickupWork; // WorldObject.work
+} PickupWork; // WorldObject.touch
 
-#define WORK(obj) ((PickupWork *)&(obj)->work)
+#define WORK(obj) ((PickupWork *)&(obj)->touch)
 
 extern s32 func_15060BA4(Actor *, s32);
 extern void func_1507C3E0(Actor *, s16 *, s16 *, s16 *);
@@ -33,9 +33,9 @@ void func_15119FC0(WorldObject *obj) {
             WORK(obj)->baseHeight = obj->y;
         }
         // phase runs over 0..6*pi: one full spin, three tilt wobbles, six bobs
-        obj->rotX = sinf(WORK(obj)->phase) * 15.0f;
-        obj->rotY = WORK(obj)->phase * 19.098593f; // 60 / pi
-        obj->rotZ = cosf(WORK(obj)->phase) * 15.0f;
+        obj->t = sinf(WORK(obj)->phase) * 15.0f;
+        obj->u = WORK(obj)->phase * 19.098593f; // 60 / pi
+        obj->v = cosf(WORK(obj)->phase) * 15.0f;
         WORK(obj)->phase += 0.08726647f * D_800BE9A4; // 5 degrees per frame
         if (18.849556f <= WORK(obj)->phase) {
             WORK(obj)->phase -= 18.849556f;
@@ -44,44 +44,44 @@ void func_15119FC0(WorldObject *obj) {
 
         if (WORK(obj)->respawnTimer == 0) {
             for (i = 0; i < D_8008FD8C; i++) {
-                if (D_800CC2D0[i].interaction_state == 0 || D_800CC2D0[i].unk127 == 0xFF || obj->param.word < 0) {
+                if (movement_obj[i].type == 0 || movement_obj[i].playernumber == 0xFF || obj->moveData.word < 0) {
                     continue;
                 }
-                distSq = ((f32)obj->x - D_800CC2D0[i].x_position) * ((f32)obj->x - D_800CC2D0[i].x_position) +
-                         ((f32)obj->z - D_800CC2D0[i].z_position) * ((f32)obj->z - D_800CC2D0[i].z_position);
+                distSq = ((f32)obj->x - movement_obj[i].xpos) * ((f32)obj->x - movement_obj[i].xpos) +
+                         ((f32)obj->z - movement_obj[i].zpos) * ((f32)obj->z - movement_obj[i].zpos);
                 if (distSq < 80.0f * 80.0f) {
-                    func_1507C3E0(&D_800CC2D0[i], &height, &width, &depth);
-                    obj->flags = 0x31;
-                    playerY = D_800CC2D0[i].y_position;
+                    func_1507C3E0(&movement_obj[i], &height, &width, &depth);
+                    obj->object_status = 0x31;
+                    playerY = movement_obj[i].ypos;
                     if (playerY < (f32)obj->y + 80.0f && (f32)obj->y - 80.0f < playerY + (f32)height &&
-                        D_800CC2D0[i].health > 0) {
-                        if (func_15060BA4(&D_800CC2D0[i], 1)) {
-                            if (obj->param.word != 0) {
-                                WORK(obj)->respawnTimer = (u16)(obj->param.word >> 16) * 60;
+                        movement_obj[i].energy > 0) {
+                        if (func_15060BA4(&movement_obj[i], 1)) {
+                            if (obj->moveData.word != 0) {
+                                WORK(obj)->respawnTimer = (u16)(obj->moveData.word >> 16) * 60;
                                 obj->state |= 4;
                             } else {
                                 obj->inactive = TRUE;
-                                func_1508EE0C(2, obj - D_800DBEF4);
+                                func_1508EE0C(2, obj - db_Object_array);
                             }
-                            obj->flags = 0x20;
-                            func_10010344(0x1CF, &D_800CC2D0[i], 0x7D00, 200, 2500);
-                            func_151D69B4(obj, &D_800CC2D0[i]);
+                            obj->object_status = 0x20;
+                            func_10010344(0x1CF, &movement_obj[i], 0x7D00, 200, 2500);
+                            func_151D69B4(obj, &movement_obj[i]);
                         } else {
                             // fade from 25% (at the centre) to 100% (at the edge) of full opacity
                             distSq *= 0.0001171875f; // 0.75 / (80 * 80)
-                            obj->flags = 0x31;
+                            obj->object_status = 0x31;
                             obj->alpha = (0.25f + distSq) * 255.0f;
                         }
                         break;
                     }
                 } else {
                     obj->alpha = 255;
-                    obj->flags = 0x21;
+                    obj->object_status = 0x21;
                 }
             }
         } else {
             // fade back in over the last 32 frames of the respawn delay
-            obj->flags = 0x31;
+            obj->object_status = 0x31;
             obj->alpha = (32 - WORK(obj)->respawnTimer) << 3;
         }
     }
@@ -90,7 +90,7 @@ void func_15119FC0(WorldObject *obj) {
         if (WORK(obj)->respawnTimer <= 0) {
             WORK(obj)->respawnTimer = 0;
             obj->alpha = 255;
-            obj->flags = 0x21;
+            obj->object_status = 0x21;
         }
     }
 }

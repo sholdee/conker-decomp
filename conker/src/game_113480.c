@@ -162,7 +162,7 @@ void *func_150E63A0(Streak *streak, s16 viewIdx) {
     } else {
         return NULL;
     }
-    eye = &D_800DBFF0[viewIdx].eye;
+    eye = &camera_global_Cameras[viewIdx].eye;
     length = streak->head.def.height;
     start = streak->head.def.pos;
     do { // matching: a do/while(0) (a VEC3 macro body) splits uopt's block so length's f0 is reused for dx; { } does not

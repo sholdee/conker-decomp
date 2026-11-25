@@ -44,7 +44,7 @@ void func_1501A220(s32 numPlayers, s32 arg1) {
         D_800BE6B8 = (f32)(scaledWidth - (scaledWidth % 4)) / width;
     }
 
-    func_150006E0(D_800BE9F0);
+    func_150006E0(level);
 
     for (i = 0; i <= (layout = D_80082FA0); i++) {
         func_1501A8C0(i, layout, 1023, 0);

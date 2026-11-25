@@ -36,10 +36,15 @@ FlickerSprite *func_150C6D90(Watcher *watcher);
 WatcherEmitter *func_150C68C4(Actor *character, Watcher *watcher);
 
 extern Vec3f D_800887E0;
-/* matching: rodata holds second copies of these constants, which repeated literals would fold into the first */
-extern f32 D_800A0450, D_800A0454; /* 5000.0f */
-extern f32 D_800A0464;             /* 0.15f */
-extern f32 D_800A0470, D_800A0474; /* 0.1f, 0.08f */
+/*
+ * Heights above the character: where the ceiling ray-cast starts, and the ceiling used when it hits
+ * nothing. They are loaded from .rodata (a 5000.0f literal would be built with lui); IDO 5.3 puts a
+ * const aggregate there (a const scalar goes to .data).
+ */
+const struct {
+    f32 rayStart;
+    f32 defaultCeiling;
+} D_800A0450 = { 5000.0f, 5000.0f };
 
 /* Watcher action: keeps the floor sprite alive, creating it on first use. */
 void func_150C66F0(Watcher *watcher) {
@@ -113,13 +118,13 @@ WatcherEmitter *func_150C68C4(Actor *character, Watcher *watcher) {
 
         link.owner = &watcher->watcher;
         link.keepAlive = 1;
-        pos[0] = character->x_position;
-        pos[1] = character->y_position + D_800A0450;
-        pos[2] = character->z_position;
-        if (func_15045800(pos, 0, character->y_position - 100.0f, &watcher->watcher.hit) != 0) {
+        pos[0] = character->xpos;
+        pos[1] = character->ypos + D_800A0450.rayStart;
+        pos[2] = character->zpos;
+        if (func_15045800(pos, 0, character->ypos - 100.0f, &watcher->watcher.hit) != 0) {
             link.ceiling = watcher->watcher.hit.height;
         } else {
-            link.ceiling = character->y_position + D_800A0454;
+            link.ceiling = character->ypos + D_800A0450.defaultCeiling;
         }
     }
     desc.target[0] = 0;
@@ -194,11 +199,11 @@ void func_150C6A08(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, WatcherEmitter *
     motion.widthPhaseStep = func_150ADA20() % 5U + 4;
     motion.heightPhaseStep = func_150ADA20() % 5U + 4;
     motion.widthWobble = (func_150ADA68() * 0.25f + 0.15f) * motion.baseSize;
-    motion.heightWobble = (func_150ADA68() * 0.25f + D_800A0464) * motion.baseSize;
+    motion.heightWobble = (func_150ADA68() * 0.25f + 0.15f) * motion.baseSize;
     motion.swayPhaseStepX = func_150ADA20() % 5U + 4;
     motion.swayPhaseStepZ = func_150ADA20() % 5U + 4;
     motion.swayX = (func_150ADA68() * 0.1f + 0.08f) * motion.baseSize;
-    motion.swayZ = (func_150ADA68() * D_800A0470 + D_800A0474) * motion.baseSize;
+    motion.swayZ = (func_150ADA68() * 0.1f + 0.08f) * motion.baseSize;
     desc.gravity = (func_150ADA68() * 60.0f + 21.0f) * 0.001f;
     particle = func_151303BC(&desc, 2, sizeof(RiseMotion));
     if (particle != NULL) {
@@ -244,14 +249,14 @@ FlickerSprite *func_150C6D90(Watcher *watcher) {
 
     sprite = NULL;
     character = watcher->watcher.character;
-    if (character->unk1D4) {
+    if (character->ob_matrix_ptr) {
         Vec3f origin = D_800887E0;
 
-        func_15143134(&origin, &pos, character->unk1D4);
+        func_15143134(&origin, &pos, character->ob_matrix_ptr);
     } else {
-        pos.x = character->x_position;
-        pos.y = character->y_position;
-        pos.z = character->z_position;
+        pos.x = character->xpos;
+        pos.y = character->ypos;
+        pos.z = character->zpos;
     }
     {
         Vec3f probe;

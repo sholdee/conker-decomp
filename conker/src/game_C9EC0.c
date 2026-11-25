@@ -321,7 +321,7 @@ extern s32 func_1518F51C(Actor *, u8, s32, s32, s8, s8, u8, s32, u8, s32);
 extern void func_150E1060(s32, s32, s32);
 extern void func_151CD35C(s32);
 extern void func_1000E7A0(s32, s32);
-extern void func_151616D0(u8, u8, s32);
+extern void light_sendEvent(u8, u8, s32);
 extern void func_150B53D0(Actor *, s32, s32, s32);
 extern void func_150BEF7C(s32);
 extern void func_15178EFC(s32);
@@ -426,9 +426,9 @@ s32 func_1509D180(s32 cmdId, ScriptCmd *cmd) {
 
                 obj = func_1505EEF4(CMD_OBJECT_ID(cmd->args[0]));
                 if (obj != NULL) {
-                    pos[0] = obj->x_position;
-                    pos[1] = obj->y_position + 50.0f;
-                    pos[2] = obj->z_position;
+                    pos[0] = obj->xpos;
+                    pos[1] = obj->ypos + 50.0f;
+                    pos[2] = obj->zpos;
                     func_151C0098(pos, obj, 1, 0xFF, 1);
                 }
             }
@@ -454,7 +454,7 @@ s32 func_1509D180(s32 cmdId, ScriptCmd *cmd) {
             break;
         case 16:
             func_1000E7A0(16, 0);
-            func_151616D0(22, 31, 0);
+            light_sendEvent(22, 31, 0);
             break;
         case 0:
             obj = func_1505EEF4(CMD_OBJECT_ID(cmd->args[0]));
@@ -488,7 +488,7 @@ s32 func_1509D180(s32 cmdId, ScriptCmd *cmd) {
             break;
         case 6:
             ret = func_150E3414(cmd->args[0].w, cmd->args[1].w, cmd->args[2].w, cmd->args[3].w, cmd->args[4].w,
-                                cmd->args[5].w, D_800CC2D0, cmd->args[6].w, cmd->args[7].w);
+                                cmd->args[5].w, movement_obj, cmd->args[6].w, cmd->args[7].w);
             if (ret != 0) {
                 ret = (ret << 6) | 0xE000 | 4;
             }
@@ -514,8 +514,8 @@ s32 func_1509D180(s32 cmdId, ScriptCmd *cmd) {
             func_151D26C0(cmd->args[0].h.lo);
             break;
         case 22:
-            func_151616D0(35, 39, 0);
-            func_151616D0(36, 39, 0);
+            light_sendEvent(35, 39, 0);
+            light_sendEvent(36, 39, 0);
             break;
         case 23:
             func_15163A60(cmd->args[0].b.lo, 0xFF, 1);
@@ -551,7 +551,7 @@ s32 func_1509D780(s32 cmdId, ScriptCmd *cmd) {
             func_150F9720(cmd->args[0].b.lo);
             break;
         case 38:
-            func_151616D0(41, 24, 0);
+            light_sendEvent(41, 24, 0);
             break;
         case 36:
             obj = func_1505EEF4(CMD_OBJECT_ID(cmd->args[0]));
@@ -560,7 +560,7 @@ s32 func_1509D780(s32 cmdId, ScriptCmd *cmd) {
             }
             break;
         case 26:
-            func_151616D0(38, 24, 0);
+            light_sendEvent(38, 24, 0);
             break;
         case 18:
             func_151CD394(cmd->args[0].w);
@@ -590,11 +590,11 @@ s32 func_1509D780(s32 cmdId, ScriptCmd *cmd) {
             func_151D2718(cmd->args[0].h.lo);
             break;
         case 21:
-            func_151616D0(32, 24, 0);
+            light_sendEvent(32, 24, 0);
             break;
         case 22:
-            func_151616D0(35, 40, 0);
-            func_151616D0(36, 40, 0);
+            light_sendEvent(35, 40, 0);
+            light_sendEvent(36, 40, 0);
             break;
     }
 }
@@ -702,7 +702,7 @@ s32 func_1509D8FC(s32 cmdId, s32 phase, ScriptCmd *cmd) {
             } else {
                 param = 23;
             }
-            func_151616D0(index, param, 0);
+            light_sendEvent(index, param, 0);
             break;
         }
         case 17:

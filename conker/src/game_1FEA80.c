@@ -164,7 +164,7 @@ s32 func_151D197C(TrackerTrail *actor) {
     if (state->owner != NULL) {
         Actor *object = state->owner->data.owner;
 
-        state->ownerScale = object->xz_scale;
+        state->ownerScale = object->scale_xz;
     }
     if (actor->head.count >= 2) {
         total = 0; // matching: integer 0 (not 0.0f) for the target's FP register allocation

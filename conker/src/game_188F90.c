@@ -70,9 +70,9 @@ Gfx *func_15142E24(Gfx *gfx, EffectTexture *tex, s32 frame, s32 arg3, s32 arg4, 
 Gfx *func_15142FBC(Gfx *gfx, s32 modeH, s32 modeL, u8 *needSync);
 Gfx *func_1513F4E4(Gfx *gfx, u8 combiner, u8 *needSync);
 void func_151441A4(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 b0, s32 a0, u8 r1, u8 g1, u8 b1,
-                   u8 a1, u8 level, u8 mode);
+                   u8 a1, u8 weight, u8 mode);
 void func_151442FC(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 b0, u8 a0, u8 r1, u8 g1, u8 b1,
-                   u8 a1, u8 level, u8 mode);
+                   u8 a1, u8 weight, u8 mode);
 void *memcpy(void *, const void *, u32);
 
 /*
@@ -158,12 +158,12 @@ ActorTracker *func_1515BE50(ActorTrackerDesc *desc, s32 extraSize, u8 owner, s32
         return NULL;
     }
     memcpy(&tracker->desc, desc, sizeof(ActorTrackerDesc));
-    tracker->pos.x = desc->actor->x_position;
-    tracker->pos.y = desc->actor->y_position;
-    tracker->pos.z = desc->actor->z_position;
-    tracker->prevPos.x = desc->actor->x_position;
-    tracker->prevPos.y = desc->actor->y_position;
-    tracker->prevPos.z = desc->actor->z_position;
+    tracker->pos.x = desc->actor->xpos;
+    tracker->pos.y = desc->actor->ypos;
+    tracker->pos.z = desc->actor->zpos;
+    tracker->prevPos.x = desc->actor->xpos;
+    tracker->prevPos.y = desc->actor->ypos;
+    tracker->prevPos.z = desc->actor->zpos;
     tracker->unk44 = 0;
     tracker->unk48 = -1;
     tracker->unk10 = 1;
@@ -202,14 +202,14 @@ void func_1515BFA8(ActorTracker *tracker) {
         }
     }
     actor = tracker->desc.actor;
-    if ((actor->interaction_state == 0) || (actor->unique_id != tracker->desc.actorId)) {
+    if ((actor->type == 0) || (actor->unique_id != tracker->desc.actorId)) {
         dead = TRUE;
     }
     if (!dead) {
         tracker->prevPos = tracker->pos;
-        tracker->pos.x = tracker->desc.actor->x_position;
-        tracker->pos.y = tracker->desc.actor->y_position;
-        tracker->pos.z = tracker->desc.actor->z_position;
+        tracker->pos.x = tracker->desc.actor->xpos;
+        tracker->pos.y = tracker->desc.actor->ypos;
+        tracker->pos.z = tracker->desc.actor->zpos;
         tracker->motion.x = (tracker->prevPos.x - tracker->pos.x) * D_800BE9A8;
         tracker->motion.y = (tracker->prevPos.y - tracker->pos.y) * D_800BE9A8;
         tracker->motion.z = (tracker->prevPos.z - tracker->pos.z) * D_800BE9A8;
@@ -258,34 +258,34 @@ void func_1515C158(void) {
  * raised by unkD6; for other ids, 1.0 and 1.0 at the actor's position.
  */
 void func_1515C1A0(Actor *actor, Vec3f *center, f32 *radius, f32 *arg3) {
-    if ((actor->id < 0xBB) && (actor->id != 0xFF)) {
+    if ((actor->character_type < 0xBB) && (actor->character_type != 0xFF)) {
         *radius = actor->unkD2;
         *arg3 = actor->unkD4;
-        center->x = actor->x_position;
-        center->y = actor->y_position + actor->unkD6;
-        center->z = actor->z_position;
+        center->x = actor->xpos;
+        center->y = actor->ypos + actor->unkD6;
+        center->z = actor->zpos;
     } else {
         *radius = 1.0f;
         *arg3 = 1.0f;
-        center->x = actor->x_position;
-        center->y = actor->y_position;
-        center->z = actor->z_position;
+        center->x = actor->xpos;
+        center->y = actor->ypos;
+        center->z = actor->zpos;
     }
 }
 
 /* Like func_1515C1A0, using the body cylinder (bodyRadius/bodyHeight/bodyOffsetY). */
 void func_1515C244(Actor *actor, Vec3f *center, f32 *radius, f32 *arg3) {
-    if ((actor->id < 0xBB) && (actor->id != 0xFF)) {
+    if ((actor->character_type < 0xBB) && (actor->character_type != 0xFF)) {
         *radius = actor->bodyRadius;
         *arg3 = actor->bodyHeight;
-        center->x = actor->x_position;
-        center->y = actor->y_position + actor->bodyOffsetY;
-        center->z = actor->z_position;
+        center->x = actor->xpos;
+        center->y = actor->ypos + actor->bodyOffsetY;
+        center->z = actor->zpos;
     } else {
         *radius = 1.0f;
         *arg3 = 1.0f;
-        center->x = actor->x_position;
-        center->y = actor->y_position;
-        center->z = actor->z_position;
+        center->x = actor->xpos;
+        center->y = actor->ypos;
+        center->z = actor->zpos;
     }
 }
