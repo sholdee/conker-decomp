@@ -831,28 +831,10 @@ extern Vec3f D_800AAA9C;
 extern u16 D_800AB140[];
 extern IdList1 D_800AB168; // effect-object kinds (game_1FFF60)
 // game_2062D0.c
-extern u8 D_800AB310[];
-extern u8  D_800AB340[3]; // 88, 64, 62
-extern u8  D_800AB344[5]; // 46, 48, 45, 51, 52
-extern u8  D_800AB34C[4]; // 96, 97, 98, 99
-extern s32 D_800AB350[7]; // 0, 1, 2, 58, 59, 60, 61
-extern s32 D_800AB36C[3]; // 15, 16, 17
-extern s32 D_800AB384[2]; // 28, 29
-extern s32 D_800AB378[3]; // 143, 144, 145
-extern s32 D_800AB38C[2]; // 8, 9
-extern s32 D_800AB394[5]; // 49, 50, 51, 13, 14
-extern s32 D_800AB3A8[3]; // 150, 151, 152
-extern s32 D_800AB3B4[2]; // 27, 28
-extern s32 D_800AB3BC[3]; // 160, 161, 162
-extern s32 D_800AB3C8[1]; // 179
-extern s32 D_800AB3CC[3]; // 185, 186, 187
-extern s32 D_800AB3D8[4]; // 96, 97, 98, 99
-extern Vec3f D_800AB3E8; // zero vector
-extern f32 D_800AB3EC; //-1.0f
-
-extern u8 D_800AB3F4[];
-extern u8 D_800AB404[];
-extern Color24 D_800AB414[]; // effect colours (RGB per colour index / effect kind)
+extern const u8 D_800AB310[13]; // texture id per effect kind
+extern const u8 D_800AB3F4[13]; // particle texture id per effect kind
+extern const u8 D_800AB404[13]; // flag per effect kind
+extern const Color24 D_800AB414[13]; // effect colours (RGB per colour index / effect kind)
 extern f32 D_800AB464;
 extern f32 D_800AB468;
 extern f32 D_800AB46C; // 0.0003000000142492354f

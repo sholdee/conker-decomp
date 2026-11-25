@@ -11,7 +11,12 @@ void func_151D9FC0(u8 kind, f32 size, u8 arg2, s32 arg3, Vec3f *pos, u8 arg5, s3
 void func_151DAB58(u8 kind, f32 size, u8 arg2, Vec3f *pos, volatile u8 arg4, u8 arg5, s32 arg6);
 s32 func_15131918(Vec3f *vel, f32 scale);
 
-extern u8 D_800AB330[]; /* per effect kind flag */
+/* Per effect kind (0..12): sprite texture id, used by game_1BDC20 and game_1DD500 emitters. */
+const u8 D_800AB310[13] = { 176, 164, 172, 169, 168, 170, 174, 175, 164, 177, 178, 171, 173 };
+/* Per effect kind: texture id of a plain sprite particle (func_151DC034). */
+static const u8 D_800AB320[13] = { 119, 118, 29, 147, 91, 45, 103, 149, 119, 159, 179, 118, 97 };
+/* Per effect kind flag. */
+static const u8 D_800AB330[13] = { 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0 };
 
 
 /* Data of a func_151DA08C effect: wobbles its scale and keeps spawning func_151DB5D0 particles. */
@@ -46,7 +51,7 @@ u8 func_151D8E20(void) {
 
 /* Id picker for effect kind 0 in the D_8008FCD0 table. */
 u8 func_151D8E6C(void) {
-    u8 ids[3] = D_800AB340;
+    const u8 ids[3] = { 88, 64, 62 };
     return ids[func_150ADA20() % 3U];
 }
 
@@ -72,7 +77,7 @@ u8 func_151D8EFC(void) {
 
 /* Id picker for effect kind 5 in the D_8008FCD0 table. */
 u8 func_151D8F30(void) {
-    u8 ids[5] = D_800AB344;
+    const u8 ids[5] = { 46, 48, 45, 51, 52 };
     return ids[func_150ADA20() % 5U];
 }
 
@@ -103,7 +108,7 @@ u8 func_151D8FD4(void) {
 
 /* Id picker for effect kind 12 in the D_8008FCD0 table. */
 u8 func_151D8FE0(void) {
-    u8 ids[4] = D_800AB34C;
+    const u8 ids[4] = { 96, 97, 98, 99 };
     return ids[func_150ADA20() & 3];
 }
 
@@ -314,73 +319,73 @@ u8 func_151D9534(Particle *particle, Vec3f *arg1) {
 
 /* Id picker for effect kind 0 in the D_8008FD04 table. */
 u8 func_151D97A8(void) {
-    s32 ids[7] = D_800AB350;
+    const s32 ids[7] = { 0, 1, 2, 58, 59, 60, 61 };
     return ids[func_150ADA20() % 7U];
 }
 
 /* Id picker for effect kind 3 in the D_8008FD04 table. */
 u8 func_151D9820(void) {
-    s32 ids[3] = D_800AB36C;
+    const s32 ids[3] = { 15, 16, 17 };
     return ids[func_150ADA20() % 3U];
 }
 
 /* Id picker for effect kind 1 in the D_8008FD04 table. */
 u8 func_151D9878(void) {
-    s32 ids[3] = D_800AB378;
+    const s32 ids[3] = { 143, 144, 145 };
     return ids[func_150ADA20() % 3U];
 }
 
 /* Id picker for effect kind 2 in the D_8008FD04 table. */
 u8 func_151D98D0(void) {
-    s32 ids[2] = D_800AB384;
+    const s32 ids[2] = { 29, 30 };
     return ids[func_150ADA20() & 1];
 }
 
 /* Id picker for effect kind 4 in the D_8008FD04 table. */
 u8 func_151D9918(void) {
-    s32 ids[2] = D_800AB38C;
+    const s32 ids[2] = { 8, 9 };
     return ids[func_150ADA20() & 1];
 }
 
 /* Id picker for effect kind 5 in the D_8008FD04 table. */
 u8 func_151D9960(void) {
-    s32 ids[5] = D_800AB394;
+    const s32 ids[5] = { 49, 50, 51, 13, 14 };
     return ids[func_150ADA20() % 5U];
 }
 
 /* Id picker for effect kind 6 in the D_8008FD04 table. */
 u8 func_151D99C8(void) {
-    s32 ids[3] = D_800AB3A8;
+    const s32 ids[3] = { 150, 151, 152 };
     return ids[func_150ADA20() % 3U];
 }
 
 /* Id picker for effect kinds 7 and 8 in the D_8008FD04 table. */
 u8 func_151D9A20(void) {
-    s32 ids[2] = D_800AB3B4;
+    const s32 ids[2] = { 27, 28 };
     return ids[func_150ADA20() & 1];
 }
 
 /* Id picker for effect kind 9 in the D_8008FD04 table. */
 u8 func_151D9A68(void) {
-    s32 ids[3] = D_800AB3BC;
+    const s32 ids[3] = { 160, 161, 162 };
     return ids[func_150ADA20() % 3U];
 }
 
 /* Id picker for effect kind 10 in the D_8008FD04 table. */
 u8 func_151D9AC0(void) {
-    s32 ids[1] = D_800AB3C8;
+    const s32 ids[1] = { 179 };
     return ids[0];
 }
 
 /* Id picker for effect kind 11 in the D_8008FD04 table. */
 u8 func_151D9ADC(void) {
-    s32 ids[3] = D_800AB3CC;
+    const s32 ids[3] = { 185, 186, 187 };
     return ids[func_150ADA20() % 3U];
 }
 
 /* Id picker for effect kind 12 in the D_8008FD04 table. */
 u8 func_151D9B34(void) {
-    s32 ids[4] = D_800AB3D8;
+    const s32 ids[4] = { 96, 97, 98, 99 };
     return ids[func_150ADA20() & 3];
 }
 
@@ -403,6 +408,8 @@ typedef struct {
 s32 func_15144E80(s32, Vec3f *, Vec3f *, Vec3f *);
 s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
 f32 func_15144A74(Vec3f *, Vec3f *);
+
+static const Vec3f D_800AB3E8 = { 0.0f, -1.0f, 0.0f }; /* straight down */
 
 /*
  * Spawns an emitter of effect kind `kind` at `pos` (lifetime -1: default). With arg8 set and an
@@ -617,6 +624,17 @@ lbl: // matching: ends the basic block so the scaleY store is not moved into the
     }
     return 1;
 }
+
+/* Per effect kind: particle texture id (func_151DA938 splashes, game_1D92F0). */
+const u8 D_800AB3F4[13] = { 13, 0, 9, 6, 4, 5, 11, 12, 12, 14, 15, 8, 10 };
+/* Per effect kind flag (colour mode). */
+const u8 D_800AB404[13] = { 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0 };
+/* Per effect kind RGB colour. */
+const Color24 D_800AB414[13] = {
+    { 255, 255, 255 }, { 255, 255, 255 }, { 190, 100, 0 },  { 255, 255, 255 }, { 255, 255, 255 },
+    { 255, 255, 255 }, { 30, 200, 10 },   { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 },
+    { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 },
+};
 
 /* Steam effect update for timed effects: shrinks the size once per elapsed frame. */
 s32 func_151DA6A8(SteamEffect *effect) {
@@ -1263,8 +1281,6 @@ void func_151DBE80(u8 kind, f32 size, f32 arg2, s16 lifetime, Vec3f *pos, s32 ar
     func_1513D668(&desc, 0, 11, 17, 0, (func_150ADA20() & 1) + (func_150ADA20() & 1),
                   (s16)(func_150ADA20() & 0xFF), size, size, 0, arg5, 0, 0, arg8, arg9);
 }
-
-extern u8 D_800AB320[];
 
 /* Spawns a plain sprite particle of effect kind `kind` (id from D_800AB320) at `pos`. */
 void func_151DC034(Vec3f *pos, f32 size, u8 arg2, s16 lifetime, u8 kind, u8 arg5, s32 arg6) {
