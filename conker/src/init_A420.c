@@ -3,143 +3,84 @@
 #include "functions.h"
 #include "variables.h"
 
-
-void func_1000E40C(s32, s32);
 s32 func_150AD960(s32, s32, s32, s32);
 s32 func_150AD9A0(s32, s32, s32);
 
-s32 func_1000A420(s32 arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 *arg9, s32 *argA, s32 *argB) {
+/*
+ * Pan and volume of a positional sound. (dx, dz) is the sound's offset from the listener, which sets the pan
+ * together with the listener's angle; (distX, distY, distZ) is the offset whose length sets the volume, from
+ * full at nearDistance down to silent at farDistance (bit 0x8000 of farDistance: horizontal distance only).
+ * The pan is skipped when pan is NULL. Returns the distance.
+ */
+s32 func_1000A420(s32 dx, s32 dy, s32 dz, f32 angle, s32 distX, s32 distY, s32 distZ, s32 farDistance,
+                  s32 nearDistance, s32 *pan, s32 *volume, s32 *distanceOut) {
     f32 ratio;
-    s32 ret;
+    s32 distance;
     s16 value;
     s32 rounded;
-    s32 mode;
-    s32 result;
+    s32 rearBit;
+    s32 level;
 
-    mode = 0x80;
-    if (arg7 & 0x8000) {
-        arg7 &= 0x7FFF;
-        ret = func_150AD960(arg4, arg6, 0, 0);
+    rearBit = 0x80; // cleared when the sound is in the front quarter (|angle| < 32)
+    if (farDistance & 0x8000) {
+        farDistance &= 0x7FFF;
+        distance = func_150AD960(distX, distZ, 0, 0);
     } else {
-        ret = func_150AD9A0(arg4, arg5, arg6);
+        distance = func_150AD9A0(distX, distY, distZ);
     }
-    result = 0x7FFF - ((arg8 - ret) << 15) / (arg8 - arg7);
-    if (result >= 401) {
-        if (arg9 != NULL) {
-            if (func_150AD960(arg0, arg2, 0, 0) >= 31) {
-                ratio = sqrtf(arg0 * arg0 + arg2 * arg2);
-                if (D_8002C200 < ratio) {
-                    ratio = arg0 / ratio;
+    level = 0x7FFF - ((nearDistance - distance) << 15) / (nearDistance - farDistance);
+    if (level > 400) {
+        if (pan != NULL) {
+            if (func_150AD960(dx, dz, 0, 0) > 30) {
+                ratio = sqrtf(dx * dx + dz * dz);
+                if (ratio > 0.01f) {
+                    ratio = dx / ratio;
                 }
-                rounded = (s32)((f64)func_150487E0(ratio) * D_8002C208);
+                rounded = func_150487E0(ratio) * (128.0 / M_PI);
                 value = rounded;
-                if (arg2 > 0) {
-                    if ((s16)rounded < 0) {
-                        value = -0x80 - (s16)rounded;
+                if (dz > 0) {
+                    if (value < 0) {
+                        value = -128 - value;
                     } else {
-                        value = 0x80 - (s16)rounded;
+                        value = 128 - value;
                     }
                 }
-                value += arg3 * D_8002C210;
+                // add the listener's angle (degrees to 256ths of a turn) and wrap to a signed byte
+                value += angle * (128.0f / 180.0f);
                 value = (s8)value;
-                if (value >= 0x60 || value < -0x60) {
+                if (value >= 96 || value < -96) {
                     value = 0;
-                } else if (value >= 0x20) {
-                    value = 0x5F - value;
-                } else if (value < -0x20) {
-                    value = -0x5F - value;
+                } else if (value >= 32) {
+                    value = 95 - value;
+                } else if (value < -32) {
+                    value = -95 - value;
                 } else {
-                    mode = 0;
+                    rearBit = 0;
+                    // matching: IDO emits sll for `value *= 2`; the original adds
                     value += value;
                 }
-                *arg9 = (value + 0x40) | mode;
+                *pan = (value + 64) | rearBit;
             } else {
-                *arg9 = 0x40;
+                *pan = 64;
             }
         }
-        if (0x7FFF - ((arg8 - ret) << 15) / (arg8 - arg7) < 0) {
-            result = (arg8 - arg7) * 0;
+        // the level is recomputed here, as in the original code
+        if (0x7FFF - ((nearDistance - distance) << 15) / (nearDistance - farDistance) < 0) {
+            // matching: `* 0` keeps (nearDistance - farDistance) live, so IDO gives it $t1 and distance $t2
+            level = (nearDistance - farDistance) * 0;
         }
-        if (result >= 0x8000) {
-            result = 0x7FFF;
+        if (level >= 0x8000) {
+            level = 0x7FFF;
         }
-        *argA = result;
+        *volume = level;
     } else {
-        *argA = 0;
+        *volume = 0;
     }
-    if (argB != NULL) {
-        *argB = ret;
+    if (distanceOut != NULL) {
+        *distanceOut = distance;
     }
-    return ret;
+    return distance;
 }
-// NON-MATCHING: mostly just regalloc
-// s32 func_150AD960(s32, s32, s32, s32);
-// s32 func_150AD9A0(s32, s32, s32);
-// s32 func_1000A420(s32 arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 *arg9, s32 *argA, s32 *argB) {
-//     f64 dbl;
-//     s32 temp_v1;
-//     f32 phi_f12;
-//     s32 sp24;
-//     s16 tmp0;
-//     s8 temp_t5;
-//     s32 ret;
-//
-//     sp24 = 128;
-//     if ((arg7 & 0x8000) != 0) {
-//         // if arg7 is negative, take abs
-//         arg7 = arg7 & 0x7FFF;
-//         ret = func_150AD960(arg4, arg6, 0, 0);
-//     } else {
-//         ret = func_150AD9A0(arg4, arg5, arg6);
-//     }
-//     temp_v1 = 0x7FFF - ((arg8 - ret) << 15) / (arg8 - arg7);
-//     if (temp_v1 >= 401) {
-//         if (arg9 != 0) {
-//             if (func_150AD960(arg0, arg2, 0, 0) >= 31) {
-//                 phi_f12 = sqrtf((f32) ((arg0 * arg0) + (arg2 * arg2)));
-//                 if (D_8002C200 < phi_f12) { // rodata, 0.009999999776482582
-//                     phi_f12 = arg0 / phi_f12;
-//                 }
-//                 dbl = (func_150487E0(phi_f12) * D_8002C208);
-//                 tmp0 = dbl;
-//                 if (arg2 > 0) {
-//                     if (tmp0 < 0) {
-//                         tmp0 = -128 - tmp0;
-//                     } else {
-//                         tmp0 = 128 - tmp0;
-//                     }
-//                 }
-//                 temp_t5 = tmp0 + (arg3 * D_8002C210);
-//                 if ((temp_t5 >= 96) || ((temp_t5 < (-96)))) {
-//                     tmp0 = 0;
-//                 } else if ( temp_t5 >= 32) {
-//                     tmp0 = 95 - temp_t5;
-//                 } else if (temp_t5 < -32) {
-//                     tmp0 = -95 - temp_t5;
-//                 } else {
-//                     sp24 = 0;
-//                     tmp0 = temp_t5 * 2;
-//                 }
-//                 *arg9 = (tmp0 + 64) | sp24;
-//             } else {
-//                 *arg9 = 64;
-//             }
-//         }
-//         if ((0x7FFF - ((s32) ((arg8 - ret) << 15) / (arg8 - arg7))) < 0) {
-//             temp_v1 = 0;
-//         }
-//         if (temp_v1 >= 0x8000) {
-//             temp_v1 = 0x7FFF;
-//         }
-//         *argA = temp_v1;
-//     } else {
-//         *argA = 0;
-//     }
-//     if (argB != 0) {
-//         *argB = ret;
-//     }
-//     return ret;
-// }
 
 typedef struct {
     s16 x;
@@ -147,8 +88,6 @@ typedef struct {
     s16 z;
     s16 pad;
 } PathPoint_A750;
-
-s32 func_1000A420(s32, s32, s32, f32, s32, s32, s32, s32, s32, s32 *, s32 *, s32 *);
 
 #define PTS (((PathPoint_A750 **)D_800D2104)[arg0])
 #define DIST (dx * dx + dy * dy + dz * dz)
@@ -252,9 +191,6 @@ s32 func_1000A750(s32 arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 x, s32 y
     return func_1000A420(resX - arg1, resY - arg2, resZ - arg3, arg4, resX - x, resY - y, resZ - z, arg8, arg9, argA,
                          argB, argC);
 }
-f32 sqrtf(f32);
-#pragma intrinsic(sqrtf)
-
 s32 func_1000B060(f32 x, f32 y, s32 offset) {
     s16 value;
     s16 mode;
@@ -289,43 +225,3 @@ s32 func_1000B060(f32 x, f32 y, s32 offset) {
     }
     return (value + 0x40) | mode;
 }
-// NON-MATCHING: fair amount to fix up
-// s32 func_1000B060(f32 arg0, f32 arg1, s32 arg2) {
-//     s16 phi_a1;
-//     f32 sp18;
-//     s16 temp_t8;
-//     f64 temp_f6;
-//     s8 temp_t9;
-//     s16 phi_v1_2;
-//
-//     sp18 = sqrtf((arg0 * arg0) + (arg1 * arg1));
-//     if (D_8002C214 < sp18) {
-//         sp18 = arg0 / sp18;
-//     }
-//     phi_a1 = 128;
-//     temp_f6 = func_150487E0(sp18) * D_8002C218;
-//     phi_v1_2 = temp_f6;
-//     if (0.0f < arg1) {
-//         temp_t8 = temp_f6;
-//         if ((s32) temp_t8 < 0) {
-//             phi_v1_2 = (s16) (-128 - temp_t8);
-//         } else {
-//             phi_v1_2 = (s16) (128 - temp_t8);
-//         }
-//     }
-//     temp_t9 = phi_v1_2 + arg2;
-//     if (( temp_t9 >= 96) || ( temp_t9 < -96)) {
-//         phi_v1_2 = 0;
-//         phi_a1 = 128;
-//     } else if ((s32) temp_t9 >= 32) {
-//         phi_v1_2 = (s16) (0x5F - temp_t9);
-//         phi_a1 = 128;
-//     } else if ((s32) temp_t9 < -32) {
-//         phi_v1_2 = (s16) (-0x5F - temp_t9);
-//         phi_a1 = 128;
-//     } else {
-//         phi_v1_2 = (s16) (temp_t9 * 2);
-//         phi_a1 = 0;
-//     }
-//     return (phi_v1_2 + 64) | phi_a1;
-// }
