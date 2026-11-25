@@ -1,10 +1,9 @@
 #include <ultra64.h>
+// functions.h declares func_15169260 with s32 parameters; this file declares its real pointer types
 #define func_15169260 func_15169260_s32
 #include "functions.h"
 #undef func_15169260
 #include "variables.h"
-
-
 
 /* Spawn descriptor for a DynModel; copied verbatim into DynModel.desc (same layout as in game_168A90.c). */
 typedef struct {
@@ -45,7 +44,7 @@ typedef struct {
 
 #define TRACK_NONE 999
 
-/* User data of the swinging lamp model (DynModel kind 1). */
+/* User data of the two swinging lamp models (DynModel kind 1). */
 typedef struct {
     /* 0x00 */ f32 swingX;   // sway offsets, sin(phase) * amplitude
     /* 0x04 */ f32 swingZ;
@@ -65,7 +64,10 @@ typedef struct {
 DynModel *func_1513B5E0(DynModelDesc *desc, u8 arg1, s32 userDataSize, u8 arg3, s32 arg4);
 struct225 *func_1516037C(Header *header, struct226 *light, s32 size, u8 arg3, s32 arg4);
 
-/* Spawns the two lamp models; the first one gets an effect that drives `light`. */
+/*
+ * Spawns the two swinging lamp models (assets 427 and 428). The first gets a light effect that moves
+ * `light` with it; the second is drawn by func_15109120 while the light is on.
+ */
 void func_15108850(struct226 *light) {
     DynModel *model;
 
@@ -168,12 +170,12 @@ f32 sinf(f32);
 void func_15108B80(DynModel *model);
 void func_15108BC0(DynModel *model);
 
-/* Update for the first lamp: advances the sway phases, then the track timer and height. */
+/* Update function 0 (first lamp model): advances the sway phases, then the track timer and height. */
 s32 func_15108AB4(DynModel *model) {
     LampData *lamp = LAMP_DATA(model);
 
-    lamp->phaseX = lamp->phaseX + 0.0857f * D_800BE9A4;
-    lamp->phaseZ = lamp->phaseZ + 0.0783f * D_800BE9A4;
+    lamp->phaseX += 0.0857f * D_800BE9A4;
+    lamp->phaseZ += 0.0783f * D_800BE9A4;
     lamp->phaseX = func_15144B68(lamp->phaseX);
     lamp->phaseZ = func_15144B68(lamp->phaseZ);
     lamp->swingX = sinf(lamp->phaseX) * 7.1050005f;
@@ -212,12 +214,12 @@ void func_15108BC0(DynModel *model) {
     }
 }
 
-/* Update for the second lamp: as func_15108AB4, and picks the draw function by the light state. */
+/* Update function 1 (second lamp model): as func_15108AB4, then draws with func_15109120 while lit. */
 s32 func_15108C38(DynModel *model) {
     LampData *lamp = LAMP_DATA(model);
 
-    lamp->phaseX = lamp->phaseX + 0.0857f * D_800BE9A4;
-    lamp->phaseZ = lamp->phaseZ + 0.0783f * D_800BE9A4;
+    lamp->phaseX += 0.0857f * D_800BE9A4;
+    lamp->phaseZ += 0.0783f * D_800BE9A4;
     lamp->phaseX = func_15144B68(lamp->phaseX);
     lamp->phaseZ = func_15144B68(lamp->phaseZ);
     lamp->swingX = sinf(lamp->phaseX) * 7.1050005f;
@@ -232,8 +234,8 @@ s32 func_15108C38(DynModel *model) {
     return 1;
 }
 
-/* Builds this frame's lamp matrix: swung, raised to its height and scaled by 0.157. */
-s32 func_15108D24(DynModel *model, s32 arg1) {
+/* Draw function 1: builds this frame's lamp matrix, swung, raised to its height and scaled by 0.157. */
+s32 func_15108D24(DynModel *model, s32 viewport) {
     f32 mtx[4][4];
     LampData *lamp;
 
@@ -363,7 +365,7 @@ void func_151090DC(void) {
 struct17 *func_15144B34(s32);
 
 /*
- * Draw setup: builds the lamp matrix and recomputes the texture coordinates of the 16 vertices of
+ * Draw function 4: builds the lamp matrix and recomputes the texture coordinates of the 16 vertices of
  * `viewport`'s buffer, projected on the horizontal axis perpendicular to the camera.
  */
 s32 func_15109120(DynModel *model, s16 viewport) {
