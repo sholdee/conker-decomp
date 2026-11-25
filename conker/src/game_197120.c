@@ -253,109 +253,97 @@ void func_1516A3F4(DropParticle *drop) {
     }
 }
 
-struct Struct1516A538 {
-    u8 pad0;
-    u8 unk1;
-    u8 padb[0xA];
-    u8 unkC;
-    u8 padd[0x7];
-    s16 unk14;
-    u8 pad16[0x2];
-    s16 unk18;
-    s16 unk1A;
-    s16 unk1C;
-    u8 pad1e[0x7];
-    u8 unk25;
-};
+/* Partial view of a type 3 SpriteFx (game_1944C0.c); unk25 is SpriteFxTemplate.unk15. */
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 list;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 owner;
+    /* 0x0D */ u8 padD[7];
+    /* 0x14 */ s16 frame;       /* 8.8 fixed point */
+    /* 0x16 */ u8 pad16[2];
+    /* 0x18 */ s16 x;
+    /* 0x1A */ s16 y;
+    /* 0x1C */ s16 z;
+    /* 0x1E */ u8 pad1E[7];
+    /* 0x25 */ u8 unk25;
+} SplashFx;
 
 extern void func_15171D4C(f32, f32, f32, s32, s32, s32, f32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_1516F864(s32);
-extern void func_1516F94C(s32, s32);
 
-void func_1516A538(struct Struct1516A538 *arg0) {
-    u32 b;
-    u32 a;
-    s32 c;
+/* Splash callback: from frame 3 on, spawns a sprite with a random texture (0x20-0x22) and angle each frame. */
+void func_1516A538(SplashFx *fx) {
+    u32 angle;
+    u32 texture;
+    s32 level;
 
-    if (arg0->unk14 >= 0x300) {
-        a = (u32)func_150ADA20() % 3;
-        c = arg0->unk25;
-        b = (u32)func_150ADA20() % 0x168;
-        func_15171D4C(
-            (f32)(s32)arg0->unk18,
-            (f32)((s32)arg0->unk1A - 0xA),
-            (f32)(s32)arg0->unk1C,
-            0x64,
-            0,
-            a + 0x20,
-            (f32)(u32)b,
-            0,
-            (c * 25) / 255 + 0x19,
-            0,
-            0x100,
-            0,
-            arg0->unkC,
-            arg0->unk1);
+    if (fx->frame >= 0x300) {
+        texture = (u32)func_150ADA20() % 3;
+        level = fx->unk25;
+        angle = (u32)func_150ADA20() % 360;
+        func_15171D4C(fx->x, fx->y - 10, fx->z, 100, 0, texture + 0x20, angle, 0,
+                      (level * 25) / 255 + 25, 0, 0x100, 0, fx->owner, fx->list);
     }
 }
 
+/* Partial view of a 0x34-byte sprite Particle (game_19A8B0.c). */
 typedef struct {
-    char pad_0[0xE];
-    s16 field_0xE;
-    s16 field_0x10;
-    s16 field_0x12;
-    s16 field_0x14;
-    s16 field_0x16;
-    s16 field_0x18;
-    char pad_0x1A[0x5];
-    u8 field_0x1F;
-    char pad_0x20[0x4];
-    u8 field_0x24;
-    char pad_0x25[0x7];
-    u8 field_0x2C;
-    u8 field_0x2D;
-} Obj1516A648;
+    /* 0x00 */ u8 pad0[0xE];
+    /* 0x0E */ s16 x;
+    /* 0x10 */ s16 y;
+    /* 0x12 */ s16 z;
+    /* 0x14 */ s16 scaleX;
+    /* 0x16 */ s16 scaleY;
+    /* 0x18 */ s16 velocityY;
+    /* 0x1A */ u8 pad1A[5];
+    /* 0x1F */ u8 alpha;
+    /* 0x20 */ u8 pad20[4];
+    /* 0x24 */ u8 lifetime;     /* fades in while nonzero, out once it runs down */
+    /* 0x25 */ u8 pad25[7];
+    /* 0x2C */ u8 floorHi;      /* floor height + 10, high byte */
+    /* 0x2D */ u8 floorLo;
+} BounceParticle;
 
-s32 func_1516A648(Obj1516A648 *arg0) {
-    s32 temp_a1;
-    s32 temp_v0;
-    s32 temp_v1;
+void func_1516F864(BounceParticle *particle);
+void func_1516F94C(BounceParticle *particle, s32 factor);
 
-    temp_a1 = arg0->field_0x24;
-    temp_v0 = arg0->field_0x1F;
-    if (temp_a1 != 0) {
-        if (temp_v0 != 0xFF) {
-            temp_v0 += D_800BE9E4 << 4;
-            if (temp_v0 >= 0x100) {
-                temp_v0 = 0xFF;
+/* Particle kind handler: fades the particle in or out, applies gravity and drift, and bounces it
+ * off the floor. Returns 1 once it has faded out completely. */
+s32 func_1516A648(BounceParticle *particle) {
+    s32 alpha;
+    s32 floorY;
+
+    alpha = particle->alpha;
+    if (particle->lifetime != 0) {
+        if (alpha != 255) {
+            alpha += D_800BE9E4 * 16;
+            if (alpha >= 256) {
+                alpha = 255;
             }
-            arg0->field_0x1F = temp_v0;
-            temp_a1 = ((volatile Obj1516A648 *)arg0)->field_0x24;
+            particle->alpha = alpha;
         }
-    } else {
-        if (temp_v0 != 0) {
-            temp_v0 -= D_800BE9E4 << 2;
-            if (temp_v0 < 0) {
-                temp_v0 = 0;
-            }
-            arg0->field_0x1F = temp_v0;
-            temp_a1 = ((volatile Obj1516A648 *)arg0)->field_0x24;
+    } else if (alpha != 0) {
+        alpha -= D_800BE9E4 * 4;
+        if (alpha < 0) {
+            alpha = 0;
         }
+        particle->alpha = alpha;
     }
 
-    if ((temp_a1 == 0) && (temp_v0 == 0)) {
+    if (particle->lifetime == 0 && alpha == 0) {
         return 1;
     }
 
-    arg0->field_0x18 = arg0->field_0x18 - 0x12C;
-    func_1516F864((s32)arg0);
-    temp_v1 = func_1510F8D8(arg0->field_0xE, arg0->field_0x10, arg0->field_0x12, 0) + 0xA;
-    arg0->field_0x2C = temp_v1 >> 8;
-    arg0->field_0x2D = temp_v1 & 0xFF;
-    if (arg0->field_0x10 < temp_v1) {
-        arg0->field_0x10 = temp_v1;
-        arg0->field_0x18 = (s16)(s32)((f32)(s32)arg0->field_0x18 * -0.5f);
-        func_1516F94C((s32)arg0, 0xE6);
+    particle->velocityY -= 300;
+    func_1516F864(particle);
+    floorY = func_1510F8D8(particle->x, particle->y, particle->z, 0) + 10;
+    particle->floorHi = floorY >> 8;
+    // matching: the redundant mask steers IDO's scratch registers for the code that follows
+    particle->floorLo = floorY & 0xFF;
+    if (particle->y < floorY) {
+        particle->y = floorY;
+        particle->velocityY *= -0.5f;
+        func_1516F94C(particle, 230);
     }
     return 0;
 }
