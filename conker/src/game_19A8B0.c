@@ -438,25 +438,28 @@ extern f32 func_150489B0(u8);
 extern f32 func_15048A40(u8);
 void func_15170034(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3);
 
-#define HI_U8(arg) (bp[2])
-#define LO_U8(arg) (bp[3])
 
 void func_1516DB90(Emitter *arg0) {
-    Emitter *emitter;
+    Emitter *emitter; // matching: IDO keeps this copy of the argument in its own register
     s32 i;
     s16 scaleX;
     s16 scaleY;
     s32 velocityY;
     s16 x;
     s16 y;
-    s32 tmp;
+    union {
+        s32 word;
+        u8 bytes[4];
+    } fixed;
     s32 velXHigh;
     s32 velXLow;
     s32 velZHigh;
     s32 velZLow;
     s16 z;
-    u8 *bp;
-    s16 c24, c25, c26, c27, c28, c2A, c2B, c2C, c32, c33, c34, c35;
+    s32 pad; // matching: unused stack slot in the original frame
+    s16 pad24, pad25; // matching: unused stack slots in the original frame
+    // matching: the template bytes are copied into s16 locals before the call, in this order
+    s16 r, g, b, envR, envG, envB, unk32, unk33, unk34, unk35;
     f32 fromX;
     f32 fromY;
     f32 fromZ;
@@ -479,7 +482,6 @@ void func_1516DB90(Emitter *arg0) {
     s32 countdown;
 
     emitter = arg0;
-    bp = (u8 *)&tmp;
     if (emitter->unk0 == 0x11) {
         isAlt = 0;
     } else {
@@ -506,13 +508,13 @@ void func_1516DB90(Emitter *arg0) {
             if (emitter->chance == 0 || roll < threshold) {
                 if (emitter->object == 0xFF) {
                     if (emitter->flags & 0x10) {
-                        
+                        /* x:y hold a pointer to an s16 position */
                         s16 *sv = (s16 *)((u16)emitter->y | (emitter->x << 16));
                         x = sv[0];
                         y = sv[1] + emitter->z;
                         z = sv[2];
                     } else if (emitter->flags & 0x20) {
-                        
+                        /* x:y hold a pointer to an f32 position */
                         f32 *fv = (f32 *)((u16)emitter->y | (emitter->x << 16));
                         x = fv[0];
                         y = fv[1] + emitter->z;
@@ -535,21 +537,21 @@ void func_1516DB90(Emitter *arg0) {
                     if (D_800A6E30[emitter->x][6] != 0) {
                         toZ += (u32)(func_150ADA20() & D_800A6E30[emitter->x][6]);
                     }
-                    func_150A7960((f32 *)((u8 *)D_800CC2D0[emitter->object].unk1D4 + (emitter->bone << 6)), fromX, fromY, fromZ, &fromX, &fromY, &fromZ);
-                    func_150A7960((f32 *)((u8 *)D_800CC2D0[emitter->object].unk1D4 + (emitter->bone << 6)), toX, toY, toZ, &toX, &toY, &toZ);
+                    func_150A7960(((f32 (*)[16])D_800CC2D0[emitter->object].unk1D4)[emitter->bone], fromX, fromY, fromZ, &fromX, &fromY, &fromZ);
+                    func_150A7960(((f32 (*)[16])D_800CC2D0[emitter->object].unk1D4)[emitter->bone], toX, toY, toZ, &toX, &toY, &toZ);
                     velX = (toX - fromX) * 8.0f;
                     velY = (toY - fromY) * 8.0f;
                     velZ = (toZ - fromZ) * 8.0f;
                     velocityY = velY;
                     angle = 0x40 - D_800CC2D0[emitter->object].unk76;
                     velX -= D_800CC2D0[emitter->object].xz_velocity * func_15048A40(angle) * 64.0f;
-                    velZ -= *(f32 *)((u8 *)D_800CC30C + emitter->object * 0x32C) * func_150489B0(angle) * 64.0f;
-                    tmp = velX;
-                    velXHigh = HI_U8(tmp);
-                    velXLow = LO_U8(tmp);
-                    tmp = velZ;
-                    velZHigh = HI_U8(tmp);
-                    velZLow = LO_U8(tmp);
+                    velZ -= D_800CC2D0[emitter->object].xz_velocity * func_150489B0(angle) * 64.0f;
+                    fixed.word = velX;
+                    velXHigh = fixed.bytes[2];
+                    velXLow = fixed.bytes[3];
+                    fixed.word = velZ;
+                    velZHigh = fixed.bytes[2];
+                    velZLow = fixed.bytes[3];
                     x = fromX;
                     y = fromY;
                     z = fromZ;
@@ -566,12 +568,12 @@ void func_1516DB90(Emitter *arg0) {
                     z += velZ * offset;
                     velX *= speed;
                     velZ *= speed;
-                    tmp = velX;
-                    velXHigh = HI_U8(tmp);
-                    velXLow = LO_U8(tmp);
-                    tmp = velZ;
-                    velZHigh = HI_U8(tmp);
-                    velZLow = LO_U8(tmp);
+                    fixed.word = velX;
+                    velXHigh = fixed.bytes[2];
+                    velXLow = fixed.bytes[3];
+                    fixed.word = velZ;
+                    velZHigh = fixed.bytes[2];
+                    velZLow = fixed.bytes[3];
                 }
                 if (emitter->radiusXZ != 0) {
                     angle = func_150ADA20();
@@ -636,14 +638,20 @@ void func_1516DB90(Emitter *arg0) {
                         }
                     }
                 }
-                {
-                    c32 = emitter->unk32; c33 = emitter->unk33; c34 = emitter->unk34; c35 = emitter->unk35;
-                    c2A = emitter->envR; c2B = emitter->envG; c2C = emitter->envB;
-                    c26 = emitter->r; c27 = emitter->g; c28 = emitter->b;
-                func_1516D4E8(x, y, z, emitter->texture, emitter->frame, c26, c27, c28, emitter->alpha, c2A, c2B,
-                              c2C, emitter->kind, velXHigh, velXLow, velZHigh, velZLow, c32, c33, c34, c35, emitter->unk36,
-                              emitter->unk37, scaleX, scaleY, emitter->particleLifetime, velocityY, isAlt, emitter->particleLink, emitter->unkC, emitter->unk1);
-                }
+                unk32 = emitter->unk32;
+                unk33 = emitter->unk33;
+                unk34 = emitter->unk34;
+                unk35 = emitter->unk35;
+                envR = emitter->envR;
+                envG = emitter->envG;
+                envB = emitter->envB;
+                r = emitter->r;
+                g = emitter->g;
+                b = emitter->b;
+                func_1516D4E8(x, y, z, emitter->texture, emitter->frame, r, g, b, emitter->alpha, envR, envG, envB,
+                              emitter->kind, velXHigh, velXLow, velZHigh, velZLow, unk32, unk33, unk34, unk35,
+                              emitter->unk36, emitter->unk37, scaleX, scaleY, emitter->particleLifetime, velocityY,
+                              isAlt, emitter->particleLink, emitter->unkC, emitter->unk1);
             }
         }
     }
