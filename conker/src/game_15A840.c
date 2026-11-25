@@ -28,12 +28,12 @@ void func_1512D390(Camera *camera) {
             return;
         }
         if (input & 1) {
-            camera->unk6B0 = 1; /* orbit direction */
+            camera->orbitDir = 1;
         } else {
-            camera->unk6B0 = -1;
+            camera->orbitDir = -1;
         }
         orbit->counter++;
-        orbit->orbitSpeed += (f32)camera->unk6B0 * 0.5f * D_800BE9A4;
+        orbit->orbitSpeed += (f32)camera->orbitDir * 0.5f * D_800BE9A4;
         speed = orbit->orbitSpeed;
         if (speed < -10.0f) {
             orbit->orbitSpeed = -10.0f;

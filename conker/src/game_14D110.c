@@ -85,7 +85,7 @@ void func_1511FC60(Camera *camera) {
         aim->targetYaw += aim->overrideYawOffset;
     }
     aim->savedYaw = camera->CameraAngle;
-    aim->savedUnk134 = camera->Tightness;
+    aim->savedTightness = camera->Tightness;
     if (camera->DoingRail) {
         aim->savedTargetDistance = sqrtf((camera->target.x - camera->eye.x) * (camera->target.x - camera->eye.x) +
                                           (camera->target.z - camera->eye.z) * (camera->target.z - camera->eye.z));
@@ -556,7 +556,7 @@ void func_151218C4(Camera *camera) {
     }
     camera->IdealTripodMagnitude = 200.0f;
     camera->height = 100.0f;
-    camera->Tightness = aim->savedUnk134;
+    camera->Tightness = aim->savedTightness;
     aim->useOverride = FALSE;
     camera->YOffsetTget = 0.0f;
     camera->sideOffsetTarget = 0.0f;

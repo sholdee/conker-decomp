@@ -1468,7 +1468,7 @@ typedef struct CamAim {
     /* 0x20 */ f32 savedYaw;                         /* view to return to on exit */
     /* 0x24 */ f32 savedTargetDistance;
     /* 0x28 */ f32 savedHeight;
-    /* 0x2C */ f32 savedUnk134;
+    /* 0x2C */ f32 savedTightness;
     /* 0x30 */ f32 savedUnk354;
     /* 0x34 */ f32 targetYaw;
     /* 0x38 */ f32 targetPitch;
@@ -1500,8 +1500,8 @@ typedef struct CamTransition {
     /* 0x28 */ f32 endDistance;
     /* 0x2C */ f32 endYaw;
     /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 endUnk5E8;
-    /* 0x38 */ f32 endUnk3A8;
+    /* 0x34 */ f32 endYawAngle;
+    /* 0x38 */ f32 endAPitchAngle;
     /* 0x3C */ f32 progress;
     /* 0x40 */ u16 duration;
     /* 0x42 */ u8 pad42[0x2];
@@ -1649,7 +1649,7 @@ struct Camera {
     /* 0x394 */ f32 FCameraAngle;
     /* 0x398 */ f32 CameraPitchRad;
     /* 0x39C */ f32 CameraAngleRad;
-    /* 0x3A0 */ f32 TrueCameraAngleRad;               /* unk380 in radians */
+    /* 0x3A0 */ f32 TrueCameraAngleRad;               /* TrueCameraAngle in radians */
     /* 0x3A4 */ f32 CutbackAngle;
     /* 0x3A8 */ f32 APitchAngle;
     /* 0x3AC */ f32 APitchUpperBound;                 /* not accessed by US code */
@@ -1705,7 +1705,7 @@ struct Camera {
     /* 0x624 */ u8 pad624[0x4];
     /* 0x628 */ s32 unk628;
     /* 0x62C */ f32 unk62C;
-    /* 0x630 */ f32 AutoRotateAngleVel;               /* yaw velocity while turning toward unk614 (func_15122170) */
+    /* 0x630 */ f32 AutoRotateAngleVel;               /* yaw velocity while turning toward PivotPtr (func_15122170) */
     /* 0x634 */ s16 CurrentChainIndex;                /* not accessed by US code */
     /* 0x636 */ u8 pad636[0x2];
     /* 0x638 */ s32 ForceAttribute;                   /* not accessed by US code */
@@ -1729,7 +1729,7 @@ struct Camera {
     /* 0x694 */ f32 BigGRecoil;                       /* not accessed by US code */
     /* 0x698 */ s32 unk698;
     /* 0x69C */ u8 pad69C[0x14];
-    /* 0x6B0 */ s32 unk6B0;                           /* orbit direction */
+    /* 0x6B0 */ s32 orbitDir;                          /* manual orbit direction, +1 or -1 (func_1512D390) */
     /* 0x6B4 */ u8 pad6B4[0xC];
     /* 0x6C0 */ s32 orbitCounter;
     /* 0x6C4 */ f32 orbitSpeed;                       /* degrees per frame, clamped to +-10 */
@@ -1748,7 +1748,7 @@ struct Camera {
     /* 0x7BC */ f32 CentreBias;
     /* 0x7C0 */ f32 CentreBiasTarget;
     /* 0x7C4 */ f32 CentreBiasVel;                    /* not accessed by US code */
-    /* 0x7C8 */ f32 AutoBehindAngleVel;               /* velocity of yaw while func_15049688 eases it (game_14F130.c, game_123FB0.c) */
+    /* 0x7C8 */ f32 AutoBehindAngleVel;               /* velocity of CameraAngle while func_15049688 eases it (game_14F130.c, game_123FB0.c) */
     /* 0x7CC */ s32 DelayOneFrame;
     /* 0x7D0 */ f32 OffsetXZVel;
     /* 0x7D4 */ f32 OffsetYVel;
@@ -1791,7 +1791,7 @@ struct Camera {
     /* 0x8D0 */ s32 RopeDirection;
     /* 0x8D4 */ f32 PredictSpeedTarget;
     /* 0x8D8 */ f32 PredictSpeedVel;
-    /* 0x8DC */ f32 PredictSpeed;                     /* how fast yaw turns toward the target */
+    /* 0x8DC */ f32 PredictSpeed;                     /* how fast CameraAngle turns toward the target */
     /* 0x8E0 */ f32 AlignBehindAngleVel;
     /* 0x8E4 */ u8 DoingAlignBehind;
     /* 0x8E5 */ u8 pad8E5[0x3];

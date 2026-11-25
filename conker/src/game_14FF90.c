@@ -304,14 +304,14 @@ void func_1512317C(Camera *camera) {
     }
 }
 
-/* With the C-left/C-right buttons, sets unk6B0 to -1/+1 (when unk84 bit 2 allows it). */
+/* With the C-left/C-right buttons, sets orbitDir to -1/+1 (when AvailableModes bit 2 allows it). */
 void func_15123508(Camera *camera) {
     if (camera->AvailableModes & 2) {
         if ((camera->CameraButtons & L_CBUTTONS) && (camera->unk698 == 0)) {
-            camera->unk6B0 = -1;
+            camera->orbitDir = -1;
         }
         if ((camera->CameraButtons & R_CBUTTONS) && (camera->unk698 == 0)) {
-            camera->unk6B0 = 1;
+            camera->orbitDir = 1;
         }
     }
 }
@@ -1904,7 +1904,7 @@ s32 func_15128030(Camera *camera) {
         camera->transition.LerpHeightStarting = camera->eye.y - camera->unk35C;
         func_15125594(camera);
         tr->startYaw = camera->CameraAngle;
-        func_151287E0(camera, &tr->endUnk5E8, &tr->endUnk3A8);
+        func_151287E0(camera, &tr->endYawAngle, &tr->endAPitchAngle);
         camera->transition.LerpCurrentFrames = tr->duration;
         tr->progress = 0.0f;
         tr->state = 2;
@@ -1948,8 +1948,8 @@ s32 func_15128030(Camera *camera) {
         D_800DC000 = tr->startDistance + (tr->endDistance - tr->startDistance) * tr->progress;
         D_800DC004 = camera->transition.LerpHeightStarting +
                      (camera->transition.LerpHeightTarget - camera->transition.LerpHeightStarting) * tr->progress;
-        camera->YawAngle = func_15048720(tr->progress, 0.0f, tr->endUnk5E8);
-        camera->APitchAngle = func_15048720(tr->progress, 0.0f, tr->endUnk3A8);
+        camera->YawAngle = func_15048720(tr->progress, 0.0f, tr->endYawAngle);
+        camera->APitchAngle = func_15048720(tr->progress, 0.0f, tr->endAPitchAngle);
         if (done) {
             camera->transition.endYaw = 999.0f;
             camera->transition.duration = 0;
