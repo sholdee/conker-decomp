@@ -267,19 +267,8 @@ void func_150B60E0(Actor *obj, Vec3f *out) {
     func_15143134(&D_8009FC30, out, (u8 *)obj->unk1D4 + 0x140);
 }
 
-/* Emitter of the bolt-ring effect: cylinder centre (x, y, z), radius and height, and its state. */
 typedef struct {
-    /* 0x00 */ s16 x;
-    /* 0x02 */ s16 y;
-    /* 0x04 */ s16 z;
-    /* 0x06 */ s16 radius;
-    /* 0x08 */ s16 height;
-    /* 0x0A */ u8 padA[0xA];
-    /* 0x14 */ u8 state;
-} BoltEmitter;
-
-typedef struct {
-    /* 0x00 */ BoltEmitter *emitter;
+    /* 0x00 */ TriggerZone *emitter;
     /* 0x04 */ f32 spawnAccum;
     /* 0x08 */ u8 emitterState;
 } BoltRingData;
@@ -303,14 +292,14 @@ extern void func_15106F98(Vec3f *start, Vec3f *end, s32 depth, BoltChainConfig *
  */
 void func_150B6110(BoltRingEffect *effect) {
     BoltRingData *data;
-    BoltEmitter *emitter;
+    TriggerZone *emitter;
     u8 prevState;
     u8 angle;
 
     emitter = effect->data.emitter;
     prevState = effect->data.emitterState;
-    effect->data.emitterState = emitter->state;
-    if (emitter->state == 1) {
+    effect->data.emitterState = emitter->disabled;
+    if (emitter->disabled == 1) {
         if (effect->data.emitterState != prevState) {
             func_151494E0(0, 0x4A);
         }
