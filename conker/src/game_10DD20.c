@@ -5,23 +5,22 @@
 #include "variables.h"
 
 
+/* Ground probe result filled by func_15046C80 (as game_105760.c's GroundHit). */
 typedef struct {
-    /* 0x00 */ f32 unk00;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ f32 unk08;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ u8  unk1C;
-    /* 0x1D */ u8  pad1D[0x7];
-} Struct150E0870Floor; /* 0x24 */
+    /* 0x00 */ f32 height;
+    /* 0x04 */ s16 points[9];
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ u8 flags;
+    /* 0x1D */ u8 unk1D;
+    /* 0x20 */ s32 unk20;
+} GroundHit; /* 0x24 */
 
+// matching: functions.h declares func_150ADA20 as returning u8; the % below needs the full u32
 extern u32 func_150ADA20(void);
-void func_1504715C(Struct150E0870Floor *, struct127 *);
-s32 func_15046C80(struct17 *, s32, f32, Struct150E0870Floor *);
+void func_1504715C(GroundHit *, struct127 *);
+s32 func_15046C80(struct17 *, s32, f32, GroundHit *);
 void func_151D3FF4(struct17 *, u8, s32);
-void func_150E7FEC(f32, u8, void *, void *, s32, s32, s32, s32, s32, s32, u8, s32);
+void func_150E7FEC(f32, u8, s16 *, struct17 *, s32, s32, s32, s32, s32, s32, u8, s32);
 void func_150E83AC(struct17 *, s16, u8, s32);
 void func_151D5334(struct17 *, f32, f32, f32, s32, u8, s32);
 void func_151D5514(struct17 *, u8, s32);
@@ -29,51 +28,49 @@ void func_151D40D4(struct17 *, s32, struct127 *, struct127 *, s32, s32, s32, s32
 void func_151541B8(struct17 *, f32, f32, f32, f32, u8, s32);
 void func_15136C3C(struct127 *, s32, s32, s32, s32, s32, u8, s32);
 
-void func_150E0870(struct127 *arg0, u8 arg1, s32 arg2) {
-    struct17 sp8C;
-    struct17 sp80;
-    u8 onGround;
+/* Spawns a burst of effects at obj: two sounds, a ground splash when there is floor below, and particles. */
+void func_150E0870(struct127 *obj, u8 arg1, s32 arg2) {
+    struct17 origin;
+    struct17 impact;
+    u8 hitGround;
 
-    if (arg0 == NULL) {
+    if (obj == NULL) {
         return;
     }
     if (D_800C35EA != 1) {
-        func_10010630(0x2BB, arg0, 0x7FFF, 1000, 2000);
-        func_10010630(0x2BA, arg0, 0x7FFF, 1000, 2000);
+        func_10010630(0x2BB, obj, 0x7FFF, 1000, 2000);
+        func_10010630(0x2BA, obj, 0x7FFF, 1000, 2000);
     }
-    sp8C.unk0 = arg0->x_position;
-    sp8C.unk4 = arg0->y_position + 20.0f;
-    sp8C.unk8 = arg0->z_position;
-    onGround = 0;
+    origin.unk0 = obj->x_position;
+    origin.unk4 = obj->y_position + 20.0f;
+    origin.unk8 = obj->z_position;
+    hitGround = FALSE;
     {
-        struct17 sp70;
-        Struct150E0870Floor sp4C;
+        struct17 top;
+        GroundHit hit;
 
-        sp70.unk0 = sp8C.unk0;
-        sp70.unk4 = sp8C.unk4 + 100.0f;
-        sp70.unk8 = sp8C.unk8;
-        func_1504715C(&sp4C, arg0);
-        if (func_15046C80(&sp70, 0, sp8C.unk4 - 200.0f, &sp4C) != 0) {
-            if (sp4C.unk1C & 1) {
-                sp80.unk0 = sp70.unk0;
-                onGround = 1;
-                sp80.unk4 = sp4C.unk00;
-                sp80.unk8 = sp70.unk8;
-                func_150E7FEC(func_150ADA68() * 125.0f + 204.0f,
-                              func_150ADA20() % 0x65U + 0x9B, &sp4C.unk04, &sp80,
-                              func_150ADA20() % 0x12EU + 0x1F4, 0, 1, 0, 0, 0, arg1, 0);
-            }
+        top.unk0 = origin.unk0;
+        top.unk4 = origin.unk4 + 100.0f;
+        top.unk8 = origin.unk8;
+        func_1504715C(&hit, obj);
+        if (func_15046C80(&top, 0, origin.unk4 - 200.0f, &hit) && (hit.flags & 1)) {
+            impact.unk0 = top.unk0;
+            hitGround = TRUE;
+            impact.unk4 = hit.height;
+            impact.unk8 = top.unk8;
+            func_150E7FEC(func_150ADA68() * 125.0f + 204.0f, func_150ADA20() % 101U + 155, hit.points, &impact,
+                          func_150ADA20() % 302U + 500, 0, 1, 0, 0, 0, arg1, 0);
         }
     }
-    func_151D5404(&sp8C, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, arg1, arg2);
-    func_151D5334(&sp8C, 506.0f, 1013.0f, 0.0009871669f, 5, arg1, arg2);
-    func_151D5514(&sp8C, arg1, arg2);
-    func_151D3FF4(&sp8C, arg1, arg2);
-    func_150E83AC(onGround ? &sp80 : &sp8C, (s16)(func_150ADA20() % 0x3EU + 0x78), arg1, arg2);
-    func_151541B8(&sp8C, func_150ADA68() * 4.0f + 12.0f, 1.6409999f,
-                  (f32)(func_150ADA20() % 0x38U + 0xC8), 0.0f, arg1, arg2);
-    func_15136C3C(arg0, 1, 1, 1, 1, 0, arg1, arg2);
-    func_151D40D4(&sp8C, 0, arg0, arg0, 0, 0x16, 0x15, 0);
+    func_151D5404(&origin, 506.0f, 1013.0f, 0.0009871669f, 15, 20, arg1, arg2);
+    func_151D5334(&origin, 506.0f, 1013.0f, 0.0009871669f, 5, arg1, arg2);
+    func_151D5514(&origin, arg1, arg2);
+    func_151D3FF4(&origin, arg1, arg2);
+    func_150E83AC(hitGround ? &impact : &origin, func_150ADA20() % 62U + 120, arg1, arg2);
+    func_151541B8(&origin, func_150ADA68() * 4.0f + 12.0f, 1.6409999f, func_150ADA20() % 56U + 200, 0.0f, arg1,
+                  arg2);
+    func_15136C3C(obj, 1, 1, 1, 1, 0, arg1, arg2);
+    func_151D40D4(&origin, 0, obj, obj, 0, 0x16, 0x15, 0);
 }
 
 extern u16 D_800CC346;
