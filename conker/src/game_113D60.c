@@ -13,19 +13,11 @@ typedef struct {
     /* 0x7 */ u8 pad7;
 } Game113D60Event; // argument of func_151D8868
 
-/* Wrappers for small id tables in rodata that functions copy onto their stack: the original
- * code used initialized local arrays, whose initializer data the asm rodata provides here. */
+/* A one-byte id table in rodata, copied onto the stack like the IdList ones. */
 typedef struct {
     u8 ids[1];
 } Game113D60Ids1;
 
-typedef struct {
-    s32 ids[2];
-} Game113D60Ids2;
-
-typedef struct {
-    s32 ids[3];
-} Game113D60Ids3;
 
 extern void *func_151D8868(Game113D60Event *event, s32 arg1, s32 arg2, s32 arg3);
 
@@ -314,10 +306,10 @@ typedef struct {
     /* 0x4 */ f32 y;
 } Vec2f;
 
-extern Game113D60Ids2 D_80088A5C;
+extern IdList2 D_80088A5C;
 extern Game113D60Ids1 D_80088A64;
-extern Game113D60Ids3 D_80088A68;
-extern Game113D60Ids3 D_80088A74;
+extern IdList3 D_80088A68;
+extern IdList3 D_80088A74;
 extern void *func_1515548C(ScreenSpriteInfo5C *, s32, s32 *, s32, s32, u8, s32);
 extern void func_15164F0C(u8, u8, void *, u8, s32);
 void func_150E75A0(Vec2f *position, f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16, s16 unk18, s32 *ids,
@@ -327,7 +319,7 @@ void func_150E76D0(f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16,
 
 /* Occasionally spawns one of the two func_1515548C effects, plus a sound and an event. */
 void func_150E7290(u8 arg0, u8 owner, s32 kind) {
-    Game113D60Ids2 ids;
+    IdList2 ids;
     Vec2f position;
     Game113D60Event event;
     s32 pad; // matching: unused stack slot
@@ -441,7 +433,7 @@ void func_150E76D0(f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16,
     case 0:
     case 1:
         {
-            Game113D60Ids3 sideIds;
+            IdList3 sideIds;
 
             sideIds = D_80088A68;
             arg.texture = sideIds.ids[func_150ADA20() % 3];
@@ -460,7 +452,7 @@ void func_150E76D0(f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16,
     case 2:
     case 3:
         {
-            Game113D60Ids3 topIds;
+            IdList3 topIds;
 
             topIds = D_80088A74;
             arg.texture = topIds.ids[func_150ADA20() % 3];
@@ -836,14 +828,14 @@ void func_150E88C0(Game113D60TimerEffect *effect) {
     }
 }
 
-extern Game113D60Ids2 D_80088A80;
+extern IdList2 D_80088A80;
 void func_150E8A80(void);
 void func_150E90DC(void);
 
 /* Fires the D_80088A80 pair through func_15169260 plus an event, effects 0x33 and 0x36 when the
  * D_800DCDC4 region list exists, and two sounds. */
 void func_150E8930(void) {
-    Game113D60Ids2 ids;
+    IdList2 ids;
     Game113D60Event event;
 
     ids = D_80088A80;

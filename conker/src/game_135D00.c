@@ -300,18 +300,14 @@ typedef struct {
     u8 sceneTag;
 } LampTrackMsg;
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-} MsgTarget;
 
-extern MsgTarget D_80088C50;
-extern MsgTarget D_80088C58;
+extern IdList2 D_80088C50;
+extern IdList2 D_80088C58;
 
 /* Sends message 0x1D: makes the lamps follow `track` for `duration`. */
 void func_15108FFC(s32 track, s32 duration, u8 sceneTag) {
     LampTrackMsg msg;
-    MsgTarget target;
+    IdList2 target;
 
     target = D_80088C50;
     msg.track = track;
@@ -344,7 +340,7 @@ void func_15109064(DynModel *model, LampTrackMsg *msg, u8 event) {
 
 /* Sends message 0x1E: toggles the lamp light. */
 void func_151090DC(void) {
-    MsgTarget target;
+    IdList2 target;
 
     target = D_80088C58;
     func_15169260(&target, 2, 0, 0x1E);

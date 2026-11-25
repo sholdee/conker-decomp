@@ -452,7 +452,7 @@ extern void (*D_80089F60[])(s32, s32, u8);
 extern f32 D_800895B0;
 extern ZDecode D_80089630[8]; // z-buffer decompression table
 extern s32 * D_80089A20[];
-extern s32 D_8008A074[2];
+extern IdList2 D_8008A074; // effect-object kinds (game_16DC80)
 extern struct32 D_8008A0B4[];
 extern s32  D_8008A084[];
 extern void (*D_8008A4E8[])(TimedEffect*);
@@ -763,7 +763,7 @@ extern u8 D_800A3FB4[]; // "power"
 extern u8 D_800A3FBC[]; // "../Effects/Blood/blood.c"
 extern s32 D_800A4AA0; //?
 extern s32 D_800A5168[4]; // object list indices (game_16DC80)
-extern f32 D_800A5178;
+extern s32 D_800A5178[3]; // effect-object kinds (game_169510)
 extern f32 D_800A45B4;
 extern f32 D_800A5624;
 extern f32 D_800A5628;
@@ -833,7 +833,7 @@ extern VtxMorphGroup D_800A7230[2]; // vertex morph groups
 extern Vec3f D_800AAA90; // bone-attachment offset (zero point)
 extern Vec3f D_800AAA9C;
 extern u16 D_800AB140[];
-extern s32 D_800AB168[1];
+extern IdList1 D_800AB168; // effect-object kinds (game_1FFF60)
 // game_2062D0.c
 extern u8 D_800AB310[];
 extern u8  D_800AB340[3]; // 88, 64, 62

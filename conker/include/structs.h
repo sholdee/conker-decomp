@@ -4374,4 +4374,18 @@ typedef struct LevelModelEntry {
     /* 0x4 */ s32 loaded;
 } LevelModelEntry;
 
+/* Small s32 id tables in rodata (effect-object kinds for func_15169260, texture ids, ...) that functions copy
+ * whole onto their stack: the original code used initialized local arrays, whose data the rodata provides. */
+typedef struct IdList1 {
+    /* 0x0 */ s32 ids[1];
+} IdList1;
+
+typedef struct IdList2 {
+    /* 0x0 */ s32 ids[2];
+} IdList2;
+
+typedef struct IdList3 {
+    /* 0x0 */ s32 ids[3];
+} IdList3;
+
 #endif

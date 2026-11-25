@@ -160,15 +160,12 @@ void func_151A55D4(struct Obj151A4FD0 *effect, void *arg1, u8 arg2) {
     }
 }
 
-struct Data151A561C {
-    s32 unk0;
-};
 
-extern struct Data151A561C D_800A8D70;
+extern IdList1 D_800A8D70;
 
 /* Forwards a message to func_15169260 with a local copy of the D_800A8D70 descriptor. */
 void func_151A561C(s32 arg0, u8 arg1) {
-    struct Data151A561C descriptor;
+    IdList1 descriptor;
 
     descriptor = D_800A8D70;
     func_15169260(&descriptor, 1, arg0, arg1);

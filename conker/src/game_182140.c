@@ -21,10 +21,6 @@ typedef struct {
     s32 unk4;
 } CombineMode;
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-} Pair1515572C;
 
 /* The two sprite lists func_151555AC searches. */
 typedef struct {
@@ -36,7 +32,7 @@ extern void (*D_8008AD04[])(ScreenSprite *, s32, u8);
 extern SpriteTexture D_80090B60[];
 extern CombineMode D_800A4AC8[];
 extern SpriteListIds D_800A6030;
-extern Pair1515572C D_800A6038;
+extern IdList2 D_800A6038;
 
 extern s32 func_15181CC8(s32);
 extern s32 func_1517EF00(s32);
@@ -274,7 +270,7 @@ lbl: // matching: unused label; it splits the block before i++
 }
 
 void func_1515572C(s32 arg0, u8 arg1) {
-    Pair1515572C pair;
+    IdList2 pair;
 
     pair = D_800A6038;
     func_15169260(&pair, 2, arg0, arg1);

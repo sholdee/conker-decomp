@@ -429,17 +429,13 @@ void func_151416E8(GlowObj *obj, u8 *msg, u8 msgType) {
     }
 }
 
-struct Data_151417C4 {
-    s32 unk0;
-    s32 unk4;
-};
 
 /* Sends func_15169260 the one-byte payload arg0, addressed with the two words of D_8008A074. */
 void func_151417C4(u8 arg0, u8 arg1) {
     u8 payload[1];
-    struct Data_151417C4 data;
+    IdList2 data;
 
-    data = *(struct Data_151417C4 *)D_8008A074;
+    data = D_8008A074;
     payload[0] = arg0;
     func_15169260(&data, 2, (s32)payload, arg1);
 }

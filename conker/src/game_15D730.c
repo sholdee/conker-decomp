@@ -64,11 +64,8 @@ typedef struct Particle {
     } data;
 } Particle;
 
-typedef struct ParticleTypeList {
-    s32 types[3];
-} ParticleTypeList;
 
-extern ParticleTypeList D_800A37F0;
+extern IdList3 D_800A37F0;
 
 
 /* Allocates a particle of the given kind with dataSize bytes of per-particle data and copies desc into it. */
@@ -701,7 +698,7 @@ void func_15131C84(u8 *phase, s8 *phaseStep, f32 base, f32 *amplitude, f32 *outX
 
 /* Calls func_15169260 with the three particle object types (see func_15130280). */
 void func_15131D4C(s32 arg0, u8 arg1) {
-    ParticleTypeList types;
+    IdList3 types;
 
     types = D_800A37F0;
     func_15169260(&types, 3, arg0, arg1);

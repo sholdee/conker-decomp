@@ -365,13 +365,10 @@ void func_151D33FC(ActorFollowerGroup *group, struct223 *msg) {
     }
 }
 
-typedef struct {
-    s32 unk0;
-} Func151D343CArgs;
 
 void func_151D343C(s32 arg0, u8 arg1) {
-    Func151D343CArgs args;
+    IdList1 args;
 
-    args = *(Func151D343CArgs *)D_800AB168; // matching: a struct copy, not an s32 load
-    func_15169260(&args.unk0, 1, arg0, arg1);
+    args = D_800AB168;
+    func_15169260(args.ids, 1, arg0, arg1);
 }
