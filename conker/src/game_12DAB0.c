@@ -45,12 +45,12 @@ typedef struct {
     /* 0x8C */ f32 unk8C;
     /* 0x90 */ s16 sound;           /* func_10010F30 handle */
     /* 0x92 */ u8 pad92[2];
-} EffectState; /* size 0x94 */
+} EffectParticleState; /* size 0x94 */
 
-/* The main particle: a func_1513D4B8 particle (0x110 bytes) followed by its EffectState. */
+/* The main particle: a func_1513D4B8 particle (0x110 bytes) followed by its EffectParticleState. */
 typedef struct {
     DefParticleHead head;
-    EffectState state;
+    EffectParticleState state;
 } EffectParticle;
 
 /* Data of the child subParticle (after its 0x110-byte particle). */
@@ -88,7 +88,7 @@ extern u8 *func_151407D0(GlowShape *, s32, ParticleDef *, u8, u8, u8, u8, s8, u8
 extern LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, u8, u8, u8, u8, u8, s32, u8, s32);
 
 /*
- * Spawns an effect on owner: a main particle carrying an EffectState plus five children (a particle,
+ * Spawns an effect on owner: a main particle carrying an EffectParticleState plus five children (a particle,
  * a flash, a glow and two func_15130374 particles) that keep a pointer back to it. lifetime -1 means
  * endless. Returns the main particle, or NULL.
  */
@@ -96,9 +96,9 @@ EffectParticle *func_15100600(Actor *owner, Vec3f *vec1, Vec3f *vec2, u8 arg3, s
                               u8 g, u8 b, f32 arg8, f32 arg9, f32 argA, f32 argB, u8 argC, u8 argD, s32 argE) {
     EffectParticle *particle;
     ParticleDef def;
-    EffectState data;
+    EffectParticleState data;
     u8 hasLifetime;
-    EffectState *state;
+    EffectParticleState *state;
 
     if (lifetime == -1) {
         hasLifetime = FALSE;
@@ -170,10 +170,10 @@ EffectParticle *func_15100600(Actor *owner, Vec3f *vec1, Vec3f *vec2, u8 arg3, s
     def.unk45 = 0xFF;
     def.unk46 = 0;
     def.unk47 = 6;
-    particle = func_1513D4B8(&def, &D_800A4AA0, 0x15, 0x1F, 0, 0x12, 0, sizeof(EffectState), argD, argE);
+    particle = func_1513D4B8(&def, &D_800A4AA0, 0x15, 0x1F, 0, 0x12, 0, sizeof(EffectParticleState), argD, argE);
     if (particle != NULL) {
         state = &particle->state;
-        memcpy(state, &data, sizeof(EffectState));
+        memcpy(state, &data, sizeof(EffectParticleState));
         {
             ParticleDef subDef;
             SubParticleData subData;

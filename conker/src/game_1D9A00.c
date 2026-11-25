@@ -25,17 +25,19 @@ typedef struct {
     /* 0x20 */ u8 unk20;
 } EffectPayload;
 
+/* A func_15147A80 effect object (EffectObj) whose items are EffectSamples and whose user data is an
+ * EffectPayload. */
 typedef struct {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
     /* 0x84 */ u8 unk84[0x10];
     /* 0x94 */ EffectSample *samples;
     /* 0x98 */ EffectPayload *payload;
-} EffectState;
+} SampleTrail;
 
 /* Calls func_151DBCBC at the current sample's (x, z) with height y, then sets the payload's
  * unk20 to 4. */
-s32 func_151AC550(EffectState *state, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
+s32 func_151AC550(SampleTrail *state, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
     EffectPayload *payload = state->payload;
     EffectSample *samples = state->samples;
     f32 position[3];

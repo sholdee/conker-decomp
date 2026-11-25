@@ -32,28 +32,25 @@ typedef struct RingSparkEmitter {
     u8 color[3];
 } RingSparkEmitter; // size 0x60
 
-typedef struct EffectObject {
-    u8 pad0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0x1B];
-    union {
+/* Timed effect (func_15149130) of this file, with an emitter trigger or a spark emitter (func_150D278C) as data. */
+typedef struct SparkEffect {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ union {
         EmitterTrigger trigger;
         RingSparkEmitter emitter;
     } data;
-} EffectObject;
+} SparkEffect;
 
 void func_150D278C(s16 *record, f32 *matrix, u8 unkC, s32 unk1);
 
 /* While params[0] bit 0 is set, spawns a spark emitter after each random delay. */
-void func_150D26F0(EffectObject *obj) {
+void func_150D26F0(SparkEffect *obj) {
     EmitterTrigger *trigger = &obj->data.trigger;
 
     if (trigger->params[0] & 1) {
         trigger->countdown -= D_800BE9E4;
         if (trigger->countdown < 0) {
-            func_150D278C(trigger->record, trigger->matrix, obj->unkC, obj->unk1);
+            func_150D278C(trigger->record, trigger->matrix, obj->base.header.owner, obj->base.header.kind);
             trigger->countdown = func_150ADA20() % (u32)(trigger->delayRange + 1) + trigger->minDelay;
         }
     }
@@ -85,7 +82,7 @@ void func_150D278C(s16 *record, f32 *matrix, u8 unkC, s32 unk1) {
     }
     object = func_15149130(func_150ADA20() % 101U + 100, -1, 0x32, -1, 1, 0, sizeof(emitter), unkC, unk1);
     if (object != NULL) {
-        memcpy(&((EffectObject *)object)->data, &emitter, sizeof(emitter));
+        memcpy(&((SparkEffect *)object)->data, &emitter, sizeof(emitter));
     }
 }
 
@@ -119,7 +116,7 @@ extern void func_1514373C(f32 angle, f32 radius, f32 *outX, f32 *outZ);
  * Accumulates the emitter's spawn rate and, for each whole spark due, spawns one on a circle around
  * the emitter's record (rotating by angleStep) with a random sway; sparks fade out 22 time units in.
  */
-void func_150D2924(EffectObject *obj) {
+void func_150D2924(SparkEffect *obj) {
     RingSparkEmitter *emitter;
     s16 *record;
 
@@ -175,7 +172,7 @@ void func_150D2924(EffectObject *obj) {
                 motion.phaseSpeedX = (func_150ADA68() * 80.0f + 50.0f) * 0.001f;
                 motion.phaseSpeedY = (func_150ADA68() * 80.0f + 50.0f) * 0.001f;
                 spawn.unk44 = motion.fadeScale * motion.life;
-                spark = func_1513D2F0(&spawn, &D_800A4AA0, 0, 0x26, 0, 0x1F, 0, 0, 0, 0x30, obj->unkC, obj->unk1);
+                spark = func_1513D2F0(&spawn, &D_800A4AA0, 0, 0x26, 0, 0x1F, 0, 0, 0, 0x30, obj->base.header.owner, obj->base.header.kind);
                 if (spark != NULL) {
                     memcpy(&((RingSparkParticle *)spark)->motion, &motion, sizeof(motion));
                 }
@@ -297,10 +294,10 @@ s32 func_150D317C(RingSparkParticle *particle) {
 }
 
 /* On event 0x34 carrying this trigger's id, spawns a spark emitter immediately. */
-void func_150D32FC(EffectObject *obj, u8 *msg, u8 event) {
+void func_150D32FC(SparkEffect *obj, u8 *msg, u8 event) {
     EmitterTrigger *trigger = &obj->data.trigger;
 
     if (event == 0x34 && msg[0] == trigger->params[1]) {
-        func_150D278C(trigger->record, trigger->matrix, obj->unkC, obj->unk1);
+        func_150D278C(trigger->record, trigger->matrix, obj->base.header.owner, obj->base.header.kind);
     }
 }
