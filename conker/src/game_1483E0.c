@@ -506,37 +506,14 @@ void func_1511BE5C(WorldObject *obj) {
     obj->rotY = func_150484A0((f32)obj->x - D_800DBFF0->eye.x, (f32)obj->z - D_800DBFF0->eye.z) * 57.29577637f;
 }
 
-/* Per-character trap state that func_1511BEBC drives while a character is caught. */
-struct CharacterTrap {
-    u8 pad0[0x6B];
-    u8 state;
-    s16 x;
-    s16 y;
-    s16 z;
-};
-
-/* The 0x32C-byte character object (Actor) as func_1511BEBC sees it. */
-struct TrapCharacter {
-    u8 pad0[0x14];
-    f32 x;
-    f32 y;
-    f32 z;
-    u8 pad20[0xC6];
-    s16 height;
-    u8 padE8[0x234];
-    struct CharacterTrap *trap;
-    u8 pad320[0xC];
-};
-
-
 extern void func_150DDED0(void *);
 
 /* After a delay, lowers onto a player found beneath it and holds them at its position; rises back to rest otherwise. */
 void func_1511BEBC(WorldObject *obj) {
     f32 pos[3];
     s16 restY;
-    struct TrapCharacter *target;
-    struct TrapCharacter *character;
+    Actor *target;
+    Actor *character;
     Camera *player;
     s32 i;
     s32 mode;
@@ -549,7 +526,7 @@ void func_1511BEBC(WorldObject *obj) {
     s32 flag4;
     s32 triggered;
     f32 velocity;
-    struct CharacterTrap *trap;
+    ActorCtl *trap;
     f32 dist;
     void (*onTrigger)(void *);
 
@@ -584,11 +561,11 @@ void func_1511BEBC(WorldObject *obj) {
                 if (player->playerExt->unk6B >= 4) {
                     continue;
                 }
-                character = (struct TrapCharacter *)player->player;
-                if (character->y + 40.0f < pos[1]) {
-                    dy = (character->y + (f32)character->height) - pos[1];
-                    dz = character->z - pos[2];
-                    dx = character->x - pos[0];
+                character = player->player;
+                if (character->y_position + 40.0f < pos[1]) {
+                    dy = (character->y_position + (f32)character->bodyHeight) - pos[1];
+                    dz = character->z_position - pos[2];
+                    dx = character->x_position - pos[0];
                     dist = dz * dz + (dx * dx + dy * dy);
                     if (dist != dist) {} // matching: no-op NaN self-test steers IDO's FP scheduling
                     if (dist < radiusSq) {
@@ -600,8 +577,8 @@ void func_1511BEBC(WorldObject *obj) {
         }
         if (target == NULL && (mode == 2 || mode == 1)) {
             for (i = 0; i < D_8008FD8C; i++) {
-                character = &((struct TrapCharacter *)D_800CC2D0)[i];
-                if (character->trap->state != 0) {
+                character = &D_800CC2D0[i];
+                if (character->unk31C->unk6B != 0) {
                     target = character;
                     break;
                 }
@@ -622,9 +599,9 @@ void func_1511BEBC(WorldObject *obj) {
                 }
                 if (target != NULL) {
                     if (timer != 0) {
-                        target->trap->state = 1;
+                        target->unk31C->unk6B = 1;
                     } else {
-                        target->trap->state = 2;
+                        target->unk31C->unk6B = 2;
                     }
                 }
                 if (timer != 0) {
@@ -643,26 +620,26 @@ void func_1511BEBC(WorldObject *obj) {
                         triggered = 0;
                         velocity = 0.0f;
                         if (target != NULL) {
-                            target->trap->state = 0;
+                            target->unk31C->unk6B = 0;
                         }
                         func_10010F88(0x1A5, 0x7FFF, 0, 0, 0, obj->x, obj->y, obj->z, 1500, 3500);
                     }
                 }
                 if (target != NULL) {
-                    target->trap->x = pos[0];
-                    target->trap->y = pos[1];
-                    target->trap->z = pos[2];
+                    target->unk31C->holdX = pos[0];
+                    target->unk31C->holdY = pos[1];
+                    target->unk31C->holdZ = pos[2];
                 }
             } else if (target != NULL) {
-                if (triggered == 0 && target->trap->state == 0) {
+                if (triggered == 0 && target->unk31C->unk6B == 0) {
                     timer = 50;
                     triggered++;
                 }
-                trap = target->trap;
+                trap = target->unk31C;
                 if (timer != 0) {
-                    trap->state = 3;
-                } else if (trap->state == 3) {
-                    trap->state = 4;
+                    trap->unk6B = 3;
+                } else if (trap->unk6B == 3) {
+                    trap->unk6B = 4;
                     triggered = 0;
                 }
                 if (timer != 0) {
@@ -674,9 +651,9 @@ void func_1511BEBC(WorldObject *obj) {
                 }
             }
             if (target != NULL) {
-                target->trap->x = pos[0];
-                target->trap->y = pos[1];
-                target->trap->z = pos[2];
+                target->unk31C->holdX = pos[0];
+                target->unk31C->holdY = pos[1];
+                target->unk31C->holdZ = pos[2];
             }
         } else if (flag8 == 0 || mode == 1) {
             if (obj->y < restY) {
@@ -694,7 +671,7 @@ void func_1511BEBC(WorldObject *obj) {
                 }
             }
             if (target != NULL) {
-                target->trap->state = 0;
+                target->unk31C->unk6B = 0;
             }
         }
         WORK(obj)->w1511BEBC.triggered = triggered;
