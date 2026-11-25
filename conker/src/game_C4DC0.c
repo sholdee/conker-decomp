@@ -1,35 +1,52 @@
 #include <ultra64.h>
+// matching: functions.h declares func_15083E90 as taking s32 and func_150ADA20 as returning u8; the
+// callers here need a u8 parameter and a full u32 return, so hide those declarations
 #define func_15083E90 func_15083E90_s32_decl_in_functions_h
 #define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
 #undef func_15083E90
 #undef func_150ADA20
-struct127 *func_15083E90(u8);
 #include "variables.h"
 
+struct127 *func_15083E90(u8);
+u32 func_150ADA20(void);
 
-struct C4DC0_elem30 {
+/* One 0x30-byte spawn slot of the D_800D20FC table (struct258 in structs.h is not the real layout). */
+typedef struct {
     u8 pad0[2];
     u8 unk2;
     u8 pad3[0x2D];
-};
-extern s32 func_15082A44(void *, s32, s32, s32, s32);
+} SpawnSlot;
 
-s32 func_15097910(s32 arg0, s32 arg1) {
+#define SPAWN_SLOTS ((SpawnSlot *)D_800D20FC)
+
+typedef struct {
+    u8 pad0[4];
+    s32 unk4;
+} C4DC0_arg1;
+
+extern s32 func_15082A44(void *, s32, s32, s32, s32);
+extern struct127 *func_1505EEF4(s32);
+extern s32 func_15053430(struct127 *);
+extern u8 D_800D2100;
+extern s32 D_800D3840;
+
+/* Returns the object id for script id `scriptId` (| 0x2000 when nonzero), spawning it from its slot if needed. */
+s32 func_15097910(s32 scriptId, s32 unused) {
     s32 ret;
     struct127 *obj;
 
-    ret = func_15083E0C((u8)arg0);
+    ret = func_15083E0C((u8)scriptId);
     if (ret != -1) {
-        obj = func_15083E90((u8)arg0);
+        obj = func_15083E90((u8)scriptId);
         if (obj == NULL) {
-            ((struct C4DC0_elem30 *)D_800D20FC)[ret].unk2 = 0;
-            if (func_15082A44(ret + (struct C4DC0_elem30 *)D_800D20FC, ret, 0, 0, 0) == 0) {
+            SPAWN_SLOTS[ret].unk2 = 0;
+            if (func_15082A44(ret + SPAWN_SLOTS, ret, 0, 0, 0) == 0) { // matching: index + base operand order
                 return -1;
             }
-            ret = func_15083E0C((u8)arg0);
+            ret = func_15083E0C((u8)scriptId);
         } else {
-            ret = ((u8 *)obj)[0x13F];
+            ret = obj->unk13F;
         }
     }
     if (ret != 0) {
@@ -38,43 +55,29 @@ s32 func_15097910(s32 arg0, s32 arg1) {
     return ret;
 }
 
+/* Removes object `objId` (flagging its spawn slot); returns 999999 on success, 0 if there is no such object. */
+s32 func_150979CC(s32 objId, C4DC0_arg1 *arg1) {
+    struct127 *obj;
 
-struct C4DC0_arg1 {
-    u8 pad0[4];
-    s32 unk4;
-};
-struct C4DC0_elem {
-    u8 pad0[2];
-    u8 unk2;
-    u8 pad3[0x2D];
-};
-extern struct127 *func_1505EEF4(s32);
-extern s32 func_15053430(struct127 *);
-extern u8 D_800D2100;
-extern s32 D_800D3840;
-
-s32 func_150979CC(s32 arg0, struct C4DC0_arg1 *arg1) {
-    struct127 *temp;
-
-    temp = func_1505EEF4(arg0);
-    if (temp == 0) {
+    obj = func_1505EEF4(objId);
+    if (obj == NULL) {
         return 0;
     }
-    if (arg0 < D_800D2100) {
-        ((struct C4DC0_elem *)D_800D20FC)[arg0].unk2 = 1;
+    if (objId < D_800D2100) {
+        SPAWN_SLOTS[objId].unk2 = 1;
     }
     if (D_800D3840 == 2) {
         if (arg1->unk4 == 0) {
-            func_15060F28(temp, 0);
+            func_15060F28(obj, 0);
         } else {
-            func_15053430(temp);
+            func_15053430(obj);
         }
     } else {
-        func_15060F28(temp, 0);
+        func_15060F28(obj, 0);
     }
     return 999999;
 }
-u32 func_150ADA20(void);
+
 
 typedef struct {
     s32 unk0;
