@@ -2,12 +2,13 @@
 #include "functions.h"
 #include "variables.h"
 
+/* Z-buffer scan parameters (D_800DC200[player][unk1B4], copied from D_80089590 by func_1512ABF8). */
 typedef struct {
-    s16 unk0;
+    s16 halfWidth; // pixels scanned on each side of the target
     s16 unk2;
-    s16 unk4;
-    s16 unk6;
-} struct1512ABF8;
+    s16 threshold; // depth gap that counts as an occluder
+    s16 altThreshold;
+} ZScanParams;
 
 /* Per-player screen record, 0x180 bytes each, in the array that D_800BE628 points to. */
 typedef struct {
@@ -21,15 +22,15 @@ typedef struct {
     /* 0x34 */ u8 pad34[0x14C];
 } ViewRec;
 
-extern struct1512ABF8 D_80089590[];
+extern ZScanParams D_80089590[];
 /* State of one z-buffer occlusion scan (see func_1512B630). */
 typedef struct {
     u8 unk0;
     u8 unk1;
     u8 unk2;
     u8 unk3;
-    s32 unk4;
-    s32 unk8;
+    s32 offset; // distance from the scan centre of the last occluder
+    s32 gap;    // its depth in front of the target
 } ZScan;
 
 /* One set of scans per player. */
@@ -40,9 +41,7 @@ typedef struct {
 } ZScanSet;
 
 extern ZScanSet D_800DC0C0[4];
-extern struct1512ABF8 D_800DC200[][4];
-extern s16 D_800DC204[];
-extern s16 D_800DC206[];
+extern ZScanParams D_800DC200[][4];
 
 void func_15123A54(struct108 *arg0);
 void func_1512C150(struct108 *arg0);
@@ -293,8 +292,8 @@ void func_1512ABF8(void) {
     s32 temp_t2;
     u8 i;
     u8 j;
-    register struct1512ABF8 *src;
-    struct1512ABF8 *temp_v0;
+    register ZScanParams *src;
+    ZScanParams *temp_v0;
 
     temp_f2 = 0.75f;
     temp_f0 = 0.5f;
@@ -309,12 +308,12 @@ void func_1512ABF8(void) {
             *temp_v0 = src[j];
 
             if ((temp_a1 > 0) && (temp_a1 < 4)) {
-                temp_v0->unk0 = temp_v0->unk0 * temp_f0;
+                temp_v0->halfWidth = temp_v0->halfWidth * temp_f0;
                 temp_v0->unk2 = temp_v0->unk2 * temp_f0;
             }
 
             if ((temp_t1 == temp_a2) || (temp_t2 == temp_a2)) {
-                temp_v0->unk0 = temp_v0->unk0 * temp_f2;
+                temp_v0->halfWidth = temp_v0->halfWidth * temp_f2;
                 temp_v0->unk2 = temp_v0->unk2 * temp_f2;
             }
             j++;
@@ -381,59 +380,61 @@ void func_1512B1B8(CamView *arg0, s32 arg1, s32 arg2, s32 arg3);
 s32 func_1512B730();
 s32 func_1512B53C();
 
-#define rec (&((ViewRec *)D_800BE628)[arg0->unk23D])
+// matching: re-indexed at every use; a local pointer to the record changes regalloc
+#define VIEW (&((ViewRec *)D_800BE628)[arg0->unk23D])
 
+/* Projects the camera target to the screen, scans the z-buffer row through it for occluders and, when blocked,
+ * swings the camera around the target (func_1512B730's correction, smoothed). */
 void func_1512AD54(CamView *arg0) {
-    s32 x;
-    s32 z;
-    f32 *q;
-    f32 y;
+    s32 screenX;
+    s32 screenY;
+    f32 *q; // matching: one local carries the projected depth (as s32) and later &D_800DC1FC
+    f32 targetY;
     struct17 pos;
 
-
-    y = arg0->unk2BC.unk4;
+    targetY = arg0->unk2BC.unk4;
     if (func_1512B53C(arg0) != 0) {
         return;
     }
     if (!(arg0->unk84 & 0x10)) {
         if (arg0->unk3D0->unk180 < arg0->unk3D0->unk17C) {
-            if (arg0->unk3D0->unk17C - 40.0f <= y) {
-                y = arg0->unk3D0->unk17C - 40.0f;
+            if (arg0->unk3D0->unk17C - 40.0f <= targetY) {
+                targetY = arg0->unk3D0->unk17C - 40.0f;
             }
         }
     }
-    func_1501A764(arg0->unk23D, arg0->unk2BC.unk0, y, arg0->unk2BC.unk8, &D_800DC1F0, &D_800DC1F4, &D_800DC1F8);
+    func_1501A764(arg0->unk23D, arg0->unk2BC.unk0, targetY, arg0->unk2BC.unk8, &D_800DC1F0, &D_800DC1F4, &D_800DC1F8);
     q = (f32 *)(s32)D_800DC1F8;
-    x = ((s32)D_800DC1F0 < (s32)rec->xMin) ? (s32)rec->xMin : (((s32)rec->xMax < (s32)D_800DC1F0) ? (s32)rec->xMax : (s32)D_800DC1F0);
-    z = ((s32)D_800DC1F4 < (s32)rec->yMin) ? (s32)rec->yMin : (((s32)rec->yMax < (s32)D_800DC1F4) ? (s32)rec->yMax : (s32)D_800DC1F4);
-    if ((x < rec->xMin) || (rec->xMax <= x) || (z < rec->yMin) || (rec->yMax <= z)) {
+    screenX = ((s32)D_800DC1F0 < (s32)VIEW->xMin) ? (s32)VIEW->xMin : (((s32)VIEW->xMax < (s32)D_800DC1F0) ? (s32)VIEW->xMax : (s32)D_800DC1F0);
+    screenY = ((s32)D_800DC1F4 < (s32)VIEW->yMin) ? (s32)VIEW->yMin : (((s32)VIEW->yMax < (s32)D_800DC1F4) ? (s32)VIEW->yMax : (s32)D_800DC1F4);
+    if ((screenX < VIEW->xMin) || (VIEW->xMax <= screenX) || (screenY < VIEW->yMin) || (VIEW->yMax <= screenY)) {
         arg0->unk5F8 = 1;
         arg0->unk8B8 = 0;
         return;
     }
     arg0->unk8B8 = 1;
-    arg0->unk8BA = z;
-    func_1512B1B8(arg0, x, z, (s32)q);
+    arg0->unk8BA = screenY;
+    func_1512B1B8(arg0, screenX, screenY, (s32)q);
     pos = arg0->unk2F8;
     func_1512B730(arg0, &arg0->unk3EC, &D_800DC1FC);
     if (fabsf(arg0->unk3EC) > 3.0f) {
         func_1508EF80(&pos, &arg0->unk2BC, arg0->unk3EC, &pos);
         {
-        f32 a;
-        f32 b;
+        f32 rate1;
+        f32 rate2;
 
-        a = 6.0f;
-        b = 8.0f;
+        rate1 = 6.0f;
+        rate2 = 8.0f;
         if (*arg0->unk36C & 3) {
-            a *= 1.2f;
-            b *= 1.2f;
+            rate1 *= 1.2f;
+            rate2 *= 1.2f;
         }
-        func_150495B0(&arg0->unk2F8.unk0, pos.unk0, &arg0->unk3FC.unk0, a, b, arg0->unk7B4);
-        func_150495B0(&arg0->unk2F8.unk4, pos.unk4, &arg0->unk3FC.unk4, a, b, arg0->unk7B4);
-        func_150495B0(&arg0->unk2F8.unk8, pos.unk8, &arg0->unk3FC.unk8, a, b, arg0->unk7B4);
+        func_150495B0(&arg0->unk2F8.unk0, pos.unk0, &arg0->unk3FC.unk0, rate1, rate2, arg0->unk7B4);
+        func_150495B0(&arg0->unk2F8.unk4, pos.unk4, &arg0->unk3FC.unk4, rate1, rate2, arg0->unk7B4);
+        func_150495B0(&arg0->unk2F8.unk8, pos.unk8, &arg0->unk3FC.unk8, rate1, rate2, arg0->unk7B4);
         }
         arg0->unk5F8 = 0;
-    lbl:;
+    lbl:; // matching: the label keeps as1 from filling the branch delay slot below
     } else {
         arg0->unk5F8 = 1;
     }
@@ -447,16 +448,13 @@ void func_1512AD54(CamView *arg0) {
     arg0->unk698 = 0;
 }
 
+/* Runs the z-buffer occlusion check (func_1512AD54) when the camera mode allows it; otherwise marks the
+ * check as off and arms the unk5FC/unk5FE countdowns. */
 void func_1512B100(CamView *arg0) {
-    s32 temp_v0;
-
-    temp_v0 = arg0->unk2C;
-    if ((temp_v0 & ~0x100) && (D_800BEAC0 == 0) && (D_800C3671 == 0)) {
-        if (temp_v0 != 0x40) {
-            temp_v0 = arg0->unk84;
-            if ((temp_v0 & 8) && !(temp_v0 & 0x200) && (arg0->unk23C == 0)) {
-                temp_v0 = arg0->unk5F0;
-                if (!(temp_v0 & 0x80) && !(temp_v0 & 0x40)) {
+    if ((arg0->unk2C & ~0x100) && (D_800BEAC0 == 0) && (D_800C3671 == 0)) {
+        if (arg0->unk2C != 0x40) {
+            if ((arg0->unk84 & 8) && !(arg0->unk84 & 0x200) && (arg0->unk23C == 0)) {
+                if (!(arg0->unk5F0 & 0x80) && !(arg0->unk5F0 & 0x40)) {
                     func_1512AD54(arg0);
                     return;
                 }
@@ -464,61 +462,65 @@ void func_1512B100(CamView *arg0) {
         }
         arg0->unk5F8 = 1;
         arg0->unk5FC = 2;
-        arg0->unk5FE = 0x3C;
+        arg0->unk5FE = 60;
     }
 }
 
+/* N64 z-buffer format table: depth = (base + (mantissa << shift)) per 3-bit exponent. */
 typedef struct {
     s32 shift;
     s32 base;
-} struct80089630;
+} ZFormat;
 
-extern struct80089630 D_80089630[];
-s32 func_1512B630(CamView *arg0, ZScan *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
+extern ZFormat D_80089630[];
+s32 func_1512B630(CamView *arg0, ZScan *scan, s32 gap, s32 offset, s32 mid, s32 useAltThreshold);
 
-void func_1512B1B8(CamView *arg0, s32 arg1, s32 arg2, s32 arg3) {
-    s32 sp74[0x281];
+/* Scans the z-buffer row arg0->unk8BC outwards from screenX, left then right, comparing each pixel's depth
+ * with the target's depth; the first occluder on each side is recorded in that side's ZScan. */
+void func_1512B1B8(CamView *arg0, s32 screenX, s32 screenY, s32 depth) {
+    s32 gaps[0x281];
     s32 start;
     s32 i;
-    s32 lim;
-    s16 n;
-    u16 code;
-    struct80089630 *tbl;
-    struct1512ABF8 *p;
-    s16 y;
+    s32 mid;
+    s16 halfWidth;
+    u16 zcode;
+    ZFormat *fmt;
+    ZScanParams *params;
+    s16 height;
 
-    p = &D_800DC200[arg0->unk23D][arg0->unk1B4];
-    n = p->unk0;
-    y = p->unk2;
-    arg0->unk60C += (n - arg0->unk60C) * 0.05000000075f;
-    n = (s16)arg0->unk60C + 0.5f;
-    arg0->unk610 += (y - arg0->unk610) * 0.05000000075f;
-    start = n / 4;
-    lim = (n * 3) / 4;
+    params = &D_800DC200[arg0->unk23D][arg0->unk1B4];
+    halfWidth = params->halfWidth;
+    height = params->unk2;
+    arg0->unk60C += (halfWidth - arg0->unk60C) * 0.05000000075f;
+    halfWidth = (s16)arg0->unk60C + 0.5f;
+    arg0->unk610 += (height - arg0->unk610) * 0.05000000075f;
+    start = halfWidth / 4;
+    mid = (halfWidth * 3) / 4;
 
-    for (i = start; i < n; i++) {
-        if (((ViewRec *)D_800BE628)[arg0->unk23D].xMin < (f32)(arg1 - i)) {
+    for (i = start; i < halfWidth; i++) {
+        if (((ViewRec *)D_800BE628)[arg0->unk23D].xMin < (f32)(screenX - i)) {
             {
-            s16 pad;
-            code = arg0->unk8BC[arg1 - i];
+            s16 pad; // matching: block-scoped pad that IDO gives a stack slot
+            zcode = arg0->unk8BC[screenX - i];
             }
-            tbl = &D_80089630[code >> 13];
-            sp74[n - i] = arg3 - ((u32)(tbl->base + (((code >> 2) & 0x7FF) << tbl->shift)) >> 3);
-            if (func_1512B630(arg0, &D_800DC0C0[arg0->unk23D].scan[0], sp74[n - i], i, lim, 0)) {
-                i = n;
+            // decode the 14-bit z value: 3-bit exponent, 11-bit mantissa (low 2 bits are dz)
+            fmt = &D_80089630[zcode >> 13];
+            gaps[halfWidth - i] = depth - ((u32)(fmt->base + (((zcode >> 2) & 0x7FF) << fmt->shift)) >> 3);
+            if (func_1512B630(arg0, &D_800DC0C0[arg0->unk23D].scan[0], gaps[halfWidth - i], i, mid, 0)) {
+                i = halfWidth; // stop scanning
             }
         }
     }
-    for (i = start; i < n; i++) {
-        if ((f32)(arg1 + i) < ((ViewRec *)D_800BE628)[arg0->unk23D].xMax) {
+    for (i = start; i < halfWidth; i++) {
+        if ((f32)(screenX + i) < ((ViewRec *)D_800BE628)[arg0->unk23D].xMax) {
             {
-            s16 pad;
-            code = arg0->unk8BC[arg1 + i];
+            s16 pad; // matching: block-scoped pad that IDO gives a stack slot
+            zcode = arg0->unk8BC[screenX + i];
             }
-            tbl = &D_80089630[code >> 13];
-            (sp74 + i)[n] = arg3 - ((u32)(tbl->base + (((code >> 2) & 0x7FF) << tbl->shift)) >> 3);
-            if (func_1512B630(arg0, &D_800DC0C0[arg0->unk23D].scan[1], (sp74 + i)[n], i, lim, 0)) {
-                i = n;
+            fmt = &D_80089630[zcode >> 13];
+            gaps[i + halfWidth] = depth - ((u32)(fmt->base + (((zcode >> 2) & 0x7FF) << fmt->shift)) >> 3);
+            if (func_1512B630(arg0, &D_800DC0C0[arg0->unk23D].scan[1], gaps[i + halfWidth], i, mid, 0)) {
+                i = halfWidth; // stop scanning
             }
         }
     }
@@ -526,6 +528,7 @@ void func_1512B1B8(CamView *arg0, s32 arg1, s32 arg2, s32 arg3) {
 
 
 
+/* While the unk5FC countdown runs, clears the z-buffer row to the far value and returns 1. */
 s32 func_1512B53C(CamView *arg0) {
     if (arg0->unk5FC != 0) {
         s32 i;
@@ -542,45 +545,48 @@ s32 func_1512B53C(CamView *arg0) {
 }
 
 
-void func_1512B5FC(ZScan *arg0, s32 arg1, s32 arg2) {
-    arg0->unk2 = arg0->unk1;
-    if (arg0->unk4 < arg1) {
-        arg0->unk1 = 0;
+/* Records a hit at offset in scan, noting whether it moved inwards (unk1) since the previous one. */
+void func_1512B5FC(ZScan *scan, s32 offset, s32 gap) {
+    scan->unk2 = scan->unk1;
+    if (scan->offset < offset) {
+        scan->unk1 = 0;
     } else {
-        arg0->unk1 = 1;
+        scan->unk1 = 1;
     }
-    arg0->unk8 = arg2;
-    arg0->unk4 = arg1;
+    scan->gap = gap;
+    scan->offset = offset;
 }
 
-s32 func_1512B630(CamView *arg0, ZScan *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
+/* Tests one scanned pixel: a depth gap above the threshold is an occluder, state 2 when it lies inside mid
+ * and 1 when outside. Returns 1 when the pixel is an occluder, else resets scan and returns 0. */
+s32 func_1512B630(CamView *arg0, ZScan *scan, s32 gap, s32 offset, s32 mid, s32 useAltThreshold) {
     s32 threshold;
 
-    if (arg5 == 0) {
-        threshold = D_800DC200[arg0->unk23D][arg0->unk1B4].unk4;
+    if (useAltThreshold == 0) {
+        threshold = D_800DC200[arg0->unk23D][arg0->unk1B4].threshold;
     } else {
-        threshold = D_800DC200[arg0->unk23D][arg0->unk1B4].unk6;
+        threshold = D_800DC200[arg0->unk23D][arg0->unk1B4].altThreshold;
     }
 
     if (arg0->unk84 & 0x8000) {
         threshold = (s16)(threshold << 1);
     }
 
-    if ((threshold < arg2) && (arg3 < arg4)) {
-        arg1->unk0 = 2;
-        func_1512B5FC(arg1, arg3, arg2);
+    if ((threshold < gap) && (offset < mid)) {
+        scan->unk0 = 2;
+        func_1512B5FC(scan, offset, gap);
         return 1;
     }
 
-    if ((threshold < arg2) && (arg4 < arg3)) {
-        arg1->unk0 = 1;
-        func_1512B5FC(arg1, arg3, arg2);
+    if ((threshold < gap) && (mid < offset)) {
+        scan->unk0 = 1;
+        func_1512B5FC(scan, offset, gap);
         return 1;
     }
 
-    arg1->unk1 = 0;
-    arg1->unk0 = 0;
-    arg1->unk8 = 0xFFFC;
+    scan->unk1 = 0;
+    scan->unk0 = 0;
+    scan->gap = 0xFFFC;
     return 0;
 }
 
@@ -634,8 +640,8 @@ s32 func_1512B730(Obj1512B730 *arg0, f32 *offset, s32 arg2) {
     state1 = D_800DC0C0[arg0->unk23D].scan[1].unk0;
     state2 = D_800DC0C0[arg0->unk23D].scan[2].unk0;
     state3 = D_800DC0C0[arg0->unk23D].scan[3].unk0;
-    edge0 = D_800DC0C0[arg0->unk23D].scan[0].unk4 + 1.0f;
-    edge1 = D_800DC0C0[arg0->unk23D].scan[1].unk4 + 1.0f;
+    edge0 = D_800DC0C0[arg0->unk23D].scan[0].offset + 1.0f;
+    edge1 = D_800DC0C0[arg0->unk23D].scan[1].offset + 1.0f;
     if (state0 == 2 && state1 != 2) {
         D_800DC0C0[arg0->unk23D].unk30 = 0;
     } else if (state0 != 2 && state1 == 2) {
@@ -647,7 +653,7 @@ s32 func_1512B730(Obj1512B730 *arg0, f32 *offset, s32 arg2) {
         D_800DC0C0[arg0->unk23D].unk30 = 3;
     }
     if (state0 == 2 || state1 == 2) {
-        halfWidth = D_800DC200[arg0->unk23D][arg0->unk1B4].unk0 + 1;
+        halfWidth = D_800DC200[arg0->unk23D][arg0->unk1B4].halfWidth + 1;
         if (state0 == 2 && state1 == 2) {
             if (arg0->unk3D0->unkAD != 1 && arg0->unk3D4->unk120 == 0) {
                 arg0->unk5FE -= D_800BE9E4;
@@ -658,9 +664,9 @@ s32 func_1512B730(Obj1512B730 *arg0, f32 *offset, s32 arg2) {
             if (arg0->unk2C != 0x80) {
                 arg0->unk3F0 = 30;
             }
-            if (D_800DC0C0[arg0->unk23D].scan[1].unk4 < D_800DC0C0[arg0->unk23D].scan[0].unk4) {
+            if (D_800DC0C0[arg0->unk23D].scan[1].offset < D_800DC0C0[arg0->unk23D].scan[0].offset) {
                 *offset = halfWidth - edge0;
-            } else if (D_800DC0C0[arg0->unk23D].scan[0].unk4 < D_800DC0C0[arg0->unk23D].scan[1].unk4) {
+            } else if (D_800DC0C0[arg0->unk23D].scan[0].offset < D_800DC0C0[arg0->unk23D].scan[1].offset) {
                 *offset = edge1 - halfWidth;
             } else if (D_800DC0C0[arg0->unk23D].unk30 == 0) {
                 *offset = halfWidth - edge0;
@@ -673,15 +679,15 @@ s32 func_1512B730(Obj1512B730 *arg0, f32 *offset, s32 arg2) {
             // matching: the unk23C tests below have identical branches in the original
             if (D_800DC0C0[arg0->unk23D].scan[0].unk0 == 2) {
                 if (arg0->unk23C != 0) {
-                    *offset = halfWidth - (D_800DC0C0[arg0->unk23D].scan[0].unk4 + 1.0f);
+                    *offset = halfWidth - (D_800DC0C0[arg0->unk23D].scan[0].offset + 1.0f);
                 } else {
-                    *offset = halfWidth - (D_800DC0C0[arg0->unk23D].scan[0].unk4 + 1.0f);
+                    *offset = halfWidth - (D_800DC0C0[arg0->unk23D].scan[0].offset + 1.0f);
                 }
             } else {
                 if (arg0->unk23C != 0) {
-                    *offset = (D_800DC0C0[arg0->unk23D].scan[1].unk4 + 1.0f) - halfWidth;
+                    *offset = (D_800DC0C0[arg0->unk23D].scan[1].offset + 1.0f) - halfWidth;
                 } else {
-                    *offset = (D_800DC0C0[arg0->unk23D].scan[1].unk4 + 1.0f) - halfWidth;
+                    *offset = (D_800DC0C0[arg0->unk23D].scan[1].offset + 1.0f) - halfWidth;
                 }
             }
         }
