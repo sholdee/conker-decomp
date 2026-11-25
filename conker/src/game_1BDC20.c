@@ -20,46 +20,166 @@ extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern void func_15191B8C(s32, u8);
 extern u8 func_151D8E20(void);
 
-struct Struct15190770Local {
-    s32 unk0;
-    u8 unk4;
-    u8 pad5[0x3];
-};
+typedef struct {
+    f32 x, y, z;
+} Vec3f;
 
-void *func_15190770(void *arg0, s32 arg1, s32 arg2, s32 arg3) {
-    void *temp_s0;
-    struct Struct15190770Local sp2C;
-    void *sp38;
+typedef struct {
+    f32 width, height;
+} Size2f;
 
-    sp2C.unk0 = *(s32 *)arg0;
-    sp2C.unk4 = *(u8 *)(*(s32 *)arg0 + 0x3B);
-    sp38 = arg0;
-    func_15191B8C((s32)&sp2C, 0xE);
-    temp_s0 = func_15167A68(0x20, arg3, arg1 + 0x300, 1, (u8)arg2, 1);
-    if (temp_s0 == 0) {
+/* Spawn template of a particle (as in game_169510.c), copied to Particle.def. */
+typedef struct {
+    u8 texture;
+    u8 type;
+    u16 renderModes;
+    s16 lifetime;
+    u8 pad6[2];
+    s32 frame;
+    s32 frameSpeed;
+    u8 rgba[4];
+    f32 width;
+    f32 height;
+    Vec3f pos;
+    Vec3f rot;
+    Vec3f scale;
+    s32 flags;
+    u8 unk44;           /* alpha, faded out with the lifetime */
+    u8 unk45;
+    u8 unk46;
+    u8 unk47;
+    s16 *unk48;
+    u8 viewportMask;
+    u8 pad4D[3];
+    s32 unk50;
+    s16 fadeStart;
+    s16 fadeRate;
+} ParticleDef; /* size 0x58 */
+
+/* Ground probe state filled by func_1504715C and updated by func_15046C80. */
+typedef struct {
+    /* 0x00 */ f32 y;
+    /* 0x04 */ u8 unk4[0x18];
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 unk1D;
+    /* 0x20 */ s32 unk20;
+} Ground; /* size 0x24 */
+
+/* Motion state of a drop that hangs on an actor's bone, then falls and splashes. */
+typedef struct {
+    /* 0x00 */ Vec3f vel;
+    /* 0x0C */ f32 gravity;
+    /* 0x10 */ f32 drag;
+    /* 0x14 */ s16 fadeStart;       /* lifetime below which the alpha fades */
+    /* 0x16 */ s16 fadeRate;        /* alpha per frame of lifetime left */
+    /* 0x18 */ f32 trail;           /* how far def.rot (the tail) lags behind def.pos */
+    /* 0x1C */ f32 stretch;         /* tilt per sqrt of sideways speed (func_1519108C) */
+    /* 0x20 */ u8 dropKind;         /* D_800A9D40 index */
+    /* 0x21 */ u8 phase[2];         /* width / height wobble angles */
+    /* 0x23 */ s8 phaseSpeed[2];
+    /* 0x28 */ Size2f baseSize;
+    /* 0x30 */ Size2f wobble;
+    /* 0x38 */ Ground ground;
+    /* 0x5C */ u8 kind;             /* emitter kind, passed to the splash spawners */
+    /* 0x5D */ u8 pad5D[3];
+} DripMotion; /* size 0x60 */
+
+typedef struct Particle {
+    /* 0x000 */ u8 type;
+    /* 0x001 */ u8 list;
+    /* 0x002 */ u8 pad2[2];
+    /* 0x004 */ struct Particle *prev;
+    /* 0x008 */ struct Particle *next;
+    /* 0x00C */ u8 owner;
+    /* 0x00D */ u8 padD[3];
+    /* 0x010 */ s32 active;
+    /* 0x014 */ s32 unk14;
+    /* 0x018 */ ParticleDef def;
+    /* 0x070 */ u8 pad70[0x50];
+    /* 0x0C0 */ Vtx vtxTemplate[4];
+    /* 0x100 */ Vtx *vtxBuffers[4];
+    /* 0x110 */ DripMotion motion;
+} Particle;
+
+/* D_800A9D40: lifetime and wobble of each kind of falling drop. */
+typedef struct {
+    /* 0x00 */ s16 lifeMin;
+    /* 0x02 */ s16 lifeRange;
+    /* 0x04 */ Size2f baseSize;
+    /* 0x0C */ Size2f wobble;
+} DropKind; /* size 0x14 */
+
+extern DropKind D_800A9D40[];
+
+/* Actor reference sent with object messages (func_15191B8C). */
+typedef struct {
+    struct127 *actor;
+    u8 id;
+} ActorRef;
+
+/* An emitter's attachment to its actor. */
+typedef struct {
+    /* 0x0 */ struct127 *actor;
+    /* 0x4 */ u8 actorId;           /* actor->unique_id when attached */
+    /* 0x6 */ s16 timer;
+    /* 0x8 */ u8 flags;             /* bit 0: the timer counts down */
+    /* 0xA */ u8 kind;              /* D_8008FA70 index */
+} ActorLink; /* size 0xC */
+
+typedef struct DripSlot {
+    /* 0x0 */ Particle *drop;
+    /* 0x4 */ s32 timer;            /* frames until the drop falls */
+    /* 0x8 */ struct DripSlot *next;
+} DripSlot;
+
+#define DRIP_SLOT_COUNT 60
+
+/* Object type 0x20: hangs drops on the bones of an actor. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x10];
+    /* 0x10 */ ActorLink link;
+    /* 0x1C */ f32 spawnAccum;
+    /* 0x20 */ s32 dropCount;
+    /* 0x24 */ DripSlot *slots;
+    /* 0x28 */ void *extra;         /* caller-sized data after the slots */
+    /* 0x2C */ u8 kind;             /* D_800AB310 / D_800AB404 index */
+    /* 0x30 */ DripSlot slotStorage[DRIP_SLOT_COUNT];
+} DripEmitter; /* size 0x300 */
+
+/* Destroys the emitter already on link->actor, then creates one with extraSize bytes of extra data. */
+DripEmitter *func_15190770(ActorLink *link, s32 extraSize, u8 owner, s32 list) {
+    DripEmitter *emitter;
+    ActorRef ref;
+
+    ref.actor = link->actor;
+    ref.id = link->actor->unique_id;
+    func_15191B8C((s32)&ref, 0xE);
+    emitter = func_15167A68(0x20, list, extraSize + sizeof(DripEmitter), 1, owner, 1);
+    if (emitter == NULL) {
         return NULL;
     }
-    memcpy((s32)temp_s0 + 0x10, sp38, 0xC);
-    *(void **)((s32)temp_s0 + 0x24) = (void *)((s32)temp_s0 + 0x30);
-    *(void **)((s32)temp_s0 + 0x28) = (void *)((s32)temp_s0 + 0x300);
-    *(s32 *)((s32)temp_s0 + 0x20) = 0;
-    *(f32 *)((s32)temp_s0 + 0x1C) = 0.0f;
-    bzero((s32)temp_s0 + 0x30, 0x2D0);
-    *(u8 *)((s32)temp_s0 + 0x2C) = func_151D8E20();
-    return temp_s0;
+    memcpy(&emitter->link, link, sizeof(ActorLink));
+    emitter->slots = emitter->slotStorage;
+    emitter->extra = emitter + 1;
+    emitter->dropCount = 0;
+    emitter->spawnAccum = 0.0f;
+    bzero(emitter->slotStorage, sizeof(emitter->slotStorage));
+    emitter->kind = func_151D8E20();
+    return emitter;
 }
 
-struct Struct15191400Arg;
-extern void func_15191400(struct Struct15191400Arg *);
+void func_15191400(DripEmitter *emitter);
 
-void func_15190840(void *arg0) {
-    func_15191400(arg0);
-    func_15169804(arg0);
+/* Type 0x20 handler: releases the drops, then func_15169804. */
+void func_15190840(DripEmitter *emitter) {
+    func_15191400(emitter);
+    func_15169804((struct102 *)emitter);
 }
 
-void func_1519086C(void *arg0) {
-    func_15191400(arg0);
-    func_15169824(arg0);
+/* Type 0x20 handler: releases the drops, then func_15169824. */
+void func_1519086C(DripEmitter *emitter) {
+    func_15191400(emitter);
+    func_15169824((struct102 *)emitter);
 }
 
 typedef struct F898Owner {
@@ -142,14 +262,7 @@ typedef struct F898Entry {
     s16 unk16;
 } F898Entry;
 
-struct Struct15191400Range {
-    s16 unk0;
-    s16 unk2;
-    s32 unk4[2];
-    s32 unkC[2];
-};
-typedef struct Struct15191400Range F898Range;
-extern struct Struct15191400Range D_800A9D40[];
+typedef DropKind F898Range;
 
 typedef struct F898Arg {
     u8 pad0[0x10];
@@ -259,7 +372,7 @@ void func_15190898(F898Arg *arg0) {
                         sub2->unk8 = dz;
                         func_1513F680(slot->obj, 0xD, 0x12, 0, 0xD);
                         keep = 1;
-                        slot->obj->unk1C = func_150ADA20() % (u32)(rng->unk2 + 1) + rng->unk0;
+                        slot->obj->unk1C = func_150ADA20() % (u32)(rng->lifeRange + 1) + rng->lifeMin;
                         slot->obj->unk58 |= 1;
                         slot->obj = NULL;
                         arg0->unk20 = arg0->unk20 - 1;
@@ -326,8 +439,8 @@ void func_15190898(F898Arg *arg0) {
                         b.unk44 = func_150ADA20() % 101U + 100;
                         b.unk14 = 0.0f;
                         b.unk18 = 0.0f;
-                        *(F898V2 *)a.unk28 = *(F898V2 *)rng2->unk4;
-                        *(F898V2 *)a.unk30 = *(F898V2 *)rng2->unkC;
+                        *(F898V2 *)a.unk28 = *(F898V2 *)&rng2->baseSize;
+                        *(F898V2 *)a.unk30 = *(F898V2 *)&rng2->wobble;
                         a.unk23 = func_150ADA20() % 5U + 4;
                         a.unk24 = func_150ADA20() % 5U + 4;
                         func_15143134(ent->unk8 + n, b.unk1C, arg0->unk10->unk1D4 + ent->unk8[n].unkC);
@@ -368,39 +481,19 @@ void func_15190898(F898Arg *arg0) {
     }
 }
 
-struct OscillatorMotionState {
-    u8 pad_0x0[0x21];
-    u8 field_0x21;
-    u8 field_0x22;
-    s8 field_0x23;
-    s8 field_0x24;
-    u8 pad_0x25[0x3];
-    f32 field_0x28;
-    f32 field_0x2C;
-    f32 field_0x30;
-    f32 field_0x34;
-};
+/* Wobbles a drop's width and height around its base size. */
+s32 func_15190F9C(Particle *drop) {
+    Particle *p = drop; // matching: the param copy steers register allocation
+    DripMotion *motion = &drop->motion;
+    f32 widthWave;
+    f32 heightWave;
 
-struct OscillatorObject {
-    u8 pad_0x0[0x2C];
-    f32 field_0x2C;
-    f32 field_0x30;
-    u8 pad_0x34[0xDC];
-    struct OscillatorMotionState field_0x110;
-};
-
-s32 func_15190F9C(struct OscillatorObject *arg0) {
-    struct OscillatorObject *p = arg0;
-    struct OscillatorMotionState *f = &arg0->field_0x110;
-    f32 r1;
-    f32 r2;
-
-    f->field_0x21 = f->field_0x21 + f->field_0x23 * D_800BE9E4;
-    f->field_0x22 = f->field_0x22 + f->field_0x24 * D_800BE9E4;
-    r1 = func_151423D8((u8)(f->field_0x21 - 0x40));
-    r2 = func_151423D8((u8)(f->field_0x22 - 0x40));
-    p->field_0x2C += (f->field_0x28 + f->field_0x30 * r1 - p->field_0x2C) * 0.5f;
-    p->field_0x30 += (f->field_0x2C + f->field_0x34 * r2 - p->field_0x30) * 0.5f;
+    motion->phase[0] += motion->phaseSpeed[0] * D_800BE9E4;
+    motion->phase[1] += motion->phaseSpeed[1] * D_800BE9E4;
+    widthWave = func_151423D8((u8)(motion->phase[0] - 0x40));
+    heightWave = func_151423D8((u8)(motion->phase[1] - 0x40));
+    p->def.width += (motion->baseSize.width + motion->wobble.width * widthWave - p->def.width) * 0.5f;
+    p->def.height += (motion->baseSize.height + motion->wobble.height * heightWave - p->def.height) * 0.5f;
     return 1;
 }
 
@@ -493,57 +586,31 @@ s16 *func_1519108C(struct Struct1519108C *arg0, s16 arg1) {
     return ret;
 }
 
-struct Struct15191400Sub {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    u8 padC[0x14];
-    u8 unk20;
-};
-struct Struct15191400Obj {
-    u8 pad0[0x1C];
-    s16 unk1C;
-    u8 pad1E[0x3A];
-    s32 unk58;
-    u8 pad5C[0xB4];
-    struct Struct15191400Sub unk110;
-};
-struct Struct15191400Slot {
-    struct Struct15191400Obj *unk0;
-    s32 unk4;
-    s32 unk8;
-};
-struct Struct15191400Arg {
-    u8 pad0[0x1C];
-    f32 unk1C;
-    s32 unk20;
-    struct Struct15191400Slot *unk24;
-};
-extern struct Struct15191400Range D_800A9D40[];
 extern void func_1513F680();
 
-void func_15191400(struct Struct15191400Arg *arg0) {
+/* Lets go of every drop the emitter still holds and clears its slots. */
+void func_15191400(DripEmitter *emitter) {
     s32 i;
-    struct Struct15191400Slot *slot;
-    struct Struct15191400Sub *sub;
-    struct Struct15191400Range *range;
+    DripSlot *slot;
+    DripMotion *motion;
+    DropKind *dropKind;
 
-    arg0->unk1C = 0.0f;
-    arg0->unk20 = 0;
-    slot = arg0->unk24;
-    for (i = 0; i < 60; i++, slot++) {
-        if (slot->unk0 != NULL) {
-            sub = &slot->unk0->unk110;
-            range = &D_800A9D40[sub->unk20];
-            sub->unk0 = 0.0f;
-            sub->unk4 = 0.0f;
-            sub->unk8 = 0.0f;
-            func_1513F680(slot->unk0, 13, 18, 0, 13);
-            slot->unk0->unk1C = (u32)func_150ADA20() % (range->unk2 + 1) + range->unk0;
-            slot->unk0->unk58 |= 1;
+    emitter->spawnAccum = 0.0f;
+    emitter->dropCount = 0;
+    slot = emitter->slots;
+    for (i = 0; i < DRIP_SLOT_COUNT; i++, slot++) {
+        if (slot->drop != NULL) {
+            motion = &slot->drop->motion;
+            dropKind = &D_800A9D40[motion->dropKind];
+            motion->vel.x = 0.0f;
+            motion->vel.y = 0.0f;
+            motion->vel.z = 0.0f;
+            func_1513F680(slot->drop, 13, 18, 0, 13);
+            slot->drop->def.lifetime = func_150ADA20() % (u32)(dropKind->lifeRange + 1) + dropKind->lifeMin;
+            slot->drop->def.flags |= 1;
         }
     }
-    bzero(arg0->unk24, 0x2D0);
+    bzero(emitter->slots, DRIP_SLOT_COUNT * sizeof(DripSlot));
 }
 
 struct Sub15191520 {
