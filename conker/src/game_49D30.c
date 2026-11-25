@@ -1789,171 +1789,172 @@ s32 func_15023264(s32 arg0, s32 arg1);
 #define ENT(a, i) ((SeqTrackInfo *)((u8 *)D_800C35F0[a] + (i) * 8))
 #define ELEM(a, i) (&D_800C3958[a][i])
 
-void func_15020EC4(s32 arg0) {
-    s32 i;
-    s32 j;
+/* Apply the scene's evaluated tracks: the camera track (type 1, the one chosen by func_15023264)
+   drives the player camera through func_1512D560 message 7, type 3 tracks drive actors, type 2
+   tracks objects (func_1502178C) and type 5 tracks func_1517D5FC. Non-camera tracks go first. */
+void func_15020EC4(s32 scene) {
+    s32 track;
+    s32 pass;
     struct108 *player;
-    SeqTrackState *e;
-    Obj15020EC4 *o;
-    f32 f22;
-    f32 f20;
+    SeqTrackState *state;
+    Obj15020EC4 *actor;
+    f32 tilt3C;
+    f32 tilt40;
 
     // matching: indexing through &D_800C35EA[0] rather than the array changes register allocation
-    if ((&D_800C35EA[0])[arg0] == 1) {
+    if ((&D_800C35EA[0])[scene] == 1) {
         D_800C3638 = 0;
         if (D_800C35F8 == 0xFF) {
-            D_800C35F8 = func_15023264(arg0, D_800C35B0[arg0]);
+            D_800C35F8 = func_15023264(scene, D_800C35B0[scene]);
         }
-        for (j = 0; j != 2; j++) {
-            for (i = 0; i < D_800C363A[arg0]; i++) {
-                if (D_800C35D0[arg0][i] == 0) {
+        for (pass = 0; pass != 2; pass++) {
+            for (track = 0; track < D_800C363A[scene]; track++) {
+                if (D_800C35D0[scene][track] == 0) {
                     continue;
                 }
-                if (D_800C35C8[arg0][i] == 0) {
+                if (D_800C35C8[scene][track] == 0) {
                     continue;
                 }
-                if (j == 0) {
-                    if (ENT(arg0, i)->type == 1) {
+                if (pass == 0) {
+                    if (ENT(scene, track)->type == 1) {
                         continue;
                     }
-                } else if (ENT(arg0, i)->type != 1) {
+                } else if (ENT(scene, track)->type != 1) {
                     continue;
                 }
-                if (ENT(arg0, i)->type == 1) {
+                if (ENT(scene, track)->type == 1) {
                     player = D_800DBFF0;
-                    if (i != D_800C35F8) {
+                    if (track != D_800C35F8) {
                         continue;
                     }
                     if (!(player->unk2C & 0x40000)) {
                         if (D_800C3671 == 0) {
-                            func_1512D560(player, 5, (void *)arg0);
+                            func_1512D560(player, 5, (void *)scene);
                         }
                         func_15128CB0(player);
                     }
-                    e = ELEM(arg0, i);
-                    if (e->unk34 == -9999.0f) {
+                    state = ELEM(scene, track);
+                    if (state->unk34 == -9999.0f) {
                         MSG2.unk8 = 0.0f;
                     } else {
-                        e->unk34 = (e->unk34 < -20.0f) ? -20.0f : (e->unk34 > 40.0f) ? 40.0f : e->unk34;
-                        e = ELEM(arg0, i);
-                        MSG2.unk8 = e->unk34;
+                        state->unk34 = (state->unk34 < -20.0f) ? -20.0f : (state->unk34 > 40.0f) ? 40.0f : state->unk34;
+                        state = ELEM(scene, track);
+                        MSG2.unk8 = state->unk34;
                     }
-                    if (e->unk3C == -9999.0f) {
-                        f22 = 0.0f;
+                    if (state->unk3C == -9999.0f) {
+                        tilt3C = 0.0f;
                     } else {
-                        e->unk3C = (e->unk3C < -20.0f) ? -20.0f : (e->unk3C > 40.0f) ? 40.0f : e->unk3C;
-                        e = ELEM(arg0, i);
-                        f22 = e->unk3C;
+                        state->unk3C = (state->unk3C < -20.0f) ? -20.0f : (state->unk3C > 40.0f) ? 40.0f : state->unk3C;
+                        state = ELEM(scene, track);
+                        tilt3C = state->unk3C;
                     }
-                    if (e->unk40 == -9999.0f) {
-                        f20 = 0.0f;
-                        while (0) { }
-                        MSG2.unk4 = arg0;
+                    if (state->unk40 == -9999.0f) {
+                        tilt40 = 0.0f;
+                        while (0) { } // matching: orders the scene store after the ENT load
+                        MSG2.unk4 = scene;
                     } else {
-                        e->unk40 = (e->unk40 < -20.0f) ? -20.0f : (e->unk40 > 40.0f) ? 40.0f : e->unk40;
-                        if (ENT(arg0, i)) { }
-                        e = ELEM(arg0, i);
-                        f20 = e->unk40;
-                        MSG2.unk4 = arg0;
+                        state->unk40 = (state->unk40 < -20.0f) ? -20.0f : (state->unk40 > 40.0f) ? 40.0f : state->unk40;
+                        if (ENT(scene, track)) { } // matching: same, in this branch
+                        state = ELEM(scene, track);
+                        tilt40 = state->unk40;
+                        MSG2.unk4 = scene;
                     }
-                    MSG2.unk14 = e->x;
-                    MSG2.unk18 = e->y;
-                    MSG2.unk1C = e->z;
-                                        if (ENT(arg0, i)->unk2 == 1) {
+                    MSG2.unk14 = state->x;
+                    MSG2.unk18 = state->y;
+                    MSG2.unk1C = state->z;
+                    if (ENT(scene, track)->unk2 == 1) {
                         MSG2.unk0 = 0;
-                        MSG2.unk20 = ELEM(arg0, (s8)ENT(arg0, i)->unk3)->x;
-                        MSG2.unk24 = ELEM(arg0, (s8)ENT(arg0, i)->unk3)->y + ENT(arg0, i)->yOffset + (e = ELEM(arg0, i))->yOffset;
-                        MSG2.unk28 = ELEM(arg0, (s8)ENT(arg0, i)->unk3)->z;
-                        MSG2.unk2C = -e->unk14;
-                        MSG2.unk30 = f22;
-                        MSG2.unk34 = f20;
-                    } else if (ENT(arg0, i)->unk2 == 2) {
-{
-    struct127 *ob;
+                        MSG2.unk20 = ELEM(scene, (s8)ENT(scene, track)->unk3)->x;
+                        MSG2.unk24 = ELEM(scene, (s8)ENT(scene, track)->unk3)->y + ENT(scene, track)->yOffset + (state = ELEM(scene, track))->yOffset;
+                        MSG2.unk28 = ELEM(scene, (s8)ENT(scene, track)->unk3)->z;
+                        MSG2.unk2C = -state->unk14;
+                        MSG2.unk30 = tilt3C;
+                        MSG2.unk34 = tilt40;
+                    } else if (ENT(scene, track)->unk2 == 2) {
+                        struct127 *obj;
 
-                        ob = func_15083E90(ENT(arg0, i)->unk3);
-                        if (ob == NULL) {
+                        obj = func_15083E90(ENT(scene, track)->unk3);
+                        if (obj == NULL) {
                             continue;
                         }
                         MSG2.unk0 = 0;
-                        D_800C3620.x = ob->x_position;
-                        D_800C3620.y = ob->y_position + ENT(arg0, i)->yOffset + (e = ELEM(arg0, i))->yOffset;
-                        D_800C3620.z = ob->z_position;
-                        MSG2.unk2C = -e->unk14;
-                        MSG2.unk30 = f22;
-                        MSG2.unk34 = f20;
-}
-                    } else if (ENT(arg0, i)->unk2 == 3) {
-                        Obj15020EC4 *ob3;
+                        D_800C3620.x = obj->x_position;
+                        D_800C3620.y = obj->y_position + ENT(scene, track)->yOffset + (state = ELEM(scene, track))->yOffset;
+                        D_800C3620.z = obj->z_position;
+                        MSG2.unk2C = -state->unk14;
+                        MSG2.unk30 = tilt3C;
+                        MSG2.unk34 = tilt40;
+                    } else if (ENT(scene, track)->unk2 == 3) {
+                        Obj15020EC4 *actor3;
 
-                        ob3 = (Obj15020EC4 *)func_151149AC(ENT(arg0, i)->unk3);
-                        if (ob3 == NULL) {
+                        actor3 = (Obj15020EC4 *)func_151149AC(ENT(scene, track)->unk3);
+                        if (actor3 == NULL) {
                             continue;
                         }
                         MSG2.unk0 = 0;
-                        D_800C3620.x = ob3->unk10;
-                        D_800C3620.y = (ob3->unk12 + ENT(arg0, i)->yOffset) + (e = ELEM(arg0, i))->yOffset;
-                        D_800C3620.z = ob3->unk14;
-                        MSG2.unk2C = -e->unk14;
-                        MSG2.unk30 = f22;
-                        MSG2.unk34 = f20;
-                    } else if (ENT(arg0, i)->unk2 == 0) {
+                        D_800C3620.x = actor3->unk10;
+                        D_800C3620.y = (actor3->unk12 + ENT(scene, track)->yOffset) + (state = ELEM(scene, track))->yOffset;
+                        D_800C3620.z = actor3->unk14;
+                        MSG2.unk2C = -state->unk14;
+                        MSG2.unk30 = tilt3C;
+                        MSG2.unk34 = tilt40;
+                    } else if (ENT(scene, track)->unk2 == 0) {
                         MSG2.unk0 = 1;
-                        MSG2.unk20 = -e->unk14;
-                        MSG2.unk24 = e->unkC;
-                        MSG2.unk28 = e->unk10;
-                        MSG2.unk18 = MSG2.unk18 + e->yOffset;
-                        MSG2.unk2C = f22;
-                        MSG2.unk30 = f20;
+                        MSG2.unk20 = -state->unk14;
+                        MSG2.unk24 = state->unkC;
+                        MSG2.unk28 = state->unk10;
+                        MSG2.unk18 = MSG2.unk18 + state->yOffset;
+                        MSG2.unk2C = tilt3C;
+                        MSG2.unk30 = tilt40;
                     }
                     if (D_800C3671 == 0) {
                         func_1512D560(player, 7, &MSG2);
                     }
-                } else if (ENT(arg0, i)->type == 3) {
-                    o = (Obj15020EC4 *)func_151149AC(ENT(arg0, i)->unk2);
-                    if (o == NULL) {
+                } else if (ENT(scene, track)->type == 3) {
+                    actor = (Obj15020EC4 *)func_151149AC(ENT(scene, track)->unk2);
+                    if (actor == NULL) {
                         continue;
                     }
-                    o->unk4E = 0;
-                    o->unk6F &= ~0x80;
-                    o->unk6F = o->unk6F;
-                    o->unk10 = ELEM(arg0, i)->x;
-                    o->unk12 = ELEM(arg0, i)->y + ELEM(arg0, i)->yOffset;
-                    o->unk14 = ELEM(arg0, i)->z;
-                    o->unk0 = ELEM(arg0, i)->unkC;
-                    o->unk4 = ELEM(arg0, i)->unk10;
-                    o->unk8 = ELEM(arg0, i)->unk14;
-                    if (ELEM(arg0, i)->unk18 != -9999.0f) {
-                        o->unk2C = ELEM(arg0, i)->unk18 * 0.01f;
+                    actor->unk4E = 0;
+                    actor->unk6F &= ~0x80;
+                    actor->unk6F = actor->unk6F; // matching: forces the byte reload
+                    actor->unk10 = ELEM(scene, track)->x;
+                    actor->unk12 = ELEM(scene, track)->y + ELEM(scene, track)->yOffset;
+                    actor->unk14 = ELEM(scene, track)->z;
+                    actor->unk0 = ELEM(scene, track)->unkC;
+                    actor->unk4 = ELEM(scene, track)->unk10;
+                    actor->unk8 = ELEM(scene, track)->unk14;
+                    if (ELEM(scene, track)->unk18 != -9999.0f) {
+                        actor->unk2C = ELEM(scene, track)->unk18 * 0.01f;
                     }
-                    if (ELEM(arg0, i)->unk1C != -9999.0f) {
-                        o->unk30 = ELEM(arg0, i)->unk1C * 0.01f;
+                    if (ELEM(scene, track)->unk1C != -9999.0f) {
+                        actor->unk30 = ELEM(scene, track)->unk1C * 0.01f;
                     }
-                    if (ELEM(arg0, i)->unk20 != -9999.0f) {
-                        o->unk34 = ELEM(arg0, i)->unk20 * 0.01f;
+                    if (ELEM(scene, track)->unk20 != -9999.0f) {
+                        actor->unk34 = ELEM(scene, track)->unk20 * 0.01f;
                     }
-                    if ((s32)ELEM(arg0, i)->unk34 >= 0x100) {
-                        o->unk8A = 0xFF;
-                    } else if ((s32)ELEM(arg0, i)->unk34 < 0) {
-                        o->unk8A = 0;
+                    if ((s32)ELEM(scene, track)->unk34 >= 0x100) {
+                        actor->unk8A = 0xFF;
+                    } else if ((s32)ELEM(scene, track)->unk34 < 0) {
+                        actor->unk8A = 0;
                     } else {
-                        o->unk8A = (s32)ELEM(arg0, i)->unk34;
+                        actor->unk8A = (s32)ELEM(scene, track)->unk34;
                     }
-                } else if (ENT(arg0, i)->type == 2) {
-                    struct127 *ob2;
+                } else if (ENT(scene, track)->type == 2) {
+                    struct127 *obj2;
 
-                    ob2 = func_15083E90(ENT(arg0, i)->unk2);
-                    func_1502178C(ob2, arg0, i);
-                } else if (ENT(arg0, i)->type == 4) {
+                    obj2 = func_15083E90(ENT(scene, track)->unk2);
+                    func_1502178C(obj2, scene, track);
+                } else if (ENT(scene, track)->type == 4) {
                     s32 arr[3];
 
-                    arr[0] = ENT(arg0, i)->unk2;
-                    arr[1] = ENT(arg0, i)->unk2;
-                    arr[2] = ENT(arg0, i)->unk2;
-                } else if (ENT(arg0, i)->type == 5) {
-                    e = ELEM(arg0, i);
-                    if (e->unk34 >= 1.0f) {
-                        func_1517D5FC(e->x, e->y, e->z, 0, e->unk18, e->unk1C);
+                    arr[0] = ENT(scene, track)->unk2;
+                    arr[1] = ENT(scene, track)->unk2;
+                    arr[2] = ENT(scene, track)->unk2;
+                } else if (ENT(scene, track)->type == 5) {
+                    state = ELEM(scene, track);
+                    if (state->unk34 >= 1.0f) {
+                        func_1517D5FC(state->x, state->y, state->z, 0, state->unk18, state->unk1C);
                     }
                 }
             }
