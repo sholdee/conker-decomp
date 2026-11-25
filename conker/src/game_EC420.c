@@ -3,56 +3,147 @@
 #include "variables.h"
 
 typedef struct {
-    /* 0x0 */ s32 unk0;
-} Struct150C04C0Word;
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3F;
 
+/* Directions a func_15150400/func_15152190 burst scatters in (256-step binary angles). */
 typedef struct {
-    /* 0x0 */ f32 x;
-    /* 0x4 */ f32 y;
-    /* 0x8 */ f32 z;
-} Vec3F150C04C0;
+    /* 0x0 */ s16 yawBase;
+    /* 0x2 */ s16 yawRange;
+    /* 0x4 */ s16 pitchBase;
+    /* 0x6 */ s16 pitchRange;
+} AngleRange;
 
+/* Config of func_15150400 (game_17CAF0.c): spawns countBase + rand(countRange) pieces around origin,
+ * each with a random entry of the variant tables and a copy of extraData. */
 typedef struct {
-    /* 0x0 */ f32 unk0;
-    /* 0x4 */ Struct150C04C0Word unk4;
-    /* 0x8 */ s32 unk8;
-} Struct150C04C0Sub;
-
-typedef struct {
-    /* 0x00 */ s32 unk00;
-    /* 0x04 */ s32 unk04;
-    /* 0x08 */ Vec3F150C04C0 unk08;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
+    /* 0x00 */ s32 countBase;
+    /* 0x04 */ s32 countRange;
+    /* 0x08 */ Vec3F origin;
+    /* 0x14 */ f32 speedBase;
+    /* 0x18 */ f32 speedRange;
     /* 0x1C */ f32 unk1C;
     /* 0x20 */ f32 unk20;
     /* 0x24 */ s16 unk24;
     /* 0x26 */ s16 unk26;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
+    /* 0x28 */ f32 scaleBase;
+    /* 0x2C */ f32 scaleRange;
+    /* 0x30 */ f32 spin;
     /* 0x34 */ void *unk34;
-    /* 0x38 */ f32 unk38;
+    /* 0x38 */ f32 unk38; /* probability */
     /* 0x3C */ f32 unk3C;
     /* 0x40 */ f32 unk40;
     /* 0x44 */ f32 unk44;
-    /* 0x48 */ void *unk48;
-    /* 0x4C */ void *unk4C;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ u8 unk58;
+    /* 0x48 */ s32 *variantIds;
+    /* 0x4C */ f32 *variantScales;
+    /* 0x50 */ u32 variantCount;
+    /* 0x54 */ f32 radius;
+    /* 0x58 */ u8 flags;
     /* 0x59 */ u8 unk59;
     /* 0x5A */ u8 pad5A[2];
+    /* 0x5C */ s32 extraSize;
+    /* 0x60 */ void *extraData; /* copied into each piece at +0x170 */
+} Arg15150400;
+
+/* Config of func_15152190 (game_17CAF0.c). */
+typedef struct {
+    /* 0x00 */ s32 countBase;
+    /* 0x04 */ s32 countRange;
+    /* 0x08 */ Vec3F origin;
+    /* 0x14 */ AngleRange angles;
+    /* 0x1C */ f32 speedBase;
+    /* 0x20 */ f32 speedRange;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ s16 unk2C;
+    /* 0x2E */ s16 unk2E;
+    /* 0x30 */ f32 scaleBase;
+    /* 0x34 */ f32 scaleRange;
+    /* 0x38 */ f32 spin;
+} Arg15152190;
+
+/* Config of func_15153634 (game_17CAF0.c): spawns countBase + rand(countRange) particles at position. */
+typedef struct {
+    /* 0x00 */ s16 countBase;
+    /* 0x02 */ s16 countRange;
+    /* 0x04 */ u8 unk4;
+    /* 0x05 */ u8 pad5;
+    /* 0x06 */ u16 unk6;
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ s16 unk10;
+    /* 0x12 */ s16 unk12;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 unk1D;
+    /* 0x1E */ u8 unk1E;
+    /* 0x1F */ u8 unk1F;
+    /* 0x20 */ u8 unk20;
+    /* 0x21 */ u8 unk21;
+    /* 0x22 */ u8 unk22;
+    /* 0x23 */ u8 unk23;
+    /* 0x24 */ u8 unk24;
+    /* 0x25 */ u8 unk25;
+    /* 0x26 */ s16 unk26;
+    /* 0x28 */ s16 unk28;
+    /* 0x2A */ s16 unk2A;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ f32 unk34;
+    /* 0x38 */ Vec3F position;
+    /* 0x44 */ s16 yawBase;
+    /* 0x46 */ s16 pitchBase;
+    /* 0x48 */ s16 yawRange;
+    /* 0x4A */ s16 pitchRange;
+    /* 0x4C */ f32 speedBase;
+    /* 0x50 */ f32 speedRange;
+    /* 0x54 */ f32 unk54;
+    /* 0x58 */ f32 unk58;
     /* 0x5C */ s32 unk5C;
-    /* 0x60 */ void *unk60;
-} Struct150C04C0;
+    /* 0x60 */ s8 unk60;
+    /* 0x61 */ s8 unk61;
+    /* 0x62 */ u8 unk62;
+    /* 0x63 */ u8 unk63;
+    /* 0x64 */ u8 unk64;
+    /* 0x65 */ u8 pad65[3];
+    /* 0x68 */ f32 extra; /* copied into each particle at +0xA8 */
+} Arg15153634;
+
+/* A piece spawned by func_15150400, as the handlers below see it. */
+typedef struct {
+    /* 0x000 */ u8 unk0;
+    /* 0x001 */ u8 unk1;
+    /* 0x002 */ u8 pad2[0xA];
+    /* 0x00C */ u8 unkC;
+    /* 0x00D */ u8 padD[0xB];
+    /* 0x018 */ f32 unk18;
+    /* 0x01C */ u8 pad1C[0x1C];
+    /* 0x038 */ Vec3F position;
+    /* 0x044 */ u8 pad44[0x1C];
+    /* 0x060 */ s32 unk60;
+    /* 0x064 */ u8 pad64[0x2];
+    /* 0x066 */ u16 unk66;
+    /* 0x068 */ u8 pad68[0xA8];
+    /* 0x110 */ u8 unk110[0x60];
+    /* 0x170 */ f32 burstChance; /* func_150C04C0's extraData */
+} Piece;
 
 typedef struct {
-    /* 0x0 */ s16 unk0;
-    /* 0x2 */ s16 unk2;
-    /* 0x4 */ s16 unk4;
-    /* 0x6 */ s16 unk6;
-} Struct150C04C0Color;
+    s32 value;
+} Word;
+
+typedef struct {
+    /* 0x0 */ f32 burstChance;
+    /* 0x4 */ Word scale;
+    /* 0x8 */ s32 id;
+} Struct150C04C0Sub;
+
+extern void func_15150400(Arg15150400 *, AngleRange *, u8, s32);
+extern void func_15152190(Arg15152190 *, const s32 *, const f32 *, u32, f32, s32, u8, s32);
+extern void func_15153634(Arg15153634 *, u8, u8, s32);
 
 /* An entry whose level ramps toward maxLevel while `rising` is set and back to 0 otherwise. */
 typedef struct {
@@ -73,7 +164,7 @@ typedef struct {
     /* 0x2F */ u8 fallRate;
 } Struct150BF0F4;
 
-extern Struct150C04C0Word D_800A0108;
+extern Word D_800A0108;
 extern f32 D_800A0170;
 extern f32 D_800A0174;
 extern f32 D_800A0178;
@@ -83,7 +174,6 @@ extern f32 D_800A0184;
 extern f32 D_800A0188;
 extern f32 D_800A018C;
 extern f32 D_800A0190;
-extern void func_15150400(Struct150C04C0 *, Struct150C04C0Color *, u8, s32);
 
 void func_150BEF70(s32 arg0) {
 }
@@ -563,232 +653,99 @@ void func_150BFA7C(Platform150BFA7C *platform) {
     platform->flags |= state;
 }
 
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3F_150BFFE0;
-
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-    u8 unk4;
-    u8 pad5;
-    s16 unk6;
-    s32 unk8;
-    s32 unkC;
-    s16 unk10;
-    s16 unk12;
-    s32 unk14;
-    s32 unk18;
-    u8 unk1C;
-    u8 unk1D;
-    u8 unk1E;
-    u8 unk1F;
-    u8 unk20;
-    u8 unk21;
-    u8 unk22;
-    u8 unk23;
-    u8 unk24;
-    u8 unk25;
-    s16 unk26;
-    s16 unk28;
-    s16 unk2A;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    Vec3F_150BFFE0 unk38;
-    s16 unk44;
-    s16 unk46;
-    s16 unk48;
-    s16 unk4A;
-    f32 unk4C;
-    f32 unk50;
-    f32 unk54;
-    f32 unk58;
-    s32 unk5C;
-    u8 unk60;
-    s8 unk61;
-    u8 unk62;
-    u8 unk63;
-    u8 unk64;
-    u8 pad65[3];
-    f32 unk68;
-} Struct150BFFE0;
-
 void func_15136C3C(struct127 *, s32, s32, s32, s32, s32, s32, s32);
-void func_15153634(Struct150BFFE0 *arg0, u8 arg1, u8 arg2, s32 arg3);
 
-void func_150BFFE0(struct127 *arg0) {
-    Vec3F_150BFFE0 pos;
-    Struct150BFFE0 sp28;
+/* func_15136C3C on the object, then a burst of particles at its x/z, unk180 + 105 high. */
+void func_150BFFE0(struct127 *obj) {
+    Vec3F pos;
+    Arg15153634 spawn;
 
-    pos.x = arg0->x_position;
-    pos.y = arg0->unk180 + 70.0f;
-    pos.z = arg0->z_position;
-    func_15136C3C(arg0, 0, 0, 1, 0, 0, 0xFF, 1);
-    sp28.unk0 = 0x11;
-    sp28.unk2 = 7;
-    sp28.unk4 = 0x6C;
-    sp28.unk6 = 0x5103;
-    sp28.unk8 = 0x200005;
-    sp28.unkC = 0;
-    sp28.unk10 = 0x28;
-    sp28.unk12 = 0x14;
-    sp28.unk14 = 0;
-    sp28.unk18 = 0;
-    sp28.unk1F = 0xFF;
-    sp28.unk1C = 0x4E;
-    sp28.unk1D = 0x54;
-    sp28.unk1E = 0x7B;
-    sp28.unk20 = 0xA4;
-    sp28.unk21 = 0xA1;
-    sp28.unk22 = 0xC8;
-    sp28.unk23 = 0x9B;
-    sp28.unk24 = 0x64;
-    sp28.unk25 = 0xFF;
-    sp28.unk26 = 0x1E;
-    sp28.unk28 = 8;
-    sp28.unk2A = 0x1E;
-    sp28.unk2C = 1.019999981f;
-    sp28.unk30 = 451.0f;
-    sp28.unk34 = 501.0f;
-    sp28.unk38.x = pos.x;
-    sp28.unk38.y = pos.y + 35.0f;
-    sp28.unk38.z = pos.z;
-    sp28.unk44 = 0;
-    sp28.unk46 = -0x14;
-    sp28.unk48 = 0xFF;
-    sp28.unk4A = 0x1E;
-    sp28.unk4C = 15.0f;
-    sp28.unk50 = 39.0f;
-    sp28.unk54 = 0.3540000021f;
-    sp28.unk58 = 0.6260000467f;
-    sp28.unk5C = 0x40040E07;
-    sp28.unk60 = 0x10;
-    sp28.unk61 = -1;
-    sp28.unk62 = 8;
-    sp28.unk63 = 6;
-    sp28.unk64 = 1;
-    sp28.unk68 = 0.8775510192f;
-    func_15153634(&sp28, 0xFF, 0xFF, 1);
+    pos.x = obj->x_position;
+    pos.y = obj->unk180 + 70.0f;
+    pos.z = obj->z_position;
+    func_15136C3C(obj, 0, 0, 1, 0, 0, 0xFF, 1);
+    spawn.countBase = 0x11;
+    spawn.countRange = 7;
+    spawn.unk4 = 0x6C;
+    spawn.unk6 = 0x5103;
+    spawn.unk8 = 0x200005;
+    spawn.unkC = 0;
+    spawn.unk10 = 0x28;
+    spawn.unk12 = 0x14;
+    spawn.unk14 = 0;
+    spawn.unk18 = 0;
+    spawn.unk1F = 0xFF;
+    spawn.unk1C = 0x4E;
+    spawn.unk1D = 0x54;
+    spawn.unk1E = 0x7B;
+    spawn.unk20 = 0xA4;
+    spawn.unk21 = 0xA1;
+    spawn.unk22 = 0xC8;
+    spawn.unk23 = 0x9B;
+    spawn.unk24 = 0x64;
+    spawn.unk25 = 0xFF;
+    spawn.unk26 = 0x1E;
+    spawn.unk28 = 8;
+    spawn.unk2A = 0x1E;
+    spawn.unk2C = 1.019999981f;
+    spawn.unk30 = 451.0f;
+    spawn.unk34 = 501.0f;
+    spawn.position.x = pos.x;
+    spawn.position.y = pos.y + 35.0f;
+    spawn.position.z = pos.z;
+    spawn.yawBase = 0;
+    spawn.pitchBase = -0x14;
+    spawn.yawRange = 0xFF;
+    spawn.pitchRange = 0x1E;
+    spawn.speedBase = 15.0f;
+    spawn.speedRange = 39.0f;
+    spawn.unk54 = 0.3540000021f;
+    spawn.unk58 = 0.6260000467f;
+    spawn.unk5C = 0x40040E07;
+    spawn.unk60 = 0x10;
+    spawn.unk61 = -1;
+    spawn.unk62 = 8;
+    spawn.unk63 = 6;
+    spawn.unk64 = 1;
+    spawn.extra = 0.8775510192f;
+    func_15153634(&spawn, 0xFF, 0xFF, 1);
 }
 
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-    u8 unk4;
-    u8 pad5;
-    u16 unk6;
-    s32 unk8;
-    s32 unkC;
-    s16 unk10;
-    s16 unk12;
-    s32 unk14;
-    s32 unk18;
-    u8 unk1C;
-    u8 unk1D;
-    u8 unk1E;
-    u8 unk1F;
-    u8 unk20;
-    u8 unk21;
-    u8 unk22;
-    u8 unk23;
-    u8 unk24;
-    u8 unk25;
-    s16 unk26;
-    s16 unk28;
-    s16 unk2A;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    struct17 unk38;
-    s16 unk44;
-    s16 unk46;
-    s16 unk48;
-    s16 unk4A;
-    f32 unk4C;
-    f32 unk50;
-    f32 unk54;
-    f32 unk58;
-    s32 unk5C;
-    s8 unk60;
-    s8 unk61;
-    u8 unk62;
-    u8 unk63;
-    u8 unk64;
-    u8 pad65[3];
-    f32 unk68;
-} Arg15153634;
-
-
-typedef struct {
-    s32 unk00;
-    s32 unk04;
-    struct17 unk08;
-    s16 unk14;
-    s16 unk16;
-    s16 unk18;
-    s16 unk1A;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    s16 unk2C;
-    s16 unk2E;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-} Arg15152190;
-
-typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x2B];
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-} Struct150C01DC;
-
-
-extern void func_15152190(Arg15152190 *, const s32 *, const f32 *, s32, f32, s32, u8, s32);
-
-s32 func_150C01DC(Struct150C01DC *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4) {
-    struct17 pos;
+/* Piece handler: two particle bursts 20 units above `y` at the piece's position. */
+s32 func_150C01DC(Piece *piece, s32 arg1, s32 arg2, s32 arg3, f32 y) {
+    Vec3F pos;
     Arg15152190 b;
 
-    pos.unk0 = arg0->unk38;
-    pos.unk4 = arg4 + 20.0f;
-    pos.unk8 = arg0->unk40;
+    pos.x = piece->position.x;
+    pos.y = y + 20.0f;
+    pos.z = piece->position.z;
     {
-    const s32 ints[1] = { 5 };
-    const f32 floats[1] = { 1.0f };
+    const s32 ids[1] = { 5 };
+    const f32 scales[1] = { 1.0f };
 
-    b.unk00 = 5;
-    b.unk04 = 4;
-    b.unk08 = pos;
-    b.unk14 = 0;
-    b.unk16 = 0xFF;
-    b.unk18 = -0x40;
-    b.unk1A = 0x22;
-    b.unk1C = 12.0f;
-    b.unk20 = 8.0f;
+    b.countBase = 5;
+    b.countRange = 4;
+    b.origin = pos;
+    b.angles.yawBase = 0;
+    b.angles.yawRange = 0xFF;
+    b.angles.pitchBase = -0x40;
+    b.angles.pitchRange = 0x22;
+    b.speedBase = 12.0f;
+    b.speedRange = 8.0f;
     b.unk24 = -1.697000027f;
     b.unk28 = 0.4990000129f;
     b.unk2C = 0x1E;
     b.unk2E = 0xF;
-    b.unk30 = 0.8000000119f;
-    b.unk34 = 1.200000048f;
-    b.unk38 = 15.29900074f;
-    func_15152190(&b, ints, floats, 1, 0.0f, 1, arg0->unkC, arg0->unk1);
+    b.scaleBase = 0.8000000119f;
+    b.scaleRange = 1.200000048f;
+    b.spin = 15.29900074f;
+    func_15152190(&b, ids, scales, 1, 0.0f, 1, piece->unkC, piece->unk1);
     }
     {
     Arg15153634 a;
 
-    a.unk0 = 5;
-    a.unk2 = 8;
+    a.countBase = 5;
+    a.countRange = 8;
     a.unk4 = 0x6C;
     a.unk6 = 0x5103;
     a.unk8 = 0x200005;
@@ -813,13 +770,13 @@ s32 func_150C01DC(Struct150C01DC *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4) 
     a.unk2C = 1.046154022f;
     a.unk30 = 218.0f;
     a.unk34 = 305.0f;
-    a.unk38 = pos;
-    a.unk44 = 0;
-    a.unk46 = -0x28;
-    a.unk48 = 0xFF;
-    a.unk4A = 0x28;
-    a.unk4C = 19.0f;
-    a.unk50 = 8.0f;
+    a.position = pos;
+    a.yawBase = 0;
+    a.pitchBase = -0x28;
+    a.yawRange = 0xFF;
+    a.pitchRange = 0x28;
+    a.speedBase = 19.0f;
+    a.speedRange = 8.0f;
     a.unk54 = 0.2620000243f;
     a.unk58 = 0.2620000243f;
     a.unk5C = 0x840E07;
@@ -828,136 +785,118 @@ s32 func_150C01DC(Struct150C01DC *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4) 
     a.unk62 = 8;
     a.unk63 = 6;
     a.unk64 = 1;
-    a.unk68 = 0.8977670074f;
-    func_15153634((Struct150BFFE0 *)&a, 0xFF, arg0->unkC, arg0->unk1);
+    a.extra = 0.8977670074f;
+    func_15153634(&a, 0xFF, piece->unkC, piece->unk1);
     }
     return 0;
 }
 
-void func_150C04C0(Vec3F150C04C0 *arg0, void *arg1, s32 arg2, u8 arg3, u8 arg4, s32 arg5) {
-    Struct150C04C0 sp34;
-    Struct150C04C0Color sp2C;
+/* Scatters 9-13 pieces of variant `id` from origin; each piece carries a 0.65 burst chance. */
+void func_150C04C0(Vec3F *origin, void *arg1, s32 id, u8 arg3, u8 arg4, s32 arg5) {
+    Arg15150400 config;
+    AngleRange angles;
     Struct150C04C0Sub sp20;
-    u8 temp_v0;
+    u8 flags;
 
-    sp20.unk4 = D_800A0108;
-    sp20.unk8 = arg2;
-    sp34.unk00 = 9;
-    sp34.unk04 = 4;
-    sp20.unk0 = D_800A0170;
-    sp34.unk08 = *arg0;
-    sp34.unk14 = 4.0f;
-    sp34.unk18 = 7.0f;
-    sp34.unk1C = D_800A0174;
-    sp34.unk20 = D_800A0178;
-    sp34.unk28 = D_800A017C;
-    sp34.unk2C = D_800A0180;
-    sp34.unk24 = 0x50;
-    sp34.unk26 = 0x3C;
-    sp34.unk34 = arg1;
-    sp34.unk48 = &sp20.unk8;
-    sp34.unk4C = &sp20.unk4;
-    sp34.unk50 = 1;
-    sp34.unk30 = D_800A0184;
-    sp34.unk38 = D_800A0188;
-    sp34.unk3C = D_800A018C;
-    sp34.unk40 = D_800A0190;
-    sp34.unk44 = 10.0f;
-    sp34.unk54 = 78.0f;
+    sp20.scale = D_800A0108;
+    sp20.id = id;
+    config.countBase = 9;
+    config.countRange = 4;
+    sp20.burstChance = D_800A0170;
+    config.origin = *origin;
+    config.speedBase = 4.0f;
+    config.speedRange = 7.0f;
+    config.unk1C = D_800A0174;
+    config.unk20 = D_800A0178;
+    config.scaleBase = D_800A017C;
+    config.scaleRange = D_800A0180;
+    config.unk24 = 0x50;
+    config.unk26 = 0x3C;
+    config.unk34 = arg1;
+    config.variantIds = &sp20.id;
+    config.variantScales = (f32 *)&sp20.scale;
+    config.variantCount = 1;
+    config.spin = D_800A0184;
+    config.unk38 = D_800A0188;
+    config.unk3C = D_800A018C;
+    config.unk40 = D_800A0190;
+    config.unk44 = 10.0f;
+    config.radius = 78.0f;
     if (arg3 != 0) {
-        temp_v0 = 1;
+        flags = 1;
     } else {
-        temp_v0 = 0;
+        flags = 0;
     }
-    sp34.unk58 = temp_v0;
-    sp34.unk59 = 0xE;
-    sp34.unk5C = 4;
-    sp34.unk60 = &sp20.unk0;
-    sp2C.unk0 = 0;
-    sp2C.unk2 = 0xFF;
-    sp2C.unk4 = -0x32;
-    sp2C.unk6 = 0x23;
-    func_15150400(&sp34, &sp2C, arg4, arg5);
+    config.flags = flags;
+    config.unk59 = 0xE;
+    config.extraSize = 4;
+    config.extraData = &sp20.burstChance;
+    angles.yawBase = 0;
+    angles.yawRange = 0xFF;
+    angles.pitchBase = -0x32;
+    angles.pitchRange = 0x23;
+    func_15150400(&config, &angles, arg4, arg5);
 }
 
-typedef struct {
-    /* 0x000 */ u8 unk0;
-    /* 0x001 */ u8 unk1;
-    /* 0x002 */ u8 pad2[0xA];
-    /* 0x00C */ u8 unkC;
-    /* 0x00D */ u8 padD[0xB];
-    /* 0x018 */ f32 unk18;
-    /* 0x01C */ u8 pad1C[0x1C];
-    /* 0x038 */ f32 unk38;
-    /* 0x03C */ f32 unk3C;
-    /* 0x040 */ f32 unk40;
-    /* 0x044 */ u8 pad44[0x1C];
-    /* 0x060 */ s32 unk60;
-    /* 0x064 */ u8 pad64[0x2];
-    /* 0x066 */ u16 unk66;
-    /* 0x068 */ u8 pad68[0xA8];
-    /* 0x110 */ u8 unk110[0x60];
-    /* 0x170 */ f32 unk170;
-} Struct150C0648;
+extern s32 func_15133B98(Piece *, s32, s32, s32, f32, s32);
 
+/* Piece handler: with probability burstChance, bursts into smaller pieces and particles 20 units above
+ * `y`; otherwise falls back to func_15133B98. */
+s32 func_150C0648(Piece *piece, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
+    u8 flags;
 
-extern s32 func_15133B98(Struct150C0648 *, s32, s32, s32, f32, s32);
-
-s32 func_150C0648(Struct150C0648 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
-    u8 flag;
-
-    if (func_150ADA68() < arg0->unk170) {
+    if (func_150ADA68() < piece->burstChance) {
         {
-            Struct150C04C0 desc;
-            Struct150C04C0Color color;
-            s32 ints[1];
-            const f32 floats[1] = { 1.0f };
+            Arg15150400 config;
+            AngleRange angles;
+            s32 ids[1];
+            const f32 scales[1] = { 1.0f };
 
-            ints[0] = arg0->unk66;
-            desc.unk00 = 2;
-            desc.unk04 = 0;
-            desc.unk08.x = arg0->unk38;
-            desc.unk08.y = arg4 + 20.0f;
-            desc.unk08.z = arg0->unk40;
-            desc.unk14 = 5.0f;
-            desc.unk18 = 4.0f;
-            desc.unk1C = -1.210000038f;
-            desc.unk20 = 0.4720000327f;
-            desc.unk24 = 0x28;
-            desc.unk26 = 0x1E;
-            desc.unk28 = arg0->unk18 * 0.3600000143f;
-            desc.unk2C = arg0->unk18 * 0.4130000174f;
-            desc.unk30 = 31.52700233f;
-            desc.unk34 = arg0->unk110;
-            desc.unk38 = 1.0f;
-            desc.unk3C = 0;
-            desc.unk40 = 0;
-            desc.unk44 = 10.0f;
-            desc.unk48 = ints;
-            desc.unk4C = (void *)floats;
-            desc.unk50 = 1;
-            desc.unk54 = 0;
-            if (arg0->unk60 & 0x800) {
-                flag = 1;
+            ids[0] = piece->unk66;
+            config.countBase = 2;
+            config.countRange = 0;
+            config.origin.x = piece->position.x;
+            config.origin.y = y + 20.0f;
+            config.origin.z = piece->position.z;
+            config.speedBase = 5.0f;
+            config.speedRange = 4.0f;
+            config.unk1C = -1.210000038f;
+            config.unk20 = 0.4720000327f;
+            config.unk24 = 0x28;
+            config.unk26 = 0x1E;
+            config.scaleBase = piece->unk18 * 0.3600000143f;
+            config.scaleRange = piece->unk18 * 0.4130000174f;
+            config.spin = 31.52700233f;
+            config.unk34 = piece->unk110;
+            config.unk38 = 1.0f;
+            config.unk3C = 0;
+            config.unk40 = 0;
+            config.unk44 = 10.0f;
+            config.variantIds = ids;
+            config.variantScales = (f32 *)scales;
+            config.variantCount = 1;
+            config.radius = 0;
+            if (piece->unk60 & 0x800) {
+                flags = 1;
             } else {
-                flag = 0;
+                flags = 0;
             }
-            desc.unk58 = flag;
-            desc.unk59 = 0xA;
-            desc.unk5C = 0;
-            desc.unk60 = NULL;
-            color.unk0 = 0;
-            color.unk2 = 0xFF;
-            color.unk4 = -0x2A;
-            color.unk6 = 0x19;
-            func_15150400(&desc, &color, arg0->unkC, arg0->unk1);
+            config.flags = flags;
+            config.unk59 = 0xA;
+            config.extraSize = 0;
+            config.extraData = NULL;
+            angles.yawBase = 0;
+            angles.yawRange = 0xFF;
+            angles.pitchBase = -0x2A;
+            angles.pitchRange = 0x19;
+            func_15150400(&config, &angles, piece->unkC, piece->unk1);
             {
-            Struct150BFFE0 a;
-            f32 y;
+            Arg15153634 a;
+            f32 spawnY;
 
-            y = arg4 + 20.0f;
-            a.unk0 = 1;
-            a.unk2 = 2;
+            spawnY = y + 20.0f;
+            a.countBase = 1;
+            a.countRange = 2;
             a.unk4 = 0x6C;
             a.unk6 = 0x5103;
             a.unk8 = 0x200005;
@@ -982,15 +921,15 @@ s32 func_150C0648(Struct150C0648 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, 
             a.unk2C = 1.024461985f;
             a.unk30 = 178.0f;
             a.unk34 = 91.0f;
-            a.unk38.x = arg0->unk38;
-            a.unk38.y = y;
-            a.unk38.z = arg0->unk40;
-            a.unk44 = 0;
-            a.unk46 = -0x12;
-            a.unk48 = 0xFF;
-            a.unk4A = 0xB;
-            a.unk4C = 4.0f;
-            a.unk50 = 6.0f;
+            a.position.x = piece->position.x;
+            a.position.y = spawnY;
+            a.position.z = piece->position.z;
+            a.yawBase = 0;
+            a.pitchBase = -0x12;
+            a.yawRange = 0xFF;
+            a.pitchRange = 0xB;
+            a.speedBase = 4.0f;
+            a.speedRange = 6.0f;
             a.unk54 = 0.006000000052f;
             a.unk58 = 0.0f;
             a.unk5C = 0x40040E07;
@@ -999,11 +938,11 @@ s32 func_150C0648(Struct150C0648 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, 
             a.unk62 = 8;
             a.unk63 = 6;
             a.unk64 = 1;
-            a.unk68 = 0.9535999894f;
-            func_15153634(&a, 0xFF, arg0->unkC, arg0->unk1);
+            a.extra = 0.9535999894f;
+            func_15153634(&a, 0xFF, piece->unkC, piece->unk1);
             }
         }
         return 0;
     }
-    return func_15133B98(arg0, arg1, arg2, arg3, arg4, arg5);
+    return func_15133B98(piece, arg1, arg2, arg3, y, arg5);
 }
