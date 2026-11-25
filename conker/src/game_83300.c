@@ -1,5 +1,9 @@
 #include <ultra64.h>
 
+/*
+ * The shared headers declare these with parameter types that would change the code here (extra
+ * narrowing in callers) or the variable type; hide those declarations and declare them below.
+ */
 #define func_1506160C func_1506160C_hdr
 #define func_1000F85C func_1000F85C_hdr
 #define func_1000F91C func_1000F91C_hdr
@@ -21,7 +25,9 @@ u16 func_10010BE8(u16, s32, s32, s32, s32, s32, s32);
 #include "variables.h"
 #undef D_800D1550
 #undef D_800CC298
-extern f32 D_800D1550;
+extern f32 D_800D1550; /* frame time step */
+
+/* State of the per-type texture animations in func_15061B4C. */
 typedef struct Game83300Anim298 {
     f32 unk0;
     f32 unk4;
