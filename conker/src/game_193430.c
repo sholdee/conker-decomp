@@ -1,4 +1,5 @@
 #include <ultra64.h>
+// functions.h declares func_15048A40 as returning void; hide that prototype and declare the real f32 one below
 #define func_15048A40 func_15048A40_hdr
 #include "functions.h"
 #undef func_15048A40
@@ -127,13 +128,12 @@ void func_15166204(QuadEffect *effect) {
     effect->life = life;
 }
 
-// matching: functions.h declares func_15048A40 as returning void; it returns f32 (like func_150489B0)
 extern f32 func_15048A40(u8);
 extern f32 func_150489B0(u8);
 
 /* Draws the effect: rebuilds this frame's quad vertices and fades alpha out over the effect's life. */
 Gfx *func_15166268(Gfx *gdl, QuadEffect *effect, s32 arg2) {
-    s32 pad;
+    s32 mode;
     s32 x;
     s32 y;
     s32 z;
@@ -163,7 +163,8 @@ Gfx *func_15166268(Gfx *gdl, QuadEffect *effect, s32 arg2) {
         } else {
             alpha = 255;
         }
-        if (effect->mode == 0) {
+        mode = effect->mode;
+        if (mode == 0) {
             effect->quads[D_800BE9C0][0].v.ob[0] = x - size;
             effect->quads[D_800BE9C0][0].v.ob[2] = z - size;
             effect->quads[D_800BE9C0][1].v.ob[0] = x + size;
@@ -172,7 +173,7 @@ Gfx *func_15166268(Gfx *gdl, QuadEffect *effect, s32 arg2) {
             effect->quads[D_800BE9C0][2].v.ob[2] = z + size;
             effect->quads[D_800BE9C0][3].v.ob[0] = x - size;
             effect->quads[D_800BE9C0][3].v.ob[2] = z + size;
-        } else if (effect->mode == 1) {
+        } else if (mode == 1) {
             dx = (effect->dirX * size) / 127;
             dz = (effect->dirZ * size) / 127;
             effect->quads[D_800BE9C0][0].v.ob[0] = x - dx;
@@ -236,8 +237,9 @@ Gfx *func_15166268(Gfx *gdl, QuadEffect *effect, s32 arg2) {
     return gdl;
 }
 
-s32 func_15094F70();
-s32 func_15142FBC();
+Gfx *func_15094F70(Gfx *gdl, void *texture, s32 frame, void *sprite, s32 tmem, s32 tile, s32 sfrac, s32 cm,
+                  s32 assetArg);
+Gfx *func_15142FBC(Gfx *gdl, s32 modeH, s32 modeL, u8 *needSync);
 extern s32 D_800903F4;
 extern s32 D_800A4AC8[][2];
 extern s32 D_800D2C9C;
@@ -247,20 +249,21 @@ extern s32 D_800DD224;
 extern void *D_800DD228;
 extern s32 D_800DD230;
 
-void func_151668B8(void *arg0, s32 arg1, s32 arg2, s32 arg3) {
-    u8 changed;
-    s16 offset;
+/* Loads the next frame of texture D_800903F4 (advancing 0x80 per call, wrapping at 0x500) and sets a render mode. */
+Gfx *func_151668B8(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3) {
+    u8 needSync;
+    s16 frame;
 
-    offset = D_800DCE40;
+    frame = D_800DCE40;
     D_800DD228 = &D_800903F4;
-    D_800DCE40 = offset + 0x80;
-    changed = 1;
-    D_800DD220 = offset;
+    D_800DCE40 = frame + 0x80;
+    needSync = TRUE;
+    D_800DD220 = frame;
     if (D_800DCE40 >= 0x500) {
         D_800DCE40 = 0;
     }
     D_800DD224 = 1;
-    func_15142FBC((void *)func_15094F70(arg0, D_800DD228, D_800DD220, &D_800DD230, 0, 0, 0, D_800DD224, 3),
-                  D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20,
-                  D_800A4AC8[3][0] | D_800A4AC8[3][1], &changed);
+    return func_15142FBC(func_15094F70(gdl, D_800DD228, D_800DD220, &D_800DD230, 0, 0, 0, D_800DD224, 3),
+                         D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[3][0] | D_800A4AC8[3][1],
+                         &needSync);
 }
