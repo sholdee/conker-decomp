@@ -136,6 +136,50 @@ typedef struct Vec3w {
     s32 unk8;
 } Vec3w;
 
+/* Zero-terminated list of the event ids that run when func_1506AD30 is filtered. */
+const u8 D_80099A30[12] = { 0x69, 0x6A, 0x9D, 0x94, 0x7E, 0x7F, 0x7A, 0x29, 0 };
+
+/* Turn-angle thresholds and animations per row (also read by game_83300.c and game_A28B0.c). */
+const u8 D_80099A3C[12][10] = {
+    { 0x10, 0x00, 0x30, 0x04, 0x05, 0x02, 0x03, 0xFF, 0x02, 0x03 },
+    { 0x20, 0x03, 0xFF, 0x06, 0x05, 0x06, 0x05, 0xFF, 0x06, 0x05 },
+    { 0x20, 0x00, 0x40, 0x0A, 0x0B, 0x04, 0x03, 0x70, 0x08, 0x09 },
+    { 0x0E, 0x00, 0x20, 0x04, 0x03, 0x02, 0x01, 0xFF, 0x02, 0x01 },
+    { 0x20, 0xFF, 0x40, 0x05, 0x04, 0x05, 0x04, 0xFF, 0x05, 0x04 },
+    { 0x15, 0x00, 0x30, 0x0C, 0x0D, 0x0C, 0x0D, 0xFF, 0x0C, 0x0D },
+    { 0x28, 0xFF, 0x68, 0x05, 0x04, 0x0D, 0x10, 0xFF, 0x0D, 0x10 },
+    { 0x40, 0x00, 0xFF, 0x05, 0x04, 0x05, 0x04, 0xFF, 0x05, 0x04 },
+    { 0x10, 0x00, 0x15, 0x0B, 0x0C, 0x10, 0x0F, 0xFF, 0x10, 0x0F },
+    { 0x16, 0x00, 0xFF, 0x05, 0x04, 0x05, 0x04, 0xFF, 0x05, 0x04 },
+    { 0x20, 0x00, 0xFF, 0x09, 0x08, 0x09, 0x08, 0x50, 0x12, 0x12 },
+    { 0x60, 0xFF, 0x60, 0x0D, 0x10, 0x0D, 0x10, 0xFF, 0x0D, 0x10 },
+};
+
+/* pissed_walk animations, one picked at random (D_80099ABC for the first pick). */
+const u8 D_80099AB4[8] = { 0xA6, 0xA7, 0xA6, 0xA6, 0xA6, 0xA7, 0xA6, 0xA8 };
+const u8 D_80099ABC[8] = { 0xAC, 0xAD, 0xAC, 0xAC, 0xAC, 0xAD, 0xAC, 0xA9 };
+
+/* Per projectile kind: hit value (also read by game_AEB40.c) and spawn offset x, y, z + bone. */
+const u8 D_80099AC4[20] = {
+    0x00, 0x00, 0x10, 0x10, 0x00, 0x13, 0x10, 0x12, 0x23, 0x24,
+    0x25, 0x10, 0x10, 0x10, 0x10, 0x3C, 0x1A, 0x10, 0x10, 0x00,
+};
+const s16 D_80099AD8[19][4] = {
+    { -2, -14, 60, 4 },  { -2, -14, 60, 4 },  { -1, -22, 77, 9 },  { 0, 0, 0, 2 },
+    { 14, -28, 37, 9 },  { -4, 23, 201, 3 },  { 0, 0, 0, 2 },      { 0, 0, 0, 0 },
+    { 0, 0, 0, 0 },      { -4, 23, 201, 3 },  { -4, 23, 201, 3 },  { -1, -20, 12, 14 },
+    { -1, -20, 12, 14 }, { 60, 0, 0, 23 },    { -40, 0, 0, 23 },   { 48, 148, 74, 0 },
+    { 0, 0, 0, 0 },      { 0, 0, 0, 9 },      { -1, -22, 77, 9 },
+};
+
+/* Effect offsets (the words are f32 bit patterns). */
+const Vec3w D_80099B70 = { 0x00000000, 0x41400000, 0x42F00000 }; /* 0, 12, 120 */
+const Vec3w D_80099B7C = { 0x00000000, 0x41D80000, 0x43570000 }; /* 0, 27, 215 */
+const Vec3w D_80099B88 = { 0x00000000, 0x00000000, 0x44080000 }; /* 0, 0, 544 */
+const Vec3w D_80099B94 = { 0x00000000, 0x00000000, 0x442F0000 }; /* 0, 0, 700 */
+const Vec3w D_80099BA0 = { 0x00000000, 0x00000000, 0x438B0000 }; /* 0, 0, 278 */
+const Vec3w D_80099BAC = { 0x00000000, 0x00000000, 0x440B0000 }; /* 0, 0, 556 */
+
 /* Locals of the effect spawners func_15070D24 / func_15070F60, in stack order. */
 typedef struct EffectLocals {
     Vec3i header2;
@@ -147,9 +191,6 @@ typedef struct EffectLocals {
     Vec3w localPos;
 } EffectLocals;
 
-extern Vec3w D_80099B88;
-extern Vec3w D_80099B94;
-extern Vec3w D_80099BBC;
 extern void func_15143134(void *, void *, s32);
 extern void func_151DC484(f32 *, CollisionHit *, s32, u8, s32);
 
@@ -166,7 +207,6 @@ s32 func_1510F8CC(s32);
 extern Actor *func_1505EEB0(s32 state, s32 *arg1);
 extern u8 func_1505DADC(Actor *arg0, s16 *arg1, s32 arg2, u8 arg3, s32 arg4);
 extern void *allocate_memory(s32, s32, s32, s32);
-extern s16 D_80099AD8[][4];
 extern void func_1506AC8C(Actor *, s32, s32);
 extern Actor *func_1505ED34(void);
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
@@ -186,26 +226,18 @@ void func_1506E0EC(void);
 void func_1506E2CC(void);
 void func_151700D8(f32 *, f32, f32, s32, f32, s32, s32, s32, s32, s32);
 s32 func_151F2CDC(void);
-extern Vec3w D_80099B70;
-extern Vec3w D_80099B7C;
 extern s32 func_15145EA4(void *arg0, void *arg1, s32 arg2, s32 arg3);
 extern Actor *func_1507515C(Actor *);
 extern void func_151C1860(void *, s32, s32);
 void func_15103E40(Actor *, Actor *, Vec3f *, u8, u8, u8, u8);
-extern Vec3w D_80099BA0;
-extern Vec3w D_80099BAC;
 extern void func_151D5334(Vec3f*, f32, f32, f32, s32, s32, s32);
 extern void func_150FE860(Actor *arg0, s32 arg1, s32 arg2);
 extern void func_151D8868(RumbleParams *params, s32 arg1, s32 arg2, s32 arg3);
 extern void func_150FF084(Actor *arg0, s32 arg1, s32 arg2);
 extern void func_150FED30(Actor *arg0, s32 arg1, s32 arg2);
-extern u32 D_80099BB8;
 void func_151C329C(s32 arg0, s32 arg1, s32 arg2);
 void func_151DC260(f32 *, void *, s32, s32, s32);
 void func_15152190(DebrisBurst *, void *, void *, s32, f32, s32, s32, s32);
-extern f32 D_80099BC8[3][3];
-extern u8 D_80099BEC[];
-extern u8 D_80099C04[];
 extern void func_1505F188(Actor *arg0);
 extern s32 func_15082A44(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 s32 func_15037698(s32, s32, s32, f32, f32, f32, f32 *, f32, s32, s32);
@@ -226,7 +258,6 @@ typedef struct TimedEvent {
 
 typedef void EventHandler(void);
 extern EventHandler *D_800863FC[];
-extern u8 D_80099A30[];
 
 /*
  * Runs every event of the object's event list whose time is <= `time`. Each event stores its
@@ -375,12 +406,12 @@ void func_1506B3B8(void) {
         absDiff = -absDiff;
     }
     absDiff32 = absDiff;
-    if (absDiff < D_80099A3C[0][sel]) { // matching: indexed by sel (still 0); [0][0] schedules differently
+    if (absDiff < D_80099A3C[0][sel]) { // matching: all three indexed by sel (still 0); constant indices schedule differently
         sel = 1;
     } else {
-        if (D_80099A43 < absDiff32) {
+        if (D_80099A3C[0][sel + 7] < absDiff32) {
             sel = 5;
-        } else if (D_80099A3E < absDiff32) {
+        } else if (D_80099A3C[0][sel + 2] < absDiff32) {
             sel = 2;
         }
         if (angleDiff < 0) {
@@ -2797,20 +2828,30 @@ void func_15071888(s32 cmd) {
     func_151D5714(D_800D154C, &D_800A1FB0, &D_800A1FBC, D_80088B90, 0.7f, 0xFF, 1);
 }
 
-/* Spawns effect func_151C329C at one of four random bones (packed bytes of D_80099BB8). */
+/* Spawns effect func_151C329C at one of four random bones. */
 void func_150718E4(s32 cmd) {
     f32 *p;
     f32 pos[2];
-    u32 bones;
+    const u8 bones[4] = { 13, 16, 24, 27 };
 
-    bones = D_80099BB8;
     if (D_800D154C->ob_matrix_ptr != NULL || (D_800D154C->unk74 & 0xF) == 0xF) {
         p = pos;
-        func_15143134(&D_800A5480, p, (s32)((Mtx *)D_800D154C->ob_matrix_ptr + ((u8 *)&bones)[func_150ADA20() & 3]));
+        func_15143134(&D_800A5480, p, (s32)((Mtx *)D_800D154C->ob_matrix_ptr + bones[func_150ADA20() & 3]));
         pos[1] = D_800D154C->floorY + 20.0f;
         func_151C329C((s32)p, 0xFF, 1);
     }
 }
+
+const Vec3w D_80099BBC = { 0x00000000, 0x41880000, 0x40E00000 }; /* 0, 17, 7 */
+const f32 D_80099BC8[3][3] = {
+    { 0.0f, 2.0f, 145.0f },
+    { 62.0f, 11.0f, 114.0f },
+    { -62.0f, 11.0f, 114.0f },
+};
+
+/* Debris model ids and their scales (func_15152190). */
+const s32 D_80099BEC[6] = { 0x39, 0x11, 0x12, 0x13, 0x14, 0x15 };
+const f32 D_80099C04[6] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
 
 void func_15071998(s32 cmd) {
     func_150FA520(D_800D154C, 0, 0xFF, 1);
@@ -4005,7 +4046,7 @@ void func_15074A94(void) {
     f32 dist;
     f32 maxScale;
     f32 scale;
-    f32 *minScale = &D_8009A0F4; // matching: the 0.3f rodata constant read through a pointer
+    f32 range;
 
     dist = func_1505A72C(movement_obj, D_800D154C);
     if (D_800D154C->unk148 < 0.2f) {
@@ -4018,12 +4059,9 @@ void func_15074A94(void) {
         if (1500.0f < dist) {
             scale = maxScale;
         } else {
-            f32 range;
-
-            range = maxScale - *minScale;
-            scale = *minScale;
-            scale = scale + (((dist - 200.0f) / 1300.0f) * range);
-            maxScale = D_800D154C->unk148;
+            range = maxScale - 0.3f;
+            maxScale = (dist - 200.0f) / 1300.0f; // matching: reusing maxScale for the fraction gives IDO's register split
+            scale = 0.3f + maxScale * range;
         }
     }
     D_800D154C->unk158 = scale;
@@ -4107,7 +4145,7 @@ void func_15074DEC(Actor *self, s32 other, s32 result) {
 
 void func_15074E04(s32 self, s32 other, s32 result) {
     func_1516FE1C((Actor *)other - movement_obj, 180, 0xFF, 0);
-    func_1518D1C0(other, 11, 0, 1, 0xFF, 0, &D_80099C1C);
+    func_1518D1C0(other, 11, 0, 1, 0xFF, 0, "mvmt_imp_set_up_smoke");
 }
 
 void func_15074E80(Actor *self, Actor *other, s32 result) {

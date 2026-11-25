@@ -1297,7 +1297,7 @@ segments:
       - [0x23E4C4, rodata]
       - [0x23E4D0, .rodata, game_97AA0]
       - [0x23E4EC, rodata]
-      - [0x23E4F0, rodata]
+      - [0x23E4F0, .rodata, game_981E0]
       - [0x23EBE0, rodata]
       - [0x23EBFC, .rodata, game_A28B0]
       - [0x23ECD0, rodata]

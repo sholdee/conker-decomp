@@ -554,40 +554,8 @@ extern f32 D_80098D90[]; /* sinf: [1]..[4] odd-power polynomial coefficients */
 
 extern const u16 D_8009919C[6];
 
-extern u8 D_80099A3C[][10]; // turn-angle thresholds per row (D_80099A3E is [0][2])
-extern u8 D_80099A3E;
-extern u8  D_80099A43;
-extern u8 D_80099AB4[];
-extern u8 D_80099ABC[];
-
-extern u8 D_80099AC4[];
-extern f32 D_80099C1C;
-extern f32 D_80099C34;
-extern f32 D_80099C38;
-extern f32 D_80099C3C;
-extern f32 D_80099C40;
-extern f32 D_80099C44;
-
-extern f32 D_80099D44;
-extern f32 D_80099D4C;
-extern f32 D_80099DA0;
-extern f32 D_80099DA4;
-extern f32 D_80099DA8;
-
-extern f32 D_80099E98;
-extern f32 D_80099E9C;
-
-extern f32 D_80099F30;
-extern f32 D_80099F4C;
-
-extern f32 D_8009A020[];
-extern f32 D_8009A0E8;
-extern f32 D_8009A0EC;
-extern f32 D_8009A0F0;
-extern f32 D_8009A0F4;
-extern f32 D_8009A0F8;
-extern f32 D_8009A0FC;
-extern f32 D_8009A100;
+extern const u8 D_80099A3C[][10]; // turn-angle thresholds per row (defined in game_981E0.c)
+extern const u8 D_80099AC4[];
 // code_75400.c
 
 extern f32 D_8009A220[];
