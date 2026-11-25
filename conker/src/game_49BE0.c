@@ -1,19 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
+#include "variables.h"
 
-/* include/variables.h is deliberately NOT included here: it types D_800BE9F4 as `u16 *`
- * (it is a plain 32-bit slot -- case 5 below stores the integer 5 into it) and
- * D_800BEA00 / D_800BEA04 as `s32 []` (they are scalars). Both are header inaccuracies;
- * the declarations below are the file-local, use-accurate ones. D_800CC382 is not in the
- * header at all. Restore the include only after those three entries are fixed globally. */
-extern u16 D_800D2132;
 extern u16 D_800CC382;
-extern s32 D_800BEA00;
-extern s32 D_800BEA04;
-extern s32 D_800BE9F4;
-extern u8  D_800DD2C0;
-extern u8  D_800BE615;
-extern u8  D_800BE616;
 
 extern void func_1501C53C(void);
 extern void func_15016680(void);

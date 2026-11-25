@@ -480,7 +480,7 @@ s32 func_1509C2A4(void) {
 
 void func_1509C3A0(void) {
     if (D_800D2E43 && !D_800D2E44 && func_1509C2A4()) {
-        D_800BE3DF = (s8)D_800BE9F4; // variables.h declares D_800BE9F4 as a pointer
+        D_800BE3DF = D_800BE9F4;
         if (D_800C35C4 == 0) {
             func_15007718(D_8008FDA8);
         }

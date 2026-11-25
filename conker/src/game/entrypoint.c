@@ -38,8 +38,8 @@ void func_15007830(void) {
     func_15008A60();
     func_15042D50();
     D_800BE615 = 5;
-    D_800BEA04[0] = 0;
-    D_800BEA00[0] = 1;
+    D_800BEA04 = 0;
+    D_800BEA00 = 1;
     D_800BEAAA = 1;
     func_1509C120();
 
@@ -55,8 +55,7 @@ void func_15007830(void) {
                 if (D_800E0B94 == 2) {
                     func_150ADACC(0x81280783);
                 }
-                // D_800BE9F4 is really an s32 (variables.h says u16 *); pass its value as s16
-                func_15007A70(D_800BEA04[0], D_800BEA00[0], (s16)(s32)D_800BE9F4);
+                func_15007A70(D_800BEA04, D_800BEA00, D_800BE9F4);
                 /* fallthrough */
             case 3:
                 func_15007B3C();

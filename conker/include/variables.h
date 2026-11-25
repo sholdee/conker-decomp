@@ -870,14 +870,14 @@ extern s32  D_800BE9E4;
 extern s32  D_800BE9E8;
 extern u8   D_800BE9EC;
 extern u8   D_800BE9ED;
-extern u16  *D_800BE9F4; // was u16
+extern s32 D_800BE9F4;   // current scene / game mode id
 extern s32  D_800BE9F8;
 
 extern OSContPad *D_800BE730[4]; // per-player pointers into D_800BE748
 extern OSContPad D_800BE748[4];   // per-player controller pads
 
-extern s32 D_800BEA00[]; // struct04
-extern s32 D_800BEA04[]; // struct04
+extern s32 D_800BEA00;
+extern s32 D_800BEA04;
 extern s32 D_800BEA08;
 extern OSMesgQueue D_800BEA10;
 extern OSMesg      D_800BEA28;

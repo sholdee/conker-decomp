@@ -1,10 +1,7 @@
 #include <ultra64.h>
 
-// matching: func_1506160C and D_800BE9F4 are declared below with types that differ from the shared headers
 #include "functions.h"
-#define D_800BE9F4 D_800BE9F4_hdr
 #include "variables.h"
-#undef D_800BE9F4
 
 extern s32 func_15084D70(s32, s32, s32, s16*, f32*, u8*, u8*, s32*, s32*, s32, s32*);
 extern void func_15022190(s16, s16, s16, f32);
@@ -304,7 +301,6 @@ void func_15181DC8(s32);
 void func_15082A44(SpawnRecord *, s32, s32, s32, s32);
 void func_15088D58(Actor *);
 extern s16 D_800BE9F2;
-extern s32 D_800BE9F4;
 
 /* Re-initialises obj through func_15060F28/func_15082A44 (health back to D_8008726C), keeping a few state bytes. */
 void func_1507D1D8(Actor *obj) {

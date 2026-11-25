@@ -58,7 +58,7 @@ struct Struct151E4314 {
 };
 
 extern ModeEntry D_800AB68C[];
-/* variables.h types D_8008FD94/D_800E0C20 (s8), D_800BE3DF (signed) and D_800BE9F4 (a u16 value) wrongly: hence casts. */
+/* variables.h types D_8008FD94/D_800E0C20 (s8), D_800BE3DF (signed) wrongly: hence casts. */
 extern struct Struct151E4314 D_800AB7A4[];
 extern s8 D_800E0C00[];
 extern s8 D_800E0BEB;
@@ -477,7 +477,7 @@ void func_151E30C4(void) {
     func_15017790();
     func_1509CC94(resource);
     func_1509CDDC(resource);
-    D_800BE9F4 = (u16 *)func_1509CA30(resource);
+    D_800BE9F4 = func_1509CA30(resource);
     func_15085710(0, 9, unk0);
     D_800BE3E4 = unk0;
 
@@ -507,7 +507,7 @@ void func_151E30C4(void) {
     D_800E0BB1 = 1;
     func_151E7EF8();
     D_800D2E40 = 1;
-    func_1501C730(6, (s32)D_800BE9F4, func_1509CA50(resource), 0, 1);
+    func_1501C730(6, D_800BE9F4, func_1509CA50(resource), 0, 1);
 }
 
 /* Resets to a one-player session using the cue D_800BE3DF/D_800BE3E0. */
