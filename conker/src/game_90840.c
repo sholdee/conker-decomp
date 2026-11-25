@@ -1196,7 +1196,9 @@ void func_151D469C(void *arg0, s32 a1, s32 a2, s32 a3, s32 a4);
 void func_151D4D58(void *arg0);
 s32 func_151F2CDC(void);
 
+/* variables.h types D_800D3098 as a struct178 array, but its first word is this table's pointer. */
 #define GATES (*(Gate15065A5C **)&D_800D3098)
+/* Bytes of struct127 that structs.h still declares only as padding. */
 #define OBJ_U8(o, off) (((u8 *)(o))[off])
 
 s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s32 arg4, s32 act, s32 arg6, s32 arg7, s32 arg8) {
@@ -1703,15 +1705,15 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                 } else {
                     func_15063A38(arg0, heldButtons, Z_TRIG | R_TRIG);
                     if ((arg0->unk84.uh != 0x11A) && (arg0->unk84.uh != 0x7B)) {
-                        u8 sp10C;
-                        sp10C = 0;
-                        if (!(heldButtons & Z_TRIG) && (CTL(arg0)->unk88 & 0x2000)) {
-                            sp10C = 1;
+                        u8 endEffect;
+                        endEffect = 0;
+                        if (!(heldButtons & Z_TRIG) && (CTL(arg0)->unk88 & Z_TRIG)) {
+                            endEffect = 1;
                         }
                         if ((CTL(arg0)->unk24 == 0) || (pressedButtons & A_BUTTON)) {
                             anim = 0x11A;
                             if (!(pressedButtons & A_BUTTON)) {
-                                sp10C = 1;
+                                endEffect = 1;
                             }
                             CTL(arg0)->unk24 = 0x3C;
                             arg0->disable_run = 0xFF;
@@ -1770,7 +1772,7 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                             speed = 1.399999976f;
                             anim = func_15063E84(arg0, 0x7D, 1, 0, pressedButtons);
                         }
-                        if (sp10C != 0) {
+                        if (endEffect != 0) {
                             func_151D4D58(arg0);
                         }
                     }
@@ -1792,17 +1794,15 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
             } else if (arg6 != 0) {
                 clearAction = 0;
             } else {
-                u8 sp107;
-                u16 pressed;
-                u16 pad7;
+                u8 endEffect;
+                u16 pad[2];  // matching: unused stack slots
 
                 arg0->disable_jump = 0xA;
                 func_15063A38(arg0, heldButtons, Z_TRIG | R_TRIG);
                 if (arg0->unk84.uh != 0x1DD) {
-                    heldButtons = heldButtons | 0;
-                    sp107 = 0;
-                    if (!(heldButtons & Z_TRIG) && (CTL(arg0)->unk88 & 0x2000)) {
-                        sp107 = 1;
+                    endEffect = 0;
+                    if (!(heldButtons & Z_TRIG) && (CTL(arg0)->unk88 & Z_TRIG)) {
+                        endEffect = 1;
                     }
                     if (heldButtons & Z_TRIG) {
                         if (arg0->xz_velocity != 0.0f) {
@@ -1849,7 +1849,7 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                         CTL(arg0)->unk1A2 = 0;
                         CTL(arg0)->unk1A4 = 0;
                     }
-                    if (sp107 != 0) {
+                    if (endEffect != 0) {
                         func_151D469C(arg0, 5, 0x78, 0xFF, 1);
                     }
                 }
@@ -2155,12 +2155,12 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                     arg0->disable_jump = 0xA;
                     arg0->disable_run = 0;
                     arg0->unk83 = 0xA;
-                    if ((PAD->buttons & Z_TRIG) || (CTL(arg0)->unk88 & 0x2000)) {
+                    if ((PAD->buttons & Z_TRIG) || (CTL(arg0)->unk88 & Z_TRIG)) {
                         CTL(arg0)->pending |= 1;
                         D_800CC2B0 = 1;
                     }
                     if (animStart != arg0->unk84.uh) {
-                        if (!(PAD->buttons & Z_TRIG) && (CTL(arg0)->unk88 & 0x2000) && (CTL(arg0)->unk19E == 0)) {
+                        if (!(PAD->buttons & Z_TRIG) && (CTL(arg0)->unk88 & Z_TRIG) && (CTL(arg0)->unk19E == 0)) {
                             CTL(arg0)->pending |= 2;
                             D_800CC2B0 = 1;
                             blend = 0.0f;
@@ -2191,7 +2191,7 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
         break;
     case 0x11:
         if (pressedButtons & B_BUTTON) {
-            u8 pad5;
+            u8 pad;  // matching: unused stack slot
 
             func_15083E90(7)->unk2E4 = 1;
         }
@@ -2276,8 +2276,6 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                     blend = 0.0f;
                 }
                 if (pressedButtons & B_BUTTON) {
-                    u8 pad6;
-
                     obj = func_15083E90(6);
                     obj->xz_velocity = 80.0f;
                     if (mag > 2000.0f) {
@@ -2384,12 +2382,12 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                 arg0->disable_jump = 0xA;
                 arg0->disable_run = 0;
                 arg0->unk83 = 0xA;
-                if ((CTL(arg0)->unk19E == 0) && ((PAD->buttons & Z_TRIG) || (CTL(arg0)->unk88 & 0x2000))) {
+                if ((CTL(arg0)->unk19E == 0) && ((PAD->buttons & Z_TRIG) || (CTL(arg0)->unk88 & Z_TRIG))) {
                     CTL(arg0)->pending |= 1;
                     D_800CC2B0 = 1;
                 }
                 if (arg0->unk84.uh != 0x152) {
-                    if (!(PAD->buttons & Z_TRIG) && (CTL(arg0)->unk88 & 0x2000) && (arg0->unk84.uh == 0x157) && (CTL(arg0)->unk19E == 0)) {
+                    if (!(PAD->buttons & Z_TRIG) && (CTL(arg0)->unk88 & Z_TRIG) && (arg0->unk84.uh == 0x157) && (CTL(arg0)->unk19E == 0)) {
                         CTL(arg0)->pending |= 2;
                         D_800CC2B0 = 1;
                         blend = 0.0f;
@@ -2467,7 +2465,7 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                 } else {
                     arg0->disable_jump = 0x14;
                     func_15063A38(arg0, heldButtons, Z_TRIG | R_TRIG);
-                    if ((CTL(arg0)->unk19E == 0) && ((D_800CC290 & Z_TRIG) || (CTL(arg0)->unk88 & 0x2000))) {
+                    if ((CTL(arg0)->unk19E == 0) && ((D_800CC290 & Z_TRIG) || (CTL(arg0)->unk88 & Z_TRIG))) {
                         if (CTL(arg0)->unk198 == 2) {
                             CTL(arg0)->pending |= 4;
                             D_800CC2B0 = 1;
@@ -2486,7 +2484,7 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                         }
                     } else {
                         held = D_800CC290 & R_TRIG;
-                        if ((((held != 0) && !(D_800CC290 & Z_TRIG) && (CTL(arg0)->unk88 & 0x2000)) ||
+                        if ((((held != 0) && !(D_800CC290 & Z_TRIG) && (CTL(arg0)->unk88 & Z_TRIG)) ||
                                     ((held == 0) && (D_800CC28C & Z_TRIG))) &&
                                    (arg0->unk84.uh != 0x225) && (arg0->unk84.uh != 0x222) && (arg0->unk84.uh != 0x236) &&
                                    (arg0->unk84.uh != 0x227) && (arg0->unk84.uh != 0x237) && (CTL(arg0)->unk19E == 0)) {
@@ -2546,7 +2544,7 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                 CTL(arg0)->unk11A = 0;
             } else {
                 arg0->disable_jump = 0x14;
-                if ((PAD->buttons & Z_TRIG) || (CTL(arg0)->unk88 & 0x2000)) {
+                if ((PAD->buttons & Z_TRIG) || (CTL(arg0)->unk88 & Z_TRIG)) {
                     if (CTL(arg0)->unk198 == 2) {
                         CTL(arg0)->pending |= 8;
                         D_800CC2B0 = 1;
@@ -2562,7 +2560,7 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                     if ((s32)arg0->unk28 != 0) {
                         CTL(arg0)->unk11A = 0;
                     }
-                } else if (!(PAD->buttons & Z_TRIG) && (CTL(arg0)->unk88 & 0x2000) && (arg0->unk84.uh != 0xC4) && (CTL(arg0)->unk19E == 0)) {
+                } else if (!(PAD->buttons & Z_TRIG) && (CTL(arg0)->unk88 & Z_TRIG) && (arg0->unk84.uh != 0xC4) && (CTL(arg0)->unk19E == 0)) {
                     anim = 0xC7;
                     blend = 0.0f;
                     arg0->disable_run = 0xFF;
@@ -2597,7 +2595,7 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                 arg0->disable_jump = 0xA;
                 arg0->disable_run = 0;
                 arg0->unk83 = 0xA;
-                if ((CTL(arg0)->unk19E == 0) && ((PAD->buttons & Z_TRIG) || (CTL(arg0)->unk88 & 0x2000))) {
+                if ((CTL(arg0)->unk19E == 0) && ((PAD->buttons & Z_TRIG) || (CTL(arg0)->unk88 & Z_TRIG))) {
                     CTL(arg0)->pending |= 1;
                     D_800CC2B0 = 1;
                 }
@@ -2610,7 +2608,7 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                             anim = 0x26E;
                             CTL(arg0)->unk199 = 0;
                         }
-                    } else if (!(PAD->buttons & Z_TRIG) && (CTL(arg0)->unk88 & 0x2000) && (arg0->unk84.uh == 0x165) && (CTL(arg0)->unk19E == 0)) {
+                    } else if (!(PAD->buttons & Z_TRIG) && (CTL(arg0)->unk88 & Z_TRIG) && (arg0->unk84.uh == 0x165) && (CTL(arg0)->unk19E == 0)) {
                         CTL(arg0)->pending |= 2;
                         D_800CC2B0 = 1;
                         blend = 0.0f;
@@ -2654,7 +2652,7 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
     case 0x17:
         anim = 999;
         if ((pressedButtons & B_BUTTON) && (arg3 <= 0.0f)) {
-            s32 pad3;
+            s32 pad;  // matching: unused stack slot
             s32 ok;
             f32 angle;
 
