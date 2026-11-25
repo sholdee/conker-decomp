@@ -387,15 +387,15 @@ typedef struct {
     s32 idx;
 } TexEntry15110CFC;
 
-extern s32 func_150A6210(s32, f32, f32, f32, f32, f32, f32);
+s32 func_150A6210(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 width, f32 height, f32 arg6);
 extern s32 func_1510D0EC(s32, s32, s32, s32);
 extern u8 D_1673[];
 extern u8 D_800DBEAB;
 extern u8 D_800DBEAC;
 extern s32 *D_800DBE80;
 
-Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 texBase, s32 arg3, s32 arg4, u32 width, u32 height,
-                   u32 tileW, u32 tileH, f32 x, f32 y, f32 z, u8 axis, f32 (*arg13)[4], s32 limit,
+Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 texBase, Vtx *quad, s32 arg4, u32 width, u32 height,
+                   u32 tileW, u32 tileH, f32 x, f32 y, f32 z, u8 axis, f32 mtx[4][4], s32 limit,
                    s32 *vtxCountPtr, s32 *vtxIdxPtr, TexEntry15110CFC *entries, s32 *lastIdxPtr,
                    u8 *sizes, u8 *shifts, s16 *palOffs, u8 *tlutCounts, u8 *tiles, s32 mode) {
     Vtx *vtxBuf;
@@ -463,7 +463,7 @@ Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 texBase, s32 arg3, s32 arg4, u
         if (limit > 320) {
             limit = 320;
         }
-        limit = (s32)(limit * nRows + 319) / 320;
+        limit = (limit * nRows + 319) / 320;
     } else {
         limit = 0x7FFF;
     }
@@ -511,8 +511,7 @@ Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 texBase, s32 arg3, s32 arg4, u
                     y3 = curV + h8;
                     break;
             }
-            if (func_150A6210((s32)arg13, (x0 + x1) >> 1, (y0 + y1) >> 1, (z0 + z1) >> 1, (s32)w8,
-                              (s32)h8, 20000.0f) &&
+            if (func_150A6210(mtx, (x0 + x1) >> 1, (y0 + y1) >> 1, (z0 + z1) >> 1, w8, h8, 20000.0f) &&
                 (D_800DBEAB || rowIdx < limit)) {
                 tex = colIdx * nRows + texBase + rowIdx;
                 if (D_800DBEAC && D_800B0DF0->unk9 == 1 && mode == 2 && rowIdx >= 4 && rowIdx < 7 &&
@@ -523,7 +522,7 @@ Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 texBase, s32 arg3, s32 arg4, u
                 if (!D_800DBEAB || rowIdx < limit) {
                     tcT = (u16)(s32)((tileH + 0.5f) * 32.0f);
                     tcS = (u16)(s32)((tileW + 0.5f) * 32.0f);
-                    arg3 = (s32)vtxBuf + vtxIdx * 16 + vtxCount * 16;
+                    quad = (Vtx *)((u8 *)vtxBuf + vtxIdx * 16 + vtxCount * 16);
                     if (axis == 'y' && (col == 0 || col == width - tileW)) {
                         x0 -= 3;
                         x3 -= 3;
@@ -534,33 +533,34 @@ Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 texBase, s32 arg3, s32 arg4, u
                         z2 -= 3;
                         z3 += 3;
                     }
-                    ((Vtx *)arg3)[0].v.ob[0] = x0;
-                    ((Vtx *)arg3)[0].v.ob[1] = y0;
-                    ((Vtx *)arg3)[0].v.ob[2] = z0;
-                    ((Vtx *)arg3)[0].v.tc[1] = 16;
-                    ((Vtx *)arg3)[0].v.tc[0] = 16;
-                    ((Vtx *)arg3)[0].v.flag = 0;
-                    ((Vtx *)arg3)[1].v.ob[0] = x2;
-                    ((Vtx *)arg3)[1].v.ob[1] = y2;
-                    ((Vtx *)arg3)[1].v.ob[2] = z2;
-                    ((Vtx *)arg3)[1].v.tc[1] = 16;
-                    ((Vtx *)arg3)[1].v.tc[0] = tcS;
-                    ((Vtx *)arg3)[1].v.flag = 0;
-                    ((Vtx *)arg3)[2].v.ob[0] = x1;
-                    ((Vtx *)arg3)[2].v.ob[1] = y1;
-                    ((Vtx *)arg3)[2].v.ob[2] = z1;
-                    ((Vtx *)arg3)[2].v.tc[1] = tcT;
-                    ((Vtx *)arg3)[2].v.tc[0] = tcS;
-                    ((Vtx *)arg3)[2].v.flag = 0;
-                    ((Vtx *)arg3)[3].v.ob[0] = x3;
-                    ((Vtx *)arg3)[3].v.ob[1] = y3;
-                    ((Vtx *)arg3)[3].v.ob[2] = z3;
-                    ((Vtx *)arg3)[3].v.tc[1] = tcT;
-                    ((Vtx *)arg3)[3].v.tc[0] = 16;
-                    ((Vtx *)arg3)[3].v.flag = 0;
+                    quad[0].v.ob[0] = x0;
+                    quad[0].v.ob[1] = y0;
+                    quad[0].v.ob[2] = z0;
+                    quad[0].v.tc[1] = 16;
+                    quad[0].v.tc[0] = 16;
+                    quad[0].v.flag = 0;
+                    quad[1].v.ob[0] = x2;
+                    quad[1].v.ob[1] = y2;
+                    quad[1].v.ob[2] = z2;
+                    quad[1].v.tc[1] = 16;
+                    quad[1].v.tc[0] = tcS;
+                    quad[1].v.flag = 0;
+                    quad[2].v.ob[0] = x1;
+                    quad[2].v.ob[1] = y1;
+                    quad[2].v.ob[2] = z1;
+                    quad[2].v.tc[1] = tcT;
+                    quad[2].v.tc[0] = tcS;
+                    quad[2].v.flag = 0;
+                    quad[3].v.ob[0] = x3;
+                    quad[3].v.ob[1] = y3;
+                    quad[3].v.ob[2] = z3;
+                    quad[3].v.tc[1] = tcT;
+                    quad[3].v.tc[0] = 16;
+                    quad[3].v.flag = 0;
                     nCols = width / tileW;
                     entries[vtxCount >> 2].tex = texAddr;
                     entries[vtxCount >> 2].idx =
+                        // matching: index + base (not D_800DBE80[...]) sets IDO's addu operand order
                         *((colIdx * nRows + rowIdx + mode * nCols * nRows) + (u8 *)D_800DBE80);
                     vtxCount += 4;
                     if (vtxCount == 16) {
