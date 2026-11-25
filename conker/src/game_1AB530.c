@@ -285,13 +285,25 @@ Gfx *func_1517EA4C(Gfx *gfx) {
     return gfx;
 }
 
+/* Vp_t with scalar fields (indexing Vp_t.vscale[2] changes IDO's FP register order). */
+typedef struct {
+    /* 0x00 */ s16 scaleX;
+    /* 0x02 */ s16 scaleY;
+    /* 0x04 */ s16 scaleZ;
+    /* 0x06 */ s16 scaleW;
+    /* 0x08 */ s16 transX;
+    /* 0x0A */ s16 transY;
+    /* 0x0C */ s16 transZ;
+    /* 0x0E */ s16 transW;
+} FlareViewport;
+
 /* Per-player camera, size 0x180 (D_800BE628 is declared s32 in variables.h). */
 typedef struct {
     /* 0x00 */ u8 pad0[0xC];
     /* 0x0C */ f32 centerX;
     /* 0x10 */ f32 centerY;
     /* 0x14 */ u8 pad14[0x2C];
-    /* 0x40 */ Vp viewport[2]; /* indexed by D_800BE9C0 */
+    /* 0x40 */ FlareViewport viewport[2]; /* indexed by D_800BE9C0 */
     /* 0x60 */ u8 pad60[0x120];
 } FlareCamera;
 
@@ -352,6 +364,7 @@ typedef struct {
 extern ZbufFormat D_80089630[8];
 s32 func_1509563C(f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ, f32 *outW, f32 maxDist);
 
+// matching: the f64 member gives the clip z/w pair the 8-byte-aligned stack slot IDO used
 typedef union {
     struct {
         f32 w;
@@ -365,37 +378,35 @@ typedef union {
  * Returns 0 when the flare is off screen or too far away, and 1 otherwise; a FLARE_DIRECTED flare that the
  * viewer is outside of returns 1 early without updating its depth.
  */
-typedef struct Struct1517EC1CView {
-    u8 pad0[0x44];
-    s16 unk44;
-    u8 pad46[0x6];
-    s16 unk4C;
-} Struct1517EC1CView;
-s32 func_1517EC1C(LensFlare *arg0, s32 *arg1) {
-    f32 temp_f0;
-    f32 temp_f2;
-    f32 temp_f12;
-    f32 temp_f14;
-    u16 temp_a3;
-    s32 idx;
-    ClipZW sp28;
+s32 func_1517EC1C(LensFlare *flare, s32 *outZbufDepth) {
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    u16 sample;
+    s32 exponent;
+    ClipZW clip;
 
-    if (func_1509563C(arg0->pos[0], arg0->pos[1], arg0->pos[2], &arg0->screenX, &arg0->screenY, &sp28.f.z, &sp28.f.w, 4000.0f) == 1) {
-        if (arg0->flags & 4) {
-            temp_f2 = arg0->pos[0] - D_800DBFF0->unk2F8;
-            temp_f12 = arg0->pos[1] - D_800DBFF0->unk2FC;
-            temp_f14 = arg0->pos[2] - D_800DBFF0->unk300;
+    if (func_1509563C(flare->pos[0], flare->pos[1], flare->pos[2], &flare->screenX, &flare->screenY, &clip.f.z,
+                      &clip.f.w, 4000.0f) == 1) {
+        if (flare->flags & FLARE_DIRECTED) {
+            dx = flare->pos[0] - D_800DBFF0->unk2F8;
+            dy = flare->pos[1] - D_800DBFF0->unk2FC;
+            dz = flare->pos[2] - D_800DBFF0->unk300;
 
-            temp_f2 = ((temp_f2 * arg0->dir[0]) + (temp_f12 * arg0->dir[1]) + (temp_f14 * arg0->dir[2])) / sqrtf((temp_f2 * temp_f2) + (temp_f12 * temp_f12) + (temp_f14 * temp_f14));
-            if (temp_f2 < arg0->minFacing) {
+            // matching: the facing cosine reuses dx's register
+            dx = (dx * flare->dir[0] + dy * flare->dir[1] + dz * flare->dir[2]) /
+                 sqrtf(dx * dx + dy * dy + dz * dz);
+            if (dx < flare->minFacing) {
                 return 1;
             }
         }
 
-        temp_a3 = arg0->zbufSample;
-        idx = temp_a3 >> 13;
-        *arg1 = ((((temp_a3 >> 2) & 0x7FF) << D_80089630[idx].shift) + D_80089630[idx].base) >> 3;
-        arg0->depth = (u32)((((f32)((Struct1517EC1CView *)((u8 *)D_800BE628 + (D_800BE9C0 << 4)))->unk4C) + ((sp28.f.z / sp28.f.w) * (f32)((Struct1517EC1CView *)((u8 *)D_800BE628 + (D_800BE9C0 << 4)))->unk44)) * 32.0f);
+        sample = flare->zbufSample;
+        exponent = sample >> 13;
+        *outZbufDepth = ((((sample >> 2) & 0x7FF) << D_80089630[exponent].shift) + D_80089630[exponent].base) >> 3;
+        // matching: `viewport + i`, not `viewport[i]` (that changes IDO's FP register order)
+        flare->depth = (u32)(((f32)(CAMERAS->viewport + D_800BE9C0)->transZ +
+                              (clip.f.z / clip.f.w) * (f32)(CAMERAS->viewport + D_800BE9C0)->scaleZ) * 32.0f);
         return 1;
     }
     return 0;
