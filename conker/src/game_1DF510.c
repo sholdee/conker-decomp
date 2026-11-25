@@ -2,153 +2,146 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct GameStruct151B2100Sub {
-    struct127 *unk0;
-    u8 unk4;
-    u8 pad5[3];
-    struct127 *unk8;
-    u8 unkC;
-    u8 unkD;
-    u8 padE[2];
-    s32 unk10;
-    s32 unk14;
-    s32 unk18;
-    s32 unk1C;
-} GameStruct151B2100Sub;
+typedef struct {
+    f32 x, y, z;
+} Vec3f_1DF510;
 
-typedef struct GameStruct151B2100 {
-    u8 pad0[0xE];
-    s16 unkE;
-    u8 pad10[0x18];
-    GameStruct151B2100Sub unk28;
-} GameStruct151B2100;
+/* Template copied into a new rope (HoltenRopeEffect 0x10-0x47, see game_1E0560.c). */
+typedef struct {
+    /* 0x00 */ u8 flags;
+    /* 0x01 */ u8 pad1;
+    /* 0x02 */ s16 timer;
+    /* 0x04 */ Vec3f_1DF510 start;
+    /* 0x10 */ Vec3f_1DF510 end;
+    /* 0x1C */ s8 startCallback;
+    /* 0x1D */ s8 endCallback;
+    /* 0x1E */ u8 drawStyle;
+    /* 0x1F */ u8 pad1F;
+    /* 0x20 */ f32 halfWidth;
+    /* 0x24 */ s8 updateCallback;
+    /* 0x25 */ u8 pad25[3];
+    /* 0x28 */ f32 length;
+    /* 0x2C */ f32 accelScale;
+    /* 0x30 */ f32 lagScale;
+    /* 0x34 */ u8 type;
+} HoltenRopeDesc;
+
+/* A point fixed relative to one of an object's bones. */
+typedef struct {
+    /* 0x00 */ struct127 *target;
+    /* 0x04 */ u8 targetId; // target->unique_id when attached
+    /* 0x05 */ u8 bone;     // index into target->unk1D4's matrices
+    /* 0x08 */ Vec3f_1DF510 offset;
+} RopeAnchor;
+
+typedef struct TiedRope TiedRope;
+typedef struct RopeLine RopeLine;
+
+/* Data at 0x28 of the effect that ties obj0 to obj1 with ropes. */
+typedef struct {
+    /* 0x00 */ struct127 *obj0;
+    /* 0x04 */ u8 obj0Id;   // obj0->unique_id when attached
+    /* 0x08 */ struct127 *obj1;
+    /* 0x0C */ u8 obj1Id;
+    /* 0x0D */ u8 state;    // last func_151B22F4 result, 0 before the first update
+    /* 0x10 */ TiedRope *ropes[3];
+    /* 0x1C */ RopeLine *line;
+} RopeTieData;
 
 typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-} GameStruct151B2690Vec;
+    /* 0x00 */ struct260 base;
+    /* 0x24 */ u8 pad24[4];
+    /* 0x28 */ RopeTieData tie;
+} RopeTie;
 
+/* Data at 0x150 of each rope a RopeTie owns. */
 typedef struct {
-    struct127 *unk0;
-    u8 unk4;
-    u8 unk5;
-    u8 pad6[2];
-    GameStruct151B2690Vec unk8;
-    struct127 *unk14;
-    u8 unk18;
-    u8 unk19;
-    u8 pad1A[2];
-    GameStruct151B2690Vec unk1C;
-    s32 *unk28;
-    u8 unk2C;
-} GameStruct151B2690Sub30;
+    /* 0x00 */ RopeAnchor start;
+    /* 0x14 */ RopeAnchor end;
+    /* 0x28 */ RopeTie *owner;
+    /* 0x2C */ u8 slot; // index in owner->tie.ropes
+} RopeTieLink;
 
+struct TiedRope {
+    /* 0x000 */ u8 pad0[0x150]; // HoltenRopeEffect
+    /* 0x150 */ RopeTieLink link;
+};
+
+/* Data at 0x28 of the straight line effect a RopeTie owns. */
 typedef struct {
-    u8 unk0;
-    u8 pad1;
-    s16 unk2;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    u8 unk1C;
-    u8 unk1D;
-    u8 unk1E;
-    u8 pad1F;
-    f32 unk20;
-    u8 unk24;
-    u8 pad25[3];
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    u8 unk34;
-} GameStruct151B2690Sub38;
+    /* 0x00 */ RopeAnchor anchor; // anchor.offset is the start point
+    /* 0x14 */ Vec3f_1DF510 endOffset;
+    /* 0x20 */ f32 halfWidth;
+    /* 0x24 */ RopeTie *owner;
+} RopeLineData;
 
-typedef struct {
-    struct127 *unk0;
-    u8 unk4;
-    u8 unk5;
-    u8 pad6[2];
-    GameStruct151B2690Vec unk8;
-    GameStruct151B2690Vec unk14;
-    f32 unk20;
-    s32 *unk24;
-} GameStruct151B2690Sub28;
+struct RopeLine {
+    /* 0x00 */ struct260 base;
+    /* 0x24 */ u8 pad24[4];
+    /* 0x28 */ RopeLineData line;
+};
 
-extern void *func_151B30B0();
-extern GameStruct151B2690Vec D_800AA320;
-extern GameStruct151B2690Vec D_800AA32C;
-extern GameStruct151B2690Vec D_800AA368;
-extern GameStruct151B2690Vec D_800AA374;
+TiedRope *func_151B30B0(HoltenRopeDesc *desc, f32 texScale, s32 extraSize, u8 arg3, s32 arg4);
+extern Vec3f_1DF510 D_800AA320;
+extern Vec3f_1DF510 D_800AA32C;
+extern Vec3f_1DF510 D_800AA368;
+extern Vec3f_1DF510 D_800AA374;
 extern f32 D_800AA388;
 extern f32 D_800AA38C;
 
-s32 func_151B22F4(s32 *arg0);
+s32 func_151B22F4(RopeTie *self);
 void func_151B222C();
-void func_151B2348(s32 *arg0);
-void func_151B2690(s32 *arg0);
-void func_151B47D8(s32 arg0, s32 arg1, s32 arg2, u8 arg3);
+void func_151B2348(RopeTie *self);
+void func_151B2690(RopeTie *self);
+void func_151B47D8(TiedRope *rope, RopeTieLink *link, s32 arg2, u8 event);
 
+/* Spawns a RopeTie between `obj` and the object from func_15083E90(1). */
+void func_151B2060(struct127 *obj) {
+    RopeTie *effect;
+    RopeTieData tie;
 
-void func_151B2060(void *arg0) {
-    struct260 *temp_v0;
-    struct {
-        void *unk0;
-        s8 unk4;
-        struct127 *unk8;
-        s8 unkC;
-        s8 unkD;
-        u8 padE[2];
-        s32 unk10;
-        s32 unk14;
-        s32 unk18;
-        s32 unk1C;
-    } tmp;
+    if (obj != NULL) {
+        tie.obj0 = obj;
+        tie.obj0Id = obj->unique_id;
+        tie.obj1 = func_15083E90(1);
+        tie.obj1Id = 1;
+        tie.state = 0;
+        bzero(tie.ropes, sizeof(tie.ropes));
+        tie.line = NULL;
 
-    if (arg0 != NULL) {
-        tmp.unk0 = arg0;
-        tmp.unk4 = *((u8 *)arg0 + 0x3B);
-        tmp.unk8 = func_15083E90(1);
-        tmp.unkC = 1;
-        tmp.unkD = 0;
-        bzero(&tmp.unk10, 0xC);
-        tmp.unk1C = 0;
-
-        temp_v0 = func_151491F4(0x12C, -1, 0x16, 0, 0x12, 0x20, 0xFF, 1);
-        if (temp_v0 != NULL) {
-            memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x20);
+        effect = (RopeTie *)func_151491F4(300, -1, 0x16, 0, 0x12, 0x20, 0xFF, 1);
+        if (effect != NULL) {
+            memcpy(&effect->tie, &tie, sizeof(tie));
         }
     }
 }
 
-void func_151B2100(GameStruct151B2100 *arg0) {
-    GameStruct151B2100Sub *sub;
+/* Per-frame update: dies when either object is gone, and respawns the ropes when the state changes. */
+void func_151B2100(RopeTie *self) {
+    RopeTieData *tie;
     struct127 *obj0;
     struct127 *obj1;
-    u8 old;
+    u8 oldState;
 
-    obj0 = arg0->unk28.unk0;
-    obj1 = arg0->unk28.unk8;
-    sub = &arg0->unk28;
-    if ((obj0->interaction_state == 0) || (obj0->id == 0xFF) || (obj0->unique_id != sub->unk4) ||
-        (obj1->interaction_state == 0) || (obj1->id == 0xFF) || (obj1->unique_id != sub->unkC)) {
-        arg0->unkE = -1;
+    obj0 = self->tie.obj0;
+    obj1 = self->tie.obj1;
+    tie = &self->tie;
+    if ((obj0->interaction_state == 0) || (obj0->id == 0xFF) || (obj0->unique_id != tie->obj0Id) ||
+        (obj1->interaction_state == 0) || (obj1->id == 0xFF) || (obj1->unique_id != tie->obj1Id)) {
+        self->base.unkE = -1;
         return;
     }
 
-    old = sub->unkD;
-    sub->unkD = func_151B22F4((s32 *)arg0);
-    if (sub->unkD != old) {
-        func_151B222C(arg0);
-        if (sub->unkD == 1) {
-            func_151B2348((s32 *)arg0);
+    oldState = tie->state;
+    tie->state = func_151B22F4(self);
+    if (tie->state != oldState) {
+        func_151B222C(self);
+        if (tie->state == 1) {
+            func_151B2348(self);
         }
 
-        if ((sub->unkD == 2) || (sub->unkD == 0)) {
-            func_151B2690((s32 *)arg0);
+        if ((tie->state == 2) || (tie->state == 0)) {
+            func_151B2690(self);
         }
     }
 }
@@ -159,230 +152,218 @@ void func_151B220C() {
     func_151B222C();
 }
 
-void func_151B222C(arg0)
-struct260 *arg0;
+/* Kills the ropes and the line this RopeTie owns. */
+void func_151B222C(self)
+RopeTie *self;
 {
     s32 i;
-    s32 v;
-    s32 *p = (s32 *)((u8 *)arg0 + 0x28);
+    void *child;
+    RopeTieData *tie = &self->tie;
 
     for (i = 0; i < 3; i = (u8)(i + 1)) {
-        v = p[i + 4];
-        if (v != 0) {
-            func_1516972C((struct102 *)v);
+        child = tie->ropes[i];
+        if (child != NULL) {
+            func_1516972C(child);
         }
     }
-    v = p[7];
-    if (v != 0) {
-        func_1516972C((struct102 *)v);
+    child = tie->line;
+    if (child != NULL) {
+        func_1516972C(child);
     }
 }
 
-void func_151B229C(struct260 *arg0) {
-    func_151B220C(arg0);
-    func_1514933C(arg0);
+void func_151B229C(RopeTie *self) {
+    func_151B220C(self);
+    func_1514933C(&self->base);
 }
 
-void func_151B22C8(struct260 *arg0) {
-    func_151B220C(arg0);
-    func_15149368(arg0);
+void func_151B22C8(RopeTie *self) {
+    func_151B220C(self);
+    func_15149368(&self->base);
 }
 
-s32 func_151B22F4(s32 *arg0) {
-    s32 temp = arg0[0x28 / 4];
-    if ((((((s32)temp - (s32)D_800CC2D0) / 0x32C) + 1) == ((struct127 *)arg0[0x30 / 4])->unk65)) {
-        if (((struct127 *)arg0[0x30 / 4])->unk5C == 1) {
+/* Returns 1 when obj1 belongs to obj0's slot (unk65) and obj1->unk5C is 1, else 2. */
+s32 func_151B22F4(RopeTie *self) {
+    struct127 *obj0 = self->tie.obj0;
+
+    if (self->tie.obj1->unk65 == (obj0 - D_800CC2D0) + 1) {
+        if (self->tie.obj1->unk5C == 1) {
             return 1;
         }
     }
     return 2;
 }
 
-extern GameStruct151B2690Vec D_800AA338;
-extern GameStruct151B2690Vec D_800AA344;
-extern GameStruct151B2690Vec D_800AA350;
-extern GameStruct151B2690Vec D_800AA35C;
+extern Vec3f_1DF510 D_800AA338;
+extern Vec3f_1DF510 D_800AA344;
+extern Vec3f_1DF510 D_800AA350;
+extern Vec3f_1DF510 D_800AA35C;
 extern f32 D_800AA380;
 extern f32 D_800AA384;
 
-void func_151B2348(s32 *arg0) {
+/* State 1: hangs three ropes between bones of obj0 and obj1. */
+void func_151B2348(RopeTie *self) {
     struct127 *obj1;
     struct127 *obj0;
-    GameStruct151B2100Sub *sub;
-    GameStruct151B2690Sub38 b;
-    GameStruct151B2690Sub30 a;
+    RopeTieData *tie;
+    HoltenRopeDesc desc;
+    RopeTieLink link;
 
-    obj1 = ((GameStruct151B2100 *)arg0)->unk28.unk8;
-    obj0 = ((GameStruct151B2100 *)arg0)->unk28.unk0;
-    a.unk28 = arg0;
-    a.unk2C = 2;
-    a.unk0 = obj1;
-    a.unk4 = obj1->unique_id;
-    a.unk5 = 5;
-    a.unk8 = D_800AA350;
-    a.unk14 = obj1;
-    a.unk18 = obj1->unique_id;
-    a.unk19 = 10;
-    a.unk1C = D_800AA35C;
+    obj1 = self->tie.obj1;
+    obj0 = self->tie.obj0;
+    link.owner = self;
+    link.slot = 2;
+    link.start.target = obj1;
+    link.start.targetId = obj1->unique_id;
+    link.start.bone = 5;
+    link.start.offset = D_800AA350;
+    link.end.target = obj1;
+    link.end.targetId = obj1->unique_id;
+    link.end.bone = 10;
+    link.end.offset = D_800AA35C;
 
-    b.unk34 = 0;
-    b.unk0 = 0;
-    b.unk2 = 1000;
-    b.unk4 = obj1->x_position;
-    b.unk8 = obj1->y_position;
-    b.unkC = obj1->z_position;
-    b.unk10 = obj1->x_position;
-    b.unk14 = obj1->y_position;
-    b.unk18 = obj1->z_position;
-    b.unk1C = 1;
-    b.unk1D = 1;
-    b.unk1E = 0;
-    b.unk24 = 3;
-    b.unk20 = 5.0f;
-    b.unk28 = 80.0f;
-    b.unk2C = D_800AA380;
-    b.unk30 = D_800AA384;
-    sub = &((GameStruct151B2100 *)arg0)->unk28;
-    sub->unk18 = (s32)func_151B30B0(&b, 0x3AC49BA6, 0x30, 0xFF, 0);
-    if (sub->unk18 != 0) {
-        memcpy((u8 *)sub->unk18 + 0x150, &a, 0x30);
+    desc.type = 0;
+    desc.flags = 0;
+    desc.timer = 1000;
+    desc.start.x = obj1->x_position;
+    desc.start.y = obj1->y_position;
+    desc.start.z = obj1->z_position;
+    desc.end.x = obj1->x_position;
+    desc.end.y = obj1->y_position;
+    desc.end.z = obj1->z_position;
+    desc.startCallback = 1;
+    desc.endCallback = 1;
+    desc.drawStyle = 0;
+    desc.updateCallback = 3;
+    desc.halfWidth = 5.0f;
+    desc.length = 80.0f;
+    desc.accelScale = D_800AA380;
+    desc.lagScale = D_800AA384;
+    tie = &self->tie;
+    tie->ropes[2] = func_151B30B0(&desc, 0.0015f, sizeof(RopeTieLink), 0xFF, 0);
+    if (tie->ropes[2] != NULL) {
+        memcpy(&tie->ropes[2]->link, &link, sizeof(link));
     }
 
-    a.unk2C = 1;
-    a.unk0 = obj0;
-    a.unk4 = obj0->unique_id;
-    a.unk5 = 5;
-    a.unk8 = D_800AA320;
-    a.unk14 = obj1;
-    a.unk18 = obj1->unique_id;
-    a.unk19 = 5;
-    a.unk1C = D_800AA338;
-    b.unk4 = obj0->x_position;
-    b.unk8 = obj0->y_position;
-    b.unkC = obj0->z_position;
-    b.unk10 = obj1->x_position;
-    b.unk14 = obj1->y_position;
-    b.unk18 = obj1->z_position;
-    b.unk1E = 0;
-    b.unk28 = 170.0f;
-    sub->unk14 = (s32)func_151B30B0(&b, 0x3AC49BA6, 0x30, 0xFF, 0);
-    if (sub->unk14 != 0) {
-        memcpy((u8 *)sub->unk14 + 0x150, &a, 0x30);
+    link.slot = 1;
+    link.start.target = obj0;
+    link.start.targetId = obj0->unique_id;
+    link.start.bone = 5;
+    link.start.offset = D_800AA320;
+    link.end.target = obj1;
+    link.end.targetId = obj1->unique_id;
+    link.end.bone = 5;
+    link.end.offset = D_800AA338;
+    desc.start.x = obj0->x_position;
+    desc.start.y = obj0->y_position;
+    desc.start.z = obj0->z_position;
+    desc.end.x = obj1->x_position;
+    desc.end.y = obj1->y_position;
+    desc.end.z = obj1->z_position;
+    desc.drawStyle = 0;
+    desc.length = 170.0f;
+    tie->ropes[1] = func_151B30B0(&desc, 0.0015f, sizeof(RopeTieLink), 0xFF, 0);
+    if (tie->ropes[1] != NULL) {
+        memcpy(&tie->ropes[1]->link, &link, sizeof(link));
     }
 
-    a.unk2C = 0;
-    a.unk0 = obj0;
-    a.unk4 = obj0->unique_id;
-    a.unk5 = 5;
-    a.unk8 = D_800AA32C;
-    a.unk14 = obj1;
-    a.unk18 = obj1->unique_id;
-    a.unk19 = 10;
-    a.unk1C = D_800AA344;
-    b.unk4 = obj0->x_position;
-    b.unk8 = obj0->y_position;
-    b.unkC = obj0->z_position;
-    b.unk10 = obj1->x_position;
-    b.unk14 = obj1->y_position;
-    b.unk18 = obj1->z_position;
-    b.unk1E = 0;
-    sub->unk10 = (s32)func_151B30B0(&b, 0x3AC49BA6, 0x30, 0xFF, 0);
-    if (sub->unk10 != 0) {
-        memcpy((u8 *)sub->unk10 + 0x150, &a, 0x30);
+    link.slot = 0;
+    link.start.target = obj0;
+    link.start.targetId = obj0->unique_id;
+    link.start.bone = 5;
+    link.start.offset = D_800AA32C;
+    link.end.target = obj1;
+    link.end.targetId = obj1->unique_id;
+    link.end.bone = 10;
+    link.end.offset = D_800AA344;
+    desc.start.x = obj0->x_position;
+    desc.start.y = obj0->y_position;
+    desc.start.z = obj0->z_position;
+    desc.end.x = obj1->x_position;
+    desc.end.y = obj1->y_position;
+    desc.end.z = obj1->z_position;
+    desc.drawStyle = 0;
+    tie->ropes[0] = func_151B30B0(&desc, 0.0015f, sizeof(RopeTieLink), 0xFF, 0);
+    if (tie->ropes[0] != NULL) {
+        memcpy(&tie->ropes[0]->link, &link, sizeof(link));
     }
 }
 
-void func_151B2690(s32 *arg0) {
-    struct260 *ret;
+/* States 0 and 2: hangs two ropes and a line from obj0's bones. */
+void func_151B2690(RopeTie *self) {
     struct127 *obj;
-    struct {
-        u8 pad0[8];
-        GameStruct151B2690Sub28 sp40;
-        GameStruct151B2690Sub30 sp68;
-        GameStruct151B2690Sub38 sp98;
-    } stack;
+    RopeTieData *tie;
+    HoltenRopeDesc desc;
+    RopeTieLink link;
+    RopeLineData lineData;
 
-    obj = ((GameStruct151B2100 *)arg0)->unk28.unk0;
-    stack.sp68.unk28 = arg0;
-    stack.sp68.unk2C = 1;
-    stack.sp68.unk0 = obj;
-    stack.sp68.unk4 = obj->unique_id;
-    stack.sp68.unk5 = 5;
-    stack.sp68.unk8 = D_800AA320;
-    stack.sp68.unk14 = obj;
-    stack.sp68.unk18 = obj->unique_id;
-    stack.sp68.unk19 = 2;
-    stack.sp68.unk1C = D_800AA368;
+    obj = self->tie.obj0;
+    link.owner = self;
+    link.slot = 1;
+    link.start.target = obj;
+    link.start.targetId = obj->unique_id;
+    link.start.bone = 5;
+    link.start.offset = D_800AA320;
+    link.end.target = obj;
+    link.end.targetId = obj->unique_id;
+    link.end.bone = 2;
+    link.end.offset = D_800AA368;
 
-    stack.sp98.unk34 = 0;
-    stack.sp98.unk0 = 0;
-    stack.sp98.unk2 = 0x64;
-    stack.sp98.unk4 = obj->x_position;
-    stack.sp98.unk8 = obj->y_position;
-    stack.sp98.unkC = obj->z_position;
-    stack.sp98.unk10 = obj->x_position;
-    stack.sp98.unk14 = obj->y_position;
-    stack.sp98.unk18 = obj->z_position;
-    stack.sp98.unk1C = 1;
-    stack.sp98.unk1D = 1;
-    stack.sp98.unk1E = 1;
-    stack.sp98.unk24 = 3;
-    stack.sp98.unk20 = 5.0f;
-    stack.sp98.unk28 = 180.0f;
-    stack.sp98.unk2C = D_800AA388;
-    stack.sp98.unk30 = D_800AA38C;
+    desc.type = 0;
+    desc.flags = 0;
+    desc.timer = 100;
+    desc.start.x = obj->x_position;
+    desc.start.y = obj->y_position;
+    desc.start.z = obj->z_position;
+    desc.end.x = obj->x_position;
+    desc.end.y = obj->y_position;
+    desc.end.z = obj->z_position;
+    desc.startCallback = 1;
+    desc.endCallback = 1;
+    desc.drawStyle = 1;
+    desc.updateCallback = 3;
+    desc.halfWidth = 5.0f;
+    desc.length = 180.0f;
+    desc.accelScale = D_800AA388;
+    desc.lagScale = D_800AA38C;
 
-    *(s32 *)((u8 *)&stack - 0x28) = 0; *(s32 **)((u8 *)&stack + 0xA0) = arg0; ret = func_151B30B0(&stack.sp98, 0x3AC49BA6, 0x30, 0xFF);
-    arg0 = *(s32 **)((u8 *)&stack + 0xA0);
-    arg0 = (s32 *)((u8 *)arg0 + 0x28);
-    ((GameStruct151B2100Sub *)arg0)->unk14 = (s32)ret;
-    if (ret != NULL) {
-        memcpy((u8 *)ret + 0x150, &stack.sp68, 0x30);
+    tie = &self->tie;
+    tie->ropes[1] = func_151B30B0(&desc, 0.0015f, sizeof(RopeTieLink), 0xFF, 0);
+    if (tie->ropes[1] != NULL) {
+        memcpy(&tie->ropes[1]->link, &link, sizeof(link));
     }
 
-    stack.sp68.unk2C = 0;
-    stack.sp68.unk8 = D_800AA32C;
-    stack.sp68.unk1C = D_800AA374;
-    stack.sp98.unk1E = 1;
-    *(s32 *)((u8 *)&stack - 0x28) = 0;
-    ret = func_151B30B0(&stack.sp98, 0x3AC49BA6, 0x30, 0xFF);
-    ((GameStruct151B2100Sub *)arg0)->unk10 = (s32)ret;
-    if (ret != NULL) {
-        memcpy((u8 *)ret + 0x150, &stack.sp68, 0x30);
+    link.slot = 0;
+    link.start.offset = D_800AA32C;
+    link.end.offset = D_800AA374;
+    desc.drawStyle = 1;
+    tie->ropes[0] = func_151B30B0(&desc, 0.0015f, sizeof(RopeTieLink), 0xFF, 0);
+    if (tie->ropes[0] != NULL) {
+        memcpy(&tie->ropes[0]->link, &link, sizeof(link));
     }
 
-    stack.sp40.unk0 = obj;
-    stack.sp40.unk4 = obj->unique_id;
-    stack.sp40.unk5 = 2;
-    stack.sp40.unk8 = D_800AA368;
-    stack.sp40.unk14 = D_800AA374;
-    stack.sp40.unk20 = 5.0f;
-    stack.sp40.unk24 = *(s32 **)((u8 *)&stack + 0xA0);
-    ret = func_15149130(0x12C, -1, -1, 0, 0, 0x13, (struct37 *)0x28, 0xFF, 1);
-    ((GameStruct151B2100Sub *)arg0)->unk1C = (s32)ret;
-    if (ret != NULL) {
-        memcpy((u8 *)ret + 0x28, &stack.sp40, 0x28);
+    lineData.anchor.target = obj;
+    lineData.anchor.targetId = obj->unique_id;
+    lineData.anchor.bone = 2;
+    lineData.anchor.offset = D_800AA368;
+    lineData.endOffset = D_800AA374;
+    lineData.halfWidth = 5.0f;
+    lineData.owner = self;
+    tie->line = (RopeLine *)func_15149130(300, -1, -1, 0, 0, 0x13, (struct37 *)sizeof(RopeLineData), 0xFF, 1);
+    if (tie->line != NULL) {
+        memcpy(&tie->line->line, &lineData, sizeof(lineData));
     }
 }
 
-typedef struct {
-    u8 pad0[0x178];
-    s32 *unk178;
-    u8 unk17C;
-} GameStruct151B2950;
+/* Rope teardown: clears the owner's reference to this rope. */
+void func_151B2950(TiedRope *self) {
+    RopeTie *owner;
 
-void func_151B2950(GameStruct151B2950 *arg0) {
-    s32 *temp;
-
-    temp = arg0->unk178;
-    if (temp != NULL) {
-        temp[arg0->unk17C + (0x38 / 4)] = 0;
+    owner = self->link.owner;
+    if (owner != NULL) {
+        owner->tie.ropes[self->link.slot] = NULL;
     }
 }
-
-typedef struct {
-    f32 x, y, z;
-} Vec3_151B2974;
 
 Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
 Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
@@ -390,7 +371,7 @@ Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
 Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
 Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
-extern void func_15143134(void *, Vec3_151B2974 *, s32);
+extern void func_15143134(Vec3f_1DF510 *in, Vec3f_1DF510 *out, s32 mtx);
 extern void func_151D5D60();
 extern u8 D_80090DE8[];
 extern s32 D_800D2C9C;
@@ -399,166 +380,169 @@ extern struct {
     s32 unk4;
 } D_800A4AC8[];
 
-Gfx *func_151B2974(Gfx *gfx, u8 *arg1, s16 arg2) {
-    GameStruct151B2690Sub28 *sub;
+/* Draws the line as a camera-facing textured quad between its two bone-relative points. */
+Gfx *func_151B2974(Gfx *gfx, RopeLine *self, s16 view) {
+    RopeLineData *line;
     volatile u8 dead;
     u8 update;
     Vtx *vtx;
-    f32 *pos;
-    f32 cx;
-    f32 cy;
-    f32 cz;
+    f32 *camera;
+    f32 sideX;
+    f32 sideY;
+    f32 sideZ;
     f32 dx;
     f32 dy;
     f32 dz;
-    f32 len;
-    Vec3_151B2974 a;
-    Vec3_151B2974 b;
-    f32 mx;
-    f32 my;
-    f32 mz;
-    s32 base;
+    f32 lenSq;
+    Vec3f_1DF510 start;
+    Vec3f_1DF510 end;
+    f32 toCamX;
+    f32 toCamY;
+    f32 toCamZ;
+    s32 boneMtx;
     f32 scale;
+
     dead = 0;
-    sub = (GameStruct151B2690Sub28 *)(arg1 + 0x28);
-    if ((sub->unk0->interaction_state == 0) || (sub->unk0->unique_id != sub->unk4)) {
+    line = &self->line;
+    if ((line->anchor.target->interaction_state == 0) || (line->anchor.target->unique_id != line->anchor.targetId)) {
         dead = 1;
     }
-    sub = (GameStruct151B2690Sub28 *)(arg1 + 0x28);
-    if ((dead == 0) && (*(s32 *)((u8 *)sub->unk0 + 0x1D4) != 0)) {
-        func_151D5D60(arg1 + 0x14, arg2, 0x40, &vtx, 0);
+    line = &self->line;
+    if ((dead == 0) && (line->anchor.target->unk1D4 != NULL)) {
+        func_151D5D60(&self->base.unk14, view, 4 * sizeof(Vtx), &vtx, 0);
         if (vtx == NULL) {
             return gfx;
         }
-        base = *(s32 *)((u8 *)sub->unk0 + 0x1D4) + (sub->unk5 << 6);
-        func_15143134(&sub->unk8, &a, base);
-        func_15143134(&sub->unk14, &b, base);
+        boneMtx = (s32)line->anchor.target->unk1D4 + (line->anchor.bone << 6);
+        func_15143134(&line->anchor.offset, &start, boneMtx);
+        func_15143134(&line->endOffset, &end, boneMtx);
         update = 1;
-        pos = (f32 *)(arg2 * 0x9A0 + (u8 *)D_800DBFF0 + 0x2F8);
+        camera = (f32 *)(view * 0x9A0 + (u8 *)D_800DBFF0 + 0x2F8);
         gfx = func_15142B7C(gfx, 0x200005, 0x60600);
         gfx = func_15142E24(gfx, (s32)D_80090DE8, 0, 0, 0, 0, 0x36, 0, 0, &update, 3);
         gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &update);
         gfx = func_15142CF0(gfx, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, &update);
         gfx = func_1513F4E4(gfx, 0x2B, &update);
         gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[5].unk0 | D_800A4AC8[5].unk4, &update);
-        dx = b.x - a.x;
-        mx = ((dx * 0.5f) + a.x) - pos[0];
-        dy = b.y - a.y;
-        my = ((dy * 0.5f) + a.y) - pos[1];
-        dz = b.z - a.z;
-        mz = ((dz * 0.5f) + a.z) - pos[2];
-        cx = (dy * mz) - (my * dz);
-        cy = (dz * mx) - (mz * dx);
-        cz = (dx * my) - (mx * dy);
-        len = (cx * cx) + (cy * cy) + (cz * cz);
-        if (len == 0.0f) {
-            cx = 0.0f;
-            cy = 0.0f;
-            cz = 0.0f;
+        // side = (end - start) x (midpoint - camera), scaled to halfWidth
+        dx = end.x - start.x;
+        toCamX = ((dx * 0.5f) + start.x) - camera[0];
+        dy = end.y - start.y;
+        toCamY = ((dy * 0.5f) + start.y) - camera[1];
+        dz = end.z - start.z;
+        toCamZ = ((dz * 0.5f) + start.z) - camera[2];
+        sideX = (dy * toCamZ) - (toCamY * dz);
+        sideY = (dz * toCamX) - (toCamZ * dx);
+        sideZ = (dx * toCamY) - (toCamX * dy);
+        lenSq = (sideX * sideX) + (sideY * sideY) + (sideZ * sideZ);
+        if (lenSq == 0.0f) {
+            sideX = 0.0f;
+            sideY = 0.0f;
+            sideZ = 0.0f;
         } else {
-            scale = sub->unk20 / sqrtf(len);
-            cx = cx * scale;
-            cy = cy * scale;
-            cz = cz * scale;
+            scale = line->halfWidth / sqrtf(lenSq);
+            sideX = sideX * scale;
+            sideY = sideY * scale;
+            sideZ = sideZ * scale;
         }
-        vtx->v.ob[0] = b.x + cx;
-        vtx->v.ob[1] = b.y + cy;
-        vtx->v.ob[2] = b.z + cz;
+        vtx->v.ob[0] = end.x + sideX;
+        vtx->v.ob[1] = end.y + sideY;
+        vtx->v.ob[2] = end.z + sideZ;
         vtx->v.tc[0] = 0;
         vtx->v.tc[1] = 0;
         vtx++;
-        vtx->v.ob[0] = b.x - cx;
-        vtx->v.ob[1] = b.y - cy;
-        vtx->v.ob[2] = b.z - cz;
-        vtx->v.tc[0] = 0x3C0;
+        vtx->v.ob[0] = end.x - sideX;
+        vtx->v.ob[1] = end.y - sideY;
+        vtx->v.ob[2] = end.z - sideZ;
+        vtx->v.tc[0] = 30 << 5;
         vtx->v.tc[1] = 0;
         vtx++;
-        vtx->v.ob[0] = a.x - cx;
-        vtx->v.ob[1] = a.y - cy;
-        vtx->v.ob[2] = a.z - cz;
-        vtx->v.tc[0] = 0x3C0;
-        vtx->v.tc[1] = 0x3C0;
+        vtx->v.ob[0] = start.x - sideX;
+        vtx->v.ob[1] = start.y - sideY;
+        vtx->v.ob[2] = start.z - sideZ;
+        vtx->v.tc[0] = 30 << 5;
+        vtx->v.tc[1] = 30 << 5;
         vtx++;
-        vtx->v.ob[0] = a.x + cx;
-        vtx->v.ob[1] = a.y + cy;
-        vtx->v.ob[2] = a.z + cz;
+        vtx->v.ob[0] = start.x + sideX;
+        vtx->v.ob[1] = start.y + sideY;
+        vtx->v.ob[2] = start.z + sideZ;
         vtx->v.tc[0] = 0;
-        vtx->v.tc[1] = 0x3C0;
+        vtx->v.tc[1] = 30 << 5;
         vtx++;
         gSPVertex(gfx++, vtx - 4, 4, 0);
         gSP1Triangle(gfx++, 0, 1, 2, 0);
         gSP1Triangle(gfx++, 0, 2, 3, 0);
     }
     if (dead != 0) {
-        ((GameStruct151B2100 *)arg1)->unkE = -1;
+        self->base.unkE = -1;
     }
     return gfx;
 }
 
-void func_151B2EC4(s32 arg0, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
+/* Line event handler: lets func_15169850 retarget the anchor object. */
+void func_151B2EC4(RopeLine *self, s32 arg1, u8 event) {
+    func_15169850(arg1, event, (s32)&self->line.anchor.target, (s32)&self->line.anchor.targetId, (s32)self);
 }
 
+/* Event 0x2D payload: two objects that swap places. */
 typedef struct {
-    s32 unk0;
-    s32 unk4;
-    u8 unk8;
-    u8 unk9;
-} GameStruct151B2F04a;
+    /* 0x00 */ struct127 *a;
+    /* 0x04 */ struct127 *b;
+    /* 0x08 */ u8 aId;
+    /* 0x09 */ u8 bId;
+} ObjectSwap;
 
-typedef struct {
-    s32 unk0;
-    u8 unk4;
-    u8 pad5[3];
-    s32 unk8;
-    u8 unkC;
-} GameStruct151B2F04b;
+/* RopeTie event handler: on event 0x2D, swaps obj0/obj1 for the other object of the pair. */
+void func_151B2F04(RopeTie *self, ObjectSwap *swap, u8 event) {
+    RopeTieData *tie = &self->tie;
 
-void func_151B2F04(void *a0, GameStruct151B2F04a *a1, u8 a2) {
-    GameStruct151B2F04b *v0 = (GameStruct151B2F04b *)((u8 *)a0 + 0x28);
-    if (a2 == 0x2D) {
-        if (v0->unk0 == a1->unk0) {
-            v0->unk0 = a1->unk4;
-            v0->unk4 = a1->unk9;
-        } else if (v0->unk0 == a1->unk4) {
-            v0->unk0 = a1->unk0;
-            v0->unk4 = a1->unk8;
+    if (event == 0x2D) {
+        if (tie->obj0 == swap->a) {
+            tie->obj0 = swap->b;
+            tie->obj0Id = swap->bId;
+        } else if (tie->obj0 == swap->b) {
+            tie->obj0 = swap->a;
+            tie->obj0Id = swap->aId;
         }
-        if (v0->unk8 == a1->unk0) {
-            v0->unk8 = a1->unk4;
-            v0->unkC = a1->unk9;
-        } else if (v0->unk8 == a1->unk4) {
-            v0->unk8 = a1->unk0;
-            v0->unkC = a1->unk8;
+        if (tie->obj1 == swap->a) {
+            tie->obj1 = swap->b;
+            tie->obj1Id = swap->bId;
+        } else if (tie->obj1 == swap->b) {
+            tie->obj1 = swap->a;
+            tie->obj1Id = swap->aId;
         }
     }
 }
 
-void func_151B2FA0(s32 arg0, s32 arg1, u8 arg2) {
-    func_151B47D8(arg0, arg0 + 0x150, arg1, arg2);
+/* Rope event handler. */
+void func_151B2FA0(TiedRope *self, s32 arg1, u8 event) {
+    func_151B47D8(self, &self->link, arg1, event);
 }
 
-void func_151B2FD0(s32 *arg0) {
-    s32 *temp = (s32 *)arg0[0x4C / 4];
-    if (temp != 0) {
-        temp[0x44 / 4] = 0;
+/* Line teardown: clears the owner's reference to this line. */
+void func_151B2FD0(RopeLine *self) {
+    RopeTie *owner = self->line.owner;
+
+    if (owner != NULL) {
+        owner->tie.line = NULL;
     }
 }
 
-void func_151B2FE8(s32 *arg0) {
-    func_151B2FD0(arg0);
-    func_1514933C((struct260 *)arg0);
+void func_151B2FE8(RopeLine *self) {
+    func_151B2FD0(self);
+    func_1514933C(&self->base);
 }
 
-void func_151B3014(s32 *arg0) {
-    func_151B2FD0(arg0);
-    func_15149368((struct260 *)arg0);
+void func_151B3014(RopeLine *self) {
+    func_151B2FD0(self);
+    func_15149368(&self->base);
 }
 
-void func_151B3040(s32 arg0, s32 arg1, u8 arg2) {
-    s32 a;
-    s32 temp;
-    temp = arg0 + 0x150;
-    func_15169850(arg1, arg2, temp, arg0 + 0x154, arg0);
-    func_15169850(arg1, arg2, temp + 0x14, temp + 0x18, arg0);
+/* Rope event handler: lets func_15169850 retarget both anchor objects. */
+void func_151B3040(TiedRope *self, s32 arg1, u8 event) {
+    RopeTieLink *link;
+
+    link = &self->link;
+    func_15169850(arg1, event, (s32)&link->start.target, (s32)&self->link.start.targetId, (s32)self);
+    func_15169850(arg1, event, (s32)&link->end.target, (s32)&link->end.targetId, (s32)self);
 }
