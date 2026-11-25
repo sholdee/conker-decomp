@@ -47,6 +47,22 @@ typedef struct {
 /* struct127 +0x324 is still padding (pad320) in include/structs.h */
 #define OBJ_CAM_DATA(obj) (*(CamData **)&(obj)->pad320[4])
 
+/* Aim points at struct127 +0x1A4 (still padding in include/structs.h), filled in by func_1503A08C. */
+typedef struct {
+    /* 0x1A4 */ s16 x;
+    /* 0x1A6 */ s16 y;
+    /* 0x1A8 */ s16 z;
+    /* 0x1AA */ s16 topY;
+    /* 0x1AC */ s16 sideA[3];
+    /* 0x1B2 */ s16 sideB[3];
+    /* 0x1B8 */ s8 dir[3];
+} ObjAimPoints;
+
+#define OBJ_AIM(obj) (*(ObjAimPoints *)&(obj)->pad1A4)
+
+/* An object's unk1D4 points at its array of 4x4 bone matrices. */
+#define OBJ_BONES(obj) ((f32 (*)[4][4])(obj)->unk1D4)
+
 /* Allocates an object's camera-aim state and marks every slot as having no target. */
 void func_15036C70(struct127 *obj) {
     s32 i;
@@ -66,7 +82,7 @@ void func_15038620(s32, s32, f32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32,
 
 void func_15036CE8(void) {
     struct127 *obj;
-    s32 arg4;
+    s32 limitIdx;
     CamData *data;
     s32 pad[4]; // matching: -g3 gives every local a stack slot; these keep the frame layout
     s32 argB;
@@ -104,12 +120,12 @@ void func_15036CE8(void) {
         D_800C3FFA = 1;
         return;
     }
-    arg4 = 0;
+    limitIdx = 0;
     argB = 1;
     if (D_800C3FFA == 0) {
         bone = 7;
         argB = 0;
-        arg4 = 1;
+        limitIdx = 1;
         if (D_800D154C->unk2F8 & 0x100) {
             data->offYaw[0] = 45;
             data->offPitch[0] = 64;
@@ -128,7 +144,7 @@ void func_15036CE8(void) {
     } else {
         func_150379DC(D_800C3FE8, bone, 0, D_800C3E78, 90.0f, 0xFF, 0);
     }
-    func_15038620(bone, 0, D_800C3FE8, D_800C3E78, arg4, 0, D_800C3FFA, 3, 0, 0, 0, argB, 0);
+    func_15038620(bone, 0, D_800C3FE8, D_800C3E78, limitIdx, 0, D_800C3FFA, 3, 0, 0, 0, argB, 0);
     D_800C3FFA++;
 }
 
@@ -515,11 +531,11 @@ s32 func_15037698(s32 objIndex, s32 refBone, s32 bone, f32 x, f32 y, f32 z, f32 
         out[2] = z;
         return 1;
     }
-    refMtx = ((f32 (*)[4][4])D_800CC2D0[objIndex].unk1D4)[refBone];
+    refMtx = OBJ_BONES(&D_800CC2D0[objIndex])[refBone];
     if (D_800CC2D0[objIndex].unk1D4 == NULL) {
         return 0;
     }
-    mtx = ((f32 (*)[4][4])D_800CC2D0[objIndex].unk1D4)[bone];
+    mtx = OBJ_BONES(&D_800CC2D0[objIndex])[bone];
     refMtx[0][3] = refMtx[1][3] = refMtx[2][3] = mtx[0][3] = mtx[1][3] = mtx[2][3] = 0.0f;
     refMtx[3][3] = mtx[3][3] = 1.0f;
     unused[0] = refMtx[1][0]; // matching: dead stores IDO keeps (stack array); removing them changes the code
@@ -809,41 +825,47 @@ void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32
     }
 }
 
-s32 func_150380C0(f32 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5, f32 *arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA) {
+/*
+ * Finds the nearest active object (other than objIndex and its linked objects) whose aim point lies within
+ * the bone's +-range degree cone, preferring object id preferId. Writes the point to out and the distance
+ * to *bestDist, and returns the object's unk13B + 1 (0 and out = -99999 when nothing qualifies).
+ */
+s32 func_150380C0(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32 preferId, f32 *bestDist,
+                  s32 noCheck, s32 skipUnk127, s32 anyRange, s32 axisMode) {
     s32 i;
     f32 dist;
     f32 dx;
     f32 dz;
     f32 dy;
     s32 found;
-    f32 range;
+    f32 maxDist;
     s32 selfId;
-    s32 next;
-    s32 flag;
-    s32 excl;
+    s32 selfLink;
+    s32 allowSameId;
+    s32 excludedId;
 
     found = -1;
-    flag = 1;
-    excl = -1;
+    allowSameId = 1;
+    excludedId = -1;
     if ((&D_800C35EA)[0] == 1 || (&D_800C35EA)[1] == 1) {
-        arg0[0] = -99999.0f;
-        arg0[1] = -99999.0f;
-        arg0[2] = -99999.0f;
+        out[0] = -99999.0f;
+        out[1] = -99999.0f;
+        out[2] = -99999.0f;
         return 0;
     }
-    next = arg3 + 1;
-    selfId = D_800CC2D0[arg3].id;
-    if (selfId == 5 || selfId == 0xAD || selfId == 0xAE || selfId == 0xAF) {
-        flag = 0;
+    selfLink = objIndex + 1;
+    selfId = D_800CC2D0[objIndex].id;
+    if (selfId == 5 || selfId == 173 || selfId == 174 || selfId == 175) {
+        allowSameId = 0;
     }
-    if (selfId == 0x2D) {
-        excl = 0x2C;
+    if (selfId == 45) {
+        excludedId = 44;
     }
-    if (arg9 == 0) {
-        range = D_800CC2D0[arg3].unk23D * 8;
-        range = range * range;
+    if (!anyRange) {
+        maxDist = D_800CC2D0[objIndex].unk23D * 8;
+        maxDist = maxDist * maxDist;
     } else {
-        range = 1600000000.0f;
+        maxDist = 1600000000.0f;
     }
     for (i = 0; i < 25; i++) {
         if (D_800CC2D0[i].interaction_state == 0) {
@@ -852,43 +874,44 @@ s32 func_150380C0(f32 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5, f
         if (D_800CC2D0[i].id == 0xFF) {
             continue;
         }
-        if (i == arg3) {
+        if (i == objIndex) {
             continue;
         }
-        if (next == D_800CC2D0[i].unk65) {
+        if (selfLink == D_800CC2D0[i].unk65) {
             continue;
         }
-        if (D_800CC2D0[arg3].unk65 == i + 1) {
+        if (D_800CC2D0[objIndex].unk65 == i + 1) {
             continue;
         }
-        if (flag == 0 && selfId == D_800CC2D0[i].id) {
+        if (!allowSameId && selfId == D_800CC2D0[i].id) {
             continue;
         }
-        if (excl == D_800CC2D0[i].id) {
+        if (excludedId == D_800CC2D0[i].id) {
             continue;
         }
-        if ((arg8 != 0 || (D_800CC2D0[arg3].unk2F8 & 7) == 4) && D_800CC2D0[i].unk127 == 0xFF) {
+        if ((skipUnk127 || (D_800CC2D0[objIndex].unk2F8 & 7) == 4) && D_800CC2D0[i].unk127 == 0xFF) {
             continue;
         }
-        if ((D_800CC2D0[arg3].unk2F8 & 7) == 5 && D_800CC2D0[i].unk127 != 0xFF) {
+        if ((D_800CC2D0[objIndex].unk2F8 & 7) == 5 && D_800CC2D0[i].unk127 != 0xFF) {
             continue;
         }
-        dx = D_800CC2D0[arg3].x_position - D_800CC2D0[i].x_position;
-        dz = D_800CC2D0[arg3].z_position - D_800CC2D0[i].z_position;
-        dy = D_800CC2D0[arg3].y_position - D_800CC2D0[i].y_position;
+        dx = D_800CC2D0[objIndex].x_position - D_800CC2D0[i].x_position;
+        dz = D_800CC2D0[objIndex].z_position - D_800CC2D0[i].z_position;
+        dy = D_800CC2D0[objIndex].y_position - D_800CC2D0[i].y_position;
         dx = dx * dx;
         dz = dz * dz;
         dy = dy * dy;
         dist = dx + dz + dy;
-        if (i == D_800CC2D0[arg3].unk222 && (D_800CC2D0[arg3].unk223 == 1 || D_800CC2D0[arg3].unk223 == 12)) {
+        if (i == D_800CC2D0[objIndex].unk222 &&
+            (D_800CC2D0[objIndex].unk223 == 1 || D_800CC2D0[objIndex].unk223 == 12)) {
             dist = 0.0f;
         }
-        if ((dist < range && dist < *arg6) || arg5 == D_800CC2D0[i].id) {
-            if (func_15037698(arg3, arg1, arg2, (s16)D_800CC2D0[i].pad1A4, *(s16 *)((u8 *)&D_800CC2D0[i] + 0x1AA),
-                              *(s16 *)((u8 *)&D_800CC2D0[i] + 0x1A8), arg0, arg4, arg7, argA) != 0) {
-                *arg6 = dist;
+        if ((dist < maxDist && dist < *bestDist) || preferId == D_800CC2D0[i].id) {
+            if (func_15037698(objIndex, refBone, bone, OBJ_AIM(&D_800CC2D0[i]).x, OBJ_AIM(&D_800CC2D0[i]).topY,
+                              OBJ_AIM(&D_800CC2D0[i]).z, out, range, noCheck, axisMode)) {
+                *bestDist = dist;
                 found = i;
-                if (arg5 == D_800CC2D0[i].id) {
+                if (preferId == D_800CC2D0[i].id) {
                     break;
                 }
             }
@@ -897,62 +920,58 @@ s32 func_150380C0(f32 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5, f
     if (found != -1) {
         return D_800CC2D0[found].pad139[2] + 1;
     }
-    arg0[0] = -99999.0f;
-    arg0[1] = -99999.0f;
-    arg0[2] = -99999.0f;
+    out[0] = -99999.0f;
+    out[1] = -99999.0f;
+    out[2] = -99999.0f;
     return 0;
 }
 
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 
-void func_15038468(f32 *arg0, f32 *arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5) {
-    f32 var_fv0;
-    f32 factor;
-
-    switch (arg5) {
+/*
+ * Converts a bone-local direction (x, y, z) to yaw/pitch in degrees, (-180, 180]. axisMode picks which
+ * local axis is "forward": 0 +z, 1 +x, 2 -x, 3 -y.
+ */
+void func_15038468(f32 *yaw, f32 *pitch, f32 x, f32 y, f32 z, s32 axisMode) {
+    switch (axisMode) {
     case 0:
-        *arg0 = func_150484A0(arg2, arg4);
-        var_fv0 = func_150484A0(arg3, sqrtf((arg2 * arg2) + (arg4 * arg4)));
-        *arg1 = var_fv0;
+        *yaw = func_150484A0(x, z);
+        *pitch = func_150484A0(y, sqrtf(x * x + z * z));
         break;
     case 1:
-        *arg0 = func_150484A0(-arg4, arg2);
-        var_fv0 = func_150484A0(arg3, sqrtf((arg2 * arg2) + (arg4 * arg4)));
-        *arg1 = var_fv0;
+        *yaw = func_150484A0(-z, x);
+        *pitch = func_150484A0(y, sqrtf(x * x + z * z));
         break;
     case 2:
-        *arg0 = func_150484A0(arg4, -arg2);
-        var_fv0 = func_150484A0(arg3, sqrtf((arg2 * arg2) + (arg4 * arg4)));
-        *arg1 = var_fv0;
+        *yaw = func_150484A0(z, -x);
+        *pitch = func_150484A0(y, sqrtf(x * x + z * z));
         break;
     case 3:
-        *arg0 = func_150484A0(arg4, -arg3);
-        var_fv0 = func_150484A0(-arg2, sqrtf((arg3 * arg3) + (arg4 * arg4)));
-        *arg1 = var_fv0;
+        *yaw = func_150484A0(z, -y);
+        *pitch = func_150484A0(-x, sqrtf(y * y + z * z));
         break;
     }
-    factor = 57.295776f;
-    *arg0 *= factor;
-    *arg1 *= factor;
-    var_fv0 = *arg0;
-    if (var_fv0 > 180.0f) {
-        *arg0 = var_fv0 - 360.0f;
+    *yaw *= 57.295776f;
+    *pitch *= 57.295776f;
+    if (*yaw > 180.0f) {
+        *yaw -= 360.0f;
     }
-    var_fv0 = *arg1;
-    if (var_fv0 > 180.0f) {
-        *arg1 = var_fv0 - 360.0f;
+    if (*pitch > 180.0f) {
+        *pitch -= 360.0f;
     }
 }
 
+/* D_800CC5E8 is &D_800CC2D0[0].camera; the original code indexes it as its own array (matching: using
+ * D_800CC2D0[i].camera instead changes the address arithmetic). */
 typedef struct {
-    struct108 *unk0;
+    struct108 *camera;
     u8 pad4[0x328];
-} GameStruct_800CC5E8;
+} ObjCameraSlot;
 
-extern GameStruct_800CC5E8 D_800CC5E8[];
+extern ObjCameraSlot D_800CC5E8[];
 
-/* D_800BE9B4 and D_800BE9E4 are members of one object: IDO shares a single address candidate */
+/* matching: reading D_800BE9E4 as a member of D_800BE9B4 lets IDO share one address register */
 typedef struct {
     /* 0x00 */ u8 unk0;
     /* 0x01 */ u8 pad1[0x2F];
@@ -965,37 +984,43 @@ extern u8 D_800BEA0C;
 extern u8 D_800C3FDC;
 extern f32 D_800C3FE0;
 extern f32 D_800C3FE4;
-extern f32 D_800981A0[][4];
+extern f32 D_800981A0[][4]; /* per rate index: yaw rate, pitch rate, yaw max step, pitch max step */
 s32 func_15021DB8(f32 *, f32 *, f32 *, f32 *, s32, s32);
 void func_15049C40(f32 *arg0, f32 *arg1);
 void func_15049CB8(f32 m[4][4], f32 *q);
 void func_15049EDC(f32 *a, f32 *b, f32 t, f32 *out);
 void func_1504A140(f32 *q, f32 m[4][4]);
 
-void func_15038620(s32 arg0, s32 arg1, f32 *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC) {
+/*
+ * Turns bone matrix `bone` of object objIndex (measured against refBone) toward target (-99999 for none),
+ * easing per aim slot through the object's CamData, with turn rates from D_800981A0[rateIdx] and the
+ * window from aim limits slot limitIdx. Bit 0/1 of axes enable yaw/pitch.
+ */
+void func_15038620(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitIdx, s32 rateIdx, s32 slot,
+                   s32 axes, s32 noLimit, s32 relative, s32 yawDeadzone, s32 argB, s32 axisMode) {
     struct127 *obj;
-    f32 (*m1)[4];
+    f32 (*refMtx)[4];
     f32 result[4][4];
     f32 scale[3];
-    f32 vec[3];
-    f32 rx;
-    f32 ry;
-    f32 rz;
+    f32 dir[3];
+    f32 localX;
+    f32 localY;
+    f32 localZ;
     f32 yaw;
     f32 pitch;
     f32 roll;
     f32 mtxC[4][4];
     f32 mtxA[4][4];
     f32 mtxB[4][4];
-    f32 v[3];
+    f32 forward[3];
     f32 origYaw;
     f32 origPitch;
-    f32 sp118;
-    f32 sp114;
+    f32 prevYaw;
+    f32 prevPitch;
     f32 dYaw;
     f32 dPitch;
-    s32 found;
-    f32 (*m0)[4];
+    s32 hasOverride;
+    f32 (*mtx)[4];
     s32 timerDone;
     s32 blendMode;
     f32 blendT;
@@ -1005,18 +1030,14 @@ void func_15038620(s32 arg0, s32 arg1, f32 *arg2, s32 arg3, s32 arg4, s32 arg5, 
     f32 maxPitch;
     s32 noTarget;
     s32 locked;
-    f32 saved[2];
-    f32 fyaw;
-    f32 fpitch;
+    f32 overrideAngles[2];
+    f32 finalYaw;
+    f32 finalPitch;
     s32 step;
     CamData *data;
 
-
-
-
-
-    obj = &D_800CC2D0[arg3];
-    data = *(CamData **)((u8 *)obj + 0x324);
+    obj = &D_800CC2D0[objIndex];
+    data = OBJ_CAM_DATA(obj);
     if (data == NULL) {
         return;
     }
@@ -1026,98 +1047,98 @@ void func_15038620(s32 arg0, s32 arg1, f32 *arg2, s32 arg3, s32 arg4, s32 arg5, 
     if (D_800C3FFA == 0) {
         obj->unk2CA = 0;
     }
-    found = func_15021DB8(&yaw, &pitch, &roll, arg2, arg3, 0);
-    if (found) {
-        saved[0] = yaw;
-        saved[1] = pitch;
+    hasOverride = func_15021DB8(&yaw, &pitch, &roll, target, objIndex, 0);
+    if (hasOverride) {
+        overrideAngles[0] = yaw;
+        overrideAngles[1] = pitch;
     }
     blendMode = 0;
     D_800C3FDC = 0;
-    sp114 = 0.0;
-    sp118 = 0.0;
-    if (arg2[0] == -99999.0f && arg2[1] == -99999.0f && arg2[2] == -99999.0f) {
+    prevPitch = 0.0; // matching: double literals; 0.0f changes IDO's register choice
+    prevYaw = 0.0;
+    if (target[0] == -99999.0f && target[1] == -99999.0f && target[2] == -99999.0f) {
         noTarget = 1;
     } else {
         noTarget = 0;
     }
-    if (noTarget && !found) {
-        if (data->timer[arg6] == 0) {
-            data->yawVel[arg6] = 0.0f;
-            data->pitchVel[arg6] = 0.0f;
-            data->blend[arg6] = 10;
-            data->yaw[arg6] = -99999.0f;
-            data->pitch[arg6] = -99999.0f;
-            data->offYaw[arg6] = 0;
-            data->offPitch[arg6] = 0;
+    if (noTarget && !hasOverride) {
+        if (data->timer[slot] == 0) {
+            data->yawVel[slot] = 0.0f;
+            data->pitchVel[slot] = 0.0f;
+            data->blend[slot] = 10;
+            data->yaw[slot] = -99999.0f;
+            data->pitch[slot] = -99999.0f;
+            data->offYaw[slot] = 0;
+            data->offPitch[slot] = 0;
             return;
         }
     }
     locked = obj->unk2FB & 4;
-    if (!found && locked) {
-        if (data->flag[arg6] == 0) {
-            data->blend[arg6] = 10;
+    if (!hasOverride && locked) {
+        if (data->flag[slot] == 0) {
+            data->blend[slot] = 10;
         }
-        if (data->blend[arg6] == 0) {
-            data->yawVel[arg6] = 0.0f;
-            data->pitchVel[arg6] = 0.0f;
-            data->yaw[arg6] = -99999.0f;
-            data->pitch[arg6] = -99999.0f;
-            data->offYaw[arg6] = 0;
-            data->offPitch[arg6] = 0;
+        if (data->blend[slot] == 0) {
+            data->yawVel[slot] = 0.0f;
+            data->pitchVel[slot] = 0.0f;
+            data->yaw[slot] = -99999.0f;
+            data->pitch[slot] = -99999.0f;
+            data->offYaw[slot] = 0;
+            data->offPitch[slot] = 0;
             return;
         }
     }
     timerDone = 0;
-    data->flag[arg6] = locked;
-    if (data->blend[arg6] < 2) {
-        if (data->timer[arg6] > 0) {
+    data->flag[slot] = locked;
+    if (data->blend[slot] < 2) {
+        if (data->timer[slot] > 0) {
             if (D_800BEAC0 == 0 && D_800BEA0C == 0) {
-                --data->timer[arg6];
+                --data->timer[slot];
             }
-            if (data->timer[arg6] == 0) {
+            if (data->timer[slot] == 0) {
                 timerDone = 1;
             }
         }
     }
     if (!noTarget) {
-        step = data->timer[arg6];
+        step = data->timer[slot];
         if (step != 0 && step < 10) {
-            data->blend[arg6] = ((10 - step) * 10) / 10.0f;
-            data->timer[arg6] = 0;
+            data->blend[slot] = ((10 - step) * 10) / 10.0f;
+            data->timer[slot] = 0;
         }
     }
-    v[1] = 0.0f;
-    switch (argC) {
+    forward[1] = 0.0f;
+    switch (axisMode) {
     case 0:
-        v[0] = 0.0f;
-        v[2] = 1.0f;
+        forward[0] = 0.0f;
+        forward[2] = 1.0f;
         break;
     case 1:
-        v[2] = 0.0f;
-        v[0] = 1.0f;
+        forward[2] = 0.0f;
+        forward[0] = 1.0f;
         break;
     case 2:
-        v[2] = 0.0f;
-        v[0] = -1.0f;
+        forward[2] = 0.0f;
+        forward[0] = -1.0f;
         break;
     case 3:
-        v[0] = 0.0f;
-        v[2] = 0.0f;
-        v[1] = -1.0f;
+        forward[0] = 0.0f;
+        forward[2] = 0.0f;
+        forward[1] = -1.0f;
         break;
     }
-    m0 = ((f32 (*)[4][4])obj->unk1D4)[arg0];
-    m1 = ((f32 (*)[4][4])obj->unk1D4)[arg1];
-    m0[0][3] = m0[1][3] = m0[2][3] = m1[0][3] = m1[1][3] = m1[2][3] = 0.0f;
-    m0[3][3] = m1[3][3] = 1.0f;
-    if (!found) {
-        vec[0] = v[0] * m0[0][0] + v[1] * m0[1][0] + v[2] * m0[2][0];
-        vec[1] = v[0] * m0[0][1] + v[1] * m0[1][1] + v[2] * m0[2][1];
-        vec[2] = v[0] * m0[0][2] + v[1] * m0[1][2] + v[2] * m0[2][2];
-        rx = vec[0] * m1[0][0] + vec[1] * m1[0][1] + vec[2] * m1[0][2];
-        ry = vec[0] * m1[1][0] + vec[1] * m1[1][1] + vec[2] * m1[1][2];
-        rz = vec[0] * m1[2][0] + vec[1] * m1[2][1] + vec[2] * m1[2][2];
-        func_15038468(&yaw, &pitch, rx, ry, rz, argC);
+    mtx = OBJ_BONES(obj)[bone];
+    refMtx = OBJ_BONES(obj)[refBone];
+    mtx[0][3] = mtx[1][3] = mtx[2][3] = refMtx[0][3] = refMtx[1][3] = refMtx[2][3] = 0.0f;
+    mtx[3][3] = refMtx[3][3] = 1.0f;
+    if (!hasOverride) {
+        dir[0] = forward[0] * mtx[0][0] + forward[1] * mtx[1][0] + forward[2] * mtx[2][0];
+        dir[1] = forward[0] * mtx[0][1] + forward[1] * mtx[1][1] + forward[2] * mtx[2][1];
+        dir[2] = forward[0] * mtx[0][2] + forward[1] * mtx[1][2] + forward[2] * mtx[2][2];
+        localX = dir[0] * refMtx[0][0] + dir[1] * refMtx[0][1] + dir[2] * refMtx[0][2];
+        localY = dir[0] * refMtx[1][0] + dir[1] * refMtx[1][1] + dir[2] * refMtx[1][2];
+        localZ = dir[0] * refMtx[2][0] + dir[1] * refMtx[2][1] + dir[2] * refMtx[2][2];
+        func_15038468(&yaw, &pitch, localX, localY, localZ, axisMode);
     }
     if (yaw > 180.0f) {
         yaw -= 360.0f;
@@ -1125,88 +1146,89 @@ void func_15038620(s32 arg0, s32 arg1, f32 *arg2, s32 arg3, s32 arg4, s32 arg5, 
     if (pitch > 180.0f) {
         pitch -= 360.0f;
     }
-    if (-99999.0f == data->yaw[arg6]) {
-        data->yaw[arg6] = yaw;
-        data->pitch[arg6] = pitch;
-        data->yawVel[arg6] = 0.0f;
-        data->pitchVel[arg6] = 0.0f;
+    if (-99999.0f == data->yaw[slot]) {
+        data->yaw[slot] = yaw;
+        data->pitch[slot] = pitch;
+        data->yawVel[slot] = 0.0f;
+        data->pitchVel[slot] = 0.0f;
     }
     if (D_800C3FFA == 0) {
         obj->unk2CA = yaw * 0.7111111283f;
     }
     origYaw = yaw;
     origPitch = pitch;
-    if ((timerDone && !found) || D_800BE9B4) {
-        func_15039ED0(arg4, &yaw, &pitch, &sp118, &sp114, origYaw, origPitch, arg3, arg6);
-        data->yawVel[arg6] = 0.0f;
-        data->pitchVel[arg6] = 0.0f;
-        *(volatile f32 *)&data->yaw[arg6] = yaw;
-        data->blend[arg6] = 10;
-        data->yaw[arg6] = -99999.0f;
-        data->pitch[arg6] = -99999.0f;
+    if ((timerDone && !hasOverride) || D_800BE9B4) {
+        func_15039ED0(limitIdx, &yaw, &pitch, &prevYaw, &prevPitch, origYaw, origPitch, objIndex, slot);
+        data->yawVel[slot] = 0.0f;
+        data->pitchVel[slot] = 0.0f;
+        *(volatile f32 *)&data->yaw[slot] = yaw; // matching: IDO would drop this store overwritten below
+        data->blend[slot] = 10;
+        data->yaw[slot] = -99999.0f;
+        data->pitch[slot] = -99999.0f;
         return;
     }
-    vec[0] = arg2[0] - m0[3][0];
-    vec[1] = arg2[1] - m0[3][1];
-    vec[2] = arg2[2] - m0[3][2];
-    if (!noTarget || found) {
-        if (!found) {
-            rx = vec[0] * m1[0][0] + vec[1] * m1[0][1] + vec[2] * m1[0][2];
-            ry = vec[0] * m1[1][0] + vec[1] * m1[1][1] + vec[2] * m1[1][2];
-            rz = vec[0] * m1[2][0] + vec[1] * m1[2][1] + vec[2] * m1[2][2];
-            func_15038468(&yaw, &pitch, rx, ry, rz, argC);
+    dir[0] = target[0] - mtx[3][0];
+    dir[1] = target[1] - mtx[3][1];
+    dir[2] = target[2] - mtx[3][2];
+    if (!noTarget || hasOverride) {
+        if (!hasOverride) {
+            localX = dir[0] * refMtx[0][0] + dir[1] * refMtx[0][1] + dir[2] * refMtx[0][2];
+            localY = dir[0] * refMtx[1][0] + dir[1] * refMtx[1][1] + dir[2] * refMtx[1][2];
+            localZ = dir[0] * refMtx[2][0] + dir[1] * refMtx[2][1] + dir[2] * refMtx[2][2];
+            func_15038468(&yaw, &pitch, localX, localY, localZ, axisMode);
             if (yaw > 0.0f) {
-                yaw -= argA;
+                yaw -= yawDeadzone;
             } else if (yaw < 0.0f) {
-                yaw += argA;
+                yaw += yawDeadzone;
             }
         } else {
             D_800C3FDC = 1;
             D_800C3FE0 = yaw;
             D_800C3FE4 = pitch;
         }
-        if (D_800CC5E8[D_800C3E78].unk0 != NULL && D_800CC5E8[D_800C3E78].unk0->unk2C == 0x100 && (yaw > 100.0f || yaw < -100.0f)) {
-            vec[0] = -vec[0];
-            vec[1] = 20.0f - vec[1];
-            vec[2] = -vec[2];
-            rx = vec[0] * m1[0][0] + vec[1] * m1[0][1] + vec[2] * m1[0][2];
-            ry = vec[0] * m1[1][0] + vec[1] * m1[1][1] + vec[2] * m1[1][2];
-            rz = vec[0] * m1[2][0] + vec[1] * m1[2][1] + vec[2] * m1[2][2];
-            func_15038468(&yaw, &pitch, rx, ry, rz, argC);
+        if (D_800CC5E8[D_800C3E78].camera != NULL && D_800CC5E8[D_800C3E78].camera->unk2C == 0x100 &&
+            (yaw > 100.0f || yaw < -100.0f)) {
+            dir[0] = -dir[0];
+            dir[1] = 20.0f - dir[1];
+            dir[2] = -dir[2];
+            localX = dir[0] * refMtx[0][0] + dir[1] * refMtx[0][1] + dir[2] * refMtx[0][2];
+            localY = dir[0] * refMtx[1][0] + dir[1] * refMtx[1][1] + dir[2] * refMtx[1][2];
+            localZ = dir[0] * refMtx[2][0] + dir[1] * refMtx[2][1] + dir[2] * refMtx[2][2];
+            func_15038468(&yaw, &pitch, localX, localY, localZ, axisMode);
         }
-        D_800C3FD0[0] = m0[3][0] + vec[0] * 100.0f;
-        D_800C3FD0[1] = m0[3][1] + vec[1] * 100.0f;
-        D_800C3FD0[2] = m0[3][2] + vec[2] * 100.0f;
-        if (arg8 == 0) {
-            func_15039ED0(arg4, &yaw, &pitch, &sp118, &sp114, origYaw, origPitch, arg3, arg6);
+        D_800C3FD0[0] = mtx[3][0] + dir[0] * 100.0f;
+        D_800C3FD0[1] = mtx[3][1] + dir[1] * 100.0f;
+        D_800C3FD0[2] = mtx[3][2] + dir[2] * 100.0f;
+        if (noLimit == 0) {
+            func_15039ED0(limitIdx, &yaw, &pitch, &prevYaw, &prevPitch, origYaw, origPitch, objIndex, slot);
         }
     } else {
         yaw = origYaw;
         pitch = origPitch;
     }
     if (D_800BEAC0 == 0 && D_800BEA0C == 0) {
-        rateYaw = D_800981A0[arg5][0];
-        ratePitch = D_800981A0[arg5][1];
-        maxYaw = D_800981A0[arg5][2];
-        maxPitch = D_800981A0[arg5][3];
+        rateYaw = D_800981A0[rateIdx][0];
+        ratePitch = D_800981A0[rateIdx][1];
+        maxYaw = D_800981A0[rateIdx][2];
+        maxPitch = D_800981A0[rateIdx][3];
         if (D_800C35EA == 1) {
             rateYaw = 1.0f;
             ratePitch = 1.0f;
             maxYaw = 5.0f;
             maxPitch = 5.0f;
-            if (1) {}
+            if (1) {} // matching: the empty block splits the basic block before the blend checks
         }
-        if (data->blend[arg6] > 0) {
+        if (data->blend[slot] > 0) {
             blendMode = 2;
-            blendT = 10 - data->blend[arg6];
+            blendT = 10 - data->blend[slot];
             blendT = blendT / 10.0f;
             if (locked == 0) {
                 blendT = 1.0f - blendT;
             }
         } else {
-            if (data->timer[arg6] && data->timer[arg6] < 10) {
+            if (data->timer[slot] && data->timer[slot] < 10) {
                 blendMode = 1;
-                blendT = 10 - data->timer[arg6];
+                blendT = 10 - data->timer[slot];
                 blendT = blendT / 10.0f;
             }
         }
@@ -1214,95 +1236,95 @@ void func_15038620(s32 arg0, s32 arg1, f32 *arg2, s32 arg3, s32 arg4, s32 arg5, 
             rateYaw += (1.0f - rateYaw) * blendT;
             ratePitch += (1.0f - ratePitch) * blendT;
         }
-        if (arg8 != 0) {
-            if (yaw > 90.0f && data->yaw[arg6] < -90.0f) {
-                data->yaw[arg6] += 360.0f;
-            } else if (yaw < -90.0f && data->yaw[arg6] > 90.0f) {
-                data->yaw[arg6] -= 360.0f;
+        if (noLimit != 0) {
+            if (yaw > 90.0f && data->yaw[slot] < -90.0f) {
+                data->yaw[slot] += 360.0f;
+            } else if (yaw < -90.0f && data->yaw[slot] > 90.0f) {
+                data->yaw[slot] -= 360.0f;
             }
         }
-        dYaw = (yaw - data->yaw[arg6]) * rateYaw;
-        dPitch = (pitch - data->pitch[arg6]) * ratePitch;
+        dYaw = (yaw - data->yaw[slot]) * rateYaw;
+        dPitch = (pitch - data->pitch[slot]) * ratePitch;
         if (blendMode != 0) {
-            yaw = data->yaw[arg6] + dYaw;
-            pitch = data->pitch[arg6] + dPitch;
+            yaw = data->yaw[slot] + dYaw;
+            pitch = data->pitch[slot] + dPitch;
         } else {
-            if (fabsf(dYaw) < fabsf(data->yawVel[arg6]) + maxYaw) {
-                data->yawVel[arg6] = dYaw;
+            if (fabsf(dYaw) < fabsf(data->yawVel[slot]) + maxYaw) {
+                data->yawVel[slot] = dYaw;
             } else {
-                data->yawVel[arg6] += maxYaw * ((dYaw < 0) ? -1 : 1);
+                data->yawVel[slot] += maxYaw * ((dYaw < 0) ? -1 : 1);
             }
-            if (fabsf(dPitch) < fabsf(data->pitchVel[arg6]) + maxPitch) {
-                data->pitchVel[arg6] = dPitch;
+            if (fabsf(dPitch) < fabsf(data->pitchVel[slot]) + maxPitch) {
+                data->pitchVel[slot] = dPitch;
             } else {
-                data->pitchVel[arg6] += maxPitch * ((dPitch < 0) ? -1 : 1);
+                data->pitchVel[slot] += maxPitch * ((dPitch < 0) ? -1 : 1);
             }
-            yaw = data->yaw[arg6] + data->yawVel[arg6];
-            pitch = data->pitch[arg6] + data->pitchVel[arg6];
+            yaw = data->yaw[slot] + data->yawVel[slot];
+            pitch = data->pitch[slot] + data->pitchVel[slot];
         }
-        if (arg8 == 0) {
-            func_15039ED0(arg4, &yaw, &pitch, NULL, NULL, origYaw, origPitch, arg3, arg6);
+        if (noLimit == 0) {
+            func_15039ED0(limitIdx, &yaw, &pitch, NULL, NULL, origYaw, origPitch, objIndex, slot);
         }
     } else {
-        yaw = data->yaw[arg6];
-        pitch = data->pitch[arg6];
+        yaw = data->yaw[slot];
+        pitch = data->pitch[slot];
     }
-    if (!(arg7 & 1)) {
+    if (!(axes & 1)) {
         yaw = origYaw;
     }
-    if (!(arg7 & 2)) {
+    if (!(axes & 2)) {
         pitch = origPitch;
     }
-    if (found) {
+    if (hasOverride) {
         blendMode = 0;
-        yaw = saved[0];
-        pitch = saved[1];
+        yaw = overrideAngles[0];
+        pitch = overrideAngles[1];
     }
     if (D_800C3FFA == 0) {
         obj->unk2CA = yaw * 0.7111111283f;
     }
-    fyaw = data->offYaw[arg6] + yaw;
-    fpitch = data->offPitch[arg6] + pitch;
-    switch (argC) {
+    finalYaw = data->offYaw[slot] + yaw;
+    finalPitch = data->offPitch[slot] + pitch;
+    switch (axisMode) {
     case 0:
         func_150A8050(mtxA, 0.0f, 0.0f, roll);
-        func_150A8050(mtxB, -fpitch, fyaw, 0.0f);
+        func_150A8050(mtxB, -finalPitch, finalYaw, 0.0f);
         break;
     case 2:
-        func_150A8050(mtxA, 0.0f, 0.0f, -fpitch);
-        func_150A8050(mtxB, roll, fyaw, 0.0f);
+        func_150A8050(mtxA, 0.0f, 0.0f, -finalPitch);
+        func_150A8050(mtxB, roll, finalYaw, 0.0f);
         break;
     case 1:
-        func_150A8050(mtxA, 0.0f, 0.0f, fpitch);
-        func_150A8050(mtxB, roll, fyaw, 0.0f);
+        func_150A8050(mtxA, 0.0f, 0.0f, finalPitch);
+        func_150A8050(mtxB, roll, finalYaw, 0.0f);
         break;
     case 3:
-        func_150A8050(mtxA, 0.0f, 0.0f, -fpitch);
-        func_150A8050(mtxB, -fyaw, roll, 0.0f);
+        func_150A8050(mtxA, 0.0f, 0.0f, -finalPitch);
+        func_150A8050(mtxB, -finalYaw, roll, 0.0f);
         break;
     }
     func_150A7A48(mtxA, mtxB, mtxC);
-    func_150A7A48(mtxC, m1, result);
-    result[3][0] = m0[3][0];
-    result[3][1] = m0[3][1];
-    result[3][2] = m0[3][2];
+    func_150A7A48(mtxC, refMtx, result);
+    result[3][0] = mtx[3][0];
+    result[3][1] = mtx[3][1];
+    result[3][2] = mtx[3][2];
     if (blendMode != 0) {
         f32 qB[4];
         f32 qA[4];
         f32 qOut[4];
         s32 i;
         s32 j;
-        bcopy(m0, mtxA, 0x40);
+        bcopy(mtx, mtxA, 0x40);
         bcopy(result, mtxB, 0x40);
         for (i = 0; i < 3; i++) {
-            scale[i] = sqrtf(m0[i][0] * m0[i][0] + m0[i][1] * m0[i][1] + m0[i][2] * m0[i][2]);
-            ry = 1.0f / scale[i];
+            scale[i] = sqrtf(mtx[i][0] * mtx[i][0] + mtx[i][1] * mtx[i][1] + mtx[i][2] * mtx[i][2]);
+            localY = 1.0f / scale[i]; // localY reused as the inverse length
             for (j = 0; j < 3; j++) {
-                mtxA[j][i] = m0[j][i] * ry;
+                mtxA[j][i] = mtx[j][i] * localY;
             }
-            ry = 1.0f / sqrtf(result[i][0] * result[i][0] + result[i][1] * result[i][1] + result[i][2] * result[i][2]);
+            localY = 1.0f / sqrtf(result[i][0] * result[i][0] + result[i][1] * result[i][1] + result[i][2] * result[i][2]);
             for (j = 0; j < 3; j++) {
-                mtxB[j][i] = result[j][i] * ry;
+                mtxB[j][i] = result[j][i] * localY;
             }
         }
         func_15049CB8(mtxB, qB);
@@ -1315,50 +1337,50 @@ void func_15038620(s32 arg0, s32 arg1, f32 *arg2, s32 arg3, s32 arg4, s32 arg5, 
         scale[1] = 1.0f;
         scale[2] = 1.0f;
     }
-    if (arg9 != 0) {
-        func_150A7A48(mtxC, m0, mtxA);
-        bcopy(mtxA, m0, 0x40);
+    if (relative != 0) {
+        func_150A7A48(mtxC, mtx, mtxA);
+        bcopy(mtxA, mtx, 0x40);
     } else {
-        bcopy(result, m0, 0x40);
+        bcopy(result, mtx, 0x40);
         if (blendMode != 0) {
             if (scale[0] != 1.0f) {
-                m0[0][0] *= scale[0];
-                m0[1][0] *= scale[0];
-                m0[2][0] *= scale[0];
+                mtx[0][0] *= scale[0];
+                mtx[1][0] *= scale[0];
+                mtx[2][0] *= scale[0];
             }
             if (scale[1] != 1.0f) {
-                m0[0][1] *= scale[1];
-                m0[1][1] *= scale[1];
-                m0[2][1] *= scale[1];
+                mtx[0][1] *= scale[1];
+                mtx[1][1] *= scale[1];
+                mtx[2][1] *= scale[1];
             }
             if (scale[2] != 1.0f) {
-                m0[0][2] *= scale[2];
-                m0[1][2] *= scale[2];
-                m0[2][2] *= scale[2];
+                mtx[0][2] *= scale[2];
+                mtx[1][2] *= scale[2];
+                mtx[2][2] *= scale[2];
             }
         }
     }
-    data->yaw[arg6] = yaw;
-    data->pitch[arg6] = pitch;
+    data->yaw[slot] = yaw;
+    data->pitch[slot] = pitch;
     if (D_800BEAC0 == 0 && D_800BEA0C == 0) {
-        if (data->blend[arg6] > 0) {
-            data->blend[arg6]--;
+        if (data->blend[slot] > 0) {
+            data->blend[slot]--;
         }
     }
     if (!noTarget) {
-        data->timer[arg6] = 40;
+        data->timer[slot] = 40;
     }
 
     step = ((GameStruct_800BE9B4 *)&D_800BE9B4)->unk30 * 10;
-    if (step < ((data->offYaw[arg6] < 0) ? -data->offYaw[arg6] : data->offYaw[arg6])) {
-        data->offYaw[arg6] -= step * ((data->offYaw[arg6] < 0) ? -1 : 1);
+    if (step < ((data->offYaw[slot] < 0) ? -data->offYaw[slot] : data->offYaw[slot])) {
+        data->offYaw[slot] -= step * ((data->offYaw[slot] < 0) ? -1 : 1);
     } else {
-        data->offYaw[arg6] = 0;
+        data->offYaw[slot] = 0;
     }
-    if (step < ((data->offPitch[arg6] < 0) ? -data->offPitch[arg6] : data->offPitch[arg6])) {
-        data->offPitch[arg6] -= step * ((data->offPitch[arg6] < 0) ? -1 : 1);
+    if (step < ((data->offPitch[slot] < 0) ? -data->offPitch[slot] : data->offPitch[slot])) {
+        data->offPitch[slot] -= step * ((data->offPitch[slot] < 0) ? -1 : 1);
     } else {
-        data->offPitch[arg6] = 0;
+        data->offPitch[slot] = 0;
     }
 }
 
@@ -1378,7 +1400,7 @@ void func_15039A78(f32 *yaw, f32 *pitch, f32 *prevYaw, f32 *prevPitch, f32 fallb
     AimLimits *lim;
     struct108 *camera;
 
-    camera = D_800CC5E8[objIndex].unk0;
+    camera = D_800CC2D0[objIndex].camera;
     lim = func_15039A54(objIndex, 0);
     if (camera != NULL && camera->unk2C != 0x100) {
         if (lim->yawMax + lim->yawMargin < *yaw || *yaw < lim->yawMin - lim->yawMargin) {
