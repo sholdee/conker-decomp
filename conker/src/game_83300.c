@@ -3141,26 +3141,27 @@ end: // matching: a jump to the shared epilogue, not an early return
 }
 void func_1505D408(struct127 *arg0, struct127 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, s32 arg7);
 
-void func_1505D5D0(struct127 *arg0, struct127 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, s32 arg7,
-                   f32 arg8, f32 arg9, f32 arg10, f32 arg11, f32 arg12) {
-    f32 temp_f0;
+/* Pushes the actor out of an extra collision cylinder attached to `other` (offset in other's frame). */
+void func_1505D5D0(struct127 *actor, struct127 *other, f32 x, f32 y, f32 z, f32 ratio, f32 radius, s32 otherSlot,
+                   f32 extraRadius, f32 extraHeight, f32 extraY, f32 offsetA, f32 offsetB) {
+    f32 offsetX;
     f32 dx;
     f32 dy;
     f32 dz;
     f32 distSq;
     f32 sumRadius;
 
-    temp_f0 = func_1505D34C(arg1->unk40, arg11, arg12, arg1->xz_scale, &arg12);
-    arg8 *= arg1->xz_scale;
-    arg9 *= arg1->y_scale;
-    dx = arg2 - (arg1->x_position + temp_f0);
-    dz = arg4 - (arg1->z_position + arg12);
-    dy = arg3 - (arg1->y_position + (arg10 * arg1->y_scale));
-    dy *= (arg5 + (arg8 / arg9)) * 0.5f;
-    sumRadius = arg6 + arg8;
+    offsetX = func_1505D34C(other->unk40, offsetA, offsetB, other->xz_scale, &offsetB);
+    extraRadius *= other->xz_scale;
+    extraHeight *= other->y_scale;
+    dx = x - (other->x_position + offsetX);
+    dz = z - (other->z_position + offsetB);
+    dy = y - (other->y_position + (extraY * other->y_scale));
+    dy *= (ratio + (extraRadius / extraHeight)) * 0.5f;
+    sumRadius = radius + extraRadius;
     distSq = ((dx * dx) + (dy * dy)) + (dz * dz);
     if (distSq < (sumRadius * sumRadius)) {
-        func_1505D408(arg0, arg1, dx, dy, dz, distSq, sumRadius, arg7);
+        func_1505D408(actor, other, dx, dy, dz, distSq, sumRadius, otherSlot);
     }
 }
 /* Resolves collisions between the actor's body cylinder (unkE4/unkE8/unkEC) and every other actor's. */
@@ -3310,7 +3311,8 @@ u8 func_1505DADC(struct127 *actor, u16 *outAngle, u8 pitch, u8 skipIdx, u8 halfC
 }
 f32 func_1505DF10(struct127 *arg0, u8 arg1, u16 *arg2, f32 *arg3, f32 *arg4, s32 arg5);
 
-s8 func_1505DDA8(struct127 *arg0, s32 arg1, u16 arg2, f32 arg3) {
+/* The first live actor that the actor would reach within `time` at its speed, inside a cone of its move angle; -1 if none. */
+s8 func_1505DDA8(struct127 *actor, s32 unused, u16 cone, f32 time) {
     u8 i;
     u16 angle;
     f32 distXZ;
@@ -3321,9 +3323,9 @@ s8 func_1505DDA8(struct127 *arg0, s32 arg1, u16 arg2, f32 arg3) {
         if (D_800CC2D0[i].interaction_state == 0) {
             continue;
         }
-        range = arg0->xz_velocity * arg3 * 0.5f;
-        if (func_1505DF10(arg0, i, &angle, &distXZ, &dy, 0) < range * range) {
-            if ((u16)(arg0->unk76 - angle + arg2 / 2) < arg2) {
+        range = actor->xz_velocity * time * 0.5f;
+        if (func_1505DF10(actor, i, &angle, &distXZ, &dy, 0) < range * range) {
+            if ((u16)(actor->unk76 - angle + cone / 2) < cone) {
                 return i;
             }
         }
@@ -3331,23 +3333,23 @@ s8 func_1505DDA8(struct127 *arg0, s32 arg1, u16 arg2, f32 arg3) {
     return -1;
 }
 /* Both callers pass a 6th argument (always 0) that the body never reads. */
-f32 func_1505DF10(struct127 *arg0, u8 arg1, u16 *arg2, f32 *arg3, f32 *arg4, s32 arg5) {
-    struct127 *ptr;
-    f32 temp_f12;
-    f32 temp_f2;
-    f32 temp_f14;
+f32 func_1505DF10(struct127 *actor, u8 otherIdx, u16 *outAngle, f32 *outDistSqXZ, f32 *outDy, s32 unused) {
+    struct127 *other;
+    f32 dx;
+    f32 dy;
+    f32 dz;
 
-    ptr = &D_800CC2D0[arg1];
-    temp_f12 = ptr->x_position - arg0->x_position;
-    temp_f2 = arg0->y_position - ptr->y_position;
-    temp_f14 = arg0->z_position - ptr->z_position;
-    *arg4 = temp_f2;
-    *arg2 = func_1505A630(temp_f12, temp_f14, 0);
-    temp_f12 = temp_f12 * temp_f12;
-    temp_f2 = temp_f2 * temp_f2;
-    temp_f14 = temp_f14 * temp_f14;
-    *arg3 = temp_f12 + temp_f14;
-    return (temp_f12 + temp_f2) + temp_f14;
+    other = &D_800CC2D0[otherIdx];
+    dx = other->x_position - actor->x_position;
+    dy = actor->y_position - other->y_position;
+    dz = actor->z_position - other->z_position;
+    *outDy = dy;
+    *outAngle = func_1505A630(dx, dz, 0);
+    dx = dx * dx;
+    dy = dy * dy;
+    dz = dz * dz;
+    *outDistSqXZ = dx + dz;
+    return (dx + dy) + dz;
 }
 extern u16 D_800C4ED0[];
 
@@ -3554,52 +3556,53 @@ void func_1505E0C4(struct127 *actor, u16 *animEntry, AnimPlaybackState *state, s
         func_150627D4(actor);
     }
 }
-void func_1505E650(struct127 *arg0, u16 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6) {
-    u16 (*anim)[4];
+/* Starts animation `anim` of the actor's type (see func_1505E0C4); ignored while a cutscene holds the actor. */
+void func_1505E650(struct127 *actor, u16 anim, f32 speed, f32 blend, f32 arg4, f32 arg5, s32 flag8000) {
+    u16 (*animTable)[4];
     s32 idx;
     u16 *entry;
     u8 *data;
 
-    idx = arg0->id;
-    if ((D_800C3638 != 0) && ((*(u8 *)&D_800C3654 == 0) || (func_150229E4(arg0) != 0))) {
+    idx = actor->id;
+    if ((D_800C3638 != 0) && ((*(u8 *)&D_800C3654 == 0) || (func_150229E4(actor) != 0))) {
         return;
     }
-    if (arg0->id == 0xFF) {
+    if (actor->id == 0xFF) {
         return;
     }
-    if ((u16)D_800C5A90[arg0->id] == 0) {
+    if ((u16)D_800C5A90[actor->id] == 0) {
         return;
     }
-    data = (u8 *)arg0->unk2D0;
+    data = (u8 *)actor->unk2D0;
     if (data == NULL) {
         return;
     }
-    if ((u16)D_800C5A90[arg0->id] != 0) {
-        if (arg1 >= (u16)D_800C5A90[arg0->id]) {
+    if ((u16)D_800C5A90[actor->id] != 0) {
+        if (anim >= (u16)D_800C5A90[actor->id]) {
             return;
         }
     } else {
         return;
     }
-    anim = (u16 (*)[4])D_800D1588[idx];
-    if (anim == NULL) {
-        func_1505DFDC(arg0);
+    animTable = (u16 (*)[4])D_800D1588[idx];
+    if (animTable == NULL) {
+        func_1505DFDC(actor);
         return;
     }
-    if (arg1 < (u16)D_800C5A90[idx]) {
-        if (anim[0][0] != 999) {
-            entry = anim[arg1];
-            anim = NULL;
+    if (anim < (u16)D_800C5A90[idx]) {
+        if (animTable[0][0] != 999) {
+            entry = animTable[anim];
+            animTable = NULL; // matching: dead store and do-while(0) shape the block like the original
             do {
                 if (entry[0] != 999) {
                     if (entry[0] >= 30000) {
-                        func_1505DFDC(arg0);
+                        func_1505DFDC(actor);
                         return;
                     }
-                    if (arg0->unk2FF == 0) {
-                        arg3 = 0.0f;
+                    if (actor->unk2FF == 0) {
+                        blend = 0.0f;
                     }
-                    func_1505E0C4(arg0, entry, (AnimPlaybackState *)data, 0, 0, arg1, 0, arg2, arg3, arg4, arg5, arg6);
+                    func_1505E0C4(actor, entry, (AnimPlaybackState *)data, 0, 0, anim, 0, speed, blend, arg4, arg5, flag8000);
                 }
             } while (0);
         }
@@ -4562,6 +4565,7 @@ void func_15060B04(s32 sound, struct127 *actor, s32 rate) {
     }
 }
 
+/* Plays a sound at the actor. */
 void func_15060B70(s32 sound, void *actor) {
     func_10010154(sound, actor, 28000, 500, 2500);
 }
@@ -5250,6 +5254,7 @@ void func_150626EC(struct127 *actor, s32 mode) {
     }
 }
 
+/* Called after the actor's animation changed. */
 void func_150627D4(struct127 *actor) {
     actor->unk2FB = 0;
     func_1503B840(actor);
