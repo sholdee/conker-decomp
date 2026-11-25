@@ -94,87 +94,91 @@ s32 func_1502AC88(u8 *table, s32 index, s32 *info) {
     return offset;
 }
 
-s32 func_1502AF04(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
-    typedef struct { u32 address; u32 flags; } Relocation;
+/*
+ * DMAs `count` entries of the ROM table at `table`, starting at entry `index`, into `buf` (16-byte
+ * aligned within it) and rebases each entry's offset onto the table. Returns the first entry.
+ */
+RomTableEntry *func_1502AF04(u8 *table, u8 *buf, s32 index, s32 count) {
     u32 i;
-    s32 source;
-    u8 *aligned;
-    Relocation *entries;
+    s32 romAddr;
+    u8 *dst;
+    RomTableEntry *entries;
 
-    arg2 <<= 3;
-    source = (s32)arg0 + arg2;
-    aligned = (u8 *)((arg1 + 8) & ~0xF);
-    func_10004514(source & ~0xF, aligned, ((source & 0xE) + (arg3 << 3) + 0xF) & ~0xF, 1);
-    entries = (Relocation *)((s32)aligned + (source & 0xFU));
-    for (i = 0; i < (u32)arg3; i++) {
-        entries[i].address += (u32)arg0;
+    index *= sizeof(RomTableEntry);
+    romAddr = (s32)table + index;
+    dst = (u8 *)(((s32)buf + 8) & ~0xF);
+    func_10004514(romAddr & ~0xF, dst, ((romAddr & 0xE) + count * 8 + 0xF) & ~0xF, 1);
+    entries = (RomTableEntry *)((u32)dst + (romAddr & 0xF));
+    for (i = 0; i < count; i++) {
+        entries[i].offset += (u32)table;
     }
-    return (s32)aligned + (source & 0xFU);
+    return entries;
 }
-extern u8 D_AB1950;
-s32 func_1502AC88(u8 *arg0, s32 arg1, s32 *arg2);
-s32 func_1502AF04(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
+extern u8 D_AB1950[];
 
-s32 func_1502B020(s32 *arg0, s32 arg1, ...) {
+/*
+ * Follows `depth` table indices (the variadic arguments) down from the root ROM table. Returns the
+ * ROM address reached, or 0 if an entry is missing, and stores the last entry's size in *size.
+ */
+u8 *func_1502B020(s32 *size, s32 depth, ...) {
     va_list args;
-    u8 *offset;
-    s32 n;
-    s32 sp38;
+    u8 *addr;
+    s32 index;
+    s32 info;
 
-    sp38 = 1;
-    offset = &D_AB1950;
-    va_start(args, arg1);
+    info = 1;
+    addr = D_AB1950;
+    va_start(args, depth);
 
-    for (; arg1 != 0; arg1--) {
-        n = va_arg(args, s32);
-        if (sp38 != 0) {
-            offset += func_1502AC88(offset, n, &sp38);
+    for (; depth != 0; depth--) {
+        index = va_arg(args, s32);
+        if (info != 0) {
+            addr += func_1502AC88(addr, index, &info);
         }
-        sp38 = sp38 & 0xFFFFFFF;
+        info &= 0xFFFFFFF;
     }
 
-    if (arg0 != 0) {
-        *arg0 = sp38 & 0xFFFFFFF;
+    if (size != NULL) {
+        *size = info & 0xFFFFFFF;
     }
 
-    if (sp38 == 0) {
-        return 0;
-    } else {
-        return (s32)offset;
+    if (info == 0) {
+        return NULL;
     }
+    return addr;
 }
-s32 func_1502B110(u8 *offset, s32 arg1, s32 arg2, u32 arg3) {
-    u8 *unused;
-    s32 *tmp;
-    s32 more;
-    s32 ret;
-    s32 n;
 
-    unused = offset;
-    more = 1;
-    ret = 0;
-    if (offset != 0) {
-    } else {
-        offset = &D_AB1950;
+/*
+ * Follows `depth - 1` table indices from `table` (the root table if NULL), then loads `count` entries
+ * of the table reached, starting at the last index, into `buf` (see func_1502AF04).
+ */
+RomTableEntry *func_1502B110(u8 *table, s32 count, u8 *buf, u32 depth, ...) {
+    va_list args;
+    s32 index;
+    s32 info;
+    RomTableEntry *entries;
+
+    info = 1;
+    entries = NULL;
+    if (table == NULL) {
+        table = D_AB1950;
     }
 
-    tmp = (s32 *)(&arg3 + 1);
-    for (; arg3 >= 2U; arg3--) {
-        tmp = (s32 *)(((s32)tmp + 3) & -4) + 1;
-        n = *(tmp - 1);
-        if (more != 0) {
-            offset += func_1502AC88(offset, n, &more);
+    va_start(args, depth);
+    for (; depth > 1; depth--) {
+        index = va_arg(args, s32);
+        if (info != 0) {
+            table += func_1502AC88(table, index, &info);
         }
-        more = more & 0xFFFFFFF;
+        info &= 0xFFFFFFF;
     }
 
-    tmp = (s32 *)(((s32)tmp + 3) & -4) + 1;
-    n = *(tmp - 1);
-    if (more != 0) {
-        ret = func_1502AF04(offset, arg2, n, arg1);
+    index = va_arg(args, s32);
+    if (info != 0) {
+        entries = func_1502AF04(table, buf, index, count);
     }
 
-    return ret;
+    return entries;
 }
 s32 func_1502B224(s32 arg0, void *arg1, u32 arg2, u32 arg3) {
     u32 size;
@@ -265,7 +269,6 @@ s32 func_1502B4A8(Pair1502B4A8 *arg0, s32 arg1) {
     }
     return arg1;
 }
-extern u8 D_AB1950;
 s32 func_1502AC88(u8 *arg0, s32 arg1, s32 *arg2);
 s32 func_1502B350(u8 *arg0, s32 arg1, s32 *arg2);
 
@@ -284,7 +287,7 @@ s32 func_1502B5C8(s32 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     }
 
     *more = 1;
-    offset = &D_AB1950;
+    offset = D_AB1950;
     tmp = &arg1 + 1;
 
     if (arg1 != 0) {
@@ -323,7 +326,7 @@ s32 func_1502B6BC(s32 *arg0, s32 arg1, s32 *arg2, s32 arg3) {
     }
 
     *more = 1;
-    offset = &D_AB1950;
+    offset = D_AB1950;
     tmp = &arg3 + 1;
 
     if (arg3 != 0) {
@@ -361,7 +364,7 @@ s32 func_1502B7F0(s32 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     s32 sp34;
 
     sp38 = 1;
-    offset = &D_AB1950;
+    offset = D_AB1950;
     tmp = &arg1 + 1;
 
     for (; arg1 != 0; arg1--) {
@@ -390,7 +393,7 @@ s32 func_1502B8E0(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     s32 sp34;
 
     more = 1;
-    offset = &D_AB1950;
+    offset = D_AB1950;
     tmp = &arg2 + 1;
 
     for (; arg2 != 0; arg2--) {
@@ -421,7 +424,7 @@ s32 func_1502B9B4(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     s32 pad0;
 
     more = 1;
-    offset = &D_AB1950;
+    offset = D_AB1950;
     tmp = &arg0 + 1;
 
     for (; arg0 != 0; arg0--) {
