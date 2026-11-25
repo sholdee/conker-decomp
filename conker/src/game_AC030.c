@@ -245,6 +245,7 @@ void func_1507EFD0(void) {
 
     idle = &((IdleOwner *)D_800D154C->unk31C)->idle;
     count = 0;
+    /* struct127 0x139: a requested sequence, 0x13A: its countdown (pad139 in include/structs.h) */
     if (D_800D154C->pad139[1] != 0) {
         if (D_800D154C->pad139[0] < 0x21) {
             func_1507EB80(candidates, &count, D_800D154C->pad139[0]);
