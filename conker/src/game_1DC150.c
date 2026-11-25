@@ -6,7 +6,7 @@
 #include "functions.h"
 #undef func_150ADA20
 #undef func_151D9B8C
-void func_151D9B8C(u8, f32, u8, void *, struct17 *, s16, u8, u8, u8, u8, s32);
+void func_151D9B8C(u8, f32, u8, void *, f32 *, s16, u8, u8, u8, u8, s32);
 u32 func_150ADA20(void);
 #include "variables.h"
 
@@ -49,7 +49,7 @@ typedef struct {
     /* 0x1E */ u8 pad1E[6];
 } GroundHit;
 
-void func_15153F18(s16 *, void *, s32, s32, s32);
+void func_15153F18(s16 *, void *, GroundHit *, s32, s32);
 void func_1504715C(GroundHit *, struct127 *);
 s32 func_15046C80(f32 *, s32, f32, GroundHit *);
 void func_15143874(s16, f32, f32 *, f32 *);
@@ -65,21 +65,7 @@ void func_151AECA0(struct127 *obj, u8 arg1, s32 arg2) {
     f32 pos[3];
     f32 center[3];
     f32 centerProbe[3];
-    f32 unused0;
-    f32 unusedA;
-    f32 unusedB;
-    f32 unused1;
-    f32 unused2;
-    f32 unused3;
-    f32 unused4;
-    f32 unused5;
-    f32 unused6;
-    f32 unused7;
-    f32 unused8;
-    f32 unused9;
-    f32 unused10;
-    f32 unused11;
-    f32 height;
+    f32 unused[15];
     u32 randA;
     u32 randB;
     f32 randF1;
@@ -117,10 +103,10 @@ lbD:
     burst.unk24 = 18.0f;
     burst.unk28 = 11.80000019f;
     burst.unk40 = 0.5f;
-    func_15153F18(&burst.unk0, burst.position, (s32)&ground, 255, 1);
+    func_15153F18(&burst.unk0, burst.position, &ground, 255, 1);
 lbA:
     count = (func_150ADA20() % 6) + 7;
-    probe[1] = obj->y_position + 100;
+    probe[1] = obj->y_position + 100.0f;
     while (count != 0) {
         angle = func_150ADA20();
         func_15143874((u8)angle, (func_150ADA68() * 59.0f) + 90.0f, &pos[0], &pos[2]);
@@ -136,7 +122,7 @@ lbC:
         pos[1] += 10.0f;
         if (func_150ADA20() & 1) {
             func_151D9B8C(0, (func_150ADA68() * 4.5f) + 15.0f, (func_150ADA68() * 100.0f) + 155.0f,
-                          ground.unk4, (struct17 *)pos, 100, 0, 1, 0, arg1, arg2);
+                          ground.unk4, pos, 100, 0, 1, 0, arg1, arg2);
         } else {
             func_151DAB58(0, (func_150ADA68() * 5.900000095f) + 6.099999905f, (func_150ADA68() * 100) + 155,
                           pos, 1, arg1, arg2);
