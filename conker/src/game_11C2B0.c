@@ -6,8 +6,6 @@ extern u8 D_800A1638[];
 extern u8 D_800A163C[];
 extern f32 D_800A15F0[][3];
 extern s32 (*D_8008FD00)(s32, u8);
-extern f32 D_800A1830;
-extern f32 D_800A1834;
 extern u8 D_800A1674;
 extern u8 D_800A1680;
 extern f32 sinf(f32);
@@ -22,7 +20,8 @@ void func_150F0A24(f32 *);
 
 struct Beam *func_150EEF80(struct127 *, u8, u8, s32);
 
-/* Fires gun slot `slot` of `actor`: spawns its beam, a spark burst and an effect at the muzzle. */
+/* Fires beam slot `slot` (0 or 1) of `actor`: spawns its beam, a spark burst and an effect
+ * at the muzzle. */
 void func_150EEE00(struct127 *actor, u8 slot) {
     f32 muzzle[3];
     Header header;
@@ -69,7 +68,7 @@ typedef union {
     ActorSwapMsg swap;
 } ActorMsg;
 
-/* Sends message 0x43 for gun slot `slot` of `actor`. */
+/* Sends message 0x43 for slot `slot` of `actor`. */
 void func_150EEF40(struct127 *actor, u8 slot) {
     ActorRefMsg msg;
 
@@ -125,13 +124,13 @@ typedef struct {
     /* 0x18 */ struct Beam *beam;
 } Flash;
 
-/* State a gun beam object carries at +0x110. */
+/* State a beam object carries at +0x110. The beam runs from a bone of `actor` to `target`. */
 typedef struct {
     /* 0x00 */ struct127 *actor;       /* the shooter */
     /* 0x04 */ u8 actorId;             /* actor->unique_id at spawn */
     /* 0x08 */ struct127 *target;
     /* 0x0C */ u8 targetId;
-    /* 0x0D */ u8 slot;                /* gun slot, 0 or 1 */
+    /* 0x0D */ u8 slot;                /* 0 or 1: picks the source bone and offset */
     /* 0x10 */ f32 widthPhase;
     /* 0x14 */ f32 alphaPhase;
     /* 0x18 */ u8 flags;               /* bit 0: the beam is aimed this frame */
@@ -216,7 +215,7 @@ extern void *func_151A7950(void *, s32, u8, s32);
 struct Glow *func_150EFEC8(struct127 *, u8, u8, u8, u8, Beam *, u8, s32);
 Flash *func_150F0198(u8, u8, u8, u8, Beam *, u8, s32);
 
-/* Spawns the beam of gun slot `slot` of `actor`, with its sparks, emitter, glow and flash. */
+/* Spawns the beam of slot `slot` of `actor`, with its sparks, emitter, glow and flash. */
 Beam *func_150EEF80(struct127 *actor, u8 slot, u8 arg2, s32 arg3) {
     Beam *beam;
     BeamSpawn spawn;
@@ -402,11 +401,12 @@ s32 func_150EF38C(Beam *beam) {
     return 1;
 }
 
+/* Whether `actor` has id 0x28. */
 s32 func_150EF784(struct127 *actor, s32 arg1, s32 arg2) {
     if (actor->id == 0x28) {
-        return 1;
+        return TRUE;
     }
-    return 0;
+    return FALSE;
 }
 
 /* Releases a beam's sparks, emitter, glow and flash (func_1516972C), then the beam itself. */
@@ -686,7 +686,7 @@ typedef struct {
     u8 unk58;
     s8 unk59;
     u8 pad5A[2];
-} Struct98_150EFEC8;
+} GlowSprite;
 
 typedef struct {
     u8 unk00;
@@ -718,7 +718,7 @@ typedef struct {
     u8 unk47;
     s32 unk48;
     u8 pad4C[0xC];
-} Struct40_150EFEC8;
+} GlowSpawn;
 
 typedef struct Glow {
     /* 0x000 */ u8 pad0[0x34];
@@ -730,11 +730,11 @@ typedef struct Glow {
     /* 0x170 */ GlowLink link;
 } Glow;
 
-/* Spawns the glow sprite of `beam` (gun slot `slot` of `actor`), tinted (r, g, b). */
+/* Spawns the glow sprite of `beam` (slot `slot` of `actor`), tinted (r, g, b). */
 Glow *func_150EFEC8(struct127 *actor, u8 slot, u8 r, u8 g, u8 b, Beam *beam, u8 arg6, s32 arg7) {
     Glow *glow;
-    Struct98_150EFEC8 sp98;
-    Struct40_150EFEC8 sp40;
+    GlowSprite sprite;
+    GlowSpawn spawn;
     GlowLink link;
 
     link.actor = actor;
@@ -742,65 +742,65 @@ Glow *func_150EFEC8(struct127 *actor, u8 slot, u8 r, u8 g, u8 b, Beam *beam, u8 
     link.slot = slot;
     link.beam = beam;
 
-    sp40.unk00 = D_8008FD00((s32)actor, slot);
-    sp40.unk01 = 3;
-    sp40.unk02 = 0x2203;
-    sp40.unk04 = 300;
-    sp40.unk08 = 0;
-    sp40.unk0C = 0;
-    sp40.unk10 = r;
-    sp40.unk11 = g;
-    sp40.unk12 = b;
-    sp40.unk13 = 0xFF;
-    sp40.unk18 = 100.0f;
-    sp40.unk14 = 100.0f;
-    sp40.unk1C = 0.0f;
-    sp40.unk20 = 0.0f;
-    sp40.unk24 = 0.0f;
-    sp40.unk28 = 0.0f;
-    sp40.unk2C = 0.0f;
-    sp40.unk30 = 0.0f;
-    sp40.unk34 = 1.0f;
-    sp40.unk38 = 1.0f;
-    sp40.unk3C = 1.0f;
-    sp40.unk40 = 0xCD2002;
-    sp40.unk44 = 0xFF;
-    sp40.unk45 = 0xFF;
-    sp40.unk46 = 0;
-    sp40.unk47 = 6;
-    sp40.unk48 = 0;
+    spawn.unk00 = D_8008FD00((s32)actor, slot);
+    spawn.unk01 = 3;
+    spawn.unk02 = 0x2203;
+    spawn.unk04 = 300;
+    spawn.unk08 = 0;
+    spawn.unk0C = 0;
+    spawn.unk10 = r;
+    spawn.unk11 = g;
+    spawn.unk12 = b;
+    spawn.unk13 = 0xFF;
+    spawn.unk18 = 100.0f;
+    spawn.unk14 = 100.0f;
+    spawn.unk1C = 0.0f;
+    spawn.unk20 = 0.0f;
+    spawn.unk24 = 0.0f;
+    spawn.unk28 = 0.0f;
+    spawn.unk2C = 0.0f;
+    spawn.unk30 = 0.0f;
+    spawn.unk34 = 1.0f;
+    spawn.unk38 = 1.0f;
+    spawn.unk3C = 1.0f;
+    spawn.unk40 = 0xCD2002;
+    spawn.unk44 = 0xFF;
+    spawn.unk45 = 0xFF;
+    spawn.unk46 = 0;
+    spawn.unk47 = 6;
+    spawn.unk48 = 0;
 
-    sp98.unk04 = 160.0f;
-    sp98.unk00 = 160.0f;
-    sp98.unk0C = 80.0f;
-    sp98.unk08 = 80.0f;
-    sp98.unk10 = 0.5f;
-    sp98.unk14 = 0.5f;
-    sp98.unk18 = 1.0f;
-    sp98.unk1C = D_800A1830;
-    sp98.unk20 = D_800A1834;
-    sp98.unk24 = -1;
-    sp98.unk34 = -1;
-    sp98.unk28 = -1;
-    sp98.unk38 = -1;
-    sp98.unk2C = -1;
-    sp98.unk3C = -1;
-    sp98.unk30 = -1;
-    sp98.unk40 = -1;
-    sp98.unk44 = 0;
-    sp98.unk48 = 1.0f;
-    sp98.unk4C = 0;
-    sp98.unk4E = 0;
-    sp98.unk50 = 0;
-    sp98.unk52 = 0;
-    sp98.unk54 = 0xFF;
-    sp98.unk55 = 0xFF;
-    sp98.unk56 = 0xFF;
-    sp98.unk57 = 0xFF;
-    sp98.unk58 = 10;
-    sp98.unk59 = -1;
+    sprite.unk04 = 160.0f;
+    sprite.unk00 = 160.0f;
+    sprite.unk0C = 80.0f;
+    sprite.unk08 = 80.0f;
+    sprite.unk10 = 0.5f;
+    sprite.unk14 = 0.5f;
+    sprite.unk18 = 1.0f;
+    sprite.unk1C = 0.6999999881f;
+    sprite.unk20 = 9.999999975e-07f;
+    sprite.unk24 = -1;
+    sprite.unk34 = -1;
+    sprite.unk28 = -1;
+    sprite.unk38 = -1;
+    sprite.unk2C = -1;
+    sprite.unk3C = -1;
+    sprite.unk30 = -1;
+    sprite.unk40 = -1;
+    sprite.unk44 = 0;
+    sprite.unk48 = 1.0f;
+    sprite.unk4C = 0;
+    sprite.unk4E = 0;
+    sprite.unk50 = 0;
+    sprite.unk52 = 0;
+    sprite.unk54 = 0xFF;
+    sprite.unk55 = 0xFF;
+    sprite.unk56 = 0xFF;
+    sprite.unk57 = 0xFF;
+    sprite.unk58 = 10;
+    sprite.unk59 = -1;
 
-    glow = func_151407D0(&sp98, 0x6C, &sp40, 0x1E, 0, 0, 0, -1, arg6, arg7);
+    glow = func_151407D0(&sprite, 0x6C, &spawn, 0x1E, 0, 0, 0, -1, arg6, arg7);
     if (glow != NULL) {
         memcpy(&glow->link, &link, sizeof(link));
     }
@@ -937,7 +937,7 @@ extern s32 func_15145EA4(f32 **src, f32 **dst, Mtx *mtx, s32 count);
 extern void func_15102B38(struct127 *, u8, f32 *, f32 *, f32 *, s32, s32, f32, struct17 *, s32, s32, s32, u8, s32);
 s32 func_151C229C(struct17 *arg0, struct17 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11, struct127 *arg12, s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24, s32 arg25, s32 arg26);
 
-/* Fires a projectile (func_151C229C) from gun slot `slot` of `actor` once actor->unk2EC
+/* Fires a projectile (func_151C229C) from slot `slot` of `actor` once actor->unk2EC
  * reaches 90, with a spark burst and a func_15102B38 effect at the muzzle. */
 s32 func_150F03F8(actor, slot, arg2, arg3)
     struct127 *actor;
@@ -1052,8 +1052,8 @@ void func_150F088C(Glow *glow, ActorMsg *msg, u8 type) {
 }
 
 void func_150F0938(s32 arg0) {
-    func_15160A58(arg0, 0x25, &D_800A1674, 2, 0x12C, 4, 0, 0xFF, 0, 0xFF, 0, -1, 0, 0, 0xFF, 1);
-    func_15160A58(arg0, 2, &D_800A1680, 2, 0x12C, 0xD, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, 0xFF, 1);
+    func_15160A58(arg0, 0x25, &D_800A1674, 2, 300, 4, 0, 0xFF, 0, 0xFF, 0, -1, 0, 0, 0xFF, 1);
+    func_15160A58(arg0, 2, &D_800A1680, 2, 300, 0xD, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, 0xFF, 1);
 }
 
 typedef struct {
@@ -1240,7 +1240,7 @@ void func_150F0BEC(struct127 *actor) {
     spawn.unk8 = 0x4403;
     spawn.unk0 = 0x200005;
     spawn.unk4 = 0x70600;
-    spawn.unkA = 0x12C;
+    spawn.unkA = 300;
     spawn.unkC = 0;
     spawn.unk10 = 0;
     spawn.unk14 = 0xFF;
@@ -1526,7 +1526,7 @@ extern f32 D_800A168C[][4][2][3];
 extern f32 D_800A174C[][4][2][3];
 extern u8 D_800A180C[][2];
 
-/* Spark burst and func_15102B38 effect at gun slot `slot` of `actor`, muzzle variant
+/* Spark burst and func_15102B38 effect at slot `slot` of `actor`, muzzle variant
  * `variant` (0-3); actors with id 0x23 use the second table set. */
 void func_150F16DC(actor, slot, variant, arg3, arg4)
     struct127 *actor;
