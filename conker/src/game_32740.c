@@ -3,14 +3,7 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3F_15005818;
-
-extern f32 D_800959F0;
-void func_1510E7A4(s32, s32, s32, s32, s32, s32, f32, f32, f32, f32, u16, s32, f32, f32);
+void func_1510E7A4(void *, void *, f32 *, void *, void *, s32, f32, f32, f32, f32, u16, s32, f32, f32);
 void func_15123070(struct108 *);
 void func_1512D560(struct108 *, s32, struct168 *);
 
@@ -129,8 +122,8 @@ void func_150054C4(struct108 *view, s32 index, s16 resource, s32 mode) {
     func_15005A60(view, resource);
     view->unk364 = -10000.0f;
     // matching: word-wise 12-byte struct copies; the header splits these vectors into scalars
-    *(struct167 *)&view->unk2E0 = *(struct167 *)&view->unk2BC;
-    *(struct167 *)&view->unk2EC = *(struct167 *)&view->unk2F8;
+    *(vertex *)&view->unk2E0 = *(vertex *)&view->unk2BC;
+    *(vertex *)&view->unk2EC = *(vertex *)&view->unk2F8;
     view->unk7E8 = 50.0f;
     view->unk86C = 999.0f;
     view->unk8BC = D_800BE2B0[view->unk23D];
@@ -141,113 +134,53 @@ void func_150054C4(struct108 *view, s32 index, s16 resource, s32 mode) {
     view->unk5FE = 60;
     view->unk23C = 1;
 }
-void func_15005818(struct108 *arg0, struct168 *arg1, Vec3F_15005818 *arg2) {
-    Vec3F_15005818 *sp48;
 
-    arg0->unk23C = 1;
-    arg0->unk2F8 = arg2->x;
-    arg0->unk2FC = arg2->y;
-    arg0->unk300 = arg2->z;
-    *(struct167 *)((u8 *)arg0 + 0x27C) = *(struct167 *)&arg0->unk2F8;
-    *(struct167 *)&arg0->unk304 = *(struct167 *)&arg0->unk2F8;
+/**
+ * Moves camera `view` to `eye`, aims it at `actor`'s position and resets its derived state.
+ */
+void func_15005818(struct108 *view, struct127 *actor, vertex *eye) {
+    vertex *viewEye;
 
-    sp48 = (Vec3F_15005818 *)&arg0->unk2F8;
-    func_1510E7A4((s32)((u8 *)arg0 + 0x644), (s32)((u8 *)arg0 + 0x648), (s32)&arg0->unk354,
-                  (s32)((u8 *)arg0 + 0x360), (s32)((u8 *)arg0 + 0x640), 0, arg0->unk2F8, arg0->unk2FC,
-                  arg0->unk300, arg0->unk2FC, 0, 0, D_800959F0, arg0->unk2FC);
+    view->unk23C = 1;
+    view->unk2F8 = eye->x;
+    view->unk2FC = eye->y;
+    view->unk300 = eye->z;
+    // matching: word-wise 12-byte struct copies; the header splits these vectors into scalars
+    *(vertex *)((u8 *)view + 0x27C) = *(vertex *)&view->unk2F8; // struct108 has no field at 0x27C
+    *(vertex *)&view->unk304 = *(vertex *)&view->unk2F8;
 
-    arg0->unk358 = arg0->unk354;
-    arg0->unk35C = arg0->unk354;
+    viewEye = (vertex *)&view->unk2F8; // matching: kept live across the call in a stack slot
+    func_1510E7A4((u8 *)view + 0x644, (u8 *)view + 0x648, &view->unk354, &view->pad360, (u8 *)view + 0x640, 0,
+                  view->unk2F8, view->unk2FC, view->unk300, view->unk2FC, 0, 0, -10000.0f, view->unk2FC);
 
-    arg0->unk2A4 = arg1->unk14;
-    arg0->unk2A8 = arg1->unk18;
-    *(f32 *)&arg0->unk2AC = arg1->unk1C;
-    *(struct167 *)&arg0->unk2BC = *(struct167 *)&arg0->unk2A4;
+    view->unk358 = view->unk354;
+    view->unk35C = view->unk354;
 
-    *(struct167 *)&arg0->unk2B0 = *(struct167 *)&arg0->unk2A4;
+    view->unk2A4 = actor->x_position;
+    view->unk2A8 = actor->y_position;
+    *(f32 *)&view->unk2AC = actor->z_position;
+    *(vertex *)&view->unk2BC = *(vertex *)&view->unk2A4;
+    *(vertex *)&view->unk2B0 = *(vertex *)&view->unk2A4;
 
-    arg0->unk374 = sqrtf(((((Vec3F_15005818 *)&arg0->unk2A4)->x - ((Vec3F_15005818 *)&arg0->unk2F8)->x) *
-                          (((Vec3F_15005818 *)&arg0->unk2A4)->x - ((Vec3F_15005818 *)&arg0->unk2F8)->x)) +
-                         ((((Vec3F_15005818 *)&arg0->unk2A4)->z - ((Vec3F_15005818 *)&arg0->unk2F8)->z) *
-                          (((Vec3F_15005818 *)&arg0->unk2A4)->z - ((Vec3F_15005818 *)&arg0->unk2F8)->z)));
-    arg0->unk34C = arg0->unk2FC - arg0->unk354;
-    arg0->unk348 = arg0->unk2FC - arg0->unk354;
+    // matching: z is read through the vector (unk2AC is typed s32); *(f32 *)&view->unk2AC reorders the loads
+    view->unk374 = sqrtf((view->unk2A4 - view->unk2F8) * (view->unk2A4 - view->unk2F8) +
+                         (((vertex *)&view->unk2A4)->z - view->unk300) * (((vertex *)&view->unk2A4)->z - view->unk300));
+    view->unk34C = view->unk2FC - view->unk354;
+    view->unk348 = view->unk2FC - view->unk354;
 
-    *(struct167 *)&arg0->unk2E0 = *(struct167 *)&arg0->unk2BC;
-    *(struct167 *)&arg0->unk2EC = *(struct167 *)sp48;
-    func_15124B18(arg0);
-    func_15125330(arg0);
-    func_1512523C(arg0);
-    func_15123070(arg0);
+    *(vertex *)&view->unk2E0 = *(vertex *)&view->unk2BC;
+    *(vertex *)&view->unk2EC = *viewEye;
+    func_15124B18(view);
+    func_15125330(view);
+    func_1512523C(view);
+    func_15123070(view);
 
-    arg0->unk5F0 |= 4;
-    if ((D_800BE9F0 != 0x21) && (D_800C35EA != 1)) {
-        func_1512D560(arg0, 5, 0);
-        *(f32 *)((u8 *)&D_800C3600 + 0xC) = arg0->unk37C;
-        func_1512D560(arg0, 8, (struct168 *)&D_800C3600);
-        func_1512D560(arg0, 6, 0);
+    view->unk5F0 |= 4;
+    if (D_800BE9F0 != 0x21 && D_800C35EA != 1) {
+        func_1512D560(view, 5, NULL);
+        // the header declares D_800C3600 as a struct168 pointer, but it is the struct itself
+        *(f32 *)((u8 *)&D_800C3600 + 0xC) = view->unk37C;
+        func_1512D560(view, 8, (struct168 *)&D_800C3600);
+        func_1512D560(view, 6, NULL);
     }
 }
-// void func_15005818(struct108 *arg0, void *arg1, void *arg2) {
-//     void *sp48;
-//     f32 temp_f0;
-//     f32 temp_f12;
-//     f32 temp_f14;
-//     f32 temp_f2;
-//     f32 temp_f2_2;
-//     void *temp_a1;
-//     void *temp_v0;
-//     void *temp_v1;
-//
-//     arg0->unk23C = (u8)1;
-//     temp_v1 = arg0->unk2F8;
-//     arg0->unk2F8 = (f32) arg2->unk0;
-//     arg0->unk2FC = (f32) arg2->unk4;
-//     arg0->unk300 = (f32) arg2->unk8;
-//     arg0->unk27C = (s32) temp_v1->unk0;
-//     arg0->unk280 = (s32) temp_v1->unk4;
-//     arg0->unk284 = (s32) temp_v1->unk8;
-//     arg0->unk304 = (s32) temp_v1->unk0;
-//     arg0->unk308 = (s32) temp_v1->unk4;
-//     arg0->unk30C = (s32) temp_v1->unk8;
-//     temp_f0 = arg0->unk2FC;
-//     sp48 = temp_v1;
-//     func_1510E7A4(arg0->unk644, arg0->unk648, arg0->unk354, arg0->unk360, arg0->unk640, 0, arg0->unk2F8, temp_f0, arg0->unk300, temp_f0, 0, 0, D_800959F0, temp_f0);
-//     temp_f2 = arg0->unk354;
-//     arg0->unk358 = temp_f2;
-//     arg0->unk35C = temp_f2;
-//     temp_v0 = arg0->unk2A4;
-//     temp_a1 = arg0->unk2BC;
-//     arg0->unk2A4 = (f32) arg1->unk14;
-//     arg0->unk2A8 = (f32) arg1->unk18;
-//     arg0->unk2AC = (f32) arg1->unk1C;
-//     temp_a1->unk0 = (s32) temp_v0->unk0;
-//     temp_a1->unk4 = (s32) temp_v0->unk4;
-//     temp_a1->unk8 = (s32) temp_v0->unk8;
-//     temp_f12 = arg0->unk2A4 - arg0->unk2F8;
-//     temp_f14 = arg0->unk2AC - arg0->unk300;
-//     arg0->unk2B0 = (s32) temp_v0->unk0;
-//     arg0->unk2B4 = (s32) temp_v0->unk4;
-//     temp_f2_2 = arg0->unk2FC - arg0->unk354;
-//     arg0->unk2B8 = (s32) temp_v0->unk8;
-//     arg0->unk34C = temp_f2_2;
-//     arg0->unk348 = temp_f2_2;
-//     arg0->unk374 = sqrtf((temp_f12 * temp_f12) + (temp_f14 * temp_f14));
-//     arg0->unk2E0 = (s32) temp_a1->unk0;
-//     arg0->unk2E4 = (s32) temp_a1->unk4;
-//     arg0->unk2E8 = (s32) temp_a1->unk8;
-//     arg0->unk2EC = (s32) temp_v1->unk0;
-//     arg0->unk2F0 = (s32) temp_v1->unk4;
-//     arg0->unk2F4 = (s32) temp_v1->unk8;
-//     func_15124B18(temp_f12, temp_f14, arg0, temp_a1);
-//     func_15125330(arg0);
-//     func_1512523C(arg0);
-//     func_15123070(arg0);
-//     arg0->unk5F0 = (s32) (arg0->unk5F0 | 4);
-//     if ((D_800BE9F0 != 0x21) && (D_800C35EA != 1)) {
-//         func_1512D560(arg0, 5, 0);
-//         D_800C3600->unkC = (f32) arg0->unk37C;
-//         func_1512D560(arg0, 8, D_800C3600);
-//         func_1512D560(arg0, 6, 0);
-//     }
-// }
