@@ -1,9 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "libc/math.h"
 
 void func_150E5AE0(void);
-
 
 /* Descriptor passed to func_15134DAC (same layout as game_1228D0.c's struct_150F6890). */
 typedef struct {
@@ -348,6 +348,7 @@ void func_150EA5CC(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz) {
     }
 }
 
+/* Callback that ignores its argument and calls func_150E5AE0. */
 void func_150EA8E0(s32 arg0) {
     func_150E5AE0();
 }
@@ -436,163 +437,167 @@ void func_150EA944(struct_EA944 *entry) {
     }
 }
 
-typedef struct Game71820Hit {
-    f32 height;
-    s16 points[9];
-    s32 object;
-    u8 flags;
-    u8 active;
-    u8 pad1E[2];
-    s32 field20;
-} Game71820Hit;
+/* Ground probe result filled by func_15046C80. */
+typedef struct {
+    /* 0x00 */ f32 height;
+    /* 0x04 */ s16 unk4[9];
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ u8  unk1C;
+    /* 0x1D */ u8  unk1D;
+    /* 0x1E */ u8  pad1E[2];
+    /* 0x20 */ s32 unk20;
+} GroundHit;
 
-typedef struct Game117FC0Vec2 {
-    f32 x;
-    f32 y;
-} Game117FC0Vec2;
+/* A point on the ground plane (world x and z). */
+typedef struct {
+    /* 0x00 */ f32 x;
+    /* 0x04 */ f32 z;
+} Vec2f;
 
-typedef struct Game117FC0Effect {
-    Game117FC0Vec2 position;
-    Game117FC0Vec2 velocity;
-    f32 height;
-    f32 field14;
-    f32 lifetime;
-    Game71820Hit hit;
-} Game117FC0Effect;
+/* Motion state of a ground-hugging flash, kept at +0x18 of the object func_151602C0 returns. */
+typedef struct {
+    /* 0x00 */ Vec2f position;
+    /* 0x08 */ Vec2f velocity;
+    /* 0x10 */ f32 height;      /* used when the ground probe finds nothing */
+    /* 0x14 */ f32 probeHeight; /* height the ground probe starts from */
+    /* 0x18 */ f32 lifetime;
+    /* 0x1C */ GroundHit ground;
+} GroundFlash; // size 0x40
 
-typedef struct Game117FC0Descriptor {
-    u8 field0;
-    s8 field1;
-    s16 field2;
-    s8 field4;
-} Game117FC0Descriptor;
-
-typedef struct Game117FC0Emitter {
-    f32 values[15];
-    u8 colour[4];
-} Game117FC0Emitter;
-
-typedef struct Game117FC0Actor {
-    u8 pad0;
-    u8 field1;
-    u8 pad2[0xA];
-    u8 fieldC;
-    u8 padD[0x1B];
-    Game117FC0Emitter emitter;
-} Game117FC0Actor;
-
-s32 func_151602C0(u8 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-f32 sqrtf(f32);
-extern f32 D_800A1460;
-
-void func_150EAB10(Game117FC0Actor *arg0) {
-    s32 unused;
-    Game117FC0Effect effect;
-    Game117FC0Descriptor descriptor;
-    s32 unusedB0;
-    Game117FC0Vec2 end;
-    Game117FC0Vec2 start;
-    f32 speed;
-    f32 length;
-    f32 random;
-    s32 position[3];
-    s32 result;
-    Game117FC0Emitter *emitter;
-
-    emitter = &arg0->emitter;
-    emitter->values[12] += (emitter->values[10] + func_150ADA68() * emitter->values[11]) * D_800BE9A4;
-    if (emitter->values[12] > 1.0f) {
-        effect.hit.object = 0;
-        effect.hit.flags = 0;
-        effect.hit.active = 0;
-        effect.hit.field20 = 0;
-        effect.hit.height = D_800A1460;
-        effect.height = emitter->values[8];
-        effect.field14 = emitter->values[9];
-        descriptor.field0 = 2;
-        descriptor.field1 = 0x13;
-        descriptor.field2 = 0x12C;
-        descriptor.field4 = 0;
-        do {
-            speed = emitter->values[13] + emitter->values[14] * func_150ADA68();
-            if (speed != 0.0f) {
-                random = func_150ADA68();
-                start.x = emitter->values[0] + emitter->values[4] * random;
-                start.y = emitter->values[1] + emitter->values[5] * random;
-                random = func_150ADA68();
-                end.x = emitter->values[2] + emitter->values[6] * random;
-                end.y = emitter->values[3] + emitter->values[7] * random;
-                effect.velocity.x = end.x - start.x;
-                effect.velocity.y = end.y - start.y;
-                length = sqrtf(effect.velocity.x * effect.velocity.x + effect.velocity.y * effect.velocity.y);
-                if (length != 0.0f) {
-                    random = 1.0f / length;
-                    effect.velocity.x *= random;
-                    effect.velocity.y *= random;
-                    if (func_150ADA20() & 1) {
-                        effect.position = start;
-                    } else {
-                        effect.position = end;
-                        effect.velocity.x = -effect.velocity.x;
-                        effect.velocity.y = -effect.velocity.y;
-                    }
-                    effect.velocity.x *= speed;
-                    effect.velocity.y *= speed;
-                    effect.lifetime = length / speed;
-                    position[0] = (s32)effect.position.x;
-                    position[1] = (s32)emitter->values[8];
-                    position[2] = (s32)effect.position.y;
-                    result = func_151602C0((u8 *)&descriptor, position,
-                        emitter->colour[3], emitter->colour[0], emitter->colour[1],
-                        emitter->colour[2], 0xFF, 0, 0x40, arg0->fieldC, arg0->field1);
-                    if (result != 0) {
-                        memcpy((u8 *)result + 0x18, &effect, 0x40);
-                    }
-                }
-            }
-            emitter->values[12] -= 1.0f;
-        } while (emitter->values[12] > 1.0f);
-    }
-}
+/* Spawner state: flashes run between a random point on the start line and one on the end line. */
+typedef struct {
+    /* 0x00 */ Vec2f startOrigin;
+    /* 0x08 */ Vec2f endOrigin;
+    /* 0x10 */ Vec2f startExtent;
+    /* 0x18 */ Vec2f endExtent;
+    /* 0x20 */ f32 height;
+    /* 0x24 */ f32 probeHeight;
+    /* 0x28 */ f32 rate;        /* flashes per frame */
+    /* 0x2C */ f32 rateRange;
+    /* 0x30 */ f32 accumulator;
+    /* 0x34 */ f32 speed;
+    /* 0x38 */ f32 speedRange;
+    /* 0x3C */ u8  colour[4];
+} FlashSpawner;
 
 typedef struct {
-    /* 0x00 */ f32 unk0;  /* arg0->0x18 */
-    /* 0x04 */ f32 unk4;  /* arg0->0x1C */
-    /* 0x08 */ f32 unk8;  /* arg0->0x20 */
-    /* 0x0C */ f32 unkC;  /* arg0->0x24 */
-    /* 0x10 */ f32 unk10; /* arg0->0x28 */
-    /* 0x14 */ s32 unk14; /* arg0->0x2C */
-    /* 0x18 */ f32 unk18; /* arg0->0x30 */
-    /* 0x1C */ f32 unk1C; /* arg0->0x34 */
-} struct_EAE24b;
+    /* 0x00 */ u8  pad0;
+    /* 0x01 */ u8  unk1;
+    /* 0x02 */ u8  pad2[0xA];
+    /* 0x0C */ u8  unkC;
+    /* 0x0D */ u8  padD[0x1B];
+    /* 0x28 */ FlashSpawner spawner;
+} struct_EAB10;
+
+/* The object func_151602C0 creates; func_150EAE24 is its per-frame update. */
+typedef struct {
+    /* 0x00 */ u8  pad0[0xE];
+    /* 0x0E */ s16 x;
+    /* 0x10 */ s16 y;
+    /* 0x12 */ s16 z;
+} FlashSprite;
 
 typedef struct {
     /* 0x00 */ u8  pad0[0x14];
-    /* 0x14 */ s16 *unk14;
-    /* 0x18 */ struct_EAE24b unk18;
-} struct_EAE24;
+    /* 0x14 */ FlashSprite *sprite;
+    /* 0x18 */ GroundFlash flash;
+} FlashObject;
 
-s32 func_15046C80(f32 *, s32, s32, f32 *);
+FlashObject *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
-s32 func_150EAE24(struct_EAE24 *arg0) {
-    struct_EAE24b *p;
-    f32 sp28[3];
+/* Spawns this frame's share of flashes, each sliding from one line to the other along the ground. */
+void func_150EAB10(struct_EAB10 *actor) {
+    s32 pad; // matching: unused stack slots that keep the frame layout
+    GroundFlash flash;
+    Header header;
+    s32 padB0; // matching: see pad
+    Vec2f end;
+    Vec2f start;
+    f32 speed;
+    f32 length;
+    f32 random;
+    Header2 origin;
+    FlashObject *obj;
+    FlashSpawner *spawner;
 
-    arg0->unk18.unk0 += arg0->unk18.unk8 * D_800BE9A4;
-    arg0->unk18.unk4 += arg0->unk18.unkC * D_800BE9A4;
-    sp28[0] = arg0->unk18.unk0;
-    sp28[1] = arg0->unk18.unk10;
-    sp28[2] = arg0->unk18.unk4;
-    arg0->unk14[7] = (s16)arg0->unk18.unk0;
-    arg0->unk14[9] = (s16)arg0->unk18.unk4;
-    p = &arg0->unk18;
-    if (func_15046C80(sp28, 0, arg0->unk18.unk14, &p->unk1C) != 0) {
-        arg0->unk14[8] = (s16)p->unk1C;
-    } else {
-        arg0->unk14[8] = (s16)p->unk10;
+    spawner = &actor->spawner;
+    spawner->accumulator += (spawner->rate + func_150ADA68() * spawner->rateRange) * D_800BE9A4;
+    if (spawner->accumulator > 1.0f) {
+        flash.ground.unk18 = 0;
+        flash.ground.unk1C = 0;
+        flash.ground.unk1D = 0;
+        flash.ground.unk20 = 0;
+        flash.ground.height = -10000.0f;
+        flash.height = spawner->height;
+        flash.probeHeight = spawner->probeHeight;
+        header.unk0 = 2;
+        header.unk1 = 19;
+        header.unk2 = 300;
+        header.unk4 = 0;
+        do {
+            speed = spawner->speed + spawner->speedRange * func_150ADA68();
+            if (speed != 0.0f) {
+                random = func_150ADA68();
+                start.x = spawner->startExtent.x * random + spawner->startOrigin.x;
+                start.z = spawner->startExtent.z * random + spawner->startOrigin.z;
+                random = func_150ADA68();
+                end.x = spawner->endExtent.x * random + spawner->endOrigin.x;
+                end.z = spawner->endExtent.z * random + spawner->endOrigin.z;
+                flash.velocity.x = end.x - start.x;
+                flash.velocity.z = end.z - start.z;
+                length = sqrtf(flash.velocity.x * flash.velocity.x + flash.velocity.z * flash.velocity.z);
+                if (length != 0.0f) {
+                    random = 1.0f / length;
+                    flash.velocity.x *= random;
+                    flash.velocity.z *= random;
+                    if (func_150ADA20() & 1) {
+                        flash.position = start;
+                    } else {
+                        flash.position = end;
+                        flash.velocity.x = -flash.velocity.x;
+                        flash.velocity.z = -flash.velocity.z;
+                    }
+                    flash.velocity.x *= speed;
+                    flash.velocity.z *= speed;
+                    flash.lifetime = length / speed;
+                    origin.unk0 = flash.position.x;
+                    origin.unk4 = spawner->height;
+                    origin.unk8 = flash.position.z;
+                    obj = func_151602C0(&header, &origin, spawner->colour[3], spawner->colour[0],
+                                        spawner->colour[1], spawner->colour[2], 0xFF, 0, 0x40, actor->unkC,
+                                        actor->unk1);
+                    if (obj != NULL) {
+                        memcpy(&obj->flash, &flash, sizeof(flash));
+                    }
+                }
+            }
+            spawner->accumulator -= 1.0f;
+        } while (spawner->accumulator > 1.0f);
     }
-    p->unk18 -= D_800BE9A4;
-    if (p->unk18 <= 0.0f) {
+}
+
+s32 func_15046C80(f32 *, s32, f32, GroundHit *);
+
+/* Slides the flash along the ground and keeps its sprite on the ground; returns 0 once it expires. */
+s32 func_150EAE24(FlashObject *obj) {
+    GroundFlash *flash;
+    f32 probe[3];
+
+    obj->flash.position.x += obj->flash.velocity.x * D_800BE9A4;
+    obj->flash.position.z += obj->flash.velocity.z * D_800BE9A4;
+    probe[0] = obj->flash.position.x;
+    probe[1] = obj->flash.height;
+    probe[2] = obj->flash.position.z;
+    obj->sprite->x = obj->flash.position.x;
+    obj->sprite->z = obj->flash.position.z;
+    flash = &obj->flash;
+    if (func_15046C80(probe, 0, obj->flash.probeHeight, &flash->ground) != 0) {
+        obj->sprite->y = flash->ground.height;
+    } else {
+        obj->sprite->y = flash->height;
+    }
+    flash->lifetime -= D_800BE9A4;
+    if (flash->lifetime <= 0.0f) {
         return 0;
     }
     return 1;
