@@ -52,12 +52,17 @@ extern u8 D_800CBD6D;
 extern u8 D_800CBD6E;
 extern u8 D_800CBD6F;
 
+/*
+ * Text queue state (declared in variables.h): D_800CBD64 = head node, D_800CBD68 = tail node,
+ * D_800CBD60..63 = RGBA, D_800CBD6C..6F = node unk12..unk15, D_800CBD70/72 = x/y,
+ * D_800CBD74 = TEXT_FLAG_*, D_800CBD78 = anchor object, D_800CBD7C = height above it,
+ * D_800CBD80 = scale. All apply to the next queued nodes; drawing resets them.
+ */
 
-
-/** Discard all queued text nodes and reset the text state. */
+/** Drop the queued text without drawing (or freeing) it and reset the text state. */
 void func_15042D50(void) {
     D_800CBD64 = 0;
-    func_15043384(0);
+    func_15043384(NULL);
 }
 
 /** Set the flags used by subsequently queued text. */
@@ -258,7 +263,7 @@ typedef struct Game70200Glyph {
     u8 width;
     u8 height;
     u8 scale; /* 128 = 1.0 */
-    u8 flags; /* 1: draw the previous entry behind it, blinking; 2: 16x16 sprite instead of 32x32 */
+    u8 flags; /* 1: draw the previous entry behind it and pulse the alpha; 2: 16x16 sprite (default 32x32) */
     s32 image;
 } Game70200Glyph;
 
@@ -284,7 +289,7 @@ Gfx *func_151ED430(Gfx *, void *, s32, s32, s32, s32, f32, s32);
 
 /**
  * Draw every queued text/icon node (projecting anchored ones to the screen), free the queue and
- * reset the text state to its defaults. Called with NULL just to discard the queue.
+ * reset the text state to its defaults. func_15042D50 calls it with NULL on an emptied queue.
  */
 Gfx *func_15043384(Gfx *gfx) {
     s32 width;
@@ -369,7 +374,7 @@ Gfx *func_15043384(Gfx *gfx) {
                     D_80090060.image = D_800859E0[icon - 1].image;
                     gfx = func_151ED430(gfx, &D_80090060, node->x, node->y, D_800859E0[icon - 1].width,
                                         D_800859E0[icon - 1].height, scale, 0);
-                    /* blink the backing glyph: alpha scale follows a 0..63..0 triangle wave */
+                    /* pulse the alpha: scale by (63 + 3 * a 0..63..0 triangle wave) / 256 */
                     pulse = (D_800BE9AC * 2) & 0x7F;
                     if (pulse >= 64) {
                         pulse = 127 - pulse;
