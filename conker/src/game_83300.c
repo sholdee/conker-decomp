@@ -58,41 +58,31 @@ extern struct255 *D_800CC4A4;
 void func_1505F188(struct127 *arg0);
 s32 func_1505C7D8(struct127 *arg0, s32 arg1);
 
+/* An actor's animation playback state (struct127.unk2D0); the previous animation is kept for blending. */
 typedef struct {
-    char pad_0[0x4];
-    u16 field_0x4;
-    s16 field_0x6;
-    f32 field_0x8;
-    f32 field_0xC;
-    f32 field_0x10;
-    f32 field_0x14;
-    f32 field_0x18;
-    f32 field_0x1C;
-    f32 field_0x20;
-    f32 field_0x24;
-    s32 field_0x28;
-    s32 field_0x2C;
-    s32 field_0x30;
-    s32 field_0x34;
-    s8 field_0x38;
-    s8 field_0x39;
-    char pad_0x3A[0x6];
-    u8 field_0x40[1];
-    u8 field_0x41;
-    char pad_0x42[0x1CE];
-    u8 field_0x210[1];
-    u8 field_0x211;
-    char pad_0x212[0x1CE];
+    /* 0x000 */ s32 unk0;
+    /* 0x004 */ u16 anim; /* bit 0x8000: set by func_1505E0C4's last argument */
+    /* 0x006 */ u16 prevAnim;
+    /* 0x008 */ f32 unk8;
+    /* 0x00C */ f32 prevUnk8;
+    /* 0x010 */ f32 speed;
+    /* 0x014 */ f32 prevSpeed;
+    /* 0x018 */ f32 frameCount;
+    /* 0x01C */ f32 prevFrameCount;
+    /* 0x020 */ f32 unk20;
+    /* 0x024 */ f32 prevUnk20;
+    /* 0x028 */ s32 loaded;
+    /* 0x02C */ s32 prevLoaded;
+    /* 0x030 */ s32 unk30;
+    /* 0x034 */ s32 unk34;
+    /* 0x038 */ s8 unk38;
+    /* 0x039 */ s8 prevUnk38;
+    /* 0x03A */ s16 blendStep;
+    /* 0x03C */ s16 blend;
+    /* 0x03E */ u8 pad3E[2];
+    /* 0x040 */ u8 header[0x1D0]; /* the animation's data header: [3] frame count */
+    /* 0x210 */ u8 prevHeader[0x1D0];
 } AnimPlaybackState;
-
-typedef struct {
-    char pad_0[0x4];
-    u8 field_0x4;
-    char pad_0x5[0x7F];
-    u16 field_0x84;
-    char pad_0x86[0x24A];
-    AnimPlaybackState *field_0x2D0;
-} AnimPlaybackOwner;
 
 typedef struct {
     s16 x;
@@ -3349,34 +3339,36 @@ f32 func_1505DF10(struct127 *arg0, u8 arg1, u16 *arg2, f32 *arg3, f32 *arg4, s32
 }
 extern u16 D_800C4ED0[];
 
-void func_1505DFDC(AnimPlaybackOwner *arg0) {
-    s32 sp1C;
-    AnimPlaybackState *temp;
+/* Stops the actor's animation and clears its playback state. */
+void func_1505DFDC(struct127 *actor) {
+    s32 id;
+    AnimPlaybackState *state;
     u16 *p;
 
-    arg0->field_0x84 = 0xFFFF;
-    temp = arg0->field_0x2D0;
-    if (temp != NULL) {
-        sp1C = arg0->field_0x4;
-        temp->field_0x28 = 0;
-        bzero(temp->field_0x40, 0x3A0);
-        p = &D_800C4ED0[sp1C];
-        temp->field_0x41 = *p + 1;
-        temp->field_0x211 = *p + 1;
-        temp->field_0x30 = 0;
-        temp->field_0x34 = 0;
+    actor->unk84.uh = 0xFFFF;
+    state = (AnimPlaybackState *)actor->unk2D0;
+    if (state != NULL) {
+        id = actor->id;
+        state->loaded = 0;
+        bzero(state->header, sizeof(state->header) + sizeof(state->prevHeader));
+        p = &D_800C4ED0[id];
+        state->header[1] = *p + 1;
+        state->prevHeader[1] = *p + 1;
+        state->unk30 = 0;
+        state->unk34 = 0;
     }
 }
 
-void func_1505E060(AnimPlaybackState *arg0) {
-    arg0->field_0x6 = arg0->field_0x4;
-    arg0->field_0xC = arg0->field_0x8;
-    arg0->field_0x14 = arg0->field_0x10;
-    arg0->field_0x24 = arg0->field_0x20;
-    arg0->field_0x1C = arg0->field_0x18;
-    arg0->field_0x39 = arg0->field_0x38;
-    arg0->field_0x2C = arg0->field_0x28;
-    bcopy(arg0->field_0x40, arg0->field_0x210, 0x1D0);
+/* Saves the current animation as the previous one, to blend from. */
+void func_1505E060(AnimPlaybackState *state) {
+    state->prevAnim = state->anim;
+    state->prevUnk8 = state->unk8;
+    state->prevSpeed = state->speed;
+    state->prevUnk20 = state->unk20;
+    state->prevFrameCount = state->frameCount;
+    state->prevUnk38 = state->unk38;
+    state->prevLoaded = state->loaded;
+    bcopy(state->header, state->prevHeader, sizeof(state->header));
 }
 
 s32 func_1502AF04(u8 *, s32, s32, s32);
@@ -3384,163 +3376,170 @@ s32 func_1502B110(u8 *, s32, s32, u32, ...);
 extern s32 D_8008630C[];
 extern u16 D_800993F8[];
 
-void func_1505E0C4(struct127 *arg0, u16 *arg1, u8 *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11) {
+/*
+ * Starts animation `anim` (entry `animEntry`) on a playback state, or only updates its speed when it is
+ * already playing. `actor` may be NULL for non-actor users; blendFrames >= 1 blends from the old one.
+ */
+void func_1505E0C4(struct127 *actor, u16 *animEntry, AnimPlaybackState *state, s32 arg3, s32 restart, s32 anim,
+                   s32 bank, f32 speed, f32 blendFrames, f32 arg9, f32 arg10, s32 flag8000) {
     s32 index;
-    s32 flag;
-    s32 sp8C;
-    s32 t1;
-    s32 sp84;
-    s32 sp80;
-    s32 *v0;
-    s16 cur;
+    s32 changed;
+    s32 assetId;
+    s32 kind;
+    s32 dataSize;
+    s32 romAddr;
+    s32 *info;
+    s16 blend;
     s32 mask;
-    u8 sp48[0x2C];
+    u8 buf[0x2C];
 
-    flag = 0;
-    if (arg4 != 0) {
-        flag = 1;
-        arg8 = 0.0f;
-    } else if (arg5 != (*(u16 *)(arg2 + 4) & 0xFFFF7FFF)) {
-        flag = 1;
-    } else if (arg0 != NULL && (arg5 != *(u16 *)((u8 *)arg0 + 0x84) || *(u16 *)((u8 *)arg0 + 0x84) == 0xFFFF || *((u8 *)arg0 + 0x103) != 0)) {
-        flag = 1;
+    changed = FALSE;
+    if (restart != 0) {
+        changed = TRUE;
+        blendFrames = 0.0f;
+    } else if (anim != (state->anim & 0xFFFF7FFF)) {
+        changed = TRUE;
+    } else if (actor != NULL && (anim != actor->unk84.uh || actor->unk84.uh == 0xFFFF || actor->unk103 != 0)) {
+        changed = TRUE;
     }
-    if (flag != 0) {
-        if (arg0 != NULL) {
-            index = ((s32)arg0 - (s32)&D_800CC2D0) / 812;
-            t1 = 2;
-            arg6 = *((u8 *)arg0 + 6);
+    if (changed != FALSE) {
+        if (actor != NULL) {
+            index = ((s32)actor - (s32)&D_800CC2D0) / 812;
+            kind = 2;
+            bank = actor->unk6;
         } else {
-            t1 = 10;
+            kind = 10;
         }
-        if (arg1 != NULL) {
-            sp8C = arg1[0];
+        if (animEntry != NULL) {
+            assetId = animEntry[0];
         } else {
-            sp8C = arg5 * 2;
+            assetId = anim * 2;
         }
-        if (arg0 != NULL) {
-            *(u16 *)((u8 *)arg0 + 0x84) = arg5;
-            *(f32 *)((u8 *)arg0 + 0x4C) = arg7;
-            *(s32 *)((u8 *)arg0 + 0x1C4) = *(s32 *)(arg1 + 2);
-            *(s8 *)((u8 *)arg0 + 0x138) = 0;
-            *((u8 *)arg0 + 0x103) = 0;
-            *(f32 *)((u8 *)arg0 + 0xB4) = 0.0f;
+        if (actor != NULL) {
+            actor->unk84.uh = anim;
+            actor->animation_speed = speed;
+            actor->pad1C4 = *(s32 *)(animEntry + 2);
+            *(s8 *)&actor->unk138 = 0;
+            actor->unk103 = 0;
+            *(f32 *)&actor->padB4 = 0.0f;
             if (index < D_8008FD8C) {
-                u8 *p = (u8 *)&D_800CC2D0 + index * 0x32C;
-                *(s8 *)(*(u8 **)(p + 0x31C) + 0x58) = 0;
-                *(s16 *)(*(u8 **)(p + 0x31C) + 0x5A) = 0;
-                *(s8 *)(*(u8 **)(p + 0x31C) + 0x59) = 0;
+                struct127 *player = &D_800CC2D0[index];
+
+                *(s8 *)&player->unk31C->unk58 = 0;
+                *(s16 *)player->unk31C->pad5A = 0;
+                *(s8 *)&player->unk31C->unk59 = 0;
             }
         }
-        if (*(s32 *)(arg2 + 0x28) != 0) {
-            cur = *(s16 *)(arg2 + 0x3C);
-            if (arg8 >= 1.0f) {
-                *(s16 *)(arg2 + 0x3A) = 500 / (s16)arg8;
-                if (*(s16 *)(arg2 + 0x3C) > 0 && arg5 == (*(u16 *)(arg2 + 6) & 0xFFFF7FFF)) {
-                    *(s16 *)(arg2 + 0x3C) = 0x3FF - *(s16 *)(arg2 + 0x3C);
-                    cur = 0;
-                } else if (cur < 600) {
-                    *(s16 *)(arg2 + 0x3C) = 0x3FF;
+        if (state->loaded != 0) {
+            blend = state->blend;
+            if (blendFrames >= 1.0f) {
+                state->blendStep = 500 / (s16)blendFrames;
+                if (state->blend > 0 && anim == (state->prevAnim & 0xFFFF7FFF)) {
+                    state->blend = 0x3FF - state->blend;
+                    blend = 0;
+                } else if (blend < 600) {
+                    state->blend = 0x3FF;
                 }
             } else {
-                *(s16 *)(arg2 + 0x3C) = 0;
+                state->blend = 0;
             }
-            if (cur < 600) {
-                *(u16 *)(arg2 + 6) = *(u16 *)(arg2 + 4);
-                *(f32 *)(arg2 + 0xC) = *(f32 *)(arg2 + 8);
-                *(f32 *)(arg2 + 0x14) = *(f32 *)(arg2 + 0x10);
-                *(f32 *)(arg2 + 0x24) = *(f32 *)(arg2 + 0x20);
-                *(f32 *)(arg2 + 0x1C) = *(f32 *)(arg2 + 0x18);
-                *(s8 *)(arg2 + 0x39) = *(s8 *)(arg2 + 0x38);
-                *(s32 *)(arg2 + 0x2C) = *(s32 *)(arg2 + 0x28);
-                bcopy(arg2 + 0x40, arg2 + 0x210, 0x1D0);
+            if (blend < 600) {
+                state->prevAnim = state->anim;
+                state->prevUnk8 = state->unk8;
+                state->prevSpeed = state->speed;
+                state->prevUnk20 = state->unk20;
+                state->prevFrameCount = state->frameCount;
+                state->prevUnk38 = state->unk38;
+                state->prevLoaded = state->loaded;
+                bcopy(state->header, state->prevHeader, sizeof(state->header));
             }
         }
-        *(u16 *)(arg2 + 4) = arg5;
-        if (arg11 != 0) {
-            *(u16 *)(arg2 + 4) |= 0x8000;
+        state->anim = anim;
+        if (flag8000 != 0) {
+            state->anim |= 0x8000;
         }
-        *(f32 *)(arg2 + 8) = arg9;
-        *(f32 *)(arg2 + 0x10) = arg7;
-        *(f32 *)(arg2 + 0x20) = arg10;
-        if (arg1 != NULL) {
-            *(s32 *)arg2 = D_8008630C[arg1[1]];
+        state->unk8 = arg9;
+        state->speed = speed;
+        state->unk20 = arg10;
+        if (animEntry != NULL) {
+            state->unk0 = D_8008630C[animEntry[1]];
         } else {
-            *(s32 *)arg2 = 0;
+            state->unk0 = 0;
         }
-        if (arg0 != NULL && *(u8 **)((u8 *)arg0 + 0x58) != NULL) {
-            v0 = (s32 *)func_1502AF04(*(u8 **)((u8 *)arg0 + 0x58), (s32)sp48, sp8C, 2);
+        if (actor != NULL && *(u8 **)&actor->pad58 != NULL) {
+            info = (s32 *)func_1502AF04(*(u8 **)&actor->pad58, (s32)buf, assetId, 2);
         } else {
-            v0 = (s32 *)func_1502B110(NULL, 2, (s32)sp48, 3, t1, arg6, sp8C);
+            info = (s32 *)func_1502B110(NULL, 2, (s32)buf, 3, kind, bank, assetId);
         }
-        if (v0 != NULL) {
-            sp84 = v0[1];
-            sp80 = v0[0];
-            *(s32 *)(arg2 + 0x28) = v0[2];
+        if (info != NULL) {
+            dataSize = info[1];
+            romAddr = info[0];
+            state->loaded = info[2];
         }
         {
-            s32 size = (sp84 + 0xF) & ~0xF;
-            if (sp84 == 0) {
-                func_1505DFDC((AnimPlaybackOwner *)arg0);
+            s32 size = (dataSize + 0xF) & ~0xF;
+
+            if (dataSize == 0) {
+                func_1505DFDC(actor);
                 return;
             }
             if (size < 200) {
-                func_1000480C(sp80, arg2 + 0x40, size);
+                func_1000480C(romAddr, state->header, size);
             } else {
-                func_10004514(sp80, arg2 + 0x40, size, 1);
+                func_10004514(romAddr, state->header, size, 1);
             }
         }
-        *(f32 *)(arg2 + 0x18) = (u32)arg2[0x43];
-        if (arg2[0x43] == 0xFF && arg0 != NULL) {
-            switch (*((u8 *)arg0 + 4)) {
+        state->frameCount = (u32)state->header[3];
+        if (state->header[3] == 0xFF && actor != NULL) {
+            switch (actor->id) {
             case 0x92:
-                *(f32 *)(arg2 + 0x18) = (u32)D_800993F8[*(u16 *)((u8 *)arg0 + 0x84)];
+                state->frameCount = (u32)D_800993F8[actor->unk84.uh];
                 break;
             case 0xB7:
             case 0xB8:
             case 0xB9:
-                *(f32 *)(arg2 + 0x18) = 641.0f;
+                state->frameCount = 641.0f;
                 break;
             }
         }
         mask = 0x303;
-        if (arg0 != NULL) {
-            *((u8 *)arg0 + 0x24E) = 0;
-            *((u8 *)arg0 + 0x1FC) |= 2;
-            *((u8 *)arg0 + 0x1FC) &= ~1;
-            if (*((u8 *)arg0 + 0x104) == 0) {
+        if (actor != NULL) {
+            actor->unk24E = 0;
+            actor->unk1FC |= 2;
+            actor->unk1FC &= ~1;
+            if (actor->stunned == 0) {
                 mask = 0x30B;
             }
-            *(s32 *)((u8 *)arg0 + 0xF4) &= ~mask;
-            if (*(s32 *)((u8 *)arg0 + 0xF4) & 0x20) {
-                *(s32 *)((u8 *)arg0 + 0xF4) |= 2;
-                *(s32 *)((u8 *)arg0 + 0xF4) &= ~0x20;
+            actor->unkF4 &= ~mask;
+            if (actor->unkF4 & 0x20) {
+                actor->unkF4 |= 2;
+                actor->unkF4 &= ~0x20;
             }
-            if (arg2[0x47] & 0x20) {
-                *((u8 *)arg0 + 0x1FD) = arg2[0x4B];
+            if (state->header[7] & 0x20) {
+                actor->unk1FD = state->header[0xB];
             } else {
-                *((u8 *)arg0 + 0x1FD) = 0;
+                actor->unk1FD = 0;
             }
         }
-        if (arg2[0x45] == 0) {
-            *(s32 *)(arg2 + 0x28) = 1;
+        if (state->header[5] == 0) {
+            state->loaded = 1;
         }
     } else {
-        if (arg0 != NULL) {
-            *(f32 *)((u8 *)arg0 + 0x4C) = arg7;
+        if (actor != NULL) {
+            actor->animation_speed = speed;
         }
-        *(f32 *)(arg2 + 0x10) = arg7;
-        if (arg11 != 0) {
-            *(u16 *)(arg2 + 4) |= 0x8000;
+        state->speed = speed;
+        if (flag8000 != 0) {
+            state->anim |= 0x8000;
         } else {
-            *(u16 *)(arg2 + 4) &= 0xFFFF7FFF;
+            state->anim &= 0xFFFF7FFF;
         }
-        if (D_800C35EA == 1 && (*(u16 *)(arg2 + 4) & 0x8000)) {
-            *(f32 *)(arg2 + 8) = arg9;
+        if (D_800C35EA == 1 && (state->anim & 0x8000)) {
+            state->unk8 = arg9;
         }
     }
-    if (arg0 != NULL && flag != 0) {
-        func_150627D4(arg0);
+    if (actor != NULL && changed != FALSE) {
+        func_150627D4(actor);
     }
 }
 void func_1505E650(struct127 *arg0, u16 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6) {
@@ -3572,7 +3571,7 @@ void func_1505E650(struct127 *arg0, u16 arg1, f32 arg2, f32 arg3, f32 arg4, f32 
     }
     anim = (u16 (*)[4])D_800D1588[idx];
     if (anim == NULL) {
-        func_1505DFDC((AnimPlaybackOwner *)arg0);
+        func_1505DFDC(arg0);
         return;
     }
     if (arg1 < (u16)D_800C5A90[idx]) {
@@ -3582,13 +3581,13 @@ void func_1505E650(struct127 *arg0, u16 arg1, f32 arg2, f32 arg3, f32 arg4, f32 
             do {
                 if (entry[0] != 999) {
                     if (entry[0] >= 30000) {
-                        func_1505DFDC((AnimPlaybackOwner *)arg0);
+                        func_1505DFDC(arg0);
                         return;
                     }
                     if (arg0->unk2FF == 0) {
                         arg3 = 0.0f;
                     }
-                    func_1505E0C4(arg0, entry, data, 0, 0, arg1, 0, arg2, arg3, arg4, arg5, arg6);
+                    func_1505E0C4(arg0, entry, (AnimPlaybackState *)data, 0, 0, arg1, 0, arg2, arg3, arg4, arg5, arg6);
                 }
             } while (0);
         }
