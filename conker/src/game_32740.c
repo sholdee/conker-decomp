@@ -22,7 +22,7 @@ void func_15005290(s32 resource, s32 mode) {
     s32 count;
     u32 i;
 
-    D_800DC020 = func_1502B5C8(&size, 3, 12, resource, 8);
+    D_800DC020 = (CamPose *)func_1502B5C8(&size, 3, 12, resource, 8);
     D_80089550 = size / 24;
     count = D_80082FA0 + 1;
     D_800DBFF0 = allocate_memory(count * sizeof(Camera), 1, 1, 0);

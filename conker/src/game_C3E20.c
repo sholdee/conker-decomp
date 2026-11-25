@@ -16,21 +16,9 @@ typedef struct {
     /* 0x20 */ f32 unk20; // actor->unk37C at setup, written to actor->unk3A4 when done
 } C3E20Command; // size 0x24
 
-typedef struct {
-    /* 0x00 */ s16 x;
-    /* 0x02 */ s16 y;
-    /* 0x04 */ s16 z;
-    /* 0x06 */ u8 pad6[6];
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-} C3E20Pose; // size 0x18
-
 extern C3E20Command D_800D2DC0[3];
 extern s32 D_800D2E30[];
 extern f32 D_800D2DB8; // actor->unk2C0 saved while a command runs
-
-// variables.h declares D_800DC020 as `s32`, but it holds a C3E20Pose table pointer; hence the casts below.
 
 void func_1512D560(Camera *, s32, struct168 *);
 
@@ -61,12 +49,12 @@ s32 func_15096A68(s32 slot) {
     switch (D_800D2DC0[slot].state) {
     case 1: {
         u8 actorIndex;
-        C3E20Pose *pose;
+        CamPose *pose;
         Camera *actor;
 
         actorIndex = D_800D2DC0[slot].actor;
         actor = &D_800DBFF0[actorIndex];
-        pose = (C3E20Pose *)D_800DC020;
+        pose = D_800DC020;
         // matching: the redundant mask on the u8 index steers IDO's register allocation
         pose = &pose[D_800D2DC0[slot].poseIndex & 0xFF];
         D_800D2DB8 = actor->target.y;
@@ -200,9 +188,9 @@ s32 func_15096D78(s32 actorIndex, s32 command, s32 *args) {
         actor->unk134 = args[2];
         return 1;
     case 10: {
-        C3E20Pose *pose;
+        CamPose *pose;
 
-        pose = (C3E20Pose *)D_800DC020;
+        pose = D_800DC020;
         pose = &pose[args[2] & 0xFFF];
         D_800D2DB4 = 1;
         D_800DBFF4[actorIndex] = 3;
@@ -288,9 +276,9 @@ s32 func_15096D78(s32 actorIndex, s32 command, s32 *args) {
         }
         break;
     case 21: {
-        C3E20Pose *pose;
+        CamPose *pose;
 
-        pose = (C3E20Pose *)D_800DC020;
+        pose = D_800DC020;
         pose = &pose[args[2] & 0xFFF];
         pose->x = args[3];
         pose->y = args[4];
@@ -345,7 +333,7 @@ s32 func_1509759C(s32 actorIndex, s32 query, s32 *args) {
     Vec3f toTarget;
     f32 angle;
     Actor *target;
-    C3E20Pose *pose;
+    CamPose *pose;
     f32 dx;
     f32 dz;
 
@@ -362,7 +350,7 @@ s32 func_1509759C(s32 actorIndex, s32 query, s32 *args) {
         return D_800D2DC0[args[2]].state;
     case 32:
         // Horizontal distance from the actor to a pose.
-        pose = (C3E20Pose *)D_800DC020;
+        pose = D_800DC020;
         pose = &pose[args[2] & 0xFFF];
         dx = actor->eye.x - pose->x;
         dz = actor->eye.z - pose->z;

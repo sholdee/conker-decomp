@@ -222,7 +222,7 @@ void func_150E6E34(Vec3f *out) {
     out->z = (segment->end.z - segment->start.z) * t + segment->start.z;
 }
 
-extern void func_1514470C(struct134 *, void *);
+extern void func_1514470C(TriggerZone *, void *);
 
 /* End callback: the position of one of the two entries of the D_800D9A20 table. */
 void func_150E6ED8(Vec3f *out) {
@@ -863,10 +863,10 @@ void func_150E8930(void) {
     event.unk4 = (func_150ADA20() % 6) + 3;
     event.unk6 = -1;
     func_151D8868(&event, 0, 0xFF, 1);
-    if (D_800DCDC4 != 0) {
+    if (D_800DCDC4 != NULL) {
         func_150E8A80();
     }
-    if (D_800DCDC4 != 0) {
+    if (D_800DCDC4 != NULL) {
         func_150E90DC();
     }
     func_10010F30(0x4C8, 0x7FFF, 0x40, 0x200 - (func_150ADA20() & 0x400), 0);
@@ -893,14 +893,6 @@ void func_150E8A80(void) {
         memcpy(((Game113D60AnyEffect *)effect)->data, &data, sizeof(data));
     }
 }
-
-/* Node of the weighted region list at D_800DCDC4, whose weights add up to D_800DCD90. */
-typedef struct Game113D60WeightedNode {
-    /* 0x0 */ struct134 *region;
-    /* 0x4 */ s32 unk4;
-    /* 0x8 */ f32 weight;
-    /* 0xC */ struct Game113D60WeightedNode *next;
-} Game113D60WeightedNode;
 
 /* Spawn rate data shared by the region spawners: `rate + random * rateRange` per frame. */
 typedef struct {
@@ -929,7 +921,7 @@ extern Vec3f *func_15144B34(s32);
 void func_150E8B1C(Game113D60RegionSpawnerEffect *effect) {
     Vec3f *center;
     Game113D60Spawner *spawner;
-    Game113D60WeightedNode *node;
+    RegionNode *node;
     f32 pick;
     Game113D60Data8B1C data;
     Game113D60Data8B1C *dataPtr;
@@ -944,9 +936,9 @@ void func_150E8B1C(Game113D60RegionSpawnerEffect *effect) {
     if (spawner->accum > 1.0f) {
         do {
             pick = func_150ADA68() * D_800DCD90;
-            node = (Game113D60WeightedNode *)D_800DCDC4;
-            while (node->weight < pick) {
-                pick -= node->weight;
+            node = D_800DCDC4;
+            while (node->area < pick) {
+                pick -= node->area;
                 node = node->next;
             }
             func_1514470C(node->region, dataPtr);
@@ -1104,7 +1096,7 @@ typedef struct {
 void func_150E9178(Game113D60RegionSpawnerEffect *effect) {
     Vec3f *center;
     Game113D60Spawner *spawner;
-    Game113D60WeightedNode *node;
+    RegionNode *node;
     f32 pick;
     Game113D60Data9178 data;
     f32 dx;
@@ -1117,9 +1109,9 @@ void func_150E9178(Game113D60RegionSpawnerEffect *effect) {
     if (spawner->accum > 1.0f) {
         do {
             pick = func_150ADA68() * D_800DCD90;
-            node = (Game113D60WeightedNode *)D_800DCDC4;
-            while (node->weight < pick) {
-                pick -= node->weight;
+            node = D_800DCDC4;
+            while (node->area < pick) {
+                pick -= node->area;
                 node = node->next;
             }
             func_1514470C(node->region, &data);

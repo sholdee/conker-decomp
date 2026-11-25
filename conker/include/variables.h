@@ -1209,7 +1209,8 @@ extern u8  D_800DBFF6;
 extern u8  D_800DBFF7;
 
 extern Camera *D_800DC010; // saved cameras (one per view)
-extern s32 D_800DC020;
+extern CamPose *D_800DC020; // the level's camera pose table (D_80089550 entries)
+extern CamPose *D_800DC024; // the pose game_15BD90 is moving to
 extern Mtx  *D_800DC2A0[2]; // per framebuffer: one view matrix per view
 extern CamMsgQueue *D_800DC2B0; // one per camera
 extern f32 *D_800DCC10[][4];
@@ -1249,7 +1250,7 @@ extern u8 D_800DCD20[3]; // ambient light colour
 extern u8 D_800DCD24[3]; // tint colour
 extern u8 D_800DCD28[3];
 
-extern s32  D_800DCDC4; // probably wrong type
+extern RegionNode *D_800DCDC4; // spawn regions; their areas add up to D_800DCD90
 extern u8   D_800DCDD0;
 extern s8   D_800DD190;
 extern void *D_800DD198[6]; // per object-list walk depth (D_800DD190): the next node to visit

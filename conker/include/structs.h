@@ -3871,6 +3871,27 @@ typedef struct LensFlare {
     /* 0x30 */ u8 alpha;
 } LensFlare; // size 0x34
 
+/* A trigger zone in a weighted list (built by func_1515F1B0 in game_18A8F0). D_800DCDC4 is a list of
+ * spawn regions whose areas add up to D_800DCD90; game_113D60 picks one at random by area. */
+typedef struct RegionNode {
+    /* 0x00 */ TriggerZone *region;
+    /* 0x04 */ f32 volume;
+    /* 0x08 */ f32 area;          // the pick weight in D_800DCDC4
+    /* 0x0C */ struct RegionNode *next;
+} RegionNode;
+
+/* A camera pose of the level's pose table D_800DC020 (D_80089550 entries, loaded by func_15005290 in
+ * game_32740); game_15BD90 reads the position, game_C3E20's scripted moves also the angles. */
+typedef struct CamPose {
+    /* 0x00 */ s16 x;
+    /* 0x02 */ s16 y;
+    /* 0x04 */ s16 z;
+    /* 0x06 */ u8  pad6[6];
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+} CamPose; // size 0x18
+
 /* One 12-byte entry of the world-mesh triangle table D_800DBE3C (built by func_15000F04 in game_2DF70):
  * the triangle's three vertices. Collision code reads the same words as offsets from a vertex base,
  * which is 0 for the static world mesh. */

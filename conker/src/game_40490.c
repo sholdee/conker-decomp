@@ -92,7 +92,7 @@ void func_15012FE0(void) {
 void func_15013000(void) {
     u32 i;
 
-    D_800DCDC4 = 0;
+    D_800DCDC4 = NULL;
     D_800DCD90 = 0.0f;
     // matching: the label ends the block, so IDO cannot hoist the D_800D3094 load above the stores
 start:
@@ -916,14 +916,14 @@ s32 func_15014F6C(TriggerZone *obj) {
 }
 
 s32 func_150150A4(void) {
-    Vec3f *item = func_1515F1B0();
+    RegionNode *item = func_1515F1B0();
 
     if (item == NULL) {
         return 1;
     }
 
     func_1515F25C(&D_800DCDC4, item);
-    D_800DCD90 += item->z;
+    D_800DCD90 += item->area;
     return 1;
 }
 

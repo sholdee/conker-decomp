@@ -12,16 +12,7 @@ typedef struct {
     /* 0xE */ u8 padE[0x2];
 } CamPathNode;
 
-// Camera point table entry (table base in D_800DC020).
-typedef struct {
-    /* 0x0 */ s16 x;
-    /* 0x2 */ s16 y;
-    /* 0x4 */ s16 z;
-    /* 0x6 */ u8 pad6[0x12];
-} CamPoint;
-
 extern CamPathNode *D_800D2350;
-extern CamPoint *D_800DC024;
 
 void func_150495B0(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
 Actor *func_1505EEF4(s32 arg0);
@@ -210,7 +201,7 @@ void func_1512E8E0(Camera *camera) {
             if ((cmd->unk8 == 5) || (cmd->unk8 == 0x11)) {
                 if (camera->unk272 != cmd->unk1C) {
                     camera->unk272 = cmd->unk1C;
-                    D_800DC024 = (CamPoint *)D_800DC020;
+                    D_800DC024 = D_800DC020;
                     D_800DC024 = &D_800DC024[camera->unk272];
                     camera->unk278 = cmd->unk20;
                     camera->unk288.x = D_800DC024->x;
@@ -228,7 +219,7 @@ void func_1512E8E0(Camera *camera) {
                 }
             } else {
                 camera->unk272 = cmd->unk1C;
-                D_800DC024 = (CamPoint *)D_800DC020;
+                D_800DC024 = D_800DC020;
                 D_800DC024 = &D_800DC024[camera->unk272];
                 camera->unk288.x = D_800DC024->x;
                 camera->unk288.y = D_800DC024->y;
