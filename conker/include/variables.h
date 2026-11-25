@@ -641,34 +641,9 @@ extern s32 D_800A5770[];
 
 // in game_18D770.c
 extern s32 D_800A6060[3]; /* { 0x36, 0x4C, 0x5B }: the model effect types */
-extern const f32 D_800A66B4[3];  // { 0.0f, -415.0f, 0.0f }
-extern const f32 D_800A66C0[9];  // { 70.0f, 38.0f, 70.0f, 55.0f, 50.0f, 80.0f, 140.0f, 70.0f, 34.0f };
-extern const s32 D_800A66E4[10]; // { 1099, 1100, 1101, 1102, 1103, 1104, 1105, 1106, 1107, 1108 }
-extern const Vec3f D_800A6A0C;
-extern const Vec3f D_800A670C[]; // { {128.0f, 59.5f, 59.5f}, {187.0f, 59.5f, 59.5f}, {128.0f, 17.5f, 0.0f} }
-extern const Vec3f D_800A6730[];
-extern const f32 D_800A6754[];
 extern const f32 D_800A6760[24];
 extern const f32 D_800A67C0[24];
 extern const f32 D_800A6820[24];
-extern const f32 D_800A6880[];
-extern const f32 D_800A6894[];
-extern const f32 D_800A68A8[];
-extern const f32 D_800A68BC[];
-extern const f32 D_800A68D0[];
-extern const f32 D_800A68E4[];
-extern const f32 D_800A68F8[3];
-extern const f32 D_800A6904[3];
-extern const f32 D_800A6910[3];
-extern const s32 D_800A691C[3];
-extern const s32 D_800A6928[3];
-extern const f32 D_800A6934[3];
-extern const f32 D_800A6940[3];
-extern const f32 D_800A694C[3];
-extern const f32 D_800A6958[3];
-extern const f32 D_800A6964[14];
-extern const f32 D_800A699C[14];
-extern const f32 D_800A69D4[14];
 
 
 extern VtxMorphGroup D_800A7230[2]; // vertex morph groups
