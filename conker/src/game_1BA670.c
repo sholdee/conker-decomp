@@ -3,16 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Settings an emitter is created with; copied verbatim into Emitter.params. */
-typedef struct EmitterParams {
-    /* 0x0 */ Actor *owner;
-    /* 0x4 */ u8 ownerId;   // owner->unique_id at creation; the emitter dies when it changes
-    /* 0x6 */ s16 lifetime; // counts down when (flags & 1)
-    /* 0x8 */ u8 flags;
-    /* 0x9 */ s8 expireCb;  // index into D_8008D628 run when lifetime runs out, -1: just die
-    /* 0xA */ u8 table;     // index into D_8008D5E0
-} EmitterParams; /* 0xC */
-
 /* Particle template, referenced by an EmitterInfo. */
 typedef struct {
     /* 0x00 */ f32 unk0;
@@ -132,7 +122,7 @@ typedef struct Emitter {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ s32 flags;
     /* 0x14 */ s32 unk14;
-    /* 0x18 */ EmitterParams params;
+    /* 0x18 */ ActorEmitterParams params;
     /* 0x24 */ f32 accum; // fractional particles owed
     /* 0x28 */ s32 count; // live particles
     /* 0x2C */ u8 state;  // 1: hidden, 2: world mode, 4: attached mode, 8: new
@@ -155,12 +145,12 @@ extern void func_1513F680();
 extern void func_15143134(void *, void *, void *);
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 void func_1518E308(Emitter *emitter);
-Emitter *func_1518E3C4(EmitterParams *params, u8 arg1);
+Emitter *func_1518E3C4(ActorEmitterParams *params, u8 arg1);
 
 /* Creates an emitter of the given kind on owner, optionally killing the owner's existing emitters first. */
 Emitter *func_1518D1C0(Actor *owner, s16 kind, s16 lifetime, u8 killExisting, u8 arg4, u8 arg5,
                        void *arg6) {
-    EmitterParams params;
+    ActorEmitterParams params;
     s32 i;
     Emitter *emitter;
 
@@ -623,7 +613,7 @@ void func_1518E37C(Emitter *emitter, u8 table) {
 }
 
 /* Starts an emitter process with the given params. */
-Emitter *func_1518E3C4(EmitterParams *params, u8 arg1) {
+Emitter *func_1518E3C4(ActorEmitterParams *params, u8 arg1) {
     Emitter *emitter;
 
     if (params->owner->id == 150) {
@@ -633,7 +623,7 @@ Emitter *func_1518E3C4(EmitterParams *params, u8 arg1) {
     if (emitter == NULL) {
         return NULL;
     }
-    memcpy(&emitter->params, params, sizeof(EmitterParams));
+    memcpy(&emitter->params, params, sizeof(ActorEmitterParams));
     emitter->count = 0;
     emitter->state = 8;
     emitter->infoMode = 4;

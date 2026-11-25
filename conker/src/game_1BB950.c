@@ -3,21 +3,11 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Settings an emitter is created with (see game_1BA670.c). */
-typedef struct EmitterParams {
-    /* 0x0 */ Actor *owner;
-    /* 0x4 */ u8 ownerId;
-    /* 0x6 */ s16 lifetime; // counts down when (flags & 1)
-    /* 0x8 */ u8 flags;
-    /* 0x9 */ s8 expireCb;  // index into D_8008D628 run when lifetime runs out, -1: just die
-    /* 0xA */ u8 table;
-} EmitterParams; /* 0xC */
-
 /* Process of type 0x21 that emits particles around its owner (see game_1BA670.c). */
 typedef struct Emitter {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8 pad10[0x8];
-    /* 0x18 */ EmitterParams params;
+    /* 0x18 */ ActorEmitterParams params;
 } Emitter;
 
 /* An emitter's particle (see game_1BA670.c and game_1BDC20.c). */

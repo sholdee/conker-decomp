@@ -2260,4 +2260,17 @@ typedef struct RiseMotion {
     /* 0x24 */ f32 ceiling;
 } RiseMotion; /* size 0x28 */
 
+/* Settings an actor-attached particle emitter (object type 0x21, func_1518E3C4 / func_1518D1C0 in
+ * game_1BA670.c) is created with; copied verbatim into the emitter at +0x18. */
+typedef struct ActorEmitterParams {
+    /* 0x0 */ Actor *owner;
+    /* 0x4 */ u8 ownerId;   /* owner->unique_id at creation; the emitter dies when it changes */
+    /* 0x5 */ u8 pad5;
+    /* 0x6 */ s16 lifetime; /* counts down when (flags & 1) */
+    /* 0x8 */ u8 flags;
+    /* 0x9 */ s8 expireCb;  /* index into D_8008D628 run when lifetime runs out, -1: just die */
+    /* 0xA */ u8 table;     /* index into D_8008D5E0 */
+    /* 0xB */ u8 padB;
+} ActorEmitterParams; /* size 0xC */
+
 #endif
