@@ -7,6 +7,7 @@
 #define D_800DC464 D_800DC464_s32_decl_in_variables_h
 #define D_800DC468 D_800DC468_u16_decl_in_variables_h
 #include "variables.h"
+#include "effects.h"
 #undef D_800DC460
 #undef D_800DC464
 #undef D_800DC468
@@ -108,24 +109,6 @@ typedef struct Particle {
     /* 0x16C */ u8 pad16C[4];
     /* 0x170 */ u8 extra[1]; // per-kind data, size passed to func_1513264C
 } Particle;
-
-/* Spawn template: the same layout as Particle 0x10..0x8B, copied into the particle by func_1513264C. */
-typedef struct {
-    /* 0x00 */ f32 radius;
-    /* 0x04 */ f32 elasticity;
-    /* 0x08 */ f32 sizeXZ;
-    /* 0x0C */ f32 sizeY;
-    /* 0x10 */ vertex rot;
-    /* 0x1C */ vertex scale;
-    /* 0x28 */ vertex pos;
-    /* 0x34 */ vertex vel;
-    /* 0x40 */ vertex rotVel;
-    /* 0x4C */ f32 gravity;
-    /* 0x50 */ u32 flags;
-    /* 0x54 */ s16 lifetime;
-    /* 0x56 */ u16 model;
-    /* 0x58 */ u8 unk58[0x7C - 0x58];
-} ParticleSpawn; // size 0x7C
 
 /* Wall-collision query filled in by the caller and updated by func_15044380. */
 typedef struct {

@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /* A collision triangle as func_150AC9C0 reports it: three s16 xyz vertices. */
 typedef struct {
@@ -66,18 +67,6 @@ typedef struct {
     /* 0x18 */ SpriteDef def;
 } SpriteFx;
 
-/* Spawn template of a particle (game_169510.c), copied to FxParticle.def. */
-typedef struct {
-    /* 0x00 */ u8 pad0[4];
-    /* 0x04 */ s16 lifetime;
-    /* 0x06 */ u8 pad6[0x16];
-    /* 0x1C */ vertex pos;
-    /* 0x28 */ vertex rot;
-    /* 0x34 */ u8 pad34[0x10];
-    /* 0x44 */ u8 unk44;           /* faded with the lifetime */
-    /* 0x45 */ u8 pad45[0x3];
-} ParticleDef;
-
 /* Per-behaviour motion block stored right after a particle. */
 typedef struct {
     /* 0x00 */ vertex vel;
@@ -90,7 +79,7 @@ typedef struct {
 typedef struct {
     /* 0x000 */ u8 pad0[0x18];
     /* 0x018 */ ParticleDef def;
-    /* 0x060 */ u8 pad60[0xB0];
+    /* 0x070 */ u8 pad70[0xA0];
     /* 0x110 */ ParticleMotion motion;
 } FxParticle;
 
