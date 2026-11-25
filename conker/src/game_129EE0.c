@@ -258,7 +258,7 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
             extern s32 D_800A4AA0; // matching: a declaration here opens a -g3 scope block (scheduling)
 
             if (onGround) {
-                extern Vec3f D_800A5480; // matching: a declaration here opens a -g3 scope block (scheduling)
+                extern const Vec3f D_800A5480; // matching: a declaration here opens a -g3 scope block (scheduling)
 
                 groundDef.texture = 3;
                 groundDef.type = 0;

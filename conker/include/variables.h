@@ -687,8 +687,8 @@ extern const u8 D_800AB3F4[13]; // particle texture id per effect kind
 extern const u8 D_800AB404[13]; // flag per effect kind
 extern const Color24 D_800AB414[13]; // effect colours (RGB per colour index / effect kind)
 
-extern Vec3f D_800A5480; // zero vector
-extern f32 D_800A548C[];
+extern const Vec3f D_800A5480; // zero vector
+extern const f32 D_800A548C[];
 
 // end of data D_800B0DBC
 
