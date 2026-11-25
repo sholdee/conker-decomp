@@ -604,7 +604,6 @@ Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 texBase, Vtx *quad, s32 arg4, 
     return gfx;
 }
 
-extern s32 *D_800DBE80;
 extern s32 *D_800891BC[];
 s32 func_1502B7F0();
 void func_10004074();
@@ -640,46 +639,51 @@ void func_1511172C(s32 sky) {
 
 extern void *allocate_memory(s32, s32, s32, s32);
 
-typedef struct Star15111858 {
+/* One star of the star-field sky: a point on a sphere of radius 256, stored as the high halves of f32s. */
+typedef struct Star {
     u16 x;
     u16 y;
     u16 z;
-    u8 unk6;
-    u8 unk7;
-} Star15111858;
+    u8 unk6; // 0..4
+    u8 unk7; // 64..254
+} Star;
 
+#define NUM_STARS 8000
+
+/* Allocates the star field in D_800DBE80 and scatters NUM_STARS random stars over the sphere, latitudes kept
+ * within 89 degrees of the equator. */
 void func_15111858(void) {
-    Star15111858 *p;
+    Star *stars;
     s32 i;
 
-    D_800DBE80 = allocate_memory(0xFA00, 1, 0, 0);
-    p = (Star15111858 *)D_800DBE80;
-    for (i = 0; i != 8000; i++) {
-        f32 r;
-        f32 ang;
+    D_800DBE80 = allocate_memory(NUM_STARS * sizeof(Star), 1, 0, 0);
+    stars = (Star *)D_800DBE80;
+    for (i = 0; i != NUM_STARS; i++) {
+        f32 ringRadius;
+        f32 longitude;
         f32 v;
-        f32 lat;
-        s32 h;
-        f32 tmp;
+        f32 latitude;
+        s32 height;
+        f32 bits; // matching: read back through a u16 pointer (a union keeps it out of memory)
 
-        ang = (f32)(func_150ADA20() % 36000U) * 0.0001745329209f;
-        v = (f32)(s32)((func_150ADA20() % 1584400U) - 792100) * 0.009999999776f;
+        longitude = (f32)(func_150ADA20() % 36000U) * 0.0001745329209f; // hundredths of a degree to radians
+        v = (f32)(s32)((func_150ADA20() % 1584400U) - 792100) * 0.01f;
         if (v >= 0.0f) {
-            lat = 89.0f - sqrtf(v);
+            latitude = 89.0f - sqrtf(v);
         } else {
-            lat = sqrtf(-v) + -89.0f;
+            latitude = sqrtf(-v) + -89.0f;
         }
-        lat *= 0.01745329238f;
-        h = func_150AD78C(lat) * 256.0f;
-        tmp = h;
-        p[i].y = *(u16 *)&tmp;
-        r = sqrtf(0x10000 - h * h);
-        tmp = (s32)(func_150AD78C(ang) * r);
-        p[i].x = *(u16 *)&tmp;
-        tmp = (s32)(func_150AD780(ang) * r);
-        p[i].z = *(u16 *)&tmp;
-        p[i].unk7 = (func_150ADA20() % 191U) + 0x40;
-        p[i].unk6 = func_150ADA20() % 5U;
+        latitude *= 0.01745329238f;
+        height = func_150AD78C(latitude) * 256.0f;
+        bits = height;
+        stars[i].y = *(u16 *)&bits;
+        ringRadius = sqrtf(0x10000 - height * height);
+        bits = (s32)(func_150AD78C(longitude) * ringRadius);
+        stars[i].x = *(u16 *)&bits;
+        bits = (s32)(func_150AD780(longitude) * ringRadius);
+        stars[i].z = *(u16 *)&bits;
+        stars[i].unk7 = (func_150ADA20() % 191U) + 64;
+        stars[i].unk6 = func_150ADA20() % 5U;
     }
 }
 
