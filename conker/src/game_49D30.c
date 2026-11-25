@@ -1333,9 +1333,6 @@ void func_1501FC8C(s32 track, f32 percent, f32 *x, f32 *y, f32 *z, s32 scene) {
     }
 }
 
-// matching: a second 0.01f literal would share FC8C's rodata entry; the ROM has one per function
-extern f32 D_800969D8;
-
 /* Heading in degrees of track `track`'s path at `percent` (0-100) of its length. */
 void func_1501FE68(s32 track, f32 percent, f32 *heading, s32 scene) {
     f32 dx;
@@ -1353,7 +1350,7 @@ void func_1501FE68(s32 track, f32 percent, f32 *heading, s32 scene) {
             percent = 0.0f;
         }
 
-        dist = D_800C3A50[scene][track].length * percent * D_800969D8;
+        dist = D_800C3A50[scene][track].length * percent * 0.009999999776f;
         func_1501F72C(track, dist, positions, scene, segment);
 
         if (D_800C3868[scene][track][segment[0]].linear == 0) {

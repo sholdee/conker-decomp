@@ -1208,7 +1208,7 @@ segments:
       - [0x23B45C, rodata]
       - [0x23B460, .rodata, game_49BE0]
       - [0x23B47C, rodata]
-      - [0x23B480, rodata]
+      - [0x23B480, .rodata, game_49D30]
       - [0x23B4E0, .rodata, game_50D80]
       - [0x23B894, rodata]
       - [0x23B8A0, .rodata, game_58F80]
