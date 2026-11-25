@@ -1331,7 +1331,6 @@ s32 func_15136698(f32 size, f32 arg1, u8 alpha, u8 arg3, s16 lifetime, s32 arg5,
     return particle;
 }
 
-extern f32 D_800BE9A4;
 
 /* The particle func_15136698 spawns; its desc is copied to +0x18 and `extra` to growth. */
 typedef struct {
@@ -1492,8 +1491,6 @@ typedef struct Blood36C3CSpray {
     u8 kind;
 } Blood36C3CSpray;
 
-s32 func_15134070();
-void func_1504715C();
 void func_1515C244(struct127 *, Vec3f *, f32 *, f32 *);
 void func_1513A24C(Vec3f *, s32 *, f32 *, s32, f32, u8, u8, u8 *, void *,
                    u8, s32);
@@ -1583,7 +1580,6 @@ void func_15136C3C(struct127 *actor, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
     }
 }
 
-extern void func_15143874(s16, f32, f32 *, f32 *);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, f32 *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
 extern s32 func_15145C90(s32);
 extern void func_151DC034(struct17 *, f32, s32, s16, u8, u8, s32);
@@ -2128,8 +2124,6 @@ typedef struct {
 extern void func_1503F404(void *matrix, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
 extern s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
 extern s32 func_1513264C(void *, s32, s32, s32, s32, u8, s32);
-extern void func_15143794(s16, s16, f32, f32 *);
-f32 func_150ADA68(void);
 
 /*
  * Throws a func_1513264C chunk (model D_800A3FD8[kind].unkC) off the actor from position, and for
@@ -3036,8 +3030,6 @@ extern struct17 D_800A42A0[];
 extern void func_1503F404(void *matrix, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
 extern s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
 extern s32 func_1513264C(void *, s32, s32, s32, s32, u8, s32);
-extern void func_15143794(s16, s16, f32, f32 *);
-f32 func_150ADA68(void);
 
 /* Gore for profile 0/7 actors. */
 void func_1513A6E0(struct127 *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
