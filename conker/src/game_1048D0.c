@@ -216,6 +216,14 @@ extern s32 func_150535F4(struct127 *arg0);
 extern void func_1001091C(struct127 *arg0, s32 arg1);
 extern void func_10010FFC(s32 a, s32 b, s32 c, s32 d, s32 e, struct127 *f);
 
+/*
+ * Per-frame update for an object that can be carried by a player (unk13C set, unk124 = player index).
+ * While the player's unk31C->unk4E is set the object follows them: it copies their 0x180-0x19E state, eases
+ * its angle towards theirs and (id 0x7F) moves halfway to them. Otherwise it is let go and, unless unk232 is 4,
+ * calls func_1505327C for each falling, eligible player. Afterwards it updates its height (unk28); once it has
+ * spent more than 10 frames over 75 units high, it dies when the player lands or it is in water. Finally it
+ * plays its movement sound and runs func_150535F4.
+ */
 void func_150D7928(struct127 *obj) {
     f32 angleOffset;
     u8 playerIndex;
@@ -266,8 +274,8 @@ void func_150D7928(struct127 *obj) {
             player->unk184 &= ~0x1F;
             player->unk184 |= 4;
             obj->y_position = player->y_position;
-            obj->x_position = obj->x_position + ((player->x_position - obj->x_position) * 0.5f);
-            obj->z_position = obj->z_position + ((player->z_position - obj->z_position) * 0.5f);
+            obj->x_position += (player->x_position - obj->x_position) * 0.5f;
+            obj->z_position += (player->z_position - obj->z_position) * 0.5f;
             player->disable_jump = 10;
             if (O31C(player)->unk4F == 2) {
                 if (speed < player->unk44 * 1.35f) {
@@ -279,7 +287,7 @@ void func_150D7928(struct127 *obj) {
             obj->y_velocity = 0.0f;
         }
         angle = obj->unk21C;
-        obj->unk21C = angle + ((s16)(n - angle) / 3);
+        obj->unk21C = angle + (s16)(n - angle) / 3;
         obj->unk7A = angle;
         obj->unk76 = angle;
         obj->xz_velocity = player->xz_velocity;
@@ -315,7 +323,8 @@ void func_150D7928(struct127 *obj) {
         } else {
             for (n = 0; n != 2; n++) {
                 if (D_800CC2D0[n].interaction_state == 1) {
-                    if ((D_800CC2D0[n].unk31C->unk78 == 0) && (D_800CC2D0[n].unk31C->unk11A == 0) && ((1 << n) & D_800CC268) && (D_800CC2D0[n].y_velocity < 0.0f)) {
+                    if (D_800CC2D0[n].unk31C->unk78 == 0 && D_800CC2D0[n].unk31C->unk11A == 0 && (D_800CC268 & (1 << n)) &&
+                        D_800CC2D0[n].y_velocity < 0.0f) {
                         obj->unk124 = n;
                         offset = 39.0f;
                         if (id == 0x48) {
@@ -332,8 +341,8 @@ void func_150D7928(struct127 *obj) {
     obj->unk28 = obj->y_position - obj->unk180;
     if (id == 0x48) {
         if (linkType == 0x7A) {
-            f32 height;
-            height = obj->unk180 + 180.0f;
+            f32 height = obj->unk180 + 180.0f;
+
             obj->unkF8 |= 0x10000;
             func_15058EA4(obj, height + 10.0f, 1.2f, height, -1.1f, 4.0f, -4.0f);
             if (obj->unk13C != 0) {
@@ -357,7 +366,8 @@ void func_150D7928(struct127 *obj) {
                 timer = obj->unk102 = 0;
             }
         }
-        if ((timer > 10) && ((player = &D_800CC2D0[playerIndex])->unk28 == 0.0f || (obj->in_water != 0) || ((obj->unk124 != 0) && (O31C(player)->unk4F == 2)))) {
+        if (timer > 10 && ((player = &D_800CC2D0[playerIndex])->unk28 == 0.0f || obj->in_water != 0 ||
+                            (obj->unk124 != 0 && O31C(player)->unk4F == 2))) {
             if (obj->unk13C != 0) {
                 D_800CC2D0[obj->unk124].unkCC = 0;
                 D_800CC2D0[obj->unk124].unk31C->unk4E = 0;
@@ -369,20 +379,20 @@ void func_150D7928(struct127 *obj) {
             obj->health = 0;
         }
         if (obj->y_scale < 1.0f) {
-            obj->y_scale = obj->y_scale + 0.05f;
+            obj->y_scale += 0.05f;
         }
         if (obj->unk28 == 0.0f) {
             obj->target_speed = 0.0f;
-            *(f32 *)&obj->padBC = *(f32 *)&obj->padBC * 0.5f;
+            *(f32 *)&obj->padBC *= 0.5f;
         }
         if (obj->target_speed == 0.0f) {
             obj->unkC4 = obj->unk44 + angleOffset;
         } else {
             obj->unkC4 += obj->target_speed;
             if (obj->unkC4 < 0.0f) {
-                obj->unkC4 = obj->unkC4 + 360.0f;
+                obj->unkC4 += 360.0f;
             } else if (obj->unkC4 > 360.0f) {
-                obj->unkC4 = obj->unkC4 - 360.0f;
+                obj->unkC4 -= 360.0f;
             }
         }
         if (obj->unk13C != 0) {
@@ -392,7 +402,7 @@ void func_150D7928(struct127 *obj) {
         } else {
             *(f32 *)&obj->padC8 = 44.0f;
         }
-        if ((0.2f < speed) && (obj->unk28 < 10.0f) && (obj->health != 0) && (D_800C35EA != 1)) {
+        if (speed > 0.2f && obj->unk28 < 10.0f && obj->health != 0 && D_800C35EA != 1) {
             volume = (s32)(1000.0f * speed);
             if (volume > 18000) {
                 volume = 18000;
