@@ -127,148 +127,150 @@ void func_151DC8BC(struct17 *pos, s32 duration, u8 burst, u8 randomColors, u8 ow
     }
 }
 
+/* ParticleDesc.flags (see game_15D730.c) */
+#define PARTICLE_FLIP_S 0x40
+#define PARTICLE_FLIP_T 0x80
+
+/* Spawn parameters of a particle; func_15130280 copies them to the particle (see game_15D730.c). */
 typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s16 unk8;
-    s16 unkA;
-    s32 unkC;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    struct17 unk30;
-    struct17 unk3C;
-    struct17 unk48;
-    f32 unk54;
-    u32 unk58;
-    s32 unk5C;
-    u8 unk60;
-    u8 unk61;
-    u8 unk62;
-    s8 unk63;
-    s8 unk64;
-    u8 unk65;
-    u8 unk66;
-    u8 pad67[9];
-} Spawn151DC97C;
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ u16 renderMode;
+    /* 0x0A */ s16 timer;
+    /* 0x0C */ s32 frame;
+    /* 0x10 */ s32 frameRate;
+    /* 0x14 */ u8 r;
+    /* 0x15 */ u8 g;
+    /* 0x16 */ u8 b;
+    /* 0x17 */ u8 a;
+    /* 0x18 */ u8 r2;
+    /* 0x19 */ u8 g2;
+    /* 0x1A */ u8 b2;
+    /* 0x1B */ u8 alpha;
+    /* 0x1C */ u8 brightness;
+    /* 0x1D */ u8 texture;
+    /* 0x1E */ s16 fadeStart;
+    /* 0x20 */ s16 fadeRate;
+    /* 0x22 */ s16 scaleStart;
+    /* 0x24 */ f32 scaleRate;
+    /* 0x28 */ f32 width;
+    /* 0x2C */ f32 height;
+    /* 0x30 */ struct17 pos;
+    /* 0x3C */ struct17 offset;
+    /* 0x48 */ struct17 vel;
+    /* 0x54 */ f32 gravity;
+    /* 0x58 */ u32 flags;      // matching: u32 here (s32 in game_15D730.c) for the or-order of the flip update
+    /* 0x5C */ void *viewMask;
+    /* 0x60 */ u8 primColorMode;
+    /* 0x61 */ u8 envColorMode;
+    /* 0x62 */ s8 updateFunc;
+    /* 0x63 */ s8 deathFunc;
+    /* 0x64 */ s8 drawFunc;
+    /* 0x65 */ u8 handlerSet;
+    /* 0x66 */ u8 views;
+    /* 0x67 */ u8 pad67;
+    /* 0x68 */ s16 minSize;
+    /* 0x6A */ s16 unk6A;
+    /* 0x6C */ f32 maxSize;
+} ParticleDesc; /* size 0x70 */
 
+/* Per-particle data of particles with update function 0x16 (ParticleDesc.updateFunc). */
 typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-    u8 unk3;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-} Extra151DC97C;
+    /* 0x00 */ u8 unk0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 unk2;
+    /* 0x03 */ u8 unk3;
+    /* 0x04 */ f32 unk4;
+    /* 0x08 */ f32 unk8;
+    /* 0x0C */ f32 unkC;
+} ParticleUpdate16Data;
 
+/* Particle created by func_15130280 (only the fields used here). */
 typedef struct {
-    struct17 pos;
-    f32 accum;
-    u8 unk10;
-} Sub151DC97C;
+    /* 0x00 */ u8 pad0[0xA8];
+    /* 0xA8 */ ParticleUpdate16Data data;
+} Particle;
 
-typedef struct {
-    u8 pad0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0x1B];
-    Sub151DC97C unk28;
-} Obj151DC97C;
+extern Particle *func_15130280(ParticleDesc *desc, u8, s32, s32 dataSize, u8, s32);
 
-extern void *func_15130280(void *, u8, s32, s32, u8, s32);
+/* Update function of the func_151DC8BC emitter: emits particles at its position at a random rate
+ * of (0.136 to 0.257) * D_800BE9A4 per frame, in a fixed colour or one of three random colour pairs. */
+void func_151DC97C(Emitter *emitter) {
+    EmitterData *data;
 
-void func_151DC97C(Obj151DC97C *arg0) {
-    Sub151DC97C *sub;
+    data = &emitter->data;
+    data->accum += (0.136f + func_150ADA68() * 0.12100001f) * D_800BE9A4;
+    if (data->accum > 1.0f) {
+        ParticleDesc desc;
+        ParticleUpdate16Data extra;
+        Particle *particle;
+        u8 colorIndex;
 
-    sub = &arg0->unk28;
-    sub->accum += (0.1360000074f + func_150ADA68() * 0.1210000068f) * D_800BE9A4;
-    if (sub->accum > 1.0f) {
-        Spawn151DC97C spawn;
-        Extra151DC97C extra;
-        void *ret;
-        u8 i;
-
-        extra.unkC = 0.9704700112f;
-        spawn.unk1D = 0x6C;
-        spawn.unk8 = 0x5103;
-        spawn.unk0 = 0x200005;
+        extra.unkC = 0.97047f;
+        desc.texture = 0x6C;
+        desc.renderMode = 0x5103;
+        desc.unk0 = 0x200005;
         extra.unk0 = 0;
         extra.unk1 = 0;
-        spawn.unk4 = 0;
-        spawn.unkC = 0;
-        spawn.unk10 = 0;
-        spawn.unk1E = 0x28;
-        spawn.unk20 = 6;
-        spawn.unk58 = 0x80DE07;
-        spawn.unk60 = 8;
-        spawn.unk61 = 6;
-        spawn.unk62 = 0x16;
-        spawn.unk63 = -1;
-        spawn.unk64 = -1;
-        spawn.unk65 = 0;
-        spawn.unk22 = 0x78;
-        spawn.unk1C = 0xFF;
-        spawn.unk24 = 1.006579041f;
-        spawn.unk30 = sub->pos;
-        spawn.unk3C.unk0 = 0.0f;
-        spawn.unk3C.unk4 = 0.0f;
-        spawn.unk3C.unk8 = 0.0f;
-        spawn.unk48.unk0 = 0.0f;
-        spawn.unk48.unk4 = 0.0f;
-        spawn.unk48.unk8 = 0.0f;
-        if (sub->unk10 == 0) {
-            spawn.unk14 = 0xEF;
-            spawn.unk15 = 0xE0;
-            spawn.unk16 = 0xCD;
-            spawn.unk17 = 0xFF;
-            spawn.unk18 = 0x30;
-            spawn.unk19 = 0x30;
-            spawn.unk1A = 0x30;
+        desc.unk4 = 0;
+        desc.frame = 0;
+        desc.frameRate = 0;
+        desc.fadeStart = 40;
+        desc.fadeRate = 6;
+        desc.flags = 0x80DE07;
+        desc.primColorMode = 8;
+        desc.envColorMode = 6;
+        desc.updateFunc = 0x16;
+        desc.deathFunc = -1;
+        desc.drawFunc = -1;
+        desc.handlerSet = 0;
+        desc.scaleStart = 120;
+        desc.brightness = 0xFF;
+        desc.scaleRate = 1.006579f;
+        desc.pos = data->pos;
+        desc.offset.unk0 = 0.0f;
+        desc.offset.unk4 = 0.0f;
+        desc.offset.unk8 = 0.0f;
+        desc.vel.unk0 = 0.0f;
+        desc.vel.unk4 = 0.0f;
+        desc.vel.unk8 = 0.0f;
+        if (data->randomColors == 0) {
+            desc.r = 0xEF;
+            desc.g = 0xE0;
+            desc.b = 0xCD;
+            desc.a = 0xFF;
+            desc.r2 = 0x30;
+            desc.g2 = 0x30;
+            desc.b2 = 0x30;
         }
         do {
             extra.unk2 = func_150ADA20() % 5U + 4;
             extra.unk3 = func_150ADA20() % 5U + 4;
             extra.unk4 = func_150ADA68() * 50.0f;
             extra.unk8 = func_150ADA68() * 50.0f;
-            spawn.unk54 = func_150ADA68() * 0.151000008f + 0.1910000145f;
-            spawn.unk58 &= ~0xC0;
-            spawn.unk58 |= ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);
-            spawn.unk1B = func_150ADA20() % 56U + 200;
-            spawn.unkA = func_150ADA20() % 36U + 110;
-            spawn.unk28 = spawn.unk2C = func_150ADA68() * 370.0f + 403.0f;
-            if (sub->unk10 != 0) {
-                const u8 colA[3][3] = { { 0xEF, 0xE0, 0xCD }, { 0x9E, 0x9C, 0xA0 }, { 0x9E, 0x9C, 0xA0 } };
-                const u8 colB[3][3] = { { 0x30, 0x30, 0x30 }, { 0x9A, 0x69, 0xD2 }, { 0xD5, 0x83, 0x91 } };
-                i = func_150ADA20() % 3U;
-                spawn.unk14 = colA[i][0];
-                spawn.unk15 = colA[i][1];
-                spawn.unk16 = colA[i][2];
-                spawn.unk17 = 0xFF;
-                spawn.unk18 = colB[i][0];
-                spawn.unk19 = colB[i][1];
-                spawn.unk1A = colB[i][2];
+            desc.gravity = func_150ADA68() * 0.15100001f + 0.19100001f;
+            desc.flags &= ~(PARTICLE_FLIP_S | PARTICLE_FLIP_T);
+            desc.flags |= ((func_150ADA20() & 1) ? PARTICLE_FLIP_S : 0) | ((func_150ADA20() & 1) ? PARTICLE_FLIP_T : 0);
+            desc.alpha = func_150ADA20() % 56U + 200;
+            desc.timer = func_150ADA20() % 36U + 110;
+            desc.width = desc.height = func_150ADA68() * 370.0f + 403.0f;
+            if (data->randomColors != 0) {
+                const u8 colors[3][3] = { { 0xEF, 0xE0, 0xCD }, { 0x9E, 0x9C, 0xA0 }, { 0x9E, 0x9C, 0xA0 } };
+                const u8 colors2[3][3] = { { 0x30, 0x30, 0x30 }, { 0x9A, 0x69, 0xD2 }, { 0xD5, 0x83, 0x91 } };
+                colorIndex = func_150ADA20() % 3U;
+                desc.r = colors[colorIndex][0];
+                desc.g = colors[colorIndex][1];
+                desc.b = colors[colorIndex][2];
+                desc.a = 0xFF;
+                desc.r2 = colors2[colorIndex][0];
+                desc.g2 = colors2[colorIndex][1];
+                desc.b2 = colors2[colorIndex][2];
             }
-            ret = func_15130280(&spawn, 0, 0, 0x10, arg0->unkC, arg0->unk1);
-            if (ret != NULL) {
-                memcpy((u8 *)ret + 0xA8, &extra, sizeof(extra));
+            particle = func_15130280(&desc, 0, 0, sizeof(extra), emitter->unkC, emitter->unk1);
+            if (particle != NULL) {
+                memcpy(&particle->data, &extra, sizeof(extra));
             }
-            sub->accum -= 1.0f;
-        } while (sub->accum > 1.0f);
+            data->accum -= 1.0f;
+        } while (data->accum > 1.0f);
     }
 }
