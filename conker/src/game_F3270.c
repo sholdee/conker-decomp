@@ -162,29 +162,9 @@ GameF3270LinkedObject *func_150C5F94(Actor *actor, GameF3270Emitter *emitter) {
     return obj;
 }
 
-/* Copied to 0xA8 of the spawned burst. */
-typedef struct {
-    /* 0x00 */ f32 size;
-    /* 0x04 */ u8 unk4;
-    /* 0x05 */ u8 unk5;
-    /* 0x06 */ u8 unk6;
-    /* 0x07 */ u8 unk7;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 unk1A;
-    /* 0x1B */ u8 unk1B;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-} GameF3270BurstMotion; // size 0x28
-
 typedef struct {
     /* 0x00 */ u8 pad0[0xA8];
-    /* 0xA8 */ GameF3270BurstMotion motion;
+    /* 0xA8 */ RiseMotion motion;
 } GameF3270BurstObject;
 
 typedef struct {
@@ -198,7 +178,7 @@ GameF3270BurstObject *func_151303BC(ParticleDesc *burst, u8 arg1, s32 arg2);
 void func_150C60D8(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz, GameF3270BurstSource *source) {
     ParticleDesc burst;
     GameF3270BurstObject *spawned;
-    GameF3270BurstMotion motion;
+    RiseMotion motion;
 
     burst.texture = 47;
     burst.renderMode = 0xC01;
@@ -229,13 +209,13 @@ void func_150C60D8(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz, GameF3270BurstSo
     burst.fadeStart = 30;
     burst.fadeRate = 8;
     burst.pos.z = z;
-    motion.unk24 = source->unk60;
-    motion.unk10 = 4.0f;
-    motion.unk14 = 0.25f;
-    motion.unk4 = 0;
-    motion.unk5 = 0;
-    motion.unk18 = 0;
-    motion.unk19 = 0;
+    motion.ceiling = source->unk60;
+    motion.maxRiseSpeed = 4.0f;
+    motion.swayPerSpeed = 0.25f;
+    motion.widthPhase = 0;
+    motion.heightPhase = 0;
+    motion.swayPhaseX = 0;
+    motion.swayPhaseZ = 0;
     burst.vel.x = -vx * 0.2f;
     burst.vel.y = 0.0f;
     burst.vel.z = -vz * 0.2f;
@@ -247,15 +227,15 @@ void func_150C60D8(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz, GameF3270BurstSo
     }
     burst.timer = func_150ADA20() % 51U + 106;
     burst.alpha = func_150ADA20() % 101U + 100;
-    motion.size = burst.width = burst.height = func_150ADA68() * 62.0f + 41.0f;
-    motion.unk6 = func_150ADA20() % 5U + 4;
-    motion.unk7 = func_150ADA20() % 5U + 4;
-    motion.unk8 = (func_150ADA68() * 0.25f + 0.15f) * motion.size;
-    motion.unkC = (func_150ADA68() * 0.25f + 0.15f) * motion.size;
-    motion.unk1A = func_150ADA20() % 5U + 4;
-    motion.unk1B = func_150ADA20() % 5U + 4;
-    motion.unk1C = (func_150ADA68() * 0.1f + 0.08f) * motion.size;
-    motion.unk20 = (func_150ADA68() * 0.1f + 0.08f) * motion.size;
+    motion.baseSize = burst.width = burst.height = func_150ADA68() * 62.0f + 41.0f;
+    motion.widthPhaseStep = func_150ADA20() % 5U + 4;
+    motion.heightPhaseStep = func_150ADA20() % 5U + 4;
+    motion.widthWobble = (func_150ADA68() * 0.25f + 0.15f) * motion.baseSize;
+    motion.heightWobble = (func_150ADA68() * 0.25f + 0.15f) * motion.baseSize;
+    motion.swayPhaseStepX = func_150ADA20() % 5U + 4;
+    motion.swayPhaseStepZ = func_150ADA20() % 5U + 4;
+    motion.swayX = (func_150ADA68() * 0.1f + 0.08f) * motion.baseSize;
+    motion.swayZ = (func_150ADA68() * 0.1f + 0.08f) * motion.baseSize;
     burst.gravity = (func_150ADA68() * 60.0f + 21.0f) * 0.001f;
     spawned = func_151303BC(&burst, 2, 40);
     if (spawned != NULL) {

@@ -459,26 +459,6 @@ s32 func_151AA5A4(PulseFx *fx) {
     return 1;
 }
 
-/* Payload copied to +0xA8 of a spawned burst. */
-typedef struct {
-    /* 0x00 */ f32 size;
-    /* 0x04 */ u8 unk4;
-    /* 0x05 */ u8 unk5;
-    /* 0x06 */ u8 unk6;
-    /* 0x07 */ u8 unk7;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 unk1A;
-    /* 0x1B */ u8 unk1B;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-} BurstPayload;
-
 typedef struct {
     /* 0x00 */ u8 pad0[0x74];
     /* 0x74 */ f32 unk74;
@@ -490,7 +470,7 @@ void *func_151303BC(ParticleDesc *desc, u8 arg1, s32 payloadSize);
 void func_151AA6D8(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, Obj151AA6D8 *obj) {
     ParticleDesc burst;
     void *spawned;
-    BurstPayload payload;
+    RiseMotion payload;
 
     burst.texture = 0x2F;
     burst.renderMode = 0xC01;
@@ -518,12 +498,12 @@ void func_151AA6D8(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, Obj151AA6D
     burst.offset.z = 0.0f;
     burst.fadeStart = 20;
     burst.fadeRate = 12;
-    payload.unk4 = 0;
-    payload.unk5 = 0;
-    payload.unk18 = 0;
-    payload.unk19 = 0;
-    payload.unk10 = 3.5f;
-    payload.unk14 = 0.2857142985f;
+    payload.widthPhase = 0;
+    payload.heightPhase = 0;
+    payload.swayPhaseX = 0;
+    payload.swayPhaseZ = 0;
+    payload.maxRiseSpeed = 3.5f;
+    payload.swayPerSpeed = 0.2857142985f;
 
     burst.vel.x = (to->x - from->x) * obj->unk74;
     burst.vel.y = (to->y - from->y) * obj->unk74;
@@ -542,15 +522,15 @@ void func_151AA6D8(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, Obj151AA6D
 
     burst.timer = (func_150ADA20() % 51U) + 50;
     burst.alpha = (func_150ADA20() % 101U) + 100;
-    payload.size = burst.width = burst.height = (func_150ADA68() * 39.0f) + 31.0f;
-    payload.unk6 = (func_150ADA20() % 5U) + 4;
-    payload.unk7 = (func_150ADA20() % 5U) + 4;
-    payload.unk8 = ((func_150ADA68() * 0.25f) + 0.150000006f) * payload.size;
-    payload.unkC = ((func_150ADA68() * 0.25f) + 0.150000006f) * payload.size;
-    payload.unk1A = (func_150ADA20() % 5U) + 4;
-    payload.unk1B = (func_150ADA20() % 5U) + 4;
-    payload.unk1C = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * payload.size;
-    payload.unk20 = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * payload.size;
+    payload.baseSize = burst.width = burst.height = (func_150ADA68() * 39.0f) + 31.0f;
+    payload.widthPhaseStep = (func_150ADA20() % 5U) + 4;
+    payload.heightPhaseStep = (func_150ADA20() % 5U) + 4;
+    payload.widthWobble = ((func_150ADA68() * 0.25f) + 0.150000006f) * payload.baseSize;
+    payload.heightWobble = ((func_150ADA68() * 0.25f) + 0.150000006f) * payload.baseSize;
+    payload.swayPhaseStepX = (func_150ADA20() % 5U) + 4;
+    payload.swayPhaseStepZ = (func_150ADA20() % 5U) + 4;
+    payload.swayX = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * payload.baseSize;
+    payload.swayZ = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * payload.baseSize;
     burst.gravity = ((func_150ADA68() * 70.0f) + 73.0f) * 0.001000000047f;
 
     spawned = func_151303BC(&burst, 2, sizeof(payload));
@@ -879,7 +859,7 @@ typedef struct {
 void func_151AB3A4(f32 x, f32 y, f32 z, f32 dx, f32 arg4, f32 dz, Obj151AB3A4 *obj) {
     ParticleDesc burst;
     void *spawned;
-    BurstPayload payload;
+    RiseMotion payload;
 
     burst.texture = 0x2F;
     burst.renderMode = 0xC01;
@@ -910,13 +890,13 @@ void func_151AB3A4(f32 x, f32 y, f32 z, f32 dx, f32 arg4, f32 dz, Obj151AB3A4 *o
     burst.fadeStart = 30;
     burst.fadeRate = 8;
     burst.pos.z = z;
-    payload.unk24 = obj->unk60;
-    payload.unk10 = 4.0f;
-    payload.unk14 = 0.25f;
-    payload.unk4 = 0;
-    payload.unk5 = 0;
-    payload.unk18 = 0;
-    payload.unk19 = 0;
+    payload.ceiling = obj->unk60;
+    payload.maxRiseSpeed = 4.0f;
+    payload.swayPerSpeed = 0.25f;
+    payload.widthPhase = 0;
+    payload.heightPhase = 0;
+    payload.swayPhaseX = 0;
+    payload.swayPhaseZ = 0;
     burst.vel.x = -dx * 0.2f;
     burst.vel.y = 0.0f;
     burst.vel.z = -dz * 0.2f;
@@ -928,15 +908,15 @@ void func_151AB3A4(f32 x, f32 y, f32 z, f32 dx, f32 arg4, f32 dz, Obj151AB3A4 *o
     }
     burst.timer = (func_150ADA20() % 51U) + 106;
     burst.alpha = (func_150ADA20() % 101U) + 100;
-    payload.size = burst.width = burst.height = (func_150ADA68() * 62.0f) + 41.0f;
-    payload.unk6 = (func_150ADA20() % 5U) + 4;
-    payload.unk7 = (func_150ADA20() % 5U) + 4;
-    payload.unk8 = ((func_150ADA68() * 0.25f) + 0.150000006f) * payload.size;
-    payload.unkC = ((func_150ADA68() * 0.25f) + 0.150000006f) * payload.size;
-    payload.unk1A = (func_150ADA20() % 5U) + 4;
-    payload.unk1B = (func_150ADA20() % 5U) + 4;
-    payload.unk1C = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * payload.size;
-    payload.unk20 = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * payload.size;
+    payload.baseSize = burst.width = burst.height = (func_150ADA68() * 62.0f) + 41.0f;
+    payload.widthPhaseStep = (func_150ADA20() % 5U) + 4;
+    payload.heightPhaseStep = (func_150ADA20() % 5U) + 4;
+    payload.widthWobble = ((func_150ADA68() * 0.25f) + 0.150000006f) * payload.baseSize;
+    payload.heightWobble = ((func_150ADA68() * 0.25f) + 0.150000006f) * payload.baseSize;
+    payload.swayPhaseStepX = (func_150ADA20() % 5U) + 4;
+    payload.swayPhaseStepZ = (func_150ADA20() % 5U) + 4;
+    payload.swayX = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * payload.baseSize;
+    payload.swayZ = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * payload.baseSize;
     burst.gravity = ((func_150ADA68() * 60.0f) + 21.0f) * 0.001000000047f;
     spawned = func_151303BC(&burst, 2, sizeof(payload));
     if (spawned != NULL) {

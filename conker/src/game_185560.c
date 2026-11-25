@@ -668,26 +668,6 @@ u8 func_1515942C(Actor *chr, s16 state0, s16 state1, s16 state2, s16 moveState, 
     return ret;
 }
 
-/* Particle data at 0xA8 for the rising-and-swaying particles (func_151596BC, func_15159594). */
-typedef struct {
-    /* 0x00 */ f32 baseSize;
-    /* 0x04 */ u8 widthPhase;
-    /* 0x05 */ u8 heightPhase;
-    /* 0x06 */ s8 widthPhaseStep;
-    /* 0x07 */ s8 heightPhaseStep;
-    /* 0x08 */ f32 widthWobble;
-    /* 0x0C */ f32 heightWobble;
-    /* 0x10 */ f32 maxRiseSpeed;
-    /* 0x14 */ f32 swayPerSpeed;
-    /* 0x18 */ u8 swayPhaseX;
-    /* 0x19 */ u8 swayPhaseZ;
-    /* 0x1A */ u8 swayPhaseStepX;
-    /* 0x1B */ u8 swayPhaseStepZ;
-    /* 0x1C */ f32 swayX;
-    /* 0x20 */ f32 swayZ;
-    /* 0x24 */ f32 ceiling;
-} RiseMotion;
-
 /* Particle data at 0xA8 for particles oscillating along a direction (func_1515A11C). */
 typedef struct {
     /* 0x00 */ f32 baseSize;
