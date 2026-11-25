@@ -3,13 +3,9 @@
 #define func_1502B7F0 func_1502B7F0_5
 #include "functions.h"
 #undef func_1502B7F0
-/* variables.h types D_800CC2D0 as Actor[], whose 0x128 is inside `u32 pad128`;
-   func_151E9D18 needs a byte there, so shadow the declaration file-locally. */
-#define D_800CC2D0 D_800CC2D0_struct127_decl_in_variables_h
 /* variables.h declares D_800BE3F8 as a pointer; this file uses it as an array of SaveSlot215960. */
 #define D_800BE3F8 D_800BE3F8_ptr_decl_in_variables_h
 #include "variables.h"
-#undef D_800CC2D0
 #undef D_800BE3F8
 
 /* Animation state of a HUD model, created by func_1503F62C; only the fields used here. */
@@ -169,23 +165,7 @@ Gfx *func_151E86E4(Gfx *gfx, s32 xl, s32 yl, s32 xh, s32 yh, s32 tile, s32 s, s3
 }
 
 
-typedef struct {
-    /* 0x000 */ char pad0[0x14];
-    /* 0x014 */ f32 unk14;
-    /* 0x018 */ f32 unk18;
-    /* 0x01C */ f32 unk1C;
-    /* 0x020 */ char pad20[0x108];
-    /* 0x128 */ u8 unk128;
-    /* 0x129 */ char pad129[0x13];
-    /* 0x13C */ u8 unk13C;
-    /* 0x13D */ char pad13D[0x1A7];
-    /* 0x2E4 */ s32 unk2E4;
-    /* 0x2E8 */ char pad2E8[0x34];
-    /* 0x31C */ ActorCtl *unk31C;
-    /* 0x320 */ char pad320[0xC];
-} ScoreObj; /* size 0x32C */
 
-extern ScoreObj D_800CC2D0[];
 extern u8 D_800ABA90[][4];
 extern s8 D_800E0BB0;
 extern u8 D_D10;
@@ -217,7 +197,7 @@ Gfx *func_151E89A0(Gfx *gfx, s32 unused, s32 alpha) {
     s32 width;
     s32 kind;
     ActorCtl *sub;
-    ScoreObj *obj;
+    Actor *obj;
     u8 nearTarget;
     u8 flags;
     s8 started;
@@ -249,7 +229,7 @@ Gfx *func_151E89A0(Gfx *gfx, s32 unused, s32 alpha) {
         sub = obj->unk31C;
         kind = sub->unk75 & 0x7F;
         if ((obj->unk13C != 0) || (sub->unk128 & 0x20)) {
-            team = obj->unk128;
+            team = obj->team;
             (&D_800E0BCC)[zero] = D_800E0BCC | (1 << i);
         }
         if ((team != -1) && (D_8008FDC0 & 0x8000)) {
@@ -260,13 +240,13 @@ Gfx *func_151E89A0(Gfx *gfx, s32 unused, s32 alpha) {
             }
             team = -1;
         }
-        if ((obj->unk128 == 1) && (obj->unk2E4 != 0) && (D_8008FDC0 & 0x4000)) {
+        if ((obj->team == 1) && (obj->unk2E4 != 0) && (D_8008FDC0 & 0x4000)) {
             flags |= 4;
         }
         if (kind == 0x25) {
             func_15086CBC(func_15086D48(0x49, i), &px, &py, &pz);
-            px -= obj->unk14;
-            pz -= obj->unk1C;
+            px -= obj->x_position;
+            pz -= obj->z_position;
             pz = px * px + pz * pz;
             if (pz < 6250000.0f) {
                 D_8008FDBC |= 0x10;
@@ -627,7 +607,7 @@ Gfx *func_151E9D18(Gfx *gfx, s32 rowY, s32 refresh) {
                 if (amount < 0) {
                     amount = 0;
                 }
-                if (D_800CC2D0[i].unk128 == 0) {
+                if (D_800CC2D0[i].team == 0) {
                     team0Total += amount;
                 } else {
                     team1Total += amount;
