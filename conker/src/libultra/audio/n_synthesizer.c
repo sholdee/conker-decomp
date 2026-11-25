@@ -10,24 +10,6 @@ Cmd *func_1001FB40(s32 arg0, Cmd *arg1);
 s32  func_1001E4A0(s16 arg0, s32 arg1, s32 arg2);
 void func_1001E530(s32 arg0, void *arg1, s32 arg2);
 
-typedef struct AuxBusData_s {
-    u8    pad0[0x2];
-    u16   unk2;     /* 0x02 */
-    u8    pad4[0x28];
-    void *unk2C;    /* 0x2C */
-    void *unk30;    /* 0x30 */
-    u8    pad34[0x4];
-} AuxBusData;       /* 0x38 */
-
-typedef struct {
-    u8          pad0[0x14];
-    s32         unk14;  /* 0x14 */
-    s32         unk18;  /* 0x18 */
-    s32         unk1C;  /* 0x1C */
-    u8          pad20[0x20];
-    AuxBusData *unk40;  /* 0x40 */
-} AuxBus;           /* 0x44 */
-
 typedef struct {
     u8    pad0[0x4];
     s32   unk4;     /* 0x04 */
@@ -120,7 +102,7 @@ void n_alSynNew(ALSynConfig *c) {
     }
     SYN->unk48 = alHeapDBAlloc(0, 0, (ALHeap *)heap, SYN->unk50, 0x44);
     for (i = 0; i < SYN->unk50; i++) {
-        SYN->unk48[i].unk14 = 0;
+        SYN->unk48[i].sources = 0;
         SYN->unk48[i].unk18 = 0;
         if (CFG->unk30[i]) {
             SYN->unk48[i].unk1C = func_1001E4A0(i, (s32)c, heap);
@@ -153,7 +135,7 @@ void n_alSynNew(ALSynConfig *c) {
         alN_PVoiceNew((N_PVoice *)pvoice, (ALDMANew)SYN->unk24, (ALHeap *)heap);
     }
     for (j = 0; j < SYN->unk50; j++) {
-        SYN->unk48[j].unk14 = 0;
+        SYN->unk48[j].sources = 0;
         SYN->unk48[j].unk18 = 0;
     }
     updBase = alHeapDBAlloc(0, 0, (ALHeap *)heap, CFG->unk8, 0x24);
