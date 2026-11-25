@@ -28,7 +28,6 @@
 typedef struct {
     s16          fc;          /* 0x00 */
     s16          fgain;       /* 0x02 */
-    s32          unk4;        /* 0x04 */
     union {
         s16  fccoef[16];
         s64  force_aligned;
@@ -39,7 +38,7 @@ typedef struct {
 
 /* The chorus resampler attached to a delay section; one state per bus. */
 typedef struct {
-    u8              pad0[0x14];
+    ALFilter        filter;   /* 0x00 */
     RESAMPLE_STATE *state[2]; /* 0x14 */
     f32             ratio;    /* 0x1C */
     s32             upitch;   /* 0x20 */
@@ -56,7 +55,6 @@ typedef struct {
     s16        ffcoef;  /* 0x08 */
     s16        fbcoef;  /* 0x0A */
     s16        gain;    /* 0x0C */
-    u8         padE[0x2];
     f32        rsinc;   /* 0x10 */
     f32        rsval;   /* 0x14 */
     s32        rsdelta; /* 0x18 */
