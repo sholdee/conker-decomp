@@ -140,15 +140,6 @@ Gfx *func_150CF5E8(Gfx *gfx) {
     gDPSetTileSize(gfx++, 1, D_80088898 >> 7, D_8008889C >> 7, 0x47E, 0x47E);
     return gfx;
 }
-extern s32 (*D_800888A0[])(struct260 *);
-
-struct struct_150D032C_prefix {
-    u8 bytes[5];
-};
-
-extern struct struct_150D032C_prefix D_800A0880;
-extern f32 D_800A0888;
-void func_15042D94(s32, s32, s32, u8 *);
 typedef struct {
     f32 x;
     f32 y;
@@ -395,350 +386,308 @@ s32 func_150CFC60(Particle *particle) {
     return 1;
 }
 
-unsigned char *func_150CFD20(unsigned char *arg0) {
-    if (*arg0 != 0xBD && *arg0 != 0) {
-        do {
-            arg0++;
-        } while (*arg0 != 0xBD && *arg0 != 0);
+/* Returns the end of the line at str: its 0xBD line break or the string's terminating 0. */
+u8 *func_150CFD20(u8 *str) {
+    while (*str != 0xBD && *str != 0) {
+        str++;
     }
-    return arg0;
+    return str;
 }
 
-unsigned char *func_150CFD5C(unsigned char *arg0) {
-    if (*arg0 != 0) {
-        do {
-            arg0++;
-        } while (*arg0 != 0);
+/* Returns the end (terminating 0) of str. */
+u8 *func_150CFD5C(u8 *str) {
+    while (*str != 0) {
+        str++;
     }
-    return arg0;
+    return str;
 }
 
-extern unsigned char *func_150CFD20(unsigned char *);
+/* Returns the length of the line at str and stores its end in *lineEnd. */
+s32 func_150CFD84(u8 *str, u8 **lineEnd) {
+    u8 *end;
 
-s32 func_150CFD84(unsigned char *arg0, unsigned char **arg1) {
-    unsigned char *temp;
-
-    temp = func_150CFD20(arg0);
-    *arg1 = temp;
-    return temp - arg0;
+    end = func_150CFD20(str);
+    *lineEnd = end;
+    return end - str;
 }
 
-s32 func_150CFDB8(unsigned char *arg0) {
-    s32 best;
-    unsigned char *end;
-    unsigned char *sp2C;
+/* Returns the length of the longest line in str. */
+s32 func_150CFDB8(u8 *str) {
+    s32 longest;
+    u8 *end;
+    u8 *lineEnd;
 
-    best = 0;
-    end = func_150CFD5C(arg0);
-    while (arg0 < end) {
-        s32 v = func_150CFD84(arg0, &sp2C);
-        if (best < v) {
-            best = v;
+    longest = 0;
+    end = func_150CFD5C(str);
+    while (str < end) {
+        s32 len = func_150CFD84(str, &lineEnd);
+        if (longest < len) {
+            longest = len;
         }
-        arg0 = sp2C + 1;
+        str = lineEnd + 1;
     }
-    return best;
+    return longest;
 }
 
-struct inner150CFE3C {
-    char pad0[0x14];
-    u8 unk14;
-    u8 unk15;
-    char pad16[0x18 - 0x16];
-    u8 *unk18[1];
-};
+/* Text box data (at 0x28 in its object): shows a string one line at a time. */
+typedef struct {
+    /* 0x00 */ u8 id; // matched against message 0x51's payload
+    /* 0x01 */ u8 pad1[3];
+    /* 0x04 */ u8 *str;
+    /* 0x08 */ u8 flags; // bit 0: a new line is being shown this frame
+    /* 0x09 */ u8 pad9[3];
+    /* 0x0C */ u8 *line;
+    /* 0x10 */ u8 *lineEnd;
+    /* 0x14 */ u8 lineLen;
+    /* 0x15 */ u8 page; // which of lines[] holds the current line; the other holds the previous one
+    /* 0x16 */ u8 pad16[2];
+    /* 0x18 */ u8 *lines[2]; // NUL-terminated copies of lines, each as long as the longest line
+    /* 0x20 */ void *style; // the display style's own state, which follows this struct
+    /* 0x24 */ s8 updateFn; // index into D_800888A0, or -1
+    /* 0x25 */ u8 msgFn; // index into D_800888B0
+    /* 0x26 */ u8 pad26[2];
+} TextBox;
 
-struct flat150CFE3C {
-    char pad0[0x34];
-    u8 *unk34;
-    char pad38[0x3C - 0x38];
-    u8 unk3C;
-    u8 unk3D;
-    char pad3E[0x40 - 0x3E];
-    u8 *unk40[1];
-};
+typedef struct {
+    /* 0x00 */ ObjHeader header;
+    /* 0x28 */ TextBox text;
+} TextObj;
 
-union par150CFE3C {
-    struct flat150CFE3C flat;
-    struct {
-        char pad0[0x28];
-        struct inner150CFE3C inner;
-    } sub;
-};
+/* Copies the current line into lines[page]. */
+void func_150CFE3C(TextObj *obj) {
+    TextBox *text = &obj->text;
 
-void func_150CFE3C(union par150CFE3C *arg0) {
-    struct inner150CFE3C *inner;
-
-    inner = &arg0->sub.inner;
-    memcpy(arg0->flat.unk40[arg0->flat.unk3D], arg0->flat.unk34, arg0->flat.unk3C);
-    inner->unk18[inner->unk15][inner->unk14] = 0;
+    memcpy(text->lines[text->page], text->line, text->lineLen);
+    text->lines[text->page][text->lineLen] = 0;
 }
 
-struct inner150CFE98 {
-    char pad0[0x8];
-    u8 unk8;
-    char pad9[0xC - 0x9];
-    u8 *unkC;
-    u8 *unk10;
-    u8 unk14;
-    u8 unk15;
-};
+/* Moves on to the next line, if there is one. */
+void func_150CFE98(TextObj *obj) {
+    TextBox *text = &obj->text;
 
-void func_150CFE98(arg0)
-union par150CFE3C *arg0;
-{
-    struct inner150CFE98 *inner = (struct inner150CFE98 *)((char *)arg0 + 0x28);
-
-    if (*inner->unk10 != 0) {
-        inner->unkC = inner->unk10 + 1;
-        inner->unk14 = func_150CFD84(inner->unk10 + 1, &inner->unk10);
-        inner->unk15 ^= 1;
-        func_150CFE3C(arg0);
-        inner->unk8 |= 1;
+    if (*text->lineEnd != 0) {
+        text->line = text->lineEnd + 1;
+        text->lineLen = func_150CFD84(text->lineEnd + 1, &text->lineEnd);
+        text->page ^= 1;
+        func_150CFE3C(obj);
+        text->flags |= 1;
     }
 }
 
-struct frame150CFF10 {
-    u8  unk0;
-    s32 unk4;
-    u8  unk8;
-    s32 unkC;
-    u8 *unk10;
-    u8  unk14;
-    u8  unk15;
-    s32 unk18;
-    s32 unk1C;
-    s32 unk20;
-    u8  unk24;
-    u8  unk25;
-};
+/* Creates a text box object for str, with styleSize bytes of style state (left zeroed). */
+TextObj *func_150CFF10(u8 id, u8 *str, s16 arg2, s32 styleSize, s8 updateFn, u8 msgFn, u8 arg6, s32 arg7) {
+    TextBox init;
+    TextObj *obj;
+    s32 lineSize;
+    TextBox *text;
 
-extern s32 func_150CFDB8(unsigned char *);
+    init.msgFn = msgFn;
+    init.updateFn = updateFn;
+    init.page = 0;
+    init.flags = 1;
+    init.str = str;
+    init.line = str;
+    init.id = id;
+    init.lineLen = func_150CFD84(str, &init.lineEnd);
+    init.lines[0] = NULL;
+    init.lines[1] = NULL;
+    init.style = NULL;
 
-struct out150CFF10 {
-    char pad0[0x18];
-    u8 *unk18;
-    u8 *unk1C;
-    u8 *unk20;
-};
+    lineSize = func_150CFDB8(str) + 1;
 
-void *func_150CFF10(u8 arg0, s32 arg1, s16 arg2, s32 arg3, s8 arg4, u8 arg5, u8 arg6, void *arg7) {
-    struct frame150CFF10 tmp;
-    struct260 *temp_v0;
-    s32 temp;
-    struct out150CFF10 *base;
-
-    tmp.unk25 = arg5;
-    tmp.unk24 = arg4;
-    tmp.unk15 = 0;
-    tmp.unk8 = 1;
-    tmp.unk4 = arg1;
-    tmp.unkC = arg1;
-    tmp.unk0 = arg0;
-    tmp.unk14 = func_150CFD84((unsigned char *)arg1, &tmp.unk10);
-    tmp.unk18 = 0;
-    tmp.unk1C = 0;
-    tmp.unk20 = 0;
-
-    temp = func_150CFDB8((unsigned char *)arg1) + 1;
-
-    temp_v0 = func_15149130(arg2, -1, -1, 5, 3, 0x47, (struct37 *)(arg3 + 0x2A + (temp - 1) * 2), arg6, (s32)arg7);
-    if (temp_v0 != NULL) {
-        base = (struct out150CFF10 *)((u8 *)temp_v0 + 0x28);
-        memcpy(base, &tmp, 0x28);
-        base->unk20 = (u8 *)base + 0x28;
-        base->unk18 = base->unk20 + arg3;
-        base->unk1C = base->unk18 + temp;
-        *base->unk18 = 0;
-        *base->unk1C = 0;
-        func_150CFE3C((union par150CFE3C *)temp_v0);
+    obj = (TextObj *)func_15149130(arg2, -1, -1, 5, 3, 0x47, (struct37 *)(sizeof(TextBox) + styleSize + lineSize * 2), arg6, arg7);
+    if (obj != NULL) {
+        text = &obj->text;
+        memcpy(text, &init, sizeof(TextBox));
+        text->style = text + 1;
+        text->lines[0] = (u8 *)text->style + styleSize;
+        text->lines[1] = text->lines[0] + lineSize;
+        *text->lines[0] = 0;
+        *text->lines[1] = 0;
+        func_150CFE3C(obj);
     }
-    return temp_v0;
+    return obj;
 }
 
-s32 func_150D0034(s32 arg0, struct260 *arg1, s32 arg2) {
-    u8 *temp_v1;
-    s32 ret;
+extern s32 (*D_800888A0[])(TextObj *);
 
-    if (*(volatile s8 *)((u8 *)arg1 + 0x4C) == -1) {
-        temp_v1 = (u8 *)arg1 + 0x28;
-    } else {
-        ret = D_800888A0[*(s8 *)((u8 *)arg1 + 0x4C)](arg1);
-        if (ret == 0) {
-            arg1->unkE = -1;
-            return arg0;
-        }
-        temp_v1 = (u8 *)arg1 + 0x28;
+/* Text box update: runs the style's update function, removing the box when it returns 0. */
+s32 func_150D0034(s32 arg0, TextObj *obj, s32 arg2) {
+    TextBox *text = &obj->text;
+
+    if ((text->updateFn != -1) && (D_800888A0[text->updateFn](obj) == 0)) {
+        obj->header.unkE = -1;
+        return arg0;
     }
-
-    temp_v1[8] &= ~1;
+    text->flags &= ~1;
     return arg0;
 }
 
-extern s32 (*D_800888B0[])(s32 *, s32, u8);
+extern void (*D_800888B0[])(TextObj *, u8 *, u8);
 
-s32 func_150D00C0(s32 *a0, s32 a1, u8 a2) {
-    s32 (*fn)(s32 *, s32, u8);
+/* Text box message handler: message 0x51 with this box's id advances the line; the style's
+   handler gets every other message. */
+void func_150D00C0(TextObj *obj, u8 *payload, u8 type) {
+    void (*handler)(TextObj *, u8 *, u8);
 
-    if (a2 == 0x51) {
-        if (*((u8 *)a0 + 0x28) == *((u8 *)a1)) {
-            func_150CFE98();
+    if (type == 0x51) {
+        if (obj->text.id == *payload) {
+            func_150CFE98(obj);
         }
     } else {
-        fn = D_800888B0[*((u8 *)a0 + 0x4D)];
-        if (fn != 0) {
-            fn(a0, a1, a2);
+        handler = D_800888B0[obj->text.msgFn];
+        if (handler != NULL) {
+            handler(obj, payload, type);
         }
     }
 }
 
-extern void *func_150CFF10(u8, s32, s16, s32, s8, u8, u8, void *);
+/* Style 0 state: frames left in the crossfade to a new line. */
+typedef struct {
+    /* 0x00 */ s8 fadeTimer;
+    /* 0x01 */ u8 pad1[7];
+} CrossfadeStyle;
 
-struct frame150D0134 {
-    u8 unk0;
-    u8 pad[7];
-};
+/* Creates a text box that crossfades between lines (style 0). */
+void func_150D0134(u8 id, u8 *str, s16 arg2, u8 arg3, s32 arg4) {
+    CrossfadeStyle style;
+    TextObj *obj;
 
-void func_150D0134(u8 arg0, s32 arg1, s16 arg2, u8 arg3, void *arg4) {
-    struct frame150D0134 sp30;
-    void *ret;
-
-    sp30.unk0 = 0;
-    ret = func_150CFF10(arg0, arg1, arg2, 8, 0, 0, arg3, arg4);
-    if (ret != 0) {
-        memcpy(*(void **)((u8 *)ret + 0x48), &sp30.unk0, 1);
+    style.fadeTimer = 0;
+    obj = func_150CFF10(id, str, arg2, 8, 0, 0, arg3, arg4);
+    if (obj != NULL) {
+        memcpy(obj->text.style, &style.fadeTimer, sizeof(style.fadeTimer));
     }
 }
 
-s32 func_150D01A0(struct260 *arg0) {
-    s8 *state;
+void func_15042D94(s32 x, s32 y, s32, u8 *str);
+
+/* Style 0 update: draws the current line fading in over 8 frames and the previous one fading out. */
+s32 func_150D01A0(TextObj *obj) {
+    s8 *fadeTimer;
     u8 alpha;
     u8 fade;
-    struct inner150CFE3C *inner;
+    TextBox *text;
 
-    state = *(s8 **)((u8 *)arg0 + 0x48);
-    inner = (struct inner150CFE3C *)((u8 *)arg0 + 0x28);
-    if (((u8 *)arg0)[0x30] & 1) {
-        *state = 8;
+    text = &obj->text;
+    fadeTimer = text->style;
+    if (text->flags & 1) {
+        *fadeTimer = 8;
     }
-    if (*state > 0) {
-        fade = *state * 31;
-        alpha = 0xFF - fade;
-        *state -= D_800BE9E4;
+    if (*fadeTimer > 0) {
+        fade = *fadeTimer * 31;
+        alpha = 255 - fade;
+        *fadeTimer -= D_800BE9E4;
     } else {
-        alpha = 0xFF;
+        alpha = 255;
         fade = 0;
     }
     if (alpha) {
         func_1504332C(0xCE, 0xC4, 0x61, alpha);
-        func_15042D94(0x92, 0xBE, 0x81, inner->unk18[inner->unk15]);
+        func_15042D94(0x92, 0xBE, 0x81, text->lines[text->page]);
     }
     if (fade) {
         func_1504332C(0xCE, 0xC4, 0x61, fade);
-        func_15042D94(0x92, 0xBE, 0x81, inner->unk18[inner->unk15 ^ 1]);
+        func_15042D94(0x92, 0xBE, 0x81, text->lines[text->page ^ 1]);
     }
     return 1;
 }
 
-struct frame150D02B4 {
-    f32 unk0;
-    s16 unk4;
-    u8 pad[2];
-};
+/* Style 1 state: how much of the line has been typed out. */
+typedef struct {
+    /* 0x00 */ f32 progress; // fraction of the next character
+    /* 0x04 */ s16 shown; // characters typed so far
+    /* 0x06 */ u8 pad6[2];
+} TypewriterStyle;
 
-void func_150D02B4(u8 arg0, s32 arg1, s16 arg2, u8 arg3, void *arg4) {
-    void *ret;
-    struct frame150D02B4 sp2C;
+/* Creates a text box that types out each line behind a "C:> " prompt (style 1). */
+void func_150D02B4(u8 id, u8 *str, s16 arg2, u8 arg3, s32 arg4) {
+    TextObj *obj;
+    TypewriterStyle style;
 
-    sp2C.unk4 = 0;
-    sp2C.unk0 = 0.0f;
-    ret = func_150CFF10(arg0, arg1, arg2, 8, 1, 0, arg3, arg4);
-    if (ret != 0) {
-        memcpy(*(void **)((u8 *)ret + 0x48), &sp2C.unk0, 8);
+    style.shown = 0;
+    style.progress = 0.0f;
+    obj = func_150CFF10(id, str, arg2, 8, 1, 0, arg3, arg4);
+    if (obj != NULL) {
+        memcpy(obj->text.style, &style, sizeof(style));
     }
 }
 
-struct frame150D032C {
-    f32 unk0;
-    s16 unk4;
-    u8 pad[2];
-};
+/* Style 1 update: types out the current line and draws it after the prompt, with a cursor. */
+s32 func_150D032C(TextObj *obj) {
+    TextBox *text;
+    TypewriterStyle *style;
+    u8 buf[0x50];
+    u8 prompt[] = "C:> ";
 
-s32 func_150D032C(struct260 *arg0) {
-    struct inner150CFE3C *inner;
-    struct frame150D032C *state;
-    u8 sp28[0x50];
-    struct struct_150D032C_prefix sp20;
+    text = &obj->text;
+    style = text->style;
 
-    inner = (struct inner150CFE3C *)((u8 *)arg0 + 0x28);
-    sp20 = D_800A0880;
-    state = *(struct frame150D032C **)((u8 *)arg0 + 0x48);
-
-    if (((u8 *)arg0)[0x30] & 1) {
-        state->unk4 = 0;
-        state->unk0 = 0.0f;
+    if (text->flags & 1) {
+        style->shown = 0;
+        style->progress = 0.0f;
     }
 
-    if (state->unk0 < (f32)inner->unk14) {
-        state->unk0 = state->unk0 + (D_800A0888 * D_800BE9A4);
-        if (state->unk0 > 1.0f) {
-            do {
-                state->unk4 = state->unk4 + 1;
-                if (inner->unk14 < state->unk4) {
-                    state->unk4 = inner->unk14;
-                }
-                state->unk0 = state->unk0 - 1.0f;
-            } while (state->unk0 > 1.0f);
+    if (style->progress < (f32)text->lineLen) {
+        style->progress += 0.437f * D_800BE9A4;
+        while (style->progress > 1.0f) {
+            style->shown++;
+            if (text->lineLen < style->shown) {
+                style->shown = text->lineLen;
+            }
+            style->progress -= 1.0f;
         }
     }
 
-    memcpy(sp28, &sp20, 4);
-    memcpy(&sp28[4], inner->unk18[inner->unk15], state->unk4);
-    sp28[state->unk4 + 4] = 0x20;
-    sp28[state->unk4 + 5] = 0xBB;
-    sp28[state->unk4 + 6] = 0;
+    memcpy(buf, prompt, 4);
+    memcpy(&buf[4], text->lines[text->page], style->shown);
+    buf[style->shown + 4] = ' ';
+    buf[style->shown + 5] = 0xBB;
+    buf[style->shown + 6] = 0;
     func_1504332C(0, 0xFF, 0, 0x96);
-    func_15042D94(0xF, 0xBE, 0x80, sp28);
+    func_15042D94(15, 0xBE, 0x80, buf);
     return 1;
 }
 
-void func_150D04C4(u8 arg0, s32 arg1, s16 arg2, u8 arg3, void *arg4) {
-    struct frame150D0134 sp30;
-    void *ret;
+/* Creates a text box that crossfades between lines more slowly, in white (style 2). */
+void func_150D04C4(u8 id, u8 *str, s16 arg2, u8 arg3, s32 arg4) {
+    CrossfadeStyle style;
+    TextObj *obj;
 
-    sp30.unk0 = 0;
-    ret = func_150CFF10(arg0, arg1, arg2, 8, 2, 0, arg3, arg4);
-    if (ret != 0) {
-        memcpy(*(void **)((u8 *)ret + 0x48), &sp30.unk0, 1);
+    style.fadeTimer = 0;
+    obj = func_150CFF10(id, str, arg2, 8, 2, 0, arg3, arg4);
+    if (obj != NULL) {
+        memcpy(obj->text.style, &style.fadeTimer, sizeof(style.fadeTimer));
     }
 }
 
-s32 func_150D0534(struct260 *arg0) {
-    s8 *state;
+/* Style 2 update: like func_150D01A0 but white and over 20 frames. */
+s32 func_150D0534(TextObj *obj) {
+    s8 *fadeTimer;
     u8 alpha;
     u8 fade;
-    struct inner150CFE3C *inner;
+    TextBox *text;
 
-    state = *(s8 **)((u8 *)arg0 + 0x48);
-    inner = (struct inner150CFE3C *)((u8 *)arg0 + 0x28);
-    if (((u8 *)arg0)[0x30] & 1) {
-        *state = 0x14;
+    text = &obj->text;
+    fadeTimer = text->style;
+    if (text->flags & 1) {
+        *fadeTimer = 20;
     }
-    if (*state > 0) {
-        fade = *state * 12;
-        alpha = 0xFF - fade;
-        *state -= D_800BE9E4;
+    if (*fadeTimer > 0) {
+        fade = *fadeTimer * 12;
+        alpha = 255 - fade;
+        *fadeTimer -= D_800BE9E4;
     } else {
-        alpha = 0xFF;
+        alpha = 255;
         fade = 0;
     }
     if (alpha) {
         func_1504332C(0xFF, 0xFF, 0xFF, alpha);
-        func_15042D94(0x14, 0x14, 0x80, inner->unk18[inner->unk15]);
+        func_15042D94(20, 20, 0x80, text->lines[text->page]);
     }
     if (fade) {
         func_1504332C(0xFF, 0xFF, 0xFF, fade);
-        func_15042D94(0x14, 0x14, 0x80, inner->unk18[inner->unk15 ^ 1]);
+        func_15042D94(20, 20, 0x80, text->lines[text->page ^ 1]);
     }
     return 1;
 }
