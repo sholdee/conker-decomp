@@ -3022,7 +3022,7 @@ void func_15071FB0(void) {
 }
 
 /*
- * Launches the player (D_800CC2D0[0]) with the current object's stored velocity unk2D8..unk2E0
+ * Launches the player (D_800CC2D0[0]) with the current object's stored velocity unk2D8[0..2]
  * and an animation. With D_800D1580 == 0, only if player->objectNum names the object owned by the
  * current player (unk65), and the player is turned around.
  */
@@ -3055,7 +3055,7 @@ void func_15071FDC(void) {
     } else {
         if (D_800D154C->unk2E8 >= 113) {
             anim = 741;
-            D_800D154C->unk2E0 = 0.0f;
+            D_800D154C->unk2D8[2] = 0.0f;
         } else {
             anim = 50;
             player->unk76 = D_800D154C->unk76;
@@ -3066,9 +3066,9 @@ void func_15071FDC(void) {
         }
         D_800D154C->unk2E4 = 50;
     }
-    player->y_velocity = D_800D154C->unk2D8;
-    player->gravity = D_800D154C->unk2DC;
-    player->xz_velocity = D_800D154C->unk2E0;
+    player->y_velocity = D_800D154C->unk2D8[0];
+    player->gravity = D_800D154C->unk2D8[1];
+    player->xz_velocity = D_800D154C->unk2D8[2];
     player->unk81 = 1;
     func_1505E650(player, anim, 1.0f, 2.0f, 6.0f, 0.0f, 0);
     D_800CC2D0[0].unk31C->unk31 = visible;

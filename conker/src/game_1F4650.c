@@ -1122,7 +1122,7 @@ void func_151C9740(Actor *actor, u8 arg1, s32 arg2) {
     origin.y = actor->y_position + 135.0f;
     origin.z = actor->z_position;
     hit = 0;
-    airborne = actor->unk2D8 != 0.0f;
+    airborne = actor->unk2D8[0] != 0.0f;
     if (!airborne) {
         query.x = origin.x;
         query.y = origin.y;

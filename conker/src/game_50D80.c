@@ -1763,8 +1763,8 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
 
                             obj->unk2EC = 1;
                             half = (f32)duration * 0.5f;
-                            obj->unk2D8 = half;
-                            obj->unk2DC = 1.0f / half;
+                            obj->unk2D8[0] = half;
+                            obj->unk2D8[1] = 1.0f / half;
                             func_150C4120(obj, duration, sceneTag, 1);
                         }
                         break;

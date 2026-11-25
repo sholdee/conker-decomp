@@ -1438,13 +1438,13 @@ struct Actor {
     /* 0x208 */ s8  unk208;
     /* 0x209 */ s8  level2Step;
     /* 0x20A */ u8  unk20A;
-    u8  pad20B;
-    u8  pad20C[0x3];
+    /* 0x20B */ u8  unk20B[4];   // script variables (command 0x59)
     u8  unk20F;
     /* 0x210 */ u8  unk210;
     u8  unk211;
     u8  unk212[0x2];
-    s32 unk214;
+    s16 unk214;
+    /* 0x216 */ s16 unk216;      // distance bias (game_C4DC0)
     struct216 *unk218; // struct216 is 5 bytes long
     u16 unk21C;
     u8  unk21E;
@@ -1531,9 +1531,7 @@ struct Actor {
     s32 unk2CC;
     struct197 *unk2D0;
     /* 0x2D4 */ struct102 *unk2D4;
-    /* 0x2D8 */ f32 unk2D8;
-    /* 0x2DC */ f32 unk2DC;
-    /* 0x2E0 */ f32 unk2E0;
+    /* 0x2D8 */ f32 unk2D8[3];   // launch velocity (y, gravity, xz) for func_15071FDC, set by script command 0x22
     s32 unk2E4;
     s32 unk2E8;
     s32 unk2EC;
