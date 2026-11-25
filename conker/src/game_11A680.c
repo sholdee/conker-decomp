@@ -2,12 +2,13 @@
 #include <ultra64.h>
 #include "functions.h"
 #undef func_1514D3B0
+// matching: functions.h's (s32, s16, u8, u8) prototype changes the call; this file passes plain ints
 extern s32 func_1514D3B0(void *, s16, s32, s32);
 #include "variables.h"
 
 extern void func_151254F4(struct108 *camera, s32 index);
 extern void func_1517F488(s32 r, s32 g, s32 b, s32 alpha, s32 duration, s32 view);
-extern f32 func_15144BC8(f32 arg0);
+extern f32 func_15144BC8(f32 angle); /* wraps an angle into [0, 360] degrees */
 
 /* File-local view of struct127.unk31C; structs.h's struct126 stops at 0x1AC, before the aim angles. */
 typedef struct {
@@ -62,7 +63,8 @@ f32 func_150ED234(struct127 *self, struct127 *target) {
     return func_150ED1D0(angle * (360.0f / 65536.0f), self->unk40);
 }
 
-extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
+/* Transforms the point (x, y, z) by the 4x4 float matrix `mf`. */
+extern void func_150A7960(f32 *mf, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
 /*
  * Ballistic aim error for a shell fired from `obj` (from its bone matrix 3 when it has a skeleton) at
@@ -127,7 +129,7 @@ f32 func_150ED298(struct127 *obj, f32 pitch, f32 targetX, f32 targetY, f32 targe
         if (firstTime > 0.0f) {
             disc = (-speedY + root) / gravity;
             if (disc > 0.0f && firstTime < disc) {
-                time = disc;
+                time = disc; // matching: disc doubles as the second root; a separate local grows the frame
             }
         }
         if (time > 0.0f) {
@@ -187,16 +189,17 @@ void func_150ED638(struct127 *obj, s32 left, s32 right) {
 }
 
 extern s8 D_800E0BCE[];
-extern s32 func_1508DAEC(s32, s32);
-extern struct216 *func_1507BB28(s32, s32);
-extern s32 func_15052F9C(struct127 *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
-extern void func_1505327C(struct127 *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
+extern s32 func_1508DAEC(s32 player, s32 mode);
+extern struct216 *func_1507BB28(s32 arg0, s32 scriptId);
+extern void func_15052F9C(struct127 *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7, s32 force, s32 arg9);
+extern void func_1505327C(struct127 *arg0, f32 yVelocity, f32 gravity, s32 arg3, s32 mtxIndex);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
 extern void func_15052590(struct127 *obj);
-extern s32 func_151452C4(f32 *, f32 *, f32 *, f32, f32 *, f32 *, f32 *, f32 *);
+/* Ray (origin, normalized dir) vs sphere (center, radius); 0 on a miss or when the near hit is behind. */
+extern s32 func_151452C4(f32 *origin, f32 *dir, f32 *center, f32 radius, f32 *hitNear, f32 *hitFar, f32 *tNear, f32 *tFar);
 
 void func_150ED748(struct127 *obj) {
-    s32 viewer[1];
+    s32 viewer[1]; // matching: an array keeps the viewer index in memory; a scalar is register-allocated
     f32 velocity;
     s32 health;
     u8 controlled;
@@ -218,13 +221,13 @@ void func_150ED748(struct127 *obj) {
     struct127 *other;
     s32 reversing;
     OSContPad *pad;
-    s8 t;
+    s8 unused1; // matching: unused, but keeps the stack layout
     struct127 *target;
     f32 aimOffset;
     f32 heading;
     f32 leadX;
     f32 leadZ;
-    f32 dx;
+    f32 unused2; // matching: unused, but keeps the stack layout
     f32 bearing;
     f32 lead;
     f32 dirX;
@@ -238,7 +241,7 @@ void func_150ED748(struct127 *obj) {
     s32 bestIdx;
     s32 objCount;
     f32 yawStep;
-    f32 a;
+    f32 offset;
     s8 camSlot;
     s32 j;
     s32 hit;
@@ -255,7 +258,6 @@ void func_150ED748(struct127 *obj) {
     struct108 *camera;
     struct127 *subject;
 
-
     health = 1;
     if (D_800BE616) {
         viewer[0] = obj->unk127;
@@ -267,7 +269,7 @@ void func_150ED748(struct127 *obj) {
     controlled = 0;
     player = obj->unk124;
     prevFacing = obj->unk7A;
-    obj->unk247 = 0x10;
+    obj->unk247 = 16;
     obj->unk248 = 8;
     if (D_800BE616 == 0) {
         if (obj->unk13C != 0) {
@@ -307,20 +309,20 @@ void func_150ED748(struct127 *obj) {
         }
     }
     if (controlled) {
-        s32 dummyA;
+        s32 unused3; // matching: an unused block local here steers IDO's register allocation
         throttleScale = 0.0f;
         lockFlags = 0;
         health = D_800CC2D0[player].health;
         if (health != 0) {
             steer = PADS[player].stick_x;
-            obj->unk247 = 0x32;
-            obj->unk248 = 0x32;
+            obj->unk247 = 50;
+            obj->unk248 = 50;
             throttleScale = 0.6399999857f;
             stateFlags = STATE(&D_800CC2D0[player])->flags;
             if ((stateFlags & 1) && (CONT_PADS[player]->button & A_BUTTON) && (STATE(&D_800CC2D0[player])->timer != 0)) {
-                obj->unk247 = 0x1C;
-                obj->unk248 = 0x1C;
-                PADS[player].stick_y = 0x50;
+                obj->unk247 = 28;
+                obj->unk248 = 28;
+                PADS[player].stick_y = 80;
                 throttleScale += throttleScale;
                 if (D_800BE9E4 < STATE(&D_800CC2D0[player])->timer) {
                     STATE(&D_800CC2D0[player])->timer -= D_800BE9E4;
@@ -379,42 +381,43 @@ void func_150ED748(struct127 *obj) {
             obj->unk244 = 1;
         }
     }
-    obj->unk247 = 0x32;
-    obj->unk248 = 0x32;
+    obj->unk247 = 50;
+    obj->unk248 = 50;
     if ((D_800BE616 == 0) || (D_800C3E78 >= D_8008FD8C) || (STATE(obj)->unk120 == 0)) {
         func_15052590(obj);
     }
     if (obj->interaction_state != 0) {
-        if (obj->unk232 == 0xD) {
+        if (obj->unk232 == 13) {
             func_15052F9C(obj, 180.0f, 5, 0x44, 1, 0x10, 0xFF, 0, 0, 0);
         } else if ((D_800BE616 == 0) && (D_800CC268 & 1)) {
             subject = &D_800CC2D0[obj->unk124];
             if ((subject->unk65 == 0) && (STATE(subject)->unk78 == 0) && (obj->unk25C & 0x400)) {
                 if ((subject->unk44 > 15.0f) && (subject->y_velocity > 10.0f)) {
-                    func_1505327C(obj, 68.0f, 4.0f, 0xD, 5);
+                    func_1505327C(obj, 68.0f, 4.0f, 13, 5);
                 } else if ((subject->disable_run == 0) && (subject->unk28 > 70.0f) && (subject->stunned == 0) && (func_1505A6F8(subject, obj) < 100.0f)) {
                     func_15052F9C(obj, 180.0f, 5, 0x44, 1, 0x10, 0xFF, 0, 1, 0);
                 }
             }
         }
         {
-        s32 dummy;
-        blend = 1.0f;
-        if (obj->health != 0) {
-            typedef s32 dummyTT2;
-            throttle = obj->unk44;
-            trackSpeed = obj->xz_velocity;
-            turn = (s16)(obj->unk7A - prevFacing) / 70;
-            if (fabsf(throttle) > 4.0f) {
-                trackSpeed = trackSpeed * 0.6000000238f + throttle * (0.400000006f * blend);
+            s32 unused4; // matching: as above
+
+            blend = 1.0f; // matching: a literal 0.4f alone schedules differently
+            if (obj->health != 0) {
+                typedef s32 scope; // matching: a declaration here gives IDO a new block scope
+                throttle = obj->unk44;
+                trackSpeed = obj->xz_velocity;
+                turn = (s16)(obj->unk7A - prevFacing) / 70;
+                if (fabsf(throttle) > 4.0f) {
+                    trackSpeed = trackSpeed * 0.6000000238f + throttle * (0.400000006f * blend);
+                }
+                left = (s32)trackSpeed + turn;
+                right = (s32)trackSpeed - turn;
+            } else {
+                right = 0;
+                left = 0;
             }
-            left = (s32)trackSpeed + turn;
-            right = (s32)trackSpeed - turn;
-        } else {
-            right = 0;
-            left = 0;
-        }
-        func_150ED638(obj, left, right);
+            func_150ED638(obj, left, right);
         }
         if ((obj->id == 0x77) || (obj->id == 0x28)) {
             if (((trackSpeed = obj->xz_velocity) > 5.0f) && (obj->unk44 <= 0.0f)) {
@@ -437,9 +440,9 @@ void func_150ED748(struct127 *obj) {
             if (STATE(obj)->target >= 0) {
                 f32 dirZ;
                 target = &D_800CC2D0[STATE(obj)->target];
-                a = target->x_position - obj->x_position;
+                offset = target->x_position - obj->x_position;
                 score = target->z_position - obj->z_position;
-                lead = sqrtf(a * a + score * score) / 200.0f;
+                lead = sqrtf(offset * offset + score * score) / 200.0f;
                 lead = target->xz_velocity * lead;
                 heading = target->unk40 * 0.01745329238f;
                 leadX = sinf(heading) * lead;
@@ -460,7 +463,7 @@ void func_150ED748(struct127 *obj) {
                 STATE(obj)->aimPitch *= 0.8999999762f;
             }
         } else if (controlled && health) {
-            typedef s32 dummyT8;
+            typedef s32 scope; // matching: as above
             bestScore = 0.0f;
             yawStep = 3.0f * D_800BE9A4;
             bestIdx = -1;
@@ -481,7 +484,7 @@ void func_150ED748(struct127 *obj) {
                 camSlot = viewer[0] + 1;
             }
             if (D_800BE616 == 0) {
-                objCount = 0x19;
+                objCount = 25;
             }
             if (camSlot == 0) {
                 for (i = 0; i < objCount; i++) {
@@ -490,10 +493,10 @@ void func_150ED748(struct127 *obj) {
                         if ((D_800BE616 == 0) && !(other->unkF8 & 0x40)) {
                             continue;
                         }
-                            a = func_150ED1D0(func_150ED234(obj, other), STATE(obj)->aimYaw);
-                            score = a;
-                            if (a < 0.0f) {
-                                score = -a;
+                            offset = func_150ED1D0(func_150ED234(obj, other), STATE(obj)->aimYaw);
+                            score = offset;
+                            if (offset < 0.0f) {
+                                score = -offset;
                             }
                             score = 35.0f - score;
                             if (score < 0.0f) {
@@ -517,7 +520,7 @@ void func_150ED748(struct127 *obj) {
                     }
                 }
                 if (bestIdx != -1) {
-                    typedef s32 dummyT5;
+                    typedef s32 scope; // matching: as above
                     subject = &D_800CC2D0[bestIdx];
                     if (D_800BE616 != 0) {
                         limit = subject->y_position + 40.0f;
@@ -540,12 +543,15 @@ void func_150ED748(struct127 *obj) {
                 camera = &D_800DBFF0[camSlot - 1];
                 subject = camera->unk3D4;
                 if (camera->unk3D4->unk197 != 0) {
-                    typedef s32 dummyT7;
+                    typedef s32 scope; // matching: as above
                     angle = -subject->unk170;
                     angle -= obj->unkB8;
                     angle2 = subject->unk16C;
                     angle2 = (obj->unk40 - 90.0f) - angle2;
-                    while (angle > 180.0f) { angle -= 360.0f; if (angle) {} }
+                    while (angle > 180.0f) {
+                        angle -= 360.0f;
+                        if (angle) {} // matching: steers the scheduling of the wrap loop
+                    }
                     while (angle < -180.0f) {
                         angle += 360.0f;
                     }
