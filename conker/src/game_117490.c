@@ -282,28 +282,28 @@ void func_150EA944(WorldObject *entry) {
     if ((entry->behaviorState & 3) == 3) {
         frames = D_800BE9E4;
 
-        entry->rotX += entry->spinX * frames;
-        angle = entry->rotX;
+        entry->t += entry->spinX * frames;
+        angle = entry->t;
         if (angle < 0.0f) {
-            entry->rotX = angle + 360.0f;
+            entry->t = angle + 360.0f;
         } else if (angle >= 360.0f) {
-            entry->rotX = angle - 360.0f;
+            entry->t = angle - 360.0f;
         }
 
-        entry->rotY += entry->spinY * frames;
-        angle = entry->rotY;
+        entry->u += entry->spinY * frames;
+        angle = entry->u;
         if (angle < 0.0f) {
-            entry->rotY = angle + 360.0f;
+            entry->u = angle + 360.0f;
         } else if (angle >= 360.0f) {
-            entry->rotY = angle - 360.0f;
+            entry->u = angle - 360.0f;
         }
 
-        entry->rotZ += entry->spinZ * frames;
-        angle = entry->rotZ;
+        entry->v += entry->spinZ * frames;
+        angle = entry->v;
         if (angle < 0.0f) {
-            entry->rotZ = angle + 360.0f;
+            entry->v = angle + 360.0f;
         } else if (angle >= 360.0f) {
-            entry->rotZ = angle - 360.0f;
+            entry->v = angle - 360.0f;
         }
 
         timer = entry->alpha;

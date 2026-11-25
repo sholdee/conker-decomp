@@ -2007,7 +2007,7 @@ void func_15145CD0(WorldObject *placement, f32 **in, f32 **out, s32 count) {
     f32 *p;
     f32 *q;
 
-    func_150A8050(mf, placement->rotX, placement->rotY, placement->rotZ);
+    func_150A8050(mf, placement->t, placement->u, placement->v);
     mf[3][0] = placement->x;
     mf[3][1] = placement->y;
     mf[3][2] = placement->z;
@@ -2031,7 +2031,7 @@ void func_15145DB4(WorldObject *placement, Vec3f *in, Vec3f *out, s32 count) {
     MtxF mf;
     s32 i;
 
-    func_150A8050(mf, placement->rotX, placement->rotY, placement->rotZ);
+    func_150A8050(mf, placement->t, placement->u, placement->v);
     mf[3][0] = placement->x;
     mf[3][1] = placement->y;
     mf[3][2] = placement->z;

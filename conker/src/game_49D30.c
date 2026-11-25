@@ -1697,17 +1697,17 @@ void func_15020EC4(s32 scene) {
                     actor->x = ELEM(scene, track)->x;
                     actor->y = ELEM(scene, track)->y + ELEM(scene, track)->yOffset;
                     actor->z = ELEM(scene, track)->z;
-                    actor->rotX = ELEM(scene, track)->unkC;
-                    actor->rotY = ELEM(scene, track)->unk10;
-                    actor->rotZ = ELEM(scene, track)->unk14;
+                    actor->t = ELEM(scene, track)->unkC;
+                    actor->u = ELEM(scene, track)->unk10;
+                    actor->v = ELEM(scene, track)->unk14;
                     if (ELEM(scene, track)->unk18 != -9999.0f) {
-                        actor->scaleX = ELEM(scene, track)->unk18 * 0.01f;
+                        actor->xScale = ELEM(scene, track)->unk18 * 0.01f;
                     }
                     if (ELEM(scene, track)->unk1C != -9999.0f) {
-                        actor->scaleY = ELEM(scene, track)->unk1C * 0.01f;
+                        actor->yScale = ELEM(scene, track)->unk1C * 0.01f;
                     }
                     if (ELEM(scene, track)->unk20 != -9999.0f) {
-                        actor->scaleZ = ELEM(scene, track)->unk20 * 0.01f;
+                        actor->zScale = ELEM(scene, track)->unk20 * 0.01f;
                     }
                     if ((s32)ELEM(scene, track)->unk34 >= 0x100) {
                         actor->alpha = 0xFF;

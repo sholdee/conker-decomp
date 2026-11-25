@@ -33,9 +33,9 @@ void func_15119FC0(WorldObject *obj) {
             WORK(obj)->baseHeight = obj->y;
         }
         // phase runs over 0..6*pi: one full spin, three tilt wobbles, six bobs
-        obj->rotX = sinf(WORK(obj)->phase) * 15.0f;
-        obj->rotY = WORK(obj)->phase * 19.098593f; // 60 / pi
-        obj->rotZ = cosf(WORK(obj)->phase) * 15.0f;
+        obj->t = sinf(WORK(obj)->phase) * 15.0f;
+        obj->u = WORK(obj)->phase * 19.098593f; // 60 / pi
+        obj->v = cosf(WORK(obj)->phase) * 15.0f;
         WORK(obj)->phase += 0.08726647f * D_800BE9A4; // 5 degrees per frame
         if (18.849556f <= WORK(obj)->phase) {
             WORK(obj)->phase -= 18.849556f;

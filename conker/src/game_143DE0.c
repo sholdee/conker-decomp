@@ -182,7 +182,7 @@ void func_15116D7C(WorldObject *obj) {
 
     accel = obj->param.word * (1.0f / 256);
     dt = D_800BE9E4;
-    rot = &obj->rotX;
+    rot = &obj->t;
     spin = &obj->spinX;
     target = WORK(obj)->targetSpin;
     for (i = 0; i < 3; i++) {

@@ -218,12 +218,12 @@ void func_151179BC(WorldObject *prop) {
         }
     }
     if (current != offset) {
-        cx = cosf(prop->rotX * 0.01745329238f);
-        sx = sinf(prop->rotX * 0.01745329238f);
-        cy = cosf(prop->rotY * 0.01745329238f);
-        sy = sinf(prop->rotY * 0.01745329238f);
-        cz = cosf(prop->rotZ * 0.01745329238f);
-        sz = sinf(prop->rotZ * 0.01745329238f);
+        cx = cosf(prop->t * 0.01745329238f);
+        sx = sinf(prop->t * 0.01745329238f);
+        cy = cosf(prop->u * 0.01745329238f);
+        sy = sinf(prop->u * 0.01745329238f);
+        cz = cosf(prop->v * 0.01745329238f);
+        sz = sinf(prop->v * 0.01745329238f);
         if (distance < 0) {
             offset = -offset;
         }
@@ -264,14 +264,14 @@ void func_15117DA4(WorldObject *prop, f32 x, f32 y, f32 z, f32 *out) {
         z = 0.0f;
     }
 
-    angle = prop->rotX * 0.01745329238f;
+    angle = prop->t * 0.01745329238f;
     s = sinf(angle);
     c = cosf(angle);
     out[0] = x;
     out[1] = (y * c) - (z * s);
     out[2] = (y * s) + (z * c);
 
-    angle = prop->rotY * 0.01745329238f;
+    angle = prop->u * 0.01745329238f;
     s = sinf(angle);
     c = cosf(angle);
     rotatedX = out[0];
@@ -395,14 +395,14 @@ void func_15117F3C(WorldObject *prop) {
     default:
         return;
     }
-    anchorX *= prop->scaleX;
-    anchorY *= prop->scaleY;
-    anchorZ *= prop->scaleZ;
-    rangeSq *= prop->scaleZ * prop->scaleZ;
+    anchorX *= prop->xScale;
+    anchorY *= prop->yScale;
+    anchorZ *= prop->zScale;
+    rangeSq *= prop->zScale * prop->zScale;
     if (WORK(prop)->hatch.counters == 0) {
         WORK(prop)->hatch.counters = 2;
         if (motion == PROP_ARRIVED) {
-            prop->rotX = maxAngle;
+            prop->t = maxAngle;
         }
     }
     timer = (WORK(prop)->hatch.counters >> 8) & 0xFF;
@@ -488,9 +488,9 @@ void func_15117F3C(WorldObject *prop) {
                         func_15114D24(prop, sound, 0x7D00, 0x5DC, 0xDAC, 0);
                     }
                 }
-                prop->rotX += speed;
-                if (maxAngle <= prop->rotX) {
-                    prop->rotX = maxAngle;
+                prop->t += speed;
+                if (maxAngle <= prop->t) {
+                    prop->t = maxAngle;
                     speed = 0.0f;
                     accel = 0.0f;
                     motion = PROP_ARRIVED;
@@ -537,7 +537,7 @@ void func_15117F3C(WorldObject *prop) {
             }
         }
     } else if (stayOpen == 0 || motion == PROP_RETURNING) {
-        if (0.0f < prop->rotX) {
+        if (0.0f < prop->t) {
             if (started == 0) {
                 accel = 0.1000000015f;
                 started++;
@@ -548,9 +548,9 @@ void func_15117F3C(WorldObject *prop) {
                 speed = 30.0f;
             }
             accel += 0.05000000075f;
-            prop->rotX -= speed;
-            if (prop->rotX <= 0.0f) {
-                prop->rotX = 0.0f;
+            prop->t -= speed;
+            if (prop->t <= 0.0f) {
+                prop->t = 0.0f;
                 started = 0;
                 motion = PROP_REST;
                 accel = 0.0f;
@@ -619,7 +619,7 @@ void func_151189AC(WorldObject *prop, s32 arg1) {
     openAngle = (prop->param.word << 22) >> 22;
     motion = prop->behaviorState & 3;
     target = openAngle;
-    angle = prop->rotY;
+    angle = prop->u;
     speed = WORK(prop)->swing.speed;
     if (motion == PROP_REST || motion == PROP_RETURNING) {
         target = 0.0f;
@@ -699,11 +699,11 @@ void func_151189AC(WorldObject *prop, s32 arg1) {
         }
     }
     WORK(prop)->swing.speed = speed;
-    if (D_800BE9B4 != 0 || angle != prop->rotY) {
+    if (D_800BE9B4 != 0 || angle != prop->u) {
         if (D_800C35EA[0] == 1 && func_15022B08(prop - db_Object_array, 0) != 0) {
-            angle = prop->rotY;
+            angle = prop->u;
         } else {
-            prop->rotY = angle;
+            prop->u = angle;
         }
         index = (prop->param.word >> 24) & 0xFF;
         if (D_800BE9F0 == 2) {
@@ -743,7 +743,7 @@ void func_15118F24(WorldObject *prop) {
     motion = prop->behaviorState & 3;
     openAngle = prop->param.half.lo;
     target = openAngle;
-    angle = prop->rotZ;
+    angle = prop->v;
     speed = WORK(prop)->swing.speed;
     if (motion == PROP_REST || motion == PROP_RETURNING) {
         target = 0.0f;
@@ -809,8 +809,8 @@ void func_15118F24(WorldObject *prop) {
         PROP_SET_MOTION(prop, motion);
     }
     WORK(prop)->swing.speed = speed;
-    if (D_800BE9B4 != 0 || angle != prop->rotZ) {
-        prop->rotZ = angle;
+    if (D_800BE9B4 != 0 || angle != prop->v) {
+        prop->v = angle;
         index = (prop->param.word >> 24) & 0xFF;
         if (index != 0 && openAngle != 0) {
             scale = 1.0f - fabsf((angle - (f32)openAngle) / (f32)openAngle);
@@ -1032,10 +1032,10 @@ void func_15119938(WorldObject *prop) {
     posX = prop->x;
     posY = prop->y;
     posZ = prop->z;
-    scaleX = prop->scaleX;
-    scaleY = prop->scaleY;
-    scaleZ = prop->scaleZ;
-    yaw = prop->rotY * 0.7111111283f; /* 256 / 360 */
+    scaleX = prop->xScale;
+    scaleY = prop->yScale;
+    scaleZ = prop->zScale;
+    yaw = prop->u * 0.7111111283f; /* 256 / 360 */
     if (WORK(prop)->sway.ready == FALSE) {
         func_151196D4(prop);
     }

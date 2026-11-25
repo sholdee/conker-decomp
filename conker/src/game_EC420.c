@@ -228,14 +228,14 @@ void func_150BF21C(WorldObject *obj) {
             BOB_WORK(obj)->speed = speed;
         }
         bobXZ = bob * 3.0f;
-        obj->rotX += ((bobXZ * sinf(BOB_WORK(obj)->bobPhase)) - obj->rotX) * rate;
-        obj->rotY += (((bob * 4.0f) * sinf(BOB_WORK(obj)->bobPhase * 1.100000024f)) - obj->rotY) * rate;
-        obj->rotZ += ((bobXZ * cosf(BOB_WORK(obj)->bobPhase)) - obj->rotZ) * rate;
+        obj->t += ((bobXZ * sinf(BOB_WORK(obj)->bobPhase)) - obj->t) * rate;
+        obj->u += (((bob * 4.0f) * sinf(BOB_WORK(obj)->bobPhase * 1.100000024f)) - obj->u) * rate;
+        obj->v += ((bobXZ * cosf(BOB_WORK(obj)->bobPhase)) - obj->v) * rate;
     } else {
         height = 0.0f;
     }
     func_150A7DA0(translate, 0.0f, height, 0.0f);
-    func_15043F6C(model, obj->rotX, obj->rotY, obj->rotZ, obj->scaleX, obj->scaleY, obj->scaleZ, obj->x, obj->y, obj->z);
+    func_15043F6C(model, obj->t, obj->u, obj->v, obj->xScale, obj->yScale, obj->zScale, obj->x, obj->y, obj->z);
     func_150A7A48(translate, model, translate);
     dst = obj->vertices[D_800BE9C0];
     src = obj->srcVertices;
@@ -282,10 +282,10 @@ void func_150BF760(WorldObject *obj) {
             anim = actor->unk2D0;
             progress = anim->frame / (anim->numFrames - 2.0f);
         }
-        obj[1].rotZ = 0.0f;
+        obj[1].v = 0.0f;
         if (mode == 2) {
             if (progress <= 0.75f) {
-                obj[1].rotZ = -sinf(progress * 3.141592741f * 1.333333254f) * 10.0f;
+                obj[1].v = -sinf(progress * 3.141592741f * 1.333333254f) * 10.0f;
             }
             if (actor == NULL) {
                 slot = func_15083E0C(0x14);
@@ -303,14 +303,14 @@ void func_150BF760(WorldObject *obj) {
             }
         } else if (mode == 0) {
             if (progress >= 0.25f) {
-                obj[1].rotZ = sinf(progress * 4.188789368f - 4.188789368f) * 10.0f;
+                obj[1].v = sinf(progress * 4.188789368f - 4.188789368f) * 10.0f;
             }
             if (actor != NULL && progress >= 1.0f) {
                 func_15060F28(actor, 0);
             }
         } else if (mode == 1) {
             if (progress >= 0.25f) {
-                obj[1].rotZ = sinf(progress * 4.188789368f - 4.188789368f) * 10.0f;
+                obj[1].v = sinf(progress * 4.188789368f - 4.188789368f) * 10.0f;
             }
             if (actor == NULL) {
                 slot = func_15083E0C(0x14);
@@ -408,15 +408,15 @@ void func_150BFA7C(WorldObject *platform) {
     } else if (state == 2) {
         WORK(platform)->unk80 += D_800BE9E4;
         if (WORK(platform)->unk80 < 0) {
-            platform->rotX = ((f32)(func_151EF610() % 5) - 2.0f) * 0.125f;
-            platform->rotZ = ((f32)(func_151EF610() % 5) - 2.0f) * 0.125f;
+            platform->t = ((f32)(func_151EF610() % 5) - 2.0f) * 0.125f;
+            platform->v = ((f32)(func_151EF610() % 5) - 2.0f) * 0.125f;
         } else {
             if (WORK(platform)->unk80 < 40) {
-                platform->rotX = ((f32)(func_151EF610() % 5) - 2.0f) / 12.0f;
-                platform->rotZ = ((f32)(func_151EF610() % 5) - 2.0f) / 12.0f;
+                platform->t = ((f32)(func_151EF610() % 5) - 2.0f) / 12.0f;
+                platform->v = ((f32)(func_151EF610() % 5) - 2.0f) / 12.0f;
             } else {
-                platform->rotZ = 0.0f;
-                platform->rotX = 0.0f;
+                platform->v = 0.0f;
+                platform->t = 0.0f;
             }
             if (platform->y < lowered) {
                 if (kind == 0) {
@@ -446,8 +446,8 @@ void func_150BFA7C(WorldObject *platform) {
                     func_1518CD20(platform, 0xFF, 0);
                 }
                 state = 3;
-                platform->rotZ = 0.0f;
-                platform->rotX = 0.0f;
+                platform->v = 0.0f;
+                platform->t = 0.0f;
                 if (kind == 2) {
                     platform->inactive = 1;
                     platform[1].inactive = 1;

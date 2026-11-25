@@ -36,10 +36,10 @@ void func_151163C0(WorldObject *obj) {
     swayRate = (obj->param.word >> 24) & 0xFF;
     swayScale = (f32)(u32)((obj->param.word >> 8) & 0xFF) * 1.40625f;
     previousY = obj->y;
-    previousSway = obj->rotX;
+    previousSway = obj->t;
     obj->yOffset = cosf((f32)WORK(obj)->bob.heightPhase * 9.58738e-05f) * heightScale;
     sway = cosf((f32)WORK(obj)->bob.swayPhase * 9.58738e-05f) * swayScale;
-    obj->rotX = sway;
+    obj->t = sway;
     WORK(obj)->bob.heightPhase += heightRate * D_800BE9E4;
     WORK(obj)->bob.swayPhase += swayRate * D_800BE9E4;
     obj->moveY = obj->y - previousY;

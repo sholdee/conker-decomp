@@ -109,7 +109,7 @@ void func_1511AF30(WorldObject *obj) {
         diff = WORK(obj)->w1511AF30.wobbleTarget - WORK(obj)->w1511AF30.wobble;
         WORK(obj)->w1511AF30.wobble += diff * 0.400000006f;
     }
-    obj->rotX = WORK(obj)->w1511AF30.tilt + WORK(obj)->w1511AF30.wobble;
+    obj->t = WORK(obj)->w1511AF30.tilt + WORK(obj)->w1511AF30.wobble;
 }
 
 /* Slides the object between fixed waypoints chosen by its param, with movement sounds. */
@@ -278,7 +278,7 @@ void func_1511B51C(WorldObject *obj) {
     openAngle = obj->param.half.lo;
     mode = obj->behaviorState & 3;
     target = openAngle;
-    angle = obj->rotZ;
+    angle = obj->v;
     velocity = WORK(obj)->w1511B51C.velocity;
     if (mode == 0 || mode == 1) {
         target = 0.0f;
@@ -324,8 +324,8 @@ void func_1511B51C(WorldObject *obj) {
         obj->behaviorState |= mode;
     }
     WORK(obj)->w1511B51C.velocity = velocity;
-    if (D_800BE9B4 != 0 || angle != obj->rotZ) {
-        obj->rotZ = angle;
+    if (D_800BE9B4 != 0 || angle != obj->v) {
+        obj->v = angle;
         sound = (obj->param.word >> 24) & 0xFF;
         if (sound != 0 && openAngle != 0) {
             ratio = fabsf((angle - openAngle) / openAngle);
@@ -361,16 +361,16 @@ void func_1511B7D4(WorldObject *obj) {
         pivots[0] = obj - 1;
         pivots[1] = obj - 2;
     }
-    if (WORK(obj)->w1511B7D4.prevAngle[0] != pivots[0]->rotZ || WORK(obj)->w1511B7D4.prevAngle[1] != pivots[1]->rotZ) {
-        WORK(obj)->w1511B7D4.prevAngle[0] = pivots[0]->rotZ;
-        WORK(obj)->w1511B7D4.prevAngle[1] = pivots[1]->rotZ;
+    if (WORK(obj)->w1511B7D4.prevAngle[0] != pivots[0]->v || WORK(obj)->w1511B7D4.prevAngle[1] != pivots[1]->v) {
+        WORK(obj)->w1511B7D4.prevAngle[0] = pivots[0]->v;
+        WORK(obj)->w1511B7D4.prevAngle[1] = pivots[1]->v;
         WORK(obj)->w1511B7D4.updates = 2;
     }
     if (WORK(obj)->w1511B7D4.updates != 0) {
         WORK(obj)->w1511B7D4.updates--;
         while (count--) {
             dx = pivots[pair[1]]->x - obj->x;
-            angle = -pivots[pair[1]]->rotZ * 0.01745329238f;
+            angle = -pivots[pair[1]]->v * 0.01745329238f;
             dy = pivots[pair[1]]->y - obj->y;
             sine = sinf(angle);
             cosine = cosf(angle);
@@ -503,7 +503,7 @@ void func_1511BDF4(Game1483E0State *obj) {
 
 /* Turns the object to face the camera (yaw in degrees). */
 void func_1511BE5C(WorldObject *obj) {
-    obj->rotY = func_150484A0((f32)obj->x - camera_global_Cameras->eye.x, (f32)obj->z - camera_global_Cameras->eye.z) * 57.29577637f;
+    obj->u = func_150484A0((f32)obj->x - camera_global_Cameras->eye.x, (f32)obj->z - camera_global_Cameras->eye.z) * 57.29577637f;
 }
 
 extern void func_150DDED0(void *);
@@ -538,7 +538,7 @@ void func_1511BEBC(WorldObject *obj) {
     triggered = WORK(obj)->w1511BEBC.triggered;
     velocity = WORK(obj)->w1511BEBC.velocity;
     if (D_800BE9F0 == 10) {
-        radiusSq = (obj->scaleZ * 100.0f) * (obj->scaleZ * 100.0f);
+        radiusSq = (obj->zScale * 100.0f) * (obj->zScale * 100.0f);
         if (WORK(obj)->w1511BEBC.restAndTimer == 0) {
             if (obj->y == 0) {
                 obj->y = 1;
@@ -694,8 +694,8 @@ void func_1511C548(WorldObject *obj) {
 
     swayX = sinf(WORK(obj)->w1511C548.phaseX);
     swayZ = sinf(WORK(obj)->w1511C548.phaseZ);
-    obj->rotX = swayX * 16.0f;
-    obj->rotZ = swayZ * 16.0f;
+    obj->t = swayX * 16.0f;
+    obj->v = swayZ * 16.0f;
     WORK(obj)->w1511C548.phaseX += 0.07299999893f * D_800BE9A4;
     WORK(obj)->w1511C548.phaseZ += 0.06499999762f * D_800BE9A4;
     WORK(obj)->w1511C548.phaseX = func_15144B68(WORK(obj)->w1511C548.phaseX);
@@ -704,9 +704,9 @@ void func_1511C548(WorldObject *obj) {
 
         WORK(obj)->w1511C548.phaseZ = wrapped;
     }
-    if (obj->rotZ == 0.0f && WORK(obj)->w1511C548.phaseZ == 0.0f) {
-        obj->rotX = 7.5f;
-        obj->rotZ = 8.0f;
+    if (obj->v == 0.0f && WORK(obj)->w1511C548.phaseZ == 0.0f) {
+        obj->t = 7.5f;
+        obj->v = 8.0f;
     }
 }
 
@@ -1223,30 +1223,30 @@ void func_1511DBC4(WorldObject *obj) {
 
     mode = obj->behaviorState & 3;
     if (mode == 0) {
-        obj->rotZ = 0.0f;
+        obj->v = 0.0f;
     } else if (mode == 3) {
-        obj->rotZ = 90.0f;
+        obj->v = 90.0f;
         wobble = cosf(swing->time * 0.01745329238f);
         wobble *= 0.5f;
-        obj->rotZ += wobble;
+        obj->v += wobble;
         swing->time += 3.0f * (f32)D_800BE9E4;
     } else if (mode == 2) {
-        if (obj->rotZ == 0.0f) {
+        if (obj->v == 0.0f) {
             swing->velocity = 0.0f;
             swing->accel = 0.0f;
         }
         swing->accel += swing->jerk;
         swing->velocity += swing->accel;
-        obj->rotZ += swing->velocity;
-        if (obj->rotZ >= 90.0f) {
+        obj->v += swing->velocity;
+        if (obj->v >= 90.0f) {
             mode = 3;
-            obj->rotZ = 90.0f;
+            obj->v = 90.0f;
         }
     } else {
-        if ((f32)D_800BE9E4 < obj->rotZ) {
-            obj->rotZ -= (f32)D_800BE9E4;
+        if ((f32)D_800BE9E4 < obj->v) {
+            obj->v -= (f32)D_800BE9E4;
         } else {
-            obj->rotZ = 0.0f;
+            obj->v = 0.0f;
             mode = 0;
         }
     }
@@ -1389,10 +1389,10 @@ void func_1511DF6C(WorldObject *obj) {
         WORK(obj)->w1511DF6C.pulse = allocate_memory(sizeof(struct Pulse1511DF6C), 1, 0, 0);
         pulse = WORK(obj)->w1511DF6C.pulse;
         bzero(pulse, sizeof(struct Pulse1511DF6C));
-        pulse->fullScale = obj->scaleX;
-        obj->scaleZ = 0.0f;
-        obj->scaleY = 0.0f;
-        obj->scaleX = 0.0f;
+        pulse->fullScale = obj->xScale;
+        obj->zScale = 0.0f;
+        obj->yScale = 0.0f;
+        obj->xScale = 0.0f;
     } else {
         pulse = WORK(obj)->w1511DF6C.pulse;
     }
@@ -1412,9 +1412,9 @@ void func_1511DF6C(WorldObject *obj) {
         }
         /* fallthrough */
     default:
-        obj->rotY += (f32)D_800BE9E4 * 1.519999981f;
+        obj->u += (f32)D_800BE9E4 * 1.519999981f;
         dist = cosf(pulse->phaseX * 9.587380191e-05f);
-        obj->rotX = 8.0f * dist;
+        obj->t = 8.0f * dist;
         dist = cosf(pulse->phaseZ * 9.587380191e-05f);
         obj->yOffset = 12.0f * dist;
         pulse->phaseX += (f32)D_800BE9E4 * 507.0f;
@@ -1458,33 +1458,33 @@ void func_1511DF6C(WorldObject *obj) {
         }
     }
     if (pulse->state == 0) {
-        obj->scaleZ += 0.2599999905f * pulse->fullScale;
-        if (pulse->fullScale <= obj->scaleZ) {
-            obj->scaleZ = pulse->fullScale;
+        obj->zScale += 0.2599999905f * pulse->fullScale;
+        if (pulse->fullScale <= obj->zScale) {
+            obj->zScale = pulse->fullScale;
             pulse->bouncePhase = 0;
             pulse->state++;
             pulse->bounce = 0.3000000119f;
         }
-        obj->scaleY = obj->scaleZ;
-        obj->scaleX = obj->scaleZ;
+        obj->yScale = obj->zScale;
+        obj->xScale = obj->zScale;
     } else if (pulse->state == 1) {
         pulse->bounce -= 0.01999999955f * pulse->fullScale;
         if (pulse->bounce <= 0.0f) {
             pulse->state++;
             pulse->bounce = 0.0f;
         }
-        obj->scaleZ = cosf(pulse->bouncePhase * 9.587380191e-05f) * pulse->bounce + pulse->fullScale;
-        obj->scaleX = obj->scaleY = obj->scaleZ;
+        obj->zScale = cosf(pulse->bouncePhase * 9.587380191e-05f) * pulse->bounce + pulse->fullScale;
+        obj->xScale = obj->yScale = obj->zScale;
         pulse->bouncePhase += D_800BE9E4 * 0x1613;
     } else if (pulse->state == 2) {
     } else if (pulse->state == 3) {
-        obj->scaleZ -= 0.2599999905f * pulse->fullScale;
-        if (obj->scaleZ <= 0.0f) {
+        obj->zScale -= 0.2599999905f * pulse->fullScale;
+        if (obj->zScale <= 0.0f) {
             pulse->state = 0;
             obj->inactive = 1;
-            obj->scaleZ = 0.0f;
+            obj->zScale = 0.0f;
         }
-        obj->scaleY = obj->scaleZ;
-        obj->scaleX = obj->scaleZ;
+        obj->yScale = obj->zScale;
+        obj->xScale = obj->zScale;
     }
 }

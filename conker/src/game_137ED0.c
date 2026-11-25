@@ -78,18 +78,18 @@ void func_1510AA44(WorldObject *minuteHand) {
     }
     minuteHand[0].spinZ = 5.0f;
     minuteHand[1].spinZ = 5.0f;
-    minuteHand[0].rotZ = -(minute * 6.0f);
-    minuteHand[1].rotZ = -hourAngle;
+    minuteHand[0].v = -(minute * 6.0f);
+    minuteHand[1].v = -hourAngle;
 }
 
-/* Swings obj->rotX by +-10 with a 2 second period, playing sound 0x4CA / 0x4CB at each end of the swing. */
+/* Swings obj->t (x rotation) by +-10 with a 2 second period, playing sound 0x4CA / 0x4CB at each end of the swing. */
 void func_1510ADD8(WorldObject *obj) {
     f32 rot;
 
     SWING_WORK(obj)->phase += (3.1415927f * D_800BE9E4) / 60.0f;
     rot = cosf(SWING_WORK(obj)->phase) * 10.0f;
-    obj->spinX = obj->rotX - rot;
-    obj->rotX = rot;
+    obj->spinX = obj->t - rot;
+    obj->t = rot;
     if (SWING_WORK(obj)->secondHalf == 0) {
         if (3.1415927f <= SWING_WORK(obj)->phase) {
             SWING_WORK(obj)->secondHalf = 1;

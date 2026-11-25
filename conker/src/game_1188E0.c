@@ -121,7 +121,7 @@ void func_150EB614(WorldObject *obj) {
         } else {
             target = -40.0f;
         }
-        angle = obj->rotX;
+        angle = obj->t;
         damping = WORK(obj)->swing.damping;
         acceleration = WORK(obj)->swing.acceleration;
         velocity = WORK(obj)->swing.velocity;
@@ -145,14 +145,14 @@ void func_150EB614(WorldObject *obj) {
             }
             WORK(obj)->swing.velocity = velocity;
         }
-        obj->rotX = angle;
+        obj->t = angle;
     } else {
-        before = obj->rotX;
+        before = obj->t;
         func_15117770(obj);
-        if (before == obj->rotX) {
+        if (before == obj->t) {
             obj->behaviorState &= ~3;
             obj->behaviorState |= 3;
-            obj->rotX = 0.0f;
+            obj->t = 0.0f;
         }
     }
 }

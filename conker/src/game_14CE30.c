@@ -66,7 +66,7 @@ void func_1511F990(WorldObject *prop, s32 mode) {
                     if (motion != PROP_REST && motion != PROP_RETURNING) {
                         motion = PROP_RETURNING;
                     }
-                    prop->rotY = (prop->param.word << 22) >> 22;
+                    prop->u = (prop->param.word << 22) >> 22;
                 } else if (mode == 1) {
                     motion = PROP_ARRIVED;
                 } else if (mode == 2) {
@@ -79,7 +79,7 @@ void func_1511F990(WorldObject *prop, s32 mode) {
                     } else if (!flag) {
                         motion = PROP_ARRIVED;
                     }
-                    prop->rotY = (prop->param.word << 22) >> 22;
+                    prop->u = (prop->param.word << 22) >> 22;
                 }
             } else if (mode == 0 || mode == 2 || mode == 3) {
                 if (mode != 3 || flag) {

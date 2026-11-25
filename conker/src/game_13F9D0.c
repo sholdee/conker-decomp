@@ -93,29 +93,29 @@ void func_15112520(WorldObject *turret) {
             pitch += 360.0f;
         }
     }
-    delta = func_15048A70(turret->rotY, yaw);
+    delta = func_15048A70(turret->u, yaw);
     yaw = fabsf(delta);
     if (cfg->maxStep < yaw) {
         delta = ((delta < 0.0f) ? -1.0f : 1.0f) * cfg->maxStep;
     }
-    turret->rotY += delta * speed;
+    turret->u += delta * speed;
     if (D_80089234 == 0 && yaw > 4.0f) {
         D_80089234 = -1;
     }
-    if (turret->rotY < 0.0f) {
-        turret->rotY += 360.0f;
-    } else if (turret->rotY >= 360.0f) {
-        turret->rotY -= 360.0f;
+    if (turret->u < 0.0f) {
+        turret->u += 360.0f;
+    } else if (turret->u >= 360.0f) {
+        turret->u -= 360.0f;
     }
-    delta = func_15048A70(turret->rotX, 360.0f - pitch);
-    turret->rotX += delta * speed;
+    delta = func_15048A70(turret->t, 360.0f - pitch);
+    turret->t += delta * speed;
     if (D_80089234 == 0 && fabsf(delta) > 4.0f) {
         D_80089234 = -1;
     }
-    if (turret->rotX < 0.0f) {
-        turret->rotX += 360.0f;
-    } else if (turret->rotX >= 360.0f) {
-        turret->rotX -= 360.0f;
+    if (turret->t < 0.0f) {
+        turret->t += 360.0f;
+    } else if (turret->t >= 360.0f) {
+        turret->t -= 360.0f;
     }
     if (D_80089234 == -1 && cfg->sfxCooldown != 0) {
         volume = 32000.0f - D_800DBEC0 * 0.1000000015f;
@@ -287,7 +287,7 @@ void func_15113218(void) {
                 } else if (obj->attach > 100 && obj->attach < 125) {
                     actor = &movement_obj[obj->attach - 100];
                     if (actor->unk1D4 == NULL) {
-                        func_150A7CB0(mf, obj->scaleX, obj->scaleY, obj->scaleZ);
+                        func_150A7CB0(mf, obj->xScale, obj->yScale, obj->zScale);
                         mf[3][0] = actor->x_position;
                         mf[3][1] = actor->y_position;
                         mf[3][2] = actor->z_position;
@@ -297,7 +297,7 @@ void func_15113218(void) {
                         rot[0] = rot[2];
                         rot[1] = actor->unk90;
                         parent = actor->unk1D4[0];
-                        func_150A7CB0(mf, obj->scaleX, obj->scaleY, obj->scaleZ);
+                        func_150A7CB0(mf, obj->xScale, obj->yScale, obj->zScale);
                         mf[3][0] = parent[3][0];
                         mf[3][1] = parent[3][1];
                         mf[3][2] = parent[3][2];
@@ -383,7 +383,7 @@ Gfx *func_151137D4(Gfx *gfx, WorldObject *obj, Mtx *mtx, s32 view, s32 distance,
     effects = obj->effectFlags;
     if (obj->effectFlags != 0) {
         if (effects & 1) {
-            gfx = func_1511FC2C(gfx, obj->x, obj->y + obj->yOffset, obj->z, obj->rotY, view);
+            gfx = func_1511FC2C(gfx, obj->x, obj->y + obj->yOffset, obj->z, obj->u, view);
         } else if (effects & 0x10) {
             gfx = func_1511FC2C(gfx, obj->x, obj->y + obj->yOffset, obj->z, obj->work.floor.unk7C, view);
         } else if (effects & 0x20) {
@@ -604,18 +604,18 @@ void func_15114348(s32 objIndex, f32 *x, f32 *y, f32 *z) {
     dx = *x - db_Object_array[objIndex].x;
     dy = *y - db_Object_array[objIndex].y;
     dz = *z - db_Object_array[objIndex].z;
-    if (db_Object_array[objIndex].rotX != 0.0f) {
-        guRotateF(m, db_Object_array[objIndex].rotX, 1, 0, 0);
+    if (db_Object_array[objIndex].t != 0.0f) {
+        guRotateF(m, db_Object_array[objIndex].t, 1, 0, 0);
         func_150A7960(m, yaxis[0], yaxis[1], yaxis[2], &yaxis[0], &yaxis[1], &yaxis[2]);
         func_150A7960(m, zaxis[0], zaxis[1], zaxis[2], &zaxis[0], &zaxis[1], &zaxis[2]);
     }
-    if (db_Object_array[objIndex].rotZ != 0.0f) {
-        guRotateF(m, db_Object_array[objIndex].rotZ, zaxis[0], zaxis[1], zaxis[2]);
+    if (db_Object_array[objIndex].v != 0.0f) {
+        guRotateF(m, db_Object_array[objIndex].v, zaxis[0], zaxis[1], zaxis[2]);
         func_150A7960(m, yaxis[0], yaxis[1], yaxis[2], &yaxis[0], &yaxis[1], &yaxis[2]);
         func_150A7960(m, xaxis[0], xaxis[1], xaxis[2], &xaxis[0], &xaxis[1], &xaxis[2]);
     }
-    if (db_Object_array[objIndex].rotY != 0.0f) {
-        guRotateF(m, db_Object_array[objIndex].rotY, yaxis[0], yaxis[1], yaxis[2]);
+    if (db_Object_array[objIndex].u != 0.0f) {
+        guRotateF(m, db_Object_array[objIndex].u, yaxis[0], yaxis[1], yaxis[2]);
         func_150A7960(m, xaxis[0], xaxis[1], xaxis[2], &xaxis[0], &xaxis[1], &xaxis[2]);
         func_150A7960(m, zaxis[0], zaxis[1], zaxis[2], &zaxis[0], &zaxis[1], &zaxis[2]);
     }
@@ -651,8 +651,8 @@ void func_1511473C(Actor *actor, s32 objIndex) {
 void func_151148A8(MtxF mtx, WorldObject *obj) {
     MtxF pitchRoll;
 
-    func_150A8050(mtx, 0.0f, obj->rotY, 0.0f);
-    func_150A8050(pitchRoll, obj->rotX, 0.0f, obj->rotZ);
+    func_150A8050(mtx, 0.0f, obj->u, 0.0f);
+    func_150A8050(pitchRoll, obj->t, 0.0f, obj->v);
     func_150A7A48(pitchRoll, mtx, mtx);
 }
 
@@ -664,7 +664,7 @@ void func_1511490C(MtxF mtx, WorldObject *obj) {
     mtx[3][0] = obj->x;
     mtx[3][1] = obj->y + obj->yOffset;
     mtx[3][2] = obj->z;
-    func_150A7CB0(scale, obj->scaleX, obj->scaleY, obj->scaleZ);
+    func_150A7CB0(scale, obj->xScale, obj->yScale, obj->zScale);
     func_150A7A48(scale, mtx, mtx);
 }
 

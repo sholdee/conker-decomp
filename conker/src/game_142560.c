@@ -17,39 +17,39 @@ void func_151150B0(s32 arg0) {
 /* Spins the object about Z by (params >> 16) / 256 degrees per frame, wrapping to [0, 360). */
 void func_151150BC(WorldObject *obj) {
     obj->spinZ = ((obj->param.word >> 16) * D_800BE9E4) * (1.0f / 256.0f);
-    obj->rotZ += obj->spinZ;
-    if (obj->rotZ < 0.0f) {
-        obj->rotZ += 360.0f;
+    obj->v += obj->spinZ;
+    if (obj->v < 0.0f) {
+        obj->v += 360.0f;
         return;
     }
-    if (obj->rotZ >= 360.0f) {
-        obj->rotZ -= 360.0f;
+    if (obj->v >= 360.0f) {
+        obj->v -= 360.0f;
     }
 }
 
 /* Spins the object about Y by (params >> 16) / 256 degrees per frame, wrapping to [0, 360). */
 void func_1511515C(WorldObject *obj) {
     obj->spinY = ((obj->param.word >> 16) * D_800BE9E4) * (1.0f / 256.0f);
-    obj->rotY += obj->spinY;
-    if (obj->rotY < 0.0f) {
-        obj->rotY += 360.0f;
+    obj->u += obj->spinY;
+    if (obj->u < 0.0f) {
+        obj->u += 360.0f;
         return;
     }
-    if (obj->rotY >= 360.0f) {
-        obj->rotY -= 360.0f;
+    if (obj->u >= 360.0f) {
+        obj->u -= 360.0f;
     }
 }
 
 /* Spins the object about X by (params >> 16) / 256 degrees per frame, wrapping to [0, 360). */
 void func_151151FC(WorldObject *obj) {
     obj->spinX = ((obj->param.word >> 16) * D_800BE9E4) * (1.0f / 256.0f);
-    obj->rotX += obj->spinX;
-    if (obj->rotX < 0.0f) {
-        obj->rotX += 360.0f;
+    obj->t += obj->spinX;
+    if (obj->t < 0.0f) {
+        obj->t += 360.0f;
         return;
     }
-    if (obj->rotX >= 360.0f) {
-        obj->rotX -= 360.0f;
+    if (obj->t >= 360.0f) {
+        obj->t -= 360.0f;
     }
 }
 
@@ -108,9 +108,9 @@ void func_15115368(WorldObject *obj) {
         t = WORK(obj)->timer - start - hold;
         if (WORK(obj)->returning == 0) {
             s = sinf(t * 0.628f * 2);
-            obj->rotX = -3 * s; // matching: int literals here; 2.0f/3.0f schedule differently
+            obj->t = -3 * s; // matching: int literals here; 2.0f/3.0f schedule differently
             s = sinf(t * 0.628f * 3);
-            obj->rotZ = 2 * s;
+            obj->v = 2 * s;
             if (t > 10.0f) {
                 if (WORK(obj)->homeY == 0) {
                     WORK(obj)->homeY = obj->y;

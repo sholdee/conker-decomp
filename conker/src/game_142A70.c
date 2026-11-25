@@ -217,8 +217,8 @@ void func_15115E0C(WorldObject *obj, Actor *player) {
     f32 dx;
     f32 dz;
 
-    sinYaw = func_150AD780(obj->rotY * 0.01745329238f);
-    cosYaw = func_150AD78C(obj->rotY * 0.01745329238f);
+    sinYaw = func_150AD780(obj->u * 0.01745329238f);
+    cosYaw = func_150AD78C(obj->u * 0.01745329238f);
     dx = player->x_position - (f32)obj->x;
     dz = player->z_position - (f32)obj->z;
     if ((obj->flags & 4) == 4) {
@@ -255,14 +255,14 @@ void func_15115F68(WorldObject *obj) {
     divisor = obj->param.word; bias = obj->param.word >> 16;
     maxTilt = obj->param.word >> 8; minTilt = obj->param.word >> 24;
     if (divisor) {
-        obj->rotX += (WORK(obj)->seesaw.weightX / divisor) + bias;
+        obj->t += (WORK(obj)->seesaw.weightX / divisor) + bias;
     } else {
-        obj->rotX += (s32)(bias * D_800BE9E4);
+        obj->t += (s32)(bias * D_800BE9E4);
     }
-    if (maxTilt < obj->rotX) {
-        obj->rotX = maxTilt;
-    } else if (obj->rotX < minTilt) {
-        obj->rotX = minTilt;
+    if (maxTilt < obj->t) {
+        obj->t = maxTilt;
+    } else if (obj->t < minTilt) {
+        obj->t = minTilt;
     }
     WORK(obj)->seesaw.weightZ = 0.0f;
     WORK(obj)->seesaw.weightX = 0.0f;

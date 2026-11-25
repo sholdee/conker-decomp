@@ -52,28 +52,28 @@ void func_150DE458(WorldObject *prop) {
     if ((prop->behaviorState & 3) == 3) {
         frames = D_800BE9E4;
 
-        prop->rotX += prop->spinX * frames;
-        angle = prop->rotX;
+        prop->t += prop->spinX * frames;
+        angle = prop->t;
         if (angle < 0.0f) {
-            prop->rotX = angle + 360.0f;
+            prop->t = angle + 360.0f;
         } else if (angle >= 360.0f) {
-            prop->rotX = angle - 360.0f;
+            prop->t = angle - 360.0f;
         }
 
-        prop->rotY += prop->spinY * frames;
-        angle = prop->rotY;
+        prop->u += prop->spinY * frames;
+        angle = prop->u;
         if (angle < 0.0f) {
-            prop->rotY = angle + 360.0f;
+            prop->u = angle + 360.0f;
         } else if (angle >= 360.0f) {
-            prop->rotY = angle - 360.0f;
+            prop->u = angle - 360.0f;
         }
 
-        prop->rotZ += prop->spinZ * frames;
-        angle = prop->rotZ;
+        prop->v += prop->spinZ * frames;
+        angle = prop->v;
         if (angle < 0.0f) {
-            prop->rotZ = angle + 360.0f;
+            prop->v = angle + 360.0f;
         } else if (angle >= 360.0f) {
-            prop->rotZ = angle - 360.0f;
+            prop->v = angle - 360.0f;
         }
 
         timer = prop->alpha;
@@ -110,8 +110,8 @@ void func_150DE458(WorldObject *prop) {
  * phase (work.words[0..2], in 1/8 steps of its angle); the phases advance 12, 16 and 24 per frame. */
 void func_150DE6D8(WorldObject *prop) {
     prop->y = func_15048A40(prop->work.words[0] >> 3) * 10.19999981f + 1130.0f;
-    prop->rotX = func_15048A40(prop->work.words[1] >> 3) * 1.100000024f;
-    prop->rotZ = func_15048A40(prop->work.words[2] >> 3) * 1.100000024f;
+    prop->t = func_15048A40(prop->work.words[1] >> 3) * 1.100000024f;
+    prop->v = func_15048A40(prop->work.words[2] >> 3) * 1.100000024f;
     prop->work.words[0] += D_800BE9E4 * 12;
     prop->work.words[1] += D_800BE9E4 * 16;
     prop->work.words[2] += D_800BE9E4 * 24;

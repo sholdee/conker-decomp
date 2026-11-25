@@ -144,13 +144,13 @@ s32 func_1509E900(s32 id, s32 op, s32 *cmd) {
         break;
     case 16:
         if (cmd[2] != ARG_KEEP) {
-            obj->rotX = cmd[2];
+            obj->t = cmd[2];
         }
         if (cmd[3] != ARG_KEEP) {
-            obj->rotY = cmd[3];
+            obj->u = cmd[3];
         }
         if (cmd[4] != ARG_KEEP) {
-            obj->rotZ = cmd[4];
+            obj->v = cmd[4];
         }
         break;
     case 17:
@@ -220,7 +220,7 @@ s32 func_1509ED74(s32 id, s32 op, s32 *cmd) {
     case 31:
         return obj->z;
     case 32:
-        return obj->rotZ;
+        return obj->v;
     case 33:
         if (cmd[2] == 0) {
             return WORK(obj)[0].i;

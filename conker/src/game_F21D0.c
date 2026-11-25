@@ -28,7 +28,7 @@ void func_150C4D20(WorldObject *pendulum) {
     f32 push;
     s32 phase;
 
-    angle = pendulum->rotX;
+    angle = pendulum->t;
     velocity = pendulum->spinX;
     if (angle > 180.0f) {
         angle -= 360.0f;
@@ -48,11 +48,11 @@ void func_150C4D20(WorldObject *pendulum) {
     }
     velocity *= 0.8f;
     pendulum->spinX = velocity;
-    pendulum->rotX += velocity;
-    if (pendulum->rotX < 0.0f) {
-        pendulum->rotX += 360.0f;
-    } else if (pendulum->rotX >= 360.0f) {
-        pendulum->rotX -= 360.0f;
+    pendulum->t += velocity;
+    if (pendulum->t < 0.0f) {
+        pendulum->t += 360.0f;
+    } else if (pendulum->t >= 360.0f) {
+        pendulum->t -= 360.0f;
     }
 }
 

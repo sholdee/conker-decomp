@@ -1575,9 +1575,9 @@ typedef struct Shadow Shadow; // blob shadow under an object, see game_13AE20.c
 
 typedef struct WorldObject WorldObject;
 struct WorldObject {
-    /* 0x00 */ f32 rotX; // degrees
-    /* 0x04 */ f32 rotY;
-    /* 0x08 */ f32 rotZ;
+    /* 0x00 */ f32 t; // x rotation, degrees
+    /* 0x04 */ f32 u; // y rotation
+    /* 0x08 */ f32 v; // z rotation
     /* 0x0C */ void *model;          // loaded model asset, if any
     /* 0x10 */ s16 x;
     /* 0x12 */ s16 y;
@@ -1587,9 +1587,9 @@ struct WorldObject {
     /* 0x1C */ Gfx *displayList;
     /* 0x20 */ Vtx *vertices[2];     // per frame buffer (D_800BE9C0); both srcVertices unless state bit 0
     /* 0x28 */ Vtx *srcVertices;     // the model's own vertices
-    /* 0x2C */ f32 scaleX;
-    /* 0x30 */ f32 scaleY;
-    /* 0x34 */ f32 scaleZ;
+    /* 0x2C */ f32 xScale;
+    /* 0x30 */ f32 yScale;
+    /* 0x34 */ f32 zScale;
     /* 0x38 */ void (*update)(WorldObject *obj);
     /* 0x3C */ union {
         void *data;                  // per-kind data, e.g. a Turret15112520Cfg

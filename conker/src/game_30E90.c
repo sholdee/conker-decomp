@@ -123,12 +123,12 @@ void func_150039E0(s32 level, s32 arg1) {
         obj->x = base[i].x;
         obj->y = base[i].y;
         obj->z = base[i].z;
-        obj->rotX = base[i].rotX;
-        obj->rotY = base[i].rotY;
-        obj->rotZ = base[i].rotZ;
-        obj->scaleX = base[i].scaleX;
-        obj->scaleY = base[i].scaleY;
-        obj->scaleZ = base[i].scaleZ;
+        obj->t = base[i].rotX;
+        obj->u = base[i].rotY;
+        obj->v = base[i].rotZ;
+        obj->xScale = base[i].scaleX;
+        obj->yScale = base[i].scaleY;
+        obj->zScale = base[i].scaleZ;
         obj->displayList = base[i].displayList;
         obj->state = base[i].state & ~8;
         obj->fadeDistance = 0;
@@ -484,11 +484,11 @@ void func_15004AAC(WorldObject *obj, ObjectSpawn *spawn) {
     i = 0;
     if (obj->numVertices > 0) {
         vtx = obj->srcVertices;
-        scaleZ = obj->scaleZ;
+        scaleZ = obj->zScale;
         z = 0.0f; // matching: these dead stores of z and x set IDO's FP register order
-        scaleX = obj->scaleX;
+        scaleX = obj->xScale;
         x = 0.0f;
-        scaleY = obj->scaleY;
+        scaleY = obj->yScale;
         do {
             z = vtx[i].v.ob[2] * scaleZ;
             x = vtx[i].v.ob[0] * scaleX;

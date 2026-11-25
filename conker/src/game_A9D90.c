@@ -517,9 +517,9 @@ s32 func_1507D754(Actor *obj) {
             spawned->x = obj->x_position;
             spawned->y = obj->y_position;
             spawned->z = obj->z_position;
-            spawned->rotX = obj->unkB8;
-            spawned->rotY = obj->unk40;
-            spawned->rotZ = obj->unkC4;
+            spawned->t = obj->unkB8;
+            spawned->u = obj->unk40;
+            spawned->v = obj->unkC4;
             spawned->alpha = 0xFF;
             spawned->work.words[0] = 0;
             spawned->work.words[1] = 0;

@@ -211,7 +211,7 @@ void func_1511F4D0(WorldObject *prop) {
         }
     }
     span = prop->param.word; // matching: loaded into span before the conversion
-    span = span * prop->scaleY;
+    span = span * prop->yScale;
     next = WORK(prop)->opening.open;
     openX = (next >> 16) & 0xFFFF;
     openY = next & 0xFFFF;

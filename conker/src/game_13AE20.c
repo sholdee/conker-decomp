@@ -128,7 +128,7 @@ void func_1510DA84(Shadow *shadow) {
             x = prop->x;
             ownerY = prop->y;
             z = prop->z;
-            scale = (f32)(prop->unk4D * 4) * prop->scaleX;
+            scale = (f32)(prop->unk4D * 4) * prop->xScale;
             angle = 0;
             break;
     }

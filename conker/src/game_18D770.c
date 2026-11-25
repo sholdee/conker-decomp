@@ -218,7 +218,7 @@ s32 func_151606A8(LightEffect *effect) {
     f32 x;
 
     mount = &effect->data.mount;
-    func_150A8050(mtx.mf, (*mount)->rotX, (*mount)->rotY, (*mount)->rotZ);
+    func_150A8050(mtx.mf, (*mount)->t, (*mount)->u, (*mount)->v);
     mtx.mf[3][0] = (*mount)->x;
     mtx.mf[3][1] = (*mount)->y;
     mtx.mf[3][2] = (*mount)->z;
@@ -1637,7 +1637,7 @@ s32 func_151644A8(LightEffect *effect) {
 
     object = swing->object;
     scale = swing->scale;
-    func_151644F4(effect, &swing->pivot, swing->offset, object->rotX * scale, object->rotZ * scale);
+    func_151644F4(effect, &swing->pivot, swing->offset, object->t * scale, object->v * scale);
     return 1;
 }
 

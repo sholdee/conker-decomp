@@ -83,44 +83,44 @@ void func_1511E780(WorldObject *prop) {
     switch (prop->param.word >> 16) {
     case 0:
         if (WORK(prop)->slide.started == 0) {
-            WORK(prop)->slide.home = prop->rotZ;
+            WORK(prop)->slide.home = prop->v;
         }
-        prop->rotZ -= speed * rate;
-        if (WORK(prop)->slide.home < prop->rotZ) {
-            prop->rotZ = WORK(prop)->slide.home;
+        prop->v -= speed * rate;
+        if (WORK(prop)->slide.home < prop->v) {
+            prop->v = WORK(prop)->slide.home;
             motion = PROP_REST;
         }
-        if (prop->rotZ < -110.0f) {
-            prop->rotZ = -110.0f;
+        if (prop->v < -110.0f) {
+            prop->v = -110.0f;
             motion = PROP_ARRIVED;
         }
         break;
     case 3:
         if (WORK(prop)->slide.started == 0) {
-            WORK(prop)->slide.home = prop->rotY;
+            WORK(prop)->slide.home = prop->u;
         }
-        prop->rotY -= speed * 3.0f;
-        if (prop->rotY < 260.0f) {
-            prop->rotY = 260.0f;
+        prop->u -= speed * 3.0f;
+        if (prop->u < 260.0f) {
+            prop->u = 260.0f;
             motion = PROP_ARRIVED;
         }
-        if (WORK(prop)->slide.home < prop->rotY) {
-            prop->rotY = WORK(prop)->slide.home;
+        if (WORK(prop)->slide.home < prop->u) {
+            prop->u = WORK(prop)->slide.home;
             motion = PROP_REST;
         }
         break;
     case 2:
     case 8:
         if (WORK(prop)->slide.started == 0) {
-            WORK(prop)->slide.home = prop->rotY;
+            WORK(prop)->slide.home = prop->u;
         }
-        prop->rotY += speed * rate;
-        if (WORK(prop)->slide.home + range < prop->rotY) {
-            prop->rotY = WORK(prop)->slide.home + range;
+        prop->u += speed * rate;
+        if (WORK(prop)->slide.home + range < prop->u) {
+            prop->u = WORK(prop)->slide.home + range;
             motion = PROP_ARRIVED;
         }
-        if (prop->rotY < WORK(prop)->slide.home) {
-            prop->rotY = WORK(prop)->slide.home;
+        if (prop->u < WORK(prop)->slide.home) {
+            prop->u = WORK(prop)->slide.home;
             motion = PROP_REST;
         }
         break;
@@ -128,15 +128,15 @@ void func_1511E780(WorldObject *prop) {
     case 6:
     case 7:
         if (WORK(prop)->slide.started == 0) {
-            WORK(prop)->slide.home = prop->rotY;
+            WORK(prop)->slide.home = prop->u;
         }
-        prop->rotY -= speed * rate;
-        if (WORK(prop)->slide.home < prop->rotY) {
-            prop->rotY = WORK(prop)->slide.home;
+        prop->u -= speed * rate;
+        if (WORK(prop)->slide.home < prop->u) {
+            prop->u = WORK(prop)->slide.home;
             motion = PROP_REST;
         }
-        if (prop->rotY < WORK(prop)->slide.home - range) {
-            prop->rotY = WORK(prop)->slide.home - range;
+        if (prop->u < WORK(prop)->slide.home - range) {
+            prop->u = WORK(prop)->slide.home - range;
             motion = PROP_ARRIVED;
         }
         break;
@@ -145,7 +145,7 @@ void func_1511E780(WorldObject *prop) {
         /* fallthrough */
     case 11:
         WORK(prop)->wobble.phase += 0.0399999991059f * D_800BE9E4;
-        prop->rotZ = sinf(WORK(prop)->wobble.phase) * 10.0f;
+        prop->v = sinf(WORK(prop)->wobble.phase) * 10.0f;
         if (WORK(prop)->wobble.phase > 12.5663709641f) { /* 4 pi */
             // matching: the multiplier converts as unsigned
             WORK(prop)->wobble.phase -= 12.5663709641f * (u32)((func_150ADA20() & 4) + 1);
@@ -158,7 +158,7 @@ void func_1511E780(WorldObject *prop) {
     case 13:
         WORK(prop)->wobble.phase += 0.0399999991059f * D_800BE9E4;
         // matching: computed in double precision (180.0, not 180.0f)
-        prop->rotZ = 180.0 - sinf(WORK(prop)->wobble.phase) * 10.0f;
+        prop->v = 180.0 - sinf(WORK(prop)->wobble.phase) * 10.0f;
         break;
     }
     WORK(prop)->slide.started = TRUE;

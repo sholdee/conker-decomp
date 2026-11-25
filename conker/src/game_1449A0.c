@@ -28,7 +28,7 @@ f32 func_15117518(WorldObject *obj, f32 angle);
 
 /* Swings rotX toward the target angle with func_151172D8's damped spring. */
 void func_151174F0(WorldObject *obj) {
-    obj->rotX = func_151172D8(obj, obj->rotX);
+    obj->t = func_151172D8(obj, obj->t);
 }
 
 /*
@@ -81,10 +81,10 @@ f32 func_15117518(WorldObject *obj, f32 angle) {
 
 /* Bounces rotX toward the target angle (func_15117518). */
 void func_15117770(WorldObject *obj) {
-    obj->rotX = func_15117518(obj, obj->rotX);
+    obj->t = func_15117518(obj, obj->t);
 }
 
 /* Bounces rotZ toward the target angle (func_15117518). */
 void func_15117798(WorldObject *obj) {
-    obj->rotZ = func_15117518(obj, obj->rotZ);
+    obj->v = func_15117518(obj, obj->v);
 }
