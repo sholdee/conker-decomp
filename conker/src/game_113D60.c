@@ -48,14 +48,28 @@ typedef struct {
 } Struct150E81A8;
 
 typedef struct {
-    /* 0x0 */ u8 unk0;
-    /* 0x1 */ u8 unk1;
-    /* 0x2 */ s16 unk2;
-    /* 0x4 */ u8 unk4;
-    /* 0x5 */ u8 unk5;
+    /* 0x0 */ s8 type;
+    /* 0x1 */ u8 pad1;
+    /* 0x2 */ s16 duration;
+    /* 0x4 */ s8 unk4;
+    /* 0x5 */ s8 unk5;
     /* 0x6 */ s8 unk6;
-    /* 0x7 */ u8 unk7;
-} Struct150E81A8Small;
+    /* 0x7 */ u8 pad7;
+} Game113D60Event; // argument of func_151D8868
+
+/* Wrappers for small id tables in rodata that functions copy onto their stack: the original
+ * code used initialized local arrays, whose initializer data the asm rodata provides here. */
+typedef struct {
+    u8 ids[1];
+} Game113D60Ids1;
+
+typedef struct {
+    s32 ids[2];
+} Game113D60Ids2;
+
+typedef struct {
+    s32 ids[3];
+} Game113D60Ids3;
 
 extern Struct150E81A8Vec D_800A1290[];
 extern f32 D_800A1354;
@@ -65,7 +79,7 @@ extern f32 D_800A1360;
 extern f32 D_800A1364;
 extern void func_151D3FF4(Struct150E81A8Vec *arg0, u8 arg1, s32 arg2);
 extern void func_1514FCE8(Struct150E81A8 *arg0, u8 arg1, s32 arg2);
-extern void *func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
+extern void *func_151D8868(Game113D60Event *event, s32 arg1, s32 arg2, s32 arg3);
 extern s32 func_151337C0(f32 *arg0);
 
 typedef struct {
@@ -179,36 +193,6 @@ void func_150E68B0(s32 actor, s32 arg1, s32 arg2, u8 sourceIndex) {
         }
     }
 }
-
-typedef struct {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 ampX;
-    /* 0x0C */ f32 ampY;
-    /* 0x10 */ f32 phaseX;
-    /* 0x14 */ f32 phaseY;
-    /* 0x18 */ f32 speedX;
-    /* 0x1C */ f32 speedY;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 count;
-    /* 0x2C */ u8 unk2C[0xC];
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ s16 unk3C;
-    /* 0x3E */ s16 unk3E;
-    /* 0x40 */ u8 unk40;
-} Struct150E6B84Sub;
-
-typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x1B];
-    /* 0x28 */ u8 sub[0x24];
-    /* 0x4C */ f32 rate;
-    /* 0x50 */ f32 accum;
-} Struct150E6B84;
 
 extern f32 sinf(f32);
 extern void func_151436B4(f32, f32, f32, Vec3f *);
@@ -404,79 +388,30 @@ void func_150E71E4(Vec3f *start, Vec3f *end, Vec3f *delta, Game113D60Emission *e
 }
 
 typedef struct {
-    /* 0x0 */ f32 unk0;
-    /* 0x4 */ f32 unk4;
-} Struct150E75A0Pos;
+    /* 0x0 */ f32 x;
+    /* 0x4 */ f32 y;
+} Vec2f;
 
 typedef struct {
-    /* 0x0 */ s32 unk0[2];
-} Struct150E7290Tbl;
-
-extern Struct150E7290Tbl D_80088A5C;
-void func_150E75A0(Struct150E75A0Pos *arg0, f32 arg1, s16 arg2, u8 arg3, u8 arg4, u8 arg5, s16 arg6, s16 arg7, s32 arg8,
-                   s32 arg9, u8 argA, s32 argB);
-void func_150E76D0(f32 arg0, s16 arg1, u8 arg2, u8 arg3, u8 arg4, s16 arg5, s16 arg6, s32 arg7, s32 arg8, u8 arg9, s32 arg10);
-extern void func_15164F0C(u8, u8, void *, u8, s32);
-
-void func_150E7290(u8 arg0, u8 arg1, s32 arg2) {
-    Struct150E7290Tbl sp60;
-    Struct150E75A0Pos sp58;
-    Struct150E81A8Small sp50;
-    s32 sp4C;
-    u32 sp48;
-    u32 sp44;
-    u32 sp40;
-    f32 sp3C;
-
-    if (func_150ADA68() < 0.00419999985f) {
-        sp60 = D_80088A5C;
-        if (func_150ADA68() < 0.7500000596f) {
-            sp58.unk0 = (func_150ADA68() * 300.0f) + -150.0f;
-            sp58.unk4 = (func_150ADA68() * 200.0f) + -100.0f;
-            sp3C = func_150ADA68();
-            sp40 = func_150ADA20();
-            sp44 = (func_150ADA20() & 1) ? 2 : 0;
-            sp48 = (func_150ADA20() & 1) ? 4 : 0;
-            func_150E75A0(&sp58, ((sp3C * 150.0f) + 200.0f) * 0.1000000015f, (sp40 % 201) + 500, (u8)(sp48 | sp44) | 9,
-                          (func_150ADA20() % 26) + 100, 0xFF, 0x40, 3, (s32)&sp60, 2, arg1, arg2);
-        } else {
-            sp3C = func_150ADA68();
-            sp48 = func_150ADA20();
-            func_150E76D0(((sp3C * 100.0f) + 150.0f) * 0.1000000015f, (sp48 % 201) + 500, 9,
-                          (func_150ADA20() % 26) + 100, 0xFF, 0x40, 3, (s32)&sp60, 2, arg1, arg2);
-        }
-        func_10010F30(0x360, 0x7FFF, 0, 0, 0);
-        func_15164F0C(1, arg0, NULL, arg1, arg2);
-        sp50.unk0 = 1;
-        sp50.unk2 = (func_150ADA20() % 26) + 25;
-        sp50.unk5 = 1;
-        sp50.unk4 = (func_150ADA20() % 6) + 3;
-        sp50.unk6 = -1;
-        func_151D8868(&sp50, 0, 0xFF, 0);
-    }
-}
-
-typedef struct {
-    /* 0x00 */ f32 unk00;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ f32 unk08;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ u8  unk10;
-    /* 0x11 */ u8  pad11;
+    /* 0x00 */ Vec2f position;
+    /* 0x08 */ f32 sizeX;
+    /* 0x0C */ f32 sizeY;
+    /* 0x10 */ u8 unk10;
+    /* 0x11 */ u8 pad11;
     /* 0x12 */ s16 unk12;
-    /* 0x14 */ u16 unk14;
+    /* 0x14 */ u16 flags;
     /* 0x16 */ s16 unk16;
     /* 0x18 */ s16 unk18;
-    /* 0x1A */ u8  unk1A;
-    /* 0x1B */ u8  unk1B;
-    /* 0x1C */ u8  unk1C;
-    /* 0x1D */ u8  unk1D;
-    /* 0x1E */ u8  unk1E;
-    /* 0x1F */ u8  unk1F;
-    /* 0x20 */ u8  unk20;
-    /* 0x21 */ u8  unk21;
-    /* 0x22 */ u8  unk22;
-    /* 0x23 */ u8  unk23;
+    /* 0x1A */ u8 unk1A;
+    /* 0x1B */ u8 unk1B;
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 unk1D;
+    /* 0x1E */ u8 unk1E;
+    /* 0x1F */ u8 unk1F;
+    /* 0x20 */ u8 unk20;
+    /* 0x21 */ u8 unk21;
+    /* 0x22 */ u8 unk22;
+    /* 0x23 */ u8 unk23;
     /* 0x24 */ s32 unk24;
     /* 0x28 */ s32 unk28;
     /* 0x2C */ s32 unk2C;
@@ -484,116 +419,155 @@ typedef struct {
     /* 0x34 */ s32 unk34;
     /* 0x38 */ s32 unk38;
     /* 0x3C */ s32 unk3C;
-    /* 0x40 */ u8  unk40;
-    /* 0x41 */ u8  unk41;
-    /* 0x42 */ u8  pad42[2];
-    /* 0x44 */ u8  unk44;
-    /* 0x45 */ u8  pad45[3];
+    /* 0x40 */ u8 unk40;
+    /* 0x41 */ u8 unk41;
+    /* 0x42 */ u8 pad42[2];
+    /* 0x44 */ u8 unk44;
+    /* 0x45 */ u8 pad45[3];
     /* 0x48 */ f32 unk48;
     /* 0x4C */ f32 unk4C;
     /* 0x50 */ f32 unk50;
     /* 0x54 */ f32 unk54;
     /* 0x58 */ f32 unk58;
-} Struct150E76D0;
+} Struct1515548CArg; // first argument of func_1515548C
 
-typedef struct {
-    /* 0x0 */ s32 unk0[3];
-} Struct150E76D0Tbl;
+extern Game113D60Ids2 D_80088A5C;
+extern Game113D60Ids1 D_80088A64;
+extern Game113D60Ids3 D_80088A68;
+extern Game113D60Ids3 D_80088A74;
+extern void *func_1515548C(Struct1515548CArg *, s32, s32 *, s32, s32, u8, s32);
+extern void func_15164F0C(u8, u8, void *, u8, s32);
+void func_150E75A0(Vec2f *position, f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16, s16 unk18, s32 *ids,
+                   s32 idCount, u8 owner, s32 kind);
+void func_150E76D0(f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16, s16 unk18, s32 *ids, s32 idCount,
+                   u8 owner, s32 kind);
 
-extern Struct150E76D0Tbl D_80088A68;
-extern Struct150E76D0Tbl D_80088A74;
-extern void *func_1515548C(Struct150E76D0 *, s32, s32, s32, s32, u8, s32);
+/* Occasionally spawns one of the two func_1515548C effects, plus a sound and an event. */
+void func_150E7290(u8 arg0, u8 owner, s32 kind) {
+    Game113D60Ids2 ids;
+    Vec2f position;
+    Game113D60Event event;
+    s32 unused;
+    u32 flip4;
+    u32 flip2;
+    u32 random;
+    f32 randomSize;
 
-typedef struct {
-    /* 0x0 */ u8 unk0[1];
-} Struct150E75A0Tbl;
-
-extern Struct150E75A0Tbl D_80088A64;
-
-void func_150E75A0(Struct150E75A0Pos *arg0, f32 arg1, s16 arg2, u8 arg3, u8 arg4, u8 arg5, s16 arg6, s16 arg7, s32 arg8,
-                   s32 arg9, u8 argA, s32 argB) {
-    Struct150E76D0 sp2C;
-    Struct150E75A0Tbl sp28;
-
-    sp28 = D_80088A64;
-    *(Struct150E75A0Pos *)&sp2C.unk00 = *arg0;
-    sp2C.unk08 = arg1;
-    sp2C.unk0C = arg1;
-    sp2C.unk10 = sp28.unk0[0];
-    sp2C.unk12 = arg2;
-    sp2C.unk14 = arg3 | 0x40;
-    sp2C.unk16 = arg6;
-    sp2C.unk18 = arg7;
-    sp2C.unk1A = 4;
-    sp2C.unk1B = 0xFF;
-    sp2C.unk1C = 0xE6;
-    sp2C.unk1D = 0xBE;
-    sp2C.unk1E = arg4;
-    sp2C.unk1F = 0xFF;
-    sp2C.unk20 = 0xFF;
-    sp2C.unk21 = 0xFF;
-    sp2C.unk22 = 0xFF;
-    sp2C.unk23 = arg5;
-    sp2C.unk24 = 1;
-    sp2C.unk28 = 0;
-    sp2C.unk2C = 0;
-    sp2C.unk40 = 0;
-    sp2C.unk41 = 0xA;
-    sp2C.unk30 = 7;
-    sp2C.unk34 = 0x3C;
-    sp2C.unk38 = 0x80;
-    sp2C.unk3C = 0x20;
-    func_1515548C(&sp2C, 0, arg8, arg9, 0, argA, argB);
+    if (func_150ADA68() < 0.00419999985f) {
+        ids = D_80088A5C;
+        if (func_150ADA68() < 0.7500000596f) {
+            position.x = (func_150ADA68() * 300.0f) + -150.0f;
+            position.y = (func_150ADA68() * 200.0f) + -100.0f;
+            randomSize = func_150ADA68();
+            random = func_150ADA20();
+            flip2 = (func_150ADA20() & 1) ? 2 : 0;
+            flip4 = (func_150ADA20() & 1) ? 4 : 0;
+            func_150E75A0(&position, ((randomSize * 150.0f) + 200.0f) * 0.1f, (random % 201) + 500,
+                          (u8)(flip4 | flip2) | 9, (func_150ADA20() % 26) + 100, 0xFF, 0x40, 3, ids.ids, 2, owner,
+                          kind);
+        } else {
+            randomSize = func_150ADA68();
+            flip4 = func_150ADA20();
+            func_150E76D0(((randomSize * 100.0f) + 150.0f) * 0.1f, (flip4 % 201) + 500, 9,
+                          (func_150ADA20() % 26) + 100, 0xFF, 0x40, 3, ids.ids, 2, owner, kind);
+        }
+        func_10010F30(0x360, 0x7FFF, 0, 0, 0);
+        func_15164F0C(1, arg0, NULL, owner, kind);
+        event.type = 1;
+        event.duration = (func_150ADA20() % 26) + 25;
+        event.unk5 = 1;
+        event.unk4 = (func_150ADA20() % 6) + 3;
+        event.unk6 = -1;
+        func_151D8868(&event, 0, 0xFF, 0);
+    }
 }
 
-void func_150E76D0(f32 arg0, s16 arg1, u8 arg2, u8 arg3, u8 arg4, s16 arg5, s16 arg6, s32 arg7, s32 arg8, u8 arg9, s32 arg10) {
-    Struct150E76D0 sp54;
-    u8 sp53;
+void func_150E75A0(Vec2f *position, f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16, s16 unk18, s32 *ids,
+                   s32 idCount, u8 owner, s32 kind) {
+    Struct1515548CArg arg;
+    Game113D60Ids1 id;
 
-    sp53 = func_150ADA20() & 3;
+    id = D_80088A64;
+    arg.position = *position;
+    arg.sizeX = size;
+    arg.sizeY = size;
+    arg.unk10 = id.ids[0];
+    arg.unk12 = unk12;
+    arg.flags = flags | 0x40;
+    arg.unk16 = unk16;
+    arg.unk18 = unk18;
+    arg.unk1A = 4;
+    arg.unk1B = 0xFF;
+    arg.unk1C = 0xE6;
+    arg.unk1D = 0xBE;
+    arg.unk1E = unk1E;
+    arg.unk1F = 0xFF;
+    arg.unk20 = 0xFF;
+    arg.unk21 = 0xFF;
+    arg.unk22 = 0xFF;
+    arg.unk23 = unk23;
+    arg.unk24 = 1;
+    arg.unk28 = 0;
+    arg.unk2C = 0;
+    arg.unk40 = 0;
+    arg.unk41 = 10;
+    arg.unk30 = 7;
+    arg.unk34 = 60;
+    arg.unk38 = 0x80;
+    arg.unk3C = 0x20;
+    func_1515548C(&arg, 0, ids, idCount, 0, owner, kind);
+}
 
-    sp54.unk12 = arg1;
-    sp54.unk14 = arg2 & 0xFFF9;
-    sp54.unk16 = arg5;
-    sp54.unk18 = arg6;
-    sp54.unk1A = 5;
-    sp54.unk1B = 0xFF;
-    sp54.unk1C = 0xE6;
-    sp54.unk1D = 0xBE;
-    sp54.unk1E = arg3;
-    sp54.unk1F = 0xFF;
-    sp54.unk20 = 0xFF;
-    sp54.unk21 = 0xFF;
-    sp54.unk22 = 0xFF;
-    sp54.unk23 = arg4;
-    sp54.unk24 = 1;
-    sp54.unk28 = 0;
-    sp54.unk2C = 0;
-    sp54.unk40 = 0;
-    sp54.unk41 = 0xA;
-    sp54.unk30 = 7;
-    sp54.unk34 = 0x3C;
-    sp54.unk38 = 0x80;
-    sp54.unk3C = 0x20;
-    sp54.unk0C = arg0;
-    sp54.unk08 = arg0;
+/* Like func_150E75A0, but enters from a random screen edge. */
+void func_150E76D0(f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16, s16 unk18, s32 *ids, s32 idCount,
+                   u8 owner, s32 kind) {
+    Struct1515548CArg arg;
+    u8 edge;
 
-    switch (sp53) {
+    edge = func_150ADA20() & 3;
+
+    arg.unk12 = unk12;
+    arg.flags = flags & 0xFFF9;
+    arg.unk16 = unk16;
+    arg.unk18 = unk18;
+    arg.unk1A = 5;
+    arg.unk1B = 0xFF;
+    arg.unk1C = 0xE6;
+    arg.unk1D = 0xBE;
+    arg.unk1E = unk1E;
+    arg.unk1F = 0xFF;
+    arg.unk20 = 0xFF;
+    arg.unk21 = 0xFF;
+    arg.unk22 = 0xFF;
+    arg.unk23 = unk23;
+    arg.unk24 = 1;
+    arg.unk28 = 0;
+    arg.unk2C = 0;
+    arg.unk40 = 0;
+    arg.unk41 = 10;
+    arg.unk30 = 7;
+    arg.unk34 = 60;
+    arg.unk38 = 0x80;
+    arg.unk3C = 0x20;
+    arg.sizeY = size;
+    arg.sizeX = size;
+
+    switch (edge) {
     case 0:
     case 1:
         {
-            Struct150E76D0Tbl sp44;
+            Game113D60Ids3 sideIds;
 
-            sp44 = D_80088A68;
-            sp54.unk10 = sp44.unk0[(u32)func_150ADA20() % 3];
-            sp54.unk04 = (func_150ADA68() * 160.0f) + -80.0f;
-            switch (sp53) {
+            sideIds = D_80088A68;
+            arg.unk10 = sideIds.ids[func_150ADA20() % 3];
+            arg.position.y = (func_150ADA68() * 160.0f) + -80.0f;
+            switch (edge) {
             case 0:
-                sp54.unk14 |= 2;
-                sp54.unk00 = 145.0f - arg0;
+                arg.flags |= 2;
+                arg.position.x = 145.0f - size;
                 break;
             case 1:
-                sp54.unk00 = arg0 - 145.0f;
+                arg.position.x = size - 145.0f;
                 break;
             }
         }
@@ -601,138 +575,135 @@ void func_150E76D0(f32 arg0, s16 arg1, u8 arg2, u8 arg3, u8 arg4, s16 arg5, s16 
     case 2:
     case 3:
         {
-            Struct150E76D0Tbl sp38;
+            Game113D60Ids3 topIds;
 
-            sp38 = D_80088A74;
-            sp54.unk10 = sp38.unk0[(u32)func_150ADA20() % 3];
-            sp54.unk00 = (func_150ADA68() * 260.0f) + -130.0f;
-            switch (sp53) {
+            topIds = D_80088A74;
+            arg.unk10 = topIds.ids[func_150ADA20() % 3];
+            arg.position.x = (func_150ADA68() * 260.0f) + -130.0f;
+            switch (edge) {
             case 2:
-                sp54.unk14 |= 4;
-                sp54.unk04 = 110.0f - arg0;
+                arg.flags |= 4;
+                arg.position.y = 110.0f - size;
                 break;
             case 3:
-                sp54.unk04 = arg0 - 110.0f;
+                arg.position.y = size - 110.0f;
                 break;
             }
         }
         break;
     }
 
-    func_1515548C(&sp54, 0, arg7, arg8, 0, arg9, arg10);
-}
-
-typedef struct {
-    /* 0x0 */ f32 unk0;
-    /* 0x4 */ f32 unk4;
-    /* 0x8 */ s16 unk8;
-    /* 0xA */ s16 unkA;
-} Struct150E7994;
-
-extern f32 func_15142A80(f32);
-extern f32 func_15142AC0(f32);
-extern f32 func_15142B04(f32);
-extern f32 func_15142B44(f32);
-
-struct260 *func_150E7994(s16 arg0, f32 arg1, u8 arg2, s32 arg3) {
-    struct260 *obj;
-    Struct150E7994 spB8;
-    Struct150E81A8Small spB0;
-    f32 sp90[8];
-    f32 *out;
-    f32 t;
-    f32 step;
-    s16 i;
-
-    if (arg0 < 2) {
-        return NULL;
-    }
-
-    func_1512D748(&D_800DBFF0[D_800BE9E8], 0, 1);
-
-    spB0.unk0 = 1;
-    spB0.unk2 = (func_150ADA20() % 0xBU) + 0x1E;
-    spB0.unk4 = 8;
-    spB0.unk6 = -1;
-    spB0.unk5 = 1;
-    func_151D8868(&spB0, 0, 0xFF, 0);
-
-    spB8.unk0 = arg1;
-    spB8.unk4 = 0.0f;
-    spB8.unk8 = arg0;
-    spB8.unkA = 0;
-
-    obj = func_151491F4(0x12C, -1, 0x10, 1, 0xC, (arg0 * 8) + 0x10, arg2, arg3);
-    if (obj != NULL) {
-        memcpy((void *)((s32)obj + 0x28), &spB8, 0xC);
-
-        sp90[0] = -146.0f;
-        sp90[1] = (func_150ADA68() * 160.0f) - 80.0f;
-        sp90[2] = -50.0f;
-        sp90[3] = (func_150ADA68() * 160.0f) - 80.0f;
-        sp90[4] = 50.0f;
-        sp90[5] = (func_150ADA68() * 160.0f) - 80.0f;
-        sp90[6] = 146.0f;
-        sp90[7] = (func_150ADA68() * 160.0f) - 80.0f;
-
-        t = -1.0f;
-        out = (f32 *)((s32)obj + 0x38);
-        step = 3.0f / (f32)(arg0 - 1);
-
-        for (i = 0; i < arg0; i++) {
-            out[i * 2] = (func_15142A80(t) * sp90[0]) + (func_15142AC0(t) * sp90[2]) + (func_15142B04(t) * sp90[4]) + (func_15142B44(t) * sp90[6]);
-            out[(i * 2) + 1] = (func_15142A80(t) * sp90[1]) + (func_15142AC0(t) * sp90[3]) + (func_15142B04(t) * sp90[5]) + (func_15142B44(t) * sp90[7]);
-            t += step;
-        }
-    }
-    return obj;
+    func_1515548C(&arg, 0, ids, idCount, 0, owner, kind);
 }
 
 typedef struct {
     /* 0x00 */ f32 rate;
     /* 0x04 */ f32 accum;
     /* 0x08 */ s16 count;
-    /* 0x0A */ s16 idx;
-    /* 0x0C */ s32 pad0C;
-    /* 0x10 */ Struct150E75A0Pos pts[1];
-} Struct150E7C9CData;
+    /* 0x0A */ s16 next;
+} Game113D60BurstHead;
 
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 unkE;
-    /* 0x10 */ u8 pad10[0x18];
-    /* 0x28 */ Struct150E7C9CData data;
-} Struct150E7C9C;
+    /* 0x00 */ Game113D60BurstHead head;
+    /* 0x0C */ s32 pad0C;
+    /* 0x10 */ f32 points[2]; // `head.count` interleaved x, y pairs
+} Game113D60Burst;
 
-void func_150E7C9C(Struct150E7C9C *arg0) {
+typedef struct {
+    /* 0x00 */ Game113D60EffectHeader header;
+    /* 0x28 */ Game113D60Burst burst;
+} Game113D60BurstEffect;
+
+extern f32 func_15142A80(f32);
+extern f32 func_15142AC0(f32);
+extern f32 func_15142B04(f32);
+extern f32 func_15142B44(f32);
+
+/* Creates a burst effect (updated by func_150E7C9C) whose `count` points lie on a random
+ * curve across the screen. */
+struct260 *func_150E7994(s16 count, f32 rate, u8 owner, s32 kind) {
+    struct260 *obj;
+    Game113D60BurstHead head;
+    Game113D60Event event;
+    Vec2f control[4];
+    f32 *points;
+    f32 t;
+    f32 step;
+    s16 i;
+
+    if (count < 2) {
+        return NULL;
+    }
+
+    func_1512D748(&D_800DBFF0[D_800BE9E8], 0, 1);
+
+    event.type = 1;
+    event.duration = (func_150ADA20() % 11) + 30;
+    event.unk4 = 8;
+    event.unk6 = -1;
+    event.unk5 = 1;
+    func_151D8868(&event, 0, 0xFF, 0);
+
+    head.rate = rate;
+    head.accum = 0.0f;
+    head.count = count;
+    head.next = 0;
+
+    obj = func_151491F4(300, -1, 16, 1, 12, (count * sizeof(Vec2f)) + 0x10, owner, kind);
+    if (obj != NULL) {
+        memcpy(&((Game113D60BurstEffect *)obj)->burst.head, &head, sizeof(head));
+
+        control[0].x = -146.0f;
+        control[0].y = (func_150ADA68() * 160.0f) - 80.0f;
+        control[1].x = -50.0f;
+        control[1].y = (func_150ADA68() * 160.0f) - 80.0f;
+        control[2].x = 50.0f;
+        control[2].y = (func_150ADA68() * 160.0f) - 80.0f;
+        control[3].x = 146.0f;
+        control[3].y = (func_150ADA68() * 160.0f) - 80.0f;
+
+        t = -1.0f;
+        points = ((Game113D60BurstEffect *)obj)->burst.points;
+        step = 3.0f / (f32)(count - 1);
+
+        for (i = 0; i < count; i++) {
+            points[i * 2] = (func_15142A80(t) * control[0].x) + (func_15142AC0(t) * control[1].x) +
+                          (func_15142B04(t) * control[2].x) + (func_15142B44(t) * control[3].x);
+            points[(i * 2) + 1] = (func_15142A80(t) * control[0].y) + (func_15142AC0(t) * control[1].y) +
+                          (func_15142B04(t) * control[2].y) + (func_15142B44(t) * control[3].y);
+            t += step;
+        }
+    }
+    return obj;
+}
+
+/* Spawns the burst's next points, `rate` per frame, and ends the effect after the last one. */
+void func_150E7C9C(Game113D60BurstEffect *effect) {
     s32 pad1;
     s32 pad2;
-    Struct150E75A0Pos pos;
-    f32 t;
-    s32 b2;
-    s32 b4;
-    Struct150E7C9CData *p;
+    Vec2f position;
+    f32 randomSize;
+    s32 flip2;
+    s32 flip4;
+    Game113D60Burst *burst;
 
-    p = &arg0->data;
-    p->accum += p->rate * D_800BE9A4;
-    while ((p->accum > 1.0f) && (p->idx != p->count)) {
-        pos.unk0 = ((f32*)p->pts)[p->idx * 2];
-        pos.unk4 = ((f32*)p->pts)[p->idx * 2 + 1];
-        t = func_150ADA68();
-        b4 = (func_150ADA20() & 1) ? 4 : 0;
-        b2 = (func_150ADA20() & 1) ? 2 : 0;
-        func_150E75A0(&pos, (t * 12.0f) + 30.0f, 0x12C, (u8)(b2 | b4), (func_150ADA68() * 25.0f) + 100.0f, 0xFF, 1, 0xFF,
-                      0, 0, arg0->unkC, arg0->unk1);
-        func_10010F30(0x360, 0x7FFF, (pos.unk0 * 0.4315068424f) + 64.0f, 0, 0);
-        p->idx++;
-        p->accum -= 1.0f;
+    burst = &effect->burst;
+    burst->head.accum += burst->head.rate * D_800BE9A4;
+    while ((burst->head.accum > 1.0f) && (burst->head.next != burst->head.count)) {
+        position.x = burst->points[burst->head.next * 2];
+        position.y = burst->points[burst->head.next * 2 + 1];
+        randomSize = func_150ADA68();
+        flip4 = (func_150ADA20() & 1) ? 4 : 0;
+        flip2 = (func_150ADA20() & 1) ? 2 : 0;
+        func_150E75A0(&position, (randomSize * 12.0f) + 30.0f, 300, (u8)(flip2 | flip4),
+                      (func_150ADA68() * 25.0f) + 100.0f, 0xFF, 1, 0xFF, NULL, 0, effect->header.owner,
+                      effect->header.kind);
+        func_10010F30(0x360, 0x7FFF, (position.x * 0.4315068424f) + 64.0f, 0, 0);
+        burst->head.next++;
+        burst->head.accum -= 1.0f;
     }
-    if (p->idx >= p->count) {
-        arg0->unkE = -1;
+    if (burst->head.next >= burst->head.count) {
+        effect->header.unkE = -1;
     }
 }
 
@@ -794,7 +765,7 @@ void func_150E7FEC(f32 arg0, u8 arg1, s32 arg2, f32 *arg3, s16 arg4, u8 arg5, u8
 void func_150E81A8(u8 arg0, s32 arg1, s32 arg2) {
     Struct150E81A8Vec sp84;
     Struct150E81A8 sp28;
-    Struct150E81A8Small sp20;
+    Game113D60Event sp20;
 
     if (arg0 == 4 || arg0 == 5 || arg0 == 6 || arg0 == 7) {
         sp84 = D_800A1290[arg0];
@@ -830,8 +801,8 @@ void func_150E81A8(u8 arg0, s32 arg1, s32 arg2) {
 
         func_1514FCE8(&sp28, ((u8 *)&arg1)[3], arg2);
 
-        sp20.unk0 = 1;
-        sp20.unk2 = (func_150ADA20() % 0xBU) + 0x1E;
+        sp20.type = 1;
+        sp20.duration = (func_150ADA20() % 0xBU) + 0x1E;
         sp20.unk4 = 8;
         sp20.unk6 = -1;
         sp20.unk5 = 1;
@@ -1013,53 +984,33 @@ void func_150E88C0(void *arg0) {
     }
 }
 
-typedef struct Game115D70Pair {
-    s32 first;
-    s32 second;
-} Game115D70Pair;
-
-typedef struct Game115D70Spawn {
-    s8 active;
-    u8 pad1;
-    s16 duration;
-    s8 size;
-    s8 enabled;
-    s8 sentinel;
-    u8 pad7;
-} Game115D70Spawn;
-
-extern Game115D70Pair D_80088A80;
+extern Game113D60Ids2 D_80088A80;
 extern u8 D_800BE9EB;
 extern void func_15164F0C(u8, u8, void *, u8, s32);
 void func_150E8A80(void);
 void func_150E90DC(void);
 
 void func_150E8930(void) {
-    Game115D70Pair sp30;
-    Game115D70Spawn sp28;
-    s32 active;
+    Game113D60Ids2 ids;
+    Game113D60Event event;
 
-    sp30 = D_80088A80;
-    func_15169260(&sp30, 2, 0, 0x1B);
-    func_15164F0C(0, D_800BE9EB, 0, 0xFF, 1);
-    sp28.active = 1;
-    sp28.duration = (func_150ADA20() % 21U) + 0x14;
-    sp28.enabled = 1;
-    sp28.size = (func_150ADA20() % 6U) + 3;
-    sp28.sentinel = -1;
-    func_151D8868(&sp28, 0, 0xFF, 1);
-    active = D_800DCDC4;
-    if (active != 0) {
+    ids = D_80088A80;
+    func_15169260(&ids, 2, 0, 0x1B);
+    func_15164F0C(0, D_800BE9EB, NULL, 0xFF, 1);
+    event.type = 1;
+    event.duration = (func_150ADA20() % 21) + 20;
+    event.unk5 = 1;
+    event.unk4 = (func_150ADA20() % 6) + 3;
+    event.unk6 = -1;
+    func_151D8868(&event, 0, 0xFF, 1);
+    if (D_800DCDC4 != 0) {
         func_150E8A80();
-        active = D_800DCDC4;
     }
-    if (active != 0) {
+    if (D_800DCDC4 != 0) {
         func_150E90DC();
     }
-    func_10010F30(0x4C8, 0x7FFF, 0x40,
-                   (s16)(0x200 - (func_150ADA20() & 0x400)), 0);
-    func_10010F30(0x4CD, 0x5DC0, 0x40,
-                   (s16)(0x200 - (func_150ADA20() & 0x400)), 0);
+    func_10010F30(0x4C8, 0x7FFF, 0x40, 0x200 - (func_150ADA20() & 0x400), 0);
+    func_10010F30(0x4CD, 0x5DC0, 0x40, 0x200 - (func_150ADA20() & 0x400), 0);
 }
 
 extern f32 D_800A137C;
