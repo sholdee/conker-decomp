@@ -1,20 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
-/* variables.h gets these types wrong, so they are shadowed here: the text-box globals below are pointers and
-   a struct, not s32 / s32[12]. */
-#define D_800D1944 D_800D1944_s32_decl_in_variables_h
-#define D_800D1948 D_800D1948_s32_decl_in_variables_h
-#define D_800D194C D_800D194C_s32_decl_in_variables_h
-#define D_800D1950 D_800D1950_s32_decl_in_variables_h
-#define D_800D1958 D_800D1958_array_decl_in_variables_h
-#define D_800D1998 D_800D1998_s32_decl_in_variables_h
 #include "variables.h"
-#undef D_800D1944
-#undef D_800D1948
-#undef D_800D194C
-#undef D_800D1950
-#undef D_800D1958
-#undef D_800D1998
 
 /* Byte-wide character in a text resource that separates two pages (see func_1516A770). */
 #define TEXT_PAGE_BREAK 0xBD
@@ -22,52 +8,13 @@
 /* Tests bit n of a byte-array bit set. */
 #define BIT_IS_SET(bits, n) ((bits)[(n) >> 3] & (1 << ((n) & 7)))
 
-/* Text resource loaded by func_1502B6BC: the text, then the sound effects voiced one per word. */
-typedef struct {
-    /* 0x0 */ char *text;
-    /* 0x4 */ s32 unk4;
-    /* 0x8 */ u16 *sounds;
-    /* 0xC */ u32 soundsSize; /* in bytes */
-} TextResource;
-
-/* Text-box description passed to func_1516A7B0 (cleared as 48 bytes in game_439B0.c). */
-typedef struct {
-    /* 0x00 */ s32 flags;
-    /* 0x04 */ char *text;
-    /* 0x08 */ u8 unk8;
-    /* 0x09 */ u8 pad9[0xF];
-    /* 0x18 */ f32 *unk18;
-    /* 0x1C */ f32 *unk1C;
-    /* 0x20 */ f32 *unk20;
-    /* 0x24 */ s16 unk24;
-    /* 0x26 */ s16 unk26;
-    /* 0x28 */ u8 unk28;
-    /* 0x29 */ u8 unk29;
-    /* 0x2A */ u8 unk2A;
-    /* 0x2B */ u8 unk2B;
-    /* 0x2C */ void (*callback)(s32, s32, s32); /* filled in by func_1516A7B0 */
-} TextBoxDesc;
-
-/* Text box returned by func_1516A7B0 (Struct1516A7B0 in game_197C20.c). */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x14];
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15; /* cleared when the box has closed */
-} TextBox;
-
-extern TextResource *D_800D1944;  /* current text */
-extern TextResource *D_800D1948;  /* header text prepended to it, or NULL */
-extern u8 *D_800D194C;            /* header + page break + current text */
-extern TextBox *D_800D1950;       /* open text box */
-extern TextBoxDesc D_800D1958;
-extern u16 *D_800D1998;           /* sound effects voiced while the text types out */
 extern TriggerZone *D_800D199C;   /* zone to disable once the text box closes */
 extern u8 D_800BE580[];           /* bit set over text ids */
 extern u8 D_800D2E40;
 
 TextResource *func_1502B6BC(s32, s32, s32, s32, s32, s32, s32);
 void *allocate_memory(s32, s32, s32, s32);
-TextBox *func_1516A7B0(s32, s32, s32, void (*)(s32, s32, s32), TextBoxDesc *, s32);
+TextBox *func_1516A7B0(s32, s32, s32, void (*)(s32, s32, s32), TextBoxConfig *, s32);
 void func_1516D2E0(TextBox *);
 void func_10004074(void *);
 void func_151F2D6C(s32, s32);
@@ -155,7 +102,7 @@ void func_15080784(void) {
     }
 }
 
-/* Text-box callback (TextBoxDesc.callback): voices the next sound effect on event 0x20. */
+/* Text-box callback (TextBoxConfig.callback): voices the next sound effect on event 0x20. */
 void func_150807F4(s32 arg0, s32 arg1, s32 event) {
     if (event == 0x20) {
         func_15080784();
@@ -222,17 +169,17 @@ void func_15080828(s32 arg0) {
         if (arg0 || D_800D1940 == 0x42) {
             D_800D1958.flags |= 0x80;
         }
-        D_800D1958.text = text;
-        D_800D1958.unk26 = 100;
-        D_800D1958.unk8 = 1;
+        D_800D1958.text = (s32)text;
+        D_800D1958.duration = 100;
+        D_800D1958.numPages = 1;
         D_800D1958.unk24 = 0;
         D_800D1958.unk2B = 0;
-        D_800D1958.unk18 = &D_800D1988;
-        D_800D1958.unk1C = &D_800D198C;
-        D_800D1958.unk20 = &D_800D1990;
-        D_800D1958.unk28 = 0xFF;
-        D_800D1958.unk29 = 0xFF;
-        D_800D1958.unk2A = 0xFF;
+        D_800D1958.screenXPercent = &D_800D1988;
+        D_800D1958.screenYPercent = &D_800D198C;
+        D_800D1958.anglePercent = &D_800D1990;
+        D_800D1958.r = 0xFF;
+        D_800D1958.g = 0xFF;
+        D_800D1958.b = 0xFF;
         D_800D1988 = 78.0f;
         D_800D198C = 48.0f;
         D_800D1990 = 9.0f;
@@ -260,7 +207,7 @@ void func_15080BE8(void) {
 
 /* Per frame: once the open text box has closed, frees it and disables the zone that showed it. */
 void func_15080C64(void) {
-    if (D_800D1941 && D_800D1950->unk15 == 0) {
+    if (D_800D1941 && D_800D1950->state == 0) {
         func_15080BE8();
         if (D_800BE9F0 != 0x29 && D_800BE9F0 != 0x2E) {
             D_800D2E60[8] |= 0x10;

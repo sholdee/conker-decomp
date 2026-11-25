@@ -2562,7 +2562,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
             }
             arg0->disable_run = 0xFF;
             arg0->unk83 = 0xFF;
-        } else if ((arg0->unk84.uh != 0x12C) && (D_800BE710[D_800C3E78] & 0x8000) && (!(D_800D1958[0] & 0x20) || (func_151F2CDC() == 0))) {
+        } else if ((arg0->unk84.uh != 0x12C) && (D_800BE710[D_800C3E78] & 0x8000) && (!(D_800D1958.flags & 0x20) || (func_151F2CDC() == 0))) {
             anim = 0x142;
         }
         break;

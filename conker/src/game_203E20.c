@@ -9,7 +9,7 @@ extern Gfx *func_15133EEC(Gfx *gfx, u16 index, u8 segment, s32 arg3);
 extern u32 D_80083740[];
 extern u32 D_800838C0[];
 
-/* Text box data (same layout as TextBox in game_FC5F0.c). */
+/* Text box data (same layout as TextLines in game_FC5F0.c). */
 typedef struct {
     /* 0x00 */ u8 id;
     /* 0x01 */ u8 pad1[3];
@@ -26,13 +26,13 @@ typedef struct {
     /* 0x24 */ s8 updateFn; // index into D_800888A0, or -1
     /* 0x25 */ u8 msgFn; // index into D_800888B0
     /* 0x26 */ u8 pad26[2];
-} TextBox;
+} TextLines;
 
 /* Text box object created by func_150CFF10 (same layout as TextObj in game_FC5F0.c). */
 typedef struct {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8 pad10[0x18];
-    /* 0x28 */ TextBox text;
+    /* 0x28 */ TextLines text;
 } TextObj;
 
 /* Style 3 text box state: an amount shown as "$ %d" that fades out with its owner. */

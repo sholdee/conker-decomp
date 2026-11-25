@@ -1037,17 +1037,17 @@ extern u8  D_800D18D0;
 
 extern u8  D_800D1940;
 extern u8  D_800D1941;
-extern s32 D_800D1944;
-extern s32 D_800D1948;
-extern s32 D_800D194C;
-extern s32 D_800D1950;
-extern s32 D_800D1958[12]; // 48 bytes long, struct?
+extern TextResource *D_800D1944; // current text
+extern TextResource *D_800D1948; // header text prepended to it, or NULL
+extern u8 *D_800D194C; // header + page break + current text
+extern TextBox *D_800D1950; // open text box
+extern TextBoxConfig D_800D1958;
 extern f32 D_800D1988;
 extern f32 D_800D198C;
 extern f32 D_800D1990;
 extern u8  D_800D1994;
 extern u8  D_800D1995;
-extern s32 D_800D1998;
+extern u16 *D_800D1998; // sound effects voiced while the text types out
 
 extern u8 *D_800D19A0[187]; // per model id: model data (just past its header)
 extern struct124 *D_800D1C90[187]; // 748 bytes, 187 pointers? 17 structs?

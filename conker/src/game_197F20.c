@@ -29,69 +29,6 @@ typedef struct {
     s32 unk4;
 } MessageEntry;
 
-/* Text box setup: a message-table entry, or one supplied by the caller (see func_1516A7B0). */
-typedef struct TextBoxConfig {
-    /* 0x00 */ s32 flags;
-    /* 0x04 */ s32 text;            /* message table index, or the string itself when supplied */
-    /* 0x08 */ u8 numPages;         /* strings in the text, separated by NULs */
-    /* 0x09 */ u8 objIndex;         /* D_800CC2D0 object the box belongs to */
-    /* 0x0A */ u8 unkA;
-    /* 0x0B */ u8 padB;
-    /* 0x0C */ f32 worldX;          /* projected to screen when not TEXTBOX_SCREEN_POS */
-    /* 0x10 */ f32 worldY;
-    /* 0x14 */ f32 worldZ;
-    /* 0x18 */ f32 *screenXPercent; /* TEXTBOX_SCREEN_POS placement */
-    /* 0x1C */ f32 *screenYPercent;
-    /* 0x20 */ f32 *anglePercent;
-    /* 0x24 */ u8 pad24[2];
-    /* 0x26 */ u16 duration;
-    /* 0x28 */ u8 r;
-    /* 0x29 */ u8 g;
-    /* 0x2A */ u8 b;
-    /* 0x2B */ u8 unk2B;            /* box is removed unless D_800C35EA == 1 */
-    /* 0x2C */ void (*callback)(struct TextBoxConfig *config, s32 page, s32 state);
-} TextBoxConfig;
-
-/* Object type OBJTYPE_TEXTBOX, 0x74 bytes. */
-typedef struct {
-    /* 0x00 */ u8 type;
-    /* 0x01 */ u8 pad1[0xC];
-    /* 0x0D */ u8 source;           /* 0: D_800DD254 text, 1: D_800DD258 text, 2: caller string */
-    /* 0x0E */ u8 visible;
-    /* 0x0F */ u8 unkF;
-    /* 0x10 */ TextBoxConfig *config;
-    /* 0x14 */ u8 unk14;            /* set for caller-supplied configs; disables button input */
-    /* 0x15 */ u8 state;            /* TEXTBOX_STATE_* */
-    /* 0x16 */ s16 timer;
-    /* 0x18 */ s16 fadeTimer;
-    /* 0x1A */ u8 textAlpha;
-    /* 0x1B */ u8 bubbleAlpha[3];
-    /* 0x1E */ u8 bubbleIndex;
-    /* 0x1F */ u8 placed;           /* screen position taken from the world point */
-    /* 0x20 */ s8 page;
-    /* 0x21 */ u8 pad21[3];
-    /* 0x24 */ u8 *text;            /* current page */
-    /* 0x28 */ f32 scale;
-    /* 0x2C */ f32 scaleSpeed;
-    /* 0x30 */ f32 halfTextWidth;
-    /* 0x34 */ f32 halfTextHeight;
-    /* 0x38 */ f32 width;
-    /* 0x3C */ f32 height;
-    /* 0x40 */ f32 x;               /* anchor (tip of the tail) */
-    /* 0x44 */ f32 y;
-    /* 0x48 */ f32 bodyX;           /* scaled body position */
-    /* 0x4C */ f32 bodyY;
-    /* 0x50 */ f32 centerX;         /* unscaled body position: the text origin */
-    /* 0x54 */ f32 centerY;
-    /* 0x58 */ f32 angle;           /* direction from the anchor to the body, radians */
-    /* 0x5C */ f32 anchorX;
-    /* 0x60 */ f32 anchorY;
-    /* 0x64 */ f32 baseX;
-    /* 0x68 */ f32 baseY;
-    /* 0x6C */ f32 yaw;             /* object heading relative to the camera, degrees */
-    /* 0x70 */ f32 bubbleX;
-} TextBox;
-
 /* TextBox.state */
 #define TEXTBOX_STATE_INIT      0x1
 #define TEXTBOX_STATE_GROW      0x2

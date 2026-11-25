@@ -396,17 +396,17 @@ typedef struct {
     /* 0x24 */ s8 updateFn; // index into D_800888A0, or -1
     /* 0x25 */ u8 msgFn; // index into D_800888B0
     /* 0x26 */ u8 pad26[2];
-} TextBox;
+} TextLines;
 
 typedef struct {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8 pad10[0x18];
-    /* 0x28 */ TextBox text;
+    /* 0x28 */ TextLines text;
 } TextObj;
 
 /* Copies the current line into lines[page]. */
 void func_150CFE3C(TextObj *obj) {
-    TextBox *text = &obj->text;
+    TextLines *text = &obj->text;
 
     memcpy(text->lines[text->page], text->line, text->lineLen);
     text->lines[text->page][text->lineLen] = 0;
@@ -414,7 +414,7 @@ void func_150CFE3C(TextObj *obj) {
 
 /* Moves on to the next line, if there is one. */
 void func_150CFE98(TextObj *obj) {
-    TextBox *text = &obj->text;
+    TextLines *text = &obj->text;
 
     if (*text->lineEnd != 0) {
         text->line = text->lineEnd + 1;
@@ -427,10 +427,10 @@ void func_150CFE98(TextObj *obj) {
 
 /* Creates a text box object for str, with styleSize bytes of style state (left zeroed). */
 TextObj *func_150CFF10(u8 id, u8 *str, s16 duration, s32 styleSize, s8 updateFn, u8 msgFn, u8 arg6, s32 arg7) {
-    TextBox init;
+    TextLines init;
     TextObj *obj;
     s32 lineSize;
-    TextBox *text;
+    TextLines *text;
 
     init.msgFn = msgFn;
     init.updateFn = updateFn;
@@ -446,10 +446,10 @@ TextObj *func_150CFF10(u8 id, u8 *str, s16 duration, s32 styleSize, s8 updateFn,
 
     lineSize = func_150CFDB8(str) + 1;
 
-    obj = (TextObj *)func_15149130(duration, -1, -1, 5, 3, 0x47, (sizeof(TextBox) + styleSize + lineSize * 2), arg6, arg7);
+    obj = (TextObj *)func_15149130(duration, -1, -1, 5, 3, 0x47, (sizeof(TextLines) + styleSize + lineSize * 2), arg6, arg7);
     if (obj != NULL) {
         text = &obj->text;
-        memcpy(text, &init, sizeof(TextBox));
+        memcpy(text, &init, sizeof(TextLines));
         text->style = text + 1;
         text->lines[0] = (u8 *)text->style + styleSize;
         text->lines[1] = text->lines[0] + lineSize;
@@ -464,7 +464,7 @@ extern s32 (*D_800888A0[])(TextObj *);
 
 /* Text box update: runs the style's update function, removing the box when it returns 0. */
 s32 func_150D0034(s32 arg0, TextObj *obj, s32 arg2) {
-    TextBox *text = &obj->text;
+    TextLines *text = &obj->text;
 
     if ((text->updateFn != -1) && (D_800888A0[text->updateFn](obj) == 0)) {
         obj->header.state = -1;
@@ -518,7 +518,7 @@ s32 func_150D01A0(TextObj *obj) {
     s8 *fadeTimer;
     u8 alpha;
     u8 fade;
-    TextBox *text;
+    TextLines *text;
 
     text = &obj->text;
     fadeTimer = text->style;
@@ -566,7 +566,7 @@ void func_150D02B4(u8 id, u8 *str, s16 duration, u8 arg3, s32 arg4) {
 
 /* Style 1 update: types out the current line and draws it after the prompt, with a cursor. */
 s32 func_150D032C(TextObj *obj) {
-    TextBox *text;
+    TextLines *text;
     TypewriterStyle *style;
     u8 buf[0x50];
     u8 prompt[] = "C:> ";
@@ -617,7 +617,7 @@ s32 func_150D0534(TextObj *obj) {
     s8 *fadeTimer;
     u8 alpha;
     u8 fade;
-    TextBox *text;
+    TextLines *text;
 
     text = &obj->text;
     fadeTimer = text->style;
