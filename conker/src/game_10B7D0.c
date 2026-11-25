@@ -8,13 +8,18 @@
 #undef func_150DE32C
 /* variables.h declares D_800D3098 as an array, but the code loads it as a pointer to the table. */
 #define D_800D3098 D_800D3098_array_decl_in_variables_h
+#define D_800A5480 D_800A5480_f32_decl_in_variables_h
 #include "variables.h"
 #undef D_800D3098
+#undef D_800A5480
 extern struct178 *D_800D3098;
 
 typedef struct {
     f32 x, y, z;
 } Vec3f;
+
+/* variables.h declares D_800A5480 as one f32; it is a vector (copied whole into ParticleDef.rot). */
+extern Vec3f D_800A5480;
 
 /* An object with a rotation and a position (func_150DE458's argument; func_151149AC returns one). */
 typedef struct {
@@ -140,186 +145,195 @@ void func_150DE458(Prop *prop) {
     }
 }
 
-extern f32 D_800A0D48;
-extern f32 D_800A0D4C;
-extern f32 D_800A0D50;
-extern f32 D_800A0D54;
+/* An object func_150DE6D8 sways: its rotation and position lead the same way as Prop's. */
+typedef struct {
+    /* 0x00 */ f32 rotation[3];
+    /* 0x0C */ u8  padC[0x4];
+    /* 0x10 */ s16 position[3];
+    /* 0x16 */ u8  pad16[0x66];
+    /* 0x7C */ s32 phase[3]; // wave phases, in 1/8 steps of func_15048A40's angle
+} SwayingProp;
 
-struct Struct150DE6D8 {
-    f32 unk0;
-    char pad4[4];
-    f32 unk8;
-    char padC[6];
-    s16 unk12;
-    char pad14[0x68];
-    s32 unk7C;
-    s32 unk80;
-    s32 unk84;
-};
-
-void func_150DE6D8(struct Struct150DE6D8 *arg0) {
-    arg0->unk12 = (s16)(s32)(func_15048A40((u8)(arg0->unk7C >> 3)) * D_800A0D48 + D_800A0D4C);
-    arg0->unk0 = func_15048A40((u8)(arg0->unk80 >> 3)) * D_800A0D50;
-    arg0->unk8 = func_15048A40((u8)(arg0->unk84 >> 3)) * D_800A0D54;
-    arg0->unk7C += D_800BE9E4 * 12;
-    arg0->unk80 += D_800BE9E4 * 16;
-    arg0->unk84 += D_800BE9E4 * 24;
+/* Sways the object: position[1] bobs around 1130 and rotation[0] / rotation[2] rock, each driven by
+ * func_15048A40 of its own phase; the phases advance 12, 16 and 24 per frame. */
+void func_150DE6D8(SwayingProp *prop) {
+    prop->position[1] = func_15048A40(prop->phase[0] >> 3) * 10.19999981f + 1130.0f;
+    prop->rotation[0] = func_15048A40(prop->phase[1] >> 3) * 1.100000024f;
+    prop->rotation[2] = func_15048A40(prop->phase[2] >> 3) * 1.100000024f;
+    prop->phase[0] += D_800BE9E4 * 12;
+    prop->phase[1] += D_800BE9E4 * 16;
+    prop->phase[2] += D_800BE9E4 * 24;
 }
 
-typedef struct { f32 x, y, z; } Vec3f_150DE7C0;
+/* Spawn template of a particle, copied to Particle.def (same layout as ParticleDef in game_169510.c). */
+typedef struct {
+    /* 0x00 */ u8 texture;
+    /* 0x01 */ u8 type;
+    /* 0x02 */ u16 renderModes;
+    /* 0x04 */ s16 lifetime;
+    /* 0x06 */ u8 pad6[2];
+    /* 0x08 */ s32 frame;
+    /* 0x0C */ s32 frameSpeed;
+    /* 0x10 */ u8 rgba[4];
+    /* 0x14 */ f32 width;
+    /* 0x18 */ f32 height;
+    /* 0x1C */ Vec3f pos;
+    /* 0x28 */ Vec3f rot;
+    /* 0x34 */ Vec3f scale;
+    /* 0x40 */ s32 flags;
+    /* 0x44 */ u8 unk44;
+    /* 0x45 */ u8 unk45;
+    /* 0x46 */ u8 unk46;
+    /* 0x47 */ u8 unk47;
+    /* 0x48 */ s16 *unk48;
+    /* 0x4C */ u8 viewportMask;
+    /* 0x4D */ u8 pad4D[3];
+    /* 0x50 */ s32 unk50;
+    /* 0x54 */ s16 fadeStart;
+    /* 0x56 */ s16 fadeRate;
+} ParticleDef;
 
-typedef union Game10BC70Pair {
-    s32 value[2];
-    f32 f[2];
-} Game10BC70Pair;
+/* State func_150DE7C0 stores after each particle it spawns. */
+typedef struct {
+    /* 0x00 */ Vec3f velocity;
+    /* 0x0C */ f32 timeLeft; // until the particle reaches the target
+    /* 0x10 */ Vec3f side;    // horizontal, perpendicular to forward
+    /* 0x1C */ Vec3f forward; // unit vector from source to target, flattened onto the XZ plane
+} ParticleTravel;
 
-typedef struct Game10BC70SpawnPacket {
-    u8 field0;
-    s8 field1;
-    s16 field2;
-    s16 field4;
-    u8 pad6[2];
-    s32 field8;
-    s32 fieldC;
-    u8 colour[4];
-    f32 scale[2];
-    Vec3f_150DE7C0 position;
-    Vec3f_150DE7C0 rotation;
-    f32 size[3];
-    s32 field40;
-    u8 field44;
-    u8 field45;
-    u8 field46;
-    u8 field47;
-    s32 field48;
-    u8 field4C;
-    u8 pad4D[3];
-    s32 field50;
-    s16 field54;
-    s16 field56;
-} Game10BC70SpawnPacket;
+/* A particle spawned by func_1513D2F0, with func_150DE7C0's state at 0x110. */
+typedef struct {
+    /* 0x000 */ u8 pad0[0x18];
+    /* 0x018 */ ParticleDef def;
+    /* 0x070 */ u8 pad70[0xA0];
+    /* 0x110 */ ParticleTravel travel;
+} Particle;
 
-typedef struct Game10BC70Motion {
-    Vec3f_150DE7C0 velocity;
-    f32 duration;
-    Vec3f_150DE7C0 side;
-    Vec3f_150DE7C0 forward;
-} Game10BC70Motion;
+typedef struct {
+    s32 ids[2];
+} TexturePair;
 
-typedef struct Game10BC70Link {
-    s16 timer;
-    u8 pad2[2];
-    s32 source;
-    s32 target;
-} Game10BC70Link;
+/* Emitter state at +0x28 of func_150DE7C0's object. */
+typedef struct {
+    /* 0x00 */ s16 timer; // frames until the next particle
+    /* 0x02 */ u8 pad2[2];
+    /* 0x04 */ s32 source;
+    /* 0x08 */ s32 target;
+} EmitterLink;
 
-typedef struct Game10BC70Emitter {
-    u8 pad0;
-    u8 flags01;
-    u8 pad2[0xA];
-    u8 flags0C;
-    u8 padD[0x1B];
-    Game10BC70Link link;
-} Game10BC70Emitter;
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD[0x1B];
+    /* 0x28 */ EmitterLink link;
+} Emitter;
 
 void *memcpy(void *, const void *, u32);
-void func_1514470C(s32, void *);
-s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
-extern Game10BC70Pair D_800A0D00;
-extern f32 D_800A0D58;
+void func_1514470C(s32, Vec3f *);
+s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
+s32 func_15140410(Particle *, Vec3f *, Vec3f *, s16);
+extern TexturePair D_800A0D00;
 
-void func_150DE7C0(Game10BC70Emitter *arg0) {
-    Game10BC70Link *link;
-    Vec3f_150DE7C0 target;
-    Vec3f_150DE7C0 delta;
+/* Every 200-400 frames, spawns a particle (texture 0xBE or 0xBF) at the link's source position that
+ * travels to its target position at a random speed of 25-55 (0xBF ones at 0.18 of that). */
+void func_150DE7C0(Emitter *emitter) {
+    EmitterLink *link;
+    Vec3f target;
+    Vec3f delta;
     f32 length;
     f32 unused;
     f32 base;
-    Game10BC70Motion motion;
-    Game10BC70SpawnPacket packet;
-    Game10BC70Pair kinds;
-    void *result;
+    ParticleTravel travel;
+    ParticleDef def;
+    TexturePair textures;
+    Particle *particle;
     f32 speed;
 
-    link = &arg0->link;
+    link = &emitter->link;
     link->timer -= D_800BE9E4;
     if (link->timer < 0) {
-        kinds = D_800A0D00;
-        packet.field0 = *(kinds.value + (func_150ADA20() & 1));
-        func_1514470C(link->source, &packet.position);
+        textures = D_800A0D00;
+        // matching: textures.ids[i] grows the frame by 8; the pointer-add form does not
+        def.texture = *(textures.ids + (func_150ADA20() & 1));
+        func_1514470C(link->source, &def.pos);
         func_1514470C(link->target, &target);
-        delta.x = target.x - packet.position.x;
-        delta.y = target.y - packet.position.y;
-        delta.z = target.z - packet.position.z;
-        func_15145128(&delta.x, &motion.velocity.x, &length, &unused);
-        speed = (func_150ADA68() * 30.0f) + 25.0f;
+        delta.x = target.x - def.pos.x;
+        delta.y = target.y - def.pos.y;
+        delta.z = target.z - def.pos.z;
+        func_15145128(&delta, &travel.velocity, &length, &unused);
+        speed = func_150ADA68() * 30.0f + 25.0f;
         base = speed;
-        if (packet.field0 == 0xBF) {
-            speed = base * D_800A0D58;
+        if (def.texture == 0xBF) {
+            speed = base * 0.1800000072f;
         }
-        motion.velocity.x *= speed;
-        motion.velocity.y *= speed;
-        motion.velocity.z *= speed;
-        motion.duration = length / speed;
-        motion.forward.x = delta.x;
-        motion.forward.y = 0.0f;
-        motion.forward.z = delta.z;
-        func_15145128(&motion.forward.x, &motion.forward.x, 0, 0);
-        motion.side.x = -motion.forward.z;
-        motion.side.y = 0.0f;
-        motion.side.z = motion.forward.x;
-        packet.rotation = *(Vec3f_150DE7C0 *)&D_800A5480;
-        packet.field1 = 0;
-        packet.field2 = 0x3B03;
-        packet.field4 = 0x12C;
-        packet.field8 = 0;
-        packet.fieldC = 0;
-        packet.colour[0] = 0xFF;
-        packet.colour[1] = 0xFF;
-        packet.colour[2] = 0xFF;
-        packet.colour[3] = 0xFF;
+        travel.velocity.x *= speed;
+        travel.velocity.y *= speed;
+        travel.velocity.z *= speed;
+        travel.timeLeft = length / speed;
+        travel.forward.x = delta.x;
+        travel.forward.y = 0.0f;
+        travel.forward.z = delta.z;
+        func_15145128(&travel.forward, &travel.forward, NULL, NULL);
+        travel.side.x = -travel.forward.z;
+        travel.side.y = 0.0f;
+        travel.side.z = travel.forward.x;
+        def.rot = D_800A5480;
+        def.type = 0;
+        def.renderModes = 0x3B03;
+        def.lifetime = 300;
+        def.frame = 0;
+        def.frameSpeed = 0;
+        def.rgba[0] = 0xFF;
+        def.rgba[1] = 0xFF;
+        def.rgba[2] = 0xFF;
+        def.rgba[3] = 0xFF;
         func_150ADA68();
-        packet.scale[1] = 706.0f;
-        packet.scale[0] = 706.0f;
-        packet.rotation = *(Vec3f_150DE7C0 *)&D_800A5480;
-        packet.field40 = 0x065C0000;
-        packet.field44 = 0xFF;
-        packet.field45 = 0xFF;
-        packet.field46 = 0;
-        packet.field47 = 7;
-        packet.field48 = 0;
-        packet.field4C = 0xFF;
-        packet.field50 = 0;
-        packet.field54 = 1;
-        packet.field56 = 0xFF;
-        packet.size[0] = 1.0f;
-        packet.size[1] = 1.0f;
-        packet.size[2] = 1.0f;
-        result = func_1513D2F0((void *)&packet, (s32)&D_800A4AA0, 0x28, 0, 0,
-                               0x26, 0, 3, 0xFF, 0x28, arg0->flags0C, arg0->flags01);
-        if (result != 0) {
-            memcpy((u8 *)result + 0x110, &motion, sizeof(motion));
+        def.height = 706.0f;
+        def.width = 706.0f;
+        def.rot = D_800A5480;
+        def.flags = 0x065C0000;
+        def.unk44 = 0xFF;
+        def.unk45 = 0xFF;
+        def.unk46 = 0;
+        def.unk47 = 7;
+        def.unk48 = NULL;
+        def.viewportMask = 0xFF;
+        def.unk50 = 0;
+        def.fadeStart = 1;
+        def.fadeRate = 0xFF;
+        def.scale.x = 1.0f;
+        def.scale.y = 1.0f;
+        def.scale.z = 1.0f;
+        particle = func_1513D2F0(&def, (s32)&D_800A4AA0, 0x28, 0, 0, 0x26, 0, 3, 0xFF, 0x28, emitter->unkC,
+                                 emitter->unk1);
+        if (particle != NULL) {
+            memcpy(&particle->travel, &travel, sizeof(travel));
         }
-        link->timer = (func_150ADA20() % 201U) + 0xC8;
+        link->timer = func_150ADA20() % 201U + 200;
     }
 }
 
-s32 func_150DEACC(f32 *arg0) {
-    arg0[13] += arg0[68] * D_800BE9A4;
-    arg0[14] += arg0[69] * D_800BE9A4;
-    arg0[15] += arg0[70] * D_800BE9A4;
-    arg0[71] -= D_800BE9A4;
-    if (arg0[71] < 0.0f) {
+/* Moves the particle along its travel velocity; returns 0 once its travel time has run out. */
+s32 func_150DEACC(Particle *particle) {
+    particle->def.pos.x += particle->travel.velocity.x * D_800BE9A4;
+    particle->def.pos.y += particle->travel.velocity.y * D_800BE9A4;
+    particle->def.pos.z += particle->travel.velocity.z * D_800BE9A4;
+    particle->travel.timeLeft -= D_800BE9A4;
+    if (particle->travel.timeLeft < 0.0f) {
         return 0;
     }
     return 1;
 }
 
-s32 func_150DEB58(s32 arg0, s16 arg1) {
+/* Calls func_15140410 with the particle's side / forward axes, unless D_800DBFF0[D_80082FA0].unk388 is
+ * below 5. */
+s32 func_150DEB58(Particle *particle, s16 arg1) {
     if (D_800DBFF0[D_80082FA0].unk388 < 5.0f) {
         return 0;
     }
-    return func_15140410(arg0, arg0 + 0x120, arg0 + 0x12C, arg1);
+    return func_15140410(particle, &particle->travel.side, &particle->travel.forward, arg1);
 }
 
 extern void func_150DEC28(u8, s32);
