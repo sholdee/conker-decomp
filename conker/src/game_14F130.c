@@ -48,15 +48,12 @@ void func_15121C80(Camera *camera, f32 yawOffset) {
         }
         func_15048758(&angle);
         if (camera->Snap) {
-            // matching: reusing speed/limit as temporaries keeps the original stack frame
-            speed = camera->mv->unk18C;
-            limit = D_800A3448;
-            if (limit != speed) {
-                camera->CameraAngle = speed;
+            if (camera->mv->unk18C != 999.0f) { // 999.0f: "no saved yaw" sentinel
+                camera->CameraAngle = camera->mv->unk18C;
                 position = camera->mv->unk160;
                 camera->eye = position;
                 camera->prevEye = position;
-                camera->mv->unk18C = limit;
+                camera->mv->unk18C = 999.0f;
             } else {
                 camera->CameraAngle = angle;
             }
