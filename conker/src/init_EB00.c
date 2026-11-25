@@ -84,9 +84,9 @@ typedef struct {
 
 // Deferred voice stop, queued by func_100112BC.
 typedef struct {
-    u16 value;
-    u8 operation;
-    u8 index;
+    u16 handle;
+    u8 delay; // updates to wait
+    u8 slot;
 } SoundQueueEntry;
 
 // Sound variant table: a base sound id and how many consecutive variants follow it.
@@ -1148,39 +1148,37 @@ u16 func_10010E78(u16 handle, s32 sound, u16 volume, s16 cents, s32 mix, s32 arg
     return 0;
 }
 
-void func_10010F30(arg0, arg1, arg2, arg3, arg4)
-s32 arg0;
-u16 arg1;
-u8 arg2;
-s16 arg3;
-s32 arg4;
+// Plays an unpositioned sound.
+void func_10010F30(sound, volume, pan, cents, mix)
+s32 sound;
+u16 volume;
+u8 pan;
+s16 cents;
+s32 mix;
 {
-    func_10010BE8(0, arg0, arg1, arg2, arg3, ((u8 *)&arg4)[3], D_80041FD9);
+    func_10010BE8(0, sound, volume, pan, cents, ((u8 *)&mix)[3], D_80041FD9); // matching: lbu of mix's low byte
 }
 
-void func_10010F88(s32 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4,
-                   s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9) {
-    func_10010E78(0, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+void func_10010F88(s32 sound, u16 volume, s16 cents, u8 mix, s32 arg4,
+                   s16 x, s16 y, s16 z, s16 nearDistance, s16 farDistance) {
+    func_10010E78(0, sound, volume, cents, mix, arg4, x, y, z, nearDistance, farDistance);
 }
-typedef struct {
-    u8 pad0[0xE];
-    u16 fieldE;
-} SoundOwnerScale;
 
-s32 func_10010FFC(u16 arg0, s32 arg1, u16 arg2, s16 arg3,
-                  u8 arg4, SoundOwnerState_10344 *owner) {
+
+// Plays a sound positioned on obj; a player-camera object (obj->camera set) plays it
+// unpositioned instead.
+s32 func_10010FFC(u16 handle, s32 sound, u16 volume, s16 cents, u8 mix, struct127 *obj) {
     f32 scale;
 
-    if ((owner == 0) || (owner->field0 == 0)) {
+    if ((obj == NULL) || (obj->interaction_state == 0)) {
         return 0;
     }
-    if (owner->field318 != 0) {
-        arg0 = func_10010BE8(arg0, arg1, arg2, 0x40,
-                              arg3, arg4, D_80041FD9);
+    if (obj->camera != NULL) {
+        handle = func_10010BE8(handle, sound, volume, 64, cents, mix, D_80041FD9);
     } else {
-        arg2 = (u16)((arg2 + arg2 + arg2) >> 2);
-        if (owner->field4 != 0xFF) {
-            scale = (f32)(u32)((SoundOwnerScale *)D_800D1C90[owner->field4])->fieldE * owner->field14C;
+        volume = (volume + volume + volume) >> 2;
+        if (obj->id != 0xFF) {
+            scale = (u16)D_800D1C90[obj->id]->unkE * obj->xz_scale;
         } else {
             scale = 0.0f;
         }
@@ -1189,34 +1187,37 @@ s32 func_10010FFC(u16 arg0, s32 arg1, u16 arg2, s16 arg3,
         } else if (scale < 80.0f) {
             scale = 0.3125f;
         } else {
-            scale *= 0.00390625f;
+            scale *= 1.0f / 256.0f;
         }
-        arg0 = func_10010E78(arg0, arg1, arg2, arg3,
-                              arg4, 0, (s32)owner->field14,
-                              (s32)owner->field18, (s32)owner->field1C,
-                              0x1F4, (s32)(2000.0f * scale) + 0x1F5);
+        handle = func_10010E78(handle, sound, volume, cents, mix, 0, obj->x_position,
+                               obj->y_position, obj->z_position, 500,
+                               (s32)(2000.0f * scale) + 501);
     }
-    return arg0;
+    return handle;
 }
 
-void func_100111C8(u16 arg0) {
-    struct120 *tmp = &D_800425E0[arg0 & 0xF];
 
-    if ((tmp->unk8 != 0) && (tmp->unk0 == arg0)) {
-        tmp->unk0 = 0;
-        tmp->unk4 = 0;
-        func_10017594(tmp->unk8);
-        tmp->unk8 = 0;
+// Stops the voice behind `handle` now.
+void func_100111C8(u16 handle) {
+    struct120 *slot = &D_800425E0[handle & 0xF];
+
+    if ((slot->unk8 != NULL) && (slot->unk0 == handle)) {
+        slot->unk0 = 0;
+        slot->unk4 = 0;
+        func_10017594(slot->unk8);
+        slot->unk8 = NULL;
     }
 }
 
-void func_1001123C(u16 arg0) {
-    struct120 *tmp = &D_800425E0[arg0 & 0xF];
 
-    if ((tmp->unk8 != 0) && (tmp->unk0 == arg0)) {
-        if (func_100112BC(arg0, 1) == 0) {
-            func_10017594(tmp->unk8);
-            tmp->unk8 = 0;
+// Stops the voice behind `handle` on the next update (now if the queue is full).
+void func_1001123C(u16 handle) {
+    struct120 *slot = &D_800425E0[handle & 0xF];
+
+    if ((slot->unk8 != NULL) && (slot->unk0 == handle)) {
+        if (func_100112BC(handle, 1) == 0) {
+            func_10017594(slot->unk8);
+            slot->unk8 = NULL;
         }
     }
 }
@@ -1227,9 +1228,9 @@ s32 func_100112BC(s32 handle, s32 delay) {
 
     if (count < 16) {
         entry = &D_80041F10[count];
-        entry->value = handle;
-        entry->operation = delay;
-        entry->index = handle & 0xF;
+        entry->handle = handle;
+        entry->delay = delay;
+        entry->slot = handle & 0xF;
         D_80041F50 = count + 1;
         return 1;
     } else {
@@ -1238,23 +1239,25 @@ s32 func_100112BC(s32 handle, s32 delay) {
 }
 
 
+
+// Runs the stop queue: counts down each entry's delay and stops its voice when it expires.
 void func_10011310(void) {
     s32 i;
     s32 j;
-    s32 flag;
+    s32 stopped;
     s32 remaining;
     s32 slot;
     struct31 *voice;
 
-    flag = 0;
+    stopped = 0;
     j = 0;
     remaining = D_80041F50;
     for (i = 0; i < D_80041F50; i++) {
-        if (D_80041F10[i].operation > 0) {
-            D_80041F10[i].operation--;
+        if (D_80041F10[i].delay > 0) {
+            D_80041F10[i].delay--;
         } else {
-            slot = D_80041F10[i].index;
-            if (D_800425E0[slot].unk0 == D_80041F10[i].value) {
+            slot = D_80041F10[i].slot;
+            if (D_800425E0[slot].unk0 == D_80041F10[i].handle) {
                 voice = D_800425E0[slot].unk8;
                 D_800425E0[slot].unk0 = 0;
                 D_800425E0[slot].unk4 = 0;
@@ -1264,27 +1267,29 @@ void func_10011310(void) {
                 D_800425E0[slot].unk8 = NULL;
             }
             remaining--;
-            flag = 1;
+            stopped = 1;
         }
         if (j != i) {
             D_80041F10[j] = D_80041F10[i];
         }
-        if (flag) {
+        if (stopped) {
             j++;
         } else {
-            flag = 0;
+            stopped = 0; // matching: dead store IDO needs for the target's branch layout
         }
     }
     D_80041F50 = remaining;
 }
 
-s32 func_1001147C(u16 arg0) {
-    struct120 *tmp;
 
-    if (arg0 != 0) {
-        tmp = &D_800425E0[arg0 & 0xF];
-        if (tmp->unk0 == arg0) {
-            return tmp->unk4 & 0x7FFF;
+// Returns the sound id playing behind `handle`, or -1.
+s32 func_1001147C(u16 handle) {
+    struct120 *slot;
+
+    if (handle != 0) {
+        slot = &D_800425E0[handle & 0xF];
+        if (slot->unk0 == handle) {
+            return slot->unk4 & 0x7FFF;
         }
     }
     return -1;
@@ -1558,11 +1563,11 @@ void func_10011BB8(void) {
     }
 }
 
-void func_10011E88(s32 arg0) {
+void func_10011E88(s32 mode) {
 }
 
-void func_10011E94(s32 arg0) {
-    if (arg0) {
+void func_10011E94(s32 mute) {
+    if (mute) {
         D_80041F61 = 1;
     } else {
         D_80041F61 = 0;
