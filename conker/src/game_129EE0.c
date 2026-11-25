@@ -17,7 +17,8 @@ extern s32 func_1000EC24();
 extern void func_15164F0C(s32 arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern void func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
 
-struct sp44_150FCA30 {
+/* Parameter block for func_151D8868. */
+typedef struct {
     u8 unk0;
     u8 unk1;
     s16 unk2;
@@ -25,40 +26,43 @@ struct sp44_150FCA30 {
     u8 unk5;
     s8 unk6;
     u8 unk7;
-};
+} Params151D8868;
 
+/* Spawns the effect at each of the three D_800D9AA0 spots, starts three positioned sounds,
+ * then calls func_15164F0C for each of the D_80082FA0 + 1 entries and func_151D8868 once. */
 void func_150FCA30(void) {
     s32 i;
-    struct sp44_150FCA30 sp44;
+    Params151D8868 params;
 
     func_150FCBC0(0);
     func_150FCBC0(1);
     func_150FCBC0(2);
 
-    func_1000FA64(0x2B8, -0x7F6, 0x618, -0xA47, 0x6D60, 0x2328, 0x1B58, (s32)func_1000EC24, (void *)0x2D, 0, 0, 0);
-    func_1000FA64(0x2B7, -0x13F, -0x111, -0xD5B, 0x6D60, 0x2328, 0x1B58, (s32)func_1000EC24, 0, 0, 0, 0);
-    func_1000FA64(0x2B6, 0x5EF, 0x3B3, -0xA49, 0x6D60, 0x2328, 0x1B58, (s32)func_1000EC24, (void *)0x5A, 0, 0, 0);
+    // func_1000FA64(sound, x, y, z, volume, farDistance, nearDistance, callback, owner, key, flags, cents)
+    func_1000FA64(0x2B8, -2038, 1560, -2631, 28000, 9000, 7000, (s32)func_1000EC24, (void *)45, 0, 0, 0);
+    func_1000FA64(0x2B7, -319, -273, -3419, 28000, 9000, 7000, (s32)func_1000EC24, NULL, 0, 0, 0);
+    func_1000FA64(0x2B6, 1519, 947, -2633, 28000, 9000, 7000, (s32)func_1000EC24, (void *)90, 0, 0, 0);
 
     for (i = 0; i < D_80082FA0 + 1; i++) {
         func_15164F0C(4, i, 0, 0xFF, 1);
     }
 
-    sp44.unk0 = 1;
-    sp44.unk2 = 0x64;
-    sp44.unk5 = 0xF;
-    sp44.unk4 = 8;
-    sp44.unk6 = -1;
-    func_151D8868(&sp44, 0, 0xFF, 0);
+    params.unk0 = 1;
+    params.unk2 = 100;
+    params.unk5 = 15;
+    params.unk4 = 8;
+    params.unk6 = -1;
+    func_151D8868(&params, 0, 0xFF, 0);
 }
 
 typedef struct {
-    /* 0x00 */ s16 unk00;
-    /* 0x02 */ s16 unk02;
-    /* 0x04 */ s16 unk04;
-    /* 0x06 */ s16 unk06;
-    /* 0x08 */ s32 unk08;
-    /* 0x0C */ s32 unk0C;
-    /* 0x10 */ struct17 unk10;
+    /* 0x00 */ s16 angle;
+    /* 0x02 */ s16 spread;
+    /* 0x04 */ s16 pitch;
+    /* 0x06 */ s16 pitchSpread;
+    /* 0x08 */ s32 count;
+    /* 0x0C */ s32 countSpread;
+    /* 0x10 */ struct17 position;
     /* 0x1C */ f32 unk1C;
     /* 0x20 */ f32 unk20;
     /* 0x24 */ f32 unk24;
@@ -78,44 +82,45 @@ typedef struct {
     /* 0x54 */ s16 unk54;
     /* 0x56 */ s16 unk56;
     /* 0x58 */ s8 unk58;
-} Struct150FCBC0;
+} ParticleBurstDesc; /* emitter description passed to func_1514FCE8 */
 
 
 extern const s16 D_800A1EE0[3][2];
-void *func_151541B8(struct17 *, f32, s32, f32, f32, u8, s32);
+void *func_151541B8(struct17 *, f32, f32, f32, f32, u8, s32);
 extern void func_15143874(s32, f32, f32 *, f32 *);
-extern void func_1514FCE8(Struct150FCBC0 *, u8, s32);
+extern void func_1514FCE8(ParticleBurstDesc *, u8, s32);
 
-void func_150FCBC0(u8 arg0) {
-    struct134 *obj;
+/* Spawns an effect in the middle of area D_800D9AA0[index] and 3-4 particle bursts at random angles around it. */
+void func_150FCBC0(u8 index) {
+    struct134 *area;
     struct17 pos;
     const s16 *range;
-    Struct150FCBC0 desc;
+    ParticleBurstDesc desc;
     s16 count;
     u8 angle;
-    u32 r;
-    f32 rnd;
+    u32 randInt;
+    f32 randFrac;
 
-    if (arg0 >= 3) {
+    if (index >= 3) {
         return;
     }
-    obj = D_800D9AA0[arg0];
-    if (obj == NULL) {
+    area = D_800D9AA0[index];
+    if (area == NULL) {
         return;
     }
-    pos.unk0 = obj->unk0;
-    pos.unk4 = (s16)obj->unk2 + (s16)obj->unk8 * 0.5f;
-    pos.unk8 = obj->unk4;
-    rnd = func_150ADA68();
-    func_151541B8(&pos, rnd * 4.0f + 12.0f, 0x40D637C9, (f32)((func_150ADA20() % 0x38U) + 0xC8), 2.6090002f, 0xFF, 1);
+    pos.unk0 = area->unk0;
+    pos.unk4 = (s16)area->unk2 + (s16)area->unk8 * 0.5f;
+    pos.unk8 = area->unk4;
+    randFrac = func_150ADA68();
+    func_151541B8(&pos, randFrac * 4.0f + 12.0f, 6.6943097f, (f32)(func_150ADA20() % 56U + 200), 2.6090002f, 0xFF, 1);
     count = (func_150ADA20() & 1) + 3;
     if (count > 0) {
-        range = D_800A1EE0[arg0];
-        desc.unk02 = 0x50;
-        desc.unk04 = -0x20;
-        desc.unk06 = 0x2B;
-        desc.unk08 = 1;
-        desc.unk0C = 8;
+        range = D_800A1EE0[index];
+        desc.spread = 80;
+        desc.pitch = -32;
+        desc.pitchSpread = 43;
+        desc.count = 1;
+        desc.countSpread = 8;
         desc.unk1C = 249.0f;
         desc.unk20 = 451.0f;
         desc.unk24 = 506.0f;
@@ -136,34 +141,34 @@ void func_150FCBC0(u8 arg0) {
         desc.unk56 = 12;
         desc.unk58 = -1;
         do {
-            r = func_150ADA20();
-            angle = range[0] + (r % (range[1] + 1));
-            desc.unk00 = angle - 40;
-            func_15143874((s16)angle, (s16)obj->unk6, &desc.unk10.unk0, &desc.unk10.unk8);
-            desc.unk10.unk0 += obj->unk0;
-            desc.unk10.unk8 += obj->unk4;
-            desc.unk10.unk4 = func_150ADA68() * (s16)obj->unk8 + (s16)obj->unk2;
+            randInt = func_150ADA20();
+            angle = range[0] + randInt % (range[1] + 1);
+            desc.angle = angle - 40;
+            func_15143874((s16)angle, (s16)area->unk6, &desc.position.unk0, &desc.position.unk8);
+            desc.position.unk0 += area->unk0;
+            desc.position.unk8 += area->unk4;
+            desc.position.unk4 = func_150ADA68() * (s16)area->unk8 + (s16)area->unk2;
             func_1514FCE8(&desc, 0xFF, 1);
             count--;
         } while (count > 0);
     }
 }
 
-extern f32 D_800A1F2C;
-extern void func_15165BB0(s32 *arg0, s32 *arg1, s32 arg2, s32 arg3, f32 arg4);
+extern f32 func_15165BB0(void *arg0, struct17 *pos, f32 arg2, f32 arg3, f32 arg4);
 
-f32 func_150FCF1C(s32 *arg0) {
-    struct134 *temp;
-    f32 sp20[3];
+/* func_15165BB0 of arg0 against the centre of area 0 (1.0f when there is no area 0). */
+f32 func_150FCF1C(void *arg0) {
+    struct134 *area;
+    struct17 pos;
 
-    temp = D_800D9AA0[0];
-    if (temp == NULL) {
+    area = D_800D9AA0[0];
+    if (area == NULL) {
         return 1.0f;
     }
-    sp20[0] = (f32)temp->unk0;
-    sp20[1] = (f32)(s16)temp->unk2;
-    sp20[2] = (f32)temp->unk4;
-    func_15165BB0(arg0, (s32 *)sp20, 0x44FAE000, 0x460CB400, D_800A1F2C);
+    pos.unk0 = area->unk0;
+    pos.unk4 = (s16)area->unk2;
+    pos.unk8 = area->unk4;
+    return func_15165BB0(arg0, &pos, 2007.0f, 9005.0f, 0.00011104942f);
 }
 
 void func_150FCFB0(s32 arg0) {
