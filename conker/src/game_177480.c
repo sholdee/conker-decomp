@@ -2,8 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void func_1513F680();
-extern void func_151D5D60();
+extern void func_1513F680(void *obj, u8 arg1, s32 arg2, u8 arg3, u8 arg4);
+extern void func_151D5D60(Vtx **buffers, s16 index, s32 size, Vtx **outVtx, u8 *outFresh);
 
 /* Per-effect behaviour parameters, at 0x110 in Effect. */
 typedef struct {
@@ -68,6 +68,7 @@ Vtx *func_15149FD0(Effect *effect, s16 index) {
 
     func_151D5D60(effect->vtxBuffers, index, sizeof(effect->vtxTemplate), &vtx, &fresh);
     ret = vtx;
+    // matching: an early `if (vtx == NULL) return NULL;` reorders the branches
     if (vtx) {
         if (fresh) {
             memcpy(effect->vtxBuffers[index], effect->vtxTemplate, sizeof(effect->vtxTemplate));
@@ -127,7 +128,7 @@ s32 func_1514A19C(Effect *effect) {
     return 1;
 }
 
-/* Grows width and height towards their targets; once both are within 95%, calls func_1513F680 with state 4. */
+/* Grows width and height towards their targets; once both are within 95%, calls func_1513F680(..., 4, ...). */
 s32 func_1514A380(Effect *effect) {
     EffectParams *params;
     s32 done;
