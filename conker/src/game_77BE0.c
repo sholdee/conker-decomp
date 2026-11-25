@@ -233,7 +233,7 @@ void func_1504AF10(Actor *obj, s32 force, s32 release) {
             D_800DBEF4[index].flags &= ~0x60;
             D_800DBEF4[index].flags |= 0x20;
             D_800DBEF4[index].x = obj->x_position;
-            D_800DBEF4[index].y = obj->y_position + (s16)obj->unk90;
+            D_800DBEF4[index].y = obj->y_position + obj->unk90;
             D_800DBEF4[index].z = obj->z_position;
         }
     }

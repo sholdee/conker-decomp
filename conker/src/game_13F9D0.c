@@ -263,25 +263,6 @@ void func_15113180(void) {
     }
 }
 
-/* The part of the D_800CC2D0 actor (Actor) this file uses. */
-typedef struct Game13F9D0Actor {
-    /* 0x000 */ u8 pad0[0x14];
-    /* 0x014 */ f32 pos[3];
-    /* 0x020 */ u8 pad20[0x56];
-    /* 0x076 */ u16 movingAngle;
-    /* 0x078 */ u8 pad78[2];
-    /* 0x07A */ s16 facingAngle;
-    /* 0x07C */ u8 pad7C[0x14];
-    /* 0x090 */ s16 unk90;
-    /* 0x092 */ u8 pad92[0xA5];
-    /* 0x137 */ u8 unk137;
-    /* 0x138 */ u8 pad138[0x9C];
-    /* 0x1D4 */ struct { MtxF mtx; } *unk1D4; // world matrix
-    /* 0x1D8 */ u8 pad1D8[0x154];
-} Game13F9D0Actor; // size 0x32C
-
-#define ACTORS ((Game13F9D0Actor *)D_800CC2D0)
-
 void func_1511490C(MtxF mtx, WorldObject *obj);
 void func_150A7B80(void *);
 extern MtxF D_800DBF08[];
@@ -289,7 +270,7 @@ extern MtxF D_800DBF08[];
 /* Writes this frame's model matrix for every object in each view's draw list. */
 void func_15113218(void) {
     WorldObject *obj;
-    Game13F9D0Actor *actor;
+    Actor *actor;
     f32 (*parent)[4];
     MtxF mf;
     s32 j;
@@ -315,18 +296,18 @@ void func_15113218(void) {
                     func_1511490C(mf, obj);
                     guMtxF2L(mf, &(*D_80089250[D_800BE9C0])[(*D_80089240[view])[j].index]);
                 } else if (obj->attach > 100 && obj->attach < 125) {
-                    actor = &ACTORS[obj->attach - 100];
+                    actor = &D_800CC2D0[obj->attach - 100];
                     if (actor->unk1D4 == NULL) {
                         func_150A7CB0(mf, obj->scaleX, obj->scaleY, obj->scaleZ);
-                        mf[3][0] = actor->pos[0];
-                        mf[3][1] = actor->pos[1];
-                        mf[3][2] = actor->pos[2];
+                        mf[3][0] = actor->x_position;
+                        mf[3][1] = actor->y_position;
+                        mf[3][2] = actor->z_position;
                         guMtxF2L(mf, &(*D_80089250[D_800BE9C0])[(*D_80089240[view])[j].index]);
                     } else {
                         rot[2] = 0.0f;
                         rot[0] = rot[2];
                         rot[1] = actor->unk90;
-                        parent = actor->unk1D4->mtx;
+                        parent = actor->unk1D4[0];
                         func_150A7CB0(mf, obj->scaleX, obj->scaleY, obj->scaleZ);
                         mf[3][0] = parent[3][0];
                         mf[3][1] = parent[3][1];
@@ -593,7 +574,7 @@ s32 func_151140C4(WorldObject *obj) {
     return 0;
 }
 
-void func_1511473C(Game13F9D0Actor *actor, s32 objIndex);
+void func_1511473C(Actor *actor, s32 objIndex);
 
 /* Dispatches this frame's actor contacts to each object's onContact callback and carries riding actors. */
 void func_15114188(void) {
@@ -609,7 +590,7 @@ void func_15114188(void) {
                         D_800DBEF4[i].onContact(i + D_800DBEF4, &D_800CC2D0[j]); // matching: addu operand order
                     }
                     if ((D_800DBEF4[i].flags & 4) == 4 && !(D_800DBEF4[i].flags & 8)) {
-                        func_1511473C(&ACTORS[j], i);
+                        func_1511473C(&D_800CC2D0[j], i);
                     }
                 }
             }
@@ -682,14 +663,14 @@ extern f32 D_800A2F60;
 extern u16 D_800CBDA0[];
 
 /* Carries an actor standing on object objIndex: moves it with the object and turns it by the object's yaw spin. */
-void func_1511473C(Game13F9D0Actor *actor, s32 objIndex) {
+void func_1511473C(Actor *actor, s32 objIndex) {
     if (actor == NULL || objIndex >= D_800DBEF0) {
         return;
     }
-    func_15114348(objIndex, &actor->pos[0], &actor->pos[1], &actor->pos[2]);
-    actor->movingAngle += D_800DBEF4[objIndex].spinY * D_800A2F60;
-    if (actor->unk137 != 0 && objIndex + 1 == D_800CBDA0[actor - ACTORS]) {
-        actor->facingAngle = actor->movingAngle;
+    func_15114348(objIndex, &actor->x_position, &actor->y_position, &actor->z_position);
+    actor->unk76 += D_800DBEF4[objIndex].spinY * D_800A2F60;
+    if (actor->unk137 != 0 && objIndex + 1 == D_800CBDA0[actor - D_800CC2D0]) {
+        actor->unk7A = actor->unk76;
     }
 }
 

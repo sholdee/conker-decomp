@@ -1256,7 +1256,7 @@ struct Actor {
     u8  pad8B;
     u16 unk8C;  // used
     u16 unk8E;  // used
-    u16 unk90;
+    /* 0x90 */  s16 unk90;    // saved unkE4
     u16 unk92;
     s32 unk94;
     /* 0x98 */  s32 unk98;     // blacked-out display-list mask

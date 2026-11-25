@@ -290,7 +290,7 @@ void func_150D7928(Actor *obj) {
         playerIndex = D_800C3E78;
         obj->unk65 = 0;
         // matching: unk90 (u16) is read as s16 (lh); a value cast still loads with lhu
-        obj->unkE4 = *(s16 *)&obj->unk90;
+        obj->unkE4 = obj->unk90;
         func_1505A3A8(0.0f, obj, 0.0f, 0.5f, 1);
         scratch = obj->xz_velocity;
         obj->stunned = 30;
