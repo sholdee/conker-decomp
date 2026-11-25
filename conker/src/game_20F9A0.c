@@ -1730,7 +1730,7 @@ void func_151E5FF4(Actor *source, Actor *victim, s32 cause) {
                         variants = 3;
                         sound = 0x571;
                     }
-                } else if (*((u8 *)victim->unk31C + 0x1AC) != 0) { // past the end of structs.h's ActorCtl
+                } else if (victim->unk31C->unk1AC != 0) {
                     if ((cause != 0x21) && ((victim->health <= 0) || ((func_150ADA20() & 3) == 3))) {
                         variants = 4;
                         sound = 0x582;

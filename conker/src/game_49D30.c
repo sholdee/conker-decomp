@@ -2693,7 +2693,7 @@ s32 func_150235DC(s32 scene) {
                 obj->in_water = 1;
                 obj->y_velocity = 0.0f;
                 obj->gravity = 0.0f;
-                if (((obj->unk118 - 50.0f) < obj->aim.y) || ((((u8 *)obj->unk31C)[0x20] & 1) != 0)) {
+                if (((obj->unk118 - 50.0f) < obj->aim.y) || ((obj->unk31C->unk20 & 1) != 0)) {
                     obj->unkB2 = 0;
                     func_1508F060();
                 }
@@ -2714,7 +2714,7 @@ s32 func_150235DC(s32 scene) {
             obj->unk28 = obj->y_position - obj->unk180;
             D_800D154C = obj;
             func_1507F640();
-            ((u8 *)obj->unk31C)[0x23] = 0;
+            obj->unk31C->unk23 = 0;
             obj->unk287 = 0;
             zero = obj->unk287;
             obj->unk276 = 0;

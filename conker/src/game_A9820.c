@@ -12,7 +12,7 @@ void func_1507C370(void) {
     for (i = 0; i < D_8008FD8C; i++, obj++) {
         ActorCtl *ext = obj->unk31C;
         if (ext != NULL) {
-            func_1507C3E0(obj, (s16 *)&ext->unk114, (s16 *)&ext->unk116, (s16 *)&ext->unk118);
+            func_1507C3E0(obj, &ext->unk114, &ext->unk116, &ext->unk118);
         }
     }
 }

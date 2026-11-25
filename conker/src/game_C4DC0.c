@@ -395,7 +395,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     case 0x72:
         if (obj->unk31C != NULL) {
-            FLD(obj->unk31C, 0x129, u8) = cmd->a[0];
+            obj->unk31C->unk129 = cmd->a[0];
         } else {
             obj->unk222 = cmd->a[0];
         }
@@ -492,7 +492,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
             obj->unk31C->unk8 = 0;
             obj->unk31C->unk16 = 0;
         } else {
-            FLD(obj->unk31C, 0x8, s16) = 1;
+            obj->unk31C->unk8 = 1;
             if (cmd->a[0] == 1) {
                 func_1507EB4C(obj, 0x15);
             } else if (cmd->a[0] == 2) {
@@ -518,7 +518,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         }
         break;
     case 0x28:
-        FLD(obj->unk31C, 0x76, u8) = cmd->a[0];
+        obj->unk31C->unk76 = cmd->a[0];
         break;
     case 0x29:
         obj->unk251 = cmd->a[0];
@@ -610,9 +610,9 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     case 0x36:
         if (cmd->a[0] != 0) {
-            FLD(obj->unk31C, 0x20, u8) |= cmd->a[1];
+            obj->unk31C->unk20 |= cmd->a[1];
         } else {
-            FLD(obj->unk31C, 0x20, u8) &= ~cmd->a[1];
+            obj->unk31C->unk20 &= ~cmd->a[1];
         }
         break;
     case 0x37:
@@ -632,16 +632,16 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     }
     case 0x3B:
-        FLD(obj->unk31C, 0x32, u16) |= cmd->a[0];
+        obj->unk31C->unk32 |= cmd->a[0];
         if (D_800D3840 == 4) {
-            FLD(obj->unk31C, 0x34, u16) = cmd->a[1];
+            obj->unk31C->unk34 = cmd->a[1];
         }
         break;
     case 0x3C:
         if (cmd->a[0] != 0) {
-            FLD(obj->unk31C, 0x1A, u8) = 1;
+            obj->unk31C->unk1A = 1;
         } else {
-            FLD(obj->unk31C, 0x1A, u8) = 0;
+            obj->unk31C->unk1A = 0;
         }
         break;
     case 0x3D:
@@ -693,7 +693,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     }
     case 0x45:
-        FLD(obj->unk31C, 0x7B, u8) = cmd->a[0];
+        obj->unk31C->unk7B = cmd->a[0];
         break;
     case 0x46:
         obj->unk234 = cmd->a[0];
@@ -701,7 +701,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->unk237 = cmd->a[2];
         break;
     case 0x47:
-        FLD(obj->unk31C, 0x1B, u8) = cmd->a[0];
+        obj->unk31C->unk1B = cmd->a[0];
         break;
     case 0x48:
         obj->unkD0 = cmd->a[0];
@@ -891,7 +891,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     case 0x76:
         if (obj->unk31C != NULL) {
-            FLD(obj->unk31C, 0x1AE, u8) = cmd->a[0];
+            obj->unk31C->unk1AE = cmd->a[0];
         }
         break;
     case 0x77:
@@ -916,7 +916,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
             func_1514DE94(obj);
             break;
         case 2:
-            FLD(obj->unk31C, 0x17, u8) = 1;
+            obj->unk31C->unk17 = 1;
             obj->unk1C9 = 6;
             break;
         case 3: {
@@ -959,7 +959,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     }
     case 0x7B:
-        FLD(obj->unk31C, 0x1AF, u8) = cmd->a[0];
+        obj->unk31C->unk1AF = cmd->a[0];
         break;
     case 0x7C:
         obj->unk23E = cmd->a[0];
@@ -968,7 +968,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         FLD(obj, 0x328, u8) = cmd->a[0] + 1;
         break;
     case 0x7E:
-        FLD(obj->unk31C, 0x7C, u8) = cmd->a[0];
+        obj->unk31C->unk7C = cmd->a[0];
         break;
     case 0x7F:
         obj->unk144->unk0 = cmd->a[0];
@@ -1183,11 +1183,11 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xA7:
         return func_15085420(obj) | 0xD000;
     case 0xA9:
-        return FLD(obj->unk31C, 0x77, u8);
+        return obj->unk31C->unk77;
     case 0xAA:
         return obj->unk31C->unk78;
     case 0xAB:
-        return FLD(obj->unk31C, 0x79, u8);
+        return obj->unk31C->unk79;
     case 0xAC:
         ret = func_150A2AEC(OBJ_INDEX(obj), D_800D3840 - 2, cmd->a);
         if (ret != -1) {
@@ -1202,7 +1202,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         if (obj->unk31C->unk16 != 0) {
             return 2;
         }
-        if (FLD(obj->unk31C, 0x8, s16) != 0) {
+        if (obj->unk31C->unk8 != 0) {
             return 1;
         }
         return 0;
@@ -1257,7 +1257,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xBF:
         return (f32)(s32)obj->unk28 * 65536.0f;
     case 0xC0:
-        return FLD(obj->unk31C, 0x1B, u8);
+        return obj->unk31C->unk1B;
     case 0xC1:
         return obj->unk31C->unk4E;
     case 0xC2:
@@ -1522,13 +1522,13 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xDA:
         return obj->unk180;
     case 0xDC:
-        if (FLD(obj->unk31C, 0x195, s8) != 0) {
-            return FLD(obj->unk31C, 0x196, s8) | 0x80;
+        if (obj->unk31C->unk195 != 0) {
+            return obj->unk31C->unk196 | 0x80;
         }
         return 0;
     case 0xDD:
         if (obj->unk31C != NULL) {
-            return FLD(obj->unk31C, 0x23, s8);
+            return obj->unk31C->unk23;
         }
         return 0;
     case 0xDE:
@@ -1541,7 +1541,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     case 0xDF:
         if (obj->unk31C != NULL) {
-            return FLD(obj->unk31C, 0x1AE, s8);
+            return obj->unk31C->unk1AE;
         }
         return 0;
     case 0xE0:
@@ -1614,7 +1614,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xE8:
         return obj->unk84.uh;
     case 0xE9:
-        return FLD(obj->unk31C, 0x51, u8);
+        return obj->unk31C->unk51;
     case 0xEA: {
         ActorCtl *p;
         s32 a;
@@ -1661,7 +1661,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         return (ret << 16) | (iz & 0xFFFF);
     }
     case 0xEC:
-        return FLD(obj->unk31C, 0x95, u8);
+        return obj->unk31C->unk95;
     case 0xED:
         return D_800BE710[objId];
     case 0xEE: {

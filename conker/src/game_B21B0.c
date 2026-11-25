@@ -111,8 +111,7 @@ s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, f32
                 }
             }
             bestDistSq = 0.0f;
-            /* state byte 0x1B0 (past the end of ActorCtl) is the last multiplayer spawn index */
-            lastSpawn = *(s8 *)((u8 *)state + 0x1B0);
+            lastSpawn = state->lastSpawnIndex;
             for (i = 0; i < count; i++) {
                 if (lastSpawn != candidates[i]) {
                     nearestDistSq = 100000000.0f;
@@ -138,7 +137,7 @@ s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, f32
                 spawnIndex = candidates[best];
             }
             state = D_800CC2D0[playerIndex].unk31C;
-            *(s8 *)((u8 *)state + 0x1B0) = spawnIndex;
+            state->lastSpawnIndex = spawnIndex;
             useLink = FALSE;
         }
         j = spawnIndex;
@@ -239,7 +238,7 @@ void func_15085430(Actor *obj, s32 spawnIndex, s32 unused) {
     obj->unk28 = 0.0f;
     obj->unk180 = obj->y_position;
     if (obj->unk31C != NULL) {
-        func_1507C3E0(obj, (s16 *)&obj->unk31C->unk114, (s16 *)&obj->unk31C->unk116, (s16 *)&obj->unk31C->unk118);
+        func_1507C3E0(obj, &obj->unk31C->unk114, &obj->unk31C->unk116, &obj->unk31C->unk118);
     }
     obj->unk1CC = obj->y_position;
     obj->unk2F8 &= ~0x10;
@@ -249,8 +248,7 @@ void func_15085430(Actor *obj, s32 spawnIndex, s32 unused) {
     obj->unk16C = 0.0f;
     obj->unk170 = 0.0f;
     if (obj->unk127 != 0xFF) {
-        /* state byte 0x23 is inside ActorCtl's pad17 */
-        *((u8 *)obj->unk31C + 0x23) = unk15;
+        obj->unk31C->unk23 = unk15;
         if (D_800BE616 && D_800D18A8) {
             func_1505D6F0(obj, obj - D_800CC2D0);
         }
