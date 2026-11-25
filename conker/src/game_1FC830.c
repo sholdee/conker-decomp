@@ -338,6 +338,11 @@ typedef struct {
     /* 0x2C */ s8 unk2C;
 } Spawn15150D1C;
 
+/* What lies under an object, filled in by func_1504715C. */
+typedef struct {
+    u8 unk0[0x24];
+} FloorInfo;
+
 extern struct17 D_800AAEEC[];
 // matching: the model goes in as s32; a struct255 * argument changes the temp registers
 void func_1503F404(s32, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
@@ -345,9 +350,9 @@ void func_15143134(struct17 *, struct17 *, Mtx *);
 void func_15143794(s16, s16, f32, struct17 *);
 s32 func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
 void func_15150D1C(Spawn15150D1C *, u8, s32);
-void func_151A9834(struct17 *, f32, f32, void *, s32, s32, s8 *, u8, s32);
+void func_151A9834(struct17 *, f32, f32, FloorInfo *, s32, s32, s8 *, u8, s32);
 void func_15151A38(Spawn15151A38 *, u8, s32);
-void func_1504715C(void *, struct127 *);
+void func_1504715C(FloorInfo *, struct127 *);
 
 /* Breaks the object apart: seven model pieces fly off its model's points with random velocity and
  * spin, plus three more effects at 200 units above it. */
@@ -475,13 +480,13 @@ void func_151CFA4C(struct127 *arg0, u8 arg1, s32 arg2) {
             func_15150D1C(&cfg2, arg1, arg2);
         }
         {
-            u8 dst[0x24];
+            FloorInfo floor;
             s8 flag;
             s32 pad; // matching: unused stack slot in the original frame
 
-            func_1504715C(dst, arg0);
+            func_1504715C(&floor, arg0);
             flag = 2;
-            func_151A9834(&pos, pos.unk4 - 2000.0f, 200.0f, dst, (func_150ADA20() & 3) + 7, 0, &flag, arg1, arg2);
+            func_151A9834(&pos, pos.unk4 - 2000.0f, 200.0f, &floor, (func_150ADA20() & 3) + 7, 0, &flag, arg1, arg2);
         }
     }
 }
@@ -709,53 +714,50 @@ Gfx *func_151D014C(Gfx *gfx, StripEffect *effect, s16 arg2) {
     return gfx;
 }
 
+/* The owner an effect follows, kept at the start of its data. */
 typedef struct {
-    s32 unk0;
-    u8  unk4;
-} SubA151D08F0;
+    struct127 *owner;
+    u8 ownerId; /* owner->unique_id at spawn; a mismatch means the owner died */
+} OwnerRef;
 
 typedef struct {
-    s32 unk0;
-    union {
-        s32 w4;
-        u8  b4;
-    } u4;
-    u8  unk8;
-    u8  unk9;
-} ArgB151D08F0;
+    EffectHead head;
+    OwnerRef ref;
+} OwnedEffect;
 
-void func_151D08F0(struct260 *arg0, s32 arg1, u8 arg2) {
-    SubA151D08F0 *temp_v0 = (SubA151D08F0 *)((u8 *)arg0 + 0x28);
-    ArgB151D08F0 *b = (ArgB151D08F0 *)arg1;
-    s32 b0;
+/* Message handler of the effects that follow an owner: frees the effect when its owner is gone
+ * (messages 0 and 0x18) and follows the owner through a swap (0x2D). */
+void func_151D08F0(OwnedEffect *effect, void *msg, u8 type) {
+    OwnerRef *ref = &effect->ref;
 
-    if (arg2 == 0 || arg2 == 0x18) {
-        b0 = b->unk0;
-        if ((b0 == temp_v0->unk0) || (b->u4.b4 == temp_v0->unk4)) {
-            func_1516972C((struct102 *)arg0);
+    if (type == 0 || type == 0x18) {
+        OwnerGoneMsg *gone = msg;
+        struct127 *obj = gone->obj;
+
+        if (obj == ref->owner || gone->objId == ref->ownerId) {
+            func_1516972C((struct102 *)effect);
         }
-    } else if (arg2 == 0x2D) {
-        if (temp_v0->unk0 == b->unk0) {
-            temp_v0->unk0 = b->u4.w4;
-            temp_v0->unk4 = b->unk9;
-        } else if (temp_v0->unk0 == b->u4.w4) {
-            temp_v0->unk0 = b->unk0;
-            temp_v0->unk4 = b->unk8;
+    } else if (type == 0x2D) {
+        OwnerSwapMsg *swap = msg;
+
+        if (ref->owner == swap->a) {
+            ref->owner = swap->b;
+            ref->ownerId = swap->bId;
+        } else if (ref->owner == swap->b) {
+            ref->owner = swap->a;
+            ref->ownerId = swap->aId;
         }
     }
 }
 
+/* Emission shape shared by func_1514FF44, func_15153CCC, func_1514F6E8 and func_1514F808. */
 typedef struct {
-    u8 unk0;
-    struct17 unk4;
-    struct17 unk10;
-    struct17 unk1C;
-    f32 unk28;
-} ShapeA151D09A8; /* 0x2C */
-
-typedef struct {
-    u8 unk0[0x24];
-} Dst151D09A8;
+    /* 0x00 */ u8 unk0;
+    /* 0x04 */ struct17 dir;
+    /* 0x10 */ struct17 unk10;
+    /* 0x1C */ struct17 unk1C;
+    /* 0x28 */ f32 unk28;
+} EmitShape; /* 0x2C */
 
 typedef struct {
     struct17 unk0;
@@ -779,7 +781,7 @@ typedef struct {
     u8 unk38;
     u8 pad39[3];
     f32 unk3C;
-} EmitA151D09A8; /* 0x40 */
+} Spawn1514FF44; /* 0x40 */
 
 typedef struct {
     struct17 unk0;
@@ -803,13 +805,13 @@ typedef struct {
     s16 unk3C;
     s16 unk3E;
     s32 unk40;
-} EmitB151D09A8; /* 0x44 */
+} Spawn15153CCC; /* 0x44 */
 
 typedef struct {
     s32 unk0;
     s32 unk4;
     s16 unk8;
-    s16 unkA;
+    s16 lifetime;
     s32 unkC;
     s32 unk10;
     u8 unk14;
@@ -832,7 +834,7 @@ typedef struct {
     struct17 unk3C;
     struct17 vel;
     f32 unk54;
-    u32 unk58;
+    u32 flags;
     s32 unk5C;
     u8 unk60;
     u8 unk61;
@@ -845,56 +847,64 @@ typedef struct {
     s16 unk68;
     u8 pad6A[2];
     f32 unk6C;
-} Particle151D09A8; /* 0x70 */
+} ParticleDesc; /* 0x70, passed to func_15130280 */
 
 extern f32 D_800AAF84[3];
 extern f32 D_800AAF90[3];
-extern void func_15145EA4(s32 *, s32 *, s32, s32);
-extern void func_1504715C(void *, struct127 *);
-extern void func_1514FF44(ShapeA151D09A8 *, EmitA151D09A8 *, Dst151D09A8 *, u8, s32);
-extern void func_15153CCC(ShapeA151D09A8 *, EmitB151D09A8 *, Dst151D09A8 *, u8, s32);
-extern s32 func_1514F6E8(ShapeA151D09A8 *);
-extern void func_1514F808(ShapeA151D09A8 *, f32, struct17 *);
-extern void *func_15130280(void *, u8, s32, s32, u8, s32);
+extern void func_15145EA4(f32 **, struct17 **, Mtx *, s32);
+extern void func_1514FF44(EmitShape *, Spawn1514FF44 *, FloorInfo *, u8, s32);
+extern void func_15153CCC(EmitShape *, Spawn15153CCC *, FloorInfo *, u8, s32);
+extern s32 func_1514F6E8(EmitShape *);
+extern void func_1514F808(EmitShape *, f32, struct17 *);
+/* Partial view of the particle func_15130280 creates. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0xA8];
+    /* 0xA8 */ struct260 *effect; /* effect that travels with the particle */
+} CarrierParticle;
 
+extern CarrierParticle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
+
+/* Emits two particle bursts along the line between two of the object's model points, and sometimes
+ * 5-10 more particles that each carry a func_151CEAAC effect. */
 void func_151D09A8(struct127 *arg0, u8 arg1, s32 arg2) {
     struct17 pos;
     struct17 dir;
-    Dst151D09A8 dst;
-    ShapeA151D09A8 a;
+    FloorInfo floor;
+    EmitShape shape;
 
     if (arg0->unk1D4 != NULL) {
         {
-            s32 srcs[2];
-            s32 dsts[2];
+            f32 *srcs[2];
+            struct17 *dsts[2];
 
-            srcs[0] = (s32)D_800AAF84;
-            srcs[1] = (s32)D_800AAF90;
-            dsts[0] = (s32)&pos;
-            dsts[1] = (s32)&dir;
-            func_15145EA4(srcs, dsts, (s32)arg0->unk1D4 + 0x80, 2);
+            srcs[0] = D_800AAF84;
+            srcs[1] = D_800AAF90;
+            dsts[0] = &pos;
+            dsts[1] = &dir;
+            func_15145EA4(srcs, dsts, (Mtx *)arg0->unk1D4 + 2, 2);
             dir.unk0 -= pos.unk0;
             dir.unk4 -= pos.unk4;
             dir.unk8 -= pos.unk8;
         }
-        func_1504715C(&dst, arg0);
-        a.unk0 = 0;
-        a.unk4 = dir;
-        a.unk10 = a.unk1C = *(struct17 *)&D_800A5480;
+        func_1504715C(&floor, arg0);
+        shape.unk0 = 0;
+        shape.dir = dir;
+        /* D_800A5480 (an f32 in variables.h) starts a zero vector. */
+        shape.unk10 = shape.unk1C = *(struct17 *)&D_800A5480;
         {
-            EmitA151D09A8 emitA;
+            Spawn1514FF44 emitA;
 
             emitA.unk0 = pos;
             emitA.unkC = 6;
             emitA.unkE = 8;
             emitA.unk10 = 0.03999999911f;
             emitA.unk14 = 0.02999999933f;
-            emitA.unk18 = 0x1E;
-            emitA.unk1A = 0x1E;
+            emitA.unk18 = 30;
+            emitA.unk1A = 30;
             emitA.unk1C = -1.467000127f;
             emitA.unk20 = 0.756000042f;
-            emitA.unk24 = 0x9B;
-            emitA.unk25 = 0x64;
+            emitA.unk24 = 155;
+            emitA.unk25 = 100;
             emitA.unk28 = 403.0f;
             emitA.unk2C = 455.0f;
             emitA.unk30 = 1;
@@ -902,11 +912,11 @@ void func_151D09A8(struct127 *arg0, u8 arg1, s32 arg2) {
             emitA.unk34 = 0.0f;
             emitA.unk38 = 1;
             emitA.unk3C = 0.0f;
-            a.unk28 = 750.0f;
-            func_1514FF44(&a, &emitA, &dst, arg1, arg2);
+            shape.unk28 = 750.0f;
+            func_1514FF44(&shape, &emitA, &floor, arg1, arg2);
         }
         {
-            EmitB151D09A8 emitB;
+            Spawn15153CCC emitB;
 
             emitB.unk0 = pos;
             emitB.unkC = 10.0f;
@@ -915,29 +925,29 @@ void func_151D09A8(struct127 *arg0, u8 arg1, s32 arg2) {
             emitB.unk18 = 0.8230000138f;
             emitB.unk1C = 0.03500000015f;
             emitB.unk20 = 0.03199999779f;
-            emitB.unk24 = 0xF;
+            emitB.unk24 = 15;
             emitB.unk26 = 8;
             emitB.unk28 = 3;
             emitB.unk2A = 2;
-            emitB.unk2C = 0x1E;
-            emitB.unk2E = 0x19;
-            emitB.unk30 = 0x9B;
-            emitB.unk32 = 0x64;
+            emitB.unk2C = 30;
+            emitB.unk2E = 25;
+            emitB.unk30 = 155;
+            emitB.unk32 = 100;
             emitB.unk38 = 0.0f;
-            emitB.unk3C = 0x10;
-            emitB.unk3E = 0xF;
+            emitB.unk3C = 16;
+            emitB.unk3E = 15;
             emitB.unk40 = 0;
             emitB.unk34 = 2;
-            a.unk28 = 750.0f;
-            func_15153CCC(&a, &emitB, &dst, arg1, arg2);
+            shape.unk28 = 750.0f;
+            func_15153CCC(&shape, &emitB, &floor, arg1, arg2);
         }
-        if (func_1514F6E8(&a) != 0) {
+        if (func_1514F6E8(&shape) != 0) {
             s32 count;
-            Particle151D09A8 spawn;
-            void *ret;
-            s32 pad;
+            ParticleDesc spawn;
+            CarrierParticle *particle;
+            s32 pad; // matching: unused stack slot in the original frame
 
-            a.unk28 = 1000.0f;
+            shape.unk28 = 1000.0f;
             count = (func_150ADA20() % 6U) + 5;
             spawn.unk1D = 0x3E;
             spawn.unk8 = 0x2203;
@@ -957,9 +967,9 @@ void func_151D09A8(struct127 *arg0, u8 arg1, s32 arg2) {
             spawn.pos = pos;
             spawn.unk3C = *(struct17 *)&D_800A5480;
             spawn.unk22 = 1;
-            spawn.unk58 = 0xC007;
+            spawn.flags = 0xC007;
             spawn.unk24 = 1.0f;
-            spawn.unkA = (func_150ADA20() % 11U) + 0x28;
+            spawn.lifetime = (func_150ADA20() % 11U) + 40;
             spawn.unk1E = 1;
             spawn.unk20 = 0xFF;
             spawn.unk60 = 6;
@@ -967,7 +977,7 @@ void func_151D09A8(struct127 *arg0, u8 arg1, s32 arg2) {
             spawn.unk64 = -1;
             spawn.unk62 = -1;
             spawn.unk63 = -1;
-            spawn.unk65 = 0xB;
+            spawn.unk65 = 11;
             spawn.unk5C = 0;
             spawn.unk66 = 0xFF;
             spawn.unk68 = 0;
@@ -975,11 +985,11 @@ void func_151D09A8(struct127 *arg0, u8 arg1, s32 arg2) {
             spawn.unk28 = 0.0f;
             spawn.unk6C = 10000.0f;
             while (count != 0) {
-                func_1514F808(&a, (func_150ADA68() * 0.03999999911f) + 0.04999999702f, &spawn.vel);
+                func_1514F808(&shape, (func_150ADA68() * 0.03999999911f) + 0.04999999702f, &spawn.vel);
                 spawn.unk54 = (func_150ADA68() * 1.340000033f) + -2.328999996f;
-                ret = func_15130280(&spawn, 1, 0, 4, arg1, arg2);
-                if (ret != NULL) {
-                    *(struct260 **)((u8 *)ret + 0xA8) = func_151CEAAC(NULL, ret, 0, arg1, arg2);
+                particle = func_15130280(&spawn, 1, 0, 4, arg1, arg2);
+                if (particle != NULL) {
+                    particle->effect = func_151CEAAC(NULL, particle, 0, arg1, arg2);
                 }
                 count--;
             }
