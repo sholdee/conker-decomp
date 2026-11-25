@@ -1,4 +1,5 @@
 #include <ultra64.h>
+/* functions.h declares func_15169260(s32, ...); passing a struct pointer through an s32 cast changes codegen. */
 #define func_15169260 func_15169260_s32_decl
 #include "functions.h"
 #undef func_15169260
@@ -26,7 +27,7 @@ typedef struct {
     /* 0x1B */ SpriteColor color1;
     /* 0x1F */ SpriteColor color2;
     /* 0x23 */ u8 unk23;
-    /* 0x24 */ s32 otherModeL;
+    /* 0x24 */ s32 otherModeH;  /* ORed with unk38, unk3C into the othermode-H word */
     /* 0x28 */ s32 unk28;
     /* 0x2C */ s32 unk2C;
     /* 0x30 */ s32 combineMode; /* index into D_800A4AC8 */
@@ -122,22 +123,15 @@ void func_15154C90(ScreenSprite *sprite) {
         }
     }
     index = sprite->unk68 & 0xF;
-    if (index != 0) {
-        if (finished == 0) {
-            s32 ret;
-
-            ret = D_8008ACC8[index](sprite);
-            if (ret == 0) {
-                finished = 1;
-            }
+    if (index != 0 && !finished) {
+        if (D_8008ACC8[index](sprite) == 0) {
+            finished = 1;
         }
     }
     if (sprite->info.flags & 8) {
-        s16 timer;
-
-        timer = sprite->info.timer;
-        if (timer < sprite->info.fadeStart) {
-            index = (s16)(timer * (u32)sprite->info.fadeRate);
+        if (sprite->info.timer < sprite->info.fadeStart) {
+            // matching: the alpha reuses index; a separate local changes register allocation
+            index = (s16)(sprite->info.timer * sprite->info.fadeRate);
             if (index < sprite->info.color1.alpha) {
                 sprite->info.color1.alpha = index;
             }
@@ -184,6 +178,7 @@ Gfx *func_15154D80(Gfx *gfx, ScreenSprite *sprite, s16 viewport) {
     if ((sprite->info.flags & 0x40) && (D_800C35EA == 1)) {
         return gfx;
     }
+    /* flag bits 11 and up: per viewport, skip unless func_15181CC8 and func_1517EF00 allow it */
     if ((sprite->info.flags & (1 << (viewport + 11))) &&
         ((func_15181CC8(viewport) == 0) || (func_1517EF00(viewport) > 200))) {
         return gfx;
@@ -204,7 +199,7 @@ Gfx *func_15154D80(Gfx *gfx, ScreenSprite *sprite, s16 viewport) {
     gfx = func_15142C10(gfx, envR, envG, envB, envA, &update);
     gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &update);
     gfx = func_1513F4E4(gfx, sprite->info.unk37, &update);
-    gfx = func_15142FBC(gfx, sprite->info.otherModeL | D_800D2C9C | G_TF_BILERP | G_TC_FILT |
+    gfx = func_15142FBC(gfx, sprite->info.otherModeH | D_800D2C9C | G_TF_BILERP | G_TC_FILT |
                             sprite->info.unk38 | sprite->info.unk3C,
                         D_800A4AC8[sprite->info.combineMode].unk0 | D_800A4AC8[sprite->info.combineMode].unk4, &update);
     x = vp->centerX + sprite->info.x * vp->scaleX;
@@ -304,7 +299,7 @@ s32 func_151555AC(f32 *center, f32 *halfSize, s32 *kinds, s32 kindCount) {
     i = 0;
     for (table = 0; table < 2; table++) {
         lists = D_800A6030;
-        i &= 0;
+        i &= 0; // matching: `i = 0` here (or a for loop) changes the loop's branch shape
         do {
             sprite = D_800DCE50[table][lists.id[i]];
             while (sprite != NULL) {
@@ -328,11 +323,12 @@ s32 func_151555AC(f32 *center, f32 *halfSize, s32 *kinds, s32 kindCount) {
                 }
                 sprite = next;
             }
-lbl:
+lbl: // matching: unused label; it splits the block before i++
             i++;
         } while (i < 2);
-        i = 0;
+        i = 0; // matching: redundant reset fills the outer loop's delay slot
     }
+    // matching: no `return 0`; i lives in v0, which is 0 once both tables are searched
 }
 
 void func_1515572C(s32 arg0, u8 arg1) {
