@@ -67,127 +67,137 @@ extern const f32 D_8009F814[1];
 extern const s32 D_8009F818[1];
 extern const f32 D_8009F81C[1];
 
-void func_150B06B0(struct127 *arg0, struct127 *arg1, u8 arg2, s32 arg3) {
+/*
+ * Spawns effects at actor's position, aimed by func_15143E24(other): actor id 0xA6 gets func_151C329C
+ * 50 units above it and one func_15152190 burst; any other actor gets a different burst plus two
+ * func_15153F18 passes (unk3C = 0, then 1) using the func_1504715C info for actor.
+ */
+void func_150B06B0(struct127 *actor, struct127 *other, u8 arg2, s32 arg3) {
     struct17 pos;
     s8 angle;
     Floor150B06B0 floor;
 
-    pos.unk0 = arg0->x_position;
-    pos.unk4 = arg0->y_position;
-    pos.unk8 = arg0->z_position;
-    angle = func_15143E24(arg1) + 0x40;
-    func_1504715C(&floor, arg0);
-    if (arg0->id == 0xA6) {
-        struct17 pos2;
-        Arg150B06B0_2190 b;
+    pos.unk0 = actor->x_position;
+    pos.unk4 = actor->y_position;
+    pos.unk8 = actor->z_position;
+    angle = func_15143E24(other) + 0x40;
+    func_1504715C(&floor, actor);
+    if (actor->id == 0xA6) {
+        struct17 raisedPos;
+        Arg150B06B0_2190 burst;
 
-        pos2.unk0 = pos.unk0;
-        pos2.unk4 = pos.unk4 + 50.0f;
-        pos2.unk8 = pos.unk8;
-        func_151C329C(&pos2, arg2, arg3);
-        b.unk00 = 0xA;
-        b.unk04 = 0xA;
-        b.unk08 = pos;
-        b.unk1C = 7.0f;
-        b.unk20 = 17.0f;
-        b.unk14 = angle - 0x28;
-        b.unk16 = 0x50;
-        b.unk18 = -0x2D;
-        b.unk1A = 0x1A;
-        b.unk2C = 0x19;
-        b.unk2E = 0x19;
-        b.unk24 = -0.8000000119f;
-        b.unk28 = 0.3440000117f;
-        b.unk30 = 0.7070000172f;
-        b.unk34 = 0.5070000291f;
-        b.unk38 = 26.41100121f;
-        func_15152190(&b, D_8009F810, D_8009F814, 1, 0.0f, 0, arg2, arg3);
+        raisedPos.unk0 = pos.unk0;
+        raisedPos.unk4 = pos.unk4 + 50.0f;
+        raisedPos.unk8 = pos.unk8;
+        func_151C329C(&raisedPos, arg2, arg3);
+        burst.unk00 = 10;
+        burst.unk04 = 10;
+        burst.unk08 = pos;
+        burst.unk1C = 7.0f;
+        burst.unk20 = 17.0f;
+        burst.unk14 = angle - 40;
+        burst.unk16 = 80;
+        burst.unk18 = -45;
+        burst.unk1A = 26;
+        burst.unk2C = 25;
+        burst.unk2E = 25;
+        burst.unk24 = -0.8000000119f;
+        burst.unk28 = 0.3440000117f;
+        burst.unk30 = 0.7070000172f;
+        burst.unk34 = 0.5070000291f;
+        burst.unk38 = 26.41100121f;
+        func_15152190(&burst, D_8009F810, D_8009F814, 1, 0.0f, 0, arg2, arg3);
     } else {
         {
-        Arg150B06B0_2190 b;
+            Arg150B06B0_2190 burst;
 
-        b.unk00 = 0xA;
-        b.unk04 = 0xA;
-        b.unk08 = pos;
-        b.unk1C = 7.0f;
-        b.unk20 = 17.0f;
-        b.unk14 = angle - 0x28;
-        b.unk16 = 0x50;
-        b.unk18 = -0x15;
-        b.unk1A = 0xD;
-        b.unk2C = 0x19;
-        b.unk2E = 0x19;
-        b.unk24 = -0.8000000119f;
-        b.unk28 = 0.3440000117f;
-        b.unk30 = 0.04900000244f;
-        b.unk34 = 0.1020000055f;
-        b.unk38 = 26.41100121f;
-        func_15152190(&b, D_8009F818, D_8009F81C, 1, 0.0f, 0, arg2, arg3);
+            burst.unk00 = 10;
+            burst.unk04 = 10;
+            burst.unk08 = pos;
+            burst.unk1C = 7.0f;
+            burst.unk20 = 17.0f;
+            burst.unk14 = angle - 40;
+            burst.unk16 = 80;
+            burst.unk18 = -21;
+            burst.unk1A = 13;
+            burst.unk2C = 25;
+            burst.unk2E = 25;
+            burst.unk24 = -0.8000000119f;
+            burst.unk28 = 0.3440000117f;
+            burst.unk30 = 0.04900000244f;
+            burst.unk34 = 0.1020000055f;
+            burst.unk38 = 26.41100121f;
+            func_15152190(&burst, D_8009F818, D_8009F81C, 1, 0.0f, 0, arg2, arg3);
         }
         {
-        Arg150B06B0_3F18 c;
-        c.unk08 = pos;
-        c.unk14 = 3.049999952f;
-        c.unk2C = 7;
-        c.unk2E = 3;
-        c.unk00 = angle - 0x3C;
-        c.unk02 = 0x78;
-        c.unk04 = -0x1E;
-        c.unk06 = 0x10;
-        c.unk30 = 3;
-        c.unk32 = 2;
-        c.unk34 = 0x14;
-        c.unk36 = 0x14;
-        c.unk38 = 0x9B;
-        c.unk3A = 0x64;
-        c.unk44 = 0x10;
-        c.unk46 = 0xF;
-        c.unk48 = 0;
-        c.unk3C = 0;
-        c.unk18 = 5.009999752f;
-        c.unk1C = 0.7000000477f;
-        c.unk20 = 0.5010000467f;
-        c.unk24 = 15.10000038f;
-        c.unk28 = 20.80000114f;
-        c.unk40 = 0.5f;
-        func_15153F18(&c, &c.unk08, &floor, arg2, arg3);
-        c.unk3C = 1;
-        func_15153F18(&c, &c.unk08, &floor, arg2, arg3);
+            Arg150B06B0_3F18 spray;
+
+            spray.unk08 = pos;
+            spray.unk14 = 3.049999952f;
+            spray.unk2C = 7;
+            spray.unk2E = 3;
+            spray.unk00 = angle - 60;
+            spray.unk02 = 120;
+            spray.unk04 = -30;
+            spray.unk06 = 16;
+            spray.unk30 = 3;
+            spray.unk32 = 2;
+            spray.unk34 = 20;
+            spray.unk36 = 20;
+            spray.unk38 = 155;
+            spray.unk3A = 100;
+            spray.unk44 = 16;
+            spray.unk46 = 15;
+            spray.unk48 = 0;
+            spray.unk3C = 0;
+            spray.unk18 = 5.009999752f;
+            spray.unk1C = 0.7000000477f;
+            spray.unk20 = 0.5010000467f;
+            spray.unk24 = 15.10000038f;
+            spray.unk28 = 20.80000114f;
+            spray.unk40 = 0.5f;
+            func_15153F18(&spray, &spray.unk08, &floor, arg2, arg3);
+            spray.unk3C = 1;
+            func_15153F18(&spray, &spray.unk08, &floor, arg2, arg3);
         }
     }
 }
 
-extern f32 D_8009F870;
+/*
+ * Picks a random spawn point on a 248-unit perimeter around owner: 122 units along the back edge
+ * (-31.5 along forward), or 63 units along either side (61 out along right). Writes the point to outPos
+ * (y taken from player->unk118) and a matching s16 yaw to outAngle.
+ */
+void func_150B0A60(struct127 *owner, struct127 *player, f32 *forward, f32 *right, f32 *outPos, s16 *outAngle) {
+    f32 along;
+    f32 spread;
+    f32 side;
 
-void func_150B0A60(s32 *arg0, s32 *arg1, f32 *arg2, f32 *arg3, f32 *arg4, s16 *arg5) {
-    f32 r1;
-    f32 v;
-    f32 ang;
-
-    *arg5 = (s16)(*(f32 *)((s32)arg0 + 0x40) * D_8009F870 - 128.0f);
-    r1 = func_150ADA68() * 248.0f;
-    v = func_150ADA68() + -0.5f;
-    if (r1 < 122.0f) {
-        arg4[0] = arg2[0] * -31.5f + (arg3[0] * v) * 122.0f;
-        arg4[1] = 0.0f;
-        arg4[2] = arg2[1] * -31.5f + (arg3[1] * v) * 122.0f;
+    *outAngle = (s16)(owner->unk40 * 0.7111111283f - 128.0f);
+    along = func_150ADA68() * 248.0f;
+    spread = func_150ADA68() + -0.5f;
+    if (along < 122.0f) {
+        outPos[0] = forward[0] * -31.5f + (right[0] * spread) * 122.0f;
+        outPos[1] = 0.0f;
+        outPos[2] = forward[1] * -31.5f + (right[1] * spread) * 122.0f;
     } else {
-        f32 k = 63.0f;
-        ang = 61.0f;
-        r1 = r1 - 122.0f;
-        if (r1 < k) {
-            ang = -ang;
-            *arg5 += 0x40;
+        f32 sideLength = 63.0f; // matching: a named local, not the literal, keeps 63.0f in one register
+
+        side = 61.0f;
+        along = along - 122.0f;
+        if (along < sideLength) {
+            side = -side;
+            *outAngle += 0x40;
         } else {
-            *arg5 -= 0x40;
+            *outAngle -= 0x40;
         }
-        arg4[0] = arg2[0] * k * v + arg3[0] * ang;
-        arg4[1] = 0.0f;
-        arg4[2] = arg2[1] * k * v + arg3[1] * ang;
+        outPos[0] = forward[0] * sideLength * spread + right[0] * side;
+        outPos[1] = 0.0f;
+        outPos[2] = forward[1] * sideLength * spread + right[1] * side;
     }
-    arg4[0] += *(f32 *)((s32)arg0 + 0x14);
-    arg4[1] += *(f32 *)((s32)arg1 + 0x118);
-    arg4[2] += *(f32 *)((s32)arg0 + 0x1C);
+    outPos[0] += owner->x_position;
+    outPos[1] += player->unk118;
+    outPos[2] += owner->z_position;
 }
 
 void func_150B0C58(void *, u8, s32);
