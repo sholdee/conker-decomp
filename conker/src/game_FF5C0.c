@@ -72,11 +72,9 @@ void func_150D2110(s16 duration, f32 litTime, f32 darkTime, u8 litAlpha, u8 dark
 void func_150D21CC(StrobeEffect *effect) {
     StrobeData *data = &effect->data;
 
-    effect->data.timer += D_800BE9A4;
-    if (effect->data.timer > effect->data.period) {
-        do {
-            data->timer -= data->period;
-        } while (data->timer > data->period);
+    data->timer += D_800BE9A4;
+    while (data->timer > data->period) {
+        data->timer -= data->period;
     }
     if (data->timer <= data->litTime) {
         data->lit = TRUE;
