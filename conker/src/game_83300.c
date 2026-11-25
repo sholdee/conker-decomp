@@ -40,7 +40,7 @@ void func_1505D6F0(struct127 *arg0, s32 arg1);
 u8   func_150599C8(struct127 *arg0, u8 arg1, u16 arg2);
 void func_1505A250(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4);
 void func_150611E8(struct127 *arg0, s32 arg1);
-void func_1505A770(void *arg0);
+void func_1505A770(struct127 *actor);
 void func_15059C84(struct127 *actor);
 void func_1505A3A8(f32 arg0, void *arg1, f32 arg2, f32 arg3, u8 arg4);
 
@@ -1727,20 +1727,21 @@ void func_15059C84(struct127 *actor) {
 }
 f32 func_150AD780(f32);
 f32 func_150AD78C(f32);
-void func_1505A184(u16 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4, f32 *arg5) {
-    f32 s2;
-    union { f32 f; f64 d; } ang2;
-    f32 c2;
+/* Splits `speed` (halved) along yaw `angle` and pitch `pitch` (degrees) into x/z/y components. */
+void func_1505A184(u16 angle, f32 speed, f32 pitch, f32 *outX, f32 *outZ, f32 *outY) {
+    f32 sinYaw;
+    union { f32 f; f64 d; } yaw; // matching: the 8-byte union gives the frame IDO used
+    f32 cosYaw;
 
-    arg1 = arg1 * 0.5f;
-    arg2 = arg2 * D_800994B8;
-    *arg5 = func_150AD78C(arg2) * -arg1;
-    arg1 = func_150AD780(arg2) * arg1;
-    ang2.f = (f32)arg0 * D_800994BC;
-    s2 = func_150AD780(ang2.f);
-    c2 = func_150AD78C(ang2.f);
-    *arg3 = s2 * arg1;
-    *arg4 = -c2 * arg1;
+    speed = speed * 0.5f;
+    pitch = pitch * D_800994B8;
+    *outY = func_150AD78C(pitch) * -speed;
+    speed = func_150AD780(pitch) * speed;
+    yaw.f = (f32)angle * D_800994BC;
+    sinYaw = func_150AD780(yaw.f);
+    cosYaw = func_150AD78C(yaw.f);
+    *outX = sinYaw * speed;
+    *outZ = -cosYaw * speed;
 }
 void func_1505A250(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4) {
     f32 dx = arg0 - *arg3, dy = arg1 - *arg4, mag, sx, sy;
@@ -1818,76 +1819,76 @@ void func_1505A3A8(f32 arg0, void *arg1, f32 arg2, f32 arg3, u8 arg4) {
     }
 }
 
-f32 func_1505A5CC(struct49 *arg0) {
+/* Analog stick deflection of a controller pad (unk2/unk3 = stick x/y), scaled and capped at 35. */
+f32 func_1505A5CC(struct49 *pad) {
     f32 x, y;
-    f32 ret;
+    f32 mag;
 
-    // regalloc nonsense
-    ret = arg0->unk2;
-    x = ret;
-    y = arg0->unk3;
+    mag = pad->unk2; // matching: staging x through mag steers IDO's register choice
+    x = mag;
+    y = pad->unk3;
 
-    x = sqrtf(x*x + y*y) * 0.6000000238f;
-    ret = x;
+    x = sqrtf(x * x + y * y) * 0.6000000238f;
+    mag = x;
 
-    if (ret > 35.0f) {
-        ret = 35.0f;
+    if (mag > 35.0f) {
+        mag = 35.0f;
     }
 
-    return ret;
+    return mag;
 }
 
-u16 func_1505A630(f32 arg0, f32 arg1, s32 arg2) {
-    return ((u16) (u32) (func_150484A0(-arg0, arg1) * 10430.37793f)) + 16384;
+/* Binary angle (0x10000 = full turn) of the direction (x, z); the third argument is unused. */
+u16 func_1505A630(f32 x, f32 z, s32 unused) {
+    return ((u16) (u32) (func_150484A0(-x, z) * 10430.37793f)) + 16384;
 }
 
-f32 func_1505A6F8(struct127 *arg0, struct127 *arg1) {
+/* Horizontal (xz) distance between two actors. */
+f32 func_1505A6F8(struct127 *a, struct127 *b) {
     f32 x, z;
 
-    x = arg0->x_position - arg1->x_position;
+    x = a->x_position - b->x_position;
     x *= x;
-    z = arg0->z_position - arg1->z_position;
+    z = a->z_position - b->z_position;
     z *= z;
     return sqrtf(x + z);
 }
 
-// distance between two objects?
-f32 func_1505A72C(struct127 *arg0, struct127 *arg1) {
+/* 3D distance between two actors. */
+f32 func_1505A72C(struct127 *a, struct127 *b) {
     f32 x, y, z;
 
-    x = arg0->x_position - arg1->x_position;
+    x = a->x_position - b->x_position;
     x *= x;
-    z = arg0->z_position - arg1->z_position;
+    z = a->z_position - b->z_position;
     z *= z;
-    y = arg0->y_position - arg1->y_position;
+    y = a->y_position - b->y_position;
     y *= y;
     return sqrtf(x + z + y);
 }
 
-void func_1505A770(void *arg0) {
+/* Applies gravity: in the air it integrates in 0.1 steps; on the ground in a single step. Fall speed is capped at 500. */
+void func_1505A770(struct127 *actor) {
     f32 velocity;
     f32 decrement;
     s32 count;
     s32 i;
 
-    if ((*(f32 *)((u8 *)arg0 + 0x28) != 0.0f) ||
-        (velocity = *(f32 *)((u8 *)arg0 + 0x20), velocity > 0.0f)) {
-        decrement = *(f32 *)((u8 *)arg0 + 0x24) * 0.1f;
+    if ((actor->unk28 != 0.0f) || (velocity = actor->y_velocity, velocity > 0.0f)) {
+        decrement = actor->gravity * 0.1f;
         count = (s32)(D_800D1550 / 0.1f);
         for (i = 0; i < count; i++) {
-            *(f32 *)((u8 *)arg0 + 0x20) -= decrement;
-            *(f32 *)((u8 *)arg0 + 0x18) +=
-                *(f32 *)((u8 *)arg0 + 0x20) * 0.05f;
+            actor->y_velocity -= decrement;
+            actor->y_position += actor->y_velocity * 0.05f;
         }
-        if (*(f32 *)((u8 *)arg0 + 0x20) < -500.0f) {
-            *(f32 *)((u8 *)arg0 + 0x20) = -500.0f;
+        if (actor->y_velocity < -500.0f) {
+            actor->y_velocity = -500.0f;
         }
     } else {
-        *(f32 *)((u8 *)arg0 + 0x20) = velocity -
-            (*(f32 *)((u8 *)arg0 + 0x24) * D_800D1550);
-        velocity = *(f32 *)((u8 *)arg0 + 0x20); *(f32 *)((u8 *)arg0 + 0x18) += velocity * D_800D1550 * 0.5f;
+        actor->y_velocity = velocity - (actor->gravity * D_800D1550);
+        velocity = actor->y_velocity; actor->y_position += velocity * D_800D1550 * 0.5f; // matching: one line (as1 tie-break)
         if (velocity < -500.0f) {
-            *(f32 *)((u8 *)arg0 + 0x20) = -500.0f;
+            actor->y_velocity = -500.0f;
         }
     }
 }
