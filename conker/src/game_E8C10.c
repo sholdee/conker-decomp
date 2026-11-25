@@ -5,12 +5,6 @@
 s32 func_150ADA20(void);
 #include "variables.h"
 
-extern f32 D_8009FFD0;
-extern f32 D_8009FFD4;
-extern f32 D_8009FFD8;
-extern f32 D_8009FFDC;
-extern f32 D_8009FFE0;
-extern f32 D_8009FFE4;
 s32 func_15147DA0(void *arg0, void *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
                   s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, s32 *arg11,
                   s32 arg12, u8 arg13, s32 arg14);
@@ -63,13 +57,8 @@ typedef struct GameE8C10Particle {
 } GameE8C10Particle;
 
 void *func_15132A4C(void *, s32, s32, s32, u8, s32);
-extern f32 D_8009FE94;
-extern f32 D_8009FE98;
-extern f32 D_8009FE9C;
-extern f32 D_8009FEA0;
-extern f32 D_8009FEA4;
 
-s32 func_150BB760(u8 *arg0) {
+s32 func_150BB760(struct127 *actor) {
     GameE8C10Particle particle;
     f32 width;
     f32 height;
@@ -78,16 +67,16 @@ s32 func_150BB760(u8 *arg0) {
     f32 offsetX;
     f32 offsetZ;
 
-    if (arg0[4] != 0x20) {
+    if (actor->id != 0x20) {
         return 1;
     }
-    if (arg0 != NULL && *(s32 *)arg0 != 0 && *(s32 *)(arg0 + 0x1D4) != 0) {
-        width = *(s16 *)(arg0 + 0xE4);
-        height = *(s16 *)(arg0 + 0xE6);
-        sine = func_151423D8(*(u16 *)(arg0 + 0x76) >> 8);
-        cosine = func_151423D8((*(u16 *)(arg0 + 0x76) >> 8) + 0x40);
-        offsetX = *(f32 *)(arg0 + 0x3C) * sine * 0.5f;
-        offsetZ = *(f32 *)(arg0 + 0x3C) * cosine * 0.5f;
+    if (actor != NULL && actor->interaction_state != 0 && actor->unk1D4 != NULL) {
+        width = actor->unkE4;
+        height = actor->unkE6;
+        sine = func_151423D8(actor->unk76 >> 8);
+        cosine = func_151423D8((actor->unk76 >> 8) + 0x40);
+        offsetX = actor->xz_velocity * sine * 0.5f;
+        offsetZ = actor->xz_velocity * cosine * 0.5f;
         particle.field56 = 1;
         particle.field50 = 0x29E9;
         particle.field58 = 0;
@@ -102,13 +91,13 @@ s32 func_150BB760(u8 *arg0) {
         particle.field67 = 0;
         particle.field68 = 0;
         particle.field6A = 1;
-        particle.field6C = (s32)arg0;
+        particle.field6C = (s32)actor;
         particle.field1C = 1.0f;
         particle.field20 = 1.0f;
         particle.field24 = 1.0f;
         particle.field48 = 0.0f;
         particle.field4C = -1.0f;
-        particle.field70 = arg0[0x3B];
+        particle.field70 = actor->unique_id;
         particle.field72 = 0x20;
         particle.field74 = 7;
         {
@@ -133,30 +122,30 @@ s32 func_150BB760(u8 *arg0) {
             distance = func_150ADA68() * width;
             spreadX = spreadSine * distance;
             spreadZ = -spreadCosine * distance;
-            heading = (*(u16 *)(arg0 + 0x76) >> 8) - (func_150ADA20() & 0x3F) - 0x20;
+            heading = (actor->unk76 >> 8) - (func_150ADA20() & 0x3F) - 0x20;
             headingSine = func_151423D8(heading);
             headingCosine = func_151423D8(heading - 0x40);
             speed = func_150ADA68() * 5.0f + 3.0f;
             velocityX = headingCosine * speed;
             velocityZ = headingSine * speed;
-            size = func_150ADA68() * D_8009FE94 + D_8009FE98;
-            distance = func_150ADA68() * D_8009FE9C + D_8009FEA0;
+            size = func_150ADA68() * 0.05f + 0.01f;
+            distance = func_150ADA68() * 0.05f + 0.01f;
             particle.field8 = size;
             particle.fieldC = distance;
             particle.field0 = (size + distance) * 0.5f;
             particle.field10 = func_150ADA68() * 360.0f;
             particle.field14 = func_150ADA68() * 360.0f;
             particle.field18 = func_150ADA68() * 360.0f;
-            particle.field28 = *(f32 *)(arg0 + 0x14) + spreadX;
-            particle.field2C = *(f32 *)(arg0 + 0x18) + func_150ADA68() * height + 4.0f;
-            particle.field30 = *(f32 *)(arg0 + 0x1C) + spreadZ;
+            particle.field28 = actor->x_position + spreadX;
+            particle.field2C = actor->y_position + func_150ADA68() * height + 4.0f;
+            particle.field30 = actor->z_position + spreadZ;
             particle.field34 = velocityX + offsetX;
             particle.field38 = func_150ADA68() * 5.0f + 3.0f;
             particle.field3C = velocityZ + offsetZ;
             particle.field40 = 25.0f - func_150ADA68() * 50.0f;
             particle.field44 = 25.0f - func_150ADA68() * 50.0f;
             particle.field54 = (func_150ADA20() & 0x1F) + 0x3C;
-            particle.field4 = func_150ADA68() * D_8009FEA4 + 0.25f;
+            particle.field4 = func_150ADA68() * 0.2f + 0.25f;
             func_15132A4C(&particle, 3, 0xFF, 0, 0xFF, 0);
         }
     }
@@ -187,7 +176,7 @@ s32 func_15168800(void *arg0, s32 arg1, s32 arg2);
 void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32,
                   s32, s32, s32, s32, s32, s32, s32, s32);
 
-s32 func_150BBB5C(u8 *arg0) {
+s32 func_150BBB5C(struct127 *actor) {
     GameE8C10Particle particle;
     s8 i;
     GameE8C10SpawnRequest request;
@@ -201,27 +190,28 @@ s32 func_150BBB5C(u8 *arg0) {
     f32 offsetX;
     f32 offsetZ;
 
-    if (arg0[4] != 0x20) {
+    if (actor->id != 0x20) {
         return 1;
     }
-    if (arg0 != NULL && *(s32 *)arg0 != 0) {
-        width = *(s16 *)(arg0 + 0xE4);
-        height = *(s16 *)(arg0 + 0xE6);
+    if (actor != NULL && actor->interaction_state != 0) {
+        width = actor->unkE4;
+        height = actor->unkE6;
         count1 = (func_150ADA20() & 3) + 6;
         count2 = (func_150ADA20() & 3) + 0xA;
-        sine = func_151423D8(*(u16 *)(arg0 + 0x76) >> 8);
-        cosine = func_151423D8((*(u16 *)(arg0 + 0x76) >> 8) + 0x40);
-        offsetX = *(f32 *)(arg0 + 0x3C) * sine * 0.5f;
-        offsetZ = *(f32 *)(arg0 + 0x3C) * cosine * 0.5f;
-        alpha = (*(s32 *)(arg0 + 0x1D4) != 0) ? 0xFF - (((*(u32 *)(arg0 + 0x184) >> 5) & 0x7FFFFFF) << 6) : 0xFF;
+        sine = func_151423D8(actor->unk76 >> 8);
+        cosine = func_151423D8((actor->unk76 >> 8) + 0x40);
+        offsetX = actor->xz_velocity * sine * 0.5f;
+        offsetZ = actor->xz_velocity * cosine * 0.5f;
+        // matching: the no-op mask is needed; without it IDO emits different code here
+        alpha = (actor->unk1D4 != NULL) ? 0xFF - ((((u32)actor->unk184 >> 5) & 0x7FFFFFF) << 6) : 0xFF;
         request.field8A = 0x80;
         request.field88 = 0;
-        request.field8C = *(f32 *)(arg0 + 0x14);
-        request.field8E = *(f32 *)(arg0 + 0x180) + 60.0f;
-        request.field90 = *(f32 *)(arg0 + 0x1C);
+        request.field8C = actor->x_position;
+        request.field8E = actor->unk180 + 60.0f;
+        request.field90 = actor->z_position;
         request.field92 = width;
         request.field94 = height;
-        request.field96 = *(f32 *)(arg0 + 0x180);
+        request.field96 = actor->unk180;
         request.fieldA2 = -1;
         request.fieldA0 = 0x2E;
         request.field98 = 0x34;
@@ -248,7 +238,7 @@ s32 func_150BBB5C(u8 *arg0) {
         particle.field70 = 0;
         particle.field72 = 0x20;
         particle.field74 = 7;
-        particle.field4 = 0.400000006f;
+        particle.field4 = 0.4f;
         particle.field1C = 1.0f;
         particle.field20 = 1.0f;
         particle.field24 = 1.0f;
@@ -283,17 +273,17 @@ s32 func_150BBB5C(u8 *arg0) {
             speed = func_150ADA68() * 4.0f + 2.0f;
             velocityX = headingCosine * speed;
             velocityZ = headingSine * speed;
-            size = func_150ADA68() * 0.02999999933f + 0.02999999933f;
-            size2 = func_150ADA68() * 0.02999999933f + 0.02999999933f;
+            size = func_150ADA68() * 0.03f + 0.03f;
+            size2 = func_150ADA68() * 0.03f + 0.03f;
             particle.field8 = size;
             particle.fieldC = size2;
             particle.field0 = (size + size2) * 0.5f;
             particle.field10 = func_150ADA68() * 360.0f;
             particle.field14 = func_150ADA68() * 360.0f;
             particle.field18 = func_150ADA68() * 360.0f;
-            particle.field28 = *(f32 *)(arg0 + 0x14) + spreadX;
-            particle.field2C = *(f32 *)(arg0 + 0x18) + func_150ADA68() * height + 5.0f;
-            particle.field30 = *(f32 *)(arg0 + 0x1C) + spreadZ;
+            particle.field28 = actor->x_position + spreadX;
+            particle.field2C = actor->y_position + func_150ADA68() * height + 5.0f;
+            particle.field30 = actor->z_position + spreadZ;
             particle.field34 = offsetX + velocityX;
             particle.field38 = func_150ADA68() * 7.0f + 13.0f;
             particle.field3C = offsetZ + velocityZ;
@@ -318,34 +308,34 @@ s32 func_150BBB5C(u8 *arg0) {
             angle = func_150ADA20() & 0xFF;
             sine2 = func_151423D8(angle);
             cosine2 = func_151423D8(angle - 0x40);
-            pos[0] = *(f32 *)(arg0 + 0x14) + sine2 * distance;
-            pos[1] = *(f32 *)(arg0 + 0x18) + func_150ADA68() * height + 5.0f;
-            pos[2] = *(f32 *)(arg0 + 0x1C) - cosine2 * distance;
+            pos[0] = actor->x_position + sine2 * distance;
+            pos[1] = actor->y_position + func_150ADA68() * height + 5.0f;
+            pos[2] = actor->z_position - cosine2 * distance;
             dir[0] = cosine2 * speed + offsetX;
             dir[1] = func_150ADA68() * 9.0f + 15.0f;
             dir[2] = sine2 * speed + offsetZ;
-            func_151DA6F8(pos, dir, 1.600000024f, (func_150ADA20() & 7) + 0x19, (func_150ADA20() & 0x7F) + 0x80,
-                          func_150ADA68() * 0.200000003f * width + 13.0f, (func_150ADA20() & 3) + 2, 0,
+            func_151DA6F8(pos, dir, 1.6f, (func_150ADA20() & 7) + 0x19, (func_150ADA20() & 0x7F) + 0x80,
+                          func_150ADA68() * 0.2f * width + 13.0f, (func_150ADA20() & 3) + 2, 0,
                           1.0f, 1.0f, 1, 1, 0, 0x10, 0xF, 0, 0xFF, 0);
             count2--;
         }
         particle.field56 = 0;
         particle.field54 = (func_150ADA20() & 0xF) + 0x10;
-        particle.field4 = 0.6000000238f;
-        particle.field10 = *(f32 *)(arg0 + 0xB8);
-        particle.field14 = *(f32 *)(arg0 + 0x40);
-        particle.field18 = *(f32 *)(arg0 + 0xC4);
+        particle.field4 = 0.6f;
+        particle.field10 = actor->unkB8;
+        particle.field14 = actor->unk40;
+        particle.field18 = actor->unkC4;
         particle.field50 = 0x39E8;
         particle.field1C = 1.0f;
         particle.field20 = 1.0f;
         particle.field24 = 1.0f;
         particle.field48 = 0.0f;
-        particle.field4C = -1.600000024f;
-        particle.field28 = *(f32 *)(arg0 + 0x14);
-        particle.field2C = *(f32 *)(arg0 + 0x18);
-        particle.field30 = *(f32 *)(arg0 + 0x1C);
-        particle.field0 = *(f32 *)(arg0 + 0x14C) * 20.0f;
-        particle.field8 = *(f32 *)(arg0 + 0x14C) + *(f32 *)(arg0 + 0x14C);
+        particle.field4C = -1.6f;
+        particle.field28 = actor->x_position;
+        particle.field2C = actor->y_position;
+        particle.field30 = actor->z_position;
+        particle.field0 = actor->xz_scale * 20.0f;
+        particle.field8 = actor->xz_scale + actor->xz_scale;
         particle.field58 = 0;
         particle.field5C = 0;
         particle.field60 = 0xFF;
@@ -374,7 +364,7 @@ s32 func_150BBB5C(u8 *arg0) {
             f32 pitchCosine;
             f32 horizontal;
 
-            speed = *(f32 *)(arg0 + 0x150) * (func_150ADA68() * 30.0f) + 10.0f;
+            speed = actor->y_scale * (func_150ADA68() * 30.0f) + 10.0f;
             yaw = func_150ADA20() & 0x7F;
             pitch = -0x20 - (func_150ADA20() & 0x1F);
             yawSine = func_151423D8(yaw);
@@ -391,12 +381,12 @@ s32 func_150BBB5C(u8 *arg0) {
             i++;
         if (i < 2) goto loop3;
         }
-        func_10010F88(0xAA, 0x6590, 0, 0, 0, *(f32 *)(arg0 + 0x14), *(f32 *)(arg0 + 0x18),
-                      *(f32 *)(arg0 + 0x1C), 0xC8, 0x7D0);
+        func_10010F88(0xAA, 0x6590, 0, 0, 0, actor->x_position, actor->y_position,
+                      actor->z_position, 0xC8, 0x7D0);
     }
 }
 
-s32 func_150BC488(u8 *arg0) {
+s32 func_150BC488(struct127 *actor) {
     f32 width;
     s32 count;
     s32 ok;
@@ -404,11 +394,11 @@ s32 func_150BC488(u8 *arg0) {
     s32 n;
     GameE8C10Particle particle;
 
-    if (arg0[4] != 0x20) {
+    if (actor->id != 0x20) {
         return 1;
     }
-    if (arg0 != NULL && *(s32 *)arg0 != 0) {
-        width = *(s16 *)(arg0 + 0xE4);
+    if (actor != NULL && actor->interaction_state != 0) {
+        width = actor->unkE4;
         count = (func_150ADA20() & 3) + 6;
         particle.field56 = 1;
         particle.field50 = 0x29E9;
@@ -464,7 +454,7 @@ s32 func_150BC488(u8 *arg0) {
             speed = func_150ADA68() * 4.0f + 4.0f;
             velocityX = headingCosine * speed;
             velocityZ = headingSine * speed;
-            velocityY = *(f32 *)(arg0 + 0x20) * 0.05f;
+            velocityY = actor->y_velocity * 0.05f;
             sizeA = func_150ADA68() * 0.04f + 0.02f;
             sizeB = func_150ADA68() * 0.04f + 0.02f;
             particle.field8 = sizeA;
@@ -473,9 +463,9 @@ s32 func_150BC488(u8 *arg0) {
             particle.field10 = func_150ADA68() * 360.0f;
             particle.field14 = func_150ADA68() * 360.0f;
             particle.field18 = func_150ADA68() * 360.0f;
-            particle.field28 = *(f32 *)(arg0 + 0x14) + spreadX;
-            particle.field2C = *(f32 *)(arg0 + 0x18);
-            particle.field30 = *(f32 *)(arg0 + 0x1C) + spreadZ;
+            particle.field28 = actor->x_position + spreadX;
+            particle.field2C = actor->y_position;
+            particle.field30 = actor->z_position + spreadZ;
             particle.field34 = velocityX;
             particle.field38 = velocityY;
             particle.field3C = velocityZ;
@@ -501,9 +491,9 @@ s32 func_150BC488(u8 *arg0) {
                 angle = func_150ADA20() & 0xFF;
                 sine = func_151423D8(angle);
                 cosine = func_151423D8(angle - 0x40);
-                position[0] = *(f32 *)(arg0 + 0x14);
-                position[1] = *(f32 *)(arg0 + 0x18) + func_150ADA68() * 5.0f;
-                position[2] = *(f32 *)(arg0 + 0x1C);
+                position[0] = actor->x_position;
+                position[1] = actor->y_position + func_150ADA68() * 5.0f;
+                position[2] = actor->z_position;
                 velocity[0] = cosine * speed;
                 velocity[1] = 0.0f;
                 velocity[2] = sine * speed;
@@ -520,20 +510,20 @@ s32 func_150BC488(u8 *arg0) {
             particle.field56 = 0;
             particle.field54 = (func_150ADA20() & 0xF) + 0x10;
             particle.field4 = 0.6f;
-            particle.field10 = *(f32 *)(arg0 + 0xB8);
-            particle.field14 = *(f32 *)(arg0 + 0x40);
-            particle.field18 = *(f32 *)(arg0 + 0xC4);
+            particle.field10 = actor->unkB8;
+            particle.field14 = actor->unk40;
+            particle.field18 = actor->unkC4;
             particle.field50 = 0x39E8;
             particle.field1C = 1.0f;
             particle.field20 = 1.0f;
             particle.field24 = 1.0f;
             particle.field48 = 0.0f;
             particle.field4C = -1.6f;
-            particle.field28 = *(f32 *)(arg0 + 0x14);
-            particle.field2C = *(f32 *)(arg0 + 0x18);
-            particle.field30 = *(f32 *)(arg0 + 0x1C);
-            particle.field0 = *(f32 *)(arg0 + 0x14C) * 20.0f;
-            particle.field8 = *(f32 *)(arg0 + 0x14C) * 2.0f;
+            particle.field28 = actor->x_position;
+            particle.field2C = actor->y_position;
+            particle.field30 = actor->z_position;
+            particle.field0 = actor->xz_scale * 20.0f;
+            particle.field8 = actor->xz_scale * 2.0f;
             particle.field58 = 0;
             particle.field5C = 0;
             particle.field60 = 0xFF;
@@ -580,19 +570,19 @@ s32 func_150BC488(u8 *arg0) {
     }
 }
 
-s32 func_150BCBBC(u8 *arg0) {
+s32 func_150BCBBC(struct127 *actor) {
     f32 width;
     f32 height;
     s32 count;
     s32 ok;
     GameE8C10Particle particle;
 
-    if (arg0[4] != 0x20) {
+    if (actor->id != 0x20) {
         return 1;
     }
-    if (arg0 != NULL && *(s32 *)arg0 != 0) {
-        width = *(s16 *)(arg0 + 0xE4);
-        height = *(s16 *)(arg0 + 0xE6);
+    if (actor != NULL && actor->interaction_state != 0) {
+        width = actor->unkE4;
+        height = actor->unkE6;
         count = func_150ADA20() & 1;
         particle.field56 = 1;
         particle.field54 = 0x96;
@@ -644,9 +634,9 @@ s32 func_150BCBBC(u8 *arg0) {
             distance = func_150ADA68() * 0.03f + 0.01f;
             sizeA = func_150ADA68() * 0.03f + 0.01f;
             if (func_150ADA20() & 1) {
-                heading = (u8)((*(u16 *)(arg0 + 0x76) >> 8) + (s32)(8 - ((u32)func_150ADA20() & 0xF)));
+                heading = (u8)((actor->unk76 >> 8) + (s32)(8 - ((u32)func_150ADA20() & 0xF)));
             } else {
-                heading = (u8)((*(u16 *)(arg0 + 0x76) >> 8) + (s32)(8 - ((u32)func_150ADA20() & 0xF)) - 0x80);
+                heading = (u8)((actor->unk76 >> 8) + (s32)(8 - ((u32)func_150ADA20() & 0xF)) - 0x80);
             }
             headingSine = func_151423D8(heading);
             headingCosine = func_151423D8(heading - 0x40);
@@ -659,9 +649,9 @@ s32 func_150BCBBC(u8 *arg0) {
             particle.field10 = func_150ADA68() * 360.0f;
             particle.field14 = func_150ADA68() * 360.0f;
             particle.field18 = func_150ADA68() * 360.0f;
-            particle.field28 = *(f32 *)(arg0 + 0x14) + spreadX;
-            particle.field2C = *(f32 *)(arg0 + 0x18) + func_150ADA68() * height + 4.0f;
-            particle.field30 = *(f32 *)(arg0 + 0x1C) + spreadZ;
+            particle.field28 = actor->x_position + spreadX;
+            particle.field2C = actor->y_position + func_150ADA68() * height + 4.0f;
+            particle.field30 = actor->z_position + spreadZ;
             particle.field34 = velocityX;
             particle.field38 = func_150ADA68() * 5.0f + 3.0f;
             particle.field3C = velocityZ;
@@ -675,7 +665,6 @@ s32 func_150BCBBC(u8 *arg0) {
     }
 }
 
-extern f32 D_8009FEF8;
 
 struct Obj150BCFB8 {
     u8 pad0[0x10];
@@ -695,7 +684,7 @@ struct Obj150BCFB8 {
 };
 
 s32 func_150BCFB8(struct Obj150BCFB8 *arg0, s32 a1, s32 a2, s32 a3, f32 arg5) {
-    arg0->x3C = (arg0->x10 * D_8009FEF8) + arg5;
+    arg0->x3C = (arg0->x10 * 1.1f) + arg5;
     if (-2.0f < arg0->x48) {
         arg0->x44 = 0.0f;
         arg0->x60 &= ~0x6F;
@@ -852,8 +841,8 @@ void func_150BD070(u8 arg0, s32 arg1) {
             particle.f48 = func_150ADA68() * 45.46600342f + -22.73300171f;
             func_1514470C(players[func_150ADA20() & 1], &particle.pos);
             r1 = func_150ADA20();
-            func_15143794((u32)r1 % 31U - 0x54, func_150ADA20() % 26U - 0x2D, func_150ADA68() * 21.80000114f + 30.20000076f, &particle.vel);
-            particle.f4C = func_150ADA68() * 1.129000068f + -1.909000039f;
+            func_15143794((u32)r1 % 31U - 0x54, func_150ADA20() % 26U - 0x2D, func_150ADA68() * 21.80000114f + 30.2f, &particle.vel);
+            particle.f4C = func_150ADA68() * 1.129000068f + -1.909f;
             func_1513264C(&particle, 3, 0xFF, 0, 0, arg0, arg1);
             count--;
         }
@@ -882,7 +871,7 @@ void func_150BD070(u8 arg0, s32 arg1) {
         spawn.unk1D = 0x6C;
         spawn.unk1E = 0x23;
         spawn.unk20 = 7;
-        spawn.unk24 = 1.012537003f;
+        spawn.unk24 = 1.012537f;
         spawn.unk3C = *(struct17 *)&D_800A5480;
         r1 = (func_150ADA20() & 1) ? 0x40 : 0;
         spawn.unk58 = ((func_150ADA20() & 1) ? 0x80 : 0) | 7 | r1 | 0x8000 | 0x4000 | 0x800 | 0x400 | 0x200 | 0x20000 | 0x800000;
@@ -896,7 +885,7 @@ void func_150BD070(u8 arg0, s32 arg1) {
         spawn.unk66 = 0xFF;
         spawn.unk68 = 0;
         spawn.unk6C = 0.0f;
-        scale = 0.9170150161f;
+        scale = 0.917015f;
         while (count > 0) {
             void *ret;
 
@@ -906,7 +895,7 @@ void func_150BD070(u8 arg0, s32 arg1) {
             func_1514470C(players[func_150ADA20() & 1], &spawn.pos);
             r1 = func_150ADA20();
             func_15143794((u32)r1 % 41U - 0x59, func_150ADA20() % 51U - 0x40, func_150ADA68() * 45.60000229f + 18.80000114f, &spawn.vel);
-            spawn.unk54 = func_150ADA68() * 0.5590000153f + -0.77700001f;
+            spawn.unk54 = func_150ADA68() * 0.559f + -0.777f;
             ret = func_15130280(&spawn, 1, 0, 4, arg0, arg1);
             if (ret != NULL) {
                 memcpy((u8 *)ret + 0xA8, &scale, 4);
@@ -987,15 +976,15 @@ s32 func_150BD954(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5,
     sp70.unk18 = 8;
     sp90.z = arg4;
 
-    r = (func_150ADA68() * 127.0f + 85.0f) * D_8009FFD0;
+    r = (func_150ADA68() * 127.0f + 85.0f) * 0.001f;
     sp70.unk04 = arg13[0] * r;
     sp70.unk08 = arg13[1] * r;
     sp70.unk0C = arg13[2] * r;
     sp70.unk1B = ((u32) func_150ADA20() % 86) + 180;
     sp90.unk15 = (func_150ADA20() & 3) + 3;
     sp90.unk0C = ((u32) func_150ADA20() % 31) + 39;
-    sp70.unk00 = (func_150ADA68() * D_8009FFD4 + D_8009FFD8) * D_8009FFDC;
-    sp70.unk10 = (func_150ADA68() * 356.0f + D_8009FFE0) * D_8009FFE4;
+    sp70.unk00 = (func_150ADA68() * 602.0f + 407.0f) * 0.01f;
+    sp70.unk10 = (func_150ADA68() * 356.0f + 1017.0f) * 0.001f;
     func_15147DA0(&sp90, &sp70, 0, 1, 0xB, 0, 0, 0, 0, 0, 0, (s32 *)&sp4C, 0, arg14, 1);
     return 1;
 }
