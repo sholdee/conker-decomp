@@ -136,16 +136,11 @@ Gfx *func_150D765C(Gfx *gdl) {
     return gdl;
 }
 
-/* The object at struct127.unk31C; struct126 doesn't reach 0x1AE, so this file uses its own view. */
+/* The fields of struct127.unk31C (a struct126) that struct126 doesn't name; it also stops short of 0x1AE. */
 typedef struct {
-    /* 0x000 */ u8 pad0[0x4E];
-    /* 0x04E */ u8 unk4E;
+    /* 0x000 */ u8 pad0[0x4F];
     /* 0x04F */ u8 unk4F;
-    /* 0x050 */ u8 pad50[0x28];
-    /* 0x078 */ u8 unk78;
-    /* 0x079 */ u8 pad79[0xA1];
-    /* 0x11A */ u8 unk11A;
-    /* 0x11B */ u8 pad11B[0x11];
+    /* 0x050 */ u8 pad50[0xDC];
     /* 0x12C */ s16 unk12C;
     /* 0x12E */ u8 pad12E[0x80];
     /* 0x1AE */ s8 unk1AE; /* uses left: each attack below spends one */
@@ -220,7 +215,7 @@ extern void func_10010FFC(s32 a, s32 b, s32 c, s32 d, s32 e, struct127 *f);
  * Per-frame update for an object that can be carried by a player (unk13C set, unk124 = player index).
  * While the player's unk31C->unk4E is set the object follows them: it copies their 0x180-0x19E state, eases
  * its angle towards theirs and (id 0x7F) moves halfway to them. Otherwise it is let go and, unless unk232 is 4,
- * calls func_1505327C for each falling, eligible player. Afterwards it updates its height (unk28); once it has
+ * calls func_1505327C for each falling, eligible player. Unless its id is 0x48, it then tracks its height (unk28); once it has
  * spent more than 10 frames over 75 units high, it dies when the player lands or it is in water. Finally it
  * plays its movement sound and runs func_150535F4.
  */
