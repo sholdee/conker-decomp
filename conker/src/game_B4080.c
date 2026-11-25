@@ -2709,7 +2709,7 @@ s32 func_1508CAD8(s32 player, s32 target, s32 arg2, s32 arg3, s32 arg4, s32 arg5
     s32 hasCam;
     s32 result;
     struct108 *cam;
-    s32 pad;
+    s32 pad; // matching: unused stack slot in the original frame
 
     doInner = 1;
     result = 0;
@@ -3382,8 +3382,8 @@ void func_1508DC24(void) {
 void func_1508E6C8(void) {
 }
 
-s32 func_1508E6D0(s32 arg0) {
-    switch (arg0) {
+s32 func_1508E6D0(s32 type) {
+    switch (type) {
     case 0x3F:
         return 1800;
     case 0x14:
@@ -3419,9 +3419,9 @@ s32 func_1508E6D0(s32 arg0) {
     }
 }
 
-s32 func_1508E780(s32 arg0) {
+s32 func_1508E780(s32 type) {
     if (D_800D23B0->gameType != 0xB8) {
-        switch (arg0) {
+        switch (type) {
         case 0x14:
             return 0x28;
         case 0x3F:
@@ -3460,7 +3460,7 @@ s32 func_1508E780(s32 arg0) {
             return -1;
         }
     } else {
-        switch (arg0) {
+        switch (type) {
         case 8:
             return -1;
         case 1:
@@ -3477,7 +3477,8 @@ s32 func_1508E780(s32 arg0) {
 
 void func_15062800(struct127 *, struct127 *);
 
-s32 func_1508E89C(s32 arg0, s32 arg1) {
+/* Player `player` takes over the multiplayer state of player `source`. */
+s32 func_1508E89C(s32 player, s32 source) {
     struct127 *obj;
     s32 savedRot;
     s32 bit0;
@@ -3485,38 +3486,38 @@ s32 func_1508E89C(s32 arg0, s32 arg1) {
     u8 slot;
     s8 *res;
 
-    obj = &D_800CC2D0[arg0];
-    if (((u8 *)&D_800D18A4)[arg0] > 50) {
-        if (!(D_800D18A2 & (1 << arg0))) {
-            bit0 = 1 << arg0;
+    obj = &D_800CC2D0[player];
+    if (((u8 *)&D_800D18A4)[player] > 50) {
+        if (!(D_800D18A2 & (1 << player))) {
+            bit0 = 1 << player;
             D_800D18A2 |= bit0;
             D_800D18A0 &= ~bit0;
-            D_800D18A0 |= (1 << arg1);
-            tmp = func_150859AC(arg1, 3);
-            func_15085710(arg0, 2, tmp);
-            func_15085710(arg1, 2, 0);
+            D_800D18A0 |= (1 << source);
+            tmp = func_150859AC(source, 3);
+            func_15085710(player, 2, tmp);
+            func_15085710(source, 2, 0);
             if (D_800D23B0->seenMask != 0) {
                 D_800D23B0->seenMask &= ~bit0;
-                D_800D23B0->seenMask |= (1 << arg1);
+                D_800D23B0->seenMask |= (1 << source);
             }
             if (D_800D23B0->layer) {
-                D_800D23B0->layer[arg0] = D_800D23B0->layer[arg1];
+                D_800D23B0->layer[player] = D_800D23B0->layer[source];
             }
             if (D_800D23B0->unk39C) {
-                D_800D23B0->unk39C[arg0] = D_800D23B0->unk39C[arg1];
+                D_800D23B0->unk39C[player] = D_800D23B0->unk39C[source];
             }
             if (D_800D23B0->unk3DC) {
-                D_800D23B0->unk3DC[arg0] = D_800D23B0->unk3DC[arg1];
+                D_800D23B0->unk3DC[player] = D_800D23B0->unk3DC[source];
             }
             if (D_800D23B0->slot) {
-                D_800D23B0->slot[arg0] = D_800D23B0->slot[arg1];
-                if (D_800D23B0->slot[arg0] >= 0) {
-                    D_800D23B0->slotOwner[D_800D23B0->slot[arg0]] = arg0;
+                D_800D23B0->slot[player] = D_800D23B0->slot[source];
+                if (D_800D23B0->slot[player] >= 0) {
+                    D_800D23B0->slotOwner[D_800D23B0->slot[player]] = player;
                 }
             }
-            D_800D23B0->unk16C0[arg0] = D_800D23B0->unk16C0[arg1];
+            D_800D23B0->unk16C0[player] = D_800D23B0->unk16C0[source];
             savedRot = obj->unk31C->unk1AA;
-            func_15062800(&D_800CC2D0[arg1], obj);
+            func_15062800(&D_800CC2D0[source], obj);
             if (D_800BE9F0 == 0x3F) {
                 if (obj->unk13C >= 100) {
                     slot = obj->unk13C - 100;
@@ -3543,19 +3544,19 @@ s32 func_1508E89C(s32 arg0, s32 arg1) {
     return 0;
 }
 
-void func_1508EB90(s32 arg0, s32 arg1, s32 arg2) {
-    s32 temp = D_800CC2D0[arg0].unk13F;
-    func_1509BFB0(1, temp | 0x2000, arg1, arg2);
+void func_1508EB90(s32 player, s32 id, s32 param) {
+    s32 temp = D_800CC2D0[player].unk13F;
+    func_1509BFB0(1, temp | 0x2000, id, param);
 }
 
-void func_1508EBF8(s32 arg0, s32 arg1) {
-    s32 temp = D_800CC2D0[arg0].unk13F;
-    func_1509BFB0(1, temp | 0x2000, 0x14, arg1);
+void func_1508EBF8(s32 player, s32 param) {
+    s32 temp = D_800CC2D0[player].unk13F;
+    func_1509BFB0(1, temp | 0x2000, 0x14, param);
 }
 
-void func_1508EC5C(s32 arg0, s32 arg1) {
-    s32 temp = D_800CC2D0[arg0].unk13F;
-    func_1509BFB0(1, temp | 0x2000, 0x61, arg1);
+void func_1508EC5C(s32 player, s32 param) {
+    s32 temp = D_800CC2D0[player].unk13F;
+    func_1509BFB0(1, temp | 0x2000, 0x61, param);
 }
 
 /* A group of linked (kind << 12 | id) entries, D_800D23C0[D_80087380]. */
