@@ -1,169 +1,146 @@
 #include <ultra64.h>
-#define func_15169260 func_15169260_s32
 #include "functions.h"
-#undef func_15169260
 #include "variables.h"
 
-
-extern f32 D_800A8D50;
-extern f32 D_800A8D54;
-extern f32 D_800A8D5C;
 extern f32 D_800A8D60;
 
-struct Data151A561C {
-    s32 unk0;
-};
+typedef struct {
+    f32 x, y, z;
+} Vec3f;
 
-extern struct Data151A561C D_800A8D70;
-void func_15169260(struct Data151A561C *, s32, s32, u8);
+/*
+ * Creation parameters of a trail (a ribbon of points that follows a point
+ * on one of an actor's bones). The same 0x30 bytes start TrailState.
+ */
+typedef struct {
+    /* 0x00 */ struct127 *owner;
+    /* 0x04 */ u8 ownerId;          /* owner->unique_id when created */
+    /* 0x05 */ u8 bone;
+    /* 0x06 */ u8 pad6[2];
+    /* 0x08 */ Vec3f offset;        /* attachment point in bone space */
+    /* 0x14 */ f32 pointsPerUnit;   /* points emitted per unit travelled */
+    /* 0x18 */ s16 intensity;       /* initial TrailPoint.intensity */
+    /* 0x1A */ s16 holdTime;        /* initial TrailPoint.holdTime */
+    /* 0x1C */ s16 fadeRate;        /* intensity lost per tick after holdTime */
+    /* 0x1E */ u8 pad1E[2];
+    /* 0x20 */ f32 width;           /* width of a new point */
+    /* 0x24 */ f32 widthGrowth;     /* width gained per second */
+    /* 0x28 */ u8 texStep;          /* texture coordinate advance per point... */
+    /* 0x29 */ u8 texStepRandom;    /* ...plus a random 0..texStepRandom */
+    /* 0x2A */ s8 texScroll;        /* texture offset scroll per tick */
+    /* 0x2B */ u8 tailFadeCount;
+    /* 0x2C */ u8 tailFadeStep;
+    /* 0x2D */ u8 headFadeCount;
+    /* 0x2E */ u8 headFadeStep;
+    /* 0x2F */ u8 pad2F;
+} TrailParams;
 
-struct vec151A3504 {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-};
+#define TRAIL_DETACHED  1 /* owner gone: die once the trail has emptied */
+#define TRAIL_FADE_TAIL 2
+#define TRAIL_FADE_HEAD 4
 
-struct frame151A3504 {
-    void *unk0;
-    u8 unk4;
-    u8 unk5;
-    u8 pad6[0x2];
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    s16 unk18;
-    s16 unk1A;
-    s16 unk1C;
-    u8 pad1E[0x2];
-    f32 unk20;
-    f32 unk24;
-    u8 unk28;
-    u8 unk29;
-    u8 unk2A;
-    u8 unk2B;
-    u8 unk2C;
-    u8 unk2D;
-    u8 unk2E;
-    u8 pad2F;
-    u8 unk30;
-    u8 pad31[0x3];
-    struct vec151A3504 unk34;
-    f32 unk40;
-    u8 unk44;
-    u8 pad45[0x3];
-    f32 unk48;
-    u8 unk4C;
-    u8 pad4D[0x3];
-};
+/* Per-trail state, stored at TrailEffect.state. */
+typedef struct {
+    /* 0x00 */ TrailParams params;
+    /* 0x30 */ u8 flags;
+    /* 0x31 */ u8 pad31[3];
+    /* 0x34 */ Vec3f lastPos;       /* head position when points were last emitted */
+    /* 0x40 */ f32 pending;         /* fractional points not yet emitted */
+    /* 0x44 */ u8 texCoord;
+    /* 0x45 */ u8 pad45[3];
+    /* 0x48 */ f32 age;
+    /* 0x4C */ u8 texOffset;
+    /* 0x4D */ u8 pad4D[3];
+} TrailState;
 
-struct header151A3504 {
-    struct vec151A3504 unk0;
-    s16 unkC;
-    u16 unkE;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 pad16[0x2];
-    s32 unk18;
-};
+/* Leading fields of a new effect object, passed to func_15147A80 (they land at its 0x10). */
+typedef struct {
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ s16 unkC;
+    /* 0x0E */ u16 flags;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 pad16[2];
+    /* 0x18 */ s32 unk18;
+} EffectSpawnInfo;
 
-struct260 *func_151A3504(struct frame151A3504 *, u8);
-void func_151A4590(s32, u8);
-void func_151A499C(void *, u8);
+struct260 *func_151A3504(TrailParams *params, u8 arg1);
+void func_151A4590(struct127 *owner, u8 arg1);
+void func_151A499C(struct127 *owner, u8 arg1);
 void *func_1513418C(void *, s32, u8, s32);
 struct260 *func_15130374(void *, u8, s32, u8, s32);
-u16 func_10010154(u16, void *, s32, s16, u16);
 s32 func_15160A58(void *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern s32 func_15147A80(void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-struct struct151A4E34;
-s32 func_151A4E34(struct struct151A4E34 **arg0, s32 arg1);
+s32 func_151A4E34(TrailParams *params, Vec3f *out);
 
-struct frame151A3390 {
-    s32 unk0;
-    u8 unk4;
-    u8 unk5;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    s16 unk18;
-    s16 unk1A;
-    s16 unk1C;
-    f32 unk20;
-    f32 unk24;
-    u8 unk28;
-    u8 unk29;
-    u8 unk2A;
-    u8 unk2B;
-    u8 unk2C;
-    u8 unk2D;
-    u8 unk2E;
-};
+void func_15143134(Vec3f *in, Vec3f *out, s32 matrix);
 
-void func_151A3390(void *arg0, u8 arg1) {
-    struct frame151A3390 sp68;
-    f32 sp5C[3];
+/* Spawns the effects attached to an actor: a trail and two more effects. */
+void func_151A3390(struct127 *owner, u8 arg1) {
+    TrailParams params;
+    f32 origin[3];
 
-    sp68.unk0 = (s32)arg0;
-    sp68.unk4 = *((u8 *)arg0 + 0x3B);
-    sp68.unk5 = 1;
-    sp68.unk8 = 0.0f;
-    sp68.unkC = 0.0f;
-    sp68.unk10 = 0.0f;
-    sp68.unk2B = 1;
-    sp68.unk2C = 0xFF;
-    sp68.unk2D = 8;
-    sp68.unk2E = 0x1F;
-    sp68.unk18 = 0xAA;
-    sp68.unk1A = 0x28;
-    sp68.unk1C = 7;
-    sp68.unk28 = 2;
-    sp68.unk29 = 4;
-    sp68.unk2A = 1;
-    sp68.unk14 = D_800A8D50;
-    sp68.unk20 = 30.0f;
-    sp68.unk24 = D_800A8D54;
-    func_151A3504(&sp68, arg1);
-    func_151A4590(arg0, arg1);
-    func_151A499C(arg0, arg1);
-    func_10010154(0x1AA, arg0, 0x55F0, 0x3E8, 0xFA0);
-    sp5C[0] = 0.0f;
-    sp5C[1] = 0.0f;
-    sp5C[2] = 0.0f;
-    func_15160A58(arg0, 1, sp5C, 2, 0x12C, 0x50, 0xFF, 0xFF, 0x75, 0xFF, 0, -1, 0, 0, arg1, 1);
+    params.owner = owner;
+    params.ownerId = owner->unique_id;
+    params.bone = 1;
+    params.offset.x = 0.0f;
+    params.offset.y = 0.0f;
+    params.offset.z = 0.0f;
+    params.tailFadeCount = 1;
+    params.tailFadeStep = 0xFF;
+    params.headFadeCount = 8;
+    params.headFadeStep = 0x1F;
+    params.intensity = 170;
+    params.holdTime = 40;
+    params.fadeRate = 7;
+    params.texStep = 2;
+    params.texStepRandom = 4;
+    params.texScroll = 1;
+    params.pointsPerUnit = 0.01800000109f;
+    params.width = 30.0f;
+    params.widthGrowth = 0.9810000658f;
+    func_151A3504(&params, arg1);
+    func_151A4590(owner, arg1);
+    func_151A499C(owner, arg1);
+    func_10010154(0x1AA, owner, 0x55F0, 1000, 4000);
+    origin[0] = 0.0f;
+    origin[1] = 0.0f;
+    origin[2] = 0.0f;
+    func_15160A58(owner, 1, origin, 2, 300, 80, 0xFF, 0xFF, 0x75, 0xFF, 0, -1, 0, 0, arg1, 1);
 }
 
-struct260 *func_151A3504(struct frame151A3504 *arg0, u8 arg1) {
-    struct header151A3504 sp8C;
-    struct frame151A3504 sp3C;
-    struct260 *temp_v0;
+/* Creates a trail effect object from params. Returns NULL if there is no owner. */
+struct260 *func_151A3504(TrailParams *params, u8 arg1) {
+    EffectSpawnInfo info;
+    TrailState state;
+    struct260 *effect;
 
-    if (arg0->unk0 == NULL) {
+    if (params->owner == NULL) {
         return NULL;
     }
 
-    memcpy(&sp3C, arg0, 0x30);
-    sp3C.unk44 = 0;
-    sp8C.unk15 = 0x32;
-    sp8C.unkE = 2;
-    sp8C.unkC = 0x3E8;
-    sp3C.unk30 = 6;
-    sp3C.unk4C = 0;
-    sp3C.unk40 = 0.0f;
-    sp3C.unk48 = 0.0f;
+    memcpy(&state, params, sizeof(TrailParams));
+    state.texCoord = 0;
+    info.unk15 = 50;
+    info.flags = 2;
+    info.unkC = 1000;
+    state.flags = TRAIL_FADE_TAIL | TRAIL_FADE_HEAD;
+    state.texOffset = 0;
+    state.pending = 0.0f;
+    state.age = 0.0f;
 
-    if (func_151A4E34((struct struct151A4E34 **)&sp3C, (s32)&sp8C) != 0) {
-        sp3C.unk34 = sp8C.unk0;
-        sp8C.unkE |= 4;
+    if (func_151A4E34(&state.params, &info.pos) != 0) {
+        state.lastPos = info.pos;
+        info.flags |= 4;
     }
 
-    sp8C.unk10 = 8;
-    temp_v0 = (struct260 *)func_15147A80(&sp8C, 0x50, 0x18, 6, 6, 6, 0, 0, 0, arg1, 0);
-    if (temp_v0 != NULL) {
-        memcpy((void *)*(s32 *)((u8 *)temp_v0 + 0x98), &sp3C, 0x50);
+    info.unk10 = 8;
+    effect = (struct260 *)func_15147A80(&info, sizeof(TrailState), 24, 6, 6, 6, 0, 0, 0, arg1, 0);
+    if (effect != NULL) {
+        memcpy((void *)*(s32 *)((u8 *)effect + 0x98), &state, sizeof(TrailState));
     }
-    return temp_v0;
+    return effect;
 }
 
 typedef struct TimedVec151A361C {
@@ -296,7 +273,7 @@ s32 func_151A37C0(TimedObject151A361C *arg0) {
     }
     found = 0;
     if (!(arg0->flags1E & 4)) {
-        if (func_151A4E34((struct struct151A4E34 **)state, (s32)&arg0->position10) != 0) {
+        if (func_151A4E34((TrailParams *)state, (Vec3f *)&arg0->position10) != 0) {
             found = 1;
             state->previous34 = arg0->position10;
             arg0->flags1E |= 4;
@@ -304,7 +281,7 @@ s32 func_151A37C0(TimedObject151A361C *arg0) {
             return 1;
         }
     }
-    if (!found && func_151A4E34((struct struct151A4E34 **)state, (s32)&arg0->position10) == 0) {
+    if (!found && func_151A4E34((TrailParams *)state, (Vec3f *)&arg0->position10) == 0) {
         func_151A4E9C(arg0);
         memcpy(buf, state, 0x30);
         {
@@ -669,46 +646,46 @@ Gfx *func_151A3BE4(Owner151A3BE4 *arg0, Gfx *gfx, s16 arg2) {
     return gfx;
 }
 
-struct frame151A4590 {
-    s32 unk0;
-    s32 unk4;
-    u8 unk8;
-    u8 pad9[3];
-    void *unkC;
-    u8 unk10;
-    u8 pad11[3];
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    s16 unk28;
-    u8 unk2A;
-    u8 unk2B;
-    s8 unk2C;
-    u8 unk2D;
-};
+/* Parameters for func_1513418C, laid out like the other bone-attached effects here. */
+typedef struct {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ u8 ownerId;
+    /* 0x09 */ u8 pad9[3];
+    /* 0x0C */ struct127 *owner;
+    /* 0x10 */ u8 bone;
+    /* 0x11 */ u8 pad11[3];
+    /* 0x14 */ Vec3f offset;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ s16 unk28;
+    /* 0x2A */ u8 unk2A;
+    /* 0x2B */ u8 unk2B;
+    /* 0x2C */ s8 unk2C;
+    /* 0x2D */ u8 unk2D;
+} BoneEffectParams151A4590;
 
-void func_151A4590(s32 arg0, u8 arg1) {
-    struct frame151A4590 sp18;
+void func_151A4590(struct127 *owner, u8 arg1) {
+    BoneEffectParams151A4590 params;
 
-    if (arg0 != 0) {
-        sp18.unk0 = 0;
-        sp18.unk4 = 0;
-        sp18.unk8 = *((u8 *)arg0 + 0x3B);
-        sp18.unk10 = 1;
-        sp18.unk14 = 0.0f;
-        sp18.unk18 = 0.0f;
-        sp18.unk1C = 0.0f;
-        sp18.unk20 = D_800A8D5C;
-        sp18.unk24 = 3.0f;
-        sp18.unk28 = 0x64;
-        sp18.unk2A = 0xA;
-        sp18.unk2B = 1;
-        sp18.unk2C = -1;
-        sp18.unk2D = 0;
-        sp18.unkC = (void *)arg0;
-        func_1513418C(&sp18, 0, arg1, 0);
+    // matching: an integer test makes IDO reload owner from its arg slot
+    if ((s32)owner != 0) {
+        params.unk0 = 0;
+        params.unk4 = 0;
+        params.ownerId = owner->unique_id;
+        params.bone = 1;
+        params.offset.x = 0.0f;
+        params.offset.y = 0.0f;
+        params.offset.z = 0.0f;
+        params.unk20 = 14.69999981f;
+        params.unk24 = 3.0f;
+        params.unk28 = 100;
+        params.unk2A = 10;
+        params.unk2B = 1;
+        params.unk2C = -1;
+        params.unk2D = 0;
+        params.owner = owner;
+        func_1513418C(&params, 0, arg1, 0);
     }
 }
 
@@ -903,7 +880,7 @@ struct frame151A499C {
     f32 unk1C;
 };
 
-void func_151A499C(void *arg0, u8 arg1) {
+void func_151A499C(struct127 *arg0, u8 arg1) {
     struct260 *ret;
     struct frame151A499C sp2C;
 
@@ -1010,7 +987,6 @@ struct Arg151A4A38 {
     f32 unk68;
 };
 
-void func_15143134(void *, s32, s32);
 void func_15153634(void *, s32, s32, s32);
 
 void func_151A4A38(struct Ent151A4A38 *arg0) {
@@ -1036,7 +1012,7 @@ void func_151A4A38(struct Ent151A4A38 *arg0) {
     sub->unkC += sub->unk8 * D_800BE9A4;
     if (sub->unkC > 1.0f) {
         sp2A = (sub->unk0->unk76 >> 8) - 0x40;
-        func_15143134(&sub->unk14, (s32)&sp98, sub->unk0->unk1D4 + (sub->unk10 << 6));
+        func_15143134((Vec3f *)&sub->unk14, (Vec3f *)&sp98, sub->unk0->unk1D4 + (sub->unk10 << 6));
 
         sp2C.unk0 = (s16)sub->unkC;
         sp2C.unk2 = 0;
@@ -1164,30 +1140,22 @@ void func_151A4D88(struct260 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-void func_15143134(void *, s32, s32);
-struct struct151A4E34
-{
-  u8 pad0[0x74];
-  u8 unk74;
-  u8 pad75[0x1D4 - 0x75];
-  struct elem151A4E34 *unk1D4;
-};
-s32 func_151A4E34(struct struct151A4E34 **arg0, s32 arg1)
-{
-  struct struct151A4E34 *v0 = arg0[0];
-  u32 offset;
-  s32 v1 = (s32) v0->unk1D4;
-  if (v1 == 0)
-  {
-    return 0;
-  }
-  if ((v0->unk74 & 0xF) == 0xF)
-  {
-    return 0;
-  }
-  offset = ((*(((u8 *) arg0) + 5)) << 4) << 2;
-  func_15143134(((u8 *) arg0) + 8, arg1, v1 + offset);
-  return 1;
+/*
+ * Transforms the trail's attachment offset by its owner's bone matrix into out.
+ * Returns 0 if the owner has no bone matrices or is not being drawn.
+ */
+s32 func_151A4E34(TrailParams *params, Vec3f *out) {
+    struct127 *owner = params->owner;
+    u8 *bones = (u8 *)owner->unk1D4;
+
+    if (bones == NULL) {
+        return 0;
+    }
+    if ((owner->unk74 & 0xF) == 0xF) {
+        return 0;
+    }
+    func_15143134(&params->offset, out, (s32)bones + params->bone * sizeof(Mtx));
+    return 1;
 }
 
 
@@ -1202,48 +1170,43 @@ void func_151A4E9C(void *arg0)
 }
 
 
-typedef struct Tgt151A4ECC {
-    s32 unk0;
-    char pad4[0x37];
-    u8 unk3B;
-    char pad3C[0x38];
-    u8 unk74;
-    char pad75[0x15F];
-    s32 unk1D4;
-} Tgt151A4ECC;
+/* A func_151491F4 task that retries creating a trail until its owner can carry it. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0xC];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 unkD;
+    /* 0x0E */ s16 unkE;
+    /* 0x10 */ u8 pad10[0x18];
+    /* 0x28 */ TrailParams trail;
+} TrailRetryTask;
 
-typedef struct Obj151A4ECC {
-    char pad0[0xC];
-    u8 unkC;
-    u8 unkD;
-    s16 unkE;
-    char pad10[0x18];
-    struct frame151A3504 unk28;
-} Obj151A4ECC;
+/*
+ * Per-tick update of a TrailRetryTask: the task ends when the owner is gone or
+ * once the trail has been re-created on the owner's bone.
+ */
+void func_151A4ECC(TrailRetryTask *task) {
+    TrailParams *trail;
+    u8 done;
 
-void func_151A4ECC(Obj151A4ECC *arg0) {
-    struct frame151A3504 *f;
-    u8 flag;
-
-    flag = 0;
-    f = &arg0->unk28;
-    if (((Tgt151A4ECC *)f->unk0)->unk0 == 0) {
-        flag = 1;
+    done = 0;
+    trail = &task->trail;
+    if (trail->owner->interaction_state == 0) {
+        done = 1;
     }
-    if (((Tgt151A4ECC *)f->unk0)->unk3B != f->unk4) {
-        flag = 1;
+    if (trail->owner->unique_id != trail->ownerId) {
+        done = 1;
     }
-    if (!flag) {
-        if (((Tgt151A4ECC *)f->unk0)->unk1D4 != 0) {
-            if ((((Tgt151A4ECC *)f->unk0)->unk74 & 0xF) != 0xF) {
-                func_151A3504(f, arg0->unkC);
-                flag = 1;
+    if (!done) {
+        if (trail->owner->unk1D4 != NULL) {
+            if ((trail->owner->unk74 & 0xF) != 0xF) {
+                func_151A3504(trail, task->unkC);
+                done = 1;
             }
         }
     }
-    if (flag) {
-        arg0->unkE = -1;
-        arg0->unkD = arg0->unkD | 1;
+    if (done) {
+        task->unkE = -1;
+        task->unkD = task->unkD | 1;
     }
 }
 
@@ -1264,43 +1227,3 @@ void func_151A4F7C(struct102 *arg0, struct102 *arg1, u8 arg2)
         }
     }
 }
-
-struct Obj151A4FD0 {
-    char pad0[0x10];
-    s32 unk10;
-    u8  unk14;
-    u8  unk15;
-    u8  unk16;
-    u8  unk17;
-    u8  unk18;
-    u8  unk19;
-    u8  unk1A;
-};
-
-extern struct Obj151A4FD0 *func_15167A68(s32, s32, s32, s32, s32, s32);
-struct Obj151A4FD0 *func_151A4FD0(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, u8 a6, s32 a7);
-void func_151A5070(struct Obj151A4FD0 *arg0);
-
-extern void (*D_8008F900[])(void *, void *, s16);
-void func_151A5130(void *arg0, void *arg1, s16 arg2);
-
-/* Viewport/screen descriptor: D_800BE628 is an array of these, 0x180 bytes each. */
-struct Scr151A5170 {
-    u8  pad0[0x4];
-    f32 unk4;
-    f32 unk8;
-    u8  padC[0x18];
-    f32 unk24;
-    u8  pad28[0x4];
-    f32 unk2C;
-    u8  pad30[0x150];
-};
-
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
-
-#define SCR151A5170(obj) (&((struct Scr151A5170 *)D_800BE628)[(obj)->unk1A])
-Gfx *func_151A5170(Gfx *gfx, struct Obj151A4FD0 *arg1, s32 arg2);
-
-extern void (*D_8008F904[])(void *, void *, u8);
-void func_151A55D4(void *arg0, void *arg1, u8 arg2);
-void func_151A561C(s32 arg0, u8 arg1);
