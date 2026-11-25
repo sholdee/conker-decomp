@@ -6,13 +6,6 @@
 #undef func_150ADA20
 s32 func_150ADA20(void);
 
-
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3F_150BABE0;
-
 /* Ground probe result filled by func_1504715C / func_15046C80. */
 typedef struct {
     /* 0x00 */ f32 height;
@@ -43,15 +36,15 @@ typedef struct {
     /* 0x1C */ s32 unk1C;
     /* 0x20 */ u8 unk20;
     /* 0x21 */ u8 pad21[7];
-} Particle_150BABE0;
+} DecalDesc_150BABE0;
 
 /* matching: the joint owner is passed as s32; a pointer parameter changes register allocation */
-void func_15142314(s32, s32, Vec3F_150BABE0 *);
+void func_15142314(s32, s32, vertex *);
 void func_15143E94(s32 arg0, s32 arg1);
 void func_15165F80(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
 void func_1514C678(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, s16 arg5, s32 arg6, s32 arg7, s32 arg8, f32 arg9, s32 argA, s32 argB);
 void func_1504715C(Ground_150BABE0 *, struct127 *);
-s32 func_15046C80(Vec3F_150BABE0 *, s32, f32, Ground_150BABE0 *);
+s32 func_15046C80(vertex *, s32, f32, Ground_150BABE0 *);
 s32 func_1518ABD0(s32, struct210 *, u8);
 
 /*
@@ -60,16 +53,16 @@ s32 func_1518ABD0(s32, struct210 *, u8);
  */
 // matching: each `*(u8 *)&arg2` reloads arg2 from its stack slot; plain or K&R arg2 is kept in a register
 void func_150BABE0(struct127 *obj, u8 side, u8 arg2) {
-    Vec3F_150BABE0 pos;
+    vertex pos;
     s32 joint;
     s32 yaw;
     Ground_150BABE0 ground;
-    Vec3F_150BABE0 probe;
-    Particle_150BABE0 part;
+    vertex probe;
+    DecalDesc_150BABE0 desc;
     struct210 *decal;
     f32 size;
 
-    /* camera angle in degrees -> 256-step angle */
+    /* the current camera's unk380 angle, degrees -> 256-step angle */
     yaw = D_800DBFF0[D_80082FA4].unk380 * 0.7111111283f;
     if (obj == NULL) {
         return;
@@ -100,29 +93,27 @@ void func_150BABE0(struct127 *obj, u8 side, u8 arg2) {
     probe.z = pos.z;
     if (func_15046C80(&probe, 0, pos.y - 100.0f, &ground) != 0) {
         size = func_150ADA68() * 200.0f + 200.0f;
-        part.unk6 = 0x2A;
-        part.unk7 = 0;
-        part.unk0 = 0x7340;
-        part.unk4 = 300;
-        part.unk8 = 0;
-        part.unkC = func_150ADA20() % 2001U + 2000;
-        part.unk10 = 0xFF;
-        part.unk11 = 0xFF;
-        part.unk12 = 0;
-        part.unk13 = 0;
-        part.unk14 = 0;
-        part.unk15 = 0xFF;
-        part.unk16 = 0;
-        part.unk17 = 0xD;
-        part.unk20 = 0xFF;
-        part.unk1C = 0;
-        part.unk18 = 0x170002;
-        decal = func_1513C73C((s32)&part, 0, 0, (s32)ground.points, pos.x, ground.height, pos.z, size, size,
+        desc.unk6 = 0x2A;
+        desc.unk7 = 0;
+        desc.unk0 = 0x7340;
+        desc.unk4 = 300;
+        desc.unk8 = 0;
+        desc.unkC = func_150ADA20() % 2001U + 2000;
+        desc.unk10 = 0xFF;
+        desc.unk11 = 0xFF;
+        desc.unk12 = 0;
+        desc.unk13 = 0;
+        desc.unk14 = 0;
+        desc.unk15 = 0xFF;
+        desc.unk16 = 0;
+        desc.unk17 = 0xD;
+        desc.unk20 = 0xFF;
+        desc.unk1C = 0;
+        desc.unk18 = 0x170002;
+        decal = func_1513C73C((s32)&desc, 0, 0, (s32)ground.points, pos.x, ground.height, pos.z, size, size,
                               func_150ADA20() & 0xFF, (func_150ADA20() & 1) * 2 + (func_150ADA20() & 1), 4, *(u8 *)&arg2, 0);
-        if (decal != NULL) {
-            if (func_1518ABD0(D_80088750, decal, 1) == 0) {
-                func_1516972C((struct102 *)decal);
-            }
+        if (decal != NULL && func_1518ABD0(D_80088750, decal, 1) == 0) {
+            func_1516972C((struct102 *)decal);
         }
     }
     func_1514C678(pos.x, pos.y, pos.z, func_150ADA68() * 40.0f + 60.0f, yaw + 60, yaw - 60,
@@ -250,7 +241,7 @@ s32 func_150BAFEC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
 /* Per-frame update of a func_150BAFEC particle: damps its horizontal velocity once per elapsed frame. */
 s32 func_150BB260(Particle_150BAFEC *particle, s32 arg1) {
     s32 i;
-    f32 *damping;
+    f32 *damping; // matching: IDO keeps the field address in a register only through a pointer
 
     damping = &particle->damping;
     for (i = D_800BE9E4; i != 0; i--) {
