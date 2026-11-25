@@ -49,7 +49,7 @@ typedef struct Prop {
         struct {
             SwingMotion *motion;
             s32 state;
-            s32 player; /* index into D_800CC2D0 and D_800DBFF0 */
+            s32 character; /* index into D_800CC2D0 and D_800DBFF0 */
         } swing;
         struct {
             s32 started;
@@ -83,84 +83,98 @@ extern Prop *func_151149AC(u8 id); /* the prop whose id is `id`, or NULL */
 extern void func_1511490C(f32 mtx[4][4], Prop *prop);
 extern void func_150A7960(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
-typedef struct {
-    f32 x, y, z, radius, angle, dx, dz;
-    s16 timer;
-    u8 pad1E[6];
-} Game11EF40Motion;
+/* State of func_1511EF40's swing, allocated on its first update. */
+struct SwingMotion {
+    /* 0x00 */ f32 x; /* centre of the arc */
+    /* 0x04 */ f32 y;
+    /* 0x08 */ f32 z;
+    /* 0x0C */ f32 radius;
+    /* 0x10 */ f32 angle; /* degrees: -90 at the start point, 90 at the end point */
+    /* 0x14 */ f32 dx; /* half the horizontal offset from the start to the end point */
+    /* 0x18 */ f32 dz;
+    /* 0x1C */ s16 timer;
+    /* 0x1E */ u8 pad1E[6];
+}; /* size 0x24 */
 
 typedef struct {
     f32 x, y, z;
-} Vec3f_1511EF40;
+} FVec3;
 
 extern s32 func_15086CBC(s32, f32 *, f32 *, f32 *);
 extern s32 func_15086D48(s32);
-extern f32 D_800A3378;
 
-void func_1511EF40(u8 *arg0) {
-    u8 *player;
+/*
+ * Carries character work.swing.character along a semicircular arc from where it stands (state 1)
+ * to the position returned for object 0x28, then marks the prop finished. While it swings
+ * (state 2) the character's actor is put in mode 0x400000 at the prop's position; it is released
+ * 60 frames later.
+ */
+void func_1511EF40(Prop *prop) {
+    struct127 *character;
     f32 x, y, z, angle;
-    Game11EF40Motion *motion;
-    u8 *actor;
+    SwingMotion *motion;
+    struct108 *actor;
     f32 dx;
 
-    if (*(Game11EF40Motion **)(arg0 + 0x7C) == NULL) {
-        motion = *(Game11EF40Motion **)(arg0 + 0x7C) = (Game11EF40Motion *)allocate_memory(0x24, 1, 0, 0);
-        bzero(motion, 0x24);
+    if (prop->work.swing.motion == NULL) {
+        motion = prop->work.swing.motion = allocate_memory(sizeof(SwingMotion), 1, 0, 0);
+        bzero(motion, sizeof(SwingMotion));
     } else {
-        motion = *(Game11EF40Motion **)(arg0 + 0x7C);
+        motion = prop->work.swing.motion;
     }
     if (motion->timer > 0) {
         motion->timer -= D_800BE9E4;
         if (motion->timer <= 0) {
-            actor = (u8 *)D_800DBFF0 + *(s32 *)(arg0 + 0x84) * 0x9A0;
-            func_151239CC((struct108 *)actor, 0xA);
+            actor = &D_800DBFF0[prop->work.swing.character];
+            func_151239CC(actor, 10);
         }
     }
-    if (*(s32 *)(arg0 + 0x80) == 1) {
-        player = (u8 *)D_800CC2D0 + *(s32 *)(arg0 + 0x84) * 0x32C;
-        *(s16 *)(arg0 + 0x10) = (s32)*(f32 *)(player + 0x14);
-        *(s16 *)(arg0 + 0x12) = (s16)*(f32 *)(player + 0x18) + 100;
-        *(s16 *)(arg0 + 0x14) = (s32)*(f32 *)(player + 0x1C);
+    if (prop->work.swing.state == 1) {
+        character = &D_800CC2D0[prop->work.swing.character];
+        prop->x = character->x_position;
+        prop->y = (s16)character->y_position + 100;
+        prop->z = character->z_position;
         func_15086CBC(func_15086D48(0x28), &x, &y, &z);
-        motion->dx = (x - *(f32 *)(player + 0x14)) * 0.5f;
+        motion->dx = (x - character->x_position) * 0.5f;
         dx = motion->dx;
-        motion->dz = (z - *(f32 *)(player + 0x1C)) * 0.5f;
-        angle = motion->dz;
-        motion->x = *(f32 *)(player + 0x14) + dx;
-        motion->y = *(f32 *)(player + 0x18) + 100.0f;
-        motion->z = *(f32 *)(player + 0x1C) + angle;
+        motion->dz = (z - character->z_position) * 0.5f;
+        angle = motion->dz; // matching: angle doubles as dz; a separate local changes the frame
+        motion->x = character->x_position + dx;
+        motion->y = character->y_position + 100.0f;
+        motion->z = character->z_position + angle;
         motion->radius = sqrtf(dx * dx + angle * angle);
         motion->angle = -90.0f;
-        *(s32 *)(arg0 + 0x80) = 2;
+        prop->work.swing.state = 2;
         return;
     }
-    if (*(s32 *)(arg0 + 0x80) == 2) {
-        if (D_80082FA0 >= *(s32 *)(arg0 + 0x84)) {
-            actor = (u8 *)D_800DBFF0 + *(s32 *)(arg0 + 0x84) * 0x9A0;
-            if (*(s32 *)(actor + 0x2C) != 0x400000) {
-                func_15123934((struct108 *)actor, 0x400000, 0, *(s32 *)(actor + 0x134), 0xA);
+    if (prop->work.swing.state == 2) {
+        if (D_80082FA0 >= prop->work.swing.character) {
+            actor = &D_800DBFF0[prop->work.swing.character];
+            if (actor->unk2C != 0x400000) {
+                func_15123934(actor, 0x400000, 0, actor->unk134, 10);
             }
-            *(f32 *)(actor + 0x2BC) = *(s16 *)(arg0 + 0x10);
-            *(f32 *)(actor + 0x2C0) = *(s16 *)(arg0 + 0x12);
-            *(f32 *)(actor + 0x2C4) = *(s16 *)(arg0 + 0x14);
-            *(Vec3f_1511EF40 *)(actor + 0x2A4) = *(Vec3f_1511EF40 *)(actor + 0x2BC);
-            *(f32 *)(actor + 0x2F8) = 0.0f;
-            *(f32 *)(actor + 0x300) = 0.0f;
-            *(f32 *)(actor + 0x2FC) = 300.0f;
+            actor->unk2BC = prop->x;
+            actor->unk2C0 = prop->y;
+            actor->unk2C4 = prop->z;
+            *(FVec3 *)&actor->unk2A4 = *(FVec3 *)&actor->unk2BC;
+            actor->unk2F8 = 0.0f;
+            actor->unk300 = 0.0f;
+            actor->unk2FC = 300.0f;
             motion->timer = 60;
         }
-        angle = (motion->angle * D_800A3378) / 180.0f;
-        *(s16 *)(arg0 + 0x12) = (s32)(cosf(angle) * motion->radius + motion->y);
-        dx = sinf(angle);
-        *(s16 *)(arg0 + 0x10) = (s32)(motion->x + motion->dx * dx);
-        *(s16 *)(arg0 + 0x14) = (s32)(motion->z + motion->dz * dx);
-        motion->angle += (f32)D_800BE9E4;
+        angle = (motion->angle * 3.1415927f) / 180.0f;
+        prop->y = cosf(angle) * motion->radius + motion->y;
+        dx = sinf(angle); // matching: dx doubles as the sine, as above
+        prop->x = motion->x + motion->dx * dx;
+        prop->z = motion->z + motion->dz * dx;
+        motion->angle += D_800BE9E4;
         if (motion->angle > 90.0f) {
             motion->angle = 90.0f;
-            *(s32 *)(arg0 + 0x80) = 0;
-            *(s8 *)(arg0 + 0x6E) = 1;
-            if (D_80082FA0 >= *(s32 *)(arg0 + 0x84)) func_151239CC((struct108 *)actor, 0xA);
+            prop->work.swing.state = 0;
+            prop->finished = TRUE;
+            if (D_80082FA0 >= prop->work.swing.character) {
+                func_151239CC(actor, 10);
+            }
         }
     }
 }
