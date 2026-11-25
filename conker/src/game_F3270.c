@@ -53,8 +53,7 @@ typedef struct GameF3270Emitter {
     /* 0x10 */ u8 pad10[0x8];
     /* 0x18 */ Actor *actor;
     /* 0x1C */ u8 pad1C[0x18];
-    /* 0x34 */ f32 surfaceY; // written by the surface probe
-    /* 0x38 */ u8 unk38[0x20];
+    /* 0x34 */ CollisionHit surface; // written by the surface probe
     /* 0x58 */ GameF3270Children children;
 } GameF3270Emitter;
 
@@ -118,7 +117,7 @@ void func_150C5F40(GameF3270Emitter *emitter) {
     }
 }
 
-s32 func_15045800(Vec3f *from, s32 arg1, f32 minY, f32 *hitY);
+s32 func_15045800(Vec3f *from, s32 arg1, f32 minY, CollisionHit *hit);
 GameF3270LinkedObject *func_1513418C(BloodDripDesc *desc, s32 arg1, u8 arg2, s32 arg3);
 
 /* Spawns the emitter's linked object, recording the surface height above the actor. */
@@ -135,8 +134,8 @@ GameF3270LinkedObject *func_150C5F94(Actor *actor, GameF3270Emitter *emitter) {
         from.x = actor->x_position;
         from.y = actor->y_position + 5000.0f;
         from.z = actor->z_position;
-        if (func_15045800(&from, 0, actor->y_position - 100.0f, &emitter->surfaceY) != 0) {
-            link.surfaceY = emitter->surfaceY;
+        if (func_15045800(&from, 0, actor->y_position - 100.0f, &emitter->surface) != 0) {
+            link.surfaceY = emitter->surface.height;
         } else {
             link.surfaceY = actor->y_position + 5000.0f;
         }
@@ -319,7 +318,7 @@ GameF3270Particle *func_150C6460(GameF3270Emitter *emitter) {
         probe.x = pos.x;
         probe.y = pos.y + 200.0f;
         probe.z = pos.z;
-        if (func_15045800(&probe, 0, pos.y - 200.0f, &emitter->surfaceY) != 0) {
+        if (func_15045800(&probe, 0, pos.y - 200.0f, &emitter->surface) != 0) {
             SpriteDef desc;
             GameF3270Wobble wobble;
             f32 size;
@@ -329,7 +328,7 @@ GameF3270Particle *func_150C6460(GameF3270Emitter *emitter) {
             s32 rand0;
 
             colorIndex = func_151D8E20();
-            probe.y = emitter->surfaceY;
+            probe.y = emitter->surface.height;
             size = func_150ADA68() * 50.0f + 100.0f;
             wobble.owner = emitter;
             wobble.alive = TRUE;
@@ -359,7 +358,7 @@ GameF3270Particle *func_150C6460(GameF3270Emitter *emitter) {
             rand2 = func_150ADA20();
             // matching: the explicit & 0xFF on rand0 (a (u8) cast emits no andi)
             particle = (GameF3270Particle *)func_1513C73C(
-                (s32)&desc, 8, 2, (s32)emitter->unk38, probe.x, probe.y, probe.z, size, size, rand0 & 0xFF,
+                (s32)&desc, 8, 2, (s32)&emitter->surface.tri, probe.x, probe.y, probe.z, size, size, rand0 & 0xFF,
                 (rand2 & 1) * 2 + (rand1 & 1), 32, emitter->header.owner, emitter->header.kind);
             if (particle != NULL) {
                 memcpy(&particle->wobble, &wobble, sizeof(wobble));

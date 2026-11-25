@@ -4,19 +4,6 @@
 #include "effects.h"
 #include "libc/string.h"
 
-/* The part of a func_15046F84 probe result (from its +0x4) that dust particles keep for their splash. */
-typedef struct FloorData {
-    /* 0x00 */ u8 unk0[0x10];
-    /* 0x10 */ u16 unk10;
-} FloorData; /* 0x12 */
-
-/* Floor probe result filled by func_15046F84 (cf. Struct150E0870Floor in game_10DD20.c). */
-typedef struct FloorProbe {
-    /* 0x00 */ f32 y;
-    /* 0x04 */ FloorData data;
-    /* 0x16 */ u8 pad16[0xE];
-} FloorProbe; /* 0x24 */
-
 /* Per-particle data of a dust particle (func_1519203C, updated by func_1519257C). */
 typedef struct DustData {
     /* 0x00 */ f32 baseSize;
@@ -24,7 +11,7 @@ typedef struct DustData {
     /* 0x06 */ s8 phaseStep[2];
     /* 0x08 */ f32 amplitude[2];
     /* 0x10 */ f32 floorY;
-    /* 0x14 */ FloorData floor;
+    /* 0x14 */ CollisionTri floor;  /* the floor triangle under the spawn point, for the splash */
     /* 0x26 */ u8 kind;
 } DustData; /* 0x28 */
 
@@ -50,7 +37,7 @@ typedef struct DustEmitterData {
     /* 0x18 */ f32 accum;          /* particles owed; one is spawned per whole unit */
     /* 0x1C */ f32 rateBase;
     /* 0x20 */ f32 rateRandom;
-    /* 0x24 */ FloorProbe floor;
+    /* 0x24 */ CollisionHit floor;
     /* 0x48 */ f32 gravityBase;
     /* 0x4C */ f32 gravityRandom;
     /* 0x50 */ s16 lifetimeBase;
@@ -70,7 +57,7 @@ typedef struct DustEmitter {
     DustEmitterData data;
 } DustEmitter;
 
-void func_1504715C(FloorProbe *probe, Actor *obj);
+void func_1504715C(CollisionHit *probe, Actor *obj);
 
 /* Spawns a dust emitter effect (func_15191D54) on `owner`'s bone; it emits dust particles at `offset`
  * in the bone's space at a randomised rate. Returns the effect, or NULL without an owner. */
@@ -116,9 +103,9 @@ DustEmitter *func_15191BE0(Actor *owner, Vec3f *offset, u8 bone, f32 rateBase, f
 
 void func_15143134(Vec3f *in, Vec3f *out, void *matrix);
 s32 func_1514672C(Vec3f *pos);
-s32 func_15046F84(Vec3f *pos, s32 arg1, f32 minY, FloorProbe *probe);
+s32 func_15046F84(Vec3f *pos, s32 arg1, f32 minY, CollisionHit *probe);
 DustParticle *func_1519203C(Vec3f *position, Vec3f *velocity, f32 gravity, s16 lifetime, u8 alpha,
-                            u8 brightness, f32 size, s32 unused, f32 floorY, FloorData *floor, u8 kind,
+                            u8 brightness, f32 size, s32 unused, f32 floorY, CollisionTri *floor, u8 kind,
                             u8 arg11, s32 arg12);
 
 /* Dust emitter effect update: frees the effect once its owner is gone, otherwise accumulates the
@@ -148,7 +135,7 @@ void func_15191D54(DustEmitter *effect) {
                 } else {
                     minY = -9500.0f;
                     if (func_15046F84(&position, 0, minY, &data->floor) != 0) {
-                        floorY = data->floor.y;
+                        floorY = data->floor.height;
                     } else {
                         floorY = minY;
                     }
@@ -166,7 +153,7 @@ void func_15191D54(DustEmitter *effect) {
                               func_150ADA20() % (data->lifetimeRandom + 1) + data->lifetimeBase,
                               func_150ADA20() % (data->alphaRandom + 1) + data->alphaBase, 0xFF,
                               func_150ADA68() * data->sizeRandom + data->sizeBase, hit, floorY,
-                              &data->floor.data, data->kind, effect->base.header.owner, effect->base.header.kind);
+                              &data->floor.tri, data->kind, effect->base.header.owner, effect->base.header.kind);
                 data->accum -= 1.0f;
             } while (data->accum > 1.0f);
         } else {
@@ -183,7 +170,7 @@ extern u8 (*D_8008FCD0[])(void);
 /* Spawns a dust particle at `position` that pulses in size and splashes when it falls below floorY
  * (update func 0xF, func_1519257C). */
 DustParticle *func_1519203C(Vec3f *position, Vec3f *velocity, f32 gravity, s16 lifetime, u8 alpha,
-                            u8 brightness, f32 size, s32 unused, f32 floorY, FloorData *floor, u8 kind,
+                            u8 brightness, f32 size, s32 unused, f32 floorY, CollisionTri *floor, u8 kind,
                             u8 arg11, s32 arg12) {
     DustParticle *particle;
     ParticleDesc desc;
