@@ -3,6 +3,9 @@
 #include "effects.h"
 #include "variables.h"
 
+/* Screen fade colours for func_1517EE40, picked by sequence events (black, white). */
+Color24 D_80084110[2] = { { 0, 0, 0 }, { 0xFF, 0xFF, 0xFF } };
+
 /* An event queued for dispatch by func_150241B4, kept sorted by time. */
 typedef struct SeqQueueEntry {
     /* 0x0 */ SeqEvent *event;
@@ -1169,11 +1172,6 @@ typedef struct {
 } Ev15190770;
 
 extern s32 D_8008CA50;
-typedef struct {
-    u8 c[3][6];
-} EvColors;
-
-extern EvColors D_80084148;
 
 extern void func_151F2BA8(void);
 extern void func_151F2BE8(void);

@@ -1007,6 +1007,8 @@ segments:
       - [0x227960, data]
       - [0x227A50, .data, game_45B80]
       - [0x227A60, data]
+      - [0x228BD0, .data, game_50D80]
+      - [0x228C20, data]
       - [0x228EA0, .data, game_64120]
       - [0x228ED0, data]
       - [0x228F40, .data, game_6CEA0]
