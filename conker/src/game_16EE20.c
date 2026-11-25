@@ -1031,184 +1031,193 @@ typedef struct {
 
 /* variables.h declares D_800D3098 as struct178[73]; the asm loads it as a pointer (lw 0(D_800D3098)). */
 extern ObjRec *D_800D3098;
-#define OBJTBL D_800D3098
 
-void func_15143D18(s32 *, s32 *, s32, s32);
+void func_15143D18(s32 *start, s32 *end, s32 lo, s32 hi);
 
-ObjRec *func_151438D8(s32 arg0, s32 arg1, u16 arg2, ObjRec *arg3) {
+/*
+ * Searches D_800D3098[start..end) for a record equal to `key` in the fields selected by `fields`.
+ * With bit 0x1000 every selected field must match, otherwise any one of them; the last hit wins.
+ */
+ObjRec *func_151438D8(s32 start, s32 end, u16 fields, ObjRec *key) {
     s32 i;
     ObjRec *result;
     u16 checked;
     u16 matched;
 
     result = NULL;
-    if (arg3 == NULL) {
+    if (key == NULL) {
         return NULL;
     }
-    func_15143D18(&arg0, &arg1, 0, D_800D3094);
-    for (i = arg0; i < arg1; i++) {
+    func_15143D18(&start, &end, 0, D_800D3094);
+    for (i = start; i < end; i++) {
         checked = 0;
         matched = 0;
-        if (arg2 & 0x1) {
-            if ((arg3->unk0 == OBJTBL[i].unk0) && (arg3->unk2 == OBJTBL[i].unk2) && (arg3->unk4 == OBJTBL[i].unk4)) {
-                checked |= 0x1;
-                matched |= 0x1;
+        if (fields & 1) {
+            if ((key->unk0 == D_800D3098[i].unk0) && (key->unk2 == D_800D3098[i].unk2) && (key->unk4 == D_800D3098[i].unk4)) {
+                checked |= 1;
+                matched |= 1;
             }
         } else {
-            checked |= 0x1;
+            checked |= 1;
         }
-        if (arg2 & 0x2) {
-            if ((arg3->unk6 == OBJTBL[i].unk6) && (arg3->unk8 == OBJTBL[i].unk8) && (arg3->unkA == OBJTBL[i].unkA)) {
+        if (fields & 0x2) {
+            if ((key->unk6 == D_800D3098[i].unk6) && (key->unk8 == D_800D3098[i].unk8) && (key->unkA == D_800D3098[i].unkA)) {
                 checked |= 0x2;
                 matched |= 0x2;
             }
         } else {
             checked |= 0x2;
         }
-        if (arg2 & 0x4) {
-            if (arg3->unkC == OBJTBL[i].unkC) {
+        if (fields & 0x4) {
+            if (key->unkC == D_800D3098[i].unkC) {
                 checked |= 0x4;
                 matched |= 0x4;
             }
         } else {
             checked |= 0x4;
         }
-        if (arg2 & 0x8) {
-            if (arg3->unk10 == OBJTBL[i].unk10) {
+        if (fields & 0x8) {
+            if (key->unk10 == D_800D3098[i].unk10) {
                 checked |= 0x8;
                 matched |= 0x8;
             }
         } else {
             checked |= 0x8;
         }
-        if (arg2 & 0x10) {
-            if (arg3->unk14 == OBJTBL[i].unk14) {
+        if (fields & 0x10) {
+            if (key->unk14 == D_800D3098[i].unk14) {
                 checked |= 0x10;
                 matched |= 0x10;
             }
         } else {
             checked |= 0x10;
         }
-        if (arg2 & 0x20) {
-            if (arg3->unk15 == (OBJTBL[i].unk15 >> 2)) {
+        if (fields & 0x20) {
+            if (key->unk15 == (D_800D3098[i].unk15 >> 2)) {
                 checked |= 0x20;
                 matched |= 0x20;
             }
         } else {
             checked |= 0x20;
         }
-        if (arg2 & 0x40) {
-            if (arg3->unk16 == OBJTBL[i].unk16) {
+        if (fields & 0x40) {
+            if (key->unk16 == D_800D3098[i].unk16) {
                 checked |= 0x40;
                 matched |= 0x40;
             }
         } else {
             checked |= 0x40;
         }
-        if (arg2 & 0x80) {
-            if (arg3->unk17 == OBJTBL[i].unk17) {
+        if (fields & 0x80) {
+            if (key->unk17 == D_800D3098[i].unk17) {
                 checked |= 0x80;
                 matched |= 0x80;
             }
         } else {
             checked |= 0x80;
         }
-        if (arg2 & 0x100) {
-            if (arg3->unk18 == OBJTBL[i].unk18) {
+        if (fields & 0x100) {
+            if (key->unk18 == D_800D3098[i].unk18) {
                 checked |= 0x100;
                 matched |= 0x100;
             }
         } else {
             checked |= 0x100;
         }
-        if (arg2 & 0x200) {
-            if (arg3->unk1C == OBJTBL[i].unk1C) {
+        if (fields & 0x200) {
+            if (key->unk1C == D_800D3098[i].unk1C) {
                 checked |= 0x200;
                 matched |= 0x200;
             }
         } else {
             checked |= 0x200;
         }
-        if (arg2 & 0x400) {
-            if (arg3->unk20 == OBJTBL[i].unk20) {
+        if (fields & 0x400) {
+            if (key->unk20 == D_800D3098[i].unk20) {
                 checked |= 0x400;
                 matched |= 0x400;
             }
         } else {
             checked |= 0x400;
         }
-        if (arg2 & 0x1000) {
+        if (fields & 0x1000) {
             if (checked == 0x7FF) {
-                result = &OBJTBL[i];
+                result = &D_800D3098[i];
             }
         } else {
             if (matched != 0) {
-                result = &OBJTBL[i];
+                result = &D_800D3098[i];
             }
         }
     }
     return result;
 }
-void func_15143D18(s32 *arg0, s32 *arg1, s32 arg2, s32 arg3) {
+/* Orders the bounds lo/hi, then orders *start/*end and clamps them into [lo, hi]. XOR swaps. */
+void func_15143D18(s32 *start, s32 *end, s32 lo, s32 hi) {
     s32 t;
     s32 t2;
 
-    if (arg3 < arg2) {
-        t = arg2 ^ arg3;
-        t2 = arg3 ^ t;
-        arg3 = t2;
-        arg2 = t ^ t2;
+    if (hi < lo) {
+        t = lo ^ hi;
+        t2 = hi ^ t;
+        hi = t2;
+        lo = t ^ t2;
     }
-    if (*arg1 < *arg0) {
-        t = *arg1 ^ *arg0;
-        *arg0 = t;
-        t2 = *arg1 ^ t;
-        *arg1 = t2;
-        *arg0 = *arg0 ^ t2;
+    if (*end < *start) {
+        t = *end ^ *start;
+        *start = t;
+        t2 = *end ^ t;
+        *end = t2;
+        *start = *start ^ t2;
     }
-    if (*arg0 < arg2) {
-        *arg0 = arg2;
+    if (*start < lo) {
+        *start = lo;
     }
-    if (arg3 < *arg1) {
-        *arg1 = arg3;
+    if (hi < *end) {
+        *end = hi;
     }
 }
-s32 func_15143DA8(s32 *arg0, s32 arg1, s32 arg2) {
-    s32 **pp = &arg0;
+
+/* Clamps *value into [lo, hi] (bounds in either order); returns 1 if raised, 2 if lowered, else 0. */
+s32 func_15143DA8(s32 *value, s32 lo, s32 hi) {
     s32 t;
     s32 t2;
-    if (arg2 < arg1) {
-        t = arg1 ^ arg2;
-        t2 = arg2 ^ t;
-        arg2 = t2;
-        arg1 = t ^ t2;
+
+    if (hi < lo) {
+        t = lo ^ hi;
+        t2 = hi ^ t;
+        hi = t2;
+        lo = t ^ t2;
     }
-    if (**pp < arg1) {
-        **pp = arg1;
+    if (*value < lo) {
+        *value = lo;
         return 1;
     }
-    if (arg2 < **pp) {
-        **pp = arg2;
+    if (hi < *value) {
+        *value = hi;
         return 2;
     }
     return 0;
 }
 
-s32 func_15143E08(struct127 *arg0) {
-    return (((s32) arg0->unk7A >> 8) + 64) & 0xFF;
+/* The actor's facing angle (unk7A) as a binary angle, a quarter turn ahead. */
+s32 func_15143E08(struct127 *actor) {
+    return (((s32)actor->unk7A >> 8) + 64) & 0xFF;
 }
 
-s32 func_15143E24(struct127 *arg0) {
-    struct126 *temp_v1 = arg0->unk31C;
-    if (temp_v1 != NULL) {
-        return (s16)((arg0->unk7A - temp_v1->unk12) >> 8);
+/* The actor's facing angle in 256ths of a turn, relative to unk31C's angle when it has one. */
+s32 func_15143E24(struct127 *actor) {
+    struct126 *ref = actor->unk31C;
+    if (ref != NULL) {
+        return (s16)((actor->unk7A - ref->unk12) >> 8);
     }
-    return (s16)(arg0->unk7A >> 8);
+    return (s16)(actor->unk7A >> 8);
 }
-f32 func_15143E64(struct17 *arg0) {
-    f32 x = arg0->unk0;
-    f32 y = arg0->unk4;
-    f32 z = arg0->unk8;
+/* Length of a vector. */
+f32 func_15143E64(struct17 *v) {
+    f32 x = v->unk0;
+    f32 y = v->unk4;
+    f32 z = v->unk8;
 
     return sqrtf(x * x + y * y + z * z);
 }
@@ -1232,6 +1241,7 @@ u8 func_15143E94(s32 arg0, s32 arg1) {
     Func15143E94Spawn spawn;
 
     ret = 0;
+// matching: an unused label here splits the block, changing IDO's scheduling of the setup
 start:
     count = D_80082FA0 + 1;
     i = 0;
@@ -1272,40 +1282,44 @@ typedef struct {
 } Unk80090B64;
 extern Unk80090B64 D_80090B64[];
 
-s32 func_1514401C(u8 arg0, u32 *arg1, s32 *arg2, u8 arg3) {
+/*
+ * Advances a 16.16 position through sequence `id` (D_80090B64[id].unk0 steps long) by speed * D_800BE9E4.
+ * Past either end it stops (1), clamps (2/0x10), bounces (4) or wraps; returns 1 when it stopped.
+ */
+s32 func_1514401C(u8 id, u32 *speed, s32 *pos, u8 flags) {
     s32 max;
     s32 ret;
     s32 n;
 
     ret = 0;
-    n = D_80090B64[arg0].unk0;
+    n = D_80090B64[id].unk0;
     max = (n << 16) - 1;
-    *arg2 += *arg1 * D_800BE9E4;
-    if (max < *arg2) {
-        if (arg3 & 1) {
+    *pos += *speed * D_800BE9E4;
+    if (max < *pos) {
+        if (flags & 1) {
             ret = 1;
-        } else if (arg3 & 2) {
-            *arg1 = 0;
-            *arg2 = max;
-        } else if (arg3 & 4) {
-            *arg2 = max - (*arg2 % max);
-            *arg1 = -*arg1;
+        } else if (flags & 2) {
+            *speed = 0;
+            *pos = max;
+        } else if (flags & 4) {
+            *pos = max - (*pos % max);
+            *speed = -*speed;
         } else {
             do {
-                *arg2 -= max;
-            } while (max < *arg2);
+                *pos -= max;
+            } while (max < *pos);
         }
-    } else if ((*arg2 < 0) && !(arg3 & 8)) {
-        if (arg3 & 0x10) {
-            *arg1 = 0;
-            *arg2 = 0;
-        } else if (arg3 & 4) {
-            *arg2 = -*arg2 % max;
-            *arg1 = -*arg1;
+    } else if ((*pos < 0) && !(flags & 8)) {
+        if (flags & 0x10) {
+            *speed = 0;
+            *pos = 0;
+        } else if (flags & 4) {
+            *pos = -*pos % max;
+            *speed = -*speed;
         } else {
             do {
-                *arg2 += max;
-            } while (*arg2 < 0);
+                *pos += max;
+            } while (*pos < 0);
         }
     }
     return ret;
