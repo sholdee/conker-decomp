@@ -2,141 +2,140 @@
 #include "functions.h"
 #include "variables.h"
 
+/* One sprite placed in the level (D_800DDD18 holds D_800DDD20 of them, sorted by x or z). */
+typedef struct {
+    s16 x;
+    s16 y;
+    s16 z;
+    u8 unk6;     /* low nibble: sprite type (texture slot 0..14) */
+    u8 phaseIdx; /* index into D_800DDC90 */
+    u8 texInfo;  /* index into D_80095CE0 */
+    u8 pad9;
+    u8 animIdx;  /* column of D_8008CF00 */
+    u8 unkB;
+    s8 halfWidth;
+    s8 height;
+} Game1A89B0Position;
+
+typedef struct {
+    u8 unk0;
+    u8 frameCount;
+    u16 frameSize;
+    u8 pad4[6];
+} Game1A89B0TexInfo;
+
 extern s32 D_800DDD58;
 extern Gfx D_8008CFA0[];
 Gfx *func_1517D074(Gfx *, s16, s16, s16, f32, s32, s32, u8, u8, s32);
 
 extern s32 func_151EF610(void);
-extern u8 D_80095CE1[];
+extern Game1A89B0TexInfo D_80095CE0[];
 
-s32 func_1517B500(s16 *arg0, s16 *arg1, s32 *arg2, s32 arg3)
-{
+/*
+ * Sprite animation callbacks (called through D_8008CEBC): each copies the sprite's position into its first
+ * vertex, possibly offset, and may advance the animation phase or lower the alpha. Nonzero hides the sprite.
+ */
+
+/* Advances the phase by half again, wrapping at the frame count, and drifts the height toward 41 with jitter. */
+s32 func_1517B500(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha) {
     s32 diff;
     s32 limit;
     s32 rnd;
 
-    *arg2 = (*arg2 * 3) / 2;
-    limit = D_80095CE1[((u8 *) arg0)[8] * 10] << 8;
-    if (*arg2 >= limit)
-    {
-        *arg2 = *arg2 - limit;
+    *phase = (*phase * 3) / 2;
+    limit = D_80095CE0[pos->texInfo].frameCount << 8;
+    if (*phase >= limit) {
+        *phase -= limit;
     }
 
-    arg1[0] = arg0[0];
-    arg1[1] = arg0[1];
-    arg1[2] = arg0[2];
+    vtx->v.ob[0] = pos->x;
+    vtx->v.ob[1] = pos->y;
+    vtx->v.ob[2] = pos->z;
 
-    diff = 0x29 - ((s8 *) arg0)[0xD];
-    if (diff == 0)
-    {
-        ((s8 *) arg0)[0xD] = (((s8 *) arg0)[0xD] - (func_151EF610() % 8)) + 4;
-    }
-    else if (diff < 0)
-    {
+    diff = 41 - pos->height;
+    if (diff == 0) {
+        pos->height -= (func_151EF610() % 8) - 4;
+    } else if (diff < 0) {
         rnd = func_151EF610();
-        ((s8 *) arg0)[0xD] = ((((s8 *) arg0)[0xD] - ((func_151EF610() % -diff) >> 1)) - (rnd % 8)) + 4;
-    }
-    else
-    {
+        pos->height -= ((func_151EF610() % -diff) >> 1) + (rnd % 8) - 4;
+    } else {
         rnd = func_151EF610();
-        ((s8 *) arg0)[0xD] = ((((func_151EF610() % diff) >> 1) + ((s8 *) arg0)[0xD]) + (rnd % 8)) - 4;
+        pos->height += ((func_151EF610() % diff) >> 1) + (rnd % 8) - 4;
     }
 
-    arg1[0] = arg0[0];
-    arg1[1] = arg0[1];
-    arg1[2] = arg0[2];
+    vtx->v.ob[0] = pos->x;
+    vtx->v.ob[1] = pos->y;
+    vtx->v.ob[2] = pos->z;
     return 0;
 }
 
-s32 func_1517B6E8(s16 *arg0, s16 *arg1, s32 *arg2, s32 arg3)
-{
-  s32 v0;
-  v0 = *arg2;
-  if (v0 >= 0x600)
-  {
-    arg1[1] = ((v0 >> 6) + arg0[1]) - ((0, 0x18));
-    arg1[0] = (arg0[0] + ((*arg2) >> 8)) - 6;
-    {
-      s32 temp;
-      s32 v2;
-      v2 = ((*((u8 *) arg3)) << 7) / (((*arg2) >> 6) - 0x17);
-      temp = *((u8 *) arg3);
-      v2 >>= 4;
-      if (v2 < temp)
-      {
-        *((u8 *) arg3) = v2;
-      }
+/* Once the phase reaches 0x600, offsets the vertex by it, fades the alpha and holds the phase at 0x600. */
+s32 func_1517B6E8(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha) {
+    s32 fade;
+
+    if (*phase >= 0x600) {
+        vtx->v.ob[1] = pos->y + (*phase >> 6) - 24;
+        vtx->v.ob[0] = pos->x + (*phase >> 8) - 6;
+        fade = ((*alpha << 7) / ((*phase >> 6) - 23)) >> 4;
+        if (fade < *alpha) {
+            *alpha = fade;
+        }
+        *phase = 0x600;
+    } else {
+        vtx->v.ob[0] = pos->x;
+        vtx->v.ob[1] = pos->y;
     }
-    *arg2 = 0x600;
-  }
-  else
-  {
-    arg1[0] = arg0[0];
-    arg1[1] = arg0[1];
-  }
-  arg1[2] = arg0[2];
-  return 0;
+    vtx->v.ob[2] = pos->z;
+    return 0;
 }
 
 
-s32 func_1517B7A8(s16 *a0, s16 *a1, s32 *a2, s32 a3) {
-    s32 v0 = *a2;
+/* Pulls a phase above 0x500 back by 0x200 and clamps 0x300..0x500 to 0x300. */
+s32 func_1517B7A8(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha) {
+    s32 cur = *phase;
 
-    if (v0 >= 0x300) {
-        if (v0 >= 0x501) {
-            *a2 = v0 - 0x200;
+    if (cur >= 0x300) {
+        if (cur > 0x500) {
+            *phase = cur - 0x200;
         } else {
-            *a2 = 0x300;
+            *phase = 0x300;
         }
     }
 
-    a1[0] = a0[0];
-    a1[1] = a0[1];
-    a1[2] = a0[2];
+    vtx->v.ob[0] = pos->x;
+    vtx->v.ob[1] = pos->y;
+    vtx->v.ob[2] = pos->z;
     return 0;
 }
 
-s32 func_1517B7F8(void *arg0, void *arg1, s32 *arg2, s32 arg3) {
-    s32 temp_v1;
-    s32 temp_v0;
+/* Hops along a parabola peaking at phase 0x600; hidden once the phase reaches 0xD00. */
+s32 func_1517B7F8(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha) {
+    s32 t;
+    s32 cur;
 
-    temp_v0 = *arg2;
-    if (temp_v0 >= 0xD00) {
+    cur = *phase;
+    if (cur >= 0xD00) {
         return 1;
     }
-    temp_v1 = temp_v0 - 0x600;
-    if (temp_v0 >= 0x100) {
-        temp_v1 = 0x190000 - (temp_v1 * temp_v1);
-        *(s16 *)((u8 *)arg1 + 2) = (s16) (*(s16 *)((u8 *)arg0 + 2) + (temp_v1 / 7680));
-        temp_v0 = *arg2;
-        if (temp_v0 >= 0x200) {
-            if (temp_v0 >= 0xA01) {
-                *arg2 = temp_v0 - 0x800;
+    t = cur - 0x600;
+    if (cur >= 0x100) {
+        t = 0x190000 - (t * t);
+        vtx->v.ob[1] = pos->y + (t / 7680);
+        cur = *phase;
+        if (cur >= 0x200) {
+            if (cur > 0xA00) {
+                *phase = cur - 0x800;
             } else {
-                *arg2 = 0x200;
+                *phase = 0x200;
             }
         }
     } else {
-        *(s16 *)((u8 *)arg1 + 2) = (s16) *(s16 *)((u8 *)arg0 + 2);
+        vtx->v.ob[1] = pos->y;
     }
-    *(s16 *)((u8 *)arg1 + 0) = (s16) *(s16 *)((u8 *)arg0 + 0);
-    *(s16 *)((u8 *)arg1 + 4) = (s16) *(s16 *)((u8 *)arg0 + 4);
+    vtx->v.ob[0] = pos->x;
+    vtx->v.ob[2] = pos->z;
     return 0;
 }
-
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    u8 unk6;
-    u8 unk7;
-    u8 unk8;
-    u8 pad9;
-    u8 unkA;
-    u8 unkB;
-    s8 unkC;
-    s8 unkD;
-} Game1A89B0Position;
 
 extern s32 D_8008CEB4;
 extern Game1A89B0Position *D_800DDD18;
@@ -151,13 +150,13 @@ void func_1517B89C(s32 first, s32 last) {
         right = last;
         while (1) {
             if (D_8008CEB4 == 0) {
-                pivot = D_800DDD18[last].unk0;
-                while (D_800DDD18[left].unk0 < pivot && left < last) left++;
-                while (pivot < D_800DDD18[right].unk0 && first < right) right--;
+                pivot = D_800DDD18[last].x;
+                while (D_800DDD18[left].x < pivot && left < last) left++;
+                while (pivot < D_800DDD18[right].x && first < right) right--;
             } else {
-                pivot = D_800DDD18[last].unk4;
-                while (D_800DDD18[left].unk4 < pivot && left < last) left++;
-                while (pivot < D_800DDD18[right].unk4 && first < right) right--;
+                pivot = D_800DDD18[last].z;
+                while (D_800DDD18[left].z < pivot && left < last) left++;
+                while (pivot < D_800DDD18[right].z && first < right) right--;
             }
             if (left < right) {
                 {
@@ -193,13 +192,6 @@ typedef struct {
 } Game1A89B0AnimRef;
 
 typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u16 unk2;
-    u8 pad4[6];
-} Game1A89B0TexInfo;
-
-typedef struct {
     s32 devAddr;
     s32 size;
     s32 buf;
@@ -214,7 +206,6 @@ typedef struct {
 
 extern Game1A89B0Anim D_8008CEBC[];
 extern Game1A89B0AnimRef D_8008CF00[][8];
-extern Game1A89B0TexInfo D_80095CE0[];
 extern u32 D_800DDC40[15];
 extern s16 D_800DDC90[];
 extern Game1A89B0TexSize D_800DDB80[];
@@ -285,37 +276,37 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 px, s32 py, s
         mid = (lo + hi) / 2;
         if (axis == 0) {
             if (dir == 1) {
-                if (minX < D_800DDD18[mid].unk0) {
+                if (minX < D_800DDD18[mid].x) {
                     hi = mid - 1;
-                } else if (D_800DDD18[mid].unk0 < minX) {
+                } else if (D_800DDD18[mid].x < minX) {
                     lo = mid + 1;
-                } else if (minX == D_800DDD18[mid].unk0) {
+                } else if (minX == D_800DDD18[mid].x) {
                     break;
                 }
             } else {
-                if (maxX < D_800DDD18[mid].unk0) {
+                if (maxX < D_800DDD18[mid].x) {
                     hi = mid - 1;
-                } else if (D_800DDD18[mid].unk0 < maxX) {
+                } else if (D_800DDD18[mid].x < maxX) {
                     lo = mid + 1;
-                } else if (maxX == D_800DDD18[mid].unk0) {
+                } else if (maxX == D_800DDD18[mid].x) {
                     break;
                 }
             }
         } else {
             if (dir == 1) {
-                if (minZ < D_800DDD18[mid].unk4) {
+                if (minZ < D_800DDD18[mid].z) {
                     hi = mid - 1;
-                } else if (D_800DDD18[mid].unk4 < minZ) {
+                } else if (D_800DDD18[mid].z < minZ) {
                     lo = mid + 1;
-                } else if (minZ == D_800DDD18[mid].unk4) {
+                } else if (minZ == D_800DDD18[mid].z) {
                     break;
                 }
             } else {
-                if (maxZ < D_800DDD18[mid].unk4) {
+                if (maxZ < D_800DDD18[mid].z) {
                     hi = mid - 1;
-                } else if (D_800DDD18[mid].unk4 < maxZ) {
+                } else if (D_800DDD18[mid].z < maxZ) {
                     lo = mid + 1;
-                } else if (maxZ == D_800DDD18[mid].unk4) {
+                } else if (maxZ == D_800DDD18[mid].z) {
                     break;
                 }
             }
@@ -325,10 +316,10 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 px, s32 py, s
         *p = 0x7FFF;
     }
     i = mid;
-    if ((axis == 0 && ((dir == 1 && mid < D_800DDD20 && D_800DDD18[mid].unk0 < maxX) ||
-                       (dir == -1 && mid >= 0 && minX < D_800DDD18[mid].unk0))) ||
-        (axis != 0 && ((dir == 1 && mid < D_800DDD20 && D_800DDD18[mid].unk4 < maxZ) ||
-                       (dir == -1 && mid >= 0 && minZ < D_800DDD18[mid].unk4)))) {
+    if ((axis == 0 && ((dir == 1 && mid < D_800DDD20 && D_800DDD18[mid].x < maxX) ||
+                       (dir == -1 && mid >= 0 && minX < D_800DDD18[mid].x))) ||
+        (axis != 0 && ((dir == 1 && mid < D_800DDD20 && D_800DDD18[mid].z < maxZ) ||
+                       (dir == -1 && mid >= 0 && minZ < D_800DDD18[mid].z)))) {
         j = ((u32) D_800DDD20 < (u32) D_800DDD0C) ? D_800DDD20 : D_800DDD0C;
         D_800DDD10[D_800BE9C0] = (s32) allocate_memory(j << 6, 4, 2, 0);
         if (D_800DDD10[D_800BE9C0] == 0) {
@@ -341,31 +332,31 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 px, s32 py, s
     {
         j = 0;
         while ((u32) j < (u32) D_800DDD0C &&
-               ((axis == 0 && ((dir == 1 && i < D_800DDD20 && D_800DDD18[i].unk0 < maxX) ||
-                               (dir == -1 && i >= 0 && minX < D_800DDD18[i].unk0))) ||
-                (axis != 0 && ((dir == 1 && i < D_800DDD20 && D_800DDD18[i].unk4 < maxZ) ||
-                               (dir == -1 && i >= 0 && minZ < D_800DDD18[i].unk4))))) {
-            dist = func_150AD9A0(D_800DDD18[i].unk0 - x, D_800DDD18[i].unk2 - y, D_800DDD18[i].unk4 - z);
+               ((axis == 0 && ((dir == 1 && i < D_800DDD20 && D_800DDD18[i].x < maxX) ||
+                               (dir == -1 && i >= 0 && minX < D_800DDD18[i].x))) ||
+                (axis != 0 && ((dir == 1 && i < D_800DDD20 && D_800DDD18[i].z < maxZ) ||
+                               (dir == -1 && i >= 0 && minZ < D_800DDD18[i].z))))) {
+            dist = func_150AD9A0(D_800DDD18[i].x - x, D_800DDD18[i].y - y, D_800DDD18[i].z - z);
             if (dist < radius) {
                 type = D_800DDD18[i].unk6 & 0xF;
                 if ((u32) dist < D_800DDC40[type]) {
                     D_800DDC40[type] = dist;
                 }
-                limit = func_150AD9A0(D_800DDD18[i].unk0 - px, D_800DDD18[i].unk2 - py, D_800DDD18[i].unk4 - pz);
+                limit = func_150AD9A0(D_800DDD18[i].x - px, D_800DDD18[i].y - py, D_800DDD18[i].z - pz);
                 if (limit > 0x8C) {
                     if (limit < 0xF0) {
                         dist = radius - ((radius - dist) * (limit - 0x8C)) / 100;
                     }
                     if ((&D_800DD478)[type * 26] == 0) {
                         if (((Game1A89B0TexFile *) &D_800DDA90)[type].devAddr != 0) {
-                            hi = D_80095CE0[D_800DDBC0[type]].unk2 * D_80095CE0[D_800DDBC0[type]].unk1;
+                            hi = D_80095CE0[D_800DDBC0[type]].frameSize * D_80095CE0[D_800DDBC0[type]].frameCount;
                             ((Game1A89B0TexFile *) &D_800DDA90)[type].buf = func_10003C6C(((Game1A89B0TexFile *) &D_800DDA90)[type].size, 1, 2, 1, 0);
                             if (((Game1A89B0TexFile *) &D_800DDA90)[type].buf != 0) {
                                 (&D_800DD478)[type * 26] = func_10003C6C(hi, 4, 1, 0, 0);
                                 if ((&D_800DD478)[type * 26] != 0) {
                                     func_10004514(((Game1A89B0TexFile *) &D_800DDA90)[type].devAddr, (void *) ((Game1A89B0TexFile *) &D_800DDA90)[type].buf, ((Game1A89B0TexFile *) &D_800DDA90)[type].size, 1);
                                     ((Game1A89B0TexFile *) &D_800DDA90)[type].loaded = 1;
-                                    hi = D_80095CE0[D_800DDBC0[type]].unk2;
+                                    hi = D_80095CE0[D_800DDBC0[type]].frameSize;
                                     for (size = 1; size < 26; size++) {
                                         (&D_800DD478)[type * 26 + size] = (&D_800DD478)[type * 26 + size - 1] + hi;
                                     }
@@ -382,17 +373,17 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 px, s32 py, s
                         }
                     }
                     vtx = &VTX(j << 2);
-                    phase = D_800DDC90[D_800DDD18[i].unk7];
+                    phase = D_800DDC90[D_800DDD18[i].phaseIdx];
                     if (phase < 0) {
                         phase = 0;
                     }
                     if (D_800DD470.unk0 != 0) {
-                        if (func_150AD9A0(D_800DDD18[i].unk0 - D_800DD470.unk0, D_800DDD18[i].unk2 - D_800DD470.unk2,
-                                          D_800DDD18[i].unk4 - D_800DD470.unk4) < 0x50 &&
+                        if (func_150AD9A0(D_800DDD18[i].x - D_800DD470.unk0, D_800DDD18[i].y - D_800DD470.unk2,
+                                          D_800DDD18[i].z - D_800DD470.unk4) < 0x50 &&
                             D_800DDBC0[type] == 0) {
                             if (D_800DDD18[i].unkB != 0x21) {
                                 D_800DDD18[i].unkB = 0x21;
-                                func_15170500(D_800DDD18[i].unk0, D_800DDD18[i].unk2 + 0x44, D_800DDD18[i].unk4, 0, 0, 0xFF, 0);
+                                func_15170500(D_800DDD18[i].x, D_800DDD18[i].y + 0x44, D_800DDD18[i].z, 0, 0, 0xFF, 0);
                             }
                         }
                     }
@@ -400,28 +391,28 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 px, s32 py, s
                         if (D_800DDD18[i].unkB >= 0x22) {
                             D_800DDD18[i].unkB--;
                         }
-                        vtx[3].v.flag = D_800DDD18[i].unkD;
+                        vtx[3].v.flag = D_800DDD18[i].height;
                     } else {
                         if (dist < 0x30 && D_800DDBC0[type] == 0) {
                             D_800DDD18[i].unkB = 0x22;
-                            func_15170500(D_800DDD18[i].unk0, D_800DDD18[i].unk2 + 0x44, D_800DDD18[i].unk4, 0, 0, 0xFF, 0);
+                            func_15170500(D_800DDD18[i].x, D_800DDD18[i].y + 0x44, D_800DDD18[i].z, 0, 0, 0xFF, 0);
                         }
-                        vtx[3].v.flag = D_800DDD18[i].unkD;
+                        vtx[3].v.flag = D_800DDD18[i].height;
                     }
-                    vtx[2].v.flag = D_800DDD18[i].unkC;
+                    vtx[2].v.flag = D_800DDD18[i].halfWidth;
                     dist = (u32) (radius - dist) >> 1;
                     if (dist >= 0x100) {
                         dist = 0xFF;
                     }
                     vtx[0].v.cn[3] = dist;
-                    if (D_8008CEBC[D_8008CF00[D_800DDC80[type]][D_800DDD18[i].unkA].idx].fn != NULL) {
-                        if (D_8008CEBC[D_8008CF00[D_800DDC80[type]][D_800DDD18[i].unkA].idx].fn(&D_800DDD18[i], vtx, &phase, &vtx[0].v.cn[3]) != 0) {
+                    if (D_8008CEBC[D_8008CF00[D_800DDC80[type]][D_800DDD18[i].animIdx].idx].fn != NULL) {
+                        if (D_8008CEBC[D_8008CF00[D_800DDC80[type]][D_800DDD18[i].animIdx].idx].fn(&D_800DDD18[i], vtx, &phase, &vtx[0].v.cn[3]) != 0) {
                             goto next;
                         }
                     } else {
-                        vtx[0].v.ob[0] = D_800DDD18[i].unk0;
-                        vtx[0].v.ob[1] = D_800DDD18[i].unk2;
-                        vtx[0].v.ob[2] = D_800DDD18[i].unk4;
+                        vtx[0].v.ob[0] = D_800DDD18[i].x;
+                        vtx[0].v.ob[1] = D_800DDD18[i].y;
+                        vtx[0].v.ob[2] = D_800DDD18[i].z;
                     }
                     bit = D_800DDD18[i].unk6 | 0x9F;
                     limit = vtx[0].v.cn[3] & 0xFF;
