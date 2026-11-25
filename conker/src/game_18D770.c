@@ -190,18 +190,19 @@ void func_151604A0(void *arg0, u8 *message, u8 event) {
     }
 }
 
-s32 func_15160600(struct225 *arg0) {
-    arg0->unk14->unk2F = func_151422DC(0, &D_800A6690, 0, 0xFF, 0xFF, &D_800A6698, 575);
+/* Sets the light's intensity from the "scale" debug value. */
+s32 func_15160600(struct225 *effect) {
+    effect->unk14->unk2F = func_151422DC(0, "scale", 0, 0xFF, 0xFF, "../Effects/Light/light.c", 575);
     return 1;
 }
 
-s32 func_1516065C(struct225 *arg0) {
-    func_15163CF8(&arg0->unk18, arg0);
+s32 func_1516065C(struct225 *effect) {
+    func_15163CF8((struct227 *)&effect->unk18, effect);
     return 1;
 }
 
-s32 func_15160684(struct225 *arg0) {
-    func_15163DEC(arg0, &arg0->unk18);
+s32 func_15160684(struct225 *effect) {
+    func_15163DEC(effect, (struct228 *)&effect->unk18);
     return 1;
 }
 
@@ -241,330 +242,295 @@ s32 func_151606A8(struct225 *effect) {
     return 1;
 }
 
-s32 func_151607A4(struct225 *arg0) {
-    struct227 *temp_a1 = &arg0->unk18;
-    if (arg0->unk28 != 0) {
-        if (temp_a1->unkC < 0.0f) {
-            temp_a1->unk4 = (temp_a1->unk4 + (temp_a1->unk8 * D_800BE9A4));
-            if (temp_a1->unk0 < temp_a1->unk4) {
-                temp_a1->unk4 = temp_a1->unk0;
-                temp_a1->unk10 -= 1;
-                if (temp_a1->unk10 != 0) {
-                    func_15160954(&temp_a1->unk4, &temp_a1->unk0, &temp_a1->unk8, &temp_a1->unkC, arg0);
+/* Payload of func_151607A4: bursts of flickers that ramp the light up from dark. */
+typedef struct {
+    f32 peak;    // intensity a flicker ramps up to
+    f32 level;   // current intensity
+    f32 rate;    // intensity gained per frame
+    f32 delay;   // frames before the current flicker starts ramping
+    s16 count;   // flickers left in this burst
+    u8  sound;   // play a sound on each flicker
+} LightFlicker;
+
+s32 func_151607A4(struct225 *effect) {
+    LightFlicker *flicker = (LightFlicker *)&effect->unk18;
+
+    if (flicker->count != 0) {
+        if (flicker->delay < 0.0f) {
+            flicker->level += flicker->rate * D_800BE9A4;
+            if (flicker->peak < flicker->level) {
+                flicker->level = flicker->peak;
+                flicker->count--;
+                if (flicker->count != 0) {
+                    func_15160954(&flicker->level, &flicker->peak, &flicker->rate, &flicker->delay, effect);
                 }
             }
         } else {
-            temp_a1->unkC -= D_800BE9A4;
+            flicker->delay -= D_800BE9A4;
         }
-    } else if (func_150ADA68() < D_800A6AD4) {
-        temp_a1->unk10 = (func_150ADA20() % 5U) + 1;
-        func_15160954(&temp_a1->unk4, &temp_a1->unk0, &temp_a1->unk8, &temp_a1->unkC, arg0);
+    } else if (func_150ADA68() < 0.005000000354f) {
+        flicker->count = (func_150ADA20() % 5U) + 1;
+        func_15160954(&flicker->level, &flicker->peak, &flicker->rate, &flicker->delay, effect);
     }
-    arg0->unk14->unk2F = arg0->unk1C;
+    effect->unk14->unk2F = flicker->level;
     return 1;
 }
 
-void func_15160954(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, struct225 *arg4) {
-    s32 pad0;
-    struct17 tmp;
-    s32 pad1;
+/* Starts one flicker: drops to dark, picks a ramp rate and delay, and optionally plays a sound at the light. */
+void func_15160954(f32 *level, f32 *peak, f32 *rate, f32 *delay, struct225 *effect) {
+    s32 pad0; // matching: unused stack slot
+    struct17 position;
+    s32 pad1; // matching: unused stack slot
 
-    *arg0 = 0.0f;
-    *arg2 = *arg1 / ((func_150ADA68() * 12.0f) + 8.0f);
-    *arg3 = (func_150ADA68() * 28.0f) + 1.0f;
+    *level = 0.0f;
+    *rate = *peak / ((func_150ADA68() * 12.0f) + 8.0f);
+    *delay = (func_150ADA68() * 28.0f) + 1.0f;
 
-    tmp.unk0 = arg4->unk14->unkE;
-    tmp.unk4 = arg4->unk14->unk10;
-    tmp.unk8 = arg4->unk14->unk12;
+    position.unk0 = effect->unk14->unkE;
+    position.unk4 = effect->unk14->unk10;
+    position.unk8 = effect->unk14->unk12;
 
-    if (arg4->unk2A != 0) {
-        func_151618BC(25000, 0, 0, 0, &tmp, 500, 1500);
+    if (((LightFlicker *)&effect->unk18)->sound) {
+        func_151618BC(25000, 0, 0, 0, &position, 500, 1500);
     }
 }
 
-struct vec3w_15160A58 { s32 unk0; s32 unk4; s32 unk8; };
+/* Payload of an effect whose light follows an actor, or a point on one of its bones. */
+typedef struct {
+    struct127 *actor;
+    u8 actorId;      // actor->unique_id when attached; a change means the actor slot was reused
+    u8 bone;         // index of the bone matrix in actor->unk1D4
+    u8 pad6[0x2];
+    struct17 offset; // position in the bone's frame
+    s8 callback;     // index into D_8008B1F8, or -1
+    u8 unk15;
+} LightAttach;
 
-struct225 *func_15160A58(struct127 *arg0, u8 arg1, struct vec3w_15160A58 *arg2, u8 arg3, s16 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s8 argB, s32 argC, u8 argD, u8 argE, s32 argF) {
-    struct225 *temp_v0;
+/* Creates a light that follows `actor` (see func_15160B74). */
+struct225 *func_15160A58(struct127 *actor, u8 bone, struct17 *offset, u8 arg3, s16 lifetime, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s8 callback, s32 extraSize, u8 unk15, u8 argE, s32 argF) {
+    struct225 *effect;
     Header header;
-    struct {
-        struct127 *unk0;
-        u8 unk4;
-        u8 unk5;
-        u8 pad6[0x2];
-        struct vec3w_15160A58 unk8;
-        s8 unk14;
-        u8 unk15;
-        u8 pad16[0x2];
-    } sp44;
-    Header2 header2;
+    LightAttach attach;
+    Header2 position;
 
-    if (arg0 == NULL) {
+    if (actor == NULL) {
         return NULL;
     }
 
     header.unk0 = arg3;
     header.unk1 = 5;
-    header.unk2 = arg4;
-    header.unk4 = 0x10;
+    header.unk2 = lifetime;
+    header.unk4 = 16;
 
-    sp44.unk0 = arg0;
-    sp44.unk4 = arg0->unique_id;
-    sp44.unk5 = arg1;
-    sp44.unk8 = *arg2;
+    attach.actor = actor;
+    attach.actorId = actor->unique_id;
+    attach.bone = bone;
+    attach.offset = *offset;
 
-    header2.unk0 = 0;
-    header2.unk4 = 0;
-    header2.unk8 = 0;
+    position.unk0 = 0;
+    position.unk4 = 0;
+    position.unk8 = 0;
 
-    sp44.unk14 = argB;
-    sp44.unk15 = argD;
+    attach.callback = callback;
+    attach.unk15 = unk15;
 
-    temp_v0 = func_151602C0(&header, &header2, arg5, arg6, arg7, arg8, 0xFF, 0, argC + 0x18, argE, argF);
-    if (temp_v0 != NULL) {
-        memcpy(&temp_v0->unk18, &sp44, 0x18);
+    effect = func_151602C0(&header, &position, arg5, arg6, arg7, arg8, 0xFF, 0, extraSize + sizeof(LightAttach), argE, argF);
+    if (effect != NULL) {
+        memcpy(&effect->unk18, &attach, sizeof(LightAttach));
     }
-    return temp_v0;
+    return effect;
 }
 
-#if 0
-struct225 *func_15160A58(void *arg0, u8 arg1, void *arg2, u8 arg3, s16 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s8 argB, s32 argC, u8 argD, u8 argE, s32 argF) {
-//     s32 sp64;
-//
-//     s8 sp60;
-//     s16 sp5E;
-//     s8 sp5D;
-//     u8 sp5C;
-//     u8 sp59;
-//     s8 sp58;
-//     ? sp4C;
-//     u8 sp49;
-//     u8 sp48;
-//     void *sp44;
-//
-//     ?32 sp40;
-//     ?32 sp3C;
-//     ?32 sp38;
-//     struct225 *temp_v0;
-//     s32 phi_v1;
-//
-//     if (arg0 == 0) {
-//         return NULL;
-//     }
-//     sp5C = arg3;
-//     sp5D = 5;
-//     sp60 = 0x10;
-//     sp5E = arg4;
-//     sp44 = arg0;
-//     sp49 = arg1;
-//     sp48 = arg0->unk3B;
-//     sp4C.unk0 = (s32) arg2->unk0;
-//     sp4C.unk4 = (s32) arg2->unk4;
-//     sp4C.unk8 = (s32) arg2->unk8;
-//     sp38 = 0;
-//     sp3C = 0;
-//     sp40 = 0;
-//     sp58 = argB;
-//     sp59 = argD;
-//     temp_v0 = func_151602C0(&sp5C, &sp38, arg5, arg6, arg7, arg8, 0xFF, 0, argC + 0x18, argE, argF);
-//     if (temp_v0 != NULL) {
-//         memcpy(&temp_v0->unk18, &sp44, 0x18);
-//     }
-//     return temp_v0;
-// }
-#endif
+void func_15143134(f32 *in, f32 *out, f32 mtx[4][4]);
 
-// ??
-void func_15143134(f32 *, f32 *, s32);
-
-u8 func_15160B74(void *arg0) {
+/* Moves the light to its actor (or the bone point); returns 0 once the actor is gone. */
+u8 func_15160B74(struct225 *effect) {
     u8 result;
-    s8 selector;
-    u8 *slot;
-    u8 *entity;
+    s8 callback;
+    LightAttach *attach;
+    struct127 *actor;
 
-    entity = *(u8 **)((u8 *)arg0 + 0x18);
+    actor = ((LightAttach *)&effect->unk18)->actor;
     result = 1;
-    slot = (u8 *)arg0 + 0x18;
-    if (*(s32 *)entity == 0) {
+    attach = (LightAttach *)&effect->unk18;
+    if (actor->interaction_state == 0) {
         return 0;
     }
-    if (slot[4] != entity[0x3B]) {
+    if (actor->unique_id != attach->actorId) {
         return 0;
     }
-    if (*(s32 *)(entity + 0x1D4) != 0 && (entity[0x74] & 0xF) != 0xF) {
-        f32 transformed[3];
+    if (actor->unk1D4 != NULL && (actor->unk74 & 0xF) != 0xF) {
+        f32 position[3];
 
-        func_15143134((f32 *)(slot + 8), transformed,
-                       (slot[5] << 6) + *(s32 *)(entity + 0x1D4));
-        *(s16 *)(*(u8 **)((u8 *)arg0 + 0x14) + 0xE) = (s16)(s32)transformed[0];
-        *(s16 *)(*(u8 **)((u8 *)arg0 + 0x14) + 0x10) = (s16)(s32)transformed[1];
-        *(s16 *)(*(u8 **)((u8 *)arg0 + 0x14) + 0x12) = (s16)(s32)transformed[2];
+        func_15143134(&attach->offset.unk0, position, ((f32 (*)[4][4])actor->unk1D4)[attach->bone]);
+        effect->unk14->unkE = position[0];
+        effect->unk14->unk10 = position[1];
+        effect->unk14->unk12 = position[2];
     } else {
-        *(s16 *)(*(u8 **)((u8 *)arg0 + 0x14) + 0xE) =
-            (s16)(s32)*(f32 *)(entity + 0x14);
-        *(s16 *)(*(u8 **)((u8 *)arg0 + 0x14) + 0x10) =
-            (s16)(s32)*(f32 *)(entity + 0x18);
-        *(s16 *)(*(u8 **)((u8 *)arg0 + 0x14) + 0x12) =
-            (s16)(s32)*(f32 *)(entity + 0x1C);
+        effect->unk14->unkE = actor->x_position;
+        effect->unk14->unk10 = actor->y_position;
+        effect->unk14->unk12 = actor->z_position;
     }
-    selector = *(s8 *)(slot + 0x14);
-    if (selector != -1) {
-        result = D_8008B1F8[selector]((struct225 *)arg0);
+    callback = attach->callback;
+    if (callback != -1) {
+        result = D_8008B1F8[callback](effect);
     }
     return result;
 }
 
-// another struct definition
-struct225 *func_15160CDC(struct127 *arg0, u8 arg1, struct vec3w_15160A58 *arg2, struct vec3w_15160A58 *arg3, f32 arg4, u8 arg5, s16 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 argB, u8 argC, u8 argD, u8 argE, s32 argF) {
-    struct225 *temp_v0;
-    Header header;
-    struct {
-        struct127 *unk0;
-        u8 unk4;
-        u8 unk5;
-        u8 pad6[0x2];
-        struct vec3w_15160A58 unk8;
-        struct vec3w_15160A58 unk14;
-        f32 unk20;
-        u8 unk24;
-        u8 unk25;
-        u8 pad26[0x2];
-    } sp4C;
-    Header2 header2;
-    s32 sp3C;
-    s32 sp38;
+/* Payload of func_15160E30: a light cast along a beam from an actor's bone, stopping at the first hit. */
+typedef struct {
+    struct127 *actor;
+    u8 actorId;      // actor->unique_id when attached
+    u8 bone;         // index of the bone matrix in actor->unk1D4
+    u8 pad6[0x2];
+    struct17 start;  // beam start in the bone's frame
+    struct17 end;    // beam end in the bone's frame
+    f32 scale;       // hit distance to intensity
+    u8 flags;        // 1: cast from the bone, 2: flag the hit actor
+    u8 unk25;
+} LightBeam;
 
-    if (arg0 == NULL) {
+/* Creates a beam light on `actor` (see func_15160E30). */
+struct225 *func_15160CDC(struct127 *actor, u8 bone, struct17 *start, struct17 *end, f32 scale, u8 arg5, s16 lifetime, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 fromBone, u8 unk25, u8 flagHit, u8 argE, s32 argF) {
+    struct225 *effect;
+    Header header;
+    LightBeam beam;
+    Header2 position;
+    s32 flag1;
+    s32 flag2;
+
+    if (actor == NULL) {
         return NULL;
     }
 
     header.unk0 = arg5;
     header.unk1 = 6;
-    header.unk2 = arg6;
-    header.unk4 = 0x11;
+    header.unk2 = lifetime;
+    header.unk4 = 17;
 
-    sp4C.unk0 = arg0;
-    sp4C.unk4 = arg0->unique_id;
-    sp4C.unk5 = arg1;
-    sp4C.unk8 = *arg2;
-    sp4C.unk14 = *arg3;
-    sp4C.unk20 = arg4;
+    beam.actor = actor;
+    beam.actorId = actor->unique_id;
+    beam.bone = bone;
+    beam.start = *start;
+    beam.end = *end;
+    beam.scale = scale;
 
-    sp3C = (argB != 0) ? 1 : 0;
-    sp38 = (argD != 0) ? 2 : 0;
-    sp4C.unk24 = sp38 | sp3C;
-    sp4C.unk25 = argC;
+    flag1 = fromBone ? 1 : 0;
+    flag2 = flagHit ? 2 : 0;
+    beam.flags = flag2 | flag1;
+    beam.unk25 = unk25;
 
-    header2.unk0 = 0;
-    header2.unk4 = 0;
-    header2.unk8 = 0;
+    position.unk0 = 0;
+    position.unk4 = 0;
+    position.unk8 = 0;
 
-    temp_v0 = func_151602C0(&header, &header2, arg7, arg8, arg9, argA, 0xFF, 0, sizeof(sp4C), argE, argF);
-    if (temp_v0 != NULL) {
-        memcpy(&temp_v0->unk18, &sp4C, sizeof(sp4C));
+    effect = func_151602C0(&header, &position, arg7, arg8, arg9, argA, 0xFF, 0, sizeof(LightBeam), argE, argF);
+    if (effect != NULL) {
+        memcpy(&effect->unk18, &beam, sizeof(LightBeam));
     }
-    return temp_v0;
+    return effect;
 }
 
-// similar to func_15160B74
+/* Result of func_15081690's ray cast. */
 typedef struct {
-    u8 *unk0;
-    f32 unk4;
-    f32 unk8[3];
+    struct127 *hit;
+    f32 distance;
+    f32 position[3];
     u8 pad14[0x45];
-    u8 unk59;
+    u8 hitCount;
     u8 pad5A[0xA];
-} Ray15160E30;
+} RayHit;
 
-void func_15081690(void *, f32, f32, f32, f32, f32, f32, Ray15160E30 *, f32, s32, s32, s32, s32, s32, s32);
+void func_15081690(struct127 *, f32, f32, f32, f32, f32, f32, RayHit *, f32, s32, s32, s32, s32, s32, s32);
 s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
-s32 func_15145EA4(f32 **arg0, f32 **arg1, s32 arg2, s32 arg3);
+s32 func_15145EA4(f32 **in, f32 **out, f32 mtx[4][4], s32 count);
 
-s32 func_15160E30(void *arg0) {
-    u8 *entity;
-    u8 *slot;
-    s32 count;
+/* Casts the beam and puts the light where it hits; the light is off and at the actor when nothing is hit. */
+s32 func_15160E30(struct225 *effect) {
+    struct127 *actor;
+    LightBeam *beam;
+    s32 hitCount;
 
-    entity = *(u8 **)((u8 *)arg0 + 0x18);
-    slot = (u8 *)arg0 + 0x18;
-    if (*(s32 *)entity == 0) {
+    actor = ((LightBeam *)&effect->unk18)->actor;
+    beam = (LightBeam *)&effect->unk18;
+    if (actor->interaction_state == 0) {
         return 0;
     }
-    if (slot[4] != entity[0x3B]) {
+    if (actor->unique_id != beam->actorId) {
         return 0;
     }
-    if (*(s32 *)(entity + 0x1D4) != 0 && (slot[0x24] & 1) && (entity[0x74] & 0xF) != 0xF) {
+    if (actor->unk1D4 != NULL && (beam->flags & 1) && (actor->unk74 & 0xF) != 0xF) {
         f32 start[3];
         f32 dir[3];
-        Ray15160E30 ray;
+        RayHit ray;
         f32 *in[2];
         f32 *out[2];
 
-        in[0] = (f32 *)(slot + 8);
-        in[1] = (f32 *)(slot + 0x14);
+        in[0] = &beam->start.unk0;
+        in[1] = &beam->end.unk0;
         out[0] = start;
         out[1] = dir;
-        func_15145EA4(in, out, (slot[5] << 6) + *(s32 *)(entity + 0x1D4), 2);
+        func_15145EA4(in, out, ((f32 (*)[4][4])actor->unk1D4)[beam->bone], 2);
         {
-            f32 dist;
+            f32 length;
 
-        dir[0] -= start[0];
-        dir[1] -= start[1];
-        dir[2] -= start[2];
-        {
-            f32 inv;
+            dir[0] -= start[0];
+            dir[1] -= start[1];
+            dir[2] -= start[2];
+            {
+                f32 invLength;
 
-        if (func_15145128(dir, dir, &dist, &inv) == 0) {
-            *(s16 *)(*(u8 **)((u8 *)arg0 + 0x14) + 0xE) = (s16)(s32)*(f32 *)(entity + 0x14);
-            *(s16 *)(*(u8 **)((u8 *)arg0 + 0x14) + 0x10) = (s16)(s32)*(f32 *)(entity + 0x18);
-            *(s16 *)(*(u8 **)((u8 *)arg0 + 0x14) + 0x12) = (s16)(s32)*(f32 *)(entity + 0x1C);
-            *(*(u8 **)((u8 *)arg0 + 0x14) + 0x2F) = 0;
-            *(*(u8 **)((u8 *)arg0 + 0x14) + 0x9) = 1;
+                if (func_15145128(dir, dir, &length, &invLength) == 0) {
+                    effect->unk14->unkE = actor->x_position;
+                    effect->unk14->unk10 = actor->y_position;
+                    effect->unk14->unk12 = actor->z_position;
+                    effect->unk14->unk2F = 0;
+                    effect->unk14->unk9 = 1;
+                    return 1;
+                }
+            }
+        }
+        func_15081690(actor, start[0], start[1], start[2], dir[0], dir[1], dir[2], &ray, 0.0f, 0, 0, 1, -1, 0, 0);
+        hitCount = ray.hitCount;
+        if (hitCount == 0) {
+            effect->unk14->unkE = actor->x_position;
+            effect->unk14->unk10 = actor->y_position;
+            effect->unk14->unk12 = actor->z_position;
+            effect->unk14->unk2F = 0;
+            effect->unk14->unk9 = 1;
             return 1;
         }
-        }
-        }
-        func_15081690(entity, start[0], start[1], start[2], dir[0], dir[1], dir[2], &ray, 0.0f, 0, 0, 1, -1, 0, 0);
-        count = ray.unk59;
-        if (count == 0) {
-            *(s16 *)(*(u8 **)((u8 *)arg0 + 0x14) + 0xE) = (s16)(s32)*(f32 *)(entity + 0x14);
-            *(s16 *)(*(u8 **)((u8 *)arg0 + 0x14) + 0x10) = (s16)(s32)*(f32 *)(entity + 0x18);
-            *(s16 *)(*(u8 **)((u8 *)arg0 + 0x14) + 0x12) = (s16)(s32)*(f32 *)(entity + 0x1C);
-            *(*(u8 **)((u8 *)arg0 + 0x14) + 0x2F) = 0;
-            *(*(u8 **)((u8 *)arg0 + 0x14) + 0x9) = 1;
-            return 1;
-        }
-        if ((slot[0x24] & 2) && count >= 2) {
-            u8 *hit;
+        if ((beam->flags & 2) && hitCount >= 2) {
+            struct127 *hit;
 
-            hit = ray.unk0;
-            if (hit[4] == 0x9E) {
-                *(s32 *)(hit + 0x2E4) = 1;
+            hit = ray.hit;
+            if (hit->id == 0x9E) {
+                hit->unk2E4 = 1;
             }
         }
-        *(s16 *)(*(u8 **)((u8 *)arg0 + 0x14) + 0xE) = (s16)(s32)ray.unk8[0];
-        *(s16 *)(*(u8 **)((u8 *)arg0 + 0x14) + 0x10) = (s16)(s32)ray.unk8[1];
-        *(s16 *)(*(u8 **)((u8 *)arg0 + 0x14) + 0x12) = (s16)(s32)ray.unk8[2];
+        effect->unk14->unkE = ray.position[0];
+        effect->unk14->unk10 = ray.position[1];
+        effect->unk14->unk12 = ray.position[2];
         {
-            f32 alpha;
+            f32 intensity;
 
-            alpha = ray.unk4 * *(f32 *)(slot + 0x20);
-            if (alpha > 255.0f) {
-                alpha = 255.0f;
+            intensity = ray.distance * beam->scale;
+            if (intensity > 255.0f) {
+                intensity = 255.0f;
             }
-            if (alpha < 0.0f) {
-                alpha = 0.0f;
+            if (intensity < 0.0f) {
+                intensity = 0.0f;
             }
-            *(*(u8 **)((u8 *)arg0 + 0x14) + 0x2F) = alpha;
+            effect->unk14->unk2F = intensity;
         }
-        *(*(u8 **)((u8 *)arg0 + 0x14) + 0x9) = 0;
+        effect->unk14->unk9 = 0;
     } else {
-        *(s16 *)(*(u8 **)((u8 *)arg0 + 0x14) + 0xE) = (s16)(s32)*(f32 *)(entity + 0x14);
-        *(s16 *)(*(u8 **)((u8 *)arg0 + 0x14) + 0x10) = (s16)(s32)*(f32 *)(entity + 0x18);
-        *(s16 *)(*(u8 **)((u8 *)arg0 + 0x14) + 0x12) = (s16)(s32)*(f32 *)(entity + 0x1C);
-        *(*(u8 **)((u8 *)arg0 + 0x14) + 0x2F) = 0;
-        *(*(u8 **)((u8 *)arg0 + 0x14) + 0x9) = 1;
+        effect->unk14->unkE = actor->x_position;
+        effect->unk14->unk10 = actor->y_position;
+        effect->unk14->unk12 = actor->z_position;
+        effect->unk14->unk2F = 0;
+        effect->unk14->unk9 = 1;
     }
     return 1;
 }
