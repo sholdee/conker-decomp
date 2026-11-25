@@ -83,20 +83,7 @@ typedef struct {
 
 /* A particle created by func_15130374. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x18];
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ s16 age;             /* counts down */
-    /* 0x1C */ u8 pad1C[0xF];
-    /* 0x2B */ u8 unk2B;
-    /* 0x2C */ u8 unk2C;
-    /* 0x2D */ u8 pad2D[0xB];
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ u8 pad40[0x30];
-    /* 0x70 */ u8 unk70;
-    /* 0x71 */ u8 unk71;
-    /* 0x72 */ u8 unk72;
-    /* 0x73 */ u8 pad73[0x35];
+    /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ ParticleAgeParams ageParams;
 } Particle;
 
@@ -679,25 +666,25 @@ s32 func_151A483C(Particle *particle, u8 arg1) {
     ParticleAgeParams *params;
 
     params = &particle->ageParams;
-    age = particle->age;
+    age = particle->head.desc.timer;
     if (age < params->limit2B) {
-        particle->unk2B = age * params->mul2B;
+        particle->head.desc.alpha = age * params->mul2B;
     }
     if (age < params->limitSize) {
         {
             f32 sizeStep = params->sizeRate * D_800BE9E4;
 
-            particle->unk38 += sizeStep;
-            particle->unk3C += sizeStep;
+            particle->head.desc.width += sizeStep;
+            particle->head.desc.height += sizeStep;
         }
-        age = particle->age;
+        age = particle->head.desc.timer;
     }
     if (age < params->limit2C) {
-        particle->unk72 = 1;
-        particle->unk70 = 2;
-        particle->unk71 = 2;
-        particle->unk2C = age * params->mul2C;
-        particle->unk18 = 0x5203;
+        particle->head.desc.updateFunc = 1;
+        particle->head.desc.primColorMode = 2;
+        particle->head.desc.envColorMode = 2;
+        particle->head.desc.brightness = age * params->mul2C;
+        particle->head.desc.renderMode = 0x5203;
     }
     return 1;
 }
@@ -708,20 +695,20 @@ s32 func_151A4900(Particle *particle, u8 arg1) {
     ParticleAgeParams *params;
 
     params = &particle->ageParams;
-    age = particle->age;
+    age = particle->head.desc.timer;
     if (age < params->limit2B) {
-        particle->unk2B = age * params->mul2B;
+        particle->head.desc.alpha = age * params->mul2B;
     }
     if (age < params->limitSize) {
         {
             f32 sizeStep = params->sizeRate * D_800BE9E4;
 
-            particle->unk38 += sizeStep;
-            particle->unk3C += sizeStep;
+            particle->head.desc.width += sizeStep;
+            particle->head.desc.height += sizeStep;
         }
-        age = particle->age;
+        age = particle->head.desc.timer;
     }
-    particle->unk2C = age * params->mul2C;
+    particle->head.desc.brightness = age * params->mul2C;
     return 1;
 }
 

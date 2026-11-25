@@ -1990,6 +1990,16 @@ typedef struct ModelBurst {
     /* 0x74 */ s16 fadeRate;
 } ModelBurst; /* size 0x78 */
 
+/* Model instance attached to a sprite or particle, drawn through func_151462C8. */
+typedef struct ModelLink {
+    /* 0x00 */ s32 model;
+    /* 0x04 */ u8 unk4;
+    /* 0x05 */ u8 pad5[3];
+    /* 0x08 */ s32 handles[4];     /* one per viewport, 0..D_80082FA0 */
+    /* 0x18 */ s32 sharedHandle;
+    /* 0x1C */ s32 unk1C;
+} ModelLink; /* size 0x20 */
+
 /* A particle object made by func_1513D2F0 / func_151407D0 (game_169510.c's Particle, 0x110 bytes), as seen
  * by callers that keep their own data after it. Its ParticleDef copy is at 0x18. */
 typedef struct DefParticleHead {
@@ -1997,7 +2007,21 @@ typedef struct DefParticleHead {
     /* 0x010 */ s32 active;             /* bit 0: alive */
     /* 0x014 */ s32 unk14;
     /* 0x018 */ ParticleDef def;
-    /* 0x070 */ u8 pad70[0x50];
+    /* 0x070 */ u8 updateFn1;            /* D_80089CB8 index, 0 = none */
+    /* 0x071 */ u8 updateFn2;            /* D_80089D60 index, 0 = none */
+    /* 0x072 */ u8 expireFn;             /* D_80089E10 index, 0 = none */
+    /* 0x073 */ u8 vertexFn;             /* D_80089E1C index */
+    /* 0x074 */ u8 unk74;
+    /* 0x075 */ u8 pad75[3];
+    /* 0x078 */ f32 unk78;
+    /* 0x07C */ u8 pad7C[0x14];
+    /* 0x090 */ s32 unk90;
+    /* 0x094 */ u8 unk94;
+    /* 0x095 */ u8 unk95;
+    /* 0x096 */ u8 pad96[2];
+    /* 0x098 */ s32 unk98;
+    /* 0x09C */ ModelLink link;
+    /* 0x0BC */ u8 padBC[4];
     /* 0x0C0 */ Vtx vtxTemplate[4];
     /* 0x100 */ Vtx *vtxBuffers[4];  /* per viewport, refreshed from vtxTemplate */
 } DefParticleHead; /* size 0x110 */
@@ -2156,16 +2180,6 @@ typedef struct BillboardSpawn38 {
     /* 0x31 */ u8 onExpire;      /* low nibble: index into D_8008D5D0, run when life reaches 0 */
     /* 0x34 */ u8 pad34[0x4];
 } BillboardSpawn38;
-
-/* Model instance attached to a sprite or particle, drawn through func_151462C8. */
-typedef struct ModelLink {
-    /* 0x00 */ s32 model;
-    /* 0x04 */ u8 unk4;
-    /* 0x05 */ u8 pad5[3];
-    /* 0x08 */ s32 handles[4];     /* one per viewport, 0..D_80082FA0 */
-    /* 0x18 */ s32 sharedHandle;
-    /* 0x1C */ s32 unk1C;
-} ModelLink; /* size 0x20 */
 
 /* Textured quad sprite (with optional model) made by func_1513C350 (game_169510.c); func_1513C4EC and the
  * other spawners return it, and callers keep their own data after it (extraSize). */

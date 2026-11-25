@@ -235,11 +235,7 @@ s32 func_151AFC08(SprayParticle *spray) {
 
 /* The spark func_151AFC88 spawns; updated by func_151AFEA4. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x58];
-    /* 0x58 */ f32 unk58;
-    /* 0x5C */ u8 pad5C[4];
-    /* 0x60 */ f32 unk60;
-    /* 0x64 */ u8 pad64[0x44];
+    /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ f32 damping; // per-frame factor applied to unk58 and unk60
 } Spark;
 
@@ -316,8 +312,8 @@ s32 func_151AFEA4(Spark *spark, s32 arg1) {
 
     damping = &spark->damping;
     for (frames = D_800BE9E4; frames != 0; frames--) {
-        spark->unk58 *= *damping;
-        spark->unk60 *= *damping;
+        spark->head.desc.vel.x *= *damping;
+        spark->head.desc.vel.z *= *damping;
     }
     return 1;
 }
