@@ -281,25 +281,15 @@ void func_151A7610(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, BloodTrail *trai
                   15, 20, 0, -1, 86, 39, 0, trail->header.owner, trail->header.kind);
 }
 
-/* Extra data of the particles run by callbacks 0x14 and 0x15. The *Start fields are values of life. */
-typedef struct {
-    /* 0x0 */ s16 tintStart;    /* from here the env colour follows life (callback 0x15) */
-    /* 0x2 */ s16 tintStep;
-    /* 0x4 */ s16 fadeOutStart;
-    /* 0x6 */ s16 fadeOutStep;
-    /* 0x8 */ s16 swellStart;   /* from here the size grows by swellRate per frame */
-    /* 0xA */ s16 swellRate;
-} SwellParticleData;
-
 /* Callback 0x14: fade out and swell; switches to callback 0x15 to tint. */
 void func_151A77C0(BillboardParticle *particle) {
-    SwellParticleData *data = (SwellParticleData *)(particle + 1);
+    AgeFadeParams *data = (AgeFadeParams *)(particle + 1);
 
-    if (particle->tmpl.life < data->fadeOutStart) {
-        particle->tmpl.primA = particle->tmpl.life * data->fadeOutStep;
+    if (particle->tmpl.life < data->fadeStart) {
+        particle->tmpl.primA = particle->tmpl.life * data->fadeStep;
     }
-    if (particle->tmpl.life < data->swellStart) {
-        s16 growth = data->swellRate * D_800BE9E4;
+    if (particle->tmpl.life < data->growStart) {
+        s16 growth = data->growRate * D_800BE9E4;
 
         particle->tmpl.width += growth;
         particle->tmpl.height += growth;
@@ -314,13 +304,13 @@ void func_151A77C0(BillboardParticle *particle) {
 
 /* Callback 0x15: func_151A77C0 after the switch, with the env colour following life. */
 void func_151A787C(BillboardParticle *particle) {
-    SwellParticleData *data = (SwellParticleData *)(particle + 1);
+    AgeFadeParams *data = (AgeFadeParams *)(particle + 1);
 
-    if (particle->tmpl.life < data->fadeOutStart) {
-        particle->tmpl.primA = particle->tmpl.life * data->fadeOutStep;
+    if (particle->tmpl.life < data->fadeStart) {
+        particle->tmpl.primA = particle->tmpl.life * data->fadeStep;
     }
-    if (particle->tmpl.life < data->swellStart) {
-        s16 growth = data->swellRate * D_800BE9E4;
+    if (particle->tmpl.life < data->growStart) {
+        s16 growth = data->growRate * D_800BE9E4;
 
         particle->tmpl.width += growth;
         particle->tmpl.height += growth;

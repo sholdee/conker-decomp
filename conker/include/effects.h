@@ -2290,6 +2290,18 @@ typedef struct ParticleJitter {
     /* 0x4C */ f32 unk4C;
 } ParticleJitter; /* size 0x50 */
 
+/* Per-particle data of the age-driven fade (func_151A483C / func_151A4900 for DescParticleHead particles,
+ * game_1D0840.c; billboard callbacks 0x14 / 0x15, game_1D43B0.c). Each *Start is a remaining-life value:
+ * below it the alpha / colour follow the life (life * step) and the size grows by growRate per tick. */
+typedef struct AgeFadeParams {
+    /* 0x0 */ s16 tintStart;   /* then brightness (or the env colour) = life * tintStep */
+    /* 0x2 */ s16 tintStep;
+    /* 0x4 */ s16 fadeStart;   /* then alpha = life * fadeStep */
+    /* 0x6 */ s16 fadeStep;
+    /* 0x8 */ s16 growStart;
+    /* 0xA */ s16 growRate;
+} AgeFadeParams; /* size 0xC */
+
 /* Settings an actor-attached particle emitter (object type 0x21, func_1518E3C4 / func_1518D1C0 in
  * game_1BA670.c) is created with; copied verbatim into the emitter at +0x18. */
 typedef struct ActorEmitterParams {

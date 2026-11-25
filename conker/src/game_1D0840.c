@@ -71,20 +71,10 @@ typedef struct {
     /* 0x98 */ TrailState *state;
 } TrailEffect;
 
-/* Per-particle parameters copied in by func_151A4638: (age limit, factor) pairs. */
-typedef struct {
-    /* 0x0 */ s16 limit2C;          /* below this age, unk2C = age * mul2C */
-    /* 0x2 */ s16 mul2C;
-    /* 0x4 */ s16 limit2B;          /* below this age, unk2B = age * mul2B */
-    /* 0x6 */ s16 mul2B;
-    /* 0x8 */ s16 limitSize;        /* below this age, sizes change by sizeRate per tick */
-    /* 0xA */ s16 sizeRate;
-} ParticleAgeParams;
-
 /* A particle created by func_15130374. */
 typedef struct {
     /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ ParticleAgeParams ageParams;
+    /* 0xA8 */ AgeFadeParams ageParams;
 } Particle;
 
 /* Emits particles from a point on one of the owner's bones (task data of func_151A499C). */
@@ -663,27 +653,27 @@ void func_151A4638(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, EffectHead
 /* Particle update for func_151A4638's bursts: fades and resizes by age. */
 s32 func_151A483C(Particle *particle, u8 arg1) {
     s16 age;
-    ParticleAgeParams *params;
+    AgeFadeParams *params;
 
     params = &particle->ageParams;
     age = particle->head.desc.timer;
-    if (age < params->limit2B) {
-        particle->head.desc.alpha = age * params->mul2B;
+    if (age < params->fadeStart) {
+        particle->head.desc.alpha = age * params->fadeStep;
     }
-    if (age < params->limitSize) {
+    if (age < params->growStart) {
         {
-            f32 sizeStep = params->sizeRate * D_800BE9E4;
+            f32 sizeStep = params->growRate * D_800BE9E4;
 
             particle->head.desc.width += sizeStep;
             particle->head.desc.height += sizeStep;
         }
         age = particle->head.desc.timer;
     }
-    if (age < params->limit2C) {
+    if (age < params->tintStart) {
         particle->head.desc.updateFunc = 1;
         particle->head.desc.primColorMode = 2;
         particle->head.desc.envColorMode = 2;
-        particle->head.desc.brightness = age * params->mul2C;
+        particle->head.desc.brightness = age * params->tintStep;
         particle->head.desc.renderMode = 0x5203;
     }
     return 1;
@@ -692,23 +682,23 @@ s32 func_151A483C(Particle *particle, u8 arg1) {
 /* Like func_151A483C, but always sets unk2C from the age. */
 s32 func_151A4900(Particle *particle, u8 arg1) {
     s16 age;
-    ParticleAgeParams *params;
+    AgeFadeParams *params;
 
     params = &particle->ageParams;
     age = particle->head.desc.timer;
-    if (age < params->limit2B) {
-        particle->head.desc.alpha = age * params->mul2B;
+    if (age < params->fadeStart) {
+        particle->head.desc.alpha = age * params->fadeStep;
     }
-    if (age < params->limitSize) {
+    if (age < params->growStart) {
         {
-            f32 sizeStep = params->sizeRate * D_800BE9E4;
+            f32 sizeStep = params->growRate * D_800BE9E4;
 
             particle->head.desc.width += sizeStep;
             particle->head.desc.height += sizeStep;
         }
         age = particle->head.desc.timer;
     }
-    particle->head.desc.brightness = age * params->mul2C;
+    particle->head.desc.brightness = age * params->tintStep;
     return 1;
 }
 
