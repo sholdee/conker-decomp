@@ -33,10 +33,10 @@ typedef struct {
     /* 0x50 */ u8 pad50[0xC];
     /* 0x5C */ s16 dy;
     /* 0x5E */ u8 pad5E[0x2];
-    /* 0x60 */ f32 dx;
+    /* 0x60 */ f32 unk60; // change in unk0 over the last update
     /* 0x64 */ f32 speed;
     /* 0x68 */ u8 pad68[0xC];
-    /* 0x74 */ u16 sound;
+    /* 0x74 */ u16 soundHandle;
     /* 0x76 */ u8 pad76[0x6];
     /* 0x7C */ s32 unk7C;
     /* 0x80 */ s32 unk80;
@@ -67,13 +67,13 @@ void func_151163C0(Game143870Object *obj) {
     obj->unk7C += heightRate * D_800BE9E4;
     obj->unk80 += swayRate * D_800BE9E4;
     obj->dy = obj->y - previousY;
-    obj->dx = sway - previousSway;
+    obj->unk60 = sway - previousSway;
 }
 /*
  * Updates the object's push value (high half of params) from the pull of D_800CC2D0[0], letting it decay
  * back to zero, then keeps a looping sound whose volume follows the object's speed.
  */
-void func_1511650C(Game143870Object *obj, s32 arg1, s32 sound, f32 pitchScale) {
+void func_1511650C(Game143870Object *obj, s32 arg1, s32 soundId, f32 pitchScale) {
     s32 push;
     s32 value;
     s32 timer;
@@ -147,7 +147,7 @@ void func_1511650C(Game143870Object *obj, s32 arg1, s32 sound, f32 pitchScale) {
     value <<= 16; // matching: shifting in place schedules the params reload before the sll
     obj->params.word = (obj->params.word & 0xFFFF) | value;
     func_1511515C(obj);
-    if (sound != 0) {
+    if (soundId != 0) {
         f32 maxAmount = 1.0f; // matching: loads 1.0f before the sound test
         speed = obj->speed;
         amount = fabsf(speed) * 0.1f;
@@ -155,17 +155,17 @@ void func_1511650C(Game143870Object *obj, s32 arg1, s32 sound, f32 pitchScale) {
             amount = maxAmount;
         }
         volume = (12767.0f * amount) + 20000.0f;
-        handle = obj->sound;
+        handle = obj->soundHandle;
         amount = (amount * pitchScale) - 500.0f;
         if (handle == 0) {
             if (speed > 0.01f) {
-                obj->sound = func_10010F88(sound, volume, amount, 0, -1, obj->x, obj->y, obj->z, 1000, 6000);
+                obj->soundHandle = func_10010F88(soundId, volume, amount, 0, -1, obj->x, obj->y, obj->z, 1000, 6000);
             }
         } else if (speed > 0.01f) {
             func_1000F91C(handle, volume, amount, 0, -1, obj->x, obj->y, obj->z, 200, 2000);
         } else {
             func_100111C8(handle);
-            obj->sound = 0;
+            obj->soundHandle = 0;
         }
     }
 }
@@ -194,5 +194,6 @@ s32 func_15116888(s32 x, s32 z, s32 *unused, struct127 *other) {
     return result;
 }
 
+/* Does nothing. */
 void func_15116924(s32 arg0) {
 }
