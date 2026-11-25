@@ -3,7 +3,13 @@
 #include "variables.h"
 #include "effects.h"
 
-extern s32 D_800A1CC0;
+static const f32 D_800A1CC0[3] = { 0.0f, -8.0f, -85.0f };
+static const Vec3f D_800A1CCC = { 24.0f, -8.0f, -85.0f };
+static const Vec3f D_800A1CD8 = { -24.0f, -8.0f, -85.0f };
+static const Vec3f D_800A1CE4 = { 30.0f, -70.0f, -85.0f };
+static const Vec3f D_800A1CF0 = { -30.0f, -70.0f, -85.0f };
+static const Vec3f D_800A1CFC[3] = { { -31.0f, -6.0f, 24.0f }, { 31.0f, -6.0f, 24.0f }, { 1.0f, -51.0f, 53.0f } };
+
 void *func_151407D0(void *, s32, void *, u8, u8, u8, u8, s8, u8, s32);
 void func_151D8868(RumbleParams *, s32, u8, s32);
 s32 func_15160A58(void *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
@@ -161,15 +167,11 @@ void func_150F9BB0(Actor *actor, u8 owner, s32 kind) {
         event.strength = 8;
         event.updateKind = -1;
         func_151D8868(&event, 0, owner, kind);
-        func_15160A58(actor, 1, &D_800A1CC0, 3, 70, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, owner, kind);
+        func_15160A58(actor, 1, D_800A1CC0, 3, 70, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, owner, kind);
     }
 }
 
 extern s32 func_15145EA4(void *offsets, void *results, Mtx *mtx, s32 count);
-extern Vec3f D_800A1CCC;
-extern Vec3f D_800A1CD8;
-extern Vec3f D_800A1CE4;
-extern Vec3f D_800A1CF0;
 
 /*
  * Burst effect update: ends when the owner is gone, keeps the sparks and glows on the owner's
@@ -283,7 +285,6 @@ typedef struct {
     /* 0xA8 */ f32 data[5];
 } ImpactParticle;
 
-extern Vec3f D_800A1CFC[];
 extern void func_15143134(Vec3f *offset, Vec3f *out, Mtx *mtx);
 extern void func_1504715C(CollisionHit *ground, Actor *actor);
 extern void func_15153F18(AngleRange *, SplashSpray *, CollisionHit *, u8, s32);
@@ -662,4 +663,94 @@ extern void func_15157F80(s32, s32, s32, s32, s32);
 /* Passes func_151D710C's result, with the same remaining arguments, to func_15157F80. */
 void func_150FB1E8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     func_15157F80(func_151D710C(arg0, arg1, arg2, arg3, arg4), arg1, arg2, arg3, arg4);
+}
+
+/* Layout of Effect (game_1844C0.c), as far as func_150FB29C uses it. */
+typedef struct {
+    /* 0x000 */ u8 pad0[0x16];
+    /* 0x016 */ s16 lifetime;  /* EffectParams.lifetime, counts down */
+    /* 0x018 */ u8 pad18[0x2B];
+    /* 0x043 */ u8 alpha;      /* EffectParams.color0 alpha */
+    /* 0x044 */ u8 pad44[0x20];
+    /* 0x064 */ s16 fadeStart; /* EffectParams.fadeStart */
+    /* 0x066 */ s16 fadeRate;  /* EffectParams.fadeRate */
+    /* 0x068 */ u8 pad68[0xB8];
+    /* 0x120 */ s16 duration;  /* Effect.extra: the lifetime's starting value */
+} FadeInEffect;
+
+/*
+ * Fades `alpha` in: while `timer` (counting down from `duration`) is within its first `fadeLength`
+ * ticks, alpha ramps up by `fadeRate` per elapsed tick; after that it is fully opaque.
+ */
+void func_150FB240(u8 *alpha, s16 timer, s16 duration, s16 fadeLength, s16 fadeRate) {
+    if (duration - fadeLength < timer) {
+        *alpha = (duration - timer) * fadeRate;
+    } else {
+        *alpha = 255;
+    }
+}
+
+/* D_8008AD90 effect update callback: fades the effect's alpha in over its first fadeStart ticks. */
+s32 func_150FB29C(FadeInEffect *effect) {
+    func_150FB240(&effect->alpha, effect->lifetime, effect->duration, effect->fadeStart, effect->fadeRate);
+    return 1;
+}
+
+/* Layout of ScreenSprite (game_182140.c), as far as func_150FB2E0 uses it. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x22];
+    /* 0x22 */ s16 timer;     /* ScreenSpriteInfo.timer, counts down */
+    /* 0x24 */ u8 pad24[2];
+    /* 0x26 */ s16 fadeStart; /* ScreenSpriteInfo.fadeStart */
+    /* 0x28 */ s16 fadeRate;  /* ScreenSpriteInfo.fadeRate */
+    /* 0x2A */ u8 pad2A[4];
+    /* 0x2E */ u8 alpha;      /* ScreenSpriteInfo.color1.alpha */
+    /* 0x2F */ u8 pad2F[0x41];
+    /* 0x70 */ s16 duration;  /* the timer's starting value */
+} FadeInSprite;
+
+void func_150FEC28(Actor *actor, u8 bone, Vec3f *arg2, Vec3f *arg3, Vec3f *position, u8 arg5, s32 arg6);
+void func_151D4408(Vec3f *pos, Vec3f *dir, void *mtx, Actor *owner, f32 scale, u8 arg5, s32 arg6);
+
+/* D_8008ACC8 sprite callback: fades the sprite's alpha in over its first fadeStart ticks. */
+s32 func_150FB2E0(FadeInSprite *sprite) {
+    func_150FB240(&sprite->alpha, sprite->timer, sprite->duration, sprite->fadeStart, sprite->fadeRate);
+    return 1;
+}
+
+/* Spawns the func_150FEC28 / func_151D4408 effects on bone 14 of `actor`: point0 goes to `position`,
+ * point2 to `origin` and point3 to `origin + delta`, all in world space. */
+void func_150FB324(Actor *actor, u8 arg1, s32 arg2) {
+    Vec3f position;
+    Vec3f origin;
+    Vec3f delta;
+    void *mtx;
+    s32 pad; // matching: unused stack slot below mtx (removing it shifts the frame)
+    const Vec3f point0 = { -108.0f, -9.0f, 85.0f };
+    const Vec3f point1 = { -150.0f, -9.0f, 111.0f };
+    const Vec3f point2 = { -32.0f, 4.0f, 40.0f };
+    const Vec3f point3 = { -21.0f, 15.0f, 40.0f };
+    Vec3f *sources[3];
+    Vec3f *destinations[3];
+
+    if (actor->ob_matrix_ptr == NULL) {
+        return;
+    }
+    sources[0] = &point0;
+    sources[1] = &point2;
+    sources[2] = &point3;
+    destinations[0] = &position;
+    destinations[1] = &origin;
+    destinations[2] = &delta;
+    mtx = (Mtx *)actor->ob_matrix_ptr + 14;
+    func_15145EA4(sources, destinations, mtx, 3);
+    delta.x -= origin.x;
+    delta.y -= origin.y;
+    delta.z -= origin.z;
+    {
+        u8 bone = 14;
+
+        func_150FEC28(actor, bone, &point0, &point1, &position, arg1, arg2);
+    }
+    func_151D4408(&origin, &delta, mtx, actor, 1.0f, arg1, arg2);
 }
