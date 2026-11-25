@@ -76,7 +76,9 @@ void func_15169C70(Debris *debris) {
     }
     if (debris->flags & 2) {
         debris->rotY = func_150484A0(debris->velX, debris->velZ) * 57.29577637f;
-        debris->rotX = func_150484A0(-debris->velY, sqrtf(debris->velX * debris->velX + debris->velZ * debris->velZ)) * 57.29577637f;
+        debris->rotX = func_150484A0(-debris->velY, sqrtf(debris->velX * debris->velX +
+                                                           debris->velZ * debris->velZ)) *
+                       57.29577637f;
     }
     func_1510F800(0);
     floorHeight = func_1510F8D8(debris->x, debris->y, debris->z, 0) + debris->floorOffset;
@@ -244,7 +246,7 @@ void func_1516A3F4(DropParticle *drop) {
             splash.unkE = dim;
             splash.unk10 = dim;
             splash.unk15 = level;
-            splash.callback = 3;
+            splash.callback = 3; /* D_8008CA20[3] = func_1516A538 */
             func_15167AD8(&splash, drop->owner, drop->list);
         }
     } else {
