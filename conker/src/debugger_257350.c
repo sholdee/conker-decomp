@@ -6,7 +6,8 @@
 #include "functions.h"
 #include "variables.h"
 
-
+/* Conversion state for one printf field (libultra _Pft): n0/n1/n2 are the lengths of the
+ * prefix, digits and suffix pieces, nz0/nz1/nz2 the zero padding after each. */
 typedef struct {
     union {
         long long ll;
@@ -177,7 +178,6 @@ s32 func_16001BB4(s32 (*pfn)(u8 *, u8 *, u32), u8 *arg, u8 *fmt, va_list args) {
         }
         fmt = s + 1;
     }
-    return 0;
 }
 
 /* _Putfld (libultra xprintf.c): converts one argument for conversion code into ac/px->s. */
@@ -298,21 +298,19 @@ void func_160021FC(DebuggerPft *px, va_list *pap, u8 code, u8 *ac) {
         break;
     }
 }
-s16 func_16002D2C(s16 *arg0, struct05 *arg1);
+s16 func_16002D2C(s16 *pex, u16 *ps);
 void func_16002DE4(DebuggerPft *px, u8 code, u8 *p, s16 nsig, s16 xexp);
 
-/* _Ldtob (libultra xldtob.c). Unlike the SDK, this copy builds its 0.0/1.0 constants as
- * float locals converted to double at runtime (golden: mtc1/cvt.d.s, with 0.0 kept in a
- * double stack slot) -- IDO folds every literal spelling. The -g3 frame also holds one
- * extra pointer local, here the typed copy of arg0. */
+/* _Ldtob (libultra xldtob.c): converts px->v.d to decimal digits for an e/f/g conversion.
+ * Unlike the SDK, this copy builds its 0.0/1.0 constants from float locals at runtime. */
 void func_1600288C(void *arg0, unsigned char code) {
     unsigned char buff[32];
     unsigned char *p;
     double ldval;
     double zero;
-    float fz = 0.0f;
+    float fz = 0.0f; // matching: golden converts 0.0/1.0 from float (mtc1/cvt.d.s); IDO folds literals
     float fo = 1.0f;
-    DebuggerPft *px = arg0;
+    DebuggerPft *px = arg0; // matching: the frame holds one extra pointer local
     short err;
     short nsig;
     short xexp;
@@ -327,7 +325,7 @@ void func_1600288C(void *arg0, unsigned char code) {
         px->prec = 1;
     }
 
-    err = func_16002D2C(&xexp, (struct05 *)px);
+    err = func_16002D2C(&xexp, (u16 *)&px->v.d);
     if (err > 0) {
         func_16001AD0(px->s, err == 2 ? "NaN" : "Inf", px->n1 = 3);
         return;
@@ -368,8 +366,8 @@ void func_1600288C(void *arg0, unsigned char code) {
         {
             int gen = px->prec + ((code == 'f') ? 10 + xexp : 6);
 
-            if (gen > 0x13) {
-                gen = 0x13;
+            if (gen > 19) {
+                gen = 19;
             }
 
             for (*p++ = '0'; gen > 0 && zero < ldval; p += 8) {
@@ -425,35 +423,33 @@ void func_1600288C(void *arg0, unsigned char code) {
     func_16002DE4(px, code, p, nsig, xexp);
 }
 
-s16 func_16002D2C(s16 *arg0, struct05 *arg1) {
-    s16 temp_v1 = (arg1->unk0 & 0x7FF0) >> 4;
+/* _Ldunscale (libultra xldtob.c): ps is a double as four u16 halves, high half first.
+ * Scales a finite value's fraction into [0.5, 1) and stores its binary exponent to *pex.
+ * Returns 0 for zero, 1 for Inf, 2 for NaN and -1 for a finite value. */
+s16 func_16002D2C(s16 *pex, u16 *ps) {
+    s16 xchar = (ps[0] & 0x7FF0) >> 4;
 
-    if (temp_v1 == 0x7FF) {
-        s32 ret;
-        *arg0 = 0;
-        if ((arg1->unk0 & 0xF) || (arg1->unk2) || (arg1->unk4) || (arg1->unk6)) {
-            ret = 2;
-        }
-        else {
-            ret = 1;
-        }
-        return ret;
+    if (xchar == 0x7FF) {
+        *pex = 0;
+        return (ps[0] & 0xF) || ps[1] || ps[2] || ps[3] ? 2 : 1;
     }
 
-    if (temp_v1 > 0) {
-        arg1->unk0 = (arg1->unk0 & 0x800F) | 0x3FF0;
-        *arg0 = temp_v1 - 0x3FE;
+    if (xchar > 0) {
+        ps[0] = (ps[0] & 0x800F) | 0x3FF0;
+        *pex = xchar - 0x3FE;
         return -1;
     }
 
-    if (temp_v1 < 0) {
-      return 2;
+    if (xchar < 0) {
+        return 2;
     }
 
-    *arg0 = 0;
+    *pex = 0;
     return 0;
 }
 
+/* _Genld (libultra xldtob.c): lays out nsig digits at p with decimal exponent xexp as an
+ * e/f/g conversion in px. */
 void func_16002DE4(DebuggerPft *px, u8 code, u8 *p, s16 nsig, s16 xexp) {
     if (nsig <= 0) {
         p = "0";
@@ -556,8 +552,11 @@ void func_16002DE4(DebuggerPft *px, u8 code, u8 *p, s16 nsig, s16 xexp) {
     }
 }
 
+#define BUFF_LEN 24
+
+/* _Litob (libultra xlitob.c): converts px->v.ll to digits for a d/i/o/u/x/X conversion. */
 void func_160033A8(DebuggerPft *px, u8 code) {
-    char buff[0x18];
+    char buff[BUFF_LEN];
     u8 *digs;
     s32 base;
     s32 i;
@@ -566,7 +565,7 @@ void func_160033A8(DebuggerPft *px, u8 code) {
     digs = (code == 'X') ? D_16003CCC : D_16003CB8;
 
     base = (code == 'o') ? 8 : ((code != 'x' && code != 'X') ? 10 : 16);
-    i = 0x18;
+    i = BUFF_LEN;
     ullval = px->v.ll;
 
     if ((code == 'd' || code == 'i') && px->v.ll < 0) {
@@ -587,15 +586,15 @@ void func_160033A8(DebuggerPft *px, u8 code) {
         buff[--i] = digs[qr.rem];
     }
 
-    px->n1 = 0x18 - i;
+    px->n1 = BUFF_LEN - i;
 
-    func_16001AD0(px->s, buff + i, px->n1);
+    func_16001AD0(px->s, &buff[i], px->n1);
 
     if (px->n1 < px->prec) {
         px->nz0 = px->prec - px->n1;
     }
 
-    if (px->prec < 0 && (px->flags & 0x14) == 0x10) {
+    if (px->prec < 0 && (px->flags & (FLAGS_MINUS | FLAGS_ZERO)) == FLAGS_ZERO) {
         if ((i = px->width - px->n0 - px->nz0 - px->n1) > 0) {
             px->nz0 += i;
         }
