@@ -30,7 +30,9 @@ def read_symbols(elf):
     secs = []
     for m in re.finditer(r"^\s*\[\s*\d+\]\s+(\S+)\s+(\S+)\s+([0-9a-f]{8})\s+[0-9a-f]+\s+([0-9a-f]+)\s+\S+\s+(\S*)", text, re.M):
         name, typ, addr, size, flags = m.groups()
-        if "A" in flags and int(size, 16):
+        # .header and .boot are ROM blobs with placeholder addresses (0x0-0x1000; IPL3 runs at
+        # 0xA4000040): small numbers there (asset ids, sizes) are constants, not pinned addresses
+        if "A" in flags and int(size, 16) and name not in (".header", ".boot"):
             secs.append((int(addr, 16), int(addr, 16) + int(size, 16), name))
     syms = []
     for m in re.finditer(r"^\s*\d+:\s+([0-9a-f]{8})\s+\d+\s+(\w+)\s+(\w+)\s+\w+\s+(\w+)\s+(\S+)$", text, re.M):
