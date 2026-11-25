@@ -1,8 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
-#define D_800CC2D0 D_800CC2D0_hdr
 #include "variables.h"
-#undef D_800CC2D0
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define gRenderViews ((RenderView *)D_800BE628)
@@ -585,29 +583,6 @@ Gfx *func_15180580(Gfx *gfx, s32 view) {
     return gfx;
 }
 
-typedef struct Game1AC2F0Mode {
-    u8 unknown000[0x120];
-    u8 state;
-    u8 unknown121[3];
-    s16 timer;
-} Game1AC2F0Mode;
-
-typedef struct Game1AC2F0Player {
-    s32 kind;
-    u8 unknown004[0x10];
-    f32 x;
-    f32 y;
-    f32 z;
-    u8 unknown020[0x130];
-    f32 height;
-    u8 unknown154[0x80];
-    u8 *model;
-    u8 unknown1D8[0x144];
-    Game1AC2F0Mode *mode;
-    u8 unknown320[0xC];
-} Game1AC2F0Player;
-
-extern Game1AC2F0Player D_800CC2D0[];
 void func_150A7960(void *mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 extern f32 D_800A7260[]; // scripted iris hold closure, by D_80082FA0
 extern f32 D_800A7270[]; // scripted iris final closure, by D_80082FA0
@@ -616,23 +591,23 @@ extern f32 D_800A7270[]; // scripted iris final closure, by D_80082FA0
  * tracking irises follow the player, and free irises run at their speed until open or closed. */
 void func_151814FC(void) {
     s32 i;
-    Game1AC2F0Player *player;
+    Actor *player;
 
     for (i = 0; i <= D_80082FA0; i++) {
         if (D_800DDE20[i] != 0) {
 
             player = &D_800CC2D0[i];
             D_800DDDC8[i] += D_800DDDD8[i] * D_800BE9E4;
-            if (player->mode == NULL) {
+            if (player->unk31C == NULL) {
                 D_800DDDC8[i] = 1.0f;
-            } else if (player->mode->state == 3) {
+            } else if (player->unk31C->unk120 == 3) {
                 if (D_800A7260[D_80082FA0] <= D_800DDDC8[i]) {
                     D_800DDDC8[i] = D_800A7260[D_80082FA0];
-                    player->mode->state = 4;
+                    player->unk31C->unk120 = 4;
                     D_800DDD70[i] = 30;
                     D_800DDD74[i] = 0;
                 }
-            } else if (player->mode->state == 4) {
+            } else if (player->unk31C->unk120 == 4) {
                 if (D_800DDD70[i]) {
                     f32 scale;
 
@@ -650,27 +625,27 @@ void func_151814FC(void) {
                     D_800DDDC8[i] = D_800A7260[D_80082FA0] + scale * func_15048A40(D_800DDD74[i]);
                 } else {
                     D_800DDDC8[i] = D_800A7260[D_80082FA0];
-                    player->mode->state = 5;
+                    player->unk31C->unk120 = 5;
                 }
-            } else if (player->mode->state == 5) {
+            } else if (player->unk31C->unk120 == 5) {
                 D_800DDDC8[i] = D_800A7260[D_80082FA0];
-            } else if (player->mode->state == 6) {
+            } else if (player->unk31C->unk120 == 6) {
                 D_800DDDD8[i] = 0.009f;
                 if (D_800A7270[D_80082FA0] <= D_800DDDC8[i]) {
                     D_800DDDC8[i] = D_800A7270[D_80082FA0];
-                    player->mode->state = 7;
-                    player->mode->timer = 30;
+                    player->unk31C->unk120 = 7;
+                    player->unk31C->unk124 = 30;
                     D_800DDDD8[i] = 0.0f;
                 }
-            } else if (player->mode->state == 8) {
+            } else if (player->unk31C->unk120 == 8) {
                 D_800DDDD8[i] = 0.004f;
                 if (D_800DDDC8[i] >= 1.0f) {
                     D_800DDDC8[i] = 1.0f;
-                    player->mode->state = 9;
+                    player->unk31C->unk120 = 9;
                 }
             }
         } else if (D_800DDE3C[i] != 0) {
-            Game1AC2F0Player *actor;
+            Actor *actor;
             f32 x;
             f32 y;
             f32 z;
@@ -683,20 +658,20 @@ void func_151814FC(void) {
 
             actor = &D_800CC2D0[i];
             D_800DDDC8[i] += D_800DDDD8[i] * D_800BE9E4;
-            if (actor->model != NULL) {
-                u8 *model;
+            if (actor->unk1D4 != NULL) {
+                MtxF *model;
                 f32 height;
 
-                model = actor->model;
-                if (actor->kind == 1) {
-                    model += 0x300;
+                model = actor->unk1D4;
+                if (actor->interaction_state == 1) {
+                    model += 12; // bone 12
                 }
-                height = actor->height * 40.0f;
+                height = actor->y_scale * 40.0f;
                 func_150A7960(model, 0.0f, height, 0.0f, &x, &y, &z);
             } else {
-                x = actor->x;
-                y = actor->y;
-                z = actor->z;
+                x = actor->x_position;
+                y = actor->y_position;
+                z = actor->z_position;
             }
             prevX = D_800DDDE8[i][0];
             prevY = D_800DDDE8[i][1];
