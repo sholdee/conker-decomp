@@ -1,11 +1,10 @@
 #include <ultra64.h>
+// matching: func_150ADA20 returns a full u32 here (callers mask it); functions.h declares it u8
 #define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
 #undef func_150ADA20
 u32 func_150ADA20(void);
 #include "variables.h"
-
-extern f32 D_800A8DE0;
 
 void func_1514373C(f32, f32, f32 *, f32 *);
 
@@ -215,8 +214,8 @@ Gfx *func_151A7D6C(Gfx *gdl, Bolt *bolt, s16 view) {
     s16 i;
     f32 parameter;
     s16 j;
-    Vec3f *a;
-    Vec3f *b;
+    Vec3f *from;
+    Vec3f *to;
 
     if (bolt->def.flags & BOLT_ACTIVE) {
         func_151D5D60(bolt->vtxBuf, view, bolt->vtxBufSize, (void **)&vtx, NULL);
@@ -253,11 +252,11 @@ Gfx *func_151A7D6C(Gfx *gdl, Bolt *bolt, s16 view) {
                 nz *= scale;
             }
             for (; i < self->def.numPoints; i++, j++) {
-                b = &bolt->points[i].world;
-                a = &bolt->points[j].world;
-                vtx->ob[0] = a->x + nx;
-                vtx->ob[1] = a->y + ny;
-                vtx->ob[2] = a->z + nz;
+                to = &bolt->points[i].world;
+                from = &bolt->points[j].world;
+                vtx->ob[0] = from->x + nx;
+                vtx->ob[1] = from->y + ny;
+                vtx->ob[2] = from->z + nz;
                 vtx->tc[0] = 0;
                 vtx->tc[1] = 0;
                 vtx->cn[0] = 0xFF;
@@ -266,9 +265,9 @@ Gfx *func_151A7D6C(Gfx *gdl, Bolt *bolt, s16 view) {
                 vtx->cn[3] = 0xFF;
                 vtx->flag = 0;
                 vtx++;
-                vtx->ob[0] = a->x - nx;
-                vtx->ob[1] = a->y - ny;
-                vtx->ob[2] = a->z - nz;
+                vtx->ob[0] = from->x - nx;
+                vtx->ob[1] = from->y - ny;
+                vtx->ob[2] = from->z - nz;
                 vtx->tc[0] = 0x3C0;
                 vtx->tc[1] = 0;
                 vtx->cn[0] = 0xFF;
@@ -277,9 +276,9 @@ Gfx *func_151A7D6C(Gfx *gdl, Bolt *bolt, s16 view) {
                 vtx->cn[3] = 0xFF;
                 vtx->flag = 0;
                 vtx++;
-                vtx->ob[0] = b->x - nx;
-                vtx->ob[1] = b->y - ny;
-                vtx->ob[2] = b->z - nz;
+                vtx->ob[0] = to->x - nx;
+                vtx->ob[1] = to->y - ny;
+                vtx->ob[2] = to->z - nz;
                 vtx->tc[0] = 0x3C0;
                 vtx->tc[1] = 0x3C0;
                 vtx->cn[0] = 0xFF;
@@ -288,9 +287,9 @@ Gfx *func_151A7D6C(Gfx *gdl, Bolt *bolt, s16 view) {
                 vtx->cn[3] = 0xFF;
                 vtx->flag = 0;
                 vtx++;
-                vtx->ob[0] = b->x + nx;
-                vtx->ob[1] = b->y + ny;
-                vtx->ob[2] = b->z + nz;
+                vtx->ob[0] = to->x + nx;
+                vtx->ob[1] = to->y + ny;
+                vtx->ob[2] = to->z + nz;
                 vtx->tc[0] = 0;
                 vtx->tc[1] = 0x3C0;
                 vtx->cn[0] = 0xFF;
@@ -307,7 +306,6 @@ Gfx *func_151A7D6C(Gfx *gdl, Bolt *bolt, s16 view) {
     }
     return gdl;
 }
-
 
 /*
  * Midpoint displacement: sets the point halfway between first and last to their average, moved up
@@ -383,7 +381,7 @@ void func_151A85D4(Bolt *bolt) {
  * Spawns a bolt from bone `bone` of owner (at boneOffset in bone space) to targetOffset from the
  * owner's position; func_151A87F8 (update1) keeps both ends attached. lifetime -1 means untimed.
  */
-void *func_151A8624(struct127 *owner, Vec3f *boneOffset, u8 bone, s16 lifetime,
+Bolt *func_151A8624(struct127 *owner, Vec3f *boneOffset, u8 bone, s16 lifetime,
                     f32 jitterDelay, f32 jitterDelayRange, BoltColor *color,
                     f32 width, Vec3f *targetOffset, u8 arg9, u8 argA,
                     s8 update2, s32 extraSize, u8 argD, s32 argE) {
@@ -428,7 +426,7 @@ void *func_151A8624(struct127 *owner, Vec3f *boneOffset, u8 bone, s16 lifetime,
         timed = BOLT_TIMED;
     }
     def.flags = timed;
-    def.jitter = D_800A8DE0;
+    def.jitter = 79.75f;
     def.color = *color;
     def.width = width;
     // matching: both arms pick update1 1 (func_151A87F8), but IDO must see the arg9 test
