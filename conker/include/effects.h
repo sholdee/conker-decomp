@@ -230,6 +230,13 @@ typedef struct BloodDripDesc {
     /* 0x2E */ u8 pad2E[2];
 } BloodDripDesc; /* size 0x30 */
 
+/* BloodDripDesc.flags */
+#define BLOOD_DRIP_FOLLOW_OWNER  0x01
+#define BLOOD_DRIP_ON_BONE       0x02   /* offset is in the space of owner's bone `bone` */
+#define BLOOD_DRIP_LIFETIME      0x04   /* lifetime counts down */
+#define BLOOD_DRIP_NO_PREVIOUS   0x08
+#define BLOOD_DRIP_STATIC        0x10
+
 /* Object attached to a glow (freed with func_1517E134): follows the glow's position and takes its alpha. */
 typedef struct GlowAttach {
     /* 0x00 */ f32 pos[3];

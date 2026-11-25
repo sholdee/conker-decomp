@@ -166,34 +166,15 @@ s32 func_1513416C(struct102 *effect) {
 
 /* Blood dripping from a point, optionally attached to an actor or one of its bones. */
 typedef struct {
-    u8 pad0[0x10];
-    s32 target[2];          /* matrices to transform offset by, double-buffered */
-    u8 ownerId;             /* owner->unique_id when attached */
-    u8 pad19[3];
-    Actor *owner;
-    u8 bone;
-    u8 pad21[3];
-    f32 offset[3];
-    f32 radius;
-    f32 rate;
-    s16 lifetime;
-    u8 flags;
-    u8 emitter;
-    s8 callback;
-    u8 pad3D[3];
-    Vec3f previous;
-    f32 inverseDiameter;
-    f32 accumulator;
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ BloodDripDesc desc;  /* copied from the spawn template */
+    /* 0x40 */ Vec3f previous;
+    /* 0x4C */ f32 inverseDiameter;
+    /* 0x50 */ f32 accumulator;
 } BloodDrip;
 
-#define BLOOD_DRIP_FOLLOW_OWNER  0x01
-#define BLOOD_DRIP_ON_BONE       0x02
-#define BLOOD_DRIP_LIFETIME      0x04
-#define BLOOD_DRIP_NO_PREVIOUS   0x08
-#define BLOOD_DRIP_STATIC        0x10
-
 /* Spawns a BloodDrip effect from a template. */
-BloodDrip *func_1513418C(void *desc, s32 arg1, u8 arg2, s32 arg3) {
+BloodDrip *func_1513418C(BloodDripDesc *desc, s32 arg1, u8 arg2, s32 arg3) {
     BloodDrip *drip;
     Actor *owner;
     u8 flags;
@@ -202,23 +183,23 @@ BloodDrip *func_1513418C(void *desc, s32 arg1, u8 arg2, s32 arg3) {
     if (drip == NULL) {
         return NULL;
     }
-    memcpy(&drip->target, desc, 0x30);
-    flags = drip->flags;
+    memcpy(&drip->desc, desc, sizeof(BloodDripDesc));
+    flags = drip->desc.flags;
     if (flags & BLOOD_DRIP_ON_BONE) {
-        owner = drip->owner;
-        if ((owner->interaction_state == 0) || (owner->unique_id != drip->ownerId)) {
+        owner = drip->desc.owner;
+        if ((owner->interaction_state == 0) || (owner->unique_id != drip->desc.ownerId)) {
             func_1516972C((struct102 *)drip);
             return NULL;
         }
         if ((owner->unk1D4 != 0) && ((owner->unk74 & 0xF) != 0xF)) {
-            func_15143134(drip->offset, &drip->previous, BONE_MATRIX(owner, drip->bone));
+            func_15143134(&drip->desc.offset, &drip->previous, BONE_MATRIX(owner, drip->desc.bone));
         } else {
-            drip->flags = flags | BLOOD_DRIP_NO_PREVIOUS;
+            drip->desc.flags = flags | BLOOD_DRIP_NO_PREVIOUS;
         }
     } else {
-        drip->flags = flags | (BLOOD_DRIP_NO_PREVIOUS | BLOOD_DRIP_STATIC);
+        drip->desc.flags = flags | (BLOOD_DRIP_NO_PREVIOUS | BLOOD_DRIP_STATIC);
     }
-    drip->inverseDiameter = 1.0f / (drip->radius + drip->radius);
+    drip->inverseDiameter = 1.0f / (drip->desc.radius + drip->desc.radius);
     drip->accumulator = 0.0f;
     return drip;
 }
@@ -245,49 +226,49 @@ void func_151342BC(BloodDrip *drip) {
     f32 distance;
 
     dead = 0;
-    if (drip->flags & BLOOD_DRIP_LIFETIME) {
-        drip->lifetime -= D_800BE9E4;
-        if (drip->lifetime < 0) {
+    if (drip->desc.flags & BLOOD_DRIP_LIFETIME) {
+        drip->desc.lifetime -= D_800BE9E4;
+        if (drip->desc.lifetime < 0) {
             dead = 1;
         }
     }
-    flags = drip->flags;
+    flags = drip->desc.flags;
     source = (flags & BLOOD_DRIP_NO_PREVIOUS) ? position : &drip->previous.x;
     if (flags & BLOOD_DRIP_FOLLOW_OWNER) {
-        position[0] = drip->owner->x_position;
-        position[1] = drip->owner->y_position;
-        position[2] = drip->owner->z_position;
+        position[0] = drip->desc.owner->x_position;
+        position[1] = drip->desc.owner->y_position;
+        position[2] = drip->desc.owner->z_position;
     } else {
         if (flags & BLOOD_DRIP_ON_BONE) {
-            if ((drip->owner->interaction_state == 0) || (drip->owner->interaction_state == 8) ||
-                (drip->owner->unique_id != drip->ownerId)) {
+            if ((drip->desc.owner->interaction_state == 0) || (drip->desc.owner->interaction_state == 8) ||
+                (drip->desc.owner->unique_id != drip->desc.ownerId)) {
                 func_1516972C((struct102 *)drip);
                 return;
             }
-            bones = (u8 *)drip->owner->unk1D4;
-            if ((bones == NULL) || ((drip->owner->unk74 & 0xF) == 0xF)) {
-                drip->flags = flags | BLOOD_DRIP_NO_PREVIOUS;
+            bones = (u8 *)drip->desc.owner->unk1D4;
+            if ((bones == NULL) || ((drip->desc.owner->unk74 & 0xF) == 0xF)) {
+                drip->desc.flags = flags | BLOOD_DRIP_NO_PREVIOUS;
                 return;
             }
-            target = (s32)((u8 (*)[0x40])bones)[drip->bone];
+            target = (s32)((u8 (*)[0x40])bones)[drip->desc.bone];
         } else if (!(flags & BLOOD_DRIP_STATIC)) {
             index = D_800BE9C0 ? 0 : 1;
-            target = drip->target[index];
+            target = drip->desc.target[index];
         } else {
             return;
         }
-        func_15143134(drip->offset, position, (void *)target);
+        func_15143134(&drip->desc.offset, position, (void *)target);
     }
     deltaX = source[0] - position[0];
     deltaY = source[1] - position[1];
     deltaZ = source[2] - position[2];
     distance = sqrtf(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
     scale = drip->inverseDiameter * distance + 1.0f;
-    drip->accumulator += scale * D_800BE9A4 * drip->rate;
+    drip->accumulator += scale * D_800BE9A4 * drip->desc.rate;
     if (drip->accumulator > 7.0f) {
         drip->accumulator = 7.0f;
     }
-    if ((drip->flags & 0x20) && (D_800C35EA == 1)) {
+    if ((drip->desc.flags & 0x20) && (D_800C35EA == 1)) {
         while (drip->accumulator > 1.0f) {
             drip->accumulator -= 1.0f;
         }
@@ -296,24 +277,24 @@ void func_151342BC(BloodDrip *drip) {
             f32 diameter;
             f32 fraction;
 
-            diameter = drip->radius + drip->radius;
+            diameter = drip->desc.radius + drip->desc.radius;
             fraction = func_150ADA68();
-            if (D_80089A70[drip->emitter] != NULL) {
+            if (D_80089A70[drip->desc.emitter] != NULL) {
                 randomX = func_150ADA68();
                 randomY = func_150ADA68();
-                D_80089A70[drip->emitter](
-                    (position[0] + deltaX * fraction + drip->radius) - randomX * diameter,
-                    (position[1] + deltaY * fraction + drip->radius) - randomY * diameter,
-                    (position[2] + deltaZ * fraction + drip->radius) - func_150ADA68() * diameter,
+                D_80089A70[drip->desc.emitter](
+                    (position[0] + deltaX * fraction + drip->desc.radius) - randomX * diameter,
+                    (position[1] + deltaY * fraction + drip->desc.radius) - randomY * diameter,
+                    (position[2] + deltaZ * fraction + drip->desc.radius) - func_150ADA68() * diameter,
                     deltaX, deltaY, deltaZ, drip);
             }
             drip->accumulator -= 1.0f;
         }
     }
     drip->previous = *(Vec3f *)position;
-    drip->flags &= ~BLOOD_DRIP_NO_PREVIOUS;
+    drip->desc.flags &= ~BLOOD_DRIP_NO_PREVIOUS;
     if (!dead) {
-        if ((drip->callback != -1) && (D_80089AA0[drip->callback](drip) == 0)) {
+        if ((drip->desc.callback != -1) && (D_80089AA0[drip->desc.callback](drip) == 0)) {
             dead = 1;
         }
     }
