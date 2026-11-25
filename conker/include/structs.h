@@ -2378,12 +2378,26 @@ typedef struct {
     s8  pad2F;
 } struct162;
 
+/* A cutscene subtitle slot, D_800C3CA0[3] (see func_150234A4). 0x04..0x33 is the TextBoxConfig passed to func_1516A7B0. */
 typedef struct {
-    u16 unk0;
-    u8  pad2[0xA];
-    u8  unkC;
-    u8  padD[0x2B];
-} struct163; // size 0x38
+    /* 0x00 */ s16 active; /* owning track + 1, 0 = free */
+    /* 0x02 */ u8 pad2[2];
+    /* 0x04 */ s32 flags;
+    /* 0x08 */ u8 *text;
+    /* 0x0C */ u8 isOpen;
+    /* 0x0D */ u8 padD[0xF];
+    /* 0x1C */ f32 *unk1C;
+    /* 0x20 */ f32 *unk20;
+    /* 0x24 */ f32 *unk24;
+    /* 0x28 */ s16 unk28;
+    /* 0x2A */ s16 unk2A;
+    /* 0x2C */ u8 r;
+    /* 0x2D */ u8 g;
+    /* 0x2E */ u8 b;
+    /* 0x2F */ u8 unk2F;
+    /* 0x30 */ u8 pad30[4];
+    /* 0x34 */ s32 handle;
+} SeqSubtitle; // size 0x38
 
 typedef struct {
     f32 unk0;   // used
@@ -2701,6 +2715,62 @@ typedef struct TexAnimState {
     /* 0x14 */ s16 pulse;
     /* 0x16 */ u8  pad16[2];
 } TexAnimState; // size 0x18
+
+/* One rising bubble sprite (drawn by func_15090630); D_800D2460[6]. */
+typedef struct Bubble {
+    /* 0x0 */ s16 x;
+    /* 0x2 */ s16 y;
+    /* 0x4 */ s16 originX;
+    /* 0x6 */ s16 size;
+    /* 0x8 */ s16 radius;
+    /* 0xA */ s16 timer;
+    /* 0xC */ u8  accel;
+    /* 0xD */ u8  state;
+    /* 0xE */ u8  angle;
+    /* 0xF */ u8  phase;
+} Bubble; // size 0x10
+
+/* A water-surface vertex (Vtx layout) and its rest position/colour (game_BC510.c). */
+typedef struct WaterVtx {
+    /* 0x0 */ s16 ob[3];
+    /* 0x6 */ u16 flag;
+    /* 0x8 */ s16 tc[2];
+    /* 0xC */ u8  cn[4];
+} WaterVtx; // size 0x10
+
+typedef struct WaterBase {
+    /* 0x0 */ s16 ob[3];
+    /* 0x6 */ u8  cn[4];
+} WaterBase; // size 0xA
+
+/* D_800D24C8: the animated water surface (game_BC510.c). */
+typedef struct WaterStage {
+    /* 0x00 */ Mtx mtx[2];
+    /* 0x80 */ s32 dl;
+    /* 0x84 */ WaterVtx *vtx[2];
+    /* 0x8C */ WaterBase *base;
+    /* 0x90 */ WaterBase *target;
+    /* 0x94 */ f32 unk94;
+    /* 0x98 */ f32 unk98;
+    /* 0x9C */ f32 unk9C;
+    /* 0xA0 */ f32 unkA0;
+    /* 0xA4 */ f32 unkA4;
+    /* 0xA8 */ f32 unkA8;
+    /* 0xAC */ f32 unkAC;
+    /* 0xB0 */ u16 tex[4];
+    /* 0xB8 */ s16 timer;
+    /* 0xBA */ u8  alpha;
+    /* 0xBB */ u8  count;
+} WaterStage; // size 0xC0
+
+/* One loaded particle model, shared by every live particle that uses it (D_800DC468 counts them). */
+typedef struct ParticleNode {
+    /* 0x0 */ s32 *resource;
+    /* 0x4 */ struct ParticleNode *next;
+    /* 0x8 */ struct ParticleNode *prev;
+    /* 0xC */ u16 model;
+    /* 0xE */ u8 keepLoaded;
+} ParticleNode;
 
 /* A cached keyframe: loaded vertex positions plus ticks left before it is freed. */
 typedef struct {

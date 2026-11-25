@@ -396,27 +396,6 @@ void func_150242F8(s32 mode, s32 scene) {
     }
 }
 
-/* A subtitle slot (see func_150234A4); from `flags` on it is the parameter block passed to func_1516A7B0. */
-typedef struct {
-    /* 0x00 */ s16 active; /* owning track + 1, 0 = free */
-    /* 0x02 */ u8 pad2[2];
-    /* 0x04 */ s32 flags;
-    /* 0x08 */ u8 *text;
-    /* 0x0C */ u8 isOpen;
-    /* 0x0D */ u8 padD[0xF];
-    /* 0x1C */ f32 *unk1C;
-    /* 0x20 */ f32 *unk20;
-    /* 0x24 */ f32 *unk24;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ s16 unk2A;
-    /* 0x2C */ u8 r;
-    /* 0x2D */ u8 g;
-    /* 0x2E */ u8 b;
-    /* 0x2F */ u8 unk2F;
-    /* 0x30 */ u8 pad30[4];
-    /* 0x34 */ s32 handle;
-} SeqSubtitle;
-
 typedef struct {
     Actor *obj;
     u8 id;

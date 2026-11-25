@@ -2,11 +2,7 @@
 
 #include "functions.h"
 void func_1509093C(void);
-#define D_800D24C8 D_800D24C8_hdr
-#define D_800D2460 D_800D2460_hdr
 #include "variables.h"
-#undef D_800D24C8
-#undef D_800D2460
 void func_1508F9F4(void);
 void func_1508F0D4(void);
 void func_1508F7BC(void);
@@ -16,22 +12,6 @@ extern u8 D_800CC49A;
 extern s32 func_1510D0EC(s32, s32, s32, s32);
 void func_15042D94(s32, s32, u8, s32 *, ...);
 extern u8 D_D16[];
-
-/* One rising bubble sprite (drawn by func_15090630). */
-typedef struct Bubble {
-    s16 x;
-    s16 y;
-    s16 originX;
-    s16 size;
-    s16 radius;
-    s16 timer;
-    u8 accel;
-    u8 state;
-    u8 angle;
-    u8 phase;
-} Bubble;
-
-extern Bubble D_800D2460[6];
 
 /* Resets all bubbles to the idle state. */
 void func_1508F060(void) {
@@ -569,38 +549,6 @@ Gfx *func_15090630(Gfx *gfx) {
     }
     return gfx;
 }
-typedef struct WaterVtx {
-    s16 ob[3];
-    u16 flag;
-    s16 tc[2];
-    u8 cn[4];
-} WaterVtx;
-
-typedef struct WaterBase {
-    s16 ob[3];
-    u8 cn[4];
-} WaterBase;
-
-typedef struct WaterStage {
-    Mtx mtx[2];
-    s32 dl;
-    WaterVtx *vtx[2];
-    WaterBase *base;
-    WaterBase *target;
-    f32 unk94;
-    f32 unk98;
-    f32 unk9C;
-    f32 unkA0;
-    f32 unkA4;
-    f32 unkA8;
-    f32 unkAC;
-    u16 tex[4];
-    s16 timer;
-    u8 alpha;
-    u8 count;
-} WaterStage;
-
-extern WaterStage D_800D24C8;
 extern s32 D_800D2558[];
 extern s32 func_1502FE10(s32 id, s32 **end, u8 *arg2, WaterVtx **start, s32 *arg4, s32 *arg5, s32 *arg6);
 extern u16 D_800CC382;

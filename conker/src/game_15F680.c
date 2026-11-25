@@ -1,28 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
-/* variables.h declares the D_800DC460/D_800DC464 list head/tail as s32 and D_800DC468 as u16;
- * func_15132444 walks them as node pointers and reads D_800DC468 with lh, so the real types
- * are made file-local here (the shared header is left alone). */
-#define D_800DC460 D_800DC460_s32_decl_in_variables_h
-#define D_800DC464 D_800DC464_s32_decl_in_variables_h
 #include "variables.h"
 #include "effects.h"
-#undef D_800DC460
-#undef D_800DC464
 
 #define ARRAY_COUNT(arr) (s32)(sizeof(arr) / sizeof(arr[0]))
-
-/* One loaded particle model, shared by every live particle that uses it (D_800DC468 counts them). */
-typedef struct ParticleNode {
-    /* 0x0 */ s32 *resource;
-    /* 0x4 */ struct ParticleNode *next;
-    /* 0x8 */ struct ParticleNode *prev;
-    /* 0xC */ u16 model;
-    /* 0xE */ u8 keepLoaded;
-} ParticleNode;
-
-extern ParticleNode *D_800DC460;
-extern ParticleNode *D_800DC464;
 
 s32 func_151464B8(s16 *arg0);
 extern u8 D_800C3E90;

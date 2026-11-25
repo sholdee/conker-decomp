@@ -17,8 +17,8 @@ void func_1500C2A0(void) {
         D_800DC468[i] = 0;
     }
 
-    D_800DC460 = 0;
-    D_800DC464 = 0;
+    D_800DC460 = NULL;
+    D_800DC464 = NULL;
     D_800DC63C = 0;
 }
 

@@ -1,9 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
-/* variables.h declares these with the wrong types; they are redeclared below with the types this file uses. */
-#define D_800C3CA0 D_800C3CA0_hdr
 #include "variables.h"
-#undef D_800C3CA0
 
 /* Cutscene ("sequence") data is kept per scene slot (0/1) and per track (up to 30 tracks). */
 
@@ -91,28 +88,6 @@ extern Actor *func_1505EEF4(s32);
 extern void func_15082A44(void *, s32, s32, s32, s32);
 extern u8 D_800D2100;
 
-/* A subtitle slot (see func_150234A4); same layout as in game_50D80.c. */
-typedef struct {
-    /* 0x00 */ s16 active; /* owning track + 1, 0 = free */
-    /* 0x02 */ u8 pad2[2];
-    /* 0x04 */ s32 flags;
-    /* 0x08 */ u8 *text;
-    /* 0x0C */ u8 isOpen;
-    /* 0x0D */ u8 padD[0xF];
-    /* 0x1C */ f32 *unk1C;
-    /* 0x20 */ f32 *unk20;
-    /* 0x24 */ f32 *unk24;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ s16 unk2A;
-    /* 0x2C */ u8 r;
-    /* 0x2D */ u8 g;
-    /* 0x2E */ u8 b;
-    /* 0x2F */ u8 unk2F;
-    /* 0x30 */ u8 pad30[4];
-    /* 0x34 */ s32 handle;
-} SeqSubtitle;
-
-extern SeqSubtitle D_800C3CA0[3];
 
 
 extern SeqTrackPath *D_800C3A50[];

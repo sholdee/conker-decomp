@@ -907,7 +907,7 @@ extern SeqTrackState *D_800C3958[]; // per scene: the track states
 extern u8  D_800C3C88;
 extern u8  D_800C3C90;
 extern s32 D_800C3C94;
-extern struct163 D_800C3CA0[3];
+extern SeqSubtitle D_800C3CA0[3];
 extern u8  D_800C3E78;
 extern u16 D_800C3E7C;
 extern s32 D_800C3E80[2]; // bone-matrix pool per frame buffer
@@ -1081,14 +1081,14 @@ extern u8  D_800D2456;
 extern u8  D_800D2457;
 extern u8  D_800D2458;
 extern struct256 *D_800D245C;
-extern u8  D_800D2460[][16];
+extern Bubble D_800D2460[6];
 extern u8  D_800D246D;
 extern u8  D_800D247D;
 extern s32 D_800D2548;
 extern s32 D_800D2588;
 extern Mtx  D_800D2590[6][2];
 extern s32 D_800D24C0;
-extern s32 D_800D24C8;
+extern WaterStage D_800D24C8;
 
 extern f32 D_800D2890[3];
 
@@ -1221,8 +1221,8 @@ extern s32 D_800DC020;
 extern Mtx  *D_800DC2A0[2]; // per framebuffer: one view matrix per view
 extern s32 D_800DC2B0;
 extern f32 *D_800DCC10[][4];
-extern s32 D_800DC460;
-extern s32 D_800DC464;
+extern ParticleNode *D_800DC460; // loaded particle models: list head
+extern ParticleNode *D_800DC464; // list tail
 extern s16 D_800DC468[];
 extern s32 D_800DC63C;
 extern s8 D_800DCD30[4][3]; // per-player directional light direction

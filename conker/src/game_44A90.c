@@ -38,7 +38,7 @@ void func_15017640(void) {
     } while (p < end);
 
     for (i = 0; i < 6; i++) {
-        D_800D2460[i][13] = 0;
+        D_800D2460[i].state = 0;
     }
 
     D_800D24C0 = 0;

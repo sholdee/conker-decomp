@@ -335,8 +335,8 @@ void func_15008248(s32 arg0) {
 
     for (i = 0; i < 3; i++)
     {
-        D_800C3CA0[i].unk0 = 0;
-        D_800C3CA0[i].unkC = 0;
+        D_800C3CA0[i].active = 0;
+        D_800C3CA0[i].isOpen = 0;
     }
 
     D_800C3681 = 0;
