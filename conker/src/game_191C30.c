@@ -2,150 +2,142 @@
 #include "functions.h"
 #include "variables.h"
 
-extern u8 D_800DCDE0[0x60];
-
-struct Obj15164780 {
-    u8 pad0[0x10];
-    u8 unk10[0x38];
-    f32 unk48;
-    f32 unk4C;
-    f32 unk50;
-    f32 unk54;
-    f32 unk58;
-    f32 unk5C;
-    u8 unk60;
-    u8 unk61;
-    u8 unk62;
-    u8 unk63;
-    u8 unk64;
-    u8 unk65;
-};
-
-extern void *func_15167A68(s32, s32, s32, s32, u8, s32);
-
-void *func_15164780(struct127 *arg0, s32 arg1, u8 arg2, s32 arg3) {
-    void *temp_v1;
-    struct108 *temp_v0;
-
-    temp_v0 = &D_800DBFF0[arg0->unk6];
-    temp_v1 = temp_v0->unk3D0;
-    if (temp_v1 != 0) {
-        temp_v0 = (struct108 *) ((struct127 *) temp_v1)->unk31C;
-        if ((temp_v0 != 0) && (((struct126 *) temp_v0)->unk198 != 0)) {
-            return NULL;
-        }
-    }
-    temp_v1 = func_15167A68(0x39, arg3, arg1 + 0x68, 1, arg2, 1);
-    if (temp_v1 == 0) {
-        return NULL;
-    }
-    memcpy((s32)temp_v1 + 0x10, arg0, 0x38);
-    ((struct Obj15164780 *) temp_v1)->unk60 = 1;
-    ((struct Obj15164780 *) temp_v1)->unk61 = 1;
-    ((struct Obj15164780 *) temp_v1)->unk62 = 1;
-    ((struct Obj15164780 *) temp_v1)->unk63 = 1;
-    ((struct Obj15164780 *) temp_v1)->unk64 = 1;
-    ((struct Obj15164780 *) temp_v1)->unk65 = 1;
-    ((struct Obj15164780 *) temp_v1)->unk48 = 0.0f;
-    ((struct Obj15164780 *) temp_v1)->unk4C = 0.0f;
-    ((struct Obj15164780 *) temp_v1)->unk50 = 0.0f;
-    ((struct Obj15164780 *) temp_v1)->unk54 = 0.0f;
-    ((struct Obj15164780 *) temp_v1)->unk58 = 0.0f;
-    ((struct Obj15164780 *) temp_v1)->unk5C = 0.0f;
-    return temp_v1;
-}
-
-typedef struct {
-    u8 pad0[0x10];
-    /* 0x10 */ u8 unk10;
-} S15164888;
-
-void func_15164888(S15164888 *arg0) {
-    arg0->unk10 |= 0x2;
-}
+/*
+ * Camera wobble effects: up to six sine waves (position xyz, rotation xyz) that are summed into a
+ * player's camera offset each frame (D_800DCDE0, applied to the view matrix in game_159940.c).
+ */
 
 typedef struct {
     u8 v[3];
-} S1516489CB3;
+} CamWobbleHalves;
+
+#define CAM_WOBBLE_TIMED    1 // stop once the timer runs out
+#define CAM_WOBBLE_STOPPING 2 // each wave stops at its next zero crossing
+#define CAM_WOBBLE_SCALED   4 // amplitudes are scaled by the scaleFn callback
+
+/* What a wobble is created from; copied into the effect at +0x10. */
+typedef struct {
+    /* 0x00 */ u8 flags;       // CAM_WOBBLE_*
+    /* 0x01 */ s8 updateFn;    // index into D_8008B390, or -1
+    /* 0x02 */ s8 scaleFn;     // index into D_8008B394, or -1
+    /* 0x04 */ s16 timer;      // frames left, with CAM_WOBBLE_TIMED
+    /* 0x06 */ u8 playerIndex;
+    /* 0x08 */ f32 amplitude[6]; // position xyz, rotation xyz
+    /* 0x20 */ f32 speed[6];     // radians per second; 0 means the wave is off
+} CamWobbleDef; // size 0x38
 
 typedef struct {
-    u8 pad0[0x10];
-    /* 0x10 */ u8 unk10;
-    /* 0x11 */ s8 unk11;
-    /* 0x12 */ s8 unk12;
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ u8 unk16;
-    /* 0x18 */ f32 amp[6];
-    /* 0x30 */ f32 speed[6];
+    /* 0x00 */ u8 pad0[0x10]; // effect header, see func_15167A68
+    /* 0x10 */ CamWobbleDef def;
     /* 0x48 */ f32 phase[6];
-    /* 0x60 */ S1516489CB3 flagA;
-    /* 0x63 */ S1516489CB3 flagB;
-} S1516489C;
+    /* 0x60 */ CamWobbleHalves posHalf; // 1 while the phase is below pi (sine positive)
+    /* 0x63 */ CamWobbleHalves rotHalf;
+} CamWobble; // size 0x68
 
-extern s32 (*D_8008B390[])(S1516489C *);
-extern f32 (*D_8008B394[])(S1516489C *);
-extern f32 D_800A6B20[6];
+extern f32 D_800DCDE0[4][6]; // per-player camera offset (position xyz, rotation xyz), summed from the wobbles
 
-#define WAVE(i, flag, prev) \
-    if (arg0->speed[i] != 0.0f) { \
-        arg0->phase[i] = func_15144B68(arg0->speed[i] * D_800BE9A4 + arg0->phase[i]); \
-        flag = arg0->phase[i] < D_800A6B20[i]; \
-        if ((arg0->unk10 & 2) && (prev != flag)) { \
-            arg0->speed[i] = 0.0f; \
-            arg0->phase[i] = 0.0f; \
-        } \
-        ((f32 (*)[6])D_800DCDE0)[arg0->unk16][i] += sinf(arg0->phase[i]) * arg0->amp[i] * scale; \
+extern s32 (*D_8008B390[])(CamWobble *); // update callbacks, return 0 to stop
+extern f32 (*D_8008B394[])(CamWobble *); // amplitude scale callbacks
+
+extern void *func_15167A68(s32, s32, s32, s32, u8, s32);
+
+/* Creates a wobble effect from def with extraSize bytes of extra state after it; NULL if none was made. */
+CamWobble *func_15164780(CamWobbleDef *def, s32 extraSize, u8 arg2, s32 arg3) {
+    CamWobble *wobble;
+    struct108 *player;
+
+    player = &D_800DBFF0[def->playerIndex];
+    if (player->unk3D0 != NULL && player->unk3D0->unk31C != NULL && player->unk3D0->unk31C->unk198 != 0) {
+        return NULL;
+    }
+    wobble = func_15167A68(0x39, arg3, extraSize + sizeof(CamWobble), 1, arg2, 1);
+    if (wobble == NULL) {
+        return NULL;
+    }
+    memcpy(&wobble->def, def, sizeof(CamWobbleDef));
+    wobble->posHalf.v[0] = 1;
+    wobble->posHalf.v[1] = 1;
+    wobble->posHalf.v[2] = 1;
+    wobble->rotHalf.v[0] = 1;
+    wobble->rotHalf.v[1] = 1;
+    wobble->rotHalf.v[2] = 1;
+    wobble->phase[0] = 0.0f;
+    wobble->phase[1] = 0.0f;
+    wobble->phase[2] = 0.0f;
+    wobble->phase[3] = 0.0f;
+    wobble->phase[4] = 0.0f;
+    wobble->phase[5] = 0.0f;
+    return wobble;
+}
+
+/* Asks the wobble to wind down: each wave stops at its next zero crossing. */
+void func_15164888(CamWobble *wobble) {
+    wobble->def.flags |= CAM_WOBBLE_STOPPING;
+}
+
+/* Advances wave i (half: its CamWobbleHalves) and adds its displacement to the player's camera offset. */
+#define WOBBLE_WAVE(i, half, prevHalf)                                                            \
+    if (wobble->def.speed[i] != 0.0f) {                                                           \
+        wobble->phase[i] = func_15144B68(wobble->def.speed[i] * D_800BE9A4 + wobble->phase[i]);   \
+        half.v[(i) % 3] = wobble->phase[i] < 3.1415927f;                                          \
+        if ((wobble->def.flags & CAM_WOBBLE_STOPPING) && (prevHalf.v[(i) % 3] != half.v[(i) % 3])) { \
+            wobble->def.speed[i] = 0.0f;                                                          \
+            wobble->phase[i] = 0.0f;                                                              \
+        }                                                                                         \
+        D_800DCDE0[wobble->def.playerIndex][i] += sinf(wobble->phase[i]) * wobble->def.amplitude[i] * scale; \
     }
 
-void func_1516489C(S1516489C *arg0) {
-    s32 pad;
-    u8 done;
-    u8 kill;
+/* Per-frame update of a wobble effect; frees it once every wave has stopped. */
+void func_1516489C(CamWobble *wobble) {
+    s32 pad; // matching: unused stack slot in the original frame
+    u8 finished;
+    u8 stop;
     f32 scale;
-    S1516489CB3 prevA;
-    S1516489CB3 prevB;
+    CamWobbleHalves prevPosHalf;
+    CamWobbleHalves prevRotHalf;
 
-    done = 0;
-    kill = 0;
-    if (arg0->unk10 & 1) {
-        arg0->unk14 -= D_800BE9E4;
-        if (arg0->unk14 < 0) {
-            kill = 1;
+    finished = 0;
+    stop = 0;
+    if (wobble->def.flags & CAM_WOBBLE_TIMED) {
+        wobble->def.timer -= D_800BE9E4;
+        if (wobble->def.timer < 0) {
+            stop = 1;
         }
     }
-    if (!kill && arg0->unk11 != -1) {
-        if (!D_8008B390[arg0->unk11](arg0)) {
-            kill = 1;
+    if (!stop && wobble->def.updateFn != -1) {
+        if (!D_8008B390[wobble->def.updateFn](wobble)) {
+            stop = 1;
         }
     }
-    if (kill) {
-        func_15164888((S15164888 *)arg0);
+    if (stop) {
+        func_15164888(wobble);
     }
-    prevA = arg0->flagA;
-    prevB = arg0->flagB;
+    prevPosHalf = wobble->posHalf;
+    prevRotHalf = wobble->rotHalf;
     scale = 1.0f;
-    if (arg0->unk10 & 4) {
-        if (arg0->unk12 != -1) {
-            scale = D_8008B394[arg0->unk12](arg0);
+    if (wobble->def.flags & CAM_WOBBLE_SCALED) {
+        if (wobble->def.scaleFn != -1) {
+            scale = D_8008B394[wobble->def.scaleFn](wobble);
         }
     }
-    WAVE(0, arg0->flagA.v[0], prevA.v[0])
-    WAVE(1, arg0->flagA.v[1], prevA.v[1])
-    WAVE(2, arg0->flagA.v[2], prevA.v[2])
-    WAVE(3, arg0->flagB.v[0], prevB.v[0])
-    WAVE(4, arg0->flagB.v[1], prevB.v[1])
-    WAVE(5, arg0->flagB.v[2], prevB.v[2])
-    if (arg0->speed[0] == 0.0f && arg0->speed[1] == 0.0f && arg0->speed[2] == 0.0f &&
-        arg0->speed[3] == 0.0f && arg0->speed[4] == 0.0f && arg0->speed[5] == 0.0f) {
-        done = 1;
+    WOBBLE_WAVE(0, wobble->posHalf, prevPosHalf)
+    WOBBLE_WAVE(1, wobble->posHalf, prevPosHalf)
+    WOBBLE_WAVE(2, wobble->posHalf, prevPosHalf)
+    WOBBLE_WAVE(3, wobble->rotHalf, prevRotHalf)
+    WOBBLE_WAVE(4, wobble->rotHalf, prevRotHalf)
+    WOBBLE_WAVE(5, wobble->rotHalf, prevRotHalf)
+    if (wobble->def.speed[0] == 0.0f && wobble->def.speed[1] == 0.0f && wobble->def.speed[2] == 0.0f &&
+        wobble->def.speed[3] == 0.0f && wobble->def.speed[4] == 0.0f && wobble->def.speed[5] == 0.0f) {
+        finished = 1;
     }
-    if (done) {
-        func_1516972C((struct102 *)arg0);
+    if (finished) {
+        func_1516972C((struct102 *)wobble);
     }
 }
 
+/* Clears every player's camera offset. */
 void func_15164EE4(void) {
-    bzero(D_800DCDE0, 0x60);
+    bzero(D_800DCDE0, sizeof(D_800DCDE0));
 }
 
 typedef struct {
