@@ -16,12 +16,6 @@ typedef struct MtxS16 {
     s16 fracPart[4][4];
 } MtxS16;
 
-/* View of a world object (WorldObject; Game13F9D0Obj in game_13F9D0.c). */
-typedef struct WorldObj {
-    /* 0x00 */ u8 pad0[0x8A];
-    /* 0x8A */ u8 alpha;
-} WorldObj;
-
 typedef struct Trail {
     /* 0x00 */ u8 type;      /* index into the update/free/draw tables */
     /* 0x01 */ u8 numFrames; /* history length */
@@ -34,7 +28,6 @@ typedef struct Trail {
     /* 0x10 */ union {
         Actor *object;
         WorldObject *worldObj;
-        WorldObj *worldObjView;
     } owner;
     /* 0x14 */ s32 unk14;    /* type 0 only: swapped into owner.object->unk94 while drawing */
 } Trail; // size 0x18 (type 1 trails are allocated without unk14)
@@ -493,7 +486,7 @@ Gfx *func_151895F4(Gfx *gfx, Trail *trail, s16 player) {
     return gfx;
 }
 
-extern Gfx *func_151137D4(Gfx *gfx, WorldObj *obj, MtxS16 *mtx, s32 view, s32 distance, s32 pass);
+extern Gfx *func_151137D4(Gfx *gfx, WorldObject *obj, MtxS16 *mtx, s32 view, s32 distance, s32 pass);
 
 /* Type-1 draw: draws the owner world object once per history frame, oldest faintest. */
 Gfx *func_151897A4(Gfx *gfx, Trail *trail, s16 player) {
@@ -513,13 +506,13 @@ Gfx *func_151897A4(Gfx *gfx, Trail *trail, s16 player) {
     numFrames = trail->numFrames;
     alpha = trail->alpha;
     base = D_800BE9C0 * numFrames;
-    saved = trail->owner.worldObjView->alpha;
+    saved = trail->owner.worldObj->alpha;
     for (i = 0; i < numFilled; i++) {
         objAlpha = ((i + 3) * 32 * alpha) >> 8;
-        trail->owner.worldObjView->alpha = objAlpha;
-        gfx = func_151137D4(gfx, trail->owner.worldObjView, &trail->frames[base + i], player, 0, 0);
+        trail->owner.worldObj->alpha = objAlpha;
+        gfx = func_151137D4(gfx, trail->owner.worldObj, &trail->frames[base + i], player, 0, 0);
     }
-    trail->owner.worldObjView->alpha = saved;
+    trail->owner.worldObj->alpha = saved;
     return gfx;
 }
 
