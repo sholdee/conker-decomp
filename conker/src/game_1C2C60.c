@@ -271,7 +271,10 @@ TexScroll *func_15195AA8(Gfx *dl, s32 texture, s32 doubled, s32 occurrence, s32 
     return scroll;
 }
 
-/* Adds a reference to the `count` tile-size commands at dl[cmdIndex] to `scroll`, unless already present. */
+/*
+ * Adds a reference to the `count` tile-size commands at dl[cmdIndex] to `scroll`, unless already present
+ * (the walk never compares the last reference).
+ */
 void func_15195D00(TexScroll *scroll, Gfx *dl, s32 cmdIndex, s32 count) {
     TexScrollRef *ref;
     TexScrollRef *next;
