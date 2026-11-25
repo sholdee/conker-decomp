@@ -2,285 +2,255 @@
 #include "functions.h"
 #include "variables.h"
 
+typedef struct {
+    f32 x, y, z;
+} Vec3f;
+
+/* Spawn header that func_15147A80 copies to EffectObject+0x10. */
+typedef struct EffectSpawn {
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ s16 lifetime;
+    /* 0x0E */ u16 flags;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 capacity; /* number of points in the ring buffer */
+    /* 0x16 */ u8 pad16[2];
+} EffectSpawn;
+
+/* Effect object created by func_15147A80: a ring buffer of points plus a kind-specific state block. */
+typedef struct EffectObject {
+    /* 0x00 */ u8 pad0[0x10];
+    /* 0x10 */ Vec3f pos;
+    /* 0x1C */ s16 lifetime;
+    /* 0x1E */ u16 flags;
+    /* 0x20 */ s32 unk20;
+    /* 0x24 */ u8 unk24;
+    /* 0x25 */ u8 capacity;
+    /* 0x26 */ u8 pad26[6];
+    /* 0x2C */ s8 count;
+    /* 0x2D */ s8 tail; /* oldest point */
+    /* 0x2E */ s8 head; /* next point to write */
+    /* 0x2F */ u8 unk2F;
+    /* 0x30 */ s8 unk30;
+    /* 0x31 */ u8 pad31[0x23];
+    /* 0x54 */ Vec3f tailPos;
+    /* 0x60 */ u8 pad60[0x24];
+    /* 0x84 */ u8 buffers[0x10];
+    /* 0x94 */ void *points;
+    /* 0x98 */ void *state;
+} EffectObject;
+
+/* Object a trail follows. */
+typedef struct TrailTarget {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ u8 pad4[0x10];
+    /* 0x14 */ Vec3f pos;
+    /* 0x20 */ u8 pad20[0x1B];
+    /* 0x3B */ u8 unk3B;
+    /* 0x3C */ f32 unk3C;
+} TrailTarget;
+
+/* State block of a trail effect (func_151B6320). */
+typedef struct TrailState {
+    /* 0x00 */ TrailTarget *target;
+    /* 0x04 */ u8 targetUnk3B; /* target->unk3B when the trail was spawned */
+    /* 0x05 */ u8 pad5[3];
+    /* 0x08 */ Vec3f lastPos;
+    /* 0x14 */ f32 pending; /* points still to emit */
+    /* 0x18 */ f32 elapsed; /* time since the last point was emitted */
+    /* 0x1C */ f32 targetTexS; /* texture s at the target's position */
+    /* 0x20 */ f32 texS; /* texture s at lastPos */
+    /* 0x24 */ f32 distance; /* distance travelled at lastPos */
+    /* 0x28 */ s32 unk28;
+} TrailState;
+
+/* One point of a trail effect. */
+typedef struct TrailPoint {
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ f32 life;
+    /* 0x10 */ u8 alpha;
+    /* 0x11 */ u8 pad11[3];
+    /* 0x14 */ f32 texS;
+    /* 0x18 */ f32 distance; /* distance travelled when emitted */
+} TrailPoint;
+
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-extern s32 func_15147A80(void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern EffectObject *func_15147A80(EffectSpawn *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-} Vec151B6320;
+/* Spawns a trail effect that follows target. */
+void func_151B6320(TrailTarget *target, u8 arg1, s32 arg2) {
+    s32 top_dummy; // matching: stack pad
+    EffectSpawn spawn;
+    s32 pad_dummy; // matching: stack pad
+    TrailState state;
+    EffectObject *obj;
 
-typedef struct {
-    Vec151B6320 unk0;
-    s16 unkC;
-    s16 unkE;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 pad16[2];
-} Header151B6320;
+    spawn.capacity = 10;
+    spawn.pos.x = target->pos.x;
+    spawn.pos.y = target->pos.y;
+    spawn.pos.z = target->pos.z;
+    spawn.lifetime = 300;
+    spawn.flags = 6;
+    state.target = target;
+    state.targetUnk3B = target->unk3B;
+    state.lastPos = spawn.pos;
+    state.pending = 0.0f;
+    state.elapsed = 0.0f;
+    state.texS = -16384.0f;
+    state.targetTexS = -16384.0f;
+    state.distance = 0.0f;
+    spawn.unk10 = 13;
 
-typedef struct {
-    f32 *unk0;
-    u8 unk4;
-    u8 pad5[3];
-    Vec151B6320 unk8;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    s32 unk28;
-} Payload151B6320;
-
-typedef struct {
-    s32 unk0;
-    u8 pad4[0x14 - 0x4];
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    u8 pad2C[0x38 - 0x2C];
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-} struct151B76CCObj;
-
-typedef struct {
-    u8 pad0[4];
-    struct151B76CCObj **unk4;
-} struct151B76CCList;
-
-typedef struct {
-    u8 pad0[0x98];
-    struct151B76CCList *unk98;
-} struct151B76CCArg0;
-
-void func_151B6320(f32 *arg0, u8 arg1, s32 arg2) {
-    s32 top_dummy;
-    Header151B6320 header;
-    s32 pad_dummy;
-    Payload151B6320 payload;
-    s32 *temp_v0;
-
-    header.unk15 = 0xA;
-    header.unk0.unk0 = arg0[5];
-    header.unk0.unk4 = arg0[6];
-    header.unk0.unk8 = arg0[7];
-    header.unkC = 0x12C;
-    header.unkE = 6;
-    payload.unk0 = arg0;
-    payload.unk4 = *(u8 *)((u8 *)arg0 + 0x3B);
-    payload.unk8 = header.unk0;
-    payload.unk14 = 0.0f;
-    payload.unk18 = 0.0f;
-    payload.unk20 = -16384.0f;
-    payload.unk1C = -16384.0f;
-    payload.unk24 = 0.0f;
-    header.unk10 = 0xD;
-
-    temp_v0 = (s32 *)func_15147A80(&header, 0x30, 0x1C, 0xB, 0xB, 0xB, 0, 0, 0, arg1, arg2);
-    if (temp_v0 != NULL) {
-        memcpy((void *)temp_v0[0x98 / 4], &payload, 0x2C);
+    obj = func_15147A80(&spawn, 0x30, sizeof(TrailPoint), 11, 11, 11, 0, 0, 0, arg1, arg2);
+    if (obj != NULL) {
+        memcpy(obj->state, &state, sizeof(state));
     }
 }
 
-typedef struct { f32 x, y, z; } Vec151B65D4;
-
-typedef struct {
-    s32 unk0;
-    u8 pad4[0x14 - 0x4];
-    Vec151B65D4 pos;
-    u8 pad20[0x3B - 0x20];
-    u8 unk3B;
-    f32 unk3C;
-} Target151B65D4;
-
-typedef struct {
-    Target151B65D4 *target;
-    u8 unk4;
-    u8 pad5[3];
-    Vec151B65D4 pos;
-    f32 count;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-} State151B65D4;
-
-typedef struct {
-    Vec151B65D4 pos;
-    f32 unkC;
-    u8 unk10;
-    u8 pad11[3];
-    f32 unk14;
-    f32 unk18;
-} Entry151B65D4;
-
-typedef struct {
-    u8 pad0[0x10];
-    Vec151B65D4 pos;
-    u8 pad1C[2];
-    u16 flags;
-    u8 pad20[5];
-    u8 capacity;
-    u8 pad26[6];
-    s8 count;
-    s8 tail;
-    s8 head;
-    u8 pad2F;
-    u8 unk30;
-    u8 pad31[0x54 - 0x31];
-    Vec151B65D4 unk54;
-    u8 pad60[0x94 - 0x60];
-    Entry151B65D4 *entries;
-    State151B65D4 *state;
-} Obj151B65D4;
-
-s32 func_151B6420(Obj151B65D4 *arg0) {
-    Entry151B65D4 *entries;
+/* Ages a trail's points, drops expired ones and sets the alpha of the rest. Returns 0 once the trail has finished. */
+s32 func_151B6420(EffectObject *obj) {
+    TrailPoint *points;
     s32 i;
     f32 base;
-    s32 v;
+    s32 alpha;
     f32 d;
 
-    entries = arg0->entries;
-    if (arg0->count < 2 && (arg0->flags & 8)) {
+    points = obj->points;
+    if (obj->count < 2 && (obj->flags & 8)) {
         return 0;
     }
-    i = arg0->head;
-    while (i != arg0->tail) {
+    i = obj->head;
+    while (i != obj->tail) {
         i--;
         if (i < 0) {
-            i = arg0->capacity - 1;
+            i = obj->capacity - 1;
         }
-        (i + entries)->unkC -= D_800BE9A4;
-        if ((i + entries)->unkC < 0.0f) {
-            while (i != arg0->tail) {
-                arg0->tail++;
-                if (arg0->tail == arg0->capacity) {
-                    arg0->tail = 0;
+        (i + points)->life -= D_800BE9A4; // matching: IDO orders the addu operands as written
+        if ((i + points)->life < 0.0f) {
+            while (i != obj->tail) {
+                obj->tail++;
+                if (obj->tail == obj->capacity) {
+                    obj->tail = 0;
                 }
-                arg0->count--;
+                obj->count--;
             }
         }
     }
-    if (arg0->count > 0) {
-        i = arg0->tail;
-        base = entries[arg0->tail].unk18;
+    if (obj->count > 0) {
+        i = obj->tail;
+        base = points[obj->tail].distance;
         do {
-            d = (i + entries)->unk18 - base;
-            v = d * 0.4940000176f;
-            if (v >= 0x9C) {
-                (i + entries)->unk10 = 0x9B;
+            d = (i + points)->distance - base; // matching: IDO orders the addu operands as written
+            alpha = d * 0.4940000176f;
+            if (alpha >= 156) {
+                (i + points)->alpha = 155;
             } else {
-                (i + entries)->unk10 = v;
+                (i + points)->alpha = alpha;
             }
             i++;
-            if (i >= arg0->capacity) {
+            if (i >= obj->capacity) {
                 i = 0;
             }
-        } while (i != arg0->head);
+        } while (i != obj->head);
     }
-    if (arg0->count > 0) {
-        arg0->unk54 = entries[arg0->tail].pos;
+    if (obj->count > 0) {
+        obj->tailPos = points[obj->tail].pos;
     } else {
-        arg0->unk54.x = 0.0f;
-        arg0->unk54.y = 0.0f;
-        arg0->unk54.z = 0.0f;
+        obj->tailPos.x = 0.0f;
+        obj->tailPos.y = 0.0f;
+        obj->tailPos.z = 0.0f;
     }
     return 1;
 }
 
-f32 func_15143E64(void *);
+f32 func_15143E64(Vec3f *);
 
-s32 func_151B65D4(Obj151B65D4 *arg0) {
-    State151B65D4 *state;
-    Entry151B65D4 *entries;
-    Target151B65D4 *target;
-    Vec151B65D4 delta;
-    s32 p0;
-    s32 p1;
+/* Follows the trail's target and emits points along the path it moved. Stops the trail once the target is gone. */
+s32 func_151B65D4(EffectObject *obj) {
+    TrailState *state;
+    TrailPoint *points;
+    TrailTarget *target;
+    Vec3f delta;
+    s32 pad0; // matching: stack pad
+    s32 pad1; // matching: stack pad
     f32 dist;
 
-    state = arg0->state;
-    entries = arg0->entries;
+    state = obj->state;
+    points = obj->points;
     target = state->target;
-    if (target->unk0 == 0 || target->unk3B != state->unk4 || target->unk3C < 15.0f) {
-        arg0->unk30 = 0;
-        arg0->flags |= 8;
+    if (target->unk0 == 0 || target->unk3B != state->targetUnk3B || target->unk3C < 15.0f) {
+        obj->unk30 = 0;
+        obj->flags |= 8;
         return 1;
     }
-    arg0->pos.x = target->pos.x;
-    arg0->pos.y = target->pos.y;
-    arg0->pos.z = target->pos.z;
-    delta.x = arg0->pos.x - state->pos.x;
-    delta.y = arg0->pos.y - state->pos.y;
-    delta.z = arg0->pos.z - state->pos.z;
+    obj->pos.x = target->pos.x;
+    obj->pos.y = target->pos.y;
+    obj->pos.z = target->pos.z;
+    delta.x = obj->pos.x - state->lastPos.x;
+    delta.y = obj->pos.y - state->lastPos.y;
+    delta.z = obj->pos.z - state->lastPos.z;
     dist = func_15143E64(&delta);
-    state->count += dist * 0.003721999936f * D_800BE9A4;
-    state->unk1C += dist * 4.409547806f;
-    if (state->count > 1.0f) {
-        Entry151B65D4 *e;
-        Vec151B65D4 cur;
+    state->pending += dist * 0.003721999936f * D_800BE9A4;
+    state->targetTexS += dist * 4.409547806f;
+    if (state->pending > 1.0f) {
+        TrailPoint *point;
+        Vec3f cur;
         f32 inv;
-        f32 y;
-        f32 dy;
-        f32 a;
-        f32 b;
-        f32 dx;
-        f32 dz;
-        f32 dw;
-        f32 diff;
-        f32 da;
-        inv = 1.0f / state->count;
-        y = state->unk18 + D_800BE9A4;
-        cur = state->pos;
-        a = state->unk20;
-        b = state->unk24;
-        dy = -(y * inv);
-        dx = delta.x * inv;
-        dz = delta.y * inv;
-        dw = delta.z * inv;
-        diff = state->unk1C - state->unk20;
-        da = diff * inv;
+        f32 elapsed;
+        f32 elapsedStep;
+        f32 texS;
+        f32 distance;
+        f32 stepX;
+        f32 stepY;
+        f32 stepZ;
+        f32 texRange;
+        f32 texStep;
+
+        inv = 1.0f / state->pending;
+        elapsed = state->elapsed + D_800BE9A4;
+        cur = state->lastPos;
+        texS = state->texS;
+        distance = state->distance;
+        elapsedStep = -(elapsed * inv);
+        stepX = delta.x * inv;
+        stepY = delta.y * inv;
+        stepZ = delta.z * inv;
+        texRange = state->targetTexS - state->texS;
+        texStep = texRange * inv;
         do {
-            e = &entries[arg0->head];
-            e->pos = cur;
-            e->unk10 = 0x9B;
-            e->unk14 = a;
-            e->unkC = 13.0f - y;
-            y += dy;
-            while (e->unk14 > 16384.0f) {
-                e->unk14 -= 32768.0f;
+            point = &points[obj->head];
+            point->pos = cur;
+            point->alpha = 155;
+            point->texS = texS;
+            point->life = 13.0f - elapsed;
+            elapsed += elapsedStep;
+            while (point->texS > 16384.0f) {
+                point->texS -= 32768.0f;
             }
-            e->unk18 = b;
-            arg0->head++;
-            if (arg0->head == arg0->capacity) {
-                arg0->head = 0;
+            point->distance = distance;
+            obj->head++;
+            if (obj->head == obj->capacity) {
+                obj->head = 0;
             }
-            arg0->count++;
-            if (arg0->head == arg0->tail) {
-                arg0->tail++;
-                if (arg0->tail == arg0->capacity) {
-                    arg0->tail = 0;
+            obj->count++;
+            if (obj->head == obj->tail) {
+                obj->tail++;
+                if (obj->tail == obj->capacity) {
+                    obj->tail = 0;
                 }
-                arg0->count--;
+                obj->count--;
             }
-            cur.x += dx;
-            cur.y += dz;
-            cur.z += dw;
-            a += da;
-            b += dist * inv;
-            state->count -= 1.0f;
-        } while (state->count > 1.0f);
-        state->pos = cur;
-        state->unk20 = a;
-        state->unk24 = b;
-        state->unk18 = y;
+            cur.x += stepX;
+            cur.y += stepY;
+            cur.z += stepZ;
+            texS += texStep;
+            distance += dist * inv;
+            state->pending -= 1.0f;
+        } while (state->pending > 1.0f);
+        state->lastPos = cur;
+        state->texS = texS;
+        state->distance = distance;
+        state->elapsed = elapsed;
     }
     return 1;
 }
@@ -723,47 +693,73 @@ void *func_151B7328(void *arg0, u8 arg1, s32 arg2, u8 arg3, s32 arg4) {
     return obj;
 }
 
-s32 func_151B7678(struct151B76CCArg0 *arg0, f32 *arg1) {
-    struct151B76CCList *list;
-    struct151B76CCObj **entry;
-    struct151B76CCObj *obj;
+/* Arguments of a ring effect when it follows a TrailTarget (selector 0). */
+typedef struct TrailTargetRef {
+    /* 0x00 */ TrailTarget *target;
+    /* 0x04 */ u8 targetUnk3B;
+} TrailTargetRef;
 
-    list = arg0->unk98;
-    entry = list->unk4;
-    obj = *entry;
-    if ((obj->unk0 == 0) || (*((u8 *) entry + 4) != *((u8 *) obj + 0x3B))) {
+/* Object a ring effect orbits (func_151B76CC). */
+typedef struct RotatedTarget {
+    /* 0x00 */ u8 pad0[0x18];
+    /* 0x18 */ f32 scaleXZ;
+    /* 0x1C */ f32 scaleY;
+    /* 0x20 */ Vec3f rot;
+    /* 0x2C */ u8 pad2C[0xC];
+    /* 0x38 */ Vec3f pos;
+} RotatedTarget;
+
+/* State block of a ring effect (func_151B7328), followed by a copy of its arguments. */
+typedef struct RingState {
+    /* 0x00 */ u8 *linked;
+    /* 0x04 */ void *args;
+    /* 0x08 */ u8 selector;
+    /* 0x09 */ u8 pad9[3];
+} RingState;
+
+/* D_8008FB90 callback: reads the followed TrailTarget's position; fails once the target is gone. */
+s32 func_151B7678(EffectObject *obj, Vec3f *pos) {
+    RingState *state;
+    TrailTargetRef *ref;
+    TrailTarget *target;
+
+    state = obj->state;
+    ref = state->args;
+    target = ref->target;
+    if (target->unk0 == 0 || target->unk3B != ref->targetUnk3B) {
         return 0;
     }
 
-    arg1[0] = obj->unk14;
-    arg1[1] = obj->unk18;
-    arg1[2] = obj->unk1C;
+    pos->x = target->pos.x;
+    pos->y = target->pos.y;
+    pos->z = target->pos.z;
     return 1;
 }
 
-s32 func_151B76CC(struct151B76CCArg0 *arg0, f32 *arg1) {
-    struct151B76CCList *list;
-    struct151B76CCObj **objPtr;
-    struct151B76CCObj *obj;
+/* D_8008FB90 callback: places pos 250 units along the target's local -z axis. */
+s32 func_151B76CC(EffectObject *obj, Vec3f *pos) {
+    RingState *state;
+    RotatedTarget **ref;
+    RotatedTarget *target;
     f32 mtx[4][4];
 
-    list = arg0->unk98;
-    objPtr = list->unk4;
-    obj = *objPtr;
-    func_150A8050(mtx, obj->unk20, obj->unk24, obj->unk28);
-    mtx[3][0] = obj->unk38;
-    mtx[3][1] = obj->unk3C;
-    mtx[3][2] = obj->unk40;
-    mtx[0][0] *= obj->unk18;
-    mtx[0][1] *= obj->unk18;
-    mtx[0][2] *= obj->unk18;
-    mtx[1][0] *= obj->unk1C;
-    mtx[1][1] *= obj->unk1C;
-    mtx[1][2] *= obj->unk1C;
-    mtx[2][0] *= obj->unk18;
-    mtx[2][1] *= obj->unk18;
-    mtx[2][2] *= obj->unk18;
-    func_150A7960(mtx[0], 0.0f, 0.0f, -250.0f, arg1, arg1 + 1, arg1 + 2);
+    state = obj->state;
+    ref = state->args;
+    target = *ref;
+    func_150A8050(mtx, target->rot.x, target->rot.y, target->rot.z);
+    mtx[3][0] = target->pos.x;
+    mtx[3][1] = target->pos.y;
+    mtx[3][2] = target->pos.z;
+    mtx[0][0] *= target->scaleXZ;
+    mtx[0][1] *= target->scaleXZ;
+    mtx[0][2] *= target->scaleXZ;
+    mtx[1][0] *= target->scaleY;
+    mtx[1][1] *= target->scaleY;
+    mtx[1][2] *= target->scaleY;
+    mtx[2][0] *= target->scaleXZ;
+    mtx[2][1] *= target->scaleXZ;
+    mtx[2][2] *= target->scaleXZ;
+    func_150A7960(mtx[0], 0.0f, 0.0f, -250.0f, &pos->x, &pos->y, &pos->z);
     return 1;
 }
 
@@ -797,7 +793,6 @@ typedef struct Game1E37D0RingObject {
 } Game1E37D0RingObject;
 
 extern s32 (*D_8008FB90[])(Game1E37D0RingObject *, RingVec3f *);
-f32 func_15143E64(void *);
 
 s32 func_151B77F4(Game1E37D0RingObject *arg0) {
     Game1E37D0RingState *state;
