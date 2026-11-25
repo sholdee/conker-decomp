@@ -230,7 +230,7 @@ void func_150D7928(struct127 *obj) {
     u8 id;
     u16 angle;
     f32 savedSpeed;
-    s32 n;
+    s32 n; /* the rider's target angle, later the player loop index */
     f32 offset;
 
     playerIndex = obj->unk124;
@@ -247,89 +247,85 @@ void func_150D7928(struct127 *obj) {
     if (obj->unkE4 != 0) {
         obj->unk90 = obj->unkE4;
     }
-    if (obj->unk13C != 0) {
-        player = &D_800CC2D0[playerIndex];
-        if (player->unk31C->unk4E != 0) {
-            n = player->unk7A;
-            obj->unkE4 = 0;
-            obj->unk180 = player->unk180;
-                    obj->unk184 = player->unk184;
-            dst = (s16 *)&obj->unk18C;
-            src = (s16 *)&player->unk18C;
-            for (i = 0; i < 9; i++) {
-                dst[i] = src[i];
-            }
-            obj->gravity = 6.0f;
-            angleOffset = *(f32 *)&player->pad54 * 0.45f;
-            obj->unk44 = player->unkC4;
-            if (id == 0x7F) {
-                player->immune = 0x14;
-                player->unk184 &= ~0x1F;
-                player->unk184 |= 4;
-                obj->y_position = player->y_position;
-                obj->x_position = obj->x_position + ((player->x_position - obj->x_position) * 0.5f);
-                obj->z_position = obj->z_position + ((player->z_position - obj->z_position) * 0.5f);
-                player->disable_jump = 0xA;
-                if (O31C(player)->unk4F == 2) {
-                    if (speed < player->unk44 * 1.35f) {
-                        speed = player->unk44 * 1.35f;
-                    }
-                    player->unkAA = 0x46;
+    if (obj->unk13C != 0 && (player = &D_800CC2D0[playerIndex])->unk31C->unk4E != 0) {
+        n = player->unk7A;
+        obj->unkE4 = 0;
+        obj->unk180 = player->unk180;
+        obj->unk184 = player->unk184;
+        dst = (s16 *)&obj->unk18C;
+        src = (s16 *)&player->unk18C;
+        for (i = 0; i < 9; i++) {
+            dst[i] = src[i];
+        }
+        obj->gravity = 6.0f;
+        angleOffset = *(f32 *)&player->pad54 * 0.45f;
+        obj->unk44 = player->unkC4;
+        if (id == 0x7F) {
+            player->immune = 0x14;
+            player->unk184 &= ~0x1F;
+            player->unk184 |= 4;
+            obj->y_position = player->y_position;
+            obj->x_position = obj->x_position + ((player->x_position - obj->x_position) * 0.5f);
+            obj->z_position = obj->z_position + ((player->z_position - obj->z_position) * 0.5f);
+            player->disable_jump = 0xA;
+            if (O31C(player)->unk4F == 2) {
+                if (speed < player->unk44 * 1.35f) {
+                    speed = player->unk44 * 1.35f;
                 }
-            } else {
-                obj->y_velocity = 0.0f;
+                player->unkAA = 0x46;
             }
-            angle = obj->unk21C;
-            obj->unk21C = angle + ((s16)(n - angle) / 3);
-            obj->unk7A = angle;
-            obj->unk76 = angle;
-            obj->xz_velocity = player->xz_velocity;
-            if (obj->unkD0 != 0) {
-                func_1505C7D8(obj, D_800C3E78);
-            }
-            goto block_36;
+        } else {
+            obj->y_velocity = 0.0f;
         }
-    }
-    obj->unk21C = obj->unk7A;
-    if (obj->unk13C != 0) {
-        if (D_800CC2D0[playerIndex].stunned != 0) {
-            obj->target_speed = 15.0f;
-            obj->y_velocity = 80.0f;
-        }
-        obj->unk13C = 0;
-    }
-    playerIndex = D_800C3E78;
-    obj->unk65 = 0;
-    obj->unkE4 = *(s16 *)&obj->unk90;
-    func_1505A3A8(0.0f, obj, 0.0f, 0.5f, 1);
-    savedSpeed = obj->xz_velocity;
-    obj->stunned = 0x1E;
-    func_15059140(obj);
-    obj->xz_velocity = savedSpeed;
-    angleOffset = (obj->unkC4 - obj->unk44) * 0.8f;
-    if (obj->unk232 == 4) {
-        if (id == 0x48) {
-            D_800CC4B4 = 1;
-        }
-        if (func_15052F9C(obj, 50.0f, 0x17, 4, 0, 5, 0, 0, 0, 0) != 0) {
-            return;
+        angle = obj->unk21C;
+        obj->unk21C = angle + ((s16)(n - angle) / 3);
+        obj->unk7A = angle;
+        obj->unk76 = angle;
+        obj->xz_velocity = player->xz_velocity;
+        if (obj->unkD0 != 0) {
+            func_1505C7D8(obj, D_800C3E78);
         }
     } else {
-        for (n = 0; n != 2; n++) {
-            if (D_800CC2D0[n].interaction_state == 1) {
-                if ((D_800CC2D0[n].unk31C->unk78 == 0) && (D_800CC2D0[n].unk31C->unk11A == 0) && ((1 << n) & D_800CC268) && (D_800CC2D0[n].y_velocity < 0.0f)) {
-                    obj->unk124 = n;
-                    offset = 39.0f;
-                    if (id == 0x48) {
-                        D_800CC2D0[n].stunned = 0;
-                        offset = 0.0f;
+        obj->unk21C = obj->unk7A;
+        if (obj->unk13C != 0) {
+            if (D_800CC2D0[playerIndex].stunned != 0) {
+                obj->target_speed = 15.0f;
+                obj->y_velocity = 80.0f;
+            }
+            obj->unk13C = 0;
+        }
+        playerIndex = D_800C3E78;
+        obj->unk65 = 0;
+        obj->unkE4 = *(s16 *)&obj->unk90;
+        func_1505A3A8(0.0f, obj, 0.0f, 0.5f, 1);
+        savedSpeed = obj->xz_velocity;
+        obj->stunned = 0x1E;
+        func_15059140(obj);
+        obj->xz_velocity = savedSpeed;
+        angleOffset = (obj->unkC4 - obj->unk44) * 0.8f;
+        if (obj->unk232 == 4) {
+            if (id == 0x48) {
+                D_800CC4B4 = 1;
+            }
+            if (func_15052F9C(obj, 50.0f, 0x17, 4, 0, 5, 0, 0, 0, 0) != 0) {
+                return;
+            }
+        } else {
+            for (n = 0; n != 2; n++) {
+                if (D_800CC2D0[n].interaction_state == 1) {
+                    if ((D_800CC2D0[n].unk31C->unk78 == 0) && (D_800CC2D0[n].unk31C->unk11A == 0) && ((1 << n) & D_800CC268) && (D_800CC2D0[n].y_velocity < 0.0f)) {
+                        obj->unk124 = n;
+                        offset = 39.0f;
+                        if (id == 0x48) {
+                            D_800CC2D0[n].stunned = 0;
+                            offset = 0.0f;
+                        }
+                        func_1505327C(obj, offset, 3.0f, 4, -1);
                     }
-                    func_1505327C(obj, offset, 3.0f, 4, -1);
                 }
             }
         }
     }
-block_36:
     obj->immune = 0xFF;
     obj->unk28 = obj->y_position - obj->unk180;
     if (id == 0x48) {
