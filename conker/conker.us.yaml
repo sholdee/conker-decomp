@@ -1119,6 +1119,7 @@ segments:
       - [0x231EA0, rodata]
       - [0x231FB0, rodata]
       - [0x231FE0, rodata]
+      - [0x232038, .rodata, game_1B4A90]
       - [0x232040, rodata]
       - [0x232060, rodata]
       - [0x232090, rodata]
