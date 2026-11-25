@@ -10,12 +10,13 @@ s32 func_151C229C(f32 *arg0, s32 arg1, f32 *arg2, f32 *arg3, s32 arg4, s32 arg5,
 void func_151C5588(struct127 *obj, f32 *pos, s16 arg2, u8 arg3, s32 arg4);
 void func_151C56A4(f32 *pos, u8 arg1, s32 arg2);
 
-/* Model-space points (model part 0x46) that func_151C5280 transforms to world space. */
+/* Model-space points that func_1514654C transforms through model part 0x46 into world space. */
 extern vertex D_800AAA90;
 extern vertex D_800AAAA8;
 
-/* Spawns a func_151C229C effect along a segment in front of `obj`; with a model (unk1D4), from model
- * part 0x46 plus extra func_151C56A4 / func_151C5588 effects at its start. */
+/* Spawns a func_151C229C effect along a segment at `obj`: offset along func_15145740's `dir` from its
+ * position, or, when it has unk1D4, between two points of model part 0x46, plus func_151C56A4 and
+ * (half the time) func_151C5588 effects at the segment start. */
 void func_151C5280(struct127 *obj, u8 arg1, s32 arg2) {
     f32 start[3];
     f32 end[3];
@@ -84,7 +85,7 @@ void func_151C5280(struct127 *obj, u8 arg1, s32 arg2) {
 extern void func_15102B38(struct127 *, u8, vertex *, vertex *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, u8, s32);
 extern vertex D_800AAA9C;
 
-/* Spawns a randomly sized and rotated func_15102B38 effect at `pos` on `obj`. */
+/* Spawns a func_15102B38 effect at `pos` on `obj` with randomized scale and parameters. */
 void func_151C5588(struct127 *obj, f32 *pos, s16 arg2, u8 arg3, s32 arg4) {
     f32 scale[2];
     f32 angle;
@@ -166,12 +167,17 @@ typedef struct {
     /* 0x04 */ f32 unk4;
 } ParticleExtra;
 
+/* Caller-defined data of the particles spawned here (func_151C577C copies only unk0). */
+typedef struct {
+    /* 0x00 */ f32 unk0;
+    /* 0x04 */ u8 pad4[4];
+    /* 0x08 */ ParticleExtra extra;
+} ParticleData; /* size 0x10 */
+
 /* Live particle, as created by func_15130280; the caller-defined data starts at 0xA8. */
 typedef struct {
     /* 0x00 */ u8 pad0[0xA8];
-    /* 0xA8 */ f32 unkA8;
-    /* 0xAC */ u8 padAC[4];
-    /* 0xB0 */ ParticleExtra extra;
+    /* 0xA8 */ ParticleData data;
 } Particle;
 
 extern s32 func_15137C64(vertex *, vertex *, f32 *, f32 *, f32 *, vertex *, vertex *, vertex *);
@@ -294,7 +300,7 @@ void func_151C577C(vertex *arg0, vertex *arg1, vertex *arg2, u8 doForward, u8 do
                 spawn.unk2C = f2;
                 particle = func_15130280(&spawn, 1, 0, sizeof(f32), arg6, arg7);
                 if (particle != NULL) {
-                    memcpy(&particle->unkA8, &unkA8, sizeof(unkA8));
+                    memcpy(&particle->data.unk0, &unkA8, sizeof(unkA8));
                 }
             }
         }
@@ -390,18 +396,19 @@ Particle *func_151C5F44(vertex *pos, vertex *vel, f32 unk54, f32 unkA8Value, u8 
     }
     spawn.unk2C = size;
     spawn.unk28 = size;
-    particle = func_15130280(&spawn, 1, arg8, sizeof(f32) + 4 + sizeof(ParticleExtra), arg9, argA);
+    particle = func_15130280(&spawn, 1, arg8, sizeof(ParticleData), arg9, argA);
     if (particle != NULL) {
-        memcpy(&particle->unkA8, &unkA8, sizeof(unkA8));
-        memcpy(&particle->extra, &extra, sizeof(extra));
+        memcpy(&particle->data.unk0, &unkA8, sizeof(unkA8));
+        memcpy(&particle->data.extra, &extra, sizeof(extra));
     }
     return particle;
 }
 
-struct conker151C61A0 {
+/* Effect descriptor passed to func_15154684. */
+typedef struct {
     /* 0x00 */ s16 unk00;
     /* 0x02 */ s16 unk02;
-    /* 0x04 */ s32 unk04;
+    /* 0x04 */ vertex *unk04;
     /* 0x08 */ s16 unk08;
     /* 0x0A */ s16 unk0A;
     /* 0x0C */ s16 unk0C;
@@ -418,44 +425,42 @@ struct conker151C61A0 {
     /* 0x2C */ f32 unk2C;
     /* 0x30 */ f32 unk30;
     /* 0x34 */ f32 unk34;
-    /* 0x38 */ s32 unk38;
-};
+    /* 0x38 */ vertex *unk38;
+} Effect15154684;
 
-void func_15154684(struct conker151C61A0 *arg0, u8 arg1, s32 arg2);
+void func_15154684(Effect15154684 *desc, u8 arg1, s32 arg2);
 
-extern f32 D_800AAAF4;
-extern f32 D_800AAAF8;
-extern f32 D_800AAAFC;
+/* Spawns a fixed func_15154684 effect between the points `arg0` and `arg1`. */
+void func_151C61A0(vertex *arg0, vertex *arg1, u8 arg2, s32 arg3) {
+    Effect15154684 desc;
 
-void func_151C61A0(s32 a0, s32 a1, u8 a2, s32 a3) {
-    struct conker151C61A0 sp1C;
-
-    sp1C.unk00 = 0xA;
-    sp1C.unk02 = 4;
-    sp1C.unk04 = a0;
-    sp1C.unk08 = 0;
-    sp1C.unk0C = 0xFF;
-    sp1C.unk0A = -0x18;
-    sp1C.unk0E = 0x19;
-    sp1C.unk10 = 5.0f;
-    sp1C.unk14 = 7.0f;
-    sp1C.unk18 = D_800AAAF4;
-    sp1C.unk1C = D_800AAAF8;
-    sp1C.unk20 = D_800AAAFC;
-    sp1C.unk24 = 0xBE;
-    sp1C.unk25 = 0x41;
-    sp1C.unk26 = 0xC8;
-    sp1C.unk28 = 0x96;
-    sp1C.unk2C = 96.0f;
-    sp1C.unk30 = 109.0f;
-    sp1C.unk34 = 1.0f;
-    sp1C.unk38 = a1;
-    func_15154684(&sp1C, a2, a3);
+    desc.unk00 = 10;
+    desc.unk02 = 4;
+    desc.unk04 = arg0;
+    desc.unk08 = 0;
+    desc.unk0C = 255;
+    desc.unk0A = -24;
+    desc.unk0E = 25;
+    desc.unk10 = 5.0f;
+    desc.unk14 = 7.0f;
+    desc.unk18 = -0.2080000043f;
+    desc.unk1C = 0.08500000089f;
+    desc.unk20 = 0.9706320167f;
+    desc.unk24 = 190;
+    desc.unk25 = 65;
+    desc.unk26 = 200;
+    desc.unk28 = 150;
+    desc.unk2C = 96.0f;
+    desc.unk30 = 109.0f;
+    desc.unk34 = 1.0f;
+    desc.unk38 = arg1;
+    func_15154684(&desc, arg2, arg3);
 }
 
-s32 func_151C6290(u8 *arg0, s32 arg1, s32 arg2) {
-    if (arg0[4] == 0x5A || arg0[4] == 0x74 || arg0[4] == 0x7A) {
-        return 0;
+/* D_80086C90 object filter: rejects objects with id 0x5A, 0x74 or 0x7A. */
+s32 func_151C6290(struct127 *obj, struct127 *self, s32 arg2) {
+    if (obj->id == 0x5A || obj->id == 0x74 || obj->id == 0x7A) {
+        return FALSE;
     }
-    return 1;
+    return TRUE;
 }
