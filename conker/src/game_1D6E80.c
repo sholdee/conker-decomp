@@ -10,7 +10,6 @@ s32 func_150ADA20(void);
 
 extern s32 func_10010F30(s32, u16, u8, s16, u8);
 extern s32 func_151EF610(void);
-extern f32 D_800A9014;
 extern s32 func_10010FFC(s32, s32, s32, s32, s32, struct127 *);
 extern void *func_15190770(void *, s32, s32, s32);
 extern u8 func_151D8E20(void);
@@ -729,17 +728,11 @@ s32 func_151AABA0(PulseFx *fx) {
 }
 
 typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec_151AABC4;
-
-typedef struct {
     /* 0x00 */ s16 unk00;
     /* 0x02 */ s16 unk02;
     /* 0x04 */ s16 unk04;
     /* 0x06 */ s16 unk06;
-    /* 0x08 */ Vec_151AABC4 unk08;
+    /* 0x08 */ Vec3f unk08;
     /* 0x14 */ f32 unk14;
     /* 0x18 */ f32 unk18;
     /* 0x1C */ f32 unk1C;
@@ -761,38 +754,34 @@ typedef struct {
     /* 0x48 */ s32 unk48;
 } Cfg_151AABC4;
 
-typedef struct {
-    f32 y;
-    u8 pad4[0x20];
-} Floor_151AABC4;
-
 extern u8 D_800A8F70[];
-extern void func_15142314(s32, u8, Vec_151AABC4 *, void *);
-extern void func_1504715C();
-extern s32 func_1504697C(Vec_151AABC4 *, s32, f32, Floor_151AABC4 *);
-extern void func_15153F18(Cfg_151AABC4 *, Vec_151AABC4 *, Floor_151AABC4 *, u8, s32);
+extern void func_15142314(struct255 *, u8, Vec3f *, struct127 *);
+extern void func_1504715C(GroundHit *hit, struct127 *actor);
+extern s32 func_1504697C(Vec3f *pos, s32 arg1, f32 minY, GroundHit *hit);
+extern void func_15153F18(Cfg_151AABC4 *, Vec3f *, GroundHit *, u8, s32);
 
-void func_151AABC4(u8 *arg0, u8 arg1) {
-    Vec_151AABC4 pos;
-    Floor_151AABC4 floor;
+/* Spawns a ground decal and splash under the actor's joint D_800A8F70[jointIndex]. */
+void func_151AABC4(struct127 *actor, u8 jointIndex) {
+    Vec3f pos;
+    GroundHit floor;
     f32 y;
-    Vec_151AABC4 probe;
+    Vec3f probe;
     u8 color;
-    Vec_151AABC4 hit;
+    Vec3f hit;
 
-    if ((arg0 != NULL) && (*(s32 *)(arg0 + 0x1D4) != 0)) {
+    if ((actor != NULL) && (actor->unk1D4 != NULL)) {
         color = func_151D8E20();
-        func_15142314(*(s32 *)(arg0 + 0x1D4), D_800A8F70[arg1], &pos, arg0);
-        func_1504715C(&floor, arg0);
+        func_15142314(actor->unk1D4, D_800A8F70[jointIndex], &pos, actor);
+        func_1504715C(&floor, actor);
         y = pos.y + 50.0f;
         probe.x = pos.x;
         probe.y = y;
         probe.z = pos.z;
         if (func_1504697C(&probe, 0, y - 100.0f, &floor) != 0) {
             hit.x = pos.x;
-            hit.y = floor.y;
+            hit.y = floor.height;
             hit.z = pos.z;
-            func_151DBCBC(color, 40.0f, 0x96, (s32)&floor.pad4, &hit, 0xFF, 1);
+            func_151DBCBC(color, 40.0f, 150, (s32)floor.points, &hit, 0xFF, 1);
             {
                 Cfg_151AABC4 c;
 
@@ -1180,77 +1169,54 @@ void func_151AB854(u8 *arg0) {
 void func_151AB920(s32 arg0, s32 arg1) {
 }
 
-void func_151AB930(struct127 *arg0) {
-    struct260 *temp_v0;
-    struct {
-        struct127 *unk0;
-        u8 unk4;
-        u8 pad5[3];
-        s32 unk8;
-        f32 unkC;
-        f32 unk10;
-        f32 unk14;
-        u8 unk18;
-    } sp28;
+/* Payload at +0x28 of the spark emitter task spawned by func_151AB930. */
+typedef struct {
+    /* 0x00 */ struct127 *actor;
+    /* 0x04 */ u8 actorId;
+    /* 0x05 */ u8 pad5[3];
+    /* 0x08 */ s32 actorSerial;  // actor->unk84 at spawn
+    /* 0x0C */ f32 accum;        // sparks owed; one is emitted per whole unit
+    /* 0x10 */ f32 rate;
+    /* 0x14 */ f32 rateRandom;
+    /* 0x18 */ u8 color;
+} EmitterPayload;
 
-    sp28.unk0 = arg0;
-    sp28.unk4 = ((struct127 *)arg0)->unique_id;
-    sp28.unk8 = arg0->unk84.uh;
-    sp28.unkC = 0.0f;
-    sp28.unk10 = D_800A9014;
-    sp28.unk14 = 3.0f;
-    sp28.unk18 = func_151D8E20();
-    temp_v0 = func_151491F4(0x3C, -1, 0xE, 1, 9, 0x1C, 0xFF, 0);
-    if (temp_v0 != NULL) {
-        memcpy((void *)((s32)temp_v0 + 0x28), &sp28, 0x1C);
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD;
+    /* 0x0E */ s16 unkE;
+    /* 0x10 */ u8 pad10[0x18];
+    /* 0x28 */ EmitterPayload payload;
+} EmitterTask;
+
+/* Spawns a spark emitter task that follows `actor`. */
+void func_151AB930(struct127 *actor) {
+    struct260 *task;
+    EmitterPayload payload;
+
+    payload.actor = actor;
+    payload.actorId = actor->unique_id;
+    payload.actorSerial = actor->unk84.uh;
+    payload.accum = 0.0f;
+    payload.rate = 0.400000006f;
+    payload.rateRandom = 3.0f;
+    payload.color = func_151D8E20();
+    task = func_151491F4(0x3C, -1, 0xE, 1, 9, 0x1C, 0xFF, 0);
+    if (task != NULL) {
+        memcpy(&((EmitterTask *)task)->payload, &payload, 0x1C);
     }
 }
 
-typedef struct {
-    s32 unk0;
-    u8 pad4[0x10];
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    u8 pad20[0x1B];
-    u8 unk3B;
-    u8 pad3C[0x48];
-    u16 unk84;
-} Ent_151AB9C8;
+extern void func_151D9014(f32 *, f32 *, u8, f32, s32, s32, f32, s32, f32, f32, s32, GroundHit *, s32, s32, u8, u8);
 
-typedef struct {
-    Ent_151AB9C8 *unk0;
-    u8 unk4;
-    u8 pad5[3];
-    s32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    u8 unk18;
-} Sub_151AB9C8;
-
-typedef struct {
-    u8 pad0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD;
-    s16 unkE;
-    u8 pad10[0x18];
-    Sub_151AB9C8 unk28;
-} Obj_151AB9C8;
-
-typedef struct {
-    u8 pad[0x24];
-} Floor_151AB9C8;
-
-extern void func_1504715C(Floor_151AB9C8 *, Ent_151AB9C8 *);
-extern void func_151D9014(f32 *, f32 *, u8, f32, s32, s32, f32, s32, f32, f32, s32, Floor_151AB9C8 *, s32, s32, u8, u8);
-
-void func_151AB9C8(Obj_151AB9C8 *arg0) {
-    Sub_151AB9C8 *sub;
+/* Spark emitter update: emits sparks around the actor, or ends the task once the actor is gone. */
+void func_151AB9C8(EmitterTask *task) {
+    EmitterPayload *emitter;
     u8 dead;
-    Floor_151AB9C8 floor;
+    GroundHit floor;
     f32 pos[3];
     f32 vel[3];
     s16 yaw;
@@ -1260,23 +1226,22 @@ void func_151AB9C8(Obj_151AB9C8 *arg0) {
     f32 sinY;
     f32 cosY;
     f32 speed;
-    s32 r1;
-    s32 r2;
+    s32 randA;
+    s32 randB;
 
-    dead = 0;
-    sub = &arg0->unk28;
-    if (arg0->unk28.unk0->unk0 == 0) {
-        dead = 1;
-    } else if (sub->unk0->unk3B != sub->unk4) {
-        dead = 1;
-    } else if (sub->unk0->unk84 != sub->unk8) {
-        dead = 1;
+    dead = FALSE;
+    emitter = &task->payload;
+    if (task->payload.actor->interaction_state == 0) {
+        dead = TRUE;
+    } else if (emitter->actor->unique_id != emitter->actorId) {
+        dead = TRUE;
+    } else if (emitter->actor->unk84.uh != emitter->actorSerial) {
+        dead = TRUE;
     }
     if (!dead) {
-        sub = &arg0->unk28;
-        sub->unkC += (sub->unk10 + func_150ADA68() * sub->unk14) * D_800BE9A4;
-        if (sub->unkC > 1.0f) {
-            func_1504715C(&floor, sub->unk0);
+        emitter->accum += (emitter->rate + func_150ADA68() * emitter->rateRandom) * D_800BE9A4;
+        if (emitter->accum > 1.0f) {
+            func_1504715C(&floor, emitter->actor);
             do {
                 yaw = func_150ADA20() & 0xFF;
                 pitch = (func_150ADA20() % 46U) - 0x3F;
@@ -1285,26 +1250,27 @@ void func_151AB9C8(Obj_151AB9C8 *arg0) {
                 sinY = func_151423D8(yaw);
                 cosY = func_151423D8(yaw - 0x40);
                 speed = (func_150ADA68() * 713.0f + 500.0f) * 0.009999999776f;
-                pos[0] = sub->unk0->unk14 + 30.0f * sinP * cosY;
-                pos[1] = sub->unk0->unk18 - 75.0f * cosP;
-                pos[2] = sub->unk0->unk1C + 30.0f * sinP * sinY;
+                pos[0] = emitter->actor->x_position + 30.0f * sinP * cosY;
+                pos[1] = emitter->actor->y_position - 75.0f * cosP;
+                pos[2] = emitter->actor->z_position + 30.0f * sinP * sinY;
                 vel[0] = speed * sinP * cosY;
                 vel[1] = -speed * cosP;
                 vel[2] = speed * sinP * sinY;
                 {
-                    f32 t;
-                t = func_150ADA68();
-                r1 = func_150ADA20();
-                r2 = func_150ADA20();
-                func_151D9014(pos, vel, sub->unk18, t * 0.5f + -1.0f, (u32)r1 % 26U + 0x20, (u32)r2 % 101U + 100,
-                              func_150ADA68() * 34.0f + 52.0f, 1, 1.0f, 1.0f, 1, &floor, 1, 0, arg0->unkC, arg0->unk1);
+                    f32 randT = func_150ADA68();
+
+                    randA = func_150ADA20();
+                    randB = func_150ADA20();
+                    func_151D9014(pos, vel, emitter->color, randT * 0.5f + -1.0f, (u32)randA % 26U + 32,
+                                  (u32)randB % 101U + 100, func_150ADA68() * 34.0f + 52.0f, 1, 1.0f, 1.0f, 1, &floor, 1,
+                                  0, task->unkC, task->unk1);
                 }
-                sub->unkC -= 1.0f;
-            } while (sub->unkC > 1.0f);
+                emitter->accum -= 1.0f;
+            } while (emitter->accum > 1.0f);
         }
     }
     if (dead) {
-        arg0->unkE = -1;
+        task->unkE = -1;
     }
 }
 
