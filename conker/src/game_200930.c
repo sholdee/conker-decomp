@@ -13,9 +13,7 @@ void func_1503F404(void *, void *, void *, void *, void *, void *, void *, void 
 void *func_15132A4C(void *, s32, s32, s32, u8, s32);
 void func_15131828(void *, void *, void *, void *);
 void func_15131958(void *, f32, void *);
-void func_151541B8(void *, f32, s32, f32, f32, u8, s32);
-struct conker151D5514;
-void func_1514FCE8(struct conker151D5514 *a0, u8 a1, s32 a2);
+void func_151541B8(struct17 *, f32, f32, f32, f32, u8, s32);
 
 typedef struct {
     s16 v[9];
@@ -942,150 +940,148 @@ void func_151D5174(struct127 *obj, struct17 *arg1, struct17 *arg2, struct17 *arg
     *outDir = NULL;
 }
 
-struct S151D5334_3C {
-    struct17 unk0;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-};
+typedef struct {
+    /* 0x00 */ struct17 pos;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+} Params151D5334;
 
 extern void func_15164F0C(u8, u8, s32, u8, s32);
 
-void func_151D5334(struct17 *arg0, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5, s32 arg6) {
+/* Calls func_15164F0C once for each i in 0..D_80082FA0 with the same parameters. */
+void func_151D5334(struct17 *pos, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5, s32 arg6) {
     s32 i;
-    struct S151D5334_3C sp3C;
+    Params151D5334 params;
 
-    sp3C.unk0 = *arg0;
-    sp3C.unkC = arg1;
-    sp3C.unk10 = arg2;
-    sp3C.unk14 = arg3;
+    params.pos = *pos;
+    params.unkC = arg1;
+    params.unk10 = arg2;
+    params.unk14 = arg3;
 
     for (i = 0; i < D_80082FA0 + 1; i++) {
-        func_15164F0C(arg4, i, (s32)&sp3C, arg5, arg6);
+        func_15164F0C(arg4, i, (s32)&params, arg5, arg6);
     }
 }
 
-struct S151D5404_30 {
-    u8 unk0;
-    u8 pad1;
-    s16 unk2;
-    u8 unk4;
-    u8 unk5;
-    u8 unk6;
-    u8 pad7;
-};
+typedef struct {
+    /* 0x0 */ u8 unk0;
+    /* 0x2 */ s16 unk2;
+    /* 0x4 */ u8 unk4;
+    /* 0x5 */ u8 mask; /* 1 << i */
+    /* 0x6 */ u8 unk6;
+} Header151D5404;
 
-struct S151D5404_38 {
-    struct17 unk0;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    u8 unk18;
-    u8 pad19[7];
-};
+/* User data of the effects func_151D5404 creates. */
+typedef struct {
+    /* 0x00 */ struct17 pos;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ u8 index;
+    /* 0x19 */ u8 pad19[7]; // matching: the original stack slot is 0x20 bytes; only 0x1C are copied
+} Params151D5404;
 
-void func_151D5404(struct17 *arg0, f32 arg1, f32 arg2, f32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
-    struct S151D5404_38 sp38;
-    struct S151D5404_30 sp30;
-    void *temp_v0;
+/* Creates one func_151D8868 effect for each i in 0..D_80082FA0, with unk2 random in [base, base + range]. */
+void func_151D5404(struct17 *pos, f32 arg1, f32 arg2, f32 arg3, s32 base, s32 range, s32 arg6, s32 arg7) {
+    Params151D5404 params;
+    Header151D5404 header;
+    void *effect;
     s32 i;
 
-    sp38.unk0 = *arg0;
-    sp38.unkC = arg1;
-    sp38.unk10 = arg2;
-    sp38.unk14 = arg3;
-    sp30.unk0 = 1;
-    sp30.unk2 = (func_150ADA20() % (u32)((s16)arg5 + 1)) + (s16)arg4;
-    sp30.unk4 = 0;
-    sp30.unk6 = 0;
+    params.pos = *pos;
+    params.unkC = arg1;
+    params.unk10 = arg2;
+    params.unk14 = arg3;
+    header.unk0 = 1;
+    header.unk2 = (func_150ADA20() % (u32)((s16)range + 1)) + (s16)base;
+    header.unk4 = 0;
+    header.unk6 = 0;
 
     for (i = 0; i < D_80082FA0 + 1; i++) {
-        sp30.unk5 = 1 << i;
-        sp38.unk18 = i;
-        temp_v0 = func_151D8868(&sp30, 0x1C, 0xFF, 0);
-        if (temp_v0 != NULL) {
-            memcpy((u8 *)temp_v0 + 0x18, &sp38, 0x1C);
+        header.mask = 1 << i;
+        params.index = i;
+        effect = func_151D8868(&header, 0x1C, 255, 0);
+        if (effect != NULL) {
+            memcpy((u8 *)effect + 0x18, &params, 0x1C);
         }
     }
 }
 
-struct vec151D5514 {
-    s32 unk00;
-    s32 unk04;
-    s32 unk08;
-};
+typedef struct {
+    /* 0x00 */ s16 unk00;
+    /* 0x02 */ s16 unk02;
+    /* 0x04 */ s16 unk04;
+    /* 0x06 */ s16 unk06;
+    /* 0x08 */ s32 unk08;
+    /* 0x0C */ s32 unk0C;
+    /* 0x10 */ struct17 pos;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ s32 unk34;
+    /* 0x38 */ s32 unk38;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ f32 unk40;
+    /* 0x44 */ f32 unk44;
+    /* 0x48 */ f32 unk48;
+    /* 0x4C */ s16 unk4C;
+    /* 0x4E */ s16 unk4E;
+    /* 0x50 */ s16 unk50;
+    /* 0x52 */ s16 unk52;
+    /* 0x54 */ s16 unk54;
+    /* 0x56 */ s16 unk56;
+    /* 0x58 */ s8 unk58;
+} Spawn151D5514;
 
-struct conker151D5514 {
-    s16 unk00;
-    s16 unk02;
-    s16 unk04;
-    s16 unk06;
-    s32 unk08;
-    s32 unk0C;
-    struct vec151D5514 unk10;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    s32 unk34;
-    s32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    s16 unk4C;
-    s16 unk4E;
-    s16 unk50;
-    s16 unk52;
-    s16 unk54;
-    s16 unk56;
-    s8 unk58;
-};
+void func_1514FCE8(Spawn151D5514 *, u8, s32);
 
-void func_151D5514(struct vec151D5514 *arg0, u8 arg1, s32 arg2) {
-    struct conker151D5514 sp1C;
+void func_151D5514(struct17 *pos, u8 arg1, s32 arg2) {
+    Spawn151D5514 spawn;
 
-    sp1C.unk00 = 0;
-    sp1C.unk02 = 0xFF;
-    sp1C.unk04 = -0x40;
-    sp1C.unk06 = 0x4A;
-    sp1C.unk08 = 9;
-    sp1C.unk0C = 3;
-    sp1C.unk10 = *arg0;
-    sp1C.unk1C = 323.0f;
-    sp1C.unk20 = 214.0f;
-    sp1C.unk24 = 203.0f;
-    sp1C.unk28 = 263.0f;
-    sp1C.unk2C = 677.0f;
-    sp1C.unk30 = 895.0f;
-    sp1C.unk34 = 7;
-    sp1C.unk38 = 3;
-    sp1C.unk3C = 45.0f;
-    sp1C.unk40 = 0.6020000577f;
-    sp1C.unk44 = -1.732000113f;
-    sp1C.unk48 = 1.512000084f;
-    sp1C.unk4C = 0xF;
-    sp1C.unk4E = 0xF;
-    sp1C.unk50 = 0x64;
-    sp1C.unk52 = 0x64;
-    sp1C.unk54 = 0xC;
-    sp1C.unk56 = 0x14;
-    sp1C.unk58 = 0;
-    func_1514FCE8(&sp1C, arg1, arg2);
+    spawn.unk00 = 0;
+    spawn.unk02 = 255;
+    spawn.unk04 = -64;
+    spawn.unk06 = 74;
+    spawn.unk08 = 9;
+    spawn.unk0C = 3;
+    spawn.pos = *pos;
+    spawn.unk1C = 323.0f;
+    spawn.unk20 = 214.0f;
+    spawn.unk24 = 203.0f;
+    spawn.unk28 = 263.0f;
+    spawn.unk2C = 677.0f;
+    spawn.unk30 = 895.0f;
+    spawn.unk34 = 7;
+    spawn.unk38 = 3;
+    spawn.unk3C = 45.0f;
+    spawn.unk40 = 0.6020000577f;
+    spawn.unk44 = -1.732000113f;
+    spawn.unk48 = 1.512000084f;
+    spawn.unk4C = 15;
+    spawn.unk4E = 15;
+    spawn.unk50 = 100;
+    spawn.unk52 = 100;
+    spawn.unk54 = 12;
+    spawn.unk56 = 20;
+    spawn.unk58 = 0;
+    func_1514FCE8(&spawn, arg1, arg2);
 }
 
-void func_151D5648(void *arg0, u8 arg1, s32 arg2) {
-    union { f32 f; f64 _a; } temp_f0;
-    u32 temp_a;
+/* Combined effect at pos: func_151D5514, func_151D3FF4 and func_151541B8. */
+void func_151D5648(struct17 *pos, u8 arg1, s32 arg2) {
+    u32 randU;
+    f32 randF;
 
-    func_151D5514(arg0, arg1, arg2);
-    func_151D3FF4(arg0, arg1, arg2);
-    temp_f0.f = func_150ADA68();
-    temp_a = func_150ADA20();
-    func_151541B8(arg0, temp_f0.f * 4.0f + 12.0f, 0x3FD20C49,
-                  (f32)(u32)((temp_a % 0x38U) + 0xC8), 0.0f, arg1, arg2);
+    func_151D5514(pos, arg1, arg2);
+    func_151D3FF4(pos, arg1, arg2);
+    randF = func_150ADA68();
+    randU = func_150ADA20();
+    func_151541B8(pos, randF * 4.0f + 12.0f, 1.640999913f,
+                  (randU % 56U) + 200, 0.0f, arg1, arg2);
 }
 
 extern s32 func_15145EA4(s32 *arg0, s32 *arg1, s32 arg2, s32 arg3);
