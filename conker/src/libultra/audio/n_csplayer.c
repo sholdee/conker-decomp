@@ -2,15 +2,10 @@
 #include <os_internal.h>
 #include <ultraerror.h>
 #include <assert.h>
-#define n_alCSeqNextEvent n_alCSeqNextEvent_HDR
 #include "n_libaudio.h"
-#undef n_alCSeqNextEvent
 #include "n_seqp.h"
 #include "cseq.h"
 #include "n_cseqp.h"
-
-/* Conker's n_alCSeqNextEvent takes a 3rd argument (see n_csq.c) */
-void n_alCSeqNextEvent(ALCSeq *seq, N_ALEvent *evt, s32 arg2);
 
 /*
  * Conker's channel state: libaudio.h's ALChanState with the Rare extras that

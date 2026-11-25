@@ -1,9 +1,4 @@
-/* The Conker build of n_alCSeqNextEvent takes a 3rd argument that the SDK
- * header prototype omits; shadow the header declaration so the real
- * definition below is not rejected as an incompatible redeclaration. */
-#define n_alCSeqNextEvent n_alCSeqNextEvent_HDR
 #include <n_libaudio.h>
-#undef n_alCSeqNextEvent
 
 u8 __getTrackByte(ALCSeq *seq, s32 track);
 u32 __readVarLen(ALCSeq *seq, s32 track);

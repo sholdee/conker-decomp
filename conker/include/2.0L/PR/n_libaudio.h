@@ -302,7 +302,8 @@ void    n_alSeqNextEvent(ALSeq *seq, N_ALEvent *event);
 void    n_alSeqNewMarker(ALSeq *seq, ALSeqMarker *m, u32 ticks);
 
 void    n_alCSeqNew(ALCSeq *seq, u8 *ptr);
-void    n_alCSeqNextEvent(ALCSeq *seq, N_ALEvent *evt);
+/* Conker: Rare's n_alCSeqNextEvent (n_csq.c) takes a third argument. */
+void    n_alCSeqNextEvent(ALCSeq *seq, N_ALEvent *evt, s32 arg2);
 void    n_alCSeqNewMarker(ALCSeq *seq, ALCSeqMarker *m, u32 ticks);
 
 
