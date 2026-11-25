@@ -2,114 +2,133 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s32 (*D_8008FAF0[])(void *, void *, s32);
-extern s32 (*D_8008FAF8[])(void *);
-extern void (*D_8008FB70[])(void *);
-extern void *func_15167A68(s32, s32, s32, s32, u8, s32);
-extern void func_151D5E30(void *);
-extern f32 D_800AA390;
-extern f32 D_800AA3AC;
+typedef struct {
+    f32 x, y, z;
+} Vec3f_1E0560;
 
 typedef struct {
-    u8 pad0[0x10];
-    u8 unk10;
-    u8 pad11;
-    s16 unk12;
-    u8 unk14[0xC];
-    u8 unk20[0xC];
-    s8 unk2C;
-    s8 unk2D;
-    u8 pad2E[0x6];
-    s8 unk34;
-} Struct151B3184;
+    /* 0x00 */ Vec3f_1E0560 pos;
+    /* 0x0C */ Vec3f_1E0560 vel;
+} HoltenRopePoint;
 
+/* Rope effect: a 10-point chain hung between two endpoints and drawn as a textured strip. */
+typedef struct {
+    /* 0x000 */ u8 pad0[0x10];
+    /* 0x010 */ u8 flags;           // 1: timed, 2: points need reset, 4: start lost, 8: end lost
+    /* 0x011 */ u8 pad11;
+    /* 0x012 */ s16 timer;
+    /* 0x014 */ Vec3f_1E0560 start; // written by startCallback
+    /* 0x020 */ Vec3f_1E0560 end;   // written by endCallback
+    /* 0x02C */ s8 startCallback;   // index into D_8008FAF0, -1 for none
+    /* 0x02D */ s8 endCallback;     // index into D_8008FAF0, -1 for none
+    /* 0x02E */ u8 drawStyle;       // index into D_8008FB10
+    /* 0x02F */ u8 pad2F;
+    /* 0x030 */ f32 halfWidth;
+    /* 0x034 */ s8 updateCallback;  // index into D_8008FAF8, -1 for none
+    /* 0x035 */ u8 pad35[3];
+    /* 0x038 */ f32 length;
+    /* 0x03C */ f32 gain;
+    /* 0x040 */ f32 stiffness;
+    /* 0x044 */ u8 type;            // index into D_8008FB68 and D_8008FB70
+    /* 0x045 */ u8 pad45[3];
+    /* 0x048 */ HoltenRopePoint points[10];
+    /* 0x138 */ f32 maxSpanSq;      // 2 * length^2 / pi^2
+    /* 0x13C */ s32 texStep;        // texture t step per segment
+    /* 0x140 */ u8 vtxBuffer[0x10];
+    /* 0x150 */                     // type-specific data follows
+} HoltenRopeEffect;
+
+/* Template copied over HoltenRopeEffect 0x10-0x47 when a rope is created. */
+typedef struct {
+    u8 data[0x38];
+} HoltenRopeDesc;
+
+/* Endpoint data at 0x150 for ropes attached to an actor. */
 typedef struct {
     s32 unk0;
     u8 pad4[0x10];
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
+    Vec3f_1E0560 pos;
     u8 pad20[0x1B];
     u8 unk3B;
-} Struct151B3F28Inner;
+} HoltenRopeTarget;
 
 typedef struct {
-    u8 pad0[0x10];
-    u8 unk10;
-    u8 pad11[0x13F];
-    Struct151B3F28Inner *unk150;
-} Struct151B3F28;
+    HoltenRopeTarget *target;
+    u8 targetId; // target->unk3B when the rope was attached
+} HoltenRopeAnchor;
 
 typedef struct {
-    u8 pad0[0x10];
-    u8 unk10;
-    u8 pad11[0x27];
-    f32 unk38;
-    u8 pad3C[0xFC];
-    f32 unk138;
-    s32 unk13C;
-    u8 unk140[0x10];
-} Struct151B30B0;
+    HoltenRopeEffect effect;
+    HoltenRopeAnchor anchor;
+} HoltenRopeAttached;
 
-void *func_151B30B0(s32 arg0, f32 arg1, s32 arg2, u8 arg3, s32 arg4) {
-    Struct151B30B0 *temp_v0;
-    Struct151B30B0 *sp24;
-    f32 temp_f0;
-    f32 temp_f2;
+extern s32 (*D_8008FAF0[])(HoltenRopeEffect *, Vec3f_1E0560 *, s32);
+extern s32 (*D_8008FAF8[])(HoltenRopeEffect *);
+extern void (*D_8008FB70[])(HoltenRopeEffect *);
+extern void *func_15167A68(s32, s32, s32, s32, u8, s32);
+extern void func_151D5E30(void *);
 
-    temp_v0 = func_15167A68(0x33, arg4, arg2 + 0x150, 1, arg3, 1);
-    if (temp_v0 == 0) {
+/* Allocates a rope effect with `extraSize` bytes of type data and initializes it from `desc`. */
+HoltenRopeEffect *func_151B30B0(HoltenRopeDesc *desc, f32 texScale, s32 extraSize, u8 arg3, s32 arg4) {
+    HoltenRopeEffect *effect;
+    HoltenRopeEffect *result;
+    f32 length;
+    f32 spanSq;
+
+    effect = func_15167A68(0x33, arg4, extraSize + sizeof(HoltenRopeEffect), 1, arg3, 1);
+    if (effect == NULL) {
         return NULL;
     }
 
-    sp24 = temp_v0;
-    memcpy(&temp_v0->unk10, (void *)arg0, 0x38);
-    temp_f0 = temp_v0->unk38;
-    temp_v0->unk10 |= 0xE;
-    temp_f2 = (temp_f0 * temp_f0) / D_800AA390;
-    temp_v0->unk138 = temp_f2 + temp_f2;
-    temp_v0->unk13C = (s32)(temp_f0 * arg1 * 4096.0f);
-    bzero(temp_v0->unk140, 0x10);
-    return sp24;
+    result = effect;
+    memcpy(&effect->flags, desc, sizeof(HoltenRopeDesc));
+    length = effect->length;
+    effect->flags |= 0xE;
+    spanSq = (length * length) / 9.869605064f;
+    effect->maxSpanSq = spanSq + spanSq;
+    effect->texStep = length * texScale * 4096.0f;
+    bzero(effect->vtxBuffer, sizeof(effect->vtxBuffer));
+    return result;
 }
 
-void func_151B3184(Struct151B3184 *arg0) {
-    s32 temp;
-    u8 failed;
+/* Per-frame update: counts down the lifetime, refreshes both endpoints and moves the points. */
+void func_151B3184(HoltenRopeEffect *effect) {
+    s32 callback;
+    u8 finished;
 
-    failed = 0;
-    if (arg0->unk10 & 1) {
-        arg0->unk12 -= D_800BE9E4;
-        if (arg0->unk12 < 0) {
-            failed = 1;
+    finished = FALSE;
+    if (effect->flags & 1) {
+        effect->timer -= D_800BE9E4;
+        if (effect->timer < 0) {
+            finished = TRUE;
         }
     }
-    if (failed == 0) {
-        temp = arg0->unk2C;
-        if (temp != -1) {
-            if (D_8008FAF0[temp](arg0, arg0->unk14, 1) == 0) {
-                failed = 1;
+    if (!finished) {
+        callback = effect->startCallback;
+        if (callback != -1) {
+            if (!D_8008FAF0[callback](effect, &effect->start, TRUE)) {
+                finished = TRUE;
             }
         }
-        temp = arg0->unk2D;
-        if (temp != -1) {
-            if (D_8008FAF0[temp](arg0, arg0->unk20, 0) == 0) {
-                failed = 1;
+        callback = effect->endCallback;
+        if (callback != -1) {
+            if (!D_8008FAF0[callback](effect, &effect->end, FALSE)) {
+                finished = TRUE;
             }
         }
-        if ((arg0->unk10 & 4) || (arg0->unk10 & 8)) {
-            arg0->unk10 |= 2;
+        if ((effect->flags & 4) || (effect->flags & 8)) {
+            effect->flags |= 2;
         } else {
-            temp = arg0->unk34;
-            if (temp != -1) {
-                if (D_8008FAF8[temp](arg0) == 0) {
-                    failed = 1;
+            callback = effect->updateCallback;
+            if (callback != -1) {
+                if (!D_8008FAF8[callback](effect)) {
+                    finished = TRUE;
                 }
             }
         }
     }
-    if (failed) {
-        func_1516972C((struct102 *) arg0);
+    if (finished) {
+        func_1516972C((struct102 *)effect);
     }
 }
 
@@ -421,42 +440,32 @@ s32 func_151B3CF0(Struct151B3A7C *arg0) {
     return 1;
 }
 
-s32 func_151B3F28(Struct151B3F28 *arg0, f32 *arg1, u8 arg2) {
-    Struct151B3F28Inner **temp_v0;
+/*
+ * Endpoint callback for a rope hung from an actor: the start follows the actor
+ * while it is still the one recorded at creation, the end hangs at a fixed point.
+ */
+s32 func_151B3F28(HoltenRopeAttached *rope, Vec3f_1E0560 *pos, u8 isStart) {
     s32 ret;
 
-    ret = 1;
-    if (arg2 == 0) {
-        goto no_arg;
+    ret = TRUE;
+    if (isStart) {
+        HoltenRopeAnchor *anchor = &rope->anchor;
+
+        if (anchor->target->unk0 != 0 && anchor->target->unk3B == anchor->targetId) {
+            pos->x = anchor->target->pos.x;
+            pos->y = anchor->target->pos.y;
+            pos->z = anchor->target->pos.z;
+            rope->effect.flags &= ~4;
+        } else {
+            ret = FALSE;
+            rope->effect.flags |= 0xC;
+        }
+    } else {
+        pos->x = 0.0f;
+        pos->y = 3000.0f;
+        pos->z = 0.0f;
+        rope->effect.flags &= ~8;
     }
-
-    temp_v0 = &arg0->unk150;
-    if ((*temp_v0)->unk0 == 0) {
-        goto failed;
-    }
-    if (*(u8 *)((u8 *) temp_v0 + 4) != (*temp_v0)->unk3B) {
-        goto failed;
-    }
-    arg1[0] = (*temp_v0)->unk14;
-    arg1[1] = (*temp_v0)->unk18;
-    arg1[2] = (*temp_v0)->unk1C;
-    arg0->unk10 &= ~4;
-    goto done;
-
-failed:
-    ret = 0;
-    arg0->unk10 |= 0xC;
-failed_after_store:
-    goto final_return;
-
-no_arg:
-    arg1[0] = 0.0f;
-    arg1[1] = D_800AA3AC;
-    arg1[2] = 0.0f;
-    arg0->unk10 &= ~8;
-
-done:
-final_return:
     return ret;
 }
 
