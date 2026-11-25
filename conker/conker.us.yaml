@@ -1909,7 +1909,7 @@ segments:
       - [0x24D840, .rodata, game_1D2B10]
       - [0x24D858, .rodata, game_1D3420]
       - [0x24D860, .rodata, game_1D3AB0]
-      - [0x24D870, rodata]
+      - [0x24D870, .rodata, game_1D4140]
       - [0x24D880, rodata]
       - [0x24D8A0, rodata]
       - [0x24D8B0, rodata]
