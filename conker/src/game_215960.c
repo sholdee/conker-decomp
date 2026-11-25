@@ -1400,7 +1400,7 @@ Gfx *func_151EC648(Gfx *);
 Gfx *func_151EE184(Gfx *);
 Gfx *func_151EEBE8(Gfx *, s32);
 
-/* Draws the current menu screen's title image, fading it in, plus the extra panels some screens add. */
+/* Draws the fading image picked by D_8008FDD4->unk2C (or the func_151EC648 / func_151EE184 screens). */
 Gfx *func_151EC3E8(Gfx *gfx) {
     static u8 D_800900D4;
     s32 alpha;
@@ -1469,62 +1469,63 @@ extern u8 D_88C;
 s32 func_151E24F0(s32 *);
 void func_151E7F60(s32, s32);
 
+/* Draws the multi-page screen selected by D_8008FDD4: page images, a rotating list, or per-slot panels. */
 Gfx *func_151EC648(Gfx *gfx) {
     static s8 D_800900F8 = 0;
-    s32 a;
+    s32 fadeAlpha;
     s32 alpha;
-    s32 pad;
+    s32 pad; // matching: stack slot
     s32 y;
-    ScoreState *s;
+    ScoreState *state;
     f32 scale;
-    f32 f;
-    u8 **pp;
-    s8 n;
-    s8 m;
+    f32 progress;
+    u8 **image;
+    s8 slotCount;
+    s8 page;
     s32 i;
     s32 j;
     s32 prev;
     s32 cur;
     s32 mid;
     s32 v;
-    s32 env;
+    s32 listAlpha;
     f32 angle;
     s32 diff;
     f32 sc;
 
-    a = (D_8008FDD4->unk0 - 0.5f) * 512.0f;
-    if (a < 0) {
-        a = -a;
+    fadeAlpha = (D_8008FDD4->unk0 - 0.5f) * 512.0f;
+    if (fadeAlpha < 0) {
+        fadeAlpha = -fadeAlpha;
     }
-    if (a >= 0x100) {
-        a = 0xFF;
+    if (fadeAlpha >= 0x100) {
+        fadeAlpha = 0xFF;
     }
     gDPPipeSync(gfx++);
-    s = D_8008FDD4;
-    f = s->unk8;
-    if (0.0f == s->unk8 && 0.0f == s->unkC) {
-        m = s->unk2C;
-        D_800900F8 = m;
+    state = D_8008FDD4;
+    progress = state->unk8;
+    if (0.0f == state->unk8 && 0.0f == state->unkC) {
+        page = state->unk2C;
+        D_800900F8 = page;
     } else {
-        m = s->unk2C;
-        if (m == 0 && s->unkC < 0.0f) {
+        page = state->unk2C;
+        if (page == 0 && state->unkC < 0.0f) {
             D_800900F8 = 4;
         }
     }
-    if (m == 0) {
+    if (page == 0) {
         y = 0x6A;
-        alpha = 0xFF - (s32)(f * 300.0f);
+        alpha = 0xFF - (s32)(progress * 300.0f);
     } else {
-        alpha = a;
+        alpha = fadeAlpha;
         if (D_800900F8 == 4) {
             sc = 68.0f;
         } else {
             sc = 76.0f;
         }
-        y = 0x6A - (s32)(f * sc);
+        y = 0x6A - (s32)(progress * sc);
     }
-    if (s->unk40 != 3) {
-        if (alpha > 0 && *(pp = &D_800900D8[D_800900F8]) != NULL) {
+    if (state->unk40 != 3) {
+        if (alpha > 0 && *(image = &D_800900D8[D_800900F8]) != NULL) {
             gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, alpha);
             diff = 2;
             if (D_800900F8 == 4) {
@@ -1537,31 +1538,31 @@ Gfx *func_151EC648(Gfx *gfx) {
                     diff = 3;
                 }
             }
-            D_80090060.img = *pp;
+            D_80090060.img = *image;
             gfx = func_151ED430(gfx, &D_80090060, 0x94, y, diff, v, scale, 0);
-            s = D_8008FDD4;
-            f = s->unk8;
+            state = D_8008FDD4;
+            progress = state->unk8;
         }
-        alpha = 0xFF - (s32)(f * 300.0f);
-        f = 2.0f;
+        alpha = 0xFF - (s32)(progress * 300.0f);
+        progress = 2.0f;
         if (alpha > 0) {
             gDPPipeSync(gfx++);
             gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, alpha);
             D_80090060.img = &D_88C;
             gfx = func_151ED430(gfx, &D_80090060, 0x94, 0x1E, 3, 1, 1.0f, 0);
-            s = D_8008FDD4;
+            state = D_8008FDD4;
         }
     }
-    switch (s->unk40) {
+    switch (state->unk40) {
     case 0:
         D_800E0C88[0] = 0;
         D_800E0C88[1] = 0xFF;
         D_800E0C88[2] = 0xFF;
         D_800E0C88[3] = 0xFF;
-        if (s->unk8 >= 0.5f && s->unk2C == 4) {
-            env = (D_800E0A94 * D_800E0A95) >> 8;
-            if (env >= 0xFE) {
-                env = 0xFF;
+        if (state->unk8 >= 0.5f && state->unk2C == 4) {
+            listAlpha = (D_800E0A94 * D_800E0A95) >> 8;
+            if (listAlpha >= 0xFE) {
+                listAlpha = 0xFF;
             }
             angle = 0.6283185482f;
             angle += 0.6283185482f + 0.6283185482f * D_8008FDE8;
@@ -1576,7 +1577,7 @@ Gfx *func_151EC648(Gfx *gfx) {
                 if (prev < cur) {
                     diff = cur - prev;
                     gDPPipeSync(gfx++);
-                    gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, env);
+                    gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, listAlpha);
                     mid = (diff >> 1) + prev;
                     sc = diff / 32.0f;
                     D_80090060.img = D_800900FC[j];
@@ -1586,7 +1587,7 @@ Gfx *func_151EC648(Gfx *gfx) {
                         if (v >= 0x40) {
                             v = 0x7F - v;
                         }
-                        v = (s32)((u32)env * (v + v + v + 0x3F)) >> 8;
+                        v = (s32)((u32)listAlpha * (v + v + v + 0x3F)) >> 8;
                         if (v >= 0x100) {
                             v = 0xFF;
                         }
@@ -1608,54 +1609,54 @@ Gfx *func_151EC648(Gfx *gfx) {
         s32 dir;
         s32 count;
         s32 pulse;
-        s32 i4;
-        s32 idx;
-        s32 vals[3];
-        struct127 **p;
+        s32 slot;
+        s32 valueIndex;
+        s32 values[3];
+        struct127 **slotObj;
 
         sc = (D_800BE9AC & 0x3F) * 0.0981746912f;
         sc = sinf(sc + 0.7853975296f);
         pulse = (D_800E0A95 * (s32)((sc + 1.0f) * 127.0f)) >> 8;
         if (D_8008FDD4->unk2C == 7) {
             x = 0x70;
-            n = 2;
+            slotCount = 2;
         } else {
             x = 0x28;
-            n = 4;
+            slotCount = 4;
         }
-        count = func_151E24F0(vals);
+        count = func_151E24F0(values);
         if (count != 0) {
-            idx = 0;
+            valueIndex = 0;
         }
-        for (i4 = 0; i4 < n; i4++) {
+        for (slot = 0; slot < slotCount; slot++) {
             mid = -1;
             dir = 1;
             for (v = 0; v < D_8008FE40; v++) {
-                if (i4 == D_8008FE44[v]) {
+                if (slot == D_8008FE44[v]) {
                     mid = v;
                     v = D_8008FE40;
                     dir = -1;
                 }
             }
-            if (i4 != 0 && D_800E0BA0[0] != 0) {
-                p = &D_800E0BA0[i4];
-                if (D_800E0C88[i4] != 0xFF) {
-                    if (*p == 0 && mid != -1) {
-                        func_151E7F60(i4, D_800E0B90[mid]);
+            if (slot != 0 && D_800E0BA0[0] != 0) {
+                slotObj = &D_800E0BA0[slot];
+                if (D_800E0C88[slot] != 0xFF) {
+                    if (*slotObj == 0 && mid != -1) {
+                        func_151E7F60(slot, D_800E0B90[mid]);
                     }
-                } else if (*p != 0) {
-                    func_15060F28(*p, 1);
-                    *p = 0;
+                } else if (*slotObj != 0) {
+                    func_15060F28(*slotObj, 1);
+                    *slotObj = 0;
                 }
             }
-            alpha = D_800E0C88[i4];
+            alpha = D_800E0C88[slot];
             alpha += dir * (D_800BE9E4 << 3);
             if (alpha >= 0x100) {
                 alpha = 0xFF;
             } else if (alpha < 0) {
                 alpha = 0;
             }
-            D_800E0C88[i4] = alpha;
+            D_800E0C88[slot] = alpha;
             gDPPipeSync(gfx++);
             gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, D_800E0A95);
             D_80090060.img = &D_89C + 2;
@@ -1677,16 +1678,16 @@ Gfx *func_151EC648(Gfx *gfx) {
                 gfx = func_151ED430(gfx, &D_80090060, x, 0x82, 1, 1, 1.0f, 0);
             }
             func_1504332C(0xFF, 0xFF, 0xFF, D_800E0A95);
-            func_15042D94(x, 0x41, 0x80, "#", i4 + 1);
+            func_15042D94(x, 0x41, 0x80, "#", slot + 1);
             if (count != 0 && mid >= 0 && D_8008FE44[mid] >= 0) {
                 count--;
                 func_15042D94(x, 0xA8, 0, "#", 0x38);
-                func_15042D94(x, 0xA2, 0x81, "%d", vals[idx] + 1);
-                idx++;
+                func_15042D94(x, 0xA2, 0x81, "%d", values[valueIndex] + 1);
+                valueIndex++;
             }
             x += 0x48;
         }
-    }
+    } // matching: the break must follow the block, not end it
         break;
     case 3:
         gfx = func_151EA15C(gfx, 0x6A, 0xFF, 0);
