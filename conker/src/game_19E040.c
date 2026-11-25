@@ -32,18 +32,6 @@ typedef struct {
     /* 0x5E */ u8 pad5E[2];
 } ModelFxTemplate;
 
-/* The actor an effect is spawned at (WorldObject / Obj1511C638 layout); only the fields used here. */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ s16 x;
-    /* 0x12 */ s16 y;
-    /* 0x14 */ s16 z;
-    /* 0x16 */ u8 pad16[0x6E - 0x16];
-    /* 0x6E */ u8 unk6E;
-    /* 0x6F */ u8 pad6F[0x72 - 0x6F];
-    /* 0x72 */ u8 unk72;
-} EffectActor;
-
 /* One piece of the func_15170F4C burst. */
 typedef struct {
     /* 0x00 */ u16 modelId;
@@ -58,15 +46,15 @@ extern s32 D_800BE9F0;
 f32 func_150489B0(u8);
 void *func_1518C900(s32);
 void func_15168BE4(ModelFxTemplate *, u8, s32);
-void func_15170B90(EffectActor *, s32, s32, s32, u8, s32);
-void func_151717FC(EffectActor *, f32, f32, f32, f32, f32, s32, s32, s32, s32, f32, u8, s32);
+void func_15170B90(WorldObject *, s32, s32, s32, u8, s32);
+void func_151717FC(WorldObject *, f32, f32, f32, f32, f32, s32, s32, s32, s32, f32, u8, s32);
 void func_151718F0(f32, f32, f32, f32, s32, f32, s32, s32, u8, s32);
 void func_151700D8(f32 (*)[3], f32, f32, s32, f32, s32, s32, s32, s32, s32);
 void func_1516D4E8(s16, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
                    s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Spawns six models bursting up and out of the actor, plus a ring of dust particles around its feet. */
-void func_15170B90(EffectActor *actor, s32 modelId, s32 kind, s32 mode, u8 owner, s32 list) {
+void func_15170B90(WorldObject *actor, s32 modelId, s32 kind, s32 mode, u8 owner, s32 list) {
     s32 i;
     ModelFxTemplate fx;
     f32 x;
@@ -128,11 +116,11 @@ void func_15170B90(EffectActor *actor, s32 modelId, s32 kind, s32 mode, u8 owner
         func_15168BE4(&fx, owner, list);
     }
     func_151718F0(x, y - 80.0f, z, 70.0f, 500, 300.0f / 65536, 0, 10, owner, list);
-    actor->unk6E = 1;
+    actor->inactive = 1;
 }
 
 /* Plays the scene-specific burst (scenes 2 and 16) at the actor. */
-void func_15170EC4(EffectActor *actor, u8 owner, s32 list) {
+void func_15170EC4(WorldObject *actor, u8 owner, s32 list) {
     switch (D_800BE9F0) {
     case 2:
         func_15170B90(actor, 1, 1, 1, owner, list);
@@ -144,7 +132,7 @@ void func_15170EC4(EffectActor *actor, u8 owner, s32 list) {
 }
 
 /* Spawns the six D_800A6ED8 pieces flying out of the actor. */
-void func_15170F4C(EffectActor *actor, u8 owner, s32 list) {
+void func_15170F4C(WorldObject *actor, u8 owner, s32 list) {
     s32 i;
     ModelFxTemplate fx;
     BurstPiece *piece;
@@ -197,7 +185,7 @@ void func_15170F4C(EffectActor *actor, u8 owner, s32 list) {
         func_15168BE4(&fx, owner, list);
         piece++;
     }
-    actor->unk6E = 1;
+    actor->inactive = 1;
 }
 
 void func_150C3D5C(Actor *);
@@ -272,8 +260,8 @@ void func_15171200(s32 count, s32 modelId, f32 x, f32 y, f32 z, f32 speed, f32 m
 }
 
 /* Spawns the scene-specific square ring of particles under the actor, chosen by its unk72. */
-void func_15171600(EffectActor *actor, u8 owner, s32 list) {
-    switch (actor->unk72) {
+void func_15171600(WorldObject *actor, u8 owner, s32 list) {
+    switch (actor->id) {
     case 0xEB:
         func_151717FC(actor, 400.0f, 500.0f, 0.0f, -1270.0f, 0.0f, 2, 5, 20, 20, 1.0f, owner, list);
         break;
@@ -293,7 +281,7 @@ void func_15171600(EffectActor *actor, u8 owner, s32 list) {
  * Passes func_151700D8 the corners of a (2 * halfX) x (2 * halfZ) rectangle centred at the actor's
  * position plus (offsetX, offsetY, offsetZ).
  */
-void func_151717FC(EffectActor *actor, f32 halfX, f32 halfZ, f32 offsetX, f32 offsetY, f32 offsetZ, s32 type,
+void func_151717FC(WorldObject *actor, f32 halfX, f32 halfZ, f32 offsetX, f32 offsetY, f32 offsetZ, s32 type,
                    s32 style, s32 countA, s32 countB, f32 scale, u8 owner, s32 list) {
     f32 corners[4][3];
     f32 centerX;

@@ -456,22 +456,12 @@ void func_150E03F8(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *ef
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 
-/* The object func_150E05F8 fades (a handler in the 0x80089xxx object table; cf. WorldObject). */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ s16 x;
-    /* 0x12 */ s16 y;
-    /* 0x14 */ s16 z;
-    /* 0x16 */ u8 pad16[0x74];
-    /* 0x8A */ u8 alpha;
-} DistanceFadeObject;
-
 /* matching: 3850.0f; as a literal IDO folds 1 / (3850 - 2570) to a constant */
 extern f32 D_800A0FD4;
 
 /* Sets alpha from the distance to D_800DBFF0's unk2F8 point: opaque within 2570, fading out
  * linearly to transparent at 3850 (D_800A0FD4). */
-void func_150E05F8(DistanceFadeObject *obj) {
+void func_150E05F8(WorldObject *obj) {
     f32 dx;
     f32 dy;
     f32 dz;
