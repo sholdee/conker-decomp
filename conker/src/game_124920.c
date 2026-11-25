@@ -12,166 +12,182 @@ extern f32 sinf(f32);
 extern s32 func_15145128(struct17 *, struct17 *, f32 *, f32 *);
 extern s32 func_15146078(struct17 *, struct17 *, struct17 *);
 
+/* Spawn descriptor for func_1513264C (0x7C bytes). */
 typedef struct {
-    f32 unk00;
-    f32 unk04;
-    f32 unk08;
-    f32 unk0C;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    struct17 unk28;
-    struct17 unk34;
-    struct17 unk40;
-    f32 unk4C;
-    s32 unk50;
-    s16 unk54;
-    s16 unk56;
-    u8 unk58;
-    u8 pad59[3];
-    s32 unk5C;
-    u8 unk60;
-    u8 unk61;
-    u8 unk62;
-    u8 unk63;
-    u8 unk64;
-    u8 unk65;
-    u8 unk66;
-    u8 unk67;
-    u8 unk68;
-    u8 pad69;
-    u8 unk6A;
-    u8 pad6B;
-    s32 unk6C;
-    u8 unk70;
-    u8 pad71;
-    s16 unk72;
-    s16 unk74;
-    u8 pad76[2];
-    s32 unk78;
-} Func150F802CSpawn;
+    /* 0x00 */ f32 unk00;
+    /* 0x04 */ f32 unk04;
+    /* 0x08 */ f32 unk08;
+    /* 0x0C */ f32 unk0C;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ struct17 pos;
+    /* 0x34 */ struct17 vel;
+    /* 0x40 */ struct17 unk40;
+    /* 0x4C */ f32 unk4C;
+    /* 0x50 */ s32 unk50;
+    /* 0x54 */ s16 unk54;
+    /* 0x56 */ s16 unk56;
+    /* 0x58 */ u8 unk58;
+    /* 0x59 */ u8 pad59[3];
+    /* 0x5C */ s32 unk5C;
+    /* 0x60 */ u8 unk60;
+    /* 0x61 */ u8 unk61;
+    /* 0x62 */ u8 unk62;
+    /* 0x63 */ u8 unk63;
+    /* 0x64 */ u8 unk64;
+    /* 0x65 */ u8 unk65;
+    /* 0x66 */ u8 unk66;
+    /* 0x67 */ u8 unk67;
+    /* 0x68 */ u8 unk68;
+    /* 0x69 */ s8 unk69;
+    /* 0x6A */ u8 unk6A;
+    /* 0x6B */ u8 pad6B;
+    /* 0x6C */ void *owner;
+    /* 0x70 */ u8 unk70;
+    /* 0x71 */ u8 pad71;
+    /* 0x72 */ s16 unk72;
+    /* 0x74 */ s16 unk74;
+    /* 0x76 */ u8 pad76[2];
+    /* 0x78 */ s32 sound; /* positional sound handle (func_10010F88), or 0 */
+} EffectSpawn;
 
-struct Func150F7E20Sub {
-    u8 pad0[0x18];
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-};
-
-struct Func150F7E20Obj {
-    u8 pad0[0x2C];
-    f32 unk2C;
-    f32 unk30;
-    u8 pad34[0x28];
-    u8 unk5C;
-};
-
-
-
+/* Per-object state of the projectile spawned by func_150F7470 (updated by func_150F78B4). */
 typedef struct {
-    u8 pad0[4];
-    f32 unk4;
-    u8 pad8[0x30];
-    struct17 unk38;
-    u8 pad44[0x20];
-    s32 unk64;
-    f32 unk68;
-    f32 unk6C;
-    u8 unk70;
-    u8 pad71[3];
-    struct17 unk74;
-    struct17 unk80;
-    f32 unk8C;
-    f32 unk90;
-    f32 unk94;
-    struct17 unk98;
-    struct17 unkA4;
-    s8 unkB0;
-    u8 padB1[3];
-} Func150F7470Big;
+    /* 0x00 */ u8 pad0[4];
+    /* 0x04 */ f32 unk4;
+    /* 0x08 */ u8 pad8[0x30];
+    /* 0x38 */ struct17 dir;
+    /* 0x44 */ u8 pad44[0x20];
+    /* 0x64 */ s32 unk64;
+    /* 0x68 */ f32 timeLeft;
+    /* 0x6C */ f32 speed;
+    /* 0x70 */ u8 flags; /* 1: impact effect, 2: ray-test the path, 4: see func_150F78B4 */
+    /* 0x71 */ u8 pad71[3];
+    /* 0x74 */ struct17 unk74;
+    /* 0x80 */ struct17 unk80;
+    /* 0x8C */ f32 trailDist;
+    /* 0x90 */ f32 trailAge;
+    /* 0x94 */ f32 trailAgeStep;
+    /* 0x98 */ struct17 trailPos;
+    /* 0xA4 */ struct17 trailStep;
+    /* 0xB0 */ s8 unkB0;
+    /* 0xB1 */ u8 padB1[3];
+} ProjectileState;
+
+/* Per-object state of the effect spawned by func_150F802C (updated by func_150F81BC). */
+typedef struct {
+    /* 0x00 */ f32 *target; /* position (3 floats), then 3 more floats copied to unk20 */
+    /* 0x04 */ struct17 trailPos;
+    /* 0x10 */ f32 trailAge;
+} FollowState;
+
+/* An object spawned by func_1513264C. */
+typedef struct {
+    /* 0x000 */ u8 pad0;
+    /* 0x001 */ u8 unk1;
+    /* 0x002 */ u8 pad2[0xA];
+    /* 0x00C */ u8 unkC;
+    /* 0x00D */ u8 padD[0x13];
+    /* 0x020 */ f32 unk20;
+    /* 0x024 */ f32 unk24;
+    /* 0x028 */ f32 unk28;
+    /* 0x02C */ u8 pad2C[0xC];
+    /* 0x038 */ struct17 pos;
+    /* 0x044 */ struct17 vel;
+    /* 0x050 */ u8 pad50[0x2C];
+    /* 0x07C */ struct127 *unk7C;
+    /* 0x080 */ u8 pad80[8];
+    /* 0x088 */ s32 sound;
+    /* 0x08C */ u8 pad8C[0xE4];
+    /* 0x170 */ union {
+        ProjectileState projectile;
+        FollowState follow;
+    } state;
+} EffectObj;
 
 typedef struct {
     u8 pad0[0x3B];
     u8 unk3B;
 } Func150F7470Obj;
 
-extern s32 func_151C4B0C(s32, Func150F7470Big *, struct17 *, struct17 *, f32 *, f32, u8, s32, struct17 *, u8 *, s32,
+extern s32 func_151C4B0C(s32, ProjectileState *, struct17 *, struct17 *, f32 *, f32, u8, s32, struct17 *, u8 *, s32,
                          f32, Func150F7470Obj *, s32, u8, u8, s32, u8);
 extern void func_15145974(struct17 *, f32 *, f32 *);
-s32 func_1513264C(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
-s32 func_10010F88(s32 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9);
+EffectObj *func_1513264C(void *spawn, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
+s32 func_10010F88(s32 sound, u16 volume, s16 cents, u8 mix, s32 arg4, s16 x, s16 y, s16 z, s16 nearDistance,
+                  s16 farDistance);
 
+/* Spawns a projectile at `pos`, aimed along `aim` (or at `target` when arg2 is set). */
+void func_150F7470(struct17 *pos, struct17 *aim, s32 arg2, struct17 *target, u8 targetIsDir, s32 arg5, f32 speed,
+                   f32 arg7, f32 arg8, Func150F7470Obj *owner, u8 arg10, u8 arg11, u8 arg12, u8 arg13, s32 arg14,
+                   s8 arg15, s32 sound, u8 arg17, u8 arg18, s32 arg19) {
+    ProjectileState state;
+    EffectSpawn spawn;
+    EffectObj *obj;
+    struct17 aimDir;
+    u8 hasAimDir;
+    struct17 targetDir;
+    u8 hasTargetDir;
 
-void func_150F7470(struct17 *arg0, struct17 *arg1, s32 arg2, struct17 *arg3, u8 arg4, s32 arg5, f32 arg6, f32 arg7,
-                   f32 arg8, Func150F7470Obj *arg9, u8 arg10, u8 arg11, u8 arg12, u8 arg13, s32 arg14, s8 arg15,
-                   s32 arg16, u8 arg17, u8 arg18, s32 arg19) {
-    Func150F7470Big big;
-    Func150F802CSpawn spawn;
-    s32 ret;
-    struct17 dirB;
-    u8 hasB;
-    struct17 dirA;
-    u8 hasA;
-
-    hasB = 0;
-    hasA = arg4;
-    if (arg4) {
-        dirA = *arg3;
+    hasAimDir = FALSE;
+    hasTargetDir = targetIsDir;
+    if (targetIsDir) {
+        targetDir = *target;
     }
-    big.unk70 = (arg11 ? 1 : 0) | (arg12 ? 2 : 0) | (arg13 ? 4 : 0);
-    big.unkB0 = arg15;
-    if (arg2 != 0 && arg3 != NULL) {
-        if (!hasA) {
-            if (!func_15145128(arg3, &dirA, NULL, NULL)) {
+    state.flags = (arg11 ? 1 : 0) | (arg12 ? 2 : 0) | (arg13 ? 4 : 0);
+    state.unkB0 = arg15;
+    if (arg2 != 0 && target != NULL) {
+        if (!hasTargetDir) {
+            if (!func_15145128(target, &targetDir, NULL, NULL)) {
                 return;
             }
-            hasA = 1;
+            hasTargetDir = TRUE;
         }
-    } else if (arg1 != NULL) {
-        if (!func_15145128(arg1, &dirB, NULL, NULL)) {
+    } else if (aim != NULL) {
+        if (!func_15145128(aim, &aimDir, NULL, NULL)) {
             return;
         }
-        hasB = 1;
+        hasAimDir = TRUE;
     }
-    if (!func_151C4B0C(arg5, &big, arg0, hasB ? &dirB : NULL, &big.unk68, arg7, arg10, arg2, hasA ? &dirA : NULL,
-                       &big.unk70, 1, arg8, arg9, arg15, arg12, arg13, 0, arg17)) {
+    if (!func_151C4B0C(arg5, &state, pos, hasAimDir ? &aimDir : NULL, &state.timeLeft, arg7, arg10, arg2,
+                       hasTargetDir ? &targetDir : NULL, &state.flags, 1, arg8, owner, arg15, arg12, arg13, 0,
+                       arg17)) {
         return;
     }
-    if (!func_15146078(&big.unk38, &big.unk74, &big.unk80)) {
+    if (!func_15146078(&state.dir, &state.unk74, &state.unk80)) {
         return;
     }
-    big.unk64 = arg14;
-    big.unk90 = 0.0f;
-    big.unk8C = 0.0f;
-    big.unk94 = 70.0f * arg7;
-    big.unk98 = *arg0;
-    big.unk6C = arg6;
-    big.unkA4.unk0 = big.unk38.unk0 * 70.0f;
-    big.unkA4.unk4 = big.unk38.unk4 * 70.0f;
-    big.unkA4.unk8 = big.unk38.unk8 * 70.0f;
-    big.unk70 |= (big.unk4 > 150.0f) ? 1 : 0;
+    state.unk64 = arg14;
+    state.trailAge = 0.0f;
+    state.trailDist = 0.0f;
+    state.trailAgeStep = 70.0f * arg7;
+    state.trailPos = *pos;
+    state.speed = speed;
+    state.trailStep.unk0 = state.dir.unk0 * 70.0f;
+    state.trailStep.unk4 = state.dir.unk4 * 70.0f;
+    state.trailStep.unk8 = state.dir.unk8 * 70.0f;
+    state.flags |= (state.unk4 > 150.0f) ? 1 : 0;
     spawn.unk00 = 1.0f;
     spawn.unk04 = 1.0f;
     spawn.unk0C = 0.02000000142f;
     spawn.unk08 = 0.02000000142f;
-    func_15145974(&big.unk38, &spawn.unk14, &spawn.unk10);
+    func_15145974(&state.dir, &spawn.unk14, &spawn.unk10);
     spawn.unk1C = 1.0f;
     spawn.unk20 = 1.0f;
     spawn.unk24 = 1.0f;
     spawn.unk18 = 0.0f;
-    spawn.unk28 = *arg0;
-    spawn.unk34.unk0 = big.unk38.unk0 * arg6;
-    spawn.unk34.unk4 = big.unk38.unk4 * arg6;
-    spawn.unk34.unk8 = big.unk38.unk8 * arg6;
+    spawn.pos = *pos;
+    spawn.vel.unk0 = state.dir.unk0 * speed;
+    spawn.vel.unk4 = state.dir.unk4 * speed;
+    spawn.vel.unk8 = state.dir.unk8 * speed;
     spawn.unk40 = *(struct17 *)&D_800A5480;
     spawn.unk4C = 0.0f;
     spawn.unk50 = 0x120;
-    spawn.unk54 = 0x12C;
+    spawn.unk54 = 300;
     spawn.unk56 = 0x2F;
     spawn.unk58 = 0;
     spawn.unk5C = 0;
@@ -185,171 +201,167 @@ void func_150F7470(struct17 *arg0, struct17 *arg1, s32 arg2, struct17 *arg3, u8 
     spawn.unk67 = 0;
     spawn.unk68 = 0;
     spawn.unk6A = 0;
-    spawn.unk6C = (s32)arg9;
-    spawn.unk70 = arg9->unk3B;
+    spawn.owner = owner;
+    spawn.unk70 = owner->unk3B;
     spawn.unk72 = 1;
     spawn.unk74 = 0xFF;
-    if (arg16 != 0) {
-        spawn.unk78 = func_10010F88(arg16, 0x4650, -500, 0, -1, spawn.unk28.unk0, spawn.unk28.unk4, spawn.unk28.unk8,
-                                    1000, 2000);
+    if (sound != 0) {
+        spawn.sound = func_10010F88(sound, 18000, -500, 0, -1, spawn.pos.unk0, spawn.pos.unk4, spawn.pos.unk8, 1000,
+                                    2000);
     } else {
-        spawn.unk78 = 0;
+        spawn.sound = 0;
     }
-    ret = func_1513264C(&spawn, 0, 0, 0, 0xB4, arg18, arg19);
-    if (ret != 0) {
-        memcpy((void *)(ret + 0x170), &big, sizeof(big));
+    obj = func_1513264C(&spawn, 0, 0, 0, 0xB4, arg18, arg19);
+    if (obj != NULL) {
+        memcpy(&obj->state.projectile, &state, sizeof(state));
     }
 }
 
+/* Spawn descriptor for func_1513D2F0. */
 typedef struct {
-    u8 unk0;
-    u8 unk1;
-    s16 unk2;
-    s16 unk4;
-    s32 unk8;
-    s32 unkC;
-    u8 unk10;
-    u8 unk11;
-    u8 unk12;
-    u8 unk13;
-    f32 unk14;
-    f32 unk18;
-    struct17 unk1C;
-    struct17 unk28;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    s32 unk40;
-    u8 unk44;
-    u8 unk45;
-    u8 unk46;
-    u8 unk47;
-    s32 unk48;
-    u8 unk4C;
-    u8 pad4D[3];
-    s32 unk50;
-} Func150F81BCSpawn;
+    /* 0x00 */ u8 unk0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ s16 unk2;
+    /* 0x04 */ s16 unk4;
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ u8 color[4];
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ struct17 pos;
+    /* 0x28 */ struct17 unk28;
+    /* 0x34 */ f32 unk34;
+    /* 0x38 */ f32 unk38;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ s32 unk40;
+    /* 0x44 */ u8 unk44;
+    /* 0x45 */ u8 unk45;
+    /* 0x46 */ u8 unk46;
+    /* 0x47 */ u8 unk47;
+    /* 0x48 */ s32 unk48;
+    /* 0x4C */ u8 unk4C;
+    /* 0x4D */ u8 pad4D[3];
+    /* 0x50 */ s32 unk50;
+} PuffSpawn;
 
+/* Per-object state of a puff spawned by func_1513D2F0 (updated by func_150F7E20). */
 typedef struct {
-    struct17 unk0;
-    struct17 unkC;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-} Func150F81BCExtra;
+    /* 0x00 */ struct17 unk0;
+    /* 0x0C */ struct17 unkC;
+    /* 0x18 */ f32 timeLeft;
+    /* 0x1C */ f32 phase;
+    /* 0x20 */ f32 phaseSpeed;
+    /* 0x24 */ f32 sizeBase;
+    /* 0x28 */ f32 sizeAmplitude;
+} PuffState;
 
+/* An object spawned by func_1513D2F0. */
 typedef struct {
-    s32 unk00;
-    f32 unk04;
-    struct17 unk08;
-    struct17 unk14;
-    struct17 unk20;
-    struct17 unk2C;
-    struct17 unk38;
-    u8 unk44[0x12];
-    s16 unk56;
-    u8 unk58;
-    u8 unk59;
-    u8 unk5A;
-    u8 pad5B;
-    s32 unk5C;
-    s32 unk60;
-    u8 pad64[0xC];
-} Func150F78B4Ray;
+    /* 0x000 */ u8 pad0[0x2C];
+    /* 0x02C */ f32 unk2C;
+    /* 0x030 */ f32 unk30;
+    /* 0x034 */ u8 pad34[0x28];
+    /* 0x05C */ u8 unk5C;
+    /* 0x05D */ u8 pad5D[0xB3];
+    /* 0x110 */ PuffState state;
+} PuffObj;
 
+/* Result of the func_15081690 ray cast. */
 typedef struct {
-    u8 pad0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0x2B];
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    f32 unk4C;
-    u8 pad50[0x2C];
-    s32 unk7C;
-    u8 pad80[8];
-    s32 unk88;
-    u8 pad8C[0xE4];
-    Func150F7470Big unk170;
-} Func150F78B4Obj;
+    /* 0x00 */ s32 unk00;
+    /* 0x04 */ f32 unk04;
+    /* 0x08 */ struct17 pos;
+    /* 0x14 */ struct17 unk14;
+    /* 0x20 */ struct17 unk20;
+    /* 0x2C */ struct17 unk2C;
+    /* 0x38 */ struct17 unk38;
+    /* 0x44 */ u8 unk44[0x12];
+    /* 0x56 */ s16 unk56;
+    /* 0x58 */ u8 unk58;
+    /* 0x59 */ u8 hit;
+    /* 0x5A */ u8 unk5A;
+    /* 0x5B */ u8 pad5B;
+    /* 0x5C */ s32 unk5C;
+    /* 0x60 */ s32 unk60;
+    /* 0x64 */ u8 pad64[0xC];
+} RayHit;
 
-void func_15081690(s32, f32, f32, f32, f32, f32, f32, Func150F78B4Ray *, f32, s32, s32, s32, s32, s32, s32);
-void func_151D4DAC(s32, s32, struct17 *, struct17 *, Func150F78B4Ray *, s32, struct17 *, u8, s32);
-void func_150F7F8C(void *arg0, u8 arg1, s32 arg2);
+void func_15081690(struct127 *obj, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, RayHit *hit, f32 maxDist, s32 arg9,
+                   s32 arg10, s32 arg11, s32 arg12, s32 arg13, s32 arg14);
+void func_151D4DAC(s32, struct127 *, struct17 *, struct17 *, RayHit *, s32, struct17 *, u8, s32);
+void func_150F7F8C(struct17 *pos, u8 arg1, s32 arg2);
 
-s8 func_150F78B4(Func150F78B4Obj *arg0) {
-    Func150F7470Big *big;
-    s32 obj;
-    s8 result;
-    f32 step;
-    f32 scale;
-    Func150F78B4Ray ray;
-    f32 count;
-    void *ret;
+/*
+ * Per-frame update of a projectile: ray-tests and moves it, runs out its lifetime, and leaves a
+ * trail of puffs every 70 units travelled. Returns 0 once it hit something or expired.
+ */
+s8 func_150F78B4(EffectObj *obj) {
+    ProjectileState *state;
+    struct127 *owner;
+    s8 alive;
+    f32 dt;
+    f32 dist;
+    RayHit hit;
+    f32 puffs;
+    PuffObj *puff;
 
-    result = 1;
-    big = &arg0->unk170;
-    obj = arg0->unk7C;
-    step = (big->unk68 < D_800BE9A4) ? big->unk68 : D_800BE9A4;
-    if (arg0->unk88 != 0) {
-        func_1000F9D4(arg0->unk88, arg0->unk38, arg0->unk3C, arg0->unk40);
+    alive = TRUE;
+    state = &obj->state.projectile;
+    owner = obj->unk7C;
+    dt = (state->timeLeft < D_800BE9A4) ? state->timeLeft : D_800BE9A4;
+    if (obj->sound != 0) {
+        func_1000F9D4(obj->sound, obj->pos.unk0, obj->pos.unk4, obj->pos.unk8);
     }
-    scale = big->unk6C * step;
-    if (big->unk70 & 2) {
-        func_15081690(obj, arg0->unk38, arg0->unk3C, arg0->unk40, big->unk38.unk0, big->unk38.unk4, big->unk38.unk8,
-                      &ray, scale, 1, 0, !(big->unk70 & 4), big->unkB0, 0, 0);
-        if (ray.unk59 >= 2) {
-            func_151D4DAC(ray.unk00, obj, &ray.unk08, &ray.unk20, &ray, 0x1A, &big->unk38, arg0->unkC, arg0->unk1);
-            if (big->unk70 & 1) {
-                func_150F7F8C(&ray.unk08, arg0->unkC, arg0->unk1);
+    dist = state->speed * dt;
+    if (state->flags & 2) {
+        func_15081690(owner, obj->pos.unk0, obj->pos.unk4, obj->pos.unk8, state->dir.unk0, state->dir.unk4,
+                      state->dir.unk8, &hit, dist, 1, 0, !(state->flags & 4), state->unkB0, 0, 0);
+        if (hit.hit >= 2) {
+            func_151D4DAC(hit.unk00, owner, &hit.pos, &hit.unk20, &hit, 0x1A, &state->dir, obj->unkC, obj->unk1);
+            if (state->flags & 1) {
+                func_150F7F8C(&hit.pos, obj->unkC, obj->unk1);
             }
-            result = 0;
+            alive = FALSE;
         }
     }
-    arg0->unk38 += arg0->unk44 * step;
-    arg0->unk3C += arg0->unk48 * step;
-    arg0->unk40 += arg0->unk4C * step;
-    if (result == 1) {
-        big->unk68 -= D_800BE9A4;
-        if (big->unk68 <= 0.0f) {
-            result = 0;
-            if (big->unk70 & 1) {
-                func_150F7F8C(&arg0->unk38, arg0->unkC, arg0->unk1);
+    obj->pos.unk0 += obj->vel.unk0 * dt;
+    obj->pos.unk4 += obj->vel.unk4 * dt;
+    obj->pos.unk8 += obj->vel.unk8 * dt;
+    if (alive == TRUE) {
+        state->timeLeft -= D_800BE9A4;
+        if (state->timeLeft <= 0.0f) {
+            alive = FALSE;
+            if (state->flags & 1) {
+                func_150F7F8C(&obj->pos, obj->unkC, obj->unk1);
             }
         }
     }
     {
-        Func150F81BCSpawn spawn;
+        PuffSpawn spawn;
 
-        big->unk8C += scale;
-        big->unk90 += step;
-        count = big->unk8C * 0.01428571437f;
-        if (count > 1.0f) {
-            Func150F81BCExtra extra;
+        state->trailDist += dist;
+        state->trailAge += dt;
+        puffs = state->trailDist * (1.0f / 70.0f);
+        if (puffs > 1.0f) {
+            PuffState puffState;
 
-            extra.unk0 = big->unk74;
-            extra.unkC = big->unk80;
-            extra.unk24 = 8.318000793f;
-            extra.unk28 = 8.318000793f;
+            puffState.unk0 = state->unk74;
+            puffState.unkC = state->unk80;
+            puffState.sizeBase = 8.318000793f;
+            puffState.sizeAmplitude = 8.318000793f;
             spawn.unk0 = 0x7A;
             spawn.unk1 = 0;
             spawn.unk2 = 0x4404;
-            spawn.unk4 = 0xA;
+            spawn.unk4 = 10;
             spawn.unk8 = 0;
             spawn.unkC = 0;
-            spawn.unk10 = 0xFF;
-            spawn.unk11 = 0xFF;
-            spawn.unk12 = 0xFF;
-            spawn.unk13 = 0xFF;
+            spawn.color[0] = 0xFF;
+            spawn.color[1] = 0xFF;
+            spawn.color[2] = 0xFF;
+            spawn.color[3] = 0xFF;
             spawn.unk14 = 0.0f;
             spawn.unk18 = 0.0f;
-            extra.unk20 = 0.4670000076f;
+            puffState.phaseSpeed = 0.4670000076f;
             spawn.unk28 = *(struct17 *)&D_800A5480;
             spawn.unk34 = 1.0f;
             spawn.unk38 = 1.0f;
@@ -362,40 +374,41 @@ s8 func_150F78B4(Func150F78B4Obj *arg0) {
             spawn.unk4C = 0xFF;
             spawn.unk50 = 0;
             do {
-                extern s32 D_800A4AA0;
+                extern s32 D_800A4AA0; // matching: a declaration here opens the loop scope IDO's scheduler needs
 
-                extra.unk1C = 4.712388992f;
-                extra.unk18 = 27.0f - big->unk90;
-                spawn.unk1C = big->unk98;
-                spawn.unk44 = extra.unk18 * 6.481481552f;
-                ret = func_1513D2F0(&spawn, (s32)&D_800A4AA0, 0x24, 0, 0, 0x21, 0, 0, 0, 0x2C, arg0->unkC, arg0->unk1);
-                if (ret != NULL) {
-                    memcpy((u8 *)ret + 0x110, &extra, sizeof(extra));
+                puffState.phase = 4.712388992f;
+                puffState.timeLeft = 27.0f - state->trailAge;
+                spawn.pos = state->trailPos;
+                spawn.unk44 = puffState.timeLeft * 6.481481552f;
+                puff = func_1513D2F0(&spawn, (s32)&D_800A4AA0, 0x24, 0, 0, 0x21, 0, 0, 0, 0x2C, obj->unkC, obj->unk1);
+                if (puff != NULL) {
+                    memcpy(&puff->state, &puffState, sizeof(puffState));
                 }
-                big->unk8C -= 70.0f;
-                big->unk90 -= big->unk94;
-                big->unk98.unk0 += big->unkA4.unk0;
-                big->unk98.unk4 += big->unkA4.unk4;
-                big->unk98.unk8 += big->unkA4.unk8;
-                count -= 1.0f;
-            } while (count > 1.0f);
+                state->trailDist -= 70.0f;
+                state->trailAge -= state->trailAgeStep;
+                state->trailPos.unk0 += state->trailStep.unk0;
+                state->trailPos.unk4 += state->trailStep.unk4;
+                state->trailPos.unk8 += state->trailStep.unk8;
+                puffs -= 1.0f;
+            } while (puffs > 1.0f);
         }
     }
-    return result;
+    return alive;
 }
 
-s32 func_150F7E20(struct Func150F7E20Obj *arg0) {
-    f32 temp;
-    struct Func150F7E20Sub *sub;
+/* Per-frame update of a puff: fades it out over its lifetime and pulses its size. Returns 0 once expired. */
+s32 func_150F7E20(PuffObj *obj) {
+    f32 size;
+    PuffState *state;
 
-    sub = (struct Func150F7E20Sub *)((u8 *)arg0 + 0x110);
-    arg0->unk5C = sub->unk18 * D_800A1BD8;
-    temp = (sinf(sub->unk1C) * sub->unk28) + sub->unk24;
-    arg0->unk30 = temp;
-    arg0->unk2C = temp;
-    sub->unk1C = func_15144B68(sub->unk1C + (sub->unk20 * D_800BE9A4));
-    sub->unk18 -= D_800BE9A4;
-    if (sub->unk18 < 0.0f) {
+    state = &obj->state;
+    obj->unk5C = state->timeLeft * D_800A1BD8;
+    size = (sinf(state->phase) * state->sizeAmplitude) + state->sizeBase;
+    obj->unk30 = size;
+    obj->unk2C = size;
+    state->phase = func_15144B68(state->phase + (state->phaseSpeed * D_800BE9A4));
+    state->timeLeft -= D_800BE9A4;
+    if (state->timeLeft < 0.0f) {
         return 0;
     }
     return 1;
@@ -406,8 +419,8 @@ void func_150F7F58(struct210 *arg0, s16 arg1) {
 }
 
 extern f32 func_150ADA68(void);
-void func_151541B8(void *, f32, u32, f32, f32, u8, s32);
-void func_151D3F14(void *, u8, s32);
+void func_151541B8(struct17 *pos, f32 arg1, u32 arg2, f32 arg3, f32 arg4, u8 arg5, s32 arg6);
+void func_151D3F14(struct17 *pos, u8, s32);
 struct126 *func_150FF288(struct127 *);
 s32 func_150FF6E0(struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, struct127 *, struct126 *);
 void func_150FF474(struct17 *, struct17 *, s32, s32);
@@ -415,145 +428,125 @@ void func_151D4408(struct17 *, struct17 *, void *, struct127 *, f32, s32, s32);
 
 typedef u8 Func150F9950Entry[0x40];
 
-void func_150F7F8C(void *arg0, u8 arg1, s32 arg2) {
-    f32 temp1;
-    f32 temp0;
+/* Impact effect at `pos`. */
+void func_150F7F8C(struct17 *pos, u8 arg1, s32 arg2) {
+    f32 random1;
+    f32 random0;
 
-    temp0 = func_150ADA68();
-    temp1 = func_150ADA68();
-    func_151541B8(arg0, temp0 * 3.0f + 9.0f, 0x3F030C35, temp1 * 70.0f + 70.0f, 0.0f, arg1, arg2);
-    func_151D3F14(arg0, arg1, arg2);
+    random0 = func_150ADA68();
+    random1 = func_150ADA68();
+    // matching: 0x3F030C35 (0.511905f) is passed as raw bits through an integer argument
+    func_151541B8(pos, random0 * 3.0f + 9.0f, 0x3F030C35, random1 * 70.0f + 70.0f, 0.0f, arg1, arg2);
+    func_151D3F14(pos, arg1, arg2);
 }
 
-void func_150F802C(f32 *arg0, s16 arg1, u8 arg2, s32 arg3) {
-    typedef struct { u32 words[3]; } Copy3;
-    u8 packet[0x90];
-    void *result;
+/* Spawns an effect that follows `target` (a position followed by three more floats), trailing puffs behind it. */
+void func_150F802C(f32 *target, s16 arg1, u8 arg2, s32 arg3) {
+    struct {
+        EffectSpawn spawn;
+        FollowState follow;
+    } packet;
+    EffectObj *obj;
 
-    *(void **)(packet + 0x7C) = arg0;
-    *(f32 *)(packet + 0x80) = arg0[0];
-    *(f32 *)(packet + 0x84) = arg0[1];
-    *(f32 *)(packet + 0x88) = arg0[2];
-    *(f32 *)(packet + 0x8C) = 0.0f;
-    *(f32 *)(packet + 0x00) = 1.0f;
-    *(f32 *)(packet + 0x04) = 1.0f;
-    *(f32 *)(packet + 0x08) = 0.020000001f;
-    *(f32 *)(packet + 0x0C) = 0.020000001f;
-    *(f32 *)(packet + 0x10) = arg0[3];
-    *(f32 *)(packet + 0x14) = arg0[4];
-    *(f32 *)(packet + 0x18) = arg0[5];
-    *(f32 *)(packet + 0x1C) = 1.0f;
-    *(f32 *)(packet + 0x20) = 1.0f;
-    *(f32 *)(packet + 0x24) = 1.0f;
-    *(f32 *)(packet + 0x28) = arg0[0];
-    *(f32 *)(packet + 0x2C) = arg0[1];
-    *(f32 *)(packet + 0x30) = arg0[2];
-    *(f32 *)(packet + 0x34) = 0.0f;
-    *(f32 *)(packet + 0x38) = 0.0f;
-    *(f32 *)(packet + 0x3C) = 0.0f;
-    *(Copy3 *)(packet + 0x40) = *(Copy3 *)&D_800A5480;
-    *(f32 *)(packet + 0x4C) = 0.0f;
-    *(s32 *)(packet + 0x50) = 0x980;
-    *(s16 *)(packet + 0x54) = arg1;
-    *(s16 *)(packet + 0x56) = 0x2F;
-    packet[0x58] = 0;
-    *(s32 *)(packet + 0x5C) = 0;
-    packet[0x60] = 0xFF;
-    packet[0x61] = 0x14;
-    packet[0x62] = 0;
-    packet[0x63] = 0;
-    packet[0x64] = 0;
-    packet[0x65] = 0;
-    packet[0x66] = 0;
-    packet[0x67] = 0;
-    packet[0x68] = 0;
-    packet[0x6A] = 0;
-    *(s32 *)(packet + 0x6C) = 0;
-    packet[0x70] = 0;
-    *(s16 *)(packet + 0x72) = 1;
-    *(s16 *)(packet + 0x74) = 0xFF;
-    *(s32 *)(packet + 0x78) = 0;
-    result = (void *)func_1513264C(packet, 3, 0xFF, 0, 0xB4, arg2, arg3);
-    if (result != 0) {
-        memcpy((u8 *)result + 0x170, packet + 0x7C, 0x14);
+    packet.follow.target = target;
+    packet.follow.trailPos.unk0 = target[0];
+    packet.follow.trailPos.unk4 = target[1];
+    packet.follow.trailPos.unk8 = target[2];
+    packet.follow.trailAge = 0.0f;
+    packet.spawn.unk00 = 1.0f;
+    packet.spawn.unk04 = 1.0f;
+    packet.spawn.unk08 = 0.02000000142f;
+    packet.spawn.unk0C = 0.02000000142f;
+    packet.spawn.unk10 = target[3];
+    packet.spawn.unk14 = target[4];
+    packet.spawn.unk18 = target[5];
+    packet.spawn.unk1C = 1.0f;
+    packet.spawn.unk20 = 1.0f;
+    packet.spawn.unk24 = 1.0f;
+    packet.spawn.pos.unk0 = target[0];
+    packet.spawn.pos.unk4 = target[1];
+    packet.spawn.pos.unk8 = target[2];
+    packet.spawn.vel.unk0 = 0.0f;
+    packet.spawn.vel.unk4 = 0.0f;
+    packet.spawn.vel.unk8 = 0.0f;
+    packet.spawn.unk40 = *(struct17 *)&D_800A5480;
+    packet.spawn.unk4C = 0.0f;
+    packet.spawn.unk50 = 0x980;
+    packet.spawn.unk54 = arg1;
+    packet.spawn.unk56 = 0x2F;
+    packet.spawn.unk58 = 0;
+    packet.spawn.unk5C = 0;
+    packet.spawn.unk60 = 0xFF;
+    packet.spawn.unk61 = 0x14;
+    packet.spawn.unk62 = 0;
+    packet.spawn.unk63 = 0;
+    packet.spawn.unk64 = 0;
+    packet.spawn.unk65 = 0;
+    packet.spawn.unk66 = 0;
+    packet.spawn.unk67 = 0;
+    packet.spawn.unk68 = 0;
+    packet.spawn.unk6A = 0;
+    packet.spawn.owner = NULL;
+    packet.spawn.unk70 = 0;
+    packet.spawn.unk72 = 1;
+    packet.spawn.unk74 = 0xFF;
+    packet.spawn.sound = 0;
+    obj = func_1513264C(&packet, 3, 0xFF, 0, 0xB4, arg2, arg3);
+    if (obj != NULL) {
+        memcpy(&obj->state.follow, &packet.follow, sizeof(packet.follow));
     }
 }
 
-extern s32 func_15145128(struct17 *, struct17 *, f32 *, f32 *);
-extern s32 func_15146078(struct17 *, struct17 *, struct17 *);
+/* Per-frame update of a func_150F802C effect: snaps to its target and drops a puff every 20 units it moved. */
+s32 func_150F81BC(EffectObj *obj) {
+    FollowState *follow;
 
-typedef struct {
-    f32 *unk0;
-    struct17 unk4;
-    f32 unk10;
-} Func150F802CExtra;
-
-typedef struct {
-    u8 pad0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0x13];
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    u8 pad2C[0xC];
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    u8 pad44[0x12C];
-    Func150F802CExtra unk170;
-} Func150F81BCObj;
-
-s32 func_150F81BC(Func150F81BCObj *arg0) {
-    Func150F802CExtra *ext;
-
-    ext = &arg0->unk170;
-    arg0->unk38 = ext->unk0[0];
-    arg0->unk3C = ext->unk0[1];
-    arg0->unk40 = ext->unk0[2];
-    arg0->unk20 = ext->unk0[3];
-    arg0->unk24 = ext->unk0[4];
-    arg0->unk28 = ext->unk0[5];
+    follow = &obj->state.follow;
+    obj->pos.unk0 = follow->target[0];
+    obj->pos.unk4 = follow->target[1];
+    obj->pos.unk8 = follow->target[2];
+    obj->unk20 = follow->target[3];
+    obj->unk24 = follow->target[4];
+    obj->unk28 = follow->target[5];
     {
-        struct17 diff;
+        struct17 delta;
         f32 dist;
         f32 unused;
         struct17 dir;
-        f32 count;
+        f32 puffs;
 
-        diff.unk0 = arg0->unk38 - ext->unk4.unk0;
-        diff.unk4 = arg0->unk3C - ext->unk4.unk4;
-        diff.unk8 = arg0->unk40 - ext->unk4.unk8;
-        ext->unk10 += D_800BE9A4;
-        if (func_15145128(&diff, &dir, &dist, &unused) != 0) {
+        delta.unk0 = obj->pos.unk0 - follow->trailPos.unk0;
+        delta.unk4 = obj->pos.unk4 - follow->trailPos.unk4;
+        delta.unk8 = obj->pos.unk8 - follow->trailPos.unk8;
+        follow->trailAge += D_800BE9A4;
+        if (func_15145128(&delta, &dir, &dist, &unused) != 0) {
             struct17 step;
-            void *ret;
-            Func150F81BCSpawn spawn;
-            Func150F81BCExtra extra;
+            PuffObj *puff;
+            PuffSpawn spawn;
+            PuffState puffState;
 
             step.unk0 = dir.unk0 * 20.0f;
             step.unk4 = dir.unk4 * 20.0f;
             step.unk8 = dir.unk8 * 20.0f;
-            count = dist * 0.05000000075f;
-            if (count > 1.0f) {
-                f32 rate;
+            puffs = dist * 0.05000000075f;
+            if (puffs > 1.0f) {
+                f32 ageStep;
 
-                rate = ext->unk10 / count;
-                func_15146078(&diff, &extra.unk0, &extra.unkC);
-                extra.unk20 = 0.4630000293f;
-                extra.unk24 = 8.241000175f;
-                extra.unk28 = 3.888999939f;
+                ageStep = follow->trailAge / puffs;
+                func_15146078(&delta, &puffState.unk0, &puffState.unkC);
+                puffState.phaseSpeed = 0.4630000293f;
+                puffState.sizeBase = 8.241000175f;
+                puffState.sizeAmplitude = 3.888999939f;
                 spawn.unk0 = 0x7A;
                 spawn.unk1 = 0;
                 spawn.unk2 = 0x4404;
-                spawn.unk4 = 0xA;
+                spawn.unk4 = 10;
                 spawn.unk8 = 0;
                 spawn.unkC = 0;
-                spawn.unk10 = 0xFF;
-                spawn.unk11 = 0xFF;
-                spawn.unk12 = 0xFF;
-                spawn.unk13 = 0xFF;
+                spawn.color[0] = 0xFF;
+                spawn.color[1] = 0xFF;
+                spawn.color[2] = 0xFF;
+                spawn.color[3] = 0xFF;
                 spawn.unk18 = 0.0f;
                 spawn.unk14 = 0.0f;
                 spawn.unk28 = *(struct17 *)&D_800A5480;
@@ -568,22 +561,23 @@ s32 func_150F81BC(Func150F81BCObj *arg0) {
                 spawn.unk4C = 0xFF;
                 spawn.unk50 = 0;
                 do {
-                    extern s32 D_800A4AA0;
+                    extern s32 D_800A4AA0; // matching: a declaration here opens the loop scope IDO's scheduler needs
 
-                    extra.unk1C = 4.712388992f;
-                    extra.unk18 = 27.0f - ext->unk10;
-                    spawn.unk1C = ext->unk4;
-                    spawn.unk44 = extra.unk18 * 6.481481552f;
-                    ret = func_1513D2F0(&spawn, (s32)&D_800A4AA0, 0x24, 0, 0, 0x21, 0, 0, 0, 0x2C, arg0->unkC, arg0->unk1);
-                    if (ret != NULL) {
-                        memcpy((u8 *)ret + 0x110, &extra, sizeof(extra));
+                    puffState.phase = 4.712388992f;
+                    puffState.timeLeft = 27.0f - follow->trailAge;
+                    spawn.pos = follow->trailPos;
+                    spawn.unk44 = puffState.timeLeft * 6.481481552f;
+                    puff = func_1513D2F0(&spawn, (s32)&D_800A4AA0, 0x24, 0, 0, 0x21, 0, 0, 0, 0x2C, obj->unkC,
+                                         obj->unk1);
+                    if (puff != NULL) {
+                        memcpy(&puff->state, &puffState, sizeof(puffState));
                     }
-                    ext->unk4.unk0 += step.unk0;
-                    ext->unk4.unk4 += step.unk4;
-                    ext->unk4.unk8 += step.unk8;
-                    count -= 1.0f;
-                    ext->unk10 -= rate;
-                } while (count > 1.0f);
+                    follow->trailPos.unk0 += step.unk0;
+                    follow->trailPos.unk4 += step.unk4;
+                    follow->trailPos.unk8 += step.unk8;
+                    puffs -= 1.0f;
+                    follow->trailAge -= ageStep;
+                } while (puffs > 1.0f);
             }
         }
     }
