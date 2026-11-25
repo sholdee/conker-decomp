@@ -653,7 +653,7 @@ void func_1511BEBC(struct Obj1511BEBC *obj) {
             if (flag4 == 0) {
                 mode = 2;
                 if (triggered == 0) {
-                    timer = 0x32;
+                    timer = 50;
                     triggered++;
                     if (onTrigger != NULL) {
                         onTrigger(obj);
@@ -671,7 +671,7 @@ void func_1511BEBC(struct Obj1511BEBC *obj) {
                         timer -= D_800BE9E4;
                     } else {
                         timer = 0;
-                        func_10010F88(0x1A4, 0x7FFF, 0, 0, 0, obj->x, obj->y, obj->z, 0x5DC, 0xDAC);
+                        func_10010F88(0x1A4, 0x7FFF, 0, 0, 0, obj->x, obj->y, obj->z, 1500, 3500);
                     }
                 } else {
                     velocity += 1.0f;
@@ -684,7 +684,7 @@ void func_1511BEBC(struct Obj1511BEBC *obj) {
                         if (target != NULL) {
                             target->trap->state = 0;
                         }
-                        func_10010F88(0x1A5, 0x7FFF, 0, 0, 0, obj->x, obj->y, obj->z, 0x5DC, 0xDAC);
+                        func_10010F88(0x1A5, 0x7FFF, 0, 0, 0, obj->x, obj->y, obj->z, 1500, 3500);
                     }
                 }
                 if (target != NULL) {
@@ -694,7 +694,7 @@ void func_1511BEBC(struct Obj1511BEBC *obj) {
                 }
             } else if (target != NULL) {
                 if (triggered == 0 && target->trap->state == 0) {
-                    timer = 0x32;
+                    timer = 50;
                     triggered++;
                 }
                 trap = target->trap;
@@ -920,180 +920,183 @@ struct Wave1511CB44 {
     u16 speed;
     f32 amp;
     s32 unkC;
-    u8 unk10;
-    u8 unk11;
-    u8 unk12;
-    u8 unk13;
-    f32 angle;
+    u8 alphaPhase;
+    u8 alphaPhaseOffset;
+    u8 pulseAlpha;
+    u8 speedPhaseOffset;
+    f32 uvAngle;
     s16 (*uv)[2];
 };
 
 struct Obj1511CB44 {
     u8 pad0[0x10];
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    u16 unk16;
+    s16 x;
+    s16 y;
+    s16 z;
+    u16 count;
     u8 pad18[0x8];
-    Vtx *unk20[2];
-    Vtx *unk28;
+    Vtx *buffers[2];
+    Vtx *source;
     u8 pad2C[0x46];
-    u8 unk72;
+    u8 variant;
     u8 pad73[0x9];
-    struct Wave1511CB44 *unk7C;
+    struct Wave1511CB44 *wave;
     u8 pad80[0xA];
-    u8 unk8A;
+    u8 alpha;
 };
 
 extern s32 D_800902D8;
 extern s32 func_15195FB0(void *, s32, s32, s32, s32, s32, s32);
-extern f32 func_150489B0(u8);
 extern void func_15094AB8(Vtx *arg0, s16 (*arg1)[2], s32 arg2, f32 arg3, s32 arg4, s32 arg5);
 
-void func_1511CB44(struct Obj1511CB44 *arg0) {
+/*
+ * Animates a wave mesh: vertex heights follow a travelling sine wave with per-vertex phase,
+ * shading and alpha pulse with it, and (variant 0xFE) the texture coordinates rotate.
+ */
+void func_1511CB44(struct Obj1511CB44 *obj) {
     Vtx *dst;
     Vtx *src;
-    s32 pad9C;
+    s32 pad9C; // matching: unused stack slots keep the original frame layout
     s32 pad98;
     s32 pad94;
-    f32 base;
+    f32 originZ;
     s32 pad8C;
     s32 created;
-    struct Wave1511CB44 *st;
+    struct Wave1511CB44 *wave;
     s32 i;
     f32 scale;
-    f32 w;
-    f32 s;
+    f32 height;
+    f32 tmp;
     f32 z;
     f32 y;
-    u32 half;
+    u32 halfSpeed;
     u16 speed;
-    u8 c;
-    u8 off;
+    u8 shade;
+    u8 phase;
     s32 mode;
     s32 pad5C;
-    f32 rate;
-    s32 p1;
-    s32 p2;
+    f32 uvRate;
+    s32 uvArg4;
+    s32 uvArg5;
 
-    rate = 0.0f;
+    uvRate = 0.0f;
     if (D_800BE9F0 == 4) {
         mode = 0;
-    } else if (D_800BE9F0 == 0x13) {
+    } else if (D_800BE9F0 == 19) {
         mode = 1;
-        if (arg0->unk72 == 0xFE) {
-            rate = 0.4530000091f;
-            p1 = 0x20;
-            p2 = 0x20;
+        if (obj->variant == 0xFE) {
+            uvRate = 0.4530000091f;
+            uvArg4 = 32;
+            uvArg5 = 32;
         }
     } else {
         return;
     }
-    func_1511CB2C((s32)arg0, &base);
-    base -= arg0->unk14;
-    if (arg0->unk7C == NULL) {
-        created = 1;
-        arg0->unk7C = allocate_memory(0x1C, 1, 0, 0);
-        st = arg0->unk7C;
-        st->phases = allocate_memory(arg0->unk16, 1, 0, 0);
-        if (rate != 0.0f) {
-            st->uv = allocate_memory(arg0->unk16 * 4, 1, 0, 0);
-            for (i = 0; i < arg0->unk16; i++) {
-                st->uv[i][0] = arg0->unk28[i].v.tc[0] - 0x2000;
-                st->uv[i][1] = arg0->unk28[i].v.tc[1] - 0x2000;
+    func_1511CB2C((s32)obj, &originZ);
+    originZ -= obj->z;
+    if (obj->wave == NULL) {
+        created = TRUE;
+        obj->wave = allocate_memory(sizeof(struct Wave1511CB44), 1, 0, 0);
+        wave = obj->wave;
+        wave->phases = allocate_memory(obj->count, 1, 0, 0);
+        if (uvRate != 0.0f) {
+            wave->uv = allocate_memory(obj->count * 4, 1, 0, 0);
+            for (i = 0; i < obj->count; i++) {
+                wave->uv[i][0] = obj->source[i].v.tc[0] - 0x2000;
+                wave->uv[i][1] = obj->source[i].v.tc[1] - 0x2000;
             }
-            st->angle = 0.0f;
+            wave->uvAngle = 0.0f;
         }
     } else {
-        created = 0;
+        created = FALSE;
     }
-    st = arg0->unk7C;
+    wave = obj->wave;
     if (created) {
         if (mode == 0) {
-            st->speed = 0x1DA;
-            st->unk13 = 0x6D;
-            st->amp = 100.0f;
+            wave->speed = 474;
+            wave->speedPhaseOffset = 109;
+            wave->amp = 100.0f;
             scale = 0.1000000015f;
         } else {
             scale = 1.0f;
-            st->speed = 0x259;
-            st->unk13 = 0x6D;
-            st->amp = 36.0f;
+            wave->speed = 601;
+            wave->speedPhaseOffset = 109;
+            wave->amp = 36.0f;
         }
-        st->phase = 0;
-        dst = arg0->unk20[D_800BE9C0];
-        src = arg0->unk28;
-        for (i = 0; i < arg0->unk16; i++) {
-            s = base - arg0->unk28[i].v.ob[2];
-            st->phases[i] = s * scale;
-            dst->v.ob[0] = src->v.ob[0] + arg0->unk10;
-            dst->v.ob[2] = src->v.ob[2] + arg0->unk14;
+        wave->phase = 0;
+        dst = obj->buffers[D_800BE9C0];
+        src = obj->source;
+        for (i = 0; i < obj->count; i++) {
+            tmp = originZ - obj->source[i].v.ob[2];
+            wave->phases[i] = tmp * scale;
+            dst->v.ob[0] = src->v.ob[0] + obj->x;
+            dst->v.ob[2] = src->v.ob[2] + obj->z;
             dst++;
             src++;
         }
-        st->unk12 = 0;
-        st->unk10 = 0;
+        wave->pulseAlpha = 0;
+        wave->alphaPhase = 0;
         if (D_800BE9F0 == 4) {
-            if (arg0->unk72 != 0xF2) {
-                if (arg0->unk72 == 0xF1) {
-                    st->unk11 = 0;
+            if (obj->variant != 0xF2) {
+                if (obj->variant == 0xF1) {
+                    wave->alphaPhaseOffset = 0;
                 } else {
-                    st->unk11 = 0x80;
+                    wave->alphaPhaseOffset = 0x80;
                 }
-                st->unk12 = 1;
+                wave->pulseAlpha = 1;
             }
         }
         if (mode == 1) {
-            st->unkC = func_15195FB0(arg0, D_800902D8, 0, 0, 0, 0, 8);
+            wave->unkC = func_15195FB0(obj, D_800902D8, 0, 0, 0, 0, 8);
         }
     }
-    dst = arg0->unk20[D_800BE9C0];
-    src = arg0->unk28;
-    off = st->phase >> 8;
+    dst = obj->buffers[D_800BE9C0];
+    src = obj->source;
+    phase = wave->phase >> 8;
     scale = 0.8100000024f;
-    for (i = 0; i < arg0->unk16; i++) {
-        w = func_150489B0(st->phases[i] + off);
-        y = (f32)(src->v.ob[1] + arg0->unk12) + w * st->amp;
+    for (i = 0; i < obj->count; i++) {
+        height = func_150489B0(wave->phases[i] + phase);
+        y = (f32)(src->v.ob[1] + obj->y) + height * wave->amp;
         if (mode == 0) {
-            z = src->v.ob[2] + arg0->unk14;
+            z = src->v.ob[2] + obj->z;
             if (z < 12000.0f) {
-                w += 1.0f;
-                w *= 0.5f;
-                s = (z - 12000.0f) * ((1.0f - scale) * w + scale);
-                z = 12000.0f + s;
+                height += 1.0f;
+                height *= 0.5f;
+                tmp = (z - 12000.0f) * ((1.0f - scale) * height + scale);
+                z = 12000.0f + tmp;
                 dst->v.ob[2] = z;
             }
         }
         dst->v.ob[1] = y;
-        if (st->unk12 == 0) {
-            w += 1.0f;
-            c = 32.5f * w + 190.0f;
-            dst->v.cn[0] = c;
-            dst->v.cn[1] = c;
-            dst->v.cn[2] = c;
+        if (wave->pulseAlpha == 0) {
+            height += 1.0f;
+            shade = 32.5f * height + 190.0f;
+            dst->v.cn[0] = shade;
+            dst->v.cn[1] = shade;
+            dst->v.cn[2] = shade;
         }
         dst++;
         src++;
     }
-    speed = st->speed;
+    speed = wave->speed;
     if (mode == 0) {
-        half = (u16)(st->speed >> 1);
-        c = st->unk13;
-        s = (func_150489B0((st->phase >> 8) + c) + 1.0f) * 0.5f * half;
-        speed = half + s;
+        halfSpeed = (u16)(wave->speed >> 1);
+        shade = wave->speedPhaseOffset;
+        tmp = (func_150489B0((wave->phase >> 8) + shade) + 1.0f) * 0.5f * halfSpeed;
+        speed = halfSpeed + tmp;
     }
-    st->phase -= speed * D_800BE9E4;
-    if (st->unk12) {
-        st->unk10 += D_800BE9E4 * 2;
-        arg0->unk8A = (func_150489B0(st->unk10 + st->unk11) + 1.0f) * 0.5f * 205.0f + 50.0f;
+    wave->phase -= speed * D_800BE9E4;
+    if (wave->pulseAlpha) {
+        wave->alphaPhase += D_800BE9E4 * 2;
+        obj->alpha = (func_150489B0(wave->alphaPhase + wave->alphaPhaseOffset) + 1.0f) * 0.5f * 205.0f + 50.0f;
     }
-    if (rate != 0.0f) {
-        func_15094AB8(arg0->unk20[D_800BE9C0], st->uv, arg0->unk16, st->angle, p1, p2);
-        st->angle += rate;
-        if (st->angle >= 360.0f) {
-            st->angle -= 360.0f;
-        } else if (st->angle < 0.0f) {
-            st->angle += 360.0f;
+    if (uvRate != 0.0f) {
+        func_15094AB8(obj->buffers[D_800BE9C0], wave->uv, obj->count, wave->uvAngle, uvArg4, uvArg5);
+        wave->uvAngle += uvRate;
+        if (wave->uvAngle >= 360.0f) {
+            wave->uvAngle -= 360.0f;
+        } else if (wave->uvAngle < 0.0f) {
+            wave->uvAngle += 360.0f;
         }
     }
 }
