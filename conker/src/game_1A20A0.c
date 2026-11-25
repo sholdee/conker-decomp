@@ -351,7 +351,6 @@ typedef struct SwarmFlight {
 } SwarmFlight;
 
 extern SwarmFlight D_8008D0B0[];
-extern s32 D_800C35B0;
 #define D_800D35E4 ((&D_800D35E8)[-1])
 s32 func_150490A8(Vec3f *arg0);
 s32 func_150AD960(s32, s32, s32, s32);
@@ -396,7 +395,7 @@ void func_15175958(SwarmActor *actor) {
         }
         /* flag 0x200: spiral down around (-3478, 3858); pitchStep, yawStep and rollStep then
          * hold the orbit angle, its angular speed and the orbit radius */
-        if (D_800C35B0 >= 60 && !(actor->flags & 0x200)) {
+        if (D_800C35B0[0] >= 60 && !(actor->flags & 0x200)) {
             actor->flags = (actor->flags & ~0x4C) | 0x200;
             dx = actor->x - -3478.0f;
             dz = actor->z - 3858.0f;

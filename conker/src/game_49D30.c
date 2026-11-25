@@ -15,13 +15,6 @@ typedef struct {
     /* 0x6 */ s16 unk6;
 } SeqEvent;
 
-/* A path keyframe: a point the track's actor moves through (D_800C3868[scene][track][key]). */
-typedef struct {
-    /* 0x0 */ s16 x;
-    /* 0x2 */ s16 y;
-    /* 0x4 */ s16 z;
-    /* 0x6 */ u16 linear;  // nonzero: straight segment to the next key, else Catmull-Rom curve
-} SeqPathKey; // size 0x8
 
 /* A channel keyframe: a timed value for one animated property (D_800C3778[scene][track][key]). */
 typedef struct {
@@ -31,14 +24,6 @@ typedef struct {
     /* 0x6 */ s16 time;
 } SeqChannelKey; // size 0x8
 
-/* What a track drives (D_800C35F0[scene][track]); type 2 tracks name an actor id in unk2. */
-typedef struct {
-    /* 0x0 */ u16 type;
-    /* 0x2 */ u8 unk2;
-    /* 0x3 */ u8 unk3;
-    /* 0x4 */ s16 yOffset;
-    /* 0x6 */ s16 unk6;
-} SeqTrackInfo; // size 0x8
 
 /* Arc-length data for a track's path (D_800C3A50[scene][track]), plus the cubic of the cached segment. */
 typedef struct {
@@ -57,9 +42,7 @@ typedef struct {
    each unk field holds depends on the track's SeqTrackInfo type. */
 
 extern u16 *D_800C35C8[];
-extern SeqTrackInfo *D_800C35F0[];
 extern void func_1507E7E4(void *, s32, s32, s32, s32);
-extern s32 D_800C35B0[];
 s32 func_1501D2C4(s32 map, s32 cutscene);
 extern u8 D_800C35AA;
 extern void func_1507F640(void);
@@ -82,7 +65,6 @@ extern void func_15082A44(void *, s32, s32, s32, s32);
 
 
 extern SeqTrackPath *D_800C3A50[];
-extern SeqPathKey *D_800C3868[][30];
 extern SeqSubtitle D_800C3D48; /* == &D_800C3CA0[3] */
 s32 func_1501F72C(s32 track, f32 dist, f32 *out, s32 scene, s32 *segmentOut);
 void func_1501FFE8(f32 *out, SeqPathKey *keys, s32 key, s32 numKeys);
@@ -420,7 +402,6 @@ void func_15022528(s32 scene);
 void func_1501DAAC(s32 scene);
 extern void (*D_800840FC[])(s32, s32, s32, s32);
 extern u8 D_800C35A8;
-extern s32 *D_800C35E0[];
 
 /* Start cutscene `cutscene` of map `map` in scene slot `scene`. If another map is loaded, switch
    maps first (func_1501C730) and leave the request pending in D_800C35C4. Otherwise load the
@@ -871,7 +852,7 @@ void func_1501E73C(s32 scene) {
 
     for (i = 0; i < D_800C363A[scene]; i++) {
         if (D_800C35F0[scene][i].type == 2) {
-            obj = func_15083E90(D_800C35F0[scene][i].unk2);
+            obj = func_15083E90(D_800C35F0[scene][i].targetId);
             if (obj == NULL) {
                 continue;
             }
@@ -1683,7 +1664,7 @@ void func_15020EC4(s32 scene) {
                     MSG.unk14 = state->x;
                     MSG.unk18 = state->y;
                     MSG.unk1C = state->z;
-                    if (ENT(scene, track)->unk2 == 1) {
+                    if (ENT(scene, track)->targetId == 1) {
                         MSG.unk0 = 0;
                         MSG.unk20 = ELEM(scene, (s8)ENT(scene, track)->unk3)->x;
                         MSG.unk24 = ELEM(scene, (s8)ENT(scene, track)->unk3)->y + ENT(scene, track)->yOffset + (state = ELEM(scene, track))->yOffset;
@@ -1691,7 +1672,7 @@ void func_15020EC4(s32 scene) {
                         MSG.unk2C = -state->unk14;
                         MSG.unk30 = tilt3C;
                         MSG.unk34 = tilt40;
-                    } else if (ENT(scene, track)->unk2 == 2) {
+                    } else if (ENT(scene, track)->targetId == 2) {
                         Actor *obj;
 
                         obj = func_15083E90(ENT(scene, track)->unk3);
@@ -1705,7 +1686,7 @@ void func_15020EC4(s32 scene) {
                         MSG.unk2C = -state->unk14;
                         MSG.unk30 = tilt3C;
                         MSG.unk34 = tilt40;
-                    } else if (ENT(scene, track)->unk2 == 3) {
+                    } else if (ENT(scene, track)->targetId == 3) {
                         WorldObject *actor3;
 
                         actor3 = func_151149AC(ENT(scene, track)->unk3);
@@ -1719,7 +1700,7 @@ void func_15020EC4(s32 scene) {
                         MSG.unk2C = -state->unk14;
                         MSG.unk30 = tilt3C;
                         MSG.unk34 = tilt40;
-                    } else if (ENT(scene, track)->unk2 == 0) {
+                    } else if (ENT(scene, track)->targetId == 0) {
                         MSG.unk0 = 1;
                         MSG.unk20 = -state->unk14;
                         MSG.unk24 = state->unkC;
@@ -1732,7 +1713,7 @@ void func_15020EC4(s32 scene) {
                         func_1512D560(player, 7, &MSG);
                     }
                 } else if (ENT(scene, track)->type == 3) {
-                    actor = func_151149AC(ENT(scene, track)->unk2);
+                    actor = func_151149AC(ENT(scene, track)->targetId);
                     if (actor == NULL) {
                         continue;
                     }
@@ -1764,14 +1745,14 @@ void func_15020EC4(s32 scene) {
                 } else if (ENT(scene, track)->type == 2) {
                     Actor *obj2;
 
-                    obj2 = func_15083E90(ENT(scene, track)->unk2);
+                    obj2 = func_15083E90(ENT(scene, track)->targetId);
                     func_1502178C(obj2, scene, track);
                 } else if (ENT(scene, track)->type == 4) {
                     s32 arr[3];
 
-                    arr[0] = ENT(scene, track)->unk2;
-                    arr[1] = ENT(scene, track)->unk2;
-                    arr[2] = ENT(scene, track)->unk2;
+                    arr[0] = ENT(scene, track)->targetId;
+                    arr[1] = ENT(scene, track)->targetId;
+                    arr[2] = ENT(scene, track)->targetId;
                 } else if (ENT(scene, track)->type == 5) {
                     state = ELEM(scene, track);
                     if (state->unk34 >= 1.0f) {
@@ -1816,7 +1797,7 @@ void func_1502178C(Actor *target, s32 scene, s32 onlyTrack) {
             }
             info = &D_800C35F0[scene][track];
             if (info->type == 2) {
-                obj = func_15083E90(info->unk2);
+                obj = func_15083E90(info->targetId);
                 if (obj != NULL && obj == target) {
                     oldPos[0] = obj->x_position;
                     oldPos[1] = obj->y_position;
@@ -1908,7 +1889,7 @@ s32 func_15021DB8(f32 *outX, f32 *outY, f32 *outZ, f32 *target, s32 objIndex, s3
             continue;
         }
         if (D_800C35F0[scene][track].type != 2 ||
-            D_800CC2D0[objIndex].unique_id != D_800C35F0[scene][track].unk2) {
+            D_800CC2D0[objIndex].unique_id != D_800C35F0[scene][track].targetId) {
             continue;
         }
         active = D_800C3960[scene][track];
@@ -1958,7 +1939,7 @@ s32 func_15022024(f32 *outA, f32 *outB, s32 objIndex, s32 scene) {
     }
     for (track = 0; track < D_800C363A[scene]; track++) {
         if (D_800C35C8[scene][track] != 0) {
-            if (D_800C35F0[scene][track].type == 2 && D_800CC2D0[objIndex].unique_id == D_800C35F0[scene][track].unk2) {
+            if (D_800C35F0[scene][track].type == 2 && D_800CC2D0[objIndex].unique_id == D_800C35F0[scene][track].targetId) {
                 outA[1] = 0.0f;
                 outB[1] = 0.0f;
                 outA[0] = 0.0f;
@@ -2041,7 +2022,7 @@ void func_150222E0(s32 track, s32 scene) {
     if (D_800C35C8[scene][track] != 0) {
         info = &D_800C35F0[scene][track];
         if (info->type == 2) {
-            obj = func_15083E90(info->unk2);
+            obj = func_15083E90(info->targetId);
             if (obj != NULL) {
                 obj->eyeCode[0] = 0;
                 obj->eyeCode[1] = 0;
@@ -2068,7 +2049,7 @@ void func_15022398(s32 track, s32 scene) {
 
     if (D_800C35C8[scene][track] != 0) {
         if (D_800C35F0[scene][track].type == 2) {
-            id = D_800C35F0[scene][track].unk2;
+            id = D_800C35F0[scene][track].targetId;
             slot = func_15083E0C(id);
             if (slot != -1) {
                 obj = func_1505EEF4(slot);
@@ -2111,7 +2092,7 @@ void func_15022528(s32 scene) {
             continue;
         }
         if (D_800C35F0[scene][track].type == 2) {
-            obj = func_15083E90(D_800C35F0[scene][track].unk2);
+            obj = func_15083E90(D_800C35F0[scene][track].targetId);
             if (obj != NULL) {
                 func_1502178C(obj, scene, track);
             }
@@ -2153,7 +2134,7 @@ void func_150226BC(s32 track, s32 scene) {
     if (D_800C35C8[scene][track] != 0) {
         info = &D_800C35F0[scene][track];
         if (info->type == 3) {
-            actor = func_151149AC(info->unk2);
+            actor = func_151149AC(info->targetId);
             if (actor != NULL) {
                 if (actor->inactive == 1) {
                     func_15022640(actor->id, scene);
@@ -2257,7 +2238,7 @@ s32 func_150229E4(Actor *obj) {
     }
     for (i = 0; i < D_800C363A[scene]; i++) {
         if (D_800C35C8[scene][i] != 0) {
-            if (D_800C35F0[scene][i].type == 2 && id == D_800C35F0[scene][i].unk2) {
+            if (D_800C35F0[scene][i].type == 2 && id == D_800C35F0[scene][i].targetId) {
                 if (parent == 0) {
                     return 1;
                 }
@@ -2275,7 +2256,7 @@ s32 func_15022B08(s32 actorIndex, s32 scene) {
 
     for (i = 0; i < D_800C363A[scene]; i++) {
         if (D_800C35C8[scene][i] != 0) {
-            if (D_800C35F0[scene][i].unk2 == D_800DBEF4[actorIndex].id) {
+            if (D_800C35F0[scene][i].targetId == D_800DBEF4[actorIndex].id) {
                 return 1;
             }
         }
@@ -2309,7 +2290,7 @@ void func_15022BA4(s32 scene) {
                 key = D_800C3868[scene][track];
                 func_15022190(key->x, key->y, key->z, 0.0f);
             }
-            if (D_800C35F0[scene][track].unk2 == 0) {
+            if (D_800C35F0[scene][track].targetId == 0) {
                 Actor *obj;
                 obj = func_15083E90(D_800C35F0[scene][track].unk3);
                 if (obj == NULL) {
@@ -2318,7 +2299,7 @@ void func_15022BA4(s32 scene) {
                 x = obj->x_position;
                 y = obj->y_position;
                 z = obj->z_position;
-            } else if (D_800C35F0[scene][track].unk2 == 1) {
+            } else if (D_800C35F0[scene][track].targetId == 1) {
                 WorldObject *obj;
                 // matching: the s8 id goes through the pointer variable before the call
                 obj = (WorldObject *)(s8)D_800C35F0[scene][track].unk3;

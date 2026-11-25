@@ -1374,6 +1374,23 @@ typedef struct AnimHeader {
     /* 0xC */ u32 reactionsSize;                      // byte size of reactions
 } AnimHeader; // size 0x10
 
+/* A path keyframe: a point the track's actor moves through (D_800C3868[scene][track][key]). */
+typedef struct {
+    /* 0x0 */ s16 x;
+    /* 0x2 */ s16 y;
+    /* 0x4 */ s16 z;
+    /* 0x6 */ u16 linear;  // nonzero: straight segment to the next key, else Catmull-Rom curve
+} SeqPathKey; // size 0x8
+
+/* What a scene track drives (D_800C35F0[scene][track]). */
+typedef struct SeqTrackInfo {
+    /* 0x0 */ u16 type;     // 1 = camera, 2 = an object (func_15083E90), 3 = an actor (func_151149AC)
+    /* 0x2 */ u8 targetId;  // object / actor id for types 2 and 3
+    /* 0x3 */ u8 unk3;
+    /* 0x4 */ s16 yOffset;
+    /* 0x6 */ s16 unk6;
+} SeqTrackInfo; // size 0x8
+
 /* The header in front of an animation table from D_800D1588. */
 #define ANIM_HEADER(anims) ((AnimHeader *)(anims) - 1)
 

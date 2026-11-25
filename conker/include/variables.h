@@ -995,6 +995,7 @@ extern u8 D_800BEBA0;
 extern s32 D_800BEBA4;
 extern u64 D_800C1060[]; // RSP ucode text buffer
 extern u16 D_800C18B8[];
+extern s32 D_800C35B0[]; // per scene: current time
 extern s32 D_800C35B8[]; /* time at the previous update */
 extern u8 D_800C35C0[];
 extern u8 D_800C35C2;
@@ -1002,8 +1003,10 @@ extern u8 D_800C35C3;
 extern u8  D_800C35C4;
 extern u8  D_800C35C5;
 extern u16 * D_800C35D8[]; /* each track's event count */
+extern u8 **D_800C35E0[]; // per scene: text lists
 extern u8 D_800C35E8[2]; // per scene: changes with each run of the scene
 extern u8  D_800C35EA[2]; // per cutscene scene slot (0/1): cutscene state, 1 = playing
+extern SeqTrackInfo *D_800C35F0[]; // per scene: what each track drives
 extern u8 D_800C35F8;
 extern struct168 D_800C3600; // scripted camera shot
 extern u8  D_800C3638;
@@ -1030,6 +1033,7 @@ extern u8 D_800C3680;
 extern u8  D_800C3681;
 extern u8  D_800C3682;
 extern u8  D_800C3683;
+extern SeqPathKey *D_800C3868[][30]; // per scene and track: path keyframes
 extern SeqTrackState *D_800C3958[]; // per scene: the track states
 extern u8 * D_800C3960[][30];
 extern u8 D_800C3A58;

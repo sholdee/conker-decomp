@@ -22,17 +22,9 @@ typedef struct SeqQueueEntry {
 } SeqQueueEntry;
 
 
-/* What a cutscene track is bound to: 2 = an object (func_15083E90), 3 = an actor (func_151149AC). */
-typedef struct {
-    /* 0x0 */ u16 targetType;
-    /* 0x2 */ u8 targetId;
-    /* 0x3 */ u8 pad3[5];
-} SeqTrackInfo;
 
 /* Cutscene state, indexed by scene (and track). */
 extern SeqEvent *D_800C3688[][30]; /* each track's events */
-extern SeqTrackInfo *D_800C35F0[];
-extern s32 D_800C35B0[];           /* current time */
 
 extern WorldObject *func_151149AC(s32);
 extern s32 func_1502460C(SeqEvent *, s32, s32, s32, s32, Actor *, WorldObject *, f32 *, s32);
@@ -398,7 +390,6 @@ typedef struct {
 #define FPTR(p, o) (*(void **) ((u8 *) (p) + (o)))
 
 extern s8 D_800E0BF4;
-extern u8 **D_800C35E0[];
 extern s32 D_80090214[];
 extern f32 D_800C3678;
 
@@ -581,7 +572,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
         if (event->value >= D_800C363A[scene]) {
             return 1;
         }
-        if (D_800C35F0[scene][event->value].targetType == 1 && D_800C35F8 != event->value) {
+        if (D_800C35F0[scene][event->value].type == 1 && D_800C35F8 != event->value) {
             D_800C35F8 = event->value;
             D_800DBFF4[0] = 4;
             D_800DBFF0->status |= 4;
@@ -682,7 +673,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             }
         } else if (event->value == 0x18) {
         } else if (event->value == 0x1D) {
-            if (D_800C35F0[scene][track].targetType == 3 && actor != NULL) {
+            if (D_800C35F0[scene][track].type == 3 && actor != NULL) {
                 if (event->unk4 == 0) {
                     FU8(actor, 0x6E) = 1;
                 } else {
@@ -1215,7 +1206,6 @@ typedef struct {
     s8 unk6;
 } Ev151D8868;
 
-extern s16 *D_800C3868[][30];
 extern s32 D_8008CA50;
 extern f32 *D_800AAA90;
 typedef struct {
@@ -1466,15 +1456,15 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 f32 from[3];
                 f32 to[3];
 
-                from[0] = D_800C3868[scene][track][0];
-                from[1] = D_800C3868[scene][track][1];
-                from[2] = D_800C3868[scene][track][2];
+                from[0] = D_800C3868[scene][track]->x;
+                from[1] = D_800C3868[scene][track]->y;
+                from[2] = D_800C3868[scene][track]->z;
                 to[0] = D_800C3958[scene][track].x;
                 to[1] = D_800C3958[scene][track].y + D_800C3958[scene][track].yOffset;
                 to[2] = D_800C3958[scene][track].z;
                 func_150B0094(from, to, sceneTag, 1);
             } else {
-                func_150E1AB0(0, D_800C3868[scene][track][0], D_800C3868[scene][track][1], D_800C3868[scene][track][2],
+                func_150E1AB0(0, D_800C3868[scene][track]->x, D_800C3868[scene][track]->y, D_800C3868[scene][track]->z,
                               D_800C3958[scene][track].x, D_800C3958[scene][track].y + D_800C3958[scene][track].yOffset,
                               D_800C3958[scene][track].z, 40.0f, 0.0f, 8.0f, 60.0f, 0x258, 0x23, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                               0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
@@ -1753,9 +1743,9 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         f32 from[3];
                         s32 to[3];
 
-                        from[0] = D_800C3868[scene][track][0];
-                        from[1] = D_800C3868[scene][track][1];
-                        from[2] = D_800C3868[scene][track][2];
+                        from[0] = D_800C3868[scene][track]->x;
+                        from[1] = D_800C3868[scene][track]->y;
+                        from[2] = D_800C3868[scene][track]->z;
                         to[0] = D_800C3958[scene][track].x;
                         to[1] = D_800C3958[scene][track].y;
                         to[2] = D_800C3958[scene][track].z;
@@ -2804,13 +2794,13 @@ void func_1502A8A0(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 sce
     pos = NULL;
     sceneTag = D_800C35E8[scene];
     info = &D_800C35F0[scene][track];
-    if (info->targetType == 2) {
+    if (info->type == 2) {
         obj = func_15083E90(info->targetId);
         if (obj == NULL) {
             return;
         }
         pos = &obj->x_position;
-    } else if (info->targetType == 3) {
+    } else if (info->type == 3) {
         actor = func_151149AC(info->targetId);
         if (actor == NULL) {
             return;
