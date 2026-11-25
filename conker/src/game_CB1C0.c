@@ -1,8 +1,6 @@
 #include <ultra64.h>
 /* functions.h declares this with a signature that doesn't match its real one; rename it out of the way. */
-#define func_15178E14 func_15178E14_header_mismatch
 #include "functions.h"
-#undef func_15178E14
 #include "variables.h"
 
 s32 func_15084000(s32);
@@ -11,7 +9,6 @@ void func_15177F90(u8 memberCount, f32 *targetPos, u8 tag, s32 x, s32 y, s32 z, 
 void func_15178BE4(u8 tag, f32 *targetPos, s16 yOffset);
 void func_15178C34(u8 tag, s32 x, s32 y, s32 z, s16 yOffset);
 s32 func_15178C9C(u8 tag, s32 index);
-void func_15178E14(u8 tag);
 
 s32 func_1509DD10(s32 arg0) {
     return 1;

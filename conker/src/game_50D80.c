@@ -1,7 +1,5 @@
 #include <ultra64.h>
-#define func_1514D3B0 func_1514D3B0_hdr
 #include "functions.h"
-#undef func_1514D3B0
 /* variables.h declares these with the wrong types; they are redeclared below with the types this file uses. */
 #include "variables.h"
 
@@ -462,7 +460,6 @@ extern u8 D_800C3C9D;
 extern s16 D_800C3C9E;
 
 extern void func_1501C730(s32, s32, s32, s32, s32);
-extern s32 func_1514D3B0(void *, s16, s32, s32);
 extern void func_15023440(SeqSubtitle *, s32);
 extern SeqSubtitle *func_150234A4(s32, s32);
 extern s32 func_15052F9C(Actor *, f32, s32, s32, s32, s32, s32, s32, s32, s32);

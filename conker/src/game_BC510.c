@@ -1,10 +1,8 @@
 #include <ultra64.h>
 
 #define func_150A7CB0 func_150A7CB0_hdr
-#define func_1502B7F0 func_1502B7F0_hdr
 #include "functions.h"
 #undef func_150A7CB0
-#undef func_1502B7F0
 void func_1509093C(void);
 void func_150A7CB0(MtxF mtx, f32 x, f32 y, f32 z);
 #define D_800D24C8 D_800D24C8_hdr
@@ -623,7 +621,6 @@ typedef struct WaterStage {
 extern WaterStage D_800D24C8;
 extern s32 D_800D2558[];
 extern s32 func_1502FE10(s32 id, s32 **end, u8 *arg2, WaterVtx **start, s32 *arg4, s32 *arg5, s32 *arg6);
-extern s32 func_1502B7F0(s32 *, s32, s32, s32);
 extern u16 D_800CC382;
 extern u16 D_8009025A;
 extern u16 D_80090262;

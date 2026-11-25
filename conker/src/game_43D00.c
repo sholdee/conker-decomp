@@ -1,7 +1,5 @@
 #include <ultra64.h>
-#define func_1502B7F0 func_1502B7F0_43D00
 #include "functions.h"
-#undef func_1502B7F0
 #define D_800D20FC D_800D20FC_hdr
 #define D_800D2104 D_800D2104_hdr
 #define D_800D2110 D_800D2110_hdr
@@ -44,7 +42,6 @@ typedef struct SpawnRecord {
     /* 0x2F */ u8 unk2F;
 } SpawnRecord; // size 0x30
 
-extern s32 func_1502B7F0(s32 *, s32, s32, s32);
 extern u8 D_800BE590;
 extern u16 D_800BE598[];
 extern s32 D_800BE5A8[];
@@ -329,7 +326,7 @@ void func_15017114(s32 level) {
         bzero(D_800D2104[i], sizeof(Path));
         D_800D2108[i] = 2;
     }
-    if (func_1502B7F0((s32 *)&table, 2, 0x10, level) != 0) {
+    if (func_1502B7F0((void **)&table, 2, 0x10, level) != 0) {
         for (i = D_800D2101; i < D_800D2100; i++) {
             if (table[i - D_800D2101].offset != 0) {
                 D_800D2108[i] = table[i - D_800D2101].count;

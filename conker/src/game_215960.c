@@ -1,8 +1,5 @@
 #include <ultra64.h>
-/* functions.h declares func_1502B7F0 with five parameters; this file calls it with three. */
-#define func_1502B7F0 func_1502B7F0_5
 #include "functions.h"
-#undef func_1502B7F0
 /* variables.h declares D_800BE3F8 as a pointer; this file uses it as an array of SaveSlot215960. */
 #define D_800BE3F8 D_800BE3F8_ptr_decl_in_variables_h
 #include "variables.h"
@@ -61,7 +58,6 @@ extern HudSprite D_8009013C;
 #define TEXTURE_NOT_LOADED ((s32)0x80000000)
 
 extern s32 func_1510D0EC(s32, s32, s32, s32); // matching: s32 params; converting &D_xxx ids to int steers scheduling
-extern s32 func_1502B7F0(s32 *, s32, s32);
 extern void func_10004074(void *);
 Gfx *func_151ED1E0(Gfx *);
 void func_15042D94(s32 x, s32 y, u8 flags, void *fmt, ...);
@@ -2323,7 +2319,7 @@ Gfx *func_151EEBE8(Gfx *gfx, s32 index) {
         u32 size;
 
         table = NULL;
-        size = func_1502B7F0((s32 *)&table, 1, 0x1D);
+        size = func_1502B7F0((void **)&table, 1, 0x1D);
         if ((u32)index < size >> 1) {
             D_8009013C.texId = (void *)table[index];
         } else {

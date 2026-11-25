@@ -1,9 +1,6 @@
 #include <ultra64.h>
 
-#define func_1515D4D4 func_1515D4D4_header
 #include "functions.h"
-#undef func_1515D4D4
-void func_1515D4D4();
 #define D_800D3098 D_800D3098_header
 #define D_800DCD80 D_800DCD80_header
 #define D_800DCD84 D_800DCD84_header

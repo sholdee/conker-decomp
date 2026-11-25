@@ -1,9 +1,7 @@
 #include <ultra64.h>
 
 // matching: func_1506160C, D_800D20FC and D_800BE9F4 are declared below with types that differ from the shared headers
-#define func_1506160C func_1506160C_hdr
 #include "functions.h"
-#undef func_1506160C
 #define D_800D20FC D_800D20FC_hdr
 #define D_800BE9F4 D_800BE9F4_hdr
 #include "variables.h"
@@ -18,7 +16,6 @@ void func_1507D1D8(Actor *obj);
 extern void func_1509C3A0(void);
 
 void func_1507CD0C(Actor *obj);
-void func_1506160C(Actor *, u8, u8, u8, u8);
 void func_1507D4F8(s32);
 void func_1507E1D0(Actor *, f32 *, f32 *, f32 *);
 void func_1517EE40(s32, s32, s32, s32, s8, s32);

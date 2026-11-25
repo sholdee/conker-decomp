@@ -4,14 +4,9 @@
  * The shared headers declare these with parameter types that would change the code here (extra
  * narrowing in callers) or the variable type; hide those declarations and declare them below.
  */
-#define func_1506160C func_1506160C_hdr
 #define func_1000F91C func_1000F91C_hdr
-#define func_1505E874 func_1505E874_hdr
 #include "functions.h"
-#undef func_1506160C
 #undef func_1000F91C
-#undef func_1505E874
-void func_1505E874(s32, Actor *);
 void func_1000F91C(u16, s32, s16, s32, s32, s32, s32, s32, s32, s32);
 u16 func_10010E78(u16, s32, u16, s32, s32, s32, s32, s32, s32, s32, s32);
 #define D_800D1550 D_800D1550_hdr
@@ -3964,7 +3959,6 @@ extern u8 D_80099428[];
 void func_1000EFB4();
 void func_151AE264(Actor *arg0);
 void func_151C6EA0(Actor *arg0, s32 arg1, s32 arg2);
-void func_1506160C(Actor *arg0, u8 arg1, u8 arg2, u8 arg3, s32 arg4);
 void func_1506045C(Actor *arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4);
 /* Player controls for jumping, swimming and the hover (anim 0xE9), from the controller pad. */
 void func_1505F298(Actor *actor, OSContPad *pad) {

@@ -1,6 +1,11 @@
 #include <ultra64.h>
 
+// matching: func_15043BB8 takes (ring, message, size); this caller passes only the ring and lets its own
+// a1/a2 through, so it keeps a one-parameter view
+#define func_15043BB8 func_15043BB8_functions_h
 #include "functions.h"
+#undef func_15043BB8
+void func_15043BB8(struct105 *ring);
 #include "variables.h"
 
 /*

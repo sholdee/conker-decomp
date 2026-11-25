@@ -1,10 +1,8 @@
 #include <ultra64.h>
 // functions.h declares these two with other signatures; this file uses its own prototypes
 #define func_15083568 func_15083568_orig
-#define func_1514D3B0 func_1514D3B0_orig
 #include "functions.h"
 #undef func_15083568
-#undef func_1514D3B0
 #include "variables.h"
 #include "effects.h"
 

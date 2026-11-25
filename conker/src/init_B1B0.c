@@ -4,14 +4,10 @@
    declarations follow below. */
 #define func_1000B1B0 func_1000B1B0_hdr
 #define func_1000B1FC func_1000B1FC_hdr
-#define func_1000D758 func_1000D758_hdr
-#define func_1000DF68 func_1000DF68_hdr
 #include "functions.h"
 #include "variables.h"
 #undef func_1000B1B0
 #undef func_1000B1FC
-#undef func_1000D758
-#undef func_1000DF68
 
 /* Per-frame update hook of a music sequence: takes and returns its private state word. */
 typedef s32 (*MusicCallback)(s32 state, s32 channel, f32 x, f32 y, f32 z);
@@ -76,7 +72,6 @@ MusicTrack *func_1000B1B0(s32 id);
 MusicTrack *func_1000B1FC(s32 id);
 void func_1000D96C(s32 newId, s32 oldId, s32 transition);
 void func_1000DEC4(void);
-void func_1000DF68(s32 id, s32 volume, s32 frames);
 void func_10008C04(u8, u8, s32);
 s32 func_10008CE8(u8, s32);
 void func_1507E7E4(Actor *, u8, u8, u16, s32);

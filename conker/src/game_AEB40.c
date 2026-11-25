@@ -9,7 +9,6 @@
 #define func_1505F0AC func_1505F0AC_hdr
 #define func_15060F28 func_15060F28_hdr
 #define func_150615DC func_150615DC_hdr
-#define func_1506160C func_1506160C_hdr
 #define func_15062BDC func_15062BDC_hdr
 #include "functions.h"
 #undef func_15083E90
@@ -18,7 +17,6 @@
 #undef func_1505F0AC
 #undef func_15060F28
 #undef func_150615DC
-#undef func_1506160C
 #undef func_15062BDC
 
 #define D_800CC2D0 D_800CC2D0_hdr
@@ -341,7 +339,6 @@ extern void func_1505E650(GameObj *obj, u16 arg1, f32 arg2, f32 arg3, f32 arg4, 
 extern GameObj *func_1505F0AC(s32);
 extern void func_15060F28(GameObj *obj, s32 arg1);
 extern void func_150615DC(GameObj *obj);
-extern void func_1506160C(GameObj *obj, s32, u8, u8, s32);
 extern void func_15062BDC(GameObj *obj, f32 arg1, f32 arg2);
 extern void *allocate_memory(s32 size, s32, s32, s32);
 extern s32 func_10004074(void *);

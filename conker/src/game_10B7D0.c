@@ -1,9 +1,7 @@
 #include <ultra64.h>
 /* functions.h has placeholder prototypes for these (void returns, no args); hide them while it is
  * included and declare the real ones below. */
-#define func_150DE32C func_150DE32C_hdr
 #include "functions.h"
-#undef func_150DE32C
 #include "variables.h"
 #include "effects.h"
 

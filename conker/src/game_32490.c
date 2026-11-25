@@ -20,7 +20,7 @@ s32 func_15004FE0(s32 assetId) {
 
     src = NULL;
     i = 0;
-    remaining = func_1502B7F0((s32 *)&src, 3, 12, assetId, 3) / sizeof(struct161);
+    remaining = func_1502B7F0((void **)&src, 3, 12, assetId, 3) / sizeof(struct161);
     AIM_POINTS = allocate_memory(remaining * sizeof(struct160), 1, 1, 0);
     D_800C6654 = remaining;
     while (remaining > 0) {

@@ -1,8 +1,6 @@
 #include <ultra64.h>
 /* functions.h declares these with signatures that don't match their real ones; rename them out of the way. */
-#define func_15178E14 func_15178E14_header_mismatch
 #include "functions.h"
-#undef func_15178E14
 #include "variables.h"
 
 extern s32 func_15168118();

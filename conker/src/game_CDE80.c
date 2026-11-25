@@ -1,8 +1,5 @@
 #include <ultra64.h>
-/* functions.h declares func_150A29C8(u8, u16); golden reads both args as full words. */
-#define func_150A29C8 func_150A29C8_hdr
 #include "functions.h"
-#undef func_150A29C8
 /* variables.h gets these types wrong, so they are shadowed here: D_800D2138 is a struct, D_800D2340 (s16)
    a u16 bit mask, and D_800D3098 (`struct178 D_800D3098[73]`) and D_800D3094 (s32) hold a POINTER to the
    trigger-zone table and its (unsigned) length. */

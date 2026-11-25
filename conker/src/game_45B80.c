@@ -2,7 +2,11 @@
 
 // matching: like D_800BE9D0 below, func_1515D6D0 (Gfx *(Gfx *, s32)) is used through an integer view here
 #define func_1515D6D0 func_1515D6D0_functions_h
+// matching: func_1000D758 takes three floats; this file passes z as raw bits in a2 through an integer view
+#define func_1000D758 func_1000D758_functions_h
 #include "functions.h"
+#undef func_1000D758
+void func_1000D758(f32 x, f32 y, s32 zBits);
 #undef func_1515D6D0
 s32 func_1515D6D0(s32 gfx, s32 player);
 // matching: this file's display-list code only matches with the write head D_800BE9D0 read as an integer

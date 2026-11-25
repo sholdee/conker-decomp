@@ -1,9 +1,6 @@
-#define func_1514D3B0 func_1514D3B0_hdr
 #include <ultra64.h>
 #include "functions.h"
-#undef func_1514D3B0
 // matching: functions.h's (s32, s16, u8, u8) prototype changes the call; this file passes plain ints
-extern s32 func_1514D3B0(void *, s16, s32, s32);
 #include "variables.h"
 
 extern void func_151254F4(Camera *camera, s32 index);

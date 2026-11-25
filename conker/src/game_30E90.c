@@ -1,10 +1,7 @@
-// functions.h declares func_1502B7F0 with five parameters; this file calls it with four and five.
-#define func_1502B7F0 func_1502B7F0__proto
 #include <ultra64.h>
 
 #include "functions.h"
 #include "variables.h"
-#undef func_1502B7F0
 
 typedef void (*ObjectFunc)();
 
@@ -97,7 +94,6 @@ extern void *D_800DBED0[4];
 extern void *D_800DBEE0;
 extern void *D_800DBEE4;
 extern s32 *D_800DBF94;
-s32 func_1502B7F0();
 void *allocate_memory(s32, u32, s32, s32);
 ModelAsset *func_1502B6BC(s32 *, s32, s32, s32, s32, s32);
 void func_1510CE60(Gfx *, s32, s32, s32, s32);

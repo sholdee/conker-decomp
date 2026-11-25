@@ -243,7 +243,7 @@ void func_15007644(void);
 void func_1500764C(void);
 void func_15007668(void);
 void func_15007684(void);
-void func_150076A0();
+void func_150076A0(); /* defined with no parameters, but game_20BDA0.c passes one */
 void func_150076BC(s32 arg0);
 void func_15007718(s32 arg0);
 void func_15007750(s32 arg0);
@@ -718,7 +718,7 @@ s32  func_150C3D48(s32 arg0);
 void func_150CEF10(Camera *arg0);
 
 void func_150DE310(s32 arg0);
-void func_150DE32C(void); // dummy
+void func_150DE32C(s32 arg0, s32 arg1, s32 arg2);
 void func_150DEC90(s32 arg0);
 void func_150EB430(void *arg0, void *arg1);
 void func_150EC4B0(Camera *arg0);
@@ -944,11 +944,11 @@ s32 func_1000C530(s32, u8, f32, f32, f32);
 //func_1000CDA0
 //func_1000CEAC
 //func_1000D2F8
-void func_1000D758(f32 arg0, f32 arg1, s32 arg2);
+void func_1000D758(f32 x, f32 y, f32 z);
 //func_1000D96C
 //func_1000DE1C
 //func_1000DEC4
-s16 func_1000DF68(s32 arg0, s32 arg1, s32 arg2);
+void func_1000DF68(s32 id, s32 volume, s32 frames);
 //func_1000E134
 //func_1000E17C
 //func_1000E2F4
@@ -1049,10 +1049,10 @@ u16 *func_15001DE0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 void func_1501748C(s16 arg0);
 
 s32  func_1501A490(s32 arg0, s16 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
-s32  func_1502B7F0(s32*, s32, s32, s32, s32);
+u32 func_1502B7F0(void **data, s32 depth, ...);
 ActorCtl *func_1503195C(Actor *, s32, s32);
 void func_150403C8(void *arg0, u32 arg1, s32 arg2);
-void func_15043BB8(struct105* arg0);
+s32 func_15043BB8(struct105 *ring, u8 *message, s32 size);
 f32  func_15047C00(f32 arg0);
 f32  func_15047D60(f32 arg0);
 f32  func_150488C8(f32 arg0);
@@ -1066,11 +1066,11 @@ f32  func_1505A72C(Actor *arg0, Actor *arg1);
 void func_1505B5F8(Actor *arg0, f32 arg1);
 void func_1505E650(Actor *arg0, u16 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6);
 u32  func_1505E7CC(s32, Actor*);
-void func_1505E874(u8, Actor*);
+void func_1505E874(s32 sourceIdx, Actor *actor);
 Actor* func_1505F0AC(s32);
 void func_15060778(s32 arg0, Actor *arg1, u16 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 void func_15060F28(Actor *arg0, s32 arg1);
-void func_1506160C(Actor*, s32, u8, u8, s32);
+void func_1506160C(Actor *actor, u8 cmd, u8 value, u8 step, s32 player);
 void func_15062B1C(Actor *arg0, f32 arg1);
 void func_15062B50(Actor *arg0, f32 arg1);
 u8 *func_1506C460(f32, f32, f32, f32, s32, s32, f32, f32, s32, s32, s32);
@@ -1083,7 +1083,7 @@ Actor *func_15083E90(s32);
 void func_15085710(s16, s16, s32);
 s32  func_150859AC(s16 arg0, s16 arg1);
 void func_1508B20C(f32, f32, f32, f32);
-s32  func_150A29C8(s32, s32);
+s32 func_150A29C8(u32 actor, u32 id);
 void func_150A7CB0(MtxF mtx, s32 x, s32 y, s32 z);
 void func_150A8050(MtxF mtx, f32 arg1, f32 arg2, f32 arg3);
 void func_150A9B0C(MtxF mtx, f32, f32, f32, f32, f32, f32);
@@ -1113,26 +1113,26 @@ f32  func_151423D8(u8);
 f32  func_15144598(struct134 *arg0);
 f32  func_1514462C(s32 arg0);
 f32  func_15144B68(f32 arg0);
-void func_1514D3B0(s32, s16, u8, u8);
+s32 func_1514D3B0(Actor *owner, s16 type, s32 msg, s32 arg);
 Gfx *func_1515D6D0(Gfx *gfx, s32 player);
-void func_1515D4D4(u8, u8, u8, s32);
+void func_1515D4D4(s32 r, s32 g, s32 b, u8 priority);
 void func_15169260(void *types, s32 count, s32 event, u8 eventType);
 void func_1516944C(s32, s32, u8);
 void func_15169850(s32, u8, s32, s32, s32);
 void func_15174690(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_15177410(u8 arg0, u8 arg1, s16 arg2, s16 arg3, s16 arg4, f32 arg5, u16 arg6, f32 arg7, s8 arg8, s8 arg9, u8 argA, u8 argB, u8 argC, u8 argD, u8 argE, u8 argF);
 s32  func_1517EFAC(s32 arg0);
-void func_15178E14(u8, s32);
+void func_15178E14(u8 tag);
 s32  func_15187EC0(s32 arg0, f32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7);
 void *func_15195AA8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7);
 void func_151B8DB0(s32 arg0, u8 arg1, u8 arg2, s32 arg3);
 void func_151D5404(Vec3f*, f32, f32, f32, s32, s32, s32, s32);
-void func_151D5714(Actor*, f32*, f32*, s32, f32, s32, s32);
+void func_151D5714(Actor *obj, Vec3f *from, Vec3f *to, u8 bone, f32 scale, u8 arg5, s32 arg6);
 void func_151D9B8C(u8 arg0, f32 arg1, u8 arg2, s32 arg3, Vec3f *arg4, s16 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, s32 argA);
-void func_151DA08C(u8 arg0, f32 arg1, f32 arg2, u8 arg3, s16 arg4, s32 arg5, void *arg6, s32 arg7, s32 arg8);
+s32 func_151DA08C(u8 kind, f32 size, f32 shrink, u8 arg3, s16 lifetime, s32 arg5, Vec3f *pos, s32 arg7, s32 arg8);
 void func_151DBCBC(u8 arg0, f32 arg1, s16 arg2, s32 arg3, void *arg4, u8 arg5, s32 arg6);
 void func_151EF954(MtxF arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7);
-void func_151F3C4C(void);
+s32 func_151F3C4C(s32 arg0, void *dst, s32 len, s32 offset);
 void func_151FA130(void);
 void func_1019EA88(void);
 void func_15168B10(s32 arg0, s32 arg1);

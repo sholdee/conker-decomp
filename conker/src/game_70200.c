@@ -1,10 +1,7 @@
 #include <ultra64.h>
 #include "libc/stdarg.h"
 
-// functions.h declares func_15043BB8 as void(struct105 *); hide that to define the real signature
-#define func_15043BB8 func_15043BB8_header_mismatch
 #include "functions.h"
-#undef func_15043BB8
 #include "variables.h"
 
 void func_15042ECC(u8 *format, s32 *argumentWords);

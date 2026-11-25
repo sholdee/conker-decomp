@@ -100,7 +100,7 @@ void func_15017930(s32 arg0) {
     u32 count;
     s32 type;
 
-    D_800D3094 = func_1502B7F0((s32 *)&D_800D3098, 3, 0xC, arg0, 5);
+    D_800D3094 = func_1502B7F0((void **)&D_800D3098, 3, 0xC, arg0, 5);
     count = D_800D3094 / sizeof(LevelObject);
     D_800D3094 = count;
     func_15017B20(D_800D3098, count);

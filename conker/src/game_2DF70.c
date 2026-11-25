@@ -1,9 +1,6 @@
 #include <ultra64.h>
 
-// functions.h declares func_1502B7F0 with five parameters; this file calls it with four.
-#define func_1502B7F0 func_1502B7F0__proto
 #include "functions.h"
-#undef func_1502B7F0
 #include "variables.h"
 
 #include "macros.h"
@@ -52,7 +49,6 @@ extern s32 *D_800891BC[];
 extern void *D_800DBEB0;
 extern u8 D_800DBEAB;
 extern u8 D_800DBEAC;
-s32 func_1502B7F0();
 extern s32 func_1510D0EC(s32, s32, s32, s32);
 void func_15111858(void);
 

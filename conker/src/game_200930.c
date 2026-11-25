@@ -1,9 +1,5 @@
 #include <ultra64.h>
-/* matching: functions.h declares func_151D5714's arg3/arg5 as s32, but the original takes u8 (read back
-   with lbu from the home slots), so its header prototype is renamed out of the way. */
-#define func_151D5714 func_151D5714_hdr
 #include "functions.h"
-#undef func_151D5714
 #include "variables.h"
 #include "effects.h"
 

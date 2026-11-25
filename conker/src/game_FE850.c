@@ -1,13 +1,7 @@
 #include <ultra64.h>
-/* See game_FEFF0.c: functions.h's u8 colour parameters for func_1515D4D4 make the
- * caller emit `andi 0xFF` masks that the golden does not have.  Shadow the header
- * declaration locally rather than edit the shared header. */
-#define func_1515D4D4 func_1515D4D4_prototype
 #include "functions.h"
-#undef func_1515D4D4
 #include "variables.h"
 
-void func_1515D4D4(s32, s32, s32, s32);
 
 
 extern f32 D_800A08B0;

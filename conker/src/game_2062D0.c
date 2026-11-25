@@ -1,13 +1,10 @@
 #include <ultra64.h>
 
 // functions.h declares these three with other return types; this file uses the s32 versions below.
-#define func_151DA08C func_151DA08C_void_proto
 #include "functions.h"
-#undef func_151DA08C
 #include "variables.h"
 #include "effects.h"
 
-s32 func_151DA08C(u8 kind, f32 size, f32 shrink, u8 arg3, s16 lifetime, s32 arg5, Vec3f *pos, s32 arg7, s32 arg8);
 s32 func_1514672C(Vec3f *arg0);
 s32 func_15046C80(Vec3f *point, s32 arg1, f32 startY, f32 *floorY);
 void func_151D9FC0(u8 kind, f32 size, u8 arg2, s32 arg3, Vec3f *pos, u8 arg5, s32 arg6);
