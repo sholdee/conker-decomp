@@ -78,7 +78,7 @@ typedef struct {
     /* 0x14 */ s16 lifetime;
     /* 0x16 */ u8 flags;
     /* 0x17 */ u8 emitter;     /* D_80089AFC index */
-} BloodTrailDesc; // matching: the callee's copy is 0x1C bytes, but this frame only holds 0x18
+} BloodTrailDesc; // matching: the callee copies 0x1C bytes (two more fields), but this frame holds only 0x18
 
 /* A BloodTrail effect; the effect header's bytes 1 and 0xC are passed on to the drops it emits. */
 typedef struct {
@@ -176,8 +176,8 @@ void func_151A6F00(DebrisEmitter *emitter, u8 mode, u8 arg2, s32 arg3) {
     spawn.fadeStart = 32;
     spawn.fadeRate = 7;
     while (count--) {
-        yaw = (func_150ADA20() % (emitter->yawRange + 1)) + emitter->yawBase;
-        pitch = (func_150ADA20() % (emitter->pitchRange + 1)) + emitter->pitchBase;
+        yaw = func_150ADA20() % (emitter->yawRange + 1) + emitter->yawBase;
+        pitch = func_150ADA20() % (emitter->pitchRange + 1) + emitter->pitchBase;
         /* func_151423D8 is a cosine, so cos(a - 64) is sin(a) */
         sinYaw = func_151423D8((u8)(yaw - 64));
         cosYaw = func_151423D8(yaw);
@@ -191,8 +191,8 @@ void func_151A6F00(DebrisEmitter *emitter, u8 mode, u8 arg2, s32 arg3) {
         case 0: {
             f32 speed;
             f32 velY;
-            speed = (func_150ADA68() * emitter->speedRange) + emitter->speedBase;
-            velY = (func_150ADA68() * emitter->velYRange) + emitter->velYBase;
+            speed = func_150ADA68() * emitter->speedRange + emitter->speedBase;
+            velY = func_150ADA68() * emitter->velYRange + emitter->velYBase;
             spawn.vel.x = speed * sinYaw;
             spawn.vel.y = velY;
             spawn.vel.z = speed * cosYaw;
@@ -200,7 +200,7 @@ void func_151A6F00(DebrisEmitter *emitter, u8 mode, u8 arg2, s32 arg3) {
             break;
         case 1: {
             f32 speed;
-            speed = (func_150ADA68() * emitter->speedRange) + emitter->speedBase;
+            speed = func_150ADA68() * emitter->speedRange + emitter->speedBase;
             spawn.vel.x = speed * cosPitch * sinYaw;
             spawn.vel.y = -speed * sinPitch;
             spawn.vel.z = speed * cosPitch * cosYaw;
@@ -211,18 +211,18 @@ void func_151A6F00(DebrisEmitter *emitter, u8 mode, u8 arg2, s32 arg3) {
             break;
         case 3: {
             f32 speed;
-            speed = (func_150ADA68() * emitter->speedRange) + emitter->speedBase;
+            speed = func_150ADA68() * emitter->speedRange + emitter->speedBase;
             spawn.vel.x = emitter->dir.x * speed;
             spawn.vel.y = emitter->dir.y * speed;
             spawn.vel.z = emitter->dir.z * speed;
             break;
         }
         }
-        size = spawn.sizeXZ = spawn.sizeY = (func_150ADA68() * emitter->sizeRange) + emitter->sizeBase;
+        size = spawn.sizeXZ = spawn.sizeY = func_150ADA68() * emitter->sizeRange + emitter->sizeBase;
         spawn.radius = size * 30.0f;
-        spawn.gravity = (func_150ADA68() * emitter->gravityRange) + emitter->gravityBase;
-        spawn.rotVel.x = (func_150ADA68() * emitter->spinRange) + emitter->spinBase;
-        spawn.rotVel.z = (func_150ADA68() * emitter->spinRange) + emitter->spinBase;
+        spawn.gravity = func_150ADA68() * emitter->gravityRange + emitter->gravityBase;
+        spawn.rotVel.x = func_150ADA68() * emitter->spinRange + emitter->spinBase;
+        spawn.rotVel.z = func_150ADA68() * emitter->spinRange + emitter->spinBase;
         particle = func_15132A4C(&spawn, 0, 0, sizeof(DebrisData), arg2, arg3);
         if (particle != NULL) {
             BloodTrailDesc trailDesc;
@@ -310,9 +310,9 @@ s32 func_151A743C(Particle *particle, f32 x, f32 y, f32 z, f32 floorY) {
     return 1;
 }
 
-void func_151A26EC(f32 *pos, f32 *offset, f32 *vel, f32 drag, f32 gravity, f32 size, s32 timer, s32 alpha,
-                   s32 fadeStart, s32 fadeOutStart, s32 eventTime, s32 eventFunc, s32 r, s32 g, s32 b,
-                   s32 argF, s32 arg10);
+s32 func_151A26EC(f32 *pos, f32 *offset, f32 *vel, f32 drag, f32 gravity, f32 size, s16 timer, u8 alpha,
+                  s16 fadeStart, s16 fadeOutStart, s16 eventTime, s8 eventFunc, u8 r, u8 g, u8 b,
+                  u8 argF, s32 arg10);
 
 extern f32 D_800A8DC8; // matching: 0.001f; as a literal IDO CSEs it with the second 0.001f
 
@@ -344,7 +344,7 @@ void func_151A7610(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, BloodTrail *trai
     }
     speed = func_150ADA68();
     dt = D_800BE9A8;
-    speed = (speed * 166.0f) + 160.0f;
+    speed = speed * 166.0f + 160.0f;
     offset[0] = 0.0f;
     offset[1] = 0.0f;
     offset[2] = 0.0f;
@@ -355,8 +355,8 @@ void func_151A7610(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, BloodTrail *trai
     rand.gravity = func_150ADA68();
     rand.size = func_150ADA68();
     rand.timer = func_150ADA20();
-    func_151A26EC(pos, offset, vel, 1.0f, ((rand.gravity * 591.0f) + -600.0f) * 0.001000000047f,
-                  ((rand.size * 500.0f) + 400.0f) * size, (rand.timer % 21) + 15, (func_150ADA20() % 101) + 100,
+    func_151A26EC(pos, offset, vel, 1.0f, (rand.gravity * 591.0f + -600.0f) /* matching: add.s of -600, not sub.s */ * 0.001000000047f,
+                  (rand.size * 500.0f + 400.0f) * size, rand.timer % 21 + 15, func_150ADA20() % 101 + 100,
                   15, 20, 0, -1, 86, 39, 0, trail->unkC, trail->unk1);
 }
 
