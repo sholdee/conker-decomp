@@ -1,10 +1,8 @@
 #include <ultra64.h>
-/* functions.h types func_1513D668 as void; the golden code for func_151AF6D4 uses its
-   return value.  Same shadow-prototype idiom as game_2062D0.c. */
+/* functions.h types func_1513D668 as void; func_151AF6D4 uses the particle it returns. */
 #define func_1513D668 func_1513D668_void_proto
 #include "functions.h"
 #undef func_1513D668
-s32 func_1513D668(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s16 arg6, f32 arg7, f32 arg8, s32 arg9, s32 argA, u8 argB, s32 argC, u8 argD, s32 argE);
 #include "variables.h"
 
 extern f32 D_800AA0F0[];
@@ -14,222 +12,219 @@ extern f32 D_800AA114;
 extern f32 D_800AA118;
 extern f32 D_800AA11C;
 
-void func_15143134(f32 *, f32 *, s32);
-void func_1504715C(s32, s32);
-s32 func_15046C80(f32 *, s32, f32, s32);
 void func_15143794(s32, s32, f32, f32 *);
 struct260 *func_15130374(void *, u8, s32, u8, s32);
 
+/* Growth applied by func_151AFC08, stored in the spray particle at 0x128. */
 typedef struct {
-    s16 unk0;
-    f32 unk4;
-} AFC08Sub;
+    /* 0x00 */ s16 growEndTimer; // grows while desc.life is above this
+    /* 0x04 */ f32 growRate;     // size gained per frame
+} SprayGrowth;
 
+/* Ground probe result filled by func_1504715C / func_15046C80. */
 typedef struct {
-    char pad0[0x1C];
-    s16 unk1C;
-    char pad1E[0x2C - 0x1E];
-    f32 unk2C;
-    f32 unk30;
-    char pad34[0x58 - 0x34];
-    s32 unk58;
-    u8 unk5C;
-    char pad5D[0x128 - 0x5D];
-    AFC08Sub unk128;
-} AFC08Struct;
+    /* 0x00 */ f32 height;
+    /* 0x04 */ f32 unk04[6];
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 pad1D[7];
+} GroundHit; /* size 0x24 */
 
-typedef struct {
-    char pad_0[0x7A];
-    u16 unk7A;
-    char pad_7C[0x1D4 - 0x7C];
-    s32 field_0x1D4;
-} ActorFields;
+void func_15143134(f32 *, f32 *, Mtx *);
+void func_1504715C(GroundHit *, struct127 *);
+s32 func_15046C80(f32 *, s32, f32, GroundHit *);
 
-s32 func_151AF5C0(f32 *arg0, ActorFields *arg1, s32 arg2, u8 arg3) {
-    f32 sp2C[3];
-    f32 *temp_a0;
-    s32 temp_a2;
+/*
+ * Transforms the fixed offset for `side` (1 or 2) by that side's bone matrix of the actor
+ * (bone 32 or 25) into `pos`.
+ * If `ground` is non-NULL, also probes the ground below that point into it.
+ */
+s32 func_151AF5C0(f32 *pos, struct127 *actor, GroundHit *ground, u8 side) {
+    f32 probe[3];
+    f32 *offset;
+    Mtx *bone;
 
-    if ((arg3 != 1) && (arg3 != 2)) {
+    if ((side != 1) && (side != 2)) {
         return 0;
     }
 
-    if (arg3 == 1) {
-        temp_a0 = D_800AA0FC;
+    if (side == 1) {
+        offset = D_800AA0FC;
     } else {
-        temp_a0 = D_800AA0F0;
+        offset = D_800AA0F0;
     }
 
-    if (arg3 == 1) {
-        temp_a2 = arg1->field_0x1D4 + 0x800;
+    if (side == 1) {
+        bone = (Mtx *)actor->unk1D4 + 32;
     } else {
-        temp_a2 = arg1->field_0x1D4 + 0x640;
+        bone = (Mtx *)actor->unk1D4 + 25;
     }
 
-    func_15143134(temp_a0, arg0, temp_a2);
-    if (arg2 == 0) {
+    func_15143134(offset, pos, bone);
+    if (ground == NULL) {
         return 1;
     }
 
-    sp2C[0] = arg0[0];
-    sp2C[1] = arg0[1] + 100.0f;
-    sp2C[2] = arg0[2];
-    func_1504715C(arg2, (s32) arg1);
-    return func_15046C80(sp2C, 0, arg0[1] - 500.0f, arg2);
+    probe[0] = pos[0];
+    probe[1] = pos[1] + 100.0f;
+    probe[2] = pos[2];
+    func_1504715C(ground, actor);
+    return func_15046C80(probe, 0, pos[1] - 500.0f, ground);
 }
 
 s32 func_151AF6C0(s32 arg0, s32 arg1) {
-    return 0xC;
+    return 12;
 }
 
+/* One corner colour passed to func_1513D668. */
 typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    s16 unk6;
+    s16 r;
+    s16 g;
+    s16 b;
+    s16 a;
     s16 unk8;
-} AF6D4Col;
+} SprayColor;
 
+/* Particle descriptor passed to func_1513D668. */
 typedef struct {
-    u8  unk0;
-    u8  unk1;
-    s16 unk2;
-    s16 unk4;
-    u8  pad6[2];
-    s32 unk8;
-    s32 unkC;
-    u8  unk10;
-    u8  unk11;
-    u8  unk12;
-    u8  unk13;
-    f32 unk14;
-    f32 unk18;
-    struct17 unk1C;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    s32 unk40;
-    u8  unk44;
-    u8  unk45;
-    u8  unk46;
-    u8  unk47;
-    s32 unk48;
-    u8  unk4C;
-    u8  pad4D[3];
-    s32 unk50;
-    s16 unk54;
-    s16 unk56;
-} AF6D4Main; /* 0x58 */
+    /* 0x00 */ u8 unk0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ s16 unk2;
+    /* 0x04 */ s16 life;     // counts down
+    /* 0x06 */ u8 pad6[2];
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ u8 unk10;
+    /* 0x11 */ u8 unk11;
+    /* 0x12 */ u8 unk12;
+    /* 0x13 */ u8 unk13;
+    /* 0x14 */ f32 size0;
+    /* 0x18 */ f32 size1;
+    /* 0x1C */ struct17 pos;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ f32 unk34;
+    /* 0x38 */ f32 unk38;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ s32 flags;
+    /* 0x44 */ u8 alpha;
+    /* 0x45 */ u8 unk45;
+    /* 0x46 */ u8 unk46;
+    /* 0x47 */ u8 unk47;
+    /* 0x48 */ s32 unk48;
+    /* 0x4C */ u8 unk4C;
+    /* 0x4D */ u8 pad4D[3];
+    /* 0x50 */ s32 unk50;
+    /* 0x54 */ s16 unk54;
+    /* 0x56 */ s16 unk56;
+} SprayDesc; /* size 0x58 */
 
+/* The spray particle func_151AF6D4 spawns; updated by func_151AFC08. */
 typedef struct {
-    f32 unk00;
-    f32 unk04;
-    f32 unk08;
-    f32 unk0C;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    u8  unk1C;
-    u8  pad1D[0x7];
-} AF6D4Ground; /* 0x24 */
+    /* 0x000 */ u8 pad0[0x18];
+    /* 0x018 */ SprayDesc desc; // copy of the spawn descriptor
+    /* 0x070 */ u8 pad70[0xB8];
+    /* 0x128 */ SprayGrowth growth;
+} SprayParticle;
 
 extern f32 D_800AA108;
 extern f32 D_800AA10C;
+
 void func_150CCD90(f32, f32 *, f32 *, f32 *);
 void func_1514C678(f32, f32, s32, f32, s32, s32, s32, s32, s32, f32, s32, s32);
+SprayParticle *func_1513D668(SprayDesc *desc, SprayColor *colors, u8 updateFn1, u8 updateFn2, u8 expireFn,
+                             u8 flip, s16 angle, f32 width, f32 height, s32 arg9, f32 *argA, u8 argB,
+                             s32 motionSize, u8 argD, s32 argE);
 
-void func_151AF6D4(ActorFields *arg0, s32 arg1, s32 arg2) {
+/* Spawns a spray particle and a puff at the emission point on the actor's `side`. */
+void func_151AF6D4(struct127 *actor, s32 side, s32 arg2) {
     f32 pos[3];
-    AF6D4Ground ground;
+    GroundHit ground;
     f32 fr;
     f32 fg;
     f32 fb;
-    s32 ret;
-    AFC08Sub extra;
-    AF6D4Main mn;
+    SprayParticle *particle;
+    SprayGrowth growth;
+    SprayDesc desc;
     s32 rnd;
-    AF6D4Col cols[4];
-    s16 spd;
+    SprayColor colors[4];
+    s16 puffCount;
     u8 r;
     u8 g;
     u8 b;
 
-    if (arg0 == 0) {
+    if (actor == NULL) {
         return;
     }
-    if (arg0->field_0x1D4 == 0) {
+    if (actor->unk1D4 == NULL) {
         return;
     }
-    if (func_151AF5C0(pos, arg0, (s32)&ground, (u8)arg1) == 0) {
+    if (func_151AF5C0(pos, actor, &ground, side) == 0) {
         return;
     }
-    if (D_800BE9F0 == 0x14) {
+    if (D_800BE9F0 == 20) {
         func_150CCD90(pos[2], &fr, &fg, &fb);
-        r = (u8)fr;
-        g = (u8)fg;
-        b = (u8)fb;
+        r = fr;
+        g = fg;
+        b = fb;
     } else {
         r = g = b = 0xFF;
     }
-    cols[0].unk0 = r;
-    cols[0].unk2 = g;
-    cols[0].unk4 = b;
-    cols[0].unk6 = 0xB4;
-    cols[0].unk8 = 0;
-    cols[1].unk0 = r;
-    cols[1].unk2 = g;
-    cols[1].unk4 = b;
-    cols[1].unk6 = 0xB4;
-    cols[1].unk8 = 0;
-    cols[2].unk0 = r;
-    cols[2].unk2 = g;
-    cols[2].unk4 = b;
-    cols[2].unk6 = 0xB4;
-    cols[2].unk8 = 0;
-    cols[3].unk0 = r;
-    cols[3].unk2 = g;
-    cols[3].unk4 = b;
-    cols[3].unk6 = 0xB4;
-    cols[3].unk8 = 0;
-    mn.unk0 = 0x50;
-    mn.unk2 = 0x2502;
+    colors[0].r = r;
+    colors[0].g = g;
+    colors[0].b = b;
+    colors[0].a = 180;
+    colors[0].unk8 = 0;
+    colors[1].r = r;
+    colors[1].g = g;
+    colors[1].b = b;
+    colors[1].a = 180;
+    colors[1].unk8 = 0;
+    colors[2].r = r;
+    colors[2].g = g;
+    colors[2].b = b;
+    colors[2].a = 180;
+    colors[2].unk8 = 0;
+    colors[3].r = r;
+    colors[3].g = g;
+    colors[3].b = b;
+    colors[3].a = 180;
+    colors[3].unk8 = 0;
+    desc.unk0 = 0x50;
+    desc.unk2 = 0x2502;
     rnd = func_150ADA20();
-    mn.unk4 = (rnd % 0x3DU) + 0x58;
-    mn.unk8 = 0;
-    mn.unkC = 0;
-    mn.unk10 = 0xFF;
-    mn.unk11 = 0xFF;
-    mn.unk12 = 0xFF;
-    mn.unk13 = 0xFF;
-    mn.unk14 = mn.unk18 = ((func_150ADA68() * 21.0f) + 91.0f) * D_800AA108;
-    mn.unk1C.unk0 = pos[0];
-    mn.unk1C.unk4 = ground.unk00;
-    mn.unk1C.unk8 = pos[2];
-    mn.unk28 = 0.0f;
-    mn.unk2C = 0.0f;
-    mn.unk30 = 0.0f;
-    mn.unk34 = 1.0f;
-    mn.unk38 = 1.0f;
-    mn.unk3C = 1.0f;
-    mn.unk40 = 0x401C0001;
-    mn.unk44 = (func_150ADA20() % 0x29U) + 0x50;
-    mn.unk45 = 0xFF;
-    extra.unk0 = (mn.unk4 - (func_150ADA20() % 6U)) - 8;
-    extra.unk4 = (((func_150ADA68() * 40.0f) + 51.0f) * mn.unk14) * D_800AA10C;
-    mn.unk46 = 0;
-    mn.unk47 = 6;
-    ret = func_1513D668((s32)&mn, (s32)cols, 0, 0x16, 0, 0,
-                        (s16)((arg0->unk7A >> 8) - ((arg1 == 1) ? -0xA : 0xA)),
-                        500.0f, 500.0f, 0, (s32)&ground.unk04, 1, 8, 0xFF, 0);
-    if (ret != 0) {
-        memcpy((u8 *)ret + 0x128, &extra, 8);
+    desc.life = (rnd % 61U) + 88;
+    desc.unk8 = 0;
+    desc.unkC = 0;
+    desc.unk10 = 0xFF;
+    desc.unk11 = 0xFF;
+    desc.unk12 = 0xFF;
+    desc.unk13 = 0xFF;
+    desc.size0 = desc.size1 = ((func_150ADA68() * 21.0f) + 91.0f) * D_800AA108;
+    desc.pos.unk0 = pos[0];
+    desc.pos.unk4 = ground.height;
+    desc.pos.unk8 = pos[2];
+    desc.unk28 = 0.0f;
+    desc.unk2C = 0.0f;
+    desc.unk30 = 0.0f;
+    desc.unk34 = 1.0f;
+    desc.unk38 = 1.0f;
+    desc.unk3C = 1.0f;
+    desc.flags = 0x401C0001;
+    desc.alpha = (func_150ADA20() % 41U) + 80;
+    desc.unk45 = 0xFF;
+    growth.growEndTimer = (desc.life - (func_150ADA20() % 6U)) - 8;
+    growth.growRate = (((func_150ADA68() * 40.0f) + 51.0f) * desc.size0) * D_800AA10C;
+    desc.unk46 = 0;
+    desc.unk47 = 6;
+    particle = func_1513D668(&desc, colors, 0, 0x16, 0, 0, (actor->unk7A >> 8) - ((side == 1) ? -10 : 10),
+                             500.0f, 500.0f, 0, ground.unk04, 1, 8, 0xFF, 0);
+    if (particle != NULL) {
+        memcpy(&particle->growth, &growth, sizeof(growth));
     }
-    spd = (func_150ADA20() % 0xBU) + 5;
+    puffCount = (func_150ADA20() % 11U) + 5;
     func_1514C678(pos[0], pos[1], *(s32 *)&pos[2], (func_150ADA68() * 17.0f) + 29.0f,
-                  0, 0xFF, spd, 0x10, 0, 0.0f, 0, 0xFF);
+                  0, 0xFF, puffCount, 16, 0, 0.0f, 0, 0xFF);
 }
 
 s32 func_151AFBD4(void *arg0) {
@@ -244,20 +239,32 @@ s32 func_151AFBD4(void *arg0) {
     return 1;
 }
 
-s32 func_151AFC08(AFC08Struct *arg0) {
-    AFC08Sub *sub;
+/*
+ * Update for the func_151AF6D4 spray: once flag 1 is set fades it out over the last 32 frames
+ * of its timer, and grows it until the timer reaches growth.growEndTimer.
+ */
+/*
+ * Update for the func_151AF6D4 spray: once flag 1 is set, fades it out over the last 32 frames
+ * of its life and grows it until life drops to growth.growEndTimer.
+ */
+s32 func_151AFC08(SprayParticle *spray) {
+    SprayDesc *desc;
+    SprayGrowth *growth;
 
-    if (arg0->unk58 & 1) {
-        sub = &arg0->unk128;
-        if (arg0->unk1C < 0x20) {
-            if ((arg0->unk1C << 3) < arg0->unk5C) {
-                *(u8*)((u8*)sub - 0xCC) = arg0->unk1C << 3;
+    if (spray->desc.flags & 1) {
+        desc = &spray->desc;
+        growth = &spray->growth;
+        if (spray->desc.life < 32) {
+            if (spray->desc.life * 8 < spray->desc.alpha) {
+                // matching: a store through a second pointer makes IDO reload life afterwards
+                desc->alpha = spray->desc.life * 8;
             }
         }
-        if (sub->unk0 < arg0->unk1C) {
-            f32 v = sub->unk4 * D_800BE9A4;
-            arg0->unk2C = arg0->unk2C + v;
-            arg0->unk30 = arg0->unk30 + v;
+        if (growth->growEndTimer < spray->desc.life) {
+            f32 grow = growth->growRate * D_800BE9A4;
+
+            spray->desc.size0 = spray->desc.size0 + grow;
+            spray->desc.size1 = spray->desc.size1 + grow;
         }
     }
     return 1;
