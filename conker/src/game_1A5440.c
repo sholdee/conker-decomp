@@ -1,4 +1,5 @@
 #include <ultra64.h>
+/* functions.h declares these with signatures that don't match their real ones; rename them out of the way. */
 #define func_15178E14 func_15178E14_header_mismatch
 #define func_10010F88 func_10010F88_hdr
 #define func_150ADA20 func_150ADA20_hdr
@@ -190,7 +191,7 @@ void func_15178268(SwarmMember *member) {
     f32 y;
     f32 z;
     s32 rnd;
-    f32 vec[3];
+    f32 vec[3]; /* direction to the target; only [0] and [2] are set */
     f32 dx;
     f32 dz;
     f32 s;
