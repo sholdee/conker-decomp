@@ -199,7 +199,7 @@ s32 func_1509F850(s32 id, s32 cmd, CommandArgs *args) {
         D_800BE3DF = args->unk8;
         // matching: the redundant '& 0xFF' uses up a temp register that the case 19/23 allocation needs
         D_800BE3E0 = args->unkC & 0xFF;
-        D_800BE9F4 = (s8)D_800BE3DF;
+        D_800BE9F4 = D_800BE3DF;
         break;
     case 20:
         func_151E8214();
@@ -268,7 +268,7 @@ s32 func_1509FE0C(s32 id, s32 query, QueryArgs *args) {
     case 31:
         return D_800BE9F8;
     case 32:
-        return (s8)D_800BE3DF;
+        return D_800BE3DF;
     case 33:
         return D_800BE3E0;
     case 34:

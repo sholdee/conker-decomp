@@ -58,7 +58,6 @@ struct Struct151E4314 {
 };
 
 extern ModeEntry D_800AB68C[];
-/* variables.h types D_8008FD94/D_800E0C20 (s8), D_800BE3DF (signed) wrongly: hence casts. */
 extern struct Struct151E4314 D_800AB7A4[];
 extern s8 D_800E0C00[];
 extern s8 D_800E0BEB;
@@ -417,7 +416,7 @@ void func_151E2834(void) {
             D_800E0AA8 |= 1 << D_800E0C00[i];
         }
     }
-    *(s8 *)&D_8008FD94 = D_8008FD90;
+    D_8008FD94 = D_8008FD90;
     D_800BE618 = D_8008FD8C;
     bzero(D_800E0BB8, 0x10);
     D_800E0AAA = -1;
@@ -453,7 +452,7 @@ void func_151E2834(void) {
     D_800E0AA0[0] = 0;
     D_800E0AA0[1] = 0;
     func_151E7EF8();
-    *(s8 *)&D_800E0C20 = 0;
+    D_800E0C20 = 0;
     D_800D2E40 = 0;
     D_8008FD7C = D_80087270[0];
     func_1501C730(6, param, 0, D_8008FF37[D_8008FD88], playerMask);
@@ -494,7 +493,7 @@ void func_151E30C4(void) {
     D_800E0B99 = 1;
     D_8008FD8C = 1;
     D_8008FD90 = 1;
-    *(s8 *)&D_8008FD94 = 1;
+    D_8008FD94 = 1;
 
     D_800BE618 = 1;
     D_80087260 = 3;
@@ -520,13 +519,13 @@ void func_151E327C(void) {
     D_80087270[0] = 0;
     D_8008FD8C = 1;
     D_8008FD90 = 1;
-    *(s8 *)&D_8008FD94 = 1;
+    D_8008FD94 = 1;
     D_8008FDBC = 0;
     D_800BE618 = 1;
     D_800D23A8 = 0;
     D_800E0B94 = 0;
     D_800D2E40 = 0;
-    func_1501C730(6, *(s8 *)&D_800BE3DF, D_800BE3E0, 0, 1);
+    func_1501C730(6, D_800BE3DF, D_800BE3E0, 0, 1);
     D_800E0B99 = 1;
     D_800E0BB1 = 1;
     func_151E7EF8();
@@ -1439,7 +1438,7 @@ s32 func_151E565C(void) {
     s32 *pj;
 
     gameOver = 0;
-    if (*(s8 *)&D_800E0C20 != 0) {
+    if (D_800E0C20 != 0) {
         return 1;
     }
     if (D_800E0BE0[3] >= 3 && D_8008FD78 <= 0) {
@@ -1459,7 +1458,7 @@ s32 func_151E565C(void) {
                 }
             }
         }
-        if (D_800BE618 - D_8008FD70 < 2 || *(s8 *)&D_8008FD94 - D_8008FD70 <= 0) {
+        if (D_800BE618 - D_8008FD70 < 2 || D_8008FD94 - D_8008FD70 <= 0) {
             gameOver = 1;
         }
         D_800E0AAA = -1;
@@ -1511,7 +1510,7 @@ s32 func_151E565C(void) {
                 }
             }
         }
-        *(s8 *)&D_800E0C20 = gameOver;
+        D_800E0C20 = gameOver;
         return gameOver;
     }
 
@@ -1598,7 +1597,7 @@ s32 func_151E565C(void) {
         gameOver = 1;
         D_800E0AAA = -1;
     }
-    *(s8 *)&D_800E0C20 = gameOver;
+    D_800E0C20 = gameOver;
     return gameOver;
 }
 

@@ -171,7 +171,7 @@ void func_15006590(s32 eepromSlot) {
                 }
                 D_800BE3F8[saveSlot].playTime = D_800BE3E8;
                 D_800BE3F8[saveSlot].flagCount = flagCount;
-                D_800BE3F8[saveSlot].unkC = *(s8 *)&D_800BE3DF; // matching: original loads it signed (lb)
+                D_800BE3F8[saveSlot].unkC = D_800BE3DF;
                 D_800BE3F8[saveSlot].unk4 = D_800BE3E4;
                 D_800BE3F8[saveSlot].sequence = sequence;
                 D_800BE3F8[saveSlot].eepromSlot = eepromSlot;
@@ -245,7 +245,7 @@ void func_15006BEC(s32 saveSlot) {
     *p++ = sequence & 0xFF;
     for (i = 0; i < 27; i++) { *p++ = ((u8 *)D_800D2E4C)[i]; }
     for (i = 0; i < 9; i++) { *p++ = D_800D2E60[i]; }
-    *p++ = *(s8 *)&D_800BE3DF; // matching: original loads it signed (lb)
+    *p++ = D_800BE3DF; // matching: original loads it signed (lb)
     *p++ = D_800BE3E0;
     D_800BE3E4 = func_150859AC(0, 6);
     *p++ = (D_800BE3E4 >> 8) & 0xFF;

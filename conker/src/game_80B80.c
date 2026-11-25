@@ -211,8 +211,7 @@ void func_150538CC(Actor *obj) {
         if (obj->unkB2 != 0) {
             obj->unk83++;
         }
-        // variables.h declares D_800E0C20 as s32; only its first byte is read here
-        if ((*(s8 *)&D_800E0C20 != 0) || (D_800E0B94 != 0)) {
+        if ((D_800E0C20 != 0) || (D_800E0B94 != 0)) {
             obj->unk83 = 1;
             done = 1;
         }

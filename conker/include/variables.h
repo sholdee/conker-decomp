@@ -439,7 +439,7 @@ extern s32  D_8008CFFC[];
 
 extern s8   D_8008FD8C;
 extern s8   D_8008FD90;
-extern s32  D_8008FD94;
+extern s8   D_8008FD94;
 extern s8   D_8008FDA8;
 extern u16  D_8008FDBC;
 
@@ -816,7 +816,7 @@ extern s8   D_800BE3DA;
 extern s8   D_800BE3DB;
 extern s16  D_800BE3DC;
 extern u8   D_800BE3DE;
-extern u8   D_800BE3DF;
+extern s8   D_800BE3DF;
 extern u8   D_800BE3E0;
 extern s32  D_800BE3E8;
 extern u8   D_800BE3EC;
@@ -1024,7 +1024,7 @@ extern u8  D_800D1893;
 extern f32 D_800D1898[];
 extern u16 D_800D18A0;
 extern u16 D_800D18A2;
-extern s32 D_800D18A4;
+extern u8  D_800D18A4[4]; // per player: half-size of the square, minus 4 (game_A9D90)
 extern u8  D_800D18A8;
 extern u8  D_800D18C0;
 extern u8  D_800D18D0;
@@ -1329,7 +1329,7 @@ extern s32  D_800DDF78[];
 
 /* 800E0000 */
 extern u8   D_800E0B94;
-extern s32  D_800E0C20;
+extern s8   D_800E0C20;
 extern s32  D_800E0E04;
 extern TriggerZone *D_800E0900[6]; // per flamethrower character
 extern void *D_800E0930;

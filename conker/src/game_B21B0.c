@@ -321,7 +321,7 @@ void func_15085710(s16 player, s16 stat, s32 value) {
         D_800D213C[player].unkC = value;
         break;
     case 10:
-        if (!D_800BE616 || !*(s8 *)&D_800E0C20) {
+        if (!D_800BE616 || !D_800E0C20) {
             // matching: a block-scoped pointer leaves this case's delay slot unfilled
             PlayerStats *target = PLAYER_STATS(player);
             target->unkC += value;

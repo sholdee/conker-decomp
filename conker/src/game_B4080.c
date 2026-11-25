@@ -3482,7 +3482,7 @@ s32 func_1508E89C(s32 player, s32 source) {
     MpGame *res;
 
     obj = &D_800CC2D0[player];
-    if (((u8 *)&D_800D18A4)[player] > 50) { /* u8 per player; variables.h declares it s32 */
+    if (D_800D18A4[player] > 50) {
         if (!(D_800D18A2 & (1 << player))) {
             bit0 = 1 << player;
             D_800D18A2 |= bit0;
@@ -3533,7 +3533,7 @@ s32 func_1508E89C(s32 player, s32 source) {
             obj->unk31C->unk1AA = savedRot;
             obj->unk31C->unk1AF = 0x40;
             func_15128774(obj->camera, obj);
-            (*(s8 *)&D_8008FD94)++; /* an s8 counter; variables.h declares it s32 */
+            D_8008FD94++;
         }
     }
     return 0;

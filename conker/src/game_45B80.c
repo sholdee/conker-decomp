@@ -44,7 +44,7 @@ void func_150186D0(void) {
     D_800BE5E0 = 1;
     D_800D18A0 = 0;
     D_800D18A2 = 0;
-    D_800D18A4 = 0;
+    *(s32 *)D_800D18A4 = 0; // clears all four players with one word store
     D_800D23A9 = 0;
 
     while (func_1501878C() != 0) {

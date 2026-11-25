@@ -389,7 +389,7 @@ void func_1507D4F8(s32 slot) {
         obj->unkB2 = 0;
 
         if (D_800BE616 != 0) {
-            if (*(s8 *)&D_800E0C20 == 0) {
+            if (D_800E0C20 == 0) {
                 func_1507D1D8(obj);
                 return;
             }
@@ -402,7 +402,7 @@ void func_1507D4F8(s32 slot) {
             func_1501C730(1, 0x22, 0, 0, 0);
             return;
         }
-        func_1501C730(2, *(s8 *)&D_800BE3DF, D_800BE3E0, 0, 0);
+        func_1501C730(2, D_800BE3DF, D_800BE3E0, 0, 0);
         return;
     }
 
@@ -421,7 +421,7 @@ void func_1507D4F8(s32 slot) {
     state = obj->unk31C;
     if (state->unk84 == 0) {
         // matching: the volatile store and load make IDO reload unk31C after the decrement, as the original does
-        *(volatile s8 *)&D_8008FD94 = *(s8 *)&D_8008FD94 - 1;
+        *(volatile s8 *)&D_8008FD94 = D_8008FD94 - 1;
         state = *(ActorCtl *volatile *)&obj->unk31C;
     }
     state->unk120 = 10;
@@ -576,7 +576,6 @@ void func_1507DB64(void) {
 s32 func_1510D0EC(s32, s32 *, s32, s32);
 extern Gfx D_80086B80[];
 extern u8 D_D0F;
-#define D_800D18A4_u8 ((u8 *)&D_800D18A4) /* one byte per player: half-size of the square, minus 4 */
 
 /*
  * Draws a 32x32 RGBA32 textured square centred on player's view (coordinates in 10.2 fixed point). While the
@@ -604,8 +603,8 @@ Gfx *func_1507DB6C(Gfx *gfx, s32 player) {
                         G_TL_TILE | G_TD_CLAMP | G_TP_NONE | G_CYC_1CYCLE | G_PM_NPRIMITIVE,
                     G_AC_NONE | G_ZS_PRIM | G_RM_OPA_SURF | G_RM_OPA_SURF2);
     if (D_800D18A2 & (1 << player)) {
-        if (D_800D18A4_u8[player] >= 4) {
-            D_800D18A4_u8[player] -= 4;
+        if (D_800D18A4[player] >= 4) {
+            D_800D18A4[player] -= 4;
         } else {
             D_800D18A2 &= ~(1 << player);
             func_15181DC8(player);
@@ -613,12 +612,12 @@ Gfx *func_1507DB6C(Gfx *gfx, s32 player) {
             return gfx;
         }
     } else {
-        D_800D18A4_u8[player] += 4;
-        if (D_800D18A4_u8[player] > 60) {
-            D_800D18A4_u8[player] = 60;
+        D_800D18A4[player] += 4;
+        if (D_800D18A4[player] > 60) {
+            D_800D18A4[player] = 60;
         }
     }
-    size = D_800D18A4_u8[player] + 4;
+    size = D_800D18A4[player] + 4;
     // matching: indexing through the (no-op) cast orders the addu as the original
     view = &((RenderView *)D_800BE628)[player];
     left = right = (s32)(view->right + view->left) * 2;
@@ -739,7 +738,7 @@ s32 func_1507E114(s32 arg0) {
     if (mode == 0x22 || mode == 0x18) {
         return 0;
     }
-    D_800BE9F4 = (s8)D_800BE3DF;
+    D_800BE9F4 = D_800BE3DF;
     func_15084D70(0, D_800BE3E0, 1, pos, vec, &unk43, &unk42, &unk44, &unk3C, 1, &type);
     return type + 1;
 }
