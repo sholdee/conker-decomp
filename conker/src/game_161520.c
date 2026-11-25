@@ -1,4 +1,5 @@
 #include <ultra64.h>
+/* This file needs other prototypes for these two than functions.h declares. */
 #define func_150ADA20 func_150ADA20_u8proto
 #define func_151D9B8C func_151D9B8C_s32proto
 #include "functions.h"
@@ -418,6 +419,7 @@ void func_151347CC(void *arg0, BloodActorMsg *msg, u8 message) {
     }
 }
 
+/* Empty callback. */
 void func_151348F0(f32 arg0, f32 arg1, s32 arg2, s32 arg3) {
 }
 
@@ -549,6 +551,7 @@ void func_15134C98(struct260 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
+/* Empty callback. */
 void func_15134CD4(f32 arg0, f32 arg1, s32 arg2, s32 arg3) {
 }
 
@@ -3044,57 +3047,57 @@ void func_1513A6E0(struct127 *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) 
 
     idx = func_150ADA20() % 6U;
     {
-    BloodChunkDesc spawn;
-    u8 extra[4];
-    s32 pad1;
-    extra[0] = 12;
-    spawn.radius = 1.0f;
-    spawn.bounce = 1.0f;
-    spawn.width = spawn.height = (actor->xz_scale + actor->y_scale) * 0.5f;
-    spawn.unk10.x = 0.0f;
-    spawn.unk10.y = 0.0f;
-    spawn.unk10.z = 0.0f;
-    spawn.unk1C = 1.0f;
-    spawn.type = 1.0f;
-    spawn.unk24 = 1.0f;
-    spawn.position.x = 0.0f;
-    spawn.position.y = 0.0f;
-    spawn.position.z = 0.0f;
-    spawn.velocity.x = 0.0f;
-    spawn.velocity.y = 0.0f;
-    spawn.velocity.z = 0.0f;
-    spawn.spin.x = 0.0f;
-    spawn.spin.y = 0.0f;
-    spawn.spin.z = 0.0f;
-    spawn.unk4C = 0.0f;
-    spawn.flags = 0x101900;
-    spawn.unk54 = 100;
-    spawn.unk58 = 5;
-    spawn.unk5C = 0;
-    spawn.unk60 = 255;
-    spawn.unk61 = 0;
-    spawn.unk62 = 0;
-    spawn.unk63 = 0;
-    spawn.unk64 = 0;
-    spawn.unk65 = 0;
-    spawn.unk66 = 0;
-    spawn.unk67 = 0;
-    spawn.unk68 = 5;
-    spawn.unk6A = 1;
-    spawn.owner = actor;
-    spawn.ownerId = actor->unique_id;
-    spawn.unk72 = 12;
-    spawn.unk74 = 21;
-    for (i = 0, mask = 1; i < 4; i++, mask <<= 1) {
-        if (D_800A4278[idx] & mask) {
-            s32 ret;
-            spawn.model = D_800A4280[i];
-            ret = func_15132A4C(&spawn, 3, 0xFF, 1, arg3, arg4);
-            if (ret != 0) {
-                memcpy((void *)(ret + 0x170), extra, 1);
+        BloodChunkDesc spawn;
+        u8 extra[4];
+        s32 pad1; // matching: unused stack slot
+        extra[0] = 12;
+        spawn.radius = 1.0f;
+        spawn.bounce = 1.0f;
+        spawn.width = spawn.height = (actor->xz_scale + actor->y_scale) * 0.5f;
+        spawn.unk10.x = 0.0f;
+        spawn.unk10.y = 0.0f;
+        spawn.unk10.z = 0.0f;
+        spawn.unk1C = 1.0f;
+        spawn.type = 1.0f;
+        spawn.unk24 = 1.0f;
+        spawn.position.x = 0.0f;
+        spawn.position.y = 0.0f;
+        spawn.position.z = 0.0f;
+        spawn.velocity.x = 0.0f;
+        spawn.velocity.y = 0.0f;
+        spawn.velocity.z = 0.0f;
+        spawn.spin.x = 0.0f;
+        spawn.spin.y = 0.0f;
+        spawn.spin.z = 0.0f;
+        spawn.unk4C = 0.0f;
+        spawn.flags = 0x101900;
+        spawn.unk54 = 100;
+        spawn.unk58 = 5;
+        spawn.unk5C = 0;
+        spawn.unk60 = 255;
+        spawn.unk61 = 0;
+        spawn.unk62 = 0;
+        spawn.unk63 = 0;
+        spawn.unk64 = 0;
+        spawn.unk65 = 0;
+        spawn.unk66 = 0;
+        spawn.unk67 = 0;
+        spawn.unk68 = 5;
+        spawn.unk6A = 1;
+        spawn.owner = actor;
+        spawn.ownerId = actor->unique_id;
+        spawn.unk72 = 12;
+        spawn.unk74 = 21;
+        for (i = 0, mask = 1; i < 4; i++, mask <<= 1) {
+            if (D_800A4278[idx] & mask) {
+                s32 ret;
+                spawn.model = D_800A4280[i];
+                ret = func_15132A4C(&spawn, 3, 0xFF, 1, arg3, arg4);
+                if (ret != 0) {
+                    memcpy((void *)(ret + 0x170), extra, 1);
+                }
             }
         }
-    }
     }
     if (actor->unk1D4 != 0 && (actor->unk74 & 0xF) != 0xF) {
         Vec3f a;
@@ -3105,8 +3108,8 @@ void func_1513A6E0(struct127 *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) 
         u32 r2;
         func_1513A5E0((Vec3f *)origin, arg3 & 0xFF, arg4);
         {
-        s32 q;
-        func_1503F404((s32)BONE_MATRIX(actor, 12), &a.x, &a.y, &a.z, &v.x, &v.y, &v.z, &b.x, &b.y, &b.z);
+            s32 q; // matching: unused stack slot
+            func_1503F404((s32)BONE_MATRIX(actor, 12), &a.x, &a.y, &a.z, &v.x, &v.y, &v.z, &b.x, &b.y, &b.z);
         }
         spawn2.radius = 1.0f;
         spawn2.bounce = 0.6490000486f;
