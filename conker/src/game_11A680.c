@@ -610,7 +610,7 @@ void func_150EEC84(Actor *obj) {
     s32 index;
 
     obj->unk5 = 3;
-    obj->unkE4 = 0;
+    obj->bodyRadius = 0;
     obj->immune = 0xFF;
     obj->unk328 = 0;
     if (obj->camera != NULL) {
@@ -638,7 +638,7 @@ void func_150EEDA8(Actor *obj) {
     if (obj->unk5 != 3) {
         func_151045E0(obj, 15, 250.0f);
         obj->unk5 = 3;
-        obj->unkE4 = 0;
+        obj->bodyRadius = 0;
         obj->immune = 0xFF;
     }
     func_15052590(obj);

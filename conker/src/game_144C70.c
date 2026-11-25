@@ -432,7 +432,7 @@ void func_15117F3C(WorldObject *prop) {
                 continue;
             }
             if (obj->y_position + 40.0f < anchor[1]) {
-                dy = (obj->y_position + (f32)obj->unkE6) - anchor[1];
+                dy = (obj->y_position + (f32)obj->bodyHeight) - anchor[1];
                 dz = obj->z_position - anchor[2];
                 dx = obj->x_position - anchor[0];
                 distSq = dz * dz + (dx * dx + dy * dy);

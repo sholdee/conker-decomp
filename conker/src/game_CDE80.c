@@ -522,7 +522,7 @@ s32 func_150A1DA0(Actor *actor, TriggerZone *zone, s32 withMargin) {
     dx = actor->x_position - zone->x;
     dy = actor->y_position - zone->y;
     dz = actor->z_position - zone->z;
-    margin = withMargin ? actor->unkE4 : 0;
+    margin = withMargin ? actor->bodyRadius : 0;
     if (!(zone->flags & 1) || ((f32)(s32)actor->y_position - actor->floorY <= 5.0f)) {
         switch (ZONE_SHAPE(zone)) {
         case 0:

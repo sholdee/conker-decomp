@@ -989,9 +989,9 @@ void func_150837D4(s32 objIdx, s32 modelId, s32 arg2) {
 
     obj->id = modelId;
     if (modelId == 0xFF) {
-        obj->unkE4 = 0;
-        obj->unkE6 = 0;
-        obj->unkE8 = 0;
+        obj->bodyRadius = 0;
+        obj->bodyHeight = 0;
+        obj->bodyOffsetY = 0;
         obj->unkD2 = 70;
         obj->unkD4 = 70;
         obj->unkD6 = 0;

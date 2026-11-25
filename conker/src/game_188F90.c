@@ -290,13 +290,13 @@ void func_1515C1A0(Actor *actor, Vec3f *center, f32 *radius, f32 *arg3) {
     }
 }
 
-/* Like func_1515C1A0, using the second set of bounds (unkE4/unkE6/unkE8). */
+/* Like func_1515C1A0, using the body cylinder (bodyRadius/bodyHeight/bodyOffsetY). */
 void func_1515C244(Actor *actor, Vec3f *center, f32 *radius, f32 *arg3) {
     if ((actor->id < 0xBB) && (actor->id != 0xFF)) {
-        *radius = actor->unkE4;
-        *arg3 = actor->unkE6;
+        *radius = actor->bodyRadius;
+        *arg3 = actor->bodyHeight;
         center->x = actor->x_position;
-        center->y = actor->y_position + (s16)actor->unkE8; // Actor declares unkE8 u16; read signed (lh)
+        center->y = actor->y_position + actor->bodyOffsetY;
         center->z = actor->z_position;
     } else {
         *radius = 1.0f;

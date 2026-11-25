@@ -1264,7 +1264,7 @@ void func_1502E4C4(s32 index) {
         cullDist = 0.0f;
     } else {
         if (D_800D1C90[id]->cullDistance == 0) {
-            cullDist = obj->unkE4;
+            cullDist = obj->bodyRadius;
         } else if (D_800D1C90[id]->cullDistance == 1) {
             cullDist = 0.0f;
         } else {

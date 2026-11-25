@@ -878,7 +878,7 @@ void func_1515FC60(Actor *obj, TriggerZone *zone) {
         if (value != 0) {
             scale = (f32)(u32)value * 0.009999999776f;
             value = func_150AD960(zone->x, zone->z, obj->x_position, obj->z_position);
-            limit = (zone->radius * scale) - obj->unkE4;
+            limit = (zone->radius * scale) - obj->bodyRadius;
             if (limit > value) {
                 return;
             }

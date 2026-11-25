@@ -1018,8 +1018,8 @@ u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32
     }
     obj->unk28 = 100.0f;
     obj->unk114 = 255.0f;
-    obj->unkE4 = 5;
-    obj->unkE6 = 5;
+    obj->bodyRadius = 5;
+    obj->bodyHeight = 5;
     obj->unkEC = 1.0f;
     obj->unkF0 = 1.0f;
     obj->unkDC = 1.0f;
@@ -3187,8 +3187,8 @@ void func_1507266C(void) {
     obj->stunned = 0;
     obj->immune = 0xFF;
     obj->unk218 = NULL;
-    obj->unkE4 = 0;
-    obj->unkE6 = 0;
+    obj->bodyRadius = 0;
+    obj->bodyHeight = 0;
     obj->unk232 = packed;
     obj->unkEC = 1.0f;
     obj->unkF0 = 1.0f;
@@ -3494,8 +3494,8 @@ u8 *func_15073118(u8 *parent, s32 bone, s32 anim, f32 offX, f32 offY, f32 offZ, 
         obj->unkF8 = 0x100E;
     }
     obj->unk66 = ((Actor *)parent)->unk66 & 0xC;
-    obj->unkE4 = 10;
-    obj->unkE6 = 10;
+    obj->bodyRadius = 10;
+    obj->bodyHeight = 10;
     obj->unkEC = 1.0f;
     obj->unkF0 = 1.0f;
     obj->unkDC = 1.0f;

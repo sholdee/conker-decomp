@@ -1442,16 +1442,16 @@ struct Actor {
     /* 0x0CE */ s16 unkCE;
     /* 0x0D0 */ u8  unkD0;
     /* 0x0D1 */ s8  padD1;
-    /* 0x0D2 */ s16 unkD2;    // used
-    /* 0x0D4 */ s16 unkD4;    // used
-    /* 0x0D6 */ s16 unkD6;    // used
+    /* 0x0D2 */ s16 unkD2;    // first set of bounds (func_1515C1A0): radius,
+    /* 0x0D4 */ s16 unkD4;    // ...
+    /* 0x0D6 */ s16 unkD6;    // ... and centre height above the position
     /* 0x0D8 */ s16 unkD8;
     /* 0x0DA */ s16 unkDA;
     /* 0x0DC */ f32 unkDC;    // used
     /* 0x0E0 */ f32 unkE0;    // used
-    /* 0x0E4 */ s16 unkE4;    // used
-    /* 0x0E6 */ s16 unkE6;    // used
-    /* 0x0E8 */ u16 unkE8;    // used
+    /* 0x0E4 */ s16 bodyRadius;  // body cylinder (func_15062AC4, collisions in game_83300)
+    /* 0x0E6 */ s16 bodyHeight;
+    /* 0x0E8 */ s16 bodyOffsetY; // its centre's height above the position (scaled by y_scale)
     /* 0x0EA */ u16 unkEA;
     /* 0x0EC */ f32 unkEC;
     /* 0x0F0 */ f32 unkF0;

@@ -529,9 +529,9 @@ s32 func_15132DDC(Particle *particle) {
             probe.floorTri = particle->floor.surface;
             probe.unk28 = 1.0f;
             probe.xz_scale = 1.0f;
-            probe.unkE4 = particle->radius;
+            probe.bodyRadius = particle->radius;
             probe.y_scale = 1.0f;
-            probe.unkE6 = particle->radius;
+            probe.bodyHeight = particle->radius;
             if (particle->floor.unk1C & 2) {
                 probe.floorY = particle->floor.height;
             } else {

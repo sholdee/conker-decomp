@@ -1085,7 +1085,7 @@ void func_1504CB98(Actor *actor) {
                     if (heightDiff > 30.0f) {
                         nudgeX = 30.0f;
                     }
-                    nudgeX = (2.0f * D_800CC2D0[D_800CC26C].unkE4) - nudgeX;
+                    nudgeX = (2.0f * D_800CC2D0[D_800CC26C].bodyRadius) - nudgeX;
                     actor->unk54 *= 0.6f;
                     actor->xz_velocity = D_800CC2D0[D_800CC26C].unk44;
                     if (D_800CC2D0[D_800CC26C].unk44 < D_800CC2D0[D_800CC26C].xz_velocity) {

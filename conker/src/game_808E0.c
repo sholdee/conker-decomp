@@ -76,7 +76,7 @@ s32 func_150535F4(Actor *obj) {
 /** Sets obj's interaction state to 8 and starts func_1506160C mode 6. */
 void func_15053694(Actor *obj) {
     obj->interaction_state = 8;
-    obj->unkE4 = 0;
-    obj->unkE6 = 0;
+    obj->bodyRadius = 0;
+    obj->bodyHeight = 0;
     func_1506160C(obj, 6, 0, 0, 0);
 }

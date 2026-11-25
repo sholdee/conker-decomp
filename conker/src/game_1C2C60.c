@@ -1551,11 +1551,11 @@ s32 func_15198570(CharacterFlamethrowerActor *actor) {
             i = actor->capacity - 1;
         }
         pos = points[i].pos;
-        r = obj->unkE4;
-        h = obj->unkE6;
+        r = obj->bodyRadius;
+        h = obj->bodyHeight;
         dx = pos.x - obj->x_position;
         dz = pos.z - obj->z_position;
-        dy = pos.y - (obj->y_position + (s16)obj->unkE8);
+        dy = pos.y - (obj->y_position + obj->bodyOffsetY);
         dy *= (1.0f + r / h) * 0.5f;
         d = dx * dx + dy * dy + dz * dz;
         if (d < r * r) {
@@ -1605,11 +1605,11 @@ s32 func_151987CC(CharacterFlamethrowerActor *actor) {
                     i = actor->capacity - 1;
                 }
                 pos = points[i].pos;
-                r = obj->unkE4;
-                h = obj->unkE6;
+                r = obj->bodyRadius;
+                h = obj->bodyHeight;
                 dx = pos.x - obj->x_position;
                 dz = pos.z - obj->z_position;
-                dy = pos.y - (obj->y_position + (s16)obj->unkE8);
+                dy = pos.y - (obj->y_position + obj->bodyOffsetY);
                 dy *= (1.0f + r / h) * 0.5f;
                 if (dx * dx + dy * dy + dz * dz < r * r + 2500.0f) {
                     while (i != actor->tail) {

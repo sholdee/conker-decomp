@@ -53,8 +53,8 @@ void func_15088780(Actor *);
 
 void func_150536D0(Actor *obj) {
     obj->interaction_state = 13;
-    obj->unkE4 = 0;
-    obj->unkE6 = 0;
+    obj->bodyRadius = 0;
+    obj->bodyHeight = 0;
 }
 
 void func_150536E8(Actor *obj) {
@@ -859,8 +859,8 @@ void func_15055A2C(s32 arg0, f32 x, f32 y, f32 z, s32 arg4) {
 void func_15055B0C(Actor *obj, s32 duration) {
     obj->interaction_state = 39;
     func_1505E650(obj, obj->unk84.uh, 0, 0.0f, 0.0f, 0.0f, 0);
-    obj->unkE4 = 0;
-    obj->unkE6 = 0;
+    obj->bodyRadius = 0;
+    obj->bodyHeight = 0;
     obj->unk21C = duration;
 }
 
@@ -915,8 +915,8 @@ void func_15055D48(Actor *obj) {
             obj->stunned = 0xFF;
             obj->disable_run = 0xFF;
             obj->unkF8 |= 0x200;
-            obj->unkE4 = 0;
-            obj->unkE6 = 0;
+            obj->bodyRadius = 0;
+            obj->bodyHeight = 0;
             obj->unk7 = 0;
             obj->health = 0;
             obj->interaction_state = 5;

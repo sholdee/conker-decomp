@@ -20,8 +20,8 @@ s32 func_150BB760(Actor *actor) {
         return 1;
     }
     if (actor != NULL && actor->interaction_state != 0 && actor->unk1D4 != NULL) {
-        width = actor->unkE4;
-        height = actor->unkE6;
+        width = actor->bodyRadius;
+        height = actor->bodyHeight;
         sine = func_151423D8(actor->unk76 >> 8);
         cosine = func_151423D8((actor->unk76 >> 8) + 0x40);
         offsetX = actor->xz_velocity * sine * 0.5f;
@@ -145,8 +145,8 @@ s32 func_150BBB5C(Actor *actor) {
         return 1;
     }
     if (actor != NULL && actor->interaction_state != 0) {
-        width = actor->unkE4;
-        height = actor->unkE6;
+        width = actor->bodyRadius;
+        height = actor->bodyHeight;
         count1 = (func_150ADA20() & 3) + 6;
         count2 = (func_150ADA20() & 3) + 0xA;
         sine = func_151423D8(actor->unk76 >> 8);
@@ -344,7 +344,7 @@ s32 func_150BC488(Actor *actor) {
         return 1;
     }
     if (actor != NULL && actor->interaction_state != 0) {
-        width = actor->unkE4;
+        width = actor->bodyRadius;
         count = (func_150ADA20() & 3) + 6;
         particle.model = 1;
         particle.flags = 0x29E9;
@@ -526,8 +526,8 @@ s32 func_150BCBBC(Actor *actor) {
         return 1;
     }
     if (actor != NULL && actor->interaction_state != 0) {
-        width = actor->unkE4;
-        height = actor->unkE6;
+        width = actor->bodyRadius;
+        height = actor->bodyHeight;
         count = func_150ADA20() & 1;
         particle.model = 1;
         particle.lifetime = 0x96;

@@ -54,14 +54,14 @@ void func_1507C3E0(Actor *obj, s16 *outHeight, s16 *outWidth, s16 *outDepth) {
         height = obj->camera->unk960;
         width = depth = obj->camera->unk95C;
     } else if (obj->interaction_state == 4) {
-        height = obj->unkE6 * 6.0f;
-        width = depth = obj->unkE4 * 3.0f;
+        height = obj->bodyHeight * 6.0f;
+        width = depth = obj->bodyRadius * 3.0f;
     } else if (obj->interaction_state == 44) {
         width = depth = 80.0f;
         height = 160.0f;
     } else if (obj->unk5 == 5) {
-        height = obj->unkE6 * 2.0f;
-        width = depth = obj->unkE4;
+        height = obj->bodyHeight * 2.0f;
+        width = depth = obj->bodyRadius;
     } else {
         switch (obj->id) {
         case 0: case 1: case 2: case 3: case 4:
@@ -130,8 +130,8 @@ void func_1507C3E0(Actor *obj, s16 *outHeight, s16 *outWidth, s16 *outDepth) {
             break;
         default:
             applyScale = 0;
-            height = obj->unkE6 * 2.0f;
-            width = depth = obj->unkE4;
+            height = obj->bodyHeight * 2.0f;
+            width = depth = obj->bodyRadius;
             break;
         }
         if (obj->unk13C > 100 && D_800CC2D0[obj->unk13C - 100].id == 19) {

@@ -264,8 +264,8 @@ lbl2: // matching: unused label splits the basic block; as1 then hoists the relo
     obj->stunned = 0xFF;
     obj->disable_run = 0xFF;
     obj->unkF8 |= 0x200;
-    obj->unkE4 = 0;
-    obj->unkE6 = 0;
+    obj->bodyRadius = 0;
+    obj->bodyHeight = 0;
     obj->xz_velocity = 0.0f;
     obj->unk31C->unk46 = 0;
     if (obj->unk13C != 0) {

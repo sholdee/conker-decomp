@@ -3113,7 +3113,7 @@ void func_1505D5D0(Actor *actor, Actor *other, f32 x, f32 y, f32 z, f32 ratio, f
         func_1505D408(actor, other, dx, dy, dz, distSq, sumRadius, otherSlot);
     }
 }
-/* Resolves collisions between the actor's body cylinder (unkE4/unkE8/unkEC) and every other actor's. */
+/* Resolves collisions between the actor's body cylinder (bodyRadius/bodyOffsetY/unkEC) and every other actor's. */
 void func_1505D6F0(Actor *actor, s32 selfIdx) {
     f32 dx;
     f32 dy;
@@ -3137,12 +3137,12 @@ void func_1505D6F0(Actor *actor, s32 selfIdx) {
     count = 25;
     if (((actor->interaction_state != 1) ||
          ((D_800CC2D0[selfIdx].unk31C->unk4E == 0) && (D_800CC2D0[selfIdx].unk31C->unk27 == 0))) &&
-        (actor->unk13D < 100) && (actor->unkE4 != 0) && (actor->unk65 == 0) && !(actor->unkF8 & 0x01000000) &&
+        (actor->unk13D < 100) && (actor->bodyRadius != 0) && (actor->unk65 == 0) && !(actor->unkF8 & 0x01000000) &&
         !(actor->unkF8 & 0x4000)) {
-        radius = actor->unkE4;
+        radius = actor->bodyRadius;
         height = actor->unkEC;
         x = actor->x_position;
-        y = actor->y_position + (s16)actor->unkE8;
+        y = actor->y_position + actor->bodyOffsetY;
         z = actor->z_position;
         if (actor->unkF8 & 0x02000000) {
             count = 1;
@@ -3152,7 +3152,7 @@ void func_1505D6F0(Actor *actor, s32 selfIdx) {
             if (other->interaction_state == 0) {
                 continue;
             }
-            if (other->unkE4 < 2) {
+            if (other->bodyRadius < 2) {
                 continue;
             }
             if ((other->unkF8 & 0x02000000) && (actor->unk127 == 0xFF)) {
@@ -3173,11 +3173,11 @@ void func_1505D6F0(Actor *actor, s32 selfIdx) {
             if (other->unk2FA == 0) {
                 continue;
             }
-            otherRadius = other->unkE4;
+            otherRadius = other->bodyRadius;
             sumRadius = radius + otherRadius;
             dx = x - other->x_position;
             dz = z - other->z_position;
-            dy = y - (other->y_position + (s16)other->unkE8);
+            dy = y - (other->y_position + other->bodyOffsetY);
             dy *= (height + other->unkEC) * 0.5f;
             if ((D_800BE616 != 0) && (((dx * dx) + (dy * dy) + (dz * dz)) < 30000.0f) &&
                 (actor->interaction_state == 1) && (other->interaction_state == 1) &&
@@ -5288,12 +5288,12 @@ void func_15062800(Actor *a, Actor *b) {
     func_150627D4(b);
 }
 
-/* Recomputes the body cylinder ratios: unkEC = radius / height, unkF0 = height / radius (radius unkE4, height unkE6). */
+/* Recomputes the body cylinder ratios: unkEC = radius / height, unkF0 = height / radius (radius bodyRadius, height bodyHeight). */
 void func_15062AC4(Actor *actor) {
-    if (actor->unkE6 && actor->unkE4) {
-        f32 radius = actor->unkE4;
-        actor->unkEC = radius / actor->unkE6;
-        actor->unkF0 = actor->unkE6 / radius;
+    if (actor->bodyHeight && actor->bodyRadius) {
+        f32 radius = actor->bodyRadius;
+        actor->unkEC = radius / actor->bodyHeight;
+        actor->unkF0 = actor->bodyHeight / radius;
     } else {
         actor->unkF0 = actor->unkEC = 0.0f;
     }
@@ -5301,13 +5301,13 @@ void func_15062AC4(Actor *actor) {
 
 /* Sets the body radius to xz_scale * radius. */
 void func_15062B1C(Actor *actor, f32 radius) {
-    actor->unkE4 = actor->xz_scale * radius;
+    actor->bodyRadius = actor->xz_scale * radius;
     func_15062AC4(actor);
 }
 
 /* Sets the body height to y_scale * height. */
 void func_15062B50(Actor *actor, f32 height) {
-    actor->unkE6 = actor->y_scale * height;
+    actor->bodyHeight = actor->y_scale * height;
     func_15062AC4(actor);
 }
 
@@ -5334,9 +5334,9 @@ void func_15062BDC(Actor *actor, f32 xzScale, f32 yScale) {
         actor->unkD2 = (s32) (info->unk20 * actor->xz_scale);
         actor->unkD4 = (s32) (info->unk22 * actor->y_scale);
         actor->unkD6 = (s32) (info->unk24 * actor->y_scale);
-        actor->unkE4 = (s32) (info->unk1A * actor->xz_scale);
-        actor->unkE6 = (s32) (info->unk1C * actor->y_scale);
-        actor->unkE8 = (s32) (info->unk1E * actor->y_scale);
+        actor->bodyRadius = (s32) (info->unk1A * actor->xz_scale);
+        actor->bodyHeight = (s32) (info->unk1C * actor->y_scale);
+        actor->bodyOffsetY = (s32) (info->unk1E * actor->y_scale);
         func_15062AC4(actor);
         func_15062B84(actor);
     }

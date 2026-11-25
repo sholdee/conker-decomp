@@ -2222,7 +2222,7 @@ void func_1507B178(void) {
     s16 value = (D_800D1891 << 8) | D_800D1890;
 
     if (D_800D1893 == 2) {
-        D_800D154C->unkE8 = (s16)(value * D_800D154C->y_scale);
+        D_800D154C->bodyOffsetY = (s16)(value * D_800D154C->y_scale);
     } else if (D_800D1893 == 1) {
         func_15062B50(D_800D154C, value);
     } else {

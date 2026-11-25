@@ -236,12 +236,12 @@ void func_150D7928(Actor *obj) {
         }
     }
     obj->unkB0 = 25;
-    if (obj->unkE4 != 0) {
-        obj->unk90 = obj->unkE4;
+    if (obj->bodyRadius != 0) {
+        obj->unk90 = obj->bodyRadius;
     }
     if (obj->unk13C != 0 && (player = &D_800CC2D0[playerIndex])->unk31C->unk4E != 0) {
         n = player->unk7A;
-        obj->unkE4 = 0;
+        obj->bodyRadius = 0;
         obj->floorY = player->floorY;
         obj->unk184 = player->unk184;
         /* copy the player's floor triangle */
@@ -290,7 +290,7 @@ void func_150D7928(Actor *obj) {
         playerIndex = D_800C3E78;
         obj->unk65 = 0;
         // matching: unk90 (u16) is read as s16 (lh); a value cast still loads with lhu
-        obj->unkE4 = obj->unk90;
+        obj->bodyRadius = obj->unk90;
         func_1505A3A8(0.0f, obj, 0.0f, 0.5f, 1);
         scratch = obj->xz_velocity;
         obj->stunned = 30;
