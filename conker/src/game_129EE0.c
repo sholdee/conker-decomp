@@ -46,47 +46,18 @@ void func_150FCA30(void) {
     func_151D8868(&params, 0, 0xFF, 0);
 }
 
-typedef struct {
-    /* 0x00 */ s16 angle;
-    /* 0x02 */ s16 spread;
-    /* 0x04 */ s16 pitch;
-    /* 0x06 */ s16 pitchSpread;
-    /* 0x08 */ s32 count;
-    /* 0x0C */ s32 countSpread;
-    /* 0x10 */ Vec3f position;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ s32 unk34;
-    /* 0x38 */ s32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ s16 unk4C;
-    /* 0x4E */ s16 unk4E;
-    /* 0x50 */ s16 unk50;
-    /* 0x52 */ s16 unk52;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-    /* 0x58 */ s8 unk58;
-} ParticleBurstDesc; /* emitter description passed to func_1514FCE8 */
-
 
 extern const s16 D_800A1EE0[3][2];
 void *func_151541B8(Vec3f *, f32, f32, f32, f32, u8, s32);
 extern void func_15143874(s32, f32, f32 *, f32 *);
-extern void func_1514FCE8(ParticleBurstDesc *, u8, s32);
+extern void func_1514FCE8(JetSpraySpec *, u8, s32);
 
 /* Spawns an effect in the middle of area D_800D9AA0[index] and 3-4 particle bursts at random angles around it. */
 void func_150FCBC0(u8 index) {
     TriggerZone *area;
     Vec3f pos;
     const s16 *range;
-    ParticleBurstDesc desc;
+    JetSpraySpec desc;
     s16 count;
     u8 angle;
     u32 randInt;
@@ -107,38 +78,38 @@ void func_150FCBC0(u8 index) {
     count = (func_150ADA20() & 1) + 3;
     if (count > 0) {
         range = D_800A1EE0[index];
-        desc.spread = 80;
-        desc.pitch = -32;
-        desc.pitchSpread = 43;
-        desc.count = 1;
-        desc.countSpread = 8;
-        desc.unk1C = 249.0f;
-        desc.unk20 = 451.0f;
-        desc.unk24 = 506.0f;
-        desc.unk28 = 100.0f;
-        desc.unk2C = 1505.0f;
-        desc.unk30 = 1511.0f;
-        desc.unk34 = 3;
-        desc.unk38 = 2;
-        desc.unk3C = 90.0f;
-        desc.unk40 = 0.813f;
-        desc.unk44 = -2.0f;
-        desc.unk48 = 1.085f;
-        desc.unk4C = 12;
-        desc.unk4E = 50;
-        desc.unk50 = 100;
-        desc.unk52 = 100;
-        desc.unk54 = 12;
-        desc.unk56 = 12;
-        desc.unk58 = -1;
+        desc.angles.yawRange = 80;
+        desc.angles.pitchBase = -32;
+        desc.angles.pitchRange = 43;
+        desc.spray.countBase = 1;
+        desc.spray.countRange = 8;
+        desc.spray.speedBase = 249.0f;
+        desc.spray.speedRange = 451.0f;
+        desc.spray.sizeBase = 506.0f;
+        desc.spray.sizeRange = 100.0f;
+        desc.spray.sizeSlopeBase = 1505.0f;
+        desc.spray.sizeSlopeRange = 1511.0f;
+        desc.spray.particleCountBase = 3;
+        desc.spray.particleCountRange = 2;
+        desc.spray.spread = 90.0f;
+        desc.spray.drag = 0.813f;
+        desc.spray.gravityBase = -2.0f;
+        desc.spray.gravityRange = 1.085f;
+        desc.spray.delayBase = 12;
+        desc.spray.delayRange = 50;
+        desc.spray.alphaBase = 100;
+        desc.spray.alphaRange = 100;
+        desc.spray.fadeStart = 12;
+        desc.spray.fadeOutStart = 12;
+        desc.spray.eventFunc = -1;
         do {
             randInt = func_150ADA20();
             angle = range[0] + randInt % (range[1] + 1);
-            desc.angle = angle - 40;
-            func_15143874((s16)angle, area->radius, &desc.position.x, &desc.position.z);
-            desc.position.x += area->x;
-            desc.position.z += area->z;
-            desc.position.y = func_150ADA68() * area->height + area->y;
+            desc.angles.yawBase = angle - 40;
+            func_15143874((s16)angle, area->radius, &desc.spray.pos.x, &desc.spray.pos.z);
+            desc.spray.pos.x += area->x;
+            desc.spray.pos.z += area->z;
+            desc.spray.pos.y = func_150ADA68() * area->height + area->y;
             func_1514FCE8(&desc, 0xFF, 1);
             count--;
         } while (count > 0);

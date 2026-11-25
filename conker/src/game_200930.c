@@ -854,66 +854,37 @@ void func_151D5404(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, s32 base, s32 range
     }
 }
 
-typedef struct {
-    /* 0x00 */ s16 unk00;
-    /* 0x02 */ s16 unk02;
-    /* 0x04 */ s16 unk04;
-    /* 0x06 */ s16 unk06;
-    /* 0x08 */ s32 unk08;
-    /* 0x0C */ s32 unk0C;
-    /* 0x10 */ Vec3f pos;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ s32 unk34;
-    /* 0x38 */ s32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ s16 unk4C;
-    /* 0x4E */ s16 unk4E;
-    /* 0x50 */ s16 unk50;
-    /* 0x52 */ s16 unk52;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-    /* 0x58 */ s8 unk58;
-} Spawn151D5514;
-
-void func_1514FCE8(Spawn151D5514 *, u8, s32);
+void func_1514FCE8(JetSpraySpec *, u8, s32);
 
 void func_151D5514(Vec3f *pos, u8 arg1, s32 arg2) {
-    Spawn151D5514 spawn;
+    JetSpraySpec spawn;
 
-    spawn.unk00 = 0;
-    spawn.unk02 = 255;
-    spawn.unk04 = -64;
-    spawn.unk06 = 74;
-    spawn.unk08 = 9;
-    spawn.unk0C = 3;
-    spawn.pos = *pos;
-    spawn.unk1C = 323.0f;
-    spawn.unk20 = 214.0f;
-    spawn.unk24 = 203.0f;
-    spawn.unk28 = 263.0f;
-    spawn.unk2C = 677.0f;
-    spawn.unk30 = 895.0f;
-    spawn.unk34 = 7;
-    spawn.unk38 = 3;
-    spawn.unk3C = 45.0f;
-    spawn.unk40 = 0.6020000577f;
-    spawn.unk44 = -1.732000113f;
-    spawn.unk48 = 1.512000084f;
-    spawn.unk4C = 15;
-    spawn.unk4E = 15;
-    spawn.unk50 = 100;
-    spawn.unk52 = 100;
-    spawn.unk54 = 12;
-    spawn.unk56 = 20;
-    spawn.unk58 = 0;
+    spawn.angles.yawBase = 0;
+    spawn.angles.yawRange = 255;
+    spawn.angles.pitchBase = -64;
+    spawn.angles.pitchRange = 74;
+    spawn.spray.countBase = 9;
+    spawn.spray.countRange = 3;
+    spawn.spray.pos = *pos;
+    spawn.spray.speedBase = 323.0f;
+    spawn.spray.speedRange = 214.0f;
+    spawn.spray.sizeBase = 203.0f;
+    spawn.spray.sizeRange = 263.0f;
+    spawn.spray.sizeSlopeBase = 677.0f;
+    spawn.spray.sizeSlopeRange = 895.0f;
+    spawn.spray.particleCountBase = 7;
+    spawn.spray.particleCountRange = 3;
+    spawn.spray.spread = 45.0f;
+    spawn.spray.drag = 0.6020000577f;
+    spawn.spray.gravityBase = -1.732000113f;
+    spawn.spray.gravityRange = 1.512000084f;
+    spawn.spray.delayBase = 15;
+    spawn.spray.delayRange = 15;
+    spawn.spray.alphaBase = 100;
+    spawn.spray.alphaRange = 100;
+    spawn.spray.fadeStart = 12;
+    spawn.spray.fadeOutStart = 20;
+    spawn.spray.eventFunc = 0;
     func_1514FCE8(&spawn, arg1, arg2);
 }
 

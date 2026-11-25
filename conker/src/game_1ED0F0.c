@@ -5,37 +5,6 @@
 
 void func_151541B8(Vec3f *, f32, f32, f32, f32, u8, s32);
 
-/* Particle parameters for a bullet impact, filled in by func_151BFC40. */
-typedef struct {
-    /* 0x00 */ s32 unk00;
-    /* 0x04 */ s32 unk04;
-    /* 0x08 */ Vec3f pos;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ s32 unk2C;
-    /* 0x30 */ s32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ s16 unk44;
-    /* 0x46 */ s16 unk46;
-    /* 0x48 */ s16 unk48;
-    /* 0x4A */ s16 unk4A;
-    /* 0x4C */ s16 unk4C;
-    /* 0x4E */ s16 unk4E;
-    /* 0x50 */ s8  unk50;
-} ImpactFxConfig; /* size 0x54 */
-
-/* Collision surface (0x12 bytes, 2-byte aligned) as stored in a ray-cast result. */
-typedef struct {
-    /* 0x00 */ s16 unk00[9];
-} HitSurface;
-
 typedef struct {
     /* 0x00 */ u8 pad00[0x4F];
     /* 0x4F */ u8 unk4F; /* (unk4F & 0x60) == 0x40: bullets pass through */
@@ -44,117 +13,72 @@ typedef struct {
 /* A surface hit record: the floor under a point, or the first pass-through surface of a bullet trace. */
 typedef struct {
     /* 0x00 */ f32 height;
-    /* 0x04 */ HitSurface surface;
+    /* 0x04 */ SurfaceTriangle surface;
     /* 0x18 */ s32 unk18;
     /* 0x1C */ s8  unk1C;
     /* 0x1D */ s8  unk1D;
     /* 0x20 */ RayHitPart *part;
 } SurfaceHit;
 
-/* Argument block for func_1514FB98: an impact with no surface. */
-typedef struct {
-    /* 0x00 */ Vec3f vel;
-    /* 0x0C */ f32 scale;
-    /* 0x10 */ ImpactFxConfig config;
-} ImpactFx; /* size 0x64 */
-
-/* Argument block for func_1514FBFC: an impact against a collision surface. */
-typedef struct {
-    /* 0x00 */ Vec3f vel;
-    /* 0x0C */ HitSurface surface;
-    /* 0x20 */ f32 scale;
-    /* 0x24 */ ImpactFxConfig config;
-} SurfaceImpactFx; /* size 0x78 */
-
-/* Argument block for func_1514FCE8. */
-typedef struct {
-    /* 0x00 */ s16 unk00;
-    /* 0x02 */ s16 unk02;
-    /* 0x04 */ s16 unk04;
-    /* 0x06 */ s16 unk06;
-    /* 0x08 */ s32 unk08;
-    /* 0x0C */ s32 unk0C;
-    /* 0x10 */ Vec3f pos;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ s32 unk34;
-    /* 0x38 */ s32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ s16 unk4C;
-    /* 0x4E */ s16 unk4E;
-    /* 0x50 */ s16 unk50;
-    /* 0x52 */ s16 unk52;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-    /* 0x58 */ s8  unk58;
-} DebrisFx;
-
 /* Fills in the impact particle parameters; fewer particles on busy frames. */
-void func_151BFC40(ImpactFxConfig *config, f32 *scale) {
-    config->unk00 = 3;
-    config->unk04 = 4 >> ((D_80082FA0 >= 2) ? 1 : 0);
+void func_151BFC40(JetSpray *config, f32 *scale) {
+    config->countBase = 3;
+    config->countRange = 4 >> ((D_80082FA0 >= 2) ? 1 : 0);
     *scale = 494.0f;
-    config->unk14 = 0.06089999899f;
-    config->unk18 = 0.02520000003f;
-    config->unk1C = 45.0f;
-    config->unk20 = 53.0f;
-    config->unk24 = 203.0f;
-    config->unk28 = 414.0f;
-    config->unk2C = 7;
-    config->unk30 = 3 >> ((D_80082FA0 >= 2 || D_8008FD8C >= 8) ? 1 : 0);
-    config->unk34 = 15.0f;
-    config->unk38 = 0.8800000548f;
-    config->unk3C = -0.3980000317f;
-    config->unk40 = 0.3910000324f;
-    config->unk44 = 25;
-    config->unk46 = 15;
-    config->unk48 = 100;
-    config->unk4A = 100;
-    config->unk4C = 12;
-    config->unk4E = 20;
-    config->unk50 = (D_80082FA0 >= 2 || D_8008FD8C >= 8) ? -1 : 0;
+    config->speedBase = 0.06089999899f;
+    config->speedRange = 0.02520000003f;
+    config->sizeBase = 45.0f;
+    config->sizeRange = 53.0f;
+    config->sizeSlopeBase = 203.0f;
+    config->sizeSlopeRange = 414.0f;
+    config->particleCountBase = 7;
+    config->particleCountRange = 3 >> ((D_80082FA0 >= 2 || D_8008FD8C >= 8) ? 1 : 0);
+    config->spread = 15.0f;
+    config->drag = 0.8800000548f;
+    config->gravityBase = -0.3980000317f;
+    config->gravityRange = 0.3910000324f;
+    config->delayBase = 25;
+    config->delayRange = 15;
+    config->alphaBase = 100;
+    config->alphaRange = 100;
+    config->fadeStart = 12;
+    config->fadeOutStart = 20;
+    config->eventFunc = (D_80082FA0 >= 2 || D_8008FD8C >= 8) ? -1 : 0;
 }
 
 void func_151C0418(Vec3f *pos, u8 fxOwner, s32 fxList);
 void func_151C04F8(Vec3f *pos, u8 fxOwner, s32 fxList);
 void func_151C05A4(Vec3f *pos, u8 fxOwner, s32 fxList);
 void func_151C05F0(Vec3f *pos, u8 fxOwner, s32 fxList);
-void func_1514FB98(ImpactFx *, u8, s32);
-void func_1514FBFC(SurfaceImpactFx *, u8, s32);
-void func_1514FCE8(DebrisFx *, u8, s32);
+void func_1514FB98(DirectedJetSpray *, u8, s32);
+void func_1514FBFC(SurfaceJetSpray *, u8, s32);
+void func_1514FCE8(JetSpraySpec *, u8, s32);
 void func_1504715C(SurfaceHit *, Actor *);
 s32 func_15046C80(Vec3f *, s32, f32, SurfaceHit *);
-void func_151C0360(HitSurface *surface, Vec3f *pos, u8 fxOwner, s32 fxList);
+void func_151C0360(SurfaceTriangle *surface, Vec3f *pos, u8 fxOwner, s32 fxList);
 void func_151C0644(Vec3f *pos, u8 fxOwner, s32 fxList);
-s32 func_15144E80(HitSurface *, Vec3f *, Vec3f *, Vec3f *);
+s32 func_15144E80(SurfaceTriangle *, Vec3f *, Vec3f *, Vec3f *);
 
 /* Bullet hit with no surface: sparks and smoke at pos, plus impact particles thrown back along -dir. */
 void func_151BFDA0(Vec3f *pos, Vec3f *dir, u8 withParticles, u8 fxOwner, s32 fxList) {
-    ImpactFx fx;
+    DirectedJetSpray fx;
 
     func_151C0418(pos, fxOwner, fxList);
     func_151C04F8(pos, fxOwner, fxList);
     func_151C05A4(pos, fxOwner, fxList);
     func_151C05F0(pos, fxOwner, fxList);
     if (withParticles) {
-        fx.vel.x = -dir->x;
-        fx.vel.y = -dir->y;
-        fx.vel.z = -dir->z;
-        func_151BFC40(&fx.config, &fx.scale);
-        fx.config.pos = *pos;
+        fx.direction.x = -dir->x;
+        fx.direction.y = -dir->y;
+        fx.direction.z = -dir->z;
+        func_151BFC40(&fx.spray, &fx.spread);
+        fx.spray.pos = *pos;
         func_1514FB98(&fx, fxOwner, fxList);
     }
 }
 
 /* Bullet hit against a collision surface (or none). */
-void func_151BFE84(HitSurface *surface, Vec3f *pos, Vec3f *dir, u8 withParticles, u8 fxOwner, s32 fxList) {
+void func_151BFE84(SurfaceTriangle *surface, Vec3f *pos, Vec3f *dir, u8 withParticles, u8 fxOwner, s32 fxList) {
     Vec3f v0;
     Vec3f v1;
     Vec3f v2;
@@ -174,23 +98,23 @@ void func_151BFE84(HitSurface *surface, Vec3f *pos, Vec3f *dir, u8 withParticles
     }
     if (withParticles) {
         if (surface != NULL) {
-            SurfaceImpactFx fx;
+            SurfaceJetSpray fx;
 
-            fx.vel.x = -dir->x;
-            fx.vel.y = -dir->y;
-            fx.vel.z = -dir->z;
-            fx.surface = *surface;
-            fx.config.pos = *pos;
-            func_151BFC40(&fx.config, &fx.scale);
+            fx.source.normal.x = -dir->x;
+            fx.source.normal.y = -dir->y;
+            fx.source.normal.z = -dir->z;
+            fx.source.triangle = *surface;
+            fx.spray.pos = *pos;
+            func_151BFC40(&fx.spray, &fx.source.spread);
             func_1514FBFC(&fx, fxOwner, fxList);
         } else {
-            ImpactFx fx;
+            DirectedJetSpray fx;
 
-            fx.vel.x = -dir->x;
-            fx.vel.y = -dir->y;
-            fx.vel.z = -dir->z;
-            func_151BFC40(&fx.config, &fx.scale);
-            fx.config.pos = *pos;
+            fx.direction.x = -dir->x;
+            fx.direction.y = -dir->y;
+            fx.direction.z = -dir->z;
+            func_151BFC40(&fx.spray, &fx.spread);
+            fx.spray.pos = *pos;
             func_1514FB98(&fx, fxOwner, fxList);
         }
     }
@@ -198,7 +122,7 @@ void func_151BFE84(HitSurface *surface, Vec3f *pos, Vec3f *dir, u8 withParticles
 
 /* Bullet hit on an object: sparks and debris at pos, plus a ground mark below it if hitObj is set. */
 void func_151C0098(Vec3f *pos, Actor *hitObj, u8 withParticles, u8 fxOwner, s32 fxList) {
-    DebrisFx fx;
+    JetSpraySpec fx;
     Vec3f probe;
     SurfaceHit floor;
     Vec3f markPos;
@@ -210,32 +134,32 @@ void func_151C0098(Vec3f *pos, Actor *hitObj, u8 withParticles, u8 fxOwner, s32 
 
     // matching: taking the address keeps withParticles in its stack slot (reloaded at each use)
     if (*(u8 *)&withParticles) {
-        fx.unk00 = 0;
-        fx.unk02 = 255;
-        fx.unk04 = -64;
-        fx.unk06 = 71;
-        fx.unk08 = 6;
-        fx.unk0C = 4;
-        fx.pos = *pos;
-        fx.unk1C = 23.0f;
-        fx.unk20 = 30.0f;
-        fx.unk24 = 45.0f;
-        fx.unk28 = 53.0f;
-        fx.unk2C = 203.0f;
-        fx.unk30 = 414.0f;
-        fx.unk34 = 7;
-        fx.unk38 = 3;
-        fx.unk3C = 15.0f;
-        fx.unk40 = 0.8720000386f;
-        fx.unk44 = -0.3980000317f;
-        fx.unk48 = 0.3640000224f;
-        fx.unk4C = 25;
-        fx.unk4E = 15;
-        fx.unk50 = 100;
-        fx.unk52 = 100;
-        fx.unk54 = 12;
-        fx.unk56 = 20;
-        fx.unk58 = 0;
+        fx.angles.yawBase = 0;
+        fx.angles.yawRange = 255;
+        fx.angles.pitchBase = -64;
+        fx.angles.pitchRange = 71;
+        fx.spray.countBase = 6;
+        fx.spray.countRange = 4;
+        fx.spray.pos = *pos;
+        fx.spray.speedBase = 23.0f;
+        fx.spray.speedRange = 30.0f;
+        fx.spray.sizeBase = 45.0f;
+        fx.spray.sizeRange = 53.0f;
+        fx.spray.sizeSlopeBase = 203.0f;
+        fx.spray.sizeSlopeRange = 414.0f;
+        fx.spray.particleCountBase = 7;
+        fx.spray.particleCountRange = 3;
+        fx.spray.spread = 15.0f;
+        fx.spray.drag = 0.8720000386f;
+        fx.spray.gravityBase = -0.3980000317f;
+        fx.spray.gravityRange = 0.3640000224f;
+        fx.spray.delayBase = 25;
+        fx.spray.delayRange = 15;
+        fx.spray.alphaBase = 100;
+        fx.spray.alphaRange = 100;
+        fx.spray.fadeStart = 12;
+        fx.spray.fadeOutStart = 20;
+        fx.spray.eventFunc = 0;
         func_1514FCE8(&fx, fxOwner, fxList);
     }
 
@@ -275,9 +199,9 @@ s32 func_151C02E4(Actor *obj, Actor *self, s32 ignoreCount, Actor **ignore) {
     return TRUE;
 }
 
-void func_150E7FEC(f32, s32, HitSurface *, Vec3f *, s32, s32, s32, s32, s32, s32, s32, s32);
+void func_150E7FEC(f32, s32, SurfaceTriangle *, Vec3f *, s32, s32, s32, s32, s32, s32, s32, s32);
 
-void func_151C0360(HitSurface *surface, Vec3f *pos, u8 fxOwner, s32 fxList) {
+void func_151C0360(SurfaceTriangle *surface, Vec3f *pos, u8 fxOwner, s32 fxList) {
     // matching: the f64 member gives the random value an 8-byte aligned stack slot
     union { u32 w; f64 align; } shade;
     f32 rand;
@@ -343,7 +267,7 @@ typedef struct {
     /* 0x20 */ Vec3f unk20;
     /* 0x2C */ Vec3f start;
     /* 0x38 */ Vec3f dir;
-    /* 0x44 */ HitSurface surface;
+    /* 0x44 */ SurfaceTriangle surface;
     /* 0x56 */ s16 unk56;
     /* 0x58 */ u8  unk58;
     /* 0x59 */ u8  hitType; /* 0: nothing, 1: end of trace, >= 2: hit */
@@ -661,7 +585,7 @@ s32 func_151C110C(SoundEmitter *emitter, s32 arg1, void **arg2, s32 arg3, s32 ar
 }
 
 void func_15055A2C(s32, f32, f32, f32, s32);
-void func_151C1654(Vec3f *pos, Vec3f *dir, Actor *owner, u8 impactType, HitSurface *surface);
+void func_151C1654(Vec3f *pos, Vec3f *dir, Actor *owner, u8 impactType, SurfaceTriangle *surface);
 void func_15081690(Actor *, f32, f32, f32, f32, f32, f32, RayHit *, f32, s32, s32, s32, s32,
                    IgnoreList *, s32);
 s32 func_151ABE40(Vec3f *, SurfaceHit *, s32, s32, s32);
@@ -777,11 +701,11 @@ void func_151C1628(Bullet *bullet) {
     func_1513259C(bullet);
 }
 
-void func_151D40D4(Vec3f *, Vec3f *, Actor *, s32, HitSurface *, s32, s32, s32);
-void func_151D42E8(Vec3f *, Vec3f *, Actor *, HitSurface *, s32);
+void func_151D40D4(Vec3f *, Vec3f *, Actor *, s32, SurfaceTriangle *, s32, s32, s32);
+void func_151D42E8(Vec3f *, Vec3f *, Actor *, SurfaceTriangle *, s32);
 
 /* Impact sound/decal for a bullet hit, chosen by impactType. */
-void func_151C1654(Vec3f *pos, Vec3f *dir, Actor *owner, u8 impactType, HitSurface *surface) {
+void func_151C1654(Vec3f *pos, Vec3f *dir, Actor *owner, u8 impactType, SurfaceTriangle *surface) {
     void (*callback)(s32, s32, s32);
 
     callback = (void (*)(s32, s32, s32))D_800E0934;

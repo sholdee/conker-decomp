@@ -305,19 +305,13 @@ s32 func_150D8FAC(Trail *trail) {
     return 1;
 }
 
-/* Surface record of a ray hit (passed on to the particle spawners). */
-typedef struct {
-    u8 unk0[0x10];
-    u16 unk10;
-} RaySurface;
-
 /* Result of the func_15081690 ray cast. */
 typedef struct {
     Actor *obj;
     f32 dist;
     Vec3f pos;
     u8 pad14[0x30];
-    RaySurface surface;
+    SurfaceTriangle surface;
     u8 pad56[3];
     u8 hit;             /* 0 none, 1 surface, 2+ object */
     u8 pad5A[0xE];
@@ -824,24 +818,10 @@ typedef struct {
     u8 unk0[0x24];
 } ImpactOrigin;
 
-typedef struct {
-    u8 unk0;
-    Vec3f dir;
-    Vec3f unk10;
-    Vec3f unk1C;
-    f32 unk28;
-} ImpactCone; /* 0x2C */
-
-typedef struct {
-    Vec3f dir;
-    RaySurface surface;
-    f32 unk20;
-} ImpactSpray; /* 0x24 */
-
 extern Spark *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 extern void func_150472C0(ImpactOrigin *, RayHit *);
-extern void func_15153CCC(ImpactCone *, SplashSpray *, ImpactOrigin *, u8, s32);
-extern void func_15153C84(ImpactSpray *, SplashSpray *, ImpactOrigin *, u8, s32);
+extern void func_15153CCC(ConeBasis *, SplashSpray *, ImpactOrigin *, u8, s32);
+extern void func_15153C84(TriangleSource *, SplashSpray *, ImpactOrigin *, u8, s32);
 
 /* Spawns the impact effects of a trail segment hitting something (hit from func_15081690). */
 void func_150DA67C(Trail *trail, RayHit *hit, f32 *dir) {
@@ -937,26 +917,26 @@ void func_150DA67C(Trail *trail, RayHit *hit, f32 *dir) {
                 emit.speedRange = 0.00699999975f;
                 emit.unk38 = 0.200000003f;
                 if (hit->hit >= 2) {
-                    ImpactCone cone;
+                    ConeBasis cone;
 
-                    cone.unk0 = 1;
-                    cone.dir.x = -dir[0];
-                    cone.dir.y = -dir[1];
-                    cone.dir.z = -dir[2];
-                    cone.unk10 = cone.unk1C = D_800A5480;
-                    cone.unk28 = 300.0f;
+                    cone.flags = 1;
+                    cone.direction.x = -dir[0];
+                    cone.direction.y = -dir[1];
+                    cone.direction.z = -dir[2];
+                    cone.axis0 = cone.axis1 = D_800A5480;
+                    cone.spread = 300.0f;
                     do {
                         func_15153CCC(&cone, &emit, &origin, trail->unkC, trail->unk1);
                         data->impactAccum -= 1.0f;
                     } while (data->impactAccum > 1.0f);
                 } else {
-                    ImpactSpray spray;
+                    TriangleSource spray;
 
-                    spray.dir.x = -dir[0];
-                    spray.dir.y = -dir[1];
-                    spray.dir.z = -dir[2];
-                    spray.surface = hit->surface;
-                    spray.unk20 = 300.0f;
+                    spray.normal.x = -dir[0];
+                    spray.normal.y = -dir[1];
+                    spray.normal.z = -dir[2];
+                    spray.triangle = hit->surface;
+                    spray.spread = 300.0f;
                     do {
                         func_15153C84(&spray, &emit, &origin, trail->unkC, trail->unk1);
                         data->impactAccum -= 1.0f;

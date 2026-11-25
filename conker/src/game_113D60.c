@@ -661,38 +661,9 @@ void func_150E7FEC(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 duration, u
                   (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2), argB, argC, 0, owner, kind);
 }
 
-typedef struct {
-    /* 0x00 */ s16 unk00;
-    /* 0x02 */ s16 unk02;
-    /* 0x04 */ s16 unk04;
-    /* 0x06 */ s16 unk06;
-    /* 0x08 */ s32 unk08;
-    /* 0x0C */ s32 unk0C;
-    /* 0x10 */ Vec3f position;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ s32 unk34;
-    /* 0x38 */ s32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ s16 unk4C;
-    /* 0x4E */ s16 unk4E;
-    /* 0x50 */ s16 unk50;
-    /* 0x52 */ s16 unk52;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-    /* 0x58 */ s8 unk58;
-} Struct1514FCE8Arg; // first argument of func_1514FCE8
-
 extern Vec3f D_800A1290[];
 extern void func_151D3FF4(Vec3f *position, u8 owner, s32 kind);
-extern void func_1514FCE8(Struct1514FCE8Arg *arg0, u8 owner, s32 kind);
+extern void func_1514FCE8(JetSpraySpec *arg0, u8 owner, s32 kind);
 
 /* For points 4-7 of the D_800A1290 table: spawns the func_151D3FF4 and func_1514FCE8 effects
  * 200 units above the point, plus an event. */
@@ -702,7 +673,7 @@ void func_150E81A8(index, owner, kind)
     s32 kind;
 {
     Vec3f position;
-    Struct1514FCE8Arg arg;
+    JetSpraySpec arg;
     Game113D60Event event;
 
     if (index == 4 || index == 5 || index == 6 || index == 7) {
@@ -710,32 +681,32 @@ void func_150E81A8(index, owner, kind)
         position.y += 200.0f;
         func_151D3FF4(&position, owner, kind);
 
-        arg.unk00 = 0;
-        arg.unk02 = 0xFF;
-        arg.unk04 = -0x40;
-        arg.unk06 = 0x4D;
-        arg.unk08 = 10;
-        arg.unk0C = 5;
-        arg.position = position;
-        arg.unk1C = 252.0f;
-        arg.unk20 = 117.0f;
-        arg.unk24 = 308.0f;
-        arg.unk28 = 256.0f;
-        arg.unk2C = 699.0f;
-        arg.unk30 = 511.0f;
-        arg.unk34 = 4;
-        arg.unk38 = 7;
-        arg.unk3C = 27.0f;
-        arg.unk40 = 0.7820000648f;
-        arg.unk44 = -0.9300000668f;
-        arg.unk48 = 0.7300000191f;
-        arg.unk4C = 25;
-        arg.unk4E = 15;
-        arg.unk50 = 100;
-        arg.unk52 = 100;
-        arg.unk54 = 12;
-        arg.unk56 = 20;
-        arg.unk58 = 0;
+        arg.angles.yawBase = 0;
+        arg.angles.yawRange = 0xFF;
+        arg.angles.pitchBase = -0x40;
+        arg.angles.pitchRange = 0x4D;
+        arg.spray.countBase = 10;
+        arg.spray.countRange = 5;
+        arg.spray.pos = position;
+        arg.spray.speedBase = 252.0f;
+        arg.spray.speedRange = 117.0f;
+        arg.spray.sizeBase = 308.0f;
+        arg.spray.sizeRange = 256.0f;
+        arg.spray.sizeSlopeBase = 699.0f;
+        arg.spray.sizeSlopeRange = 511.0f;
+        arg.spray.particleCountBase = 4;
+        arg.spray.particleCountRange = 7;
+        arg.spray.spread = 27.0f;
+        arg.spray.drag = 0.7820000648f;
+        arg.spray.gravityBase = -0.9300000668f;
+        arg.spray.gravityRange = 0.7300000191f;
+        arg.spray.delayBase = 25;
+        arg.spray.delayRange = 15;
+        arg.spray.alphaBase = 100;
+        arg.spray.alphaRange = 100;
+        arg.spray.fadeStart = 12;
+        arg.spray.fadeOutStart = 20;
+        arg.spray.eventFunc = 0;
 
         func_1514FCE8(&arg, owner, kind);
 

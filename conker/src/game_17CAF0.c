@@ -8,6 +8,7 @@
  * (func_150ADA20() % (range + 1)) + base and a float field is func_150ADA68() * range + base
  * (a random float). Angles are 256-step binary angles; func_151423D8 is their cosine.
  */
+
 /* Vector helpers (game_16EE20.c). */
 extern s32 func_15144E80(s16 *, Vec3f *, Vec3f *, Vec3f *); /* triangle edges + normal */
 extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);          /* normalize */
@@ -16,29 +17,12 @@ extern s32 func_15146078(Vec3f *, Vec3f *, Vec3f *);       /* two axes perpendic
 extern void func_15143794(s16, s16, f32, f32 *); /* (yaw, pitch, length) -> vector */
 extern void func_15143874(s32, f32, f32 *, f32 *);
 
-/* A random direction inside a cone around `direction`, built lazily (see func_1514F6E8). */
-struct ConeBasis {
-    u8 flags; /* 1: direction normalized and scaled, 2: axes built, 4: axes normalized */
-    u8 pad1[3];
-    Vec3f direction;
-    Vec3f axis0;
-    Vec3f axis1;
-    f32 spread;
-};
-
-/* A cone emitter described by a surface triangle (three s16 vertices) and the side its normal faces. */
-struct TriangleSource {
-    Vec3f normal;
-    s16 triangle[9];
-    f32 spread;
-};
-
 /* Builds a cone basis from a triangle: the axes are two triangle edges, the direction is its normal,
  * flipped to face the same side as source->normal. */
-void func_1514F640(struct TriangleSource *source, struct ConeBasis *cone) {
+void func_1514F640(TriangleSource *source, ConeBasis *cone) {
     cone->flags = 2;
     cone->spread = source->spread;
-    if (func_15144E80(source->triangle, &cone->axis0, &cone->axis1, &cone->direction) != 0) {
+    if (func_15144E80(source->triangle.v, &cone->axis0, &cone->axis1, &cone->direction) != 0) {
         if (func_15144A74(&cone->direction, &source->normal) < 0.0f) {
             cone->direction.x = -cone->direction.x;
             cone->direction.y = -cone->direction.y;
@@ -48,7 +32,7 @@ void func_1514F640(struct TriangleSource *source, struct ConeBasis *cone) {
 }
 
 /* Finishes whatever parts of the cone basis are still missing; returns 0 if a vector is degenerate. */
-s32 func_1514F6E8(struct ConeBasis *cone) {
+s32 func_1514F6E8(ConeBasis *cone) {
     if (!(cone->flags & 1)) {
         if (func_15145128(&cone->direction, &cone->direction, NULL, NULL) == 0) {
             return 0;
@@ -77,7 +61,7 @@ s32 func_1514F6E8(struct ConeBasis *cone) {
 }
 
 /* Picks a random direction inside the cone and scales it by `speed`. */
-void func_1514F808(struct ConeBasis *cone, f32 speed, Vec3f *out) {
+void func_1514F808(ConeBasis *cone, f32 speed, Vec3f *out) {
     f32 second;
     f32 first;
 
@@ -87,49 +71,11 @@ void func_1514F808(struct ConeBasis *cone, f32 speed, Vec3f *out) {
     out->z = (((cone->axis0.z * first) + (cone->axis1.z * second)) + cone->direction.z) * speed;
 }
 
-struct ConeSprayConfig {
-    s32 countBase;
-    s32 countRange;
-    Vec3f position;
-    f32 speedBase;
-    f32 speedRange;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    s32 unk2C;
-    s32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    s16 unk44;
-    s16 unk46;
-    s16 unk48;
-    s16 unk4A;
-    s16 unk4C;
-    s16 unk4E;
-    s8 unk50;
-};
-
-/* An emitter aimed along a direction (func_1514FB98). */
-struct DirectionEmitter {
-    Vec3f direction;
-    f32 spread;
-    struct ConeSprayConfig config;
-};
-
-/* An emitter aimed off a surface triangle (func_1514FBFC). */
-struct TriangleEmitter {
-    struct TriangleSource source;
-    struct ConeSprayConfig config;
-};
-
 extern void func_151A2AD4(Vec3f *, Vec3f *, f32, f32, s32, f32, f32, f32, f32, s16, s16, s16, s16, s16, s16, s8, u8, s32);
 
 /* Spawns a random number of particles from config->position, each moving in a random direction inside
  * the cone around `direction` (scaled by 1000 here) spanned by axis0/axis1. */
-void func_1514F8F8(struct ConeSprayConfig *config, Vec3f *direction, Vec3f *axis0, Vec3f *axis1, f32 spread, u8 arg5, s32 arg6) {
+void func_1514F8F8(JetSpray *config, Vec3f *direction, Vec3f *axis0, Vec3f *axis1, f32 spread, u8 arg5, s32 arg6) {
     s32 count;
     Vec3f velocity;
     f32 second;
@@ -147,27 +93,27 @@ void func_1514F8F8(struct ConeSprayConfig *config, Vec3f *direction, Vec3f *axis
         velocity.x = ((axis0->x * first) + (axis1->x * second) + direction->x) * speed;
         velocity.y = ((axis0->y * first) + (axis1->y * second) + direction->y) * speed;
         velocity.z = ((axis0->z * first) + (axis1->z * second) + direction->z) * speed;
-        func_151A2AD4(&config->position, &velocity,
-                      (func_150ADA68() * config->unk20) + config->unk1C,
-                      (func_150ADA68() * config->unk28) + config->unk24,
-                      (func_150ADA20() % (u32)(config->unk30 + 1)) + config->unk2C,
-                      config->unk34, config->unk38, config->unk3C, config->unk40,
-                      config->unk44, config->unk46, config->unk48, config->unk4A,
-                      config->unk4C, config->unk4E, config->unk50, arg5, arg6);
+        func_151A2AD4(&config->pos, &velocity,
+                      (func_150ADA68() * config->sizeRange) + config->sizeBase,
+                      (func_150ADA68() * config->sizeSlopeRange) + config->sizeSlopeBase,
+                      (func_150ADA20() % (u32)(config->particleCountRange + 1)) + config->particleCountBase,
+                      config->spread, config->drag, config->gravityBase, config->gravityRange,
+                      config->delayBase, config->delayRange, config->alphaBase, config->alphaRange,
+                      config->fadeStart, config->fadeOutStart, config->eventFunc, arg5, arg6);
         count--;
     }
 }
 
-void func_1514FB98(struct DirectionEmitter *emitter, u8 arg1, s32 arg2) {
+void func_1514FB98(DirectedJetSpray *emitter, u8 arg1, s32 arg2) {
     Vec3f axis0;
     Vec3f axis1;
 
     if (func_15146078(&emitter->direction, &axis0, &axis1) != 0) {
-        func_1514F8F8(&emitter->config, &emitter->direction, &axis0, &axis1, emitter->spread, arg1, arg2);
+        func_1514F8F8(&emitter->spray, &emitter->direction, &axis0, &axis1, emitter->spread, arg1, arg2);
     }
 }
 
-void func_1514FBFC(struct TriangleEmitter *emitter, u8 arg1, s32 arg2) {
+void func_1514FBFC(SurfaceJetSpray *emitter, u8 arg1, s32 arg2) {
     Vec3f axis0;
     f32 length0;
     f32 inverse0;
@@ -178,7 +124,7 @@ void func_1514FBFC(struct TriangleEmitter *emitter, u8 arg1, s32 arg2) {
     f32 normalLength;
     f32 normalInverse;
 
-    if (func_15144E80(emitter->source.triangle, &axis0, &axis1, &normal) != 0) {
+    if (func_15144E80(emitter->source.triangle.v, &axis0, &axis1, &normal) != 0) {
         func_15145128(&axis0, &axis0, &length0, &inverse0);
         func_15145128(&axis1, &axis1, &length1, &inverse1);
         func_15145128(&normal, &normal, &normalLength, &normalInverse);
@@ -187,73 +133,44 @@ void func_1514FBFC(struct TriangleEmitter *emitter, u8 arg1, s32 arg2) {
             normal.y = -normal.y;
             normal.z = -normal.z;
         }
-        func_1514F8F8(&emitter->config, &normal, &axis0, &axis1, emitter->source.spread, arg1, arg2);
+        func_1514F8F8(&emitter->spray, &normal, &axis0, &axis1, emitter->source.spread, arg1, arg2);
     }
 }
 
-struct Local1514FCE8 {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    s16 unk6;
-    s32 countBase;
-    s32 countRange;
-    Vec3f position;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    s32 unk34;
-    s32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    s16 unk4C;
-    s16 unk4E;
-    s16 unk50;
-    s16 unk52;
-    s16 unk54;
-    s16 unk56;
-    s8 unk58;
-};
-
 extern void func_151A2A14(Vec3f *, s16, s16, f32, f32, f32, s32, f32, f32, f32, f32, s16, s16, s16, s16, s16, s16, s8, u8, s32);
 
-void func_1514FCE8(struct Local1514FCE8 *config, u8 arg1, s32 arg2) {
+void func_1514FCE8(JetSpraySpec *config, u8 arg1, s32 arg2) {
     s32 count;
 
-    count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
+    count = (func_150ADA20() % (u32)(config->spray.countRange + 1)) + config->spray.countBase;
     while (count != 0) {
-        func_151A2A14(&config->position,
-                      (s16)((func_150ADA20() % (u32)(config->unk2 + 1)) + config->unk0),
-                      (s16)((func_150ADA20() % (u32)(config->unk6 + 1)) + config->unk4),
-                      (func_150ADA68() * config->unk20) + config->unk1C,
-                      (func_150ADA68() * config->unk28) + config->unk24,
-                      (func_150ADA68() * config->unk30) + config->unk2C,
-                      (func_150ADA20() % (u32)(config->unk38 + 1)) + config->unk34,
-                      config->unk3C, config->unk40, config->unk44, config->unk48,
-                      config->unk4C, config->unk4E, config->unk50,
-                      config->unk52, config->unk54, config->unk56,
-                      config->unk58, arg1, arg2);
+        func_151A2A14(&config->spray.pos,
+                      (s16)((func_150ADA20() % (u32)(config->angles.yawRange + 1)) + config->angles.yawBase),
+                      (s16)((func_150ADA20() % (u32)(config->angles.pitchRange + 1)) + config->angles.pitchBase),
+                      (func_150ADA68() * config->spray.speedRange) + config->spray.speedBase,
+                      (func_150ADA68() * config->spray.sizeRange) + config->spray.sizeBase,
+                      (func_150ADA68() * config->spray.sizeSlopeRange) + config->spray.sizeSlopeBase,
+                      (func_150ADA20() % (u32)(config->spray.particleCountRange + 1)) + config->spray.particleCountBase,
+                      config->spray.spread, config->spray.drag, config->spray.gravityBase, config->spray.gravityRange,
+                      config->spray.delayBase, config->spray.delayRange, config->spray.alphaBase,
+                      config->spray.alphaRange, config->spray.fadeStart, config->spray.fadeOutStart,
+                      config->spray.eventFunc, arg1, arg2);
         count--;
     }
 }
 
-extern void func_1514FF44(struct ConeBasis *, DropSpray *, s32, u8, s32);
+extern void func_1514FF44(ConeBasis *, DropSpray *, s32, u8, s32);
 extern void func_151D9014(Vec3f *, Vec3f *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, u8, s32);
 
-void func_1514FEFC(struct TriangleSource *source, DropSpray *config, s32 arg2, u8 arg3, s32 arg4) {
-    struct ConeBasis cone;
+void func_1514FEFC(TriangleSource *source, DropSpray *config, s32 arg2, u8 arg3, s32 arg4) {
+    ConeBasis cone;
 
     func_1514F640(source, &cone);
     func_1514FF44(&cone, config, arg2, arg3, arg4);
 }
 
 /* Spawns a random number of particles, each moving in a random direction inside the cone. */
-void func_1514FF44(struct ConeBasis *cone, DropSpray *config, s32 arg2, u8 arg3, s32 arg4) {
+void func_1514FF44(ConeBasis *cone, DropSpray *config, s32 arg2, u8 arg3, s32 arg4) {
     s32 count;
     Vec3f velocity;
 
@@ -1824,10 +1741,10 @@ void func_151539B4(struct Local151539B4Arg *config, u8 arg1) {
 }
 
 extern void func_151DA6F8(Vec3f *, Vec3f *, f32, s16, s32, f32, s32, s32, f32, f32, s32, u8, s32, s16, s16, s32, u8, s32);
-extern void func_15153CCC(struct ConeBasis *, SplashSpray *, s32, u8, s32);
+extern void func_15153CCC(ConeBasis *, SplashSpray *, s32, u8, s32);
 
-void func_15153C84(struct TriangleSource *source, SplashSpray *config, s32 arg2, u8 arg3, s32 arg4) {
-    struct ConeBasis cone;
+void func_15153C84(TriangleSource *source, SplashSpray *config, s32 arg2, u8 arg3, s32 arg4) {
+    ConeBasis cone;
 
     func_1514F640(source, &cone);
     func_15153CCC(&cone, config, arg2, arg3, arg4);
@@ -1835,7 +1752,7 @@ void func_15153C84(struct TriangleSource *source, SplashSpray *config, s32 arg2,
 
 /* Spawns a random number of particles (func_151DA6F8), each moving in a random direction inside the
  * cone. */
-void func_15153CCC(struct ConeBasis *cone, SplashSpray *config, s32 arg2, u8 arg3, s32 arg4) {
+void func_15153CCC(ConeBasis *cone, SplashSpray *config, s32 arg2, u8 arg3, s32 arg4) {
     s32 count;
     Vec3f velocity;
 

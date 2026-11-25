@@ -3,11 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/* A collision triangle as func_150AC9C0 reports it: three s16 xyz vertices. */
-typedef struct {
-    s16 coords[9];
-} SurfaceTriangle;
-
 /* Argument of func_151511FC (layout from game_17CAF0.c): a burst of particles off a surface triangle. */
 typedef struct {
     /* 0x00 */ s16 countBase;

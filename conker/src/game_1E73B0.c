@@ -6,15 +6,10 @@
 s32 func_151BB0E0(); /* sound update callback, defined below */
 void func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
-/* Collision surface record, from the func_150AC9C0 ray cast or a floor query. */
-typedef struct {
-    s16 unk[9];
-} Surface;
-
 /* Floor below a point, from func_1504715C / func_15046C80. */
 typedef struct {
     /* 0x00 */ f32 height;
-    /* 0x04 */ Surface surf;
+    /* 0x04 */ SurfaceTriangle surf;
     /* 0x16 */ u8 pad16[0x24 - 0x16];
 } FloorInfo;
 
@@ -249,36 +244,11 @@ void func_151BA468(struct260 *effect, EffectMsg *msg, u8 msgType) {
     }
 }
 
-/* Spawn descriptor read by func_1514FCE8. */
-typedef struct {
-    /* 0x00 */ s16 unk0;
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ s16 unk4;
-    /* 0x06 */ s16 unk6;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ Vec3f pos;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ s32 unk34;
-    /* 0x38 */ s32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ s16 unk4C[6];
-    /* 0x58 */ s8 unk58;
-} Desc1514FCE8;
-
 extern Vec3f D_800AA590, D_800AA59C, D_800AA5A8, D_800AA5B4[], D_800AA5CC[], D_800AA5FC[];
 extern f32 D_800AA62C[];
 extern Vec3f D_800AA63C, D_800AA648[], D_800AA660[], D_800AA678[], D_800AA6A8[], D_800AA6D8[];
 extern f32 D_800AA708[];
-void func_1514FCE8(Desc1514FCE8 *, u8, s32);
+void func_1514FCE8(JetSpraySpec *, u8, s32);
 extern void func_1503F404(Mtx *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
 extern void func_1513264C(ParticleSpawn80 *, s32, s32, FloorInfo *, s32, u8, s32);
 extern void func_15143134(Vec3f *in, Vec3f *out, Mtx *mtx);
@@ -288,7 +258,7 @@ extern void func_15143134(Vec3f *in, Vec3f *out, Mtx *mtx);
  * the object's model matrix (several of them picked at random).
  */
 void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
-    Desc1514FCE8 burst;
+    JetSpraySpec burst;
     FloorInfo floor;
     Vec3f objPos;
     ParticleSpawn80 part;
@@ -298,47 +268,47 @@ void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
     s32 shift;
     f32 speed, scale, accel;
 
-    burst.unk0 = 0;
-    burst.unk2 = 0xFF;
-    burst.unk4 = -0x3F;
-    burst.unk6 = 0x34;
-    burst.unk8 = 6;
+    burst.angles.yawBase = 0;
+    burst.angles.yawRange = 0xFF;
+    burst.angles.pitchBase = -0x3F;
+    burst.angles.pitchRange = 0x34;
+    burst.spray.countBase = 6;
     if (D_80082FA0 >= 2) {
         shift = 1;
     } else {
         shift = 0;
     }
-    burst.unkC = 5 >> shift;
-    burst.pos.x = obj->x_position;
-    burst.pos.y = obj->y_position + 25.0f;
-    burst.pos.z = obj->z_position;
-    burst.unk34 = 6;
-    burst.unk1C = 50.0f;
-    burst.unk20 = 42.0f;
-    burst.unk24 = 98.0f;
-    burst.unk28 = 68.0f;
-    burst.unk2C = 609.0f;
-    burst.unk30 = 271.0f;
+    burst.spray.countRange = 5 >> shift;
+    burst.spray.pos.x = obj->x_position;
+    burst.spray.pos.y = obj->y_position + 25.0f;
+    burst.spray.pos.z = obj->z_position;
+    burst.spray.particleCountBase = 6;
+    burst.spray.speedBase = 50.0f;
+    burst.spray.speedRange = 42.0f;
+    burst.spray.sizeBase = 98.0f;
+    burst.spray.sizeRange = 68.0f;
+    burst.spray.sizeSlopeBase = 609.0f;
+    burst.spray.sizeSlopeRange = 271.0f;
     if ((D_80082FA0 >= 2) || (D_8008FD8C >= 8)) {
         shift = 1;
     } else {
         shift = 0;
     }
-    burst.unk38 = 3 >> shift;
-    burst.unk4C[0] = 25;
-    burst.unk4C[1] = 15;
-    burst.unk4C[2] = 100;
-    burst.unk4C[3] = 100;
-    burst.unk4C[4] = 12;
-    burst.unk4C[5] = 20;
-    burst.unk3C = 18.0f;
-    burst.unk40 = 0.7690000534f;
-    burst.unk44 = -0.1690000147f;
-    burst.unk48 = 0;
+    burst.spray.particleCountRange = 3 >> shift;
+    burst.spray.delayBase = 25;
+    burst.spray.delayRange = 15;
+    burst.spray.alphaBase = 100;
+    burst.spray.alphaRange = 100;
+    burst.spray.fadeStart = 12;
+    burst.spray.fadeOutStart = 20;
+    burst.spray.spread = 18.0f;
+    burst.spray.drag = 0.7690000534f;
+    burst.spray.gravityBase = -0.1690000147f;
+    burst.spray.gravityRange = 0;
     if ((D_80082FA0 >= 2) || (D_8008FD8C >= 8)) {
-        burst.unk58 = -1;
+        burst.spray.eventFunc = -1;
     } else {
-        burst.unk58 = 0;
+        burst.spray.eventFunc = 0;
     }
     func_1514FCE8(&burst, arg1, arg2);
     if ((obj->unk1D4 != NULL) && ((obj->unk74 & 0xF) != 0xF)) {
@@ -625,43 +595,13 @@ end:
     return 1;
 }
 
-/* Effect descriptor read by func_1514FBFC. */
-typedef struct {
-    Vec3f dir;      /* 0x00 */
-    Surface surf;     /* 0x0C */
-    u8 pad1E[2];
-    f32 unk20;
-    s32 unk24;
-    s32 unk28;
-    Vec3f pos;      /* 0x2C */
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    f32 unk4C;
-    s32 unk50;
-    s32 unk54;
-    f32 unk58;
-    f32 unk5C;
-    f32 unk60;
-    f32 unk64;
-    s16 unk68;
-    s16 unk6A;
-    s16 unk6C;
-    s16 unk6E;
-    s16 unk70;
-    s16 unk72;
-    s8 unk74;
-} Desc1514FBFC;
-
 /* Effect descriptor read by func_15151D6C. */
 typedef struct {
     s32 unk0;
     s32 unk4;
     Vec3f pos;      /* 0x08 */
     Vec3f vel;      /* 0x14 */
-    Surface surf;     /* 0x20 */
+    SurfaceTriangle surf;     /* 0x20 */
     u8 pad32[2];
     f32 unk34;
     f32 unk38;
@@ -681,31 +621,31 @@ typedef struct { f32 v[9]; } F32x9;
 extern S32x9 D_800AA718;
 extern F32x9 D_800AA73C;
 void func_15055A2C(s32, f32, f32, f32, s32);
-s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, Surface *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
+s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, SurfaceTriangle *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
 s32 func_15145C90(s32 hitInfo);
-s32 func_15144E80(Surface *, Vec3f *, Vec3f *, Vec3f *);
-void func_1514FBFC(Desc1514FBFC *, u8, s32);
+s32 func_15144E80(SurfaceTriangle *, Vec3f *, Vec3f *, Vec3f *);
+void func_1514FBFC(SurfaceJetSpray *, u8, s32);
 void func_15151D6C(Desc15151D6C *, s32 *, f32 *, s32, u8, s32);
 void func_151C04F8(Vec3f *, u8, s32);
 void func_151C05A4(Vec3f *, u8, s32);
 void func_151C05F0(Vec3f *, u8, s32);
 void func_151C0644(Vec3f *, u8, s32);
 void func_151BBEE4(Vec3f *pos, u8 arg1, s32 arg2);
-void func_151BBFBC(Surface *surf, Vec3f *pos, s32 arg2, s32 arg3);
+void func_151BBFBC(SurfaceTriangle *surf, Vec3f *pos, s32 arg2, s32 arg3);
 
 /*
  * Impact effect for a shot from `from` towards `to`: effects at the origin, then a ray cast along the
  * shot and, where it hits a surface, impact effects there.
  */
 void func_151BB61C(Actor *obj, Vec3f *from, Vec3f *to, u8 arg3, s32 arg4) {
-    Surface surf;
+    SurfaceTriangle surf;
     Vec3f hit;
     Vec3f delta;
     s32 hitInfo;
     Vec3f edgeA;
     Vec3f edgeB;
     Vec3f normal;
-    Desc1514FBFC fx;
+    SurfaceJetSpray fx;
 
     if (obj != NULL) {
         func_15055A2C(0, from->x, from->y, from->z, 0);
@@ -724,33 +664,33 @@ void func_151BB61C(Actor *obj, Vec3f *from, Vec3f *to, u8 arg3, s32 arg4) {
             if (func_15144E80(&surf, &edgeA, &edgeB, &normal) != 0 && normal.y < 0.0f) {
                 func_151C0644(&hit, arg3, arg4);
             }
-            fx.dir.x = -delta.x;
-            fx.dir.y = -delta.y;
-            fx.dir.z = -delta.z;
-            fx.surf = surf;
-            fx.unk20 = 494.0f;
-            fx.pos = hit;
-            fx.unk24 = 3;
-            fx.unk28 = 4;
-            fx.unk38 = 0.0609f;
-            fx.unk3C = 0.0252f;
-            fx.unk40 = 45.0f;
-            fx.unk44 = 53.0f;
-            fx.unk48 = 203.0f;
-            fx.unk4C = 414.0f;
-            fx.unk50 = 7;
-            fx.unk54 = 3;
-            fx.unk58 = 15.0f;
-            fx.unk5C = 0.8800000548f;
-            fx.unk60 = -0.3980000317f;
-            fx.unk64 = 0.3910000324f;
-            fx.unk68 = 25;
-            fx.unk6A = 15;
-            fx.unk6C = 100;
-            fx.unk6E = 100;
-            fx.unk70 = 12;
-            fx.unk72 = 20;
-            fx.unk74 = 0;
+            fx.source.normal.x = -delta.x;
+            fx.source.normal.y = -delta.y;
+            fx.source.normal.z = -delta.z;
+            fx.source.triangle = surf;
+            fx.source.spread = 494.0f;
+            fx.spray.pos = hit;
+            fx.spray.countBase = 3;
+            fx.spray.countRange = 4;
+            fx.spray.speedBase = 0.0609f;
+            fx.spray.speedRange = 0.0252f;
+            fx.spray.sizeBase = 45.0f;
+            fx.spray.sizeRange = 53.0f;
+            fx.spray.sizeSlopeBase = 203.0f;
+            fx.spray.sizeSlopeRange = 414.0f;
+            fx.spray.particleCountBase = 7;
+            fx.spray.particleCountRange = 3;
+            fx.spray.spread = 15.0f;
+            fx.spray.drag = 0.8800000548f;
+            fx.spray.gravityBase = -0.3980000317f;
+            fx.spray.gravityRange = 0.3910000324f;
+            fx.spray.delayBase = 25;
+            fx.spray.delayRange = 15;
+            fx.spray.alphaBase = 100;
+            fx.spray.alphaRange = 100;
+            fx.spray.fadeStart = 12;
+            fx.spray.fadeOutStart = 20;
+            fx.spray.eventFunc = 0;
             func_1514FBFC(&fx, arg3, arg4);
             {
                 S32x9 colors;
@@ -792,7 +732,7 @@ extern Vec3f D_8008FBAC;
  */
 void func_151BBA9C(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
     Vec3f center;
-    Desc1514FCE8 burst;
+    JetSpraySpec burst;
     FloorInfo floor;
     Vec3f probe;
     Vec3f hit;
@@ -809,35 +749,35 @@ void func_151BBA9C(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
         func_151C05F0(&center, arg3, arg4);
         func_15055A2C(1, center.x, center.y, center.z, 0);
         func_151BBEE4(&center, arg3, arg4);
-        burst.unk0 = 0;
-        burst.unk2 = 0xFF;
-        burst.unk4 = -0x40;
-        burst.unk6 = 0x47;
-        burst.unk8 = 6;
-        burst.unkC = 4 >> ((D_80082FA0 >= 2) ? 1 : 0);
-        burst.pos = center;
-        burst.unk34 = 7;
-        burst.unk1C = 23.0f;
-        burst.unk20 = 30.0f;
-        burst.unk24 = 45.0f;
-        burst.unk28 = 53.0f;
-        burst.unk2C = 203.0f;
-        burst.unk30 = 414.0f;
-        burst.unk38 = 3 >> ((D_80082FA0 >= 2 || D_8008FD8C >= 8) ? 1 : 0);
-        burst.unk4C[0] = 25;
-        burst.unk4C[1] = 15;
-        burst.unk4C[2] = 100;
-        burst.unk4C[3] = 100;
-        burst.unk4C[4] = 12;
-        burst.unk4C[5] = 20;
-        burst.unk3C = 15.0f;
-        burst.unk40 = 0.8720000386f;
-        burst.unk44 = -0.3980000317f;
-        burst.unk48 = 0.3640000224f;
+        burst.angles.yawBase = 0;
+        burst.angles.yawRange = 0xFF;
+        burst.angles.pitchBase = -0x40;
+        burst.angles.pitchRange = 0x47;
+        burst.spray.countBase = 6;
+        burst.spray.countRange = 4 >> ((D_80082FA0 >= 2) ? 1 : 0);
+        burst.spray.pos = center;
+        burst.spray.particleCountBase = 7;
+        burst.spray.speedBase = 23.0f;
+        burst.spray.speedRange = 30.0f;
+        burst.spray.sizeBase = 45.0f;
+        burst.spray.sizeRange = 53.0f;
+        burst.spray.sizeSlopeBase = 203.0f;
+        burst.spray.sizeSlopeRange = 414.0f;
+        burst.spray.particleCountRange = 3 >> ((D_80082FA0 >= 2 || D_8008FD8C >= 8) ? 1 : 0);
+        burst.spray.delayBase = 25;
+        burst.spray.delayRange = 15;
+        burst.spray.alphaBase = 100;
+        burst.spray.alphaRange = 100;
+        burst.spray.fadeStart = 12;
+        burst.spray.fadeOutStart = 20;
+        burst.spray.spread = 15.0f;
+        burst.spray.drag = 0.8720000386f;
+        burst.spray.gravityBase = -0.3980000317f;
+        burst.spray.gravityRange = 0.3640000224f;
         if (D_80082FA0 >= 2 || D_8008FD8C >= 8) {
-            burst.unk58 = -1;
+            burst.spray.eventFunc = -1;
         } else {
-            burst.unk58 = 0;
+            burst.spray.eventFunc = 0;
         }
         func_1514FCE8(&burst, arg3, arg4);
         func_1504715C(&floor, obj);
@@ -896,10 +836,10 @@ void func_151BBEE4(Vec3f *pos, u8 arg1, s32 arg2) {
     func_151602C0(&header, &header2, (func_150ADA20() % 21U) + 30, 0xFF, 0x61, 0x36, 0xFF, 0, 0, arg1, arg2);
 }
 
-void func_150E7FEC(f32, s32, Surface *, Vec3f *, s32, s32, s32, s32, s32, s32, s32, s32);
+void func_150E7FEC(f32, s32, SurfaceTriangle *, Vec3f *, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Spawns a randomised func_150E7FEC effect on surface `surf` at `pos`. */
-void func_151BBFBC(Surface *surf, Vec3f *pos, s32 arg2, s32 arg3) {
+void func_151BBFBC(SurfaceTriangle *surf, Vec3f *pos, s32 arg2, s32 arg3) {
     s32 pad; // matching: unused stack slot
     u32 rnd1;
     f32 rnd0;

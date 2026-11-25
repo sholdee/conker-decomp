@@ -709,22 +709,13 @@ void func_151D08F0(OwnedEffect *effect, void *msg, u8 type) {
     }
 }
 
-/* Emission shape shared by func_1514FF44, func_15153CCC, func_1514F6E8 and func_1514F808. */
-typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x04 */ Vec3f dir;
-    /* 0x10 */ Vec3f unk10;
-    /* 0x1C */ Vec3f unk1C;
-    /* 0x28 */ f32 unk28;
-} EmitShape; /* 0x2C */
-
 extern f32 D_800AAF84[3];
 extern f32 D_800AAF90[3];
 extern void func_15145EA4(f32 **, Vec3f **, Mtx *, s32);
-extern void func_1514FF44(EmitShape *, DropSpray *, FloorInfo *, u8, s32);
-extern void func_15153CCC(EmitShape *, SplashSpray *, FloorInfo *, u8, s32);
-extern s32 func_1514F6E8(EmitShape *);
-extern void func_1514F808(EmitShape *, f32, Vec3f *);
+extern void func_1514FF44(ConeBasis *, DropSpray *, FloorInfo *, u8, s32);
+extern void func_15153CCC(ConeBasis *, SplashSpray *, FloorInfo *, u8, s32);
+extern s32 func_1514F6E8(ConeBasis *);
+extern void func_1514F808(ConeBasis *, f32, Vec3f *);
 /* Partial view of the particle func_15130280 creates. */
 typedef struct {
     /* 0x00 */ u8 pad0[0xA8];
@@ -739,7 +730,7 @@ void func_151D09A8(Actor *obj, u8 arg1, s32 arg2) {
     Vec3f pos;
     Vec3f dir;
     FloorInfo floor;
-    EmitShape shape;
+    ConeBasis shape;
 
     if (obj->unk1D4 != NULL) {
         {
@@ -756,10 +747,10 @@ void func_151D09A8(Actor *obj, u8 arg1, s32 arg2) {
             dir.z -= pos.z;
         }
         func_1504715C(&floor, obj);
-        shape.unk0 = 0;
-        shape.dir = dir;
+        shape.flags = 0;
+        shape.direction = dir;
         /* Start from the zero vector D_800A5480. */
-        shape.unk10 = shape.unk1C = D_800A5480;
+        shape.axis0 = shape.axis1 = D_800A5480;
         {
             DropSpray emitA;
 
@@ -781,7 +772,7 @@ void func_151D09A8(Actor *obj, u8 arg1, s32 arg2) {
             emitA.unk34 = 0.0f;
             emitA.wobbles = 1;
             emitA.bounceChance = 0.0f;
-            shape.unk28 = 750.0f;
+            shape.spread = 750.0f;
             func_1514FF44(&shape, &emitA, &floor, arg1, arg2);
         }
         {
@@ -807,7 +798,7 @@ void func_151D09A8(Actor *obj, u8 arg1, s32 arg2) {
             emitB.unk3E = 15;
             emitB.unk40 = 0;
             emitB.kind = 2;
-            shape.unk28 = 750.0f;
+            shape.spread = 750.0f;
             func_15153CCC(&shape, &emitB, &floor, arg1, arg2);
         }
         if (func_1514F6E8(&shape) != 0) {
@@ -816,7 +807,7 @@ void func_151D09A8(Actor *obj, u8 arg1, s32 arg2) {
             CarrierParticle *particle;
             s32 pad; // matching: unused stack slot in the original frame
 
-            shape.unk28 = 1000.0f;
+            shape.spread = 1000.0f;
             count = (func_150ADA20() % 6U) + 5;
             spawn.texture = 0x3E;
             spawn.renderMode = 0x2203;

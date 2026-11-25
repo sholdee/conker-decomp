@@ -904,4 +904,77 @@ typedef struct DebrisBurst {
     /* 0x38 */ f32 spin;         /* rotVel.x / rotVel.z are random in [-spin, spin] */
 } DebrisBurst; /* size 0x3C */
 
+/* A random direction inside a cone around `direction`, built lazily by func_1514F6E8 (game_17CAF0.c);
+ * the first argument of func_1514FF44 / func_15153CCC. */
+typedef struct ConeBasis {
+    /* 0x00 */ u8 flags;         /* 1: direction normalized and scaled, 2: axes built, 4: axes normalized */
+    /* 0x01 */ u8 pad1[3];
+    /* 0x04 */ Vec3f direction;
+    /* 0x10 */ Vec3f axis0;
+    /* 0x1C */ Vec3f axis1;
+    /* 0x28 */ f32 spread;
+} ConeBasis; /* size 0x2C */
+
+/* Three s16 vertices of a collision triangle, as stored in a ray-cast result. */
+typedef struct SurfaceTriangle {
+    /* 0x00 */ s16 v[9];
+} SurfaceTriangle; /* size 0x12 */
+
+/* A cone described by a surface triangle (three s16 vertices) and the side its normal faces
+ * (func_1514F640); the first argument of func_1514FEFC / func_15153C84. */
+typedef struct TriangleSource {
+    /* 0x00 */ Vec3f normal;
+    /* 0x0C */ SurfaceTriangle triangle;
+    /* 0x1E */ u8 pad1E[2];
+    /* 0x20 */ f32 spread;
+} TriangleSource; /* size 0x24 */
+
+/* func_1514F8F8 (game_17CAF0.c): countBase + rand % (countRange + 1) jets of particles from pos
+ * (func_151A2AD4 / func_151A2A14, game_1CE2F0.c), each with particleCount particles whose speed falls off
+ * over the jet. */
+typedef struct JetSpray {
+    /* 0x00 */ s32 countBase;
+    /* 0x04 */ s32 countRange;
+    /* 0x08 */ Vec3f pos;
+    /* 0x14 */ f32 speedBase;
+    /* 0x18 */ f32 speedRange;
+    /* 0x1C */ f32 sizeBase;
+    /* 0x20 */ f32 sizeRange;
+    /* 0x24 */ f32 sizeSlopeBase;
+    /* 0x28 */ f32 sizeSlopeRange;
+    /* 0x2C */ s32 particleCountBase;
+    /* 0x30 */ s32 particleCountRange;
+    /* 0x34 */ f32 spread;
+    /* 0x38 */ f32 drag;
+    /* 0x3C */ f32 gravityBase;
+    /* 0x40 */ f32 gravityRange;
+    /* 0x44 */ s16 delayBase;
+    /* 0x46 */ s16 delayRange;
+    /* 0x48 */ s16 alphaBase;
+    /* 0x4A */ s16 alphaRange;
+    /* 0x4C */ s16 fadeStart;
+    /* 0x4E */ s16 fadeOutStart;
+    /* 0x50 */ s8 eventFunc;      /* index into D_8008F8E0, -1: none */
+    /* 0x51 */ u8 pad51[3];
+} JetSpray; /* size 0x54 */
+
+/* func_1514FCE8: jets in random yaw/pitch directions from `angles`. */
+typedef struct JetSpraySpec {
+    /* 0x00 */ AngleRange angles;
+    /* 0x08 */ JetSpray spray;
+} JetSpraySpec; /* size 0x5C */
+
+/* func_1514FB98: jets inside a cone of the given spread around `direction`. */
+typedef struct DirectedJetSpray {
+    /* 0x00 */ Vec3f direction;
+    /* 0x0C */ f32 spread;
+    /* 0x10 */ JetSpray spray;
+} DirectedJetSpray; /* size 0x64 */
+
+/* func_1514FBFC: jets inside a cone around the normal of a surface triangle. */
+typedef struct SurfaceJetSpray {
+    /* 0x00 */ TriangleSource source;
+    /* 0x24 */ JetSpray spray;
+} SurfaceJetSpray; /* size 0x78 */
+
 #endif
