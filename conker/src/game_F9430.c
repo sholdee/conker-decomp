@@ -1,8 +1,5 @@
 #include <ultra64.h>
-/* functions.h declares func_1513D668 as void; this file uses its real return value (declared below) */
-#define func_1513D668 func_1513D668_void_proto
 #include "functions.h"
-#undef func_1513D668
 #include "variables.h"
 #include "effects.h"
 
@@ -91,9 +88,6 @@ typedef struct {
 
 typedef f32 BoneMtx[4][4];
 
-GrowParticle *func_1513D668(ParticleDef *spawn, CornerColor *colors, u8 arg2, u8 arg3, u8 arg4, u8 arg5,
-                            s16 yaw, f32 arg7, f32 arg8, s32 arg9, f32 *argA, u8 argB, s32 argC, u8 argD,
-                            s32 argE);
 
 extern GroundBurstDef D_800A0640[];
 void func_1504715C(GroundHit *, Actor *);

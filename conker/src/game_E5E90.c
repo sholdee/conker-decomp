@@ -153,7 +153,7 @@ s32 func_150B89E0(PhysicsParticle *particle, f32 x, f32 y, f32 z, f32 floorHeigh
             extra[0] = ((func_150ADA68() * 80.0f) + 50.0f) * 1e-05f;
             def.unk50 = particle->floor.unk18;
             // matching: the spawned particle reuses the surface parameter; a new local takes another stack slot
-            surface = (void *)func_1513D594((s32)&def, (s32)&D_800A4AA0, 0x18, 0, 0,
+            surface = (void *)func_1513D594(&def, &D_800A4AA0, 0x18, 0, 0,
                                             (func_150ADA20() & 1) * 2 + (func_150ADA20() & 1),
                                             func_150ADA20() & 0xFF, 500.0f, 500.0f, 0, (s32)surface,
                                             particle->unk14C, particle->unk168, 0, 8, particle->unkC,
@@ -327,7 +327,7 @@ s32 func_150B8F44(PhysicsParticle *particle, CollisionProbe *probe, f32 x, f32 y
                     def.scale.z = 0.0f;
                     extra = (func_150ADA68() * 80.0f + 50.0f) * 1e-05f;
                     def.unk50 = particle->floor.unk18;
-                    spawned = (AxisParticle *)func_1513D594((s32)&def, (s32)&D_800A4AA0, 0x18, 0, 0,
+                    spawned = (AxisParticle *)func_1513D594(&def, &D_800A4AA0, 0x18, 0, 0,
                                                             (func_150ADA20() & 1) * 2 + (func_150ADA20() & 1),
                                                             func_150ADA20() & 0xFF, 500.0f, 500.0f, 0,
                                                             (s32)&triangle, particle->unk14C, particle->unk168, 0,

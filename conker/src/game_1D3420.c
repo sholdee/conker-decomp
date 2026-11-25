@@ -140,7 +140,7 @@ void func_151A6068(Game1D3420Emitter *emitter, s32 arg1, u8 playSound, u8 arg3, 
     spawn.scale.x = 1.0f;
     spawn.scale.y = 1.0f;
     spawn.scale.z = 1.0f;
-    effect = func_1513D2F0(&spawn, (s32)&D_800A4AA0, 0, 0x28, 0, 0x20, 0, 0, 0, sizeof(init), arg4, arg5);
+    effect = func_1513D2F0(&spawn, &D_800A4AA0, 0, 0x28, 0, 0x20, 0, 0, 0, sizeof(init), arg4, arg5);
     if (effect != NULL) {
         state = &effect->state;
         memcpy(state, &init, sizeof(init));

@@ -274,7 +274,7 @@ void func_150FF474(struct17 *position, struct17 *points, u8 arg2, s32 arg3) {
         spawn.unk28 = points[i];
         spawn.unk44 = (func_150ADA20() % 156U) + 100;
         variant = (func_150ADA20() & 1) ? 2 : 0;
-        func_1513D2F0(&spawn, (s32)&D_800A4AA0, 0, 0, 0, 0x1B, variant + 1, 0, 0, 0, arg2, arg3);
+        func_1513D2F0(&spawn, (s32)&D_800A4AA0, 0, 0, 0, 0x1B, variant + 1, 0, 0, 0, arg2, arg3); // matching: the int cast orders the arg setup
     }
 }
 

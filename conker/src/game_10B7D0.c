@@ -241,7 +241,7 @@ void func_150DE7C0(Emitter *emitter) {
         def.scale.x = 1.0f;
         def.scale.y = 1.0f;
         def.scale.z = 1.0f;
-        particle = func_1513D2F0(&def, (s32)&D_800A4AA0, 0x28, 0, 0, 0x26, 0, 3, 0xFF, 0x28, emitter->unkC,
+        particle = func_1513D2F0(&def, &D_800A4AA0, 0x28, 0, 0, 0x26, 0, 3, 0xFF, 0x28, emitter->unkC,
                                  emitter->unk1);
         if (particle != NULL) {
             memcpy(&particle->travel, &travel, sizeof(travel));

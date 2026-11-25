@@ -330,7 +330,7 @@ s8 func_150F78B4(EffectObj *obj) {
                 puffState.timeLeft = 27.0f - state->trailAge;
                 spawn.pos = *(vertex *)&state->trailPos; // TODO(vectors): struct17/vertex mix
                 spawn.unk44 = puffState.timeLeft * 6.481481552f;
-                puff = func_1513D2F0(&spawn, (s32)&D_800A4AA0, 0x24, 0, 0, 0x21, 0, 0, 0, 0x2C, obj->unkC, obj->unk1);
+                puff = func_1513D2F0(&spawn, (s32)&D_800A4AA0, 0x24, 0, 0, 0x21, 0, 0, 0, 0x2C, obj->unkC, obj->unk1); // matching: the int cast orders the arg setup
                 if (puff != NULL) {
                     memcpy(&puff->state, &puffState, sizeof(puffState));
                 }
@@ -516,7 +516,7 @@ s32 func_150F81BC(EffectObj *obj) {
                     spawn.pos = *(vertex *)&follow->trailPos; // TODO(vectors): struct17/vertex mix
                     spawn.unk44 = puffState.timeLeft * 6.481481552f;
                     puff = func_1513D2F0(&spawn, (s32)&D_800A4AA0, 0x24, 0, 0, 0x21, 0, 0, 0, 0x2C, obj->unkC,
-                                         obj->unk1);
+                                         obj->unk1); // matching: the int cast orders the arg setup
                     if (puff != NULL) {
                         memcpy(&puff->state, &puffState, sizeof(puffState));
                     }

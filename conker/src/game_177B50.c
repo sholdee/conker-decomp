@@ -583,7 +583,7 @@ void func_1514B364(struct17 *position, Struct1514B364Hit *ground, u8 arg2, s32 a
         randB = func_150ADA20();
         randC = func_150ADA20();
         sum = (randB & 1) + (randA & 1);
-        func_1513D668((s32)&desc, 0, 18, 29, 0, sum, (u8)randC,
+        func_1513D668(&desc, 0, 18, 29, 0, sum, (u8)randC,
                       100.0f, 100.0f, 0, (s32)&ground->unk04, 0, 0, arg2, arg3);
     }
 }
@@ -716,7 +716,7 @@ void *func_1514B8E4(vertex *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, s
     } else {
         flag = 0;
     }
-    particle = func_1513D2F0(&desc, (s32)&D_800A4AA0, arg8, arg9, argA, 28, flag | 2, 0, 0, argF + 80, arg10, arg11);
+    particle = func_1513D2F0(&desc, &D_800A4AA0, arg8, arg9, argA, 28, flag | 2, 0, 0, argF + 80, arg10, arg11);
     if (particle != NULL) {
         memcpy((u8 *)particle + 0x110, &state, sizeof(state));
     }

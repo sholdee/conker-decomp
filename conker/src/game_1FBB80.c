@@ -1,11 +1,7 @@
-/* matching: functions.h types func_1513D2F0's arg1 as s32; this file passes a pointer (an int-typed
- * address changes which loop invariants IDO keeps in saved registers). */
-#define func_1513D2F0 func_1513D2F0_s32_decl_in_functions_h
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
 #include "effects.h"
-#undef func_1513D2F0
 
 typedef struct Game1FBB80Owner {
     s16 field00;
@@ -29,7 +25,6 @@ typedef struct Game1FBB80Object {
 } Game1FBB80Object;
 
 s32 func_1504530C(void *, f32, void *);
-void *func_1513D2F0(void *, void *, u8, u8, u8, u8, u8, s32, s32, s32, u8, s32);
 void func_151432BC(void *, f32 *, f32 *, f32 *, f32 *);
 
 /* Emitter update: accumulates a randomized spawn rate and, for each whole unit, spawns one

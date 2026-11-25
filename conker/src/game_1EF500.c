@@ -276,7 +276,7 @@ Game1EF500Trail *func_151C229C(vertex *origin, vertex *direction, vertex *altOri
     spawn.field46 = 0;
     spawn.field47 = 0;
     spawn.field4C = arg22;
-    result = func_1513D2F0(&spawn, (s32)&D_800A4AA0, 0x16, 0, 0, 0x14, 0, 0, 0, extraSize + sizeof(ext), arg25, arg26);
+    result = func_1513D2F0(&spawn, &D_800A4AA0, 0x16, 0, 0, 0x14, 0, 0, 0, extraSize + sizeof(ext), arg25, arg26);
     if (result != NULL) {
         u8 failed;
 
@@ -1029,7 +1029,7 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
         spark.field4C = sparkArg;
         spark.field54 = 8;
         spark.field56 = 0x1F;
-        func_1513D2F0(&spark, (s32)&D_800A4AA0, 0x22, 0, 0, 0x1C, 2, 0, 0, 0, trail->unkC, trail->unk1);
+        func_1513D2F0(&spark, &D_800A4AA0, 0x22, 0, 0, 0x1C, 2, 0, 0, 0, trail->unkC, trail->unk1);
     }
     if (func_150ADA68() < smokeChance) {
         SmokeConfig smoke;

@@ -1,10 +1,5 @@
 #include <ultra64.h>
-// functions.h declares func_1513D4B8 as void; this file uses its real return type, so the header's
-// declaration is renamed out of the way.
-#define func_1513D4B8 func_1513D4B8_void_decl
 #include "functions.h"
-#undef func_1513D4B8
-void *func_1513D4B8(void *desc, void *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
 #include "variables.h"
 #include "effects.h"
 

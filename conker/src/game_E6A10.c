@@ -254,7 +254,7 @@ s32 func_150B963C(PhysicsParticle *particle) {
                     def.scale.z = 0.0f;
                     extra = ((func_150ADA68() * 80.0f) + 50.0f) * 1e-05f;
                     def.unk50 = particle->floor.unk18;
-                    spawned = func_1513D594((s32)&def, (s32)&D_800A4AA0, 0x18, 0, 0,
+                    spawned = func_1513D594(&def, &D_800A4AA0, 0x18, 0, 0,
                                             (func_150ADA20() & 1) * 2 + (func_150ADA20() & 1), func_150ADA20() & 0xFF,
                                             500.0f, 500.0f, 0, (s32)&particle->floor.surface, particle->unk14C,
                                             particle->unk168, 0, 8, particle->unkC, particle->unk1);

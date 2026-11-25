@@ -170,7 +170,7 @@ Particle *func_15102B38(Actor *target, u8 bone, vertex *start, vertex *end, Part
         flip = 0;
     }
 
-    particle = func_1513D2F0(&def, (s32)&D_800A4AA0, 0x29, 0, 0, 0x16, flip + 1, 0, 0,
+    particle = func_1513D2F0(&def, &D_800A4AA0, 0x29, 0, 0, 0x16, flip + 1, 0, 0,
                                   extraSize + sizeof(BeamData), arg12, arg13);
     if (particle != NULL) {
         memcpy(&particle->beam, &beam, sizeof(BeamData));

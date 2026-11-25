@@ -1,6 +1,3 @@
-// matching: functions.h types func_1513D2F0's 2nd param as s32, but it takes a pointer and passing
-// an s32 moves regalloc in func_150D2924, so hide the header prototype and redeclare it here
-#define func_1513D2F0 func_1513D2F0_hdr
 #include <ultra64.h>
 // matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
 // prototype (callers use the low byte without masking it), so it keeps that view.
@@ -10,9 +7,6 @@
 u8 func_150ADA20(void);
 #include "variables.h"
 #include "effects.h"
-#undef func_1513D2F0
-void *func_1513D2F0(void *params, void *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9,
-                    u8 argA, s32 argB);
 
 /* Object data (at +0x28) of a trigger that spawns spark emitters. */
 typedef struct EmitterTrigger {

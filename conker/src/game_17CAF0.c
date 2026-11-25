@@ -832,7 +832,7 @@ void func_151511FC(Local151511FCArg *config, u8 arg1, s32 arg2) {
             extra.spin.x = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
             extra.spin.z = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
             // matching: the comma expression makes IDO load &D_800A4AA0 inside the loop's register plan
-            object = func_1513D2F0(&desc, (s32)(0, &D_800A4AA0), 25, 0, 0, 23, ((func_150ADA20() & 1) * 2) + (func_150ADA20() & 1),
+            object = func_1513D2F0(&desc, (0, &D_800A4AA0), 25, 0, 0, 23, ((func_150ADA20() & 1) * 2) + (func_150ADA20() & 1),
                                    config->unk60, config->unk64, 32, arg1, arg2);
             if (object != NULL) {
                 memcpy((u8 *)object + 0x110, &extra, sizeof(extra));

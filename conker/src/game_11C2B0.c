@@ -237,7 +237,7 @@ Beam *func_150EEF80(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     spawn.unk50 = 0;
     spawn.fadeStart = 1;
     spawn.fadeRate = 0xFF;
-    beam = func_1513D2F0(&spawn, (s32)&D_800A4AA0, 0x1D, 0, 0, 0x1C, 0, 0, 0, 0x44, arg2, arg3);
+    beam = func_1513D2F0(&spawn, &D_800A4AA0, 0x1D, 0, 0, 0x1C, 0, 0, 0, 0x44, arg2, arg3);
     if (beam != NULL) {
         link = &beam->link;
         memcpy(link, &init, sizeof(init));

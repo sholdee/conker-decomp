@@ -1,11 +1,8 @@
-// functions.h declares func_1513D2F0 with an s32 second parameter; it takes a pointer (see below).
-#define func_1513D2F0 func_1513D2F0_hdr
 #include <ultra64.h>
 
 #include "functions.h"
 #include "variables.h"
 #include "effects.h"
-#undef func_1513D2F0
 
 /* Pseudo-random value mixed from the CPU cycle counter and func_150ADA20. */
 #define RANDOM() (osGetCount() * func_150ADA20())
@@ -342,7 +339,6 @@ typedef struct {
 } Particle1513D2F0Extra; /* size 0x1C */
 
 // The real prototype: functions.h has an s32 second parameter, and passing (s32)&D_800A4AA0 changes codegen.
-void *func_1513D2F0(void *, void *, u8, u8, u8, u8, u8, s32, s32, s32, u8, s32);
 
 /* Spawns func_1514462C(region) * density * 2e-7 func_1513D2F0 particles using D_800A4AA0. */
 void func_1500CE4C(s32 region, f32 density) {

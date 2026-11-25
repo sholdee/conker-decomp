@@ -1,13 +1,7 @@
 #include <ultra64.h>
-/* functions.h declares func_1513D2F0's second parameter as s32; this file passes a pointer
-   (the (s32) cast changes register allocation in func_151BD828). */
-#define func_1513D2F0 func_1513D2F0_hdr
 #include "functions.h"
 #include "variables.h"
 #include "effects.h"
-#undef func_1513D2F0
-void *func_1513D2F0(void *arg0, void *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9,
-                    u8 argA, s32 argB);
 
 /* Weak reference to an actor: valid while actor->unique_id still equals uniqueId. */
 typedef struct {

@@ -263,7 +263,7 @@ void func_1519ED84(SeqTrackState *track, s32 texture, s16 lifetime, u8 arg3, s32
     def.fadeStart = 1;
     def.fadeRate = 0xFF;
 
-    particle = func_1513D2F0(&def, (s32)&D_800A4AA0, 0x27, 0, 0, 0x17, 0, 3, 0xFF, 4, arg3, arg4);
+    particle = func_1513D2F0(&def, &D_800A4AA0, 0x27, 0, 0, 0x17, 0, 3, 0xFF, 4, arg3, arg4);
     if (particle != NULL) {
         memcpy(&particle->track, &trackArg, sizeof(trackArg));
     }

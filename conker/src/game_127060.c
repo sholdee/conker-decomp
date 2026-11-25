@@ -1,17 +1,11 @@
 #include <ultra64.h>
-// matching: redeclared below with the types this file was built against (functions.h has an s32 arg1
-// for func_1513D2F0, whose cast swaps registers)
-#define func_1513D2F0 func_1513D2F0_hdr
 #include "functions.h"
 /* variables.h declares D_800D3098 as an array, but the code loads it as a pointer to the table. */
 #define D_800D3098 D_800D3098_array_decl_in_variables_h
 #include "variables.h"
 #include "effects.h"
 #undef D_800D3098
-#undef func_1513D2F0
 extern struct178 *D_800D3098;
-void *func_1513D2F0(void *spawn, void *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8,
-                    s32 dataSize, u8 owner, s32 kind);
 
 
 /* Per-spark data of a burst spark (func_150F9BB0), stored at 0x110 of the spawned object. */

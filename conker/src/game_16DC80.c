@@ -1,8 +1,6 @@
 #include <ultra64.h>
 
-#define func_1513D524 func_1513D524_void_proto
 #include "functions.h"
-#undef func_1513D524
 #include "variables.h"
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
@@ -130,7 +128,6 @@ typedef struct {
     u32 base;
 } ZDecode;
 
-extern void *func_1513D524(s32, u8, u8, u8, u8, u8, s32, u8, s32);
 extern s32 D_800DC9F0; /* live glow count */
 extern ZDecode D_80089630[];
 extern s32 (*D_80089F90[])(GlowObj *, s16);
@@ -157,7 +154,7 @@ GlowObj *func_151407D0(GlowParams *params, s32 paramSize, GlowSpawn *spawn, u8 a
 
     spawn->unk1 = 3;
     spawn->flags |= 0x40400000;
-    obj = func_1513D524((s32)spawn, arg3, arg4, arg5, 1, arg6, paramSize, arg8, arg9);
+    obj = func_1513D524(spawn, arg3, arg4, arg5, 1, arg6, paramSize, arg8, arg9);
     if (obj != NULL) {
         GlowParams *dst = &obj->params;
 

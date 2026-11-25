@@ -1,7 +1,5 @@
 #include <ultra64.h>
-#define func_1513D524 func_1513D524_void_proto
 #include "functions.h"
-#undef func_1513D524
 #include "variables.h"
 #include "effects.h"
 
@@ -55,7 +53,6 @@ typedef struct {
     BoneMtx *bones;
 } BeamOwner;
 
-extern Effect *func_1513D524(ParticleDef *spawn, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8);
 extern void func_15143134(Vec3f *in, Vec3f *out, BoneMtx *mtx);
 extern void func_151D5D60(Vtx_t **buffers, s16 index, s32 size, Vtx_t **vertices, u8 *fresh);
 

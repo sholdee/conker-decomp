@@ -1,13 +1,9 @@
 #include <ultra64.h>
-// matching: functions.h declares func_1513D524 as void; it returns the spawned object here
-#define func_1513D524 func_1513D524_void_proto
 #include "functions.h"
-#undef func_1513D524
 #include "variables.h"
 #include "effects.h"
 
 extern void func_1510F800(s32);
-extern void *func_1513D524(void *spawn, u8, u8, u8, u8, u8, s32 extraSize, u8, s32);
 extern void func_1513F680(void *obj, u8, u8 effect, u8, u8);
 extern void func_151429E0(u8, u8 *r, u8 *g, u8 *b);
 extern void func_1518CA80(void *effect, u8 mode);

@@ -1,8 +1,5 @@
 #include <ultra64.h>
-/* functions.h types func_1513D668 as void; func_150CB1F4 uses the particle it returns. */
-#define func_1513D668 func_1513D668_void_proto
 #include "functions.h"
-#undef func_1513D668
 #include "variables.h"
 #include "effects.h"
 
@@ -103,9 +100,6 @@ void func_150CCD90(f32, f32 *, f32 *, f32 *);
 void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 arg8,
                    f32 arg9, Rgb8 *argA, u8 argB);
 s32 func_1518ABD0(s32, DustParticle *, s32);
-DustParticle *func_1513D668(ParticleDef *desc, DustColor *colors, u8 updateFn1, u8 updateFn2, u8 expireFn,
-                            u8 flip, s16 angle, f32 width, f32 height, s32 arg9, f32 *argA, u8 argB,
-                            s32 motionSize, u8 argD, s32 argE);
 
 /* Spawns a dust puff (tinted by func_150CCD90) on the ground below the actor's bone on `side`. */
 void func_150CB1F4(Actor *actor, s32 side, s32 arg2) {

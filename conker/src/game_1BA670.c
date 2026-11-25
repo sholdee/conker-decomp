@@ -1,8 +1,5 @@
 #include <ultra64.h>
-/* functions.h declares func_1513D524 as returning void; this file uses the particle it returns. */
-#define func_1513D524 func_1513D524_void_proto
 #include "functions.h"
-#undef func_1513D524
 #include "variables.h"
 #include "effects.h"
 
@@ -165,7 +162,6 @@ extern s32 (*D_8008D628[])(Emitter *);
 
 void *memcpy(void *, const void *, u32);
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
-extern Particle *func_1513D524(ParticleDef *, u8, u8, u8, u8, u8, s32, u8, s32);
 extern void func_1513F680();
 extern void func_15143134(void *, void *, void *);
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);

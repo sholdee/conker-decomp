@@ -304,7 +304,7 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
     def.unk50 = 0;
     def.fadeStart = 1;
     def.fadeRate = 0xFF;
-    particle = func_1513D2F0(&def, (s32)D_800A1EEC, 0, 0x2B, 0, 0x24, 0, 0, 0, 0x5C, arg1, arg2);
+    particle = func_1513D2F0(&def, D_800A1EEC, 0, 0x2B, 0, 0x24, 0, 0, 0, 0x5C, arg1, arg2);
     if (particle != NULL) {
         dst = &particle->ext;
         memcpy(dst, &ext, sizeof(ext));
@@ -353,7 +353,7 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
                 groundDef.unk50 = 0;
                 groundDef.fadeStart = 1;
                 groundDef.fadeRate = 0xFF;
-                dst->groundParticle = (Actor150FD514 *)func_1513D594((s32)&groundDef, (s32)&D_800A4AA0, 0, 0, 0, 0, 0, 50.0f, 50.0f, 0, (s32)&ground.unk04, 0, 0, 0, 0, arg1, arg2);
+                dst->groundParticle = (Actor150FD514 *)func_1513D594(&groundDef, &D_800A4AA0, 0, 0, 0, 0, 0, 50.0f, 50.0f, 0, (s32)&ground.unk04, 0, 0, 0, 0, arg1, arg2);
             }
         }
     }

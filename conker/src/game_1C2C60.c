@@ -1,14 +1,9 @@
 #include <ultra64.h>
 #define func_151422C0 func_151422C0_header
-#define func_1513D2F0 func_1513D2F0_hdr
-#define func_1513D524 func_1513D524_hdr
 #define func_15195AA8 func_15195AA8_hdr
 #include "functions.h"
 #undef func_151422C0
-#undef func_1513D2F0
-#undef func_1513D524
 #undef func_15195AA8
-void *func_1513D2F0(void *arg0, void *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, u8 argA, s32 argB);
 #define D_800DBFF0 D_800DBFF0_hdr
 #define D_800DD198 D_800DD198_hdr
 #define D_800E0900 D_800E0900_hdr
@@ -1466,7 +1461,6 @@ typedef struct ParticleDef48 {
 } ParticleDef48;
 
 extern JetChildPreset D_800A8710[];
-extern SceneParticle *func_1513D524(ParticleDef48 *, u8, u8, u8, u8, u8, s32, u8, s32);
 
 /*
  * Called when jet point `index` fades below childLife: spawns line particles (moved and faded by

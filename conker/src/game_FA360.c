@@ -1,8 +1,5 @@
 #include <ultra64.h>
-// functions.h declares func_1513D524 as void; this file uses the effect it returns
-#define func_1513D524 func_1513D524_void
 #include "functions.h"
-#undef func_1513D524
 #include "variables.h"
 #include "effects.h"
 
@@ -48,8 +45,6 @@ typedef struct {
     /* 0x110 */ DriftMotion drift;
 } Effect;
 
-extern Effect *func_1513D524(ParticleDef *spawn, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7,
-                             s32 arg8);
 
 /* Spawns a tumbling, swaying quad that drifts down from spawn->pos. */
 Effect *func_150CCEB0(DriftSpawn *spawn, u8 arg1, u8 arg2) {

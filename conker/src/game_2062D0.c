@@ -1,15 +1,12 @@
 #include <ultra64.h>
 
 // functions.h declares these three with other return types; this file uses the s32 versions below.
-#define func_1513D668 func_1513D668_void_proto
 #define func_151DA08C func_151DA08C_void_proto
 #include "functions.h"
-#undef func_1513D668
 #undef func_151DA08C
 #include "variables.h"
 #include "effects.h"
 
-s32 func_1513D668(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s16 arg6, f32 arg7, f32 arg8, s32 arg9, s32 argA, u8 argB, s32 argC, u8 argD, s32 argE);
 s32 func_151DA08C(u8 kind, f32 size, f32 shrink, u8 arg3, s16 lifetime, s32 arg5, vertex *pos, s32 arg7, s32 arg8);
 s32 func_1514672C(struct17 *arg0);
 s32 func_15046C80(struct17 *point, s32 arg1, f32 startY, f32 *floorY);
@@ -614,7 +611,7 @@ s32 func_151DA08C(u8 kind, f32 size, f32 shrink, u8 arg3, s16 lifetime, s32 arg5
     rand1 = func_150ADA20();
     rand2 = func_150ADA20();
     rand3 = func_150ADA20();
-    effect = func_1513D668((s32)&desc, 0, 14, 19, 0, (rand2 & 1) + (rand1 & 1), rand3 & 0xFF, 500.0f, 500.0f, 0,
+    effect = func_1513D668(&desc, 0, 14, 19, 0, (rand2 & 1) + (rand1 & 1), rand3 & 0xFF, 500.0f, 500.0f, 0,
                            arg5, 0, sizeof(steam), 0xFF, 0);
     if (effect != 0) {
         memcpy(&((SteamEffect *)effect)->steam, &steam, sizeof(steam));
@@ -941,7 +938,7 @@ void func_151DAB58(u8 kind, f32 size, u8 arg2, vertex *pos, volatile u8 arg4, u8
     arg7 = value ? 3 : 0;
     value = value ? 0xFF : 0;
     effect = func_1513D2F0(
-&desc, (s32)&D_800A4AA0, 0, 20, 0, 14, coinFlip | 2, arg7, value, sizeof(squash), arg5,
+&desc, &D_800A4AA0, 0, 20, 0, 14, coinFlip | 2, arg7, value, sizeof(squash), arg5,
                            arg6);
     if (effect != NULL) {
         memcpy(&((SquashEffect *)effect)->squash, &squash, sizeof(squash));
@@ -1426,7 +1423,7 @@ void func_151DBE80(u8 kind, f32 size, f32 arg2, s16 lifetime, vertex *pos, s32 a
     desc.rot.y = 0.0f;
     desc.rot.z = 0.0f;
 
-    func_1513D668((s32)&desc, 0, 11, 17, 0, (func_150ADA20() & 1) + (func_150ADA20() & 1),
+    func_1513D668(&desc, 0, 11, 17, 0, (func_150ADA20() & 1) + (func_150ADA20() & 1),
                   (s16)(func_150ADA20() & 0xFF), size, size, 0, arg5, 0, 0, arg8, arg9);
 }
 

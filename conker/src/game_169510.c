@@ -639,7 +639,7 @@ void func_1513CFE4(Particle *particle) {
 }
 
 /* Allocates a particle from a template; motionSize extra bytes follow it for its behaviour state. */
-void *func_1513D2F0(void *def, s32 colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip, s32 model,
+void *func_1513D2F0(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip, s32 model,
                     s32 arg8, s32 motionSize, u8 argA, s32 argB) {
     Particle *particle;
     s32 flags;
@@ -692,39 +692,39 @@ void *func_1513D2F0(void *def, s32 colors, u8 updateFn1, u8 updateFn2, u8 expire
     return particle;
 }
 
-void func_1513D4B8(s32 def, s32 colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip, s32 motionSize,
-                   u8 arg8, s32 arg9) {
-    func_1513D2F0(def, colors, updateFn1, updateFn2, expireFn, vertexFn, flip, 0, 0, motionSize, arg8, arg9);
+void *func_1513D4B8(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip,
+                    s32 motionSize, u8 arg8, s32 arg9) {
+    return func_1513D2F0(def, colors, updateFn1, updateFn2, expireFn, vertexFn, flip, 0, 0, motionSize, arg8, arg9);
 }
 
 /* As func_1513D4B8 with the default colours. */
-void func_1513D524(s32 def, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip, s32 motionSize, u8 arg7,
-                   s32 arg8) {
-    func_1513D2F0(def, &D_800A4AA0, updateFn1, updateFn2, expireFn, vertexFn, flip, 0, 0, motionSize, arg7, arg8);
+void *func_1513D524(void *def, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip, s32 motionSize,
+                    u8 arg7, s32 arg8) {
+    return func_1513D2F0(def, &D_800A4AA0, updateFn1, updateFn2, expireFn, vertexFn, flip, 0, 0, motionSize, arg7, arg8);
 }
 
 /* Spawns a particle whose quad is spanned by two axes from func_1513D6FC (vertex function 12). */
-s32 func_1513D594(s32 def, s32 colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 flip, s16 angle, f32 width,
+void *func_1513D594(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 flip, s16 angle, f32 width,
                   f32 height, s32 arg9, s32 argA, s32 model, s32 argC, u8 argD, s32 motionSize, u8 argF, s32 arg10) {
     Particle *particle;
 
     if (colors == 0) {
-        colors = (s32)&D_800A4AA0;
+        colors = &D_800A4AA0;
     }
     particle = func_1513D2F0(def, colors, updateFn1, updateFn2, expireFn, 12, flip, model, argC,
                              motionSize + sizeof(PARTICLE_MOTION(particle)->axes), argF, arg10);
     if ((particle != NULL) &&
         (func_1513D6FC((struct211 *)&PARTICLE_MOTION(particle)->axes, angle, width, height, arg9, argA, argD) == 0)) {
         func_1516972C(particle);
-        return 0;
+        return NULL;
     }
-    return (s32)particle;
+    return particle;
 }
 
-void func_1513D668(s32 def, s32 colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 flip, s16 angle, f32 width,
-                   f32 height, s32 arg9, s32 argA, u8 argB, s32 motionSize, u8 argD, s32 argE) {
-    func_1513D594(def, colors, updateFn1, updateFn2, expireFn, flip, angle, width, height, arg9, argA, 0, 0, argB,
-                  motionSize, argD, argE);
+void *func_1513D668(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 flip, s16 angle,
+                    f32 width, f32 height, s32 arg9, s32 argA, u8 argB, s32 motionSize, u8 argD, s32 argE) {
+    return func_1513D594(def, colors, updateFn1, updateFn2, expireFn, flip, angle, width, height, arg9, argA, 0, 0, argB,
+                         motionSize, argD, argE);
 }
 
 s32 func_1510E388(s32, s32, f32 *, f32 *);

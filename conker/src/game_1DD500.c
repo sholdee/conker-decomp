@@ -1,10 +1,8 @@
 #include <ultra64.h>
 /* functions.h declares these three with stale signatures; hide them there and declare the real ones here. */
 #define func_151D9B8C func_151D9B8C_decl_in_functions_h
-#define func_1513D524 func_1513D524_decl_in_functions_h
 #include "functions.h"
 #undef func_151D9B8C
-#undef func_1513D524
 void func_151D9B8C(u8, f32, u8, void *, f32 *, s16, u8, u8, u8, u8, s32);
 #include "variables.h"
 #include "effects.h"
@@ -393,7 +391,6 @@ typedef struct Game1DD500Mount {
     /* 0x4 */ vertex offset;
 } Game1DD500Mount;
 
-Game1DD500Particle *func_1513D524(ParticleDef *, u8, u8, u8, u8, u8, s32, u8, s32);
 void func_1513F680(Game1DD500Particle *, u8, u8, u8, u8);
 extern Game1DD500Mount D_800AA12C[11];
 extern Game1DD500Mount D_800AA1DC[11]; /* actor type 0x36 */

@@ -246,7 +246,7 @@ void func_1501175C(Actor *owner, u8 arg1, s32 arg2) {
             packet.unk46 = 0;
             packet.unk47 = 7;
             packet.unk48 = 0;
-            controller->effect = func_1513D2F0(&packet, (s32)&D_800A4AA0, 0, 0x25, 0, 0x1D,
+            controller->effect = func_1513D2F0(&packet, &D_800A4AA0, 0, 0x25, 0, 0x1D,
                                                ((func_150ADA20() & 1) ? 2 : 0) + 1, 0, 0, sizeof(motion), arg1, arg2);
             if (controller->effect != NULL) {
                 memcpy(&controller->effect->motion, &motion, sizeof(motion));

@@ -207,7 +207,7 @@ void func_150F2D14(Emitter *emitter) {
                     def.unk50 = 0;
                     def.fadeStart = 1;
                     def.fadeRate = 0xFF;
-                    spawned = func_1513D2F0(&def, (s32)&D_800A4AA0, 0x26, 0, 0, 0x25, 0, 0, 0, 0x34, emitter->unkC, emitter->unk1);
+                    spawned = func_1513D2F0(&def, &D_800A4AA0, 0x26, 0, 0, 0x25, 0, 0, 0, 0x34, emitter->unkC, emitter->unk1);
                     if (spawned != NULL) {
                         memcpy(&spawned->state, &particle, sizeof(particle));
                     }
