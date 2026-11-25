@@ -19,6 +19,7 @@ typedef union {
         s16 startX;
         s16 startY;
     } move; /* func_150B73F0: from start to end as the timer runs down */
+    s32 words[3]; /* move's points packed as x << 16 | y */
 } SpriteParams;
 
 /* SpriteObj descriptor passed to func_15169968/func_15169900, which copy it to the new sprite at +0x10. */
@@ -266,652 +267,353 @@ void func_150B709C(SpriteObj *sprite) {
     sprite->y = elapsed * -50 / 30 + 170;
 }
 
-extern s32 D_800BE9E4;
-void func_150B71A8(void *arg0)
-{
-  u8 *new_var;
-  s16 temp_v0;
-  unsigned int temp_v1;
-  temp_v1 = 0x1000;
-  temp_v0 = *((s16 *) (((u8 *) arg0) + 0x38));
-  if (temp_v1 == temp_v0)
-  {
-  }
-  else
-  {
-    *((s16 *) (((u8 *) arg0) + 0x38)) = temp_v0 + (D_800BE9E4 * 0x100);
-    if ((*((s16 *) (((u8 *) arg0) - -0x38))) >= 0x1001)
-    {
-      *((s16 *) (((u8 *) arg0) + 0x38)) = temp_v1;
+/* Update routine 6: grows scaleX up to 1.0, then scaleY. */
+void func_150B71A8(SpriteObj *sprite) {
+    if (sprite->scaleX != 0x1000) {
+        sprite->scaleX += D_800BE9E4 * 0x100;
+        if (sprite->scaleX > 0x1000) {
+            sprite->scaleX = 0x1000;
+        }
+    } else if (sprite->scaleY != 0x1000) {
+        sprite->scaleY += D_800BE9E4 * 0x100;
+        if (sprite->scaleY > 0x1000) {
+            sprite->scaleY = 0x1000;
+        }
     }
-    return;
-  }
-  temp_v0 = *((s16 *) (((u8 *) arg0) + 0x3A));
-  if (temp_v1 != temp_v0)
-  {
-    *((s16 *) (((u8 *) arg0) + 0x3A)) = temp_v0 + (D_800BE9E4 * 0x100);
-    if ((*((s16 *) (((u8 *) arg0) + 0x3A))) >= 0x1001)
-    {
-      new_var = (u8 *) arg0;
-      *((s16 *) (new_var + 0x3A)) = temp_v1;
-    }
-  }
 }
-
-
-typedef struct {
-    /* 0x00 */ void *unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ s16 unk1A;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ s16 unk24;
-    /* 0x26 */ s16 unk26;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ s16 unk2A;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ s16 unk2E;
-    /* 0x30 */ u8 unk30;
-    /* 0x31 */ u8 unk31;
-    /* 0x32 */ u8 unk32;
-    /* 0x33 */ u8 unk33;
-    /* 0x34 */ u8 unk34;
-    /* 0x35 */ u8 unk35;
-    /* 0x36 */ u8 unk36;
-    /* 0x37 */ u8 unk37;
-    /* 0x38 */ u8 unk38;
-    /* 0x39 */ u8 unk39;
-    /* 0x3A */ u8 pad3A[2];
-} Struct150B7220;
 
 extern u8 D_80091924;
-s32 func_15169900(void *arg0, s32 arg1);
+s32 func_15169900(SpriteDesc *desc, s32 arg1);
 
-void func_150B7220(s32 arg0, s32 arg1, s32 arg2, s32 arg3)
-{
-  Struct150B7220 sp44;
-  s32 r;
-  s32 x;
-  s32 y;
-  x = arg0;
-  y = arg1;
-  sp44.unk0 = &D_80091924;
-  sp44.unk8 = (x << 16) | (y & 0xFFFF);
-  sp44.unk28 = 0x1000;
-  sp44.unk2A = 0x1000;
-  sp44.unkC = arg2;
-  sp44.unk14 = arg2;
-  sp44.unk18 = 0;
-  sp44.unk24 = 0;
-  sp44.unk26 = 0;
-  sp44.unk2C = 0x10;
-  sp44.unk2E = 0x10;
-  sp44.unk30 = 7;
-  sp44.unk31 = 2;
-  sp44.unk32 = 0xFF;
-  sp44.unk33 = 0;
-  sp44.unk34 = 0;
-  if (y)
-  {
-  }
-  sp44.unk35 = 0xFF;
-  sp44.unk36 = 7;
-  sp44.unk37 = 0x11;
-  if (x < (D_800BE638 >> 1))
-  {
- do { r = D_800BE638 - x; } while (0);
-  }
-  else
-  {
-    r = x;
-  }
-  sp44.unk10 = (x << 16) | ((y - r) & 0xFFFF);
-  sp44.unk39 = 0;
-  sp44.unk16 = 0;
-  sp44.unk1C = x;
-  sp44.unk20 = y - r;
-  func_15169900(&sp44, arg3);
-  sp44.unk10 = (x << 16) | ((y + r) & 0xFFFF);
-  sp44.unk39 = 8;
-  sp44.unk20 = y + r;
-  func_15169900(&sp44, arg3);
-  sp44.unk1C = x - r;
-  sp44.unk10 = ((x - r) << 16) | (y & 0xFFFF);
-  sp44.unk39 = 4;
-  sp44.unk16 = 0x100;
-  sp44.unk20 = y;
-  func_15169900(&sp44, arg3);
-  sp44.unk10 = ((x + r) << 16) | (y & 0xFFFF);
-  sp44.unk39 = 0;
-  sp44.unk1C = x + r;
-  func_15169900(&sp44, arg3);
+/* Spawns four D_80091924 sprites (update routine 7) that converge on (arg0, arg1) from above, below,
+ * left and right over `duration` frames. */
+void func_150B7220(s32 arg0, s32 arg1, s32 duration, s32 arg3) {
+    SpriteDesc desc;
+    s32 r;
+    s32 x;
+    s32 y;
+
+    // matching: copies of the args give the 0x80 frame and IDO's register choice
+    x = arg0;
+    y = arg1;
+    desc.texture = &D_80091924;
+    desc.params.words[0] = (x << 16) | (y & 0xFFFF);
+    desc.scaleX = 0x1000;
+    desc.scaleY = 0x1000;
+    desc.params.words[1] = duration;
+    desc.timer = duration;
+    desc.unk18 = 0;
+    desc.unk24 = 0;
+    desc.unk26 = 0;
+    desc.width = 16;
+    desc.height = 16;
+    desc.update = 7;
+    desc.frameCount = 2;
+    desc.red = 0xFF;
+    desc.green = 0;
+    desc.blue = 0;
+    if (y) {} // matching: steers IDO's s1/s2 choice for y and r
+    desc.alpha = 0xFF;
+    desc.unk36 = 7;
+    desc.unk37 = 0x11;
+    if (x < (D_800BE638 >> 1)) {
+        do { // matching: the loop's -g3 markers steer IDO's register choice for r
+            r = D_800BE638 - x;
+        } while (0);
+    } else {
+        r = x;
+    }
+
+    desc.params.words[2] = (x << 16) | ((y - r) & 0xFFFF);
+    desc.unk39 = 0;
+    desc.frame = 0;
+    desc.x = x;
+    desc.y = y - r;
+    func_15169900(&desc, arg3);
+
+    desc.params.words[2] = (x << 16) | ((y + r) & 0xFFFF);
+    desc.unk39 = 8;
+    desc.y = y + r;
+    func_15169900(&desc, arg3);
+
+    desc.x = x - r;
+    desc.params.words[2] = ((x - r) << 16) | (y & 0xFFFF);
+    desc.unk39 = 4;
+    desc.frame = 0x100;
+    desc.y = y;
+    func_15169900(&desc, arg3);
+
+    desc.params.words[2] = ((x + r) << 16) | (y & 0xFFFF);
+    desc.unk39 = 0;
+    desc.x = x + r;
+    func_15169900(&desc, arg3);
 }
 
-typedef struct {
-    char pad18[0x18];
-    s16 unk18;
-    s16 unk1A;
-    s32 unk1C;
-    s16 unk20;
-    s16 unk22;
-    s16 unk24;
-    char pad26[6];
-    f32 unk2C;
-    f32 unk30;
-} Struct73F0;
+/* Update routine 7: moves the sprite in a straight line from its start point to its end point as its
+ * timer runs down from the duration to 0. */
+void func_150B73F0(SpriteObj *sprite) {
+    s32 endX = sprite->params.move.endX;
+    s32 endY = sprite->params.move.endY;
+    s32 startX = sprite->params.move.startX;
+    s32 startY = sprite->params.move.startY;
+    s32 duration = sprite->params.move.duration;
+    s32 timer = sprite->timer;
+    s32 t = (timer << 16) / duration; /* time left as a 16.16 fraction */
 
-void func_150B73F0(Struct73F0 *a0) {
-    s32 a = a0->unk18;
-    s32 b = a0->unk1A;
-    s32 c = a0->unk20;
-    s32 e = a0->unk22;
-    s32 d = a0->unk1C;
-    s32 n = a0->unk24;
-    s32 t1 = (n << 16) / d;
-    a0->unk2C = (f32)((((c - a) * t1) >> 16) + a);
-    a0->unk30 = (f32)((((e - b) * t1) >> 16) + b);
+    sprite->x = (((startX - endX) * t) >> 16) + endX;
+    sprite->y = (((startY - endY) * t) >> 16) + endY;
 }
 
-typedef struct {
-    /* 0x00 */ void *unk0;
-    /* 0x04 */ void *unk4;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ u8  pad1A[0x2];
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ s16 unk24;
-    /* 0x26 */ s16 unk26;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ s16 unk2A;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ s16 unk2E;
-    /* 0x30 */ u8  unk30;
-    /* 0x31 */ u8  unk31;
-    /* 0x32 */ u8  unk32;
-    /* 0x33 */ u8  unk33;
-    /* 0x34 */ u8  unk34;
-    /* 0x35 */ u8  unk35;
-    /* 0x36 */ u8  unk36;
-    /* 0x37 */ u8  unk37;
-    /* 0x38 */ u8  unk38;
-    /* 0x39 */ u8  unk39;
-} struct_7484;
 
 extern u8 D_800918DC;
 extern u8 D_800918E8;
 extern u8 D_800918F4;
 extern u8 D_80091900;
-struct102 *func_15169968(struct_7484 *);
+struct102 *func_15169968(SpriteDesc *desc);
 
+/* Replaces sprite slot 0 with a D_800918DC sprite at (60, 60) that grows in (update routine 6). */
 void func_150B7484(void) {
-    struct_7484 sp1C;
+    SpriteDesc desc;
 
-    sp1C.unk31 = 1;
-    sp1C.unk2C = 0x58;
-    sp1C.unk1C = 60.0f;
-    sp1C.unk20 = 60.0f;
-    sp1C.unk14 = 0;
-    sp1C.unk16 = 0;
-    sp1C.unk18 = 0;
-    sp1C.unk2E = 0x58;
-    sp1C.unk30 = 6;
-    sp1C.unk0 = &D_800918DC;
-    sp1C.unk32 = 0xFF;
-    sp1C.unk33 = 0;
-    sp1C.unk34 = 0;
-    sp1C.unk35 = 0xFF;
-    sp1C.unk24 = 0;
-    sp1C.unk26 = 0;
-    sp1C.unk39 = 0;
-    sp1C.unk36 = 7;
-    sp1C.unk37 = 0x15;
-    sp1C.unk38 = 1;
-    sp1C.unk28 = 0x51;
-    sp1C.unk2A = 0x51;
-    if (D_800D9898[0] != 0) {
-        func_1516972C((struct102 *)D_800D9898[0]);
+    desc.frameCount = 1;
+    desc.width = 88;
+    desc.x = 60.0f;
+    desc.y = 60.0f;
+    desc.timer = 0;
+    desc.frame = 0;
+    desc.unk18 = 0;
+    desc.height = 88;
+    desc.update = 6;
+    desc.texture = &D_800918DC;
+    desc.red = 0xFF;
+    desc.green = 0;
+    desc.blue = 0;
+    desc.alpha = 0xFF;
+    desc.unk24 = 0;
+    desc.unk26 = 0;
+    desc.unk39 = 0;
+    desc.unk36 = 7;
+    desc.unk37 = 0x15;
+    desc.unk38 = 1;
+    desc.scaleX = 0x51;
+    desc.scaleY = 0x51;
+    if (D_800D9898[0] != NULL) {
+        func_1516972C(D_800D9898[0]);
     }
-    D_800D9898[0] = (s32 *)func_15169968(&sp1C);
+    D_800D9898[0] = func_15169968(&desc);
     D_800D9890 = 3;
 }
 
+/* Frees sprite slot 0 and puts a static 15-frame D_800918DC sprite at (60, 60) in slot 3. */
 void func_150B7560(void) {
-    struct_7484 sp1C;
+    SpriteDesc desc;
 
-    if (D_800D9898[0] != 0) {
-        func_1516972C((struct102 *)D_800D9898[0]);
-        D_800D9898[0] = 0;
+    if (D_800D9898[0] != NULL) {
+        func_1516972C(D_800D9898[0]);
+        D_800D9898[0] = NULL;
     }
-    sp1C.unk18 = 0x4D;
-    sp1C.unk31 = 0xF;
-    sp1C.unk14 = 0;
-    sp1C.unk16 = 0;
-    sp1C.unk2C = 0x58;
-    sp1C.unk2E = 0x58;
-    sp1C.unk30 = 0;
-    sp1C.unk0 = &D_800918DC;
-    sp1C.unk24 = 0;
-    sp1C.unk26 = 0;
-    sp1C.unk32 = 0xFF;
-    sp1C.unk33 = 0;
-    sp1C.unk34 = 0;
-    sp1C.unk35 = 0xFF;
-    sp1C.unk36 = 7;
-    sp1C.unk37 = 0x11;
-    sp1C.unk38 = 1;
-    sp1C.unk39 = 0;
-    sp1C.unk28 = 0x1000;
-    sp1C.unk2A = 0x1000;
-    sp1C.unk1C = 60.0f;
-    sp1C.unk20 = 60.0f;
-    if (D_800D9898[3] != 0) {
-        func_1516972C((struct102 *)D_800D9898[3]);
+    desc.unk18 = 0x4D;
+    desc.frameCount = 15;
+    desc.timer = 0;
+    desc.frame = 0;
+    desc.width = 88;
+    desc.height = 88;
+    desc.update = 0;
+    desc.texture = &D_800918DC;
+    desc.unk24 = 0;
+    desc.unk26 = 0;
+    desc.red = 0xFF;
+    desc.green = 0;
+    desc.blue = 0;
+    desc.alpha = 0xFF;
+    desc.unk36 = 7;
+    desc.unk37 = 0x11;
+    desc.unk38 = 1;
+    desc.unk39 = 0;
+    desc.scaleX = 0x1000;
+    desc.scaleY = 0x1000;
+    desc.x = 60.0f;
+    desc.y = 60.0f;
+    if (D_800D9898[3] != NULL) {
+        func_1516972C(D_800D9898[3]);
     }
-    D_800D9898[3] = (s32 *)func_15169968(&sp1C);
+    D_800D9898[3] = func_15169968(&desc);
     D_800D9890 = 3;
 }
 
-void func_150B76BC(s32, s32);
+void func_150B76BC(s32 x, s32 slot);
 
+/* Spawns the growing D_800918E8 sprite at x = 60 in slot 1. */
 void func_150B765C(void) {
     func_150B76BC(0x3C, 1);
     D_800D9890 = 3;
 }
 
+/* Spawns the growing D_800918E8 sprite at x = 230 in slot 2. */
 void func_150B768C(void) {
     func_150B76BC(0xE6, 2);
     D_800D9890 = 3;
 }
 
-void func_150B76BC(s32 arg0, s32 arg1) {
-    struct_7484 sp24;
+/* Replaces sprite `slot` with a D_800918E8 sprite at (x, 170) that grows in (update routine 6). */
+void func_150B76BC(s32 x, s32 slot) {
+    SpriteDesc desc;
 
-    sp24.unk1C = (f32)arg0;
-    sp24.unk20 = 170.0f;
-    sp24.unk31 = 1;
-    sp24.unk2C = 0x58;
-    sp24.unk2E = 0x40;
-    sp24.unk30 = 6;
-    sp24.unk14 = 0;
-    sp24.unk16 = 0;
-    sp24.unk18 = 0;
-    sp24.unk0 = &D_800918E8;
-    sp24.unk32 = 0xFF;
-    sp24.unk33 = 0;
-    sp24.unk34 = 0;
-    sp24.unk35 = 0xFF;
-    sp24.unk24 = 0;
-    sp24.unk26 = 0;
-    sp24.unk39 = 0;
-    sp24.unk36 = 7;
-    sp24.unk37 = 0x15;
-    sp24.unk38 = 1;
-    sp24.unk28 = 0x51;
-    sp24.unk2A = 0x51;
-    if (D_800D9898[arg1] != 0) {
-        func_1516972C((struct102 *)D_800D9898[arg1]);
+    desc.x = x;
+    desc.y = 170.0f;
+    desc.frameCount = 1;
+    desc.width = 88;
+    desc.height = 64;
+    desc.update = 6;
+    desc.timer = 0;
+    desc.frame = 0;
+    desc.unk18 = 0;
+    desc.texture = &D_800918E8;
+    desc.red = 0xFF;
+    desc.green = 0;
+    desc.blue = 0;
+    desc.alpha = 0xFF;
+    desc.unk24 = 0;
+    desc.unk26 = 0;
+    desc.unk39 = 0;
+    desc.unk36 = 7;
+    desc.unk37 = 0x15;
+    desc.unk38 = 1;
+    desc.scaleX = 0x51;
+    desc.scaleY = 0x51;
+    if (D_800D9898[slot] != NULL) {
+        func_1516972C(D_800D9898[slot]);
     }
-    D_800D9898[arg1] = (s32 *)func_15169968(&sp24);
+    D_800D9898[slot] = func_15169968(&desc);
 }
 
+/* Frees sprite slot 1, then puts the D_800918F4/D_80091900 sprite (update routine 4) in slot 4
+ * and a static D_800918E8 sprite in slot 8, both at (60, 170). */
 void func_150B77A8(void) {
-    struct_7484 sp24;
+    SpriteDesc desc;
 
-    if (D_800D9898[1] != 0) {
-        func_1516972C((struct102 *)D_800D9898[1]);
-        D_800D9898[1] = 0;
+    if (D_800D9898[1] != NULL) {
+        func_1516972C(D_800D9898[1]);
+        D_800D9898[1] = NULL;
     }
 
-    sp24.unk1C = 60.0f;
-    sp24.unk20 = 170.0f;
-    sp24.unk2C = 0x40;
-    sp24.unk2E = 0x40;
-    sp24.unk30 = 4;
-    sp24.unk0 = &D_800918F4;
-    sp24.unk4 = &D_80091900;
-    sp24.unk14 = 0;
-    sp24.unk16 = 0;
-    sp24.unk18 = 0;
-    sp24.unk31 = 0;
-    sp24.unk24 = -0x800;
-    sp24.unk26 = 9;
-    sp24.unk32 = 0xFF;
-    sp24.unk33 = 0;
-    sp24.unk34 = 0;
-    sp24.unk35 = 0xFF;
-    sp24.unk36 = 0xD;
-    sp24.unk37 = 0x12;
-    sp24.unk38 = 2;
-    sp24.unk39 = 3;
-    sp24.unk28 = 0x1000;
-    sp24.unk2A = 0x1000;
-    if (D_800D9898[4] != 0) {
-        func_1516972C((struct102 *)D_800D9898[4]);
+    desc.x = 60.0f;
+    desc.y = 170.0f;
+    desc.width = 64;
+    desc.height = 64;
+    desc.update = 4;
+    desc.texture = &D_800918F4;
+    desc.unk4 = &D_80091900;
+    desc.timer = 0;
+    desc.frame = 0;
+    desc.unk18 = 0;
+    desc.frameCount = 0;
+    desc.unk24 = -0x800;
+    desc.unk26 = 9;
+    desc.red = 0xFF;
+    desc.green = 0;
+    desc.blue = 0;
+    desc.alpha = 0xFF;
+    desc.unk36 = 0xD;
+    desc.unk37 = 0x12;
+    desc.unk38 = 2;
+    desc.unk39 = 3;
+    desc.scaleX = 0x1000;
+    desc.scaleY = 0x1000;
+    if (D_800D9898[4] != NULL) {
+        func_1516972C(D_800D9898[4]);
     }
-    D_800D9898[4] = (s32 *)func_15169968(&sp24);
+    D_800D9898[4] = func_15169968(&desc);
 
-    sp24.unk24 = 0;
-    sp24.unk26 = 0;
-    sp24.unk2C = 0x58;
-    sp24.unk2E = 0x40;
-    sp24.unk30 = 0;
-    sp24.unk36 = 7;
-    sp24.unk37 = 0x11;
-    sp24.unk0 = &D_800918E8;
-    sp24.unk38 = 1;
-    if (D_800D9898[8] != 0) {
-        func_1516972C((struct102 *)D_800D9898[8]);
+    desc.unk24 = 0;
+    desc.unk26 = 0;
+    desc.width = 88;
+    desc.height = 64;
+    desc.update = 0;
+    desc.unk36 = 7;
+    desc.unk37 = 0x11;
+    desc.texture = &D_800918E8;
+    desc.unk38 = 1;
+    if (D_800D9898[8] != NULL) {
+        func_1516972C(D_800D9898[8]);
     }
-    D_800D9898[8] = (s32 *)func_15169968(&sp24);
+    D_800D9898[8] = func_15169968(&desc);
     D_800D9890 = 3;
 }
 
 extern u8 D_8009190C;
 
+/* Frees sprite slot 2, then puts three D_8009190C frames that scroll into place at y = 150, 170
+ * and 190 (update routine 5) in slots 5-7, and a static D_800918E8 sprite at (230, 170) in slot 9. */
 void func_150B791C(void) {
-    struct_7484 sp24;
+    SpriteDesc desc;
 
-    if (D_800D9898[2] != 0) {
-        func_1516972C((struct102 *)D_800D9898[2]);
-        D_800D9898[2] = 0;
+    if (D_800D9898[2] != NULL) {
+        func_1516972C(D_800D9898[2]);
+        D_800D9898[2] = NULL;
     }
-    sp24.unk1C = 230.0f;
-    sp24.unk31 = 3;
-    sp24.unk2C = 0x40;
-    sp24.unk2E = 0x10;
-    sp24.unk30 = 5;
-    sp24.unk24 = 0;
-    sp24.unk26 = 0;
-    sp24.unk14 = 0;
-    sp24.unk16 = 0;
-    sp24.unk18 = 0;
-    sp24.unk0 = &D_8009190C;
-    sp24.unk4 = 0;
-    sp24.unk8 = 0;
-    sp24.unk20 = 150.0f;
-    sp24.unkC = sp24.unk20;
-    sp24.unk10 = 0;
-    sp24.unk32 = 0xFF;
-    sp24.unk33 = 0;
-    sp24.unk34 = 0;
-    sp24.unk35 = 0x80;
-    sp24.unk36 = 7;
-    sp24.unk37 = 0x11;
-    sp24.unk38 = 1;
-    sp24.unk39 = 0;
-    sp24.unk28 = 0x1000;
-    sp24.unk2A = 0x1000;
-    if (D_800D9898[5] != 0) {
-        func_1516972C((struct102 *)D_800D9898[5]);
+    desc.x = 230.0f;
+    desc.frameCount = 3;
+    desc.width = 64;
+    desc.height = 16;
+    desc.update = 5;
+    desc.unk24 = 0;
+    desc.unk26 = 0;
+    desc.timer = 0;
+    desc.frame = 0;
+    desc.unk18 = 0;
+    desc.texture = &D_8009190C;
+    desc.unk4 = NULL;
+    desc.params.scroll.frame = 0;
+    desc.y = 150.0f;
+    desc.params.scroll.y = desc.y;
+    desc.params.scroll.stage = 0;
+    desc.red = 0xFF;
+    desc.green = 0;
+    desc.blue = 0;
+    desc.alpha = 0x80;
+    desc.unk36 = 7;
+    desc.unk37 = 0x11;
+    desc.unk38 = 1;
+    desc.unk39 = 0;
+    desc.scaleX = 0x1000;
+    desc.scaleY = 0x1000;
+    if (D_800D9898[5] != NULL) {
+        func_1516972C(D_800D9898[5]);
     }
-    D_800D9898[5] = (s32 *)func_15169968(&sp24);
-    sp24.unk16 = 0x100;
-    sp24.unk8 = 0x100;
-    sp24.unk20 = 170.0f;
-    sp24.unkC = sp24.unk20;
-    sp24.unk35 = 0xFF;
-    if (D_800D9898[6] != 0) {
-        func_1516972C((struct102 *)D_800D9898[5]);
+    D_800D9898[5] = func_15169968(&desc);
+    desc.frame = 0x100;
+    desc.params.scroll.frame = 0x100;
+    desc.y = 170.0f;
+    desc.params.scroll.y = desc.y;
+    desc.alpha = 0xFF;
+    if (D_800D9898[6] != NULL) {
+        func_1516972C(D_800D9898[5]); /* sic: frees slot 5, not 6 */
     }
-    D_800D9898[6] = (s32 *)func_15169968(&sp24);
-    sp24.unk16 = 0x200;
-    sp24.unk8 = 0x200;
-    sp24.unk20 = 190.0f;
-    sp24.unkC = sp24.unk20;
-    sp24.unk35 = 0x80;
-    if (D_800D9898[7] != 0) {
-        func_1516972C((struct102 *)D_800D9898[5]);
+    D_800D9898[6] = func_15169968(&desc);
+    desc.frame = 0x200;
+    desc.params.scroll.frame = 0x200;
+    desc.y = 190.0f;
+    desc.params.scroll.y = desc.y;
+    desc.alpha = 0x80;
+    if (D_800D9898[7] != NULL) {
+        func_1516972C(D_800D9898[5]); /* sic */
     }
-    D_800D9898[7] = (s32 *)func_15169968(&sp24);
-    sp24.unk14 = 0;
-    sp24.unk16 = 0;
-    sp24.unk18 = 0;
-    sp24.unk31 = 0;
-    sp24.unk2C = 0x58;
-    sp24.unk2E = 0x40;
-    sp24.unk35 = 0xFF;
-    sp24.unk30 = 0;
-    sp24.unk0 = &D_800918E8;
-    sp24.unk1C = 230.0f;
-    sp24.unk20 = 170.0f;
-    if (D_800D9898[9] != 0) {
-        func_1516972C((struct102 *)D_800D9898[9]);
+    D_800D9898[7] = func_15169968(&desc);
+    desc.timer = 0;
+    desc.frame = 0;
+    desc.unk18 = 0;
+    desc.frameCount = 0;
+    desc.width = 88;
+    desc.height = 64;
+    desc.alpha = 0xFF;
+    desc.update = 0;
+    desc.texture = &D_800918E8;
+    desc.x = 230.0f;
+    desc.y = 170.0f;
+    if (D_800D9898[9] != NULL) {
+        func_1516972C(D_800D9898[9]);
     }
-    D_800D9898[9] = (s32 *)func_15169968(&sp24);
+    D_800D9898[9] = func_15169968(&desc);
     D_800D9890 = 3;
 }
-
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-} Vec3_150B85C0;
-
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3_150B7B40;
-
-typedef struct {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C[3];
-    /* 0x28 */ Vec3_150B7B40 pos;
-    /* 0x34 */ f32 vel[3];
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-    /* 0x58 */ u8 unk58;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ u8 unk63;
-    /* 0x64 */ u8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 unk66;
-    /* 0x67 */ u8 unk67;
-    /* 0x68 */ u8 unk68;
-    /* 0x69 */ u8 pad69;
-    /* 0x6A */ u8 unk6A;
-    /* 0x6C */ s32 unk6C;
-    /* 0x70 */ u8 unk70;
-    /* 0x72 */ s16 unk72;
-    /* 0x74 */ s16 unk74;
-} Particle150B7B40;
-
-typedef struct {
-    Vec3_150B7B40 unk0;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    s16 unk24;
-    s16 unk26;
-    s16 unk28;
-    s16 unk2A;
-    s16 unk2C;
-    s16 unk2E;
-    s16 unk30;
-    s16 unk32;
-    s16 unk34;
-    s16 unk36;
-    u8 unk38;
-    u8 unk39;
-    u8 unk3A;
-    s32 unk3C;
-    s32 unk40;
-    s32 unk44;
-    s32 unk48;
-    s32 unk4C;
-    s32 unk50;
-    u8 unk54;
-    u8 unk55;
-    u8 unk56;
-    s32 unk58;
-    s32 unk5C;
-    s32 unk60;
-    s32 unk64;
-    s32 unk68;
-    s32 unk6C;
-    s32 unk70;
-    s32 unk74;
-    s32 unk78;
-    u8 unk7C;
-    u8 unk7D;
-    u8 pad7E[2];
-    s16 unk80;
-    s16 unk82;
-    s32 unk84;
-} Burst150B7B40;
-
-typedef struct {
-    /* 0x00 */ f32 unk00;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ f32 unk08;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ u8  unk1C;
-    /* 0x1D */ u8  pad1D[0x7];
-} Floor150B7B40;
-
-extern f32 D_8009FD30[3];
-extern f32 D_8009FD3C[3];
-extern f32 D_8009FD48[3];
-
-void func_15142314(s32, s32, f32 *);
-void func_15143134(f32 *, f32 *, s32);
-void func_1515C244(struct127 *, f32 *, f32 *, f32 *);
-void func_150B82D0(Vec3_150B7B40 *, f32 *, f32 *, f32 *, u8, s32);
-void func_150B85C0(Vec3_150B85C0 *, f32 *, f32 *, u8, s32);
-void func_1504715C(Floor150B7B40 *, struct127 *);
-s32 func_15046C80(Vec3_150B7B40 *, s32, f32, Floor150B7B40 *);
-void func_1514C678(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, s32, u8);
-s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
-void func_15151A38(Burst150B7B40 *, u8, s32);
-void func_150B7B40(struct127 *arg0, u8 arg1, s32 arg2);
-
-void func_15143794(s16, s16, f32, f32 *);
-void *func_1518A3C0(f32 *, f32 *, f32, f32 *, f32 *, f32, f32, u8, s16, u8, s32, u8, s32);
-void func_150B82D0(Vec3_150B7B40 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, u8 arg4, s32 arg5);
-
-
-typedef struct {
-    s32 unk00;
-    s32 unk04;
-    s16 unk08;
-    s16 unk0A;
-    s32 unk0C;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    Vec3_150B85C0 unk30;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    f32 unk4C;
-    f32 unk50;
-    f32 unk54;
-    s32 unk58;
-    u8 pad5C[4];
-    u8 unk60;
-    u8 unk61;
-    s8 unk62;
-    s8 unk63;
-    s8 unk64;
-    u8 unk65;
-    u8 unk66;
-    u8 pad67[9];
-} Fx150B85C0;
-
-extern void *func_15130374(void *, u8, s32, u8, s32);
-void func_150B85C0(Vec3_150B85C0 *arg0, f32 *arg1, f32 *arg2, u8 arg3, s32 arg4);
-
-typedef struct {
-    s32 unk00;
-    s32 unk04;
-    s16 unk08;
-    s16 unk0A;
-    s32 unk0C;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    f32 unk4C;
-    f32 unk50;
-    f32 unk54;
-    s32 unk58;
-    u8 pad5C[4];
-    u8 unk60;
-    u8 unk61;
-    s8 unk62;
-    s8 unk63;
-    s8 unk64;
-    u8 unk65;
-    u8 unk66;
-    u8 pad67[0x9];
-} Fx150B879C;
-
-extern void func_15143874(s16, f32, f32 *, f32 *);
-void *memcpy(void *, const void *, u32);
-s32 func_150B879C(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s16 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE);
