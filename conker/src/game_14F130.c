@@ -62,13 +62,17 @@ typedef struct Game14F130Camera {
     f32 speedVelocity, limitVelocity;
 } Game14F130Camera;
 
-void func_150495B0(f32 *, f32, f32 *, f32, f32, f32);
-void func_1512E140(void *);
-void func_15123A54(void *);
-void func_1512A390(void *);
-extern f32 D_800A3448; // matching: a 999.0f literal becomes lui+mtc1, the original loads it from rodata
+void func_150495B0(f32 *value, f32 goal, f32 *velocity, f32 arg3, f32 arg4, f32 dt);
+void func_1512E140(Game14F130Camera *camera);
+void func_15123A54(Game14F130Camera *camera);
+void func_1512A390(Game14F130Camera *camera);
+extern f32 D_800A3448; // 999.0f, "no saved yaw" sentinel; matching: a literal becomes lui+mtc1 instead of this load
 extern u8 D_800BEA0C;
 
+/**
+ * Eases the camera yaw toward the yaw behind its actor (or straight to the saved target yaw when the camera
+ * is instant), then runs the three follow-up camera updates.
+ */
 void func_15121C80(Game14F130Camera *camera, f32 yawOffset) {
     f32 angle;
     f32 speed;
@@ -78,11 +82,11 @@ void func_15121C80(Game14F130Camera *camera, f32 yawOffset) {
     Vec3i position;
 
     active = (camera->flags5F0 & 0x10) != 0;
-    if (active != 0) {
+    if (active) {
         active = (*camera->controls & 0x10) != 0;
     }
-    if (active == 0 && (D_800BE616 != 0 || (mode = camera->mode) == 9 || mode == 0x3B) && camera->target->enabled != 0) {
-        if (D_800BE616 != 0) {
+    if (!active && (D_800BE616 || camera->mode == 9 || camera->mode == 59) && camera->target->enabled) {
+        if (D_800BE616) {
             camera->targetSpeed = 5.0f;
             camera->targetLimit = 8.0f;
             func_150495B0(&camera->speed, 5.0f, &camera->speedVelocity, 1.0f, 2.0f, camera->delta);
@@ -91,18 +95,19 @@ void func_15121C80(Game14F130Camera *camera, f32 yawOffset) {
         } else {
             func_15049688(&camera->yaw, camera->actor->yaw - 180.0f, &camera->yawVelocity, 5.0f, 8.0f, camera->delta);
         }
-        camera->yawRadians = camera->yaw * 0.017453292f;
-    } else if (camera->locked == 0) {
-        angle = ((camera->actor->yaw + (f32) camera->actor->angle * 0.0054931640625f) - 180.0f) - yawOffset;
-        if (active != 0 && camera->mode != 0x1C) {
+        camera->yawRadians = camera->yaw * (3.1415927f / 180.0f);
+    } else if (!camera->locked) {
+        angle = ((camera->actor->yaw + (f32) camera->actor->angle * (360.0f / 65536)) - 180.0f) - yawOffset;
+        if (active && camera->mode != 28) {
             angle -= (f32) (camera->actor->rotation >> 16) * 0.02f;
         }
-        mode = camera->mode;
-        if (mode == 9 || mode == 0x38 || mode == 0x39 || mode == 0x37 || mode == 0x3B || mode == 0x12) {
-            angle -= (f32) camera->target->angle * 0.0054931640625f;
+        if (camera->mode == 9 || camera->mode == 56 || camera->mode == 57 || camera->mode == 55 ||
+            camera->mode == 59 || camera->mode == 18) {
+            angle -= (f32) camera->target->angle * (360.0f / 65536);
         }
         func_15048758(&angle);
-        if (camera->instant != 0) {
+        if (camera->instant) {
+            // matching: reusing speed/limit as temporaries keeps the original stack frame
             speed = camera->target->yaw;
             limit = D_800A3448;
             if (limit != speed) {
@@ -116,12 +121,13 @@ void func_15121C80(Game14F130Camera *camera, f32 yawOffset) {
             }
             camera->yawVelocity = 0.0f;
         } else {
-            if (active != 0 || camera->fast != 0) {
+            if (active || camera->fast) {
                 speed = 4.0f;
                 limit = 6.0f;
             } else {
                 mode = camera->mode;
-                if ((mode == 9 && D_800BE616 != 0) || mode == 0x38 || mode == 0x39 || mode == 0x37 || mode == 0x3B || mode == 0x12) {
+                if ((mode == 9 && D_800BE616) || mode == 56 || mode == 57 || mode == 55 || mode == 59 ||
+                    mode == 18) {
                     speed = 2.0f;
                     limit = 6.0f;
                 } else if (camera->flags84 & 0x200000) {
@@ -132,11 +138,11 @@ void func_15121C80(Game14F130Camera *camera, f32 yawOffset) {
                     limit = 2.2f;
                 }
             }
-            if (D_800BEA0C == 0) {
+            if (!D_800BEA0C) {
                 func_15049688(&camera->yaw, angle, &camera->yawVelocity, speed, limit, camera->delta);
             }
         }
-        camera->yawRadians = camera->yaw * 0.017453292f;
+        camera->yawRadians = camera->yaw * (3.1415927f / 180.0f);
     }
     func_1512A390(camera);
     func_15123A54(camera);
