@@ -181,17 +181,6 @@ typedef struct {
     /* 0x48 */ s8 onDeath;      /* index into D_8008CA20, -1 = none */
 } Particle;
 
-typedef struct {
-    char pad_0[0x98];
-    s16 field_0x98;
-    s16 field_0x9A;
-    char pad_0x9C[0xC];
-    u16 field_0xA8;
-    char pad_0xAA[0x6];
-    u8 field_0xB0;
-    char pad_0xB1[0x1];
-    s8 field_0xB2;
-} GameAnimObject;
 
 typedef struct {
     char pad_0[0x1];
@@ -837,159 +826,146 @@ s32 func_15168118(Gfx *gfx, Particle *p, s16 viewIndex) {
     gfx = func_15142C10(gfx, c0, c1, c2, 0, &update);
     return func_15095760(gfx, &params);
 }
+/* Template / payload of a type 0xE object: a textured quad pair animated through a SpriteAnim. */
 typedef struct {
-    Vtx vtx[8];
-    u8 pad80[8];
-    s16 unk88;
-    u8 pad8A[0xE];
-    u16 unk98;
-    u8 pad9A[2];
-    s16 unk9C;
-    s16 unk9E;
-    u8 unkA0;
-} Struct1516865C;
+    /* 0x00 */ Vtx vtx[8];
+    /* 0x80 */ u8 pad80[8];
+    /* 0x88 */ s16 frame;       /* 8.8 fixed point; -1 = finished */
+    /* 0x8A */ s16 frameStep;
+    /* 0x8C */ u8 pad8C[0xC];
+    /* 0x98 */ u16 flags;       /* 0x4: finish at either end, 0x40: ping-pong, 0x80/0x100: flip s/t */
+    /* 0x9A */ u8 pad9A[2];
+    /* 0x9C */ s16 unk9C;
+    /* 0x9E */ s16 unk9E;
+    /* 0xA0 */ u8 animIndex;    /* index into D_8008CA4C */
+    /* 0xA1 */ u8 padA1;
+    /* 0xA2 */ s8 callback;     /* index into D_8008C9C8, -1 = none */
+} QuadFxData;
 
-void func_1516865C(Struct1516865C *arg0, u8 r, u8 g, u8 b, u8 a) {
-    s16 s0;
-    s16 s1;
-    s16 t0;
-    s16 t1;
+/* Type 0xE object. */
+typedef struct {
+    /* 0x00 */ ObjLink link;
+    /* 0x10 */ QuadFxData data;
+} QuadFx;
+
+/* Fills a QuadFxData template's vertex colours and texture coordinates from its animation. */
+void func_1516865C(QuadFxData *q, u8 r, u8 g, u8 b, u8 a) {
+    s16 tB;
+    s16 tA;
+    s16 sB;
+    s16 sA;
     s32 i;
 
-    s1 = 0x2000;
-    s0 = (D_8008CA4C[arg0->unkA0]->unk8 + 0x100) << 5;
-    t1 = 0x2000;
-    t0 = (D_8008CA4C[arg0->unkA0]->unk6 + 0x100) << 5;
+    tA = 0x2000;
+    tB = (D_8008CA4C[q->animIndex]->unk8 + 0x100) << 5;
+    sA = 0x2000;
+    sB = (D_8008CA4C[q->animIndex]->unk6 + 0x100) << 5;
     for (i = 0; i < 2; i++) {
-        arg0->vtx[i * 4 + 1].v.flag = 0;
-        arg0->vtx[i * 4 + 1].v.cn[0] = r;
-        arg0->vtx[i * 4 + 1].v.cn[1] = g;
-        arg0->vtx[i * 4 + 1].v.cn[2] = b;
-        arg0->vtx[i * 4 + 1].v.cn[3] = a;
-        arg0->vtx[i * 4 + 2].v.flag = 0;
-        arg0->vtx[i * 4 + 2].v.cn[0] = r;
-        arg0->vtx[i * 4 + 2].v.cn[1] = g;
-        arg0->vtx[i * 4 + 2].v.cn[2] = b;
-        arg0->vtx[i * 4 + 2].v.cn[3] = a;
-        arg0->vtx[i * 4 + 3].v.flag = 0;
-        arg0->vtx[i * 4 + 3].v.cn[0] = r;
-        arg0->vtx[i * 4 + 3].v.cn[1] = g;
-        arg0->vtx[i * 4 + 3].v.cn[2] = b;
-        arg0->vtx[i * 4 + 3].v.cn[3] = a;
-        arg0->vtx[i * 4 + 0].v.flag = 0;
-        arg0->vtx[i * 4 + 0].v.cn[0] = r;
-        arg0->vtx[i * 4 + 0].v.cn[1] = g;
-        arg0->vtx[i * 4 + 0].v.cn[2] = b;
-        arg0->vtx[i * 4 + 0].v.cn[3] = a;
+        q->vtx[i * 4 + 1].v.flag = 0;
+        q->vtx[i * 4 + 1].v.cn[0] = r;
+        q->vtx[i * 4 + 1].v.cn[1] = g;
+        q->vtx[i * 4 + 1].v.cn[2] = b;
+        q->vtx[i * 4 + 1].v.cn[3] = a;
+        q->vtx[i * 4 + 2].v.flag = 0;
+        q->vtx[i * 4 + 2].v.cn[0] = r;
+        q->vtx[i * 4 + 2].v.cn[1] = g;
+        q->vtx[i * 4 + 2].v.cn[2] = b;
+        q->vtx[i * 4 + 2].v.cn[3] = a;
+        q->vtx[i * 4 + 3].v.flag = 0;
+        q->vtx[i * 4 + 3].v.cn[0] = r;
+        q->vtx[i * 4 + 3].v.cn[1] = g;
+        q->vtx[i * 4 + 3].v.cn[2] = b;
+        q->vtx[i * 4 + 3].v.cn[3] = a;
+        q->vtx[i * 4 + 0].v.flag = 0;
+        q->vtx[i * 4 + 0].v.cn[0] = r;
+        q->vtx[i * 4 + 0].v.cn[1] = g;
+        q->vtx[i * 4 + 0].v.cn[2] = b;
+        q->vtx[i * 4 + 0].v.cn[3] = a;
     }
-    if (arg0->unk98 & 0x80) {
-        s0 = 0x2000;
-        s1 = (D_8008CA4C[arg0->unkA0]->unk8 + 0x100) << 5;
+    if (q->flags & 0x80) {
+        tB = 0x2000;
+        tA = (D_8008CA4C[q->animIndex]->unk8 + 0x100) << 5;
     }
-    if (arg0->unk98 & 0x100) {
-        t0 = 0x2000;
-        t1 = (D_8008CA4C[arg0->unkA0]->unk6 + 0x100) << 5;
+    if (q->flags & 0x100) {
+        sB = 0x2000;
+        sA = (D_8008CA4C[q->animIndex]->unk6 + 0x100) << 5;
     }
-    arg0->vtx[1].v.tc[0] = arg0->vtx[5].v.tc[0] = arg0->vtx[2].v.tc[0] = arg0->vtx[6].v.tc[0] = t1;
-    arg0->vtx[2].v.tc[1] = arg0->vtx[6].v.tc[1] = arg0->vtx[3].v.tc[1] = arg0->vtx[7].v.tc[1] = s1;
-    arg0->vtx[0].v.tc[0] = arg0->vtx[4].v.tc[0] = arg0->vtx[3].v.tc[0] = arg0->vtx[7].v.tc[0] = t0;
-    arg0->vtx[0].v.tc[1] = arg0->vtx[4].v.tc[1] = arg0->vtx[1].v.tc[1] = arg0->vtx[5].v.tc[1] = s0;
-    arg0->unk88 = 0;
-    arg0->unk9C = 0;
-    arg0->unk9E = 0;
+    q->vtx[1].v.tc[0] = q->vtx[5].v.tc[0] = q->vtx[2].v.tc[0] = q->vtx[6].v.tc[0] = sA;
+    q->vtx[2].v.tc[1] = q->vtx[6].v.tc[1] = q->vtx[3].v.tc[1] = q->vtx[7].v.tc[1] = tA;
+    q->vtx[0].v.tc[0] = q->vtx[4].v.tc[0] = q->vtx[3].v.tc[0] = q->vtx[7].v.tc[0] = sB;
+    q->vtx[0].v.tc[1] = q->vtx[4].v.tc[1] = q->vtx[1].v.tc[1] = q->vtx[5].v.tc[1] = tB;
+    q->frame = 0;
+    q->unk9C = 0;
+    q->unk9E = 0;
 }
-// PERMUTER CANDIDATE (best 3095): leaf func; logic decoded fully (strided 8x0x10 init loop +
-// two conditional value-swaps keyed on obj->0x98 flags 0x80/0x100 + field mirroring). Target
-// homes a1/a2/a3 to caller arg slots (0xc/0x10/0x14) in a leaf while keeping them register-
-// resident, an IDO arg-home idiom not reproducible from C; register allocation also diverges.
-// Best reconstruction:
-// void func_1516865C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
-//     u8 *obj = (u8 *)arg0; s32 v0_val, v1_val, t1_val, t2_val, flags, i; s16 tmp; u8 *q; u8 t0b;
-//     arg1 &= 0xFF; arg2 &= 0xFF; arg3 &= 0xFF;
-//     v0_val = 0x2000; t1_val = 0x2000;
-//     v1_val = ((s32)((D_8008CA4C[obj[0xA0]]->unk8 + 0x100) << 21)) >> 16;
-//     t2_val = ((s32)((D_8008CA4C[obj[0xA0]]->unk6 + 0x100) << 21)) >> 16;
-//     t0b = (u8)arg4; q = obj; i = 0;
-//     do { i++; q += 0x40;
-//         *(s16*)(q-0x2A)=0; q[-0x24]=arg1; q[-0x23]=arg2; q[-0x22]=arg3; q[-0x21]=t0b;
-//         *(s16*)(q-0x1A)=0; q[-0x14]=arg1; q[-0x13]=arg2; q[-0x12]=arg3; q[-0x11]=t0b;
-//         *(s16*)(q-0x0A)=0; q[-0x04]=arg1; q[-0x03]=arg2; q[-0x02]=arg3; q[-0x01]=t0b;
-//         *(s16*)(q-0x3A)=0; q[-0x34]=arg1; q[-0x33]=arg2; q[-0x32]=arg3; q[-0x31]=t0b;
-//     } while (i != 2);
-//     flags = *(u16*)(obj+0x98);
-//     if (flags & 0x80)  { v0_val = ((s32)((D_8008CA4C[obj[0xA0]]->unk8 + 0x100) << 21)) >> 16; v1_val = 0x2000; }
-//     if (flags & 0x100) { t1_val = ((s32)((D_8008CA4C[obj[0xA0]]->unk6 + 0x100) << 21)) >> 16; t2_val = 0x2000; }
-//     *(s16*)(obj+0x68)=t1_val; tmp=*(s16*)(obj+0x68);
-//     *(s16*)(obj+0x7A)=v0_val; *(s16*)(obj+0x78)=t2_val;
-//     *(s16*)(obj+0x28)=tmp; *(s16*)(obj+0x58)=tmp; *(s16*)(obj+0x18)=tmp;
-//     tmp=*(s16*)(obj+0x7A); *(s16*)(obj+0x5A)=v1_val; *(s16*)(obj+0x88)=0;
-//     *(s16*)(obj+0x3A)=tmp; *(s16*)(obj+0x6A)=tmp; *(s16*)(obj+0x2A)=tmp;
-//     tmp=*(s16*)(obj+0x78); *(s16*)(obj+0x9C)=0; *(s16*)(obj+0x9E)=0;
-//     *(s16*)(obj+0x38)=tmp; *(s16*)(obj+0x48)=tmp; *(s16*)(obj+0x8)=tmp;
-//     tmp=*(s16*)(obj+0x5A); *(s16*)(obj+0x1A)=tmp; *(s16*)(obj+0x4A)=tmp; *(s16*)(obj+0xA)=tmp;
-// }
-s32 func_15168800(s32 arg0, s32 arg1, s32 arg2) {
-    s32 temp;
 
-    temp = (s32)func_15167A68(0xE, arg2, 0xB8, 1, *((u8 *)&arg1 + 3), 1);
-    if (temp == 0) {
-        return 0;
+/* Spawns a type 0xE QuadFx from a template prepared with func_1516865C. */
+QuadFx *func_15168800(src, owner, list)
+    QuadFxData *src;
+    u8 owner;
+    s32 list;
+{
+    QuadFx *fx;
+
+    fx = func_15167A68(0xE, list, sizeof(QuadFx), 1, owner, 1);
+    if (fx == NULL) {
+        return NULL;
     }
-    bcopy(arg0, (void *)(temp + 0x10), 0xA8);
-    return temp;
+    bcopy(src, &fx->data, sizeof(QuadFxData));
+    return fx;
 }
-void func_15168870(GameAnimObject *arg0) {
-    s32 temp_v0;
-    s32 temp_v1;
-    u8 temp_a1;
-    s16 temp_a2;
+
+/* Type 0xE update: advances the animation (wrapping, ping-ponging or finishing) and runs its callback. */
+void func_15168870(QuadFx *fx) {
+    s32 frame;
+    s32 limit;
+    u8 frameCount;
+    s16 step;
     void (*func)(struct102 *);
 
-    temp_a2 = arg0->field_0x9A;
-    if (temp_a2 != 0) {
-        temp_a1 = D_8008CA4C[arg0->field_0xB0]->frameCount;
-        temp_v1 = temp_a1;
-        temp_v1 <<= 8;
-        arg0->field_0x98 += temp_a2 * D_800BE9E4;
-        temp_v0 = arg0->field_0x98;
-        temp_v1 -= 1;
-        if (temp_v1 < temp_v0) {
-            if (arg0->field_0xA8 & 0x40) {
-                arg0->field_0x98 = temp_v1 - (temp_v0 % temp_v1);
-                arg0->field_0x9A = -temp_a2;
-            } else if (arg0->field_0xA8 & 4) {
-                arg0->field_0x98 = -1;
+    step = fx->data.frameStep;
+    if (step != 0) {
+        frameCount = D_8008CA4C[fx->data.animIndex]->frameCount;
+        limit = (frameCount << 8) - 1;
+        fx->data.frame += step * D_800BE9E4;
+        frame = fx->data.frame;
+        if (limit < frame) {
+            if (fx->data.flags & 0x40) {
+                fx->data.frame = limit - (frame % limit);
+                fx->data.frameStep = -step;
+            } else if (fx->data.flags & 4) {
+                fx->data.frame = -1;
             } else {
                 do {
-                    arg0->field_0x98 = temp_v0 - temp_v1;
-                    temp_v0 = arg0->field_0x98;
-                } while (temp_v1 < temp_v0);
+                    fx->data.frame = frame - limit;
+                    frame = fx->data.frame;
+                } while (limit < frame);
             }
-        } else if (temp_v0 < 0) {
-            if (arg0->field_0xA8 & 0x40) {
-                arg0->field_0x98 = -temp_v0 % temp_v1;
-                arg0->field_0x9A = -temp_a2;
-            } else if (arg0->field_0xA8 & 4) {
-                arg0->field_0x98 = -1;
+        } else if (frame < 0) {
+            if (fx->data.flags & 0x40) {
+                fx->data.frame = -frame % limit;
+                fx->data.frameStep = -step;
+            } else if (fx->data.flags & 4) {
+                fx->data.frame = -1;
             } else {
                 do {
-                    arg0->field_0x98 = temp_v0 + temp_v1;
-                    temp_v0 = arg0->field_0x98;
-                } while (temp_v0 < 0);
+                    fx->data.frame = frame + limit;
+                    frame = fx->data.frame;
+                } while (frame < 0);
             }
         }
     }
 
-    temp_v0 = arg0->field_0xB2;
-    if (temp_v0 != -1) {
-        func = D_8008C9C8[temp_v0];
+    frame = fx->data.callback;
+    if (frame != -1) {
+        func = D_8008C9C8[frame];
         if (func != NULL) {
-            func((struct102 *)arg0);
+            func((struct102 *)fx);
         }
     }
 
-    if (arg0->field_0x98 == -1) {
-        func_1516972C((struct102 *)arg0);
+    if (fx->data.frame == -1) {
+        func_1516972C((struct102 *)fx);
     }
 }
 void func_15168A2C(s32 arg0) {
