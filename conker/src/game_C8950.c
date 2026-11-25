@@ -3,7 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-
 /*
  * Variable-size per-id record, kept in the doubly linked list D_800D2F48 sorted by id.
  * The payload (dataSize bytes) lives inside the same allocation at dataOffset.
@@ -36,17 +35,17 @@ typedef struct {
 /* One state byte per id. */
 #define ID_STATE ((u8 *)&D_800D2E70)
 
-C8950Node *func_1509B950(C8950Node *);
-C8950Node *func_1509B704(s16 arg0);
-C8950Node *func_1509B5AC(s32 arg0, s32 arg1);
-void func_1509B810();
-C8950Node *func_1509B8FC(s16 arg0);
+C8950Node *func_1509B950(C8950Node *node);
+C8950Node *func_1509B704(s16 id);
+C8950Node *func_1509B5AC(s32 id, s32 reload);
+void func_1509B810(C8950Node *node);
+C8950Node *func_1509B8FC(s16 id);
 void func_1509C120(void);
 void func_1509C3A0(void);
-void func_150ADAF0();
+void func_150ADAF0(C8950Node *node, s32 mode);
 
-
-void func_1509B4A0(s32 arg0, s32 arg1) {
+/* Gets (and, if needed, creates) the record of every id listed in D_800D2F40 that func_1509CBD4 accepts. */
+void func_1509B4A0(s32 unused, s32 reload) {
     s32 i;
 
     D_8003C8E0 = 0x5000000;
@@ -57,7 +56,7 @@ void func_1509B4A0(s32 arg0, s32 arg1) {
         if (!func_1509CBD4(D_800D2F40[i])) {
             continue;
         }
-        func_1509B5AC(D_800D2F40[i], arg1);
+        func_1509B5AC(D_800D2F40[i], reload);
     }
 
     func_1509C3A0();
@@ -229,8 +228,9 @@ void func_1509C228(void);
 extern u8 D_800D2E69;
 
 /*
- * Unloads records: with `unloadAll` set every record is unloaded (mode 3); otherwise records whose id
- * flag is set, that have flag 0x8000, or that have flag 0x1000 and belong to another D_800BE9F0.
+ * Frees records. With `unloadAll` every record runs its mode-3 handler and is freed. Otherwise records
+ * whose id flag is set are freed silently (state 3), and records with flag 0x8000, or with flag 0x1000
+ * and an unk2 other than D_800BE9F0, run the mode-3 handler and are freed.
  */
 void func_1509BA04(s32 unloadAll) {
     C8950Node *node;
@@ -340,82 +340,94 @@ void func_1509BBA0(s32 mode) {
     D_800D3858 = 0;
 }
 
-//
+// matching: a tentative definition here (not extern) lets as1 share one `lui` for the [0]/[1] stores
 s32 D_800D2F60[16];
 extern s32 D_800D3840;
 extern s32 (*D_80088498[])(s32, s32, s32 *);
-
-s32 func_1509BE40(s32 num, s32 arg1, s32 arg2, ...) {
-    va_list ap;
-    s32 i;
-    s32 cmd;
-    s32 type;
-    s32 saved;
-
-    va_start(ap, num);
-    cmd = va_arg(ap, s32);
-    saved = D_800D3840;
-    type = ((cmd & 0xF000) >> 12) - 1;
-    cmd &= 0xFFF;
-    arg2 = va_arg(ap, s32);
-    D_800D2F60[0] = cmd;
-    D_800D2F60[1] = arg2;
-    for (i = 0; i < num; i++) {
-        D_800D2F60[i + 2] = va_arg(ap, s32);
-    }
-    D_800D3840 = num + 2;
-    D_80088498[type](cmd, arg2, D_800D2F60);
-    D_800D3840 = saved;
-}
-
 extern s32 (*D_800884D4[])(s32, s32, s32 *);
 
-void func_1509BFB0(s32 num, s32 arg1, s32 arg2, ...) {
+/*
+ * Command dispatchers: bits 12-15 of `cmd` select a handler in the table, bits 0-11 are passed
+ * to it with `arg` and `count` further variadic words (collected in D_800D2F60 with cmd and arg).
+ * matching: cmdWord and arg are read back from their home slots via va_arg (va_start on `count`)
+ * into a separate local `cmd` and the reused `arg`.
+ */
+s32 func_1509BE40(s32 count, s32 cmdWord, s32 arg, ...) {
+    va_list ap;
+    s32 i;
+    s32 cmd;
+    s32 type;
+    s32 saved;
+    s32 result;
+
+    va_start(ap, count);
+    cmd = va_arg(ap, s32);
+    saved = D_800D3840;
+    type = ((cmd & 0xF000) >> 12) - 1;
+    cmd &= 0xFFF;
+    arg = va_arg(ap, s32);
+    D_800D2F60[0] = cmd;
+    D_800D2F60[1] = arg;
+    for (i = 0; i < count; i++) {
+        D_800D2F60[i + 2] = va_arg(ap, s32);
+    }
+    va_end(ap);
+    D_800D3840 = count + 2;
+    result = D_80088498[type](cmd, arg, D_800D2F60);
+    D_800D3840 = saved;
+    return result;
+}
+
+void func_1509BFB0(s32 count, s32 cmdWord, s32 arg, ...) {
     va_list ap;
     s32 i;
     s32 cmd;
     s32 type;
     s32 saved;
 
-    va_start(ap, num);
+    va_start(ap, count);
     cmd = va_arg(ap, s32);
     saved = D_800D3840;
     type = ((cmd & 0xF000) >> 12) - 1;
     cmd &= 0xFFF;
-    arg2 = va_arg(ap, s32);
+    arg = va_arg(ap, s32);
     D_800D2F60[0] = cmd;
-    D_800D2F60[1] = arg2;
-    for (i = 0; i < num; i++) {
+    D_800D2F60[1] = arg;
+    for (i = 0; i < count; i++) {
         D_800D2F60[i + 2] = va_arg(ap, s32);
     }
-    D_800D3840 = num + 2;
-    D_800884D4[type](cmd, arg2, D_800D2F60);
+    va_end(ap);
+    D_800D3840 = count + 2;
+    D_800884D4[type](cmd, arg, D_800D2F60);
     D_800D3840 = saved;
 }
 
-
+/*
+ * (Re)allocates the 0x1B-byte id bit array: allocates 1-4 buffers (count from func_150ADA20),
+ * keeps the last one and frees the others, then copies the old array over and frees it.
+ */
 void func_1509C120(void) {
     s32 i;
-    s32 n;
+    s32 last;
     struct102 *bufs[4];
     struct102 *old;
 
-    n = func_150ADA20() & 3;
+    last = func_150ADA20() & 3;
     old = D_800D2E4C;
     if (old != NULL) {
         if (!(func_150ADA20() & 4)) {
             return;
         }
     }
-    for (i = 0; i <= n; i++) {
+    for (i = 0; i <= last; i++) {
         bufs[i] = allocate_memory(0x1B, 0xFF, 2, 0);
     }
-    for (i = 0; i <= n; i++) {
-        if (i != n) {
+    for (i = 0; i <= last; i++) {
+        if (i != last) {
             func_10004074(bufs[i]);
         }
     }
-    D_800D2E4C = bufs[n];
+    D_800D2E4C = bufs[last];
     if (old != NULL) {
         bcopy(old, D_800D2E4C, 0x1B);
         func_10004074(old);
@@ -423,41 +435,42 @@ void func_1509C120(void) {
 }
 
 void func_1509C228(void) {
-    if ((D_800D2E68 & 8) || (D_800D2E4C->unkF & 1)) {
+    if ((D_800D2E68 & 8) || ID_FLAG(120)) {
         func_1509BFB0(2, 0x2000, 0x36, 0, 1);
         return;
     }
     func_1509BFB0(2, 0x2000, 0x36, 1, 1);
 }
 
+/* Returns 0 when D_800BE9F0 is one of the listed values or D_800D2E44 is set, else 1. */
 s32 func_1509C2A4(void) {
-    s32 temp_v0 = D_800BE9F0;
-    if ((temp_v0 == 3) ||
-        (temp_v0 == 5) ||
-        (temp_v0 == 9) ||
-        (temp_v0 == 13) ||
-        (temp_v0 == 15) ||
-        (temp_v0 == 17) ||
-        (temp_v0 == 21) ||
-        (temp_v0 == 22) ||
-        (temp_v0 == 24) ||
-        (temp_v0 == 26) ||
-        (temp_v0 == 29) ||
-        (temp_v0 == 31) ||
-        (temp_v0 == 32) ||
-        (temp_v0 == 33) ||
-        (temp_v0 == 34) ||
-        (temp_v0 == 36) ||
-        (temp_v0 == 37) ||
-        (temp_v0 == 42) ||
-        (temp_v0 == 43) ||
-        (temp_v0 == 45) ||
-        (temp_v0 == 48) ||
-        (temp_v0 == 51) ||
-        (temp_v0 == 52) ||
-        (temp_v0 == 56) ||
-        (temp_v0 == 62) ||
-        (temp_v0 == 63) ||
+    s32 value = D_800BE9F0;
+    if ((value == 3) ||
+        (value == 5) ||
+        (value == 9) ||
+        (value == 13) ||
+        (value == 15) ||
+        (value == 17) ||
+        (value == 21) ||
+        (value == 22) ||
+        (value == 24) ||
+        (value == 26) ||
+        (value == 29) ||
+        (value == 31) ||
+        (value == 32) ||
+        (value == 33) ||
+        (value == 34) ||
+        (value == 36) ||
+        (value == 37) ||
+        (value == 42) ||
+        (value == 43) ||
+        (value == 45) ||
+        (value == 48) ||
+        (value == 51) ||
+        (value == 52) ||
+        (value == 56) ||
+        (value == 62) ||
+        (value == 63) ||
         (D_800D2E44 != 0)
       ) {
         return 0;
@@ -466,8 +479,8 @@ s32 func_1509C2A4(void) {
 }
 
 void func_1509C3A0(void) {
-    if ((D_800D2E43 != 0) && (D_800D2E44 == 0) && (func_1509C2A4() != 0)) {
-        D_800BE3DF = (s8) D_800BE9F4;
+    if (D_800D2E43 && !D_800D2E44 && func_1509C2A4()) {
+        D_800BE3DF = (s8)D_800BE9F4; // variables.h declares D_800BE9F4 as a pointer
         if (D_800C35C4 == 0) {
             func_15007718(D_8008FDA8);
         }
@@ -475,7 +488,7 @@ void func_1509C3A0(void) {
     }
 }
 
-
-s32 func_1509C414(s32 arg0) {
-    return ((D_800D2E4C->unk3 & 1) << 0xA) + arg0 + 0x1400;
+/* Returns index + 0x1400, plus 0x400 when id flag 24 is set. */
+s32 func_1509C414(s32 index) {
+    return (ID_FLAG(24) << 10) + index + 0x1400;
 }
