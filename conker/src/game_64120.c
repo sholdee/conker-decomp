@@ -1657,79 +1657,73 @@ void func_1503A08C(struct127 *obj) {
     }
 }
 
-typedef struct {
-    u8  pad0[0x30];
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-} GameStruct_1503A60C;
-
+/* Moves bone matrix 1's translation of the current object to (unk174, y_position, unk178). */
 void func_1503A60C(void) {
-    GameStruct_1503A60C *dst = (GameStruct_1503A60C *)((u8 *)D_800CC2D0[D_800C3E78].unk1D4 + 0x40);
+    f32 (*mtx)[4] = OBJ_BONES(&D_800CC2D0[D_800C3E78])[1];
 
-    dst->unk30 = *(f32 *)&D_800CC2D0[D_800C3E78].pad174;
-    dst->unk34 = D_800CC2D0[D_800C3E78].y_position;
-    dst->unk38 = *(f32 *)&D_800CC2D0[D_800C3E78].pad178;
+    mtx[3][0] = *(f32 *)&D_800CC2D0[D_800C3E78].pad174;
+    mtx[3][1] = D_800CC2D0[D_800C3E78].y_position;
+    mtx[3][2] = *(f32 *)&D_800CC2D0[D_800C3E78].pad178;
 }
 
-extern u8 D_800C3FFA;
-extern u8 D_80084404[];
-void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
-
+/*
+ * For object type 0x22: scales bone D_80084404[D_800C3FFA] by 1 + unk20A / 64 in x and z (the inverse for
+ * every pass after the first), keeping its translation.
+ */
 void func_1503A678(void) {
     struct127 *obj;
-    f32 (*m)[4];
-    f32 sz;
-    f32 sy;
-    f32 sx;
-    f32 f;
-    f32 inv;
-    f32 mtx[4][4];
+    f32 (*bone)[4];
+    f32 scaleZ;
+    f32 scaleY;
+    f32 scaleX;
+    f32 factor;
+    f32 unused; // matching: -g3 stack slot
+    f32 scaleMtx[4][4];
     f32 tmp[4][4];
     f32 pos[3];
 
     obj = &D_800CC2D0[D_800C3E78];
     if (obj->id == 0x22) {
-        f = *((u8 *)&D_800CC2D0[D_800C3E78] + 0x20A);
-        f /= 64.0f;
-        f += 1.0f;
+        factor = ((u8 *)&D_800CC2D0[D_800C3E78].pad208)[2]; /* +0x20A */
+        factor /= 64.0f;
+        factor += 1.0f;
         if (D_800C3FFA == 0) {
-            sx = f;
-            sy = 1.0f;
-            sz = f;
+            scaleX = factor;
+            scaleY = 1.0f;
+            scaleZ = factor;
         } else {
-            sx = 1.0f / f;
-            sy = 1.0f;
-            sz = 1.0f / f;
+            scaleX = 1.0f / factor;
+            scaleY = 1.0f;
+            scaleZ = 1.0f / factor;
         }
-        m = (f32 (*)[4])((u8 *)D_800CC2D0[D_800C3E78].unk1D4 + (D_80084404[D_800C3FFA] << 6));
-        m[3][3] = 1.0f;
-        m[0][3] = 0.0f;
-        m[1][3] = 0.0f;
-        m[2][3] = 0.0f;
-        pos[0] = m[3][0];
-        pos[1] = m[3][1];
-        pos[2] = m[3][2];
-        guMtxIdentF(mtx);
-        func_150A7CB0(mtx, *(s32 *)&sx, *(s32 *)&sy, *(s32 *)&sz);
-        func_150A7A48(m, mtx, tmp);
-        bcopy(tmp, m, 0x40);
-        m[3][0] = pos[0];
-        m[3][1] = pos[1];
-        m[3][2] = pos[2];
+        // matching: byte-offset form; indexing OBJ_BONES() here changes the code
+        bone = (f32 (*)[4])((u8 *)D_800CC2D0[D_800C3E78].unk1D4 + (D_80084404[D_800C3FFA] << 6));
+        bone[3][3] = 1.0f;
+        bone[0][3] = 0.0f;
+        bone[1][3] = 0.0f;
+        bone[2][3] = 0.0f;
+        pos[0] = bone[3][0];
+        pos[1] = bone[3][1];
+        pos[2] = bone[3][2];
+        guMtxIdentF(scaleMtx);
+        // functions.h declares the scale arguments as s32, so the float bits are passed
+        func_150A7CB0(scaleMtx, *(s32 *)&scaleX, *(s32 *)&scaleY, *(s32 *)&scaleZ);
+        func_150A7A48(bone, scaleMtx, tmp);
+        bcopy(tmp, bone, sizeof(tmp));
+        bone[3][0] = pos[0];
+        bone[3][1] = pos[1];
+        bone[3][2] = pos[2];
         D_800C3FFA++;
     }
 }
 
-extern u8 D_800C3FFA;
-extern void func_15036F34(void);
-extern void func_1503A678(void);
-
+/* Runs func_15036F34 as the first pass (D_800C3FFA = 0), then func_1503A678 with the real pass number. */
 void func_1503A7F0(void) {
-    s32 temp = D_800C3FFA;
+    s32 pass = D_800C3FFA;
+
     D_800C3FFA = 0;
     func_15036F34();
-    D_800C3FFA = temp;
+    D_800C3FFA = pass;
     func_1503A678();
 }
 f32 func_15048A40(u8 arg0);
