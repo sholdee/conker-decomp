@@ -234,7 +234,7 @@ s32 func_151A26EC(f32 *pos, f32 *offset, f32 *vel, f32 drag, f32 gravity, f32 si
                   s16 fadeStart, s16 fadeOutStart, s16 eventTime, s8 eventFunc, u8 r, u8 g, u8 b,
                   u8 argF, s32 arg10);
 
-extern f32 D_800A8DC8; // matching: 0.001f; as a literal IDO CSEs it with the second 0.001f
+
 
 /*
  * BloodTrail emitter 1 (the debris trails of func_151A6F00): emits one blood drop at (x, y, z),
@@ -246,13 +246,13 @@ void func_151A7610(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, BloodTrail *trai
     f32 offset[3];
     f32 speed;
     f32 size;
+    f32 dt;
+    s32 pad; // matching: unused stack slot above rand
     struct {
         f32 gravity;
         f32 size;
         u32 timer;
-        u32 pad[2]; // matching: the draws sit 8 bytes lower in the frame
     } rand;
-    f32 dt;
 
     size = trail->size;
     pos[0] = x;
@@ -268,7 +268,7 @@ void func_151A7610(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, BloodTrail *trai
     offset[0] = 0.0f;
     offset[1] = 0.0f;
     offset[2] = 0.0f;
-    speed *= D_800A8DC8;
+    speed *= 0.001000000047f;
     vel[0] = -dx * dt * speed;
     vel[1] = -dy * dt * speed;
     vel[2] = -dz * dt * speed;
