@@ -1,4 +1,5 @@
 #include <ultra64.h>
+// functions.h declares these two with other signatures; this file uses its own prototypes
 #define func_15083568 func_15083568_orig
 #define func_1514D3B0 func_1514D3B0_orig
 #include "functions.h"
@@ -6,11 +7,11 @@
 #undef func_1514D3B0
 #include "variables.h"
 
-struct St1514DE94 {
-    char pad0[0x38];
-    s32 unk38;
-};
-struct St1514DE94 *func_15083568(struct127 *, s32, f32, s32);
+typedef struct Vec3f {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3f;
 
 /* One node of an object's attachment list: something spawned for the object (an effect, a
  * sound, a sub-object) together with the attachment type that knows how to message or free it. */
@@ -38,29 +39,34 @@ typedef struct AttachmentType {
     /* 0x6 */ s16 nextSibling;              // -1 terminates
 } AttachmentType;
 
-extern void (*D_8008AB58[])(s32);
-extern s32 (*D_8008AB64[])(s32, s32, s32);
-extern AttachmentType *D_8008ABE8[];
+/* Tells a spawned emitter how to follow its owner: two points (p0, p1) given in the space of
+ * bone `bone` of `target`, which func_1518A094 transforms every frame. */
+typedef struct EmitterAttach {
+    /* 0x00 */ Vec3f p0;
+    /* 0x0C */ Vec3f p1;
+    /* 0x18 */ struct127 *target;
+    /* 0x1C */ u8 bone;
+    /* 0x1D */ u8 targetId;             // the target's unique_id
+    /* 0x1E */ s8 handler;              // index into D_8008D5A0, or -1
+    /* 0x1F */ u8 pad1F;
+} EmitterAttach;
 
-Attachment *func_1514EC1C(s32 handle, struct127 *owner, s16 type);
-s32 func_1514D4B8(s16 root, s16 type);
-
-typedef struct Vec3w1514F308 {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-} Vec3w1514F308;
+/* What func_15083568 returns, seen as a raw view (struct127 has a u8 at 0x38). */
+struct St1514DE94 {
+    /* 0x00 */ u8 pad0[0x38];
+    /* 0x38 */ s32 unk38;
+};
 
 typedef struct Struct1514F5CCArg {
-    s32 unk00;
-    f32 unk04;
-    struct127 *obj;
-    u8 uniqueId;
-    u8 pad0D[3];
-    f32 unk10;
-    s16 unk14;
-    s16 unk16;
-    u8 unk18;
+    /* 0x00 */ s32 unk00;
+    /* 0x04 */ f32 unk04;
+    /* 0x08 */ struct127 *obj;
+    /* 0x0C */ u8 uniqueId;
+    /* 0x0D */ u8 pad0D[3];
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ s16 unk14;
+    /* 0x16 */ s16 unk16;
+    /* 0x18 */ u8 unk18;
 } Struct1514F5CCArg;
 
 typedef struct HudSpriteState {
@@ -73,51 +79,61 @@ typedef struct HudSpriteHandle {
     /* 0x14 */ HudSpriteState *state;
 } HudSpriteHandle;
 
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
-extern Vec3w1514F308 D_800A5970;
-extern Vec3w1514F308 D_800A597C;
-extern u8 D_800A58A0;
-extern u8 D_800A5958;
-extern u8 D_800A5964;
-s32 func_15189FF0(void *, void *, void *, s32, s32, s32, s32);
-extern void func_151D74B0(struct127 *, s32, s32, s32, s32);
-void func_151BB044(struct127 *);
-void func_151BC074(struct127 *);
-void func_151BD2F8(struct127 *, s32, s32);
-void func_151B9F00(struct127 *, s32, s32);
-void func_150C0AC0(Struct1514F5CCArg *, s32, s32);
-s32 func_150C5370(void *, s32);
-extern struct102 *func_15155FD4(s32);
-extern void *func_15155780(s32, s32);
-s32 func_1514CA80(struct127 *, s32 *, s32 *, s32 *);
+/* Spawn-callback tables (see func_1514D15C). */
 extern void (*D_8008AA70[])(struct127 *);
 extern void (*D_8008AACC[])(struct127 *);
 extern u8 *D_8008AB90[];
 extern u8 D_800A5EC0[];
 extern u8 D_800A5ED8[];
+
+/* Attachment type tables. */
+extern void (*D_8008AB58[])(s32);
+extern s32 (*D_8008AB64[])(s32, s32, s32);
+extern AttachmentType *D_8008ABE8[];
+
+/* Emitter offsets. */
+extern Vec3f D_800A58A0;
+extern Vec3f D_800A58AC;
+extern Vec3f D_800A58B8;
+extern Vec3f D_800A58C4;
+extern Vec3f D_800A5934;
+extern Vec3f D_800A5940;
+extern Vec3f D_800A594C;
+extern Vec3f D_800A5958;
+extern Vec3f D_800A5964;
+
+/* This file. */
+s32 func_1514CA80(struct127 *obj, s32 *uniqueSlot, s32 *globalSlot, s32 *idSlot);
+s32 func_1514D4B8(s16 root, s16 type);
+Attachment *func_1514EC1C(s32 handle, struct127 *owner, s16 type);
+void func_1514F194(struct127 *obj);
+
+/* Elsewhere. */
+void func_1501175C(struct127 *obj, u8 arg1, s32 arg2);
+struct St1514DE94 *func_15083568(struct127 *obj, s32 arg1, f32 arg2, s32 arg3);
+s32 func_15083FB0(u8 uniqueId);
+void func_150C0AC0(Struct1514F5CCArg *desc, s32 arg1, s32 arg2);
+void func_150C4120(struct127 *obj, s32 arg1, s32 arg2, s32 arg3);
+s32 func_150C5370(void *desc, s32 payloadSize);
+void *func_15155780(s32 slot, s32 arg1);
+struct102 *func_15155FD4(s32 slot);
+s32 func_15158BD0(struct127 *obj, s32 arg1, s32 payloadSize);
+void func_1515F10C(void *);
 s32 func_15160A58(struct127 *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-s32 func_1518D1C0(struct127 *, s32, s32, s32, s32, s32, char *name);
+void func_15160CDC(struct127 *, s32, void *, void *, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+void *func_15167A68(s32, s32, s32, s32, s32, s32);
+s32 func_15189FF0(void *spawn, void *emitter, EmitterAttach *attach, s32, s32, s32, s32);
 s32 func_1515D5F8(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-void func_150C4120(struct127 *, s32, s32, s32);
-void func_1501175C(struct127 *, u8, s32);
-
-typedef struct Vec3f {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f;
-
-/* Tells a spawned emitter how to follow its owner: two points (p0, p1) given in the space of bone `bone`
- * of `target`, which func_1518A094 transforms every frame. */
-typedef struct EmitterAttach {
-    /* 0x00 */ Vec3f p0;
-    /* 0x0C */ Vec3f p1;
-    /* 0x18 */ struct127 *target;
-    /* 0x1C */ u8 bone;
-    /* 0x1D */ u8 targetId;             // the target's unique_id
-    /* 0x1E */ s8 handler;              // index into D_8008D5A0, or -1
-    /* 0x1F */ u8 pad1F;
-} EmitterAttach;
+s32 func_1518D1C0(struct127 *obj, s32, s32, s32, s32, s32, char *name);
+void func_1518E308(void *);
+s32 func_151ACA60(struct127 *obj, f32 arg1, s32 arg2);
+void func_151B2060(struct127 *obj);
+void func_151B9F00(struct127 *obj, s32, s32);
+void func_151BB044(struct127 *obj);
+void func_151BC074(struct127 *obj);
+void func_151BD2F8(struct127 *obj, s32, s32);
+void func_151D0F60(struct127 *obj, s32, s32, s32);
+void func_151D74B0(struct127 *obj, s32, s32, s32, s32);
 
 typedef struct Struct1514E00C_4C {
     /* 0x00 */ u8 unk00;
@@ -524,7 +540,6 @@ s32 func_1514CA80(struct127 *obj, s32 *uniqueSlot, s32 *globalSlot, s32 *idSlot)
     return found;
 }
 
-
 /**
  * Runs the spawn callbacks for `obj` (see func_1514CA80), after freeing whatever is still
  * queued for its slot. Does nothing if the object already has attachments.
@@ -655,14 +670,11 @@ typedef struct Struct1514D564Payload {
     f32 unk10;
 } Struct1514D564Payload;
 
+/* func_150C5370 copies the first 0x24 bytes and caches the distance between p0 and p1. */
 typedef struct Struct1514D564Desc {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    s8 unk18;
+    /* 0x00 */ Vec3f p0;
+    /* 0x0C */ Vec3f p1;
+    /* 0x18 */ s8 unk18;
     u8 pad19[3];
     f32 unk1C;
     s8 unk20;
@@ -671,7 +683,7 @@ typedef struct Struct1514D564Desc {
 
 void func_1514D564(struct127 *obj) {
     Struct1514D564Desc desc;
-    s32 spawned;
+    s32 spawned;   // the object func_150C5370 allocated; the payload goes at +0xC8
     Struct1514D564Payload payload;
 
     payload.obj = obj;
@@ -679,14 +691,14 @@ void func_1514D564(struct127 *obj) {
     payload.unk8 = 0.0f;
     payload.unkC = -180.0f;
     payload.unk10 = 77.0f;
-    desc.unk0 = -477.0f;
-    desc.unk4 = -2015.0f;
-    desc.unk8 = 2244.0f;
+    desc.p0.x = -477.0f;
+    desc.p0.y = -2015.0f;
+    desc.p0.z = 2244.0f;
     payload.unk5 = 6;
     desc.unk18 = 1;
-    desc.unkC = obj->x_position;
-    desc.unk10 = obj->y_position;
-    desc.unk14 = obj->z_position;
+    desc.p1.x = obj->x_position;
+    desc.p1.y = obj->y_position;
+    desc.p1.z = obj->z_position;
     desc.unk20 = 1;
     desc.unk1C = 0.3199999928f;
     spawned = func_150C5370(&desc, sizeof(payload));
@@ -795,14 +807,11 @@ void func_1514D64C(struct127 *obj) {
     emitter.unk48 = 1.0f;
 
     func_1514EC1C(func_15189FF0(&spawn, &emitter, &attach, 2, 0, 0, 0), obj, 0xA);
-    func_15160A58(obj, 5, &attach, 2, 0x12C, 0x28, 0xFF, 0, 0, 0xFF, 0, 1, 0, 0, 0xFF, 1);
+    func_15160A58(obj, 5, &attach, 2, 300, 40, 0xFF, 0, 0, 0xFF, 0, 1, 0, 0, 0xFF, 1);
 }
 
 void func_1514D96C(struct127 *obj) {
 }
-
-s32 func_15158BD0(struct127 *obj, s32 arg1, s32 payloadSize);
-s32 func_151ACA60(struct127 *obj, f32 arg1, s32 arg2);
 
 void func_1514D978(struct127 *obj) {
     struct {
@@ -895,9 +904,6 @@ void func_1514DB18(struct127 *obj) {
 void func_1514DB58(struct127 *obj) {
 }
 
-void func_151B2060(struct127 *obj);
-void func_1514F194(struct127 *obj);
-
 void func_1514DB64(struct127 *obj) {
     if (D_800BE9F0 == 20) {
         func_151B2060(obj);
@@ -915,8 +921,6 @@ void func_1514DBB8(struct127 *obj) {
 void func_1514DC38(struct127 *obj) {
     func_1500EE18(obj, 0xFF, 1);
 }
-
-void func_151D0F60(struct127 *obj, s32, s32, s32);
 
 void func_1514DC5C(struct127 *obj) {
     func_151D0F60(obj, 0, 0xFF, 1);
@@ -993,11 +997,6 @@ void func_1514DE50(struct127 *obj) {
 void func_1514DE88(struct127 *obj) {
 }
 
-void func_15160CDC(struct127 *, s32, void *, void *, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-extern u8 D_800A58AC;
-extern u8 D_800A58B8;
-extern u8 D_800A58C4;
-
 void func_1514DE94(struct127 *obj) {
     struct St1514DE94 *part;
 
@@ -1009,8 +1008,6 @@ void func_1514DE94(struct127 *obj) {
     }
     func_1514EC1C(func_15160A58(obj, 0, &D_800A58C4, 2, 300, 11, 0xFF, 0xFF, 0xFF, 2, 0, -1, 0, 0, 0xFF, 1), obj, 0x19);
 }
-
-s32 func_15083FB0(u8 uniqueId);
 
 /** Links `obj` to the object whose unique_id is 9 (unk65 holds that object's slot + 1). */
 void func_1514DFD0(struct127 *obj) {
@@ -1248,14 +1245,10 @@ void func_1514E830(struct102 *handle) {
     func_1516972C(handle);
 }
 
-void func_1518E308(void *);
-
 void func_1514E850(void *handle) {
     func_1518E308(handle);
     func_1516972C(handle);
 }
-
-void func_1515F10C(void *);
 
 void func_1514E87C(void *handle) {
     func_1515F10C(handle);
@@ -1596,10 +1589,6 @@ typedef struct Struct1514EECC_C4 {
     /* 0x56 */ s16 unk56;
 } Struct1514EECC_C4;
 
-extern Vec3f D_800A5934;
-extern Vec3f D_800A5940;
-extern Vec3f D_800A594C;
-
 void func_1514EECC(struct127 *obj) {
     s32 handle;
 
@@ -1612,7 +1601,7 @@ void func_1514EECC(struct127 *obj) {
 
         spawn.unk00 = 0x69;
         spawn.unk40 = 0x04ED200A;
-        spawn.unk04 = 0x12C;
+        spawn.unk04 = 300;
         spawn.unk08 = 0;
         spawn.unk0C = 0;
         spawn.unk45 = 0xFF;
