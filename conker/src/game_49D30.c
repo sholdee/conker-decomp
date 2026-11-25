@@ -1153,171 +1153,174 @@ extern f32 func_150497E0(f32 *, s32, f32);
 void func_1501FC8C(s32 arg0, f32 arg1, f32 *arg2, f32 *arg3, f32 *arg4, s32 arg5);
 void func_1501FE68(s32 arg0, f32 arg1, f32 *arg2, s32 arg3);
 
-void func_1501EC38(s32 arg0) {
-    s32 lo[15];
-    s32 hi[15];
-    s32 idx[15];
-    s32 flag[15];
-    f32 first[15];
-    f32 last[15];
-    s32 cnt[15];
-    f32 r[15];
+/* Evaluate every track of the scene at the current time D_800C35B0: start from the track's path
+   start and type defaults, then interpolate each of its 15 channels between the keys around the
+   current time (Catmull-Rom via func_150497E0, or linear) and store them in its SeqTrackState.
+   Channel 10 is the position along the path in percent. */
+void func_1501EC38(s32 scene) {
+    s32 prevTime[15];
+    s32 nextTime[15];
+    s32 nextKey[15];
+    s32 prevInterp[15];
+    f32 firstValue[15];
+    f32 lastValue[15];
+    s32 numKeys[15];
+    f32 value[15];
     s32 j;
     s32 k;
-    s32 i;
+    s32 track;
     f32 t;
     s32 mask;
     s32 found;
     s32 n;
-    f32 pts[4];
+    f32 points[4];
     s32 start;
-    s32 remaining;
+    s32 needed;
     s32 m;
-    s32 ch;
+    s32 channel;
     s32 q;
     s32 next;
     SeqChannelKey *key;
 
     // matching: indexing through &D_800C35EA[0] rather than the array changes register allocation
-    if ((&D_800C35EA[0])[arg0] == 1) {
+    if ((&D_800C35EA[0])[scene] == 1) {
         D_800C3638 = 0;
-        for (i = 0; i < D_800C363A[arg0]; i++) {
-            if (D_800C35C8[arg0][i] != 0) {
-                D_800C3958[arg0][i].x = D_800C3868[arg0][i]->x;
-                D_800C3958[arg0][i].y = D_800C3868[arg0][i]->y;
-                D_800C3958[arg0][i].z = D_800C3868[arg0][i]->z;
+        for (track = 0; track < D_800C363A[scene]; track++) {
+            if (D_800C35C8[scene][track] != 0) {
+                D_800C3958[scene][track].x = D_800C3868[scene][track]->x;
+                D_800C3958[scene][track].y = D_800C3868[scene][track]->y;
+                D_800C3958[scene][track].z = D_800C3868[scene][track]->z;
             } else {
-                D_800C3958[arg0][i].x = 0.0f;
-                D_800C3958[arg0][i].y = 0.0f;
-                D_800C3958[arg0][i].z = 0.0f;
+                D_800C3958[scene][track].x = 0.0f;
+                D_800C3958[scene][track].y = 0.0f;
+                D_800C3958[scene][track].z = 0.0f;
             }
-            if (D_800C35F0[arg0][i].type == 4) {
-                D_800C3958[arg0][i].unkC = 64.0f;
-                D_800C3958[arg0][i].unk10 = 0.0f;
-                D_800C3958[arg0][i].unk14 = 20.0f;
-                D_800C3958[arg0][i].unk18 = 255.0f;
-                D_800C3958[arg0][i].unk1C = 62.5f;
-                D_800C3958[arg0][i].unk20 = 50.0f;
-                D_800C3958[arg0][i].unk24 = 0.0f;
-                D_800C3958[arg0][i].unk28 = 0.0f;
-                D_800C3958[arg0][i].unk2C = 0.0f;
-                D_800C3958[arg0][i].unk34 = 0.0f;
+            if (D_800C35F0[scene][track].type == 4) {
+                D_800C3958[scene][track].unkC = 64.0f;
+                D_800C3958[scene][track].unk10 = 0.0f;
+                D_800C3958[scene][track].unk14 = 20.0f;
+                D_800C3958[scene][track].unk18 = 255.0f;
+                D_800C3958[scene][track].unk1C = 62.5f;
+                D_800C3958[scene][track].unk20 = 50.0f;
+                D_800C3958[scene][track].unk24 = 0.0f;
+                D_800C3958[scene][track].unk28 = 0.0f;
+                D_800C3958[scene][track].unk2C = 0.0f;
+                D_800C3958[scene][track].unk34 = 0.0f;
             } else {
-                D_800C3958[arg0][i].unkC = 0.0f;
-                D_800C3958[arg0][i].unk10 = D_800C35A4;
-                D_800C3958[arg0][i].unk14 = 0.0f;
-                D_800C3958[arg0][i].unk18 = -9999.0f;
-                D_800C3958[arg0][i].unk1C = -9999.0f;
-                D_800C3958[arg0][i].unk20 = -9999.0f;
-                D_800C3958[arg0][i].unk24 = 0.0f;
-                D_800C3958[arg0][i].unk28 = 0.0f;
-                D_800C3958[arg0][i].unk2C = 0.0f;
-                D_800C3958[arg0][i].unk3C = -9999.0f;
-                D_800C3958[arg0][i].unk40 = -9999.0f;
-                D_800C3958[arg0][i].unk30 = -9999.0f;
+                D_800C3958[scene][track].unkC = 0.0f;
+                D_800C3958[scene][track].unk10 = D_800C35A4;
+                D_800C3958[scene][track].unk14 = 0.0f;
+                D_800C3958[scene][track].unk18 = -9999.0f;
+                D_800C3958[scene][track].unk1C = -9999.0f;
+                D_800C3958[scene][track].unk20 = -9999.0f;
+                D_800C3958[scene][track].unk24 = 0.0f;
+                D_800C3958[scene][track].unk28 = 0.0f;
+                D_800C3958[scene][track].unk2C = 0.0f;
+                D_800C3958[scene][track].unk3C = -9999.0f;
+                D_800C3958[scene][track].unk40 = -9999.0f;
+                D_800C3958[scene][track].unk30 = -9999.0f;
             }
-            D_800C3958[arg0][i].yOffset = 0.0f;
-            if (D_800C35F0[arg0][i].type == 1) {
-                D_800C3958[arg0][i].unk34 = -9999.0f;
-            } else if (D_800C35F0[arg0][i].type == 2) {
-                D_800C3958[arg0][i].unk34 = 255.0f;
-            } else if (D_800C35F0[arg0][i].type == 5) {
-                D_800C3958[arg0][i].unk18 = 32.0f;
-                D_800C3958[arg0][i].unk1C = 32.0f;
-                D_800C3958[arg0][i].unk34 = 1.0f;
-            } else if (D_800C35F0[arg0][i].type == 3) {
-                D_800C3958[arg0][i].unk18 = -9999.0f;
-                D_800C3958[arg0][i].unk1C = -9999.0f;
-                D_800C3958[arg0][i].unk20 = -9999.0f;
-                D_800C3958[arg0][i].unk34 = 255.0f;
+            D_800C3958[scene][track].yOffset = 0.0f;
+            if (D_800C35F0[scene][track].type == 1) {
+                D_800C3958[scene][track].unk34 = -9999.0f;
+            } else if (D_800C35F0[scene][track].type == 2) {
+                D_800C3958[scene][track].unk34 = 255.0f;
+            } else if (D_800C35F0[scene][track].type == 5) {
+                D_800C3958[scene][track].unk18 = 32.0f;
+                D_800C3958[scene][track].unk1C = 32.0f;
+                D_800C3958[scene][track].unk34 = 1.0f;
+            } else if (D_800C35F0[scene][track].type == 3) {
+                D_800C3958[scene][track].unk18 = -9999.0f;
+                D_800C3958[scene][track].unk1C = -9999.0f;
+                D_800C3958[scene][track].unk20 = -9999.0f;
+                D_800C3958[scene][track].unk34 = 255.0f;
             }
-            if (D_800C3778[arg0][i] != NULL) {
+            if (D_800C3778[scene][track] != NULL) {
                 for (j = 0; j < 15; j++) {
-                    hi[j] = -9999;
-                    lo[j] = -9999;
-                    idx[j] = -9999;
-                    flag[j] = 1;
-                    cnt[j] = 0;
-                    first[j] = -9999.0f;
-                    last[j] = -9999.0f;
+                    nextTime[j] = -9999;
+                    prevTime[j] = -9999;
+                    nextKey[j] = -9999;
+                    prevInterp[j] = 1;
+                    numKeys[j] = 0;
+                    firstValue[j] = -9999.0f;
+                    lastValue[j] = -9999.0f;
                 }
-                for (j = 0; j < D_800C35D0[arg0][i]; j++) {
-                    key = &D_800C3778[arg0][i][j];
-                    ch = key->channel;
-                    if (idx[ch] == -9999) {
-                        if (key->time >= D_800C35B0[arg0]) {
-                            idx[ch] = cnt[ch];
-                            hi[ch] = key->time;
+                for (j = 0; j < D_800C35D0[scene][track]; j++) {
+                    key = &D_800C3778[scene][track][j];
+                    channel = key->channel;
+                    if (nextKey[channel] == -9999) {
+                        if (key->time >= D_800C35B0[scene]) {
+                            nextKey[channel] = numKeys[channel];
+                            nextTime[channel] = key->time;
                         } else {
-                            flag[ch] = key->interp;
-                            lo[ch] = key->time;
+                            prevInterp[channel] = key->interp;
+                            prevTime[channel] = key->time;
                         }
                     }
-                    last[ch] = key->value;
-                    if (first[ch] == -9999.0f) {
-                        first[ch] = key->value;
+                    lastValue[channel] = key->value;
+                    if (firstValue[channel] == -9999.0f) {
+                        firstValue[channel] = key->value;
                     }
-                    cnt[ch]++;
+                    numKeys[channel]++;
                 }
                 for (j = 0; j < 15; j++) {
-                    r[j] = -9999.0f;
-                    if (lo[j] == -9999 && hi[j] == -9999) {
+                    value[j] = -9999.0f;
+                    if (prevTime[j] == -9999 && nextTime[j] == -9999) {
                         continue;
                     }
-                    if (lo[j] == -9999) {
-                        r[j] = first[j];
-                    } else if (hi[j] == -9999) {
-                        r[j] = last[j];
+                    if (prevTime[j] == -9999) {
+                        value[j] = firstValue[j];
+                    } else if (nextTime[j] == -9999) {
+                        value[j] = lastValue[j];
                     } else {
-                        t = (f32)(D_800C35B0[arg0] - lo[j]) / (f32)(hi[j] - lo[j]);
+                        t = (f32)(D_800C35B0[scene] - prevTime[j]) / (f32)(nextTime[j] - prevTime[j]);
                         mask = 6;
                         found = -1;
-                        if (flag[j] == 0) {
+                        if (prevInterp[j] == 0) {
                             s32 skip;
-                            if (idx[j] - 2 >= 0) {
+                            if (nextKey[j] - 2 >= 0) {
                                 mask = 7;
-                                start = idx[j] - 2;
-                                remaining = 3;
+                                start = nextKey[j] - 2;
+                                needed = 3;
                                 q = 0;
                             } else {
-                                start = idx[j] - 1;
-                                remaining = 2;
+                                start = nextKey[j] - 1;
+                                needed = 2;
                                 q = 1;
                             }
-                            if (idx[j] + 1 < cnt[j]) {
+                            if (nextKey[j] + 1 < numKeys[j]) {
                                 mask |= 8;
-                                remaining++;
+                                needed++;
                             }
                             skip = 0;
-                            for (m = 0; m < D_800C35D0[arg0][i]; m++) {
-                                if (remaining == 0) {
+                            for (m = 0; m < D_800C35D0[scene][track]; m++) {
+                                if (needed == 0) {
                                     break;
                                 }
-                                key = &D_800C3778[arg0][i][m];
+                                key = &D_800C3778[scene][track][m];
                                 if (j == key->channel) {
                                     if (skip == start) {
-                                        pts[q++] = key->value;
-                                        remaining--;
+                                        points[q++] = key->value;
+                                        needed--;
                                     } else {
                                         skip++;
                                     }
                                 }
                             }
                             if (!(mask & 1)) {
-                                pts[0] = pts[1];
+                                points[0] = points[1];
                             }
                             if (!(mask & 8)) {
-                                pts[3] = pts[2];
+                                points[3] = points[2];
                             }
-                            r[j] = func_150497E0(pts, 0, t);
+                            value[j] = func_150497E0(points, 0, t);
                         } else {
                             n = 0;
-                            k = 0;
-                            for (; k < D_800C35D0[arg0][i]; k++) {
-                                key = &D_800C3778[arg0][i][k];
+                            for (k = 0; k < D_800C35D0[scene][track]; k++) {
+                                key = &D_800C3778[scene][track][k];
                                 if (j == key->channel) {
                                     if (found == -1) {
-                                        if (n == idx[j] - 1) {
+                                        if (n == nextKey[j] - 1) {
                                             found = k;
                                         } else {
                                             n++;
@@ -1328,62 +1331,62 @@ void func_1501EC38(s32 arg0) {
                                     }
                                 }
                             }
-                            r[j] = D_800C3778[arg0][i][next].value - D_800C3778[arg0][i][found].value;
-                            r[j] *= t;
-                            r[j] += D_800C3778[arg0][i][found].value;
+                            value[j] = D_800C3778[scene][track][next].value - D_800C3778[scene][track][found].value;
+                            value[j] *= t;
+                            value[j] += D_800C3778[scene][track][found].value;
                         }
                     }
                 }
-                if (r[10] == -9999.0f) {
-                    r[10] = 0.0f;
+                if (value[10] == -9999.0f) {
+                    value[10] = 0.0f;
                 }
-                if (*((u8 *(*)[30])D_800C3960)[arg0][i] != 0xFF) {
-                    func_1501FE68(i, r[10], &D_800C3958[arg0][i].unk10, arg0);
-                } else if (r[7] != -9999.0f) {
-                    D_800C3958[arg0][i].unk10 = r[7];
+                if (D_800C3960[scene][track][0] != 0xFF) {
+                    func_1501FE68(track, value[10], &D_800C3958[scene][track].unk10, scene);
+                } else if (value[7] != -9999.0f) {
+                    D_800C3958[scene][track].unk10 = value[7];
                 }
-                if (r[8] != -9999.0f) {
-                    D_800C3958[arg0][i].unkC = r[8];
+                if (value[8] != -9999.0f) {
+                    D_800C3958[scene][track].unkC = value[8];
                 }
-                if (r[6] != -9999.0f) {
-                    D_800C3958[arg0][i].unk14 = r[6];
+                if (value[6] != -9999.0f) {
+                    D_800C3958[scene][track].unk14 = value[6];
                 }
-                if (r[5] != -9999.0f) {
-                    D_800C3958[arg0][i].unk18 = r[5];
+                if (value[5] != -9999.0f) {
+                    D_800C3958[scene][track].unk18 = value[5];
                 }
-                if (r[4] != -9999.0f) {
-                    D_800C3958[arg0][i].unk1C = r[4];
+                if (value[4] != -9999.0f) {
+                    D_800C3958[scene][track].unk1C = value[4];
                 }
-                if (r[3] != -9999.0f) {
-                    D_800C3958[arg0][i].unk20 = r[3];
+                if (value[3] != -9999.0f) {
+                    D_800C3958[scene][track].unk20 = value[3];
                 }
-                if (r[1] != -9999.0f) {
-                    D_800C3958[arg0][i].unk24 = r[1];
+                if (value[1] != -9999.0f) {
+                    D_800C3958[scene][track].unk24 = value[1];
                 }
-                if (r[2] != -9999.0f) {
-                    D_800C3958[arg0][i].unk28 = r[2];
+                if (value[2] != -9999.0f) {
+                    D_800C3958[scene][track].unk28 = value[2];
                 }
-                if (r[0] != -9999.0f) {
-                    D_800C3958[arg0][i].unk2C = r[0];
+                if (value[0] != -9999.0f) {
+                    D_800C3958[scene][track].unk2C = value[0];
                 }
-                if (r[14] != -9999.0f) {
-                    D_800C3958[arg0][i].unk30 = r[14];
+                if (value[14] != -9999.0f) {
+                    D_800C3958[scene][track].unk30 = value[14];
                 }
-                if (r[9] != -9999.0f) {
-                    D_800C3958[arg0][i].unk34 = r[9];
+                if (value[9] != -9999.0f) {
+                    D_800C3958[scene][track].unk34 = value[9];
                 }
-                if (r[11] != -9999.0f) {
-                    D_800C3958[arg0][i].yOffset = r[11];
+                if (value[11] != -9999.0f) {
+                    D_800C3958[scene][track].yOffset = value[11];
                 }
-                if (r[13] != -9999.0f) {
-                    D_800C3958[arg0][i].unk3C = r[13];
+                if (value[13] != -9999.0f) {
+                    D_800C3958[scene][track].unk3C = value[13];
                 }
-                if (r[12] != -9999.0f) {
-                    D_800C3958[arg0][i].unk40 = r[12];
+                if (value[12] != -9999.0f) {
+                    D_800C3958[scene][track].unk40 = value[12];
                 }
-                func_1501FC8C(i, r[10], &D_800C3958[arg0][i].x,
-                              &D_800C3958[arg0][i].y,
-                              &D_800C3958[arg0][i].z, arg0);
+                func_1501FC8C(track, value[10], &D_800C3958[scene][track].x,
+                              &D_800C3958[scene][track].y,
+                              &D_800C3958[scene][track].z, scene);
             }
         }
         D_800C3638 = 1;
