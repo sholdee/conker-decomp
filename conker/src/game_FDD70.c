@@ -2,21 +2,23 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s8 *D_80088890;
-extern s8 *D_80088894;
-extern s8 *D_80088898;
-extern s8 *D_8008889C;
-extern s32 *D_800DBF94;
+extern s32 D_80088890;
+extern s32 D_80088894;
+extern s32 D_80088898;
+extern s32 D_8008889C;
+extern s32 *D_800DBF94; /* per prop: bit i set while D_800CC2D0[i] stands on it */
 
-extern struct131 *func_151149AC(s32);
+extern struct131 *func_151149AC(u8 id); /* the prop whose id is `id` */
 extern void func_151951E0(struct127 *);
 extern void func_15136C3C(struct127 *, s32, s32, s32, s32, s32, s32, s32);
 extern void func_1507CD64(struct127 *, s32);
 
-s32 func_1509BE40();
-void func_1509BFB0(s32 num, s32, s32, ...);
-void func_150495B0(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
+s32 func_1509BE40(s32, s32, s32, ...);
+void func_1509BFB0(s32, s32, s32, ...);
+/* Eases *value toward target, tracking its rate of change in *velocity. */
+void func_150495B0(f32 *value, f32 target, f32 *velocity, f32 arg3, f32 arg4, f32 delta);
 
+/* Current values, targets and easing velocities of three channels. */
 extern f32 D_800888C0;
 extern f32 D_800888C4;
 extern f32 D_800888C8;
@@ -27,18 +29,20 @@ extern f32 D_800888D8;
 extern f32 D_800888DC;
 extern f32 D_800888E0;
 
-void func_150D08C0(struct108 *arg0) {
-    if (func_1509BE40(1, 0x403D, 6, 0x9000) != 0) {
-        arg0->unk84 |= 0x80021000;
-        if (func_1509BE40(1, 0x4043, 6, 0x9000) != 0) {
+/* Picks targets for three channels (255, or one of them 64 per flags 0x4043-0x4045 while 0x403D is
+ * set), eases the channels toward them, and writes them to ids 0x30F3-0x30F5 and 0x30F8-0x30FA. */
+void func_150D08C0(struct108 *camera) {
+    if (func_1509BE40(1, 0x403D, 6, 0x9000)) {
+        camera->unk84 |= 0x80021000;
+        if (func_1509BE40(1, 0x4043, 6, 0x9000)) {
             D_800888CC = 64.0f;
             D_800888D0 = 255.0f;
             D_800888D4 = 255.0f;
-        } else if (func_1509BE40(1, 0x4044, 6, 0x9000) != 0) {
+        } else if (func_1509BE40(1, 0x4044, 6, 0x9000)) {
             D_800888CC = 255.0f;
             D_800888D0 = 64.0f;
             D_800888D4 = 255.0f;
-        } else if (func_1509BE40(1, 0x4045, 6, 0x9000) != 0) {
+        } else if (func_1509BE40(1, 0x4045, 6, 0x9000)) {
             D_800888CC = 255.0f;
             D_800888D0 = 255.0f;
             D_800888D4 = 64.0f;
@@ -51,12 +55,12 @@ void func_150D08C0(struct108 *arg0) {
         D_800888CC = 255.0f;
         D_800888D0 = 255.0f;
         D_800888D4 = 255.0f;
-        arg0->unk84 &= ~0x80021000;
-        arg0->unk84 |= 8;
+        camera->unk84 &= ~0x80021000;
+        camera->unk84 |= 8;
     }
-    func_150495B0(&D_800888C0, D_800888CC, &D_800888D8, 4.0f, 6.0f, arg0->unk7B4);
-    func_150495B0(&D_800888C4, D_800888D0, &D_800888DC, 4.0f, 6.0f, arg0->unk7B4);
-    func_150495B0(&D_800888C8, D_800888D4, &D_800888E0, 4.0f, 6.0f, arg0->unk7B4);
+    func_150495B0(&D_800888C0, D_800888CC, &D_800888D8, 4.0f, 6.0f, camera->unk7B4);
+    func_150495B0(&D_800888C4, D_800888D0, &D_800888DC, 4.0f, 6.0f, camera->unk7B4);
+    func_150495B0(&D_800888C8, D_800888D4, &D_800888E0, 4.0f, 6.0f, camera->unk7B4);
     func_1509BFB0(1, 0x30F5, 0x12, (u8)D_800888C0);
     func_1509BFB0(1, 0x30F4, 0x12, (u8)D_800888C4);
     func_1509BFB0(1, 0x30F3, 0x12, (u8)D_800888C8);
@@ -65,32 +69,33 @@ void func_150D08C0(struct108 *arg0) {
     func_1509BFB0(1, 0x30F8, 0x12, (u8)D_800888C8);
 }
 
+/* Steps four scroll counters by D_800BE9E4; then, unless D_800CC2D0[0]'s unk31C->unk120 is set, kills
+ * D_800CC2D0[0] once per prop 0xFA-0xF8 it stands on, and if it stands on prop 0xFB plays sound 0x627 and
+ * runs it through func_15136C3C .. func_1507CD64(6). */
 void func_150D0E90(s32 arg0) {
-    struct131 *temp;
-    s32 idx;
+    struct131 *prop;
+    s32 propIndex;
     s32 i;
 
-    D_80088890 += D_800BE9E4 * 0x28;
-    D_80088894 += D_800BE9E4 * -0x42;
+    D_80088890 += D_800BE9E4 * 40;
+    D_80088894 += D_800BE9E4 * -66;
     D_80088898 += D_800BE9E4 * -8;
-    D_8008889C += D_800BE9E4 * 0x5C;
+    D_8008889C += D_800BE9E4 * 92;
 
-    i = 0;
     if (D_800CC2D0->unk31C->unk120 == 0) {
-        do {
-            temp = func_151149AC((0xFA - i) & 0xFF);
-            idx = temp - D_800DBEF4;
-            if (D_800DBF94[idx] & 1) {
+        for (i = 0; i < 3; i++) {
+            prop = func_151149AC(0xFA - i);
+            propIndex = prop - D_800DBEF4;
+            if (D_800DBF94[propIndex] & 1) {
                 func_151951E0(D_800CC2D0);
-                func_10010154(0x627, D_800CC2D0, 0x7FFF, 0xC8, 0x2BC);
+                func_10010154(0x627, D_800CC2D0, 0x7FFF, 200, 700);
             }
-            i += 1;
-        } while (i != 3);
+        }
 
-        temp = func_151149AC(0xFB);
-        idx = temp - D_800DBEF4;
-        if (D_800DBF94[idx] & 1) {
-            func_10010154(0x627, D_800CC2D0, 0x7FFF, 0xC8, 0x2BC);
+        prop = func_151149AC(0xFB);
+        propIndex = prop - D_800DBEF4;
+        if (D_800DBF94[propIndex] & 1) {
+            func_10010154(0x627, D_800CC2D0, 0x7FFF, 200, 700);
             func_15136C3C(D_800CC2D0, 1, 1, 1, 1, 0, 0xFF, 1);
             func_15145A50(D_800CC2D0);
             func_1507CD64(D_800CC2D0, 6);
