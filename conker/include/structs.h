@@ -2165,7 +2165,7 @@ struct Camera {
     /* 0x8B9 */ u8 pad8B9[0x1];
     /* 0x8BA */ s16 unk8BA;
     /* 0x8BC */ u16 *unk8BC;
-    /* 0x8C0 */ u8 pad8C0[0x4];
+    /* 0x8C0 */ f32 yawSpringVel;                    /* yaw velocity for func_15121C00 */
     /* 0x8C4 */ f32 unk8C4;
     /* 0x8C8 */ f32 unk8C8;
     /* 0x8CC */ f32 unk8CC;

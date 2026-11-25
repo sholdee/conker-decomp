@@ -146,7 +146,7 @@ void func_15005818(Camera *view, Actor *actor, vertex *eye) {
     view->eye.y = eye->y;
     view->eye.z = eye->z;
     // matching: word-wise 12-byte struct copies; the header splits these vectors into scalars
-    *(vertex *)((u8 *)view + 0x27C) = *(vertex *)&view->eye.x; // Camera has no field at 0x27C
+    view->unk27C = view->eye;
     view->prevEye = view->eye;
 
     viewEye = (vertex *)&view->eye.x; // matching: kept live across the call in a stack slot

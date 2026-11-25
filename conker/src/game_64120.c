@@ -675,7 +675,7 @@ void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32
     if (obj->camera != NULL && obj->camera->mode == 0x100 && obj->camera->aimState != 0) {
         Vec3f camTarget;
 
-        camTarget = *(Vec3f *)&obj->camera->pad73E[2]; /* Camera +0x740 */
+        camTarget = *(Vec3f *)&obj->camera->aim.orbitPos;
         out[0] = camTarget.x;
         out[1] = camTarget.y;
         out[2] = camTarget.z;

@@ -103,33 +103,30 @@ Gfx *func_1510FEA0(Gfx *gfx, s32 arg1) {
     if (D_800C35EA == 1 && D_800C3681 != 0) {
         return gfx;
     }
-    // matching: byte offsets into D_800DBFF0[D_80082FA4] (Camera pitch/unk380/eye); IDO
-    // schedules the struct-member loads differently
-    pitch = 360.0f - (*(f32 *)((u8 *)D_800DBFF0 + D_80082FA4 * 0x9A0 + 0x388) + D_800DCDE0[D_80082FA4].pitch);
+    pitch = 360.0f - (D_800DBFF0[D_80082FA4].pitch + D_800DCDE0[D_80082FA4].pitch);
     while (pitch < -180.0f) {
         pitch += 360.0f;
     }
     while (pitch >= 180.0f) {
         pitch -= 360.0f;
     }
-    yaw = 360.0f - (*(f32 *)((u8 *)D_800DBFF0 + D_80082FA4 * 0x9A0 + 0x380) + D_800DCDE0[D_80082FA4].yaw);
+    yaw = 360.0f - (D_800DBFF0[D_80082FA4].unk380 + D_800DCDE0[D_80082FA4].yaw);
     while (yaw < 0.0f) {
         yaw += 360.0f;
     }
     while (yaw >= 360.0f) {
         yaw -= 360.0f;
     }
-    // matching: the (f32 *) cast (a no-op on swayAmount) keeps IDO from reusing the address of D_800DBFF0[D_80082FA4]
-    roll = *(f32 *)&D_800DBFF0[D_80082FA4].swayAmount + D_800DCDE0[D_80082FA4].roll;
+    roll = D_800DBFF0[D_80082FA4].swayAmount + D_800DCDE0[D_80082FA4].roll;
     while (roll < -180.0f) {
         roll += 360.0f;
     }
     while (roll >= 180.0f) {
         roll -= 360.0f;
     }
-    x = *(f32 *)((u8 *)D_800DBFF0 + D_80082FA4 * 0x9A0 + 0x2F8);
-    y = *(f32 *)((u8 *)D_800DBFF0 + D_80082FA4 * 0x9A0 + 0x2FC);
-    z = *(f32 *)((u8 *)D_800DBFF0 + D_80082FA4 * 0x9A0 + 0x300);
+    x = D_800DBFF0[D_80082FA4].eye.x;
+    y = D_800DBFF0[D_80082FA4].eye.y;
+    z = D_800DBFF0[D_80082FA4].eye.z;
     if (D_800C3682 != 0) {
         view = &RENDER_VIEWS[D_80082FA4];
         return func_15110544(gfx, view->left, view->top, view->right - 1.0f, view->bottom, 0x16, 0x1C, 0x1B);

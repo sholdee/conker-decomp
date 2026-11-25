@@ -68,12 +68,11 @@ void func_151219D0(Camera *camera) {
 }
 
 /**
- * Springs the camera yaw (unk37C, degrees) towards targetYaw with func_15049688, using the f32 at 0x8C0
- * as its velocity and unk7B4 as the frame time, then stores the yaw in radians in unk39C.
+ * Springs the camera yaw (degrees) towards targetYaw with func_15049688, using yawSpringVel as its
+ * velocity, then stores the yaw in radians in yawRad.
  */
 void func_15121C00(Camera *camera, f32 targetYaw, s32 unused, f32 speedGain, f32 accelGain) {
-    // pad8C0: the shared Camera does not declare this f32 yaw velocity
-    func_15049688(&camera->yaw, targetYaw, (f32 *)&camera->pad8C0, speedGain, accelGain, camera->dt);
+    func_15049688(&camera->yaw, targetYaw, &camera->yawSpringVel, speedGain, accelGain, camera->dt);
     camera->yawRad = camera->yaw * 0.01745329238f; // degrees to radians
 }
 
