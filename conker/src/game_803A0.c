@@ -5,20 +5,23 @@
 
 u8 *func_15033E84(struct127 *arg0);
 
-void func_15052EF0(struct127 *arg0) {
-    arg0->immune = 100;
-    arg0->unk40 =  ((s16) (arg0->unk7A + 16384)) * 0.005493164f;
-    func_1505E650(arg0, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+/* Sets the object's immunity timer and heading (in degrees, from its facing angle) and starts animation 0. */
+void func_15052EF0(struct127 *obj) {
+    obj->immune = 100;
+    // binary angle (0x10000 per turn) to degrees, a quarter turn ahead of the facing angle
+    obj->unk40 = (s16)(obj->unk7A + 0x4000) * 0.005493164f;
+    func_1505E650(obj, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);
 }
 
-struct127 *func_15052F58(s32 arg0, s32 arg1) {
-    struct127 *temp_v0;
+/* Resets object `index` (unk13C, unk218) and sets its unk232; returns the object. */
+struct127 *func_15052F58(s32 index, s32 arg1) {
+    struct127 *obj;
 
-    temp_v0 = &D_800CC2D0[arg0];
-    temp_v0->unk13C = (u8)0;
-    temp_v0->unk218 = 0;
-    temp_v0->unk232 = arg1;
-    return temp_v0;
+    obj = &D_800CC2D0[index];
+    obj->unk13C = 0;
+    obj->unk218 = NULL;
+    obj->unk232 = arg1;
+    return obj;
 }
 
 void func_15052F9C(struct127 *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9) {
@@ -97,45 +100,40 @@ void func_15052F9C(struct127 *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 
     }
 }
 
-void func_1505327C(struct127 *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4) {
-    vertex sp3C;
-    struct127 *temp_s0;
-    struct126 *temp_v0;
-    struct255 *temp_v0_2;
-    struct113 *temp_a1;
-    register s32 temp_t8;
+/*
+ * Launches the object linked by arg0->unk124 (velocity/gravity given), starts animation 50 and sets its
+ * unk31C target x/z to arg0's position, or to the translation of matrix `mtxIndex` of arg0->unk1D4.
+ */
+void func_1505327C(struct127 *arg0, f32 yVelocity, f32 gravity, s32 arg3, s32 mtxIndex) {
+    s32 pad[2]; // matching: frame keeps 8 unused bytes above pos
+    vertex pos;
+    struct127 *obj;
 
-    temp_s0 = &D_800CC2D0[arg0->unk124];
-    if ((temp_s0->disable_run == 0) && (temp_s0->stunned == 0)) {
-        temp_v0 = temp_s0->unk31C;
-        if (temp_v0 != 0) {
-            if (temp_v0->unk6B != 0) {
-                return;
-            }
+    obj = &D_800CC2D0[arg0->unk124];
+    if ((obj->disable_run == 0) && (obj->stunned == 0)) {
+        if ((obj->unk31C != NULL) && (obj->unk31C->unk6B != 0)) {
+            return;
         }
-            temp_s0->immune = 0xFF;
-            temp_s0->y_velocity = arg1;
-            temp_s0->gravity = arg2;
-            temp_s0->unk83 = 0xFF;
-            temp_s0->disable_run = 0xFF;
-            temp_s0->unk76 = arg0->unk7A;
-            arg0->unk232 = arg3;
-            arg0->unk218 = 0;
-            func_1505E650(temp_s0, 0x32, 1.2999999523162842f, 4.0f, 0.0f, 0.0f, 0);
-            D_800CC2D0[arg0->unk124].unk31C->unk30 = 0x46;
-            *(f32 *)&D_800CC2D0[arg0->unk124].unk31C->unk28 = arg0->x_position;
-            *(f32 *)&D_800CC2D0[arg0->unk124].unk31C->unk2C = arg0->z_position;
-            temp_v0_2 = arg0->unk1D4;
-            if (temp_v0_2 != 0) {
-                temp_t8 = arg4 << 6;
-                if (arg4 != -1) {
-block_1505327C:
-                temp_a1 = (struct113 *) ((u8 *) temp_v0_2 + temp_t8);
-                func_15043FF0((vertex *) ((u8 *) &sp3C - 8), temp_a1);
-                *(f32 *)&D_800CC2D0[arg0->unk124].unk31C->unk28 = ((vertex *) ((u8 *) &sp3C - 8))->x;
-                *(f32 *)&D_800CC2D0[arg0->unk124].unk31C->unk2C = ((vertex *) ((u8 *) &sp3C - 8))->z;
-                }
-            }
-            D_800CC2D0[arg0->unk124].unk31C->unk27 = 1;
+        obj->immune = 0xFF;
+        obj->y_velocity = yVelocity;
+        obj->gravity = gravity;
+        obj->unk83 = 0xFF;
+        obj->disable_run = 0xFF;
+        obj->unk76 = arg0->unk7A;
+        arg0->unk232 = arg3;
+        arg0->unk218 = NULL;
+        func_1505E650(obj, 50, 1.3f, 4.0f, 0.0f, 0.0f, 0);
+        D_800CC2D0[arg0->unk124].unk31C->unk30 = 70;
+        // unk28/unk2C are declared s32 in struct126 but hold floats
+        *(f32 *)&D_800CC2D0[arg0->unk124].unk31C->unk28 = arg0->x_position;
+        *(f32 *)&D_800CC2D0[arg0->unk124].unk31C->unk2C = arg0->z_position;
+        if ((arg0->unk1D4 != NULL) && (mtxIndex != -1)) {
+        // matching: an unused label keeps IDO from sinking the index shift below the -1 test
+        joint:
+            func_15043FF0(&pos, &((struct113 *)arg0->unk1D4)[mtxIndex]);
+            *(f32 *)&D_800CC2D0[arg0->unk124].unk31C->unk28 = pos.x;
+            *(f32 *)&D_800CC2D0[arg0->unk124].unk31C->unk2C = pos.z;
+        }
+        D_800CC2D0[arg0->unk124].unk31C->unk27 = 1;
     }
 }
