@@ -867,7 +867,7 @@ s32 func_15196B4C(CharacterFlamethrowerActor *actor, s32 arg1) {
     f32 t;
     f32 speed;
     f32 size;
-    f32 fq;
+    f32 fq; /* scratch: first the time of the first point, later the size step */
     s32 head;
     s32 tail;
     f32 pad4;
@@ -968,9 +968,9 @@ s32 func_15196B4C(CharacterFlamethrowerActor *actor, s32 arg1) {
 
 /* Per-view camera (D_800DBFF0[view]). */
 typedef struct ViewCamera {
-    u8 unknown0[0x2F8];
+    u8 pad0[0x2F8];
     Vec3f position;
-    u8 unknown304[0x69C];
+    u8 pad304[0x69C];
 } ViewCamera;
 
 void func_151D5D60(void *, s16, s32, void **, u8 *);
@@ -1605,7 +1605,7 @@ s32 func_15198570(CharacterFlamethrowerActor *actor) {
     f32 dx;
     f32 dz;
     f32 dy;
-    f32 p1;
+    f32 p1; // matching: unused, keeps the original frame size
 
     jet = actor->state;
     points = actor->points;
@@ -1653,7 +1653,7 @@ s32 func_151987CC(CharacterFlamethrowerActor *actor) {
     f32 dx;
     f32 dz;
     f32 dy;
-    f32 p1;
+    f32 p1; // matching: unused (with p3), keeps the original frame size
     f32 p3;
 
     jet = actor->state;
@@ -3729,104 +3729,104 @@ typedef struct FlamethrowerController {
 
 /* Spawns the controller owner's flame from a built-in setup. */
 void func_1519C9C4(FlamethrowerController *ctrl) {
-    CharacterFlamethrowerActor *ret;
-    CharacterFlamethrowerSetup d;
+    CharacterFlamethrowerActor *flame;
+    CharacterFlamethrowerSetup setup;
     struct127 *obj;
-    s32 pad;
+    s32 pad; // matching: unused stack slot
     CharacterFlamethrowerFlameEx *state;
 
-    d.seed.owner = obj = ctrl->owner;
-    d.seed.ownerId = obj->unique_id;
-    d.seed.bone = 9;
-    d.seed.startOffset.x = 7.0f;
-    d.seed.startOffset.y = -147.0f;
-    d.seed.startOffset.z = 54.0f;
-    d.seed.endOffset.x = 7.0f;
-    d.seed.endOffset.y = -228.0f;
-    d.seed.endOffset.z = 80.0f;
-    d.seed.gravity = 0.8700000048f;
-    d.seed.emitRate = 0.6970000267f;
-    d.seed.maxLength = 703.0f;
-    d.seed.fadeStart = 0.5600000024f;
-    d.seed.size = 8.400000572f;
-    d.seed.sizeRate = 6.599999905f;
-    d.seed.alpha = 200;
-    d.seed.initFn = -1;
-    d.seed.unk35 = 0;
-    d.seed.destroyFn = -1;
-    d.seed.soundFn = 0;
-    d.seed.soundUpdateFn = 0;
-    d.seed.soundStopFn = 0;
-    d.seed.texSpeed = -234.0f;
-    d.seed.texScale = 9.579999924f;
-    d.seed.updateFn = 0;
-    d.kind = 15;
-    d.flags = 15;
-    d.red = 60;
-    d.green = 255;
-    d.blue = 235;
-    d.alpha = 82;
-    d.line.rate = 0.001949999947f;
-    d.line.rateRange = 0.00699999975f;
-    d.line.lifeMin = 20;
-    d.line.lifeRange = 13;
-    d.line.unkC = 0.503000021f;
-    d.line.unk14 = 0.5120000243f;
-    d.line.unk10 = 0.2990000248f;
-    d.line.unk18 = 0.3920000196f;
-    d.line.speedMin = 0.5550000072f;
-    d.line.speedRange = 0.7080000043f;
-    d.line.gravityMin = 0.04200000316f;
-    d.line.gravityRange = 0.3410000205f;
-    d.line.dragA = 0.973477006f;
-    d.line.dragB = 0.9759860039f;
-    d.line.fadeStart = 12;
-    d.line.alphaPerLife = 21;
-    d.line.position = 0.4360000193f;
-    d.line.unk3C = 100;
-    d.line.unk3D = 80;
-    d.line.shrinkRate = 0.006000000052f;
-    d.scatter.target.x = 7.0f;
-    d.scatter.target.y = -218.0f;
-    d.scatter.target.z = 150.0f;
-    d.scatter.rate = 0.2040000111f;
-    d.scatter.rateRange = 0.4030000269f;
-    d.scatter.unk14 = 4;
-    d.scatter.unk18 = 3;
-    d.scatter.unk1C = 50;
-    d.scatter.unk1E = 21;
-    d.scatter.unk20 = 4.0f;
-    d.scatter.unk24 = 6.0f;
-    d.scatter.speedMin = 0.1000000015f;
-    d.scatter.speedRange = 0.1000000015f;
-    d.scatter.spread = 50.0f;
-    d.scatter.unk34 = 0.3110000193f;
-    d.scatter.unk38 = 0.3080000281f;
-    d.scatter.unk3C = 80;
-    d.scatter.unk3E = 175;
-    d.scatter.unk40 = 22;
-    d.scatter.unk42 = 11;
-    d.emit.target.x = 7.0f;
-    d.emit.target.y = -218.0f;
-    d.emit.target.z = 150.0f;
-    d.emit.rate = 0.05000000075f;
-    d.emit.rateRange = 0.351000011f;
-    d.emit.unk14 = 60;
-    d.emit.unk16 = 20;
-    d.emit.unk18 = 155;
-    d.emit.unk1A = 100;
-    d.emit.unk1C = 134.0f;
-    d.emit.unk20 = 120.0f;
-    d.emit.speedMin = 0.05000000075f;
-    d.emit.speedRange = 0.06000000238f;
-    d.emit.spread = 43.0f;
-    d.emit.unk30 = -0.25f;
-    d.emit.unk34 = 0.1780000031f;
-    d.emit.unk38 = 23;
-    d.emit.unk3A = 11;
-    ret = func_151994B8(sizeof(ctrl->aliveState), &d, ctrl->unkC, ctrl->unk1);
-    if (ret != NULL) {
-        state = ret->state;
+    setup.seed.owner = obj = ctrl->owner;
+    setup.seed.ownerId = obj->unique_id;
+    setup.seed.bone = 9;
+    setup.seed.startOffset.x = 7.0f;
+    setup.seed.startOffset.y = -147.0f;
+    setup.seed.startOffset.z = 54.0f;
+    setup.seed.endOffset.x = 7.0f;
+    setup.seed.endOffset.y = -228.0f;
+    setup.seed.endOffset.z = 80.0f;
+    setup.seed.gravity = 0.8700000048f;
+    setup.seed.emitRate = 0.6970000267f;
+    setup.seed.maxLength = 703.0f;
+    setup.seed.fadeStart = 0.5600000024f;
+    setup.seed.size = 8.400000572f;
+    setup.seed.sizeRate = 6.599999905f;
+    setup.seed.alpha = 200;
+    setup.seed.initFn = -1;
+    setup.seed.unk35 = 0;
+    setup.seed.destroyFn = -1;
+    setup.seed.soundFn = 0;
+    setup.seed.soundUpdateFn = 0;
+    setup.seed.soundStopFn = 0;
+    setup.seed.texSpeed = -234.0f;
+    setup.seed.texScale = 9.579999924f;
+    setup.seed.updateFn = 0;
+    setup.kind = 15;
+    setup.flags = 15;
+    setup.red = 60;
+    setup.green = 255;
+    setup.blue = 235;
+    setup.alpha = 82;
+    setup.line.rate = 0.001949999947f;
+    setup.line.rateRange = 0.00699999975f;
+    setup.line.lifeMin = 20;
+    setup.line.lifeRange = 13;
+    setup.line.unkC = 0.503000021f;
+    setup.line.unk14 = 0.5120000243f;
+    setup.line.unk10 = 0.2990000248f;
+    setup.line.unk18 = 0.3920000196f;
+    setup.line.speedMin = 0.5550000072f;
+    setup.line.speedRange = 0.7080000043f;
+    setup.line.gravityMin = 0.04200000316f;
+    setup.line.gravityRange = 0.3410000205f;
+    setup.line.dragA = 0.973477006f;
+    setup.line.dragB = 0.9759860039f;
+    setup.line.fadeStart = 12;
+    setup.line.alphaPerLife = 21;
+    setup.line.position = 0.4360000193f;
+    setup.line.unk3C = 100;
+    setup.line.unk3D = 80;
+    setup.line.shrinkRate = 0.006000000052f;
+    setup.scatter.target.x = 7.0f;
+    setup.scatter.target.y = -218.0f;
+    setup.scatter.target.z = 150.0f;
+    setup.scatter.rate = 0.2040000111f;
+    setup.scatter.rateRange = 0.4030000269f;
+    setup.scatter.unk14 = 4;
+    setup.scatter.unk18 = 3;
+    setup.scatter.unk1C = 50;
+    setup.scatter.unk1E = 21;
+    setup.scatter.unk20 = 4.0f;
+    setup.scatter.unk24 = 6.0f;
+    setup.scatter.speedMin = 0.1000000015f;
+    setup.scatter.speedRange = 0.1000000015f;
+    setup.scatter.spread = 50.0f;
+    setup.scatter.unk34 = 0.3110000193f;
+    setup.scatter.unk38 = 0.3080000281f;
+    setup.scatter.unk3C = 80;
+    setup.scatter.unk3E = 175;
+    setup.scatter.unk40 = 22;
+    setup.scatter.unk42 = 11;
+    setup.emit.target.x = 7.0f;
+    setup.emit.target.y = -218.0f;
+    setup.emit.target.z = 150.0f;
+    setup.emit.rate = 0.05000000075f;
+    setup.emit.rateRange = 0.351000011f;
+    setup.emit.unk14 = 60;
+    setup.emit.unk16 = 20;
+    setup.emit.unk18 = 155;
+    setup.emit.unk1A = 100;
+    setup.emit.unk1C = 134.0f;
+    setup.emit.unk20 = 120.0f;
+    setup.emit.speedMin = 0.05000000075f;
+    setup.emit.speedRange = 0.06000000238f;
+    setup.emit.spread = 43.0f;
+    setup.emit.unk30 = -0.25f;
+    setup.emit.unk34 = 0.1780000031f;
+    setup.emit.unk38 = 23;
+    setup.emit.unk3A = 11;
+    flame = func_151994B8(sizeof(ctrl->aliveState), &setup, ctrl->unkC, ctrl->unk1);
+    if (flame != NULL) {
+        state = flame->state;
         memcpy(&state->aliveState, ctrl->aliveState, sizeof(ctrl->aliveState));
     }
 }
