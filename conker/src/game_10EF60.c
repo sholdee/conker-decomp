@@ -13,63 +13,40 @@ typedef struct {
     s32 field_0xDC[1];
 } CollisionPairRecord;
 
-typedef struct {
-    s16 ob[3];
-    u16 flag;
-    s16 tc[2];
-    u8 cn[4];
-} Vtx150E1AB0;
-
+/* A tracer/beam effect: a textured quad stretched from its position along its direction. */
 typedef struct {
     u8 pad0[0x10];
-    Vtx150E1AB0 v[2][4];
-    s16 unk90;
+    Vtx_t quads[2][4]; // double-buffered by D_800BE9C0
+    s16 lifetime;
     u8 pad92[2];
-    f32 unk94;
-    f32 unk98;
-    f32 unk9C;
-    f32 unkA0;
-    f32 unkA4;
-    f32 unkA8;
-    f32 unkAC;
-    f32 unkB0;
-    f32 unkB4;
-    f32 unkB8;
-    f32 unkBC;
-    f32 unkC0;
-    f32 unkC4;
-    f32 unkC8;
-    f32 unkCC;
-    s8 unkD0;
+    f32 x, y, z;
+    f32 pitch, yaw;
+    f32 speed;    // distance per frame; 0 means random
+    f32 stopDist; // nonzero: stop on reaching the target
+    f32 target_x, target_y, target_z;
+    f32 halfWidth;
+    f32 length;
+    f32 dx, dy, dz; // unit direction
+    s8 mode;        // nonzero: re-fired from a bone of the owner
     u8 padD1;
-    s16 unkD2;
-    s16 unkD4;
-    s16 unkD6;
-    s16 unkD8;
-    u8 unkDA;
-    u8 unkDB;
-    s32 unkDC;
-    s16 unkE0;
-    u8 unkE2;
-    u8 unkE3;
-    f32 unkE4;
-    f32 unkE8;
-    f32 unkEC;
-    f32 unkF0;
-    f32 unkF4;
-    f32 unkF8;
-    u8 unkFC;
-    u8 unkFD;
+    s16 onTime;
+    s16 offTime;
+    s16 timer;      // drawn while positive
+    s16 texture;    // index into D_8008CA4C
+    u8 ownerId;     // owner's unique_id when attached
+    u8 drawn;
+    struct127 *owner;
+    s16 ownerTag;   // compared with owner->unk84.uh; -1 for none
+    u8 bone;
+    u8 attachDelay;
+    f32 startOffset[3]; // in bone space
+    f32 endOffset[3];
+    u8 impactEffect;
+    u8 fireCounter;
     u8 unkFE;
-} Obj150E1AB0;
+    u8 padFF;
+} Game10EF60Effect;
 
-struct Tex150E1AB0 {
-    u8 pad0[6];
-    u16 unk6;
-    u16 unk8;
-};
-
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 typedef struct {
     u8 pad0[6];
     u16 width;
@@ -77,76 +54,81 @@ typedef struct {
 } Game10EF60Texture;
 
 extern Game10EF60Texture *D_8008CA4C[];
+extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 
-void func_150E1AB0(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 argA, s16 argB, u16 argC, s8 argD, s16 argE, s16 argF, s32 arg10, u8 arg11, u8 arg12, s32 arg13, u8 arg14, u8 arg15, f32 arg16, f32 arg17, f32 arg18, f32 arg19, f32 arg1A, f32 arg1B) {
-    Obj150E1AB0 *obj;
+/* Spawns a tracer effect from (x0, y0, z0) towards (x1, y1, z1). */
+void func_150E1AB0(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 speed, f32 stopDist,
+                   f32 halfWidth, f32 length, s16 lifetime, u16 texture, s8 mode, s16 onTime, s16 offTime,
+                   struct127 *owner, u8 ownerId, u8 bone, s32 ownerTag, u8 impactEffect, u8 unkFE,
+                   f32 startX, f32 startY, f32 startZ, f32 endX, f32 endY, f32 endZ) {
+    Game10EF60Effect *effect;
     s32 i;
-    s32 s;
-    s32 t;
+    s32 sMax;
+    s32 tMax;
 
-    obj = func_15167A68(0xB, 0, 0x100, 1, 0xFF, 1);
-    if (obj != NULL) {
-        obj->unk90 = argB;
-        obj->unk94 = arg1;
-        obj->unk98 = arg2;
-        obj->unk9C = arg3;
-        obj->unkA4 = func_150484A0(-(arg4 - arg1), -(arg6 - arg3));
-        obj->unkA0 = func_150484A0(arg5 - arg2, sqrtf((arg4 - arg1) * (arg4 - arg1) + (arg6 - arg3) * (arg6 - arg3)));
-        obj->unkC4 = 0.0f;
-        obj->unkC8 = 0.0f;
-        obj->unkCC = 0.0f;
-        obj->unkB0 = arg4;
-        obj->unkB4 = arg5;
-        obj->unkB8 = arg6;
-        obj->unkAC = arg8;
-        obj->unkA8 = arg7;
-        obj->unkBC = arg9;
-        obj->unkC0 = argA;
-        obj->unkE3 = 0;
-        obj->unkFC = arg14;
-        obj->unkFD = 0;
-        obj->unkFE = arg15;
-        obj->unkDC = arg10;
-        obj->unkD8 = argC;
-        obj->unkD0 = argD;
-        if (obj->unkD0 != 0) {
-            if (arg10 == 0) {
-                func_1516979C((struct102 *)obj);
+    effect = func_15167A68(0xB, 0, 0x100, 1, 0xFF, 1);
+    if (effect != NULL) {
+        effect->lifetime = lifetime;
+        effect->x = x0;
+        effect->y = y0;
+        effect->z = z0;
+        effect->yaw = func_150484A0(-(x1 - x0), -(z1 - z0));
+        effect->pitch = func_150484A0(y1 - y0, sqrtf((x1 - x0) * (x1 - x0) + (z1 - z0) * (z1 - z0)));
+        effect->dx = 0.0f;
+        effect->dy = 0.0f;
+        effect->dz = 0.0f;
+        effect->target_x = x1;
+        effect->target_y = y1;
+        effect->target_z = z1;
+        effect->stopDist = stopDist;
+        effect->speed = speed;
+        effect->halfWidth = halfWidth;
+        effect->length = length;
+        effect->attachDelay = 0;
+        effect->impactEffect = impactEffect;
+        effect->fireCounter = 0;
+        effect->unkFE = unkFE;
+        effect->owner = owner;
+        effect->texture = texture;
+        effect->mode = mode;
+        if (effect->mode != 0) {
+            if (owner == NULL) {
+                func_1516979C((struct102 *)effect);
                 return;
             }
-            obj->unkD2 = argE;
-            obj->unkD6 = -argF;
-            obj->unkD4 = argF;
-            obj->unkDA = arg11;
-            obj->unkE2 = arg12;
-            obj->unkE0 = arg13;
-            obj->unkE4 = arg16;
-            obj->unkE8 = arg17;
-            obj->unkEC = arg18;
-            obj->unkF0 = arg19;
-            obj->unkF4 = arg1A;
-            obj->unkF8 = arg1B;
+            effect->onTime = onTime;
+            effect->timer = -offTime;
+            effect->offTime = offTime;
+            effect->ownerId = ownerId;
+            effect->bone = bone;
+            effect->ownerTag = ownerTag;
+            effect->startOffset[0] = startX;
+            effect->startOffset[1] = startY;
+            effect->startOffset[2] = startZ;
+            effect->endOffset[0] = endX;
+            effect->endOffset[1] = endY;
+            effect->endOffset[2] = endZ;
         } else {
-            obj->unkD6 = 1;
-            obj->unkE0 = -1;
+            effect->timer = 1;
+            effect->ownerTag = -1;
         }
         for (i = 0; i < 2; i++) {
-            s = D_8008CA4C[obj->unkD8]->width - 1;
-            t = D_8008CA4C[obj->unkD8]->height - 1;
-            obj->v[i][2].tc[0] = 0x2000;
-            obj->v[i][2].tc[1] = 0x2000;
-            obj->v[i][2].flag = 0;
-            obj->v[i][0].tc[0] = (u16)(s << 5) + 0x2000;
-            obj->v[i][0].tc[1] = 0x2000;
-            obj->v[i][0].flag = 0;
-            obj->v[i][3].tc[0] = 0x2000;
-            obj->v[i][3].tc[1] = (u16)(t << 5) + 0x2000;
-            obj->v[i][3].flag = 0;
-            obj->v[i][1].tc[0] = (u16)(s << 5) + 0x2000;
-            obj->v[i][1].tc[1] = (u16)(t << 5) + 0x2000;
-            obj->v[i][1].flag = 0;
+            sMax = D_8008CA4C[effect->texture]->width - 1;
+            tMax = D_8008CA4C[effect->texture]->height - 1;
+            effect->quads[i][2].tc[0] = 0x2000;
+            effect->quads[i][2].tc[1] = 0x2000;
+            effect->quads[i][2].flag = 0;
+            effect->quads[i][0].tc[0] = (u16)(sMax << 5) + 0x2000;
+            effect->quads[i][0].tc[1] = 0x2000;
+            effect->quads[i][0].flag = 0;
+            effect->quads[i][3].tc[0] = 0x2000;
+            effect->quads[i][3].tc[1] = (u16)(tMax << 5) + 0x2000;
+            effect->quads[i][3].flag = 0;
+            effect->quads[i][1].tc[0] = (u16)(sMax << 5) + 0x2000;
+            effect->quads[i][1].tc[1] = (u16)(tMax << 5) + 0x2000;
+            effect->quads[i][1].flag = 0;
         }
-        obj->unkDB = 0;
+        effect->drawn = 0;
     }
 }
 
@@ -166,36 +148,6 @@ void func_150E4550(f32, f32, f32, s32, s32, s32, s32);
 s32 func_1510F8CC(s32);
 s32 func_151EF610(void);
 
-typedef struct {
-    s16 pos[3];
-    s16 zero;
-    s16 u;
-    s16 v;
-    u8 padC[4];
-} Game10EF60Vertex;
-
-typedef struct {
-    u8 pad0[0x10];
-    Game10EF60Vertex quads[2][4];
-    s16 lifetime;
-    u8 pad92[2];
-    f32 x, y, z;
-    f32 pitch, yaw;
-    f32 scale, speed;
-    f32 target_x, target_y, target_z;
-    f32 range, rate;
-    f32 dx, dy, dz;
-    volatile s8 mode;
-    u8 padD1;
-    s16 fieldD2, fieldD4, fieldD6;
-    volatile s16 material;
-    u8 fieldDA, fieldDB;
-    struct127 *owner;
-    s16 timeout;
-    u8 fieldE2, fieldE3;
-    f32 fieldE4, fieldE8, fieldEC, fieldF0, fieldF4, fieldF8;
-    u8 fieldFC, fieldFD, fieldFE, padFF;
-} Game10EF60Effect;
 
 void func_150E1D14(Game10EF60Effect *arg0) {
     f32 vx;
@@ -234,40 +186,40 @@ void func_150E1D14(Game10EF60Effect *arg0) {
     type = 0x23;
     dist = 0.0f;
     arg0->lifetime -= D_800BE9E4;
-    if (arg0->lifetime < 0 || (arg0->owner != NULL && arg0->timeout != -1 && arg0->owner->unk84.uh != arg0->timeout)) {
+    if (arg0->lifetime < 0 || (arg0->owner != NULL && arg0->ownerTag != -1 && arg0->owner->unk84.uh != arg0->ownerTag)) {
         func_1516972C((struct102 *)arg0);
         return;
     }
     if (arg0->mode != 0) {
-        if (arg0->fieldE3 == 0) {
-            if (arg0->owner != NULL && arg0->owner->unk1D4 != NULL && arg0->owner->unique_id == arg0->fieldDA && (idx = arg0->owner->unk127) != 0xFF) {
-                bone = (f32 *)((u8 *)arg0->owner->unk1D4 + (arg0->fieldE2 << 6));
-                func_150A7960(bone, arg0->fieldE4, arg0->fieldE8, arg0->fieldEC, &arg0->x, &arg0->y, &arg0->z);
-                func_150A7960(bone, arg0->fieldF0, arg0->fieldF4, arg0->fieldF8, &arg0->target_x, &arg0->target_y, &arg0->target_z);
-                arg0->fieldE3 = 3;
+        if (arg0->attachDelay == 0) {
+            if (arg0->owner != NULL && arg0->owner->unk1D4 != NULL && arg0->owner->unique_id == arg0->ownerId && (idx = arg0->owner->unk127) != 0xFF) {
+                bone = (f32 *)((u8 *)arg0->owner->unk1D4 + (arg0->bone << 6));
+                func_150A7960(bone, arg0->startOffset[0], arg0->startOffset[1], arg0->startOffset[2], &arg0->x, &arg0->y, &arg0->z);
+                func_150A7960(bone, arg0->endOffset[0], arg0->endOffset[1], arg0->endOffset[2], &arg0->target_x, &arg0->target_y, &arg0->target_z);
+                arg0->attachDelay = 3;
             }
         } else {
-            arg0->fieldE3--;
+            arg0->attachDelay--;
         }
-        arg0->fieldD6 -= D_800BE9E4;
-        if (arg0->fieldD6 < -arg0->fieldD4) {
-            arg0->fieldD6 = arg0->fieldD2;
-            if (arg0->owner != NULL && arg0->owner->unk1D4 != NULL && arg0->owner->unique_id == arg0->fieldDA) {
-                bone = (f32 *)((u8 *)arg0->owner->unk1D4 + (arg0->fieldE2 << 6));
-                func_150A7960(bone, arg0->fieldE4, arg0->fieldE8, arg0->fieldEC, &arg0->x, &arg0->y, &arg0->z);
+        arg0->timer -= D_800BE9E4;
+        if (arg0->timer < -arg0->offTime) {
+            arg0->timer = arg0->onTime;
+            if (arg0->owner != NULL && arg0->owner->unk1D4 != NULL && arg0->owner->unique_id == arg0->ownerId) {
+                bone = (f32 *)((u8 *)arg0->owner->unk1D4 + (arg0->bone << 6));
+                func_150A7960(bone, arg0->startOffset[0], arg0->startOffset[1], arg0->startOffset[2], &arg0->x, &arg0->y, &arg0->z);
                 idx = arg0->owner->unk127;
-                func_150A7960(bone, arg0->fieldF0, arg0->fieldF4, arg0->fieldF8, &arg0->target_x, &arg0->target_y, &arg0->target_z);
+                func_150A7960(bone, arg0->endOffset[0], arg0->endOffset[1], arg0->endOffset[2], &arg0->target_x, &arg0->target_y, &arg0->target_z);
                 hit = 0.0f;
-                if (arg0->fieldFD-- == 0) {
-                    arg0->fieldFD = 2;
+                if (arg0->fireCounter-- == 0) {
+                    arg0->fireCounter = 2;
                     fire = 1;
                 } else {
                     fire = 0;
                 }
-                if (arg0->scale == 0.0f) {
+                if (arg0->speed == 0.0f) {
                     speed = (f32)(func_151EF610() % 70) + 40.0f;
                 } else {
-                    speed = arg0->scale;
+                    speed = arg0->speed;
                 }
                 surf = 0;
                 if (idx != 0xFF) {
@@ -297,7 +249,7 @@ void func_150E1D14(Game10EF60Effect *arg0) {
                         arg0->target_y += arg0->y;
                         arg0->target_z += arg0->z;
                     }
-                    arg0->rate = (f32)(func_151EF610() % 3) * 80.0f + 80.0f;
+                    arg0->length = (f32)(func_151EF610() % 3) * 80.0f + 80.0f;
                 } else {
                     if (fire) {
                         hx = arg0->target_x - arg0->x;
@@ -323,7 +275,7 @@ void func_150E1D14(Game10EF60Effect *arg0) {
                 arg0->dy = 0.0f;
                 arg0->dz = 0.0f;
                 if (fire) {
-                    func_150E1AB0(0, arg0->x, arg0->y, arg0->z, arg0->target_x, arg0->target_y, arg0->target_z, speed, hit, 15.0f, 820.0f, 75, type, 0, 0, 0, (s32)arg0->owner, 0, 0, 0, surf, arg0->fieldFE, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+                    func_150E1AB0(0, arg0->x, arg0->y, arg0->z, arg0->target_x, arg0->target_y, arg0->target_z, speed, hit, 15.0f, 820.0f, 75, type, 0, 0, 0, arg0->owner, 0, 0, 0, surf, arg0->unkFE, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
                 }
             } else {
                 func_1516972C((struct102 *)arg0);
@@ -332,7 +284,7 @@ void func_150E1D14(Game10EF60Effect *arg0) {
         }
     } else {
     }
-    if (arg0->fieldD6 > 0) {
+    if (arg0->timer > 0) {
         y0 = 0.0f;
         z0 = -1.0f;
         sn = func_150AD78C(arg0->pitch);
@@ -345,10 +297,10 @@ void func_150E1D14(Game10EF60Effect *arg0) {
         vx = cs * a + sn * c;
         vy = b;
         vz = -sn * a + cs * c;
-        if (arg0->speed != 0.0f) {
+        if (arg0->stopDist != 0.0f) {
             dist = sqrtf((arg0->target_x - arg0->x) * (arg0->target_x - arg0->x) + (arg0->target_y - arg0->y) * (arg0->target_y - arg0->y) + (arg0->target_z - arg0->z) * (arg0->target_z - arg0->z));
         }
-        if (arg0->fieldDB == 0) {
+        if (arg0->drawn == 0) {
             vx *= 0.5f;
             vy *= 0.5f;
             vz *= 0.5f;
@@ -356,35 +308,35 @@ void func_150E1D14(Game10EF60Effect *arg0) {
         arg0->dx = vx;
         arg0->dy = vy;
         arg0->dz = vz;
-        s = arg0->scale * D_800BE9E4;
-        if (dist < s && arg0->speed != 0.0f) {
+        s = arg0->speed * D_800BE9E4;
+        if (dist < s && arg0->stopDist != 0.0f) {
             vx *= dist;
             vy *= dist;
             vz *= dist;
-            arg0->rate = dist;
+            arg0->length = dist;
         } else {
             vx *= s;
             vy *= s;
             vz *= s;
         }
-        if (arg0->fieldFE == 1) {
+        if (arg0->unkFE == 1) {
             i = arg0->owner != NULL ? arg0->owner - D_800CC2D0 : 0;
             func_150E1570(arg0->owner, arg0->x, arg0->y, arg0->z, arg0->x + vx, arg0->y + vy, arg0->z + vz, i, 0);
         }
         arg0->x += vx;
         arg0->y += vy;
         arg0->z += vz;
-        if (arg0->speed != 0.0f) {
+        if (arg0->stopDist != 0.0f) {
             s = sqrtf((arg0->target_x - arg0->x) * (arg0->target_x - arg0->x) + (arg0->target_y - arg0->y) * (arg0->target_y - arg0->y) + (arg0->target_z - arg0->z) * (arg0->target_z - arg0->z));
-            if (s < arg0->speed || dist < s) {
-                if (arg0->fieldFC != 0) {
-                    func_150E4550(arg0->target_x, arg0->target_y, arg0->target_z, 1, arg0->fieldFC, 0, 0xFF);
+            if (s < arg0->stopDist || dist < s) {
+                if (arg0->impactEffect != 0) {
+                    func_150E4550(arg0->target_x, arg0->target_y, arg0->target_z, 1, arg0->impactEffect, 0, 0xFF);
                 }
                 func_1516972C((struct102 *)arg0);
                 return;
             }
-            if (s < arg0->rate) {
-                arg0->rate = s;
+            if (s < arg0->length) {
+                arg0->length = s;
             }
         }
     }
@@ -422,17 +374,17 @@ Gfx *func_150E28DC(Gfx *arg0, Game10EF60Effect *arg1, s16 arg2) {
     Game10EF60Owner owner;
     u8 flag;
 
-    if (arg1->fieldD6 > 0) {
+    if (arg1->timer > 0) {
         points[0].x = arg1->x;
         points[0].y = arg1->y;
         points[0].z = arg1->z;
-        points[1].x = arg1->x + arg1->rate * arg1->dx;
-        points[1].y = arg1->y + arg1->rate * arg1->dy;
-        points[1].z = arg1->z + arg1->rate * arg1->dz;
+        points[1].x = arg1->x + arg1->length * arg1->dx;
+        points[1].y = arg1->y + arg1->length * arg1->dy;
+        points[1].z = arg1->z + arg1->length * arg1->dz;
         camera[0] = D_800DBFF0[arg2].unk2F8;
         camera[1] = D_800DBFF0[arg2].unk2FC;
         camera[2] = D_800DBFF0[arg2].unk300;
-        range = arg1->range;
+        range = arg1->halfWidth;
         for (i = 0; i < 2; i++) {
             distances[i] = (points[i].x - camera[0]) * (points[i].x - camera[0]) + (points[i].y - camera[1]) * (points[i].y - camera[1]) + (points[i].z - camera[2]) * (points[i].z - camera[2]);
         }
@@ -475,17 +427,17 @@ Gfx *func_150E28DC(Gfx *arg0, Game10EF60Effect *arg1, s16 arg2) {
         }
         for (i = 0; i < 4; i++) {
             for (j = 0; j < 3; j++) {
-                arg1->quads[D_800BE9C0][i].pos[j] = corners[i][j];
+                arg1->quads[D_800BE9C0][i].ob[j] = corners[i][j];
             }
         }
-        arg0 = (Gfx *)func_15094F70((s32)arg0, D_8008CA4C[arg1->material], 0, &owner, 0, 0, 0, 2, 3);
+        arg0 = (Gfx *)func_15094F70((s32)arg0, D_8008CA4C[arg1->texture], 0, &owner, 0, 0, 0, 2, 3);
         flag = 0;
         arg0 = func_15142FBC(arg0, D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, 0x504A50, &flag);
         gSPVertex(arg0++, arg1->quads[D_800BE9C0], 4, 0);
         gSP1Triangle(arg0++, 0, 1, 3, 0);
         gSP1Triangle(arg0++, 0, 3, 2, 0);
     }
-    arg1->fieldDB = 1;
+    arg1->drawn = 1;
     return arg0;
 }
 
@@ -493,14 +445,12 @@ s32 func_150E2DA4(s32 arg0, s32 arg1) {
     return arg0;
 }
 
-void func_150E1AB0(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, s16, u16, s8, s16, s16, s32, u8, u8, s32, u8, u8, f32, f32, f32, f32, f32, f32);
-
-void func_150E2DB4(s32 a0, u8 a1, s16 a2, s32 a3, f32 a4, f32 a5, f32 a6, f32 a7, f32 a8, f32 a9, s16 a10, s16 a11, u16 a12, u8 a13) {
+void func_150E2DB4(struct127 *a0, u8 a1, s16 a2, s32 a3, f32 a4, f32 a5, f32 a6, f32 a7, f32 a8, f32 a9, s16 a10, s16 a11, u16 a12, u8 a13) {
     func_150E1AB0(0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 40.0f, 400.0f, a12, 39, 1, a10, a11, a0, a1, a2, a3, 0, a13, a4, a5, a6, a7, a8, a9);
 }
 
 void func_150E2EA4(struct127 *a0, s32 a1, s32 a2, s32 a3, f32 a4, f32 a5, f32 a6, f32 a7, f32 a8, f32 a9, s32 a10, s32 a11, s32 a12, f32 a13, f32 a14, s32 a15, f32 a16) {
-    func_150E1AB0(0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, a16, 0.0f, a13, a14, *(u16 *)((u8 *)&a12 + 2), 39, 1, *(s16 *)((u8 *)&a10 + 2), *(s16 *)((u8 *)&a11 + 2), (s32)a0, *((u8 *)&a1 + 3), *(s16 *)((u8 *)&a2 + 2), a3, 0, *((u8 *)&a15 + 3), a4, a5, a6, a7, a8, a9);
+    func_150E1AB0(0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, a16, 0.0f, a13, a14, *(u16 *)((u8 *)&a12 + 2), 39, 1, *(s16 *)((u8 *)&a10 + 2), *(s16 *)((u8 *)&a11 + 2), a0, *((u8 *)&a1 + 3), *(s16 *)((u8 *)&a2 + 2), a3, 0, *((u8 *)&a15 + 3), a4, a5, a6, a7, a8, a9);
 }
 
 s32 func_150E2DA4(s32, s32);
