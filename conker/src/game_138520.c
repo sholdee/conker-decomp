@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-extern MtxF D_800D9B28;
+extern Mtx D_800D9B28;
 
 f32 cosf(f32);
 f32 sinf(f32);
@@ -14,7 +14,7 @@ void func_1510B070(s32 arg0) {
     D_800D9B20 = D_800DD2F2;
     D_800D9B1C = D_800DD2F4;
     D_800D3670 = 100.0f - D_800D9B1C;
-    func_151EF954(D_800D9B28, -D_800BE628->halfWidth, D_800BE628->halfWidth, -D_800BE628->halfHeight,
+    func_151EF954(&D_800D9B28, -D_800BE628->halfWidth, D_800BE628->halfWidth, -D_800BE628->halfHeight,
                   D_800BE628->halfHeight, 1.0f, 10000.0f, 1.0f);
 }
 

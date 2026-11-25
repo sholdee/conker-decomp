@@ -1509,7 +1509,7 @@ extern s32 D_800DC9F0; /* live glow count */
 extern u8 D_800DCA20;
 extern f32 D_800DCA24;
 extern BurstPoint D_800DCA30[3][10]; // random burst points around each pipe (func_150124A0 fills, func_15156B54 uses)
-extern f32 *D_800DCC10[][4];
+extern Mtx D_800DCC10[]; // per-view orthographic projection (func_151EF954)
 extern ParticleNode *D_800DC460; // loaded particle models: list head
 extern ParticleNode *D_800DC464; // list tail
 extern s16 D_800DC468[];

@@ -372,7 +372,7 @@ void func_15157DEC(Effect *fx, f32 *xform) {
 /* Pre-draw callback (D_8008ADBC[3]): loads the identity modelview and this view's projection. */
 Gfx *func_15157F80(Gfx *gfx, Effect *fx, s32 view, u8 *needSync, u8 *proceed) {
     gSPMatrix(gfx++, &D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
-    gSPMatrix(gfx++, &((Mtx *)D_800DCC10)[view], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, &D_800DCC10[view], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
     *proceed = TRUE;
     return gfx;
 }

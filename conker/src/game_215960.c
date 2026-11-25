@@ -970,7 +970,7 @@ Gfx *func_151EB06C(Gfx *gfx) {
             gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFF);
             gfx = func_150900F0(gfx, 1);
             halfWidth = D_800BE628[0].width * 0.5f;
-            func_151EF954((f32 (*)[4])&D_800E0C38, -halfWidth, halfWidth, -(D_800BE628[0].height * 0.5f), D_800BE628[0].height * 0.5f, 1.0f, 20000.0f, 1.0f);
+            func_151EF954(&D_800E0C38, -halfWidth, halfWidth, -(D_800BE628[0].height * 0.5f), D_800BE628[0].height * 0.5f, 1.0f, 20000.0f, 1.0f);
             D_800E0C30 = D_8008FDCC;
             if (D_80090058 != NULL) {
                 i = 10;
