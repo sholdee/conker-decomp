@@ -448,6 +448,7 @@ void func_150E7290(u8 arg0, u8 owner, s32 kind) {
     }
 }
 
+/* Spawns a func_1515548C effect of the given size at `position`. */
 void func_150E75A0(Vec2f *position, f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16, s16 unk18, s32 *ids,
                    s32 idCount, u8 owner, s32 kind) {
     Struct1515548CArg arg;
@@ -484,7 +485,7 @@ void func_150E75A0(Vec2f *position, f32 size, s16 unk12, u8 flags, u8 unk1E, u8 
     func_1515548C(&arg, 0, ids, idCount, 0, owner, kind);
 }
 
-/* Like func_150E75A0, but enters from a random screen edge. */
+/* Like func_150E75A0, but placed at a random screen edge. */
 void func_150E76D0(f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16, s16 unk18, s32 *ids, s32 idCount,
                    u8 owner, s32 kind) {
     Struct1515548CArg arg;
@@ -998,7 +999,7 @@ typedef struct {
 // matching: unprototyped, since the call below also passes the effect (in a0) to this void function
 extern void func_150E8930();
 
-/* Counts the timer down and fires func_150E8930 every 201-538 frames. */
+/* Counts the timer down and fires func_150E8930 each time it runs out (rearmed to 201-538). */
 void func_150E88C0(Game113D60TimerEffect *effect) {
     effect->timer -= D_800BE9A4;
     if (effect->timer < 0.0f) {
@@ -1009,10 +1010,11 @@ void func_150E88C0(Game113D60TimerEffect *effect) {
 
 extern Game113D60Ids2 D_80088A80;
 extern u8 D_800BE9EB;
-extern void func_15164F0C(u8, u8, void *, u8, s32);
 void func_150E8A80(void);
 void func_150E90DC(void);
 
+/* Fires the D_80088A80 pair through func_15169260 plus an event, effects 0x33 and 0x36 when the
+ * D_800DCDC4 region list exists, and two sounds. */
 void func_150E8930(void) {
     Game113D60Ids2 ids;
     Game113D60Event event;
