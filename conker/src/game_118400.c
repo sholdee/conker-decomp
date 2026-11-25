@@ -13,7 +13,6 @@ typedef struct {
     /* 0x20 */ s32 unk20;
 } GroundHit; // size 0x24
 
-void func_15142314(struct255 *bones, s32 bone, Vec3f *out);
 void func_1504715C(GroundHit *hit, Actor *actor);
 s32 func_15046C80(Vec3f *probe, s32 arg1, f32 bottom, GroundHit *hit);
 void func_15141F78(u8, GroundHit *, f32, u8, Vec3f *, u8);

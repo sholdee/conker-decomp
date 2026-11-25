@@ -100,7 +100,6 @@ extern f32 D_8009FD3C[3];
 extern f32 D_8009FD48[3];
 
 // matching: the model is passed as s32; a pointer type moves the unk1D4 temp from v0 to a3
-void func_15142314(s32 model, s32 joint, f32 *out);
 void func_15143134(f32 *in, f32 *out, void *mtx);
 void func_1515C244(Actor *, f32 *, f32 *, f32 *);
 void func_150B82D0(Vec3f *, f32 *, f32 *, f32 *, u8, s32);

@@ -38,7 +38,6 @@ extern f32 D_800DCA10;
 
 Actor *func_15083E90();
 void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-void func_15142314(Mtx *, s32, f32 *);
 Gfx *func_15094FE8(Gfx *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 s32 func_1514306C(s32 *, s32, s32, u8);
 
@@ -461,26 +460,26 @@ typedef union {
     MtxF mf;
 } MtxView;
 
-/* Copies the translation of mtx[index] to out (fixed-point when D_800C3E90 is set). */
-void func_15142314(Mtx *mtx, s32 index, f32 *out) {
+/* Copies the translation of bone matrix bones[bone] to out (fixed-point when D_800C3E90 is set). */
+void func_15142314(struct255 *bones, s32 bone, Vec3f *out) {
     MtxView *m;
 
     // matching: a byte offset (not &mtx[index]) gives IDO's base + offset operand order
-    m = (MtxView *)((u8 *)mtx + index * sizeof(Mtx));
+    m = (MtxView *)((u8 *)bones + bone * sizeof(Mtx));
     if (D_800C3E90 != 0) {
         // matching: the original recomputes m here; IDO keeps both computations
-        m = (MtxView *)((u8 *)mtx + index * sizeof(Mtx));
+        m = (MtxView *)((u8 *)bones + bone * sizeof(Mtx));
         {
             f32 scale = 1.0f / 65536.0f;
-            out[0] = ((f32)(m->fx.whole[3][0] << 16) + (f32)m->fx.frac[3][0]) * scale;
-            out[1] = ((f32)(m->fx.whole[3][1] << 16) + (f32)m->fx.frac[3][1]) * scale;
-            out[2] = ((f32)(m->fx.whole[3][2] << 16) + (f32)m->fx.frac[3][2]) * scale;
+            out->x = ((f32)(m->fx.whole[3][0] << 16) + (f32)m->fx.frac[3][0]) * scale;
+            out->y = ((f32)(m->fx.whole[3][1] << 16) + (f32)m->fx.frac[3][1]) * scale;
+            out->z = ((f32)(m->fx.whole[3][2] << 16) + (f32)m->fx.frac[3][2]) * scale;
         }
         return;
     }
-    out[0] = m->mf[3][0];
-    out[1] = m->mf[3][1];
-    out[2] = m->mf[3][2];
+    out->x = m->mf[3][0];
+    out->y = m->mf[3][1];
+    out->z = m->mf[3][2];
 }
 
 /* Cosine of a binary angle (256 steps per turn), from the quarter-wave table D_8009A220. */

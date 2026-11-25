@@ -126,7 +126,6 @@ typedef struct {
 } AttachedEffect;
 
 extern s32 D_8008CB14;
-void func_15142314(struct255 *bones, s32 bone, f32 *out);
 extern s32 func_15147DA0(Spawn150AE790 *, Motion150AE790 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, Style150AE790 *, s32, s32, s32);
 s32 func_15167D84(void *, s32, s32, s32, s32, s32);
 

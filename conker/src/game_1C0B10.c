@@ -46,7 +46,6 @@ typedef struct {
     /* 0x74 */ s16 unk74;
 } ParticleBurst;
 
-void func_15142314(struct255 *bones, s32 bone, Vec3f *out);
 void func_15152520(ParticleBurst *burst, u8 arg1, s32 arg2);
 
 /* Spawns a particle burst at bone 10 of `actor`. */

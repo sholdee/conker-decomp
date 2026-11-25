@@ -1,6 +1,10 @@
 #include <ultra64.h>
 /* functions.h declares these two with the wrong return types; use the ones this file needs. */
+// matching: the call below also loads the actor into a3, as if func_15142314 took a 4th argument
+#define func_15142314 func_15142314_functions_h
 #include "functions.h"
+#undef func_15142314
+void func_15142314(struct255 *bones, u8 bone, Vec3f *out, Actor *actor);
 #include "variables.h"
 #include "effects.h"
 
@@ -699,7 +703,6 @@ typedef struct {
 } Cfg_151AABC4;
 
 extern u8 D_800A8F70[];
-extern void func_15142314(struct255 *, u8, Vec3f *, Actor *);
 extern void func_1504715C(GroundHit *hit, Actor *actor);
 extern s32 func_1504697C(Vec3f *pos, s32 arg1, f32 minY, GroundHit *hit);
 extern void func_15153F18(Cfg_151AABC4 *, Vec3f *, GroundHit *, u8, s32);

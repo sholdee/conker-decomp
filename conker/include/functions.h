@@ -394,6 +394,7 @@ void func_15048758(f32 *arg0);
 f32  func_150487E0(f32 arg0);
 f32  func_15048864(f32 arg0);
 f32  func_15048A40(u8 arg0);
+void func_15142314(struct255 *bones, s32 bone, Vec3f *out);
 f32  func_15048A70(f32 arg0, f32 arg1);
 s32  func_15048AD0(s32 arg0, s32 arg1);
 void func_15048B10(s32 arg0, s32 arg1);

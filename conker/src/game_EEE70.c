@@ -8,7 +8,6 @@ u8 func_150ADA20(void);
 #include "variables.h"
 #include "effects.h"
 
-void func_15142314(struct255 *bones, s32 bone, Vec3f *out);
 
 /* Gets the position of the actor's bone 0x18 (side 1) or 0x15 (side 2). */
 s32 func_150C19C0(Vec3f *pos, Actor *actor, u8 side) {
