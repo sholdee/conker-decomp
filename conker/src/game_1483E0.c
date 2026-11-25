@@ -52,113 +52,109 @@ extern f32 D_800A3214;
 
 
 struct Obj1511AF30 {
-    f32 pos;
+    f32 rotX;
     u8 pad4[0x38];
     s32 level;
     u8 pad40[0x3C];
-    f32 base;
+    f32 tilt;
     f32 wobble;
     f32 wobbleTarget;
 };
 
-extern f32 D_800A3188;
-extern f32 D_800A318C;
-extern f32 D_800A3190;
-extern f32 D_800A3194;
-
-void func_1511AF30(struct Obj1511AF30 *arg0) {
+/* Eases the tilt toward 0.75 degrees per level, then wobbles randomly around it. */
+void func_1511AF30(struct Obj1511AF30 *obj) {
     f32 level;
     f32 target;
     f32 diff;
-    s32 r;
+    s32 roll;
 
-    level = arg0->level;
-    target = 75.0f * level * D_800A3188;
-    if (target != arg0->base) {
-        diff = target - arg0->base;
+    level = obj->level;
+    target = 75.0f * level * 0.009999999776f;
+    if (target != obj->tilt) {
+        diff = target - obj->tilt;
         if (fabsf(diff) < 1.0f) {
-            arg0->base = target;
+            obj->tilt = target;
         } else {
-            arg0->base += (diff < 0.0f) ? -1 : 1;
+            obj->tilt += (diff < 0.0f) ? -1 : 1;
         }
-        arg0->wobble = 0.0f;
+        obj->wobble = 0.0f;
     } else {
-        r = (u32)func_150ADA20() % 1000;
-        if (r < 500) {
-            arg0->wobbleTarget = r * 5.0f * level * D_800A318C * D_800A3190;
+        roll = (u32)func_150ADA20() % 1000;
+        if (roll < 500) {
+            obj->wobbleTarget = roll * 5.0f * level * 0.002000000095f * 0.009999999776f;
         }
-        diff = arg0->wobbleTarget - arg0->wobble;
-        arg0->wobble += diff * D_800A3194;
+        diff = obj->wobbleTarget - obj->wobble;
+        obj->wobble += diff * 0.400000006f;
     }
-    arg0->pos = arg0->base + arg0->wobble;
-
+    obj->rotX = obj->tilt + obj->wobble;
 }
 
 struct Obj1511B07C {
     u8 pad0[0x10];
-    s16 unk10;
+    s16 x;
     u8 pad12[0x2];
-    s16 unk14;
+    s16 z;
     u8 pad16[0x26];
-    s32 unk3C;
+    s32 param;
     u8 pad40[0x33];
-    u8 unk73;
-    u16 unk74;
+    u8 flags;
+    u16 soundHandle;
     u8 pad76[0x6];
-    s32 unk7C;
-    s32 unk80;
-    f32 unk84;
+    s32 homeX;
+    s32 homeZ;
+    f32 speed;
 };
 
-void func_1511B07C(struct Obj1511B07C *arg0) {
-    f32 cur;
+/* Slides the object between fixed waypoints chosen by its param, with movement sounds. */
+void func_1511B07C(struct Obj1511B07C *obj) {
     f32 speed;
+    f32 maxSpeed;
     s32 mode;
     s32 state;
     s32 targetX;
     s32 targetZ;
-    s32 d;
+    s32 step;
     s32 moveX;
     s32 moveZ;
     s32 sound;
 
-    speed = 7.0f;
+    maxSpeed = 7.0f;
     moveX = 0;
     moveZ = 0;
     sound = 0;
     if (D_800C35EA == 1) {
-        if (func_15022B08((struct131 *)arg0 - D_800DBEF4, 0) != 0) {
+        if (func_15022B08((struct131 *)obj - D_800DBEF4, 0) != 0) {
             return;
         }
     }
-    if (arg0->unk7C == 0) {
-        arg0->unk7C = arg0->unk10 | 0x80000000;
-        arg0->unk80 = arg0->unk14;
+    if (obj->homeX == 0) {
+        obj->homeX = obj->x | 0x80000000;
+        obj->homeZ = obj->z;
     }
-    targetX = (s16)arg0->unk7C;
-    targetZ = arg0->unk80;
-    state = arg0->unk3C & 0x3FF;
+    targetX = (s16)obj->homeX;
+    targetZ = obj->homeZ;
+    state = obj->param & 0x3FF;
     if (state >= 4 && state < 7) {
-        func_1511F990(arg0, 1);
+        func_1511F990(obj, 1);
     }
-    mode = arg0->unk73 & 3;
+    mode = obj->flags & 3;
     if (mode == 3 || mode == 2) {
         switch (state) {
         case 0:
-            targetX = -0x45;
-            targetZ = -0x78;
+            targetX = -69;
+            targetZ = -120;
             if (mode == 2) {
                 sound = 0x4E;
             }
             moveX = 1;
             break;
         case 1:
-            targetX = -0x45;
-            targetZ = 0x78;
+            targetX = -69;
+            targetZ = 120;
             moveX = 1;
             break;
         case 2:
-            targetX = 0x64;
+            targetX = 100;
             if (mode == 2) {
                 sound = 0x4E;
             }
@@ -167,27 +163,27 @@ void func_1511B07C(struct Obj1511B07C *arg0) {
             targetX = 0;
             break;
         case 4:
-            speed = 15.0f;
-            targetX = 0x10E;
-            targetZ = -0x756;
+            maxSpeed = 15.0f;
+            targetX = 270;
+            targetZ = -1878;
             moveZ = 1;
             if (mode == 2) {
                 sound = 0x4E;
             }
             break;
         case 5:
-            targetZ = 0x8C;
+            targetZ = 140;
             if (mode == 2) {
                 sound = 0x4C1;
             }
             break;
         case 6:
-            targetZ = -0x8C;
+            targetZ = -140;
             break;
         case 7:
-            speed = 15.0f;
-            targetX = -0x1004;
-            targetZ = 0x1A6;
+            maxSpeed = 15.0f;
+            targetX = -4100;
+            targetZ = 422;
             moveX = 1;
             if (mode == 2) {
                 sound = 0x4E;
@@ -197,14 +193,14 @@ void func_1511B07C(struct Obj1511B07C *arg0) {
     } else {
         switch (state) {
         case 4:
-            speed = 15.0f;
+            maxSpeed = 15.0f;
             moveX = 1;
             if (mode == 1) {
                 sound = 0x4E;
             }
             break;
         case 7:
-            speed = 15.0f;
+            maxSpeed = 15.0f;
             moveZ = 1;
             if (mode == 1) {
                 sound = 0x4E;
@@ -213,104 +209,112 @@ void func_1511B07C(struct Obj1511B07C *arg0) {
         }
     }
     if (sound != 0) {
-        func_15114D24(arg0, sound, 0x7D00, 0x64, 0x9C4, 1);
+        func_15114D24(obj, sound, 0x7D00, 100, 2500, 1);
     }
-    cur = arg0->unk84;
+    speed = obj->speed;
     if (mode == 0 || mode == 3) {
-        cur = 0.0f;
-        arg0->unk10 = targetX;
-        arg0->unk14 = targetZ;
+        speed = 0.0f;
+        obj->x = targetX;
+        obj->z = targetZ;
     }
-    if (cur < speed) {
-        cur += (speed - cur) * 0.02999999933f;
+    if (speed < maxSpeed) {
+        speed += (maxSpeed - speed) * 0.02999999933f;
     }
-    if ((moveX != 0 || targetZ == arg0->unk14) && targetX != arg0->unk10 && (moveZ == 0 || targetZ == arg0->unk14)) {
-        d = targetX - arg0->unk10;
-        if (d < -cur) {
-            d = -cur;
-        } else if (cur < d) {
-            d = cur;
+    if ((moveX != 0 || targetZ == obj->z) && targetX != obj->x && (moveZ == 0 || targetZ == obj->z)) {
+        step = targetX - obj->x;
+        if (step < -speed) {
+            step = -speed;
+        } else if (speed < step) {
+            step = speed;
         }
-        arg0->unk10 += d;
-        if (targetX == arg0->unk10) {
-            cur = 0.0f;
+        obj->x += step;
+        if (targetX == obj->x) {
+            speed = 0.0f;
             if (state == 0) {
-                func_15114D24(arg0, 0x4E, 0x7D00, 0x64, 0x9C4, 1);
+                func_15114D24(obj, 0x4E, 0x7D00, 100, 2500, 1);
             }
         }
-    } else if (targetZ != arg0->unk14) {
-        d = targetZ - arg0->unk14;
-        if (d < -cur) {
-            d = -cur;
-        } else if (cur < d) {
-            d = cur;
+    } else if (targetZ != obj->z) {
+        step = targetZ - obj->z;
+        if (step < -speed) {
+            step = -speed;
+        } else if (speed < step) {
+            step = speed;
         }
-        arg0->unk14 += d;
+        obj->z += step;
     } else if (mode == 2 || mode == 1) {
-        arg0->unk73 = ((mode == 2) ? 3 : 0) | (arg0->unk73 &= ~3);
-        if (arg0->unk74 != 0) {
-            func_100111C8(arg0->unk74);
-            arg0->unk74 = 0;
-            func_15114D24(arg0, 0x4C8, 0x7D00, 0x64, 0x9C4, 1);
+        // matching: the embedded &= makes IDO store the cleared flags before merging
+        obj->flags = ((mode == 2) ? 3 : 0) | (obj->flags &= ~3);
+        if (obj->soundHandle != 0) {
+            func_100111C8(obj->soundHandle);
+            obj->soundHandle = 0;
+            func_15114D24(obj, 0x4C8, 0x7D00, 100, 2500, 1);
         }
     }
-    arg0->unk84 = cur;
+    obj->speed = speed;
 }
 
 
 struct Obj1511B51C {
     u8 pad0[0x8];
-    f32 unk8;
+    f32 angle;
     u8 padC[0x30];
-    s32 unk3C;
+    union {
+        s32 word;
+        struct {
+            s16 hi;
+            s16 targetAngle;
+        } half;
+    } param;
     u8 pad40[0x33];
-    u8 unk73;
+    u8 flags;
     u8 pad74[0x8];
-    f32 unk7C;
-    f32 unk80;
-    f32 unk84;
+    f32 restitution;
+    f32 maxSpeed;
+    f32 velocity;
 };
 
-void func_1511B51C(struct Obj1511B51C *arg0) {
-    f32 vel;
+/* Swings the angle toward its open/closed target with a damped bounce, driving a sound by it. */
+void func_1511B51C(struct Obj1511B51C *obj) {
+    f32 velocity;
     f32 target;
     f32 angle;
     f32 diff;
-    f32 damp;
-    f32 maxv;
+    f32 restitution;
+    f32 maxSpeed;
     s32 mode;
-    s32 idx;
-    s32 raw;
+    s32 sound;
+    s32 openAngle;
     f32 ratio;
 
-    raw = ((s16 *)arg0)[0x3E / 2];
-    mode = arg0->unk73 & 3;
-    target = raw;
-    angle = arg0->unk8;
-    vel = arg0->unk84;
+    openAngle = obj->param.half.targetAngle;
+    mode = obj->flags & 3;
+    target = openAngle;
+    angle = obj->angle;
+    velocity = obj->velocity;
     if (mode == 0 || mode == 1) {
         target = 0.0f;
     }
     if (mode == 0 || mode == 3) {
         angle = target;
-        vel = 0.0f;
+        velocity = 0.0f;
     }
-    if (angle != target || vel != 0.0f) {
-        damp = arg0->unk7C;
-        if (damp == 0.0f) {
-            damp = 0.4499999881f;
+    if (angle != target || velocity != 0.0f) {
+        restitution = obj->restitution;
+        if (restitution == 0.0f) {
+            restitution = 0.4499999881f;
         }
-        maxv = arg0->unk80;
-        if (maxv == 0.0f) {
-            maxv = 0.5f;
+        maxSpeed = obj->maxSpeed;
+        if (maxSpeed == 0.0f) {
+            maxSpeed = 0.5f;
         }
-        angle += vel;
-        if (angle != 0.0f) {}
+        angle += velocity;
+        if (angle != 0.0f) {} // matching: no-op use of angle steers IDO's FP register choice
         diff = func_15048A70(angle, target);
-        if (fabsf(diff) < fabsf(vel)) {
-            vel = -vel * damp;
-            if (fabsf(vel) < maxv * 0.05000000075f) {
-                vel = 0.0f;
+        if (fabsf(diff) < fabsf(velocity)) {
+            velocity = -velocity * restitution;
+            if (fabsf(velocity) < maxSpeed * 0.05000000075f) {
+                velocity = 0.0f;
                 angle = target;
                 if (target == 0.0f) {
                     mode = 0;
@@ -319,110 +323,104 @@ void func_1511B51C(struct Obj1511B51C *arg0) {
                 }
             }
         } else if (diff > 0.0f) {
-            vel += (maxv - vel) * 0.009999999776f;
+            velocity += (maxSpeed - velocity) * 0.009999999776f;
         } else {
-            vel -= (maxv + vel) * 0.009999999776f;
+            velocity -= (maxSpeed + velocity) * 0.009999999776f;
         }
         if (angle < 0.0f) {
             angle += 360.0f;
         } else if (angle >= 360.0f) {
             angle -= 360.0f;
         }
-        arg0->unk73 &= ~3;
-        arg0->unk73 |= mode;
+        obj->flags &= ~3;
+        obj->flags |= mode;
     }
-    arg0->unk84 = vel;
-    if (D_800BE9B4 != 0 || angle != arg0->unk8) {
-        arg0->unk8 = angle;
-        idx = (arg0->unk3C >> 24) & 0xFF;
-        if (idx != 0 && raw != 0) {
-            ratio = fabsf((angle - raw) / raw);
-            func_1518804C(idx - 1, ratio);
-            func_15173C60((s32)((1.0f - ratio) * 255.0f), idx - 1);
+    obj->velocity = velocity;
+    if (D_800BE9B4 != 0 || angle != obj->angle) {
+        obj->angle = angle;
+        sound = (obj->param.word >> 24) & 0xFF;
+        if (sound != 0 && openAngle != 0) {
+            ratio = fabsf((angle - openAngle) / openAngle);
+            func_1518804C(sound - 1, ratio);
+            func_15173C60((s32)((1.0f - ratio) * 255.0f), sound - 1);
         }
     }
 }
 
-struct Vtx1511B7D4 {
+struct Obj1511B7D4 {
+    u8 pad0[0x8];
+    f32 angle;
+    u8 padC[0x4];
     s16 x;
     s16 y;
     s16 z;
-    u8 pad6[0xA];
-};
-
-struct Obj1511B7D4 {
-    u8 pad0[0x8];
-    f32 unk8;
-    u8 padC[0x4];
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
     u8 pad16[0xA];
-    struct Vtx1511B7D4 *unk20[2];
-    struct Vtx1511B7D4 *unk28;
+    Vtx *buffers[2];
+    Vtx *source;
     u8 pad2C[0x10];
-    s32 unk3C;
+    s32 param;
     u8 pad40[0x3C];
-    s32 unk7C;
-    f32 unk80;
-    f32 unk84;
+    s32 updates;
+    f32 prevAngle[2];
     u8 pad88[0x18];
 };
 
+/* (vertex, pivot) index pairs: vertices that follow the rotation of a preceding object. */
 extern u8 D_800A2F70;
 extern u8 D_800A2F71[];
 
-void func_1511B7D4(struct Obj1511B7D4 *arg0) {
-    u8 *table;
+/* Rotates the listed vertices about the pivot objects just before this one in the object array. */
+void func_1511B7D4(struct Obj1511B7D4 *obj) {
+    u8 *pair;
     s32 count;
     s32 dx;
     s32 dy;
     f32 angle;
-    f32 s;
-    f32 c;
+    f32 sine;
+    f32 cosine;
     s32 x;
     s32 y;
     s32 z;
-    s32 tmp;
-    struct Obj1511B7D4 *objs[2];
+    s32 rotatedY;
+    struct Obj1511B7D4 *pivots[2];
 
     count = 0;
-    if (arg0->unk3C == 0) {
-        table = D_800A2F71;
+    if (obj->param == 0) {
+        pair = D_800A2F71;
         count = D_800A2F70;
-        objs[0] = arg0 - 1;
-        objs[1] = arg0 - 2;
+        pivots[0] = obj - 1;
+        pivots[1] = obj - 2;
     }
-    if (arg0->unk80 != objs[0]->unk8 || arg0->unk84 != objs[1]->unk8) {
-        arg0->unk80 = objs[0]->unk8;
-        arg0->unk84 = objs[1]->unk8;
-        arg0->unk7C = 2;
+    if (obj->prevAngle[0] != pivots[0]->angle || obj->prevAngle[1] != pivots[1]->angle) {
+        obj->prevAngle[0] = pivots[0]->angle;
+        obj->prevAngle[1] = pivots[1]->angle;
+        obj->updates = 2;
     }
-    if (arg0->unk7C != 0) {
-        arg0->unk7C--;
+    if (obj->updates != 0) {
+        obj->updates--;
         while (count--) {
-            dx = objs[table[1]]->unk10 - arg0->unk10;
-            angle = -objs[table[1]]->unk8 * 0.01745329238f;
-            dy = objs[table[1]]->unk12 - arg0->unk12;
-            s = sinf(angle);
-            c = cosf(angle);
-            y = arg0->unk28[table[0]].y;
-            x = arg0->unk28[table[0]].x;
-            z = arg0->unk28[table[0]].z;
+            dx = pivots[pair[1]]->x - obj->x;
+            angle = -pivots[pair[1]]->angle * 0.01745329238f;
+            dy = pivots[pair[1]]->y - obj->y;
+            sine = sinf(angle);
+            cosine = cosf(angle);
+            y = obj->source[pair[0]].v.ob[1];
+            x = obj->source[pair[0]].v.ob[0];
+            z = obj->source[pair[0]].v.ob[2];
             y -= dy;
             x -= dx;
-            tmp = (s32)(y * c - x * s);
-            x = (s32)(y * s + x * c);
-            y = tmp;
+            rotatedY = (s32)(y * cosine - x * sine);
+            x = (s32)(y * sine + x * cosine);
+            y = rotatedY;
             x += dx;
             y += dy;
-            x += arg0->unk10;
-            y += arg0->unk12;
-            z += arg0->unk14;
-            arg0->unk20[D_800BE9C0][table[0]].x = x;
-            arg0->unk20[D_800BE9C0][table[0]].y = y;
-            arg0->unk20[D_800BE9C0][table[0]].z = z;
-            table += 2;
+            x += obj->x;
+            y += obj->y;
+            z += obj->z;
+            obj->buffers[D_800BE9C0][pair[0]].v.ob[0] = x;
+            obj->buffers[D_800BE9C0][pair[0]].v.ob[1] = y;
+            obj->buffers[D_800BE9C0][pair[0]].v.ob[2] = z;
+            pair += 2;
         }
     }
 }
