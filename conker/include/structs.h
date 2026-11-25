@@ -4050,4 +4050,21 @@ typedef struct BurstPoint {
     /* 0xC */ s32 unkC;
 } BurstPoint; /* size 0x10 */
 
+/* z-buffer decompression table entry (D_80089630, indexed by the 3-bit exponent): depth = (mantissa << shift) + base. */
+typedef struct {
+    /* 0x0 */ s32 shift;
+    /* 0x4 */ u32 base;
+} ZDecode;
+
+/* A row of the prop sound table D_80089260 (row picked by bits of WorldObject.param). Doors play open/close
+   when they start moving and opened/closed when they stop; movers play `open` on start and `opened` on stop. */
+typedef struct PropSounds {
+    /* 0x0 */ s16 open;       /* starts moving forward (opening) */
+    /* 0x2 */ s16 close;      /* starts moving back (closing) */
+    /* 0x4 */ s16 opened;     /* stops at the far end */
+    /* 0x6 */ s16 closed;     /* stops back at the start */
+    /* 0x8 */ s16 arrive;     /* movers: played just before reaching the target; selects func_15116BAC */
+    /* 0xA */ s16 arriveLead; /* movers: how early (in units of the move rate) to play `arrive` */
+} PropSounds; /* size 0xC */
+
 #endif

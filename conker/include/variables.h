@@ -426,6 +426,7 @@ extern u8  D_80088BB0;
 extern u8 D_80089120[4]; // per collision set: 1 = enabled
 extern s32 * D_800891BC[];
 extern Mtx ** D_80089250[]; // per frame buffer: one Mtx per object
+extern PropSounds D_80089260[]; // prop sound rows (doors, movers, sliders)
 extern Mtx D_80089470; // fixed modelview matrix
 extern s32 D_800894B0;
 extern s32 D_80089520;
@@ -442,6 +443,7 @@ extern void (*D_80089EF8[])(void);
 extern void (*D_80089F2C[])(void);
 extern void (*D_80089F60[])(s32, s32, u8);
 extern f32 D_800895B0;
+extern ZDecode D_80089630[8]; // z-buffer decompression table
 extern s32 * D_80089A20[];
 extern s32 D_8008A074[2];
 extern struct32 D_8008A0B4[];

@@ -46,13 +46,6 @@ typedef struct {
 
 extern Probe D_800DD348[3];
 
-/* z-buffer decompression table, indexed by the exponent (top 3 bits). */
-typedef struct {
-    s32 shift;
-    u32 base;
-} ZDecode;
-
-extern ZDecode D_80089630[];
 extern void (*D_8008A080[])(Probe *, s32, s32, s32); // probe visible callbacks, given the sampled r, g, b
 extern s32 D_800DD300[]; // each probe's projected depth
 extern u16 D_800DD310[][4]; // each probe's z-buffer sample

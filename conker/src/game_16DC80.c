@@ -39,13 +39,6 @@ typedef struct {
 } GlowViewDepth;
 
 
-/* z-buffer decompression table, indexed by the exponent (top 3 bits). */
-typedef struct {
-    s32 shift;
-    u32 base;
-} ZDecode;
-
-extern ZDecode D_80089630[];
 extern s32 (*D_80089F90[])(GlowObj *, s16);
 extern void (*D_80089F9C[])(GlowObj *);
 extern void (*D_80089FE4[])(GlowObj *);
