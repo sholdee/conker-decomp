@@ -258,11 +258,8 @@ segments:
       - [0x2C850, rodata]
       - [0x2C920, rodata]
       - [0x2C960, rodata]
-      # TODO: could .bss be from 0x8002D4B0 to 0x80082B20 (0x55670 big) i.e. to start of game_data ?
-      # func_10001050 suggests .bss is from 0x8002D4B0 to 0x80043B40
-      # - {start: 0x2D4B0, type: bss, vram: 0x8002D4B0}
-      # - {start: 0x2D4B0, type: .bss, vram: 0x8003B260, name: init_50A0}
-      # - {start: 0x2D4B0, type: bss, vram: 0x8003B270}
+      # init bss: func_10001050 clears 0x8002D4B0..0x80043B40 (bss_size)
+      - {start: 0x2D4B0, type: bss, vram: 0x8002D4B0}
 
   - name:  game
     type:  code
@@ -946,6 +943,7 @@ segments:
     type:  code
     start: 0x002275E0
     vram:  0x80082B20
+    bss_size: 0x38F40   # the game setup clears 0x800B0DC0..0x800E9D00
     subalign: 4
     subsegments:
       - [0x2275E0, data]
@@ -2016,6 +2014,7 @@ segments:
       - [0x255710, rodata]
 
       # BSS ?
+      - {start: 0x255880, type: bss, vram: 0x800B0DC0}
 
   - name:  debugger
     type:  code

@@ -273,3 +273,10 @@ movement_obj = 0x800CC2D0;
 db_Object_array = 0x800DBEF4;
 camera_global_Cameras = 0x800DBFF0;
 dc_glbl_CharNum = 0x800C3E78;
+
+// init bss variables referenced only from C (splat labels them in the bss section)
+D_800388E0 = 0x800388E0;
+D_8003A5E8 = 0x8003A5E8;
+D_8003C8E8 = 0x8003C8E8;
+D_800427F0 = 0x800427F0;
+D_80042A58 = 0x80042A58;
