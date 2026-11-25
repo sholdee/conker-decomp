@@ -715,7 +715,7 @@ extern struct Game13D350U8x2 D_800891FC;
 extern Game13D350Face D_800A2DA0[];
 extern Mtx *D_800DBEB0;
 extern s32 D_800DBE88[][2];
-extern u8 D_80089470;
+extern Mtx D_80089470;
 
 
 Gfx *func_15111AF4(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, f32 pitch, f32 yaw, f32 roll, s32 dist);
@@ -756,7 +756,7 @@ Gfx *func_15111AF4(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, f32 pitch, f32 yaw, f
     spFC = D_800891F4;
     spF8 = D_800891F8;
     spF4 = D_800891FC;
-    { Gfx *command = gfx++; command->words.w0 = 0xD7000002; command->words.w1 = 0xFFFFFFFF; }
+    gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
     gfx = func_1501A680((Gfx *)func_1501A490((s32)gfx, D_80082FA6, 0, 0, 0, 0));
     fov = (D_80082FA0 != 1) ? 80.0f : 95.0f;
     if (D_800BE9F0 == 0x41) {
@@ -769,29 +769,32 @@ Gfx *func_15111AF4(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, f32 pitch, f32 yaw, f
         gfx = func_15110544(gfx, RENDER_VIEWS[D_80082FA4].left, RENDER_VIEWS[D_80082FA4].top,
                             RENDER_VIEWS[D_80082FA4].right - 1.0f, RENDER_VIEWS[D_80082FA4].bottom, 0, 0, 0);
     }
-    color[0] = ((u8 *)D_800B0DF0)[5];
-    color[1] = ((u8 *)D_800B0DF0)[6];
-    color[2] = ((u8 *)D_800B0DF0)[7];
-    { Gfx *command = gfx++; command->words.w0 = 0xE7000000; command->words.w1 = 0; }
-    if (color[0] + color[1] + color[2] == 0x2FD) {
-        { Gfx *command = gfx++; command->words.w0 = 0xFCFFFFFF; command->words.w1 = 0xFFFCF279; }
+    color[0] = D_800B0DF0->unk5;
+    color[1] = D_800B0DF0->unk6;
+    color[2] = D_800B0DF0->unk7;
+    gDPPipeSync(gfx++);
+    if (color[0] + color[1] + color[2] == 3 * 255) {
+        gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     } else {
-        gDPSetEnvColor(gfx++, color[0], color[1], color[2], 0xFF);
-        { Gfx *command = gfx++; command->words.w0 = 0xFC129A25; command->words.w1 = 0xFF37FFFF; }
+        gDPSetEnvColor(gfx++, color[0], color[1], color[2], 255);
+        gDPSetCombineLERP(gfx++, TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0, ENVIRONMENT, 0,
+                          TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0, ENVIRONMENT, 0);
     }
-    { Gfx *command = gfx++; command->words.w0 = 0xEF08AC0F; command->words.w1 = 0x0F0A4004; }
-    { Gfx *command = gfx++; command->words.w0 = 0xF5500000; command->words.w1 = 0x07000000; }
-    { Gfx *command = gfx++; command->words.w0 = 0xF5481000; command->words.w1 = 0x00080200; }
-    { Gfx *command = gfx++; command->words.w0 = 0xF2000000; command->words.w1 = 0x000F407C; }
-    { Gfx *command = gfx++; command->words.w0 = 0xF5400800; command->words.w1 = 0x01080200; }
-    { Gfx *command = gfx++; command->words.w0 = 0xF2000000; command->words.w1 = 0x010F407C; }
-    { Gfx *command = gfx++; command->words.w0 = 0xF5000100; command->words.w1 = 0x06000000; }
+    gDPSetOtherMode(gfx++, 0x08AC0F, 0x0F0A4004);
+    gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
+    gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_8b, 8, 0, G_TX_RENDERTILE, 0, G_TX_CLAMP, G_TX_NOMASK, G_TX_NOLOD,
+               G_TX_CLAMP, G_TX_NOMASK, G_TX_NOLOD);
+    gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, 61 << G_TEXTURE_IMAGE_FRAC, 31 << G_TEXTURE_IMAGE_FRAC);
+    gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_4b, 4, 0, G_TX_RENDERTILE + 1, 0, G_TX_CLAMP, G_TX_NOMASK, G_TX_NOLOD,
+               G_TX_CLAMP, G_TX_NOMASK, G_TX_NOLOD);
+    gDPSetTileSize(gfx++, G_TX_RENDERTILE + 1, 0, 0, 61 << G_TEXTURE_IMAGE_FRAC, 31 << G_TEXTURE_IMAGE_FRAC);
+    gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_4b, 0, 256, G_TX_LOADTILE - 1, 0, 0, 0, 0, 0, 0, 0);
     func_151102CC(mtx, pitch, yaw, roll);
     func_150A7A48(mtx, RENDER_VIEWS[D_80082FA4].projection, mtx2);
     guMtxF2L(mtx2, &D_800DBEB0[D_80082FA4 * 2 + D_800BE9C0]);
-    { Gfx *command = gfx++; command->words.w0 = 0xDA380007; command->words.w1 = (u32)&D_800DBEB0[D_80082FA4 * 2 + D_800BE9C0]; }
-    { Gfx *command = gfx++; command->words.w0 = 0xDA380003; command->words.w1 = (u32)&D_80089470; }
-    { Gfx *command = gfx++; command->words.w0 = 0xDB0E0000; command->words.w1 = RENDER_VIEWS[D_80082FA4].perspNorm; }
+    gSPMatrix(gfx++, &D_800DBEB0[D_80082FA4 * 2 + D_800BE9C0], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, &D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPPerspNormalize(gfx++, RENDER_VIEWS[D_80082FA4].perspNorm);
     texList = D_800891BC[D_800B0DF0->unk9];
     count = 0;
     vtx = D_800DBE88[D_80082FA4][D_800BE9C0];
@@ -855,11 +858,11 @@ Gfx *func_15111AF4(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, f32 pitch, f32 yaw, f
         for (j = 0; j < count; j += 4) {
             idx = queue[j >> 2].format;
             gDPPipeSync(gfx++);
-            { Gfx *command = gfx++; command->words.w0 = 0xFD100000; command->words.w1 = queue[j >> 2].texture; }
-            { Gfx *command = gfx++; command->words.w0 = 0xF3000000; command->words.w1 = 0x077FF000; }
-            { Gfx *command = gfx++; command->words.w0 = 0xFD100000; command->words.w1 = queue[j >> 2].texture + spFC.v[idx]; }
+            gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, queue[j >> 2].texture);
+            gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, 2047, 0);
+            gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, queue[j >> 2].texture + spFC.v[idx]);
             gDPLoadSync(gfx++);
-            gDPLoadTLUTCmd(gfx++, 6, spF8.v[idx]);
+            gDPLoadTLUTCmd(gfx++, G_TX_LOADTILE - 1, spF8.v[idx]);
             if (idx != lastIdx) {
                 lastIdx = idx;
                 gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, spF4.v[idx], G_ON);
