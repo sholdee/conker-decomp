@@ -42,10 +42,10 @@ typedef struct {
         ParticleSourceData source;
         FogFlashData fog;
     } data;
-} Effect;
+} EmitterEffect;
 
 /* Emitter effect: while its owner is alive, spawns effect 0x5A at random points on its shape. */
-void func_150EC520(Effect *effect) {
+void func_150EC520(EmitterEffect *effect) {
     ShapeEmitter *emitter;
     EmittedPoint point;
     f32 upper;
@@ -56,10 +56,10 @@ void func_150EC520(Effect *effect) {
         if (emitter->accumulator > 1.0f) {
             point.w = 0.0f;
             do {
-                Effect *spawned;
+                EmitterEffect *spawned;
 
                 func_151432BC(emitter->shape, &point.x, &point.z, &upper, &point.y);
-                spawned = (Effect *)func_15149130(func_150ADA20() % 131U + 80, -1, 0x5A, -1, TRUE, 0,
+                spawned = (EmitterEffect *)func_15149130(func_150ADA20() % 131U + 80, -1, 0x5A, -1, TRUE, 0,
                                                   sizeof(point), effect->base.header.owner, effect->base.header.kind);
                 if (spawned != NULL) {
                     memcpy(&spawned->data, &point, sizeof(point));
@@ -73,7 +73,7 @@ void func_150EC520(Effect *effect) {
 extern SpriteParticle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 
 /* Particle source effect: emits particles from its position at a random rate. */
-void func_150EC6B0(Effect *effect) {
+void func_150EC6B0(EmitterEffect *effect) {
     ParticleSourceData *source;
 
     source = &effect->data.source;
@@ -142,7 +142,7 @@ void func_150EC6B0(Effect *effect) {
  * for duration frames or, when duration is -1, until obj goes away. */
 void func_150ECA68(Actor *obj, u8 r, u8 g, u8 b, u8 a, u8 rate, s16 duration, u8 owner, s32 kind) {
     FogFlashData data;
-    Effect *effect;
+    EmitterEffect *effect;
 
     data.owner = obj;
     data.ownerId = obj->unique_id;
@@ -152,7 +152,7 @@ void func_150ECA68(Actor *obj, u8 r, u8 g, u8 b, u8 a, u8 rate, s16 duration, u8
     data.g = g;
     data.b = b;
 
-    effect = (Effect *)func_15149130((duration == -1) ? 300 : duration, -1, 0x5D, -1, (duration == -1) ? FALSE : TRUE,
+    effect = (EmitterEffect *)func_15149130((duration == -1) ? 300 : duration, -1, 0x5D, -1, (duration == -1) ? FALSE : TRUE,
                                      0x45, sizeof(data), owner, kind);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
@@ -160,14 +160,14 @@ void func_150ECA68(Actor *obj, u8 r, u8 g, u8 b, u8 a, u8 rate, s16 duration, u8
 }
 
 /* Effect callback for the fog flash effect: hands func_15169850 the owner reference. */
-void func_150ECB4C(Effect *effect, s32 arg1, u8 arg2) {
+void func_150ECB4C(EmitterEffect *effect, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, &effect->data.fog.owner, &effect->data.fog.ownerId, effect);
 }
 
 extern void func_1502EA98(Actor *, u8, u8, u8, u8, s32, u8);
 
 /* Fog flash effect: re-flashes the owner's fog each frame, and ends once the owner is gone. */
-void func_150ECB8C(Effect *effect) {
+void func_150ECB8C(EmitterEffect *effect) {
     FogFlashData *fog = &effect->data.fog;
     Actor *owner = fog->owner;
 

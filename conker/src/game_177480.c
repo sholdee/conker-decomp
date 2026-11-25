@@ -6,7 +6,7 @@
 extern void func_1513F680(void *obj, u8 arg1, s32 arg2, u8 arg3, u8 arg4);
 extern void func_151D5D60(Vtx **buffers, s16 index, s32 size, Vtx **outVtx, u8 *outFresh);
 
-/* Per-effect behaviour parameters, at 0x110 in Effect. */
+/* Per-effect behaviour parameters, at 0x110 in FlickerParticle. */
 typedef struct {
     /* 0x00 */ f32 widthMax;
     /* 0x04 */ f32 widthMin;
@@ -34,13 +34,13 @@ typedef struct {
     /* 0x00 */ DefParticleHead head; /* head.def.rot: the previous position, head.def.scale.z: trail factor,
                                       * head.unk74: flags */
     /* 0x110 */ FlickerParams params;
-} Effect;
+} FlickerParticle;
 
 #define EFFECT_WIDTH_GROWN  2
 #define EFFECT_HEIGHT_GROWN 8
 
 /* Fills the next vertex quad of buffer `index`: a billboard of the effect's width and height at pos. */
-Vtx *func_15149FD0(Effect *effect, s16 index) {
+Vtx *func_15149FD0(FlickerParticle *effect, s16 index) {
     Vtx *vtx;
     Vtx *ret;
     f32 offsetZ;
@@ -77,7 +77,7 @@ Vtx *func_15149FD0(Effect *effect, s16 index) {
 }
 
 /* Flickers width, height and unk24 towards random targets that are re-rolled on timers. */
-s32 func_1514A19C(Effect *effect) {
+s32 func_1514A19C(FlickerParticle *effect) {
     FlickerParams *params;
 
     params = &effect->params;
@@ -110,7 +110,7 @@ s32 func_1514A19C(Effect *effect) {
 }
 
 /* Grows width and height towards their targets; once both are within 95%, calls func_1513F680(..., 4, ...). */
-s32 func_1514A380(Effect *effect) {
+s32 func_1514A380(FlickerParticle *effect) {
     FlickerParams *params;
     s32 done;
 
@@ -139,7 +139,7 @@ s32 func_1514A380(Effect *effect) {
 }
 
 /* Shrinks width and height by shrinkRate; while unk1C < unk156, sets unk5C = unk1C * unk158. */
-s32 func_1514A498(Effect *effect) {
+s32 func_1514A498(FlickerParticle *effect) {
     effect->head.def.height -= effect->head.def.height * effect->params.shrinkRate;
     effect->head.def.width -= effect->head.def.width * effect->params.shrinkRate;
     if (effect->head.def.lifetime < effect->params.unk156) {
@@ -149,7 +149,7 @@ s32 func_1514A498(Effect *effect) {
 }
 
 /* Integrates velocity (damped x/z, gravity on y) into pos, remembering the previous pos. */
-s32 func_1514A4EC(Effect *effect) {
+s32 func_1514A4EC(FlickerParticle *effect) {
     f32 damping;
 
     damping = effect->params.damping;
@@ -166,7 +166,7 @@ s32 func_1514A4EC(Effect *effect) {
 }
 
 /* Like func_1514A4EC, but moves prevPos along with pos and then pulls it towards pos by trailFactor. */
-s32 func_1514A594(Effect *effect) {
+s32 func_1514A594(FlickerParticle *effect) {
     f32 dx;
     f32 dy;
     f32 dz;

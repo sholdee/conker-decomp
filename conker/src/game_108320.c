@@ -25,6 +25,7 @@ typedef struct {
     f32 *alpha;
 } LinkedQuad;
 
+/* Quad particle created by func_1513D524 (a DefParticleHead view) with this file's motion after it. */
 typedef struct {
     u8  pad0[0x2C];
     f32 halfWidth;
@@ -40,7 +41,7 @@ typedef struct {
         BeamMotion beam;
         LinkedQuad linked;
     } u;
-} Effect;
+} BeamQuad;
 
 extern void func_15143134(Vec3f *in, Vec3f *out, MtxF *mtx);
 extern void func_151D5D60(Vtx_t **buffers, s16 index, s32 size, Vtx_t **vertices, u8 *fresh);
@@ -66,7 +67,7 @@ void func_150DAE70(Actor *owner, s32 type, u8 arg2, s32 arg3) {
     ParticleDef spawn;
     f32 distSq;
     f32 invDist;
-    Effect *effect;
+    BeamQuad *effect;
 
     if (owner != NULL && owner->ob_matrix_ptr != NULL) {
         mtx = &owner->ob_matrix_ptr[D_80088928[type]];
@@ -112,7 +113,7 @@ void func_150DAE70(Actor *owner, s32 type, u8 arg2, s32 arg3) {
 }
 
 /* Beam update: moves, pulses the quad's scale and fades out. Returns 0 once fully faded. */
-s32 func_150DB114(Effect *effect) {
+s32 func_150DB114(BeamQuad *effect) {
     BeamMotion *beam;
     s16 alpha;
 
@@ -153,7 +154,7 @@ s32 func_150DB114(Effect *effect) {
 }
 
 /* Beam draw: fills this frame's vertex buffer with a quad facing along dir. */
-Vtx_t *func_150DB2D8(Effect *effect, s16 bufferIndex) {
+Vtx_t *func_150DB2D8(BeamQuad *effect, s16 bufferIndex) {
     Vtx_t *vertices;
     Vtx_t *result;
     f32 offsetX;
@@ -198,7 +199,7 @@ Vtx_t *func_150DB2D8(Effect *effect, s16 bufferIndex) {
 /* Spawns a quad whose position, angle, size and alpha follow the given values. */
 void func_150DB518(f32 *pos, f32 *angle, f32 *halfWidth, f32 *alpha, f32 *halfHeight, s16 arg5, u8 arg6, s32 arg7) {
     ParticleDef spawn;
-    Effect *effect;
+    BeamQuad *effect;
 
     if (pos != NULL && angle != NULL && halfWidth != NULL && alpha != NULL && halfHeight != NULL && arg5 != 0) {
         spawn.texture = 0x17;
@@ -225,7 +226,7 @@ void func_150DB518(f32 *pos, f32 *angle, f32 *halfWidth, f32 *alpha, f32 *halfHe
 }
 
 /* Linked quad update: copies the followed alpha, clamped to 0..255. */
-s32 func_150DB630(Effect *effect) {
+s32 func_150DB630(BeamQuad *effect) {
     f32 **source;
     f32 alpha;
 
@@ -245,7 +246,7 @@ s32 func_150DB630(Effect *effect) {
 }
 
 /* Linked quad draw: fills this frame's vertex buffer with a quad rotated by the followed angle. */
-Vtx_t *func_150DB714(Effect *effect, s16 bufferIndex) {
+Vtx_t *func_150DB714(BeamQuad *effect, s16 bufferIndex) {
     Vtx_t *vertices;
     Vtx_t *result;
     f32 cosine;

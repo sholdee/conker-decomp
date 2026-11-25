@@ -3,12 +3,12 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Per-effect motion state of a drifting quad (lives at Effect + 0x110). */
+/* Per-effect motion state of a drifting quad (lives at DriftQuad + 0x110). */
 typedef struct {
     /* 0x00 */ Vec3f vel;
     /* 0x0C */ f32 gravity;
     /* 0x10 */ f32 drag;
-    /* 0x14 */ Vec3f spin; /* added to Effect.dir every frame */
+    /* 0x14 */ Vec3f spin; /* added to DriftQuad.dir every frame */
     /* 0x20 */ u8 pad20[4];
     /* 0x24 */ f32 swayLength;
     /* 0x28 */ f32 swayLengthRate;
@@ -31,12 +31,12 @@ typedef struct {
     /* 0x0C0 */ Vtx_t template[4];
     /* 0x100 */ Vtx_t *buffers[4]; /* each holds two copies of the 4-vertex quad */
     /* 0x110 */ QuadDriftMotion drift;
-} Effect;
+} DriftQuad;
 
 
 /* Spawns a tumbling, swaying quad that drifts down from spawn->pos. */
-Effect *func_150CCEB0(DriftSpawn *spawn, u8 arg1, u8 arg2) {
-    Effect *effect;
+DriftQuad *func_150CCEB0(DriftSpawn *spawn, u8 arg1, u8 arg2) {
+    DriftQuad *effect;
     ParticleDef packet;
     QuadDriftMotion drift;
 
@@ -87,7 +87,7 @@ Effect *func_150CCEB0(DriftSpawn *spawn, u8 arg1, u8 arg2) {
 void func_151436B4(f32 yaw, f32 pitch, f32 length, f32 *out);
 
 /* Per-frame update of a drifting quad: integrates velocity with gravity and drag, sways it while falling. */
-s32 func_150CD17C(Effect *effect) {
+s32 func_150CD17C(DriftQuad *effect) {
     QuadDriftMotion *drift;
     s32 i;
     f32 wave;
@@ -135,7 +135,7 @@ extern void func_151D5D60(Vtx_t **buffers, s16 index, s32 size, Vtx_t **vertices
 void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
 /* Draw: fills this frame's vertex buffer with the quad, rotated by dir and placed at pos (plus sway while falling). */
-Vtx_t *func_150CD59C(Effect *effect, s16 bufferIndex) {
+Vtx_t *func_150CD59C(DriftQuad *effect, s16 bufferIndex) {
     s32 pad; // matching: unused stack slot
     Vtx_t *vertices;
     Vtx_t *result;
