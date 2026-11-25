@@ -233,13 +233,13 @@ void func_150A7960(f32 *mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *out
 
 /* Payload of func_151606A8: the object the light hangs from. */
 typedef struct {
-    f32 unk0; // rotation passed to func_150A8050
-    f32 unk4;
-    f32 unk8;
+    f32 rotX; // passed to func_150A8050
+    f32 rotY;
+    f32 rotZ;
     u8  padC[0x4];
-    s16 unk10; // position
-    s16 unk12;
-    s16 unk14;
+    s16 x;
+    s16 y;
+    s16 z;
 } LightMount;
 
 /* Places the light at the point (0, -415, 0) in the mount's rotated and translated frame. */
@@ -254,10 +254,10 @@ s32 func_151606A8(struct225 *effect) {
     f32 x;
 
     mount = (LightMount **)&effect->unk18;
-    func_150A8050(mtx.mf, (*mount)->unk0, (*mount)->unk4, (*mount)->unk8);
-    mtx.mf[3][0] = (*mount)->unk10;
-    mtx.mf[3][1] = (*mount)->unk12;
-    mtx.mf[3][2] = (*mount)->unk14;
+    func_150A8050(mtx.mf, (*mount)->rotX, (*mount)->rotY, (*mount)->rotZ);
+    mtx.mf[3][0] = (*mount)->x;
+    mtx.mf[3][1] = (*mount)->y;
+    mtx.mf[3][2] = (*mount)->z;
     func_150A7960(mtx.mf[0], D_800A66B4[0], D_800A66B4[1], D_800A66B4[2], &x, &y, &z);
     effect->unk14->unkE = x;
     effect->unk14->unk10 = y;
