@@ -288,47 +288,48 @@ s32 func_1514AF74(Particle177B50 *p) {
 
 extern void func_15143874(s16, f32, f32 *, f32 *);
 
-void func_1514B034(struct17 *arg0, u8 arg1, s32 arg2) {
+/* Spawns a random number of particles scattered within 42 units of `pos` in the XZ plane. */
+void func_1514B034(struct17 *pos, u8 arg1, s32 arg2) {
     f32 count;
-    Struct15149550Arg sp84;
+    Struct15149550Arg particle;
     s32 angle;
-    f32 h;
-    f32 w;
+    f32 size;
+    f32 height;
 
-    count = ((func_150ADA68() * 20.0f) + 29.0f) * 0.0001f * 5541.7695f;
+    count = (func_150ADA68() * 20.0f + 29.0f) * 0.0001f * 5541.7695f;
     if (count > 1.0f) {
-        sp84.unk20 = 0x6231;
-        sp84.unk22 = 0x1A4D;
-        sp84.pos.unk4 = arg0->unk4;
-        sp84.unk26 = 0;
-        sp84.unk27 = 0;
-        sp84.unk28 = 0;
-        sp84.unk29 = 0xFF;
-        sp84.unk2D = 0xFF;
-        sp84.unk2E = 0;
-        sp84.unk2F = 1;
-        sp84.unk30 = 0;
-        sp84.unk2A = 1;
-        sp84.unk34 = 0x1C;
-        sp84.unk3C = 0.0f;
+        particle.unk20 = 0x6231;
+        particle.unk22 = 0x1A4D;
+        particle.pos.unk4 = pos->unk4;
+        particle.unk26 = 0;
+        particle.unk27 = 0;
+        particle.unk28 = 0;
+        particle.unk29 = 0xFF;
+        particle.unk2D = 0xFF;
+        particle.unk2E = 0;
+        particle.unk2F = 1;
+        particle.unk30 = 0;
+        particle.unk2A = 1;
+        particle.unk34 = 28;
+        particle.unk3C = 0.0f;
         do {
             angle = func_150ADA20();
-            func_15143874(angle & 0xFF, func_150ADA68() * 42.0f, &sp84.pos.unk0, &sp84.pos.unk8);
-            sp84.pos.unk0 += arg0->unk0;
-            sp84.pos.unk8 += arg0->unk8;
-            sp84.unk40 = ((func_150ADA68() * 16.0f) + 29.0f) * 0.001f;
-            sp84.unk44 = ((func_150ADA68() * 600.0f) + 400.0f) * 0.001f;
-            h = ((func_150ADA68() * 1205.0f) + 304.0f) * 0.001f;
-            w = ((func_150ADA68() * 1006.0f) + 504.0f) * 0.001f;
-            sp84.unkC = 22.6f * h;
-            sp84.unk14 = 13.786f * h;
-            sp84.unk10 = 57.969f * w;
-            sp84.unk18 = 42.714f * w;
-            sp84.unk1C = 118.763f * w;
-            sp84.unk24 = func_150ADA20() % 31U + 20;
-            sp84.unk38 = func_150ADA68() * 497.0f * 0.001f;
-            sp84.unk2C = func_150ADA20() % 156U + 100;
-            func_15149550(&sp84, 0xA, 0, 0, arg1, arg2);
+            func_15143874(angle & 0xFF, func_150ADA68() * 42.0f, &particle.pos.unk0, &particle.pos.unk8);
+            particle.pos.unk0 += pos->unk0;
+            particle.pos.unk8 += pos->unk8;
+            particle.unk40 = (func_150ADA68() * 16.0f + 29.0f) * 0.001f;
+            particle.unk44 = (func_150ADA68() * 600.0f + 400.0f) * 0.001f;
+            size = (func_150ADA68() * 1205.0f + 304.0f) * 0.001f;
+            height = (func_150ADA68() * 1006.0f + 504.0f) * 0.001f;
+            particle.unkC = 22.6f * size;
+            particle.unk14 = 13.786f * size;
+            particle.unk10 = 57.969f * height;
+            particle.unk18 = 42.714f * height;
+            particle.unk1C = 118.763f * height;
+            particle.unk24 = func_150ADA20() % 31U + 20;
+            particle.unk38 = func_150ADA68() * 497.0f * 0.001f;
+            particle.unk2C = func_150ADA20() % 156U + 100;
+            func_15149550(&particle, 10, 0, 0, arg1, arg2);
             count -= 1.0f;
         } while (count > 1.0f);
     }
@@ -472,24 +473,25 @@ extern s32 func_15046C80(struct17 *, s32, f32, Struct1514B364Hit *);
 extern void func_15152B38(Struct1514B364Spawn *, u8, s32);
 extern void func_15152F70(Struct1514B364Emit *, u8);
 
-void func_1514B364(struct17 *arg0, Struct1514B364Hit *arg1, u8 arg2, s32 arg3) {
+/* If func_15046C80 finds ground within 200 units of `position`, spawns a cluster of effects there. */
+void func_1514B364(struct17 *position, Struct1514B364Hit *ground, u8 arg2, s32 arg3) {
     struct17 pos;
 
-    pos = *arg0;
+    pos = *position;
     {
         struct17 probe;
 
-        probe.unk0 = arg0->unk0;
-        probe.unk4 = arg0->unk4 + 200.0f;
-        probe.unk8 = arg0->unk8;
-        if (func_15046C80(&probe, 0, arg0->unk4 - 200.0f, arg1) == 0) {
+        probe.unk0 = position->unk0;
+        probe.unk4 = position->unk4 + 200.0f;
+        probe.unk8 = position->unk8;
+        if (func_15046C80(&probe, 0, position->unk4 - 200.0f, ground) == 0) {
             return;
         }
     }
     {
         Struct1514B364Spawn spawn;
 
-        spawn.unk0 = 0xA;
+        spawn.unk0 = 10;
         spawn.unk4 = 0;
         spawn.unk14 = 9.900001f;
         spawn.unk18 = 21.0f;
@@ -499,24 +501,24 @@ void func_1514B364(struct17 *arg0, Struct1514B364Hit *arg1, u8 arg2, s32 arg3) {
         spawn.unk28 = 30.4f;
         spawn.unk2C = 0;
         spawn.unk2E = 0xFF;
-        spawn.unk30 = -0x3F;
-        spawn.unk32 = 0x2B;
+        spawn.unk30 = -63;
+        spawn.unk32 = 43;
         spawn.unk34 = 4;
         spawn.unk38 = 5;
-        spawn.unk3C = 0x1E;
-        spawn.unk3E = 0x1E;
+        spawn.unk3C = 30;
+        spawn.unk3E = 30;
         spawn.unk40 = 1;
-        spawn.unk42 = 0xC;
+        spawn.unk42 = 12;
         spawn.unk43 = 2;
         spawn.unk44 = 3;
-        spawn.unk45 = 0xB4;
+        spawn.unk45 = 180;
         spawn.unk46 = 0;
         spawn.unk47 = 0;
-        spawn.unk48 = 0x9B;
-        spawn.unk49 = 0x32;
-        spawn.unk4A = 0x64;
+        spawn.unk48 = 155;
+        spawn.unk49 = 50;
+        spawn.unk4A = 100;
         spawn.unk4B = 0;
-        spawn.unk4C = 0x64;
+        spawn.unk4C = 100;
         spawn.unk4D = 0xFF;
         spawn.unk4E = 0xFF;
         spawn.unk4F = 0xFF;
@@ -528,11 +530,11 @@ void func_1514B364(struct17 *arg0, Struct1514B364Hit *arg1, u8 arg2, s32 arg3) {
         spawn.unk55 = 0xFF;
         spawn.unk56 = 0;
         spawn.unk57 = 1;
-        spawn.unk58 = 0x24;
+        spawn.unk58 = 36;
         spawn.unk5C = 0x200005;
         spawn.unk60 = 0x60600;
-        spawn.unk64 = 0x14;
-        spawn.unk66 = 0xC;
+        spawn.unk64 = 20;
+        spawn.unk66 = 12;
         spawn.unk68 = 1;
         spawn.unk6A = 0;
         spawn.unk6C = 1.f;
@@ -557,36 +559,36 @@ void func_1514B364(struct17 *arg0, Struct1514B364Hit *arg1, u8 arg2, s32 arg3) {
         emit.unk26 = 8;
         emit.unk28 = 0;
         emit.unk2A = 0xFF;
-        emit.unk2C = -0x40;
-        emit.unk2E = 0x2C;
+        emit.unk2C = -64;
+        emit.unk2E = 44;
         emit.unk30 = 5;
         emit.unk32 = 4;
-        emit.unk34 = 0x42;
-        emit.unk36 = 0x1E;
-        emit.unk38 = 0xA;
-        emit.unk39 = 0x21;
+        emit.unk34 = 66;
+        emit.unk36 = 30;
+        emit.unk38 = 10;
+        emit.unk39 = 33;
         emit.unk3C = 1;
-        emit.unk40 = 0xC;
+        emit.unk40 = 12;
         emit.unk44 = 0;
         emit.unk48 = 0;
         emit.unk4C = 0;
         emit.unk50 = 0;
         emit.unk54 = 0xFF;
-        emit.unk55 = func_150ADA20() % 101U + 0x9B;
+        emit.unk55 = func_150ADA20() % 101U + 155;
         func_15152F70(&emit, 0xFF);
     }
     func_1514B034(&pos, arg2, arg3);
 
     {
         Struct1514B8E4Desc desc;
-        s32 a;
-        s32 c;
-        s32 b;
+        s32 randA;
+        s32 randC;
+        s32 randB;
         s32 sum;
 
-        desc.unk0 = 0x38;
+        desc.unk0 = 56;
         desc.unk2 = 1;
-        desc.unk4 = 0x32;
+        desc.unk4 = 50;
         desc.unk8 = 0;
         desc.unkC = 0x6666;
         desc.unk13 = 0xFF;
@@ -606,68 +608,41 @@ void func_1514B364(struct17 *arg0, Struct1514B364Hit *arg1, u8 arg2, s32 arg3) {
         desc.unk45 = 0xFF;
         desc.unk46 = 0;
         desc.unk47 = 6;
-        desc.unk10 = func_150ADA20() % 51U + 0xB4;
+        desc.unk10 = func_150ADA20() % 51U + 180;
         desc.unk11 = func_150ADA20() % 101U;
         desc.unk12 = func_150ADA20() % 1U;
-        a = func_150ADA20();
-        b = func_150ADA20();
-        c = func_150ADA20();
-        sum = (b & 1) + (a & 1);
-        func_1513D668((s32)&desc, 0, 0x12, 0x1D, 0, sum, (u8)c,
-                      100.0f, 100.0f, 0, (s32)&arg1->unk04, 0, 0, arg2, arg3);
+        randA = func_150ADA20();
+        randB = func_150ADA20();
+        randC = func_150ADA20();
+        sum = (randB & 1) + (randA & 1);
+        func_1513D668((s32)&desc, 0, 18, 29, 0, sum, (u8)randC,
+                      100.0f, 100.0f, 0, (s32)&ground->unk04, 0, 0, arg2, arg3);
     }
 }
 
-struct Foo1514B844 {
-    char pad1C[0x1C];
-    s16 unk1C;
-    char pad1E[0x7A];
-    u8 *unk98;
-};
+/* Fades out over the last 16 frames of life: caps the alpha byte at unk98[0x1B] to life * 16. */
+s32 func_1514B844(Particle177B50 *p) {
+    u8 *unk98 = p->unk98;
 
-s32 func_1514B844(struct Foo1514B844 *arg0) {
-    u8 *p = arg0->unk98;
-    s16 v = arg0->unk1C;
-    if (v < 0x10) {
-        s32 sh = v << 4;
-        if (sh < p[0x1B]) {
-            p[0x1B] = sh;
-        }
+    if (p->life < 16 && p->life * 16 < unk98[0x1B]) {
+        unk98[0x1B] = p->life * 16;
     }
     return 1;
 }
 
-extern f32 D_800BE9A4;
+/* Grows unk2C and unk30 by unk4C, scaled by the frame delta D_800BE9A4. */
+s32 func_1514B87C(Particle177B50 *p) {
+    f32 growth = p->unk4C * D_800BE9A4;
 
-struct Foo1514B87C {
-    char pad2C[0x2C];
-    f32 unk2C;
-    f32 unk30;
-    char pad34[0x18];
-    f32 unk4C;
-};
-
-s32 func_1514B87C(struct Foo1514B87C *arg0) {
-    f32 temp = arg0->unk4C * D_800BE9A4;
-    arg0->unk2C = arg0->unk2C + temp;
-    arg0->unk30 = arg0->unk30 + temp;
+    p->unk2C += growth;
+    p->unk30 += growth;
     return 1;
 }
 
-struct Foo1514B8B0 {
-    char pad1C[0x1C];
-    s16 unk1C;
-    char pad1E[0x3E];
-    u8 unk5C;
-};
-
-s32 func_1514B8B0(struct Foo1514B8B0 *arg0) {
-    s32 v = arg0->unk1C;
-    if (v < 0x10) {
-        s32 sh = v << 4;
-        if (sh < arg0->unk5C) {
-            arg0->unk5C = sh;
-        }
+/* Fades out over the last 16 frames of life: caps alpha at life * 16. */
+s32 func_1514B8B0(Particle177B50 *p) {
+    if (p->life < 16 && p->life * 16 < p->alpha) {
+        p->alpha = p->life * 16;
     }
     return 1;
 }
@@ -699,10 +674,14 @@ typedef struct {
 } Struct1514B8E4Extra;
 
 
-void *func_1514B8E4(struct17 *arg0, Struct1514B8E4Size *arg1, s16 arg2, u8 arg3, struct17 *arg4,
-                    f32 arg5, f32 arg6, f32 arg7, u8 arg8, u8 arg9, u8 argA, s32 argB, u8 argC,
+/*
+ * Spawns a particle at `pos` through func_1513D2F0 and copies its extra state to offset 0x110.
+ * A `life` of -1 means 300 frames without the timed-life flag.
+ */
+void *func_1514B8E4(struct17 *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, struct17 *arg4,
+                    f32 arg5, f32 arg6, f32 arg7, u8 arg8, u8 arg9, u8 argA, s32 argB, u8 flags,
                     s16 argD, s16 argE, s32 argF, u8 arg10, s32 arg11) {
-    void *ret;
+    void *particle;
     Struct1514B8E4Desc desc;
     Struct1514B8E4Extra extra;
     s32 flag;
@@ -725,36 +704,36 @@ void *func_1514B8E4(struct17 *arg0, Struct1514B8E4Size *arg1, s16 arg2, u8 arg3,
     extra.unk4C = arg7;
     extra.unk24 = 6733.0f;
     extra.unk28 = 18404.0f;
-    extra.unk0 = arg1->unk0 * 15.045272f;
-    extra.unk8 = arg1->unk0 * 5.8676558f;
-    extra.unk10 = arg1->unk0 * 12.111444f;
+    extra.unk0 = scale->unk0 * 15.045272f;
+    extra.unk8 = scale->unk0 * 5.8676558f;
+    extra.unk10 = scale->unk0 * 12.111444f;
     desc.unk14 = 0.0f;
-    extra.unk4 = arg1->unk4 * 0.396174f;
-    extra.unkC = arg1->unk4 * 0.1042563f;
-    extra.unk18 = arg1->unk4 * 0.5197371f;
-    extra.unk14 = arg1->unk4 * 0.34404588f;
+    extra.unk4 = scale->unk4 * 0.396174f;
+    extra.unkC = scale->unk4 * 0.1042563f;
+    extra.unk18 = scale->unk4 * 0.5197371f;
+    extra.unk14 = scale->unk4 * 0.34404588f;
     desc.unk18 = 0.0f;
     desc.unk0 = argB;
     desc.unk1 = 0;
     desc.unk2 = 0x2203;
-    if (arg2 == -1) {
+    if (life == -1) {
         desc.unk4 = 300;
     } else {
-        desc.unk4 = arg2;
+        desc.unk4 = life;
     }
     desc.unk8 = 0;
     desc.unk10 = 0xFF;
     desc.unk11 = 0xFF;
     desc.unk12 = 0xFF;
     desc.unk13 = 0xFF;
-    desc.unk1C = *arg0;
-    desc.unk28 = arg0->unk0;
-    desc.unk2C = arg0->unk4 + 100.0f;
-    desc.unk30 = arg0->unk8;
+    desc.unk1C = *pos;
+    desc.unk28 = pos->unk0;
+    desc.unk2C = pos->unk4 + 100.0f;
+    desc.unk30 = pos->unk8;
     desc.unk34 = 1.0f;
     desc.unk38 = 1.0f;
     desc.unk3C = 1.0f;
-    desc.unk40 = ((arg2 == -1) ? 0 : 1) | 0x40000 | 0x80000 | 0x200000 | 0x400000 | ((argC & 1) ? 0x800000 : 0) | ((argC & 2) ? 0x2000000 : 0) | 0x40000000;
+    desc.unk40 = ((life == -1) ? 0 : 1) | 0x40000 | 0x80000 | 0x200000 | 0x400000 | ((flags & 1) ? 0x800000 : 0) | ((flags & 2) ? 0x2000000 : 0) | 0x40000000;
     desc.unk44 = arg3;
     desc.unk45 = 0xFF;
     desc.unk46 = 0;
@@ -767,66 +746,58 @@ void *func_1514B8E4(struct17 *arg0, Struct1514B8E4Size *arg1, s16 arg2, u8 arg3,
     } else {
         flag = 0;
     }
-    ret = func_1513D2F0(&desc, (s32)&D_800A4AA0, arg8, arg9, argA, 0x1C, flag | 2, 0, 0, argF + 0x50, arg10, arg11);
-    if (ret != NULL) {
-        memcpy((u8 *)ret + 0x110, &extra, sizeof(extra));
+    particle = func_1513D2F0(&desc, (s32)&D_800A4AA0, arg8, arg9, argA, 0x1C, flag | 2, 0, 0, argF + 0x50, arg10, arg11);
+    if (particle != NULL) {
+        memcpy((u8 *)particle + 0x110, &extra, sizeof(extra));
     }
-    return ret;
+    return particle;
 }
 
-struct Foo1514BC08Obj {
-    char pad0[0x24];
-    s32 unk24;
-    char pad28[0x4];
-    f32 unk2C;
-    f32 unk30;
-};
+/* Per-particle state for func_1514BC08, stored at offset 0x110 of the particle. */
+typedef struct {
+    /* 0x00 */ f32 base2C;
+    /* 0x04 */ f32 base30;
+    /* 0x08 */ f32 range2C;
+    /* 0x0C */ f32 range30A;
+    /* 0x10 */ f32 target2C;
+    /* 0x14 */ f32 target30;
+    /* 0x18 */ f32 range30B;
+    /* 0x1C */ f32 timer2C;
+    /* 0x20 */ f32 timer30;
+    /* 0x24 */ f32 base24;
+    /* 0x28 */ f32 range24;
+    /* 0x2C */ f32 target24;
+    /* 0x30 */ f32 timer24;
+    /* 0x34 */ f32 value24;
+} Wobble1514BC08;
 
-struct Foo1514BC08Sub {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-};
-
-s32 func_1514BC08(void *arg0, void *arg1) {
-    struct Foo1514BC08Obj *obj;
-    struct Foo1514BC08Sub *sub;
-
-    obj = arg0;
-    sub = arg1;
-    sub->unk1C -= D_800BE9A4;
-    if (sub->unk1C < 0.0f) {
-        sub->unk1C = func_150ADA68() * 4.0f;
-        sub->unk10 = func_150ADA68() * sub->unk8 + sub->unk0;
+/*
+ * Eases unk2C, unk30 and unk24 toward random targets, picking a new target for each when its
+ * countdown timer (decremented by the frame delta) runs out.
+ */
+s32 func_1514BC08(Particle177B50 *p, Wobble1514BC08 *w) {
+    w->timer2C -= D_800BE9A4;
+    if (w->timer2C < 0.0f) {
+        w->timer2C = func_150ADA68() * 4.0f;
+        w->target2C = func_150ADA68() * w->range2C + w->base2C;
     }
-    obj->unk2C = obj->unk2C + ((sub->unk10 - obj->unk2C) * 0.35f);
-    sub->unk20 -= D_800BE9A4;
-    if (sub->unk20 < 0.0f) {
-        sub->unk20 = func_150ADA68() * 9.0f;
+    p->unk2C += (w->target2C - p->unk2C) * 0.35f;
+    w->timer30 -= D_800BE9A4;
+    if (w->timer30 < 0.0f) {
+        w->timer30 = func_150ADA68() * 9.0f;
         if (func_150ADA20() & 1) {
-            sub->unk14 = func_150ADA68() * sub->unkC + sub->unk4;
+            w->target30 = func_150ADA68() * w->range30A + w->base30;
         } else {
-            sub->unk14 = func_150ADA68() * sub->unk18 + sub->unk4;
+            w->target30 = func_150ADA68() * w->range30B + w->base30;
         }
     }
-    obj->unk30 = obj->unk30 + ((sub->unk14 - obj->unk30) * 0.4f);
-    sub->unk30 -= D_800BE9A4;
-    if (sub->unk30 < 0.0f) {
-        sub->unk30 = func_150ADA68() * 7.0f;
-        sub->unk2C = func_150ADA68() * sub->unk28 + sub->unk24;
+    p->unk30 += (w->target30 - p->unk30) * 0.4f;
+    w->timer24 -= D_800BE9A4;
+    if (w->timer24 < 0.0f) {
+        w->timer24 = func_150ADA68() * 7.0f;
+        w->target24 = func_150ADA68() * w->range24 + w->base24;
     }
-    sub->unk34 = sub->unk34 + ((sub->unk2C - sub->unk34) * 0.4f);
-    obj->unk24 = sub->unk34;
+    w->value24 += (w->target24 - w->value24) * 0.4f;
+    p->unk24 = w->value24;
     return 1;
 }
