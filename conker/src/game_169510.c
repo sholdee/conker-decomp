@@ -77,7 +77,7 @@ typedef struct {
     f32 width;
     f32 height;
     Vec3f pos;
-    Vec3f rot;          /* beams (func_1513FAB4) use this as their end point */
+    Vec3f rot;          /* a point instead for func_1513F114 (bend target) and beams (end point) */
     Vec3f scale;
     s32 flags;
     u8 unk44;           /* faded out with the lifetime (flag 0x8000000) */
@@ -1334,12 +1334,12 @@ Vtx *func_1513EAD8(particle, reversed, viewport)
     vertices[1].v.flag = 0;
     vertices[2].v.flag = 0;
     vertices[3].v.flag = 0;
-    corners[3][0] = corners[0][0] = (s16)(s32)(particle->def.pos.x + offsetX);
-    corners[1][1] = corners[0][1] = (s16)(s32)(particle->def.pos.y - heightScale);
-    corners[3][2] = corners[0][2] = (s16)(s32)(particle->def.pos.z - offsetZ);
-    corners[2][0] = corners[1][0] = (s16)(s32)(particle->def.pos.x - offsetX);
-    corners[3][1] = corners[2][1] = (s16)(s32)(particle->def.pos.y + heightDelta);
-    corners[2][2] = corners[1][2] = (s16)(s32)(particle->def.pos.z + offsetZ);
+    corners[3][0] = corners[0][0] = particle->def.pos.x + offsetX;
+    corners[1][1] = corners[0][1] = particle->def.pos.y - heightScale;
+    corners[3][2] = corners[0][2] = particle->def.pos.z - offsetZ;
+    corners[2][0] = corners[1][0] = particle->def.pos.x - offsetX;
+    corners[3][1] = corners[2][1] = particle->def.pos.y + heightDelta;
+    corners[2][2] = corners[1][2] = particle->def.pos.z + offsetZ;
     if (reversed != 0) {
         vertices[0].v.ob[0] = corners[1][0];
         vertices[0].v.ob[1] = corners[1][1];
@@ -1577,7 +1577,7 @@ s32 func_1513F728(Particle *particle) {
     Vec3f oldVel;
     s32 i;
 
-    motion = (ParticleMotion *)((u8 *)particle + offsetof(Particle, motion));
+    motion = &particle->motion;
     oldVel = motion->ballistic.vel;
     for (i = D_800BE9E4; i != 0; i--) {
         motion->ballistic.vel.x *= motion->ballistic.drag;
@@ -1603,145 +1603,136 @@ s32 func_1513F728(Particle *particle) {
     return 1;
 }
 
+/* Fractions of a beam particle's width and length to draw. */
 typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f1513FAB4;
-
-typedef struct {
-    u8 pad0[0x2C];
     f32 width;
     f32 length;
-    Vec3f1513FAB4 start;
-    Vec3f1513FAB4 end;
-} Beam1513FAB4;
+} BeamScale;
 
-typedef struct {
-    s16 x, y, z, flag;
-    u8 other[8];
-} BeamVtx1513FAB4;
+extern Vec3f *func_15144B34(s32 viewport);
+extern void func_150AD8B0(Vec3f *a, Vec3f *b, Vec3f *out);
 
-typedef struct { f32 w; f32 l; } Scale1513FAB4;
-extern f32 *func_15144B34(s32);
-extern void func_150AD8B0(f32 *, f32 *, f32 *);
-void *func_1513FAB4(Beam1513FAB4 *arg0, u8 arg1, Scale1513FAB4 *arg2, s16 arg3);
+Vtx *func_1513FAB4(Particle *particle, u8 reversed, BeamScale *scale, s16 viewport);
 
 void func_1513FA2C(Particle *particle, s16 viewport) {
-    f32 scale[2];
+    BeamScale scale;
 
-    scale[0] = 1.0f;
-    scale[1] = 1.0f;
-    func_1513FAB4(particle, FALSE, scale, viewport);
+    scale.width = 1.0f;
+    scale.length = 1.0f;
+    func_1513FAB4(particle, FALSE, &scale, viewport);
 }
 
 void func_1513FA70(Particle *particle, s16 viewport) {
-    f32 scale[2];
+    BeamScale scale;
 
-    scale[0] = 1.0f;
-    scale[1] = 1.0f;
-    func_1513FAB4(particle, TRUE, scale, viewport);
+    scale.width = 1.0f;
+    scale.length = 1.0f;
+    func_1513FAB4(particle, TRUE, &scale, viewport);
 }
 
-void *func_1513FAB4(Beam1513FAB4 *arg0, u8 arg1, Scale1513FAB4 *arg2, s16 arg3) {
-    BeamVtx1513FAB4 *vertices;
-    void *result;
-    Vec3f1513FAB4 *camera;
-    Vec3f1513FAB4 delta;
-    Vec3f1513FAB4 end;
-    Vec3f1513FAB4 middle;
-    Vec3f1513FAB4 view;
-    Vec3f1513FAB4 side;
+/*
+ * Beam from def.pos towards def.rot (its length scaled by def.height * scale->length), def.width *
+ * scale->width wide and turned to face the viewport's camera; reversed rotates the corner order.
+ */
+Vtx *func_1513FAB4(Particle *particle, u8 reversed, BeamScale *scale, s16 viewport) {
+    Vtx *vertices;
+    Vtx *result;
+    Vec3f *camera;
+    Vec3f delta;
+    Vec3f end;
+    Vec3f middle;
+    Vec3f view;
+    Vec3f side;
     f32 lengthSquared;
     f32 length;
     f32 width;
     u8 fresh;
 
-    func_151D5D60((u8 *)arg0 + 0x100, arg3, 0x40, (void **)&vertices, &fresh);
+    func_151D5D60(particle->vtxBuffers, viewport, sizeof(particle->vtxTemplate), &vertices, &fresh);
     result = vertices;
-    if (vertices != 0) {
+    if (vertices != NULL) {
         if (fresh != 0) {
-            memcpy(*(u8 **)((u8 *)arg0 + arg3 * 4 + 0x100), (u8 *)arg0 + 0xC0, 0x40);
-            memcpy(*(u8 **)((u8 *)arg0 + arg3 * 4 + 0x100) + 0x40, (u8 *)arg0 + 0xC0, 0x40);
+            memcpy(particle->vtxBuffers[viewport], particle->vtxTemplate, sizeof(particle->vtxTemplate));
+            memcpy(particle->vtxBuffers[viewport] + 4, particle->vtxTemplate, sizeof(particle->vtxTemplate));
         }
     } else {
-        return 0;
+        return NULL;
     }
-    camera = (Vec3f1513FAB4 *)func_15144B34(arg3);
-    width = arg0->width * arg2->w;
-    length = arg0->length * arg2->l;
-    delta.x = arg0->end.x - arg0->start.x;
-    delta.y = arg0->end.y - arg0->start.y;
-    delta.z = arg0->end.z - arg0->start.z;
+    camera = func_15144B34(viewport);
+    width = particle->def.width * scale->width;
+    length = particle->def.height * scale->length;
+    delta.x = particle->def.rot.x - particle->def.pos.x;
+    delta.y = particle->def.rot.y - particle->def.pos.y;
+    delta.z = particle->def.rot.z - particle->def.pos.z;
     delta.x *= length;
     delta.y *= length;
     delta.z *= length;
-    end.x = arg0->start.x + delta.x;
-    end.y = arg0->start.y + delta.y;
-    end.z = arg0->start.z + delta.z;
-    middle.x = arg0->start.x + delta.x * 0.5f;
-    middle.y = arg0->start.y + delta.y * 0.5f;
-    middle.z = arg0->start.z + delta.z * 0.5f;
+    end.x = particle->def.pos.x + delta.x;
+    end.y = particle->def.pos.y + delta.y;
+    end.z = particle->def.pos.z + delta.z;
+    middle.x = particle->def.pos.x + delta.x * 0.5f;
+    middle.y = particle->def.pos.y + delta.y * 0.5f;
+    middle.z = particle->def.pos.z + delta.z * 0.5f;
     view.x = middle.x - camera->x;
     view.y = middle.y - camera->y;
     view.z = middle.z - camera->z;
-    func_150AD8B0(&delta.x, &view.x, &side.x);
+    func_150AD8B0(&delta, &view, &side);
     lengthSquared = side.x * side.x + side.y * side.y + side.z * side.z;
     if (lengthSquared != 0.0f) {
-        f32 scale = width / sqrtf(lengthSquared);
+        f32 sideScale = width / sqrtf(lengthSquared);
 
-        side.x = side.x * scale;
-        side.y = side.y * scale;
-        side.z = side.z * scale;
+        side.x = side.x * sideScale;
+        side.y = side.y * sideScale;
+        side.z = side.z * sideScale;
     } else {
         side.x = 0;
         side.y = 0;
         side.z = 0;
     }
-    if (arg1 != 0) {
-        vertices->x = arg0->start.x + side.x;
-        vertices->y = arg0->start.y + side.y;
-        vertices->z = arg0->start.z + side.z;
-        vertices->flag = 0;
+    if (reversed != 0) {
+        vertices->v.ob[0] = particle->def.pos.x + side.x;
+        vertices->v.ob[1] = particle->def.pos.y + side.y;
+        vertices->v.ob[2] = particle->def.pos.z + side.z;
+        vertices->v.flag = 0;
         vertices++;
-        vertices->x = arg0->start.x - side.x;
-        vertices->y = arg0->start.y - side.y;
-        vertices->z = arg0->start.z - side.z;
-        vertices->flag = 0;
-        /* IDO ugen reads stale tree-node memory left by earlier functions in this file;
-           these empty statements pad the node count so that state lines up. */
+        vertices->v.ob[0] = particle->def.pos.x - side.x;
+        vertices->v.ob[1] = particle->def.pos.y - side.y;
+        vertices->v.ob[2] = particle->def.pos.z - side.z;
+        vertices->v.flag = 0;
+        // matching: IDO ugen reads stale tree-node memory left by earlier functions in this file;
+        // these empty statements pad the node count so that state lines up
         ;
         vertices++;
-        vertices->x = end.x - side.x;
-        vertices->y = end.y - side.y;
-        vertices->z = end.z - side.z;
-        vertices->flag = 0;
+        vertices->v.ob[0] = end.x - side.x;
+        vertices->v.ob[1] = end.y - side.y;
+        vertices->v.ob[2] = end.z - side.z;
+        vertices->v.flag = 0;
         vertices++;
-        vertices->x = end.x + side.x;
-        vertices->y = end.y + side.y;
-        vertices->z = end.z + side.z;
-        vertices->flag = 0;
+        vertices->v.ob[0] = end.x + side.x;
+        vertices->v.ob[1] = end.y + side.y;
+        vertices->v.ob[2] = end.z + side.z;
+        vertices->v.flag = 0;
     } else {
-        vertices->x = arg0->start.x - side.x;
-        vertices->y = arg0->start.y - side.y;
-        vertices->z = arg0->start.z - side.z;
-        vertices->flag = 0;
+        vertices->v.ob[0] = particle->def.pos.x - side.x;
+        vertices->v.ob[1] = particle->def.pos.y - side.y;
+        vertices->v.ob[2] = particle->def.pos.z - side.z;
+        vertices->v.flag = 0;
         ;;;;;;;;
         vertices++;
-        vertices->x = end.x - side.x;
-        vertices->y = end.y - side.y;
-        vertices->z = end.z - side.z;
-        vertices->flag = 0;
+        vertices->v.ob[0] = end.x - side.x;
+        vertices->v.ob[1] = end.y - side.y;
+        vertices->v.ob[2] = end.z - side.z;
+        vertices->v.flag = 0;
         vertices++;
-        vertices->x = end.x + side.x;
-        vertices->y = end.y + side.y;
-        vertices->z = end.z + side.z;
-        vertices->flag = 0;
+        vertices->v.ob[0] = end.x + side.x;
+        vertices->v.ob[1] = end.y + side.y;
+        vertices->v.ob[2] = end.z + side.z;
+        vertices->v.flag = 0;
         vertices++;
-        vertices->x = arg0->start.x + side.x;
-        vertices->y = arg0->start.y + side.y;
-        vertices->z = arg0->start.z + side.z;
-        vertices->flag = 0;
+        vertices->v.ob[0] = particle->def.pos.x + side.x;
+        vertices->v.ob[1] = particle->def.pos.y + side.y;
+        vertices->v.ob[2] = particle->def.pos.z + side.z;
+        vertices->v.flag = 0;
     }
     return result;
 }
@@ -1894,21 +1885,21 @@ Vtx *func_15140410(Particle *particle, Vec3f *axisU, Vec3f *axisV, s16 viewport)
     vx = axisV->x * particle->def.height;
     vy = axisV->y * particle->def.height;
     vz = axisV->z * particle->def.height;
-    vertices[0].v.ob[0] = (s32)(particle->def.pos.x + ux + vx);
-    vertices[0].v.ob[1] = (s32)(particle->def.pos.y + uy + vy);
-    vertices[0].v.ob[2] = (s32)(particle->def.pos.z + uz + vz);
+    vertices[0].v.ob[0] = particle->def.pos.x + ux + vx;
+    vertices[0].v.ob[1] = particle->def.pos.y + uy + vy;
+    vertices[0].v.ob[2] = particle->def.pos.z + uz + vz;
     vertices[0].v.flag = 0;
-    vertices[1].v.ob[0] = (s32)(particle->def.pos.x - ux + vx);
-    vertices[1].v.ob[1] = (s32)(particle->def.pos.y - uy + vy);
-    vertices[1].v.ob[2] = (s32)(particle->def.pos.z - uz + vz);
+    vertices[1].v.ob[0] = particle->def.pos.x - ux + vx;
+    vertices[1].v.ob[1] = particle->def.pos.y - uy + vy;
+    vertices[1].v.ob[2] = particle->def.pos.z - uz + vz;
     vertices[1].v.flag = 0;
-    vertices[2].v.ob[0] = (s32)(particle->def.pos.x - ux - vx);
-    vertices[2].v.ob[1] = (s32)(particle->def.pos.y - uy - vy);
-    vertices[2].v.ob[2] = (s32)(particle->def.pos.z - uz - vz);
+    vertices[2].v.ob[0] = particle->def.pos.x - ux - vx;
+    vertices[2].v.ob[1] = particle->def.pos.y - uy - vy;
+    vertices[2].v.ob[2] = particle->def.pos.z - uz - vz;
     vertices[2].v.flag = 0;
-    vertices[3].v.ob[0] = (s32)(particle->def.pos.x + ux - vx);
-    vertices[3].v.ob[1] = (s32)(particle->def.pos.y + uy - vy);
-    vertices[3].v.ob[2] = (s32)(particle->def.pos.z + uz - vz);
+    vertices[3].v.ob[0] = particle->def.pos.x + ux - vx;
+    vertices[3].v.ob[1] = particle->def.pos.y + uy - vy;
+    vertices[3].v.ob[2] = particle->def.pos.z + uz - vz;
     vertices[3].v.flag = 0;
     return result;
 }
