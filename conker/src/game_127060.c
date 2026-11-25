@@ -696,7 +696,7 @@ void func_150FAA40(u8 owner, s32 kind) {
         if (effect != NULL) {
             D_80088B60 = 1;
         }
-        if (effect != NULL) {
+        if (effect != NULL) { // matching: a second test; one merged if mismatches
             memcpy(&effect->data, &data, sizeof(data));
         }
     }
