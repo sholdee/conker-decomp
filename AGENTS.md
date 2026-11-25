@@ -91,7 +91,14 @@ functions, with zero occurrences: (d) an opcode-2 `j`, or a branch that leaves t
 (IDO uses `b` for local jumps and never tail-calls); (e) a bare `cvt.w.s`/`cvt.w.d` with no `ctc1` in the
 function. GCC output is ruled out because GCC's `move` assembles to `addu rd,rs,zero` (9 in all compiled C,
 0 in these functions). Patterns that do appear in compiled C are not proof: `ra` saved above the frame,
-a second sp allocation, `addiu r,zero,0`. The 2026-11-24 audit (`~/conker-ws/asmproof/tiers.json`) converted 94 functions, and a second pass converted 17 more (rules d/e) plus func_150ADAF0. The
+a second sp allocation, `addiu r,zero,0`. The 2026-11-24 audit (`~/conker-ws/asmproof/tiers.json`) converted 94 functions, and a second pass converted 17 more (rules d/e) plus func_150ADAF0. A third pass (2026-11-25) added
+rules each found 0 times in compiled C: `syscall`; no return (falls into the next function); a store below `$sp`
+before the frame exists; `ra` saved in the outgoing-argument area or without allocating a frame; an odd FPR as a
+single-precision arithmetic operand; `jal` without saving `ra`; every `mul.s` (6 or more) followed by a `nop`
+(compiled C peaks at 67%); and object boundaries (IDO pads every C object's `.text` and `.rodata` to 16 at both
+ends, so a function that meets proven asm at a non-16-aligned code or rodata address shares its object).
+`bzero` and `__osSetFpcCsr` are source-identical with ultralib assembled by the full IDO 5.3 toolchain
+(`~/conker-ws/asmproof/g4/ido53_v12/x/cc -O1`, which includes `as0`). See ACCOUNTING.md. The
 unproven ones stay GLOBAL_ASM stubs or plain `asm` segments. They are listed in tools/skip.txt and kept
 out of fleets.
 Layout notes:
