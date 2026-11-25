@@ -56,17 +56,6 @@ extern s32 (*D_8008B07C[])(TexturedQuad *);
 extern EffectTexture D_80090B60[];
 extern RenderModePair D_800A4AC8[];
 
-s32 func_1514401C(u8 id, u32 *speed, s32 *pos, u8 flags);
-Gfx *func_15142B7C(Gfx *gfx, s32 setBits, s32 clearBits);
-Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
-Gfx *func_15142CF0(Gfx *gfx, s32 minLevel, s32 lodFrac, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
-Gfx *func_15142E24(Gfx *gfx, EffectTexture *tex, s32 frame, s32 arg3, s32 arg4, s32 arg5, s32 texture, u8 arg7, s32 arg8,
-                   u8 *needSync, s32 argA);
-Gfx *func_15142FBC(Gfx *gfx, s32 modeH, s32 modeL, u8 *needSync);
-void func_151441A4(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 b0, s32 a0, u8 r1, u8 g1, u8 b1,
-                   u8 a1, u8 weight, u8 mode);
-void func_151442FC(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 b0, u8 a0, u8 r1, u8 g1, u8 b1,
-                   u8 a1, u8 weight, u8 mode);
 void *memcpy(void *, const void *, u32);
 
 /*

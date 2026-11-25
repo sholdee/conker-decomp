@@ -104,7 +104,6 @@ BeamObj *func_150F6DE4(Actor *owner) {
     return obj;
 }
 
-void func_15145740(Actor *actor, Vec3f *out, Vec3f *arg2, Vec3f *arg3, f32 arg4);
 void func_15081690(Actor *actor, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, RayHit *hit, f32 maxDist, s32 arg9,
                    s32 argA, s32 argB, s32 argC, s32 argD, s32 argE);
 s32 func_1506196C(u8 *obj, s32 arg1);

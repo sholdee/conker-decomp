@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_15143794(s16, s16, f32, void *);
 void func_151A26EC(f32 *, f32 *, f32 *, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Drip emitter callback (D_80089A70[39]): spawns one particle at (x, y, z), flung in a random

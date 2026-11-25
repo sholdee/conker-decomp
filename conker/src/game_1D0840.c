@@ -97,13 +97,7 @@ typedef struct {
 
 s32 func_15160A58(void *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void *func_15147A80(EffectTemplate *info, s32 stateSize, s32 capacity, s32, s32, s32, s32, s32, s32, s32, s32);
-void func_15143134(Vec3f *in, Vec3f *out, s32 matrix);
 void func_151D5D60(void *, s16, s32, void **, u8 *);
-Gfx *func_15142E24(Gfx *arg0, void *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
-Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
-Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
-Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 BoneTrailEffect *func_151A3504(BoneTrailParams *params, u8 arg1);
 void func_151A4590(Actor *owner, u8 arg1);
 void func_151A499C(Actor *owner, u8 arg1);

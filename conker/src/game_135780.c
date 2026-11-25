@@ -4,8 +4,6 @@
 
 #define EMITTER_ENABLED 1
 
-extern void func_1514373C(f32 angle, f32 radius, f32 *x, f32 *z);
-
 /* Emitter update: accumulates 0.03..0.04 particles per unit of D_800BE9A4 and, while enabled,
  * spawns one at a random point of the emitter's area for each whole one. */
 void func_151082D0(AreaEmitter *emitter) {

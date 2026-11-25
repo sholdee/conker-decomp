@@ -4,8 +4,6 @@
 
 /* Rumble effect objects: a timed rumble on the controllers of the players in a mask. */
 
-extern Vec3f *func_15144B34(s32 view);
-extern f32 func_15143E64(Vec3f *);
 extern void (*D_8008FCC0[])(RumbleObj *);
 
 /* Returns whether any player in `playerMask` has a rumble pak; false at the first player without a

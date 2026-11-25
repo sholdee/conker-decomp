@@ -624,8 +624,6 @@ s32 func_150BCFB8(struct Obj150BCFB8 *obj, s32 arg1, s32 arg2, s32 arg3, f32 flo
     return 1;
 }
 
-void func_1514470C(TriggerZone *, Vec3f *);
-void func_15143794(s16, s16, f32, Vec3f *);
 void func_151D5334(Vec3f *, f32, f32, f32, s32, u8, s32);
 
 /* Burst of particles and spawned particles from two random anchors (entries 0x4C/0x4D of zones). */

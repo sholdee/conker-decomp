@@ -4,7 +4,6 @@
 
 #define ARRAY_COUNT(arr) (s32)(sizeof(arr) / sizeof(arr[0]))
 
-s32 func_151464B8(s16 *arg0);
 extern s32 D_800A3880[];
 extern s32 D_800DC640[];
 void func_15168E54(s32 arg0, s32 arg1);
@@ -30,7 +29,6 @@ extern ParticleUpdateFn D_800898B0[];
 extern ParticleUpdateFn D_80089914[];
 extern ParticleDestroyFn D_8008997C[];
 extern ParticleUpdateFn D_80089988[];
-s32 func_1514672C(f32 *pos);
 
 /* Per-frame update: run the particle's update callbacks, age and fade it, and destroy it when any step says so. */
 void func_151321D0(ModelParticle *particle) {
@@ -320,10 +318,6 @@ void func_15132A88(ModelParticle *particle) {
 }
 
 extern Gfx *(*D_800899A4[])(Gfx *gfx, ModelParticle *particle, s16 arg2);
-Gfx *func_15142B7C(Gfx *gfx, s32 setGeometryMode, s32 clearGeometryMode);
-Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 alpha, u8 *state);
-Gfx *func_151462C8(Gfx *gfx, s32 *arg1, u8 arg2, Actor *owner, u8 ownerId, s16 arg5, f32 *pos, u8 arg7,
-                   s32 arg8);
 
 /* Draw a particle whose matrix func_15132A88 built this frame: segment 8, render and geometry mode (lit when
  * flag 0x800), optional extra commands from drawFn, then the matrix and the model's display list. */
@@ -534,9 +528,6 @@ s32 func_151332DC(ModelParticle *particle) {
     return 1;
 }
 
-void func_151424F4(Mtx *mtx, f32 sizeXZ, f32 sizeY, f32 rotX, f32 rotY, f32 rotZ, f32 scaleX, f32 scaleY,
-                   f32 scaleZ, f32 posX, f32 posY, f32 posZ);
-
 /* Matrix handler: rotation, per-axis scale times size, and translation. */
 s32 func_15133510(Mtx *mtx, ModelParticle *particle) {
     func_151424F4(mtx, particle->sizeXZ, particle->sizeY, particle->rot.x, particle->rot.y, particle->rot.z,
@@ -599,8 +590,6 @@ s32 func_151336A8(s32 model, ParticleNode *node, ModelParticle *particle) {
     func_15168E54(*node->resource, (s32)node->resource);
     return TRUE;
 }
-
-void func_15142838(Mtx *mtx, f32 sizeXZ, f32 sizeY, f32 rotX, f32 rotY, f32 rotZ, f32 posX, f32 posY, f32 posZ);
 
 /* Matrix handler: rotation scaled by size only, and translation. */
 s32 func_15133760(Mtx *mtx, ModelParticle *particle) {

@@ -26,7 +26,6 @@ const Vec3f D_8009FFA0[4] = {
     { 0.0f, 139.0f, 360.0f },
     { -360.0f, 139.0f, 0.0f },
 };
-void func_15143134(Vec3f *src, Vec3f *dst, MtxF *frame);
 
 /* Transforms three 4-point tables by the actor's ob_matrix_ptr and emits two segments (point 2->3 and 3->0). */
 void func_150BD740(Actor *actor, u8 arg1, s32 arg2) {

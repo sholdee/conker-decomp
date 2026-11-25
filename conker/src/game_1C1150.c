@@ -547,8 +547,6 @@ void func_151951E0(Actor *obj) {
     func_150D10E4(copy, 1);
 }
 
-extern void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z);
-
 // Calls func_15137610 on a 40-unit segment through other, at right angles to self's (or other's, or a random) heading.
 void func_15195528(Actor *self, Actor *other, u8 *arg2) {
     f32 angle;

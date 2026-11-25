@@ -56,7 +56,6 @@ void func_151070F8(BoltChainObj *obj, s16 lo, s16 hi, f32 spread);
 void func_15107A20(Actor *actor, s32 yaw, s32 pitch, Vec3f *out, Vec3f *centerOut);
 void func_15107AE0(Vec3f *start, Vec3f *end, Vec3f *ctrl1, Vec3f *ctrl2);
 void func_15107F54(Actor *actor, u8 bone, Vec3f *localPos, Vec3f *out);
-void func_15143794(s32 yaw, s32 pitch, f32 length, Vec3f *out);
 void func_15081690(Actor *actor, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, RayHit *hit, f32 maxDist, s32, s32, s32, s32, s32, s32);
 BoltObj *func_15105CE0(BoltDesc *desc, s32 extraSize, u8 arg2, s32 arg3);
 void func_15106214(BoltObj *bolt);
@@ -201,7 +200,6 @@ f32 func_15106558(f32 t);
 f32 func_15106584(f32 t);
 f32 func_151065BC(f32 t);
 f32 func_151065EC(f32 t);
-s32 func_15146078(Vec3f *dir, Vec3f *perp0, Vec3f *perp1);
 
 /* Samples the Bezier at t = step, 2 * step, ...: position, tangent and a frame around the tangent. */
 void func_15106214(BoltObj *bolt) {
@@ -294,8 +292,6 @@ f32 func_151065EC(f32 t) {
     return 3.0f * t * t;
 }
 
-void func_15143874(s16 angle, f32 radius, f32 *x, f32 *y);
-
 /* Rebuilds the joint points: the fixed end points plus each sample pushed a random distance sideways. */
 void func_15106610(BoltObj *bolt) {
     BoltSample *samples;
@@ -322,11 +318,6 @@ void func_15106610(BoltObj *bolt) {
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 void func_151D5D60(void *, s16, s32, void **, u8 *);
-Vec3f *func_15144B34(s32 view);
-Gfx *func_15142E24(Gfx *, s32, s32, s32, s32, s32, s32, u8, s32, u8 *, s32);
-Gfx *func_15142C10(Gfx *, s32, s32, s32, s32, u8 *);
-Gfx *func_15142B7C(Gfx *, s32, s32);
-Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
 extern s32 D_800A4AC8[][2];
 
 /* Draws the bolt as a camera-facing strip: three vertices (one side, centre, other side) per joint point. */
@@ -876,8 +867,6 @@ s32 func_15107E48(BoltObj *bolt, u8 *moved) {
     }
     return 1;
 }
-
-void func_15143134(Vec3f *in, Vec3f *out, s32 mtx);
 
 /* Transforms localPos by the actor's bone matrix (64 bytes each, at ob_matrix_ptr). */
 void func_15107F54(Actor *actor, u8 bone, Vec3f *localPos, Vec3f *out) {

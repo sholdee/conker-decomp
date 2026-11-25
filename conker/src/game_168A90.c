@@ -22,7 +22,6 @@ typedef struct {
 extern f32 sinf(f32);
 extern void func_15109064(DynModel *, s32, u8);
 extern void func_151BA468(DynModel *, s32, u8);
-extern Vec3f *func_15144B34(s32);
 
 extern s32 (*D_80089C18[])(DynModel *);
 extern s32 (*D_80089C28[])(DynModel *, s16);

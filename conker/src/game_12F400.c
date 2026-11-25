@@ -4,8 +4,6 @@
 #include "effects.h"
 
 extern void func_151D5D60(Vtx **buffers, s16 viewport, s32 size, Vtx **out, u8 *isNew);
-extern s32 func_15144E80(void *, Vec3f *, Vec3f *, Vec3f *);
-extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
 
 /* A quad particle (same layout as Particle in game_169510.c), followed by its motion state at 0x110. */
 struct Struct15101F50 {

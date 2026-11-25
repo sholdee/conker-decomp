@@ -80,8 +80,6 @@ typedef struct BoltRainObj {
 } BoltRainObj;
 
 s32 func_1000FD38();
-extern s32 func_151464B8(s16 *);
-extern void func_15143874(s16 angle, f32 radius, f32 *x, f32 *z);
 extern s32 func_15046C80(f32 *pos, s32, f32 y, CollisionHit *hit);
 extern void func_15105CE0(BoltDesc *desc, s32 extraSize, s32, s32);
 
@@ -355,8 +353,6 @@ struct SparkObj {
     /* 0x28 */ SparkState state;
 };
 
-extern void func_151432BC(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom);
-extern void func_15143794(s16, s16, f32, f32 *);
 extern void func_1515C2F0(EffectTemplate18 *, s32, TrailBurstParams *, s32, s32, s32);
 void func_151058B4(SparkObj *obj);
 

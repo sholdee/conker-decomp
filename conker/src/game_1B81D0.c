@@ -5,7 +5,6 @@
 
 
 extern void func_1518CA80(BillboardSpawn *, u8);
-extern void func_151429E0(u8, u8 *, u8 *, u8 *);
 extern s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
 
 /*

@@ -446,10 +446,6 @@ s32 func_1519D454(MatrixTrail *trail) {
 }
 
 void func_151D5D60(void *, s16, s32, void **, u8 *);
-Gfx *func_15142E24(Gfx *arg0, void *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
-Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
-Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 
 /*
  * Draws a trail for view `view` as a strip of quads from the newest point to the oldest, each
@@ -654,8 +650,6 @@ void func_1519E1F4(MatrixTrail *trail, TrailEvent *event, u8 eventId) {
         }
     }
 }
-
-extern void func_15143134(Vec3f *in, Vec3f *out, void *mtx);
 
 /*
  * Transforms data->offset by the owner's matrix into out, lerped from (x, y, z) by t.

@@ -51,7 +51,6 @@ void func_150D278C(s16 *record, f32 *matrix, u8 unkC, s32 unk1) {
 }
 
 extern void func_150A7960(f32 *matrix, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
-extern void func_1514373C(f32 angle, f32 radius, f32 *outX, f32 *outZ);
 
 /*
  * Accumulates the emitter's spawn rate and, for each whole spark due, spawns one on a circle around
@@ -126,7 +125,6 @@ void func_150D2924(SparkEffect *obj) {
 }
 
 void func_150AD8B0(f32 *a, f32 *b, f32 *out);
-Vec3f *func_15144B34(s32 viewport);
 void func_151D5D60(Vtx **buffers, s16 index, s32 size, Vtx **out, u8 *fresh);
 
 /*

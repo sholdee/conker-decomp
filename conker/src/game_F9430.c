@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_15143794(s16 yaw, s16 pitch, f32 speed, f32 *out);
-
 /* One entry of the D_800A0640 table: where on the owner's skeleton func_150CBF80 spawns, and its random ranges. */
 typedef struct {
     /* 0x00 */ u8 type;
@@ -32,7 +30,6 @@ typedef struct {
 extern GroundBurstDef D_800A0640[];
 void func_1504715C(CollisionHit *, Actor *);
 s32 func_15046C80(f32 *, s32, f32, CollisionHit *);
-void func_15143134(f32 *in, f32 *out, MtxF *mtx);
 void *memcpy(void *, void *, s32);
 
 /* Spawns a burst at a bone-relative point of owner, dropped onto the ground below: a growing

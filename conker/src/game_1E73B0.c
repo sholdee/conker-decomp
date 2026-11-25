@@ -12,8 +12,6 @@ void func_1504715C(CollisionHit *, Actor *);
 
 
 
-DynModel *func_1513B5E0(DynModelDesc *, s32, s32, u8, s32);
-
 /* Spawns the effect tied to `owner` and records the owner in the effect's extra data. */
 void *func_151B9F00(Actor *owner, u8 arg1, s32 arg2) {
     DynModel *effect;
@@ -185,7 +183,6 @@ extern f32 D_800AA62C[];
 extern Vec3f D_800AA63C, D_800AA648[], D_800AA660[], D_800AA678[], D_800AA6A8[], D_800AA6D8[];
 extern f32 D_800AA708[];
 extern void func_1503F404(Mtx *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
-extern void func_15143134(Vec3f *in, Vec3f *out, Mtx *mtx);
 
 /*
  * Spawns a burst effect at `obj` plus up to twelve particles launched along fixed paths in the space of
@@ -536,8 +533,6 @@ extern S32x9 D_800AA718;
 extern F32x9 D_800AA73C;
 void func_15055A2C(s32, f32, f32, f32, s32);
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, CollisionTri *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
-s32 func_15145C90(s32 hitInfo);
-s32 func_15144E80(CollisionTri *, Vec3f *, Vec3f *, Vec3f *);
 void func_151C04F8(Vec3f *, u8, s32);
 void func_151C05A4(Vec3f *, u8, s32);
 void func_151C05F0(Vec3f *, u8, s32);

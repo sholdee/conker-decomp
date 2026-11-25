@@ -179,7 +179,6 @@ typedef struct EffectLocals {
     Vec3w localPos;
 } EffectLocals;
 
-extern void func_15143134(void *, void *, s32);
 extern void func_151DC484(f32 *, CollisionHit *, s32, u8, s32);
 
 /* A floor probe result together with a point (func_15071A64, func_15074C00). */
@@ -199,7 +198,6 @@ extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 extern s32 func_1515D480(s32);
 extern void *func_1515D440(void);
 extern void *func_15158BD0(Actor *, s32, s32);
-extern void func_15145974(void *, f32 *, f32 *);
 extern Actor *func_1505EEF4(s32 arg0);
 extern void func_151A3390(void *arg0, u8 arg1);
 void func_1516F1C0(s32, s32, u8, s32);
@@ -207,7 +205,6 @@ void func_1516F2F8(u8, s32, s32, s32, u8, s32);
 void func_151875E0(f32, f32, f32, s32, s32, s32, f32, f32);
 void func_151700D8(f32 *, f32, f32, s32, f32, s32, s32, s32, s32, s32);
 s32 func_151F2CDC(void);
-extern s32 func_15145EA4(void *arg0, void *arg1, s32 arg2, s32 arg3);
 extern void func_151C1860(void *, s32, s32);
 extern void func_151D5334(Vec3f*, f32, f32, f32, s32, s32, s32);
 extern void func_150FE860(Actor *arg0, s32 arg1, s32 arg2);

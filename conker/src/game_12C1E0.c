@@ -41,8 +41,6 @@ s32 func_151C229C(Vec3f *arg0, Vec3f *arg1, s32 arg2, s32 arg3, s32 arg4, s32 ar
 void func_151D3F14(Vec3f *position, u8 arg1, s32 arg2);
 void func_151D4408(Vec3f *, Vec3f *, void *, Actor *, f32, s32, s32);
 void func_1505D1C4(f32 x, f32 y, f32 z, s32 flags, s32 objIndex, s32 angle, s32 arg6, Vec3f *arg7);
-s32 func_1514654C(Actor *obj, ModelAttachment *attachment, s32 arg2, Vec3f **src, Vec3f **dst, s32 count);
-void func_15145740(Actor *obj, Vec3f *direction, Vec3f *axis0, Vec3f *axis1, f32 arg4);
 
 /* Fires a shot from the gun attachment (set 0x82) of `obj`, with muzzle effects when it has bones. */
 void func_150FED30(Actor *obj, s32 arg1, s32 arg2) {

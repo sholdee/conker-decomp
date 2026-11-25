@@ -172,13 +172,7 @@ typedef struct ParticleRenderMode {
 
 extern s32 (*D_80089804[])(SpriteParticle *, s16);
 extern ParticleRenderMode D_800A4AC8[];
-s32 func_15144CEC(Vec3f *, f32 *, f32 *, f32 *, f32 *, s32);
 void func_1515E888(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5, u8 *arg6, u8 *arg7);
-Gfx *func_15142E24(Gfx *gfx, EffectTexture *tex, s32 frame, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *needSync, s32 argA);
-Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
-Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
-Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *needSync);
 
 /* Draws a particle as a screen-space textured rectangle in the given view. */
 Gfx *func_15130A9C(Gfx *gfx, SpriteParticle *p, s16 viewIdx) {
@@ -536,7 +530,6 @@ s32 func_151319A4(SpriteParticle *p, Vec3f *prevPos) {
     return func_151319C4(p, prevPos, &p->data.bounce);
 }
 
-extern s32 func_1514672C(Vec3f *);
 extern s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
 extern s32 (*D_80089874[])(SpriteParticle *, Vec3f *, f32 *, ParticleBounce *);
 

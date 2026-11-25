@@ -3136,7 +3136,7 @@ typedef struct EmitterState {
     /* 0x00 */ EmitterDef def;
     /* 0x28 */ f32 pending;          /* particles owed; one spawns per whole unit */
     /* 0x2C */ CollisionHit ground;
-    /* 0x50 */ s32 zone;             /* func_1510FD20 zone of the centre, with EMITTER_ZONED */
+    /* 0x50 */ s16 *zone;            /* func_1510FD20 zone of the centre, with EMITTER_ZONED */
     /* 0x54 */ f32 area;
 } EmitterState; /* size 0x58 */
 

@@ -722,8 +722,6 @@ s32 func_150142EC(TriggerZone *obj) {
     return 1;
 }
 
-void func_15145974(void *, f32 *, f32 *);
-
 /** Spawns a StreamEmitter aimed along the object's rotation, configured by the bytes of data1 and data2. */
 s32 func_150144B8(TriggerZone *obj) {
     StreamEmitter emitter;

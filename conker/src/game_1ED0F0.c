@@ -1,6 +1,11 @@
 #include <ultra64.h>
+// matching: func_151C0698 calls func_15144AA8 (one s32 parameter) with a u8 index and a second argument,
+// so this file keeps that view of it.
+#define func_15144AA8 func_15144AA8_effect_h
 #include "functions.h"
 #include "variables.h"
+#undef func_15144AA8
+f32 func_15144AA8(u8, Camera *);
 #include "effects.h"
 
 /* Fills in the impact particle parameters; fewer particles on busy frames. */
@@ -37,7 +42,6 @@ void func_1504715C(CollisionHit *, Actor *);
 s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
 void func_151C0360(CollisionTri *surface, Vec3f *pos, u8 fxOwner, s32 fxList);
 void func_151C0644(Vec3f *pos, u8 fxOwner, s32 fxList);
-s32 func_15144E80(CollisionTri *, Vec3f *, Vec3f *, Vec3f *);
 
 /* Bullet hit with no surface: sparks and smoke at pos, plus impact particles thrown back along -dir. */
 void func_151BFDA0(Vec3f *pos, Vec3f *dir, u8 withParticles, u8 fxOwner, s32 fxList) {
@@ -256,14 +260,10 @@ typedef struct {
     /* 0x18 */ Bullet *bullet;
 } SoundEmitter;
 
-f32 func_15144AA8(u8, Camera *);
-void func_15145740(Actor *, Vec3f *, void *, s32, f32);
 s32 func_151D5B6C(Vec3f *, Vec3f *, Actor *, s32, IgnoreList *);
-void func_15145974(Vec3f *, f32 *, f32 *);
 FollowFx *func_151B8908(Bullet *);
 Bullet88 *func_151B8400(Bullet *);
 void *func_151B8668(Bullet *, u8, s32);
-void func_15145EA4(Vec3f **, Vec3f **, MtxF *, s32);
 void func_151C1798(Actor *obj, Vec3f *pos);
 void func_151C1860(Vec3f *pos, u8 fxOwner, s32 fxList);
 s32 func_151C196C(RayHit *ray, Vec3f *start, Vec3f *dir, Vec3f *aimPos, Vec3f *aimDir,
@@ -636,7 +636,6 @@ void func_151C1654(Vec3f *pos, Vec3f *dir, Actor *owner, u8 impactType, Collisio
     }
 }
 
-void func_15143134(Vec3f *, Vec3f *, MtxF *);
 /* Bone index per muzzle. */
 const u8 D_800AA954[3] = { 9, 4, 4 };
 /* Muzzle offset in bone space. */
@@ -700,7 +699,6 @@ s32 func_151C1940(Actor *obj, Actor *self, IgnoreList *ignore) {
 
 void func_151C1D5C(Actor *, Vec3f *, Vec3f *, RayHit *, f32, s32, s32, s32, s8,
                    IgnoreList *, Vec3f *, f32 *, CollisionHit *, s32);
-s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
 
 /*
  * Traces a bullet from start along dir. With an aim view (aimPos/aimDir), first traces the view ray and

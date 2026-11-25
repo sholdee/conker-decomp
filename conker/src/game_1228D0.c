@@ -268,7 +268,6 @@ void func_150F5C08(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
 
 extern f32 D_800A1B00[3];
 extern f32 D_800A1B0C[3];
-extern s32 func_15145EA4(f32 **src, f32 **dst, Mtx *mtx, s32 count);
 
 /* Spark effect: while the owner lives, emits sparks along the segment between two points of
  * its bone 5, at a random rate. */
@@ -532,7 +531,6 @@ void func_150F64B0(DefParticleHead *obj) {
 
 
 extern f32 D_800A1B30[3];
-void func_15143134(void *, f32 *, Mtx *);
 extern LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 void *func_15107C1C(Actor *, u8, void *, s16, s32, s32, s32, f32, f32, s32, s32, u8 *, s32, s32);
 

@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s32 func_15145128(Vec3f *out, Vec3f *in, f32 *length, f32 *invLength);
-
 /*
  * Eases unk40 toward the point 100 units above the particle's position by easeFactor,
  * then pins it back to exactly 100 units from the position along that direction.

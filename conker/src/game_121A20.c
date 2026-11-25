@@ -18,8 +18,6 @@ const f32 D_800A1A24[16] = {
 #define SPIRAL_SOUND 2     /* plays a positional sound */
 #define SPIRAL_MUTED 4     /* sound no longer updated or restarted */
 
-extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
-
 /* Spawns an effect that spirals from `from` to `to` at `speed` (invSpeed = 1 / speed), playing
  * `sound` near the camera when it is non-zero. */
 void func_150F4570(Vec3f *from, Vec3f *to, u8 id, f32 speed, f32 invSpeed, f32 scale, u8 fadeNear, s32 sound,
@@ -95,8 +93,6 @@ void func_150F4570(Vec3f *from, Vec3f *to, u8 id, f32 speed, f32 invSpeed, f32 s
     }
 }
 
-extern void func_1514373C(f32 arg0, f32 arg1, f32 *arg2, f32 *arg3);
-
 /* Update: moves the spiral centre along the object's velocity and puts the object on the
  * circle around it; returns 0 once the travel time is up. */
 s32 func_150F48D0(SpiralParticle *obj) {
@@ -124,9 +120,6 @@ s32 func_150F48D0(SpiralParticle *obj) {
     obj->rot.z += obj->spin.z * D_800BE9A4;
     // matching: the original falls off the end here without setting a return value
 }
-
-extern Vec3f *func_15144B34(s32);
-extern f32 func_15143E64(Vec3f *);
 
 /* Fades the object out near the camera and keeps its positional sound playing (started
  * within 200 units of the camera), as its SPIRAL_* flags ask; always returns 1. */
@@ -195,7 +188,6 @@ void func_150F4D5C(Camera *camera, s8 condition, u8 variants, u8 owner, s32 kind
 }
 
 extern s32 (*D_80088B38[])();
-extern void func_15143874(s16 angle, f32 dist, f32 *x, f32 *z);
 
 /* Emitter update: while its condition callback (if any) holds, spawns 0.05-0.20 spirals per frame
  * (times D_800BE9A4) around the camera, each between two random points on either side of

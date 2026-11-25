@@ -175,6 +175,131 @@ typedef struct {
 
 #define PATH_MOVER_WORK(obj) ((PathMoverWork *)&(obj)->touch)
 
+/* game_168A90.c */
+DynModel *func_1513B5E0(DynModelDesc *desc, u8 arg1, s32 userDataSize, u8 arg3, s32 arg4);
+void func_1513B798(DynModel *obj);
+Gfx *func_1513B83C(Gfx *gfx, DynModel *obj, s16 viewport);
+s32 func_1513B968(DynModel *obj, s16 viewport);
+void func_1513B9A8(DynModel *obj);
+void func_1513B9DC(DynModel *obj);
+void func_1513BA10(DynModel *obj);
+void func_1513BA44(DynModel *obj);
+void func_1513BA78(DynModel *obj, s32 arg1, u8 arg2);
+s32 func_1513BAD4(DynModel *obj, s16 viewport);
+DynModel *func_1513BAE8(void);
+s32 func_1513BBFC(DynModel *obj, s16 viewport);
+s32 func_1513BEB0(DynModel *obj);
+
+/* game_16EE20.c */
+typedef struct Source15141F78 Source15141F78;
+typedef struct Msg151419D0 Msg151419D0;
+typedef struct LinkedObject151419D0 LinkedObject151419D0;
+typedef struct Args151420F8 Args151420F8;
+void func_15141970(LinkedObject151419D0 *obj);
+void func_15141990(void *arg0);
+void func_151419B0(void *arg0);
+void func_151419D0(LinkedObject151419D0 *obj, Msg151419D0 *msg, u8 msgType);
+void func_15141A7C(Actor *actor, s32 arg1);
+s32 func_15141C0C(Actor *actor);
+s32 func_15141CC0(u32 type);
+void func_15141DA4(void *actor, s32 selector, s32 handler);
+void func_15141E38(Actor *actor, s32 handler);
+void func_15141F78(u8 kind, Source15141F78 *src, f32 scale, u8 arg3, Vec3f *pos, u8 arg5);
+s32 func_151420F8(s32 actor);
+void func_15142180(u8 kind, Vec3f *pos, s32 arg2, f32 scaleA, f32 scaleB);
+extern const Args151420F8 D_800A5200;
+
+/* game_16F770.c */
+typedef struct Tri15144E80 Tri15144E80;
+s32 func_151422C0(s32 id, const char *name, s32 min, s32 max, const char *file, s32 line);
+s32 func_151422DC(s32 id, const char *name, s32 min, s32 max, s32 value, const char *file, s32 line);
+s32 func_151422F8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+void func_15142314(void *bones, s32 bone, Vec3f *out);
+f32 func_151423D8(u8 angle);
+Actor *func_15142444(u8 uniqueId, Actor *self);
+void func_151424F4(Mtx *out, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 rotZ, f32 sx, f32 sy, f32 sz, f32 x,
+                   f32 y, f32 z);
+void func_15142600(Mtx *out, f32 scaleXZ, f32 scaleY, f32 sx, f32 sy, f32 sz, f32 x, f32 y, f32 z, f32 atX, f32 atY,
+                   f32 atZ);
+void func_15142838(Mtx *out, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 rotZ, f32 x, f32 y, f32 z);
+void func_15142914(MtxF mf, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 rotZ, f32 x, f32 y, f32 z);
+void func_151429E0(u8 palette, u8 *r, u8 *g, u8 *b);
+s32 func_15142A5C(Actor *actor);
+f32 func_15142A80(f32 t);
+f32 func_15142AC0(f32 t);
+f32 func_15142B04(f32 t);
+f32 func_15142B44(f32 t);
+Gfx *func_15142B7C(Gfx *gfx, s32 setBits, s32 clearBits);
+Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
+Gfx *func_15142CF0(Gfx *gfx, s32 minLevel, s32 lodFrac, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
+Gfx *func_15142E24(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8,
+                   u8 *needSync, s32 argA);
+Gfx *func_15142FBC(Gfx *gfx, s32 modeH, s32 modeL, u8 *needSync);
+s16 func_15143044(u8 arg0, s32 arg1);
+s32 func_1514306C(s32 *arg0, s32 arg1, s32 arg2, u8 mode);
+void func_15143134(Vec3f *offset, f32 *out, Mtx *mtx);
+void func_151432BC(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom);
+void func_151436B4(f32 yaw, f32 pitch, f32 length, f32 *out);
+void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z);
+void func_15143794(s16 yaw, s16 pitch, f32 length, f32 *out); /* (yaw, pitch, length) -> vector */
+void func_15143834(s16 yaw, s16 pitch, f32 length, f32 *out);
+void func_15143874(s16 angle, f32 length, f32 *x, f32 *z);
+TriggerZone *func_151438D8(s32 start, s32 end, u16 fields, TriggerZone *key);
+void func_15143D18(s32 *start, s32 *end, s32 lo, s32 hi);
+s32 func_15143DA8(s32 *value, s32 lo, s32 hi);
+s32 func_15143E08(Actor *actor);
+s32 func_15143E24(Actor *actor);
+f32 func_15143E64(Vec3f *v);
+u8 func_15143E94(s32 arg0, s32 arg1);
+s32 func_1514401C(u8 id, u32 *speed, s32 *pos, u8 flags);
+void func_151441A4(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 b0, s32 a0, u8 r1, u8 g1, u8 b1, u8 a1,
+                   u8 weight, u8 mode);
+void func_151442FC(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 b0, u8 a0, u8 r1, u8 g1, u8 b1, u8 a1,
+                   u8 weight, u8 mode);
+s32 func_151444DC(s32 value, s32 hi, s32 lo);
+f32 func_15144528(f32 value, f32 hi, f32 lo);
+f32 func_15144598(TriggerZone *region);
+f32 func_1514462C(s32 arg0);
+void func_1514470C(TriggerZone *region, f32 *out);
+f32 func_15144A74(Vec3f *a, Vec3f *b); /* dot product */
+f32 func_15144AA8(s32 index);
+Vec3f *func_15144B34(s32 index);
+f32 func_15144B68(f32 angle);
+f32 func_15144BC8(f32 angle); /* wraps an angle into [0, 360] degrees */
+s32 func_15144C2C(s16 value);
+f32 func_15144C8C(f32 a, f32 b);
+s32 func_15144CEC(f32 *pos, f32 *screen, f32 *outA, f32 *outDepth, f32 *outInvDepth, u8 viewport);
+s32 func_15144E80(Tri15144E80 *tri, Vec3f *binormal, Vec3f *edgeOut, Vec3f *normal); /* triangle edges + normal */
+void func_151450B4(Vec3f *a, Vec3f *b, Vec3f *out);
+s32 func_15145128(Vec3f *v, Vec3f *out, f32 *length, f32 *invLength); /* normalize */
+s32 func_151451F0(Vec3f *origin, Vec3f *dir, Vec3f *center, f32 radius, f32 maxDist, Vec3f *hitNear, Vec3f *hitFar,
+                  f32 *tNear, f32 *tFar);
+s32 func_151452C4(Vec3f *origin, Vec3f *dir, Vec3f *center, f32 radius, Vec3f *hitNear, Vec3f *hitFar, f32 *tNear,
+                  f32 *tFar);
+s32 func_151454BC(u8 index, f32 radius, Vec3f *point);
+void func_15145548(Vec3f *start, Vec3f *dir, Vec3f *point, Vec3f *out, f32 *t);
+s32 func_1514563C(Vec3f *start, Vec3f *dir, Vec3f *point, Vec3f *out, f32 *t);
+void func_15145740(Actor *actor, Vec3f *target, Vec3f *dir, Vec3f *offsetDir, f32 pitchOffset);
+void func_15145974(Vec3f *v, f32 *heading, f32 *elevation);
+f32 func_15145A0C(f32 arg0, f32 scale, f32 arg2);
+void func_15145A50(Actor *actor);
+s32 func_15145AD8(Vec3f *start, Vec3f *dir, Actor *actor, Vec3f *hitNear, Vec3f *hitFar, f32 *radius, f32 *arg6,
+                  Vec3f *center);
+u8 func_15145C90(s32 index);
+void func_15145CD0(WorldObject *placement, f32 **in, f32 **out, s32 count);
+void func_15145DB4(WorldObject *placement, Vec3f *in, Vec3f *out, s32 count);
+void func_15145EA4(f32 **offsets, f32 **results, Mtx *mtx, s32 count);
+s32 func_15146078(Vec3f *n, Vec3f *u, Vec3f *v); /* two axes perpendicular to a direction */
+void *func_151462C8(void *gfx, s32 *model, u8 mode, Actor *actor, u8 uniqueId, s16 slot, Vec3f *pos, u8 flags,
+                    s32 arg8);
+u8 func_151464B8(s16 *flags);
+void func_15146508(Actor *a, Actor *b);
+s32 func_1514654C(Actor *actor, ModelAttachment *point, s32 index, f32 **offsets, f32 **results, s32 count);
+s32 func_1514672C(Vec3f *pos);
+void func_151467A4(f32 *timer, f32 maxTime, f32 *target, f32 lo, f32 mid, f32 hi, f32 rate, f32 *value);
+extern const Vec3f D_800A5480; /* zero vector */
+extern const f32 D_800A548C[102];
+
 /* game_193430.c */
 /* Effect kind 4 (0xA8 bytes from func_15167A68): one textured quad, double-buffered by D_800BE9C0. */
 typedef struct {
@@ -288,6 +413,7 @@ s32 func_150BB498(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
 /* game_E8C10.c */
 struct Obj150BCFB8;
 struct Obj150BCFB8;
+struct Obj150BCFB8;
 s32 func_150BB760(Actor *actor);
 s32 func_150BBB5C(Actor *actor);
 s32 func_150BC488(Actor *actor);
@@ -296,6 +422,7 @@ s32 func_150BCFB8(struct Obj150BCFB8 *obj, s32 arg1, s32 arg2, s32 arg3, f32 flo
 void func_150BD070(u8 arg0, s32 arg1);
 
 /* game_EABF0.c */
+struct Obj150BDB3C;
 struct Obj150BDB3C;
 struct Obj150BDB3C;
 void func_150BD740(Actor *actor, u8 arg1, s32 arg2);

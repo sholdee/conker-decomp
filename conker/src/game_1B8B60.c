@@ -4,7 +4,6 @@
 
 
 extern void func_1518CA80(void *, u8); // matching: takes a BillboardSpawn; this caller passes a BillboardSpawn38
-extern void func_151429E0(u8, u8 *, u8 *, u8 *);
 
 void func_1518B6B0(f32 arg0, f32 arg1, f32 arg2, u8 arg3, s32 arg4) {
     s32 i;

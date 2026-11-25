@@ -112,7 +112,6 @@ void func_150C1A40(Actor *actor, s32 side, s32 arg2) {
     }
 }
 
-void func_151429E0(u8 palette, u8 *r, u8 *g, u8 *b);
 void func_1518CA80(BillboardSpawn *effect, u8 mode);
 
 /*

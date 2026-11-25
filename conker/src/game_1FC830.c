@@ -6,10 +6,7 @@
 #include "effects.h"
 
 extern f32 D_800D9860;
-extern f32 func_15144AA8(s32);
-extern Vec3f *func_15144B34(s32);
 extern s32 func_15046C80(Vec3f *, s32, f32, f32 *);
-f32 func_15143E64(Vec3f *);
 TimedEffect *func_151CEAAC(void *arg0, void *arg1, u8 arg2, u8 arg3, s32 arg4);
 
 /* One point of a RibbonActor's ring buffer. */
@@ -37,9 +34,6 @@ typedef struct {
 
 extern RenderModePair D_800A4AC8[];
 void func_151D5D60(void *, s16, s32, void **, u8 *);
-Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
-Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 
 /* Draws the ribbon from its newest point back to its oldest, one quad per segment. */
 Gfx *func_151CF380(RibbonActor *ribbon, Gfx *gfx, s16 cameraIdx) {
@@ -198,8 +192,6 @@ void func_151CF898(Actor *obj, f32 probeY, f32 arg2) {
 extern Vec3f D_800AAEEC[];
 // matching: the model goes in as s32; a pointer argument changes the temp registers
 void func_1503F404(s32, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
-void func_15143134(Vec3f *, Vec3f *, Mtx *);
-void func_15143794(s16, s16, f32, Vec3f *);
 void func_151A9834(Vec3f *, f32, f32, CollisionHit *, s32, s32, s8 *, u8, s32);
 void func_1504715C(CollisionHit *, Actor *);
 
@@ -397,7 +389,6 @@ extern Vec3f D_800AAF5C[];
 extern Vec3f D_800AAF74;
 extern u8 D_800AAF80[];
 extern u8 D_80091154[];
-Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
 
 /* Draws the strip effect: six camera-facing quads joining two of the owner's model points, pinched
  * in the middle when the points are far apart. */
@@ -580,7 +571,6 @@ void func_151D08F0(OwnedEffect *effect, void *msg, u8 type) {
 
 extern f32 D_800AAF84[3];
 extern f32 D_800AAF90[3];
-extern void func_15145EA4(f32 **, Vec3f **, Mtx *, s32);
 // matching: a CollisionHit * third argument (the definition takes s32)
 extern void func_1514FF44(ConeBasis *, DropSpray *, CollisionHit *, u8, s32);
 /* Partial view of the particle func_15130280 creates. */

@@ -4,7 +4,6 @@
 #undef func_150E7FEC
 #include "variables.h"
 
-extern void func_15145974(Vec3f *, f32 *, f32 *);
 extern void func_1000FD38(void *, void *, s32);
 
 extern void func_1504715C(CollisionHit *, Actor *);
@@ -95,7 +94,6 @@ typedef struct {
 } SightCommandMsg;
 
 extern void func_1510F800(s32);
-extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
 extern LightEffect *func_1516284C(LightEffectHeader *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
 
 /* Spawns a sight beam object between two surface points, with emitters at both ends. */
@@ -251,9 +249,7 @@ s32 func_151C756C(Vec3f *start, CollisionTri *startTri, Vec3f *end, CollisionTri
     return (s32)obj;
 }
 
-extern Vec3f *func_15144B34(s32);
 void func_151D5D60(void *, s16, s32, void **, u8 *);
-void func_15145548(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, Vec3f *arg3, f32 *arg4);
 
 /* Builds the beam's quad for one view: a strip of the beam's width facing the camera. */
 void *func_151C7E98(SightBeamObject *obj, s16 view) {
@@ -474,7 +470,6 @@ s32 func_151C87AC(SightSoundHandle *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg
 }
 
 extern void func_1507C3E0(void *, s16 *, s16 *, s16 *);
-extern s32 func_151451F0(Vec3f *, Vec3f *, Vec3f *, f32, f32, Vec3f *, Vec3f *, f32 *, f32 *);
 
 /* Returns whether the beam segment passes through the actor's bounding sphere. */
 s32 func_151C87E0(Actor *actor, SightBeamObject *obj) {
@@ -663,8 +658,6 @@ SightExtension *func_151C8FCC(SightBeamObject *owner, Vec3f *start, Vec3f *end, 
     }
     return effect;
 }
-
-extern s32 func_15144E80(CollisionTri *, Vec3f *, Vec3f *, Vec3f *);
 
 /* Spawns the three parts of a beam emitter on the surface triangle at `pos`. */
 void func_151C9198(SightEmitter **emitters, Vec3f *pos, CollisionTri *triangle, Vec3f *dir, SightZone *zone, u8 altColors, u8 zoneMasked, u8 arg7, s32 arg8) {

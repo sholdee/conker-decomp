@@ -74,16 +74,6 @@ extern s32 (*D_8008AE0C[])(Mtx *, EffectActor *);
 extern Gfx *D_8008AFB8[];
 extern RenderPreset D_800A4AC8[];
 
-Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *update);
-Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 r, s32 g, s32 b, s32 a, u8 *update);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *update);
-void func_151441A4(s16 *r, s16 *g, s16 *b, s16 *a, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, u8 arg9,
-                   u8 arg10, u8 arg11, u8 arg12, u8 arg13);
-void func_151442FC(s16 *r, s16 *g, s16 *b, s16 *a, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9,
-                   u8 arg10, u8 arg11, u8 arg12, u8 arg13);
-Gfx *func_151462C8(Gfx *gfx, void *arg1, u8 arg2, void *arg3, u8 arg4, s16 arg5, Vec3f *arg6, u8 arg7, s32 arg8);
-
 /* Draws an effect actor: sets its render state and colors, then its matrix and display list. */
 Gfx *func_151582C8(Gfx *gfx, EffectActor *actor, s16 arg2) {
     s32 pad; // matching: IDO's frame has an unused slot here
@@ -764,7 +754,6 @@ typedef struct {
 s32 func_151596BC(EffectMotionParticle *particle, ParticleUpdateArg *arg1);
 u8 func_151D8E20(void);
 s32 func_15046C00(Vec3f *pos, u16 arg1, f32 maxHeight, CollisionHit *hit);
-s32 func_1514672C(Vec3f *pos);
 
 /* Update callback: rises and sways; dies on reaching the ground hit above it (splashing when ground.source is 3). */
 u8 func_15159594(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {

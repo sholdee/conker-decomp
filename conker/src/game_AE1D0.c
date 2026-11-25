@@ -24,7 +24,6 @@ typedef struct {
 extern HitSphere *D_80086C60[];
 extern u8 D_8009CBCC[];
 
-void func_15143134(Vec3f *in, Vec3f *out, MtxF *mtx);
 void func_1505D1C4(f32, f32, f32, s32, s32, s32, s32, s32);
 
 /* Point vs. hit-sphere test: takes the point `dist` ahead of `self` (rotated by its pitch unkB8
@@ -123,9 +122,6 @@ s32 func_1508108C(Actor *obj) {
     }
     return -1;
 }
-
-/* Ray vs. sphere: nonzero on a hit, with the entry/exit points and their ray parameters. */
-s32 func_151452C4(Vec3f *origin, Vec3f *dir, Vec3f *centre, f32 radius, Vec3f *outNear, Vec3f *outFar, f32 *outTNear, f32 *outTFar);
 
 /* Ray vs. per-bone hit-sphere test for one actor.  Broad phase: build the whole-object
  * bounding sphere from D_800D1C90[obj->id] and ray-test it; if that hits, walk the model's

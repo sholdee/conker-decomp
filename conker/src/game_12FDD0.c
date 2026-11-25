@@ -147,9 +147,6 @@ void func_15102D50(BoneBeamParticle *particle, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, &particle->beam.target, &particle->beam.targetId, particle);
 }
 
-extern s32 func_1514654C(Actor *, ModelAttachment *, s32, void *, void *, s32);
-extern void func_15145EA4(Vec3f **src, Vec3f **dst, Mtx *matrix, s32 count);
-
 /* Beam update: moves the beam's end points with its target's bone or model node.
  * Returns 0 when the beam should die (target gone or node missing). */
 s32 func_15102D90(BoneBeamParticle *particle) {
@@ -188,9 +185,7 @@ s32 func_15102D90(BoneBeamParticle *particle) {
     return 1;
 }
 
-extern Vec3f *func_15144B34(s32);
 void func_151D5D60(Vtx **buffers, s16 viewport, s32 size, Vtx **vtx, u8 *fresh);
-void func_15145548(Vec3f *origin, Vec3f *dir, Vec3f *point, Vec3f *closest, f32 *t);
 
 /* Vertex function: builds the beam's quad for `viewport`, from its start to def.height of the way to its end,
  * def.width wide and facing the viewport's camera. */

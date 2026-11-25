@@ -79,8 +79,6 @@ s32 func_151BC64C(RibbonTrail *trail) {
     return 1;
 }
 
-extern f32 func_15143E64(Vec3f *);
-
 /* Follows the owner and emits trail points evenly along the distance it moved. */
 s32 func_151BC794(RibbonTrail *trail) {
     RibbonTrailData *data;
@@ -164,11 +162,6 @@ s32 func_151BC794(RibbonTrail *trail) {
     return 1;
 }
 
-Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
-Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
-extern Vec3f *func_15144B34(s32);
 void func_151D5D60(void *, s16, s32, void **, u8 *);
 extern struct {
     s32 unk0;
@@ -689,7 +682,6 @@ extern Vec3f D_800AA778;
 extern Vec3f D_800AA784;
 extern Vec3f D_800AA790;
 extern Vec3f D_800AA79C;
-extern s32 func_15145EA4(Vec3f **src, Vec3f **dst, Mtx *matrix, s32 count);
 
 /* Per-frame update of the burst: keeps the sparks and glows on bone 1 of the owner. */
 void func_151BDD8C(BurstEffect *effect) {

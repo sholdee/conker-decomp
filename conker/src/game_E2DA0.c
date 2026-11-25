@@ -239,7 +239,6 @@ void func_150B6000(Vec3f *pos, u8 owner, s32 kind) {
     func_151602C0(&header, &ipos, func_150ADA20() % 201U + 55, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, owner, kind);
 }
 
-extern void func_15143134(Vec3f *in, Vec3f *out, void *mtx);
 extern Vec3f D_8009FC30;
 
 /** Transforms the fixed point D_8009FC30 by the matrix at obj->ob_matrix_ptr + 0x140 into out. */
@@ -258,7 +257,6 @@ struct BoltRingEffect {
     /* 0x28 */ BoltRingData data;
 };
 
-extern void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z);
 extern void func_15106F98(Vec3f *start, Vec3f *end, s32 depth, BoltChainConfig *config, f32 spread, s32 type, s32 owner, s32 kind);
 
 /**
@@ -331,7 +329,6 @@ void func_150B6450(EffectHeader *effect, s32 arg1, u8 msg) {
 }
 
 extern void *func_150B3F5C(TrailStateParams *params, Vec3f *pos, s16 capacity);
-extern void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out);
 
 /* Per-variant trail settings used by func_150B648C. */
 extern Vec3f D_8009FC3C[];   /* emitter position (variants 1 and 2) */

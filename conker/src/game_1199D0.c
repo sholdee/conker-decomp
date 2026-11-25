@@ -2,10 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_151432BC(void *, f32 *, f32 *, f32 *, f32 *);
 void *memcpy(void *, const void *, u32);
-u8 func_151464B8(s16 *);
-
 
 /* Emitter effect: while its owner is alive, spawns effect 0x5A at random points on its shape. */
 void func_150EC520(EmitterEffect *effect) {

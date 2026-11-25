@@ -648,7 +648,6 @@ const CharacterFlamethrowerJetTemplate D_800A87A0[] = {
     { 600, 0.0f, 2.14f, 255, 20, 9, { 12.0f, -44.0f, 136.0f }, { 12.0f, -54.0f, 175.0f }, 0, 12, 200, 0, 4.0f, 9.0f, -1, 2, -1, 0, 0, 0, 0, 2, 1, 100, 0.8f, 1, 0.15f, 1, 0.2f, 6, 42, 6, 42 },
 };
 
-void func_15143134(Vec3f *in, Vec3f *out, s32 matrix);
 void *func_15147A80(void *spawn, s32 stateSize, s32 pointSize, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Spawns a jet effect from preset D_800A87A0[preset], attached to a bone of `owner`. */
@@ -973,9 +972,6 @@ typedef struct OneFrameTextureDesc {
 } OneFrameTextureDesc; /* size 0x10 */
 
 extern Texture D_800915B0;
-Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
-Gfx *func_15142B7C(Gfx *, s32, s32);
-Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
 
 /* Draws a jet as a camera-facing ribbon through its points, oldest last. */
 Gfx *func_15197148(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
@@ -2075,8 +2071,6 @@ struct CharacterFlamethrowerSetup {
     /* 0xE0 */ FlameEmitParams emit;
 };
 
-void func_15145EA4(Vec3f **in, Vec3f **out, s32 matrix, s32 count);
-
 /* Flame callback tables, indexed by the FlameSeed *Fn fields (-1 = none). */
 void (*D_8008F8A4[])(void *) = { (void (*)(void *))func_1519BEB8 };
 void (*D_8008F8A8[])(void *) = {
@@ -2288,10 +2282,6 @@ s32 func_15199A10(CharacterFlamethrowerActor *actor) {
     }
     return 1;
 }
-
-void func_15145740(void *, void *, void *, void *, f32);
-s32 func_15146078(Vec3f *, Vec3f *, Vec3f *);
-void func_15143874(s16, f32, f32 *, f32 *);
 
 /*
  * Flame emitter: tracks the owner's bone (or its position and facing when it has no bones), emits
@@ -2566,10 +2556,6 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
 }
 
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
-f32 func_15143E64(Vec3f *);
-f32 func_15144528(f32, f32, f32);
-void func_15143794(s16, s16, f32, f32 *);
-
 
 /*
  * Flame shaping: clips the ribbon to maxLength (and to a wall hit when flags & 4), fades the far part,
@@ -2873,7 +2859,6 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
 }
 
 
-s32 func_15144B34(s32);
 s32 func_150A6360(void *, void *, f32, f32, f32, f32, f32, f32);
 extern u8 D_80091064[];
 extern s32 D_800A4AC8[][2];
@@ -3297,8 +3282,6 @@ s32 func_1519C4E4(SceneParticle *beam) {
     }
     return 1;
 }
-
-void func_15145548(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, Vec3f *arg3, f32 *arg4);
 
 /* Builds a flame line beam's quad (4 vertices) from start towards end, `progress` of the way, facing the camera. */
 void *func_1519C56C(SceneParticle *beam, s16 view) {

@@ -718,8 +718,6 @@ s32 func_1507E114(s32 arg0) {
     return type + 1;
 }
 
-void func_15143134(f32 *in, f32 *out, MtxF *mtx);
-
 /* Gets obj's tracking point: 30 * scale_y up through bone 0 (12 or 3 in some states), or its position. */
 void func_1507E1D0(Actor *obj, f32 *x, f32 *y, f32 *z) {
     if (obj->ob_matrix_ptr != NULL) {

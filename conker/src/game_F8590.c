@@ -5,10 +5,8 @@
 extern f32 D_800A05E0[];
 extern f32 D_800A05EC[];
 
-void func_15143134(f32 *, f32 *, Mtx *);
 void func_1504715C(CollisionHit *, Actor *);
 s32 func_15046C80(f32 *, s32, f32, CollisionHit *);
-void func_15143794(s16, s16, f32, f32 *);
 
 /*
  * Transforms the fixed offset for `side` (1 or 2) by that side's bone matrix of the actor

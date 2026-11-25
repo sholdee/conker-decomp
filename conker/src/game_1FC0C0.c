@@ -17,8 +17,6 @@ s32 func_151CEC10(Vec3f *out, Actor *owner, DescParticleHead *anchor) {
     return TRUE;
 }
 
-f32 func_15143E64(Vec3f *);
-
 /*
  * Follows the trail's attachment point and, once it has moved far enough, pushes it as the newest point
  * of the ring buffer `points`. Points carry an XZ normal (and that normal scaled by 51) perpendicular

@@ -17,7 +17,6 @@ void func_150BA4C0(Actor *owner, u8 arg1, s32 arg2) {
     }
 }
 
-void func_15143794(s16, s16, f32, f32 *);
 void func_1515C244(Actor *, f32 *, f32 *, f32 *);
 void func_1518A3C0(f32 *arg0, f32 *arg1, f32 arg2, f32 *arg3, f32 *arg4, f32 arg5, f32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC);
 

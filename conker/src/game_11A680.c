@@ -4,8 +4,6 @@
 #include "variables.h"
 
 extern void func_151254F4(Camera *camera, s32 index);
-extern f32 func_15144BC8(f32 angle); /* wraps an angle into [0, 360] degrees */
-
 
 /* Actor (structs.h) declares 0x6C, 0x128, 0x1A8 and 0x2E4 with other widths, so the code below
    reaches the bytes and halves it uses through those fields. */
@@ -162,7 +160,6 @@ extern void func_1505327C(Actor *arg0, f32 yVelocity, f32 gravity, s32 arg3, s32
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
 extern void func_15052590(Actor *obj);
 /* Ray (origin, normalized dir) vs sphere (center, radius); 0 on a miss or when the near hit is behind. */
-extern s32 func_151452C4(f32 *origin, f32 *dir, f32 *center, f32 radius, f32 *hitNear, f32 *hitFar, f32 *tNear, f32 *tFar);
 
 /*
  * Per-frame update of a player-driven tracked vehicle with an aimable gun.

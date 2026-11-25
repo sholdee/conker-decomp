@@ -348,9 +348,7 @@ typedef struct GameDC6B0TrailArgs {
     s32 unk4;
 } GameDC6B0TrailArgs;
 
-void func_15145974(Vec3f *v, f32 *heading, f32 *elevation);
 EffectHeader *func_151B7328(void *args, s32 selector, s32 argsSize, s32, s32);
-s32 func_15145128(Vec3f *v, Vec3f *out, f32 *length, f32 *invLength);
 
 /* Fires a projectile from `from` towards `to` at speed 80, with a ribbon trail. Does nothing if
  * the two points coincide. */

@@ -27,13 +27,12 @@ typedef struct {
     /* 0x62 */ u8 pad62[2];
     /* 0x64 */ f32 pending; /* particles owed, accumulated by rate */
     /* 0x68 */ f32 floorY;  /* lowest point of the spawn segment */
-    /* 0x6C */ s32 unk6C;   /* from func_1510FD20 at the segment's midpoint */
+    /* 0x6C */ s16 *unk6C;   /* from func_1510FD20 at the segment's midpoint */
     /* 0x70 */ u8 flags;
     /* 0x71 */ u8 pad71[7];
 } SprayEmitter; /* size 0x78 */
 
 extern void func_1510F800(s32);
-extern s32 func_151464B8(s32);
 extern SprayTrail *func_15147DA0(EffectTemplate20 *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4,
                             s32 finishFn, s32 hitFn, s32 hitKind3Fn, s32 arg8, s32 arg9, s32 arg10,
                             TrailRender *render, s32 arg12, s32 arg13, s32 arg14);
@@ -48,7 +47,7 @@ void func_15189900(SprayDesc *desc, u8 arg1) {
     if (emitter != NULL) {
         memcpy(&emitter->desc, desc, sizeof(SprayDesc));
         func_1510F800(0);
-        emitter->unk6C = func_1510FD20((s32)(emitter->desc.origin.x + (emitter->desc.extent.x * 0.5f)),
+        emitter->unk6C = (s16 *)func_1510FD20((s32)(emitter->desc.origin.x + (emitter->desc.extent.x * 0.5f)),
                                        (s32)(emitter->desc.origin.z + (emitter->desc.extent.z * 0.5f)));
         if (arg1 != 0) {
             flag = 1;

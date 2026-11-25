@@ -48,15 +48,8 @@ WavyBeamEffect *func_151B5240(s16 duration, u8 arg1, s32 arg2) {
     return effect;
 }
 
-void func_15143134(const f32 *in, Vec3f *out, MtxF *mtx);
-Gfx *func_15142E24(Gfx *, u8 *, s32, s32, s32, s32, s32, u8, s32, u8 *, s32);
-Gfx *func_15142B7C(Gfx *, s32, s32);
-Gfx *func_15142C10(Gfx *, s32, s32, s32, s32, u8 *);
-Gfx *func_15142CF0(Gfx *, s32, s32, s32, s32, s32, s32, u8 *);
-Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
-f32 func_15143E64(Vec3f *);
 extern u8 D_8008FB80;
 extern u8 D_8008FB84;
 extern u8 D_80090F68[];

@@ -46,8 +46,6 @@ typedef struct {
     /* 0x1C */ s32 unk1C;
 } Arg11D60;
 
-extern ObjRec *func_151438D8(s32, s32, u16, ObjRec *);
-
 void func_15011D40(void) {
     func_15103800();
 }

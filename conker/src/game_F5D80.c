@@ -3,8 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-void func_15143794(s32 heading, s32 pitch, f32 speed, f32 *out);
-
 typedef struct {
     f32 x; /* sin of the segment angle */
     f32 z; /* cos of the segment angle */
@@ -139,10 +137,6 @@ typedef struct {
 extern RingProfile D_80088820;
 extern s32 *D_80090E84;
 extern struct { s32 unk0; s32 unk4; } D_800A4AC8[];
-Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
-Gfx *func_15142CF0(Gfx *, s32, s32, s32, s32, s32, s32, u8 *);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 
 /*
  * Draws a ring effect as a strip of quads: for every segment direction, the ring profile

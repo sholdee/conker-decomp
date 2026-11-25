@@ -15,13 +15,9 @@ s32 func_151C229C(Vec3f *pos, Vec3f *dir, Vec3f *arg2, Vec3f *arg3, s32 arg4, s3
                   f32 arg8, f32 arg9, f32 arg10, s32 arg11, Actor *arg12, s32 arg13, s32 arg14, s32 arg15,
                   s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24,
                   s32 arg25, s32 arg26);
-void func_15145740(Actor *arg0, Vec3f *arg1, Vec3f *arg2, Vec3f *arg3, f32 arg4);
-s32 func_1514654C(Actor *, ModelAttachment *, s32, Vec3f **points, Vec3f **results, s32 count);
 void func_151D5174(Actor *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f **,
                    Vec3f **, Vec3f *);
-s32 func_15142A5C(Actor *arg0);
 void func_151D5148(Actor *arg0);
-s32 func_15145EA4(Vec3f **points, Vec3f **results, s32 matrix, s32 count);
 void func_151D3F14(Vec3f *arg0, u8 arg1, s32 arg2);
 void func_151D4408(Vec3f *, Vec3f *, s32, Actor *, f32, u8, s32);
 void func_151C6D70(Actor *, u8, Vec3f *, s16, u8, s32);
@@ -151,7 +147,6 @@ s32 func_151C62D0(Actor *arg0, u8 side, u8 arg2, ModelAttachment *attachment, s1
                          -1, 0, arg5, arg6);
 }
 
-void func_15143134(Vec3f *point, Vec3f *out, s32 matrix);
 void func_151C69CC(Actor *arg0, Vec3f *out, u8 side);
 
 /* Handler-table entry: the side-0 point of func_151C69CC. */

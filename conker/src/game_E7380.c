@@ -6,7 +6,6 @@
 extern s32 func_151E7EF8[];
 extern s32 func_151E7F60[];
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, CollisionTri *, f32 *, f32 *, f32 *, void *, s32 *, void *, f32);
-extern s32 func_15145C90(s32);
 
 /*
  * Called when the actor has moved from (prevX, prevZ): casts a ray from 80 units above it back towards

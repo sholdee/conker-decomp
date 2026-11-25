@@ -4,7 +4,6 @@
 #define func_15142314 func_15142314_functions_h
 #include "functions.h"
 #undef func_15142314
-void func_15142314(MtxF *bones, u8 bone, Vec3f *out, Actor *actor);
 #include "variables.h"
 #include "effects.h"
 

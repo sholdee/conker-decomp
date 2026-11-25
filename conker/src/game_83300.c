@@ -2671,7 +2671,6 @@ s32 func_1505C7D8(Actor *arg0, s32 arg1);
 extern s32 D_800B2CD0;
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, void *, void *, void *, f32 *, s32, s32, f32);
 void func_1507C3E0(Actor *, s16 *, s32, s32);
-f32 func_15143E64(f32 *);
 
 /* Tests the attacker's active attack (unkD0) against every other actor and applies the hits; returns the hit mask. */
 s32 func_1505C7D8(Actor *attacker, s32 selfSlot) {

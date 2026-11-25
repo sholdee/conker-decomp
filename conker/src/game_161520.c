@@ -12,11 +12,6 @@ void func_151D9B8C(u8, f32, u8, void *, Vec3f *, s16, u8, u8, u8, u8, s32);
 #include "variables.h"
 #undef D_800A3F14
 
-/* Transforms the point `in` by a 4x4 matrix into `out`. */
-extern void func_15143134(void *in, void *out, void *matrix);
-extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
-extern s32 func_15146078(Vec3f *, Vec3f *, Vec3f *);
-
 /* Scale factors passed to func_1513A24C (all 1.0f). */
 const f32 D_800A3C30[15] = {
     1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
@@ -697,8 +692,6 @@ void func_151353A8(BloodStrip *arg0) {
     D_80089B88[mode](strip);
 }
 
-extern s32 func_15145EA4(Vec3f **in, Vec3f **out, void *matrix, s32 count);
-
 /* Transforms inA and inB by matrix into outA and outB. */
 void func_15135424(void *matrix, Vec3f *inA, Vec3f *inB, Vec3f *outA, Vec3f *outB) {
     Vec3f *in[2];
@@ -991,7 +984,6 @@ extern s32 func_15046460(Vec3f *, u16, f32, CollisionHit *);
 extern void func_151DB5D0(u8, void *, Vec3f *, f32, f32, f32, f32, s32, s32, s32, s32, s32, u8, s32);
 extern void func_151DA6F8(void *, Vec3f *, f32, s16, s32, f32, s32, s32, f32, f32, s32, u8, s32, s32, s32, s32, u8, s32);
 extern void func_151D9014(void *, void *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
-extern void func_15143794(s16, s16, f32, f32 *);
 
 /* Blood spray from `from` towards `to`; splashes droplets instead when the ground below is surface type 3. */
 void func_15135DD0(Vec3f *from, Vec3f *to, f32 radius, u8 arg3, s32 arg4) {
@@ -1069,7 +1061,6 @@ void func_15135DD0(Vec3f *from, Vec3f *to, f32 radius, u8 arg3, s32 arg4) {
     }
 }
 
-extern void func_15143874(s16, f32, f32 *, f32 *);
 void func_1504715C();
 s32 func_15046C80(Vec3f *, u16, f32, CollisionHit *);
 
@@ -1367,7 +1358,6 @@ void func_15136C3C(Actor *actor, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
 }
 
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, f32 *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
-extern s32 func_15145C90(s32);
 extern void func_151DC034(Vec3f *, f32, s32, s16, u8, u8, s32);
 
 /* Blood for an impact from `from` to `to`: a burst, a spray along the decalPos and wall decals. */
@@ -1566,7 +1556,6 @@ void func_15137610(Actor *actor, Vec3f *from, Vec3f *to,
 typedef void *(*Blood3783CSpawn)(Vec3f *, Vec3f *, f32, Vec3f *, Vec3f *, f32,
                                  s32, s32, s32, f32, s32, s32, s32, s32);
 
-s32 func_1514672C(f32 *);
 void *func_151B5BF0(Vec3f *, Vec3f *, f32, Vec3f *, Vec3f *, f32, s32, s32,
                     s32, f32, s32, s32, s32, s32);
 /* Blood when an actor dies: a burst, a splat and, on flagged ground, a pool and a chunk. */

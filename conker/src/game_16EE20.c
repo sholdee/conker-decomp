@@ -7,7 +7,7 @@
 #include "variables.h"
 #include "effects.h"
 
-typedef struct {
+struct Msg151419D0 {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ union {
         s32 w;
@@ -15,7 +15,7 @@ typedef struct {
     } unk4;
     /* 0x08 */ u8 unk8;
     /* 0x09 */ u8 unk9;
-} Msg151419D0;
+};
 
 /* The block at 0x28 of the receiving object. */
 typedef struct {
@@ -25,10 +25,10 @@ typedef struct {
 } Link151419D0;
 
 /* An object carrying a Link151419D0 at 0x28. */
-typedef struct {
+struct LinkedObject151419D0 {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ Link151419D0 link;
-} LinkedObject151419D0;
+};
 
 /* Calls func_1514EDF0 with the object and its owner (link.unk4). */
 void func_15141970(LinkedObject151419D0 *obj) {
@@ -83,10 +83,7 @@ typedef struct {
 
 typedef s32 (*EffectSelector)(s32, Actor *);
 
-s32 func_15141C0C(Actor *actor);
-s32 func_15141CC0(u32 arg0);
 u32 func_1510F8CC(s32);
-void func_15141E38(Actor *actor, s32 handler);
 
 /* Runs the actor's model-specific effect selector, then every attached timed effect's handler. */
 void func_15141A7C(Actor *actor, s32 arg1) {
@@ -251,11 +248,11 @@ void func_15141E38(Actor *actor, s32 handler) {
     }
 }
 
-typedef struct {
+struct Source15141F78 {
     /* 0x00 */ f32 unk0;
     /* 0x04 */ u8 unk4[0x14];
     /* 0x18 */ s32 unk18;
-} Source15141F78;
+};
 
 /* Spawns a burst of particles of the given kind, sized by `scale`. */
 void func_15141F78(u8 kind, Source15141F78 *src, f32 scale, u8 arg3, Vec3f *pos, u8 arg5) {
@@ -294,14 +291,14 @@ void func_15141F78(u8 kind, Source15141F78 *src, f32 scale, u8 arg3, Vec3f *pos,
 }
 
 /* Template copied onto the stack for func_150A2AEC. */
-typedef struct {
+struct Args151420F8 {
     s32 unk0;
     s32 unk4;
     s32 unk8;
     s32 unkC;
     s32 unk10;
     s32 unk14;
-} Args151420F8;
+};
 
 const Args151420F8 D_800A5200 = { 0x402E, 0x402F, 0x4030, 0x4031, 0x4032, 0x4033 };
 s32 func_150A2AEC(s32, s32, Args151420F8 *, s32);

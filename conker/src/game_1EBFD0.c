@@ -67,7 +67,6 @@ typedef struct {
 } S151BECB8;
 
 extern void func_1515C1A0(Actor *, f32 *, f32 *, f32 *);
-extern f32 func_15143E64(Vec3f *);
 s32 func_151BEE94(Actor *arg0);
 
 /*

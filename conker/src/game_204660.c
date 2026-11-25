@@ -41,8 +41,6 @@ extern s32 (*D_8008FCA8[])(AnchoredTrailEmitter *);
 extern Vec3f D_800AB280[];
 extern u8 D_800AB2D4[];
 
-extern f32 func_15143E64(Vec3f *);
-void func_15143134(Vec3f *offset, f32 *out, Mtx *mtx);
 void func_151D77C8(AnchoredTrailEmitter *emitter);
 void func_151D7830(AnchoredTrailEmitter *emitter);
 
@@ -419,8 +417,6 @@ s32 func_151D7A38(AnchoredTrail *trail) {
     return 1;
 }
 
-extern f32 func_15144528(f32, f32, f32);
-
 /*
  * Shapes the trail, walking from the newest point to the oldest: limits its length to 80 (shortening
  * the last segment and dropping older points), scrolls the texture along it, and fades the alpha out
@@ -548,10 +544,6 @@ typedef struct {
 } Mode151D80C4;
 extern Mode151D80C4 D_800A4AC8[];
 void func_151D5D60(void *, s16, s32, void **, u8 *);
-Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142E24(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *needSync, s32 argA);
-Gfx *func_15142FBC(Gfx *gfx, s32 modeH, s32 modeL, u8 *needSync);
-
 
 /*
  * Draws the trail as a ribbon 11 units wide, spread sideways by view's cos/sin (D_800DD1E8/D_800DD1D8), from

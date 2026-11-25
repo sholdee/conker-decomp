@@ -184,7 +184,6 @@ EffectObj *func_15147A80(EffectTemplate *header, s32 dataSize, s32 itemSize, s32
     return obj;
 }
 
-extern void *func_151462C8(void *, void *, u8, void *, s32, s16, void *, s32, void *);
 extern void *(*D_8008A2A4[])(EffectObj *, void *, s16);
 
 /* Draws the object through func_151462C8 and then its drawKind handler; returns the advanced display list. */

@@ -8,7 +8,6 @@ extern f32 D_8009FD3C[3];
 extern f32 D_8009FD48[3];
 
 // matching: the model is passed as s32; a pointer type moves the ob_matrix_ptr temp from v0 to a3
-void func_15143134(f32 *in, f32 *out, void *mtx);
 void func_1515C244(Actor *, f32 *, f32 *, f32 *);
 void func_1504715C(CollisionHit *, Actor *);
 s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
@@ -220,7 +219,6 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
     }
 }
 
-void func_15143794(s16, s16, f32, f32 *);
 void *func_1518A3C0(f32 *, f32 *, f32, f32 *, f32 *, f32, f32, u8, s16, u8, s32, u8, s32);
 
 /*
@@ -308,7 +306,6 @@ void func_150B85C0(Vec3f *center, f32 *height, f32 *radius, u8 arg3, s32 arg4) {
     func_15130374(&spawn, 1, 0, arg3, arg4);
 }
 
-extern void func_15143874(s16 angle, f32 speed, f32 *outX, f32 *outZ);
 void *memcpy(void *, const void *, u32);
 
 /* Spawns one particle at (x, y, z) moving along `angle`; its extra data is a float. */

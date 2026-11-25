@@ -19,7 +19,6 @@ extern f32 D_800DCA10;
 
 void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 Gfx *func_15094FE8(Gfx *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-s32 func_1514306C(s32 *, s32, s32, u8);
 
 /* Debug tunable stub: returns the midpoint of min and max (the name and source location are unused). */
 s32 func_151422C0(s32 id, const char *name, s32 min, s32 max, const char *file, s32 line) {
@@ -552,7 +551,7 @@ void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z) {
 }
 
 /* Binary-angle (256 per turn) version of func_151436B4. */
-void func_15143794(s32 yaw, s32 pitch, f32 length, f32 *out) {
+void func_15143794(s16 yaw, s16 pitch, f32 length, f32 *out) {
     f32 cosYaw;
     f32 sinYaw;
     f32 cosPitch;
@@ -578,7 +577,7 @@ void func_15143834(s16 yaw, s16 pitch, f32 length, f32 *out) {
 }
 
 /* Binary-angle version of func_1514373C. */
-void func_15143874(s32 angle, f32 length, f32 *x, f32 *z) {
+void func_15143874(s16 angle, f32 length, f32 *x, f32 *z) {
     f32 c;
     f32 s;
     u8 quarter;
@@ -589,8 +588,6 @@ void func_15143874(s32 angle, f32 length, f32 *x, f32 *z) {
     *x = length * s;
     *z = length * c;
 }
-
-void func_15143D18(s32 *start, s32 *end, s32 lo, s32 hi);
 
 /*
  * Searches zones[start..end) for a record equal to `key` in the fields selected by `fields`.
@@ -1281,11 +1278,11 @@ s32 func_15144CEC(f32 *pos, f32 *screen, f32 *outA, f32 *outDepth, f32 *outInvDe
 }
 
 /* A triangle as three s16 vertices. */
-typedef struct {
+struct Tri15144E80 {
     s16 v0[3];
     s16 v1[3];
     s16 v2[3];
-} Tri15144E80;
+};
 
 /*
  * Edge vectors of a triangle: normal = (v0 - v1) x (v2 - v1), binormal = edge x normal, edge = v0 - v1.
@@ -1366,9 +1363,6 @@ s32 func_15145128(Vec3f *v, Vec3f *out, f32 *length, f32 *invLength) {
     out->z = *invLength * v->z;
     return 1;
 }
-
-s32 func_151452C4(Vec3f *origin, Vec3f *dir, Vec3f *center, f32 radius, Vec3f *hitNear,
-                  Vec3f *hitFar, f32 *tNear, f32 *tFar);
 
 /* Ray/sphere test (see func_151452C4) that also requires the hit to be closer than maxDist. */
 s32 func_151451F0(Vec3f *origin, Vec3f *dir, Vec3f *center, f32 radius, f32 maxDist, Vec3f *hitNear,
@@ -1468,8 +1462,6 @@ s32 func_151454BC(u8 index, f32 radius, Vec3f *point) {
     }
     return 1;
 }
-
-s32 func_1514563C(Vec3f *start, Vec3f *dir, Vec3f *point, Vec3f *out, f32 *t);
 
 /* Closest point to `point` on the segment start .. start + dir, into out (t optional). */
 void func_15145548(Vec3f *start, Vec3f *dir, Vec3f *point, Vec3f *out, f32 *t) {
@@ -1918,8 +1910,6 @@ void func_15146508(Actor *a, Actor *b) {
     msg.idB = b->unique_id;
     func_15169040(&msg, 45, a, b);
 }
-
-void func_15145EA4(f32 **, f32 **, Mtx *, s32);
 
 /*
  * Transforms `count` offsets by the matrix of a model attachment on the actor: its animation's part

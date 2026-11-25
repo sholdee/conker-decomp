@@ -60,8 +60,6 @@ void func_150D8B10(Actor *actor, Vec3f *out) {
     out->z = actor->zpos;
 }
 
-void func_15145740(Actor *actor, Vec3f *target, Vec3f *dir, Vec3f *offsetDir, f32 pitchOffset);
-
 /* Trail launch vector from the actor (func_15145740's offset direction). */
 void func_150D8B3C(Actor *actor, Vec3f *out) {
     Vec3f target;
@@ -292,8 +290,6 @@ s32 func_150D8FAC(PissTrail *trail) {
 
 f32 sqrtf(f32);
 
-extern f32 func_15143E64(f32 *);
-extern f32 func_15144528(f32, f32, f32);
 extern void func_15081690(Actor *, f32, f32, f32, f32, f32, f32, RayHit *, f32, s32, s32, s32, s32, s32, s32);
 extern void func_1505A250(f32, f32, f32, f32 *, f32 *);
 extern void func_1505D024(Actor *, s32, u16, s32);
@@ -506,10 +502,6 @@ s32 func_150D942C(PissTrail *trail) {
 }
 
 void func_151D5D60(void *, s16, s32, void **, u8 *);
-Vec3f *func_15144B34(s32);
-Gfx *func_15142E24(Gfx *, u8 *, s32, s32, s32, s32, s32, u8, s32, u8 *, s32);
-Gfx *func_15142B7C(Gfx *, s32, s32);
-Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
 extern s32 D_800A4AC8[][2];
 
 /* Draws the trail as a camera-facing ribbon, one quad per segment. */

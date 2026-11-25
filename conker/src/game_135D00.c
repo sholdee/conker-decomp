@@ -22,7 +22,6 @@ typedef struct {
 
 #define LAMP_DATA(model) ((LampData *)DYNMODEL_USERDATA(model))
 
-DynModel *func_1513B5E0(DynModelDesc *desc, u8 arg1, s32 userDataSize, u8 arg3, s32 arg4);
 LightEffect *func_1516037C(LightEffectHeader *header, PointLight *light, s32 size, u8 arg3, s32 arg4);
 
 /*
@@ -309,8 +308,6 @@ void func_151090DC(void) {
     target = D_80088C58;
     func_15169260(&target, 2, 0, 0x1E);
 }
-
-Vec3f *func_15144B34(s32);
 
 /*
  * Draw function 4: builds the lamp matrix and recomputes the texture coordinates of the 16 vertices of

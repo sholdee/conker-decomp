@@ -4,7 +4,6 @@
 #include "effects.h"
 
 u8 func_151D8E20(void);
-void func_15143794(s32 yaw, s32 pitch, f32 length, f32 *out);
 void func_151D9014(f32 *position, f32 *velocity, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32,
                    s32, s32, s32, s32);
 void func_151D5D60(void *buffers, s16 index, s32 size, void **out, u8 *fresh);

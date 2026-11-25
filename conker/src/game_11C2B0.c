@@ -47,8 +47,6 @@ static const u8 D_800A180C[2][2] = { { 0x16, 0x1A }, { 0x09, 0x06 } };
 extern s32 (*D_8008FD00)(s32, u8);
 extern f32 sinf(f32);
 
-void func_15143134(void *, f32 *, Mtx *);
-void func_15143874(s32, f32, f32 *, f32 *);
 void func_151C329C(void *, s32, s32);
 LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 s32 func_15160A58(s32, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
@@ -296,7 +294,6 @@ AimedBeam *func_150EEF80(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     return beam;
 }
 
-s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
 void func_15081690(void *, f32, f32, f32, f32, f32, f32, void *, f32, s32, s32, s32, s32, s32, s32);
 s32 func_1505D024(void *, s32, s32, s32);
 void func_1502EA98(void *, s32, s32, s32, s32, s32, s32);
@@ -510,7 +507,6 @@ s32 func_150EFA4C(BeamSpark *spark) {
     return 1;
 }
 
-extern void func_15143794(s16, s16, f32, f32 *);
 extern void func_1515C2F0(EffectTemplate18 *, s32, TrailBurstParams *, s32, s32, s32);
 
 /* Per-frame update of a beam's emitter: spawns about 0.36-0.66 particles per frame at the beam's end. */
@@ -787,7 +783,6 @@ void func_150F03E8(LightEffect *flash) {
     beam->link.flash = NULL;
 }
 
-extern s32 func_15145EA4(f32 **src, f32 **dst, Mtx *mtx, s32 count);
 s32 func_151C229C(Vec3f *, Vec3f *, s32, s32, s32, s32, f32, f32, f32, f32, f32, s32, Actor *,
                   s32, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, s32, s32, s32);
 

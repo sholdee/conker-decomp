@@ -100,7 +100,6 @@ u8 func_151C43E0(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt);
 void func_151C4510(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt);
 s32 func_151C455C(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt);
 void *memcpy(void *, const void *, u32);
-s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
 s32 func_151D5B6C(Vec3f *, Vec3f *, Actor *, s8, s32);
 s32 func_151C4B0C(RayHit *arg0, RayHit *arg1, Vec3f *arg2, Vec3f *arg3, f32 *arg4, f32 arg5,
                   u8 arg6, Vec3f *arg7, Vec3f *arg8, u8 *arg9, u8 arg10, f32 arg11, void *arg12, s8 arg13,
@@ -305,7 +304,6 @@ s8 func_151C2734(Game1EF500Trail *trail) {
 }
 
 void func_151D5D60(u8 **, s16, s32, void **, u8 *);
-Vec3f *func_15144B34(s32);
 
 /*
  * Builds the projectile's tail for view index: a quad from its position back along accel, widened

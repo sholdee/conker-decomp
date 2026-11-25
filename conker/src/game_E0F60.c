@@ -3,12 +3,8 @@
 #include "variables.h"
 #include "effects.h"
 
-extern void func_15143134(Vec3f *in, Vec3f *out, Mtx *mtx);
 extern void func_151D3FF4(Vec3f *, u8, s32);
 extern Vec3f D_8009FBC0; // a point in bone space
-
-extern void func_151429E0(u8, u8 *, u8 *, u8 *);
-
 
 /* Spawns an effect at bone 25 of obj, plus a camera event (type 1, 12-27 long) and a func_151D3FF4 at the same point. */
 void func_150B3AB0(Actor *obj, u8 arg1) {

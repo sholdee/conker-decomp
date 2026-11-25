@@ -9,13 +9,10 @@ s32 func_150A2AEC(s32 index, s32 count, const s32 *list, Actor *actor);
 
 void func_1504715C(CollisionHit *hit, Actor *actor);
 s32 func_15046C80(Vec3f *probe, s32 arg1, f32 bottom, CollisionHit *hit);
-void func_15141F78(u8, CollisionHit *, f32, u8, Vec3f *, u8);
-void func_15142180(u8, Vec3f *, s32, f32, f32);
 u8 func_151D8E20(void);
 void func_151DAB58(u8, f32, u8, Vec3f *, s32, u8, u8);
 extern u8 (*D_8008FD1C)(void);
 extern u8 (*D_8008FD30)(void);
-void func_15143794(s16 yaw, s16 pitch, f32 distance, f32 *out);
 
 /* Get the position of one of the actor's bones (0x13 for side 1, 0x17 for side 2; any other side
    fails with 0).  With a `hit` buffer, also look for the ground below that point and return
@@ -45,8 +42,6 @@ s32 func_15146890(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side) {
     func_1504715C(hit, actor);
     return func_15046C80(&probe, 0, pos->y - 50.0f, hit);
 }
-
-s32 func_151420F8(Actor *actor);
 
 /* Map an actor's damage/effect kind onto the particle-effect id used for it.  Most kinds are a
    fixed id; kind 1 depends on the current world (level) and, in world 4, on whether

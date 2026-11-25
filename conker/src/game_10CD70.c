@@ -310,8 +310,6 @@ void func_150E02C0(BoltEmitter *emitter, s32 arg1, u8 arg2) {
     func_15149514(arg1, arg2, &emitter->src.obj, &emitter->src.id, emitter);
 }
 
-void func_1513BAE8(void);
-
 /* One-time setup, guarded by the D_80088980 flag. */
 void func_150E0300(void) {
     if (D_80088980 == 0) {
@@ -341,7 +339,6 @@ void func_150E0348(Actor *actor, u8 arg1, s32 arg2) {
     func_1513418C(&desc, 0, arg1, arg2);
 }
 
-void func_15143794(s16, s16, f32, void *);
 void func_151A26EC(f32 *, f32 *, f32 *, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Blood-drip emitter callback (D_80089A70): spawns one drop at (x, y, z), flung in a random
@@ -410,7 +407,6 @@ extern u8 D_80088988;
 /* Effect start and end points (bone space) of the two slots. */
 static const f32 D_800A0F70[2][3] = { { 17.0f, 0.0f, 90.0f }, { -17.0f, 0.0f, 90.0f } };
 static const f32 D_800A0F88[2][3] = { { 17.0f, 0.0f, 150.0f }, { -17.0f, 0.0f, 150.0f } };
-extern s32 func_15145EA4(f32 **src, f32 **dst, Mtx *mtx, s32 count);
 
 /* Spawns a func_15102B38 effect between points D_800A0F70[slot] and D_800A0F88[slot] of the
  * actor's bone D_80088988, starting at the first point in world space. */

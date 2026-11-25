@@ -3,7 +3,6 @@
 #include "variables.h"
 
 void func_151D3FF4(Vec3f *, u8, s32);
-extern void func_151429E0(u8, u8 *, u8 *, u8 *);
 
 s32 func_150B2480(s32 arg0, s32 arg1) {
     return 10;

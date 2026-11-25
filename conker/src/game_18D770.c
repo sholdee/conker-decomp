@@ -308,8 +308,6 @@ LightEffect *func_15160A58(Actor *actor, u8 bone, Vec3f *offset, u8 arg3, s16 li
     return effect;
 }
 
-void func_15143134(f32 *in, f32 *out, MtxF mtx);
-
 /* Moves the light to its actor (or the bone point); returns 0 once the actor is gone. */
 u8 func_15160B74(LightEffect *effect) {
     u8 result;
@@ -387,8 +385,6 @@ LightEffect *func_15160CDC(Actor *actor, u8 bone, Vec3f *start, Vec3f *end, f32 
 }
 
 void func_15081690(Actor *, f32, f32, f32, f32, f32, f32, RayHit *, f32, s32, s32, s32, s32, s32, s32);
-s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
-s32 func_15145EA4(f32 **in, f32 **out, MtxF mtx, s32 count);
 
 /* Casts the beam and puts the light where it hits; the light is off and at the actor when nothing is hit. */
 s32 func_15160E30(LightEffect *effect) {
@@ -1662,8 +1658,6 @@ s32 func_151643F8(LightEffect *effect) {
     func_1516441C(effect, &effect->data.transformed);
     return 1;
 }
-
-void func_15145CD0(s32 mtx, LightTransformed **in, f32 **out, s32 count);
 
 /* Moves the light to the point transformed by its matrix. */
 void func_1516441C(LightEffect *effect, LightTransformed *point) {

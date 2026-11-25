@@ -241,10 +241,6 @@ extern EffectTexture D_80090B60[];
 extern Mode150DD640 D_800A4AC8[];
 void *memcpy(void *, const void *, u32);
 void func_151D5D60(Vtx **buffers, s16 view, s32 size, Vtx **vtx, u8 *fresh);
-Gfx *func_15142E24(Gfx *gfx, EffectTexture *texture, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
-Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
-Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 
 // matching: the original branches on the axis index around two identical stores
 #define SET_TEXCOORD(vtx, axis, value) \

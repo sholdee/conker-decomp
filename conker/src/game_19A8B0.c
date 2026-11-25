@@ -266,9 +266,6 @@ typedef struct ParticleSprite {
 } ParticleSprite;
 
 extern EffectTexture *D_8008CA4C[];
-Gfx *func_15142E24(Gfx *gfx, s32 texture, s32 frame, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7,
-                   s32 sprite, u8 *synced, s32 argA);
-Gfx *func_15142FBC(Gfx *gfx, s32 othermodeH, s32 othermodeL, u8 *synced);
 Gfx *func_15095760(Gfx *gfx, ParticleSprite *sprite);
 
 Gfx *func_1516D738(Gfx *gfx, StyleParticle *particle, s32 arg2) {

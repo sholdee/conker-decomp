@@ -10,14 +10,6 @@
  * (a random float). Angles are 256-step binary angles; func_151423D8 is their cosine.
  */
 
-/* Vector helpers (game_16EE20.c). */
-extern s32 func_15144E80(s16 *, Vec3f *, Vec3f *, Vec3f *); /* triangle edges + normal */
-extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);          /* normalize */
-extern f32 func_15144A74(Vec3f *, Vec3f *);                        /* dot product */
-extern s32 func_15146078(Vec3f *, Vec3f *, Vec3f *);       /* two axes perpendicular to a direction */
-extern void func_15143794(s16, s16, f32, f32 *); /* (yaw, pitch, length) -> vector */
-extern void func_15143874(s32, f32, f32 *, f32 *);
-
 /* Builds a cone basis from a triangle: the axes are two triangle edges, the direction is its normal,
  * flipped to face the same side as source->normal. */
 void func_1514F640(TriangleSource *source, ConeBasis *cone) {
@@ -391,7 +383,6 @@ void func_1515080C(DebrisSpray *config, s32 *variantIds, f32 *variantScales, s32
     }
 }
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, CollisionTri *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
-extern s32 func_15145C90(s32);
 
 /* Casts a random number of rays from config->origin and spawns a decal (func_151D9B8C) on each
  * suitable surface hit closer than config->maxDistance. */

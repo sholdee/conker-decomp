@@ -483,9 +483,6 @@ f32 func_15165B80(CamWobbleEnv *wobble) {
                          wobble->falloff.invFadeRange);
 }
 
-extern Vec3f *func_15144B34(s32);
-extern f32 func_15143E64(Vec3f *);
-
 /* 1 within radius of origin, 0 beyond radius + fadeRange, linear in between. */
 f32 func_15165BB0(CamWobble *wobble, Vec3f *origin, f32 radius, f32 fadeRange, f32 invFadeRange) {
     f32 scale;

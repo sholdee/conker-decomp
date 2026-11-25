@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_15143794(s16 yaw, s16 pitch, f32 distance, f32 *out);
-
 void func_1504715C(CollisionHit *hit, Actor *actor);
 s32 func_15046C80(Vec3f *probe, s32 arg1, f32 bottom, CollisionHit *hit);
 

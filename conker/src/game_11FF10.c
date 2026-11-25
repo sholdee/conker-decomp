@@ -6,7 +6,6 @@ static const f32 D_800A1950[3] = { 0.0f, 24.0f, 11.0f };
 static const f32 D_800A195C[3] = { 0.0f, 71.0f, 9.0f };
 
 s32 func_1509BE40();
-void func_15143134(f32 *, f32 *, Mtx *);
 
 // matching: D_800CC5EC is movement_obj[0].mv; func_150F2A60 tests it through the array and reads through
 // this alias so IDO reloads it (as the original does) instead of reusing the first load
@@ -77,8 +76,6 @@ void func_150F2C8C(Actor *target) {
 }
 
 void func_1502EA98(Actor *, s32, s32, s32, s32, s32, s32);
-void func_15145EA4(f32 **, f32 **, Mtx *, s32);
-extern s32 func_15146078(Vec3f *, Vec3f *, Vec3f *);
 
 /* Emitter update: while the target lives, emits a burst of 3 particles from its bone 15 each time its unk222
  * changes to a nonzero value. */

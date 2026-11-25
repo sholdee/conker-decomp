@@ -93,7 +93,6 @@ void func_151B8668(Bullet *bullet, u8 fxOwner, s32 fxList) {
     func_15134908(&desc, 0, fxOwner, fxList);
 }
 
-void func_15143794(s16 yaw, s16 pitch, f32 speed, f32 *out);
 void func_151A26EC(f32 *, f32 *, f32 *, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Emitter callback (D_80089B08): spawns one particle at (x, y, z), flung in a random direction and

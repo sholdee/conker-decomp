@@ -8,8 +8,6 @@ static const f32 D_800A18CC[3] = { 1.0f, 1.0f, 1.0f };
 static const s32 D_800A18D8[2] = { 0x2D, 0x2E };
 static const f32 D_800A18E0[2] = { 1.0f, 1.0f };
 
-void func_15143134(void *, f32 *, Mtx *);
-void func_15143874(s32, f32, f32 *, f32 *);
 void func_151C329C(void *, s32, s32);
 
 typedef struct {

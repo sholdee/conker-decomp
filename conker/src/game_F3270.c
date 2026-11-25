@@ -200,7 +200,6 @@ void func_150C6438(WatcherEmitter *obj) {
 }
 
 extern Vec3f D_800887D0;
-void func_15143134(Vec3f *in, Vec3f *out, MtxF *mtx);
 u8 func_151D8E20(void);
 
 /* Spawns the emitter's particle on the surface below the actor, if there is one within 200 units. */

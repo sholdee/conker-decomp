@@ -102,8 +102,6 @@ void func_150E68B0(s32 actor, s32 arg1, s32 arg2, u8 sourceIndex) {
 }
 
 extern f32 sinf(f32);
-extern void func_151436B4(f32, f32, f32, Vec3f *);
-extern f32 func_15144528(f32, f32, f32);
 
 /* Emits this frame's particles along a sine-wobbled direction and advances the wobble phases. */
 void func_150E6B84(Game113D60Effect *effect) {
@@ -188,8 +186,6 @@ void func_150E6E34(Vec3f *out) {
     out->y = (segment->end.y - segment->start.y) * t + segment->start.y;
     out->z = (segment->end.z - segment->start.z) * t + segment->start.z;
 }
-
-extern void func_1514470C(TriggerZone *, void *);
 
 /* End callback: the position of one of the two entries of the D_800D9A20 table. */
 void func_150E6ED8(Vec3f *out) {
@@ -441,11 +437,6 @@ void func_150E76D0(f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16,
 
     func_1515548C(&arg, 0, ids, idCount, 0, owner, kind);
 }
-
-extern f32 func_15142A80(f32);
-extern f32 func_15142AC0(f32);
-extern f32 func_15142B04(f32);
-extern f32 func_15142B44(f32);
 
 /* Creates a burst effect (updated by func_150E7C9C) whose `count` points lie on a random
  * curve across the screen. */
@@ -798,8 +789,6 @@ typedef struct {
     /* 0x10 */ f32 unk10;
     /* 0x14 */ f32 unk14;
 } Game113D60Data8B1C;
-
-extern Vec3f *func_15144B34(s32);
 
 /* Spawns effect 0x34 at random points of the weighted regions within 1800 units of the
  * position func_15144B34 returns. */

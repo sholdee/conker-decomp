@@ -354,15 +354,6 @@ void func_1513CBA4(DefParticleHead *particle) {
 }
 
 extern RenderModePair D_800A4AC8[];
-Gfx *func_15142B7C(Gfx *gfx, s32 setModes, s32 clearModes);
-Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
-Gfx *func_15142CF0(Gfx *gfx, s32 m, s32 l, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
-Gfx *func_15142E24(Gfx *gfx, EffectTexture *tex, s32 frame, s32 arg3, s32 arg4, s32 arg5, s32 texture, u8 arg7, s32 arg8,
-                   u8 *needSync, s32 argA);
-Gfx *func_15142FBC(Gfx *gfx, s32 modeHi, s32 modeLo, u8 *needSync);
-void func_151441A4(s16 *r, s16 *g, s16 *b, s16 *a, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32 mode);
-void func_151442FC(s16 *r, s16 *g, s16 *b, s16 *a, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32 mode);
-Gfx *func_151462C8(Gfx *gfx, ModelLink *link, s32, s32, s32, s16 viewport, Vec3f *pos, s32, s32);
 
 /* Draws a sprite's quad (and attached model) for one viewport. */
 Gfx *func_1513CBF0(Gfx *gfx, QuadSprite *sprite, s16 viewport) {
@@ -617,9 +608,6 @@ void *func_1513D668(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expi
     return func_1513D594(def, colors, updateFn1, updateFn2, expireFn, flip, angle, width, height, arg9, argA, 0, 0, argB,
                          motionSize, argD, argE);
 }
-
-s32 func_15144E80(s32, Vec3f *, Vec3f *, Vec3f *);
-s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
 
 /*
  * Computes the two half-axes of a particle quad rotated by angle. With onSlope the quad lies on the
@@ -1381,8 +1369,6 @@ void func_1513F4B0(DefParticleHead *head, s16 viewport) {
     func_15140410(particle, &PARTICLE_MOTION(particle)->axes.u, &PARTICLE_MOTION(particle)->axes.v, viewport);
 }
 
-s16 func_15143044(u8, s32);
-
 /*
  * Combiner modes: each 16-byte entry holds the a, b, c, d inputs of cycle 0 colour, cycle 0 alpha,
  * cycle 1 colour and cycle 1 alpha, in that order.
@@ -1468,7 +1454,6 @@ s32 func_1513F728(DefParticleHead *particle) {
     return 1;
 }
 
-extern Vec3f *func_15144B34(s32 viewport);
 extern void func_150AD8B0(Vec3f *a, Vec3f *b, Vec3f *out);
 
 void func_1513FA2C(DefParticleHead *particle, s16 viewport) {

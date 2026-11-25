@@ -4,7 +4,6 @@
 
 
 extern void *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out);
 
 /* Spawns a burst at pos scaled by scale: one func_15130374 particle moving along vel,
  * 5-12 func_15132A4C pieces flung in random directions, and a func_151602C0 flash. */
@@ -108,8 +107,6 @@ void func_150E9890(Vec3f *pos, Vec3f *vel, f32 scale, u8 arg3, s32 arg4) {
     func_151602C0(&flash, &origin, (func_150ADA20() % 31U) + 70, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg3, arg4);
 }
 
-
-void func_1514470C(s32, Vec3f *);
 
 /* Emitter update (handler table entry): accumulates a random spawn rate and, for each whole unit,
  * fires a func_150E9890 burst at the spawner's source with a random direction and scale. */

@@ -5,7 +5,6 @@
 #include "variables.h"
 #include "effects.h"
 
-s32 func_1514672C(Vec3f *arg0);
 s32 func_15046C80(Vec3f *point, s32 arg1, f32 startY, CollisionHit *hit);
 void func_151D9FC0(u8 kind, f32 size, u8 arg2, s32 arg3, Vec3f *pos, u8 arg5, s32 arg6);
 void func_151DAB58(u8 kind, f32 size, u8 arg2, Vec3f *pos, volatile u8 arg4, u8 arg5, s32 arg6);
@@ -402,10 +401,6 @@ typedef struct {
     TimedEffect base;
     DripData drip;
 } DripEffect;
-
-s32 func_15144E80(s32, Vec3f *, Vec3f *, Vec3f *);
-s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
-f32 func_15144A74(Vec3f *, Vec3f *);
 
 static const Vec3f D_800AB3E8 = { 0.0f, -1.0f, 0.0f }; /* straight down */
 

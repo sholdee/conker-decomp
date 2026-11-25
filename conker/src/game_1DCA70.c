@@ -12,7 +12,6 @@ typedef struct {
     /* 0x04 */ f32 growRate;     // size gained per frame
 } SprayGrowth;
 
-void func_15143134(f32 *, f32 *, Mtx *);
 void func_1504715C(CollisionHit *, Actor *);
 s32 func_15046C80(f32 *, s32, f32, CollisionHit *);
 
@@ -211,8 +210,6 @@ s32 func_151AFC08(SprayParticle *spray) {
     }
     return 1;
 }
-
-void func_15143794(s16 yaw, s16 pitch, f32 speed, f32 *vel);
 
 /* Spawns one spark at (x, y, z), thrown in a random direction around `yaw`. */
 s32 func_151AFC88(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,

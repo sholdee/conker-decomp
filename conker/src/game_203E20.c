@@ -175,8 +175,6 @@ void func_151D6BFC(Actor *owner, u8 arg1, s32 arg2) {
     }
 }
 
-extern f32 func_15144AA8(s32);
-
 /*
  * Effect update (D_8008ADA0[3]): this frame's matrix is func_150A8050's for (0, func_15144AA8(0) + 25, 0),
  * placed 120 units above the owner and scaled by 0.551.

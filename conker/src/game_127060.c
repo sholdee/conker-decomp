@@ -173,8 +173,6 @@ void func_150F9BB0(Actor *actor, u8 owner, s32 kind) {
     }
 }
 
-extern s32 func_15145EA4(void *offsets, void *results, Mtx *mtx, s32 count);
-
 /*
  * Burst effect update: ends when the owner is gone, keeps the sparks and glows on the owner's
  * second matrix (hiding them while it has none), and shows them once the effect is 10 frames old.
@@ -287,7 +285,6 @@ typedef struct {
     /* 0xA8 */ f32 data[5];
 } ImpactParticle;
 
-extern void func_15143134(Vec3f *offset, Vec3f *out, Mtx *mtx);
 extern void func_1504715C(CollisionHit *ground, Actor *actor);
 // matching: a pointer for argument 3 (the definition has s32)
 extern void func_15153F18(AngleRange *, SplashSpray *, CollisionHit *, u8, s32);
@@ -448,8 +445,6 @@ void func_150FAA40(u8 owner, s32 kind) {
         }
     }
 }
-
-void func_1514470C(s32, Vec3f *);
 
 /* Emitter update: spawns func_150F4570 effects between the two endpoints, 0.08-0.26 per frame (times D_800BE9A4). */
 void func_150FAAEC(LineEmitter *effect) {

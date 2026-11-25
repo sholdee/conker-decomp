@@ -3,9 +3,6 @@
 #include "variables.h"
 #include "libc/string.h"
 
-extern void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z);
-extern void func_15145DB4(WorldObject *placement, Vec3f *in, Vec3f *out, s32 count);
-
 /* Spawns 25-35 particles on a ring around (111, -90, 0) in placement space, flying outward from its center. */
 void func_1518CD20(WorldObject *placement, u8 arg1, s32 arg2) {
     s16 count;

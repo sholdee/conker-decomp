@@ -95,8 +95,6 @@ DustEmitter *func_15191BE0(Actor *owner, Vec3f *offset, u8 bone, f32 rateBase, f
     return effect;
 }
 
-void func_15143134(Vec3f *in, Vec3f *out, void *matrix);
-s32 func_1514672C(Vec3f *pos);
 s32 func_15046F84(Vec3f *pos, s32 arg1, f32 minY, CollisionHit *probe);
 DustParticle *func_1519203C(Vec3f *position, Vec3f *velocity, f32 gravity, s16 lifetime, u8 alpha,
                             u8 brightness, f32 size, s32 unused, f32 floorY, CollisionTri *floor, u8 kind,
@@ -239,7 +237,6 @@ u8 func_15192308(DustParticle *particle, Vec3f *prevPos) {
     return TRUE;
 }
 
-void func_151436B4(f32, f32, f32, f32 *);
 void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32,
                   s32, s32, s32, s32, s32, s32, s32, s32);
 

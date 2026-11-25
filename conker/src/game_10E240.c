@@ -128,7 +128,6 @@ TimedEffect *func_150E1060(u8 index, u8 owner, s32 kind) {
 /* Two points per emitter index, in the prop's space (start and end of the emission direction). */
 extern Vec3f D_800A0FE4[];
 extern Vec3f D_800A0FFC[];
-extern void func_15145CD0(WorldObject *, Vec3f **, f32 **, s32);
 
 /* Emitter effect update: accumulates a random rate and, while the emitter's lookup has one of the
  * low D_80082FA0 + 1 bits set, emits one particle per whole unit along D_800A0FE4 -> D_800A0FFC. */

@@ -971,8 +971,6 @@ s32 func_15088A08(Racer *racer, f32 step) {
     return dir;
 }
 
-f32 func_15144BC8(f32);
-
 /* Places actor obj at the start of its racer's path, facing along it. */
 void func_15088D58(Actor *obj) {
     Racer *racer;

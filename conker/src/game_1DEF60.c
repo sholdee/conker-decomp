@@ -4,8 +4,6 @@
 #include "effects.h"
 
 void *memcpy(void *, const void *, u32);
-void func_15143134(Vec3f *in, Vec3f *out, MtxF *mtx);
-void func_15143874(s16 angle, f32 dist, f32 *x, f32 *z);
 
 /* Per-task data kept at offset 0x28 of the task created by func_151B1AB0. */
 typedef struct {

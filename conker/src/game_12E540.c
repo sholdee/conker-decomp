@@ -257,8 +257,6 @@ void func_15101350(BeamEndFx *fx) {
     func_1513175C((struct DescParticleHead *)fx);
 }
 
-extern void func_15143134(Vec3f *src, Vec3f *dst, f32 (*mtx)[4]);
-extern f32 func_15143E64(Vec3f *);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32 *, CollisionTri *, f32 *, f32 *, f32 *, s32, s32, s32, f32);
 
 /*
@@ -438,9 +436,6 @@ s8 func_15101378(RayBeam *beam) {
 }
 
 
-
-extern f32 *func_15144B34(s32);
-extern void func_15145548(Vec3f *, Vec3f *, f32 *, Vec3f *, s32);
 
 /*
  * Builds this frame's quad for the beam as seen from viewport `viewport`: four vertices from start to

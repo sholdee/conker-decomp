@@ -48,8 +48,6 @@ void func_150C29F0(Struct150C29F0 *emitter) {
     func_15149550(&particle, 0xA, 1, 0, emitter->base.header.owner, emitter->base.header.kind);
     emitter->base.header.state = (func_150ADA20() % 51U) + 25;
 }
-void func_1514373C(f32 arg0, f32 arg1, f32 *arg2, f32 *arg3);
-Vec3f *func_15144B34(s32);
 void *memcpy(void *, const void *, u32);
 
 void func_150C2C00(Struct150C29F0 *emitter) {

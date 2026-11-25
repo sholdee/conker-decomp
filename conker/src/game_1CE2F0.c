@@ -3,7 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-void func_15143794(s32, s32, f32, f32 *);
 void func_151A11CC(f32, f32, f32, f32, f32, s32, s32, s32,
                    s32, s32, f32, s32, s32, s32, s32, s32,
                    s32, f32, s32, s32, s32, s32, s32, s32,

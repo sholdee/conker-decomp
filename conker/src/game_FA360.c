@@ -53,8 +53,6 @@ DriftQuad *func_150CCEB0(DriftSpawn *spawn, u8 arg1, u8 arg2) {
     return effect;
 }
 
-void func_151436B4(f32 yaw, f32 pitch, f32 length, f32 *out);
-
 /* Per-frame update of a drifting quad: integrates velocity with gravity and drag, sways it while falling. */
 s32 func_150CD17C(DriftQuad *effect) {
     QuadDriftMotion *drift;
@@ -168,7 +166,6 @@ typedef struct {
 } BurstYaws;
 
 extern BurstYaws D_80088874;
-extern void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z);
 
 /*
  * Emitter update: accumulates rate over time and, for each whole unit, spawns a burst at a random distance

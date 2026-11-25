@@ -35,7 +35,6 @@ void func_150FCA30(void) {
 
 
 extern const s16 D_800A1EE0[3][2];
-extern void func_15143874(s32, f32, f32 *, f32 *);
 
 /* Spawns an effect in the middle of area D_800D9AA0[index] and 3-4 particle bursts at random angles around it. */
 void func_150FCBC0(u8 index) {

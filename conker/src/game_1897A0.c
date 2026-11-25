@@ -118,16 +118,6 @@ extern struct {
 } D_800A4AC8[];
 
 extern void func_151D5D60(void *, s16, s32, Vtx **, u8 *);
-extern void func_151441A4(s16 *outR, s16 *outG, s16 *outB, s16 *outA, s32 r0, s32 g0, s32 b0, s32 a0, s32 r1, s32 g1,
-                          s32 b1, s32 a1, s32 weight, s32 mode);
-extern void func_151442FC(s16 *outR, s16 *outG, s16 *outB, s16 *outA, s32 r0, s32 g0, s32 b0, s32 a0, s32 r1, s32 g1,
-                          s32 b1, s32 a1, s32 weight, s32 mode);
-extern Gfx *func_15142E24(Gfx *gfx, u8 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8,
-                          u8 *update, s32 argA);
-extern Gfx *func_15142B7C(Gfx *gfx, s32 setGeometryMode, s32 clearGeometryMode);
-extern Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *update);
-extern Gfx *func_15142CF0(Gfx *gfx, s32 minLevel, s32 lodFrac, s32 r, s32 g, s32 b, s32 a, u8 *update);
-extern Gfx *func_15142FBC(Gfx *gfx, s32 otherModeH, s32 otherModeL, u8 *update);
 
 /*
  * Draws the trail as a camera-facing ribbon from the newest point (i) back to the tail, one quad per segment;
@@ -440,7 +430,6 @@ typedef struct {
 /* Burst description for func_15152B38, which spawns a randomised batch of trails with func_1515C2F0. */
 
 extern TrailBurstPreset D_800A64A0[];
-extern void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out);
 
 /* Emits trail bursts at random points on a sphere around the origin, at the preset's random rate. */
 void func_1515D130(TrailBurstEmitter *owner) {

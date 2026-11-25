@@ -29,7 +29,6 @@ typedef struct {
 } Struct3DF10Tail; /* size 0x2C */
 
 extern void func_1510F800(s32);
-extern DynModel *func_1513B5E0(DynModelDesc *, s32, s32, s32, s32);
 extern LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 extern u32 osGetCount(void);
 

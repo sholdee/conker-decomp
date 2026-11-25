@@ -110,13 +110,7 @@ void func_151A7A90(Bolt *bolt) {
 
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
-Gfx *func_15142E24(Gfx *, u8 *, s32, s32, s32, s32, s32, u8, s32, u8 *, s32);
-Vec3f *func_15144B34(s32);
-void func_15145548(Vec3f *, Vec3f *, Vec3f *, Vec3f *, f32 *);
 void func_151D5D60(void *, s16, s32, void **, u8 *);
-Gfx *func_15142B7C(Gfx *, s32, s32);
-Gfx *func_15142C10(Gfx *, s32, s32, s32, s32, u8 *);
-Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
 extern s32 D_800A4AC8[][2];
 
 /*
@@ -385,10 +379,6 @@ Bolt *func_151A8624(Actor *owner, Vec3f *boneOffset, u8 bone, s16 lifetime,
 }
 
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, s32, s32 *, s32, f32);
-extern s32 func_15145C90(s32);
-extern void func_15143134(Vec3f *, Vec3f *, s32);
-extern f32 func_15143E64(Vec3f *);
-extern s32 func_15146078(Vec3f *, Vec3f *, Vec3f *);
 
 /*
  * Update hook 1 of a bolt spawned by func_151A8624: puts the start on the owner's bone and, until

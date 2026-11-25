@@ -5,8 +5,6 @@
 #include "variables.h"
 #include "effects.h"
 
-void func_1514373C(f32, f32, f32 *, f32 *);
-
 Bolt *func_151A7950(BoltDef *, s32, u8, s32);
 Bolt *func_151A7950(BoltDef *def, s32 extraSize, u8 arg2, s32 arg3);
 
@@ -54,7 +52,7 @@ Emitter *func_151A8B20(EmitterDef *def, s16 lifetime, s32 extraSize, u8 arg3, s3
                 z = state->def.pos.z;
             }
             func_1510F800(0);
-            state->zone = func_1510FD20(x, z);
+            state->zone = (s16 *)func_1510FD20(x, z);
         } else {
             state->zone = 0;
         }
@@ -71,7 +69,6 @@ Emitter *func_151A8B20(EmitterDef *def, s16 lifetime, s32 extraSize, u8 arg3, s3
 extern s32 (*D_8008F980[])(Emitter *);
 extern void (*D_8008F970[])(Emitter *, Vec3f *, f32, u8);
 
-s32 func_151464B8(s32);
 s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
 void func_151A8F1C(Emitter *, Vec3f *, f32 *, f32 *);
 void func_151A8F6C(Emitter *, Vec3f *, f32 *, f32 *);
@@ -134,15 +131,11 @@ void func_151A8CEC(Emitter *emitter) {
     }
 }
 
-extern void func_151432BC(TriggerZone *, f32 *, f32 *, f32 *, f32 *);
-
 /* Picks a random point of the anchor object's area; *top is its height. */
 void func_151A8F1C(Emitter *emitter, Vec3f *pos, f32 *top, f32 *bottom) {
     func_151432BC(emitter->state.def.anchor, &pos->x, &pos->z, top, bottom);
     pos->y = *top;
 }
-
-void func_15143874(s16, f32, f32 *, f32 *);
 
 /* Picks a random point within def.radius of def.pos; *top is def.pos.y, *bottom def.bottom. */
 void func_151A8F6C(Emitter *emitter, Vec3f *pos, f32 *top, f32 *bottom) {

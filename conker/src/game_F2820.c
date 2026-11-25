@@ -41,8 +41,6 @@ typedef struct StripObj {
     /* 0xC8 */ StripTarget target;
 } StripObj;
 
-extern f32 func_15143E64(Vec3f *);
-
 /** Allocates a strip (0xC8-byte header plus `payloadSize` bytes of payload, its target) and caches its length. */
 StripObj *func_150C5370(StripDesc *desc, s32 payloadSize) {
     StripObj *strip;
@@ -155,12 +153,6 @@ void func_150C5568(StripObj *strip) {
 
 extern s32 D_800A4AC8[][2];
 
-Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
-Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
-Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
-
 /** Draws the strip for viewport `view` as a quad from p0 to p1 widened sideways to face the camera. */
 Gfx *func_150C56A4(Gfx *gfx, StripObj *strip, s16 view) {
     s32 pad; // matching: unused stack word in the target frame
@@ -262,8 +254,6 @@ s32 func_150C5B88(StripObj *strip) {
     strip->p1.z = target->obj->zpos;
     return 1;
 }
-
-extern void func_15143134(Vec3f *in, Vec3f *out, Mtx *mtx);
 
 /**
  * Moves p1 to the target's bone-local offset transformed by its bone matrix, or to its position when it has

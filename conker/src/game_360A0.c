@@ -4,7 +4,6 @@
 #include "variables.h"
 #include "effects.h"
 
-extern void func_15143874(s16 angle, f32 dist, f32 *x, f32 *z);
 extern void func_15189900(SprayDesc *descriptor, u8 style);
 
 /* Zone handler D_80082ECC[...]: flags the zone and spawns a spray spanning its xSize, oriented by its pitch/yaw;

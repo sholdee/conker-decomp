@@ -15,11 +15,9 @@ typedef struct Game1DD500Profile {
     /* 0x0F */ u8 padF;
 } Game1DD500Profile; // size 0x10
 
-void func_15143794(s16 yaw, s16 pitch, f32 speed, f32 *out);
 void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32,
                    s32, s32, s32, s32, s32, s32, s32, s32);
 void func_1504715C(CollisionHit *, Actor *);
-void func_15143134(Vec3f *, Vec3f *, Mtx *);
 extern Vec3f D_800AA120;
 
 /* Joint matrix of an actor, as an Mtx. */
@@ -95,7 +93,6 @@ void func_151B01B8(Actor *actor, Actor *other) {
     }
 }
 
-void func_15143874(s16 angle, f32 radius, f32 *outX, f32 *outZ);
 s32 func_15046C80(f32 *, s32, f32, CollisionHit *);
 s32 func_1504697C(f32 *, s32, f32, CollisionHit *);
 void func_151DAB58(u8, f32, u8, f32 *, s32, u8, s32);

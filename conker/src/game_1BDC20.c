@@ -132,7 +132,6 @@ typedef struct {
 
 extern EmitterKind D_8008FA70[];
 void func_1504715C(CollisionHit *ground, Actor *actor);
-void func_15143134(Vec3f *offset, Vec3f *out, Mtx *mtx);
 
 /*
  * Update of the emitter: keeps its hanging drops on their bones and lets them fall when their time is up,
@@ -426,7 +425,6 @@ void func_15191400(DripEmitter *emitter) {
     bzero(emitter->slots, DRIP_SLOT_COUNT * sizeof(DripSlot));
 }
 
-s32 func_1514672C(Vec3f *pos);
 s32 func_15046C80(Vec3f *pos, s32 arg1, f32 minY, CollisionHit *ground);
 void func_151DAB58(u8, f32, u8, Vec3f *, s32, u8, u8);
 

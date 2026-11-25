@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void func_1514373C(f32 arg0, f32 arg1, f32 *arg2, f32 *arg3);
 extern s32 func_1515C0F8(Actor *arg0, f32 **arg1);
 
 /* Attaches a FollowEffect (func_150D54C8) to obj. */
@@ -148,12 +147,7 @@ void func_150D5A4C(TimedEffect *effect) {
 }
 
 
-s32 func_15145128(Vec3f *, Vec3f *, s32 *, s32 *);
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, f32 *, s32 *, s32 *, s32 *, f32 *, s32, s32 *, f32);
-s32 func_15144E80(f32 *, Vec3f *, Vec3f *, Vec3f *);
-f32 func_15144A74(Vec3f *, Vec3f *);
-void func_15146078(Vec3f *, Vec3f *, Vec3f *);
-void func_15143874(s16, f32, f32 *, f32 *);
 void func_151C05A4(Vec3f *, u8, s32);
 void func_151C05F0(Vec3f *, u8, s32);
 void func_151C0360(f32 *, s32 *, u8, s32);
@@ -429,8 +423,6 @@ void func_150D66A4(u8 arg0, u8 arg1, s32 arg2) {
     rand2 = func_150ADA20();
     func_15182670(0xFF, 0xFF, 0xFF, rand1 % 56 + 200, rand2 % 6 + 25, arg0, arg1, arg2);
 }
-
-extern void func_15143794(s16, s16, f32, Vec3f *);
 
 /* Spawns 15-25 drift particles and one grow particle that follow obj. */
 void func_150D6730(Actor *obj, u8 arg1, s32 arg2) {

@@ -33,9 +33,7 @@ void func_15088824(Racer *racer);
 u8 func_150888A8(u8 prev, u8 cur, s8 route);
 s32 func_15088A08(Racer *racer, f32 step);
 
-f32 func_15144BC8(f32);
 void func_15088F30(Racer *racer, f32 *outX, f32 *outY, f32 *outZ);
-
 
 void func_150891E8(Racer *racer, Actor *obj);
 void func_150896EC(Racer *racer, Actor *obj, s32 leave);

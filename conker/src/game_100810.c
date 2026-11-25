@@ -246,7 +246,6 @@ void func_150D3360(Actor *owner, u8 arg1, s32 arg2) {
 }
 
 void func_150D4D58(Vec3f *pos, Vec3f *vel, f32 angle, u8 arg3, s32 arg4);
-extern f32 func_15143E64(Vec3f *);
 extern s32 func_1515C0F8(Actor *, Vec3f **);
 
 /*
@@ -510,7 +509,6 @@ typedef struct {
 } TrailVtx;
 
 void func_151D5D60(Vtx **, s16, s32, Vtx **, u8 *);
-extern Vec3f *func_15144B34(s32);
 extern struct {
     s32 unk0;
     s32 unk4;
@@ -731,7 +729,6 @@ void func_150D49C0(CharacterTrail *actor, ActorMsg *msg, u8 id) {
     }
 }
 
-extern s32 func_1514654C(Actor *, ModelAttachment *, s32, Vec3f **, Vec3f **, s32);
 extern Vec3f D_800A09D0;
 extern Vec3f D_800A09DC;
 
@@ -810,8 +807,6 @@ s32 func_150D4CC4(TrailGlow *particle) {
     sub->scale += (particle->tail.targetScale - sub->scale) * 0.6500000358f;
     return 1;
 }
-
-extern void func_15143794(s16, s16, f32, f32 *);
 
 /* Throws 10-20 sparks from `pos`, fanned around the owner's facing `angle` (degrees) and against `vel`. */
 void func_150D4D58(Vec3f *pos, Vec3f *vel, f32 angle, u8 arg3, s32 arg4) {

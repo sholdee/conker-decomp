@@ -215,8 +215,6 @@ s32 func_1514AF74(Particle177B50 *p) {
     return 1;
 }
 
-extern void func_15143874(s16, f32, f32 *, f32 *);
-
 /* Spawns a random number of particles scattered within 42 units of `pos` in the XZ plane. */
 void func_1514B034(Vec3f *pos, u8 arg1, s32 arg2) {
     f32 count;

@@ -1,7 +1,12 @@
 #include <ultra64.h>
 
+// matching: func_151408A4 passes its s16 view to func_15144CEC without the u8 conversion of the
+// viewport parameter, so this file keeps an s32 view of it.
+#define func_15144CEC func_15144CEC_effect_h
 #include "functions.h"
 #include "variables.h"
+#undef func_15144CEC
+s32 func_15144CEC(f32 *pos, f32 *screen, f32 *outA, f32 *outDepth, f32 *outInvDepth, s32 viewport);
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define VIEWS ((RenderView *)D_800BE628)
@@ -42,8 +47,6 @@ extern void (*D_80089F9C[])(GlowObj *);
 extern void (*D_80089FE4[])(GlowObj *);
 typedef void (*GlowMsgFn)(GlowObj *, u8 *, u8);
 extern GlowMsgFn D_8008A02C[];
-extern Vec3f *func_15144B34(s32);
-extern s32 func_15144CEC(f32 *, f32 *, f32 *, f32 *, f32 *, s32);
 void func_151D5D60(void **, s16, s32, void **, u8 *);
 void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 f32 sqrtf(f32);

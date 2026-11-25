@@ -4,8 +4,6 @@
 #include "effects.h"
 
 extern f32 sinf(f32);
-extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
-extern s32 func_15146078(Vec3f *, Vec3f *, Vec3f *);
 
 /* Per-object state of the projectile spawned by func_150F7470 (updated by func_150F78B4). */
 typedef struct {
@@ -63,7 +61,6 @@ struct ProjectileParticle {
 
 extern s32 func_151C4B0C(s32, ProjectileState *, Vec3f *, Vec3f *, f32 *, f32, u8, s32, Vec3f *, u8 *, s32,
                          f32, Actor *, s32, u8, u8, s32, u8);
-extern void func_15145974(Vec3f *, f32 *, f32 *);
 
 /* Spawns a projectile at `pos`, aimed along `aim` (or at `target` when arg2 is set). */
 void func_150F7470(Vec3f *pos, Vec3f *aim, s32 arg2, Vec3f *target, u8 targetIsDir, s32 arg5, f32 speed,

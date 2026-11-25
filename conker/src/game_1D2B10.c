@@ -40,10 +40,9 @@ typedef struct {
     /* 0x42 */ u8 unk2CRange;
     /* 0x43 */ u8 pad43[5];
     /* 0x48 */ CollisionHit ground;
-    /* 0x6C */ s32 unk6C;
+    /* 0x6C */ s16 *unk6C;
 } RegionEmitterState;
 
-extern s32 func_151464B8(s32);
 extern s32 func_15046C80(f32 *, s32, f32, CollisionHit *);
 
 /*

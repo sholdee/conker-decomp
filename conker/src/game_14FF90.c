@@ -53,7 +53,6 @@ void func_15129934(Camera *camera);
 void func_1512A360(Camera *camera);
 void func_1512E4B0(Camera *camera);
 void func_1512DEA4(Camera *camera);
-void func_15143134(f32 *in, f32 *out, Mtx *mtx);
 void func_15097798(u8);
 void func_15130230(Camera *camera, s32 arg1);
 void func_15125A6C(Camera *camera);

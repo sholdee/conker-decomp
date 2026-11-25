@@ -67,8 +67,6 @@ void func_151A5130(void *arg0, struct Obj151A4FD0 *effect, s16 arg2) {
     D_8008F900[effect->type](arg0, effect, arg2);
 }
 
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
-
 /*
  * Redraws the effect's viewport from the current framebuffer, tinted by the effect's colour.
  * The copy goes through TMEM in strips: 8 rows of up to 256 columns, then 54 rows of any columns past 256.

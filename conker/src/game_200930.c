@@ -12,11 +12,8 @@ void func_15131958(void *, f32, void *); // matching: called with a third argume
 
 extern s32 func_1000EC24();
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, void *, s32 *, s32, f32);
-u8 func_15145C90(s32);
 s32 func_10010E78(u16 arg0, s32 arg1, u16 arg2, s16 arg3, u8 arg4, s32 arg5,
                   s16 arg6, s16 arg7, s16 arg8, s16 arg9, s16 argA);
-void func_15145974(void *, f32 *, f32 *);
-s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
 void *memcpy(void *, const void *, u32);
 
 /* Bobbing motion stored in a debris particle's user data (object + 0x170). */
@@ -257,8 +254,6 @@ s32 func_151D3D50(WobbleParticle *particle) {
     return 1;
 }
 
-void func_15143134(void *, s32, s32);
-
 /* Writes the world position of a point attached to bone `bone` of obj to out; objects without bone
    matrices use their origin raised by yOffset. */
 void func_151D3E04(Actor *obj, f32 *out, void *localPos, u8 bone, f32 yOffset) {
@@ -486,8 +481,6 @@ typedef struct {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ ObjEmitter emitter;
 } ObjEmitterEffect;
-
-extern f32 func_15143E64(Vec3f *);
 
 /* Effect update: tracks the emitter's point on its object and spawns smoke puffs along the path it moved. */
 void func_151D4794(ObjEmitterEffect *effect) {
@@ -855,8 +848,6 @@ void func_151D5648(Vec3f *pos, u8 arg1, s32 arg2) {
                   (randU % 56U) + 200, 0.0f, arg1, arg2);
 }
 
-extern s32 func_15145EA4(Vec3f **src, Vec3f **dst, s32 mtx, s32 count);
-
 /* Spawns a func_151D4408 particle on bone `bone` of obj, from local point from towards local point to. */
 void func_151D5714(Actor *obj, Vec3f *from, Vec3f *to, u8 bone, f32 scale, u8 arg5, s32 arg6) {
     Vec3f start;
@@ -927,8 +918,6 @@ void func_151D57F8(Actor *obj, u8 slot) {
     func_150636A4(obj);
 }
 
-void func_15145740(Actor *, Vec3f *, Vec3f *, Vec3f *, f32);
-
 /* Computes obj's axes (forward, axis1, axis2) and the world position of localPos on bone `bone`;
    objects without bone matrices use a point 34 units out and 49 up from their origin. */
 void func_151D5A18(Actor *obj, Vec3f *out, Vec3f *forward, Vec3f *axis1, Vec3f *axis2, Vec3f *localPos, u8 bone) {
@@ -962,7 +951,6 @@ void func_151D5A18(Actor *obj, Vec3f *out, Vec3f *forward, Vec3f *axis1, Vec3f *
     }
 }
 
-s32 func_151452C4(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, f32 arg3, Vec3f *arg4, Vec3f *arg5, f32 *arg6, f32 *arg7);
 extern s32 (*D_80086C90[])(Actor *, Actor *, s32);
 
 /* Runs func_151452C4(p0, p1, center, 2 * radius) for every active object except `self` (and, when filter

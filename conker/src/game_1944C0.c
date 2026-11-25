@@ -44,8 +44,6 @@ typedef struct {
     /* 0x90 */ ModelFxData data;
 } ModelFx;
 
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
-
 /* Type 3 object (0x28 bytes): a fading, animated billboard sprite. */
 typedef struct {
     /* 0x00 */ EffectHeader link;
@@ -390,7 +388,6 @@ typedef struct {
     s32 unk4;
     s32 unk8;
 } PaddedFlag;
-Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
 s32 func_15095760(Gfx *arg0, void *arg1);
 /* Type 3 draw: the current animation frame as a billboard. */
 Gfx *func_15167C58(Gfx *gdl, SpriteFx *fx, u8 arg2) {
@@ -548,9 +545,6 @@ void func_15167E0C(BillboardParticle *p) {
 }
 extern EffectTexture D_800907FC;
 extern EffectTexture D_8009053C;
-Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
-Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
 
 /* BillboardParticle draw: sets render/combine modes and colours, then the current frame as a billboard. */
 s32 func_15168118(Gfx *gfx, BillboardParticle *p, s16 viewIndex) {
@@ -1079,7 +1073,6 @@ void func_15168F84(s32 group, s32 *first, s32 *last) {
 void func_15169040(s32 event, u8 eventType) {
     func_15169070(0, OBJ_TYPE_COUNT, event, eventType);
 }
-void func_15143D18(s32 *, s32 *, s32, s32);
 void func_1516968C(EffectHeader *obj, u8 *event, u8 eventType);
 
 /* Sends an event to every object of types [first, last) (clamped by func_15143D18). */

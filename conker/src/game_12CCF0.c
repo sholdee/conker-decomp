@@ -97,8 +97,6 @@ void func_150FFB6C(Vec3f *position, Vec3f *origin, Actor *obj, s32 type) {
     func_1505D1C4(position->x, position->y, position->z, flags, index, angle, 0, origin);
 }
 
-s32 func_15145EA4(Vec3f **src, Vec3f **dst, void *mtx, s32 count);
-
 /* Writes the world position of the muzzle point D_800A2130 on bone D_80088BB0 of `obj` to `out`. */
 void func_150FFBDC(Actor *obj, s32 arg1, Vec3f *out) {
     Vec3f *src;
@@ -144,9 +142,6 @@ void func_150FFD2C(Actor *obj, Actor *other, s32 arg2) {
         }
     }
 }
-
-void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out);
-void func_15145974(Vec3f *direction, f32 *yaw, f32 *pitch);
 
 /* Spawns 10-18 particles at `position`, fanned out around the yaw of `direction`. */
 void func_150FFD84(Vec3f *position, Vec3f *direction, u8 arg2, s32 arg3) {

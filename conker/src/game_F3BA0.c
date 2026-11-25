@@ -26,7 +26,6 @@ struct Watcher {
 
 void *memcpy(void *, const void *, u32);
 s32 func_15045800(f32 *pos, s32 mask, f32 bottom, CollisionHit *hit);
-void func_15143134(Vec3f *in, Vec3f *out, MtxF *matrix);
 u8 func_151D8E20(void);
 
 extern Vec3f D_800887E0;

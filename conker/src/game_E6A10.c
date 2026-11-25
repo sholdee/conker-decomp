@@ -11,8 +11,6 @@
 void *memcpy(void *, const void *, u32);
 s32 func_15046C80(Vec3f *pos, s32 arg1, f32 bottom, CollisionHit *floor);
 extern s32 D_80088740;
-void func_15142600(Mtx *out, f32 scaleXZ, f32 scaleY, f32 sx, f32 sy, f32 sz, f32 x, f32 y, f32 z,
-                   f32 atX, f32 atY, f32 atZ);
 
 /* Falls (speed growing by 0.3 per frame-time) until lifetime 80; from 115 on grows by 1.35x a frame,
  * below 65 the height grows instead. */

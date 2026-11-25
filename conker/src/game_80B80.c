@@ -25,7 +25,6 @@ void func_15081690(Actor *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5
 s32 func_15081E78(Actor *, void *, s32);
 void func_1505A3A8(f32 arg0, Actor *arg1, f32 arg2, f32 arg3, u8 arg4);
 void func_1505D6F0(Actor *arg0, s32 arg1);
-s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
 void func_15088780(Actor *);
 
 void func_150536D0(Actor *obj) {

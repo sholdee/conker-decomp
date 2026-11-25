@@ -17,7 +17,6 @@ struct ActorEmitter {
 };
 
 void func_1504715C(CollisionHit *, Actor *);
-void func_15143794(s16 yaw, s16 pitch, f32 distance, f32 *out);
 void func_1515C244(Actor *, f32 *center, f32 *, f32 *);
 void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32,
                    s32, CollisionHit *, s32, s32, s32, s32);

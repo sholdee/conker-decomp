@@ -759,7 +759,6 @@ void func_15176B84(SwarmActor *actor) {
 }
 
 void func_150A7A48(MtxF a, MtxF b, MtxF c);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 
 /* Draws a flying swarm actor: builds its scaled model matrix, eases its brightness towards
  * the lighting of the surface below it, and draws its model with that colour and its alpha. */
