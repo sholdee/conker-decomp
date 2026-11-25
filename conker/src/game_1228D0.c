@@ -33,39 +33,11 @@ typedef struct {
     /* 0x39 */ u8  unk39;
 } struct_7484;
 
-typedef struct {
-    /* 0x00 */ u8  ownerId;
-    /* 0x01 */ u8  pad1[0x3];
-    /* 0x04 */ struct127 *owner;
-    /* 0x08 */ u8  unk8;
-    /* 0x09 */ u8  pad9[0x3];
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ u8  unk24;
-    /* 0x25 */ u8  pad25;
-    /* 0x26 */ s16 unk26;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ s16 unk2A;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ u8  unk2E;
-    /* 0x2F */ u8  unk2F;
-    /* 0x30 */ s8  unk30;
-    /* 0x31 */ u8  pad31[0x3];
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ u8  unk38;
-    /* 0x39 */ s8  unk39;
-} struct_150F6890; /* descriptor passed to func_15134DAC */
-
 extern u8 D_800917F8;
 extern u8 D_80091930;
 extern u8 D_8009193C;
 extern u8 D_80091948;
 struct102 *func_15169968(struct_7484 *);
-void *func_15134DAC(struct_150F6890 *, s32);
 
 /* Shows a sprite (picked by `style`) that fades in over `fadeIn` frames, holds for
  * `hold` frames and fades out over `fadeOut` frames. */
@@ -676,19 +648,19 @@ void func_150F644C(Beam *beam) {
     func_1513CAA0((struct210 *)beam);
 }
 
-void func_150F6478(struct210 *arg0) {
+void func_150F6478(struct210 *obj) {
 }
 
-void func_150F6484(struct210 *arg0) {
-    func_150F6478(arg0);
-    func_151411A4(arg0);
+void func_150F6484(struct210 *obj) {
+    func_150F6478(obj);
+    func_151411A4(obj);
 }
 
 void func_151411C4(struct210 *);
 
-void func_150F64B0(struct210 *arg0) {
-    func_150F6478(arg0);
-    func_151411C4(arg0);
+void func_150F64B0(struct210 *obj) {
+    func_150F6478(obj);
+    func_151411C4(obj);
 }
 
 /* Data of the effect run by func_150F64DC. */
@@ -704,7 +676,7 @@ typedef struct {
     BurstData data;
 } BurstEffect;
 
-extern u8 D_800A1B30;
+extern f32 D_800A1B30[3];
 void func_15143134(void *, f32 *, Mtx *);
 extern struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 void *func_15107C1C(struct127 *, u8, void *, s16, s32, s32, s32, f32, f32, s32, s32, u8 *, s32, s32);
@@ -738,7 +710,7 @@ void func_150F64DC(BurstEffect *effect) {
                 s32 rand2;
                 s32 rand3;
 
-                func_15143134(&D_800A1B30, pos, (Mtx *)owner->unk1D4);
+                func_15143134(D_800A1B30, pos, (Mtx *)owner->unk1D4);
                 header.unk0 = 3;
                 header.unk1 = -1;
                 header.unk2 = (func_150ADA20() % 9U) + 10;
@@ -757,7 +729,7 @@ void func_150F64DC(BurstEffect *effect) {
                     rand1 = func_150ADA20();
                     rand2 = func_150ADA20();
                     rand3 = func_150ADA20();
-                    func_15107C1C(owner, 0, &D_800A1B30, (u8)rand1, (rand2 % 43U) - 50, (rand3 % 18U) + 5, 4,
+                    func_15107C1C(owner, 0, D_800A1B30, (u8)rand1, (rand2 % 43U) - 50, (rand3 % 18U) + 5, 4,
                                   27.0f, (func_150ADA68() * 16.0f) + 20.0f, 0, 2, color, effect->head.unkC,
                                   effect->head.unk1);
                     count--;
@@ -772,6 +744,36 @@ void func_150F64DC(BurstEffect *effect) {
 void func_150F6850(BurstEffect *effect, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, (s32)&effect->data.owner, (s32)&effect->data.ownerId, (s32)effect);
 }
+
+/* Descriptor passed to func_15134DAC. */
+typedef struct {
+    /* 0x00 */ u8  ownerId;
+    /* 0x01 */ u8  pad1[0x3];
+    /* 0x04 */ struct127 *owner;
+    /* 0x08 */ u8  unk8;
+    /* 0x09 */ u8  pad9[0x3];
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ u8  unk24;
+    /* 0x25 */ u8  pad25;
+    /* 0x26 */ s16 unk26;
+    /* 0x28 */ s16 unk28;
+    /* 0x2A */ s16 unk2A;
+    /* 0x2C */ s16 unk2C;
+    /* 0x2E */ u8  unk2E;
+    /* 0x2F */ u8  unk2F;
+    /* 0x30 */ s8  unk30;
+    /* 0x31 */ u8  pad31[0x3];
+    /* 0x34 */ f32 unk34;
+    /* 0x38 */ u8  unk38;
+    /* 0x39 */ s8  unk39;
+} struct_150F6890;
+
+void *func_15134DAC(struct_150F6890 *, s32);
 
 /* Creates a func_15134DAC object attached to `owner`. */
 void func_150F6890(struct127 *owner, s16 arg1, s32 arg2, s32 arg3) {
