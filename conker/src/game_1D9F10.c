@@ -166,7 +166,6 @@ Rope *func_151ACBD4(void *spawn, s32 extraSize) {
     Rope *rope;
     TextureInfo *tex;
     s32 i;
-    s32 n;
     s32 segments;
     s32 buf;
     s32 x;
@@ -195,7 +194,8 @@ Rope *func_151ACBD4(void *spawn, s32 extraSize) {
     rope->regrabTimer = 0;
     rope->unk34 = 1.0f / rope->unk2C;
     segments = 19;
- rope->nodes = allocate_memory(20 * sizeof(RopeNode), 1, 0, 0); rope->nodeCount = segments + 1;
+    rope->nodes = allocate_memory(20 * sizeof(RopeNode), 1, 0, 0);
+    rope->nodeCount = segments + 1;
     x = rope->x;
     z = rope->z;
     topY = rope->topY;
@@ -205,7 +205,28 @@ Rope *func_151ACBD4(void *spawn, s32 extraSize) {
         rope->nodes[i].pos[1] = (i * (topY - bottomY)) / segments + bottomY;
         rope->nodes[i].pos[2] = z;
         rope->nodes[i].vel[0] = 0.0f;
- rope->nodes[i].vel[1] = 0.0f; rope->nodes[i].vel[2] = 0.0f; } rope->segmentLength = (f32)(topY - bottomY) / (f32)segments; rope->vertices = allocate_memory(2 * 20 * 4 * sizeof(Vtx), 1, 2, 0); if (D_800BE9F0 == 0xB) { rope->textureId = 0x37; shift = 4; } else { rope->textureId = 0x36; shift = 5; } g = (r = 0xFF); if (D_800BE9F0 == 0x39) { r = 0x58; g = 0x4B; b = 0x2C; } else { b = 0xFF; } tex = &D_80090B60[rope->textureId]; // matching: -g3 line numbers steer as1's scheduling; these statements must share lines
+        rope->nodes[i].vel[1] = 0.0f;
+        rope->nodes[i].vel[2] = 0.0f;
+    }
+    rope->segmentLength = (f32)(topY - bottomY) / (f32)segments;
+    rope->vertices = allocate_memory(2 * 20 * 4 * sizeof(Vtx), 1, 2, 0);
+    if (D_800BE9F0 == 0xB) {
+        rope->textureId = 0x37;
+        shift = 4;
+    } else {
+        rope->textureId = 0x36;
+        shift = 5;
+    }
+    r = 0xFF;
+    g = 0xFF;
+    if (D_800BE9F0 == 0x39) {
+        r = 0x58;
+        g = 0x4B;
+        b = 0x2C;
+    } else {
+        b = 0xFF;
+    }
+    tex = &D_80090B60[rope->textureId];
     quarterW = tex->width >> 2;
     rowH = tex->height - 1;
     s0 = 0x100 << 5;
@@ -217,7 +238,8 @@ Rope *func_151ACBD4(void *spawn, s32 extraSize) {
             for (i = 0, u = 0x100; i < 20; i++, u += rowH) {
                 t = u << shift;
                 rope->vertices[((buf * 20 + i) * 4) + 0].v.flag = 0;
- do { rope->vertices[((buf * 20 + i) * 4) + 0].v.tc[0] = s0; } while (0);
+                rope->vertices[((buf * 20 + i) * 4) + 0].v.tc[0] = s0;
+                if (1) {} // matching: block boundary fixes IDO's register choice in this loop
                 rope->vertices[((buf * 20 + i) * 4) + 0].v.tc[1] = t;
                 rope->vertices[((buf * 20 + i) * 4) + 0].v.cn[0] = r;
                 rope->vertices[((buf * 20 + i) * 4) + 0].v.cn[1] = g;
@@ -247,7 +269,7 @@ Rope *func_151ACBD4(void *spawn, s32 extraSize) {
             }
         }
     }
-    rope->releaseForce = 0;
+    rope->releaseForce = 0; // matching: integer 0 (0.0f schedules differently)
     return rope;
 }
 
@@ -272,7 +294,7 @@ void func_151AD174(Rope *rope) {
     f32 t;
     f32 h;
     f32 len;
-    f32 zero;
+    f32 pad; // matching: unused stack slot
     f32 scale;
     f32 dx2;
 
@@ -314,14 +336,12 @@ void func_151AD174(Rope *rope) {
         }
     }
 
-    len = 9.0f;
-    zero = 0.0f;
     /* Walk down from the node below the fixed anchor. */
     for (i = last - 1; i >= 0; i--) {
         for (j = 0; j < 3; j++) {
             pos[j] = oldPos[i][j];
             vel[j] = rope->nodes[i].vel[j];
-            pull[j] = pos[j] - oldPos[i + 1][j];
+            pull[j] = pos[j] - oldPos[i + 1][j]; // matching: dead store (pull is recomputed below)
         }
 
         /* Pull toward hanging straight down, len below the node above. */
@@ -347,14 +367,13 @@ void func_151AD174(Rope *rope) {
             } else {
                 t = 0.0f;
             }
-            h = len * len; // matching: dead store; makes IDO hoist len * len before -len
             dist = t / dist;
             pull[0] = dx * dist;
             pull[1] = dy * dist;
             pull[2] = dz * dist;
-            pull[0] = zero - pull[0];
+            pull[0] = 0.0f - pull[0];
             pull[1] = -len - pull[1];
-            pull[2] = zero - pull[2];
+            pull[2] = 0.0f - pull[2];
         }
         for (j = 0; j < 3; j++) {
             vel[j] += pull[j];
@@ -530,23 +549,25 @@ void func_151AE0E4(struct127 *obj, u8 ropeId) {
         while (TRUE) {
         }
     }
-    if (rope->regrabTimer == 0 && obj->health != 0 && obj->stunned == 0) {
-        func_151AE2BC(&ROPE_RIDE(obj)->progress, rope, obj->x_position, obj->y_position, obj->z_position);
-        endNodes = 140.0f / rope->segmentLength;
-        i = (f32)(rope->nodeCount - endNodes - 1) * ROPE_RIDE(obj)->progress;
-        pos[0] = rope->nodes[i].pos[0];
-        pos[1] = rope->nodes[i].pos[1];
-        pos[2] = rope->nodes[i].pos[2];
-        dist = (pos[0] - obj->x_position) * (pos[0] - obj->x_position) +
-               (pos[1] - obj->y_position) * (pos[1] - obj->y_position) +
-               (pos[2] - obj->z_position) * (pos[2] - obj->z_position);
-        if (!(10000.0f < dist)) {
-            ROPE_RIDE(obj)->ropeId = ropeId;
-            obj->disable_jump = 18;
-            ROPE_RIDE(obj)->rope = rope;
-            rope->rider = obj;
-        }
+    if (rope->regrabTimer != 0 || obj->health == 0 || obj->stunned != 0) {
+        return;
     }
+    func_151AE2BC(&ROPE_RIDE(obj)->progress, rope, obj->x_position, obj->y_position, obj->z_position);
+    endNodes = 140.0f / rope->segmentLength;
+    i = (f32)(rope->nodeCount - endNodes - 1) * ROPE_RIDE(obj)->progress;
+    pos[0] = rope->nodes[i].pos[0];
+    pos[1] = rope->nodes[i].pos[1];
+    pos[2] = rope->nodes[i].pos[2];
+    dist = (pos[0] - obj->x_position) * (pos[0] - obj->x_position) +
+           (pos[1] - obj->y_position) * (pos[1] - obj->y_position) +
+           (pos[2] - obj->z_position) * (pos[2] - obj->z_position);
+    if (dist > 10000.0f) {
+        return;
+    }
+    ROPE_RIDE(obj)->ropeId = ropeId;
+    obj->disable_jump = 18;
+    ROPE_RIDE(obj)->rope = rope;
+    rope->rider = obj;
 }
 
 /** Lets go of the current rope, giving it a swing impulse from obj's horizontal speed. */
