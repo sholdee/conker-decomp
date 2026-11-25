@@ -865,7 +865,7 @@ extern f32  D_800BE980[];
 extern OSMesg      D_800BE990;
 extern u8   D_800BE9B4;
 extern u8   D_800BE9C0;
-extern s32  D_800BE9C4;
+extern u16 *D_800BE9C4; // z-buffer (D_800BE620 x D_800BE624)
 extern s32  D_800BE9E0; // OSMesg
 extern s32  D_800BE9E4;
 extern s32  D_800BE9E8;

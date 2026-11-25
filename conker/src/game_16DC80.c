@@ -38,7 +38,6 @@ typedef struct {
     /* 0x04C */ s16 vpTransZ; /* viewports[0].vp.vtrans[2] */
 } GlowViewDepth;
 
-#define ZBUFFER ((u16 *)D_800BE9C4)
 
 /* z-buffer decompression table, indexed by the exponent (top 3 bits). */
 typedef struct {
@@ -325,7 +324,7 @@ void func_151412BC(void) {
                         params = &cur->params;
                         for (j = 0; j <= D_80082FA0; j++) {
                             if (params->shape.screenX[j] >= 0 && params->shape.screenX[j] < D_800BE620 && params->shape.screenY[j] >= 0 && params->shape.screenY[j] < D_800BE624) {
-                                params->shape.zbufSample[j] = ZBUFFER[params->shape.screenX[j] + params->shape.screenY[j] * D_800BE620];
+                                params->shape.zbufSample[j] = D_800BE9C4[params->shape.screenX[j] + params->shape.screenY[j] * D_800BE620];
                             } else {
                                 params->shape.zbufSample[j] = 0x7FFF;
                             }

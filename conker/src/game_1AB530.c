@@ -93,7 +93,7 @@ void func_1517E1AC(void) {
         if (x >= 0.0f && x < (f32)D_800BE620) {
             y = cur->screenY;
             if (y >= 0.0f && y < (f32)D_800BE624) {
-                cur->zbufSample = ((u16 *)D_800BE9C4)[(s32)x + (s32)y * D_800BE620];
+                cur->zbufSample = D_800BE9C4[(s32)x + (s32)y * D_800BE620];
             }
         }
     }

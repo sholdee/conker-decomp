@@ -17,7 +17,7 @@ Gfx *func_1512E5F0(Gfx *gfx, Camera *camera) {
                         G_TD_CLAMP | G_TP_NONE | G_CYC_COPY | G_PM_NPRIMITIVE | 0xF, // 0xF: blend mask bits
                     G_AC_NONE | G_ZS_PIXEL);
     gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1,
-                       ((u16)camera->unk8BA * D_800BE620 * 2) + D_800BE9C4);
+                       D_800BE9C4 + (u16)camera->unk8BA * D_800BE620);
     gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
     gDPLoadSync(gfx++);
     gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, D_800BE620 - 1, CALC_DXT(D_800BE620, G_IM_SIZ_16b_BYTES));
