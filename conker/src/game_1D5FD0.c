@@ -29,9 +29,6 @@ typedef struct {
     /* 0x4C */ u8 type;              /* index into the D_8008F94C/D_8008F958/D_8008F964 handlers */
 } BoltDef; /* size 0x50 */
 
-#define BOLT_TIMED  1
-#define BOLT_ACTIVE 2
-
 typedef struct {
     Vec3f local; /* x: sideways, y: along up, z: fraction of the way from start to end */
     Vec3f world;
@@ -62,47 +59,12 @@ typedef struct {
 Bolt *func_151A7950(BoltDef *, s32, u8, s32);
 Bolt *func_151A7950(BoltDef *def, s32 extraSize, u8 arg2, s32 arg3);
 
-extern s32 (*D_8008F940[])(Bolt *);
-extern s32 (*D_8008F948[])(Bolt *);
-
 void func_151A8340(Bolt *, s16, s16, f32, s16);
-void func_151A7A90(Bolt *bolt);
 
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
-Gfx *func_15142E24(Gfx *, u8 *, s32, s32, s32, s32, s32, u8, s32, u8 *, s32);
-Vec3f *func_15144B34(s32);
-void func_15145548(Vec3f *, Vec3f *, Vec3f *, Vec3f *, f32 *);
-void func_151D5D60(void *, s16, s32, void **, u8 *);
-Gfx *func_1513F4E4(Gfx *, u8, u8 *);
-Gfx *func_15142B7C(Gfx *, s32, s32);
-Gfx *func_15142C10(Gfx *, s32, s32, s32, s32, u8 *);
-Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
-extern s32 D_800A4AC8[][2];
-Gfx *func_151A7D6C(Gfx *gdl, Bolt *bolt, s16 view);
+
 void func_151A8340(Bolt *bolt, s16 first, s16 last, f32 amp, s16 depth);
-
-extern void func_151D5E30(void *);
-void func_151A8560(Bolt *bolt);
-
-extern void (*D_8008F94C[])(Bolt *);
-void func_151A8584(Bolt *bolt);
-
-extern void (*D_8008F958[])(Bolt *);
-void func_151A85D4(Bolt *bolt);
-Bolt *func_151A8624(Actor *owner, Vec3f *boneOffset, u8 bone, s16 lifetime, f32 jitterDelay, f32 jitterDelayRange, BoltColor *color, f32 width, Vec3f *targetOffset, u8 arg9, u8 argA, s8 update2, s32 extraSize, u8 argD, s32 argE);
-
-extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, s32, s32 *, s32, f32);
-extern s32 func_15145C90(s32);
-extern void func_15143134(Vec3f *, Vec3f *, s32);
-extern f32 func_15143E64(Vec3f *);
-extern s32 func_15146078(Vec3f *, Vec3f *, Vec3f *);
-s32 func_151A87F8(Bolt *bolt);
-
-extern void (*D_8008F964[])(Bolt *, void *, u8);
-void func_151A8A20(Bolt *bolt, void *msg, u8 msgType);
-void func_151A8A78(Bolt *bolt, void *arg, u8 msgType);
-
 
 #define EMITTER_ON       1
 #define EMITTER_ANCHORED 2

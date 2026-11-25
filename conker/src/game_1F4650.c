@@ -3,16 +3,8 @@
 #include "variables.h"
 #include "effects.h"
 
-
-extern f32 sinf(f32);
-extern void func_1514373C(f32, f32, f32 *, f32 *);
 extern void func_15145974(Vec3f *, f32 *, f32 *);
 extern void func_1000FD38(void *, void *, s32);
-extern void *func_1515548C(ScreenSpriteInfo *, u8, s32, s32, s32, u8, s32);
-extern void *func_1515FF74(void *, s32, u8, s32);
-extern void func_15160274(s32, s32, s32);
-extern void func_1515572C(s32, s32);
-extern void func_151A561C(s32, s32);
 
 extern void func_1504715C(CollisionHit *, Actor *);
 extern s32 func_151ABE40(f32 *, CollisionHit *, s32, u8, s32);
@@ -200,7 +192,6 @@ typedef struct {
     u8 pad0[0x18];
     SightBeamState *state;
 } SightSoundHandle;
-
 
 /* A sight beam object: spawn descriptor copy at +0x18, quad vertex buffers, beam state at +0x110. */
 typedef struct {
@@ -733,8 +724,6 @@ void func_151C899C(Actor *actor, SightBeamObject *obj) {
     func_1516972C(&obj->head.header);
 }
 
-
-
 void *func_151407D0(GlowShape *, s32, ParticleDef *, s32, s32, s32, s32, s32, s32, s32);
 
 /* Effect spawned by func_151C8FCC; +0x170 holds the beam object that owns it. */
@@ -1104,7 +1093,6 @@ s32 func_151C9B64(SightStatusObject *obj, u8 *visible) {
     return 1;
 }
 
-extern u8 D_800CBFA8[][0x32C];
 void func_151C9ED4(Camera *player);
 void func_151C9F38(Camera *player, u8 type, u8 arg2, s8 arg3, u8 arg4);
 void func_151CA6A0(Camera *player, u8 big);
@@ -1117,9 +1105,7 @@ void func_151CC840(Camera *, u8, u8, u8, u8, u8);
 void func_151CCD1C(Camera *, u8, u8, u8);
 void func_151CCF08(Camera *, u8, s8, u8);
 void func_151CB5FC(Camera *player, u8 kind, u8 arg2, s8 arg3, u8 arg4);
-void func_151C9BA0(Camera *player, s32 state);
 
-void func_150BDE90(void *, u8, s32);
 void func_151C9DE8(Camera *player, u8 arg1, s8 arg2, u8 arg3, s32 arg4);
 void func_151C9ED4(Camera *player);
 
@@ -1162,65 +1148,24 @@ typedef struct {
     SightSpritePayload payload;
 } SightSprite;
 
-/* Message 0x37 (see func_151CB918). */
-typedef struct {
-    u8 side;
-    Camera *player;
-} SightPanelMsg;
-
 f32 func_151CC1D4(SightSprite *sprite);
 
-/* Effect spawned by func_151CCE94; +0x20 holds the owning player. */
-typedef struct {
-    EffectHeader header;
-    u8 pad10[0x10];
-    Camera *player;
-} SightOwnedEffect;
-
-extern void (*D_8008FC10[])(SightSprite *, void **, u8);
 void func_151C9F38(Camera *player, u8 type, u8 arg2, s8 arg3, u8 arg4);
 void func_151CA6A0(Camera *player, u8 big);
-void func_151CAACC(SightSprite *sprite, void **msg, u8 msgId);
+
 void func_151CAB78(Camera *player, u8 big);
 
-/* State of the lens effect (func_151CB110), stored at +0x18 of its object. */
-typedef struct {
-    Camera *player;
-    RenderView *view;
-    u16 *pixels;
-    s32 left;
-    u32 topOffset;
-} SightLens;
-
-typedef struct {
-    EffectHeader header;
-    u8 pad10[0x8];
-    SightLens lens;
-    u8 pad2C[4];
-    u16 pixels[24 * 24]; /* 24x24 copy of the framebuffer under the lens */
-} SightLensObject;
 void func_151CAD28(Camera *player, u8 big);
-void func_151CB110(SightLensObject *obj, u16 *framebuffer);
-void func_151CB49C(SightLensObject *obj, void **msg, u8 msgId);
-void func_151CB510(SightSprite *sprite);
 
 void func_151CB5FC(Camera *player, u8 kind, u8 arg2, s8 arg3, u8 arg4);
-void func_151CB918(SightSprite *sprite, SightPanelMsg *msg, u8 msgId);
-s32 func_151CB970(SightSprite *sprite);
-void func_151CBB6C(SightOwnedEffect *effect, void **msg, u8 msgId);
-s32 func_151CBBE0(SightSprite *sprite);
-s32 func_151CBC60(SightSprite *sprite);
+
 f32 func_151CC1D4(SightSprite *sprite);
-void func_151CC290(s32 player);
-void func_151CC2BC(SightSprite *sprite, s32 *msg, u8 msgId);
+
 void func_151CC524(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u8 arg5);
-s32 func_151CC77C(SightSprite *sprite);
+
 void func_151CC840(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u8 arg5);
 void func_151CCD1C(Camera *player, u8 red, u8 green, u8 blue);
 void func_151CCE94(Camera *player);
 
-/* Texture ids of the four strips in a scope frame row. */
-typedef struct { u8 b[4]; } SightTextureRow;
-extern SightTextureRow D_8008FC28;
 void func_151CCF08(Camera *player, u8 arg1, s8 arg2, u8 arg3);
-void func_151CD224(SightSprite *sprite);
+

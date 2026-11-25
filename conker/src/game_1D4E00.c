@@ -3,8 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-void func_1514373C(f32, f32, f32 *, f32 *);
-
 typedef struct {
     u8 r, g, b, a;
 } BoltColor;
@@ -60,7 +58,6 @@ typedef struct {
 } Bolt;
 
 Bolt *func_151A7950(BoltDef *, s32, u8, s32);
-
 
 /*
  * Allocates a bolt for def with extraSize bytes of user data after its points. The local points run
@@ -551,12 +548,6 @@ void func_151A8A78(Bolt *bolt, void *arg, u8 msgType) {
     }
 }
 
-
-#define EMITTER_ON       1
-#define EMITTER_ANCHORED 2
-#define EMITTER_ZONED    4 /* only spawns while its zone is visible */
-#define EMITTER_NO_PROBE 8 /* spawns at `bottom` without probing for the ground */
-
 typedef struct {
     /* 0x00 */ EmitterDef def;
     /* 0x28 */ f32 pending;          /* particles owed; one spawns per whole unit */
@@ -571,109 +562,14 @@ typedef struct {
     /* 0x80 */ u8 data[1];           /* user data */
 } Emitter;
 
-extern void func_1510F800(s32);
-Emitter *func_151A8B20(EmitterDef *def, s16 lifetime, s32 extraSize, u8 arg3, s32 arg4);
-
-extern s32 (*D_8008F980[])(Emitter *);
-extern void (*D_8008F970[])(Emitter *, Vec3f *, f32, u8);
-
-s32 func_151464B8(s32);
-s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
 void func_151A8F1C(Emitter *, Vec3f *, f32 *, f32 *);
 void func_151A8F6C(Emitter *, Vec3f *, f32 *, f32 *);
-void func_151A8CEC(Emitter *emitter);
 
-extern void func_151432BC(TriggerZone *, f32 *, f32 *, f32 *, f32 *);
 void func_151A8F1C(Emitter *emitter, Vec3f *pos, f32 *top, f32 *bottom);
 
-void func_15143874(s16, f32, f32 *, f32 *);
 void func_151A8F6C(Emitter *emitter, Vec3f *pos, f32 *top, f32 *bottom);
 
 void func_151A931C(Emitter *, u8 *, u8);
-void func_151A9024(Emitter *emitter, u8 *msg, u8 msgType);
 
-extern void (*D_8008F984[])(TriggerZone *, s32);
-s32 func_151A9060(TriggerZone *obj);
-void func_151A90C0(TriggerZone *obj, s32 kind);
-
-typedef struct {
-    s16 ids[3];
-} SpriteChoices;
-
-extern SpriteChoices D_8008F9A4;
-
-/* Spawn descriptor passed to func_1513C650. */
-typedef struct {
-    /* 0x00 */ s32 flags;
-    /* 0x04 */ s16 lifetime;
-    /* 0x06 */ u8 unk6;
-    /* 0x07 */ u8 unk7;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ u8 unk10;
-    /* 0x11 */ u8 unk11;
-    /* 0x12 */ u8 unk12;
-    /* 0x13 */ u8 unk13;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ s32 unk20;
-    /* 0x24 */ s32 unk24;
-    /* 0x28 */ s32 unk28;
-} SpriteSpawn;
-void func_151A91AC(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround);
 void func_151A931C(Emitter *emitter, u8 *msg, u8 msgType);
 
-typedef struct {
-    s16 base;
-    s16 range;
-} RangeS16; /* base + rand % (range + 1) */
-
-/* User data of a type 2 emitter: the particles spawn hook 1 (func_151A9634) launches. */
-typedef struct {
-    /* 0x00 */ f32 vec0Base;         /* the two floats passed to func_1514B8E4: base + rand * range */
-    /* 0x04 */ f32 vec1Base;
-    /* 0x08 */ f32 vec0Range;
-    /* 0x0C */ f32 vec1Range;
-    /* 0x10 */ RangeS16 unk10;
-    /* 0x14 */ RangeS16 unk14;       /* goes into the particle's extra data */
-    /* 0x18 */ RangeS16 unk18;
-    /* 0x1C */ s16 unk1C;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ f32 unk20Base;        /* goes into the particle's extra data */
-    /* 0x24 */ f32 unk20Range;
-    /* 0x28 */ u8 flags;             /* 1: particle kind 0x71 (else 0x13 or 0x14); 2: clear the 2 flag */
-} ParticleSettings; /* size 0x2C */
-
-/* One of the nine emitter presets of func_151A9390. */
-typedef struct {
-    /* 0x00 */ f32 rate;
-    /* 0x04 */ f32 rateRange;
-    /* 0x08 */ u8 unk8;              /* unk8..unkC go to func_1516284C */
-    /* 0x09 */ u8 unk9;
-    /* 0x0A */ u8 unkA;
-    /* 0x0B */ u8 unkB;
-    /* 0x0C */ u8 unkC;
-    /* 0x10 */ ParticleSettings *settings;
-} EmitterPreset;
-
-extern EmitterPreset D_8008F9AC[];
-
-void *func_1516284C(LightEffectHeader *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
-void func_151A9390(u8 options, u8 preset, TriggerZone *obj, Vec3f *pos, f32 bottom, f32 radius, s16 lifetime, u8 arg7, s32 arg8);
-
-/* Extra data stored at 0x160 of each particle (the particle object is not typed here). */
-typedef struct {
-    f32 unk0;
-    s16 unk4;
-} ParticleExtra;
-
-u8 *func_1514B8E4(Vec3f *, f32 *, s16, s32, s32, f32, f32, f32,
-    s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-void func_151A9634(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround);
-
-extern void (*D_8008FA60[])(Vec3f *, CollisionHit *, s32, u8, s32);
-void func_151A9834(Vec3f *center, f32 minY, f32 radius, CollisionHit *hit, s32 count, u8 spawnFunc, s32 arg6, u8 arg7, s32 arg8);

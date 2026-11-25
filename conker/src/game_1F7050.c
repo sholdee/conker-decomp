@@ -3,19 +3,15 @@
 #include "variables.h"
 #include "effects.h"
 
-
 extern f32 sinf(f32);
 extern void func_1514373C(f32, f32, f32 *, f32 *);
 extern void func_15145974(Vec3f *, f32 *, f32 *);
-extern void func_1000FD38(void *, void *, s32);
+
 extern void *func_1515548C(ScreenSpriteInfo *, u8, s32, s32, s32, u8, s32);
 extern void *func_1515FF74(void *, s32, u8, s32);
 extern void func_15160274(s32, s32, s32);
 extern void func_1515572C(s32, s32);
 extern void func_151A561C(s32, s32);
-
-extern void func_1504715C(CollisionHit *, Actor *);
-extern s32 func_151ABE40(f32 *, CollisionHit *, s32, u8, s32);
 
 /* Placement parameters for a sight beam (laser tripwire) between two surfaces. */
 typedef struct {
@@ -33,23 +29,8 @@ typedef struct {
     u32 colors;
     u32 widths;
 } SightBeamParams;
-extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, void *, void *, s32, f32);
+
 extern s32 func_151C756C(Vec3f *start, CollisionTri *startTri, Vec3f *end, CollisionTri *endTri, SightBeamParams *beam, SightBeamParams *source, u8 red, u8 green, u8 blue, u8 hasMidEffect, s16 activeTime, s16 inactiveTime, s16 startTime, u8 blinks, u8 startsOff, u8 zoneMasked, u8 hasEndEffects, u8 arg11, u8 pulses, f32 pulseAngle, f32 pulseSpeed, u8 keepEnabled, u8 arg16, s32 arg17);
-s32 func_151C71A0(SightBeamParams *beam);
-
-typedef struct {
-    u8 pad0[0x6F];
-    u8 unk6F;
-} SightStatusBlock;
-
-typedef struct {
-    EffectHeader header;
-    u8 pad10[0x48];
-    s32 flags;
-    u8 pad5C[0x12C];
-    SightStatusBlock *status;
-} SightStatusObject;
 
 /* Animation parameters copied into an emitter part by func_151C9198. */
 typedef struct {
@@ -72,18 +53,6 @@ typedef struct {
     u8 pad110[0x60];
     SightEmitterAnim anim;
 } SightEmitter;
-
-/* Message 0x20 (see func_151C8674). */
-typedef struct {
-    Actor *actor;
-    SightBeamParams *source;
-} SightTouchMsg;
-
-/* Message 0x3A: 0 = switch on, 1 = switch off, 2 = trigger. */
-typedef struct {
-    SightBeamParams *source;
-    u8 command;
-} SightCommandMsg;
 
 /* Visibility record returned by func_1510FD20 for a map position. */
 typedef struct {
@@ -133,48 +102,24 @@ typedef struct {
     SightBeamState *state;
 } SightSoundHandle;
 
-
 /* A sight beam object: spawn descriptor copy at +0x18, quad vertex buffers, beam state at +0x110. */
 typedef struct {
     /* 0x000 */ DefParticleHead head;
     /* 0x110 */ SightBeamState state;
 } SightBeamObject;
 
-extern void func_1510F800(s32);
-extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
-extern LightEffect *func_1516284C(LightEffectHeader *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
 struct SightExtension *func_151C8FCC(SightBeamObject *owner, Vec3f *start, Vec3f *end, u8 red, u8 green, u8 blue, SightZone *zone, u8 zoneMasked, u8 arg8, s32 arg9);
 s32 func_151C87AC(SightSoundHandle *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 *volume);
 s32 func_151C756C(Vec3f *start, CollisionTri *startTri, Vec3f *end, CollisionTri *endTri, SightBeamParams *beam, SightBeamParams *source, u8 red, u8 green, u8 blue, u8 hasMidEffect, s16 activeTime, s16 inactiveTime, s16 startTime, u8 blinks, u8 startsOff, u8 zoneMasked, u8 hasEndEffects, u8 arg11, u8 pulses, f32 pulseAngle, f32 pulseSpeed, u8 keepEnabled, u8 arg16, s32 arg17);
 
-extern Vec3f *func_15144B34(s32);
-void func_151D5D60(void *, s16, s32, void **, u8 *);
-void func_15145548(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, Vec3f *arg3, f32 *arg4);
-void *func_151C7E98(SightBeamObject *obj, s16 view);
-s32 func_151C82D0(SightBeamObject *obj);
-void func_151C8674(s32 actor, s32 source);
-
 s32 func_151C87E0(Actor *actor, SightBeamObject *obj);
 void func_151C899C(Actor *actor, SightBeamObject *obj);
-void func_151C86AC(SightBeamObject *obj, void *msg, u8 msgId);
+
 s32 func_151C87AC(SightSoundHandle *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 *volume);
 
-extern void func_1507C3E0(void *, s16 *, s16 *, s16 *);
-extern s32 func_151451F0(Vec3f *, Vec3f *, Vec3f *, f32, f32, Vec3f *, Vec3f *, f32 *, f32 *);
 s32 func_151C87E0(Actor *actor, SightBeamObject *obj);
 
-extern void func_1514FBFC(SurfaceJetSpray *, u8, s32);
-extern LightEffect *func_151602C0(LightEffectHeader *, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_150E7FEC(f32, s32, void *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_15164F0C(s32, u8, s32, u8, s32);
-extern void func_151D8868(RumbleParams *, s32, s32, s32);
-extern void func_1505D024(s32, u8 *, s32, s32);
-extern void func_1000EC24();
 void func_151C899C(Actor *actor, SightBeamObject *obj);
-
-
-
-void *func_151407D0(GlowShape *, s32, ParticleDef *, s32, s32, s32, s32, s32, s32, s32);
 
 /* Effect spawned by func_151C8FCC; +0x170 holds the beam object that owns it. */
 typedef struct SightExtension {
@@ -184,27 +129,9 @@ typedef struct SightExtension {
 } SightExtension;
 SightExtension *func_151C8FCC(SightBeamObject *owner, Vec3f *start, Vec3f *end, u8 red, u8 green, u8 blue, SightZone *zone, u8 zoneMasked, u8 arg8, s32 arg9);
 
-extern s32 func_15144E80(CollisionTri *, Vec3f *, Vec3f *, Vec3f *);
-extern void *func_15132A4C(void *, s32, s32, s32, u8, s32);
-extern void func_15133760(void *, void *);
-void func_151C9198(SightEmitter **emitters, Vec3f *pos, CollisionTri *triangle, Vec3f *dir, SightZone *zone, u8 altColors, u8 zoneMasked, u8 arg7, s32 arg8);
-void func_151C94D4(SightBeamObject *obj);
-void func_151C95D8(SightBeamObject *obj);
-s32 func_151C96DC(SightExtension *effect, s32 arg1);
-void func_151C970C(s32 command, s32 source);
+void func_151C9AC0(Actor *actor, u8 arg1, s32 arg2);
 
-extern s32 func_15046C80(f32 *, u16, f32, void *);
-extern void func_150E83AC(void *, s16, u8, s32);
-extern void func_15136C3C(void *, u8, u8, u8, u8, u8, u8, s32);
-extern void *func_151541B8(void *, f32, f32, f32, f32, u8, s32);
-extern void func_151D5334(void *, f32, f32, f32, u8, u8, s32);
-extern void func_151D5514(void *, u8, s32);
-extern void func_151D3FF4(f32 *, u8, s32);
 void func_151C9AC0(Actor *actor, u8 arg1, s32 arg2);
-void func_151C9740(Actor *actor, u8 arg1, s32 arg2);
-void func_151C9AC0(Actor *actor, u8 arg1, s32 arg2);
-s32 func_151C9B30(LightEffect *obj);
-s32 func_151C9B64(SightStatusObject *obj, u8 *visible);
 
 extern u8 D_800CBFA8[][0x32C];
 void func_151C9ED4(Camera *player);
@@ -771,7 +698,6 @@ void func_151CAD28(Camera *player, u8 big) {
     }
 }
 
-
 /* Draws the zoom lens: saves the 24x24 framebuffer block under it, then writes it back
  * magnified towards the centre, mirrored into all four quadrants. */
 void func_151CB110(SightLensObject *obj, u16 *framebuffer) {
@@ -873,7 +799,6 @@ void func_151CB510(SightSprite *sprite) {
     payload->unk4 += (target - payload->unk4) * 0.400000006f;
     sprite->desc.color1.alpha = payload->unk4;
 }
-
 
 /* Spawns the four pieces (two sides, two layers each) of side panel `kind` for `player`. */
 void func_151CB5FC(Camera *player, u8 kind, u8 arg2, s8 arg3, u8 arg4) {
@@ -1091,8 +1016,6 @@ f32 func_151CC1D4(SightSprite *sprite) {
     }
     return value;
 }
-
-
 
 /* Broadcasts message 0x46 (flash the sight sprites of `player`). */
 void func_151CC290(s32 player) {
@@ -1472,8 +1395,6 @@ void func_151CCF08(Camera *player, u8 arg1, s8 arg2, u8 arg3) {
         }
     }
 }
-
-
 
 /* Scope frame strip update: the top (kind 5) and bottom (kind 4) rows slide with the sight value. */
 void func_151CD224(SightSprite *sprite) {
