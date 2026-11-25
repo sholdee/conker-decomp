@@ -1,4 +1,5 @@
 #include <ultra64.h>
+/* The shared headers declare these with the wrong types; hide those declarations and redeclare below. */
 #define func_15048A40 func_15048A40_hdr
 #define func_10010F30 func_10010F30_void
 #include "functions.h"
@@ -72,7 +73,6 @@ extern s32 D_800DD440;
 extern s16 D_800DD444;      /* state timer */
 extern s8 D_800DD446;       /* rain state */
 extern u8 D_800C35EA[];
-extern f32 D_800A7208;
 
 extern f32 sqrtf(f32);
 extern void func_10004074(void *);
@@ -81,11 +81,11 @@ extern void *allocate_memory(s32, s32, s32, s32);
 extern f32 func_15048A40(u8);
 extern f32 func_150489B0(u8);
 void func_1516865C(QuadFxData *q, s32 r, s32 g, s32 b, s32 a);
-QuadFx *func_15168800();
+QuadFx *func_15168800(QuadFxData *src, s32 owner, s32 list);
 s32 func_1510F8D8(s32 x, s32 y, s32 z, s32 arg3);
 
 void func_151794C8(void);
-void func_15179600(s32 arg0, s32 dropFlags);
+void func_15179600(s32 scatterY, s32 dropFlags);
 void func_15179AB8(void);
 void func_15179B14(s32 count);
 
@@ -162,7 +162,7 @@ void func_15179008(s32 player) {
         if (D_800DD434 == 4 || D_800DD444 >= 600) {
             D_800DD440 = (s32)allocate_memory(RAIN_MAX_DROPS * sizeof(QuadFx *), 1, 0, 0);
             i = 0;
-            do {
+            do { // matching: a for loop here changes the whole function's allocation
                 RAIN_DROP(i) = NULL;
                 i++;
             } while (i < maxDrops);
@@ -278,7 +278,7 @@ void func_15179600(s32 scatterY, s32 dropFlags) {
     s32 baseZ;
     s32 rand;
     QuadFx *drop;
-    s32 pad[2];
+    s32 pad; // matching: unused stack slot
     QuadFxData packet;
 
     packet.animIndex = 0x11;
@@ -312,7 +312,7 @@ void func_15179600(s32 scatterY, s32 dropFlags) {
     packet.dropFlags = dropFlags;
     packet.slot = D_800DD436;
 
-    drop = func_15168800(&packet, 0xFF, 0, y);
+    drop = func_15168800(&packet, 0xFF, 0);
     if (drop != NULL) {
         RAIN_DROP(D_800DD436) = drop;
         D_800DD436++;
@@ -345,7 +345,7 @@ void func_151797B0(QuadFx *drop) {
     }
     heading = drop->data.heading;
     drop->data.unkA4 = alpha;
-    heading += (u32)((D_800DD433 << 4) * ((func_150ADA20() & 0xFF) + 0x80)) >> 9;
+    heading += (u32)(D_800DD433 * 16 * ((func_150ADA20() & 0xFF) + 128)) >> 9;
     heading = heading * 0.888890028f;
     if (heading > 0x3200) {
         heading = 0x3200;
@@ -467,5 +467,5 @@ void func_15179CB0(QuadFx *splash) {
     dx = (f32)splash->data.z - D_800DBFF0->unk300;
     dz = (f32)splash->data.x - D_800DBFF0->unk2F8;
     dist = sqrtf((dx * dx) + (dz * dz));
-    splash->data.unkA4 = (u32)(255.0f - ((160.0f * dist) / 1000.0f));
+    splash->data.unkA4 = 255.0f - (160.0f * dist) / 1000.0f;
 }
