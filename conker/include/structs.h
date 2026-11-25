@@ -17,6 +17,7 @@ typedef struct struct216 struct216;
 typedef struct struct256 struct256;
 /* Effect objects (include/effects.h), named here for the prototypes in functions.h. */
 struct DefParticleHead;
+struct ParticleDesc;
 struct QuadSprite;
 
 /*
@@ -3346,21 +3347,6 @@ typedef struct {
   u8  pad8[0x7];
   u8  unkF;
 } struct217;
-
-typedef struct {
-    u16 unk0;
-    u8  pad2[0x2];
-    s32 unk4;
-    s32 unk8;
-    u8  padC[0x8];
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 pad17;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-} struct218;
 
 typedef struct {
     s32 unk0;

@@ -799,10 +799,10 @@ void func_10017604(u8 arg0) {
 // NON-MATCHING: stack isnt quite right
 // void func_10017604(u8 arg0) {
 //     s32 mask;
-//     struct31 *sp20;
+//     SndState *sp20;
 //     u16 foo;
 //     s16 sp1C;
-//     struct31 *sp18;
+//     SndState *sp18;
 //
 //     mask = osSetIntMask(1);
 //     sp18 = D_8002BA20;
@@ -875,12 +875,12 @@ void func_10017780(u8 arg0, u16 arg1) {
 // NON-MATCHING: far from matching
 // void func_10017780(u8 arg0, u16 arg1) {
 //     s32 sp34;
-//     struct31 *sp30;
+//     SndState *sp30;
 //     s32 sp2C;
-//     struct31 *sp20;
+//     SndState *sp20;
 //     s16 sp1C;
-//     struct31 *temp_t4;
-//     struct31 *temp_t4_2;
+//     SndState *temp_t4;
+//     SndState *temp_t4_2;
 //
 //     sp34 = osSetIntMask(1);
 //     sp30 = D_8002BA20;

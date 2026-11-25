@@ -944,120 +944,120 @@ Vtx *func_151DAE28(QuadEffect *effect, s16 view) {
     return ret;
 }
 
-/* Colour setter for effect kind 0 (D_8008FD38): fills the RGB triples unk14-16 and unk18-1A. */
-void func_151DB004(struct218 *arg0) {
-    arg0->unk14 = (func_150ADA20() % 56U) + 80;
-    arg0->unk15 = 0;
-    arg0->unk16 = 0;
-    arg0->unk18 = (func_150ADA20() % 46U) + 180;
-    arg0->unk19 = 0;
-    arg0->unk1A = 0;
+/* Colour setter for effect kind 0 (D_8008FD38): fills the colours rgb and rgb2. */
+void func_151DB004(ParticleDesc *desc) {
+    desc->r = (func_150ADA20() % 56U) + 80;
+    desc->g = 0;
+    desc->b = 0;
+    desc->r2 = (func_150ADA20() % 46U) + 180;
+    desc->g2 = 0;
+    desc->b2 = 0;
 }
 
-/* Colour setter for effect kinds 1 and 11 (D_8008FD38): fills the RGB triples unk14-16 and unk18-1A. */
-void func_151DB068(struct218 *arg0) {
-    arg0->unk14 = arg0->unk15 = (func_150ADA20() % 56U) + 100;
-    arg0->unk16 = 0;
-    arg0->unk18 = arg0->unk19 = (func_150ADA20() % 46U) + 180;
-    arg0->unk1A = 0;
+/* Colour setter for effect kinds 1 and 11 (D_8008FD38): fills the colours rgb and rgb2. */
+void func_151DB068(ParticleDesc *desc) {
+    desc->r = desc->g = (func_150ADA20() % 56U) + 100;
+    desc->b = 0;
+    desc->r2 = desc->g2 = (func_150ADA20() % 46U) + 180;
+    desc->b2 = 0;
 }
 
-/* Colour setter for effect kind 2 (D_8008FD38): fills the RGB triples unk14-16 and unk18-1A. */
-void func_151DB0CC(struct218 *arg0) {
-    arg0->unk14 = (func_150ADA20() % 56U) + 80;
-    arg0->unk15 = (func_150ADA20() % 56U) + 80;
-    arg0->unk16 = 0;
-    arg0->unk18 = (func_150ADA20() % 46U) + 180;
-    arg0->unk19 = (func_150ADA20() % 46U) + 180;
-    arg0->unk1A = 0;
+/* Colour setter for effect kind 2 (D_8008FD38): fills the colours rgb and rgb2. */
+void func_151DB0CC(ParticleDesc *desc) {
+    desc->r = (func_150ADA20() % 56U) + 80;
+    desc->g = (func_150ADA20() % 56U) + 80;
+    desc->b = 0;
+    desc->r2 = (func_150ADA20() % 46U) + 180;
+    desc->g2 = (func_150ADA20() % 46U) + 180;
+    desc->b2 = 0;
 }
 
-/* Colour setter for effect kind 3 (D_8008FD38): fills the RGB triples unk14-16 and unk18-1A. */
-void func_151DB15C(struct218 *arg0) {
-    arg0->unk14 = (func_150ADA20() % 56U) + 80;
-    arg0->unk15 = (func_150ADA20() % 56U) + 80;
-    arg0->unk16 = 0;
-    arg0->unk18 = (func_150ADA20() % 46U) + 180;
-    arg0->unk19 = (func_150ADA20() % 46U) + 180;
-    arg0->unk1A = 0;
+/* Colour setter for effect kind 3 (D_8008FD38): fills the colours rgb and rgb2. */
+void func_151DB15C(ParticleDesc *desc) {
+    desc->r = (func_150ADA20() % 56U) + 80;
+    desc->g = (func_150ADA20() % 56U) + 80;
+    desc->b = 0;
+    desc->r2 = (func_150ADA20() % 46U) + 180;
+    desc->g2 = (func_150ADA20() % 46U) + 180;
+    desc->b2 = 0;
 }
 
-/* Colour setter for effect kind 4 (D_8008FD38): fills the RGB triples unk14-16 and unk18-1A. */
-void func_151DB1EC(struct218 *arg0) {
-    arg0->unk14 = (func_150ADA20() % 56U) + 80;
-    arg0->unk15 = (func_150ADA20() % 56U) + 80;
-    arg0->unk16 = 0;
-    arg0->unk18 = (func_150ADA20() % 46U) + 180;
-    arg0->unk19 = (func_150ADA20() % 46U) + 180;
-    arg0->unk1A = 0;
+/* Colour setter for effect kind 4 (D_8008FD38): fills the colours rgb and rgb2. */
+void func_151DB1EC(ParticleDesc *desc) {
+    desc->r = (func_150ADA20() % 56U) + 80;
+    desc->g = (func_150ADA20() % 56U) + 80;
+    desc->b = 0;
+    desc->r2 = (func_150ADA20() % 46U) + 180;
+    desc->g2 = (func_150ADA20() % 46U) + 180;
+    desc->b2 = 0;
 }
 
-/* Colour setter for effect kind 5 (D_8008FD38): fills the RGB triples unk14-16 and unk18-1A. */
-void func_151DB27C(struct218 *arg0) {
-    arg0->unk14 = 255;
-    arg0->unk15 = 255;
-    arg0->unk16 = 255;
-    arg0->unk18 = 180;
-    arg0->unk19 = 200;
-    arg0->unk1A = 200;
+/* Colour setter for effect kind 5 (D_8008FD38): fills the colours rgb and rgb2. */
+void func_151DB27C(ParticleDesc *desc) {
+    desc->r = 255;
+    desc->g = 255;
+    desc->b = 255;
+    desc->r2 = 180;
+    desc->g2 = 200;
+    desc->b2 = 200;
 }
 
-/* Colour setter for effect kind 6 (D_8008FD38): fills the RGB triples unk14-16 and unk18-1A. */
-void func_151DB2A8(struct218 *arg0) {
-    arg0->unk14 = 0;
-    arg0->unk15 = 200;
-    arg0->unk16 = 0;
-    arg0->unk18 = 0;
-    arg0->unk19 = 200;
-    arg0->unk1A = 0;
+/* Colour setter for effect kind 6 (D_8008FD38): fills the colours rgb and rgb2. */
+void func_151DB2A8(ParticleDesc *desc) {
+    desc->r = 0;
+    desc->g = 200;
+    desc->b = 0;
+    desc->r2 = 0;
+    desc->g2 = 200;
+    desc->b2 = 0;
 }
 
-/* Colour setter for effect kind 7 (D_8008FD38): fills the RGB triples unk14-16 and unk18-1A. */
-void func_151DB2CC(struct218 *arg0) {
-    arg0->unk14 = 0;
-    arg0->unk15 = (func_150ADA20() % 56U) + 80;
-    arg0->unk16 = 0;
-    arg0->unk18 = 0;
-    arg0->unk19 = (func_150ADA20() % 46U) + 180;
-    arg0->unk1A = 0;
+/* Colour setter for effect kind 7 (D_8008FD38): fills the colours rgb and rgb2. */
+void func_151DB2CC(ParticleDesc *desc) {
+    desc->r = 0;
+    desc->g = (func_150ADA20() % 56U) + 80;
+    desc->b = 0;
+    desc->r2 = 0;
+    desc->g2 = (func_150ADA20() % 46U) + 180;
+    desc->b2 = 0;
 }
 
-/* Colour setter for effect kind 8 (D_8008FD38): fills the RGB triples unk14-16 and unk18-1A. */
-void func_151DB330(struct218 *arg0) {
-    arg0->unk14 = (func_150ADA20() % 21U) + 95;
-    arg0->unk15 = (func_150ADA20() % 21U) + 95;
-    arg0->unk16 = (func_150ADA20() % 11U) + 45;
-    arg0->unk18 = (func_150ADA20() & 0xF) + 58;
-    arg0->unk19 = (func_150ADA20() & 0xF) + 60;
-    arg0->unk1A = (func_150ADA20() % 11U) + 25;
+/* Colour setter for effect kind 8 (D_8008FD38): fills the colours rgb and rgb2. */
+void func_151DB330(ParticleDesc *desc) {
+    desc->r = (func_150ADA20() % 21U) + 95;
+    desc->g = (func_150ADA20() % 21U) + 95;
+    desc->b = (func_150ADA20() % 11U) + 45;
+    desc->r2 = (func_150ADA20() & 0xF) + 58;
+    desc->g2 = (func_150ADA20() & 0xF) + 60;
+    desc->b2 = (func_150ADA20() % 11U) + 25;
 }
 
-/* Colour setter for effect kind 9 (D_8008FD38): fills the RGB triples unk14-16 and unk18-1A. */
-void func_151DB3D8(struct218 *arg0) {
-    arg0->unk14 = 0;
-    arg0->unk15 = arg0->unk16 = (func_150ADA20() % 56U) + 80;
-    arg0->unk18 = 0;
-    arg0->unk19 = arg0->unk1A = (func_150ADA20() % 46U) + 180;
+/* Colour setter for effect kind 9 (D_8008FD38): fills the colours rgb and rgb2. */
+void func_151DB3D8(ParticleDesc *desc) {
+    desc->r = 0;
+    desc->g = desc->b = (func_150ADA20() % 56U) + 80;
+    desc->r2 = 0;
+    desc->g2 = desc->b2 = (func_150ADA20() % 46U) + 180;
 }
 
-/* Colour setter for effect kind 10 (D_8008FD38): fills the RGB triples unk14-16 and unk18-1A. */
-void func_151DB43C(struct218 *arg0) {
-    arg0->unk14 = (func_150ADA20() % 56U) + 80;
-    arg0->unk15 = 0;
-    arg0->unk16 = (func_150ADA20() % 56U) + 80;
-    arg0->unk18 = (func_150ADA20() % 46U) + 180;
-    arg0->unk19 = 0;
-    arg0->unk1A = (func_150ADA20() % 46U) + 180;
+/* Colour setter for effect kind 10 (D_8008FD38): fills the colours rgb and rgb2. */
+void func_151DB43C(ParticleDesc *desc) {
+    desc->r = (func_150ADA20() % 56U) + 80;
+    desc->g = 0;
+    desc->b = (func_150ADA20() % 56U) + 80;
+    desc->r2 = (func_150ADA20() % 46U) + 180;
+    desc->g2 = 0;
+    desc->b2 = (func_150ADA20() % 46U) + 180;
 }
 
-/* Colour setter for effect kind 12 (D_8008FD38): fills the RGB triples unk14-16 and unk18-1A. */
-void func_151DB4CC(struct218 *arg0) {
-    arg0->unk14 = (func_150ADA20() % 56U) + 200;
-    arg0->unk15 = (func_150ADA20() % 56U) + 200;
-    arg0->unk16 = (func_150ADA20() % 56U) + 200;
-    arg0->unk18 = (func_150ADA20() % 56U) + 200;
-    arg0->unk19 = (func_150ADA20() % 56U) + 200;
-    arg0->unk1A = (func_150ADA20() % 56U) + 200;
+/* Colour setter for effect kind 12 (D_8008FD38): fills the colours rgb and rgb2. */
+void func_151DB4CC(ParticleDesc *desc) {
+    desc->r = (func_150ADA20() % 56U) + 200;
+    desc->g = (func_150ADA20() % 56U) + 200;
+    desc->b = (func_150ADA20() % 56U) + 200;
+    desc->r2 = (func_150ADA20() % 56U) + 200;
+    desc->g2 = (func_150ADA20() % 56U) + 200;
+    desc->b2 = (func_150ADA20() % 56U) + 200;
 }
 
 extern void (*D_8008FD38[])(ParticleDesc *);
