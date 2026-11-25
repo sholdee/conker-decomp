@@ -8,11 +8,6 @@ typedef struct Game1BBFC0Vec3f {
     f32 z;
 } Game1BBFC0Vec3f;
 
-typedef struct Game1BBFC0Vertex {
-    s16 x, y, z, flag;
-    u8 other[8];
-} Game1BBFC0Vertex;
-
 typedef struct Game1BBFC0Motion {
     /* 0x00 */ u8 unknown0[0x30];
     /* 0x30 */ Game1BBFC0Vec3f velocity;
@@ -35,8 +30,8 @@ typedef struct Game1BBFC0Beam {
     /* 0x04C */ u8 unknown4C[0x10];
     /* 0x05C */ u8 unk5C;
     /* 0x05D */ u8 unknown5D[0x63];
-    /* 0x0C0 */ u8 vertexTemplate[0x40];
-    /* 0x100 */ u8 *buffers[1];
+    /* 0x0C0 */ Vtx vertexTemplate[4]; /* copied into a camera buffer when it is fresh */
+    /* 0x100 */ Vtx *buffers[1]; /* one per camera, indexed by camera id */
     /* 0x104 */ u8 unknown104[0xC];
     /* 0x110 */ Game1BBFC0Motion motion;
 } Game1BBFC0Beam;
@@ -46,9 +41,13 @@ void func_151D5D60(void *, s16, s32, void **, u8 *);
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 
-void *func_1518EB10(Game1BBFC0Beam *arg0, s16 arg1) {
-    Game1BBFC0Vertex *vertices;
-    void *result;
+/*
+ * Fills this camera's four beam vertices: a quad from start toward end (scaled by progress),
+ * widened by width perpendicular to the view direction from the camera eye.
+ */
+Vtx *func_1518EB10(Game1BBFC0Beam *beam, s16 cam) {
+    Vtx *vtx;
+    Vtx *result;
     f32 progress;
     Game1BBFC0Vec3f tip;
     f32 dx, dy, dz;
@@ -59,30 +58,31 @@ void *func_1518EB10(Game1BBFC0Beam *arg0, s16 arg1) {
     Game1BBFC0Vec3f *eye;
     f32 scale;
 
-    func_151D5D60(arg0->buffers, arg1, 0x40, (void **)&vertices, &fresh);
-    result = vertices;
-    if (vertices != NULL) {
-        if (fresh != 0) {
-            memcpy(arg0->buffers[arg1], arg0->vertexTemplate, 0x40);
-            memcpy(arg0->buffers[arg1] + 0x40, arg0->vertexTemplate, 0x40);
+    func_151D5D60(beam->buffers, cam, 4 * sizeof(Vtx), (void **)&vtx, &fresh);
+    result = vtx;
+    // matching: IDO lays out the branches as in the target only with the NULL return in the else
+    if (vtx != NULL) {
+        if (fresh) {
+            memcpy(beam->buffers[cam], beam->vertexTemplate, sizeof(beam->vertexTemplate));
+            memcpy(beam->buffers[cam] + 4, beam->vertexTemplate, sizeof(beam->vertexTemplate));
         }
     } else {
         return NULL;
     }
-    progress = arg0->progress;
-    dx = arg0->end.x - arg0->start.x;
-    dy = arg0->end.y - arg0->start.y;
-    dz = arg0->end.z - arg0->start.z;
-    tip.x = arg0->start.x + dx * progress;
-    tip.y = arg0->start.y + dy * progress;
-    tip.z = arg0->start.z + dz * progress;
-    eye = (Game1BBFC0Vec3f *)&D_800DBFF0[arg1].unk2F8;
-    dx = tip.x - arg0->start.x;
-    dy = tip.y - arg0->start.y;
-    dz = tip.z - arg0->start.z;
-    vx = arg0->start.x - eye->x;
-    vy = arg0->start.y - eye->y;
-    vz = arg0->start.z - eye->z;
+    progress = beam->progress;
+    dx = beam->end.x - beam->start.x;
+    dy = beam->end.y - beam->start.y;
+    dz = beam->end.z - beam->start.z;
+    tip.x = beam->start.x + dx * progress;
+    tip.y = beam->start.y + dy * progress;
+    tip.z = beam->start.z + dz * progress;
+    eye = (Game1BBFC0Vec3f *)&D_800DBFF0[cam].unk2F8;
+    dx = tip.x - beam->start.x;
+    dy = tip.y - beam->start.y;
+    dz = tip.z - beam->start.z;
+    vx = beam->start.x - eye->x;
+    vy = beam->start.y - eye->y;
+    vz = beam->start.z - eye->z;
     nx = dy * vz - vy * dz;
     ny = dz * vx - vz * dx;
     nz = dx * vy - vx * dy;
@@ -92,21 +92,21 @@ void *func_1518EB10(Game1BBFC0Beam *arg0, s16 arg1) {
         ny = 0.0f;
         nz = 0.0f;
     } else {
-        scale = arg0->width / sqrtf(lengthSquared);
+        scale = beam->width / sqrtf(lengthSquared);
         nx *= scale;
         ny *= scale;
         nz *= scale;
     }
-    vertices->x = arg0->start.x + nx;
-    vertices->y = arg0->start.y + ny;
-    vertices->z = arg0->start.z + nz;
-    vertices->flag = 0;
-    vertices++;
-    vertices->x = arg0->start.x - nx;
-    vertices->y = arg0->start.y - ny;
-    vertices->z = arg0->start.z - nz;
-    vertices->flag = 0;
-    vertices++;
+    vtx->v.ob[0] = beam->start.x + nx;
+    vtx->v.ob[1] = beam->start.y + ny;
+    vtx->v.ob[2] = beam->start.z + nz;
+    vtx->v.flag = 0;
+    vtx++;
+    vtx->v.ob[0] = beam->start.x - nx;
+    vtx->v.ob[1] = beam->start.y - ny;
+    vtx->v.ob[2] = beam->start.z - nz;
+    vtx->v.flag = 0;
+    vtx++;
     dx = -dx;
     dy = -dy;
     dz = -dz;
@@ -122,20 +122,20 @@ void *func_1518EB10(Game1BBFC0Beam *arg0, s16 arg1) {
         ny = 0.0f;
         nz = 0.0f;
     } else {
-        scale = arg0->width / sqrtf(lengthSquared);
+        scale = beam->width / sqrtf(lengthSquared);
         nx *= scale;
         ny *= scale;
         nz *= scale;
     }
-    vertices->x = tip.x + nx;
-    vertices->y = tip.y + ny;
-    vertices->z = tip.z + nz;
-    vertices->flag = 0;
-    vertices++;
-    vertices->x = tip.x - nx;
-    vertices->y = tip.y - ny;
-    vertices->z = tip.z - nz;
-    vertices->flag = 0;
+    vtx->v.ob[0] = tip.x + nx;
+    vtx->v.ob[1] = tip.y + ny;
+    vtx->v.ob[2] = tip.z + nz;
+    vtx->v.flag = 0;
+    vtx++;
+    vtx->v.ob[0] = tip.x - nx;
+    vtx->v.ob[1] = tip.y - ny;
+    vtx->v.ob[2] = tip.z - nz;
+    vtx->v.flag = 0;
     return result;
 }
 
