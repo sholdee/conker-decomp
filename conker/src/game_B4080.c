@@ -119,7 +119,7 @@ typedef struct MpGame {
     /* 0x0EAC */ s32 respawnDelay;            /* slotTimer after a pickup */
     /* 0x0EB0 */ s32 slot[16];                /* slot held by each player, -1 = none */
     /* 0x0EF0 */ s32 slotEntity[32];          /* func_151149AC id of each slot's pickup */
-    /* 0x0F70 */ s32 slotOwner[32];           /* player holding each slot, -1 = none */
+    /* 0x0F70 */ s32 slotOwner[32];           /* player holding each slot (| 0x2000 once taken), -1 = none */
     /* 0x0FF0 */ s32 itemOverride[32];        /* per player: 0 = none, 0x457 = no item */
     /* 0x1070 */ s32 slotTimer[32];           /* >0 counting down to respawn, 0 = available, -1 = held */
     /* 0x10F0 */ s32 slotSpawn[32];           /* spawnNodes index it sits at, -1 = none */
@@ -3116,11 +3116,16 @@ s32 func_15033E28(struct127 *, Attachment **);
 
 extern s32 D_800D121C;
 
+/*
+ * Per-frame pickup update. Gives each player the item of its override, its slot or the default
+ * (swapping attachments when it changes), then moves the slot pickups: drop timers, respawns at
+ * a spawn node, and handing a touched pickup to its player (0x8AE adds 3 grenades, up to 6).
+ */
 void func_1508DC24(void) {
     static s8 D_80087340;
     MpGame *base;
     s32 i;
-    struct127 *obj;
+    struct127 *obj; // matching: unused stack slot in the original frame
     s32 count;
     s32 cur;
     s32 prev;
@@ -3154,7 +3159,7 @@ void func_1508DC24(void) {
     s32 k;
 
     base = D_800D23B0;
-    i = 0;
+    i = 0; // matching: zeroed here, before the field loads, not in the for
     slots = base->slot;
     entities = base->slotEntity;
     owners = base->slotOwner;
@@ -3174,132 +3179,138 @@ void func_1508DC24(void) {
         if (kind == 0xB9 && *(u8 *)&D_800CC2D0[i].pad128 != 0) {
             continue;
         }
-        {
-            prev = D_800CC2D0[i].unk31C->unk75 & 0x7F;
-            cur = overrides[i];
-            if (D_800CC2D0[i].unk31C->unk19B >= 5) {
-                cur = 0x3A;
-            } else if (D_800CC2D0[i].unk31C->unk19B > 0) {
-                cur = 0x26;
+        prev = D_800CC2D0[i].unk31C->unk75 & 0x7F;
+        cur = overrides[i];
+        if (D_800CC2D0[i].unk31C->unk19B >= 5) {
+            cur = 0x3A;
+        } else if (D_800CC2D0[i].unk31C->unk19B > 0) {
+            cur = 0x26;
+        }
+        if (cur == 0) {
+            if (slots[i] != -1) {
+                cur = items[slots[i]];
+            } else {
+                cur = base->defaultItem;
             }
-            if (cur == 0) {
-                if (slots[i] != -1) {
-                    cur = items[slots[i]];
-                } else {
-                    cur = base->defaultItem;
+        } else if (cur == 0x457) {
+            cur = 0;
+        }
+        if (kind == 0xB8) {
+            prev = D_800CC2D0[i].unk31C->unk128 & ~0x20;
+        }
+        if (cur != prev) {
+            setId = func_1508E780(prev);
+            if (setId != -1) {
+                setId &= ~0x1000;
+                func_1508EB90(i, 0x4C, setId);
+                if (setId == 0x1D) {
+                    func_1508EB90(i, 0x4C, 0x1E);
                 }
-            } else if (cur == 0x457) {
-                cur = 0;
+                D_800CC2D0[i].unk31C->unk11A = 0;
             }
-            if (kind == 0xB8) {
-                prev = D_800CC2D0[i].unk31C->unk128 & ~0x20;
+            setId = func_1508E780(cur);
+            if (setId > 0x1000) {
+                setId &= ~0x1000;
+                func_1508EB90(i, 0x4B, setId);
             }
-            if (cur != prev) {
-                setId = func_1508E780(prev);
+
+            if (D_800D23B0->gameType == 0xB8) {
+                if (prev == 0x80) {
+                    func_1502EA50(&D_800CC2D0[i]);
+                    D_800CC2D0[i].immune = 0;
+                }
+                D_800CC2D0[i].unk31C->unk128 = cur;
+                if (cur == 1) {
+                    OBJ_STATE(&D_800CC2D0[i])->unk12C = 600;
+                } else if (cur == 0x80) {
+                    OBJ_STATE(&D_800CC2D0[i])->unk12C = 1800;
+                    func_1502EA0C(&D_800CC2D0[i], 0, 0, 0xFF, 0xBF, 4);
+                } else if (cur == 0x10) {
+                    OBJ_STATE(&D_800CC2D0[i])->unk12C = 3;
+                }
+            } else {
+                func_15080620(i, 1, cur, 0);
+                if ((cur == 0) && (prev != 3)) {
+                    D_800CC2D0[i].unk31C->unk78 = 0;
+                }
+                if (prev == 0x20) {
+                    func_1508EB90(i, 0x45, 4);
+                }
+                if (cur == 0x20) {
+                    func_1508EB90(i, 0x45, 3);
+                }
+            }
+        }
+        base = D_800D23B0;
+        if ((D_80087340 == i) && (base->gameType != 0xB8)) {
+            setId = func_1508E780(cur);
+            found = 0;
+            numAttached = func_15033E28(&D_800CC2D0[i], attached);
+            if ((numAttached == 0) && (D_800CC2D0[i].unk31C->unk11A == 2) && (setId != 0x55) && (setId != 0x2E)) {
+                func_15083568(&D_800CC2D0[i], setId, 1.0f, 0);
+                if (setId == 0x1D) {
+                    func_15083568(&D_800CC2D0[i], 0x1E, 1.0f, 0);
+                }
+            }
+            if ((numAttached != 0) && (cur != 0x20)) {
                 if (setId != -1) {
                     setId &= ~0x1000;
-                    func_1508EB90(i, 0x4C, setId);
-                    if (setId == 0x1D) {
-                        func_1508EB90(i, 0x4C, 0x1E);
+                    for (j = 0; j < numAttached; j++) {
+                        if ((attached[j]->setId != 0x1E || setId != 0x1D) && setId != attached[j]->setId &&
+                            attached[j]->setId != 0x2A && attached[j]->setId != 0x22 &&
+                            attached[j]->setId != 0x2D && attached[j]->setId != 0x72 &&
+                            attached[j]->setId != 0x73 && attached[j]->setId != 0x76 &&
+                            attached[j]->setId != 0x77 && attached[j]->setId != 0x78 && attached[j]->setId != 7) {
+                            func_15030158(attached[j], 0);
+                            D_800CC2D0[i].unk31C->unk11A = 0;
+                        } else if (setId == attached[j]->setId) {
+                            found = 1;
+                        }
                     }
-                    D_800CC2D0[i].unk31C->unk11A = 0;
-                }
-                setId = func_1508E780(cur);
-                if (setId > 0x1000) {
-                    setId &= ~0x1000;
-                    func_1508EB90(i, 0x4B, setId);
-                }
-
-                if (D_800D23B0->gameType == 0xB8) {
-                    if (prev == 0x80) {
-                        func_1502EA50(&D_800CC2D0[i]);
-                        D_800CC2D0[i].immune = 0;
-                    }
-                    D_800CC2D0[i].unk31C->unk128 = cur;
-                    if (cur == 1) {
-                        OBJ_STATE(&D_800CC2D0[i])->unk12C = 0x258;
-                    } else if (cur == 0x80) {
-                        OBJ_STATE(&D_800CC2D0[i])->unk12C = 0x708;
-                        func_1502EA0C(&D_800CC2D0[i], 0, 0, 0xFF, 0xBF, 4);
-                    } else if (cur == 0x10) {
-                        OBJ_STATE(&D_800CC2D0[i])->unk12C = 3;
+                    if ((found == 0) && (D_800CC2D0[i].unk31C->unk11A == 2) && (setId != 0x55) && (setId != 0x2E)) {
+                        func_15083568(&D_800CC2D0[i], setId, 1.0f, 0);
+                        if (setId == 0x1D) {
+                            func_15083568(&D_800CC2D0[i], 0x1E, 1.0f, 0);
+                        }
                     }
                 } else {
-                    func_15080620(i, 1, cur, 0);
-                    if ((cur == 0) && (prev != 3)) {
-                        D_800CC2D0[i].unk31C->unk78 = 0;
-                    }
-                    if (prev == 0x20) {
-                        func_1508EB90(i, 0x45, 4);
-                    }
-                    if (cur == 0x20) {
-                        func_1508EB90(i, 0x45, 3);
+                    for (j = 0; j < numAttached; j++) {
+                        if (attached[j]->setId != 0x2A && attached[j]->setId != 0x22 &&
+                            attached[j]->setId != 0x2C && attached[j]->setId != 0x64 &&
+                            attached[j]->setId != 0x2D && attached[j]->setId != 0x72 &&
+                            attached[j]->setId != 0x73 && attached[j]->setId != 0x76 &&
+                            attached[j]->setId != 0x77 && attached[j]->setId != 0x78 && attached[j]->setId != 7) {
+                            func_15030158(attached[j], 0);
+                            D_800CC2D0[i].unk31C->unk11A = 0;
+                        }
                     }
                 }
+            }
+            if (setId != 0x55) {
+                s32 m;
+                for (m = D_800D23B0->numPlayers; m < 25; m++) {
+                    other = &D_800CC2D0[m];
+                    if (other->interaction_state == 0) {
+                        continue;
+                    }
+                    if (other->unk65 != i + 1) {
+                        continue;
+                    }
+                    if (other->id != 0x6E) {
+                        continue;
+                    }
+                    func_151027E8(other);
+                    func_15060F28(other, 0);
+                    break;
+                }
+                // matching: empty tests of the original source; without them IDO allocates registers differently
+                if (setId == 0x7B) {}
+                if (numAttached == 0x7C) {}
+                if (setId == 0x55) {}
             }
             base = D_800D23B0;
-            if ((D_80087340 == i) && (base->gameType != 0xB8)) {
-                setId = func_1508E780(cur);
-                found = 0;
-                numAttached = func_15033E28(&D_800CC2D0[i], attached);
-                if ((numAttached == 0) && (D_800CC2D0[i].unk31C->unk11A == 2) && (setId != 0x55) && (setId != 0x2E)) {
-                    func_15083568(&D_800CC2D0[i], setId, 1.0f, 0);
-                    if (setId == 0x1D) {
-                        func_15083568(&D_800CC2D0[i], 0x1E, 1.0f, 0);
-                    }
-                }
-                if ((numAttached != 0) && (cur != 0x20)) {
-                    if (setId != -1) {
-                        setId &= ~0x1000;
-                        for (j = 0; j < numAttached; j++) {
-                            if (((attached[j]->setId != 0x1E) || (setId != 0x1D)) && (setId != attached[j]->setId) && (attached[j]->setId != 0x2A) &&
-                                (attached[j]->setId != 0x22) && (attached[j]->setId != 0x2D) && (attached[j]->setId != 0x72) && (attached[j]->setId != 0x73) &&
-                                (attached[j]->setId != 0x76) && (attached[j]->setId != 0x77) && (attached[j]->setId != 0x78) && (attached[j]->setId != 7)) {
-                                func_15030158(attached[j], 0);
-                                D_800CC2D0[i].unk31C->unk11A = 0;
-                            } else if (setId == attached[j]->setId) {
-                                found = 1;
-                            }
-}
-                        if ((found == 0) && (D_800CC2D0[i].unk31C->unk11A == 2) && (setId != 0x55) && (setId != 0x2E)) {
-                            func_15083568(&D_800CC2D0[i], setId, 1.0f, 0);
-                            if (setId == 0x1D) {
-                                func_15083568(&D_800CC2D0[i], 0x1E, 1.0f, 0);
-                            }
-                        }
-                    } else {
-                        for (j = 0; j < numAttached; j++) {
-                            if ((attached[j]->setId != 0x2A) && (attached[j]->setId != 0x22) && (attached[j]->setId != 0x2C) && (attached[j]->setId != 0x64) &&
-                                (attached[j]->setId != 0x2D) && (attached[j]->setId != 0x72) && (attached[j]->setId != 0x73) && (attached[j]->setId != 0x76) &&
-                                (attached[j]->setId != 0x77) && (attached[j]->setId != 0x78) && (attached[j]->setId != 7)) {
-                                func_15030158(attached[j], 0);
-                                D_800CC2D0[i].unk31C->unk11A = 0;
-                            }
-}
-                    }
-                }
-                if (setId != 0x55) {
-                    s32 m;
-                    for (m = D_800D23B0->numPlayers; m < 25; m++) {
-                        other = &D_800CC2D0[m];
-                        if (other->interaction_state == 0) continue;
-                        if (other->unk65 != i + 1) continue;
-                        if (other->id != 0x6E) continue;
-                        func_151027E8(other);
-                            func_15060F28(other, 0);
-                            break;
-                    }
-                    if (setId == 0x7B) {
-                    }
-                    if (numAttached == 0x7C) {
-                    }
-                    if (setId == 0x55) {
-                    }
-                }
-                base = D_800D23B0;
-            }
-            count = base->numPlayers;
         }
+        count = base->numPlayers;
     }
     D_80087340++;
     if (D_80087340 >= count) {
@@ -3347,7 +3358,7 @@ void func_1508DC24(void) {
                     if (idx != -1) {
                         func_15086CBC(idx, &x, &y, &z);
                         pickup->x = x;
-                        pickup->y = (s16)y + 0x3C;
+                        pickup->y = (s16)y + 60;
                         pickup->z = z;
                     }
                 }
@@ -3360,7 +3371,6 @@ void func_1508DC24(void) {
                     D_800CC2D0[j].unk31C->grenade_count += 3;
                     if (D_800CC2D0[j].unk31C->grenade_count >= 7) {
                         D_800CC2D0[j].unk31C->grenade_count = 6;
-
                     }
                     timers[i] = D_800D23B0->respawnDelay;
                 } else {
@@ -3376,15 +3386,17 @@ void func_1508DC24(void) {
                     slots[j] = i;
                     D_800D23B0->unk5C[j] = 1;
                 }
-                if ((kind = D_800D23B0->gameType) == 0xB9) {
-                    OBJ_STATE(&D_800CC2D0[j])->unk12C = 0x258;
+                kind = D_800D23B0->gameType;
+                if (kind == 0xB9) {
+                    OBJ_STATE(&D_800CC2D0[j])->unk12C = 600;
                 }
-                if ((kind = D_800D23B0->gameType) == 0xB8) {
-                    if (items[i] == (pp = D_800CC2D0[j].unk31C->unk128)) {
+                kind = D_800D23B0->gameType;
+                if (kind == 0xB8) {
+                    if (items[i] == (pp = D_800CC2D0[j].unk31C->unk128)) { // matching: the u16 temporary
                         if (items[i] == 1) {
-                            OBJ_STATE(&D_800CC2D0[j])->unk12C = 0x258;
+                            OBJ_STATE(&D_800CC2D0[j])->unk12C = 600;
                         } else if (items[i] == 0x80) {
-                            OBJ_STATE(&D_800CC2D0[j])->unk12C = 0x708;
+                            OBJ_STATE(&D_800CC2D0[j])->unk12C = 1800;
                         } else if (items[i] == 0x10) {
                             OBJ_STATE(&D_800CC2D0[j])->unk12C = 3;
                         }
