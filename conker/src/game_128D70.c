@@ -63,15 +63,18 @@ typedef struct {
 extern struct260 *func_15164780(EmitterEffect *, s32, u8, s32);
 
 
+/* The fields of struct127.unk31C that func_150FB8C0 reads (struct126 only declares them as padding). */
 typedef struct {
-    u8 pad0[0x130];
-    f32 unk130;
-    f32 unk134;
-    f32 unk138;
-    f32 unk13C[3];
-    u8 pad148[0x4F];
-    u8 unk197;
-} S31C_150FB8C0;
+    /* 0x000 */ u8 pad0[0x130];
+    /* 0x130 */ f32 lineDirX;
+    /* 0x134 */ f32 lineDirY;
+    /* 0x138 */ f32 lineDirZ;
+    /* 0x13C */ f32 linePoint[3];
+    /* 0x148 */ u8 pad148[0x4F];
+    /* 0x197 */ u8 unk197;
+} TargetState_150FB8C0;
+
+#define TARGET_STATE(obj) ((TargetState_150FB8C0 *)(obj)->unk31C)
 
 /* First argument of func_1515548C (same layout as game_113D60.c's Struct1515548CArg). */
 typedef struct {
@@ -137,187 +140,187 @@ extern void func_15102B38(struct127 *, u8, void *, void *, f32 *, s32, s32, f32,
 extern void func_1515548C(void *, s32, s32, s32, s32, s32, s32);
 extern void func_1515572C(void *, s32);
 
-void func_150FB8C0(struct127 *arg0, u8 arg1, f32 arg2, u8 arg3, u8 arg4, s32 arg5) {
-    struct127 *sp1C4;
-    u8 sp1C3;
-    f32 sp1B4[3];
-    f32 sp1A8[3];
-    f32 sp19C[3];
-    f32 sp190[3];
-    f32 sp184[3];
-    f32 sp178[3];
-    void *sp16C[3];
-    void *sp160[3];
-    s32 sp15C;
-    f32 sp150[3];
-    struct17 sp144;
+void func_150FB8C0(struct127 *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, s32 arg5) {
+    struct127 *target;
+    u8 useTarget;
+    f32 origin[3];
+    f32 dir[3];
+    f32 hitPoint[3];
+    f32 lineDir[3];
+    f32 edgeA[3];
+    f32 edgeB[3];
+    void *srcPoints[3];
+    void *dstPoints[3];
+    s32 matrix;
+    f32 localPoint[3];
+    struct17 normal;
     f32 t;
-    f32 d0;
-    f32 d1;
-    f32 d2;
-    f32 *sp130;
-    u8 sp12F;
-    s8 sp12E;
-    SparkArg_150FB8C0 sp128;
-    s32 sp11C[3];
-    f32 sp114[2];
-    u8 sp113;
-    EffectArg_150FB8C0 spB8;
-    CameraArg_150FB8C0 spB0;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    f32 *linePoint;
+    u8 cameraMask;
+    s8 variant;
+    SparkArg_150FB8C0 spark;
+    s32 sparkPos[3];
+    f32 trailParams[2];
+    u8 trailCameraMask;
+    EffectArg_150FB8C0 effect;
+    CameraArg_150FB8C0 cameraArg;
 
-    if (arg0 == NULL || arg1 < 0 || arg1 >= 2) {
+    if (obj == NULL || side < 0 || side >= 2) {
         return;
     }
-    if (arg3 != 0) {
-        sp1C4 = NULL;
-        sp1C3 = 0;
+    if (skipTarget != 0) {
+        target = NULL;
+        useTarget = 0;
     } else {
-        sp1C4 = func_1507515C(arg0);
-        if (sp1C4 == NULL) {
+        target = func_1507515C(obj);
+        if (target == NULL) {
             return;
         }
-        if (((S31C_150FB8C0 *)sp1C4->unk31C) == NULL) {
+        if (TARGET_STATE(target) == NULL) {
             return;
         }
-        if (((S31C_150FB8C0 *)sp1C4->unk31C)->unk197 != 0) {
-            sp1C3 = 1;
+        if (TARGET_STATE(target)->unk197 != 0) {
+            useTarget = 1;
         } else {
-            sp1C3 = 0;
+            useTarget = 0;
         }
     }
-    if (arg0->unk1D4 == NULL) {
+    if (obj->unk1D4 == NULL) {
         return;
     }
-    if (arg0->id == 0x23) {
-        sp16C[0] = D_800A1E38[arg1];
-        if (sp1C3) {
-            sp16C[1] = D_800A1E68[arg1];
+    if (obj->id == 0x23) {
+        srcPoints[0] = D_800A1E38[side];
+        if (useTarget) {
+            srcPoints[1] = D_800A1E68[side];
         } else {
-            sp16C[1] = D_800A1E50[arg1];
+            srcPoints[1] = D_800A1E50[side];
         }
-        sp16C[2] = D_800A1E80[arg1];
-        sp15C = (D_800A1E34[arg1] << 6) + (s32)arg0->unk1D4;
+        srcPoints[2] = D_800A1E80[side];
+        matrix = (D_800A1E34[side] << 6) + (s32)obj->unk1D4;
     } else {
-        sp150[0] = (13.0f - (1.0f + func_150ADA68() * 6.0f)) * (arg1 ? -1 : 1);
-        sp150[1] = D_800A1DEC[arg1][1];
-        sp150[2] = D_800A1DEC[arg1][2];
-        sp16C[0] = D_800A1DD4[arg1];
-        sp16C[1] = sp1C3 ? D_800A1E04[arg1] : sp150;
-        sp16C[2] = D_800A1E1C[arg1];
-        sp15C = (D_800A1DD0[arg1] << 6) + (s32)arg0->unk1D4;
+        localPoint[0] = (13.0f - (1.0f + func_150ADA68() * 6.0f)) * (side ? -1 : 1);
+        localPoint[1] = D_800A1DEC[side][1];
+        localPoint[2] = D_800A1DEC[side][2];
+        srcPoints[0] = D_800A1DD4[side];
+        srcPoints[1] = useTarget ? D_800A1E04[side] : localPoint;
+        srcPoints[2] = D_800A1E1C[side];
+        matrix = (D_800A1DD0[side] << 6) + (s32)obj->unk1D4;
     }
-    sp160[0] = sp1B4;
-    if (sp1C3) {
-        sp160[1] = sp184;
+    dstPoints[0] = origin;
+    if (useTarget) {
+        dstPoints[1] = edgeA;
     } else {
-        sp160[1] = sp1A8;
+        dstPoints[1] = dir;
     }
-    sp160[2] = sp178;
-    func_15145EA4(sp16C, sp160, sp15C, sp1C3 ? 3 : 2);
-    if (sp1C3) {
+    dstPoints[2] = edgeB;
+    func_15145EA4(srcPoints, dstPoints, matrix, useTarget ? 3 : 2);
+    if (useTarget) {
         extern void func_151450B4(struct17 *, struct17 *, struct17 *);
 
-        sp130 = ((S31C_150FB8C0 *)sp1C4->unk31C)->unk13C;
-        sp184[0] -= sp1B4[0];
-        sp184[1] -= sp1B4[1];
-        sp184[2] -= sp1B4[2];
-        sp178[0] -= sp1B4[0];
-        sp178[1] -= sp1B4[1];
-        sp178[2] -= sp1B4[2];
-                func_151450B4((struct17 *)sp184, (struct17 *)sp178, &sp144);
-        d0 = sp1B4[0] - sp130[0];
-        d1 = sp1B4[1] - sp130[1];
-        d2 = sp1B4[2] - sp130[2];
-        t = ((sp144.unk0 * d0) + (sp144.unk4 * d1) + (sp144.unk8 * d2)) /
-            ((sp144.unk0 * ((S31C_150FB8C0 *)sp1C4->unk31C)->unk130) + (sp144.unk4 * ((S31C_150FB8C0 *)sp1C4->unk31C)->unk134) + (sp144.unk8 * ((S31C_150FB8C0 *)sp1C4->unk31C)->unk138));
-        sp19C[0] = sp130[0] + (t * ((S31C_150FB8C0 *)sp1C4->unk31C)->unk130);
-        sp19C[1] = sp130[1] + (t * ((S31C_150FB8C0 *)sp1C4->unk31C)->unk134);
-        sp19C[2] = sp130[2] + (t * ((S31C_150FB8C0 *)sp1C4->unk31C)->unk138);
-        sp190[0] = ((S31C_150FB8C0 *)sp1C4->unk31C)->unk130;
-        sp190[1] = ((S31C_150FB8C0 *)sp1C4->unk31C)->unk134;
-        sp190[2] = ((S31C_150FB8C0 *)sp1C4->unk31C)->unk138;
+        linePoint = TARGET_STATE(target)->linePoint;
+        edgeA[0] -= origin[0];
+        edgeA[1] -= origin[1];
+        edgeA[2] -= origin[2];
+        edgeB[0] -= origin[0];
+        edgeB[1] -= origin[1];
+        edgeB[2] -= origin[2];
+                func_151450B4((struct17 *)edgeA, (struct17 *)edgeB, &normal);
+        dx = origin[0] - linePoint[0];
+        dy = origin[1] - linePoint[1];
+        dz = origin[2] - linePoint[2];
+        t = ((normal.unk0 * dx) + (normal.unk4 * dy) + (normal.unk8 * dz)) /
+            ((normal.unk0 * TARGET_STATE(target)->lineDirX) + (normal.unk4 * TARGET_STATE(target)->lineDirY) + (normal.unk8 * TARGET_STATE(target)->lineDirZ));
+        hitPoint[0] = linePoint[0] + (t * TARGET_STATE(target)->lineDirX);
+        hitPoint[1] = linePoint[1] + (t * TARGET_STATE(target)->lineDirY);
+        hitPoint[2] = linePoint[2] + (t * TARGET_STATE(target)->lineDirZ);
+        lineDir[0] = TARGET_STATE(target)->lineDirX;
+        lineDir[1] = TARGET_STATE(target)->lineDirY;
+        lineDir[2] = TARGET_STATE(target)->lineDirZ;
     } else {
-        sp1A8[0] -= sp1B4[0];
-        sp1A8[1] -= sp1B4[1];
-        sp1A8[2] -= sp1B4[2];
+        dir[0] -= origin[0];
+        dir[1] -= origin[1];
+        dir[2] -= origin[2];
     }
-    if (!sp1C3 || sp1C4->camera == NULL) {
-        sp12F = 0xFF;
+    if (!useTarget || target->camera == NULL) {
+        cameraMask = 0xFF;
     } else {
-        sp12F = ~(1 << sp1C4->camera->unk23D) & 0xFF;
+        cameraMask = ~(1 << target->camera->unk23D) & 0xFF;
     }
     if (D_800BE9F0 == 0x34 || D_800BE9F0 == 0x26) {
-        sp12E = 5;
+        variant = 5;
     } else {
-        sp12E = 4;
+        variant = 4;
     }
-    func_151C229C(sp1B4, (sp1C3) ? NULL : sp1A8, (sp1C3) ? sp19C : NULL, (sp1C3) ? sp190 : NULL, (sp1C3) ? 1 : 0, 0,
+    func_151C229C(origin, (useTarget) ? NULL : dir, (useTarget) ? hitPoint : NULL, (useTarget) ? lineDir : NULL, (useTarget) ? 1 : 0, 0,
                   252.0f, 0.003968254197f, (func_150ADA68() * 20.0f) + 75.0f, (func_150ADA68() * 250.0f) + 502.0f, 50.0f,
-                  (func_150ADA20() % 31U) + 0xE1, (sp1C4 != NULL) ? sp1C4 : arg0, 1, 1, (D_800BE616 != 0) ? 0 : 1, 0x32, 0, 1, sp12E, 0x2C, arg2,
-                  sp12F, 0, 0, arg4, arg5);
-    if ((arg0->unk74 & 0xF) != 0xF) {
+                  (func_150ADA20() % 31U) + 0xE1, (target != NULL) ? target : obj, 1, 1, (D_800BE616 != 0) ? 0 : 1, 0x32, 0, 1, variant, 0x2C, timeOffset,
+                  cameraMask, 0, 0, arg4, arg5);
+    if ((obj->unk74 & 0xF) != 0xF) {
         if (!(func_150ADA20() & 7)) {
-            sp128.unk0 = 3;
-            sp128.unk1 = -1;
-            sp128.unk2 = (func_150ADA20() % 5U) + 4;
-            sp128.unk4 = 0;
-            sp11C[0] = (s32)sp1B4[0];
-            sp11C[1] = (s32)sp1B4[1];
-            sp11C[2] = (s32)sp1B4[2];
-            func_151602C0(&sp128, sp11C, (func_150ADA20() % 31U) + 0x46, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg4, arg5);
+            spark.unk0 = 3;
+            spark.unk1 = -1;
+            spark.unk2 = (func_150ADA20() % 5U) + 4;
+            spark.unk4 = 0;
+            sparkPos[0] = (s32)origin[0];
+            sparkPos[1] = (s32)origin[1];
+            sparkPos[2] = (s32)origin[2];
+            func_151602C0(&spark, sparkPos, (func_150ADA20() % 31U) + 0x46, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg4, arg5);
         }
         if (!(func_150ADA20() & 1)) {
-            sp114[1] = (func_150ADA68() * 2.435000181f) + 3.534000158f;
-            sp114[0] = (func_150ADA68() * 43.40000153f) + 48.40000153f;
-            if (!sp1C3 || sp1C4->camera == NULL) {
-                sp113 = 0xFF;
+            trailParams[1] = (func_150ADA68() * 2.435000181f) + 3.534000158f;
+            trailParams[0] = (func_150ADA68() * 43.40000153f) + 48.40000153f;
+            if (!useTarget || target->camera == NULL) {
+                trailCameraMask = 0xFF;
             } else {
-                sp113 = ~(1 << sp1C4->camera->unk23D) & 0xFF;
+                trailCameraMask = ~(1 << target->camera->unk23D) & 0xFF;
             }
-            func_15102B38(arg0, (arg0->id == 0x23) ? D_800A1E34[arg1] : D_800A1DD0[arg1], (arg0->id == 0x23) ? (void *)D_800A1E38[arg1] : (void *)D_800A1DD4[arg1],
-                          (arg0->id == 0x23) ? (void *)D_800A1E50[arg1] : (void *)D_800A1DEC[arg1], sp114,
-                          (func_150ADA20() % 3U) + 4, (func_150ADA20() % 101U) + 0x9B, (func_150ADA68() * 1012.0f) + 1497.0f, sp1B4,
-                          sp113, 0, -1, arg4, arg5);
+            func_15102B38(obj, (obj->id == 0x23) ? D_800A1E34[side] : D_800A1DD0[side], (obj->id == 0x23) ? (void *)D_800A1E38[side] : (void *)D_800A1DD4[side],
+                          (obj->id == 0x23) ? (void *)D_800A1E50[side] : (void *)D_800A1DEC[side], trailParams,
+                          (func_150ADA20() % 3U) + 4, (func_150ADA20() % 101U) + 0x9B, (func_150ADA68() * 1012.0f) + 1497.0f, origin,
+                          trailCameraMask, 0, -1, arg4, arg5);
         }
     }
-    if (sp1C3 && sp1C4->camera != NULL) {
-        if (arg1) {
-            spB8.x = -59.0f;
+    if (useTarget && target->camera != NULL) {
+        if (side) {
+            effect.x = -59.0f;
         } else {
-            spB8.x = 59.0f;
+            effect.x = 59.0f;
         }
-        spB8.y = 68.0f;
-        spB8.sizeX = (func_150ADA68() * 20.0f) + 40.0f;
-        spB8.sizeY = (func_150ADA68() * 20.0f) + 80.0f;
-        spB8.unk10 = 0x80;
-        spB8.unk12 = (func_150ADA20() & 3) + 5;
-        spB8.flags = (s16)((arg1 ? 2 : 0) | 0x39) & 0xFFFF;
-        spB8.unk16 = 3;
-        spB8.unk18 = 0x55;
-        spB8.unk1A = 0;
-        spB8.unk1B = 0xFF;
-        spB8.unk1C = 0xFF;
-        spB8.unk1D = 0xFF;
-        spB8.unk1E = (func_150ADA20() % 56U) + 0xC8;
-        spB8.unk1F = 0xFF;
-        spB8.unk20 = 0xFF;
-        spB8.unk21 = 0xFF;
-        spB8.unk22 = 0xFF;
-        spB8.unk23 = 0xFF;
-        spB8.unk28 = 0x200004;
-        spB8.unk24 = 0;
-        spB8.unk2C = 0x1F0601;
-        spB8.unk30 = 3;
-        spB8.unk34 = 0x22;
-        spB8.unk38 = 0x80;
-        spB8.unk3C = 0x20;
-        spB8.unk40 = 0;
-        spB8.unk41 = 7;
-        spB8.unk44 = sp1C4->camera->unk23D;
-        func_1515548C(&spB8, 0, 0, 0, 0, 0, arg5);
-        spB0.side = arg1;
-        spB0.camera = sp1C4->camera;
-        func_1515572C(&spB0, 0x37);
+        effect.y = 68.0f;
+        effect.sizeX = (func_150ADA68() * 20.0f) + 40.0f;
+        effect.sizeY = (func_150ADA68() * 20.0f) + 80.0f;
+        effect.unk10 = 0x80;
+        effect.unk12 = (func_150ADA20() & 3) + 5;
+        effect.flags = (s16)((side ? 2 : 0) | 0x39) & 0xFFFF;
+        effect.unk16 = 3;
+        effect.unk18 = 0x55;
+        effect.unk1A = 0;
+        effect.unk1B = 0xFF;
+        effect.unk1C = 0xFF;
+        effect.unk1D = 0xFF;
+        effect.unk1E = (func_150ADA20() % 56U) + 0xC8;
+        effect.unk1F = 0xFF;
+        effect.unk20 = 0xFF;
+        effect.unk21 = 0xFF;
+        effect.unk22 = 0xFF;
+        effect.unk23 = 0xFF;
+        effect.unk28 = 0x200004;
+        effect.unk24 = 0;
+        effect.unk2C = 0x1F0601;
+        effect.unk30 = 3;
+        effect.unk34 = 0x22;
+        effect.unk38 = 0x80;
+        effect.unk3C = 0x20;
+        effect.unk40 = 0;
+        effect.unk41 = 7;
+        effect.unk44 = target->camera->unk23D;
+        func_1515548C(&effect, 0, 0, 0, 0, 0, arg5);
+        cameraArg.side = side;
+        cameraArg.camera = target->camera;
+        func_1515572C(&cameraArg, 0x37);
     }
 }
 
