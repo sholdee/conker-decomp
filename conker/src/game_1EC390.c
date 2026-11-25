@@ -271,7 +271,8 @@ void func_151BF340(u8 owner, s32 kind) {
                 memcpy(&display->panel->extra, &panelExtra, sizeof(panelExtra));
             }
             {
-                const s32 digitSprites[10] = { 0xC4, 0xC5, 0xC6, 0xC7, 0xC8, 0xC9, 0xCA, 0xCB, 0xCC, 0xCD };
+                // not const: the original unit (game_1EBD00..game_1EC390) keeps its aggregate initializers ahead of the literals (ROM 0x24F374)
+                s32 digitSprites[10] = { 0xC4, 0xC5, 0xC6, 0xC7, 0xC8, 0xC9, 0xCA, 0xCB, 0xCC, 0xCD };
                 u8 i;
 
                 digitArg.x = -500.0f;
