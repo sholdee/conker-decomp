@@ -3,37 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Config of func_15150400 (game_17CAF0.c): spawns countBase + rand(countRange) pieces around origin,
- * each with a random entry of the variant tables and a copy of extraData. */
-typedef struct {
-    /* 0x00 */ s32 countBase;
-    /* 0x04 */ s32 countRange;
-    /* 0x08 */ Vec3f origin;
-    /* 0x14 */ f32 speedBase;
-    /* 0x18 */ f32 speedRange;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ s16 unk24;
-    /* 0x26 */ s16 unk26;
-    /* 0x28 */ f32 scaleBase;
-    /* 0x2C */ f32 scaleRange;
-    /* 0x30 */ f32 spin;
-    /* 0x34 */ void *unk34;
-    /* 0x38 */ f32 unk38; /* probability */
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ s32 *variantIds;
-    /* 0x4C */ const f32 *variantScales;
-    /* 0x50 */ u32 variantCount;
-    /* 0x54 */ f32 radius;
-    /* 0x58 */ u8 flags;
-    /* 0x59 */ u8 unk59;
-    /* 0x5A */ u8 pad5A[2];
-    /* 0x5C */ s32 extraSize;
-    /* 0x60 */ void *extraData; /* copied into each piece at +0x170 */
-} Arg15150400;
-
 /* A piece spawned by func_15150400, as the handlers below see it. */
 typedef struct {
     /* 0x000 */ u8 unk0;
@@ -53,7 +22,7 @@ typedef struct {
     /* 0x170 */ f32 burstChance; /* func_150C04C0's extraData */
 } Piece;
 
-extern void func_15150400(Arg15150400 *, AngleRange *, u8, s32);
+extern void func_15150400(DebrisScatter *, AngleRange *, u8, s32);
 extern void func_15152190(DebrisBurst *, const s32 *, const f32 *, u32, f32, s32, u8, s32);
 extern void func_15153634(SpriteBurst *, u8, u8, s32);
 
@@ -649,7 +618,7 @@ s32 func_150C01DC(Piece *piece, s32 arg1, s32 arg2, s32 arg3, f32 y) {
 
 /* Scatters 9-13 pieces of variant `id` from origin; each piece carries a 0.65 burst chance. */
 void func_150C04C0(Vec3f *origin, void *arg1, s32 id, u8 arg3, u8 arg4, s32 arg5) {
-    Arg15150400 config;
+    DebrisScatter config;
     AngleRange angles;
     s32 ids[1];
     const f32 scales[1] = { 1.0f };
@@ -663,21 +632,21 @@ void func_150C04C0(Vec3f *origin, void *arg1, s32 id, u8 arg3, u8 arg4, s32 arg5
     config.origin = *origin;
     config.speedBase = 4.0f;
     config.speedRange = 7.0f;
-    config.unk1C = -1.280000091f;
-    config.unk20 = 0.3360000253f;
+    config.gravityBase = -1.280000091f;
+    config.gravityRange = 0.3360000253f;
     config.scaleBase = 0.6000000238f;
     config.scaleRange = 0.4500000179f;
-    config.unk24 = 0x50;
-    config.unk26 = 0x3C;
-    config.unk34 = arg1;
+    config.lifetimeBase = 0x50;
+    config.lifetimeRange = 0x3C;
+    config.floor = arg1;
     config.variantIds = ids;
     config.variantScales = scales;
     config.variantCount = 1;
     config.spin = 17.07700157f;
-    config.unk38 = 0.7520000339f;
-    config.unk3C = 0.2040000111f;
-    config.unk40 = 0.1640000045f;
-    config.unk44 = 10.0f;
+    config.floorHitChance = 0.7520000339f;
+    config.elasticityBase = 0.2040000111f;
+    config.elasticityRange = 0.1640000045f;
+    config.radiusScale = 10.0f;
     config.radius = 78.0f;
     if (arg3 != 0) {
         flags = 1;
@@ -685,7 +654,7 @@ void func_150C04C0(Vec3f *origin, void *arg1, s32 id, u8 arg3, u8 arg4, s32 arg5
         flags = 0;
     }
     config.flags = flags;
-    config.unk59 = 0xE;
+    config.floorHitFn = 0xE;
     config.extraSize = 4;
     config.extraData = &burstChance;
     angles.yawBase = 0;
@@ -704,7 +673,7 @@ s32 func_150C0648(Piece *piece, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
 
     if (func_150ADA68() < piece->burstChance) {
         {
-            Arg15150400 config;
+            DebrisScatter config;
             AngleRange angles;
             s32 ids[1];
             const f32 scales[1] = { 1.0f };
@@ -717,18 +686,18 @@ s32 func_150C0648(Piece *piece, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
             config.origin.z = piece->position.z;
             config.speedBase = 5.0f;
             config.speedRange = 4.0f;
-            config.unk1C = -1.210000038f;
-            config.unk20 = 0.4720000327f;
-            config.unk24 = 0x28;
-            config.unk26 = 0x1E;
+            config.gravityBase = -1.210000038f;
+            config.gravityRange = 0.4720000327f;
+            config.lifetimeBase = 0x28;
+            config.lifetimeRange = 0x1E;
             config.scaleBase = piece->unk18 * 0.3600000143f;
             config.scaleRange = piece->unk18 * 0.4130000174f;
             config.spin = 31.52700233f;
-            config.unk34 = piece->unk110;
-            config.unk38 = 1.0f;
-            config.unk3C = 0; // matching: integer zeros here; 0.0f changes the code
-            config.unk40 = 0;
-            config.unk44 = 10.0f;
+            config.floor = piece->unk110;
+            config.floorHitChance = 1.0f;
+            config.elasticityBase = 0; // matching: integer zeros here; 0.0f changes the code
+            config.elasticityRange = 0;
+            config.radiusScale = 10.0f;
             config.variantIds = ids;
             config.variantScales = scales;
             config.variantCount = 1;
@@ -739,7 +708,7 @@ s32 func_150C0648(Piece *piece, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
                 flags = 0;
             }
             config.flags = flags;
-            config.unk59 = 0xA;
+            config.floorHitFn = 0xA;
             config.extraSize = 0;
             config.extraData = NULL;
             angles.yawBase = 0;

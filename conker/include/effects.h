@@ -1411,6 +1411,75 @@ typedef struct SurfaceBurst {
     /* 0x70 */ f32 spin;            /* spin.x / spin.z are random in [-spin, spin] */
 } SurfaceBurst; /* size 0x74 */
 
+/* func_150CCEB0 (game_FA360.c): spawn description of a drifting quad (filled by func_15152874). */
+typedef struct DriftSpawn {
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ Vec3f vel;
+    /* 0x18 */ f32 drag;
+    /* 0x1C */ f32 gravity;
+    /* 0x20 */ Color8 color;        /* alpha goes to ParticleDef.unk44 */
+    /* 0x24 */ s32 life;
+    /* 0x28 */ ParticleSize size;
+    /* 0x30 */ f32 minVy;
+    /* 0x34 */ u8 pad34[4];
+} DriftSpawn; /* size 0x38 */
+
+/* func_15152874 (game_17CAF0.c): countBase + rand % (countRange + 1) drifting quads (func_150CCEB0) at pos,
+ * each launched at a random yaw/pitch and speed. */
+typedef struct DriftBurst {
+    /* 0x00 */ s32 countBase;
+    /* 0x04 */ s32 countRange;
+    /* 0x08 */ Vec3f pos;
+    /* 0x14 */ AngleRange angles;   /* binary angles (256 per turn) */
+    /* 0x1C */ f32 speedBase;
+    /* 0x20 */ f32 speedRange;
+    /* 0x24 */ f32 drag;
+    /* 0x28 */ f32 gravityBase;
+    /* 0x2C */ f32 gravityRange;
+    /* 0x30 */ s8 colorFunc;        /* index into D_8008AC60, or -1 for opaque white */
+    /* 0x31 */ u8 pad31;
+    /* 0x32 */ s16 lifeBase;
+    /* 0x34 */ s16 lifeRange;
+    /* 0x36 */ u8 pad36[2];
+    /* 0x38 */ f32 widthBase;
+    /* 0x3C */ f32 heightBase;
+    /* 0x40 */ f32 widthRange;
+    /* 0x44 */ f32 heightRange;
+    /* 0x48 */ f32 minVy;
+} DriftBurst; /* size 0x4C */
+
+/* func_15150400 (game_17CAF0.c; the direction ranges are a separate argument): throws countBase + rand %
+ * (countRange + 1) model pieces (func_1513264C) from a sphere of the given radius around origin, each a random
+ * entry of the variant tables, with a copy of extraData at +0x170. */
+typedef struct DebrisScatter {
+    /* 0x00 */ s32 countBase;
+    /* 0x04 */ s32 countRange;
+    /* 0x08 */ Vec3f origin;
+    /* 0x14 */ f32 speedBase;
+    /* 0x18 */ f32 speedRange;
+    /* 0x1C */ f32 gravityBase;
+    /* 0x20 */ f32 gravityRange;
+    /* 0x24 */ s16 lifetimeBase;
+    /* 0x26 */ s16 lifetimeRange;
+    /* 0x28 */ f32 scaleBase;       /* times the variant's scale */
+    /* 0x2C */ f32 scaleRange;
+    /* 0x30 */ f32 spin;            /* rotVel.x / rotVel.z are random in [-spin, spin] */
+    /* 0x34 */ void *floor;         /* func_1513264C's floor argument */
+    /* 0x38 */ f32 floorHitChance;  /* pieces that bounce use floorHitFn */
+    /* 0x3C */ f32 elasticityBase;
+    /* 0x40 */ f32 elasticityRange;
+    /* 0x44 */ f32 radiusScale;     /* ParticleSpawn.radius = radiusScale * size */
+    /* 0x48 */ s32 *variantIds;
+    /* 0x4C */ const f32 *variantScales;
+    /* 0x50 */ u32 variantCount;
+    /* 0x54 */ f32 radius;
+    /* 0x58 */ u8 flags;            /* 1: attached pieces (0x800) */
+    /* 0x59 */ u8 floorHitFn;       /* ParticleSpawn.floorHitFn of the pieces that bounce */
+    /* 0x5A */ u8 pad5A[2];
+    /* 0x5C */ s32 extraSize;
+    /* 0x60 */ void *extraData;     /* copied into each piece at +0x170 */
+} DebrisScatter; /* size 0x64 */
+
 /* func_151580B0 (game_185560.c): template of an effect actor (object type 0x37 / 0x55), copied to the actor
  * at +0x10. Like EffectParams, but the actor draws one display list from D_8008AFB8. */
 typedef struct EffectActorTemplate {

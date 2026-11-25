@@ -212,40 +212,11 @@ void func_15150178(AngleRange *angles, DropSpray *config, s32 arg2, u8 arg3, s32
     }
 }
 
-struct Arg15150400 {
-    s32 countBase;
-    s32 countRange;
-    Vec3f origin;
-    f32 speedBase;
-    f32 speedRange;
-    f32 unk1C;
-    f32 unk20;
-    s16 unk24;
-    s16 unk26;
-    f32 scaleBase;
-    f32 scaleRange;
-    f32 spin; /* spawn.spin.x/z are random in [-spin, spin] */
-    s32 unk34;
-    f32 unk38; /* probability */
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    s32 *variantIds;
-    f32 *variantScales;
-    u32 variantCount;
-    f32 radius;
-    u8 flags;
-    u8 unk59;
-    u8 pad5A[2];
-    s32 extraSize;
-    void *extraData;
-};
-
-extern void *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
+extern void *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, void *floor, s32 arg4, u8 arg5, s32 arg6);
 
 /* Spawns a random number of pieces in random directions around config->origin; each picks a random
  * entry of the variant tables and gets a copy of config->extraData. */
-void func_15150400(struct Arg15150400 *config, AngleRange *angles, u8 arg2, s32 arg3) {
+void func_15150400(DebrisScatter *config, AngleRange *angles, u8 arg2, s32 arg3) {
     s32 count;
     ParticleSpawn spawn;
     s16 yaw;
@@ -276,22 +247,22 @@ void func_15150400(struct Arg15150400 *config, AngleRange *angles, u8 arg2, s32 
     while (count != 0) {
         yaw = (func_150ADA20() % (u32)(angles->yawRange + 1)) + angles->yawBase;
         pitch = (func_150ADA20() % (u32)(angles->pitchRange + 1)) + angles->pitchBase;
-        if (func_150ADA68() < config->unk38) {
+        if (func_150ADA68() < config->floorHitChance) {
             spawn.updateFn = 13;
-            spawn.floorHitFn = config->unk59;
+            spawn.floorHitFn = config->floorHitFn;
         } else {
             spawn.updateFn = 8;
             spawn.floorHitFn = 0;
         }
-        spawn.elasticity = (func_150ADA68() * config->unk40) + config->unk3C;
+        spawn.elasticity = (func_150ADA68() * config->elasticityRange) + config->elasticityBase;
         spawn.rot.x = func_150ADA68() * 360.0f;
         spawn.rot.y = func_150ADA68() * 360.0f;
         spawn.rot.z = func_150ADA68() * 360.0f;
         func_15143794(yaw, pitch, (func_150ADA68() * config->speedRange) + config->speedBase, &spawn.vel.x);
         spawn.rotVel.x = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
         spawn.rotVel.z = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
-        spawn.gravity = (func_150ADA68() * config->unk20) + config->unk1C;
-        spawn.lifetime = (func_150ADA20() % (u32)(config->unk26 + 1)) + config->unk24;
+        spawn.gravity = (func_150ADA68() * config->gravityRange) + config->gravityBase;
+        spawn.lifetime = (func_150ADA20() % (u32)(config->lifetimeRange + 1)) + config->lifetimeBase;
         func_15143794(yaw, pitch, config->radius, &spawn.pos.x);
         spawn.pos.x += config->origin.x;
         spawn.pos.y += config->origin.y;
@@ -303,8 +274,8 @@ void func_15150400(struct Arg15150400 *config, AngleRange *angles, u8 arg2, s32 
         spawn.model = config->variantIds[variant];
         spawn.sizeY = (config->scaleBase + (func_150ADA68() * config->scaleRange)) * config->variantScales[variant];
         spawn.sizeXZ = spawn.sizeY;
-        spawn.radius = config->unk44 * spawn.sizeXZ;
-        piece = func_1513264C(&spawn, (config->flags & 1) ? 3 : 0, 0xFF, config->unk34, config->extraSize, arg2, arg3);
+        spawn.radius = config->radiusScale * spawn.sizeXZ;
+        piece = func_1513264C(&spawn, (config->flags & 1) ? 3 : 0, 0xFF, config->floor, config->extraSize, arg2, arg3);
         if (config->extraSize > 0 && piece != NULL) {
             memcpy((u8 *)piece + 0x170, config->extraData, config->extraSize);
         }
@@ -904,62 +875,26 @@ void func_15152520(ModelBurst *config, u8 arg1, s32 arg2) {
     }
 }
 
-struct Local15152874Arg {
-    s32 countBase;
-    s32 countRange;
-    Vec3f position;
-    AngleRange angles;
-    f32 speedBase;
-    f32 speedRange;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    s8 colorFunc; /* index into D_8008AC60, or -1 for opaque white */
-    u8 pad31;
-    s16 unk32;
-    s16 unk34;
-    u8 pad36[2];
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-};
-
-/* First argument of func_150CCEB0. */
-struct Local15152874Spawn {
-    Vec3f position;
-    Vec3f velocity;
-    f32 unk18;
-    f32 unk1C;
-    Color8 color;
-    s32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    s32 pad34;
-};
-
-extern void func_150CCEB0(struct Local15152874Spawn *, u8, u8);
+extern void func_150CCEB0(DriftSpawn *, u8, u8);
 extern void (*D_8008AC60[])(Color8 *);
 
-void func_15152874(struct Local15152874Arg *config, u8 arg1, s32 arg2) {
-    struct Local15152874Spawn spawn;
+void func_15152874(DriftBurst *config, u8 arg1, s32 arg2) {
+    DriftSpawn spawn;
     s32 count;
 
     count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
-    spawn.position = config->position;
-    spawn.unk18 = config->unk24;
-    spawn.unk30 = config->unk48;
+    spawn.pos = config->pos;
+    spawn.drag = config->drag;
+    spawn.minVy = config->minVy;
     while (count != 0) {
         func_15143794((s16)((func_150ADA20() % (u32)(config->angles.yawRange + 1)) + config->angles.yawBase),
                       (s16)((func_150ADA20() % (u32)(config->angles.pitchRange + 1)) + config->angles.pitchBase),
                       (func_150ADA68() * config->speedRange) + config->speedBase,
-                      &spawn.velocity.x);
-        spawn.unk1C = (func_150ADA68() * config->unk2C) + config->unk28;
-        spawn.unk24 = (func_150ADA20() % (u32)(config->unk34 + 1)) + config->unk32;
-        spawn.unk28 = (func_150ADA68() * config->unk40) + config->unk38;
-        spawn.unk2C = (func_150ADA68() * config->unk44) + config->unk3C;
+                      &spawn.vel.x);
+        spawn.gravity = (func_150ADA68() * config->gravityRange) + config->gravityBase;
+        spawn.life = (func_150ADA20() % (u32)(config->lifeRange + 1)) + config->lifeBase;
+        spawn.size.width = (func_150ADA68() * config->widthRange) + config->widthBase;
+        spawn.size.height = (func_150ADA68() * config->heightRange) + config->heightBase;
         if (config->colorFunc != -1) {
             D_8008AC60[config->colorFunc](&spawn.color);
         } else {

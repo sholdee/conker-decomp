@@ -3,18 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Spawn description consumed by func_150CCEB0 (filled by func_15152874). */
-typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ Vec3f vel;
-    /* 0x18 */ f32 drag;
-    /* 0x1C */ f32 gravity;
-    /* 0x20 */ u8 color[4];
-    /* 0x24 */ s32 life;
-    /* 0x28 */ ParticleSize size;
-    /* 0x30 */ f32 minVy;
-} DriftSpawn;
-
 /* Per-effect motion state of a drifting quad (lives at Effect + 0x110). */
 typedef struct {
     /* 0x00 */ Vec3f vel;
@@ -57,9 +45,9 @@ Effect *func_150CCEB0(DriftSpawn *spawn, u8 arg1, u8 arg2) {
     packet.lifetime = spawn->life;
     packet.frame = 0;
     packet.frameSpeed = 0;
-    packet.rgba[0] = spawn->color[0];
-    packet.rgba[1] = spawn->color[1];
-    packet.rgba[2] = spawn->color[2];
+    packet.rgba[0] = spawn->color.red;
+    packet.rgba[1] = spawn->color.green;
+    packet.rgba[2] = spawn->color.blue;
     packet.rgba[3] = 0xFF;
     *(ParticleSize *)&packet.width = spawn->size; // matching: copied whole (lw/sw); two f32 assignments move through FPRs
     packet.pos = spawn->pos;
@@ -70,7 +58,7 @@ Effect *func_150CCEB0(DriftSpawn *spawn, u8 arg1, u8 arg2) {
     packet.scale.x = 0.0f;
     packet.scale.y = 0.0f;
     packet.scale.z = 0.0f;
-    packet.unk44 = spawn->color[3];
+    packet.unk44 = spawn->color.alpha;
     packet.unk45 = 0xFF;
     packet.unk46 = 0;
     packet.unk47 = 6;
@@ -205,30 +193,6 @@ Vtx_t *func_150CD59C(Effect *effect, s16 bufferIndex) {
     return result;
 }
 
-/* Burst description passed to func_15152874, which spawns countBase..+countRange func_150CCEB0 quads. */
-typedef struct {
-    /* 0x00 */ s32 countBase;
-    /* 0x04 */ s32 countRange;
-    /* 0x08 */ Vec3f pos;
-    /* 0x14 */ s16 yawBase; /* binary angles (256 per turn) */
-    /* 0x16 */ s16 yawRange;
-    /* 0x18 */ s16 pitchBase;
-    /* 0x1A */ s16 pitchRange;
-    /* 0x1C */ f32 speedBase;
-    /* 0x20 */ f32 speedRange;
-    /* 0x24 */ f32 drag;
-    /* 0x28 */ f32 gravityBase;
-    /* 0x2C */ f32 gravityRange;
-    /* 0x30 */ s8 colorFunc; /* index into D_8008AC60, or -1 for opaque white */
-    /* 0x32 */ s16 lifeBase;
-    /* 0x34 */ s16 lifeRange;
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 minVy;
-} DriftBurst;
-
 /* Five yaw angles (radians) around which the bursts appear. */
 typedef struct {
     f32 yaw[5];
@@ -269,8 +233,8 @@ void func_150CD7F8(BurstEmitter *emitter) {
 
     timer->pending += 0.08f * D_800BE9A4 * timer->rate;
     if (timer->pending > 1.0f) {
-        burst.pitchBase = -23;
-        burst.pitchRange = 6;
+        burst.angles.pitchBase = -23;
+        burst.angles.pitchRange = 6;
         burst.colorFunc = 0;
         burst.drag = 0.992233f;
         burst.minVy = -10.1175995f;
@@ -294,14 +258,14 @@ void func_150CD7F8(BurstEmitter *emitter) {
                 burst.countBase = 15;
                 burst.countRange = 20;
                 /* 40.743664 = 256 / (2 * pi): radians to binary angle */
-                burst.yawBase = (yaw + 3.1415927f - 0.15100001f) * 40.743664f;
-                burst.yawRange = 12;
+                burst.angles.yawBase = (yaw + 3.1415927f - 0.15100001f) * 40.743664f;
+                burst.angles.yawRange = 12;
                 burst.lifeBase = 550;
                 burst.lifeRange = 0;
-                burst.unk3C = 15.0f;
-                burst.unk38 = 15.0f;
-                burst.unk44 = 25.300001f;
-                burst.unk40 = 25.300001f;
+                burst.heightBase = 15.0f;
+                burst.widthBase = 15.0f;
+                burst.heightRange = 25.300001f;
+                burst.widthRange = 25.300001f;
                 burst.speedBase = 78.6f;
                 burst.speedRange = 25.2f;
                 burst.gravityBase = -1.108f;
