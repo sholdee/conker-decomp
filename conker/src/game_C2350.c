@@ -79,7 +79,7 @@ void func_15094EA0(s32 view) {
 extern Gfx D_800873D0[];
 extern u8 *D_800D2CA0;
 
-/* Emits the texture-drawing setup display list and forgets the loaded texture address. */
+/* Emits display list D_800873D0 and forgets the last loaded texture address. */
 Gfx *func_15094F40(Gfx *gfx) {
     gSPDisplayList(gfx++, D_800873D0);
     D_800D2CA0 = NULL;
@@ -90,7 +90,7 @@ void func_15095060(TextureDesc *desc, s32 frame, SpriteParams *sprite);
 Gfx *func_150950D4(Gfx *gfx, Texture *tex, s32 tmem, s32 tile, s32 frame, s32 sfrac, s32 cm, s32 s, s32 t, s32 assetArg);
 extern Texture D_800D2C90;
 
-/* Loads `desc` (frame frame >> 8) into tile `tile` at tmem 0, origin (256, 256). */
+/* Loads frame `frame >> 8` of `desc` as tile `tile` at tmem `tmem`, with the tile origin at (256, 256). */
 Gfx *func_15094F70(Gfx *gfx, TextureDesc *desc, s32 frame, SpriteParams *sprite, s32 tmem, s32 tile, s32 sfrac, s32 cm, s32 assetArg) {
     func_15095060(desc, frame, sprite);
     return func_150950D4(gfx, &D_800D2C90, tmem, tile, 0, sfrac, cm, 0x100, 0x100, assetArg);
@@ -289,7 +289,7 @@ Gfx *func_15095A90(Gfx *gfx, SpriteParams *sprite, f32 x, f32 y, f32 z, s32 proj
     return gfx;
 }
 
-// SpriteParams placement computed by func_15095B08 for func_15095D34.
+// Sprite placement computed by func_15095B08 for func_15095D34.
 extern f32 D_800D2C70; // x scale
 extern f32 D_800D2C74; // y scale
 extern f32 D_800D2C78; // left
@@ -557,7 +557,7 @@ Gfx *func_1509629C(Gfx *gfx, TextureDesc *desc, f32 scaleX, f32 scaleY, f32 x, f
 
 extern Gfx D_80087408[];
 
-/* Emits the closing display list and clears D_800D2DAB. */
+/* Emits display list D_80087408 and clears D_800D2DAB (back to the sprite prim colour). */
 Gfx *func_15096934(Gfx *gfx) {
     gSPDisplayList(gfx++, D_80087408);
     D_800D2DAB = 0;
