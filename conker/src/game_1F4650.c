@@ -1,4 +1,6 @@
 #include <ultra64.h>
+// functions.h declares func_150ADA20 as returning u8 and func_1513D4B8 as void; this file uses
+// their real return types, so the header's declarations are renamed out of the way.
 #define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #define func_1513D4B8 func_1513D4B8_void_decl
 #include "functions.h"
@@ -321,6 +323,7 @@ s32 func_151C756C(vertex *start, SightTriangle *startTri, vertex *end, SightTria
     state.speedS = (func_150ADA68() * 80.0f + 50.0f) * 0.001000000047f;
     state.speedT = (func_150ADA68() * 80.0f + 50.0f) * 0.001000000047f;
     {
+        // matching: a block-scope declaration gives IDO a scope boundary here
         extern void func_151C9198(SightEmitter **, vertex *, SightTriangle *, vertex *, SightZone *, u8, u8, u8, s32);
 
         spawn.unk34.x = end->x - start->x;
@@ -1277,6 +1280,7 @@ void func_151C9DE8(struct108 *player, u8 arg1, s8 arg2, u8 arg3, s32 arg4);
 void func_151CC524(struct108 *, u8, u8, u8, u8, u8);
 void func_151CC840(struct108 *, u8, u8, u8, u8, u8);
 void func_151CCD1C(struct108 *, u8, u8, u8);
+void func_151CCF08(struct108 *, u8, s8, u8);
 void func_151CB5FC(struct108 *player, u8 kind, u8 arg2, s8 arg3, u8 arg4);
 
 /* Starts the screen/player effects for player state `state` (some held items force state 27). */
@@ -1336,11 +1340,6 @@ void func_151C9BA0(struct108 *player, s32 state) {
 }
 
 void func_150BDE90(void *, u8, s32);
-void func_151C9F38(struct108 *player, u8 type, u8 arg2, s8 arg3, u8 arg4);
-void func_151CC524(struct108 *, u8, u8, u8, u8, u8);
-void func_151CC840(struct108 *, u8, u8, u8, u8, u8);
-void func_151CCF08(struct108 *, u8, s8, u8);
-void func_151CB5FC(struct108 *player, u8 kind, u8 arg2, s8 arg3, u8 arg4);
 
 /* Effects for state 27 when D_800BE9F0 is 0x27 (see func_151C9BA0). */
 void func_151C9DE8(struct108 *player, u8 arg1, s8 arg2, u8 arg3, s32 arg4) {
@@ -2195,7 +2194,6 @@ f32 func_151CC1D4(SightSprite *sprite) {
 }
 
 
-extern void func_1515572C(s32, s32);
 
 /* Broadcasts message 0x46 (flash the sight sprites of `player`). */
 void func_151CC290(s32 player) {
