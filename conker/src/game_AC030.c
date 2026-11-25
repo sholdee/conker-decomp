@@ -211,7 +211,7 @@ void func_1507EFD0(void) {
 
     idle = &D_800D154C->unk31C->idle;
     count = 0;
-    /* Actor 0x139: a requested sequence, 0x13A: its countdown (pad139 in include/structs.h) */
+    /* unk139: a requested sequence, unk13A: its countdown */
     if (D_800D154C->unk13A != 0) {
         if (D_800D154C->unk139 < 0x21) {
             func_1507EB80(candidates, &count, D_800D154C->unk139);

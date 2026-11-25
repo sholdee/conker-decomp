@@ -542,10 +542,6 @@ extern Actor *func_1505ED34(void);
 extern s32 func_150838EC(Actor *obj, s32 anim, s32 arg2, f32 speed);
 extern void func_150D10E4(Actor *obj, u8 arg1);
 
-// Actor declares these offsets as padding, so they are reached by offset.
-#define U8AT(p, off) (*(u8 *)((u8 *)(p) + (off)))
-#define F32AT(p, off) (*(f32 *)((u8 *)(p) + (off)))
-
 // Kills obj and spawns a copy of it; the two are thrown apart with random velocities.
 void func_151951E0(Actor *obj) {
     Actor *copy;
@@ -555,7 +551,7 @@ void func_151951E0(Actor *obj) {
     func_15194AB4(obj);
     obj->interaction_state = 0x28;
     obj->xz_velocity = -3.0f;
-    F32AT(obj, 0xBC) = -10.0f - (func_150ADA20() % 5U);
+    obj->unkBC = -10.0f - (func_150ADA20() % 5U);
     obj->unk148 = (func_150ADA20() % 10U) - 5.0f;
     obj->y_velocity = 0.0f;
     obj->gravity = 0.0f;
@@ -574,14 +570,14 @@ void func_151951E0(Actor *obj) {
     copy->xz_scale = obj->xz_scale;
     copy->y_scale = obj->y_scale;
     copy->xz_velocity = 10.0f;
-    F32AT(copy, 0xBC) = (func_150ADA20() % 5U) + 10.0f;
+    copy->unkBC = (func_150ADA20() % 5U) + 10.0f;
     copy->unk148 = (func_150ADA20() % 10U) - 5.0f;
-    U8AT(copy, 0x68) = U8AT(obj, 0x68);
-    U8AT(copy, 0x69) = U8AT(obj, 0x69);
-    U8AT(copy, 0x6A) = U8AT(obj, 0x6A);
-    U8AT(copy, 0x6B) = U8AT(obj, 0x6B);
-    U8AT(copy, 0x6C) = U8AT(obj, 0x6C);
-    U8AT(copy, 0x6D) = U8AT(obj, 0x6D);
+    copy->unk68[0] = obj->unk68[0];
+    copy->unk68[1] = obj->unk68[1];
+    copy->eyeClosed[0] = obj->eyeClosed[0];
+    copy->eyeClosed[1] = obj->eyeClosed[1];
+    copy->eyeCode[0] = obj->eyeCode[0];
+    copy->eyeCode[1] = obj->eyeCode[1];
     copy->unk76 += (func_150ADA20() % 10922U) - 65536.0f / 12;
     copy->unk40 = (obj->unk76 + 0x4000) * (360.0f / 65536);
     copy->unkF8 = obj->unkF8;

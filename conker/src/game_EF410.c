@@ -828,9 +828,9 @@ void func_150C3994(Actor *obj) {
         }
     }
     if (obj->y_velocity < 0.0f) {
-        if ((obj->unk28 > 20.0f) && (*(u8 *)((u8 *)obj + 0x136) == 0) && (obj->unk28 < (-20.0f * obj->y_velocity))) {
+        if ((obj->unk28 > 20.0f) && (obj->unk136 == 0) && (obj->unk28 < (-20.0f * obj->y_velocity))) {
             func_10010630(0x92, obj, 0x7D00, 0xC8, 0x9C4);
-            *(u8 *)((u8 *)obj + 0x136) = 1;
+            obj->unk136 = 1;
         }
     }
     if (obj->unk83 == 0) {

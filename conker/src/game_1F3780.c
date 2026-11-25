@@ -212,7 +212,7 @@ typedef struct {
     /* 0x10 */ ShotSource *source;
 } ShotSourceEntry;
 
-s32 func_1514ECE0(s32, s16, ShotSourceEntry **);
+s32 func_1514ECE0(struct Attachment *, s16, ShotSourceEntry **);
 void func_150F7470(Vec3f *, s32, s32, s32, s32, ShotDesc *, f32, f32, f32, Actor *, s32, s32, s32, s32, s32, s32,
                    s32, s32, u8, s32);
 
@@ -255,8 +255,7 @@ void func_151C6A28(Actor *arg0, u8 side, u8 arg2, s32 arg3) {
                 ShotHolder *holder;
                 ShotDesc *src;
 
-                /* 0x2F4 lies in Actor's pad2F0 */
-                if (func_1514ECE0(*(s32 *)((u8 *)arg0 + 0x2F4), 0x1B, &entry) != 0) {
+                if (func_1514ECE0(arg0->attachments, 0x1B, &entry) != 0) {
                     source = entry->source;
                     holder = &source->holder;
                     if (source->flags & 1) {

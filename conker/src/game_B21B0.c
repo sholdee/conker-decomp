@@ -77,7 +77,6 @@ s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, f32
         if (D_800BE616 && D_800D18A8) {
             u8 candidates[32];
 
-            /* the byte at 0x128 (inside Actor's pad128) is the player's team */
             team = D_800CC2D0[playerIndex].team;
             state = D_800CC2D0[playerIndex].unk31C;
             count = 0;

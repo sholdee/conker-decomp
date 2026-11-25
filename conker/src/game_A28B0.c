@@ -1744,7 +1744,6 @@ select_object: // matching: unused label, splits the block for the scheduler
         return;
     }
     case 6:
-        // Actor declares 0xC8 as u32 padC8
         D_800CC2D0[index].unkC8 = D_800D1890;
         return;
     case 7:
