@@ -7,6 +7,41 @@ u32 func_150ADA20(void);
 
 void func_151058B4();
 
+typedef struct { f32 x, y, z; } Vec3f;
+typedef struct { u8 r, g, b, a; } ColorRGBA;
+
+/* Same layout as SpawnRegion in game_16EE20.c. */
+typedef struct SpawnRegion {
+    /* 0x00 */ s16 x;
+    /* 0x02 */ s16 y;
+    /* 0x04 */ s16 z;
+    /* 0x06 */ s16 radiusX;
+    /* 0x08 */ s16 height;
+    /* 0x0A */ s16 radiusZ;
+    /* 0x0C */ u8 padC[4];
+    /* 0x10 */ f32 rotation; /* degrees */
+    /* 0x14 */ u8 unk14;     /* the effects here set it to 1 while off */
+    /* 0x15 */ u8 flags;     /* bits 0-1: shape */
+} SpawnRegion;
+
+/* Same layout as BoltDesc in game_133190.c: a lightning bolt along a cubic Bezier. */
+typedef struct BoltDesc {
+    /* 0x00 */ s16 life;
+    /* 0x02 */ u8 flags;          /* bit 0: life counts down */
+    /* 0x03 */ u8 pad3;
+    /* 0x04 */ Vec3f ctrl[4];     /* Bezier control points; ctrl[0] and ctrl[3] are the end points */
+    /* 0x34 */ s8 updateKind;     /* -1: none */
+    /* 0x35 */ u8 pad35[3];
+    /* 0x38 */ s32 segments;
+    /* 0x3C */ f32 jitter;        /* max sideways offset of each joint */
+    /* 0x40 */ f32 width;         /* half width of the drawn strip */
+    /* 0x44 */ s16 rejitterBase;  /* frames between re-jitters: base + rand % (range + 1) */
+    /* 0x46 */ s16 rejitterRange;
+    /* 0x48 */ ColorRGBA color;
+    /* 0x4C */ u8 kind;
+    /* 0x4D */ u8 pad4D[3];
+} BoltDesc; /* size 0x50 */
+
 extern s32 D_800DCE50[][0x68];
 
 typedef struct Func15105C24Obj {
@@ -23,25 +58,27 @@ extern s32 *D_800DBF94;
 typedef struct {
     s32 count;
     const u8 *list;
-    struct127 *obj;
+    struct127 *player;
 } Msg35;
 
+/* Sends message 0x35 (selection list for kinds 0xF7-0xF9) or 0x38 (kinds 0xF6) about the
+ * first active player in this object's player mask. */
 void func_15104A80(struct131 *arg0) {
-    struct127 *found;
+    struct127 *player;
 
-    found = NULL;
+    player = NULL;
     {
         s32 mask;
         s32 i;
-        struct127 *obj;
+        struct127 *candidate;
 
         i = arg0 - D_800DBEF4;
         mask = D_800DBF94[i];
         if (mask != 0) {
-            for (i = 0; i < 25 && found == NULL; i++) {
-                obj = &D_800CC2D0[i];
-                if (obj->interaction_state != 0 && (mask & (1U << i))) {
-                    found = obj;
+            for (i = 0; i < 25 && player == NULL; i++) {
+                candidate = &D_800CC2D0[i];
+                if (candidate->interaction_state != 0 && (mask & (1U << i))) {
+                    player = candidate;
                 }
             }
         }
@@ -49,162 +86,139 @@ void func_15104A80(struct131 *arg0) {
     if (((u8 *)arg0)[0x72] == 0xF9 || ((u8 *)arg0)[0x72] == 0xF8 || ((u8 *)arg0)[0x72] == 0xF7) {
         Msg35 msg;
 
-        msg.obj = found;
+        msg.player = player;
         if (((u8 *)arg0)[0x72] == 0xF9) {
-            const u8 list[9] = { 0, 1, 2, 3, 4, 5, 0xF, 0x10, 0x11 };
+            const u8 list[9] = { 0, 1, 2, 3, 4, 5, 15, 16, 17 };
 
             msg.count = 9;
             msg.list = list;
         } else if (((u8 *)arg0)[0x72] == 0xF8) {
-            const u8 list[9] = { 6, 7, 8, 0x18, 0x19, 0x1A, 0x12, 0x13, 0x14 };
+            const u8 list[9] = { 6, 7, 8, 24, 25, 26, 18, 19, 20 };
 
             msg.count = 9;
             msg.list = list;
         } else if (((u8 *)arg0)[0x72] == 0xF7) {
-            const u8 list[9] = { 9, 0xA, 0xB, 0xC, 0xD, 0xE, 0x15, 0x16, 0x17 };
+            const u8 list[9] = { 9, 10, 11, 12, 13, 14, 21, 22, 23 };
 
             msg.count = 9;
             msg.list = list;
         }
         func_151494E0((s32)&msg, 0x35);
     } else if (((u8 *)arg0)[0x72] == 0xF6) {
-        Msg35 msg2;
+        Msg35 msg;
 
-        msg2.obj = found;
-        func_151494E0((s32)&msg2.obj, 0x38);
+        msg.player = player;
+        func_151494E0((s32)&msg.player, 0x38);
     }
 }
 
+/* Header shared by the effect objects in this file; each kind keeps its own state at 0x28. */
+typedef struct ObjHeader {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD[0x1B];
+} ObjHeader; /* size 0x28 */
+
+/* Rain of lightning bolts falling around a point onto the ground (func_15104C44, func_15104FF8). */
+typedef struct BoltRainState {
+    /* 0x00 */ SpawnRegion *region;
+    /* 0x04 */ f32 pending;      /* bolts owed, accumulated per frame */
+    /* 0x08 */ s16 timer;        /* frames left; negative when off */
+    /* 0x0A */ u8 padA[2];
+    /* 0x0C */ Vec3f pos;
+    /* 0x18 */ f32 radius;
+    /* 0x1C */ f32 height;       /* bolts start this far above pos */
+    /* 0x20 */ f32 groundY;
+    /* 0x24 */ u8 pad24[0x20];
+    /* 0x44 */ s16 *unk44;
+} BoltRainState;
+
+typedef struct BoltRainObj {
+    /* 0x00 */ ObjHeader header;
+    /* 0x28 */ BoltRainState state;
+} BoltRainObj;
+
 s32 func_1000FD38();
 extern s32 func_151464B8(s16 *);
+extern void func_15143874(s16 angle, f32 radius, f32 *x, f32 *z);
+extern s32 func_15046C80(f32 *pos, s32, f32 y, f32 *groundY);
+extern void func_15105CE0(BoltDesc *desc, s32 extraSize, s32, s32);
 
-typedef struct {
-    void *target;
-    f32 accum;
-    s16 timer;
-    f32 x;
-    f32 y;
-    f32 z;
-    f32 radius;
-    f32 yOffset;
-    f32 floor;
-    u8 pad24[0x20];
-    s16 *unk44;
-} Func15104C44Data;
+/* While the timer runs, drops lightning bolts from above pos to random ground points within radius. */
+void func_15104C44(BoltRainObj *obj) {
+    BoltRainState *state;
 
-typedef struct {
-    s16 unk0;
-    u8 unk2;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    s8 unk34;
-    s32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    s16 unk44;
-    s16 unk46;
-    u8 unk48;
-    u8 unk49;
-    u8 unk4A;
-    u8 unk4B;
-    u8 unk4C;
-} Func15104C44Desc;
-
-extern void func_15143874(s16, f32, f32 *, f32 *);
-extern s32 func_15046C80(f32 *, s32, f32, f32 *);
-extern void func_15105CE0(Func15104C44Desc *, s32, s32, s32);
-
-void func_15104C44(struct131 *arg0) {
-    Func15104C44Data *data;
-
-    data = (Func15104C44Data *)((u8 *)arg0 + 0x28);
-    if (data->timer >= 0) {
-        data->timer -= D_800BE9E4;
-        if (data->timer < 0) {
-            func_1000FD38(func_1000EF40, data->target, 0);
+    state = &obj->state;
+    if (state->timer >= 0) {
+        state->timer -= D_800BE9E4;
+        if (state->timer < 0) {
+            func_1000FD38(func_1000EF40, state->region, 0);
         }
-        if (func_151464B8(data->unk44) == 0) {
-            data->accum += (0.1970000118f + func_150ADA68() * 0.3f) * D_800BE9A4;
-            if (data->accum > 1.0f) {
-                Func15104C44Desc desc;
-                f32 pos[3];
+        if (func_151464B8(state->unk44) == 0) {
+            state->pending += (0.1970000118f + func_150ADA68() * 0.3f) * D_800BE9A4;
+            if (state->pending > 1.0f) {
+                BoltDesc desc;
+                f32 ground[3];
                 f32 offZ1;
                 f32 offX1;
                 f32 offZ2;
                 f32 offX2;
 
-                pos[1] = data->y + data->yOffset;
-                desc.unk2 = 1;
-                desc.unk34 = -1;
-                desc.unk44 = 3;
-                desc.unk46 = 4;
-                desc.unk4C = 0;
-                desc.unk40 = 45.0f;
-                desc.unk3C = 25.0f;
-                desc.unk4 = data->x;
-                desc.unk8 = data->y + data->yOffset;
-                desc.unkC = data->z;
-                desc.unk14 = data->y + data->yOffset - 180.0f;
-                desc.unk48 = 0x61;
-                desc.unk49 = 0xF2;
-                desc.unk4A = 0xFF;
+                ground[1] = state->pos.y + state->height;
+                desc.flags = 1;
+                desc.updateKind = -1;
+                desc.rejitterBase = 3;
+                desc.rejitterRange = 4;
+                desc.kind = 0;
+                desc.width = 45.0f;
+                desc.jitter = 25.0f;
+                desc.ctrl[0].x = state->pos.x;
+                desc.ctrl[0].y = state->pos.y + state->height;
+                desc.ctrl[0].z = state->pos.z;
+                desc.ctrl[1].y = state->pos.y + state->height - 180.0f;
+                desc.color.r = 0x61;
+                desc.color.g = 0xF2;
+                desc.color.b = 0xFF;
                 do {
-                    func_15143874(func_150ADA20() & 0xFF, (func_150ADA68() * 0.5f + 0.5f) * data->radius, &pos[0], &pos[2]);
-                    pos[0] += data->x;
-                    pos[2] += data->z;
-                    if (func_15046C80(pos, 0, data->y, &data->floor) != 0) {
+                    func_15143874(func_150ADA20() & 0xFF, (func_150ADA68() * 0.5f + 0.5f) * state->radius,
+                                  &ground[0], &ground[2]);
+                    ground[0] += state->pos.x;
+                    ground[2] += state->pos.z;
+                    if (func_15046C80(ground, 0, state->pos.y, &state->groundY) != 0) {
                         func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * 220.0f, &offX1, &offZ1);
                         func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * 220.0f, &offX2, &offZ2);
-                        desc.unk10 = data->x + offX1;
-                        desc.unk18 = data->z + offZ1;
-                        desc.unk28 = pos[0];
-                        desc.unk2C = data->floor;
-                        desc.unk30 = pos[2];
-                        desc.unk1C = offX2 + pos[0];
-                        desc.unk20 = desc.unk2C + 180.0f;
-                        desc.unk24 = offZ2 + pos[2];
-                        desc.unk0 = func_150ADA20() % 13U + 8;
-                        desc.unk4B = func_150ADA20() % 156U + 100;
-                        desc.unk38 = func_150ADA20() % 3U + 5;
-                        func_15105CE0(&desc, 0, ((u8 *)arg0)[0xC], ((u8 *)arg0)[1]);
+                        desc.ctrl[1].x = state->pos.x + offX1;
+                        desc.ctrl[1].z = state->pos.z + offZ1;
+                        desc.ctrl[3].x = ground[0];
+                        desc.ctrl[3].y = state->groundY;
+                        desc.ctrl[3].z = ground[2];
+                        desc.ctrl[2].x = offX2 + ground[0];
+                        desc.ctrl[2].y = desc.ctrl[3].y + 180.0f;
+                        desc.ctrl[2].z = offZ2 + ground[2];
+                        desc.life = func_150ADA20() % 13U + 8;
+                        desc.color.a = func_150ADA20() % 156U + 100;
+                        desc.segments = func_150ADA20() % 3U + 5;
+                        func_15105CE0(&desc, 0, obj->header.unkC, obj->header.unk1);
                     }
-                    data->accum -= 1.0f;
-                } while (data->accum > 1.0f);
+                    state->pending -= 1.0f;
+                } while (state->pending > 1.0f);
             }
         }
     }
 }
 
-s32 func_1000FD38();
+/* Message handler: on 0x38 while the region is idle, restarts the rain for 300 frames with its sound. */
+void func_15104FF8(BoltRainObj *obj, s32 arg1, u8 msg) {
+    BoltRainState *state = &obj->state;
 
-void func_15104FF8(struct207 *arg0, s32 arg1, u8 arg2) {
-    struct206 *m = (struct206 *)&arg0->unk28;
-    if ((arg2 == 0x38) && (m->unk0->unk14 == 1)) {
-        *(s16 *)((u8 *)m + 8) = 300;
-        func_1000FD38(func_1000EF40, (struct205 *)((s32)m->unk0), 0);
-        func_1000FA64(
-            0x236,
-            ((s16 *)m->unk0)[0],
-            ((s16 *)m->unk0)[1],
-            ((s16 *)m->unk0)[2],
-            0x4000,
-            0x5DC,
-            0x3E8,
-            (s32)func_1000EF40,
-            m->unk0,
-            0,
-            8,
-            0);
+    if (msg == 0x38 && state->region->unk14 == 1) {
+        state->timer = 300;
+        // matching: the (s32) copy keeps IDO from sharing one register for region across the call
+        func_1000FD38(func_1000EF40, (s32)state->region, 0);
+        func_1000FA64(0x236, state->region->x, state->region->y, state->region->z, 0x4000, 1500, 1000,
+                      (s32)func_1000EF40, state->region, 0, 8, 0);
     }
 }
 
