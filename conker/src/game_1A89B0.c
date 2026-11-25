@@ -535,69 +535,64 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fa
 extern void func_10006240(s32, s32, s32);
 extern void func_10004074(s32);
 
-struct s1517CFC4_a { s32 unk0; s32 unk4; s32 unk8; s32 unkC; };
-
+/* Releases every sprite type's texture file buffer, first passing it with the frames to func_10006240. */
 void func_1517CFC4(void) {
     s32 i;
-    s32 *q;
-    struct s1517CFC4_a *p;
 
-    for (q = (s32 *)&D_800DD478, p = (struct s1517CFC4_a *)&D_800DDA90, i = 0; i != 15; i++, p++) {
-        if (p->unk8 != 0) {
-            if (q[i * 26] != 0) {
-                func_10006240(p->unk8, q[i * 26], D_8003809C);
-                func_10004074(p->unk8);
+    for (i = 0; i < 15; i++) {
+        if (sTexFiles[i].buf != 0) {
+            if (sFrames[i * FRAMES_PER_TYPE] != 0) {
+                func_10006240(sTexFiles[i].buf, sFrames[i * FRAMES_PER_TYPE], D_8003809C);
+                func_10004074(sTexFiles[i].buf);
             }
-            p->unk8 = 0;
+            sTexFiles[i].buf = 0;
         }
     }
 }
 
 
-Gfx *func_1517D074(Gfx *gfx, s16 x, s16 y, s16 z, f32 angle, s32 radius, s32 height, u8 width, u8 depth, s32 timg)
-{
-    u32 i;
-    s16 c;
-    s16 s;
+/* Draws one textured billboard quad at (x, y, z) facing `angle` into the sprite vertex buffer's next slot. */
+Gfx *func_1517D074(Gfx *gfx, s16 x, s16 y, s16 z, f32 angle, s32 halfWidth, s32 height, u8 texWidth, u8 texHeight, s32 texture) {
+    u32 count;
+    s16 dx;
+    s16 dz;
     Vtx *v;
 
-    i = D_800DDD58;
-    v = &((Vtx *)D_800DDD10[D_800BE9C0])[i * 4];
-    if ((u32)D_800DDD58 >= (u32)D_800DDD0C)
-    {
+    count = D_800DDD58;
+    v = &VTX(count * 4);
+    if ((u32)D_800DDD58 >= (u32)D_800DDD0C) {
         return gfx;
     }
 
-    gSPDisplayList(gfx++, &D_8008CFA0);
-    gDPSetCombine(gfx++, 0xFFFFFF, 0xFFFCF438);
+    gSPDisplayList(gfx++, D_8008CFA0);
+    gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, 0, 0, 0, TEXEL1, 0, 0, 0, COMBINED, 0, 0, 0, COMBINED);
     gSPClearGeometryMode(gfx++, G_CULL_BACK);
     gDPSetOtherMode(gfx++, 0x182C3F, 0x0C184B50);
 
     angle *= 0.01745329238f;
-    c = cosf(angle) * radius;
-    s = sinf(angle) * radius;
+    dx = cosf(angle) * halfWidth;
+    dz = sinf(angle) * halfWidth;
 
-    v[0].v.ob[0] = v[3].v.ob[0] = x + c;
-    v[1].v.ob[1] = y;
-    v[0].v.ob[1] = v[1].v.ob[1];
-    v[0].v.ob[2] = v[3].v.ob[2] = z - s;
-    v[1].v.ob[0] = v[2].v.ob[0] = x - c;
-    v[2].v.ob[1] = v[3].v.ob[1] = (s16)(y + height + height);
-    v[1].v.ob[2] = v[2].v.ob[2] = z + s;
-    v[1].v.tc[0] = v[2].v.tc[0] = (width << 5) - 1;
-    v[2].v.tc[1] = v[3].v.tc[1] = (depth << 5) - 1;
+    v[0].v.ob[0] = v[3].v.ob[0] = x + dx;
+    v[0].v.ob[1] = v[1].v.ob[1] = y;
+    v[0].v.ob[2] = v[3].v.ob[2] = z - dz;
+    v[1].v.ob[0] = v[2].v.ob[0] = x - dx;
+    v[2].v.ob[1] = v[3].v.ob[1] = y + height + height;
+    v[1].v.ob[2] = v[2].v.ob[2] = z + dz;
+    v[1].v.tc[0] = v[2].v.tc[0] = (texWidth << 5) - 1;
+    v[2].v.tc[1] = v[3].v.tc[1] = (texHeight << 5) - 1;
 
-    gSPVertex(gfx++, &((Vtx *)D_800DDD10[D_800BE9C0])[i * 4], 4, 0);
-    gDPLoadTextureBlock(gfx++, timg, G_IM_FMT_RGBA, G_IM_SIZ_16b, width, (depth * 5 + 3) >> 2, 0,
-                        G_TX_CLAMP, G_TX_CLAMP, 0, 0, 0, 0);
-    gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_4b, ((width >> 1) + 7) >> 3, (width * depth) >> 2, 1, 0,
-               G_TX_CLAMP, 0, 0, G_TX_CLAMP, 0, 0);
-    gDPSetTileSize(gfx++, 1, 0, 0, (width - 1) << 2, (depth - 1) << 2);
+    gSPVertex(gfx++, &VTX(count * 4), 4, 0);
+    gDPLoadTextureBlock(gfx++, texture, G_IM_FMT_RGBA, G_IM_SIZ_16b, texWidth, (texHeight * 5 + 3) >> 2, 0,
+                        G_TX_CLAMP, G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_4b, ((texWidth >> 1) + 7) >> 3, (texWidth * texHeight) >> 2, 1, 0,
+               G_TX_CLAMP, G_TX_NOMASK, G_TX_NOLOD, G_TX_CLAMP, G_TX_NOMASK, G_TX_NOLOD);
+    gDPSetTileSize(gfx++, 1, 0, 0, (texWidth - 1) << G_TEXTURE_IMAGE_FRAC, (texHeight - 1) << G_TEXTURE_IMAGE_FRAC);
 
-    ((Vtx *)D_800DDD10[D_800BE9C0])[i * 4].v.flag =
-        ((Vtx *)D_800DDD10[D_800BE9C0])[i * 4 + 1].v.flag =
-        ((Vtx *)D_800DDD10[D_800BE9C0])[i * 4 + 2].v.flag =
-        ((Vtx *)D_800DDD10[D_800BE9C0])[i * 4 + 3].v.flag = 0;
+    VTX(count * 4).v.flag =
+        VTX(count * 4 + 1).v.flag =
+        VTX(count * 4 + 2).v.flag =
+        VTX(count * 4 + 3).v.flag = 0;
 
     gSP1Triangle(gfx++, 0, 2, 1, 0);
     gSP1Triangle(gfx++, 0, 3, 2, 0);
@@ -606,67 +601,66 @@ Gfx *func_1517D074(Gfx *gfx, s16 x, s16 y, s16 z, f32 angle, s32 radius, s32 hei
     return gfx;
 }
 
+/* A billboard queued by func_1517D578 and drawn by func_1517D690. */
 struct Entry1517D578 {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    u8  unk6;
-    s16 unk8;
-    s16 unkA;
-    f32 unkC;
+    s16 x;
+    s16 y;
+    s16 z;
+    u8  frame; /* texture frame (from the D_800DDD1C animation counter) */
+    u16 halfWidth;
+    u16 height;
+    f32 angle;
 };
 extern struct Entry1517D578 D_800DDD28[];
 
-void func_1517D578(s16 arg0, s16 arg1, s16 arg2, f32 arg3, s32 arg4, s32 arg5, u8 arg6)
-{
+/* Queues a billboard (at most 3 per frame; D_8008CEB0 counts them). */
+void func_1517D578(s16 x, s16 y, s16 z, f32 angle, s32 halfWidth, s32 height, u8 frame) {
     struct Entry1517D578 *e;
     u8 idx = D_8008CEB0;
-    if (D_8008CEB0 < 3)
-    {
+
+    if (D_8008CEB0 < 3) {
         e = &D_800DDD28[idx];
-        e->unk0 = arg0;
-        e->unk2 = arg1;
-        e->unk4 = arg2;
-        e->unkC = arg3;
-        e->unk8 = arg4;
-        e->unkA = arg5;
-        e->unk6 = arg6;
+        e->x = x;
+        e->y = y;
+        e->z = z;
+        e->angle = angle;
+        e->halfWidth = halfWidth;
+        e->height = height;
+        e->frame = frame;
         D_8008CEB0 = idx + 1;
     }
 }
 
-void func_1517D5FC(s16 arg0, s16 arg1, s16 arg2, s32 arg3, s32 arg4, s32 arg5)
-{
-    func_1517D578(arg0, arg1, arg2, D_800DBFF0[arg3].unk380, arg4, arg5, D_800DDD1C >> 3);
+/* Queues a billboard facing player `player`'s view angle, showing the current animation frame. */
+void func_1517D5FC(s16 x, s16 y, s16 z, s32 player, s32 halfWidth, s32 height) {
+    func_1517D578(x, y, z, D_800DBFF0[player].unk380, halfWidth, height, D_800DDD1C >> 3);
 }
 
-s32 func_1517D690(s32 arg0, s32 arg1) {
+/*
+ * Advances the billboard animation counter and drains the queue, drawing each billboard with its frame of
+ * the 16x32 texture strip at `texture` (nothing is drawn when it is 0). Leaves the sprite count unchanged.
+ */
+Gfx *func_1517D690(Gfx *gfx, s32 texture) {
     s32 saved;
 
     saved = D_800DDD58;
-    if ((D_800DDD1C = D_800DDD1C + 5) >= 0xC8) {
-        D_800DDD1C -= 0xC8;
+    if ((D_800DDD1C += 5) >= 200) {
+        D_800DDD1C -= 200;
     }
 
-    if (D_8008CEB0 != 0) {
-        do {
-            D_8008CEB0 = D_8008CEB0 - 1;
-            if (arg1 != 0) {
-                arg0 = func_1517D074(arg0,
-                                      D_800DDD28[D_8008CEB0].unk0,
-                                      D_800DDD28[D_8008CEB0].unk2,
-                                      D_800DDD28[D_8008CEB0].unk4,
-                                      D_800DDD28[D_8008CEB0].unkC,
-                                      (s32)(u16)D_800DDD28[D_8008CEB0].unk8,
-                                      (s32)(u16)D_800DDD28[D_8008CEB0].unkA,
-                                      0x10, 0x20,
-                                      ((D_800DDD28[D_8008CEB0].unk6 * 0x280) << 1) + arg1);
-            }
-        } while (D_8008CEB0 != 0);
+    while (D_8008CEB0 != 0) {
+        D_8008CEB0--;
+        if (texture != 0) {
+            /* frames are 0x500 bytes apart */
+            gfx = func_1517D074(gfx, D_800DDD28[D_8008CEB0].x, D_800DDD28[D_8008CEB0].y, D_800DDD28[D_8008CEB0].z,
+                                D_800DDD28[D_8008CEB0].angle, D_800DDD28[D_8008CEB0].halfWidth,
+                                D_800DDD28[D_8008CEB0].height, 16, 32,
+                                ((D_800DDD28[D_8008CEB0].frame * 0x280) << 1) + texture); // matching: `* 0x500` codegens differently
+        }
     }
 
     D_800DDD58 = saved;
-    return arg0;
+    return gfx;
 }
 
 extern s32 D_800DDD24;
@@ -685,7 +679,7 @@ void func_1517D7B0(Gfx **arg0, s32 arg1) {
 
     tex = 0xFFFF;
     if (D_800DDD10[D_800BE9C0] != 0) {
-        *arg0 = (Gfx *)func_1517D690((s32)*arg0, D_800DDD24);
+        *arg0 = func_1517D690(*arg0, D_800DDD24);
         if (D_800DDD20 != 0 && D_800DDD58 != 0) {
             k = 0;
             gSPDisplayList((*arg0)++, D_8008CFA0);
