@@ -2312,7 +2312,7 @@ void func_151E6C1C(s32 index) {
     obj->target.x = obj->focus.x;
     obj->target.y = obj->focus.y;
     obj->target.z = UNK2AC_F32;
-    *(Vec3f *)&obj->focus.x = *(Vec3f *)&obj->target.x;
+    obj->focus = obj->target;
     obj->unk390 = 0.0f;
     obj->unk1A4 = 20.0f;
     obj->unk19C = 20.0f;

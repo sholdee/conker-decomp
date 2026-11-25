@@ -575,7 +575,7 @@ EffectObject *func_151B7328(void *args, u8 selector, s32 argsSize, u8 arg3, s32 
     init.args = NULL;
     init.selector = selector;
     spawn.capacity = 20;
-    spawn.pos = D_800A5480; /* D_800A5480 holds a vertex; variables.h declares it as f32 */
+    spawn.pos = D_800A5480;
     spawn.lifetime = 300;
     spawn.flags = 20;
     spawn.unk10 = 16;

@@ -478,7 +478,7 @@ void func_150B0094(Vec3f *from, Vec3f *to, u8 arg2, s32 arg3) {
         func_15145974(&packet.vel, &packet.rot.y, &packet.rot.x);
         packet.scale.z = packet.scale.y = packet.scale.x = 1.0f;
         packet.rot.z = 0.0f;
-        packet.rotVel = D_800A5480; /* D_800A5480 holds a zero vertex; variables.h declares it as f32 */
+        packet.rotVel = D_800A5480;
         packet.flags = 0x19A0;
         packet.lifetime = 300;
         packet.model = 210;

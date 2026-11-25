@@ -370,7 +370,7 @@ void func_150E0348(Actor *actor, u8 arg1, s32 arg2) {
     desc.ownerId = actor->unique_id;
     desc.bone = 0;
     desc.owner = actor;
-    desc.offset = D_800A5480; /* a Vec3; variables.h declares it as one f32 */
+    desc.offset = D_800A5480;
     desc.lifetime = 300;
     desc.flags = 0x1B; /* FOLLOW_OWNER | ON_BONE | NO_PREVIOUS | STATIC */
     desc.emitter = 11; /* D_80089A70[11] = func_150E03F8 */

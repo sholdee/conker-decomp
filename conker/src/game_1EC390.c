@@ -416,7 +416,7 @@ void func_151BF340(u8 owner, s32 kind) {
                 panelConfig.position.y = 79.0f;
             }
             panelConfig.position.z = 0.0f;
-            panelExtra.unk0 = D_800A5480; /* variables.h declares D_800A5480 as a single f32 */
+            panelExtra.unk0 = D_800A5480;
             panelExtra.unkC = 0.3010000288f;
             panelExtra.unk10 = 0.3010000288f;
             display->panel = func_15157010(&panelConfig, 0, 1.0f, 0, 0, 0x14, owner, kind);
