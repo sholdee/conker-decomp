@@ -51,40 +51,46 @@ extern u8 D_800CBD6F;
 
 
 
+/** Discard all queued text nodes and reset the text state. */
 void func_15042D50(void) {
     D_800CBD64 = 0;
     func_15043384(0);
 }
 
-void func_15042D78(u8 arg0) {
-    D_800CBD74 = arg0;
+/** Set the flags used by subsequently queued text. */
+void func_15042D78(u8 flags) {
+    D_800CBD74 = flags;
 }
 
-void func_15042D94(s32 arg0, s32 arg1, u8 arg2, s32 arg3, ...) {
+/** Queue formatted text at (x, y) with the given flags; see func_15042ECC for the format. */
+void func_15042D94(s32 x, s32 y, u8 flags, s32 format, ...) {
     va_list args;
-    s32 sp24[16];
+    s32 argumentWords[16];
     s32 i;
 
-    D_800CBD74 = arg2;
-    D_800CBD70 = arg0;
-    D_800CBD72 = arg1;
-    va_start(args, arg3);
+    D_800CBD74 = flags;
+    D_800CBD70 = x;
+    D_800CBD72 = y;
+    va_start(args, format);
     for (i = 0; i < 16; i++) {
-        sp24[i] = va_arg(args, s32);
+        argumentWords[i] = va_arg(args, s32);
     }
-    func_15042ECC(arg3, sp24);
+    func_15042ECC(format, argumentWords);
 }
-void func_15042E3C(s32 arg0, ...) {
+
+/** Queue formatted text at the current text position. */
+void func_15042E3C(s32 format, ...) {
     va_list args;
-    s32 sp24[16];
+    s32 argumentWords[16];
     s32 i;
 
-    va_start(args, arg0);
+    va_start(args, format);
     for (i = 0; i < 16; i++) {
-        sp24[i] = va_arg(args, s32);
+        argumentWords[i] = va_arg(args, s32);
     }
-    func_15042ECC(arg0, sp24);
+    func_15042ECC(format, argumentWords);
 }
+
 void func_15042ECC(u8 *format, s32 *argumentWords) {
     struct {
         Game70200TextNode *node;
@@ -221,27 +227,31 @@ void func_15042ECC(u8 *format, s32 *argumentWords) {
     D_800CBD78 = 0;
 }
 
-void func_150432BC(f32 arg0) {
-    D_800CBD80 = arg0;
+/** Set the scale of subsequently queued text. */
+void func_150432BC(f32 scale) {
+    D_800CBD80 = scale;
 }
 
-void func_150432CC(s32 arg0, s32 arg1) {
-    D_800CBD74 = D_800CBD74 | 1;
-    D_800CBD74 = D_800CBD74;
-    D_800CBD7C = arg1;
-    D_800CBD78 = arg0;
+/** Attach the next queued text to an object, `yOffset` above its position. */
+void func_150432CC(s32 object, s32 yOffset) {
+    D_800CBD74 |= 1;
+    D_800CBD74 = D_800CBD74; // matching: IDO re-stores the flags byte after the OR
+    D_800CBD7C = yOffset;
+    D_800CBD78 = object;
 }
 
-void func_150432FC(s16 arg0, s16 arg1) {
-    D_800CBD70 = arg0;
-    D_800CBD72 = arg1;
+/** Set the screen position of subsequently queued text. */
+void func_150432FC(s16 x, s16 y) {
+    D_800CBD70 = x;
+    D_800CBD72 = y;
 }
 
-void func_1504332C(u8 arg0, u8 arg1, u8 arg2, u8 arg3) {
-    D_800CBD60 = arg0;
-    D_800CBD61 = arg1;
-    D_800CBD62 = arg2;
-    D_800CBD63 = arg3;
+/** Set the colour of subsequently queued text. */
+void func_1504332C(u8 red, u8 green, u8 blue, u8 alpha) {
+    D_800CBD60 = red;
+    D_800CBD61 = green;
+    D_800CBD62 = blue;
+    D_800CBD63 = alpha;
 }
 
 typedef struct Game70200Glyph {
