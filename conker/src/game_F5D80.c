@@ -24,7 +24,6 @@ extern f32 D_800A04F8;
 extern f32 D_800A04FC;
 
 void func_15143794(s32 heading, s32 pitch, f32 speed, f32 *out);
-struct260 *func_15130374(void *, u8, s32, u8, s32);
 s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
 extern void func_1503E5F8(f32 (*)[4], f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
 extern struct260 *func_15073118(struct108 *, s32, s32, f32, f32, f32, f32, f32, f32, f32, s32);
@@ -465,6 +464,16 @@ typedef struct {
     u8 pad64[0xC];
 } Particle; /* size 0x70 */
 
+/* Object spawned by func_15130374 from a Particle packet. */
+typedef struct {
+    u8 pad0[0x10];
+    Particle p;   /* 0x10 */
+    u8 pad80[0x28];
+    f32 damping;  /* 0xA8: velocity factor per tick, written by func_150CAA04 */
+} ParticleObject;
+
+ParticleObject *func_15130374(Particle *packet, u8, s32, u8, s32);
+
 /* Ring emit callback 0: spawns a dark particle at pos, moving along heading. */
 void func_150C99B4(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosine, f32 sine) {
     Particle packet;
@@ -859,230 +868,138 @@ s32 func_150CA9D0(Struct150CA9D0 *arg0) {
     return 1;
 }
 
-s32 func_150CAA04(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5,
-                  s32 arg6, s32 arg7, s16 arg8, s32 arg9, s32 arg10, s32 arg11,
+/* Spawns a particle at (x, y, z) moving along heading; func_150CAC28 damps its velocity. */
+s32 func_150CAA04(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
+                  s32 arg6, s32 arg7, s16 heading, s32 arg9, s32 arg10, s32 arg11,
                   s32 arg12, s32 arg13, u8 arg14) {
-    struct260 *ret;
-    struct {
-        s32 temp;
-        u8 pad28[4];
-        f32 sp2C;
-        u8 pad30[4];
-        struct {
-            s32 unk00;
-            s32 unk04;
-            s16 unk08;
-            s16 unk0A;
-            s32 unk0C;
-            s32 unk10;
-            u8 unk14;
-            u8 unk15;
-            u8 unk16;
-            u8 unk17;
-            u8 unk18;
-            u8 unk19;
-            u8 unk1A;
-            u8 unk1B;
-            u8 unk1C;
-            u8 unk1D;
-            s16 unk1E;
-            s16 unk20;
-            s16 unk22;
-            f32 unk24;
-            f32 unk28;
-            f32 unk2C;
-            f32 unk30;
-            f32 unk34;
-            f32 unk38;
-            u8 pad3C[0xC];
-            f32 unk48;
-            f32 unk4C;
-            f32 unk50;
-            f32 unk54;
-            s32 unk58;
-            u8 pad5C[4];
-            u8 unk60;
-            u8 unk61;
-            u8 unk62;
-            s8 unk63;
-        } sp34;
-        u8 pad98[0xC];
-    } stack;
+    ParticleObject *obj;
+    Particle packet;
+    s32 pad1; // matching: unused stack slot
+    f32 damping;
+    s32 pad2; // matching: unused stack slot
+    u32 random;
 
-    stack.sp34.unk1D = 0x29;
-    stack.sp34.unk08 = 0xE03;
-    stack.sp34.unk00 = 0x200005;
-    stack.sp34.unk04 = 0;
-    stack.sp34.unk0A = (func_150ADA20() % 0x1AU) + 0x19;
-    stack.sp34.unk0C = 0;
-    stack.sp34.unk10 = 0;
-    stack.sp34.unk18 = 0xB0;
-    stack.sp34.unk19 = 0xA0;
-    stack.sp34.unk1A = 0x2A;
-    stack.sp34.unk14 = 0x40;
-    stack.sp34.unk15 = 0xB;
-    stack.sp34.unk16 = 0x6A;
-    stack.sp34.unk17 = 0xFF;
+    packet.unk1D = 0x29;
+    packet.unk08 = 0xE03;
+    packet.unk00 = 0x200005;
+    packet.unk04 = 0;
+    packet.unk0A = (func_150ADA20() % 26U) + 25;
+    packet.unk0C = 0;
+    packet.unk10 = 0;
+    packet.color1[0] = 0xB0;
+    packet.color1[1] = 0xA0;
+    packet.color1[2] = 0x2A;
+    packet.color0[0] = 0x40;
+    packet.color0[1] = 0x0B;
+    packet.color0[2] = 0x6A;
+    packet.color0[3] = 0xFF;
+    packet.color1[3] = (func_150ADA20() % 156U) + 100;
+    packet.unk1C = 0xFF;
+    packet.unk60 = 3;
+    packet.unk61 = 3;
 
-    stack.sp34.unk1B = (func_150ADA20() % 0x9CU) + 0x64;
-    stack.sp34.unk1C = 0xFF;
-    stack.sp34.unk60 = 3;
-    stack.sp34.unk61 = 3;
+    packet.unk28 = packet.unk2C = (func_150ADA68() * 401.0f) + 800.0f;
+    packet.pos.x = x;
+    packet.pos.y = y;
+    packet.pos.z = z;
 
-    stack.sp34.unk28 = stack.sp34.unk2C = (func_150ADA68() * D_800A05AC) + 800.0f;
-    stack.sp34.unk30 = arg2;
-    stack.sp34.unk34 = arg3;
-    stack.sp34.unk38 = arg4;
+    random = func_150ADA20();
+    func_15143794(heading, (s16)((random % 12U) - 21),
+                  (func_150ADA68() * 300.0f + 498.0f) * 0.1000000015f,
+                  packet.velocity);
 
-    stack.temp = func_150ADA20();
-    func_15143794(arg8, (s16)((stack.temp % 0xCU) - 0x15),
-                  (func_150ADA68() * 300.0f + 498.0f) * D_800A05B0,
-                  &stack.sp34.unk48);
-
-    stack.sp34.unk54 = 0.0f;
-    stack.sp34.unk58 = 0xE05;
-
+    packet.unk54 = 0.0f;
+    packet.unk58 = 0xE05;
     if (func_150ADA20() & 1) {
-        stack.sp34.unk58 |= 0x40;
+        packet.unk58 |= 0x40;
+    }
+    if (func_150ADA20() & 1) {
+        packet.unk58 |= 0x80;
     }
 
-    if (func_150ADA20() & 1) {
-        stack.sp34.unk58 |= 0x80;
-    }
+    packet.unk62 = 9;
+    packet.unk24 = 1.039999962f;
+    damping = 0.9510000348f;
+    packet.unk63 = -1;
+    packet.unk1E = 25;
+    packet.unk20 = 10;
+    packet.unk22 = 0x20;
 
-    stack.sp34.unk62 = 9;
-    stack.sp34.unk24 = D_800A05B4;
-    stack.sp2C = D_800A05B8;
-    stack.sp34.unk63 = -1;
-    stack.sp34.unk1E = 0x19;
-    stack.sp34.unk20 = 0xA;
-    stack.sp34.unk22 = 0x20;
-
-    ret = func_15130374(&stack.sp34, 1, 4, arg14, 1);
-    if (ret != 0) {
-        memcpy((u8 *)ret + 0xA8, &stack.sp2C, 4);
+    obj = func_15130374(&packet, 1, 4, arg14, 1);
+    if (obj != NULL) {
+        memcpy(&obj->damping, &damping, sizeof(f32));
     }
 
     return 1;
 }
 
-typedef struct {
-    u8 pad0[0x58];
-    f32 unk58;
-    u8 pad5C[4];
-    f32 unk60;
-    u8 pad64[0x44];
-    f32 damping; /* 0xA8, written by func_150CAA04 */
-} Struct150CAC28;
-
-/* Applies the per-tick damping factor to unk58 and unk60 once per elapsed tick. */
-s32 func_150CAC28(Struct150CAC28 *arg0, s32 arg1) {
-    f32 *damping; // matching: reading arg0->damping directly changes the loop code
+/* Damps a particle's horizontal velocity once per elapsed tick. */
+s32 func_150CAC28(ParticleObject *obj, s32 arg1) {
+    f32 *damping; // matching: reading obj->damping directly changes the loop code
     s32 ticks;
 
-    damping = &arg0->damping;
+    damping = &obj->damping;
     for (ticks = D_800BE9E4; ticks != 0; ticks--) {
-        arg0->unk58 *= *damping;
-        arg0->unk60 *= *damping;
+        obj->p.velocity[0] *= *damping;
+        obj->p.velocity[2] *= *damping;
     }
     return 1;
 }
 
-s32 func_150CADD0(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5,
-                  s32 arg6, s32 arg7, s16 arg8, s32 arg9, s32 arg10, s32 arg11,
+/* Spawns a tumbling burst object at (x, y, z) moving along heading. */
+s32 func_150CADD0(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
+                  s32 arg6, s32 arg7, s16 heading, s32 arg9, s32 arg10, s32 arg11,
                   s32 arg12, f32 *arg13, u8 arg14) {
-    struct {
-            f32 unk00;
-            f32 unk04;
-            f32 unk08;
-            f32 unk0C;
-            f32 unk10;
-            f32 unk14;
-            f32 unk18;
-            f32 unk1C;
-            f32 unk20;
-            f32 unk24;
-            f32 unk28;
-            f32 unk2C;
-            f32 unk30;
-            f32 unk34;
-            f32 unk38;
-            f32 unk3C;
-            f32 unk40;
-            f32 unk44;
-            f32 unk48;
-            f32 unk4C;
-            s32 unk50;
-            s16 unk54;
-            s16 unk56;
-            u8 unk58;
-            u8 pad59[3];
-            s32 unk5C;
-            u8 unk60;
-            u8 unk61;
-            u8 unk62;
-            u8 unk63;
-            u8 unk64;
-            u8 unk65;
-            u8 unk66;
-            u8 unk67;
-            u8 unk68;
-            u8 pad69;
-            u8 unk6A;
-            u8 pad6B;
-            s32 unk6C;
-            u8 unk70;
-            u8 pad71;
-            s16 unk72;
-            s16 unk74;
-            u8 pad76[0xA];
-    } sp28;
+    s32 pad; // matching: unused stack slot
+    BurstPacket packet;
 
-    sp28.unk28 = arg2;
-    sp28.unk2C = arg3;
-    sp28.unk1C = 1.0f;
-    sp28.unk20 = 1.0f;
-    sp28.unk24 = 1.0f;
-    sp28.unk50 = 0x29E8;
-    sp28.unk10 = 0.0f;
-    sp28.unk14 = 0.0f;
-    sp28.unk18 = 0.0f;
-    sp28.unk44 = 0.0f;
-    sp28.unk00 = 1.0f;
-    sp28.unk56 = 0x20;
-    sp28.unk30 = arg4;
-    sp28.unk04 = D_800A05BC;
+    packet.pos.x = x;
+    packet.pos.y = y;
+    packet.scale[0] = 1.0f;
+    packet.scale[1] = 1.0f;
+    packet.scale[2] = 1.0f;
+    packet.unk50 = 0x29E8;
+    packet.rotation[0] = 0.0f;
+    packet.rotation[1] = 0.0f;
+    packet.rotation[2] = 0.0f;
+    packet.spin[1] = 0.0f;
+    packet.unk00 = 1.0f;
+    packet.unk56 = 0x20;
+    packet.pos.z = z;
+    packet.unk04 = 0.200000003f;
 
-    ((s32 *)&sp28)[-2] = func_150ADA20();
-    func_15143794(arg8, (s16)((((s32 *)&sp28)[-2] % 21U) - 40),
-                  (func_150ADA68() * 204.0f + 500.0f) * D_800A05C0,
-                  &sp28.unk34);
+    // matching: the original func_150ADA20 returned a full word; its spill is the
+    // call-argument slot at sp+0x20, 8 below packet
+    ((s32 *)&packet)[-2] = func_150ADA20();
+    func_15143794(heading, (s16)((((s32 *)&packet)[-2] % 21U) - 40),
+                  (func_150ADA68() * 204.0f + 500.0f) * 0.1000000015f,
+                  packet.velocity);
 
-    sp28.unk40 = (func_150ADA68() * 260.0f + -130.0f) * D_800A05C4;
-    sp28.unk48 = (func_150ADA68() * 260.0f + -130.0f) * D_800A05C8;
-    sp28.unk54 = (func_150ADA20() % 0x33U) + 0x32;
-    sp28.unk4C = (func_150ADA68() * 1008.0f + D_800A05CC) * D_800A05D0;
+    packet.spin[0] = (func_150ADA68() * 260.0f + -130.0f) * 0.1000000015f;
+    packet.spin[2] = (func_150ADA68() * 260.0f + -130.0f) * 0.1000000015f;
+    packet.unk54 = (func_150ADA20() % 51U) + 50;
+    packet.gravity = (func_150ADA68() * 1008.0f + -3085.0f) * 0.001000000047f;
 
-    sp28.unk08 = sp28.unk0C = (func_150ADA68() * D_800A05D4 + 200.0f) * D_800A05D8;
-    sp28.unk58 = 0;
-    sp28.unk5C = 0;
+    packet.unk08 = packet.unk0C = (func_150ADA68() * 601.0f + 200.0f) * 0.001000000047f;
+    packet.unk58 = 0;
+    packet.unk5C = 0;
 
-    sp28.unk60 = (func_150ADA20() % 0x4CU) + 0xB4;
-    sp28.unk61 = 4;
-    sp28.unk62 = 0;
-    sp28.unk63 = 0;
-    sp28.unk64 = 0;
-    sp28.unk65 = 0;
-    sp28.unk66 = 0;
-    sp28.unk67 = 0;
-    sp28.unk68 = 0;
-    sp28.unk6A = 2;
-    sp28.unk6C = 0;
-    sp28.unk70 = 0;
-    sp28.unk72 = 0x20;
-    sp28.unk74 = 7;
+    packet.unk60 = (func_150ADA20() % 76U) + 180;
+    packet.unk61 = 4;
+    packet.unk62 = 0;
+    packet.unk63 = 0;
+    packet.unk64 = 0;
+    packet.unk65 = 0;
+    packet.unk66 = 0;
+    packet.unk67 = 0;
+    packet.unk68 = 0;
+    packet.unk6A = 2;
+    packet.unk6C = 0;
+    packet.unk70 = 0;
+    packet.unk72 = 0x20;
+    packet.unk74 = 7;
 
-    func_15132A4C(&sp28, 3, 0xFF, 0, arg14, 0);
+    func_15132A4C(&packet, 3, 0xFF, 0, arg14, 0);
     return 1;
 }
 
