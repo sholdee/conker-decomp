@@ -372,7 +372,6 @@ void func_150242F8(s32 mode, s32 scene) {
 #define FF32(p, o) (*(f32 *) ((u8 *) (p) + (o)))
 #define FPTR(p, o) (*(void **) ((u8 *) (p) + (o)))
 
-extern s8 D_800E0BF4;
 extern u8 D_800D9890; // game_E4070.c
 extern s32 D_80090214[];
 
@@ -429,11 +428,11 @@ extern void func_151E53E8(s32);
 
 /*
  * First cutscene event handler: subtitles (types 7, 0xE-0x10, 0x12; shown only
- * when D_800E0BF4 is set and D_800BEAAB selects that type), event types 1, 3, 4,
+ * when D_800E0BE0[20] is set and D_800BEAAB selects that type), event types 1, 3, 4,
  * 9, 0xC and 0xD, and most type-5 commands. Returns 1 when the event was handled.
  */
 s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scene, Actor *obj, WorldObject *actor, f32 *pos, s32 sceneTag) {
-    if (D_800E0BF4 != 0 && (event->type == 7 || event->type == 0xE || event->type == 0xF || event->type == 0x10 || event->type == 0x12)) {
+    if (D_800E0BE0[20] != 0 && (event->type == 7 || event->type == 0xE || event->type == 0xF || event->type == 0x10 || event->type == 0x12)) {
         s32 opening;
         SeqSubtitle *sub;
         u8 *text;

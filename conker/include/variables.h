@@ -1442,9 +1442,7 @@ extern u8 D_800E0BD1;
 extern s8 D_800E0BD3;
 extern u8 **D_800E0BD8; // text strings of the current language ([8 + n]: player names)
 extern u8 D_800E0BDC;
-extern s8 D_800E0BE3;
-extern s8 D_800E0BE7;
-extern s8 D_800E0BE9;
+extern s8 D_800E0BE0[]; /* multiplayer settings record (game_20AE20.c) */
 extern s8 D_800E0C00[]; /* team of each D_8008FE44 entry */
 extern s16 D_800E0C10[];
 extern s32 D_800E0C18[];

@@ -1275,7 +1275,7 @@ Gfx *func_150918EC(Gfx *gfx) {
     }
 
     if ((D_8008FDC0 & 0x80) && D_800872A0 != NULL) {
-        lapCount = D_800E0BE7;
+        lapCount = D_800E0BE0[7];
         for (i = 0; i <= D_80082FA0; i++) {
             rowY = (s32)D_800BE628[i].top + 5;
             func_1504332C(255, 255, 255, 255);
