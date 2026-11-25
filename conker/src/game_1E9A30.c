@@ -1150,59 +1150,50 @@ void func_151BDD8C(BurstEffect *effect) {
     }
 }
 
-typedef struct {
-    s32 unk0;
-    u8  unk4;
-} SubA_151BE0AC;
+/* Message handler of the burst: message 0x3B (func_151BD7F4) for its owner frees it; the rest go to func_15169850. */
+/* Message handler of the burst: message 0x3B (func_151BD7F4) for its owner frees it; the rest go to func_15169850. */
+void func_151BE0AC(s32 effect, s32 msg, u8 msgId) {
+    // matching: the original reads its parameters through this pointer; typed parameters
+    // with the same body let IDO merge the two loads of msg
+    s32 *args = &effect;
+    s32 owner;
 
-typedef struct {
-    s32 unk0;
-    u8  b4;
-} ArgB_151BE0AC;
-
-void func_151BE0AC(s32 arg0, s32 arg1, u8 arg2) {
-    s32 *pp = &arg0;
-    s32 t;
-    if (arg2 == 0x3B) {
-        t = *pp + 0x28;
-        if ((*(s32 *)t == *(s32 *)arg1) ||
-            (*(u8 *)(t + 4) == *(u8 *)(pp[1] + 4))) {
-            func_1516972C((struct102 *)*pp);
+    if (msgId == 0x3B) {
+        owner = args[0] + 0x28; /* &((BurstEffect *)effect)->data.owner */
+        if (((ActorRef *)msg)->actor == ((ActorRef *)owner)->actor ||
+            ((ActorRef *)owner)->uniqueId == ((ActorRef *)args[1])->uniqueId) {
+            func_1516972C((struct102 *)args[0]);
         }
     } else {
-        t = *pp + 0x28;
-        func_15169850(arg1, arg2, t, t + 4, *pp);
+        owner = args[0] + 0x28;
+        func_15169850(msg, msgId, owner, owner + 4, args[0]);
     }
 }
 
-void func_151BE138(struct260 *arg0) {
-    struct102 **p;
+/* Frees the burst's sparks and glows. */
+void func_151BE138(BurstEffect *effect) {
+    BurstData *data = &effect->data;
 
-    p = (struct102 **)((u8 *)arg0 + 0x28);
-    if (p[2] != 0) {
-        func_1516972C(p[2]);
+    if (data->sparks[0] != NULL) {
+        func_1516972C((struct102 *)data->sparks[0]);
     }
-    if (p[3] != 0) {
-        func_1516972C(p[3]);
+    if (data->sparks[1] != NULL) {
+        func_1516972C((struct102 *)data->sparks[1]);
     }
-    if (p[4] != 0) {
-        func_1516972C(p[4]);
+    if (data->glows[0] != NULL) {
+        func_1516972C((struct102 *)data->glows[0]);
     }
-    if (p[5] != 0) {
-        func_1516972C(p[5]);
+    if (data->glows[1] != NULL) {
+        func_1516972C((struct102 *)data->glows[1]);
     }
 }
 
-extern void func_151BE138(struct260 *arg0);
-
-void func_151BE1B8(struct260 *arg0) {
-    func_151BE138(arg0);
-    func_1514933C(arg0);
+void func_151BE1B8(BurstEffect *effect) {
+    func_151BE138(effect);
+    func_1514933C((struct260 *)effect);
 }
 
-extern void func_15149368(struct260 *arg0);
-
-void func_151BE1E4(struct260 *arg0) {
-    func_151BE138(arg0);
-    func_15149368(arg0);
+void func_151BE1E4(BurstEffect *effect) {
+    func_151BE138(effect);
+    func_15149368((struct260 *)effect);
 }
