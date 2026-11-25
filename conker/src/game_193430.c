@@ -4,267 +4,232 @@
 #undef func_15048A40
 #include "variables.h"
 
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
+extern void *func_15167A68(s32, s32, s32, s32, u8, s32);
 extern void func_1517E05C(s32, s32, s32);
-extern f32 D_800A6C94;
+extern f32 D_800A6C94; // pi / 180
 
+/* Effect kind 4 (0xA8 bytes from func_15167A68): one textured quad, double-buffered by D_800BE9C0. */
 typedef struct {
-    u8 pad_0x00[0x12];
-    s16 field_0x12;
-    u8 pad_0x14[0x2];
-    s16 field_0x16;
-    s16 field_0x18;
-    s16 field_0x1A;
-    u8 pad_0x1C[0x6];
-    s16 field_0x22;
-    u8 pad_0x24[0x2];
-    s16 field_0x26;
-    s16 field_0x28;
-    s16 field_0x2A;
-    u8 pad_0x2C[0x6];
-    s16 field_0x32;
-    u8 pad_0x34[0x2];
-    s16 field_0x36;
-    s16 field_0x38;
-    s16 field_0x3A;
-    u8 pad_0x3C[0x6];
-    s16 field_0x42;
-    u8 pad_0x44[0x2];
-    s16 field_0x46;
-    s16 field_0x48;
-    s16 field_0x4A;
-} EffectQuadFields;
+    /* 0x00 */ u8 unk00[0x10];
+    /* 0x10 */ Vtx quads[2][4];
+    /* 0x90 */ s8 dirX;       // -cos(direction) * 127, mode 1 only
+    /* 0x91 */ s8 dirZ;       //  sin(direction) * 127, mode 1 only
+    /* 0x92 */ u8 life;       // frames left; fades out over the last 3/4 of lifeMax
+    /* 0x93 */ u8 lifeMax;
+    /* 0x94 */ u8 unk94;
+    /* 0x95 */ u8 mode;       // 0: flat in XZ, 1: upright facing dirX/dirZ, 2: rotated by angleA/angleB
+    /* 0x96 */ s16 growthRate;
+    /* 0x98 */ s16 x;
+    /* 0x9A */ s16 y;
+    /* 0x9C */ s16 z;
+    /* 0x9E */ s16 size;      // half the quad's edge length
+    /* 0xA0 */ u8 angleA;
+    /* 0xA1 */ u8 angleB;
+    /* 0xA2 */ u8 padA2[0x6];
+} QuadEffect;
 
-typedef struct {
-    u8 pad_0x00[0x90];
-    u8 field_0x90;
-    u8 field_0x91;
-    u8 field_0x92;
-    u8 field_0x93;
-    u8 field_0x94;
-    u8 field_0x95;
-    s16 field_0x96;
-    s16 field_0x98;
-    s16 field_0x9A;
-    s16 field_0x9C;
-    s16 field_0x9E;
-    u8 field_0xA0;
-    u8 field_0xA1;
-    u8 pad_0xA2[0x6];
-} EffectType4Object;
-
-void func_15165F80(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8) {
+/* Spawns a quad effect at (x, y, z); direction is in degrees, or -1 for a quad lying flat at height y. */
+void func_15165F80(s32 direction, s32 x, s32 y, s32 z, s32 growthRate, s32 life, s32 arg6, u8 arg7, s32 arg8) {
     s32 i;
-    EffectType4Object *temp_v0;
+    QuadEffect *effect;
     f32 angle;
-    EffectQuadFields *ptr;
 
-    temp_v0 = func_15167A68(4, arg8, 0xA8, 1, (u8)arg7, 1);
-    if (temp_v0 != NULL) {
-        if (arg0 == -1) {
-            {
-                s32 j;
-                EffectQuadFields *quad_ptr;
-
-                j = 0;
-                quad_ptr = (EffectQuadFields *)temp_v0;
-                do {
-                    j += 0x40;
-                    quad_ptr = (EffectQuadFields *)((u8 *)quad_ptr + 0x40);
-                    ((EffectQuadFields *)((u8 *)quad_ptr - 0x40))->field_0x12 = arg2;
-                    ((EffectQuadFields *)((u8 *)quad_ptr - 0x40))->field_0x22 = arg2;
-                    ((EffectQuadFields *)((u8 *)quad_ptr - 0x40))->field_0x32 = arg2;
-                    ((EffectQuadFields *)((u8 *)quad_ptr - 0x40))->field_0x42 = arg2;
-                    ((EffectQuadFields *)((u8 *)quad_ptr - 0x40))->field_0x16 = 0;
-                    ((EffectQuadFields *)((u8 *)quad_ptr - 0x40))->field_0x26 = 0;
-                    ((EffectQuadFields *)((u8 *)quad_ptr - 0x40))->field_0x36 = 0;
-                    ((EffectQuadFields *)((u8 *)quad_ptr - 0x40))->field_0x46 = 0;
-                } while (j != 0x80);
+    effect = func_15167A68(4, arg8, sizeof(QuadEffect), 1, arg7, 1);
+    if (effect != NULL) {
+        if (direction == -1) {
+            for (i = 0; i < 2; i++) {
+                effect->quads[i][0].v.ob[1] = y;
+                effect->quads[i][1].v.ob[1] = y;
+                effect->quads[i][2].v.ob[1] = y;
+                effect->quads[i][3].v.ob[1] = y;
+                effect->quads[i][0].v.flag = 0;
+                effect->quads[i][1].v.flag = 0;
+                effect->quads[i][2].v.flag = 0;
+                effect->quads[i][3].v.flag = 0;
             }
-            temp_v0->field_0x95 = 0;
+            effect->mode = 0;
         } else {
-            angle = (f32)arg0 * D_800A6C94;
-            temp_v0->field_0x91 = (s32)(sinf(angle) * 127.0f);
-            temp_v0->field_0x90 = (s32)(-cosf(angle) * 127.0f);
-            temp_v0->field_0x95 = 1;
+            // matching: the 0.01745329238f literal swaps the spill slots of effect and angle
+            angle = (f32)direction * D_800A6C94;
+            effect->dirZ = sinf(angle) * 127.0f;
+            effect->dirX = -cosf(angle) * 127.0f;
+            effect->mode = 1;
         }
 
-        i = 0;
-        ptr = (EffectQuadFields *)temp_v0;
-        do {
-            i++;
-            ptr = (EffectQuadFields *)((u8 *)ptr + 0x40);
-            ((EffectQuadFields *)((u8 *)ptr - 0x40))->field_0x18 = 0x2000;
-            ((EffectQuadFields *)((u8 *)ptr - 0x40))->field_0x1A = 0x2000;
-            ((EffectQuadFields *)((u8 *)ptr - 0x40))->field_0x28 = 0x2800;
-            ((EffectQuadFields *)((u8 *)ptr - 0x40))->field_0x2A = 0x2000;
-            ((EffectQuadFields *)((u8 *)ptr - 0x40))->field_0x38 = 0x2800;
-            ((EffectQuadFields *)((u8 *)ptr - 0x40))->field_0x3A = 0x2800;
-            ((EffectQuadFields *)((u8 *)ptr - 0x40))->field_0x48 = 0x2000;
-            ((EffectQuadFields *)((u8 *)ptr - 0x40))->field_0x4A = 0x2800;
-        } while (i != 2);
-
-        temp_v0->field_0x9A = arg2;
-        temp_v0->field_0x9E = 1;
-        temp_v0->field_0x92 = arg5;
-        temp_v0->field_0x93 = arg5;
-        temp_v0->field_0x98 = arg1;
-        temp_v0->field_0x9C = arg3;
-        temp_v0->field_0x96 = arg4;
-        temp_v0->field_0x94 = arg6;
-        func_1517E05C(arg1, arg2, arg3);
-    }
-}
-
-typedef struct {
-    Vtx v[4];
-} VtxQuad15166118;
-
-void func_15166118(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9) {
-    s32 i;
-    EffectType4Object *temp_v0;
-
-    temp_v0 = func_15167A68(4, arg9, 0xA8, 1, (u8)arg8, 1);
-    if (temp_v0 != NULL) {
-        temp_v0->field_0x95 = 2;
         for (i = 0; i < 2; i++) {
-            ((VtxQuad15166118 *)((u8 *)temp_v0 + 0x10))[i].v[0].v.tc[0] = 0x2000;
-            ((VtxQuad15166118 *)((u8 *)temp_v0 + 0x10))[i].v[0].v.tc[1] = 0x2000;
-            ((VtxQuad15166118 *)((u8 *)temp_v0 + 0x10))[i].v[1].v.tc[0] = 0x2800;
-            ((VtxQuad15166118 *)((u8 *)temp_v0 + 0x10))[i].v[1].v.tc[1] = 0x2000;
-            ((VtxQuad15166118 *)((u8 *)temp_v0 + 0x10))[i].v[2].v.tc[0] = 0x2800;
-            ((VtxQuad15166118 *)((u8 *)temp_v0 + 0x10))[i].v[2].v.tc[1] = 0x2800;
-            ((VtxQuad15166118 *)((u8 *)temp_v0 + 0x10))[i].v[3].v.tc[0] = 0x2000;
-            ((VtxQuad15166118 *)((u8 *)temp_v0 + 0x10))[i].v[3].v.tc[1] = 0x2800;
+            effect->quads[i][0].v.tc[0] = 0x2000;
+            effect->quads[i][0].v.tc[1] = 0x2000;
+            effect->quads[i][1].v.tc[0] = 0x2800;
+            effect->quads[i][1].v.tc[1] = 0x2000;
+            effect->quads[i][2].v.tc[0] = 0x2800;
+            effect->quads[i][2].v.tc[1] = 0x2800;
+            effect->quads[i][3].v.tc[0] = 0x2000;
+            effect->quads[i][3].v.tc[1] = 0x2800;
         }
 
-        temp_v0->field_0x9E = 1;
-        temp_v0->field_0x92 = arg6;
-        temp_v0->field_0x93 = arg6;
-        temp_v0->field_0x98 = arg2;
-        temp_v0->field_0x9A = arg3;
-        temp_v0->field_0x9C = arg4;
-        temp_v0->field_0x96 = arg5;
-        temp_v0->field_0x94 = arg7;
-        temp_v0->field_0xA0 = arg0;
-        temp_v0->field_0xA1 = arg1;
-        func_1517E05C(arg2, arg3, arg4);
+        effect->y = y;
+        effect->size = 1;
+        effect->life = life;
+        effect->lifeMax = life;
+        effect->x = x;
+        effect->z = z;
+        effect->growthRate = growthRate;
+        effect->unk94 = arg6;
+        func_1517E05C(x, y, z);
     }
 }
 
-void func_15166204(EffectType4Object *arg0) {
-    s32 temp_v0;
+/* Spawns a mode-2 quad effect at (x, y, z), rotated by angleA and angleB. */
+void func_15166118(s32 angleA, s32 angleB, s32 x, s32 y, s32 z, s32 growthRate, s32 life, s32 arg7, u8 arg8,
+                   s32 arg9) {
+    s32 i;
+    QuadEffect *effect;
 
-    temp_v0 = arg0->field_0x92;
-    arg0->field_0x9E = arg0->field_0x9E + (arg0->field_0x96 * D_800BE9E4);
-    temp_v0 -= D_800BE9E4;
-    if (temp_v0 <= 0) {
-        func_1516972C((struct102 *)arg0);
+    effect = func_15167A68(4, arg9, sizeof(QuadEffect), 1, arg8, 1);
+    if (effect != NULL) {
+        effect->mode = 2;
+        for (i = 0; i < 2; i++) {
+            effect->quads[i][0].v.tc[0] = 0x2000;
+            effect->quads[i][0].v.tc[1] = 0x2000;
+            effect->quads[i][1].v.tc[0] = 0x2800;
+            effect->quads[i][1].v.tc[1] = 0x2000;
+            effect->quads[i][2].v.tc[0] = 0x2800;
+            effect->quads[i][2].v.tc[1] = 0x2800;
+            effect->quads[i][3].v.tc[0] = 0x2000;
+            effect->quads[i][3].v.tc[1] = 0x2800;
+        }
+
+        effect->size = 1;
+        effect->life = life;
+        effect->lifeMax = life;
+        effect->x = x;
+        effect->y = y;
+        effect->z = z;
+        effect->growthRate = growthRate;
+        effect->unk94 = arg7;
+        effect->angleA = angleA;
+        effect->angleB = angleB;
+        func_1517E05C(x, y, z);
+    }
+}
+
+/* Per-frame update: grows the quad and frees the effect when its life runs out. */
+void func_15166204(QuadEffect *effect) {
+    s32 life;
+
+    life = effect->life;
+    effect->size = effect->size + effect->growthRate * D_800BE9E4;
+    life -= D_800BE9E4;
+    if (life <= 0) {
+        func_1516972C((struct102 *)effect);
         return;
     }
-    arg0->field_0x92 = temp_v0;
+    effect->life = life;
 }
 
+// matching: functions.h declares func_15048A40 as returning void; it returns f32 (like func_150489B0)
 extern f32 func_15048A40(u8);
 extern f32 func_150489B0(u8);
 
-Gfx *func_15166268(Gfx *gdl, EffectType4Object *obj, s32 arg2) {
+/* Draws the effect: rebuilds this frame's quad vertices and fades alpha out over the effect's life. */
+Gfx *func_15166268(Gfx *gdl, QuadEffect *effect, s32 arg2) {
     s32 pad;
     s32 x;
     s32 y;
     s32 z;
     s32 size;
     s32 alpha;
-    s32 thr;
+    s32 fadeStart;
     s32 half;
-    s32 off0;
-    s32 off1;
+    s32 dx;
+    s32 dz;
     s32 i;
 
-    if (obj->field_0x92 != 0) {
-        x = obj->field_0x98;
-        y = obj->field_0x9A;
-        z = obj->field_0x9C;
-        size = obj->field_0x9E;
-        half = obj->field_0x93 >> 1;
-        thr = (obj->field_0x93 * 3) / 4;
-        if (obj->field_0x92 < half) {
-            obj->field_0x96 = (obj->field_0x96 * 14) / 15;
-            if (obj->field_0x96 <= 0) {
-                obj->field_0x96 = 1;
+    if (effect->life != 0) {
+        x = effect->x;
+        y = effect->y;
+        z = effect->z;
+        size = effect->size;
+        half = effect->lifeMax >> 1;
+        fadeStart = (effect->lifeMax * 3) / 4;
+        if (effect->life < half) {
+            effect->growthRate = (effect->growthRate * 14) / 15;
+            if (effect->growthRate <= 0) {
+                effect->growthRate = 1;
             }
         }
-        if (obj->field_0x92 < thr) {
-            alpha = (obj->field_0x92 * 255) / thr;
+        if (effect->life < fadeStart) {
+            alpha = (effect->life * 255) / fadeStart;
         } else {
             alpha = 255;
         }
-        if (obj->field_0x95 == 0) {
-            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[0].v.ob[0] = x - size;
-            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[0].v.ob[2] = z - size;
-            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[1].v.ob[0] = x + size;
-            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[1].v.ob[2] = z - size;
-            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[2].v.ob[0] = x + size;
-            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[2].v.ob[2] = z + size;
-            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[3].v.ob[0] = x - size;
-            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[3].v.ob[2] = z + size;
-        } else if (obj->field_0x95 == 1) {
-            off0 = (*(s8 *)&obj->field_0x90 * size) / 127;
-            off1 = (*(s8 *)&obj->field_0x91 * size) / 127;
-            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[0].v.ob[0] = x - off0;
-            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[0].v.ob[1] = y + size;
-            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[0].v.ob[2] = z - off1;
-            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[1].v.ob[0] = x + off0;
-            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[1].v.ob[1] = y + size;
-            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[1].v.ob[2] = z + off1;
-            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[2].v.ob[0] = x + off0;
-            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[2].v.ob[1] = y - size;
-            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[2].v.ob[2] = z + off1;
-            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[3].v.ob[0] = x - off0;
-            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[3].v.ob[1] = y - size;
-            ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[3].v.ob[2] = z - off1;
+        if (effect->mode == 0) {
+            effect->quads[D_800BE9C0][0].v.ob[0] = x - size;
+            effect->quads[D_800BE9C0][0].v.ob[2] = z - size;
+            effect->quads[D_800BE9C0][1].v.ob[0] = x + size;
+            effect->quads[D_800BE9C0][1].v.ob[2] = z - size;
+            effect->quads[D_800BE9C0][2].v.ob[0] = x + size;
+            effect->quads[D_800BE9C0][2].v.ob[2] = z + size;
+            effect->quads[D_800BE9C0][3].v.ob[0] = x - size;
+            effect->quads[D_800BE9C0][3].v.ob[2] = z + size;
+        } else if (effect->mode == 1) {
+            dx = (effect->dirX * size) / 127;
+            dz = (effect->dirZ * size) / 127;
+            effect->quads[D_800BE9C0][0].v.ob[0] = x - dx;
+            effect->quads[D_800BE9C0][0].v.ob[1] = y + size;
+            effect->quads[D_800BE9C0][0].v.ob[2] = z - dz;
+            effect->quads[D_800BE9C0][1].v.ob[0] = x + dx;
+            effect->quads[D_800BE9C0][1].v.ob[1] = y + size;
+            effect->quads[D_800BE9C0][1].v.ob[2] = z + dz;
+            effect->quads[D_800BE9C0][2].v.ob[0] = x + dx;
+            effect->quads[D_800BE9C0][2].v.ob[1] = y - size;
+            effect->quads[D_800BE9C0][2].v.ob[2] = z + dz;
+            effect->quads[D_800BE9C0][3].v.ob[0] = x - dx;
+            effect->quads[D_800BE9C0][3].v.ob[1] = y - size;
+            effect->quads[D_800BE9C0][3].v.ob[2] = z - dz;
         } else {
-            f32 v[4][3];
+            f32 corners[4][3];
             f32 sinA;
             f32 cosA;
             f32 sinB;
             f32 cosB;
-            f32 vx;
-            f32 vy;
-            f32 vz;
+            f32 cx;
+            f32 cy;
+            f32 cz;
 
-            v[0][0] = -size;
-            v[0][1] = size;
-            v[0][2] = 0.0f;
-            v[1][0] = size;
-            v[1][1] = size;
-            v[1][2] = 0.0f;
-            v[2][0] = size;
-            v[2][1] = -size;
-            v[2][2] = 0.0f;
-            v[3][0] = -size;
-            v[3][1] = -size;
-            v[3][2] = 0.0f;
-            sinA = func_15048A40(obj->field_0xA0);
-            sinB = func_15048A40(obj->field_0xA1);
-            cosA = func_150489B0(obj->field_0xA0);
-            cosB = func_150489B0(obj->field_0xA1);
+            corners[0][0] = -size;
+            corners[0][1] = size;
+            corners[0][2] = 0.0f;
+            corners[1][0] = size;
+            corners[1][1] = size;
+            corners[1][2] = 0.0f;
+            corners[2][0] = size;
+            corners[2][1] = -size;
+            corners[2][2] = 0.0f;
+            corners[3][0] = -size;
+            corners[3][1] = -size;
+            corners[3][2] = 0.0f;
+            sinA = func_15048A40(effect->angleA);
+            sinB = func_15048A40(effect->angleB);
+            cosA = func_150489B0(effect->angleA);
+            cosB = func_150489B0(effect->angleB);
             for (i = 0; i < 4; i++) {
-                vx = v[i][0];
-                vy = v[i][1];
-                vz = v[i][2];
-                v[i][1] = cosA * vy - sinA * vz;
-                vz = cosA * vz + sinA * vy;
-                v[i][0] = cosB * vx - sinB * vz;
-                v[i][2] = cosB * vz + sinB * vx;
-                ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[i].v.ob[0] = v[i][0] + x;
-                ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[i].v.ob[1] = v[i][1] + y;
-                ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v[i].v.ob[2] = v[i][2] + z;
+                // rotate about X by angleA, then about Y by angleB
+                cx = corners[i][0];
+                cy = corners[i][1];
+                cz = corners[i][2];
+                corners[i][1] = cosA * cy - sinA * cz;
+                cz = cosA * cz + sinA * cy;
+                corners[i][0] = cosB * cx - sinB * cz;
+                corners[i][2] = cosB * cz + sinB * cx;
+                effect->quads[D_800BE9C0][i].v.ob[0] = corners[i][0] + x;
+                effect->quads[D_800BE9C0][i].v.ob[1] = corners[i][1] + y;
+                effect->quads[D_800BE9C0][i].v.ob[2] = corners[i][2] + z;
             }
         }
         gDPPipeSync(gdl++);
         gDPSetPrimColor(gdl++, 0, 0, 255, 255, 255, alpha);
-        gSPVertex(gdl++, ((VtxQuad15166118 *)((u8 *)obj + 0x10))[D_800BE9C0].v, 4, 0);
+        gSPVertex(gdl++, effect->quads[D_800BE9C0], 4, 0);
         gSP1Triangle(gdl++, 0, 1, 2, 0);
         gSP1Triangle(gdl++, 0, 2, 3, 0);
     }
