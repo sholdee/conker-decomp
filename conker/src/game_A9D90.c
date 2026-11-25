@@ -634,56 +634,72 @@ void func_1507DB44(struct127 *obj, s32 arg1) {
 void func_1507DB64(void) {
 }
 
-typedef struct { u32 first, second; } GameA9D90Command;
+/* Layout of the 0x180-byte D_800BE628 records, as far as func_1507DB6C uses them. */
+typedef struct ViewRecord {
+    /* 0x00 */ u8 pad0[0x24];
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ u8 pad34[0x14C];
+} ViewRecord; // size 0x180
 
 s32 func_1510D0EC(s32, s32 *, s32, s32);
-extern u8 D_80086B80[];
+extern Gfx D_80086B80[];
 extern u8 D_D0F;
-#define D_800D18A4_u8 ((u8 *)&D_800D18A4)
+#define D_800D18A4_u8 ((u8 *)&D_800D18A4) /* one byte per player: half-size of the square, minus 4 */
 
-GameA9D90Command *func_1507DB6C(GameA9D90Command *arg0, s32 arg1) {
+/*
+ * Draws a 32x32 RGBA32 textured square centred on player's view (coordinates in 10.2 fixed point). While the
+ * player's D_800D18A2 bit is set the square shrinks each frame and, once gone, the bit is cleared; otherwise it
+ * grows back to its full size.
+ */
+Gfx *func_1507DB6C(Gfx *gfx, s32 player) {
     s32 texture;
     s32 size;
-    u8 *viewport;
+    ViewRecord *view;
     s32 right, left, bottom, top;
     s32 scale;
 
-    { GameA9D90Command *command = arg0++; command->first = 0xDE000000; command->second = (u32)D_80086B80; }
-    texture = func_1510D0EC((s32)&D_D0F, 0, 3, 0);
-    { GameA9D90Command *command = arg0++; command->first = 0xFD180000; command->second = texture; }
-    { GameA9D90Command *command = arg0++; command->first = 0xF5180000; command->second = 0x07080200; }
-    { GameA9D90Command *command = arg0++; command->first = 0xE6000000; command->second = 0; }
-    { GameA9D90Command *command = arg0++; command->first = 0xF3000000; command->second = 0x073FF000; }
-    { GameA9D90Command *command = arg0++; command->first = 0xE7000000; command->second = 0; }
-    { GameA9D90Command *command = arg0++; command->first = 0xF5181000; command->second = 0x00080200; }
-    { GameA9D90Command *command = arg0++; command->first = 0xF2000000; command->second = 0x0007C07C; }
-    { GameA9D90Command *command = arg0++; command->first = 0xEF002C3F; command->second = 0x0F0A4004; }
-    if (D_800D18A2 & (1 << arg1)) {
-        if (D_800D18A4_u8[arg1] >= 4) {
-            D_800D18A4_u8[arg1] -= 4;
+    gSPDisplayList(gfx++, D_80086B80);
+    texture = func_1510D0EC((s32)&D_D0F, NULL, 3, 0);
+    gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, 1, texture);
+    gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, 0, 0, G_TX_LOADTILE, 0, G_TX_CLAMP, 0, 0, G_TX_CLAMP, 0, 0);
+    gDPLoadSync(gfx++);
+    gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, 32 * 32 - 1, 0);
+    gDPPipeSync(gfx++);
+    gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, 8, 0, G_TX_RENDERTILE, 0, G_TX_CLAMP, 0, 0, G_TX_CLAMP, 0, 0);
+    gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, 31 << G_TEXTURE_IMAGE_FRAC, 31 << G_TEXTURE_IMAGE_FRAC);
+    gDPSetOtherMode(gfx++,
+                    0xF /* blend mask bits */ | G_AD_DISABLE | G_CD_MAGICSQ | G_CK_NONE | G_TC_FILT | G_TF_BILERP | G_TT_NONE |
+                        G_TL_TILE | G_TD_CLAMP | G_TP_NONE | G_CYC_1CYCLE | G_PM_NPRIMITIVE,
+                    G_AC_NONE | G_ZS_PRIM | G_RM_OPA_SURF | G_RM_OPA_SURF2);
+    if (D_800D18A2 & (1 << player)) {
+        if (D_800D18A4_u8[player] >= 4) {
+            D_800D18A4_u8[player] -= 4;
         } else {
-            D_800D18A2 &= ~(1 << arg1);
-            func_15181DC8(arg1);
-            func_1517EE40(0, 0, 0, 120, 0, arg1);
-            return arg0;
+            D_800D18A2 &= ~(1 << player);
+            func_15181DC8(player);
+            func_1517EE40(0, 0, 0, 120, 0, player);
+            return gfx;
         }
     } else {
-        D_800D18A4_u8[arg1] += 4;
-        if (D_800D18A4_u8[arg1] > 60) {
-            D_800D18A4_u8[arg1] = 60;
+        D_800D18A4_u8[player] += 4;
+        if (D_800D18A4_u8[player] > 60) {
+            D_800D18A4_u8[player] = 60;
         }
     }
-    size = D_800D18A4_u8[arg1] + 4;
-    viewport = (u8 *)D_800BE628 + arg1 * 0x180;
-    left = right = (s32)(*(f32 *)(viewport + 0x2C) + *(f32 *)(viewport + 0x30)) * 2;
-    top = bottom = (s32)(*(f32 *)(viewport + 0x24) + *(f32 *)(viewport + 0x28)) * 2;
+    size = D_800D18A4_u8[player] + 4;
+    view = &((ViewRecord *)D_800BE628)[player];
+    left = right = (s32)(view->unk30 + view->unk2C) * 2;
+    top = bottom = (s32)(view->unk28 + view->unk24) * 2;
     left -= size;
     right += size;
     top -= size;
     bottom += size;
     scale = 0x20000 / (right - left);
-    gSPTextureRectangle(arg0++, left, top, right, bottom, 0, 0, 0, scale, scale);
-    return arg0;
+    gSPTextureRectangle(gfx++, left, top, right, bottom, G_TX_RENDERTILE, 0, 0, scale, scale);
+    return gfx;
 }
 
 void func_1507DE4C(struct127 *arg0) {
