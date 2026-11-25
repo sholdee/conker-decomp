@@ -37,7 +37,7 @@ typedef struct {
     /* 0x40 */ f32 unk40;
     /* 0x44 */ f32 unk44;
     /* 0x48 */ s32 *variantIds;
-    /* 0x4C */ f32 *variantScales;
+    /* 0x4C */ const f32 *variantScales;
     /* 0x50 */ u32 variantCount;
     /* 0x54 */ f32 radius;
     /* 0x58 */ u8 flags;
@@ -131,15 +131,6 @@ typedef struct {
     /* 0x170 */ f32 burstChance; /* func_150C04C0's extraData */
 } Piece;
 
-typedef struct {
-    s32 value;
-} Word;
-
-typedef struct {
-    /* 0x0 */ f32 burstChance;
-    /* 0x4 */ Word scale;
-    /* 0x8 */ s32 id;
-} Struct150C04C0Sub;
 
 extern void func_15150400(Arg15150400 *, AngleRange *, u8, s32);
 extern void func_15152190(Arg15152190 *, const s32 *, const f32 *, u32, f32, s32, u8, s32);
@@ -164,16 +155,6 @@ typedef struct {
     /* 0x2F */ u8 fallRate;
 } Struct150BF0F4;
 
-extern Word D_800A0108;
-extern f32 D_800A0170;
-extern f32 D_800A0174;
-extern f32 D_800A0178;
-extern f32 D_800A017C;
-extern f32 D_800A0180;
-extern f32 D_800A0184;
-extern f32 D_800A0188;
-extern f32 D_800A018C;
-extern f32 D_800A0190;
 
 void func_150BEF70(s32 arg0) {
 }
@@ -795,31 +776,32 @@ s32 func_150C01DC(Piece *piece, s32 arg1, s32 arg2, s32 arg3, f32 y) {
 void func_150C04C0(Vec3F *origin, void *arg1, s32 id, u8 arg3, u8 arg4, s32 arg5) {
     Arg15150400 config;
     AngleRange angles;
-    Struct150C04C0Sub sp20;
+    s32 ids[1];
+    const f32 scales[1] = { 1.0f };
+    f32 burstChance;
     u8 flags;
 
-    sp20.scale = D_800A0108;
-    sp20.id = id;
+    ids[0] = id;
     config.countBase = 9;
     config.countRange = 4;
-    sp20.burstChance = D_800A0170;
+    burstChance = 0.6500000358f;
     config.origin = *origin;
     config.speedBase = 4.0f;
     config.speedRange = 7.0f;
-    config.unk1C = D_800A0174;
-    config.unk20 = D_800A0178;
-    config.scaleBase = D_800A017C;
-    config.scaleRange = D_800A0180;
+    config.unk1C = -1.280000091f;
+    config.unk20 = 0.3360000253f;
+    config.scaleBase = 0.6000000238f;
+    config.scaleRange = 0.4500000179f;
     config.unk24 = 0x50;
     config.unk26 = 0x3C;
     config.unk34 = arg1;
-    config.variantIds = &sp20.id;
-    config.variantScales = (f32 *)&sp20.scale;
+    config.variantIds = ids;
+    config.variantScales = scales;
     config.variantCount = 1;
-    config.spin = D_800A0184;
-    config.unk38 = D_800A0188;
-    config.unk3C = D_800A018C;
-    config.unk40 = D_800A0190;
+    config.spin = 17.07700157f;
+    config.unk38 = 0.7520000339f;
+    config.unk3C = 0.2040000111f;
+    config.unk40 = 0.1640000045f;
     config.unk44 = 10.0f;
     config.radius = 78.0f;
     if (arg3 != 0) {
@@ -830,7 +812,7 @@ void func_150C04C0(Vec3F *origin, void *arg1, s32 id, u8 arg3, u8 arg4, s32 arg5
     config.flags = flags;
     config.unk59 = 0xE;
     config.extraSize = 4;
-    config.extraData = &sp20.burstChance;
+    config.extraData = &burstChance;
     angles.yawBase = 0;
     angles.yawRange = 0xFF;
     angles.pitchBase = -0x32;
@@ -873,7 +855,7 @@ s32 func_150C0648(Piece *piece, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
             config.unk40 = 0;
             config.unk44 = 10.0f;
             config.variantIds = ids;
-            config.variantScales = (f32 *)scales;
+            config.variantScales = scales;
             config.variantCount = 1;
             config.radius = 0;
             if (piece->unk60 & 0x800) {
