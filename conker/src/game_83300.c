@@ -3294,7 +3294,6 @@ void func_1505E060(AnimPlaybackState *state) {
 s32 func_1502AF04(u8 *, s32, s32, s32);
 s32 func_1502B110(u8 *, s32, s32, u32, ...);
 extern s32 D_8008630C[];
-extern u16 D_800993F8[];
 
 /*
  * Starts animation `anim` (entry `animEntry`) on a playback state, or only updates its speed when it is
@@ -3413,7 +3412,7 @@ void func_1505E0C4(Actor *actor, u16 *animEntry, AnimPlaybackState *state, s32 a
         if (state->header[3] == 0xFF && actor != NULL) {
             switch (actor->character_type) {
             case 0x92:
-                state->frameCount = (u32)D_800993F8[actor->animseq.uh];
+                state->frameCount = (u32)D_80099420[actor->animseq.uh - 20];
                 break;
             case 0xB7:
             case 0xB8:
