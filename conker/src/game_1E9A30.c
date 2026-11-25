@@ -1,9 +1,12 @@
 #include <ultra64.h>
+/* functions.h declares func_1513D2F0's second parameter as s32; this file passes a pointer
+   (the (s32) cast changes register allocation in func_151BD828). */
 #define func_1513D2F0 func_1513D2F0_hdr
 #include "functions.h"
 #include "variables.h"
 #undef func_1513D2F0
-void *func_1513D2F0(void *arg0, void *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, u8 argA, s32 argB);
+void *func_1513D2F0(void *arg0, void *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9,
+                    u8 argA, s32 argB);
 
 /* Weak reference to an actor: valid while actor->unique_id still equals uniqueId. */
 typedef struct {
@@ -441,8 +444,19 @@ void func_151BD21C(TrailEffect *trail, ActorMsg *msg, u8 msgId) {
     }
 }
 
+/* Common head of effect objects; each effect's own data starts at 0x28. */
 typedef struct {
-    u8 pad0[0x28];
+    u8 pad0;
+    u8 kind;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD;
+    s16 state;             /* 0x0E: -1 frees the effect */
+    u8 pad10[0x18];
+} EffectHeader;
+
+typedef struct {
+    EffectHeader header;
     ActorRef owner;
 } OwnedEffect28;
 
@@ -639,12 +653,24 @@ typedef struct {
     /* 0x65 */ u8 handlerSet;
 } ParticleDesc;
 
-u8 *func_15130374(ParticleDesc *desc, u8 kind, s32 dataSize, u8 arg3, s32 arg4);
+/* Particle spawned by func_151BD43C, with its 0x10 bytes of per-particle data. */
+typedef struct {
+    u8 pad0[0x4C];
+    struct17 offset;   /* 0x4C: ParticleDesc.offset, the point the particle moves with */
+    u8 pad58[0x50];
+    f32 drag;          /* 0xA8: read by func_1513170C */
+    u8 padAC[4];
+    ActorRef owner;    /* 0xB0 */
+} BloodDroplet;
+
+s32 func_1513170C(BloodDroplet *particle, struct17 *prevPos);
+
+BloodDroplet *func_15130374(ParticleDesc *desc, u8 kind, s32 dataSize, u8 arg3, s32 arg4);
 
 /* BloodStrip emit callback: spawns one blood droplet at pointA moving towards pointB. */
 void func_151BD43C(struct17 *pointA, struct17 *pointB, struct17 *velA, struct17 *velB, f32 time,
                    BloodStrip *strip) {
-    u8 *particle;
+    BloodDroplet *particle;
     struct127 *owner;
     ParticleDesc desc;
     f32 drag;
@@ -703,8 +729,8 @@ void func_151BD43C(struct17 *pointA, struct17 *pointB, struct17 *velA, struct17 
         desc.offset.unk8 = strip->owner->z_position;
         particle = func_15130374(&desc, 1, 0x10, strip->unkC, strip->kind);
         if (particle != NULL) {
-            memcpy(particle + 0xA8, &drag, sizeof(drag));
-            memcpy(particle + 0xB0, &ownerRef, sizeof(ownerRef));
+            memcpy(&particle->drag, &drag, sizeof(drag));
+            memcpy(&particle->owner, &ownerRef, sizeof(ownerRef));
         }
     }
 }
@@ -723,56 +749,46 @@ f32 func_151BD750(AgedBloodStrip *strip) {
     return rate;
 }
 
-extern void func_1513170C(void);
+/* Particle update: keeps the droplet moving with its owner, then runs the standard update. */
+void func_151BD79C(BloodDroplet *particle, struct17 *prevPos) {
+    struct127 *owner = particle->owner.actor;
 
-struct S151BD79C_sub {
-    s32 unk0;
-    u8 unk4;
-    u8 pad5[0xF];
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-};
-
-struct S151BD79C {
-    u8 pad0[0x4C];
-    f32 unk4C;
-    f32 unk50;
-    f32 unk54;
-    u8 padB0[0xB0 - 0x58];
-    struct S151BD79C_sub *unkB0;
-};
-
-void func_151BD79C(struct S151BD79C *arg0) {
-    struct S151BD79C_sub *v0 = arg0->unkB0;
-    if (v0->unk0 != 0 && v0->unk4 != 0xFF) {
-        arg0->unk4C = v0->unk14;
-        arg0->unk50 = v0->unk18;
-        arg0->unk54 = v0->unk1C;
+    if (owner->interaction_state != 0 && owner->id != 0xFF) {
+        particle->offset.unk0 = owner->x_position;
+        particle->offset.unk4 = owner->y_position;
+        particle->offset.unk8 = owner->z_position;
     }
-    func_1513170C();
+    func_1513170C(particle, prevPos);
 }
 
-void func_151BD7F4(s32 arg0) {
-    s32 sp18[2];
-    sp18[0] = arg0;
-    *((u8 *)&sp18 + 4) = *((u8 *)arg0 + 0x3B);
-    func_151494E0((s32)&sp18, 0x3B);
+/* Broadcasts message 0x3B for actor. */
+void func_151BD7F4(struct127 *actor) {
+    ActorRef ref;
+
+    ref.actor = actor;
+    ref.uniqueId = actor->unique_id;
+    func_151494E0((s32)&ref, 0x3B);
 }
 
-s32 func_151407D0(void *, u32, void *, u8, u8, u8, u8, s8, u8, s32);
+typedef struct BurstSpark BurstSpark;
+typedef struct BurstGlow BurstGlow;
 
-typedef struct Game1E9A30BurstData {
-    void *owner;
-    u8 id;
-    u8 pad05[3];
-    void *sparks[2];
-    void *glows[2];
-} Game1E9A30BurstData;
+/* Data of the burst effect object (at 0x28). */
+typedef struct {
+    ActorRef owner;
+    BurstSpark *sparks[2];
+    BurstGlow *glows[2];
+} BurstData;
 
-typedef struct Game1E9A30BurstSpark {
-    void *owner;
-    u8 id;
+typedef struct {
+    EffectHeader header;
+    BurstData data;
+} BurstEffect;
+
+/* Per-object data func_151BD828 copies into each spark (at spark+0x110). */
+typedef struct {
+    struct127 *owner;
+    u8 ownerId;
     u8 index;
     u8 pad06[2];
     f32 field08;
@@ -793,13 +809,14 @@ typedef struct Game1E9A30BurstSpark {
     f32 field44;
     f32 field48;
     f32 field4C;
-    void *object;
+    BurstEffect *burst;
     f32 field54;
-    s8 field58;
+    u8 flags;              /* bit 0: owner visible */
     u8 pad59[3];
-} Game1E9A30BurstSpark;
+} BurstSparkData;
 
-typedef struct Game1E9A30BurstEffect {
+/* Spawn parameters func_151BD828 passes to func_1513D2F0 and func_151407D0. */
+typedef struct {
     u8 kind;
     u8 mode;
     s16 flags;
@@ -823,9 +840,10 @@ typedef struct Game1E9A30BurstEffect {
     s32 field48;
     u8 field4C;
     u8 pad4D[0xB];
-} Game1E9A30BurstEffect;
+} BurstObjectDesc;
 
-typedef struct Game1E9A30BurstGlowShape {
+/* Shape parameters of a glow (copied to glow+0x110 by func_151407D0). */
+typedef struct {
     f32 field00;
     f32 field04;
     f32 field08;
@@ -856,43 +874,65 @@ typedef struct Game1E9A30BurstGlowShape {
     u8 field58;
     s8 field59;
     u8 pad5A[2];
-} Game1E9A30BurstGlowShape;
+} BurstGlowShape;
 
-typedef struct Game1E9A30BurstGlow {
+/* Per-object data func_151BD828 copies into each glow (at glow+0x170). */
+typedef struct {
     s16 field00;
     u8 pad02[2];
     f32 field04;
-    void *object;
+    BurstEffect *burst;
     u8 index;
     u8 pad0D[3];
-    void *owner;
-    u8 id;
+    struct127 *owner;
+    u8 ownerId;
     u8 pad15[3];
-} Game1E9A30BurstGlow;
+} BurstGlowData;
 
-void func_151BD828(u8 *arg0, u8 arg1, s32 arg2) {
-    void *object;
-    Game1E9A30BurstData burst;
-    Game1E9A30BurstData *data;
+struct BurstSpark {
+    u8 pad0[0x34];
+    struct17 start;        /* 0x34 */
+    struct17 end;          /* 0x40 */
+    u8 pad4C[0x110 - 0x4C];
+    BurstSparkData data;   /* 0x110 */
+};
 
-    burst.owner = arg0;
-    burst.id = arg0[0x3B];
-    burst.sparks[0] = 0;
-    burst.sparks[1] = 0;
-    burst.glows[0] = 0;
-    burst.glows[1] = 0;
-    object = func_15149130(0x12C, -1, 0x40, -1, 0, 0x33, (struct37 *)0x18, arg1, arg2);
-    if (object != NULL) {
-        data = (Game1E9A30BurstData *)((u8 *)object + 0x28);
+struct BurstGlow {
+    u8 pad0[0x34];
+    struct17 start;        /* 0x34 */
+    struct17 end;          /* 0x40 */
+    u8 pad4C[0xC];
+    s32 flags;             /* 0x58: bit 1 visible */
+    u8 pad5C[0x170 - 0x5C];
+    BurstGlowData data;    /* 0x170 */
+};
+
+BurstGlow *func_151407D0(BurstGlowShape *shape, u32 shapeSize, BurstObjectDesc *desc, u8, u8, u8, u8, s8, u8, s32);
+
+/* Spawns the burst effect on actor: two sparks and two glows that the effect keeps on the actor. */
+void func_151BD828(struct127 *actor, u8 arg1, s32 arg2) {
+    BurstEffect *effect;
+    BurstData burst;
+    BurstData *data;
+
+    burst.owner.actor = actor;
+    burst.owner.uniqueId = actor->unique_id;
+    burst.sparks[0] = NULL;
+    burst.sparks[1] = NULL;
+    burst.glows[0] = NULL;
+    burst.glows[1] = NULL;
+    effect = (BurstEffect *)func_15149130(300, -1, 0x40, -1, 0, 0x33, (struct37 *)sizeof(BurstData), arg1, arg2);
+    if (effect != NULL) {
+        data = &effect->data;
         memcpy(data, &burst, sizeof(burst));
         {
-            Game1E9A30BurstSpark spark;
-            Game1E9A30BurstEffect sparkEffect;
+            BurstSparkData spark;
+            BurstObjectDesc sparkEffect;
 
-            spark.field58 = 0;
-            spark.field54 = (*(f32 *)(arg0 + 0x150) + *(f32 *)(arg0 + 0x14C)) * 0.5f;
-            spark.owner = arg0;
-            spark.id = arg0[0x3B];
+            spark.flags = 0;
+            spark.field54 = (actor->xz_scale + actor->y_scale) * 0.5f;
+            spark.owner = actor;
+            spark.ownerId = actor->unique_id;
             spark.field08 = 15.045272f;
             spark.field10 = 5.8676558f;
             spark.field18 = 12.111444f;
@@ -907,11 +947,11 @@ void func_151BD828(u8 *arg0, u8 arg1, s32 arg2) {
             spark.field40 = 1.0f;
             spark.field4C = 1.0f;
             spark.field44 = 1.0f;
-            spark.object = object;
+            spark.burst = effect;
             sparkEffect.kind = 0x5F;
             sparkEffect.mode = 8;
             sparkEffect.flags = 0x2203;
-            sparkEffect.lifetime = 0x12C;
+            sparkEffect.lifetime = 300;
             sparkEffect.field08 = 0;
             sparkEffect.field0C = 0;
             sparkEffect.color[0] = 0xFF;
@@ -938,21 +978,21 @@ void func_151BD828(u8 *arg0, u8 arg1, s32 arg2) {
             for (spark.index = 0; spark.index < 2; spark.index++) {
                 data->sparks[spark.index] = func_1513D2F0(&sparkEffect, &D_800A4AA0, 0, 0x25, 0, 0x1D,
                     ((func_150ADA20() & 1) ? 2 : 0) + 1, 0, 0, 0x5C, arg1, arg2);
-                if (data->sparks[spark.index] != 0) {
-                    memcpy((u8 *)data->sparks[spark.index] + 0x110, &spark, sizeof(spark));
+                if (data->sparks[spark.index] != NULL) {
+                    memcpy(&data->sparks[spark.index]->data, &spark, sizeof(spark));
                 }
             }
         }
         {
-            Game1E9A30BurstGlowShape shape;
-            Game1E9A30BurstEffect glowEffect;
-            Game1E9A30BurstGlow glow;
+            BurstGlowShape shape;
+            BurstObjectDesc glowEffect;
+            BurstGlowData glow;
 
             glow.field00 = 0;
             glow.field04 = 1.0f;
-            glow.owner = arg0;
-            glow.object = object;
-            glow.id = arg0[0x3B];
+            glow.owner = actor;
+            glow.burst = effect;
+            glow.ownerId = actor->unique_id;
             shape.field00 = 50.3f;
             shape.field04 = 50.3f;
             shape.field08 = 30.9f;
@@ -985,7 +1025,7 @@ void func_151BD828(u8 *arg0, u8 arg1, s32 arg2) {
             glowEffect.kind = 0x60;
             glowEffect.mode = 3;
             glowEffect.flags = 0x2203;
-            glowEffect.lifetime = 0x12C;
+            glowEffect.lifetime = 300;
             glowEffect.field08 = 0;
             glowEffect.field0C = 0;
             glowEffect.color[0] = 0xFF;
@@ -1007,147 +1047,103 @@ void func_151BD828(u8 *arg0, u8 arg1, s32 arg2) {
             glowEffect.field48 = 0;
             glowEffect.field4C = 0xFF;
             for (glow.index = 0; glow.index < 2; glow.index++) {
-                data->glows[glow.index] = (void *)func_151407D0(&shape, 0x78, &glowEffect, 0, 0x2A, 0, 0, -1, arg1, arg2);
-                if (data->glows[glow.index] != 0) {
-                    memcpy((u8 *)data->glows[glow.index] + 0x170, &glow, sizeof(glow));
+                data->glows[glow.index] = func_151407D0(&shape, 0x78, &glowEffect, 0, 0x2A, 0, 0, -1, arg1, arg2);
+                if (data->glows[glow.index] != NULL) {
+                    memcpy(&data->glows[glow.index]->data, &glow, sizeof(glow));
                 }
             }
         }
     }
 }
 
-typedef struct {
-    u8 pad0[0x48];
-    f32 unk48;
-    f32 unk4C;
-    u8 pad50[8];
-    u8 flags;
-} Part151BDD8C;
-
-typedef struct {
-    u8 pad0[4];
-    f32 unk4;
-} Sub151BDD8C;
-
-typedef struct {
-    u8 pad0[0x34];
-    struct17 start;
-    struct17 end;
-    u8 pad4C[0x110 - 0x4C];
-    Part151BDD8C part;
-} Obj151BDD8C_A;
-
-typedef struct {
-    u8 pad0[0x34];
-    struct17 start;
-    struct17 end;
-    u8 pad4C[0xC];
-    s32 flags58;
-    u8 pad5C[0x170 - 0x5C];
-    Sub151BDD8C sub;
-} Obj151BDD8C_B;
-
-typedef struct {
-    struct127 *owner;
-    u8 ownerId;
-    Obj151BDD8C_A *a[2];
-    Obj151BDD8C_B *b[2];
-} Data151BDD8C;
-
-typedef struct {
-    u8 pad0[0xE];
-    s16 state;
-    u8 pad10[0x18];
-    Data151BDD8C data;
-} Effect151BDD8C;
-
 extern struct17 D_800AA778;
 extern struct17 D_800AA784;
 extern struct17 D_800AA790;
 extern struct17 D_800AA79C;
-extern s32 func_15145EA4(s32 *arg0, s32 *arg1, s32 arg2, s32 arg3);
+extern s32 func_15145EA4(struct17 **src, struct17 **dst, Mtx *matrix, s32 count);
 
-void func_151BDD8C(Effect151BDD8C *effect) {
-    Data151BDD8C *data;
+/* Per-frame update of the burst: keeps the sparks and glows on bone 1 of the owner. */
+void func_151BDD8C(BurstEffect *effect) {
+    BurstData *data;
     struct127 *owner;
-    struct17 a[2];
-    struct17 b[2];
+    struct17 starts[2];
+    struct17 ends[2];
     u8 i;
     u8 j;
     u8 k;
-    s32 srcs[4];
-    s32 dsts[4];
-    s32 idx;
+    struct17 *srcs[4];
+    struct17 *dsts[4];
+    s32 player;
 
     data = &effect->data;
-    owner = data->owner;
-    if (owner->interaction_state == 0 || owner->unique_id != data->ownerId) {
-        effect->state = -1;
+    owner = data->owner.actor;
+    if (owner->interaction_state == 0 || owner->unique_id != data->owner.uniqueId) {
+        effect->header.state = -1;
         return;
     }
-    if (owner->unk1D4 != 0 && (owner->unk74 & 0xF) != 0xF) {
-        Obj151BDD8C_A *oa;
-        Obj151BDD8C_B *ob;
-        s32 pad1;
+    if (owner->unk1D4 != NULL && (owner->unk74 & 0xF) != 0xF) {
+        BurstSpark *spark;
+        BurstGlow *glow;
+        s32 pad1; // matching: stack slots of the original frame
         s32 pad2;
 
-        srcs[0] = (s32)&D_800AA778;
-        srcs[1] = (s32)&D_800AA784;
-        srcs[2] = (s32)&D_800AA790;
-        srcs[3] = (s32)&D_800AA79C;
-        dsts[0] = (s32)&a[0];
-        dsts[1] = (s32)&a[1];
-        dsts[2] = (s32)&b[0];
-        dsts[3] = (s32)&b[1];
-        func_15145EA4(srcs, dsts, (s32)((Mtx *)owner->unk1D4 + 1), 4);
+        srcs[0] = &D_800AA778;
+        srcs[1] = &D_800AA784;
+        srcs[2] = &D_800AA790;
+        srcs[3] = &D_800AA79C;
+        dsts[0] = &starts[0];
+        dsts[1] = &starts[1];
+        dsts[2] = &ends[0];
+        dsts[3] = &ends[1];
+        func_15145EA4(srcs, dsts, (Mtx *)owner->unk1D4 + 1, 4);
         for (i = 0; i < 2; i++) {
-            if (data->a[i] != NULL) {
-                oa = data->a[i];
-                oa->part.flags |= 1;
-                oa->start = a[i];
-                oa->end = b[i];
+            if (data->sparks[i] != NULL) {
+                spark = data->sparks[i];
+                spark->data.flags |= 1;
+                spark->start = starts[i];
+                spark->end = ends[i];
             }
-            if (data->b[i] != NULL) {
-                ob = data->b[i];
-                ob->flags58 |= 2;
-                ob->flags58 &= ~4;
-                ob->start = a[i];
-                ob->end = b[i];
+            if (data->glows[i] != NULL) {
+                glow = data->glows[i];
+                glow->flags |= 2;
+                glow->flags &= ~4;
+                glow->start = starts[i];
+                glow->end = ends[i];
             }
         }
     } else {
         for (j = 0; j < 2; j++) {
-            if (data->a[j] != NULL) {
-                Part151BDD8C *part = &data->a[j]->part;
+            if (data->sparks[j] != NULL) {
+                BurstSparkData *sparkData = &data->sparks[j]->data;
 
-                part->flags &= ~1;
+                sparkData->flags &= ~1;
             }
-            if (data->b[j] != NULL) {
-                data->b[j]->flags58 &= ~2;
+            if (data->glows[j] != NULL) {
+                data->glows[j]->flags &= ~2;
             }
         }
     }
-    idx = owner - D_800CC2D0;
-    if (idx < 4) {
+    player = owner - D_800CC2D0;
+    if (player < 4) {
         for (k = 0; k < 2; k++) {
-            if (data->a[k] != NULL) {
-                Part151BDD8C *part = &data->a[k]->part;
+            if (data->sparks[k] != NULL) {
+                BurstSparkData *sparkData = &data->sparks[k]->data;
 
-                if (*((u16 **)D_800BE728[0])[(u8)idx] & 0x8000) {
-                    part->unk48 = 6.0f;
-                    part->unk4C = 21.0f;
+                if (*((u16 **)D_800BE728[0])[(u8)player] & 0x8000) {
+                    sparkData->field48 = 6.0f;
+                    sparkData->field4C = 21.0f;
                 } else {
-                    part->unk48 = 3.0f;
-                    part->unk4C = 8.0f;
+                    sparkData->field48 = 3.0f;
+                    sparkData->field4C = 8.0f;
                 }
             }
-            if (data->b[k] != NULL) {
-                Sub151BDD8C *sub = &data->b[k]->sub;
+            if (data->glows[k] != NULL) {
+                BurstGlowData *glowData = &data->glows[k]->data;
 
-                if (*((u16 **)D_800BE728[0])[(u8)idx] & 0x8000) {
-                    sub->unk4 = 1.5f;
+                if (*((u16 **)D_800BE728[0])[(u8)player] & 0x8000) {
+                    glowData->field04 = 1.5f;
                 } else {
-                    sub->unk4 = 1.0f;
+                    glowData->field04 = 1.0f;
                 }
             }
         }
