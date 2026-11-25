@@ -31,147 +31,138 @@ typedef struct {
 
 extern Struct15136698Table D_80089BAC;
 
-// requires jump table
-s32 func_15134070(void *arg0) {
-    switch (*((u8 *)arg0 + 4)) {
-    case 135:
-    case 176:
-        return 0xE;
-    case 177:
-        return 0xF;
-    case 180:
-        return 0x10;
-    case 112:
-    case 178:
-        return 0x11;
-    case 0xAB:
-        return 0x12;
-    case 16:
-    case 56:
-    case 145:
-        return 0xD;
-    case 152:
-        return 0xC;
-    case 52:
-        return 0xB;
-    case 71:
-        return 0xA;
-    case 17:
-    case 20:
-    case 59:
+/* Actor model ids (struct127::id) that have a blood profile. */
+enum {
+    MODEL_CONKER = 0,
+    MODEL_CONKER_VARIANT_1 = 1,
+    MODEL_CONKER_VARIANT_2 = 2,
+    MODEL_CONKER_VARIANT_3 = 3,
+    MODEL_CONKER_VARIANT_4 = 4,
+    MODEL_ROCKMAN = 16,
+    MODEL_WEASEL_GUARD_TALL_VARIANT = 17,
+    MODEL_WEASEL_GUARD_SHORT_SHIELD_VARIANT = 20,
+    MODEL_UGA_BUGA_BLUE_HEADGEAR = 22,
+    MODEL_TNT_IMP = 52,
+    MODEL_ROCKMAN_BOW_TIE = 56,
+    MODEL_WISE_GUY = 59,
+    MODEL_ROBO_SPIDER = 71,
+    MODEL_SHC_SOLDIER = 88,
+    MODEL_TEDIZ = 90,
+    MODEL_RODENT = 91,
+    MODEL_TEDIZ_AMMUNITION_BELT = 95,
+    MODEL_GREGG_THE_GRIM_REAPER_SCYTHE = 112,
+    MODEL_TEDIZ_VARIANT_1 = 116,
+    MODEL_TEDIZ_VARIANT_2 = 117,
+    MODEL_TEDIZ_VARIANT_3 = 122,
+    MODEL_SHC_SOLDIER_VARIANT = 128,
+    MODEL_SHC_SOLDIER_DECORATED_UNIFORM = 135,
+    MODEL_UGA_BUGA = 136,
+    MODEL_SURF_PUNK_SUNGLASSES = 144,
+    MODEL_ROCKWOMAN = 145,
+    MODEL_CONKER_BLACK_OUTFIT = 150,
+    MODEL_WEASEL_BLACK_HELMET_AND_UNIFORM = 152,
+    MODEL_UNKNOWN_154 = 154,
+    MODEL_VILLAGER_BROWN_HAT = 156,
+    MODEL_VILLAGER_STRIPED_BONNET = 157,
+    MODEL_ZOMBIE_DARK_SUIT = 159,
+    MODEL_ZOMBIE_PURPLE_DRESS = 160,
+    MODEL_UNKNOWN_171 = 171,
+    MODEL_SHC_SOLDIER_DECORATED_UNIFORM_VARIANT = 176,
+    MODEL_TEDIZ_BROAD_SHOULDERED_VARIANT = 177,
+    MODEL_GREGG_THE_GRIM_REAPER_HOODED = 178,
+    MODEL_GREGG_THE_GRIM_REAPER_WITHOUT_ROBE = 180
+};
+
+#define BLOOD_PROFILE_NONE 99
+
+/* Returns the blood profile index (0-19) for an actor's model, or BLOOD_PROFILE_NONE. */
+s32 func_15134070(struct127 *actor) {
+    switch (actor->id) {
+    case MODEL_SHC_SOLDIER_DECORATED_UNIFORM:
+    case MODEL_SHC_SOLDIER_DECORATED_UNIFORM_VARIANT:
+        return 14;
+    case MODEL_TEDIZ_BROAD_SHOULDERED_VARIANT:
+        return 15;
+    case MODEL_GREGG_THE_GRIM_REAPER_WITHOUT_ROBE:
+        return 16;
+    case MODEL_GREGG_THE_GRIM_REAPER_SCYTHE:
+    case MODEL_GREGG_THE_GRIM_REAPER_HOODED:
+        return 17;
+    case MODEL_UNKNOWN_171:
+        return 18;
+    case MODEL_ROCKMAN:
+    case MODEL_ROCKMAN_BOW_TIE:
+    case MODEL_ROCKWOMAN:
+        return 13;
+    case MODEL_WEASEL_BLACK_HELMET_AND_UNIFORM:
+        return 12;
+    case MODEL_TNT_IMP:
+        return 11;
+    case MODEL_ROBO_SPIDER:
+        return 10;
+    case MODEL_WEASEL_GUARD_TALL_VARIANT:
+    case MODEL_WEASEL_GUARD_SHORT_SHIELD_VARIANT:
+    case MODEL_WISE_GUY:
         return 1;
-    case 90:
-    case 95:
-    case 116:
-    case 117:
-    case 122:
+    case MODEL_TEDIZ:
+    case MODEL_TEDIZ_AMMUNITION_BELT:
+    case MODEL_TEDIZ_VARIANT_1:
+    case MODEL_TEDIZ_VARIANT_2:
+    case MODEL_TEDIZ_VARIANT_3:
         return 2;
-    case 88:
-    case 91:
-    case 128:
+    case MODEL_SHC_SOLDIER:
+    case MODEL_RODENT:
+    case MODEL_SHC_SOLDIER_VARIANT:
         return 3;
-    case 22:
-    case 136:
-    case 144:
+    case MODEL_UGA_BUGA_BLUE_HEADGEAR:
+    case MODEL_UGA_BUGA:
+    case MODEL_SURF_PUNK_SUNGLASSES:
         return 4;
-    case 156:
+    case MODEL_VILLAGER_BROWN_HAT:
         return 5;
-    case 157:
+    case MODEL_VILLAGER_STRIPED_BONNET:
         return 6;
-    case 150:
+    case MODEL_CONKER_BLACK_OUTFIT:
         return 7;
-    case 160:
+    case MODEL_ZOMBIE_PURPLE_DRESS:
         return 8;
-    case 159:
+    case MODEL_ZOMBIE_DARK_SUIT:
         return 9;
-    case 0x9A:
-        return 0x13;
-    case 0:
-    case 1:
-    case 2:
-    case 3:
-    case 4:
+    case MODEL_UNKNOWN_154:
+        return 19;
+    case MODEL_CONKER:
+    case MODEL_CONKER_VARIANT_1:
+    case MODEL_CONKER_VARIANT_2:
+    case MODEL_CONKER_VARIANT_3:
+    case MODEL_CONKER_VARIANT_4:
         return 0;
     default:
-        return 0x63;
+        return BLOOD_PROFILE_NONE;
     }
 }
 
-s32 func_1513416C(struct102 *arg0) {
-    s16 temp_v0 = arg0->unk1C;
-    if (temp_v0 < 32) {
-        arg0->unk28 = temp_v0 * 8;
+s32 func_1513416C(struct102 *effect) {
+    s16 value = effect->unk1C;
+
+    if (value < 32) {
+        effect->unk28 = value * 8;
     }
     return 1;
 }
 
-typedef struct {
-    u8 pad0[0x10];
-    u8 pad10[0x8];
-    u8 unk18;
-    u8 pad19[0x3];
-    struct127 *unk1C;
-    u8 unk20;
-    u8 pad21[0x3];
-    u8 unk24[0xC];
-    f32 unk30;
-    u8 pad34[0x6];
-    u8 unk3A;
-    u8 pad3B[0x5];
-    u8 unk40[0xC];
-    f32 unk4C;
-    f32 unk50;
-} Struct1513418C;
-
-void *func_1513418C(void *arg0, s32 arg1, s32 arg2, s32 arg3) {
-    Struct1513418C *temp_v0;
-    struct127 *temp_v0_2;
-    s32 temp_v1;
-    s32 temp_a2;
-    u8 temp_a0;
-    Struct1513418C *sp24;
-
-    temp_v0 = func_15167A68(0x28, arg3, arg1 + 0x58, 1, (u8)arg2, 1);
-    if (temp_v0 == NULL) {
-        return NULL;
-    }
-    sp24 = temp_v0;
-    memcpy(&temp_v0->pad10, arg0, 0x30);
-    temp_a0 = temp_v0->unk3A;
-    if (temp_a0 & 2) {
-        temp_v0_2 = temp_v0->unk1C;
-        if ((temp_v0_2->interaction_state == 0) || (temp_v0_2->unique_id != temp_v0->unk18)) {
-            func_1516972C((struct102 *)temp_v0);
-            return NULL;
-        }
-        temp_v1 = (s32)temp_v0_2->unk1D4;
-        if ((temp_v1 != 0) && ((temp_v0_2->unk74 & 0xF) != 0xF)) {
-            sp24 = temp_v0;
-            temp_a2 = temp_v1;
-            temp_a2 += temp_v0->unk20 << 6;
-            func_15143134(temp_v0->unk24, (s32)temp_v0->unk40, temp_a2);
-        } else {
-            temp_v0->unk3A = temp_a0 | 8;
-        }
-    } else {
-        temp_v0->unk3A = temp_a0 | 0x18;
-    }
-    temp_v0->unk4C = 1.0f / (temp_v0->unk30 + temp_v0->unk30);
-    temp_v0->unk50 = 0.0f;
-    return temp_v0;
-}
 
 typedef struct {
     f32 x, y, z;
 } BloodDripVec3f;
 
+/* Blood dripping from a point, optionally attached to an actor or one of its bones. */
 typedef struct {
     u8 pad0[0x10];
-    s32 target[2];
-    u8 field18;
+    s32 target[2];          /* matrices to transform offset by, double-buffered */
+    u8 ownerId;             /* owner->unique_id when attached */
     u8 pad19[3];
-    void *field1C;
-    u8 field20;
+    struct127 *owner;
+    u8 bone;
     u8 pad21[3];
     f32 offset[3];
     f32 radius;
@@ -186,9 +177,48 @@ typedef struct {
     f32 accumulator;
 } BloodDrip;
 
+#define BLOOD_DRIP_FOLLOW_OWNER  0x01
+#define BLOOD_DRIP_ON_BONE       0x02
+#define BLOOD_DRIP_LIFETIME      0x04
+#define BLOOD_DRIP_NO_PREVIOUS   0x08
+#define BLOOD_DRIP_STATIC        0x10
+
+/* Spawns a BloodDrip effect from a template. */
+BloodDrip *func_1513418C(void *desc, s32 arg1, u8 arg2, s32 arg3) {
+    BloodDrip *drip;
+    struct127 *owner;
+    u8 flags;
+
+    drip = func_15167A68(0x28, arg3, arg1 + 0x58, 1, arg2, 1);
+    if (drip == NULL) {
+        return NULL;
+    }
+    memcpy(&drip->target, desc, 0x30);
+    flags = drip->flags;
+    if (flags & BLOOD_DRIP_ON_BONE) {
+        owner = drip->owner;
+        if ((owner->interaction_state == 0) || (owner->unique_id != drip->ownerId)) {
+            func_1516972C((struct102 *)drip);
+            return NULL;
+        }
+        if ((owner->unk1D4 != 0) && ((owner->unk74 & 0xF) != 0xF)) {
+            func_15143134(drip->offset, (s32)&drip->previous, (s32)((u8 (*)[0x40])owner->unk1D4)[drip->bone]);
+        } else {
+            drip->flags = flags | BLOOD_DRIP_NO_PREVIOUS;
+        }
+    } else {
+        drip->flags = flags | (BLOOD_DRIP_NO_PREVIOUS | BLOOD_DRIP_STATIC);
+    }
+    drip->inverseDiameter = 1.0f / (drip->radius + drip->radius);
+    drip->accumulator = 0.0f;
+    return drip;
+}
+
+
 extern void (*D_80089A70[])(f32, f32, f32, f32, f32, f32, void *);
 extern s32 (*D_80089AA0[])(void *);
 
+/* Per-frame update: follows the drip source and emits drops along the path it moved. */
 void func_151342BC(BloodDrip *drip) {
     f32 *source;
     u8 dead;
@@ -206,31 +236,32 @@ void func_151342BC(BloodDrip *drip) {
     f32 distance;
 
     dead = 0;
-    if (drip->flags & 4) {
+    if (drip->flags & BLOOD_DRIP_LIFETIME) {
         drip->lifetime -= D_800BE9E4;
         if (drip->lifetime < 0) {
             dead = 1;
         }
     }
     flags = drip->flags;
-    source = (flags & 8) ? position : &drip->previous.x;
-    if (flags & 1) {
-        position[0] = *(f32 *)((u8 *)drip->field1C + 0x14);
-        position[1] = *(f32 *)((u8 *)drip->field1C + 0x18);
-        position[2] = *(f32 *)((u8 *)drip->field1C + 0x1C);
+    source = (flags & BLOOD_DRIP_NO_PREVIOUS) ? position : &drip->previous.x;
+    if (flags & BLOOD_DRIP_FOLLOW_OWNER) {
+        position[0] = drip->owner->x_position;
+        position[1] = drip->owner->y_position;
+        position[2] = drip->owner->z_position;
     } else {
-        if (flags & 2) {
-            if ((*(s32 *)drip->field1C == 0) || (*(s32 *)drip->field1C == 8) || (drip->field18 != *((u8 *)drip->field1C + 0x3B))) {
+        if (flags & BLOOD_DRIP_ON_BONE) {
+            if ((drip->owner->interaction_state == 0) || (drip->owner->interaction_state == 8) ||
+                (drip->owner->unique_id != drip->ownerId)) {
                 func_1516972C((struct102 *)drip);
                 return;
             }
-            bones = *(u8 **)((u8 *)drip->field1C + 0x1D4);
-            if ((bones == NULL) || ((*((u8 *)drip->field1C + 0x74) & 0xF) == 0xF)) {
-                drip->flags = flags | 8;
+            bones = (u8 *)drip->owner->unk1D4;
+            if ((bones == NULL) || ((drip->owner->unk74 & 0xF) == 0xF)) {
+                drip->flags = flags | BLOOD_DRIP_NO_PREVIOUS;
                 return;
             }
-            target = (s32)((u8 (*)[0x40])bones)[drip->field20];
-        } else if (!(flags & 0x10)) {
+            target = (s32)((u8 (*)[0x40])bones)[drip->bone];
+        } else if (!(flags & BLOOD_DRIP_STATIC)) {
             index = D_800BE9C0 ? 0 : 1;
             target = drip->target[index];
         } else {
@@ -271,7 +302,7 @@ void func_151342BC(BloodDrip *drip) {
         }
     }
     drip->previous = *(BloodDripVec3f *)position;
-    drip->flags &= ~8;
+    drip->flags &= ~BLOOD_DRIP_NO_PREVIOUS;
     if (!dead) {
         if ((drip->callback != -1) && (D_80089AA0[drip->callback](drip) == 0)) {
             dead = 1;
@@ -282,90 +313,92 @@ void func_151342BC(BloodDrip *drip) {
     }
 }
 
-s32 func_151346D0(s32 arg0, struct102 *arg1, s32 arg2) {
-    arg1->unk3A &= 0xFFEF;
+s32 func_151346D0(s32 arg0, struct102 *effect, s32 arg2) {
+    effect->unk3A &= ~0x10;
     return arg0;
 }
 
-void func_151346EC(struct102 *arg0) {
-    func_15169804(arg0);
+void func_151346EC(struct102 *effect) {
+    func_15169804(effect);
 }
 
-void func_1513470C(struct102 *arg0) {
-    func_15169824(arg0);
+void func_1513470C(struct102 *effect) {
+    func_15169824(effect);
 }
 
-void func_1513472C(struct102 *arg0) {
-    s32 idx = arg0->unk3D;
-    if (idx < 0) {
-        idx = 0;
+/* Calls the D_80089AAC handler selected by effect->unk3D (0 when out of range). */
+void func_1513472C(struct102 *effect) {
+    s32 index = effect->unk3D;
+
+    if (index < 0) {
+        index = 0;
     }
-    if (idx >= 10) {
-        idx = 0;
+    if (index >= 10) {
+        index = 0;
     }
-    D_80089AAC[idx]();
+    D_80089AAC[index]();
 }
 
-void func_1513477C(struct102 *arg0) {
-  s32 idx = arg0->unk3D;
-  if (idx < 0) {
-      idx = 0;
-  }
-  if (idx >= 10) {
-      idx = 0;
-  }
-    D_80089AD4[idx]();
+/* Calls the D_80089AD4 handler selected by effect->unk3D (0 when out of range). */
+void func_1513477C(struct102 *effect) {
+    s32 index = effect->unk3D;
+
+    if (index < 0) {
+        index = 0;
+    }
+    if (index >= 10) {
+        index = 0;
+    }
+    D_80089AD4[index]();
 }
 
 typedef struct {
-    u8  pad0[0x18];
-    u8  unk18;
-    u8  pad19[0x3];
-    s32 unk1C;
-    u8  pad20[0x1D];
-    u8  unk3D;
+    u8 pad0[0x18];
+    u8 ownerId;
+    u8 pad19[0x3];
+    s32 owner;
+    u8 pad20[0x1D];
+    u8 unk3D;
 } SubA_151347CC;
 
+/* Message 0x2D: an actor handle was replaced. */
 typedef struct {
-    s32 unk0;
+    s32 oldOwner;
     union {
-        s32 w4;
-        u8  b4;
+        s32 newOwner;
+        u8 ownerId;
     } u4;
-    u8  unk8;
-    u8  unk9;
+    u8 oldOwnerId;
+    u8 newOwnerId;
 } ArgB_151347CC;
 
-void func_151347CC(void *arg0, s32 arg1, u8 arg2) {
-    SubA_151347CC *a = (SubA_151347CC *)arg0;
-    ArgB_151347CC *b = (ArgB_151347CC *)arg1;
-    s32 t;
+/* Message handler: frees the effect when its owner goes away, follows owner handle swaps. */
+void func_151347CC(void *arg0, ArgB_151347CC *msg, u8 message) {
+    SubA_151347CC *effect = arg0; // matching: copying the parameter keeps IDO's register choice in case 0x2D
+    s32 oldOwner;
 
-    if ((arg2 == 0) || (arg2 == 0x3)) {
-        if ((b->unk0 == a->unk1C) || (b->u4.b4 == a->unk18)) {
-            func_1516972C((struct102 *)arg0);
+    if ((message == 0) || (message == 3)) {
+        if ((msg->oldOwner == effect->owner) || (msg->u4.ownerId == effect->ownerId)) {
+            func_1516972C((struct102 *)effect);
         }
-    } else if (arg2 == 0x11) {
-        if (a->unk3D == 0x5) {
-            if ((b->unk0 == a->unk1C) || (b->u4.b4 == a->unk18)) {
-                func_1516972C((struct102 *)arg0);
+    } else if (message == 0x11) {
+        if (effect->unk3D == 5) {
+            if ((msg->oldOwner == effect->owner) || (msg->u4.ownerId == effect->ownerId)) {
+                func_1516972C((struct102 *)effect);
             }
         }
-    } else if (arg2 == 0x16) {
-        if (arg1 == a->unk1C) {
-            func_1516972C((struct102 *)arg0);
+    } else if (message == 0x16) {
+        if ((s32)msg == effect->owner) {
+            func_1516972C((struct102 *)effect);
         }
-    } else if (arg2 == 0x2D) {
-        t = b->unk0;
-        if (a->unk1C == t) {
-            a->unk1C = b->u4.w4;
-            a->unk18 = b->unk9;
-        } else {
-            if (a->unk1C == b->u4.w4) {
-                a->unk1C = t;
-                a->unk18 = b->unk8;
-            }
-        dummy_label_151347CC: ;
+    } else if (message == 0x2D) {
+        oldOwner = msg->oldOwner;
+        if (effect->owner == oldOwner) {
+            effect->owner = msg->u4.newOwner;
+            effect->ownerId = msg->newOwnerId;
+        } else if (effect->owner == msg->u4.newOwner) {
+            effect->owner = oldOwner;
+            effect->ownerId = msg->oldOwnerId;
         }
     }
 }
