@@ -72,7 +72,7 @@ void func_15129C30(Camera *cam) {
     f32 strafe;
     f32 stickX;
     f32 stickY;
-    struct17 floor;
+    struct17 floor; // matching: frame size needs 12 bytes here although only .unk0 is written
     u8 index;
     u16 buttons;
     f32 f;
@@ -137,6 +137,7 @@ void func_15129C30(Camera *cam) {
         if (cam->pitch < -89.5f) {
             cam->pitch = -89.5f;
         } else {
+            // matching: clamp through the temp f; a plain `else if` store or direct ternary mismatches
             f = (cam->pitch > 89.5f) ? 89.5f : cam->pitch;
             cam->pitch = f;
         }
@@ -188,6 +189,7 @@ void func_15129C30(Camera *cam) {
         lookY = sinf(cam->pitchRad) * f;
         dirX = cosf(cam->pitchRad) * dirX;
         dirZ = cosf(cam->pitchRad) * dirZ;
+        // matching: the look point reuses stickX/stickY; separate locals change register allocation
         stickX = cam->posX + dirX;
         cam->unk2A4.unk0 = stickX;
         stickY = cam->posY + lookY;
