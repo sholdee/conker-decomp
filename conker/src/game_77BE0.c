@@ -3,6 +3,36 @@
 #include "functions.h"
 #include "variables.h"
 
+// 3-byte entries of D_80099140
+typedef struct {
+    s8 unk0;
+    s8 unk1;
+    s8 unk2;
+} Struct80099140;
+
+/* Per-mode tables indexed by D_800CC27C (D_800990C0 and D_800990E0 are read by game_79F10.c). */
+const f32 D_800990C0[8] = { 0.0f, 0.6000000238f, 0.1800000072f, 0.3000000119f, 0.0f, 2.0f, 2.0f, 4.0f };
+const f32 D_800990E0[8] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
+const f32 D_80099100[8] = { 0.75f, 0.75f, 0.75f, 0.75f, 0.75f, 0.75f, 0.75f, 0.75f };
+const f32 D_80099120[8] = { 0.0f, 0.75f, 0.75f, 1.0f, 1.25f, 0.5f, 0.5f, 0.5f };
+
+/* Indexed by floor material (func_1504BA38). */
+const Struct80099140 D_80099140[20] = {
+    { 0, 0, 0 },     { 0, 0, 0 },     { 0, 0, 0 },     { 0, 0, 0 },     { 0, 0, 0 },
+    { 0, 0, 0 },     { 0, 0, 0 },     { 45, -5, 50 },  { 0, 0, 0 },     { 0, 0, 0 },
+    { -6, 0, 90 },   { -6, 0, 90 },   { 44, -6, 40 },  { 0, 0, 0 },     { -100, 0, 0 },
+    { 44, -4, 80 },  { 0, 0, 0 },     { 0, 0, 0 },     { 44, -4, 80 },  { -100, 0, 30 },
+};
+
+/* Angle for each 4-bit direction mask (read by game_79F10.c). */
+const u16 D_8009917C[16] = {
+    0x0000, 0xC000, 0x4000, 0xFFFF, 0x8000, 0xA000, 0x6000, 0x8000,
+    0x0000, 0xE000, 0x2000, 0x0000, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+};
+
+/* Sound ids (read by game_80B80.c). */
+const u16 D_8009919C[6] = { 0x2B1, 0x2B5, 0x2B6, 0x2B7, 0x2BD, 0x2BE };
+
 void func_1508295C(s32, s32, s32);
 void func_1507D4F8(s32);
 s32 func_1504C8BC(Actor *);
@@ -423,14 +453,6 @@ f32 func_1504B0FC(Actor *obj, f32 arg1) {
     }
     return result;
 }
-// 3-byte entries of D_80099140
-typedef struct {
-    s8 unk0;
-    s8 unk1;
-    s8 unk2;
-} Struct80099140;
-
-extern Struct80099140 D_80099140[];
 
 void func_1504BA38(Actor *obj) {
     Struct80099140 *entry;
@@ -452,7 +474,7 @@ void func_1504BA38(Actor *obj) {
         obj->unkCE = entry->unk0;
         return;
     }
-    obj->unkCE = unk1 * D_800991D4 * (entry->unk0 - obj->speed);
+    obj->unkCE = unk1 * 0.1000000015f * (entry->unk0 - obj->speed);
     if (unk2) { // matching: keeps unk2 live to the end (in a1 rather than v0)
     }
 }
@@ -630,16 +652,6 @@ s32 func_1504C0B8(void) {
 
 void func_15064A14(void *);
 s32 func_15064B94(Actor *, f32, f32, s32, f32);
-extern f32 D_800991DC;
-extern f32 D_800991E0;
-extern f32 D_800991E4;
-extern f32 D_800991E8;
-extern f32 D_800991EC;
-extern f32 D_800991F0;
-extern f32 D_800991F4;
-extern f32 D_800991F8;
-extern f32 D_800991FC;
-extern f32 D_80099200;
 
 void func_1504C0E8(Actor *obj, s32 arg1, f32 arg2) {
     f32 blend;
@@ -677,7 +689,7 @@ void func_1504C0E8(Actor *obj, s32 arg1, f32 arg2) {
             speed = 1.0f;
             start = 0.0f;
             blend = 4.0f;
-            vel = obj->speed * D_800991DC + arg2 * D_800991E0;
+            vel = obj->speed * 0.4000000060f + arg2 * 0.6000000238f;
             ext = obj->mv;
             if (ext->bitten > 0 || ext->transport != 0 || obj->lifting >= 100 || arg1 != 0 ||
                 (ext->walk_attrib & 3) || ext->rt_context_b != 0 || ext->injured != 0 ||
@@ -697,10 +709,10 @@ void func_1504C0E8(Actor *obj, s32 arg1, f32 arg2) {
                 if ((ext->transport == 1 || pressed == 0x81) && vel > 1.0f) {
                     arg2 = 10.0f;
                     anim = 0x302;
-                    speed = obj->speed / 7.0f + D_800991E4;
+                    speed = obj->speed / 7.0f + 0.2000000030f;
                     if (obj->speed > 23.0f) {
                         anim = 0x303;
-                        speed = obj->speed / 23.0f + D_800991E8;
+                        speed = obj->speed / 23.0f + 0.3000000119f;
                     }
                 } else if (ext->chased > 0 && vel >= 5.0f) {
                     anim = 0x2B;
@@ -708,21 +720,21 @@ void func_1504C0E8(Actor *obj, s32 arg1, f32 arg2) {
                 } else if (ext->chasing > 0 && vel >= 5.0f) {
                     anim = 0xDF;
                     speed = vel / 12.0f;
-                } else if (obj->unk118 != D_800991EC && obj->ypos < obj->unk118 &&
+                } else if (obj->unk118 != -10000.0f && obj->ypos < obj->unk118 &&
                            obj->speed >= 1.0f && ext->transport == 0) {
-                    speed = vel / 18.0f + D_800991F0;
+                    speed = vel / 18.0f + 0.2000000030f;
                     anim = 0x8B;
                     obj->unkAA = 0x4B;
                 } else if (vel > 14.0f) {
                     anim = (D_800BE9F0 != 4) ? 2 : 0x1B2;
-                    speed = vel / 23.0f + D_800991F4;
+                    speed = vel / 23.0f + 0.8000000119f;
                 } else if (vel > 6.0f || (arg2 < 1.0f && obj->speed > 1.0f)) {
                     anim = 1;
-                    speed = vel * 0.125f + D_800991F8;
+                    speed = vel * 0.125f + 0.3000000119f;
                 } else if (vel > 1.0f) {
                     blend = 15.0f;
                     anim = (obj->character_type == 0x80) ? 1 : 0;
-                    speed = vel * 0.125f + D_800991FC;
+                    speed = vel * 0.125f + 0.1000000015f;
                 } else {
                     anim = func_1504C078();
                 }
@@ -743,7 +755,7 @@ void func_1504C0E8(Actor *obj, s32 arg1, f32 arg2) {
                 if (obj->speed < 3.0f) {
                     ext->dwalk = 1;
                 }
-                if (obj->stickspeed > D_80099200 && (ext = obj->mv)->dwalk != 0) {
+                if (obj->stickspeed > 2.599999905f && (ext = obj->mv)->dwalk != 0) {
                     ext->duck_tilt = 1;
                     obj->unkAA = 0x28;
                     blend = 5.0f;
