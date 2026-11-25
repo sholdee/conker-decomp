@@ -2407,9 +2407,6 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
 }
 
 extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
-extern void func_1000D96C(s32, s32, s32);
-extern void func_1000DE1C(s32, s32);
-extern s32 func_1000E134(s32);
 extern void func_1503DE70(Actor *, s32, s32);
 extern void func_151557FC(s32, s32, f32);
 extern void func_15155F90(void);

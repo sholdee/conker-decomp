@@ -193,7 +193,6 @@ void func_150806A8(s32);
 void func_150829D8(Actor *);
 void func_1512D560(Camera *, s32, TriggerZone *);
 void func_15055C88(Actor *arg0);
-void func_1000D96C(s32 newId, s32 oldId, s32 transition);
 void func_15080500(Actor *, TriggerZone *, s32, s32, s32);
 void func_151AE06C(Actor *, TriggerZone *);
 void func_1501D348(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callbackArg);

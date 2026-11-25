@@ -47,7 +47,6 @@ typedef struct {
 } PissTrail;
 
 extern s32 func_151EF610(void);
-extern void func_1000D96C(s32, s32, s32);
 extern PissTrail *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_15131958(void *, f32, void *); // matching: called with a third argument (the definition takes two)
 

@@ -5,7 +5,6 @@
 #include "effects.h"
 
 extern s32 func_1000B060(f32, f32, u32);
-extern void func_1000E7A0(u32, s32);
 extern s32 func_1510F8CC(s32);
 extern f32 D_800AAA30; /* 0.1f; ROM 0x24F4F0, just before this file's .rodata slice */
 

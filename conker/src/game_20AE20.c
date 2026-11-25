@@ -141,7 +141,6 @@ s32 func_151DDB94(s32 value) {
 
 void func_1501C730(s32, s32, s32, s32, s32);
 void func_151E557C(void);
-void func_1000E934(void);
 void func_1000F1A8(void);
 
 /* Requests a switch to map 0x1D (func_1501C730 mode 6) and resets this mode's state flags. */
@@ -493,7 +492,6 @@ void func_151DD9E4(void);
 
 void func_15007778(void);
 void func_151E81EC(void);
-void func_1000E7A0(s32, s32);
 void func_151DF574(void);
 void func_151E7DC0(void);
 void func_151DF1BC(void);
@@ -738,7 +736,6 @@ void func_151DE8F0(void) {
 
 extern char D_800AB800[];
 ObjScriptCmd *func_1507BB28(s32, s32);
-void func_1000DE1C(s32, s32);
 void func_151E7E9C(void);
 
 /* Menu page for unk2C == 1: fades in and out, toggling D_8008FEF8 and object 9's animation (0xE/0xF) each fade-out. */
@@ -3867,7 +3864,6 @@ extern Snd151E6C1C D_800AB908[];
 extern Snd151E6C1C D_800AB920[];
 extern s32 func_15086CBC(s32, f32 *, f32 *, f32 *);
 extern s32 func_15086D48(s32);
-extern void func_1000D96C(s32, s32, s32);
 extern f32 sinf(f32);
 
 #define UNK2AC_F32 (*(f32 *)&obj->focus.z) // an f32; structs.h declares Camera.unk2AC as s32

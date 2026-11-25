@@ -79,8 +79,6 @@ void func_150C7968(WorldObject *obj) {
     }
 }
 
-extern void func_1000D96C(s32 newId, s32 oldId, s32 transition);
-extern void func_1000DE1C(s32, s32);
 extern f32 func_150489B0(u8 angle); /* cos */
 extern void func_15179FE0(u8 texture, s16 x, s16 y, s16 z, s8 velY, u16 timer, u16 unkAC, u8 speedRange,
                           u8 spinRange, u8 dragRange, s32 type);

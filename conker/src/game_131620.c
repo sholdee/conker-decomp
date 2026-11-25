@@ -30,7 +30,6 @@ void func_15104170(s32 mode, Actor *owner, Actor *source) {
     }
 }
 
-void func_1000E2F4(s32 arg0);
 void func_151254F4(Camera *camera, s32 arg1);
 void func_151D66F0(s32 arg0, s32 arg1);
 

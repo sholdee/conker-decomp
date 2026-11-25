@@ -3,7 +3,11 @@
 // matching: func_1501A490 is defined below with the display list as an integer (functions.h gives callers the
 // Gfx * prototype); a Gfx * parameter, even copied into an integer local, changes its code.
 #define func_1501A490 func_1501A490_hdr
+// matching: this file calls func_150006E0, which takes no arguments, with the level; hide the header's prototype
+#define func_150006E0 func_150006E0_hdr
 #include "functions.h"
+#undef func_150006E0
+void func_150006E0(s32 level);
 #undef func_1501A490
 #include "variables.h"
 

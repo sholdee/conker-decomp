@@ -601,7 +601,6 @@ void func_1501DE18(s32 scene) {
     func_1501E81C(1, scene);
 }
 
-extern void func_1000E17C(void);
 extern void func_151F2BA8(void);
 void func_1501DE18(s32 scene);
 /* Skip the running cutscene: jump to its end (again while the next one chains on, D_800C3C99),

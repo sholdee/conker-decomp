@@ -124,8 +124,6 @@ void func_150E3340(f32 *origin, s32 *to, f32 *follow, s16 lifetime) {
     func_150E3020(x, y, z, x, y, z, 0x1A, 10.0f, NULL, origin[0], origin[1], origin[2], follow, lifetime);
 }
 
-void func_1000E7A0(s32, s32);
-
 /* Sound callback of the effect started by func_150E3414. */
 s32 func_150E33CC(s32 arg0, s32 arg1, void **arg2, s32 arg3) {
     if (*arg2 == NULL) {

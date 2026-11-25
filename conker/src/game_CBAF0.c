@@ -43,9 +43,6 @@ s32 func_1509E6F0(s32 id, s32 opcode, ScriptCmd *cmd) {
     return 0;
 }
 
-void func_1000D96C(s32, s32, s32);
-void func_1000DE1C(s32, s32);
-
 /* Script command handler (D_800884D4[9]): forwards the low 12 bits of `id` and the parameters to
  * the func_1000Dxxx/func_1000Exxx routine selected by `opcode`. Optional parameters default when
  * the command is short. Returns 0 for an unknown opcode. */
@@ -90,16 +87,14 @@ unknown:
     return 0;
 }
 
-s32 func_1000E8F0(void);
-
 /* Script query handler (D_80088498[9]): opcode 7 returns func_1000E0F8(id), 8 returns
- * func_1000E8F0(), anything else 0. */
+ * func_1000E8F0(id), anything else 0. */
 s32 func_1509E8A0(s32 id, s32 opcode, ScriptCmd *cmd) {
     switch (opcode) {
     case 7:
         return func_1000E0F8(id);
     case 8:
-        return func_1000E8F0();
+        return func_1000E8F0(id);
     }
     return 0;
 }

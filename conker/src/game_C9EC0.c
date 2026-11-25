@@ -294,7 +294,6 @@ extern void func_150FCA30(void);
 extern s32 func_1518F51C(Actor *, u8, s32, s32, s8, s8, u8, s32, u8, s32);
 extern void func_150E1060(s32, s32, s32);
 extern void func_151CD35C(s32);
-extern void func_1000E7A0(s32, s32);
 extern void light_sendEvent(u8, u8, s32);
 extern void func_150BEF7C(s32);
 extern void func_15178EFC(s32);

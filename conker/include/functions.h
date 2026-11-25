@@ -54,9 +54,6 @@ struct SoundRecord {
 typedef struct BankRecord BankRecord;
 typedef void *(*BankFetchProc)(u32 *slot, s32 mode);
 
-/* A playing music sequence (init_B1B0.c). */
-typedef struct MusicTrack MusicTrack;
-
 /* matching */
 void func_1000349C(s32 arg0);
 void func_100084D8(u8 arg0);
@@ -87,22 +84,6 @@ ALDMAproc func_10009980(void *state);
 void func_10009B2C(BankRecord *record);
 void func_10009B4C(BankRecord *record);
 void func_10009B90(BankRecord *record);
-s32  func_1000BA18(u32 arg0, u8 arg1, f32 arg2, f32 arg3, f32 arg4);
-MusicTrack *func_1000B1B0(s32 id);
-s32  func_1000B830(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
-s32  func_1000B8B8(s32 arg0, u8 arg1, f32 arg2, f32 arg3, f32 arg4);
-s32  func_1000BBE8(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
-s32  func_1000BC28(s32 arg0, u8 arg1, s32 arg2, s32 arg3);
-void func_1000CBA8(s32 arg0);
-s32  func_1000CD40(s32 arg0, s32 arg1, s32 arg2);
-void func_1000E054(s32 arg0, s32 arg1);
-s32  func_1000E0F8(s32 arg0);
-void func_1000E40C(s32 arg0, s32 arg1);
-s32  func_1000E654(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
-s32  func_1000E704(s32 arg0, s32 arg1, s32 arg2);
-void func_1000E75C(s32 arg0);
-s32  func_1000E770(s32 *arg0, s32 *arg1);
-u16  func_1000EA94(s32 arg0);
 s32 func_1000EB00(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
 s32 func_1000EBC4(SoundRecord *record, s32 *active, u32 *volume, s32 *pan);
 s32 func_1000EF40(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
@@ -165,8 +146,6 @@ void func_1001DAE4(ALVoiceConfig *arg0, s16 arg1, s32 *arg2);
 s32  func_1001E4A0(s16 arg0, s32 arg1, s32 arg2);
 f32  func_1001FA78(MtxF arg0, s32 arg1);
 /* chunk0 */
-void func_15000000(void);
-void func_15000090(void);
 void func_15000AC0(void);
 void func_15001B08(void);
 u16* func_15001B10(void);
@@ -597,42 +576,6 @@ BankFetchProc func_10009FFC(void);
 //func_1000A420
 //func_1000A750
 //func_1000B060
-MusicTrack *func_1000B1FC(s32 id);
-//func_1000B294
-//func_1000B2F4
-//func_1000B3D4
-//func_1000B548
-//func_1000B638
-//func_1000B8B8
-//func_1000BAFC
-//func_1000BCBC
-//func_1000BF60
-//func_1000C350
-s32 func_1000C530(s32, u8, f32, f32, f32);
-//func_1000C7E8
-//func_1000C934
-//func_1000CA18
-//func_1000CAE4
-//func_1000CBF0
-//func_1000CC54
-//func_1000CDA0
-//func_1000CEAC
-//func_1000D2F8
-void func_1000D758(f32 x, f32 y, f32 z);
-//func_1000D96C
-//func_1000DE1C
-//func_1000DEC4
-void func_1000DF68(s32 id, s32 volume, s32 frames);
-//func_1000E134
-//func_1000E17C
-//func_1000E2F4
-s32 func_1000E46C(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
-s32 func_1000E588(s32 arg0, s32 arg1, s32 arg2);
-//func_1000E654
-//func_1000E7A0
-//func_1000E8C4
-//func_1000E8F0
-//func_1000E934
 //func_1000EC24
 //func_1000ECCC
 s32 func_1000EDA0(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);

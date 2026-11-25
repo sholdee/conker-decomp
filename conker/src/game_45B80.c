@@ -112,7 +112,6 @@ void func_15084A18(void);
 void func_15125628(void);
 void func_1517CFC4(void);
 void func_1501C880(s32, s32);
-void func_1000E2F4(s32);
 s32 func_151F2CDC(void);
 void func_151F2BE8(void);
 void func_151F2C4C(void);

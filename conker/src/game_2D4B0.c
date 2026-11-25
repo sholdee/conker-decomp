@@ -22,11 +22,6 @@ void func_15000090(void) {
     func_1000DEC4();
 }
 
-extern s32 func_1000B548(s32 *arg0);
-extern void func_1000E2F4(s32 arg0);
-extern void func_1000DE1C(s32 arg0, s32 arg1);
-extern void func_1000D96C(s32 arg0, s32 arg1, s32 arg2);
-
 void func_150000B0(void) {
     LevelMusic q;
     s32 i;

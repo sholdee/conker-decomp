@@ -1215,7 +1215,6 @@ LightEffect *func_15162FAC(PointLight *light, u8 kind, u8 type, u8 arg3, s16 lif
 }
 
 extern s32 func_151EF610(void);
-s32 func_1000E770();
 
 /* Lightning update: decays the flash, fires the next flash and thunder sound of a burst, or waits for the next burst. */
 s32 func_151630F4(LightEffect *effect) {

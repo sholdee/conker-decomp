@@ -32,10 +32,6 @@ extern s32 D_800D18C4;
 
 s32 func_1515942C(Actor *, s32, s32, s32, s32, s32);
 void func_1507CD64(Actor *actor, s32 arg1);
-void func_1000D96C(s32 arg0, s32 arg1, s32 arg2);
-void func_1000DE1C(s32 arg0, s32 arg1);
-void func_1000E7A0(u32 arg0, s32 arg1);
-void func_1000E8C4(s32 arg0);
 void func_15191B8C(s32 arg0, u8 arg1);
 
 /* Appends one sequence to a 40-entry candidate list. */

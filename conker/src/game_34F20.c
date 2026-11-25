@@ -1,6 +1,10 @@
 #include <ultra64.h>
 
+// matching: this file calls func_150006E0, which takes no arguments, with the level; hide the header's prototype
+#define func_150006E0 func_150006E0_hdr
 #include "functions.h"
+#undef func_150006E0
+void func_150006E0(s32 level);
 #include "variables.h"
 
 
@@ -60,7 +64,6 @@ void func_15181E18(s32);
 void func_15187F90(void);
 void func_151E562C(void);
 s8 func_151E5FAC(void);
-void func_150000B0(void);
 void func_15000AD0(s32);
 void func_150031EC(s32);
 void func_150039E0(s32, s32);
