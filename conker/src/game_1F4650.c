@@ -8,12 +8,10 @@ s32 func_1513D4B8(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg
 u32 func_150ADA20(void);
 #include "variables.h"
 
-extern f32 D_800AAED4;
-extern f32 D_800AAED8;
 
 extern f32 sinf(f32);
 extern void func_1514373C(f32, f32, f32 *, f32 *);
-extern void func_15145974(struct17 *, f32 *, f32 *);
+extern void func_15145974(vertex *, f32 *, f32 *);
 extern void func_1000FD38(void *, void *, s32);
 extern void *func_1515548C(void *, u8, s32, s32, s32, u8, s32);
 extern void *func_1515FF74(void *, s32, u8, s32);
@@ -2310,34 +2308,42 @@ void func_151CC524(struct108 *player, u8 red, u8 green, u8 blue, u8 arg4, u8 arg
     }
 }
 
-s32 func_151CC77C(void *arg0) {
-    register f32 *temp_a1;
-    register f32 *temp_a2;
-    struct {
-        f32 sp20;
-        f32 sp24;
-        s32 pad28;
-        s32 pad2C;
-    } sp20;
-    void *temp_v0;
-    void *temp_v1;
+/* The part of the struct126 at struct127.unk31C read here (struct126 does not declare it). */
+typedef struct {
+    u8 pad0[0x130];
+    vertex aimDir;
+} SightAimer;
 
-    temp_v0 = *(void **)((s32)arg0 + 0x70);
-    temp_v1 = *(void **)((s32)temp_v0 + 0x3D0);
-    if (temp_v1 == NULL) {
+/* Cross-bar update: shifts the bar sideways (texture 0x9A) or vertically by the aim angles. */
+s32 func_151CC77C(SightSprite *sprite) {
+    // matching: the angle pointers are taken (in registers) before the NULL check
+    register f32 *pitchp;
+    register f32 *yawp;
+    struct {
+        f32 yaw;
+        f32 pitch;
+        s32 pad[2];
+    } angles;
+    SightAimer *aimer;
+    struct127 *state;
+
+    // matching: one variable first holds the player, then the aimer (as IDO allocated it)
+    aimer = (SightAimer *)sprite->payload.player;
+    state = ((struct108 *)aimer)->unk3D0;
+    if (state == NULL) {
         return 0;
     }
-    temp_v0 = *(void **)((s32)temp_v1 + 0x31C);
-    temp_a1 = &sp20.sp24;
-    temp_a2 = &sp20.sp20;
-    if (temp_v0 == NULL) {
+    aimer = (SightAimer *)state->unk31C;
+    pitchp = &angles.pitch;
+    yawp = &angles.yaw;
+    if (aimer == NULL) {
         return 0;
     }
-    func_15145974((struct17 *)((s32)temp_v0 + 0x130), temp_a1, temp_a2);
-    if (*(u8 *)((s32)arg0 + 0x20) == 0x9A) {
-        *(f32 *)((s32)arg0 + 0x60) = -((sp20.sp24 * D_800AAED4) * 2560.0f) * 2.0f;
+    func_15145974(&aimer->aimDir, pitchp, yawp);
+    if (sprite->desc.texture == 0x9A) {
+        sprite->desc.unk50 = -((angles.pitch * 0.002777777845f) * 2560.0f) * 2.0f;
     } else {
-        *(f32 *)((s32)arg0 + 0x64) = ((sp20.sp20 * D_800AAED8) * 2560.0f) * 2.0f;
+        sprite->desc.unk54 = ((angles.yaw * 0.002777777845f) * 2560.0f) * 2.0f;
     }
     return 1;
 }
