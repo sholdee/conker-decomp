@@ -3892,6 +3892,29 @@ typedef struct CamPose {
     /* 0x14 */ f32 unk14;
 } CamPose; // size 0x18
 
+/* Mtx viewed as its s16 integer and fraction halves. */
+typedef struct MtxS16 {
+    s16 intPart[4][4];
+    s16 fracPart[4][4];
+} MtxS16;
+
+/* A bone-matrix trail ("afterimage") drawn behind an object (game_1B5CC0); D_800DF7C8[type] lists them. */
+typedef struct BoneTrail {
+    /* 0x00 */ u8 type;      /* index into the update/free/draw tables */
+    /* 0x01 */ u8 numFrames; /* history length */
+    /* 0x02 */ u8 numFilled; /* history frames captured so far */
+    /* 0x03 */ u8 alpha;
+    /* 0x04 */ u8 maxDist;   /* max spacing between frames, see func_15189118 */
+    /* 0x06 */ s16 timer;
+    /* 0x08 */ MtxS16 *frames;
+    /* 0x0C */ struct BoneTrail *next;
+    /* 0x10 */ union {
+        Actor *object;
+        WorldObject *worldObj;
+    } owner;
+    /* 0x14 */ s32 unk14;    /* type 0 only: swapped into owner.object->unk94 while drawing */
+} BoneTrail; // size 0x18 (type 1 trails are allocated without unk14)
+
 /* One 12-byte entry of the world-mesh triangle table D_800DBE3C (built by func_15000F04 in game_2DF70):
  * the triangle's three vertices. Collision code reads the same words as offsets from a vertex base,
  * which is 0 for the static world mesh. */

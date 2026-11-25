@@ -17,12 +17,12 @@ typedef struct {
  * speed units per frame, spawning particles that run from origin to the moving point. Live effects are
  * registered in the 8 handle slots D_800D99D0 (handle = slot + 1).
  */
-typedef struct Effect {
+typedef struct HomingEffect {
     /* 0x00 */ u8 type;
     /* 0x01 */ u8 list;
     /* 0x02 */ u8 pad2[2];
-    /* 0x04 */ struct Effect *prev;
-    /* 0x08 */ struct Effect *next;
+    /* 0x04 */ struct HomingEffect *prev;
+    /* 0x08 */ struct HomingEffect *next;
     /* 0x0C */ u8 owner;
     /* 0x0D */ u8 padD[3];
     /* 0x10 */ Vec3f pos;
@@ -48,17 +48,15 @@ typedef struct Effect {
     /* 0x74 */ s32 unk74;
     /* 0x78 */ f32 *follow;
     /* 0x7C */ s16 lifetime; /* frames left, or -99 for unlimited */
-} Effect;
-
-#define EFFECT_SLOTS ((Effect **)D_800D99D0)
+} HomingEffect;
 
 /* Object lists (see game_1944C0.c); list D_800DCE50[n][0x27] holds the effects. */
-extern Effect *D_800DCE50[2][104];
+extern HomingEffect *D_800DCE50[2][104];
 
 /* Creates an effect from (x, y, z) toward (targetX, targetY, targetZ) and registers it in a free slot. */
-Effect *func_150E3020(s32 x, s32 y, s32 z, s32 targetX, s32 targetY, s32 targetZ, s32 arg6, f32 speed,
+HomingEffect *func_150E3020(s32 x, s32 y, s32 z, s32 targetX, s32 targetY, s32 targetZ, s32 arg6, f32 speed,
                       Actor *targetObj, f32 originX, f32 originY, f32 originZ, f32 *follow, s16 lifetime) {
-    Effect *effect;
+    HomingEffect *effect;
     s32 i;
 
     effect = func_15167A68(0x27, 0, 0x80, 1, 0xFF, 1);
@@ -90,8 +88,8 @@ Effect *func_150E3020(s32 x, s32 y, s32 z, s32 targetX, s32 targetY, s32 targetZ
     effect->lingerTimer = 0;
     effect->sound = 0;
     for (i = 0; i < 8; i++) {
-        if (EFFECT_SLOTS[i] == NULL) {
-            EFFECT_SLOTS[i] = effect;
+        if (D_800D99D0[i] == NULL) {
+            D_800D99D0[i] = effect;
             effect->slot = i;
             return effect;
         }
@@ -102,7 +100,7 @@ Effect *func_150E3020(s32 x, s32 y, s32 z, s32 targetX, s32 targetY, s32 targetZ
 
 /* Starts an effect that reaches the target in `frames` frames; returns its handle, or 0. */
 s32 func_150E3208(s32 x, s32 y, s32 z, s32 targetX, s32 targetY, s32 targetZ, s32 arg6, s32 frames) {
-    Effect *effect;
+    HomingEffect *effect;
 
     effect = func_150E3020(x, y, z, targetX, targetY, targetZ, arg6,
                            (f32)func_150AD9A0(x - targetX, y - targetY, z - targetZ) / (f32)frames,
@@ -115,7 +113,7 @@ s32 func_150E3208(s32 x, s32 y, s32 z, s32 targetX, s32 targetY, s32 targetZ, s3
 
 /* Starts an effect that homes in on targetObj; returns its handle, or 0. */
 s32 func_150E32D0(s32 x, s32 y, s32 z, Actor *targetObj, s32 arg4, f32 speed) {
-    Effect *effect;
+    HomingEffect *effect;
 
     effect = func_150E3020(x, y, z, 0, 0, 0, arg4, speed, targetObj, 0.0f, 0.0f, 0.0f, NULL, -99);
     if (effect != NULL) {
@@ -150,7 +148,7 @@ s32 func_150E33CC(s32 arg0, s32 arg1, void **arg2, s32 arg3) {
 /* Starts an effect with a looping sound (0x2D0) at its origin; returns its handle, or 0. */
 s32 func_150E3414(s32 originX, s32 originY, s32 originZ, s32 x, s32 y, s32 z, Actor *targetObj, s32 arg7,
                   f32 speed) {
-    Effect *effect;
+    HomingEffect *effect;
 
     effect = func_150E3020(x, y, z, 0, 0, 0, arg7, speed, targetObj, originX, originY, originZ, NULL, -99);
     if (effect != NULL) {
@@ -162,14 +160,14 @@ s32 func_150E3414(s32 originX, s32 originY, s32 originZ, s32 x, s32 y, s32 z, Ac
 }
 
 /* Destroys an effect: frees its slot, stops its sound (playing 0x2D7 at the origin) and frees the object. */
-void func_150E3514(Effect *effect) {
+void func_150E3514(HomingEffect *effect) {
     s32 slot;
-    Effect **entry;
+    HomingEffect **entry;
     u16 sound;
 
     slot = effect->slot;
     if (slot >= 0) {
-        entry = &EFFECT_SLOTS[slot];
+        entry = &D_800D99D0[slot];
         if (*entry == effect) {
             *entry = NULL;
         }
@@ -188,7 +186,7 @@ void func_150E3514(Effect *effect) {
 /* Destroys the effect with the given handle, or every effect for handle 0. */
 void func_150E35DC(s32 handle) {
     s32 list;
-    Effect *effect;
+    HomingEffect *effect;
 
     handle--;
     for (list = 0; list != 2; list++) {
@@ -211,11 +209,11 @@ void func_150E35DC(s32 handle) {
 
 /* Reads the position of the effect with the given handle, truncated to integers. */
 void func_150E36BC(s32 handle, s32 *x, s32 *y, s32 *z) {
-    Effect *effect;
+    HomingEffect *effect;
 
     handle--;
     if (handle >= 0 && handle < 8) {
-        effect = EFFECT_SLOTS[handle];
+        effect = D_800D99D0[handle];
         if (effect != NULL && effect->type == 0x27) {
             *x = effect->pos.x;
             *y = effect->pos.y;
@@ -252,8 +250,8 @@ extern void func_15103254(s16, u8, f32, Vec3f *, s32, s32, s32);
  * Per-frame update of an effect: counts down its lifetime, steps pos toward the target and spawns particles
  * that run from origin to random points along that step, plus sparks at origin.
  */
-void func_150E3738(Effect *arg0) {
-    Effect *effect; // matching: the copy of arg0 sets the frame layout
+void func_150E3738(HomingEffect *arg0) {
+    HomingEffect *effect; // matching: the copy of arg0 sets the frame layout
     Vec3f prevPos;
     Vec3f nextPos;
     Vec3f delta;

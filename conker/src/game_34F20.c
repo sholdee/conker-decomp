@@ -295,7 +295,7 @@ void func_150081E4(void) {
 
     for (i = 0; i < 2; i++)
     {
-        D_800DF7C8[i] = 0;
+        D_800DF7C8[i] = NULL;
     }
 
     D_800D245C = 0;

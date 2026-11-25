@@ -1129,7 +1129,7 @@ extern u8  D_800D9939;
 extern u8  D_800D992A[];
 extern u8  D_800D993A[];
 
-extern s32 D_800D99D0[8];
+extern struct HomingEffect *D_800D99D0[8]; // live homing effects by handle - 1 (defined in game_1104D0)
 extern TriggerZone *D_800D9A20[2]; // registered by func_15014040 (by unk18)
 extern s32 D_800D9A40;
 extern Vec3f D_800D9A50;
@@ -1320,7 +1320,7 @@ extern u8   D_800DDE40; // nonzero: iris driven by the cutscene tracks
 extern u8   D_800DDE50;
 extern EffectModelSlot D_800DDE80[11];
 
-extern s32  D_800DF7C8[];
+extern BoneTrail *D_800DF7C8[2]; // [0]: Actor owners, [1]: world object owners
 extern u8   D_800DDF5C[];
 extern u8   D_800DDF60[];
 extern s8   D_800DDF68[];

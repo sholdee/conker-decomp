@@ -10,44 +10,20 @@
  * D_800DF7C8[1] lists type-1 trails (world object owners, one matrix).
  */
 
-/* Mtx viewed as its s16 integer and fraction halves. */
-typedef struct MtxS16 {
-    s16 intPart[4][4];
-    s16 fracPart[4][4];
-} MtxS16;
-
-typedef struct Trail {
-    /* 0x00 */ u8 type;      /* index into the update/free/draw tables */
-    /* 0x01 */ u8 numFrames; /* history length */
-    /* 0x02 */ u8 numFilled; /* history frames captured so far */
-    /* 0x03 */ u8 alpha;
-    /* 0x04 */ u8 maxDist;   /* max spacing between frames, see func_15189118 */
-    /* 0x06 */ s16 timer;
-    /* 0x08 */ MtxS16 *frames;
-    /* 0x0C */ struct Trail *next;
-    /* 0x10 */ union {
-        Actor *object;
-        WorldObject *worldObj;
-    } owner;
-    /* 0x14 */ s32 unk14;    /* type 0 only: swapped into owner.object->unk94 while drawing */
-} Trail; // size 0x18 (type 1 trails are allocated without unk14)
-
-#define sTrailLists ((Trail **)D_800DF7C8)
-
 extern void *allocate_memory();
 extern void func_10004074(void *);
 extern s32 func_1502DB20(s32);
-void func_15188A58(Trail *trail, Trail **list);
+void func_15188A58(BoneTrail *trail, BoneTrail **list);
 
 /* Starts (or extends) a type-0 trail behind a game object. */
 void func_15188810(Actor *object, s32 duration, s32 maxDist) {
-    Trail *trail;
+    BoneTrail *trail;
     s32 numBones;
     s32 size;
     s32 pad; // matching: unused slot, moves size's spill to sp+0x20
     MtxS16 *frames;
 
-    for (trail = sTrailLists[0]; trail != NULL; trail = trail->next) {
+    for (trail = D_800DF7C8[0]; trail != NULL; trail = trail->next) {
         if (object == trail->owner.object) {
             if (trail->timer < duration) {
                 trail->timer = duration;
@@ -57,7 +33,7 @@ void func_15188810(Actor *object, s32 duration, s32 maxDist) {
         }
     }
 
-    trail = allocate_memory(sizeof(Trail), 1, 0, 0);
+    trail = allocate_memory(sizeof(BoneTrail), 1, 0, 0);
     if (trail != NULL) {
         numBones = func_1502DB20(object->id);
         if (numBones == 0) {
@@ -82,16 +58,16 @@ void func_15188810(Actor *object, s32 duration, s32 maxDist) {
         trail->owner.object = object;
         trail->unk14 = 0;
         bzero(frames, size);
-        func_15188A58(trail, &sTrailLists[0]);
+        func_15188A58(trail, &D_800DF7C8[0]);
     }
 }
 
 /* Starts (or extends) a type-1 trail behind a WorldObject object. */
 void func_1518894C(WorldObject *owner, s32 duration, s32 maxDist) {
-    Trail *trail;
+    BoneTrail *trail;
     MtxS16 *frames;
 
-    for (trail = sTrailLists[1]; trail != NULL; trail = trail->next) {
+    for (trail = D_800DF7C8[1]; trail != NULL; trail = trail->next) {
         if (owner == trail->owner.worldObj) {
             if (trail->timer < duration) {
                 trail->timer = duration;
@@ -118,13 +94,13 @@ void func_1518894C(WorldObject *owner, s32 duration, s32 maxDist) {
         trail->frames = frames;
         trail->owner.worldObj = owner;
         bzero(frames, 3 * 2 * sizeof(Mtx));
-        func_15188A58(trail, &sTrailLists[1]);
+        func_15188A58(trail, &D_800DF7C8[1]);
     }
 }
 
 /* Appends a trail to the end of a list. */
-void func_15188A58(Trail *trail, Trail **list) {
-    Trail *last;
+void func_15188A58(BoneTrail *trail, BoneTrail **list) {
+    BoneTrail *last;
 
     trail->next = NULL;
     if (*list != NULL) {
@@ -140,9 +116,9 @@ void func_15188A58(Trail *trail, Trail **list) {
 
 /* Lets an object's type-0 trail start fading out. */
 void func_15188A9C(Actor *object) {
-    Trail *trail;
+    BoneTrail *trail;
 
-    for (trail = sTrailLists[0]; trail != NULL; trail = trail->next) {
+    for (trail = D_800DF7C8[0]; trail != NULL; trail = trail->next) {
         if (object == trail->owner.object) {
             trail->timer = 0;
         }
@@ -151,16 +127,16 @@ void func_15188A9C(Actor *object) {
 
 /* Removes and frees an object's type-0 trails immediately. */
 void func_15188AD0(Actor *object) {
-    Trail *trail;
-    Trail *prev;
-    Trail *next;
+    BoneTrail *trail;
+    BoneTrail *prev;
+    BoneTrail *next;
 
     prev = NULL;
-    for (trail = sTrailLists[0]; trail != NULL; trail = next) {
+    for (trail = D_800DF7C8[0]; trail != NULL; trail = next) {
         next = trail->next;
         if (object == trail->owner.object) {
             if (prev == NULL) {
-                sTrailLists[0] = next;
+                D_800DF7C8[0] = next;
             } else {
                 prev->next = next;
             }
@@ -172,20 +148,20 @@ void func_15188AD0(Actor *object) {
     }
 }
 
-extern void (*D_8008D580[])(Trail *); /* per-type update: capture a history frame */
-extern void (*D_8008D588[])(Trail *); /* per-type free */
+extern void (*D_8008D580[])(BoneTrail *); /* per-type update: capture a history frame */
+extern void (*D_8008D588[])(BoneTrail *); /* per-type free */
 
 /* Advances every trail in list `listIndex`: counts down timers, captures history,
  * fades alpha in while the timer runs and out after it expires, freeing the
  * trail once fully faded. */
 void func_15188B74(s32 listIndex) {
-    Trail **head;
-    Trail *trail;
-    Trail *prev;
-    Trail *next;
+    BoneTrail **head;
+    BoneTrail *trail;
+    BoneTrail *prev;
+    BoneTrail *next;
     s32 alpha;
 
-    head = &sTrailLists[listIndex];
+    head = &D_800DF7C8[listIndex];
     prev = NULL;
     for (trail = *head; trail != NULL; trail = next) {
         next = trail->next;
@@ -229,13 +205,13 @@ void func_15188B74(s32 listIndex) {
 }
 
 extern Mtx D_80089470;
-extern Gfx *(*D_8008D590[])(Gfx *, Trail *, s16); /* per-type draw */
+extern Gfx *(*D_8008D590[])(Gfx *, BoneTrail *, s16); /* per-type draw */
 
 /* Draws every trail in list `listIndex`. */
 Gfx *func_15188D00(Gfx *gfx, s32 listIndex, s16 player) {
-    Trail *trail;
+    BoneTrail *trail;
 
-    trail = sTrailLists[listIndex];
+    trail = D_800DF7C8[listIndex];
     if (trail == NULL) {
         return gfx;
     }
@@ -257,7 +233,7 @@ Gfx *func_15188D00(Gfx *gfx, s32 listIndex, s16 player) {
  * (D_800BE9C0) takes frame i + 1 of the other half, and the last frame takes
  * the owner's current bone matrices.
  */
-void func_15188E48(Trail *trail) {
+void func_15188E48(BoneTrail *trail) {
     s32 i;
     s32 numFrames;
     s32 numBones;
@@ -306,8 +282,8 @@ extern u16 D_800DBEE8[];         // per view: entries in D_80089240
  * the owner's matrix from view 0's draw list; an owner that is not in the list
  * clears the history.
  */
-void func_15188F84(Trail *arg) {
-    Trail *trail;
+void func_15188F84(BoneTrail *arg) {
+    BoneTrail *trail;
     s32 i;
     s32 view;
     s32 numFrames;
@@ -356,7 +332,7 @@ void func_15188F84(Trail *arg) {
  * newer frame to that distance.
  */
 void func_15189118(s32 listIndex) {
-    Trail *trail;
+    BoneTrail *trail;
     s32 numFrames;
     s32 numBones;
     s32 base;
@@ -375,7 +351,7 @@ void func_15189118(s32 listIndex) {
     f32 ny;
     f32 nz;
 
-    for (trail = sTrailLists[listIndex]; trail != NULL; trail = trail->next) {
+    for (trail = D_800DF7C8[listIndex]; trail != NULL; trail = trail->next) {
         if (trail->maxDist != 0) {
             numFrames = trail->numFrames;
             numBones = func_1502DB20(trail->owner.object->id);
@@ -428,12 +404,12 @@ void func_15189118(s32 listIndex) {
 }
 
 /* Type-0 free. */
-void func_151895A4(Trail *trail) {
+void func_151895A4(BoneTrail *trail) {
     func_100043B4((s32 *)trail->frames, 2);
 }
 
 /* Type-1 free. */
-void func_151895CC(Trail *trail) {
+void func_151895CC(BoneTrail *trail) {
     func_100043B4((s32 *)trail->frames, 2);
 }
 
@@ -444,7 +420,7 @@ extern MtxS16 *D_800DF7C0; // bone matrices drawn by func_1502C974 mode 4
 extern u8 D_800DF7C4;      // alpha scale for func_1502C974 mode 4
 
 /* Type-0 draw: draws the owner object once per history frame, oldest faintest. */
-Gfx *func_151895F4(Gfx *gfx, Trail *trail, s16 player) {
+Gfx *func_151895F4(Gfx *gfx, BoneTrail *trail, s16 player) {
     s32 i;
     s32 numBones;
     s32 numFilled;
@@ -489,7 +465,7 @@ Gfx *func_151895F4(Gfx *gfx, Trail *trail, s16 player) {
 extern Gfx *func_151137D4(Gfx *gfx, WorldObject *obj, MtxS16 *mtx, s32 view, s32 distance, s32 pass);
 
 /* Type-1 draw: draws the owner world object once per history frame, oldest faintest. */
-Gfx *func_151897A4(Gfx *gfx, Trail *trail, s16 player) {
+Gfx *func_151897A4(Gfx *gfx, BoneTrail *trail, s16 player) {
     s32 i;
     s32 numFilled;
     s32 alpha;
@@ -518,9 +494,9 @@ Gfx *func_151897A4(Gfx *gfx, Trail *trail, s16 player) {
 
 /* Sets unk14 of an object's type-0 trail. */
 void func_151898C0(Actor *object, s32 value) {
-    Trail *trail;
+    BoneTrail *trail;
 
-    for (trail = sTrailLists[0]; trail != NULL; trail = trail->next) {
+    for (trail = D_800DF7C8[0]; trail != NULL; trail = trail->next) {
         if (object == trail->owner.object) {
             trail->unk14 = value;
             return;
