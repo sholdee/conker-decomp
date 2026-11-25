@@ -1,15 +1,9 @@
 #include <ultra64.h>
-#define func_10010F30 func_10010F30_void
-#define func_1513D4B8 func_1513D4B8_void
 #include "functions.h"
-#undef func_10010F30
-#undef func_1513D4B8
-extern s32 func_10010F30(s32, u16, u8, s16, u8);
-extern void *func_1513D4B8(void *, void *, u8, u8, u8, u8, u8, s32, u8, s32);
 #include "variables.h"
 
-extern void func_151D5D60();
-extern s32 func_15144E80(struct17 *, struct17 *, struct17 *, struct17 *);
+extern void func_151D5D60(Vtx **buffers, s16 index, s32 size, Vtx **out, u8 *isNew);
+extern s32 func_15144E80(void *, struct17 *, struct17 *, struct17 *);
 extern s32 func_15145128(struct17 *, struct17 *, f32 *, f32 *);
 
 typedef struct {
@@ -49,260 +43,75 @@ typedef struct {
     u8 field_0x174;
 } Field124Owner;
 
+/* A camera-facing quad: four vertices around `center`, spanned by two axes scaled by scaleU/scaleV. */
 typedef struct {
     char pad0[0x2C];
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
+    f32 scaleU;
+    f32 scaleV;
+    struct17 center;
     char pad40[0x80];
-    char unkC0[0x40];
-    s16 *unk100[4];
-    u8 unk110;
+    Vtx templateVtx[4];
+    Vtx *vtxBuffers[4];
+    u8 flags;
     u8 unk111;
     u8 unk112[0xC];
 } Struct15101F50;
 
+/* Fetches vertex buffer `index` (initialised from templateVtx when new) and fills in the quad's corners. */
+Vtx *func_15101F50(Struct15101F50 *quad, s16 index) {
+    s32 pad; // matching: unused stack slot in the original frame
+    Vtx *vtx;
+    Vtx *ret;
+    struct17 axisU;
+    struct17 axisV;
+    u8 isNew;
 
-typedef struct {
-    u8 *obj;
-    u8 unk4;
-    u8 pad5[3];
-    struct17 unk8;
-    struct17 unk14;
-    u8 unk20;
-    s8 unk21;
-    u8 unk22;
-    u8 unk23;
-    u8 pad24[0x14];
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    f32 unk4C;
-    f32 unk50;
-    f32 unk54;
-    f32 unk58;
-    f32 unk5C;
-    f32 unk60;
-    f32 unk64;
-    f32 unk68;
-    f32 unk6C;
-    f32 unk70;
-    f32 unk74;
-    f32 unk78;
-    f32 unk7C;
-    f32 unk80;
-    f32 unk84;
-    f32 unk88;
-    f32 unk8C;
-    s16 unk90;
-    u8 pad92[2];
-} Data15100600;
-
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    s16 unk2;
-    s16 unk4;
-    u8 pad6[2];
-    s32 unk8;
-    s32 unkC;
-    u8 unk10, unk11, unk12, unk13;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    s32 unk40;
-    u8 unk44, unk45, unk46, unk47;
-    u8 pad48[0x10];
-} Spawn15100600;
-
-typedef struct {
-    u8 unk0;
-    u8 pad1[0x13];
-    void *unk14;
-} Data2_15100600;
-
-typedef struct {
-    u8 unk0;
-    s8 unk1;
-    s16 unk2;
-    u8 unk4;
-    u8 pad5[3];
-} Hdr15100600;
-
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-} Hdr2_15100600;
-
-typedef struct {
-    s32 unk00;
-    s32 unk04;
-    s16 unk08;
-    s16 unk0A;
-    s32 unk0C;
-    s32 unk10;
-    u8 unk14, unk15, unk16, unk17;
-    u8 unk18, unk19, unk1A, unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    f32 unk4C;
-    f32 unk50;
-    f32 unk54;
-    s32 unk58;
-    u8 pad5C[4];
-    u8 unk60;
-    u8 unk61;
-    s8 unk62;
-    s8 unk63;
-    u8 unk64;
-    u8 unk65;
-    u8 pad66[0xA];
-} Effect15100600;
-
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    void *unk28;
-    u8 unk2C;
-    u8 pad2D[3];
-} Data3_15100600;
-
-typedef struct {
-    f32 unk0, unk4, unk8, unkC, unk10, unk14, unk18, unk1C, unk20;
-    s32 unk24, unk28, unk2C, unk30, unk34, unk38, unk3C, unk40, unk44;
-    f32 unk48;
-    s16 unk4C, unk4E, unk50, unk52;
-    u8 unk54, unk55, unk56, unk57, unk58;
-    u8 pad59[3];
-} Emit15100600;
-
-typedef struct {
-    void *unk0;
-    u8 unk4;
-    u8 pad5[3];
-} Data4_15100600;
-
-extern void *func_15130374(void *, u8, s32, u8, s32);
-extern void *func_151407D0(void *, s32, void *, u8, u8, u8, u8, s8, u8, s32);
-extern void *func_151602C0(void *, void *, s32, u8, u8, u8, u8, u8, s32, u8, s32);
-s32 func_15100600(u8 *arg0, f32 *arg1, f32 *arg2, u8 arg3, s16 arg4, u8 arg5, u8 arg6, u8 arg7, f32 arg8, f32 arg9, f32 argA, f32 argB, u8 argC, u8 argD, s32 argE);
-
-typedef struct {
-    u8 pad0[0x24];
-    struct102 *unk24;
-    struct102 *unk28;
-    struct102 *unk2C;
-    struct102 *unk30;
-    struct102 *unk34;
-} Block15101148;
-void func_15101090(u8 *arg0);
-void func_15101148(u8 *arg0);
-void func_151011E8(Field124Owner *arg0);
-void func_15101210(Field124Owner *arg0);
-
-void func_151617C4(struct210 *arg0);
-void func_15101238(Field124Owner *arg0);
-
-void func_151617E4(struct210 *arg0);
-void func_15101260(Field124Owner *arg0);
-
-void func_1513173C(struct210 *);
-void func_15101288(Field124Owner *arg0);
-
-void func_1513175C(struct210 *);
-void func_151012B0(Field124Owner *arg0);
-void func_151012D8(Field124Owner *arg0);
-void func_15101300(Field124Owner *arg0);
-void func_15101328(Field124Owner *arg0);
-void func_15101350(Field124Owner *arg0);
-
-s16 *func_15101F50(Struct15101F50 *arg0, s16 arg1) {
-    s32 unused;
-    s16 *var_v0;
-    s16 *ret;
-    struct17 sp40;
-    struct17 sp34;
-    u8 sp33;
-
-    func_151D5D60(arg0->unk100, arg1, 0x40, &var_v0, &sp33);
-    ret = var_v0;
-    if (var_v0) {
-        if (sp33) {
-            memcpy(arg0->unk100[arg1], arg0->unkC0, 0x40);
-            memcpy(arg0->unk100[arg1] + 0x20, arg0->unkC0, 0x40);
+    func_151D5D60(quad->vtxBuffers, index, sizeof(quad->templateVtx), &vtx, &isNew);
+    ret = vtx;
+    // matching: an early `if (vtx == NULL) return NULL;` lays out the branches differently
+    if (vtx != NULL) {
+        if (isNew) {
+            memcpy(quad->vtxBuffers[index], quad->templateVtx, sizeof(quad->templateVtx));
+            memcpy(quad->vtxBuffers[index] + 4, quad->templateVtx, sizeof(quad->templateVtx));
         }
     } else {
-        return 0;
+        return NULL;
     }
 
-    if (!(arg0->unk110 & 1)) {
-        return 0;
+    if (!(quad->flags & 1)) {
+        return NULL;
     }
 
-    if (func_15144E80((struct17 *)arg0->unk112, &sp40, &sp34, 0) == 0) {
-        return 0;
+    if (func_15144E80(quad->unk112, &axisU, &axisV, NULL) == 0) {
+        return NULL;
     }
 
-    func_15145128(&sp40, &sp40, 0, 0);
-    func_15145128(&sp34, &sp34, 0, 0);
+    func_15145128(&axisU, &axisU, NULL, NULL);
+    func_15145128(&axisV, &axisV, NULL, NULL);
 
-    sp40.unk0 *= arg0->unk2C;
-    sp40.unk4 *= arg0->unk2C;
-    sp40.unk8 *= arg0->unk2C;
-    sp34.unk0 *= arg0->unk30;
-    sp34.unk4 *= arg0->unk30;
-    sp34.unk8 *= arg0->unk30;
+    axisU.unk0 *= quad->scaleU;
+    axisU.unk4 *= quad->scaleU;
+    axisU.unk8 *= quad->scaleU;
+    axisV.unk0 *= quad->scaleV;
+    axisV.unk4 *= quad->scaleV;
+    axisV.unk8 *= quad->scaleV;
 
-    var_v0[0] = (arg0->unk34 - sp40.unk0) + sp34.unk0;
-    var_v0[1] = (arg0->unk38 - sp40.unk4) + sp34.unk4;
-    var_v0[2] = (arg0->unk3C - sp40.unk8) + sp34.unk8;
-    var_v0[3] = 0;
-    var_v0[8] = (arg0->unk34 + sp40.unk0) + sp34.unk0;
-    var_v0[9] = (arg0->unk38 + sp40.unk4) + sp34.unk4;
-    var_v0[10] = (arg0->unk3C + sp40.unk8) + sp34.unk8;
-    var_v0[11] = 0;
-    var_v0[16] = (arg0->unk34 + sp40.unk0) - sp34.unk0;
-    var_v0[17] = (arg0->unk38 + sp40.unk4) - sp34.unk4;
-    var_v0[18] = (arg0->unk3C + sp40.unk8) - sp34.unk8;
-    var_v0[19] = 0;
-    var_v0[24] = (arg0->unk34 - sp40.unk0) - sp34.unk0;
-    var_v0[25] = (arg0->unk38 - sp40.unk4) - sp34.unk4;
-    var_v0[26] = (arg0->unk3C - sp40.unk8) - sp34.unk8;
-    var_v0[27] = 0;
+    vtx[0].v.ob[0] = (quad->center.unk0 - axisU.unk0) + axisV.unk0;
+    vtx[0].v.ob[1] = (quad->center.unk4 - axisU.unk4) + axisV.unk4;
+    vtx[0].v.ob[2] = (quad->center.unk8 - axisU.unk8) + axisV.unk8;
+    vtx[0].v.flag = 0;
+    vtx[1].v.ob[0] = (quad->center.unk0 + axisU.unk0) + axisV.unk0;
+    vtx[1].v.ob[1] = (quad->center.unk4 + axisU.unk4) + axisV.unk4;
+    vtx[1].v.ob[2] = (quad->center.unk8 + axisU.unk8) + axisV.unk8;
+    vtx[1].v.flag = 0;
+    vtx[2].v.ob[0] = (quad->center.unk0 + axisU.unk0) - axisV.unk0;
+    vtx[2].v.ob[1] = (quad->center.unk4 + axisU.unk4) - axisV.unk4;
+    vtx[2].v.ob[2] = (quad->center.unk8 + axisU.unk8) - axisV.unk8;
+    vtx[2].v.flag = 0;
+    vtx[3].v.ob[0] = (quad->center.unk0 - axisU.unk0) - axisV.unk0;
+    vtx[3].v.ob[1] = (quad->center.unk4 - axisU.unk4) - axisV.unk4;
+    vtx[3].v.ob[2] = (quad->center.unk8 - axisU.unk8) - axisV.unk8;
+    vtx[3].v.flag = 0;
 
     return ret;
 }
