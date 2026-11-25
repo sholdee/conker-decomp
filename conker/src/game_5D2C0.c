@@ -25,7 +25,6 @@ extern void func_150A7A48(f32 arg0[4][4], f32 arg1[4][4], f32 arg2[4][4]);
 extern void func_1503E5F8();
 extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
 extern void func_10004074(void *arg0);
-void func_1503F7B8(void *arg0);
 void func_1518CA04(s32 arg0);
 s32 func_1503F62C(s32 arg0, s32 arg1, void *arg2, void *arg3, void *arg4, void *arg5, void *arg6);
 
@@ -217,6 +216,8 @@ typedef struct Attachment {
 } Attachment; // size 0x5C
 
 void func_15031C14(Attachment *att);
+void func_1503F5B8(AnimInstance *anim, s32 arg1, s32 animId, f32 arg3, f32 arg4, s32 arg5);
+void func_1503F7B8(AnimInstance *anim);
 
 typedef struct Func15030158Arg0 {
     u8 unk0;
@@ -1266,50 +1267,52 @@ s32 func_15031E2C(Attachment *att, struct127 *owner) {
     return 0;
 }
 
-s32 func_15031E7C(u8 *arg0, struct127 *arg1) {
+/* First byte of a display list command, read signed as the game does. */
+#define GFX_CMD(gfx) (*(s8 *)(gfx))
+
+/* Hook: sets the tile t of the first display list's 4th G_SETTILESIZE from the owner's
+ * animation frame (0..120 maps to 27..2). */
+s32 func_15031E7C(Attachment *att, struct127 *owner) {
     struct197 *anim;
     Gfx *gfx;
     s32 count;
     s32 i;
-    f32 scale;
+    f32 t;
 
-    anim = arg1->unk2D0;
-    if (anim == 0) {
+    anim = owner->unk2D0;
+    if (anim == NULL) {
         return 0;
     }
 
-    gfx = **(Gfx ***)(arg0 + 0x24);
-    if (gfx == 0) {
+    gfx = att->dlists[0];
+    if (gfx == NULL) {
         return 0;
     }
 
-    if (arg1->unk84.uh == 0x55) {
-        scale = 1.0f;
-    } else if (arg1->unk84.uh == 0x56) {
-        scale = 0.0f;
+    if (owner->unk84.uh == 0x55) {
+        t = 1.0f;
+    } else if (owner->unk84.uh == 0x56) {
+        t = 0.0f;
+    } else if ((0.0f <= anim->unk8) && (anim->unk8 <= 120.0f)) {
+        t = anim->unk8 * 0.008333333768f;
+        t = 1.0f - t;
     } else {
-        if ((0.0f <= anim->unk8) && (anim->unk8 <= 120.0f)) {
-            scale = anim->unk8 * D_800970DC;
-            scale = 1.0f - scale;
-        } else {
-            scale = 0.0f;
-        }
+        t = 0.0f;
     }
 
     i = 0;
     count = 4;
     do {
         count--;
-        if (*(s8 *)((i << 3) + (u8 *)gfx) != -0xE) {
-            do {
-            } while (*(s8 *)((u8 *)gfx + (++i << 3)) != -0xE);
+        while (GFX_CMD(&gfx[i]) != (s8)G_SETTILESIZE) {
+            i++;
         }
         if (count != 0) {
             i++;
         }
     } while (count != 0);
 
-    gfx[i].words.w0 = (G_SETTILESIZE << 24) | (2 << 12) | ((s32)((25.0f * scale) + 2.0f) & 0xFFF);
+    gfx[i].words.w0 = (G_SETTILESIZE << 24) | (2 << 12) | ((s32)((25.0f * t) + 2.0f) & 0xFFF);
     return 0;
 }
 
@@ -1359,7 +1362,6 @@ typedef struct F15031FC8Arg1 {
 
 extern s32 D_800902D0;
 extern s32 D_800902D4;
-void func_1503F5B8(s32 arg0, s32 arg1, s32 arg2, f32 arg3, f32 arg4, s32 arg5);
 extern void func_1505E060(F15031FC8Anim *arg0);
 
 s32 func_15031FC8(F15031FC8Arg0 *arg0, F15031FC8Arg1 *arg1) {
@@ -2555,7 +2557,7 @@ s32 func_15031FC8(F15031FC8Arg0 *arg0, F15031FC8Arg1 *arg1) {
         break;
     }
     if (anim != -1) {
-        func_1503F5B8((s32)arg0->unk48, 0, anim, 0.0f, 0.0f, 1);
+        func_1503F5B8((AnimInstance *)arg0->unk48, 0, anim, 0.0f, 0.0f, 1);
     }
     if (sub != NULL) {
         a = arg0->unk48;
@@ -2587,127 +2589,110 @@ s32 func_15031FC8(F15031FC8Arg0 *arg0, F15031FC8Arg1 *arg1) {
 static s32 (*const D_800841D4_entry[])(F15031FC8Arg0 *, F15031FC8Arg1 *) = { func_15031FC8 };
 
 
-void func_1503F5B8(s32 arg0, s32 arg1, s32 arg2, f32 arg3, f32 arg4, s32 arg5);
+/* Hook: plays the owner's unk2E4 animation on the attachment and keeps it in step with the owner's frame. */
+s32 func_150331B8(Attachment *att, struct127 *owner) {
+    struct197 *ownerAnim;
+    AnimInstance *anim;
 
-s32 func_150331B8(Game5D2C0AnimationOwner *arg0, struct127 *arg1) {
-    struct197 *ptr;
-    struct197 *temp;
-
-    ptr = arg1->unk2D0;
-    temp = arg0->field_0x48;
-    if (temp == 0) {
+    ownerAnim = owner->unk2D0;
+    anim = att->anim;
+    if (anim == NULL) {
         return 0;
     }
-    if ((arg1->unk2E4 & 0xFF) != 0xFF) {
-        func_1503F5B8((s32)temp, 0, arg1->unk2E4 & 0xFF, 1.0f, 0.0f, 1);
+    if ((owner->unk2E4 & 0xFF) != 0xFF) {
+        func_1503F5B8(anim, 0, owner->unk2E4 & 0xFF, 1.0f, 0.0f, 1);
     }
-    if (ptr != 0) {
-        arg0->field_0x48->unk8 = ptr->unk8;
-        temp = arg0->field_0x48;
-        if (temp->unk18 <= temp->unk8) {
-            temp->unk8 = temp->unk18 - 1.0f;
+    if (ownerAnim != NULL) {
+        att->anim->frame = ownerAnim->unk8;
+        anim = att->anim;
+        if (anim->numFrames <= anim->frame) {
+            anim->frame = anim->numFrames - 1.0f;
         }
     }
     return 0;
 }
 
+/* Hook: plays animation 0 on the attachment once; removes the attachment when it has finished. */
+s32 func_1503327C(Attachment *att, struct127 *owner) {
+    AnimInstance *anim;
 
-s32 func_1503327C(Game5D2C0AnimationOwner *arg0, s32 arg1) {
-    Game5D2C0AnimationState *ptr;
-
-    ptr = (Game5D2C0AnimationState *)arg0->field_0x48;
-    if (ptr == 0) {
+    anim = att->anim;
+    if (anim == NULL) {
         return 0;
     }
-    if ((ptr->field_0x04 & 0x8000) != 0x8000) {
-        func_1503F5B8((s32)ptr, 0, 0, 1.0f, 0.0f, 1);
-        ptr = (Game5D2C0AnimationState *)arg0->field_0x48;
+    if ((anim->anim & 0x8000) != 0x8000) {
+        func_1503F5B8(anim, 0, 0, 1.0f, 0.0f, 1);
+        anim = att->anim;
     }
-    if (ptr->field_0x18 - 1.0f <= ptr->field_0x08) {
+    if (anim->numFrames - 1.0f <= anim->frame) {
         return 1;
     }
     return 0;
 }
 
-s32 func_15033328(Game5D2C0EffectState *arg0, Game5D2C0PositionState *arg1) {
+s32 func_15033328(Attachment *att, struct127 *owner) {
     s32 delta;
 
     if (D_800C35EA == 1) {
         return 0;
     }
-    if (arg1->field_0xAD == 0) {
-        if (arg1->field_0x118 < arg1->field_0x180) {
+    if (owner->in_water == 0) {
+        if (owner->unk118 < owner->unk180) {
             delta = D_800BE9E4;
-            arg1 = (Game5D2C0PositionState *)arg0->field_0x38;
-            if (delta < (s32)arg1) {
-                arg0->field_0x38 = (s32)arg1 - delta;
+            if (delta < att->unk38) {
+                att->unk38 -= delta;
                 return 0;
             } else {
                 return 1;
             }
         }
     }
-    arg0->field_0x38 = 0x1E;
+    att->unk38 = 30;
     return 0;
 }
 
-s32 func_150333A8(Game5D2C0FlagState *arg0, Game5D2C0PositionState *arg1) {
-    Game5D2C0ActorState *temp;
+/* Hook: hides the attachment while the owner is below unk118 + 300; removes it in water. */
+s32 func_150333A8(Attachment *att, struct127 *owner) {
+    struct126 *unk;
 
     if (D_800C35EA == 1) {
         return 0;
     }
-    if (arg1->field_0xAD != 0) {
-        temp = arg1->field_0x31C;
-        if (temp != 0) {
-            temp->field_0x11A = 0;
+    if (owner->in_water != 0) {
+        unk = owner->unk31C;
+        if (unk != NULL) {
+            unk->unk11A = 0;
         }
         return 1;
     }
-    if ((arg1->field_0x118 != D_80097B68) && (arg1->field_0x18 < arg1->field_0x118 + 300.0f)) {
-        arg0->field_0x03 = 0;
+    if ((owner->unk118 != -10000.0f) && (owner->y_position < owner->unk118 + 300.0f)) {
+        att->alpha = 0;
     } else {
-        arg0->field_0x03 = 0xFF;
+        att->alpha = 0xFF;
     }
     return 0;
 }
 
-s32 func_15033440(Game5D2C0EffectState *arg0, Game5D2C0EventState *arg1) {
-    s32 state;
-
-    state = arg0->field_0x01;
-    if (state == 0x27) {
-        goto add_delta;
+/* Hook: while the owner's unk5 is 5, moves models 0x27/0x35/0x29 to bone 0 (spinning 0x27/0x35). */
+s32 func_15033440(Attachment *att, struct127 *owner) {
+    switch (att->model) {
+    case 0x27:
+    case 0x35:
+        if (owner->unk5 == 5) {
+            att->bone = 0;
+            att->rotZ += D_800BE9E4 * 0xAAA;
+        }
+        break;
+    case 0x29:
+        if (owner->unk5 == 5) {
+            att->bone = 0;
+        }
+        break;
     }
-    if (state == 0x29) {
-        goto clear;
-    }
-    if (state != 0x35) {
-        goto done;
-    }
-
-add_delta:
-    if (arg1->field_0x05 != 5) {
-        goto done;
-    }
-    arg0->field_0x02 = 0;
-    arg0->field_0x22 += D_800BE9E4 * 0xAAA;
-    goto done;
-
-clear:
-    if (arg1->field_0x05 != 5) {
-        goto done;
-    }
-    arg0->field_0x02 = 0;
-
-done:
     return 0;
 }
 
-s32 func_150334B8(arg0, arg1)
-u8 *arg0;
-s16 arg1;
-{
+s32 func_150334B8(Attachment *att, struct127 *owner) {
     Gfx *gfx;
     s32 count;
     s32 i;
@@ -2719,27 +2704,24 @@ s16 arg1;
     s32 height;
     s32 offset;
 
-    gfx = 0;
+    gfx = NULL;
     count = 0;
     offset = 0;
-    if (arg0[1] == 0x37) {
-        gfx = **(Gfx ***)(arg0 + 0x24);
+    if (att->model == 0x37) {
+        gfx = att->dlists[0];
         count = 4;
-        offset = -0x64;
+        offset = -100;
     }
-    if (gfx != 0) {
+    if (gfx != NULL) {
         i = 0;
-        if (count != 0) {
-            do {
-                count--;
-                if (*(s8 *)((i << 3) + (u8 *)gfx) != -0xE) {
-                    do {
-                    } while (*(s8 *)((u8 *)gfx + (++i << 3)) != -0xE);
-                }
-                if (count != 0) {
-                    i++;
-                }
-            } while (count != 0);
+        while (count != 0) {
+            count--;
+            while (GFX_CMD(&gfx[i]) != (s8)G_SETTILESIZE) {
+                i++;
+            }
+            if (count != 0) {
+                i++;
+            }
         }
 
         w0 = gfx[i].words.w0;
@@ -2905,97 +2887,94 @@ s32 func_15033838(Attachment *att, struct127 *owner) {
     return 0;
 }
 
-s32 func_150339C8(Game5D2C0EffectState *arg0, Game5D2C0PositionState *arg1) {
-    func_150334B8(arg0, arg1);
+/* Hook (model 0x37): scrolls the texture and keeps looping sound 0x448 playing at the owner
+ * unless D_800BEA0C is set. */
+s32 func_150339C8(Attachment *att, struct127 *owner) {
+    func_150334B8(att, owner);
     if (D_800C35EA != 1) {
         if (D_800BEA0C != 0) {
-            if (arg0->field_0x3C != 0) {
-                func_1000FD38(func_15033BDC, arg0, (s32)arg1);
+            if (att->unk3C != 0) {
+                func_1000FD38(func_15033BDC, att, (s32)owner);
             }
-            arg0->field_0x3C = 0;
-        } else if (arg0->field_0x3C == 0) {
-            arg0->field_0x3C = func_1000FA64(0x448,
-                (s16)(s32)arg1->field_0x14,
-                (s16)(s32)arg1->field_0x18,
-                (s16)(s32)arg1->field_0x1C,
-                0x7D00, 0x3E8, 0x1F4, (s32)func_15033BDC, arg0, (s32)arg1, 0, 0) | 0x80000000;
+            att->unk3C = 0;
+        } else if (att->unk3C == 0) {
+            att->unk3C = func_1000FA64(0x448, owner->x_position, owner->y_position, owner->z_position, 32000, 1000,
+                                       500, (s32)func_15033BDC, att, (s32)owner, 0, 0) |
+                         0x80000000;
         }
     }
     return 0;
 }
 
-s32 func_15033BDC();
-
-s32 func_15033AD8(Game5D2C0EffectState *arg0, Game5D2C0PositionState *arg1) {
+/* Hook: after a 30-tick delay, starts sound 0x513 at the owner (func_15033BDC follows it up). */
+s32 func_15033AD8(Attachment *att, struct127 *owner) {
     if (D_800BE616 != 0) {
-        func_1508B20C(arg1->field_0x14, arg1->field_0x18, arg1->field_0x1C, 900.0f);
+        func_1508B20C(owner->x_position, owner->y_position, owner->z_position, 900.0f);
     }
-    if (arg0->field_0x38 == 0) {
-        if (arg0->field_0x3C < 0x1E) {
-            arg0->field_0x3C += D_800BE9E4;
+    if (att->unk38 == 0) {
+        if (att->unk3C < 30) {
+            att->unk3C += D_800BE9E4;
         } else {
-            arg0->field_0x3C = func_1000FA64(0x513,
-                (s16)(s32)arg1->field_0x14,
-                (s16)(s32)arg1->field_0x18,
-                (s16)(s32)arg1->field_0x1C,
-                0x7D00, 0x3E8, 0x1F4, (s32)func_15033BDC, arg0, (s32)arg1, 0, 0);
-            arg0->field_0x38 = 0x513;
+            att->unk3C = func_1000FA64(0x513, owner->x_position, owner->y_position, owner->z_position, 32000, 1000,
+                                       500, (s32)func_15033BDC, att, (s32)owner, 0, 0);
+            att->unk38 = 0x513;
         }
     }
     return 0;
 }
 
-typedef struct Game5D2C0SoundInstance {
-    u16 field_0x00;
-    s16 field_0x02;
-    s16 field_0x04;
-    s16 field_0x06;
-    u8 pad_0x08[0x10];
-    Game5D2C0EffectState *field_0x18;
-    Game5D2C0PositionState *field_0x1C;
-    u8 pad_0x20[0x4];
-    u16 field_0x24;
-} Game5D2C0SoundInstance;
+/* Sound started by the attachment hooks (func_1000FA64); only the fields used here. */
+typedef struct AttachmentSound {
+    /* 0x00 */ u16 unk0;
+    /* 0x02 */ s16 x;
+    /* 0x04 */ s16 y;
+    /* 0x06 */ s16 z;
+    /* 0x08 */ u8 pad8[0x10];
+    /* 0x18 */ Attachment *att;
+    /* 0x1C */ struct127 *owner;
+    /* 0x20 */ u8 pad20[0x4];
+    /* 0x24 */ u16 unk24;
+} AttachmentSound;
 
-void func_10010FFC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, void *arg5);
+void func_10010FFC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *arg5);
 
-s32 func_15033BDC(Game5D2C0SoundInstance *arg0, s32 arg1, s32 *arg2, s32 arg3, s32 arg4, s32 arg5, s16 *arg6) {
-    Game5D2C0EffectState *effect;
-    Game5D2C0PositionState *pos;
-    Game5D2C0ActorState *actor;
+/* Sound callback: tracks the owner's position and plays the model's follow-up sounds. Returns 1
+ * when the sound should stop. */
+s32 func_15033BDC(AttachmentSound *sound, s32 arg1, s32 *arg2, s32 arg3, s32 arg4, s32 arg5, s16 *arg6) {
+    Attachment *att;
+    struct127 *owner;
+    struct126 *unk;
 
-    effect = arg0->field_0x18;
-    pos = arg0->field_0x1C;
-    if ((effect != 0) && (pos != 0) && (pos->field_0x00 != 0)) {
-        arg0->field_0x02 = pos->field_0x14;
-        arg0->field_0x04 = pos->field_0x18;
-        arg0->field_0x06 = pos->field_0x1C;
+    att = sound->att;
+    owner = sound->owner;
+    if ((att != NULL) && (owner != NULL) && (owner->interaction_state != 0)) {
+        sound->x = owner->x_position;
+        sound->y = owner->y_position;
+        sound->z = owner->z_position;
 
         if (*arg2 != 0) {
-            if (effect->field_0x01 == 0x37) {
-                s32 currentId = effect->field_0x38;
+            if (att->model == 0x37) {
+                s32 lastState = att->unk38;
                 s32 sfxId = -1;
 
-                if (pos->field_0x84 != (currentId & 0xFFFF)) {
-                    if (pos->field_0x84 == 0x15F) {
+                if (owner->unk84.uh != (lastState & 0xFFFF)) {
+                    if (owner->unk84.uh == 0x15F) {
                         sfxId = (func_150ADA20() & 3) + 0x444;
                     }
                 }
                 if (sfxId != -1) {
-                    func_10010FFC(0, sfxId, 0x5DC0, 0, 0, pos);
+                    func_10010FFC(0, sfxId, 24000, 0, 0, owner);
                 }
-                effect->field_0x38 = pos->field_0x84;
+                att->unk38 = owner->unk84.uh;
             } else {
-                actor = pos->field_0x31C;
-                if (actor != 0) {
-                    if (actor->field_0x19C < 0x78) {
-                        if (effect->field_0x38 == 0x513) {
-                            effect->field_0x38 = 0x3A1;
-                            effect->field_0x3C = func_1000FA64(0x3A1,
-                                (s16)(s32)pos->field_0x14,
-                                (s16)(s32)pos->field_0x18,
-                                (s16)(s32)pos->field_0x1C,
-                                0x7D00, 0x3E8, 0x1F4, (s32)func_15033BDC, effect, (s32)pos, 0, 0);
+                unk = owner->unk31C;
+                if (unk != NULL) {
+                    if (*(u16 *)&unk->pad19C < 120) {
+                        if (att->unk38 == 0x513) {
+                            att->unk38 = 0x3A1;
+                            att->unk3C = func_1000FA64(0x3A1, owner->x_position, owner->y_position,
+                                                       owner->z_position, 32000, 1000, 500, (s32)func_15033BDC, att,
+                                                       (s32)owner, 0, 0);
                             return 1;
                         }
                     }
@@ -3004,10 +2983,10 @@ s32 func_15033BDC(Game5D2C0SoundInstance *arg0, s32 arg1, s32 *arg2, s32 arg3, s
             return 0;
         }
 
-        if (effect->field_0x01 == 0x37) {
-            if (arg0->field_0x24 != 0) {
-                func_100111C8(arg0->field_0x24);
-                arg0->field_0x24 = 0;
+        if (att->model == 0x37) {
+            if (sound->unk24 != 0) {
+                func_100111C8(sound->unk24);
+                sound->unk24 = 0;
             }
             *arg6 = 0;
             return 0;
@@ -3016,7 +2995,6 @@ s32 func_15033BDC(Game5D2C0SoundInstance *arg0, s32 arg1, s32 *arg2, s32 arg3, s
     return 1;
 }
 
-/* Hook: removes the attachment once its owner's unk5 becomes 3. */
 s32 func_15033E00(Attachment *att, struct127 *owner) {
     if (owner->unk5 == 3) {
         return 1;
