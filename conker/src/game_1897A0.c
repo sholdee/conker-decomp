@@ -163,8 +163,10 @@ extern struct {
 extern s32 D_800D2C9C;
 
 extern void func_151D5D60(void *, s16, s32, Vtx **, u8 *);
-extern void func_151441A4(s16 *, s16 *, s16 *, s16 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_151442FC(s16 *, s16 *, s16 *, s16 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern void func_151441A4(s16 *outR, s16 *outG, s16 *outB, s16 *outA, s32 r0, s32 g0, s32 b0, s32 a0, s32 r1, s32 g1,
+                          s32 b1, s32 a1, s32 level, s32 mode);
+extern void func_151442FC(s16 *outR, s16 *outG, s16 *outB, s16 *outA, s32 r0, s32 g0, s32 b0, s32 a0, s32 r1, s32 g1,
+                          s32 b1, s32 a1, s32 level, s32 mode);
 extern Gfx *func_15142E24(Gfx *gfx, u8 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8,
                           u8 *update, s32 argA);
 extern Gfx *func_1513F4E4(Gfx *, s32, u8 *);
@@ -173,7 +175,10 @@ extern Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *update);
 extern Gfx *func_15142CF0(Gfx *gfx, s32 minLevel, s32 lodFrac, s32 r, s32 g, s32 b, s32 a, u8 *update);
 extern Gfx *func_15142FBC(Gfx *gfx, s32 otherModeH, s32 otherModeL, u8 *update);
 
-/* Draws the trail as a camera-facing ribbon, newest point first, fading in alpha towards the tail. */
+/*
+ * Draws the trail as a camera-facing ribbon from the newest point (i) back to the tail, one quad per segment;
+ * alpha and the texture s coordinate ramp up along the ribbon.
+ */
 Gfx *func_1515C6F4(Trail *trail, Gfx *gfx, s16 view) {
     Vtx *vtx;
     s32 i;
@@ -182,7 +187,7 @@ Gfx *func_1515C6F4(Trail *trail, Gfx *gfx, s16 view) {
     vertex cur;
     TrailData *data;
     TrailPoint *points;
-    f32 *cam;
+    f32 *camPos;
     s32 j;
     f32 headScale;
     s32 texStep;
@@ -212,7 +217,7 @@ Gfx *func_1515C6F4(Trail *trail, Gfx *gfx, s16 view) {
         if (vtx != NULL) {
             data = trail->data;
             update = 1;
-            cam = &D_800DBFF0[view].unk2F8;
+            camPos = &D_800DBFF0[view].unk2F8;
             points = trail->points;
             func_151441A4(&primR, &primG, &primB, &primA, data->color2[0], data->color2[1], data->color2[2], data->color2[3],
                           data->color[0], data->color[1], data->color[2], data->color[3], data->colorLevel, data->primMode);
@@ -242,9 +247,9 @@ Gfx *func_1515C6F4(Trail *trail, Gfx *gfx, s16 view) {
             segX = cur.x - next.x;
             segY = cur.y - next.y;
             segZ = cur.z - next.z;
-            toCamX = cur.x - cam[0];
-            toCamY = cur.y - cam[1];
-            toCamZ = cur.z - cam[2];
+            toCamX = cur.x - camPos[0];
+            toCamY = cur.y - camPos[1];
+            toCamZ = cur.z - camPos[2];
             sideX = segY * toCamZ - toCamY * segZ;
             sideY = segZ * toCamX - toCamZ * segX;
             sideZ = segX * toCamY - toCamX * segY;
@@ -288,9 +293,9 @@ Gfx *func_1515C6F4(Trail *trail, Gfx *gfx, s16 view) {
                 segX = cur.x - next.x;
                 segY = cur.y - next.y;
                 segZ = cur.z - next.z;
-                toCamX = next.x - cam[0];
-                toCamY = next.y - cam[1];
-                toCamZ = next.z - cam[2];
+                toCamX = next.x - camPos[0];
+                toCamY = next.y - camPos[1];
+                toCamZ = next.z - camPos[2];
                 sideX = segY * toCamZ - toCamY * segZ;
                 sideY = segZ * toCamX - toCamZ * segX;
                 sideZ = segX * toCamY - toCamX * segY;
@@ -582,8 +587,8 @@ void func_1515D130(Emitter *owner) {
         burst.colorLevelRange = 0;
         burst.renderMode = 1;
         burst.unk21 = 0x24;
-        burst.setGeometryMode = 0x200005;
-        burst.clearGeometryMode = 0x60600;
+        burst.setGeometryMode = G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH;
+        burst.clearGeometryMode = G_CULL_BOTH | G_LIGHTING | G_TEXTURE_GEN;
         burst.fadeStart = preset->fadeStart;
         burst.fadeRate = preset->fadeRate;
         burst.shrinkStart = preset->shrinkStart;
