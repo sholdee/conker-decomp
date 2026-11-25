@@ -70,6 +70,48 @@ typedef struct {
     f32 z;
 } E7380Obj;
 
+/* Spawn template of a sprite (game_169510.c); fields this file does not use are padding. */
+typedef struct {
+    /* 0x00 */ s32 flags;
+    /* 0x04 */ s16 lifetime;
+    /* 0x06 */ u8 pad6[0xA];
+    /* 0x10 */ u8 unk10;           /* faded out with the lifetime */
+} SpriteDef;
+
+/* A live sprite of game_169510.c; the update callbacks of D_80089C70 get one. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x18];
+    /* 0x18 */ SpriteDef def;
+} SpriteFx;
+
+/* Spawn template of a particle (game_169510.c), copied to FxParticle.def. */
+typedef struct {
+    /* 0x00 */ u8 pad0[4];
+    /* 0x04 */ s16 lifetime;
+    /* 0x06 */ u8 pad6[0x16];
+    /* 0x1C */ vertex pos;
+    /* 0x28 */ vertex rot;
+    /* 0x34 */ u8 pad34[0x10];
+    /* 0x44 */ u8 unk44;           /* faded with the lifetime */
+    /* 0x45 */ u8 pad45[0x3];
+} ParticleDef;
+
+/* Per-behaviour motion block stored right after a particle. */
+typedef struct {
+    /* 0x00 */ vertex vel;
+    /* 0x0C */ f32 rotVelX;
+    /* 0x10 */ f32 rotVelY;
+    /* 0x14 */ f32 minY;           /* the particle expires below this height */
+} ParticleMotion;
+
+/* A live particle of game_169510.c; the update callbacks of D_80089CB8 / D_80089D60 get one. */
+typedef struct {
+    /* 0x000 */ u8 pad0[0x18];
+    /* 0x018 */ ParticleDef def;
+    /* 0x060 */ u8 pad60[0xB0];
+    /* 0x110 */ ParticleMotion motion;
+} FxParticle;
+
 extern u8 D_80084060;
 extern s32 func_151E7EF8[];
 extern s32 func_151E7F60[];
@@ -165,53 +207,58 @@ void func_150B9ED0(E7380Obj *arg0, f32 arg1, f32 arg2, u8 arg3, s32 arg4) {
     }
 }
 
-s32 func_150BA35C(s16 *arg0) {
-    s16 temp = arg0[0xE];
-    if (temp < 0x40) {
-        *((s8 *)arg0 + 0x28) = temp << 2;
+/* Fades the sprite out over its last 64 frames (def.unk10 = 4 * lifetime). */
+s32 func_150BA35C(SpriteFx *sprite) {
+    s16 lifetime = sprite->def.lifetime;
+
+    if (lifetime < 64) {
+        sprite->def.unk10 = lifetime * 4;
     }
     return 1;
 }
 
-extern f32 D_800BE9A4;
-extern f32 D_8009FE2C;
-
-s32 func_150BA37C(s32 *arg0) {
-    *(f32 *)((s8 *)arg0 + 0x114) = *(f32 *)((s8 *)arg0 + 0x114) + D_8009FE2C * D_800BE9A4;
-    *(f32 *)((s8 *)arg0 + 0x34) = *(f32 *)((s8 *)arg0 + 0x110) * D_800BE9A4 + *(f32 *)((s8 *)arg0 + 0x34);
-    *(f32 *)((s8 *)arg0 + 0x38) = *(f32 *)((s8 *)arg0 + 0x114) * D_800BE9A4 + *(f32 *)((s8 *)arg0 + 0x38);
-    *(f32 *)((s8 *)arg0 + 0x3C) = *(f32 *)((s8 *)arg0 + 0x118) * D_800BE9A4 + *(f32 *)((s8 *)arg0 + 0x3C);
-    *(f32 *)((s8 *)arg0 + 0x40) = *(f32 *)((s8 *)arg0 + 0x11C) * D_800BE9A4 + *(f32 *)((s8 *)arg0 + 0x40);
-    *(f32 *)((s8 *)arg0 + 0x44) = *(f32 *)((s8 *)arg0 + 0x120) * D_800BE9A4 + *(f32 *)((s8 *)arg0 + 0x44);
+/* Moves the particle by its velocity and spins it, under gravity of -0.6 per frame. */
+s32 func_150BA37C(FxParticle *particle) {
+    particle->motion.vel.y += -0.6f * D_800BE9A4;
+    particle->def.pos.x += particle->motion.vel.x * D_800BE9A4;
+    particle->def.pos.y += particle->motion.vel.y * D_800BE9A4;
+    particle->def.pos.z += particle->motion.vel.z * D_800BE9A4;
+    particle->def.rot.x += particle->motion.rotVelX * D_800BE9A4;
+    particle->def.rot.y += particle->motion.rotVelY * D_800BE9A4;
     return 1;
 }
 
-s32 func_150BA424(s32 *arg0) {
-    f32 diff = *(f32 *)((s8 *)arg0 + 0x38) - *(f32 *)((s8 *)arg0 + 0x124);
-    s32 a;
-    s32 b;
+/*
+ * Fades the particle with whichever is smaller of 16 * lifetime and 4 * its height above
+ * motion.minY (capped at 255). Returns 0 (expire) once it falls below minY.
+ */
+s32 func_150BA424(FxParticle *particle) {
+    f32 height = particle->def.pos.y - particle->motion.minY;
+    s32 lifeAlpha;
+    s32 heightAlpha;
 
-    if (diff < 0.0f) {
+    if (height < 0.0f) {
         return 0;
     }
 
-    a = *(s16 *)((s8 *)arg0 + 0x1C) << 4;
-    if (a >= 0x100) {
-        a = 0xFF;
+    lifeAlpha = particle->def.lifetime * 16;
+    if (lifeAlpha >= 256) {
+        lifeAlpha = 255;
     }
 
-    b = (s32)diff << 2;
-    if (b >= 0x100) {
-        b = 0xFF;
+    heightAlpha = (s32)height * 4;
+    if (heightAlpha >= 256) {
+        heightAlpha = 255;
     }
 
-    if (b < a) {
-        *((s8 *)arg0 + 0x5C) = b;
+    if (heightAlpha < lifeAlpha) {
+        particle->def.unk44 = heightAlpha;
     } else {
-        *((s8 *)arg0 + 0x5C) = a;
+        particle->def.unk44 = lifeAlpha;
     }
 
-    if (*((u8 *)arg0 + 0x5C) < 0) {
+    // matching: never true for a u8, but the original tests it (IDO reloads the stored byte)
+    if (particle->def.unk44 < 0) {
         return 0;
     }
     return 1;
