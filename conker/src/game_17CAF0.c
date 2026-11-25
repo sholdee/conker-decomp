@@ -9,15 +9,13 @@
 extern s32 func_150ADA20(void);
 
 struct Vec3F { f32 x; f32 y; f32 z; };
-struct Local1514F6E8 { u8 unk0; u8 pad1[3]; struct Vec3F unk4; struct Vec3F unk10; struct Vec3F unk1C; f32 unk28; };
-struct Arg1514FB98 { u8 pad[0xC]; f32 unkC; u8 unk10[0x4]; };
-struct Arg1514FBFC { struct Vec3F unk0; struct Vec3F unkC; f32 unk18; f32 unk1C; f32 unk20; u8 unk24[0x4]; };
-extern s32 func_15146078(struct Arg1514FB98 *, struct Vec3F *, struct Vec3F *);
-extern s32 func_15144E80(struct Vec3F *, struct Vec3F *, struct Vec3F *, struct Vec3F *);
+struct ConeBasis;
+extern s32 func_15146078(struct Vec3F *, struct Vec3F *, struct Vec3F *);
+extern s32 func_15144E80(s16 *, struct Vec3F *, struct Vec3F *, struct Vec3F *);
 extern f32 func_15144A74(struct Vec3F *, struct Vec3F *);
 extern s32 func_15145128(struct Vec3F *, struct Vec3F *, f32 *, f32 *);
-struct Local1514F8F8;
-extern void func_1514F8F8(struct Local1514F8F8 *, struct Vec3F *, struct Vec3F *, struct Vec3F *, f32, u8, s32);
+struct ConeSprayConfig;
+extern void func_1514F8F8(struct ConeSprayConfig *, struct Vec3F *, struct Vec3F *, struct Vec3F *, f32, u8, s32);
 extern void *func_15130280(void *, u8, s32, s32, u8, s32);
 extern f32 D_800A601C;
 extern f32 D_800A6020;
@@ -207,10 +205,9 @@ extern void func_150CCEB0(struct Local15152874Spawn *, u8, u8);
 extern void (*D_8008AC60[])(u8 *);
 extern s32 (*D_8008ACC8[])(void *);
 extern void func_15156190(void *, u8, s32, u8, s32);
-extern f32 D_800A5FF0;
 extern f32 D_800A5FFC;
 extern f32 D_800A6000;
-extern void func_1514F808(struct Local1514F6E8 *, f32, struct Vec3F *);
+extern void func_1514F808(struct ConeBasis *, f32, struct Vec3F *);
 extern void func_151DA6F8(struct Local15153CCCArg *, struct Vec3F *, f32, s16, s32, f32, s32, s32, f32, f32, s32, u8, s32, s16, s16, s32, u8, s32);
 
 struct Local15152520Bytes {
@@ -616,68 +613,87 @@ struct Local15151A38Spawn {
     s16 unk1E;
 };
 
+/* A random direction inside a cone around `direction`, built lazily (see func_1514F6E8). */
+struct ConeBasis {
+    u8 flags; /* 1: direction normalized and scaled, 2: axes built, 4: axes normalized */
+    u8 pad1[3];
+    struct Vec3F direction;
+    struct Vec3F axis0;
+    struct Vec3F axis1;
+    f32 spread;
+};
 
-struct Local1514FEFC;
+/* A cone emitter described by a surface triangle (three s16 vertices) and the side its normal faces. */
+struct TriangleSource {
+    struct Vec3F normal;
+    s16 triangle[9];
+    f32 spread;
+};
+
 struct Local1514FF44Arg;
 
-void func_1514F640(void *arg0, struct Local1514FEFC *arg1) {
-    *(u8 *)arg1 = 2;
-    *(f32 *)((u8 *)arg1 + 0x28) = *(f32 *)((u8 *)arg0 + 0x20);
-    if (func_15144E80((struct Vec3F *)((u8 *)arg0 + 0xC), (struct Vec3F *)((u8 *)arg1 + 0x10), (struct Vec3F *)((u8 *)arg1 + 0x1C), (struct Vec3F *)((u8 *)arg1 + 4)) != 0) {
-        if (func_15144A74((struct Vec3F *)((u8 *)arg1 + 4), (struct Vec3F *)arg0) < 0.0f) {
-            *(f32 *)((u8 *)arg1 + 4) = -*(f32 *)((u8 *)arg1 + 4);
-            *(f32 *)((u8 *)arg1 + 8) = -*(f32 *)((u8 *)arg1 + 8);
-            *(f32 *)((u8 *)arg1 + 0xC) = -*(f32 *)((u8 *)arg1 + 0xC);
+/* Builds a cone basis from a triangle: the axes are two triangle edges, the direction is its normal,
+ * flipped to face the same side as source->normal. */
+void func_1514F640(struct TriangleSource *source, struct ConeBasis *cone) {
+    cone->flags = 2;
+    cone->spread = source->spread;
+    if (func_15144E80(source->triangle, &cone->axis0, &cone->axis1, &cone->direction) != 0) {
+        if (func_15144A74(&cone->direction, &source->normal) < 0.0f) {
+            cone->direction.x = -cone->direction.x;
+            cone->direction.y = -cone->direction.y;
+            cone->direction.z = -cone->direction.z;
         }
     }
 }
 
-s32 func_1514F6E8(struct Local1514F6E8 *arg0) {
-    if (!(arg0->unk0 & 1)) {
-        if (func_15145128(&arg0->unk4, &arg0->unk4, NULL, NULL) == 0) {
+/* Finishes whatever parts of the cone basis are still missing; returns 0 if a vector is degenerate. */
+s32 func_1514F6E8(struct ConeBasis *cone) {
+    if (!(cone->flags & 1)) {
+        if (func_15145128(&cone->direction, &cone->direction, NULL, NULL) == 0) {
             return 0;
         }
-        arg0->unk4.x *= 1000.0f;
-        arg0->unk4.y *= 1000.0f;
-        arg0->unk4.z *= 1000.0f;
-        arg0->unk0 |= 1;
+        cone->direction.x *= 1000.0f;
+        cone->direction.y *= 1000.0f;
+        cone->direction.z *= 1000.0f;
+        cone->flags |= 1;
     }
-    if (!(arg0->unk0 & 2)) {
-        if (func_15146078((struct Arg1514FB98 *)&arg0->unk4, &arg0->unk10, &arg0->unk1C) == 0) {
+    if (!(cone->flags & 2)) {
+        if (func_15146078(&cone->direction, &cone->axis0, &cone->axis1) == 0) {
             return 0;
         }
-        arg0->unk0 |= 6;
+        cone->flags |= 2 | 4;
     }
-    if (!(arg0->unk0 & 4)) {
-        if (func_15145128(&arg0->unk10, &arg0->unk10, NULL, NULL) == 0) {
+    if (!(cone->flags & 4)) {
+        if (func_15145128(&cone->axis0, &cone->axis0, NULL, NULL) == 0) {
             return 0;
         }
-        if (func_15145128(&arg0->unk1C, &arg0->unk1C, NULL, NULL) == 0) {
+        if (func_15145128(&cone->axis1, &cone->axis1, NULL, NULL) == 0) {
             return 0;
         }
-        arg0->unk0 |= 4;
+        cone->flags |= 4;
     }
     return 1;
 }
 
 extern void func_15143874(s32, f32, f32 *, f32 *);
 
-void func_1514F808(struct Local1514F6E8 *arg0, f32 arg1, struct Vec3F *arg2) {
-    f32 b;
-    f32 a;
+/* Picks a random direction inside the cone and scales it by `speed`. */
+void func_1514F808(struct ConeBasis *cone, f32 speed, struct Vec3F *out) {
+    f32 second;
+    f32 first;
 
-    func_15143874((s16)(func_150ADA20() & 0xFF), func_150ADA68() * arg0->unk28, &a, &b);
-    arg2->x = (((arg0->unk10.x * a) + (arg0->unk1C.x * b)) + arg0->unk4.x) * arg1;
-    arg2->y = (((arg0->unk10.y * a) + (arg0->unk1C.y * b)) + arg0->unk4.y) * arg1;
-    arg2->z = (((arg0->unk10.z * a) + (arg0->unk1C.z * b)) + arg0->unk4.z) * arg1;
+    func_15143874((s16)(func_150ADA20() & 0xFF), func_150ADA68() * cone->spread, &first, &second);
+    out->x = (((cone->axis0.x * first) + (cone->axis1.x * second)) + cone->direction.x) * speed;
+    out->y = (((cone->axis0.y * first) + (cone->axis1.y * second)) + cone->direction.y) * speed;
+    out->z = (((cone->axis0.z * first) + (cone->axis1.z * second)) + cone->direction.z) * speed;
 }
 
-struct Local1514F8F8 {
-    s32 unk0;
-    s32 unk4;
-    u8 unk8[0xC];
-    f32 unk14;
-    f32 unk18;
+struct ConeSprayConfig {
+    s32 countBase;
+    s32 countRange;
+    struct Vec3F position;
+    f32 speedBase;
+    f32 speedRange;
     f32 unk1C;
     f32 unk20;
     f32 unk24;
@@ -697,79 +713,82 @@ struct Local1514F8F8 {
     s8 unk50;
 };
 
-extern void func_15143874(s32, f32, f32 *, f32 *);
-extern void func_151A2AD4(void *, f32 *, f32, f32, s32, f32, f32, f32, f32, s16, s16, s16, s16, s16, s16, s8, u8, s32);
+/* An emitter aimed along a direction (func_1514FB98). */
+struct DirectionEmitter {
+    struct Vec3F direction;
+    f32 spread;
+    struct ConeSprayConfig config;
+};
 
-void func_1514F8F8(struct Local1514F8F8 *arg0, struct Vec3F *arg1, struct Vec3F *arg2, struct Vec3F *arg3, f32 arg4, u8 arg5, s32 arg6) {
-    s32 rand;
-    struct Vec3F spB0;
-    f32 spAC;
-    f32 spA8;
-    f32 temp_f20;
-    f32 temp_f22;
+/* An emitter aimed off a surface triangle (func_1514FBFC). */
+struct TriangleEmitter {
+    struct TriangleSource source;
+    struct ConeSprayConfig config;
+};
+
+extern void func_151A2AD4(struct Vec3F *, struct Vec3F *, f32, f32, s32, f32, f32, f32, f32, s16, s16, s16, s16, s16, s16, s8, u8, s32);
+
+/* Spawns a random number of particles from config->position, each moving in a random direction inside
+ * the cone around `direction` (scaled by 1000 here) spanned by axis0/axis1. */
+void func_1514F8F8(struct ConeSprayConfig *config, struct Vec3F *direction, struct Vec3F *axis0, struct Vec3F *axis1, f32 spread, u8 arg5, s32 arg6) {
     s32 count;
+    struct Vec3F velocity;
+    f32 second;
+    f32 first;
+    f32 speed;
 
-    arg1->x *= 1000.0f;
-    arg1->y *= 1000.0f;
-    arg1->z *= 1000.0f;
+    direction->x *= 1000.0f;
+    direction->y *= 1000.0f;
+    direction->z *= 1000.0f;
 
-    count = (func_150ADA20() % (u32)(arg0->unk4 + 1)) + arg0->unk0;
-    if (count != 0) {
-        do {
-            temp_f20 = (func_150ADA68() * arg0->unk18) + arg0->unk14;
-            rand = func_150ADA20();
-            temp_f22 = func_150ADA68();
-            func_15143874((s16)(rand & 0xFF), temp_f22 * arg4, &spA8, &spAC);
-
-            spB0.x = ((arg2->x * spA8) + (arg3->x * spAC) + arg1->x) * temp_f20;
-            spB0.y = ((arg2->y * spA8) + (arg3->y * spAC) + arg1->y) * temp_f20;
-            spB0.z = ((arg2->z * spA8) + (arg3->z * spAC) + arg1->z) * temp_f20;
-
-            temp_f22 = func_150ADA68();
-            temp_f20 = func_150ADA68();
-            func_151A2AD4(arg0->unk8, &spB0.x,
-                          ((temp_f22 = temp_f22) * arg0->unk20) + arg0->unk1C,
-                          ((temp_f20 = temp_f20) * arg0->unk28) + arg0->unk24,
-                          (func_150ADA20() % (u32)(arg0->unk30 + 1)) + arg0->unk2C,
-                          arg0->unk34, arg0->unk38, arg0->unk3C, arg0->unk40,
-                          arg0->unk44, arg0->unk46, arg0->unk48, arg0->unk4A,
-                          arg0->unk4C, arg0->unk4E, arg0->unk50, arg5, arg6);
-            count--;
-        } while (count != 0);
+    count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
+    while (count != 0) {
+        speed = (func_150ADA68() * config->speedRange) + config->speedBase;
+        func_15143874((s16)(func_150ADA20() & 0xFF), func_150ADA68() * spread, &first, &second);
+        velocity.x = ((axis0->x * first) + (axis1->x * second) + direction->x) * speed;
+        velocity.y = ((axis0->y * first) + (axis1->y * second) + direction->y) * speed;
+        velocity.z = ((axis0->z * first) + (axis1->z * second) + direction->z) * speed;
+        func_151A2AD4(&config->position, &velocity,
+                      (func_150ADA68() * config->unk20) + config->unk1C,
+                      (func_150ADA68() * config->unk28) + config->unk24,
+                      (func_150ADA20() % (u32)(config->unk30 + 1)) + config->unk2C,
+                      config->unk34, config->unk38, config->unk3C, config->unk40,
+                      config->unk44, config->unk46, config->unk48, config->unk4A,
+                      config->unk4C, config->unk4E, config->unk50, arg5, arg6);
+        count--;
     }
 }
 
+void func_1514FB98(struct DirectionEmitter *emitter, u8 arg1, s32 arg2) {
+    struct Vec3F axis0;
+    struct Vec3F axis1;
 
-void func_1514FB98(struct Arg1514FB98 *arg0, u8 arg1, s32 arg2) {
-    struct Vec3F sp34;
-    struct Vec3F sp28;
-
-    if (func_15146078(arg0, &sp34, &sp28) != 0) {
-        func_1514F8F8((u8 *)arg0 + 0x10, arg0, &sp34, &sp28, arg0->unkC, arg1, arg2);
+    if (func_15146078(&emitter->direction, &axis0, &axis1) != 0) {
+        func_1514F8F8(&emitter->config, &emitter->direction, &axis0, &axis1, emitter->spread, arg1, arg2);
     }
 }
 
-void func_1514FBFC(struct Arg1514FBFC *arg0, u8 arg1, s32 arg2) {
-    struct Vec3F sp5C;
-    f32 sp58;
-    f32 sp54;
-    struct Vec3F sp48;
-    f32 sp44;
-    f32 sp40;
-    struct Vec3F sp34;
-    f32 sp30;
-    f32 sp2C;
+void func_1514FBFC(struct TriangleEmitter *emitter, u8 arg1, s32 arg2) {
+    struct Vec3F axis0;
+    f32 length0;
+    f32 inverse0;
+    struct Vec3F axis1;
+    f32 length1;
+    f32 inverse1;
+    struct Vec3F normal;
+    f32 normalLength;
+    f32 normalInverse;
 
-    if (func_15144E80(&arg0->unkC, &sp5C, &sp48, &sp34) != 0) {
-        func_15145128(&sp5C, &sp5C, &sp58, &sp54);
-        func_15145128(&sp48, &sp48, &sp44, &sp40);
-        func_15145128(&sp34, &sp34, &sp30, &sp2C);
-        if (func_15144A74(&sp34, &arg0->unk0) < 0.0f) {
-            sp34.x = -sp34.x;
-            sp34.y = -sp34.y;
-            sp34.z = -sp34.z;
+    if (func_15144E80(emitter->source.triangle, &axis0, &axis1, &normal) != 0) {
+        func_15145128(&axis0, &axis0, &length0, &inverse0);
+        func_15145128(&axis1, &axis1, &length1, &inverse1);
+        func_15145128(&normal, &normal, &normalLength, &normalInverse);
+        if (func_15144A74(&normal, &emitter->source.normal) < 0.0f) {
+            normal.x = -normal.x;
+            normal.y = -normal.y;
+            normal.z = -normal.z;
         }
-        func_1514F8F8(arg0->unk24, &sp34, &sp5C, &sp48, arg0->unk20, arg1, arg2);
+        func_1514F8F8(&emitter->config, &normal, &axis0, &axis1, emitter->source.spread, arg1, arg2);
     }
 }
 
@@ -778,9 +797,9 @@ struct Local1514FCE8 {
     s16 unk2;
     s16 unk4;
     s16 unk6;
-    s32 unk8;
-    s32 unkC;
-    struct Vec3F unk10;
+    s32 countBase;
+    s32 countRange;
+    struct Vec3F position;
     f32 unk1C;
     f32 unk20;
     f32 unk24;
@@ -804,55 +823,32 @@ struct Local1514FCE8 {
 
 extern void func_151A2A14(struct Vec3F *, s16, s16, f32, f32, f32, s32, f32, f32, f32, f32, s16, s16, s16, s16, s16, s16, s8, u8, s32);
 
-void func_1514FCE8(struct Local1514FCE8 *arg0, u8 arg1, s32 arg2) {
+void func_1514FCE8(struct Local1514FCE8 *config, u8 arg1, s32 arg2) {
     s32 count;
-    s32 rand0;
-    s32 rand1;
-    s32 rand2;
-    f32 randf0;
-    f32 randf1;
-    f32 randf2;
 
-    count = (func_150ADA20() % (u32)(arg0->unkC + 1)) + arg0->unk8;
-    if (count != 0) {
-        do {
-            rand0 = func_150ADA20();
-            rand1 = func_150ADA20();
-            randf0 = func_150ADA68();
-            randf1 = func_150ADA68();
-            randf2 = func_150ADA68();
-            rand2 = func_150ADA20();
-            func_151A2A14(&arg0->unk10,
-                          (s16)((rand0 % (u32)(arg0->unk2 + 1)) + arg0->unk0),
-                          (s16)((rand1 % (u32)(arg0->unk6 + 1)) + arg0->unk4),
-                          ((randf0 = randf0) * arg0->unk20) + arg0->unk1C,
-                          ((randf1 = randf1) * arg0->unk28) + arg0->unk24,
-                          ((randf2 = randf2) * arg0->unk30) + arg0->unk2C,
-                          (rand2 % (u32)(arg0->unk38 + 1)) + arg0->unk34,
-                          arg0->unk3C,
-                          arg0->unk40,
-                          arg0->unk44,
-                          arg0->unk48,
-                          arg0->unk4C,
-                          arg0->unk4E,
-                          arg0->unk50,
-                          arg0->unk52,
-                          arg0->unk54,
-                          arg0->unk56,
-                          arg0->unk58,
-                          arg1,
-                          arg2);
-            count--;
-        } while (count != 0);
+    count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
+    while (count != 0) {
+        func_151A2A14(&config->position,
+                      (s16)((func_150ADA20() % (u32)(config->unk2 + 1)) + config->unk0),
+                      (s16)((func_150ADA20() % (u32)(config->unk6 + 1)) + config->unk4),
+                      (func_150ADA68() * config->unk20) + config->unk1C,
+                      (func_150ADA68() * config->unk28) + config->unk24,
+                      (func_150ADA68() * config->unk30) + config->unk2C,
+                      (func_150ADA20() % (u32)(config->unk38 + 1)) + config->unk34,
+                      config->unk3C, config->unk40, config->unk44, config->unk48,
+                      config->unk4C, config->unk4E, config->unk50,
+                      config->unk52, config->unk54, config->unk56,
+                      config->unk58, arg1, arg2);
+        count--;
     }
 }
 
 struct Local1514FF44Arg {
-    u8 pad0[0xC];
-    s16 unkC;
-    s16 unkE;
-    f32 unk10;
-    f32 unk14;
+    struct Vec3F position;
+    s16 countBase;
+    s16 countRange;
+    f32 speedBase;
+    f32 speedRange;
     s16 unk18;
     s16 unk1A;
     f32 unk1C;
@@ -865,107 +861,70 @@ struct Local1514FF44Arg {
     u8 pad30;
     u8 unk31;
     u8 pad32[2];
-    f32 unk34;
+    f32 unk34; /* probability */
     u8 unk38;
     u8 pad39[3];
-    f32 unk3C;
+    f32 unk3C; /* probability */
 };
 
-struct Local1514FEFC { u8 unk0[0x2C]; };
-extern void func_1514F640(void *, struct Local1514FEFC *);
-extern void func_1514FF44(struct Local1514FEFC *, struct Local1514FF44Arg *, s32, u8, s32);
-extern void func_151D9014(struct Local1514FF44Arg *, struct Vec3F *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, u8, s32);
-extern f32 D_800A5FF4;
+extern void func_1514F640(struct TriangleSource *, struct ConeBasis *);
+extern void func_1514FF44(struct ConeBasis *, struct Local1514FF44Arg *, s32, u8, s32);
+extern void func_151D9014(struct Vec3F *, struct Vec3F *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, u8, s32);
 
-void func_1514FEFC(void *arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4) {
-    struct Local1514FEFC sp24;
+void func_1514FEFC(struct TriangleSource *source, struct Local1514FF44Arg *config, s32 arg2, u8 arg3, s32 arg4) {
+    struct ConeBasis cone;
 
-    func_1514F640(arg0, &sp24);
-    func_1514FF44(&sp24, (struct Local1514FF44Arg *)arg1, arg2, arg3, arg4);
+    func_1514F640(source, &cone);
+    func_1514FF44(&cone, config, arg2, arg3, arg4);
 }
 
-void func_1514FF44(struct Local1514FEFC *arg0, struct Local1514FF44Arg *arg1, s32 arg2, u8 arg3, s32 arg4) {
-    u8 spB4[4];
-    f32 temp_f0;
-    f32 temp_f20;
-    f32 temp_f22;
-    f32 temp_f24;
-    f32 temp_f26;
+/* Spawns a random number of particles, each moving in a random direction inside the cone. */
+void func_1514FF44(struct ConeBasis *cone, struct Local1514FF44Arg *config, s32 arg2, u8 arg3, s32 arg4) {
     s32 count;
-    s32 rand0;
-    s32 rand1;
+    struct Vec3F velocity;
 
-    if (func_1514F6E8((struct Local1514F6E8 *)arg0) != 0) {
-        count = (func_150ADA20() % (u32)(arg1->unkE + 1)) + arg1->unkC;
-        if (count != 0) {
-            temp_f26 = D_800A5FF0;
-            do {
-                func_1514F808((struct Local1514F6E8 *)arg0, (func_150ADA68() * arg1->unk14) + arg1->unk10, (struct Vec3F *)(spB4 - 0xC));
-                temp_f24 = func_150ADA68();
-                rand0 = func_150ADA20();
-                rand1 = func_150ADA20();
-                temp_f20 = func_150ADA68();
-                temp_f22 = func_150ADA68();
-                temp_f0 = func_150ADA68();
-                func_151D9014(arg1, (struct Vec3F *)(spB4 - 0xC), arg1->unk31,
-                              ((temp_f24 = temp_f24) * arg1->unk20) + arg1->unk1C,
-                              (rand0 % (u32)(arg1->unk1A + 1)) + arg1->unk18,
-                              (rand1 % (u32)(arg1->unk25 + 1)) + arg1->unk24,
-                              ((temp_f20 = temp_f20) * arg1->unk2C) + arg1->unk28,
-                              temp_f22 < arg1->unk34, temp_f26, temp_f26, 1, arg2, arg1->unk38,
-                              temp_f0 < arg1->unk3C, arg3, arg4);
-                count--;
-            } while (count != 0);
+    if (func_1514F6E8(cone) != 0) {
+        count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
+        while (count != 0) {
+            func_1514F808(cone, (func_150ADA68() * config->speedRange) + config->speedBase, &velocity);
+            func_151D9014(&config->position, &velocity, config->unk31,
+                          (func_150ADA68() * config->unk20) + config->unk1C,
+                          (func_150ADA20() % (u32)(config->unk1A + 1)) + config->unk18,
+                          (func_150ADA20() % (u32)(config->unk25 + 1)) + config->unk24,
+                          (func_150ADA68() * config->unk2C) + config->unk28,
+                          func_150ADA68() < config->unk34, 1.4f, 1.4f, 1, arg2, config->unk38,
+                          func_150ADA68() < config->unk3C, arg3, arg4);
+            count--;
         }
     }
 }
 
 struct Local15150178Angles {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    s16 unk6;
+    s16 yawBase;
+    s16 yawRange;
+    s16 pitchBase;
+    s16 pitchRange;
 };
 
-void func_15150178(struct Local15150178Angles *arg0, struct Local1514FF44Arg *arg1, s32 arg2, u8 arg3, s32 arg4) {
-    u8 spB4[4];
+/* Like func_1514FF44, but each direction is a random yaw/pitch from `angles`. */
+void func_15150178(struct Local15150178Angles *angles, struct Local1514FF44Arg *config, s32 arg2, u8 arg3, s32 arg4) {
     s32 count;
-    s32 rand0;
-    s32 rand1;
-    f32 randf0;
-    f32 randf1;
-    f32 randf2;
-    f32 randf3;
-    f32 one;
+    struct Vec3F velocity;
 
-    count = (func_150ADA20() % (u32)(arg1->unkE + 1)) + arg1->unkC;
-
-    if (count != 0) {
-        one = D_800A5FF4;
-        do {
-            rand0 = func_150ADA20();
-            rand1 = func_150ADA20();
-            func_15143794((s16)((rand0 % (u32)(arg0->unk2 + 1)) + arg0->unk0),
-                          (s16)((rand1 % (u32)(arg0->unk6 + 1)) + arg0->unk4),
-                          (func_150ADA68() * arg1->unk14) + arg1->unk10,
-                          (f32 *)(spB4 - 0xC));
-
-            randf0 = func_150ADA68();
-            rand0 = func_150ADA20();
-            rand1 = func_150ADA20();
-            randf1 = func_150ADA68();
-            randf2 = func_150ADA68();
-            randf3 = func_150ADA68();
-
-            func_151D9014(arg1, (struct Vec3F *)(spB4 - 0xC), arg1->unk31,
-                          ((randf0 = randf0) * arg1->unk20) + arg1->unk1C,
-                          (rand0 % (u32)(arg1->unk1A + 1)) + arg1->unk18,
-                          (rand1 % (u32)(arg1->unk25 + 1)) + arg1->unk24,
-                          ((randf1 = randf1) * arg1->unk2C) + arg1->unk28,
-                          randf2 < arg1->unk34, one, one, 1, arg2,
-                          arg1->unk38, randf3 < arg1->unk3C, arg3, arg4);
-            count--;
-        } while (count != 0);
+    count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
+    while (count != 0) {
+        func_15143794((s16)((func_150ADA20() % (u32)(angles->yawRange + 1)) + angles->yawBase),
+                      (s16)((func_150ADA20() % (u32)(angles->pitchRange + 1)) + angles->pitchBase),
+                      (func_150ADA68() * config->speedRange) + config->speedBase,
+                      &velocity.x);
+        func_151D9014(&config->position, &velocity, config->unk31,
+                      (func_150ADA68() * config->unk20) + config->unk1C,
+                      (func_150ADA20() % (u32)(config->unk1A + 1)) + config->unk18,
+                      (func_150ADA20() % (u32)(config->unk25 + 1)) + config->unk24,
+                      (func_150ADA68() * config->unk2C) + config->unk28,
+                      func_150ADA68() < config->unk34, 1.4f, 1.4f, 1, arg2, config->unk38,
+                      func_150ADA68() < config->unk3C, arg3, arg4);
+        count--;
     }
 }
 
@@ -2466,16 +2425,16 @@ void func_151539B4(struct Local151539B4Arg *arg0, u8 arg1) {
     }
 }
 
-extern void func_15153CCC(struct Local1514FEFC *, struct Local15153CCCArg *, s32, u8, s32);
+extern void func_15153CCC(struct ConeBasis *, struct Local15153CCCArg *, s32, u8, s32);
 
 void func_15153C84(void *arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4) {
-    struct Local1514FEFC sp24;
+    struct ConeBasis sp24;
 
     func_1514F640(arg0, &sp24);
     func_15153CCC(&sp24, (struct Local15153CCCArg *)arg1, arg2, arg3, arg4);
 }
 
-void func_15153CCC(struct Local1514FEFC *arg0, struct Local15153CCCArg *arg1Struct, s32 arg2, u8 arg3, s32 arg4) {
+void func_15153CCC(struct ConeBasis *arg0, struct Local15153CCCArg *arg1Struct, s32 arg2, u8 arg3, s32 arg4) {
     u8 spB4[4];
     s32 count;
     s32 rand0;
@@ -2485,12 +2444,12 @@ void func_15153CCC(struct Local1514FEFC *arg0, struct Local15153CCCArg *arg1Stru
     f32 randf1;
     f32 temp_f24;
 
-    if (func_1514F6E8((struct Local1514F6E8 *)arg0) != 0) {
+    if (func_1514F6E8(arg0) != 0) {
         count = (func_150ADA20() % (u32)(arg1Struct->unk26 + 1)) + arg1Struct->unk24;
         if (count != 0) {
             temp_f24 = D_800A5FFC;
             do {
-                func_1514F808((struct Local1514F6E8 *)arg0,
+                func_1514F808(arg0,
                               (func_150ADA68() * arg1Struct->unk20) + arg1Struct->unk1C,
                               (struct Vec3F *)(spB4 - 0xC));
                 randf1 = func_150ADA68();
@@ -2539,8 +2498,8 @@ void func_15153F18(struct Local15150178Angles *arg0, struct Local15153CCCArg *ar
         do {
             rand1 = func_150ADA20();
             rand0 = func_150ADA20();
-            func_15143794((s16)((rand1 % (u32)(arg0->unk2 + 1)) + arg0->unk0),
-                          (s16)((rand0 % (u32)(arg0->unk6 + 1)) + arg0->unk4),
+            func_15143794((s16)((rand1 % (u32)(arg0->yawRange + 1)) + arg0->yawBase),
+                          (s16)((rand0 % (u32)(arg0->pitchRange + 1)) + arg0->pitchBase),
                           (func_150ADA68() * arg1->unk20) + arg1->unk1C,
                           (f32 *)(spB4 - 0xC));
 
