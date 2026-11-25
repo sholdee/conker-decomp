@@ -2,43 +2,68 @@
 #include "functions.h"
 #include "variables.h"
 
-
-extern void func_150D6730(s32 arg0, s32 arg1, s32 arg2);
-extern s32 func_15042E3C(s32 arg0, ...);
-extern s32 func_15133EEC(s32 arg0, u16 arg1, u8 arg2, s32 arg3);
-extern char D_800AB254[];
+extern void func_150D6730(struct127 *obj, u8 arg1, s32 arg2);
+extern s32 func_15042E3C(char *format, ...);
+extern Gfx *func_15133EEC(Gfx *gfx, u16 index, u8 segment, s32 arg3);
 extern u32 D_80083740[];
 extern u32 D_800838C0[];
 
-typedef struct Obj151D7000 {
-    s32 unk0;
-    u8 pad4[0x37];
-    u8 unk3B;
-} Obj151D7000;
+/* Header shared by the objects func_15149130 creates (same layout as in game_FC5F0.c). */
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xC - 0x2];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD;
+    /* 0x0E */ s16 unkE; // set to -1 to remove the object
+    /* 0x10 */ u8 pad10[0x28 - 0x10];
+} ObjHeader;
 
-typedef struct Sub151D7000 {
-    Obj151D7000 *unk0;
-    u8 unk4;
-    u8 pad5[0x3];
-    s32 unk8;
-    s16 unkC;
-    s16 unkE;
-} Sub151D7000;
+/* Text box data (same layout as TextBox in game_FC5F0.c). */
+typedef struct {
+    /* 0x00 */ u8 id;
+    /* 0x01 */ u8 pad1[3];
+    /* 0x04 */ u8 *str;
+    /* 0x08 */ u8 flags;
+    /* 0x09 */ u8 pad9[3];
+    /* 0x0C */ u8 *line;
+    /* 0x10 */ u8 *lineEnd;
+    /* 0x14 */ u8 lineLen;
+    /* 0x15 */ u8 page;
+    /* 0x16 */ u8 pad16[2];
+    /* 0x18 */ u8 *lines[2];
+    /* 0x20 */ void *style; // the display style's own state
+    /* 0x24 */ s8 updateFn; // index into D_800888A0, or -1
+    /* 0x25 */ u8 msgFn; // index into D_800888B0
+    /* 0x26 */ u8 pad26[2];
+} TextBox;
 
-typedef struct Arg151D7000 {
-    u8 pad0[0xE];
-    s16 unkE;
-    u8 pad10[0x38];
-    Sub151D7000 *unk48;
-} Arg151D7000;
+/* Text box object created by func_150CFF10 (same layout as TextObj in game_FC5F0.c). */
+typedef struct {
+    /* 0x00 */ ObjHeader header;
+    /* 0x28 */ TextBox text;
+} TextObj;
 
-void func_151D6970(s32 arg0, s32 arg1) {
+/* Style 3 text box state: an amount shown as "$ %d" that fades out with its owner. */
+typedef struct {
+    /* 0x00 */ struct127 *owner;
+    /* 0x04 */ u8 ownerId; // owner->unique_id when the box was made
+    /* 0x05 */ u8 pad5[3];
+    /* 0x08 */ s32 amount;
+    /* 0x0C */ s16 fadeStart; // alpha fades once the lifetime drops below this
+    /* 0x0E */ s16 fadeRate;
+} AmountTextStyle;
+
+/* Called when `character` touches a pulse object (game_1483E0.c): spawns func_150D6730's particles on it
+   while D_800BE9F0 is 0x32 or 0x33. */
+void func_151D6970(struct127 *character, void *obj) {
     if ((D_800BE9F0 == 0x32) || (D_800BE9F0 == 0x33)) {
-        func_150D6730(arg0, 0xFF, 1);
+        func_150D6730(character, 0xFF, 1);
     }
 }
 
-typedef struct Pkt151D69B4A {
+/* Parameter block for func_15153F18 (Params15153F18 in game_16EE20.c). */
+typedef struct {
     s16 unk00;
     s16 unk02;
     s16 unk04;
@@ -64,9 +89,10 @@ typedef struct Pkt151D69B4A {
     s16 unk44;
     s16 unk46;
     s32 unk48;
-} Pkt151D69B4A;
+} Params15153F18;
 
-typedef struct Pkt151D69B4B {
+/* Parameter block for func_15150178. */
+typedef struct {
     s16 unk00;
     s16 unk02;
     s16 unk04;
@@ -92,278 +118,289 @@ typedef struct Pkt151D69B4B {
     u8 unk40;
     u8 pad41[3];
     f32 unk44;
-} Pkt151D69B4B;
+} Params15150178;
 
-typedef struct Obj151D69B4 {
-    u8 pad0[0x10];
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-} Obj151D69B4;
+/* Pickup object (Obj15119FC0 in game_147470.c; only the fields used here). */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x10];
+    /* 0x10 */ s16 position[3];
+} Pickup;
 
-extern void func_1504715C(void *, void *);
-extern void func_15153F18(s16 *, void *, void *, s32, s32);
-extern void func_15150178(s16 *, void *, void *, s32, s32);
+extern void func_1504715C(void *ground, struct127 *actor);
+extern void func_15153F18(s16 *params, f32 *pos, void *ground, s32 arg3, s32 arg4);
+extern void func_15150178(s16 *params, f32 *pos, void *ground, s32 arg3, s32 arg4);
 
-void func_151D69B4(Obj151D69B4 *arg0, void *arg1) {
-    u8 scratch[0x24];
-    Pkt151D69B4A a;
+/* Spawns the func_15153F18 and func_15150178 bursts at `pickup`, on the ground under `player`. */
+void func_151D69B4(Pickup *pickup, struct127 *player) {
+    u8 ground[0x24]; // ground probe result (Ground in game_1228D0.c)
+    Params15153F18 first;
 
-    func_1504715C(scratch, arg1);
-    a.pos[0] = arg0->unk10;
-    a.pos[1] = arg0->unk12;
-    a.pos[2] = arg0->unk14;
-    a.unk14 = 2.49000001f;
-    a.unk2C = 3;
-    a.unk2E = 3;
-    a.unk02 = 0xFF;
-    a.unk04 = -0x2B;
-    a.unk00 = 0;
-    a.unk06 = 0x20;
-    a.unk30 = 3;
-    a.unk32 = 2;
-    a.unk34 = 0x28;
-    a.unk36 = 0x14;
-    a.unk38 = 0x9B;
-    a.unk3A = 0x64;
-    a.unk44 = 0x10;
-    a.unk46 = 0xF;
-    a.unk48 = 0;
-    a.unk3C = 9;
-    a.unk18 = 2.029999971f;
-    a.unk1C = 0.6080000401f;
-    a.unk20 = 0.2569999993f;
-    a.unk24 = 17.0f;
-    a.unk28 = 3.5f;
-    a.unk40 = 0.400000006f;
-    func_15153F18(&a.unk00, a.pos, scratch, 0xFF, 1);
+    func_1504715C(ground, player);
+    first.pos[0] = pickup->position[0];
+    first.pos[1] = pickup->position[1];
+    first.pos[2] = pickup->position[2];
+    first.unk14 = 2.49000001f;
+    first.unk2C = 3;
+    first.unk2E = 3;
+    first.unk02 = 0xFF;
+    first.unk04 = -0x2B;
+    first.unk00 = 0;
+    first.unk06 = 0x20;
+    first.unk30 = 3;
+    first.unk32 = 2;
+    first.unk34 = 0x28;
+    first.unk36 = 0x14;
+    first.unk38 = 0x9B;
+    first.unk3A = 0x64;
+    first.unk44 = 0x10;
+    first.unk46 = 0xF;
+    first.unk48 = 0;
+    first.unk3C = 9;
+    first.unk18 = 2.029999971f;
+    first.unk1C = 0.6080000401f;
+    first.unk20 = 0.2569999993f;
+    first.unk24 = 17.0f;
+    first.unk28 = 3.5f;
+    first.unk40 = 0.400000006f;
+    func_15153F18(&first.unk00, first.pos, ground, 0xFF, 1);
     {
-    Pkt151D69B4B b;
-    b.pos[0] = arg0->unk10;
-    b.pos[1] = arg0->unk12;
-    b.pos[2] = arg0->unk14;
-    b.unk14 = 0xF;
-    b.unk16 = 6;
-    b.unk00 = 0;
-    b.unk02 = 0xFF;
-    b.unk04 = -0x40;
-    b.unk06 = 0xC;
-    b.unk20 = 0x3C;
-    b.unk22 = 0x2D;
-    b.unk2C = 0xC8;
-    b.unk2D = 0x37;
-    b.unk38 = 1;
-    b.unk39 = 9;
-    b.unk3C = 1.0f;
-    b.unk40 = 0;
-    b.unk44 = 1.0f;
-    b.unk18 = 10.0f;
-    b.unk1C = 6.0f;
-    b.unk24 = -1.506000042f;
-    b.unk28 = 0.8140000105f;
-    b.unk30 = 44.0f;
-    b.unk34 = 88.0f;
-    func_15150178(&b.unk00, b.pos, scratch, 0xFF, 1);
+    Params15150178 second;
+
+    second.pos[0] = pickup->position[0];
+    second.pos[1] = pickup->position[1];
+    second.pos[2] = pickup->position[2];
+    second.unk14 = 0xF;
+    second.unk16 = 6;
+    second.unk00 = 0;
+    second.unk02 = 0xFF;
+    second.unk04 = -0x40;
+    second.unk06 = 0xC;
+    second.unk20 = 0x3C;
+    second.unk22 = 0x2D;
+    second.unk2C = 0xC8;
+    second.unk2D = 0x37;
+    second.unk38 = 1;
+    second.unk39 = 9;
+    second.unk3C = 1.0f;
+    second.unk40 = 0;
+    second.unk44 = 1.0f;
+    second.unk18 = 10.0f;
+    second.unk1C = 6.0f;
+    second.unk24 = -1.506000042f;
+    second.unk28 = 0.8140000105f;
+    second.unk30 = 44.0f;
+    second.unk34 = 88.0f;
+    func_15150178(&second.unk00, second.pos, ground, 0xFF, 1);
     }
 }
 
-extern void *func_15157010(void *, s32, f32, s32, s32, s32, u8, s32);
-extern void *func_150CFF10(u8, void *, s16, s32, s8, u8, u8, s32);
-extern void *func_1509B570(s32);
-
+/* Effect spawn parameters (same layout as EffectParams in game_1844C0.c). */
 typedef struct {
-    /* 0x00 */ u8 unk00;
-    /* 0x01 */ s8 unk01;
-    /* 0x02 */ u8 unk02;
-    /* 0x03 */ s8 unk03;
-    /* 0x04 */ s8 unk04;
-    /* 0x05 */ u8 pad05;
-    /* 0x06 */ s16 unk06;
-    /* 0x08 */ s32 unk08;
-    /* 0x0C */ s32 unk0C;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ s32 unk1C;
+    /* 0x00 */ u8 flags;
+    /* 0x01 */ s8 updateFunc;   // index into D_8008AD90, -1 = none
+    /* 0x02 */ s8 updateFunc2;  // index into D_8008ADA0, -1 = none
+    /* 0x03 */ s8 preDrawFunc;  // index into D_8008ADBC, -1 = none
+    /* 0x04 */ s8 postDrawFunc; // index into D_8008ADCC, -1 = none
+    /* 0x05 */ u8 pad5;
+    /* 0x06 */ s16 lifetime;
+    /* 0x08 */ s32 model;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ s32 otherModeH;
+    /* 0x14 */ s32 geometrySet;
+    /* 0x18 */ s32 geometryClear;
+    /* 0x1C */ s32 renderMode;
     /* 0x20 */ s32 unk20;
-    /* 0x24 */ s32 unk24;
-    /* 0x28 */ s32 unk28;
-    /* 0x2C */ u8 unk2C;
-    /* 0x2D */ u8 unk2D;
+    /* 0x24 */ s32 otherModeH2;
+    /* 0x28 */ s32 otherModeH3;
+    /* 0x2C */ s8 primMode;
+    /* 0x2D */ s8 envMode;
     /* 0x2E */ u8 pad2E[2];
-    /* 0x30 */ u8 unk30;
-    /* 0x31 */ u8 unk31;
-    /* 0x32 */ u8 unk32;
-    /* 0x33 */ u8 unk33;
-    /* 0x34 */ u8 unk34;
-    /* 0x35 */ u8 unk35;
-    /* 0x36 */ u8 unk36;
-    /* 0x37 */ u8 unk37;
+    /* 0x30 */ u8 color0[4];
+    /* 0x34 */ u8 color1[4];
     /* 0x38 */ u8 unk38;
     /* 0x39 */ u8 pad39[3];
-    /* 0x3C */ Obj151D7000 *unk3C;
-    /* 0x40 */ u8 unk40;
+    /* 0x3C */ struct127 *owner;
+    /* 0x40 */ u8 ownerId;
     /* 0x41 */ u8 unk41;
     /* 0x42 */ u8 pad42[2];
-    /* 0x44 */ struct17 unk44;
+    /* 0x44 */ struct17 pos;
     /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-} S151D6BFC;
+    /* 0x54 */ s16 fadeStart; // alpha fades once lifetime drops below this
+    /* 0x56 */ s16 fadeRate;
+} EffectParams; // size 0x58
+
+/* Model effect object (Effect in game_1844C0.c; only the fields used here). */
+typedef struct {
+    /* 0x00 */ u8 header[0x10];
+    /* 0x10 */ EffectParams params;
+    /* 0x68 */ u8 pad68[0x7C - 0x68];
+    /* 0x7C */ f32 mtx[2][4][4]; // per frame
+} ModelEffect;
 
 typedef struct {
-    s32 unk0;
-    Sub151D7000 unk4;
-    s32 unk14;
-} S151D6BFC_2;
+    /* 0x00 */ u8 pad0[0x64];
+    /* 0x64 */ s32 unk64;
+} Struct1509B570;
 
-typedef struct {
-    u8 pad0[0x64];
-    s32 unk64;
-} S1509B570;
+extern void *func_15157010(EffectParams *params, s32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 extraSize, u8 owner,
+                           s32 list);
+extern TextObj *func_150CFF10(u8 id, u8 *str, s16 duration, s32 styleSize, s8 updateFn, u8 msgFn, u8 arg6, s32 arg7);
+extern Struct1509B570 *func_1509B570(s32);
 
-void func_151D6BFC(Obj151D7000 *arg0, u8 arg1, s32 arg2) {
-    S151D6BFC sp50;
-    s32 unused;
-    sp50.unk38 = 0;
-    sp50.unk00 = 0x27;
-    sp50.unk01 = -1;
-    sp50.unk02 = 3;
-    sp50.unk03 = 1;
-    sp50.unk04 = -1;
-    sp50.unk06 = 0x96;
-    sp50.unk08 = 0xA5;
-    sp50.unk0C = 0x17;
-    sp50.unk10 = 0;
-    sp50.unk14 = 0x220405;
-    sp50.unk18 = 0x40200;
-    sp50.unk2D = 8;
-    sp50.unk1C = 1;
-    sp50.unk20 = 0x38;
-    sp50.unk2C = 0;
-    sp50.unk24 = 0x80;
-    sp50.unk28 = 0x20;
-    sp50.unk30 = 0xFF;
-    sp50.unk31 = 0xFF;
-    sp50.unk32 = 0xFF;
-    sp50.unk33 = 0xFF;
-    sp50.unk34 = 0xFF;
-    sp50.unk35 = 0xFF;
-    sp50.unk36 = 0xFF;
-    sp50.unk37 = 0xFF;
-    sp50.unk3C = arg0;
-    sp50.unk40 = arg0->unk3B;
-    sp50.unk41 = 1;
-    sp50.unk44 = *(struct17 *)&D_800A5480;
-    sp50.unk54 = 8;
-    sp50.unk56 = 0x1F;
-    func_15157010(&sp50, 0, 1.0f, 0, 0, 0, arg1, arg2);
+/*
+ * Spawns model effect 0xA5 on `owner` (updated by func_151D6E60, drawn with func_151D710C) and a text box
+ * showing a random amount as "$ %d" (style 3: func_151D7000 / func_151D70CC).
+ */
+void func_151D6BFC(struct127 *owner, u8 arg1, s32 arg2) {
+    EffectParams params;
+    Struct1509B570 *entry;
+
+    params.unk38 = 0;
+    params.flags = 0x27;
+    params.updateFunc = -1;
+    params.updateFunc2 = 3;
+    params.preDrawFunc = 1;
+    params.postDrawFunc = -1;
+    params.lifetime = 150;
+    params.model = 0xA5;
+    params.unkC = 0x17;
+    params.otherModeH = 0;
+    params.geometrySet = 0x220405;
+    params.geometryClear = 0x40200;
+    params.envMode = 8;
+    params.renderMode = 1;
+    params.unk20 = 0x38;
+    params.primMode = 0;
+    params.otherModeH2 = 0x80;
+    params.otherModeH3 = 0x20;
+    params.color0[0] = 0xFF;
+    params.color0[1] = 0xFF;
+    params.color0[2] = 0xFF;
+    params.color0[3] = 0xFF;
+    params.color1[0] = 0xFF;
+    params.color1[1] = 0xFF;
+    params.color1[2] = 0xFF;
+    params.color1[3] = 0xFF;
+    params.owner = owner;
+    params.ownerId = owner->unique_id;
+    params.unk41 = 1;
+    params.pos = *(struct17 *)&D_800A5480;
+    params.fadeStart = 8;
+    params.fadeRate = 0x1F;
+    func_15157010(&params, 0, 1.0f, 0, 0, 0, arg1, arg2);
     {
-    Sub151D7000 sub;
-    char buf[4] = "500";
-    S1509B570 *p;
-    s32 v;
-    void *ret;
-    sub.unk0 = arg0;
-    sub.unk4 = arg0->unk3B;
-    sub.unkC = 8;
-    sub.unkE = 0x1F;
-    sub.unk8 = func_150859AC(0, 6);
-    p = func_1509B570(0x83);
-    if (p != NULL) {
-        v = p->unk64 + 1;
-        if (v == 0xFF) {
-            sub.unk8 += 100;
-        } else if (v == 0) {
-            sub.unk8 = 0;
-        } else if (v < 3) {
-            s32 t;
-            t = sub.unk8 * v;
-            sub.unk8 = t / 3;
+    AmountTextStyle style;
+    char str[4] = "500";
+    s32 scale;
+    TextObj *textObj;
+    style.owner = owner;
+    style.ownerId = owner->unique_id;
+    style.fadeStart = 8;
+    style.fadeRate = 0x1F;
+    style.amount = func_150859AC(0, 6);
+    entry = func_1509B570(0x83);
+    if (entry != NULL) {
+        scale = entry->unk64 + 1;
+        if (scale == 0xFF) {
+            style.amount += 100;
+        } else if (scale == 0) {
+            style.amount = 0;
+        } else if (scale < 3) {
+            s32 scaled = style.amount * scale; // matching: the product needs its own local
+
+            style.amount = scaled / 3;
         }
     } else {
-        sub.unk8 = 0;
+        style.amount = 0;
     }
-    ret = func_150CFF10(0x63, buf, 0x96, 0x10, 3, 1, arg1, arg2);
-    if (ret != NULL) {
-        memcpy(*(void **)((u8 *)ret + 0x48), &sub, 0x10);
+    textObj = func_150CFF10(0x63, str, 150, sizeof(AmountTextStyle), 3, 1, arg1, arg2);
+    if (textObj != NULL) {
+        memcpy(textObj->text.style, &style, sizeof(AmountTextStyle));
     }
     }
 }
 
 extern f32 func_15144AA8(s32);
-extern f32 D_800AB278;
 
-struct Foo203E20 {
-    u8 pad0[0x4C];
-    s32 *unk4C;
-    u8 pad50[0x7C - 0x50];
-    f32 mat[1][4][4];
-};
+/*
+ * Effect update (D_8008ADA0[3]): this frame's matrix is func_150A8050's for (0, func_15144AA8(0) + 25, 0),
+ * placed 120 units above the owner and scaled by 0.551.
+ */
+s32 func_151D6E60(ModelEffect *fx) {
+    f32 scale;
 
-s32 func_151D6E60(struct Foo203E20 *arg0) {
-    f32 m;
+    func_150A8050(fx->mtx[D_800BE9C0], 0.0f, func_15144AA8(0) + 25.0f, 0.0f);
 
-    func_150A8050(arg0->mat[D_800BE9C0], 0.0f, func_15144AA8(0) + 25.0f, 0.0f);
+    scale = 0.5509999990f;
+    fx->mtx[D_800BE9C0][3][0] = fx->params.owner->x_position;
+    fx->mtx[D_800BE9C0][3][1] = fx->params.owner->y_position + 120.0f;
+    fx->mtx[D_800BE9C0][3][2] = fx->params.owner->z_position;
 
-    m = D_800AB278;
-    arg0->mat[D_800BE9C0][3][0] = ((f32 *)arg0->unk4C)[5];
-    arg0->mat[D_800BE9C0][3][1] = ((f32 *)arg0->unk4C)[6] + 120.0f;
-    arg0->mat[D_800BE9C0][3][2] = ((f32 *)arg0->unk4C)[7];
-
-    arg0->mat[D_800BE9C0][0][0] *= m;
-    arg0->mat[D_800BE9C0][0][1] *= m;
-    arg0->mat[D_800BE9C0][0][2] *= m;
-    arg0->mat[D_800BE9C0][1][0] *= m;
-    arg0->mat[D_800BE9C0][1][1] *= m;
-    arg0->mat[D_800BE9C0][1][2] *= m;
-    arg0->mat[D_800BE9C0][2][0] *= m;
-    arg0->mat[D_800BE9C0][2][1] *= m;
-    arg0->mat[D_800BE9C0][2][2] *= m;
+    fx->mtx[D_800BE9C0][0][0] *= scale;
+    fx->mtx[D_800BE9C0][0][1] *= scale;
+    fx->mtx[D_800BE9C0][0][2] *= scale;
+    fx->mtx[D_800BE9C0][1][0] *= scale;
+    fx->mtx[D_800BE9C0][1][1] *= scale;
+    fx->mtx[D_800BE9C0][1][2] *= scale;
+    fx->mtx[D_800BE9C0][2][0] *= scale;
+    fx->mtx[D_800BE9C0][2][1] *= scale;
+    fx->mtx[D_800BE9C0][2][2] *= scale;
 
     return 1;
 }
 
-s32 func_151D7000(Arg151D7000 *arg0) {
-    Obj151D7000 *obj;
-    Sub151D7000 *sub;
-    s16 temp;
-    s16 pad;
-    s16 value;
+/*
+ * Text box update for style 3 (D_800888A0[3]): removes the box (returns 0) once its owner is gone or
+ * replaced, otherwise prints the amount, fading out over the last fadeStart frames.
+ */
+s32 func_151D7000(TextObj *obj) {
+    struct127 *owner;
+    AmountTextStyle *style;
+    s16 timeLeft;
+    s16 pad; // matching: unused, but alpha's register allocation depends on it
+    s16 alpha;
 
-    sub = arg0->unk48;
-    obj = sub->unk0;
-    if ((obj->unk0 == 0) || (obj->unk3B != sub->unk4)) {
+    style = obj->text.style;
+    owner = style->owner;
+    if ((owner->interaction_state == 0) || (owner->unique_id != style->ownerId)) {
         return 0;
     }
 
-    temp = arg0->unkE;
-    if (temp < sub->unkC) {
-        value = temp * sub->unkE;
-        if (value < 0) {
-            value = 0;
+    timeLeft = obj->header.unkE;
+    if (timeLeft < style->fadeStart) {
+        alpha = timeLeft * style->fadeRate;
+        if (alpha < 0) {
+            alpha = 0;
         }
     } else {
-        value = 0xFF;
+        alpha = 0xFF;
     }
 
-    func_150432CC((s32)obj, 0x109);
-    func_1504332C(0x32, 0x7D, 0x1C, value);
+    func_150432CC((s32)owner, 0x109);
+    func_1504332C(0x32, 0x7D, 0x1C, alpha);
     func_15042D78(0x81);
-    return func_15042E3C((s32)D_800AB254, sub->unk8);
+    return func_15042E3C("$ %d", style->amount);
 }
 
-void func_151D70CC(s32 *arg0, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, arg0[0x12], arg0[0x12] + 4, (s32)arg0);
+/* Text box message handler for style 3 (D_800888B0[1]): keeps the owner reference up to date. */
+void func_151D70CC(TextObj *obj, u8 *payload, u8 type) {
+    AmountTextStyle *style = obj->text.style;
+
+    func_15169850((s32)payload, type, (s32)&style->owner, (s32)&style->ownerId, (s32)obj);
 }
 
-void func_151D710C(Gfx *arg0, void *arg1, s32 arg2, s32 arg3, u8 *arg4) {
-    if (*(u8 *)((u8 *)arg1 + 0x43) < 0xFF) {
-        gSPSegment(arg0++, 8, D_80083740);
+/*
+ * Effect pre-draw (D_8008ADBC[1]): binds segment 8 to D_80083740 while the effect's alpha is below 0xFF
+ * (else D_800838C0), then texture 0xC3 to segments 6 and 7.
+ */
+Gfx *func_151D710C(Gfx *gfx, ModelEffect *fx, s16 view, u8 *needSync, u8 *proceed) {
+    if (fx->params.color0[3] < 0xFF) {
+        gSPSegment(gfx++, 8, D_80083740);
     } else {
-        gSPSegment(arg0++, 8, D_800838C0);
+        gSPSegment(gfx++, 8, D_800838C0);
     }
 
-    func_15133EEC(func_15133EEC((s32)arg0, 0xC3, 6, 3), 0xC3, 7, 3);
-    *arg4 = 1;
+    gfx = func_15133EEC(func_15133EEC(gfx, 0xC3, 6, 3), 0xC3, 7, 3);
+    *proceed = 1;
+    return gfx;
 }
