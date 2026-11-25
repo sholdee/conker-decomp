@@ -17,9 +17,7 @@ typedef struct {
 
 /* Particle created by func_15130280 (only the fields used here, see game_15D730.c). */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ ParticleDesc desc;
-    /* 0x80 */ u8 pad80[0x28];
+    /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ FlashParticleData data;
 } Particle;
 
@@ -134,32 +132,32 @@ s32 func_15108658(Particle *particle, s32 arg1) {
     f32 elapsed = data->lifetime - data->life;
 
     if (data->life < data->frame0Time || elapsed < data->frame0Time) {
-        particle->desc.frame = 0;
+        particle->head.desc.frame = 0;
     } else if (data->life < data->frame1Time || elapsed < data->frame1Time) {
-        particle->desc.frame = 0x10000;
+        particle->head.desc.frame = 0x10000;
     } else {
-        particle->desc.frame = 0x20000;
+        particle->head.desc.frame = 0x20000;
     }
     if (data->flashTimer) {
         f32 flashElapsed = 11.0f - data->flashTimer;
 
         if (data->flashTimer < 1.5730001f || flashElapsed < 1.5730001f) {
-            particle->desc.frame = 0;
-            particle->desc.drawFunc = -1;
+            particle->head.desc.frame = 0;
+            particle->head.desc.drawFunc = -1;
         } else {
-            particle->desc.drawFunc = 3;
+            particle->head.desc.drawFunc = 3;
         }
         data->flashTimer -= D_800BE9A4;
         if (data->flashTimer < 0.0f) {
             data->flashTimer = 0.0f;
-            particle->desc.drawFunc = -1;
+            particle->head.desc.drawFunc = -1;
         }
     } else {
         data->life -= D_800BE9A4;
         if (data->life < 0.0f) {
             return 0;
         }
-        if (particle->desc.frame == 0x20000 && func_150ADA68() < 0.051000003f) {
+        if (particle->head.desc.frame == 0x20000 && func_150ADA68() < 0.051000003f) {
             data->flashTimer = 11.0f;
         }
     }
