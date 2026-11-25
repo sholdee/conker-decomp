@@ -356,49 +356,52 @@ typedef struct {
     u8 pad0[0x18];
     u8 ownerId;
     u8 pad19[0x3];
-    s32 owner;
+    struct127 *owner;
     u8 pad20[0x1D];
     u8 unk3D;
 } SubA_151347CC;
 
-/* Message 0x2D: an actor handle was replaced. */
+/*
+ * Actor message payload. Messages 0, 3 and 0x11 carry an actor and (in the first byte of
+ * the second word) its unique id; message 0x2D swaps actorA and actorB.
+ */
 typedef struct {
-    s32 oldOwner;
+    struct127 *actorA;
     union {
-        s32 newOwner;
-        u8 ownerId;
+        struct127 *actorB;
+        u8 actorAId;
     } u4;
-    u8 oldOwnerId;
-    u8 newOwnerId;
-} ArgB_151347CC;
+    u8 swapIdA;
+    u8 swapIdB;
+} BloodActorMsg;
 
 /* Message handler: frees the effect when its owner goes away, follows owner handle swaps. */
-void func_151347CC(void *arg0, ArgB_151347CC *msg, u8 message) {
+void func_151347CC(void *arg0, BloodActorMsg *msg, u8 message) {
     SubA_151347CC *effect = arg0; // matching: copying the parameter keeps IDO's register choice in case 0x2D
-    s32 oldOwner;
+    struct127 *actorA;
 
     if ((message == 0) || (message == 3)) {
-        if ((msg->oldOwner == effect->owner) || (msg->u4.ownerId == effect->ownerId)) {
+        if ((msg->actorA == effect->owner) || (msg->u4.actorAId == effect->ownerId)) {
             func_1516972C((struct102 *)effect);
         }
     } else if (message == 0x11) {
         if (effect->unk3D == 5) {
-            if ((msg->oldOwner == effect->owner) || (msg->u4.ownerId == effect->ownerId)) {
+            if ((msg->actorA == effect->owner) || (msg->u4.actorAId == effect->ownerId)) {
                 func_1516972C((struct102 *)effect);
             }
         }
     } else if (message == 0x16) {
-        if ((s32)msg == effect->owner) {
+        if ((struct127 *)msg == effect->owner) {
             func_1516972C((struct102 *)effect);
         }
     } else if (message == 0x2D) {
-        oldOwner = msg->oldOwner;
-        if (effect->owner == oldOwner) {
-            effect->owner = msg->u4.newOwner;
-            effect->ownerId = msg->newOwnerId;
-        } else if (effect->owner == msg->u4.newOwner) {
-            effect->owner = oldOwner;
-            effect->ownerId = msg->oldOwnerId;
+        actorA = msg->actorA;
+        if (effect->owner == actorA) {
+            effect->owner = msg->u4.actorB;
+            effect->ownerId = msg->swapIdB;
+        } else if (effect->owner == msg->u4.actorB) {
+            effect->owner = actorA;
+            effect->ownerId = msg->swapIdA;
         }
     }
 }
@@ -588,7 +591,7 @@ typedef struct {
     s8 rateCallback;
     u8 pad31[3];
     f32 rate;
-    u8 pad38;
+    u8 mode;
     s8 updateCallback;
     u8 pad3A[2];
 } BloodStripDesc;
@@ -619,7 +622,7 @@ typedef struct {
     s8 rateCallback;
     u8 pad49[3];
     f32 rate;
-    u8 pad50;
+    u8 mode;                /* selects the message handler */
     s8 updateCallback;
     u8 pad52[2];
     s16 timer;
@@ -762,12 +765,12 @@ void func_15134E48(BloodStrip *arg0) {
     }
 }
 
-void func_151352EC(struct102 *arg0) {
-    func_15169804(arg0);
+void func_151352EC(struct102 *effect) {
+    func_15169804(effect);
 }
 
-void func_1513530C(struct102 *arg0) {
-    func_15169824(arg0);
+void func_1513530C(struct102 *effect) {
+    func_15169824(effect);
 }
 
 extern void (*D_80089B70[])(void *);
@@ -779,40 +782,42 @@ typedef struct {
     u8 unk50;
 } struct1513532C;
 
+/* Releases unk44 (func_100111C8), then calls the D_80089B70 handler selected by unk50. */
 void func_1513532C(struct1513532C *arg0) {
-    struct1513532C *p = arg0;
-    s32 idx;
+    struct1513532C *effect = arg0; // matching: the parameter copy keeps effect in a saved register
+    s32 index;
 
-    idx = p->unk50;
-    if (idx < 0) {
-        idx = 0;
-    } else if (idx >= 6) {
-        idx = 0;
+    index = effect->unk50;
+    if (index < 0) {
+        index = 0;
+    } else if (index >= 6) {
+        index = 0;
     }
-    if (p->unk44 != 0) {
-        func_100111C8(p->unk44);
-        p->unk44 = 0;
+    if (effect->unk44 != 0) {
+        func_100111C8(effect->unk44);
+        effect->unk44 = 0;
     }
-    D_80089B70[idx](p);
+    D_80089B70[index](effect);
 }
 
 extern void (*D_80089B88[])(void *);
 
+/* Releases unk44 (func_100111C8), then calls the D_80089B88 handler selected by unk50. */
 void func_151353A8(struct1513532C *arg0) {
-    struct1513532C *p = arg0;
-    s32 idx;
+    struct1513532C *effect = arg0; // matching: the parameter copy keeps effect in a saved register
+    s32 index;
 
-    idx = p->unk50;
-    if (idx < 0) {
-        idx = 0;
-    } else if (idx >= 6) {
-        idx = 0;
+    index = effect->unk50;
+    if (index < 0) {
+        index = 0;
+    } else if (index >= 6) {
+        index = 0;
     }
-    if (p->unk44 != 0) {
-        func_100111C8(p->unk44);
-        p->unk44 = 0;
+    if (effect->unk44 != 0) {
+        func_100111C8(effect->unk44);
+        effect->unk44 = 0;
     }
-    D_80089B88[idx](p);
+    D_80089B88[index](effect);
 }
 
 extern s32 func_15145EA4(Vec3f **in, Vec3f **out, void *matrix, s32 count);
@@ -829,74 +834,65 @@ void func_15135424(void *matrix, Vec3f *inA, Vec3f *inB, Vec3f *outA, Vec3f *out
     func_15145EA4(in, out, matrix, 2);
 }
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    u8 unk8;
-    u8 unk9;
-} Arg15135480;
+void func_1513555C(BloodStrip *strip, BloodActorMsg *msg, u8 message);
+void func_151355B8(BloodStrip *strip, BloodActorMsg *msg, u8 message);
 
-struct arg1_1513555C {
-    s32 unk0;
-    u8 unk4;
-};
+/* BloodStrip message handler: follows owner swaps, then dispatches on strip->mode. */
+void func_15135480(BloodStrip *strip, BloodActorMsg *msg, u8 message) {
+    s32 actorA;
+    s32 owner;
 
-void func_1513555C(struct102 *arg0, struct arg1_1513555C *arg1, u8 arg2);
-void func_151355B8(struct102 *arg0, struct arg1_1513555C *arg1, u8 arg2);
-
-void func_15135480(struct102 *arg0, struct arg1_1513555C *arg1, u8 arg2) {
-    s32 incoming;
-    s32 current;
-
-    if (arg2 == 0x2D) {
-        incoming = arg1->unk0;
-        current = *(s32 *)&arg0->unk1C;
-        if (incoming == current) {
-            *(s32 *)&arg0->unk1C = ((Arg15135480 *)arg1)->unk4;
-            arg0->unk18 = ((Arg15135480 *)arg1)->unk9;
-        } else if ((current | 0) == ((Arg15135480 *)arg1)->unk4) {
-            *(s32 *)&arg0->unk1C = incoming;
-            arg0->unk18 = ((Arg15135480 *)arg1)->unk8;
+    if (message == 0x2D) {
+        actorA = (s32)msg->actorA;
+        owner = (s32)strip->owner;
+        if (actorA == owner) {
+            strip->owner = msg->u4.actorB;
+            strip->ownerId = msg->swapIdB;
+        } else if ((owner | 0) == (s32)msg->u4.actorB) { // matching: `| 0` makes IDO copy owner, fixing operand order
+            strip->owner = (struct127 *)actorA;
+            strip->ownerId = msg->swapIdA;
         }
     }
-    switch (*((u8 *)arg0 + 0x50)) {
+    switch (strip->mode) {
     case 1:
-        func_151355B8(arg0, arg1, arg2);
+        func_151355B8(strip, msg, message);
         break;
     case 2:
-        func_1513555C(arg0, arg1, arg2);
+        func_1513555C(strip, msg, message);
         break;
     default:
-        if (arg2 == 0) {
-            if (arg1->unk0 == ((current = *(s32 *)&arg0->unk1C) | 0) || arg0->unk18 == arg1->unk4) {
-                func_1516972C(arg0);
+        if (message == 0) {
+            if ((s32)msg->actorA == ((owner = (s32)strip->owner) | 0) || strip->ownerId == msg->u4.actorAId) { // matching: as above
+                func_1516972C((struct102 *)strip);
             }
         }
         break;
     }
 }
 
-void func_1513555C(struct102 *arg0, struct arg1_1513555C *arg1, u8 arg2) {
-    s32 a = arg2;
-    if (a == 0 || a == 0x12) {
-        if (arg1->unk0 == *(s32 *)&arg0->unk1C || arg0->unk18 == arg1->unk4) {
-            func_1516972C(arg0);
+/* Mode 2 handler: frees the strip when its owner is removed (messages 0 and 0x12). */
+void func_1513555C(BloodStrip *strip, BloodActorMsg *msg, u8 message) {
+    if (message == 0 || message == 0x12) {
+        if (strip->owner == msg->actorA || strip->ownerId == msg->u4.actorAId) {
+            func_1516972C((struct102 *)strip);
         }
     }
 }
 
-void func_151355B8(struct102 *arg0, struct arg1_1513555C *arg1, u8 arg2) {
-    switch (arg2) {
+/* Mode 1 handler: frees the strip on message 0, stops it on message 3, for its owner. */
+void func_151355B8(BloodStrip *strip, BloodActorMsg *msg, u8 message) {
+    switch (message) {
     case 0:
-        if (arg1->unk0 == *(s32 *)&arg0->unk1C || arg0->unk18 == arg1->unk4) {
-            func_1516972C(arg0);
+        if (strip->owner == msg->actorA || strip->ownerId == msg->u4.actorAId) {
+            func_1516972C((struct102 *)strip);
         }
         break;
     case 3:
-        if (arg1->unk0 == *(s32 *)&arg0->unk1C || arg0->unk18 == arg1->unk4) {
-            s32 *p = (s32 *)((u8 *)arg0 + 0x10);
-            *p &= ~1;
-            *p = *p;
+        if (strip->owner == msg->actorA || strip->ownerId == msg->u4.actorAId) {
+            s32 *active = &strip->active;
+
+            *active &= ~1;
+            *active = *active; // matching: IDO emits the extra reload/store of this self-assignment
         }
         break;
     }
