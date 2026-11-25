@@ -25,9 +25,9 @@ typedef struct {
     /* 0x24 */ f32 scaleY;
     /* 0x28 */ f32 scaleZ;
     /* 0x2C */ u8 unk4C;
-    /* 0x2D */ u8 unk4D;
-    /* 0x2E */ u16 unk50;
-    /* 0x30 */ u16 unk52;
+    /* 0x2D */ u8 shadowSize;
+    /* 0x2E */ u16 cullRadiusXZ;
+    /* 0x30 */ u16 cullRadiusY;
     /* 0x32 */ u8 flags;
     /* 0x33 */ u8 id;            // 0: assign a free one
     /* 0x34 */ u8 inactive;
@@ -44,9 +44,9 @@ typedef struct {
 /* Defaults for objects of the second (grouped) list, indexed by model id (D_800A26C0). */
 typedef struct {
     /* 0x0 */ u8 unk4C;
-    /* 0x1 */ u8 unk4D;
-    /* 0x2 */ s16 unk52;
-    /* 0x4 */ s16 unk50;
+    /* 0x1 */ u8 shadowSize;
+    /* 0x2 */ s16 cullRadiusY;
+    /* 0x4 */ s16 cullRadiusXZ;
     /* 0x6 */ u16 drawDistance;
     /* 0x8 */ u8 flags;
     /* 0x9 */ u8 state;
@@ -195,9 +195,9 @@ void func_150039E0(s32 level, s32 arg1) {
             }
             if (i >= D_800DBF00) {
                 obj->unk4C = D_800A26C0[id].unk4C;
-                obj->shadowSize = D_800A26C0[id].unk4D;
-                obj->cullRadiusXZ = D_800A26C0[id].unk50;
-                obj->cullRadiusY = D_800A26C0[id].unk52;
+                obj->shadowSize = D_800A26C0[id].shadowSize;
+                obj->cullRadiusXZ = D_800A26C0[id].cullRadiusXZ;
+                obj->cullRadiusY = D_800A26C0[id].cullRadiusY;
                 obj->object_status = D_800A26C0[id].flags;
                 obj->state = D_800A26C0[id].state & ~8;
                 obj->effectFlags = D_800A26C0[id].effectFlags;
@@ -207,11 +207,11 @@ void func_150039E0(s32 level, s32 arg1) {
                 obj->drawDistance = D_800A26C0[id].drawDistance;
                 obj->unique_id = base[i].id;
             } else {
-                obj->cullRadiusXZ = base[i].unk50;
-                obj->cullRadiusY = base[i].unk52;
+                obj->cullRadiusXZ = base[i].cullRadiusXZ;
+                obj->cullRadiusY = base[i].cullRadiusY;
                 obj->object_status = base[i].flags;
                 obj->unk4C = base[i].unk4C;
-                obj->shadowSize = base[i].unk4D;
+                obj->shadowSize = base[i].shadowSize;
                 obj->drawDistance = base[i].drawDistance;
                 if (base[i].id != 0) {
                     obj->unique_id = base[i].id;
@@ -268,11 +268,11 @@ void func_150039E0(s32 level, s32 arg1) {
                 obj->effectFlags = base[i].effectFlags;
                 obj->model = NULL;
             }
-            obj->cullRadiusXZ = base[i].unk50;
-            obj->cullRadiusY = base[i].unk52;
+            obj->cullRadiusXZ = base[i].cullRadiusXZ;
+            obj->cullRadiusY = base[i].cullRadiusY;
             obj->object_status = base[i].flags;
             obj->unk4C = base[i].unk4C;
-            obj->shadowSize = base[i].unk4D;
+            obj->shadowSize = base[i].shadowSize;
             obj->drawDistance = base[i].drawDistance;
             if (base[i].id != 0) {
                 obj->unique_id = base[i].id;
@@ -465,7 +465,7 @@ f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 
 /*
- * Sets the object's bounding radius (unk50, unk52) from its farthest scaled vertex if it has none,
+ * Sets the object's bounding radius (cullRadiusXZ, cullRadiusY) from its farthest scaled vertex if it has none,
  * and counts in D_800BE2A0/2/4 whether a preset radius is too small, was computed, or is large enough.
  */
 void func_15004AAC(WorldObject *obj, ObjectSpawn *spawn) {
