@@ -2056,8 +2056,8 @@ typedef struct ModelLink {
     /* 0x1C */ s32 unk1C;
 } ModelLink; /* size 0x20 */
 
-/* A particle object made by func_1513D2F0 / func_151407D0 (game_169510.c's Particle, 0x110 bytes), as seen
- * by callers that keep their own data after it. Its ParticleDef copy is at 0x18. */
+/* A particle object made by func_1513D2F0 / func_151407D0 (game_169510.c), 0x110 bytes; callers keep their own
+ * data after it (game_169510.c: DefParticleMotion). Its ParticleDef copy is at 0x18. */
 typedef struct DefParticleHead {
     /* 0x000 */ EffectHeader header;    /* header.owner / kind as passed to the spawner */
     /* 0x010 */ s32 active;             /* bit 0: alive */

@@ -9,12 +9,12 @@ typedef struct {
     /* 0x0C */ f32 rotVelX;
     /* 0x10 */ f32 rotVelY;
     /* 0x14 */ f32 minY;           /* the particle expires below this height */
-} ParticleMotion;
+} FxParticleMotion;
 
 /* A live particle of game_169510.c; the update callbacks of D_80089CB8 / D_80089D60 get one. */
 typedef struct {
     /* 0x00 */ DefParticleHead head;
-    /* 0x110 */ ParticleMotion motion;
+    /* 0x110 */ FxParticleMotion motion;
 } FxParticle;
 
 /* Code range checksummed by func_150B9ED0 (anti-tamper: a mismatch breaks player 1's controller mapping). */

@@ -4,7 +4,7 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Per-behaviour state that follows a particle. */
+/* Per-behaviour state that follows a particle (a DefParticleHead). */
 typedef union {
     ParticleAxes axes;  /* func_1513D6FC, func_1513F4B0 */
     ActorRef owner;     /* func_1513E084 */
@@ -26,36 +26,9 @@ typedef union {
         f32 drag;
         Vec3f rotVel;
     } ballistic;        /* func_1513F728 */
-} ParticleMotion;
+} DefParticleMotion;
 
-typedef struct Particle {
-    u8 pad0[4];
-    struct Particle *prev;
-    struct Particle *next;
-    u8 padC[4];
-    s32 active;         /* bit 0: alive */
-    s32 unk14;
-    ParticleDef def;
-    u8 updateFn1;       /* D_80089CB8 index, 0 = none */
-    u8 updateFn2;       /* D_80089D60 index, 0 = none */
-    u8 expireFn;        /* D_80089E10 index, 0 = none */
-    u8 vertexFn;        /* D_80089E1C index */
-    u8 unk74;
-    u8 pad75[3];
-    f32 unk78;
-    u8 pad7C[0x14];
-    s32 unk90;
-    u8 unk94;
-    u8 unk95;
-    u8 pad96[2];
-    s32 unk98;
-    ModelLink link;
-    u8 padBC[4];
-    Vtx vtxTemplate[4];
-    Vtx *vtxBuffers[4]; /* per viewport, refreshed from vtxTemplate */
-} Particle; /* size 0x110; its ParticleMotion follows it */
-
-#define PARTICLE_MOTION(particle) ((ParticleMotion *)((particle) + 1))
+#define PARTICLE_MOTION(particle) ((DefParticleMotion *)((particle) + 1))
 
 /* Source of the four vertex colours given to func_151400D0. */
 typedef struct {
@@ -357,14 +330,13 @@ void func_1513CAA0(DefParticleHead *particle) {
 void func_1513CAD4(DefParticleHead *arg0) {
     s32 i;
 
-    // matching: a typed local copy of arg0 gets its own saved register
     for (i = 0; i <= D_80082FA0; i++) {
-        if (((Particle *)arg0)->link.handles[i]) {
-            func_100043B4(((Particle *)arg0)->link.handles[i], 4);
+        if (arg0->link.handles[i]) {
+            func_100043B4(arg0->link.handles[i], 4);
         }
     }
-    if (((Particle *)arg0)->link.sharedHandle != 0) {
-        func_100043B4(((Particle *)arg0)->link.sharedHandle, 4);
+    if (arg0->link.sharedHandle != 0) {
+        func_100043B4(arg0->link.sharedHandle, 4);
     }
 }
 
@@ -474,12 +446,12 @@ void func_1513CF9C(s32 arg0, s32 arg1, u8 arg2) {
 void func_1513CFD0(s32 arg0, s32 arg1, s32 arg2) {
 }
 
-extern s32 (*D_80089CB8[])(Particle *);
-extern s32 (*D_80089D60[])(Particle *);
-extern s32 (*D_80089E10[])(Particle *);
+extern s32 (*D_80089CB8[])(DefParticleHead *);
+extern s32 (*D_80089D60[])(DefParticleHead *);
+extern s32 (*D_80089E10[])(DefParticleHead *);
 
 /* Per-frame update of a particle: lifetime, fading and texture animation. */
-void func_1513CFE4(Particle *particle) {
+void func_1513CFE4(DefParticleHead *particle) {
     s32 speed;
     s8 expired;
     s32 numFrames;
@@ -574,7 +546,7 @@ void func_1513CFE4(Particle *particle) {
 /* Allocates a particle from a template; motionSize extra bytes follow it for its behaviour state. */
 void *func_1513D2F0(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip, s32 model,
                     s32 arg8, s32 motionSize, u8 argA, s32 argB) {
-    Particle *particle;
+    DefParticleHead *particle;
     s32 flags;
     s32 kind;
     s32 i;
@@ -587,7 +559,7 @@ void *func_1513D2F0(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expi
     } else {
         kind = 0x1C;
     }
-    particle = func_15167A68(kind, argB, motionSize + sizeof(Particle), 1, argA,
+    particle = func_15167A68(kind, argB, motionSize + sizeof(DefParticleHead), 1, argA,
                              (flags & 0x80000000U) ? 2 : 1);
     if (particle == NULL) {
         return NULL;
@@ -639,7 +611,7 @@ void *func_1513D524(void *def, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 verte
 /* Spawns a particle whose quad is spanned by two axes from func_1513D6FC (vertex function 12). */
 void *func_1513D594(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 flip, s16 angle, f32 width,
                   f32 height, s32 arg9, s32 argA, s32 model, s32 argC, u8 argD, s32 motionSize, u8 argF, s32 arg10) {
-    Particle *particle;
+    DefParticleHead *particle;
 
     if (colors == 0) {
         colors = &D_800A4AA0;
@@ -781,10 +753,10 @@ end: // matching: an unused label keeps the final return 1 in its own basic bloc
     return 1;
 }
 
-extern Vtx *(*D_80089E1C[])(Particle *, s16);
+extern Vtx *(*D_80089E1C[])(DefParticleHead *, s16);
 
 /* Draws a particle's quad (and attached model) for one viewport. */
-Gfx *func_1513DB00(Gfx *gfx, Particle *particle, s16 viewport) {
+Gfx *func_1513DB00(Gfx *gfx, DefParticleHead *particle, s16 viewport) {
     s32 pad; // matching: unused stack slot
     u8 needSync;
     s16 primR;
@@ -872,10 +844,10 @@ Gfx *func_1513DB00(Gfx *gfx, Particle *particle, s16 viewport) {
     return gfx;
 }
 
-extern void (*D_80089F64[])(Particle *, s32, u8);
+extern void (*D_80089F64[])(DefParticleHead *, s32, u8);
 
 /* Dispatches to the D_80089F64 handler for the particle's type. */
-void func_1513DF9C(Particle *particle, s32 arg1, u8 arg2) {
+void func_1513DF9C(DefParticleHead *particle, s32 arg1, u8 arg2) {
     s32 index;
 
     if (!(particle->def.flags & 0x400000)) {
@@ -929,7 +901,7 @@ void func_1513E070(s32 arg0, s32 arg1, s32 arg2) {
 
 /* Message handler: frees the particle when its owner goes away (0x1A), or retargets it on an actor swap (0x2D). */
 void func_1513E084(DefParticleHead *particle, ActorMsg *msg, u8 eventId) {
-    ActorRef *link = &PARTICLE_MOTION((Particle *)particle)->owner;
+    ActorRef *link = &PARTICLE_MOTION(particle)->owner;
 
     if (eventId == 0x1A) {
         if ((link->actor == msg->ref.actor) || (link->uniqueId == msg->ref.uniqueId)) {
@@ -1110,8 +1082,8 @@ s32 func_1513E2AC(s32 sprite, s32 arg1, s32 surface, f32 x, f32 y, f32 z, f32 wi
 }
 
 /* Moves, rotates and scales a particle by its drift velocities times the frame time, with optional gravity. */
-s32 func_1513E6E8(Particle *particle) {
-    ParticleMotion *motion;
+s32 func_1513E6E8(DefParticleHead *particle) {
+    DefParticleMotion *motion;
 
     motion = PARTICLE_MOTION(particle);
     if (particle->def.flags & 0x20) {
@@ -1145,7 +1117,7 @@ void func_150A7960(MtxF m, f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
  */
 
 /* Quad of width x height, rotated by def.rot, scaled by def.scale and placed at def.pos. */
-Vtx *func_1513E83C(Particle *particle, s16 viewport) {
+Vtx *func_1513E83C(DefParticleHead *particle, s16 viewport) {
     MtxF mtx;
     s32 pad; // matching: unused stack slot
     Vtx *vertices;
@@ -1207,7 +1179,7 @@ Vtx *func_1513E83C(Particle *particle, s16 viewport) {
  * direction), scaled vertically by def.scale.y; reversed mirrors the corner order.
  */
 Vtx *func_1513EAD8(particle, reversed, viewport)
-    Particle *particle;
+    DefParticleHead *particle;
     u8 reversed;
     s16 viewport;
 {
@@ -1271,7 +1243,7 @@ Vtx *func_1513EAD8(particle, reversed, viewport)
     return result;
 }
 
-Vtx *func_1513EAD8(Particle *particle, s32 reversed, s32 viewport);
+Vtx *func_1513EAD8(DefParticleHead *particle, s32 reversed, s32 viewport);
 
 Vtx *func_1513EDB4(void *particle, s16 viewport) {
     return func_1513EAD8(particle, FALSE, viewport);
@@ -1282,7 +1254,7 @@ Vtx *func_1513EDE4(void *particle, s16 viewport) {
 }
 
 /* Quad of width x height, rotated by def.rot and placed at def.pos (unrolled form of func_15140190). */
-Vtx *func_1513EE14(Particle *particle, s16 viewport) {
+Vtx *func_1513EE14(DefParticleHead *particle, s16 viewport) {
     Vtx *vertices;
     Vtx *result;
     MtxF mtx;
@@ -1342,7 +1314,7 @@ Vtx *func_1513EE14(Particle *particle, s16 viewport) {
  * Camera-facing upright quad that bends towards the point def.rot: the bend angle grows with the
  * square root of that point's sideways offset (scaled by def.scale.x), capped at 90 degrees.
  */
-Vtx *func_1513F114(Particle *particle, s16 viewport) {
+Vtx *func_1513F114(DefParticleHead *particle, s16 viewport) {
     Vtx *vertices;
     Vtx *result;
     f32 sinDir;
@@ -1419,11 +1391,11 @@ Vtx *func_1513F114(Particle *particle, s16 viewport) {
     return result;
 }
 
-Vtx *func_15140410(Particle *particle, Vec3f *axisU, Vec3f *axisV, s16 viewport);
+Vtx *func_15140410(DefParticleHead *particle, Vec3f *axisU, Vec3f *axisV, s16 viewport);
 
 /* Quad spanned by the two axes in motion.axes (vertex function 12). */
 void func_1513F4B0(DefParticleHead *head, s16 viewport) {
-    Particle *particle = (Particle *)head;
+    DefParticleHead *particle = head;
 
     func_15140410(particle, &PARTICLE_MOTION(particle)->axes.u, &PARTICLE_MOTION(particle)->axes.v, viewport);
 }
@@ -1458,7 +1430,7 @@ Gfx *func_1513F4E4(Gfx *gfx, u8 combiner, u8 *needSync) {
 }
 
 /* Sets a particle's update, expiry and vertex function indices. */
-void func_1513F680(Particle *particle, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn) {
+void func_1513F680(DefParticleHead *particle, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn) {
     particle->updateFn1 = updateFn1;
     particle->updateFn2 = updateFn2;
     particle->expireFn = expireFn;
@@ -1472,7 +1444,7 @@ void func_1513F6C0(QuadSprite *sprite, u8 updateFn, u8 expireFn) {
 }
 
 /* Grows a particle's width and height by motion.grow.rate times the frame time. */
-s32 func_1513F6E8(Particle *particle) {
+s32 func_1513F6E8(DefParticleHead *particle) {
     f32 rate = PARTICLE_MOTION(particle)->grow.rate;
 
     particle->def.width += rate * D_800BE9A4;
@@ -1484,8 +1456,8 @@ s32 func_1513F6E8(Particle *particle) {
  * Ballistic motion: applies drag once per elapsed tick and gravity, then moves the particle by the
  * average of its old and new velocity; also spins it by motion.ballistic.rotVel.
  */
-s32 func_1513F728(Particle *particle) {
-    ParticleMotion *motion;
+s32 func_1513F728(DefParticleHead *particle) {
+    DefParticleMotion *motion;
     Vec3f oldVel;
     s32 i;
 
@@ -1518,9 +1490,9 @@ s32 func_1513F728(Particle *particle) {
 extern Vec3f *func_15144B34(s32 viewport);
 extern void func_150AD8B0(Vec3f *a, Vec3f *b, Vec3f *out);
 
-Vtx *func_1513FAB4(Particle *particle, u8 reversed, BeamScale *scale, s16 viewport);
+Vtx *func_1513FAB4(DefParticleHead *particle, u8 reversed, BeamScale *scale, s16 viewport);
 
-void func_1513FA2C(Particle *particle, s16 viewport) {
+void func_1513FA2C(DefParticleHead *particle, s16 viewport) {
     BeamScale scale;
 
     scale.width = 1.0f;
@@ -1528,7 +1500,7 @@ void func_1513FA2C(Particle *particle, s16 viewport) {
     func_1513FAB4(particle, FALSE, &scale, viewport);
 }
 
-void func_1513FA70(Particle *particle, s16 viewport) {
+void func_1513FA70(DefParticleHead *particle, s16 viewport) {
     BeamScale scale;
 
     scale.width = 1.0f;
@@ -1540,7 +1512,7 @@ void func_1513FA70(Particle *particle, s16 viewport) {
  * Beam from def.pos towards def.rot (its length scaled by def.height * scale->length), def.width *
  * scale->width wide and turned to face the viewport's camera; reversed rotates the corner order.
  */
-Vtx *func_1513FAB4(Particle *particle, u8 reversed, BeamScale *scale, s16 viewport) {
+Vtx *func_1513FAB4(DefParticleHead *particle, u8 reversed, BeamScale *scale, s16 viewport) {
     Vtx *vertices;
     Vtx *result;
     Vec3f *camera;
@@ -1706,7 +1678,7 @@ void func_151400D0(Vtx *vtx, VtxColor *colors) {
 }
 
 /* Quad of width x height, rotated by def.rot and placed at def.pos. */
-Vtx *func_15140190(Particle *particle, s16 viewport) {
+Vtx *func_15140190(DefParticleHead *particle, s16 viewport) {
     Vtx *vertices;
     Vtx *result;
     MtxF mtx;
@@ -1766,7 +1738,7 @@ void func_151403DC(s32 arg0, u8 arg1) {
 }
 
 /* Quad centred on def.pos with half-axes axisU * width and axisV * height. */
-Vtx *func_15140410(Particle *particle, Vec3f *axisU, Vec3f *axisV, s16 viewport) {
+Vtx *func_15140410(DefParticleHead *particle, Vec3f *axisU, Vec3f *axisV, s16 viewport) {
     Vtx *vertices;
     Vtx *result;
     f32 ux, uy, uz, vx, vy, vz;
@@ -1815,53 +1787,53 @@ Vtx *func_15140410(Particle *particle, Vec3f *axisU, Vec3f *axisV, s16 viewport)
 
 /* List callback: insertion-sorts draw list D_800DCE50[group][list] by PARTICLE_SORT_KEY. */
 s32 func_151406AC(s32 arg0, s32 list, s32 group, s16 phase) {
-    Particle head;
-    Particle **slot;
-    Particle *cur;
-    Particle *prev;
-    Particle *next;
-    Particle *node;
+    DefParticleHead head;
+    DefParticleHead **slot;
+    DefParticleHead *cur;
+    DefParticleHead *prev;
+    DefParticleHead *next;
+    DefParticleHead *node;
     s32 key;
     s32 nodeKey;
 
     if (phase != 0) {
         return arg0;
     }
-    slot = (Particle **)&D_800DCE50[group][list];
+    slot = (DefParticleHead **)&D_800DCE50[group][list];
     node = *slot;
     head.def.texture = 0;
     head.def.frame = 0;
-    head.next = node;
+    head.header.next = &node->header;
     /* BUG (original game): dereferences the list head before the NULL check below
        (and again after the sort); an empty list writes to address 4. */
-    node->prev = &head;
+    node->header.prev = &head.header;
     if (node != NULL) {
-        for (cur = node->next; cur != NULL; cur = next) {
-            prev = cur->prev;
-            next = cur->next;
+        for (cur = (DefParticleHead *)node->header.next; cur != NULL; cur = next) {
+            prev = (DefParticleHead *)cur->header.prev;
+            next = (DefParticleHead *)cur->header.next;
             key = PARTICLE_SORT_KEY(cur);
-            for (node = prev; node != NULL; node = node->prev) {
+            for (node = prev; node != NULL; node = (DefParticleHead *)node->header.prev) {
                 nodeKey = PARTICLE_SORT_KEY(node);
                 if (key < nodeKey) {
                     continue;
                 }
                 if (node != prev) {
-                    prev->next = cur->next;
-                    if (cur->next != NULL) {
-                        cur->next->prev = cur->prev;
+                    prev->header.next = cur->header.next;
+                    if (cur->header.next != NULL) {
+                        cur->header.next->prev = cur->header.prev;
                     }
-                    cur->next = node->next;
-                    if (cur->next != NULL) {
-                        cur->next->prev = cur;
+                    cur->header.next = node->header.next;
+                    if (cur->header.next != NULL) {
+                        cur->header.next->prev = &cur->header;
                     }
-                    cur->prev = node;
-                    node->next = cur;
+                    cur->header.prev = &node->header;
+                    node->header.next = &cur->header;
                 }
                 break;
             }
         }
     }
-    *slot = head.next;
-    head.next->prev = NULL;
+    *slot = (DefParticleHead *)head.header.next;
+    head.header.next->prev = NULL;
     return arg0;
 }
