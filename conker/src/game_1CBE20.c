@@ -4,27 +4,7 @@
 #include "effects.h"
 #include "libc/string.h"
 
-/* First argument of func_15152190 (as Arg15108120 in game_1355D0.c). */
-typedef struct {
-    /* 0x00 */ s32 unk00;
-    /* 0x04 */ s32 unk04;
-    /* 0x08 */ Vec3f pos;
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ s16 unk1A;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ s16 unk2E;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-} Arg15152190;
-
-void func_15152190(Arg15152190 *, s32 *, f32 *, s32, f32, s32, s32, s32);
+void func_15152190(DebrisBurst *, s32 *, f32 *, s32, f32, s32, s32, s32);
 
 /* Owner of a func_1519E970 timer (EvNodeData in game_50D80.c): unk30 holds the running timer. */
 typedef struct {
@@ -87,26 +67,26 @@ void func_1519EA04(EvTimer *timer) {
 
 /* Spawns a func_15152190 effect at pos (cutscene event; the caller passes an id < 0xE9 and a scale). */
 void func_1519EA78(Vec3f *pos, u16 id, f32 scale, u8 arg3, s32 arg4) {
-    Arg15152190 def;
+    DebrisBurst def;
     s32 idArg;
     f32 scaleArg;
 
-    def.unk00 = 10;
-    def.unk04 = 7;
+    def.countBase = 10;
+    def.countRange = 7;
     def.pos = *pos;
-    def.unk14 = 0;
-    def.unk16 = 0xFF;
-    def.unk18 = -0x35;
-    def.unk1A = 0x18;
-    def.unk1C = 10.0f;
-    def.unk20 = 8.0f;
-    def.unk24 = -1.32400012f;
-    def.unk28 = 0.7440000176f;
-    def.unk2C = 50;
-    def.unk2E = 20;
-    def.unk30 = 0.6000000238f;
-    def.unk34 = 0.8000000119f;
-    def.unk38 = 26.18200111f;
+    def.angles.yawBase = 0;
+    def.angles.yawRange = 0xFF;
+    def.angles.pitchBase = -0x35;
+    def.angles.pitchRange = 0x18;
+    def.speedBase = 10.0f;
+    def.speedRange = 8.0f;
+    def.gravityBase = -1.32400012f;
+    def.gravityRange = 0.7440000176f;
+    def.lifeBase = 50;
+    def.lifeRange = 20;
+    def.scaleBase = 0.6000000238f;
+    def.scaleRange = 0.8000000119f;
+    def.spin = 26.18200111f;
     idArg = id;
     scaleArg = scale;
     func_15152190(&def, &idArg, &scaleArg, 1, 0.0f, 0, arg3, arg4);

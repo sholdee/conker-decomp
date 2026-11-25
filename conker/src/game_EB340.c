@@ -250,26 +250,6 @@ typedef struct {
     /* 0x40 */ s8 unk40;
 } EB340Cfg80C;
 
-/* func_15152190 parameter block (same layout as game_11C2B0.c's Cfg150F1D10B). */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ Vec3f pos;
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ s16 unk1A;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ s16 unk2E;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-} EB340Cfg2190;
-
 extern s32 D_800A0010[];
 extern f32 D_800A0038[];
 extern s32 D_800A0060[];
@@ -278,7 +258,7 @@ extern f32 D_800A0064[];
 void func_1515C244(Actor *, Vec3f *, f32 *, f32 *);
 void func_1504715C(void *, Actor *);
 void func_1515080C(EB340Cfg80C *, s32 *, f32 *, s32, s32, s32, s32, s32, s32, void *, f32, s32, s32, u8, s32);
-void func_15152190(EB340Cfg2190 *, s32 *, f32 *, s32, f32, s32, u8, s32);
+void func_15152190(DebrisBurst *, s32 *, f32 *, s32, f32, s32, u8, s32);
 void func_15153F18(AngleRange *, SplashSpray *, void *, u8, s32);
 
 /* Spawns the burst of effects at `obj`'s centre: one func_1515080C, one func_15152190
@@ -290,7 +270,7 @@ void func_150BE494(Actor *obj, u8 arg1, s32 arg2) {
     f32 halfSize;
     u8 ground[0x24]; // filled by func_1504715C (a ground probe in other files)
     EB340Cfg80C primary;
-    EB340Cfg2190 secondary;
+    DebrisBurst secondary;
 
     if (obj != NULL) {
         halfSize = (obj->xz_scale + obj->y_scale) * 0.5f;
@@ -315,22 +295,22 @@ void func_150BE494(Actor *obj, u8 arg1, s32 arg2) {
         primary.unk3C = 1.0f;
         primary.unk40 = 0xB;
         func_1515080C(&primary, D_800A0010, D_800A0038, 10, 0, 0, 0, 1, -1, ground, 55.0f, 0, 0, arg1, arg2);
-        secondary.unk0 = 0x11;
-        secondary.unk4 = 9;
+        secondary.countBase = 0x11;
+        secondary.countRange = 9;
         secondary.pos = pos;
-        secondary.unk14 = 0;
-        secondary.unk16 = 0xFF;
-        secondary.unk18 = -0x3F;
-        secondary.unk1A = 0x4B;
-        secondary.unk1C = 14.0f;
-        secondary.unk20 = 11.0f;
-        secondary.unk2C = 0x28;
-        secondary.unk2E = 0x14;
-        secondary.unk24 = -0.8000000119f;
-        secondary.unk28 = 0.3030000031f;
-        secondary.unk30 = 0.151000008f;
-        secondary.unk34 = 0.1590000093f;
-        secondary.unk38 = 29.78700066f;
+        secondary.angles.yawBase = 0;
+        secondary.angles.yawRange = 0xFF;
+        secondary.angles.pitchBase = -0x3F;
+        secondary.angles.pitchRange = 0x4B;
+        secondary.speedBase = 14.0f;
+        secondary.speedRange = 11.0f;
+        secondary.lifeBase = 0x28;
+        secondary.lifeRange = 0x14;
+        secondary.gravityBase = -0.8000000119f;
+        secondary.gravityRange = 0.3030000031f;
+        secondary.scaleBase = 0.151000008f;
+        secondary.scaleRange = 0.1590000093f;
+        secondary.spin = 29.78700066f;
         func_15152190(&secondary, D_800A0060, D_800A0064, 1, 10.0f, 0, arg1, arg2);
         {
             SplashSpraySpec particles;

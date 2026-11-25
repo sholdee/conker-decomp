@@ -14,6 +14,7 @@ void func_10010630(u16 arg0, Actor *arg1, u32 arg2, s16 arg3, u16 arg4);
 #define D_80099AB4 D_80099AB4_s16_hdr
 #define D_80099ABC D_80099ABC_s16_hdr
 #include "variables.h"
+#include "effects.h"
 #undef D_80099A3C
 #undef D_80099A3E
 #undef D_80099AB4
@@ -220,7 +221,7 @@ extern void func_150FED30(Actor *arg0, s32 arg1, s32 arg2);
 extern u32 D_80099BB8;
 void func_151C329C(s32 arg0, s32 arg1, s32 arg2);
 void func_151DC260(f32 *, void *, s32, s32, s32);
-void func_15152190(void *, void *, void *, s32, f32, s32, s32, s32);
+void func_15152190(DebrisBurst *, void *, void *, s32, f32, s32, s32, s32);
 extern f32 D_80099BC8[3][3];
 extern u8 D_80099BEC[];
 extern u8 D_80099C04[];
@@ -2885,62 +2886,40 @@ void func_15071A64(s32 cmd) {
         func_151DC484(&hit.unk24, &hit, 0, 0xFF, 1);
     }
 }
-typedef struct Game981E0EffectPoint {
-    f32 values[3];
-} Game981E0EffectPoint;
-
-typedef struct Game981E0SmokeConfig {
-    s32 kind;
-    s32 count;
-    Game981E0EffectPoint position;
-    s16 zero14;
-    s16 alpha;
-    s16 minimum;
-    s16 maximum;
-    f32 size0;
-    f32 size1;
-    f32 range0;
-    f32 range1;
-    s16 lifetime;
-    s16 rate;
-    f32 value0;
-    f32 value1;
-    f32 value2;
-} Game981E0SmokeConfig;
 
 void func_15071B18(s32 cmd) {
-    Game981E0EffectPoint point;
+    Vec3f point;
     u8 collision[0x24];
 
     if (D_800D154C->unk1D4 != NULL && (D_800D154C->unk74 & 0xF) != 0xF) {
-        func_15143134(D_80099BC8[func_150ADA20() % 3U], point.values, (s32)((Mtx *)D_800D154C->unk1D4 + 7));
+        func_15143134(D_80099BC8[func_150ADA20() % 3U], &point.x, (s32)((Mtx *)D_800D154C->unk1D4 + 7));
         func_1504715C(collision, D_800D154C);
         if (func_150ADA20() & 1) {
             if (func_150ADA20() & 1) {
-                func_151DC260(point.values, collision, 0, 0xFF, 1);
+                func_151DC260(&point.x, collision, 0, 0xFF, 1);
             } else {
-                func_151DC484(point.values, (struct199 *)collision, 0, 0xFF, 1);
+                func_151DC484(&point.x, (struct199 *)collision, 0, 0xFF, 1);
             }
         }
         if (func_150ADA20() & 1) {
-            Game981E0SmokeConfig config;
+            DebrisBurst config;
 
-            config.kind = 8;
-            config.count = 5;
-            config.position = point;
-            config.zero14 = 0;
-            config.alpha = 0xFF;
-            config.minimum = -64;
-            config.maximum = 60;
-            config.size0 = 10.0f;
-            config.size1 = 10.0f;
-            config.lifetime = 25;
-            config.rate = 20;
-            config.range0 = -0.97800004f;
-            config.range1 = 0.263f;
-            config.value0 = 0.096f;
-            config.value1 = 0.07f;
-            config.value2 = 21.892f;
+            config.countBase = 8;
+            config.countRange = 5;
+            config.pos = point;
+            config.angles.yawBase = 0;
+            config.angles.yawRange = 0xFF;
+            config.angles.pitchBase = -64;
+            config.angles.pitchRange = 60;
+            config.speedBase = 10.0f;
+            config.speedRange = 10.0f;
+            config.lifeBase = 25;
+            config.lifeRange = 20;
+            config.gravityBase = -0.97800004f;
+            config.gravityRange = 0.263f;
+            config.scaleBase = 0.096f;
+            config.scaleRange = 0.07f;
+            config.spin = 21.892f;
             func_15152190(&config, D_80099BEC, D_80099C04,
                           6, 25.0f, 0, 0xFF, 1);
         }

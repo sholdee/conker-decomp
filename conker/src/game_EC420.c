@@ -1,14 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
-/* Directions a func_15150400/func_15152190 burst scatters in (256-step binary angles). */
-typedef struct {
-    /* 0x0 */ s16 yawBase;
-    /* 0x2 */ s16 yawRange;
-    /* 0x4 */ s16 pitchBase;
-    /* 0x6 */ s16 pitchRange;
-} AngleRange;
+#include "effects.h"
 
 /* Config of func_15150400 (game_17CAF0.c): spawns countBase + rand(countRange) pieces around origin,
  * each with a random entry of the variant tables and a copy of extraData. */
@@ -40,23 +33,6 @@ typedef struct {
     /* 0x5C */ s32 extraSize;
     /* 0x60 */ void *extraData; /* copied into each piece at +0x170 */
 } Arg15150400;
-
-/* Config of func_15152190 (game_17CAF0.c). */
-typedef struct {
-    /* 0x00 */ s32 countBase;
-    /* 0x04 */ s32 countRange;
-    /* 0x08 */ Vec3f origin;
-    /* 0x14 */ AngleRange angles;
-    /* 0x1C */ f32 speedBase;
-    /* 0x20 */ f32 speedRange;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ s16 unk2E;
-    /* 0x30 */ f32 scaleBase;
-    /* 0x34 */ f32 scaleRange;
-    /* 0x38 */ f32 spin;
-} Arg15152190;
 
 /* Config of func_15153634 (game_17CAF0.c): spawns countBase + rand(countRange) particles at position. */
 typedef struct {
@@ -126,7 +102,7 @@ typedef struct {
 } Piece;
 
 extern void func_15150400(Arg15150400 *, AngleRange *, u8, s32);
-extern void func_15152190(Arg15152190 *, const s32 *, const f32 *, u32, f32, s32, u8, s32);
+extern void func_15152190(DebrisBurst *, const s32 *, const f32 *, u32, f32, s32, u8, s32);
 extern void func_15153634(Arg15153634 *, u8, u8, s32);
 
 /* An entry whose level ramps toward maxLevel while `rising` is set and back to 0 otherwise. */
@@ -642,7 +618,7 @@ void func_150BFFE0(Actor *obj) {
 /* Piece handler: two particle bursts 20 units above `y` at the piece's position. */
 s32 func_150C01DC(Piece *piece, s32 arg1, s32 arg2, s32 arg3, f32 y) {
     Vec3f pos;
-    Arg15152190 burst;
+    DebrisBurst burst;
 
     pos.x = piece->position.x;
     pos.y = y + 20.0f;
@@ -653,17 +629,17 @@ s32 func_150C01DC(Piece *piece, s32 arg1, s32 arg2, s32 arg3, f32 y) {
 
     burst.countBase = 5;
     burst.countRange = 4;
-    burst.origin = pos;
+    burst.pos = pos;
     burst.angles.yawBase = 0;
     burst.angles.yawRange = 0xFF;
     burst.angles.pitchBase = -0x40;
     burst.angles.pitchRange = 0x22;
     burst.speedBase = 12.0f;
     burst.speedRange = 8.0f;
-    burst.unk24 = -1.697000027f;
-    burst.unk28 = 0.4990000129f;
-    burst.unk2C = 0x1E;
-    burst.unk2E = 0xF;
+    burst.gravityBase = -1.697000027f;
+    burst.gravityRange = 0.4990000129f;
+    burst.lifeBase = 0x1E;
+    burst.lifeRange = 0xF;
     burst.scaleBase = 0.8000000119f;
     burst.scaleRange = 1.200000048f;
     burst.spin = 15.29900074f;

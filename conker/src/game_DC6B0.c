@@ -568,27 +568,6 @@ typedef struct {
     /* 0x68 */ f32 unk68;
 } ParticleBurst;
 
-/* Debris description passed to func_15152190: a random number of pieces thrown in random
- * directions from origin. */
-typedef struct {
-    /* 0x00 */ s32 count;
-    /* 0x04 */ s32 countRange;
-    /* 0x08 */ Vec3f origin;
-    /* 0x14 */ s16 yaw;
-    /* 0x16 */ s16 yawRange;
-    /* 0x18 */ s16 pitch;
-    /* 0x1A */ s16 pitchRange;
-    /* 0x1C */ f32 speed;
-    /* 0x20 */ f32 speedRange;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ s16 unk2E;
-    /* 0x30 */ f32 scale;
-    /* 0x34 */ f32 scaleRange;
-    /* 0x38 */ f32 spin;
-} DebrisBurst;
-
 extern void func_15153634(ParticleBurst *, s32, u8, s32);
 extern void func_15152190(DebrisBurst *, const s32 *variantIds, const f32 *variantScales, s32 variantCount,
                           f32 radius, s32, u8, s32);
@@ -653,20 +632,20 @@ void func_150B0348(Actor *obj, u8 arg1, s32 arg2) {
     {
         DebrisBurst debris;
 
-        debris.count = 36;
+        debris.countBase = 36;
         debris.countRange = 10;
-        debris.origin = pos;
-        debris.yaw = 0;
-        debris.yawRange = 0xFF;
-        debris.pitch = -40;
-        debris.pitchRange = 20;
-        debris.speed = 11.0f;
+        debris.pos = pos;
+        debris.angles.yawBase = 0;
+        debris.angles.yawRange = 0xFF;
+        debris.angles.pitchBase = -40;
+        debris.angles.pitchRange = 20;
+        debris.speedBase = 11.0f;
         debris.speedRange = 8.0f;
-        debris.unk24 = -1.09f;
-        debris.unk28 = 0.3710000217f;
-        debris.unk2C = 34;
-        debris.unk2E = 15;
-        debris.scale = 0.302000016f;
+        debris.gravityBase = -1.09f;
+        debris.gravityRange = 0.3710000217f;
+        debris.lifeBase = 34;
+        debris.lifeRange = 15;
+        debris.scaleBase = 0.302000016f;
         debris.scaleRange = 0.3180000186f;
         debris.spin = 9.687f;
         func_15152190(&debris, D_8009F790, D_8009F7A4, 5, 65.0f, 0, arg1, arg2);

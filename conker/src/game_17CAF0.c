@@ -1077,25 +1077,9 @@ void func_15151D6C(struct Arg15151D6C *config, s32 *variantIds, f32 *variantScal
     }
 }
 
-struct Arg15152190 {
-    s32 countBase;
-    s32 countRange;
-    Vec3f origin;
-    AngleRange angles;
-    f32 speedBase;
-    f32 speedRange;
-    f32 unk24;
-    f32 unk28;
-    s16 unk2C;
-    s16 unk2E;
-    f32 scaleBase;
-    f32 scaleRange;
-    f32 spin; /* spawn.spin.x/z are random in [-spin, spin] */
-};
-
 /* Spawns a random number of pieces in random directions around config->origin, each using a random
  * entry of the variant tables. */
-void func_15152190(struct Arg15152190 *config, s32 *variantIds, f32 *variantScales, u32 variantCount, f32 radius, u8 arg5, u8 arg6, s32 arg7) {
+void func_15152190(DebrisBurst *config, s32 *variantIds, f32 *variantScales, u32 variantCount, f32 radius, u8 arg5, u8 arg6, s32 arg7) {
     s32 count;
     s32 variant;
     ParticleSpawn78 spawn;
@@ -1135,12 +1119,12 @@ void func_15152190(struct Arg15152190 *config, s32 *variantIds, f32 *variantScal
         func_15143794(yaw, pitch, (func_150ADA68() * config->speedRange) + config->speedBase, &spawn.vel.x);
         spawn.rotVel.x = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
         spawn.rotVel.z = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
-        spawn.gravity = (func_150ADA68() * config->unk28) + config->unk24;
-        spawn.lifetime = (func_150ADA20() % (u32)(config->unk2E + 1)) + config->unk2C;
+        spawn.gravity = (func_150ADA68() * config->gravityRange) + config->gravityBase;
+        spawn.lifetime = (func_150ADA20() % (u32)(config->lifeRange + 1)) + config->lifeBase;
         func_15143794(yaw, pitch, radius, &spawn.pos.x);
-        spawn.pos.x += config->origin.x;
-        spawn.pos.y += config->origin.y;
-        spawn.pos.z += config->origin.z;
+        spawn.pos.x += config->pos.x;
+        spawn.pos.y += config->pos.y;
+        spawn.pos.z += config->pos.z;
     // matching: the label ends a basic block, which keeps as1 from filling a call's delay slot
     pickVariant:
         variant = func_150ADA20() % variantCount;

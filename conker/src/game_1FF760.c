@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /* Parameter block for the particle emitter func_1515080C. */
 typedef struct {
@@ -24,25 +25,6 @@ typedef struct {
     /* 0x40 */ s8 unk40;
 } Emitter080CParams;
 
-/* Parameter block for the particle emitter func_15152190. */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ Vec3f pos;
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ s16 unk1A;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ s16 unk2E;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-} Emitter2190Params;
 
 /* Parameter block for the particle emitter func_15151A38. */
 typedef struct {
@@ -100,7 +82,7 @@ extern f32 D_800AB114[];
 void func_1515C244(Actor *, Vec3f *, f32 *, f32 *);
 void func_1504715C(void *, Actor *);
 void func_1515080C(Emitter080CParams *, s32 *, f32 *, s32, s32, s32, s32, s32, s32, void *, f32, s32, s32, u8, s32);
-void func_15152190(Emitter2190Params *, s32 *, f32 *, s32, f32, s32, u8, s32);
+void func_15152190(DebrisBurst *, s32 *, f32 *, s32, f32, s32, u8, s32);
 void func_15151A38(Emitter1A38Params *, u8, s32);
 
 /* Plays sound 0xAA at the actor and spawns three particle effects (via func_1515080C, func_15152190
@@ -141,23 +123,23 @@ void func_151D22B0(Actor *actor, u8 arg1, s32 arg2) {
             func_1515080C(&params, D_800AB0B0, D_800AB0E0, 12, 0, 0, 0, 1, -1, surface, 20.0f, 0, 0, arg1, arg2);
         }
         {
-            Emitter2190Params params;
-            params.unk0 = 15;
-            params.unk4 = 7;
+            DebrisBurst params;
+            params.countBase = 15;
+            params.countRange = 7;
             params.pos = origin;
-            params.unk1C = 30.0f;
-            params.unk20 = 10.0f;
-            params.unk14 = 0;
-            params.unk16 = 0xFF;
-            params.unk18 = -29;
-            params.unk1A = 20;
-            params.unk2C = 32;
-            params.unk2E = 18;
-            params.unk24 = -1.309000015f;
-            params.unk28 = 0.4200000167f;
-            params.unk30 = 0.1070000082f;
-            params.unk34 = 0.3000000119f;
-            params.unk38 = 19.23800087f;
+            params.speedBase = 30.0f;
+            params.speedRange = 10.0f;
+            params.angles.yawBase = 0;
+            params.angles.yawRange = 0xFF;
+            params.angles.pitchBase = -29;
+            params.angles.pitchRange = 20;
+            params.lifeBase = 32;
+            params.lifeRange = 18;
+            params.gravityBase = -1.309000015f;
+            params.gravityRange = 0.4200000167f;
+            params.scaleBase = 0.1070000082f;
+            params.scaleRange = 0.3000000119f;
+            params.spin = 19.23800087f;
             func_15152190(&params, D_800AB110, D_800AB114, 1, 0.0f, 0, arg1, arg2);
         }
         {

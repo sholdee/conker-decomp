@@ -1543,25 +1543,6 @@ typedef struct {
     /* 0x40 */ u8 unk40;
 } Cfg150F1D10A;
 
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ Vec3f pos;
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ s16 unk1A;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ s16 unk2E;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-} Cfg150F1D10B;
-
 extern s32 D_800A18C0[];
 extern f32 D_800A18CC[];
 extern s32 D_800A18D8[];
@@ -1572,7 +1553,7 @@ void func_151D5514(Vec3f *, u8, s32);
 void func_151D3FF4(Vec3f *, u8, s32);
 void func_151541B8(Vec3f *, f32, f32, f32, f32, u8, s32);
 void func_1515080C(Cfg150F1D10A *, s32 *, f32 *, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, u8, s32);
-void func_15152190(Cfg150F1D10B *, s32 *, f32 *, s32, f32, s32, u8, s32);
+void func_15152190(DebrisBurst *, s32 *, f32 *, s32, f32, s32, u8, s32);
 
 /* Burst of effects at `actor` (func_151D5404 and friends, sound 0x2B6/0x2BE, two particle
  * sprays scaled by the actor's size). */
@@ -1596,7 +1577,7 @@ void func_150F1D10(Actor *actor, u8 arg1, s32 arg2) {
                   (f32)(u32)(func_150ADA20() % 56U + 200), 0.0f, arg1, arg2);
     {
         Cfg150F1D10A a;
-        Cfg150F1D10B b;
+        DebrisBurst b;
 
         a.unk0 = 3;
         a.unk4 = 0;
@@ -1617,22 +1598,22 @@ void func_150F1D10(Actor *actor, u8 arg1, s32 arg2) {
         a.unk3C = 0.0f;
         a.unk40 = 12;
         func_1515080C(&a, D_800A18C0, D_800A18CC, 3, 0, 0, 0, 1, -1, 0, 0.0f, 0, 0, arg1, arg2);
-        b.unk0 = 5;
-        b.unk4 = 3;
+        b.countBase = 5;
+        b.countRange = 3;
         b.pos = pos;
-        b.unk1C = 25.0f;
-        b.unk20 = 15.0f;
-        b.unk14 = 0;
-        b.unk16 = 0xFF;
-        b.unk18 = -64;
-        b.unk1A = 30;
-        b.unk2C = 70;
-        b.unk2E = 20;
-        b.unk24 = -1.239000082f;
-        b.unk28 = 0.3760000169f;
-        b.unk30 = 0.503000021f;
-        b.unk34 = 0.2560000122f;
-        b.unk38 = 13.93300056f;
+        b.speedBase = 25.0f;
+        b.speedRange = 15.0f;
+        b.angles.yawBase = 0;
+        b.angles.yawRange = 0xFF;
+        b.angles.pitchBase = -64;
+        b.angles.pitchRange = 30;
+        b.lifeBase = 70;
+        b.lifeRange = 20;
+        b.gravityBase = -1.239000082f;
+        b.gravityRange = 0.3760000169f;
+        b.scaleBase = 0.503000021f;
+        b.scaleRange = 0.2560000122f;
+        b.spin = 13.93300056f;
         func_15152190(&b, D_800A18D8, D_800A18E0, 2, 0.0f, 0, arg1, arg2);
     }
 }

@@ -2808,50 +2808,30 @@ void func_1513A24C(Vec3f *position, s32 *table, f32 *arg2, s32 count, f32 scale,
     func_15133E3C(0, 0x45);
 }
 
-/* Parameters of a func_15152190 blood splash. */
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    Vec3f position;
-    s16 unk14;
-    s16 unk16;
-    s16 unk18;
-    s16 unk1A;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    s16 unk2C;
-    s16 unk2E;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-} BloodSplashConfig;
-
-void func_15152190(BloodSplashConfig *, void *, void *, s32, f32, s32, s32, s32);
+void func_15152190(DebrisBurst *, void *, void *, s32, f32, s32, s32, s32);
 extern u8 D_800A4260[];
 extern u8 D_800A4264[];
 
 /* Small blood splash at position (func_15152190 with D_800A4260). */
 void func_1513A48C(Vec3f *position, u8 arg1, s32 arg2) {
-    BloodSplashConfig config;
+    DebrisBurst config;
 
-    config.unk0 = 8;
-    config.unk4 = 4;
-    config.position = *position;
-    config.unk14 = 0;
-    config.unk16 = 255;
-    config.unk18 = -55;
-    config.unk1A = 32;
-    config.unk2C = 40;
-    config.unk2E = 20;
-    config.unk30 = 0.07f;
-    config.unk34 = 0.07f;
-    config.unk1C = 10.0f;
-    config.unk20 = 9.0f;
-    config.unk24 = -1.0040001f;
-    config.unk28 = 0.254f;
-    config.unk38 = 23.446001f;
+    config.countBase = 8;
+    config.countRange = 4;
+    config.pos = *position;
+    config.angles.yawBase = 0;
+    config.angles.yawRange = 255;
+    config.angles.pitchBase = -55;
+    config.angles.pitchRange = 32;
+    config.lifeBase = 40;
+    config.lifeRange = 20;
+    config.scaleBase = 0.07f;
+    config.scaleRange = 0.07f;
+    config.speedBase = 10.0f;
+    config.speedRange = 9.0f;
+    config.gravityBase = -1.0040001f;
+    config.gravityRange = 0.254f;
+    config.spin = 23.446001f;
     func_15152190(&config, D_800A4260, D_800A4264, 1, 0.0f, 1,
                   (s32)arg1, arg2);
 }
@@ -2870,24 +2850,24 @@ extern u8 D_800A4270[];
 
 /* Blood splash at position (func_15152190 with D_800A4268). */
 void func_1513A5E0(Vec3f *position, s32 arg1, s32 arg2) {
-    BloodSplashConfig config;
+    DebrisBurst config;
 
-    config.unk0 = 7;
-    config.unk4 = 7;
-    config.position = *position;
-    config.unk14 = 0;
-    config.unk16 = 255;
-    config.unk18 = -50;
-    config.unk1A = 27;
-    config.unk1C = 4.0f;
-    config.unk20 = 4.0f;
-    config.unk2C = 25;
-    config.unk2E = 40;
-    config.unk30 = 0.0201f;
-    config.unk34 = 0.0201f;
-    config.unk24 = -0.43f;
-    config.unk28 = 0.272f;
-    config.unk38 = 20.187f;
+    config.countBase = 7;
+    config.countRange = 7;
+    config.pos = *position;
+    config.angles.yawBase = 0;
+    config.angles.yawRange = 255;
+    config.angles.pitchBase = -50;
+    config.angles.pitchRange = 27;
+    config.speedBase = 4.0f;
+    config.speedRange = 4.0f;
+    config.lifeBase = 25;
+    config.lifeRange = 40;
+    config.scaleBase = 0.0201f;
+    config.scaleRange = 0.0201f;
+    config.gravityBase = -0.43f;
+    config.gravityRange = 0.272f;
+    config.spin = 20.187f;
     func_15152190(&config, D_800A4268, D_800A4270, 2, 0.0f, 1,
                   (u8)arg1, arg2);
 }

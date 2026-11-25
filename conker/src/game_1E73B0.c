@@ -781,27 +781,7 @@ void func_151BB61C(Actor *obj, Vec3f *from, Vec3f *to, u8 arg3, s32 arg4) {
     }
 }
 
-/* Spawn descriptor read by func_15152190. */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ Vec3f pos;
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ s16 unk1A;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ s16 unk2E;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-} Desc15152190;
-
-void func_15152190(Desc15152190 *, Vec3f *, Vec3f *, s32, f32, s32, s32, s32);
+void func_15152190(DebrisBurst *, Vec3f *, Vec3f *, s32, f32, s32, s32, s32);
 s32 func_15046C80(Vec3f *, u16, f32, FloorInfo *);
 extern Vec3f D_8008FBA0;
 extern Vec3f D_8008FBAC;
@@ -874,26 +854,26 @@ void func_151BBA9C(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
             }
         }
         {
-            Desc15152190 debris;
+            DebrisBurst debris;
             Vec3f first = D_8008FBA0;
             Vec3f second = D_8008FBAC;
 
-            debris.unk0 = 4;
-            debris.unk4 = 8;
+            debris.countBase = 4;
+            debris.countRange = 8;
             debris.pos = center;
-            debris.unk1C = 12.0f;
-            debris.unk20 = 6.0f;
-            debris.unk14 = 0;
-            debris.unk16 = 0xFF;
-            debris.unk18 = -0x3F;
-            debris.unk1A = 0x57;
-            debris.unk2C = 50;
-            debris.unk2E = 10;
-            debris.unk24 = -1.438000083f;
-            debris.unk28 = 0.4490000308f;
-            debris.unk30 = 0.2480000108f;
-            debris.unk34 = 0.09900000691f;
-            debris.unk38 = 22.85900116f;
+            debris.speedBase = 12.0f;
+            debris.speedRange = 6.0f;
+            debris.angles.yawBase = 0;
+            debris.angles.yawRange = 0xFF;
+            debris.angles.pitchBase = -0x3F;
+            debris.angles.pitchRange = 0x57;
+            debris.lifeBase = 50;
+            debris.lifeRange = 10;
+            debris.gravityBase = -1.438000083f;
+            debris.gravityRange = 0.4490000308f;
+            debris.scaleBase = 0.2480000108f;
+            debris.scaleRange = 0.09900000691f;
+            debris.spin = 22.85900116f;
             func_15152190(&debris, &first, &second, 3, 0.0f, 1, arg3, arg4);
         }
     }

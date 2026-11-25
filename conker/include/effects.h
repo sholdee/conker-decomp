@@ -886,4 +886,22 @@ typedef struct DropSpraySpec {
     /* 0x08 */ DropSpray spray;
 } DropSpraySpec; /* size 0x48 */
 
+/* func_15152190 (game_17CAF0.c): throws countBase + rand % (countRange + 1) model pieces (func_15132A4C) out of a
+ * sphere of the given radius around pos, each a random entry of the caller's model / scale tables. */
+typedef struct DebrisBurst {
+    /* 0x00 */ s32 countBase;
+    /* 0x04 */ s32 countRange;
+    /* 0x08 */ Vec3f pos;
+    /* 0x14 */ AngleRange angles;
+    /* 0x1C */ f32 speedBase;
+    /* 0x20 */ f32 speedRange;
+    /* 0x24 */ f32 gravityBase;
+    /* 0x28 */ f32 gravityRange;
+    /* 0x2C */ s16 lifeBase;
+    /* 0x2E */ s16 lifeRange;
+    /* 0x30 */ f32 scaleBase;    /* times the variant's scale */
+    /* 0x34 */ f32 scaleRange;
+    /* 0x38 */ f32 spin;         /* rotVel.x / rotVel.z are random in [-spin, spin] */
+} DebrisBurst; /* size 0x3C */
+
 #endif

@@ -4,26 +4,6 @@
 #include "effects.h"
 
 
-/* Parameter block of func_15152190. */
-typedef struct {
-    s32 unk00;
-    s32 unk04;
-    Vec3f unk08; // position
-    s16 unk14;
-    s16 unk16;
-    s16 unk18;
-    s16 unk1A;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    s16 unk2C;
-    s16 unk2E;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-} Arg150B06B0_2190;
-
 /* Filled in by func_1504715C for an actor; only passed on to func_15153F18 here. */
 typedef struct {
     u8 pad[0x24];
@@ -32,7 +12,7 @@ typedef struct {
 extern s32 func_15143E24(Actor *);
 extern void func_1504715C(Floor150B06B0 *, Actor *);
 extern void func_151C329C(void *, u8, s32);
-extern void func_15152190(Arg150B06B0_2190 *, const s32 *, const f32 *, s32, f32, s32, u8, s32);
+extern void func_15152190(DebrisBurst *, const s32 *, const f32 *, s32, f32, s32, u8, s32);
 extern void func_15153F18(AngleRange *, SplashSpray *, Floor150B06B0 *, u8, s32);
 
 extern const s32 D_8009F810[1];
@@ -57,49 +37,49 @@ void func_150B06B0(Actor *actor, Actor *other, u8 arg2, s32 arg3) {
     func_1504715C(&floor, actor);
     if (actor->id == 0xA6) {
         Vec3f raisedPos;
-        Arg150B06B0_2190 burst;
+        DebrisBurst burst;
 
         raisedPos.x = pos.x;
         raisedPos.y = pos.y + 50.0f;
         raisedPos.z = pos.z;
         func_151C329C(&raisedPos, arg2, arg3);
-        burst.unk00 = 10;
-        burst.unk04 = 10;
-        burst.unk08 = pos;
-        burst.unk1C = 7.0f;
-        burst.unk20 = 17.0f;
-        burst.unk14 = angle - 40;
-        burst.unk16 = 80;
-        burst.unk18 = -45;
-        burst.unk1A = 26;
-        burst.unk2C = 25;
-        burst.unk2E = 25;
-        burst.unk24 = -0.8000000119f;
-        burst.unk28 = 0.3440000117f;
-        burst.unk30 = 0.7070000172f;
-        burst.unk34 = 0.5070000291f;
-        burst.unk38 = 26.41100121f;
+        burst.countBase = 10;
+        burst.countRange = 10;
+        burst.pos = pos;
+        burst.speedBase = 7.0f;
+        burst.speedRange = 17.0f;
+        burst.angles.yawBase = angle - 40;
+        burst.angles.yawRange = 80;
+        burst.angles.pitchBase = -45;
+        burst.angles.pitchRange = 26;
+        burst.lifeBase = 25;
+        burst.lifeRange = 25;
+        burst.gravityBase = -0.8000000119f;
+        burst.gravityRange = 0.3440000117f;
+        burst.scaleBase = 0.7070000172f;
+        burst.scaleRange = 0.5070000291f;
+        burst.spin = 26.41100121f;
         func_15152190(&burst, D_8009F810, D_8009F814, 1, 0.0f, 0, arg2, arg3);
     } else {
         {
-            Arg150B06B0_2190 burst;
+            DebrisBurst burst;
 
-            burst.unk00 = 10;
-            burst.unk04 = 10;
-            burst.unk08 = pos;
-            burst.unk1C = 7.0f;
-            burst.unk20 = 17.0f;
-            burst.unk14 = angle - 40;
-            burst.unk16 = 80;
-            burst.unk18 = -21;
-            burst.unk1A = 13;
-            burst.unk2C = 25;
-            burst.unk2E = 25;
-            burst.unk24 = -0.8000000119f;
-            burst.unk28 = 0.3440000117f;
-            burst.unk30 = 0.04900000244f;
-            burst.unk34 = 0.1020000055f;
-            burst.unk38 = 26.41100121f;
+            burst.countBase = 10;
+            burst.countRange = 10;
+            burst.pos = pos;
+            burst.speedBase = 7.0f;
+            burst.speedRange = 17.0f;
+            burst.angles.yawBase = angle - 40;
+            burst.angles.yawRange = 80;
+            burst.angles.pitchBase = -21;
+            burst.angles.pitchRange = 13;
+            burst.lifeBase = 25;
+            burst.lifeRange = 25;
+            burst.gravityBase = -0.8000000119f;
+            burst.gravityRange = 0.3440000117f;
+            burst.scaleBase = 0.04900000244f;
+            burst.scaleRange = 0.1020000055f;
+            burst.spin = 26.41100121f;
             func_15152190(&burst, D_8009F818, D_8009F81C, 1, 0.0f, 0, arg2, arg3);
         }
         {
