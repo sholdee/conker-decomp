@@ -76,19 +76,18 @@ extern void func_15114D24(MoverObj *obj, s32 sound, s32 arg2, s16 arg3, s16 arg4
 void func_151169B4(MoverObj *obj);
 void func_15116BAC(MoverObj *obj);
 
-/* Trigger handler: when an actor touches a resting triggerable object, start it moving. */
+/*
+ * Actor handler paired with func_15116984: a triggerable object (flags & 4) at rest (state bits 0-2 clear)
+ * enters the moving state 2 when the actor's unk31C->unk57 is 1.
+ */
 void func_15116930(MoverObj *obj, struct127 *actor) {
-    if (obj->flags & 4) {
-        if (!(obj->state & 3) && !(obj->state & 4)) {
-            if (actor->unk31C->unk57 == 1) {
-                obj->state &= ~3;
-                obj->state |= 2;
-            }
-        }
+    if ((obj->flags & 4) && !(obj->state & 3) && !(obj->state & 4) && actor->unk31C->unk57 == 1) {
+        obj->state &= ~3;
+        obj->state |= 2;
     }
 }
 
-/* Moves the object only while it has been triggered. */
+/* Moves the object toward its target while it is in the moving state. */
 void func_15116984(MoverObj *obj) {
     if (obj->state & 2) {
         func_151169B4(obj);
@@ -196,10 +195,8 @@ void func_15116BAC(MoverObj *obj) {
     }
     if (sound != 0 && D_80089260[sound].arrive != 0) {
         maxDist -= (D_80089260[sound].arriveLead * rate) >> 1;
-        if (maxDist <= 0) {
-            if (maxDist > -step || started) {
-                func_15114D24(obj, D_80089260[sound].arrive, 24000, 2000, 4000, 0);
-            }
+        if (maxDist <= 0 && (maxDist > -step || started)) {
+            func_15114D24(obj, D_80089260[sound].arrive, 24000, 2000, 4000, 0);
         }
     }
 }
@@ -322,10 +319,8 @@ f32 func_151172D8(MoverObj *obj, f32 angle) {
     velocity = obj->work.swing.velocity;
     target = (obj->params << 22) >> 22;
     if (angle != target || velocity != 0.0f) {
-        if (velocity == 0.0f && (obj->params >> 10) != 0) {
-            if (D_80089260[obj->params >> 10].start != 0) {
-                func_15114D24(obj, D_80089260[obj->params >> 10].start, 24000, 200, 2500, 0);
-            }
+        if (velocity == 0.0f && (obj->params >> 10) != 0 && D_80089260[obj->params >> 10].start != 0) {
+            func_15114D24(obj, D_80089260[obj->params >> 10].start, 24000, 200, 2500, 0);
         }
         angle += velocity * D_800BE9E4;
         delta = func_15048A70(angle, target);
