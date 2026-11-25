@@ -197,10 +197,11 @@ extern void func_1513F680();
 extern void func_15143134(void *, void *, void *);
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 void func_1518E308(Emitter *emitter);
-Emitter *func_1518E3C4(EmitterParams *params, s32 arg1);
+Emitter *func_1518E3C4(EmitterParams *params, u8 arg1);
 
 /* Creates an emitter of the given kind on owner, optionally killing the owner's existing emitters first. */
-Emitter *func_1518D1C0(struct127 *owner, s16 kind, s16 lifetime, u8 killExisting, u8 arg4, u8 arg5, void *arg6) {
+Emitter *func_1518D1C0(struct127 *owner, s16 kind, s16 lifetime, u8 killExisting, u8 arg4, u8 arg5,
+                       void *arg6) {
     EmitterParams params;
     s32 i;
     Emitter *emitter;
@@ -209,7 +210,7 @@ Emitter *func_1518D1C0(struct127 *owner, s16 kind, s16 lifetime, u8 killExisting
         return NULL;
     }
     if (killExisting) {
-        for (i = 0; i != 2; i++) {
+        for (i = 0; i < 2; i++) {
             D_800DD190++;
             emitter = D_800DCE50[i][0x21];
             while (emitter != NULL) {
@@ -220,6 +221,7 @@ Emitter *func_1518D1C0(struct127 *owner, s16 kind, s16 lifetime, u8 killExisting
                 emitter = ((Emitter **)D_800DD198)[D_800DD190];
             }
             {
+                // matching: the block-scope redeclaration makes IDO rematerialize &D_800DD190
                 extern s8 D_800DD190;
 
                 D_800DD190--;
@@ -341,11 +343,11 @@ Emitter *func_1518D1C0(struct127 *owner, s16 kind, s16 lifetime, u8 killExisting
     return NULL;
 }
 
-void func_1518D6E0(Emitter *arg0) {
+void func_1518D6E0(Emitter *emitter) {
     Emitter *self;
     s8 done;
 
-    self = arg0;
+    self = emitter; // matching: IDO allocates the param copy differently
     done = 0;
     if (!(self->flags & 1)) {
         if (self->count != 0) {
@@ -354,11 +356,9 @@ void func_1518D6E0(Emitter *arg0) {
         }
         return;
     }
-    if (self->params.owner == NULL || self->params.owner->interaction_state == 0 || self->params.owner->unique_id != self->params.ownerId) {
-        goto fail;
-    }
-    {
-        u8 mode;
+    if (self->params.owner != NULL && self->params.owner->interaction_state != 0 &&
+        self->params.owner->unique_id == self->params.ownerId) {
+        u8 attach;
         s16 i;
         s16 j;
         EmitterTable *table;
@@ -368,9 +368,9 @@ void func_1518D6E0(Emitter *arg0) {
         u8 reset;
         EmitterSlot *slot;
         s32 k;
-        s32 n;
-        EmitterSlot *first;
-        EmitterSlot *prev;
+        s32 numFree;
+        EmitterSlot *prevFree;
+        EmitterSlot *freeSlot;
 
         if (self->scaleSrc != NULL) {
             self->scale = *self->scaleSrc->unk18 * 0.009999999776f;
@@ -385,7 +385,7 @@ void func_1518D6E0(Emitter *arg0) {
                 }
             }
         }
-        prev = NULL;
+        freeSlot = NULL;
         if (self->params.owner->unk74 & (1 << D_80082FA4)) {
             if (!(self->state & 1)) {
                 func_1518E308(self);
@@ -393,11 +393,11 @@ void func_1518D6E0(Emitter *arg0) {
             }
         } else {
             reset = 0;
-            n = 0;
-            first = NULL;
+            numFree = 0;
+            prevFree = NULL;
             table = D_8008D5E0[self->params.table];
             if (self->params.owner->unk1D4 != NULL && (self->params.owner->unk74 & 0xF) != 0xF) {
-                mode = 4;
+                attach = 4;
                 row = &table->infos[self->params.owner->pad1C8 * (table->n + 2)];
                 i = 0;
                 found = 0;
@@ -411,21 +411,21 @@ void func_1518D6E0(Emitter *arg0) {
                             }
                         }
                         i++;
-                        goto cond;
+                        goto cond; // matching: block boundary lets IDO keep i's s16 increment in its register
                     cond:;
                     } while (!found && i < table->n);
                 }
             } else {
                 info = table->infos[self->params.owner->pad1C8 * (table->n + 2) + table->n + 1];
-                mode = 2;
+                attach = 2;
             }
-            if (!(self->state & 8) && (self->state != mode || info->mode != self->infoMode)) {
+            if (!(self->state & 8) && (self->state != attach || info->mode != self->infoMode)) {
                 func_1518E308(self);
                 reset = 1;
                 self->accum = info->maxCount;
             }
-            if (mode == 2) {
-                        self->pos.x = self->params.owner->x_position;
+            if (attach == 2) {
+                self->pos.x = self->params.owner->x_position;
                 self->pos.y = self->params.owner->y_position + info->yOffset;
                 self->pos.z = self->params.owner->z_position;
             } else if (info->mode == 2) {
@@ -434,12 +434,12 @@ void func_1518D6E0(Emitter *arg0) {
             }
             slot = self->slots;
             for (k = 0; k < info->numSlots; k++, slot++) {
-                u8 alive;
+                u8 isFree;
 
-                alive = 1;
+                isFree = 1;
                 if (slot->particle) {
                     slot->particle->prevPos = slot->particle->pos;
-                    if (info->mode == 2 || mode == 2) {
+                    if (info->mode == 2 || attach == 2) {
                         slot->particle->pos.x = self->pos.x + slot->offset.x;
                         slot->particle->pos.y = self->pos.y + slot->offset.y;
                         slot->particle->pos.z = self->pos.z + slot->offset.z;
@@ -465,36 +465,38 @@ void func_1518D6E0(Emitter *arg0) {
                             data->vel.z = -10.0f;
                         }
                         data->vel.y = 0.0f;
-                        func_1513F680(slot->particle, data->tmpl->unk3B, data->tmpl->unk3C, data->tmpl->unk3D, data->tmpl->unk3E);
-                        slot->particle->lifetime = (u32)func_150ADA20() % (data->tmpl->lifeRange + 1) + data->tmpl->lifeMin;
+                        func_1513F680(slot->particle, data->tmpl->unk3B, data->tmpl->unk3C, data->tmpl->unk3D,
+                                      data->tmpl->unk3E);
+                        slot->particle->lifetime =
+                            (u32)func_150ADA20() % (data->tmpl->lifeRange + 1) + data->tmpl->lifeMin;
                         slot->particle->flags |= 1;
                         slot->particle = NULL;
                         self->count--;
                     } else {
-                        alive = 0;
+                        isFree = 0;
                     }
                 }
-                if (alive) {
-                    n++;
-                    if (first == NULL) {
-                        first = slot;
+                if (isFree) {
+                    numFree++;
+                    if (prevFree == NULL) {
+                        prevFree = slot;
                     }
-                    slot->next = prev;
-                    prev = slot;
+                    slot->next = freeSlot;
+                    freeSlot = slot;
                 }
             }
-            if (n != 0) {
+            if (numFree != 0) {
                 self->accum += info->rate;
                 if (self->accum > 1.0f) {
                     ParticleSpawn spawn;
                     ParticleData data;
                     ParticleTemplate *tmpl;
                     u8 ok;
-                    u8 flag;
+                    u8 spawnFlag;
 
                     tmpl = info->tmpl;
                     ok = 1;
-                    first->next = prev;
+                    prevFree->next = freeSlot;
                     spawn.unk8 = 0;
                     data.unk20 = tmpl->unk14;
                     data.unk24 = tmpl->unk18;
@@ -523,96 +525,93 @@ void func_1518D6E0(Emitter *arg0) {
                     spawn.unk40 = 0x40000000;
                     spawn.unk44 = 0xFF;
                     spawn.unk45 = 0xFF;
-                    if (n != 0 && !(self->accum < 1.0f) && self->count < info->maxCount) {
-                        do {
-                            s32 r;
+                    while (ok && numFree != 0 && !(self->accum < 1.0f) && self->count < info->maxCount) {
+                        s32 skip;
 
-                            r = (u32)func_150ADA20() % (n + 1);
-                            while (r--) {
-                                first = prev;
-                                prev = prev->next;
-                            }
-                            D_8008D620[tmpl->spawnCb](&spawn.unk0, &flag, &spawn.unk10, &spawn.unk11, &spawn.unk12,
-                                                    &spawn.unk13, &spawn.unk2);
-                            prev->particle = func_1513D524(&spawn, tmpl->unk38, tmpl->unk39, 0, tmpl->unk3A, flag, 0x58,
-                                                    0xFF, 0);
-                            if (prev->particle != NULL) {
-                                memcpy(&prev->particle->data, &data, 0x58);
-                                prev->particle->flags |= 0x40000000;
-                                if (info->mode == 2 || mode == 2) {
-                                    switch (info->spread) {
-                                        case 1: {
-                                            u8 yaw;
-                                            u8 pitch;
-                                            f32 speed;
-                                            f32 c1;
-                                            f32 c2;
-                                            f32 c3;
-                                            f32 c4;
+                        skip = (u32)func_150ADA20() % (numFree + 1);
+                        while (skip--) {
+                            prevFree = freeSlot;
+                            freeSlot = freeSlot->next;
+                        }
+                        D_8008D620[tmpl->spawnCb](&spawn.unk0, &spawnFlag, &spawn.unk10, &spawn.unk11,
+                                                  &spawn.unk12, &spawn.unk13, &spawn.unk2);
+                        freeSlot->particle = func_1513D524(&spawn, tmpl->unk38, tmpl->unk39, 0, tmpl->unk3A,
+                                                           spawnFlag, sizeof(ParticleData), 0xFF, 0);
+                        if (freeSlot->particle != NULL) {
+                            memcpy(&freeSlot->particle->data, &data, sizeof(ParticleData));
+                            freeSlot->particle->flags |= 0x40000000;
+                            if (info->mode == 2 || attach == 2) {
+                                switch (info->spread) {
+                                case 1: {
+                                    u8 yaw;
+                                    u8 pitch;
+                                    f32 speed;
+                                    f32 c1;
+                                    f32 c2;
+                                    f32 c3;
+                                    f32 c4;
 
-                                            yaw = func_150ADA20() & 0xFF;
-                                            pitch = func_150ADA20() & 0xFF;
-                                            speed = func_150ADA68() * info->speed;
-                                            c1 = func_151423D8(pitch - 0x40);
-                                            c2 = func_151423D8(pitch);
-                                            c3 = func_151423D8(yaw - 0x40);
-                                            c4 = func_151423D8(yaw);
-                                            prev->offset.x = speed * c2 * c3;
-                                            prev->offset.y = -speed * c1;
-                                            prev->offset.z = speed * c2 * c4;
-                                        }
-                                            break;
-                                        case 2: {
-                                            u8 pitch;
-                                            f32 speed;
-
-                                            pitch = func_150ADA20() & 0xFF;
-                                            speed = func_150ADA68() * info->speed;
-                                            prev->offset.x = func_151423D8(pitch) * speed;
-                                            prev->offset.y = func_150ADA68() * info->speedY;
-                                            prev->offset.z = -func_151423D8(pitch - 0x40) * speed;
-                                        }
-                                            break;
-                                    }
-                                    prev->particle->pos.x = self->pos.x + prev->offset.x;
-                                    prev->particle->pos.y = self->pos.y + prev->offset.y;
-                                    prev->particle->pos.z = self->pos.z + prev->offset.z;
-                                } else {
-                                    s32 idx;
-
-                                    idx = prev - self->slots;
-                                    func_15143134(&info->points[idx], &prev->particle->pos,
-                                                  (Mtx *)self->params.owner->unk1D4 + info->points[idx].bone);
+                                    yaw = func_150ADA20() & 0xFF;
+                                    pitch = func_150ADA20() & 0xFF;
+                                    speed = func_150ADA68() * info->speed;
+                                    c1 = func_151423D8(pitch - 0x40);
+                                    c2 = func_151423D8(pitch);
+                                    c3 = func_151423D8(yaw - 0x40);
+                                    c4 = func_151423D8(yaw);
+                                    freeSlot->offset.x = speed * c2 * c3;
+                                    freeSlot->offset.y = -speed * c1;
+                                    freeSlot->offset.z = speed * c2 * c4;
                                 }
-                                prev->particle->prevPos = prev->particle->pos;
-                                prev->timer = (u32)func_150ADA20() % (info->lifeRange + 1) + info->lifeMin;
-                                prev = prev->next;
-                                first->next = prev;
-                                self->count++;
+                                    break;
+                                case 2: {
+                                    u8 pitch;
+                                    f32 speed;
+
+                                    pitch = func_150ADA20() & 0xFF;
+                                    speed = func_150ADA68() * info->speed;
+                                    freeSlot->offset.x = func_151423D8(pitch) * speed;
+                                    freeSlot->offset.y = func_150ADA68() * info->speedY;
+                                    freeSlot->offset.z = -func_151423D8(pitch - 0x40) * speed;
+                                }
+                                    break;
+                                }
+                                freeSlot->particle->pos.x = self->pos.x + freeSlot->offset.x;
+                                freeSlot->particle->pos.y = self->pos.y + freeSlot->offset.y;
+                                freeSlot->particle->pos.z = self->pos.z + freeSlot->offset.z;
                             } else {
-                                ok = 0;
+                                s32 idx;
+
+                                idx = freeSlot - self->slots;
+                                func_15143134(&info->points[idx], &freeSlot->particle->pos,
+                                              (Mtx *)self->params.owner->unk1D4 + info->points[idx].bone);
                             }
-                            n--;
-                            self->accum -= 1.0f;
-                        } while (ok && n != 0 && !(self->accum < 1.0f) && self->count < info->maxCount);
+                            freeSlot->particle->prevPos = freeSlot->particle->pos;
+                            freeSlot->timer = (u32)func_150ADA20() % (info->lifeRange + 1) + info->lifeMin;
+                            freeSlot = freeSlot->next;
+                            prevFree->next = freeSlot;
+                            self->count++;
+                        } else {
+                            ok = 0;
+                        }
+                        numFree--;
+                        self->accum -= 1.0f;
                     }
                     while (self->accum > 1.0f) {
                         self->accum -= 1.0f;
                     }
                 }
             }
-            self->state = mode;
+            self->state = attach;
             self->infoMode = info->mode;
         }
+    } else {
+        done = 1;
     }
-    goto end;
-fail:
-    done = 1;
-end:
     if (done) {
         func_1516972C(self);
     }
 }
+
 typedef struct {
     /* 0x00 */ u8 pad0[2];
     /* 0x02 */ s16 x;
@@ -622,18 +621,16 @@ typedef struct {
     /* 0x1C */ struct127 *target;
 } Struct1518E298;
 
-/* Copies the target's position into arg0; returns 1 when there is no live target. */
-s32 func_1518E298(Struct1518E298 *arg0, s32 arg1, s32 arg2, s32 arg3) {
+/* Copies the target's position into the tracker (as s16); returns 1 when there is no live target. */
+s32 func_1518E298(Struct1518E298 *tracker, s32 arg1, s32 arg2, s32 arg3) {
     struct127 *target;
 
-    target = arg0->target;
-    if (target != NULL) {
-        if (target->interaction_state != 0) {
-            arg0->x = target->x_position;
-            arg0->y = target->y_position;
-            arg0->z = target->z_position;
-            return 0;
-        }
+    target = tracker->target;
+    if (target != NULL && target->interaction_state != 0) {
+        tracker->x = target->x_position;
+        tracker->y = target->y_position;
+        tracker->z = target->z_position;
+        return 0;
     }
 
     return 1;
@@ -643,21 +640,16 @@ s32 func_1518E298(Struct1518E298 *arg0, s32 arg1, s32 arg2, s32 arg3) {
 void func_1518E308(Emitter *emitter) {
     EmitterSlot *slot;
     s32 i;
-    s32 sp28[2];
 
     slot = emitter->slots;
-    sp28[1] = (s32)slot;
     emitter->count = 0;
-    i = 0;
     emitter->accum = 0.0f;
-    do {
+    for (i = 0; i < 100; i++, slot++) {
         if (slot->particle != NULL) {
             func_1516972C((struct102 *)slot->particle);
         }
-        i++;
-        slot++;
-    } while (i != 100);
-    bzero((void *)sp28[1], sizeof(emitter->slots));
+    }
+    bzero(emitter->slots, sizeof(emitter->slots));
 }
 
 /* Switches the emitter to another EmitterTable, dropping its particles. */
@@ -669,19 +661,17 @@ void func_1518E37C(Emitter *emitter, u8 table) {
 }
 
 /* Starts an emitter process with the given params. */
-Emitter *func_1518E3C4(EmitterParams *params, s32 arg1) {
-    Emitter *temp_v1;
+Emitter *func_1518E3C4(EmitterParams *params, u8 arg1) {
     Emitter *emitter;
 
     if (params->owner->id == 150) {
         return NULL;
     }
-    temp_v1 = func_15167A68(0x21, 1, 0x9EC, 1, (u8)arg1, 1);
-    if (temp_v1 == NULL) {
+    emitter = func_15167A68(0x21, 1, 0x9EC, 1, arg1, 1);
+    if (emitter == NULL) {
         return NULL;
     }
-    emitter = temp_v1;
-    memcpy(&temp_v1->params, params, sizeof(EmitterParams));
+    memcpy(&emitter->params, params, sizeof(EmitterParams));
     emitter->count = 0;
     emitter->state = 8;
     emitter->infoMode = 4;
