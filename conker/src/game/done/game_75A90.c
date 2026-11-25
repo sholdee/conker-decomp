@@ -3,10 +3,8 @@
 #include "functions.h"
 #include "variables.h"
 
-extern u16 D_80085EC0[61];
-extern u16 D_80085F3C[64];
-extern u16 D_80085FBC[4];
-
+// Table contents (in the data segment, declared in variables.h): acos(x) for x in steps of
+// 512 from 0 to 30720, steps of 32 from 30720 to 32736, and steps of 8 from 32736 to 32760.
 #if 0
 u16 D_80085EC0[61] = {
     32768, 32442, 32116, 31789,
@@ -47,67 +45,78 @@ u16 D_80085F3C[64] = {
 u16 D_80085FBC[4] = { 922, 798, 652, 461 };
 #endif
 
-s32 func_150485E0(s32 arg0) {
+/*
+ * Fixed-point arc cosine / arc sine. Inputs are s16 with 0x7FFF ~ 1.0; angles use 0x10000 = 2*pi,
+ * so acos(0) = 0x8000. The float wrappers are func_15048360 / func_15048408 in game_75810.c.
+ */
+
+/**
+ * Returns acos(x) for 0 <= x <= 0x7FFF by linear interpolation in three tables of increasing
+ * resolution (acos gets steep near 1.0): step 512 below 30720, step 32 below 32736, step 8 above.
+ */
+s32 func_150485E0(s32 x) {
     s32 index;
-    s32 tmp1;
-    s32 tmp2;
-    u16* array;
-    s32 phi_a1;
-    s32 phi_v1;
+    s32 lo;
+    s32 hi;
+    u16 *table;
+    s32 shift;
+    s32 fracMask;
 
-    if (arg0 >= 32736) {
-        phi_v1 = 7;
-        phi_a1 = 3;
-        array = D_80085FBC;
-        arg0 -= 32736;
-    } else if (arg0 >= 30720) {
-        phi_v1 = 31;
-        phi_a1 = 5;
-        array = D_80085F3C;
-        arg0 -= 30720;
+    if (x >= 32736) {
+        fracMask = 7;
+        shift = 3;
+        table = D_80085FBC;
+        x -= 32736;
+    } else if (x >= 30720) {
+        fracMask = 31;
+        shift = 5;
+        table = D_80085F3C;
+        x -= 30720;
     } else {
-        phi_v1 = 511;
-        phi_a1 = 9;
-        array = D_80085EC0;
+        fracMask = 511;
+        shift = 9;
+        table = D_80085EC0;
     }
 
-    index = arg0 >> phi_a1;
-    tmp1 = array[index];
-    tmp2 = array[index+1];
+    index = x >> shift;
+    lo = table[index];
+    hi = table[index + 1];
 
-    return tmp1 - (((tmp1 - tmp2) * (arg0 & phi_v1)) >> phi_a1);
+    return lo - (((lo - hi) * (x & fracMask)) >> shift);
 }
 
-u16 func_15048664(s16 arg0) {
-    s32 tmp;
+/** Returns acos(x) as a u16 angle (0x10000 = 2*pi), using acos(-x) = pi - acos(x). */
+u16 func_15048664(s16 x) {
+    s32 angle;
 
-    if (arg0 >= 0) {
-       tmp = arg0;
+    if (x >= 0) {
+        angle = x;
     } else {
-       tmp = -arg0;
+        angle = -x;
     }
 
-    tmp = func_150485E0(tmp);
-    if (arg0 < 0) {
-        tmp = 0xFFFF - tmp;
+    angle = func_150485E0(angle);
+    if (x < 0) {
+        angle = 0xFFFF - angle;
     }
-    return tmp;
+    return angle;
 }
 
-s16 func_150486B8(s16 arg0) {
-    s32 tmp;
+/** Returns asin(x) as an s16 angle (0x8000 = pi/2), using asin(x) = pi/2 - acos(x). */
+s16 func_150486B8(s16 x) {
+    s32 angle;
 
-    if (arg0 >= 0) {
-        tmp = arg0;
+    if (x >= 0) {
+        angle = x;
     } else {
-        tmp = -arg0;
+        angle = -x;
     }
 
-    tmp = func_150485E0(tmp);
-    if (arg0 >= 0) {
-        tmp = 0x7FFF - tmp;
+    angle = func_150485E0(angle);
+    if (x >= 0) {
+        angle = 0x7FFF - angle;
     } else {
-        tmp = tmp - 0x8000;
+        angle = angle - 0x8000;
     }
-    return tmp;
+    return angle;
 }
