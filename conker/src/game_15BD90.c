@@ -11,13 +11,13 @@ typedef struct {
 // Camera command playback state (embedded in the camera at 0x6CC).
 typedef struct {
     /* 0x00 */ s16 unk0;
-    /* 0x02 */ s16 unk2; // id of the command last started (cmd.unk4)
-    /* 0x04 */ s16 unk4;
+    /* 0x02 */ s16 cmdId; // id (cmd.unk4) of the command last started
+    /* 0x04 */ s16 lastType; // cmd.type of the last command run
     /* 0x06 */ s16 unk6;
-    /* 0x08 */ s16 unk8;
+    /* 0x08 */ s16 blending; // still easing back (blend < 1) after a type 1 command
     /* 0x0A */ u8 padA[0x6];
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
+    /* 0x10 */ f32 blend; // 0..1 easing factor
+    /* 0x14 */ f32 pushRate; // 0..0.04, scales the minimum-distance push
     /* 0x18 */ f32 unk18;
     /* 0x1C */ f32 unk1C;
     /* 0x20 */ f32 unk20;
@@ -29,7 +29,7 @@ typedef struct {
 // Current camera command (embedded in the camera at 0x6FC).
 typedef struct {
     /* 0x00 */ u32 type;
-    /* 0x04 */ s16 unk4;
+    /* 0x04 */ s16 id;
     /* 0x06 */ u8 pad6[0x2];
     /* 0x08 */ u32 unk8;
     /* 0x0C */ u8 padC[0x4];
@@ -67,12 +67,14 @@ typedef struct {
 // layout is used until the header is reconciled.
 typedef struct {
     /* 0x000 */ u8 pad0[0x2C];
-    /* 0x02C */ s32 unk2C;
+    /* 0x02C */ s32 mode; // one-hot camera mode, set through func_15123934
     /* 0x030 */ u8 pad30[0x54];
-    /* 0x084 */ s32 unk84;
+    /* 0x084 */ s32 flags;
     /* 0x088 */ u8 pad88[0xAC];
     /* 0x134 */ s32 unk134;
-    /* 0x138 */ u8 pad138[0x7C];
+    /* 0x138 */ u8 pad138[0x58];
+    /* 0x190 */ f32 unk190;
+    /* 0x194 */ u8 pad194[0x20];
     /* 0x1B4 */ s16 unk1B4;
     /* 0x1B6 */ u8 pad1B6[0xE];
     /* 0x1C4 */ s16 unk1C4;
@@ -127,14 +129,14 @@ typedef struct {
     /* 0x630 */ u8 pad630[0x40];
     /* 0x670 */ f32 unk670;
     /* 0x674 */ u8 pad674[0x54];
-    /* 0x6C8 */ s32 unk6C8;
+    /* 0x6C8 */ s32 cmdRunning;
     /* 0x6CC */ CamCmdState cam;
     /* 0x6FC */ CamCmd cmd;
     /* 0x734 */ s32 unk734;
     /* 0x738 */ s32 unk738;
     /* 0x73C */ s16 unk73C;
     /* 0x73E */ u8 pad73E[0x76];
-    /* 0x7B4 */ f32 unk7B4;
+    /* 0x7B4 */ f32 frameScale; // per-frame time scale, set by the camera update loop
     /* 0x7B8 */ u8 pad7B8[0x138];
     /* 0x8F0 */ f32 unk8F0;
     /* 0x8F4 */ f32 unk8F4;
@@ -148,7 +150,7 @@ typedef struct {
     /* 0x914 */ f32 unk914;
     /* 0x918 */ f32 unk918;
     /* 0x91C */ f32 unk91C;
-    /* 0x920 */ u16 unk920;
+    /* 0x920 */ u16 pathFlags; // type 7 command options (cmd.unk8)
     /* 0x922 */ u8 pad922[0x2];
     /* 0x924 */ f32 unk924;
     /* 0x928 */ f32 unk928;
@@ -168,14 +170,14 @@ void func_151254F4(struct108 *arg0, s32 arg1);
 void func_151287E0(struct108 *arg0, f32 *arg1, f32 *arg2);
 void func_1512DD50(struct108 *arg0);
 void func_1512E140(struct108 *arg0);
-void func_1512FE00(struct108 *arg0, s32 arg1);
+void func_1512FE00(CameraView *camera, s32 action);
 
 // Runs one frame of the camera's current command; cmd.type selects the behaviour.
 void func_1512E8E0(CameraView *camera) {
     CamCmd *cmd;
     CamCmdState *cam;
 
-    if (camera->unk2C & 0x100) {
+    if (camera->mode & 0x100) {
         return;
     }
     if (camera->unk73C != 0) {
@@ -184,12 +186,12 @@ void func_1512E8E0(CameraView *camera) {
     func_151239CC((struct108 *)camera, 13);
     cmd = &camera->cmd;
     cam = &camera->cam;
-    if (camera->unk2C & 0x40000) {
+    if (camera->mode & 0x40000) {
         return;
     }
-    if (cam->unk2 != cmd->unk4) {
+    if (cam->cmdId != cmd->id) {
         camera->unk92C = 0;
-        cam->unk2 = cmd->unk4;
+        cam->cmdId = cmd->id;
         cam->unk6 = 0;
         func_151239CC((struct108 *)camera, 12);
         func_151239CC((struct108 *)camera, 13);
@@ -202,14 +204,14 @@ void func_1512E8E0(CameraView *camera) {
     if (cam->unk6 != 0) {
         func_151239CC((struct108 *)camera, 12);
     }
-    if ((camera->cam.unk0 != 0) && (cam->unk6 == 0) && (cam->unk8 == 0)) {
-        cam->unk4 = cmd->type;
+    if ((camera->cam.unk0 != 0) && (cam->unk6 == 0) && (cam->blending == 0)) {
+        cam->lastType = cmd->type;
         if (cmd->type != 10) {
-            func_1512FE00((struct108 *)camera, cmd->unk8);
+            func_1512FE00(camera, cmd->unk8);
         }
         if (cmd->type == 4) {
             camera->unk272 = -1;
-            camera->unk6C8 = 1;
+            camera->cmdRunning = 1;
             camera->unk1C4 = camera->unk1B4;
             camera->unk1F0 = camera->unk1E0;
             return;
@@ -232,7 +234,7 @@ void func_1512E8E0(CameraView *camera) {
             // Find the closest point to the camera on the path segments leaving its nearest node.
             node = &D_800D2350[func_15085DF8(camera->pos.x, camera->pos.y, camera->pos.z, 7, 0)];
             minDist = 1e14f;
-            if (camera->unk2C & 0x100) {
+            if (camera->mode & 0x100) {
                 return;
             }
             nodePos.unk0 = node->x;
@@ -261,35 +263,35 @@ void func_1512E8E0(CameraView *camera) {
                     }
                 }
             }
-            if (func_15123934((struct108 *)camera, camera->unk2C, 0, camera->unk134, 12) != 0) {
-                camera->unk6C8 = 1;
-                camera->unk84 &= ~0x80000006;
-                camera->unk920 = cmd->unk8;
+            if (func_15123934((struct108 *)camera, camera->mode, 0, camera->unk134, 12) != 0) {
+                camera->cmdRunning = 1;
+                camera->flags &= ~0x80000006;
+                camera->pathFlags = cmd->unk8;
                 camera->unk924 = cmd->unk1C;
                 camera->unk928 = cmd->unk20;
-                if (camera->unk920 & 1) {
-                    camera->unk84 |= 4;
+                if (camera->pathFlags & 1) {
+                    camera->flags |= 4;
                 }
-                if (camera->unk920 & 2) {
-                    camera->unk84 |= 2;
+                if (camera->pathFlags & 2) {
+                    camera->flags |= 2;
                 }
-                if (camera->unk920 & 7) {
-                    camera->unk84 |= 0x20000;
+                if (camera->pathFlags & 7) {
+                    camera->flags |= 0x20000;
                 }
                 camera->unk92C = 1;
             }
-            if (camera->unk920 & 0x20) {
-                camera->unk84 |= 8;
+            if (camera->pathFlags & 0x20) {
+                camera->flags |= 8;
             } else {
-                camera->unk84 &= ~8;
+                camera->flags &= ~8;
             }
             camera->unk910 = 1.5f;
             camera->unk914 = 2.5f;
-            if ((camera->unk920 & 2) && (*camera->unk36C & 7)) {
-                camera->unk84 |= 8;
+            if ((camera->pathFlags & 2) && (*camera->unk36C & 7)) {
+                camera->flags |= 8;
                 camera->unk910 *= 0.25f;
                 camera->unk914 *= 0.25f;
-            } else if (camera->unk920 & 0x40) {
+            } else if (camera->pathFlags & 0x40) {
                 if (camera->unk3D0->xz_velocity > 30.0f) {
                     camera->unk910 *= 7.0f;
                     camera->unk914 *= 7.0f;
@@ -297,7 +299,7 @@ void func_1512E8E0(CameraView *camera) {
                     camera->unk910 *= 4.0f;
                     camera->unk914 *= 4.0f;
                 }
-                camera->unk84 |= 0x20000;
+                camera->flags |= 0x20000;
             }
             if (camera->unk23C != 0) {
                 camera->unk918 = 0.0f;
@@ -305,26 +307,26 @@ void func_1512E8E0(CameraView *camera) {
                 camera->unk91C = 0.0f;
                 camera->unk90C = camera->unk914;
             } else {
-                func_150495B0(&camera->unk908, camera->unk910, &camera->unk918, 1.5f, 2.0f, camera->unk7B4);
-                func_150495B0(&camera->unk90C, camera->unk914, &camera->unk91C, 1.5f, 2.0f, camera->unk7B4);
+                func_150495B0(&camera->unk908, camera->unk910, &camera->unk918, 1.5f, 2.0f, camera->frameScale);
+                func_150495B0(&camera->unk90C, camera->unk914, &camera->unk91C, 1.5f, 2.0f, camera->frameScale);
             }
-            if (!(camera->unk920 & 0x10)) {
+            if (!(camera->pathFlags & 0x10)) {
                 if (camera->unk23C != 0) {
                     camera->unk8F4 = 0.0f;
                     camera->unk904 = 0.0f;
                     camera->pos.x = best.unk0;
                     camera->pos.z = best.unk8;
                 } else {
-                    func_150495B0(&camera->pos.x, best.unk0, &camera->unk8F4, camera->unk908, camera->unk90C, camera->unk7B4);
-                    func_150495B0(&camera->pos.z, best.unk8, &camera->unk904, camera->unk908, camera->unk90C, camera->unk7B4);
+                    func_150495B0(&camera->pos.x, best.unk0, &camera->unk8F4, camera->unk908, camera->unk90C, camera->frameScale);
+                    func_150495B0(&camera->pos.z, best.unk8, &camera->unk904, camera->unk908, camera->unk90C, camera->frameScale);
                 }
             }
-            if (!(camera->unk920 & 8)) {
+            if (!(camera->pathFlags & 8)) {
                 if (camera->unk23C != 0) {
                     camera->pos.y = best.unk4;
                     camera->unk8FC = 0.0f;
                 } else {
-                    func_150495B0(&camera->pos.y, best.unk4, &camera->unk8FC, camera->unk908, camera->unk90C, camera->unk7B4);
+                    func_150495B0(&camera->pos.y, best.unk4, &camera->unk8FC, camera->unk908, camera->unk90C, camera->frameScale);
                 }
             }
             func_15125594((struct108 *)camera);
@@ -332,16 +334,16 @@ void func_1512E8E0(CameraView *camera) {
             camera->unk928 = cmd->unk20;
             camera->unk374 = camera->unk924;
             camera->unk348 = camera->unk928;
-            if (camera->unk920 & 4) {
-                camera->unk734 = cmd->unk4 | 0x4000;
+            if (camera->pathFlags & 4) {
+                camera->unk734 = cmd->id | 0x4000;
                 camera->unk738 = 1;
             }
             return;
         }
         if (cmd->type == 5) {
             if (func_15123934((struct108 *)camera, 0x40, 0, 0, 12) != 0) {
-                camera->unk84 &= ~0xE;
-                camera->unk84 |= 0x200;
+                camera->flags &= ~0xE;
+                camera->flags |= 0x200;
                 camera->unk27C = camera->pos;
             }
             if ((cmd->unk8 == 5) || (cmd->unk8 == 0x11)) {
@@ -373,7 +375,7 @@ void func_1512E8E0(CameraView *camera) {
                 camera->unk278 = cmd->unk20;
             }
             camera->unk274 = cmd->unk8;
-            camera->unk6C8 = 1;
+            camera->cmdRunning = 1;
             return;
         }
         if (cmd->type == 11) {
@@ -395,10 +397,10 @@ void func_1512E8E0(CameraView *camera) {
                     if (cmd->type == 14) {
                         func_151254F4((struct108 *)camera, obj - D_800CC2D0);
                     }
-                    camera->unk84 &= ~8;
+                    camera->flags &= ~8;
                     camera->unk628 = 0;
                     camera->unk614 = &camera->unk618;
-                    camera->unk6C8 = 1;
+                    camera->cmdRunning = 1;
                     camera->unk62C = 0.0f;
                     camera->unk5DC = 0.0f;
                     dist = sqrtf(((camera->pos.x - obj->x_position) * (camera->pos.x - obj->x_position)) + ((camera->pos.z - obj->z_position) * (camera->pos.z - obj->z_position)));
@@ -437,8 +439,8 @@ void func_1512E8E0(CameraView *camera) {
         if (cmd->type == 15) {
             if (func_15123934((struct108 *)camera, 0x800000, 0, camera->unk134, 2) != 0) {
                 camera->unk134 = 0;
-                camera->unk84 |= 0x200;
-                camera->unk84 &= ~8;
+                camera->flags |= 0x200;
+                camera->flags &= ~8;
                 func_1512DD50((struct108 *)camera);
             }
             return;
@@ -446,14 +448,14 @@ void func_1512E8E0(CameraView *camera) {
         if (cmd->type == 3) {
             if (func_15123934((struct108 *)camera, 0x400, 0, camera->unk134, 2) != 0) {
                 camera->unk628 = 0;
-                camera->unk84 |= 8;
+                camera->flags |= 8;
                 camera->unk614 = &camera->unk618;
                 camera->unk62C = 0.0f;
                 camera->unk5DC = 0.0f;
                 camera->unk374 = cmd->unk1C;
                 camera->unk34C = cmd->unk20;
                 cmd->unk34 = cmd->unk20;
-                camera->unk6C8 = 1;
+                camera->cmdRunning = 1;
             }
             camera->unk618.x = cmd->x;
             camera->unk618.y = cmd->y;
@@ -469,15 +471,15 @@ void func_1512E8E0(CameraView *camera) {
                 camera->unk34C = cmd->unk20;
                 cmd->unk34 = cmd->unk20;
             }
-            camera->unk6C8 = 1;
+            camera->cmdRunning = 1;
             func_1512E140((struct108 *)camera);
             camera->unk370 = sqrtf(((camera->pos.x - camera->unk2A4) * (camera->pos.x - camera->unk2A4)) + ((camera->pos.z - camera->unk2AC) * (camera->pos.z - camera->unk2AC)));
             if (camera->unk370 < camera->unk374) {
                 shortfall = camera->unk374 - camera->unk370;
-                camera->pos.x += shortfall * cam->unk14 * func_150AD78C(camera->unk39C);
-                camera->pos.z += shortfall * cam->unk14 * func_150AD780(camera->unk39C);
-                cam->unk14 += 0.004999999888f;
-                cam->unk14 = (cam->unk14 > 0.03999999911f) ? 0.03999999911f : cam->unk14;
+                camera->pos.x += shortfall * cam->pushRate * func_150AD78C(camera->unk39C);
+                camera->pos.z += shortfall * cam->pushRate * func_150AD780(camera->unk39C);
+                cam->pushRate += 0.004999999888f;
+                cam->pushRate = (cam->pushRate > 0.03999999911f) ? 0.03999999911f : cam->pushRate;
             }
             func_151287E0((struct108 *)camera, NULL, NULL);
             return;
@@ -487,15 +489,15 @@ void func_1512E8E0(CameraView *camera) {
             f32 shortfall;
 
             dist = sqrtf(((camera->pos.x - cmd->x) * (camera->pos.x - cmd->x)) + ((camera->pos.z - cmd->z) * (camera->pos.z - cmd->z)));
-            if ((camera->unk6C8 == 0) || (cmd->type == 0)) {
-                if (func_15123934((struct108 *)camera, camera->unk2C, 0, camera->unk134, 2) != 0) {
-                    camera->unk6C8 = 1;
+            if ((camera->cmdRunning == 0) || (cmd->type == 0)) {
+                if (func_15123934((struct108 *)camera, camera->mode, 0, camera->unk134, 2) != 0) {
+                    camera->cmdRunning = 1;
                     camera->unk374 = cmd->unk1C;
                     camera->unk34C = cmd->unk20;
                     cmd->unk34 = cmd->unk20;
-                    camera->unk84 &= ~4;
+                    camera->flags &= ~4;
                     if (cmd->type == 0) {
-                        camera->unk734 = cmd->unk4 | 0x4000;
+                        camera->unk734 = cmd->id | 0x4000;
                         camera->unk738 = 1;
                     }
                 }
@@ -505,10 +507,10 @@ void func_1512E8E0(CameraView *camera) {
             cmd->unk34 = cmd->unk20;
             if ((dist < camera->unk374) && (cmd->type == 1)) {
                 shortfall = camera->unk374 - dist;
-                camera->pos.x += shortfall * cam->unk14 * func_150AD78C(camera->unk39C);
-                camera->pos.z += shortfall * cam->unk14 * func_150AD780(camera->unk39C);
-                cam->unk14 += 0.002499999944f;
-                cam->unk14 = (cam->unk14 > 0.03999999911f) ? 0.03999999911f : cam->unk14;
+                camera->pos.x += shortfall * cam->pushRate * func_150AD78C(camera->unk39C);
+                camera->pos.z += shortfall * cam->pushRate * func_150AD780(camera->unk39C);
+                cam->pushRate += 0.002499999944f;
+                cam->pushRate = (cam->pushRate > 0.03999999911f) ? 0.03999999911f : cam->pushRate;
             }
             if (cmd->type == 1) {
                 cam->unk18 += (cmd->x - cam->unk18) * 0.03999999911f;
@@ -519,12 +521,12 @@ void func_1512E8E0(CameraView *camera) {
             if (cmd->type != 0) {
                 func_1512E140((struct108 *)camera);
                 func_15124C38((struct108 *)camera, 0);
-                cam->unk10 = 0.0f;
+                cam->blend = 0.0f;
             }
             return;
         }
         if (cmd->type == 13) {
-            func_15123934((struct108 *)camera, camera->unk2C, 0, camera->unk134, 2);
+            func_15123934((struct108 *)camera, camera->mode, 0, camera->unk134, 2);
             return;
         }
     }
@@ -534,21 +536,21 @@ void func_1512E8E0(CameraView *camera) {
     if (camera->cam.unk0 == 0) {
         cam->unk6 = 0;
     }
-    if ((camera->unk6C8 == 1) && (cam->unk4 == 1)) {
+    if ((camera->cmdRunning == 1) && (cam->lastType == 1)) {
         cam->unk18 = camera->unk2A4 + (cam->unk18 - camera->unk2A4) * 0.5f;
         cam->unk20 = camera->unk2AC + (cam->unk20 - camera->unk2AC) * 0.5f;
-        cam->unk14 = 0.0f;
+        cam->pushRate = 0.0f;
     }
-    if (camera->unk2C == 0x40) {
+    if (camera->mode == 0x40) {
         camera->unk272 = -1;
         func_151239CC((struct108 *)camera, 12);
     }
-    if (camera->unk6C8 == 1) {
-        if (cam->unk4 == 0) {
+    if (camera->cmdRunning == 1) {
+        if (cam->lastType == 0) {
             cam->unk18 = camera->unk2A4;
             cam->unk20 = camera->unk2AC;
         }
-        if (cam->unk4 == 14) {
+        if (cam->lastType == 14) {
             camera->unk670 = 0.009999999776f;
             func_151254F4((struct108 *)camera, camera->unk23D);
         }
@@ -556,24 +558,24 @@ void func_1512E8E0(CameraView *camera) {
     if (camera->unk23C != 0) {
         cam->unk18 = camera->unk2A4;
         cam->unk20 = camera->unk2AC;
-        cam->unk10 = 1.0f;
+        cam->blend = 1.0f;
     } else {
-        cam->unk18 += (camera->unk2A4 - cam->unk18) * cam->unk10;
-        cam->unk20 += (camera->unk2AC - cam->unk20) * cam->unk10;
+        cam->unk18 += (camera->unk2A4 - cam->unk18) * cam->blend;
+        cam->unk20 += (camera->unk2AC - cam->unk20) * cam->blend;
     }
     camera->unk2A4 = cam->unk18;
     camera->unk2AC = cam->unk20;
-    cam->unk10 += 0.01499999966f;
-    cam->unk10 = (cam->unk10 > 1.0f) ? 1.0f : cam->unk10;
-    if ((cam->unk10 != 1.0f) && (cam->unk4 == 1)) {
-        cam->unk8 = 1;
+    cam->blend += 0.01499999966f;
+    cam->blend = (cam->blend > 1.0f) ? 1.0f : cam->blend;
+    if ((cam->blend != 1.0f) && (cam->lastType == 1)) {
+        cam->blending = 1;
     } else {
-        cam->unk8 = 0;
+        cam->blending = 0;
     }
-    if (camera->unk6C8 == 1) {
+    if (camera->cmdRunning == 1) {
         camera->unk272 = -1;
         camera->unk614 = NULL;
-        camera->unk6C8 = 0;
+        camera->cmdRunning = 0;
         cmd->unk34 = 0;
         cmd->type = 13;
         camera->unk8F0 = 0.0f;
@@ -588,7 +590,7 @@ void func_1512E8E0(CameraView *camera) {
         camera->unk914 = 0.0f;
         camera->unk90C = 0.0f;
         camera->unk91C = 0.0f;
-        camera->unk920 = 0;
+        camera->pathFlags = 0;
         camera->unk92C = 0;
         camera->unk948 = 0;
         camera->unk384 = camera->unk37C;
@@ -604,95 +606,95 @@ void func_1512E8E0(CameraView *camera) {
 }
 
 // Starts the camera mode for a command's action (cmd.unk8) and sets its flags.
-void func_1512FE00(struct108 *camera, s32 action) {
+void func_1512FE00(CameraView *camera, s32 action) {
     switch (action) {
     case 1:
-        func_15123934(camera, camera->unk2C, 0, 0, 7);
+        func_15123934((struct108 *)camera, camera->mode, 0, 0, 7);
         break;
     case 2:
-        func_15123934(camera, camera->unk2C, 0, camera->unk134, 7);
-        camera->unk84 &= ~8;
+        func_15123934((struct108 *)camera, camera->mode, 0, camera->unk134, 7);
+        camera->flags &= ~8;
         break;
     case 3:
-        func_15123934(camera, camera->unk2C, 0, camera->unk134, 7);
-        camera->unk84 |= 0x10000000;
+        func_15123934((struct108 *)camera, camera->mode, 0, camera->unk134, 7);
+        camera->flags |= 0x10000000;
         break;
     case 8:
-        func_15123934(camera, camera->unk2C, 0, camera->unk134, 7);
-        camera->unk84 |= 0x80;
+        func_15123934((struct108 *)camera, camera->mode, 0, camera->unk134, 7);
+        camera->flags |= 0x80;
         break;
     case 9:
-        func_15123934(camera, camera->unk2C, 0, camera->unk134, 7);
-        camera->unk84 &= ~8;
-        camera->unk84 |= 0x80;
+        func_15123934((struct108 *)camera, camera->mode, 0, camera->unk134, 7);
+        camera->flags &= ~8;
+        camera->flags |= 0x80;
         break;
     case 11:
-        func_15123934(camera, camera->unk2C, 0, camera->unk134, 7);
-        camera->unk84 |= 0x4000;
+        func_15123934((struct108 *)camera, camera->mode, 0, camera->unk134, 7);
+        camera->flags |= 0x4000;
         break;
     case 12:
-        func_15123934(camera, camera->unk2C, 0, camera->unk134, 7);
-        camera->unk84 |= 0x8000;
+        func_15123934((struct108 *)camera, camera->mode, 0, camera->unk134, 7);
+        camera->flags |= 0x8000;
         break;
     case 13:
-        func_15123934(camera, camera->unk2C, 0, camera->unk134, 7);
-        camera->unk84 |= 0x20000;
+        func_15123934((struct108 *)camera, camera->mode, 0, camera->unk134, 7);
+        camera->flags |= 0x20000;
         break;
     case 16:
-        func_15123934(camera, 8, 0, camera->unk134, 7);
+        func_15123934((struct108 *)camera, 8, 0, camera->unk134, 7);
         break;
     case 14:
-        func_15123934(camera, 2, 0, camera->unk134, 7);
+        func_15123934((struct108 *)camera, 2, 0, camera->unk134, 7);
         break;
     case 18:
-        func_15123934(camera, camera->unk2C, 0, camera->unk134, 7);
-        camera->unk84 |= 0x100000;
+        func_15123934((struct108 *)camera, camera->mode, 0, camera->unk134, 7);
+        camera->flags |= 0x100000;
         break;
     case 19:
-        func_15123934(camera, camera->unk2C, 0, camera->unk134, 7);
-        camera->unk84 |= 0x400000;
+        func_15123934((struct108 *)camera, camera->mode, 0, camera->unk134, 7);
+        camera->flags |= 0x400000;
         break;
     case 21:
-        func_15123934(camera, camera->unk2C, 0, camera->unk134, 7);
+        func_15123934((struct108 *)camera, camera->mode, 0, camera->unk134, 7);
         camera->unk190 = 0.0f;
         break;
     case 22:
-        func_15123934(camera, camera->unk2C, 0, camera->unk134, 7);
-        camera->unk84 |= 0x800;
+        func_15123934((struct108 *)camera, camera->mode, 0, camera->unk134, 7);
+        camera->flags |= 0x800;
         camera->unk190 = -30.0f;
         break;
     case 25:
-        func_15123934(camera, camera->unk2C, 0, camera->unk134, 7);
-        camera->unk84 |= 0x40;
+        func_15123934((struct108 *)camera, camera->mode, 0, camera->unk134, 7);
+        camera->flags |= 0x40;
         break;
     case 23:
-        func_15123934(camera, camera->unk2C, 0, camera->unk134, 7);
-        camera->unk84 |= 0x1000000;
+        func_15123934((struct108 *)camera, camera->mode, 0, camera->unk134, 7);
+        camera->flags |= 0x1000000;
         break;
     case 24:
-        func_15123934(camera, camera->unk2C, 0, camera->unk134, 7);
-        camera->unk84 |= 0x80000000;
+        func_15123934((struct108 *)camera, camera->mode, 0, camera->unk134, 7);
+        camera->flags |= 0x80000000;
         break;
     case 26:
-        func_15123934(camera, camera->unk2C, 0, camera->unk134, 7);
-        camera->unk84 |= 0x10;
+        func_15123934((struct108 *)camera, camera->mode, 0, camera->unk134, 7);
+        camera->flags |= 0x10;
         break;
     case 27:
-        func_15123934(camera, camera->unk2C, 0, camera->unk134, 7);
-        camera->unk84 |= 0x20;
+        func_15123934((struct108 *)camera, camera->mode, 0, camera->unk134, 7);
+        camera->flags |= 0x20;
         break;
     case 28:
-        func_15123934(camera, camera->unk2C, 0, camera->unk134, 7);
-        camera->unk84 |= 0x10;
-        camera->unk84 &= ~8;
+        func_15123934((struct108 *)camera, camera->mode, 0, camera->unk134, 7);
+        camera->flags |= 0x10;
+        camera->flags &= ~8;
         break;
     case 29:
-        func_15123934(camera, camera->unk2C, 0, camera->unk134, 7);
-        camera->unk84 |= 0x1000010;
-        camera->unk84 &= ~8;
+        func_15123934((struct108 *)camera, camera->mode, 0, camera->unk134, 7);
+        camera->flags |= 0x1000010;
+        camera->flags &= ~8;
         break;
     case 30:
-        func_15128774(camera, camera->unk3D0);
+        func_15128774((struct108 *)camera, camera->unk3D0);
         break;
     }
 }
