@@ -26,29 +26,6 @@ typedef struct {
     /* 0x110 */ BeamData beam;
 } Particle;
 
-/* First argument of func_1513C650 (as Struct1513C650Arg in game_113D60.c). */
-typedef struct {
-    /* 0x00 */ s32 flags;
-    /* 0x04 */ s16 lifetime;
-    /* 0x06 */ u8 unk06;
-    /* 0x07 */ u8 unk07;
-    /* 0x08 */ s32 unk08;
-    /* 0x0C */ s32 unk0C;
-    /* 0x10 */ u8 unk10;
-    /* 0x11 */ u8 unk11;
-    /* 0x12 */ u8 unk12;
-    /* 0x13 */ u8 unk13;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ s16 unk24;
-} Struct1513C650Arg;
-
 void func_15103254(s16 lifetime, u8 alpha, f32 size, Vec3f *pos, u8 views, u8 arg5, s32 arg6);
 
 /* Spawns a func_1513C650 effect of the given size on a surface (none for some materials on maps 0x36 and 0x26);
@@ -56,21 +33,21 @@ void func_15103254(s16 lifetime, u8 alpha, f32 size, Vec3f *pos, u8 views, u8 ar
 struct210 *func_15102920(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 duration, u8 arg5, u8 arg6,
                          s32 surfaceFlags, u8 arg8, s32 arg9) {
     struct210 *result;
-    Struct1513C650Arg arg;
+    SpriteDef arg;
     s32 argB;
     s32 argC;
     s32 material;
 
-    arg.unk22 = 10;
-    arg.unk24 = 25;
+    arg.fadeStart = 10;
+    arg.fadeRate = 25;
     material = func_1510F8CC(surfaceFlags);
-    arg.unk06 = 0x5C;
+    arg.texture = 0x5C;
     switch (D_800BE9F0) {
     case 0x36:
         if (material == 9) {
             return NULL;
         }
-        arg.unk06 = 0x85;
+        arg.texture = 0x85;
         size *= 0.6000000238f;
         break;
     case 0x26:
@@ -79,22 +56,22 @@ struct210 *func_15102920(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 durat
         }
         break;
     }
-    arg.unk07 = 0;
+    arg.unk7 = 0;
     arg.flags = ((duration == -1) ? 0 : 1) | 0x100 | 0x200 | 0x400 | 0x1000 | 0x8000 | 0x20000;
     arg.lifetime = (duration == -1) ? 300 : duration;
-    arg.unk08 = 0;
-    arg.unk0C = 0;
+    arg.frame = 0;
+    arg.frameSpeed = 0;
     if (D_800BE9F0 == 0x36) {
         arg.unk10 = arg1 >> 1;
     } else {
         arg.unk10 = arg1;
     }
     arg.unk11 = 0xFF;
-    arg.unk14 = 0;
-    arg.unk13 = 0;
-    arg.unk12 = 0;
-    arg.unk15 = 0xFF;
-    arg.unk18 = ((arg6 != 0) ? 2 : 1) + 0x3B0000;
+    arg.rgba[2] = 0;
+    arg.rgba[1] = 0;
+    arg.rgba[0] = 0;
+    arg.rgba[3] = 0xFF;
+    arg.renderModes = ((arg6 != 0) ? 2 : 1) + 0x3B0000;
     arg.unk16 = 0;
     arg.unk17 = 7;
     if (arg5 != 0) {

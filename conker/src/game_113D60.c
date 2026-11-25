@@ -596,52 +596,30 @@ void func_150E7C9C(Game113D60BurstEffect *effect) {
     }
 }
 
-typedef struct {
-    /* 0x00 */ s32 flags;
-    /* 0x04 */ s16 unk04;
-    /* 0x06 */ u8 unk06;
-    /* 0x07 */ u8 unk07;
-    /* 0x08 */ s32 unk08;
-    /* 0x0C */ s32 unk0C;
-    /* 0x10 */ u8 unk10;
-    /* 0x11 */ u8 unk11;
-    /* 0x12 */ u8 unk12;
-    /* 0x13 */ u8 unk13;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ s16 unk24;
-} Struct1513C650Arg; // first argument of func_1513C650 / func_1513C73C (passed as an s32)
-
 /* Spawns a func_1513C650 effect of the given size at `position`, lasting `duration` frames
  * (-1: a fixed 300 frames without the timed flag). */
 void func_150E7FEC(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
                    u8 arg9, u8 owner, s32 kind) {
     s32 pad; // matching: unused stack slot
-    Struct1513C650Arg arg;
+    SpriteDef arg;
     s32 argB;
     s32 argC;
 
-    arg.unk22 = 20;
-    arg.unk24 = 12;
-    arg.unk06 = 0x4F;
-    arg.unk07 = 0;
+    arg.fadeStart = 20;
+    arg.fadeRate = 12;
+    arg.texture = 0x4F;
+    arg.unk7 = 0;
     arg.flags = ((duration == -1) ? 0 : 1) | (arg5 ? 0x400 : 0) | 0x100 | 0x200 | 0x1000 | 0x8000 | 0x40000;
-    arg.unk04 = (duration == -1) ? 300 : duration + 20;
-    arg.unk08 = 0;
-    arg.unk0C = 0;
+    arg.lifetime = (duration == -1) ? 300 : duration + 20;
+    arg.frame = 0;
+    arg.frameSpeed = 0;
     arg.unk10 = arg1;
     arg.unk11 = 0xFF;
-    arg.unk12 = arg7;
-    arg.unk13 = arg8;
-    arg.unk14 = arg9;
-    arg.unk15 = 0xFF;
-    arg.unk18 = ((arg6 != 0) ? 2 : 1) + 0x480000;
+    arg.rgba[0] = arg7;
+    arg.rgba[1] = arg8;
+    arg.rgba[2] = arg9;
+    arg.rgba[3] = 0xFF;
+    arg.renderModes = ((arg6 != 0) ? 2 : 1) + 0x480000;
     arg.unk16 = 0;
     arg.unk17 = 6;
     if (arg5 != 0) {
@@ -1263,7 +1241,7 @@ extern s32 func_151337C0(Game113D60Debris *);
  * ends (returns 0), spawning a func_1513C73C splash first if its type is 0xA. */
 s32 func_150E971C(Game113D60Debris *debris) {
     Game113D60DebrisExtra *extra;
-    Struct1513C650Arg splash;
+    SpriteDef splash;
 
     func_151337C0(debris);
     extra = &debris->extra;
@@ -1273,23 +1251,23 @@ s32 func_150E971C(Game113D60Debris *debris) {
 
             size = (func_150ADA68() * 20.0f) + 20.0f;
 
-            splash.unk06 = 0xB;
-            splash.unk07 = 0;
+            splash.texture = 0xB;
+            splash.unk7 = 0;
             splash.flags = 0x9701;
-            splash.unk04 = 100;
-            splash.unk08 = 0;
-            splash.unk0C = 0;
+            splash.lifetime = 100;
+            splash.frame = 0;
+            splash.frameSpeed = 0;
             splash.unk10 = 0xFF;
             splash.unk11 = 0xFF;
-            splash.unk12 = 0xFF;
-            splash.unk13 = 0xFF;
-            splash.unk14 = 0xFF;
-            splash.unk15 = 0xFF;
-            splash.unk18 = 0x3B0003;
+            splash.rgba[0] = 0xFF;
+            splash.rgba[1] = 0xFF;
+            splash.rgba[2] = 0xFF;
+            splash.rgba[3] = 0xFF;
+            splash.renderModes = 0x3B0003;
             splash.unk16 = 0;
             splash.unk17 = 7;
-            splash.unk22 = 20;
-            splash.unk24 = 12;
+            splash.fadeStart = 20;
+            splash.fadeRate = 12;
 
             func_1513C73C(&splash, 0, 0, (s32)extra->unk8, debris->position.x, extra->floorY + 5.0f,
                           debris->position.z, size, size, func_150ADA20() & 0xFF, 0, 0, debris->header.owner,
