@@ -1301,7 +1301,7 @@ extern u8 D_800CBFA8[][0x32C];
 void func_151C9ED4(struct108 *player);
 void func_151C9F38(struct108 *player, u8 type, u8 arg2, s8 arg3, u8 arg4);
 void func_151CA6A0(struct108 *player, u8 big);
-void func_151CAD28(void *, u8);
+void func_151CAD28(struct108 *player, u8 big);
 void func_151CAB78(struct108 *player, u8 big);
 void func_151CCE94(void *arg0);
 void func_151C9DE8(struct108 *player, u8 arg1, s8 arg2, u8 arg3, s32 arg4);
@@ -1748,156 +1748,129 @@ void func_151CAB78(struct108 *player, u8 big) {
     }
 }
 
-void func_151CAD28(void *arg0, u8 arg1) {
-    typedef struct {
-        f32 unk0;
-        f32 unk4;
-        f32 unk8;
-        f32 unkC;
-        u8  unk10;
-        u8  pad11;
-        s16 unk12;
-        u16 unk14;
-        s16 unk16;
-        s16 unk18;
-        u8  unk1A;
-        u8  unk1B;
-        u8  unk1C;
-        u8  unk1D;
-        u8  unk1E;
-        u8  unk1F;
-        u8  unk20;
-        u8  unk21;
-        u8  unk22;
-        u8  unk23;
-        s32 unk24;
-        s32 unk28;
-        s32 unk2C;
-        s32 unk30;
-        s32 unk34;
-        s32 unk38;
-        s32 unk3C;
-        u8  unk40;
-        u8  unk41;
-        u8  pad42[2];
-        u8  unk44;
-        u8  pad45[3];
-        f32 unk48;
-        f32 unk4C;
-        f32 unk50;
-        f32 unk54;
-    } struct_151CAD28_spA8;
-    typedef struct {
-        void *unk0;
-        f32 unk4;
-        f32 unk8;
-        u8 unkC;
-        u8 unkD;
-        u8 padE[0x4A];
-    } struct_151CAD28_sp4C;
+/* One viewport of the D_800BE628 array (0x180 bytes each). */
+typedef struct {
+    u8 pad0[0x34];
+    f32 centerX;
+    f32 centerY;
+    u8 pad3C[0x144];
+} SightViewport;
+
+/* State of the lens effect (func_151CB110), stored at +0x18 of its object. */
+typedef struct {
+    struct108 *player;
+    SightViewport *view;
+    u16 *pixels;
+    s32 left;
+    u32 topOffset;
+} SightLens;
+
+typedef struct {
+    u8 pad0[0x18];
+    SightLens lens;
+    u8 pad2C[4];
+    u16 pixels[24 * 24]; /* 24x24 copy of the framebuffer under the lens */
+} SightLensObject;
+
+/* Spawns the corner brackets of the zoom sight and, unless D_800BE616 is set, its centre lens. */
+void func_151CAD28(struct108 *player, u8 big) {
     typedef struct {
         s8 unk0;
         s8 unk1;
         s8 unk2;
         s16 unk4;
         s8 unk6;
-    } struct_151CAD28_sp44;
-    typedef struct {
-        void *unk0;
-        void *unk4;
-        void *unk8;
-        s32 unkC;
-        u32 unk10;
-    } struct_151CAD28_sp30;
-    struct_151CAD28_spA8 spA8;
-    void *temp_v0;
-    struct_151CAD28_sp4C sp4C;
+    } LensSpawn;
+    SightSpriteDesc desc;
+    SightSprite *sprite;
+    SightSpritePayload payload;
 
-    sp4C.unkD = 0;
-    sp4C.unkC = 0;
-    spA8.unkC = 25.0f;
-    spA8.unk8 = 25.0f;
-    sp4C.unk0 = arg0;
-    sp4C.unk4 = 0.0f;
-    sp4C.unk8 = 130.0f;
+    payload.kind = 0;
+    payload.unkC = 0;
+    desc.height = 25.0f;
+    desc.width = 25.0f;
+    payload.player = player;
+    payload.unk4 = 0.0f;
+    payload.unk8 = 130.0f;
     if (D_80082FA0 > 0) {
-        spA8.unk10 = 0x72;
+        desc.texture = 0x72;
     } else {
-        spA8.unk10 = 0x65;
+        desc.texture = 0x65;
     }
-    spA8.unk12 = 0x12C;
-    spA8.unk14 = (1 << (*(u8 *)((s32)arg0 + 0x23D) + 0xB)) | 0x50;
-    spA8.unk16 = 1;
-    spA8.unk18 = 0xFF;
-    spA8.unk1A = 7;
-    spA8.unk1B = 0;
-    spA8.unk1C = 0xFF;
-    spA8.unk1D = 0;
-    spA8.unk1E = 0x82;
-    spA8.unk1F = 0xFF;
-    spA8.unk20 = 0xFF;
-    spA8.unk21 = 0xFF;
-    spA8.unk22 = 0xFF;
-    spA8.unk23 = 0xFF;
-    spA8.unk24 = 0;
-    spA8.unk28 = 0x200004;
-    spA8.unk2C = 0x1F0601;
-    spA8.unk30 = 8;
-    spA8.unk34 = 0x44;
-    spA8.unk38 = 0x80;
-    spA8.unk3C = 0x20;
-    spA8.unk40 = 0;
-    spA8.unk41 = 0xA;
-    spA8.unk44 = *(u8 *)((s32)arg0 + 0x23D);
-    spA8.unk14 &= ~6;
-    spA8.unk14 |= 6;
-    spA8.unk0 = 25.0f;
-    spA8.unk4 = 25.0f;
-    temp_v0 = func_1515548C(&spA8, arg1 ? 4 : 0, 0, 0, 0x58, 0xFF, 1);
-    if (temp_v0 != NULL) {
-        memcpy((u8 *)temp_v0 + 0x70, &sp4C, 0x58);
+    desc.lifetime = 300;
+    desc.flags = (1 << (player->unk23D + 11)) | 0x50;
+    desc.unk16 = 1;
+    desc.unk18 = 0xFF;
+    desc.unk1A = 7;
+    desc.red = 0;
+    desc.green = 0xFF;
+    desc.blue = 0;
+    desc.alpha = 130;
+    desc.unk1F = 0xFF;
+    desc.unk20 = 0xFF;
+    desc.unk21 = 0xFF;
+    desc.unk22 = 0xFF;
+    desc.unk23 = 0xFF;
+    desc.unk24 = 0;
+    desc.unk28 = 0x200004;
+    desc.unk2C = 0x1F0601;
+    desc.unk30 = 8;
+    desc.unk34 = 0x44;
+    desc.unk38 = 0x80;
+    desc.unk3C = 0x20;
+    desc.unk40 = 0;
+    desc.unk41 = 10;
+    desc.playerNum = player->unk23D;
+    desc.flags &= ~6;
+    desc.flags |= 6;
+    desc.x = 25.0f;
+    desc.y = 25.0f;
+    sprite = func_1515548C(&desc, big ? 4 : 0, 0, 0, sizeof(SightSpritePayload), 0xFF, 1);
+    if (sprite != NULL) {
+        memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
-    spA8.unk14 &= ~6;
-    spA8.unk14 |= 4;
-    spA8.unk0 = -25.0f;
-    spA8.unk4 = 25.0f;
-    temp_v0 = func_1515548C(&spA8, arg1 ? 4 : 0, 0, 0, 0x58, 0xFF, 1);
-    if (temp_v0 != NULL) {
-        memcpy((u8 *)temp_v0 + 0x70, &sp4C, 0x58);
+    desc.flags &= ~6;
+    desc.flags |= 4;
+    desc.x = -25.0f;
+    desc.y = 25.0f;
+    sprite = func_1515548C(&desc, big ? 4 : 0, 0, 0, sizeof(SightSpritePayload), 0xFF, 1);
+    if (sprite != NULL) {
+        memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
-    spA8.unk14 &= ~6;
-    spA8.unk14 |= 0;
-    spA8.unk0 = -25.0f;
-    spA8.unk4 = -25.0f;
-    temp_v0 = func_1515548C(&spA8, arg1 ? 4 : 0, 0, 0, 0x58, 0xFF, 1);
-    if (temp_v0 != NULL) {
-        memcpy((u8 *)temp_v0 + 0x70, &sp4C, 0x58);
+    desc.flags &= ~6;
+    desc.flags |= 0;
+    desc.x = -25.0f;
+    desc.y = -25.0f;
+    sprite = func_1515548C(&desc, big ? 4 : 0, 0, 0, sizeof(SightSpritePayload), 0xFF, 1);
+    if (sprite != NULL) {
+        memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
-    spA8.unk14 &= ~6;
-    spA8.unk14 |= 2;
-    spA8.unk0 = 25.0f;
-    spA8.unk4 = -25.0f;
-    temp_v0 = func_1515548C(&spA8, arg1 ? 4 : 0, 0, 0, 0x58, 0xFF, 1);
-    if (temp_v0 != NULL) {
-        memcpy((u8 *)temp_v0 + 0x70, &sp4C, 0x58);
+    desc.flags &= ~6;
+    desc.flags |= 2;
+    desc.x = 25.0f;
+    desc.y = -25.0f;
+    sprite = func_1515548C(&desc, big ? 4 : 0, 0, 0, sizeof(SightSpritePayload), 0xFF, 1);
+    if (sprite != NULL) {
+        memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
     if (D_800BE616 == 0) {
-    struct_151CAD28_sp44 sp44;
-    struct_151CAD28_sp30 sp30;
+        LensSpawn spawn;
+        SightLens lens;
+        SightLensObject *lensObj;
 
-        sp30.unk0 = arg0;
-        sp30.unk4 = (void *)(*(u8 *)((s32)arg0 + 0x23D) * 0x180 + D_800BE628);
-        sp30.unkC = *(f32 *)((s32)sp30.unk4 + 0x34) - 12.0f;
-        sp30.unk10 = (u32)(s32)(*(f32 *)((s32)sp30.unk4 + 0x38) - 12.0f) * D_800BE620;
-        sp44.unk0 = 0xE;
-        sp44.unk1 = -1;
-        sp44.unk2 = 1;
-        sp44.unk4 = 0x12C;
-        sp44.unk6 = 1;
-        temp_v0 = func_1515FF74(&sp44, 0x498, 0xFF, 1);
-        if (temp_v0 != NULL) {
-            sp30.unk8 = (u8 *)temp_v0 + 0x30;
-            memcpy((u8 *)temp_v0 + 0x18, &sp30, 0x14);
+        lens.player = player;
+        lens.view = (SightViewport *)(player->unk23D * sizeof(SightViewport) + D_800BE628); // D_800BE628 holds the array address
+        lens.left = lens.view->centerX - 12.0f;
+        lens.topOffset = (u32)(s32)(lens.view->centerY - 12.0f) * D_800BE620;
+        spawn.unk0 = 0xE;
+        spawn.unk1 = -1;
+        spawn.unk2 = 1;
+        spawn.unk4 = 300;
+        spawn.unk6 = 1;
+        lensObj = func_1515FF74(&spawn, 0x498, 0xFF, 1);
+        if (lensObj != NULL) {
+            lens.pixels = lensObj->pixels;
+            memcpy(&lensObj->lens, &lens, sizeof(SightLens));
         }
     }
 }
