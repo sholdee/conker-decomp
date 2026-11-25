@@ -251,7 +251,7 @@ void func_150EB8C4(void) {
     func_150E83AC(&D_800A149C, func_150ADA20() % 62U + 120, 0xFF, 1);
     func_151D5514(&D_800A1490, 0xFF, 1);
     func_151D3FF4(&D_800A1490, 0xFF, 1);
-    func_151541B8(&D_800A1490, func_150ADA68() * 4.0f + 12.0f, 1.6409999f,
+    func_151541B8(&D_800A1490, func_150ADA68() * 4.0f + 12.0f, 1.640999913f,
                   func_150ADA20() % 56U + 200, 0.0f, 0xFF, 1);
     {
         u8 i;
@@ -274,8 +274,6 @@ void func_150EB8C4(void) {
         spawn.unk61 = 13;
         spawn.unk62 = 0;
         spawn.unk63 = 12;
-        if (pitch) {
-        }
         spawn.unk64 = 0;
         spawn.unk65 = 0;
         spawn.unk66 = 0;
@@ -287,6 +285,9 @@ void func_150EB8C4(void) {
         spawn.unk72 = 25;
         spawn.unk74 = 10;
         spawn.sound = 0;
+        // matching: an early use of pitch makes IDO give it $s1 and yaw $s2
+        if (pitch) {
+        }
         for (i = 0; i < 4; i++) {
             spawn.pos = D_800A14A8[i];
             yaw = func_150ADA20();
@@ -341,7 +342,7 @@ void func_150EBC80(GateCylinder *arg0, u8 arg1, s32 arg2) {
     event.field5 = 1;
     func_151D8868(&event, 0, arg1, arg2);
     func_15164F0C(0, 0, 0, arg1, arg2);
-    scale = 1.6409999f;
+    scale = 1.640999913f;
     index = 0;
     do {
         func_151D3FF4(&position, arg1, arg2);
