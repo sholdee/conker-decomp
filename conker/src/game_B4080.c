@@ -18,59 +18,6 @@ typedef struct PathNode {
     /* 0xF */ u8 param;
 } PathNode;
 
-/* Camera request passed to func_1512D560 (mode 7). */
-typedef struct CamParams {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ f32 eyeX;
-    /* 0x18 */ f32 eyeY;
-    /* 0x1C */ f32 eyeZ;
-    /* 0x20 */ f32 atX;
-    /* 0x24 */ f32 atY;
-    /* 0x28 */ f32 atZ;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-} CamParams;
-
-/* Per-racer state of the race mode (D_800872A0[]), 0x84 bytes. */
-typedef struct Racer {
-    /* 0x00 */ f32 lateral;       /* 0..1 across the track, see func_15088F30 */
-    /* 0x04 */ f32 lateralTarget;
-    /* 0x08 */ f32 segmentT;      /* spline parameter between nodes[1] and nodes[2] */
-    /* 0x0C */ f32 dirX;
-    /* 0x10 */ f32 dirZ;
-    /* 0x14 */ f32 speed;
-    /* 0x18 */ s32 lapStartTime;
-    /* 0x1C */ s32 raceTime;
-    /* 0x20 */ s32 lastLapTime;
-    /* 0x24 */ s16 nodesPassed;
-    /* 0x26 */ s8 lapLength;      /* nodes per lap */
-    /* 0x27 */ s8 lap;
-    /* 0x28 */ s8 maxLap;
-    /* 0x29 */ s8 rank;
-    /* 0x2A */ s8 finishOrder;    /* 0x7F while still racing */
-    /* 0x2B */ u8 nodes[4];       /* spline control nodes */
-    /* 0x2F */ s8 route;
-    /* 0x30 */ s8 state;
-    /* 0x31 */ s8 actorIndex;     /* index into D_800CC2D0 */
-    /* 0x32 */ s8 prevTicks;
-    /* 0x33 */ s8 ticks;
-    /* 0x34 */ f32 camT;
-    /* 0x38 */ f32 camX;
-    /* 0x3C */ f32 camY;
-    /* 0x40 */ f32 camZ;
-    /* 0x44 */ u8 camNodes[4];
-    /* 0x48 */ u8 started; /* 0 during the pre-race fly-through, then nonzero */
-    /* 0x49 */ s8 camState;
-    /* 0x4A */ u8 camNode;
-    /* 0x4B */ u8 camNextNode;
-    /* 0x4C */ CamParams cam;
-} Racer;
-
 /* A circular area registered with func_1508B20C. */
 typedef struct MpZone {
     /* 0x0 */ f32 radiusSq;
@@ -296,7 +243,6 @@ f32 func_15086D94(f32 x, f32 y, f32 z, f32 dx, f32 dz) {
     return -1.0f;
 }
 
-extern Racer *D_800872A0;
 extern s32 D_800D2394;
 extern void *allocate_memory(s32, s32, s32, s32);
 u8 func_150888A8(u8, u8, s8);

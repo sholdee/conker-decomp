@@ -875,14 +875,6 @@ typedef struct HudBars {
 } HudBars;
 
 
-typedef struct HudTime {
-    u8 pad0[0x1C];
-    s32 unk1C;
-    s32 unk20;
-    u8 pad24[3];
-    s8 unk27;
-    u8 pad28[0x84 - 0x28];
-} HudTime;
 
 extern HudBars D_800873B0;
 extern Gfx D_80087390[];
@@ -890,7 +882,6 @@ extern u8 D_800873B4[];
 extern u8 D_800873BC[];
 extern u8 D_800873C4[];
 extern u8 D_800873C8[];
-extern HudTime *D_800872A0;
 extern u8 D_CF1[];
 extern u8 D_CF2[];
 extern u8 D_D13[];
@@ -1288,16 +1279,16 @@ Gfx *func_150918EC(Gfx *gfx) {
         for (i = 0; i <= D_80082FA0; i++) {
             rowY = (s32)D_800BE628[i].top + 5;
             func_1504332C(255, 255, 255, 255);
-            if (D_800872A0[i].unk20 > 0) {
+            if (D_800872A0[i].lastLapTime > 0) {
                 x = (s32)D_800BE628[i].left;
-                func_150916B4(x + 23, rowY + 25, D_800872A0[i].unk20, 0xC0);
+                func_150916B4(x + 23, rowY + 25, D_800872A0[i].lastLapTime, 0xC0);
             }
             x = (s32)D_800BE628[i].left + (vpWidth >> 1);
-            icon = (s8)(D_800872A0[i].unk27 + 1); /* the current lap */
+            icon = (s8)(D_800872A0[i].lap + 1); /* the current lap */
             if (icon <= lapCount) {
                 func_15042D94(x, rowY, 0xC1, (s32 *)"%s", D_800E0BD8[8 + D_800E0AC0[i]]);
                 func_15042D94((s32)D_800BE628[i].left + 29, rowY + 14, 0xC1, (s32 *)"lap %d/%d", icon, lapCount);
-                func_150916B4(x, (s32)D_800BE628[i].bottom - 12, D_800872A0[i].unk1C, 0xC0);
+                func_150916B4(x, (s32)D_800BE628[i].bottom - 12, D_800872A0[i].raceTime, 0xC0);
             }
         }
     }

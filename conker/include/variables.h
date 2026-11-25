@@ -407,6 +407,7 @@ extern u8  D_80087280[];
 extern s16 D_80087290; /* node count */
 extern u8 D_80087298; /* goal node reached by the last search, 0xFF if none */
 extern u8 D_8008729C;
+extern Racer *D_800872A0; // per-racer state of the race mode
 extern u32 D_80087380;
 
 extern Gfx D_800873D0[];

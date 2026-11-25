@@ -1294,14 +1294,6 @@ s8 func_151E564C(void) {
     return D_8008FDC8;
 }
 
-struct Struct151E565C {
-    char pad0[0x29];
-    s8 unk29;
-    s8 unk2A;
-    char pad2B[0x84 - 0x2B];
-};
-
-extern struct Struct151E565C *D_800872A0;
 
 /*
  * Checks whether the match is over (score/time limits, players or teams left) and computes the
@@ -1353,10 +1345,10 @@ s32 func_151E565C(void) {
                 if (D_800E0AB0[i] != -1) {
                     D_800E0AC0[i] = D_800E0AB0[i];
                 } else {
-                    if (D_800872A0[i].unk2A == 0x7F) {
-                        D_800E0AC0[i] = D_800872A0[i].unk29;
+                    if (D_800872A0[i].finishOrder == 0x7F) {
+                        D_800E0AC0[i] = D_800872A0[i].rank;
                     } else {
-                        D_800E0AC0[i] = D_800872A0[i].unk2A;
+                        D_800E0AC0[i] = D_800872A0[i].finishOrder;
                     }
                 }
             }
