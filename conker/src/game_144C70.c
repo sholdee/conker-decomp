@@ -1,5 +1,5 @@
 #include <ultra64.h>
-// functions.h declares these with the wrong return types
+// functions.h declares func_15048A40 as returning void
 #define func_15048A40 func_15048A40_void_decl_in_functions_h
 #include "functions.h"
 #undef func_15048A40
@@ -629,6 +629,7 @@ void func_15117F3C(Prop *prop) {
 
 void func_151189AC(Prop *prop, s32 arg1);
 
+/* Door behaviours: func_151189AC with func_1511F990 mode 0 or 3. */
 void func_1511896C(Prop *prop) {
     func_151189AC(prop, 0);
 }
@@ -694,6 +695,7 @@ void func_151189AC(Prop *prop, s32 arg1) {
         angle = target;
     }
     if (angle != target || speed != 0.0f) {
+        /* both arms use the same values (two separate rodata constants in the ROM) */
         if (prop->work.swing.bounce == 0.0f) {
             if (slow) {
                 prop->work.swing.bounce = 0.3000000119f;
