@@ -90,17 +90,17 @@ typedef struct {
     /* 0x754 */ f32 unk754;
 } ChainCamera;
 
-extern f32 D_800986F0[4];
-extern f32 D_80098700[4];
-extern f32 D_80098710[4];
-extern f32 D_80098720[4];
-extern f32 D_80098730[4];
-extern f32 D_80098740[5];
-extern f32 D_80098754[5];
-extern f32 D_80098768[5];
+extern f32 D_800986F0[4]; /* link lengths */
+extern f32 D_80098700[4]; /* link lengths for objects 0x80 and 0xB0 */
+extern f32 D_80098710[4]; /* per-link x/z follow factors */
+extern f32 D_80098720[4]; /* per-link y follow factors */
+extern f32 D_80098730[4]; /* per-link bend limits, degrees */
+extern f32 D_80098740[5]; /* per-joint lift weights */
+extern f32 D_80098754[5]; /* per-joint lift weights for animations 0x1B and 0x18B */
+extern f32 D_80098768[5]; /* per-joint lift weights for objects 0x80 and 0xB0 */
 extern u8 D_800BEA0C;
 extern u8 D_800C3C9D;
-extern f32 D_800C4008[3];
+extern f32 D_800C4008[3]; /* chain anchor position */
 typedef f32 MtxF[4][4]; /* one bone matrix; struct127.unk1D4 points at an array of them */
 
 void func_1503CB98(s32 objIndex, s32 mode, f32 blend, BoneChain *chain);
@@ -110,13 +110,20 @@ extern f32 cosf(f32);
 
 #define CLAMP(x, lo, hi) ((x) < (lo) ? (lo) : ((x) > (hi) ? (hi) : (x)))
 
+/*
+ * Per-frame update of an object's bone chain (bones 24-28). While the animation poses the chain
+ * (mode 0) the joints just copy the bones; otherwise the chain trails the root as a rope of fixed
+ * link lengths, bobbing with the walking speed, swaying when idle and turning towards the R-trigger
+ * camera. Mode 2 blends from the animated pose back to the simulated one. Ends by rebuilding the
+ * bone matrices with func_1503CB98.
+ */
 void func_1503B9BC(s32 objIndex) {
     struct127 *obj;
     s32 prev;
     s32 i;
     f32 link[3];
     f32 offsets[5][3];
-    u8 *bits;
+    u8 *resetMask;
     f32 goal[3];
     f32 cosYaw;
     f32 sinYaw;
@@ -134,7 +141,7 @@ void func_1503B9BC(s32 objIndex) {
     f32 yaw;
     s32 facingCamera;
     f32 speed;
-    f32 amp;
+    f32 unused1; // matching: unused, keeps the stack frame layout
     f32 blend;
     s32 mode;
     s32 reset;
@@ -143,11 +150,11 @@ void func_1503B9BC(s32 objIndex) {
     f32 *linkLen;
     BoneChain *chain;
     s32 anim;
-    f32 a;
+    f32 unused2; // matching: unused, keeps the stack frame layout
     f32 tipBob;
     f32 (*bone)[4];
 
-    dirX = dirY = dirZ = 0.0f;
+    dirX = dirY = dirZ = 0.0f; // matching: dead store, steers IDO's FP register order
     obj = &D_800CC2D0[objIndex];
     facingCamera = 0;
     if (obj->unk31C == NULL) {
@@ -158,17 +165,18 @@ void func_1503B9BC(s32 objIndex) {
     }
     chain = CHAIN_EXT(obj)->chain;
     mode = func_1503B95C(objIndex, chain);
-    bits = &D_800C4000;
+    resetMask = &D_800C4000; /* one bit per object: reset the chain once it has bones again */
     if (obj->unk1D4 == NULL) {
-        *bits |= 1 << objIndex;
+        *resetMask |= 1 << objIndex;
         return;
     }
     if (D_800C4000 & (1 << objIndex)) {
-        *bits = D_800C4000 & ~(1 << objIndex);
+        *resetMask = D_800C4000 & ~(1 << objIndex);
         reset = 1;
     } else {
         reset = 0;
     }
+    /* any of the four camera hold timers, or byte 0x2FD of the object */
     if (*(s32 *)D_800DBFF4 != 0 || obj->pad2FC[1] != 0) {
         reset = 1;
     }
@@ -189,7 +197,9 @@ void func_1503B9BC(s32 objIndex) {
             chain->blendTimer = 0;
         }
     }
+    // matching: the loop start below goes through a variable, so IDO unrolls it for any start
     prev = 24;
+    /* the chain is anchored at bone 0's position */
     bone = ((MtxF *)obj->unk1D4)[0];
     D_800C4008[0] = bone[3][0];
     D_800C4008[1] = bone[3][1];
@@ -263,7 +273,7 @@ void func_1503B9BC(s32 objIndex) {
             }
             if (clamped) {
                 delta = turn - chain->swayAngle;
-                turn = chain->swayAngle + delta * 0.6000000238f;
+                turn = chain->swayAngle + delta * 0.6f;
             }
             chain->swayAngle = turn;
             chain->swayTimer = 60;
@@ -277,7 +287,7 @@ void func_1503B9BC(s32 objIndex) {
     }
     sinYaw = sinf(yaw);
     cosYaw = cosf(yaw);
-    anim = D_800CC2D0[objIndex].unk84.uh;
+    anim = D_800CC2D0[objIndex].unk84.uh; // matching: reloaded via the array, not obj
     if (anim == 0x24 || anim == 0x22 || anim == 0xD1) {
         D_800C4008[1] = chain->pos[0][1];
         if (obj->unkB8 > 0.0f) {
@@ -292,7 +302,7 @@ void func_1503B9BC(s32 objIndex) {
         bob = 60.0f - (speed + speed);
         if (D_800C35EA == 1 && D_800C3C9D < 100) {
             bob *= D_800C3C9D;
-            bob *= 0.009999999776f;
+            bob *= 0.01f;
         }
         if (obj->id == 0x80 || obj->id == 0xB0) {
             liftWeights = D_80098768;
@@ -306,7 +316,7 @@ void func_1503B9BC(s32 objIndex) {
             liftWeights = D_80098740;
         }
         if (CHAIN_EXT(obj)->unk78 == 0x3B && cam != NULL && cam->mode == 0x100 && cam->pitch > -17.0f) {
-            bob = 0;
+            bob = 0; // matching: an int 0 (0.0f allocates differently)
         }
         offsets[0][1] += bob * liftWeights[0];
         offsets[1][1] += bob * liftWeights[1];
@@ -360,9 +370,9 @@ void func_1503B9BC(s32 objIndex) {
     }
     for (i = 1; i < 5; i++) {
         prev = i - 1;
-        dirX = chain->pos[i - 1][0] + offsets[i - 1][0] * obj->xz_scale;
-        dirY = chain->pos[i - 1][1] + offsets[i - 1][1] * obj->y_scale;
-        dirZ = chain->pos[i - 1][2] + offsets[i - 1][2] * obj->xz_scale;
+        dirX = chain->pos[prev][0] + offsets[prev][0] * obj->xz_scale;
+        dirY = chain->pos[prev][1] + offsets[prev][1] * obj->y_scale;
+        dirZ = chain->pos[prev][2] + offsets[prev][2] * obj->xz_scale;
         if (prev == 0) {
             dirX -= D_800C4008[0];
             dirY -= D_800C4008[1];
