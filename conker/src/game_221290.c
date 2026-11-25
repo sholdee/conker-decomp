@@ -3,7 +3,102 @@
 #include "functions.h"
 #include "variables.h"
 
+/* Rare's MPEG audio layer III decoder (the streamed-audio codec).  One global
+ * instance, D_800E1880.  Field names follow ISO 11172-3 / 13818-3 where the
+ * header and side-info bit widths read in func_151F8088 / func_151F6FD0 pin
+ * them down.
+ *
+ * The per-granule/channel side-info arrays are declared [2][1]: the ROM indexes
+ * them [gr][ch] with BOTH indices striding one element (only gr 0 / mono ever
+ * reach them), so a few arrays below overlap their neighbours for ch 1. */
+typedef struct Mp3Decoder Mp3Decoder;
 
+typedef s32 (*Mp3ReadFn)(s32 handle, void *dst, s32 size, s32 seekPos);
+typedef s32 (*Mp3DecodeFn)(Mp3Decoder *dec);
+
+typedef struct {
+    /* 0x00 */ s32 l[23];    /* long-block scalefactors, per band */
+    /* 0x5C */ s32 s[3][13]; /* short-block scalefactors, [window][band] */
+} Mp3ScaleFac; /* size 0xF8 */
+
+struct Mp3Decoder {
+    /* 0x0000 */ s32 handle;            /* opaque, passed back to read() */
+    /* 0x0004 */ Mp3ReadFn read;
+    /* 0x0008 */ s32 unk0008;
+    /* 0x000C */ s32 unk000C;
+    /* 0x0010 */ s32 unk0010;
+    /* 0x0014 */ s32 unk0014;
+    /* 0x0018 */ s32 streamPos;         /* bytes consumed from the stream */
+    /* 0x001C */ u8  mainData[0x2000];  /* bit reservoir */
+    /* 0x201C */ s32 mainDataLen;       /* bytes filled */
+    /* 0x2020 */ s32 mainDataBit;       /* bit cursor */
+    /* 0x2024 */ u8  headerBuf[0x40];   /* header + CRC + side info bytes */
+    /* 0x2064 */ s32 headerBit;         /* bit cursor into headerBuf */
+    /* 0x2068 */ s32 headerLen;         /* 4, or 6 with CRC */
+    /* 0x206C */ s32 sideInfoLen;
+    /* 0x2070 */ u8  outBuf[6][0x488];  /* ring of decoded output blocks */
+    /* 0x3BA0 */ s32 outIndex;
+    /* 0x3BA4 */ s32 id;                /* 1 = MPEG-1, 0 = MPEG-2 LSF */
+    /* 0x3BA8 */ s32 layer;             /* raw 2-bit field: 1 = layer III */
+    /* 0x3BAC */ s32 protectionBit;     /* 0 = CRC follows the header */
+    /* 0x3BB0 */ s32 bitrateIndex;
+    /* 0x3BB4 */ s32 sampleRateIndex;
+    /* 0x3BB8 */ s32 paddingBit;
+    /* 0x3BBC */ s32 privateBit;
+    /* 0x3BC0 */ s32 mode;              /* 3 = mono */
+    /* 0x3BC4 */ s32 modeExtension;
+    /* 0x3BC8 */ s32 copyright;
+    /* 0x3BCC */ s32 original;
+    /* 0x3BD0 */ s32 emphasis;
+    /* 0x3BD4 */ s32 haveFirstHeader;
+    /* 0x3BD8 */ s32 firstId;           /* first frame's header, to detect a stream change */
+    /* 0x3BDC */ s32 firstLayer;
+    /* 0x3BE0 */ s32 firstProtectionBit;
+    /* 0x3BE4 */ s32 firstSampleRateIndex;
+    /* 0x3BE8 */ s32 firstMode;
+    /* 0x3BEC */ s32 firstCopyright;
+    /* 0x3BF0 */ s32 firstOriginal;
+    /* 0x3BF4 */ s32 mainDataBegin;
+    /* 0x3BF8 */ s32 scfsi[1][32];      /* [ch][scfsi band] */
+    /* 0x3C78 */ s32 part23Length[2][1];
+    /* 0x3C80 */ s32 bigValues[2][1];
+    /* 0x3C88 */ s32 globalGain[2][1];
+    /* 0x3C90 */ s32 scalefacCompress[2][1];
+    /* 0x3C98 */ s32 windowSwitching[2][1];
+    /* 0x3CA0 */ s32 blockType[2][1];
+    /* 0x3CA8 */ s32 mixedBlock[2][1];
+    /* 0x3CB0 */ s32 tableSelect[2][1][3];
+    /* 0x3CC8 */ s32 subblockGain[2][1][3];
+    /* 0x3CE0 */ s32 region0Count[2][1];
+    /* 0x3CE8 */ s32 region1Count[2][1];
+    /* 0x3CF0 */ s32 preflag[2][1];
+    /* 0x3CF8 */ s32 scalefacScale[2][1];
+    /* 0x3D00 */ s32 count1TableSelect[2][1];
+    /* 0x3D08 */ Mp3ScaleFac scalefac[2][1];
+    /* 0x3EF8 */ s32 intensityScale;    /* MPEG-2 LSF intensity stereo */
+    /* 0x3EFC */ s32 unk3EFC[6];        /* written past its end, into unk3F14 */
+    /* 0x3F14 */ s32 unk3F14[16];
+    /* 0x3F54 */ u8  pad3F54[0x3F7C - 0x3F54];
+    /* 0x3F7C */ s32 bitrate;
+    /* 0x3F80 */ s32 sampleRate;
+    /* 0x3F84 */ s32 frameSize;
+    /* 0x3F88 */ s32 mainDataSize;      /* main-data bytes in this frame */
+    /* 0x3F8C */ s32 nch;
+    /* 0x3F90 */ s32 ngr;
+    /* 0x3F94 */ s16 huffVal[1][578];   /* Huffman-decoded magnitudes, per ch */
+    /* 0x4418 */ u8  huffSign[1][578];  /* their sign bits */
+    /* 0x465A */ u8  pad465A[2];
+    /* 0x465C */ s32 nonZero[1];        /* decoded lines, per ch */
+    /* 0x4660 */ s32 zeroTail[1];       /* 576 - nonZero, per ch */
+    /* 0x4664 */ f32 xr[1][576];        /* dequantised lines, per ch */
+    /* 0x4F64 */ f32 xrSb[2][32][18];   /* reordered lines, [ch][subband][line] */
+    /* 0x6164 */ u8  pad6164[0x6A64 - 0x6164];
+    /* 0x6A64 */ f32 overlap[2][32][18]; /* IMDCT overlap-add state */
+    /* 0x7C64 */ u8  pad7C64[0x8474 - 0x7C64];
+    /* 0x8474 */ s32 seekPos;           /* next sync search start, -1 = continue */
+    /* 0x8478 */ Mp3DecodeFn decodeFrame;
+    /* 0x847C */ Mp3DecodeFn readSideInfo;
+}; /* size 0x8480 */
 
 extern f32 D_800B0C2C;
 extern f32 D_800B0C30;
@@ -16,82 +111,82 @@ extern f32 D_800B0C48;
 extern s32 *D_800E0E20;
 extern s32 D_800E0E28;
 extern f32 *D_800E0E30;
-/* One 36-entry IMDCT window per block type; D_800E0EC8 and D_800E0FE8 are rows
- * 1 and 3 of the same table, which func_151F78B4 indexes as D_800E0E38[type]. */
+/* The IMDCT window for each block type (0 normal, 1 start, 2 short, 3 stop). */
 extern f32 D_800E0E38[4][36];
-extern f32 D_800E0EC8[36];
-extern f32 D_800E0FE8[36];
 extern f32 *D_800E1078;
 extern f32 D_800E1080[256];
 extern f32 D_800E1480[256];
 
+/* Builds the decoder's tables: the four IMDCT windows, the relocated Huffman
+ * table pointers, x^(4/3) for the 8192 quantised magnitudes (Newton iteration
+ * on x^3 = i^4) and the two gain-power tables. Returns 0 without a pow43 buffer. */
 s32 func_151F3DE0(void) {
-    s32 sp34;
-    f32 sp30;
-    f32 sp2C;
-    f32 sp28;
-    f32 sp24;
-    f32 sp20;
-    f32 sp1C;
-    f32 sp18;
+    s32 i;
+    f32 x;
+    f32 xSq;
+    f32 step;
+    f32 target;
+    f32 tolerance;
+    f32 gain;
+    f32 subblockGain;
 
-    for (sp34 = 0; sp34 < 0x24; sp34++) {
-        D_800E0E38[0][sp34] = sinf(((f32)sp34 + 0.5f) * D_800B0C2C);
+    for (i = 0; i < 36; i++) {
+        D_800E0E38[0][i] = sinf((i + 0.5f) * D_800B0C2C);
     }
-    for (sp34 = 0; sp34 < 0x12; sp34++) {
-        D_800E0EC8[sp34] = sinf(((f32)sp34 + 0.5f) * D_800B0C30);
+    for (i = 0; i < 18; i++) {
+        D_800E0E38[1][i] = sinf((i + 0.5f) * D_800B0C30);
     }
-    for (sp34 = 0x12; sp34 < 0x18; sp34++) {
-        D_800E0EC8[sp34] = 1.0f;
+    for (i = 18; i < 24; i++) {
+        D_800E0E38[1][i] = 1.0f;
     }
-    for (sp34 = 0x18; sp34 < 0x1E; sp34++) {
-        D_800E0EC8[sp34] = sinf((((f32)sp34 + 0.5f) - 18.0f) * D_800B0C34);
+    for (i = 24; i < 30; i++) {
+        D_800E0E38[1][i] = sinf((i + 0.5f - 18.0f) * D_800B0C34);
     }
-    for (sp34 = 0x1E; sp34 < 0x24; sp34++) {
-        D_800E0EC8[sp34] = 0.0f;
+    for (i = 30; i < 36; i++) {
+        D_800E0E38[1][i] = 0.0f;
     }
-    for (sp34 = 0; sp34 < 6; sp34++) {
-        D_800E0FE8[sp34] = 0.0f;
+    for (i = 0; i < 6; i++) {
+        D_800E0E38[3][i] = 0.0f;
     }
-    for (sp34 = 6; sp34 < 0xC; sp34++) {
-        D_800E0FE8[sp34] = sinf((((f32)sp34 + 0.5f) - 6.0f) * D_800B0C38);
+    for (i = 6; i < 12; i++) {
+        D_800E0E38[3][i] = sinf((i + 0.5f - 6.0f) * D_800B0C38);
     }
-    for (sp34 = 0xC; sp34 < 0x12; sp34++) {
-        D_800E0FE8[sp34] = 1.0f;
+    for (i = 12; i < 18; i++) {
+        D_800E0E38[3][i] = 1.0f;
     }
-    for (sp34 = 0x12; sp34 < 0x24; sp34++) {
-        D_800E0FE8[sp34] = sinf(((f32)sp34 + 0.5f) * D_800B0C3C);
+    for (i = 18; i < 36; i++) {
+        D_800E0E38[3][i] = sinf((i + 0.5f) * D_800B0C3C);
     }
-    for (sp34 = 1; sp34 < 0x22; sp34++) {
-        D_800E0E20[sp34] += D_800E0E28;
+    for (i = 1; i < 34; i++) {
+        D_800E0E20[i] += D_800E0E28;
     }
     D_800E1078 = D_800E0E30;
     if (D_800E1078 == NULL) {
         return 0;
     }
-    sp30 = 1.0f;
+    x = 1.0f;
     D_800E1078[0] = 0.0f;
-    for (sp34 = 1; sp34 < 0x2000; sp34++) {
-        sp24 = (f32)sp34;
-        sp24 = sp24 * sp24;
-        sp20 = sp24 * D_800B0C40;
-        sp24 = sp24 * sp24;
+    for (i = 1; i < 8192; i++) {
+        target = i;
+        target *= target;
+        tolerance = target * D_800B0C40;
+        target *= target;
         do {
-            sp2C = sp30 * sp30;
-            sp28 = ((sp2C * sp30) - sp24) / (2.0f * sp2C);
-            sp30 -= sp28;
-        } while ((sp28 > sp20) || (sp28 < -sp20));
-        D_800E1078[sp34] = sp30;
+            xSq = x * x;
+            step = (xSq * x - target) / (2.0f * xSq);
+            x -= step;
+        } while (step > tolerance || step < -tolerance);
+        D_800E1078[i] = x;
     }
-    sp1C = D_800B0C44;
-    sp18 = 0.25f;
+    gain = D_800B0C44;
+    subblockGain = 0.25f;
     D_800E1080[0] = 1.0f;
     D_800E1480[0] = 1.0f;
-    for (sp34 = 1; sp34 < 0x100; sp34++) {
-        D_800E1080[sp34] = sp1C;
-        D_800E1480[sp34] = sp18;
-        sp18 = sp18 * 0.25f;
-        sp1C = sp1C * D_800B0C48;
+    for (i = 1; i < 256; i++) {
+        D_800E1080[i] = gain;
+        D_800E1480[i] = subblockGain;
+        subblockGain *= 0.25f;
+        gain *= D_800B0C48;
     }
     return 1;
 }
@@ -648,42 +743,30 @@ s32 func_151F63C4(AudFrm *arg0, s32 arg1, s32 arg2) {
 }
 extern s16 D_800AEB7C[2][3][576];
 
-typedef struct {
-    /* 0x0000 */ u8  pad0000[0x3BA4];
-    /* 0x3BA4 */ s32 unk3BA4;
-    /* 0x3BA8 */ u8  pad3BA8[0x3BB4 - 0x3BA8];
-    /* 0x3BB4 */ s32 unk3BB4;
-    /* 0x3BB8 */ u8  pad3BB8[0x3C98 - 0x3BB8];
-    /* 0x3C98 */ s32 unk3C98[2];
-    /* 0x3CA0 */ s32 unk3CA0[2];
-    /* 0x3CA8 */ s32 unk3CA8[2];
-    /* 0x3CB0 */ u8  pad3CB0[0x4664 - 0x3CB0];
-    /* 0x4664 */ f32 unk4664[576];
-    /* 0x4F64 */ f32 unk4F64[576];
-} AudX6970;
+/* Short-block reordering: xr is copied into xrSb, short blocks through the
+ * D_800AEB7C index table (mixed blocks keep their first 36 long lines). */
+s32 func_151F6970(Mp3Decoder *dec, s32 gr) {
+    s16 *reorder;
+    f32 *dst;
+    f32 *src;
+    s32 i;
 
-s32 func_151F6970(AudX6970 *arg0, s32 arg1) {
-    s16 *sp14;
-    f32 *sp10;
-    f32 *spC;
-    s32 sp8;
-
-    sp14 = &D_800AEB7C[arg0->unk3BA4][arg0->unk3BB4][0];
-    sp10 = arg0->unk4F64;
-    spC = arg0->unk4664;
-    sp8 = 0;
-    if ((arg0->unk3C98[arg1] != 0) && (arg0->unk3CA0[arg1] == 2)) {
-        if (arg0->unk3CA8[arg1] != 0) {
-            while (sp8++ < 0x24) {
-                *sp10++ = *spC++;
+    reorder = D_800AEB7C[dec->id][dec->sampleRateIndex];
+    dst = dec->xrSb[0][0];
+    src = dec->xr[0];
+    i = 0;
+    if ((dec->windowSwitching[gr][0] != 0) && (dec->blockType[gr][0] == 2)) {
+        if (dec->mixedBlock[gr][0] != 0) {
+            while (i++ < 36) {
+                *dst++ = *src++;
             }
         }
-        while (sp8 < 0x240) {
-            sp10[sp14[sp8++]] = *spC++;
+        while (i < 576) {
+            dst[reorder[i++]] = *src++;
         }
     } else {
-        while (sp8++ < 0x240) {
-            *sp10++ = *spC++;
+        while (i++ < 576) {
+            *dst++ = *src++;
         }
     }
     return 1;
@@ -709,60 +792,59 @@ typedef struct {
     /* 0x4F44 */ AudBlk151F6B28 unk4F44[2][32];
 } AudState151F6B28;
 
-s32 func_151F6B28(AudState151F6B28 *arg0, s32 arg1, s32 arg2) {
-    s32 i;
-    f32 *p;
-    f32 v;
-    f32 u;
+s32 func_151F6B28(Mp3Decoder *dec, s32 gr, s32 ch) {
+    s32 sb;
+    f32 *xr;
+    f32 bd;
+    f32 bu;
 
-    if (arg0->unk3C98[arg1][arg2] != 0) {
-        if (arg0->unk3CA0[arg1][arg2] == 2) {
+    if (dec->windowSwitching[gr][ch] != 0) {
+        if (dec->blockType[gr][ch] == 2) {
             return 1;
         }
     }
 
-    for (i = 1; i < 32; i++) {
-        p = arg0->unk4F44[arg2][i].unk20;
+    for (sb = 1; sb < 32; sb++) {
+        xr = dec->xrSb[ch][sb];
+        bd = xr[0];
+        bu = xr[-1];
+        xr[-1] = bu * D_800B069C[0] - D_800B067C[0] * bd;
+        xr[0] = bd * D_800B069C[0] + D_800B067C[0] * bu;
 
-        v = p[0];
-        u = p[-1];
-        p[-1] = u * D_800B069C[0] - D_800B067C[0] * v;
-        p[0] = v * D_800B069C[0] + D_800B067C[0] * u;
+        bd = xr[1];
+        bu = xr[-2];
+        xr[-2] = bu * D_800B069C[1] - D_800B067C[1] * bd;
+        xr[1] = bd * D_800B069C[1] + D_800B067C[1] * bu;
 
-        v = p[1];
-        u = p[-2];
-        p[-2] = u * D_800B069C[1] - D_800B067C[1] * v;
-        p[1] = v * D_800B069C[1] + D_800B067C[1] * u;
+        bd = xr[2];
+        bu = xr[-3];
+        xr[-3] = bu * D_800B069C[2] - D_800B067C[2] * bd;
+        xr[2] = bd * D_800B069C[2] + D_800B067C[2] * bu;
 
-        v = p[2];
-        u = p[-3];
-        p[-3] = u * D_800B069C[2] - D_800B067C[2] * v;
-        p[2] = v * D_800B069C[2] + D_800B067C[2] * u;
+        bd = xr[3];
+        bu = xr[-4];
+        xr[-4] = bu * D_800B069C[3] - D_800B067C[3] * bd;
+        xr[3] = bd * D_800B069C[3] + D_800B067C[3] * bu;
 
-        v = p[3];
-        u = p[-4];
-        p[-4] = u * D_800B069C[3] - D_800B067C[3] * v;
-        p[3] = v * D_800B069C[3] + D_800B067C[3] * u;
+        bd = xr[4];
+        bu = xr[-5];
+        xr[-5] = bu * D_800B069C[4] - D_800B067C[4] * bd;
+        xr[4] = bd * D_800B069C[4] + D_800B067C[4] * bu;
 
-        v = p[4];
-        u = p[-5];
-        p[-5] = u * D_800B069C[4] - D_800B067C[4] * v;
-        p[4] = v * D_800B069C[4] + D_800B067C[4] * u;
+        bd = xr[5];
+        bu = xr[-6];
+        xr[-6] = bu * D_800B069C[5] - D_800B067C[5] * bd;
+        xr[5] = bd * D_800B069C[5] + D_800B067C[5] * bu;
 
-        v = p[5];
-        u = p[-6];
-        p[-6] = u * D_800B069C[5] - D_800B067C[5] * v;
-        p[5] = v * D_800B069C[5] + D_800B067C[5] * u;
+        bd = xr[6];
+        bu = xr[-7];
+        xr[-7] = bu * D_800B069C[6] - D_800B067C[6] * bd;
+        xr[6] = bd * D_800B069C[6] + D_800B067C[6] * bu;
 
-        v = p[6];
-        u = p[-7];
-        p[-7] = u * D_800B069C[6] - D_800B067C[6] * v;
-        p[6] = v * D_800B069C[6] + D_800B067C[6] * u;
-
-        v = p[7];
-        u = p[-8];
-        p[-8] = u * D_800B069C[7] - D_800B067C[7] * v;
-        p[7] = v * D_800B069C[7] + D_800B067C[7] * u;
+        bd = xr[7];
+        bu = xr[-8];
+        xr[-8] = bu * D_800B069C[7] - D_800B067C[7] * bd;
+        xr[7] = bd * D_800B069C[7] + D_800B067C[7] * bu;
     }
 
     return 1;
@@ -983,7 +1065,7 @@ s32 func_151F78B4(AudInst *arg0) {
         func_151F63C4((AudFrm *)arg0, sp950, sp94C);
         func_151F42E8((AudRqt *)arg0, sp950, sp94C);
     }
-    func_151F6970((AudX6970 *)arg0, sp950);
+    func_151F6970(arg0, sp950);
     if ((arg0->unk3C98[sp950][0] != 0) && (arg0->unk3CA0[sp950][0] == 2)) {
         sp948 = 0x20;
     } else {
