@@ -1212,109 +1212,45 @@ s32 func_151DB97C(Particle *particle, s32 arg1) {
     return 1;
 }
 
-/* Direction spread shared by the burst specs: func_15143794 takes a random angle from each range. */
-typedef struct {
-    s16 angle1;
-    s16 angle1Range;
-    s16 angle2;
-    s16 angle2Range;
-} BurstAngles;
-
-/*
- * Parameters for func_15153F18, which throws count + rand(countRange) func_151DA6F8 splashes.
- * Each `x` / `xRange` pair is drawn as x + rand(xRange). func_15153F18 reads `angles` from its first
- * argument and everything else relative to its second (&spec->pos).
- */
-typedef struct {
-    BurstAngles angles;
-    Vec3f pos;
-    f32 scale;
-    f32 scaleRange;
-    f32 size;
-    f32 sizeRange;
-    f32 speed;
-    f32 speedRange;
-    s16 count;
-    s16 countRange;
-    s16 unk30; /* splash arg6 */
-    s16 unk30Range;
-    s16 lifetime;
-    s16 lifetimeRange;
-    s16 unk38; /* splash arg4 */
-    s16 unk38Range;
-    s8 kind;
-    u8 pad3D[3];
-    f32 unk40Chance; /* probability of splash arg7 */
-    s16 unk44;
-    s16 unk46;
-    s32 unk48;
-} SplashBurstSpec; /* 0x4C */
-
-/* Parameters for func_15150178, which throws count + rand(countRange) func_151D9014 particles. */
-typedef struct {
-    BurstAngles angles;
-    Vec3f pos;
-    s16 count;
-    s16 countRange;
-    f32 speed;
-    f32 speedRange;
-    s16 lifetime;
-    s16 lifetimeRange;
-    f32 gravity;
-    f32 gravityRange;
-    u8 unk2C; /* particle arg5 */
-    u8 unk2CRange;
-    u8 pad2E[2];
-    f32 size;
-    f32 sizeRange;
-    s8 unk38;
-    u8 kind;
-    u8 pad3A[2];
-    f32 unk3CChance; /* probability of particle arg7 */
-    s8 wobble;
-    u8 pad41[3];
-    f32 bounceChance;
-} DropBurstSpec; /* 0x48 */
-
-extern void func_15153F18(SplashBurstSpec *spec, Vec3f *params, s32 arg2, u8 arg3, s32 arg4);
-extern void func_15150178(DropBurstSpec *spec, Vec3f *params, s32 arg2, u8 arg3, s32 arg4);
+extern void func_15153F18(AngleRange *angles, SplashSpray *spray, s32 arg2, u8 arg3, s32 arg4);
+extern void func_15150178(AngleRange *angles, DropSpray *spray, s32 arg2, u8 arg3, s32 arg4);
 
 /* Throws `count` splashes of effect kind `kind` from `pos`. */
 void func_151DBAA8(Vec3f *pos, s32 count, u8 kind, u8 arg3, s32 arg4) {
-    SplashBurstSpec splash;
+    SplashSpraySpec splash;
 
-    splash.pos = *pos;
+    splash.spray.pos = *pos;
 
-    splash.count = count;
+    splash.spray.countBase = count;
 
-    splash.angles.angle1Range = 0xFF;
-    splash.angles.angle2 = -64;
-    splash.angles.angle2Range = 46;
+    splash.angles.yawRange = 0xFF;
+    splash.angles.pitchBase = -64;
+    splash.angles.pitchRange = 46;
 
-    splash.countRange = 0;
-    splash.angles.angle1 = 0;
-    splash.unk30 = 3;
-    splash.unk30Range = 2;
-    splash.lifetime = 30;
-    splash.lifetimeRange = 30;
-    splash.unk38 = 155;
-    splash.scale = 5.5f;
+    splash.spray.countRange = 0;
+    splash.angles.yawBase = 0;
+    splash.spray.itemCountBase = 3;
+    splash.spray.itemCountRange = 2;
+    splash.spray.lifeBase = 30;
+    splash.spray.lifeRange = 30;
+    splash.spray.unk30 = 155;
+    splash.spray.scaleBase = 5.5f;
 
-    splash.scaleRange = 2.9399998f;
-    splash.size = 0.61300004f;
-    splash.sizeRange = 0.60300004f;
-    splash.speed = 10.0f;
-    splash.speedRange = 10.2f;
+    splash.spray.scaleRange = 2.9399998f;
+    splash.spray.sizeBase = 0.61300004f;
+    splash.spray.sizeRange = 0.60300004f;
+    splash.spray.speedBase = 10.0f;
+    splash.spray.speedRange = 10.2f;
 
-    splash.unk38Range = 100;
-    splash.unk44 = 16;
-    splash.unk46 = 15;
-    splash.unk48 = 0;
-    splash.unk40Chance = 0.5f;
+    splash.spray.unk32 = 100;
+    splash.spray.unk3C = 16;
+    splash.spray.unk3E = 15;
+    splash.spray.unk40 = 0;
+    splash.spray.unk38 = 0.5f;
 
-    splash.kind = kind;
+    splash.spray.kind = kind;
 
-    func_15153F18(&splash, &splash.pos, 0, arg3, arg4);
+    func_15153F18(&splash.angles, &splash.spray, 0, arg3, arg4);
 
 }
 
@@ -1468,118 +1404,118 @@ void func_151DC034(Vec3f *pos, f32 size, u8 arg2, s16 lifetime, u8 kind, u8 arg5
 
 /* Throws a splash burst plus a burst of wobbling drops of effect kind `kind` from `pos`. */
 void func_151DC260(Vec3f *pos, s32 arg1, u8 kind, u8 arg3, s32 arg4) {
-    SplashBurstSpec splash;
+    SplashSpraySpec splash;
 
-    splash.pos = *pos;
-    splash.count = 10;
-    splash.countRange = 10;
-    splash.angles.angle1Range = 0xFF;
-    splash.angles.angle2 = -64;
-    splash.angles.angle2Range = 40;
-    splash.scale = 3.0f;
-    splash.angles.angle1 = 0;
-    splash.unk30 = 3;
-    splash.unk30Range = 1;
-    splash.lifetime = 60;
-    splash.lifetimeRange = 40;
-    splash.unk38 = 100;
-    splash.unk38Range = 100;
-    splash.unk44 = 16;
-    splash.unk46 = 15;
-    splash.unk48 = 0;
-    splash.scaleRange = 4.0f;
-    splash.size = 0.80700004f;
-    splash.sizeRange = 0.51000005f;
-    splash.speed = 12.0f;
-    splash.speedRange = 11.0f;
-    splash.unk40Chance = 1.0f;
-    splash.kind = kind;
-    func_15153F18(&splash, &splash.pos, arg1, arg3, arg4);
+    splash.spray.pos = *pos;
+    splash.spray.countBase = 10;
+    splash.spray.countRange = 10;
+    splash.angles.yawRange = 0xFF;
+    splash.angles.pitchBase = -64;
+    splash.angles.pitchRange = 40;
+    splash.spray.scaleBase = 3.0f;
+    splash.angles.yawBase = 0;
+    splash.spray.itemCountBase = 3;
+    splash.spray.itemCountRange = 1;
+    splash.spray.lifeBase = 60;
+    splash.spray.lifeRange = 40;
+    splash.spray.unk30 = 100;
+    splash.spray.unk32 = 100;
+    splash.spray.unk3C = 16;
+    splash.spray.unk3E = 15;
+    splash.spray.unk40 = 0;
+    splash.spray.scaleRange = 4.0f;
+    splash.spray.sizeBase = 0.80700004f;
+    splash.spray.sizeRange = 0.51000005f;
+    splash.spray.speedBase = 12.0f;
+    splash.spray.speedRange = 11.0f;
+    splash.spray.unk38 = 1.0f;
+    splash.spray.kind = kind;
+    func_15153F18(&splash.angles, &splash.spray, arg1, arg3, arg4);
 
     {
-        DropBurstSpec drops;
+        DropSpraySpec drops;
 
-        drops.pos = *pos;
-        drops.angles.angle1 = 0;
-        drops.count = 12;
-        drops.speed = 6.0f;
-        drops.countRange = 6;
-        drops.angles.angle1Range = 0xFF;
-        drops.angles.angle2 = -64;
-        drops.angles.angle2Range = 36;
-        drops.lifetime = 35;
-        drops.lifetimeRange = 15;
-        drops.unk2C = 155;
-        drops.unk2CRange = 100;
-        drops.speedRange = 8.0f;
-        drops.unk38 = 1;
-        drops.gravity = -1.266f;
-        drops.gravityRange = 0.46600002f;
-        drops.kind = kind;
-        drops.size = 123.0f;
-        drops.sizeRange = 134.0f;
-        drops.wobble = 1;
-        drops.unk3CChance = 0.6f;
-        drops.bounceChance = 0.0f;
-        func_15150178(&drops, &drops.pos, arg1, arg3, arg4);
+        drops.spray.pos = *pos;
+        drops.angles.yawBase = 0;
+        drops.spray.countBase = 12;
+        drops.spray.speedBase = 6.0f;
+        drops.spray.countRange = 6;
+        drops.angles.yawRange = 0xFF;
+        drops.angles.pitchBase = -64;
+        drops.angles.pitchRange = 36;
+        drops.spray.lifeBase = 35;
+        drops.spray.lifeRange = 15;
+        drops.spray.unk24 = 155;
+        drops.spray.unk25 = 100;
+        drops.spray.speedRange = 8.0f;
+        drops.spray.unk30 = 1;
+        drops.spray.gravityBase = -1.266f;
+        drops.spray.gravityRange = 0.46600002f;
+        drops.spray.kind = kind;
+        drops.spray.sizeBase = 123.0f;
+        drops.spray.sizeRange = 134.0f;
+        drops.spray.wobbles = 1;
+        drops.spray.unk34 = 0.6f;
+        drops.spray.bounceChance = 0.0f;
+        func_15150178(&drops.angles, &drops.spray, arg1, arg3, arg4);
     }
 }
 
 /* Smaller variant of func_151DC260: splash burst plus wobbling drops of effect kind `kind`. */
 void func_151DC484(Vec3f *pos, s32 arg1, u8 kind, u8 arg3, s32 arg4) {
-    SplashBurstSpec splash;
+    SplashSpraySpec splash;
 
-    splash.pos = *pos;
-    splash.count = 8;
-    splash.countRange = 6;
-    splash.angles.angle1Range = 0xFF;
-    splash.angles.angle2 = -64;
-    splash.scale = 3.0f;
-    splash.angles.angle1 = 0;
-    splash.angles.angle2Range = 40;
-    splash.unk30 = 3;
-    splash.unk30Range = 0;
-    splash.lifetime = 60;
-    splash.lifetimeRange = 40;
-    splash.unk38 = 100;
-    splash.unk38Range = 100;
-    splash.unk44 = 16;
-    splash.unk46 = 15;
-    splash.unk48 = 0;
-    splash.scaleRange = 2.0f;
-    splash.size = 0.642f;
-    splash.sizeRange = 0.314f;
-    splash.speed = 8.0f;
-    splash.speedRange = 5.0f;
-    splash.unk40Chance = 1.0f;
-    splash.kind = kind;
-    func_15153F18(&splash, &splash.pos, arg1, arg3, arg4);
+    splash.spray.pos = *pos;
+    splash.spray.countBase = 8;
+    splash.spray.countRange = 6;
+    splash.angles.yawRange = 0xFF;
+    splash.angles.pitchBase = -64;
+    splash.spray.scaleBase = 3.0f;
+    splash.angles.yawBase = 0;
+    splash.angles.pitchRange = 40;
+    splash.spray.itemCountBase = 3;
+    splash.spray.itemCountRange = 0;
+    splash.spray.lifeBase = 60;
+    splash.spray.lifeRange = 40;
+    splash.spray.unk30 = 100;
+    splash.spray.unk32 = 100;
+    splash.spray.unk3C = 16;
+    splash.spray.unk3E = 15;
+    splash.spray.unk40 = 0;
+    splash.spray.scaleRange = 2.0f;
+    splash.spray.sizeBase = 0.642f;
+    splash.spray.sizeRange = 0.314f;
+    splash.spray.speedBase = 8.0f;
+    splash.spray.speedRange = 5.0f;
+    splash.spray.unk38 = 1.0f;
+    splash.spray.kind = kind;
+    func_15153F18(&splash.angles, &splash.spray, arg1, arg3, arg4);
 
     {
-        DropBurstSpec drops;
+        DropSpraySpec drops;
 
-        drops.pos = *pos;
-        drops.count = 12;
-        drops.countRange = 6;
-        drops.angles.angle1Range = 0xFF;
-        drops.angles.angle1 = 0;
-        drops.angles.angle2 = -64;
-        drops.angles.angle2Range = 26;
-        drops.lifetime = 35;
-        drops.lifetimeRange = 15;
-        drops.unk2C = 155;
-        drops.unk2CRange = 100;
-        drops.size = 59.0f;
-        drops.sizeRange = 59.0f;
-        drops.unk38 = 1;
-        drops.speed = 7.0f;
-        drops.speedRange = 3.0f;
-        drops.gravity = -1.23f;
-        drops.gravityRange = 0.47500002f;
-        drops.kind = kind;
-        drops.wobble = 1;
-        drops.unk3CChance = 0.6f;
-        drops.bounceChance = 0.0f;
-        func_15150178(&drops, &drops.pos, arg1, arg3, arg4);
+        drops.spray.pos = *pos;
+        drops.spray.countBase = 12;
+        drops.spray.countRange = 6;
+        drops.angles.yawRange = 0xFF;
+        drops.angles.yawBase = 0;
+        drops.angles.pitchBase = -64;
+        drops.angles.pitchRange = 26;
+        drops.spray.lifeBase = 35;
+        drops.spray.lifeRange = 15;
+        drops.spray.unk24 = 155;
+        drops.spray.unk25 = 100;
+        drops.spray.sizeBase = 59.0f;
+        drops.spray.sizeRange = 59.0f;
+        drops.spray.unk30 = 1;
+        drops.spray.speedBase = 7.0f;
+        drops.spray.speedRange = 3.0f;
+        drops.spray.gravityBase = -1.23f;
+        drops.spray.gravityRange = 0.47500002f;
+        drops.spray.kind = kind;
+        drops.spray.wobbles = 1;
+        drops.spray.unk34 = 0.6f;
+        drops.spray.bounceChance = 0.0f;
+        func_15150178(&drops.angles, &drops.spray, arg1, arg3, arg4);
     }
 }

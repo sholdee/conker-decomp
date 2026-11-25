@@ -756,59 +756,11 @@ typedef struct {
     /* 0x28 */ f32 unk28;
 } EmitShape; /* 0x2C */
 
-typedef struct {
-    Vec3f unk0;
-    s16 unkC;
-    s16 unkE;
-    f32 unk10;
-    f32 unk14;
-    s16 unk18;
-    s16 unk1A;
-    f32 unk1C;
-    f32 unk20;
-    u8 unk24;
-    u8 unk25;
-    u8 pad26[2];
-    f32 unk28;
-    f32 unk2C;
-    u8 unk30;
-    u8 unk31;
-    u8 pad32[2];
-    f32 unk34;
-    u8 unk38;
-    u8 pad39[3];
-    f32 unk3C;
-} Spawn1514FF44; /* 0x40 */
-
-typedef struct {
-    Vec3f unk0;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    s16 unk24;
-    s16 unk26;
-    s16 unk28;
-    s16 unk2A;
-    s16 unk2C;
-    s16 unk2E;
-    s16 unk30;
-    s16 unk32;
-    u8 unk34;
-    u8 pad35[3];
-    f32 unk38;
-    s16 unk3C;
-    s16 unk3E;
-    s32 unk40;
-} Spawn15153CCC; /* 0x44 */
-
 extern f32 D_800AAF84[3];
 extern f32 D_800AAF90[3];
 extern void func_15145EA4(f32 **, Vec3f **, Mtx *, s32);
-extern void func_1514FF44(EmitShape *, Spawn1514FF44 *, FloorInfo *, u8, s32);
-extern void func_15153CCC(EmitShape *, Spawn15153CCC *, FloorInfo *, u8, s32);
+extern void func_1514FF44(EmitShape *, DropSpray *, FloorInfo *, u8, s32);
+extern void func_15153CCC(EmitShape *, SplashSpray *, FloorInfo *, u8, s32);
 extern s32 func_1514F6E8(EmitShape *);
 extern void func_1514F808(EmitShape *, f32, Vec3f *);
 /* Partial view of the particle func_15130280 creates. */
@@ -847,52 +799,52 @@ void func_151D09A8(Actor *obj, u8 arg1, s32 arg2) {
         /* Start from the zero vector D_800A5480. */
         shape.unk10 = shape.unk1C = D_800A5480;
         {
-            Spawn1514FF44 emitA;
+            DropSpray emitA;
 
-            emitA.unk0 = pos;
-            emitA.unkC = 6;
-            emitA.unkE = 8;
-            emitA.unk10 = 0.03999999911f;
-            emitA.unk14 = 0.02999999933f;
-            emitA.unk18 = 30;
-            emitA.unk1A = 30;
-            emitA.unk1C = -1.467000127f;
-            emitA.unk20 = 0.756000042f;
+            emitA.pos = pos;
+            emitA.countBase = 6;
+            emitA.countRange = 8;
+            emitA.speedBase = 0.03999999911f;
+            emitA.speedRange = 0.02999999933f;
+            emitA.lifeBase = 30;
+            emitA.lifeRange = 30;
+            emitA.gravityBase = -1.467000127f;
+            emitA.gravityRange = 0.756000042f;
             emitA.unk24 = 155;
             emitA.unk25 = 100;
-            emitA.unk28 = 403.0f;
-            emitA.unk2C = 455.0f;
+            emitA.sizeBase = 403.0f;
+            emitA.sizeRange = 455.0f;
             emitA.unk30 = 1;
-            emitA.unk31 = 2;
+            emitA.kind = 2;
             emitA.unk34 = 0.0f;
-            emitA.unk38 = 1;
-            emitA.unk3C = 0.0f;
+            emitA.wobbles = 1;
+            emitA.bounceChance = 0.0f;
             shape.unk28 = 750.0f;
             func_1514FF44(&shape, &emitA, &floor, arg1, arg2);
         }
         {
-            Spawn15153CCC emitB;
+            SplashSpray emitB;
 
-            emitB.unk0 = pos;
-            emitB.unkC = 10.0f;
-            emitB.unk10 = 25.0f;
-            emitB.unk14 = 1.253000021f;
-            emitB.unk18 = 0.8230000138f;
-            emitB.unk1C = 0.03500000015f;
-            emitB.unk20 = 0.03199999779f;
-            emitB.unk24 = 15;
-            emitB.unk26 = 8;
-            emitB.unk28 = 3;
-            emitB.unk2A = 2;
-            emitB.unk2C = 30;
-            emitB.unk2E = 25;
+            emitB.pos = pos;
+            emitB.scaleBase = 10.0f;
+            emitB.scaleRange = 25.0f;
+            emitB.sizeBase = 1.253000021f;
+            emitB.sizeRange = 0.8230000138f;
+            emitB.speedBase = 0.03500000015f;
+            emitB.speedRange = 0.03199999779f;
+            emitB.countBase = 15;
+            emitB.countRange = 8;
+            emitB.itemCountBase = 3;
+            emitB.itemCountRange = 2;
+            emitB.lifeBase = 30;
+            emitB.lifeRange = 25;
             emitB.unk30 = 155;
             emitB.unk32 = 100;
             emitB.unk38 = 0.0f;
             emitB.unk3C = 16;
             emitB.unk3E = 15;
             emitB.unk40 = 0;
-            emitB.unk34 = 2;
+            emitB.kind = 2;
             shape.unk28 = 750.0f;
             func_15153CCC(&shape, &emitB, &floor, arg1, arg2);
         }

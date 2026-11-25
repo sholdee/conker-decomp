@@ -6,37 +6,9 @@
 #undef func_151D9B8C
 void func_151D9B8C(u8, f32, u8, void *, f32 *, s16, u8, u8, u8, u8, s32);
 #include "variables.h"
+#include "effects.h"
 
 void func_151DAB58(u8, f32, u8, f32 *, s32, u8, s32);
-
-/* Parameter block for func_15153F18; the s16 header (unk0..unk6) is passed separately. */
-typedef struct {
-    /* 0x00 */ s16 unk0;
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ s16 unk4;
-    /* 0x06 */ s16 unk6;
-    /* 0x08 */ f32 position[3];
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ s16 unk2E;
-    /* 0x30 */ s16 unk30;
-    /* 0x32 */ s16 unk32;
-    /* 0x34 */ s16 unk34;
-    /* 0x36 */ s16 unk36;
-    /* 0x38 */ s16 unk38;
-    /* 0x3A */ s16 unk3A;
-    /* 0x3C */ u8 unk3C;
-    /* 0x3D */ u8 pad3D[3];
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ s16 unk44;
-    /* 0x46 */ s16 unk46;
-    /* 0x48 */ s32 unk48;
-} BurstParams;
 
 /* Ground hit filled by func_1504715C / func_15046C80. */
 typedef struct {
@@ -46,7 +18,7 @@ typedef struct {
     /* 0x1E */ u8 pad1E[6];
 } GroundHit;
 
-void func_15153F18(s16 *, void *, GroundHit *, s32, s32);
+void func_15153F18(AngleRange *, SplashSpray *, GroundHit *, s32, s32);
 void func_1504715C(GroundHit *, Actor *);
 s32 func_15046C80(f32 *, s32, f32, GroundHit *);
 void func_15143874(s16, f32, f32 *, f32 *);
@@ -56,7 +28,7 @@ void func_15136698(f32, f32, u8, u8, s32, void *, f32 *, s32, s32, s32, s32);
  * func_151D9B8C / func_151DAB58 particles on the ground, and a func_15136698 effect under obj. */
 void func_151AECA0(Actor *obj, u8 arg1, s32 arg2) {
     GroundHit ground;
-    BurstParams burst;
+    SplashSpraySpec burst;
     s32 count;
     f32 probe[3];
     f32 pos[3];
@@ -76,33 +48,33 @@ void func_151AECA0(Actor *obj, u8 arg1, s32 arg2) {
 // matching: the unused labels lbD/lbA/lbC/lbB/lbl split basic blocks; without them uopt
 // register-allocates far more (callee-saved $f22-$f30, s5/s6) and the frame grows
 lbD:
-    burst.position[0] = obj->x_position;
-    burst.position[1] = obj->y_position;
-    burst.position[2] = obj->z_position;
-    burst.unk14 = 5.079999924f;
-    burst.unk2C = 10;
-    burst.unk2E = 0;
-    burst.unk2 = 255;
-    burst.unk4 = -63;
-    burst.unk0 = 0;
-    burst.unk6 = 45;
-    burst.unk30 = 3;
-    burst.unk32 = 2;
-    burst.unk34 = 40;
-    burst.unk36 = 20;
-    burst.unk38 = 155;
-    burst.unk3A = 100;
-    burst.unk44 = 16;
-    burst.unk46 = 15;
-    burst.unk48 = 0;
-    burst.unk3C = 0;
-    burst.unk18 = 3.019999981f;
-    burst.unk1C = 0.807000041f;
-    burst.unk20 = 0.7010000348f;
-    burst.unk24 = 18.0f;
-    burst.unk28 = 11.80000019f;
-    burst.unk40 = 0.5f;
-    func_15153F18(&burst.unk0, burst.position, &ground, 255, 1);
+    burst.spray.pos.x = obj->x_position;
+    burst.spray.pos.y = obj->y_position;
+    burst.spray.pos.z = obj->z_position;
+    burst.spray.scaleBase = 5.079999924f;
+    burst.spray.countBase = 10;
+    burst.spray.countRange = 0;
+    burst.angles.yawRange = 255;
+    burst.angles.pitchBase = -63;
+    burst.angles.yawBase = 0;
+    burst.angles.pitchRange = 45;
+    burst.spray.itemCountBase = 3;
+    burst.spray.itemCountRange = 2;
+    burst.spray.lifeBase = 40;
+    burst.spray.lifeRange = 20;
+    burst.spray.unk30 = 155;
+    burst.spray.unk32 = 100;
+    burst.spray.unk3C = 16;
+    burst.spray.unk3E = 15;
+    burst.spray.unk40 = 0;
+    burst.spray.kind = 0;
+    burst.spray.scaleRange = 3.019999981f;
+    burst.spray.sizeBase = 0.807000041f;
+    burst.spray.sizeRange = 0.7010000348f;
+    burst.spray.speedBase = 18.0f;
+    burst.spray.speedRange = 11.80000019f;
+    burst.spray.unk38 = 0.5f;
+    func_15153F18(&burst.angles, &burst.spray, &ground, 255, 1);
 lbA:
     count = (func_150ADA20() % 6) + 7;
     probe[1] = obj->y_position + 100.0f;

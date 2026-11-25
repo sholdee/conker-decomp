@@ -8,7 +8,7 @@ void func_151D9B8C(u8, f32, u8, void *, Vec3f *, s16, u8, u8, u8, u8, s32);
 #include "variables.h"
 #include "effects.h"
 
-extern void func_15153F18(void *, void *, s32, u8, s32);
+extern void func_15153F18(AngleRange *, SplashSpray *, s32, u8, s32);
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 /* Transforms the point `in` by a 4x4 matrix into `out`. */
 extern void func_15143134(void *in, void *out, void *matrix);
@@ -1951,69 +1951,42 @@ void func_15138120(Actor *actor, s32 kind, u8 arg2) {
     }
 }
 
-typedef struct {
-    s16 unk00;
-    s16 unk02;
-    s16 unk04;
-    s16 unk06;
-    Vec3f position;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    s16 unk2C;
-    s16 unk2E;
-    s16 unk30;
-    s16 unk32;
-    s16 unk34;
-    s16 unk36;
-    s16 unk38;
-    s16 unk3A;
-    s8 unk3C;
-    f32 unk40;
-    s16 unk44;
-    s16 unk46;
-    s32 unk48;
-} LocalDef151382E0;
-
 /* Spawns a func_15153F18 blood burst at position for profile `kind` (none for type 2). */
 void func_151382E0(Vec3f *position, s32 kind, void *arg2, u8 arg3, s32 arg4) {
-    LocalDef151382E0 burst;
+    SplashSpraySpec burst;
     s32 type;
 
     type = D_800A3FD8[kind].unkE;
     if (type != 2) {
-        burst.position = *position;
-        burst.unk14 = 1.9799999f;
-        burst.unk18 = 2.00999999f;
-        burst.unk1C = 0.202000007f;
-        burst.unk20 = 0.6460000277f;
-        burst.unk24 = 4.0f;
-        burst.unk28 = 9.0f;
-        burst.unk2C = 18;
-        burst.unk2E = 7;
-        burst.unk02 = 255;
-        burst.unk00 = 0;
-        burst.unk04 = -63;
-        burst.unk06 = 78;
-        burst.unk30 = 3;
-        burst.unk32 = 3;
-        burst.unk34 = 20;
-        burst.unk36 = 30;
-        burst.unk38 = 155;
-        burst.unk3A = 100;
-        burst.unk44 = 16;
-        burst.unk46 = 15;
-        burst.unk48 = 0;
-        burst.unk40 = 0.3000000119f;
+        burst.spray.pos = *position;
+        burst.spray.scaleBase = 1.9799999f;
+        burst.spray.scaleRange = 2.00999999f;
+        burst.spray.sizeBase = 0.202000007f;
+        burst.spray.sizeRange = 0.6460000277f;
+        burst.spray.speedBase = 4.0f;
+        burst.spray.speedRange = 9.0f;
+        burst.spray.countBase = 18;
+        burst.spray.countRange = 7;
+        burst.angles.yawRange = 255;
+        burst.angles.yawBase = 0;
+        burst.angles.pitchBase = -63;
+        burst.angles.pitchRange = 78;
+        burst.spray.itemCountBase = 3;
+        burst.spray.itemCountRange = 3;
+        burst.spray.lifeBase = 20;
+        burst.spray.lifeRange = 30;
+        burst.spray.unk30 = 155;
+        burst.spray.unk32 = 100;
+        burst.spray.unk3C = 16;
+        burst.spray.unk3E = 15;
+        burst.spray.unk40 = 0;
+        burst.spray.unk38 = 0.3000000119f;
         if (type == 1) {
-            burst.unk3C = 1;
+            burst.spray.kind = 1;
         } else {
-            burst.unk3C = 0;
+            burst.spray.kind = 0;
         }
-        func_15153F18(&burst, &burst.position, (s32)arg2, arg3, arg4);
+        func_15153F18(&burst.angles, &burst.spray, (s32)arg2, arg3, arg4);
     }
 }
 

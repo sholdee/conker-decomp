@@ -25,41 +25,13 @@ typedef struct Game1DD500Profile {
     /* 0x0F */ u8 padF;
 } Game1DD500Profile; // size 0x10
 
-/* Parameters for the impact effect spawned by func_15153F18. */
-typedef struct Game1DD500Impact {
-    /* 0x00 */ s16 unk00;
-    /* 0x02 */ s16 unk02;
-    /* 0x04 */ s16 unk04;
-    /* 0x06 */ s16 unk06;
-    /* 0x08 */ Vec3f position;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ s16 unk2E;
-    /* 0x30 */ s16 unk30;
-    /* 0x32 */ s16 unk32;
-    /* 0x34 */ s16 unk34;
-    /* 0x36 */ s16 unk36;
-    /* 0x38 */ s16 unk38;
-    /* 0x3A */ s16 unk3A;
-    /* 0x3C */ s8 unk3C;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ s16 unk44;
-    /* 0x46 */ s16 unk46;
-    /* 0x48 */ s32 unk48;
-} Game1DD500Impact;
-
 void func_15143794(s16 yaw, s16 pitch, f32 speed, f32 *out);
 void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32,
                    s32, s32, s32, s32, s32, s32, s32, s32);
 void func_1504715C(Game1DD500Ground *, Actor *);
 s32 func_15134070(Actor *);
 void func_15143134(Vec3f *, Vec3f *, Mtx *);
-void func_15153F18(Game1DD500Impact *, Vec3f *, Game1DD500Ground *, s32, s32);
+void func_15153F18(AngleRange *, SplashSpray *, Game1DD500Ground *, s32, s32);
 extern Game1DD500Profile D_800A3FD8[];
 extern Vec3f D_800AA120;
 
@@ -91,7 +63,7 @@ s32 func_151B0050(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
 
 /* Spawns an impact effect at joint 6 of actor, styled by the profile of other. */
 void func_151B01B8(Actor *actor, Actor *other) {
-    Game1DD500Impact impact;
+    SplashSpraySpec impact;
     u8 shade;
     Game1DD500Ground ground;
     s32 profile;
@@ -102,35 +74,35 @@ void func_151B01B8(Actor *actor, Actor *other) {
         if (profile != 99) {
             if (D_800A3FD8[profile].unkE != 2) {
                 shade = (actor->unk7A >> 8) + 0x40;
-                func_15143134(&D_800AA120, &impact.position, JOINT_MTX(actor, 6));
-                impact.unk2C = 10;
-                impact.unk2E = 20;
-                impact.unk00 = shade - 0x68;
-                impact.unk14 = 7.22f;
-                impact.unk02 = 0xD0;
-                impact.unk04 = -0x1B;
-                impact.unk06 = 0x36;
-                impact.unk30 = 3;
-                impact.unk32 = 2;
-                impact.unk34 = 30;
-                impact.unk36 = 40;
-                impact.unk38 = 155;
-                impact.unk3A = 100;
-                impact.unk18 = 3.04f;
-                impact.unk1C = 0.810000062f;
-                impact.unk20 = 0.405000031f;
-                impact.unk24 = 6.0f;
-                impact.unk28 = 13.90000057f;
-                impact.unk40 = 0.5f;
+                func_15143134(&D_800AA120, &impact.spray.pos, JOINT_MTX(actor, 6));
+                impact.spray.countBase = 10;
+                impact.spray.countRange = 20;
+                impact.angles.yawBase = shade - 0x68;
+                impact.spray.scaleBase = 7.22f;
+                impact.angles.yawRange = 0xD0;
+                impact.angles.pitchBase = -0x1B;
+                impact.angles.pitchRange = 0x36;
+                impact.spray.itemCountBase = 3;
+                impact.spray.itemCountRange = 2;
+                impact.spray.lifeBase = 30;
+                impact.spray.lifeRange = 40;
+                impact.spray.unk30 = 155;
+                impact.spray.unk32 = 100;
+                impact.spray.scaleRange = 3.04f;
+                impact.spray.sizeBase = 0.810000062f;
+                impact.spray.sizeRange = 0.405000031f;
+                impact.spray.speedBase = 6.0f;
+                impact.spray.speedRange = 13.90000057f;
+                impact.spray.unk38 = 0.5f;
                 if (D_800A3FD8[profile].unkE == 1) {
-                    impact.unk3C = 1;
+                    impact.spray.kind = 1;
                 } else {
-                    impact.unk3C = 0;
+                    impact.spray.kind = 0;
                 }
-                impact.unk44 = 16;
-                impact.unk46 = 15;
-                impact.unk48 = 0;
-                func_15153F18(&impact, &impact.position, &ground, 0xFF, 1);
+                impact.spray.unk3C = 16;
+                impact.spray.unk3E = 15;
+                impact.spray.unk40 = 0;
+                func_15153F18(&impact.angles, &impact.spray, &ground, 0xFF, 1);
             }
         }
     }
@@ -144,7 +116,7 @@ void func_15136698(f32, f32, u8, u8, s32, void *, f32 *, s32, s32, u8, s32);
 
 /* Big landing burst at actor: an impact effect, 12-17 splats scattered on the ground around it, and a mark under it. */
 void func_151B03B8(Actor *actor, u8 arg1, s32 arg2) {
-    Game1DD500Impact impact;
+    SplashSpraySpec impact;
     Game1DD500Ground ground;
     s32 count;
     Game1DD500Ground scatterGround;
@@ -155,33 +127,33 @@ void func_151B03B8(Actor *actor, u8 arg1, s32 arg2) {
 
     if (actor != NULL) {
         func_1504715C(&ground, actor);
-        impact.position.x = actor->x_position;
-        impact.position.y = actor->y_position;
-        impact.position.z = actor->z_position;
-        impact.unk14 = 5.08f;
-        impact.unk2C = 10;
-        impact.unk02 = 0xFF;
-        impact.unk04 = -0x3F;
-        impact.unk2E = 0;
-        impact.unk00 = 0;
-        impact.unk06 = 0x2D;
-        impact.unk30 = 3;
-        impact.unk32 = 2;
-        impact.unk34 = 40;
-        impact.unk36 = 20;
-        impact.unk38 = 155;
-        impact.unk3A = 100;
-        impact.unk3C = 0;
-        impact.unk44 = 16;
-        impact.unk46 = 15;
-        impact.unk48 = 0;
-        impact.unk18 = 3.02f;
-        impact.unk1C = 0.807000041f;
-        impact.unk20 = 0.701000035f;
-        impact.unk24 = 18.0f;
-        impact.unk28 = 11.8f;
-        impact.unk40 = 0.5f;
-        func_15153F18(&impact, &impact.position, &ground, 0xFF, 1);
+        impact.spray.pos.x = actor->x_position;
+        impact.spray.pos.y = actor->y_position;
+        impact.spray.pos.z = actor->z_position;
+        impact.spray.scaleBase = 5.08f;
+        impact.spray.countBase = 10;
+        impact.angles.yawRange = 0xFF;
+        impact.angles.pitchBase = -0x3F;
+        impact.spray.countRange = 0;
+        impact.angles.yawBase = 0;
+        impact.angles.pitchRange = 0x2D;
+        impact.spray.itemCountBase = 3;
+        impact.spray.itemCountRange = 2;
+        impact.spray.lifeBase = 40;
+        impact.spray.lifeRange = 20;
+        impact.spray.unk30 = 155;
+        impact.spray.unk32 = 100;
+        impact.spray.kind = 0;
+        impact.spray.unk3C = 16;
+        impact.spray.unk3E = 15;
+        impact.spray.unk40 = 0;
+        impact.spray.scaleRange = 3.02f;
+        impact.spray.sizeBase = 0.807000041f;
+        impact.spray.sizeRange = 0.701000035f;
+        impact.spray.speedBase = 18.0f;
+        impact.spray.speedRange = 11.8f;
+        impact.spray.unk38 = 0.5f;
+        func_15153F18(&impact.angles, &impact.spray, &ground, 0xFF, 1);
 
         count = func_150ADA20() % 6 + 12;
         scatterGround.unk18 = 0;

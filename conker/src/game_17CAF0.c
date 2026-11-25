@@ -242,34 +242,10 @@ void func_1514FCE8(struct Local1514FCE8 *config, u8 arg1, s32 arg2) {
     }
 }
 
-struct Local1514FF44Arg {
-    Vec3f position;
-    s16 countBase;
-    s16 countRange;
-    f32 speedBase;
-    f32 speedRange;
-    s16 unk18;
-    s16 unk1A;
-    f32 unk1C;
-    f32 unk20;
-    u8 unk24;
-    u8 unk25;
-    u8 pad26[2];
-    f32 unk28;
-    f32 unk2C;
-    u8 pad30;
-    u8 unk31;
-    u8 pad32[2];
-    f32 unk34; /* probability */
-    u8 unk38;
-    u8 pad39[3];
-    f32 unk3C; /* probability */
-};
-
-extern void func_1514FF44(struct ConeBasis *, struct Local1514FF44Arg *, s32, u8, s32);
+extern void func_1514FF44(struct ConeBasis *, DropSpray *, s32, u8, s32);
 extern void func_151D9014(Vec3f *, Vec3f *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, u8, s32);
 
-void func_1514FEFC(struct TriangleSource *source, struct Local1514FF44Arg *config, s32 arg2, u8 arg3, s32 arg4) {
+void func_1514FEFC(struct TriangleSource *source, DropSpray *config, s32 arg2, u8 arg3, s32 arg4) {
     struct ConeBasis cone;
 
     func_1514F640(source, &cone);
@@ -277,7 +253,7 @@ void func_1514FEFC(struct TriangleSource *source, struct Local1514FF44Arg *confi
 }
 
 /* Spawns a random number of particles, each moving in a random direction inside the cone. */
-void func_1514FF44(struct ConeBasis *cone, struct Local1514FF44Arg *config, s32 arg2, u8 arg3, s32 arg4) {
+void func_1514FF44(struct ConeBasis *cone, DropSpray *config, s32 arg2, u8 arg3, s32 arg4) {
     s32 count;
     Vec3f velocity;
 
@@ -285,20 +261,20 @@ void func_1514FF44(struct ConeBasis *cone, struct Local1514FF44Arg *config, s32 
         count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
         while (count != 0) {
             func_1514F808(cone, (func_150ADA68() * config->speedRange) + config->speedBase, &velocity);
-            func_151D9014(&config->position, &velocity, config->unk31,
-                          (func_150ADA68() * config->unk20) + config->unk1C,
-                          (func_150ADA20() % (u32)(config->unk1A + 1)) + config->unk18,
+            func_151D9014(&config->pos, &velocity, config->kind,
+                          (func_150ADA68() * config->gravityRange) + config->gravityBase,
+                          (func_150ADA20() % (u32)(config->lifeRange + 1)) + config->lifeBase,
                           (func_150ADA20() % (u32)(config->unk25 + 1)) + config->unk24,
-                          (func_150ADA68() * config->unk2C) + config->unk28,
-                          func_150ADA68() < config->unk34, 1.4f, 1.4f, 1, arg2, config->unk38,
-                          func_150ADA68() < config->unk3C, arg3, arg4);
+                          (func_150ADA68() * config->sizeRange) + config->sizeBase,
+                          func_150ADA68() < config->unk34, 1.4f, 1.4f, 1, arg2, config->wobbles,
+                          func_150ADA68() < config->bounceChance, arg3, arg4);
             count--;
         }
     }
 }
 
 /* Like func_1514FF44, but each direction is a random yaw/pitch from `angles`. */
-void func_15150178(AngleRange *angles, struct Local1514FF44Arg *config, s32 arg2, u8 arg3, s32 arg4) {
+void func_15150178(AngleRange *angles, DropSpray *config, s32 arg2, u8 arg3, s32 arg4) {
     s32 count;
     Vec3f velocity;
 
@@ -308,13 +284,13 @@ void func_15150178(AngleRange *angles, struct Local1514FF44Arg *config, s32 arg2
                       (s16)((func_150ADA20() % (u32)(angles->pitchRange + 1)) + angles->pitchBase),
                       (func_150ADA68() * config->speedRange) + config->speedBase,
                       &velocity.x);
-        func_151D9014(&config->position, &velocity, config->unk31,
-                      (func_150ADA68() * config->unk20) + config->unk1C,
-                      (func_150ADA20() % (u32)(config->unk1A + 1)) + config->unk18,
+        func_151D9014(&config->pos, &velocity, config->kind,
+                      (func_150ADA68() * config->gravityRange) + config->gravityBase,
+                      (func_150ADA20() % (u32)(config->lifeRange + 1)) + config->lifeBase,
                       (func_150ADA20() % (u32)(config->unk25 + 1)) + config->unk24,
-                      (func_150ADA68() * config->unk2C) + config->unk28,
-                      func_150ADA68() < config->unk34, 1.4f, 1.4f, 1, arg2, config->unk38,
-                      func_150ADA68() < config->unk3C, arg3, arg4);
+                      (func_150ADA68() * config->sizeRange) + config->sizeBase,
+                      func_150ADA68() < config->unk34, 1.4f, 1.4f, 1, arg2, config->wobbles,
+                      func_150ADA68() < config->bounceChance, arg3, arg4);
         count--;
     }
 }
@@ -1944,34 +1920,10 @@ void func_151539B4(struct Local151539B4Arg *config, u8 arg1) {
     }
 }
 
-struct Local15153CCCArg {
-    Vec3f position;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 speedBase;
-    f32 speedRange;
-    s16 countBase;
-    s16 countRange;
-    s16 unk28;
-    s16 unk2A;
-    s16 unk2C;
-    s16 unk2E;
-    s16 unk30;
-    s16 unk32;
-    u8 unk34;
-    u8 pad35[3];
-    f32 unk38; /* probability */
-    s16 unk3C;
-    s16 unk3E;
-    s32 unk40;
-};
-
 extern void func_151DA6F8(Vec3f *, Vec3f *, f32, s16, s32, f32, s32, s32, f32, f32, s32, u8, s32, s16, s16, s32, u8, s32);
-extern void func_15153CCC(struct ConeBasis *, struct Local15153CCCArg *, s32, u8, s32);
+extern void func_15153CCC(struct ConeBasis *, SplashSpray *, s32, u8, s32);
 
-void func_15153C84(struct TriangleSource *source, struct Local15153CCCArg *config, s32 arg2, u8 arg3, s32 arg4) {
+void func_15153C84(struct TriangleSource *source, SplashSpray *config, s32 arg2, u8 arg3, s32 arg4) {
     struct ConeBasis cone;
 
     func_1514F640(source, &cone);
@@ -1980,7 +1932,7 @@ void func_15153C84(struct TriangleSource *source, struct Local15153CCCArg *confi
 
 /* Spawns a random number of particles (func_151DA6F8), each moving in a random direction inside the
  * cone. */
-void func_15153CCC(struct ConeBasis *cone, struct Local15153CCCArg *config, s32 arg2, u8 arg3, s32 arg4) {
+void func_15153CCC(struct ConeBasis *cone, SplashSpray *config, s32 arg2, u8 arg3, s32 arg4) {
     s32 count;
     Vec3f velocity;
 
@@ -1988,13 +1940,13 @@ void func_15153CCC(struct ConeBasis *cone, struct Local15153CCCArg *config, s32 
         count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
         while (count != 0) {
             func_1514F808(cone, (func_150ADA68() * config->speedRange) + config->speedBase, &velocity);
-            func_151DA6F8(&config->position, &velocity,
-                          (func_150ADA68() * config->unk18) + config->unk14,
-                          (s16)((func_150ADA20() % (u32)(config->unk2E + 1)) + config->unk2C),
+            func_151DA6F8(&config->pos, &velocity,
+                          (func_150ADA68() * config->sizeRange) + config->sizeBase,
+                          (s16)((func_150ADA20() % (u32)(config->lifeRange + 1)) + config->lifeBase),
                           (func_150ADA20() % (u32)(config->unk32 + 1)) + config->unk30,
-                          (func_150ADA68() * config->unk10) + config->unkC,
-                          (func_150ADA20() % (u32)(config->unk2A + 1)) + config->unk28,
-                          func_150ADA68() < config->unk38, 1.7f, 1.7f, 1, config->unk34, arg2,
+                          (func_150ADA68() * config->scaleRange) + config->scaleBase,
+                          (func_150ADA20() % (u32)(config->itemCountRange + 1)) + config->itemCountBase,
+                          func_150ADA68() < config->unk38, 1.7f, 1.7f, 1, config->kind, arg2,
                           config->unk3C, config->unk3E, config->unk40, arg3, arg4);
             count--;
         }
@@ -2002,7 +1954,7 @@ void func_15153CCC(struct ConeBasis *cone, struct Local15153CCCArg *config, s32 
 }
 
 /* Like func_15153CCC, but each direction is a random yaw/pitch from `angles`. */
-void func_15153F18(AngleRange *angles, struct Local15153CCCArg *config, s32 arg2, u8 arg3, s32 arg4) {
+void func_15153F18(AngleRange *angles, SplashSpray *config, s32 arg2, u8 arg3, s32 arg4) {
     s32 count;
     Vec3f velocity;
 
@@ -2012,13 +1964,13 @@ void func_15153F18(AngleRange *angles, struct Local15153CCCArg *config, s32 arg2
                       (s16)((func_150ADA20() % (u32)(angles->pitchRange + 1)) + angles->pitchBase),
                       (func_150ADA68() * config->speedRange) + config->speedBase,
                       &velocity.x);
-        func_151DA6F8(&config->position, &velocity,
-                      (func_150ADA68() * config->unk18) + config->unk14,
-                      (s16)((func_150ADA20() % (u32)(config->unk2E + 1)) + config->unk2C),
+        func_151DA6F8(&config->pos, &velocity,
+                      (func_150ADA68() * config->sizeRange) + config->sizeBase,
+                      (s16)((func_150ADA20() % (u32)(config->lifeRange + 1)) + config->lifeBase),
                       (func_150ADA20() % (u32)(config->unk32 + 1)) + config->unk30,
-                      (func_150ADA68() * config->unk10) + config->unkC,
-                      (func_150ADA20() % (u32)(config->unk2A + 1)) + config->unk28,
-                      func_150ADA68() < config->unk38, 1.7f, 1.7f, 1, config->unk34, arg2,
+                      (func_150ADA68() * config->scaleRange) + config->scaleBase,
+                      (func_150ADA20() % (u32)(config->itemCountRange + 1)) + config->itemCountBase,
+                      func_150ADA68() < config->unk38, 1.7f, 1.7f, 1, config->kind, arg2,
                       config->unk3C, config->unk3E, config->unk40, arg3, arg4);
         count--;
     }

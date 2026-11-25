@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 
 /* Parameter block of func_15152190. */
@@ -23,34 +24,6 @@ typedef struct {
     f32 unk38;
 } Arg150B06B0_2190;
 
-/* Parameter block of func_15153F18 (which is also passed &unk08 separately). */
-typedef struct {
-    s16 unk00;
-    s16 unk02;
-    s16 unk04;
-    s16 unk06;
-    Vec3f unk08; // position
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    s16 unk2C;
-    s16 unk2E;
-    s16 unk30;
-    s16 unk32;
-    s16 unk34;
-    s16 unk36;
-    s16 unk38;
-    s16 unk3A;
-    s8 unk3C;
-    f32 unk40;
-    s16 unk44;
-    s16 unk46;
-    s32 unk48;
-} Arg150B06B0_3F18;
-
 /* Filled in by func_1504715C for an actor; only passed on to func_15153F18 here. */
 typedef struct {
     u8 pad[0x24];
@@ -60,7 +33,7 @@ extern s32 func_15143E24(Actor *);
 extern void func_1504715C(Floor150B06B0 *, Actor *);
 extern void func_151C329C(void *, u8, s32);
 extern void func_15152190(Arg150B06B0_2190 *, const s32 *, const f32 *, s32, f32, s32, u8, s32);
-extern void func_15153F18(Arg150B06B0_3F18 *, Vec3f *, Floor150B06B0 *, u8, s32);
+extern void func_15153F18(AngleRange *, SplashSpray *, Floor150B06B0 *, u8, s32);
 
 extern const s32 D_8009F810[1];
 extern const f32 D_8009F814[1];
@@ -130,35 +103,35 @@ void func_150B06B0(Actor *actor, Actor *other, u8 arg2, s32 arg3) {
             func_15152190(&burst, D_8009F818, D_8009F81C, 1, 0.0f, 0, arg2, arg3);
         }
         {
-            Arg150B06B0_3F18 spray;
+            SplashSpraySpec spray;
 
-            spray.unk08 = pos;
-            spray.unk14 = 3.049999952f;
-            spray.unk2C = 7;
-            spray.unk2E = 3;
-            spray.unk00 = angle - 60;
-            spray.unk02 = 120;
-            spray.unk04 = -30;
-            spray.unk06 = 16;
-            spray.unk30 = 3;
-            spray.unk32 = 2;
-            spray.unk34 = 20;
-            spray.unk36 = 20;
-            spray.unk38 = 155;
-            spray.unk3A = 100;
-            spray.unk44 = 16;
-            spray.unk46 = 15;
-            spray.unk48 = 0;
-            spray.unk3C = 0;
-            spray.unk18 = 5.009999752f;
-            spray.unk1C = 0.7000000477f;
-            spray.unk20 = 0.5010000467f;
-            spray.unk24 = 15.10000038f;
-            spray.unk28 = 20.80000114f;
-            spray.unk40 = 0.5f;
-            func_15153F18(&spray, &spray.unk08, &floor, arg2, arg3);
-            spray.unk3C = 1;
-            func_15153F18(&spray, &spray.unk08, &floor, arg2, arg3);
+            spray.spray.pos = pos;
+            spray.spray.scaleBase = 3.049999952f;
+            spray.spray.countBase = 7;
+            spray.spray.countRange = 3;
+            spray.angles.yawBase = angle - 60;
+            spray.angles.yawRange = 120;
+            spray.angles.pitchBase = -30;
+            spray.angles.pitchRange = 16;
+            spray.spray.itemCountBase = 3;
+            spray.spray.itemCountRange = 2;
+            spray.spray.lifeBase = 20;
+            spray.spray.lifeRange = 20;
+            spray.spray.unk30 = 155;
+            spray.spray.unk32 = 100;
+            spray.spray.unk3C = 16;
+            spray.spray.unk3E = 15;
+            spray.spray.unk40 = 0;
+            spray.spray.kind = 0;
+            spray.spray.scaleRange = 5.009999752f;
+            spray.spray.sizeBase = 0.7000000477f;
+            spray.spray.sizeRange = 0.5010000467f;
+            spray.spray.speedBase = 15.10000038f;
+            spray.spray.speedRange = 20.80000114f;
+            spray.spray.unk38 = 0.5f;
+            func_15153F18(&spray.angles, &spray.spray, &floor, arg2, arg3);
+            spray.spray.kind = 1;
+            func_15153F18(&spray.angles, &spray.spray, &floor, arg2, arg3);
         }
     }
 }

@@ -53,129 +53,71 @@ void func_151D6970(Actor *character, void *obj) {
     }
 }
 
-/* Parameter block for func_15153F18 (Params15153F18 in game_16EE20.c). */
-typedef struct {
-    s16 unk00;
-    s16 unk02;
-    s16 unk04;
-    s16 unk06;
-    f32 pos[3];
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    s16 unk2C;
-    s16 unk2E;
-    s16 unk30;
-    s16 unk32;
-    s16 unk34;
-    s16 unk36;
-    s16 unk38;
-    s16 unk3A;
-    u8 unk3C;
-    u8 pad3D[3];
-    f32 unk40;
-    s16 unk44;
-    s16 unk46;
-    s32 unk48;
-} Params15153F18;
-
-/* Parameter block for func_15150178. */
-typedef struct {
-    s16 unk00;
-    s16 unk02;
-    s16 unk04;
-    s16 unk06;
-    f32 pos[3];
-    s16 unk14;
-    s16 unk16;
-    f32 unk18;
-    f32 unk1C;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    u8 unk2C;
-    u8 unk2D;
-    u8 pad2E[2];
-    f32 unk30;
-    f32 unk34;
-    u8 unk38;
-    u8 unk39;
-    u8 pad3A[2];
-    f32 unk3C;
-    u8 unk40;
-    u8 pad41[3];
-    f32 unk44;
-} Params15150178;
-
 extern void func_1504715C(void *ground, Actor *actor);
-extern void func_15153F18(s16 *params, f32 *pos, void *ground, s32 arg3, s32 arg4);
-extern void func_15150178(s16 *params, f32 *pos, void *ground, s32 arg3, s32 arg4);
+extern void func_15153F18(AngleRange *angles, SplashSpray *spray, void *ground, s32 arg3, s32 arg4);
+extern void func_15150178(AngleRange *angles, DropSpray *spray, void *ground, s32 arg3, s32 arg4);
 
 /* Spawns the func_15153F18 and func_15150178 bursts at `pickup`, on the ground under `player`. */
 void func_151D69B4(WorldObject *pickup, Actor *player) {
     u8 ground[0x24]; // ground probe result (Ground in game_1228D0.c)
-    Params15153F18 first;
+    SplashSpraySpec first;
 
     func_1504715C(ground, player);
-    first.pos[0] = pickup->x;
-    first.pos[1] = pickup->y;
-    first.pos[2] = pickup->z;
-    first.unk14 = 2.49000001f;
-    first.unk2C = 3;
-    first.unk2E = 3;
-    first.unk02 = 0xFF;
-    first.unk04 = -0x2B;
-    first.unk00 = 0;
-    first.unk06 = 0x20;
-    first.unk30 = 3;
-    first.unk32 = 2;
-    first.unk34 = 0x28;
-    first.unk36 = 0x14;
-    first.unk38 = 0x9B;
-    first.unk3A = 0x64;
-    first.unk44 = 0x10;
-    first.unk46 = 0xF;
-    first.unk48 = 0;
-    first.unk3C = 9;
-    first.unk18 = 2.029999971f;
-    first.unk1C = 0.6080000401f;
-    first.unk20 = 0.2569999993f;
-    first.unk24 = 17.0f;
-    first.unk28 = 3.5f;
-    first.unk40 = 0.400000006f;
-    func_15153F18(&first.unk00, first.pos, ground, 0xFF, 1);
+    first.spray.pos.x = pickup->x;
+    first.spray.pos.y = pickup->y;
+    first.spray.pos.z = pickup->z;
+    first.spray.scaleBase = 2.49000001f;
+    first.spray.countBase = 3;
+    first.spray.countRange = 3;
+    first.angles.yawRange = 0xFF;
+    first.angles.pitchBase = -0x2B;
+    first.angles.yawBase = 0;
+    first.angles.pitchRange = 0x20;
+    first.spray.itemCountBase = 3;
+    first.spray.itemCountRange = 2;
+    first.spray.lifeBase = 0x28;
+    first.spray.lifeRange = 0x14;
+    first.spray.unk30 = 0x9B;
+    first.spray.unk32 = 0x64;
+    first.spray.unk3C = 0x10;
+    first.spray.unk3E = 0xF;
+    first.spray.unk40 = 0;
+    first.spray.kind = 9;
+    first.spray.scaleRange = 2.029999971f;
+    first.spray.sizeBase = 0.6080000401f;
+    first.spray.sizeRange = 0.2569999993f;
+    first.spray.speedBase = 17.0f;
+    first.spray.speedRange = 3.5f;
+    first.spray.unk38 = 0.400000006f;
+    func_15153F18(&first.angles, &first.spray, ground, 0xFF, 1);
     {
-        Params15150178 second;
+        DropSpraySpec second;
 
-        second.pos[0] = pickup->x;
-        second.pos[1] = pickup->y;
-        second.pos[2] = pickup->z;
-        second.unk14 = 0xF;
-        second.unk16 = 6;
-        second.unk00 = 0;
-        second.unk02 = 0xFF;
-        second.unk04 = -0x40;
-        second.unk06 = 0xC;
-        second.unk20 = 0x3C;
-        second.unk22 = 0x2D;
-        second.unk2C = 0xC8;
-        second.unk2D = 0x37;
-        second.unk38 = 1;
-        second.unk39 = 9;
-        second.unk3C = 1.0f;
-        second.unk40 = 0;
-        second.unk44 = 1.0f;
-        second.unk18 = 10.0f;
-        second.unk1C = 6.0f;
-        second.unk24 = -1.506000042f;
-        second.unk28 = 0.8140000105f;
-        second.unk30 = 44.0f;
-        second.unk34 = 88.0f;
-        func_15150178(&second.unk00, second.pos, ground, 0xFF, 1);
+        second.spray.pos.x = pickup->x;
+        second.spray.pos.y = pickup->y;
+        second.spray.pos.z = pickup->z;
+        second.spray.countBase = 0xF;
+        second.spray.countRange = 6;
+        second.angles.yawBase = 0;
+        second.angles.yawRange = 0xFF;
+        second.angles.pitchBase = -0x40;
+        second.angles.pitchRange = 0xC;
+        second.spray.lifeBase = 0x3C;
+        second.spray.lifeRange = 0x2D;
+        second.spray.unk24 = 0xC8;
+        second.spray.unk25 = 0x37;
+        second.spray.unk30 = 1;
+        second.spray.kind = 9;
+        second.spray.unk34 = 1.0f;
+        second.spray.wobbles = 0;
+        second.spray.bounceChance = 1.0f;
+        second.spray.speedBase = 10.0f;
+        second.spray.speedRange = 6.0f;
+        second.spray.gravityBase = -1.506000042f;
+        second.spray.gravityRange = 0.8140000105f;
+        second.spray.sizeBase = 44.0f;
+        second.spray.sizeRange = 88.0f;
+        func_15150178(&second.angles, &second.spray, ground, 0xFF, 1);
     }
 }
 

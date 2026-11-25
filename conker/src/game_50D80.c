@@ -1,5 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
+#include "effects.h"
 /* variables.h declares these with the wrong types; they are redeclared below with the types this file uses. */
 #include "variables.h"
 
@@ -1396,7 +1397,7 @@ extern void func_15138C80(Actor *, u8, s32);
 extern void func_15193660(Actor *, u8, s32);
 extern void func_151A0A10(Actor *, s32, u8, s32);
 extern void func_151A6F00(void *, s32, u8, s32);
-extern void func_15153F18(s16 *, f32 *, s32, u8, s32);
+extern void func_15153F18(AngleRange *, SplashSpray *, s32, u8, s32);
 extern void func_151DBAA8(f32 *, s32, u8, u8, s32);
 extern void func_151AF4D0(Actor *, u8, u8, s32);
 extern void func_150C1F60(u8);
@@ -2381,62 +2382,35 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             sp.unk50 = 8.0f;
             func_151A6F00(&sp, 1, sceneTag, 1);
         } else if (event->value == 0x4F) {
-            struct {
-                s16 unk0;
-                s16 unk2;
-                s16 unk4;
-                s16 unk6;
-                f32 unk8;
-                f32 unkC;
-                f32 unk10;
-                f32 unk14;
-                f32 unk18;
-                f32 unk1C;
-                f32 unk20;
-                f32 unk24;
-                f32 unk28;
-                s16 unk2C;
-                s16 unk2E;
-                s16 unk30;
-                s16 unk32;
-                s16 unk34;
-                s16 unk36;
-                s16 unk38;
-                s16 unk3A;
-                s8 unk3C;
-                f32 unk40;
-                s16 unk44;
-                s16 unk46;
-                s32 unk48;
-            } sp;
+            SplashSpraySpec sp;
 
-            sp.unk8 = pos[0];
-            sp.unkC = pos[1];
-            sp.unk10 = pos[2];
-            sp.unk14 = 2.900000095f;
-            sp.unk18 = 17.0f;
-            sp.unk1C = 2.5f;
-            sp.unk2C = 0xF;
-            sp.unk20 = 0.5770000219f;
-            sp.unk24 = 25.0f;
-            sp.unk28 = 20.20000076f;
-            sp.unk2E = 0xA;
-            sp.unk0 = -0x14;
-            sp.unk2 = 0x31;
-            sp.unk4 = -0x34;
-            sp.unk6 = 0x2B;
-            sp.unk30 = 3;
-            sp.unk32 = 4;
-            sp.unk34 = 0x28;
-            sp.unk36 = 0x1E;
-            sp.unk38 = 0x64;
-            sp.unk3A = 0x64;
-            sp.unk3C = 0;
-            sp.unk44 = 0x10;
-            sp.unk46 = 0xF;
-            sp.unk48 = 0;
-            sp.unk40 = 0.5f;
-            func_15153F18(&sp.unk0, &sp.unk8, 0, sceneTag, 1);
+            sp.spray.pos.x = pos[0];
+            sp.spray.pos.y = pos[1];
+            sp.spray.pos.z = pos[2];
+            sp.spray.scaleBase = 2.900000095f;
+            sp.spray.scaleRange = 17.0f;
+            sp.spray.sizeBase = 2.5f;
+            sp.spray.countBase = 0xF;
+            sp.spray.sizeRange = 0.5770000219f;
+            sp.spray.speedBase = 25.0f;
+            sp.spray.speedRange = 20.20000076f;
+            sp.spray.countRange = 0xA;
+            sp.angles.yawBase = -0x14;
+            sp.angles.yawRange = 0x31;
+            sp.angles.pitchBase = -0x34;
+            sp.angles.pitchRange = 0x2B;
+            sp.spray.itemCountBase = 3;
+            sp.spray.itemCountRange = 4;
+            sp.spray.lifeBase = 0x28;
+            sp.spray.lifeRange = 0x1E;
+            sp.spray.unk30 = 0x64;
+            sp.spray.unk32 = 0x64;
+            sp.spray.kind = 0;
+            sp.spray.unk3C = 0x10;
+            sp.spray.unk3E = 0xF;
+            sp.spray.unk40 = 0;
+            sp.spray.unk38 = 0.5f;
+            func_15153F18(&sp.angles, &sp.spray, 0, sceneTag, 1);
         } else if (event->value == 0x24) {
             f32 p[3];
             s32 count;

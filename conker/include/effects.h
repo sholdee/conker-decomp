@@ -520,4 +520,68 @@ typedef struct TrailBurst {
     /* 0x73 */ s8 unk73;
 } TrailBurst; /* size 0x74 */
 
+/* func_15153F18 / func_15153CCC / func_15153C84 (game_17CAF0.c): throws countBase + rand % (countRange + 1)
+ * splashes (func_151DA6F8, game_2062D0.c) from pos, each value drawn from its base/range pair. */
+typedef struct SplashSpray {
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ f32 scaleBase;
+    /* 0x10 */ f32 scaleRange;
+    /* 0x14 */ f32 sizeBase;
+    /* 0x18 */ f32 sizeRange;
+    /* 0x1C */ f32 speedBase;
+    /* 0x20 */ f32 speedRange;
+    /* 0x24 */ s16 countBase;
+    /* 0x26 */ s16 countRange;
+    /* 0x28 */ s16 itemCountBase;   /* EffectTemplate.itemCount of each splash */
+    /* 0x2A */ s16 itemCountRange;
+    /* 0x2C */ s16 lifeBase;
+    /* 0x2E */ s16 lifeRange;
+    /* 0x30 */ s16 unk30;           /* base of func_151DA6F8's arg4 */
+    /* 0x32 */ s16 unk32;           /* its range */
+    /* 0x34 */ u8 kind;
+    /* 0x35 */ u8 pad35[3];
+    /* 0x38 */ f32 unk38;           /* probability of func_151DA6F8's arg7 */
+    /* 0x3C */ s16 unk3C;           /* func_151DA6F8's argD */
+    /* 0x3E */ s16 unk3E;           /* func_151DA6F8's argE */
+    /* 0x40 */ s32 unk40;           /* func_151DA6F8's argF (EffectTemplate.unk18) */
+} SplashSpray; /* size 0x44 */
+
+/* What the callers of func_15153F18 build: the direction ranges followed by the spray. */
+typedef struct SplashSpraySpec {
+    /* 0x00 */ AngleRange angles;
+    /* 0x08 */ SplashSpray spray;
+} SplashSpraySpec; /* size 0x4C */
+
+/* func_15150178 / func_1514FF44 / func_1514FEFC (game_17CAF0.c): throws countBase + rand % (countRange + 1)
+ * wobbling drops (func_151D9014, game_2062D0.c) from pos, each value drawn from its base/range pair. */
+typedef struct DropSpray {
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ s16 countBase;
+    /* 0x0E */ s16 countRange;
+    /* 0x10 */ f32 speedBase;
+    /* 0x14 */ f32 speedRange;
+    /* 0x18 */ s16 lifeBase;
+    /* 0x1A */ s16 lifeRange;
+    /* 0x1C */ f32 gravityBase;
+    /* 0x20 */ f32 gravityRange;
+    /* 0x24 */ u8 unk24;            /* base of func_151D9014's arg5 */
+    /* 0x25 */ u8 unk25;            /* its range */
+    /* 0x26 */ u8 pad26[2];
+    /* 0x28 */ f32 sizeBase;
+    /* 0x2C */ f32 sizeRange;
+    /* 0x30 */ s8 unk30;            /* not read by the spray functions */
+    /* 0x31 */ u8 kind;
+    /* 0x32 */ u8 pad32[2];
+    /* 0x34 */ f32 unk34;           /* probability of func_151D9014's arg7 */
+    /* 0x38 */ u8 wobbles;
+    /* 0x39 */ u8 pad39[3];
+    /* 0x3C */ f32 bounceChance;
+} DropSpray; /* size 0x40 */
+
+/* What the callers of func_15150178 build: the direction ranges followed by the spray. */
+typedef struct DropSpraySpec {
+    /* 0x00 */ AngleRange angles;
+    /* 0x08 */ DropSpray spray;
+} DropSpraySpec; /* size 0x48 */
+
 #endif

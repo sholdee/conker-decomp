@@ -270,34 +270,6 @@ typedef struct {
     /* 0x38 */ f32 unk38;
 } EB340Cfg2190;
 
-/* func_15153F18 parameter block (same layout as game_16EE20.c's Params15153F18). */
-typedef struct {
-    /* 0x00 */ s16 unk00;
-    /* 0x02 */ s16 unk02;
-    /* 0x04 */ s16 unk04;
-    /* 0x06 */ s16 unk06;
-    /* 0x08 */ Vec3f pos;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ s16 unk2E;
-    /* 0x30 */ s16 unk30;
-    /* 0x32 */ s16 unk32;
-    /* 0x34 */ s16 unk34;
-    /* 0x36 */ s16 unk36;
-    /* 0x38 */ s16 unk38;
-    /* 0x3A */ s16 unk3A;
-    /* 0x3C */ s8 kind;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ s16 unk44;
-    /* 0x46 */ s16 unk46;
-    /* 0x48 */ s32 unk48;
-} EB340Cfg3F18;
-
 extern s32 D_800A0010[];
 extern f32 D_800A0038[];
 extern s32 D_800A0060[];
@@ -307,7 +279,7 @@ void func_1515C244(Actor *, Vec3f *, f32 *, f32 *);
 void func_1504715C(void *, Actor *);
 void func_1515080C(EB340Cfg80C *, s32 *, f32 *, s32, s32, s32, s32, s32, s32, void *, f32, s32, s32, u8, s32);
 void func_15152190(EB340Cfg2190 *, s32 *, f32 *, s32, f32, s32, u8, s32);
-void func_15153F18(EB340Cfg3F18 *, Vec3f *, void *, u8, s32);
+void func_15153F18(AngleRange *, SplashSpray *, void *, u8, s32);
 
 /* Spawns the burst of effects at `obj`'s centre: one func_1515080C, one func_15152190
  * and three func_15153F18 particle sets (kinds 0, 2 and 10). */
@@ -361,37 +333,37 @@ void func_150BE494(Actor *obj, u8 arg1, s32 arg2) {
         secondary.unk38 = 29.78700066f;
         func_15152190(&secondary, D_800A0060, D_800A0064, 1, 10.0f, 0, arg1, arg2);
         {
-            EB340Cfg3F18 particles;
+            SplashSpraySpec particles;
 
-            particles.pos = pos;
-            particles.unk14 = 6.900000095f;
-            particles.unk18 = 14.90000057f;
-            particles.unk1C = 1.281000018f;
-            particles.unk20 = 0.5430000424f;
-            particles.unk24 = 15.69999981f;
-            particles.unk28 = 18.89999962f;
-            particles.unk2C = 4;
-            particles.unk2E = 3;
-            particles.unk02 = 0xFF;
-            particles.unk00 = 0;
-            particles.unk04 = -0x2B;
-            particles.unk06 = 0x1A;
-            particles.unk30 = 3;
-            particles.unk32 = 3;
-            particles.unk34 = 0x1E;
-            particles.unk36 = 0x14;
-            particles.unk38 = 0x9B;
-            particles.unk3A = 0x64;
-            particles.unk44 = 0x10;
-            particles.unk46 = 0xF;
-            particles.unk48 = 0;
-            particles.unk40 = 0.5f;
-            particles.kind = 0;
-            func_15153F18(&particles, &particles.pos, ground, arg1, arg2);
-            particles.kind = 2;
-            func_15153F18(&particles, &particles.pos, ground, arg1, arg2);
-            particles.kind = 10;
-            func_15153F18(&particles, &particles.pos, ground, arg1, arg2);
+            particles.spray.pos = pos;
+            particles.spray.scaleBase = 6.900000095f;
+            particles.spray.scaleRange = 14.90000057f;
+            particles.spray.sizeBase = 1.281000018f;
+            particles.spray.sizeRange = 0.5430000424f;
+            particles.spray.speedBase = 15.69999981f;
+            particles.spray.speedRange = 18.89999962f;
+            particles.spray.countBase = 4;
+            particles.spray.countRange = 3;
+            particles.angles.yawRange = 0xFF;
+            particles.angles.yawBase = 0;
+            particles.angles.pitchBase = -0x2B;
+            particles.angles.pitchRange = 0x1A;
+            particles.spray.itemCountBase = 3;
+            particles.spray.itemCountRange = 3;
+            particles.spray.lifeBase = 0x1E;
+            particles.spray.lifeRange = 0x14;
+            particles.spray.unk30 = 0x9B;
+            particles.spray.unk32 = 0x64;
+            particles.spray.unk3C = 0x10;
+            particles.spray.unk3E = 0xF;
+            particles.spray.unk40 = 0;
+            particles.spray.unk38 = 0.5f;
+            particles.spray.kind = 0;
+            func_15153F18(&particles.angles, &particles.spray, ground, arg1, arg2);
+            particles.spray.kind = 2;
+            func_15153F18(&particles.angles, &particles.spray, ground, arg1, arg2);
+            particles.spray.kind = 10;
+            func_15153F18(&particles.angles, &particles.spray, ground, arg1, arg2);
         }
     }
 }

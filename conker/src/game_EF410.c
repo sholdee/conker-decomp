@@ -2,6 +2,7 @@
 
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 void func_151D9014(f32 *pos, f32 *vel, s32 arg2, f32 arg3, s32 arg4, s32 arg5,
                    f32 arg6, s32 arg7, f32 arg8, f32 arg9, s32 arg10, s32 arg11,
@@ -86,34 +87,7 @@ typedef struct {
 } Struct150C2558;
 
 void func_15151A38(Struct150C2558 *, u8, s32);
-typedef struct {
-    /* 0x00 */ s16 unk0;
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ s16 unk4;
-    /* 0x06 */ s16 unk6;
-    /* 0x08 */ Vec3f unk8;
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ u8 unk2C;
-    /* 0x2D */ s8 unk2D;
-    /* 0x2E */ u8 pad2E[2];
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ s8 unk38;
-    /* 0x39 */ u8 unk39;
-    /* 0x3A */ u8 pad3A[2];
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ s8 unk40;
-    /* 0x41 */ u8 pad41[3];
-    /* 0x44 */ f32 unk44;
-} Struct150C2700;
-void func_15150178(Struct150C2700 *arg0, Vec3f *arg1, s32 arg2, u8 arg3, s32 arg4);
+void func_15150178(AngleRange *angles, DropSpray *spray, s32 arg2, u8 arg3, s32 arg4);
 
 void func_150C1F60(u8 arg0) {
     Struct150C2558 params;
@@ -181,30 +155,30 @@ void func_150C1F60(u8 arg0) {
     params.unk18 = 1.0f;
     func_15151A38(&params, arg0, 1);
     {
-    Struct150C2700 params2;
-    params2.unk8 = params.unk0;
-    params2.unk14 = 0x19;
-    params2.unk16 = 0x12;
-    params2.unk0 = -0x9F;
-    params2.unk2 = 0x44;
-    params2.unk4 = -0x34;
-    params2.unk6 = 0x26;
-    params2.unk20 = 0x19;
-    params2.unk22 = 0x19;
-    params2.unk2C = 0x9B;
-    params2.unk2D = 0x64;
-    params2.unk38 = 1;
-    params2.unk39 = 6;
-    params2.unk3C = 0.0f;
-    params2.unk40 = 1;
-    params2.unk44 = 0.0f;
-    params2.unk18 = 40.0f;
-    params2.unk1C = 35.0f;
-    params2.unk24 = -2.0210001f;
-    params2.unk28 = 0.89400005f;
-    params2.unk30 = 1152.0f;
-    params2.unk34 = 848.0f;
-    func_15150178(&params2, &params2.unk8, 0, arg0, 1);
+    DropSpraySpec params2;
+    params2.spray.pos = params.unk0;
+    params2.spray.countBase = 0x19;
+    params2.spray.countRange = 0x12;
+    params2.angles.yawBase = -0x9F;
+    params2.angles.yawRange = 0x44;
+    params2.angles.pitchBase = -0x34;
+    params2.angles.pitchRange = 0x26;
+    params2.spray.lifeBase = 0x19;
+    params2.spray.lifeRange = 0x19;
+    params2.spray.unk24 = 0x9B;
+    params2.spray.unk25 = 0x64;
+    params2.spray.unk30 = 1;
+    params2.spray.kind = 6;
+    params2.spray.unk34 = 0.0f;
+    params2.spray.wobbles = 1;
+    params2.spray.bounceChance = 0.0f;
+    params2.spray.speedBase = 40.0f;
+    params2.spray.speedRange = 35.0f;
+    params2.spray.gravityBase = -2.0210001f;
+    params2.spray.gravityRange = 0.89400005f;
+    params2.spray.sizeBase = 1152.0f;
+    params2.spray.sizeRange = 848.0f;
+    func_15150178(&params2.angles, &params2.spray, 0, arg0, 1);
 }
 }
 
@@ -354,33 +328,33 @@ s32 func_150C2558(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
 
 
 s32 func_150C2700(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
-    Struct150C2700 params;
+    DropSpraySpec params;
 
-    params.unk8.x = x;
-    params.unk8.y = y;
-    params.unk14 = 6;
-    params.unk16 = 5;
-    params.unk0 = 0x6B;
-    params.unk2 = 0x46;
-    params.unk4 = -0x1F;
-    params.unk6 = 0x2E;
-    params.unk20 = 0x64;
-    params.unk22 = 0;
-    params.unk2C = 0x9B;
-    params.unk2D = 0x64;
-    params.unk34 = 0.0f;
-    params.unk38 = 1;
-    params.unk39 = 6;
-    params.unk3C = 0.0f;
-    params.unk40 = 1;
-    params.unk44 = 0.0f;
-    params.unk8.z = z;
-    params.unk18 = 30.0f;
-    params.unk1C = 35.0f;
-    params.unk24 = -2.328f;
-    params.unk28 = 1.6630001f;
-    params.unk30 = 1655.0f;
-    func_15150178(&params, &params.unk8, 0, argE, 1);
+    params.spray.pos.x = x;
+    params.spray.pos.y = y;
+    params.spray.countBase = 6;
+    params.spray.countRange = 5;
+    params.angles.yawBase = 0x6B;
+    params.angles.yawRange = 0x46;
+    params.angles.pitchBase = -0x1F;
+    params.angles.pitchRange = 0x2E;
+    params.spray.lifeBase = 0x64;
+    params.spray.lifeRange = 0;
+    params.spray.unk24 = 0x9B;
+    params.spray.unk25 = 0x64;
+    params.spray.sizeRange = 0.0f;
+    params.spray.unk30 = 1;
+    params.spray.kind = 6;
+    params.spray.unk34 = 0.0f;
+    params.spray.wobbles = 1;
+    params.spray.bounceChance = 0.0f;
+    params.spray.pos.z = z;
+    params.spray.speedBase = 30.0f;
+    params.spray.speedRange = 35.0f;
+    params.spray.gravityBase = -2.328f;
+    params.spray.gravityRange = 1.6630001f;
+    params.spray.sizeBase = 1655.0f;
+    func_15150178(&params.angles, &params.spray, 0, argE, 1);
     return 1;
 }
 

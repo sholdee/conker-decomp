@@ -821,30 +821,6 @@ s32 func_150DA628(Spark *particle, s32 arg1) {
 }
 
 typedef struct {
-    Vec3f unk0;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    s16 unk24;
-    s16 unk26;
-    s16 unk28;
-    s16 unk2A;
-    s16 unk2C;
-    s16 unk2E;
-    s16 unk30;
-    s16 unk32;
-    u8 unk34;
-    u8 pad35[3];
-    f32 unk38;
-    s16 unk3C;
-    s16 unk3E;
-    s32 unk40;
-} ImpactEmitter; /* 0x44 */
-
-typedef struct {
     u8 unk0[0x24];
 } ImpactOrigin;
 
@@ -864,8 +840,8 @@ typedef struct {
 
 extern Spark *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 extern void func_150472C0(ImpactOrigin *, RayHit *);
-extern void func_15153CCC(ImpactCone *, ImpactEmitter *, ImpactOrigin *, u8, s32);
-extern void func_15153C84(ImpactSpray *, ImpactEmitter *, ImpactOrigin *, u8, s32);
+extern void func_15153CCC(ImpactCone *, SplashSpray *, ImpactOrigin *, u8, s32);
+extern void func_15153C84(ImpactSpray *, SplashSpray *, ImpactOrigin *, u8, s32);
 
 /* Spawns the impact effects of a trail segment hitting something (hit from func_15081690). */
 void func_150DA67C(Trail *trail, RayHit *hit, f32 *dir) {
@@ -936,29 +912,29 @@ void func_150DA67C(Trail *trail, RayHit *hit, f32 *dir) {
         } else {
             data->impactAccum += (0.06000000238f + func_150ADA68() * 0.06000000238f) * D_800BE9A4;
             if (data->impactAccum > 1.0f) {
-                ImpactEmitter emit;
+                SplashSpray emit;
                 ImpactOrigin origin;
 
                 func_150472C0(&origin, hit);
-                emit.unk0 = hit->pos;
-                emit.unkC = 3.480000019f;
-                emit.unk24 = 1;
-                emit.unk26 = 2;
-                emit.unk28 = 3;
-                emit.unk2A = 1;
-                emit.unk2C = 20;
-                emit.unk2E = 10;
+                emit.pos = hit->pos;
+                emit.scaleBase = 3.480000019f;
+                emit.countBase = 1;
+                emit.countRange = 2;
+                emit.itemCountBase = 3;
+                emit.itemCountRange = 1;
+                emit.lifeBase = 20;
+                emit.lifeRange = 10;
                 emit.unk30 = 200;
                 emit.unk32 = 55;
                 emit.unk3C = 16;
                 emit.unk3E = 15;
                 emit.unk40 = 0;
-                emit.unk34 = 3;
-                emit.unk10 = 2.659999847f;
-                emit.unk14 = 1.33100009f;
-                emit.unk18 = 1.160000086f;
-                emit.unk1C = 0.01499999966f;
-                emit.unk20 = 0.00699999975f;
+                emit.kind = 3;
+                emit.scaleRange = 2.659999847f;
+                emit.sizeBase = 1.33100009f;
+                emit.sizeRange = 1.160000086f;
+                emit.speedBase = 0.01499999966f;
+                emit.speedRange = 0.00699999975f;
                 emit.unk38 = 0.200000003f;
                 if (hit->hit >= 2) {
                     ImpactCone cone;

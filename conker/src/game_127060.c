@@ -359,62 +359,6 @@ void func_150FA468(struct260 *effect, s32 arg1, u8 event) {
     }
 }
 
-typedef struct {
-    s16 unk00;
-    s16 unk02;
-    s16 unk04;
-    s16 unk06;
-    Vec3f pos;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    s16 unk2C;
-    s16 unk2E;
-    s16 unk30;
-    s16 unk32;
-    s16 unk34;
-    s16 unk36;
-    s16 unk38;
-    s16 unk3A;
-    u8 unk3C;
-    u8 pad3D[3];
-    f32 unk40;
-    s16 unk44;
-    s16 unk46;
-    s32 unk48;
-} Spawn15153F18;
-
-typedef struct {
-    s16 unk00;
-    s16 unk02;
-    s16 unk04;
-    s16 unk06;
-    Vec3f pos;
-    s16 unk14;
-    s16 unk16;
-    f32 unk18;
-    f32 unk1C;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    u8 unk2C;
-    u8 unk2D;
-    u8 pad2E[2];
-    f32 unk30;
-    f32 unk34;
-    u8 unk38;
-    u8 unk39;
-    u8 pad3A[2];
-    f32 unk3C;
-    u8 unk40;
-    u8 pad41[3];
-    f32 unk44;
-} Spawn15150178;
-
 /* A particle created by func_15130280; this caller's data lives at 0xA8. */
 typedef struct {
     /* 0x00 */ u8 pad0[0xA8];
@@ -424,8 +368,8 @@ typedef struct {
 extern Vec3f D_800A1CFC[];
 extern void func_15143134(Vec3f *offset, Vec3f *out, Mtx *mtx);
 extern void func_1504715C(void *ground, Actor *actor);
-extern void func_15153F18(s16 *, void *, void *, u8, s32);
-extern void func_15150178(s16 *, void *, void *, u8, s32);
+extern void func_15153F18(AngleRange *, SplashSpray *, void *, u8, s32);
+extern void func_15150178(AngleRange *, DropSpray *, void *, u8, s32);
 extern ImpactParticle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 extern void func_151C329C(Vec3f *, u8, s32);
 
@@ -441,60 +385,60 @@ void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
         func_15143134(&D_800A1CFC[point], &pos, (Mtx *)actor->unk1D4 + 5);
         func_1504715C(ground, actor);
         {
-            Spawn15153F18 first;
+            SplashSpraySpec first;
 
-            first.pos = pos;
-            first.unk14 = 4.0f;
-            first.unk2C = 9;
-            first.unk2E = 6;
-            first.unk02 = 0xFF;
-            first.unk04 = -40;
-            first.unk00 = 0;
-            first.unk06 = 0x32;
-            first.unk30 = 3;
-            first.unk32 = 1;
-            first.unk34 = 0x1E;
-            first.unk36 = 0x32;
-            first.unk38 = 0x64;
-            first.unk3A = 0x64;
-            first.unk44 = 0x10;
-            first.unk46 = 0xF;
-            first.unk48 = 0;
-            first.unk3C = 1;
-            first.unk18 = 3.879999876f;
-            first.unk1C = 0.694f;
-            first.unk20 = 0.4500000179f;
-            first.unk24 = 12.0f;
-            first.unk28 = 13.90000057f;
-            first.unk40 = 1.0f;
-            func_15153F18(&first.unk00, &first.pos, ground, owner, kind);
+            first.spray.pos = pos;
+            first.spray.scaleBase = 4.0f;
+            first.spray.countBase = 9;
+            first.spray.countRange = 6;
+            first.angles.yawRange = 0xFF;
+            first.angles.pitchBase = -40;
+            first.angles.yawBase = 0;
+            first.angles.pitchRange = 0x32;
+            first.spray.itemCountBase = 3;
+            first.spray.itemCountRange = 1;
+            first.spray.lifeBase = 0x1E;
+            first.spray.lifeRange = 0x32;
+            first.spray.unk30 = 0x64;
+            first.spray.unk32 = 0x64;
+            first.spray.unk3C = 0x10;
+            first.spray.unk3E = 0xF;
+            first.spray.unk40 = 0;
+            first.spray.kind = 1;
+            first.spray.scaleRange = 3.879999876f;
+            first.spray.sizeBase = 0.694f;
+            first.spray.sizeRange = 0.4500000179f;
+            first.spray.speedBase = 12.0f;
+            first.spray.speedRange = 13.90000057f;
+            first.spray.unk38 = 1.0f;
+            func_15153F18(&first.angles, &first.spray, ground, owner, kind);
         }
         {
-            Spawn15150178 second;
+            DropSpraySpec second;
 
-            second.pos = pos;
-            second.unk14 = 7;
-            second.unk16 = 6;
-            second.unk00 = 0;
-            second.unk02 = 0xFF;
-            second.unk04 = -63;
-            second.unk06 = 0x18;
-            second.unk20 = 0x23;
-            second.unk22 = 0xB;
-            second.unk2C = 0x64;
-            second.unk2D = 0x64;
-            second.unk38 = 1;
-            second.unk39 = 1;
-            second.unk40 = 1;
-            second.unk18 = 8.0f;
-            second.unk1C = 10.0f;
-            second.unk24 = -1.266f;
-            second.unk28 = 0.4660000205f;
-            second.unk30 = 123.0f;
-            second.unk34 = 104.0f;
-            second.unk3C = 1.0f;
-            second.unk44 = 0.3f;
-            func_15150178(&second.unk00, &second.pos, ground, owner, kind);
+            second.spray.pos = pos;
+            second.spray.countBase = 7;
+            second.spray.countRange = 6;
+            second.angles.yawBase = 0;
+            second.angles.yawRange = 0xFF;
+            second.angles.pitchBase = -63;
+            second.angles.pitchRange = 0x18;
+            second.spray.lifeBase = 0x23;
+            second.spray.lifeRange = 0xB;
+            second.spray.unk24 = 0x64;
+            second.spray.unk25 = 0x64;
+            second.spray.unk30 = 1;
+            second.spray.kind = 1;
+            second.spray.wobbles = 1;
+            second.spray.speedBase = 8.0f;
+            second.spray.speedRange = 10.0f;
+            second.spray.gravityBase = -1.266f;
+            second.spray.gravityRange = 0.4660000205f;
+            second.spray.sizeBase = 123.0f;
+            second.spray.sizeRange = 104.0f;
+            second.spray.unk34 = 1.0f;
+            second.spray.bounceChance = 0.3f;
+            func_15150178(&second.angles, &second.spray, ground, owner, kind);
         }
         {
             ParticleDesc spawn;

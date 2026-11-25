@@ -6,6 +6,7 @@
 #undef func_15083E90
 Actor *func_15083E90();
 #include "variables.h"
+#include "effects.h"
 
 /* Cached RDP state (prim/env colour, geometry and other modes, last texture) for func_15142B7C..func_15142FBC. */
 extern s16 D_800DD1C0;
@@ -371,66 +372,39 @@ s32 func_151420F8(s32 actor) {
     }
     return 1;
 }
-/* Parameter block for func_15153F18. */
-typedef struct {
-    /* 0x00 */ s16 unk0;
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ s16 unk4;
-    /* 0x06 */ s16 unk6;
-    /* 0x08 */ Vec3f pos;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ s16 unk2E;
-    /* 0x30 */ s16 unk30;
-    /* 0x32 */ s16 unk32;
-    /* 0x34 */ s16 unk34;
-    /* 0x36 */ s16 unk36;
-    /* 0x38 */ s16 unk38;
-    /* 0x3A */ s16 unk3A;
-    /* 0x3C */ s8 unk3C;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ s16 unk44;
-    /* 0x46 */ s16 unk46;
-    /* 0x48 */ s32 unk48;
-} Params15153F18;
 
 
-void func_15153F18(Params15153F18 *params, Vec3f *pos, s32, s32, s32);
+void func_15153F18(AngleRange *angles, SplashSpray *spray, s32, s32, s32);
 
 /* Spawns the func_15153F18 effect of the given kind at `pos`. */
 void func_15142180(u8 kind, Vec3f *pos, s32 arg2, f32 scaleA, f32 scaleB) {
-    Params15153F18 params;
+    SplashSpraySpec params;
 
-    params.pos = *pos;
-    params.unk2C = 3;
-    params.unk2E = 3;
-    params.unk2 = 255;
-    params.unk4 = -25;
-    params.unk6 = 10;
-    params.unk14 = 2.5f * scaleA;
-    params.unk18 = (1.0f + 1.0f) * scaleA; // matching: folds to 2.0f but avoids IDO turning 2.0f * x into x + x
-    params.unk1C = 0.1080000028f;
-    params.unk20 = 0.2050000131f;
-    params.unk24 = 3.0f * scaleB;
-    params.unk28 = 3.5f * scaleB;
-    params.unk0 = 0;
-    params.unk30 = 3;
-    params.unk32 = 1;
-    params.unk34 = 9;
-    params.unk36 = 15;
-    params.unk38 = 180;
-    params.unk3A = 75;
-    params.unk40 = 0.0f;
-    params.unk44 = 12;
-    params.unk46 = 21;
-    params.unk48 = arg2;
-    params.unk3C = kind;
-    func_15153F18(&params, &params.pos, 0, 0xFF, 1);
+    params.spray.pos = *pos;
+    params.spray.countBase = 3;
+    params.spray.countRange = 3;
+    params.angles.yawRange = 255;
+    params.angles.pitchBase = -25;
+    params.angles.pitchRange = 10;
+    params.spray.scaleBase = 2.5f * scaleA;
+    params.spray.scaleRange = (1.0f + 1.0f) * scaleA; // matching: folds to 2.0f but avoids IDO turning 2.0f * x into x + x
+    params.spray.sizeBase = 0.1080000028f;
+    params.spray.sizeRange = 0.2050000131f;
+    params.spray.speedBase = 3.0f * scaleB;
+    params.spray.speedRange = 3.5f * scaleB;
+    params.angles.yawBase = 0;
+    params.spray.itemCountBase = 3;
+    params.spray.itemCountRange = 1;
+    params.spray.lifeBase = 9;
+    params.spray.lifeRange = 15;
+    params.spray.unk30 = 180;
+    params.spray.unk32 = 75;
+    params.spray.unk38 = 0.0f;
+    params.spray.unk3C = 12;
+    params.spray.unk3E = 21;
+    params.spray.unk40 = arg2;
+    params.spray.kind = kind;
+    func_15153F18(&params.angles, &params.spray, 0, 0xFF, 1);
 }
 
 /* Debug tunable stub: returns the midpoint of min and max (the name and source location are unused). */

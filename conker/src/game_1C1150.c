@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 // Ground info for an object, as filled in by func_1504715C.
 typedef struct GroundInfo {
@@ -121,41 +122,12 @@ void func_15194394(Actor *self, Actor *other, u8 *arg2) {
     }
 }
 
-// Parameters for func_15153F18, which spawns a random number of effects flying out from a point.
-// Each xxxMin/xxxRange pair is picked as min + rand() % (range + 1) (or min + randf() * range).
-typedef struct BurstParams {
-    /* 0x00 */ s16 yawMin;
-    /* 0x02 */ s16 yawRange;
-    /* 0x04 */ s16 pitchMin;
-    /* 0x06 */ s16 pitchRange;
-    /* 0x08 */ Vec3f position;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 speedMin;
-    /* 0x28 */ f32 speedRange;
-    /* 0x2C */ s16 countMin;
-    /* 0x2E */ s16 countRange;
-    /* 0x30 */ s16 unk30;
-    /* 0x32 */ s16 unk32;
-    /* 0x34 */ s16 unk34;
-    /* 0x36 */ s16 unk36;
-    /* 0x38 */ s16 unk38;
-    /* 0x3A */ s16 unk3A;
-    /* 0x3C */ u8 unk3C;
-    /* 0x40 */ f32 unk40Chance;
-    /* 0x44 */ s16 unk44;
-    /* 0x46 */ s16 unk46;
-    /* 0x48 */ s32 unk48;
-} BurstParams;
-
-extern void func_15153F18(BurstParams *params, Vec3f *position, GroundInfo *ground, u8 arg3, s32 arg4);
+extern void func_15153F18(AngleRange *angles, SplashSpray *spray, GroundInfo *ground, u8 arg3, s32 arg4);
 extern void *func_151AE7B0(Actor *obj, f32 arg1, s16 arg2, u8 arg3, s32 arg4);
 
 // Spawns a burst of effects from other when its id is 0-4.
 void func_15194408(Actor *self, Actor *other) {
-    BurstParams burst;
+    SplashSpraySpec burst;
     GroundInfo ground;
 
     switch (other->id) {
@@ -171,33 +143,33 @@ void func_15194408(Actor *self, Actor *other) {
 
     func_151AE7B0(other, 0.6f, 90, 0xFF, 1);
     func_1504715C(&ground, other);
-    burst.position.x = other->x_position;
-    burst.position.y = other->y_position + 50.0f;
-    burst.position.z = other->z_position;
-    burst.unk14 = 6.0f;
-    burst.countMin = 12;
-    burst.countRange = 5;
-    burst.yawRange = 0xFF;
-    burst.pitchMin = -0x3F;
-    burst.yawMin = 0;
-    burst.pitchRange = 0x23;
-    burst.unk30 = 3;
-    burst.unk32 = 2;
-    burst.unk34 = 30;
-    burst.unk36 = 30;
-    burst.unk38 = 100;
-    burst.unk3A = 100;
-    burst.unk44 = 16;
-    burst.unk46 = 15;
-    burst.unk48 = 0;
-    burst.unk3C = 0;
-    burst.unk18 = 3.0f;
-    burst.unk1C = 0.21f;
-    burst.unk20 = 0.406f;
-    burst.speedMin = 13.0f;
-    burst.speedRange = 8.0f;
-    burst.unk40Chance = 0.3f;
-    func_15153F18(&burst, &burst.position, &ground, 0xFF, 1);
+    burst.spray.pos.x = other->x_position;
+    burst.spray.pos.y = other->y_position + 50.0f;
+    burst.spray.pos.z = other->z_position;
+    burst.spray.scaleBase = 6.0f;
+    burst.spray.countBase = 12;
+    burst.spray.countRange = 5;
+    burst.angles.yawRange = 0xFF;
+    burst.angles.pitchBase = -0x3F;
+    burst.angles.yawBase = 0;
+    burst.angles.pitchRange = 0x23;
+    burst.spray.itemCountBase = 3;
+    burst.spray.itemCountRange = 2;
+    burst.spray.lifeBase = 30;
+    burst.spray.lifeRange = 30;
+    burst.spray.unk30 = 100;
+    burst.spray.unk32 = 100;
+    burst.spray.unk3C = 16;
+    burst.spray.unk3E = 15;
+    burst.spray.unk40 = 0;
+    burst.spray.kind = 0;
+    burst.spray.scaleRange = 3.0f;
+    burst.spray.sizeBase = 0.21f;
+    burst.spray.sizeRange = 0.406f;
+    burst.spray.speedBase = 13.0f;
+    burst.spray.speedRange = 8.0f;
+    burst.spray.unk38 = 0.3f;
+    func_15153F18(&burst.angles, &burst.spray, &ground, 0xFF, 1);
 }
 
 extern void func_150C7020(Actor *obj, s32 arg1, u8 arg2, s32 arg3);
@@ -215,7 +187,7 @@ extern void func_151B4CD0(Actor *obj, u8 arg1, s32 arg2);
 void func_151945CC(Actor *self, Actor *other, u8 *arg2) {
     Vec3f pos;
     s16 facingYaw;
-    BurstParams burst;
+    SplashSpraySpec burst;
     GroundInfo ground;
 
     facingYaw = (self->unk7A >> 8) - 0x40; // unk7A is a u16 angle; >> 8 makes it a byte angle
@@ -231,35 +203,35 @@ void func_151945CC(Actor *self, Actor *other, u8 *arg2) {
         if (kind != 0x63) {
             profile = D_800A3FE6[kind * 16]; // 16-byte records
             if (profile != 2) {
-                burst.position = pos;
-                burst.unk14 = 6.699999809f;
-                burst.unk18 = 2.329999924f;
-                burst.unk1C = 0.6800000072f;
-                burst.unk20 = 0.0f;
-                burst.speedMin = 4.400000095f;
-                burst.countMin = 15;
-                burst.countRange = 12;
-                burst.yawMin = facingYaw - 0x40;
-                burst.yawRange = 0x80;
-                burst.pitchMin = -0xA0;
-                burst.pitchRange = 0x20;
-                burst.unk30 = 3;
-                burst.unk32 = 1;
-                burst.unk34 = 31;
-                burst.unk36 = 19;
-                burst.unk38 = 155;
-                burst.unk3A = 100;
-                burst.unk44 = 16;
-                burst.unk46 = 15;
-                burst.unk48 = 0;
-                burst.speedRange = 5.300000191f;
-                burst.unk40Chance = 0.5f;
+                burst.spray.pos = pos;
+                burst.spray.scaleBase = 6.699999809f;
+                burst.spray.scaleRange = 2.329999924f;
+                burst.spray.sizeBase = 0.6800000072f;
+                burst.spray.sizeRange = 0.0f;
+                burst.spray.speedBase = 4.400000095f;
+                burst.spray.countBase = 15;
+                burst.spray.countRange = 12;
+                burst.angles.yawBase = facingYaw - 0x40;
+                burst.angles.yawRange = 0x80;
+                burst.angles.pitchBase = -0xA0;
+                burst.angles.pitchRange = 0x20;
+                burst.spray.itemCountBase = 3;
+                burst.spray.itemCountRange = 1;
+                burst.spray.lifeBase = 31;
+                burst.spray.lifeRange = 19;
+                burst.spray.unk30 = 155;
+                burst.spray.unk32 = 100;
+                burst.spray.unk3C = 16;
+                burst.spray.unk3E = 15;
+                burst.spray.unk40 = 0;
+                burst.spray.speedRange = 5.300000191f;
+                burst.spray.unk38 = 0.5f;
                 if (profile == 1) {
-                    burst.unk3C = 1;
+                    burst.spray.kind = 1;
                 } else {
-                    burst.unk3C = 0;
+                    burst.spray.kind = 0;
                 }
-                func_15153F18(&burst, &burst.position, &ground, 0xFF, 1);
+                func_15153F18(&burst.angles, &burst.spray, &ground, 0xFF, 1);
                 func_151B4CD0(other, 0xFF, 1);
             }
         }
@@ -287,7 +259,7 @@ void func_15194794(Actor *self, Actor *other, u8 *arg2) {
 // For ids 0-4 and 0x53, spawns a burst of effects above other and calls func_151D8868.
 void func_15194810(Actor *self, Actor *other, u8 *arg2) {
     Vec3f pos;
-    BurstParams burst;
+    SplashSpraySpec burst;
     GroundInfo ground;
     Struct15195738Small params;
 
@@ -303,31 +275,31 @@ void func_15194810(Actor *self, Actor *other, u8 *arg2) {
         pos.z = other->z_position;
     fence: // matching: this basic-block boundary keeps as1 from scheduling across it
         func_1504715C(&ground, other);
-        burst.position = pos;
-        burst.unk14 = 10.0f;
-        burst.countMin = 15;
-        burst.countRange = 10;
-        burst.yawRange = 0xFF;
-        burst.pitchMin = -0x3F;
-        burst.yawMin = 0;
-        burst.pitchRange = 0x39;
-        burst.unk30 = 3;
-        burst.unk32 = 2;
-        burst.unk34 = 70;
-        burst.unk36 = 22;
-        burst.unk38 = 155;
-        burst.unk3A = 100;
-        burst.unk44 = 16;
-        burst.unk46 = 15;
-        burst.unk48 = 0;
-        burst.unk3C = 0;
-        burst.unk18 = 5.0f;
-        burst.unk1C = 0.6750000119f;
-        burst.unk20 = 0.2310000062f;
-        burst.speedMin = 5.0f;
-        burst.speedRange = 25.10000038f;
-        burst.unk40Chance = 0.5f;
-        func_15153F18(&burst, &burst.position, &ground, 0xFF, 1);
+        burst.spray.pos = pos;
+        burst.spray.scaleBase = 10.0f;
+        burst.spray.countBase = 15;
+        burst.spray.countRange = 10;
+        burst.angles.yawRange = 0xFF;
+        burst.angles.pitchBase = -0x3F;
+        burst.angles.yawBase = 0;
+        burst.angles.pitchRange = 0x39;
+        burst.spray.itemCountBase = 3;
+        burst.spray.itemCountRange = 2;
+        burst.spray.lifeBase = 70;
+        burst.spray.lifeRange = 22;
+        burst.spray.unk30 = 155;
+        burst.spray.unk32 = 100;
+        burst.spray.unk3C = 16;
+        burst.spray.unk3E = 15;
+        burst.spray.unk40 = 0;
+        burst.spray.kind = 0;
+        burst.spray.scaleRange = 5.0f;
+        burst.spray.sizeBase = 0.6750000119f;
+        burst.spray.sizeRange = 0.2310000062f;
+        burst.spray.speedBase = 5.0f;
+        burst.spray.speedRange = 25.10000038f;
+        burst.spray.unk38 = 0.5f;
+        func_15153F18(&burst.angles, &burst.spray, &ground, 0xFF, 1);
         params.unk0 = 1;
         params.unk2 = (func_150ADA20() % 11U) + 20;
         params.unk4 = 8;

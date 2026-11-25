@@ -3,43 +3,8 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Direction spread of a burst: func_15143794 takes a random angle from each range (see game_2062D0.c). */
-typedef struct {
-    s16 angle1;
-    s16 angle1Range;
-    s16 angle2;
-    s16 angle2Range;
-} BurstAngles;
-
-/* Parameters for func_15150178, which throws count + rand(countRange) func_151D9014 particles
- * (same layout as DropBurstSpec in game_2062D0.c). */
-typedef struct {
-    /* 0x00 */ BurstAngles angles;
-    /* 0x08 */ Vec3f pos;
-    /* 0x14 */ s16 count;
-    /* 0x16 */ s16 countRange;
-    /* 0x18 */ f32 speed;
-    /* 0x1C */ f32 speedRange;
-    /* 0x20 */ s16 lifetime;
-    /* 0x22 */ s16 lifetimeRange;
-    /* 0x24 */ f32 gravity;
-    /* 0x28 */ f32 gravityRange;
-    /* 0x2C */ u8 unk2C; /* particle arg5 */
-    /* 0x2D */ u8 unk2CRange;
-    /* 0x2E */ u8 pad2E[2];
-    /* 0x30 */ f32 size;
-    /* 0x34 */ f32 sizeRange;
-    /* 0x38 */ s8 unk38;
-    /* 0x39 */ u8 kind;
-    /* 0x3A */ u8 pad3A[2];
-    /* 0x3C */ f32 unk3CChance; /* probability of particle arg7 */
-    /* 0x40 */ s8 wobble;
-    /* 0x41 */ u8 pad41[3];
-    /* 0x44 */ f32 bounceChance;
-} DropBurstSpec; /* 0x48 */
-
 void func_15103254(s16 lifetime, u8 alpha, f32 size, Vec3f *pos, u8 views, u8 arg5, s32 arg6);
-void func_15150178(DropBurstSpec *spec, Vec3f *pos, s32 arg2, u8 owner, s32 kind);
+void func_15150178(AngleRange *angles, DropSpray *spray, s32 arg2, u8 owner, s32 kind);
 void func_151D3F14(Vec3f *pos, u8 owner, s32 kind);
 void func_15182670(u8 r, u8 g, u8 b, u8 alpha, s32 duration, s32 view, u8 owner, s32 kind);
 
@@ -49,31 +14,31 @@ void func_151DC6A0(Vec3f *pos, u8 owner, s32 kind) {
     func_15103254(func_150ADA20() % 5U + 12, func_150ADA20() % 56U + 200, func_150ADA68() * 600.0f + 1700.0f,
                   pos, 0xFF, owner, kind);
     {
-        DropBurstSpec drops;
+        DropSpraySpec drops;
 
-        drops.pos = *pos;
-        drops.count = 12;
-        drops.countRange = 7;
-        drops.angles.angle1 = 0;
-        drops.angles.angle1Range = 0xFF;
-        drops.angles.angle2 = -64;
-        drops.angles.angle2Range = 60;
-        drops.lifetime = 36;
-        drops.lifetimeRange = 60;
-        drops.unk2C = 200;
-        drops.unk2CRange = 55;
-        drops.unk38 = 0;
-        drops.kind = 12;
-        drops.wobble = 1;
-        drops.speed = 8.0f;
-        drops.speedRange = 10.0f;
-        drops.gravity = -1.097f;
-        drops.gravityRange = 0.37f;
-        drops.size = 280.0f;
-        drops.sizeRange = 390.0f;
-        drops.unk3CChance = 0.6f;
-        drops.bounceChance = 1.0f;
-        func_15150178(&drops, &drops.pos, 0, owner, kind);
+        drops.spray.pos = *pos;
+        drops.spray.countBase = 12;
+        drops.spray.countRange = 7;
+        drops.angles.yawBase = 0;
+        drops.angles.yawRange = 0xFF;
+        drops.angles.pitchBase = -64;
+        drops.angles.pitchRange = 60;
+        drops.spray.lifeBase = 36;
+        drops.spray.lifeRange = 60;
+        drops.spray.unk24 = 200;
+        drops.spray.unk25 = 55;
+        drops.spray.unk30 = 0;
+        drops.spray.kind = 12;
+        drops.spray.wobbles = 1;
+        drops.spray.speedBase = 8.0f;
+        drops.spray.speedRange = 10.0f;
+        drops.spray.gravityBase = -1.097f;
+        drops.spray.gravityRange = 0.37f;
+        drops.spray.sizeBase = 280.0f;
+        drops.spray.sizeRange = 390.0f;
+        drops.spray.unk34 = 0.6f;
+        drops.spray.bounceChance = 1.0f;
+        func_15150178(&drops.angles, &drops.spray, 0, owner, kind);
     }
     func_151D3F14(pos, owner, kind);
     func_15182670(0xFF, 0xFF, 0xFF, func_150ADA20() % 51U + 150, func_150ADA20() % 5U + 8, 0, owner, kind);
