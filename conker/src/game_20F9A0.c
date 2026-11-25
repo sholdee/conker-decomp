@@ -2,18 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct {
-    s8 unk0;
-    s8 unk1;
-    s16 unk2;
-    s8 unk4;
-    s8 unk5;
-    s8 unk6;
-    s8 unk7;
-    s8 unk8;
-    s8 unk9;
-} ModeEntry; /* row of the mode table D_800AB68C, indexed by D_8008FDD4->selection */
-
 /* Cue table row: func_1501D348(unk0, unk2 or unk3). */
 struct Struct151E4314 {
     s16 unk0;
@@ -21,10 +9,8 @@ struct Struct151E4314 {
     s8 unk3;
 };
 
-extern ModeEntry D_800AB68C[];
 extern struct Struct151E4314 D_800AB7A4[];
 extern s8 D_800E0BEB;
-extern u8 **D_800E0BD8;
 extern void func_1501D348(s32, s32, s32, s32, s32);
 void func_151E2834(void);
 s32 func_1517EFDC(void);
@@ -208,9 +194,9 @@ void func_151E2834(void) {
     D_80084060[3] = -1;
     param = entry->unk2;
     D_8008FDC8 = entry->unk5 < 0;
-    flags = D_800AB754[entry->unk4];
-    D_8008FDC0 = D_800AB77C[entry->unk4];
-    D_8008FDBC = D_800AB790[entry->unk4] | 1;
+    flags = D_800AB754[entry->mode];
+    D_8008FDC0 = D_800AB77C[entry->mode];
+    D_8008FDBC = D_800AB790[entry->mode] | 1;
     if (flags & 0x80000) {
         D_800D23A8 = D_800E0BE0[19];
     } else {

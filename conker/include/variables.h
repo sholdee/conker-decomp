@@ -871,6 +871,7 @@ extern f32 D_800A548C[];
 /* 800B0000 */
 
 extern u8 D_800AB62C[][3]; // team colours (RGB)
+extern ModeEntry D_800AB68C[]; // multiplayer game-mode table
 extern s32 D_800AB754[];
 extern s32  D_800B0DC0;
 extern s32  D_800B0DC4;
@@ -1694,6 +1695,7 @@ extern s8 D_800E0BCE[];
 extern s8 D_800E0BD0;
 extern u8 D_800E0BD1;
 extern s8 D_800E0BD3;
+extern u8 **D_800E0BD8; // text strings of the current language ([8 + n]: player names)
 extern u8 D_800E0BDC;
 extern s8 D_800E0BE3;
 extern s8 D_800E0BE7;

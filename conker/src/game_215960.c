@@ -26,7 +26,6 @@ extern Gfx D_80090028;
 extern HudSprite D_80091804;
 extern HudSprite D_80091810;
 extern Gfx *(*D_8008FFF4[])(Gfx *);
-extern u8 **D_800E0BD8;
 extern u8 D_7FB;
 extern u8 D_887;
 extern u8 D_800E0C85;

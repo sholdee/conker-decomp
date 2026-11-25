@@ -13,23 +13,8 @@ extern s8 D_800E0BE0[];
 #define MENU_CLEFT  0x40 /* C-left */
 #define MENU_CRIGHT 0x80 /* C-right */
 
-extern char **D_800E0BD8; /* text strings */
 extern void func_1501D348(s32, s32, s32, s32, s32);
 void func_151E2834(void);
-/* One entry of the menu's game-mode table (D_800AB68C[]) */
-typedef struct {
-    /* 0x0 */ s16 nameText;
-    /* 0x2 */ s8 unk2;
-    /* 0x3 */ s8 unk3;
-    /* 0x4 */ s8 mode;
-    /* 0x5 */ s8 unk5;
-    /* 0x6 */ s8 unk6;
-    /* 0x7 */ s8 unk7;
-    /* 0x8 */ s8 unk8;
-    /* 0x9 */ s8 unk9;
-} MenuEntry;
-
-extern MenuEntry D_800AB68C[];
 extern char D_800AB850[];
 extern void (*D_800E0A88)(void);
 extern s8 D_800E0A96; /* page to switch to once faded out; -1: none */
@@ -1273,7 +1258,7 @@ void func_151E1214(void) {
 /* Per-team x jitter for stacked names; a struct so the initial copy is one word */
 typedef struct { s8 v[4]; } Offs4;
 extern Offs4 D_8008FF34;
-/* Team layout of a mode (D_800AB710[MenuEntry.unk5]) */
+/* Team layout of a mode (D_800AB710[ModeEntry.unk5]) */
 typedef struct {
     /* 0x0 */ s8 teamCount;
     /* 0x1 */ s8 minSlots;    /* bounds on teamCount * team size, with fewer than 3 players */

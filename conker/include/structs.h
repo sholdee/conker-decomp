@@ -4157,4 +4157,16 @@ typedef struct {
     /* 0x66 */ PlayerMatchStats stats[4];
 } MenuState; /* size 0x98 */
 
+/* One entry of the multiplayer game-mode table D_800AB68C[] (indexed by MenuState.selection). */
+typedef struct {
+    /* 0x0 */ s16 nameText;
+    /* 0x2 */ s16 unk2;  /* mode parameter read when the match is set up */
+    /* 0x4 */ s8 mode;   /* index into D_800AB754 / D_800AB77C / D_800AB790 */
+    /* 0x5 */ s8 unk5;
+    /* 0x6 */ s8 unk6;
+    /* 0x7 */ s8 unk7;
+    /* 0x8 */ s8 unk8;
+    /* 0x9 */ s8 unk9;
+} ModeEntry; /* size 0xA */
+
 #endif
