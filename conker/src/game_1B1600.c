@@ -792,36 +792,56 @@ extern void *allocate_memory(s32, s32, s32, s32);
 extern s32 func_10004074(void *);
 extern void func_1503DA9C(struct127 *, s32, s32, s32);
 
-Gfx *func_15186794(Gfx *gfx, s32 arg1) {
-    ShadowVtx *buf;
-    s32 count;
-    Vtx *verts;
-    u32 total;
+/*
+ * Rare microcode command 0x10: four triangles sharing vertex c, (c, v-3, v-2) (c, v-2, v-1) (c, v, v+1)
+ * (c, v-1, v), packed as 5-bit vertex indices.
+ */
+#define gSPFan4Triangles(pkt, c, v)                                                                         \
+    {                                                                                                     \
+        Gfx *_g = (Gfx *)(pkt);                                                                           \
+        _g->words.w0 = _SHIFTL(c, 23, 5) | 0x10000000 | _SHIFTL(v - 3, 18, 5) | _SHIFTL((v - 2) >> 2, 15, 3) | \
+                       _SHIFTL(c, 10, 5) | _SHIFTL(v - 2, 5, 5) | _SHIFTL(v - 1, 0, 5);                    \
+        _g->words.w1 = _SHIFTL((v - 2), 30, 2) | _SHIFTL(c, 25, 5) | _SHIFTL(v, 20, 5) |                   \
+                       _SHIFTL(v + 1, 15, 5) | _SHIFTL(c, 10, 5) | _SHIFTL(v - 1, 5, 5) | _SHIFTL(v, 0, 5);  \
+    }
+
+/*
+ * Draws the real-time shadows for view 0: for each visible object (up to 8 shadows in all), renders its
+ * silhouette into the shadow texture for each of its nearest lights, gathers the level geometry around it,
+ * and draws that geometry textured with the shadow, clipped to the light frustum. The vertex budget
+ * D_8008D3E0 adapts to last frame's use. Drops everything (returns the original gfx) if the display list
+ * would overflow.
+ */
+Gfx *func_15186794(Gfx *gfx, s32 view) {
+    ShadowVtx *recv;
+    s32 recvCount;
+    Vtx *vtx;
+    u32 vtxTotal;
     u32 idx;
-    s32 flag;
+    s32 split;
     u32 j;
-    s32 cnt;
-    s32 k;
+    s32 batch;
+    s32 quad;
     s32 nv;
-    s32 arr[5];
+    s32 quadEnd[5];
     s32 i;
-    s32 n;
+    s32 slot;
     s32 base;
     f32 *mtx;
-    Gfx *saved;
-    s32 v;
-    s32 sub;
-    f32 f;
-    f32 sx;
-    f32 sy;
-    f32 sz;
-    Gfx *vtxcmd;
-    Gfx *start;
-    s32 id;
+    Gfx *gfxShadows;
+    s32 v; // matching: only written, see the object tests below
+    s32 modelSub;
+    f32 lightDist;
+    f32 halfX;
+    f32 halfY;
+    f32 halfZ;
+    Gfx *vtxCmd;
+    Gfx *gfxStart;
+    s32 modelId;
 
-    n = 0;
-    start = gfx;
-    if (arg1 != 0) {
+    slot = 0;
+    gfxStart = gfx;
+    if (view != 0) {
         return gfx;
     }
     if (D_800DE01C < D_8008D3E0) {
@@ -838,24 +858,25 @@ Gfx *func_15186794(Gfx *gfx, s32 arg1) {
             D_8008D3E0 = D_800DE024;
         }
     }
-    verts = allocate_memory(D_8008D3E0 * 0x10 + 0x1C0, 3, 1, 1);
-    if (verts == NULL) {
+    vtx = allocate_memory((D_8008D3E0 + 28) * sizeof(Vtx), 3, 1, 1);
+    if (vtx == NULL) {
         return gfx;
     }
-    buf = allocate_memory(D_8008D3E0 * sizeof(ShadowVtx), 2, 1, 1);
-    if (buf == NULL) {
-        func_10004074(verts);
+    recv = allocate_memory(D_8008D3E0 * sizeof(ShadowVtx), 2, 1, 1);
+    if (recv == NULL) {
+        func_10004074(vtx);
         return gfx;
     }
-    memcpy(&D_800DF090[arg1], &((S180_15186794 *)D_800BE628)[D_80082FA4].vp[D_800BE9C0], sizeof(Vp));
-    D_800DF090[arg1].vp.vtrans[2] = (s32)(D_800DF090[arg1].vp.vtrans[2] * (u32)D_800DE030) >> 10;
-    saved = gfx;
-    total = 0;
+    memcpy(&D_800DF090[view], &((S180_15186794 *)D_800BE628)[D_80082FA4].vp[D_800BE9C0], sizeof(Vp));
+    D_800DF090[view].vp.vtrans[2] = (s32)(D_800DF090[view].vp.vtrans[2] * (u32)D_800DE030) >> 10;
+    gfxShadows = gfx;
+    vtxTotal = 0;
     for (i = 0; i < 25; i++) {
+        // matching: the dead store to v and the repeated unk74 test (as u32) steer IDO's register allocation
         if (D_800CC2D0[i].interaction_state == 0 || D_800CC2D0[i].unk1D4 == NULL ||
-            ((v = D_800CC2D0[i].unk74) & (1 << arg1)) || D_800CC2D0[i].unk5 != 0 ||
+            ((v = D_800CC2D0[i].unk74) & (1 << view)) || D_800CC2D0[i].unk5 != 0 ||
             (D_800CC2D0[i].pad66 & 0x10) != 0x10 ||
-            (u32)(D_800CC2D0[i].unk74 & (1 << arg1)) == (u32)(1 << arg1) ||
+            (u32)(D_800CC2D0[i].unk74 & (1 << view)) == (u32)(1 << view) ||
             D_800CC2D0[i].unk84.uh == 0x2D8 ||
             (D_800CC2D0[i].unk31C != NULL && ((u8)D_800CC2D0[i].unk31C->unk95 != 0 || D_800CC2D0[i].unk31C->pad98[0] != 0)) ||
             (D_800DF0E0 & (1 << i))) {
@@ -865,64 +886,62 @@ Gfx *func_15186794(Gfx *gfx, s32 arg1) {
             continue;
         }
         if (D_800CC2D0[i].pad288[0x40] != 0) {
-            id = func_150849CC(&D_800CC2D0[i], &sub);
-            func_1503DA9C(&D_800CC2D0[i], id, sub, 0);
+            modelId = func_150849CC(&D_800CC2D0[i], &modelSub);
+            func_1503DA9C(&D_800CC2D0[i], modelId, modelSub, 0);
         } else {
-            id = D_800CC2D0[i].id;
-            sub = 0;
+            modelId = D_800CC2D0[i].id;
+            modelSub = 0;
         }
-        if (D_800C48F0[id] == 0) {
+        if (D_800C48F0[modelId] == 0) {
             continue;
         }
-        if (func_15184DF0(i, arg1, &sx, &sy, &sz) == 0) {
+        if (func_15184DF0(i, view, &halfX, &halfY, &halfZ) == 0) {
             continue;
         }
-        f = 0.0f;
-        for (j = 0; j < D_800DE038 && n < 8 && total < D_8008D3E0; j++) {
-            f = func_15184368(i, n, sx, sy, sz, f);
-            if (f == 0.0f) {
+        lightDist = 0.0f;
+        for (j = 0; j < D_800DE038 && slot < 8 && vtxTotal < D_8008D3E0; j++) {
+            lightDist = func_15184368(i, slot, halfX, halfY, halfZ, lightDist);
+            if (lightDist == 0.0f) {
                 break;
             }
-            mtx = (f32 *)D_800DF0F8[n];
-            count = func_151873E4(D_800CC2D0[i].x_position, D_800CC2D0[i].z_position, 0xE6, buf, mtx, &buf[D_8008D3E0 - 2],
-                                  func_1518652C(D_800CC2D0[i].x_position, D_800CC2D0[i].z_position, 0xE6, buf, mtx, &buf[D_8008D3E0 - 2]));
-            if (count != 0) {
+            mtx = (f32 *)D_800DF0F8[slot];
+            recvCount = func_151873E4(D_800CC2D0[i].x_position, D_800CC2D0[i].z_position, 230, recv, mtx, &recv[D_8008D3E0 - 2],
+                                  func_1518652C(D_800CC2D0[i].x_position, D_800CC2D0[i].z_position, 230, recv, mtx, &recv[D_8008D3E0 - 2]));
+            if (recvCount != 0) {
                 idx = 0;
-                gfx = func_15184FA4(gfx, i, n, arg1);
-                cnt = 0;
+                gfx = func_15184FA4(gfx, i, slot, view);
+                batch = 0;
                 if (D_800CC2D0[i].unk127 != 0xFF && D_800CC2D0[i].pad1C8 < 2) {
-                    flag = 1;
+                    split = 1;
+                } else if (i + 1 == D_800CC2D0[D_800CC2D0[i].unk124].unk65 &&
+                           D_800CC2D0[D_800CC2D0[i].unk124].unk127 != 0xFF && D_800CC2D0[i].id == 0x53) {
+                    split = 1;
                 } else {
-                    if (i + 1 == D_800CC2D0[D_800CC2D0[i].unk124].unk65 && D_800CC2D0[D_800CC2D0[i].unk124].unk127 != 0xFF && D_800CC2D0[i].id == 0x53) {
-                        flag = 1;
-                    } else {
-                        flag = 0;
-                    }
+                    split = 0;
                 }
                 gSPDisplayList(gfx++, D_8008D410);
-                gSPViewport(gfx++, &D_800DF090[arg1]);
+                gSPViewport(gfx++, &D_800DF090[view]);
                 gDPSetOtherMode(gfx++, 0x082C3F, 0x5049D8);
                 gDPLoadTextureBlock(gfx++, D_800DF088, G_IM_FMT_I, G_IM_SIZ_8b, 64, 64, 0, G_TX_CLAMP, G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-                vtxcmd = gfx++;
-                for (idx = 0; idx < count && total < D_8008D3E0; idx++) {
+                vtxCmd = gfx++;
+                for (idx = 0; idx < recvCount && vtxTotal < D_8008D3E0; idx++) {
                     if ((s32)idx % 3 == 2) {
-                        func_15185F24(&buf[idx - 2], 3, 0x1A, verts, arr, flag);
-                        for (k = 0; k < 4; k++) {
-                            nv = arr[k + 1] - arr[k];
-                            cnt += nv;
-                            verts += nv;
-                            total += nv;
-                            if (cnt > 16) {
-                                gSPVertex(vtxcmd, &verts[-cnt], cnt - nv, 0);
-                                vtxcmd = gfx++;
-                                cnt = nv;
+                        func_15185F24(&recv[idx - 2], 3, 0x1A, vtx, quadEnd, split);
+                        for (quad = 0; quad < 4; quad++) {
+                            nv = quadEnd[quad + 1] - quadEnd[quad];
+                            batch += nv;
+                            vtx += nv;
+                            vtxTotal += nv;
+                            if (batch > 16) {
+                                gSPVertex(vtxCmd, &vtx[-batch], batch - nv, 0);
+                                vtxCmd = gfx++;
+                                batch = nv;
                             }
-                            base = cnt - nv;
+                            base = batch - nv;
                             nv -= 2;
                             while (nv > 0) {
-                                
                                 if (nv >= 4) {
-                                    { Gfx *_g = gfx++; _g->words.w0 = _SHIFTL(base, 23, 5) | 0x10000000 | _SHIFTL((base + nv) - 3, 18, 5) | _SHIFTL(((base + nv) - 2) >> 2, 15, 3) | _SHIFTL(base, 10, 5) | _SHIFTL((base + nv) - 2, 5, 5) | _SHIFTL((base + nv) - 1, 0, 5); _g->words.w1 = _SHIFTL(((base + nv) - 2), 30, 2) | _SHIFTL(base, 25, 5) | _SHIFTL((base + nv), 20, 5) | _SHIFTL((base + nv) + 1, 15, 5) | _SHIFTL(base, 10, 5) | _SHIFTL((base + nv) - 1, 5, 5) | _SHIFTL((base + nv), 0, 5); }
+                                    gSPFan4Triangles(gfx++, base, (base + nv));
                                     nv -= 4;
                                 } else if (nv >= 2) {
                                     gSP2Triangles(gfx++, base, (base + nv), (base + nv) + 1, 0, base, (base + nv) - 1, (base + nv), 0);
@@ -935,32 +954,33 @@ Gfx *func_15186794(Gfx *gfx, s32 arg1) {
                         }
                     }
                 }
-                if (cnt != 0) {
-                    gSPVertex(vtxcmd, &verts[-cnt], cnt, 0);
+                if (batch != 0) {
+                    gSPVertex(vtxCmd, &vtx[-batch], batch, 0);
                 } else {
-                    gfx = vtxcmd;
+                    gfx = vtxCmd;
                 }
                 gDPPipeSync(gfx++);
-                n++;
+                slot++;
             }
         }
     }
-    if (n != 0) {
-        gfx = func_1510B7B4(gfx, arg1);
+    if (slot != 0) {
+        gfx = func_1510B7B4(gfx, view);
         gSPViewport(gfx++, &((S180_15186794 *)D_800BE628)[D_80082FA4].vp[D_800BE9C0]);
     } else {
-        gfx = saved;
+        gfx = gfxShadows;
     }
-    if (total >= D_8008D3E0) {
-        D_8008D3E0 = total + 0x30;
+    if (vtxTotal >= D_8008D3E0) {
+        D_8008D3E0 = vtxTotal + 48;
     } else {
-        D_8008D3E0 = total;
+        D_8008D3E0 = vtxTotal;
     }
     D_800DF0E0 = 0;
     D_800DF0E1 = 0;
-    func_10004074(buf);
+    func_10004074(recv);
+    // matching: the ?: materialises a 0/1 flag before the branch
     if ((D_800BEBA4 < gfx - D_800BE9C8[D_800BE9C0]) ? 1 : 0) {
-        return start;
+        return gfxStart;
     }
     return gfx;
 }
