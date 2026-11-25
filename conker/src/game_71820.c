@@ -43,9 +43,6 @@ typedef struct TriggerVolume {
 extern TriggerNode *D_800CBE00;
 extern s32 (*D_80085E80[])(TriggerNode *);
 extern void (*D_80085E8C[])(void);
-extern f32 D_80098D60;
-extern f32 D_80098D64;
-extern f32 D_80098D68;
 extern f32 sqrtf(f32);
 extern s32 D_800CBD9C;
 extern s32 func_15145C90(s32);
@@ -1312,106 +1309,106 @@ typedef struct Game71820FloorSrc {
 /* Fills a CollisionHit from a Game71820FloorSrc; unk59 == 1 marks it valid (flags 7, source 1). */
 void func_150472C0(CollisionHit *hit, Game71820FloorSrc *src) {
     s32 one;
-    s32 valid;
     s32 inRange;
     s32 flag1;
-    u8 source1;
+    s32 valid;
+    s32 hasTri;
 
-    one = 1;
+    one = 1; // matching: keeps the constant 1 in a register for every compare
     hit->height = src->height;
-    hit->tri = (0, src->tri); // matching: comma expression steers the struct copy's scheduling
+    hit->tri = src->tri;
     hit->material = src->material;
     valid = src->unk59;
-    inRange = (1 == (valid ^ 0)) ? 2 : 0;
-    source1 = 1;
+    inRange = (1 == (valid ^ 0)) ? 2 : 0; // matching: the ^ 0 keeps IDO from swapping the compare operands
     flag1 = (one == valid) ? one : 0;
-    valid = (one == valid) ? 4 : 0;
-    hit->flags = (valid | flag1) | inRange;
+    hasTri = (one == valid) ? 4 : 0;
+    hit->flags = hasTri | flag1 | inRange;
     if (src->unk59 == one) {
-        hit->source = source1;
+        hit->source = 1;
     } else {
         hit->source = 0;
     }
     hit->surface = src->surface;
 }
 
-
-void func_15047390(f32 mf[4][4], f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9) {
-    f32 temp_f0;
-    f32 temp_f20;
-    f32 temp_f22;
-    f32 temp_f24;
-    f32 temp_f26;
-    f32 temp_f28;
-    f32 temp_f30;
-    f32 temp_f18;
+/* guLookAtF equivalent: view matrix from eye, target and up vector (sqrtf called out of line). */
+void func_15047390(f32 mf[4][4], f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp) {
+    f32 scale;
+    f32 xRight;
+    f32 yRight;
+    f32 zRight;
+    f32 xLook;
+    f32 yLook;
+    f32 zLook;
+    f32 len;
 
     guMtxIdentF(mf);
 
-    temp_f26 = arg4 - arg1;
-    temp_f28 = arg5 - arg2;
-    temp_f30 = arg6 - arg3;
-    temp_f18 = sqrtf((temp_f26 * temp_f26) + (temp_f28 * temp_f28) + (temp_f30 * temp_f30));
-    if (temp_f18 == 0.0f) {
-        temp_f18 = D_80098D60;
+    xLook = xAt - xEye;
+    yLook = yAt - yEye;
+    zLook = zAt - zEye;
+    len = sqrtf((xLook * xLook) + (yLook * yLook) + (zLook * zLook));
+    if (len == 0.0f) {
+        len = 0.001f;
     }
-    temp_f0 = -1.0f / temp_f18;
-    temp_f26 *= temp_f0;
-    temp_f28 *= temp_f0;
-    temp_f30 *= temp_f0;
+    scale = -1.0f / len;
+    xLook *= scale;
+    yLook *= scale;
+    zLook *= scale;
 
-    temp_f20 = (arg8 * temp_f30) - (arg9 * temp_f28);
-    temp_f22 = (arg9 * temp_f26) - (arg7 * temp_f30);
-    temp_f24 = (arg7 * temp_f28) - (arg8 * temp_f26);
-    temp_f18 = sqrtf((temp_f20 * temp_f20) + (temp_f22 * temp_f22) + (temp_f24 * temp_f24));
-    if (temp_f18 == 0.0f) {
-        temp_f18 = D_80098D64;
+    xRight = (yUp * zLook) - (zUp * yLook);
+    yRight = (zUp * xLook) - (xUp * zLook);
+    zRight = (xUp * yLook) - (yUp * xLook);
+    len = sqrtf((xRight * xRight) + (yRight * yRight) + (zRight * zRight));
+    if (len == 0.0f) {
+        len = 0.001f;
     }
-    temp_f0 = 1.0f / temp_f18;
-    temp_f20 *= temp_f0;
-    temp_f22 *= temp_f0;
-    temp_f24 *= temp_f0;
+    scale = 1.0f / len;
+    xRight *= scale;
+    yRight *= scale;
+    zRight *= scale;
 
-    arg7 = (temp_f28 * temp_f24) - (temp_f30 * temp_f22);
-    arg8 = (temp_f30 * temp_f20) - (temp_f26 * temp_f24);
-    arg9 = (temp_f26 * temp_f22) - (temp_f28 * temp_f20);
-    temp_f18 = sqrtf((arg7 * arg7) + (arg8 * arg8) + (arg9 * arg9));
-    if (temp_f18 == 0.0f) {
-        temp_f18 = D_80098D68;
+    xUp = (yLook * zRight) - (zLook * yRight);
+    yUp = (zLook * xRight) - (xLook * zRight);
+    zUp = (xLook * yRight) - (yLook * xRight);
+    len = sqrtf((xUp * xUp) + (yUp * yUp) + (zUp * zUp));
+    if (len == 0.0f) {
+        len = 0.001f;
     }
-    temp_f0 = 1.0f / temp_f18;
-    arg7 *= temp_f0;
-    arg8 *= temp_f0;
-    arg9 *= temp_f0;
+    scale = 1.0f / len;
+    xUp *= scale;
+    yUp *= scale;
+    zUp *= scale;
 
-    mf[0][0] = temp_f20;
-    mf[1][0] = temp_f22;
-    mf[2][0] = temp_f24;
-    mf[3][0] = -((arg1 * temp_f20) + (arg2 * temp_f22) + (arg3 * temp_f24));
-    mf[0][1] = arg7;
-    mf[1][1] = arg8;
-    mf[2][1] = arg9;
-    mf[3][1] = -((arg1 * arg7) + (arg2 * arg8) + (arg3 * arg9));
-    mf[0][2] = temp_f26;
-    mf[1][2] = temp_f28;
-    mf[2][2] = temp_f30;
-    mf[3][2] = -((arg1 * temp_f26) + (arg2 * temp_f28) + (arg3 * temp_f30));
+    mf[0][0] = xRight;
+    mf[1][0] = yRight;
+    mf[2][0] = zRight;
+    mf[3][0] = -((xEye * xRight) + (yEye * yRight) + (zEye * zRight));
+    mf[0][1] = xUp;
+    mf[1][1] = yUp;
+    mf[2][1] = zUp;
+    mf[3][1] = -((xEye * xUp) + (yEye * yUp) + (zEye * zUp));
+    mf[0][2] = xLook;
+    mf[1][2] = yLook;
+    mf[2][2] = zLook;
+    mf[3][2] = -((xEye * xLook) + (yEye * yLook) + (zEye * zLook));
     mf[3][3] = 1.0f;
     mf[0][3] = 0.0f;
     mf[1][3] = 0.0f;
     mf[2][3] = 0.0f;
 }
 
-void func_15047688(Mtx *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9) {
+void func_15047688(Mtx *arg0, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp) {
     f32 sp30[4][4];
 
-    func_15047390(&sp30, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+    func_15047390(&sp30, xEye, yEye, zEye, xAt, yAt, zAt, xUp, yUp, zUp);
     guMtxF2L(&sp30, arg0);
 }
 
 #pragma intrinsic(sqrtf)
 
-void func_15047700(f32 mf[4][4], s32 arg1, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp) {
+/* guLookAtReflectF equivalent: view matrix plus the reflection LookAt for highlights. */
+void func_15047700(f32 mf[4][4], LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp) {
     f32 len;
     f32 xLook;
     f32 yLook;
@@ -1466,29 +1463,29 @@ void func_15047700(f32 mf[4][4], s32 arg1, f32 xEye, f32 yEye, f32 zEye, f32 xAt
         zUp = 0.0f;
     }
 
-    ((LookAt *)arg1)->l[0].l.dir[0] = (s32)((xRight * 128.0f) < 127.0f ? (xRight * 128.0f) : 127.0f) & 0xFF;
-    ((LookAt *)arg1)->l[0].l.dir[1] = (s32)((yRight * 128.0f) < 127.0f ? (yRight * 128.0f) : 127.0f) & 0xFF;
-    ((LookAt *)arg1)->l[0].l.dir[2] = (s32)((zRight * 128.0f) < 127.0f ? (zRight * 128.0f) : 127.0f) & 0xFF;
-    ((LookAt *)arg1)->l[1].l.dir[0] = (s32)((xUp * 128.0f) < 127.0f ? (xUp * 128.0f) : 127.0f) & 0xFF;
-    ((LookAt *)arg1)->l[1].l.dir[1] = (s32)((yUp * 128.0f) < 127.0f ? (yUp * 128.0f) : 127.0f) & 0xFF;
-    ((LookAt *)arg1)->l[1].l.dir[2] = (s32)((zUp * 128.0f) < 127.0f ? (zUp * 128.0f) : 127.0f) & 0xFF;
+    l->l[0].l.dir[0] = FTOFRAC8(xRight);
+    l->l[0].l.dir[1] = FTOFRAC8(yRight);
+    l->l[0].l.dir[2] = FTOFRAC8(zRight);
+    l->l[1].l.dir[0] = FTOFRAC8(xUp);
+    l->l[1].l.dir[1] = FTOFRAC8(yUp);
+    l->l[1].l.dir[2] = FTOFRAC8(zUp);
 
-    ((LookAt *)arg1)->l[0].l.col[0] = 0;
-    ((LookAt *)arg1)->l[0].l.col[1] = 0;
-    ((LookAt *)arg1)->l[0].l.col[2] = 0;
-    ((LookAt *)arg1)->l[0].l.pad1 = 0;
-    ((LookAt *)arg1)->l[0].l.colc[0] = 0;
-    ((LookAt *)arg1)->l[0].l.colc[1] = 0;
-    ((LookAt *)arg1)->l[0].l.colc[2] = 0;
-    ((LookAt *)arg1)->l[0].l.pad2 = 0;
-    ((LookAt *)arg1)->l[1].l.col[0] = 0;
-    ((LookAt *)arg1)->l[1].l.col[1] = 0x80;
-    ((LookAt *)arg1)->l[1].l.col[2] = 0;
-    ((LookAt *)arg1)->l[1].l.pad1 = 0;
-    ((LookAt *)arg1)->l[1].l.colc[0] = 0;
-    ((LookAt *)arg1)->l[1].l.colc[1] = 0x80;
-    ((LookAt *)arg1)->l[1].l.colc[2] = 0;
-    ((LookAt *)arg1)->l[1].l.pad2 = 0;
+    l->l[0].l.col[0] = 0;
+    l->l[0].l.col[1] = 0;
+    l->l[0].l.col[2] = 0;
+    l->l[0].l.pad1 = 0;
+    l->l[0].l.colc[0] = 0;
+    l->l[0].l.colc[1] = 0;
+    l->l[0].l.colc[2] = 0;
+    l->l[0].l.pad2 = 0;
+    l->l[1].l.col[0] = 0;
+    l->l[1].l.col[1] = 0x80;
+    l->l[1].l.col[2] = 0;
+    l->l[1].l.pad1 = 0;
+    l->l[1].l.colc[0] = 0;
+    l->l[1].l.colc[1] = 0x80;
+    l->l[1].l.colc[2] = 0;
+    l->l[1].l.pad2 = 0;
 
     mf[0][0] = xRight;
     mf[1][0] = yRight;
@@ -1511,11 +1508,11 @@ void func_15047700(f32 mf[4][4], s32 arg1, f32 xEye, f32 yEye, f32 zEye, f32 xAt
     mf[3][3] = 1.0f;
 }
 
-void func_15047700(f32 mf[4][4], s32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
+/* guLookAtReflect equivalent: func_15047700 converted to a fixed-point Mtx. */
+void func_15047B80(Mtx *m, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp,
+                   f32 zUp) {
+    f32 mf[4][4];
 
-void func_15047B80(Mtx *arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10) {
-    f32 sp38[4][4];
-
-    func_15047700(&sp38, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
-    guMtxF2L(&sp38, arg0);
+    func_15047700(mf, l, xEye, yEye, zEye, xAt, yAt, zAt, xUp, yUp, zUp);
+    guMtxF2L(mf, m);
 }
