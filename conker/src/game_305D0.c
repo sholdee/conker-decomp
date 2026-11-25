@@ -195,35 +195,31 @@ void func_15003570(void) {
     func_10004074(buf);
 }
 
+/* The D_800D3300 hit records (variables.h declares D_800D3300 as a pointer, but it is the array). */
 typedef struct {
     s32 unk0;
     s32 unk4;
-} SegmentEntry;
+} HitRecord;
 
-typedef struct {
-    u8  pad0[0x1C];
-    s32 unk1C;
-    u8  pad20[0x2F];
-    u8  unk4F;
-    u8  pad50[0x6];
-    s16 unk56;
-    s16 unk58;
-    u8  pad5A[0x46];
-} SceneObject;
+#define sHitRecords ((HitRecord *)&D_800D3300)
 
-extern void func_15001460(s32 arg0);
+extern void func_15001460(s32 dl);
 extern void func_15002754(void);
 extern s32 func_15002878(void);
-extern void func_1510F800(s32 arg0);
+extern void func_1510F800(s32 type);
 
-void func_15003668(s32 arg0) {
-    s32 start;
+/*
+ * Builds the collision triangle tables of the three maps: map 0 from level display list 0, map 1
+ * from display list 3 and map 2 from the D_800DBEF4 objects, recording each object's triangle range.
+ */
+void func_15003668(s32 unused) {
+    s32 firstTri;
     s32 size;
     s32 i;
 
-    D_800DBE62 = (u8)0;
+    D_800DBE62 = 0;
     func_15001970();
-    D_800D2C68 = (u8)0;
+    D_800D2C68 = 0;
 
     func_150026C4(0);
     func_15002724(D_800B0E00[0]);
@@ -237,32 +233,34 @@ void func_15003668(s32 arg0) {
     func_15001460(D_800B0E00[3]);
     func_150026E8(1);
 
+    // matching: struct131 declares unk4F as s8; the code reads it unsigned (lbu)
     func_150026C4(2);
     for (i = 0; i < D_800DBEF0; i++) {
-        if ((((SceneObject *)D_800DBEF4)[i].unk4F & 0x60) != 0x20) {
-            func_15002724(((SceneObject *)D_800DBEF4)[i].unk1C);
+        if (((u8)D_800DBEF4[i].unk4F & 0x60) != 0x20) {
+            func_15002724(D_800DBEF4[i].unk1C);
         }
     }
     func_15002754();
 
-    D_800D2C68 = (u8)1;
+    D_800D2C68 = 1;
     D_800D2C2C = 0;
     for (i = 0; i < D_800DBEF0; i++) {
-        if ((((SceneObject *)D_800DBEF4)[i].unk4F & 0x60) != 0x20) {
-            start = D_800DBE38;
-            ((SceneObject *)D_800DBEF4)[i].unk58 = D_800DBE38;
-            func_15001460(((SceneObject *)D_800DBEF4)[i].unk1C);
-            ((SceneObject *)D_800DBEF4)[i].unk56 = D_800DBE38 - start;
+        if (((u8)D_800DBEF4[i].unk4F & 0x60) != 0x20) {
+            // matching: storing D_800DBE38 rather than firstTri keeps firstTri at two references (regalloc)
+            firstTri = D_800DBE38;
+            D_800DBEF4[i].unk58 = D_800DBE38;
+            func_15001460(D_800DBEF4[i].unk1C);
+            D_800DBEF4[i].unk56 = D_800DBE38 - firstTri;
         } else {
-            ((SceneObject *)D_800DBEF4)[i].unk58 = 0;
-            ((SceneObject *)D_800DBEF4)[i].unk56 = 0;
+            D_800DBEF4[i].unk58 = 0;
+            D_800DBEF4[i].unk56 = 0;
         }
     }
     func_150026E8(2);
 
-    D_800D2C68 = (u8)0;
-    ((SegmentEntry *)&D_800D3300)->unk0 = 0;
-    ((SegmentEntry *)&D_800D3300)->unk4 = D_800DBE3C << 8;
+    D_800D2C68 = 0;
+    sHitRecords[0].unk0 = 0;
+    sHitRecords[0].unk4 = D_800DBE3C << 8;
     func_1510F800(0);
 
     size = (func_15002878() + 7) & ~7;
@@ -271,121 +269,23 @@ void func_15003668(s32 arg0) {
     func_1510F800(2);
 }
 
-// MATCHED 2026-08-21.  The residual described below was a 3-way rotation of the
-// callee-saved registers holding {i, &D_800DBEF4, start}.  IDO ranks webs by
-// reference count (defs+uses) and hands out $s1,$s2,... in that order; golden's
-// ranking is off(10) > i(8) > base(7) > start(3).  Writing
-//     start = D_800DBE38;  obj->unk58 = start;
-// gives `start` THREE references, which lifts it above i and base and takes $s1.
-// Spelling the store as `obj->unk58 = D_800DBE38;` leaves `start` with two
-// references (one def, one use in the subtraction); IDO CSEs the two loads of
-// D_800DBE38 into the single `lw $s3, 0($s4)` golden emits, the instruction
-// stream is unchanged, and `start` drops to $s3.  Everything else in the note
-// below (declaration order, block scoping, merging locals, `register`, the
-// unused parameter, the line-join lever) was re-measured this wave and is inert
-// -- all of it plateaus at 20 mismatching words.
-
-// SUPERSEDED (kept for the record) -- score 125, instruction-for-instruction
-// identical; the only
-// residual is a 3-way rotation of the callee-saved registers holding the loop
-// counter (target s1 / IDO s2), the hoisted &D_800DBEF4 base (target s2 / IDO
-// s3) and `start` (target s3 / IDO s1). Declaration order, block scoping,
-// merging `start` with `size`, chained assignment, `register` and using the
-// (unused) parameter as the scratch all leave the rotation unchanged --
-// permuter candidate.
-//
-// typedef struct {
-//     s32 unk0;
-//     s32 unk4;
-// } SegmentEntry;
-//
-// typedef struct {
-//     u8  pad0[0x1C];
-//     s32 unk1C;
-//     u8  pad20[0x2F];
-//     u8  unk4F;
-//     u8  pad50[0x6];
-//     s16 unk56;
-//     s16 unk58;
-//     u8  pad5A[0x46];
-// } SceneObject; /* size 0xA0 */
-//
-// extern void func_15001460(s32 arg0);
-// extern void func_15002754(void);
-// extern s32 func_15002878(void);
-// extern void func_1510F800(s32 arg0);
-//
-// void func_15003668(s32 arg0) {
-//     s32 start;
-//     s32 size;
-//     s32 i;
-//
-//     arg0 = arg0;
-//     D_800DBE62 = (u8)0;
-//     func_15001970();
-//     D_800D2C68 = (u8)0;
-//
-//     func_150026C4(0);
-//     func_15002724(D_800B0E00[0]);
-//     func_15002754();
-//     func_15001460(D_800B0E00[0]);
-//     func_150026E8(0);
-//
-//     func_150026C4(1);
-//     func_15002724(D_800B0E00[3]);
-//     func_15002754();
-//     func_15001460(D_800B0E00[3]);
-//     func_150026E8(1);
-//
-//     func_150026C4(2);
-//     for (i = 0; i < D_800DBEF0; i++) {
-//         if ((((SceneObject *)D_800DBEF4)[i].unk4F & 0x60) != 0x20) {
-//             func_15002724(((SceneObject *)D_800DBEF4)[i].unk1C);
-//         }
-//     }
-//     func_15002754();
-//
-//     D_800D2C68 = (u8)1;
-//     D_800D2C2C = 0;
-//     for (i = 0; i < D_800DBEF0; i++) {
-//         if ((((SceneObject *)D_800DBEF4)[i].unk4F & 0x60) != 0x20) {
-//             start = D_800DBE38;
-//             ((SceneObject *)D_800DBEF4)[i].unk58 = start;
-//             func_15001460(((SceneObject *)D_800DBEF4)[i].unk1C);
-//             ((SceneObject *)D_800DBEF4)[i].unk56 = D_800DBE38 - start;
-//         } else {
-//             ((SceneObject *)D_800DBEF4)[i].unk58 = 0;
-//             ((SceneObject *)D_800DBEF4)[i].unk56 = 0;
-//         }
-//     }
-//     func_150026E8(2);
-//
-//     D_800D2C68 = (u8)0;
-//     ((SegmentEntry *)&D_800D3300)->unk0 = 0;
-//     ((SegmentEntry *)&D_800D3300)->unk4 = D_800DBE3C << 8;
-//     func_1510F800(0);
-//
-//     size = (func_15002878() + 7) & ~7;
-//     D_800D3668 = D_8003809C;
-//     D_800D366C = D_800D3668 + size;
-//     func_1510F800(2);
-// }
-
+/* Builds the quadtrees of the three collision maps (map 2 gets a single leaf). */
 void func_150038A0(void) {
     func_15001A08();
     func_15001BC8(0, &D_800DBE2A, &D_800DBE2C);
-    func_15001BC8(1, 0, 0);
+    func_15001BC8(1, NULL, NULL);
     func_15001CEC(2);
     func_1510F800(0);
     func_150025FC();
-    D_800DBE62 = (u8)1;
+    D_800DBE62 = 1;
 }
 
-s32 func_1500390C(s32 arg0) {
+/* Returns the id of the texture loaded at `addr`, or -1. */
+s32 func_1500390C(s32 addr) {
     s32 i;
 
-    for (i = 0; i < 7762; i++) {
-        if (arg0 == D_800B0E58[i]) {
+    for (i = 0; i < NUM_TEXTURES; i++) {
+        if (addr == D_800B0E58[i]) {
             return i;
         }
     }
@@ -395,8 +295,9 @@ s32 func_1500390C(s32 arg0) {
 void func_150039B0(s32 arg0) {
 }
 
-void func_150039BC(s32 arg0) {
-    D_800DBE5C = arg0;
+/* Sets D_800DBE5C to `addr` + 8, or to 0 when `addr` is 0. */
+void func_150039BC(s32 addr) {
+    D_800DBE5C = addr;
     if (D_800DBE5C) {
         D_800DBE5C += 8;
     }
