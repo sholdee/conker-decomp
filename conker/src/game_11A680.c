@@ -200,7 +200,7 @@ extern s32 func_151452C4(f32 *origin, f32 *dir, f32 *center, f32 radius, f32 *hi
 
 /*
  * Per-frame update of a player-driven tracked vehicle with an aimable gun.
- * - The controlling player (D_800CC2D0[unk127], or object 0 in single player) drives it: stick X steers,
+ * - The controlling player (D_800CC2D0[unk127] when D_800BE616 is set, else object 0) drives it: stick X steers,
  *   stick Y sets the throttle, A boosts while the player's state allows it, R stops it.
  * - The two treads are scrolled from the forward speed and the turn rate (func_150ED638).
  * - The gun angles (STATE aimYaw/aimPitch) either lead STATE->target, or turn with C-left/C-right while
@@ -442,7 +442,7 @@ void func_150ED748(struct127 *obj) {
             } else {
                 func_1514D3B0(obj, 25, 14, 0);
             }
-            reversing = reversing ? 0xC : 0xF;
+            reversing = reversing ? 12 : 15;
             ((u8 *)&obj->pad6C)[0] = reversing + 10;
             ((u8 *)&obj->pad6C)[1] = 19;
         }
