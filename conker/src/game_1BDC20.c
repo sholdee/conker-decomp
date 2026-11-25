@@ -1,7 +1,5 @@
 #include <ultra64.h>
-#define func_15169850 func_15169850_s32
 #include "functions.h"
-#undef func_15169850
 #include "variables.h"
 #include "effects.h"
 
@@ -9,7 +7,6 @@ void *memcpy(void *, const void *, u32);
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 
-void func_15169850(struct ActorRef *ref, u8 msg, Actor **actor, u8 *actorId, struct102 *self);
 void func_151D5D60(Vtx **buffers, s16 viewport, s32 size, Vtx **out, u8 *fresh);
 void *func_15167A68(s32 type, s32 list, s32 size, s32 arg3, s32 owner, s32 arg5);
 u8 func_151D8E20(void);
@@ -614,7 +611,7 @@ void func_15191980(DripEmitter *emitter, ActorRef *ref, u8 msg) {
     } else if (msg == 0x4E) {
         func_1516972C((struct102 *)emitter);
     } else {
-        func_15169850(ref, msg, &emitter->link.actor, &emitter->link.actorId, (struct102 *)emitter);
+        func_15169850((s32)ref, msg, &emitter->link.actor, &emitter->link.actorId, emitter);
     }
 }
 
@@ -646,7 +643,7 @@ void func_15191A84(DripRetryTask *task, ActorRef *ref, u8 msg) {
         task->header.timer = 100;
     skip:;
     } else {
-        func_15169850(ref, msg, &link->actor, &link->actorId, (struct102 *)task);
+        func_15169850((s32)ref, msg, &link->actor, &link->actorId, task);
     }
 }
 

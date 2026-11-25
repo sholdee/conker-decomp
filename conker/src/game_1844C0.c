@@ -392,7 +392,7 @@ s32 func_15157AA8(Effect *fx) {
 
 /* Event handler: lets func_15169850 track or retarget this effect's owner. */
 void func_15157D88(Effect *fx, s32 event, u8 eventType) {
-    func_15169850(event, eventType, (s32)&fx->params.owner, (s32)&fx->params.ownerId, (s32)fx);
+    func_15169850(event, eventType, &fx->params.owner, &fx->params.ownerId, fx);
 }
 
 void func_15157DEC(Effect *fx, f32 *xform);

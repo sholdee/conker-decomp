@@ -372,7 +372,7 @@ s32 func_151D7000(TextObj *obj) {
 void func_151D70CC(TextObj *obj, u8 *payload, u8 type) {
     AmountTextStyle *style = obj->text.style;
 
-    func_15169850((s32)payload, type, (s32)&style->owner, (s32)&style->ownerId, (s32)obj);
+    func_15169850((s32)payload, type, &style->owner, &style->ownerId, obj);
 }
 
 /*

@@ -182,7 +182,7 @@ Particle *func_15102B38(Actor *target, u8 bone, Vec3f *start, Vec3f *end, Partic
 
 /* Particle type handler: hands the beam's target pointer and id to func_15169850. */
 void func_15102D50(Particle *particle, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, (s32)&particle->beam.target, (s32)&particle->beam.targetId, (s32)particle);
+    func_15169850(arg1, arg2, &particle->beam.target, &particle->beam.targetId, particle);
 }
 
 extern s32 func_1514654C(Actor *, ActorCtl *, s32, void *, void *, s32);

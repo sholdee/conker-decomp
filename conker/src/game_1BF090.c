@@ -385,5 +385,5 @@ DustEmitter *func_151925C4(Actor *obj, s16 duration, u8 arg2, s32 arg3) {
 
 /* Effect callback for the dust emitter: hands func_15169850 the owner reference. */
 void func_1519277C(DustEmitter *effect, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, (s32)&effect->data.owner, (s32)&effect->data.ownerId, (s32)effect);
+    func_15169850(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }

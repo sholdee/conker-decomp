@@ -134,7 +134,7 @@ s32 func_151ACB60(RopeRider *rider) {
 }
 
 void func_151ACB94(RopeRider *rider, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, (s32)&rider->owner, (s32)&rider->ownerId, (s32)rider);
+    func_15169850(arg1, arg2, &rider->owner, &rider->ownerId, rider);
 }
 
 /** Creates a rope from 0x24 bytes of spawn data: 20 nodes hanging from topY down to bottomY. */

@@ -244,7 +244,7 @@ void func_1515BFA8(ActorTracker *tracker) {
 
 /* Actor-event handler: dies with its actor and follows actor swaps (see func_15169850). */
 void func_1515C0B8(ActorTracker *tracker, s32 event, u8 eventType) {
-    func_15169850(event, eventType, (s32)&tracker->desc.actor, (s32)&tracker->desc.actorId, (s32)tracker);
+    func_15169850(event, eventType, &tracker->desc.actor, &tracker->desc.actorId, tracker);
 }
 
 /* Finds `actor`'s tracker attachment (type 0x16); on success stores a pointer to its motion in *motion. */

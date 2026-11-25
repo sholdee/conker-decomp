@@ -1436,20 +1436,20 @@ void func_15169824(struct102 *obj) {
  * Shared actor-event handler for objects that remember an owner (`owner`, `ownerId`): event type 0 destroys
  * `obj` if the event names its owner; type 0x2D hands ownership over to the other actor of the swap.
  */
-void func_15169850(s32 event, u8 eventType, s32 owner, s32 ownerId, s32 obj) {
+void func_15169850(s32 event, u8 eventType, Actor **owner, u8 *ownerId, void *obj) {
     if (eventType == 0) {
-        if (((ActorEvent *)event)->actor == *(Actor **)owner || ((ActorEvent *)event)->id == *(u8 *)ownerId) {
-            func_1516972C((struct102 *)obj);
+        if (((ActorEvent *)event)->actor == *owner || ((ActorEvent *)event)->id == *ownerId) {
+            func_1516972C(obj);
         }
     } else if (eventType == 0x2D) {
         Actor *from = ((ActorSwapEvent *)event)->from;
 
-        if (from == *(Actor **)owner) {
-            *(Actor **)owner = ((ActorSwapEvent *)event)->to;
-            *(u8 *)ownerId = ((ActorSwapEvent *)event)->toId;
-        } else if (((ActorSwapEvent *)event)->to == *(Actor **)owner) {
-            *(Actor **)owner = from;
-            *(u8 *)ownerId = ((ActorSwapEvent *)event)->fromId;
+        if (from == *owner) {
+            *owner = ((ActorSwapEvent *)event)->to;
+            *ownerId = ((ActorSwapEvent *)event)->toId;
+        } else if (((ActorSwapEvent *)event)->to == *owner) {
+            *owner = from;
+            *ownerId = ((ActorSwapEvent *)event)->fromId;
         }
     }
 }

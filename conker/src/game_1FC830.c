@@ -177,7 +177,7 @@ void func_151CF844(FollowerActor *actor, s32 arg1, u8 arg2) {
     FollowerData *data = actor->data;
 
     if (data->owner != NULL) {
-        func_15169850(arg1, arg2, (s32)&data->owner, (s32)&data->unk4, (s32)actor);
+        func_15169850(arg1, arg2, &data->owner, &data->unk4, actor);
     }
 }
 
@@ -1101,7 +1101,7 @@ void func_151D1138(TrackerEffect *effect) {
 
 /* Message handler of the tracker effect: lets func_15169850 update or end the link to its owner. */
 void func_151D1328(TrackerEffect *effect, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, (s32)&effect->data.owner, (s32)&effect->data.ownerId, (s32)effect);
+    func_15169850(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
 /* Tracker teardown: lets go of the trail. */

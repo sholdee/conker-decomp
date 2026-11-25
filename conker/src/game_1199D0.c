@@ -191,7 +191,7 @@ void func_150ECA68(Actor *obj, u8 r, u8 g, u8 b, u8 a, u8 rate, s16 duration, u8
 
 /* Effect callback for the fog flash effect: hands func_15169850 the owner reference. */
 void func_150ECB4C(Effect *effect, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, (s32)&effect->data.fog.owner, (s32)&effect->data.fog.ownerId, (s32)effect);
+    func_15169850(arg1, arg2, &effect->data.fog.owner, &effect->data.fog.ownerId, effect);
 }
 
 extern void func_1502EA98(Actor *, u8, u8, u8, u8, s32, u8);

@@ -221,12 +221,12 @@ void func_150F2D14(Emitter *emitter) {
 
 /* Hands the emitter's target pointer and id to func_15169850. */
 void func_150F3194(Emitter *emitter, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, (s32)&emitter->state.target, (s32)&emitter->state.targetId, (s32)emitter);
+    func_15169850(arg1, arg2, &emitter->state.target, &emitter->state.targetId, emitter);
 }
 
 /* Hands the particle's target pointer and id to func_15169850. */
 void func_150F31D4(Particle *particle, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, (s32)&particle->state.target, (s32)&particle->state.targetId, (s32)particle);
+    func_15169850(arg1, arg2, &particle->state.target, &particle->state.targetId, particle);
 }
 
 /* Particle update: follows the target's bone 15, grows and fades with age. Returns 0 when it should die. */

@@ -205,7 +205,7 @@ void func_151BE558(OwnedParticle *particle, ActorMsg *msg, u8 msgId) {
 
 /* Message handler of a burst spark: passes the message on with the spark's owner reference. */
 void func_151BE604(BurstSpark *spark, s32 msg, u8 msgId) {
-    func_15169850(msg, msgId, (s32)&spark->data.owner, (s32)&spark->data.ownerId, (s32)spark);
+    func_15169850(msg, msgId, &spark->data.owner, &spark->data.ownerId, spark);
 }
 
 /* Clears the spark's slot in its burst effect. */
@@ -248,7 +248,7 @@ s32 func_151BE6CC(BurstGlow *glow) {
 
 /* Message handler of a burst glow: passes the message on with the glow's owner reference. */
 void func_151BE788(BurstGlow *glow, s32 msg, u8 msgId) {
-    func_15169850(msg, msgId, (s32)&glow->data.owner, (s32)&glow->data.ownerId, (s32)glow);
+    func_15169850(msg, msgId, &glow->data.owner, &glow->data.ownerId, glow);
 }
 
 /* Clears the glow's slot in its burst effect. */

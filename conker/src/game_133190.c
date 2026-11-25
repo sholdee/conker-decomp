@@ -772,7 +772,7 @@ BoltObj *func_15107700(Actor *actor, s16 yaw, s16 pitch, s16 life, s32 segments,
 
 /* D_80088C28 handler for kind 2. */
 void func_151078E4(BoltObj *bolt, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, (s32)bolt->userData, (s32)bolt->userData + 4, (s32)bolt);
+    func_15169850(arg1, arg2, bolt->userData, (u8 *)bolt->userData + 4, bolt);
 }
 
 /* updateKind 0: keeps a kind-2 bolt's start on its owner; returns 0 once the owner is gone. */
@@ -945,5 +945,5 @@ void func_15107F54(Actor *actor, u8 bone, Vec3f *localPos, Vec3f *out) {
 
 /* D_80088C28 handler for kind 3. */
 void func_15107F98(BoltObj *bolt, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, (s32)bolt->userData, (s32)bolt->userData + 4, (s32)bolt);
+    func_15169850(arg1, arg2, bolt->userData, (u8 *)bolt->userData + 4, bolt);
 }

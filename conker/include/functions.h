@@ -1118,7 +1118,7 @@ Gfx *func_1515D6D0(Gfx *gfx, s32 player);
 void func_1515D4D4(s32 r, s32 g, s32 b, u8 priority);
 void func_15169260(void *types, s32 count, s32 event, u8 eventType);
 void func_1516944C(s32, s32, u8);
-void func_15169850(s32, u8, s32, s32, s32);
+void func_15169850(s32 event, u8 eventType, Actor **owner, u8 *ownerId, void *obj);
 void func_15174690(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_15177410(u8 arg0, u8 arg1, s16 arg2, s16 arg3, s16 arg4, f32 arg5, u16 arg6, f32 arg7, s8 arg8, s8 arg9, u8 argA, u8 argB, u8 argC, u8 argD, u8 argE, u8 argF);
 s32  func_1517EFAC(s32 arg0);

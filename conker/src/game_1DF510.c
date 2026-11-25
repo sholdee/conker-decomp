@@ -467,7 +467,7 @@ Gfx *func_151B2974(Gfx *gfx, RopeLine *self, s16 view) {
 
 /* Line event handler: lets func_15169850 retarget the anchor object. */
 void func_151B2EC4(RopeLine *self, s32 arg1, u8 event) {
-    func_15169850(arg1, event, (s32)&self->line.anchor.target, (s32)&self->line.anchor.targetId, (s32)self);
+    func_15169850(arg1, event, &self->line.anchor.target, &self->line.anchor.targetId, self);
 }
 
 /* Event 0x2D payload: two objects that swap places. */
@@ -529,6 +529,6 @@ void func_151B3040(TiedRope *self, s32 arg1, u8 event) {
     RopeTieLink *link;
 
     link = &self->link;
-    func_15169850(arg1, event, (s32)&link->start.target, (s32)&link->start.targetId, (s32)self);
-    func_15169850(arg1, event, (s32)&link->end.target, (s32)&link->end.targetId, (s32)self);
+    func_15169850(arg1, event, &link->start.target, &link->start.targetId, self);
+    func_15169850(arg1, event, &link->end.target, &link->end.targetId, self);
 }

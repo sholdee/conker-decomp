@@ -1,8 +1,5 @@
 #include <ultra64.h>
-// functions.h declares these pointer parameters as s32; this file uses the real pointer types.
-#define func_15169850 func_15169850_hdr
 #include "functions.h"
-#undef func_15169850
 #include "variables.h"
 
 /* Per-type state of a sprite effect, at sprite + 0x110. */
@@ -179,7 +176,6 @@ typedef struct {
     /* 0x34 */ s32 pad34;
 } ChildDesc;
 
-void func_15169850(ContactKey *, u8, s32 *, u8 *, ContactObj *);
 void *memcpy(void *, const void *, u32);
 s32 func_1518E298();
 void func_15143134(Vec3f *offset, Vec3f *out, Mtx *mtx);
@@ -255,7 +251,7 @@ void func_1518F45C(s32 arg0, u8 arg1) {
 }
 
 void func_1518F49C(ContactObj *self, ContactKey *other, u8 arg2) {
-    func_15169850(other, arg2, &self->key.unk0, &self->key.unk4, self);
+    func_15169850((s32)other, arg2, (Actor **)&self->key.unk0, &self->key.unk4, self);
     if (arg2 == 0x49) {
         s32 selfId = self->key.unk0;
         s32 otherId = other->unk0;

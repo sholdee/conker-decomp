@@ -571,7 +571,7 @@ void func_150F6394(BeamEffect *effect) {
 
 /* Effect callback for the beam effect: hands func_15169850 the owner reference. */
 void func_150F63C0(BeamEffect *effect, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, (s32)&effect->data.owner, (s32)&effect->data.ownerId, (s32)effect);
+    func_15169850(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
 /* Clears the beam effect's reference to this beam. */
@@ -691,7 +691,7 @@ void func_150F64DC(BurstEffect *effect) {
 
 /* Effect callback for the burst effect: hands func_15169850 the owner reference. */
 void func_150F6850(BurstEffect *effect, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, (s32)&effect->data.owner, (s32)&effect->data.ownerId, (s32)effect);
+    func_15169850(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
 /* Descriptor passed to func_15134DAC. */

@@ -56,7 +56,7 @@ struct Particle {
 
 /* Effect callback: hands func_15169850 the emitter's target reference. */
 void func_150C09B0(Emitter *emitter, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, (s32)&emitter->desc.target, (s32)&emitter->desc.targetId, (s32)emitter);
+    func_15169850(arg1, arg2, &emitter->desc.target, &emitter->desc.targetId, emitter);
 }
 
 void func_150C0A48(Emitter *emitter);

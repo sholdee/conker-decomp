@@ -244,7 +244,7 @@ void func_150B0C58(Actor *owner, u8 arg1, s32 arg2) {
 
 /* Effect callback: hands func_15169850 the owner reference. */
 void func_150B0CE0(DDB60Effect *effect, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, (s32)&effect->data.owner, (s32)&effect->data.ownerId, (s32)effect);
+    func_15169850(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
 extern f32 D_8009F860[];
