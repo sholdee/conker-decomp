@@ -1806,25 +1806,12 @@ typedef struct {
     s16 unk1E;
 } ScatterMotion;
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s32 unkC;
-    s32 unk10;
-    s32 unk14;
-    s32 unk18;
-    u8 unk1C;
-    u8 unk1D;
-    u8 pad1E[2];
-} ScatterStyle;
-
 extern JetScatterPreset D_800A8728[];
-extern s32 func_15147DA0(ScatterSpawn *, ScatterMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32, ScatterStyle *, s32, s32, s32);
+extern s32 func_15147DA0(ScatterSpawn *, ScatterMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32, TrailRender *, s32, s32, s32);
 
 /* Spawns scatterAccum particles (func_15147DA0) flying from the actor towards random points around `end`. */
 void func_15198D88(CharacterFlamethrowerActor *actor, Vec3f *end) {
-    ScatterStyle style;
+    TrailRender style;
     CharacterFlamethrowerJet *jet;
     JetScatterPreset *preset;
     ScatterSpawn spawn;
@@ -1850,14 +1837,14 @@ void func_15198D88(CharacterFlamethrowerActor *actor, Vec3f *end) {
     motion.unk1B = 0x82;
     spawn.pos = actor->pos;
     style.unk0 = 0;
-    style.unk4 = 1;
-    style.unk8 = 0x160600;
-    style.unkC = 3;
+    style.setGeometryMode = 1;
+    style.clearGeometryMode = 0x160600;
+    style.renderMode = 3;
     style.unk10 = 0x10;
     style.unk14 = 0x80;
     style.unk18 = 0x20;
-    style.unk1C = 0;
-    style.unk1D = 9;
+    style.envMode = 0;
+    style.primMode = 9;
     do {
         speed = (func_150ADA68() * preset->unk8) + preset->unk4;
         a = func_150ADA20() & 0xFF;
@@ -2526,7 +2513,7 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
             s32 pad; // matching: unused stack slot (also pad2 below)
             ScatterSpawn spawn;
             ScatterMotion motion;
-            ScatterStyle style;
+            TrailRender style;
             Vec3f delta;
             Vec3f axisA;
             Vec3f axisB;
@@ -2534,15 +2521,15 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
             f32 s;
             f32 speed;
 
-            style.unk4 = 0x200005;
-            style.unk8 = 0x1F0600;
-            style.unkC = 3;
+            style.setGeometryMode = 0x200005;
+            style.clearGeometryMode = 0x1F0600;
+            style.renderMode = 3;
             style.unk10 = 0x22;
             style.unk0 = 0;
             style.unk14 = 0x80;
             style.unk18 = 0x20;
-            style.unk1C = 0;
-            style.unk1D = 7;
+            style.envMode = 0;
+            style.primMode = 7;
             spawn.unkE = 0x15;
             spawn.unk10 = 1;
             spawn.unk14 = -1;

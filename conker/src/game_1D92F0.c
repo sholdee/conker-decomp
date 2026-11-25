@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /* Surface hit record from a ground/collision probe (cf. GroundHit in game_1D6E80.c). */
 typedef struct {
@@ -134,23 +135,10 @@ typedef struct {
     /* 0x1C */ u8 pad1C[4];
 } FxSprayPart;
 
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ u8 pad1E[2];
-} FxSprayStyle;
-
 extern FxSprayParams D_800A9068[];
 extern u8 D_800AB3F4[];
 extern u8 D_800AB404[];
-s32 func_15147DA0(FxSpraySpawn *, FxSprayPart *, s32, s32, s32, s32, s32, s32, s32, s32, s32, FxSprayStyle *,
+s32 func_15147DA0(FxSpraySpawn *, FxSprayPart *, s32, s32, s32, s32, s32, s32, s32, s32, s32, TrailRender *,
                   FxSurfaceHit *, s32, s32);
 
 /* Spawn callback: launches one spray particle at (x, y, z) heading along `yaw`, with random
@@ -161,7 +149,7 @@ s32 func_151AC078(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     FxSpraySpawn spawn;
     FxSprayPart part;
     f32 roll;
-    FxSprayStyle style;
+    TrailRender style;
     f32 sinYaw;
     f32 cosYaw;
     f32 speed;
@@ -181,14 +169,14 @@ s32 func_151AC078(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
         sinYaw = func_151423D8(yaw);
         cosYaw = func_151423D8(yaw - 0x40);
         style.unk0 = 0;
-        style.unk4 = 1;
-        style.unk8 = 0x160600;
-        style.unkC = 1;
+        style.setGeometryMode = 1;
+        style.clearGeometryMode = 0x160600;
+        style.renderMode = 1;
         style.unk10 = 16;
         style.unk14 = 128;
         style.unk18 = 32;
-        style.unk1C = 0;
-        style.unk1D = 9;
+        style.envMode = 0;
+        style.primMode = 9;
         spawn.unk10 = 1;
         spawn.unkE = 1;
         spawn.pos[1] = y;

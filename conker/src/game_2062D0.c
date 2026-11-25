@@ -703,19 +703,6 @@ typedef struct {
     u8 pad9[3];
 } SplashBurst; /* 0xC */
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s32 unkC;
-    s32 unk10;
-    s32 unk14;
-    s32 unk18;
-    u8 unk1C;
-    u8 unk1D;
-    u8 pad1E[2];
-} SplashStyle; /* 0x20 */
-
 /* The block a live splash points to at +0x98: its SplashMotion copy, state, and SplashBurst. */
 typedef struct {
     SplashMotion motion;
@@ -745,7 +732,7 @@ typedef struct {
 extern u8 D_800AB3F4[];
 extern u8 D_800AB404[];
 extern Splash *func_15147DA0(EffectTemplate *, SplashMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32,
-                             SplashStyle *, s32, s32, s32);
+                             TrailRender *, s32, s32, s32);
 
 /* Spawns a splash of effect kind `kind` at `pos` moving with `vel`. */
 Splash *func_151DA6F8(Vec3f *pos, Vec3f *vel, f32 size, s16 lifetime, u8 arg4, f32 scale, s32 arg6, u8 arg7,
@@ -759,7 +746,7 @@ Splash *func_151DA6F8(Vec3f *pos, Vec3f *vel, f32 size, s16 lifetime, u8 arg4, f
     s32 b;
     s32 c;
     s32 d;
-    SplashStyle style;
+    TrailRender style;
     s32 flag80;
     s32 flag20;
 
@@ -797,14 +784,14 @@ Splash *func_151DA6F8(Vec3f *pos, Vec3f *vel, f32 size, s16 lifetime, u8 arg4, f
         s32 pad; // matching: unused stack slot
 
         style.unk0 = 0;
-        style.unk4 = 0x220005;
-        style.unk8 = 0x50600;
-        style.unkC = 3;
+        style.setGeometryMode = 0x220005;
+        style.clearGeometryMode = 0x50600;
+        style.renderMode = 3;
         style.unk10 = 0x46;
         style.unk14 = 0x80;
         style.unk18 = 0x20;
-        style.unk1C = 0;
-        style.unk1D = 0xC;
+        style.envMode = 0;
+        style.primMode = 0xC;
         if (argA != 0) {
             c = 2;
             d = 0xFF;

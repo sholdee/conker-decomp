@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /* Link fields shared by every object (see game_1944C0.c). */
 typedef struct ObjLink {
@@ -46,19 +47,6 @@ typedef struct {
     s16 unk1C;
     s16 unk1E;
 } TrailMotion; /* size 0x20 */
-
-/* Render settings that func_15147DA0 copies from its 12th argument. */
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s32 renderMode;
-    s32 unk10;
-    s32 unk14;
-    s32 unk18;
-    u8 unk1C;
-    u8 unk1D;
-} TrailRender; /* size 0x20 */
 
 typedef struct {
     TrailMotion motion;
@@ -211,14 +199,14 @@ void func_15189A00(SprayEmitter *emitter) {
         motion.texture = 3;
         motion.unk1A = 0xFF;
         render.unk0 = 0;
-        render.unk4 = 1;
-        render.unk8 = 0x160600;
+        render.setGeometryMode = 1;
+        render.clearGeometryMode = 0x160600;
         render.renderMode = 3;
         render.unk10 = 0x22;
         render.unk14 = 0x80;
         render.unk18 = 0x20;
-        render.unk1C = 0;
-        render.unk1D = 7;
+        render.envMode = 0;
+        render.primMode = 7;
         do {
             spawn.pointCount = (func_150ADA20() % (u32)(emitter->desc.pointCountRange + 1)) + emitter->desc.pointCount;
             {

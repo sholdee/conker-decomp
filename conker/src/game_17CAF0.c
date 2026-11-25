@@ -709,20 +709,7 @@ typedef struct {
     s16 unk1E;
 } Motion15147DA0;
 
-/* The block func_15147DA0 takes by pointer (its 12th argument). */
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s32 unkC;
-    s32 unk10;
-    s32 unk14;
-    s32 unk18;
-    u8 unk1C;
-    u8 unk1D;
-} Params15147DA0;
-
-extern s32 func_15147DA0(Spawn15147DA0 *, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32 *, s32, u8, s32);
+extern s32 func_15147DA0(Spawn15147DA0 *, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, TrailRender *, s32, u8, s32);
 
 typedef struct {
     Vec3f position;
@@ -736,7 +723,7 @@ typedef struct {
     s32 unk58[6];
     u8 blue, alphaBase, alphaRange, pad73;
     s32 unk74, unk78;
-    Params15147DA0 params;
+    TrailRender params;
     s16 unk9C, unk9E;
     s32 unkA0;
 } Game151670Config;
@@ -797,7 +784,7 @@ void func_15151670(Game151670Config *config, u8 arg1, s32 arg2) {
             func_15147DA0(&spawn, &motion, 0, config->unk58[0], config->unk58[1],
                           config->unk58[2], config->unk58[3], config->unk58[4],
                           config->unk58[5], config->unk74, config->unk78,
-                          (s32 *)&config->params, 0, kind, arg2);
+                          &config->params, 0, kind, arg2);
             count--;
         }
     }
@@ -837,7 +824,7 @@ struct Local15151A38Arg {
     u8 pad57;
     s32 unk58;
     s32 unk5C;
-    Params15147DA0 params;
+    TrailRender params;
     s16 unk80;
     s16 unk82;
     s32 unk84;
@@ -886,7 +873,7 @@ void func_15151A38(struct Local15151A38Arg *config, u8 arg1, s32 arg2) {
         motion.velocity.y = -speed * sinPitch;
         motion.velocity.z = horizontal * cosYaw;
         func_15147DA0(&spawn, &motion, 0, config->unk3C, config->unk40, config->unk44, config->unk48,
-                      config->unk4C, config->unk50, config->unk58, config->unk5C, (s32 *)&config->params, 0, arg1, arg2);
+                      config->unk4C, config->unk50, config->unk58, config->unk5C, &config->params, 0, arg1, arg2);
         count--;
     }
 }
@@ -1370,7 +1357,7 @@ void func_15152F70(struct Local15152F70Arg *config, u8 arg1) {
     s32 count;
     MotionShort15147DA0 motion;
     s16 yaw;
-    Params15147DA0 params;
+    TrailRender params;
     s16 pitch;
     f32 speed;
     f32 cosPitch;
@@ -1386,14 +1373,14 @@ void func_15152F70(struct Local15152F70Arg *config, u8 arg1) {
     motion.alpha = config->alpha;
     spawn.position = config->position;
     params.unk0 = 0;
-    params.unk4 = 1;
-    params.unk8 = 0x160600;
-    params.unkC = 3;
+    params.setGeometryMode = 1;
+    params.clearGeometryMode = 0x160600;
+    params.renderMode = 3;
     params.unk10 = 0x10;
     params.unk14 = 0x80;
     params.unk18 = 0x20;
-    params.unk1C = 0;
-    params.unk1D = 9;
+    params.envMode = 0;
+    params.primMode = 9;
     count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
     while (count != 0) {
         yaw = (func_150ADA20() % (u32)(config->yawRange + 1)) + config->yawBase;
@@ -1411,7 +1398,7 @@ void func_15152F70(struct Local15152F70Arg *config, u8 arg1) {
         motion.velocity.y = -speed * sinPitch;
         motion.velocity.z = (speed * cosPitch) * cosYaw;
         func_15147DA0(&spawn, &motion, 0, config->unk3C, config->unk40, config->unk44, config->unk48,
-                      config->unk4C, config->unk50, 0, 0, (s32 *)&params, 0, arg1, 1);
+                      config->unk4C, config->unk50, 0, 0, &params, 0, arg1, 1);
         count--;
     }
 }

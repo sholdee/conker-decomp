@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /* Link fields shared by every object (see game_1944C0.c). */
 typedef struct ObjLink {
@@ -175,22 +176,6 @@ typedef struct {
     s16 unk1E;
 } TrailMotion; /* size 0x20 */
 
-/* Render settings that func_15147DA0 copies from its 12th argument. */
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s32 renderMode;
-    union {
-        s32 word;
-        u8 bytes[4];
-    } unk10;
-    s32 unk14;
-    s32 unk18;
-    s8 unk1C;
-    s8 unk1D;
-} TrailRender; /* size 0x20 */
-
 typedef struct {
     TrailMotion motion;
     u8 state;      /* 0x20: handler index */
@@ -264,14 +249,14 @@ void func_1518BD60(TrailEmitter *emitter) {
                 speed = func_150ADA68() * emitter->params.speedRange + emitter->params.speedMin;
                 emitter->timers[i] = func_150ADA20() % 23U + 5;
                 render.unk0 = 0;
-                render.unk4 = 1;
-                render.unk8 = 0x160600;
+                render.setGeometryMode = 1;
+                render.clearGeometryMode = 0x160600;
                 render.renderMode = 3;
-                render.unk10.word = 0x10;
+                render.unk10 = 0x10;
                 render.unk14 = 0x80;
                 render.unk18 = 0x20;
-                render.unk1C = 0;
-                render.unk1D = 9;
+                render.envMode = 0;
+                render.primMode = 9;
                 spawn.pointCount = func_150ADA20() % (u32)(emitter->params.pointRange + 1) + 3;
                 spawn.unk10 = 1;
                 spawn.unkE = 1;

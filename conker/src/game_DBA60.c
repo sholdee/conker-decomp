@@ -65,20 +65,6 @@ typedef struct {
     /* 0x1C */ u8 pad1C[4];
 } Motion150AE790;
 
-/* Render options for func_15147DA0. */
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s32 unkC;
-    s32 unk10;
-    s32 unk14;
-    s32 unk18;
-    u8 unk1C;
-    u8 unk1D;
-    u8 pad1E[2];
-} Style150AE790;
-
 /* Link from an effect to the actor it is attached to. */
 typedef struct {
     /* 0x00 */ Actor *owner;
@@ -97,7 +83,7 @@ typedef struct {
 } AttachedEffect;
 
 extern s32 D_8008CB14;
-extern s32 func_15147DA0(Spawn150AE790 *, Motion150AE790 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, Style150AE790 *, s32, s32, s32);
+extern s32 func_15147DA0(Spawn150AE790 *, Motion150AE790 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, TrailRender *, s32, s32, s32);
 s32 func_15167D84(void *, s32, s32, s32, s32, s32);
 
 /* Bursts 12-20 particles plus one emission from the owner's bone, when the owner is still the same actor. */
@@ -107,7 +93,7 @@ void func_150AE790(AttachedEffect *effect) {
     Spawn150AE790 spawn;
     Motion150AE790 motion;
     s32 pad; // matching: unused stack slot
-    Style150AE790 style;
+    TrailRender style;
     f32 sinYaw;
     f32 cosYaw;
     f32 speed;
@@ -142,14 +128,14 @@ void func_150AE790(AttachedEffect *effect) {
         motion.alpha = 0xFF;
         count = func_150ADA20() % 9U + 12;
         style.unk0 = 0;
-        style.unk4 = 1;
-        style.unk8 = 0x160600;
-        style.unkC = 3;
+        style.setGeometryMode = 1;
+        style.clearGeometryMode = 0x160600;
+        style.renderMode = 3;
         style.unk10 = 0x10;
         style.unk14 = 0x80;
         style.unk18 = 0x20;
-        style.unk1C = 0;
-        style.unk1D = 9;
+        style.envMode = 0;
+        style.primMode = 9;
         for (; count != 0; count--) {
             yaw = func_150ADA20() & 0xFF;
             pitch = func_150ADA20() % 51U;

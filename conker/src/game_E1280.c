@@ -532,25 +532,12 @@ typedef struct {
     /* 0x1C */ u8 pad1C[4];
 } BurstParticle; // size = 0x20
 
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ u8 pad1E[2];
-} BurstStyle; // size = 0x20
-
 extern TrailBurstPreset D_8009FBF0[];
-extern s32 func_15147DA0(EffectTemplate *, BurstParticle *, s32, s32, s32, s32, s32, s32, s32, s32, s32, BurstStyle *, s32, s32, s32);
+extern s32 func_15147DA0(EffectTemplate *, BurstParticle *, s32, s32, s32, s32, s32, s32, s32, s32, s32, TrailRender *, s32, s32, s32);
 
 /* Throws out a burst of particles around the trail's emitter, one per whole unit of burstAccum. */
 void func_150B5088(Trail *trail) {
-    BurstStyle style;
+    TrailRender style;
     TrailState *state;
     EffectTemplate spawn;
     BurstParticle particle;
@@ -570,14 +557,14 @@ void func_150B5088(Trail *trail) {
     preset = &D_8009FBF0[state->burstPreset];
 
     style.unk0 = 0;
-    style.unk4 = 1;
-    style.unk8 = 0x160600;
-    style.unkC = 3;
+    style.setGeometryMode = 1;
+    style.clearGeometryMode = 0x160600;
+    style.renderMode = 3;
     style.unk10 = 16;
     style.unk14 = 128;
     style.unk18 = 32;
-    style.unk1C = 0;
-    style.unk1D = 9;
+    style.envMode = 0;
+    style.primMode = 9;
     spawn.flags = 1;
     particle.unk19 = 6;
     particle.shade = state->shade;

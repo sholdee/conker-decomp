@@ -553,18 +553,6 @@ typedef struct PipeTrailMotion {
     /* 0x1C */ s32 pad1C;
 } PipeTrailMotion;
 
-typedef struct PipeTrailStyle {
-    /* 0x00 */ s32 unk00;
-    /* 0x04 */ s32 unk04;
-    /* 0x08 */ s32 unk08;
-    /* 0x0C */ s32 unk0C;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-} PipeTrailStyle;
-
 typedef struct PipeKinds {
     s16 kind[3];
 } PipeKinds;
@@ -572,7 +560,7 @@ typedef struct PipeKinds {
 extern PipeKinds D_80088700;
 
 s32 func_15147DA0(EffectTemplate *pos, PipeTrailMotion *motion, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
-                  s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, s32 *arg11,
+                  s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, TrailRender *arg11,
                   s32 arg12, u8 arg13, s32 arg14);
 
 /* Spawns a random particle and a trail at the actor's current point, at height `y`. */
@@ -583,7 +571,7 @@ s32 func_150B37C8(PipeExplodeActor *actor, s32 arg1, s32 arg2, s32 arg3, f32 y, 
     PipeKinds kinds;
     EffectTemplate pos;
     PipeTrailMotion motion;
-    PipeTrailStyle style;
+    TrailRender style;
 
     {
         s32 rand2;
@@ -620,15 +608,15 @@ s32 func_150B37C8(PipeExplodeActor *actor, s32 arg1, s32 arg2, s32 arg3, f32 y, 
                       actor->unk0C, actor->unk01);
 
     }
-    style.unk00 = 0;
-    style.unk04 = 1;
-    style.unk08 = 0x160600;
-    style.unk0C = 3;
+    style.unk0 = 0;
+    style.setGeometryMode = 1;
+    style.clearGeometryMode = 0x160600;
+    style.renderMode = 3;
     style.unk10 = 16;
     style.unk14 = 128;
     style.unk18 = 32;
-    style.unk1C = 0;
-    style.unk1D = 9;
+    style.envMode = 0;
+    style.primMode = 9;
     pos.kind = 1;
     pos.flags = 1;
     motion.unk19 = state->unk19;
@@ -645,6 +633,6 @@ s32 func_150B37C8(PipeExplodeActor *actor, s32 arg1, s32 arg2, s32 arg3, f32 y, 
     motion.unk04 = state->unk04;
     motion.unk08 = func_150ADA68() * 15.0f + 15.0f;
     motion.unk0C = state->unk0C;
-    func_15147DA0(&pos, &motion, 0, 1, 7, 0, 0, 0, 0, 0, 0, (s32 *)&style, 0, actor->unk0C, actor->unk01);
+    func_15147DA0(&pos, &motion, 0, 1, 7, 0, 0, 0, 0, 0, 0, &style, 0, actor->unk0C, actor->unk01);
     return 1;
 }

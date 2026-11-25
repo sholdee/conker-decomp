@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /* Spawn description passed to func_15147DA0 (first argument). */
 typedef struct {
@@ -33,22 +34,6 @@ typedef struct {
     s16 unk1C;
     s16 unk1E;
 } TrailMotion; /* size 0x20 */
-
-/* Render settings that func_15147DA0 copies from its 12th argument. */
-typedef struct {
-    s32 unk0; /* ORed into the other-mode high word */
-    s32 unk4;
-    s32 unk8;
-    s32 renderMode; /* index into D_800A4AC8 */
-    union {
-        s32 word;
-        u8 bytes[4];
-    } unk10;
-    s32 unk14; /* ORed into the other-mode high word */
-    s32 unk18; /* ORed into the other-mode high word */
-    s8 unk1C;
-    s8 unk1D;
-} TrailRender; /* size 0x20 */
 
 typedef struct {
     TrailMotion motion;
@@ -238,12 +223,12 @@ Gfx *func_1514803C(Trail *trail, Gfx *gfx, s16 arg2) {
                 gfx = func_150950D4(gfx, &D_800915A4, 0, 0, 0, 0, 2, 0x100, 0x100, (params->motion.flags & 0x80) ? 0x3E : 3);
                 D_800DD1B0 = tex;
             }
-            func_151441A4(&envR, &envG, &envB, &envA, 0, 0, 0, 0, 0, 0, 0, params->motion.unk1B, params->motion.unk1A, params->render.unk1C);
-            func_151442FC(&primR, &primG, &primB, &primA, 0, 0, 0, 0, 0, 0, 0, params->motion.unk1B, params->motion.unk1A, params->render.unk1D);
-            gfx = func_15142B7C(gfx, params->render.unk4, params->render.unk8);
+            func_151441A4(&envR, &envG, &envB, &envA, 0, 0, 0, 0, 0, 0, 0, params->motion.unk1B, params->motion.unk1A, params->render.envMode);
+            func_151442FC(&primR, &primG, &primB, &primA, 0, 0, 0, 0, 0, 0, 0, params->motion.unk1B, params->motion.unk1A, params->render.primMode);
+            gfx = func_15142B7C(gfx, params->render.setGeometryMode, params->render.clearGeometryMode);
             gfx = func_15142C10(gfx, primR, primG, primB, primA, &update);
             gfx = func_15142CF0(gfx, 0, 0, envR, envG, envB, envA, &update);
-            gfx = func_1513F4E4(gfx, params->render.unk10.bytes[3], &update);
+            gfx = func_1513F4E4(gfx, ((u8 *)&params->render.unk10)[3] /* matching: reads the low byte */, &update);
             gfx = func_15142FBC(gfx, params->render.unk0 | G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | params->render.unk14 | params->render.unk18, D_800A4AC8[params->render.renderMode].unk0 | D_800A4AC8[params->render.renderMode].unk4, &update);
             i = trail->end - 1;
             if (i < 0) {
@@ -596,14 +581,14 @@ void func_15148F1C(u8 texture, f32 x, f32 y, f32 z, s32 arg4, s32 yaw, s32 pitch
     spawn.unkC = arg8;
 
     render.unk0 = 0;
-    render.unk4 = 1;
-    render.unk8 = 0x160600;
+    render.setGeometryMode = 1;
+    render.clearGeometryMode = 0x160600;
     render.renderMode = 3;
-    render.unk10.word = 0x10;
+    render.unk10 = 0x10;
     render.unk14 = 0x80;
     render.unk18 = 0x20;
-    render.unk1C = 0;
-    render.unk1D = 9;
+    render.envMode = 0;
+    render.primMode = 9;
     func_15147DA0(&spawn, (TrailMotion *)&motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &render, 0, arg11, 1);
 }
 

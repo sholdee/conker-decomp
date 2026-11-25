@@ -977,4 +977,18 @@ typedef struct SurfaceJetSpray {
     /* 0x24 */ JetSpray spray;
 } SurfaceJetSpray; /* size 0x78 */
 
+/* Render settings of a func_15147DA0 effect (game_175250.c), its 12th argument, copied into the effect. */
+typedef struct TrailRender {
+    /* 0x00 */ s32 unk0;              /* ORed into the other-mode high word */
+    /* 0x04 */ s32 setGeometryMode;
+    /* 0x08 */ s32 clearGeometryMode;
+    /* 0x0C */ s32 renderMode;        /* index into D_800A4AC8 */
+    /* 0x10 */ s32 unk10;             /* its low byte is func_1513F4E4's argument */
+    /* 0x14 */ s32 unk14;             /* ORed into the other-mode high word */
+    /* 0x18 */ s32 unk18;             /* ORed into the other-mode high word */
+    /* 0x1C */ s8 envMode;            /* mode of func_151441A4 (env color) */
+    /* 0x1D */ s8 primMode;           /* mode of func_151442FC (prim color) */
+    /* 0x1E */ u8 pad1E[2];
+} TrailRender; /* size 0x20 */
+
 #endif

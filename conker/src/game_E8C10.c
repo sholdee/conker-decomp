@@ -839,18 +839,6 @@ typedef struct {
     /* 0x1C */ u8 pad1C[4];
 } TrailMotion; /* size 0x20 */
 
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 renderMode;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-} TrailRender; /* size 0x20 */
-
 s32 func_15147DA0(TrailSpawn *spawn, TrailMotion *motion, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
                   s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, TrailRender *render,
                   s32 arg12, u8 arg13, s32 arg14);
@@ -865,14 +853,14 @@ s32 func_150BD954(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     TrailRender render;
 
     render.unk0 = 0;
-    render.unk4 = 1;
-    render.unk8 = 0x160600;
+    render.setGeometryMode = 1;
+    render.clearGeometryMode = 0x160600;
     render.renderMode = 3;
     render.unk10 = 0x10;
     render.unk14 = 0x80;
     render.unk18 = 0x20;
-    render.unk1C = 0;
-    render.unk1D = 9;
+    render.envMode = 0;
+    render.primMode = 9;
     spawn.unk10 = 1;
     spawn.unkE = 1;
     spawn.pos.x = x;

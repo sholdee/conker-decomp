@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 void func_1514C2F0(f32 x, f32 y, f32 z, f32 radius, u8 startAngle, s8 angleStep, s16 count,
                    u8 kind, s32 arg8, f32 arg9, s32 arg10, u8 arg11);
@@ -29,19 +30,6 @@ typedef struct {
     /* 0x1C */ s16 unk1C;
     /* 0x1E */ s16 unk1E;
 } TrailMotion; /* size 0x20 */
-
-/* Render settings that func_15147DA0 copies from its 12th argument. */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 renderMode;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ s8 unk1C;
-    /* 0x1D */ s8 unk1D;
-} TrailRender; /* size 0x20 */
 
 /* Trail parameters; only the fields used here. */
 typedef struct {
@@ -85,14 +73,14 @@ s32 func_150C16C0(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 or
 
     count = 1; // matching: a do/while spawn loop; the for form schedules differently
     render.unk0 = 0;
-    render.unk4 = 1;
-    render.unk8 = 0x160600;
+    render.setGeometryMode = 1;
+    render.clearGeometryMode = 0x160600;
     render.renderMode = 3;
     render.unk10 = 0x10;
     render.unk14 = 0x80;
     render.unk18 = 0x20;
-    render.unk1C = 0;
-    render.unk1D = 9;
+    render.envMode = 0;
+    render.primMode = 9;
     spawn.unk10 = 1;
     spawn.unkE = 1;
     motion.texture = 10;
