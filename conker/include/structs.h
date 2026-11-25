@@ -4294,4 +4294,21 @@ typedef struct {
     /* 0x4 */ s32 unk4;
 } MessageEntry;
 
+/* Per-view list of the objects to draw this frame (D_80089240, built in game_13F9D0.c). */
+typedef struct DrawEntry {
+    /* 0x0 */ u16 index;    // into D_800DBEF4
+    /* 0x2 */ u16 distance; // from func_150A6360
+} DrawEntry;
+
+/* Node of the zone tree at D_800DBE48: square regions linked by byte offsets. */
+typedef struct ZoneNode {
+    /* 0x0 */ s16 unk0;
+    /* 0x2 */ s16 unk2;     // bitmask tested by func_1503F800
+    /* 0x4 */ s16 next;     // byte offset to the next sibling, 0 = last
+    /* 0x6 */ u16 halfSize; // half the region's side length
+    /* 0x8 */ s16 x;        // region centre
+    /* 0xA */ s16 z;
+    /* 0xC */ s16 child;    // byte offset to the first child, 0 = leaf
+} ZoneNode;
+
 #endif

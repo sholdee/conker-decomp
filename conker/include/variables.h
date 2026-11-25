@@ -431,6 +431,7 @@ extern u8  D_80088BB0;
 extern ObjectBehavior D_80088C90[]; // level-object behaviour handlers
 extern u8 D_80089120[4]; // per collision set: 1 = enabled
 extern s32 * D_800891BC[];
+extern DrawEntry **D_80089240[]; // per-view draw lists
 extern Mtx ** D_80089250[]; // per frame buffer: one Mtx per object
 extern PropSounds D_80089260[]; // prop sound rows (doors, movers, sliders)
 extern Mtx D_80089470; // fixed modelview matrix
@@ -1463,6 +1464,7 @@ extern u16 D_800DBE34;
 extern u16 D_800DBE36;
 extern s32 D_800DBE38;
 extern MeshTri *D_800DBE3C;
+extern ZoneNode *D_800DBE48; // zone tree root
 extern s32 D_800DBE4C;
 extern s32 D_800DBE50;
 extern u32 *D_800DBE5C; // per world-mesh triangle: material / surface flags

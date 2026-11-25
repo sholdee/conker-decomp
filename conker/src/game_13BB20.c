@@ -8,18 +8,6 @@ extern s32 D_800DBDC8;
 extern f32 D_800DBDCC;
 extern f32 D_800DBDD0;
 
-/* Node of the zone tree at D_800DBE48: square regions linked by byte offsets. */
-typedef struct ZoneNode {
-    /* 0x0 */ s16 unk0;
-    /* 0x2 */ s16 unk2;
-    /* 0x4 */ s16 next;     // byte offset to the next sibling, 0 = last
-    /* 0x6 */ u16 halfSize; // half the region's side length
-    /* 0x8 */ s16 x;        // region centre
-    /* 0xA */ s16 z;
-    /* 0xC */ s16 child;    // byte offset to the first child, 0 = leaf
-} ZoneNode;
-
-extern ZoneNode *D_800DBE48;
 
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 
@@ -437,7 +425,6 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
     }
     D_800DBE58 = ceilingY;
 }
-
 
 /* Returns the height of the first prop surface found at (x, z) from height y, or -10000. */
 f32 func_1510F648(f32 x, f32 y, f32 z) {

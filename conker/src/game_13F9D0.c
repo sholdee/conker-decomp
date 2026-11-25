@@ -128,13 +128,6 @@ void func_15112520(WorldObject *turret) {
     }
 }
 
-/* Per-view list of the objects to draw this frame. */
-typedef struct DrawEntry {
-    u16 index;    // into D_800DBEF4
-    u16 distance; // from func_150A6360
-} DrawEntry;
-
-extern DrawEntry **D_80089240[]; // per view
 
 extern s32 func_15022B08(s32, s32);
 extern s32 func_1503F800(void *, s16, s16, s32, s32);
@@ -473,7 +466,6 @@ void func_15113C88(void) {
     }
 }
 
-
 /* A group of objects that move together; the first member leads. */
 
 /* Runs the update callback of every flagged object: first the ungrouped ones, then each group's members,
@@ -527,7 +519,6 @@ void func_15113E54(s32 arg0) {
         }
     }
 }
-
 
 /* Whether actor `actor` (any actor if -1) touches obj; only objects with flags bit 0x80 track contacts. */
 s32 func_15114050(WorldObject *obj, s32 actor) {
