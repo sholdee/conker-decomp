@@ -4,12 +4,8 @@
 #define func_150DE32C func_150DE32C_hdr
 #include "functions.h"
 #undef func_150DE32C
-/* variables.h declares D_800D3098 as an array, but the code loads it as a pointer to the table. */
-#define D_800D3098 D_800D3098_array_decl_in_variables_h
 #include "variables.h"
 #include "effects.h"
-#undef D_800D3098
-extern struct178 *D_800D3098;
 
 extern s32 func_150A32B4(struct178 *, s32, s32, s32);
 extern WorldObject *func_151149AC(u8);

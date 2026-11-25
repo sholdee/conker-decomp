@@ -3,9 +3,7 @@
 #include "functions.h"
 #undef func_1514D3B0
 /* variables.h declares these with the wrong types; they are redeclared below with the types this file uses. */
-#define D_800D3098 D_800D3098_hdr
 #include "variables.h"
-#undef D_800D3098
 
 /* One 8-byte cutscene script event. Each track starts with a 4-event header whose value is the start time. */
 typedef struct {
@@ -25,7 +23,6 @@ typedef struct {
     /* 0xA */ u16 index;
 } SeqQueueEntry;
 
-extern struct178 *D_800D3098;
 
 /* What a cutscene track is bound to: 2 = an object (func_15083E90), 3 = an actor (func_151149AC). */
 typedef struct {

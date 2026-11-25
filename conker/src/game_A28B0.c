@@ -1499,7 +1499,7 @@ void func_15079228(void) {
     f32 z;
     u16 angle;
 
-    // D_800D3098 holds a pointer (the header declares an array); the load through its address matches
+    // matching: the (no-op) load through the variable's address orders the address computation as the original
     gate = &(*(struct178 **)&D_800D3098)[D_800D154C->unk251];
     obj = D_800D154C;
     x = gate->unk0;

@@ -4,13 +4,9 @@
 #define func_15083E90 func_15083E90_s32_decl_in_functions_h
 #include "functions.h"
 #undef func_15083E90
-/* variables.h declares D_800D3098 as an array, but the code loads it as a pointer to the table. */
-#define D_800D3098 D_800D3098_array_decl_in_variables_h
 #include "variables.h"
-#undef D_800D3098
 
 Actor *func_15083E90(u8);
-extern struct178 *D_800D3098;
 
 /* One 0x30-byte spawn slot of the D_800D20FC table (struct258 in structs.h is not the real layout). */
 typedef struct {

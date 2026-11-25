@@ -17,7 +17,7 @@ void func_15010880(void) {
     func_15177410(0x10, 0xE9, -0x1B5, 0x463, -0xCBF, 90.0f, 0x3A98, 36.0f, 0x4D, 0xF, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F);
     D_800E0934 = (s32) func_150DE32C;
 dummy_label_15010880:
-    base = *(s32 *) &D_800D3098;
+    base = (s32)D_800D3098;
 
     tmp.unk0 = 0;
     tmp.unk4 = base + 0xEA0;

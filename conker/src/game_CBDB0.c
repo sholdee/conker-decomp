@@ -1,10 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
-/* variables.h declares D_800D3098 as an array, but the code loads it as a pointer to the table. */
-#define D_800D3098 D_800D3098_array_decl_in_variables_h
 #include "variables.h"
-#undef D_800D3098
-extern struct178 *D_800D3098;
 
 /* Script operand value meaning "leave this field unchanged". */
 #define ARG_KEEP 0x7FFFFFFF

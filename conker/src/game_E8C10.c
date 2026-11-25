@@ -664,9 +664,8 @@ void func_150BD070(u8 arg0, s32 arg1) {
     const u8 idx[2] = {0x4C, 0x4D};
     s16 count;
 
-    // D_800D3098 holds a pointer to the struct178 array (variables.h types it as the array itself)
-    anchors[0] = *(struct178 **)D_800D3098 + idx[0];
-    anchors[1] = *(struct178 **)D_800D3098 + idx[1];
+    anchors[0] = D_800D3098 + idx[0];
+    anchors[1] = D_800D3098 + idx[1];
     {
         ParticleSpawn particle;
         s32 rnd;
