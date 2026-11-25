@@ -3029,8 +3029,12 @@ s32 func_1505D024(struct127 *victim, s32 flags, u16 angle, s32 sourceSlot) {
     return ret;
 }
 
-/* Runs attack attackId from point (x, y, z) through the dummy attacker D_800D121C. */
-void func_1505D1C4(f32 x, f32 y, f32 z, s32 attackId, s32 sourceSlot, u16 angle, s32 arg6, s32 arg7) {
+/*
+ * Runs attack attackId from point (x, y, z) through the dummy attacker D_800D121C. The D_800D12xx..D_800D15xx
+ * globals written here are that dummy's struct127 fields: position (0x14), unk124, unk13D, unk76, unk2F4
+ * (line-of-sight origin), unk114 (timer), unkD0 (attack + 1) and the xz/y scales.
+ */
+void func_1505D1C4(f32 x, f32 y, f32 z, s32 attackId, s32 sourceSlot, u16 angle, s32 losSkipSlot, s32 losOrigin) {
     s32 pad;
     s32 savedIdx;
 
@@ -3040,10 +3044,10 @@ void func_1505D1C4(f32 x, f32 y, f32 z, s32 attackId, s32 sourceSlot, u16 angle,
     D_800D1234 = y;
     D_800D1238 = z;
     D_800D1340 = sourceSlot + 1;
-    D_800D1359 = arg6;
+    D_800D1359 = losSkipSlot;
     D_800D1292 = angle;
     D_800C3E78 = 25;
-    D_800D1510 = arg7;
+    D_800D1510 = losOrigin;
     D_800D1330 = 100.0f;
     D_800D12EC = (attackId & 0xFFFF) + 1;
     D_800D1368 = 0.5f;
