@@ -6,7 +6,7 @@
 /*
  * The types below are local copies of layouts first worked out elsewhere (fields this file does not
  * use are padding):
- *   FxParticle, SpriteFx                         - the particle/sprite system of game_169510.c
+ *   FxParticle, QuadSprite                         - the particle/sprite system of game_169510.c
  *   PhysicsParticle, CollisionHit               - the pooled physics particles of game_15F680.c
  */
 
@@ -17,12 +17,6 @@ typedef struct {
     /* 0x070 */ u8 pad70[0xA0];
     /* 0x110 */ f32 fallSpeed;     /* first word of the per-behaviour motion block after the particle */
 } FxParticle;
-
-/* A live sprite of game_169510.c; the update callbacks of D_80089C70 get one. */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x18];
-    /* 0x18 */ SpriteDef def;
-} SpriteFx;
 
 /* A pooled physics particle of game_15F680.c (the D_80089914 / D_8008998C callbacks get one). */
 typedef struct {
@@ -100,7 +94,7 @@ s32 func_150B95FC(FxParticle *particle) {
 }
 
 /* Sets def.unk10 to 4x the lifetime once it drops below 64. */
-s32 func_150B961C(SpriteFx *sprite) {
+s32 func_150B961C(QuadSprite *sprite) {
     s16 lifetime = sprite->def.lifetime;
 
     if (lifetime < 64) {

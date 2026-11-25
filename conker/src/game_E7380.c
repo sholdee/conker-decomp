@@ -3,12 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/* A live sprite of game_169510.c; the update callbacks of D_80089C70 get one. */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x18];
-    /* 0x18 */ SpriteDef def;
-} SpriteFx;
-
 /* Per-behaviour motion block stored right after a particle. */
 typedef struct {
     /* 0x00 */ Vec3f vel;
@@ -133,7 +127,7 @@ void func_150B9ED0(Actor *actor, f32 prevX, f32 prevZ, u8 arg3, s32 arg4) {
 }
 
 /* Fades the sprite out over its last 64 frames (def.unk10 = 4 * lifetime). */
-s32 func_150BA35C(SpriteFx *sprite) {
+s32 func_150BA35C(QuadSprite *sprite) {
     s16 lifetime = sprite->def.lifetime;
 
     if (lifetime < 64) {

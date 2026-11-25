@@ -5,12 +5,6 @@
 
 s32 func_150DBD70(u8 kind);
 
-/* Sprite effect created by func_1513C350 (see game_169510.c); only the template is used here. */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x18];
-    /* 0x18 */ SpriteDef def;
-} SpriteFx;
-
 /* Billboard particle (see game_1944C0.c); only the fields used here. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x34];
@@ -173,7 +167,7 @@ s32 func_150DE12C(EffectSpawnSource *source, s32 arg1, s32 arg2, s32 arg3, f32 y
 }
 
 /* Sprite update callback 5: fades unk10 out over the sprite's last 32 frames. */
-s32 func_150DE2A4(SpriteFx *sprite) {
+s32 func_150DE2A4(QuadSprite *sprite) {
     s16 lifetime = sprite->def.lifetime;
 
     if (lifetime < 32) {

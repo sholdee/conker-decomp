@@ -660,21 +660,14 @@ void func_150CA930(Vec3f *pos) {
                   0, 0xFF, randomArg, 0x13, 0, 0.0f, NULL, 0xFF);
 }
 
-typedef struct {
-    u8 pad0[0x1C];
-    s16 timer;
-    u8 pad1E[0xA];
-    u8 alpha;
-} Struct150CA9D0;
-
 /* Fades the object out over its last 32 ticks by capping alpha at timer * 8. */
-s32 func_150CA9D0(Struct150CA9D0 *arg0) {
+s32 func_150CA9D0(QuadSprite *arg0) {
     s32 maxAlpha;
 
-    if (arg0->timer < 32) {
-        maxAlpha = arg0->timer * 8;
-        if (maxAlpha < arg0->alpha) {
-            arg0->alpha = maxAlpha;
+    if (arg0->def.lifetime < 32) {
+        maxAlpha = arg0->def.lifetime * 8;
+        if (maxAlpha < arg0->def.unk10) {
+            arg0->def.unk10 = maxAlpha;
         }
     }
     return 1;
