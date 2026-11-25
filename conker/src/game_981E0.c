@@ -32,14 +32,18 @@ extern u8 D_80099ABC[];
 typedef struct struct127Hidden {
     /* 0x000 */ u8 pad0[0x70];
     /* 0x070 */ u8 unk70;
-    /* 0x071 */ u8 pad71[0xC8 - 0x71];
+    /* 0x071 */ u8 pad71[0xB4 - 0x71];
+    /* 0x0B4 */ f32 lastEventTime;  /* func_1506AD30 */
+    /* 0x0B8 */ u8 padB8[0xC8 - 0xB8];
     /* 0x0C8 */ f32 unkC8;
     /* 0x0CC */ u8 padCC[0x136 - 0xCC];
     /* 0x136 */ u8 unk136;
     /* 0x137 */ u8 unk137;
     /* 0x138 */ u8 pad138[0x160 - 0x138];
     /* 0x160 */ s16 unk160;
-    /* 0x162 */ u8 pad162[0x288 - 0x162];
+    /* 0x162 */ u8 pad162[0x1C4 - 0x162];
+    /* 0x1C4 */ struct TimedEvent *events; /* timed event list, index unk138 */
+    /* 0x1C8 */ u8 pad1C8[0x288 - 0x1C8];
     /* 0x288 */ u8 unk288;
     /* 0x289 */ u8 pad289[0x2D8 - 0x289];
     /* 0x2D8 */ f32 unk2D8;
@@ -282,64 +286,51 @@ extern void func_100100E0(void *, void *, void *, void *, void *, s32);
 extern void func_150F16DC(struct127 *, u8, u8, s32, s32);
 void func_15194408(struct127 *arg0, struct127 *arg1);
 
-typedef struct {
+/* One entry of an object's timed event list. */
+typedef struct TimedEvent {
     f32 time;
     u8 pad4[3];
     u8 id;
     s32 parameter;
-} Game6AD30Event;
+} TimedEvent;
 
-typedef struct {
-    u8 pad0[8];
-    f32 time;
-    u8 padC[0x1C];
-    s32 token;
-} Game6AD30State;
+/* struct197 (struct127.unk2D0) with the state token it lacks. */
+typedef struct struct197Hidden {
+    /* 0x00 */ u8 pad0[0x28];
+    /* 0x28 */ s32 token;
+} struct197Hidden;
 
-typedef struct {
-    u8 pad0[5];
-    u8 kind;
-    u8 pad6[0xAE];
-    f32 previousTime;
-    u8 padB8[0x80];
-    u8 index;
-    u8 pad139[0x8B];
-    Game6AD30Event *events;
-    u8 pad1C8[0x108];
-    Game6AD30State *state;
-} Game6AD30Actor;
-
-typedef void Game6AD30Callback(void);
-extern Game6AD30Callback *D_800863FC[];
+typedef void EventHandler(void);
+extern EventHandler *D_800863FC[];
 extern u8 D_80099A30[];
 extern u8 D_800C365E;
 
 /*
- * Runs every event of the actor's event list whose time is <= `time`. Each event stores its
+ * Runs every event of the object's event list whose time is <= `time`. Each event stores its
  * parameter in D_800D1580 (and as a float in D_800D1874) and calls handler D_800863FC[id].
  * With `filtered` set, only ids in the zero-terminated list D_80099A30 run. A handler that
- * restarts the actor's state (new token) rewinds `time` to the state's time. Returns
+ * restarts the object's state (new token) rewinds `time` to the state's time. Returns
  * D_800D1878, which handlers may set.
  */
-f32 func_1506AD30(Game6AD30Actor *actor, f32 time, u8 filtered) {
+f32 func_1506AD30(struct127 *obj, f32 time, u8 filtered) {
     s32 token;
     u8 id;
 
-    if (actor->kind == 4) {
+    if (obj->unk5 == 4) {
         return 0.0f;
     }
     D_800D1878 = 0.0f;
-    if (time < actor->previousTime) {
-        actor->index = 0;
+    if (time < HIDDEN(obj)->lastEventTime) {
+        obj->unk138 = 0;
     }
     D_800D1880 = 1;
-    while (actor->events != NULL && actor->events[actor->index].time <= time && D_800D1880 != 0) {
-        if (actor->events[actor->index].time < 900.0f) {
-            D_800D1580 = actor->events[actor->index].parameter;
+    while (HIDDEN(obj)->events != NULL && HIDDEN(obj)->events[obj->unk138].time <= time && D_800D1880 != 0) {
+        if (HIDDEN(obj)->events[obj->unk138].time < 900.0f) {
+            D_800D1580 = HIDDEN(obj)->events[obj->unk138].parameter;
             D_800D1874 = *(f32 *)&D_800D1580;
-            token = actor->state->token;
+            token = ((struct197Hidden *)obj->unk2D0)->token;
             if (D_800C35EA == 0 || D_800C365E != 0) {
-                id = actor->events[actor->index].id;
+                id = HIDDEN(obj)->events[obj->unk138].id;
                 if (filtered) {
                     s32 i;
                     for (i = 0; filtered; i++) {
@@ -355,10 +346,10 @@ f32 func_1506AD30(Game6AD30Actor *actor, f32 time, u8 filtered) {
                     D_800863FC[id]();
                 }
             }
-            if (token != actor->state->token) {
-                time = actor->state->time;
+            if (token != ((struct197Hidden *)obj->unk2D0)->token) {
+                time = obj->unk2D0->unk8;
             } else {
-                actor->index++;
+                obj->unk138++;
             }
         }
     }
