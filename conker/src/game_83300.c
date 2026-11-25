@@ -2369,8 +2369,7 @@ void func_1505B9C4(struct127 *attacker, struct127 *victim, Entry1505C1E4 *base, 
     s32 slot;
     struct127 *savedActor;
     s32 savedIdx;
-    s16 id;
-    u8 tu;
+    u8 tmp;
     s32 v;
     struct126 *movement;
     struct127 *other;
@@ -2432,11 +2431,11 @@ void func_1505B9C4(struct127 *attacker, struct127 *victim, Entry1505C1E4 *base, 
             func_151AE264(victim);
         }
         victim->unk31C->unk54 = 0;
-        tu = victim->unk65;
+        tmp = victim->unk65;
         ((u8 *)&victim->pad134)[3] = 0;
-        if (tu != 0) {
+        if (tmp != 0) {
             extern s32 D_800ZZZZ; // matching: block-scope declaration steers IDO register allocation
-            v = tu - 1;
+            v = tmp - 1;
             other = &D_800CC2D0[(u8)v];
 
             if (((0x8A != other->id) && (0x23 != other->id)) || (victim->health == 0) ||
@@ -2471,10 +2470,10 @@ void func_1505B9C4(struct127 *attacker, struct127 *victim, Entry1505C1E4 *base, 
         D_80086694[v](attacker, victim, &reaction);
     }
     if (D_800BE616 != 0) {
-        tu = reaction;
+        tmp = reaction;
         v = attacker->unk124;
         other = v != 0 ? &D_800CC2D0[v - 1] : attacker;
-        func_151E5FF4(other, victim, tu);
+        func_151E5FF4(other, victim, tmp);
     }
     {
         extern s32 D_800ZZZZ; // matching: block-scope declaration steers IDO register allocation
