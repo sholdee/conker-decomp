@@ -55,40 +55,38 @@ extern s16 D_800DD1C2;
 extern s16 D_800DD1C4;
 extern s16 D_800DD1C6;
 
+/* Template / payload of a type 0x10 object. */
 typedef struct {
-    u8 pad0[0x10];
-    Mtx mtx[2];
-    f32 unk90;
-    f32 unk94;
-    f32 unk98;
-    f32 unk9C;
-    f32 unkA0;
-    f32 unkA4;
-    u8 padA8[0x18];
-    f32 unkC0;
-    f32 unkC4;
-    f32 unkC8;
-    u8 padCC[0x4];
-    Gfx *display_list;
-    u8 padD4[0x11];
-    u8 prim_alpha;
-    u8 tile_ult;
-    u8 padE7[0x5];
-    u8 render_mode;
-    u8 combine_mode;
-} Struct15168C4C;
+    /* 0x00 */ f32 x;
+    /* 0x04 */ f32 y;
+    /* 0x08 */ f32 z;
+    /* 0x0C */ f32 rotX;
+    /* 0x10 */ f32 rotY;
+    /* 0x14 */ f32 rotZ;
+    /* 0x18 */ u8 pad18[0x18];
+    /* 0x30 */ f32 scaleX;
+    /* 0x34 */ f32 scaleY;
+    /* 0x38 */ f32 scaleZ;
+    /* 0x3C */ u8 pad3C[4];
+    /* 0x40 */ Gfx *displayList;
+    /* 0x44 */ u8 pad44[0x10];
+    /* 0x54 */ u8 callback;     /* index into D_8008CA20, 0 = none */
+    /* 0x55 */ u8 primA;
+    /* 0x56 */ u8 tileUlt;
+    /* 0x57 */ u8 pad57[5];
+    /* 0x5C */ u8 renderMode;
+    /* 0x5D */ u8 combineMode;
+} ModelFxData;
+
+/* Type 0x10 object (0xF0 bytes): a display list drawn with a per-frame matrix (created by func_15168BE4). */
+typedef struct {
+    /* 0x00 */ ObjLink link;
+    /* 0x10 */ Mtx mtx[2];      /* double-buffered by D_800BE9C0 */
+    /* 0x90 */ ModelFxData data;
+} ModelFx;
 
 Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 
-#define WGFX15168C4C(pkt, a, b)     \
-{                                   \
-    Gfx *_g = (Gfx *)(pkt);         \
-    _g->words.w0 = (u32)(a);        \
-    _g->words.w1 = (u32)(b);        \
-}
-
-#define WGSPMATRIX15168C4C(pkt, mtx)        WGFX15168C4C(pkt, 0xDA380003, mtx)
-#define WGSPDISPLAYLIST15168C4C(pkt, dl)    WGFX15168C4C(pkt, 0xDE000000, dl)
 
 /*
  * Sprite animation: `frames` is a single (segmented, < 0x10000000) texture address or a pointer to a table of
@@ -1010,10 +1008,17 @@ void func_15168B10(s32 obj, s32 type) {
     func_15168A4C((ObjLink *)obj, type);
 }
 
-// PERMUTER CANDIDATE / JUSTREG (best 1057): structure fully matches (both 0x14 stores kept via
-// RMW forwarding). Remainder is a v0<->t6 register rotation on `lo`/`masked` + constant-hoist
-// scheduling (li 0x1E vs lui order) that no C form pinned. Best reconstruction:
-// permuter NO ZERO, best 305 (improved from 1057)
+/*
+ * Particle callback: unk14 holds a fade rate (high half) and a delay (low half). Keeps the particle alive
+ * (life = 30) while the delay counts down, then fades primA by the rate each call and lets it die.
+ * Readable equivalent:
+ *     word = p->unk14;
+ *     if (word & 0xFFFF) {
+ *         p->unk14 &= 0xFFFF0000; p->life = 30; p->unk14 |= (u16)((word & 0xFFFF) - 1); return;
+ *     }
+ *     if ((u16)(word >> 16) < p->primA) { p->primA -= (u16)(word >> 16); p->life = 30; } else { p->life = 0; }
+ */
+// matching: permuter output; every readable form tried allocates `word` and the delay in other registers
 typedef struct Local15168B44 { u8 pad0[0x14]; s32 unk14; u8 pad18[0x20]; s16 unk38; u8 pad3A[5]; u8 unk3F; } Local15168B44;
 
 void func_15168B44(void *arg0)
@@ -1087,86 +1092,71 @@ void func_15168B44(void *arg0)
     a->unk38 = (a2, 0);
   }
 }
-// void func_15168B44(struct102 *arg0) {
-//     s32 lo = *(s32 *)((u8 *)arg0 + 0x14) & 0xFFFF;
-//     s32 hi;
-//     s32 max;
-//     if (lo != 0) {
-//         *(s32 *)((u8 *)arg0 + 0x14) &= 0xFFFF0000;
-//         *(s16 *)((u8 *)arg0 + 0x38) = 0x1E;
-//         *(s32 *)((u8 *)arg0 + 0x14) |= (u16)(lo - 1);
-//     } else {
-//         max = *(u8 *)((u8 *)arg0 + 0x3F);
-//         hi = (*(s32 *)((u8 *)arg0 + 0x14) >> 16) & 0xFFFF;
-//         if (hi < max) {
-//             *(u8 *)((u8 *)arg0 + 0x3F) = max - hi;
-//             *(s16 *)((u8 *)arg0 + 0x38) = 0x1E;
-//         } else {
-//             *(s16 *)((u8 *)arg0 + 0x38) = 0;
-//         }
-//     }
-// }
-void func_15168BAC(struct102 *arg0) {
-    u8 temp_v0;
+/* Type 0x10 update: runs the object's callback, if any. */
+void func_15168BAC(ModelFx *fx) {
+    u8 index;
 
-    temp_v0 = *(u8 *)((u8 *)arg0 + 0xE4);
-    if (temp_v0 != 0) {
-        D_8008CA20[temp_v0](arg0);
+    index = fx->data.callback;
+    if (index != 0) {
+        D_8008CA20[index]((struct102 *)fx);
     }
 }
 
-void func_15168BE4(s32 *arg0, s32 arg1, s32 arg2) {
-    s32 temp;
+/* Spawns a type 0x10 ModelFx from the template at `src`, if it has a display list. */
+void func_15168BE4(src, owner, list)
+    ModelFxData *src;
+    u8 owner;
+    s32 list;
+{
+    ModelFx *fx;
 
-    if (arg0[0x10] != 0) {
-        temp = (s32)func_15167A68(0x10, arg2, 0xF0, 1, (u8)arg1, 1);
-        if (temp != 0) {
-            bcopy(arg0, (void *)(temp + 0x90), 0x60);
+    if (src->displayList != NULL) {
+        fx = func_15167A68(0x10, list, sizeof(ModelFx), 1, owner, 1);
+        if (fx != NULL) {
+            bcopy(src, &fx->data, sizeof(ModelFxData));
         }
     }
 }
-Gfx *func_15168C4C(Gfx *gfx, Struct15168C4C *obj, s32 arg2) {
-    s32 mode1;
+
+/* Type 0x10 draw: builds this frame's matrix, sets fade/tile/render state and calls the display list. */
+Gfx *func_15168C4C(Gfx *gfx, ModelFx *fx, s32 arg2) {
+    s32 pad; // matching: stack layout of the target frame
+    s32 renderMode;
     u8 update;
-    s16 *zero_ptr;
-    s16 *copy_ptr;
 
-    func_15043D90((Mtx *)((u8 *)obj + (D_800BE9C0 << 6) + 0x10), obj->unk9C, obj->unkA0, obj->unkA4,
-        obj->unkC0, obj->unkC4, obj->unkC8, obj->unk90, obj->unk94, obj->unk98);
-
-    zero_ptr = &D_800DD1C4;
-    copy_ptr = &D_800DD1C2;
+    func_15043D90(&fx->mtx[D_800BE9C0], fx->data.rotX, fx->data.rotY, fx->data.rotZ,
+                  fx->data.scaleX, fx->data.scaleY, fx->data.scaleZ, fx->data.x, fx->data.y, fx->data.z);
 
     gDPPipeSync(gfx++);
-    gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, obj->prim_alpha);
-    D_800DD1C6 = obj->prim_alpha;
-    *zero_ptr = 0;
-    *copy_ptr = *zero_ptr;
-    D_800DD1C0 = *copy_ptr;
+    gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, fx->data.primA);
+    /* D_800DD1C0..C6: cached prim colour (reset to -1 per type by func_151674F8) */
+    D_800DD1C6 = fx->data.primA;
+    D_800DD1C0 = D_800DD1C2 = D_800DD1C4 = 0;
     gDPSetEnvColor(gfx++, 0, 0, 0, 0);
-    gDPSetTileSize(gfx++, 0, 2, obj->tile_ult, 0x7E, 0xFE);
+    gDPSetTileSize(gfx++, 0, 2, fx->data.tileUlt, 0x7E, 0xFE);
 
-    switch (obj->render_mode) {
+    switch (fx->data.renderMode) {
     case 1:
-        *(s32 *)((u8 *)&mode1 - 4) = 0x552230;
+        renderMode = 0x552230;
         break;
     case 2:
-        *(s32 *)((u8 *)&mode1 - 4) = 0x504A50;
+        renderMode = 0x504A50;
         break;
     }
 
-    *(u8 *)((u8 *)&update - 4) = 0;
-    gfx = func_15142FBC(gfx, 0x8ACA0, *(s32 *)((u8 *)&mode1 - 4), (u8 *)((u8 *)&update - 4));
+    update = 0;
+    gfx = func_15142FBC(gfx, 0x8ACA0, renderMode, &update);
 
-    if (obj->combine_mode == 1) {
+    if (fx->data.combineMode == 1) {
         gDPSetCombine(gfx++, 0x123824, 0xFF73FFFF);
     }
 
-    WGSPMATRIX15168C4C(gfx++, (u8 *)obj + (D_800BE9C0 << 6) + 0x10);
-    WGSPDISPLAYLIST15168C4C(gfx++, obj->display_list);
+    gSPMatrix(gfx++, &fx->mtx[D_800BE9C0], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPDisplayList(gfx++, fx->data.displayList);
 
     return gfx;
 }
+
 void func_15168E34(s32 *arg0, s32 arg1) {
     s32 val = *arg0;
     if ((val & 0x0F000000) == 0) {
