@@ -158,7 +158,6 @@ extern s32 D_800BEBA4;
 f32 cosf(f32);
 Gfx *func_15094F70(Gfx *, u8 *, s32, GlyphSprite *, s32, s32, s32, s32, s32);
 Gfx *func_15095A48(Gfx *, GlyphSprite *, f32, f32);
-s32 func_15042C40(u8 arg0);
 
 #define VIEW (&((ViewRec *)D_800BE628)[D_80082FA4])
 
@@ -173,7 +172,7 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
     u8 *tex;
     s32 pad1AC; // matching: stack-slot pads (frame layout of the IDO original)
     GlyphSprite sprite;
-    s32 shift;
+    s32 frame;
     f32 sx;
     f32 sy;
     f32 gy;
@@ -181,7 +180,7 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
     s32 h;
     s32 prevW;
     s32 prevH;
-    f32 ty;
+    f32 ty; // matching: unused, holds a stack slot
     s32 ix;
     s32 iy;
     s32 dsdx;
@@ -259,7 +258,7 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
         }
         if (D_800CBD5D != 0) {
             ang = D_800CBD5E + phase;
-            wave = (cosf((ang & 0xFF) * 0.02454369329f) + 1.0f) * 1.5f;
+            wave = (cosf((ang & 0xFF) * 0.02454369329f) + 1.0f) * 1.5f; // 2*pi/256 per step
             phase += 0x4E;
         }
         if (str[i] == 0xBC) {
@@ -311,89 +310,89 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
                 break;
             case 0xA8:
                 tex = D_800915DC;
-                shift = 0;
+                frame = 0;
                 break;
             case 0xA9:
                 tex = D_800915EC;
-                shift = 0;
+                frame = 0;
                 break;
             case 0xAE:
                 tex = D_800915FC;
-                shift = 0;
+                frame = 0;
                 break;
             case 0xAF:
                 tex = D_8009160C;
-                shift = 0;
+                frame = 0;
                 break;
             case 0xB0:
                 tex = D_8009161C;
-                shift = 0;
+                frame = 0;
                 break;
             case 0xAA:
                 tex = D_8009162C;
-                shift = 0;
+                frame = 0;
                 break;
             case 0xAB:
                 tex = D_8009163C;
-                shift = 0;
+                frame = 0;
                 break;
             case 0xAC:
                 tex = D_8009164C;
-                shift = 0;
+                frame = 0;
                 break;
             case 0xAD:
                 tex = D_8009165C;
-                shift = 0;
+                frame = 0;
                 break;
             case 0xB2:
                 tex = D_800916AC;
-                shift = (D_800CBD4E >> 8) & 3;
+                frame = (D_800CBD4E >> 8) & 3;
                 break;
             case 0xB4:
                 tex = D_800916C8;
-                shift = (D_800CBD4E >> 8) & 3;
+                frame = (D_800CBD4E >> 8) & 3;
                 break;
             case 0xB3:
                 tex = D_800916E4;
-                shift = (D_800CBD4E >> 8) & 3;
+                frame = (D_800CBD4E >> 8) & 3;
                 break;
             case 0xB5:
                 tex = D_80091700;
-                shift = (D_800CBD4E >> 8) & 3;
+                frame = (D_800CBD4E >> 8) & 3;
                 break;
             case 0xB6:
                 tex = D_80091710;
-                shift = 0;
+                frame = 0;
                 break;
             case 0xB7:
                 tex = D_80091720;
-                shift = 0;
+                frame = 0;
                 break;
             case 0xB8:
                 tex = D_80091730;
-                shift = 0;
+                frame = 0;
                 break;
             case 0xB9:
                 tex = D_80091740;
-                shift = 0;
+                frame = 0;
                 break;
             case 0xBA:
                 tex = D_80091750;
-                shift = 0;
+                frame = 0;
                 break;
             case 0xBB:
                 tex = D_80091764;
-                shift = (D_800CBD4E >> 10) & 1;
+                frame = (D_800CBD4E >> 10) & 1;
                 break;
             case 0xB1:
-                shift = (D_800CBD4E >> 8) % 10;
+                frame = (D_800CBD4E >> 8) % 10;
                 tex = D_80091690;
                 break;
         }
         gDPPipeSync(gfx++);
         if (font != 1) {
             draw = 0;
-            if (c == 0x60) {
+            if (c == 0x60) { // space
                 x += 4.0f * D_800380A0;
             } else if (c >= 0xA1 && c < 0xA8) {
                 // control code: nothing to draw
@@ -423,8 +422,8 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
                     gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0,
                                       0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
                 }
-                // matching: IDO allocates differently without the dead store in "shift <<= 8"
-                gfx = func_15094F70(gfx, tex, shift <<= 8, &sprite, 0, 0, 0, 2, 3);
+                // matching: IDO allocates differently without the dead store in "frame <<= 8"
+                gfx = func_15094F70(gfx, tex, frame <<= 8, &sprite, 0, 0, 0, 2, 3);
                 if (D_800D2CA0 != 0x80000000) {
                     gfx = func_15095A48(gfx, &sprite, x, y - yOff);
                 }
