@@ -29,7 +29,7 @@ void func_151D22B0(Actor *actor, u8 arg1, s32 arg2) {
     if (actor != NULL) {
         func_10010154(0xAA, actor, 0x7FFF, 1000, 3000);
         func_10010A3C(actor);
-        scale = (actor->xz_scale + actor->y_scale) * 0.5f;
+        scale = (actor->scale_xz + actor->scale_y) * 0.5f;
         func_1515C244(actor, &origin, &extent1, &extent2);
         func_1504715C(&surface, actor);
         {

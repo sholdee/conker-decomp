@@ -22,7 +22,7 @@ s32 func_15080738(s32 textId);
 /* Queues text textId on obj's text slot (0 or 1), unless a script has locked that slot. Slot 1 also
    records the trigger zone, which func_15080C64 disables once text 0x2B / 0x2C has been shown. */
 void func_15080500(Actor *obj, TriggerZone *zone, s32 slot, s32 textId) {
-    if (obj != NULL && obj->interaction_state != 0 && obj->unk127 != 0xFF) {
+    if (obj != NULL && obj->type != 0 && obj->playernumber != 0xFF) {
         if (textId == 0x2B || textId == 0x2C) {
             D_800D1940 = textId;
             D_800D199C = zone;
@@ -35,12 +35,12 @@ void func_15080500(Actor *obj, TriggerZone *zone, s32 slot, s32 textId) {
         }
 
         if (slot == 0) {
-            if (!(obj->unk31C->context_a & 0x80)) {
-                obj->unk31C->context_a = textId;
+            if (!(obj->mv->context_a & 0x80)) {
+                obj->mv->context_a = textId;
             }
-        } else if (!(obj->unk31C->context_b & 0x80)) {
-            obj->unk31C->context_b = textId;
-            obj->unk31C->cont_zone_ind = zone - D_800D3098;
+        } else if (!(obj->mv->context_b & 0x80)) {
+            obj->mv->context_b = textId;
+            obj->mv->cont_zone_ind = zone - D_800D3098;
         }
     }
 }
@@ -51,9 +51,9 @@ void func_15080620(s32 objIndex, s32 slot, s32 textId, s32 arg3) {
         textId |= 0x80;
     }
     if (slot == 0) {
-        movement_obj[objIndex].unk31C->context_a = textId;
+        movement_obj[objIndex].mv->context_a = textId;
     } else {
-        movement_obj[objIndex].unk31C->context_b = textId;
+        movement_obj[objIndex].mv->context_b = textId;
     }
 }
 
@@ -61,11 +61,11 @@ void func_15080620(s32 objIndex, s32 slot, s32 textId, s32 arg3) {
 void func_150806A8(s32 objIndex) {
     Actor *obj = &movement_obj[objIndex];
 
-    if (obj->unk31C->context_a != 0 && !(obj->unk31C->context_a & 0x80)) {
-        obj->unk31C->context_a = 0;
+    if (obj->mv->context_a != 0 && !(obj->mv->context_a & 0x80)) {
+        obj->mv->context_a = 0;
     }
-    if (obj->unk31C->context_b != 0 && !(obj->unk31C->context_b & 0x80)) {
-        obj->unk31C->context_b = 0;
+    if (obj->mv->context_b != 0 && !(obj->mv->context_b & 0x80)) {
+        obj->mv->context_b = 0;
     }
 }
 

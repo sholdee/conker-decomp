@@ -616,9 +616,9 @@ s32 func_151C87E0(Actor *actor, SightBeamObject *obj) {
     s16 width;
     s16 depth;
 
-    kind = actor->id;
+    kind = actor->character_type;
     if (kind < 187 && kind != 0xFF) {
-        radius = actor->xz_scale * D_800D1C90[kind]->unk1A;
+        radius = actor->scale_xz * D_800D1C90[kind]->unk1A;
     } else {
         radius = 50.0f;
     }
@@ -627,9 +627,9 @@ s32 func_151C87E0(Actor *actor, SightBeamObject *obj) {
         return 0;
     }
     halfHeight = (f32)height * 0.5f;
-    center.x = actor->x_position;
-    center.y = actor->y_position + halfHeight;
-    center.z = actor->z_position;
+    center.x = actor->xpos;
+    center.y = actor->ypos + halfHeight;
+    center.z = actor->zpos;
     scale = radius / halfHeight;
     start.x = obj->head.def.pos.x;
     start.y = (obj->head.def.pos.y - center.y) * scale + center.y;
@@ -717,7 +717,7 @@ void func_151C899C(Actor *actor, SightBeamObject *obj) {
     func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle0, &obj->head.def.pos, -1, 1, 1, 0, 0, 0, obj->head.header.owner, 0);
     func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle1, &obj->head.def.rot, -1, 1, 1, 0, 0, 0, obj->head.header.owner, 0);
     if (actor != NULL) {
-        func_15164F0C(2, actor->camera->playerIndex, 0, obj->head.header.owner, obj->head.header.kind);
+        func_15164F0C(2, actor->CameraPtr->playerIndex, 0, obj->head.header.owner, obj->head.header.kind);
         params8868.flags = 1;
         params8868.duration = 40;
         params8868.playerMask = 1;
@@ -1033,9 +1033,9 @@ void func_151C9740(Actor *actor, u8 arg1, s32 arg2) {
     if (actor == NULL) {
         return;
     }
-    origin.x = actor->x_position;
-    origin.y = actor->y_position + 135.0f;
-    origin.z = actor->z_position;
+    origin.x = actor->xpos;
+    origin.y = actor->ypos + 135.0f;
+    origin.z = actor->zpos;
     hit = 0;
     airborne = actor->unk2D8[0] != 0.0f;
     if (!airborne) {
@@ -1074,9 +1074,9 @@ void func_151C9AC0(Actor *actor, u8 arg1, s32 arg2) {
     f32 pos[3];
     CollisionHit collision;
 
-    pos[0] = actor->x_position;
+    pos[0] = actor->xpos;
     pos[1] = actor->floorY + 2.0f;
-    pos[2] = actor->z_position;
+    pos[2] = actor->zpos;
     func_1504715C(&collision, actor);
     func_151ABE40(pos, &collision, 2, arg1, arg2);
 }
@@ -1123,7 +1123,7 @@ void func_151C9BA0(Camera *player, s32 state) {
     u8 idx;
 
     func_151C9ED4(player);
-    idx = player->player->unk65;
+    idx = player->player->attach_char;
     if (idx != 0) {
         if (D_800CBFA8[idx][0] == 0x23 || D_800CBFA8[idx][0] == 0x8A) {
             state = 0x1B;
@@ -1459,7 +1459,7 @@ void func_151CAACC(SightSprite *sprite, void **msg, u8 msgId) {
         }
     } else if (msgId == 0) {
         actor = *msg;
-        if (actor->camera == sprite->payload.player) {
+        if (actor->CameraPtr == sprite->payload.player) {
             func_1516972C(&sprite->header);
         }
     }
@@ -1724,7 +1724,7 @@ void func_151CB49C(SightLensObject *obj, void **msg, u8 msgId) {
         }
     } else if (msgId == 0) {
         actor = *msg;
-        if (actor->camera == obj->lens.player) {
+        if (actor->CameraPtr == obj->lens.player) {
             func_1516972C(&obj->header);
         }
     }
@@ -1893,7 +1893,7 @@ void func_151CBB6C(SightOwnedEffect *effect, void **msg, u8 msgId) {
         }
     } else if (msgId == 0) {
         actor = *msg;
-        if (actor->camera == effect->player) {
+        if (actor->CameraPtr == effect->player) {
             func_1516972C(&effect->header);
         }
     }
@@ -2076,7 +2076,7 @@ s32 func_151CC77C(SightSprite *sprite) {
     if (state == NULL) {
         return 0;
     }
-    aimer = state->unk31C;
+    aimer = state->mv;
     pitchp = &angles.pitch;
     yawp = &angles.yaw;
     if (aimer == NULL) {

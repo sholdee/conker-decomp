@@ -38,7 +38,7 @@ void func_15104A80(WorldObject *prop) {
         if (mask != 0) {
             for (i = 0; i < 25 && player == NULL; i++) {
                 candidate = &movement_obj[i];
-                if (candidate->interaction_state != 0 && (mask & (1U << i))) {
+                if (candidate->type != 0 && (mask & (1U << i))) {
                     player = candidate;
                 }
             }

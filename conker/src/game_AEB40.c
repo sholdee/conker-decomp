@@ -130,18 +130,18 @@ void func_15081690(Actor *self, f32 originX, f32 originY, f32 originZ, f32 dirX,
         maxDist = 9999999.0f;
     }
     if (self != NULL) {
-        skip = self->unk124 - 1;
+        skip = self->owner - 1;
     } else {
         skip = -1;
     }
     // childSlot[owner] = 1-based slot of an object owned by owner
     bzero(childSlot, sizeof(childSlot));
     for (i = 0; i < 25; i++) {
-        if (movement_obj[i].interaction_state == 0) {
+        if (movement_obj[i].type == 0) {
             continue;
         }
-        if (movement_obj[i].unk65 != 0) {
-            childSlot[movement_obj[i].unk65 - 1] = i + 1;
+        if (movement_obj[i].attach_char != 0) {
+            childSlot[movement_obj[i].attach_char - 1] = i + 1;
         }
     }
     if (skipWorld == 0 &&
@@ -168,16 +168,16 @@ void func_15081690(Actor *self, f32 originX, f32 originY, f32 originZ, f32 dirX,
                 continue;
             }
             obj = &movement_obj[i];
-            if (obj->interaction_state == 0) {
+            if (obj->type == 0) {
                 continue;
             }
-            if (obj->unk5 == 3) {
+            if (obj->drawtype == 3) {
                 continue;
             }
             if (obj == self) {
                 continue;
             }
-            if (!(obj->unkF8 & 0x40)) {
+            if (!(obj->noshove & 0x40)) {
                 continue;
             }
             if (filter != -1 && D_80086C90[filter](obj, self, filterArg) == 0) {
@@ -219,9 +219,9 @@ void func_15081690(Actor *self, f32 originX, f32 originY, f32 originZ, f32 dirX,
 s32 func_15081C20(Vec3f *origin, Vec3f *dir, Actor *obj, Vec3f *outNear, Vec3f *outFar, f32 *outNearDist, f32 *outFarDist) {
     Vec3f pos;
 
-    pos.x = obj->x_position;
-    pos.y = obj->y_position + obj->unkD6;
-    pos.z = obj->z_position;
+    pos.x = obj->xpos;
+    pos.y = obj->ypos + obj->unkD6;
+    pos.z = obj->zpos;
     {
         Vec3f start;
         Vec3f unitDir;
@@ -266,8 +266,8 @@ s32 func_15081C20(Vec3f *origin, Vec3f *dir, Actor *obj, Vec3f *outNear, Vec3f *
 
 void func_15081E0C(Actor *obj, u16 part, u8 skip) {
     if (D_800BE616 == 0) {
-        if (obj->health != 0) {
-            obj->health = 7;
+        if (obj->energy != 0) {
+            obj->energy = 7;
         }
         if ((skip == 0) || (part != 10)) {
             func_1507DF10(obj, part);
@@ -293,7 +293,7 @@ s32 func_15081E78(Actor *self, RayHit *hit, s32 kind) {
     s32 pad;
 
     playImpact = 1;
-    ext = self->unk31C;
+    ext = self->mv;
     if (ext != NULL) {
         ext->shotsfired++;
     }
@@ -342,7 +342,7 @@ s32 func_15081E78(Actor *self, RayHit *hit, s32 kind) {
         case 9:
         case 10:
             effect = -1;
-            func_15104608(hit->pos.x, hit->pos.y, hit->pos.z, self->unk124);
+            func_15104608(hit->pos.x, hit->pos.y, hit->pos.z, self->owner);
             func_1506AC8C(self, 2, 0);
             break;
         default:
@@ -358,14 +358,14 @@ s32 func_15081E78(Actor *self, RayHit *hit, s32 kind) {
     if (kind == 5 || kind == 9 || kind == 10) {
         func_1506AC8C(self, 3, 0);
     }
-    if (obj->health == 0) {
+    if (obj->energy == 0) {
     // matching: an (unused) label here stops IDO hoisting the store out of the then-block
     noHealthLabel:
         noHealth = 1;
     } else {
         noHealth = 0;
     }
-    if ((obj->immune != 0 || obj->stunned != 0) && noHealth == 0) {
+    if ((obj->imune != 0 || obj->stunned != 0) && noHealth == 0) {
         return 2;
     }
     longShot = 0;
@@ -377,33 +377,33 @@ s32 func_15081E78(Actor *self, RayHit *hit, s32 kind) {
     }
     func_15145974(&hit->dir, &yaw, &pitch);
     if (hit->hitType == 2) {
-        if (obj->id == 0x94) {
+        if (obj->character_type == 0x94) {
             playImpact = 0;
             func_150B5C38(&hit->pos, 0xFF, 1);
             func_150B6754(0xFF, 1);
         }
     } else if (hit->hitType == 3) {
         if (D_800BE616 == 0) {
-            if (obj->id == 0x9F || obj->id == 0xA0) {
+            if (obj->character_type == 0x9F || obj->character_type == 0xA0) {
                 if (1000.0f < hit->dist) {
                     longShot = 1;
                 }
             }
         }
-        if (hit->part == 10 && (obj->unk31C == NULL || obj->unk31C->unk1AD == 0) && longShot == 0) {
+        if (hit->part == 10 && (obj->mv == NULL || obj->mv->unk1AD == 0) && longShot == 0) {
             // matching: unsigned compares keep the constants as immediates
             if ((u32)kind != 2 && (u32)kind != 18 && (u32)kind != 11 && (u32)kind != 12) {
                 func_1507DE4C(obj);
-                if (obj->unk31C != NULL) {
-                    obj->unk31C->unk1AD = 1;
+                if (obj->mv != NULL) {
+                    obj->mv->unk1AD = 1;
                 }
-                if (obj->id == 0x80 && hit->index == 0 && hit->pos.y - 5.5f > hit->centre.y) {
+                if (obj->character_type == 0x80 && hit->index == 0 && hit->pos.y - 5.5f > hit->centre.y) {
                     func_15060A9C((func_150ADA20() & 7) + 0x2E3, obj);
                 }
                 func_15138C80(obj, 0xFF, 1);
                 sound = 0x20;
-                if (obj->id == 0x9F || obj->id == 0xA0) {
-                    if (obj->unk2EC != 0) {
+                if (obj->character_type == 0x9F || obj->character_type == 0xA0) {
+                    if (obj->taskint[2] != 0) {
                         sound = 0x3D;
                     }
                 }
@@ -411,10 +411,10 @@ s32 func_15081E78(Actor *self, RayHit *hit, s32 kind) {
             } else {
                 func_15060A30(0x107, obj);
             }
-            if (kind != 11 && kind != 12 && obj->health != 0) {
-                obj->health = 1;
+            if (kind != 11 && kind != 12 && obj->energy != 0) {
+                obj->energy = 1;
             }
-        } else if (obj->id == 0x9F || obj->id == 0xA0) {
+        } else if (obj->character_type == 0x9F || obj->character_type == 0xA0) {
             func_15081E0C(obj, hit->part, longShot);
         }
         switch (kind) {
@@ -434,17 +434,17 @@ s32 func_15081E78(Actor *self, RayHit *hit, s32 kind) {
             spawnEffect = 0;
             break;
         }
-        if (spawnEffect != 0 && obj->health < 2) {
+        if (spawnEffect != 0 && obj->energy < 2) {
             Actor source;
 
-            source.x_position = hit->pos.x;
-            source.y_position = hit->pos.y;
-            source.z_position = hit->pos.z;
-            source.unkB8 = pitch;
-            source.unk40 = yaw + 180.0f;
-            source.unkC4 = 0.0f;
-            source.xz_scale = obj->xz_scale;
-            source.y_scale = obj->y_scale;
+            source.xpos = hit->pos.x;
+            source.ypos = hit->pos.y;
+            source.zpos = hit->pos.z;
+            source.vtilt = pitch;
+            source.theta = yaw + 180.0f;
+            source.lean_angle = 0.0f;
+            source.scale_xz = obj->scale_xz;
+            source.scale_y = obj->scale_y;
             func_150335C8(&source, obj, spawnEffect, hit->bone, 1, 0);
             if (hit->part == 10) {
                 sound = 0x20;
@@ -506,17 +506,17 @@ s32 func_150825C0(s32 spawnIdx, s32 arg1) {
             }
             clear = 1;
             for (j = 0; j < D_8008FD8C; j++) {
-                if (movement_obj[j].interaction_state == 0) {
+                if (movement_obj[j].type == 0) {
                     continue;
                 }
-                if (movement_obj[j].unk127 == 0xFF) {
+                if (movement_obj[j].playernumber == 0xFF) {
                     continue;
                 }
-                if (D_800D2138.unk208 & (1 << movement_obj[j].unk127)) {
+                if (D_800D2138.unk208 & (1 << movement_obj[j].playernumber)) {
                     // matching: squaring in place (d = d * d) reuses the operand's register
-                    dx = movement_obj[j].x_position - D_800D20FC[spawnIdx].x;
+                    dx = movement_obj[j].xpos - D_800D20FC[spawnIdx].x;
                     dx = dx * dx;
-                    dz = movement_obj[j].z_position - D_800D20FC[spawnIdx].z;
+                    dz = movement_obj[j].zpos - D_800D20FC[spawnIdx].z;
                     dz = dz * dz;
                     if (dx + dz <= radiusSq) {
                         clear = 0;
@@ -569,9 +569,9 @@ void func_1508295C(s32 arg0, s32 arg1, s32 firstRange) {
 }
 
 void func_150829D8(Actor *obj) {
-    obj->unkF8 &= 0xF7FFFFFD;
-    obj->unkF8 |= 4;
-    if ((obj->unk31C != NULL) && (obj->unk31C->unk56 == 0)) {
+    obj->noshove &= 0xF7FFFFFD;
+    obj->noshove |= 4;
+    if ((obj->mv != NULL) && (obj->mv->unk56 == 0)) {
         switch (D_800BE9F0) {
         case 0:
         case 10:
@@ -588,7 +588,7 @@ void func_150829D8(Actor *obj) {
         case 68:
             break;
         default:
-            obj->unkF8 |= 2;
+            obj->noshove |= 2;
             break;
         }
     }
@@ -631,83 +631,83 @@ s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot
         } else {
             D_800D210C[spawnIdx] = idx + 0x81;
         }
-        obj->unk13F = spawnIdx;
+        obj->listpos = spawnIdx;
         if (spawnIdx < D_8008FD8C) {
-            obj->unk127 = spawnIdx;
+            obj->playernumber = spawnIdx;
         } else {
-            obj->unk127 = 0xFF;
+            obj->playernumber = 0xFF;
         }
     }
-    obj->spawn = spawn;
+    obj->listpos_ptr = spawn;
     ret = idx + 1;
-    func_15084488(spawn, obj->unk13F, arg3);
+    func_15084488(spawn, obj->listpos, arg3);
     if ((idx < D_8008FD8C) || (type == 0x98) || (type == 0x28)) {
-        obj->unk31C = allocate_memory(sizeof(ActorCtl), 1, 0, 0);
-        bzero(obj->unk31C, sizeof(ActorCtl));
-        obj->unk31C->unk1B8 = 5.0f;
+        obj->mv = allocate_memory(sizeof(ActorCtl), 1, 0, 0);
+        bzero(obj->mv, sizeof(ActorCtl));
+        obj->mv->unk1B8 = 5.0f;
     }
     obj->unique_id = spawn->unique_id;
     obj->unk1D0 = 2;
-    obj->xz_scale = spawn->xz_scale;
-    obj->y_scale = spawn->y_scale;
+    obj->scale_xz = spawn->xz_scale;
+    obj->scale_y = spawn->y_scale;
     obj->unk154 = spawn->xz_scale;
     obj->unk158 = spawn->y_scale;
-    obj->interaction_state = spawn->interaction_state;
-    obj->x_position = spawn->x;
-    obj->y_position = spawn->y;
-    obj->z_position = spawn->z;
+    obj->type = spawn->interaction_state;
+    obj->xpos = spawn->x;
+    obj->ypos = spawn->y;
+    obj->zpos = spawn->z;
     obj->unk212[0] = 0xFF;
     obj->unk20F = 0xFF;
     obj->unk210 = 0xFF;
     obj->unk211 = 0xFF;
     obj->team = 0xFF;
-    obj->old_x_position = obj->x_position;
-    obj->old_y_position = obj->y_position;
-    obj->unk1CC = obj->y_position;
-    obj->old_z_position = obj->z_position;
+    obj->old_xpos = obj->xpos;
+    obj->old_ypos = obj->ypos;
+    obj->unk1CC = obj->ypos;
+    obj->old_zpos = obj->zpos;
     if ((spawn->flags & 6) || (spawn->flags & 4) || (spawn->flags & 2)) {
         func_1506160C(obj, 4, 0, 0, 0);
     }
-    obj->unk232 = spawn->unkD;
+    obj->intelwalk = spawn->unkD;
     if ((spawnIdx < D_8008FD8C) && (D_8008FE44[spawnIdx] == -2)) {
-        obj->unk31C->bot = 1;
-        obj->unk232 = 1;
+        obj->mv->bot = 1;
+        obj->intelwalk = 1;
     }
     {
         // matching: unused stack slot
         u8 pad;
 
-        if (obj->unk127 != 0xFF) {
-            obj->team = func_151E5F64(obj->unk127);
-            obj->unk31C->numGrenades = D_800D2130;
-            obj->unk31C->unk1AF = 0x40;
-            obj->unk31C->lastSpawnIndex = -1;
+        if (obj->playernumber != 0xFF) {
+            obj->team = func_151E5F64(obj->playernumber);
+            obj->mv->numGrenades = D_800D2130;
+            obj->mv->unk1AF = 0x40;
+            obj->mv->lastSpawnIndex = -1;
         }
     }
-    obj->health = spawn->unkE & 0xF;
+    obj->energy = spawn->unkE & 0xF;
     obj->unk1E5 = spawn->unkF;
     obj->unk1E6 = obj->unk1E5;
     obj->unk221 = 1;
     obj->unk23C = spawn->unk1C;
     obj->unk23D = spawn->unk1D;
-    obj->unk76 = spawn->angle << 8;
-    angle = obj->unk76;
-    obj->unk7A = angle;
-    obj->unk78 = angle;
-    obj->unk40 = (angle + 0x4000) * (360.0f / 65536.0f);
+    obj->angle = spawn->angle << 8;
+    angle = obj->angle;
+    obj->langle = angle;
+    obj->fangle = angle;
+    obj->theta = (angle + 0x4000) * (360.0f / 65536.0f);
     obj->unk140 = arg2;
-    obj->gravity = 6.0f;
-    obj->unkF8 = spawn->objFlags;
-    if (obj->unkF8 & 0x200000) {
-        obj->unk224 = obj->y_position;
+    obj->ygrav = 6.0f;
+    obj->noshove = spawn->objFlags;
+    if (obj->noshove & 0x200000) {
+        obj->unk224 = obj->ypos;
     }
-    if (obj->unkF8 & 0x10000000) {
-        obj->unk38 = obj->y_position - 500.0f;
+    if (obj->noshove & 0x10000000) {
+        obj->unk38 = obj->ypos - 500.0f;
     }
-    if (obj->unkF8 & 0x800000) {
+    if (obj->noshove & 0x800000) {
         D_800C67F0 = 1;
     }
-    obj->unk1E4 = spawn->unk11;
+    obj->family = spawn->unk11;
     obj->unk66 = spawn->unk10;
     obj->unk1DD[0] = 120;
     obj->unk1DD[1] = 120;
@@ -716,9 +716,9 @@ s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot
     obj->unk1E0[1] = 255;
     obj->unk1E0[2] = 255;
     obj->unk23E = 4;
-    obj->unk246 = 1;
-    obj->unk247 = 100;
-    obj->unk248 = 100;
+    obj->intel_animspd = 1;
+    obj->intel_accel = 100;
+    obj->intel_decel = 100;
     obj->unk1FC |= 2;
     func_150839B8(obj, type, spawn);
     t = spawn->unk13 & 0x7F;
@@ -728,16 +728,16 @@ s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot
     if (type != 0xFF) {
         func_150838EC(obj, 0, 0, 1.0f);
     } else {
-        obj->unk5 = 3;
+        obj->drawtype = 3;
     }
-    if (obj->unkF8 & 0x4000) {
-        func_1503DA9C(obj, obj->id, 0, 0);
+    if (obj->noshove & 0x4000) {
+        func_1503DA9C(obj, obj->character_type, 0, 0);
     }
     if (spawn->partSet) {
         func_15083568(obj, spawn->partSet, 1.0f, 0);
     }
-    if (obj->unk127 != 0xFF) {
-        obj->health = func_150859AC(obj->unk127, 4);
+    if (obj->playernumber != 0xFF) {
+        obj->energy = func_150859AC(obj->playernumber, 4);
         obj->unkB2 = D_800D2132;
         func_150829D8(obj);
         func_15083384(obj, func_150859AC(idx, 1));
@@ -749,7 +749,7 @@ s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot
     }
     obj->unk288 = func_15084CB0(type);
     if (D_800BE616 != 0) {
-        t = func_151E5F64(obj->unk127);
+        t = func_151E5F64(obj->playernumber);
         if (t >= 4) {
             t = 3;
         }
@@ -800,11 +800,11 @@ void func_150832AC(Actor *obj) {
     s32 i;
     s32 count;
 
-    spawn = obj->spawn;
+    spawn = obj->listpos_ptr;
     if (spawn != NULL) {
         n = spawn->unk2F;
         if (n == 0) {
-            if (obj->unk127 == 0) {
+            if (obj->playernumber == 0) {
                 count = 5;
             } else {
                 count = 3;
@@ -831,7 +831,7 @@ void func_15083384(Actor *obj, s32 arg1) {
     switch (arg1) {
     case 37:
     case 38:
-        ext = obj->unk31C;
+        ext = obj->mv;
         if (ext != NULL) {
             ext->unk1B2 = 1;
         }
@@ -938,7 +938,7 @@ void func_150836CC(Actor *parent, s32 setId) {
         if (parts[i].type == 0) {
             child = func_1505F0AC(parts[i].unk0);
             if (child != NULL) {
-                if (child->unk65 == ((parent - movement_obj) + 1)) {
+                if (child->attach_char == ((parent - movement_obj) + 1)) {
                     func_15060F28(child, 0);
                 }
             }
@@ -951,7 +951,7 @@ void func_150837D4(s32 objIdx, s32 modelId, s32 arg2) {
     Actor *obj = &movement_obj[objIdx];
     ModelDef *def;
 
-    obj->id = modelId;
+    obj->character_type = modelId;
     if (modelId == 0xFF) {
         obj->bodyRadius = 0;
         obj->bodyHeight = 0;
@@ -959,13 +959,13 @@ void func_150837D4(s32 objIdx, s32 modelId, s32 arg2) {
         obj->unkD2 = 70;
         obj->unkD4 = 70;
         obj->unkD6 = 0;
-        obj->unk160 = 0;
+        obj->shadow_size = 0;
         obj->unkC8 = 0.0f;
     } else {
         obj->unkC8 = D_800D1C90[modelId]->unk6;
-        func_15062BDC(obj, obj->xz_scale, obj->y_scale);
+        func_15062BDC(obj, obj->scale_xz, obj->scale_y);
         def = D_800D1C90[modelId];
-        obj->unk5 = def->unk12;
+        obj->drawtype = def->unk12;
     }
     obj->unk6 = func_15084D00(obj);
     if (D_800C5A90[obj->unk6] != 0) {
@@ -977,7 +977,7 @@ void func_150837D4(s32 objIdx, s32 modelId, s32 arg2) {
 s32 func_150838EC(Actor *obj, s32 arg1, s32 arg2, f32 arg3) {
     s32 modelId;
 
-    modelId = obj->id;
+    modelId = obj->character_type;
     if (D_800D1588[modelId] == NULL) {
         return 0;
     }
@@ -1020,10 +1020,10 @@ void func_150839B8(Actor *obj, s32 modelId, SpawnRecord *spawn) {
         obj->unk13B = def->unk39;
         obj->unk2CB = def->unk33;
         obj->unk2CC = def->unk34;
-        obj->unk5 = def->unk12;
+        obj->drawtype = def->unk12;
         obj->unk68[0] = def->eyeDefault[0];
         obj->unk68[1] = def->eyeDefault[1];
-        obj->unk160 = def->unk2;
+        obj->shadow_size = def->unk2;
         if (def->subModelCount != 0) {
             obj->modelIds = D_80086CAC[def->subModelList];
             obj->lodCount = def->subModelCount;
@@ -1049,15 +1049,15 @@ Actor *func_15083AC8(Actor *parent, s32 arg1, s32 modelId, s32 arg3, s32 state, 
     obj = func_1505ED34();
     obj->unique_id = 0xFF - (obj - movement_obj);
     obj->unkAB = arg3;
-    obj->interaction_state = state;
+    obj->type = state;
     func_150615DC(obj);
-    obj->unk232 = 1;
-    obj->health = 1;
-    obj->immune = 0xFF;
-    obj->unk65 = (parent - movement_obj) + 1;
-    obj->unk5C = arg1;
+    obj->intelwalk = 1;
+    obj->energy = 1;
+    obj->imune = 0xFF;
+    obj->attach_char = (parent - movement_obj) + 1;
+    obj->basemtx = arg1;
     obj->unk123 = 1;
-    obj->id = modelId;
+    obj->character_type = modelId;
     obj->unk66 = parent->unk66;
     obj->unk66 &= ~0x10;
     // matching: a no-op |= 0 (a constant flag field upstream) keeps the reload of unk66
@@ -1069,13 +1069,13 @@ Actor *func_15083AC8(Actor *parent, s32 arg1, s32 modelId, s32 arg3, s32 state, 
     obj->unk1E0[1] = parent->unk1E0[1];
     obj->unk1E0[2] = parent->unk1E0[2];
     if (inheritScale == 0) {
-        obj->xz_scale = 1.0f;
-        obj->y_scale = 1.0f;
+        obj->scale_xz = 1.0f;
+        obj->scale_y = 1.0f;
         obj->unk154 = 1.0f;
         obj->unk158 = 1.0f;
     } else {
-        obj->xz_scale = parent->xz_scale;
-        obj->y_scale = parent->y_scale;
+        obj->scale_xz = parent->scale_xz;
+        obj->scale_y = parent->scale_y;
         obj->unk154 = parent->unk154;
         obj->unk158 = parent->unk158;
     }
@@ -1083,8 +1083,8 @@ Actor *func_15083AC8(Actor *parent, s32 arg1, s32 modelId, s32 arg3, s32 state, 
     obj->unkAC = arg5;
     func_1503D774(modelId, 0);
     if (arg5 & 1) {
-        obj->unkF8 |= 0x4000;
-        obj->unk270 = D_800D1C90[modelId]->bodyRadius * obj->xz_scale;
+        obj->noshove |= 0x4000;
+        obj->cull_radius_xz = D_800D1C90[modelId]->bodyRadius * obj->scale_xz;
     }
     animFlag = 0;
     if (arg5 & 2) {
@@ -1158,7 +1158,7 @@ Actor *func_15083E90(u8 id) {
     // matching: a walking pointer; indexing movement_obj[i] makes IDO unroll the loop differently
     obj = movement_obj;
     for (i = 0; i < 26; i++) {
-        if (obj->interaction_state != 0 && obj->unique_id == id) {
+        if (obj->type != 0 && obj->unique_id == id) {
             return obj;
         }
         obj++;
@@ -1201,10 +1201,10 @@ s32 func_15084044(Actor *obj, s32 model) {
     // matching: every access to modelData[model] goes through this byte pointer (slot + 0x28C/0x290) or
     // an s32 row view, as s32 lvalues; typed field access reallocates registers (see the func_15084044 ledger)
     slot = (u8 *)((s32)obj + model * 8);
-    if (obj->unk65 != 0) {
-        spawn = movement_obj[obj->unk65 - 1].spawn;
+    if (obj->attach_char != 0) {
+        spawn = movement_obj[obj->attach_char - 1].listpos_ptr;
     } else {
-        spawn = obj->spawn;
+        spawn = obj->listpos_ptr;
     }
     id = obj->modelIds[model];
     mode = (spawn != NULL) ? (spawn->unk10 & 3) : 0;
@@ -1365,7 +1365,7 @@ void func_15084558(Actor *self) {
     u8 *block;
     TexCoord *table;
 
-    id = self->id;
+    id = self->character_type;
     if (id != 0xFF && D_800D19A0[id] != NULL) {
         count = self->modelCount;
         list = self->modelIds;
@@ -1382,7 +1382,7 @@ void func_15084558(Actor *self) {
             for (j = 0; j < 25; j++) {
                 if (j != (self - movement_obj)) {
                     obj = &movement_obj[j];
-                    if (obj->interaction_state != 0 && obj->id != 0xFF && obj->unk5 != 2) {
+                    if (obj->type != 0 && obj->character_type != 0xFF && obj->drawtype != 2) {
                         otherCount = obj->modelCount;
                         otherList = obj->modelIds;
                         for (k = 0; k < otherCount; k++) {
@@ -1437,9 +1437,9 @@ void func_15084558(Actor *self) {
     }
 }
 
-/* Returns obj's current model id (modelIds[lodRequest - 1], or the first). */
+/* Returns obj's current model id (modelIds[forced_lod - 1], or the first). */
 u8 func_150849A0(Actor *obj) {
-    s32 current = obj->lodRequest;
+    s32 current = obj->forced_lod;
 
     if (current != 0) {
         return obj->modelIds[current - 1];
@@ -1452,7 +1452,7 @@ u8 func_150849CC(Actor *obj, s32 *outIndex) {
     s32 index;
     s32 n;
 
-    n = obj->lodRequest;
+    n = obj->forced_lod;
     if (n != 0) {
         index = n - 1;
     } else {
@@ -1489,7 +1489,7 @@ void func_15084A18(void) {
             if (D_800D19A0[i] != NULL && D_800C5C08[i] == NULL) {
                 for (m = 0; m < 25; m++) {
                     obj = &movement_obj[m];
-                    if (obj->interaction_state != 0) {
+                    if (obj->type != 0) {
                         for (j = 0; j < obj->modelCount; j++) {
                             for (k = 0; k < 2; k++) {
                                 if (obj->modelData[j][k] == D_800D19A0[i]) {
@@ -1521,7 +1521,7 @@ void func_15084C30(Actor *obj) {
     AnimInstance *anim;
     f32 phase;
 
-    if (obj->id == 0x94) {
+    if (obj->character_type == 0x94) {
         anim = obj->unk2D0;
         phase = func_150ADA20() % (s32)anim->numFrames;
         anim->frame = phase;

@@ -27,17 +27,17 @@ void func_15122440(Camera *camera) {
     f32 goalZ;
     f32 goalY;
 
-    yaw = (camera->player->unk40 + 90.0f) * DEG2RAD;
+    yaw = (camera->player->theta + 90.0f) * DEG2RAD;
     func_1512A390(camera);
     if (!(camera->status & 1) && (camera->player->unk102 == 0)) {
         yaw = camera->yawRad - 1.570796371f;
     }
     if (camera->pitchOverride != 999.0f) {
         pitch = camera->pitchOverride;
-    } else if (camera->player->health == 0) {
+    } else if (camera->player->energy == 0) {
         pitch = 0.0f;
     } else {
-        pitch = (camera->player->unk102 ? 10.0f : 0.0f) + camera->player->unkB8;
+        pitch = (camera->player->unk102 ? 10.0f : 0.0f) + camera->player->vtilt;
     }
     if (camera->player->unk102) {
         pitch *= 0.5f;

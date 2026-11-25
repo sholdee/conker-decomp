@@ -465,15 +465,15 @@ s32 func_151A87F8(Bolt *bolt) {
 
     link = bolt->link;
     owner = link->owner;
-    if ((owner->interaction_state == 0) || (owner->unique_id != link->ownerId) || (owner->id == 0xFF)) {
+    if ((owner->type == 0) || (owner->unique_id != link->ownerId) || (owner->character_type == 0xFF)) {
         return 0;
     }
-    if (owner->unk1D4 != NULL) {
-        func_15143134(&link->boneOffset, &bolt->def.start, (s32)owner->unk1D4 + (link->bone << 6)); /* 0x40-byte bone matrices */
+    if (owner->ob_matrix_ptr != NULL) {
+        func_15143134(&link->boneOffset, &bolt->def.start, (s32)owner->ob_matrix_ptr + (link->bone << 6)); /* 0x40-byte bone matrices */
         if (!(link->linkFlags & 1)) {
-            dx = bolt->def.start.x - (owner->x_position + link->targetOffset.x);
-            dy = bolt->def.start.y - (owner->y_position + link->targetOffset.y);
-            dz = bolt->def.start.z - (owner->z_position + link->targetOffset.z);
+            dx = bolt->def.start.x - (owner->xpos + link->targetOffset.x);
+            dy = bolt->def.start.y - (owner->ypos + link->targetOffset.y);
+            dz = bolt->def.start.z - (owner->zpos + link->targetOffset.z);
             if (func_150AC9C0(bolt->def.start.x, bolt->def.start.y, bolt->def.start.z, dx, dy, dz, 0, 0,
                               &bolt->def.end.x, &bolt->def.end.y, &bolt->def.end.z, 0, &hit, 0, 0.0f)) {
                 if (func_15145C90(hit)) {

@@ -29,7 +29,7 @@ void func_150F9BB0(Actor *actor, u8 owner, s32 kind) {
             ParticleDef spawn;
 
             spark.flags = 0;
-            spark.scale = (actor->xz_scale + actor->y_scale) * 0.5f;
+            spark.scale = (actor->scale_xz + actor->scale_y) * 0.5f;
             spark.owner = actor;
             spark.ownerId = actor->unique_id;
             spark.widthBase = 15.045272f;
@@ -181,11 +181,11 @@ void func_150FA1B8(BurstEffect *effect) {
 
     actor = effect->data.owner;
     burst = &effect->data;
-    if ((actor->interaction_state == 0) || (actor->unique_id != burst->ownerId)) {
+    if ((actor->type == 0) || (actor->unique_id != burst->ownerId)) {
         effect->base.header.state = -1;
         return;
     }
-    if (actor->unk1D4 != NULL) {
+    if (actor->ob_matrix_ptr != NULL) {
         Vec3f positions[2];
         Vec3f directions[2];
         s32 pad; // matching: unused stack slot
@@ -203,7 +203,7 @@ void func_150FA1B8(BurstEffect *effect) {
         results[1] = &positions[1];
         results[2] = &directions[0];
         results[3] = &directions[1];
-        func_15145EA4(offsets, results, (Mtx *)actor->unk1D4 + 1, 4);
+        func_15145EA4(offsets, results, (Mtx *)actor->ob_matrix_ptr + 1, 4);
         for (i = 0; i < 2; i++) {
             if (burst->sparks[i] != NULL) {
                 spark = burst->sparks[i];
@@ -299,8 +299,8 @@ void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
     Vec3f pos;
     CollisionHit ground;
 
-    if (actor->unk1D4) {
-        func_15143134(&D_800A1CFC[point], &pos, (Mtx *)actor->unk1D4 + 5);
+    if (actor->ob_matrix_ptr) {
+        func_15143134(&D_800A1CFC[point], &pos, (Mtx *)actor->ob_matrix_ptr + 5);
         func_1504715C(&ground, actor);
         {
             SplashSpraySpec first;

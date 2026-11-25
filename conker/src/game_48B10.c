@@ -31,12 +31,12 @@ void func_1501B660(Actor *arg0, f32 *arg1, s32 arg2) {
     s32 i;
     u8 steps;
 
-    vertices = (Game48B10Vertex *)arg0->modelData[arg0->lod][D_800BE9C0]; // the model's vertex copy
+    vertices = (Game48B10Vertex *)arg0->modelData[arg0->current_lod][D_800BE9C0]; // the model's vertex copy
     if (vertices == NULL) {
         return;
     }
     previous = -1;
-    for (i = 0; i < D_800C57A0[arg0->id]; i++) {
+    for (i = 0; i < D_800C57A0[arg0->character_type]; i++) {
         if (vertices[i].flags & 0x7F00) {
             group = (vertices[i].flags & 0x7F00) >> 8;
             if (group != previous) {

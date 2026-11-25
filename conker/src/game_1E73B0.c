@@ -90,10 +90,10 @@ s32 func_151BA084(DynModel *effect, s16 viewport) {
 
     ref = DYNMODEL_USERDATA(effect);
     owner = ref->actor;
-    if (owner->interaction_state == 0 || owner->unique_id != ref->uniqueId) {
+    if (owner->type == 0 || owner->unique_id != ref->uniqueId) {
         func_1516972C(&effect->header);
     }
-    model = (u8 *)owner->unk1D4;
+    model = (u8 *)owner->ob_matrix_ptr;
     if (model == NULL) {
         return 0;
     }
@@ -101,14 +101,14 @@ s32 func_151BA084(DynModel *effect, s16 viewport) {
         return 0;
     }
     if (D_800BE616 != 0) {
-        if (owner->camera != NULL && owner->unk31C != NULL &&
-            owner->unk31C->SniperState != 0 && viewport == owner->camera->playerIndex) {
+        if (owner->CameraPtr != NULL && owner->mv != NULL &&
+            owner->mv->SniperState != 0 && viewport == owner->CameraPtr->playerIndex) {
             return 0;
         }
     } else {
         player = &movement_obj[0];
-        if (player->camera != NULL && player->unk31C != NULL &&
-            player->unk31C->SniperState != 0 && viewport == player->camera->playerIndex) {
+        if (player->CameraPtr != NULL && player->mv != NULL &&
+            player->mv->SniperState != 0 && viewport == player->CameraPtr->playerIndex) {
             return 0;
         }
     }
@@ -213,9 +213,9 @@ void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
         shift = 0;
     }
     burst.spray.countRange = 5 >> shift;
-    burst.spray.pos.x = obj->x_position;
-    burst.spray.pos.y = obj->y_position + 25.0f;
-    burst.spray.pos.z = obj->z_position;
+    burst.spray.pos.x = obj->xpos;
+    burst.spray.pos.y = obj->ypos + 25.0f;
+    burst.spray.pos.z = obj->zpos;
     burst.spray.particleCountBase = 6;
     burst.spray.speedBase = 50.0f;
     burst.spray.speedRange = 42.0f;
@@ -245,9 +245,9 @@ void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
         burst.spray.eventFunc = 0;
     }
     func_1514FCE8(&burst, arg1, arg2);
-    if ((obj->unk1D4 != NULL) && ((obj->unk74 & 0xF) != 0xF)) {
+    if ((obj->ob_matrix_ptr != NULL) && ((obj->unk74 & 0xF) != 0xF)) {
         func_1504715C(&floor, obj);
-        mtx = (Mtx *)((u8 *)obj->unk1D4 + 0x40);
+        mtx = (Mtx *)((u8 *)obj->ob_matrix_ptr + 0x40);
         {
             typedef s32 T151; // matching: a declaration makes -g3 open a scope here, which steers the scheduler
             func_1503F404(mtx, &outA0, &outA1, &outA2, &objPos.x, &objPos.y, &objPos.z, &outB0, &outB1, &outB2);
@@ -402,7 +402,7 @@ void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
 
 /* Starts sound 0x4A7 at `obj`; func_151BB0E0 keeps it updated. */
 void func_151BB044(Actor *obj) {
-    func_1000FA64(0x4A7, obj->x_position, obj->y_position, obj->z_position, 0x2000, 0x320, 0xC8,
+    func_1000FA64(0x4A7, obj->xpos, obj->ypos, obj->zpos, 0x2000, 0x320, 0xC8,
                   (SoundRecordCallback)func_151BB0E0, obj, 0, 8, 0);
 }
 s32 func_1000F568(s32, s32);
@@ -438,21 +438,21 @@ s32 func_151BB0E0(SoundChannel *chan, s32 arg1, u32 *volume, s32 arg3, s32 *spee
     s32 fadingIn;
 
     obj = chan->obj;
-    if ((obj != NULL) && (obj->health != 0)) {
+    if ((obj != NULL) && (obj->energy != 0)) {
         state = 0;
         sound = 0;
         prevState = chan->userData & 0x7F;
         fade = (chan->userData >> 8) & 0xFF;
         timer = (chan->userData >> 16) & 0xFFF;
         fadingIn = (chan->userData >> 7) & 1;
-        chan->x = obj->x_position;
-        chan->y = obj->y_position;
-        chan->z = obj->z_position;
-        if (((obj->xz_velocity > 1.0f) && (obj->unk44 > 0.0f)) ||
-            ((obj->xz_velocity < -1.0f) && (obj->unk44 < 0.0f))) {
+        chan->x = obj->xpos;
+        chan->y = obj->ypos;
+        chan->z = obj->zpos;
+        if (((obj->speed > 1.0f) && (obj->stickspeed > 0.0f)) ||
+            ((obj->speed < -1.0f) && (obj->stickspeed < 0.0f))) {
             state = 1;
-        } else if (((obj->xz_velocity > 5.0f) && (obj->unk44 <= 0.0f)) ||
-                   ((obj->xz_velocity < -5.0f) && (obj->unk44 >= 0.0f))) {
+        } else if (((obj->speed > 5.0f) && (obj->stickspeed <= 0.0f)) ||
+                   ((obj->speed < -5.0f) && (obj->stickspeed >= 0.0f))) {
             state = 2;
         }
         // matching: emits no code; the extra reads of state raise its uopt register priority
@@ -480,7 +480,7 @@ s32 func_151BB0E0(SoundChannel *chan, s32 arg1, u32 *volume, s32 arg3, s32 *spee
             param = 0x2000;
         }
         if (sound != 0) {
-            func_1000FA64(sound, obj->x_position, obj->y_position, obj->z_position, param, 0x320, 0xC8,
+            func_1000FA64(sound, obj->xpos, obj->ypos, obj->zpos, param, 0x320, 0xC8,
                           (SoundRecordCallback)func_151BB0E0, obj, state | 0x12CFF00, 8, 0);
             goto end; // matching: a plain return 1 here is scheduled differently
         }
@@ -505,13 +505,13 @@ s32 func_151BB0E0(SoundChannel *chan, s32 arg1, u32 *volume, s32 arg3, s32 *spee
                 if (timer <= 0) {
                     timer = 0;
                     if (*soundId == 0x4A8) {
-                        func_1000FA64(0x4A9, obj->x_position, obj->y_position, obj->z_position, 0x2EE0, 0x320,
+                        func_1000FA64(0x4A9, obj->xpos, obj->ypos, obj->zpos, 0x2EE0, 0x320,
                                       0xC8, (SoundRecordCallback)func_151BB0E0, obj, state | 0x880, 8, 0);
                         timer = (func_150ADA20() & 0x200) + 900;
                     }
                 }
             }
-            *speedOut = fabsf(obj->xz_velocity) * obj->unkB8 * 0.5f;
+            *speedOut = fabsf(obj->speed) * obj->vtilt * 0.5f;
         }
         chan->userData = (fadingIn << 7) | state | (fade << 8) | (timer << 16);
         if ((*volume == 0) || (chan->flags & 0x80)) {
@@ -817,9 +817,9 @@ void func_151BC104(Actor *obj, u8 arg1, s32 arg2) {
         ActorRef ref;
 
         desc.radius = 15.0f;
-        desc.x = &obj->x_position;
-        desc.y = &obj->y_position;
-        desc.z = &obj->z_position;
+        desc.x = &obj->xpos;
+        desc.y = &obj->ypos;
+        desc.z = &obj->zpos;
         desc.lifetime = 300;
         desc.rate = 0.3033999801f * D_800DCA24;
         desc.flags = 4;
@@ -839,9 +839,9 @@ void func_151BC104(Actor *obj, u8 arg1, s32 arg2) {
         Data15147A80 data;
 
         desc.itemCount = 40;
-        desc.pos.x = obj->x_position;
-        desc.pos.y = obj->y_position;
-        desc.pos.z = obj->z_position;
+        desc.pos.x = obj->xpos;
+        desc.pos.y = obj->ypos;
+        desc.pos.z = obj->zpos;
         desc.life = 300;
         desc.flags = 6;
         desc.kind = 12;
@@ -868,7 +868,7 @@ void func_151BC104(Actor *obj, u8 arg1, s32 arg2) {
         header.update = 14;
         header.lifetime = 300;
         header.lightType = 31;
-        fx3 = func_15163414(&header, &obj->x_position, &obj->y_position, &obj->z_position,
+        fx3 = func_15163414(&header, &obj->xpos, &obj->ypos, &obj->zpos,
                            0, 0, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, 8, arg1, arg2);
         if (fx3 != NULL) {
             memcpy(&fx3->data.trackActor.ref, &ref, sizeof(ref));

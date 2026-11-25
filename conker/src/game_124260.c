@@ -122,7 +122,7 @@ void func_150F706C(BeamObj *obj) {
     beam = &obj->beam;
     owner = beam->owner;
 
-    if (owner->interaction_state == 0 || owner->unique_id != beam->ownerId) {
+    if (owner->type == 0 || owner->unique_id != beam->ownerId) {
         obj->base.header.state = -1;
         return;
     }
@@ -135,9 +135,9 @@ void func_150F706C(BeamObj *obj) {
         return;
     }
 
-    origin.x = owner->x_position;
-    origin.y = owner->y_position + 46.0f;
-    origin.z = owner->z_position;
+    origin.x = owner->xpos;
+    origin.y = owner->ypos + 46.0f;
+    origin.z = owner->zpos;
     func_15145740(owner, &D_800D9A50, NULL, NULL, 0.0f);
 
     D_800D9A50.x *= 0.001f;

@@ -52,7 +52,7 @@ TrailEmitter *func_1518BA90(Actor *actor, u8 owner, s32 list) {
         }
     }
 
-    switch (actor->id + 1) {
+    switch (actor->character_type + 1) {
     case 0: /* id 0xFF */
         return NULL;
     case 8:
@@ -163,7 +163,7 @@ void func_1518BD60(TrailEmitter *emitter) {
     for (i = 0; i < 2; i++) {
         emitter->timers[i] -= D_800BE9E4;
         owner = emitter->params.owner;
-        if (owner != NULL && owner->interaction_state != 0 && owner->unk1D4 != NULL &&
+        if (owner != NULL && owner->type != 0 && owner->ob_matrix_ptr != NULL &&
             owner->unique_id == emitter->params.ownerId) {
             if (emitter->timers[i] < 0) {
                 point = i;
@@ -242,8 +242,8 @@ s32 func_1518C0B8(MotionTrail *trail) {
     link = &params->link;
     offsets = params->offsets;
     i = trail->head.start;
-    if (link->emitter->params.owner == NULL || link->emitter->params.owner->interaction_state == 0 ||
-        link->emitter->params.owner->unk1D4 == NULL ||
+    if (link->emitter->params.owner == NULL || link->emitter->params.owner->type == 0 ||
+        link->emitter->params.owner->ob_matrix_ptr == NULL ||
         link->emitter->params.owner->unique_id != link->emitter->params.ownerId) {
         return 0;
     }

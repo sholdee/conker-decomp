@@ -29,7 +29,7 @@ void func_150EB1C0(Camera *actor)
                 actor->flags |= 0x01100004;
                 actor->flags &= ~2;
                 actor->followRateTarget = 0.0f;
-                func_151254F4(actor, actor->player->unk65 - 1);
+                func_151254F4(actor, actor->player->attach_char - 1);
                 actor->status |= 0x10;
             }
             actor->targetDistance = 550.0f;

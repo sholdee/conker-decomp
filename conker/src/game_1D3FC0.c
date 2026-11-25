@@ -46,7 +46,7 @@ void func_151A6B68(Actor *target, s32 owner) {
     } else {
         actorIndex = -1;
     }
-    func_1505D024(target, 0x60034, target->unk7A, actorIndex);
+    func_1505D024(target, 0x60034, target->langle, actorIndex);
 }
 
 /* Returns the first type-0x2C object in either object list, among the object types listed in D_800A5770,

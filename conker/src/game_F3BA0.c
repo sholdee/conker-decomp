@@ -113,13 +113,13 @@ WatcherEmitter *func_150C68C4(Actor *character, Watcher *watcher) {
 
         link.owner = &watcher->watcher;
         link.keepAlive = 1;
-        pos[0] = character->x_position;
-        pos[1] = character->y_position + D_800A0450;
-        pos[2] = character->z_position;
-        if (func_15045800(pos, 0, character->y_position - 100.0f, &watcher->watcher.hit) != 0) {
+        pos[0] = character->xpos;
+        pos[1] = character->ypos + D_800A0450;
+        pos[2] = character->zpos;
+        if (func_15045800(pos, 0, character->ypos - 100.0f, &watcher->watcher.hit) != 0) {
             link.ceiling = watcher->watcher.hit.height;
         } else {
-            link.ceiling = character->y_position + D_800A0454;
+            link.ceiling = character->ypos + D_800A0454;
         }
     }
     desc.target[0] = 0;
@@ -244,14 +244,14 @@ FlickerSprite *func_150C6D90(Watcher *watcher) {
 
     sprite = NULL;
     character = watcher->watcher.character;
-    if (character->unk1D4) {
+    if (character->ob_matrix_ptr) {
         Vec3f origin = D_800887E0;
 
-        func_15143134(&origin, &pos, character->unk1D4);
+        func_15143134(&origin, &pos, character->ob_matrix_ptr);
     } else {
-        pos.x = character->x_position;
-        pos.y = character->y_position;
-        pos.z = character->z_position;
+        pos.x = character->xpos;
+        pos.y = character->ypos;
+        pos.z = character->zpos;
     }
     {
         Vec3f probe;

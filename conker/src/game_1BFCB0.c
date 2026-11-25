@@ -41,7 +41,7 @@ void func_15192800(Actor *obj, s32 arg1) {
 s32 func_151928B0(Actor *obj, s32 *group) {
     s32 found;
 
-    switch (obj->id) {
+    switch (obj->character_type) {
     case 0:
     case 1:
     case 2:

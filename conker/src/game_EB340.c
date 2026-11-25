@@ -109,7 +109,7 @@ void func_150BE150(EB340Obj *obj, void **msg, u8 event) {
     } else if (event == 0) {
         Actor *sender = msg[0];
 
-        if (sender->camera == obj->spawn.owner) {
+        if (sender->CameraPtr == obj->spawn.owner) {
             func_1516972C(&obj->base.header);
         }
     }
@@ -217,12 +217,12 @@ typedef struct {
     /* 0x02 */ s16 value;
 } EB340Command;
 
-/* Writes object `id`'s two commands (0x68 = unk2E8, 0xE = unk2E4) and returns the next slot. */
+/* Writes object `id`'s two commands (0x68 = taskint[1], 0xE = taskint[0]) and returns the next slot. */
 EB340Command *func_150BE438(EB340Command *cmd, s32 id) {
     cmd[0].opcode = 0x68;
-    cmd[0].value = movement_obj[id].unk2E8;
+    cmd[0].value = movement_obj[id].taskint[1];
     cmd[1].opcode = 0xE;
-    cmd[1].value = movement_obj[id].unk2E4;
+    cmd[1].value = movement_obj[id].taskint[0];
     return cmd + 2;
 }
 
@@ -249,7 +249,7 @@ void func_150BE494(Actor *obj, u8 arg1, s32 arg2) {
     DebrisBurst secondary;
 
     if (obj != NULL) {
-        halfSize = (obj->xz_scale + obj->y_scale) * 0.5f;
+        halfSize = (obj->scale_xz + obj->scale_y) * 0.5f;
         func_1515C244(obj, &pos, &radius, &unk2);
         func_1504715C(&ground, obj);
         primary.countBase = 10;

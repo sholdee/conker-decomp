@@ -75,16 +75,16 @@ s32 func_150CE200(MosaicEffect *effect) {
     f32 projectedW;
     f32 scale;
 
-    if (mosaic->owner->interaction_state == 0) {
+    if (mosaic->owner->type == 0) {
         return 0;
     }
     if (mosaic->owner->unique_id != mosaic->ownerId) {
         return 0;
     }
-    if (mosaic->owner->unk1D4 == NULL) {
+    if (mosaic->owner->ob_matrix_ptr == NULL) {
         mosaic->flags &= ~1;
     } else {
-        func_15143134(D_800A07F0, pos, (Mtx *)mosaic->owner->unk1D4 + 52);
+        func_15143134(D_800A07F0, pos, (Mtx *)mosaic->owner->ob_matrix_ptr + 52);
         if (func_15144CEC(pos, mosaic->center, &projectedZ, &projectedW, &scale, D_80082FA4)) {
             f32 dx;
             f32 dy;
@@ -234,17 +234,17 @@ void func_150CE740(Actor *obj) {
     s16 v; // matching: one s16 for both the control index and the 3/4 anim value merges their registers
 
     isType21 = 0;
-    prevFacing = obj->unk7A;
-    if (obj->id == 0x21) {
+    prevFacing = obj->langle;
+    if (obj->character_type == 0x21) {
         isType21 = 1;
     }
-    v = obj->unk13C;
+    v = obj->lifting;
     if ((v == 0) && (D_800BE616 == 0)) {
         goto control_done; // matching: a goto (not an if block) lets IDO keep D_800BE616 in a register
     }
     action = 0;
     if (D_800BE616 != 0) {
-        if (obj->unk31C->bot != 0) {
+        if (obj->mv->bot != 0) {
             func_1504C854(obj);
         } else {
             D_800CC288 = D_800BE710[dc_glbl_CharNum];
@@ -252,11 +252,11 @@ void func_150CE740(Actor *obj) {
     } else {
         D_800CC288 = D_800BE648[v];
     }
-    if ((D_800CC288 & 0x8000) && (obj->disable_jump == 0) && (obj->unk28 == 0.0f)) {
+    if ((D_800CC288 & 0x8000) && (obj->nojump == 0) && (obj->shad == 0.0f)) {
         action = 1;
     }
-    if ((D_800CC288 & 0x6000) && (obj->unk28 == 0.0f) &&
-        ((isType21 && (obj->disable_run != 0xFF)) || (obj->disable_run == 0))) {
+    if ((D_800CC288 & 0x6000) && (obj->shad == 0.0f) &&
+        ((isType21 && (obj->norun != 0xFF)) || (obj->norun == 0))) {
         action = 2;
     }
     if (action) {
@@ -266,106 +266,106 @@ void func_150CE740(Actor *obj) {
         if (D_800BE616 != 0) {
             action += 2;
         }
-        obj->disable_run = 180;
-        obj->unk232 = D_800A080F[action];
+        obj->norun = 180;
+        obj->intelwalk = D_800A080F[action];
         obj->unk218 = NULL;
-        if ((obj->unk232 == 0x22) && (obj->unk2E4 == 0)) {
-            obj->unk31C->shotsfired++;
+        if ((obj->intelwalk == 0x22) && (obj->taskint[0] == 0)) {
+            obj->mv->shotsfired++;
         }
     }
-    obj->unk124 = 0;
-    if ((obj->disable_run == 0) && ((D_800BE616 == 0) || (obj->unk31C->bot == 0))) {
+    obj->owner = 0;
+    if ((obj->norun == 0) && ((D_800BE616 == 0) || (obj->mv->bot == 0))) {
         if (D_800BE616 != 0) {
             /* camera yaw in degrees -> 16-bit binary angle (65536 / 360) */
             D_800CC280 = camera_global_Cameras[dc_glbl_CharNum].yaw * 182.0444488525390625f;
             heading = func_1505A630(D_800CC284->stick_x, D_800CC284->stick_y, 0) + D_800CC280;
-            obj->unk44 = func_1505A5CC(D_800CC284);
+            obj->stickspeed = func_1505A5CC(D_800CC284);
         } else {
-            obj->unk44 = movement_obj[obj->unk124].unk44 * 1.75f;
-            heading = movement_obj[obj->unk124].unk31C->press_angle;
+            obj->stickspeed = movement_obj[obj->owner].stickspeed * 1.75f;
+            heading = movement_obj[obj->owner].mv->press_angle;
         }
         if (obj->unk223 == 13) {
-            obj->unk44 = 0.0f;
+            obj->stickspeed = 0.0f;
         }
         if (isType21) {
-            if (obj->unk44 < 5.0f) {
+            if (obj->stickspeed < 5.0f) {
                 heading = func_150ADA20();
-                obj->unk44 = (func_150ADA20() % 60U) + 20.0f;
+                obj->stickspeed = (func_150ADA20() % 60U) + 20.0f;
             }
-            obj->unk78 = ((func_150ADA20() % 10000U) + heading) - 5000;
-            obj->unk44 = (obj->unk44 * 0.5f) + 22.0f;
-            if ((u8)(((s32)(obj->unk76 - obj->unk78) >> 8) - 0x50) < 0x60) {
+            obj->fangle = ((func_150ADA20() % 10000U) + heading) - 5000;
+            obj->stickspeed = (obj->stickspeed * 0.5f) + 22.0f;
+            if ((u8)(((s32)(obj->angle - obj->fangle) >> 8) - 0x50) < 0x60) {
                 obj->unk218 = NULL;
-                obj->unk232 = 0x10;
+                obj->intelwalk = 0x10;
             }
-        } else if (obj->unk44 < 5.0f) {
-            obj->unk44 = 0.0f;
-            if (obj->unk232 != 5) {
-                obj->unk78 = obj->unk76;
+        } else if (obj->stickspeed < 5.0f) {
+            obj->stickspeed = 0.0f;
+            if (obj->intelwalk != 5) {
+                obj->fangle = obj->angle;
             }
         } else {
-            obj->unk78 = heading;
+            obj->fangle = heading;
             if (obj->unk223 == 1) {
                 v = 3;
-                if (obj->xz_velocity < 35.0f) {
+                if (obj->speed < 35.0f) {
                     v = 4;
                 }
                 obj->unk1E6 = v;
                 obj->unk1E5 = v;
-                if ((u8)(((s32)(obj->unk76 - obj->unk78) >> 8) - 0x50) < 0x60) {
-                    if (obj->xz_velocity > 35.0f) {
-                        obj->unk232 = 4;
+                if ((u8)(((s32)(obj->angle - obj->fangle) >> 8) - 0x50) < 0x60) {
+                    if (obj->speed > 35.0f) {
+                        obj->intelwalk = 4;
                     } else {
-                        obj->unk232 = 5;
+                        obj->intelwalk = 5;
                     }
                 } else {
-                    obj->unk232 = 3;
+                    obj->intelwalk = 3;
                 }
                 obj->unk218 = NULL;
             }
         }
     }
 control_done:
-    if ((D_800BE616 == 0) || (dc_glbl_CharNum >= D_8008FD8C) || (obj->unk31C->death_State == 0)) {
+    if ((D_800BE616 == 0) || (dc_glbl_CharNum >= D_8008FD8C) || (obj->mv->death_State == 0)) {
         func_15052590(obj);
     }
-    if ((movement_obj[0].unk31C->jump_on_char != 0) && ((obj->unk232 != D_800A0818[isType21]) || (obj->stunned != 0))) {
-        movement_obj[0].unk31C->jump_on_char = 0;
-        movement_obj[0].disable_run = 0;
-        movement_obj[0].unk83 = 0;
-        movement_obj[0].immune = 0;
-        obj->unk232 = 0x11;
+    if ((movement_obj[0].mv->jump_on_char != 0) && ((obj->intelwalk != D_800A0818[isType21]) || (obj->stunned != 0))) {
+        movement_obj[0].mv->jump_on_char = 0;
+        movement_obj[0].norun = 0;
+        movement_obj[0].count5 = 0;
+        movement_obj[0].imune = 0;
+        obj->intelwalk = 0x11;
     }
     if (D_800BE616 == 0) {
         /* D_800A0818 holds three 2-entry tables indexed by isType21 */
         // matching: (&table[i])[n] adds n after i; table[i + n] folds n into the address
-        if (obj->unk232 == D_800A0818[isType21]) {
+        if (obj->intelwalk == D_800A0818[isType21]) {
             func_15052F9C(obj, 156.0f, (&D_800A0818[isType21])[4], 4, 0, (&D_800A0818[isType21])[2], 0xFF, 0, 0, 0);
-        } else if ((D_800CC268 & 1) && (movement_obj[obj->unk124].unk65 == 0) && (obj->unk25C & 0x400)) {
-            obj->unk124 = 0;
+        } else if ((D_800CC268 & 1) && (movement_obj[obj->owner].attach_char == 0) && (obj->task_attrib & 0x400)) {
+            obj->owner = 0;
             func_1505327C(obj, 50.0f, 3.0f, D_800A0818[isType21], (&D_800A0818[isType21])[4]);
         }
     }
     turn = 0;
-    if ((isType21 && (obj->xz_velocity > 5.0f)) || (!isType21 && (obj->unk84.uh == 10))) {
-        turn = obj->unk76 - obj->unk78;
+    if ((isType21 && (obj->speed > 5.0f)) || (!isType21 && (obj->animseq.uh == 10))) {
+        turn = obj->angle - obj->fangle;
         if (turn > 0x3000) {
             turn = 0x3000;
         }
         if (turn < -0x3000) {
             turn = -0x3000;
         }
-        if (isType21 && (obj->unk13C == 0)) {
+        if (isType21 && (obj->lifting == 0)) {
             turn >>= 1;
         }
     }
-    obj->unkC4 += ((turn * 0.005f) - obj->unkC4) * 0.15f;
+    obj->lean_angle += ((turn * 0.005f) - obj->lean_angle) * 0.15f;
     if (isType21) {
-        obj->unk2E4 += ((s16)((prevFacing - obj->unk7A) * 4) - (s16)obj->unk2E4) / 8;
-        obj->unk2E8 += (-turn - obj->unk2E8) / 8;
+        obj->taskint[0] += ((s16)((prevFacing - obj->langle) * 4) - (s16)obj->taskint[0]) / 8;
+        obj->taskint[1] += (-turn - obj->taskint[1]) / 8;
     }
     if ((D_800BE616 != 0) && (D_800CC268 != 0)) {
-        owner = obj->unk31C;
+        owner = obj->mv;
         if ((owner != NULL) && (((u8 *)owner)[0x1AC] != 0)) { /* past the end of ActorCtl as declared */
             func_15063168(obj);
         }

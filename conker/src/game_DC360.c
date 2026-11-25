@@ -48,9 +48,9 @@ void func_150AEEB0(Actor *obj, u8 owner) {
             sinYaw = func_151423D8(yaw);
             cosYaw = func_151423D8(yaw - 0x40);
             speed = func_150ADA68() * 5.0f + 10.0f;
-            spawn.pos.x = obj->x_position + 100.0f * cosYaw;
-            spawn.pos.y = func_150ADA68() * 15.0f + obj->y_position;
-            spawn.pos.z = obj->z_position + 100.0f * sinYaw;
+            spawn.pos.x = obj->xpos + 100.0f * cosYaw;
+            spawn.pos.y = func_150ADA68() * 15.0f + obj->ypos;
+            spawn.pos.z = obj->zpos + 100.0f * sinYaw;
             spawn.itemCount = func_150ADA20() % 7U + 3;
             spawn.life = func_150ADA20() % 26U + 35;
             motion.halfWidth = func_150ADA68() * 6.0f + 2.0f;

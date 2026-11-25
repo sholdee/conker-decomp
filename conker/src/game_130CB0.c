@@ -58,9 +58,9 @@ s32 func_15103910(ObjSoundRecord *record, s32 *active, u32 *volume, s32 *pan, s3
 
     obj = record->obj;
     remaining = record->delay;
-    record->x = obj->x_position;
-    record->y = obj->y_position;
-    record->z = obj->z_position;
+    record->x = obj->xpos;
+    record->y = obj->ypos;
+    record->z = obj->zpos;
     if (remaining != 0) {
         if (*sound != 0) {
             record->delay = (*sound << 16) | (record->delay & 0xFFFF);
@@ -104,9 +104,9 @@ s32 func_15103AA0(ObjSoundRecord *record, s32 *active, u32 *volume, s32 *pan, s3
 
     obj = record->obj;
     remaining = record->delay & 0x7FFF;
-    record->x = obj->x_position;
-    record->y = obj->y_position;
-    record->z = obj->z_position;
+    record->x = obj->xpos;
+    record->y = obj->ypos;
+    record->z = obj->zpos;
     if (remaining != 0) {
         if (*sound != 0) {
             record->delay = (*sound << 16) | (record->delay & 0xFFFF);
@@ -169,17 +169,17 @@ void func_15103C14(s32 sound, s32 objId, u32 variantCount, s32 slot, s32 pairVar
         }
     }
 
-    if (obj->camera != NULL) {
+    if (obj->CameraPtr != NULL) {
         hasCamera = TRUE;
     } else if (pairVariants) {
         sound += 1;
     }
 
     if (hasCamera) {
-        func_1000FA64(sound, obj->x_position, obj->y_position, obj->z_position, 30000, 0x7FFF,
+        func_1000FA64(sound, obj->xpos, obj->ypos, obj->zpos, 30000, 0x7FFF,
                       0x7FFE, func_15103910, 20, obj, 0x100, 0);
     } else {
-        func_1000FA64(sound, obj->x_position, obj->y_position, obj->z_position, 32700, 0x7FFF,
+        func_1000FA64(sound, obj->xpos, obj->ypos, obj->zpos, 32700, 0x7FFF,
                       0x7FFE, func_15103AA0, (pairVariants << 15) | 20, obj, 0x100, 0);
     }
 

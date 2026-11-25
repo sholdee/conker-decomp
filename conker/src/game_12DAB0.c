@@ -107,8 +107,8 @@ EffectParticle *func_15100600(Actor *owner, Vec3f *vec1, Vec3f *vec2, u8 arg3, s
         hasLifetime = TRUE;
     }
     data.ownerSlot = owner - movement_obj;
-    if (owner->camera != NULL) {
-        data.unk22 = owner->camera->playerIndex;
+    if (owner->CameraPtr != NULL) {
+        data.unk22 = owner->CameraPtr->playerIndex;
     } else {
         data.unk22 = 0xFF;
     }
@@ -139,7 +139,7 @@ EffectParticle *func_15100600(Actor *owner, Vec3f *vec1, Vec3f *vec2, u8 arg3, s
     data.unk80 = 127.0f;
     data.unk88 = 20.0f;
     data.unk8C = 0.400000006f;
-    if (owner->camera != NULL) {
+    if (owner->CameraPtr != NULL) {
         data.sound = func_10010F30(0x4D0, 2000, 0x40, 0, 0);
     } else {
         data.sound = 0;

@@ -42,22 +42,22 @@ s32 func_15184150(s32 objIndex, f32 *halfX, f32 *halfY, f32 *halfZ) {
     MtxF *bones;
 
     obj = &movement_obj[objIndex];
-    id = obj->id;
+    id = obj->character_type;
     *halfZ = 0.0f;
     *halfY = 0.0f;
     *halfX = 0.0f;
-    if (obj->unk1D4 == NULL || D_800C3E90 != 0) {
+    if (obj->ob_matrix_ptr == NULL || D_800C3E90 != 0) {
         return 0;
     }
     count = func_1502DB20(id);
     for (i = 0; i < count; i++) {
-        bones = obj->unk1D4;
+        bones = obj->ob_matrix_ptr;
         dx = bones[i][3][0];
         dy = bones[i][3][1];
         dz = bones[i][3][2];
-        dx -= obj->x_position;
-        dy -= obj->y_position;
-        dz -= obj->z_position;
+        dx -= obj->xpos;
+        dy -= obj->ypos;
+        dz -= obj->zpos;
         if (dx < 0.0f) {
             dx = -dx;
         }
@@ -79,12 +79,12 @@ s32 func_15184150(s32 objIndex, f32 *halfX, f32 *halfY, f32 *halfZ) {
     }
 
     if (*halfX == 0.0f || *halfY == 0.0f || *halfZ == 0.0f) {
-        dx = D_800D1C90[obj->id]->unk1A;
-        dy = obj->xz_scale * dx;
+        dx = D_800D1C90[obj->character_type]->unk1A;
+        dy = obj->scale_xz * dx;
         *halfZ = dy;
         *halfX = dy;
-        dx = D_800D1C90[obj->id]->unk1C + D_800D1C90[obj->id]->unk1E;
-        *halfY = obj->y_scale * dx;
+        dx = D_800D1C90[obj->character_type]->unk1C + D_800D1C90[obj->character_type]->unk1E;
+        *halfY = obj->scale_y * dx;
     }
 }
 
@@ -141,11 +141,11 @@ f32 func_15184368(s32 objIndex, s32 slot, f32 halfX, f32 halfY, f32 halfZ, f32 m
     obj = &movement_obj[objIndex];
     done = 0;
     dist = 5000.0f;
-    objPos.x = obj->x_position;
+    objPos.x = obj->xpos;
     perspScale = 2.0f;
-    objPos.y = obj->y_position;
+    objPos.y = obj->ypos;
     found = 0;
-    objPos.z = obj->z_position;
+    objPos.z = obj->zpos;
     if (D_800DE034 == 0) {
         node = D_800DCD78;
         while (node != NULL) {
@@ -331,9 +331,9 @@ s32 func_15184DF0(s32 objIndex, s32 view, f32 *halfX, f32 *halfY, f32 *halfZ) {
     f32 z;
     s32 dist;
 
-    x = movement_obj[objIndex].x_position;
-    y = movement_obj[objIndex].y_position;
-    z = movement_obj[objIndex].z_position;
+    x = movement_obj[objIndex].xpos;
+    y = movement_obj[objIndex].ypos;
+    z = movement_obj[objIndex].zpos;
     dist = math_distance3D(x - camera_global_Cameras[view].eye.x,
                          y - camera_global_Cameras[view].eye.y,
                          z - camera_global_Cameras[view].eye.z);
@@ -370,10 +370,10 @@ Gfx *func_15184FA4(Gfx *gfx, s32 objIndex, s32 slot, s32 view) {
     s32 lod;
     s32 col[3];
 
-    if (movement_obj[objIndex].unk127 == 0xFF) {
-        lod = movement_obj[objIndex].lod + 1;
+    if (movement_obj[objIndex].playernumber == 0xFF) {
+        lod = movement_obj[objIndex].current_lod + 1;
     } else {
-        lod = movement_obj[objIndex].lod;
+        lod = movement_obj[objIndex].current_lod;
     }
     gDPPipeSync(gfx++);
     gDPSetColorImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_8b, 64, D_800DF088);
@@ -383,7 +383,7 @@ Gfx *func_15184FA4(Gfx *gfx, s32 objIndex, s32 slot, s32 view) {
     gSPMatrix(gfx++, &D_800DF2F8[slot][D_800BE9C0], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPMatrix(gfx++, &D_89470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     col[0] = col[1] = col[2] = 0;
-    gfx = func_1502CCFC(gfx, objIndex, view, movement_obj[objIndex].unk1D4, func_1506196C(&movement_obj[objIndex], view), col, 3, 1);
+    gfx = func_1502CCFC(gfx, objIndex, view, movement_obj[objIndex].ob_matrix_ptr, func_1506196C(&movement_obj[objIndex], view), col, 3, 1);
     gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
     gDPPipeSync(gfx++);
     if (lod < 2) {
@@ -852,23 +852,23 @@ Gfx *func_15186794(Gfx *gfx, s32 view) {
     vtxTotal = 0;
     for (i = 0; i < 25; i++) {
         // matching: the dead store to v and the repeated unk74 test (as u32) steer IDO's register allocation
-        if (movement_obj[i].interaction_state == 0 || movement_obj[i].unk1D4 == NULL ||
-            ((v = movement_obj[i].unk74) & (1 << view)) || movement_obj[i].unk5 != 0 ||
+        if (movement_obj[i].type == 0 || movement_obj[i].ob_matrix_ptr == NULL ||
+            ((v = movement_obj[i].unk74) & (1 << view)) || movement_obj[i].drawtype != 0 ||
             (movement_obj[i].unk66 & 0x10) != 0x10 ||
             (u32)(movement_obj[i].unk74 & (1 << view)) == (u32)(1 << view) ||
-            movement_obj[i].unk84.uh == 0x2D8 ||
-            (movement_obj[i].unk31C != NULL && (movement_obj[i].unk31C->ladder != 0 || movement_obj[i].unk31C->rope != 0)) ||
+            movement_obj[i].animseq.uh == 0x2D8 ||
+            (movement_obj[i].mv != NULL && (movement_obj[i].mv->ladder != 0 || movement_obj[i].mv->rope != 0)) ||
             (D_800DF0E0 & (1 << i))) {
             continue;
         }
-        if (movement_obj[i].unk65 != 0 && movement_obj[i].id != 0x62) {
+        if (movement_obj[i].attach_char != 0 && movement_obj[i].character_type != 0x62) {
             continue;
         }
         if (movement_obj[i].lodCount != 0) {
             modelId = func_150849CC(&movement_obj[i], &modelSub);
             func_1503DA9C(&movement_obj[i], modelId, modelSub, 0);
         } else {
-            modelId = movement_obj[i].id;
+            modelId = movement_obj[i].character_type;
             modelSub = 0;
         }
         if (D_800C48F0[modelId] == NULL) {
@@ -884,16 +884,16 @@ Gfx *func_15186794(Gfx *gfx, s32 view) {
                 break;
             }
             mtx = (f32 *)D_800DF0F8[slot];
-            recvCount = func_151873E4(movement_obj[i].x_position, movement_obj[i].z_position, 230, recv, mtx, &recv[D_8008D3E0 - 2],
-                                  func_1518652C(movement_obj[i].x_position, movement_obj[i].z_position, 230, recv, mtx, &recv[D_8008D3E0 - 2]));
+            recvCount = func_151873E4(movement_obj[i].xpos, movement_obj[i].zpos, 230, recv, mtx, &recv[D_8008D3E0 - 2],
+                                  func_1518652C(movement_obj[i].xpos, movement_obj[i].zpos, 230, recv, mtx, &recv[D_8008D3E0 - 2]));
             if (recvCount != 0) {
                 idx = 0;
                 gfx = func_15184FA4(gfx, i, slot, view);
                 batch = 0;
-                if (movement_obj[i].unk127 != 0xFF && movement_obj[i].lod < 2) {
+                if (movement_obj[i].playernumber != 0xFF && movement_obj[i].current_lod < 2) {
                     split = 1;
-                } else if (i + 1 == movement_obj[movement_obj[i].unk124].unk65 &&
-                           movement_obj[movement_obj[i].unk124].unk127 != 0xFF && movement_obj[i].id == 0x53) {
+                } else if (i + 1 == movement_obj[movement_obj[i].owner].attach_char &&
+                           movement_obj[movement_obj[i].owner].playernumber != 0xFF && movement_obj[i].character_type == 0x53) {
                     split = 1;
                 } else {
                     split = 0;

@@ -49,7 +49,7 @@ void func_150FED30(Actor *obj, s32 arg1, s32 arg2) {
         func_151D5148(obj);
         func_150FF2AC(obj, &direction, &axis0, &axis1);
 
-        if ((obj->unk1D4 != NULL) && ((obj->unk74 & 0xF) != 0xF)) {
+        if ((obj->ob_matrix_ptr != NULL) && ((obj->unk74 & 0xF) != 0xF)) {
             valid = TRUE;
         } else {
             valid = FALSE;
@@ -68,7 +68,7 @@ void func_150FED30(Actor *obj, s32 arg1, s32 arg2) {
             kind = 0x1A;
         }
 
-        if (obj->id == 0x98) {
+        if (obj->character_type == 0x98) {
             directionSign = 1;
         } else {
             directionSign = -1;
@@ -84,7 +84,7 @@ void func_150FED30(Actor *obj, s32 arg1, s32 arg2) {
         if (valid) {
             func_151D3F14(&position, ((u8 *)&arg1)[3], arg2);
             /* byte 2 of an attachment is the owner bone it follows */
-            func_151D4408(&hit, &normal, obj->unk1D4[gun->bone], obj, 1.0f,
+            func_151D4408(&hit, &normal, obj->ob_matrix_ptr[gun->bone], obj, 1.0f,
                           ((u8 *)&arg1)[3], arg2);
             func_150FF474(&position, points, ((u8 *)&arg1)[3], arg2);
         }
@@ -98,15 +98,15 @@ void func_150FEFD0(Actor *obj, s16 setId, Vec3f *out) {
     ModelAttachment *attachment;
 
     if (setId == -1) {
-        out->x = obj->x_position;
-        out->y = obj->y_position;
-        out->z = obj->z_position;
+        out->x = obj->xpos;
+        out->y = obj->ypos;
+        out->z = obj->zpos;
     } else {
         attachment = func_1503195C(obj, setId, 0);
         if (attachment == NULL) {
-            out->x = obj->x_position;
-            out->y = obj->y_position;
-            out->z = obj->z_position;
+            out->x = obj->xpos;
+            out->y = obj->ypos;
+            out->z = obj->zpos;
         } else {
             src = &D_800A2050;
             dst = out;
@@ -139,7 +139,7 @@ void func_150FF084(Actor *obj, u8 arg1, s32 arg2) {
         func_151D5148(obj);
         func_150FF2AC(obj, &direction, &axis0, &axis1);
 
-        if (obj->unk1D4 != NULL) {
+        if (obj->ob_matrix_ptr != NULL) {
             valid = TRUE;
         } else {
             valid = FALSE;
@@ -160,7 +160,7 @@ void func_150FF084(Actor *obj, u8 arg1, s32 arg2) {
 
         if (valid) {
             func_151D3F14(&position, arg1, arg2);
-            func_151D4408(&hit, &normal, obj->unk1D4[gun->bone], obj, 1.0f,
+            func_151D4408(&hit, &normal, obj->ob_matrix_ptr[gun->bone], obj, 1.0f,
                           arg1, arg2);
             func_150FF474(&position, points, arg1, arg2);
         }
@@ -210,9 +210,9 @@ void func_150FF2D4(u8 *valid, Vec3f *points, Vec3f *position, Vec3f *hit, Vec3f 
             sideZ = 1.0f;
             sideX = 0.0f;
         }
-        position->x = obj->x_position + (34.0f * sideX);
-        position->y = obj->y_position + 49.0f;
-        position->z = obj->z_position + (34.0f * sideZ);
+        position->x = obj->xpos + (34.0f * sideX);
+        position->y = obj->ypos + 49.0f;
+        position->z = obj->zpos + (34.0f * sideZ);
         *endpoint = *position;
     }
     func_151D5174(obj, position, direction, axis0, axis1, output0, output1, value0, value1, endpoint);
@@ -280,7 +280,7 @@ void func_150FF474(Vec3f *position, Vec3f *points, u8 arg2, s32 arg3) {
 
 /* Returns FALSE for object id 0x98, TRUE otherwise. */
 s32 func_150FF6B4(Actor *obj, s32 arg1, s32 arg2) {
-    if (obj->id == 0x98) {
+    if (obj->character_type == 0x98) {
         return FALSE;
     }
     return TRUE;
@@ -357,7 +357,7 @@ void func_150FF840(Actor *obj, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
 
     func_150FFCC8(obj, &position, &direction, &axis0, &axis1);
     func_151D5148(obj);
-    if ((obj->unk1D4 != NULL) && ((obj->unk74 & 0xF) != 0xF)) {
+    if ((obj->ob_matrix_ptr != NULL) && ((obj->unk74 & 0xF) != 0xF)) {
         func_151D3F14(&position, arg3, arg4);
         motion[1] = ((func_150ADA68() * 3400.0f) + 4800.0f) * 0.001000000047f;
         motion[0] = ((func_150ADA68() * 220.0f) + 320.0f) * 0.1000000015f;
@@ -385,7 +385,7 @@ void func_150FF840(Actor *obj, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
         func_150FFB6C(&trail[2], &position, obj, 0x31);
     }
     if (arg2) {
-        state = obj->unk31C;
+        state = obj->mv;
         if (state != NULL) {
             buffer = (u8 *)state + 0xB0;
         } else {
@@ -407,7 +407,7 @@ void func_150FFB6C(Vec3f *position, Vec3f *origin, Actor *obj, s32 type) {
 
     flags = type | 0x60000;
     index = obj - movement_obj;
-    angle = obj->unk7A;
+    angle = obj->langle;
     func_1505D1C4(position->x, position->y, position->z, flags, index, angle, 0, origin);
 }
 
@@ -420,7 +420,7 @@ void func_150FFBDC(Actor *obj, s32 arg1, Vec3f *out) {
 
     src = &D_800A2130;
     dst = out;
-    func_15145EA4(&src, &dst, obj->unk1D4[D_80088BB0], 1);
+    func_15145EA4(&src, &dst, obj->ob_matrix_ptr[D_80088BB0], 1);
 }
 
 void func_151D8868(RumbleParams *event, s32 arg1, s32 arg2, s32 arg3);
@@ -429,10 +429,10 @@ void func_151D8868(RumbleParams *event, s32 arg1, s32 arg2, s32 arg3);
 void func_150FFC3C(Actor *obj) {
     RumbleParams event;
 
-    if (obj->camera != NULL) {
+    if (obj->CameraPtr != NULL) {
         event.flags = 1;
         event.duration = (func_150ADA20() % 11U) + 20;
-        event.playerMask = 1 << obj->camera->playerIndex;
+        event.playerMask = 1 << obj->CameraPtr->playerIndex;
         event.strength = (func_150ADA20() & 1) + 7;
         event.updateKind = -1;
         func_151D8868(&event, 0, 0xFF, 1);
@@ -453,7 +453,7 @@ void func_15081E0C(Actor *obj, s32 arg1, s32 arg2);
 
 /* Calls func_15081E0C(other, 4, 0) when `other` is a 0x9F/0xA0 object without flag 0x80 in unk94. */
 void func_150FFD2C(Actor *obj, Actor *other, s32 arg2) {
-    if (other->id == 0x9F || other->id == 0xA0) {
+    if (other->character_type == 0x9F || other->character_type == 0xA0) {
         if (!(other->unk94 & 0x80)) {
             func_15081E0C(other, 4, 0);
         }

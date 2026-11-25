@@ -84,12 +84,12 @@ enum {
 
 #define BLOOD_PROFILE_NONE 99
 
-/* An actor's bone matrix (unk1D4 holds 0x40-byte matrices). */
-#define BONE_MATRIX(actor, bone) ((u8 *)(actor)->unk1D4 + (bone) * 0x40)
+/* An actor's bone matrix (ob_matrix_ptr holds 0x40-byte matrices). */
+#define BONE_MATRIX(actor, bone) ((u8 *)(actor)->ob_matrix_ptr + (bone) * 0x40)
 
 /* Returns the blood profile index (0-19) for an actor's model, or BLOOD_PROFILE_NONE. */
 s32 func_15134070(Actor *actor) {
-    switch (actor->id) {
+    switch (actor->character_type) {
     case MODEL_SHC_SOLDIER_DECORATED_UNIFORM:
     case MODEL_SHC_SOLDIER_DECORATED_UNIFORM_VARIANT:
         return 14;
@@ -187,11 +187,11 @@ BloodDrip *func_1513418C(BloodDripDesc *desc, s32 arg1, u8 arg2, s32 arg3) {
     flags = drip->desc.flags;
     if (flags & BLOOD_DRIP_ON_BONE) {
         owner = drip->desc.owner;
-        if ((owner->interaction_state == 0) || (owner->unique_id != drip->desc.ownerId)) {
+        if ((owner->type == 0) || (owner->unique_id != drip->desc.ownerId)) {
             func_1516972C(&drip->header);
             return NULL;
         }
-        if ((owner->unk1D4 != 0) && ((owner->unk74 & 0xF) != 0xF)) {
+        if ((owner->ob_matrix_ptr != 0) && ((owner->unk74 & 0xF) != 0xF)) {
             func_15143134(&drip->desc.offset, &drip->previous, BONE_MATRIX(owner, drip->desc.bone));
         } else {
             drip->desc.flags = flags | BLOOD_DRIP_NO_PREVIOUS;
@@ -235,17 +235,17 @@ void func_151342BC(BloodDrip *drip) {
     flags = drip->desc.flags;
     source = (flags & BLOOD_DRIP_NO_PREVIOUS) ? position : &drip->previous.x;
     if (flags & BLOOD_DRIP_FOLLOW_OWNER) {
-        position[0] = drip->desc.owner->x_position;
-        position[1] = drip->desc.owner->y_position;
-        position[2] = drip->desc.owner->z_position;
+        position[0] = drip->desc.owner->xpos;
+        position[1] = drip->desc.owner->ypos;
+        position[2] = drip->desc.owner->zpos;
     } else {
         if (flags & BLOOD_DRIP_ON_BONE) {
-            if ((drip->desc.owner->interaction_state == 0) || (drip->desc.owner->interaction_state == 8) ||
+            if ((drip->desc.owner->type == 0) || (drip->desc.owner->type == 8) ||
                 (drip->desc.owner->unique_id != drip->desc.ownerId)) {
                 func_1516972C(&drip->header);
                 return;
             }
-            bones = (u8 *)drip->desc.owner->unk1D4;
+            bones = (u8 *)drip->desc.owner->ob_matrix_ptr;
             if ((bones == NULL) || ((drip->desc.owner->unk74 & 0xF) == 0xF)) {
                 drip->desc.flags = flags | BLOOD_DRIP_NO_PREVIOUS;
                 return;
@@ -615,11 +615,11 @@ void func_15134E48(BloodStrip *arg0) {
     u8 *boneMatrix;
 
     kill = 0;
-    if (strip->owner->interaction_state == 0 || strip->owner->unique_id != strip->ownerId) {
+    if (strip->owner->type == 0 || strip->owner->unique_id != strip->ownerId) {
         kill = 1;
     }
     if (strip->active & 1) {
-        if (!kill && strip->owner->unk1D4 != 0 && (strip->owner->unk74 & 0xF) != 0xF) {
+        if (!kill && strip->owner->ob_matrix_ptr != 0 && (strip->owner->unk74 & 0xF) != 0xF) {
             boneMatrix = BONE_MATRIX(strip->owner, strip->bone);
             strip->timer -= D_800BE9E4;
             if (strip->timer < -strip->pause) {
@@ -1130,10 +1130,10 @@ void func_15136404(Actor *actor, f32 radius, u8 arg2, s32 arg3) {
         func_1504715C(&hit, actor);
         while (count > 1.0f) {
             func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * radius, &probe.x, &probe.z);
-            probe.x += actor->x_position;
-            probe.z += actor->z_position;
-            probe.y = actor->y_position + 500.0f;
-            if (func_15046C80(&probe, 0, actor->y_position - 5000.0f, &hit) != 0 && hit.source != 3) {
+            probe.x += actor->xpos;
+            probe.z += actor->zpos;
+            probe.y = actor->ypos + 500.0f;
+            if (func_15046C80(&probe, 0, actor->ypos - 5000.0f, &hit) != 0 && hit.source != 3) {
                 pos.x = probe.x;
                 pos.y = hit.height;
                 pos.z = probe.z;
@@ -1375,7 +1375,7 @@ void func_15136C3C(Actor *actor, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
     if (actor == NULL) {
         return;
     }
-    scale = (actor->xz_scale + actor->y_scale) * 0.5f;
+    scale = (actor->scale_xz + actor->scale_y) * 0.5f;
     func_1515C244(actor, &position, &unused0, &unused1);
     kind = func_15134070(actor);
     if (kind == BLOOD_PROFILE_NONE) {
@@ -1384,7 +1384,7 @@ void func_15136C3C(Actor *actor, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
     func_1504715C(&hit, actor);
     if (arg3 != 0) {
         func_1513A24C(&position, D_80089A20[kind], &D_800A3C30,
-                      ((arg5 != 0) || ((kind == 4) && (actor->id != MODEL_UGA_BUGA_BLUE_HEADGEAR)))
+                      ((arg5 != 0) || ((kind == 4) && (actor->character_type != MODEL_UGA_BUGA_BLUE_HEADGEAR)))
                           ? D_800A3F14[kind] - 2
                           : D_800A3F14[kind],
                       scale, kind, D_800A3F64[kind], (u8 *)actor, &hit, arg6,
@@ -1552,11 +1552,11 @@ void func_15137610(Actor *actor, Vec3f *from, Vec3f *to,
     s32 mode;
 
     if (actor != 0) {
-        if (actor->unk1D4 == 0 || (actor->unk74 & 0xF) == 0xF ||
-            (s32)actor->health <= 0) {
+        if (actor->ob_matrix_ptr == 0 || (actor->unk74 & 0xF) == 0xF ||
+            (s32)actor->energy <= 0) {
             return;
         }
-        mode = actor->id;
+        mode = actor->character_type;
         switch (mode) {
             case 5:
             case 173:
@@ -1594,7 +1594,7 @@ void func_15137610(Actor *actor, Vec3f *from, Vec3f *to,
             case MODEL_TEDIZ_VARIANT_3:
             case 141:
             case MODEL_TEDIZ_BROAD_SHOULDERED_VARIANT:
-                mode = actor->immune;
+                mode = actor->imune;
                 if (mode == 0xFF) {
                     if ((func_150ADA20() & 0x1F) == 0) {
                         mode = 1;
@@ -1606,7 +1606,7 @@ void func_15137610(Actor *actor, Vec3f *from, Vec3f *to,
                 }
                 return;
             default:
-                if (actor->immune == 0 && actor->stunned == 0) {
+                if (actor->imune == 0 && actor->stunned == 0) {
                     mode = 0;
                 } else {
                     return;
@@ -1664,7 +1664,7 @@ void func_1513783C(Actor *actor, u8 arg1, s32 arg2) {
     if (kind == BLOOD_PROFILE_NONE) {
         return;
     }
-    scale = (actor->xz_scale + actor->y_scale) * 0.5f;
+    scale = (actor->scale_xz + actor->scale_y) * 0.5f;
     func_1515C244(actor, &position, &unused0, &unused1);
     func_1504715C(&hit, actor);
     probe.x = position.x;
@@ -1814,7 +1814,7 @@ void func_15137F30(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *veloci
 
 /* Writes the actor's blood point for profile `kind` (bone 12 space) to out; 0 if no skeleton. */
 s32 func_151380B4(Actor *actor, s32 kind, f32 *out) {
-    s32 bones = (s32)actor->unk1D4;
+    s32 bones = (s32)actor->ob_matrix_ptr;
 
     if (bones == 0) {
         return 0;
@@ -1862,9 +1862,9 @@ void func_15138120(Actor *actor, s32 kind, u8 arg2) {
         desc.mode = 0;
         desc.updateCallback = -1;
         desc.rate = 1.0f;
-        desc.sound = func_1000FA64(0x4FE, (s16)(s32)actor->x_position,
-                                   (s16)(s32)actor->y_position,
-                                   (s16)(s32)actor->z_position, 0x5DC0,
+        desc.sound = func_1000FA64(0x4FE, (s16)(s32)actor->xpos,
+                                   (s16)(s32)actor->ypos,
+                                   (s16)(s32)actor->zpos, 0x5DC0,
                                    600, 300, (SoundRecordCallback)func_1000EBC4,
                                    (void *)120, 0, 0, 0);
         func_15134DAC(&desc, 0);
@@ -1941,7 +1941,7 @@ void func_15138424(Actor *actor, Vec3f *position, s32 kind, void *arg3, u8 arg4,
     spawn.rotVel.y = 0.0f;
     spawn.lifetime = func_150ADA20() % 51U + 250;
     spawn.model = D_800A3FD8[kind].unkC;
-    spawn.sizeY = ((&D_800A40C8 == &D_800A3FD8[kind]) ? 0.6000000238f : 1.0f) * ((actor->xz_scale + actor->y_scale) * 0.5f);
+    spawn.sizeY = ((&D_800A40C8 == &D_800A3FD8[kind]) ? 0.6000000238f : 1.0f) * ((actor->scale_xz + actor->scale_y) * 0.5f);
     spawn.sizeXZ = spawn.sizeY;
     spawn.gravity = (func_150ADA68() * 292.0f + -1099.0f) * 0.001000000047f;
     spawn.pos = *position;
@@ -2193,7 +2193,7 @@ void func_15138E98(Actor *actor, f32 *origin, u8 extraSpray, void *hit, u8 arg4,
         tag[0] = 12;
         burst.radius = 1.0f;
         burst.elasticity = 1.0f;
-        burst.sizeXZ = burst.sizeY = (actor->xz_scale + actor->y_scale) * 0.5f;
+        burst.sizeXZ = burst.sizeY = (actor->scale_xz + actor->scale_y) * 0.5f;
         burst.rot.x = 0.0f;
         burst.rot.y = 0.0f;
         burst.rot.z = 0.0f;
@@ -2239,7 +2239,7 @@ void func_15138E98(Actor *actor, f32 *origin, u8 extraSpray, void *hit, u8 arg4,
             }
         }
     }
-    if (actor->unk1D4 == NULL) {
+    if (actor->ob_matrix_ptr == NULL) {
         return;
     }
     if ((actor->unk74 & 0xF) == 0xF) {
@@ -2261,7 +2261,7 @@ void func_15138E98(Actor *actor, f32 *origin, u8 extraSpray, void *hit, u8 arg4,
                       &second[0], &second[1], &second[2]);
         packet.radius = 1.0f;
         packet.elasticity = 0.64900005f;
-        packet.sizeXZ = packet.sizeY = (actor->xz_scale + actor->y_scale) * 0.5f;
+        packet.sizeXZ = packet.sizeY = (actor->scale_xz + actor->scale_y) * 0.5f;
         packet.rot = position;
         packet.scale.x = 1.0f;
         packet.scale.y = 0.0f;
@@ -2304,7 +2304,7 @@ void func_15138E98(Actor *actor, f32 *origin, u8 extraSpray, void *hit, u8 arg4,
         }
         spray.radius = 1.0f;
         spray.elasticity = 0.64900005f;
-        spray.sizeXZ = spray.sizeY = (actor->xz_scale + actor->y_scale) * 0.5f;
+        spray.sizeXZ = spray.sizeY = (actor->scale_xz + actor->scale_y) * 0.5f;
         spray.rot = position;
         spray.scale.x = 1.0f;
         spray.scale.y = 1.0f;
@@ -2405,7 +2405,7 @@ void func_15139768(Actor *actor, f32 *origin, f32 scale, void *hit, u8 arg4, s32
         tag[0] = 12;
         spawn.radius = 1.0f;
         spawn.elasticity = 1.0f;
-        spawn.sizeXZ = spawn.sizeY = (actor->xz_scale + actor->y_scale) * 0.5f * scale;
+        spawn.sizeXZ = spawn.sizeY = (actor->scale_xz + actor->scale_y) * 0.5f * scale;
         spawn.rot.x = 0.0f;
         spawn.rot.y = 0.0f;
         spawn.rot.z = 0.0f;
@@ -2451,7 +2451,7 @@ void func_15139768(Actor *actor, f32 *origin, f32 scale, void *hit, u8 arg4, s32
             }
         }
     }
-    if (actor->unk1D4 != 0 && (actor->unk74 & 0xF) != 0xF) {
+    if (actor->ob_matrix_ptr != 0 && (actor->unk74 & 0xF) != 0xF) {
         s32 count;
         u8 mask2;
         u8 j;
@@ -2471,7 +2471,7 @@ void func_15139768(Actor *actor, f32 *origin, f32 scale, void *hit, u8 arg4, s32
         }
         spawn2.radius = 1.0f;
         spawn2.elasticity = 0.6490000486f;
-        spawn2.sizeXZ = spawn2.sizeY = (actor->xz_scale + actor->y_scale) * 0.5f * scale;
+        spawn2.sizeXZ = spawn2.sizeY = (actor->scale_xz + actor->scale_y) * 0.5f * scale;
         spawn2.rot = v;
         spawn2.rotVel.y = 0.0f;
         spawn2.variant = 0;
@@ -2530,7 +2530,7 @@ void func_15139D74(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
         tag[0] = 12;
         burst.radius = 1.0f;
         burst.elasticity = 1.0f;
-        burst.sizeXZ = burst.sizeY = (actor->xz_scale + actor->y_scale) * 0.5f;
+        burst.sizeXZ = burst.sizeY = (actor->scale_xz + actor->scale_y) * 0.5f;
         burst.rot.x = 0.0f;
         burst.rot.y = 0.0f;
         burst.rot.z = 0.0f;
@@ -2576,7 +2576,7 @@ void func_15139D74(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
             }
         }
     }
-    if (actor->unk1D4 == NULL) {
+    if (actor->ob_matrix_ptr == NULL) {
         return;
     }
     if ((actor->unk74 & 0xF) == 0xF) {
@@ -2597,7 +2597,7 @@ void func_15139D74(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
                       &second[0], &second[1], &second[2]);
         packet.radius = 1.0f;
         packet.elasticity = 0.64900005f;
-        packet.sizeXZ = packet.sizeY = (actor->xz_scale + actor->y_scale) * 0.5f;
+        packet.sizeXZ = packet.sizeY = (actor->scale_xz + actor->scale_y) * 0.5f;
         packet.rot = position;
         packet.scale.x = 1.0f;
         packet.scale.y = 0.0f;
@@ -2738,7 +2738,7 @@ void func_1513A48C(Vec3f *position, u8 arg1, s32 arg2) {
 /* Gore for profile 4 actors: just a splash. */
 void func_1513A594(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 arg4) {
     func_1513A5E0(origin, arg3 & 0xFF, arg4);
-    if (actor->unk1D4 != 0) { // matching: dead test, IDO still emits the unk1D4 load
+    if (actor->ob_matrix_ptr != 0) { // matching: dead test, IDO still emits the ob_matrix_ptr load
         if (actor) {
         }
     }
@@ -2794,7 +2794,7 @@ void func_1513A6E0(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
         extra[0] = 12;
         spawn.radius = 1.0f;
         spawn.elasticity = 1.0f;
-        spawn.sizeXZ = spawn.sizeY = (actor->xz_scale + actor->y_scale) * 0.5f;
+        spawn.sizeXZ = spawn.sizeY = (actor->scale_xz + actor->scale_y) * 0.5f;
         spawn.rot.x = 0.0f;
         spawn.rot.y = 0.0f;
         spawn.rot.z = 0.0f;
@@ -2840,7 +2840,7 @@ void func_1513A6E0(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
             }
         }
     }
-    if (actor->unk1D4 != 0 && (actor->unk74 & 0xF) != 0xF) {
+    if (actor->ob_matrix_ptr != 0 && (actor->unk74 & 0xF) != 0xF) {
         Vec3f a;
         Vec3f b;
         ParticleSpawn spawn2;
@@ -2854,7 +2854,7 @@ void func_1513A6E0(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
         }
         spawn2.radius = 1.0f;
         spawn2.elasticity = 0.6490000486f;
-        spawn2.sizeXZ = spawn2.sizeY = (actor->xz_scale + actor->y_scale) * 0.5f;
+        spawn2.sizeXZ = spawn2.sizeY = (actor->scale_xz + actor->scale_y) * 0.5f;
         spawn2.rot = v;
         spawn2.scale.x = 1.0f;
         spawn2.scale.y = 0.0f;
@@ -2915,7 +2915,7 @@ void func_1513ABB8(Actor *actor, f32 *origin, u8 variant, void *hit, u8 arg4, s3
         tag[0] = 12;
         burst.radius = 1.0f;
         burst.elasticity = 1.0f;
-        burst.sizeXZ = burst.sizeY = (actor->xz_scale + actor->y_scale) * 0.5f;
+        burst.sizeXZ = burst.sizeY = (actor->scale_xz + actor->scale_y) * 0.5f;
         burst.rot.x = 0.0f;
         burst.rot.y = 0.0f;
         burst.rot.z = 0.0f;
@@ -2961,7 +2961,7 @@ void func_1513ABB8(Actor *actor, f32 *origin, u8 variant, void *hit, u8 arg4, s3
             }
         }
     }
-    if (actor->unk1D4 == NULL) {
+    if (actor->ob_matrix_ptr == NULL) {
         return;
     }
     if ((actor->unk74 & 0xF) == 0xF) {
@@ -2982,7 +2982,7 @@ void func_1513ABB8(Actor *actor, f32 *origin, u8 variant, void *hit, u8 arg4, s3
                       &second[0], &second[1], &second[2]);
         packet.radius = 1.0f;
         packet.elasticity = 0.64900005f;
-        packet.sizeXZ = packet.sizeY = (actor->xz_scale + actor->y_scale) * 0.5f;
+        packet.sizeXZ = packet.sizeY = (actor->scale_xz + actor->scale_y) * 0.5f;
         packet.rot = position;
         packet.scale.x = 1.0f;
         packet.scale.y = 0.0f;
@@ -3063,7 +3063,7 @@ void func_1513B0F8(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
     tag = 0xC;
     spawn.radius = 1.0f;
     spawn.elasticity = 1.0f;
-    spawn.sizeXZ = spawn.sizeY = (actor->xz_scale + actor->y_scale) * 0.5f;
+    spawn.sizeXZ = spawn.sizeY = (actor->scale_xz + actor->scale_y) * 0.5f;
     spawn.rot.x = 0.0f;
     spawn.rot.y = 0.0f;
     spawn.rot.z = 0.0f;
@@ -3109,7 +3109,7 @@ void func_1513B0F8(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
             }
         }
     }
-    if (actor->unk1D4 == NULL) {
+    if (actor->ob_matrix_ptr == NULL) {
         return;
     }
     if ((actor->unk74 & 0xF) == 0xF) {
@@ -3120,7 +3120,7 @@ void func_1513B0F8(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
                   &second[0], &second[1], &second[2]);
     drop.radius = 1.0f;
     drop.elasticity = 0.64900005f;
-    drop.sizeXZ = drop.sizeY = (actor->xz_scale + actor->y_scale) * 0.5f;
+    drop.sizeXZ = drop.sizeY = (actor->scale_xz + actor->scale_y) * 0.5f;
     drop.rot = rotation;
     drop.scale.x = 1.0f;
     drop.scale.y = 2.0f;

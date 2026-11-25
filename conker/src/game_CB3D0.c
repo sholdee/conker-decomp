@@ -230,15 +230,15 @@ s32 func_1509E3DC(s32 arg0, s32 cmd, struct CB3D0_arg2 *args) {
     case 18:
         obj = func_15083E90((u8)args->params[0]);
         if (obj != NULL) {
-            x = obj->x_position;
-            z = obj->z_position;
+            x = obj->xpos;
+            z = obj->zpos;
             return (x << 16) | (z & 0xFFFF);
         }
         return 0;
     case 19:
         obj = func_15083E90((u8)args->params[0]);
         if (obj != NULL) {
-            return (s16)obj->y_position;
+            return (s16)obj->ypos;
         }
         return 0;
     }

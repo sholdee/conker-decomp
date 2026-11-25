@@ -11,9 +11,9 @@ void func_15193660(Actor *actor, u8 arg1, s32 arg2) {
     ModelBurst burst;
     MtxF *bones;
 
-    if ((actor != NULL) && (actor->interaction_state != 0)) {
-        bones = actor->unk1D4;
-        if (actor->unk1D4 == NULL) { // matching: the original reloads the field rather than testing bones
+    if ((actor != NULL) && (actor->type != 0)) {
+        bones = actor->ob_matrix_ptr;
+        if (actor->ob_matrix_ptr == NULL) { // matching: the original reloads the field rather than testing bones
             return;
         }
         func_15142314(bones, 10, &burst.position);
@@ -63,7 +63,7 @@ void *func_15134DAC(BloodStripDesc *desc, s32 arg1);
 void func_151937F4(Actor *owner, s32 arg1, s32 arg2) {
     BloodStripDesc desc;
 
-    if ((owner != NULL) && (owner->interaction_state != 0)) {
+    if ((owner != NULL) && (owner->type != 0)) {
         desc.ownerId = owner->unique_id;
         desc.owner = owner;
         desc.bone = 0;
@@ -126,7 +126,7 @@ void func_151938FC(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, Emitter *e
     if (!func_1515C0F8(emitter->owner, &ownerMotion)) {
         return;
     }
-    if (emitter->owner->in_water) {
+    if (emitter->owner->inwater) {
         return;
     }
 

@@ -497,7 +497,7 @@ void func_1511BDF4(Game1483E0State *obj) {
         reference = func_15083E90(obj->reference_id);
     }
     if (reference != NULL) {
-        func_1511BB04(obj, reference->x_position, reference->z_position, 1.0f, 1.0f);
+        func_1511BB04(obj, reference->xpos, reference->zpos, 1.0f, 1.0f);
     }
 }
 
@@ -562,10 +562,10 @@ void func_1511BEBC(WorldObject *obj) {
                     continue;
                 }
                 character = player->player;
-                if (character->y_position + 40.0f < pos[1]) {
-                    dy = (character->y_position + (f32)character->bodyHeight) - pos[1];
-                    dz = character->z_position - pos[2];
-                    dx = character->x_position - pos[0];
+                if (character->ypos + 40.0f < pos[1]) {
+                    dy = (character->ypos + (f32)character->bodyHeight) - pos[1];
+                    dz = character->zpos - pos[2];
+                    dx = character->xpos - pos[0];
                     dist = dz * dz + (dx * dx + dy * dy);
                     if (dist != dist) {} // matching: no-op NaN self-test steers IDO's FP scheduling
                     if (dist < radiusSq) {
@@ -578,7 +578,7 @@ void func_1511BEBC(WorldObject *obj) {
         if (target == NULL && (mode == 2 || mode == 1)) {
             for (i = 0; i < D_8008FD8C; i++) {
                 character = &movement_obj[i];
-                if (character->unk31C->unk6B != 0) {
+                if (character->mv->unk6B != 0) {
                     target = character;
                     break;
                 }
@@ -599,9 +599,9 @@ void func_1511BEBC(WorldObject *obj) {
                 }
                 if (target != NULL) {
                     if (timer != 0) {
-                        target->unk31C->unk6B = 1;
+                        target->mv->unk6B = 1;
                     } else {
-                        target->unk31C->unk6B = 2;
+                        target->mv->unk6B = 2;
                     }
                 }
                 if (timer != 0) {
@@ -620,22 +620,22 @@ void func_1511BEBC(WorldObject *obj) {
                         triggered = 0;
                         velocity = 0.0f;
                         if (target != NULL) {
-                            target->unk31C->unk6B = 0;
+                            target->mv->unk6B = 0;
                         }
                         func_10010F88(0x1A5, 0x7FFF, 0, 0, 0, obj->x, obj->y, obj->z, 1500, 3500);
                     }
                 }
                 if (target != NULL) {
-                    target->unk31C->holdX = pos[0];
-                    target->unk31C->holdY = pos[1];
-                    target->unk31C->holdZ = pos[2];
+                    target->mv->holdX = pos[0];
+                    target->mv->holdY = pos[1];
+                    target->mv->holdZ = pos[2];
                 }
             } else if (target != NULL) {
-                if (triggered == 0 && target->unk31C->unk6B == 0) {
+                if (triggered == 0 && target->mv->unk6B == 0) {
                     timer = 50;
                     triggered++;
                 }
-                trap = target->unk31C;
+                trap = target->mv;
                 if (timer != 0) {
                     trap->unk6B = 3;
                 } else if (trap->unk6B == 3) {
@@ -651,9 +651,9 @@ void func_1511BEBC(WorldObject *obj) {
                 }
             }
             if (target != NULL) {
-                target->unk31C->holdX = pos[0];
-                target->unk31C->holdY = pos[1];
-                target->unk31C->holdZ = pos[2];
+                target->mv->holdX = pos[0];
+                target->mv->holdY = pos[1];
+                target->mv->holdZ = pos[2];
             }
         } else if (flag8 == 0 || mode == 1) {
             if (obj->y < restY) {
@@ -671,7 +671,7 @@ void func_1511BEBC(WorldObject *obj) {
                 }
             }
             if (target != NULL) {
-                target->unk31C->unk6B = 0;
+                target->mv->unk6B = 0;
             }
         }
         WORK(obj)->w1511BEBC.triggered = triggered;
@@ -1283,8 +1283,8 @@ void func_1511DD98(WorldObject *obj, Actor *character) {
     s32 isChar80;
 
     volume = 26000;
-    isChar3B = character->id == 0x3B;
-    isChar80 = character->id == 0x80;
+    isChar3B = character->character_type == 0x3B;
+    isChar80 = character->character_type == 0x80;
     sound = 0;
     switch (obj->modelId) {
     case 0x39:
@@ -1424,7 +1424,7 @@ void func_1511DF6C(WorldObject *obj) {
     if (pulse->state < 3 && !skip) {
         for (i = 0; i < D_8008FD8C; i++) {
             character = &movement_obj[i];
-            if (character->interaction_state == 0 || character->health <= 0 || character->unk127 == 0xFF) {
+            if (character->type == 0 || character->energy <= 0 || character->playernumber == 0xFF) {
                 continue;
             }
             if (character->unk300 == 0) {
@@ -1436,8 +1436,8 @@ void func_1511DF6C(WorldObject *obj) {
             if (anim != -1 && func_1503195C(character, anim, 0) != NULL) {
                 continue;
             }
-            dist = ((f32)obj->x - character->x_position) * ((f32)obj->x - character->x_position) + ((f32)obj->z - character->z_position) * ((f32)obj->z - character->z_position);
-            data = (u8 *)character->unk31C;
+            dist = ((f32)obj->x - character->xpos) * ((f32)obj->x - character->xpos) + ((f32)obj->z - character->zpos) * ((f32)obj->z - character->zpos);
+            data = (u8 *)character->mv;
             radius = 100.0f;
             scale = (f32)(((ActorCtl *)data)->unk1AF & 0xFF) * 0.015625f;
             if (((ActorCtl *)data)->bot != 0) {
@@ -1447,7 +1447,7 @@ void func_1511DF6C(WorldObject *obj) {
             if (dist < radius * radius) {
                 func_1507C3E0(character, &height, &unused1, &unused2);
                 y = (f32)obj->y;
-                if (y < character->ceilingY && character->y_position < y + radius && y - radius < character->y_position + height) {
+                if (y < character->ceilingY && character->ypos < y + radius && y - radius < character->ypos + height) {
                     WORK(obj)->w1511DF6C.lastCharacter = character->unique_id;
                     pulse->state = 3;
                     func_1511DD98(obj, character);

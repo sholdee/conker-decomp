@@ -46,11 +46,11 @@ void func_1511FC60(Camera *camera) {
         aim->targetYaw = camera->yaw;
     } else if (aim->unk4D) {
         if (IS_FACING_ZONE(camera->zone)) {
-            aim->targetYaw = (f32)((camera->player->unk7A - camera->playerExt->pssd_waist_tilt) + 0xC000) * BAM2DEG;
+            aim->targetYaw = (f32)((camera->player->langle - camera->playerExt->pssd_waist_tilt) + 0xC000) * BAM2DEG;
         } else if ((D_800D1940 == 0x42) && (zone == 0x1A)) {
-            aim->targetYaw = camera->player->unk40;
+            aim->targetYaw = camera->player->theta;
         } else {
-            aim->targetYaw = camera->player->unk40 - 180.0f;
+            aim->targetYaw = camera->player->theta - 180.0f;
         }
     } else {
         aim->targetYaw = camera->yaw;
@@ -71,7 +71,7 @@ void func_1511FC60(Camera *camera) {
     } else if (zone == 0xF) {
         aim->targetPitch = 27.0f;
         aim->pitch = 27.0f;
-        aim->targetYaw = camera->player->unk40 + 225.0f;
+        aim->targetYaw = camera->player->theta + 225.0f;
     } else {
         aim->targetPitch = 0.0f;
         aim->pitch = 0.0f;
@@ -107,7 +107,7 @@ void func_1511FC60(Camera *camera) {
     aim->stickLock = 0;
     camera->aimState = 1;
     if (camera->snap) {
-        aim->targetYaw = camera->player->unk40 - 180.0f;
+        aim->targetYaw = camera->player->theta - 180.0f;
         camera->yaw = aim->targetYaw;
         camera->yawRad = camera->yaw * DEG2RAD;
         camera->side = camera->sideTarget;
@@ -163,7 +163,7 @@ void func_15120158(Camera *camera) {
             camera->liftTarget = 18.0f;
             camera->sideTarget = 60.0f;
             aim->distance = 250.0f;
-            aim->targetYaw = camera->player->unk40;
+            aim->targetYaw = camera->player->theta;
         } else if (zone == 0x1A) {
             camera->liftTarget = 35.0f;
             camera->sideTarget = 100.0f;
@@ -198,9 +198,9 @@ void func_15120158(Camera *camera) {
         camera->height = (s32)(sinPitch * dist);
         if (camera->snap) {
             if (inMap42Zone1A) {
-                aim->targetYaw = camera->player->unk40;
+                aim->targetYaw = camera->player->theta;
             } else {
-                aim->targetYaw = camera->player->unk40 - 180.0f;
+                aim->targetYaw = camera->player->theta - 180.0f;
             }
             camera->yaw = aim->targetYaw;
             camera->yawRad = camera->yaw * DEG2RAD;
@@ -250,9 +250,9 @@ void func_15120158(Camera *camera) {
         }
         if (camera->snap) {
             if (inMap42Zone1A) {
-                aim->targetYaw = camera->player->unk40;
+                aim->targetYaw = camera->player->theta;
             } else {
-                aim->targetYaw = camera->player->unk40 - 180.0f;
+                aim->targetYaw = camera->player->theta - 180.0f;
             }
             camera->yaw = aim->targetYaw;
             camera->yawRad = camera->yaw * DEG2RAD;
@@ -290,12 +290,12 @@ void func_15120158(Camera *camera) {
                 }
             }
             if (IS_FACING_ZONE(zone)) {
-                aim->targetYaw = (f32)((camera->player->unk7A - camera->playerExt->pssd_waist_tilt) + 0xC000) * BAM2DEG;
+                aim->targetYaw = (f32)((camera->player->langle - camera->playerExt->pssd_waist_tilt) + 0xC000) * BAM2DEG;
             } else if (inMap42Zone1A) {
-                aim->targetYaw = camera->player->unk40;
+                aim->targetYaw = camera->player->theta;
             } else if (zone != 0xF) {
                 if (camera->status & 2) {
-                    aim->targetYaw = (((f32)camera->player->unk7A - (f32)camera->playerExt->pssd_waist_tilt * 0.349999994f) + 49152.0f) * BAM2DEG;
+                    aim->targetYaw = (((f32)camera->player->langle - (f32)camera->playerExt->pssd_waist_tilt * 0.349999994f) + 49152.0f) * BAM2DEG;
                 } else {
                     if (zone == 0x34) {
                         aim->targetYaw -= (f32)camera->contPad->stick_x * rate * (f32)D_800BE9E4;
@@ -309,12 +309,12 @@ void func_15120158(Camera *camera) {
             if (zone == 0x38) {
                 // matching: sinPitch doubles as the pitch adjustment; a separate local changes the frame
                 if (camera->contPad->button & Z_TRIG) {
-                    sinPitch = camera->unk8B4 - (f32)(camera->player->unk31C->unk1A2 >> 8) * 1.098632812f;
+                    sinPitch = camera->unk8B4 - (f32)(camera->player->mv->unk1A2 >> 8) * 1.098632812f;
                 } else {
                     sinPitch = 0.0f;
                 }
                 aim->targetPitch += sinPitch;
-                camera->unk8B4 = (f32)(camera->player->unk31C->unk1A2 >> 8) * 1.098632812f;
+                camera->unk8B4 = (f32)(camera->player->mv->unk1A2 >> 8) * 1.098632812f;
             }
             func_15048758(&aim->targetYaw);
             if (zone == 0x34) {
@@ -447,20 +447,20 @@ void func_15121490(Actor *player, OSContPad *pad) {
     Vec3f dir;
     f32 temp;
 
-    player->unk31C->AimState = 0;
+    player->mv->AimState = 0;
     if (pad->button & R_TRIG) {
-        zone = player->unk31C->rt_context_b;
+        zone = player->mv->rt_context_b;
         if (IS_FACING_ZONE(zone)) {
-            ext = player->unk31C;
-            angle = (player->unk40 - 90.0f) * DEG2RAD;
-            target.x = player->x_position;
-            target.y = player->y_position + ((f32)ext->height * 0.75f);
-            target.z = player->z_position;
+            ext = player->mv;
+            angle = (player->theta - 90.0f) * DEG2RAD;
+            target.x = player->xpos;
+            target.y = player->ypos + ((f32)ext->height * 0.75f);
+            target.z = player->zpos;
             eye = target;
             target.x = (sinf(angle) * 100.0f) + eye.x;
             target.y = eye.y;
             target.z = (cosf(angle) * 100.0f) + eye.z;
-            eye.y += player->y_position - player->old_y_position;
+            eye.y += player->ypos - player->old_ypos;
             ext->aimEye = eye;
             ext->aimTarget = target;
             ext->AimState = 1;

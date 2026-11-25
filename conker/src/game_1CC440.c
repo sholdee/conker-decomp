@@ -127,11 +127,11 @@ s32 func_1519EF90(config, side, out)
 
     trails = &config->owner->trails;
     actor = config->owner->actor;
-    if (actor->unk1D4 == NULL) {
+    if (actor->ob_matrix_ptr == NULL) {
         return 0;
     }
-    dx = actor->x_position - config->actorX;
-    dz = actor->z_position - config->actorZ;
+    dx = actor->xpos - config->actorX;
+    dz = actor->zpos - config->actorZ;
     if ((0.0001f < fabsf(dx)) || (0.0001f < fabsf(dz))) {
         f32 inv;
 
@@ -150,10 +150,10 @@ s32 func_1519EF90(config, side, out)
     } else {
         dist = -trails->sideOffset;
     }
-    out->x = actor->x_position + (dist * dirX);
-    out->z = actor->z_position - (dist * dirZ);
+    out->x = actor->xpos + (dist * dirX);
+    out->z = actor->zpos - (dist * dirZ);
     if (actor->unk118 < -9500.0f) {
-        out->y = actor->y_position;
+        out->y = actor->ypos;
     } else {
         out->y = actor->unk118;
     }
@@ -242,8 +242,8 @@ Trail *func_1519F1C8(owner, side)
     sideWord = side;
     header.kind = sideWord;
     config.driftSpeed = 1.5f;
-    config.actorX = actor->x_position;
-    config.actorZ = actor->z_position;
+    config.actorX = actor->xpos;
+    config.actorZ = actor->zpos;
     if (func_1519EF90(&config, (u8)sideWord, &header.pos) != 0) {
         config.emitPos = header.pos;
         header.flags |= 4;
@@ -424,10 +424,10 @@ s32 func_1519F7F0(Trail *trail) {
     config = trail->config;
     points = trail->points;
     actor = config->owner->actor;
-    if (actor->interaction_state == 0) {
+    if (actor->type == 0) {
         return 0;
     }
-    if (actor->unk1D4 == NULL) {
+    if (actor->ob_matrix_ptr == NULL) {
         return 0;
     }
     if (actor->unique_id != config->owner->actorId) {
@@ -459,8 +459,8 @@ s32 func_1519F7F0(Trail *trail) {
         }
         return 1;
     }
-    config->actorX = actor->x_position;
-    config->actorZ = actor->z_position;
+    config->actorX = actor->xpos;
+    config->actorZ = actor->zpos;
     dx = trail->head.tmpl.pos.x - config->emitPos.x;
     dy = trail->head.tmpl.pos.y - config->emitPos.y;
     dz = trail->head.tmpl.pos.z - config->emitPos.z;
@@ -525,7 +525,7 @@ s32 func_1519F7F0(Trail *trail) {
 
                 probe.x = point->x;
                 if (actor->unk118 < -9500.0f) {
-                    probe.y = actor->y_position + 100.0f;
+                    probe.y = actor->ypos + 100.0f;
                 } else {
                     probe.y = actor->unk118 + 100.0f;
                 }
@@ -831,13 +831,13 @@ void func_151A084C(TrailSpawner *spawner) {
     link = &spawner->link;
     actor = link->owner->actor;
     trails = &link->owner->trails;
-    if (actor->interaction_state == 0) {
+    if (actor->type == 0) {
         done = 1;
     }
     if (actor->unique_id != link->owner->actorId) {
         done = 1;
     }
-    if (!done && actor->unk1D4 != NULL) {
+    if (!done && actor->ob_matrix_ptr != NULL) {
         done = 1;
         // matching: the unused extra arguments pin link and spawner to a2/a3
         trail = func_1519F1C8(link->owner, link->side, link, spawner);

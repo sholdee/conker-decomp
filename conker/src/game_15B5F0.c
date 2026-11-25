@@ -57,10 +57,10 @@ void func_1512E140(Camera *camera) {
     } else {
         if (((camera->status & 0x40) && camera->mode != 0x100) || (camera->mode & 0x01000000)) {
             targetHeight = 0; // matching: int 0 again (see above)
-        } else if (camera->player->y_position - camera->player->floorY > 600.0f && !(camera->status & 0x400) &&
-                   camera->player->in_water == 0 && camera->player->unk102 == 0 &&
+        } else if (camera->player->ypos - camera->player->floorY > 600.0f && !(camera->status & 0x400) &&
+                   camera->player->inwater == 0 && camera->player->unk102 == 0 &&
                    camera->playerExt->ropePtr == NULL && camera->playerExt->ladder == 0 &&
-                   camera->player->unk137 == 0 && camera->player->unk84.uh != 0x194 && !(camera->status & 0x80)) {
+                   camera->player->unk137 == 0 && camera->player->animseq.uh != 0x194 && !(camera->status & 0x80)) {
             return;
         }
         if ((camera->mode & 0x100) || cappedByCeiling) {
@@ -72,7 +72,7 @@ void func_1512E140(Camera *camera) {
     }
     camera->eye.y = camera->unk354 + height;
     camera->unk344 = camera->eye.y - camera->unk354;
-    if (camera->player->in_water == 1 && camera->aimState != 0 && camera->unk360 != -10000.0f) {
+    if (camera->player->inwater == 1 && camera->aimState != 0 && camera->unk360 != -10000.0f) {
         if (camera->eye.y < camera->unk360 + 5.0f) {
             camera->eye.y = camera->unk360 + 5.0f;
             camera->unk344 = 5.0f;

@@ -87,18 +87,18 @@ void func_150D54C8(FollowEffect *effect) {
     owner = effect->data.owner;
     data = &effect->data;
     if (owner) {} // matching: raises owner's register priority over data
-    if (owner->interaction_state == 0 || owner->unique_id != data->ownerId) {
+    if (owner->type == 0 || owner->unique_id != data->ownerId) {
         effect->base.header.state = -1;
         return;
     }
-    if (owner->unk28 < 8.0f && (owner->unk184 & 0x1F) == 0xE) {
+    if (owner->shad < 8.0f && (owner->unk184 & 0x1F) == 0xE) {
         // matching: (f32)1 keeps the multiply by 1.0 that a 1.0f literal would fold away
         data->spawnAccum += (3.000000238f + func_150ADA68() * (f32)1) * D_800BE9A4;
         if (data->spawnAccum > 1.0f) {
             if (func_1515C0F8(owner, &refVel) == 0) {
                 refVel = &D_800A5480;
             }
-            func_1514373C(owner->unk40 * 0.01745329238f, 1.0f, &sinYaw, &cosYaw);
+            func_1514373C(owner->theta * 0.01745329238f, 1.0f, &sinYaw, &cosYaw);
             rightX = cosYaw;
             rightZ = -sinYaw;
             spawn.texture = 40;
@@ -140,9 +140,9 @@ void func_150D54C8(FollowEffect *effect) {
                 } else {
                     sideOffset = -35.0f;
                 }
-                spawn.pos.x = owner->x_position + rightX * sideOffset - sinYaw * 180.0f * 0.5f + sinYaw * 180.0f * along;
+                spawn.pos.x = owner->xpos + rightX * sideOffset - sinYaw * 180.0f * 0.5f + sinYaw * 180.0f * along;
                 spawn.pos.y = owner->floorY;
-                spawn.pos.z = owner->z_position + rightZ * sideOffset - cosYaw * 180.0f * 0.5f + cosYaw * 180.0f * along;
+                spawn.pos.z = owner->zpos + rightZ * sideOffset - cosYaw * 180.0f * 0.5f + cosYaw * 180.0f * along;
                 // matching: the two spellings of 6.0f / 0.564f keep IDO from sharing one rodata load
                 spawn.vel.x = (right ? (speed = speed * 2.907000065f + 6.000000477f)
                                      : -(speed = speed * 2.907000065f + 6.0000005f)) * rightX - refVel->x * 0.5640000105f;
@@ -234,12 +234,12 @@ void func_150D5A6C(Actor *obj, u8 arg1, s32 arg2) {
     ParticleSpawn piece;
 
     hit = 0;
-    pos.x = obj->x_position;
-    pos.y = obj->y_position + 50.0f;
-    pos.z = obj->z_position;
-    vel.x = obj->x_position - obj->old_x_position;
-    vel.y = obj->y_position - obj->old_y_position;
-    vel.z = obj->z_position - obj->old_z_position;
+    pos.x = obj->xpos;
+    pos.y = obj->ypos + 50.0f;
+    pos.z = obj->zpos;
+    vel.x = obj->xpos - obj->old_xpos;
+    vel.y = obj->ypos - obj->old_ypos;
+    vel.z = obj->zpos - obj->old_zpos;
     type = func_15134070(obj);
     if (type == 99) {
         return;
@@ -254,7 +254,7 @@ void func_150D5A6C(Actor *obj, u8 arg1, s32 arg2) {
     func_151C05A4(&pos, arg1, arg2);
     func_151C05F0(&pos, arg1, arg2);
     func_15145A50(obj);
-    if (obj->unk1D4 == NULL) {
+    if (obj->ob_matrix_ptr == NULL) {
         return;
     }
     if ((obj->unk74 & 0xF) == 0xF) {
@@ -264,7 +264,7 @@ void func_150D5A6C(Actor *obj, u8 arg1, s32 arg2) {
     if (moving) {
         typedef s32 ScopeBarrier1; // matching: -g3 scope pins the 0.0f register setup at block entry
 
-        if (func_150AC9C0(obj->old_x_position, obj->old_y_position, obj->old_z_position, vel.x, vel.y, vel.z, 0,
+        if (func_150AC9C0(obj->old_xpos, obj->old_ypos, obj->old_zpos, vel.x, vel.y, vel.z, 0,
                           hitPos, &hitOut[0], &hitOut[1], &hitOut[2], &dist, 0, &hitSurface, 0.0f) &&
             dist < 397.0f) {
             hit = 1;
@@ -319,8 +319,8 @@ void func_150D5A6C(Actor *obj, u8 arg1, s32 arg2) {
         normal.x *= 1000.0f;
         normal.y *= 1000.0f;
         normal.z *= 1000.0f;
-        piece.sizeXZ = obj->xz_scale;
-        piece.sizeY = obj->y_scale;
+        piece.sizeXZ = obj->scale_xz;
+        piece.sizeY = obj->scale_y;
         piece.scale.x = 1.0f;
         piece.scale.y = 1.0f;
         piece.scale.z = 1.0f;
@@ -392,10 +392,10 @@ void func_150D5A6C(Actor *obj, u8 arg1, s32 arg2) {
                 func_15132A4C(&piece, 0, 0, 0, arg1, arg2);
             }
         }
-        if (obj->camera != NULL && D_80082FA0 <= 0) {
-            func_150D66A4(obj->camera->playerIndex, arg1, arg2);
+        if (obj->CameraPtr != NULL && D_80082FA0 <= 0) {
+            func_150D66A4(obj->CameraPtr->playerIndex, arg1, arg2);
         }
-        if (hit && obj->camera != NULL) {
+        if (hit && obj->CameraPtr != NULL) {
             if ((hitSurface & 0x1F) == 0xE) {
                 func_150D65F0(hitPos, hitOut, arg1, arg2);
             } else {
@@ -634,9 +634,9 @@ void func_150D6730(Actor *obj, u8 arg1, s32 arg2) {
 
 /* Writes the point 60 units above obj's position to out. */
 void func_150D6C98(Actor *obj, Vec3f *out) {
-    out->x = obj->x_position;
-    out->y = obj->y_position + 60.0f;
-    out->z = obj->z_position;
+    out->x = obj->xpos;
+    out->y = obj->ypos + 60.0f;
+    out->z = obj->zpos;
 }
 
 void func_15131958(Vec3f *, f32);
@@ -648,7 +648,7 @@ s32 func_150D6CC4(Particle *particle, s32 arg1) {
 
     data = &particle->data.drift;
     owner = data->owner;
-    if (owner->interaction_state == 0 || owner->unique_id != data->ownerId) {
+    if (owner->type == 0 || owner->unique_id != data->ownerId) {
         return 0;
     }
     func_150D6C98(owner, &particle->head.desc.pos);
@@ -707,7 +707,7 @@ s32 func_150D6F0C(Particle *particle, s32 arg1) {
     data = &particle->data.grow;
     owner = data->owner;
 
-    if (owner->interaction_state == 0 || owner->unique_id != data->ownerId) {
+    if (owner->type == 0 || owner->unique_id != data->ownerId) {
         return 0;
     }
 

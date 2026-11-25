@@ -57,15 +57,15 @@ void func_150BA55C(EffectE7970 *effect) {
 
     owner = effect->data.owner;
     data = &effect->data;
-    if ((owner->interaction_state == 0) || (owner->unique_id != data->ownerId)) {
+    if ((owner->type == 0) || (owner->unique_id != data->ownerId)) {
         effect->base.header.state = -1;
         return;
     }
-    if (owner->unk1D4 != NULL) {
+    if (owner->ob_matrix_ptr != NULL) {
         data->spawnAccum += (0.3143000007f + (func_150ADA68() * 0.58100003f)) * D_800BE9A4;
         if (data->spawnAccum > 1.0f) {
-            size = (owner->xz_scale + owner->y_scale) * 0.5f;
-            heading = (owner->unk76 >> 8) - 64;
+            size = (owner->scale_xz + owner->scale_y) * 0.5f;
+            heading = (owner->angle >> 8) - 64;
             func_1515C244(owner, ownerPos, &radius, &unused);
             growth[1] = 0.0f;
             do {
@@ -104,13 +104,13 @@ s32 func_15046C80(Vec3f *pos, s32 arg1, f32 minY, CollisionHit *hit);
 s32 func_150BA930(Vec3f *pos, Actor *obj, CollisionHit *hit, s32 arg3) {
     Vec3f probe;
 
-    pos->x = obj->x_position;
+    pos->x = obj->xpos;
     if (-9500.0f < obj->floorY) {
         pos->y = obj->floorY;
     } else {
-        pos->y = obj->y_position;
+        pos->y = obj->ypos;
     }
-    pos->z = obj->z_position;
+    pos->z = obj->zpos;
     if (hit == NULL) {
         return 1;
     }
@@ -134,7 +134,7 @@ void func_150BAA14(Actor *obj, s32 arg1, s32 arg2) {
     u8 onGround;
     s16 pad; // matching: unused slot moves IDO's spill of func_150ADA68()'s result to sp38
 
-    if (obj->unk1D4 == NULL) {
+    if (obj->ob_matrix_ptr == NULL) {
         return;
     }
 

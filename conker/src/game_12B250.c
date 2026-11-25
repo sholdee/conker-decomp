@@ -72,16 +72,16 @@ void func_150FDF38(obj, arg1, arg2, muzzleOut, launchOut)
     Vec3f *dst[2];
 
     if (obj != NULL) {
-        if (obj->unk1D4 != NULL) {
+        if (obj->ob_matrix_ptr != NULL) {
             src[0] = &D_800A1F70;
             src[1] = &D_800A1F88;
             dst[0] = &muzzle;
             dst[1] = &launch;
-            func_15145EA4(src, dst, (Mtx *)obj->unk1D4 + D_80088B80, 2);
+            func_15145EA4(src, dst, (Mtx *)obj->ob_matrix_ptr + D_80088B80, 2);
         } else {
-            muzzle.x = obj->x_position;
-            muzzle.y = obj->y_position + 56.0f;
-            muzzle.z = obj->z_position;
+            muzzle.x = obj->xpos;
+            muzzle.y = obj->ypos + 56.0f;
+            muzzle.z = obj->zpos;
             launch = muzzle;
         }
         func_151D3E6C(obj, &muzzle, &launch, (D_800BE9F0 == 0x2B) ? 0x28 : 0x1E);
@@ -98,7 +98,7 @@ void func_150FDF38(obj, arg1, arg2, muzzleOut, launchOut)
 }
 
 /* Muzzle effect (func_15102B38) at `muzzle` for objects with bone matrices, hidden from the
- * camera of obj's unk31C target while that has unk197 set. */
+ * camera of obj's mv target while that has unk197 set. */
 void func_150FE0B8(obj, muzzle, arg2, arg3)
     Actor *obj;
     Vec3f *muzzle;
@@ -111,12 +111,12 @@ void func_150FE0B8(obj, muzzle, arg2, arg3)
     s32 random1;
     s32 random0;
 
-    if (obj->unk1D4 != NULL && (obj->unk74 & 0xF) != 0xF) {
+    if (obj->ob_matrix_ptr != NULL && (obj->unk74 & 0xF) != 0xF) {
         params[1] = func_150ADA68() * 1.5f + 2.0f;
         params[0] = func_150ADA68() * 10.10000038f + 2.059999943f;
 
-        if (obj->unk31C != NULL && obj->unk31C->SniperState != 0 && obj->camera != NULL) {
-            cameraMask = ~(1 << obj->camera->playerIndex) & 0xFF;
+        if (obj->mv != NULL && obj->mv->SniperState != 0 && obj->CameraPtr != NULL) {
+            cameraMask = ~(1 << obj->CameraPtr->playerIndex) & 0xFF;
         } else {
             cameraMask = 0xFF;
         }
@@ -137,10 +137,10 @@ void func_150FE248(Actor *obj, s32 arg1, Vec3f *out) {
 void func_150FE288(Actor *obj) {
     RumbleParams event;
 
-    if (obj->camera != NULL) {
+    if (obj->CameraPtr != NULL) {
         event.flags = 1;
         event.duration = (func_150ADA20() % 9U) + 15;
-        event.playerMask = 1 << obj->camera->playerIndex;
+        event.playerMask = 1 << obj->CameraPtr->playerIndex;
         event.strength = (func_150ADA20() & 3) + 3;
         event.updateKind = -1;
         func_151D8868(&event, 0, 0xFF, 1);

@@ -219,8 +219,8 @@ void func_15115E0C(WorldObject *obj, Actor *player) {
 
     sinYaw = func_150AD780(obj->u * 0.01745329238f);
     cosYaw = func_150AD78C(obj->u * 0.01745329238f);
-    dx = player->x_position - (f32)obj->x;
-    dz = player->z_position - (f32)obj->z;
+    dx = player->xpos - (f32)obj->x;
+    dz = player->zpos - (f32)obj->z;
     if ((obj->object_status & 4) == 4) {
         WORK(obj)->seesaw.weightX += (cosYaw * dx + sinYaw * dz);
         WORK(obj)->seesaw.weightZ -= (cosYaw * dz + sinYaw * dx);
@@ -235,7 +235,7 @@ void func_15115EDC(WorldObject *obj, Actor *player) {
     oldX = WORK(obj)->seesaw.weightX;
     oldZ = WORK(obj)->seesaw.weightZ;
     func_15115E0C(obj, player);
-    if (player->unk84.uh == 0x4B) {
+    if (player->animseq.uh == 0x4B) {
         // matching: the old values are reused to hold this frame's extra gain
         oldX = (WORK(obj)->seesaw.weightX - oldX) * 4.0f;
         oldZ = (WORK(obj)->seesaw.weightZ - oldZ) * 4.0f;

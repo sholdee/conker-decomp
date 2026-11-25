@@ -276,13 +276,13 @@ void func_150E3738(HomingEffect *arg0) {
     }
     prevPos = effect->pos;
     if (effect->targetObj != NULL) {
-        if (effect->targetObj->interaction_state == 0) {
+        if (effect->targetObj->type == 0) {
             func_150E3514(effect);
             return;
         }
-        effect->target.x = effect->targetObj->x_position;
-        effect->target.y = effect->targetObj->y_position;
-        effect->target.z = effect->targetObj->z_position;
+        effect->target.x = effect->targetObj->xpos;
+        effect->target.y = effect->targetObj->ypos;
+        effect->target.z = effect->targetObj->zpos;
     } else if (effect->follow != NULL) {
         effect->target.x = effect->follow[0];
         effect->target.y = effect->follow[1];

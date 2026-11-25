@@ -188,9 +188,9 @@ Gfx *func_151E89A0(Gfx *gfx, s32 unused, s32 alpha) {
     team = -1;
     for (i = 0; i < D_8008FD8C; i++) {
         obj = &movement_obj[i];
-        sub = obj->unk31C;
+        sub = obj->mv;
         kind = sub->context_b & 0x7F;
-        if ((obj->unk13C != 0) || (sub->unk128 & 0x20)) {
+        if ((obj->lifting != 0) || (sub->unk128 & 0x20)) {
             team = obj->team;
             (&D_800E0BCC)[zero] = D_800E0BCC | (1 << i);
         }
@@ -202,13 +202,13 @@ Gfx *func_151E89A0(Gfx *gfx, s32 unused, s32 alpha) {
             }
             team = -1;
         }
-        if ((obj->team == 1) && (obj->unk2E4 != 0) && (D_8008FDC0 & 0x4000)) {
+        if ((obj->team == 1) && (obj->taskint[0] != 0) && (D_8008FDC0 & 0x4000)) {
             flags |= 4;
         }
         if (kind == 0x25) {
             func_15086CBC(func_15086D48(0x49, i), &px, &py, &pz);
-            px -= obj->x_position;
-            pz -= obj->z_position;
+            px -= obj->xpos;
+            pz -= obj->zpos;
             pz = px * px + pz * pz;
             if (pz < 6250000.0f) {
                 D_8008FDBC |= 0x10;
@@ -723,7 +723,7 @@ Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
             gfx = func_151E86E4(gfx, (xbase + 8) << 2, (y - 2) << 2, (xbase + 0x18) << 2, (y + 0xE) << 2, 0,
                                 (icon & 1) << 9, (icon >> 1) << 9, 0x400, 0x400);
             if (live != 0) {
-                total = movement_obj[i].unk31C->shotsfired;
+                total = movement_obj[i].mv->shotsfired;
             } else {
                 total = D_8008FDD4->stats[i].unk6;
             }
@@ -2122,10 +2122,10 @@ Gfx *func_151EE184(Gfx *gfx) {
                 }
                 obj = func_15083E90(9);
                 if (obj != NULL) {
-                    obj->unk232 = cheatType;
+                    obj->intelwalk = cheatType;
                     D_800D154C = obj;
                     dc_glbl_CharNum = D_800D154C - movement_obj;
-                    obj->unk218 = func_1507BB28(0, obj->unk232);
+                    obj->unk218 = func_1507BB28(0, obj->intelwalk);
                     obj->unk21C = 0;
                 }
                 D_800E0C83 = 0;

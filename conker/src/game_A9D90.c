@@ -19,8 +19,8 @@ void func_1517F814(s32, f32, f32, f32, s32);
 
 /* Puts obj into state 2 with the given timer. */
 void func_1507C8E0(Actor *obj, s32 timer) {
-    obj->unk31C->death_State = 2;
-    obj->unk31C->unk124 = timer;
+    obj->mv->death_State = 2;
+    obj->mv->unk124 = timer;
 }
 
 /* Per-frame update of every active player's state machine. */
@@ -34,77 +34,77 @@ void func_1507C8FC(void) {
     if (D_800BEAC0 == 0) {
         player = movement_obj;
         for (i = 0; i < D_8008FD8C; i++, player++) {
-            if (player->unk31C == NULL) {
+            if (player->mv == NULL) {
                 continue;
             }
-            if (player->unk31C->death_State == 0) {
-                player->unk31C->unk126 = 0;
+            if (player->mv->death_State == 0) {
+                player->mv->unk126 = 0;
                 continue;
             }
-            if (player->unk31C->death_State == 1) {
+            if (player->mv->death_State == 1) {
                 continue;
             }
             if (i <= D_80082FA0) {
                 if (D_800BE616 != 0 && (D_800D18A2 & (1 << i))) {
-                    player->unk31C->death_State = 2;
-                    player->unk31C->unk124 = 60;
+                    player->mv->death_State = 2;
+                    player->mv->unk124 = 60;
                 }
-                if (player->unk31C->death_State == 11) {
+                if (player->mv->death_State == 11) {
                     func_1517EE40(0, 0, 0, 15, 1, i);
-                    player->unk31C->death_State = 12;
+                    player->mv->death_State = 12;
                     continue;
                 }
-                if (player->unk31C->death_State == 12) {
+                if (player->mv->death_State == 12) {
                     if (func_1517EFAC(i) != 0) {
                         func_1507D4F8(i);
                     }
                     continue;
                 }
-                if (player->unk31C->death_State == 2) {
-                    if (player->unk31C->unk124 > 0) {
-                        player->unk31C->unk124 -= D_800BE9E4;
+                if (player->mv->death_State == 2) {
+                    if (player->mv->unk124 > 0) {
+                        player->mv->unk124 -= D_800BE9E4;
                     } else {
                         func_1507CD0C(player);
                     }
-                } else if (player->unk31C->death_State == 7) {
-                    if (player->unk31C->unk124 > 0) {
-                        player->unk31C->unk124 -= D_800BE9E4;
+                } else if (player->mv->death_State == 7) {
+                    if (player->mv->unk124 > 0) {
+                        player->mv->unk124 -= D_800BE9E4;
                     } else {
-                        player->unk31C->death_State = 8;
+                        player->mv->death_State = 8;
                         func_1506160C(player, 2, 0, 60, 0);
                     }
                 }
-                player->unk31C->unk126 += D_800BE9E4;
-                if ((D_800BE710[i] & 0x8000) || (D_800BE616 != 0 && player->unk31C->bot == 0) ||
-                    func_150859AC(i, 3) < 2 || (player->unk31C->bot == 1 && player->unk31C->unk126 >= 181)) {
-                    player->unk31C->unk122 = TRUE;
+                player->mv->unk126 += D_800BE9E4;
+                if ((D_800BE710[i] & 0x8000) || (D_800BE616 != 0 && player->mv->bot == 0) ||
+                    func_150859AC(i, 3) < 2 || (player->mv->bot == 1 && player->mv->unk126 >= 181)) {
+                    player->mv->unk122 = TRUE;
                 }
                 if (D_8008FDBC & 0x80) {
-                    player->unk31C->unk122 = FALSE;
+                    player->mv->unk122 = FALSE;
                 }
                 func_1507E1D0(player, &x, &y, &z);
                 func_1517F814(0, x, y, z, i);
-                if (player->unk31C->unk122 && player->unk31C->death_State == 5) {
-                    player->unk31C->death_State = 6;
+                if (player->mv->unk122 && player->mv->death_State == 5) {
+                    player->mv->death_State = 6;
                 }
-                if (player->unk31C->death_State == 9) {
+                if (player->mv->death_State == 9) {
                     func_1507D4F8(i);
                 }
-            } else if (player->unk31C->death_State == 11) {
+            } else if (player->mv->death_State == 11) {
                 func_1507D4F8(i);
                 continue;
-            } else if (player->unk31C->death_State == 2) {
-                if (player->unk31C->unk124 > 0) {
-                    player->unk31C->unk124 -= D_800BE9E4;
+            } else if (player->mv->death_State == 2) {
+                if (player->mv->unk124 > 0) {
+                    player->mv->unk124 -= D_800BE9E4;
                 } else {
-                    player->unk31C->death_State = 7;
+                    player->mv->death_State = 7;
                 }
             } else {
-                player->unk31C->unk126 += D_800BE9E4;
-                if (player->unk7 == 0xFF && player->unk31C->unk126 >= 161) {
+                player->mv->unk126 += D_800BE9E4;
+                if (player->unk7 == 0xFF && player->mv->unk126 >= 161) {
                     func_1506160C(player, 2, 0, 60, 0);
                 }
-                if (player->unk31C->unk126 >= 181 && player->unk31C->death_State != 10) {
+                if (player->mv->unk126 >= 181 && player->mv->death_State != 10) {
                     func_1507D4F8(i);
                 }
             }
@@ -117,7 +117,7 @@ void func_1507C8FC(void) {
 void func_1507CD0C(Actor *obj) {
     s32 slot = obj - movement_obj;
 
-    obj->unk31C->death_State = 3;
+    obj->mv->death_State = 3;
 
     if (slot <= D_80082FA0) {
         func_15181D70(slot);
@@ -140,22 +140,22 @@ void func_1507CD64(Actor *obj, s32 cause) {
     s32 again;
     s32 flag;
 
-    if (obj->unk31C == NULL) {
+    if (obj->mv == NULL) {
         return;
     }
     slot = obj - movement_obj;
     if (slot >= D_8008FD8C) {
         return;
     }
-    if (obj->unk31C->death_State != 0) {
-        if (cause != 9 || cause == obj->unk31C->unk121) {
+    if (obj->mv->death_State != 0) {
+        if (cause != 9 || cause == obj->mv->unk121) {
             return;
         }
         again = TRUE;
     } else {
         again = FALSE;
     }
-    obj->unk31C->unk121 = cause;
+    obj->mv->unk121 = cause;
     if (D_800BE616 != 0 && !again) {
         if (slot < 16) {
             D_800E0AD0[slot]++;
@@ -172,7 +172,7 @@ lbl2: // matching: unused label splits the basic block; as1 then hoists the relo
     sound = -1;
     flag = 0;
     mode = 0;
-    if (obj->unk31C->on_fire) {
+    if (obj->mv->on_fire) {
         D_800D18A9 = 2;
     }
     switch (cause) {
@@ -208,8 +208,8 @@ lbl2: // matching: unused label splits the basic block; as1 then hoists the relo
         D_800D18A9 = 3;
         break;
     case 6:
-        if (obj->interaction_state == 1 || obj->interaction_state == 0x15 || obj->unk5 == 3 ||
-            obj->unk65 != 0) {
+        if (obj->type == 1 || obj->type == 0x15 || obj->drawtype == 3 ||
+            obj->attach_char != 0) {
             sound = 0x170;
         }
         mode = 1;
@@ -250,28 +250,28 @@ lbl2: // matching: unused label splits the basic block; as1 then hoists the relo
     if (sound != -1) {
         func_1505E650(obj, sound, 1.0f, 3.0f, 0.0f, 0.0f, flag);
     }
-    obj->health = 0;
-    obj->immune = 0xFF;
+    obj->energy = 0;
+    obj->imune = 0xFF;
     obj->stunned = 0xFF;
-    obj->disable_run = 0xFF;
-    obj->unkF8 |= 0x200;
+    obj->norun = 0xFF;
+    obj->noshove |= 0x200;
     obj->bodyRadius = 0;
     obj->bodyHeight = 0;
-    obj->xz_velocity = 0.0f;
-    obj->unk31C->bitten = 0;
-    if (obj->unk13C != 0) {
+    obj->speed = 0.0f;
+    obj->mv->bitten = 0;
+    if (obj->lifting != 0) {
         saved = D_800D154C;
         D_800D154C = obj;
         func_1504BAF0(obj);
         D_800D154C = saved;
     }
     if (mode == 0 || mode == 3) {
-        obj->unk31C->death_State = 1;
+        obj->mv->death_State = 1;
     } else {
         func_1507C8E0(obj, 0);
     }
     if (mode == 2) {
-        obj->unk31C->death_State = 11;
+        obj->mv->death_State = 11;
     } else if (mode == 3) {
         func_1507D4F8(slot);
     }
@@ -284,7 +284,7 @@ lbl2: // matching: unused label splits the basic block; as1 then hoists the relo
 
 /* Forwards four arguments to func_1509BFB0(3, ...) keyed by object slot's unk13F | 0x2000. */
 void func_1507D158(s32 slot, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
-    s32 value = movement_obj[slot].unk13F;
+    s32 value = movement_obj[slot].listpos;
 
     func_1509BFB0(3, value | 0x2000, arg1, arg2, arg3, arg4);
 }
@@ -306,12 +306,12 @@ void func_1507D1D8(Actor *obj) {
     s32 choice;
     s32 slot;
 
-    saved1AA = obj->unk31C->shotsfired;
-    saved1B0 = obj->unk31C->lastSpawnIndex;
+    saved1AA = obj->mv->shotsfired;
+    saved1B0 = obj->mv->lastSpawnIndex;
     saved328 = obj->unk328; // signed byte at 0x328 (Actor types it u8)
-    saved1AF = obj->unk31C->unk1AF;
+    saved1AF = obj->mv->unk1AF;
     if (D_800BE616 != 0) {
-        player = obj->unk31C->spawnIndex;
+        player = obj->mv->spawnIndex;
     } else {
         player = -1;
     }
@@ -332,8 +332,8 @@ void func_1507D1D8(Actor *obj) {
     func_15060F28(obj, 0);
     D_800D18A8 = 1;
     func_15082A44(&D_800D20FC[slot], slot, 0, 0, 0);
-    obj->unk31C->lastSpawnIndex = saved1B0;
-    obj->unk31C->unk1AF = saved1AF;
+    obj->mv->lastSpawnIndex = saved1B0;
+    obj->mv->unk1AF = saved1AF;
     obj->unk328 = saved328;
     if (D_80082FA0 >= slot) {
         func_150054C4(&camera_global_Cameras[slot], slot, D_800BE9F2, player);
@@ -344,22 +344,22 @@ void func_1507D1D8(Actor *obj) {
         func_15085430(obj, player, 0);
     }
     D_800D18A8 = 0;
-    obj->unk31C->death_State = 0;
-    obj->unk31C->unk122 = FALSE;
-    obj->unk31C->unk124 = 0;
-    obj->unk31C->shotsfired = saved1AA;
-    obj->health = D_8008726C;
+    obj->mv->death_State = 0;
+    obj->mv->unk122 = FALSE;
+    obj->mv->unk124 = 0;
+    obj->mv->shotsfired = saved1AA;
+    obj->energy = D_8008726C;
     obj->unk22C |= 0x100;
-    obj->unk31C->context_b = 0;
+    obj->mv->context_b = 0;
     obj->unk20F = 0xFF;
     obj->unk210 = 0xFF;
     obj->unk211 = 0xFF;
-    obj->unk232 = 1;
+    obj->intelwalk = 1;
     obj->unk218 = NULL;
-    obj->unk31C->spawnIndex = player;
+    obj->mv->spawnIndex = player;
     if (D_800BE616 != 0) {
-        obj->immune = 150;
-        obj->unk31C->unk1B1 = obj->immune;
+        obj->imune = 150;
+        obj->mv->unk1B1 = obj->imune;
         if (D_800BE9F0 == 0x33) {
             func_1507D158(slot, 120, 0, 0, 0);
             func_15088D58(obj);
@@ -386,7 +386,7 @@ void func_1507D4F8(s32 slot) {
                 func_1507D1D8(obj);
                 return;
             }
-            obj->unk31C->death_State = 10;
+            obj->mv->death_State = 10;
             return;
         }
 
@@ -411,11 +411,11 @@ void func_1507D4F8(s32 slot) {
     }
 
     obj = &movement_obj[slot];
-    state = obj->unk31C;
+    state = obj->mv;
     if (state->bot == 0) {
-        // matching: the volatile store and load make IDO reload unk31C after the decrement, as the original does
+        // matching: the volatile store and load make IDO reload mv after the decrement, as the original does
         *(volatile s8 *)&D_8008FD94 = D_8008FD94 - 1;
-        state = *(ActorCtl *volatile *)&obj->unk31C;
+        state = *(ActorCtl *volatile *)&obj->mv;
     }
     state->death_State = 10;
     D_800BE618--;
@@ -448,7 +448,7 @@ s32 func_1507D754(Actor *obj) {
     WorldObject *spawned;
     void *handle;
 
-    switch (obj->id) {
+    switch (obj->character_type) {
     case 0x7F:
         func_150B0348(obj, 0xFF, 1);
         break;
@@ -468,7 +468,7 @@ s32 func_1507D754(Actor *obj) {
         func_151C9740(obj, 0xFF, 1);
         break;
     case 0x25:
-        if (obj->unk2EC != 0 || D_800BE9F0 == 6 || D_800BE9F0 == 0x3B) {
+        if (obj->taskint[2] != 0 || D_800BE9F0 == 6 || D_800BE9F0 == 0x3B) {
             func_151CFA4C(obj, 0xFF, 1);
         }
         return 0;
@@ -502,7 +502,7 @@ s32 func_1507D754(Actor *obj) {
         func_15145A50(obj);
         if (D_800BE616 != 0) {
             func_1507CD64(obj, 6);
-            spawned = func_151149AC((u8)(obj->unk127 + 11));
+            spawned = func_151149AC((u8)(obj->playernumber + 11));
         } else {
             if (D_800BE9F0 == 0x23) {
                 spawned = func_151149AC(1);
@@ -514,12 +514,12 @@ s32 func_1507D754(Actor *obj) {
         }
         if (spawned != NULL) {
             spawned->inactive = 0;
-            spawned->x = obj->x_position;
-            spawned->y = obj->y_position;
-            spawned->z = obj->z_position;
-            spawned->t = obj->unkB8;
-            spawned->u = obj->unk40;
-            spawned->v = obj->unkC4;
+            spawned->x = obj->xpos;
+            spawned->y = obj->ypos;
+            spawned->z = obj->zpos;
+            spawned->t = obj->vtilt;
+            spawned->u = obj->theta;
+            spawned->v = obj->lean_angle;
             spawned->alpha = 0xFF;
             spawned->touch.i.a = 0;
             spawned->touch.i.b = 0;
@@ -533,7 +533,7 @@ s32 func_1507D754(Actor *obj) {
         func_150B7B40(obj, 0xFF, 1);
         break;
     case 0x20:
-        if (obj->y_velocity < -20.0f) {
+        if (obj->yspd < -20.0f) {
             func_150BC488(obj);
         } else {
             func_150BBB5C(obj);
@@ -626,9 +626,9 @@ Gfx *func_1507DB6C(Gfx *gfx, s32 player) {
 
 void func_150836CC(Actor *, s32);
 
-/* Sets bits in obj->unk9C (after re-running func_150836CC 0x44/0x23 when interaction_state is 1). */
+/* Sets bits in obj->unk9C (after re-running func_150836CC 0x44/0x23 when type is 1). */
 void func_1507DE4C(Actor *obj) {
-    if (obj->interaction_state == 1) {
+    if (obj->type == 1) {
         func_150836CC(obj, 0x44);
         func_150836CC(obj, 0x23);
         obj->unk9C |= 0xF000;
@@ -637,7 +637,7 @@ void func_1507DE4C(Actor *obj) {
         return;
     }
 
-    switch (obj->id) {
+    switch (obj->character_type) {
     case 0x9F:
     case 0xA0:
         obj->unk9C |= 0xF000;
@@ -650,32 +650,32 @@ void func_1507DE4C(Actor *obj) {
     }
 }
 
-/* Sets obj's unk94/unk9C flags and unk2E4 (1, 2, 4 or 8) for part 4..9. */
+/* Sets obj's unk94/unk9C flags and taskint[0] (1, 2, 4 or 8) for part 4..9. */
 void func_1507DF10(Actor *obj, s32 part) {
     switch (part) {
     case 9:
         obj->unk94 |= 0x20;
         obj->unk9C |= 0x78;
-        obj->unk2E4 = 1;
+        obj->taskint[0] = 1;
         return;
     case 8:
         obj->unk94 |= 0x40;
         obj->unk94 &= ~0x200;
         obj->unk9C |= 0xF00;
-        obj->unk2E4 = 2;
+        obj->taskint[0] = 2;
         return;
     case 6:
     case 7:
         obj->unk94 |= 0xE;
         obj->unk94 &= ~0x410;
         obj->unk9C |= 0xEE0000;
-        obj->unk2E4 = 4;
+        obj->taskint[0] = 4;
         return;
     case 4:
     case 5:
         obj->unk94 |= 0x80;
         obj->unk94 &= ~0x500;
-        obj->unk2E4 = 8;
+        obj->taskint[0] = 8;
         return;
     }
 }
@@ -738,20 +738,20 @@ s32 func_1507E114(s32 arg0) {
 
 void func_15143134(f32 *in, f32 *out, MtxF *mtx);
 
-/* Gets obj's tracking point: 30 * y_scale up through bone 0 (12 or 3 in some states), or its position. */
+/* Gets obj's tracking point: 30 * scale_y up through bone 0 (12 or 3 in some states), or its position. */
 void func_1507E1D0(Actor *obj, f32 *x, f32 *y, f32 *z) {
-    if (obj->unk1D4 != NULL) {
+    if (obj->ob_matrix_ptr != NULL) {
         MtxF *bone;
         f32 in[3];
         f32 out[3];
 
         in[0] = 0.0f;
-        in[1] = obj->y_scale * 30.0f;
+        in[1] = obj->scale_y * 30.0f;
         in[2] = 0.0f;
-        bone = obj->unk1D4;
-        if (obj->interaction_state == 1) {
+        bone = obj->ob_matrix_ptr;
+        if (obj->type == 1) {
             bone += 12;
-        } else if (obj->interaction_state == 0x1E) {
+        } else if (obj->type == 0x1E) {
             bone += 3;
         }
         func_15143134(in, out, bone);
@@ -759,8 +759,8 @@ void func_1507E1D0(Actor *obj, f32 *x, f32 *y, f32 *z) {
         *y = out[1];
         *z = out[2];
     } else {
-        *x = obj->x_position;
-        *y = obj->y_position;
-        *z = obj->z_position;
+        *x = obj->xpos;
+        *y = obj->ypos;
+        *z = obj->zpos;
     }
 }

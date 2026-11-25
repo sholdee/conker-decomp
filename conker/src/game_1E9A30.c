@@ -13,7 +13,7 @@ typedef struct {
 s32 func_151BC580(OwnedEffect40 *effect) {
     Actor *owner = effect->owner.actor;
 
-    if (owner->interaction_state == 0) {
+    if (owner->type == 0) {
         return 0;
     }
     return 1;
@@ -130,13 +130,13 @@ s32 func_151BC794(TrailEffect *trail) {
     data = trail->data;
     points = trail->points;
     owner = data->owner.actor;
-    if (owner->interaction_state == 0 || owner->unique_id != data->owner.uniqueId) {
+    if (owner->type == 0 || owner->unique_id != data->owner.uniqueId) {
         trail->head.tmpl.flags |= 8;
         return 1;
     }
-    trail->head.tmpl.pos.x = owner->x_position;
-    trail->head.tmpl.pos.y = owner->y_position;
-    trail->head.tmpl.pos.z = owner->z_position;
+    trail->head.tmpl.pos.x = owner->xpos;
+    trail->head.tmpl.pos.y = owner->ypos;
+    trail->head.tmpl.pos.z = owner->zpos;
     delta.x = trail->head.tmpl.pos.x - data->lastPos.x;
     delta.y = trail->head.tmpl.pos.y - data->lastPos.y;
     delta.z = trail->head.tmpl.pos.z - data->lastPos.z;
@@ -414,7 +414,7 @@ typedef struct {
 s32 func_151BD2BC(OwnedEffect28 *effect) {
     Actor *owner = effect->owner.actor;
 
-    if (owner->interaction_state == 0) {
+    if (owner->type == 0) {
         return 0;
     }
     if (owner->unique_id != effect->owner.uniqueId) {
@@ -588,18 +588,18 @@ void func_151BD43C(Vec3f *pointA, Vec3f *pointB, Vec3f *velA, Vec3f *velB, f32 t
         desc.vel.x = (pointB->x - pointA->x) * strip->power;
         desc.vel.y = (pointB->y - pointA->y) * strip->power;
         desc.vel.z = (pointB->z - pointA->z) * strip->power;
-        desc.pos.x = pointA->x - strip->owner->x_position;
-        desc.pos.y = pointA->y - strip->owner->y_position;
-        desc.pos.z = pointA->z - strip->owner->z_position;
+        desc.pos.x = pointA->x - strip->owner->xpos;
+        desc.pos.y = pointA->y - strip->owner->ypos;
+        desc.pos.z = pointA->z - strip->owner->zpos;
         desc.pos.x += desc.vel.x * time;
         desc.pos.y += desc.vel.y * time;
         desc.pos.z += desc.vel.z * time;
         ownerRef.actor = strip->owner;
         ownerRef.uniqueId = strip->owner->unique_id;
         desc.updateFunc = 0x13;
-        desc.offset.x = strip->owner->x_position;
-        desc.offset.y = strip->owner->y_position;
-        desc.offset.z = strip->owner->z_position;
+        desc.offset.x = strip->owner->xpos;
+        desc.offset.y = strip->owner->ypos;
+        desc.offset.z = strip->owner->zpos;
         particle = func_15130374(&desc, 1, 0x10, strip->unkC, strip->kind);
         if (particle != NULL) {
             memcpy(&particle->drag, &drag, sizeof(drag));
@@ -626,10 +626,10 @@ f32 func_151BD750(AgedBloodStrip *strip) {
 void func_151BD79C(BloodDroplet *particle, Vec3f *prevPos) {
     Actor *owner = particle->owner.actor;
 
-    if (owner->interaction_state != 0 && owner->id != 0xFF) {
-        particle->offset.x = owner->x_position;
-        particle->offset.y = owner->y_position;
-        particle->offset.z = owner->z_position;
+    if (owner->type != 0 && owner->character_type != 0xFF) {
+        particle->offset.x = owner->xpos;
+        particle->offset.y = owner->ypos;
+        particle->offset.z = owner->zpos;
     }
     func_1513170C(particle, prevPos);
 }
@@ -666,7 +666,7 @@ void func_151BD828(Actor *actor, u8 arg1, s32 arg2) {
             ParticleDef sparkEffect;
 
             spark.flags = 0;
-            spark.scale = (actor->xz_scale + actor->y_scale) * 0.5f;
+            spark.scale = (actor->scale_xz + actor->scale_y) * 0.5f;
             spark.owner = actor;
             spark.ownerId = actor->unique_id;
             spark.widthBase = 15.045272f;
@@ -813,11 +813,11 @@ void func_151BDD8C(BurstEffect *effect) {
 
     data = &effect->data;
     owner = data->owner;
-    if (owner->interaction_state == 0 || owner->unique_id != data->ownerId) {
+    if (owner->type == 0 || owner->unique_id != data->ownerId) {
         effect->base.header.state = -1;
         return;
     }
-    if (owner->unk1D4 != NULL && (owner->unk74 & 0xF) != 0xF) {
+    if (owner->ob_matrix_ptr != NULL && (owner->unk74 & 0xF) != 0xF) {
         BurstSpark *spark;
         BurstGlow *glow;
         s32 pad1; // matching: stack slots of the original frame
@@ -831,7 +831,7 @@ void func_151BDD8C(BurstEffect *effect) {
         dsts[1] = &starts[1];
         dsts[2] = &ends[0];
         dsts[3] = &ends[1];
-        func_15145EA4(srcs, dsts, (Mtx *)owner->unk1D4 + 1, 4);
+        func_15145EA4(srcs, dsts, (Mtx *)owner->ob_matrix_ptr + 1, 4);
         for (i = 0; i < 2; i++) {
             if (data->sparks[i] != NULL) {
                 spark = data->sparks[i];

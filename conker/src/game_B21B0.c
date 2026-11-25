@@ -10,7 +10,7 @@ extern u8 *D_80087240[];
  * the first entry of the row that contains it, or the id itself when no row does.
  * Same search as func_1503D5F0 (game_6A3D0). */
 s32 func_15084D00(Actor *obj) {
-    s32 id = obj->id;
+    s32 id = obj->character_type;
     s32 i;
     s32 j;
 
@@ -56,10 +56,10 @@ s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, f32
     }
     if (playerIndex != 0xFF) {
         if (spawnIndex == -1) {
-            spawnIndex = movement_obj[playerIndex].unk31C->spawnIndex;
+            spawnIndex = movement_obj[playerIndex].mv->spawnIndex;
         }
         if (remember) {
-            movement_obj[playerIndex].unk31C->spawnIndex = 0;
+            movement_obj[playerIndex].mv->spawnIndex = 0;
         }
     }
     spawnIndex &= 0xFFF;
@@ -71,7 +71,7 @@ s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, f32
             u8 candidates[32];
 
             team = movement_obj[playerIndex].team;
-            state = movement_obj[playerIndex].unk31C;
+            state = movement_obj[playerIndex].mv;
             count = 0;
             best = 0;
             if (team == 0) {
@@ -92,8 +92,8 @@ s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, f32
                     nearestDistSq = 100000000.0f;
                     for (mask = 0; mask < D_8008FD8C; mask++) {
                         if (team != movement_obj[mask].team) {
-                            dx = movement_obj[mask].x_position - D_800D212C[candidates[i]].pos[0];
-                            dz = movement_obj[mask].z_position - D_800D212C[candidates[i]].pos[2];
+                            dx = movement_obj[mask].xpos - D_800D212C[candidates[i]].pos[0];
+                            dz = movement_obj[mask].zpos - D_800D212C[candidates[i]].pos[2];
                             dx = dx * dx + dz * dz;
                             if (dx < nearestDistSq) {
                                 nearestDistSq = dx;
@@ -111,7 +111,7 @@ s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, f32
             if (D_8008FDD4->selection != 0 || D_800E0BE3 == 0) {
                 spawnIndex = candidates[best];
             }
-            state = movement_obj[playerIndex].unk31C;
+            state = movement_obj[playerIndex].mv;
             state->lastSpawnIndex = spawnIndex;
             useLink = FALSE;
         }
@@ -151,7 +151,7 @@ s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, f32
             outPos[2] += cosf(angle) * offset;
         }
         if (playerIndex != 0xFF && remember) {
-            movement_obj[playerIndex].unk31C->spawnIndex = spawnIndex;
+            movement_obj[playerIndex].mv->spawnIndex = spawnIndex;
         }
         return 0;
     }
@@ -160,12 +160,12 @@ s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, f32
 
 /* Sets the spawn index func_15084D70 falls back to for this player object. */
 void func_15085410(Actor *obj, s32 spawnIndex) {
-    obj->unk31C->spawnIndex = spawnIndex;
+    obj->mv->spawnIndex = spawnIndex;
 }
 
 /* Returns the player object's stored spawn index. */
 u8 func_15085420(Actor *obj) {
-    return obj->unk31C->spawnIndex;
+    return obj->mv->spawnIndex;
 }
 
 extern f32  func_1506AD30(Actor *, f32, s32);
@@ -187,7 +187,7 @@ void func_15085430(Actor *obj, s32 spawnIndex, s32 unused) {
     s32 savedIndex;
     ActorRef event;
 
-    func_15084D70(obj->unk127, spawnIndex, D_800D18A8, pos, unk8, &unk6, &facing, &unk14, &unk15, unused, NULL);
+    func_15084D70(obj->playernumber, spawnIndex, D_800D18A8, pos, unk8, &unk6, &facing, &unk14, &unk15, unused, NULL);
     savedObject = D_800D154C;
     savedIndex = dc_glbl_CharNum;
     D_800D154C = obj;
@@ -195,43 +195,43 @@ void func_15085430(Actor *obj, s32 spawnIndex, s32 unused) {
     func_1506AD30(obj, 800.0f, 1);
     D_800D154C = savedObject;
     dc_glbl_CharNum = savedIndex;
-    obj->x_position = pos[0];
-    obj->y_position = pos[1];
-    obj->z_position = pos[2];
-    obj->old_x_position = obj->x_position;
-    obj->old_y_position = *(volatile f32 *)&obj->y_position; // matching: stops IDO carrying y_position across the loop below
-    obj->old_z_position = obj->z_position;
-    obj->unk76 = obj->unk78 = obj->unk7A = facing << 8;
-    obj->unk40 = (s16)(obj->unk7A + 0x4000) * (360.0f / 65536);
-    obj->unkB8 = (unk6 * 360) >> 8;
-    while (obj->unkB8 > 180.0f) {
-        obj->unkB8 -= 360.0f;
+    obj->xpos = pos[0];
+    obj->ypos = pos[1];
+    obj->zpos = pos[2];
+    obj->old_xpos = obj->xpos;
+    obj->old_ypos = *(volatile f32 *)&obj->ypos; // matching: stops IDO carrying ypos across the loop below
+    obj->old_zpos = obj->zpos;
+    obj->angle = obj->fangle = obj->langle = facing << 8;
+    obj->theta = (s16)(obj->langle + 0x4000) * (360.0f / 65536);
+    obj->vtilt = (unk6 * 360) >> 8;
+    while (obj->vtilt > 180.0f) {
+        obj->vtilt -= 360.0f;
     }
-    obj->unk28 = 0.0f;
-    obj->floorY = obj->y_position;
-    if (obj->unk31C != NULL) {
-        func_1507C3E0(obj, &obj->unk31C->height, &obj->unk31C->width, &obj->unk31C->depth);
+    obj->shad = 0.0f;
+    obj->floorY = obj->ypos;
+    if (obj->mv != NULL) {
+        func_1507C3E0(obj, &obj->mv->height, &obj->mv->width, &obj->mv->depth);
     }
-    obj->unk1CC = obj->y_position;
+    obj->unk1CC = obj->ypos;
     obj->unk2F8 &= ~0x10;
     obj->unk22C |= 0x200;
-    obj->unk164 = 0.0f;
-    obj->unk168 = 0.0f;
-    obj->unk16C = 0.0f;
-    obj->unk170 = 0.0f;
-    if (obj->unk127 != 0xFF) {
-        obj->unk31C->door_walkf_time = unk15;
+    obj->ob_slopex = 0.0f;
+    obj->ob_slopey = 0.0f;
+    obj->ob_overslopex = 0.0f;
+    obj->ob_overslopey = 0.0f;
+    if (obj->playernumber != 0xFF) {
+        obj->mv->door_walkf_time = unk15;
         if (D_800BE616 && D_800D18A8) {
             func_1505D6F0(obj, obj - movement_obj);
         }
-        if (obj->unk31C->rt_context_b == 0 && obj->unk31C->GrenadeThrowState != 4 && obj->unk31C->GrenadeThrowState != 7) {
-            obj->unk83 = 0;
+        if (obj->mv->rt_context_b == 0 && obj->mv->GrenadeThrowState != 4 && obj->mv->GrenadeThrowState != 7) {
+            obj->count5 = 0;
         }
     } else {
-        obj->unk83 = 0;
+        obj->count5 = 0;
     }
-    if (obj->camera != NULL) {
-        func_15005818(obj->camera, obj, unk8);
+    if (obj->CameraPtr != NULL) {
+        func_15005818(obj->CameraPtr, obj, unk8);
     }
     event.actor = obj;
     event.uniqueId = obj->unique_id;
@@ -359,7 +359,7 @@ void func_15085ABC(s16 players) {
     }
     for (i = 0; i < 4; i++) {
         if ((1 << i) & players) {
-            func_15085710(i, 5, movement_obj[i].health);
+            func_15085710(i, 5, movement_obj[i].energy);
         }
     }
 }

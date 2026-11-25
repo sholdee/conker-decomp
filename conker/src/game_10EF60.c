@@ -164,20 +164,20 @@ void func_150E1D14(Game10EF60Effect *effect) {
 
     // matching: dead stores; first mentions order uopt'len CSE temp slots
     impact = (s32)D_800D9960[aim].normal;
-    fire = effect->owner->unk76 - effect->owner->unk31C->pssd_waist_tilt;
+    fire = effect->owner->angle - effect->owner->mv->pssd_waist_tilt;
     i = (s32)&effect->target_x;
     bone = &effect->target_z;
     texture = 0x23;
     dist = 0.0f;
     effect->lifetime -= D_800BE9E4;
-    if (effect->lifetime < 0 || (effect->owner != NULL && effect->ownerTag != -1 && effect->owner->unk84.uh != effect->ownerTag)) {
+    if (effect->lifetime < 0 || (effect->owner != NULL && effect->ownerTag != -1 && effect->owner->animseq.uh != effect->ownerTag)) {
         func_1516972C(&effect->header);
         return;
     }
     if (effect->mode != 0) {
         if (effect->attachDelay == 0) {
-            if (effect->owner != NULL && effect->owner->unk1D4 != NULL && effect->owner->unique_id == effect->ownerId && (aim = effect->owner->unk127) != 0xFF) {
-                bone = effect->owner->unk1D4[effect->bone][0];
+            if (effect->owner != NULL && effect->owner->ob_matrix_ptr != NULL && effect->owner->unique_id == effect->ownerId && (aim = effect->owner->playernumber) != 0xFF) {
+                bone = effect->owner->ob_matrix_ptr[effect->bone][0];
                 func_150A7960(bone, effect->startOffset[0], effect->startOffset[1], effect->startOffset[2], &effect->x, &effect->y, &effect->z);
                 func_150A7960(bone, effect->endOffset[0], effect->endOffset[1], effect->endOffset[2], &effect->target_x, &effect->target_y, &effect->target_z);
                 effect->attachDelay = 3;
@@ -188,10 +188,10 @@ void func_150E1D14(Game10EF60Effect *effect) {
         effect->timer -= D_800BE9E4;
         if (effect->timer < -effect->offTime) {
             effect->timer = effect->onTime;
-            if (effect->owner != NULL && effect->owner->unk1D4 != NULL && effect->owner->unique_id == effect->ownerId) {
-                bone = effect->owner->unk1D4[effect->bone][0];
+            if (effect->owner != NULL && effect->owner->ob_matrix_ptr != NULL && effect->owner->unique_id == effect->ownerId) {
+                bone = effect->owner->ob_matrix_ptr[effect->bone][0];
                 func_150A7960(bone, effect->startOffset[0], effect->startOffset[1], effect->startOffset[2], &effect->x, &effect->y, &effect->z);
-                aim = effect->owner->unk127;
+                aim = effect->owner->playernumber;
                 func_150A7960(bone, effect->endOffset[0], effect->endOffset[1], effect->endOffset[2], &effect->target_x, &effect->target_y, &effect->target_z);
                 stopDist = 0.0f;
                 if (effect->fireCounter-- == 0) {
@@ -207,7 +207,7 @@ void func_150E1D14(Game10EF60Effect *effect) {
                 }
                 impact = 0;
                 if (aim != 0xFF) {
-                    if (effect->owner->unk76 - effect->owner->unk31C->pssd_waist_tilt == D_800D9960[aim].unk0 && effect->owner->unk1D1 == D_800D9960[aim].unk2) {
+                    if (effect->owner->angle - effect->owner->mv->pssd_waist_tilt == D_800D9960[aim].unk0 && effect->owner->unk1D1 == D_800D9960[aim].unk2) {
                         effect->target_x = D_800D9960[aim].x;
                         effect->target_y = D_800D9960[aim].y;
                         effect->target_z = D_800D9960[aim].z;
@@ -228,7 +228,7 @@ void func_150E1D14(Game10EF60Effect *effect) {
                         stopDist = 1.0f;
                     } else {
                         angle = effect->owner->unk1D1 * 200;
-                        func_1505A184(effect->owner->unk76 - effect->owner->unk31C->pssd_waist_tilt, 2000.0f, (f32)angle * 0.005493164f, &effect->target_x, &effect->target_z, &effect->target_y);
+                        func_1505A184(effect->owner->angle - effect->owner->mv->pssd_waist_tilt, 2000.0f, (f32)angle * 0.005493164f, &effect->target_x, &effect->target_z, &effect->target_y);
                         effect->target_x += effect->x;
                         effect->target_y += effect->y;
                         effect->target_z += effect->z;

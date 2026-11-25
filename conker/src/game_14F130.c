@@ -32,15 +32,15 @@ void func_15121C80(Camera *camera, f32 yawOffset) {
             camera->targetLimit = 8.0f;
             func_150495B0(&camera->speed, 5.0f, &camera->speedVel, 1.0f, 2.0f, camera->dt);
             func_150495B0(&camera->limit, camera->targetLimit, &camera->limitVel, 1.0f, 2.0f, camera->dt);
-            func_15049688(&camera->yaw, camera->player->unk40 - 180.0f, &camera->yawEaseVel, camera->speed, camera->limit, camera->dt);
+            func_15049688(&camera->yaw, camera->player->theta - 180.0f, &camera->yawEaseVel, camera->speed, camera->limit, camera->dt);
         } else {
-            func_15049688(&camera->yaw, camera->player->unk40 - 180.0f, &camera->yawEaseVel, 5.0f, 8.0f, camera->dt);
+            func_15049688(&camera->yaw, camera->player->theta - 180.0f, &camera->yawEaseVel, 5.0f, 8.0f, camera->dt);
         }
         camera->yawRad = camera->yaw * (3.1415927f / 180.0f);
     } else if (!camera->unk698) {
-        angle = ((camera->player->unk40 + (f32) camera->player->unk7C * (360.0f / 65536)) - 180.0f) - yawOffset;
+        angle = ((camera->player->theta + (f32) camera->player->mod_angle * (360.0f / 65536)) - 180.0f) - yawOffset;
         if (active && camera->zone != 28) {
-            angle -= (f32) (camera->player->unk2E4 >> 16) * 0.02f;
+            angle -= (f32) (camera->player->taskint[0] >> 16) * 0.02f;
         }
         if (camera->zone == 9 || camera->zone == 56 || camera->zone == 57 || camera->zone == 55 ||
             camera->zone == 59 || camera->zone == 18) {

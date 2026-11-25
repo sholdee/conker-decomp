@@ -15,7 +15,7 @@ typedef struct GameCommand {
 } GameCommand;
 
 /*
- * Appends two commands built from the object's unk2E4 angle pair (two s16s):
+ * Appends two commands built from the object's taskint[0] angle pair (two s16s):
  * opcode 0x12 with the second angle, opcode 0xE with the negated first one,
  * both scaled by 65536 / 18000.
  */
@@ -23,17 +23,17 @@ GameCommand *func_150344A0(GameCommand *cmd, s32 index) {
     s32 angle;
 
     cmd[0].opcode = 0x12;
-    angle = ((s16 *)&movement_obj[index].unk2E4)[1];
+    angle = ((s16 *)&movement_obj[index].taskint[0])[1];
     cmd[0].value = angle * 3.640889f;
     cmd[1].opcode = 0xE;
-    angle = -((s16 *)&movement_obj[index].unk2E4)[0];
+    angle = -((s16 *)&movement_obj[index].taskint[0])[0];
     cmd[1].value = angle * 3.640889f;
     return cmd + 2;
 }
 
 /* Calls func_1503B9BC for objects with id 0-4, 0x80 or 0xB0. */
 void func_1503453C(s32 index) {
-    switch (movement_obj[index].id) {
+    switch (movement_obj[index].character_type) {
     case 0:
     case 1:
     case 2:
@@ -48,16 +48,16 @@ void func_1503453C(s32 index) {
 
 /* Per-object update hook for objects that have bone matrices. */
 void func_150345E4(s32 index) {
-    if (movement_obj[index].unk1D4 != NULL) {
-        if (movement_obj[index].interaction_state == 1 || movement_obj[index].unk5 == 7) {
+    if (movement_obj[index].ob_matrix_ptr != NULL) {
+        if (movement_obj[index].type == 1 || movement_obj[index].drawtype == 7) {
             func_1503453C(index);
         }
 
-        if (movement_obj[index].interaction_state == 0x22) {
+        if (movement_obj[index].type == 0x22) {
             func_1503453C(index);
         }
 
-        switch (movement_obj[index].id) {
+        switch (movement_obj[index].character_type) {
         case 4:
             if (D_800BE616 == 0) {
                 func_15036310(0, index, 9, 0);
@@ -85,9 +85,9 @@ void func_15034728(Actor *obj) {
     s32 lastBone;
     MtxF *bones;
 
-    if (obj->unk1D4 != NULL && obj->unk9C != 0) {
-        lastBone = func_1502DB20(obj->id) - 1;
-        bones = obj->unk1D4;
+    if (obj->ob_matrix_ptr != NULL && obj->unk9C != 0) {
+        lastBone = func_1502DB20(obj->character_type) - 1;
+        bones = obj->ob_matrix_ptr;
         bone = 31;
         if (lastBone < 31) {
             bone = lastBone;
@@ -116,7 +116,7 @@ void func_150347E8(void) {
 
     obj = movement_obj;
     do {
-        if (obj->interaction_state != 0 && obj->unk9C != 0) {
+        if (obj->type != 0 && obj->unk9C != 0) {
             func_15034728(obj);
         }
         obj++;

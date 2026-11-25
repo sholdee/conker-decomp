@@ -32,9 +32,9 @@ s32 func_150CB0E0(f32 *pos, Actor *actor, CollisionHit *ground, u8 side) {
     }
 
     if (side == 1) {
-        bone = (Mtx *)actor->unk1D4 + 40;
+        bone = (Mtx *)actor->ob_matrix_ptr + 40;
     } else {
-        bone = (Mtx *)actor->unk1D4 + 47;
+        bone = (Mtx *)actor->ob_matrix_ptr + 47;
     }
 
     func_15143134(offset, pos, bone);
@@ -109,7 +109,7 @@ void func_150CB1F4(Actor *actor, s32 side, s32 arg2) {
     ParticleDef desc;
     DustParticle *particle;
 
-    if (actor->unk1D4 == NULL) {
+    if (actor->ob_matrix_ptr == NULL) {
         return;
     }
     if (func_150CB0E0(pos, actor, &ground, side) == 0) {
@@ -178,7 +178,7 @@ void func_150CB1F4(Actor *actor, s32 side, s32 arg2) {
         desc.unk46 = 0;
         desc.unk47 = 6;
         angleOffset = (side == 1) ? -8 : 8;
-        particle = func_1513D668(&desc, colors, 0, 0x17, 0, 0, (actor->unk7A >> 8) - angleOffset,
+        particle = func_1513D668(&desc, colors, 0, 0x17, 0, 0, (actor->langle >> 8) - angleOffset,
                                  500.0f, 500.0f, 0, (s32)&ground.tri, 1, 8, 0xFF, 0);
         if (particle != NULL) {
             memcpy(&particle->growth, &growth, sizeof(growth));

@@ -314,9 +314,9 @@ CharacterWatcher *func_15158BD0(Actor *chr, u8 enableActions, s32 extraSize) {
     watcher->state2 = 2;
     watcher->moveState = 3;
     watcher->surfaceState = 0;
-    watcher->lastPosition.x = chr->x_position;
-    watcher->lastPosition.y = chr->y_position;
-    watcher->lastPosition.z = chr->z_position;
+    watcher->lastPosition.x = chr->xpos;
+    watcher->lastPosition.y = chr->ypos;
+    watcher->lastPosition.z = chr->zpos;
     watcher->flags = 0;
     if (enableActions != 0) {
         watcher->flags |= 1;
@@ -398,9 +398,9 @@ void func_15158D2C(CharacterWatcher *watcher) {
     }
 
     watcher->moveState = func_15159230(watcher->character, &watcher->lastPosition, watcher->moveState);
-    watcher->lastPosition.x = watcher->character->x_position;
-    watcher->lastPosition.y = watcher->character->y_position;
-    watcher->lastPosition.z = watcher->character->z_position;
+    watcher->lastPosition.x = watcher->character->xpos;
+    watcher->lastPosition.y = watcher->character->ypos;
+    watcher->lastPosition.z = watcher->character->zpos;
     watcher->surfaceState = func_151592B8(watcher->character, watcher->mode);
 
     if (watcher->flags & 1) {
@@ -460,7 +460,7 @@ s32 func_15159084(Actor *chr, u8 mode) {
     } else {
         if ((-10000.0f == chr->unk118) && ((flags & 0xA) == 0)) {
             ret = 1;
-        } else if ((chr->unk118 < chr->y_position) || (chr->unk137 != 0)) { /* byte 0x137 */
+        } else if ((chr->unk118 < chr->ypos) || (chr->unk137 != 0)) { /* byte 0x137 */
             ret = 1;
         } else {
             ret = 0;
@@ -488,12 +488,12 @@ s32 func_15159184(Actor *chr, u8 mode) {
     if ((mode == 2) || (mode == 3)) {
         if (D_800C35EA[0] != 1) {
             ret = 0;
-        } else if ((chr->unk118 - 75.0f) < chr->y_position) {
+        } else if ((chr->unk118 - 75.0f) < chr->ypos) {
             ret = 1;
         } else {
             ret = 0;
         }
-    } else if ((chr->unk118 - 75.0f) < chr->y_position) {
+    } else if ((chr->unk118 - 75.0f) < chr->ypos) {
         ret = 1;
     } else {
         ret = 0;
@@ -505,8 +505,8 @@ s32 func_15159184(Actor *chr, u8 mode) {
 s32 func_15159230(Actor *chr, Vec3f *lastPosition, u8 prevState) {
     s32 ret;
 
-    if ((chr->x_position != lastPosition->x) || (chr->y_position != lastPosition->y) ||
-        (chr->z_position != lastPosition->z)) {
+    if ((chr->xpos != lastPosition->x) || (chr->ypos != lastPosition->y) ||
+        (chr->zpos != lastPosition->z)) {
         if ((prevState == 1) || (prevState == 2)) {
             ret = 2;
         } else {
@@ -534,7 +534,7 @@ s32 func_151592B8(Actor *chr, u8 mode) {
         ids.value = D_8008B040;
         i = 1;
         do {
-            if (chr->unk84.uh == ids.bytes[i--]) {
+            if (chr->animseq.uh == ids.bytes[i--]) {
                 found = 1;
             }
         } while ((found == 0) && (i >= 0));
@@ -543,9 +543,9 @@ s32 func_151592B8(Actor *chr, u8 mode) {
     }
     if (found != 0) {
         i = 3;
-    } else if (chr->in_water != 0) {
+    } else if (chr->inwater != 0) {
         i = 2;
-    } else if (chr->unk28 != 0.0f) {
+    } else if (chr->shad != 0.0f) {
         i = 1;
     } else {
         i = 4;
@@ -566,11 +566,11 @@ s32 func_15159370(Actor *chr, u8 *mode) {
         *mode = 0;
         ret = 1;
     }
-    if ((chr->unk5 == 5) || (chr->unk5 == 2)) {
+    if ((chr->drawtype == 5) || (chr->drawtype == 2)) {
         *mode = 1;
         ret = 1;
     }
-    switch (chr->id) {
+    switch (chr->character_type) {
     case 8:
         *mode = 2;
         ret = 1;

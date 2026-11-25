@@ -1233,7 +1233,7 @@ void func_151E53E8(s32 flag) {
             D_800E0A88 = func_151DDBA0;
         }
         for (i = 0; i < D_8008FD90; i++) {
-            D_8008FDD4->stats[i].unk6 = movement_obj[i].unk31C->shotsfired;
+            D_8008FDD4->stats[i].unk6 = movement_obj[i].mv->shotsfired;
         }
         D_8008FDC0 &= 0xE35F;
         D_800E0A86 = flag;
@@ -1374,9 +1374,9 @@ s32 func_151E565C(void) {
                                 if (score < other) {
                                     D_800E0AC0[i]++;
                                 } else if (score == other) {
-                                    if (movement_obj[j].unk31C->shotsfired < movement_obj[i].unk31C->shotsfired) {
+                                    if (movement_obj[j].mv->shotsfired < movement_obj[i].mv->shotsfired) {
                                         D_800E0AC0[i]++;
-                                    } else if (movement_obj[i].unk31C->shotsfired == movement_obj[j].unk31C->shotsfired) {
+                                    } else if (movement_obj[i].mv->shotsfired == movement_obj[j].mv->shotsfired) {
                                         if (j < i && D_80082FA0 < j) {
                                             D_800E0AC0[i]++;
                                         }
@@ -1401,7 +1401,7 @@ s32 func_151E565C(void) {
         teamStats[team] += D_8008FDD4->score[i];
         teamStats[team + 4] += func_150859AC(i, 3) * 6 + func_150859AC(i, 4);
         teamStats[team + 8] = func_150859AC(team, 6);
-        teamStats[team + 12] += movement_obj[i].unk31C->shotsfired;
+        teamStats[team + 12] += movement_obj[i].mv->shotsfired;
     }
     statBase = 8;
     team = -1;
@@ -1529,7 +1529,7 @@ void func_151E5FF4(Actor *source, Actor *victim, s32 cause) {
     attacker = source;
     attackerIdx = source - movement_obj;
     if (attackerIdx >= D_8008FD8C) {
-        attackerIdx = source->unk124 - 1;
+        attackerIdx = source->owner - 1;
         if (attackerIdx >= 0) {
             attacker = &movement_obj[attackerIdx];
         }
@@ -1544,11 +1544,11 @@ void func_151E5FF4(Actor *source, Actor *victim, s32 cause) {
                     D_8008FDD4->stats[attackerIdx].unk4++;
                 }
             }
-            if ((victim->health <= 0) && (D_800E0C00[attackerIdx] == D_800E0C00[victimIdx]) && (cause != 0x2D)) {
+            if ((victim->energy <= 0) && (D_800E0C00[attackerIdx] == D_800E0C00[victimIdx]) && (cause != 0x2D)) {
                 D_8008FDD4->stats[attackerIdx].unkA++;
             }
         }
-        if (victim->health <= 0) {
+        if (victim->energy <= 0) {
             if ((D_8008FDD4->score[attackerIdx] < 9999) && (D_800E0C00[attackerIdx] != D_800E0C00[victimIdx])) {
                 D_8008FDD4->score[attackerIdx]++;
                 if (D_8008FDBC & 0x200) {
@@ -1559,18 +1559,18 @@ void func_151E5FF4(Actor *source, Actor *victim, s32 cause) {
         if (victimIdx < D_8008FD90) {
             D_8008FDD4->stats[victimIdx].unk8++;
         }
-        if ((attacker != victim) && (victim->unk31C != NULL) && (attacker->health != 0)) {
+        if ((attacker != victim) && (victim->mv != NULL) && (attacker->energy != 0)) {
             sound = 0;
             delay = 0;
-            attacker->unk31C->unkAF = 0;
+            attacker->mv->unkAF = 0;
             variants = 0;
             if (cause == 0x33) {
-                victimKind = victim->unk31C->rt_context_b;
+                victimKind = victim->mv->rt_context_b;
                 if ((victimKind == 0x21) || (victimKind == 0x22)) {
                     func_10010630(0x510, victim, 0x61A8, 0x12C, 0x190);
                 }
-            } else if ((attacker->id == 0x75) && (victim->health <= 0)) {
-                if (attacker->id == victim->id) {
+            } else if ((attacker->character_type == 0x75) && (victim->energy <= 0)) {
+                if (attacker->character_type == victim->character_type) {
                     if ((victimIdx < D_8008FD90) && (D_8008FDD4->stats[victimIdx].unkA >= 4)) {
                         sound = 0x665;
                         variants = 4;
@@ -1589,30 +1589,30 @@ void func_151E5FF4(Actor *source, Actor *victim, s32 cause) {
                     }
                     func_10010558(sound, attacker, 0x6D60, 0x320, 0xBB8, delay);
                 }
-            } else if (attacker->id == 0x80) {
+            } else if (attacker->character_type == 0x80) {
                 sourceState = -1;
-                if ((source != attacker) && (source->interaction_state == 4)) {
+                if ((source != attacker) && (source->type == 4)) {
                     sourceState = (u16)source->unk278;
                 }
-                if (attacker->id == victim->id) {
+                if (attacker->character_type == victim->character_type) {
                     if ((victimIdx < D_8008FD90) && (D_8008FDD4->stats[victimIdx].unkA >= 4)) {
                         variants = 8;
                         sound = 0x65A;
                     }
                 } else if (sourceState == 2) {
-                    if ((victim->health <= 0) || ((func_150ADA20() & 7) == 0)) {
+                    if ((victim->energy <= 0) || ((func_150ADA20() & 7) == 0)) {
                         variants = 3;
                         sound = 0x571;
                     }
-                } else if (victim->unk31C->on_fire != 0) {
-                    if ((cause != 0x21) && ((victim->health <= 0) || ((func_150ADA20() & 3) == 3))) {
+                } else if (victim->mv->on_fire != 0) {
+                    if ((cause != 0x21) && ((victim->energy <= 0) || ((func_150ADA20() & 3) == 3))) {
                         variants = 4;
                         sound = 0x582;
                         delay = 0x1E;
                     }
                 } else if (cause == 0x2E) {
                     delay = 0x1E;
-                    if ((attacker->unk31C->rt_context_b == 0x23) && ((func_150ADA20() & 3) == 0)) {
+                    if ((attacker->mv->rt_context_b == 0x23) && ((func_150ADA20() & 3) == 0)) {
                         sound = 0x587;
                     } else {
                         sound = 0x579;
@@ -1628,7 +1628,7 @@ void func_151E5FF4(Actor *source, Actor *victim, s32 cause) {
                     variants = 7;
                     delay = 0x3C;
                 } else if (((cause == 0x21) || (cause == 0x20) || (cause == 0x31)) &&
-                           ((victim->health <= 0) || ((func_150ADA20() & 7) == 3))) {
+                           ((victim->energy <= 0) || ((func_150ADA20() & 7) == 3))) {
                     sound = 0x571;
                     variants = 3;
                     delay = 0x1E;
@@ -1639,13 +1639,13 @@ void func_151E5FF4(Actor *source, Actor *victim, s32 cause) {
                     }
                     func_10010558(sound, attacker, 0x7D00, 0x258, 0x7D0, delay);
                 }
-            } else if (attacker->id == 0x3B) {
+            } else if (attacker->character_type == 0x3B) {
                 sourceState2 = -1;
-                if ((source != attacker) && (source->interaction_state == 4)) {
+                if ((source != attacker) && (source->type == 4)) {
                     sourceState2 = (u16)source->unk278;
                 }
                 if (sourceState2 == 2) {
-                    if ((victim->health <= 0) || ((func_150ADA20() & 7) == 7)) {
+                    if ((victim->energy <= 0) || ((func_150ADA20() & 7) == 7)) {
                         sound = 0x538;
                         variants = 3;
                     }
@@ -1658,7 +1658,7 @@ void func_151E5FF4(Actor *source, Actor *victim, s32 cause) {
                     variants = 2;
                     delay = 0x3C;
                 } else if ((cause == 0x25) || (cause == 0x26)) {
-                    health = victim->health;
+                    health = victim->energy;
                     if (attackerIdx & 1) {
                         if (health >= 2) {
                             sound = 0x55F - health;
@@ -1689,7 +1689,7 @@ void func_151E5FF4(Actor *source, Actor *victim, s32 cause) {
                     }
                     func_10010558(sound, attacker, 0x7D00, 0x258, 0x7D0, delay);
                 }
-            } else if ((attacker->id == 0x88) && (victim->health <= 0)) {
+            } else if ((attacker->character_type == 0x88) && (victim->energy <= 0)) {
                 if (cause == 0x34) {
                     if ((func_150ADA20() & 3) == 3) {
                         sound = 0x52A;
@@ -1978,8 +1978,8 @@ void func_151E6C1C(s32 index) {
         }
     }
 
-    obj->player->unk25C |= 0x200;
-    obj->player->y_position = 1000.0f;
+    obj->player->task_attrib |= 0x200;
+    obj->player->ypos = 1000.0f;
 
     if (scale > 0.0f) {
         path[0] = func_15086D48(homeNode);
@@ -2299,12 +2299,12 @@ void func_151E7F60(s32 slotIdx, s32 charIdx) {
     if (objSlot != 0) {
         obj = &movement_obj[objSlot - 1];
         D_800E0BA0[slotIdx] = obj;
-        obj->unk5 = 7;
+        obj->drawtype = 7;
         obj->unk2F8 |= 3;
-        obj->xz_scale = obj->y_scale = D_800AB57C[charIdx].unk0;
-        if (obj->id == 0 || obj->id == 0x80) {
-            obj->unk31C = allocate_memory(0x1C0, 1, 0, 0);
-            bzero(obj->unk31C, 0x1C0);
+        obj->scale_xz = obj->scale_y = D_800AB57C[charIdx].unk0;
+        if (obj->character_type == 0 || obj->character_type == 0x80) {
+            obj->mv = allocate_memory(0x1C0, 1, 0, 0);
+            bzero(obj->mv, 0x1C0);
         }
         if (kind == 0x3B) {
             obj->unk68[0] = slotIdx + 1;

@@ -41,7 +41,7 @@ void func_150FB324(Actor *actor, u8 arg1, s32 arg2) {
     Vec3f *sources[3];
     Vec3f *destinations[3];
 
-    if (actor->unk1D4 == NULL) {
+    if (actor->ob_matrix_ptr == NULL) {
         return;
     }
     sources[0] = &point0;
@@ -50,7 +50,7 @@ void func_150FB324(Actor *actor, u8 arg1, s32 arg2) {
     destinations[0] = &position;
     destinations[1] = &origin;
     destinations[2] = &delta;
-    mtx = (Mtx *)actor->unk1D4 + 14;
+    mtx = (Mtx *)actor->ob_matrix_ptr + 14;
     func_15145EA4(sources, destinations, mtx, 3);
     delta.x -= origin.x;
     delta.y -= origin.y;

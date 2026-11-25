@@ -181,7 +181,7 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
     }
     for (type = 0; type < numProbes; type++) {
         if (D_80089120[type] == 1) {
-            if (type == PROBE_OBJECT && object != NULL && (object->unkF8 & 0x200)) {
+            if (type == PROBE_OBJECT && object != NULL && (object->noshove & 0x200)) {
                 continue;
             }
             ix = (s32)x;
@@ -309,7 +309,7 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
                             object->floorTriIndex = WORLD_TRI_INDEX(triAddr);
                         }
                     } else if (object != NULL) {
-                        object->floorTriIndex = (triAddr - (s32)D_800C6070[movement_obj[hit->unkC].id]) / 12;
+                        object->floorTriIndex = (triAddr - (s32)D_800C6070[movement_obj[hit->unkC].character_type]) / 12;
                     }
                     if (vtxBase == 0 && outTri != NULL) {
                         *outTri = (s32)hit->tri;
@@ -409,9 +409,9 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
             D_800DBF94[D_800DBE60 - 1] |= 1 << (object - movement_obj);
         }
         if (objectNum != 0 && (y - *outFloorY) < 10.0f) {
-            object->objectNum = objectNum;
+            object->stand_on_char = objectNum;
         } else {
-            object->objectNum = 0;
+            object->stand_on_char = 0;
         }
     }
     if (total == 0) {

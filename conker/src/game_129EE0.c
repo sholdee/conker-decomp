@@ -182,20 +182,20 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
     if (obj->unk7 < 0xFF) {
         return;
     }
-    pos.x = obj->x_position;
+    pos.x = obj->xpos;
     probe.x = pos.x;
-    probe.y = obj->y_position + 100.0f;
-    pos.z = obj->z_position;
+    probe.y = obj->ypos + 100.0f;
+    pos.z = obj->zpos;
     probe.z = pos.z;
     func_1504715C(&ground, obj);
     if (func_15046C80(&probe, 0, -10000.0f, &ground)) {
         pos.y = ground.height;
         onGround = 1;
     } else {
-        pos.y = obj->y_position;
+        pos.y = obj->ypos;
         onGround = 0;
     }
-    func_1505D024(obj, 0x39, obj->unk7A, -1);
+    func_1505D024(obj, 0x39, obj->langle, -1);
     ext.owner = obj;
     ext.ownerId = obj->unique_id;
     ext.maxWidth = 60.0f;
@@ -317,13 +317,13 @@ s32 func_150FD514(Actor150FD514 *particle) {
     ext = &particle->ext;
     owner = ext->owner;
     if (owner != NULL) {
-        if (owner->interaction_state == 0 || owner->unique_id != ext->ownerId) {
+        if (owner->type == 0 || owner->unique_id != ext->ownerId) {
             ext->owner = NULL;
             owner = NULL;
         }
         /* BUG (original game): owner may have just been set to NULL above, and is dereferenced anyway */
-        x = owner->x_position;
-        z = owner->z_position;
+        x = owner->xpos;
+        z = owner->zpos;
     } else {
         x = particle->head.def.pos.x;
         z = particle->head.def.pos.z;
@@ -344,7 +344,7 @@ s32 func_150FD514(Actor150FD514 *particle) {
         particle->head.def.width = ext->timer * 0.1f * ext->maxWidth;
         if (ext->burstDone == 0) {
             if (owner != NULL) {
-                func_1505D024(owner, 0x16, owner->unk7A, -1);
+                func_1505D024(owner, 0x16, owner->langle, -1);
                 func_10010F88(0x69D, 32000, 0, 0, 0, particle->head.def.pos.x, particle->head.def.pos.y, particle->head.def.pos.z, 500, 3000);
             }
             ext->burstDone = 1;

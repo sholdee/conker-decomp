@@ -184,7 +184,7 @@ s32 func_1509ED74(s32 id, s32 op, s32 *cmd) {
         return func_15114050(obj, func_15084000(cmd[2] & 0xFFFF0FFF));
     case 21:
         for (i = 0; i < 25; i++) {
-            if (movement_obj[i].interaction_state == cmd[2] && func_15114050(obj, i)) {
+            if (movement_obj[i].type == cmd[2] && func_15114050(obj, i)) {
                 return 1;
             }
         }
@@ -466,9 +466,9 @@ s32 func_1509F6E8(s32 sound, s32 path, s32 volume, s32 nearDistance, s32 farDist
     if (actor == NULL) {
         return 0;
     }
-    x = actor->x_position;
-    y = actor->y_position;
-    z = actor->z_position;
+    x = actor->xpos;
+    y = actor->ypos;
+    z = actor->zpos;
     return func_10010F88(sound, volume, 0, 0, 0, x, y, z, nearDistance, farDistance);
 }
 
@@ -480,9 +480,9 @@ void func_1509F77C(s32 handle, s32 path, s32 cents, s32 nearDistance, s32 farDis
     s32 z;
 
     actor = func_1505EEF4(path);
-    x = actor->x_position;
-    y = actor->y_position;
-    z = actor->z_position;
+    x = actor->xpos;
+    y = actor->ypos;
+    z = actor->zpos;
     func_1000F91C(handle, 0x7FFF, cents, 0, 0, x, y, z, nearDistance, farDistance);
 }
 

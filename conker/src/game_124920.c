@@ -483,9 +483,9 @@ extern void func_15152B38(TrailBurst *, u8, s32);
 void func_150F85A0(s32 arg0, Actor *obj, s32 arg2) {
     Vec3f pos;
 
-    pos.x = obj->x_position;
-    pos.y = obj->y_position + 50.0f;
-    pos.z = obj->z_position;
+    pos.x = obj->xpos;
+    pos.y = obj->ypos + 50.0f;
+    pos.z = obj->zpos;
     {
         LightEffectHeader header;
         Vec3i header2;
@@ -647,7 +647,7 @@ void func_150F892C(StageObj *obj) {
 
         other = movement_obj;
         for (i = 0; i < 25; i++, other++) {
-            if (other->id == 0x98 && other->unk84.uh == 0x1EB && other->unk222 == 0) {
+            if (other->character_type == 0x98 && other->animseq.uh == 0x1EB && other->unk222 == 0) {
                 count++;
             }
         }
@@ -899,12 +899,12 @@ s32 arg2;
     s32 random1;
     s32 random0;
 
-    if (obj->unk1D4 == NULL) {
+    if (obj->ob_matrix_ptr == NULL) {
         return;
     }
     src = &D_800A1C48;
     dst = &pos;
-    mtx = obj->unk1D4[D_80088B50];
+    mtx = obj->ob_matrix_ptr[D_80088B50];
     func_15145EA4(&src, &dst, mtx, 1);
     one = 1.0f; // matching: IDO folds a literal "* 1.0f" away; the original multiplies by a variable
     motion[1] = func_150ADA68() * one + 2.0f;
@@ -932,7 +932,7 @@ s32 arg2;
     if (gun != NULL) {
         if (func_150FF6E0(points, &position, &hit, &normal, &unk30, obj, gun) != 0) {
             func_151D3F14(&position, arg1, arg2);
-            func_151D4408(&hit, &normal, obj->unk1D4[gun->bone], obj, 1.0f, arg1, arg2);
+            func_151D4408(&hit, &normal, obj->ob_matrix_ptr[gun->bone], obj, 1.0f, arg1, arg2);
             func_150FF474(&position, points, arg1, arg2);
         }
     }

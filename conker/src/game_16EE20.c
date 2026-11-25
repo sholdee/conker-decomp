@@ -142,7 +142,7 @@ void func_15141A7C(Actor *actor, s32 arg1) {
 
 /* Maps an actor's model id to its effect selector index (11: none). */
 s32 func_15141C0C(Actor *actor) {
-    switch (actor->id) {
+    switch (actor->character_type) {
     case 121:
         return 10;
     case 33:
@@ -432,28 +432,28 @@ f32 func_151423D8(u8 angle) {
     return -D_8009A220[index];
 }
 
-/* Resolves an actor unique id (0xFF: `self`) to an actor with a model (unk1D4), or NULL. */
+/* Resolves an actor unique id (0xFF: `self`) to an actor with a model (ob_matrix_ptr), or NULL. */
 Actor *func_15142444(u8 uniqueId, Actor *self) {
     s32 id;
     Actor *actor;
 
     id = uniqueId;
     if (id == 0xFF) {
-        if (self->unk1D4 != NULL) {
+        if (self->ob_matrix_ptr != NULL) {
             return self;
         }
         return NULL;
     }
 
-    if ((self != NULL) && (self->interaction_state != 0) && (id == self->unique_id)) {
-        if (self->unk1D4 != NULL) {
+    if ((self != NULL) && (self->type != 0) && (id == self->unique_id)) {
+        if (self->ob_matrix_ptr != NULL) {
             return self;
         }
         return NULL;
     }
 
     actor = func_15083E90();
-    if ((actor != NULL) && (actor->unk1D4 != NULL)) {
+    if ((actor != NULL) && (actor->ob_matrix_ptr != NULL)) {
         return actor;
     }
     return NULL;
@@ -1084,16 +1084,16 @@ s32 func_15143DA8(s32 *value, s32 lo, s32 hi) {
 
 /* The actor's facing angle (unk7A) as a binary angle, a quarter turn ahead. */
 s32 func_15143E08(Actor *actor) {
-    return (((s32)actor->unk7A >> 8) + 64) & 0xFF;
+    return (((s32)actor->langle >> 8) + 64) & 0xFF;
 }
 
-/* The actor's facing angle in 256ths of a turn, relative to unk31C's angle when it has one. */
+/* The actor's facing angle in 256ths of a turn, relative to mv's angle when it has one. */
 s32 func_15143E24(Actor *actor) {
-    ActorCtl *ref = actor->unk31C;
+    ActorCtl *ref = actor->mv;
     if (ref != NULL) {
-        return (s16)((actor->unk7A - ref->pssd_waist_tilt) >> 8);
+        return (s16)((actor->langle - ref->pssd_waist_tilt) >> 8);
     }
-    return (s16)(actor->unk7A >> 8);
+    return (s16)(actor->langle >> 8);
 }
 /* Length of a vector. */
 f32 func_15143E64(Vec3f *v) {
@@ -1124,7 +1124,7 @@ start:
     i = 0;
     found = 0;
     while (!found && i < count) {
-        if (movement_obj[i].health != 0) {
+        if (movement_obj[i].energy != 0) {
             found = 1;
         } else {
             i++;
@@ -1856,15 +1856,15 @@ void func_15145740(Actor *actor, Vec3f *target, Vec3f *dir, Vec3f *offsetDir, f3
     f32 yawRad[1];
     f32 pitchRad[1];
 
-    if ((actor->id == 150) && (actor->unk31C->matrix_physics != 0)) {
-        yaw = actor->unk7A + actor->unk31C->unk80;
-    } else if (actor->unk31C != NULL) {
-        yaw = actor->unk7A - actor->unk31C->pssd_waist_tilt;
+    if ((actor->character_type == 150) && (actor->mv->matrix_physics != 0)) {
+        yaw = actor->langle + actor->mv->unk80;
+    } else if (actor->mv != NULL) {
+        yaw = actor->langle - actor->mv->pssd_waist_tilt;
     } else {
-        yaw = actor->unk7A;
+        yaw = actor->langle;
     }
-    if ((actor->id == 150) && (actor->unk31C->matrix_physics != 0)) {
-        pitch = actor->unk31C->unk82 + 1024;
+    if ((actor->character_type == 150) && (actor->mv->matrix_physics != 0)) {
+        pitch = actor->mv->unk82 + 1024;
     } else {
         pitch = actor->unk1D1 * 200;
     }
@@ -1912,13 +1912,13 @@ f32 func_15145A0C(f32 arg0, f32 scale, f32 arg2) {
 }
 
 void func_15145A50(Actor *actor) {
-    actor->unk5 = 3;
+    actor->drawtype = 3;
     if (D_800BE9F0 != 51) {
-        if ((D_800BE616 != 0) || (actor->interaction_state == 5) || (actor->interaction_state == 1) ||
-            (actor->interaction_state == 21)) {
-            actor->interaction_state = 5;
-            if (actor->unk31C != NULL) {
-                actor->unk31C->rt_context_b = 0;
+        if ((D_800BE616 != 0) || (actor->type == 5) || (actor->type == 1) ||
+            (actor->type == 21)) {
+            actor->type = 5;
+            if (actor->mv != NULL) {
+                actor->mv->rt_context_b = 0;
             }
         } else {
             func_15053694(actor);
@@ -2189,8 +2189,8 @@ void *func_151462C8(void *gfx, s32 *model, u8 mode, Actor *actor, u8 uniqueId, s
         if (unk18 != 0) {
             if (mode == 1) {
                 if (actor != NULL) {
-                    if ((actor->interaction_state == 0) || (actor->unique_id != uniqueId) ||
-                        (actor->id == 0xFF) || (actor->unk302 == 0)) {
+                    if ((actor->type == 0) || (actor->unique_id != uniqueId) ||
+                        (actor->character_type == 0xFF) || (actor->unk302 == 0)) {
                         mode = 2;
                     }
                 } else {
@@ -2261,7 +2261,7 @@ s32 func_1514654C(Actor *actor, ModelAttachment *point, s32 index, f32 **offsets
     Mtx *partBoneMtx;
     MtxF mf;
 
-    if ((actor == NULL) || (point == NULL) || (actor->unk1D4 == NULL)) {
+    if ((actor == NULL) || (point == NULL) || (actor->ob_matrix_ptr == NULL)) {
         return 0;
     }
     if (point->anim != NULL) {
@@ -2287,7 +2287,7 @@ s32 func_1514654C(Actor *actor, ModelAttachment *point, s32 index, f32 **offsets
     } else if (point->mtx != NULL) {
         mtx = point->mtx + D_800BE9C0;
     } else {
-        func_15145EA4(offsets, results, (Mtx *)actor->unk1D4 + point->bone, count);
+        func_15145EA4(offsets, results, (Mtx *)actor->ob_matrix_ptr + point->bone, count);
         return 1;
     }
     if (mtx != NULL) {

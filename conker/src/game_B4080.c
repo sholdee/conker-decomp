@@ -363,8 +363,8 @@ void func_15087350(s32 index, s32 started, f32 lookahead) {
     if (D_800872A0 != NULL) {
         racer = &D_800872A0[index];
         obj = &movement_obj[racer->actorIndex];
-        posX = obj->x_position;
-        posZ = obj->z_position;
+        posX = obj->xpos;
+        posZ = obj->zpos;
         D_800D2390 = 0;
         if (racer->state == 0) {
             racer->lateral = 0.5f;
@@ -426,7 +426,7 @@ void func_15087350(s32 index, s32 started, f32 lookahead) {
         func_15042D78(0x80);
         racer->prevTicks = racer->ticks;
         racer->ticks = D_800BE9E4;
-        adist = (obj->old_x_position * dx + dz * obj->old_z_position + d) - dist;
+        adist = (obj->old_xpos * dx + dz * obj->old_zpos + d) - dist;
         racer->speed = (adist * 4.0f) / racer->prevTicks;
         if (racer->state != 0) {
             bcopy(racer, &copy, sizeof(Racer));
@@ -438,20 +438,20 @@ void func_15087350(s32 index, s32 started, f32 lookahead) {
             if (index < D_800D2398) {
                 if (started == 0) {
                     f = D_800CC310 * 0.01745;
-                    D_800D239C = sinf(f) * 300.0f + obj->x_position;
-                    D_800D23A0 = obj->y_position;
-                    D_800D23A4 = cosf(f) * 300.0f + obj->z_position;
+                    D_800D239C = sinf(f) * 300.0f + obj->xpos;
+                    D_800D23A0 = obj->ypos;
+                    D_800D23A4 = cosf(f) * 300.0f + obj->zpos;
                 }
-                D_800D2104[obj->unk13F][1].x = D_800D239C;
-                D_800D2104[obj->unk13F][1].y = D_800D23A0;
-                D_800D2104[obj->unk13F][1].z = D_800D23A4;
-                obj->unk44 = started;
+                D_800D2104[obj->listpos][1].x = D_800D239C;
+                D_800D2104[obj->listpos][1].y = D_800D23A0;
+                D_800D2104[obj->listpos][1].z = D_800D23A4;
+                obj->stickspeed = started;
                 if (D_800D2390 == 1) {
-                    obj->y_velocity = 75.0f;
+                    obj->yspd = 75.0f;
                 } else if (D_800D2390 == 2) {
-                    obj->y_velocity = 55.0f;
+                    obj->yspd = 55.0f;
                 } else if (D_800D2390 == 3) {
-                    obj->y_velocity = 65.0f;
+                    obj->yspd = 65.0f;
                 }
                 obj->unk21E = 0;
             lbl:; // matching: the empty labelled statement splits the block for IDO's scheduler
@@ -480,7 +480,7 @@ void func_15087350(s32 index, s32 started, f32 lookahead) {
         if (racer->state == 0 && racer->started > 0 && !(D_800D18A0 & (1 << racer->actorIndex))) {
             racer->raceTime += D_800BE9E4;
         }
-        if (racer->state >= 2 && obj->unk31C->bot == 0) {
+        if (racer->state >= 2 && obj->mv->bot == 0) {
             func_1508802C(racer, obj, 13);
         }
         if (index == 0) {
@@ -533,7 +533,7 @@ void func_15087CC0(void) {
     for (i = 0; i < D_800D2398; i++) {
         racer = &D_800872A0[i];
         obj = &movement_obj[racer->actorIndex];
-        if (obj->camera != NULL) {
+        if (obj->CameraPtr != NULL) {
             if (racer->state >= 2) {
                 func_150891E8(racer, obj);
             } else if (racer->started == 0) {
@@ -572,14 +572,14 @@ void func_15087E54(s32 index, Actor *obj) {
     }
     racer = &D_800872A0[index];
     r = func_1505A630(racer->dirZ, racer->dirX, 0) + 0x4000;
-    d = (u16)(r - obj->unk76);
+    d = (u16)(r - obj->angle);
     if (d & 0x8000) {
         if (d < 0xDBFF) {
-            obj->unk76 = r + 0x2400;
+            obj->angle = r + 0x2400;
         }
     } else {
         if (d >= 0x2401) {
-            obj->unk76 = r - 0x2400;
+            obj->angle = r - 0x2400;
         }
     }
 }
@@ -606,7 +606,7 @@ void func_15087EF0(s32 index, Actor *obj) {
             r = (u16)(r + 0x3600);
         }
     }
-    obj->unk76 = r;
+    obj->angle = r;
 }
 
 /* Binds racer `index` to actor `actorIndex`. */
@@ -633,7 +633,7 @@ void func_15087FEC(s32 index, s32 lateral) {
 s32 func_1508802C(Racer *racer, Actor *obj, s32 mode) {
     ActorCtl *state;
 
-    state = obj->unk31C;
+    state = obj->mv;
     if (state->death_State != 0) {
         return 1;
     }
@@ -643,13 +643,13 @@ s32 func_1508802C(Racer *racer, Actor *obj, s32 mode) {
     }
 
     state->bot = 1;
-    obj->interaction_state = 12;
-    obj->unk232 = mode;
+    obj->type = 12;
+    obj->intelwalk = mode;
     D_800D154C = obj;
     dc_glbl_CharNum = racer->actorIndex;
     obj->unk218 = func_1507BB28(0, mode);
     obj->unk21C = 0;
-    obj->immune = 0xFF;
+    obj->imune = 0xFF;
     racer->state = 2;
     return 0;
 }
@@ -671,7 +671,7 @@ s32 func_150880F8(s32 index, s32 mode) {
         ret = func_1508802C(racer, obj, mode);
     } else if (racer->state == 1) {
         racer->state = 2;
-        obj->immune = 0xFF;
+        obj->imune = 0xFF;
     }
 
     racer->finishOrder = D_800D239A;
@@ -789,19 +789,19 @@ Actor *func_150883B0(s32 index, s32 dir, f32 *lateral, s32 *route) {
         sign = 1.0f;
     }
     dir = racer->route;
-    x = movement_obj[racer->actorIndex].x_position;
-    z = movement_obj[racer->actorIndex].z_position;
+    x = movement_obj[racer->actorIndex].xpos;
+    z = movement_obj[racer->actorIndex].zpos;
     dx = racer->dirX * sign;
     dz = racer->dirZ * sign;
-    self = movement_obj[racer->actorIndex].unk124 - 1;
+    self = movement_obj[racer->actorIndex].owner - 1;
     base = -((dx * x) + (dz * z));
     ret = NULL;
     best = D_8009DA00;
     for (i = 0; i < D_800D2398; i++) {
         racer = &D_800872A0[i];
         if (self != racer->actorIndex && (dir == 0 || dir == racer->route)) {
-            x = movement_obj[racer->actorIndex].x_position;
-            z = movement_obj[racer->actorIndex].z_position;
+            x = movement_obj[racer->actorIndex].xpos;
+            z = movement_obj[racer->actorIndex].zpos;
             d = (dx * x) + (dz * z) + base;
             if (d > 0.0f && d < best) {
                 best = d;
@@ -1127,15 +1127,15 @@ void func_15088D58(Actor *obj) {
         } while (again != 0);
         racer->segmentT = 0.0f;
         func_15088F30(racer, xs, ys, zs);
-        obj->x_position = func_150498A4(xs, 0, racer->segmentT, &x_derivative);
-        obj->y_position = func_150497E0(ys, 0, racer->segmentT);
-        obj->z_position = func_150498A4(zs, 0, racer->segmentT, &z_derivative);
+        obj->xpos = func_150498A4(xs, 0, racer->segmentT, &x_derivative);
+        obj->ypos = func_150497E0(ys, 0, racer->segmentT);
+        obj->zpos = func_150498A4(zs, 0, racer->segmentT, &z_derivative);
         angle = func_15144BC8((f32)(func_1505A630(racer->dirZ, racer->dirX, 0) + 0x8000) * 0.005493164f);
-        obj->unk40 = angle;
+        obj->theta = angle;
         rotation = (s32)(short)(s32)(angle * D_8009DA04) - 0x4000;
-        obj->unk7A = rotation;
-        obj->unk78 = rotation;
-        obj->unk76 = rotation;
+        obj->langle = rotation;
+        obj->fangle = rotation;
+        obj->angle = rotation;
     }
 }
 
@@ -1229,7 +1229,7 @@ void func_150891E8(Racer *racer, Actor *obj) {
     CamParams *p;
     Camera *cam;
 
-    if (obj->camera == NULL) {
+    if (obj->CameraPtr == NULL) {
         return;
     }
     if (D_8008FDBC & 0x40) {
@@ -1237,7 +1237,7 @@ void func_150891E8(Racer *racer, Actor *obj) {
     } else {
         param = 0;
     }
-    cam = obj->camera;
+    cam = obj->CameraPtr;
     if (racer->state == 2) {
         for (i = 0; i < D_80087290; i++) {
             entry = &D_800D2350[i];
@@ -1264,8 +1264,8 @@ void func_150891E8(Racer *racer, Actor *obj) {
             nextNode = func_1508907C(curNode, 0xFF, prevNode, param);
             prevNode = curNode;
             curNode = nextNode;
-            dx = obj->x_position - entry->x;
-            dz = obj->z_position - entry->z;
+            dx = obj->xpos - entry->x;
+            dz = obj->zpos - entry->z;
             distSq = dx * dx + dz * dz;
             if (distSq < best) {
                 best = distSq;
@@ -1273,7 +1273,7 @@ void func_150891E8(Racer *racer, Actor *obj) {
                 racer->camNextNode = nextNode;
             }
         } while (curNode != start);
-        func_1512D560(obj->camera, 5, 0);
+        func_1512D560(obj->CameraPtr, 5, 0);
         racer->state = 3;
     }
     p = &racer->cam;
@@ -1281,21 +1281,21 @@ void func_150891E8(Racer *racer, Actor *obj) {
     nextNode = racer->camNode;
     entry = &D_800D2350[nextNode];
     other = &D_800D2350[camNext];
-    dx = obj->x_position - other->x;
-    dz = obj->z_position - other->z;
+    dx = obj->xpos - other->x;
+    dz = obj->zpos - other->z;
     distSq = dx * dx + dz * dz;
-    dx = obj->x_position - entry->x;
-    dz = obj->z_position - entry->z;
+    dx = obj->xpos - entry->x;
+    dz = obj->zpos - entry->z;
     best = dx * dx + dz * dz;
     if (distSq < best) {
         racer->camNode = camNext;
         racer->camNextNode = func_1508907C(racer->camNode, 0xFF, nextNode, param);
         entry = other;
-        dx = obj->x_position - entry->x;
-        dz = obj->z_position - entry->z;
+        dx = obj->xpos - entry->x;
+        dz = obj->zpos - entry->z;
         best = distSq;
     }
-    dy = obj->y_position - entry->y;
+    dy = obj->ypos - entry->y;
     best = sqrtf(dy * dy + best);
     dx /= best;
     dy /= best;
@@ -1304,17 +1304,17 @@ void func_150891E8(Racer *racer, Actor *obj) {
         best = 1000.0f;
     }
     p->unk0 = 0;
-    p->atX = obj->x_position;
-    p->atY = obj->y_position;
-    p->atZ = obj->z_position;
-    p->eyeX = obj->x_position - dx * best;
-    p->eyeY = obj->y_position - dy * best;
-    p->eyeZ = obj->z_position - dz * best;
+    p->atX = obj->xpos;
+    p->atY = obj->ypos;
+    p->atZ = obj->zpos;
+    p->eyeX = obj->xpos - dx * best;
+    p->eyeY = obj->ypos - dy * best;
+    p->eyeZ = obj->zpos - dz * best;
     p->unk4 = 0;
     p->unk30 = 30.0f;
     p->unk34 = 30.0f;
     p->unk2C = 0.0f;
-    func_1512D560(obj->camera, 7, p);
+    func_1512D560(obj->CameraPtr, 7, p);
     cam->unk19C = 30.0f;
     cam->unk1A4 = 30.0f;
     cam->unk1A0 = 30.0f;
@@ -1342,16 +1342,16 @@ void func_150896EC(Racer *racer, Actor *obj, s32 leave) {
     f32 lys[4];
     f32 lzs[4];
 
-    if (obj->camera == NULL) {
+    if (obj->CameraPtr == NULL) {
         return;
     }
-    cam = obj->camera;
+    cam = obj->CameraPtr;
     p = &racer->cam;
     if (leave != 0) {
         p->unk10 = 120;
         p->unkC = 999.0f;
-        func_1512D560(obj->camera, 10, p);
-        func_1512D560(obj->camera, 6, cam->playerIndex);
+        func_1512D560(obj->CameraPtr, 10, p);
+        func_1512D560(obj->CameraPtr, 6, cam->playerIndex);
         racer->camState = 0;
         return;
     }
@@ -1367,11 +1367,11 @@ void func_150896EC(Racer *racer, Actor *obj, s32 leave) {
         racer->camNodes[1] = func_1508907C(racer->camNodes[0], 6, 0xFF, 0);
         racer->camNodes[2] = func_1508907C(racer->camNodes[1], 6, racer->camNodes[0], 0);
         racer->camNodes[3] = func_1508907C(racer->camNodes[2], 6, racer->camNodes[1], 0);
-        racer->camX = obj->x_position;
-        racer->camY = obj->y_position;
-        racer->camZ = obj->z_position;
+        racer->camX = obj->xpos;
+        racer->camY = obj->ypos;
+        racer->camZ = obj->zpos;
         racer->camT = 0.0f;
-        func_1512D560(obj->camera, 5, cam->playerIndex);
+        func_1512D560(obj->CameraPtr, 5, cam->playerIndex);
         racer->camState = 1;
     }
     racer->camT += 0.01700000092f * D_800BE9E4;
@@ -1394,7 +1394,7 @@ void func_150896EC(Racer *racer, Actor *obj, s32 leave) {
             func_15086CBC(func_1508907C(racer->camNodes[i], 4, 0xFF, 0), &lxs[i], &lys[i], &lzs[i]);
         } else if (active == 1) {
             active = 0;
-            angle = obj->unk40 * 0.0174500000000000002;
+            angle = obj->theta * 0.0174500000000000002;
             xs[i] = racer->camX - sinf(angle) * 500.0f;
             ys[i] = racer->camY + 180.0f;
             zs[i] = racer->camZ - cosf(angle) * 500.0f;
@@ -1423,7 +1423,7 @@ void func_150896EC(Racer *racer, Actor *obj, s32 leave) {
     p->unk30 = 30.0f;
     p->unk34 = 30.0f;
     p->unk2C = 0.0f;
-    func_1512D560(obj->camera, 7, p);
+    func_1512D560(obj->CameraPtr, 7, p);
 }
 
 void func_15089BB0(void) {
@@ -1537,8 +1537,8 @@ s32 func_15089F9C(s32 player) {
             other = &movement_obj[i];
             if (other != NULL) {
                 self = &movement_obj[player];
-                dx = self->x_position - other->x_position;
-                dz = self->z_position - other->z_position;
+                dx = self->xpos - other->xpos;
+                dz = self->zpos - other->zpos;
                 dist = sqrtf((dx * dx) + (dz * dz));
             } else {
                 dist = 32000.0f;
@@ -1615,8 +1615,8 @@ s32 func_1508A1BC(void) {
             other = &movement_obj[i];
             self = &movement_obj[cur];
             if (other != NULL) {
-                dx = self->x_position - other->x_position;
-                dist = sqrtf((dx * dx) + ((self->z_position - other->z_position) * (self->z_position - other->z_position)));
+                dx = self->xpos - other->xpos;
+                dist = sqrtf((dx * dx) + ((self->zpos - other->zpos) * (self->zpos - other->zpos)));
             } else {
                 dist = 32000;
             }
@@ -1625,7 +1625,7 @@ s32 func_1508A1BC(void) {
                 dist += 500;
             }
             if ((0x10000 << i) & myMask) {
-                if (dist > 3000 && other->unk65 != 0) {
+                if (dist > 3000 && other->attach_char != 0) {
                     dist = -1;
                 }
             } else {
@@ -1640,7 +1640,7 @@ s32 func_1508A1BC(void) {
                 if (dist == -1) {
                     dist = rawDist;
                 }
-                if (other->unk13C != 0) {
+                if (other->lifting != 0) {
                     if (i >= D_8008FD90) {
                         dist *= 2;
                     }
@@ -1758,7 +1758,7 @@ s32 func_1508A6FC(void) {
             obj = &movement_obj[i];
             team = teams[i];
             if (team != 0 && D_800D23B0->gameType == 0xB9) {
-                obj->unk1E4 = 1;
+                obj->family = 1;
             }
             old = attackTimers[i];
             aimTimes[i] += D_800BE9E4;
@@ -1781,10 +1781,10 @@ s32 func_1508A6FC(void) {
             attackers[i] = D_800E0BB8[i];
             D_800E0BB8[i] &= 0x7F;
             if (D_800D23B0->grenades != NULL) {
-                D_800D23B0->grenades[i] = obj->unk31C->numGrenades;
+                D_800D23B0->grenades[i] = obj->mv->numGrenades;
             }
             arr39C[i] = func_150859AC(i, 4);
-            layers[i] = func_15085DA8(obj->y_position);
+            layers[i] = func_15085DA8(obj->ypos);
             if (arr39C[i] == 0 || isNew || obj->unk2FD != 0) {
                 if (arr35C[i] == 0) {
                     if (obj->unk20F != 0xFF) {
@@ -1819,7 +1819,7 @@ s32 func_1508A6FC(void) {
             if (arr31C[i] != 0 && D_800D23B0->gameType != 0xB8) {
                 reset = 0;
                 if (arr19C[i] != 1 && aimTimes[i] < 30) {
-                    type = obj->unk232;
+                    type = obj->intelwalk;
                     obj->unk222 = arr31C[i] - 2;
                     if (type != 4 && type != 5) {
                         func_1508EBF8(i, 4);
@@ -1830,13 +1830,13 @@ s32 func_1508A6FC(void) {
                     if (type == 5) {
                         aimTimes[i] = 30;
                         D_800D23B0->aimRate[i] = D_800872F8[D_800E0BD0];
-                        D_800D23B0->aimX[i] = (func_150ADA68() * 50.0f) + obj->x_position;
-                        D_800D23B0->aimY[i] = obj->y_position + 40.0f;
-                        D_800D23B0->aimZ[i] = (func_150ADA68() * 50.0f) + obj->z_position;
+                        D_800D23B0->aimX[i] = (func_150ADA68() * 50.0f) + obj->xpos;
+                        D_800D23B0->aimY[i] = obj->ypos + 40.0f;
+                        D_800D23B0->aimZ[i] = (func_150ADA68() * 50.0f) + obj->zpos;
                         if ((arr31C[i] - 2) >= 2) {
                             tgt = &movement_obj[arr31C[i] - 2];
-                            D_800D23B0->aimX[i] += (tgt->x_position - obj->x_position) * 0.5f;
-                            D_800D23B0->aimZ[i] += (tgt->z_position - obj->z_position) * 0.5f;
+                            D_800D23B0->aimX[i] += (tgt->xpos - obj->xpos) * 0.5f;
+                            D_800D23B0->aimZ[i] += (tgt->zpos - obj->zpos) * 0.5f;
                         }
                     }
                 }
@@ -1883,7 +1883,7 @@ s32 func_1508A6FC(void) {
                 arr19C[i] = 0;
                 arr1C[i] = 1;
             }
-            if (obj->unk31C->on_fire != 0) {
+            if (obj->mv->on_fire != 0) {
                 arr25C[i] = 20;
             }
         } else {
@@ -2030,10 +2030,10 @@ void func_1508B3F8(void) {
         z = zones[i].z;
         for (j = D_8008FD90; j < D_8008FD8C; j++) {
             obj = &movement_obj[j];
-            d = obj->y_position - y;
+            d = obj->ypos - y;
             if (d < 200.0f && d > -100.0f) {
-                dx = obj->x_position - x;
-                d = obj->z_position - z;
+                dx = obj->xpos - x;
+                d = obj->zpos - z;
                 if (dx * dx + d * d < s.radiusSq + 100.0f) {
                     bestDist = 100000000.0f;
                     best = 0xFF;
@@ -2052,8 +2052,8 @@ void func_1508B3F8(void) {
                     }
                     for (k = 0; k < s.count; k++) {
                         node = &D_800D2350[s.ids[k]];
-                        dx = node->x - obj->x_position;
-                        d = node->z - obj->z_position;
+                        dx = node->x - obj->xpos;
+                        d = node->z - obj->zpos;
                         d = dx * dx + d * d;
                         if (d < s.dist[k] && d < bestDist) {
                             best = s.ids[k];
@@ -2157,8 +2157,8 @@ s32 func_1508B9BC(void) {
 
         actor = &movement_obj[current];
         other = &movement_obj[winner];
-        dx = actor->x_position - other->x_position;
-        dz = actor->z_position - other->z_position;
+        dx = actor->xpos - other->xpos;
+        dz = actor->zpos - other->zpos;
         distance = sqrtf(dx * dx + dz * dz);
         D_800D23B0->opponentDist[current] = (s32)distance;
     } else {
@@ -2346,41 +2346,41 @@ void func_1508C1A4(s32 a, s32 b) {
     from = func_1505EEF4(a & 0xFFFF0FFF);
     to = func_1505EEF4(b & 0xFFFF0FFF);
     if (from != NULL && to != NULL) {
-        x0 = from->x_position;
-        z0 = from->z_position;
-        fromInner = from->unk31C;
+        x0 = from->xpos;
+        z0 = from->zpos;
+        fromInner = from->mv;
         fromFlag = fromInner->bot;
         if (fromFlag) {
-            y0 = from->y_position + fromInner->height * 0.75f;
+            y0 = from->ypos + fromInner->height * 0.75f;
             if ((fromInner->context_b & 0x7F) == 9) {
                 y0 -= 50.0f;
             }
-        } else if (from->interaction_state == 0x1F) {
-            y0 = from->y_position + 80.0f;
-        } else if (to->unk31C->bot && D_800872C4[D_800E0BD0] != -1) {
+        } else if (from->type == 0x1F) {
+            y0 = from->ypos + 80.0f;
+        } else if (to->mv->bot && D_800872C4[D_800E0BD0] != -1) {
             /* 0x1A4..0x1A9 is an s16 point; structs.h types it as u16 pad1A4/s16 unk1A6/u32 pad1A8 */
             x0 = from->aim.x;
             y0 = from->aim.y;
             z0 = from->aim.z;
         } else {
-            y0 = from->y_position + 40.0f;
+            y0 = from->ypos + 40.0f;
         }
-        x1 = to->x_position;
-        z1 = to->z_position;
-        toFlag = to->unk31C->bot;
+        x1 = to->xpos;
+        z1 = to->zpos;
+        toFlag = to->mv->bot;
         if (toFlag) {
-            y1 = to->y_position + to->unk31C->height * 0.75f;
-            if ((to->unk31C->context_b & 0x7F) == 9) {
+            y1 = to->ypos + to->mv->height * 0.75f;
+            if ((to->mv->context_b & 0x7F) == 9) {
                 y1 -= 50.0f;
             }
-        } else if (to->interaction_state == 0x1F) {
-            y1 = to->y_position + 80.0f;
+        } else if (to->type == 0x1F) {
+            y1 = to->ypos + 80.0f;
         } else if (fromFlag && D_800872C4[D_800E0BD0] != -1) {
             x1 = to->aim.x;
             y1 = to->aim.y;
             z1 = to->aim.z;
         } else {
-            y1 = to->y_position + 40.0f;
+            y1 = to->ypos + 40.0f;
         }
         distance = sqrtf((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0) +
                          (z1 - z0) * (z1 - z0));
@@ -2433,8 +2433,8 @@ s32 func_1508C5B8(s32 player, s32 checks) {
     list = D_800D23B0->team;
     if (checks != 0) {
         for (i = 0; i < D_8008FD90; i++) {
-            x0 = movement_obj[i].x_position;
-            x1 = movement_obj[i].x_position;
+            x0 = movement_obj[i].xpos;
+            x1 = movement_obj[i].xpos;
             for (k = 0; k < 3; k++) {
                 idx[k] = -1;
                 dist[k] = 900000000.0f;
@@ -2443,8 +2443,8 @@ s32 func_1508C5B8(s32 player, s32 checks) {
                 if (list[i] != list[k] &&
                     !(D_800D23B0->unk16C0[i] & (0x10001 << k))) {
                     /* BUG (original game): measures player i against itself, not k */
-                    dx = x0 - movement_obj[i].x_position;
-                    dz = x1 - movement_obj[i].z_position;
+                    dx = x0 - movement_obj[i].xpos;
+                    dz = x1 - movement_obj[i].zpos;
                     if (i == D_800D23B0->target[k]) {
                         dx *= 0.5f;
                         dz *= 0.5f;
@@ -2502,7 +2502,7 @@ s32 func_1508C5B8(s32 player, s32 checks) {
 
 /*
  * Advances unk1702 round-robin over the D_8008FD8C actors; returns the next active one with
- * unk31C->unk84 set that isn't in D_800D18A0, or -1.
+ * mv->unk84 set that isn't in D_800D18A0, or -1.
  */
 s32 func_1508C9CC(void) {
     s32 count;
@@ -2520,8 +2520,8 @@ s32 func_1508C9CC(void) {
             cur = 0;
         }
         obj = &movement_obj[cur];
-        if (obj->interaction_state != 0) {
-            state = obj->unk31C;
+        if (obj->type != 0) {
+            state = obj->mv;
             if (state != NULL && state->bot != 0 && !(D_800D18A0 & (1 << cur))) {
                 count = D_8008FD8C;
                 ret = cur;
@@ -2595,13 +2595,13 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
     obj = &movement_obj[player];
     ratio = VIEWS[0].fovY / VIEWS[0].fovX;
     if (target != -1) {
-        cam = obj->camera;
+        cam = obj->CameraPtr;
         if (cam != NULL) {
             hasCam = 1;
         } else {
             hasCam = 0;
         }
-        type = obj->unk31C->rt_context_b;
+        type = obj->mv->rt_context_b;
         if (type == 9 || type == 0x38 || type == 0x15) {
             hasCam = 0;
         }
@@ -2628,14 +2628,14 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
             aimAtPoint = 0;
         }
         height = 40.0f;
-        if (victim->interaction_state == 0x1F) {
+        if (victim->type == 0x1F) {
             aimAtPoint = 0;
             height = 80.0f;
         }
         dx = 0.0f;
         dz = 0.0f;
         if (D_800D23B0->gameType == 0xB9 || D_800E0BD0 >= 3) {
-            switch (obj->unk31C->rt_context_b) {
+            switch (obj->mv->rt_context_b) {
                 case 0x18:
                 case 0x41:
                     V = 0.01600000076f;
@@ -2655,18 +2655,18 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
                     break;
             }
             if (V != 0.0f) {
-                dx = victim->x_position - obj->x_position;
-                dz = victim->z_position - obj->z_position;
-                dy = victim->y_position - obj->y_position;
+                dx = victim->xpos - obj->xpos;
+                dz = victim->zpos - obj->zpos;
+                dy = victim->ypos - obj->ypos;
                 dy = sqrtf((dx * dx) + (dy * dy) + (dz * dz));
                 V = (dy * V) / D_800D23B0->ticks;
-                dx = (victim->x_position - victim->old_x_position) * V;
-                dz = (victim->z_position - victim->old_z_position) * V;
+                dx = (victim->xpos - victim->old_xpos) * V;
+                dz = (victim->zpos - victim->old_zpos) * V;
             }
         }
         if (aimAtPoint == 0) {
-            dx = (victim->x_position + dx) - D_800D23B0->aimX[player];
-            dz = (victim->z_position + dz) - D_800D23B0->aimZ[player];
+            dx = (victim->xpos + dx) - D_800D23B0->aimX[player];
+            dz = (victim->zpos + dz) - D_800D23B0->aimZ[player];
         } else {
             dx = ((f32)victim->aim.x + dx) - D_800D23B0->aimX[player];
             dz = ((f32)victim->aim.z + dz) - D_800D23B0->aimZ[player];
@@ -2682,8 +2682,8 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
         }
         D_800D23B0->aimX[player] += dx * scale;
         D_800D23B0->aimZ[player] += dz * scale;
-        dx = D_800D23B0->aimX[player] - obj->x_position;
-        dz = D_800D23B0->aimZ[player] - obj->z_position;
+        dx = D_800D23B0->aimX[player] - obj->xpos;
+        dz = D_800D23B0->aimZ[player] - obj->zpos;
         dist = sqrtf((dx * dx) + (dz * dz));
         if (dist < 1.0f) {
             dist = 1.0f;
@@ -2707,9 +2707,9 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
         }
         ang = func_1505A630(dx, -dz, 0) * 0.005493164f;
         if (type != 3) {
-            curYaw = obj->unk31C->aimYaw;
+            curYaw = obj->mv->aimYaw;
         } else {
-            curYaw = obj->unk40 - 90.0f;
+            curYaw = obj->theta - 90.0f;
         }
         ang = func_15144BC8(ang);
         curYaw = func_15144BC8(curYaw);
@@ -2721,14 +2721,14 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
             result = 1;
         }
         if (aimAtPoint == 0) {
-            cur = ((victim->y_position + height) - dropOffset) - D_800D23B0->aimY[player];
+            cur = ((victim->ypos + height) - dropOffset) - D_800D23B0->aimY[player];
         } else {
             cur = ((f32)victim->aim.y - (f32)dropOffset) - D_800D23B0->aimY[player];
         }
         D_800D23B0->aimY[player] += cur * scale;
-        cur = obj->unk31C->aimEye.y - D_800D23B0->aimY[player];
+        cur = obj->mv->aimEye.y - D_800D23B0->aimY[player];
         ang = func_1505A630(dist, cur, 0) * 0.005493164f;
-        curYaw = obj->unk31C->aimPitch;
+        curYaw = obj->mv->aimPitch;
         while (ang > 180.0f) {
             ang -= 360.0f;
         }
@@ -2764,28 +2764,28 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
             roll = 0.0f;
         }
         if (doInner != 0) {
-            ptr = &obj->unk31C->unk90;
-            obj->unk31C->aimYaw -= diff;
-            obj->unk31C->aimPitch = ang;
-            func_15048758(&obj->unk31C->aimYaw);
-            obj->unk31C->aimYawTarget = obj->unk31C->aimYaw;
-            obj->unk31C->aimPitchTarget = obj->unk31C->aimPitch;
-            obj->unk31C->stick_x = 0;
-            obj->unk31C->stick_y = 0;
+            ptr = &obj->mv->unk90;
+            obj->mv->aimYaw -= diff;
+            obj->mv->aimPitch = ang;
+            func_15048758(&obj->mv->aimYaw);
+            obj->mv->aimYawTarget = obj->mv->aimYaw;
+            obj->mv->aimPitchTarget = obj->mv->aimPitch;
+            obj->mv->stick_x = 0;
+            obj->mv->stick_y = 0;
         } else if (hasCam != 0) {
             ptr = &cam->unk1A4;
             ((OSContPad *)cam->contPad)->stick_x = (s32)yaw;
             ((OSContPad *)cam->contPad)->stick_y = (s32)-roll;
         } else {
-            ptr = &obj->unk31C->unk90;
-            obj->unk31C->stick_x = (s32)yaw;
-            obj->unk31C->stick_y = (s32)-roll;
+            ptr = &obj->mv->unk90;
+            obj->mv->stick_x = (s32)yaw;
+            obj->mv->stick_y = (s32)-roll;
         }
         if (mode != 0) {
             if (type == 0x1B) {
                 if (h < -50.0f && (D_800D23B0->unk16C0[player] & (0x10001 << target))) {
-                    obj->unk31C->buttons |= Z_TRIG;
-                    obj->unk31C->unk8E = 2;
+                    obj->mv->buttons |= Z_TRIG;
+                    obj->mv->unk8E = 2;
                 }
             } else if (type == 3) {
                 f32 f;
@@ -2799,47 +2799,47 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
                     f = 1.0f;
                 }
                 f = (f * 0.02569000237f) + 0.01724099927f;
-                obj->unk31C->stick_y = 0;
-                obj->unk31C->stick_x = 0;
-                obj->unk76 -= (s32)(yaw * 16.0f);
-                obj->unk7A = obj->unk76;
-                obj->unk40 = (f32)(s16)(obj->unk7A + 0x4000) * 0.005493164f;
+                obj->mv->stick_y = 0;
+                obj->mv->stick_x = 0;
+                obj->angle -= (s32)(yaw * 16.0f);
+                obj->langle = obj->angle;
+                obj->theta = (f32)(s16)(obj->langle + 0x4000) * 0.005493164f;
                 func_150DA5EC(obj, f);
             } else if (D_800D23B0->attackTimer[player] >= 0) {
-                obj->unk31C->buttons = Z_TRIG;
+                obj->mv->buttons = Z_TRIG;
                 if (mode == 1) {
-                    obj->unk31C->unk8E = 2;
+                    obj->mv->unk8E = 2;
                     if (D_800872D8[D_800E0BD0] < D_800D23B0->attackTimer[player]) {
-                        obj->unk31C->buttons &= ~Z_TRIG;
-                        obj->unk31C->unk8E = 0;
+                        obj->mv->buttons &= ~Z_TRIG;
+                        obj->mv->unk8E = 0;
                     }
                 } else if (mode == 2) {
                     if (fire != 0) {
-                        obj->unk31C->unk8E = 0xA;
+                        obj->mv->unk8E = 0xA;
                     } else {
-                        obj->unk31C->buttons &= ~Z_TRIG;
+                        obj->mv->buttons &= ~Z_TRIG;
                     }
                 } else {
-                    obj->unk31C->unk8E = 2;
+                    obj->mv->unk8E = 2;
                 }
             }
         } else if (fire != 0) {
             if (flagA != 0) {
-                obj->unk31C->unk8C = 0;
-                obj->unk31C->buttons = 0;
+                obj->mv->unk8C = 0;
+                obj->mv->buttons = 0;
             } else {
-                obj->unk31C->unk8C = Z_TRIG;
-                obj->unk31C->unk8F = 1;
+                obj->mv->unk8C = Z_TRIG;
+                obj->mv->unk8F = 1;
             }
         } else if (flagA != 0) {
             if (cam != NULL) {
                 cam->contPad->button |= Z_TRIG;
             }
-            obj->unk31C->buttons = Z_TRIG;
-            obj->unk31C->unk8E = 2;
+            obj->mv->buttons = Z_TRIG;
+            obj->mv->unk8E = 2;
         }
-        obj->unk31C->buttons |= R_TRIG;
-        obj->unk31C->unk8E = 1;
+        obj->mv->buttons |= R_TRIG;
+        obj->mv->unk8E = 1;
         *ptr += (h - *ptr) * 0.125f;
         if (hasCam != 0) {
             cam->unk1A8 = cam->unk1A4 * ratio;
@@ -2878,12 +2878,12 @@ s32 func_1508D850(s32 player) {
     obj = &movement_obj[player];
     off = player * 4;
     target = (s32 *)(targets + off);
-    obj->unk31C->unk129 = *target;
+    obj->mv->unk129 = *target;
     if (*target < 0) {
         return 0;
     }
-    dx = movement_obj[*target].x_position - obj->x_position;
-    dz = movement_obj[*target].z_position - obj->z_position;
+    dx = movement_obj[*target].xpos - obj->xpos;
+    dz = movement_obj[*target].zpos - obj->zpos;
     dist = sqrtf((dx * dx) + (dz * dz));
     if (5000.0f < dist) {
         range = 0;
@@ -2900,9 +2900,9 @@ s32 func_1508D850(s32 player) {
         }
     }
     if (*(s32 *)(timers + off) == 0) {
-        obj->unk31C->unk12A = 0;
+        obj->mv->unk12A = 0;
         if (D_800872E8[D_800E0BD0] < (s32)(func_150ADA68() * 100.0f)) {
-            obj->unk31C->unk12A = 1;
+            obj->mv->unk12A = 1;
         }
     }
 }
@@ -2958,9 +2958,9 @@ s32 func_1508DAEC(s32 player, s32 mode) {
                 D_800D23B0->slotDropTimer[slot] = 300;
                 obj = &movement_obj[player];
                 next = 4;
-                D_800D23B0->slotDropX[slot] = obj->x_position;
-                D_800D23B0->slotDropY[slot] = obj->y_position + 50.0f;
-                D_800D23B0->slotDropZ[slot] = obj->z_position;
+                D_800D23B0->slotDropX[slot] = obj->xpos;
+                D_800D23B0->slotDropY[slot] = obj->ypos + 50.0f;
+                D_800D23B0->slotDropZ[slot] = obj->zpos;
             }
             D_800D23B0->slotTimer[slot] = next;
         }
@@ -3042,11 +3042,11 @@ void func_1508DC24(void) {
         if (kind == 0xB9 && movement_obj[i].team != 0) {
             continue;
         }
-        prev = movement_obj[i].unk31C->context_b & 0x7F;
+        prev = movement_obj[i].mv->context_b & 0x7F;
         cur = overrides[i];
-        if (movement_obj[i].unk31C->GrenadeThrowState >= 5) {
+        if (movement_obj[i].mv->GrenadeThrowState >= 5) {
             cur = 0x3A;
-        } else if (movement_obj[i].unk31C->GrenadeThrowState > 0) {
+        } else if (movement_obj[i].mv->GrenadeThrowState > 0) {
             cur = 0x26;
         }
         if (cur == 0) {
@@ -3059,7 +3059,7 @@ void func_1508DC24(void) {
             cur = 0;
         }
         if (kind == 0xB8) {
-            prev = movement_obj[i].unk31C->unk128 & ~0x20;
+            prev = movement_obj[i].mv->unk128 & ~0x20;
         }
         if (cur != prev) {
             setId = func_1508E780(prev);
@@ -3069,7 +3069,7 @@ void func_1508DC24(void) {
                 if (setId == 0x1D) {
                     func_1508EB90(i, 0x4C, 0x1E);
                 }
-                movement_obj[i].unk31C->weapon_status = 0;
+                movement_obj[i].mv->weapon_status = 0;
             }
             setId = func_1508E780(cur);
             if (setId > 0x1000) {
@@ -3080,21 +3080,21 @@ void func_1508DC24(void) {
             if (D_800D23B0->gameType == 0xB8) {
                 if (prev == 0x80) {
                     func_1502EA50(&movement_obj[i]);
-                    movement_obj[i].immune = 0;
+                    movement_obj[i].imune = 0;
                 }
-                movement_obj[i].unk31C->unk128 = cur;
+                movement_obj[i].mv->unk128 = cur;
                 if (cur == 1) {
-                    movement_obj[i].unk31C->unk12C = 600;
+                    movement_obj[i].mv->unk12C = 600;
                 } else if (cur == 0x80) {
-                    movement_obj[i].unk31C->unk12C = 1800;
+                    movement_obj[i].mv->unk12C = 1800;
                     func_1502EA0C(&movement_obj[i], 0, 0, 0xFF, 0xBF, 4);
                 } else if (cur == 0x10) {
-                    movement_obj[i].unk31C->unk12C = 3;
+                    movement_obj[i].mv->unk12C = 3;
                 }
             } else {
                 func_15080620(i, 1, cur, 0);
                 if (cur == 0 && prev != 3) {
-                    movement_obj[i].unk31C->rt_context_b = 0;
+                    movement_obj[i].mv->rt_context_b = 0;
                 }
                 if (prev == 0x20) {
                     func_1508EB90(i, 0x45, 4);
@@ -3109,7 +3109,7 @@ void func_1508DC24(void) {
             setId = func_1508E780(cur);
             found = 0;
             numAttached = func_15033E28(&movement_obj[i], attached);
-            if (numAttached == 0 && movement_obj[i].unk31C->weapon_status == 2 && setId != 0x55 && setId != 0x2E) {
+            if (numAttached == 0 && movement_obj[i].mv->weapon_status == 2 && setId != 0x55 && setId != 0x2E) {
                 func_15083568(&movement_obj[i], setId, 1.0f, 0);
                 if (setId == 0x1D) {
                     func_15083568(&movement_obj[i], 0x1E, 1.0f, 0);
@@ -3125,12 +3125,12 @@ void func_1508DC24(void) {
                             attached[j]->setId != 0x73 && attached[j]->setId != 0x76 &&
                             attached[j]->setId != 0x77 && attached[j]->setId != 0x78 && attached[j]->setId != 7) {
                             func_15030158(attached[j], 0);
-                            movement_obj[i].unk31C->weapon_status = 0;
+                            movement_obj[i].mv->weapon_status = 0;
                         } else if (setId == attached[j]->setId) {
                             found = 1;
                         }
                     }
-                    if (found == 0 && movement_obj[i].unk31C->weapon_status == 2 && setId != 0x55 && setId != 0x2E) {
+                    if (found == 0 && movement_obj[i].mv->weapon_status == 2 && setId != 0x55 && setId != 0x2E) {
                         func_15083568(&movement_obj[i], setId, 1.0f, 0);
                         if (setId == 0x1D) {
                             func_15083568(&movement_obj[i], 0x1E, 1.0f, 0);
@@ -3144,7 +3144,7 @@ void func_1508DC24(void) {
                             attached[j]->setId != 0x73 && attached[j]->setId != 0x76 &&
                             attached[j]->setId != 0x77 && attached[j]->setId != 0x78 && attached[j]->setId != 7) {
                             func_15030158(attached[j], 0);
-                            movement_obj[i].unk31C->weapon_status = 0;
+                            movement_obj[i].mv->weapon_status = 0;
                         }
                     }
                 }
@@ -3153,13 +3153,13 @@ void func_1508DC24(void) {
                 s32 m;
                 for (m = D_800D23B0->numPlayers; m < 25; m++) {
                     other = &movement_obj[m];
-                    if (other->interaction_state == 0) {
+                    if (other->type == 0) {
                         continue;
                     }
-                    if (other->unk65 != i + 1) {
+                    if (other->attach_char != i + 1) {
                         continue;
                     }
-                    if (other->id != 0x6E) {
+                    if (other->character_type != 0x6E) {
                         continue;
                     }
                     func_151027E8(other);
@@ -3231,9 +3231,9 @@ void func_1508DC24(void) {
             if (j != -1) {
                 pickup->touch.i.b = 0;
                 if (items[i] == 0x8AE) {
-                    movement_obj[j].unk31C->numGrenades += 3;
-                    if (movement_obj[j].unk31C->numGrenades >= 7) {
-                        movement_obj[j].unk31C->numGrenades = 6;
+                    movement_obj[j].mv->numGrenades += 3;
+                    if (movement_obj[j].mv->numGrenades >= 7) {
+                        movement_obj[j].mv->numGrenades = 6;
                     }
                     timers[i] = D_800D23B0->respawnDelay;
                 } else {
@@ -3251,17 +3251,17 @@ void func_1508DC24(void) {
                 }
                 kind = D_800D23B0->gameType;
                 if (kind == 0xB9) {
-                    movement_obj[j].unk31C->unk12C = 600;
+                    movement_obj[j].mv->unk12C = 600;
                 }
                 kind = D_800D23B0->gameType;
                 if (kind == 0xB8) {
-                    if (items[i] == (pp = movement_obj[j].unk31C->unk128)) { // matching: the u16 temporary
+                    if (items[i] == (pp = movement_obj[j].mv->unk128)) { // matching: the u16 temporary
                         if (items[i] == 1) {
-                            movement_obj[j].unk31C->unk12C = 600;
+                            movement_obj[j].mv->unk12C = 600;
                         } else if (items[i] == 0x80) {
-                            movement_obj[j].unk31C->unk12C = 1800;
+                            movement_obj[j].mv->unk12C = 1800;
                         } else if (items[i] == 0x10) {
-                            movement_obj[j].unk31C->unk12C = 3;
+                            movement_obj[j].mv->unk12C = 3;
                         }
                     }
                 }
@@ -3410,11 +3410,11 @@ s32 func_1508E89C(s32 player, s32 source) {
                 }
             }
             D_800D23B0->unk16C0[player] = D_800D23B0->unk16C0[source];
-            savedRot = obj->unk31C->shotsfired;
+            savedRot = obj->mv->shotsfired;
             func_15062800(&movement_obj[source], obj);
             if (D_800BE9F0 == 0x3F) {
-                if (obj->unk13C >= 100) {
-                    slot = obj->unk13C - 100;
+                if (obj->lifting >= 100) {
+                    slot = obj->lifting - 100;
                     res = func_1509B570(D_800D2E48);
                     if (res != NULL) {
                         s32 idx;
@@ -3427,11 +3427,11 @@ s32 func_1508E89C(s32 player, s32 source) {
                     }
                 }
             }
-            obj->unk31C->bot = 0;
-            obj->immune = 90;
-            obj->unk31C->shotsfired = savedRot;
-            obj->unk31C->unk1AF = 0x40;
-            func_15128774(obj->camera, obj);
+            obj->mv->bot = 0;
+            obj->imune = 90;
+            obj->mv->shotsfired = savedRot;
+            obj->mv->unk1AF = 0x40;
+            func_15128774(obj->CameraPtr, obj);
             D_8008FD94++;
         }
     }
@@ -3440,19 +3440,19 @@ s32 func_1508E89C(s32 player, s32 source) {
 
 /* Calls func_1509BFB0(1, actor | 0x2000, id, param) for player's actor (unk13F). */
 void func_1508EB90(s32 player, s32 id, s32 param) {
-    s32 temp = movement_obj[player].unk13F;
+    s32 temp = movement_obj[player].listpos;
     func_1509BFB0(1, temp | 0x2000, id, param);
 }
 
 /* func_1508EB90(player, 0x14, param). */
 void func_1508EBF8(s32 player, s32 param) {
-    s32 temp = movement_obj[player].unk13F;
+    s32 temp = movement_obj[player].listpos;
     func_1509BFB0(1, temp | 0x2000, 0x14, param);
 }
 
 /* func_1508EB90(player, 0x61, param). */
 void func_1508EC5C(s32 player, s32 param) {
-    s32 temp = movement_obj[player].unk13F;
+    s32 temp = movement_obj[player].listpos;
     func_1509BFB0(1, temp | 0x2000, 0x61, param);
 }
 

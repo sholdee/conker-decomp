@@ -98,7 +98,7 @@ void func_150D3360(Actor *owner, u8 arg1, s32 arg2) {
     init.effects[1] = NULL;
     init.owner = owner;
     init.ownerId = owner->unique_id;
-    attachment = func_1503195C(owner, (owner->id == 0x48) ? 0x7A : 0x79, 0);
+    attachment = func_1503195C(owner, (owner->character_type == 0x48) ? 0x7A : 0x79, 0);
     if (attachment == NULL) {
         return;
     }
@@ -121,11 +121,11 @@ void func_150D3360(Actor *owner, u8 arg1, s32 arg2) {
     state = ((TrailActor *)state)->state;
     memcpy(state, &init, sizeof(TrailState));
     if (D_8008FD8C < 5) {
-        func_1000FA64(0x5B3, state->owner->x_position, state->owner->y_position, state->owner->z_position, 1000, 1000, 200, (SoundRecordCallback)func_150D5124, state, 0x5B3, 12, 0);
+        func_1000FA64(0x5B3, state->owner->xpos, state->owner->ypos, state->owner->zpos, 1000, 1000, 200, (SoundRecordCallback)func_150D5124, state, 0x5B3, 12, 0);
     }
-    func_1000FA64(0x5B4, state->owner->x_position, state->owner->y_position, state->owner->z_position, 1000, 1000, 200, (SoundRecordCallback)func_150D5124, state, 0x5B4, 12, 0);
-    if (D_8008FD8C < 7 || owner->camera != NULL) {
-        func_1000FA64(0x5BC, state->owner->x_position, state->owner->y_position, state->owner->z_position, 1000, 1000, 200, (SoundRecordCallback)func_150D5124, state, 0x5BC, 12, 0);
+    func_1000FA64(0x5B4, state->owner->xpos, state->owner->ypos, state->owner->zpos, 1000, 1000, 200, (SoundRecordCallback)func_150D5124, state, 0x5B4, 12, 0);
+    if (D_8008FD8C < 7 || owner->CameraPtr != NULL) {
+        func_1000FA64(0x5BC, state->owner->xpos, state->owner->ypos, state->owner->zpos, 1000, 1000, 200, (SoundRecordCallback)func_150D5124, state, 0x5BC, 12, 0);
     }
     {
         GlowShape params;
@@ -276,7 +276,7 @@ s32 func_150D3A68(TrailActor *actor) {
     points = actor->points;
     owner = state->owner;
     attachment = state->attachment;
-    if (owner->interaction_state == 0 || owner->unique_id != state->ownerId) {
+    if (owner->type == 0 || owner->unique_id != state->ownerId) {
         return 0;
     }
     if (D_800BE9E4 > 0) {
@@ -345,13 +345,13 @@ s32 func_150D3A68(TrailActor *actor) {
                 actor->head.count--;
             }
         }
-        if (owner->unk31C != NULL) {
+        if (owner->mv != NULL) {
             tail = (state->effects[1] != NULL) ? &state->effects[1]->tail : NULL;
             prevMode = state->mode;
-            if (owner->unk31C->bot != 0) {
-                if (owner->unk44 > 6.0f) {
+            if (owner->mv->bot != 0) {
+                if (owner->stickspeed > 6.0f) {
                     state->mode = 0;
-                } else if (owner->unk44 > 3.0f) {
+                } else if (owner->stickspeed > 3.0f) {
                     state->mode = 1;
                 } else {
                     state->mode = 2;
@@ -381,7 +381,7 @@ s32 func_150D3A68(TrailActor *actor) {
                     if (func_1515C0F8(owner, &vel) == 0) {
                         vel = &D_800A5480;
                     }
-                    func_150D4D58(&actor->head.tmpl.pos, vel, owner->unk40, actor->head.header.owner, actor->head.header.kind);
+                    func_150D4D58(&actor->head.tmpl.pos, vel, owner->theta, actor->head.header.owner, actor->head.header.kind);
                 }
             } else if (state->mode == 2) {
                 if (tail != NULL) {
@@ -570,7 +570,7 @@ Gfx *func_150D4300(TrailActor *actor, Gfx *gfx, s16 view) {
     state = actor->state;
     points = actor->points;
     owner = state->owner;
-    if (owner->unk1D4 == NULL || (owner->unk74 & 0xF) == 0xF) {
+    if (owner->ob_matrix_ptr == NULL || (owner->unk74 & 0xF) == 0xF) {
         return gfx;
     }
     func_151D5D60(actor->vtxBufs, view, (actor->head.tmpl.itemCount * 3 * sizeof(Vtx)) + (5 * 3 * sizeof(Vtx)), &vtx, &fresh);
@@ -729,11 +729,11 @@ void func_150D49C0(TrailActor *actor, ActorMsg *msg, u8 id) {
         if (state->owner == msg->swap.actorA) {
             state->owner = msg->swap.actorB;
             state->ownerId = msg->swap.idB;
-            state->attachment = func_1503195C(state->owner, (state->owner->id == 0x48) ? 0x7A : 0x79, 0);
+            state->attachment = func_1503195C(state->owner, (state->owner->character_type == 0x48) ? 0x7A : 0x79, 0);
         } else if (state->owner == msg->swap.actorB) {
             state->owner = msg->swap.actorA;
             state->ownerId = msg->swap.idA;
-            state->attachment = func_1503195C(state->owner, (state->owner->id == 0x48) ? 0x7A : 0x79, 0);
+            state->attachment = func_1503195C(state->owner, (state->owner->character_type == 0x48) ? 0x7A : 0x79, 0);
         }
     }
 }
@@ -750,7 +750,7 @@ s32 func_150D4AE0(Vec3f *start, Vec3f *end, Actor *owner, ModelAttachment *attac
     Vec3f *modelPoints[2];
     Vec3f *out[2];
 
-    if (owner->unk1D4 != NULL) {
+    if (owner->ob_matrix_ptr != NULL) {
         modelPoints[0] = &D_800A09D0;
         modelPoints[1] = &D_800A09DC;
         out[0] = start;
@@ -761,12 +761,12 @@ s32 func_150D4AE0(Vec3f *start, Vec3f *end, Actor *owner, ModelAttachment *attac
         return 0;
     }
 
-    start->x = owner->x_position;
-    start->y = owner->y_position + 100.0f;
-    start->z = owner->z_position;
-    end->x = owner->x_position;
-    end->y = owner->y_position + 100.0f + 500.0f;
-    end->z = owner->z_position;
+    start->x = owner->xpos;
+    start->y = owner->ypos + 100.0f;
+    start->z = owner->zpos;
+    end->x = owner->xpos;
+    end->y = owner->ypos + 100.0f + 500.0f;
+    end->z = owner->zpos;
     return 2;
 }
 
@@ -905,13 +905,13 @@ s32 func_150D5124(TrailSound *snd, s32 arg1, u32 *arg2, s32 arg3, s32 *pitchOut,
 
     if (snd->soundId == 0x5B3) {
         if (state->owner != NULL) {
-            targetVolume = state->owner->unk28 * 25.0f;
+            targetVolume = state->owner->shad * 25.0f;
             if (targetVolume > 5000) {
                 targetVolume = 5000;
             } else if (targetVolume < 500) {
                 targetVolume = 0;
             }
-            targetPitch += state->owner->unk28 * 5.0f;
+            targetPitch += state->owner->shad * 5.0f;
             if (targetPitch > 1000) {
                 targetPitch = 1000;
             }
@@ -980,9 +980,9 @@ s32 func_150D5124(TrailSound *snd, s32 arg1, u32 *arg2, s32 arg3, s32 *pitchOut,
         *playing = snd->soundId;
     }
 
-    snd->x = state->owner->x_position;
-    snd->y = state->owner->y_position;
-    snd->z = state->owner->z_position;
+    snd->x = state->owner->xpos;
+    snd->y = state->owner->ypos;
+    snd->z = state->owner->zpos;
 
     if (D_800C35EA[0] == 1) {
         snd->volume = volume >> 1;

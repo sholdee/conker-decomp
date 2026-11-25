@@ -66,16 +66,16 @@ void func_15075498(void) {
     s32 value = D_800D1893 & 0x7F;
 
     if (value != 0x7F) {
-        D_800D154C->unk244 = value;
+        D_800D154C->intel_animseq = value;
     }
-    D_800D154C->unkF4 &= ~0x143E;
+    D_800D154C->mvmt_control &= ~0x143E;
     if (D_800D1890 == 0xFA) {
-        D_800D154C->unkF4 |= 0x22;
+        D_800D154C->mvmt_control |= 0x22;
     } else if (D_800D1890 == 0xFB) {
-        D_800D154C->unkF4 |= 4;
+        D_800D154C->mvmt_control |= 4;
     }
     if (D_800D1893 & 0x80) {
-        D_800D154C->unkF4 |= 0x10;
+        D_800D154C->mvmt_control |= 0x10;
     }
 }
 
@@ -89,13 +89,13 @@ void func_15075548(void) {
     speedArg = D_800D1892;
     if (speedArg != 0xFF) {
         speed = speedArg;
-        D_800D154C->unk44 = speed;
-        if (D_800D154C->unk44 == 1.0f) {
-            D_800D154C->unk44 = 0.5f;
+        D_800D154C->stickspeed = speed;
+        if (D_800D154C->stickspeed == 1.0f) {
+            D_800D154C->stickspeed = 0.5f;
         }
         if (D_800BE616 != 0) {
-            if ((D_800D154C->id == 40) && (D_800D154C->unk31C->unk128 & 1)) {
-                D_800D154C->unk44 *= 1.4f;
+            if ((D_800D154C->character_type == 40) && (D_800D154C->mv->unk128 & 1)) {
+                D_800D154C->stickspeed *= 1.4f;
             }
         }
     }
@@ -109,7 +109,7 @@ void func_15075650(void) {
     u8 previous;
     Actor *obj;
 
-    index = D_800D2108[D_800D154C->unk13F] - 1;
+    index = D_800D2108[D_800D154C->listpos] - 1;
     if (D_800D154C->unk21F != 0) {
         index = D_800D154C->unk21F;
     }
@@ -143,9 +143,9 @@ set_timer:
     D_800D154C->unk21C = D_800D1890 * 100;
 
     if (D_800D1892 != 0xFF) {
-        D_800D154C->unk44 = D_800D1892;
-        if (D_800D154C->unk44 == 1.0f) {
-            D_800D154C->unk44 = 0.5f;
+        D_800D154C->stickspeed = D_800D1892;
+        if (D_800D154C->stickspeed == 1.0f) {
+            D_800D154C->stickspeed = 0.5f;
         }
     }
     if (D_800D154C->unk21E < D_800D154C->unk220) {
@@ -164,12 +164,12 @@ void func_15075884(void) {
 
     func_15075548();
     obj = D_800D154C;
-    dx = (f32)D_800D2104[obj->unk13F][obj->unk21E + 1].x - obj->x_position;
-    dz = (f32)D_800D2104[obj->unk13F][obj->unk21E + 1].z - obj->z_position;
+    dx = (f32)D_800D2104[obj->listpos][obj->unk21E + 1].x - obj->xpos;
+    dz = (f32)D_800D2104[obj->listpos][obj->unk21E + 1].z - obj->zpos;
     dist = sqrtf((dx * dx) + (dz * dz));
     dx = (f32)(u32)D_800D1891;
     speed = dist / dx;
-    obj->unk44 = speed + speed;
+    obj->stickspeed = speed + speed;
 }
 
 /* Jumps to arg0 when waypoint arg1 compares (per arg2) with the waypoint unk221 steps back. */
@@ -181,11 +181,11 @@ void func_15075938(void) {
     matched = 0;
     position = D_800D154C->unk21E - (s8)D_800D154C->unk221;
     if (position < 0) {
-        position += D_800D2108[D_800D154C->unk13F] - 1;
-    } else if (position >= D_800D2108[D_800D154C->unk13F] - 1) {
-        position -= D_800D2108[D_800D154C->unk13F] - 1;
+        position += D_800D2108[D_800D154C->listpos] - 1;
+    } else if (position >= D_800D2108[D_800D154C->listpos] - 1) {
+        position -= D_800D2108[D_800D154C->listpos] - 1;
     }
-    desired = D_800D1891 == 0xFF ? D_800D2108[D_800D154C->unk13F] - 2 : D_800D1891;
+    desired = D_800D1891 == 0xFF ? D_800D2108[D_800D154C->listpos] - 2 : D_800D1891;
     if (D_800D1892 == 0) {
         if (desired == position) {
             matched = 1;
@@ -223,12 +223,12 @@ void func_15075AAC(void) {
     f32 dz;
 
     func_15075548();
-    point = D_800D2104[D_800D154C->unk13F] + D_800D1891;
-    dx = point->x - D_800D154C->x_position;
-    dz = point->z - D_800D154C->z_position;
+    point = D_800D2104[D_800D154C->listpos] + D_800D1891;
+    dx = point->x - D_800D154C->xpos;
+    dz = point->z - D_800D154C->zpos;
     if (fabsf(dx) + fabsf(dz) < 40.0f) {
         D_800D154C->unk21C = 0;
-        D_800D154C->xz_velocity = 0.0f;
+        D_800D154C->speed = 0.0f;
     }
 }
 
@@ -257,10 +257,10 @@ void func_15075BE8(void) {
 /* Sets the vertical velocity to the s16 (arg2:arg0) unless arg3 == 1, and gravity to (s8)arg1 unless arg3 == 2. */
 void func_15075C24(void) {
     if (D_800D1893 != 1) {
-        D_800D154C->y_velocity = (s16)((D_800D1892 << 8) | D_800D1890);
+        D_800D154C->yspd = (s16)((D_800D1892 << 8) | D_800D1890);
     }
     if (D_800D1893 != 2) {
-        D_800D154C->gravity = (s16)(s8)D_800D1891;
+        D_800D154C->ygrav = (s16)(s8)D_800D1891;
     }
 }
 
@@ -303,10 +303,10 @@ void func_15075DC8(void) {
 /* Switches to script arg1 (0: the object's current script id); a nonzero arg3 becomes the new id. */
 void func_15075DE8(void) {
     if (D_800D1891 == 0) {
-        D_800D1891 = D_800D154C->unk232;
+        D_800D1891 = D_800D154C->intelwalk;
     }
     if (D_800D1893 != 0) {
-        D_800D154C->unk232 = D_800D1893;
+        D_800D154C->intelwalk = D_800D1893;
     }
     D_800D154C->unk218 = func_1507BB28(0, D_800D1891);
     // the interpreter steps past the current command after this returns
@@ -344,13 +344,13 @@ void func_15075F40(void) {
 void func_15075F6C(void) {
     if (D_800D1890 != 0) {
         if (D_800D1892 == 0) {
-            D_800D154C->y_velocity = D_800D1890;
+            D_800D154C->yspd = D_800D1890;
         } else {
-            D_800D154C->y_velocity = -D_800D1890;
+            D_800D154C->yspd = -D_800D1890;
         }
     }
     if (D_800D1891 != 0) {
-        D_800D154C->gravity = D_800D1891;
+        D_800D154C->ygrav = D_800D1891;
     }
     D_800D154C->unk3A = D_800D1893;
 }
@@ -363,15 +363,15 @@ void func_1507602C(void) {
 
     func_15075548();
     D_800D154C->unk21E = D_800D1891;
-    dx = (f32)D_800D2104[D_800D154C->unk13F][D_800D1891 + 1].x - D_800D154C->x_position;
-    dz = (f32)D_800D2104[D_800D154C->unk13F][D_800D1891 + 1].z - D_800D154C->z_position;
-    time = 2.0f * (sqrtf((dx * dx) + (dz * dz)) / D_800D154C->unk44);
+    dx = (f32)D_800D2104[D_800D154C->listpos][D_800D1891 + 1].x - D_800D154C->xpos;
+    dz = (f32)D_800D2104[D_800D154C->listpos][D_800D1891 + 1].z - D_800D154C->zpos;
+    time = 2.0f * (sqrtf((dx * dx) + (dz * dz)) / D_800D154C->stickspeed);
     if (time < 12.0f) {
-        D_800D154C->unk44 *= time * 0.08333300054f;
+        D_800D154C->stickspeed *= time * 0.08333300054f;
         time = 12.0f;
     }
     D_800D154C->unk21C = (u32)(time * 100.0f);
-    D_800D154C->y_velocity = D_800D154C->gravity * time * 0.5f;
+    D_800D154C->yspd = D_800D154C->ygrav * time * 0.5f;
     D_800D154C->unk223 = 4;
 }
 
@@ -403,16 +403,16 @@ void func_150762B0(void) {
 extern void func_151669A0(s32 arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4, s32 arg5);
 
 void func_150762D4(void) {
-    func_151669A0((s32)D_800D154C->x_position, (s32)(D_800D154C->y_position + 100.0f),
-                  (s32)D_800D154C->z_position, 0.45f, 0xFF, 0);
+    func_151669A0((s32)D_800D154C->xpos, (s32)(D_800D154C->ypos + 100.0f),
+                  (s32)D_800D154C->zpos, 0.45f, 0xFF, 0);
 }
 
 void func_15076340(void) {
-    if (D_800D154C->unk107 == 0) {
+    if (D_800D154C->ivehitit == 0) {
         func_15075400(D_800D1890);
     }
     if (D_800D1891 != 0) {
-        D_800D154C->unk107 = 0;
+        D_800D154C->ivehitit = 0;
     }
 }
 
@@ -422,7 +422,7 @@ void func_15076394(void) {
 
 void func_150763B0(void) {
     if (D_800D1890 == 128) {
-        D_800D154C->unk1E5 = D_800D154C->spawn->unkF;
+        D_800D154C->unk1E5 = D_800D154C->listpos_ptr->unkF;
     } else {
         D_800D154C->unk1E5 = D_800D1890;
     }
@@ -452,7 +452,7 @@ void func_150764C8(void) {
 }
 
 void func_150764E4(void) {
-    D_800D154C->unk239 = D_800D1890;
+    D_800D154C->intelhitroute = D_800D1890;
 }
 
 void func_15076500(void) {
@@ -462,16 +462,16 @@ void func_15076500(void) {
 /* Sets `immune` to arg0 on the object's target (arg1 != 0) or on the object itself. */
 void func_1507652C(void) {
     if (D_800D1891 != 0) {
-        movement_obj[D_800D154C->unk124].immune = D_800D1890;
+        movement_obj[D_800D154C->owner].imune = D_800D1890;
     } else {
-        D_800D154C->immune = D_800D1890;
+        D_800D154C->imune = D_800D1890;
     }
 }
 
 void func_1507659C(void) {
-    D_800D154C->y_position = D_800D154C->y_position + D_800D1890 * 100;
+    D_800D154C->ypos = D_800D154C->ypos + D_800D1890 * 100;
     if (D_800D1893 != 0) {
-        D_800D154C->y_position = 1800.0f;
+        D_800D154C->ypos = 1800.0f;
     }
 }
 
@@ -486,19 +486,19 @@ void func_15076608(void) {
 void func_15076624(void) {
     s32 flags = (D_800D1890 << 24) | (D_800D1891 << 16) | (D_800D1892 << 8) | D_800D1893;
 
-    D_800D154C->unkF8 |= flags;
+    D_800D154C->noshove |= flags;
 }
 
 /* Clears the flags given by the four argument bytes in unkF8. */
 void func_15076678(void) {
     s32 flags = (D_800D1890 << 24) | (D_800D1891 << 16) | (D_800D1892 << 8) | D_800D1893;
 
-    D_800D154C->unkF8 &= ~flags;
+    D_800D154C->noshove &= ~flags;
 }
 
 void func_150766D0(void) {
-    if (((D_800D154C->unk28 > 0.0f) && (D_800D1890 == 0)) ||
-        ((D_800D1890 * 50 < D_800D154C->unk28) && (D_800D1890 != 0))) {
+    if (((D_800D154C->shad > 0.0f) && (D_800D1890 == 0)) ||
+        ((D_800D1890 * 50 < D_800D154C->shad) && (D_800D1890 != 0))) {
         D_800D154C->unk21C = 99;
         D_800D154C->unk218--;
     }
@@ -516,9 +516,9 @@ void func_15076768(void) {
         func_15197A7C(D_800D154C);
         break;
     case 1:
-        position[0] = D_800D154C->x_position;
+        position[0] = D_800D154C->xpos;
         position[1] = -390.0f;
-        position[2] = D_800D154C->z_position;
+        position[2] = D_800D154C->zpos;
         // matching: the jump ends the basic block, so as1 keeps the stores before the call
         goto setup_done;
     setup_done:
@@ -535,9 +535,9 @@ void func_150767F4(void) {
 
     target = &movement_obj[D_800D154C->unk222];
     // matching: the (s32) cast before narrowing to u16 is needed
-    angle = (s32)func_1505A630(target->x_position - D_800D154C->x_position,
-                               D_800D154C->z_position - target->z_position, 0);
-    if ((((angle >> 8) - (movement_obj[D_800D154C->unk222].unk7A >> 8) + D_800D1891) & 0xFF) < D_800D1891 * 2) {
+    angle = (s32)func_1505A630(target->xpos - D_800D154C->xpos,
+                               D_800D154C->zpos - target->zpos, 0);
+    if ((((angle >> 8) - (movement_obj[D_800D154C->unk222].langle >> 8) + D_800D1891) & 0xFF) < D_800D1891 * 2) {
         func_15075400(D_800D1890);
     }
 }
@@ -566,18 +566,18 @@ void func_150768DC(void) {
 
     for (i = 0; i < 25; i++) {
         obj = &movement_obj[i];
-        if ((obj->interaction_state != 0) && (obj->health != 0) && (obj->unkF8 & 0x20) && (i != self)) {
-            if ((D_800D1891 != 0) || (obj->id != D_800D154C->id)) {
-                if (fabsf(D_800D154C->y_position - obj->y_position) > 50.0f) {
+        if ((obj->type != 0) && (obj->energy != 0) && (obj->noshove & 0x20) && (i != self)) {
+            if ((D_800D1891 != 0) || (obj->character_type != D_800D154C->character_type)) {
+                if (fabsf(D_800D154C->ypos - obj->ypos) > 50.0f) {
                     continue;
                 }
                 dist = func_1505A72C(D_800D154C, obj);
                 if (dist < nearest) {
-                    type = D_800D1C90[D_800D154C->id];
+                    type = D_800D1C90[D_800D154C->character_type];
                     viewAngle = type->viewAngle;
-                    angle = func_1505A630(obj->x_position - D_800D154C->x_position,
-                                          D_800D154C->z_position - obj->z_position, 0) >> 8;
-                    if (((((D_800D154C->unk76 >> 8) + D_800D154C->unk2CA) - angle + (viewAngle / 2)) & 0xFF) < viewAngle) {
+                    angle = func_1505A630(obj->xpos - D_800D154C->xpos,
+                                          D_800D154C->zpos - obj->zpos, 0) >> 8;
+                    if (((((D_800D154C->angle >> 8) + D_800D154C->unk2CA) - angle + (viewAngle / 2)) & 0xFF) < viewAngle) {
                         D_800D154C->unkA8 = i + 0x80;
                         nearest = dist;
                     }
@@ -594,7 +594,7 @@ void func_150768DC(void) {
             foundIndex = D_800D154C->unkA8;
             found = &movement_obj[foundIndex & 0x7F];
             found->unk218 = NULL;
-            found->unk232 = script;
+            found->intelwalk = script;
             found->unk222 = self;
         }
     }
@@ -605,7 +605,7 @@ void func_15076B5C(void) {
 }
 
 void func_15076B78(void) {
-    D_800D154C->unk5 = D_800D1890;
+    D_800D154C->drawtype = D_800D1890;
 }
 
 /* Targets the last object below this one (all 25 if arg1) of type arg0 that is alive, and starts mode 9. */
@@ -616,7 +616,7 @@ void func_15076B94(void) {
         i = 25;
     }
     while (i != 0) {
-        if ((D_800D1890 == movement_obj[i - 1].id) && (movement_obj[i - 1].health != 0)) {
+        if ((D_800D1890 == movement_obj[i - 1].character_type) && (movement_obj[i - 1].energy != 0)) {
             func_15075548();
             D_800D154C->unk223 = 9;
             D_800D154C->unk222 = i - 1;
@@ -632,7 +632,7 @@ void func_15076C7C(void) {
 }
 
 void func_15076CB4(void) {
-    D_800D154C->unk76 = D_800D154C->unk78;
+    D_800D154C->angle = D_800D154C->fangle;
 }
 
 void func_15076CCC(void) {
@@ -641,7 +641,7 @@ void func_15076CCC(void) {
 }
 
 void func_15076D04(void) {
-    D_800D154C->xz_velocity = D_800D1890;
+    D_800D154C->speed = D_800D1890;
 }
 
 /* Sets the object's scale from two s16 percentages, (arg1:arg0) horizontal and (arg3:arg2) vertical. */
@@ -650,15 +650,15 @@ void func_15076D3C(void) {
     s16 xz = D_800D1890 | (D_800D1891 << 8);
     s16 y = D_800D1892 | (D_800D1893 << 8);
 
-    D_800D154C->xz_scale = (f32)xz * scale;
-    D_800D154C->y_scale = (f32)y * scale;
-    D_800D154C->unk154 = D_800D154C->xz_scale;
-    D_800D154C->unk158 = D_800D154C->y_scale;
-    func_15062BDC(D_800D154C, D_800D154C->xz_scale, D_800D154C->y_scale);
+    D_800D154C->scale_xz = (f32)xz * scale;
+    D_800D154C->scale_y = (f32)y * scale;
+    D_800D154C->unk154 = D_800D154C->scale_xz;
+    D_800D154C->unk158 = D_800D154C->scale_y;
+    func_15062BDC(D_800D154C, D_800D154C->scale_xz, D_800D154C->scale_y);
 }
 
 void func_15076DF4(void) {
-    D_800D154C->interaction_state = D_800D1890;
+    D_800D154C->type = D_800D1890;
 }
 
 void func_15076E10(void) {
@@ -672,11 +672,11 @@ void func_15076E48(void) {
 /* Starts mode 7: a jump in a random direction with random speeds. */
 void func_15076E50(void) {
     func_15075548();
-    D_800D154C->y_velocity = (f32)(u32)(func_150ADA20() % 20U) + 55.0f;
-    D_800D154C->gravity = 2.0f;
-    D_800D154C->unk78 = func_150ADA20() % 0xFFFFU;
-    D_800D154C->xz_velocity = (u32)((func_150ADA20() % 20U) + 15);
-    D_800D154C->unk44 = D_800D154C->xz_velocity;
+    D_800D154C->yspd = (f32)(u32)(func_150ADA20() % 20U) + 55.0f;
+    D_800D154C->ygrav = 2.0f;
+    D_800D154C->fangle = func_150ADA20() % 0xFFFFU;
+    D_800D154C->speed = (u32)((func_150ADA20() % 20U) + 15);
+    D_800D154C->stickspeed = D_800D154C->speed;
     D_800D154C->unk223 = 7;
 }
 
@@ -701,17 +701,17 @@ void func_15076FA8(void) {
         s16 offset;
 
         offset = (func_150ADA20() % (u32)D_800D1890) - (D_800D1890 / 2);
-        D_800D154C->x_position += offset * 3.0f;
+        D_800D154C->xpos += offset * 3.0f;
         offset = (func_150ADA20() % (u32)D_800D1891) - (D_800D1891 / 2);
-        D_800D154C->z_position += offset * 3.0f;
-    } else if (D_800D154C->xz_velocity < D_800D1893) {
-        D_800D154C->xz_velocity = D_800D1893;
+        D_800D154C->zpos += offset * 3.0f;
+    } else if (D_800D154C->speed < D_800D1893) {
+        D_800D154C->speed = D_800D1893;
     }
 }
 
 /* Jumps to arg3 when the target's speed is below arg2. */
 void func_150770E4(void) {
-    if (movement_obj[D_800D154C->unk222].xz_velocity < D_800D1892) {
+    if (movement_obj[D_800D154C->unk222].speed < D_800D1892) {
         func_15075400(D_800D1893);
     }
 }
@@ -755,10 +755,10 @@ void func_150771F0(void) {
 void func_15077294(void) {
     switch (D_800D1891) {
     case 0:
-        D_800D154C->health = D_800D1890;
+        D_800D154C->energy = D_800D1890;
         break;
     case 1:
-        D_800D154C->health--;
+        D_800D154C->energy--;
         break;
     }
 }
@@ -782,10 +782,10 @@ void func_15077364(void) {
     if (D_800D1893 != 0) {
         D_800D1890 += func_150ADA20() % (u32)D_800D1893;
     }
-    D_800D154C->unk246 = D_800D1890;
+    D_800D154C->intel_animspd = D_800D1890;
     D_800D154C->unk249 = 0;
-    D_800D154C->unk247 = D_800D1891;
-    D_800D154C->unk248 = D_800D1892;
+    D_800D154C->intel_accel = D_800D1891;
+    D_800D154C->intel_decel = D_800D1892;
 }
 
 /*
@@ -797,23 +797,23 @@ void func_15077404(void) {
         s16 value;
         s16 delta;
 
-        value = ((D_800D154C->unk246 & 0x1F) << 8) + D_800D154C->unk249;
+        value = ((D_800D154C->intel_animspd & 0x1F) << 8) + D_800D154C->unk249;
         delta = (D_800D1891 << 8) + D_800D1892;
         value += delta * D_800BE9E4;
         if (value < 0) {
             value = 0;
         }
-        D_800D154C->unk246 = (value >> 8) | 0x80;
+        D_800D154C->intel_animspd = (value >> 8) | 0x80;
         D_800D154C->unk249 = value;
     } else {
-        D_800D154C->unk246 = D_800D1890;
+        D_800D154C->intel_animspd = D_800D1890;
     }
 }
 
 /* Jumps to arg0 when the object has reached its destination node (or has none). */
 void func_150774B4(void) {
     if ((D_800D154C->unk20F == D_800D154C->unk211) || (D_800D154C->unk211 == 0xFF)) {
-        D_800D154C->unk25C |= 0x800;
+        D_800D154C->task_attrib |= 0x800;
         func_15075400(D_800D1890);
     }
 }
@@ -852,15 +852,15 @@ void func_15077508(void) {
     if (D_800D1890 != 1) {
         if (D_800D154C->unk20F == D_800D154C->unk211) {
             UNK216(D_800D154C) = 0;
-            D_800D154C->unk25C |= 0x800;
+            D_800D154C->task_attrib |= 0x800;
             return;
         }
         if (D_800D154C->unk211 == 0xFF) {
             UNK216(D_800D154C) = 0;
         }
     }
-    D_800D154C->unk25C &= ~0x800;
-    if (D_800D2108[D_800D154C->unk13F] - 1 > 0) {
+    D_800D154C->task_attrib &= ~0x800;
+    if (D_800D2108[D_800D154C->listpos] - 1 > 0) {
         hasGoal2 = 0;
         hasGoal = 0;
         if (D_800D154C->unk211 != 0xFF) {
@@ -877,7 +877,7 @@ void func_15077508(void) {
                 next = D_800D154C->unk210;
             }
             if (next == 0xFF) {
-                next = func_15086098(D_800D154C->x_position, D_800D154C->y_position, D_800D154C->z_position,
+                next = func_15086098(D_800D154C->xpos, D_800D154C->ypos, D_800D154C->zpos,
                                      hasGoal, hasGoal2, &D_800D154C->unk211, D_800D154C->unk212);
             }
         } else if (current != 0xFF) {
@@ -901,7 +901,7 @@ void func_15077508(void) {
                 }
                 next = best;
                 if (next == 0xFF) {
-                    D_800D154C->unk25C |= 0x800;
+                    D_800D154C->task_attrib |= 0x800;
                     next = D_800D154C->unk210;
                 }
             } else {
@@ -921,8 +921,8 @@ void func_15077508(void) {
                     f32 dist;
 
                     width = (f32)(u32)D_800D2350[next].unk8 + (f32)(u32)D_800D2350[next].unk8;
-                    dx = x - D_800D154C->x_position;
-                    dz = z - D_800D154C->z_position;
+                    dx = x - D_800D154C->xpos;
+                    dz = z - D_800D154C->zpos;
                     dist = sqrtf(dx * dx + dz * dz);
                     if (dist > 1.0f) {
                         dist = func_150ADA68() * width / dist;
@@ -930,9 +930,9 @@ void func_15077508(void) {
                         z += dx * dist;
                     }
                 }
-                D_800D2104[D_800D154C->unk13F][1].x = x;
-                D_800D2104[D_800D154C->unk13F][1].y = y;
-                D_800D2104[D_800D154C->unk13F][1].z = z;
+                D_800D2104[D_800D154C->listpos][1].x = x;
+                D_800D2104[D_800D154C->listpos][1].y = y;
+                D_800D2104[D_800D154C->listpos][1].z = z;
             }
         }
     }
@@ -942,7 +942,7 @@ void func_15077508(void) {
 void func_150778F0(void) {
     u8 count;
 
-    count = D_800D2108[D_800D154C->unk13F] - 1;
+    count = D_800D2108[D_800D154C->listpos] - 1;
     if (D_800D154C->unk21F != 0) {
         count = D_800D154C->unk21F;
     }
@@ -971,7 +971,7 @@ void func_150779D4(void) {
     }
     if (dc_glbl_CharNum != index) {
         obj = &movement_obj[index];
-        if ((obj->interaction_state != 1) || (obj->unk65 == 0)) {
+        if ((obj->type != 1) || (obj->attach_char == 0)) {
             // matching: the assignment inside the test makes IDO keep the bound in $f2
             if (func_1505A6F8(D_800D154C, obj) < (range = D_800D1893 << 3)) {
                 func_15075400(D_800D1890);
@@ -981,7 +981,7 @@ void func_150779D4(void) {
 }
 
 void func_15077AA0(void) {
-    D_800D154C->unk239 = D_800D1890;
+    D_800D154C->intelhitroute = D_800D1890;
 }
 
 void func_15077ABC(void) {
@@ -1002,7 +1002,7 @@ void func_15077B44(void) {
 void func_15077B80(void) {
     s32 flags = (D_800D1890 << 8) + D_800D1891;
 
-    D_800D154C->unk25C |= flags;
+    D_800D154C->task_attrib |= flags;
 }
 
 /* Restarts the object returned by func_1505F0AC(arg1) on script arg0. */
@@ -1010,13 +1010,13 @@ void func_15077BB4(void) {
     Actor *obj = func_1505F0AC(D_800D1891);
 
     obj->unk218 = NULL;
-    obj->unk232 = D_800D1890;
+    obj->intelwalk = D_800D1890;
 }
 
 void func_15077BE4(void) {
     s32 mask = ~((D_800D1890 << 8) + D_800D1891);
 
-    D_800D154C->unk25C &= mask;
+    D_800D154C->task_attrib &= mask;
 }
 
 void func_15077C1C(void) {
@@ -1038,10 +1038,10 @@ void func_15077C38(void) {
 
     for (i = 0; i < 25; i++) {
         obj = &movement_obj[i];
-        if (((obj->interaction_state != 0) && (obj->health != 0)) &&
-            ((obj->immune == 0) || (obj->immune == 0xFF)) &&
-            ((obj->unk65 == 0) || (D_800D1892 != 0)) &&
-            ((obj->id == D_800D1890) || ((obj->interaction_state == D_800D1891) && (obj->stunned == 0)))) {
+        if (((obj->type != 0) && (obj->energy != 0)) &&
+            ((obj->imune == 0) || (obj->imune == 0xFF)) &&
+            ((obj->attach_char == 0) || (D_800D1892 != 0)) &&
+            ((obj->character_type == D_800D1890) || ((obj->type == D_800D1891) && (obj->stunned == 0)))) {
             if (D_800D1893 == 0) {
                 D_800D154C->unk222 = i;
                 return;
@@ -1064,9 +1064,9 @@ void func_15077DBC(void) {
     if (D_800D1890 != 0xFA) {
         D_800D154C->unk21E = D_800D1890;
     }
-    D_800D154C->x_position = D_800D2104[D_800D154C->unk13F][D_800D154C->unk21E + 1].x;
-    D_800D154C->y_position = D_800D2104[D_800D154C->unk13F][D_800D154C->unk21E + 1].y;
-    D_800D154C->z_position = D_800D2104[D_800D154C->unk13F][D_800D154C->unk21E + 1].z;
+    D_800D154C->xpos = D_800D2104[D_800D154C->listpos][D_800D154C->unk21E + 1].x;
+    D_800D154C->ypos = D_800D2104[D_800D154C->listpos][D_800D154C->unk21E + 1].y;
+    D_800D154C->zpos = D_800D2104[D_800D154C->listpos][D_800D154C->unk21E + 1].z;
 }
 
 void func_15077E9C(void) {
@@ -1096,10 +1096,10 @@ void func_15077F64(void) {
     u8 index;
 
     index = D_800D1890 - 1;
-    dx = (f32)D_800D2104[D_800D154C->unk13F][D_800D154C->unk21E + 1].x - D_800D154C->x_position;
-    dz = D_800D154C->z_position - (f32)D_800D2104[D_800D154C->unk13F][D_800D154C->unk21E + 1].z;
-    D_800D154C->unk78 = func_1505A630(dx, dz, 0);
-    turn = (D_800D154C->unk78 - D_800D154C->unk76) >> 8;
+    dx = (f32)D_800D2104[D_800D154C->listpos][D_800D154C->unk21E + 1].x - D_800D154C->xpos;
+    dz = D_800D154C->zpos - (f32)D_800D2104[D_800D154C->listpos][D_800D154C->unk21E + 1].z;
+    D_800D154C->fangle = func_1505A630(dx, dz, 0);
+    turn = (D_800D154C->fangle - D_800D154C->angle) >> 8;
     if (turn & 0x80) {
         turn = -turn;
     }
@@ -1119,7 +1119,7 @@ void func_15078074(void) {
 
     for (i = 0; i < 25; i++) {
         obj = &movement_obj[i];
-        if ((obj->interaction_state != 0) && (dc_glbl_CharNum != i)) {
+        if ((obj->type != 0) && (dc_glbl_CharNum != i)) {
             if (func_1505A6F8(D_800D154C, obj) < range) {
                 func_15075400(D_800D1890);
                 return;
@@ -1132,7 +1132,7 @@ void func_15078074(void) {
 void func_1507813C(void) {
     s32 index = D_800D154C->unk222;
 
-    if (movement_obj[index].interaction_state == 0) {
+    if (movement_obj[index].type == 0) {
         func_15075400(D_800D1890);
     }
 }
@@ -1153,9 +1153,9 @@ void func_150781F4(void) {
     s32 index;
 
     index = D_800D1891 + 1;
-    point = &D_800D2104[D_800D154C->unk13F][index];
-    dx = point->x - D_800D154C->x_position;
-    dz = point->z - D_800D154C->z_position;
+    point = &D_800D2104[D_800D154C->listpos][index];
+    dx = point->x - D_800D154C->xpos;
+    dz = point->z - D_800D154C->zpos;
     dist = sqrtf((dx * dx) + (dz * dz));
     dx = (f32)(D_800D1893 << 3);
     if (((D_800D1892 == 0) && (dist < dx)) ||
@@ -1202,7 +1202,7 @@ void func_1507839C(void) {
         target = &movement_obj[D_800D154C->unk222];
         dist = func_1505A72C(D_800D154C, target);
     } else {
-        dist = fabsf(D_800D154C->y_position - movement_obj[D_800D154C->unk222].y_position);
+        dist = fabsf(D_800D154C->ypos - movement_obj[D_800D154C->unk222].ypos);
     }
 
     threshold = D_800D1893 * 8;
@@ -1243,28 +1243,28 @@ void func_15078544(void) {
 
     mode = D_800D1890 >> 6;
     D_800D1890 &= 0x3F;
-    x = movement_obj[D_800D154C->unk222].x_position;
-    z = movement_obj[D_800D154C->unk222].z_position;
-    y = movement_obj[D_800D154C->unk222].y_position;
+    x = movement_obj[D_800D154C->unk222].xpos;
+    z = movement_obj[D_800D154C->unk222].zpos;
+    y = movement_obj[D_800D154C->unk222].ypos;
     offsetX = ((((s8)D_800D1891 << 4) | (D_800D1893 >> 4)) * 8);
     offsetZ = ((((s8)D_800D1892 << 4) | (D_800D1893 & 0xF)) * 8);
     if (mode == 0) {
-        facing = ((movement_obj[D_800D154C->unk222].unk7A >> 8) & 0xFF) - 0x40;
+        facing = ((movement_obj[D_800D154C->unk222].langle >> 8) & 0xFF) - 0x40;
         sine = func_15048A40(facing);
         cosine = func_150489B0(facing);
     } else if (mode == 1) {
         sine = 0.0f;
         cosine = 1.0f;
     } else {
-        angle = func_150484A0(D_800D154C->x_position - x, D_800D154C->z_position - z);
+        angle = func_150484A0(D_800D154C->xpos - x, D_800D154C->zpos - z);
         sine = sinf(angle);
         cosine = cosf(angle);
     }
     x += offsetX * cosine + offsetZ * sine;
     z += offsetZ * cosine - offsetX * sine;
-    D_800D2104[D_800D154C->unk13F][D_800D1890 + 1].x = x;
-    D_800D2104[D_800D154C->unk13F][D_800D1890 + 1].y = y;
-    D_800D2104[D_800D154C->unk13F][D_800D1890 + 1].z = z;
+    D_800D2104[D_800D154C->listpos][D_800D1890 + 1].x = x;
+    D_800D2104[D_800D154C->listpos][D_800D1890 + 1].y = y;
+    D_800D2104[D_800D154C->listpos][D_800D1890 + 1].z = z;
 }
 
 /* Jumps to arg0 when the target's unk2D0->unk8 is below (arg2 == 0) or above (arg2 == 1) arg1. */
@@ -1329,54 +1329,54 @@ s32 func_15078A60(s32 index) {
 
     switch (D_800D1892) {
     case 0:
-        value = movement_obj[index].xz_velocity;
+        value = movement_obj[index].speed;
         break;
     case 1:
-        value = movement_obj[index].unk2E4;
+        value = movement_obj[index].taskint[0];
         break;
     case 2:
-        value = movement_obj[index].unk2E8;
+        value = movement_obj[index].taskint[1];
         break;
     case 3:
-        value = movement_obj[index].unk2EC;
+        value = movement_obj[index].taskint[2];
         break;
     case 4:
-        value = movement_obj[index].y_position;
+        value = movement_obj[index].ypos;
         break;
     case 5:
-        value = movement_obj[index].unk44;
+        value = movement_obj[index].stickspeed;
         break;
     case 6:
         // angle between the object's facing and the direction to it from the current object
-        facing = movement_obj[index].unk7A >> 8;
+        facing = movement_obj[index].langle >> 8;
         facing -= 0x40;
-        diff = (u8)(func_150484A0(movement_obj[index].x_position - D_800D154C->x_position,
-                                  movement_obj[index].z_position - D_800D154C->z_position) * 40.74366379f) - facing;
+        diff = (u8)(func_150484A0(movement_obj[index].xpos - D_800D154C->xpos,
+                                  movement_obj[index].zpos - D_800D154C->zpos) * 40.74366379f) - facing;
         value = (u8)diff;
         if (value > 0x80) {
             value = 0x100 - value;
         }
         break;
     case 7:
-        value = movement_obj[index].unk13C;
+        value = movement_obj[index].lifting;
         break;
     case 8:
         value = movement_obj[index].stunned;
         break;
     case 9:
         value = 0;
-        if ((movement_obj[index].unk31C->pissed_up != 0) && (movement_obj[index].unk31C->pissed_hangover != 0)) {
+        if ((movement_obj[index].mv->pissed_up != 0) && (movement_obj[index].mv->pissed_hangover != 0)) {
             value = 2;
         }
         break;
     case 10:
-        value = movement_obj[index].unk28;
+        value = movement_obj[index].shad;
         break;
     case 11:
-        value = movement_obj[0].unk31C->rt_context_b;
+        value = movement_obj[0].mv->rt_context_b;
         break;
     case 12:
-        value = movement_obj[0].unk31C->matrix_physics;
+        value = movement_obj[0].mv->matrix_physics;
         break;
     case 13:
         value = movement_obj[0].unk102;
@@ -1385,16 +1385,16 @@ s32 func_15078A60(s32 index) {
         value = D_800BE9EC;
         break;
     case 15:
-        value = movement_obj[D_800D154C->unk222].id;
+        value = movement_obj[D_800D154C->unk222].character_type;
         break;
     case 16:
-        value = movement_obj[index].health;
+        value = movement_obj[index].energy;
         break;
     case 17:
-        value = movement_obj[D_800D154C->unk222].unk232;
+        value = movement_obj[D_800D154C->unk222].intelwalk;
         break;
     case 18:
-        value = movement_obj[index].disable_run;
+        value = movement_obj[index].norun;
         break;
     }
     // matching: one line, as -g3 line numbers steer the scheduling of this test
@@ -1438,9 +1438,9 @@ void func_1507911C(void) {
     if (index != 0) {
         index = dc_glbl_CharNum;
     }
-    coord = movement_obj[index].y_position;
+    coord = movement_obj[index].ypos;
     if (D_800D1893 & 2) {
-        coord = movement_obj[index].x_position;
+        coord = movement_obj[index].xpos;
     }
     if (coord < limit) {
         func_15075400(D_800D1890);
@@ -1449,9 +1449,9 @@ void func_1507911C(void) {
 
 void func_150791F0(void) {
     if (D_800D154C->modelCount < D_800D1890) {
-        D_800D154C->lodRequest = 0xFF;
+        D_800D154C->forced_lod = 0xFF;
     } else {
-        D_800D154C->lodRequest = D_800D1890;
+        D_800D154C->forced_lod = D_800D1890;
     }
 }
 
@@ -1468,7 +1468,7 @@ void func_15079228(void) {
     obj = D_800D154C;
     x = gate->x;
     z = gate->z;
-    angle = func_1505A630(obj->x_position - x, z - obj->z_position, 0);
+    angle = func_1505A630(obj->xpos - x, z - obj->zpos, 0);
     if (angle == 0) {
         angle = 1;
     }
@@ -1478,7 +1478,7 @@ void func_15079228(void) {
 }
 
 void func_150792E0(void) {
-    D_800D154C->unk232 = D_800D1890;
+    D_800D154C->intelwalk = D_800D1890;
 }
 
 void func_150792FC(void) {
@@ -1493,7 +1493,7 @@ void func_15079334(void) {
     if (D_800D154C->unkA8 != 0) {
         found = &movement_obj[D_800D154C->unkA8 & 0x7F];
         found->unk218 = NULL;
-        found->unk232 = D_800D1890;
+        found->intelwalk = D_800D1890;
     }
 }
 
@@ -1516,8 +1516,8 @@ void func_150793D8(void) {
     s16 x;
     s16 z;
 
-    x = (s16)(s32)movement_obj[0].x_position;
-    z = (s16)(s32)movement_obj[0].z_position;
+    x = (s16)(s32)movement_obj[0].xpos;
+    z = (s16)(s32)movement_obj[0].zpos;
     if ((x < -1180) || (x > 1180) || (z < -1180) || (z > 1180)) {
         x = 0;
         z = 0;
@@ -1540,8 +1540,8 @@ void func_150793D8(void) {
         z = 1200;
     }
 
-    D_800D2104[D_800D154C->unk13F][D_800D1890 + 1].x = x;
-    D_800D2104[D_800D154C->unk13F][D_800D1890 + 1].z = z;
+    D_800D2104[D_800D154C->listpos][D_800D1890 + 1].x = x;
+    D_800D2104[D_800D154C->listpos][D_800D1890 + 1].z = z;
 }
 
 /* Sets the speeds for a jump that lands on the target. */
@@ -1550,10 +1550,10 @@ void func_15079570(void) {
     f32 time;
 
     dist = func_1505A6F8(D_800D154C, &movement_obj[D_800D154C->unk222]);
-    D_800D154C->unk44 = D_800D154C->xz_velocity;
-    time = 2.0f * (dist / D_800D154C->unk44);
-    D_800D154C->y_velocity = (D_800D154C->gravity * time) * 0.5f;
-    D_800D154C->y_velocity += 2.0f * ((movement_obj[D_800D154C->unk222].y_position - D_800D154C->y_position) / time);
+    D_800D154C->stickspeed = D_800D154C->speed;
+    time = 2.0f * (dist / D_800D154C->stickspeed);
+    D_800D154C->yspd = (D_800D154C->ygrav * time) * 0.5f;
+    D_800D154C->yspd += 2.0f * ((movement_obj[D_800D154C->unk222].ypos - D_800D154C->ypos) / time);
 }
 
 /* Restarts the object with unique id arg0 on script arg1. */
@@ -1564,7 +1564,7 @@ void func_1507965C(void) {
     index = func_15083FB0(D_800D1890);
     if (index != -1) {
         obj = &movement_obj[index];
-        obj->unk232 = D_800D1891;
+        obj->intelwalk = D_800D1891;
         obj->unk218 = NULL;
         obj->unk23A = 0;
     }
@@ -1576,7 +1576,7 @@ void func_150796CC(void) {
 
     if (D_800D1892 != 0) {
         if (index != -1) {
-            movement_obj[index].immune = D_800D1891;
+            movement_obj[index].imune = D_800D1891;
         }
     } else if ((index != -1) && (movement_obj[index].stunned != 0)) {
         func_15075400(D_800D1891);
@@ -1589,19 +1589,19 @@ void func_15079790(void) {
     s16 offsetZ;
 
     if (D_800D1892 != 0) {
-        D_800D154C->id = 0xFF;
+        D_800D154C->character_type = 0xFF;
     } else {
-        D_800D154C->id = 0x3A;
+        D_800D154C->character_type = 0x3A;
         offsetX = (func_150ADA20() % 500U) - 250;
         offsetZ = (func_150ADA20() % 500U) - 250;
-        D_800D154C->x_position = D_800D2104[D_800D154C->unk13F][0].x + offsetX;
-        D_800D154C->z_position = D_800D2104[D_800D154C->unk13F][0].z + offsetZ;
+        D_800D154C->xpos = D_800D2104[D_800D154C->listpos][0].x + offsetX;
+        D_800D154C->zpos = D_800D2104[D_800D154C->listpos][0].z + offsetZ;
     }
 }
 
 /* Starts a move with object 0's speed plus (s8)arg2, clamped to [arg1, 250]. */
 void func_15079880(void) {
-    s32 speed = movement_obj[0].xz_velocity + (s8)D_800D1892;
+    s32 speed = movement_obj[0].speed + (s8)D_800D1892;
 
     if (speed < D_800D1891) {
         speed = D_800D1891;
@@ -1647,7 +1647,7 @@ void func_15079A28(void) {
 }
 
 void func_15079A58(void) {
-    D_800D2110[D_800D154C->unk13F] = (D_800D1890 << 8) + D_800D1891;
+    D_800D2110[D_800D154C->listpos] = (D_800D1890 << 8) + D_800D1891;
 }
 
 /* Returns the direction from object `arg0` to the centre of the current object's path. */
@@ -1655,9 +1655,9 @@ u16 func_15079A98(s32 arg0) {
     PathPoint *path;
     Actor *obj;
 
-    path = D_800D2104[D_800D154C->unk13F];
+    path = D_800D2104[D_800D154C->listpos];
     obj = &movement_obj[arg0];
-    return func_1505A630(path[0].x - obj->x_position, obj->z_position - path[0].z, 0);
+    return func_1505A630(path[0].x - obj->xpos, obj->zpos - path[0].z, 0);
 }
 
 /*
@@ -1692,13 +1692,13 @@ select_object: // matching: unused label, splits the block for the scheduler
     }
     switch (D_800D1892) {
     case 1:
-        counter = &movement_obj[index].unk2E4;
+        counter = &movement_obj[index].taskint[0];
         break;
     case 2:
-        counter = &movement_obj[index].unk2E8;
+        counter = &movement_obj[index].taskint[1];
         break;
     case 3:
-        counter = &movement_obj[index].unk2EC;
+        counter = &movement_obj[index].taskint[2];
         break;
     case 4:
     case 5: {
@@ -1710,9 +1710,9 @@ select_object: // matching: unused label, splits the block for the scheduler
         savedIndex = dc_glbl_CharNum;
         D_800D154C = &movement_obj[index];
         dc_glbl_CharNum = index;
-        if (D_800D154C->unk232 != D_800D1890) {
-            D_800D154C->unk232 = D_800D1890;
-            D_800D154C->unk218 = func_1507BB28(0, D_800D154C->unk232);
+        if (D_800D154C->intelwalk != D_800D1890) {
+            D_800D154C->intelwalk = D_800D1890;
+            D_800D154C->unk218 = func_1507BB28(0, D_800D154C->intelwalk);
             D_800D154C->unk21C = 0;
         }
         dc_glbl_CharNum = savedIndex;
@@ -1723,7 +1723,7 @@ select_object: // matching: unused label, splits the block for the scheduler
         movement_obj[index].unkC8 = D_800D1890;
         return;
     case 7:
-        movement_obj[index].unkB8 = 0.0f;
+        movement_obj[index].vtilt = 0.0f;
         return;
     case 8:
         angle = func_15079A98(D_800D154C->unk222);
@@ -1734,7 +1734,7 @@ select_object: // matching: unused label, splits the block for the scheduler
     case 9: {
         u16 value = (D_800D1893 << 8) | D_800D1890;
 
-        D_800D154C->unk244 = value;
+        D_800D154C->intel_animseq = value;
         return;
     }
     case 10:
@@ -1770,7 +1770,7 @@ select_object: // matching: unused label, splits the block for the scheduler
 }
 
 void func_15079F24(void) {
-    D_800D154C->unk48 = D_800D1898[D_800D1890];
+    D_800D154C->speedup = D_800D1898[D_800D1890];
 }
 
 void func_15079F50(void) {
@@ -1796,19 +1796,19 @@ void func_15079F6C(void) {
 void func_15079FBC(void) {
     s16 speed;
 
-    if ((movement_obj[0].unk65 == 0) || (movement_obj[0].unk44 < 5.0f)) {
-        D_800D154C->unk232 = D_800D1891;
-        D_800D154C->unk218 = func_1507BB28(0, D_800D154C->unk232);
+    if ((movement_obj[0].attach_char == 0) || (movement_obj[0].stickspeed < 5.0f)) {
+        D_800D154C->intelwalk = D_800D1891;
+        D_800D154C->unk218 = func_1507BB28(0, D_800D154C->intelwalk);
         D_800D154C->unk218--;
         return;
     }
 
-    D_800D154C->unk78 = movement_obj[0].unk31C->press_angle;
+    D_800D154C->fangle = movement_obj[0].mv->press_angle;
 
-    if (movement_obj[0].unk31C->chased) {
-        speed = movement_obj[0].unk44;
+    if (movement_obj[0].mv->chased) {
+        speed = movement_obj[0].stickspeed;
     } else {
-        speed = movement_obj[0].unk44 * 0.7f;
+        speed = movement_obj[0].stickspeed * 0.7f;
     }
     if (speed < 17) {
         D_800D1893 += 1;
@@ -1816,29 +1816,29 @@ void func_15079FBC(void) {
     }
     D_800D1892 = speed;
     func_15075F40();
-    D_800D154C->unkF4 |= 0x40;
+    D_800D154C->mvmt_control |= 0x40;
 }
 
 /* Sets coordinate arg1 (0 x, 1 y, 2 z) of waypoint arg0 to (s16)(arg2:arg3). */
 s32 func_1507A100(void) {
     s32 value = ((s8)D_800D1892 << 8) | D_800D1893;
 
-    ((s16 *)&(D_800D2104[D_800D154C->unk13F] + 1)[D_800D1890])[D_800D1891] = value; // matching: waypoints start one point past the centre
+    ((s16 *)&(D_800D2104[D_800D154C->listpos] + 1)[D_800D1890])[D_800D1891] = value; // matching: waypoints start one point past the centre
     return value;
 }
 
 /* Sets the speed to object 0's speed plus (s8)arg2, clamped to [arg1, arg0]. */
 void func_1507A164(void) {
-    s32 speed = movement_obj[0].xz_velocity + (s8)D_800D1892;
+    s32 speed = movement_obj[0].speed + (s8)D_800D1892;
 
     if (speed < D_800D1891) {
         speed = D_800D1891;
     } else if (speed > D_800D1890) {
         speed = D_800D1890;
     }
-    D_800D154C->unk44 = speed;
-    if (D_800D154C->unk44 == 1.0f) {
-        D_800D154C->unk44 = 0.5f;
+    D_800D154C->stickspeed = speed;
+    if (D_800D154C->stickspeed == 1.0f) {
+        D_800D154C->stickspeed = 0.5f;
     }
 }
 
@@ -1866,7 +1866,7 @@ void func_1507A2F8(void) {
 
     count = 0;
     for (i = 0; i < 25; i++) {
-        if ((movement_obj[i].interaction_state != 0) && (movement_obj[i].id == D_800D1890)) {
+        if ((movement_obj[i].type != 0) && (movement_obj[i].character_type == D_800D1890)) {
             candidates[count] = i;
             count++;
         }
@@ -1932,7 +1932,7 @@ void func_1507A528(void) {
         if (D_800D1892 != 0) {
             count = D_800D1892;
         } else {
-            count = D_800D2108[D_800D154C->unk13F] - 1;
+            count = D_800D2108[D_800D154C->listpos] - 1;
         }
         D_800D154C->unk221 = -D_800D154C->unk221;
         index = D_800D154C->unk21E + D_800D154C->unk221;
@@ -1960,10 +1960,10 @@ void func_1507A620(void) {
 
     index = D_800D154C->unk222;
     if (D_800D1891 != 0) {
-        angle = D_800D154C->unk78 >> 8;
+        angle = D_800D154C->fangle >> 8;
     } else {
-        angle = (D_800D154C->unk7A - func_1505A630(movement_obj[index].x_position - D_800D154C->x_position,
-                                                   D_800D154C->z_position - movement_obj[index].z_position, 0)) >> 8;
+        angle = (D_800D154C->langle - func_1505A630(movement_obj[index].xpos - D_800D154C->xpos,
+                                                   D_800D154C->zpos - movement_obj[index].zpos, 0)) >> 8;
     }
     if ((u8)(angle - D_800D1892) < (u8)(D_800D1893 - D_800D1892)) {
         func_15075400(D_800D1890);
@@ -1993,7 +1993,7 @@ void func_1507A774(void) {
 }
 
 void func_1507A7C0(void) {
-    D_800D154C->disable_run = D_800D1890;
+    D_800D154C->norun = D_800D1890;
 }
 
 void func_1507A7DC(void) {
@@ -2005,7 +2005,7 @@ void func_1507A808(void) {
 }
 
 void func_1507A838(void) {
-    if (D_800D154C->health == D_800D1891) {
+    if (D_800D154C->energy == D_800D1891) {
         func_15075400(D_800D1890);
     }
 }
@@ -2015,14 +2015,14 @@ void func_1507A878(void) {
 }
 
 void func_1507A8A8(void) {
-    if ((movement_obj[0].unk65 != 0) || (D_800BE616 != 0)) {
+    if ((movement_obj[0].attach_char != 0) || (D_800BE616 != 0)) {
         func_15075400(D_800D1890);
     }
 }
 
 /* Jumps to arg0 when the target is (arg2 == 0) or is not (arg2 == 1) of type arg1. */
 void func_1507A8EC(void) {
-    if (D_800D1891 == movement_obj[D_800D154C->unk222].id) {
+    if (D_800D1891 == movement_obj[D_800D154C->unk222].character_type) {
         D_800D1892 ^= 1;
     }
     if (D_800D1892 != 0) {
@@ -2043,11 +2043,11 @@ void func_1507A984(void) {
             if (D_800D1893 != 0) {
                 D_800D154C->unk101 |= 0x40;
             }
-            D_800D154C->unk65 = (linked - movement_obj) + 1;
-            D_800D154C->unk5C = D_800D1891;
+            D_800D154C->attach_char = (linked - movement_obj) + 1;
+            D_800D154C->basemtx = D_800D1891;
         }
     } else {
-        D_800D154C->unk65 = 0;
+        D_800D154C->attach_char = 0;
     }
 }
 
@@ -2060,38 +2060,38 @@ void func_1507AA48(void) {
     value = (D_800D1890 << 8) | D_800D1891;
     switch (D_800D1892) {
     case 0:
-        D_800D154C->unk78 = D_800D154C->unk76 + value;
+        D_800D154C->fangle = D_800D154C->angle + value;
         break;
     case 1:
-        D_800D154C->unk78 = D_800D154C->unk76 - value;
+        D_800D154C->fangle = D_800D154C->angle - value;
         break;
     case 2:
-        D_800D154C->unk78 = value;
+        D_800D154C->fangle = value;
         break;
     case 3:
         // matching: the do-while wrapper changes how IDO schedules case 4 below
         do {
-            D_800D154C->unk76 = D_800D154C->unk78;
-            D_800D154C->unk7A = D_800D154C->unk78;
+            D_800D154C->angle = D_800D154C->fangle;
+            D_800D154C->langle = D_800D154C->fangle;
         } while (0);
         break;
     case 4:
         // direction from waypoint arg0 to waypoint arg1, plus arg3 / 256 turns
-        path = D_800D2104[D_800D154C->unk13F];
+        path = D_800D2104[D_800D154C->listpos];
         angle = (u16)(func_150484A0(path[D_800D1891 + 1].x - path[D_800D1890 + 1].x, path[D_800D1891 + 1].z - path[D_800D1890 + 1].z) * 10430.37793f) + (D_800D1893 << 8);
-        D_800D154C->unk78 = angle + 0x4000;
+        D_800D154C->fangle = angle + 0x4000;
         break;
     case 5:
-        D_800D154C->unk78 = func_150ADA20();
+        D_800D154C->fangle = func_150ADA20();
         break;
     case 6:
-        D_800D154C->unk78 = D_800D154C->unk76;
+        D_800D154C->fangle = D_800D154C->angle;
         break;
     case 7:
-        D_800D154C->unk76 = movement_obj[D_800D154C->unk222].unk7A + value;
+        D_800D154C->angle = movement_obj[D_800D154C->unk222].langle + value;
         break;
     case 8:
-        D_800D154C->unk76 = D_800D154C->unk7A;
+        D_800D154C->angle = D_800D154C->langle;
         break;
     }
 }
@@ -2114,23 +2114,23 @@ void func_1507AD30(void) {
 }
 
 void func_1507AD60(void) {
-    D_800D154C->unk1E4 = D_800D1890;
+    D_800D154C->family = D_800D1890;
 }
 
 void func_1507AD7C(void) {
-    D_800D154C->unkF4 |= func_1507A3E8();
+    D_800D154C->mvmt_control |= func_1507A3E8();
 }
 
 void func_1507ADAC(void) {
-    D_800D154C->unkF4 &= ~func_1507A3E8();
+    D_800D154C->mvmt_control &= ~func_1507A3E8();
 }
 
 /* Splits (angle between unk78 and the facing unk7A) / arg0 into unk1E6 (high byte) and unk1E8 (low byte). */
 void func_1507ADE0(void) {
     s32 diff;
     s32 step;
-    s32 facing = D_800D154C->unk7A;
-    s32 target = D_800D154C->unk78;
+    s32 facing = D_800D154C->langle;
+    s32 target = D_800D154C->fangle;
 
     diff = target - facing;
     if (diff < 0) {
@@ -2154,24 +2154,24 @@ void func_1507AE78(void) {
 void func_1507AE94(void) {
     D_800D154C->unkD2 = (D_800D1890 << 8) | D_800D1891;
     D_800D154C->unkD4 = (D_800D1892 << 8) | D_800D1893;
-    D_800D154C->unkD2 *= D_800D154C->xz_scale;
-    D_800D154C->unkD4 *= D_800D154C->y_scale;
+    D_800D154C->unkD2 *= D_800D154C->scale_xz;
+    D_800D154C->unkD4 *= D_800D154C->scale_y;
 }
 
 void func_1507AF3C(void) {
     D_800D154C->unkD6 = (D_800D1890 << 8) | D_800D1891;
-    D_800D154C->unkD6 *= D_800D154C->y_scale;
+    D_800D154C->unkD6 *= D_800D154C->scale_y;
 }
 
 void func_1507AF98(void) {
     D_800D154C->unkD8 = (D_800D1890 << 8) | D_800D1891;
     D_800D154C->unkDA = (D_800D1892 << 8) | D_800D1893;
-    D_800D154C->unkD8 *= D_800D154C->xz_scale;
-    D_800D154C->unkDA *= D_800D154C->xz_scale;
+    D_800D154C->unkD8 *= D_800D154C->scale_xz;
+    D_800D154C->unkDA *= D_800D154C->scale_xz;
 }
 
 void func_1507B040(void) {
-    D_800D154C->unk76 = D_800D154C->unk7A;
+    D_800D154C->angle = D_800D154C->langle;
 }
 
 /* Acts on the object returned by func_15072208: arg0 0 calls func_1506160C, 1 sets and 2 restarts script arg1. */
@@ -2188,7 +2188,7 @@ void func_1507B058(void) {
             func_1506160C(D_800D154C, 1, D_800D1891, 0, 0);
             break;
         case 1:
-            D_800D154C->unk232 = D_800D1891;
+            D_800D154C->intelwalk = D_800D1891;
             /* fallthrough */
         case 2:
             D_800D154C->unk218 = func_1507BB28(0, D_800D1891);
@@ -2200,14 +2200,14 @@ void func_1507B058(void) {
 }
 
 void func_1507B15C(void) {
-    D_800D154C->disable_jump = D_800D1890;
+    D_800D154C->nojump = D_800D1890;
 }
 
 void func_1507B178(void) {
     s16 value = (D_800D1891 << 8) | D_800D1890;
 
     if (D_800D1893 == 2) {
-        D_800D154C->bodyOffsetY = (s16)(value * D_800D154C->y_scale);
+        D_800D154C->bodyOffsetY = (s16)(value * D_800D154C->scale_y);
     } else if (D_800D1893 == 1) {
         func_15062B50(D_800D154C, value);
     } else {
@@ -2293,13 +2293,13 @@ void func_1507B52C(void) {
 }
 
 void func_1507B578(void) {
-    D_800D154C->unkD0 = D_800D1890;
+    D_800D154C->doing_hit = D_800D1890;
     D_800D154C->unk114 = D_800D1891;
 }
 
-/* Jumps to arg0 when unk31C->context_b is (arg2 == 0) or is not (arg2 == 1) arg1. */
+/* Jumps to arg0 when mv->context_b is (arg2 == 0) or is not (arg2 == 1) arg1. */
 void func_1507B5C4(void) {
-    if (D_800D154C->unk31C->context_b == D_800D1891) {
+    if (D_800D154C->mv->context_b == D_800D1891) {
         D_800D1892 ^= 1;
     }
     if (D_800D1892 != 0) {
@@ -2308,13 +2308,13 @@ void func_1507B5C4(void) {
 }
 
 void func_1507B630(void) {
-    if ((D_800D154C->disable_run == 0) && (D_800D154C->unk28 == 0.0f)) {
-        if (D_800D154C->unk31C->rt_context_b != 0) {
+    if ((D_800D154C->norun == 0) && (D_800D154C->shad == 0.0f)) {
+        if (D_800D154C->mv->rt_context_b != 0) {
             D_800D1890 ^= 1;
         }
         if (D_800D1890 != 0) {
-            D_800D154C->unk31C->unk8C |= 0x4000;
-            D_800D154C->unk31C->unk8F = 0;
+            D_800D154C->mv->unk8C |= 0x4000;
+            D_800D154C->mv->unk8F = 0;
         }
     } else {
         // repeat this command
@@ -2324,7 +2324,7 @@ void func_1507B630(void) {
 }
 
 void func_1507B6E0(void) {
-    if ((D_800D154C->disable_run != 0) || (D_800D154C->unk28 > 5.0f)) {
+    if ((D_800D154C->norun != 0) || (D_800D154C->shad > 5.0f)) {
         // repeat this command
         D_800D154C->unk218--;
         D_800D154C->unk21C = 100;
@@ -2335,11 +2335,11 @@ void func_1507B734(void) {
     u16 value = (D_800D1890 << 8) | D_800D1891;
 
     if (D_800D1893 != 0) {
-        D_800D154C->unk31C->unk8C = value;
-        D_800D154C->unk31C->unk8F = D_800D1892;
+        D_800D154C->mv->unk8C = value;
+        D_800D154C->mv->unk8F = D_800D1892;
     } else {
-        D_800D154C->unk31C->buttons = value;
-        D_800D154C->unk31C->unk8E = D_800D1892;
+        D_800D154C->mv->buttons = value;
+        D_800D154C->mv->unk8E = D_800D1892;
     }
 }
 
@@ -2352,7 +2352,7 @@ void func_1507B7BC(void) {
 void func_1507B7E8(void) {
     Actor *target = &movement_obj[D_800D154C->unk222];
 
-    if ((target->stunned != 0) || (target->health == 0)) {
+    if ((target->stunned != 0) || (target->energy == 0)) {
         D_800D1891 ^= 1;
     }
     if (D_800D1891 != 0) {
@@ -2380,7 +2380,7 @@ void func_1507B884(void) {
 
 void func_1507B8F4(void) {
     if (D_800BE616 != 0) {
-        if ((D_800D1891 != 0) || ((D_800D154C->unk31C != NULL) && (D_800D154C->unk31C->bot != 0))) {
+        if ((D_800D1891 != 0) || ((D_800D154C->mv != NULL) && (D_800D154C->mv->bot != 0))) {
             func_15075400(D_800D1890);
         }
     }
@@ -2398,10 +2398,10 @@ void func_1507B974(void) {
     Actor *obj;
 
     obj = D_800D154C;
-    if (D_800D154C->unk65 != 0) {
-        obj = &movement_obj[D_800D154C->unk65 - 1];
+    if (D_800D154C->attach_char != 0) {
+        obj = &movement_obj[D_800D154C->attach_char - 1];
     }
-    if (D_800D1891 == D_800D2104[obj->unk13F][obj->unk21E + D_800D1893].param) {
+    if (D_800D1891 == D_800D2104[obj->listpos][obj->unk21E + D_800D1893].param) {
         D_800D1892 ^= 1;
     }
     if (D_800D1892 != 0) {
@@ -2443,7 +2443,7 @@ ObjScriptCmd *func_1507BB28(s32 arg0, s32 scriptId) {
     ScriptEntry *table;
     s32 i;
 
-    typeData = D_800D1588[D_800D154C->id];
+    typeData = D_800D1588[D_800D154C->character_type];
     if (typeData == NULL) {
         return D_8009A120;
     }
@@ -2485,10 +2485,10 @@ void func_1507BC14(Actor *obj) {
             if ((obj->unk21C >= 50000) || (obj->unk21C == 0)) {
                 // expired (or wrapped below zero)
                 obj->unk21C = 0;
-                if (obj->unkF4 & 0x400) {
+                if (obj->mvmt_control & 0x400) {
                     obj->unk21C = 20000;
-                    obj->unkF4 &= ~0x400;
-                    obj->unkF4 |= 4;
+                    obj->mvmt_control &= ~0x400;
+                    obj->mvmt_control |= 4;
                 }
             } else {
                 return;
@@ -2497,7 +2497,7 @@ void func_1507BC14(Actor *obj) {
     }
 
     if (obj->unk218 == NULL) {
-        obj->unk218 = func_1507BB28(0, obj->unk232);
+        obj->unk218 = func_1507BB28(0, obj->intelwalk);
         obj->unk21C = 0;
     }
 

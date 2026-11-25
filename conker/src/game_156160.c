@@ -164,7 +164,7 @@ void func_15128CB0(Camera *cam) {
                         cam->contPad->button |= 0x10;
                         angle = cam->aim.targetYaw;
                     } else if (D_80089524[cam->playerIndex] != 0) {
-                        if ((cam->zone == 12 && cam->player->unk84.uh != 0x76) || cam->zone == 27 || (cam->contPad->button & 0x10)) {
+                        if ((cam->zone == 12 && cam->player->animseq.uh != 0x76) || cam->zone == 27 || (cam->contPad->button & 0x10)) {
                             cam->buttonsPressed |= 0x10;
                             cam->contPad->button |= 0x10;
                             cam->playerExt->SniperState = D_80089524[cam->playerIndex];
@@ -184,7 +184,7 @@ void func_15128CB0(Camera *cam) {
                     }
                     func_15126138(cam);
                     if (cam->status & 2) {
-                        angle = cam->player->unk40 - 180.0f;
+                        angle = cam->player->theta - 180.0f;
                     }
                     cam->yaw = angle;
                     cam->yawRad = angle * 0.01745329238f;
@@ -229,7 +229,7 @@ void func_15128CB0(Camera *cam) {
             data = msg->arg.data;
             cam->transition.duration = data->unk10;
             if (data->unkC == 999.0f) {
-                cam->transition.endYaw = cam->player->unk40 - 180.0f;
+                cam->transition.endYaw = cam->player->theta - 180.0f;
             } else {
                 cam->transition.endYaw = data->unkC;
             }

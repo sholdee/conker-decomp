@@ -19,8 +19,8 @@ void func_15036310(s32 unused, s32 actorIndex, s32 bone, s32 quarterTurn) {
     f32 swap;
 
     actor = &movement_obj[actorIndex];
-    if (actor->unk1D4 != NULL) {
-        mtx = actor->unk1D4[bone];
+    if (actor->ob_matrix_ptr != NULL) {
+        mtx = actor->ob_matrix_ptr[bone];
         position[0] = mtx[3][0];
         position[1] = mtx[3][1];
         position[2] = mtx[3][2];
@@ -45,18 +45,18 @@ void func_15036310(s32 unused, s32 actorIndex, s32 bone, s32 quarterTurn) {
         func_150440A0(mtx, position[0], position[1], position[2],
                       position[0] - dir[0], position[1] - dir[1], position[2] - dir[2],
                       up[0], up[1], up[2]);
-        if (actor->xz_scale != 1.0f) {
-            mtx[0][0] *= actor->xz_scale;
-            mtx[1][0] *= actor->xz_scale;
-            mtx[2][0] *= actor->xz_scale;
-            mtx[0][2] *= actor->xz_scale;
-            mtx[1][2] *= actor->xz_scale;
-            mtx[2][2] *= actor->xz_scale;
+        if (actor->scale_xz != 1.0f) {
+            mtx[0][0] *= actor->scale_xz;
+            mtx[1][0] *= actor->scale_xz;
+            mtx[2][0] *= actor->scale_xz;
+            mtx[0][2] *= actor->scale_xz;
+            mtx[1][2] *= actor->scale_xz;
+            mtx[2][2] *= actor->scale_xz;
         }
-        if (actor->y_scale != 1.0f) {
-            mtx[0][1] *= actor->y_scale;
-            mtx[1][1] *= actor->y_scale;
-            mtx[2][1] *= actor->y_scale;
+        if (actor->scale_y != 1.0f) {
+            mtx[0][1] *= actor->scale_y;
+            mtx[1][1] *= actor->scale_y;
+            mtx[2][1] *= actor->scale_y;
         }
     }
 }

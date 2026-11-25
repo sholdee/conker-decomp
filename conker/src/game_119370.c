@@ -45,14 +45,14 @@ s32 func_150EBEC0(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     if (slot >= 2) {
         return 0;
     }
-    if (actor->unk1D4 == NULL) {
+    if (actor->ob_matrix_ptr == NULL) {
         return 0;
     }
     srcs[0] = D_800A1500;
     srcs[1] = D_800A150C;
     dsts[0] = &aimStart.x;
     dsts[1] = &aimDir.x;
-    func_15145EA4(srcs, dsts, (Mtx *)actor->unk1D4 + 2, 2);
+    func_15145EA4(srcs, dsts, (Mtx *)actor->ob_matrix_ptr + 2, 2);
     aimDir.x -= aimStart.x;
     aimDir.y -= aimStart.y;
     aimDir.z -= aimStart.z;
@@ -62,7 +62,7 @@ s32 func_150EBEC0(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
 
         muzzleSrc[0] = D_800A1518[slot];
         muzzleDst[0] = &muzzle.x;
-        func_15145EA4(muzzleSrc, muzzleDst, (Mtx *)actor->unk1D4 + D_800A1548[slot], 1);
+        func_15145EA4(muzzleSrc, muzzleDst, (Mtx *)actor->ob_matrix_ptr + D_800A1548[slot], 1);
     }
     if (func_150AC9C0(aimStart.x, aimStart.y, aimStart.z, aimDir.x, aimDir.y, aimDir.z, NULL,
                       NULL, &hit.x, &hit.y, &hit.z, NULL, NULL, NULL, 0.0f)) {
@@ -113,7 +113,7 @@ s32 func_150EBEC0(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     return tracer;
 }
 
-/* Returns whether `actor` is not `self`, is active (nonzero interaction_state) and has one of the ids 0-4, 40
+/* Returns whether `actor` is not `self`, is active (nonzero type) and has one of the ids 0-4, 40
  * or 119. */
 s32 func_150EC3D4(Actor *actor, Actor *self) {
     s32 id;
@@ -121,10 +121,10 @@ s32 func_150EC3D4(Actor *actor, Actor *self) {
     if (actor == self) {
         return FALSE;
     }
-    if (actor->interaction_state == 0) {
+    if (actor->type == 0) {
         return FALSE;
     }
-    id = actor->id;
+    id = actor->character_type;
     if (id == 0xFF) {
         return FALSE;
     }

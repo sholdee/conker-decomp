@@ -184,7 +184,7 @@ void func_150ECB8C(Effect *effect) {
     FogFlashData *fog = &effect->data.fog;
     Actor *owner = fog->owner;
 
-    if ((owner->interaction_state == 0) || (owner->unique_id != fog->ownerId)) {
+    if ((owner->type == 0) || (owner->unique_id != fog->ownerId)) {
         effect->base.header.state = -1;
     } else {
         func_1502EA98(owner, fog->r, fog->g, fog->b, fog->a, FALSE, fog->rate);

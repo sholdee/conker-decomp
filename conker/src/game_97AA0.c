@@ -10,9 +10,9 @@ void func_1506A5F0(Actor *obj, s32 arg1) {
     DebrisEmitter emitter;
 
     emitter.count = 3;
-    emitter.pos.x = obj->x_position;
-    emitter.pos.y = obj->y_position;
-    emitter.pos.z = obj->z_position;
+    emitter.pos.x = obj->xpos;
+    emitter.pos.y = obj->ypos;
+    emitter.pos.z = obj->zpos;
     emitter.radius = 151.5f;
     emitter.speedBase = 15.10000038f;
     emitter.speedRange = 25.20000076f;
@@ -79,9 +79,9 @@ void func_1506A79C(Actor *obj, s32 arg1) {
     f32 pos[3];
     f32 delta[3];
 
-    pos[0] = obj->x_position;
-    pos[1] = obj->y_position;
-    pos[2] = obj->z_position;
+    pos[0] = obj->xpos;
+    pos[1] = obj->ypos;
+    pos[2] = obj->zpos;
     delta[0] = D_800D1570[0] - D_800D1560[0];
     delta[1] = D_800D1570[1] - D_800D1560[1];
     delta[2] = D_800D1570[2] - D_800D1560[2];
@@ -99,9 +99,9 @@ void func_1506A864(Actor *obj, s32 arg1) {
     f32 params[4];
     Vec3i pos;
 
-    pos.x = obj->x_position;
-    pos.y = obj->y_position + 50.0f;
-    pos.z = obj->z_position;
+    pos.x = obj->xpos;
+    pos.y = obj->ypos + 50.0f;
+    pos.z = obj->zpos;
     params[0] = 0.0f;
     params[2] = 0.0f;
     header.flags = 2;
@@ -121,9 +121,9 @@ void func_1506A968(Actor *obj, s32 arg1) {
     f32 pos[3];
     f32 delta[3];
 
-    pos[0] = obj->x_position;
-    pos[1] = obj->y_position;
-    pos[2] = obj->z_position;
+    pos[0] = obj->xpos;
+    pos[1] = obj->ypos;
+    pos[2] = obj->zpos;
     delta[0] = D_800D1570[0] - D_800D1560[0];
     delta[1] = D_800D1570[1] - D_800D1560[1];
     delta[2] = D_800D1570[2] - D_800D1560[2];
@@ -199,9 +199,9 @@ void func_1506AC58(Actor *obj, s32 arg1) {
 /* Runs movement-hit handler `type` (0..14) for obj, passing arg on to it. */
 void func_1506AC8C(Actor *obj, s32 type, s32 arg) {
     if (type >= 0 && type < 15) {
-        D_800D1560[0] = obj->old_x_position;
-        D_800D1560[1] = obj->old_y_position;
-        D_800D1560[2] = obj->old_z_position;
+        D_800D1560[0] = obj->old_xpos;
+        D_800D1560[1] = obj->old_ypos;
+        D_800D1560[2] = obj->old_zpos;
         D_800D1570[0] = D_800CC254;
         D_800D1570[1] = D_800CC258;
         D_800D1570[2] = D_800CC25C;

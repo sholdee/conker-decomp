@@ -18,9 +18,9 @@ s32 func_150B2480(s32 arg0, s32 arg1) {
 void func_150B2494(Actor *obj, s32 arg1, s32 arg2) {
     Vec3f position;
 
-    position.x = obj->x_position;
+    position.x = obj->xpos;
     position.y = obj->floorY;
-    position.z = obj->z_position;
+    position.z = obj->zpos;
     func_1514C678(position.x, position.y, position.z, 135.0f, 0, 255,
                   (func_150ADA20() % 15U) + 27, 7, 0, 0.0f, 0, 255);
     func_151D5404(&position, 1502.0f, 3000.0f, 0.00033333333f, 12, 15, 255, 0);

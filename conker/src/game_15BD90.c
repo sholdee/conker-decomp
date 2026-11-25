@@ -133,7 +133,7 @@ void func_1512E8E0(Camera *camera) {
                 camera->unk910 *= 0.25f;
                 camera->unk914 *= 0.25f;
             } else if (camera->pathFlags & 0x40) {
-                if (camera->player->xz_velocity > 30.0f) {
+                if (camera->player->speed > 30.0f) {
                     camera->unk910 *= 7.0f;
                     camera->unk914 *= 7.0f;
                 } else {
@@ -244,24 +244,24 @@ void func_1512E8E0(Camera *camera) {
                     camera->cmdRunning = 1;
                     camera->unk62C = 0.0f;
                     camera->unk5DC = 0.0f;
-                    dist = sqrtf(((camera->eye.x - obj->x_position) * (camera->eye.x - obj->x_position)) + ((camera->eye.z - obj->z_position) * (camera->eye.z - obj->z_position)));
+                    dist = sqrtf(((camera->eye.x - obj->xpos) * (camera->eye.x - obj->xpos)) + ((camera->eye.z - obj->zpos) * (camera->eye.z - obj->zpos)));
                     camera->unk618.x = -sinf(camera->yaw * 0.01745329238f) * dist + camera->focus.x;
                     camera->unk618.y = camera->focus.y;
                     camera->unk618.z = -cosf(camera->yaw * 0.01745329238f) * dist + camera->focus.z;
                     camera->unk384 = camera->yaw;
                 }
                 if (cmd->type == 14) {
-                    camera->unk618.x = movement_obj[camera->playerIndex].x_position;
-                    camera->unk618.y = movement_obj[camera->playerIndex].y_position;
-                    camera->unk618.z = movement_obj[camera->playerIndex].z_position;
+                    camera->unk618.x = movement_obj[camera->playerIndex].xpos;
+                    camera->unk618.y = movement_obj[camera->playerIndex].ypos;
+                    camera->unk618.z = movement_obj[camera->playerIndex].zpos;
                 } else if (camera->snap != 0) {
-                    camera->unk618.x = obj->x_position;
-                    camera->unk618.y = obj->y_position;
-                    camera->unk618.z = obj->z_position;
+                    camera->unk618.x = obj->xpos;
+                    camera->unk618.y = obj->ypos;
+                    camera->unk618.z = obj->zpos;
                 } else {
-                    camera->unk618.x += (obj->x_position - camera->unk618.x) * 0.03999999911f;
-                    camera->unk618.y += (obj->y_position - camera->unk618.y) * 0.03999999911f;
-                    camera->unk618.z += (obj->z_position - camera->unk618.z) * 0.03999999911f;
+                    camera->unk618.x += (obj->xpos - camera->unk618.x) * 0.03999999911f;
+                    camera->unk618.y += (obj->ypos - camera->unk618.y) * 0.03999999911f;
+                    camera->unk618.z += (obj->zpos - camera->unk618.z) * 0.03999999911f;
                 }
                 // matching: two separate tests; merging them (or dropping h) changes scheduling
                 if (cmd->unk8 != 0) {

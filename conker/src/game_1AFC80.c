@@ -31,9 +31,9 @@ void func_151827D0(void) {
         for (sample = 1; sample < 39; sample++) {
             pushes[sample] = 0;
             for (actor = 0; actor < 4; actor++) {
-                if (movement_obj[actor].interaction_state != 0) {
+                if (movement_obj[actor].type != 0) {
                     push = func_15182FDC(&movement_obj[actor], sample, chain);
-                    if (movement_obj[actor].unk84.uh == 75) {
+                    if (movement_obj[actor].animseq.uh == 75) {
                         push *= 2;
                     }
                     pushes[sample] += push;
@@ -68,12 +68,12 @@ void func_151827D0(void) {
                 D_8008D050[D_800DDE54[chain]].soundTimer = (func_150ADA20() & 0x3F) + 180;
                 if (D_800DDE54[chain] == 2 || D_800DDE54[chain] == 3) {
                     func_10010F88((func_150ADA20() & 8) + 0x507, 0x5DC0, 0, 0, 0,
-                                  movement_obj[lastActor - 1].x_position, movement_obj[lastActor - 1].y_position,
-                                  movement_obj[lastActor - 1].z_position, 300, 800);
+                                  movement_obj[lastActor - 1].xpos, movement_obj[lastActor - 1].ypos,
+                                  movement_obj[lastActor - 1].zpos, 300, 800);
                 } else {
                     func_10010F88(15, 0x5DC0, 0, 0, 0,
-                                  movement_obj[lastActor - 1].x_position, movement_obj[lastActor - 1].y_position,
-                                  movement_obj[lastActor - 1].z_position, 300, 800);
+                                  movement_obj[lastActor - 1].xpos, movement_obj[lastActor - 1].ypos,
+                                  movement_obj[lastActor - 1].zpos, 300, 800);
                 }
             } else if (!falling) {
                 // matching: the duplicated test is in the original (it emits a second lbu/beqz)
@@ -166,7 +166,7 @@ s32 func_15182FDC(Actor *actor, s32 sample, s32 chain) {
     s32 under;
     s8 push;
 
-    if (actor->unk28 > 3.0f) {
+    if (actor->shad > 3.0f) {
         return 0;
     }
 
@@ -174,14 +174,14 @@ s32 func_15182FDC(Actor *actor, s32 sample, s32 chain) {
     originX = db_Object_array[objIndex].x;
     originY = db_Object_array[objIndex].y;
     originZ = db_Object_array[objIndex].z;
-    if (actor->y_position < D_800DDE60[chain][sample].pos * 0.0625f + originY - 300.0f ||
-        D_800DDE60[chain][sample].pos * 0.0625f + originY + 300.0f < actor->y_position) {
+    if (actor->ypos < D_800DDE60[chain][sample].pos * 0.0625f + originY - 300.0f ||
+        D_800DDE60[chain][sample].pos * 0.0625f + originY + 300.0f < actor->ypos) {
         return 0;
     }
 
-    dx = actor->x_position - originX;
+    dx = actor->xpos - originX;
     dy = 0.0f;
-    dz = actor->z_position - originZ;
+    dz = actor->zpos - originZ;
     func_150A8050(mtx, 0.0f, D_8008D050[D_800DDE54[chain]].angle, 0.0f);
     func_150A7960(mtx, dx, dy, dz, &localX, &localY, &localZ);
 

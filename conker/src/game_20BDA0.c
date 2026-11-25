@@ -308,10 +308,10 @@ void func_151DF1BC(void) {
                 func_1001263C((func_150ADA20() % 3U) + 0xBE, 0x7D00, 0x40);
             }
             if (obj != NULL) {
-                obj->unk232 = anim;
+                obj->intelwalk = anim;
                 D_800D154C = obj;
                 dc_glbl_CharNum = D_800D154C - movement_obj;
-                obj->unk218 = func_1507BB28(0, obj->unk232);
+                obj->unk218 = func_1507BB28(0, obj->intelwalk);
                 obj->unk21C = 0;
                 obj->unk201 = 0x14;
             }

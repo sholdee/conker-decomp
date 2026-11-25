@@ -105,7 +105,7 @@ s32 func_151BECB8(S151BECB8 *arg0) {
                     s32 mode;
                     s32 kind; // matching: switching on arg0->unk48 directly changes the frame size
 
-                    func_15085710(obj->unk127, 3, params->unk10);
+                    func_15085710(obj->playernumber, 3, params->unk10);
                     untouched = 0;
                     func_10010F30(0x511, 0x7D00, 0x40, 0, 0);
                     func_151BF340(arg0->unkC, arg0->unk1);
@@ -136,13 +136,13 @@ s32 func_151BECB8(S151BECB8 *arg0) {
 
 /* An object counts as active when it has a player slot, an interaction state and a valid id. */
 s32 func_151BEE94(Actor *arg0) {
-    if (arg0->unk127 == 0xFF) {
+    if (arg0->playernumber == 0xFF) {
         return 0;
     }
-    if (arg0->interaction_state == 0) {
+    if (arg0->type == 0) {
         return 0;
     }
-    if (arg0->id == 0xFF) {
+    if (arg0->character_type == 0xFF) {
         return 0;
     }
     return 1;

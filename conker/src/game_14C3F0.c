@@ -81,17 +81,17 @@ void func_1511EF40(WorldObject *prop) {
     }
     if (WORK(prop)->swing.state == 1) {
         character = &movement_obj[WORK(prop)->swing.character];
-        prop->x = character->x_position;
-        prop->y = (s16)character->y_position + 100;
-        prop->z = character->z_position;
+        prop->x = character->xpos;
+        prop->y = (s16)character->ypos + 100;
+        prop->z = character->zpos;
         func_15086CBC(func_15086D48(0x28), &x, &y, &z);
-        motion->dx = (x - character->x_position) * 0.5f;
+        motion->dx = (x - character->xpos) * 0.5f;
         dx = motion->dx;
-        motion->dz = (z - character->z_position) * 0.5f;
+        motion->dz = (z - character->zpos) * 0.5f;
         angle = motion->dz; // matching: angle doubles as dz; a separate local changes the frame
-        motion->x = character->x_position + dx;
-        motion->y = character->y_position + 100.0f;
-        motion->z = character->z_position + angle;
+        motion->x = character->xpos + dx;
+        motion->y = character->ypos + 100.0f;
+        motion->z = character->zpos + angle;
         motion->radius = sqrtf(dx * dx + angle * angle);
         motion->angle = -90.0f;
         WORK(prop)->swing.state = 2;

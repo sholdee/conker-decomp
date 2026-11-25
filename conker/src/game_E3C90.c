@@ -74,7 +74,7 @@ void func_150B67E0(Camera *camera) {
         if (func_15123934(camera, camera->mode, 0, 0, 3)) {
             camera->flags |= 0x100002;
             camera->followRateTarget = 0.0f;
-            func_151254F4(camera, camera->player->unk65 - 1);
+            func_151254F4(camera, camera->player->attach_char - 1);
             camera->unk134 = 0;
         }
         camera->targetDistance = 650.0f;

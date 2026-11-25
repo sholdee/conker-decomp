@@ -595,7 +595,7 @@ void func_1501DE18(s32 scene) {
 
     // matching: the object count lives in its own register
     for (obj = movement_obj, i = 0, count = 25; i != count; i++, obj++) {
-        if (obj->interaction_state) {
+        if (obj->type) {
             dc_glbl_CharNum = i;
             if (func_150229E4(obj)) {
                 func_1502178C(obj, scene, -1);
@@ -636,7 +636,7 @@ void func_1501DF04(s32 scene) {
     }
     // matching: the fade call and the loop setup share a source line (-g3 line numbers steer scheduling)
     if (D_800C35A9 == 0 && D_800C3C8A != 1 && D_800C3C8D == 0) { func_1517EE40(0, 0, 0, 0x1E, 0, 0); } { Actor *obj = movement_obj; Actor *end = &D_800D121C; do {
-        if (obj->interaction_state != 0) {
+        if (obj->type != 0) {
             obj->fogMode = 0;
         }
         obj++;
@@ -953,10 +953,10 @@ void func_1501EA18(s32 scene) {
     }
     func_150227BC(scene);
     for (i = 0; i != 25; i++) {
-        if (movement_obj[i].interaction_state != 0 && func_150229E4(&movement_obj[i]) != 0) {
+        if (movement_obj[i].type != 0 && func_150229E4(&movement_obj[i]) != 0) {
             movement_obj[i].fogMode = 0;
-            movement_obj[i].unkB8 = 0.0f;
-            movement_obj[i].unkC4 = 0.0f;
+            movement_obj[i].vtilt = 0.0f;
+            movement_obj[i].lean_angle = 0.0f;
         }
     }
     if (D_800C35C2 == 0) {
@@ -1654,9 +1654,9 @@ void func_15020EC4(s32 scene) {
                             continue;
                         }
                         MSG.unk0 = 0;
-                        D_800C3620.x = obj->x_position;
-                        D_800C3620.y = obj->y_position + ENT(scene, track)->yOffset + (state = ELEM(scene, track))->yOffset;
-                        D_800C3620.z = obj->z_position;
+                        D_800C3620.x = obj->xpos;
+                        D_800C3620.y = obj->ypos + ENT(scene, track)->yOffset + (state = ELEM(scene, track))->yOffset;
+                        D_800C3620.z = obj->zpos;
                         MSG.unk2C = -state->unk14;
                         MSG.unk30 = tilt3C;
                         MSG.unk34 = tilt40;
@@ -1773,57 +1773,57 @@ void func_1502178C(Actor *target, s32 scene, s32 onlyTrack) {
             if (info->type == 2) {
                 obj = func_15083E90(info->targetId);
                 if (obj != NULL && obj == target) {
-                    oldPos[0] = obj->x_position;
-                    oldPos[1] = obj->y_position;
-                    oldPos[2] = obj->z_position;
-                    obj->x_position = D_800C3958[scene][track].x;
-                    obj->y_position = D_800C3958[scene][track].y + D_800C3958[scene][track].yOffset;
-                    obj->z_position = D_800C3958[scene][track].z;
-                    obj->unk1CC = obj->y_position;
+                    oldPos[0] = obj->xpos;
+                    oldPos[1] = obj->ypos;
+                    oldPos[2] = obj->zpos;
+                    obj->xpos = D_800C3958[scene][track].x;
+                    obj->ypos = D_800C3958[scene][track].y + D_800C3958[scene][track].yOffset;
+                    obj->zpos = D_800C3958[scene][track].z;
+                    obj->unk1CC = obj->ypos;
                     if (D_800C3C88 == 0) {
-                        obj->xz_velocity = (obj->x_position - oldPos[0]) * (obj->x_position - oldPos[0]) + (obj->z_position - oldPos[2]) * (obj->z_position - oldPos[2]);
-                        if (obj->xz_velocity) {
-                            obj->xz_velocity = sqrtf(obj->xz_velocity) * 2.0f;
+                        obj->speed = (obj->xpos - oldPos[0]) * (obj->xpos - oldPos[0]) + (obj->zpos - oldPos[2]) * (obj->zpos - oldPos[2]);
+                        if (obj->speed) {
+                            obj->speed = sqrtf(obj->speed) * 2.0f;
                         }
                     } else {
-                        obj->xz_velocity = 0.0f;
+                        obj->speed = 0.0f;
                     }
-                    if (obj->unk31C != NULL) {
-                        obj->unk31C->actual_speed = obj->xz_velocity * 2.0f;
+                    if (obj->mv != NULL) {
+                        obj->mv->actual_speed = obj->speed * 2.0f;
                     }
                     obj->unk54 = 0.0f;
                     obj->unkCC = 0;
                     rescaled = 0;
                     D_800D35DC = (target - movement_obj) + 1;
                     func_1510E7A4(&obj->unk188, obj->floorTri.v, &floorY, &obj->unk118, &obj->unk184, &obj->floorType,
-                                  obj->x_position, obj->y_position, obj->z_position, obj->y_position, 0, obj,
-                                  -10000.0f, target->y_position);
+                                  obj->xpos, obj->ypos, obj->zpos, obj->ypos, 0, obj,
+                                  -10000.0f, target->ypos);
                     ((u8 *)&D_800D35E0)[-4] = 0;
                     obj->floorY = floorY;
-                    obj->unkD0 = 0;
-                    obj->unk28 = obj->y_position - obj->floorY;
-                    if (obj->interaction_state == 1) {
-                        if (obj->unk118 != -10000.0f && obj->y_position < obj->unk118) {
-                            obj->in_water = 1;
+                    obj->doing_hit = 0;
+                    obj->shad = obj->ypos - obj->floorY;
+                    if (obj->type == 1) {
+                        if (obj->unk118 != -10000.0f && obj->ypos < obj->unk118) {
+                            obj->inwater = 1;
                         } else {
-                            obj->in_water = 0;
+                            obj->inwater = 0;
                             obj->unkB2 = 0;
                         }
                     }
                     if (D_800C3958[scene][track].unk18 != -9999.0f) {
                         rescaled = 1;
-                        obj->xz_scale = D_800C3958[scene][track].unk18 * 0.009999999776f;
+                        obj->scale_xz = D_800C3958[scene][track].unk18 * 0.009999999776f;
                         obj->unk154 = D_800C3958[scene][track].unk18 * 0.009999999776f;
                     }
                     if (D_800C3958[scene][track].unk1C != -9999.0f) {
                         rescaled = 1;
-                        obj->y_scale = D_800C3958[scene][track].unk1C * 0.009999999776f;
+                        obj->scale_y = D_800C3958[scene][track].unk1C * 0.009999999776f;
                         obj->unk158 = D_800C3958[scene][track].unk1C * 0.009999999776f;
                     }
                     if (rescaled) {
-                        func_15062BDC(obj, obj->xz_scale, obj->y_scale);
+                        func_15062BDC(obj, obj->scale_xz, obj->scale_y);
                     }
-                    obj->unkB8 = D_800C3958[scene][track].unkC;
+                    obj->vtilt = D_800C3958[scene][track].unkC;
                     angle = D_800C3958[scene][track].unk10 + 180.0f;
                     while (angle >= 360.0f) {
                         angle -= 360.0f;
@@ -1831,14 +1831,14 @@ void func_1502178C(Actor *target, s32 scene, s32 onlyTrack) {
                     while (angle < 0.0f) {
                         angle += 360.0f;
                     }
-                    obj->unk76 = obj->unk7A = obj->unk78 = (s16)((u32)(angle * 182.0444489f) - 0x4000);
-                    obj->unk40 = angle;
-                    obj->unkC4 = D_800C3958[scene][track].unk14;
+                    obj->angle = obj->langle = obj->fangle = (s16)((u32)(angle * 182.0444489f) - 0x4000);
+                    obj->theta = angle;
+                    obj->lean_angle = D_800C3958[scene][track].unk14;
                     D_800C3958[scene][track].unk34 = (D_800C3958[scene][track].unk34 < 0.0f) ? 0.0f : (D_800C3958[scene][track].unk34 > 255.0f) ? 255.0f : D_800C3958[scene][track].unk34;
                     func_1506160C(obj, 1, D_800C3958[scene][track].unk34, 0, 0);
-                    obj->old_x_position = obj->x_position;
-                    obj->old_y_position = obj->y_position;
-                    obj->old_z_position = obj->z_position;
+                    obj->old_xpos = obj->xpos;
+                    obj->old_ypos = obj->ypos;
+                    obj->old_zpos = obj->zpos;
                 }
             }
         }
@@ -2028,15 +2028,15 @@ void func_15022398(s32 track, s32 scene) {
             if (slot != -1) {
                 obj = func_1505EEF4(slot);
                 if (obj != NULL) {
-                    if (obj->unk5 == 3) {
+                    if (obj->drawtype == 3) {
                         if (D_800C35F0 != &D_800C35F0[scene]) {
-                            obj->unk5 = 4;
+                            obj->drawtype = 4;
                         } else {
-                            obj->unk5 = 0;
+                            obj->drawtype = 0;
                         }
                     }
                     if (id == 1) {
-                        obj->unkF4 &= -0x2B;
+                        obj->mvmt_control &= -0x2B;
                     }
                 } else {
                     if (slot < D_800D2100) {
@@ -2167,7 +2167,7 @@ void func_150228E4(s32 scene) {
     count = *countPtr;
     for (i = 0; i < count; i++) {
         obj = &movement_obj[D_800C3518[scene][i]];
-        if (obj->interaction_state != 0) {
+        if (obj->type != 0) {
             func_15060F28(obj, 0);
             count = *countPtr;
         }
@@ -2195,16 +2195,16 @@ s32 func_150229E4(Actor *obj) {
     if (obj == NULL) {
         return 0;
     }
-    if (obj->interaction_state == 0) {
+    if (obj->type == 0) {
         return 0;
     }
     if (D_800C35C8[scene] == NULL) {
         return 0;
     }
-    if (obj->unk5 == 4) {
+    if (obj->drawtype == 4) {
         scene = 1;
     }
-    parent = obj->unk65;
+    parent = obj->attach_char;
     if (parent != 0) {
         id = movement_obj[parent - 1].unique_id;
     } else {
@@ -2270,9 +2270,9 @@ void func_15022BA4(s32 scene) {
                 if (obj == NULL) {
                     return;
                 }
-                x = obj->x_position;
-                y = obj->y_position;
-                z = obj->z_position;
+                x = obj->xpos;
+                y = obj->ypos;
+                z = obj->zpos;
             } else if (D_800C35F0[scene][track].targetId == 1) {
                 WorldObject *obj;
                 // matching: the s8 id goes through the pointer variable before the call
@@ -2487,46 +2487,46 @@ s32 func_150235DC(s32 scene) {
     ActorCtl *ctl;
     s8 zero;
 
-    movement_obj[0].unk25C &= ~0x200;
+    movement_obj[0].task_attrib &= ~0x200;
     if (D_800C35AA == 0) {
         obj = func_15083E90(1);
         if (obj != NULL) {
             dc_glbl_CharNum = obj - movement_obj;
-            ctl = obj->unk31C;
-            obj->xz_velocity = 0.0f;
+            ctl = obj->mv;
+            obj->speed = 0.0f;
             if (ctl != NULL) {
                 ctl->actual_speed = 0.0f;
             }
             obj->unk54 = 0.0f;
             obj->unkCC = 0;
-            obj->unkD0 = 0;
+            obj->doing_hit = 0;
 
-            if ((-10000.0f != obj->unk118) && (obj->y_position < obj->unk118)) {
-                obj->in_water = 1;
-                obj->y_velocity = 0.0f;
-                obj->gravity = 0.0f;
-                if (((obj->unk118 - 50.0f) < obj->aim.y) || ((obj->unk31C->water_attribs & 1) != 0)) {
+            if ((-10000.0f != obj->unk118) && (obj->ypos < obj->unk118)) {
+                obj->inwater = 1;
+                obj->yspd = 0.0f;
+                obj->ygrav = 0.0f;
+                if (((obj->unk118 - 50.0f) < obj->aim.y) || ((obj->mv->water_attribs & 1) != 0)) {
                     obj->unkB2 = 0;
                     func_1508F060();
                 }
             } else {
-                obj->in_water = 0;
+                obj->inwater = 0;
                 obj->unkB2 = 0;
-                obj->y_velocity = -4.0f;
-                obj->y_position = obj->floorY;
+                obj->yspd = -4.0f;
+                obj->ypos = obj->floorY;
                 obj->unk1CC = obj->floorY;
-                obj->gravity = 5.0f;
+                obj->ygrav = 5.0f;
             }
 
-            obj->unk81 = 0;
-            obj->unk83 = 0;
-            obj->disable_run = 0;
-            obj->disable_jump = 0;
+            obj->count3 = 0;
+            obj->count5 = 0;
+            obj->norun = 0;
+            obj->nojump = 0;
             obj->stunned = 0;
-            obj->unk28 = obj->y_position - obj->floorY;
+            obj->shad = obj->ypos - obj->floorY;
             D_800D154C = obj;
             func_1507F640();
-            obj->unk31C->door_walkf_time = 0;
+            obj->mv->door_walkf_time = 0;
             obj->unk287 = 0;
             zero = obj->unk287;
             obj->unk276 = 0;
@@ -2564,7 +2564,7 @@ void func_1502378C(void) {
     // matching: 1 and 25 live in registers; the no-op `^ 0` and `& 0xFFFFFFFF` and the empty
     // do-while steer IDO's scheduling of them
     for (one = 1, limit = 25; i != (limit ^ 0); obj++) {
-        if (obj->interaction_state != 0) {
+        if (obj->type != 0) {
             dc_glbl_CharNum = i;
             func_15022998((s32 *)obj);
             func_1507E73C(obj);

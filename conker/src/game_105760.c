@@ -27,7 +27,7 @@ s32 func_150D82BC(ModelAttachment *att, Actor *actor) {
         return 0;
     }
     att->seg6Id = D_80090298[6];
-    if (actor->unk84.uh == 13) {
+    if (actor->animseq.uh == 13) {
         if (23.0f <= anim->frame && anim->frame <= 40.0f) {
             att->seg6Id = D_80090298[7];
             t = anim->frame - 23.0f;
@@ -59,7 +59,7 @@ s32 func_150D83D8(ModelAttachment *att, Actor *actor) {
         case 0:
             att->unk3C = 50;
             att->seg6Id = D_80090298[27];
-            if (actor->unk84.uh == 0x18D && 46.0f <= actor->unk2D0->frame) {
+            if (actor->animseq.uh == 0x18D && 46.0f <= actor->unk2D0->frame) {
                 att->unk38 = 1;
                 att->seg6Id = D_80090298[28];
             }
@@ -72,7 +72,7 @@ s32 func_150D83D8(ModelAttachment *att, Actor *actor) {
             }
             break;
         case 2:
-            if (actor->unk84.uh == 0x18E && 34.0f <= actor->unk2D0->frame) {
+            if (actor->animseq.uh == 0x18E && 34.0f <= actor->unk2D0->frame) {
                 att->unk38 = 3;
             }
             break;
@@ -110,9 +110,9 @@ void func_15153634(SpriteBurst *, u8, u8, s32);
 void func_150D85AC(Actor *actor) {
     Vec3f pos;
 
-    pos.x = actor->x_position;
+    pos.x = actor->xpos;
     pos.y = actor->floorY;
-    pos.z = actor->z_position;
+    pos.z = actor->zpos;
     {
         Vec3f probe;
         CollisionHit ground;
@@ -235,7 +235,7 @@ s32 func_150D88E0(Vec3f *out, Actor *actor, u8 point) {
             break;
     }
     y = 0.0f;
-    func_150A7960(actor->unk1D4[bone], x, y, z, &x, &y, &z);
+    func_150A7960(actor->ob_matrix_ptr[bone], x, y, z, &x, &y, &z);
     out->x = x;
     out->y = y;
     out->z = z;
@@ -253,7 +253,7 @@ void func_15165F80(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_150D8A34(Actor *actor, s32 point, s32 arg2) {
     Vec3f pos;
 
-    if (actor->unk1D4 != NULL) {
+    if (actor->ob_matrix_ptr != NULL) {
         func_150D88E0(&pos, actor, point);
         func_151875E0(pos.x, pos.y, pos.z, 30, 15, 7, 0.1000000015f, 0.02999999933f);
         func_15165F80(-1, pos.x, actor->floorY + 4.0f, pos.z, 4, 50, 0, 255, 0);

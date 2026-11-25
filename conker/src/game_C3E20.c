@@ -73,7 +73,7 @@ s32 func_15096A68(s32 slot) {
         func_1512D560(actor, 7, &D_800C3600);
         if (!(D_800D2DC0[slot].flags & 1)) {
             actor->player->unk7 = 0;
-            actor->player->unk25C |= 0x200;
+            actor->player->task_attrib |= 0x200;
         }
         D_800D2E30[slot] = D_800D2DC0[slot].scale;
         D_800D2DC0[slot].state = 2;
@@ -84,7 +84,7 @@ s32 func_15096A68(s32 slot) {
 
         actor = &camera_global_Cameras[D_800D2DC0[slot].actor];
         D_800D2DC0[slot].timer -= D_800BE9A0;
-        if (actor->player->health == 0) {
+        if (actor->player->energy == 0) {
             D_800D2DC0[slot].timer = 0;
         }
         if (D_800D2DC0[slot].timer <= 0) {
@@ -94,7 +94,7 @@ s32 func_15096A68(s32 slot) {
             }
             D_800D2DB4 = 0;
             if (!(D_800D2DC0[slot].flags & 1)) {
-                actor->player->unk25C &= ~0x200;
+                actor->player->task_attrib &= ~0x200;
                 actor->player->unk7 = 0xFF;
             }
             D_800D2DC0[slot].timer = 0;
@@ -204,13 +204,13 @@ s32 func_15096D78(s32 actorIndex, s32 command, s32 *args) {
         D_800C365C[0] = 0;
         func_1512D560(actor, 5, NULL);
         func_1512D560(actor, 7, &D_800C3600);
-        movement_obj[0].unk25C |= 0x200;
+        movement_obj[0].task_attrib |= 0x200;
     }
         break;
     case 11:
         func_1512D560(actor, 6, NULL);
         D_800D2DB4 = 0;
-        movement_obj[0].unk25C &= ~0x200;
+        movement_obj[0].task_attrib &= ~0x200;
         break;
     case 14:
         actor->focus.x = args[2];
@@ -363,7 +363,7 @@ s32 func_1509759C(s32 actorIndex, s32 query, s32 *args) {
         facing.x = sinf(angle);
         facing.y = 0.0f;
         facing.z = cosf(angle);
-        func_15048F90(&actor->eye, (Vec3f *)&target->x_position, &toTarget);
+        func_15048F90(&actor->eye, (Vec3f *)&target->xpos, &toTarget);
         toTarget.y = 0.0f;
         if (func_150AD900((f32 *)&facing, (f32 *)&toTarget) >= 0.0f) {
             side = -1;

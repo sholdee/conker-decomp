@@ -68,8 +68,8 @@ void func_150DAE70(Actor *owner, s32 type, u8 arg2, s32 arg3) {
     f32 invDist;
     Effect *effect;
 
-    if (owner != NULL && owner->unk1D4 != NULL) {
-        mtx = &owner->unk1D4[D_80088928[type]];
+    if (owner != NULL && owner->ob_matrix_ptr != NULL) {
+        mtx = &owner->ob_matrix_ptr[D_80088928[type]];
         func_15143134(&D_80088910[type], &from, mtx);
         func_15143134(&D_8008891C[type], &to, mtx);
         vel.x = D_8008892C[type] * (to.x - from.x);

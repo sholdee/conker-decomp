@@ -31,11 +31,11 @@ void func_150FE860(Actor *actor, u8 arg1, s32 arg2) {
 
     func_151D5148(actor);
     func_15145740(actor, &direction, &axis0, &axis1, 0.8110000491f);
-    if (actor->unk1D4 != NULL) {
+    if (actor->ob_matrix_ptr != NULL) {
         Vec3f *sources[3];
         Vec3f *destinations[3];
 
-        mtx = actor->unk1D4[D_80088BA0];
+        mtx = actor->ob_matrix_ptr[D_80088BA0];
         sources[0] = &D_800A2000;
         sources[1] = &D_800A2018;
         sources[2] = &D_800A2024;
@@ -61,15 +61,15 @@ void func_150FE860(Actor *actor, u8 arg1, s32 arg2) {
             sideZ = 1.0f;
             sideX = 0.0f;
         }
-        position.x = actor->x_position + 34.0f * sideX;
-        position.y = actor->y_position + 49.0f;
-        position.z = actor->z_position + 34.0f * sideZ;
+        position.x = actor->xpos + 34.0f * sideX;
+        position.y = actor->ypos + 49.0f;
+        position.z = actor->zpos + 34.0f * sideZ;
     }
     func_151C229C(&position, &direction, 0, 0, 0, 0, 300.0f, 0.003333333414f,
                   func_150ADA68() * 10.0f + 25.0f, func_150ADA68() * 200.0f + 400.0f, 50.0f,
                   (func_150ADA20() % 156U) + 100, actor, 1, 1, 0, 0, 1, 1, 0, 0x35, 0.0f, 0xFF, -1, 0,
                   arg1, arg2);
-    if (actor->unk1D4 != NULL && (actor->unk74 & 0xF) != 0xF) {
+    if (actor->ob_matrix_ptr != NULL && (actor->unk74 & 0xF) != 0xF) {
         func_151D3F14(&position, arg1, arg2);
         func_151D4408(&origin, &delta, mtx, actor, 1.0f, arg1, arg2);
         if (func_150ADA20() & 1) {
@@ -84,7 +84,7 @@ void func_150FEBC8(Actor *actor, s32 arg1, Vec3f *out) {
     Vec3f *src;
     Vec3f *dst;
 
-    mtx = actor->unk1D4[D_80088BA0];
+    mtx = actor->ob_matrix_ptr[D_80088BA0];
     src = &D_800A2000;
     dst = out;
     func_15145EA4(&src, &dst, mtx, 1);

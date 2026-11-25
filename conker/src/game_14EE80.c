@@ -20,15 +20,15 @@ void func_151219D0(Camera *camera) {
     maxX = -10000.0f;
     sumY = 0.0f;
     for (i = 0; i < D_8008FD8C; i++) {
-        x = movement_obj[i].x_position;
+        x = movement_obj[i].xpos;
         if (x < minX) {
             minX = x;
         }
         if (maxX < x) {
             maxX = x;
         }
-        z = movement_obj[i].z_position;
-        sumY += movement_obj[i].y_position;
+        z = movement_obj[i].zpos;
+        sumY += movement_obj[i].ypos;
         if (z < minZ) {
             minZ = z;
         }
@@ -43,11 +43,11 @@ void func_151219D0(Camera *camera) {
     midZ = (minZ + maxZ) * 0.5f;
     camera->target.z = midZ;
     for (i = 0; i < D_8008FD8C; i++) {
-        dx = (movement_obj[i].x_position - maxX) * 0.5f;
+        dx = (movement_obj[i].xpos - maxX) * 0.5f;
         if (dx < 0.0f) {
             dx = 0.0f;
         }
-        dz = movement_obj[i].z_position - midZ;
+        dz = movement_obj[i].zpos - midZ;
         if (dz < 0.0f) {
             dz = -dz;
         }

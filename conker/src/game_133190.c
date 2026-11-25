@@ -664,7 +664,7 @@ BoltObj *func_15107700(Actor *actor, s16 yaw, s16 pitch, s16 life, s32 segments,
     RayHit hit;
     Vec3f center;
     s32 countsDown;
-    if (actor->unk1D4 == NULL) {
+    if (actor->ob_matrix_ptr == NULL) {
         return NULL;
     }
 
@@ -727,7 +727,7 @@ s32 func_15107924(BoltObj *bolt, u8 *moved) {
 
     anchor = bolt->userData;
     owner = anchor->owner;
-    if ((owner->interaction_state == 0) || (owner->unique_id != anchor->ownerId)) {
+    if ((owner->type == 0) || (owner->unique_id != anchor->ownerId)) {
         return 0;
     }
     *moved = FALSE;
@@ -785,7 +785,7 @@ void func_15107B78(Actor *actor, s32 yaw, s32 pitch, s32 arg3, s32 arg4) {
     f32 radius;
     f32 unused;
 
-    if (actor->unk1D4 != NULL) {
+    if (actor->ob_matrix_ptr != NULL) {
         func_1515C244(actor, &center, &radius, &unused);
         func_15143794((s16)yaw, (s16)pitch, radius, &pos);
         pos.y *= actor->unkF0;
@@ -807,7 +807,7 @@ BoltObj *func_15107C1C(Actor *actor, u8 bone, Vec3f *localPos, s16 yaw, s16 pitc
     RayHit hit;
     Vec3f dir;
     s32 countsDown;
-    if (actor->unk1D4 == NULL) {
+    if (actor->ob_matrix_ptr == NULL) {
         return NULL;
     }
 
@@ -864,10 +864,10 @@ s32 func_15107E48(BoltObj *bolt, u8 *moved) {
 
     anchor = bolt->userData;
     owner = anchor->owner;
-    if ((owner->interaction_state == 0) || (owner->unique_id != anchor->ownerId)) {
+    if ((owner->type == 0) || (owner->unique_id != anchor->ownerId)) {
         return 0;
     }
-    if (owner->unk1D4 == NULL) {
+    if (owner->ob_matrix_ptr == NULL) {
         return 0;
     }
     *moved = FALSE;
@@ -882,9 +882,9 @@ s32 func_15107E48(BoltObj *bolt, u8 *moved) {
 
 void func_15143134(Vec3f *in, Vec3f *out, s32 mtx);
 
-/* Transforms localPos by the actor's bone matrix (64 bytes each, at unk1D4). */
+/* Transforms localPos by the actor's bone matrix (64 bytes each, at ob_matrix_ptr). */
 void func_15107F54(Actor *actor, u8 bone, Vec3f *localPos, Vec3f *out) {
-    func_15143134(localPos, out, (s32)actor->unk1D4 + (bone << 6));
+    func_15143134(localPos, out, (s32)actor->ob_matrix_ptr + (bone << 6));
 }
 
 /* D_80088C28 handler for kind 3. */

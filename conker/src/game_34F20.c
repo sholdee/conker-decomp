@@ -263,7 +263,7 @@ void func_15007B3C(void) {
     func_15017640();
     func_1501CC3C();
     for (i = 0; i < 25; i++) {
-        if ((movement_obj[i].interaction_state != 0) && (movement_obj[i].unk127 != 0xFF)) {
+        if ((movement_obj[i].type != 0) && (movement_obj[i].playernumber != 0xFF)) {
             func_150A11C4(&movement_obj[i]);
         }
     }

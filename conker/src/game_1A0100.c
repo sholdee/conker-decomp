@@ -41,8 +41,8 @@ void func_15172CA8(s32 player) {
 void func_15172D28(Actor *actor, s32 spawnIndex) {
     func_15085430(actor, spawnIndex, 1);
     actor->unk2F8 &= ~0x10;
-    if (D_800BE9B4 == 0 && actor->unk31C != NULL) {
-        actor->unk31C->unk56 = 3;
+    if (D_800BE9B4 == 0 && actor->mv != NULL) {
+        actor->mv->unk56 = 3;
     }
 }
 
@@ -52,7 +52,7 @@ void func_15172D80(s32 player) {
     if (D_800DD2B0[player] == -1) {
         return;
     }
-    if (movement_obj[player].health == 0) {
+    if (movement_obj[player].energy == 0) {
         D_800DD2B0[player] = -1;
         func_1517EE40(0, 0, 0, 50, 0, player);
     }
@@ -72,10 +72,10 @@ void func_15172D80(s32 player) {
  * respawned at once when `level` is the current one.
  */
 void func_15172E7C(Actor *actor, s32 level, s32 spawnIndex) {
-    s32 player = actor->unk127;
+    s32 player = actor->playernumber;
 
-    if (actor->health != 0 && (actor->unk31C == NULL || actor->unk31C->door_walkf_time <= 0)) {
-        if (actor->camera != NULL) {
+    if (actor->energy != 0 && (actor->mv == NULL || actor->mv->door_walkf_time <= 0)) {
+        if (actor->CameraPtr != NULL) {
             if (D_800DD2B0[player] == -1) {
                 func_1517EE40(0, 0, 0, 10, 1, player);
                 actor->unk2F8 |= 0x10;

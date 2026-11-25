@@ -26,11 +26,11 @@ extern Game1DD500Profile D_800A3FD8[];
 extern Vec3f D_800AA120;
 
 /* Joint matrix of an actor, as an Mtx. */
-#define JOINT_MTX(actor, joint) (&((Mtx *)(actor)->unk1D4)[joint])
+#define JOINT_MTX(actor, joint) (&((Mtx *)(actor)->ob_matrix_ptr)[joint])
 
 /* Effect profile index for an actor; actor types 0x53 and 0xA5 (and no actor) use profile 4. */
 #define EFFECT_PROFILE(actor) \
-    ((actor) != NULL ? (((actor)->id == 0x53 || (actor)->id == 0xA5) ? 4 : func_15134070(actor)) : 4)
+    ((actor) != NULL ? (((actor)->character_type == 0x53 || (actor)->character_type == 0xA5) ? 4 : func_15134070(actor)) : 4)
 
 /* Spawns one randomized particle at (x, y, z) launched in direction (yaw, pitch). */
 s32 func_151B0050(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7,
@@ -58,12 +58,12 @@ void func_151B01B8(Actor *actor, Actor *other) {
     CollisionHit ground;
     s32 profile;
 
-    if (actor != NULL && actor->unk1D4 != NULL && (actor->unk74 & 0xF) != 0xF) {
+    if (actor != NULL && actor->ob_matrix_ptr != NULL && (actor->unk74 & 0xF) != 0xF) {
         func_1504715C(&ground, actor);
         profile = EFFECT_PROFILE(other);
         if (profile != 99) {
             if (D_800A3FD8[profile].unkE != 2) {
-                shade = (actor->unk7A >> 8) + 0x40;
+                shade = (actor->langle >> 8) + 0x40;
                 func_15143134(&D_800AA120, &impact.spray.pos, JOINT_MTX(actor, 6));
                 impact.spray.countBase = 10;
                 impact.spray.countRange = 20;
@@ -117,9 +117,9 @@ void func_151B03B8(Actor *actor, u8 arg1, s32 arg2) {
 
     if (actor != NULL) {
         func_1504715C(&ground, actor);
-        impact.spray.pos.x = actor->x_position;
-        impact.spray.pos.y = actor->y_position;
-        impact.spray.pos.z = actor->z_position;
+        impact.spray.pos.x = actor->xpos;
+        impact.spray.pos.y = actor->ypos;
+        impact.spray.pos.z = actor->zpos;
         impact.spray.scaleBase = 5.08f;
         impact.spray.countBase = 10;
         impact.angles.yawRange = 0xFF;
@@ -151,16 +151,16 @@ void func_151B03B8(Actor *actor, u8 arg1, s32 arg2) {
         scatterGround.source = 0;
         scatterGround.surface = 0;
         scatterGround.height = -10000.0f;
-        probe[1] = actor->y_position + 100.0f;
+        probe[1] = actor->ypos + 100.0f;
         if (count != 0) {
             // matching: a do/while (--count != 0) loop schedules differently from this break form
             for (;;) {
                 func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * 100.0f + 110.0f, &spot[0], &spot[2]);
-                spot[0] += actor->x_position;
-                spot[2] += actor->z_position;
+                spot[0] += actor->xpos;
+                spot[2] += actor->zpos;
                 probe[0] = spot[0];
                 probe[2] = spot[2];
-                if (!func_15046C80(probe, 0, actor->y_position - 500.0f, &scatterGround) || scatterGround.source == 3) {
+                if (!func_15046C80(probe, 0, actor->ypos - 500.0f, &scatterGround) || scatterGround.source == 3) {
                     return;
                 }
                 spot[1] = scatterGround.height;
@@ -179,9 +179,9 @@ void func_151B03B8(Actor *actor, u8 arg1, s32 arg2) {
             }
         }
 
-        center[0] = actor->x_position;
-        center[1] = actor->y_position;
-        center[2] = actor->z_position;
+        center[0] = actor->xpos;
+        center[1] = actor->ypos;
+        center[2] = actor->zpos;
         centerGround.surface = 0;
         centerGround.source = 0;
         centerGround.flags = 0;
@@ -341,7 +341,7 @@ void func_151B0B88(Game1DD500Task *task) {
     u8 failed; // matching: ending the task directly in the check reorders the whole function
 
     failed = FALSE;
-    if (emitter->owner->interaction_state == 0 || emitter->owner->unique_id != emitter->ownerId) {
+    if (emitter->owner->type == 0 || emitter->owner->unique_id != emitter->ownerId) {
         failed = TRUE;
     }
     if (!failed) {
@@ -350,7 +350,7 @@ void func_151B0B88(Game1DD500Task *task) {
         s32 i;
         u32 freeCount;
 
-        if (emitter->owner->unk1D4 != NULL && (emitter->owner->unk74 & 0xF) != 0xF) {
+        if (emitter->owner->ob_matrix_ptr != NULL && (emitter->owner->unk74 & 0xF) != 0xF) {
             head = NULL;
             last = NULL;
             freeCount = 0;
@@ -360,9 +360,9 @@ void func_151B0B88(Game1DD500Task *task) {
 
                 if (slot->particle != NULL) {
                     slot->particle->previous = slot->particle->position;
-                    func_15143134(emitter->owner->id == 0x36 ? &D_800AA1DC[i].offset : &D_800AA12C[i].offset,
+                    func_15143134(emitter->owner->character_type == 0x36 ? &D_800AA1DC[i].offset : &D_800AA12C[i].offset,
                                   &slot->particle->position,
-                                  emitter->owner->id == 0x36 ? JOINT_MTX(emitter->owner, D_800AA1DC[i].joint)
+                                  emitter->owner->character_type == 0x36 ? JOINT_MTX(emitter->owner, D_800AA1DC[i].joint)
                                                              : JOINT_MTX(emitter->owner, D_800AA12C[i].joint));
                     slot->timer -= D_800BE9E4;
                     if (slot->timer < 0) {

@@ -229,7 +229,7 @@ void func_15123070(Camera *camera) {
         func_15048F90(&camera->unk618, &camera->focus, &delta);
         camera->unk390 = camera->yaw - func_15048FC8(&delta);
     } else {
-        angle = camera->player->unk40 - camera->yaw - 180.0f;
+        angle = camera->player->theta - camera->yaw - 180.0f;
 
         while (angle < 0.0f) {
             angle += 360.0f;
@@ -258,14 +258,14 @@ void func_1512317C(Camera *camera) {
 
     blocked = ((camera->mode & 0x80) != 0) ||
               ((camera->flags & 0x1000000) != 0) ||
-              ((camera->player->unk28 != 0.0f) && (camera->player->in_water == 0) &&
+              ((camera->player->shad != 0.0f) && (camera->player->inwater == 0) &&
                (camera->playerExt->ropePtr == NULL) && (status100 == 0) && (status200 == 0) &&
                (camera->zone != 3)) ||
-              ((camera->player->unk65 != 0) && (status100 == 0) && (status200 == 0)) ||
+              ((camera->player->attach_char != 0) && (status100 == 0) && (status200 == 0)) ||
               (stunned != 0) ||
               (func_15125490(camera) != 0) ||
-              (camera->player->health == 0) ||
-              (((camera->playerExt->transport & 0xF) == 1) && (camera->player->xz_velocity > 15.0f)) ||
+              (camera->player->energy == 0) ||
+              (((camera->playerExt->transport & 0xF) == 1) && (camera->player->speed > 15.0f)) ||
               (camera->playerExt->on_fire != 0);
 
     if ((camera->contPad->button & R_TRIG) && !blocked) {
@@ -335,7 +335,7 @@ void func_15123568(Camera *camera) {
         }
     } else if ((camera->flags & 4) && (camera->buttonsPressed & U_CBUTTONS) && (camera->unkDC != 4) &&
                ((camera->cmdRunning == 0) || (camera->cmd.type == 4)) &&
-               ((camera->player->in_water != 1) || (camera->preset != 1))) {
+               ((camera->player->inwater != 1) || (camera->preset != 1))) {
         // matching: the loop flag (not an if around for (;;)) keeps the constant 1 in a1
         cycle = camera->preset != 1;
         while (cycle) {
@@ -366,7 +366,7 @@ void func_151236D0(Camera *camera) {
         } else {
             camera->status &= ~0x40;
         }
-        if (camera->player->unk28 == 0.0f) {
+        if (camera->player->shad == 0.0f) {
             camera->status &= ~0x400;
         }
         if ((camera->playerExt->pissed_up != 0) && (camera->playerExt->pissed_hangover == 0)) {
@@ -484,13 +484,13 @@ void func_15123A54(Camera *camera) {
                         camera->presetCooldown = 20;
                         camera->targetDistance = 300.0f;
                         camera->height = 150.0f;
-                        func_15049688(&camera->yaw, camera->player->unk40 - 180.0f, &camera->lookBehindYawVel, 1.5f, 2.0f,
+                        func_15049688(&camera->yaw, camera->player->theta - 180.0f, &camera->lookBehindYawVel, 1.5f, 2.0f,
                                       camera->dt);
                         if (!(camera->contPad->button & D_CBUTTONS)) {
                             camera->lookBehindTimer = 0;
                         }
                     } else {
-                        func_15049688(&camera->yaw, camera->player->unk40 - 180.0f, &camera->lookBehindYawVel, 2.0f, 4.0f,
+                        func_15049688(&camera->yaw, camera->player->theta - 180.0f, &camera->lookBehindYawVel, 2.0f, 4.0f,
                                       camera->dt);
                     }
                     camera->yawRad = camera->yaw * DEG2RAD;
@@ -499,7 +499,7 @@ void func_15123A54(Camera *camera) {
                             camera->lookBehindHold -= D_800BEA08;
                             if (camera->lookBehindHold <= 0) {
                                 camera->lookBehindTimer = 0;
-                            } else if (fabsf(camera->yaw - (camera->player->unk40 - 180.0f)) <= 2.0f) {
+                            } else if (fabsf(camera->yaw - (camera->player->theta - 180.0f)) <= 2.0f) {
                                 camera->lookBehindTimer = 0;
                             }
                         } else {
@@ -527,7 +527,7 @@ void func_15123A54(Camera *camera) {
             camera->spinDir = 1.0f;
         }
         if ((camera->playerExt->ladder != 0) && (camera->status & 0x40)) {
-            angle = camera->player->unk40 + 180.0f;
+            angle = camera->player->theta + 180.0f;
             func_15049688(&camera->yaw, angle, &camera->yawVel, 2.0f, 4.0f, camera->dt);
             camera->yawRad = camera->yaw * DEG2RAD;
             angle = camera->yawRad;
@@ -737,27 +737,27 @@ void func_151247C0(Camera *camera) {
             if (camera->snap) {
                 obj = camera->player;
                 pair = camera->pairObj;
-                camera->focus.x = (obj->x_position + pair->x_position) * 0.5f;
-                camera->focus.y = (obj->y_position + pair->y_position) * 0.5f;
-                camera->focus.z = (obj->z_position + pair->z_position) * 0.5f;
+                camera->focus.x = (obj->xpos + pair->xpos) * 0.5f;
+                camera->focus.y = (obj->ypos + pair->ypos) * 0.5f;
+                camera->focus.z = (obj->zpos + pair->zpos) * 0.5f;
             } else {
                 obj = camera->player;
                 pair = camera->pairObj;
-                camera->focus.x += (((obj->x_position + pair->x_position) * 0.5f) - camera->focus.x) * camera->followRate;
-                camera->focus.y = (obj->y_position + pair->y_position) * 0.5f;
-                camera->focus.z += (((obj->z_position + pair->z_position) * 0.5f) - camera->focus.z) * camera->followRate;
+                camera->focus.x += (((obj->xpos + pair->xpos) * 0.5f) - camera->focus.x) * camera->followRate;
+                camera->focus.y = (obj->ypos + pair->ypos) * 0.5f;
+                camera->focus.z += (((obj->zpos + pair->zpos) * 0.5f) - camera->focus.z) * camera->followRate;
             }
         } else {
             if (camera->snap) {
                 obj = camera->player;
-                camera->focus.x = obj->x_position;
-                camera->focus.z = obj->z_position;
+                camera->focus.x = obj->xpos;
+                camera->focus.z = obj->zpos;
             } else {
                 obj = camera->player;
-                camera->focus.x += (obj->x_position - camera->focus.x) * camera->followRate;
-                camera->focus.z += (obj->z_position - camera->focus.z) * camera->followRate;
+                camera->focus.x += (obj->xpos - camera->focus.x) * camera->followRate;
+                camera->focus.z += (obj->zpos - camera->focus.z) * camera->followRate;
             }
-            camera->focus.y = obj->y_position;
+            camera->focus.y = obj->ypos;
         }
         if (camera->sideOffset != 0.0f || camera->sideOffsetTarget != 0.0f) {
             if (camera->snap) {
@@ -881,29 +881,29 @@ void func_15124C38(Camera *camera, f32 *outY) {
                 height += 30.0f;
             }
             if ((camera->mode & 0x80) || (func_15125490(camera) != 0)) {
-                goalY = camera->player->y_position + height * 0.25f;
+                goalY = camera->player->ypos + height * 0.25f;
             } else if (camera->flags & 0x20000000) {
                 goalY = camera->player->floorY + height;
             } else if ((D_800C3671 != 0) || (camera->player->unk137 != 0) ||
-                       (camera->player->unk84.uh == 0x194) || (camera->player->in_water == 1)) {
-                goalY = camera->player->y_position + height;
+                       (camera->player->animseq.uh == 0x194) || (camera->player->inwater == 1)) {
+                goalY = camera->player->ypos + height;
             } else if ((-10000.0f == camera->unk360) && !(camera->flags & 0x20000000) && !(camera->flags & 0x200000) &&
-                       (camera->player->unk28 < 170.0f) && (300.0f < camera->distance)) {
+                       (camera->player->shad < 170.0f) && (300.0f < camera->distance)) {
                 goalY = camera->player->floorY + height;
             } else {
-                factor = camera->player->unk28 * (1.0f / 300.0f);
+                factor = camera->player->shad * (1.0f / 300.0f);
                 factor = (factor < 0.0f) ? 0.0f : ((1.0f < factor) ? 1.0f : factor);
-                goalY = camera->player->floorY + camera->player->unk28 * factor + height;
+                goalY = camera->player->floorY + camera->player->shad * factor + height;
             }
             if (camera->player->unk102 != 0) {
                 if (camera->distance < 100.0f) {
-                    if (camera->eye.y < camera->player->y_position) {
-                        goalY = camera->player->y_position - 10.0f;
+                    if (camera->eye.y < camera->player->ypos) {
+                        goalY = camera->player->ypos - 10.0f;
                     } else {
-                        goalY = camera->player->y_position + 10.0f;
+                        goalY = camera->player->ypos + 10.0f;
                     }
                 } else {
-                    goalY = camera->player->y_position;
+                    goalY = camera->player->ypos;
                 }
             }
             if (outY != 0) {
@@ -1012,8 +1012,8 @@ s32 func_15125490(Camera *camera) {
     Actor *player = camera->player;
     s32 depth;
 
-    if (player->in_water == 1) {
-        depth = fabsf(player->y_position - player->unk118);
+    if (player->inwater == 1) {
+        depth = fabsf(player->ypos - player->unk118);
         if (depth < 100) {
             return 0;
         }
@@ -1183,7 +1183,7 @@ void func_15125A6C(Camera *camera) {
 
     zone = camera->zone;
     if (zone == 0x2A) {
-        yaw = camera->player->unk40;
+        yaw = camera->player->theta;
         if (camera->mode != 0x40000) {
             func_1512D560(camera, 5, 0);
             camera->unk7E4 = 1;
@@ -1200,11 +1200,11 @@ void func_15125A6C(Camera *camera) {
         sideAngle = (yaw - 90.0f) * D_800A3554;
         sideSin = sinf(sideAngle);
         // matching: the position fields go through their own symbols (D_800C3600.unk14.. moves code)
-        D_800C3614 = (sideSin * sideRadius) + (camera->player->x_position + (radius * trig));
-        D_800C3618 = camera->player->y_position + height;
+        D_800C3614 = (sideSin * sideRadius) + (camera->player->xpos + (radius * trig));
+        D_800C3618 = camera->player->ypos + height;
         trig = cosf(angle);
         sideCos = cosf(sideAngle);
-        D_800C361C = (sideCos * sideRadius) + (camera->player->z_position + (radius * trig));
+        D_800C361C = (sideCos * sideRadius) + (camera->player->zpos + (radius * trig));
         D_800C3600.unk20 = 0.0f;
         D_800C3624 = -180.0f;
         D_800C3600.unk8 = 0.0f;
@@ -1233,7 +1233,7 @@ void func_15125C40(Camera *camera) {
     if (active) {
         if (camera->unk7CC == 0) {
             if (level42) {
-                func_1509BFB0(3, 0x9000, 0x18, (s32)camera->player->unk40, 0, 250);
+                func_1509BFB0(3, 0x9000, 0x18, (s32)camera->player->theta, 0, 250);
             } else if (zone == 0x1A) {
                 func_1509BFB0(3, 0x9000, 0x18, 0, 0, 250);
             }
@@ -1290,7 +1290,7 @@ void func_15125DB4(Camera *camera) {
         }
     }
 
-    if ((camera->player->in_water == 1) && (camera->mode & 0x80)) {
+    if ((camera->player->inwater == 1) && (camera->mode & 0x80)) {
         camera->buttonsPressed &= ~(R_TRIG | U_CBUTTONS | D_CBUTTONS);
         camera->contPad->button &= ~(U_CBUTTONS | D_CBUTTONS);
     }
@@ -1337,9 +1337,9 @@ void func_15126138(Camera *camera) {
 
     player = camera->player;
 
-    if (((player->x_position != camera->lastPlayerPos.x) ||
-         (player->y_position != camera->lastPlayerPos.y) ||
-         (player->z_position != camera->lastPlayerPos.z)) && ((camera->mode & ~0x100) != 0)) {
+    if (((player->xpos != camera->lastPlayerPos.x) ||
+         (player->ypos != camera->lastPlayerPos.y) ||
+         (player->zpos != camera->lastPlayerPos.z)) && ((camera->mode & ~0x100) != 0)) {
         camera->playerMoved = 1;
         camera->unk7E6 = 60;
         camera->unk8ED = 0;
@@ -1349,7 +1349,7 @@ void func_15126138(Camera *camera) {
 
     if (camera->flags & 0x200000) {
         player = camera->player;
-        if (player->interaction_state != 0x1E) {
+        if (player->type != 0x1E) {
             if (player->unk102 == 0) {
                 if (camera->contPad->button & CAM_C_BUTTONS) {
                     if (!(camera->mode & 0x40)) {
@@ -1373,7 +1373,7 @@ void func_1512623C(Actor *obj, ActorCtl *ext, s32 zone, f32 *outX, f32 *outY, f3
     f32 offsetY;
 
     useObjectPos = 1;
-    if (obj->unk1D4 != NULL) {
+    if (obj->ob_matrix_ptr != NULL) {
         useObjectPos = 0;
         if (lowView != 0) {
             bone = 3;
@@ -1392,7 +1392,7 @@ void func_1512623C(Actor *obj, ActorCtl *ext, s32 zone, f32 *outX, f32 *outY, f3
         }
 
         if (useObjectPos == 0) {
-            boneMtx = (Mtx *)obj->unk1D4;
+            boneMtx = (Mtx *)obj->ob_matrix_ptr;
             boneMtx += bone;
             func_15143134(localPos, worldPos, boneMtx);
             *outX = worldPos[0];
@@ -1402,9 +1402,9 @@ void func_1512623C(Actor *obj, ActorCtl *ext, s32 zone, f32 *outX, f32 *outY, f3
     }
 
     if (useObjectPos != 0) {
-        *outX = obj->x_position;
-        *outY = obj->y_position + (ext->height * 0.75f);
-        *outZ = obj->z_position;
+        *outX = obj->xpos;
+        *outY = obj->ypos + (ext->height * 0.75f);
+        *outZ = obj->zpos;
     }
 }
 
@@ -1439,7 +1439,7 @@ s32 func_15126378(Camera *camera) {
     maxZoom = -(D_800BE628[camera->playerIndex].fovX - 5.0f);
     zoomStep = D_800BE628[camera->playerIndex].fovX * scale;
     zone = camera->zone;
-    if (((zone == 0xC) && (camera->player->unk84.uh != 0x76)) || (zone == 0x1B)) {
+    if (((zone == 0xC) && (camera->player->animseq.uh != 0x76)) || (zone == 0x1B)) {
         camera->buttonsPressed |= R_TRIG;
         camera->contPad->button |= R_TRIG;
     }
@@ -1447,22 +1447,22 @@ s32 func_15126378(Camera *camera) {
         ext->aimReset = 1;
     }
     // matching: [linked] - 1 rather than [linked - 1]
-    viewer = (camera->player->unk65 != 0) ? &movement_obj[camera->player->unk65] - 1 : camera->player;
+    viewer = (camera->player->attach_char != 0) ? &movement_obj[camera->player->attach_char] - 1 : camera->player;
     valid = (ext->weapon_status == 2) || (zone == 0x1B) || (zone == 0x1F) || (zone == 0x29);
     if (((zone == 0x23) || (zone == 0x24) || (zone == 0x16) || (zone == 0x18) || (zone == 0x41) ||
          (zone == 0xC) || (zone == 0x14) || (zone == 0x3F) || (zone == 0x1B) || (zone == 0x1F) ||
          (zone == 0x29)) &&
         (camera->contPad->button & R_TRIG) && valid &&
-        (((s32)camera->player->unk28 == 0) || ((s32)viewer->unk28 == 0)) &&
+        (((s32)camera->player->shad == 0) || ((s32)viewer->shad == 0)) &&
         (camera->player->stunned == 0) && (ext->SniperState == 0)) {
         camera->playerExt->AimState = 0;
         camera->aimState = 0;
         if (((zone == 0x1F) || (zone == 0x29)) && !(camera->status & 4)) {
-            t = *(s16 *)&viewer->unk2E4 * scale;
-            angle = (viewer->unk40 - 90.0f) - t;
+            t = *(s16 *)&viewer->taskint[0] * scale;
+            angle = (viewer->theta - 90.0f) - t;
             ext->aimReset = 1;
         } else {
-            angle = camera->player->unk40 - 90.0f;
+            angle = camera->player->theta - 90.0f;
         }
         func_15048758(&angle);
         yawRad = angle * DEG2RAD;
@@ -1471,7 +1471,7 @@ s32 func_15126378(Camera *camera) {
         func_151C9BA0(camera, zone);
         func_1512623C(viewer, camera->playerExt, zone, &camera->eye.x, &camera->eye.y, &camera->eye.z, camera->status & 0x10);
         camera->target.x = (sinf(yawRad) * 100.0f) + camera->eye.x;
-        camera->target.y = camera->player->y_position + (camera->playerExt->height * 0.75f);
+        camera->target.y = camera->player->ypos + (camera->playerExt->height * 0.75f);
         camera->target.z = (cosf(yawRad) * 100.0f) + camera->eye.z;
         ext->aimEye = camera->eye;
         ext->unk18C = camera->yaw;
@@ -1532,8 +1532,8 @@ s32 func_15126378(Camera *camera) {
         zoomRatio = camera->unk19C / maxZoom;
         zoomRatio = (zoomRatio < 0.0f) ? 0.0f : ((zoomRatio > 1.0f) ? 1.0f : zoomRatio);
         if (!(buttons & R_TRIG) || (zone == 0) || (ext->on_fire != 0) ||
-            ((camera->player->health == 0) && (zone != 0x29)) ||
-            ((camera->player->stunned != 0) && (camera->player->unk65 == 0) && ((s32)camera->player->unk28 != 0) &&
+            ((camera->player->energy == 0) && (zone != 0x29)) ||
+            ((camera->player->stunned != 0) && (camera->player->attach_char == 0) && ((s32)camera->player->shad != 0) &&
              (zone != 0x1F) && (zone != 0x29))) {
             func_15127EB8(camera);
             return 0;
@@ -1619,9 +1619,9 @@ s32 func_15126378(Camera *camera) {
         camera->target.x = camera->eye.x + dir.x;
         camera->target.y = camera->eye.y + dir.y;
         camera->target.z = camera->eye.z + dir.z;
-        camera->focus.x = camera->player->x_position;
-        camera->focus.y = camera->player->y_position;
-        camera->focus.z = camera->player->z_position;
+        camera->focus.x = camera->player->xpos;
+        camera->focus.y = camera->player->ypos;
+        camera->focus.z = camera->player->zpos;
         ext->aimTarget = camera->target;
         ext->aimEye = camera->eye;
         ext->aimDir = dir;
@@ -1654,9 +1654,9 @@ s32 func_15127520(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 a
         *soundId = 0;
     }
 
-    sound->x = camera->player->x_position;
-    sound->y = camera->player->y_position;
-    sound->z = camera->player->z_position;
+    sound->x = camera->player->xpos;
+    sound->y = camera->player->ypos;
+    sound->z = camera->player->zpos;
 
     if (camera->playerExt->SniperState == 2) {
         newZoom = (u32)zoom;
@@ -1714,9 +1714,9 @@ s32 func_151277B0(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 a
         *soundId = 0;
     }
 
-    sound->x = camera->player->x_position;
-    sound->y = camera->player->y_position;
-    sound->z = camera->player->z_position;
+    sound->x = camera->player->xpos;
+    sound->y = camera->player->ypos;
+    sound->z = camera->player->zpos;
 
     if (camera->playerExt->SniperState == 2) {
         if (oldKey != newKey) {
@@ -1773,7 +1773,7 @@ s32 func_151279A0(Actor *obj, OSContPad *contPad) {
     s32 buttons;
     f32 angle;
 
-    ext = obj->unk31C;
+    ext = obj->mv;
     zone = ext->rt_context_b;
     dt = D_800BE9E4 * (1.0f / 60.0f);
     if ((zone == 0xC) || (zone == 0x1B)) {
@@ -1785,7 +1785,7 @@ s32 func_151279A0(Actor *obj, OSContPad *contPad) {
         (contPad->button & R_TRIG) && (ext->SniperState == 0)) {
         ext->SniperState = 2;
         ext->aimEye = base;
-        ext->aimYawTarget = obj->unk40 - 90.0f;
+        ext->aimYawTarget = obj->theta - 90.0f;
         ext->aimPitchTarget = 0.0f;
         ext->aimPitch = 0.0f;
         ext->aimYawVel = 0.0f;
@@ -1798,14 +1798,14 @@ s32 func_151279A0(Actor *obj, OSContPad *contPad) {
     }
     if (ext->SniperState == 2) {
         buttons = contPad->button;
-        angle = (obj->unk40 - 90.0f) * DEG2RAD;
-        pos.x = obj->x_position;
-        pos.y = obj->y_position + (ext->height * 0.75f);
-        pos.z = obj->z_position;
+        angle = (obj->theta - 90.0f) * DEG2RAD;
+        pos.x = obj->xpos;
+        pos.y = obj->ypos + (ext->height * 0.75f);
+        pos.z = obj->zpos;
         base = pos;
         pos.x = (sinf(angle) * 100.0f) + base.x;
         pos.z = (cosf(angle) * 100.0f) + base.z;
-        base.y += obj->y_position - obj->old_y_position;
+        base.y += obj->ypos - obj->old_ypos;
         if (!(buttons & R_TRIG) || (zone == 0)) {
             ext->SniperState = 0;
             func_150627D4(obj);
@@ -1860,7 +1860,7 @@ void func_15127EB8(Camera *camera) {
     D_800DBFF4[camera->playerIndex] = 2;
 
     player = camera->player;
-    linked = player->unk65;
+    linked = player->attach_char;
     // matching: [linked] - 1 rather than [linked - 1] (the latter changes the code)
     target = (linked != 0) ? &movement_obj[linked] - 1 : player;
 
@@ -1895,8 +1895,8 @@ s32 func_15128030(Camera *camera) {
     case 0:
         return 0;
     case 1:
-        tr->startDistance = sqrtf((camera->eye.x - camera->player->x_position) * (camera->eye.x - camera->player->x_position) +
-                                  (camera->eye.z - camera->player->z_position) * (camera->eye.z - camera->player->z_position));
+        tr->startDistance = sqrtf((camera->eye.x - camera->player->xpos) * (camera->eye.x - camera->player->xpos) +
+                                  (camera->eye.z - camera->player->zpos) * (camera->eye.z - camera->player->zpos));
         camera->unk5E8 = 0.0f;
         camera->unk660 = 0.0f;
         camera->unk3A8 = 0.0f;
@@ -1924,16 +1924,16 @@ s32 func_15128030(Camera *camera) {
         func_15123568(camera);
         tr->endDistance = camera->targetDistance;
         camera->transition.endHeight = camera->height;
-        tr->endTarget.x = camera->player->x_position;
+        tr->endTarget.x = camera->player->xpos;
         func_15124C38(camera, &tr->endTarget.y);
         angle = tr->endYaw;
-        tr->endTarget.z = camera->player->z_position;
+        tr->endTarget.z = camera->player->zpos;
         while (angle < 0.0f) {
             angle += 360.0f;
         }
-        camera->focus.x = camera->player->x_position;
-        camera->focus.y = camera->player->y_position;
-        camera->focus.z = camera->player->z_position;
+        camera->focus.x = camera->player->xpos;
+        camera->focus.y = camera->player->ypos;
+        camera->focus.z = camera->player->zpos;
         camera->unk390 = angle;
         while (camera->unk390 < -360.0f) {
             camera->unk390 += 360.0f;
@@ -2007,9 +2007,9 @@ void func_151284C4(Camera *camera) {
 
     func_1512C490(camera);
     player = camera->player;
-    camera->lastPlayerPos.x = player->x_position;
-    camera->lastPlayerPos.y = player->y_position;
-    camera->lastPlayerPos.z = player->z_position;
+    camera->lastPlayerPos.x = player->xpos;
+    camera->lastPlayerPos.y = player->ypos;
+    camera->lastPlayerPos.z = player->zpos;
     if (camera->snap != 0) {
         camera->snap--;
     }
@@ -2092,7 +2092,7 @@ void func_1512868C(Camera *camera) {
     index = camera->playerIndex;
     camera->player = player = &movement_obj[index];
     camera->controller = camera->unk3CC = index;
-    camera->playerExt = player->unk31C;
+    camera->playerExt = player->mv;
     camera->liftTarget = 0.0f;
     camera->sideTarget = 0.0f;
     camera->lift = 0.0f;
@@ -2105,10 +2105,10 @@ void func_1512868C(Camera *camera) {
 /* Places the eye at obj (current and previous position) and looks the way the player faces. */
 void func_15128774(Camera *camera, Actor *obj) {
     camera->unk35C = obj->floorY;
-    camera->prevEye.x = camera->eye.x = obj->x_position;
-    camera->prevEye.y = camera->eye.y = obj->y_position;
-    camera->prevEye.z = camera->eye.z = obj->z_position;
-    camera->yaw = camera->player->unk40 - 180.0f;
+    camera->prevEye.x = camera->eye.x = obj->xpos;
+    camera->prevEye.y = camera->eye.y = obj->ypos;
+    camera->prevEye.z = camera->eye.z = obj->zpos;
+    camera->yaw = camera->player->theta - 180.0f;
     camera->playerExt->unk18C = 999.0f;
     camera->snap = 1;
 }

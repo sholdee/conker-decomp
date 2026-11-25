@@ -177,9 +177,9 @@ void func_1512C490(Camera *camera) {
             return;
         }
         if (((camera->mode & 0x80) || camera->player->unk102 != 0) && camera->playerMoved != 0) {
-            swayTarget = camera->player->unkC4 * 0.25f;
+            swayTarget = camera->player->lean_angle * 0.25f;
         } else if ((camera->status & 0x80) && camera->mode != 0x40) {
-            swayTarget = camera->player->unkC4 * 0.5f;
+            swayTarget = camera->player->lean_angle * 0.5f;
         } else {
             swayTarget = 0.0f;
         }

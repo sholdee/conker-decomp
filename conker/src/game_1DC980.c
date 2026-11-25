@@ -27,9 +27,9 @@ void func_151AF4D0(obj, type, sceneTag, arg3)
     Mtx *boneMtx;
     struct_AF4D0 *entry;
 
-    if (obj != NULL && obj->unk1D4 != NULL && (obj->unk74 & 0xF) != 0xF) {
+    if (obj != NULL && obj->ob_matrix_ptr != NULL && (obj->unk74 & 0xF) != 0xF) {
         entry = &D_800A9DF0[type];
-        boneMtx = (Mtx *)obj->unk1D4 + entry->bone;
+        boneMtx = (Mtx *)obj->ob_matrix_ptr + entry->bone;
         func_15143134(entry->from, from, boneMtx);
         func_15143134(entry->to, to, boneMtx);
         func_15135DD0(from, to, ((func_150ADA68() * 170.0f) + 71.0f) * 0.01f, sceneTag, arg3);

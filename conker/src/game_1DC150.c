@@ -40,9 +40,9 @@ void func_151AECA0(Actor *obj, u8 arg1, s32 arg2) {
 // matching: the unused labels lbD/lbA/lbC/lbB/lbl split basic blocks; without them uopt
 // register-allocates far more (callee-saved $f22-$f30, s5/s6) and the frame grows
 lbD:
-    burst.spray.pos.x = obj->x_position;
-    burst.spray.pos.y = obj->y_position;
-    burst.spray.pos.z = obj->z_position;
+    burst.spray.pos.x = obj->xpos;
+    burst.spray.pos.y = obj->ypos;
+    burst.spray.pos.z = obj->zpos;
     burst.spray.scaleBase = 5.079999924f;
     burst.spray.countBase = 10;
     burst.spray.countRange = 0;
@@ -69,16 +69,16 @@ lbD:
     func_15153F18(&burst.angles, &burst.spray, &ground, 255, 1);
 lbA:
     count = (func_150ADA20() % 6) + 7;
-    probe[1] = obj->y_position + 100.0f;
+    probe[1] = obj->ypos + 100.0f;
     while (count != 0) {
         angle = func_150ADA20();
         func_15143874((u8)angle, (func_150ADA68() * 59.0f) + 90.0f, &pos[0], &pos[2]);
 lbC:
-        pos[0] += obj->x_position;
-        pos[2] += obj->z_position;
+        pos[0] += obj->xpos;
+        pos[2] += obj->zpos;
         probe[0] = pos[0];
         probe[2] = pos[2];
-        if (func_15046C80(probe, 0, obj->y_position - 500.0f, &ground) == 0 || ground.source == 3) {
+        if (func_15046C80(probe, 0, obj->ypos - 500.0f, &ground) == 0 || ground.source == 3) {
             return;
         }
         pos[1] = ground.height;
@@ -93,9 +93,9 @@ lbC:
         count--;
     }
 lbB:
-    center[0] = obj->x_position;
-    center[1] = obj->y_position;
-    center[2] = obj->z_position;
+    center[0] = obj->xpos;
+    center[1] = obj->ypos;
+    center[2] = obj->zpos;
     centerProbe[0] = center[0];
     centerProbe[1] = center[1] + 100.0f;
     centerProbe[2] = center[2];

@@ -45,7 +45,7 @@ s32 func_1509DDFC(s32 tag, s32 op, struct215 *cmd) {
     switch (op) {
     case 0: {
         s32 mask = ~0x2000; // matching: the inline constant schedules differently
-        func_15178BE4(tag & 0xFF, &movement_obj[func_15084000(cmd->unk8 & mask)].x_position, cmd->unkC.s.unk2);
+        func_15178BE4(tag & 0xFF, &movement_obj[func_15084000(cmd->unk8 & mask)].xpos, cmd->unkC.s.unk2);
         return 1;
     }
     case 1:

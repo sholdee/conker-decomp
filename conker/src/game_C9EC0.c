@@ -426,9 +426,9 @@ s32 func_1509D180(s32 cmdId, ScriptCmd *cmd) {
 
                 obj = func_1505EEF4(CMD_OBJECT_ID(cmd->args[0]));
                 if (obj != NULL) {
-                    pos[0] = obj->x_position;
-                    pos[1] = obj->y_position + 50.0f;
-                    pos[2] = obj->z_position;
+                    pos[0] = obj->xpos;
+                    pos[1] = obj->ypos + 50.0f;
+                    pos[2] = obj->zpos;
                     func_151C0098(pos, obj, 1, 0xFF, 1);
                 }
             }

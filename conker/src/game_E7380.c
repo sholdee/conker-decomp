@@ -48,9 +48,9 @@ void func_150B9ED0(Actor *actor, f32 prevX, f32 prevZ, u8 arg3, s32 arg4) {
     if (sum != 0x3843095E) {
         D_80084060[0] = 0xFF;
     }
-    if ((func_150A3058(2, (s16)actor->x_position, (s16)actor->y_position, (s16)actor->z_position) == 0) &&
-        (func_150A3058(1, (s16)actor->x_position, (s16)actor->y_position, (s16)actor->z_position) == 0)) {
-        f32 rayY = actor->y_position + 80.0f;
+    if ((func_150A3058(2, (s16)actor->xpos, (s16)actor->ypos, (s16)actor->zpos) == 0) &&
+        (func_150A3058(1, (s16)actor->xpos, (s16)actor->ypos, (s16)actor->zpos) == 0)) {
+        f32 rayY = actor->ypos + 80.0f;
         f32 dz;
         f32 dy;
         f32 dx;
@@ -61,10 +61,10 @@ void func_150B9ED0(Actor *actor, f32 prevX, f32 prevZ, u8 arg3, s32 arg4) {
         SurfaceBurst burst;
 
         /* Ray back along the move, i.e. minus the displacement since (prevX, prevZ). */
-        dx = -(actor->x_position - prevX);
+        dx = -(actor->xpos - prevX);
         dy = 0.0f;
-        dz = -(actor->z_position - prevZ);
-        if (func_150AC9C0(actor->x_position, rayY, actor->z_position, dx, dy, dz, NULL, &triangle, &hit.x,
+        dz = -(actor->zpos - prevZ);
+        if (func_150AC9C0(actor->xpos, rayY, actor->zpos, dx, dy, dz, NULL, &triangle, &hit.x,
                           &hit.y, &hit.z, NULL, &hitObject, NULL, 0.0f) == 0) {
             return;
         }

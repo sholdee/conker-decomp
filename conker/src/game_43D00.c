@@ -217,10 +217,10 @@ players: // matching: unused label splits the basic block; IDO schedules the loo
             }
             obj = movement_obj;
             obj += i | 0; // matching: `| 0` keeps IDO from strength-reducing &movement_obj[i] into a loop pointer
-            D_800D20FC[i].x = obj->x_position;
-            D_800D20FC[i].y = obj->y_position;
-            D_800D20FC[i].z = obj->z_position;
-            D_800D20FC[i].angle = obj->unk76 >> 8;
+            D_800D20FC[i].x = obj->xpos;
+            D_800D20FC[i].y = obj->ypos;
+            D_800D20FC[i].z = obj->zpos;
+            D_800D20FC[i].angle = obj->angle >> 8;
             continue;
         }
         D_800D20FC[i].unk2 = 1;

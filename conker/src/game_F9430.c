@@ -79,12 +79,12 @@ void func_150CBF80(Actor *owner, u8 index, s32 arg2, u8 arg3) {
     u8 b;
     CollisionHit ground;
 
-    if (owner == NULL || owner->unk1D4 == NULL) {
+    if (owner == NULL || owner->ob_matrix_ptr == NULL) {
         return;
     }
     func_1504715C(&ground, owner);
     def = &D_800A0640[index];
-    func_15143134(def->offset, pos, &owner->unk1D4[def->bone]);
+    func_15143134(def->offset, pos, &owner->ob_matrix_ptr[def->bone]);
     {
         f32 ray[3];
 
@@ -154,7 +154,7 @@ lbl: // matching: unused label ends the basic block so the pos[1] store stays ou
         spawn.unk47 = 6;
         extra.growDelay = (spawn.lifetime - (func_150ADA20() % (u32)(def->growDelayRange + 1))) - def->growDelayMin;
         extra.growRate = ((func_150ADA68() * def->growRateRange) + def->growRateMin) * spawn.width;
-        particle = func_1513D668(&spawn, colors, 0, 0x18, 0, 0, (owner->unk7A >> 8) + def->yawOffset,
+        particle = func_1513D668(&spawn, colors, 0, 0x18, 0, 0, (owner->langle >> 8) + def->yawOffset,
                                  500.0f, 500.0f, 0, (s32)&ground.tri, 1, 8, arg3, arg2);
         if (particle != NULL) {
             memcpy(&particle->extra, &extra, sizeof(extra));

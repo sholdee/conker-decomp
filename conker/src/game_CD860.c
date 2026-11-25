@@ -131,9 +131,9 @@ s32 func_150A04D8(s32 slot, s32 query, Msg_CD860 *msg) {
             s32 i;
 
             for (i = 0; i < 25; i++) {
-                if (movement_obj[i].interaction_state == msg->params[0] && func_150A29C8(i, slot) == 0) {
+                if (movement_obj[i].type == msg->params[0] && func_150A29C8(i, slot) == 0) {
                     if (query == 11) {
-                        return movement_obj[i].unk13F | 0x2000;
+                        return movement_obj[i].listpos | 0x2000;
                     }
                     return movement_obj[i].unique_id;
                 }
@@ -178,7 +178,7 @@ s32 func_150A04D8(s32 slot, s32 query, Msg_CD860 *msg) {
                         return 1;
                     }
                     if (msg->params[1] != 0) {
-                        if (movement_obj[i].unk31C->rt_context_b != 3 && func_150A2D84(i, msg->params[0] & 0xFFFF0FFF) == 0) {
+                        if (movement_obj[i].mv->rt_context_b != 3 && func_150A2D84(i, msg->params[0] & 0xFFFF0FFF) == 0) {
                             return 1;
                         }
                     } else {

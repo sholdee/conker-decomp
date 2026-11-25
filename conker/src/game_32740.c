@@ -77,7 +77,7 @@ void func_150054C4(Camera *view, s32 index, s16 resource, s32 mode) {
     view->unk24C = 1.0f;
     view->unk250 = 1.0f;
     view->unk3CC = actorIndex;
-    actor->camera = view;
+    actor->CameraPtr = view;
     view->unk134 = 1;
     view->flags = 14;
     view->unk240 = 0;
@@ -106,7 +106,7 @@ void func_150054C4(Camera *view, s32 index, s16 resource, s32 mode) {
     view->controller = actorIndex;
     actor = &movement_obj[actorIndex];
     view->player = actor;
-    view->playerExt = actor->unk31C;
+    view->playerExt = actor->mv;
     func_151298C0(view, resource, actor);
     view->unk7CC = 2;
     view->unk3F4 = -1.0f;
@@ -155,9 +155,9 @@ void func_15005818(Camera *view, Actor *actor, Vec3f *eye) {
     view->unk358 = view->unk354;
     view->unk35C = view->unk354;
 
-    view->focus.x = actor->x_position;
-    view->focus.y = actor->y_position;
-    *(f32 *)&view->focus.z = actor->z_position;
+    view->focus.x = actor->xpos;
+    view->focus.y = actor->ypos;
+    *(f32 *)&view->focus.z = actor->zpos;
     view->target = view->focus;
     view->lastPlayerPos = view->focus;
 

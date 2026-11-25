@@ -293,8 +293,8 @@ void func_150BF760(WorldObject *obj) {
                 func_150825C0(slot, 0);
                 actor = func_15083E90(0x14);
             }
-            if (actor->unk232 != 2) {
-                actor->unk232 = 2;
+            if (actor->intelwalk != 2) {
+                actor->intelwalk = 2;
                 actor->unk218 = NULL;
             }
         } else if (mode == 3) {
@@ -318,8 +318,8 @@ void func_150BF760(WorldObject *obj) {
                 func_150825C0(slot, 0);
                 actor = func_15083E90(0x14);
             }
-            if (actor == NULL && actor->unk232 != 3) { /* sic: the original tests actor == NULL */
-                actor->unk232 = 3;
+            if (actor == NULL && actor->intelwalk != 3) { /* sic: the original tests actor == NULL */
+                actor->intelwalk = 3;
                 actor->unk218 = NULL;
             }
         }
@@ -382,8 +382,8 @@ void func_150BFA7C(WorldObject *platform) {
         }
         return;
     }
-    if ((platform->object_status & 4) && movement_obj[0].unk31C->unk57 == 1) {
-        func_1518B6B0(movement_obj[0].x_position, movement_obj[0].y_position, movement_obj[0].z_position, 0xFF, 0);
+    if ((platform->object_status & 4) && movement_obj[0].mv->unk57 == 1) {
+        func_1518B6B0(movement_obj[0].xpos, movement_obj[0].ypos, movement_obj[0].zpos, 0xFF, 0);
         if (state == 0) {
             func_15164F0C(3, D_800BE9EB, NULL, 0xFF, 0);
             fx.flags = 1;
@@ -475,9 +475,9 @@ void func_150BFFE0(Actor *obj) {
     Vec3f pos;
     SpriteBurst spawn;
 
-    pos.x = obj->x_position;
+    pos.x = obj->xpos;
     pos.y = obj->floorY + 70.0f;
-    pos.z = obj->z_position;
+    pos.z = obj->zpos;
     func_15136C3C(obj, 0, 0, 1, 0, 0, 0xFF, 1);
     spawn.countBase = 0x11;
     spawn.countRange = 7;

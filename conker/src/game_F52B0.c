@@ -109,11 +109,11 @@ void func_150C7E00(Camera *camera)
         if (target != NULL)
         {
           actor = camera->player;
-          if (actor->unk65 != 0)
+          if (actor->attach_char != 0)
           {
-            actor->x_position = target->x_position;
-            camera->player->y_position = target->y_position;
-            camera->player->z_position = target->z_position;
+            actor->xpos = target->xpos;
+            camera->player->ypos = target->ypos;
+            camera->player->zpos = target->zpos;
           }
         }
       }

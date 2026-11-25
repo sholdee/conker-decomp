@@ -179,11 +179,11 @@ void func_15190898(DripEmitter *emitter) {
             done = 1;
         }
     }
-    if (!done && (emitter->link.actor->interaction_state == 0 || emitter->link.actor->unique_id != emitter->link.actorId)) {
+    if (!done && (emitter->link.actor->type == 0 || emitter->link.actor->unique_id != emitter->link.actorId)) {
         done = 1;
     }
     if (!done) {
-        if (emitter->link.actor->unk1D4 != NULL) {
+        if (emitter->link.actor->ob_matrix_ptr != NULL) {
             kind = &D_8008FA70[emitter->link.kind];
             head = NULL;
             tail = NULL;
@@ -191,7 +191,7 @@ void func_15190898(DripEmitter *emitter) {
             for (i = 0, slot = emitter->slots; i < kind->numMounts; i++, slot++) {
                 if (slot->drop != NULL) {
                     slot->drop->head.def.rot = slot->drop->head.def.pos;
-                    func_15143134(&kind->mounts[i].offset, &slot->drop->head.def.pos, (Mtx *)emitter->link.actor->unk1D4 + kind->mounts[i].bone);
+                    func_15143134(&kind->mounts[i].offset, &slot->drop->head.def.pos, (Mtx *)emitter->link.actor->ob_matrix_ptr + kind->mounts[i].bone);
                     slot->timer -= D_800BE9E4;
                     if (slot->timer < 0) {
                         Particle *falling = slot->drop;
@@ -276,7 +276,7 @@ void func_15190898(DripEmitter *emitter) {
                         motion.wobble = newKind->wobble;
                         motion.phaseSpeed[0] = func_150ADA20() % 5U + 4;
                         motion.phaseSpeed[1] = func_150ADA20() % 5U + 4;
-                        func_15143134(&kind->mounts[index].offset, &def.pos, (Mtx *)emitter->link.actor->unk1D4 + kind->mounts[index].bone);
+                        func_15143134(&kind->mounts[index].offset, &def.pos, (Mtx *)emitter->link.actor->ob_matrix_ptr + kind->mounts[index].bone);
                         def.rot = def.pos;
                         if (emitter->link.actor->unk118 < def.pos.y - motion.baseSize.height - motion.wobble.height) {
                             /* the random flip bit is always 0 (% 1), but still advances the RNG */
@@ -524,12 +524,12 @@ void func_151918BC(DripRetryTask *task) {
     link = &task->link;
     actor = link->actor;
     done = 0;
-    if (actor->interaction_state == 0) {
+    if (actor->type == 0) {
         done = 1;
     } else if (actor->unique_id != link->actorId) {
         done = 1;
     }
-    if (!done && actor->unk1D4 != NULL) {
+    if (!done && actor->ob_matrix_ptr != NULL) {
         if (task->base.header.flags & 1) {
             link->timer = task->base.header.state;
             link->flags |= 1;

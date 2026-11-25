@@ -183,7 +183,7 @@ void func_1501175C(Actor *owner, u8 arg1, s32 arg2) {
             LightEffectHeader header;
 
             motion.unk58 = 0;
-            motion.size = (owner->xz_scale + owner->y_scale) * 0.5f;
+            motion.size = (owner->scale_xz + owner->scale_y) * 0.5f;
             motion.owner = owner;
             motion.id = owner->unique_id;
             motion.unk08 = 15.04527187f;

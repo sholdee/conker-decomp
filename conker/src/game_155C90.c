@@ -54,7 +54,7 @@ void func_151287E0(Camera *camera, f32 *outUnk5E8, f32 *outUnk3A8) {
     if ((snap != 0) || (unk3A8Scale == unk3A8SpeedScale)) {
         speed = 0.0f;
     } else {
-        speed = camera->player->xz_velocity;
+        speed = camera->player->speed;
     }
     if (speed > 30.0f) {
         speed = 30.0f;

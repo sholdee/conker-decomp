@@ -251,7 +251,7 @@ s32 func_151A37C0(TrailEffect *effect) {
     BoneTrailParams retry;
 
     owner = state->params.owner;
-    if (owner->interaction_state == 0) {
+    if (owner->type == 0) {
         return 0;
     }
     if (owner->unique_id != state->params.ownerId) {
@@ -732,14 +732,14 @@ void func_151A4A38(BoneEmitterTask *task) {
     s16 angle;
 
     emitter = &task->emitter;
-    if ((emitter->owner->interaction_state == 0) || (emitter->owner->interaction_state == 8)
+    if ((emitter->owner->type == 0) || (emitter->owner->type == 8)
         || (emitter->owner->unique_id != emitter->ownerId)) {
         task->base.header.state = -1;
         task->base.header.flags |= 1;
         return;
     }
 
-    if (emitter->owner->unk1D4 == NULL) {
+    if (emitter->owner->ob_matrix_ptr == NULL) {
         return;
     }
     if ((emitter->owner->unk74 & 0xF) == 0xF) {
@@ -748,8 +748,8 @@ void func_151A4A38(BoneEmitterTask *task) {
 
     emitter->pending += emitter->rate * D_800BE9A4;
     if (emitter->pending > 1.0f) {
-        angle = (emitter->owner->unk76 >> 8) - 0x40;
-        func_15143134(&emitter->offset, &pos, (s32)emitter->owner->unk1D4 + emitter->bone * sizeof(Mtx));
+        angle = (emitter->owner->angle >> 8) - 0x40;
+        func_15143134(&emitter->offset, &pos, (s32)emitter->owner->ob_matrix_ptr + emitter->bone * sizeof(Mtx));
 
         spawn.countBase = emitter->pending;
         spawn.countRange = 0;
@@ -849,7 +849,7 @@ void func_151A4D88(BoneEmitterTask *task, ActorMsg *msg, u8 type) {
  */
 s32 func_151A4E34(BoneTrailParams *params, Vec3f *out) {
     Actor *owner = params->owner;
-    u8 *bones = (u8 *)owner->unk1D4;
+    u8 *bones = (u8 *)owner->ob_matrix_ptr;
 
     if (bones == NULL) {
         return 0;
@@ -881,13 +881,13 @@ void func_151A4ECC(TrailRetryTask *task) {
 
     done = 0;
     trail = &task->trail;
-    if (trail->owner->interaction_state == 0) {
+    if (trail->owner->type == 0) {
         done = 1;
     }
     if (trail->owner->unique_id != trail->ownerId) {
         done = 1;
     }
-    if (!done && trail->owner->unk1D4 != NULL && (trail->owner->unk74 & 0xF) != 0xF) {
+    if (!done && trail->owner->ob_matrix_ptr != NULL && (trail->owner->unk74 & 0xF) != 0xF) {
         func_151A3504(trail, task->base.header.owner);
         done = 1;
     }

@@ -38,11 +38,11 @@ void func_150CF140(ActorEmitter *emitter) {
 
     actor = emitter->state.actor;
     state = &emitter->state;
-    if ((actor->interaction_state == 0) || (actor->unique_id != state->actorId)) {
+    if ((actor->type == 0) || (actor->unique_id != state->actorId)) {
         emitter->base.header.state = -1;
         return;
     }
-    if (actor->unk1D4 != NULL) {
+    if (actor->ob_matrix_ptr != NULL) {
         state->spawnCredit += (0.06f + (func_150ADA68() * 0.0704f)) * D_800BE9A4;
         func_1515C244(actor, center, &extentA, &extentB);
         radius = (extentA + extentB) * 0.5f;
@@ -86,7 +86,7 @@ void func_150CF484(ActorEmitter *emitter, ActorMsg *msg, u8 type) {
 void func_151CF898(Actor *, f32, f32);
 
 void func_150CF530(s32 arg0) {
-    func_151CF898(&movement_obj[0], movement_obj[0].y_position + 300.0f, -10000.0f);
+    func_151CF898(&movement_obj[0], movement_obj[0].ypos + 300.0f, -10000.0f);
 }
 
 /* Texture scroll offsets; >> 7 gives the 10.2 fixed-point tile coordinate. */

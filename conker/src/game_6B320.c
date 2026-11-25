@@ -84,7 +84,7 @@ void func_1503DF48(s32 objIndex) {
     if (state == PARTS_STATE_START) {
         movement_obj[objIndex].unk74 |= 0x80;
         state = PARTS_STATE_SETUP;
-        if (movement_obj[objIndex].unk1D4 == NULL) {
+        if (movement_obj[objIndex].ob_matrix_ptr == NULL) {
             return;
         }
     }
@@ -171,8 +171,8 @@ void func_1503E260(s32 objIndex) {
     }
 }
 
-/* Bone `i` of the object's skeleton: obj->unk1D4 is an array of 4x4 float matrices. */
-#define OBJ_BONE(obj, i) ((f32 (*)[4])((u8 *)(obj)->unk1D4 + (i) * 64))
+/* Bone `i` of the object's skeleton: obj->ob_matrix_ptr is an array of 4x4 float matrices. */
+#define OBJ_BONE(obj, i) ((f32 (*)[4])((u8 *)(obj)->ob_matrix_ptr + (i) * 64))
 
 /*
  * Initialise `part` from bone (partIndex + boneOffset) of the object's skeleton: its transform relative
@@ -217,9 +217,9 @@ void func_1503E3C4(s32 objIndex, s32 partIndex, s32 boneOffset, ObjPart *part, s
     part->scale[1] = part->initScale[1];
     part->scale[2] = part->initScale[2];
 
-    dx = part->initPos[0] - obj->x_position;
-    dy = (part->pos[1] - obj->y_position) - 30.0f;
-    dz = part->pos[2] - obj->z_position;
+    dx = part->initPos[0] - obj->xpos;
+    dy = (part->pos[1] - obj->ypos) - 30.0f;
+    dz = part->pos[2] - obj->zpos;
     len = sqrtf((dx * dx) + (dy * dy) + (dz * dz));
     if (len == 0.0f) {
         len = 1.0f;
@@ -300,7 +300,7 @@ void func_1503E82C(s32 objIndex) {
     MtxF m;
     ObjPart *part;
 
-    if (movement_obj[objIndex].unk1D4 != NULL) {
+    if (movement_obj[objIndex].ob_matrix_ptr != NULL) {
         count = D_80098914[D_800C6660[objIndex].kind];
         parents = D_80084454[D_800C6660[objIndex].kind];
         for (i = 0; i < count; i++) {

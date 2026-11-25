@@ -118,14 +118,14 @@ void func_150A0D8C(void) {
         if (!D_800D3098[i].disabled && ZONE_TYPE(&D_800D3098[i]) == 6) {
             for (j = 0; j < 25; j++) {
                 obj = &movement_obj[j];
-                if (obj->interaction_state == 0) continue;
-                if (obj->unk5 != 0 && obj->unk5 != 1) continue;
+                if (obj->type == 0) continue;
+                if (obj->drawtype != 0 && obj->drawtype != 1) continue;
                 if (func_150A1DA0(obj, &D_800D3098[i], 1) != 0) continue;
 
-                dy = obj->y_position - D_800D3098[i].y;
+                dy = obj->ypos - D_800D3098[i].y;
                 if (D_800D3098[i].subtype == 0) {
-                    if (math_distance3D((s16)(obj->x_position - D_800D3098[i].x), dy,
-                                      (s16)(obj->z_position - D_800D3098[i].z)) < D_800D3098[i].radius) {
+                    if (math_distance3D((s16)(obj->xpos - D_800D3098[i].x), dy,
+                                      (s16)(obj->zpos - D_800D3098[i].z)) < D_800D3098[i].radius) {
                         fade = D_800D3098[i].radius * 0.2f;
                         if (fade > 100.0f) {
                             fade = 100.0f;
@@ -135,7 +135,7 @@ void func_150A0D8C(void) {
                                       255.0f);
                     }
                 } else {
-                    func_15035808(1, j, obj->x_position, obj->floorY, obj->z_position,
+                    func_15035808(1, j, obj->xpos, obj->floorY, obj->zpos,
                                   0.0f, 0.0f, 100.0f, 150.0f, 255.0f);
                 }
             }
@@ -152,13 +152,13 @@ s32 func_150A1040(s32 value) {
 void func_150A104C(Camera *cam, TriggerZone **zones, s32 count) {
     Actor probe;
 
-    probe.x_position = cam->eye.x;
-    probe.y_position = cam->eye.y;
-    probe.z_position = cam->eye.z;
-    probe.floorY = probe.y_position;
-    probe.old_x_position = cam->prevEye.x;
-    probe.old_y_position = cam->prevEye.y;
-    probe.old_z_position = cam->prevEye.z;
+    probe.xpos = cam->eye.x;
+    probe.ypos = cam->eye.y;
+    probe.zpos = cam->eye.z;
+    probe.floorY = probe.ypos;
+    probe.old_xpos = cam->prevEye.x;
+    probe.old_ypos = cam->prevEye.y;
+    probe.old_zpos = cam->prevEye.z;
     cam->unk364 = -10000.0f;
     cam->flags &= ~0x40000;
     while (count != 0) {
@@ -225,18 +225,18 @@ void func_150A11C4(Actor *actor) {
     s32 idx;
 
     bestUnk18 = 1000;
-    unk127 = actor->unk127;
-    cam = actor->camera;
+    unk127 = actor->playernumber;
+    cam = actor->CameraPtr;
     if (cam == NULL) {
         unk127 = 0xFF;
     } else if (D_800D3274 != 0) {
         func_150A104C(cam, D_800D3270, D_800D3274);
     }
-    x = (s16)actor->x_position;
-    prev = (u64 *)(s16)actor->y_position;
-    z = actor->z_position;
-    if (actor->unk127 != 0xFF) {
-        func_150806A8(actor->unk127);
+    x = (s16)actor->xpos;
+    prev = (u64 *)(s16)actor->ypos;
+    z = actor->zpos;
+    if (actor->playernumber != 0xFF) {
+        func_150806A8(actor->playernumber);
     }
     func_150829D8(actor);
     actor->unk120 = -10000;
@@ -330,16 +330,16 @@ void func_150A11C4(Actor *actor) {
                 case 1:
                     switch (D_800D3098[i].subtype) {
                     case 0:
-                        actor->unkF8 &= ~4;
+                        actor->noshove &= ~4;
                         break;
                     case 1:
-                        actor->unkF8 &= ~2;
+                        actor->noshove &= ~2;
                         break;
                     case 2:
                         actor->unk120 = D_800D3098[i].y + D_800D3098[i].height;
                         break;
                     case 3:
-                        actor->unkF8 |= 2;
+                        actor->noshove |= 2;
                         break;
                     case 4:
                         func_15055C88(actor);
@@ -350,34 +350,34 @@ void func_150A11C4(Actor *actor) {
                         f32 height;
 
                         /* unk95 is read as u8 here (s8 in structs.h); yaw * 65536/360 is a binary angle */
-                        if (*(u8 *)&actor->unk31C->ladder == 0 && actor->stunned == 0 && actor->health != 0 &&
-                            actor->disable_run == 0 &&
-                            (actor->unk31C->weapon_status == 0 || D_800BE9F0 == 6) && actor->unk44 > 8.0f) {
+                        if (*(u8 *)&actor->mv->ladder == 0 && actor->stunned == 0 && actor->energy != 0 &&
+                            actor->norun == 0 &&
+                            (actor->mv->weapon_status == 0 || D_800BE9F0 == 6) && actor->stickspeed > 8.0f) {
                             height = D_800D3098[i].y + D_800D3098[i].height;
                             flag = 0;
                             angle = (u32)(D_800D3098[i].yaw * 182.0444489f);
-                            angle -= actor->unk31C->press_angle;
-                            if (height < actor->y_position + 250.0f && actor->unk28 == 0.0f) {
+                            angle -= actor->mv->press_angle;
+                            if (height < actor->ypos + 250.0f && actor->shad == 0.0f) {
                                 angle -= 0x8000;
                                 flag = 1;
                             }
                             if (angle > 0x2000 && angle < 0x6000) {
-                                actor->unk31C->unk97 = flag;
-                                actor->unk31C->unk96 = 0;
-                                actor->disable_jump = 18;
-                                actor->unk31C->ladder = i + 1;
+                                actor->mv->unk97 = flag;
+                                actor->mv->unk96 = 0;
+                                actor->nojump = 18;
+                                actor->mv->ladder = i + 1;
                                 if (D_800D3098[i].unk18 != 0) {
-                                    *(u8 *)&actor->unk31C->ladder |= 0x80;
+                                    *(u8 *)&actor->mv->ladder |= 0x80;
                                 }
                             }
                         }
                     }
                         break;
                     case 6:
-                        actor->unkF8 |= 4;
+                        actor->noshove |= 4;
                         break;
                     case 7:
-                        actor->unkF4 |= 0x100000;
+                        actor->mvmt_control |= 0x100000;
                         break;
                     case 8:
                         if (D_800D3098[i].unk18 != 0) {
@@ -387,7 +387,7 @@ void func_150A11C4(Actor *actor) {
                         }
                         break;
                     case 9:
-                        actor->unkF8 |= 0x8000000;
+                        actor->noshove |= 0x8000000;
                         break;
                     }
                     break;
@@ -428,11 +428,11 @@ void func_150A11C4(Actor *actor) {
                     __osPiGetAccess();
                     osPiRawReadIo(func_150A1040(0xB0000054), &raw);
                     __osPiRelAccess();
-                    if (func_150A1040(raw) == 0x1090C2B && D_800C35EA[0] == 0 && actor->health != 0) {
+                    if (func_150A1040(raw) == 0x1090C2B && D_800C35EA[0] == 0 && actor->energy != 0) {
                         func_15172E7C(actor, D_800D3098[i].subtype, D_800D3098[i].unk18);
                         if (D_800BE9F0 != D_800D3098[i].subtype) {
-                            actor->immune = 0xFF;
-                            actor->unk1CC = actor->y_position;
+                            actor->imune = 0xFF;
+                            actor->unk1CC = actor->ypos;
                         }
                     }
                 }
@@ -449,7 +449,7 @@ void func_150A11C4(Actor *actor) {
                     }
                     break;
                 case 13:
-                    if (unk127 != 0xFF && !(prevBits & 1) && D_800E0B94 == 0 && actor->health != 0 &&
+                    if (unk127 != 0xFF && !(prevBits & 1) && D_800E0B94 == 0 && actor->energy != 0 &&
                         D_800C35EA[0] == 0) {
                         if (D_800D3098[i].subtype == 0) {
                             D_800D3098[i].disabled = 1;
@@ -496,11 +496,11 @@ s32 func_150A1DA0(Actor *actor, TriggerZone *zone, s32 withMargin) {
     if (zone->disabled == 1 || actor == NULL || zone == NULL) {
         return 1;
     }
-    dx = actor->x_position - zone->x;
-    dy = actor->y_position - zone->y;
-    dz = actor->z_position - zone->z;
+    dx = actor->xpos - zone->x;
+    dy = actor->ypos - zone->y;
+    dz = actor->zpos - zone->z;
     margin = withMargin ? actor->bodyRadius : 0;
-    if (!(zone->flags & 1) || ((f32)(s32)actor->y_position - actor->floorY <= 5.0f)) {
+    if (!(zone->flags & 1) || ((f32)(s32)actor->ypos - actor->floorY <= 5.0f)) {
         switch (ZONE_SHAPE(zone)) {
         case 0:
             if (0.01f < zone->pitch || 0.01f < zone->yaw) {
@@ -546,9 +546,9 @@ s32 func_150A1DA0(Actor *actor, TriggerZone *zone, s32 withMargin) {
             }
             break;
         case 3:
-            odx = actor->old_x_position - zone->x;
-            ody = actor->old_y_position - zone->y;
-            odz = actor->old_z_position - zone->z;
+            odx = actor->old_xpos - zone->x;
+            ody = actor->old_ypos - zone->y;
+            odz = actor->old_zpos - zone->z;
             c = zone->cosYaw;
             s = zone->sinYaw;
             a = dx;
@@ -731,7 +731,7 @@ void func_150A25D4(TriggerZone *zone, Actor *actor, s32 unk127, s64 prevBits) {
 void func_150A278C(Actor *actor) {
     s32 i;
 
-    if (actor->unk65 != 0) {
+    if (actor->attach_char != 0) {
         return;
     }
     for (i = 0; i < D_800D3094; i++) {
@@ -844,13 +844,13 @@ s32 func_150A2D84(s32 camIndex, s32 id) {
     if (D_800D3094 < id) {
         return 1;
     }
-    probe.x_position = cam->eye.x;
-    probe.y_position = cam->eye.y;
-    probe.z_position = cam->eye.z;
-    probe.floorY = probe.y_position;
-    probe.old_x_position = cam->prevEye.x;
-    probe.old_y_position = cam->prevEye.y;
-    probe.old_z_position = cam->prevEye.z;
+    probe.xpos = cam->eye.x;
+    probe.ypos = cam->eye.y;
+    probe.zpos = cam->eye.z;
+    probe.floorY = probe.ypos;
+    probe.old_xpos = cam->prevEye.x;
+    probe.old_ypos = cam->prevEye.y;
+    probe.old_zpos = cam->prevEye.z;
     return func_150A1DA0(&probe, &D_800D3098[id], 0);
 }
 
@@ -890,8 +890,8 @@ s32 func_150A2EE4(s32 actor, s32 id) {
         return 1;
     }
     if (ZONE_SHAPE(&D_800D3098[id]) == 3) {
-        return func_150A2E4C(&D_800D3098[id], movement_obj[actor].x_position, movement_obj[actor].y_position,
-                             movement_obj[actor].z_position);
+        return func_150A2E4C(&D_800D3098[id], movement_obj[actor].xpos, movement_obj[actor].ypos,
+                             movement_obj[actor].zpos);
     }
     return 0;
 }
@@ -917,13 +917,13 @@ s32 func_150A3058(s32 subtype, s16 x, s16 y, s16 z) {
     Actor probe;
     s32 i;
 
-    probe.x_position = x;
-    probe.old_x_position = x;
-    probe.y_position = y;
+    probe.xpos = x;
+    probe.old_xpos = x;
+    probe.ypos = y;
     probe.floorY = y;
-    probe.old_y_position = y;
-    probe.z_position = z;
-    probe.old_z_position = z;
+    probe.old_ypos = y;
+    probe.zpos = z;
+    probe.old_zpos = z;
 
     for (i = 0; i < D_800D3094; i++) {
         if (!D_800D3098[i].disabled) {
@@ -944,13 +944,13 @@ TriggerZone *func_150A3194(s32 type, s32 subtype, s32 x, s32 y, s32 z) {
     s32 i;
     Actor probe;
 
-    probe.x_position = x;
-    probe.old_x_position = x;
-    probe.y_position = y;
+    probe.xpos = x;
+    probe.old_xpos = x;
+    probe.ypos = y;
     probe.floorY = y;
-    probe.old_y_position = y;
-    probe.z_position = z;
-    probe.old_z_position = z;
+    probe.old_ypos = y;
+    probe.zpos = z;
+    probe.old_zpos = z;
 
     for (i = 0; i < D_800D3094; i++) {
         if (!D_800D3098[i].disabled) {
@@ -971,13 +971,13 @@ s32 func_150A32B4(TriggerZone *zone, s32 x, s32 y, s32 z) {
     Actor probe;
     u8 pad[8]; // matching: unused local of the original (frame layout)
 
-    probe.x_position = x;
-    probe.old_x_position = x;
-    probe.y_position = y;
+    probe.xpos = x;
+    probe.old_xpos = x;
+    probe.ypos = y;
     probe.floorY = y;
-    probe.old_y_position = y;
-    probe.z_position = z;
-    probe.old_z_position = z;
+    probe.old_ypos = y;
+    probe.zpos = z;
+    probe.old_zpos = z;
     if (func_150A1DA0(&probe, zone, 0) == 0) {
         return 1;
     }

@@ -9,7 +9,7 @@ extern f32 D_800A3730; // pi; matching: the 3.141592741f literal changes the byt
 /*
  * Aims `camera` at object 0 (object 1 when camera->playerIndex == 3): unk2BC..unk2C4 become the object's
  * position raised by 150, and unk2F8..unk300 a point 60 units from there on the same height, along
- * the heading (tenths of a degree) unk40 * 10 less the s16 angle in the upper half of unk2E4.
+ * the heading (tenths of a degree) unk40 * 10 less the s16 angle in the upper half of taskint[0].
  */
 void func_1512E4B0(Camera *camera) {
     s32 index;
@@ -23,12 +23,12 @@ void func_1512E4B0(Camera *camera) {
     }
 
     obj = &movement_obj[index];
-    camera->target.x = obj->x_position;
-    camera->target.y = obj->y_position + 150.0f;
-    camera->target.z = obj->z_position;
+    camera->target.x = obj->xpos;
+    camera->target.y = obj->ypos + 150.0f;
+    camera->target.z = obj->zpos;
 
-    heading = -*(s16 *)&obj->unk2E4; // matching: the high half of unk2E4
-    heading += obj->unk40 * 10.0f;
+    heading = -*(s16 *)&obj->taskint[0]; // matching: the high half of taskint[0]
+    heading += obj->theta * 10.0f;
     radians = (heading * D_800A3730) / 1800.0f;
 
     camera->eye.x = camera->target.x - sinf(radians) * 60.0f;

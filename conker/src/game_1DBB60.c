@@ -26,13 +26,13 @@ void func_151AE6B0(ActorTask *task) {
         f32 pos[3];
         CollisionHit *hit;
 
-        pos[0] = actor->x_position;
+        pos[0] = actor->xpos;
         if (-9500.0f < actor->unk118) {
             pos[1] = actor->unk118 + 100.0f;
         } else {
-            pos[1] = actor->y_position + 150.0f;
+            pos[1] = actor->ypos + 150.0f;
         }
-        pos[2] = actor->z_position;
+        pos[2] = actor->zpos;
         hit = &task->hit;
         if (func_15045800(pos, 0, pos[1] - 300.0f, hit) != 0) {
             pos[1] = task->hit.height;

@@ -20,7 +20,7 @@ void func_151C2050(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 distance
     f32 intensity;
 
     if (obj != NULL) {
-        if (D_800BE616 || (camera = obj->camera) == NULL) {
+        if (D_800BE616 || (camera = obj->CameraPtr) == NULL) {
             level = D_800B0DF0->music.song;
             if (level == 0x24 || level == 0x13 || level == 0x4D || level == 0x85 || level == 0x93) {
                 func_100114D0((s32)pos->x, (s32)pos->y, (s32)pos->z, 0x7FFF, 1000, 100, &pan, &volume, NULL);
@@ -396,10 +396,10 @@ s32 func_151C2E4C(Actor *obj, Actor *self) {
     if (obj == self) {
         return FALSE;
     }
-    if (obj->interaction_state == 0) {
+    if (obj->type == 0) {
         return FALSE;
     }
-    if (obj->id == 0xFF) {
+    if (obj->character_type == 0xFF) {
         return FALSE;
     }
     return TRUE;
@@ -410,13 +410,13 @@ s32 func_151C2E94(Actor *obj, Actor *self) {
     if (obj == self) {
         return FALSE;
     }
-    if (obj->interaction_state == 0) {
+    if (obj->type == 0) {
         return FALSE;
     }
-    if (obj->id == 0xFF) {
+    if (obj->character_type == 0xFF) {
         return FALSE;
     }
-    if (obj->unk127 == 0xFF) {
+    if (obj->playernumber == 0xFF) {
         return FALSE;
     }
     return TRUE;

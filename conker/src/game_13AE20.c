@@ -102,17 +102,17 @@ void func_1510DA84(Shadow *shadow) {
     switch (shadow->ownerType) {
         case 0:
             obj = (Actor *)shadow->owner;
-            x = obj->x_position;
-            ownerY = obj->y_position;
-            z = obj->z_position;
+            x = obj->xpos;
+            ownerY = obj->ypos;
+            z = obj->zpos;
             floorY = obj->floorY;
-            if (obj->id == 0x25) {
+            if (obj->character_type == 0x25) {
                 ownerY = floorY;
             }
             triPtrs = obj->unk188;
             tri = obj->floorTri.v;
-            scale = (f32)(u32)obj->unk160 * obj->xz_scale; // matching: the (u32) gives the unsigned-convert fixup
-            angle = (obj->unk7A >> 8) + 0x20;
+            scale = (f32)(u32)obj->shadow_size * obj->scale_xz; // matching: the (u32) gives the unsigned-convert fixup
+            angle = (obj->langle >> 8) + 0x20;
             break;
         case 1:
             prop = (WorldObject *)shadow->owner;

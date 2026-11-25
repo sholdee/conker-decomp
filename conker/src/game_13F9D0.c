@@ -40,9 +40,9 @@ void func_15112520(WorldObject *turret) {
     static s16 D_80089234; // sound timer: 0 idle, -1 start the sound, >0 cooldown frames
 
     cfg = turret->moveData.data;
-    dx = movement_obj[0].x_position - turret->x;
-    dy = (movement_obj[0].y_position + 65.0f) - turret->y;
-    dz = movement_obj[0].z_position - turret->z;
+    dx = movement_obj[0].xpos - turret->x;
+    dy = (movement_obj[0].ypos + 65.0f) - turret->y;
+    dz = movement_obj[0].zpos - turret->z;
     D_800DBEC0 = dx * dx + dy * dy + dz * dz;
     if (cfg->range * cfg->range < D_800DBEC0) {
         pitch = cfg->basePitch;
@@ -286,17 +286,17 @@ void func_15113218(void) {
                     guMtxF2L(mf, &(*D_80089250[D_800BE9C0])[(*D_80089240[view])[j].index]);
                 } else if (obj->attach > 100 && obj->attach < 125) {
                     actor = &movement_obj[obj->attach - 100];
-                    if (actor->unk1D4 == NULL) {
+                    if (actor->ob_matrix_ptr == NULL) {
                         func_150A7CB0(mf, obj->xScale, obj->yScale, obj->zScale);
-                        mf[3][0] = actor->x_position;
-                        mf[3][1] = actor->y_position;
-                        mf[3][2] = actor->z_position;
+                        mf[3][0] = actor->xpos;
+                        mf[3][1] = actor->ypos;
+                        mf[3][2] = actor->zpos;
                         guMtxF2L(mf, &(*D_80089250[D_800BE9C0])[(*D_80089240[view])[j].index]);
                     } else {
                         rot[2] = 0.0f;
                         rot[0] = rot[2];
                         rot[1] = actor->unk90;
-                        parent = actor->unk1D4[0];
+                        parent = actor->ob_matrix_ptr[0];
                         func_150A7CB0(mf, obj->xScale, obj->yScale, obj->zScale);
                         mf[3][0] = parent[3][0];
                         mf[3][1] = parent[3][1];
@@ -560,7 +560,7 @@ void func_15114188(void) {
             for (j = 0; j < 25 && D_800DBF94[i] != 0; j++) {
                 if (D_800DBF94[i] & (1 << j)) {
                     D_800DBF94[i] ^= 1 << j;
-                    if (db_Object_array[i].onContact != NULL && (db_Object_array[i].unk92 != 0 || movement_obj[j].unk127 != 0xFF)) {
+                    if (db_Object_array[i].onContact != NULL && (db_Object_array[i].unk92 != 0 || movement_obj[j].playernumber != 0xFF)) {
                         db_Object_array[i].onContact(i + db_Object_array, &movement_obj[j]); // matching: addu operand order
                     }
                     if ((db_Object_array[i].object_status & 4) == 4 && !(db_Object_array[i].object_status & 8)) {
@@ -640,10 +640,10 @@ void func_1511473C(Actor *actor, s32 objIndex) {
     if (actor == NULL || objIndex >= D_800DBEF0) {
         return;
     }
-    func_15114348(objIndex, &actor->x_position, &actor->y_position, &actor->z_position);
-    actor->unk76 += db_Object_array[objIndex].spinY * D_800A2F60;
+    func_15114348(objIndex, &actor->xpos, &actor->ypos, &actor->zpos);
+    actor->angle += db_Object_array[objIndex].spinY * D_800A2F60;
     if (actor->unk137 != 0 && objIndex + 1 == D_800CBDA0[actor - movement_obj]) {
-        actor->unk7A = actor->unk76;
+        actor->langle = actor->angle;
     }
 }
 

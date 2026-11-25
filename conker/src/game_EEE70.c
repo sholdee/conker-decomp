@@ -22,7 +22,7 @@ s32 func_150C19C0(Vec3f *pos, Actor *actor, u8 side) {
         break;
     }
 
-    func_15142314(actor->unk1D4, bone, pos);
+    func_15142314(actor->ob_matrix_ptr, bone, pos);
     return 1;
 }
 
@@ -58,13 +58,13 @@ void func_150C1A40(Actor *actor, s32 side, s32 arg2) {
     u32 count;
     u8 startAngle;
 
-    if (actor->unk1D4 == NULL) {
+    if (actor->ob_matrix_ptr == NULL) {
         return;
     }
 
-    scale = (actor->xz_scale + actor->y_scale) * 0.5f;
+    scale = (actor->scale_xz + actor->scale_y) * 0.5f;
     func_150C19C0(&pos, actor, side);
-    startAngle = (actor->unk76 >> 8) + 0x40;
+    startAngle = (actor->angle >> 8) + 0x40;
     radius = scale * 70.0f;
     func_1514C2F0(pos.x, actor->floorY, pos.z, radius, startAngle,
                   (side == 1) ? 16 : -16, 8, 0, 0, radius * 4.04f, 0, 255);

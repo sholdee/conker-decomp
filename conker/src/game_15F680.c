@@ -506,23 +506,23 @@ s32 func_15132DDC(Particle *particle) {
         }
 
         if (particle->flags & 4) {
-            probe.interaction_state = 4;
-            probe.x_position = particle->pos.x;
-            probe.y_position = particle->pos.y;
-            probe.z_position = particle->pos.z;
+            probe.type = 4;
+            probe.xpos = particle->pos.x;
+            probe.ypos = particle->pos.y;
+            probe.zpos = particle->pos.z;
             probe.unk188 = 0;
             probe.floorTri = particle->floor.tri;
-            probe.unk28 = 1.0f;
-            probe.xz_scale = 1.0f;
+            probe.shad = 1.0f;
+            probe.scale_xz = 1.0f;
             probe.bodyRadius = particle->radius;
-            probe.y_scale = 1.0f;
+            probe.scale_y = 1.0f;
             probe.bodyHeight = particle->radius;
             if (particle->floor.flags & 2) {
                 probe.floorY = particle->floor.height;
             } else {
                 probe.floorY = -10000.0f;
             }
-            probe.unkF8 = 0;
+            probe.noshove = 0;
 
             if (func_15044380(prev.x, prev.y, prev.z, &probe, 0, 0) != 0) {
                 particle->hitFlags |= 4;
@@ -533,8 +533,8 @@ s32 func_15132DDC(Particle *particle) {
                         particle->hitFlags |= 0x10;
                         particle->speed = speed;
                         particle->invSpeed = 1.0f / speed;
-                        particle->squashAngle = func_150484A0(probe.x_position - particle->pos.x,
-                                                              probe.z_position - particle->pos.z) *
+                        particle->squashAngle = func_150484A0(probe.xpos - particle->pos.x,
+                                                              probe.zpos - particle->pos.z) *
                                                 40.74366379f; // 256 / (2 * pi): radians to a byte angle
                     }
                 }
@@ -757,11 +757,11 @@ s32 func_15133A94(Mtx *mtx, Particle *particle) {
     s32 pad; // matching: unused stack slot
 
     owner = particle->owner;
-    if (owner == NULL || owner->interaction_state == 0 || owner->id == 0xFF ||
+    if (owner == NULL || owner->type == 0 || owner->character_type == 0xFF ||
         owner->unique_id != particle->ownerId) {
         return -1;
     }
-    ownerMtxs = owner->unk1D4;
+    ownerMtxs = owner->ob_matrix_ptr;
     if (ownerMtxs == NULL) {
         return 0;
     }

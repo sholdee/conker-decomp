@@ -94,9 +94,9 @@ void func_151929A4(Effect1BFDD0 *effect) {
             desc.timer = (func_150ADA20() % 31U) + 20;
             desc.alpha = (func_150ADA20() % 156U) + 100;
             desc.width = desc.height = (func_150ADA68() * 150.0f) + 100.0f;
-            func_15143874(data->object->unk7A >> 8, side ? 20.0f : -20.0f, &desc.pos.x, &desc.pos.z);
-            desc.pos.x += data->object->x_position;
-            desc.pos.z += data->object->z_position;
+            func_15143874(data->object->langle >> 8, side ? 20.0f : -20.0f, &desc.pos.x, &desc.pos.z);
+            desc.pos.x += data->object->xpos;
+            desc.pos.z += data->object->zpos;
             desc.pos.y = data->object->floorY + 20.0f;
             desc.flags &= ~(PARTICLE_FLIP_S | PARTICLE_FLIP_T);
             if (func_150ADA20() & 1) {
@@ -155,12 +155,12 @@ void func_15192DF0(Effect1BFDD0 *effect) {
     data = &effect->data;
     data->spawnAccum += (792.0f + (func_150ADA68() * 1202.0f)) * 0.001f * D_800BE9A4;
     if (data->spawnAccum > 1.0f) {
-        if (data->object->unk1D4 == NULL) {
+        if (data->object->ob_matrix_ptr == NULL) {
             // the object has no bone matrices: spins forever
             while (data->spawnAccum > 1.0f) {
             }
         } else {
-            facing = (data->object->unk7A >> 8) + 0x40;
+            facing = (data->object->langle >> 8) + 0x40;
             desc.texture = 0x29;
             desc.renderMode = 0xE03;
             desc.unk0 = 0x200005;
@@ -200,7 +200,7 @@ void func_15192DF0(Effect1BFDD0 *effect) {
                 desc.timer = (func_150ADA20() % 11U) + 30;
                 desc.alpha = (func_150ADA20() % 101U) + 100;
                 desc.width = desc.height = (func_150ADA68() * 150.0f) + 100.0f;
-                func_15143134(&offset, &desc.pos, (Mtx *)data->object->unk1D4 + 1);
+                func_15143134(&offset, &desc.pos, (Mtx *)data->object->ob_matrix_ptr + 1);
                 rand = func_150ADA20();
                 func_15143794(yaw, (rand % 28U) - 25, func_150ADA68() * 3998.0f * 0.001f, &desc.vel);
                 desc.flags &= ~(PARTICLE_FLIP_S | PARTICLE_FLIP_T);

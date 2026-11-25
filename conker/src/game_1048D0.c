@@ -151,15 +151,15 @@ void func_150D7790(Actor *obj, s32 action) {
     Actor *projectile;
 
     variant = 0;
-    if (obj->unk31C != NULL && obj->unk31C->ammo_count <= 0) {
+    if (obj->mv != NULL && obj->mv->ammo_count <= 0) {
         return;
     }
     switch (action) {
     case 0x30:
     case 0x31:
-        if (obj->unk31C != NULL) {
-            obj->unk31C->unk12C = 120;
-            obj->unk31C->ammo_count -= 1;
+        if (obj->mv != NULL) {
+            obj->mv->unk12C = 120;
+            obj->mv->ammo_count -= 1;
             func_10010154(0x628, obj, 0x7FFF, 500, 1000);
         }
         return;
@@ -170,10 +170,10 @@ void func_150D7790(Actor *obj, s32 action) {
     default:
         return;
     }
-    projectile = (Actor *)func_1506C460(obj->unk40, 310.0f, 0.0f, 0.0f, variant * 30 + 30, 0xD, 0.0f, 1.0f,
+    projectile = (Actor *)func_1506C460(obj->theta, 310.0f, 0.0f, 0.0f, variant * 30 + 30, 0xD, 0.0f, 1.0f,
                                             0, 1, variant == 0);
     if (projectile != NULL) {
-        projectile->unk124 = dc_glbl_CharNum + 1;
+        projectile->owner = dc_glbl_CharNum + 1;
     }
     if (projectile != NULL && variant != 0) {
         projectile->unk221 = -1;
@@ -185,8 +185,8 @@ void func_150D7790(Actor *obj, s32 action) {
             }
         }
     }
-    if (obj->unk31C != NULL) {
-        obj->unk31C->ammo_count -= 1;
+    if (obj->mv != NULL) {
+        obj->mv->ammo_count -= 1;
     }
 }
 
@@ -202,7 +202,7 @@ extern void func_10010FFC(s32 a, s32 b, s32 c, s32 d, s32 e, Actor *f);
 
 /*
  * Per-frame update for an object that can be carried by a player (unk13C set, unk124 = player index).
- * While the player's unk31C->unk4E is set the object follows them: it copies their 0x180-0x19E state, eases
+ * While the player's mv->unk4E is set the object follows them: it copies their 0x180-0x19E state, eases
  * its angle towards theirs and (id 0x7F) moves halfway to them. Otherwise it is let go and, unless unk232 is 4,
  * calls func_1505327C for each falling, eligible player. Unless its id is 0x48, it then tracks its height (unk28); once it has
  * spent more than 10 frames over 75 units high, it dies when the player lands or it is in water. Finally it
@@ -225,9 +225,9 @@ void func_150D7928(Actor *obj) {
     s32 n; /* the rider's target angle, later the player loop index */
     f32 offset;
 
-    playerIndex = obj->unk124;
-    speed = obj->xz_velocity;
-    id = obj->id;
+    playerIndex = obj->owner;
+    speed = obj->speed;
+    id = obj->character_type;
     linkType = -1;
     if (id == 0x48) {
         player = (Actor *)func_15033E84(obj);
@@ -239,8 +239,8 @@ void func_150D7928(Actor *obj) {
     if (obj->bodyRadius != 0) {
         obj->unk90 = obj->bodyRadius;
     }
-    if (obj->unk13C != 0 && (player = &movement_obj[playerIndex])->unk31C->transport != 0) {
-        n = player->unk7A;
+    if (obj->lifting != 0 && (player = &movement_obj[playerIndex])->mv->transport != 0) {
+        n = player->langle;
         obj->bodyRadius = 0;
         obj->floorY = player->floorY;
         obj->unk184 = player->unk184;
@@ -250,54 +250,54 @@ void func_150D7928(Actor *obj) {
         for (i = 0; i < 9; i++) {
             dst[i] = src[i];
         }
-        obj->gravity = 6.0f;
+        obj->ygrav = 6.0f;
         angleOffset = player->unk54 * 0.45f;
-        obj->unk44 = player->unkC4;
+        obj->stickspeed = player->lean_angle;
         if (id == 0x7F) {
-            player->immune = 20;
+            player->imune = 20;
             player->unk184 &= ~0x1F;
             player->unk184 |= 4;
-            obj->y_position = player->y_position;
-            obj->x_position += (player->x_position - obj->x_position) * 0.5f;
-            obj->z_position += (player->z_position - obj->z_position) * 0.5f;
-            player->disable_jump = 10;
-            if (player->unk31C->transport_surface == 2) {
-                if (speed < player->unk44 * 1.35f) {
-                    speed = player->unk44 * 1.35f;
+            obj->ypos = player->ypos;
+            obj->xpos += (player->xpos - obj->xpos) * 0.5f;
+            obj->zpos += (player->zpos - obj->zpos) * 0.5f;
+            player->nojump = 10;
+            if (player->mv->transport_surface == 2) {
+                if (speed < player->stickspeed * 1.35f) {
+                    speed = player->stickspeed * 1.35f;
                 }
                 player->unkAA = 70;
             }
         } else {
-            obj->y_velocity = 0.0f;
+            obj->yspd = 0.0f;
         }
         angle = obj->unk21C;
         obj->unk21C = angle + (s16)(n - angle) / 3;
-        obj->unk7A = angle;
-        obj->unk76 = angle;
-        obj->xz_velocity = player->xz_velocity;
-        if (obj->unkD0 != 0) {
+        obj->langle = angle;
+        obj->angle = angle;
+        obj->speed = player->speed;
+        if (obj->doing_hit != 0) {
             func_1505C7D8(obj, dc_glbl_CharNum);
         }
     } else {
-        obj->unk21C = obj->unk7A;
-        if (obj->unk13C != 0) {
+        obj->unk21C = obj->langle;
+        if (obj->lifting != 0) {
             if (movement_obj[playerIndex].stunned != 0) {
-                obj->target_speed = 15.0f;
-                obj->y_velocity = 80.0f;
+                obj->wantspeed = 15.0f;
+                obj->yspd = 80.0f;
             }
-            obj->unk13C = 0;
+            obj->lifting = 0;
         }
         playerIndex = dc_glbl_CharNum;
-        obj->unk65 = 0;
+        obj->attach_char = 0;
         // matching: unk90 (u16) is read as s16 (lh); a value cast still loads with lhu
         obj->bodyRadius = obj->unk90;
         func_1505A3A8(0.0f, obj, 0.0f, 0.5f, 1);
-        scratch = obj->xz_velocity;
+        scratch = obj->speed;
         obj->stunned = 30;
         func_15059140(obj);
-        obj->xz_velocity = scratch;
-        angleOffset = (obj->unkC4 - obj->unk44) * 0.8f;
-        if (obj->unk232 == 4) {
+        obj->speed = scratch;
+        angleOffset = (obj->lean_angle - obj->stickspeed) * 0.8f;
+        if (obj->intelwalk == 4) {
             if (id == 0x48) {
                 D_800CC4B4 = 1;
             }
@@ -306,10 +306,10 @@ void func_150D7928(Actor *obj) {
             }
         } else {
             for (n = 0; n != 2; n++) {
-                if (movement_obj[n].interaction_state == 1) {
-                    if (movement_obj[n].unk31C->rt_context_b == 0 && movement_obj[n].unk31C->weapon_status == 0 && (D_800CC268 & (1 << n)) &&
-                        movement_obj[n].y_velocity < 0.0f) {
-                        obj->unk124 = n;
+                if (movement_obj[n].type == 1) {
+                    if (movement_obj[n].mv->rt_context_b == 0 && movement_obj[n].mv->weapon_status == 0 && (D_800CC268 & (1 << n)) &&
+                        movement_obj[n].yspd < 0.0f) {
+                        obj->owner = n;
                         offset = 39.0f;
                         if (id == 0x48) {
                             movement_obj[n].stunned = 0;
@@ -321,25 +321,25 @@ void func_150D7928(Actor *obj) {
             }
         }
     }
-    obj->immune = 0xFF;
-    obj->unk28 = obj->y_position - obj->floorY;
+    obj->imune = 0xFF;
+    obj->shad = obj->ypos - obj->floorY;
     if (id == 0x48) {
         if (linkType == 0x7A) {
             f32 height = obj->floorY + 180.0f;
 
-            obj->unkF8 |= 0x10000;
+            obj->noshove |= 0x10000;
             func_15058EA4(obj, height + 10.0f, 1.2f, height, -1.1f, 4.0f, -4.0f);
-            if (obj->unk13C != 0) {
-                movement_obj[obj->unk124].unkCC = 30;
+            if (obj->lifting != 0) {
+                movement_obj[obj->owner].unkCC = 30;
             }
-            obj->unkC4 = -obj->y_velocity;
-            obj->unk40 = obj->unk7A * (360.0f / 65536.0f);
+            obj->lean_angle = -obj->yspd;
+            obj->theta = obj->langle * (360.0f / 65536.0f);
         }
     } else {
         s32 volume;
         s32 pad; // matching: unused stack slot keeps the frame layout
         func_1506B100(0, 2.0f, 4.0f);
-        if (obj->unk28 > 75.0f) {
+        if (obj->shad > 75.0f) {
             timer = obj->unk102;
             if (timer < 30) {
                 timer = ++obj->unk102;
@@ -350,43 +350,43 @@ void func_150D7928(Actor *obj) {
                 timer = obj->unk102 = 0;
             }
         }
-        if (timer > 10 && ((player = &movement_obj[playerIndex])->unk28 == 0.0f || obj->in_water != 0 ||
-                            (obj->unk124 != 0 && player->unk31C->transport_surface == 2))) {
-            if (obj->unk13C != 0) {
-                movement_obj[obj->unk124].unkCC = 0;
-                movement_obj[obj->unk124].unk31C->transport = 0;
-                movement_obj[obj->unk124].in_water = 0;
-                movement_obj[obj->unk124].gravity = 4.0f;
+        if (timer > 10 && ((player = &movement_obj[playerIndex])->shad == 0.0f || obj->inwater != 0 ||
+                            (obj->owner != 0 && player->mv->transport_surface == 2))) {
+            if (obj->lifting != 0) {
+                movement_obj[obj->owner].unkCC = 0;
+                movement_obj[obj->owner].mv->transport = 0;
+                movement_obj[obj->owner].inwater = 0;
+                movement_obj[obj->owner].ygrav = 4.0f;
             }
             func_100109D0(obj);
             func_10010FFC(0, 0x51, 0x6D60, 0, 0, obj);
-            obj->health = 0;
+            obj->energy = 0;
         }
-        if (obj->y_scale < 1.0f) {
-            obj->y_scale += 0.05f;
+        if (obj->scale_y < 1.0f) {
+            obj->scale_y += 0.05f;
         }
-        if (obj->unk28 == 0.0f) {
-            obj->target_speed = 0.0f;
+        if (obj->shad == 0.0f) {
+            obj->wantspeed = 0.0f;
             obj->unkBC *= 0.5f;
         }
-        if (obj->target_speed == 0.0f) {
-            obj->unkC4 = obj->unk44 + angleOffset;
+        if (obj->wantspeed == 0.0f) {
+            obj->lean_angle = obj->stickspeed + angleOffset;
         } else {
-            obj->unkC4 += obj->target_speed;
-            if (obj->unkC4 < 0.0f) {
-                obj->unkC4 += 360.0f;
-            } else if (obj->unkC4 > 360.0f) {
-                obj->unkC4 -= 360.0f;
+            obj->lean_angle += obj->wantspeed;
+            if (obj->lean_angle < 0.0f) {
+                obj->lean_angle += 360.0f;
+            } else if (obj->lean_angle > 360.0f) {
+                obj->lean_angle -= 360.0f;
             }
         }
-        if (obj->unk13C != 0) {
-            scratch = (s16)(fabsf(obj->unkC4 * 0.7f) + 44.0f);
+        if (obj->lifting != 0) {
+            scratch = (s16)(fabsf(obj->lean_angle * 0.7f) + 44.0f);
             obj->unkC8 = scratch;
-            movement_obj[obj->unk124].unkCC = (s16)(scratch + 44) * obj->y_scale;
+            movement_obj[obj->owner].unkCC = (s16)(scratch + 44) * obj->scale_y;
         } else {
             obj->unkC8 = 44.0f;
         }
-        if (speed > 0.2f && obj->unk28 < 10.0f && obj->health != 0 && D_800C35EA[0] != 1) {
+        if (speed > 0.2f && obj->shad < 10.0f && obj->energy != 0 && D_800C35EA[0] != 1) {
             volume = (s32)(1000.0f * speed);
             if (volume > 18000) {
                 volume = 18000;
@@ -399,7 +399,7 @@ void func_150D7928(Actor *obj) {
         } else {
             func_100109D0(obj);
         }
-        func_15052490(obj, obj->unk76, speed, 0.55f);
+        func_15052490(obj, obj->angle, speed, 0.55f);
     }
     func_150535F4(obj);
 }

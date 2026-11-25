@@ -508,13 +508,13 @@ TriggerZone *func_1515EB84(s32 x, s32 y, s32 z, s32 mask, ZoneLink *node) {
     Actor probe;
     TriggerZone *zone;
 
-    probe.x_position = x;
-    probe.y_position = y;
+    probe.xpos = x;
+    probe.ypos = y;
     probe.floorY = y;
-    probe.old_x_position = x;
-    probe.old_y_position = y;
-    probe.z_position = z;
-    probe.old_z_position = z;
+    probe.old_xpos = x;
+    probe.old_ypos = y;
+    probe.zpos = z;
+    probe.old_zpos = z;
 
     for (; node != NULL; node = node->next) {
         zone = node->zone;
@@ -714,7 +714,7 @@ void func_1515F270(Actor *obj, TriggerZone *zone) {
 s32 func_1505D024(Actor *obj, s32 arg1, u16 arg2, s32 arg3);
 
 void func_1515F2B8(Actor *obj, TriggerZone *zone) {
-    func_1505D024(obj, 0x6001D, obj->unk7A, -1);
+    func_1505D024(obj, 0x6001D, obj->langle, -1);
 }
 
 extern ZoneHandler D_8008B0C0[3];
@@ -823,7 +823,7 @@ void func_1515FB70(Actor *obj, TriggerZone *zone) {
 }
 
 void func_1515FB94(Actor *obj, TriggerZone *zone) {
-    func_1505D024(obj, 0x6002D, obj->unk7A, -1);
+    func_1505D024(obj, 0x6002D, obj->langle, -1);
 }
 
 /* TriggerZone handler: like func_1515FB94, also passing the index of the object linked to this zone (or -1). */
@@ -842,7 +842,7 @@ void func_1515FBC4(Actor *obj, TriggerZone *zone) {
     } else {
         targetIndex = -1;
     }
-    func_1505D024(obj, 0x6002E, obj->unk7A, targetIndex);
+    func_1505D024(obj, 0x6002E, obj->langle, targetIndex);
 }
 
 void func_1515FC34(Actor *obj, TriggerZone *zone) {
@@ -863,11 +863,11 @@ void func_1515FC60(Actor *obj, TriggerZone *zone) {
     f32 scale;
     s32 value;
 
-    if (obj->unk31C != NULL && obj->unk31C->death_State == 0) {
+    if (obj->mv != NULL && obj->mv->death_State == 0) {
         value = zone->unk1C;
         if (value != 0) {
             scale = (f32)(u32)value * 0.009999999776f;
-            value = func_150AD960(zone->x, zone->z, obj->x_position, obj->z_position);
+            value = func_150AD960(zone->x, zone->z, obj->xpos, obj->zpos);
             limit = (zone->radius * scale) - obj->bodyRadius;
             if (limit > value) {
                 return;

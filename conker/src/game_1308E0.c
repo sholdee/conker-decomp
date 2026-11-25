@@ -11,7 +11,7 @@ void func_15103430(Camera *actor) {
     s32 queryFlags;
 
     queryFlags = actor->playerIndex | 0x9000;
-    if (actor->player->in_water == 1) {
+    if (actor->player->inwater == 1) {
         actor->flags |= 0x01000000;
     } else {
         actor->flags &= ~0x01000000;

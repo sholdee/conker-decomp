@@ -41,8 +41,8 @@ extern u8 D_8009D910[];
 
 /* Advances eye blinking: random open periods of 10-149 frames, closed for one frame. */
 void func_1507E2B0(Actor *actor) {
-    if ((actor->id != 0x2B) && (D_800C35EA[0] != 1)) {
-        if ((actor->unk127 != 0xFF) && (actor->unk31C->death_State != 0)) {
+    if ((actor->character_type != 0x2B) && (D_800C35EA[0] != 1)) {
+        if ((actor->playernumber != 0xFF) && (actor->mv->death_State != 0)) {
             actor->eyeClosed[0] = 1;
             actor->eyeClosed[1] = 1;
             return;
@@ -77,7 +77,7 @@ void func_1507E3C0(Actor *actor) {
     s32 eyePart[2];
     u8 model;
 
-    model = actor->id;
+    model = actor->character_type;
     if ((model == 0xF) || (model == 0x46) || (model == 0x4C)) {
         for (i = 0; i < 2; i++) {
             eyePart[i] = actor->eyeCode[i];
@@ -155,12 +155,12 @@ void func_1507E5C8(Actor *actor, s32 morphDuration) {
         if (record->unk8 != 0) {
             actor->unk68[0] = record->unk8;
         } else {
-            actor->unk68[0] = D_800D1C90[actor->id]->eyeDefault[0];
+            actor->unk68[0] = D_800D1C90[actor->character_type]->eyeDefault[0];
         }
         if (record->unk9 != 0) {
             actor->unk68[1] = record->unk9;
         } else {
-            actor->unk68[1] = D_800D1C90[actor->id]->eyeDefault[1];
+            actor->unk68[1] = D_800D1C90[actor->character_type]->eyeDefault[1];
         }
     }
 }
@@ -170,7 +170,7 @@ s32 func_1507E6B8(Actor *actor) {
     s32 model;
     s32 expression;
 
-    if (actor->health == 0) {
+    if (actor->energy == 0) {
         return FALSE;
     }
     if (actor->expression == actor->defaultExpression) {
@@ -192,7 +192,7 @@ s32 func_1507E6B8(Actor *actor) {
 void func_1507E73C(Actor *actor) {
     s32 timer;
 
-    if (actor->unk5 != 2) {
+    if (actor->drawtype != 2) {
         if (actor->expressionTimer != 0) {
             timer = actor->expressionTimer;
             if (timer == 0xFFFE) {
@@ -266,7 +266,7 @@ s32 func_1507E968(Actor *actor) {
     s32 model;
     s32 id;
 
-    id = actor->id;
+    id = actor->character_type;
     model = (id != 0x96) ? func_150849A0(actor) : id;
     if (model == 0xFF) {
         return 0;

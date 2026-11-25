@@ -7,7 +7,7 @@ extern f32 D_8009FD30[3];
 extern f32 D_8009FD3C[3];
 extern f32 D_8009FD48[3];
 
-// matching: the model is passed as s32; a pointer type moves the unk1D4 temp from v0 to a3
+// matching: the model is passed as s32; a pointer type moves the ob_matrix_ptr temp from v0 to a3
 void func_15143134(f32 *in, f32 *out, void *mtx);
 void func_1515C244(Actor *, f32 *, f32 *, f32 *);
 void func_150B82D0(Vec3f *, f32 *, f32 *, f32 *, u8, s32);
@@ -43,15 +43,15 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
     f32 aspect;
 
     if (obj != NULL) {
-        if (obj->unk1D4 != NULL) {
-            // matching: integer casts keep unk1D4 out of a0 (a pointer argument is loaded straight into a0)
-            func_15142314((s32)obj->unk1D4, 4, &joints[0].x);
-            func_15142314((s32)obj->unk1D4, 5, &joints[1].x);
-            func_15142314((s32)obj->unk1D4, 0, &root.x);
+        if (obj->ob_matrix_ptr != NULL) {
+            // matching: integer casts keep ob_matrix_ptr out of a0 (a pointer argument is loaded straight into a0)
+            func_15142314((s32)obj->ob_matrix_ptr, 4, &joints[0].x);
+            func_15142314((s32)obj->ob_matrix_ptr, 5, &joints[1].x);
+            func_15142314((s32)obj->ob_matrix_ptr, 0, &root.x);
         } else {
-            root.x = obj->x_position;
-            root.y = obj->y_position;
-            root.z = obj->z_position;
+            root.x = obj->xpos;
+            root.y = obj->ypos;
+            root.z = obj->zpos;
             joints[0].x = root.x + 20.0f;
             joints[0].y = root.y + 130.0f;
             joints[0].z = root.z;
@@ -59,20 +59,20 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
             joints[1].y = root.y + 130.0f;
             joints[1].z = root.z;
         }
-        dirX = func_151423D8(obj->unk76 >> 8);
-        dirZ = func_151423D8((obj->unk76 >> 8) + 0x40);
-        velX = obj->xz_velocity * dirX;
-        velZ = obj->xz_velocity * dirZ;
+        dirX = func_151423D8(obj->angle >> 8);
+        dirZ = func_151423D8((obj->angle >> 8) + 0x40);
+        velX = obj->speed * dirX;
+        velZ = obj->speed * dirZ;
         {
             f32 bottom[3];
             f32 side[3];
 
-            if (obj->unk1D4 != NULL) {
+            if (obj->ob_matrix_ptr != NULL) {
                 void *mtx;
                 f32 dx;
                 f32 dz;
 
-                mtx = (u8 *)obj->unk1D4 + 0x80; /* bone 2 */
+                mtx = (u8 *)obj->ob_matrix_ptr + 0x80; /* bone 2 */
                 func_15143134(D_8009FD30, &center.x, mtx);
                 func_15143134(D_8009FD3C, bottom, mtx);
                 func_15143134(D_8009FD48, side, mtx);
@@ -108,9 +108,9 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
         chunk.model = 0;
         chunk.lifetime = 300;
         chunk.elasticity = 0.6f;
-        chunk.rot.x = obj->unkB8;
-        chunk.rot.y = obj->unk40;
-        chunk.rot.z = obj->unkC4;
+        chunk.rot.x = obj->vtilt;
+        chunk.rot.y = obj->theta;
+        chunk.rot.z = obj->lean_angle;
         chunk.scale.x = 1.0f;
         chunk.scale.y = 1.0f;
         chunk.scale.z = 1.0f;
@@ -133,14 +133,14 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
         chunk.fadeRate = 0xFF;
         chunk.rotVel.z = 0; // matching: an int 0 here; 0.0f makes IDO keep a shared zero in $f22
         chunk.gravity = -1.6f;
-        scaleXZ = obj->xz_scale;
+        scaleXZ = obj->scale_xz;
         if (scaleXZ > 1.0f) {
             scaleXZ = 1.0f;
         }
         if (scaleXZ < 0.5f) {
             scaleXZ = 0.5f;
         }
-        scaleY = obj->y_scale;
+        scaleY = obj->scale_y;
         if (scaleY > 1.0f) {
             scaleY = 1.0f;
         }
@@ -161,7 +161,7 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
             f32 horizontal;
             PuffSpray burst;
 
-            speed = (func_150ADA68() * 30.0f * obj->y_scale) + 10.0f;
+            speed = (func_150ADA68() * 30.0f * obj->scale_y) + 10.0f;
             yaw = func_150ADA20() & 0x7F;
             pitch = -0x20 - (func_150ADA20() & 0x1F);
             sinYaw = func_151423D8(yaw);
@@ -176,7 +176,7 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
             chunk.rotVel.x = 30.0f - (func_150ADA68() * 60.0f);
             chunk.rotVel.y = 30.0f - (func_150ADA68() * 60.0f);
             func_15132A4C(&chunk, 3, 2, 0, arg1, 0);
-            scale = ((obj->xz_scale + obj->y_scale) * 0.5f) / 0.96f;
+            scale = ((obj->scale_xz + obj->scale_y) * 0.5f) / 0.96f;
             burst.pos = joints[i];
             burst.countBase = 4;
             burst.countRange = 4;

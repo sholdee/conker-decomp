@@ -161,9 +161,9 @@ void func_1509C8FC(s32 ref, s32 alt) {
         }
 
         if (alt) {
-            func_150221E8(obj->x_position, obj->y_position, obj->z_position, angle + 180.0f);
+            func_150221E8(obj->xpos, obj->ypos, obj->zpos, angle + 180.0f);
         } else {
-            func_15022190(obj->x_position, obj->y_position, obj->z_position, angle + 180.0f);
+            func_15022190(obj->xpos, obj->ypos, obj->zpos, angle + 180.0f);
         }
     }
 }

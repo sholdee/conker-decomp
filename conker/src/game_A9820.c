@@ -10,7 +10,7 @@ void func_1507C370(void) {
     Actor *obj = movement_obj;
 
     for (i = 0; i < D_8008FD8C; i++, obj++) {
-        ActorCtl *ext = obj->unk31C;
+        ActorCtl *ext = obj->mv;
         if (ext != NULL) {
             func_1507C3E0(obj, &ext->height, &ext->width, &ext->depth);
         }
@@ -27,7 +27,7 @@ void dbgp(f32 *);
 void dbgu();
 extern f32 dbgx[];
 /* Computes an object's height, width and depth (each output may be NULL): fixed sizes for
- * special states and object ids, otherwise its unkE6/unkE4, scaled by y_scale/xz_scale. */
+ * special states and object ids, otherwise its unkE6/unkE4, scaled by scale_y/scale_xz. */
 void func_1507C3E0(Actor *obj, s16 *outHeight, s16 *outWidth, s16 *outDepth) {
     f32 height;
     f32 width;
@@ -47,35 +47,35 @@ void func_1507C3E0(Actor *obj, s16 *outHeight, s16 *outWidth, s16 *outDepth) {
     dbg = 0; // matching: guards the dead debug blocks below
     applyScale = 1;
     zero = 0.0f;
-    if (obj->interaction_state == 0) {
+    if (obj->type == 0) {
         width = depth = 60.0f;
         height = 180.0f;
-    } else if (obj->interaction_state == 45) {
-        height = obj->camera->unk960;
-        width = depth = obj->camera->unk95C;
-    } else if (obj->interaction_state == 4) {
+    } else if (obj->type == 45) {
+        height = obj->CameraPtr->unk960;
+        width = depth = obj->CameraPtr->unk95C;
+    } else if (obj->type == 4) {
         height = obj->bodyHeight * 6.0f;
         width = depth = obj->bodyRadius * 3.0f;
-    } else if (obj->interaction_state == 44) {
+    } else if (obj->type == 44) {
         width = depth = 80.0f;
         height = 160.0f;
-    } else if (obj->unk5 == 5) {
+    } else if (obj->drawtype == 5) {
         height = obj->bodyHeight * 2.0f;
         width = depth = obj->bodyRadius;
     } else {
-        switch (obj->id) {
+        switch (obj->character_type) {
         case 0: case 1: case 2: case 3: case 4:
         case 59:
         case 117: case 128: case 130: case 136: case 144: case 150: case 152:
         case 156: case 157: case 159: case 160: case 176: case 177: case 178: case 180:
-            ext = obj->unk31C;
+            ext = obj->mv;
             if (ext != NULL && ext->duck_tilt != 0) {
                 width = depth = 60.0f;
                 height = 80.0f;
             } else if (ext != NULL && ext->env_suit != 0) {
                 width = depth = 70.0f;
                 height = 300.0f;
-            } else if (obj->in_water) {
+            } else if (obj->inwater) {
                 height = 180.0f;
                 width = 90.0; depth = 90.0f; // matching: double literal un-CSEs the constant
             } else {
@@ -83,7 +83,7 @@ void func_1507C3E0(Actor *obj, s16 *outHeight, s16 *outWidth, s16 *outDepth) {
                 depth = 60.0f;
                 height = 180.0f;
                 if (ext != NULL) {
-                    if ((obj->camera != NULL && obj->camera->aimState != 0) ||
+                    if ((obj->CameraPtr != NULL && obj->CameraPtr->aimState != 0) ||
                         ext->SniperState != 0 || ext->unk1B3 != 0) {
                         width *= 2.0f; depth *= 2.0f;
                     }
@@ -91,7 +91,7 @@ void func_1507C3E0(Actor *obj, s16 *outHeight, s16 *outWidth, s16 *outDepth) {
                 }
             }
             if (ext != NULL && (ext->transport & 0xF) == 1 && ext->transport_surface == 0 &&
-                obj->xz_velocity < 40.0f) {
+                obj->speed < 40.0f) {
                 width = depth = 110.0f;
                 height = 500.0f;
             }
@@ -134,14 +134,14 @@ void func_1507C3E0(Actor *obj, s16 *outHeight, s16 *outWidth, s16 *outDepth) {
             width = depth = obj->bodyRadius;
             break;
         }
-        if (obj->unk13C > 100 && movement_obj[obj->unk13C - 100].id == 19) {
-            depth += 120.0f * obj->xz_scale;
-            height += 100.0f * obj->y_scale;
+        if (obj->lifting > 100 && movement_obj[obj->lifting - 100].character_type == 19) {
+            depth += 120.0f * obj->scale_xz;
+            height += 100.0f * obj->scale_y;
         }
         if (applyScale) {
             f32 xzScale;
-            xzScale = obj->xz_scale;
-            height *= obj->y_scale;
+            xzScale = obj->scale_xz;
+            height *= obj->scale_y;
             width *= xzScale;
             depth *= xzScale;
             goto end; // matching: falling out of the if/else schedules the tail differently

@@ -133,19 +133,19 @@ Gfx *func_1502BAD0(Gfx *gdl, s32 mode, s16 player) {
     obj = movement_obj;
     for (i = 0; i != 25; i++, obj++) {
         D_8003C8E0 = (i & 0xFFFFFF) | 0x01000000;
-        state = obj->interaction_state;
-        if (state == 0 || obj->unk5 == 3 || obj->unk5 == 5) {
+        state = obj->type;
+        if (state == 0 || obj->drawtype == 3 || obj->drawtype == 5) {
             continue;
         }
-        if (obj->unk5 == 2) {
+        if (obj->drawtype == 2) {
             if (mode != 2) {
                 continue;
             }
-        } else if (obj->id == 0xFF) {
+        } else if (obj->character_type == 0xFF) {
             continue;
         }
         if (mode == 6) {
-            if (obj->unk5 != 7) {
+            if (obj->drawtype != 7) {
                 continue;
             }
         } else if (mode == 0) {
@@ -153,21 +153,21 @@ Gfx *func_1502BAD0(Gfx *gdl, s32 mode, s16 player) {
                 continue;
             }
         } else if (mode == 1) {
-            if (obj->unk5 == 7 || obj->unk5 == 1) {
+            if (obj->drawtype == 7 || obj->drawtype == 1) {
                 continue;
             }
-            if (obj->unk5 == 0 && func_1506196C(obj, player) < 0xFF) {
+            if (obj->drawtype == 0 && func_1506196C(obj, player) < 0xFF) {
                 continue;
             }
-        } else if (mode == 2 && obj->unk5 != 2) {
-            if (obj->unk5 == 7 || (obj->unk5 != 0 && obj->unk5 != 1)) {
+        } else if (mode == 2 && obj->drawtype != 2) {
+            if (obj->drawtype == 7 || (obj->drawtype != 0 && obj->drawtype != 1)) {
                 continue;
             }
-            if (obj->unk5 == 0 && func_1506196C(obj, player) == 0xFF) {
+            if (obj->drawtype == 0 && func_1506196C(obj, player) == 0xFF) {
                 continue;
             }
         }
-        if (obj->unk5 == 2) {
+        if (obj->drawtype == 2) {
             gdl = func_1502C408(gdl, i);
         } else {
             gdl = func_1502C974(gdl, i, player, mode, 0);
@@ -191,28 +191,28 @@ Gfx *func_1502BAD0(Gfx *gdl, s32 mode, s16 player) {
 
 /* Per-frame update of one object: LOD, culling, bone matrices, fog effect and attachments. */
 void func_1502BD84(Actor *obj, s32 index) {
-    obj->unk1D4 = NULL;
-    if (obj->unk5 == 5) {
+    obj->ob_matrix_ptr = NULL;
+    if (obj->drawtype == 5) {
         func_1502DF38(index, TRUE);
         return;
     }
-    if (obj->id == 0xFF) {
+    if (obj->character_type == 0xFF) {
         return;
     }
-    if (obj->unk5 == 3) {
+    if (obj->drawtype == 3) {
         return;
     }
-    if (obj->unk5 == 2) {
+    if (obj->drawtype == 2) {
         func_1502C608(index);
         return;
     }
-    if (obj->lodRequest != 0) {
+    if (obj->forced_lod != 0) {
         func_1502FBE8(obj);
     }
     func_1502E4C4(index);
     func_1502DF38(index, FALSE);
     func_1503A08C(obj);
-    if (obj->unk1D4 == NULL) {
+    if (obj->ob_matrix_ptr == NULL) {
         obj->unk1FC = 2;
     } else {
         func_150345E4(index);
@@ -221,13 +221,13 @@ void func_1502BD84(Actor *obj, s32 index) {
     if (D_800C666F[index].unk0 != 0) {
         func_1503DF48(index);
     }
-    if (obj->interaction_state != 0) {
+    if (obj->type != 0) {
         func_1502EEF4(index);
         func_1502F264(index);
         if (obj->fogMode != 0) {
             func_1502EAFC(obj);
         }
-        if (obj->unkF8 & 0x4000) {
+        if (obj->noshove & 0x4000) {
             func_150A4B04(obj);
         }
         if (obj->morph != NULL) {
@@ -253,20 +253,20 @@ void func_1502BEE4(void) {
     D_800C3E90 = 0;
     D_800C3E74 = 0;
     for (i = 0; i < 25; i++) {
-        if (movement_obj[i].objectNum != 0) {
-            D_800C3E74 |= 1 << (movement_obj[i].objectNum - 1);
+        if (movement_obj[i].stand_on_char != 0) {
+            D_800C3E74 |= 1 << (movement_obj[i].stand_on_char - 1);
         }
     }
     bzero(depth, 25);
     for (i = 0; i < 25; i++) {
         obj = &movement_obj[i];
-        state = obj->interaction_state;
+        state = obj->type;
         if (state != 0) {
-            if (obj->unk65 != 0) {
+            if (obj->attach_char != 0) {
                 parent = obj;
                 depth[i] = 0;
-                while (parent->unk65 != 0) {
-                    parent = &movement_obj[parent->unk65 - 1];
+                while (parent->attach_char != 0) {
+                    parent = &movement_obj[parent->attach_char - 1];
                     depth[i]++;
                 }
                 if (maxDepth < depth[i]) {
@@ -292,7 +292,7 @@ void func_1502BEE4(void) {
     }
     func_1502F3C8();
     for (i = 0; i < 25; i++) {
-        if (movement_obj[i].interaction_state != 0) {
+        if (movement_obj[i].type != 0) {
             func_1502F948(&movement_obj[i]);
         }
     }
@@ -316,12 +316,12 @@ void func_1502C1A4(void) {
 
     // matching: -g3 line numbers; the init shares the loop's first line (preheader schedule)
     obj = movement_obj; do {
-        state = obj->interaction_state;
+        state = obj->type;
         if (state != 0) {
-            id = obj->id;
+            id = obj->character_type;
             visible = FALSE;
-            if (obj->unk5 != 3 && id != 0xFF && obj->unk123 == 0 && (obj->unk66 & 0x10) != 0x10 &&
-                obj->unk160 != 0 && obj->unk65 == 0 &&
+            if (obj->drawtype != 3 && id != 0xFF && obj->unk123 == 0 && (obj->unk66 & 0x10) != 0x10 &&
+                obj->shadow_size != 0 && obj->attach_char == 0 &&
                 (D_800C3638 == 0 || D_800C3656[0] != 0 || func_150229E4(obj) != 0) &&
                 (obj->unk88 == 0 || obj->unkCC >= -150)) {
                 for (i = 0; i <= D_80082FA0; i++) {
@@ -333,7 +333,7 @@ void func_1502C1A4(void) {
             if (visible) {
                 if (obj->unk2D4 == NULL) {
                     variant = 0;
-                    if (obj->id == 0x4D) {
+                    if (obj->character_type == 0x4D) {
                         variant = 2;
                         variantFlag = 1;
                     } else {
@@ -394,7 +394,7 @@ Gfx *func_1502C408(Gfx *gdl, s32 index) {
         return gdl;
     }
     h = w = size * 19;
-    if (movement_obj[index].interaction_state == 3) {
+    if (movement_obj[index].type == 3) {
         h = w = size * 15;
     }
     tex = func_1502C3BC(index);
@@ -407,9 +407,9 @@ Gfx *func_1502C408(Gfx *gdl, s32 index) {
     sprite.alpha = alpha;
     sprite.w = w;
     sprite.h = h;
-    sprite.x = movement_obj[index].x_position;
-    sprite.y = movement_obj[index].y_position + (f32)(size / 2);
-    sprite.z = movement_obj[index].z_position;
+    sprite.x = movement_obj[index].xpos;
+    sprite.y = movement_obj[index].ypos + (f32)(size / 2);
+    sprite.z = movement_obj[index].zpos;
     gdl = func_15095760(gdl, &sprite);
     gSPDisplayList(gdl++, D_80087408);
     return gdl;
@@ -451,10 +451,10 @@ void func_1502C6E8(s32 index, s16 player, s32 mode) {
 
     cam = &camera_global_Cameras[player];
     obj = &movement_obj[index];
-    if (obj->lodRequest != 0) {
+    if (obj->forced_lod != 0) {
         return;
     }
-    if (obj->unk5 == 7) {
+    if (obj->drawtype == 7) {
         return;
     }
     range[0] = 500.0f;
@@ -466,12 +466,12 @@ void func_1502C6E8(s32 index, s16 player, s32 mode) {
         return;
     }
     special = func_150849A0(obj);
-    diff = cam->eye.x - obj->x_position;
+    diff = cam->eye.x - obj->xpos;
     distSq = diff * diff;
-    diff = cam->eye.y - obj->y_position;
+    diff = cam->eye.y - obj->ypos;
     diff = diff * diff;
     distSq += diff;
-    diff = cam->eye.z - obj->z_position;
+    diff = cam->eye.z - obj->zpos;
     diff = diff * diff;
     distSq += diff;
     if (distSq < range[0] * range[0]) {
@@ -485,7 +485,7 @@ void func_1502C6E8(s32 index, s16 player, s32 mode) {
     } else {
         lod = 4;
     }
-    if (lod >= 2 && obj->xz_velocity < 3.0f) {
+    if (lod >= 2 && obj->speed < 3.0f) {
         lod--;
     }
     if (special) {
@@ -509,12 +509,12 @@ void func_1502C6E8(s32 index, s16 player, s32 mode) {
     if (lod == -1) {
         return;
     }
-    if (lod == obj->lod) {
+    if (lod == obj->current_lod) {
         return;
     }
     model = obj->modelIds[lod];
     func_150837D4(index, model, 0);
-    obj->lod = lod;
+    obj->current_lod = lod;
 }
 
 /* Draws one object's model for one player; drops the output if the display list would overflow. */
@@ -538,12 +538,12 @@ Gfx *func_1502C974(Gfx *gdl, s32 index, s32 player, s32 mode, s32 wrap) {
     if (func_1506196C(obj, player) == 0) {
         return gdl;
     }
-    if (obj->unk1D4 == NULL) {
+    if (obj->ob_matrix_ptr == NULL) {
         return gdl;
     }
     if (mode != 4 && mode != 5 && mode != 3) {
         func_1502C6E8(index, player, mode);
-        lod = obj->lod;
+        lod = obj->current_lod;
     } else {
         func_150849CC(obj, &lod);
     }
@@ -555,7 +555,7 @@ Gfx *func_1502C974(Gfx *gdl, s32 index, s32 player, s32 mode, s32 wrap) {
     }
     alpha = func_1506196C(obj, player);
     if (alpha < 0xFF) {
-        if (obj->camera != NULL && obj->camera->mode == 0x100 && player != obj->unk127) {
+        if (obj->CameraPtr != NULL && obj->CameraPtr->mode == 0x100 && player != obj->playernumber) {
             alpha = 0xFF;
         }
     }
@@ -563,7 +563,7 @@ Gfx *func_1502C974(Gfx *gdl, s32 index, s32 player, s32 mode, s32 wrap) {
         alpha = (D_800DF7C4 * alpha) >> 8;
         model = (s32)D_800DF7C0;
     } else {
-        model = obj->unk1D4;
+        model = obj->ob_matrix_ptr;
     }
     gdl = func_1502CCFC(gdl, index, player, model, alpha, colour, mode, wrap);
     // matching: IDO materialises the comparison as a 0/1 value only through this flag
@@ -625,11 +625,11 @@ Gfx *func_1502CCFC(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s32 
     s32 pad; // matching: unused stack slot
 
     obj = &movement_obj[index];
-    id = obj->id;
+    id = obj->character_type;
     if (mode == 3 || mode == 4 || mode == 5) {
         id = func_150849CC(obj, &lod);
     } else {
-        lod = obj->lod;
+        lod = obj->current_lod;
     }
     if (func_1503DA9C(obj, id, lod, (mode == 3) ? 0 : 1) != 0) {
         return gdl;
@@ -687,7 +687,7 @@ Gfx *func_1502CCFC(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s32 
         if (D_800D9900 != 0) {
             lightFlags |= 8;
         }
-        gdl = func_1515D914(gdl, player, (s32)obj->x_position, (s32)obj->y_position, (s32)obj->z_position,
+        gdl = func_1515D914(gdl, player, (s32)obj->xpos, (s32)obj->ypos, (s32)obj->zpos,
                             obj->unk184, obj->unk304[player], obj->unk301, obj->unk314[D_800BE9C0],
                             &obj->unk302, 2, obj->unk1DD, lightFlags, D_800D9E28);
     }
@@ -784,7 +784,7 @@ void func_1502D630(Actor *obj, s32 *colour, s32 player) {
     step = (first - last) * 0.001000000047f;
     near = (f32)(u32)D_800DD2E8 * step + last;
     far = (f32)(u32)D_800DD2EC * step + last;
-    func_150A7A00(D_800D2CA8[player], obj->x_position, obj->y_position, obj->z_position, &x, &y, &z, &w);
+    func_150A7A00(D_800D2CA8[player], obj->xpos, obj->ypos, obj->zpos, &x, &y, &z, &w);
     w = (w != 0.0f) ? 1.0f / w : 0.001000000047f;
     if (w < 0) { // matching: integer zeros here; 0.0f literals share the 1.0f register differently
         amount = 0;
@@ -816,7 +816,7 @@ void func_1502D824(ObjAnim *anim, Actor *obj, u8 *buf) {
     channels = 1;
     align = 0;
     if (obj != NULL) {
-        if (obj->unk84.uh == 0xFFFF) {
+        if (obj->animseq.uh == 0xFFFF) {
             func_1505DFDC(obj);
         }
         anim = ((ObjAnim *)obj->unk2D0);
@@ -923,16 +923,16 @@ void func_1502DB84(MtxF mtx, s32 index) {
     SpawnRecord *unk144;
 
     obj = &movement_obj[index];
-    id = obj->id;
+    id = obj->character_type;
     remap = NULL;
     if (D_800D19A0[id] == NULL) {
-        unk144 = obj->spawn;
+        unk144 = obj->listpos_ptr;
         if (func_1503CF20(id, 0, unk144, 1, obj->unkAC) != 0) {
-            obj->unk1D4 = NULL;
+            obj->ob_matrix_ptr = NULL;
             return;
         }
         if (D_800D19A0[id] == NULL) {
-            obj->unk1D4 = NULL;
+            obj->ob_matrix_ptr = NULL;
             return;
         }
     }
@@ -946,11 +946,11 @@ load:
         if (D_800C4ED0[id] < 2 || ((ObjAnim *)obj->unk2D0) != NULL) {
             count = func_1502DB20(id);
             if ((u32)(D_800C3E7C << 6) < (u32)(D_800C3E88 + (count << 6) - D_800C3E8C)) {
-                obj->unk1D4 = NULL;
+                obj->ob_matrix_ptr = NULL;
                 return;
             }
             func_1502FD70(obj);
-            obj->unk1D4 = (void *)D_800C3E88;
+            obj->ob_matrix_ptr = (void *)D_800C3E88;
             {
                 s32 k;
 
@@ -974,13 +974,13 @@ load:
                 s16 scale;
 
                 if (D_800C35EA[0] != 1) {
-                    scale = obj->y_scale * obj->unkCC;
+                    scale = obj->scale_y * obj->unkCC;
                 } else {
                     scale = 0;
                 }
                 func_150A81D0(&D_800C3E88, mtx, ((ObjAnim *)obj->unk2D0), (s32)D_800C4BE0[id], count, cmd, remap, scale);
             }
-            obj->unk7C = D_8008857C;
+            obj->mod_angle = D_8008857C;
             moved = D_80088558;
             if (moved != 0) {
                 f32 f0;
@@ -993,16 +993,16 @@ load:
                 obj->unk1F8 = f0;
                 if (obj->unk1FC & 2) {
                     obj->unk1FC &= ~3;
-                    obj->unk1F4 = obj->xz_velocity;
+                    obj->unk1F4 = obj->speed;
                 } else {
                     obj->unk1FC |= 1;
                 }
-                if (obj->unk246 & 0x40) {
+                if (obj->intel_animspd & 0x40) {
                     f0 = moved * 0.03125f;
-                    if (1) {} // matching: with the volatile below, keeps IDO from reusing the earlier xz_velocity load
-                    f0 = obj->xz_scale * f0;
+                    if (1) {} // matching: with the volatile below, keeps IDO from reusing the earlier speed load
+                    f0 = obj->scale_xz * f0;
                     f0 = f0 / ((ObjAnim *)obj->unk2D0)->frameCount[0];
-                    f0 = *(volatile f32 *)&obj->xz_velocity / f0;
+                    f0 = *(volatile f32 *)&obj->speed / f0;
                     ((ObjAnim *)obj->unk2D0)->unk10 = f0 * 0.5f;
                 }
             }
@@ -1028,12 +1028,12 @@ void func_1502DF38(s32 index, s32 rootOnly) {
     s32 parent;
 
     obj = &movement_obj[index];
-    if (obj->xz_scale == 0.0f) {
-        obj->xz_scale = 0.1000000015f;
+    if (obj->scale_xz == 0.0f) {
+        obj->scale_xz = 0.1000000015f;
         obj->unk154 = 0.1000000015f;
     }
-    if (obj->y_scale == 0.0f) {
-        obj->y_scale = 0.1000000015f;
+    if (obj->scale_y == 0.0f) {
+        obj->scale_y = 0.1000000015f;
         obj->unk158 = 0.1000000015f;
     }
     if ((obj->unk66 & 0x20) == 0x20) {
@@ -1041,15 +1041,15 @@ void func_1502DF38(s32 index, s32 rootOnly) {
     } else {
         canCull = TRUE;
     }
-    if (obj->unk31C != NULL && obj->unk31C->SniperState != 0) {
+    if (obj->mv != NULL && obj->mv->SniperState != 0) {
         canCull = FALSE;
     }
     if ((1 << index) & D_800C3E74) {
         canCull = FALSE;
     }
-    if (obj->id == 0x8A) {
+    if (obj->character_type == 0x8A) {
         other = func_15072208(obj, 0);
-        if (other != NULL && other->unk31C != NULL && other->unk31C->SniperState != 0) {
+        if (other != NULL && other->mv != NULL && other->mv->SniperState != 0) {
             canCull = FALSE;
         }
     }
@@ -1069,19 +1069,19 @@ void func_1502DF38(s32 index, s32 rootOnly) {
         }
     }
     dc_glbl_CharNum = index;
-    if (obj->unk65 && !(obj->unk101 & 0x10)) {
-        parent = obj->unk65 - 1;
-        bone = movement_obj[parent].unk1D4;
+    if (obj->attach_char && !(obj->unk101 & 0x10)) {
+        parent = obj->attach_char - 1;
+        bone = movement_obj[parent].ob_matrix_ptr;
         if (bone == NULL) {
             return;
         }
-        bone += obj->unk5C;
+        bone += obj->basemtx;
         if (!(obj->unk101 & 4)) {
             for (i = 0; i < 3; i++) {
                 if (i == 1) {
-                    scale = obj->y_scale;
+                    scale = obj->scale_y;
                 } else {
-                    scale = obj->xz_scale;
+                    scale = obj->scale_xz;
                 }
                 for (j = 0; j < 3; j++) {
                     mtx[i][j] = (*bone)[i][j] * scale;
@@ -1097,9 +1097,9 @@ void func_1502DF38(s32 index, s32 rootOnly) {
                 len = sqrtf((*bone)[i][0] * (*bone)[i][0] + (*bone)[i][1] * (*bone)[i][1] +
                             (*bone)[i][2] * (*bone)[i][2]);
                 if (i == 1) {
-                    scale = obj->y_scale / len;
+                    scale = obj->scale_y / len;
                 } else {
-                    scale = obj->xz_scale / len;
+                    scale = obj->scale_xz / len;
                 }
                 for (j = 0; j < 3; j++) {
                     mtx[i][j] = (*bone)[i][j] * scale;
@@ -1110,25 +1110,25 @@ void func_1502DF38(s32 index, s32 rootOnly) {
             mtx[3][3] = 1.0f;
         }
     } else {
-        func_150A9B0C(mtx, obj->unkB8, obj->unk40, obj->unkC4, obj->xz_scale, obj->y_scale, obj->xz_scale);
+        func_150A9B0C(mtx, obj->vtilt, obj->theta, obj->lean_angle, obj->scale_xz, obj->scale_y, obj->scale_xz);
         if (obj->unk101 & 0x10) {
-            other = &movement_obj[obj->unk65 - 1];
-            bone = movement_obj[obj->unk65 - 1].unk1D4;
+            other = &movement_obj[obj->attach_char - 1];
+            bone = movement_obj[obj->attach_char - 1].ob_matrix_ptr;
             if (bone == NULL) {
                 mtx[3][0] = 0;
                 mtx[3][1] = 0;
                 mtx[3][2] = 0;
             } else {
-                bone += obj->unk5C;
+                bone += obj->basemtx;
                 mtx[3][0] = (*bone)[3][0];
                 mtx[3][1] = (*bone)[3][1];
                 mtx[3][2] = (*bone)[3][2];
             }
         } else {
             other = obj;
-            mtx[3][0] = obj->x_position;
-            mtx[3][1] = obj->y_position + obj->y_scale * obj->unkC8;
-            mtx[3][2] = obj->z_position;
+            mtx[3][0] = obj->xpos;
+            mtx[3][1] = obj->ypos + obj->scale_y * obj->unkC8;
+            mtx[3][2] = obj->zpos;
         }
         if (((ObjAnim *)other->unk2D0) != NULL && ((ObjAnim *)other->unk2D0)->frameData[0] == NULL) {
             mtx[3][1] += other->unkCC;
@@ -1136,7 +1136,7 @@ void func_1502DF38(s32 index, s32 rootOnly) {
     }
     if (rootOnly) {
         dst = (void *)D_800C3E88;
-        obj->unk1D4 = dst;
+        obj->ob_matrix_ptr = dst;
         bcopy(mtx, dst, sizeof(mtx));
         D_800C3E88 += sizeof(mtx);
         D_800C3E7A++;
@@ -1175,8 +1175,8 @@ void func_1502E4C4(s32 index) {
 
     mask = 1;
     obj = &movement_obj[index];
-    id = obj->id;
-    if (obj->unk5 == 7) {
+    id = obj->character_type;
+    if (obj->drawtype == 7) {
         obj->unk74 &= ~0xF;
         return;
     }
@@ -1185,7 +1185,7 @@ void func_1502E4C4(s32 index) {
     if (D_800C3638 != 0 && D_800C3656[0] == 0 && func_150229E4(obj) == 0) {
         return;
     }
-    if (obj->unk127 != 0xFF && !((u16)D_800D2340 & (1 << obj->unk127))) {
+    if (obj->playernumber != 0xFF && !((u16)D_800D2340 & (1 << obj->playernumber))) {
         return;
     }
     if ((obj->unk101 & 1) == 1) {
@@ -1194,14 +1194,14 @@ void func_1502E4C4(s32 index) {
     if (obj->unk7 == 0) {
         return;
     }
-    if (obj->unk65 != 0) {
-        obj->unk74 = movement_obj[obj->unk65 - 1].unk74;
+    if (obj->attach_char != 0) {
+        obj->unk74 = movement_obj[obj->attach_char - 1].unk74;
         return;
     }
-    width = (u32)D_800D1C90[id]->bodyRadius * obj->xz_scale;
-    height = (u32)D_800D1C90[id]->bodyRadius * obj->y_scale;
-    yOffset = (D_800D1C90[id]->bodyHeight + obj->unkCC) * obj->y_scale;
-    obj->unk270 = width;
+    width = (u32)D_800D1C90[id]->bodyRadius * obj->scale_xz;
+    height = (u32)D_800D1C90[id]->bodyRadius * obj->scale_y;
+    yOffset = (D_800D1C90[id]->bodyHeight + obj->unkCC) * obj->scale_y;
+    obj->cull_radius_xz = width;
     range = obj->unk10;
     if (D_800C35EA[0] == 1 && D_800C3660[0] == 0) {
         range = 0;
@@ -1215,7 +1215,7 @@ void func_1502E4C4(s32 index) {
         } else if (D_800D1C90[id]->cullDistance == 1) {
             cullDist = 0.0f;
         } else {
-            cullDist = (u32)D_800D1C90[id]->cullDistance * obj->xz_scale;
+            cullDist = (u32)D_800D1C90[id]->cullDistance * obj->scale_xz;
         }
     }
     for (i = 0; i <= D_80082FA0; i++) {
@@ -1229,7 +1229,7 @@ void func_1502E4C4(s32 index) {
         } else {
             playerRange = range;
         }
-        dist = func_150A6360(view, tbl, obj->x_position, obj->y_position + yOffset, obj->z_position, width,
+        dist = func_150A6360(view, tbl, obj->xpos, obj->ypos + yOffset, obj->zpos, width,
                              height, 20000.0f);
         if (dist == 0) {
             inside = TRUE;
@@ -1257,7 +1257,7 @@ void func_1502E4C4(s32 index) {
                 func_1506160C(obj, 9, 0, 0, i);
                 event = -1;
             }
-            if ((obj->unkF8 & 0x800000) && event != 8 && D_800C35EA[0] != 1 && func_1503F904(obj, i, oldMask) != 0) {
+            if ((obj->noshove & 0x800000) && event != 8 && D_800C35EA[0] != 1 && func_1503F904(obj, i, oldMask) != 0) {
                 inside = TRUE;
             }
         } else {
@@ -1275,7 +1275,7 @@ void func_1502E4C4(s32 index) {
         mask <<= 1;
     }
     func_1502E9FC(obj, maxDist);
-    if (obj->camera != NULL && (obj->camera->mode == 0x10000 || obj->unk31C->SniperState != 0)) {
+    if (obj->CameraPtr != NULL && (obj->CameraPtr->mode == 0x10000 || obj->mv->SniperState != 0)) {
         obj->unk74 |= 1 << index;
     }
     if (D_800C35EA[0] != 1) {
@@ -1502,7 +1502,7 @@ Gfx *func_1502F01C(Gfx *gdl, s32 index) {
     ObjTexture *tex;
 
     obj = &movement_obj[index];
-    id = obj->id;
+    id = obj->character_type;
     override = NULL;
     for (i = 0; i < 2; i++) {
         if (obj->eyeCode[i] >= 10) {
@@ -1529,7 +1529,7 @@ Gfx *func_1502F01C(Gfx *gdl, s32 index) {
             }
         }
     }
-    tex = D_800C5338[obj->id];
+    tex = D_800C5338[obj->character_type];
     if (tex != NULL) {
         gSPSegment(gdl++, 6, tex[texIndex[0]].addr);
         gSPSegment(gdl++, 7, tex[texIndex[1]].addr);
@@ -1547,33 +1547,33 @@ void func_1502F264(s32 index) {
     s32 i;
 
     obj = &movement_obj[index];
-    if (obj->unk65 == 0) {
+    if (obj->attach_char == 0) {
         return;
     }
-    parent = &movement_obj[obj->unk65 - 1];
+    parent = &movement_obj[obj->attach_char - 1];
     if ((obj->unk101 & 2) == 2) {
         return;
     }
-    bone = parent->unk1D4;
+    bone = parent->ob_matrix_ptr;
     if (bone == NULL) {
-        obj->x_position = parent->x_position;
-        obj->y_position = parent->y_position;
-        obj->z_position = parent->z_position;
+        obj->xpos = parent->xpos;
+        obj->ypos = parent->ypos;
+        obj->zpos = parent->zpos;
     } else {
-        bone += obj->unk5C;
-        obj->x_position = (*bone)[3][0];
-        obj->y_position = (*bone)[3][1];
-        obj->z_position = (*bone)[3][2];
+        bone += obj->basemtx;
+        obj->xpos = (*bone)[3][0];
+        obj->ypos = (*bone)[3][1];
+        obj->zpos = (*bone)[3][2];
     }
     obj->floorY = parent->floorY;
-    obj->y_velocity = -4.0f;
+    obj->yspd = -4.0f;
     if (!(obj->unk101 & 0x20)) {
-        obj->unk76 = parent->unk76;
-        obj->xz_velocity = parent->xz_velocity;
-        obj->unk40 = parent->unk40;
-        obj->unk76 = parent->unk76; /* copied twice in the original */
-        obj->unk7A = parent->unk7A;
-        obj->unk78 = parent->unk78;
+        obj->angle = parent->angle;
+        obj->speed = parent->speed;
+        obj->theta = parent->theta;
+        obj->angle = parent->angle; /* copied twice in the original */
+        obj->langle = parent->langle;
+        obj->fangle = parent->fangle;
     }
     if (!(obj->unk101 & 0x40)) {
         obj->unk7 = parent->unk7;
@@ -1592,19 +1592,19 @@ void func_1502F3C8(void) {
     s32 i;
 
     for (i = 0; i < 25; i++) {
-        if (movement_obj[i].interaction_state == 0) {
+        if (movement_obj[i].type == 0) {
             continue;
         }
-        if (movement_obj[i].objectNum == 0) {
+        if (movement_obj[i].stand_on_char == 0) {
             continue;
         }
-        movement_obj[i].y_position = movement_obj[i].floorY;
-        func_1502F490(&movement_obj[movement_obj[i].objectNum - 1], &movement_obj[i].x_position, &movement_obj[i].y_position,
-                      &movement_obj[i].z_position, movement_obj[i].floorTriIndex);
-        if (movement_obj[i].y_position < movement_obj[i].floorY) {
-            movement_obj[i].y_position = movement_obj[i].floorY;
+        movement_obj[i].ypos = movement_obj[i].floorY;
+        func_1502F490(&movement_obj[movement_obj[i].stand_on_char - 1], &movement_obj[i].xpos, &movement_obj[i].ypos,
+                      &movement_obj[i].zpos, movement_obj[i].floorTriIndex);
+        if (movement_obj[i].ypos < movement_obj[i].floorY) {
+            movement_obj[i].ypos = movement_obj[i].floorY;
         } else {
-            movement_obj[i].floorY = movement_obj[i].y_position;
+            movement_obj[i].floorY = movement_obj[i].ypos;
         }
     }
 }
@@ -1628,7 +1628,7 @@ void func_1502F490(Actor *platform, f32 *x, f32 *y, f32 *z, s32 tri) {
     f32 s;
     f32 t;
 
-    id = platform->id;
+    id = platform->character_type;
     if (D_800C6070[id] == NULL) {
         return;
     }
@@ -1653,13 +1653,13 @@ void func_1502F490(Actor *platform, f32 *x, f32 *y, f32 *z, s32 tri) {
         range++;
     } while (found != 7);
 
-    if (platform->prevBones == NULL || platform->unk1D4 == NULL) {
+    if (platform->prevBones == NULL || platform->ob_matrix_ptr == NULL) {
         return;
     }
     bones = platform->prevBones;
     for (i = 0; i < 2; i++) {
         if (i == 1) {
-            bones = platform->unk1D4;
+            bones = platform->ob_matrix_ptr;
         }
         for (j = 0; j < 3; j++) {
             // matching: byte-offset form; bones[bone[j]] swaps the addu operands
@@ -1707,16 +1707,16 @@ void func_1502F948(Actor *obj) {
     s32 id;
     void *copy;
 
-    if ((obj->unkF8 & 0x4000) && obj->unk264 != 0 && obj->unk1D4 != NULL) {
-        id = obj->id;
+    if ((obj->noshove & 0x4000) && obj->hit_vtx_array != 0 && obj->ob_matrix_ptr != NULL) {
+        id = obj->character_type;
         if (obj->prevBones == NULL) {
-            copy = allocate_memory(D_800C4ED0[id] * sizeof(*obj->unk1D4), 1, 1, 2);
+            copy = allocate_memory(D_800C4ED0[id] * sizeof(*obj->ob_matrix_ptr), 1, 1, 2);
             obj->prevBones = copy;
             if (copy == NULL) {
                 return;
             }
         }
-        bcopy(obj->unk1D4, obj->prevBones, D_800C4ED0[id] * sizeof(*obj->unk1D4));
+        bcopy(obj->ob_matrix_ptr, obj->prevBones, D_800C4ED0[id] * sizeof(*obj->ob_matrix_ptr));
     }
 }
 
@@ -1732,7 +1732,7 @@ Gfx *func_1502F9FC(Gfx *gdl, s32 index) {
     s32 lrt;
     s32 tile;
 
-    id = movement_obj[index].id;
+    id = movement_obj[index].character_type;
     if (id == 0x89 || id == 0xBA) {
         return func_150C3160(gdl, &movement_obj[index]);
     }
@@ -1761,40 +1761,40 @@ Gfx *func_1502F9FC(Gfx *gdl, s32 index) {
     return gdl;
 }
 
-/* Applies a requested LOD model change (lodRequest), restarting the animation if the new model
+/* Applies a requested LOD model change (forced_lod), restarting the animation if the new model
    uses a different animation set. */
 void func_1502FBE8(Actor *obj) {
     s32 lod;
     ActorAnim *oldAnims;
     s32 model;
 
-    if (obj->lodRequest == 0) {
+    if (obj->forced_lod == 0) {
         return;
     }
-    oldAnims = D_800D1588[obj->id];
-    if (obj->lodRequest == 0xFF) {
-        obj->lodRequest = 0;
+    oldAnims = D_800D1588[obj->character_type];
+    if (obj->forced_lod == 0xFF) {
+        obj->forced_lod = 0;
         lod = 0;
     } else {
-        lod = obj->lodRequest - 1;
-        if (lod >= obj->modelCount || lod == obj->lod) {
+        lod = obj->forced_lod - 1;
+        if (lod >= obj->modelCount || lod == obj->current_lod) {
             return;
         }
     }
     model = obj->modelIds[lod];
     func_150837D4(obj - movement_obj, model, 0);
-    obj->lod = lod;
+    obj->current_lod = lod;
     if (D_800C35EA[0] == 1) {
         D_800C3638 = 0;
     }
     if (oldAnims != D_800D1588[model]) {
-        if (obj->unk84.uh >= D_800C5A90[model]) {
-            obj->unk84.uh = 0xFFFF;
+        if (obj->animseq.uh >= D_800C5A90[model]) {
+            obj->animseq.uh = 0xFFFF;
             func_1505E650(obj, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);
         } else {
-            s32 anim = obj->unk84.uh;
+            s32 anim = obj->animseq.uh;
 
-            obj->unk84.uh = 0xFFFF;
+            obj->animseq.uh = 0xFFFF;
             func_1505E650(obj, anim, 1.0f, 0.0f, 0.0f, 0.0f, 0);
         }
     }
@@ -1808,7 +1808,7 @@ void func_1502FBE8(Actor *obj) {
    or keepTime seconds). */
 void func_1502FD70(Actor *arg0) {
     Actor *obj = arg0; // matching: the parameter copy changes register allocation
-    u8 id = obj->id;
+    u8 id = obj->character_type;
     u8 *counter;
 
     if (D_80038080 == 0 && D_800BE9F0 == 0x1D) {
@@ -1818,11 +1818,11 @@ void func_1502FD70(Actor *arg0) {
     counter = &D_800D2040[id];
     if (*counter != 0xFF) {
         // matching: the shared default store needs the goto (an || condition reorders the tests)
-        if (obj->spawn != NULL) {
-            if (obj->spawn->keepTime != 0xFF) {
-                if (obj->spawn->keepTime != 0) {
-                    if (*counter < obj->spawn->keepTime * 30) {
-                        *counter = obj->spawn->keepTime * 30;
+        if (obj->listpos_ptr != NULL) {
+            if (obj->listpos_ptr->keepTime != 0xFF) {
+                if (obj->listpos_ptr->keepTime != 0) {
+                    if (*counter < obj->listpos_ptr->keepTime * 30) {
+                        *counter = obj->listpos_ptr->keepTime * 30;
                     }
                 } else {
                     goto useDefault;

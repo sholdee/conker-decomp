@@ -48,8 +48,8 @@ typedef struct CamData {
     /* 0x40 */ s16 offPitch[3];
 } CamData;
 
-/* An object's unk1D4 points at its array of 4x4 bone matrices. */
-#define OBJ_BONES(obj) ((MtxF *)(obj)->unk1D4)
+/* An object's ob_matrix_ptr points at its array of 4x4 bone matrices. */
+#define OBJ_BONES(obj) ((MtxF *)(obj)->ob_matrix_ptr)
 
 /* Allocates an object's camera-aim state and marks every slot as having no target. */
 void func_15036C70(Actor *obj) {
@@ -85,7 +85,7 @@ void func_15036CE8(void) {
     if (data == NULL) {
         return;
     }
-    switch (obj->id) {
+    switch (obj->character_type) {
         case 59:
         case 117:
         case 128:
@@ -177,7 +177,7 @@ void func_15036F34(void) {
     yOffset = 0.0f;
     do {} while (0); // matching: the empty loop splits the block and swaps IDO's register choice for clearTarget/forceSearch
     clearTarget = 0;
-    switch (movement_obj[dc_glbl_CharNum].id) {
+    switch (movement_obj[dc_glbl_CharNum].character_type) {
     case 130:
         bone = 12;
         refBone = 1;
@@ -269,7 +269,7 @@ void func_15036F34(void) {
         yOffset = -165.0f;
         limitIdx = 10;
         rateIdx = 7;
-        switch (movement_obj[dc_glbl_CharNum].unk84.uh) {
+        switch (movement_obj[dc_glbl_CharNum].animseq.uh) {
         case 7:
         case 9:
             skipUnk127 = 1;
@@ -322,7 +322,7 @@ void func_15036F34(void) {
         }
         bone = 4;
         refBone = 0;
-        if (movement_obj[dc_glbl_CharNum].unk2E8 == 1) {
+        if (movement_obj[dc_glbl_CharNum].taskint[1] == 1) {
             return;
         }
         yOffset = -100.0f;
@@ -528,7 +528,7 @@ s32 func_15037698(s32 objIndex, s32 refBone, s32 bone, f32 x, f32 y, f32 z, f32 
         return 1;
     }
     refMtx = OBJ_BONES(&movement_obj[objIndex])[refBone];
-    if (movement_obj[objIndex].unk1D4 == NULL) {
+    if (movement_obj[objIndex].ob_matrix_ptr == NULL) {
         return 0;
     }
     mtx = OBJ_BONES(&movement_obj[objIndex])[bone];
@@ -573,9 +573,9 @@ s32 func_15037880(s32 objIndex, f32 *out) {
         return 1;
     }
     if (mode == 2) {
-        if (obj->unk5 == 4) {
-            dx = obj->x_position - (f32)D_800C3FF4[0];
-            dz = obj->z_position - (f32)D_800C3FF4[2];
+        if (obj->drawtype == 4) {
+            dx = obj->xpos - (f32)D_800C3FF4[0];
+            dz = obj->zpos - (f32)D_800C3FF4[2];
             if (62500.0f < dx * dx + dz * dz) {
                 return 1;
             }
@@ -650,10 +650,10 @@ void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32
         return;
     }
     obj = &movement_obj[objIndex];
-    if (obj->camera != NULL && obj->camera->mode == 0x100 && obj->camera->aimState != 0) {
+    if (obj->CameraPtr != NULL && obj->CameraPtr->mode == 0x100 && obj->CameraPtr->aimState != 0) {
         Vec3f camTarget;
 
-        camTarget = obj->camera->aim.orbitPos;
+        camTarget = obj->CameraPtr->aim.orbitPos;
         out[0] = camTarget.x;
         out[1] = camTarget.y;
         out[2] = camTarget.z;
@@ -662,7 +662,7 @@ void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32
     if (func_15037880(objIndex, out)) {
         return;
     }
-    if (objIndex == 0 && obj->unk84.uh == 0x81) {
+    if (objIndex == 0 && obj->animseq.uh == 0x81) {
         ModelAttachment *holder;
         AnimInstance *holderData;
         Mtx *model;
@@ -672,10 +672,10 @@ void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32
         if ((holder = func_150319CC(0x1F, obj)) != NULL && (holderData = holder->anim) != NULL &&
             holderData->unk3F6 != 0 && (model = holderData->partMtx[D_800BE9C0]) != NULL &&
             (held = func_15083E90(holder->ownerId)) != NULL) {
-            if (held->unk5 == 5) {
-                target.x = held->x_position;
-                target.y = held->y_position;
-                target.z = held->z_position;
+            if (held->drawtype == 5) {
+                target.x = held->xpos;
+                target.y = held->ypos;
+                target.z = held->zpos;
             } else {
                 func_15043FF0(&target, (struct113 *)model);
             }
@@ -685,7 +685,7 @@ void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32
         }
     }
     foundKind = 0;
-    objX = (s32)movement_obj[objIndex].x_position;
+    objX = (s32)movement_obj[objIndex].xpos;
     bestDist = 1600000000.0f;
     hitObj = func_150380C0(out, refBone, bone, objIndex, range, preferId, &bestDist, 0, 0, 0, axisMode);
     if (hitObj != 0 && bestDist != 1600000000.0f) {
@@ -715,8 +715,8 @@ void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32
                     px = point->x;
                     py = point->y;
                     pz = point->z;
-                    dz = obj->z_position - pz;
-                    dy = obj->y_position - py;
+                    dz = obj->zpos - pz;
+                    dy = obj->ypos - py;
                     dz *= dz;
                     dx = objX - px;
                     dy *= dy;
@@ -766,8 +766,8 @@ void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32
                         pz = pos[2];
                         py = pos[1];
                         px = pos[0];
-                        dz = obj->z_position - pz;
-                        dy = obj->y_position - py;
+                        dz = obj->zpos - pz;
+                        dy = obj->ypos - py;
                         dz *= dz;
                         dx = objX - px;
                         dy *= dy;
@@ -828,7 +828,7 @@ s32 func_150380C0(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32 
         return 0;
     }
     selfLink = objIndex + 1;
-    selfId = movement_obj[objIndex].id;
+    selfId = movement_obj[objIndex].character_type;
     if (selfId == 5 || selfId == 173 || selfId == 174 || selfId == 175) {
         allowSameId = 0;
     }
@@ -842,36 +842,36 @@ s32 func_150380C0(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32 
         maxDist = 1600000000.0f;
     }
     for (i = 0; i < 25; i++) {
-        if (movement_obj[i].interaction_state == 0) {
+        if (movement_obj[i].type == 0) {
             continue;
         }
-        if (movement_obj[i].id == 0xFF) {
+        if (movement_obj[i].character_type == 0xFF) {
             continue;
         }
         if (i == objIndex) {
             continue;
         }
-        if (selfLink == movement_obj[i].unk65) {
+        if (selfLink == movement_obj[i].attach_char) {
             continue;
         }
-        if (movement_obj[objIndex].unk65 == i + 1) {
+        if (movement_obj[objIndex].attach_char == i + 1) {
             continue;
         }
-        if (!allowSameId && selfId == movement_obj[i].id) {
+        if (!allowSameId && selfId == movement_obj[i].character_type) {
             continue;
         }
-        if (excludedId == movement_obj[i].id) {
+        if (excludedId == movement_obj[i].character_type) {
             continue;
         }
-        if ((skipUnk127 || (movement_obj[objIndex].unk2F8 & 7) == 4) && movement_obj[i].unk127 == 0xFF) {
+        if ((skipUnk127 || (movement_obj[objIndex].unk2F8 & 7) == 4) && movement_obj[i].playernumber == 0xFF) {
             continue;
         }
-        if ((movement_obj[objIndex].unk2F8 & 7) == 5 && movement_obj[i].unk127 != 0xFF) {
+        if ((movement_obj[objIndex].unk2F8 & 7) == 5 && movement_obj[i].playernumber != 0xFF) {
             continue;
         }
-        dx = movement_obj[objIndex].x_position - movement_obj[i].x_position;
-        dz = movement_obj[objIndex].z_position - movement_obj[i].z_position;
-        dy = movement_obj[objIndex].y_position - movement_obj[i].y_position;
+        dx = movement_obj[objIndex].xpos - movement_obj[i].xpos;
+        dz = movement_obj[objIndex].zpos - movement_obj[i].zpos;
+        dy = movement_obj[objIndex].ypos - movement_obj[i].ypos;
         dx = dx * dx;
         dz = dz * dz;
         dy = dy * dy;
@@ -880,12 +880,12 @@ s32 func_150380C0(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32 
             (movement_obj[objIndex].unk223 == 1 || movement_obj[objIndex].unk223 == 12)) {
             dist = 0.0f;
         }
-        if ((dist < maxDist && dist < *bestDist) || preferId == movement_obj[i].id) {
+        if ((dist < maxDist && dist < *bestDist) || preferId == movement_obj[i].character_type) {
             if (func_15037698(objIndex, refBone, bone, movement_obj[i].aim.x, movement_obj[i].aim.topY,
                               movement_obj[i].aim.z, out, range, noCheck, axisMode)) {
                 *bestDist = dist;
                 found = i;
-                if (preferId == movement_obj[i].id) {
+                if (preferId == movement_obj[i].character_type) {
                     break;
                 }
             }
@@ -1373,7 +1373,7 @@ void func_15039A78(f32 *yaw, f32 *pitch, f32 *prevYaw, f32 *prevPitch, f32 fallb
     AimLimits *lim;
     Camera *camera;
 
-    camera = movement_obj[objIndex].camera;
+    camera = movement_obj[objIndex].CameraPtr;
     lim = func_15039A54(objIndex, 0);
     if (camera != NULL && camera->mode != 0x100) {
         if (lim->yawMax + lim->yawMargin < *yaw || *yaw < lim->yawMin - lim->yawMargin) {
@@ -1404,7 +1404,7 @@ void func_15039A78(f32 *yaw, f32 *pitch, f32 *prevYaw, f32 *prevPitch, f32 fallb
 /*
  * Per-frame aim bookkeeping: object 0x53 in anim 0x15 (or any object while D_800BE9B4 is set) resets all aim
  * slots, and an object whose type has an "aim-locked" anim list gets unk2FB bit 2 set while it plays one of
- * them, or (for interaction state 1) while dead, slow in water, flagged in unk31C, or moving fast.
+ * them, or (for interaction state 1) while dead, slow in water, flagged in mv, or moving fast.
  */
 void func_15039CC8(Actor *obj) {
     s32 id;
@@ -1416,8 +1416,8 @@ void func_15039CC8(Actor *obj) {
 
     data = obj->camData;
     if (data != NULL) {
-        id = obj->id;
-        if ((id == 0x53 && obj->unk84.uh == 0x15) || D_800BE9B4 != 0) {
+        id = obj->character_type;
+        if ((id == 0x53 && obj->animseq.uh == 0x15) || D_800BE9B4 != 0) {
             for (i = 0; i < 3; i++) {
                 data->timer[i] = 40;
                 data->blend[i] = 0;
@@ -1431,18 +1431,18 @@ void func_15039CC8(Actor *obj) {
             anims = D_80084380[group];
             count = D_80098050[group];
             for (i = 0; i < count; i++) {
-                if (obj->unk84.uh == anims[i]) {
+                if (obj->animseq.uh == anims[i]) {
                     obj->unk2FB |= 4;
                     return;
                 }
             }
 
-            if (obj->interaction_state == 1) {
-                if (obj->health == 0 || (obj->in_water != 0 && obj->xz_velocity < 5.0f) ||
-                    obj->unk31C->SniperState != 0 || obj->xz_velocity > 20.0f) {
+            if (obj->type == 1) {
+                if (obj->energy == 0 || (obj->inwater != 0 && obj->speed < 5.0f) ||
+                    obj->mv->SniperState != 0 || obj->speed > 20.0f) {
                     obj->unk2FB |= 4;
                 }
-            } else if (obj->health == 0) {
+            } else if (obj->energy == 0) {
                 obj->unk2FB |= 4;
             }
         }
@@ -1509,13 +1509,13 @@ void func_1503A08C(Actor *obj) {
     s32 topHeight;
     f32 scale;
 
-    if (obj->id != 0xFF) {
-        if ((obj->unk1D4 != NULL) && (D_800D1C90[obj->id] != NULL)) {
-            if (func_1503D774(obj->id, 0) == 0) {
-                def = D_800D1C90[obj->id];
-                bone = (f32 (*)[4])obj->unk1D4;
+    if (obj->character_type != 0xFF) {
+        if ((obj->ob_matrix_ptr != NULL) && (D_800D1C90[obj->character_type] != NULL)) {
+            if (func_1503D774(obj->character_type, 0) == 0) {
+                def = D_800D1C90[obj->character_type];
+                bone = (f32 (*)[4])obj->ob_matrix_ptr;
                 bone = ((MtxF *)bone)[def->aimBone]; // matching: two steps; one OBJ_BONES() index mismatches
-                scale = obj->y_scale;
+                scale = obj->scale_y;
                 width = def->aimHalfWidth * scale;
                 if (width != 0) {
                     vx = bone[0][0];
@@ -1591,17 +1591,17 @@ void func_1503A08C(Actor *obj) {
                 obj->aim.side[1][2] = obj->aim.z - sideZ + upZ;
             }
         } else {
-            def = D_800D1C90[obj->id];
+            def = D_800D1C90[obj->character_type];
             if (def != NULL) {
                 topHeight = def->aimHeight;
             } else {
                 topHeight = 0;
             }
             func_1507C3E0(obj, &height, &size2, &size3);
-            obj->aim.x = obj->x_position;
-            obj->aim.y = obj->y_position + (height * 7) / 8;
-            obj->aim.z = obj->z_position;
-            obj->aim.topY = obj->aim.y + topHeight * obj->y_scale;
+            obj->aim.x = obj->xpos;
+            obj->aim.y = obj->ypos + (height * 7) / 8;
+            obj->aim.z = obj->zpos;
+            obj->aim.topY = obj->aim.y + topHeight * obj->scale_y;
             obj->aim.side[0][0] = obj->aim.x;
             obj->aim.side[1][0] = obj->aim.x;
             obj->aim.side[0][1] = obj->aim.topY;
@@ -1613,12 +1613,12 @@ void func_1503A08C(Actor *obj) {
     }
 }
 
-/* Moves bone matrix 1's translation of the current object to (unk174, y_position, unk178). */
+/* Moves bone matrix 1's translation of the current object to (unk174, ypos, unk178). */
 void func_1503A60C(void) {
     f32 (*mtx)[4] = OBJ_BONES(&movement_obj[dc_glbl_CharNum])[1];
 
     mtx[3][0] = movement_obj[dc_glbl_CharNum].unk174;
-    mtx[3][1] = movement_obj[dc_glbl_CharNum].y_position;
+    mtx[3][1] = movement_obj[dc_glbl_CharNum].ypos;
     mtx[3][2] = movement_obj[dc_glbl_CharNum].unk178;
 }
 
@@ -1639,7 +1639,7 @@ void func_1503A678(void) {
     f32 pos[3];
 
     obj = &movement_obj[dc_glbl_CharNum];
-    if (obj->id == 0x22) {
+    if (obj->character_type == 0x22) {
         factor = movement_obj[dc_glbl_CharNum].unk20A;
         factor /= 64.0f;
         factor += 1.0f;
@@ -1653,7 +1653,7 @@ void func_1503A678(void) {
             scaleZ = 1.0f / factor;
         }
         // matching: byte-offset form; indexing OBJ_BONES() here changes the code
-        bone = (f32 (*)[4])((u8 *)movement_obj[dc_glbl_CharNum].unk1D4 + (D_80084404[D_800C3FFA] << 6));
+        bone = (f32 (*)[4])((u8 *)movement_obj[dc_glbl_CharNum].ob_matrix_ptr + (D_80084404[D_800C3FFA] << 6));
         bone[3][3] = 1.0f;
         bone[0][3] = 0.0f;
         bone[1][3] = 0.0f;
@@ -1731,13 +1731,13 @@ void func_1503A830(Actor *obj) {
     s32 noHolderTarget;
     ModelDef *unusedDef; // matching: -g3 stack slot
 
-    if (obj->unk1D4 == NULL) {
+    if (obj->ob_matrix_ptr == NULL) {
         return;
     }
     D_800C3FE8[0] = D_800C3FD0[0];
     D_800C3FE8[1] = D_800C3FD0[1];
     D_800C3FE8[2] = D_800C3FD0[2];
-    id = obj->id;
+    id = obj->character_type;
     step = 8;
     preferId = 0x100;
     search = 1;
@@ -1789,7 +1789,7 @@ void func_1503A830(Actor *obj) {
         func_150379DC(D_800C3FE8, bone, bone, obj - movement_obj, 90.0f, preferId, 0);
     }
     // matching: byte-offset form; indexing OBJ_BONES() here changes the code
-    mtx = (f32 (*)[4])((u8 *)movement_obj[obj - movement_obj].unk1D4 + (bone << 6));
+    mtx = (f32 (*)[4])((u8 *)movement_obj[obj - movement_obj].ob_matrix_ptr + (bone << 6));
     mtx[3][3] = 1.0f;
     mtx[2][3] = 0.0f;
     mtx[1][3] = 0.0f;
@@ -1874,7 +1874,7 @@ void func_1503A830(Actor *obj) {
             f32 (*targetBone)[4];
 
             if (obj->unk278 != -1) { // always true for the u16; matching: removing it changes the code
-                targetBone = (f32 (*)[4])obj->unk1D4;
+                targetBone = (f32 (*)[4])obj->ob_matrix_ptr;
                 if (targetBone != NULL) {
                     targetBone = ((MtxF *)targetBone)[obj->unk278];
                     D_800C3FE8[0] = targetBone[3][0];
@@ -1883,7 +1883,7 @@ void func_1503A830(Actor *obj) {
                 }
             }
         } else if (obj->unk276 == 4) {
-            if (obj->unk84.uh == 0x26) {
+            if (obj->animseq.uh == 0x26) {
                 if (obj->unk278 == 0) {
                     obj->unk284 -= D_800BE9E4;
                     if (obj->unk284 < -20) {
@@ -1916,7 +1916,7 @@ void func_1503A830(Actor *obj) {
             clamp = 0;
             mirror = 0;
         } else if (obj->unk276 == 6) {
-            if (obj->unk31C->rt_context_b == 0x2A) {
+            if (obj->mv->rt_context_b == 0x2A) {
                 pitch[0] = 30.0f;
                 yaw[0] = -6.0f;
                 yaw[1] = 6.0f;

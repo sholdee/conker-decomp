@@ -603,7 +603,7 @@ typedef struct ModelDef {
     /* 0x3A */ u8  aimHalfWidth;    // aim side points along the aim bone's x axis
     /* 0x3B */ u8  eyeDefault[2];   // default Actor.unk68[0..1]
     /* 0x3D */ u8  pad3D;
-    /* 0x3E */ u16 cullDistance;    // 0 = Actor.unkE4, 1 = never culled, else scaled by xz_scale
+    /* 0x3E */ u16 cullDistance;    // 0 = Actor.unkE4, 1 = never culled, else scaled by scale_xz
 } ModelDef;
 
 typedef struct {
@@ -629,7 +629,7 @@ typedef struct {
     /* 0xE */ s16 delay;
 } IdleState; // size 0x10
 
-/* Per-character control block (Actor.unk31C, 0x1C0 bytes, allocated for player-controlled and
+/* Per-character control block (Actor.mv, 0x1C0 bytes, allocated for player-controlled and
  * scripted characters): movement state, controller input, rope riding, idle animation and the
  * first-person aim state.
  * original: mv_struct (rom_debug_struct.c, reached through movement_move "->mv"); the Oct 2000
@@ -1130,11 +1130,12 @@ typedef struct VtxMorphState {
     /* 0xA */ u8  hold;  // counts down once the blend has reached 1.0f
 } VtxMorphState; // size 0xC
 
-/* The game actor: the 0x32C-byte entries of movement_obj. */
+/* The game actor: the 0x32C-byte entries of movement_obj (D_800CC2D0). original: movement_move (rom_debug_struct.c);
+ * Oct 2000 had it 4 bytes shorter (the insertion is somewhere in 0x174-0x1C3). */
 struct Actor {
-    /* 0x000 */ s32 interaction_state;
-    /* 0x004 */ u8  id;
-    /* 0x005 */ u8  unk5;
+    /* 0x000 */ s32 type;
+    /* 0x004 */ u8  character_type;
+    /* 0x005 */ u8  drawtype;
     /* 0x006 */ u8  unk6;
     /* 0x007 */ u8  unk7;
     /* 0x008 */ u8  unk8;
@@ -1144,31 +1145,31 @@ struct Actor {
     /* 0x00F */ u8  unkF;     // per-player bits (<< 4: seen by player i)
     /* 0x010 */ u16 unk10;    // view range
     /* 0x012 */ u16 unk12;    // frame counter
-    /* 0x014 */ f32 x_position;
-    /* 0x018 */ f32 y_position;
-    /* 0x01C */ f32 z_position;
-    /* 0x020 */ f32 y_velocity;
-    /* 0x024 */ f32 gravity;
-    /* 0x028 */ f32 unk28;
-    /* 0x02C */ f32 old_x_position;
-    /* 0x030 */ f32 old_y_position;
-    /* 0x034 */ f32 old_z_position;
+    /* 0x014 */ f32 xpos;
+    /* 0x018 */ f32 ypos;
+    /* 0x01C */ f32 zpos;
+    /* 0x020 */ f32 yspd;
+    /* 0x024 */ f32 ygrav;
+    /* 0x028 */ f32 shad;
+    /* 0x02C */ f32 old_xpos;
+    /* 0x030 */ f32 old_ypos;
+    /* 0x034 */ f32 old_zpos;
     /* 0x038 */ s16 unk38;
     /* 0x03A */ s8  unk3A;
     /* 0x03B */ u8  unique_id;
-    /* 0x03C */ f32 xz_velocity;
-    /* 0x040 */ f32 unk40;  // used
-    /* 0x044 */ f32 unk44;
-    /* 0x048 */ f32 unk48;
-    /* 0x04C */ f32 animation_speed;
-    /* 0x050 */ u32 pad50;
+    /* 0x03C */ f32 speed;
+    /* 0x040 */ f32 theta;  // used
+    /* 0x044 */ f32 stickspeed;
+    /* 0x048 */ f32 speedup;
+    /* 0x04C */ f32 animsp;
+    /* 0x050 */ f32 wantanimsp;   // not accessed in US code
     /* 0x054 */ f32 unk54;
     /* 0x058 */ s32 unk58;
-    /* 0x05C */ s32 unk5C;  // used
+    /* 0x05C */ s32 basemtx;  // used
     /* 0x060 */ s16 unk60;    // texture scroll
     /* 0x062 */ s16 unk62;    // its speed
     /* 0x064 */ s8  unk64;
-    /* 0x065 */ u8  unk65;  // used
+    /* 0x065 */ u8  attach_char;  // used
     /* 0x066 */ u8  unk66;      // flags
     /* 0x067 */ u8  pad67;
     /* 0x068 */ u8  unk68[2];    // texture frame of each animated part (eyes), from eyeCode
@@ -1181,25 +1182,25 @@ struct Actor {
     /* 0x072 */ u16 expressionTimer; // 0xFFFF = no timeout, 0xFFFE = frozen
     /* 0x074 */ u8  unk74;
     /* 0x075 */ s8  pad75;
-    /* 0x076 */ u16 unk76;  // moving_angle
-    /* 0x078 */ u16 unk78;
-    /* 0x07A */ u16 unk7A;  // facing angle
-    /* 0x07C */ u16 unk7C;
+    /* 0x076 */ u16 angle;  // moving_angle
+    /* 0x078 */ u16 fangle;
+    /* 0x07A */ u16 langle;  // facing angle
+    /* 0x07C */ u16 mod_angle;
     /* 0x07E */ u8  unk7E;
-    /* 0x07F */ u8  unk7F;  // counter
-    /* 0x080 */ u8  unk80;  // counter
-    /* 0x081 */ u8  unk81;  // counter
-    /* 0x082 */ u8  unk82;  // counter
-    /* 0x083 */ u8  unk83;  // used
+    /* 0x07F */ u8  count1;  // counter
+    /* 0x080 */ u8  count2;  // counter
+    /* 0x081 */ u8  count3;  // counter
+    /* 0x082 */ u8  count4;  // counter
+    /* 0x083 */ u8  count5;  // used
     /* 0x084 */ union {
         u16 uh;
         u8  ub[2];
-    }   unk84;
+    }   animseq;
     /* 0x086 */ u8  unk86;
     /* 0x087 */ u8  unk87;
     /* 0x088 */ u8  unk88;
-    /* 0x089 */ u8  disable_run;   // slowdown?
-    /* 0x08A */ u8  disable_jump; // unk8A;
+    /* 0x089 */ u8  norun;   // slowdown?
+    /* 0x08A */ u8  nojump; // unk8A;
     /* 0x08B */ u8  pad8B;
     /* 0x08C */ u16 unk8C;  // used
     /* 0x08E */ u16 unk8E;  // used
@@ -1218,21 +1219,21 @@ struct Actor {
     /* 0x0AA */ u8  unkAA;
     /* 0x0AB */ u8  unkAB;
     /* 0x0AC */ u8  unkAC;
-    /* 0x0AD */ u8  in_water;
+    /* 0x0AD */ u8  inwater;
     /* 0x0AE */ u8  unkAE;
     /* 0x0AF */ u8  padAF;
     /* 0x0B0 */ s8  unkB0;
     /* 0x0B1 */ u8  padB1;
     /* 0x0B2 */ u16 unkB2;  // (oxygen?)
     /* 0x0B4 */ f32 lastEventTime; // animation time of the last timed event (func_1506AD30)
-    /* 0x0B8 */ f32 unkB8;  // used
+    /* 0x0B8 */ f32 vtilt;  // used
     /* 0x0BC */ f32 unkBC;
-    /* 0x0C0 */ f32 target_speed;
-    /* 0x0C4 */ f32 unkC4;
+    /* 0x0C0 */ f32 wantspeed;
+    /* 0x0C4 */ f32 lean_angle;
     /* 0x0C8 */ f32 unkC8;
     /* 0x0CC */ s16 unkCC;
     /* 0x0CE */ s16 unkCE;
-    /* 0x0D0 */ u8  unkD0;
+    /* 0x0D0 */ u8  doing_hit;
     /* 0x0D1 */ s8  padD1;
     /* 0x0D2 */ s16 unkD2;    // first set of bounds (func_1515C1A0): radius,
     /* 0x0D4 */ s16 unkD4;    // ...
@@ -1243,21 +1244,21 @@ struct Actor {
     /* 0x0E0 */ f32 unkE0;    // used
     /* 0x0E4 */ s16 bodyRadius;  // body cylinder (func_15062AC4, collisions in game_83300)
     /* 0x0E6 */ s16 bodyHeight;
-    /* 0x0E8 */ s16 bodyOffsetY; // its centre's height above the position (scaled by y_scale)
+    /* 0x0E8 */ s16 bodyOffsetY; // its centre's height above the position (scaled by scale_y)
     /* 0x0EA */ u16 unkEA;
     /* 0x0EC */ f32 unkEC;
     /* 0x0F0 */ f32 unkF0;
-    /* 0x0F4 */ s32 unkF4;
-    /* 0x0F8 */ s32 unkF8;
+    /* 0x0F4 */ s32 mvmt_control;
+    /* 0x0F8 */ s32 noshove;
     /* 0x0FC */ s32 unkFC;
     /* 0x100 */ u8  unk100;   // used
     /* 0x101 */ u8  unk101;
     /* 0x102 */ u8  unk102;
     /* 0x103 */ u8  unk103;
     /* 0x104 */ u8  stunned; //unk104;
-    /* 0x105 */ u8  unk105;
-    /* 0x106 */ u8  unk106;
-    /* 0x107 */ u8  unk107;
+    /* 0x105 */ u8  stunnednum;
+    /* 0x106 */ u8  stunnedseq;
+    /* 0x107 */ u8  ivehitit;
     /* 0x108 */ u8  unk108;  // attacker slot | 0x80
     /* 0x109 */ u8  unk109;
     /* 0x10A */ u8  unk10A;  // victim/attacker slot | 0x80
@@ -1274,10 +1275,10 @@ struct Actor {
     /* 0x120 */ s16 unk120;
     /* 0x122 */ u8  unk122;
     /* 0x123 */ u8  unk123;
-    /* 0x124 */ u8  unk124;
-    /* 0x125 */ u8  immune; // used
+    /* 0x124 */ u8  owner;
+    /* 0x125 */ u8  imune; // used
     /* 0x126 */ u8  unk126;  // owner index into movement_obj
-    /* 0x127 */ u8  unk127;
+    /* 0x127 */ u8  playernumber;
     /* 0x128 */ u8  team;
     /* 0x129 */ u8  unk129;
     /* 0x12A */ u8  unk12A;
@@ -1289,30 +1290,30 @@ struct Actor {
     /* 0x135 */ u8  morphDuration;
     /* 0x136 */ u8  unk136;  // sprite texture
     /* 0x137 */ u8  unk137;
-    /* 0x138 */ u8  unk138;
+    /* 0x138 */ u8  speccnt;
     /* 0x139 */ u8  unk139;  // requested sequence
     /* 0x13A */ u8  unk13A;  // its countdown
     /* 0x13B */ u8  unk13B;
-    /* 0x13C */ u8  unk13C; // used
-    /* 0x13D */ u8  unk13D;
+    /* 0x13C */ u8  lifting; // used
+    /* 0x13D */ u8  carried;
     /* 0x13E */ u8  unk13E;
-    /* 0x13F */ u8  unk13F; // index of its spawn record in D_800D20FC, 0xFF = none
+    /* 0x13F */ u8  listpos; // index of its spawn record in D_800D20FC, 0xFF = none
     /* 0x140 */ u8  unk140;
     /* 0x141 */ u8  pad141[0x3];
-    /* 0x144 */ SpawnRecord *spawn; // the spawn record this actor came from
+    /* 0x144 */ SpawnRecord *listpos_ptr; // the spawn record this actor came from
     /* 0x148 */ f32 unk148;
-    /* 0x14C */ f32 xz_scale;
-    /* 0x150 */ f32 y_scale;
+    /* 0x14C */ f32 scale_xz;
+    /* 0x150 */ f32 scale_y;
     /* 0x154 */ f32 unk154;
     /* 0x158 */ f32 unk158;
     /* 0x15C */ f32 unk15C;
-    /* 0x160 */ u16 unk160;  // shadow size, scaled by xz_scale (game_13AE20)
+    /* 0x160 */ u16 shadow_size;  // shadow size, scaled by scale_xz (game_13AE20)
     /* 0x162 */ u8  unk162;
     /* 0x163 */ u8  pad163;
-    /* 0x164 */ f32 unk164;
-    /* 0x168 */ f32 unk168;
-    /* 0x16C */ f32 unk16C;
-    /* 0x170 */ f32 unk170;
+    /* 0x164 */ f32 ob_slopex;
+    /* 0x168 */ f32 ob_slopey;
+    /* 0x16C */ f32 ob_overslopex;
+    /* 0x170 */ f32 ob_overslopey;
     /* 0x174 */ f32 unk174;
     /* 0x178 */ f32 unk178;
     /* 0x17C */ f32 ceilingY;
@@ -1327,21 +1328,21 @@ struct Actor {
     /* 0x1BC */ s16 unk1BC[3];   // a bone position (game_83300)
     /* 0x1C2 */ u8  pad1C2[0x2];
     /* 0x1C4 */ struct TimedEvent *events; // timed event list
-    /* 0x1C8 */ u8  lod;       // current level of detail
-    /* 0x1C9 */ u8  lodRequest; // requested LOD + 1, 0xFF = reset to 0
-    /* 0x1CA */ u8  health;
+    /* 0x1C8 */ u8  current_lod;       // current level of detail
+    /* 0x1C9 */ u8  forced_lod; // requested LOD + 1, 0xFF = reset to 0
+    /* 0x1CA */ u8  energy;
     /* 0x1CB */ u8  unk1CB;
     /* 0x1CC */ f32 unk1CC;
     /* 0x1D0 */ s8  unk1D0;
     /* 0x1D1 */ s8  unk1D1;
     /* 0x1D2 */ u16 pad1D2;
-    /* 0x1D4 */ MtxF *unk1D4;   // this frame's bone matrices
+    /* 0x1D4 */ MtxF *ob_matrix_ptr;   // this frame's bone matrices
     /* 0x1D8 */ MtxF *prevBones; // last frame's copy (platforms)
     /* 0x1DC */ u8  unk1DC;
     /* 0x1DD */ u8  unk1DD[3];
     /* 0x1E0 */ u8  unk1E0[3];
     /* 0x1E3 */ u8  unk1E3;
-    /* 0x1E4 */ u8  unk1E4;
+    /* 0x1E4 */ u8  family;
     /* 0x1E5 */ u8  unk1E5;
     /* 0x1E6 */ u8  unk1E6;
     /* 0x1E7 */ u8  unk1E7;
@@ -1393,14 +1394,14 @@ struct Actor {
     /* 0x22E */ u16 unk22E;   // cooldown
     /* 0x230 */ u8  pad230;
     /* 0x231 */ u8  unk231;
-    /* 0x232 */ u8  unk232; // used
+    /* 0x232 */ u8  intelwalk; // used
     /* 0x233 */ u8  unk233;
     /* 0x234 */ u8  unk234;
     /* 0x235 */ u8  unk235;
     /* 0x236 */ u8  unk236;
     /* 0x237 */ u8  unk237;
     /* 0x238 */ u8  unk238;
-    /* 0x239 */ s8  unk239; // used
+    /* 0x239 */ s8  intelhitroute; // used
     /* 0x23A */ u8  unk23A;
     /* 0x23B */ u8  unk23B;
     /* 0x23C */ u8  unk23C;
@@ -1411,10 +1412,10 @@ struct Actor {
     /* 0x241 */ u8  unk241;
     /* 0x242 */ u8  unk242;
     /* 0x243 */ u8  pad243;
-    /* 0x244 */ s16 unk244;
-    /* 0x246 */ u8  unk246;
-    /* 0x247 */ u8  unk247;
-    /* 0x248 */ u8  unk248;
+    /* 0x244 */ s16 intel_animseq;
+    /* 0x246 */ u8  intel_animspd;
+    /* 0x247 */ u8  intel_accel;
+    /* 0x248 */ u8  intel_decel;
     /* 0x249 */ u8  unk249;
     /* 0x24A */ u8  unk24A;
     /* 0x24B */ u8  pad24B;
@@ -1432,14 +1433,14 @@ struct Actor {
     /* 0x257 */ u8  unk257;
     /* 0x258 */ u8  unk258;
     /* 0x259 */ u8  unk259[3];
-    /* 0x25C */ s32 unk25C;
+    /* 0x25C */ s32 task_attrib;
     /* 0x260 */ VtxMorphState *morph; // vertex morph (game_1A8060), NULL when the model has none
-    /* 0x264 */ s32 unk264;      // allocations freed with the actor (func_15060F28)
-    /* 0x268 */ s32 unk268;
-    /* 0x26C */ s32 unk26C;
-    /* 0x270 */ f32 unk270;
-    /* 0x274 */ u8  objectNum; // movement_obj index + 1 of the object stood on, 0 = none
-    /* 0x275 */ u8  unk275;  // movement_obj index + 1
+    /* 0x264 */ s32 hit_vtx_array;      // allocations freed with the actor (func_15060F28)
+    /* 0x268 */ s32 hit_box_array;
+    /* 0x26C */ s32 hit_ylimit_array;
+    /* 0x270 */ f32 cull_radius_xz;
+    /* 0x274 */ u8  stand_on_char; // movement_obj index + 1 of the object stood on, 0 = none
+    /* 0x275 */ u8  touching_char;  // movement_obj index + 1
     /* 0x276 */ u8  unk276;      // head-turn effect kind, 0-6 (func_1503D9B4)
     /* 0x277 */ u8  pad277;
     /* 0x278 */ u16 unk278;      // effect state
@@ -1463,9 +1464,8 @@ struct Actor {
     /* 0x2D4 */ EffectHeader *unk2D4;
     /* 0x2D8 */ f32 unk2D8[3];   // launch velocity (y, gravity, xz) for func_15071FDC, set by script command 0x22;
                                  // [0]/[1] are also a fade timer/rate (func_150DFDD0, game_F15D0)
-    /* 0x2E4 */ s32 unk2E4;     // per-type state; game_EB340 saves 2E4/2E8 as commands 0xE/0x68
-    /* 0x2E8 */ s32 unk2E8;
-    /* 0x2EC */ s32 unk2EC;     // nonzero while the unk2D8 fade runs
+    /* 0x2E4 */ s32 taskint[3]; // per-type state; game_EB340 saves [0]/[1] as commands 0xE/0x68;
+                                // [2] is nonzero while the unk2D8 fade runs
     /* 0x2F0 */ u32 pad2F0;
     /* 0x2F4 */ Attachment *attachments; // head of the attachment list
     /* 0x2F8 */ u16 unk2F8; // wait animation?
@@ -1481,8 +1481,8 @@ struct Actor {
     /* 0x303 */ u8  unk303;
     /* 0x304 */ s32 unk304[4]; // one per view
     /* 0x314 */ u8 (*unk314)[8]; // one per frame buffer
-    /* 0x318 */ Camera *camera;
-    /* 0x31C */ ActorCtl *unk31C;
+    /* 0x318 */ Camera *CameraPtr;
+    /* 0x31C */ ActorCtl *mv;
     /* 0x320 */ u32 unk320;
     /* 0x324 */ struct CamData *camData; // aim easing state, one entry per aim slot
     /* 0x328 */ s8  unk328;
@@ -1852,7 +1852,7 @@ struct Camera {
     /* 0x3CC */ s16 unk3CC;
     /* 0x3CE */ u8 pad3CE[0x2];
     /* 0x3D0 */ Actor *player;                   /* the object the camera follows */
-    /* 0x3D4 */ ActorCtl *playerExt;                /* player->unk31C */
+    /* 0x3D4 */ ActorCtl *playerExt;                /* player->mv */
     /* 0x3D8 */ u8 pad3D8[0x4];
     /* 0x3DC */ f32 unk3DC;                          /* orbit yaw of the eye, radians */
     /* 0x3E0 */ f32 unk3E0;
@@ -2568,7 +2568,7 @@ typedef struct LightActorRef {
 typedef struct LightAttach {
     /* 0x00 */ Actor *actor;
     /* 0x04 */ u8 actorId;   // actor->unique_id when attached; a change means the actor slot was reused
-    /* 0x05 */ u8 bone;      // index of the bone matrix in actor->unk1D4
+    /* 0x05 */ u8 bone;      // index of the bone matrix in actor->ob_matrix_ptr
     /* 0x06 */ u8 pad6[0x2];
     /* 0x08 */ Vec3f offset; // position in the bone's frame
     /* 0x14 */ s8 callback;     // index into D_8008B1F8, or -1
@@ -2579,7 +2579,7 @@ typedef struct LightAttach {
 typedef struct LightBeam {
     /* 0x00 */ Actor *actor;
     /* 0x04 */ u8 actorId;  // actor->unique_id when attached
-    /* 0x05 */ u8 bone;     // index of the bone matrix in actor->unk1D4
+    /* 0x05 */ u8 bone;     // index of the bone matrix in actor->ob_matrix_ptr
     /* 0x06 */ u8 pad6[0x2];
     /* 0x08 */ Vec3f start; // beam start in the bone's frame
     /* 0x14 */ Vec3f end;   // beam end in the bone's frame

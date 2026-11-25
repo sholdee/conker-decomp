@@ -27,14 +27,14 @@ void func_15033FE0(GameCommand *commands, s32 index) {
 
     actor = &movement_obj[index];
     cursor = commands;
-    if (actor->unk1D4 == NULL) {
+    if (actor->ob_matrix_ptr == NULL) {
         commands->opcode = 0x1000;
         return;
     }
-    if (actor->interaction_state == 1) {
+    if (actor->type == 1) {
         cursor = func_150341BC(commands, index);
     } else {
-        switch (actor->id) {
+        switch (actor->character_type) {
         case 0x2B:
             cursor = func_150D8590(commands, index);
             break;
@@ -65,8 +65,8 @@ void func_15033FE0(GameCommand *commands, s32 index) {
             break;
         }
     }
-    first = func_1503DA3C(actor->id, 0);
-    *func_15034860(cursor, actor, first, func_1503DA3C(actor->id, 1)) = 0x1000;
+    first = func_1503DA3C(actor->character_type, 0);
+    *func_15034860(cursor, actor, first, func_1503DA3C(actor->character_type, 1)) = 0x1000;
 }
 
 /* Appends the commands for an actor in interaction state 1. Angles are in degrees, scaled to 65536/360 units. */
@@ -78,11 +78,11 @@ GameCommand *func_150341BC(GameCommand *cmd, s32 index) {
     s32 offset;
 
     actor = &movement_obj[index];
-    sub = actor->unk31C;
+    sub = actor->mv;
     if ((sub != NULL) && !(actor->unk2F8 & 0x80)) {
         // pad54 is declared u32 in structs.h but holds an f32 here
         angle = actor->unk54 * (65536.0f / 360.0f);
-        kind = actor->unk84.uh;
+        kind = actor->animseq.uh;
         if ((kind != 0x42) && (kind != 0x14) && (kind != 0x76)) {
             offset = (sub->rt_context_b == 10) ? 0 : 4;
             cmd->opcode = offset + 6;
@@ -104,10 +104,10 @@ GameCommand *func_150341BC(GameCommand *cmd, s32 index) {
         cmd++;
         cmd[-1].value = actor->unk1D1 * 200;
     }
-    if ((movement_obj[dc_glbl_CharNum].unk31C != NULL) && (movement_obj[dc_glbl_CharNum].unk31C->pssd_waist_tilt != 0)) {
+    if ((movement_obj[dc_glbl_CharNum].mv != NULL) && (movement_obj[dc_glbl_CharNum].mv->pssd_waist_tilt != 0)) {
         cmd->opcode = 8;
         cmd++;
-        cmd[-1].value = -movement_obj[dc_glbl_CharNum].unk31C->pssd_waist_tilt;
+        cmd[-1].value = -movement_obj[dc_glbl_CharNum].mv->pssd_waist_tilt;
     }
     return cmd;
 }
@@ -136,12 +136,12 @@ GameCommand *func_150343B0(GameCommand *cmd, s32 index) {
     return cmd;
 }
 
-/* Converts unk2E4 (tenths of a degree) to angle units and splits it across an opcode-0 and an opcode-0x18 command. */
+/* Converts taskint[0] (tenths of a degree) to angle units and splits it across an opcode-0 and an opcode-0x18 command. */
 GameCommand *func_15034420(GameCommand *cmd, s32 index) {
     s16 part;
     s16 value;
 
-    value = (f32)movement_obj[index].unk2E4 * (65536.0f / 3600.0f);
+    value = (f32)movement_obj[index].taskint[0] * (65536.0f / 3600.0f);
     part = value >> 4;
     value -= part;
     cmd[0].value = part;

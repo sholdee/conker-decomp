@@ -54,7 +54,7 @@ s32 func_151905BC(PeriodicObject *obj) {
         func_1505D024(obj->linked, 0x60021, 0, trigger->target - movement_obj);
         trigger->elapsed -= trigger->interval;
     }
-    state = obj->linked->unk31C;
+    state = obj->linked->mv;
     if (state != NULL && state->bot == 0) {
         state->bitten = 1000;
     }
@@ -63,7 +63,7 @@ s32 func_151905BC(PeriodicObject *obj) {
 
 /* Clears unk1AC of the linked object's state, if it has one. */
 void func_151906C4(PeriodicObject *obj) {
-    ActorCtl *state = obj->linked->unk31C;
+    ActorCtl *state = obj->linked->mv;
 
     if (state != NULL) {
         state->on_fire = 0;

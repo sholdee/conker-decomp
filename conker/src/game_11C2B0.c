@@ -34,7 +34,7 @@ void func_150EEE00(Actor *actor, u8 slot) {
     }
 
     func_150EEF80(actor, slot, 0xFF, 1);
-    bones = actor->unk1D4;
+    bones = actor->ob_matrix_ptr;
     if (bones != NULL) {
         func_15143134(D_800A15F0[slot], muzzle, (Mtx *)bones + D_800A1638[slot]);
         header.flags = 3;
@@ -293,21 +293,21 @@ s32 func_150EF38C(Beam *beam) {
     link = &beam->link;
     actor = link->actor;
     target = link->target;
-    if (actor->unique_id != link->actorId || actor->interaction_state == 0 || actor->id == 0xFF) {
+    if (actor->unique_id != link->actorId || actor->type == 0 || actor->character_type == 0xFF) {
         return 0;
     }
-    if (target->unique_id != link->targetId || target->interaction_state == 0) {
+    if (target->unique_id != link->targetId || target->type == 0) {
         return 0;
     }
     if (actor->unk94 & D_800A163C[link->slot]) {
         return 0;
     }
     link->flags &= ~1;
-    if (actor->unk1D4 != NULL) {
-        func_15143134(D_800A15F0[link->slot], &beam->head.def.pos.x, (Mtx *)actor->unk1D4 + D_800A1638[link->slot]);
-        beam->head.def.rot.x = target->x_position;
-        beam->head.def.rot.y = target->y_position;
-        beam->head.def.rot.z = target->z_position;
+    if (actor->ob_matrix_ptr != NULL) {
+        func_15143134(D_800A15F0[link->slot], &beam->head.def.pos.x, (Mtx *)actor->ob_matrix_ptr + D_800A1638[link->slot]);
+        beam->head.def.rot.x = target->xpos;
+        beam->head.def.rot.y = target->ypos;
+        beam->head.def.rot.z = target->zpos;
         link->direction.x = beam->head.def.rot.x - beam->head.def.pos.x;
         link->direction.y = beam->head.def.rot.y - beam->head.def.pos.y;
         link->direction.z = beam->head.def.rot.z - beam->head.def.pos.z;
@@ -347,7 +347,7 @@ s32 func_150EF38C(Beam *beam) {
 
 /* Whether `actor` has id 0x28. */
 s32 func_150EF784(Actor *actor, s32 arg1, s32 arg2) {
-    if (actor->id == 0x28) {
+    if (actor->character_type == 0x28) {
         return TRUE;
     }
     return FALSE;
@@ -468,7 +468,7 @@ s32 func_150EFA4C(Spark *spark) {
         Actor *actor;
 
         actor = link->actor;
-        if (actor->unk1D4) {
+        if (actor->ob_matrix_ptr) {
             u8 slot;
 
             slot = link->slot;
@@ -476,7 +476,7 @@ s32 func_150EFA4C(Spark *spark) {
             spark->end = beam->head.def.rot;
             spark->distance = link->distance;
             spark->inverse = link->inverse;
-            func_15143134(D_800A1620[slot], &spark->offset.x, (Mtx *)actor->unk1D4 + D_800A1638[slot]);
+            func_15143134(D_800A1620[slot], &spark->offset.x, (Mtx *)actor->ob_matrix_ptr + D_800A1638[slot]);
             spark->offset.x = spark->offset.x - spark->start.x;
             spark->offset.y = spark->offset.y - spark->start.y;
             spark->offset.z = spark->offset.z - spark->start.z;
@@ -776,7 +776,7 @@ extern void func_15102B38(Actor *, u8, f32 *, f32 *, f32 *, s32, s32, f32, Vec3f
 s32 func_151C229C(Vec3f *, Vec3f *, s32, s32, s32, s32, f32, f32, f32, f32, f32, s32, Actor *,
                   s32, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, s32, s32, s32);
 
-/* Fires a projectile (func_151C229C) from slot `slot` of `actor` once actor->unk2EC
+/* Fires a projectile (func_151C229C) from slot `slot` of `actor` once actor->taskint[2]
  * reaches 90, with a spark burst and a func_15102B38 effect at the muzzle. */
 s32 func_150F03F8(actor, slot, arg2, arg3)
     Actor *actor;
@@ -803,17 +803,17 @@ s32 func_150F03F8(actor, slot, arg2, arg3)
     if (slot >= 2) {
         return 0;
     }
-    if (actor->unk1D4 == NULL) {
+    if (actor->ob_matrix_ptr == NULL) {
         return 0;
     }
-    if (actor->unk2EC < 90) {
+    if (actor->taskint[2] < 90) {
         return 0;
     }
     src[0] = D_800A1640[slot];
     src[1] = D_800A1658[slot];
     dst[0] = &muzzle.x;
     dst[1] = &dir.x;
-    func_15145EA4(src, dst, (Mtx *)actor->unk1D4 + D_800A1670[slot], 2);
+    func_15145EA4(src, dst, (Mtx *)actor->ob_matrix_ptr + D_800A1670[slot], 2);
     dir.x -= muzzle.x;
     dir.y -= muzzle.y;
     dir.z -= muzzle.z;
@@ -1010,9 +1010,9 @@ void func_150F0BEC(Actor *actor) {
     spawn.brightness = 0xFF;
     spawn.height = 250.0f;
     spawn.width = 250.0f;
-    spawn.pos.x = actor->x_position;
-    spawn.pos.y = actor->y_position;
-    spawn.pos.z = actor->z_position;
+    spawn.pos.x = actor->xpos;
+    spawn.pos.y = actor->ypos;
+    spawn.pos.z = actor->zpos;
     spawn.offset = D_800A5480;
     spawn.vel = D_800A5480;
     spawn.fadeStart = 1;
@@ -1063,9 +1063,9 @@ s32 func_150F0E48(Particle *particle, s32 arg1) {
         return 0;
     }
 
-    particle->head.desc.pos.x = actor->x_position;
-    particle->head.desc.pos.y = actor->y_position;
-    particle->head.desc.pos.z = actor->z_position;
+    particle->head.desc.pos.x = actor->xpos;
+    particle->head.desc.pos.y = actor->ypos;
+    particle->head.desc.pos.z = actor->zpos;
     link->phase[0] += 0.2630000114f * D_800BE9A4;
     link->phase[1] += 0.3030000031f * D_800BE9A4;
     link->phase[2] += 0.25f * D_800BE9A4;
@@ -1126,9 +1126,9 @@ void func_150F10D4(Actor *actor) {
     link.actor = actor;
     link.actorId = actor->unique_id;
     link.accum = 0.0f;
-    link.lastPos.x = actor->x_position;
-    link.lastPos.y = actor->y_position;
-    link.lastPos.z = actor->z_position;
+    link.lastPos.x = actor->xpos;
+    link.lastPos.y = actor->ypos;
+    link.lastPos.z = actor->zpos;
 
     emitter = (TrailEmitter *)func_15149130(300, -1, 0x4C, -1, 0, 0x3A, sizeof(TrailLink),
                                             0xFF, 1);
@@ -1154,13 +1154,13 @@ void func_150F1170(TrailEmitter *emitter) {
     actor = emitter->link.actor;
     last = emitter->link.lastPos;
     link = &emitter->link;
-    if ((actor->interaction_state == 0) || (actor->unique_id != link->actorId)) {
+    if ((actor->type == 0) || (actor->unique_id != link->actorId)) {
         emitter->base.header.state = -1;
         return;
     }
-    link->lastPos.x = actor->x_position;
-    link->lastPos.y = actor->y_position;
-    link->lastPos.z = actor->z_position;
+    link->lastPos.x = actor->xpos;
+    link->lastPos.y = actor->ypos;
+    link->lastPos.z = actor->zpos;
     dx = link->lastPos.x - last.x;
     dy = link->lastPos.y - last.y;
     dz = link->lastPos.z - last.z;
@@ -1294,7 +1294,7 @@ void func_150F16DC(actor, slot, variant, arg3, arg4)
     if (slot >= 2) {
         return;
     }
-    if (actor->id == 0x23) {
+    if (actor->character_type == 0x23) {
         kind = 1;
     } else {
         const u8 masks[2] = { 4, 2 };
@@ -1313,12 +1313,12 @@ void func_150F16DC(actor, slot, variant, arg3, arg4)
         f32 rand0;
         s32 randA;
 
-        if (actor->unk1D4 == NULL) {
+        if (actor->ob_matrix_ptr == NULL) {
             return;
         }
         src[0] = D_800A168C[kind][variant][slot];
         dst[0] = &muzzle.x;
-        func_15145EA4(src, dst, (Mtx *)actor->unk1D4 + D_800A180C[kind][slot], 1);
+        func_15145EA4(src, dst, (Mtx *)actor->ob_matrix_ptr + D_800A180C[kind][slot], 1);
         hdr.flags = 3;
         hdr.update = -1;
         hdr.lifetime = (func_150ADA20() % 5U) + 4;
@@ -1346,7 +1346,7 @@ typedef struct {
 extern Rates150F1A00 D_80088B00;
 f32 cosf(f32);
 
-/* Pulses the scale of bone matrix 62 of `actor`, faster as bit pairs of actor->unk2E4 are set. */
+/* Pulses the scale of bone matrix 62 of `actor`, faster as bit pairs of actor->taskint[0] are set. */
 void func_150F1A00(Actor *actor) {
     f32 (*mtx)[4];
     Rates150F1A00 rates;
@@ -1359,17 +1359,17 @@ void func_150F1A00(Actor *actor) {
 
     rates = D_80088B00;
     idx = 0;
-    if ((actor->unk2E4 & 3) == 3) {
+    if ((actor->taskint[0] & 3) == 3) {
         idx = 1;
     }
-    if ((actor->unk2E4 & 0xC) == 0xC) {
+    if ((actor->taskint[0] & 0xC) == 0xC) {
         idx = 2;
     }
     rate = rates.v[idx];
     rec = &D_800CC298;
     rec->pulse += rate * D_800BE9E4;
     scale = (((cosf(rec->pulse * 9.587380191e-05f) + 1.0f) * 0.5f) * 0.3500000238f) + 0.8999999762f;
-    mtx = actor->unk1D4[62];
+    mtx = actor->ob_matrix_ptr[62];
     for (i = 0; i < 3; i++) {
         for (j = 0; j < 3; j++) {
             mtx[i][j] *= scale;
@@ -1390,7 +1390,7 @@ GameCommand *func_150F1B48(GameCommand *cmd, s32 index) {
     s32 tilt;
     s32 i;
 
-    down = (movement_obj[index].unk84.uh == 0x21) ? 1 : 0;
+    down = (movement_obj[index].animseq.uh == 0x21) ? 1 : 0;
     step = D_800BE9E4 * 0x222;
     if (down) {
         tilt = D_800CC298.tilt - step;
@@ -1415,18 +1415,18 @@ GameCommand *func_150F1B48(GameCommand *cmd, s32 index) {
     return cmd;
 }
 
-/* Picks actor->unk68[0] by state (0x14 or not) and actor->unk68[1] by the bit pairs of actor->unk2E4. */
+/* Picks actor->unk68[0] by state (0x14 or not) and actor->unk68[1] by the bit pairs of actor->taskint[0]. */
 void func_150F1CB0(Actor *actor) {
-    if (actor->unk84.uh == 0x14) {
+    if (actor->animseq.uh == 0x14) {
         actor->unk68[0] = 0x1B;
     } else {
         actor->unk68[0] = 0xC;
     }
     actor->unk68[1] = 0x13;
-    if ((actor->unk2E4 & 3) == 3) {
+    if ((actor->taskint[0] & 3) == 3) {
         actor->unk68[1] = 0x14;
     }
-    if ((actor->unk2E4 & 0xC) == 0xC) {
+    if ((actor->taskint[0] & 0xC) == 0xC) {
         actor->unk68[1] = 0x17;
     }
 }
@@ -1452,10 +1452,10 @@ void func_150F1D10(Actor *actor, u8 arg1, s32 arg2) {
     if (actor == NULL) {
         return;
     }
-    pos.x = actor->x_position;
-    pos.y = actor->y_position + 20.0f;
-    pos.z = actor->z_position;
-    scale = (actor->xz_scale + actor->y_scale) * 0.5f;
+    pos.x = actor->xpos;
+    pos.y = actor->ypos + 20.0f;
+    pos.z = actor->zpos;
+    scale = (actor->scale_xz + actor->scale_y) * 0.5f;
     func_151D5404(&pos, 506.0f, 1013.0f, 0.0009871669f, 15, 20, arg1, arg2);
     func_151D5334(&pos, 506.0f, 1013.0f, 0.0009871669f, 5, arg1, arg2);
     func_151D5514(&pos, arg1, arg2);
@@ -1518,8 +1518,8 @@ void func_150F20F0(s32 index) {
     Actor *actor;
 
     actor = &movement_obj[index];
-    x = actor->x_position;
-    z = actor->z_position;
+    x = actor->xpos;
+    z = actor->zpos;
     x *= x;
     z *= z;
     /* squares the already-squared terms: the test is on x^4 + z^4 */
@@ -1532,7 +1532,7 @@ void func_150F20F0(s32 index) {
         }
     } else if (x > 6760000.0f) {
         // matching: indexes movement_obj again rather than reading through `actor`
-        func_100114D0(0, (s32)movement_obj[index].y_position, 0, 0x7FFF, 20000, 19000, &pan, &out2, &out3);
+        func_100114D0(0, (s32)movement_obj[index].ypos, 0, 0x7FFF, 20000, 19000, &pan, &out2, &out3);
         pan += 0x80;
         D_800D98F0 = (func_150ADA20() & 0x7F) + 0x80;
         func_10010F30((func_150ADA20() % 3U) + 0x6C, 24000, pan, 0, 0);
@@ -1545,12 +1545,12 @@ void func_150F2230(Actor *actor, s32 arg1, s32 arg2) {
     Vec3f offset;
     Vec3f pos;
 
-    if ((actor->unk1D4 != NULL) && ((actor->unk74 & 0xF) != 0xF)) {
+    if ((actor->ob_matrix_ptr != NULL) && ((actor->unk74 & 0xF) != 0xF)) {
         offset.x = 0.0f;
         offset.y = 0.0f;
         offset.z = 0.0f;
         func_15143874((s16)(func_150ADA20() & 0xFF), 100.0f, &offset.x, &offset.z);
-        func_15143134(&offset.x, &pos.x, (Mtx *)actor->unk1D4 + 19);
+        func_15143134(&offset.x, &pos.x, (Mtx *)actor->ob_matrix_ptr + 19);
         func_151C329C(&pos.x, (u8)arg1, arg2);
     }
 }

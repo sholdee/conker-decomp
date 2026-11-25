@@ -161,7 +161,7 @@ void func_1507EEF4(void) {
     IdleState *idle;
     s32 phase;
 
-    idle = &D_800D154C->unk31C->idle;
+    idle = &D_800D154C->mv->idle;
     phase = idle->phase;
 
     if (phase == 0) {
@@ -210,7 +210,7 @@ void func_1507EFD0(void) {
     s32 reused;
     s32 seq;
 
-    idle = &D_800D154C->unk31C->idle;
+    idle = &D_800D154C->mv->idle;
     count = 0;
     /* unk139: a requested sequence, unk13A: its countdown */
     if (D_800D154C->unk13A != 0) {
@@ -220,10 +220,10 @@ void func_1507EFD0(void) {
     } else if (D_800D18C0 & 2) {
         func_1507EB80(candidates, &count, 3);
         D_800D18C0 = 0;
-    } else if (D_800D154C->unk31C->idle.delay != 0 && D_800D154C->unk31C->rt_context_b == 0) {
+    } else if (D_800D154C->mv->idle.delay != 0 && D_800D154C->mv->rt_context_b == 0) {
         seq = 0xB;
         if (idle->timer >= 121) {
-            D_800D154C->unk31C->idle.delay = 0;
+            D_800D154C->mv->idle.delay = 0;
             idle->timer = 0;
             idle->phase = 0;
             seq = 0xC;
@@ -232,7 +232,7 @@ void func_1507EFD0(void) {
             seq = 0xB; // matching: the redundant store keeps the else-branch block
         }
         func_1507EB80(candidates, &count, seq);
-    } else if (D_800D154C->health < 2) {
+    } else if (D_800D154C->energy < 2) {
         func_1507EB80(candidates, &count, 0);
     } else if (func_1515942C(&movement_obj[dc_glbl_CharNum], 0, 0, -1, -1, -1) != 0) {
         func_1507EB80(candidates, &count, 0);
@@ -241,11 +241,11 @@ void func_1507EFD0(void) {
         category = -1;
         if (D_800D154C->unk2F8 & 0x200) {
             category = 2;
-        } else if (D_800D154C->unk31C->rt_context_b == 9) {
+        } else if (D_800D154C->mv->rt_context_b == 9) {
             category = 5;
-        } else if (D_800D154C->unk31C->rt_context_b == 0x23) {
+        } else if (D_800D154C->mv->rt_context_b == 0x23) {
             category = 9;
-        } else if (D_800D154C->unk31C->rt_context_b == 0x16) {
+        } else if (D_800D154C->mv->rt_context_b == 0x16) {
             category = 10;
         } else if (func_1503195C(D_800D154C, 0x17, 0) != NULL) {
             category = 6;
@@ -255,7 +255,7 @@ void func_1507EFD0(void) {
             } else {
                 category = 7;
             }
-        } else if (D_800D154C->id == 0x96 || D_800BE9F0 == 0x10 || D_800BE9F0 == 0x1B ||
+        } else if (D_800D154C->character_type == 0x96 || D_800BE9F0 == 0x10 || D_800BE9F0 == 0x1B ||
                    D_800BE9F0 == 0x1E || D_800BE9F0 == 0x26 || D_800BE9F0 == 0x2F ||
                    D_800BE9F0 == 0xE || D_800BE9F0 == 0x28 || D_800BE9F0 == 0x23 ||
                    D_800BE9F0 == 0x1C || D_800BE9F0 == 0x36 || D_800BE9F0 == 0x3A) {
@@ -305,7 +305,7 @@ s32 func_1507F454(void) {
     s32 sequence;
     s32 next;
 
-    idle = &D_800D154C->unk31C->idle;
+    idle = &D_800D154C->mv->idle;
     sequence = idle->sequence;
 
     if (sequence == 0) {
@@ -349,9 +349,9 @@ void func_1507F54C(Actor *actor) {
     s32 slot;
     s32 anim;
 
-    slot = actor->unk13C;
+    slot = actor->lifting;
     if (slot >= 100) {
-        switch (movement_obj[slot - 100].id) {
+        switch (movement_obj[slot - 100].character_type) {
         case 0x57:
             anim = 0x115;
             break;
@@ -395,18 +395,18 @@ void func_1507F640(void) {
     if (D_800C35EA[0] == 1) {
         return;
     }
-    if (D_800D154C->unk5 == 4) {
+    if (D_800D154C->drawtype == 4) {
         return;
     }
     if (dc_glbl_CharNum >= D_8008FD8C) {
         return;
     }
-    idle = &D_800D154C->unk31C->idle;
+    idle = &D_800D154C->mv->idle;
     idle->active = TRUE;
     if (D_800D154C->unk2F8 & 0x20) {
         return;
     }
-    if (D_800D154C->unk31C->death_State) {
+    if (D_800D154C->mv->death_State) {
         return;
     }
     if (idle->holdFrames > 0) {
@@ -414,24 +414,24 @@ void func_1507F640(void) {
         idle->timer = 0;
         return;
     }
-    if (D_800D154C->health == 0) {
+    if (D_800D154C->energy == 0) {
         func_1507CD64(D_800D154C, 0);
         return;
     }
     anim = 0x4F;
-    if (D_800D154C->disable_run >= 250) {
-        D_800D154C->disable_run = 0;
+    if (D_800D154C->norun >= 250) {
+        D_800D154C->norun = 0;
     }
-    if (D_800D154C->disable_jump == 0xFF) {
-        D_800D154C->disable_jump = 0;
+    if (D_800D154C->nojump == 0xFF) {
+        D_800D154C->nojump = 0;
     }
-    D_800D154C->unk83 = 0;
+    D_800D154C->count5 = 0;
     D_800D154C->unkAA = 0;
-    D_800D154C->unk76 = D_800D154C->unk7A;
+    D_800D154C->angle = D_800D154C->langle;
     D_800D154C->unk100 &= 0xFE;
     D_800D154C->unk2F8 &= ~7;
     D_800D154C->unk2F8 |= 0; // matching: a second store, as from setting a 3-bit field to 0
-    owner = D_800D154C->unk31C;
+    owner = D_800D154C->mv;
     if (owner->env_suit) {
         s32 pad; // matching: unused stack slot
         if (func_150ADA20() & 3) {
@@ -529,7 +529,7 @@ void func_1507F640(void) {
         func_1505E650(D_800D154C, override, speed, blend, 0.0f, 0.0f, 0);
         return;
     }
-    if (D_800D154C->unk13C >= 100) {
+    if (D_800D154C->lifting >= 100) {
         func_1507F54C(D_800D154C);
         return;
     }
@@ -538,7 +538,7 @@ void func_1507F640(void) {
         return;
     }
     if (func_1507F454()) {
-        owner = D_800D154C->unk31C;
+        owner = D_800D154C->mv;
         if (owner->AimState && idle->sequence == 0) {
             switch (owner->rt_context_b) {
             case 3:
@@ -569,7 +569,7 @@ void func_1507F640(void) {
     override = D_80086BA0[sequence][frame];
     entry = &D_8009B8B0[override];
     if (override == 0) {
-        owner = D_800D154C->unk31C;
+        owner = D_800D154C->mv;
         sequence = -1;
         switch (owner->rt_context_b) {
         case 9:
@@ -582,7 +582,7 @@ void func_1507F640(void) {
             sequence = 0x44;
             break;
         default:
-            if (D_800D154C->health == 1) {
+            if (D_800D154C->energy == 1) {
                 sequence = 0xE;
             } else if (owner->injured) {
                 sequence = 0x25;
@@ -611,7 +611,7 @@ void func_1507FC2C(Actor *actor) {
     s32 changed;
     u8 sequence;
 
-    idle = &actor->unk31C->idle;
+    idle = &actor->mv->idle;
     if (idle->sequence != 0) {
         sequence = idle->sequence;
         frame = idle->frame;
@@ -673,11 +673,11 @@ void func_1507FEA0(Actor *actor) {
     s16 delay;
     s32 limit;
 
-    if (actor->unk31C == NULL || actor->unk127 == 0xFF) {
+    if (actor->mv == NULL || actor->playernumber == 0xFF) {
         return;
     }
     countdown = actor->unk13A;
-    idle = &actor->unk31C->idle;
+    idle = &actor->mv->idle;
     if (countdown != 0) {
         actor->unk13A = countdown - 1;
     }
@@ -694,13 +694,13 @@ void func_1507FEA0(Actor *actor) {
         idle->phase = 0;
         idle->phaseCount = 0;
     }
-    delay = actor->unk31C->idle.delay; // matching: re-read through actor, not idle
+    delay = actor->mv->idle.delay; // matching: re-read through actor, not idle
     if (delay != 0) {
         if (D_800BE9E4 < delay) {
-            actor->unk31C->idle.delay = delay - D_800BE9E4;
+            actor->mv->idle.delay = delay - D_800BE9E4;
         } else {
             func_1507FF94(actor);
-            actor->unk31C->idle.delay = 0;
+            actor->mv->idle.delay = 0;
         }
     }
     func_1507FC2C(actor);
@@ -752,9 +752,9 @@ s32 func_1507FFD8(Actor *actor) {
     f32 pad[3]; // matching: unused stack space (frame size)
     s32 type;
 
-    inZone = func_150A3194(4, 5, actor->x_position, actor->y_position, actor->z_position);
+    inZone = func_150A3194(4, 5, actor->xpos, actor->ypos, actor->zpos);
     if (!inZone) {
-        inZone = func_150A3194(4, 11, actor->x_position, actor->y_position, actor->z_position);
+        inZone = func_150A3194(4, 11, actor->xpos, actor->ypos, actor->zpos);
     }
     if (inZone) {
         types = D_80086C50;
@@ -765,9 +765,9 @@ s32 func_1507FFD8(Actor *actor) {
                 x = obj->x;
                 y = obj->y;
                 z = obj->z;
-                distSq = (x - actor->x_position) * (x - actor->x_position) +
-                         (y - actor->y_position) * (y - actor->y_position) +
-                         (z - actor->z_position) * (z - actor->z_position);
+                distSq = (x - actor->xpos) * (x - actor->xpos) +
+                         (y - actor->ypos) * (y - actor->ypos) +
+                         (z - actor->zpos) * (z - actor->zpos);
                 if (distSq < 1000000.0f &&
                     func_15037698(actor - movement_obj, 0, 0, x, y, z, out, 90.0f, 0, 0) != 0) {
                     return TRUE;

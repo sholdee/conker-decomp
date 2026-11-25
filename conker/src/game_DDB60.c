@@ -25,12 +25,12 @@ void func_150B06B0(Actor *actor, Actor *other, u8 arg2, s32 arg3) {
     s8 angle;
     CollisionHit floor;
 
-    pos.x = actor->x_position;
-    pos.y = actor->y_position;
-    pos.z = actor->z_position;
+    pos.x = actor->xpos;
+    pos.y = actor->ypos;
+    pos.z = actor->zpos;
     angle = func_15143E24(other) + 0x40;
     func_1504715C(&floor, actor);
-    if (actor->id == 0xA6) {
+    if (actor->character_type == 0xA6) {
         Vec3f raisedPos;
         DebrisBurst burst;
 
@@ -121,7 +121,7 @@ void func_150B0A60(Actor *owner, Actor *player, f32 *forward, f32 *right, f32 *o
     f32 spread;
     f32 side;
 
-    *outAngle = (s16)(owner->unk40 * 0.7111111283f - 128.0f);
+    *outAngle = (s16)(owner->theta * 0.7111111283f - 128.0f);
     along = func_150ADA68() * 248.0f;
     spread = func_150ADA68() + -0.5f;
     if (along < 122.0f) {
@@ -143,9 +143,9 @@ void func_150B0A60(Actor *owner, Actor *player, f32 *forward, f32 *right, f32 *o
         outPos[1] = 0.0f;
         outPos[2] = forward[1] * sideLength * spread + right[1] * side;
     }
-    outPos[0] += owner->x_position;
+    outPos[0] += owner->xpos;
     outPos[1] += player->unk118;
-    outPos[2] += owner->z_position;
+    outPos[2] += owner->zpos;
 }
 
 /* State a DDB60Effect keeps at +0x28: func_150B0C58 fills it, func_150B0D20 updates it each frame. */
@@ -197,7 +197,7 @@ void func_15143794(s16, s16, f32, f32 *);
 void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
 
 /*
- * DDB60Effect update: while the owner lives and player movement_obj[owner->unk124] has unk31C byte 0x4F == 2,
+ * DDB60Effect update: while the owner lives and player movement_obj[owner->unk124] has mv byte 0x4F == 2,
  * emits particles around the owner when its speed (at least 1.35 * player->unk44) exceeds 26.
  */
 void func_150B0D20(DDB60Effect *effect) {
@@ -216,15 +216,15 @@ void func_150B0D20(DDB60Effect *effect) {
 
     owner = effect->data.owner;
     data = &effect->data;
-    if (owner->interaction_state == 0 || owner->unique_id != data->ownerId) {
+    if (owner->type == 0 || owner->unique_id != data->ownerId) {
         effect->base.header.state = -1;
         return;
     }
-    idx = owner->unk124;
+    idx = owner->owner;
     emit = 0;
-    if (movement_obj[idx].unk31C->transport_surface == 2) {
-        speed = owner->xz_velocity;
-        minSpeed = movement_obj[idx].unk44 * 1.350000024f;
+    if (movement_obj[idx].mv->transport_surface == 2) {
+        speed = owner->speed;
+        minSpeed = movement_obj[idx].stickspeed * 1.350000024f;
         if (speed < minSpeed) {
             speed = minSpeed;
         }
@@ -240,7 +240,7 @@ void func_150B0D20(DDB60Effect *effect) {
             if (func_1515C0F8(owner, &refVel) == 0) {
                 refVel = &D_800A5480;
             }
-            func_1514373C(owner->unk40 * 0.01745329238f, 1.0f, &forward[0], &forward[1]);
+            func_1514373C(owner->theta * 0.01745329238f, 1.0f, &forward[0], &forward[1]);
             right[0] = forward[1];
             right[1] = -forward[0];
             do {

@@ -230,12 +230,12 @@ void func_151179BC(WorldObject *prop) {
     PROP_SET_MOTION(prop, motion);
 }
 
-/* Starts the prop moving when an object with interaction_state 1 triggers it while it is at rest. */
+/* Starts the prop moving when an object with type 1 triggers it while it is at rest. */
 void func_15117D3C(WorldObject *prop, Actor *obj) {
     s32 delay = prop->moveData.word & 0xFFFF;
 
-    if (obj->interaction_state == 1 && (prop->object_status & 4) && !(prop->task_flag & TASK_FLAG_STATE) && !(prop->task_flag & TASK_FLAG_LOCKED) &&
-        (delay == 0 || obj->unk31C->unk57 == 1)) {
+    if (obj->type == 1 && (prop->object_status & 4) && !(prop->task_flag & TASK_FLAG_STATE) && !(prop->task_flag & TASK_FLAG_LOCKED) &&
+        (delay == 0 || obj->mv->unk57 == 1)) {
         PROP_SET_MOTION(prop, TASK_FLAG_GOING_ON);
     }
 }
@@ -409,13 +409,13 @@ void func_15117F3C(WorldObject *prop) {
     if (motion != TASK_FLAG_ON && motion != TASK_FLAG_GOING_OFF) {
         for (i = 0; i < D_8008FD8C; i++) {
             obj = &movement_obj[i];
-            if (obj->unk65) {
+            if (obj->attach_char) {
                 continue;
             }
             if (obj->stunned) {
                 continue;
             }
-            control = obj->unk31C;
+            control = obj->mv;
             if (control->env_suit) {
                 continue;
             }
@@ -425,10 +425,10 @@ void func_15117F3C(WorldObject *prop) {
             if (control->unk6B >= 4) {
                 continue;
             }
-            if (obj->y_position + 40.0f < anchor[1]) {
-                dy = (obj->y_position + (f32)obj->bodyHeight) - anchor[1];
-                dz = obj->z_position - anchor[2];
-                dx = obj->x_position - anchor[0];
+            if (obj->ypos + 40.0f < anchor[1]) {
+                dy = (obj->ypos + (f32)obj->bodyHeight) - anchor[1];
+                dz = obj->zpos - anchor[2];
+                dx = obj->xpos - anchor[0];
                 distSq = dz * dz + (dx * dx + dy * dy);
                 if (distSq) {} // matching: keeps distSq in its own register
                 if (distSq < rangeSq) {
@@ -441,7 +441,7 @@ void func_15117F3C(WorldObject *prop) {
     if (target == NULL && motion == TASK_FLAG_GOING_ON) {
         for (i = 0; i < D_8008FD8C; i++) {
             obj = &movement_obj[i];
-            if (obj->unk31C->unk6B != 0) {
+            if (obj->mv->unk6B != 0) {
                 target = obj;
                 break;
             }
@@ -460,9 +460,9 @@ void func_15117F3C(WorldObject *prop) {
             }
             if (target != NULL) {
                 if (timer != 0) {
-                    target->unk31C->unk6B = 1;
+                    target->mv->unk6B = 1;
                 } else {
-                    target->unk31C->unk6B = 2;
+                    target->mv->unk6B = 2;
                 }
             }
             if (timer != 0) {
@@ -491,18 +491,18 @@ void func_15117F3C(WorldObject *prop) {
                     started = 0;
                     func_15114D24(prop, 0x14, 0x7D00, 0x5DC, 0xDAC, 4);
                     if (target != NULL) {
-                        target->unk31C->unk6B = 0;
+                        target->mv->unk6B = 0;
                     }
                 }
             }
             if (target != NULL) {
                 func_15117DA4(prop, anchorX, anchorY, anchorZ, anchor);
-                target->unk31C->holdX = anchor[0];
-                target->unk31C->holdY = anchor[1];
-                target->unk31C->holdZ = anchor[2];
+                target->mv->holdX = anchor[0];
+                target->mv->holdY = anchor[1];
+                target->mv->holdZ = anchor[2];
             }
         } else {
-            if (target != NULL && (control = target->unk31C) != NULL) {
+            if (target != NULL && (control = target->mv) != NULL) {
                 if (started == 0 && control->unk6B == 0) {
                     timer = 50;
                     started++;
@@ -523,11 +523,11 @@ void func_15117F3C(WorldObject *prop) {
             }
         }
         if (target != NULL) {
-            if (target->unk31C != NULL) {
+            if (target->mv != NULL) {
                 func_15117DA4(prop, anchorX, anchorY, anchorZ, anchor);
-                target->unk31C->holdX = anchor[0];
-                target->unk31C->holdY = anchor[1];
-                target->unk31C->holdZ = anchor[2];
+                target->mv->holdX = anchor[0];
+                target->mv->holdY = anchor[1];
+                target->mv->holdZ = anchor[2];
             }
         }
     } else if (stayOpen == 0 || motion == TASK_FLAG_GOING_OFF) {
@@ -552,7 +552,7 @@ void func_15117F3C(WorldObject *prop) {
             }
         }
         if (target != NULL) {
-            target->unk31C->unk6B = 0;
+            target->mv->unk6B = 0;
         }
     }
     PROP_SET_MOTION(prop, motion);
@@ -814,9 +814,9 @@ void func_15118F24(WorldObject *prop) {
     }
 }
 
-/* Starts the prop moving when an object with interaction_state 1 (and unk65 clear) triggers it at rest. */
+/* Starts the prop moving when an object with type 1 (and unk65 clear) triggers it at rest. */
 void func_151193AC(WorldObject *prop, Actor *obj) {
-    if (obj->interaction_state == 1 && obj->unk65 == 0 && !(prop->task_flag & TASK_FLAG_STATE) && !(prop->task_flag & TASK_FLAG_LOCKED)) {
+    if (obj->type == 1 && obj->attach_char == 0 && !(prop->task_flag & TASK_FLAG_STATE) && !(prop->task_flag & TASK_FLAG_LOCKED)) {
         PROP_SET_MOTION(prop, TASK_FLAG_GOING_ON);
     }
 }
@@ -1068,12 +1068,12 @@ void func_15119938(WorldObject *prop) {
     if (WORK(prop)->sway.timer != 0x420) {
         player = func_1505EFD0(0);
         if (player != NULL) {
-            x = player->x_position - prop->x;
-            y = player->y_position - prop->y;
-            z = player->z_position - prop->z;
+            x = player->xpos - prop->x;
+            y = player->ypos - prop->y;
+            z = player->zpos - prop->z;
             distSq = x * x + y * y + z * z;
             if (distSq < 3072.0f) {
-                if (player->unk31C->unk57 == 1) {
+                if (player->mv->unk57 == 1) {
                     WORK(prop)->sway.timer = 0x420;
                 } else {
                     WORK(prop)->sway.timer = 0x41F;

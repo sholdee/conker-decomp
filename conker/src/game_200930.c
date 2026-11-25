@@ -267,18 +267,18 @@ void func_15143134(void *, s32, s32);
 /* Writes the world position of a point attached to bone `bone` of obj to out; objects without bone
    matrices use their origin raised by yOffset. */
 void func_151D3E04(Actor *obj, f32 *out, void *localPos, u8 bone, f32 yOffset) {
-    if (obj->unk1D4 != NULL) {
-        func_15143134(localPos, (s32)out, (s32)obj->unk1D4 + (bone << 6));
+    if (obj->ob_matrix_ptr != NULL) {
+        func_15143134(localPos, (s32)out, (s32)obj->ob_matrix_ptr + (bone << 6));
     } else {
-        out[0] = obj->x_position;
-        out[1] = obj->y_position + yOffset;
-        out[2] = obj->z_position;
+        out[0] = obj->xpos;
+        out[1] = obj->ypos + yOffset;
+        out[2] = obj->zpos;
     }
 }
 
 extern void func_1505D1C4(f32, f32, f32, s32, s32, u16, s32, s32);
 
-/* Calls func_1505D1C4 at the midpoint of a and b, with obj's movement angle relative to its unk31C. */
+/* Calls func_1505D1C4 at the midpoint of a and b, with obj's movement angle relative to its mv. */
 void func_151D3E6C(Actor *obj, f32 *a, f32 *b, s32 arg3) {
     f32 x = (b[0] + a[0]) * 0.5f;
     f32 y = (b[1] + a[1]) * 0.5f;
@@ -287,10 +287,10 @@ void func_151D3E6C(Actor *obj, f32 *a, f32 *b, s32 arg3) {
     {
         u16 angle;
 
-        if (obj->unk31C != NULL) {
-            angle = obj->unk76 - obj->unk31C->pssd_waist_tilt;
+        if (obj->mv != NULL) {
+            angle = obj->angle - obj->mv->pssd_waist_tilt;
         } else {
-            angle = obj->unk76;
+            angle = obj->angle;
         }
         func_1505D1C4(x, y, z, arg3, obj - movement_obj, angle, 0, 0);
     }
@@ -473,7 +473,7 @@ void func_151D469C(obj, posFunc, arg2, arg3, arg4)
         emitter.unk6 = 0x82;
     }
 
-    if (obj->unk1D4 != NULL) {
+    if (obj->ob_matrix_ptr != NULL) {
         if ((obj->unk74 & 0xF) != 0xF) {
             D_8008FC70[posFunc](obj, emitter.unk6, &emitter.pos);
             emitter.flags |= 1;
@@ -507,11 +507,11 @@ void func_151D4794(EmitterEffect *effect) {
     prev = effect->emitter.pos;
     emitter = &effect->emitter;
     wasValid = effect->emitter.flags & 1;
-    if (obj->interaction_state == 0 || obj->unique_id != emitter->uniqueId) {
+    if (obj->type == 0 || obj->unique_id != emitter->uniqueId) {
         effect->base.header.state = -1;
         return;
     }
-    if (obj->unk1D4 != NULL && (obj->unk74 & 0xF) != 0xF) {
+    if (obj->ob_matrix_ptr != NULL && (obj->unk74 & 0xF) != 0xF) {
         D_8008FC70[emitter->posFunc](obj, emitter->unk6, &emitter->pos);
         emitter->flags |= 1;
     }
@@ -660,22 +660,22 @@ void func_151D4DAC(Actor *victim, Actor *attacker, f32 *arg2, f32 *arg3, S151D4D
     s32 hp;
     u16 angle;
 
-    if ((victim->id == 9) || (victim->id == 0xF) || (victim->id == 0x10) || (victim->id == 0x12) ||
-        (victim->id == 0x17) || (victim->id == 0x1B) || (victim->id == 0x1E) || (victim->id == 0x28) ||
-        (victim->id == 0x29) || (victim->id == 0x2A) || (victim->id == 0x2B) || (victim->id == 0x2C) ||
-        (victim->id == 0x2E) || (victim->id == 0x38) || (victim->id == 0x41) || (victim->id == 0x42) ||
-        (victim->id == 0x4B) || (victim->id == 0x46) || (victim->id == 0x47) || (victim->id == 0x49) ||
-        (victim->id == 0x4A) || (victim->id == 0x4C) || (victim->id == 0x4D) || (victim->id == 0x4E) ||
-        (victim->id == 0x4F) || (victim->id == 0x52) || (victim->id == 0x5D) || (victim->id == 0x60) ||
-        (victim->id == 0x61) || (victim->id == 0x66) || (victim->id == 0x67) || (victim->id == 0x70) ||
-        (victim->id == 0x73) || (victim->id == 0x77) || (victim->id == 0x7B) || (victim->id == 0x89) ||
-        (victim->id == 0x8C) || (victim->id == 0x8E) || (victim->id == 0x8F) || (victim->id == 0x91) ||
-        (victim->id == 0x9E) || (victim->id == 0xA6) || (victim->id == 0xAB) || (victim->id == 0xAC) ||
-        (victim->id == 0xB2) || (victim->id == 0xB4) || (victim->id == 0x5B)) {
+    if ((victim->character_type == 9) || (victim->character_type == 0xF) || (victim->character_type == 0x10) || (victim->character_type == 0x12) ||
+        (victim->character_type == 0x17) || (victim->character_type == 0x1B) || (victim->character_type == 0x1E) || (victim->character_type == 0x28) ||
+        (victim->character_type == 0x29) || (victim->character_type == 0x2A) || (victim->character_type == 0x2B) || (victim->character_type == 0x2C) ||
+        (victim->character_type == 0x2E) || (victim->character_type == 0x38) || (victim->character_type == 0x41) || (victim->character_type == 0x42) ||
+        (victim->character_type == 0x4B) || (victim->character_type == 0x46) || (victim->character_type == 0x47) || (victim->character_type == 0x49) ||
+        (victim->character_type == 0x4A) || (victim->character_type == 0x4C) || (victim->character_type == 0x4D) || (victim->character_type == 0x4E) ||
+        (victim->character_type == 0x4F) || (victim->character_type == 0x52) || (victim->character_type == 0x5D) || (victim->character_type == 0x60) ||
+        (victim->character_type == 0x61) || (victim->character_type == 0x66) || (victim->character_type == 0x67) || (victim->character_type == 0x70) ||
+        (victim->character_type == 0x73) || (victim->character_type == 0x77) || (victim->character_type == 0x7B) || (victim->character_type == 0x89) ||
+        (victim->character_type == 0x8C) || (victim->character_type == 0x8E) || (victim->character_type == 0x8F) || (victim->character_type == 0x91) ||
+        (victim->character_type == 0x9E) || (victim->character_type == 0xA6) || (victim->character_type == 0xAB) || (victim->character_type == 0xAC) ||
+        (victim->character_type == 0xB2) || (victim->character_type == 0xB4) || (victim->character_type == 0x5B)) {
         func_151C2050(attacker, arg2, dir, 9, (hit != NULL) ? hit->unk4 : 0.0f);
     }
 
-    health = victim->health;
+    health = victim->energy;
     if (health == 0) {
         alreadyDead = 1;
     } else {
@@ -683,12 +683,12 @@ void func_151D4DAC(Actor *victim, Actor *attacker, f32 *arg2, f32 *arg3, S151D4D
     }
 
     flags |= 0x60000;
-    hp = victim->health;
+    hp = victim->energy;
     if ((hit != NULL) && (hit->unk59 == 3) && (hit->unk58 == 10)) {
         if (health >= 3) {
-            victim->health = hp - 1;
+            victim->energy = hp - 1;
         } else {
-            victim->health = 0;
+            victim->energy = 0;
             func_1507DE4C(victim);
             func_15138C80(victim, 0xFF, 1);
             flags = 0x100020;
@@ -704,15 +704,15 @@ void func_151D4DAC(Actor *victim, Actor *attacker, f32 *arg2, f32 *arg3, S151D4D
     }
 }
 
-/* Counts down unk31C->gun_before_reload and counts up unk31C->shotsfired. */
+/* Counts down mv->gun_before_reload and counts up mv->shotsfired. */
 void func_151D5148(Actor *obj) {
-    if (obj->unk31C->gun_before_reload > 0) {
-        obj->unk31C->gun_before_reload--;
+    if (obj->mv->gun_before_reload > 0) {
+        obj->mv->gun_before_reload--;
     }
-    obj->unk31C->shotsfired++;
+    obj->mv->shotsfired++;
 }
 
-/* If obj's unk31C is in state 2 (or unk84 is set): intersects the line through unk31C->aimEye along
+/* If obj's mv is in state 2 (or unk84 is set): intersects the line through mv->aimEye along
    unk31C->unk130 with the plane through ref (arg9, or arg1 without it) whose normal func_151450B4 derives
    from arg2..arg4. The point and the line direction go to pointBuf/dirBuf and *outPoint/*outDir point at
    them; otherwise both are NULL. */
@@ -725,9 +725,9 @@ void func_151D5174(Actor *obj, Vec3f *arg1, Vec3f *arg2, Vec3f *arg3, Vec3f *arg
     f32 dz;
     f32 t;
 
-    if (obj->unk1D4 != NULL) {
-        if (obj->unk31C != NULL && (obj->unk31C->AimState == 2 || obj->unk31C->bot != 0)) {
-            origin = &obj->unk31C->aimEye;
+    if (obj->ob_matrix_ptr != NULL) {
+        if (obj->mv != NULL && (obj->mv->AimState == 2 || obj->mv->bot != 0)) {
+            origin = &obj->mv->aimEye;
             func_151450B4(arg2, arg3, &temp);
             func_151450B4(&temp, arg4, &normal);
             if (arg9 != NULL) {
@@ -740,14 +740,14 @@ void func_151D5174(Actor *obj, Vec3f *arg1, Vec3f *arg2, Vec3f *arg3, Vec3f *arg
                 dz = arg1->z - origin->z;
             }
             t = normal.x * dx + normal.y * dy + normal.z * dz;
-            t /= normal.x * obj->unk31C->aimDir.x + normal.y * obj->unk31C->aimDir.y +
-                 normal.z * obj->unk31C->aimDir.z;
-            pointBuf->x = origin->x + t * obj->unk31C->aimDir.x;
-            pointBuf->y = origin->y + t * obj->unk31C->aimDir.y;
-            pointBuf->z = origin->z + t * obj->unk31C->aimDir.z;
-            dirBuf->x = obj->unk31C->aimDir.x;
-            dirBuf->y = obj->unk31C->aimDir.y;
-            dirBuf->z = obj->unk31C->aimDir.z;
+            t /= normal.x * obj->mv->aimDir.x + normal.y * obj->mv->aimDir.y +
+                 normal.z * obj->mv->aimDir.z;
+            pointBuf->x = origin->x + t * obj->mv->aimDir.x;
+            pointBuf->y = origin->y + t * obj->mv->aimDir.y;
+            pointBuf->z = origin->z + t * obj->mv->aimDir.z;
+            dirBuf->x = obj->mv->aimDir.x;
+            dirBuf->y = obj->mv->aimDir.y;
+            dirBuf->z = obj->mv->aimDir.z;
             *outPoint = pointBuf;
             *outDir = dirBuf;
         end: // matching: the unused label changes IDO's block layout and register allocation
@@ -875,9 +875,9 @@ void func_151D5714(Actor *obj, Vec3f *from, Vec3f *to, u8 bone, f32 scale, u8 ar
     Vec3f *srcs[2];
     Vec3f *dsts[2];
 
-    if (obj->unk1D4 != NULL) {
+    if (obj->ob_matrix_ptr != NULL) {
         if ((obj->unk74 & 0xF) != 0xF) {
-            mtx = (s32)obj->unk1D4 + (bone << 6);
+            mtx = (s32)obj->ob_matrix_ptr + (bone << 6);
             srcs[0] = from;
             srcs[1] = to;
             dsts[0] = &start;
@@ -912,26 +912,26 @@ void func_151D57F8(Actor *obj, u8 slot) {
 
     func_151D5A18(obj, &pos, &forward, &axis1, &axis2, D_8008FC8C[slot], *D_8008FC94[slot]);
     func_151D5174(obj, &pos, &forward, &axis1, &axis2, &pointBuf, &dirBuf, &origin, &dir, NULL);
-    obj->unk31C->unk109 = 1;
+    obj->mv->unk109 = 1;
     if (origin == NULL) {
         origin = &pos;
     }
     if (dir == NULL) {
         dir = &forward;
     }
-    obj->unk31C->unkB8 = origin->x + dir->x * 9999.0f;
-    obj->unk31C->unkBC = origin->y + dir->y * 9999.0f;
-    obj->unk31C->unkC0 = origin->z + dir->z * 9999.0f;
-    if (obj->unk31C->unk109) {
+    obj->mv->unkB8 = origin->x + dir->x * 9999.0f;
+    obj->mv->unkBC = origin->y + dir->y * 9999.0f;
+    obj->mv->unkC0 = origin->z + dir->z * 9999.0f;
+    if (obj->mv->unk109) {
         Vec3f delta;
         f32 len;
 
-        delta.x = obj->unk31C->unkB8 - pos.x;
-        delta.y = obj->unk31C->unkBC - pos.y;
-        delta.z = obj->unk31C->unkC0 - pos.z;
+        delta.x = obj->mv->unkB8 - pos.x;
+        delta.y = obj->mv->unkBC - pos.y;
+        delta.z = obj->mv->unkC0 - pos.z;
         if (func_15145128(&delta, &delta, &len, NULL) != 0) {
             func_15081690(obj, pos.x, pos.y, pos.z, delta.x, delta.y, delta.z,
-                          &obj->unk31C->unkB0, len * 1.00999999f, 0, 0, 0, -1, 0, 0);
+                          &obj->mv->unkB0, len * 1.00999999f, 0, 0, 0, -1, 0, 0);
         }
     }
     func_150636A4(obj);
@@ -946,10 +946,10 @@ void func_151D5A18(Actor *obj, Vec3f *out, Vec3f *forward, Vec3f *axis1, Vec3f *
     Vec3f *dst;
 
     func_15145740(obj, forward, axis1, axis2, 0.8110000491f);
-    if (obj->unk1D4 != NULL) {
+    if (obj->ob_matrix_ptr != NULL) {
         dst = out;
         src = localPos;
-        func_15145EA4(&src, &dst, (s32)obj->unk1D4 + (bone << 6), 1);
+        func_15145EA4(&src, &dst, (s32)obj->ob_matrix_ptr + (bone << 6), 1);
     } else {
         f32 dz;
         f32 dx;
@@ -966,9 +966,9 @@ void func_151D5A18(Actor *obj, Vec3f *out, Vec3f *forward, Vec3f *axis1, Vec3f *
             dz = 1.0f;
             dx = 0.0f;
         }
-        out->x = obj->x_position + (34.0f * dx);
-        out->y = obj->y_position + 49.0f;
-        out->z = obj->z_position + (34.0f * dz);
+        out->x = obj->xpos + (34.0f * dx);
+        out->y = obj->ypos + 49.0f;
+        out->z = obj->zpos + (34.0f * dz);
     }
 }
 
@@ -992,20 +992,20 @@ s32 func_151D5B6C(Vec3f *p0, Vec3f *p1, Actor *self, s8 filter, s32 filterArg) {
     mask = -1;
     for (i = 0; i < 25; i++) {
         obj = &movement_obj[i];
-        if (obj->interaction_state == 0) continue;
-        if (obj->unk5 == 3) continue;
-        if (D_800BE9F0 != 0x23 && obj->id == 0xFF) continue;
+        if (obj->type == 0) continue;
+        if (obj->drawtype == 3) continue;
+        if (D_800BE9F0 != 0x23 && obj->character_type == 0xFF) continue;
         if (obj == self) continue;
-        if (!(obj->unkF8 & 0x40)) continue;
+        if (!(obj->noshove & 0x40)) continue;
         if (filter != -1 && D_80086C90[filter](obj, self, filterArg) == 0) continue;
         if (obj->unkD2 < obj->unkD4) {
             radius = obj->unkD4;
         } else {
             radius = obj->unkD2;
         }
-        center.x = obj->x_position;
-        center.y = obj->y_position + obj->unkD6;
-        center.z = obj->z_position;
+        center.x = obj->xpos;
+        center.y = obj->ypos + obj->unkD6;
+        center.z = obj->zpos;
         if (func_151452C4(p0, p1, &center, radius + radius, &out0, &out1, &outF0, &outF1)) {
             mask &= ~(1 << i);
         }

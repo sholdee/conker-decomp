@@ -32,15 +32,15 @@ void func_1504A730(void) {
 
     for (i = 0; i != 25; i++) {
         obj = &movement_obj[i];
-        if (obj->interaction_state == 0) {
+        if (obj->type == 0) {
             continue;
         }
-        obj->objectNum = 0;
+        obj->stand_on_char = 0;
         obj->unk300 = 0;
-        obj->unkF4 &= 0xFFEE5FFF;
+        obj->mvmt_control &= 0xFFEE5FFF;
         dc_glbl_CharNum = i;
-        if (obj->y_position <= (f32)obj->unk38) {
-            if (obj->unk127 == 0xFF) {
+        if (obj->ypos <= (f32)obj->unk38) {
+            if (obj->playernumber == 0xFF) {
                 func_15060F28(obj, 0);
                 continue;
             }
@@ -60,11 +60,11 @@ void func_1504A730(void) {
         if (D_800BE616 == 0 || (tickResult = func_1504C8BC(obj)) != 0) {
             maxStep = 2.0f;
             if (i < D_8008FD8C) {
-                obj->unk31C->being_sniped -= D_800BE9E4;
-                if (obj->unk31C->being_sniped < 0) {
-                    obj->unk31C->being_sniped = 0;
+                obj->mv->being_sniped -= D_800BE9E4;
+                if (obj->mv->being_sniped < 0) {
+                    obj->mv->being_sniped = 0;
                 }
-                obj->unk31C->unk57 = 0;
+                obj->mv->unk57 = 0;
                 if (i < 4) {
                     D_800CC284 = D_800BE728[i];
                 } else {
@@ -72,23 +72,23 @@ void func_1504A730(void) {
                     D_800CC284 = &noPad;
                 }
             }
-            if (obj->camera != NULL) {
-                if (obj->camera->unk384 == 999.0f) {
-                    D_800CC280 = obj->camera->yaw * (65536.0f / 360.0f);
+            if (obj->CameraPtr != NULL) {
+                if (obj->CameraPtr->unk384 == 999.0f) {
+                    D_800CC280 = obj->CameraPtr->yaw * (65536.0f / 360.0f);
                 } else {
-                    D_800CC280 = obj->camera->unk384 * (65536.0f / 360.0f);
+                    D_800CC280 = obj->CameraPtr->unk384 * (65536.0f / 360.0f);
                 }
             } else {
                 D_800CC280 = 0;
             }
-            if (obj->unk127 != 0xFF) {
+            if (obj->playernumber != 0xFF) {
                 func_150A11C4(obj);
-            } else if (obj->unkF8 & 0x400000) {
+            } else if (obj->noshove & 0x400000) {
                 func_150A278C(obj);
             }
-            obj->old_x_position = obj->x_position;
-            obj->old_y_position = obj->y_position;
-            obj->old_z_position = obj->z_position;
+            obj->old_xpos = obj->xpos;
+            obj->old_ypos = obj->ypos;
+            obj->old_zpos = obj->zpos;
             D_800CC27C = (obj->unk184 >> 28) & 7;
             step = D_800BE9A4;
             if (D_800BE616 != 0 && (D_8008FDBC & 0x100)) {
@@ -97,7 +97,7 @@ void func_1504A730(void) {
             if (maxStep < step) {
                 step = maxStep;
             }
-            D_800D1550 = obj->unk48 * step;
+            D_800D1550 = obj->speedup * step;
             D_800CC264 = D_800D1550 * 100.0f;
             {
                 // matching: a -g3 scope here keeps the lbu after the sh above and lets the lui hoist
@@ -109,16 +109,16 @@ void func_1504A730(void) {
             if (D_800B0DF0->unk49 != 0) {
                 D_80086004[D_800B0DF0->unk49]((s32)obj);
             }
-            if (!(obj->unk25C & 0x200)) {
-                if (D_80086014[obj->interaction_state] != NULL) {
-                    D_80086014[obj->interaction_state]((s32)obj);
+            if (!(obj->task_attrib & 0x200)) {
+                if (D_80086014[obj->type] != NULL) {
+                    D_80086014[obj->type]((s32)obj);
                 }
             }
-            if (obj->interaction_state != 0) {
+            if (obj->type != 0) {
                 func_1507E73C(obj);
                 func_1504AF10(obj, 0, 0);
                 if (i < D_8008FD8C && D_800D18A8 == 0) {
-                    func_15085710(obj->unk127, 5, obj->health);
+                    func_15085710(obj->playernumber, 5, obj->energy);
                 }
             }
             obj->unk2FF = 1;
@@ -131,8 +131,8 @@ void func_1504A730(void) {
                     D_800BE9A8 = 0.0f;
                 }
             }
-            if (obj->old_x_position != obj->x_position || obj->old_y_position != obj->y_position ||
-                obj->old_z_position != obj->z_position) {
+            if (obj->old_xpos != obj->xpos || obj->old_ypos != obj->ypos ||
+                obj->old_zpos != obj->zpos) {
                 obj->unk300 = 1;
             }
             if (D_800B0DF0->unk4A != 0) {
@@ -142,15 +142,15 @@ void func_1504A730(void) {
     }
 
     for (j = 0; j < D_8008FD8C; j++) {
-        if ((movement_obj)[j].interaction_state != 0 && (movement_obj)[j].unk31C != NULL) {
+        if ((movement_obj)[j].type != 0 && (movement_obj)[j].mv != NULL) {
             if ((movement_obj)[j].unk137 != 0) {
                 if (D_800CBDA0[j] != 0) {
                     db_Object_array[D_800CBDA0[j] - 1].object_status |= 0x84;
                     D_800DBF94[D_800CBDA0[j] - 1] |= 1 << j;
                 }
-                (movement_obj)[j].unk31C->unk56 = 5;
-            } else if ((movement_obj)[j].unk31C->unk56 != 0) {
-                (movement_obj)[j].unk31C->unk56--;
+                (movement_obj)[j].mv->unk56 = 5;
+            } else if ((movement_obj)[j].mv->unk56 != 0) {
+                (movement_obj)[j].mv->unk56--;
             }
         }
     }
@@ -171,7 +171,7 @@ void func_1504ADD0(void) {
     if (D_800C35EA[0] != 1) {
         for (i = 0; i < 25; i++) {
             obj = &movement_obj[i];
-            if (obj->interaction_state == 0) {
+            if (obj->type == 0) {
                 continue;
             }
             dc_glbl_CharNum = i;
@@ -184,7 +184,7 @@ void func_1504ADD0(void) {
                     D_800CC284 = &noPad;
                 }
             }
-            switch (obj->id) {
+            switch (obj->character_type) {
             case 0x28:
             case 0x77:
                 func_150ED578(obj);
@@ -229,9 +229,9 @@ void func_1504AF10(Actor *obj, s32 force, s32 release) {
             }
             db_Object_array[index].object_status &= ~0x60;
             db_Object_array[index].object_status |= 0x20;
-            db_Object_array[index].x = obj->x_position;
-            db_Object_array[index].y = obj->y_position + obj->unk90;
-            db_Object_array[index].z = obj->z_position;
+            db_Object_array[index].x = obj->xpos;
+            db_Object_array[index].y = obj->ypos + obj->unk90;
+            db_Object_array[index].z = obj->zpos;
         }
     }
 }
@@ -257,20 +257,20 @@ f32 func_1504B0FC(Actor *obj, f32 arg1) {
     f32 excess;
 
     result = 0.0f;
-    obj->unk31C->unk68 = 0;
+    obj->mv->unk68 = 0;
     obj->unk110 = 0;
-    if (obj->stunned == 0 && obj->health != 0 && obj->unk31C->AimState == 0) {
+    if (obj->stunned == 0 && obj->energy != 0 && obj->mv->AimState == 0) {
         stickX = D_800CC284->stick_x;
         stickY = D_800CC284->stick_y;
     } else {
         stickX = 0;
         stickY = 0;
     }
-    if (obj->unk31C->unk22 > 100) {
+    if (obj->mv->unk22 > 100) {
         stickY = 80;
     }
-    delta = (obj->y_position - ((obj->unk118 - 60.0f) - 170.0f)) * 2.0f;
-    if ((obj->unk31C->water_attribs & 1) || obj->unk31C->unk21 != 0) {
+    delta = (obj->ypos - ((obj->unk118 - 60.0f) - 170.0f)) * 2.0f;
+    if ((obj->mv->water_attribs & 1) || obj->mv->unk21 != 0) {
         obj->unkB2 = 0;
         if (delta < 400.0f) {
             // matching: loading 8.0f into step first gives the target's mul.s operand order
@@ -282,40 +282,40 @@ f32 func_1504B0FC(Actor *obj, f32 arg1) {
             if (delta + step > 400.0f) {
                 step = 400.0f - delta;
             }
-            obj->y_position += step;
+            obj->ypos += step;
         }
     }
-    if (obj->in_water == 1) {
-        obj->unk1CC = obj->y_position;
+    if (obj->inwater == 1) {
+        obj->unk1CC = obj->ypos;
         if (obj->unk118 == -10000.0f) {
             func_15052408(obj);
             return 0.0f;
         }
-        if (stickY != 0 || ((obj->unk118 - 60.0f) - 175.0f) < obj->y_position) {
+        if (stickY != 0 || ((obj->unk118 - 60.0f) - 175.0f) < obj->ypos) {
             targetPitch = stickY * 2.25f;
         } else {
-            targetPitch = obj->unkB8;
+            targetPitch = obj->vtilt;
         }
-        if (obj->unk31C->unk21 != 0) {
+        if (obj->mv->unk21 != 0) {
             targetPitch = 0.0f;
         }
         func_15059444(obj);
-        if ((obj->stunned != 0 && (obj->health != 0 || obj->y_velocity >= 60.0f)) || obj->unk84.uh == 0x262) {
+        if ((obj->stunned != 0 && (obj->energy != 0 || obj->yspd >= 60.0f)) || obj->animseq.uh == 0x262) {
             return 0.0f;
         }
-        if (delta > 0.0f && obj->unk84.uh != 0x22) {
+        if (delta > 0.0f && obj->animseq.uh != 0x22) {
             if (delta > 300.0f) {
                 delta = 300.0f;
             }
-            obj->y_position += delta * arg1 * 0.002997f;
+            obj->ypos += delta * arg1 * 0.002997f;
         }
-    } else if ((obj->gravity < 0.0f && obj->y_velocity > 0.0f) || (obj->gravity > 0.0f && obj->y_velocity < 0.0f)) {
-        obj->gravity = 0.0f;
-        obj->y_velocity = 0.0f;
+    } else if ((obj->ygrav < 0.0f && obj->yspd > 0.0f) || (obj->ygrav > 0.0f && obj->yspd < 0.0f)) {
+        obj->ygrav = 0.0f;
+        obj->yspd = 0.0f;
     }
-    if (obj->in_water != 1 || obj->unk28 >= 10.0f || obj->y_position < (obj->unk118 - 60.0f) + 20.0f) {
-        if (obj->in_water == 1) {
-            if ((obj->unk118 - 50.0f < obj->aim.y || (obj->unk31C->water_attribs & 1)) && obj->health != 0) {
+    if (obj->inwater != 1 || obj->shad >= 10.0f || obj->ypos < (obj->unk118 - 60.0f) + 20.0f) {
+        if (obj->inwater == 1) {
+            if ((obj->unk118 - 50.0f < obj->aim.y || (obj->mv->water_attribs & 1)) && obj->energy != 0) {
                 if (obj->unkB2 > 30) {
                     if (obj->unkB2 > 1500) {
                         func_15060A30(0x1A7, obj);
@@ -326,17 +326,17 @@ f32 func_1504B0FC(Actor *obj, f32 arg1) {
                 obj->unkB2 = 0;
             } else {
                 obj->unkB2 += D_800BE9E4;
-                if (obj->unkB2 > 1560 || (obj->health == 0 && obj->unk31C->death_State == 0)) {
+                if (obj->unkB2 > 1560 || (obj->energy == 0 && obj->mv->death_State == 0)) {
                     obj->unkB2 -= 60;
-                    if (obj->health >= 2) {
-                        if (obj->health == 4) {
+                    if (obj->energy >= 2) {
+                        if (obj->energy == 4) {
                             func_15060A30(0x499, obj);
                         }
-                        obj->health--;
+                        obj->energy--;
                     } else {
-                        obj->health = 0;
+                        obj->energy = 0;
                         if (obj->stunned != 0) {
-                            obj->gravity = 0.0f;
+                            obj->ygrav = 0.0f;
                             func_1507CD64(obj, 4);
                         } else {
                             func_1507CD64(obj, 3);
@@ -344,46 +344,46 @@ f32 func_1504B0FC(Actor *obj, f32 arg1) {
                     }
                 } else if (obj->unkB2 > 1440 && obj->unkB2 < 1500) {
                     obj->unkB2 += 120;
-                    if (obj->health < 4) {
+                    if (obj->energy < 4) {
                         func_15060A30(0x499, obj);
                     }
                 }
             }
-            if ((obj->y_velocity != 0.0f || obj->gravity != 0.0f) && obj->gravity < 0.0f && obj->y_velocity > 0.0f) {
-                obj->gravity = 0.0f;
-                obj->y_velocity = 0.0f;
+            if ((obj->yspd != 0.0f || obj->ygrav != 0.0f) && obj->ygrav < 0.0f && obj->yspd > 0.0f) {
+                obj->ygrav = 0.0f;
+                obj->yspd = 0.0f;
             }
-            if (((obj->unk118 - 60.0f) - 175.0f) < obj->y_position && obj->unk84.uh != 0x28) {
-                if (obj->unk31C->water_up < 2.5f) {
-                    obj->unk31C->water_up += 0.05f;
+            if (((obj->unk118 - 60.0f) - 175.0f) < obj->ypos && obj->animseq.uh != 0x28) {
+                if (obj->mv->water_up < 2.5f) {
+                    obj->mv->water_up += 0.05f;
                 }
             } else {
-                obj->unk31C->water_up = 0.0f;
+                obj->mv->water_up = 0.0f;
             }
-            obj->y_position += obj->unk31C->water_up * D_800D1550;
-            excess = obj->y_position - ((obj->unk118 - 60.0f) + 14.0f);
+            obj->ypos += obj->mv->water_up * D_800D1550;
+            excess = obj->ypos - ((obj->unk118 - 60.0f) + 14.0f);
             if (excess > 0.0f) {
                 excess *= 0.65f;
-                obj->y_position -= excess;
-                obj->unk31C->water_up = 0.0f;
+                obj->ypos -= excess;
+                obj->mv->water_up = 0.0f;
             }
-            if (((obj->unk118 - 60.0f) - 75.0f) < obj->y_position) {
+            if (((obj->unk118 - 60.0f) - 75.0f) < obj->ypos) {
                 targetPitch -= 30.0f;
             }
         }
-        if (obj->unk84.uh == 0x22 && targetPitch < -20.0f) {
+        if (obj->animseq.uh == 0x22 && targetPitch < -20.0f) {
             targetPitch = -20.0f;
         }
-        if (obj->unk28 < 40.0f) {
+        if (obj->shad < 40.0f) {
             func_1510F820(obj->unk188, obj->floorTri.v, &out0, &out1, &out2, &out3, &out4);
             out3 = func_1505210C(obj, out3, out4, &out4, 180.0f);
-            if (out4 < obj->unkB8) {
-                obj->unkB8 += (out4 - obj->unkB8) * 0.2f;
+            if (out4 < obj->vtilt) {
+                obj->vtilt += (out4 - obj->vtilt) * 0.2f;
             }
         }
-        obj->unkBC = targetPitch - obj->unkB8;
+        obj->unkBC = targetPitch - obj->vtilt;
         if (2.7f * D_800D1550 > fabsf(obj->unkBC)) {
-            obj->unkB8 = targetPitch;
+            obj->vtilt = targetPitch;
         } else {
             if (obj->unkBC > 2.7f) {
                 obj->unkBC = 2.7f;
@@ -391,34 +391,34 @@ f32 func_1504B0FC(Actor *obj, f32 arg1) {
             if (obj->unkBC < -2.7f) {
                 obj->unkBC = -2.7f;
             }
-            obj->unkB8 += obj->unkBC * D_800D1550;
+            obj->vtilt += obj->unkBC * D_800D1550;
         }
-        if (obj->unkB8 < -90.0f) {
-            obj->unkB8 = -90.0f;
+        if (obj->vtilt < -90.0f) {
+            obj->vtilt = -90.0f;
         }
-        if (obj->unkB8 > 90.0f) {
-            obj->unkB8 = 90.0f;
+        if (obj->vtilt > 90.0f) {
+            obj->vtilt = 90.0f;
         }
-        if (obj->unk31C->unk21 == 0) {
+        if (obj->mv->unk21 == 0) {
             if ((stickX + 8) / 18 != 0) {
-                obj->unk76 -= ((((stickX + 8) / 18) * D_800CC264) << 8) / 100;
+                obj->angle -= ((((stickX + 8) / 18) * D_800CC264) << 8) / 100;
                 obj->unk7E = 0x17;
             }
-            result = obj->target_speed;
+            result = obj->wantspeed;
         }
-        obj->unk80 = 1;
+        obj->count2 = 1;
     } else {
         func_15052408(obj);
-        if (obj->xz_velocity > 16.0f) {
-            obj->xz_velocity = 16.0f;
+        if (obj->speed > 16.0f) {
+            obj->speed = 16.0f;
         }
-        result = obj->xz_velocity;
+        result = obj->speed;
     }
-    if (obj->unk31C->ladder != 0) {
-        obj->y_position = obj->old_y_position;
-        belowLevel = obj->unk118 != -10000.0f && obj->y_position < obj->unk118 - 60.0f;
+    if (obj->mv->ladder != 0) {
+        obj->ypos = obj->old_ypos;
+        belowLevel = obj->unk118 != -10000.0f && obj->ypos < obj->unk118 - 60.0f;
         if (!belowLevel) {
-            obj->in_water = 0;
+            obj->inwater = 0;
         }
     }
     return result;
@@ -437,7 +437,7 @@ void func_1504BA38(Actor *obj) {
     s8 unk2;
     s32 unk1;
 
-    if (obj->unk28 > 10.0f) {
+    if (obj->shad > 10.0f) {
         obj->unkCE = 0;
         unk1 = entry->unk1; // matching: dead use of entry here sets the register allocation
         return;
@@ -452,7 +452,7 @@ void func_1504BA38(Actor *obj) {
         obj->unkCE = entry->unk0;
         return;
     }
-    obj->unkCE = unk1 * D_800991D4 * (entry->unk0 - obj->xz_velocity);
+    obj->unkCE = unk1 * D_800991D4 * (entry->unk0 - obj->speed);
     if (unk2) { // matching: keeps unk2 live to the end (in a1 rather than v0)
     }
 }
@@ -461,10 +461,10 @@ void func_1504BAF0(Actor *obj) {
     s16 index;
     Actor *other;
 
-    index = obj->unk13C - 100;
+    index = obj->lifting - 100;
     if (index >= 0) {
         other = &movement_obj[index];
-        if (other->unk13D >= 100 && (other->id == 168 || other->id == 169)) {
+        if (other->carried >= 100 && (other->character_type == 168 || other->character_type == 169)) {
             D_800D1580 = 3;
             func_1507490C();
         }
@@ -473,29 +473,29 @@ void func_1504BAF0(Actor *obj) {
 }
 
 void func_1504BB88(Actor *obj) {
-    if (obj->unk25C & 0x10) {
-        obj->unk83 = 0xFF;
-        obj->disable_run = 0xFF;
-        if (obj->interaction_state == 1) {
+    if (obj->task_attrib & 0x10) {
+        obj->count5 = 0xFF;
+        obj->norun = 0xFF;
+        if (obj->type == 1) {
             func_1505E650(obj, 0xD6, 1.15f, 3.0f, 0.0f, 0.0f, 0);
         }
-        obj->unk25C &= ~0x10;
+        obj->task_attrib &= ~0x10;
     }
 
-    if (obj->unk25C & 2) {
-        if (obj->unk13C != 0) {
+    if (obj->task_attrib & 2) {
+        if (obj->lifting != 0) {
             func_1504BAF0(obj);
         }
-        obj->unk25C &= ~2;
+        obj->task_attrib &= ~2;
     }
 }
 
 void func_1504BC38(Actor *obj) {
-    if (obj->disable_run != 0 && obj->disable_run < 250) {
-        if (obj->disable_run <= D_800BE9A0) {
-            obj->disable_run = 0;
+    if (obj->norun != 0 && obj->norun < 250) {
+        if (obj->norun <= D_800BE9A0) {
+            obj->norun = 0;
         } else {
-            obj->disable_run -= D_800BE9A0;
+            obj->norun -= D_800BE9A0;
         }
     }
     if (obj->unk228) { // matching: "!= 0" here changes the register allocation (a2 -> a1)
@@ -508,56 +508,56 @@ void func_1504BC38(Actor *obj) {
     if (obj->unkAE != 0) {
         obj->unkAE--;
     }
-    if (obj->disable_jump != 0xFF) {
-        if (obj->disable_jump <= D_800BE9A0) {
-            obj->disable_jump = 0;
+    if (obj->nojump != 0xFF) {
+        if (obj->nojump <= D_800BE9A0) {
+            obj->nojump = 0;
         } else {
-            obj->disable_jump -= D_800BE9A0;
+            obj->nojump -= D_800BE9A0;
         }
     }
-    if (obj->immune != 0xFF) {
-        if (obj->immune <= D_800BE9A0) {
-            obj->immune = 0;
+    if (obj->imune != 0xFF) {
+        if (obj->imune <= D_800BE9A0) {
+            obj->imune = 0;
         } else {
-            obj->immune -= D_800BE9A0;
+            obj->imune -= D_800BE9A0;
         }
     }
-    if (obj->unk31C->chased > 0) {
-        obj->unk31C->chased -= D_800BE9A0;
+    if (obj->mv->chased > 0) {
+        obj->mv->chased -= D_800BE9A0;
     }
-    if (obj->unk31C->chasing > 0) {
-        obj->unk31C->chasing -= D_800BE9A0;
+    if (obj->mv->chasing > 0) {
+        obj->mv->chasing -= D_800BE9A0;
     }
-    if (obj->unk31C->camjolt > 0) {
-        obj->unk31C->camjolt -= D_800BE9A0;
+    if (obj->mv->camjolt > 0) {
+        obj->mv->camjolt -= D_800BE9A0;
     }
-    if (obj->unk107 != 0) {
-        obj->unk107--;
+    if (obj->ivehitit != 0) {
+        obj->ivehitit--;
     }
     if (obj->unk1D0 > 0) {
         obj->unk1D0 -= D_800BE9A0;
     }
-    if (obj->unk31C->side > 0) {
-        obj->unk31C->side -= D_800BE9A0;
+    if (obj->mv->side > 0) {
+        obj->mv->side -= D_800BE9A0;
     }
-    if (obj->unk31C->save_done != 0) {
-        obj->unk31C->save_done--;
+    if (obj->mv->save_done != 0) {
+        obj->mv->save_done--;
     }
 
-    obj->unk31C->use_cam_butt >>= 1;
+    obj->mv->use_cam_butt >>= 1;
 
-    if (obj->unk31C->ReloadTimer != 0) {
-        if (obj->unk31C->ReloadTimer > D_800BE9E4) {
-            obj->unk31C->ReloadTimer -= D_800BE9E4;
+    if (obj->mv->ReloadTimer != 0) {
+        if (obj->mv->ReloadTimer > D_800BE9E4) {
+            obj->mv->ReloadTimer -= D_800BE9E4;
         } else {
-            obj->unk31C->ReloadTimer = 0;
+            obj->mv->ReloadTimer = 0;
         }
     }
-    if (obj->unk31C->unk1A0 != 0) {
-        if (obj->unk31C->unk1A0 > D_800BE9E4) {
-            obj->unk31C->unk1A0 -= D_800BE9E4;
+    if (obj->mv->unk1A0 != 0) {
+        if (obj->mv->unk1A0 > D_800BE9E4) {
+            obj->mv->unk1A0 -= D_800BE9E4;
         } else {
-            obj->unk31C->unk1A0 = 0;
+            obj->mv->unk1A0 = 0;
         }
     }
 }
@@ -568,54 +568,54 @@ void func_1504BE2C(Actor *obj, u16 *arg1, f32 *arg2, s8 *arg3) {
     s32 pad[2]; // matching: the frame has two unused words
     f32 angle;
 
-    angle = obj->unk31C->pissed_cycle * 0.024543693f; // pi / 128: unkB counts 256ths of a turn
+    angle = obj->mv->pissed_cycle * 0.024543693f; // pi / 128: unkB counts 256ths of a turn
     D_800CC2B4 = 16.0f;
-    if (obj->unk31C->pissed_hangover != 0 && obj->unk31C->pissed_hangover == 0) { // never true, but compiled in
+    if (obj->mv->pissed_hangover != 0 && obj->mv->pissed_hangover == 0) { // never true, but compiled in
         func_1507EB2C(obj);
-        obj->unk31C->pissed_up = 0;
+        obj->mv->pissed_up = 0;
     }
-    if (obj->unk31C->pissed_walk == 0) {
-        obj->unk31C->pissed_walk = 0xA6;
+    if (obj->mv->pissed_walk == 0) {
+        obj->mv->pissed_walk = 0xA6;
     }
-    obj->unk31C->turn = 5;
+    obj->mv->turn = 5;
     if (arg1) { // matching: this and the empty if below keep arg1 live in a1 across the calls
     }
-    if (*arg2 > 4.0f && obj->unk84.uh == 0xAA) {
-        obj->unk31C->turn = 1;
-        obj->unk31C->pissed_angle = *arg1;
+    if (*arg2 > 4.0f && obj->animseq.uh == 0xAA) {
+        obj->mv->turn = 1;
+        obj->mv->pissed_angle = *arg1;
     }
     func_150AD78C(angle);
     if (arg1) {
     }
-    obj->unk31C->pissed_cycle += 2;
-    if (obj->unk31C->pissed_hangover != 0) {
+    obj->mv->pissed_cycle += 2;
+    if (obj->mv->pissed_hangover != 0) {
         obj->unkAA = 25;
-    } else if (obj->unk84.uh == 0xA7) {
+    } else if (obj->animseq.uh == 0xA7) {
         obj->unkAA = 50;
     } else {
         obj->unkAA = 32;
     }
     obj->unk54 *= 0.5f;
-    if (obj->unk84.uh == 0x2C || obj->unk84.uh == 0xE0) {
+    if (obj->animseq.uh == 0x2C || obj->animseq.uh == 0xE0) {
         *arg3 = D_800CC284->stick_y >> 1;
     } else {
         if (!(func_150ADA20() & 0x3F)) {
-            obj->unk31C->pssd_waist_wobble = (func_150ADA20() % 25000U) - 12500;
+            obj->mv->pssd_waist_wobble = (func_150ADA20() % 25000U) - 12500;
         }
-        D_800CC2B2 = obj->unk31C->pssd_waist_wobble;
-        if (obj->unk31C->pissed_hangover != 0) {
+        D_800CC2B2 = obj->mv->pssd_waist_wobble;
+        if (obj->mv->pissed_hangover != 0) {
             D_800CC2B2 /= 3;
         }
     }
-    if (D_800C35EA[0] == 0 && obj->unk31C->pissed_hangover == 0) {
+    if (D_800C35EA[0] == 0 && obj->mv->pissed_hangover == 0) {
         obj->unk282 = 30;
         obj->unk276 = 0;
     }
 }
 
 s32 func_1504C078(void) {
-    if (D_800D154C->unk31C->idle.active != 1) {
-        D_800D154C->unk31C->idle.holdFrames = 0;
+    if (D_800D154C->mv->idle.active != 1) {
+        D_800D154C->mv->idle.holdFrames = 0;
         func_1507F640();
     }
     return 999;
@@ -651,56 +651,56 @@ void func_1504C0E8(Actor *obj, s32 arg1, f32 arg2) {
     ActorCtl *ext;
     f32 diff;
 
-    if (D_800CC2B2 == 0 && (ext = obj->unk31C)->pssd_waist_tilt >= -29 && ext->pssd_waist_tilt < 30) {
+    if (D_800CC2B2 == 0 && (ext = obj->mv)->pssd_waist_tilt >= -29 && ext->pssd_waist_tilt < 30) {
         ext->pssd_waist_tilt = 0;
     } else {
-        ext = obj->unk31C;
+        ext = obj->mv;
         // matching: computed in two statements to keep the target's float register order
         diff = D_800CC2B2 - ext->pssd_waist_tilt;
         diff = (D_800D1550 / D_800CC2B4) * diff;
         ext->pssd_waist_tilt += (s16)diff;
     }
-    ext = obj->unk31C;
+    ext = obj->mv;
     if (ext->unk6B != 0) {
         return;
     }
     anim = 999;
-    if (obj->unk65 != 0 && obj->stunned == 0) {
+    if (obj->attach_char != 0 && obj->stunned == 0) {
         func_15064A14(obj);
         return;
     }
-    if (obj->unk81 == 0 && obj->stunned == 0 && obj->in_water == 0) {
-        if (obj->unk83 == 0 && ext->weapon_status != 3) {
-            obj->unk80 = 1;
+    if (obj->count3 == 0 && obj->stunned == 0 && obj->inwater == 0) {
+        if (obj->count5 == 0 && ext->weapon_status != 3) {
+            obj->count2 = 1;
             obj->unk100 &= 0xF3;
             D_800CC2BC |= 0x80;
             speed = 1.0f;
             start = 0.0f;
             blend = 4.0f;
-            vel = obj->xz_velocity * D_800991DC + arg2 * D_800991E0;
-            ext = obj->unk31C;
-            if (ext->bitten > 0 || ext->transport != 0 || obj->unk13C >= 100 || arg1 != 0 ||
+            vel = obj->speed * D_800991DC + arg2 * D_800991E0;
+            ext = obj->mv;
+            if (ext->bitten > 0 || ext->transport != 0 || obj->lifting >= 100 || arg1 != 0 ||
                 (ext->walk_attrib & 3) || ext->rt_context_b != 0 || ext->injured != 0 ||
                 ext->pissed_up > 0 || ext->env_suit != 0) {
                 if (func_15064B94(obj, vel, vel, arg1, arg2) != 0) {
                     return;
                 }
-                ext = obj->unk31C;
+                ext = obj->mv;
             }
             pressed = D_800CC284->button & Z_TRIG;
             if (pressed == 0 || D_800CC2B1 != 0 || ext->rt_context_b != 0 || (ext->transport & 0xF) == 1) {
-                if (obj->xz_velocity > 4.0f) {
+                if (obj->speed > 4.0f) {
                     ext->dwalk = 0;
-                    ext = obj->unk31C;
+                    ext = obj->mv;
                 }
                 pressed = ext->transport; // matching: reusing pressed for this value sets the register allocation
                 if ((ext->transport == 1 || pressed == 0x81) && vel > 1.0f) {
                     arg2 = 10.0f;
                     anim = 0x302;
-                    speed = obj->xz_velocity / 7.0f + D_800991E4;
-                    if (obj->xz_velocity > 23.0f) {
+                    speed = obj->speed / 7.0f + D_800991E4;
+                    if (obj->speed > 23.0f) {
                         anim = 0x303;
-                        speed = obj->xz_velocity / 23.0f + D_800991E8;
+                        speed = obj->speed / 23.0f + D_800991E8;
                     }
                 } else if (ext->chased > 0 && vel >= 5.0f) {
                     anim = 0x2B;
@@ -708,46 +708,46 @@ void func_1504C0E8(Actor *obj, s32 arg1, f32 arg2) {
                 } else if (ext->chasing > 0 && vel >= 5.0f) {
                     anim = 0xDF;
                     speed = vel / 12.0f;
-                } else if (obj->unk118 != D_800991EC && obj->y_position < obj->unk118 &&
-                           obj->xz_velocity >= 1.0f && ext->transport == 0) {
+                } else if (obj->unk118 != D_800991EC && obj->ypos < obj->unk118 &&
+                           obj->speed >= 1.0f && ext->transport == 0) {
                     speed = vel / 18.0f + D_800991F0;
                     anim = 0x8B;
                     obj->unkAA = 0x4B;
                 } else if (vel > 14.0f) {
                     anim = (D_800BE9F0 != 4) ? 2 : 0x1B2;
                     speed = vel / 23.0f + D_800991F4;
-                } else if (vel > 6.0f || (arg2 < 1.0f && obj->xz_velocity > 1.0f)) {
+                } else if (vel > 6.0f || (arg2 < 1.0f && obj->speed > 1.0f)) {
                     anim = 1;
                     speed = vel * 0.125f + D_800991F8;
                 } else if (vel > 1.0f) {
                     blend = 15.0f;
-                    anim = (obj->id == 0x80) ? 1 : 0;
+                    anim = (obj->character_type == 0x80) ? 1 : 0;
                     speed = vel * 0.125f + D_800991FC;
                 } else {
                     anim = func_1504C078();
                 }
-                if (obj->unk28 > 60.0f && obj->unk31C->transport == 0) {
+                if (obj->shad > 60.0f && obj->mv->transport == 0) {
                     speed = 0.5f;
                     anim = 0x38;
                     obj->unk100 |= 0x10;
                 }
-                if (obj->xz_velocity > 18.0f && obj->unk31C->weapon_status != 1 && obj->unk31C->weapon_status != 3 && arg2 == 0.0f &&
-                    obj->unk28 == 0.0f && D_800CC27C == 0) {
+                if (obj->speed > 18.0f && obj->mv->weapon_status != 1 && obj->mv->weapon_status != 3 && arg2 == 0.0f &&
+                    obj->shad == 0.0f && D_800CC27C == 0) {
                     speed = 0.5f;
                     anim = 0x21;
                     blend = 3.0f;
-                    obj->disable_run = 8;
-                    obj->unk83 = 0x11;
+                    obj->norun = 8;
+                    obj->count5 = 0x11;
                 }
             } else if (pressed != 0) {
-                if (obj->xz_velocity < 3.0f) {
+                if (obj->speed < 3.0f) {
                     ext->dwalk = 1;
                 }
-                if (obj->unk44 > D_80099200 && (ext = obj->unk31C)->dwalk != 0) {
+                if (obj->stickspeed > D_80099200 && (ext = obj->mv)->dwalk != 0) {
                     ext->duck_tilt = 1;
                     obj->unkAA = 0x28;
                     blend = 5.0f;
-                    speed = obj->unk44 / 15.0f + 0.5f;
+                    speed = obj->stickspeed / 15.0f + 0.5f;
                     anim = func_1504C0B8();
                 } else {
                     blend = 6.0f;
@@ -759,48 +759,48 @@ void func_1504C0E8(Actor *obj, s32 arg1, f32 arg2) {
         if (anim != 999) {
             func_1505E650(obj, anim, speed, blend, start, 0.0f, 0);
         }
-    } else if (obj->unk84.uh == 0x21 && D_800CC2B1 == 0 && obj->unk44 == 0.0f &&
+    } else if (obj->animseq.uh == 0x21 && D_800CC2B1 == 0 && obj->stickspeed == 0.0f &&
                (D_800CC284->button & Z_TRIG)) {
         func_1505E650(obj, 0x16, 1.5f, 6.0f, 0.0f, 0.0f, 0);
     }
 }
 
 void func_1504C854(Actor *obj) {
-    D_800CC288 = obj->unk31C->unk8C;
-    if (obj->unk31C->unk8E > 0) {
-        obj->unk31C->unk8E -= D_800BE9A0;
+    D_800CC288 = obj->mv->unk8C;
+    if (obj->mv->unk8E > 0) {
+        obj->mv->unk8E -= D_800BE9A0;
     } else {
-        obj->unk31C->buttons = 0;
+        obj->mv->buttons = 0;
     }
-    if (obj->unk31C->unk8F > 0) {
-        obj->unk31C->unk8F -= D_800BE9A0;
+    if (obj->mv->unk8F > 0) {
+        obj->mv->unk8F -= D_800BE9A0;
     } else {
-        obj->unk31C->unk8C = 0;
+        obj->mv->unk8C = 0;
     }
 }
 
 s32 func_1504C8BC(Actor *obj) {
     ActorCtl *ext;
 
-    ext = obj->unk31C;
+    ext = obj->mv;
     if (ext == NULL) {
         return 1;
     }
-    if (obj->unk1D4 != NULL || D_800BE9F0 == 0x33 || obj->interaction_state == 0x25) {
+    if (obj->ob_matrix_ptr != NULL || D_800BE9F0 == 0x33 || obj->type == 0x25) {
         ext->unk1A8 = 0;
         return 1;
     }
-    if ((obj->unk127 & 1) == D_800CC2B8) {
+    if ((obj->playernumber & 1) == D_800CC2B8) {
         if (ext->unk1A8 != 0) {
             D_800CC2BA = D_800BE9E4;
-            D_800BE9E4 += obj->unk31C->unk1A8;
+            D_800BE9E4 += obj->mv->unk1A8;
             D_800BE9A4 = D_800BE9E4 * 0.5f;
             if (D_800BE9A4 != 0.0f) {
                 D_800BE9A8 = 1.0f / D_800BE9A4;
             } else {
                 D_800BE9A8 = 0.0f;
             }
-            obj->unk31C->unk1A8 = 0;
+            obj->mv->unk1A8 = 0;
             return 2;
         }
         return 1;

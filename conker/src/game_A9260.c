@@ -40,7 +40,7 @@ void func_1507BDB0(AnimInstance *anim, f32 rate, Actor *obj, s32 mode) {
 
     hold = anim->anim & 0x8000;
     if (obj != NULL) {
-        hold |= obj->unkF4 & 0xE;
+        hold |= obj->mvmt_control & 0xE;
         obj->unk1FC &= ~4;
         dc_glbl_CharNum = obj - movement_obj;
         D_800D154C = obj;
@@ -59,7 +59,7 @@ void func_1507BDB0(AnimInstance *anim, f32 rate, Actor *obj, s32 mode) {
     if (anim->speed >= 0.0f) {
         if (((anim->numFrames - 1.0f) <= time) && (anim->frame < (anim->numFrames - 1.0f)) && (anim->callback != NULL)) {
             oldAnimId = anim->animId;
-            if ((obj != NULL) && (obj->unkF4 & 8)) {
+            if ((obj != NULL) && (obj->mvmt_control & 8)) {
                 obj->unk10C = 0;
                 obj->events = NULL;
                 anim->speed = 0.0f;
@@ -74,11 +74,11 @@ void func_1507BDB0(AnimInstance *anim, f32 rate, Actor *obj, s32 mode) {
         }
 
         if ((obj != NULL) && (obj->unk1FD != 0) && ((anim->numFrames - 1.0f) <= time)) {
-            obj->unk76 += obj->unk1FD << 8;
-            obj->unk7A = obj->unk76;
-            obj->unk78 = obj->unk76;
+            obj->angle += obj->unk1FD << 8;
+            obj->langle = obj->angle;
+            obj->fangle = obj->angle;
             anim->frame = anim->start;
-            if (obj->unkF4 & 4) {
+            if (obj->mvmt_control & 4) {
                 obj->unk21C = 0;
             }
         } else if ((hold == 0) && (anim->numFrames <= time)) {
@@ -88,21 +88,21 @@ void func_1507BDB0(AnimInstance *anim, f32 rate, Actor *obj, s32 mode) {
                 obj->unk1FC |= 4;
             }
         } else if ((hold != 0) && ((anim->numFrames - 1.0f) <= time)) {
-            if (((obj != NULL) && (obj->unkF4 & 0xA)) || (anim->anim & 0x8000)) {
+            if (((obj != NULL) && (obj->mvmt_control & 0xA)) || (anim->anim & 0x8000)) {
                 anim->frame = anim->numFrames - 1.0f;
             } else if (anim->frame < (anim->numFrames - 1.0f)) {
                 anim->frame = anim->numFrames - 1.0f;
-                if ((obj != NULL) && (obj->unkF4 & 4)) {
+                if ((obj != NULL) && (obj->mvmt_control & 4)) {
                     obj->unk21C = 0;
                 }
             } else {
                 anim->frame = anim->start;
                 if (obj != NULL) {
-                    obj->unk138 = 0;
+                    obj->speccnt = 0;
                     obj->unk1FC |= 2;
                 }
             }
-            if ((obj != NULL) && (obj->unkF4 & 8)) {
+            if ((obj != NULL) && (obj->mvmt_control & 8)) {
                 obj->unk10C = 0;
                 obj->events = NULL;
                 anim->speed = 0.0f;
@@ -141,13 +141,13 @@ void func_1507C22C(s32 onlyType4) {
 
     for (i = 0; i < 25; i++) {
         obj = &movement_obj[i];
-        if (obj->interaction_state == 0) continue;
-        if (obj->unk25C & 0x200) continue;
-        if (onlyType4 && (obj->unk5 != 4)) continue;
+        if (obj->type == 0) continue;
+        if (obj->task_attrib & 0x200) continue;
+        if (onlyType4 && (obj->drawtype != 4)) continue;
         if (D_800C3638 && (D_800C3654[0] == 0) && (func_150229E4(obj) == 0)) continue;
         anim = obj->unk2D0;
         if ((anim != NULL) && obj->unk2FA) {
-            func_1507BDB0(anim, obj->unk48, obj, onlyType4);
+            func_1507BDB0(anim, obj->speedup, obj, onlyType4);
         }
     }
 }

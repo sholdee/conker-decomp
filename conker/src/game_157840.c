@@ -52,7 +52,7 @@ void func_1512A390(Camera *arg0) {
     f32 pad68; // matching: frame padding
     f32 pad64;
 
-    unused28 = arg0->player->unk28;
+    unused28 = arg0->player->shad;
     if (arg0->playerExt != NULL) {
         flag4E = arg0->playerExt->transport;
         targetHeight = arg0->playerExt->height;
@@ -99,7 +99,7 @@ void func_1512A390(Camera *arg0) {
         arg0->unk360 = arg0->unk364;
     }
     if (arg0->player->unk137 != 0) {
-        arg0->unk35C = arg0->unk354 = arg0->player->y_position;
+        arg0->unk35C = arg0->unk354 = arg0->player->ypos;
     }
     if ((D_800C3671 != 0) || (arg0->transition.state != 0)) {
         arg0->unk35C = arg0->unk354 = arg0->player->floorY;
@@ -124,7 +124,7 @@ void func_1512A390(Camera *arg0) {
                     arg0->unk35C = arg0->unk354 = arg0->player->floorY;
                 }
             }
-            if ((arg0->mode != 0x80) || ((arg0->status & 0x80) && (arg0->player->unk81 != 0)) ||
+            if ((arg0->mode != 0x80) || ((arg0->status & 0x80) && (arg0->player->count3 != 0)) ||
                 (arg0->flags & 0x800)) {
                 if (arg0->unk354 < arg0->focus.y) {
                     arg0->unk354 = arg0->focus.y;
@@ -153,7 +153,7 @@ void func_1512A390(Camera *arg0) {
     }
     arg0->unk354 = arg0->unk35C + (arg0->unk354 - arg0->unk35C);
     if (!(arg0->flags & 0x4000) || (func_15125490(arg0) == 0)) {
-        if ((arg0->player->in_water == 1) && (arg0->mode != 0x80) && (-10000.0f != arg0->unk360)) {
+        if ((arg0->player->inwater == 1) && (arg0->mode != 0x80) && (-10000.0f != arg0->unk360)) {
             arg0->unk354 = arg0->unk360 + 50.0f;
         }
     }
@@ -461,7 +461,7 @@ s32 func_1512B730(Camera *arg0, f32 *offset, f32 *unused) {
     if (state0 == 2 || state1 == 2) {
         halfWidth = D_800DC200[arg0->playerIndex][arg0->preset].halfWidth + 1;
         if (state0 == 2 && state1 == 2) {
-            if (arg0->player->in_water != 1 && arg0->playerExt->death_State == 0) {
+            if (arg0->player->inwater != 1 && arg0->playerExt->death_State == 0) {
                 arg0->unk5FE -= D_800BE9E4;
                 if (arg0->unk5FE < 0) {
                     arg0->unk5FE = 0;
@@ -566,7 +566,7 @@ void func_1512BB10(Camera *arg0) {
         } else {
             if (((arg0->aimState != 0) && (arg0->aimState != 1) && (arg0->aimState != 3)) ||
                 ((arg0->player->unk102 != 0) &&
-                 ((arg0->player->x_position != arg0->lastPlayerPos.x) || (arg0->player->z_position != arg0->lastPlayerPos.z))) ||
+                 ((arg0->player->xpos != arg0->lastPlayerPos.x) || (arg0->player->zpos != arg0->lastPlayerPos.z))) ||
                 (sub->unk1B3 != 0)) {
                 arg0->unk94C = 20.0f;
                 arg0->unk950 = 20.0f;
@@ -588,20 +588,20 @@ void func_1512BB10(Camera *arg0) {
             func_150495B0(&arg0->unk95C, arg0->unk94C, &arg0->unk954, 4.0f, 6.0f, arg0->dt);
             func_150495B0(&arg0->unk960, arg0->unk950, &arg0->unk958, 4.0f, 6.0f, arg0->dt);
         }
-        probe.interaction_state = 0x2D;
-        probe.camera = arg0;
-        probe.x_position = arg0->eye.x;
+        probe.type = 0x2D;
+        probe.CameraPtr = arg0;
+        probe.xpos = arg0->eye.x;
         if (arg0->status & 0x800) {
-            probe.y_position = arg0->eye.y + arg0->lift;
+            probe.ypos = arg0->eye.y + arg0->lift;
         } else {
-            probe.y_position = arg0->eye.y;
+            probe.ypos = arg0->eye.y;
         }
-        probe.z_position = arg0->eye.z;
+        probe.zpos = arg0->eye.z;
         probe.unk188 = arg0->unk644;
-        probe.unk28 = probe.y_position - arg0->unk354;
+        probe.shad = probe.ypos - arg0->unk354;
         probe.floorY = arg0->unk354;
-        probe.y_velocity = 0.0f;
-        probe.unk40 = arg0->yaw;
+        probe.yspd = 0.0f;
+        probe.theta = arg0->yaw;
         if ((arg0->flags & 0x80000000) || (D_800BE9F0 == 0x37)) {
             D_80089120[2] = 0;
         }
@@ -634,15 +634,15 @@ void func_1512BB10(Camera *arg0) {
             arg0->unk3E8 = 1;
             arg0->unk26C += (1.0f - arg0->unk26C) * 0.1000000015f;
         }
-        arg0->eye.x = probe.x_position;
+        arg0->eye.x = probe.xpos;
         if (arg0->mode != 0x100) {
             if (arg0->status & 0x800) {
-                arg0->eye.y = probe.y_position - arg0->lift;
+                arg0->eye.y = probe.ypos - arg0->lift;
             } else {
-                arg0->eye.y = probe.y_position;
+                arg0->eye.y = probe.ypos;
             }
         }
-        arg0->eye.z = probe.z_position;
+        arg0->eye.z = probe.zpos;
         if ((D_800BE9F0 != 0x1B) && (hit != 0) && (arg0->mode != 0x100)) {
             func_1510E8BC(NULL, NULL, &floorY, NULL, NULL, 0, arg0->eye.x, arg0->eye.y, arg0->eye.z,
                           arg0->prevEye.y, 0, 0, -10000.0f, arg0->eye.y, 1);

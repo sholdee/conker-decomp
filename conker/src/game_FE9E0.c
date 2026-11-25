@@ -21,9 +21,9 @@ void func_150D1530(Camera *camera) {
         f32 speedFrac;
         s32 found;
 
-        speedFrac = (camera->player->xz_velocity < 0.0f)
+        speedFrac = (camera->player->speed < 0.0f)
                     ? 0.0f
-                    : ((170.0f < camera->player->xz_velocity) ? 170.0f : camera->player->xz_velocity);
+                    : ((170.0f < camera->player->speed) ? 170.0f : camera->player->speed);
         speedFrac = speedFrac * D_800A08D0;
         if (func_15123934(camera, 8, 0, camera->unk134, 3) != 0) {
             camera->flags |= 0x1300080;
@@ -41,7 +41,7 @@ void func_150D1530(Camera *camera) {
         if (found != 0) {
             camera->flags |= 0x10000000;
         } else {
-            if (camera->player->unk81 != 0) {
+            if (camera->player->count3 != 0) {
                 camera->liftTarget = -30.0f;
             } else {
                 camera->liftTarget = 123.0f;

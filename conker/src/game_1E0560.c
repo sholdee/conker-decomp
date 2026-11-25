@@ -409,10 +409,10 @@ s32 func_151B3F28(HoltenRopeAttached *rope, Vec3f *pos, u8 isStart) {
     if (isStart) {
         HoltenRopeAnchor *anchor = &rope->anchor;
 
-        if (anchor->target->interaction_state != 0 && anchor->target->unique_id == anchor->targetId) {
-            pos->x = anchor->target->x_position;
-            pos->y = anchor->target->y_position;
-            pos->z = anchor->target->z_position;
+        if (anchor->target->type != 0 && anchor->target->unique_id == anchor->targetId) {
+            pos->x = anchor->target->xpos;
+            pos->y = anchor->target->ypos;
+            pos->z = anchor->target->zpos;
             rope->effect.flags &= ~ROPE_FLAG_NO_START;
         } else {
             ret = FALSE;
@@ -663,16 +663,16 @@ s32 func_151B47D8(HoltenRopeEffect *effect, HoltenRopeBoneAnchors *anchors, Vec3
     Actor *startTarget = anchors->start.target;
     Actor *endTarget = anchors->end.target;
 
-    if (startTarget->unk1D4 == NULL || endTarget->unk1D4 == NULL) {
+    if (startTarget->ob_matrix_ptr == NULL || endTarget->ob_matrix_ptr == NULL) {
         effect->flags |= ROPE_FLAG_NO_START | ROPE_FLAG_NO_END;
         return TRUE;
     }
-    if (startTarget->interaction_state == 0 || startTarget->unique_id != anchors->start.targetId || endTarget->interaction_state == 0 || endTarget->unique_id != anchors->end.targetId) {
+    if (startTarget->type == 0 || startTarget->unique_id != anchors->start.targetId || endTarget->type == 0 || endTarget->unique_id != anchors->end.targetId) {
         return FALSE;
     }
     effect->flags &= ~(isStart ? ROPE_FLAG_NO_START : ROPE_FLAG_NO_END);
     func_15143134(isStart ? &anchors->start.offset : &anchors->end.offset, pos,
-                  isStart ? &startTarget->unk1D4[anchors->start.bone] : &endTarget->unk1D4[anchors->end.bone]);
+                  isStart ? &startTarget->ob_matrix_ptr[anchors->start.bone] : &endTarget->ob_matrix_ptr[anchors->end.bone]);
     return TRUE;
 }
 

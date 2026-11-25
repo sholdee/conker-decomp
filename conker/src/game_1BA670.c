@@ -181,19 +181,19 @@ Emitter *func_1518D1C0(Actor *owner, s16 kind, s16 lifetime, u8 killExisting, u8
     switch (kind) {
     case 10:
         params.lifetime = 75;
-        params.flags = owner->health ? 1 : 0;
+        params.flags = owner->energy ? 1 : 0;
         params.expireCb = 1;
         params.table = 7;
         return func_1518E3C4(&params, arg4);
     case 11:
         params.lifetime = 75;
-        params.flags = owner->health ? 1 : 0;
+        params.flags = owner->energy ? 1 : 0;
         params.expireCb = 0;
         params.table = 1;
         return func_1518E3C4(&params, arg4);
     case 12:
         params.lifetime = 75;
-        params.flags = owner->health ? 1 : 0;
+        params.flags = owner->energy ? 1 : 0;
         params.expireCb = 1;
         params.table = 7;
         return func_1518E3C4(&params, arg4);
@@ -308,7 +308,7 @@ void func_1518D6E0(Emitter *emitter) {
         }
         return;
     }
-    if (self->params.owner != NULL && self->params.owner->interaction_state != 0 &&
+    if (self->params.owner != NULL && self->params.owner->type != 0 &&
         self->params.owner->unique_id == self->params.ownerId) {
         u8 attach;
         s16 i;
@@ -348,16 +348,16 @@ void func_1518D6E0(Emitter *emitter) {
             numFree = 0;
             prevFree = NULL;
             table = D_8008D5E0[self->params.table];
-            if (self->params.owner->unk1D4 != NULL && (self->params.owner->unk74 & 0xF) != 0xF) {
+            if (self->params.owner->ob_matrix_ptr != NULL && (self->params.owner->unk74 & 0xF) != 0xF) {
                 attach = 4;
-                row = &table->infos[self->params.owner->lod * (table->n + 2)];
+                row = &table->infos[self->params.owner->current_lod * (table->n + 2)];
                 i = 0;
                 found = 0;
                 info = row[table->n];
                 if (i < table->n) {
                     do {
                         for (j = 0; !found && j < table->idLists[i].count; j++) {
-                            if (self->params.owner->unk84.uh == table->idLists[i].ids[j]) {
+                            if (self->params.owner->animseq.uh == table->idLists[i].ids[j]) {
                                 found = 1;
                                 info = row[i];
                             }
@@ -368,7 +368,7 @@ void func_1518D6E0(Emitter *emitter) {
                     } while (!found && i < table->n);
                 }
             } else {
-                info = table->infos[self->params.owner->lod * (table->n + 2) + table->n + 1];
+                info = table->infos[self->params.owner->current_lod * (table->n + 2) + table->n + 1];
                 attach = 2;
             }
             if (!(self->state & 8) && (self->state != attach || info->mode != self->infoMode)) {
@@ -377,11 +377,11 @@ void func_1518D6E0(Emitter *emitter) {
                 self->accum = info->maxCount;
             }
             if (attach == 2) {
-                self->pos.x = self->params.owner->x_position;
-                self->pos.y = self->params.owner->y_position + info->yOffset;
-                self->pos.z = self->params.owner->z_position;
+                self->pos.x = self->params.owner->xpos;
+                self->pos.y = self->params.owner->ypos + info->yOffset;
+                self->pos.z = self->params.owner->zpos;
             } else if (info->mode == 2) {
-                func_150A7960((f32 *)((Mtx *)self->params.owner->unk1D4 + info->bone), info->x, info->y, info->z,
+                func_150A7960((f32 *)((Mtx *)self->params.owner->ob_matrix_ptr + info->bone), info->x, info->y, info->z,
                               &self->pos.x, &self->pos.y, &self->pos.z);
             }
             slot = self->slots;
@@ -397,7 +397,7 @@ void func_1518D6E0(Emitter *emitter) {
                         slot->particle->head.def.pos.z = self->pos.z + slot->offset.z;
                     } else {
                         func_15143134(&info->points[k], &slot->particle->head.def.pos,
-                                      (Mtx *)self->params.owner->unk1D4 + info->points[k].bone);
+                                      (Mtx *)self->params.owner->ob_matrix_ptr + info->points[k].bone);
                     }
                     slot->timer -= D_800BE9E4;
                     if (slot->timer < 0) {
@@ -535,7 +535,7 @@ void func_1518D6E0(Emitter *emitter) {
 
                                 idx = freeSlot - self->slots;
                                 func_15143134(&info->points[idx], &freeSlot->particle->head.def.pos,
-                                              (Mtx *)self->params.owner->unk1D4 + info->points[idx].bone);
+                                              (Mtx *)self->params.owner->ob_matrix_ptr + info->points[idx].bone);
                             }
                             freeSlot->particle->head.def.rot = freeSlot->particle->head.def.pos;
                             freeSlot->timer = func_150ADA20() % (info->lifeRange + 1) + info->lifeMin;
@@ -578,10 +578,10 @@ s32 func_1518E298(Struct1518E298 *tracker, s32 arg1, s32 arg2, s32 arg3) {
     Actor *target;
 
     target = tracker->target;
-    if (target != NULL && target->interaction_state != 0) {
-        tracker->x = target->x_position;
-        tracker->y = target->y_position;
-        tracker->z = target->z_position;
+    if (target != NULL && target->type != 0) {
+        tracker->x = target->xpos;
+        tracker->y = target->ypos;
+        tracker->z = target->zpos;
         return 0;
     }
 
@@ -616,7 +616,7 @@ void func_1518E37C(Emitter *emitter, u8 table) {
 Emitter *func_1518E3C4(ActorEmitterParams *params, u8 arg1) {
     Emitter *emitter;
 
-    if (params->owner->id == 150) {
+    if (params->owner->character_type == 150) {
         return NULL;
     }
     emitter = func_15167A68(0x21, 1, 0x9EC, 1, arg1, 1);

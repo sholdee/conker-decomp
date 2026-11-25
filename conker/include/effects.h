@@ -2238,7 +2238,7 @@ typedef struct TrackerTrailData {
     /* 0x10 */ f32 widthBase;
     /* 0x14 */ f32 widthScale;
     /* 0x18 */ f32 alphaScale;
-    /* 0x1C */ f32 ownerScale;    /* the tracker owner's xz_scale */
+    /* 0x1C */ f32 ownerScale;    /* the tracker owner's scale_xz */
 } TrackerTrailData; /* size 0x20 */
 
 /* The ribbon trail of a tracker effect (func_15147A80 object, kind 19). */

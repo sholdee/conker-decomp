@@ -14,7 +14,7 @@ struct BoneFollower {
     /* 0x14 */ u8 actorUid;         // actor->unique_id when spawned
     /* 0x15 */ u8 pad15[3];
     /* 0x18 */ Vec3f offset;        // point in bone space
-    /* 0x24 */ u8 bone;             // index into actor->unk1D4
+    /* 0x24 */ u8 bone;             // index into actor->ob_matrix_ptr
     /* 0x25 */ u8 pad25;
     /* 0x26 */ s16 timer;
     /* 0x28 */ u8 flags;            // bit 0: timer counts down
@@ -105,13 +105,13 @@ void func_151D2C40(BoneFollower *follower) {
     Vec3f position;
 
     actor = follower->actor;
-    if (actor->interaction_state == 0 || actor->id == 0xFF || actor->unique_id != follower->actorUid ||
-        actor->unk1D4 == NULL || (actor->unk74 & 0xF) == 0xF) {
+    if (actor->type == 0 || actor->character_type == 0xFF || actor->unique_id != follower->actorUid ||
+        actor->ob_matrix_ptr == NULL || (actor->unk74 & 0xF) == 0xF) {
         func_1516972C(&follower->header);
         return;
     }
 
-    func_15143134(&follower->offset, &position, &actor->unk1D4[follower->bone]);
+    func_15143134(&follower->offset, &position, &actor->ob_matrix_ptr[follower->bone]);
 
     if (follower->flags & 1) {
         follower->timer -= D_800BE9E4;
@@ -207,11 +207,11 @@ void func_151D2F90(ActorFollowerGroup *group) {
 
     actor = group->actor;
     wasTrackable = group->flags & 2;
-    if (actor->interaction_state == 0 || actor->id == 0xFF || actor->unique_id != group->actorUid) {
+    if (actor->type == 0 || actor->character_type == 0xFF || actor->unique_id != group->actorUid) {
         func_1516972C(&group->header);
         return;
     }
-    if (actor->unk1D4 != NULL && (actor->unk74 & 0xF) != 0xF) {
+    if (actor->ob_matrix_ptr != NULL && (actor->unk74 & 0xF) != 0xF) {
         group->flags |= 2;
     } else {
         group->flags &= ~2;

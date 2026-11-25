@@ -51,9 +51,9 @@ s32 func_1517AD00(s32 frame, s32 duration, s32 actorIndex) {
     s16 (*to)[3];
     Vtx *vtxBase;
 
-    id = movement_obj[actorIndex].id;
+    id = movement_obj[actorIndex].character_type;
     kind = func_150849A0(&movement_obj[actorIndex]);
-    set = movement_obj[actorIndex].lod;
+    set = movement_obj[actorIndex].current_lod;
     config = NULL;
     for (i = 0; i < 2; i++) {
         if (kind == D_800A7230[i].kind) {

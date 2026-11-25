@@ -45,19 +45,19 @@ void func_15193CA0(Actor *obj, u8 arg1, u8 arg2, s32 arg3) {
             *(s32 *)addr = osGetCount() & 0x3FFFF7;
         }
     }
-    if (obj->id == 6 || obj->id == 6 || obj->id == 9 || obj->id == 0xC || obj->id == 0xF || obj->id == 0x10 || obj->id == 0x12 || obj->id == 0x17 || obj->id == 0x1B || obj->id == 0x1E || obj->id == 0x28 || obj->id == 0x29 || obj->id == 0x2A || obj->id == 0x2B || obj->id == 0x2C || obj->id == 0x2D || obj->id == 0x2E || obj->id == 0x30 || obj->id == 0x34 || obj->id == 0x38 || obj->id == 0x3A || obj->id == 0x41 || obj->id == 0x42 || obj->id == 0x4B || obj->id == 0x46 || obj->id == 0x47 || obj->id == 0x49 || obj->id == 0x4A || obj->id == 0x4C || obj->id == 0x4D || obj->id == 0x4E || obj->id == 0x4F || obj->id == 0x51 || obj->id == 0x52 || obj->id == 0x55 || obj->id == 0x56 || obj->id == 0x5D || obj->id == 0x60 || obj->id == 0x61 || obj->id == 0x62 || obj->id == 0x63 || obj->id == 0x66 || obj->id == 0x67 || obj->id == 0x6F || obj->id == 0x70 || obj->id == 0x73 || obj->id == 0x77 || obj->id == 0x7B || obj->id == 0x7D || obj->id == 0x7E || obj->id == 0x7F || obj->id == 0x82 || obj->id == 0x83 || obj->id == 0x84 || obj->id == 0x89 || obj->id == 0x8C || obj->id == 0x8E || obj->id == 0x8F || obj->id == 0x91 || obj->id == 0x94 || obj->id == 0x9E || obj->id == 0xA1 || obj->id == 0xA6 || obj->id == 0xAB || obj->id == 0xAC || obj->id == 0xB2 || obj->id == 0xB4 || obj->id == 0xB7 || obj->id == 0xB8 || obj->id == 0xB9) { // matching: the repeated first id test is in the original
+    if (obj->character_type == 6 || obj->character_type == 6 || obj->character_type == 9 || obj->character_type == 0xC || obj->character_type == 0xF || obj->character_type == 0x10 || obj->character_type == 0x12 || obj->character_type == 0x17 || obj->character_type == 0x1B || obj->character_type == 0x1E || obj->character_type == 0x28 || obj->character_type == 0x29 || obj->character_type == 0x2A || obj->character_type == 0x2B || obj->character_type == 0x2C || obj->character_type == 0x2D || obj->character_type == 0x2E || obj->character_type == 0x30 || obj->character_type == 0x34 || obj->character_type == 0x38 || obj->character_type == 0x3A || obj->character_type == 0x41 || obj->character_type == 0x42 || obj->character_type == 0x4B || obj->character_type == 0x46 || obj->character_type == 0x47 || obj->character_type == 0x49 || obj->character_type == 0x4A || obj->character_type == 0x4C || obj->character_type == 0x4D || obj->character_type == 0x4E || obj->character_type == 0x4F || obj->character_type == 0x51 || obj->character_type == 0x52 || obj->character_type == 0x55 || obj->character_type == 0x56 || obj->character_type == 0x5D || obj->character_type == 0x60 || obj->character_type == 0x61 || obj->character_type == 0x62 || obj->character_type == 0x63 || obj->character_type == 0x66 || obj->character_type == 0x67 || obj->character_type == 0x6F || obj->character_type == 0x70 || obj->character_type == 0x73 || obj->character_type == 0x77 || obj->character_type == 0x7B || obj->character_type == 0x7D || obj->character_type == 0x7E || obj->character_type == 0x7F || obj->character_type == 0x82 || obj->character_type == 0x83 || obj->character_type == 0x84 || obj->character_type == 0x89 || obj->character_type == 0x8C || obj->character_type == 0x8E || obj->character_type == 0x8F || obj->character_type == 0x91 || obj->character_type == 0x94 || obj->character_type == 0x9E || obj->character_type == 0xA1 || obj->character_type == 0xA6 || obj->character_type == 0xAB || obj->character_type == 0xAC || obj->character_type == 0xB2 || obj->character_type == 0xB4 || obj->character_type == 0xB7 || obj->character_type == 0xB8 || obj->character_type == 0xB9) { // matching: the repeated first id test is in the original
         func_151C329C(pos, arg2, arg3);
         return;
     }
-    if (obj->id == 5 || obj->id == 5 || obj->id == 7 || obj->id == 0x13 || obj->id == 0x20 || obj->id == 0x23 || obj->id == 0x44 || obj->id == 0x5A || obj->id == 0x5C || obj->id == 0x5E || obj->id == 0x5F || obj->id == 0x6D || obj->id == 0x74 || obj->id == 0x75 || obj->id == 0x78 || obj->id == 0x7A || obj->id == 0x8A || obj->id == 0x8D || obj->id == 0xAD || obj->id == 0xAE || obj->id == 0xAF || obj->id == 0xB1) { // matching: repeated first test, as above
+    if (obj->character_type == 5 || obj->character_type == 5 || obj->character_type == 7 || obj->character_type == 0x13 || obj->character_type == 0x20 || obj->character_type == 0x23 || obj->character_type == 0x44 || obj->character_type == 0x5A || obj->character_type == 0x5C || obj->character_type == 0x5E || obj->character_type == 0x5F || obj->character_type == 0x6D || obj->character_type == 0x74 || obj->character_type == 0x75 || obj->character_type == 0x78 || obj->character_type == 0x7A || obj->character_type == 0x8A || obj->character_type == 0x8D || obj->character_type == 0xAD || obj->character_type == 0xAE || obj->character_type == 0xAF || obj->character_type == 0xB1) { // matching: repeated first test, as above
         type = 1;
-    } else if (obj->id == 0 || obj->id == 1 || obj->id == 2 || obj->id == 3 || obj->id == 4 || obj->id == 0x96 || obj->id == 8 || obj->id == 0xA || obj->id == 0x11 || obj->id == 0x14 || obj->id == 0x16 || obj->id == 0x1A || obj->id == 0x21 || obj->id == 0x22 || obj->id == 0x26 || obj->id == 0x27 || obj->id == 0x31 || obj->id == 0x36 || obj->id == 0x3B || obj->id == 0x3E || obj->id == 0x50 || obj->id == 0x53 || obj->id == 0x54 || obj->id == 0x58 || obj->id == 0x5B || obj->id == 0x64 || obj->id == 0x69 || obj->id == 0x71 || obj->id == 0x6B || obj->id == 0x72 || obj->id == 0x76 || obj->id == 0x79 || obj->id == 0x80 || obj->id == 0x86 || obj->id == 0x87 || obj->id == 0x88 || obj->id == 0x90 || obj->id == 0x97 || obj->id == 0x98 || obj->id == 0x9A || obj->id == 0x9B || obj->id == 0x9C || obj->id == 0x9D || obj->id == 0x9F || obj->id == 0xA0 || obj->id == 0xA2 || obj->id == 0xA4 || obj->id == 0xA5 || obj->id == 0xA7 || obj->id == 0xB0 || obj->id == 0xB3 || obj->id == 0xB5 || obj->id == 0xB6) {
+    } else if (obj->character_type == 0 || obj->character_type == 1 || obj->character_type == 2 || obj->character_type == 3 || obj->character_type == 4 || obj->character_type == 0x96 || obj->character_type == 8 || obj->character_type == 0xA || obj->character_type == 0x11 || obj->character_type == 0x14 || obj->character_type == 0x16 || obj->character_type == 0x1A || obj->character_type == 0x21 || obj->character_type == 0x22 || obj->character_type == 0x26 || obj->character_type == 0x27 || obj->character_type == 0x31 || obj->character_type == 0x36 || obj->character_type == 0x3B || obj->character_type == 0x3E || obj->character_type == 0x50 || obj->character_type == 0x53 || obj->character_type == 0x54 || obj->character_type == 0x58 || obj->character_type == 0x5B || obj->character_type == 0x64 || obj->character_type == 0x69 || obj->character_type == 0x71 || obj->character_type == 0x6B || obj->character_type == 0x72 || obj->character_type == 0x76 || obj->character_type == 0x79 || obj->character_type == 0x80 || obj->character_type == 0x86 || obj->character_type == 0x87 || obj->character_type == 0x88 || obj->character_type == 0x90 || obj->character_type == 0x97 || obj->character_type == 0x98 || obj->character_type == 0x9A || obj->character_type == 0x9B || obj->character_type == 0x9C || obj->character_type == 0x9D || obj->character_type == 0x9F || obj->character_type == 0xA0 || obj->character_type == 0xA2 || obj->character_type == 0xA4 || obj->character_type == 0xA5 || obj->character_type == 0xA7 || obj->character_type == 0xB0 || obj->character_type == 0xB3 || obj->character_type == 0xB5 || obj->character_type == 0xB6) {
         type = 0;
-    } else if (obj->id == 0x25 || obj->id == 0x25 || obj->id == 0x92 || obj->id == 0x95) {
+    } else if (obj->character_type == 0x25 || obj->character_type == 0x25 || obj->character_type == 0x92 || obj->character_type == 0x95) {
         type = 2;
-    } else if (obj->id == 0x3F) {
+    } else if (obj->character_type == 0x3F) {
         type = 6;
-    } else if (obj->id == 0x93) {
+    } else if (obj->character_type == 0x93) {
         type = 5;
     } else {
         return;
@@ -80,7 +80,7 @@ void func_151942E8(Actor *self, Actor *other, u8 *arg2) {
 extern u8 D_800A8210;
 
 void func_15194320(Actor *self, Actor *other, u8 *arg2) {
-    switch (other->id) {
+    switch (other->character_type) {
     case 0:
     case 1:
     case 2:
@@ -94,7 +94,7 @@ void func_15194320(Actor *self, Actor *other, u8 *arg2) {
 extern u8 D_800A822C;
 
 void func_15194394(Actor *self, Actor *other, u8 *arg2) {
-    switch (other->id) {
+    switch (other->character_type) {
     case 0:
     case 1:
     case 2:
@@ -113,7 +113,7 @@ void func_15194408(Actor *self, Actor *other) {
     SplashSpraySpec burst;
     CollisionHit ground;
 
-    switch (other->id) {
+    switch (other->character_type) {
     case 0:
     case 1:
     case 2:
@@ -126,9 +126,9 @@ void func_15194408(Actor *self, Actor *other) {
 
     func_151AE7B0(other, 0.6f, 90, 0xFF, 1);
     func_1504715C(&ground, other);
-    burst.spray.pos.x = other->x_position;
-    burst.spray.pos.y = other->y_position + 50.0f;
-    burst.spray.pos.z = other->z_position;
+    burst.spray.pos.x = other->xpos;
+    burst.spray.pos.y = other->ypos + 50.0f;
+    burst.spray.pos.z = other->zpos;
     burst.spray.scaleBase = 6.0f;
     burst.spray.countBase = 12;
     burst.spray.countRange = 5;
@@ -173,10 +173,10 @@ void func_151945CC(Actor *self, Actor *other, u8 *arg2) {
     SplashSpraySpec burst;
     CollisionHit ground;
 
-    facingYaw = (self->unk7A >> 8) - 0x40; // unk7A is a u16 angle; >> 8 makes it a byte angle
-    pos.x = other->x_position;
-    pos.y = other->y_position + 270.0;
-    pos.z = other->z_position;
+    facingYaw = (self->langle >> 8) - 0x40; // unk7A is a u16 angle; >> 8 makes it a byte angle
+    pos.x = other->xpos;
+    pos.y = other->ypos + 270.0;
+    pos.z = other->zpos;
     {
         s32 kind;
         s32 profile;
@@ -228,7 +228,7 @@ void *func_151AF270(Actor *obj, u8 arg1, s32 arg2);
 void func_15194794(Actor *self, Actor *other, u8 *arg2) {
     func_151B01B8(self, other);
     func_151B09BC(self, other, 1000, 0xFF, 0);
-    switch (other->id) {
+    switch (other->character_type) {
     case 0:
     case 1:
     case 2:
@@ -246,16 +246,16 @@ void func_15194810(Actor *self, Actor *other, u8 *arg2) {
     CollisionHit ground;
     RumbleParams params;
 
-    switch (other->id) {
+    switch (other->character_type) {
     case 0:
     case 1:
     case 2:
     case 3:
     case 4:
     case 0x53:
-        pos.x = other->x_position;
-        pos.y = other->y_position + 95.0f;
-        pos.z = other->z_position;
+        pos.x = other->xpos;
+        pos.y = other->ypos + 95.0f;
+        pos.z = other->zpos;
     fence: // matching: this basic-block boundary keeps as1 from scheduling across it
         func_1504715C(&ground, other);
         burst.spray.pos = pos;
@@ -300,11 +300,11 @@ extern void func_15104170(s32 arg0, Actor *self, Actor *other);
 extern void func_1507DE4C(Actor *obj);
 extern void func_15138BC0(Actor *obj, u8 arg1, s32 arg2);
 
-// Calls func_15104170 when D_8008FD90 == 1 and self's unk31C->unk1A0 cooldown has run out, then restarts it.
+// Calls func_15104170 when D_8008FD90 == 1 and self's mv->unk1A0 cooldown has run out, then restarts it.
 void func_151949F4(s32 arg0, Actor *self, Actor *other) {
-    if (D_8008FD90 == 1 && self->unk127 == 0 && (D_800E9D00 & 8) && self->unk31C->unk1A0 == 0) {
+    if (D_8008FD90 == 1 && self->playernumber == 0 && (D_800E9D00 & 8) && self->mv->unk1A0 == 0) {
         func_15104170(arg0, self, other);
-        self->unk31C->unk1A0 = 1200;
+        self->mv->unk1A0 = 1200;
     }
 }
 
@@ -320,7 +320,7 @@ void func_15194AB4(Actor *obj) {
 
     obj->unk9C |= 0xFFFE;
     anim = -1;
-    switch (obj->id) {
+    switch (obj->character_type) {
     case 0x75:
         anim = 0x73;
         break;
@@ -348,7 +348,7 @@ void func_15194B1C(Actor *obj) {
 }
 
 void func_15194B94(Actor *self, Actor *other, u8 *arg2) {
-    if (other->id == 0x53) {
+    if (other->character_type == 0x53) {
         func_151942B0(self, other, arg2);
         return;
     }
@@ -357,18 +357,18 @@ void func_15194B94(Actor *self, Actor *other, u8 *arg2) {
 }
 
 void func_15194BF0(Actor *self, Actor *other, u8 *arg2) {
-    switch (other->id) {
+    switch (other->character_type) {
     case 0x16:
         func_15136C3C(other, 1, 1, 1, 1, 0, 0xFF, 1);
         func_15145A50(other);
         /* fallthrough */
     case 0x7C:
-        if (other->unk65 != 0) {
-            s32 slot = other->unk65 - 1;
+        if (other->attach_char != 0) {
+            s32 slot = other->attach_char - 1;
 
-            movement_obj[slot].unk232 = 10;
+            movement_obj[slot].intelwalk = 10;
             movement_obj[slot].unk218 = NULL;
-            other->unk65 = 0;
+            other->attach_char = 0;
         }
         break;
     case 0:
@@ -403,7 +403,7 @@ void func_15194BF0(Actor *self, Actor *other, u8 *arg2) {
         func_15136C3C(other, 1, 1, 1, 1, 0, 0xFF, 1);
         func_15145A50(other);
         func_1507CD64(other, 6);
-        if (other->unk31C != NULL && other->unk31C->GrenadeThrowState != 0) {
+        if (other->mv != NULL && other->mv->GrenadeThrowState != 0) {
             func_15063B64(other);
         }
         break;
@@ -431,13 +431,13 @@ void func_15194DC8(Actor *self, Actor *other, u8 *arg2) {
         func_1518D1C0(other, 11, 0, 1, 0xFF, 1, D_800A8244);
     }
     func_1504715C(&ground, other);
-    func_1514B364(&other->x_position, &ground, 0xFF, 1);
+    func_1514B364(&other->xpos, &ground, 0xFF, 1);
 }
 
 extern void func_150B06B0(Actor *obj, Actor *other, u8 arg2, s32 arg3);
 
 void func_15194E54(Actor *self, Actor *other, u8 *arg2) {
-    if (other->id == 0x3E || other->id == 0xA6) {
+    if (other->character_type == 0x3E || other->character_type == 0xA6) {
         func_150B06B0(other, self, 0xFF, 1);
     }
 }
@@ -450,10 +450,10 @@ void func_15194EA8(Actor *self, Actor *other, u8 *arg2) {
     u32 rand0;
 
     result = 0;
-    if (other->camera != NULL) {
+    if (other->CameraPtr != NULL) {
         rand0 = func_150ADA20();
         rand1 = func_150ADA20();
-        func_15182670(0xFF, 0xFF, 0xFF, 0xFF, rand1 % 11 + 35, other->camera->playerIndex, 0xFF, 1);
+        func_15182670(0xFF, 0xFF, 0xFF, 0xFF, rand1 % 11 + 35, other->CameraPtr->playerIndex, 0xFF, 1);
         if (rand0) { } // matching: keeps the unused first random value live across the second call
     }
     func_15194BF0(self, other, &result);
@@ -462,9 +462,9 @@ void func_15194EA8(Actor *self, Actor *other, u8 *arg2) {
 void func_15194F48(Actor *self, Actor *other, u8 *arg2) {
     f32 pos[3];
 
-    pos[0] = other->x_position;
-    pos[1] = other->y_position + 50.0f;
-    pos[2] = other->z_position;
+    pos[0] = other->xpos;
+    pos[1] = other->ypos + 50.0f;
+    pos[2] = other->zpos;
     func_151C0098(pos, other, 1, 0xFF, 1);
     func_15136C3C(other, 0, 0, 1, 0, 0, 0xFF, 1);
     func_15145A50(other);
@@ -489,7 +489,7 @@ u8 arg2;
     Struct15194FF4 info;
 
     func_15190518(other);
-    switch (other->id) {
+    switch (other->character_type) {
     case 0x00: case 0x01: case 0x02: case 0x03: case 0x04: case 0x11: case 0x14: case 0x16:
     case 0x3B: case 0x50: case 0x53: case 0x58: case 0x5A: case 0x5F: case 0x70: case 0x74:
     case 0x75: case 0x7A: case 0x80: case 0x87: case 0x88: case 0x90: case 0x96: case 0x98:
@@ -498,8 +498,8 @@ u8 arg2;
         if (D_800BE616 != 0) {
             info.unk0 = 0x7D;
             info.unk4 = 5;
-            if (self->id == 0xFF && self->unk124 != 0) { // an id-0xFF object names its owner by slot + 1
-                info.source = &movement_obj[self->unk124 - 1];
+            if (self->character_type == 0xFF && self->owner != 0) { // an id-0xFF object names its owner by slot + 1
+                info.source = &movement_obj[self->owner - 1];
             } else {
                 info.source = self;
             }
@@ -507,7 +507,7 @@ u8 arg2;
             if (spawned != NULL && arg2 != 0) {
                 memcpy(spawned + 0x90, &info, sizeof(info));
                 {
-                    ActorCtl *ext = other->unk31C;
+                    ActorCtl *ext = other->mv;
 
                     if (ext != NULL) {
                         ext->on_fire = 1;
@@ -529,30 +529,30 @@ extern void func_150D10E4(Actor *obj, u8 arg1);
 void func_151951E0(Actor *obj) {
     Actor *copy;
 
-    obj->health = 0;
+    obj->energy = 0;
     func_1507CD64(obj, 5);
     func_15194AB4(obj);
-    obj->interaction_state = 0x28;
-    obj->xz_velocity = -3.0f;
+    obj->type = 0x28;
+    obj->speed = -3.0f;
     obj->unkBC = -10.0f - (func_150ADA20() % 5U);
     obj->unk148 = (func_150ADA20() % 10U) - 5.0f;
-    obj->y_velocity = 0.0f;
-    obj->gravity = 0.0f;
+    obj->yspd = 0.0f;
+    obj->ygrav = 0.0f;
     copy = func_1505ED34();
-    copy->interaction_state = 0x28;
-    copy->id = obj->id;
-    copy->immune = 0xFF;
+    copy->type = 0x28;
+    copy->character_type = obj->character_type;
+    copy->imune = 0xFF;
     copy->stunned = 0xFF;
-    copy->x_position = obj->x_position;
-    copy->y_position = obj->y_position;
-    copy->z_position = obj->z_position;
-    copy->unk40 = obj->unk40;
-    copy->unk76 = obj->unk76;
-    copy->unk7A = obj->unk7A;
-    copy->unkB8 = obj->unkB8;
-    copy->xz_scale = obj->xz_scale;
-    copy->y_scale = obj->y_scale;
-    copy->xz_velocity = 10.0f;
+    copy->xpos = obj->xpos;
+    copy->ypos = obj->ypos;
+    copy->zpos = obj->zpos;
+    copy->theta = obj->theta;
+    copy->angle = obj->angle;
+    copy->langle = obj->langle;
+    copy->vtilt = obj->vtilt;
+    copy->scale_xz = obj->scale_xz;
+    copy->scale_y = obj->scale_y;
+    copy->speed = 10.0f;
     copy->unkBC = (func_150ADA20() % 5U) + 10.0f;
     copy->unk148 = (func_150ADA20() % 10U) - 5.0f;
     copy->unk68[0] = obj->unk68[0];
@@ -561,11 +561,11 @@ void func_151951E0(Actor *obj) {
     copy->eyeClosed[1] = obj->eyeClosed[1];
     copy->eyeCode[0] = obj->eyeCode[0];
     copy->eyeCode[1] = obj->eyeCode[1];
-    copy->unk76 += (func_150ADA20() % 10922U) - 65536.0f / 12;
-    copy->unk40 = (obj->unk76 + 0x4000) * (360.0f / 65536);
-    copy->unkF8 = obj->unkF8;
+    copy->angle += (func_150ADA20() % 10922U) - 65536.0f / 12;
+    copy->theta = (obj->angle + 0x4000) * (360.0f / 65536);
+    copy->noshove = obj->noshove;
     copy->unk9C |= 0x0FFF0000;
-    func_150838EC(copy, obj->unk84.uh, 0, obj->animation_speed);
+    func_150838EC(copy, obj->animseq.uh, 0, obj->animsp);
     func_150D10E4(obj, 0);
     func_150D10E4(copy, 1);
 }
@@ -583,22 +583,22 @@ void func_15195528(Actor *self, Actor *other, u8 *arg2) {
     f32 dz;
 
     if (self != NULL) {
-        angle = self->unk40 - 90.0f;
+        angle = self->theta - 90.0f;
     } else if (other != NULL) {
-        angle = other->unk40 - 90.0f;
+        angle = other->theta - 90.0f;
     } else {
         angle = func_150ADA68() * 360.0f;
     }
     func_1514373C(angle * 0.01745329238f, 1.0f, &dir[0], &dir[2]);
     dir[1] = 0.0f;
     dx = dir[0] * 20.0f;
-    from[0] = other->x_position + dx;
-    from[1] = other->y_position + 50.0f;
+    from[0] = other->xpos + dx;
+    from[1] = other->ypos + 50.0f;
     dz = dir[2] * 20.0f;
-    from[2] = other->z_position + dz;
-    to[0] = other->x_position - dx;
-    to[1] = other->y_position + 50.0f;
-    to[2] = other->z_position - dz;
+    from[2] = other->zpos + dz;
+    to[0] = other->xpos - dx;
+    to[1] = other->ypos + 50.0f;
+    to[2] = other->zpos - dz;
     func_15137610(other, from, to, dir, 0xFF, 1);
 }
 
@@ -608,13 +608,13 @@ void func_15195650(Actor *self, Actor *other, u8 *arg2) {
 }
 
 void func_15195698(Actor *self, Actor *other, u8 *arg2) {
-    if (other->health == 0 && other->unk127 != 0xFF) {
+    if (other->energy == 0 && other->playernumber != 0xFF) {
         func_15136C3C(other, 1, 1, 1, 1, 0, 0xFF, 1);
         func_15145A50(other);
         func_1507CD64(other, 6);
     }
-    if (self->id == 0x47) {
-        self->health = 0;
+    if (self->character_type == 0x47) {
+        self->energy = 0;
     }
 }
 

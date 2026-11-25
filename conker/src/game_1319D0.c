@@ -15,7 +15,7 @@ void func_15104520(Camera *camera) {
         camera->liftTarget = 77.0f;
     }
     target = camera->player;
-    if (target->xz_velocity < 50.0f && camera->unk3E8 == 0) {
+    if (target->speed < 50.0f && camera->unk3E8 == 0) {
         // matching: the no-op (f32 *) cast changes how IDO schedules the distance load
         if (0.5f * camera->targetDistance < *(f32 *)&camera->distance - camera->targetDistance) {
             func_15128774(camera, target);

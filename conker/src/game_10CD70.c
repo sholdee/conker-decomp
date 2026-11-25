@@ -66,9 +66,9 @@ void func_150DF920(s32 arg0) {
         id = 7;
         if (obj != NULL) {
             func_150A2864(slot, 0);
-            x = obj->x_position;
-            y = obj->y_position + 200.0f;
-            z = obj->z_position;
+            x = obj->xpos;
+            y = obj->ypos + 200.0f;
+            z = obj->zpos;
             func_150A3444(slot, x, y, z);
         } else {
             func_150A2864(slot, 1);
@@ -198,14 +198,14 @@ void func_150DFCA8(SwingObject *obj) {
 
 /* Moves bone 1 of the actor to its x/z position at a fixed height of 2706. */
 void func_150DFDA4(Actor *actor) {
-    f32 (*bone)[4] = actor->unk1D4[1];
+    f32 (*bone)[4] = actor->ob_matrix_ptr[1];
 
-    bone[3][0] = actor->x_position;
+    bone[3][0] = actor->xpos;
     bone[3][1] = 2706.0f;
-    bone[3][2] = actor->z_position;
+    bone[3][2] = actor->zpos;
 }
 
-/* Model attachment hook 12 (D_800841C0[12]). While the owner's fade is active (unk2EC), counts
+/* Model attachment hook 12 (D_800841C0[12]). While the owner's fade is active (taskint[2]), counts
  * its timer (unk2D8[0]) down, returning 1 once it expires, and rewrites the G_SETTILESIZE of the
  * attachment's display list: uls follows the fade, ult steps back by a third of the old uls. */
 s32 func_150DFDD0(ModelAttachment *att, Actor *owner) {
@@ -215,11 +215,11 @@ s32 func_150DFDD0(ModelAttachment *att, Actor *owner) {
     s32 j;
     s32 ult;
 
-    if (owner->unk2EC != 0) {
+    if (owner->taskint[2] != 0) {
         att->hiddenDLists = 2;
         owner->unk2D8[0] -= D_800BE9A4;
         if (owner->unk2D8[0] < 0.0f) {
-            owner->unk2EC = 0;
+            owner->taskint[2] = 0;
             return 1;
         }
         fade = 1.0f - (owner->unk2D8[0] * owner->unk2D8[1]);
@@ -278,15 +278,15 @@ void func_150DFEFC(BoltEmitter *emitter) {
 
     obj = emitter->src.obj;
     src = &emitter->src;
-    if (obj->interaction_state == 0 || obj->unique_id != src->id) {
+    if (obj->type == 0 || obj->unique_id != src->id) {
         emitter->base.header.state = -1;
         return;
     }
     src->flashTimer -= D_800BE9E4;
     if (src->flashTimer < 0) {
-        pos.x = obj->x_position;
-        pos.y = obj->y_position;
-        pos.z = obj->z_position;
+        pos.x = obj->xpos;
+        pos.y = obj->ypos;
+        pos.z = obj->zpos;
         header.flags = 3;
         header.update = -1;
         header.lifetime = func_150ADA20() % 11U + 5;
@@ -445,12 +445,12 @@ void func_150E06D8(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     s32 randB;
     s32 randA;
 
-    if (actor->unk1D4 == NULL) {
+    if (actor->ob_matrix_ptr == NULL) {
         return;
     }
     src[0] = D_800A0F70[slot];
     dst[0] = &start.x;
-    func_15145EA4(src, dst, (Mtx *)actor->unk1D4 + D_80088988, 1);
+    func_15145EA4(src, dst, (Mtx *)actor->ob_matrix_ptr + D_80088988, 1);
     scale = 1.0f; // matching: IDO keeps the multiply by 1.0 only through a variable
     params[1] = func_150ADA68() * scale + 2.0f;
     params[0] = func_150ADA68() * 14.0f + 28.0f;

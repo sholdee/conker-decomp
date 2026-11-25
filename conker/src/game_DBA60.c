@@ -83,12 +83,12 @@ void func_150AE790(AttachedEffect *effect) {
         return;
     }
     owner = link->owner;
-    if (link->owner->interaction_state == 0) {
+    if (link->owner->type == 0) {
         return;
     }
-    bones = owner->unk1D4;
+    bones = owner->ob_matrix_ptr;
     if (bones != NULL && link->owner->unique_id == link->ownerId) {
-        func_15142314(link->owner->unk1D4, link->bone, &spawn.pos);
+        func_15142314(link->owner->ob_matrix_ptr, link->bone, &spawn.pos);
         spawn.kind = 1;
         spawn.flags = 1;
         motion.texture = 0;

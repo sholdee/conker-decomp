@@ -44,17 +44,17 @@ void func_15119FC0(WorldObject *obj) {
 
         if (WORK(obj)->respawnTimer == 0) {
             for (i = 0; i < D_8008FD8C; i++) {
-                if (movement_obj[i].interaction_state == 0 || movement_obj[i].unk127 == 0xFF || obj->moveData.word < 0) {
+                if (movement_obj[i].type == 0 || movement_obj[i].playernumber == 0xFF || obj->moveData.word < 0) {
                     continue;
                 }
-                distSq = ((f32)obj->x - movement_obj[i].x_position) * ((f32)obj->x - movement_obj[i].x_position) +
-                         ((f32)obj->z - movement_obj[i].z_position) * ((f32)obj->z - movement_obj[i].z_position);
+                distSq = ((f32)obj->x - movement_obj[i].xpos) * ((f32)obj->x - movement_obj[i].xpos) +
+                         ((f32)obj->z - movement_obj[i].zpos) * ((f32)obj->z - movement_obj[i].zpos);
                 if (distSq < 80.0f * 80.0f) {
                     func_1507C3E0(&movement_obj[i], &height, &width, &depth);
                     obj->object_status = 0x31;
-                    playerY = movement_obj[i].y_position;
+                    playerY = movement_obj[i].ypos;
                     if (playerY < (f32)obj->y + 80.0f && (f32)obj->y - 80.0f < playerY + (f32)height &&
-                        movement_obj[i].health > 0) {
+                        movement_obj[i].energy > 0) {
                         if (func_15060BA4(&movement_obj[i], 1)) {
                             if (obj->moveData.word != 0) {
                                 WORK(obj)->respawnTimer = (u16)(obj->moveData.word >> 16) * 60;

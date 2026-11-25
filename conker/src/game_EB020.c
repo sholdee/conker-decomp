@@ -22,7 +22,7 @@ void func_150BDB70(Actor *self) {
     s32 mask;
 
     searchState = 1;
-    if (self->id == 0x23) {
+    if (self->character_type == 0x23) {
         searchState = 10;
         runState = 11;
         runArg = 12;
@@ -32,41 +32,41 @@ void func_150BDB70(Actor *self) {
         runArg = 3;
         stateArg = 3;
     }
-    self->unk2E8 = 0;
+    self->taskint[1] = 0;
     self->unk2FC = 0;
-    self->unk2E4 -= self->unk2E4 >> 3;
+    self->taskint[0] -= self->taskint[0] >> 3;
     if (1) {} // matching: splits the block here; without it IDO swaps the owner/state registers
     owner = movement_obj;
     if (D_800BE616 != 0) {
         self->unk66 &= ~0x20;
     }
-    mask = self->unk13C;
+    mask = self->lifting;
     if (mask != 0) {
         owner += mask - 100;
-        if (owner->camera != NULL) {
-            self->unk2FC = 1 << owner->camera->playerIndex;
+        if (owner->CameraPtr != NULL) {
+            self->unk2FC = 1 << owner->CameraPtr->playerIndex;
         }
         // matching: the state pointer must reuse mask's register (a separate local grows the frame)
-        mask = (s32) owner->unk31C;
+        mask = (s32) owner->mv;
         if (mask != 0 && ((ActorCtl *) mask)->SniperState != 0) {
-            self->unk7A = (s32) (((ActorCtl *) mask)->aimYaw * (65536.0f / 360.0f));
-            self->unk76 = self->unk7A;
-            angle = owner->unk31C->aimPitch;
+            self->langle = (s32) (((ActorCtl *) mask)->aimYaw * (65536.0f / 360.0f));
+            self->angle = self->langle;
+            angle = owner->mv->aimPitch;
             if (angle > 180.0f) {
                 angle -= 360.0f;
             }
             angle *= 10.0f;
-            self->unk2E4 = angle;
-            self->unk2E8 = 1;
+            self->taskint[0] = angle;
+            self->taskint[1] = 1;
             self->unk66 |= 0x20;
         }
     }
     func_15052590(self);
-    if (runState == self->unk232) {
+    if (runState == self->intelwalk) {
         func_15052F9C(self, 100.0f, stateArg, 4, 0, runArg, 0, 0, 0, 0);
         return;
     }
-    if (searchState == self->unk232 && (~D_800D18A0 & D_800CC268) && func_15072208(self, 0) == NULL) {
+    if (searchState == self->intelwalk && (~D_800D18A0 & D_800CC268) && func_15072208(self, 0) == NULL) {
         mask = ~D_800D18A0 & D_800CC268;
         for (i = 0; i < 25; i++) {
             while (!(mask & (1 << i)) && i < 25) {
@@ -76,12 +76,12 @@ void func_150BDB70(Actor *self) {
                 return;
             }
             other = &movement_obj[i];
-            if (other->unk127 != 0xFF && other->unk65 == 0 && other->unk31C->GrenadeThrowState == 0 &&
-                other->unk31C->SniperState == 0 && other->unk13C == 0) {
-                self->unk124 = i;
+            if (other->playernumber != 0xFF && other->attach_char == 0 && other->mv->GrenadeThrowState == 0 &&
+                other->mv->SniperState == 0 && other->lifting == 0) {
+                self->owner = i;
                 func_1505327C(self, 44.0f, 3.2f, runState, stateArg);
-                other->unk31C->gun_before_reload = 600;
-                other->unk31C->ReloadTimer = 0;
+                other->mv->gun_before_reload = 600;
+                other->mv->ReloadTimer = 0;
                 return;
             }
         }

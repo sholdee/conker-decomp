@@ -31,10 +31,10 @@ void func_150BABE0(Actor *obj, u8 side, u8 arg2) {
     if (obj == NULL) {
         return;
     }
-    if (obj->interaction_state == 0 || obj->interaction_state == 8) {
+    if (obj->type == 0 || obj->type == 8) {
         return;
     }
-    if (obj->unk1D4 == NULL) {
+    if (obj->ob_matrix_ptr == NULL) {
         return;
     }
     switch (side) {
@@ -45,8 +45,8 @@ void func_150BABE0(Actor *obj, u8 side, u8 arg2) {
         joint = 0x1A;
         break;
     }
-    // matching: an integer cast keeps unk1D4 out of a0 (a pointer argument is loaded straight into a0)
-    func_15142314((s32)obj->unk1D4, joint, &pos);
+    // matching: an integer cast keeps ob_matrix_ptr out of a0 (a pointer argument is loaded straight into a0)
+    func_15142314((s32)obj->ob_matrix_ptr, joint, &pos);
     pos.y = obj->floorY;
     func_15143E94(5, 0x4022);
     func_15165F80(-1, pos.x, pos.y + 6.0f, pos.z, 25, 18, 0, *(u8 *)&arg2, 1);

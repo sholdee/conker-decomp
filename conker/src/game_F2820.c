@@ -18,7 +18,7 @@ typedef struct StripDesc {
 typedef struct StripTarget {
     /* 0x00 */ Actor *obj;
     /* 0x04 */ u8 uniqueId;     // obj->unique_id when attached
-    /* 0x05 */ u8 bone;         // matrix index into obj->unk1D4
+    /* 0x05 */ u8 bone;         // matrix index into obj->ob_matrix_ptr
     /* 0x06 */ u8 pad6[2];
     /* 0x08 */ Vec3f offset;    // bone-local position
 } StripTarget;
@@ -255,12 +255,12 @@ Gfx *func_150C56A4(Gfx *gfx, StripObj *strip, s16 view) {
 s32 func_150C5B88(StripObj *strip) {
     StripTarget *target = &strip->target;
 
-    if (target->obj->interaction_state == 0) {
+    if (target->obj->type == 0) {
         return 0;
     }
-    strip->p1.x = target->obj->x_position;
-    strip->p1.y = target->obj->y_position;
-    strip->p1.z = target->obj->z_position;
+    strip->p1.x = target->obj->xpos;
+    strip->p1.y = target->obj->ypos;
+    strip->p1.z = target->obj->zpos;
     return 1;
 }
 
@@ -274,17 +274,17 @@ s32 func_150C5BD4(StripObj *strip) {
     StripTarget *target = &strip->target;
     Mtx *bones;
 
-    if (target->obj->interaction_state == 0) {
+    if (target->obj->type == 0) {
         return 0;
     }
     if (target->obj->unique_id != target->uniqueId) {
         return 0;
     }
-    bones = (Mtx *)target->obj->unk1D4;
+    bones = (Mtx *)target->obj->ob_matrix_ptr;
     if (bones == NULL) {
-        strip->p1.x = target->obj->x_position;
-        strip->p1.y = target->obj->y_position;
-        strip->p1.z = target->obj->z_position;
+        strip->p1.x = target->obj->xpos;
+        strip->p1.y = target->obj->ypos;
+        strip->p1.z = target->obj->zpos;
     } else {
         // matching: byte offset; &bones[target->bone] swaps the addu operands
         func_15143134(&target->offset, &strip->p1, (Mtx *)((u8 *)bones + target->bone * sizeof(Mtx)));

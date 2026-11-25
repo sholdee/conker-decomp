@@ -247,7 +247,7 @@ AnchorEmitter *func_1518F5D0(Actor *owner, AnchorEmitterTemplate *tmpl, s16 dura
             dest->child = NULL;
         }
         func_151D2AB0(dest->tmpl.anchorSet);
-        func_1000FA64(0x4D, owner->x_position, owner->y_position, owner->z_position, 15000, 2000, 800,
+        func_1000FA64(0x4D, owner->xpos, owner->ypos, owner->zpos, 15000, 2000, 800,
                       (SoundRecordCallback)func_1518E298, emitter, (s32)owner, 0, 0);
     }
     return emitter;
@@ -299,14 +299,14 @@ void func_1518F8E0(AnchorEmitter *emitter) {
     owner = emitter->owner;
     params = &emitter->params;
     if (params->accum > 1.0f) {
-        if ((owner->unk1D4 != NULL) && ((owner->unk74 & 0xF) != 0xF)) {
+        if ((owner->ob_matrix_ptr != NULL) && ((owner->unk74 & 0xF) != 0xF)) {
             do {
                 if (emitter->count < params->tmpl.maxCount) {
                     set = params->tmpl.anchorSet;
                     anchor = &D_800E0990[set][func_150ADA20() % D_800E0968[set]];
                     size.x = func_150ADA68() * params->tmpl.sizeXRange + params->tmpl.sizeX;
                     size.y = func_150ADA68() * params->tmpl.sizeYRange + params->tmpl.sizeY;
-                    func_15143134(&anchor->offset, &pos, (Mtx *)owner->unk1D4 + anchor->bone);
+                    func_15143134(&anchor->offset, &pos, (Mtx *)owner->ob_matrix_ptr + anchor->bone);
                     frameRand = func_150ADA20();
                     if (func_150ADA20() & 1) {
                         kind = 0x13;
@@ -397,7 +397,7 @@ void func_1518FC84(EmitterParticle *particle, Vec3f *dest) {
 
 /* Maps an object id to its emitter kind; only variant 0 exists. Returns 0 for unknown ids. */
 s32 func_1518FDC4(Actor *obj, u8 *kind, u8 variant) {
-    switch (obj->id) {
+    switch (obj->character_type) {
     case 0x87:
     case 0xB0:
         *kind = 13;
@@ -556,7 +556,7 @@ extern u8 D_800A7B10;
 u8 *func_1519003C(Actor *obj, s32 *found) {
     u8 *data;
 
-    switch (obj->id) {
+    switch (obj->character_type) {
     case 0x87:
     case 0xB0:
         data = &D_800A7AFC;
@@ -684,9 +684,9 @@ LightEffect *func_1519021C(AnchorEmitter *emitter, Actor *owner, u8 kind, s16 du
     desc.owner.actor = owner;
     desc.owner.uniqueId = owner->unique_id;
 
-    pos.x = owner->x_position;
-    pos.y = owner->y_position;
-    pos.z = owner->z_position;
+    pos.x = owner->xpos;
+    pos.y = owner->ypos;
+    pos.z = owner->zpos;
 
     child = func_151602C0(&desc.header, &pos, 0, 0xFF, 0xD1, 0, 0xFF, 0, 0x30, arg4, arg5);
     if (child != NULL) {

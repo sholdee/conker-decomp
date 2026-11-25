@@ -163,7 +163,7 @@ void func_150C7D7C(WorldObject *obj) {
     Actor *target;
 
     target = func_15083E90(0xC);
-    obj->x = target->x_position - 30.0f;
-    obj->y = target->y_position + 50.0f;
-    obj->z = target->z_position + 30.0f;
+    obj->x = target->xpos - 30.0f;
+    obj->y = target->ypos + 50.0f;
+    obj->z = target->zpos + 30.0f;
 }

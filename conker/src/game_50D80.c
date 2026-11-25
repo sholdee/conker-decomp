@@ -571,7 +571,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
         if (v == 0) {
             v = 0xFF;
         }
-        obj->lodRequest = v;
+        obj->forced_lod = v;
     } else if (event->type == 5) {
         if (event->value == 0x3B) {
             if (event->unk4 == 0) {
@@ -890,11 +890,11 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     r = func_15083FB0((u8) event->unk6);
                     if (r != -1) {
                         obj->unk101 |= 4;
-                        obj->unk65 = r + 1;
-                        obj->unk5C = event->unk5;
+                        obj->attach_char = r + 1;
+                        obj->basemtx = event->unk5;
                     }
                 } else {
-                    obj->unk65 = 0;
+                    obj->attach_char = 0;
                 }
             }
         } else if (event->value == 0x42) {
@@ -935,7 +935,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             }
         } else if (event->value == 0x49) {
             if (obj != NULL && event->unk4 < 3) {
-                (&obj->unk2E4)[event->unk4] = event->unk6;
+                (&obj->taskint[0])[event->unk4] = event->unk6;
             }
         } else if (event->value == 0x4B) {
             if (obj != NULL) {
@@ -955,24 +955,24 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             D_800C3C8B = 1;
         } else if (event->value == 0x5A) {
             dc_glbl_CharNum = obj - movement_obj;
-            if (obj->id == 0x53) {
-                obj->unk124 = 0;
+            if (obj->character_type == 0x53) {
+                obj->owner = 0;
                 func_15052F9C(obj, 156.0f, 1, 4, 0, 10, 0xFF, 0, 1, 0);
-            } else if (obj->id == 0x28) {
-                obj->unk124 = 0;
+            } else if (obj->character_type == 0x28) {
+                obj->owner = 0;
                 func_15052F9C(obj, 180.0f, 5, 0x44, 1, 1, 0xFF, 0, 1, 0);
-            } else if (obj->id == 0x21) {
-                obj->unk124 = 0;
+            } else if (obj->character_type == 0x21) {
+                obj->owner = 0;
                 func_15052F9C(obj, 156.0f, 0x19, 4, 0, 0xF, 0xFF, 0, 1, 0);
             }
         } else if (event->value == 0x71) {
             movement_obj->unkCC = 0;
-            movement_obj->unk31C->transport = 0;
-            movement_obj->unk65 = 0;
-            movement_obj->unk31C->jump_on_char = 0;
-            movement_obj->unkF8 &= ~0x01000000;
+            movement_obj->mv->transport = 0;
+            movement_obj->attach_char = 0;
+            movement_obj->mv->jump_on_char = 0;
+            movement_obj->noshove &= ~0x01000000;
             if (obj != NULL) {
-                obj->unk13C = 0;
+                obj->lifting = 0;
             }
         } else if (event->value == 0x37) {
             s32 duration;
@@ -1050,30 +1050,30 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
         } else if (event->value == 0x69) {
             if (obj != NULL) {
                 if (event->unk4 == 0) {
-                    obj->gravity = 4.0f;
-                    obj->y_velocity = 20.0f;
+                    obj->ygrav = 4.0f;
+                    obj->yspd = 20.0f;
                 } else if (event->unk4 == 1) {
-                    obj->gravity = 0.0f;
-                    obj->y_velocity = 0.0f;
+                    obj->ygrav = 0.0f;
+                    obj->yspd = 0.0f;
                 } else if (event->unk4 == 2) {
                     func_150836CC(obj, 0x11);
                     obj->unkA9 = 0;
                 } else if (event->unk4 == 3) {
                     dc_glbl_CharNum = obj - movement_obj;
-                    movement_obj->unk13C = dc_glbl_CharNum + 100;
-                    movement_obj->xz_velocity = 0.0f;
-                    FS16(movement_obj->unk31C, 0x18) = 0;
+                    movement_obj->lifting = dc_glbl_CharNum + 100;
+                    movement_obj->speed = 0.0f;
+                    FS16(movement_obj->mv, 0x18) = 0;
                     func_1505959C(obj, 0);
-                    *(u32 *) &obj->unk5C = 9; // matching: an unsigned store
-                    obj->unk65 = 1;
+                    *(u32 *) &obj->basemtx = 9; // matching: an unsigned store
+                    obj->attach_char = 1;
                     obj->unk101 |= 4;
                 } else if (event->unk4 == 4) {
-                    FU8(movement_obj->unk31C, 0x17) = 1;
+                    FU8(movement_obj->mv, 0x17) = 1;
                 } else if (event->unk4 == 5) {
                     D_800D154C = obj;
                     func_15073F1C();
                 } else if (event->unk4 == 6) {
-                    obj->unk31C->transport = 0;
+                    obj->mv->transport = 0;
                 }
             }
         } else if (event->value == 0x6A) {
@@ -1094,7 +1094,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             D_800C3C8C = 1;
         } else if (event->value == 0x72) {
             if (obj != NULL) {
-                obj->unkC8 = D_800D1C90[obj->id]->unk6;
+                obj->unkC8 = D_800D1C90[obj->character_type]->unk6;
             }
         } else if (event->value == 0x78) {
             D_800C3C8D = 1;
@@ -1110,7 +1110,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             }
         } else if (event->value == 0x7D) {
             if (obj != NULL && event->unk4 == 0) {
-                obj->unk5 = 1;
+                obj->drawtype = 1;
             }
         } else if (event->value == 0x7E) {
             if (obj != NULL) {
@@ -1470,10 +1470,10 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         f32 c;
                         s32 pad2; // matching: stack padding
 
-                        x = obj->x_position;
-                        y = obj->y_position;
-                        z = obj->z_position;
-                        angle = obj->unk7A >> 8;
+                        x = obj->xpos;
+                        y = obj->ypos;
+                        z = obj->zpos;
+                        angle = obj->langle >> 8;
                         s = func_15048A40(angle);
                         c = func_150489B0(angle);
                         func_1516F548(x + 20.0f, y + 475.0f, z, duration, 14.0f * s, 0xB00, 14.0f * c, 0xC8,
@@ -1581,7 +1581,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         sp.unk6 = duration;
                         sp.unk8 = 1;
                         sp.unk9 = 0;
-                        switch (obj->id) {
+                        switch (obj->character_type) {
                             case 0x57:
                             case 0x71:
                                 sp.unkA = 1;
@@ -1629,7 +1629,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         if (obj != NULL && duration > 0) {
                             f32 half;
 
-                            obj->unk2EC = 1;
+                            obj->taskint[2] = 1;
                             half = (f32)duration * 0.5f;
                             obj->unk2D8[0] = half;
                             obj->unk2D8[1] = 1.0f / half;
@@ -1759,7 +1759,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
 
             if (event->unk4 == 0) {
                 duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-                if (obj->id == 0x49 || obj->id == 0x58) {
+                if (obj->character_type == 0x49 || obj->character_type == 0x58) {
                     list = func_1519003C(obj, &count);
                     if (list != NULL && event->unk6 < count) {
                         func_1518F51C(obj, list[event->unk6], duration, -1, -1, -1, 0, 0, sceneTag, 1);
@@ -1899,10 +1899,10 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         f32 out[3];
 
                         func_1504715C(&floor, obj);
-                        pos[0] = obj->x_position;
-                        pos[1] = obj->y_position + 100.0f;
-                        pos[2] = obj->z_position;
-                        if (func_15046C80(pos, 0, obj->y_position - 300.0f, &floor) != 0) {
+                        pos[0] = obj->xpos;
+                        pos[1] = obj->ypos + 100.0f;
+                        pos[2] = obj->zpos;
+                        if (func_15046C80(pos, 0, obj->ypos - 300.0f, &floor) != 0) {
                             out[0] = pos[0];
                             out[1] = floor.height;
                             out[2] = pos[2];
@@ -1918,7 +1918,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     f32 vec[3];
 
                     if (obj != NULL) {
-                        switch (obj->id) {
+                        switch (obj->character_type) {
                             case 0x5A:
                             case 0x74:
                             case 0x75:
@@ -1994,7 +1994,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     func_15136C3C(obj, 1, 1, 1, 1, 0, sceneTag, 1);
                     break;
                 case 10: {
-                    if (obj->unk1D4 != NULL) {
+                    if (obj->ob_matrix_ptr != NULL) {
                         const f32 *sel;
                         const f32 a[3][3] = { { 73.0f, 14.0f, 0.0f }, { 68.0f, -10.0f, 8.0f }, { 62.0f, 1.0f, -5.0f } };
                         const f32 b[4][3] = { { -55.0f, -6.0f, -1.0f }, { -47.0f, -1.0f, -10.0f }, { -53.0f, -14.0f, 6.0f }, { -57.0f, 10.0f, 6.0f } };
@@ -2013,7 +2013,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                                 sel = c[func_150ADA20() % 6];
                                 break;
                         }
-                        func_15143134(sel, out, &((MtxF *) obj->unk1D4)[bones[event->unk5]]);
+                        func_15143134(sel, out, &((MtxF *) obj->ob_matrix_ptr)[bones[event->unk5]]);
                         func_151C329C(out, sceneTag, 1);
                     }
                     break;
@@ -2085,22 +2085,22 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     break;
                 }
                 case 18: {
-                    if (obj->unk1D4) {
+                    if (obj->ob_matrix_ptr) {
                         f32 out[3];
                         const f32 offs[2][3] = { { -65.0f, 172.0f, 9.0f }, { 15.0f, 63.0f, 9.0f } };
 
-                        func_15143134(offs[event->unk5], out, obj->unk1D4);
+                        func_15143134(offs[event->unk5], out, obj->ob_matrix_ptr);
                         func_15131EE4(out, 0.6460000277f, sceneTag, 0);
                     }
                     break;
                 }
                 case 19: {
-                    if (obj->unk1D4) {
+                    if (obj->ob_matrix_ptr) {
                         f32 out[3];
                         const f32 offs[8][3] = { { 0.0f, -14.0f, 18.0f }, { 0.0f, -14.0f, 18.0f }, { 0.0f, -14.0f, 18.0f }, { 0.0f, -14.0f, 18.0f }, { -5.0f, 25.0f, -7.0f }, { -11.0f, 28.0f, -5.0f }, { -4.0f, 30.0f, -4.0f }, { 3.0f, 30.0f, -8.0f } };
                         const u8 bones[8] = { 7, 8, 9, 10, 13, 14, 15, 16 };
 
-                        func_15143134(offs[event->unk5], out, &((MtxF *) obj->unk1D4)[bones[event->unk5]]);
+                        func_15143134(offs[event->unk5], out, &((MtxF *) obj->ob_matrix_ptr)[bones[event->unk5]]);
                         func_15131EE4(out, 6.990000248f, sceneTag, 0);
                     }
                     break;
@@ -2604,7 +2604,7 @@ s32 func_15029BB8(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             } else {
                 loop = 1;
             }
-            if (id != obj->unk84.uh) {
+            if (id != obj->animseq.uh) {
                 func_1505E650(obj, id, 1.0f, rate, 0.0f, 0.0f, loop);
             }
             if (duration > 0.0f) {
@@ -2643,7 +2643,7 @@ s32 func_15029BB8(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
 
             if (obj != NULL) {
                 if (skipping == 0) {
-                    kind = (obj->id == 0x4B) ? 2 : -1;
+                    kind = (obj->character_type == 0x4B) ? 2 : -1;
                     if (kind != -1) {
                         // matching: the original reuses the (otherwise unused) index parameter as the temp
                         index = (event->unk4 == 0) ? -1 : event->unk4 - 1;
@@ -2751,7 +2751,7 @@ void func_1502A8A0(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 sce
         if (obj == NULL) {
             return;
         }
-        pos = &obj->x_position;
+        pos = &obj->xpos;
     } else if (info->type == 3) {
         actor = func_151149AC(info->targetId);
         if (actor == NULL) {

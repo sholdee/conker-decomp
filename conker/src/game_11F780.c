@@ -37,7 +37,7 @@ s32 func_150F22D0(f32 *out, Actor *owner, u8 slot) {
     default:
         return 0;
     }
-    func_15143134(D_800A1920, out, &owner->unk1D4[bone]);
+    func_15143134(D_800A1920, out, &owner->ob_matrix_ptr[bone]);
     return 1;
 }
 
@@ -49,7 +49,7 @@ s32 func_150F237C(s32 arg0, s32 arg1) {
 void func_150F2390(Actor *owner, s32 slot, s32 arg2) {
     f32 pos[3];
 
-    if (owner->unk1D4 != NULL) {
+    if (owner->ob_matrix_ptr != NULL) {
         func_150F22D0(pos, owner, slot);
         func_151C329C(pos, 0xFF, 0);
     }

@@ -244,11 +244,11 @@ s32 func_1000EE70(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *
     if ((obj = record->owner) != NULL) {
         if (*volume != 0) {
             uid = record->key & 0xFF;
-            if ((obj->interaction_state != 0) && (uid == obj->unique_id)) {
+            if ((obj->type != 0) && (uid == obj->unique_id)) {
                 *mix = (((u32)obj->unk184 >> 3) & 0x30) * 2;
-                record->x = obj->x_position;
-                record->y = obj->y_position;
-                record->z = obj->z_position;
+                record->x = obj->xpos;
+                record->y = obj->ypos;
+                record->z = obj->zpos;
                 return 0;
             }
             if (func_1000F44C(record->handle) == 0) {
@@ -298,13 +298,13 @@ s32 func_1000EFB4(OwnerListSoundRecord *record, s32 *active, u32 *volume, s32 *p
     if (owner != NULL) {
         level = *volume;
         if (level != 0) {
-            if (owner->interaction_state != 0) {
+            if (owner->type != 0) {
                 for (id = record->ids; *id != 0; id++) {
-                    if ((owner->unk84.uh == *id) || !(record->flags & 1)) {
+                    if ((owner->animseq.uh == *id) || !(record->flags & 1)) {
                         *mix = (((u32)owner->unk184 >> 3) & 0x30) * 2;
-                        record->x = owner->x_position;
-                        record->y = owner->y_position;
-                        record->z = owner->z_position;
+                        record->x = owner->xpos;
+                        record->y = owner->ypos;
+                        record->z = owner->zpos;
                         return 0;
                     }
                 }
@@ -720,28 +720,28 @@ s32 func_10010154(u16 sound, Actor *obj, s32 volume, s16 nearDistance, u16 farDi
     s32 handle = 0;
     s32 flags = 0;
 
-    if ((obj->interaction_state == 0) || (obj->interaction_state == 5)) {
+    if ((obj->type == 0) || (obj->type == 5)) {
         return 0;
     }
-    if (obj->camera != NULL) {
+    if (obj->CameraPtr != NULL) {
         u32 mixFlags = obj->unk184;
 
         handle = func_10010BE8(obj->unk8E, sound, volume, 64, 0, ((mixFlags >> 3) & 0x30) * 2,
                                D_80041FD9);
     } else {
-        if (obj->id == 0x16) {
+        if (obj->character_type == 0x16) {
             nearDistance *= 2;
             if (farDistance < nearDistance) {
                 nearDistance = farDistance - 200;
             }
-        } else if ((obj->id == 5) || (obj->id == 0x4F) || (obj->id == 0x83)) {
+        } else if ((obj->character_type == 5) || (obj->character_type == 0x4F) || (obj->character_type == 0x83)) {
             flags = 4;
-        } else if ((obj->unk13C != 0) && ((obj->id == 0x8A) || (obj->id == 0x23))) {
+        } else if ((obj->lifting != 0) && ((obj->character_type == 0x8A) || (obj->character_type == 0x23))) {
             flags = 0x100;
         }
         func_1000FD38((SoundRecordCallback)func_1000EE70, obj, obj->unique_id | 0x10000);
-        if (obj->interaction_state != 0) {
-            handle = func_1000FA64(sound, obj->x_position, obj->y_position, obj->z_position,
+        if (obj->type != 0) {
+            handle = func_1000FA64(sound, obj->xpos, obj->ypos, obj->zpos,
                                    volume, farDistance, nearDistance,
                                    (SoundRecordCallback)func_1000EE70, obj,
                                    obj->unique_id | 0x10000, flags, 0);
@@ -755,37 +755,37 @@ s32 func_10010344(u16 sound, void *owner, u32 volume, s16 nearDistance, u16 farD
     Actor *obj = owner;
     s32 flags = 0;
 
-    if ((obj->interaction_state == 0) || (obj->interaction_state == 5)) {
+    if ((obj->type == 0) || (obj->type == 5)) {
         return 0;
     }
     if ((s32)volume < 0) {
         volume = -(s32)volume;
         flags = 0x100;
     }
-    if (obj->camera != NULL) {
+    if (obj->CameraPtr != NULL) {
         u8 bus;
         s32 mix;
 
         bus = D_80041FD9;
         mix = (((u32)obj->unk184 >> 3) & 0x30) * 2;
-        if ((obj->unk31C != NULL) && (obj->unk31C->unk94 == 1)) {
+        if ((obj->mv != NULL) && (obj->mv->unk94 == 1)) {
             bus = 1;
             volume = 0x7FFF;
         }
         flags = func_10010BE8(obj->unk8C, sound, volume, 64, 0, mix, bus);
     } else {
-        if (obj->id == 0x16) {
+        if (obj->character_type == 0x16) {
             nearDistance *= 2;
             if (farDistance < nearDistance) {
                 nearDistance = farDistance - 200;
             }
-        } else if ((obj->id == 0x8A) && (obj->unk13C != 0)) {
+        } else if ((obj->character_type == 0x8A) && (obj->lifting != 0)) {
             flags |= 0x100;
-        } else if ((obj->id == 0x4F) || (obj->id == 0x83)) {
+        } else if ((obj->character_type == 0x4F) || (obj->character_type == 0x83)) {
             flags |= 4;
         }
         func_1000FD38((SoundRecordCallback)func_1000EE70, obj, obj->unique_id | 0x20000);
-        flags = func_1000FA64(sound, obj->x_position, obj->y_position, obj->z_position, volume,
+        flags = func_1000FA64(sound, obj->xpos, obj->ypos, obj->zpos, volume,
                               farDistance, nearDistance, (SoundRecordCallback)func_1000EE70,
                               obj, obj->unique_id | 0x20000, flags, 0);
     }
@@ -798,7 +798,7 @@ void func_10010558(u16 sound, Actor *obj, s32 volume, s16 nearDistance, u16 farD
     if (delay <= 0) {
         func_10010344(sound, obj, volume, nearDistance, farDistance);
     } else {
-        func_1000FA64(sound, obj->x_position, obj->y_position, obj->z_position, volume,
+        func_1000FA64(sound, obj->xpos, obj->ypos, obj->zpos, volume,
                       farDistance, nearDistance, (SoundRecordCallback)func_1000ECCC,
                       (void *)delay, (s32)obj, 0, 0);
     }
@@ -809,13 +809,13 @@ void func_10010630(u16 sound, Actor *obj, s32 volume, s16 nearDistance, u16 farD
     if (volume) {}
     if (volume) {}
     if (volume) {}
-    if (obj->interaction_state != 0) {
-        if (obj->camera != NULL) {
+    if (obj->type != 0) {
+        if (obj->CameraPtr != NULL) {
             u32 mixFlags = obj->unk184;
 
             func_10010F30(sound, (u16)volume, 64, 0, ((mixFlags >> 3) & 0x30) * 2);
         } else {
-            func_1000FA64(sound, obj->x_position, obj->y_position, obj->z_position, volume,
+            func_1000FA64(sound, obj->xpos, obj->ypos, obj->zpos, volume,
                           farDistance, nearDistance, (SoundRecordCallback)func_1000EE70, obj,
                           obj->unique_id, 0, 0);
         }
@@ -827,17 +827,17 @@ void func_10010720(u16 sound, Actor *obj, s32 volume, s16 nearDistance, u16 farD
     if (delay <= 0) {
         func_10010630(sound, obj, volume, nearDistance, farDistance);
     } else {
-        func_1000FA64(sound, obj->x_position, obj->y_position, obj->z_position, volume,
+        func_1000FA64(sound, obj->xpos, obj->ypos, obj->zpos, volume,
                       farDistance, nearDistance, (SoundRecordCallback)func_1000EDA0,
                       (void *)delay, (s32)obj, 0, 0);
     }
 }
 
 s32 func_100107F8(Actor *obj) {
-    if (obj->interaction_state == 0) {
+    if (obj->type == 0) {
         return 0;
     } else {
-        if (obj->camera != NULL) {
+        if (obj->CameraPtr != NULL) {
             if (obj->unk8E != 0) {
                 if (func_1000F3D0(obj->unk8E) != 0) {
                     return 1;
@@ -855,7 +855,7 @@ s32 func_100107F8(Actor *obj) {
 }
 
 s32 func_10010894(Actor *obj) {
-    if (obj->camera != NULL) {
+    if (obj->CameraPtr != NULL) {
         if (obj->unk8C != 0) {
             if (func_1000F3D0(obj->unk8C) != 0) {
                 return 1;
@@ -874,8 +874,8 @@ s32 func_10010894(Actor *obj) {
 void func_1001091C(Actor *obj, u32 volume) {
     s32 index;
 
-    if ((volume != 0) && (obj->interaction_state != 0)) {
-        if (obj->camera != NULL) {
+    if ((volume != 0) && (obj->type != 0)) {
+        if (obj->CameraPtr != NULL) {
             if (obj->unk8E != 0) {
                 func_1000F85C(obj->unk8E, 8, *(s32 *)&volume); // matching: the pun makes IDO reload volume from its stack home
             }
@@ -892,7 +892,7 @@ void func_1001091C(Actor *obj, u32 volume) {
 }
 
 void func_100109D0(Actor *obj) {
-    if (obj->camera != NULL) {
+    if (obj->CameraPtr != NULL) {
         if (obj->unk8E != 0) {
             func_100111C8(obj->unk8E);
         }
@@ -903,7 +903,7 @@ void func_100109D0(Actor *obj) {
 }
 
 void func_10010A3C(Actor *obj) {
-    if (obj->camera != NULL) {
+    if (obj->CameraPtr != NULL) {
         if (obj->unk8C != 0) {
             func_100111C8(obj->unk8C);
         }
@@ -917,7 +917,7 @@ void func_10010AA8(Actor *obj) {
     s32 index;
     SoundRecord *record;
 
-    if (obj->camera != NULL) {
+    if (obj->CameraPtr != NULL) {
         if (obj->unk8C && func_1000F44C(obj->unk8C)) {
             func_100111C8(obj->unk8C);
         }
@@ -1037,15 +1037,15 @@ u16 func_10010F88(s32 sound, u16 volume, s16 cents, u8 mix, s32 arg4,
 s32 func_10010FFC(u16 handle, s32 sound, u16 volume, s16 cents, u8 mix, Actor *obj) {
     f32 scale;
 
-    if ((obj == NULL) || (obj->interaction_state == 0)) {
+    if ((obj == NULL) || (obj->type == 0)) {
         return 0;
     }
-    if (obj->camera != NULL) {
+    if (obj->CameraPtr != NULL) {
         handle = func_10010BE8(handle, sound, volume, 64, cents, mix, D_80041FD9);
     } else {
         volume = (volume + volume + volume) >> 2;
-        if (obj->id != 0xFF) {
-            scale = D_800D1C90[obj->id]->bodyRadius * obj->xz_scale;
+        if (obj->character_type != 0xFF) {
+            scale = D_800D1C90[obj->character_type]->bodyRadius * obj->scale_xz;
         } else {
             scale = 0.0f;
         }
@@ -1056,8 +1056,8 @@ s32 func_10010FFC(u16 handle, s32 sound, u16 volume, s16 cents, u8 mix, Actor *o
         } else {
             scale *= 1.0f / 256.0f;
         }
-        handle = func_10010E78(handle, sound, volume, cents, mix, 0, obj->x_position,
-                               obj->y_position, obj->z_position, 500,
+        handle = func_10010E78(handle, sound, volume, cents, mix, 0, obj->xpos,
+                               obj->ypos, obj->zpos, 500,
                                (s32)(2000.0f * scale) + 501);
     }
     return handle;

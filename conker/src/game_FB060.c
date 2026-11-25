@@ -23,10 +23,10 @@ void func_150CDBB0(Actor *actor, u8 owner, s32 arg2) {
         CollisionHit hit;
 
         func_1504715C(&hit, actor);
-        pos.x = actor->x_position;
-        pos.y = actor->y_position + 1000.0f;
-        pos.z = actor->z_position;
-        if (!func_15046C80(&pos, 0, actor->y_position - 3000.0f, &hit)) {
+        pos.x = actor->xpos;
+        pos.y = actor->ypos + 1000.0f;
+        pos.z = actor->zpos;
+        if (!func_15046C80(&pos, 0, actor->ypos - 3000.0f, &hit)) {
             return;
         }
         pos.y = hit.height;

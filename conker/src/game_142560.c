@@ -128,8 +128,8 @@ void func_15115368(WorldObject *obj) {
                 f32 dx;
                 f32 dz;
 
-                dx = movement_obj[0].x_position - obj->x;
-                dz = movement_obj[0].z_position - obj->z;
+                dx = movement_obj[0].xpos - obj->x;
+                dz = movement_obj[0].zpos - obj->z;
                 dx = dx * dx;
                 dz = dz * dz;
                 distSq = dx + dz;

@@ -472,9 +472,9 @@ s32 func_15178C9C(u8 tag, s32 index) {
 
     swarm = func_15178B98(tag);
     if (swarm != NULL) {
-        dx = movement_obj[index].x_position - swarm->x;
-        dy = movement_obj[index].y_position - swarm->y;
-        dz = movement_obj[index].z_position - swarm->z;
+        dx = movement_obj[index].xpos - swarm->x;
+        dy = movement_obj[index].ypos - swarm->y;
+        dz = movement_obj[index].zpos - swarm->z;
         dx = dx * dx;
         dy = dy * dy;
         dz = dz * dz;

@@ -23,7 +23,7 @@ void func_150F6B00(Camera *actor) {
     f32 projection;
     f32 clamped;
 
-    if (func_1509BE40(1, 0x4003, 6, 0x2000) && actor->player->health) {
+    if (func_1509BE40(1, 0x4003, 6, 0x2000) && actor->player->energy) {
         actor->flags |= 0xC0001000;
         func_15048F90(&D_800A1B80, &actor->focus, &offset);
         func_15048F90(&D_800A1B80, &D_800A1B8C, &direction);

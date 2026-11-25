@@ -47,10 +47,10 @@ void func_15116BAC(WorldObject *obj);
 
 /*
  * Actor handler paired with func_15116984: a triggerable object (flags & 4) at rest (state bits 0-2 clear)
- * enters the moving state 2 when the actor's unk31C->unk57 is 1.
+ * enters the moving state 2 when the actor's mv->unk57 is 1.
  */
 void func_15116930(WorldObject *obj, Actor *actor) {
-    if ((obj->object_status & 4) && !(obj->task_flag & TASK_FLAG_STATE) && !(obj->task_flag & TASK_FLAG_LOCKED) && actor->unk31C->unk57 == 1) {
+    if ((obj->object_status & 4) && !(obj->task_flag & TASK_FLAG_STATE) && !(obj->task_flag & TASK_FLAG_LOCKED) && actor->mv->unk57 == 1) {
         obj->task_flag &= ~TASK_FLAG_STATE;
         obj->task_flag |= TASK_FLAG_GOING_ON;
     }

@@ -6,7 +6,7 @@ s32 func_1509BE40();
 void func_15123070(Camera *arg0);
 
 void func_15107FE0(Camera *arg0) {
-    if (func_150859AC(arg0->player->unk127, 1) == 9) {
+    if (func_150859AC(arg0->player->playernumber, 1) == 9) {
         func_151239CC(arg0, 2);
         if (func_15123934(arg0, 8, 0, arg0->unk134, 3) != 0) {
             arg0->aimState = 0;

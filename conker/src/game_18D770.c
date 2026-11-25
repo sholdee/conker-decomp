@@ -319,23 +319,23 @@ u8 func_15160B74(LightEffect *effect) {
     actor = effect->data.attach.actor;
     result = 1;
     attach = &effect->data.attach;
-    if (actor->interaction_state == 0) {
+    if (actor->type == 0) {
         return 0;
     }
     if (actor->unique_id != attach->actorId) {
         return 0;
     }
-    if (actor->unk1D4 != NULL && (actor->unk74 & 0xF) != 0xF) {
+    if (actor->ob_matrix_ptr != NULL && (actor->unk74 & 0xF) != 0xF) {
         f32 position[3];
 
-        func_15143134(&attach->offset.x, position, actor->unk1D4[attach->bone]);
+        func_15143134(&attach->offset.x, position, actor->ob_matrix_ptr[attach->bone]);
         effect->light->x = position[0];
         effect->light->y = position[1];
         effect->light->z = position[2];
     } else {
-        effect->light->x = actor->x_position;
-        effect->light->y = actor->y_position;
-        effect->light->z = actor->z_position;
+        effect->light->x = actor->xpos;
+        effect->light->y = actor->ypos;
+        effect->light->z = actor->zpos;
     }
     callback = attach->callback;
     if (callback != -1) {
@@ -397,13 +397,13 @@ s32 func_15160E30(LightEffect *effect) {
 
     actor = effect->data.beam.actor;
     beam = &effect->data.beam;
-    if (actor->interaction_state == 0) {
+    if (actor->type == 0) {
         return 0;
     }
     if (actor->unique_id != beam->actorId) {
         return 0;
     }
-    if (actor->unk1D4 != NULL && (beam->flags & 1) && (actor->unk74 & 0xF) != 0xF) {
+    if (actor->ob_matrix_ptr != NULL && (beam->flags & 1) && (actor->unk74 & 0xF) != 0xF) {
         f32 start[3];
         f32 dir[3];
         RayHit ray;
@@ -414,7 +414,7 @@ s32 func_15160E30(LightEffect *effect) {
         in[1] = &beam->end.x;
         out[0] = start;
         out[1] = dir;
-        func_15145EA4(in, out, actor->unk1D4[beam->bone], 2);
+        func_15145EA4(in, out, actor->ob_matrix_ptr[beam->bone], 2);
         {
             f32 length;
 
@@ -425,9 +425,9 @@ s32 func_15160E30(LightEffect *effect) {
                 f32 invLength;
 
                 if (func_15145128(dir, dir, &length, &invLength) == 0) {
-                    effect->light->x = actor->x_position;
-                    effect->light->y = actor->y_position;
-                    effect->light->z = actor->z_position;
+                    effect->light->x = actor->xpos;
+                    effect->light->y = actor->ypos;
+                    effect->light->z = actor->zpos;
                     effect->light->radius = 0;
                     effect->light->disabled = 1;
                     return 1;
@@ -437,9 +437,9 @@ s32 func_15160E30(LightEffect *effect) {
         func_15081690(actor, start[0], start[1], start[2], dir[0], dir[1], dir[2], &ray, 0.0f, 0, 0, 1, -1, 0, 0);
         hitType = ray.hitType;
         if (hitType == 0) {
-            effect->light->x = actor->x_position;
-            effect->light->y = actor->y_position;
-            effect->light->z = actor->z_position;
+            effect->light->x = actor->xpos;
+            effect->light->y = actor->ypos;
+            effect->light->z = actor->zpos;
             effect->light->radius = 0;
             effect->light->disabled = 1;
             return 1;
@@ -448,8 +448,8 @@ s32 func_15160E30(LightEffect *effect) {
             Actor *hit;
 
             hit = ray.obj;
-            if (hit->id == 0x9E) {
-                hit->unk2E4 = 1;
+            if (hit->character_type == 0x9E) {
+                hit->taskint[0] = 1;
             }
         }
         effect->light->x = ray.pos.x;
@@ -469,9 +469,9 @@ s32 func_15160E30(LightEffect *effect) {
         }
         effect->light->disabled = 0;
     } else {
-        effect->light->x = actor->x_position;
-        effect->light->y = actor->y_position;
-        effect->light->z = actor->z_position;
+        effect->light->x = actor->xpos;
+        effect->light->y = actor->ypos;
+        effect->light->z = actor->zpos;
         effect->light->radius = 0;
         effect->light->disabled = 1;
     }
@@ -480,10 +480,10 @@ s32 func_15160E30(LightEffect *effect) {
 
 /* Returns whether `actor` is live and is not `exclude`. */
 s32 func_15161238(Actor *actor, Actor *exclude) {
-    if (actor->interaction_state == 0) {
+    if (actor->type == 0) {
         return 0;
     }
-    if (actor->id == 0xFF) {
+    if (actor->character_type == 0xFF) {
         return 0;
     }
     if (actor == exclude) {
@@ -777,9 +777,9 @@ LightEffect *func_15161E24(Actor *actor, u8 eventHandler, u8 arg2, s16 lifetime,
     ref.actorId = actor->unique_id;
     ref.eventHandler = eventHandler;
 
-    position.x = actor->x_position;
-    position.y = actor->y_position;
-    position.z = actor->z_position;
+    position.x = actor->xpos;
+    position.y = actor->ypos;
+    position.z = actor->zpos;
 
     effect = func_151602C0(&header, &position, arg4, arg5, arg6, arg7, 0xFF, 0, sizeof(ref), arg8, arg9);
     if (effect != NULL) {
@@ -1457,18 +1457,18 @@ s32 func_15163F50(LightEffect *effect, LightActorRef *ref) {
     Actor *actor;
 
     actor = ref->actor;
-    if (actor->interaction_state == 0) {
+    if (actor->type == 0) {
         return 0;
     }
-    if (actor->id == 0xFF) {
+    if (actor->character_type == 0xFF) {
         return 0;
     }
     if (actor->unique_id != ref->actorId) {
         return 0;
     }
-    effect->light->x = actor->x_position;
-    effect->light->y = actor->y_position;
-    effect->light->z = actor->z_position;
+    effect->light->x = actor->xpos;
+    effect->light->y = actor->ypos;
+    effect->light->z = actor->zpos;
     return 1;
 }
 

@@ -156,17 +156,17 @@ s32 func_15116888(s32 x, s32 z, s32 *unused, Actor *other) {
     f32 cosine;
     Vec3f delta;
 
-    otherX = (s32)other->x_position;
-    otherZ = (s32)other->z_position;
+    otherX = (s32)other->xpos;
+    otherZ = (s32)other->zpos;
     delta.x = otherX - x;
     delta.z = otherZ - z;
 
     bearing = func_150490A8(&delta);
-    angle = other->unk76;
+    angle = other->angle;
     angle = 0x40 - (angle >> 8);
     angle -= bearing;
     cosine = func_15048A40(angle);
-    result = other->xz_velocity * cosine;
+    result = other->speed * cosine;
     return result;
 }
 

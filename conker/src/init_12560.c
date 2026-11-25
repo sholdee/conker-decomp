@@ -81,10 +81,10 @@ s32 func_10012718(u16 id, Actor *obj, s32 volume, s16 nearDistance, u16 farDista
     s32 attenuatedVolume;
     s32 unused;
 
-    if (obj->camera != 0) {
+    if (obj->CameraPtr != 0) {
         func_1001263C(id, volume, 64);
     } else {
-        func_100114D0(obj->x_position, obj->y_position, obj->z_position, volume, farDistance, nearDistance,
+        func_100114D0(obj->xpos, obj->ypos, obj->zpos, volume, farDistance, nearDistance,
                       &pan, &attenuatedVolume, &unused);
         func_1001263C(id, attenuatedVolume, pan);
     }

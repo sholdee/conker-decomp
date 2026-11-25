@@ -268,7 +268,7 @@ s32 func_150DBD70(u8 kind) {
         if (character == NULL) {
             return 0;
         }
-        if (character->unk84.uh == 6) {
+        if (character->animseq.uh == 6) {
             state.floor = 498.0f;
         } else {
             state.floor = -37.0f;

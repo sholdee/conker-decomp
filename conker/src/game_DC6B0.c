@@ -370,14 +370,14 @@ void func_150AFE64(s32 altBone) {
     s32 bone;
     f32 (*mtx)[4];
 
-    if (D_800D154C->unk1D4 != NULL) {
+    if (D_800D154C->ob_matrix_ptr != NULL) {
         if (altBone == 0) {
             bone = 3;
         } else {
             bone = 2;
         }
 
-        mtx = D_800D154C->unk1D4[bone];
+        mtx = D_800D154C->ob_matrix_ptr[bone];
         startX = 0.0f;
         startY = 0.0f;
         startZ = -20.0f;
@@ -515,9 +515,9 @@ extern const f32 D_8009F7A4[5];
 void func_150B0348(Actor *obj, u8 arg1, s32 arg2) {
     Vec3f pos;
 
-    pos.x = obj->x_position;
-    pos.y = obj->y_position + 30.0f;
-    pos.z = obj->z_position;
+    pos.x = obj->xpos;
+    pos.y = obj->ypos + 30.0f;
+    pos.z = obj->zpos;
     {
         SpriteBurst burst;
 

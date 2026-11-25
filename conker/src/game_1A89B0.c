@@ -738,7 +738,7 @@ void func_1517DE5C(void) {
         for (i = 0; i < 15; i++) {
             D_800DDA90[i].used = 0;
         }
-        func_1517BBAC(movement_obj->x_position, movement_obj->y_position, movement_obj->z_position, 1500,
+        func_1517BBAC(movement_obj->xpos, movement_obj->ypos, movement_obj->zpos, 1500,
                       camera_global_Cameras->unk380, camera_global_Cameras->eye.x, camera_global_Cameras->eye.y, camera_global_Cameras->eye.z);
         for (i = 0; i < 15; i++) {
             if (D_800DD478[i * FRAMES_PER_TYPE] != 0 && D_800DDA90[i].used == 0) {

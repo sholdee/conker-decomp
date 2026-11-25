@@ -26,7 +26,7 @@ void func_150EB430(Vec3f *start, Vec3f *delta, Vec3f *hit) {
 /*
  * Tests the segment from start to end against the D_800D3098 cylinders. While object 9 exists,
  * a hit on one of the four D_80088AA0 cylinders disables it (func_150A2864(id, 1)), stores
- * which one (1-4) in the object's unk2E8 and plays func_150EBC80's effect at it; the eight
+ * which one (1-4) in the object's taskint[1] and plays func_150EBC80's effect at it; the eight
  * D_80088AB0 cylinders are only tested. Otherwise only cylinder 76 is tested, and a hit sets
  * its unk18. Returns TRUE when object 9 exists and the segment hit one of the twelve.
  */
@@ -41,7 +41,7 @@ s32 func_150EB484(Vec3f *start, Vec3f *end, Vec3f *hit) {
             id = D_80088AA0[i];
             if (func_150A34B0(&D_800D3098[id], start, end, hit)) {
                 func_150A2864(id, 1);
-                obj->unk2E8 = i + 1;
+                obj->taskint[1] = i + 1;
                 func_150EBC80(&D_800D3098[id], 0xFF, 1);
                 return TRUE;
             }
@@ -80,7 +80,7 @@ void func_15117770(WorldObject *obj);
 /*
  * Mover handler. In states 0-1 it swings rotX on a damped spring toward an angle set by the
  * player's distance (with flags & 4: -40 degrees at the player rising to -32 at 740 units;
- * otherwise -40). Once the player's unk31C->unk57 is set it switches to state 2, which bounces
+ * otherwise -40). Once the player's mv->unk57 is set it switches to state 2, which bounces
  * rotX back to 0 with func_15117770 until it stops; then state 3 keeps it at 0.
  */
 void func_150EB614(WorldObject *obj) {
@@ -102,7 +102,7 @@ void func_150EB614(WorldObject *obj) {
     }
     if ((obj->task_flag & TASK_FLAG_STATE) != TASK_FLAG_GOING_ON) {
         if (obj->object_status & 4) {
-            if (movement_obj->unk31C->unk57 != 0) {
+            if (movement_obj->mv->unk57 != 0) {
                 obj->task_flag &= ~TASK_FLAG_STATE;
                 obj->task_flag |= TASK_FLAG_GOING_ON;
                 obj->moveData.word = 0;
@@ -110,9 +110,9 @@ void func_150EB614(WorldObject *obj) {
                 WORK(obj)->bounce.acceleration = 0.3000000119f;
                 WORK(obj)->bounce.velocity = 0.0f;
             }
-            dz = obj->z - movement_obj->z_position;
-            dx = obj->x - movement_obj->x_position;
-            dy = obj->y - movement_obj->y_position;
+            dz = obj->z - movement_obj->zpos;
+            dx = obj->x - movement_obj->xpos;
+            dy = obj->y - movement_obj->ypos;
             distance = sqrtf(dz * dz + (dx * dx + dy * dy));
             if (distance > 740.0f) {
                 distance = 740.0f;

@@ -79,7 +79,7 @@ void func_151D74B0(Actor *obj, s32, s32, s32, s32);
 s32 func_1514CA80(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s32 *idSlot) {
     u8 found = 0;
 
-    switch (obj->id) {
+    switch (obj->character_type) {
     case 94:
         *idSlot = 25;
         found = 4;
@@ -203,7 +203,7 @@ s32 func_1514CA80(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s32 *idSlot) {
     case 43:
         *globalSlot = 21;
         found |= 2;
-        if (obj->id == 156 || obj->id == 157) {
+        if (obj->character_type == 156 || obj->character_type == 157) {
             *uniqueSlot = 0;
             found |= 1;
         }
@@ -586,9 +586,9 @@ void func_1514D564(Actor *obj) {
     desc.p0.z = 2244.0f;
     payload.unk5 = 6;
     desc.unk18 = 1;
-    desc.p1.x = obj->x_position;
-    desc.p1.y = obj->y_position;
-    desc.p1.z = obj->z_position;
+    desc.p1.x = obj->xpos;
+    desc.p1.y = obj->ypos;
+    desc.p1.z = obj->zpos;
     desc.unk20 = 1;
     desc.unk1C = 0.3199999928f;
     spawned = func_150C5370(&desc, sizeof(payload));
@@ -837,8 +837,8 @@ void func_1514DCAC(Actor *obj) {
 }
 
 void func_1514DCF4(Actor *obj) {
-    if (obj->unk31C != NULL) {
-        obj->unk31C->unk94 = 1;
+    if (obj->mv != NULL) {
+        obj->mv->unk94 = 1;
     }
     func_15083568(obj, 0x17, 1.0f, 0);
 }
@@ -907,7 +907,7 @@ void func_1514DE94(Actor *obj) {
 
 /** Links `obj` to the object whose unique_id is 9 (unk65 holds that object's slot + 1). */
 void func_1514DFD0(Actor *obj) {
-    obj->unk65 = func_15083FB0(9) + 1;
+    obj->attach_char = func_15083FB0(9) + 1;
     obj->unk101 |= 0x34;
 }
 
@@ -1088,7 +1088,7 @@ void func_1514E508(Actor *obj) {
 
     handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, "Charactereffect 0");
     func_1514EC1C(handle, obj, 0xD);
-    pos = (s32)&obj->x_position; // passed as two 16-bit halves
+    pos = (s32)&obj->xpos; // passed as two 16-bit halves
     handle = func_1515D5F8(-0x8000, pos >> 16, pos & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
     func_1514EC1C(handle, obj, 0x18);
 }
@@ -1099,7 +1099,7 @@ void func_1514E5B8(Actor *obj) {
 
     handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, "Charactereffect -1");
     func_1514EC1C(handle, obj, 0xD);
-    pos = (s32)&obj->x_position; // passed as two 16-bit halves
+    pos = (s32)&obj->xpos; // passed as two 16-bit halves
     handle = func_1515D5F8(-0x8000, pos >> 16, pos & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
     func_1514EC1C(handle, obj, 0x18);
 }
@@ -1110,7 +1110,7 @@ void func_1514E668(Actor *obj) {
 
     handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, "Charactereffect 1");
     func_1514EC1C(handle, obj, 0xD);
-    pos = (s32)&obj->x_position; // passed as two 16-bit halves
+    pos = (s32)&obj->xpos; // passed as two 16-bit halves
     handle = func_1515D5F8(-0x8000, pos >> 16, pos & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
     func_1514EC1C(handle, obj, 0x18);
 }
@@ -1121,7 +1121,7 @@ void func_1514E718(Actor *obj) {
 
     handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, "Charactereffect 2");
     func_1514EC1C(handle, obj, 0xE);
-    pos = (s32)&obj->x_position; // passed as two 16-bit halves
+    pos = (s32)&obj->xpos; // passed as two 16-bit halves
     handle = func_1515D5F8(-0x8000, pos >> 16, pos & 0xFFFF, 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0);
     func_1514EC1C(handle, obj, 0x18);
 }
