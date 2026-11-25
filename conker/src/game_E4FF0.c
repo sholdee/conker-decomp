@@ -107,20 +107,21 @@ s32 func_15132A4C(ModelParticleSpawn *, s32, s32, s32, u8, s32);
 void func_15151A38(BurstConfig *, u8, s32);
 
 /*
- * Spawns the debris of a smashed object: shards and a dust cloud around its bounds, a ground
- * decal under it, and two flung chunks (each with a burst) from joints 4 and 5 of its model.
+ * Spawns break-up effects for `obj`: debris and a particle around its bounds (func_150B82D0,
+ * func_150B85C0), an effect on the ground below it, and two chunks, each with a burst, flung
+ * from joints 4 and 5 of its model (or from fixed points above it when it has no model).
  */
 void func_150B7B40(struct127 *obj, u8 arg1, s32 arg2) {
-    f32 joints[2][3];
-    f32 root[3];
+    vertex joints[2];
+    vertex root;
     f32 scaleXZ;
     f32 scaleY;
     f32 scale;
     f32 dirX;
     f32 dirZ;
-    s32 pad5; // matching: stack slot
+    s32 pad5; // matching: unused stack slot; keeps the frame layout
     ModelParticleSpawn chunk;
-    s32 pad2[3]; // matching: stack slot
+    s32 pad2[3]; // matching: unused stack slots; keep the frame layout
     s8 i;
     f32 velX;
     f32 velZ;
@@ -131,19 +132,19 @@ void func_150B7B40(struct127 *obj, u8 arg1, s32 arg2) {
 
     if (obj != NULL) {
         if (obj->unk1D4 != NULL) {
-            func_15142314((s32)obj->unk1D4, 4, joints[0]);
-            func_15142314((s32)obj->unk1D4, 5, joints[1]);
-            func_15142314((s32)obj->unk1D4, 0, root);
+            func_15142314((s32)obj->unk1D4, 4, &joints[0].x);
+            func_15142314((s32)obj->unk1D4, 5, &joints[1].x);
+            func_15142314((s32)obj->unk1D4, 0, &root.x);
         } else {
-            root[0] = obj->x_position;
-            root[1] = obj->y_position;
-            root[2] = obj->z_position;
-            joints[0][0] = root[0] + 20.0f;
-            joints[0][1] = root[1] + 130.0f;
-            joints[0][2] = root[2];
-            joints[1][0] = root[0] - 20.0f;
-            joints[1][1] = root[1] + 130.0f;
-            joints[1][2] = root[2];
+            root.x = obj->x_position;
+            root.y = obj->y_position;
+            root.z = obj->z_position;
+            joints[0].x = root.x + 20.0f;
+            joints[0].y = root.y + 130.0f;
+            joints[0].z = root.z;
+            joints[1].x = root.x - 20.0f;
+            joints[1].y = root.y + 130.0f;
+            joints[1].z = root.z;
         }
         dirX = func_151423D8(obj->unk76 >> 8);
         dirZ = func_151423D8((obj->unk76 >> 8) + 0x40);
@@ -193,7 +194,7 @@ void func_150B7B40(struct127 *obj, u8 arg1, s32 arg2) {
         }
         chunk.model = 0;
         chunk.lifetime = 300;
-        chunk.elasticity = 0.6000000238f;
+        chunk.elasticity = 0.6f;
         chunk.rot.x = obj->unkB8;
         chunk.rot.y = obj->unk40;
         chunk.rot.z = obj->unkC4;
@@ -218,7 +219,7 @@ void func_150B7B40(struct127 *obj, u8 arg1, s32 arg2) {
         chunk.fadeStart = 1;
         chunk.fadeRate = 0xFF;
         chunk.rotVel.z = 0; // matching: an int 0 here; 0.0f makes IDO keep a shared zero in $f22
-        chunk.gravity = -1.600000024f;
+        chunk.gravity = -1.6f;
         scaleXZ = obj->xz_scale;
         if (scaleXZ > 1.0f) {
             scaleXZ = 1.0f;
@@ -255,15 +256,15 @@ void func_150B7B40(struct127 *obj, u8 arg1, s32 arg2) {
             sinPitch = func_151423D8(pitch);
             cosPitch = func_151423D8(pitch - 0x40);
             horizontal = speed * sinPitch;
-            chunk.pos = *(vertex *)joints[i];
+            chunk.pos = joints[i];
             chunk.vel.x = (horizontal * cosYaw) + velX;
             chunk.vel.y = -speed * cosPitch;
             chunk.vel.z = (horizontal * sinYaw) + velZ;
             chunk.rotVel.x = 30.0f - (func_150ADA68() * 60.0f);
             chunk.rotVel.y = 30.0f - (func_150ADA68() * 60.0f);
             func_15132A4C(&chunk, 3, 2, 0, arg1, 0);
-            scale = ((obj->xz_scale + obj->y_scale) * 0.5f) / 0.9599999785f;
-            burst.position = *(vertex *)joints[i];
+            scale = ((obj->xz_scale + obj->y_scale) * 0.5f) / 0.96f;
+            burst.position = joints[i];
             burst.countBase = 4;
             burst.countRange = 4;
             burst.yawRange = 0xFF;
@@ -271,8 +272,8 @@ void func_150B7B40(struct127 *obj, u8 arg1, s32 arg2) {
             burst.pitchRange = 0x4B;
             burst.sizeBase = 3.0f * scale;
             burst.sizeRange = 3.0f * scale;
-            burst.growthBase = 0.6000000238f;
-            burst.growthRange = 0.2310000062f;
+            burst.growthBase = 0.6f;
+            burst.growthRange = 0.231f;
             burst.speedBase = 15.0f * scale;
             burst.speedRange = 10.0f * scale;
             burst.yawBase = 0;
@@ -314,38 +315,40 @@ void func_150B7B40(struct127 *obj, u8 arg1, s32 arg2) {
 void func_15143794(s16, s16, f32, f32 *);
 void *func_1518A3C0(f32 *, f32 *, f32, f32 *, f32 *, f32, f32, u8, s16, u8, s32, u8, s32);
 
-void func_150B82D0(vertex *arg0, f32 *arg1, f32 *arg2, f32 *arg3, u8 arg4, s32 arg5) {
-    s32 n;
+/*
+ * Spawns 35-60 tumbling pieces at random directions around `center`, at distance `radius`
+ * with the vertical offset scaled by `yScale`, each flying outwards.
+ */
+void func_150B82D0(vertex *center, f32 *height, f32 *radius, f32 *yScale, u8 arg4, s32 arg5) {
+    s32 count;
     f32 pos[3];
     f32 rot[3];
     f32 vel[3];
-    f32 sc[3];
-    s16 ang1;
-    s16 ang2;
+    f32 accel[3];
+    s16 yaw;
+    s16 pitch;
 
-    n = (func_150ADA20() % 26U) + 0x23;
-    while (n > 0) {
-        ang1 = func_150ADA20() & 0xFF;
-        ang2 = (func_150ADA20() % 61U) - 0x3F;
-        func_15143794(ang1, ang2, *arg2, pos);
-        pos[1] *= *arg3;
-        pos[0] += arg0->x;
-        pos[1] += arg0->y;
-        pos[2] += arg0->z;
+    for (count = (func_150ADA20() % 26U) + 35; count > 0; count--) {
+        yaw = func_150ADA20() & 0xFF;
+        pitch = (func_150ADA20() % 61U) - 63;
+        func_15143794(yaw, pitch, *radius, pos);
+        pos[1] *= *yScale;
+        pos[0] += center->x;
+        pos[1] += center->y;
+        pos[2] += center->z;
         rot[0] = func_150ADA68() * 360.0f;
         rot[1] = func_150ADA68() * 360.0f;
         rot[2] = func_150ADA68() * 360.0f;
-        func_15143794(ang1, ang2, ((func_150ADA68() * 1221.0f) + 1806.0f) * 0.009999999776f, vel);
-        sc[0] = ((func_150ADA68() * 3140.0f) + -1570.0f) * 0.009999999776f;
-        sc[1] = 0.0f;
-        sc[2] = ((func_150ADA68() * 3140.0f) + -1570.0f) * 0.009999999776f;
-        func_1518A3C0(pos, rot, ((func_150ADA68() * 104.0f) + 78.0f) * 0.001000000047f, vel, sc,
-                      ((func_150ADA68() * 633.0f) + -1064.0f) * 0.001000000047f, 0.9425339699f, 1,
-                      (func_150ADA20() % 51U) + 0x4B, 0, 0, 0xFF, 1);
-        n--;
+        func_15143794(yaw, pitch, ((func_150ADA68() * 1221.0f) + 1806.0f) * 0.01f, vel);
+        // matching: random ranges are written `rand * range + min`; `- 1570.0f` would emit sub.s
+        accel[0] = ((func_150ADA68() * 3140.0f) + -1570.0f) * 0.01f;
+        accel[1] = 0.0f;
+        accel[2] = ((func_150ADA68() * 3140.0f) + -1570.0f) * 0.01f;
+        func_1518A3C0(pos, rot, ((func_150ADA68() * 104.0f) + 78.0f) * 0.001f, vel, accel,
+                      ((func_150ADA68() * 633.0f) + -1064.0f) * 0.001f, 0.9425339699f, 1,
+                      (func_150ADA20() % 51U) + 75, 0, 0, 0xFF, 1);
     }
 }
-
 
 /* Particle spawn template passed to func_15130374 (same layout as ParticleSpawn in game_1368C0.c). */
 typedef struct {
@@ -388,7 +391,7 @@ typedef struct {
 
 extern SpawnedParticle *func_15130374(ParticleSpawn *spawn, u8 arg1, s32 dataSize, u8 arg3, s32 arg4);
 
-/* Spawns one dust-coloured particle at `center`, sized from `radius` and `height`. */
+/* Spawns one particle at `center`, sized from `radius` and `height`. */
 void func_150B85C0(vertex *center, f32 *height, f32 *radius, u8 arg3, s32 arg4) {
     ParticleSpawn spawn;
 
