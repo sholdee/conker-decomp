@@ -3,8 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-typedef struct { f32 x, z; } TrailVec2;
-
 extern f32 D_800D9860;
 extern f32 func_15144AA8(s32);
 extern Vec3f *func_15144B34(s32);

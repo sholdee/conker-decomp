@@ -2256,6 +2256,49 @@ typedef struct TrackerTrail {
     /* 0x98 */ TrackerTrailData *state;
 } TrackerTrail;
 
+/* A vector in the XZ plane: the sideways normals and drift velocities of trails. */
+typedef struct TrailVec2 {
+    f32 x;
+    f32 z;
+} TrailVec2;
+
+/* Kind 17 trail (func_151CEAAC, game_1FBED0.c): follows an actor or a sprite particle (func_151CEC54,
+ * game_1FC0C0.c) and wobbles as a sine wave that grows along its length (func_151CF120, game_1FC5D0.c). */
+
+/* WaveTrailData.flags */
+#define WAVE_TRAIL_HAS_NORMAL 1 /* scaled/normal have been initialised */
+#define WAVE_TRAIL_SMOOTH     2 /* recompute the previous point's normal */
+
+/* User data of a WaveTrail, copied in at spawn. */
+typedef struct WaveTrailData {
+    /* 0x00 */ Actor *owner;              /* followed when anchor is NULL */
+    /* 0x04 */ u8 ownerId;                /* owner->unique_id at spawn; the trail dies when it changes */
+    /* 0x08 */ DescParticleHead *anchor;  /* followed instead of the owner, when not NULL */
+    /* 0x0C */ TrailVec2 scaled;          /* normal * 51 */
+    /* 0x14 */ TrailVec2 normal;          /* sideways unit normal of the newest segment */
+    /* 0x1C */ u8 flags;                  /* WAVE_TRAIL_* */
+    /* 0x20 */ f32 maxLength;             /* points beyond this summed length are trimmed */
+    /* 0x24 */ f32 phase;                 /* of the sine wave, at the newest point */
+} WaveTrailData; /* size 0x28 */
+
+/* One point of a WaveTrail's ring buffer. */
+typedef struct WaveTrailPoint {
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ f32 dist;     /* length of the segment to the next-older point */
+    /* 0x10 */ f32 invLen;   /* 1 / its XZ length */
+    /* 0x14 */ f32 wave;     /* sideways sine offset */
+    /* 0x18 */ TrailVec2 scaled;
+    /* 0x20 */ TrailVec2 normal;
+} WaveTrailPoint; /* size 0x28 */
+
+typedef struct WaveTrail {
+    /* 0x00 */ EffectObjHead head;
+    /* 0x60 */ u8 pad60[0x24];
+    /* 0x84 */ u8 unk84[0x10];
+    /* 0x94 */ WaveTrailPoint *points;
+    /* 0x98 */ WaveTrailData *data;
+} WaveTrail;
+
 /* Head of the data of a particle stream (TimedEffect data at 0x28): every tick it emits `rate` particles from
  * position, aimed along func_151436B4 angles that wobble as sines (func_151C4820, game_1F1CD0.c;
  * func_150E6B84, game_113D60.c). */

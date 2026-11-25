@@ -3,10 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-typedef struct {
-    f32 x, z;
-} TrailVec2;
-
 /* One sample in the trail's ring buffer. */
 typedef struct TrackerTrailPoint {
     /* 0x00 */ Vec3f position;

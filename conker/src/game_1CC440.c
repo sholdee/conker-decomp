@@ -12,11 +12,6 @@
 #define TRAIL_SIDE_6 6
 #define TRAIL_SIDE_7 7
 
-typedef struct TrailVec2 {
-    f32 x;
-    f32 z;
-} TrailVec2;
-
 struct Trail;
 struct TrailSpawner;
 
