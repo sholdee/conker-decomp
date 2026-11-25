@@ -2041,6 +2041,12 @@ typedef struct BurstEffect {
     /* 0x28 */ BurstData data;
 } BurstEffect; /* size 0x40 */
 
+/* Fractions of a beam particle's width and length to draw (func_1513FAB4). */
+typedef struct BeamScale {
+    /* 0x0 */ f32 width;
+    /* 0x4 */ f32 length;
+} BeamScale; /* size 0x8 */
+
 /* Per-spark data (at spark+0x110). Each flickering value has a countdown timer; when it runs out a new
  * random target base + rand * range is picked. */
 typedef struct BurstSparkData {

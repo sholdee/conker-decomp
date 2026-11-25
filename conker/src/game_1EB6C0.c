@@ -8,12 +8,6 @@
  * message handler of a particle that follows an owner actor.
  */
 
-/* Fractions of a beam particle's width and length to draw. */
-typedef struct {
-    f32 width;
-    f32 length;
-} BeamScale;
-
 Vtx *func_1513FAB4(void *particle, u8 reversed, BeamScale *scale, s16 viewport);
 
 /* Per-frame update of a burst spark: flickers its width, height and alpha towards random targets. */

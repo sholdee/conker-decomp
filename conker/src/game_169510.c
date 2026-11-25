@@ -1515,12 +1515,6 @@ s32 func_1513F728(Particle *particle) {
     return 1;
 }
 
-/* Fractions of a beam particle's width and length to draw. */
-typedef struct {
-    f32 width;
-    f32 length;
-} BeamScale;
-
 extern Vec3f *func_15144B34(s32 viewport);
 extern void func_150AD8B0(Vec3f *a, Vec3f *b, Vec3f *out);
 
