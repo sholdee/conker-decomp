@@ -115,23 +115,23 @@ typedef struct MpGame {
     /* 0x0E1C */ u8 padE1C[0x48];
     /* 0x0E64 */ s32 team[16];
     /* 0x0EA4 */ s32 numSlots;
-    /* 0x0EA8 */ s32 unkEA8;
-    /* 0x0EAC */ s32 unkEAC;
-    /* 0x0EB0 */ s32 slot[16];      /* slot held by each player, -1 = none */
-    /* 0x0EF0 */ s32 unkEF0[32];
-    /* 0x0F70 */ s32 slotOwner[32]; /* player holding each slot, -1 = none */
-    /* 0x0FF0 */ s32 unkFF0[32];
-    /* 0x1070 */ s32 unk1070[32];
-    /* 0x10F0 */ s32 unk10F0[32];
-    /* 0x1170 */ s32 unk1170;
-    /* 0x1174 */ s32 unk1174[32];
-    /* 0x11F4 */ s32 unk11F4[32];
-    /* 0x1274 */ s32 unk1274[32];
-    /* 0x12F4 */ s32 unk12F4[32];
-    /* 0x1374 */ s32 unk1374[32];
-    /* 0x13F4 */ s32 unk13F4[32];
-    /* 0x1474 */ s32 unk1474[32];
-    /* 0x14F4 */ s32 unk14F4[32];
+    /* 0x0EA8 */ s32 numSpawns;               /* entries in spawnNodes */
+    /* 0x0EAC */ s32 respawnDelay;            /* slotTimer after a pickup */
+    /* 0x0EB0 */ s32 slot[16];                /* slot held by each player, -1 = none */
+    /* 0x0EF0 */ s32 slotEntity[32];          /* func_151149AC id of each slot's pickup */
+    /* 0x0F70 */ s32 slotOwner[32];           /* player holding each slot, -1 = none */
+    /* 0x0FF0 */ s32 itemOverride[32];        /* per player: 0 = none, 0x457 = no item */
+    /* 0x1070 */ s32 slotTimer[32];           /* >0 counting down to respawn, 0 = available, -1 = held */
+    /* 0x10F0 */ s32 slotSpawn[32];           /* spawnNodes index it sits at, -1 = none */
+    /* 0x1170 */ s32 defaultItem;             /* item of a player without a slot */
+    /* 0x1174 */ s32 slotItem[32];
+    /* 0x11F4 */ s32 slotFlags[32];           /* 1 random spawn, 2 respawns instead of being held, 4 never moves */
+    /* 0x1274 */ s32 slotHomeSpawn[32];
+    /* 0x12F4 */ s32 slotDropTimer[32];       /* frames before a dropped pickup returns */
+    /* 0x1374 */ s32 slotDropX[32];           /* where it was dropped */
+    /* 0x13F4 */ s32 slotDropY[32];
+    /* 0x1474 */ s32 slotDropZ[32];
+    /* 0x14F4 */ s32 spawnNodes[32];          /* path node ids (func_15086D48) */
     /* 0x1574 */ s32 unk1574[16];
     /* 0x15B4 */ u8 weights[16][16];
     /* 0x16B4 */ f32 ticks;
@@ -1925,7 +1925,7 @@ s32 func_1508A6FC(void) {
                         }
                     }
                     if (D_800D23B0->gameType != 0xB9) {
-                        D_800D23B0->unkFF0[i] = 0;
+                        D_800D23B0->itemOverride[i] = 0;
                         func_1508DAEC(i, 1);
                     }
                     result |= bit;
@@ -3024,24 +3024,25 @@ s32 func_1508D850(s32 player) {
     }
 }
 
+/* Resets the pickup slots: nobody holds one and each respawns on the next update. */
 s32 func_1508DA1C(void) {
     s32 i;
-    s32 *a = D_800D23B0->slot;
-    s32 *b = D_800D23B0->slotOwner;
-    s32 *c = D_800D23B0->unkFF0;
-    s32 *d = D_800D23B0->unk1070;
-    s32 *e = D_800D23B0->unk10F0;
-    s32 *f = D_800D23B0->unk12F4;
+    s32 *slots = D_800D23B0->slot;
+    s32 *owners = D_800D23B0->slotOwner;
+    s32 *overrides = D_800D23B0->itemOverride;
+    s32 *timers = D_800D23B0->slotTimer;
+    s32 *spawns = D_800D23B0->slotSpawn;
+    s32 *dropTimers = D_800D23B0->slotDropTimer;
 
     for (i = 0; i < D_800D23B0->numPlayers; i++) {
-        a[i] = -1;
+        slots[i] = -1;
     }
     for (i = 0; i < D_800D23B0->numSlots; i++) {
-        b[i] = -1;
-        c[i] = 0;
-        e[i] = -1;
-        d[i] = 1;
-        f[i] = 0;
+        owners[i] = -1;
+        overrides[i] = 0;
+        spawns[i] = -1;
+        timers[i] = 1;
+        dropTimers[i] = 0;
     }
 }
 
@@ -3066,19 +3067,19 @@ s32 func_1508DAEC(s32 player, s32 mode) {
         }
         game->slot[player] = -1;
         obj = &D_800CC2D0[player];
-        if ((D_800D23B0->unk11F4[slot] & 2) == 0) {
+        if ((D_800D23B0->slotFlags[slot] & 2) == 0) {
             D_800D23B0->slotOwner[slot] = -1;
-            D_800D23B0->unk10F0[slot] = -1;
-            next = D_800D23B0->unkEAC;
+            D_800D23B0->slotSpawn[slot] = -1;
+            next = D_800D23B0->respawnDelay;
             if (mode == 1) {
-                D_800D23B0->unk12F4[slot] = 300;
+                D_800D23B0->slotDropTimer[slot] = 300;
                 obj = &D_800CC2D0[player];
                 next = 4;
-                D_800D23B0->unk1374[slot] = obj->x_position;
-                D_800D23B0->unk13F4[slot] = obj->y_position + 50.0f;
-                D_800D23B0->unk1474[slot] = obj->z_position;
+                D_800D23B0->slotDropX[slot] = obj->x_position;
+                D_800D23B0->slotDropY[slot] = obj->y_position + 50.0f;
+                D_800D23B0->slotDropZ[slot] = obj->z_position;
             }
-            D_800D23B0->unk1070[slot] = next;
+            D_800D23B0->slotTimer[slot] = next;
         }
     }
     return 0;
@@ -3089,23 +3090,42 @@ void func_1502EA0C(struct127 *, s32, s32, s32, s32, s32);
 s32 func_1508E780(s32 arg0);
 void func_1508EB90(s32 arg0, s32 arg1, s32 arg2);
 void func_1502EA50(struct127 *);
-void func_15030158(void *, s32);
-s32 func_15033E28(struct127 *, void **);
 void func_15080620(s32, s32, s32, s32);
 void func_151027E8(struct127 *);
-u8 *func_151149AC(u8);
+/* Partial view of an attachment (Attachment in game_5D2C0.c). */
+typedef struct Attachment {
+    /* 0x00 */ u8 pad0[6];
+    /* 0x06 */ u8 setId; /* attachment set id (see func_15083568) */
+} Attachment;
+
+/* Partial view of a level prop (Prop in game_144C70.c), used here for the pickups. */
+typedef struct Prop {
+    /* 0x00 */ u8 pad0[0x10];
+    /* 0x10 */ s16 x;
+    /* 0x12 */ s16 y;
+    /* 0x14 */ s16 z;
+    /* 0x16 */ u8 pad16[0x6E - 0x16];
+    /* 0x6E */ u8 unk6E;
+    /* 0x6F */ u8 pad6F[0x80 - 0x6F];
+    /* 0x80 */ s32 touchedBy; /* player + 1 that touched the pickup, 0 = none */
+} Prop;
+
+Prop *func_151149AC(u8);
+void func_15030158(Attachment *, s32);
+s32 func_15033E28(struct127 *, Attachment **);
 
 extern s32 D_800D121C;
 
 void func_1508DC24(void) {
-    static s8 D_80087340; MpGame *base;
+    static s8 D_80087340;
+    MpGame *base;
     s32 i;
     struct127 *obj;
     s32 count;
     s32 cur;
     s32 prev;
-    s32 anim;
-    s32 n;
+    s32 setId;
+    s32 numAttached;
     s32 j;
     f32 x;
     f32 y;
@@ -3113,41 +3133,41 @@ void func_1508DC24(void) {
     s32 found;
     u16 pp;
     s32 kind;
-    s32 *arrEB0;
-    s32 *arrEF0;
-    s32 *arrF70;
-    s32 *arrFF0;
-    s32 *arr1070;
-    s32 *arr10F0;
-    s32 *arr1174;
-    s32 *arr11F4;
-    s32 *arr1274;
-    s32 *arr12F4;
-    s32 *arr1374;
-    s32 *arr13F4;
-    s32 *arr1474;
-    u8 *buf[10];
+    s32 *slots;
+    s32 *entities;
+    s32 *owners;
+    s32 *overrides;
+    s32 *timers;
+    s32 *spawns;
+    s32 *items;
+    s32 *flags;
+    s32 *homeSpawns;
+    s32 *dropTimers;
+    s32 *dropX;
+    s32 *dropY;
+    s32 *dropZ;
+    Attachment *attached[10];
     struct127 *other;
-    u8 *ent;
+    Prop *pickup;
     s32 idx;
     s32 r;
     s32 k;
 
     base = D_800D23B0;
     i = 0;
-    arrEB0 = base->slot;
-    arrEF0 = base->unkEF0;
-    arrF70 = base->slotOwner;
-    arrFF0 = base->unkFF0;
-    arr1070 = base->unk1070;
-    arr10F0 = base->unk10F0;
-    arr1174 = base->unk1174;
-    arr11F4 = base->unk11F4;
-    arr1274 = base->unk1274;
-    arr12F4 = base->unk12F4;
-    arr1374 = base->unk1374;
-    arr13F4 = base->unk13F4;
-    arr1474 = base->unk1474;
+    slots = base->slot;
+    entities = base->slotEntity;
+    owners = base->slotOwner;
+    overrides = base->itemOverride;
+    timers = base->slotTimer;
+    spawns = base->slotSpawn;
+    items = base->slotItem;
+    flags = base->slotFlags;
+    homeSpawns = base->slotHomeSpawn;
+    dropTimers = base->slotDropTimer;
+    dropX = base->slotDropX;
+    dropY = base->slotDropY;
+    dropZ = base->slotDropZ;
     count = base->numPlayers;
     for (; i < count; i++) {
         kind = base->gameType;
@@ -3156,17 +3176,17 @@ void func_1508DC24(void) {
         }
         {
             prev = D_800CC2D0[i].unk31C->unk75 & 0x7F;
-            cur = arrFF0[i];
+            cur = overrides[i];
             if (D_800CC2D0[i].unk31C->unk19B >= 5) {
                 cur = 0x3A;
             } else if (D_800CC2D0[i].unk31C->unk19B > 0) {
                 cur = 0x26;
             }
             if (cur == 0) {
-                if (arrEB0[i] != -1) {
-                    cur = arr1174[arrEB0[i]];
+                if (slots[i] != -1) {
+                    cur = items[slots[i]];
                 } else {
-                    cur = base->unk1170;
+                    cur = base->defaultItem;
                 }
             } else if (cur == 0x457) {
                 cur = 0;
@@ -3175,19 +3195,19 @@ void func_1508DC24(void) {
                 prev = D_800CC2D0[i].unk31C->unk128 & ~0x20;
             }
             if (cur != prev) {
-                anim = func_1508E780(prev);
-                if (anim != -1) {
-                    anim &= ~0x1000;
-                    func_1508EB90(i, 0x4C, anim);
-                    if (anim == 0x1D) {
+                setId = func_1508E780(prev);
+                if (setId != -1) {
+                    setId &= ~0x1000;
+                    func_1508EB90(i, 0x4C, setId);
+                    if (setId == 0x1D) {
                         func_1508EB90(i, 0x4C, 0x1E);
                     }
                     D_800CC2D0[i].unk31C->unk11A = 0;
                 }
-                anim = func_1508E780(cur);
-                if (anim > 0x1000) {
-                    anim &= ~0x1000;
-                    func_1508EB90(i, 0x4B, anim);
+                setId = func_1508E780(cur);
+                if (setId > 0x1000) {
+                    setId &= ~0x1000;
+                    func_1508EB90(i, 0x4B, setId);
                 }
 
                 if (D_800D23B0->gameType == 0xB8) {
@@ -3219,46 +3239,46 @@ void func_1508DC24(void) {
             }
             base = D_800D23B0;
             if ((D_80087340 == i) && (base->gameType != 0xB8)) {
-                anim = func_1508E780(cur);
+                setId = func_1508E780(cur);
                 found = 0;
-                n = func_15033E28(&D_800CC2D0[i], (void **)buf);
-                if ((n == 0) && (D_800CC2D0[i].unk31C->unk11A == 2) && (anim != 0x55) && (anim != 0x2E)) {
-                    func_15083568(&D_800CC2D0[i], anim, 1.0f, 0);
-                    if (anim == 0x1D) {
+                numAttached = func_15033E28(&D_800CC2D0[i], attached);
+                if ((numAttached == 0) && (D_800CC2D0[i].unk31C->unk11A == 2) && (setId != 0x55) && (setId != 0x2E)) {
+                    func_15083568(&D_800CC2D0[i], setId, 1.0f, 0);
+                    if (setId == 0x1D) {
                         func_15083568(&D_800CC2D0[i], 0x1E, 1.0f, 0);
                     }
                 }
-                if ((n != 0) && (cur != 0x20)) {
-                    if (anim != -1) {
-                        anim &= ~0x1000;
-                        for (j = 0; j < n; j++) {
-                            if (((buf[j][6] != 0x1E) || (anim != 0x1D)) && (anim != buf[j][6]) && (buf[j][6] != 0x2A) &&
-                                (buf[j][6] != 0x22) && (buf[j][6] != 0x2D) && (buf[j][6] != 0x72) && (buf[j][6] != 0x73) &&
-                                (buf[j][6] != 0x76) && (buf[j][6] != 0x77) && (buf[j][6] != 0x78) && (buf[j][6] != 7)) {
-                                func_15030158(buf[j], 0);
+                if ((numAttached != 0) && (cur != 0x20)) {
+                    if (setId != -1) {
+                        setId &= ~0x1000;
+                        for (j = 0; j < numAttached; j++) {
+                            if (((attached[j]->setId != 0x1E) || (setId != 0x1D)) && (setId != attached[j]->setId) && (attached[j]->setId != 0x2A) &&
+                                (attached[j]->setId != 0x22) && (attached[j]->setId != 0x2D) && (attached[j]->setId != 0x72) && (attached[j]->setId != 0x73) &&
+                                (attached[j]->setId != 0x76) && (attached[j]->setId != 0x77) && (attached[j]->setId != 0x78) && (attached[j]->setId != 7)) {
+                                func_15030158(attached[j], 0);
                                 D_800CC2D0[i].unk31C->unk11A = 0;
-                            } else if (anim == buf[j][6]) {
+                            } else if (setId == attached[j]->setId) {
                                 found = 1;
                             }
 }
-                        if ((found == 0) && (D_800CC2D0[i].unk31C->unk11A == 2) && (anim != 0x55) && (anim != 0x2E)) {
-                            func_15083568(&D_800CC2D0[i], anim, 1.0f, 0);
-                            if (anim == 0x1D) {
+                        if ((found == 0) && (D_800CC2D0[i].unk31C->unk11A == 2) && (setId != 0x55) && (setId != 0x2E)) {
+                            func_15083568(&D_800CC2D0[i], setId, 1.0f, 0);
+                            if (setId == 0x1D) {
                                 func_15083568(&D_800CC2D0[i], 0x1E, 1.0f, 0);
                             }
                         }
                     } else {
-                        for (j = 0; j < n; j++) {
-                            if ((buf[j][6] != 0x2A) && (buf[j][6] != 0x22) && (buf[j][6] != 0x2C) && (buf[j][6] != 0x64) &&
-                                (buf[j][6] != 0x2D) && (buf[j][6] != 0x72) && (buf[j][6] != 0x73) && (buf[j][6] != 0x76) &&
-                                (buf[j][6] != 0x77) && (buf[j][6] != 0x78) && (buf[j][6] != 7)) {
-                                func_15030158(buf[j], 0);
+                        for (j = 0; j < numAttached; j++) {
+                            if ((attached[j]->setId != 0x2A) && (attached[j]->setId != 0x22) && (attached[j]->setId != 0x2C) && (attached[j]->setId != 0x64) &&
+                                (attached[j]->setId != 0x2D) && (attached[j]->setId != 0x72) && (attached[j]->setId != 0x73) && (attached[j]->setId != 0x76) &&
+                                (attached[j]->setId != 0x77) && (attached[j]->setId != 0x78) && (attached[j]->setId != 7)) {
+                                func_15030158(attached[j], 0);
                                 D_800CC2D0[i].unk31C->unk11A = 0;
                             }
 }
                     }
                 }
-                if (anim != 0x55) {
+                if (setId != 0x55) {
                     s32 m;
                     for (m = D_800D23B0->numPlayers; m < 25; m++) {
                         other = &D_800CC2D0[m];
@@ -3269,11 +3289,11 @@ void func_1508DC24(void) {
                             func_15060F28(other, 0);
                             break;
                     }
-                    if (anim == 0x7B) {
+                    if (setId == 0x7B) {
                     }
-                    if (n == 0x7C) {
+                    if (numAttached == 0x7C) {
                     }
-                    if (anim == 0x55) {
+                    if (setId == 0x55) {
                     }
                 }
                 base = D_800D23B0;
@@ -3286,86 +3306,86 @@ void func_1508DC24(void) {
         D_80087340 = 0;
     }
     for (i = 0; i < base->numSlots; i++) {
-        ent = func_151149AC(arrEF0[i]);
-        if (ent == NULL) {
+        pickup = func_151149AC(entities[i]);
+        if (pickup == NULL) {
             base = D_800D23B0;
             continue;
         }
-        if (arr12F4[i] != 0) {
-            arr12F4[i] -= D_800BE9E4;
-            if (arr12F4[i] <= 0) {
-                arr1070[i] = 4;
-                arr12F4[i] = 0;
+        if (dropTimers[i] != 0) {
+            dropTimers[i] -= D_800BE9E4;
+            if (dropTimers[i] <= 0) {
+                timers[i] = 4;
+                dropTimers[i] = 0;
             }
         }
-        if (arr1070[i] > 0) {
-            arr1070[i] -= D_800BE9E4;
-            if (arr1070[i] <= 0) {
-                arr1070[i] = 0;
-                ent[0x6E] = 0;
-                if (arr12F4[i] != 0) {
-                    *(s16 *)(ent + 0x10) = arr1374[i];
-                    *(s16 *)(ent + 0x12) = arr13F4[i];
-                    *(s16 *)(ent + 0x14) = arr1474[i];
-                } else if (!(arr11F4[i] & 4)) {
-                    if (arr11F4[i] & 1) {
-                        x = D_800D23B0->unkEA8;
+        if (timers[i] > 0) {
+            timers[i] -= D_800BE9E4;
+            if (timers[i] <= 0) {
+                timers[i] = 0;
+                pickup->unk6E = 0;
+                if (dropTimers[i] != 0) {
+                    pickup->x = dropX[i];
+                    pickup->y = dropY[i];
+                    pickup->z = dropZ[i];
+                } else if (!(flags[i] & 4)) {
+                    if (flags[i] & 1) {
+                        x = D_800D23B0->numSpawns;
                         do {
                             r = func_150ADA68() * 0.9999899864f * x;
-                            for (k = 0; k < D_800D23B0->unkEA8; k++) {
-                                if (r == arr10F0[k]) {
+                            for (k = 0; k < D_800D23B0->numSpawns; k++) {
+                                if (r == spawns[k]) {
                                     r = -1;
                                     k = 1000;
                                 }
                             }
                         } while (r == -1);
                     } else {
-                        r = arr1274[i];
+                        r = homeSpawns[i];
                     }
-                    arr10F0[i] = r;
-                    idx = func_15086D48(D_800D23B0->unk14F4[r]);
+                    spawns[i] = r;
+                    idx = func_15086D48(D_800D23B0->spawnNodes[r]);
                     if (idx != -1) {
                         func_15086CBC(idx, &x, &y, &z);
-                        *(s16 *)(ent + 0x10) = x;
-                        *(s16 *)(ent + 0x12) = (s16)y + 0x3C;
-                        *(s16 *)(ent + 0x14) = z;
+                        pickup->x = x;
+                        pickup->y = (s16)y + 0x3C;
+                        pickup->z = z;
                     }
                 }
             }
-        } else if (arr1070[i] == 0) {
-            j = *(s32 *)(ent + 0x80) - 1;
+        } else if (timers[i] == 0) {
+            j = pickup->touchedBy - 1;
             if (j != -1) {
-                *(s32 *)(ent + 0x80) = 0;
-                if (arr1174[i] == 0x8AE) {
+                pickup->touchedBy = 0;
+                if (items[i] == 0x8AE) {
                     D_800CC2D0[j].unk31C->grenade_count += 3;
                     if (D_800CC2D0[j].unk31C->grenade_count >= 7) {
                         D_800CC2D0[j].unk31C->grenade_count = 6;
 
                     }
-                    arr1070[i] = D_800D23B0->unkEAC;
+                    timers[i] = D_800D23B0->respawnDelay;
                 } else {
                     func_1508DAEC(j, 0);
-                    if (arr11F4[i] & 2) {
-                        arr1070[i] = D_800D23B0->unkEAC;
+                    if (flags[i] & 2) {
+                        timers[i] = D_800D23B0->respawnDelay;
                     } else {
-                        arr1070[i] = -1;
-                        arrF70[i] = j | 0x2000;
-                        arr10F0[i] = -1;
+                        timers[i] = -1;
+                        owners[i] = j | 0x2000;
+                        spawns[i] = -1;
                     }
-                    arr12F4[i] = 0;
-                    arrEB0[j] = i;
+                    dropTimers[i] = 0;
+                    slots[j] = i;
                     D_800D23B0->unk5C[j] = 1;
                 }
                 if ((kind = D_800D23B0->gameType) == 0xB9) {
                     OBJ_STATE(&D_800CC2D0[j])->unk12C = 0x258;
                 }
                 if ((kind = D_800D23B0->gameType) == 0xB8) {
-                    if (arr1174[i] == (pp = D_800CC2D0[j].unk31C->unk128)) {
-                        if (arr1174[i] == 1) {
+                    if (items[i] == (pp = D_800CC2D0[j].unk31C->unk128)) {
+                        if (items[i] == 1) {
                             OBJ_STATE(&D_800CC2D0[j])->unk12C = 0x258;
-                        } else if (arr1174[i] == 0x80) {
+                        } else if (items[i] == 0x80) {
                             OBJ_STATE(&D_800CC2D0[j])->unk12C = 0x708;
-                        } else if (arr1174[i] == 0x10) {
+                        } else if (items[i] == 0x10) {
                             OBJ_STATE(&D_800CC2D0[j])->unk12C = 3;
                         }
                     }
