@@ -367,20 +367,11 @@ visible:;
 extern u8 D_80082FC0[];
 extern u8 D_80083140[];
 
-struct Obj15035D6C {
-    u8 unk0;
-    u8 pad1[2];
-    u8 unk3;
-    u8 pad4[2];
-    u8 unk6;
-    u8 pad7[0xC];
-    u8 unk13;
-    u8 unk14;
-    u8 pad15[0xF];
-    Gfx **unk24;
-};
-
-Gfx *func_15035D6C(Gfx *gfx, struct Obj15035D6C *obj, s32 red, s32 green, s32 blue) {
+/*
+ * Draws the queued reflections of attachment `att`: its display lists once per reflection, with
+ * the reflection's matrices in segment 3 and its alpha in the env colour.
+ */
+Gfx *func_15035D6C(Gfx *gfx, Attachment *att, s32 red, s32 green, s32 blue) {
     ReflectionEntry *entry;
     s32 alpha;
     s32 i;
@@ -394,17 +385,17 @@ Gfx *func_15035D6C(Gfx *gfx, struct Obj15035D6C *obj, s32 red, s32 green, s32 bl
 
     for (i = 0; i < D_800C3F00; i++) {
         entry = &D_800C3F08[i];
-        if (entry->isAttachment != 1) {
+        if (entry->isAttachment != TRUE) {
             continue;
         }
-        if (entry->ownerId != obj->unk0) {
+        if (entry->ownerId != att->ownerId) {
             continue;
         }
-        if (entry->setId != obj->unk6) {
+        if (entry->setId != att->setId) {
             continue;
         }
 
-        alpha = (entry->alpha * obj->unk3) >> 8;
+        alpha = (entry->alpha * att->alpha) >> 8;
 
         gDPPipeSync(gfx++);
         gSPSegment(gfx++, 3, entry->mtx);
@@ -416,9 +407,9 @@ Gfx *func_15035D6C(Gfx *gfx, struct Obj15035D6C *obj, s32 red, s32 green, s32 bl
             gSPSegment(gfx++, 8, D_80083140);
         }
 
-        for (j = 0; j < obj->unk14; j++) {
-            if (!(obj->unk13 & (1 << j))) {
-                gSPDisplayList(gfx++, obj->unk24[j]);
+        for (j = 0; j < att->numDLists; j++) {
+            if (!(att->hiddenDLists & (1 << j))) {
+                gSPDisplayList(gfx++, att->dlists[j]);
             }
         }
     }
@@ -430,9 +421,10 @@ Gfx *func_15035D6C(Gfx *gfx, struct Obj15035D6C *obj, s32 red, s32 green, s32 bl
 
 extern Gfx *func_1502CCFC(Gfx *, s32, s32, u32, s32, s32 *, s32, s32);
 
-Gfx *func_15035FE8(Gfx *gfx, s32 arg1) {
-    ReflectionEntry *e;
-    s32 col[4];
+/* Draws the queued object reflections (not the attachment ones) for `player`. */
+Gfx *func_15035FE8(Gfx *gfx, s32 player) {
+    ReflectionEntry *entry;
+    s32 color[4];
     s32 i;
 
     if (D_800C3F00 == 0) {
@@ -442,36 +434,42 @@ Gfx *func_15035FE8(Gfx *gfx, s32 arg1) {
     gSPClearGeometryMode(gfx++, G_FOG | G_LOD);
     gDPSetAlphaCompare(gfx++, G_AC_NONE);
     for (i = 0; i < D_800C3F00; i++) {
-        e = &D_800C3F08[i];
-        if (e->isAttachment != 0) {
+        entry = &D_800C3F08[i];
+        if (entry->isAttachment) {
             continue;
         }
-        col[0] = e->color[0];
-        col[1] = e->color[1];
-        col[2] = e->color[2];
-        col[3] = 0xFF;
-        gfx = func_1502CCFC(gfx, e->objIndex, arg1, e->mtx, e->alpha, col, 0, 1);
+        color[0] = entry->color[0];
+        color[1] = entry->color[1];
+        color[2] = entry->color[2];
+        color[3] = 255;
+        gfx = func_1502CCFC(gfx, entry->objIndex, player, entry->mtx, entry->alpha, color, 0, 1);
     }
     return gfx;
 }
 
-void func_1507C3E0(struct127 *arg0, s16 *arg1, s16 *arg2, s16 *arg3);
-void func_15035808(s32, s32, f32, f32, f32, f32, f32, f32, f32, f32);
+void func_1507C3E0(struct127 *, s16 *, s16 *, s16 *);
 
+/*
+ * Queues a reflection in the horizontal plane y = unk118 for every moving object of kind 0 or 1
+ * that is above that plane while unk180 lies below it, when the gap is larger than the height from
+ * func_1507C3E0.
+ */
 void func_15036148(void) {
-    s32 pad;
+    s32 pad; // matching: stack slot
     s16 height;
-    s16 sp90;
-    s16 sp8E;
+    s16 unusedA;
+    s16 unusedB;
     s32 i;
 
     if (!(D_800DBFF0->unk5F0 & 1)) {
         for (i = 0; i < 25; i++) {
             if (D_800CC2D0[i].interaction_state != 0 && (D_800CC2D0[i].unk5 == 0 || D_800CC2D0[i].unk5 == 1)) {
-                if (D_800CC2D0[i].unk118 != -10000.0f && D_800CC2D0[i].unk118 < D_800CC2D0[i].y_position && D_800CC2D0[i].unk180 < D_800CC2D0[i].unk118 && D_800CC2D0[i].unk28 > 5.0f) {
-                    func_1507C3E0(&D_800CC2D0[i], &height, &sp90, &sp8E);
+                if (D_800CC2D0[i].unk118 != -10000.0f && D_800CC2D0[i].unk118 < D_800CC2D0[i].y_position &&
+                    D_800CC2D0[i].unk180 < D_800CC2D0[i].unk118 && D_800CC2D0[i].unk28 > 5.0f) {
+                    func_1507C3E0(&D_800CC2D0[i], &height, &unusedA, &unusedB);
                     if ((f32)height < D_800CC2D0[i].unk118 - D_800CC2D0[i].unk180) {
-                        func_15035808(1, i, D_800CC2D0[i].x_position, D_800CC2D0[i].unk118, D_800CC2D0[i].z_position, 0.0f, 0.0f, 100.0f, 150.0f, 127.0f);
+                        func_15035808(1, i, D_800CC2D0[i].x_position, D_800CC2D0[i].unk118,
+                                      D_800CC2D0[i].z_position, 0.0f, 0.0f, 100.0f, 150.0f, 127.0f);
                     }
                 }
             }
