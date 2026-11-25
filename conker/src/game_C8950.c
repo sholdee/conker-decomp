@@ -77,7 +77,7 @@ void *func_1509B570(s32 id) {
 
 /* Returns the record for `id`, creating it if needed; NULL if `reload` is 0 and the id's flag is set. */
 C8950Node *func_1509B5AC(s32 id, s32 reload) {
-    register C8950Node *node;
+    C8950Node *node;
 
     node = func_1509B704(id);
     if (!reload && ID_FLAG(id)) {
@@ -225,69 +225,48 @@ C8950Node *func_1509B950(C8950Node *node) {
     return copy;
 }
 
-extern s32 D_8003C8E0;
-extern s32 D_800BE9F0;
-extern s32 D_800D2E70;
-extern struct102 *D_800D2E4C;
-extern struct250 D_800D2F48;
 void func_1509C228(void);
-void func_150ADAF0();
 extern u8 D_800D2E69;
-void func_1509BA04(s32 arg0)
-{
-  register struct249 *node;
-  register struct249 *next;
-  s32 count;
-  s32 i;
-  count = D_800D2F48.length;
-  node = D_800D2F48.unk4;
-  if (D_800D2E69 != 0)
-  {
-    func_1509C228();
-    D_800D2E69 = 0;
-  }
-  i = 0;
-  if (count > 0)
-  {
-    u8 *table;
-    s32 tmp;
-    s32 value;
-    table = (u8 *) (&D_800D2E70);
-    do
-    {
-      value = node->unk0;
-      tmp = value & 0xFFFF03FF;
-      next = node->next;
-      if ((*(u8 *)((tmp >> 3) + (s32) D_800D2E4C) & (1 << (tmp & 7))) && (arg0 == 0))
-      {
-        func_1509B764(node);
-        table[tmp] = 3;
-      }
-      else
-        if (((arg0 != 0) || (value & 0x8000)) || ((value & 0x1000) && (D_800BE9F0 != (*((u16 *) (((u8 *) node) + 2))))))
-      {
-        D_8003C8E0 = 0x6000001;
-        func_150ADAF0(node, 3);
-        D_8003C8E0 = 0;
-        func_1509B764(node);
-        if ((*(u8 *)((tmp >> 3) + (s32) D_800D2E4C) & (1 << (tmp & 7))) == 0)
-        {
-          table[tmp] = 0;
-        }
-        else
-        {
-          table[tmp] = 3;
-        }
-      }
-      i++;
-      node = next;
+
+/*
+ * Unloads records: with `unloadAll` set every record is unloaded (mode 3); otherwise records whose id
+ * flag is set, that have flag 0x8000, or that have flag 0x1000 and belong to another D_800BE9F0.
+ */
+void func_1509BA04(s32 unloadAll) {
+    C8950Node *node;
+    C8950Node *next;
+    s32 count;
+    s32 i;
+
+    count = NODE_LIST.count;
+    node = NODE_LIST.head;
+    if (D_800D2E69 != 0) {
+        func_1509C228();
+        D_800D2E69 = 0;
     }
-    while (i != count);
-  }
+    for (i = 0; i < count; i++, node = next) {
+        s32 id;
+        s32 key;
+
+        key = node->key;
+        id = key & ~NODE_FLAGS;
+        next = node->next;
+        if (ID_FLAG(id) && !unloadAll) {
+            func_1509B764(node);
+            ID_STATE[id] = 3;
+        } else if (unloadAll || (key & 0x8000) || ((key & 0x1000) && D_800BE9F0 != node->unk2)) {
+            D_8003C8E0 = 0x6000001;
+            func_150ADAF0(node, 3);
+            D_8003C8E0 = 0;
+            func_1509B764(node);
+            if (!ID_FLAG(id)) {
+                ID_STATE[id] = 0;
+            } else {
+                ID_STATE[id] = 3;
+            }
+        }
+    }
 }
-
-void func_1509C228(void);
-
 
 void func_15096D08(void);
 s32 func_1509BE40(s32, s32, s32, ...);
@@ -295,61 +274,62 @@ extern s16 D_800BE9F2;
 extern s32 D_800D2E48;
 extern s32 D_800D2F58;
 
-void func_1509BBA0(s32 arg0) {
-    struct249 *node;
+/* Runs every record's handler for `mode` (1, 2 or 4) and updates the per-id state bytes. */
+void func_1509BBA0(s32 mode) {
+    C8950Node *node;
     s32 i;
-    u16 idx;
-    s32 flags;
+    u16 id;
+    s32 key;
 
-    node = D_800D2F48.unk4;
+    node = NODE_LIST.head;
     func_15096D08();
-    if (!D_800BE616 && D_800BE9F0 != 0x32 && !func_1509BE40(0, 0x2000, 0x93) && arg0 == 2) {
+    if (!D_800BE616 && D_800BE9F0 != 50 && !func_1509BE40(0, 0x2000, 0x93) && mode == 2) {
         return;
     }
     func_1509C228();
-    for (i = 0; i < D_800D2F48.length; i++) {
-        idx = node->unk0 & 0x3FF;
-        D_800D2E48 = idx;
-        flags = node->unk0;
-        if (flags & 0x8000) {
+    for (i = 0; i < NODE_LIST.count; i++) {
+        id = node->key & 0x3FF;
+        D_800D2E48 = id;
+        key = node->key;
+        if (key & 0x8000) {
             node = node->next;
             continue;
         }
-        if (arg0 == 4) {
-            if (*(u8 *)((idx >> 3) + (s32)D_800D2E4C) & (1 << (idx & 7))) {
+        if (mode == 4) {
+            if (ID_FLAG(id)) {
                 D_8003C8E0 = 0x6000002;
                 func_150ADAF0(node, 4);
                 D_8003C8E0 = 0;
-                ((u8 *)&D_800D2E70)[idx] = 3;
-                node->unk0 |= 0x8000;
+                ID_STATE[id] = 3;
+                node->key |= 0x8000;
                 node = node->next;
                 continue;
             }
-        } else if (!(*(u8 *)((idx >> 3) + (s32)D_800D2E4C) & (1 << (idx & 7)))) {
-            if (flags & 0x4000) {
+        } else if (!ID_FLAG(id)) {
+            if (key & 0x4000) {
                 D_8003C8E0 = 0x6000003;
                 func_150ADAF0(node, 1);
                 D_8003C8E0 = 0;
-                flags = node->unk0 &= ~0x4000;
+                key = node->key &= ~0x4000;
             }
-            if (flags & 0x8000) {
+            if (key & 0x8000) {
                 node = node->next;
                 continue;
             }
-            if (!(flags & 0x2000) || D_800BE9F0 == *(u16 *)((u8 *)node + 2)) {
-                if (arg0 == 2 || (arg0 == 1 && !(flags & 0x400))) {
+            if (!(key & 0x2000) || D_800BE9F0 == node->unk2) {
+                if (mode == 2 || (mode == 1 && !(key & 0x400))) {
                     D_8003C8E0 = 0x6000004;
-                    func_150ADAF0(node, arg0);
+                    func_150ADAF0(node, mode);
                     D_8003C8E0 = 0;
                 }
-                if (arg0 == 2) {
-                    ((u8 *)&D_800D2E70)[idx] = 1;
+                if (mode == 2) {
+                    ID_STATE[id] = 1;
                 }
             } else {
-                ((u8 *)&D_800D2E70)[idx] = 2;
+                ID_STATE[id] = 2;
             }
         } else {
-            ((u8 *)&D_800D2E70)[idx] = 3;
+            ID_STATE[id] = 3;
         }
         node = node->next;
     }
