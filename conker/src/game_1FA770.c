@@ -29,7 +29,7 @@ typedef struct {
     u8 unk14; /* 0 while the stream has an emitter, 1 once it ended */
     u8 pad15[3];
     s32 id;
-    s32 unk1C; /* copied to StreamData.unk4C */
+    s32 textureIndex; /* into D_800AAEE0 */
 } StreamSource;
 
 /* One particle of a stream (0x1C bytes); the emitter keeps them in a ring. */
@@ -61,7 +61,7 @@ typedef struct {
     f32 spawnCount; /* particles owed; one is spawned per whole unit */
     f32 floorY;
     s32 id;
-    u8 unk4C;
+    u8 textureIndex;
     u8 pad4D[3];
 } StreamData;
 
@@ -106,7 +106,7 @@ typedef struct {
     StreamSource *source;
     s32 id;
     Emitter *emitter;
-    u8 unkC;
+    u8 textureIndex;
     u8 padD[3];
 } StreamSpawner;
 
@@ -119,6 +119,7 @@ typedef struct {
     StreamSpawner spawner;
 } StreamTask;
 
+/* Unprototyped: func_151CD4C0 is a K&R definition (callers pass its u8 arguments unnarrowed). */
 Emitter *func_151CD4C0();
 void func_151CE47C(Emitter *emitter);
 Emitter *func_15147A80(EmitterTemplate *template, s32 dataSize, s32 particleSize, s32 arg3, s32 arg4, s32 arg5,
@@ -132,7 +133,7 @@ StreamTask *func_151CD2C0(StreamSource *source, u8 arg1, s32 arg2) {
     spawner.source = source;
     spawner.id = source->id;
     spawner.emitter = NULL;
-    spawner.unkC = source->unk1C;
+    spawner.textureIndex = source->textureIndex;
 
     task = (StreamTask *)func_15149130(0x12C, -1, -1, -1, 0, 0x1E, (struct37 *)0x10, arg1, arg2);
     if (task != NULL) {
@@ -170,7 +171,7 @@ void func_151CD3CC(StreamTask *task, s32 *id, u8 event) {
     if (event == STREAM_EVENT_START) {
         if (spawner->id == *id) {
             if (spawner->emitter == NULL) {
-                spawner->emitter = func_151CD4C0(spawner->source, spawner->unkC, spawner->id, task->unkC, task->unk1);
+                spawner->emitter = func_151CD4C0(spawner->source, spawner->textureIndex, spawner->id, task->unkC, task->unk1);
                 spawner->source->unk14 = 0;
             label: ; // matching: the empty block ends the if, so as1 fills the exit branch's delay slot with the ra reload
             }
@@ -190,9 +191,9 @@ void func_151CD3CC(StreamTask *task, s32 *id, u8 event) {
 }
 
 /* Creates the emitter for a stream source. */
-Emitter *func_151CD4C0(source, unkC, id, arg3, arg4)
+Emitter *func_151CD4C0(source, textureIndex, id, arg3, arg4)
     StreamSource *source;
-    u8 unkC;
+    u8 textureIndex;
     s32 id;
     u8 arg3;
     s32 arg4;
@@ -229,7 +230,7 @@ Emitter *func_151CD4C0(source, unkC, id, arg3, arg4)
     data.unk38 = -16384.0f;
     data.tc = -16384.0f;
     data.unk20 = 0.0f;
-    data.unk4C = unkC;
+    data.textureIndex = textureIndex;
     template.unk18 = 0;
     template.unk14 = 7;
     emitter = func_15147A80(&template, sizeof(StreamData), sizeof(StreamParticle), 9, 9, 9, 0, 0, 0, arg3, arg4);
@@ -455,7 +456,7 @@ Gfx *func_151CDE20(Emitter *emitter, Gfx *gfx, s16 view) {
             data = emitter->data;
             particles = emitter->particles;
             update = 1;
-            gfx = func_15142E24(gfx, (s32)D_80090B60[D_800AAEE0[data->unk4C]], 0, 0, 0, 0, D_800AAEE0[data->unk4C], 0,
+            gfx = func_15142E24(gfx, (s32)D_80090B60[D_800AAEE0[data->textureIndex]], 0, 0, 0, 0, D_800AAEE0[data->textureIndex], 0,
                                 0, &update, 3);
             gfx = func_1513F4E4(gfx, 0x4E, &update);
             gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
@@ -561,7 +562,7 @@ void func_151CE47C(Emitter *emitter) {
 }
 
 extern void func_151478F4(void *);
-extern void func_15147928(s32);
+extern void func_15147928(void *);
 
 /* Destroy callbacks: tell the spawner its stream ended, then free the emitter. */
 void func_151CE49C(Emitter *emitter) {
@@ -581,7 +582,7 @@ void func_151CE4DC(Emitter *emitter) {
     data = emitter->data;
     payload = data->id;
     func_151494E0((s32)&payload, STREAM_EVENT_ENDED);
-    func_15147928((s32)emitter);
+    func_15147928(emitter);
 }
 
 Emitter *func_151CE634(s32 id);
