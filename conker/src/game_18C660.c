@@ -1,9 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-f32 func_1515F008(s16 *, s32);
-void func_1515F040(f32, s32);
-void func_1515F0AC(f32, s32);
 
 /* The type-0x2E object func_15105C24 finds by owner (Func15105C24Obj in game_131F30.c). */
 struct ZoneLinkObj {
@@ -13,30 +10,6 @@ struct ZoneLinkObj {
 
 struct ZoneLinkObj *func_15105C24(s32 owner);
 void func_1515D4D4(s32 r, s32 g, s32 b, u8 priority);
-
-PointLight *func_1515D5F8(s32 x, s32 y, s32 z, s32 radius, s32 r, s32 g, s32 b, s32 arg7, s32 disabled, u8 group);
-PointLight *func_1515D5F8(s32 x, s32 y, s32 z, s32 radius, s32 r, s32 g, s32 b, s32 arg7, s32 disabled, u8 group);
-void func_1515EF74(s16 *mtx);
-
-/* G_MOVEWORD index this microcode uses for the light-space scale matrix. */
-#define G_MW_LIGHTSCALE 0x10
-
-void func_1515E43C(s32 x, s32 y, s32 z, s32 arg3, u8 *colorA, u8 *colorB, u8 *amountA, u8 *amountB);
-void func_1515E278(s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg5, s32 flags);
-void func_1515EC78(PointLight *light, s32 player, PointLightGfx *out, s32 x, s32 y, s32 z, s32 flags);
-
-/* Loads the 0x30-byte light at `l` into the microcode light table at byte offset `ofs` (point lights start at 0x60). */
-#define gSPPointLight(pkt, l, ofs) gDma2p((pkt), G_MOVEMEM, (l), sizeof(PointLightGfx), G_MV_LIGHT, (ofs))
-
-TriggerZone *func_1515EB84(s32 x, s32 y, s32 z, s32 mask, ZoneLink *node);
-void func_1515E278(s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg5, s32 flags);
-void func_1515E43C(s32 x, s32 y, s32 z, s32 arg3, u8 *colorA, u8 *colorB, u8 *amountA, u8 *amountB);
-TriggerZone *func_1515EB84(s32 x, s32 y, s32 z, s32 mask, ZoneLink *node);
-void func_1515EC78(PointLight *light, s32 player, PointLightGfx *out, s32 x, s32 y, s32 z, s32 flags);
-void func_1515EF74(s16 *mtx);
-f32 func_1515F008(s16 *mtx, s32 i);
-void func_1515F040(f32 value, s32 i);
-void func_1515F0AC(f32 value, s32 i);
 
 /* A node of a list of spawn regions with their cached volume and area. */
 RegionNode *func_1515F1B0(TriggerZone *region) {
