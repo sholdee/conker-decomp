@@ -57,10 +57,10 @@ typedef struct ParticleDesc {
     /* 0x66 */ u8 pad66[0xA];
 } ParticleDesc; /* size 0x70 */
 
-/* Floor data copied out of a func_15046F84 probe result (from its +0x4). */
+/* The part of a func_15046F84 probe result (from its +0x4) that dust particles keep for their splash. */
 typedef struct FloorData {
-    u8 bytes[16];
-    u16 last;
+    /* 0x00 */ u8 unk0[0x10];
+    /* 0x10 */ u16 unk10;
 } FloorData; /* 0x12 */
 
 /* Floor probe result filled by func_15046F84 (cf. Struct150E0870Floor in game_10DD20.c). */
@@ -222,7 +222,7 @@ void func_15191D54(DustEmitter *effect) {
                 floorY = -9500.0f;
             }
             do {
-                hit = (func_150ADA68() < data->unk60) ? TRUE : FALSE;
+                hit = (func_150ADA68() < data->unk60) ? TRUE : FALSE; // passed to an unused parameter
                 velocity.x = 0.0f;
                 velocity.y = 0.0f;
                 velocity.z = 0.0f;
