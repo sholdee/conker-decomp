@@ -9,13 +9,6 @@ extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 extern void func_150E1AB0(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, u16, s32, s32, s16, s16, s32, u8, s16, s32, s32, u8, f32, f32, f32, f32, f32, f32);
 extern void func_150E2DB4(struct127 *, u8, s16, s32, f32, f32, f32, f32, f32, f32, s16, s16, u16, u8);
 extern void func_15179008(s32);
-extern void func_15131828(void *, void *, void *, void *);
-extern void func_15131958(void *, s32, void *);
-
-typedef struct {
-    char pad0[0xC];
-    s32 unkC;
-} struct150AF6E4;
 
 /* If object idA (else idB) has bit 0 of its D_800DBF94 flag word set, calls func_1505D024 on
  * D_800CC2D0[0] with 0x6E00 (else 0xEE00). Does nothing while D_800CC3D4[0] is set. */
@@ -95,21 +88,20 @@ typedef struct {
     /* 0x67 */ u8 pad67[9];
 } ParticleSpawn; /* size 0x70 */
 
-/* Per-particle data a func_150AF328 particle carries at +0xA8. */
+/* Per-particle data of the wobbling particles func_150AF328 spawns (updated by func_150AF6E4). */
 typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 unk2;
-    /* 0x03 */ u8 unk3;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-} ParticleExtra;
+    /* 0x00 */ u8 phase[2];     /* x and z angles of the wobble ellipse */
+    /* 0x02 */ u8 phaseStep[2]; /* added to phase per tick */
+    /* 0x04 */ f32 amplitude[2];
+    /* 0x0C */ f32 drag;        /* velocity scale per tick */
+} WobbleData;
 
 /* A particle created by func_15130280. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0xA8];
-    /* 0xA8 */ ParticleExtra extra;
+    /* 0x00 */ u8 pad0[0x58];
+    /* 0x58 */ vertex vel;
+    /* 0x64 */ u8 pad64[0xA8 - 0x64];
+    /* 0xA8 */ WobbleData wobble;
 } Particle;
 
 /* Per-effect data of the func_150AF328 emitter. */
@@ -128,6 +120,8 @@ typedef struct {
 } Emitter;
 
 extern Particle *func_15130280(ParticleSpawn *, u8, s32, s32, u8, s32);
+extern void func_15131828(Particle *, f32 *amplitude, u8 *phase, u8 *phaseStep);
+extern void func_15131958(vertex *vel, f32 drag);
 
 /* Emitter update: accumulates 0.1352..0.305 particles per unit of D_800BE9A4 and spawns one
  * randomly sized particle at the emitter's position for each whole one. */
@@ -138,10 +132,10 @@ void func_150AF328(Emitter *emitter) {
     data->spawnAccum += (1352.0f + func_150ADA68() * 1698.0f) * 0.0001f * D_800BE9A4;
     if (data->spawnAccum > 1.0f) {
         ParticleSpawn spawn;
-        ParticleExtra extra;
+        WobbleData wobble;
         Particle *particle;
 
-        extra.unkC = 0.9704700112f;
+        wobble.drag = 0.9704700112f;
         spawn.unk1D = 0x6C;
         spawn.unk8 = 0x5103;
         spawn.unk0 = 0x200005;
@@ -151,8 +145,8 @@ void func_150AF328(Emitter *emitter) {
         spawn.unk60 = 8;
         spawn.unk61 = 6;
         spawn.unk62 = 0x16;
-        extra.unk0 = 0;
-        extra.unk1 = 0;
+        wobble.phase[0] = 0;
+        wobble.phase[1] = 0;
         spawn.unk4 = 0;
         spawn.unkC = 0;
         spawn.unk10 = 0;
@@ -177,10 +171,10 @@ void func_150AF328(Emitter *emitter) {
         spawn.vel.y = 0.0f;
         spawn.vel.z = 0.0f;
         do {
-            extra.unk2 = func_150ADA20() % 5U + 4;
-            extra.unk3 = func_150ADA20() % 5U + 4;
-            extra.unk4 = func_150ADA68() * 11.0f;
-            extra.unk8 = func_150ADA68() * 11.0f;
+            wobble.phaseStep[0] = func_150ADA20() % 5U + 4;
+            wobble.phaseStep[1] = func_150ADA20() % 5U + 4;
+            wobble.amplitude[0] = func_150ADA68() * 11.0f;
+            wobble.amplitude[1] = func_150ADA68() * 11.0f;
             spawn.unk54 = func_150ADA68() * 0.172f + 0.09800000489f;
             spawn.flags &= ~0xC0;
             spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);
@@ -189,42 +183,45 @@ void func_150AF328(Emitter *emitter) {
             spawn.scaleX = spawn.scaleY = func_150ADA68() * 71.0f + 80.0f;
             particle = func_15130280(&spawn, 0, 0, 0x10, emitter->unkC, emitter->unk1);
             if (particle != NULL) {
-                memcpy(&particle->extra, &extra, sizeof(extra));
+                memcpy(&particle->wobble, &wobble, sizeof(wobble));
             }
             data->spawnAccum -= 1.0f;
         } while (data->spawnAccum > 1.0f);
     }
 }
 
-s32 func_150AF6E4(u8 *arg0, s32 arg1) {
-    struct150AF6E4 *temp_a2;
+/* Update for func_150AF328's particles: wobbles the offset and applies drag to the velocity. */
+s32 func_150AF6E4(Particle *particle, s32 arg1) {
+    WobbleData *wobble;
 
-    temp_a2 = (struct150AF6E4 *)(arg0 + 0xA8);
-    func_15131828(arg0, arg0 + 0xAC, temp_a2, arg0 + 0xAA);
-    func_15131958(arg0 + 0x58, temp_a2->unkC, temp_a2);
+    wobble = &particle->wobble;
+    func_15131828(particle, wobble->amplitude, wobble->phase, wobble->phaseStep);
+    func_15131958(&particle->vel, wobble->drag);
     return 1;
 }
 
-extern void func_1515FF74(void *, s32, u8, s32);
+/* Effect descriptor that func_1515FF74 copies into the new effect node at 0xE. */
+typedef struct {
+    /* 0x0 */ u8 flags;        /* 1: the effect ends when lifetime runs out */
+    /* 0x1 */ s8 updateIndex;  /* D_8008B0D0 handler, -1 for none */
+    /* 0x2 */ s8 drawIndex;    /* D_8008B0D8 handler */
+    /* 0x3 */ u8 pad3;
+    /* 0x4 */ s16 lifetime;
+    /* 0x6 */ u8 messageIndex; /* D_8008B0E4 handler */
+} EffectDesc;
 
-struct sp18 {
-    s8 unk0;
-    s8 unk1;
-    s8 unk2;
-    s8 pad3;
-    s16 unk4;
-    s8 unk6;
-};
+extern void func_1515FF74(EffectDesc *desc, s32 dataSize, u8, s32);
 
-void func_150AF738(s16 arg0, u8 arg1, s32 arg2) {
-    struct sp18 sp18;
+/* Starts a data-less effect (draw handler 2, no update) that ends after `lifetime` frames. */
+void func_150AF738(s16 lifetime, u8 arg1, s32 arg2) {
+    EffectDesc desc;
 
-    sp18.unk0 = 1;
-    sp18.unk1 = -1;
-    sp18.unk2 = 2;
-    sp18.unk4 = arg0;
-    sp18.unk6 = 0;
-    func_1515FF74(&sp18, 0, arg1, arg2);
+    desc.flags = 1;
+    desc.updateIndex = -1;
+    desc.drawIndex = 2;
+    desc.lifetime = lifetime;
+    desc.messageIndex = 0;
+    func_1515FF74(&desc, 0, arg1, arg2);
 }
 
 extern void func_150B1DB0(void *, void *);
@@ -265,16 +262,24 @@ typedef struct GameDC6B0SmokePacket {
 } GameDC6B0SmokePacket;
 
 typedef struct GameDC6B0SmokeMotion {
-    f32 x, y, speed, angle;
+    f32 x, y;
+    f32 phase; /* random in [0, 2pi) */
+    f32 unkC;
 } GameDC6B0SmokeMotion;
 
-u8 func_151D8E6C(void);
-void *func_1515548C(void *, u8, s32, s32, s32, u8, s32);
-extern f32 D_8009F7D0;
-extern f32 D_8009F7D4;
+/* A sprite created by func_1515548C; the puffs carry their motion at 0x70. */
+typedef struct {
+    u8 pad0[0x70];
+    GameDC6B0SmokeMotion motion;
+} GameDC6B0SmokeSprite;
 
-void func_150AF7C4(GameDC6B0SmokeSource *arg0) {
-    u8 *result;
+u8 func_151D8E6C(void);
+GameDC6B0SmokeSprite *func_1515548C(GameDC6B0SmokePacket *, u8, s32, s32, s32, u8, s32);
+
+/* Counts down the source's two timers and, when each expires, spawns a moving puff sprite or a
+ * static spark sprite (lifetime capped at the source's maxLifetime) and restarts it randomly. */
+void func_150AF7C4(GameDC6B0SmokeSource *source) {
+    GameDC6B0SmokeSprite *sprite;
     struct {
         GameDC6B0SmokeMotion motion;
         GameDC6B0SmokePacket packet;
@@ -282,13 +287,13 @@ void func_150AF7C4(GameDC6B0SmokeSource *arg0) {
     GameDC6B0SmokeTimers *timers;
     GameDC6B0SmokePacket spark;
 
-    timers = &arg0->timers;
+    timers = &source->timers;
     timers->puff -= D_800BE9E4;
     if (timers->puff < 0) {
         puff.motion.x = func_150ADA68() * 280.0f + -140.0f;
         puff.motion.y = func_150ADA68() * 50.0f;
-        puff.motion.speed = 2.0f * (func_150ADA68() * D_8009F7D0);
-        puff.motion.angle = func_150ADA68() * D_8009F7D4;
+        puff.motion.phase = 2.0f * (func_150ADA68() * 3.141592741f);
+        puff.motion.unkC = func_150ADA68() * 0.2680000067f;
         puff.packet.x = 0.0f;
         puff.packet.y = 0.0f;
         func_150ADA68();
@@ -296,8 +301,8 @@ void func_150AF7C4(GameDC6B0SmokeSource *arg0) {
         puff.packet.scaleX = 1.0f;
         puff.packet.scaleY = 115.0f;
         puff.packet.lifetime = func_150ADA20() % 71U + 20;
-        if (arg0->maxLifetime < puff.packet.lifetime) {
-            puff.packet.lifetime = arg0->maxLifetime;
+        if (source->maxLifetime < puff.packet.lifetime) {
+            puff.packet.lifetime = source->maxLifetime;
         }
         puff.packet.flags = 0x21;
         puff.packet.field16 = 1;
@@ -322,9 +327,9 @@ void func_150AF7C4(GameDC6B0SmokeSource *arg0) {
         puff.packet.field40 = 0;
         puff.packet.field41 = 0xA;
         puff.packet.field44 = 0;
-        result = func_1515548C(&puff.packet, 6, 0, 0, 0x10, arg0->group, arg0->owner);
-        if (result != NULL) {
-            memcpy(result + 0x70, &puff.motion, sizeof(puff.motion));
+        sprite = func_1515548C(&puff.packet, 6, 0, 0, 0x10, source->group, source->owner);
+        if (sprite != NULL) {
+            memcpy(&sprite->motion, &puff.motion, sizeof(puff.motion));
         }
         timers->puff = func_150ADA20() % 41U + 45;
     }
@@ -335,8 +340,8 @@ void func_150AF7C4(GameDC6B0SmokeSource *arg0) {
         spark.scaleX = spark.scaleY = 2.0f * func_150ADA68() + 1.0f;
         spark.selector = func_151D8E6C();
         spark.lifetime = func_150ADA20() % 7U + 5;
-        if (arg0->maxLifetime < spark.lifetime) {
-            spark.lifetime = arg0->maxLifetime;
+        if (source->maxLifetime < spark.lifetime) {
+            spark.lifetime = source->maxLifetime;
         }
         spark.flags = 1 | (func_150ADA20() ? 2 : 0) | (func_150ADA20() ? 4 : 0) | 0x20;
         spark.field16 = 1;
@@ -361,7 +366,7 @@ void func_150AF7C4(GameDC6B0SmokeSource *arg0) {
         spark.field40 = 0;
         spark.field41 = 7;
         spark.field44 = 0;
-        func_1515548C(&spark, 0, 0, 0, 0, arg0->group, arg0->owner);
+        func_1515548C(&spark, 0, 0, 0, 0, source->group, source->owner);
         timers->spark = func_150ADA20() % 11U + 3;
     }
 }
@@ -390,16 +395,20 @@ s32 func_150AFBF4(struct Obj150AFBF4 *arg0) {
     return 1;
 }
 
-extern void func_1516D99C();
+/* Defined (K&R) in game_19A8B0.c; this is the int-argument prototype callers use. */
+extern void func_1516D99C(s16, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
+    s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
+    s32, s32, s32, s32, s32, u8, s32, s32, s32, s32, s32, u8, s32);
 
-void func_150AFC68(s32 a0, s32 a1, s32 a2, s32 a3, u8 a4, s32 a5) {
-    func_1516D99C(1, 0, 0, 0xD,
-        0, 0, 0, 0, 0, 0, 0, 0,
-        4, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0,
-        0xFF, 0, 1, 0, 0, 0, 0, 0xAA,
-        0xAA, 0xAA, 0xAA, a2, a3, 0, a0, 0xF0,
-        0x50, 0x50, 1, 4, 0, 1, 0, 0,
-        0, a1, 0, a4, a5);
+/* Spawns a func_1516D99C particle emitter (texture 0xD, kind 4) on `object`'s `bone`. */
+void func_150AFC68(s32 object, s32 bone, s32 timer, s32 radiusXZ, u8 arg4, s32 arg5) {
+    func_1516D99C(1, 0, 0, 0xD,                 /* x, y, z, texture */
+        0, 0, 0, 0, 0, 0, 0, 0,                 /* frame, rgba, env rgb */
+        4, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0,        /* kind, velocity x/z high/low, unk32..34 */
+        0xFF, 0, 1, 0, 0, 0, 0, 0xAA,           /* unk35..37, velocity randoms, scaleX */
+        0xAA, 0xAA, 0xAA, timer, radiusXZ, 0,   /* scaleY, scale randoms, timer, radii */
+        object, 0xF0, 0x50, 0x50, 1, 4, 0, 1,   /* object, lifetime, velocityY (+random), flags, interval, chance, burst */
+        0, 0, 0, bone, 0, arg4, arg5);          /* speed, startOffset, isAlt, bone, particleLink */
 }
 
 extern void *D_800DCE94;
