@@ -1,190 +1,158 @@
 #include <ultra64.h>
+/* functions.h declares these two void, but both return a value. */
 #define func_10010F30 func_10010F30_void
 #define func_1513D4B8 func_1513D4B8_void
 #include "functions.h"
 #undef func_10010F30
 #undef func_1513D4B8
-extern s32 func_10010F30(s32, u16, u8, s16, u8);
-extern void *func_1513D4B8(void *, void *, u8, u8, u8, u8, u8, s32, u8, s32);
 #include "variables.h"
 
-extern void func_151D5D60();
-extern s32 func_15144E80(struct17 *, struct17 *, struct17 *, struct17 *);
-extern s32 func_15145128(struct17 *, struct17 *, f32 *, f32 *);
-
+/* Spawn template of a func_1513D4B8 particle (ParticleDef in game_169510.c). */
 typedef struct {
-    char pad_0[0x197];
-    u8 field_0x197;
-} ObjectState197;
-
-typedef struct {
-    char pad_0[0x31C];
-    ObjectState197 *field_0x31C;
-} ObjectWithState197;
-
-typedef struct {
-    ObjectWithState197 *field_0x0;
-    char pad_0[0x1E];
-    u8 field_0x22;
-    char pad_1[0x1];
-    s32 field_0x24;
-    s32 field_0x28;
-    s32 field_0x2C;
-    s32 field_0x30;
-    s32 field_0x34;
-} Field124ChildBlock;
-
-typedef struct {
-    char pad_0[0x18];
-    s32 field_0x18;
-    char pad_1[0x8C];
-    s32 field_0xA8;
-    char pad_2[0x24];
-    s32 field_0xD0;
-    u8 field_0xD4;
-    char pad_3[0x4F];
-    s32 field_0x124;
-    char pad_4[0x48];
-    s32 field_0x170;
-    u8 field_0x174;
-} Field124Owner;
-
-typedef struct {
-    char pad0[0x2C];
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    char pad40[0x80];
-    char unkC0[0x40];
-    s16 *unk100[4];
-    u8 unk110;
-    u8 unk111;
-    u8 unk112[0xC];
-} Struct15101F50;
-
-
-typedef struct {
-    u8 *obj;
-    u8 unk4;
-    u8 pad5[3];
-    struct17 unk8;
-    struct17 unk14;
-    u8 unk20;
-    s8 unk21;
-    u8 unk22;
-    u8 unk23;
-    u8 pad24[0x14];
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    f32 unk4C;
-    f32 unk50;
-    f32 unk54;
-    f32 unk58;
-    f32 unk5C;
-    f32 unk60;
-    f32 unk64;
-    f32 unk68;
-    f32 unk6C;
-    f32 unk70;
-    f32 unk74;
-    f32 unk78;
-    f32 unk7C;
-    f32 unk80;
-    f32 unk84;
-    f32 unk88;
-    f32 unk8C;
-    s16 unk90;
-    u8 pad92[2];
-} Data15100600;
-
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    s16 unk2;
-    s16 unk4;
+    u8 texture;         /* D_80090B60 index */
+    u8 type;
+    u16 renderModes;
+    s16 lifetime;
     u8 pad6[2];
-    s32 unk8;
-    s32 unkC;
-    u8 unk10, unk11, unk12, unk13;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    s32 unk40;
-    u8 unk44, unk45, unk46, unk47;
+    s32 frame;          /* 16.16 animation frame */
+    s32 frameSpeed;
+    u8 rgba[4];
+    f32 width;
+    f32 height;
+    f32 pos[3];
+    f32 rot[3];
+    f32 scale[3];
+    s32 flags;
+    u8 unk44;
+    u8 unk45;
+    u8 unk46;
+    u8 unk47;
     u8 pad48[0x10];
-} Spawn15100600;
+} ParticleDef; /* size 0x58 */
 
+/* ParticleDesc.flags (see game_15D730.c) */
+#define PARTICLE_LIFETIME 0x1
+#define PARTICLE_FLIP_S   0x40
+#define PARTICLE_FLIP_T   0x80
+#define PARTICLE_HANDLERS 0x4000
+#define PARTICLE_DRAW_FUNC 0x8000
+
+/* Spawn parameters of a func_15130374 particle (ParticleDesc in game_15D730.c). */
+typedef struct {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ u16 renderMode;
+    /* 0x0A */ s16 timer;
+    /* 0x0C */ s32 frame;       /* 16.16 animation frame */
+    /* 0x10 */ s32 frameRate;
+    /* 0x14 */ u8 r;
+    /* 0x15 */ u8 g;
+    /* 0x16 */ u8 b;
+    /* 0x17 */ u8 a;
+    /* 0x18 */ u8 r2;
+    /* 0x19 */ u8 g2;
+    /* 0x1A */ u8 b2;
+    /* 0x1B */ u8 alpha;
+    /* 0x1C */ u8 brightness;
+    /* 0x1D */ u8 texture;      /* D_80090B60 index */
+    /* 0x1E */ s16 fadeStart;
+    /* 0x20 */ s16 fadeRate;
+    /* 0x22 */ s16 scaleStart;
+    /* 0x24 */ f32 scaleRate;
+    /* 0x28 */ f32 width;
+    /* 0x2C */ f32 height;
+    /* 0x30 */ f32 pos[3];
+    /* 0x3C */ f32 offset[3];
+    /* 0x48 */ f32 vel[3];
+    /* 0x54 */ f32 gravity;
+    /* 0x58 */ s32 flags;
+    /* 0x5C */ u8 pad5C[4];
+    /* 0x60 */ u8 primColorMode;
+    /* 0x61 */ u8 envColorMode;
+    /* 0x62 */ s8 updateFunc;   /* -1 for none */
+    /* 0x63 */ s8 deathFunc;    /* -1 for none */
+    /* 0x64 */ s8 drawFunc;
+    /* 0x65 */ u8 handlerSet;
+    /* 0x66 */ u8 pad66[0xA];
+} ParticleDesc; /* size 0x70 */
+
+/* Glow parameters handed to func_151407D0 (GlowParams in game_16DC80.c, without the animation union). */
+typedef struct {
+    /* 0x00 */ f32 width1;      /* width, height and offset when facing the viewer... */
+    /* 0x04 */ f32 height1;
+    /* 0x08 */ f32 width0;      /* ...and when facing away */
+    /* 0x0C */ f32 height0;
+    /* 0x10 */ f32 offset1;
+    /* 0x14 */ f32 offset0;
+    /* 0x18 */ f32 alpha1;
+    /* 0x1C */ f32 alpha0;
+    /* 0x20 */ f32 fadeRate;
+    /* 0x24 */ s32 screenX[4];
+    /* 0x34 */ s32 screenY[4];
+    /* 0x44 */ void *attach;
+    /* 0x48 */ f32 scale;
+    /* 0x4C */ u16 zbufSample[4];
+    /* 0x54 */ u8 visibility[4];
+    /* 0x58 */ u8 type;
+    /* 0x59 */ u8 pad59[3];
+} GlowParams;
+
+/* State of the effect, stored after its main particle. */
+typedef struct {
+    /* 0x00 */ struct127 *owner;
+    /* 0x04 */ u8 ownerId;          /* owner->unique_id */
+    /* 0x05 */ u8 pad5[3];
+    /* 0x08 */ struct17 unk8;
+    /* 0x14 */ struct17 unk14;
+    /* 0x20 */ u8 unk20;
+    /* 0x21 */ s8 ownerSlot;        /* owner's index in D_800CC2D0 */
+    /* 0x22 */ u8 unk22;            /* owner->camera->unk23D, 0xFF without a camera */
+    /* 0x23 */ u8 unk23;
+    /* 0x24 */ u8 *particleA;       /* func_15130374 particle */
+    /* 0x28 */ u8 *subParticle;     /* func_1513D4B8 particle */
+    /* 0x2C */ struct225 *flash;    /* func_151602C0 */
+    /* 0x30 */ u8 *glow;            /* func_151407D0 glow */
+    /* 0x34 */ u8 *particleB;       /* func_15130374 particle */
+    /* 0x38 */ f32 unk38;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ f32 unk40;
+    /* 0x44 */ f32 unk44;
+    /* 0x48 */ f32 unk48;
+    /* 0x4C */ f32 unk4C;
+    /* 0x50 */ f32 unk50;
+    /* 0x54 */ f32 unk54;
+    /* 0x58 */ f32 unk58;
+    /* 0x5C */ f32 unk5C;
+    /* 0x60 */ f32 unk60;
+    /* 0x64 */ f32 unk64;
+    /* 0x68 */ f32 unk68;
+    /* 0x6C */ f32 unk6C;
+    /* 0x70 */ f32 unk70;
+    /* 0x74 */ f32 unk74;
+    /* 0x78 */ f32 unk78;
+    /* 0x7C */ f32 unk7C;
+    /* 0x80 */ f32 unk80;
+    /* 0x84 */ f32 unk84;
+    /* 0x88 */ f32 unk88;
+    /* 0x8C */ f32 unk8C;
+    /* 0x90 */ s16 sound;           /* func_10010F30 handle */
+    /* 0x92 */ u8 pad92[2];
+} EffectState; /* size 0x94 */
+
+/* The main particle: a func_1513D4B8 particle (0x110 bytes) followed by its EffectState. */
+typedef struct {
+    u8 pad0[0x110];
+    EffectState state;
+} EffectParticle;
+
+/* Data of the child subParticle (after its 0x110-byte particle). */
 typedef struct {
     u8 unk0;
     u8 pad1[0x13];
-    void *unk14;
-} Data2_15100600;
+    EffectParticle *parent;
+} SubParticleData;
 
-typedef struct {
-    u8 unk0;
-    s8 unk1;
-    s16 unk2;
-    u8 unk4;
-    u8 pad5[3];
-} Hdr15100600;
-
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-} Hdr2_15100600;
-
-typedef struct {
-    s32 unk00;
-    s32 unk04;
-    s16 unk08;
-    s16 unk0A;
-    s32 unk0C;
-    s32 unk10;
-    u8 unk14, unk15, unk16, unk17;
-    u8 unk18, unk19, unk1A, unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    f32 unk4C;
-    f32 unk50;
-    f32 unk54;
-    s32 unk58;
-    u8 pad5C[4];
-    u8 unk60;
-    u8 unk61;
-    s8 unk62;
-    s8 unk63;
-    u8 unk64;
-    u8 unk65;
-    u8 pad66[0xA];
-} Effect15100600;
-
+/* Data of the child particleA (at 0xA8 in the particle). */
 typedef struct {
     f32 unk0;
     f32 unk4;
@@ -192,59 +160,58 @@ typedef struct {
     f32 unkC;
     f32 unk10;
     f32 unk14;
-    f32 unk18;
-    f32 unk1C;
+    f32 angle[2];               /* random, 0 to 2pi */
     f32 unk20;
     f32 unk24;
-    void *unk28;
+    EffectParticle *parent;
     u8 unk2C;
     u8 pad2D[3];
-} Data3_15100600;
+} ParticleAData;
 
+/* Data of the child glow (at 0x170, GlowParams.anim) and particleB (at 0xA8). */
 typedef struct {
-    f32 unk0, unk4, unk8, unkC, unk10, unk14, unk18, unk1C, unk20;
-    s32 unk24, unk28, unk2C, unk30, unk34, unk38, unk3C, unk40, unk44;
-    f32 unk48;
-    s16 unk4C, unk4E, unk50, unk52;
-    u8 unk54, unk55, unk56, unk57, unk58;
-    u8 pad59[3];
-} Emit15100600;
-
-typedef struct {
-    void *unk0;
+    EffectParticle *parent;
     u8 unk4;
     u8 pad5[3];
-} Data4_15100600;
+} ChildData;
 
+extern s32 func_10010F30(s32, u16, u8, s16, u8);
+extern void *func_1513D4B8(void *, void *, u8, u8, u8, u8, u8, s32, u8, s32);
 extern void *func_15130374(void *, u8, s32, u8, s32);
 extern void *func_151407D0(void *, s32, void *, u8, u8, u8, u8, s8, u8, s32);
-extern void *func_151602C0(void *, void *, s32, u8, u8, u8, u8, u8, s32, u8, s32);
+extern struct225 *func_151602C0(Header *, Header2 *, s32, u8, u8, u8, u8, u8, s32, u8, s32);
 
-s32 func_15100600(u8 *arg0, f32 *arg1, f32 *arg2, u8 arg3, s16 arg4, u8 arg5, u8 arg6, u8 arg7, f32 arg8, f32 arg9, f32 argA, f32 argB, u8 argC, u8 argD, s32 argE) {
-    u8 *ret;
-    Spawn15100600 spawn;
-    Data15100600 data;
-    u8 flag;
-    Field124ChildBlock *p;
+/*
+ * Spawns an effect on owner: a main particle carrying an EffectState plus five children (a particle,
+ * a flash, a glow and two func_15130374 particles) that keep a pointer back to it. lifetime -1 means
+ * endless. Returns the main particle, or NULL.
+ */
+EffectParticle *func_15100600(struct127 *owner, struct17 *vec1, struct17 *vec2, u8 arg3, s16 lifetime, u8 r,
+                              u8 g, u8 b, f32 arg8, f32 arg9, f32 argA, f32 argB, u8 argC, u8 argD, s32 argE) {
+    EffectParticle *particle;
+    ParticleDef def;
+    EffectState data;
+    u8 hasLifetime;
+    EffectState *state;
 
-    if (arg4 == -1) {
-        flag = 0;
-        arg4 = 0x12C;
+    if (lifetime == -1) {
+        hasLifetime = FALSE;
+        lifetime = 300;
     } else {
-        flag = 1;
+        hasLifetime = TRUE;
     }
-    data.unk21 = (struct127 *)arg0 - D_800CC2D0;
-    if (*(void **)(arg0 + 0x318) != NULL) {
-        data.unk22 = (*(u8 **)(arg0 + 0x318))[0x23D];
+    data.ownerSlot = owner - D_800CC2D0;
+    if (owner->camera != NULL) {
+        data.unk22 = owner->camera->unk23D;
     } else {
         data.unk22 = 0xFF;
     }
-    data.obj = arg0;
-    data.unk4 = arg0[0x3B];
+    data.owner = owner;
+    data.ownerId = owner->unique_id;
     data.unk20 = arg3;
     data.unk23 = (s32)(argC ? 2 : 0);
-    data.unk8 = *(struct17 *)arg1;
-    data.unk14 = *(struct17 *)arg2;
+    data.unk8 = *vec1;
+    data.unk14 = *vec2;
     data.unk3C = arg8;
     data.unk40 = 0.1019999981f;
     data.unk48 = arg9;
@@ -266,343 +233,259 @@ s32 func_15100600(u8 *arg0, f32 *arg1, f32 *arg2, u8 arg3, s16 arg4, u8 arg5, u8
     data.unk80 = 127.0f;
     data.unk88 = 20.0f;
     data.unk8C = 0.400000006f;
-    if (*(void **)(arg0 + 0x318) != NULL) {
-        data.unk90 = func_10010F30(0x4D0, 0x7D0, 0x40, 0, 0);
+    if (owner->camera != NULL) {
+        data.sound = func_10010F30(0x4D0, 2000, 0x40, 0, 0);
     } else {
-        data.unk90 = 0;
+        data.sound = 0;
     }
-    spawn.unk0 = 0x59;
-    spawn.unk1 = 1;
-    spawn.unk2 = 0x3103;
-    spawn.unk4 = arg4;
-    spawn.unk8 = 0;
-    spawn.unkC = 0;
-    spawn.unk10 = arg5;
-    spawn.unk11 = arg6;
-    spawn.unk12 = arg7;
-    spawn.unk13 = 0xFF;
-    spawn.unk14 = 100.0f;
-    spawn.unk18 = 100.0f;
-    spawn.unk1C = 0.0f;
-    spawn.unk20 = 0.0f;
-    spawn.unk24 = 0.0f;
-    spawn.unk28 = 0.0f;
-    spawn.unk2C = 0.0f;
-    spawn.unk30 = 0.0f;
-    spawn.unk34 = 1.0f;
-    spawn.unk38 = 1.0f;
-    spawn.unk3C = 1.0f;
-    spawn.unk40 = (flag ? 1 : 0) | 0x40000 | 0x80000 | 0x200000 | 0x400000 | 0x80000000;
-    spawn.unk44 = 0xFF;
-    spawn.unk45 = 0xFF;
-    spawn.unk46 = 0;
-    spawn.unk47 = 6;
-    ret = func_1513D4B8(&spawn, &D_800A4AA0, 0x15, 0x1F, 0, 0x12, 0, 0x94, argD, argE);
-    if (ret != NULL) {
-        p = (Field124ChildBlock *)(ret + 0x110);
-        memcpy(p, &data, 0x94);
+    def.texture = 0x59;
+    def.type = 1;
+    def.renderModes = 0x3103;
+    def.lifetime = lifetime;
+    def.frame = 0;
+    def.frameSpeed = 0;
+    def.rgba[0] = r;
+    def.rgba[1] = g;
+    def.rgba[2] = b;
+    def.rgba[3] = 0xFF;
+    def.width = 100.0f;
+    def.height = 100.0f;
+    def.pos[0] = 0.0f;
+    def.pos[1] = 0.0f;
+    def.pos[2] = 0.0f;
+    def.rot[0] = 0.0f;
+    def.rot[1] = 0.0f;
+    def.rot[2] = 0.0f;
+    def.scale[0] = 1.0f;
+    def.scale[1] = 1.0f;
+    def.scale[2] = 1.0f;
+    def.flags = (hasLifetime ? 1 : 0) | 0x40000 | 0x80000 | 0x200000 | 0x400000 | 0x80000000;
+    def.unk44 = 0xFF;
+    def.unk45 = 0xFF;
+    def.unk46 = 0;
+    def.unk47 = 6;
+    particle = func_1513D4B8(&def, &D_800A4AA0, 0x15, 0x1F, 0, 0x12, 0, sizeof(EffectState), argD, argE);
+    if (particle != NULL) {
+        state = &particle->state;
+        memcpy(state, &data, sizeof(EffectState));
         {
-            Spawn15100600 spawn2;
-            Data2_15100600 data2;
+            ParticleDef subDef;
+            SubParticleData subData;
 
-        data2.unk14 = ret;
-        {
-            Hdr15100600 hdr;
-            Hdr2_15100600 hdr2;
-            void *data3;
-            Effect15100600 fx;
-            Data3_15100600 data4;
+            subData.parent = particle;
+            {
+                Header flashHeader;
+                Header2 flashPos;
+                EffectParticle *flashData;
+                ParticleDesc descA;
+                ParticleAData particleAData;
 
-        data2.unk0 = 0;
-        spawn2.unk0 = 3;
-        spawn2.unk1 = 2;
-        spawn2.unk2 = 0x3201;
-        spawn2.unk4 = arg4;
-        spawn2.unk8 = 0;
-        spawn2.unkC = 0;
-        spawn2.unk10 = arg5;
-        spawn2.unk11 = arg6;
-        spawn2.unk12 = arg7;
-        spawn2.unk13 = 0xFF;
-        spawn2.unk18 = 0.0f;
-        spawn2.unk14 = 0.0f;
-        spawn2.unk1C = 0.0f;
-        spawn2.unk20 = 0.0f;
-        spawn2.unk24 = 0.0f;
-        spawn2.unk28 = 0.0f;
-        spawn2.unk2C = 0.0f;
-        spawn2.unk30 = 0.0f;
-        spawn2.unk34 = 1.0f;
-        spawn2.unk38 = 1.0f;
-        spawn2.unk3C = 1.0f;
-        spawn2.unk40 = (flag ? 1 : 0) | 0x40000 | 0x80000 | 0x400000;
-        spawn2.unk44 = 0xFF;
-        spawn2.unk45 = 0xFF;
-        spawn2.unk46 = 0;
-        spawn2.unk47 = 6;
-        if ((p->field_0x28 = (s32)func_1513D4B8(&spawn2, &D_800A4AA0, 0, 0, 0, 0x13, 0, 0x18, argD, argE)) != 0) {
-            memcpy((u8 *)p->field_0x28 + 0x110, &data2, 0x18);
-        }
-        hdr2.unk0 = 0;
-        hdr2.unk4 = 0;
-        hdr2.unk8 = 0;
-        data3 = ret;
-        hdr.unk0 = (flag ? 1 : 0) | 2;
-        hdr.unk1 = -1;
-        hdr.unk2 = arg4;
-        hdr.unk4 = 7;
-        if ((p->field_0x2C = (s32)func_151602C0(&hdr, &hdr2, 5, arg5, arg6, arg7, 0xFF, 0, 4, argD, argE)) != 0) {
-            memcpy((u8 *)p->field_0x2C + 0x18, &data3, 4);
-        }
-        data4.unk2C = 0;
-        data4.unk0 = 0.0f;
-        data4.unk4 = 0.0f;
-        data4.unkC = 10.25000095f;
-        data4.unk8 = 10.25000095f;
-        data4.unk14 = 2.750000238f;
-        data4.unk10 = 2.750000238f;
-        data4.unk28 = ret;
-        data4.unk18 = func_150ADA68() * 6.283185482f;
-        data4.unk1C = func_150ADA68() * 6.283185482f;
-        data4.unk20 = (func_150ADA68() * 0.5999999642f) + -0.2999999821f;
-        data4.unk24 = (func_150ADA68() * 0.5999999642f) + -0.2999999821f;
-        fx.unk1D = 0x2B;
-        fx.unk08 = 0x3303;
-        fx.unk00 = 0x200005;
-        fx.unk04 = 0;
-        fx.unk0A = arg4;
-        fx.unk0C = 0;
-        fx.unk10 = 0;
-        fx.unk14 = 0xFF;
-        fx.unk15 = 0xFF;
-        fx.unk16 = 0xFF;
-        fx.unk17 = 0xFF;
-        fx.unk18 = arg5;
-        fx.unk19 = arg6;
-        fx.unk1A = arg7;
-        fx.unk1B = 0xFF;
-        fx.unk1C = 0xFF;
-        fx.unk2C = 0.0f;
-        fx.unk28 = 0.0f;
-        fx.unk30 = 0.0f;
-        fx.unk34 = 0.0f;
-        fx.unk38 = 0.0f;
-        fx.unk3C = 0.0f;
-        fx.unk40 = 0.0f;
-        fx.unk44 = 0.0f;
-        fx.unk48 = 0.0f;
-        fx.unk4C = 0.0f;
-        fx.unk50 = 0.0f;
-        fx.unk54 = 0.0f;
-        fx.unk1E = 1;
-        fx.unk20 = 0xFF;
-        fx.unk22 = 1;
-        fx.unk24 = 1.0f;
-        fx.unk58 = ((func_150ADA20() & 1) ? 0x40 : 0) | ((flag ? 1 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0)) | 0x4000 | 0x8000;
-        fx.unk60 = 6;
-        fx.unk61 = 6;
-        fx.unk62 = 0xB;
-        fx.unk63 = -1;
-        fx.unk64 = 0;
-        fx.unk65 = 1;
-        if ((p->field_0x24 = (s32)func_15130374(&fx, 1, 0x30, argD, argE)) != 0) {
-            memcpy((u8 *)p->field_0x24 + 0xA8, &data4, 0x30);
-        }
-        {
-            Emit15100600 emit;
-            Spawn15100600 spawn3;
-            Data4_15100600 data5;
+                subData.unk0 = 0;
+                subDef.texture = 3;
+                subDef.type = 2;
+                subDef.renderModes = 0x3201;
+                subDef.lifetime = lifetime;
+                subDef.frame = 0;
+                subDef.frameSpeed = 0;
+                subDef.rgba[0] = r;
+                subDef.rgba[1] = g;
+                subDef.rgba[2] = b;
+                subDef.rgba[3] = 0xFF;
+                subDef.height = 0.0f;
+                subDef.width = 0.0f;
+                subDef.pos[0] = 0.0f;
+                subDef.pos[1] = 0.0f;
+                subDef.pos[2] = 0.0f;
+                subDef.rot[0] = 0.0f;
+                subDef.rot[1] = 0.0f;
+                subDef.rot[2] = 0.0f;
+                subDef.scale[0] = 1.0f;
+                subDef.scale[1] = 1.0f;
+                subDef.scale[2] = 1.0f;
+                subDef.flags = (hasLifetime ? 1 : 0) | 0x40000 | 0x80000 | 0x400000;
+                subDef.unk44 = 0xFF;
+                subDef.unk45 = 0xFF;
+                subDef.unk46 = 0;
+                subDef.unk47 = 6;
+                if ((state->subParticle = func_1513D4B8(&subDef, &D_800A4AA0, 0, 0, 0, 0x13, 0, sizeof(SubParticleData),
+                                                   argD, argE)) != NULL) {
+                    memcpy(state->subParticle + 0x110, &subData, sizeof(SubParticleData));
+                }
+                flashPos.unk0 = 0;
+                flashPos.unk4 = 0;
+                flashPos.unk8 = 0;
+                flashData = particle;
+                flashHeader.unk0 = (hasLifetime ? 1 : 0) | 2;
+                flashHeader.unk1 = -1;
+                flashHeader.unk2 = lifetime;
+                flashHeader.unk4 = 7;
+                if ((state->flash = func_151602C0(&flashHeader, &flashPos, 5, r, g, b, 0xFF, 0, sizeof(flashData),
+                                                  argD, argE)) != NULL) {
+                    memcpy(&state->flash->unk18, &flashData, sizeof(flashData));
+                }
+                particleAData.unk2C = 0;
+                particleAData.unk0 = 0.0f;
+                particleAData.unk4 = 0.0f;
+                particleAData.unkC = 10.25000095f;
+                particleAData.unk8 = 10.25000095f;
+                particleAData.unk14 = 2.750000238f;
+                particleAData.unk10 = 2.750000238f;
+                particleAData.parent = particle;
+                particleAData.angle[0] = func_150ADA68() * 6.283185482f;
+                particleAData.angle[1] = func_150ADA68() * 6.283185482f;
+                particleAData.unk20 = (func_150ADA68() * 0.5999999642f) + -0.2999999821f;
+                particleAData.unk24 = (func_150ADA68() * 0.5999999642f) + -0.2999999821f;
+                descA.texture = 0x2B;
+                descA.renderMode = 0x3303;
+                descA.unk0 = 0x200005;
+                descA.unk4 = 0;
+                descA.timer = lifetime;
+                descA.frame = 0;
+                descA.frameRate = 0;
+                descA.r = 0xFF;
+                descA.g = 0xFF;
+                descA.b = 0xFF;
+                descA.a = 0xFF;
+                descA.r2 = r;
+                descA.g2 = g;
+                descA.b2 = b;
+                descA.alpha = 0xFF;
+                descA.brightness = 0xFF;
+                descA.height = 0.0f;
+                descA.width = 0.0f;
+                descA.pos[0] = 0.0f;
+                descA.pos[1] = 0.0f;
+                descA.pos[2] = 0.0f;
+                descA.offset[0] = 0.0f;
+                descA.offset[1] = 0.0f;
+                descA.offset[2] = 0.0f;
+                descA.vel[0] = 0.0f;
+                descA.vel[1] = 0.0f;
+                descA.vel[2] = 0.0f;
+                descA.gravity = 0.0f;
+                descA.fadeStart = 1;
+                descA.fadeRate = 0xFF;
+                descA.scaleStart = 1;
+                descA.scaleRate = 1.0f;
+                descA.flags = ((func_150ADA20() & 1) ? PARTICLE_FLIP_S : 0) |
+                             ((hasLifetime ? PARTICLE_LIFETIME : 0) | ((func_150ADA20() & 1) ? PARTICLE_FLIP_T : 0)) |
+                             PARTICLE_HANDLERS | PARTICLE_DRAW_FUNC;
+                descA.primColorMode = 6;
+                descA.envColorMode = 6;
+                descA.updateFunc = 0xB;
+                descA.deathFunc = -1;
+                descA.drawFunc = 0;
+                descA.handlerSet = 1;
+                if ((state->particleA = func_15130374(&descA, 1, sizeof(ParticleAData), argD, argE)) != NULL) {
+                    memcpy(state->particleA + 0xA8, &particleAData, sizeof(ParticleAData));
+                }
+                {
+                    GlowParams glowParams;
+                    ParticleDef glowDef;
+                    ChildData glowData;
 
-        data5.unk0 = ret;
-        data5.unk4 = 0;
-        spawn3.unk0 = 3;
-        spawn3.unk1 = 3;
-        spawn3.unk2 = 0x3403;
-        spawn3.unk4 = arg4;
-        spawn3.unk8 = 0;
-        spawn3.unkC = 0;
-        spawn3.unk10 = arg5;
-        spawn3.unk11 = arg6;
-        spawn3.unk12 = arg7;
-        spawn3.unk13 = 0xFF;
-        spawn3.unk14 = 100.0f;
-        spawn3.unk18 = 100.0f;
-        spawn3.unk1C = 0.0f;
-        spawn3.unk20 = 0.0f;
-        spawn3.unk24 = 0.0f;
-        spawn3.unk28 = 0.0f;
-        spawn3.unk2C = 0.0f;
-        spawn3.unk30 = 500.0f;
-        spawn3.unk34 = 1.0f;
-        spawn3.unk38 = 1.0f;
-        spawn3.unk3C = 1.0f;
-        spawn3.unk40 = (flag ? 1 : 0) | 0x2 | 0x10 | 0x2000 | 0x20000 | 0x40000 | 0x80000 | 0x400000;
-        spawn3.unk45 = 0xFF;
-        spawn3.unk44 = 0xFF;
-        spawn3.unk46 = 0;
-        spawn3.unk47 = 6;
-        emit.unkC = 0.0f;
-        emit.unk8 = 0.0f;
-        emit.unk1C = 0.0f;
-        emit.unk54 = 0;
-        emit.unk55 = 0;
-        emit.unk56 = 0;
-        emit.unk57 = 0;
-        emit.unk48 = 1.0f;
-        emit.unk58 = 1;
-        emit.unk4 = 60.00000381f;
-        emit.unk0 = 60.00000381f;
-        emit.unk10 = 0.5f;
-        emit.unk14 = 0.5f;
-        emit.unk18 = 0.3000000119f;
-        emit.unk20 = 9.999999975e-07f;
-        if ((p->field_0x30 = (s32)func_151407D0(&emit, 0x68, &spawn3, 0, 0, 0, 0, 0, argD, argE)) != 0) {
-            memcpy((u8 *)p->field_0x30 + 0x170, &data5, 8);
-        }
-        {
-            Effect15100600 fx2;
-            Data4_15100600 data6;
+                    glowData.parent = particle;
+                    glowData.unk4 = 0;
+                    glowDef.texture = 3;
+                    glowDef.type = 3;
+                    glowDef.renderModes = 0x3403;
+                    glowDef.lifetime = lifetime;
+                    glowDef.frame = 0;
+                    glowDef.frameSpeed = 0;
+                    glowDef.rgba[0] = r;
+                    glowDef.rgba[1] = g;
+                    glowDef.rgba[2] = b;
+                    glowDef.rgba[3] = 0xFF;
+                    glowDef.width = 100.0f;
+                    glowDef.height = 100.0f;
+                    glowDef.pos[0] = 0.0f;
+                    glowDef.pos[1] = 0.0f;
+                    glowDef.pos[2] = 0.0f;
+                    glowDef.rot[0] = 0.0f;
+                    glowDef.rot[1] = 0.0f;
+                    glowDef.rot[2] = 500.0f;
+                    glowDef.scale[0] = 1.0f;
+                    glowDef.scale[1] = 1.0f;
+                    glowDef.scale[2] = 1.0f;
+                    glowDef.flags = (hasLifetime ? 1 : 0) | 0x2 | 0x10 | 0x2000 | 0x20000 | 0x40000 | 0x80000 |
+                                    0x400000;
+                    glowDef.unk45 = 0xFF;
+                    glowDef.unk44 = 0xFF;
+                    glowDef.unk46 = 0;
+                    glowDef.unk47 = 6;
+                    glowParams.height0 = 0.0f;
+                    glowParams.width0 = 0.0f;
+                    glowParams.alpha0 = 0.0f;
+                    glowParams.visibility[0] = 0;
+                    glowParams.visibility[1] = 0;
+                    glowParams.visibility[2] = 0;
+                    glowParams.visibility[3] = 0;
+                    glowParams.scale = 1.0f;
+                    glowParams.type = 1;
+                    glowParams.height1 = 60.00000381f;
+                    glowParams.width1 = 60.00000381f;
+                    glowParams.offset1 = 0.5f;
+                    glowParams.offset0 = 0.5f;
+                    glowParams.alpha1 = 0.3000000119f;
+                    glowParams.fadeRate = 9.999999975e-07f;
+                    if ((state->glow = func_151407D0(&glowParams, 0x68, &glowDef, 0, 0, 0, 0, 0, argD, argE)) != NULL) {
+                        memcpy(state->glow + 0x170, &glowData, sizeof(ChildData));
+                    }
+                    {
+                        ParticleDesc descB;
+                        ChildData particleBData;
 
-        data6.unk4 = 0;
-        data6.unk0 = ret;
-        fx2.unk1D = 0x15;
-        fx2.unk08 = 0x3203;
-        fx2.unk00 = 0x200005;
-        fx2.unk04 = 0;
-        fx2.unk0A = arg4;
-        fx2.unk0C = 0;
-        fx2.unk10 = 0;
-        fx2.unk14 = 0xFF;
-        fx2.unk15 = 0xFF;
-        fx2.unk16 = 0xFF;
-        fx2.unk17 = 0xFF;
-        fx2.unk18 = arg5;
-        fx2.unk19 = arg6;
-        fx2.unk1A = arg7;
-        fx2.unk1B = 0xFF;
-        fx2.unk1C = 0xFF;
-        fx2.unk2C = 125.0f;
-        fx2.unk28 = 125.0f;
-        fx2.unk30 = 0.0f;
-        fx2.unk34 = 0.0f;
-        fx2.unk38 = 0.0f;
-        fx2.unk3C = 0.0f;
-        fx2.unk40 = 0.0f;
-        fx2.unk44 = 0.0f;
-        fx2.unk48 = 0.0f;
-        fx2.unk4C = 0.0f;
-        fx2.unk50 = 0.0f;
-        fx2.unk54 = 0.0f;
-        fx2.unk1E = 1;
-        fx2.unk20 = 0xFF;
-        fx2.unk22 = 1;
-        fx2.unk24 = 1.0f;
-        fx2.unk58 = ((func_150ADA20() & 1) ? 0x40 : 0) | ((flag ? 1 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0)) | 0x4000 | 0x8000;
-        fx2.unk60 = 6;
-        fx2.unk61 = 6;
-        fx2.unk62 = -1;
-        fx2.unk63 = -1;
-        fx2.unk64 = 1;
-        fx2.unk65 = 5;
-        if ((p->field_0x34 = (s32)func_15130374(&fx2, 1, 8, argD, argE)) != 0) {
-            memcpy((u8 *)p->field_0x34 + 0xA8, &data6, 8);
-        }
-        }
-        }
-        }
+                        particleBData.unk4 = 0;
+                        particleBData.parent = particle;
+                        descB.texture = 0x15;
+                        descB.renderMode = 0x3203;
+                        descB.unk0 = 0x200005;
+                        descB.unk4 = 0;
+                        descB.timer = lifetime;
+                        descB.frame = 0;
+                        descB.frameRate = 0;
+                        descB.r = 0xFF;
+                        descB.g = 0xFF;
+                        descB.b = 0xFF;
+                        descB.a = 0xFF;
+                        descB.r2 = r;
+                        descB.g2 = g;
+                        descB.b2 = b;
+                        descB.alpha = 0xFF;
+                        descB.brightness = 0xFF;
+                        descB.height = 125.0f;
+                        descB.width = 125.0f;
+                        descB.pos[0] = 0.0f;
+                        descB.pos[1] = 0.0f;
+                        descB.pos[2] = 0.0f;
+                        descB.offset[0] = 0.0f;
+                        descB.offset[1] = 0.0f;
+                        descB.offset[2] = 0.0f;
+                        descB.vel[0] = 0.0f;
+                        descB.vel[1] = 0.0f;
+                        descB.vel[2] = 0.0f;
+                        descB.gravity = 0.0f;
+                        descB.fadeStart = 1;
+                        descB.fadeRate = 0xFF;
+                        descB.scaleStart = 1;
+                        descB.scaleRate = 1.0f;
+                        descB.flags = ((func_150ADA20() & 1) ? PARTICLE_FLIP_S : 0) |
+                                      ((hasLifetime ? PARTICLE_LIFETIME : 0) |
+                                       ((func_150ADA20() & 1) ? PARTICLE_FLIP_T : 0)) |
+                                      PARTICLE_HANDLERS | PARTICLE_DRAW_FUNC;
+                        descB.primColorMode = 6;
+                        descB.envColorMode = 6;
+                        descB.updateFunc = -1;
+                        descB.deathFunc = -1;
+                        descB.drawFunc = 1;
+                        descB.handlerSet = 5;
+                        if ((state->particleB = func_15130374(&descB, 1, sizeof(ChildData), argD, argE)) != NULL) {
+                            memcpy(state->particleB + 0xA8, &particleBData, sizeof(ChildData));
+                        }
+                    }
+                }
+            }
         }
     }
-    return (s32)ret;
+    return particle;
 }
-
-typedef struct {
-    u8 pad0[0x24];
-    struct102 *unk24;
-    struct102 *unk28;
-    struct102 *unk2C;
-    struct102 *unk30;
-    struct102 *unk34;
-} Block15101148;
-void func_15101090(u8 *arg0);
-void func_15101148(u8 *arg0);
-void func_151011E8(Field124Owner *arg0);
-void func_15101210(Field124Owner *arg0);
-
-void func_151617C4(struct210 *arg0);
-void func_15101238(Field124Owner *arg0);
-
-void func_151617E4(struct210 *arg0);
-void func_15101260(Field124Owner *arg0);
-
-void func_1513173C(struct210 *);
-void func_15101288(Field124Owner *arg0);
-
-void func_1513175C(struct210 *);
-void func_151012B0(Field124Owner *arg0);
-void func_151012D8(Field124Owner *arg0);
-void func_15101300(Field124Owner *arg0);
-void func_15101328(Field124Owner *arg0);
-void func_15101350(Field124Owner *arg0);
-s16 *func_15101F50(Struct15101F50 *arg0, s16 arg1);
-
-extern f32 D_800BE9A4;
-
-typedef struct {
-    u8 pad0[0x14];
-    u8 *unk14;
-} Sub151022AC_2C;
-
-typedef struct {
-    u8 pad0[0x2C];
-    f32 unk2C;
-    f32 unk30;
-    u8 pad34[0x28];
-    u8 unk5C;
-} Sub151022AC_28;
-
-typedef struct {
-    u8 pad0[0x38];
-    f32 unk38;
-    f32 unk3C;
-} Sub151022AC_34;
-
-typedef struct {
-    u8 pad0[0x24];
-    u8 *unk24;
-    Sub151022AC_28 *unk28;
-    Sub151022AC_2C *unk2C;
-    u8 pad30[4];
-    Sub151022AC_34 *unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    u8 pad44[0xC];
-    f32 unk50;
-    f32 unk54;
-    f32 unk58;
-    f32 unk5C;
-    f32 unk60;
-    f32 unk64;
-    f32 unk68;
-    f32 unk6C;
-    f32 unk70;
-    f32 unk74;
-    f32 unk78;
-    f32 unk7C;
-    f32 unk80;
-    f32 unk84;
-    f32 unk88;
-    f32 unk8C;
-} Block151022AC;
-s32 func_151022AC(u8 *arg0);
-s32 func_151025F4(u8 *arg0, s32 arg1);
-
-extern f32 D_800A21A0[][3];
-extern f32 D_800A21F4[][3];
-extern u8 D_800A2248[];
-s32 func_15100600(u8 *, f32 *, f32 *, u8, s16, u8, u8, u8, f32, f32, f32, f32, u8, u8, s32);
-s32 func_151026BC(u8 *arg0, s16 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5);
-void func_151027E8(struct210 *arg0);
-s32 func_1510281C(Field124Owner *arg0, s16 arg1);
-s32 func_15102884(struct210 *arg0, s32 arg1);
-s32 func_151028AC(Field124Owner *arg0, s16 arg1);
