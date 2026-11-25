@@ -2249,87 +2249,86 @@ void func_1505A9AC(struct127 *actor, f32 floorY) {
     }
 }
 
-#define arg0 ((u8 *)arg0_s)
-void func_1505B5F8(struct127 *arg0_s, f32 arg1) {
-    f32 previousSpeed;
-    f32 height;
+/* Lands a non-player actor on floorY: fall damage, landing bounce/sound, and the fall-off reaction (unk252). */
+void func_1505B5F8(struct127 *actor, f32 floorY) {
+    f32 prevHeight;
+    f32 y;
     f32 factor;
-    f32 speed;
-    s32 count;
-    s32 remaining;
+    f32 gravity;
+    s32 animKind;
+    s32 health;
     s32 step;
     s32 sound;
-    u8 *owner;
+    struct129 *owner;
 
-    previousSpeed = *(f32 *)(arg0 + 0x28);
-    if (!(*(s32 *)(arg0 + 0xF8) & 0x8000)) {
-        if (arg0[0x252] != 0 && (f32)(arg0[0x253] * 8) < *(f32 *)(arg0 + 0x1CC) - *(f32 *)(arg0 + 0x18) &&
-            arg0[0x104] == 0) {
-            count = arg0[0x252];
-            arg0[0x104] = 0xFE;
-            arg0[0x105] = 0;
-            arg0[0x106] = func_1505E7CC(count, (struct127 *)arg0);
-            *(s16 *)(arg0 + 0x84) = 0xFF;
-            func_1505E874(D_800C3E78, (struct127 *)arg0);
-            *(f32 *)(arg0 + 0x18) = *(f32 *)(arg0 + 0x30);
+    prevHeight = actor->unk28;
+    if (!(actor->unkF8 & 0x8000)) {
+        if (actor->unk252 != 0 && (f32)(actor->unk253 * 8) < actor->unk1CC - actor->y_position &&
+            actor->stunned == 0) {
+            animKind = actor->unk252;
+            actor->stunned = 0xFE;
+            actor->unk105 = 0;
+            actor->unk106 = func_1505E7CC(animKind, actor);
+            actor->unk84.uh = 0xFF;
+            func_1505E874(D_800C3E78, actor);
+            actor->y_position = actor->old_y_position;
         }
-        height = *(f32 *)(arg0 + 0x18);
-        *(f32 *)(arg0 + 0x28) = height - arg1;
-        if (height <= arg1) {
-            *(s32 *)(arg0 + 0xF4) |= 0x8000;
+        y = actor->y_position;
+        actor->unk28 = y - floorY;
+        if (y <= floorY) {
+            actor->unkF4 |= 0x8000;
             step = ((u8 *)D_800B0DF0)[0x13];
-            if (step != 0 && previousSpeed != 0.0f) {
+            if (step != 0 && prevHeight != 0.0f) {
                 func_15174690(D_800C3E78, 0, 0x1000 / step, 0, 0x199, 4, 0xAA, 0xFF, 0);
             }
-            *(f32 *)(arg0 + 0x18) = arg1;
-            *(f32 *)(arg0 + 0x28) = 0.0f;
-            if (arg0[0x104] != 0 || !(*(s32 *)(arg0 + 0xF8) & 0x10000)) {
-                if (*(s32 *)arg0 == 1) {
-                    if (*(f32 *)(arg0 + 0x20) < -6.0f) {
-                        *(f32 *)(arg0 + 0x20) = -6.0f;
+            actor->y_position = floorY;
+            actor->unk28 = 0.0f;
+            if (actor->stunned != 0 || !(actor->unkF8 & 0x10000)) {
+                if (actor->interaction_state == 1) {
+                    if (actor->y_velocity < -6.0f) {
+                        actor->y_velocity = -6.0f;
                     }
                 } else {
-                    if (*(f32 *)(arg0 + 0x1CC) - *(f32 *)(arg0 + 0x18) > 450.0f) {
-                        remaining = arg0[0x1CA];
-                        if (remaining > 0) {
-                            owner = *(u8 **)(arg0 + 0x144);
-                            if (owner != NULL && !(owner[0xE] & 0x80)) {
-                                arg0[0x1CA] = remaining - 1;
+                    if (actor->unk1CC - actor->y_position > 450.0f) {
+                        health = actor->health;
+                        if (health > 0) {
+                            owner = actor->unk144;
+                            if (owner != NULL && !(owner->unkE & 0x80)) {
+                                actor->health = health - 1;
                             }
                         }
                     }
-                    *(f32 *)(arg0 + 0x1CC) = arg1;
-                    if (arg0[0x104] == 0 && (speed = *(f32 *)(arg0 + 0x24)) > 0.5f) {
-                        if ((*(s32 *)(arg0 + 0xF8) & 0x800) && previousSpeed != 0.0f &&
-                            *(f32 *)(arg0 + 0x20) < -4.0f * speed * D_800D1550) {
-                            sound = *(s32 *)(arg0 + 0x2CC);
-                            factor = (f32)(s8)arg0[0x2CB] * 0.009999999776f;
-                            *(f32 *)(arg0 + 0x20) = (0.0f - *(f32 *)(arg0 + 0x20)) * factor;
-                            if (sound != 0 && *(f32 *)(arg0 + 0x20) > 5.0f) {
+                    actor->unk1CC = floorY;
+                    if (actor->stunned == 0 && (gravity = actor->gravity) > 0.5f) {
+                        if ((actor->unkF8 & 0x800) && prevHeight != 0.0f &&
+                            actor->y_velocity < -4.0f * gravity * D_800D1550) {
+                            sound = actor->unk2CC;
+                            factor = (f32)actor->unk2CB * 0.009999999776f;
+                            actor->y_velocity = (0.0f - actor->y_velocity) * factor;
+                            if (sound != 0 && actor->y_velocity > 5.0f) {
                                 D_800D1580 = sound;
                                 func_1506E5FC();
                             }
-                        } else if (*(s32 *)arg0 != 7) {
-                            *(f32 *)(arg0 + 0x20) = -4.0f * D_800D1550;
+                        } else if (actor->interaction_state != 7) {
+                            actor->y_velocity = -4.0f * D_800D1550;
                         }
                     } else {
-                        if (*(s32 *)(arg0 + 0xF4) & 0x80) {
-                            *(f32 *)(arg0 + 0x20) = -4.0f;
-                        } else if (previousSpeed == 0.0f ||
-                                   -1.5f * *(f32 *)(arg0 + 0x24) * D_800D1550 < *(f32 *)(arg0 + 0x20)) {
-                            *(f32 *)(arg0 + 0x20) = 0.0f;
+                        if (actor->unkF4 & 0x80) {
+                            actor->y_velocity = -4.0f;
+                        } else if (prevHeight == 0.0f ||
+                                   actor->y_velocity > -1.5f * actor->gravity * D_800D1550) {
+                            actor->y_velocity = 0.0f;
                         } else {
-                            factor = (f32)(s8)arg0[0x2CB] * 0.009999999776f;
-                            *(f32 *)(arg0 + 0x20) = (0.0f - *(f32 *)(arg0 + 0x20)) * factor;
+                            factor = (f32)actor->unk2CB * 0.009999999776f;
+                            actor->y_velocity = (0.0f - actor->y_velocity) * factor;
                         }
-                        *(f32 *)(arg0 + 0x3C) *= 0.8999999762f;
+                        actor->xz_velocity *= 0.8999999762f;
                     }
                 }
             }
         }
     }
 }
-#undef arg0
 extern f32 D_800CC270, D_800CC274, D_800CC278;
 extern u8 D_800BE616;
 extern s16 D_800D1582;
