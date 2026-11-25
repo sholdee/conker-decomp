@@ -1,5 +1,6 @@
 #include <ultra64.h>
 
+// functions.h declares func_1502B7F0 with five parameters; this file calls it with four.
 #define func_1502B7F0 func_1502B7F0__proto
 #include "functions.h"
 #undef func_1502B7F0
@@ -17,15 +18,10 @@ typedef struct func_15002560_node {
     s16 unkC;
 } func_15002560_node;
 
-typedef struct Point16 {
-    s16 x;
-    s16 y;
-    s16 z;
-} Point16;
-
-typedef struct Face16 {
-    Point16 *pts[3];
-} Face16;
+// One entry of the triangle table D_800DBE3C: the triangle's three vertices.
+typedef struct MeshTri {
+    Vtx *verts[3];
+} MeshTri;
 
 typedef struct Point32 {
     f32 x;
@@ -42,17 +38,16 @@ typedef struct YRange {
     s16 max;
 } YRange;
 
-extern s32 D_800DBE44;
+extern YRange *D_800DBE44;
 
 void func_15002560(u16 *arg0, u16 *arg1);
 void func_15002008(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u16 *arg4);
 s32 func_15049260(Face32 arg0);
 
 void func_15000AC0(void) {
-    D_800D9E64 = (u8)0;
+    D_800D9E64 = 0;
 }
 
-// jump table
 extern u8 D_800DBEA8[];
 extern Vtx *D_800DBE88[][2];
 extern s32 *D_800DBE80;
@@ -64,10 +59,15 @@ s32 func_1502B7F0();
 extern s32 func_1510D0EC(s32, s32, s32, s32);
 void func_15111858(void);
 
+/**
+ * Sets up the current map's background according to D_800B0DF0->unk8:
+ * mode 4 allocates two vertex buffers per view (D_80082FA0 + 1 views), mode 2 builds a
+ * 256-entry, four-band colour gradient (chosen by map) plus a quad per view and buffer.
+ */
 void func_15000AD0(s32 arg0) {
     s32 i;
     s32 j;
-    s32 n;
+    s32 end; // one past the last gradient entry of the current band
     s32 start;
     s32 size;
     s32 from[3];
@@ -92,7 +92,7 @@ void func_15000AD0(s32 arg0) {
         }
         func_1502B7F0(&D_800DBE80, 2, 0xD, D_800B0DF0->unk9);
         if (D_80038080 != 0) {
-            for (i = 0; i != 0x168; i++) {
+            for (i = 0; i < 360; i++) {
                 func_1510D0EC(D_800891BC[D_800B0DF0->unk9][0] + i, 0, 0x3F, 0);
             }
         }
@@ -113,7 +113,7 @@ void func_15000AD0(s32 arg0) {
                 from[0] = 0;
                 from[1] = 0;
                 from[2] = 0xBF;
-                n = 0xA7;
+                end = 0xA7;
                 to[0] = 0xD0;
                 to[1] = 0xD5;
                 to[2] = 0xFF;
@@ -122,7 +122,7 @@ void func_15000AD0(s32 arg0) {
                 from[0] = 0;
                 from[1] = 0;
                 from[2] = 0;
-                n = 0x85;
+                end = 0x85;
                 to[0] = 0;
                 to[1] = 0;
                 to[2] = 0x5D;
@@ -131,7 +131,7 @@ void func_15000AD0(s32 arg0) {
                 from[0] = 0;
                 from[1] = 0;
                 from[2] = 0;
-                n = 0x7B;
+                end = 0x7B;
                 to[0] = 0;
                 to[1] = 0;
                 to[2] = 0x1F;
@@ -140,15 +140,15 @@ void func_15000AD0(s32 arg0) {
                 from[0] = 0;
                 from[1] = 0x67;
                 from[2] = 0x38;
-                n = 0x23;
+                end = 0x23;
                 to[0] = 0xC8;
                 to[1] = 0xD5;
                 to[2] = 0x2E;
                 break;
         }
-        for (i = 0; i < n; i++) {
+        for (i = 0; i < end; i++) {
             for (j = 0; j < 3; j++) {
-                cur[j] = (to[j] - from[j]) * i / n + from[j];
+                cur[j] = (to[j] - from[j]) * i / end + from[j];
             }
             color = (cur[0] << 24) | (cur[1] << 16) | (cur[2] << 8);
             buf[i * 4 + 3] = color;
@@ -164,8 +164,8 @@ void func_15000AD0(s32 arg0) {
                 from[0] = to[0];
                 from[1] = to[1];
                 from[2] = to[2];
-                start = n;
-                n = 0xB1;
+                start = end;
+                end = 0xB1;
                 to[0] = 0x12;
                 to[1] = 0x4E;
                 to[2] = 0x19;
@@ -174,8 +174,8 @@ void func_15000AD0(s32 arg0) {
                 from[0] = to[0];
                 from[1] = to[1];
                 from[2] = to[2];
-                start = n;
-                n = 0x9C;
+                start = end;
+                end = 0x9C;
                 to[0] = 0x1C;
                 to[1] = 0x15;
                 to[2] = 0x93;
@@ -184,8 +184,8 @@ void func_15000AD0(s32 arg0) {
                 from[0] = to[0];
                 from[1] = to[1];
                 from[2] = to[2];
-                start = n;
-                n = 0xA2;
+                start = end;
+                end = 0xA2;
                 to[0] = 0x3;
                 to[1] = 0x1C;
                 to[2] = 0x36;
@@ -194,16 +194,16 @@ void func_15000AD0(s32 arg0) {
                 from[0] = to[0];
                 from[1] = to[1];
                 from[2] = to[2];
-                start = n;
-                n = 0x63;
+                start = end;
+                end = 0x63;
                 to[0] = 0xFF;
                 to[1] = 0x3E;
                 to[2] = 0x12;
                 break;
         }
-        for (i = start; i < n; i++) {
+        for (i = start; i < end; i++) {
             for (j = 0; j < 3; j++) {
-                cur[j] = (to[j] - from[j]) * (i - start) / (n - start) + from[j];
+                cur[j] = (to[j] - from[j]) * (i - start) / (end - start) + from[j];
             }
             color = (cur[0] << 24) | (cur[1] << 16) | (cur[2] << 8);
             buf[i * 4 + 3] = color;
@@ -219,8 +219,8 @@ void func_15000AD0(s32 arg0) {
                 from[0] = to[0];
                 from[1] = to[1];
                 from[2] = to[2];
-                start = n;
-                n = 0xDD;
+                start = end;
+                end = 0xDD;
                 to[0] = 0;
                 to[1] = 0xC7;
                 to[2] = 0;
@@ -229,8 +229,8 @@ void func_15000AD0(s32 arg0) {
                 from[0] = to[0];
                 from[1] = to[1];
                 from[2] = to[2];
-                start = n;
-                n = 0xB4;
+                start = end;
+                end = 0xB4;
                 to[0] = 0xA;
                 to[1] = 0x22;
                 to[2] = 0xFF;
@@ -239,8 +239,8 @@ void func_15000AD0(s32 arg0) {
                 from[0] = to[0];
                 from[1] = to[1];
                 from[2] = to[2];
-                start = n;
-                n = 0xB7;
+                start = end;
+                end = 0xB7;
                 to[0] = 0x21;
                 to[1] = 0x24;
                 to[2] = 0x31;
@@ -249,16 +249,16 @@ void func_15000AD0(s32 arg0) {
                 from[0] = to[0];
                 from[1] = to[1];
                 from[2] = to[2];
-                start = n;
-                n = 0xC8;
+                start = end;
+                end = 0xC8;
                 to[0] = 0;
                 to[1] = 0;
                 to[2] = 0;
                 break;
         }
-        for (i = start; i < n; i++) {
+        for (i = start; i < end; i++) {
             for (j = 0; j < 3; j++) {
-                cur[j] = (to[j] - from[j]) * (i - start) / (n - start) + from[j];
+                cur[j] = (to[j] - from[j]) * (i - start) / (end - start) + from[j];
             }
             color = (cur[0] << 24) | (cur[1] << 16) | (cur[2] << 8);
             buf[i * 4 + 3] = color;
@@ -266,7 +266,7 @@ void func_15000AD0(s32 arg0) {
             buf[i * 4 + 1] = color;
             buf[i * 4 + 0] = color;
         }
-        for (i = n; i < 0x100; i++) {
+        for (i = end; i < 0x100; i++) {
             for (j = 0; j < 3; j++) {
                 cur[j] = to[j];
             }
@@ -282,23 +282,23 @@ void func_15000AD0(s32 arg0) {
             D_800DBE88[i][0] = vtx;
             D_800DBE88[i][1] = vtx + 4;
             for (j = 0; j < 2; j++) {
-                D_800DBE88[i][j][0].v.ob[0] = -0x6D6;
-                D_800DBE88[i][j][0].v.ob[1] = 0x6D6;
+                D_800DBE88[i][j][0].v.ob[0] = -1750;
+                D_800DBE88[i][j][0].v.ob[1] = 1750;
                 D_800DBE88[i][j][0].v.ob[2] = -1000;
                 D_800DBE88[i][j][0].v.flag = 0;
                 D_800DBE88[i][j][0].v.tc[0] = 0x2000;
-                D_800DBE88[i][j][1].v.ob[0] = 0x6D6;
-                D_800DBE88[i][j][1].v.ob[1] = 0x6D6;
+                D_800DBE88[i][j][1].v.ob[0] = 1750;
+                D_800DBE88[i][j][1].v.ob[1] = 1750;
                 D_800DBE88[i][j][1].v.ob[2] = -1000;
                 D_800DBE88[i][j][1].v.flag = 0;
                 D_800DBE88[i][j][1].v.tc[0] = 0x2000;
-                D_800DBE88[i][j][2].v.ob[0] = 0x6D6;
-                D_800DBE88[i][j][2].v.ob[1] = -0x6D6;
+                D_800DBE88[i][j][2].v.ob[0] = 1750;
+                D_800DBE88[i][j][2].v.ob[1] = -1750;
                 D_800DBE88[i][j][2].v.ob[2] = -1000;
                 D_800DBE88[i][j][2].v.flag = 0;
                 D_800DBE88[i][j][2].v.tc[0] = 0x2000;
-                D_800DBE88[i][j][3].v.ob[0] = -0x6D6;
-                D_800DBE88[i][j][3].v.ob[1] = -0x6D6;
+                D_800DBE88[i][j][3].v.ob[0] = -1750;
+                D_800DBE88[i][j][3].v.ob[1] = -1750;
                 D_800DBE88[i][j][3].v.ob[2] = -1000;
                 D_800DBE88[i][j][3].v.flag = 0;
                 D_800DBE88[i][j][3].v.tc[0] = 0x2000;
@@ -313,7 +313,6 @@ void func_15000AD0(s32 arg0) {
         D_800DBEAC = 0;
     }
 }
-// loops!
 typedef struct XZRange {
     s16 minx;
     s16 minz;
@@ -321,156 +320,119 @@ typedef struct XZRange {
     s16 maxz;
 } XZRange;
 
-typedef struct GfxW {
-    u32 w0;
-    u32 w1;
-} GfxW;
+extern XZRange *D_800DBE40;
 
-extern s32 D_800DBE40;
+/**
+ * Appends every triangle drawn by display list `dl` to the triangle table D_800DBE3C
+ * and records its bounding box: x/z in D_800DBE40, y in D_800DBE44.
+ */
+void func_15001460(Gfx *dl) {
+    s32 i;
+    Gfx *gfx;
+    s32 opcode;
+    s32 count;
+    s32 t;
+    s32 numTris;
+    s32 j;
+    s32 k;
+    u32 addr;
+    s32 m;
+    Vtx *verts[31];
+    s16 numVerts;
+    s16 first;
+    s16 tris[4][3];
+    s16 min[3];
+    s16 max[3];
 
-void func_15001460(GfxW *arg0)
-{
-  s32 i;
-  GfxW *gfx;
-  s32 cmd;
-  s32 cnt;
-  s32 s;
-  s32 n;
-  s32 j;
-  s32 k;
-  u32 addr;
-  s32 m;
-  Point16 *vtx[31];
-  s16 num;
-  s16 start;
-  s16 tris[4][3];
-  s16 min[3];
-  s16 max[3];
-  if (arg0 == 0)
-  {
-    return;
-  }
-  {
-    cnt = D_800DBE38;
-    for (i = 0; (*((s8 *) (&arg0[i]))) != (-0x21); i++)
-    {
-      gfx = &arg0[i];
-      n = 0;
-      cmd = *((s8 *) gfx);
-      s = 0;
-      if ((cmd >> 4) == 1)
-      {
-        tris[0][0] = (gfx->w1 >> 25) & 0x1F;
-        tris[0][1] = (gfx->w1 >> 20) & 0x1F;
-        tris[0][2] = (gfx->w1 >> 15) & 0x1F;
-        tris[1][0] = (gfx->w1 >> 10) & 0x1F;
-        tris[1][1] = (gfx->w1 >> 5) & 0x1F;
-        tris[1][2] = gfx->w1 & 0x1F;
-        tris[2][0] = (gfx->w0 >> 10) & 0x1F;
-        tris[2][1] = (gfx->w0 >> 5) & 0x1F;
-        tris[2][2] = gfx->w0 & 0x1F;
-        tris[3][0] = (gfx->w0 >> 23) & 0x1F;
-        tris[3][1] = (gfx->w0 >> 18) & 0x1F;
-        tris[3][2] = ((gfx->w1 >> 30) & 3) | ((gfx->w0 >> 13) & 0x1C);
-        n = 4;
-      }
-      else
-        if (cmd == 6)
-      {
-        tris[0][0] = (gfx->w0 >> 17) & 0x1F;
-        tris[0][1] = (gfx->w0 >> 9) & 0x1F;
-        tris[0][2] = (gfx->w0 >> 1) & 0x1F;
-        tris[1][0] = (gfx->w1 >> 17) & 0x1F;
-        tris[1][1] = (gfx->w1 >> 9) & 0x1F;
-        tris[1][2] = (gfx->w1 >> 1) & 0x1F;
-        n = 2;
-      }
-      else
-        if (cmd == 1)
-      {
-        addr = gfx->w1;
-        if ((addr >> 24) & 0xF)
-        {
-          addr = ((&D_800D2C28)[(addr >> 24) & 0xF] + addr) - (D_800D2C68 << 24);
-        }
-        num = (((s32) gfx->w0) >> 12) & 0xFF;
-        start = (((s32) gfx->w0) >> 1) & 0x7F;
-        start -= num;
-        for (m = start; m < num; m++)
-        {
-          vtx[m] = (Point16 *) addr;
-          addr += 16;
-        }
-
-      }
-      else
-        if (cmd == 5)
-      {
-        for (k = 0; k < 3; k++)
-        {
-          tris[0][k] = ((u8 *) gfx)[k + 1] >> 1;
-        }
-
-        n = 1;
-      }
-      for (s = 0; s < n; s++)
-      {
-        if (((u32) vtx[0]) > 0x100000)
-        {
-          for (cmd = 0; cmd < 3; cmd++)
-          {
-            if (D_800DBE63 == 0)
-            {
-              min[cmd] = (max[cmd] = (&vtx[tris[s][0]]->x)[cmd]);
-              for (k = 1; k < 3; k++)
-              {
-                if ((&vtx[tris[s][k]]->x)[cmd] < min[cmd])
-                {
-                  min[cmd] = (&vtx[tris[s][k]]->x)[cmd];
-                }
-                else
-                  if (max[cmd] < (&vtx[tris[s][k]]->x)[cmd])
-                {
-                  max[cmd] = (&vtx[tris[s][k]]->x)[cmd];
-                }
-                if ((&vtx[tris[s][k]]->x)[cmd] < min[cmd])
-                {
-                  min[cmd] = (&vtx[tris[s][k]]->x)[cmd];
-                }
-                else
-                  if (max[cmd] < (&vtx[tris[s][k]]->x)[cmd])
-                {
-                  max[cmd] = (&vtx[tris[s][k]]->x)[cmd];
-                }
-              }
-
-            }
-            else
-            {
-              min[cmd] = -0x8000;
-              max[cmd] = 0x7FFF;
-            }
-          }
-
-        }
-        for (j = 0; j < 3; j++)
-        {
-          ((Face16 *) D_800DBE3C)[cnt].pts[j] = vtx[tris[s][j]];
-        }
-
-        ((XZRange *) D_800DBE40)[cnt].minx = min[0];
-        ((XZRange *) D_800DBE40)[cnt].maxx = max[0];
-        ((XZRange *) D_800DBE40)[cnt].minz = min[2];
-        ((XZRange *) D_800DBE40)[cnt].maxz = max[2];
-        ((YRange *) D_800DBE44)[cnt].min = min[1];
-        ((YRange *) D_800DBE44)[cnt].max = max[1];
-        cnt++;
-      }
-
+    if (dl == NULL) {
+        return;
     }
-
-    D_800DBE38 = cnt;
-  }
+    count = D_800DBE38;
+    for (i = 0; *(s8 *)&dl[i] != (s8)G_ENDDL; i++) {
+        gfx = &dl[i];
+        numTris = 0;
+        opcode = *(s8 *)gfx;
+        t = 0;
+        if ((opcode >> 4) == 1) {
+            // Conker's G_TRI4 (opcodes 0x10-0x1F): four triangles, 5-bit vertex indices
+            tris[0][0] = (gfx->words.w1 >> 25) & 0x1F;
+            tris[0][1] = (gfx->words.w1 >> 20) & 0x1F;
+            tris[0][2] = (gfx->words.w1 >> 15) & 0x1F;
+            tris[1][0] = (gfx->words.w1 >> 10) & 0x1F;
+            tris[1][1] = (gfx->words.w1 >> 5) & 0x1F;
+            tris[1][2] = gfx->words.w1 & 0x1F;
+            tris[2][0] = (gfx->words.w0 >> 10) & 0x1F;
+            tris[2][1] = (gfx->words.w0 >> 5) & 0x1F;
+            tris[2][2] = gfx->words.w0 & 0x1F;
+            tris[3][0] = (gfx->words.w0 >> 23) & 0x1F;
+            tris[3][1] = (gfx->words.w0 >> 18) & 0x1F;
+            tris[3][2] = ((gfx->words.w1 >> 30) & 3) | ((gfx->words.w0 >> 13) & 0x1C);
+            numTris = 4;
+        } else if (opcode == G_TRI2) {
+            tris[0][0] = (gfx->words.w0 >> 17) & 0x1F;
+            tris[0][1] = (gfx->words.w0 >> 9) & 0x1F;
+            tris[0][2] = (gfx->words.w0 >> 1) & 0x1F;
+            tris[1][0] = (gfx->words.w1 >> 17) & 0x1F;
+            tris[1][1] = (gfx->words.w1 >> 9) & 0x1F;
+            tris[1][2] = (gfx->words.w1 >> 1) & 0x1F;
+            numTris = 2;
+        } else if (opcode == G_VTX) {
+            addr = gfx->words.w1;
+            if ((addr >> 24) & 0xF) {
+                // segmented address: rebase through the segment table
+                addr = (&D_800D2C28)[(addr >> 24) & 0xF] + addr - (D_800D2C68 << 24);
+            }
+            numVerts = ((s32)gfx->words.w0 >> 12) & 0xFF;
+            first = ((s32)gfx->words.w0 >> 1) & 0x7F;
+            first -= numVerts;
+            // (sic) the bound is the vertex count, not first + count
+            for (m = first; m < numVerts; m++) {
+                verts[m] = (Vtx *)addr;
+                addr += sizeof(Vtx);
+            }
+        } else if (opcode == G_TRI1) {
+            for (k = 0; k < 3; k++) {
+                tris[0][k] = ((u8 *)gfx)[k + 1] >> 1;
+            }
+            numTris = 1;
+        }
+        for (t = 0; t < numTris; t++) {
+            if ((u32)verts[0] > 0x100000) {
+                // matching: `opcode` doubles as the axis counter; a separate local reallocates registers
+                for (opcode = 0; opcode < 3; opcode++) {
+                    if (D_800DBE63 == 0) {
+                        min[opcode] = max[opcode] = verts[tris[t][0]]->v.ob[opcode];
+                        for (k = 1; k < 3; k++) {
+                            if (verts[tris[t][k]]->v.ob[opcode] < min[opcode]) {
+                                min[opcode] = verts[tris[t][k]]->v.ob[opcode];
+                            } else if (max[opcode] < verts[tris[t][k]]->v.ob[opcode]) {
+                                max[opcode] = verts[tris[t][k]]->v.ob[opcode];
+                            }
+                            if (verts[tris[t][k]]->v.ob[opcode] < min[opcode]) {
+                                min[opcode] = verts[tris[t][k]]->v.ob[opcode];
+                            } else if (max[opcode] < verts[tris[t][k]]->v.ob[opcode]) {
+                                max[opcode] = verts[tris[t][k]]->v.ob[opcode];
+                            }
+                        }
+                    } else {
+                        min[opcode] = -0x8000;
+                        max[opcode] = 0x7FFF;
+                    }
+                }
+            }
+            for (j = 0; j < 3; j++) {
+                ((MeshTri *)D_800DBE3C)[count].verts[j] = verts[tris[t][j]];
+            }
+            D_800DBE40[count].minx = min[0];
+            D_800DBE40[count].maxx = max[0];
+            D_800DBE40[count].minz = min[2];
+            D_800DBE40[count].maxz = max[2];
+            D_800DBE44[count].min = min[1];
+            D_800DBE44[count].max = max[1];
+            count++;
+        }
+    }
+    D_800DBE38 = count;
 }
 
 void func_15001970(void) {
@@ -668,7 +630,7 @@ u16 *func_15001DE0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
 }
 
 void func_15002008(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u16 *arg4) {
-    Face16 *face;
+    MeshTri *face;
     s32 count;
     s32 idx;
     s32 last;
@@ -684,13 +646,13 @@ void func_15002008(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u16 *arg4) {
 
     for (i = 1; i <= count; i++) {
         idx = arg4[i];
-        face = &((Face16 *)D_800DBE3C)[idx];
+        face = &((MeshTri *)D_800DBE3C)[idx];
 
         for (j = 0; j < 3; j++) {
-            if ((u32)face->pts[j] > 0x80000000) {
-                sp78.pts[j].x = (f32)(face->pts[j]->x - (arg0 + arg1) / 2);
-                sp78.pts[j].y = (f32)face->pts[j]->y;
-                sp78.pts[j].z = (f32)(face->pts[j]->z - (arg2 + arg3) / 2);
+            if ((u32)face->verts[j] > 0x80000000) {
+                sp78.pts[j].x = (f32)(face->verts[j]->v.ob[0] - (arg0 + arg1) / 2);
+                sp78.pts[j].y = (f32)face->verts[j]->v.ob[1];
+                sp78.pts[j].z = (f32)(face->verts[j]->v.ob[2] - (arg2 + arg3) / 2);
             } else {
                 sp78.pts[j].x = 0.0f;
                 sp78.pts[j].y = 0.0f;
@@ -721,7 +683,7 @@ int func_15002248(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 *arg4, s32 *arg5, 
     s32 total;
     s32 idx;
     u16 *out;
-    Face16 *face;
+    MeshTri *face;
     s32 temp;
     s32 flag;
     s32 res;
@@ -744,13 +706,13 @@ int func_15002248(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 *arg4, s32 *arg5, 
 
     for (i = 1; i < total; i++) {
         idx = arg6[i];
-        face = &((Face16 *)D_800DBE3C)[idx];
+        face = &((MeshTri *)D_800DBE3C)[idx];
 
         for (j = 0; j < 3; j++) {
-            if ((u32)face->pts[j] > 0x80000000) {
-                sp74.pts[j].x = (f32)(face->pts[j]->x - ((arg0 + arg1) >> 1));
-                sp74.pts[j].y = (f32)face->pts[j]->y;
-                sp74.pts[j].z = (f32)(face->pts[j]->z - ((arg2 + arg3) >> 1));
+            if ((u32)face->verts[j] > 0x80000000) {
+                sp74.pts[j].x = (f32)(face->verts[j]->v.ob[0] - ((arg0 + arg1) >> 1));
+                sp74.pts[j].y = (f32)face->verts[j]->v.ob[1];
+                sp74.pts[j].z = (f32)(face->verts[j]->v.ob[2] - ((arg2 + arg3) >> 1));
             } else {
                 sp74.pts[j].x = 0.0f;
                 sp74.pts[j].y = 0.0f;
@@ -764,18 +726,18 @@ int func_15002248(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 *arg4, s32 *arg5, 
             out[count] = idx;
 
             if (flag) {
-                temp = (((YRange *)D_800DBE44)[idx].min - pad) & mask;
+                temp = (D_800DBE44[idx].min - pad) & mask;
                 if (temp < *arg4) {
                     *arg4 = temp;
                 }
-                temp = ((((YRange *)D_800DBE44)[idx].max + pad) & mask) + pad;
+                temp = ((D_800DBE44[idx].max + pad) & mask) + pad;
                 if (*arg5 < temp) {
                     *arg5 = temp;
                 }
             } else {
                 flag = 1;
-                *arg4 = (((YRange *)D_800DBE44)[idx].min - pad) & mask;
-                *arg5 = ((((YRange *)D_800DBE44)[idx].max + pad) & mask) + pad;
+                *arg4 = (D_800DBE44[idx].min - pad) & mask;
+                *arg5 = ((D_800DBE44[idx].max + pad) & mask) + pad;
             }
         }
     }
