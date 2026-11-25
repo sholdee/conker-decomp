@@ -68,7 +68,6 @@ s32 func_1502B8E0(void *, s32, s32, ...);
 s32 func_1502B9B4(s32, ...);
 
 // FIXME: create header file for audio related functions
-s32  func_10017A80(N_ALCSPlayer *csp);
 void func_10017AF0(N_ALCSPlayer *csp, s32 arg1);
 void func_10017B04(N_ALCSPlayer *csp, s32 chan, u8 arg2);
 void func_10017B30(N_ALCSPlayer *csp);
@@ -98,7 +97,7 @@ void func_10008180(void) {
     ALSeqpConfig playerConfig;
     AudioDeviceConfig_8180 deviceConfig;
     ALBankFile *bankFile;
-    ALSeqFile *header;
+    ALSeqFile *seqHeader;
     u32 sequenceAddress;
     u8 *waveBase;
     s32 i;
@@ -130,10 +129,10 @@ void func_10008180(void) {
 
     // read the sequence table header for its count, then the whole table
     sequenceAddress = (u32)func_1502B020(0, 2, 0x17, 3);
-    header = allocate_memory(0x10, 1, 2, 0);
-    func_100046E4(sequenceAddress, header, 0x10);
-    sequenceSize = header->seqCount * sizeof(ALSeqData) + 4;
-    func_10004074(header);
+    seqHeader = allocate_memory(0x10, 1, 2, 0);
+    func_100046E4(sequenceAddress, seqHeader, 0x10);
+    sequenceSize = seqHeader->seqCount * sizeof(ALSeqData) + 4;
+    func_10004074(seqHeader);
     D_8003CD40 = allocate_memory(sequenceSize, 0xFF, 2, 0);
     func_100046E4(sequenceAddress, D_8003CD40, ALIGN16(sequenceSize));
     alSeqFileNew(D_8003CD40, (u8 *)sequenceAddress);
@@ -319,18 +318,18 @@ void func_10008C6C(u8 player, u8 marker) {
 
 /* Stop the player, load `sequence` into its buffer if it isn't loaded already, and start playing it. */
 s32 func_10008CE8(u8 player, s32 sequence) {
-    s32 address;
+    u8 *romAddress;
     u32 count;
 
     // wait (bounded) for the player to stop
     count = 0;
     func_10018C60(D_8003C900[player]);
-    while (n_alCSPGetState(D_8003C900[player]) != AL_STOPPED && count != 2000000) {
+    while (n_alCSPGetState(D_8003C900[player]) != AL_STOPPED && count < 2000000) {
         count++;
     }
-    if (count >= 2000000U) {
+    if (count >= 2000000) {
         func_10018C60(D_8003C900[player]);
-        while (n_alCSPGetState(D_8003C900[player]) != AL_STOPPED && count < 4000000U) {
+        while (n_alCSPGetState(D_8003C900[player]) != AL_STOPPED && count < 4000000) {
             count++;
         }
     }
@@ -341,12 +340,12 @@ s32 func_10008CE8(u8 player, s32 sequence) {
             func_10004074((void *)(s32)D_8003CA48[player]);
             D_8003CA48[player] = NULL;
         }
-        address = (s32)D_8003CD40->seqArray[sequence].offset;
+        romAddress = D_8003CD40->seqArray[sequence].offset;
         D_8003CA48[player] = allocate_memory(D_8003C910[sequence], 0xFF, 2, 2);
         if (D_8003CA48[player] == NULL) {
             return -1;
         }
-        func_10004514(address, D_8003CA48[player], (D_8003C910[sequence] + 0xF) & ~0xF, 1);
+        func_10004514((u32)romAddress, D_8003CA48[player], ALIGN16(D_8003C910[sequence]), 1);
         D_8003CA3C[player] = sequence;
     }
     n_alCSeqNew(&D_8003CA58[player], D_8003CA48[player]);
