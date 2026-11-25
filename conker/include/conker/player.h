@@ -12,6 +12,7 @@
  *   game_44A90.c
  *   game_79F10.c
  *   game_B21B0.c
+ *   game_B2BC0.c
  *   game_1A0100.c
  */
 

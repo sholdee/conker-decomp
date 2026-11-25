@@ -10,16 +10,18 @@
  *   game/done/game_35CF0.c
  *   game_35D20.c
  *   game/done/game_36040.c
- *   game_DB730.c
  *   game_DBA60.c
  *   game_DDB60.c
+ *   game_DDF10.c
  *   game_E0F60.c
  *   game_E2880.c
  *   game_E2DA0.c
  *   game_E4FF0.c
  *   game_E8090.c
  *   game_E8C10.c
+ *   game_EABF0.c
  *   game_EB340.c
+ *   game_EB600.c
  *   game_EBE60.c
  *   game_EEE70.c
  *   game_F15D0.c
@@ -29,6 +31,8 @@
  *   game_F5D80.c
  *   game_FC410.c
  *   game_FC5F0.c
+ *   game_FC9E0.c
+ *   game_FD1D0.c
  *   game_FDBE0.c
  *   game_FE850.c
  *   game_FF0E0.c
@@ -46,16 +50,17 @@
  *   game_10E240.c
  *   game_1104D0.c
  *   game_111670.c
+ *   game_111A00.c
  *   game_112F90.c
  *   game_117490.c
+ *   game_117FC0.c
  *   game_118400.c
  *   game_11F780.c
  *   game/done/game_122650.c
  *   game_1227F0.c
  *   game_124920.c
+ *   game_125A50.c
  *   game_127060.c
- *   game_1286F0.c
- *   game_128790.c
  *   game_129DE0.c
  *   game_129E80.c
  *   game_129EE0.c
@@ -71,6 +76,7 @@
  *   game_1355D0.c
  *   game_168A90.c
  *   game_16EE20.c
+ *   game_16F770.c
  *   game_173D40.c
  *   game_174BF0.c
  *   game/done/game_1765E0.c

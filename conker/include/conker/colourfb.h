@@ -8,9 +8,6 @@
  * Subsystem "colourfb": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
  *   game_18D250.c
- *   zz_m.c
- *   zz_s.c
- *   zz_t1.c
  */
 
 #endif

@@ -10,7 +10,6 @@
  *   game_6CEA0.c
  *   game_6D800.c
  *   game_6E240.c
- *   _k_.c
  */
 
 #endif

@@ -10,7 +10,6 @@
  *   init_12560.c
  *   game_43620.c
  *   game_221290.c
- *   game_2261A0.c
  */
 
 #endif

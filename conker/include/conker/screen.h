@@ -9,6 +9,7 @@
  * that these files define, grouped by file in address order:
  *   game/done/game_35EC0.c
  *   game_FB600.c
+ *   game_FBBF0.c
  *   game_FF5C0.c
  *   game_126F60.c
  *   game_131620.c

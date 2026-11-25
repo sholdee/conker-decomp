@@ -13,6 +13,7 @@
  *   game_FF900.c
  *   game_135D00.c
  *   game_18A8F0.c
+ *   game_18C660.c
  *   game_18D770.c
  *   game_1BD880.c
  *   game_1E6260.c

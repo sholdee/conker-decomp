@@ -54,12 +54,16 @@
  *   game_135490.c
  *   game_14D110.c
  *   game_14EE80.c
+ *   game_14F0B0.c
  *   game_14F130.c
  *   game_14F580.c
+ *   game_14F620.c
  *   game_14F8F0.c
+ *   game_14FE30.c
  *   game_14FF90.c
  *   game_155C90.c
  *   game_156160.c
+ *   game_156D70.c
  *   game_1570E0.c
  *   game_157840.c
  *   game_159940.c

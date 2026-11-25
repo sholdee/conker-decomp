@@ -12,7 +12,9 @@
  *   game_71820.c
  *   game_AE1D0.c
  *   game_AEB40.c
+ *   game_AFA70.c
  *   game_D0960.c
+ *   game_DB750.c
  *   game_10EA20.c
  *   game_131A90.c
  *   game_13BB20.c

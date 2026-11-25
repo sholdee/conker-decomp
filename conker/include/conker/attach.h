@@ -11,6 +11,7 @@
  *   game_F4890.c
  *   game_F5BE0.c
  *   game_105760.c
+ *   game_105D90.c
  *   game_1B9DB0.c
  */
 

@@ -8,6 +8,7 @@
  * Subsystem "mp": prototypes of the non-static functions and declarations of the globals
  * that these files define, grouped by file in address order:
  *   game_B4080.c
+ *   game_B7060.c
  */
 
 /* A circular area registered with func_1508B20C. */

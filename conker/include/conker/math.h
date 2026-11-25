@@ -27,19 +27,6 @@
  *   game/done/game_77A90.c
  *   game_77AD0.c
  *   game_BC430.c
- *   game_D39B0.c
- *   game_D4E10.c
- *   game_D4EF8.c
- *   game_D5160.c
- *   game_D5250.c
- *   game_D52A0.c
- *   game_D5500.c
- *   game_D6FBC.c
- *   game_D70F0.c
- *   game_D7CC4.c
- *   game_DAC30.c
- *   game_DAD60.c
- *   game_DADB0.c
  *   game_21CAC0.c
  */
 

@@ -16,9 +16,12 @@
  *   game_E6A10.c
  *   game_E7380.c
  *   game_E7970.c
+ *   game_E7DE0.c
  *   game_EDE60.c
  *   game_EE710.c
  *   game_EF410.c
+ *   game_EFEA0.c
+ *   game_F0610.c
  *   game_F3270.c
  *   game_F8590.c
  *   game_F9430.c
@@ -32,6 +35,7 @@
  *   game_116D40.c
  *   game_1199D0.c
  *   game_11FF10.c
+ *   game_120950.c
  *   game_121A20.c
  *   game_128D70.c
  *   game_12DAB0.c
@@ -56,6 +60,7 @@
  *   game_19F150.c
  *   game_1A1B40.c
  *   game_1A7260.c
+ *   game_1A7490.c
  *   game_1B74A0.c
  *   game_1B81D0.c
  *   game_1B8B60.c

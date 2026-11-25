@@ -12,6 +12,7 @@
  *   game_12B250.c
  *   game_12BD10.c
  *   game_12C1E0.c
+ *   game_12CCF0.c
  *   game_1E58B0.c
  *   game_1ED0F0.c
  *   game_1EF500.c

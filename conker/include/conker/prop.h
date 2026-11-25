@@ -26,7 +26,6 @@
  *   game_1478C0.c
  *   game_147C70.c
  *   game_1483E0.c
- *   game_14BC30.c
  *   game_14C3F0.c
  *   game_14CE30.c
  *   game/done/game_14D0D0.c

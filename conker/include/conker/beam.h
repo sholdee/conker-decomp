@@ -11,6 +11,7 @@
  *   game_108320.c
  *   game_10EF60.c
  *   game_11C2B0.c
+ *   game_11EEB0.c
  *   game_1228D0.c
  *   game_124260.c
  *   game_12E540.c
@@ -18,6 +19,7 @@
  *   game_133190.c
  *   game_1BBFC0.c
  *   game_1D4E00.c
+ *   game_1D5FD0.c
  *   game_1E26F0.c
  */
 
