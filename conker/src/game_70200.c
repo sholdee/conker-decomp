@@ -17,32 +17,35 @@ typedef struct Game70200Anchor {
     f32 z;
 } Game70200Anchor;
 
+/* One queued line of HUD text (or, when `icon` is nonzero, one icon), freed after drawing. */
 typedef struct Game70200TextNode {
-    Game70200Anchor *attachedObject;
+    Game70200Anchor *anchor; /* if set, the text is drawn over this object */
     f32 scale;
     s16 x;
-    s16 yOrVerticalOffset;
-    u8 flagsRaw;
-    u8 kindSelector;
-    u8 primaryRed;
-    u8 primaryGreen;
-    u8 primaryBlue;
-    u8 primaryAlpha;
-    u8 field_12;
-    u8 field_13;
-    u8 field_14;
-    u8 field_15;
-    u8 pad_16[2];
+    s16 y; /* height above the anchor while one is attached */
+    u8 flags; /* TEXT_FLAG_* */
+    u8 icon; /* 1-based index into D_800859E0; 0 = text */
+    u8 red;
+    u8 green;
+    u8 blue;
+    u8 alpha;
+    u8 unk12;
+    u8 unk13;
+    u8 unk14;
+    u8 unk15;
+    u8 pad16[2];
     struct Game70200TextNode *next;
     u8 text[0x40];
 } Game70200TextNode;
 
+#define TEXT_FLAG_CENTERED 0x01 /* centre horizontally on x */
+#define TEXT_FLAG_SCREEN_SPACE 0x40 /* x/y are already in screen pixels: skip the resolution scale */
+#define TEXT_FLAG_SHADOW 0x80
+
 void *allocate_memory(s32, s32, s32, s32);
 s32 func_151EFF94(u8 *, const u8 *, ...);
-extern u8 D_80085CC0[];
-extern u8 D_80085CC4;
-extern s32 D_80098B90;
-extern s32 D_80098B94;
+extern u8 D_80085CC0[]; /* "%s%s", deliberately unterminated: runs on into the spec buffer below */
+extern u8 D_80085CC4[]; /* conversion spec being parsed, e.g. "%2d" */
 extern Game70200TextNode *D_800CBD68;
 extern u8 D_800CBD6C;
 extern u8 D_800CBD6D;
@@ -91,53 +94,52 @@ void func_15042E3C(s32 format, ...) {
     func_15042ECC(format, argumentWords);
 }
 
+/**
+ * Parse `format` into queued text nodes, one per line. Supports %d/%x/%X/%s, %f/%F (the argument
+ * word is a pointer to an f32), %%, "#?" (the next argument becomes an icon node; the character
+ * after '#' is skipped) and '\n' (starts a new node 11 pixels lower).
+ */
 void func_15042ECC(u8 *format, s32 *argumentWords) {
-    struct {
-        Game70200TextNode *node;
-        s32 pad;
-        s32 finished;
-        s32 pad2;
-    } local;
+    s32 pad; // matching: pads place `finished` at sp+0x50 and `newNode` at sp+0x48
+    s32 finished;
+    s32 pad2;
+    Game70200TextNode *newNode;
     Game70200TextNode *node;
     u8 *out;
     s32 argumentIndex;
     s32 conversionIndex;
+    u8 *spec;
     u8 ch;
-    u8 flags;
-    u8 *conversion;
 
     argumentIndex = 0;
-    conversion = &D_80085CC4;
+    spec = D_80085CC4;
     while (*format != 0) {
-        local.node = allocate_memory(sizeof(Game70200TextNode), 1, 0, 1);
-        if (local.node == 0) {
+        newNode = allocate_memory(sizeof(Game70200TextNode), 1, 0, 1);
+        if (newNode == NULL) {
             return;
         }
-        local.node->next = 0;
-        local.finished = 0;
-        if (D_800CBD68 == 0) {
-            D_800CBD64 = (s32)local.node;
+        newNode->next = NULL;
+        finished = 0;
+        if (D_800CBD68 == NULL) {
+            D_800CBD64 = (s32)newNode;
         } else {
-            D_800CBD68->next = local.node;
+            D_800CBD68->next = newNode;
         }
-        out = local.node->text;
-        local.node->kindSelector = 0;
+        out = newNode->text;
+        newNode->icon = 0;
         do {
             ch = *format;
             if (ch == '%') {
                 format++;
-                *conversion = '%';
+                spec[0] = '%';
                 for (conversionIndex = 1; conversionIndex != 0; conversionIndex++, format++) {
-                    u8 *destination = &(&D_80085CC4)[conversionIndex];
-
-                    destination[0] = *format;
-                    destination[1] = 0;
-                    switch (destination[0]) {
+                    spec[conversionIndex] = *format;
+                    spec[conversionIndex + 1] = 0;
+                    switch (spec[conversionIndex]) {
                     case 'X':
                     case 'd':
                     case 'x':
-                        func_151EFF94(out, &D_80085CC4,
-                                     argumentWords[argumentIndex++]);
+                        func_151EFF94(out, spec, argumentWords[argumentIndex++]);
                         while (*out != 0) {
                             out++;
                         }
@@ -148,9 +150,7 @@ void func_15042ECC(u8 *format, s32 *argumentWords) {
                         f32 *number = (f32 *)argumentWords[argumentIndex++];
                         f32 value = *number;
 
-                        func_151EFF94(out, D_80085CC0, &D_80098B90,
-                                     &D_80098B94,
-                                     (f64)value);
+                        func_151EFF94(out, D_80085CC0, "", "", (f64)value);
                         while (*out != 0) {
                             out++;
                         }
@@ -158,8 +158,7 @@ void func_15042ECC(u8 *format, s32 *argumentWords) {
                         break;
                     }
                     case 's':
-                        func_151EFF94(out, &D_80085CC4,
-                                     argumentWords[argumentIndex++]);
+                        func_151EFF94(out, spec, argumentWords[argumentIndex++]);
                         while (*out != 0) {
                             out++;
                         }
@@ -170,33 +169,33 @@ void func_15042ECC(u8 *format, s32 *argumentWords) {
                         *out = 0;
                         conversionIndex = -1;
                         break;
-                    default:
+                    default: /* flags/width/precision: keep copying into the spec */
                         break;
                     }
                 }
             } else if (ch == '#') {
-                local.node->kindSelector = argumentWords[argumentIndex++];
+                newNode->icon = argumentWords[argumentIndex++];
                 format += 2;
             } else if (ch == '\n') {
                 format++;
-                local.finished = 1;
+                finished = 1;
             } else if (ch == 0) {
-                local.finished = 1;
+                finished = 1;
             } else {
                 *out = ch;
                 format++;
                 out++;
                 *out = 0;
             }
-        } while (local.finished == 0);
+        } while (finished == 0);
 
-        node = local.node;
-        node->flagsRaw = D_800CBD74;
-        node->attachedObject = (Game70200Anchor *)D_800CBD78;
-        if (node->attachedObject != 0) {
-            node->yOrVerticalOffset = D_800CBD7C;
-            flags = node->flagsRaw | 1;
-            node->flagsRaw = (node->flagsRaw = flags);
+        node = newNode;
+        node->flags = D_800CBD74;
+        node->anchor = (Game70200Anchor *)D_800CBD78;
+        if (node->anchor != NULL) {
+            node->y = D_800CBD7C;
+            node->flags |= TEXT_FLAG_CENTERED;
+            node->flags = node->flags; // matching: IDO re-stores the flags byte after the OR
             if (D_8008FD90 >= 2) {
                 node->scale = D_800CBD80 + D_800CBD80;
             } else {
@@ -204,24 +203,24 @@ void func_15042ECC(u8 *format, s32 *argumentWords) {
             }
         } else {
             node->x = D_800CBD70;
-            node->yOrVerticalOffset = D_800CBD72;
+            node->y = D_800CBD72;
             node->scale = D_800CBD80;
         }
-        node->primaryRed = D_800CBD60;
-        node->primaryGreen = D_800CBD61;
-        node->primaryBlue = D_800CBD62;
-        node->primaryAlpha = D_800CBD63;
-        node->field_12 = D_800CBD6C;
-        node->field_13 = D_800CBD6D;
-        node->field_14 = D_800CBD6E;
-        node->field_15 = D_800CBD6F;
+        node->red = D_800CBD60;
+        node->green = D_800CBD61;
+        node->blue = D_800CBD62;
+        node->alpha = D_800CBD63;
+        node->unk12 = D_800CBD6C;
+        node->unk13 = D_800CBD6D;
+        node->unk14 = D_800CBD6E;
+        node->unk15 = D_800CBD6F;
         D_800CBD68 = node;
-        if (node->kindSelector != 0) {
-            node->primaryRed = 0xFF;
-            node->primaryGreen = 0xFF;
-            node->primaryBlue = 0xFF;
+        if (node->icon != 0) {
+            node->red = 0xFF;
+            node->green = 0xFF;
+            node->blue = 0xFF;
         } else {
-            D_800CBD72 += 0xB;
+            D_800CBD72 += 11; /* line height */
         }
     }
     D_800CBD78 = 0;
@@ -234,7 +233,7 @@ void func_150432BC(f32 scale) {
 
 /** Attach the next queued text to an object, `yOffset` above its position. */
 void func_150432CC(s32 object, s32 yOffset) {
-    D_800CBD74 |= 1;
+    D_800CBD74 |= TEXT_FLAG_CENTERED;
     D_800CBD74 = D_800CBD74; // matching: IDO re-stores the flags byte after the OR
     D_800CBD7C = yOffset;
     D_800CBD78 = object;
@@ -309,50 +308,50 @@ Gfx *func_15043384(Gfx *gfx) {
         gSPDisplayList(gfx++, D_800859A0);
         GFX_RAW(gfx++, 0xEF002C3F, 0x504240);
         while (node != NULL) {
-            if (node->kindSelector == 0) {
+            if (node->icon == 0) {
                 visible = 1;
-                if (node->flagsRaw & 0x40) {
-                    node->flagsRaw &= ~0x40;
+                if (node->flags & 0x40) {
+                    node->flags &= ~0x40;
                 } else {
                     node->x = node->x * D_8008FE1C;
-                    node->yOrVerticalOffset = node->yOrVerticalOffset * D_8008FE20;
+                    node->y = node->y * D_8008FE20;
                 }
-                if (node->flagsRaw & 0x80) {
+                if (node->flags & 0x80) {
                     shadow = 1;
-                    node->flagsRaw &= ~0x80;
+                    node->flags &= ~0x80;
                 } else {
                     shadow = 0;
                 }
-                if (node->attachedObject != NULL) {
-                    anchor = node->attachedObject;
+                if (node->anchor != NULL) {
+                    anchor = node->anchor;
                     D_80082FA4 = 0;
-                    visible = func_1509563C(anchor->x, anchor->y + node->yOrVerticalOffset, anchor->z,
+                    visible = func_1509563C(anchor->x, anchor->y + node->y, anchor->z,
                                             &screenX, &screenY, &screenZ, &screenW, 30000.0f);
                     if (visible) {
                         node->x = screenX;
-                        node->yOrVerticalOffset = screenY;
+                        node->y = screenY;
                     }
                 }
-                if (node->flagsRaw == 1 || node->field_15 != 0) {
+                if (node->flags == 1 || node->unk15 != 0) {
                     func_150428D4(node->text, &width, &height, &lines);
                     width = width * node->scale;
                 }
-                if (node->flagsRaw == 1) {
+                if (node->flags == 1) {
                     node->x -= width >> 1;
                 }
                 if (visible) {
                     scale = node->scale * 4096.0f;
                     if (shadow) {
-                        gfx = func_150417AC(gfx, node->x + 1, node->yOrVerticalOffset + 1, node->text, 0, 0, 0,
-                                            node->primaryAlpha, scale, scale, strlen(node->text));
+                        gfx = func_150417AC(gfx, node->x + 1, node->y + 1, node->text, 0, 0, 0,
+                                            node->alpha, scale, scale, strlen(node->text));
                     }
-                    gfx = func_150417AC(gfx, node->x, node->yOrVerticalOffset, node->text, node->primaryRed,
-                                        node->primaryGreen, node->primaryBlue, node->primaryAlpha, scale,
+                    gfx = func_150417AC(gfx, node->x, node->y, node->text, node->red,
+                                        node->green, node->blue, node->alpha, scale,
                                         scale, strlen(node->text));
                 }
                 gDPPipeSync(gfx++);
             } else {
-                kind = node->kindSelector - 1;
+                kind = node->icon - 1;
                 scale = D_800859E0[kind].scale * 0.0078125f;
                 GFX_RAW(gfx++, 0xFC12D225, 0xFFA7FFFF);
                 if (D_800859E0[kind].flags & 2) {
@@ -361,24 +360,24 @@ Gfx *func_15043384(Gfx *gfx) {
                 }
                 if (D_800859E0[kind].flags & 1) {
                     gDPPipeSync(gfx++);
-                    gDPSetEnvColor(gfx++, node->primaryRed, node->primaryGreen, node->primaryBlue,
-                                   node->primaryAlpha);
+                    gDPSetEnvColor(gfx++, node->red, node->green, node->blue,
+                                   node->alpha);
                     D_80090060.image = D_800859E0[kind - 1].image;
-                    gfx = func_151ED430(gfx, &D_80090060, node->x, node->yOrVerticalOffset, D_800859E0[kind - 1].width,
+                    gfx = func_151ED430(gfx, &D_80090060, node->x, node->y, D_800859E0[kind - 1].width,
                                         D_800859E0[kind - 1].height, scale, 0);
                     v = (D_800BE9AC * 2) & 0x7F;
                     if (v >= 0x40) {
                         v = 0x7F - v;
                     }
-                    v = (node->primaryAlpha * (v + v + v + 0x3F)) >> 8;
+                    v = (node->alpha * (v + v + v + 0x3F)) >> 8;
                     if (v >= 0x100) {
                         v = 0xFF;
                     }
-                    node->primaryAlpha = v;
+                    node->alpha = v;
                 }
                 gDPPipeSync(gfx++);
-                gDPSetEnvColor(gfx++, node->primaryRed, node->primaryGreen, node->primaryBlue,
-                               node->primaryAlpha);
+                gDPSetEnvColor(gfx++, node->red, node->green, node->blue,
+                               node->alpha);
                 D_80090060.image = D_800859E0[kind].image;
                 if (&D_80085AA8 == &D_800859E0[kind]) {
                     frame = (D_80085CD0 >> 1) % 10;
@@ -388,7 +387,7 @@ Gfx *func_15043384(Gfx *gfx) {
                     }
                     D_80090060.image = D_800859E0[kind].image + v;
                 }
-                gfx = func_151ED430(gfx, &D_80090060, node->x, node->yOrVerticalOffset, D_800859E0[kind].width,
+                gfx = func_151ED430(gfx, &D_80090060, node->x, node->y, D_800859E0[kind].width,
                                     D_800859E0[kind].height, scale, 0);
                 gSPDisplayList(gfx++, D_800859A0);
                 GFX_RAW(gfx++, 0xEF002C3F, 0x504240);
