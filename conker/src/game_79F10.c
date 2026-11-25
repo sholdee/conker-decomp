@@ -303,6 +303,9 @@ typedef struct Actor {
     /* 0x320 */ u8 pad320[0xC];
 } Actor;
 
+/* The object table D_800CC2D0 viewed as Actors. */
+#define gActors ((Actor *)D_800CC2D0)
+
 typedef struct {
     /* 0x0 */ u16 buttons;
     /* 2 */ s8 stick_x;
@@ -459,21 +462,17 @@ void func_1504CB98(Actor *arg0) {
     u16 temp_a0_3;
     s32 vb34;
     f32 sp1A8;
-    u8 padb2;
     s8 var_v1_3;
     s8 var_v1_4;
     u8 t3_id;
     u8 temp_v0_43;
     u8 temp_v0_5;
-    u8 padb3;
-    u8 padb4;
     s32 var_a1_2;
     s32 sp198;
     s8 sp197;
     f32 sp190;
     f32 sp18C;
     s32 sp188;
-    s16 pad1;
     ContPad sp180;
     s32 sp17C;
     f32 sp178;
@@ -483,8 +482,6 @@ void func_1504CB98(Actor *arg0) {
     f32 tf13;
     u8 t3_4Eb;
     u8 t3_102;
-    u8 padu1;
-    u8 padu2;
     f32 vf12c;
     f32 var_f12;
     u32 sp158;
@@ -492,10 +489,11 @@ void func_1504CB98(Actor *arg0) {
     f32 var_f18;
     f32 tf4;
     s32 var_a0;
-    u16 vc34; u16 padvc;
-    u16 var_a2_2; u16 padA2;
+    u16 vc34;
+    u16 var_a2_2;
+    u16 padA2;
     s32 anim;
-    u8 sg; u8 padsg1; u8 padsg2; u8 padsg3;
+    u8 sg;
     f32 ang;
     u16 tmpi;
     u16 padx3;
@@ -515,7 +513,6 @@ void func_1504CB98(Actor *arg0) {
     u16 angx;
     u16 padx1;
     s16 spF6;
-    s16 pad10;
     u16 angt;
     u16 padx2;
     u16 dd;
@@ -545,7 +542,6 @@ void func_1504CB98(Actor *arg0) {
     f32 tf6;
     f32 tf7;
     s16 sp92;
-    s16 pad26;
     f32 tf8;
     f32 sp88;
     f32 sp84;
@@ -812,7 +808,7 @@ void func_1504CB98(Actor *arg0) {
                         tf3 -= 360.0f;
                     }
                     tf3 *= 0.91022223f;
-                    *(u8 *)&sp197 = (s32) tf3;
+                    sp197 = tf3;
                     if (arg0->unk31C->unk78 == 0x38) {
                         sp197 -= arg0->unk31C->unk1A2 >> 8;
                     }
@@ -936,9 +932,9 @@ void func_1504CB98(Actor *arg0) {
                 }
                 sp1BC = va_w5 - D_800cc280;
             }
-            goto l1374; }
+        } else {
             arg0->unk31C->unk4C = arg0->unk7A;
-        l1374:
+        }
         if (arg0->in_water != 0) {
             tf4 = func_1504B0FC((struct127 *) arg0, sp1A8);
             sp1BC = arg0->unk31C->unk4C;
@@ -1030,7 +1026,7 @@ void func_1504CB98(Actor *arg0) {
                         }
                     }
                 }
-                if (((arg0->unk13C != 0) && ((&((Actor *)D_800CC2D0)[D_800D154C->unk13C - 100])->id != 0x57)) || (arg0->unk31C->unk198 != 0) || (D_800CC284->buttons & 0x2000)) {
+                if (((arg0->unk13C != 0) && (gActors[D_800D154C->unk13C - 100].id != 0x57)) || (arg0->unk31C->unk198 != 0) || (D_800CC284->buttons & 0x2000)) {
                     var_f14 = 0.0f;
                 }
             }
@@ -1090,7 +1086,7 @@ void func_1504CB98(Actor *arg0) {
                         if (arg0->y_velocity < -10.0f) {
                             var_v1_3 = 0;
                         }
-                    } else {}
+                    }
                 }
                 sp1BA = ((sp1BC - arg0->unk76) >> 8); sg = sp1BA & 0x80;
                 var_a0 = sp1BA;
@@ -1376,20 +1372,20 @@ void func_1504CB98(Actor *arg0) {
         func_1505A770((struct127 *) arg0);
         func_1505D6F0(arg0, D_800C3E78);
         if ((D_800CC26C != 0) && (arg0->unk31C->unk8 <= 0) && (arg0->unk13C == 0)) {
-            temp_a0_3 = func_1505A630((&((Actor *)D_800CC2D0)[D_800CC26C])->x_position - arg0->x_position, arg0->z_position - (&((Actor *)D_800CC2D0)[D_800CC26C])->z_position, 0);
+            temp_a0_3 = func_1505A630(gActors[D_800CC26C].x_position - arg0->x_position, arg0->z_position - gActors[D_800CC26C].z_position, 0);
             
             if ((arg0->unk28 == 0.0f) && (sp1B4 > 15.0f) && (((D_800CC27E - temp_a0_3) - 0x4000) & 0x8000)) { BLK;
                 spCC = 0.1f;
                 spCB = 1;
-                if ((&((Actor *)D_800CC2D0)[D_800CC26C])->id == 0x61) {
+                if (gActors[D_800CC26C].id == 0x61) {
                     if (arg0->unk84 == 0x7A) {
-                        t7A = (&((Actor *)D_800CC2D0)[D_800CC26C])->unk7A;
+                        t7A = gActors[D_800CC26C].unk7A;
                         vb34 = arg0->unk76 - t7A; padx3 = (vb34 + 0x2000) & 0xC000;
                         if (padx3 & 0x4000) {
-                            (&((Actor *)D_800CC2D0)[D_800CC26C])->unk218 = NULL;
-                            (&((Actor *)D_800CC2D0)[D_800CC26C])->unk232 = 2;
-                            (&((Actor *)D_800CC2D0)[D_800CC26C])->unk76 = t7A + padx3;
-                            arg0->unk76 = (&((Actor *)D_800CC2D0)[D_800CC26C])->unk76;
+                            gActors[D_800CC26C].unk218 = NULL;
+                            gActors[D_800CC26C].unk232 = 2;
+                            gActors[D_800CC26C].unk76 = t7A + padx3;
+                            arg0->unk76 = gActors[D_800CC26C].unk76;
                             arg0->unk31C->unk3C = 1;
                             { BLK; arg0->unk54 *= 0.4f; }
                         }
@@ -1397,22 +1393,22 @@ void func_1504CB98(Actor *arg0) {
                 } else {
                     spC4 = 0.3f;
                     spC0 = 0.5f;
-                    tf10 = fabsf(arg0->y_position - (&((Actor *)D_800CC2D0)[D_800CC26C])->y_position);
+                    tf10 = fabsf(arg0->y_position - gActors[D_800CC26C].y_position);
                     spD8 = tf10;
                     if (tf10 > 30.0f) {
                         spD8 = 30.0f;
                     }
-                    spD8 = (2.0f * (&((Actor *)D_800CC2D0)[D_800CC26C])->unkE4) - spD8;
+                    spD8 = (2.0f * gActors[D_800CC26C].unkE4) - spD8;
                     arg0->unk54 *= 0.6f;
-                    arg0->xz_velocity = ((Actor *)D_800CC2D0)[D_800CC26C].unk44;
-                    if (((&((Actor *)D_800CC2D0)[D_800CC26C])->unk44) < ((&((Actor *)D_800CC2D0)[D_800CC26C])->xz_velocity)) {
-                        spD4 = ((&((Actor *)D_800CC2D0)[D_800CC26C])->xz_velocity);
+                    arg0->xz_velocity = gActors[D_800CC26C].unk44;
+                    if (gActors[D_800CC26C].unk44 < gActors[D_800CC26C].xz_velocity) {
+                        spD4 = gActors[D_800CC26C].xz_velocity;
                     } else {
-                        spD4 = ((&((Actor *)D_800CC2D0)[D_800CC26C])->unk44);
+                        spD4 = gActors[D_800CC26C].unk44;
                     }
                     arg0->unk31C->unk3C = ((32.0f - spD4) * 0.125f);
-                    if ((&((Actor *)D_800CC2D0)[D_800CC26C])->id == 0x34) {
-                        if ((&((Actor *)D_800CC2D0)[D_800CC26C])->unk251 != 1) {
+                    if (gActors[D_800CC26C].id == 0x34) {
+                        if (gActors[D_800CC26C].unk251 != 1) {
                             spCB = 0;
                         }
                         sp198 = 0x23;
@@ -1424,35 +1420,35 @@ void func_1504CB98(Actor *arg0) {
                     } else {
                         sp198 = 0x18;
                     }
-                    if ((sp198 != arg0->unk84) && ((&((Actor *)D_800CC2D0)[D_800CC26C])->id != 0x17)) {
+                    if ((sp198 != arg0->unk84) && (gActors[D_800CC26C].id != 0x17)) {
                         D_800D1580 = -0xF7FED5;
                         spC0 = 0.5f;
                         func_1506E8D8();
                     }
-                    if ((&((Actor *)D_800CC2D0)[D_800CC26C])->unk224 != 0) {
-                        spC4 = (&((Actor *)D_800CC2D0)[D_800CC26C])->unk224 * 0.01f;
+                    if (gActors[D_800CC26C].unk224 != 0) {
+                        spC4 = gActors[D_800CC26C].unk224 * 0.01f;
                     }
                     if (spCB != 0) {
                         spC0 = 0.5f;
                         func_1505A184(arg0->unk76, spD8, 0.0f, &spD8, &spD4, &spD0);
-                        arg0->x_position += (((((&((Actor *)D_800CC2D0)[D_800CC26C])->x_position - spD8) + (&((Actor *)D_800CC2D0)[D_800CC26C])->unkBC) - arg0->x_position) * spCC);
-                        arg0->z_position += (((((&((Actor *)D_800CC2D0)[D_800CC26C])->z_position - spD4) + (&((Actor *)D_800CC2D0)[D_800CC26C])->unk148) - arg0->z_position) * spCC);
-                        (&((Actor *)D_800CC2D0)[D_800CC26C])->unk76 = arg0->unk76;
+                        arg0->x_position += ((((gActors[D_800CC26C].x_position - spD8) + gActors[D_800CC26C].unkBC) - arg0->x_position) * spCC);
+                        arg0->z_position += ((((gActors[D_800CC26C].z_position - spD4) + gActors[D_800CC26C].unk148) - arg0->z_position) * spCC);
+                        gActors[D_800CC26C].unk76 = arg0->unk76;
                     }
-                    (&((Actor *)D_800CC2D0)[D_800CC26C])->unk87 = 1;
+                    gActors[D_800CC26C].unk87 = 1;
                     spD8 = arg0->unk44 * spC4;
-                    if ((&((Actor *)D_800CC2D0)[D_800CC26C])->id == 0x25) {
+                    if (gActors[D_800CC26C].id == 0x25) {
                         spD8 = arg0->unk44 * 0.6f;
                         arg0->xz_velocity += 2.0f;
                         spC0 = 1.0f;
                         arg0->unk31C->unk3C += 3;
                     }
-                    if ((&((Actor *)D_800CC2D0)[D_800CC26C])->id != 0x34) {
-                        if ((&((Actor *)D_800CC2D0)[D_800CC26C])->xz_velocity < spD8) {
-                            (&((Actor *)D_800CC2D0)[D_800CC26C])->xz_velocity = (&((Actor *)D_800CC2D0)[D_800CC26C])->xz_velocity + (spC0 * D_800BE9A4);
+                    if (gActors[D_800CC26C].id != 0x34) {
+                        if (gActors[D_800CC26C].xz_velocity < spD8) {
+                            gActors[D_800CC26C].xz_velocity = gActors[D_800CC26C].xz_velocity + (spC0 * D_800BE9A4);
                         }
                     } else {
-                        arg0->xz_velocity = (&((Actor *)D_800CC2D0)[D_800CC26C])->xz_velocity;
+                        arg0->xz_velocity = gActors[D_800CC26C].xz_velocity;
                     }
                 }
             }
