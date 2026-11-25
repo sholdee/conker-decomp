@@ -345,213 +345,165 @@ void func_15194810(struct127 *self, struct127 *other, u8 *arg2) {
 void func_151949E0(s32 arg0, s32 arg1, s32 arg2) {
 }
 
-extern void func_15104170(s32);
+extern void func_15104170(s32 arg0, struct127 *self, struct127 *other);
+extern void func_1507DE4C(struct127 *obj);
+extern void func_15138BC0(struct127 *obj, u8 arg1, s32 arg2);
 
-void func_151949F4(arg0, arg1) s32 arg0; struct127 *arg1; {
-    if (D_8008FD90 == 1) {
-        if (arg1->unk127 == 0) {
-            if (D_800E9D00 & 0x8) {
-                if (arg1->unk31C->unk1A0 == 0) {
-                    func_15104170(arg0);
-                    arg1->unk31C->unk1A0 = 0x4B0;
-                }
-            }
-        }
+void func_151949F4(s32 arg0, struct127 *self, struct127 *other) {
+    if (D_8008FD90 == 1 && self->unk127 == 0 && (D_800E9D00 & 8) && self->unk31C->unk1A0 == 0) {
+        func_15104170(arg0, self, other);
+        self->unk31C->unk1A0 = 1200;
     }
 }
 
-extern void func_1507DE4C(s32);
-extern void func_15138BC0(s32, s32, s32);
-
-void func_15194A68(s32 arg0, s32 arg1, s32 arg2) {
-    func_1507DE4C(arg1);
-    func_15138BC0(arg1, 0xFF, 1);
-    func_151949F4(0, arg0, arg1);
+void func_15194A68(struct127 *self, struct127 *other, u8 *arg2) {
+    func_1507DE4C(other);
+    func_15138BC0(other, 0xFF, 1);
+    func_151949F4(0, self, other);
 }
 
-void func_15194AB4(struct127* arg0) {
-    s32 sp_a1;
+void func_15194AB4(struct127 *obj) {
+    s32 anim;
 
-    arg0->unk9C |= 0xFFFE;
-    sp_a1 = -1;
-    switch (arg0->id) {
+    obj->unk9C |= 0xFFFE;
+    anim = -1;
+    switch (obj->id) {
     case 0x75:
-        sp_a1 = 0x73;
+        anim = 0x73;
         break;
     case 0x80:
-        sp_a1 = 0x72;
+        anim = 0x72;
         break;
     }
-    if (sp_a1 != -1) {
-        func_15083568(arg0, sp_a1, 1.0f, 0);
+    if (anim != -1) {
+        func_15083568(obj, anim, 1.0f, 0);
     }
 }
 
-extern s32 func_15134070(struct127*);
-extern void func_15138120(struct127*, s32, s32);
-extern void func_15136C3C(struct127*, s32, s32, s32, s32, s32, s32, s32);
+extern void func_15138120(struct127 *obj, s32 kind, s32 arg2);
+extern void func_15136C3C(struct127 *obj, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, s32 arg7);
 
-void func_15194B1C(struct127* arg0) {
-    s32 temp;
+void func_15194B1C(struct127 *obj) {
+    s32 kind;
 
-    temp = func_15134070(arg0);
-    if (temp != 0x63) {
-        func_15138120(arg0, temp, 0);
+    kind = func_15134070(obj);
+    if (kind != 0x63) {
+        func_15138120(obj, kind, 0);
     }
-    func_15136C3C(arg0, 1, 1, 1, 1, 1, 0xFF, 1);
-    func_15194AB4(arg0);
+    func_15136C3C(obj, 1, 1, 1, 1, 1, 0xFF, 1);
+    func_15194AB4(obj);
 }
 
-void func_15194B94(s32 arg0, struct127* arg1, s32 arg2) {
-    struct127* temp;
-
-    temp = arg1;
-    if (temp->id == 0x53) {
-        func_151942B0(arg0, (s32)temp, arg2);
+void func_15194B94(struct127 *self, struct127 *other, u8 *arg2) {
+    if (other->id == 0x53) {
+        func_151942B0(self, other, arg2);
         return;
     }
-    func_15194B1C(temp);
-    func_151949F4(1, arg0, temp);
+    func_15194B1C(other);
+    func_151949F4(1, self, other);
 }
 
-void func_15194BF0(s32 arg0, struct127 *arg1, u8 *arg2) {
-    s32 id;
-    struct126 *temp_v0;
-    struct127 *temp_t6;
-    s32 temp_v1;
+void func_15194BF0(struct127 *self, struct127 *other, u8 *arg2) {
+    switch (other->id) {
+    case 0x16:
+        func_15136C3C(other, 1, 1, 1, 1, 0, 0xFF, 1);
+        func_15145A50(other);
+        /* fallthrough */
+    case 0x7C:
+        if (other->unk65 != 0) {
+            s32 slot = other->unk65 - 1;
 
-    id = arg1->id;
-    if (id >= 0x3C) {
-        switch (id) {
-        case 0x58:
-        case 0x5A:
-        case 0x5B:
-        case 0x5F:
-        case 0x74:
-        case 0x75:
-        case 0x7A:
-        case 0x80:
-        case 0x87:
-        case 0x88:
-        case 0x90:
-        case 0x96:
-        case 0x98:
-        case 0x9C:
-        case 0x9D:
-        case 0x9F:
-        case 0xA0:
-        case 0xB0:
-        case 0xB1:
-        case 0xB2:
-        case 0xB4:
-            goto full_body;
-        case 0x7C:
-            goto cleanup_body;
+            D_800CC2D0[slot].unk232 = 10;
+            D_800CC2D0[slot].unk218 = NULL;
+            other->unk65 = 0;
         }
-    } else {
-        if (id >= 0x17) {
-            if (id != 0x3B) {
-                return;
-            }
-            goto full_body;
-        } else {
-            switch (id) {
-            case 0:
-            case 1:
-            case 2:
-            case 3:
-            case 4:
-            case 0x11:
-            case 0x14:
-                goto full_body;
-            case 0x16:
-                goto stop_then_cleanup;
-            }
+        break;
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 0x11:
+    case 0x14:
+    case 0x3B:
+    case 0x58:
+    case 0x5A:
+    case 0x5B:
+    case 0x5F:
+    case 0x74:
+    case 0x75:
+    case 0x7A:
+    case 0x80:
+    case 0x87:
+    case 0x88:
+    case 0x90:
+    case 0x96:
+    case 0x98:
+    case 0x9C:
+    case 0x9D:
+    case 0x9F:
+    case 0xA0:
+    case 0xB0:
+    case 0xB1:
+    case 0xB2:
+    case 0xB4:
+        func_15136C3C(other, 1, 1, 1, 1, 0, 0xFF, 1);
+        func_15145A50(other);
+        func_1507CD64(other, 6);
+        if (other->unk31C != NULL && other->unk31C->unk19B != 0) {
+            func_15063B64(other);
         }
-    }
-    return;
-
-stop_then_cleanup:
-    func_15136C3C(arg1, 1, 1, 1, 1, 0, 0xFF, 1);
-    func_15145A50(arg1);
-
-cleanup_body:
-    if (arg1->unk65 != 0) {
-        temp_v1 = arg1->unk65 - 1;
-        temp_t6 = arg1;
-        D_800CC2D0[temp_v1].unk232 = 0xA;
-        D_800CC2D0[temp_v1].unk218 = NULL;
-        temp_t6->unk65 = 0;
-after_store_unk65:
-        return;
-    }
-    return;
-
-full_body:
-    func_15136C3C(arg1, 1, 1, 1, 1, 0, 0xFF, 1);
-    func_15145A50(arg1);
-    func_1507CD64(arg1, 6);
-    temp_v0 = arg1->unk31C;
-    if (temp_v0 != NULL) {
-        if (((u8 *) temp_v0)[0x19B] != 0) {
-            func_15063B64(arg1);
-        }
+        break;
     }
 }
 
-void func_15194FF4();
+void func_15194FF4(struct127 *self, struct127 *other, s32 arg2);
 
-s32 func_15194D80(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    func_15194FF4(arg0, arg1, 0, arg3);
+void func_15194D80(struct127 *self, struct127 *other, u8 *arg2) {
+    func_15194FF4(self, other, FALSE);
 }
 
-s32 func_15194DA4(arg0, arg1, arg2, arg3)
-s32 arg0;
-s32 arg1;
-s32 arg2;
-s32 arg3;
-{
-    func_15194FF4(arg0, arg1, 1, arg3);
+void func_15194DA4(struct127 *self, struct127 *other, u8 *arg2) {
+    func_15194FF4(self, other, TRUE);
 }
 
 extern void func_1514B364(f32 *pos, GroundInfo *ground, u8 arg2, s32 arg3);
 
-void func_15194DC8(s32 arg0, struct127 *arg1, s32 arg2) {
+void func_15194DC8(struct127 *self, struct127 *other, u8 *arg2) {
     GroundInfo ground;
 
     if (D_800BE616 != 0) {
-        func_15194DA4(arg0, (s32)arg1, arg2);
+        func_15194DA4(self, other, arg2);
     } else {
-        func_1518D1C0(arg1, 0xB, 0, 1, 0xFF, 1, D_800A8244);
+        func_1518D1C0(other, 11, 0, 1, 0xFF, 1, D_800A8244);
     }
-    func_1504715C(&ground, arg1);
-    func_1514B364(&arg1->x_position, &ground, 0xFF, 1);
+    func_1504715C(&ground, other);
+    func_1514B364(&other->x_position, &ground, 0xFF, 1);
 }
 
-extern void func_150B06B0(s32, s32, s32, s32);
+extern void func_150B06B0(struct127 *obj, struct127 *other, u8 arg2, s32 arg3);
 
-void func_15194E54(s32 arg0, s32 arg1, s32 arg2) {
-    if ((*(u8 *)(arg1 + 4) == 0x3E) || (*(u8 *)(arg1 + 4) == 0xA6)) {
-        func_150B06B0(arg1, arg0, 0xFF, 1);
+void func_15194E54(struct127 *self, struct127 *other, u8 *arg2) {
+    if (other->id == 0x3E || other->id == 0xA6) {
+        func_150B06B0(other, self, 0xFF, 1);
     }
 }
 
-extern void func_15182670(s32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_15194BF0(s32, struct127*, u8*);
+extern void func_15182670(u8 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, u8 arg5, u8 arg6, s32 arg7);
 
-void func_15194EA8(s32 arg0, struct127* arg1, s32 arg2) {
-    u8 sp37;
-    u32 temp1;
-    u32 temp0;
+void func_15194EA8(struct127 *self, struct127 *other, u8 *arg2) {
+    u8 result;
+    u32 rand1;
+    u32 rand0;
 
-    sp37 = 0;
-    if (arg1->camera != 0) {
-        temp0 = func_150ADA20();
-        temp1 = func_150ADA20();
-        func_15182670(0xFF, 0xFF, 0xFF, 0xFF, temp1 % 0xB + 0x23, arg1->camera->unk23D, 0xFF, 1);
-        if (temp0) { }
+    result = 0;
+    if (other->camera != NULL) {
+        rand0 = func_150ADA20();
+        rand1 = func_150ADA20();
+        func_15182670(0xFF, 0xFF, 0xFF, 0xFF, rand1 % 11 + 35, other->camera->unk23D, 0xFF, 1);
+        if (rand0) { } // matching: keeps the unused first random value live across the second call
     }
-    func_15194BF0(arg0, arg1, &sp37);
+    func_15194BF0(self, other, &result);
 }
 
 void func_15194F48(s32 arg0, struct127* arg1, s32 arg2) {
