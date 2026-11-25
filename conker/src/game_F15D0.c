@@ -2,148 +2,166 @@
 #include "functions.h"
 #include "variables.h"
 
+/* Spawn parameters of a particle (same layout as ParticleDesc in game_15D730.c). */
 typedef struct {
-    u8 pad_0[0x4];
-    u8 field_0x04;
-    u8 pad_5[0x11];
-    u8 field_0x16;
-} EventPayloadFlags;
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ u16 renderMode;
+    /* 0x0A */ s16 timer;
+    /* 0x0C */ s32 frame;
+    /* 0x10 */ s32 frameRate;
+    /* 0x14 */ u8 r;
+    /* 0x15 */ u8 g;
+    /* 0x16 */ u8 b;
+    /* 0x17 */ u8 a;
+    /* 0x18 */ u8 r2;
+    /* 0x19 */ u8 g2;
+    /* 0x1A */ u8 b2;
+    /* 0x1B */ u8 alpha;
+    /* 0x1C */ u8 brightness;
+    /* 0x1D */ u8 texture;
+    /* 0x1E */ s16 fadeStart;
+    /* 0x20 */ s16 fadeRate;
+    /* 0x22 */ s16 scaleStart;
+    /* 0x24 */ f32 scaleRate;
+    /* 0x28 */ f32 width;
+    /* 0x2C */ f32 height;
+    /* 0x30 */ struct17 pos;
+    /* 0x3C */ struct17 offset;
+    /* 0x48 */ struct17 vel;
+    /* 0x54 */ f32 gravity;
+    /* 0x58 */ s32 flags;
+    /* 0x5C */ void *viewMask;
+    /* 0x60 */ u8 primColorMode;
+    /* 0x61 */ u8 envColorMode;
+    /* 0x62 */ s8 updateFunc;
+    /* 0x63 */ s8 deathFunc;
+    /* 0x64 */ s8 drawFunc;
+    /* 0x65 */ u8 handlerSet;
+    /* 0x66 */ u8 views;
+    /* 0x67 */ u8 pad67;
+    /* 0x68 */ s16 minSize;
+    /* 0x6A */ s16 unk6A;
+    /* 0x6C */ f32 maxSize;
+} ParticleDesc; /* size 0x70 */
 
-
+/* Per-particle data of a pulsing particle: two sizes oscillating around a base size
+ * (same layout as ParticlePulse in game_15D730.c). */
 typedef struct {
-    void *unk0;
-    u8 unk4;
-    f32 unk8;
-    s32 unkC;
-    f32 unk10;
-    s16 unk14;
-    s8 unk16;
-    s32 unk18;
-} Data150C4120;
+    u8 phase[2];
+    s8 phaseStep[2];
+    f32 baseSize;
+    f32 amplitude[2];
+} ParticlePulse;
 
+/* Partial view of the particle func_15130280 creates (Particle in game_15D730.c). */
 typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s16 unk8;
-    s16 unkA;
-    s32 unkC;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    struct17 unk30;
-    struct17 unk3C;
-    struct17 unk48;
-    f32 unk54;
-    u32 unk58;
-    s32 unk5C;
-    u8 unk60;
-    u8 unk61;
-    u8 unk62;
-    s8 unk63;
-    s8 unk64;
-    u8 unk65;
-    u8 unk66;
-    s16 unk68;
-    f32 unk6C;
-} Spawn150C4120;
+    /* 0x00 */ u8 pad0[0x10];
+    /* 0x10 */ ParticleDesc desc;
+    /* 0x80 */ u8 pad80[0xA8 - 0x80];
+    /* 0xA8 */ ParticlePulse pulse;
+} Particle;
 
+/* Data of the effect spawned by func_150C4120 (at +0x28 of the effect object). */
 typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-    u8 unk3;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-} Extra150C4120;
+    /* 0x00 */ struct127 *owner;
+    /* 0x04 */ u8 ownerId;       /* owner->unique_id at spawn; a mismatch means the owner died */
+    /* 0x08 */ f32 unk8;
+    /* 0x0C */ Particle *particle;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ s16 unk14;
+    /* 0x16 */ u8 flags;
+    /* 0x18 */ s32 unk18;
+} EffectData; /* size 0x1C */
 
-extern void *func_15130280(void *, u8, s32, s32, u8, s32);
+/* Effect object (struct260 is a shorter view of its head). */
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xC - 0x2];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD;
+    /* 0x0E */ s16 state; /* set to -1 to free the effect */
+    /* 0x10 */ u8 pad10[0x28 - 0x10];
+    /* 0x28 */ EffectData data;
+} Effect;
 
-void func_150C4120(u8 *arg0, s16 arg1, u8 arg2, s32 arg3) {
-    Data150C4120 data;
-    struct260 *temp_v0;
-    void *ret;
-    Spawn150C4120 spawn;
-    Extra150C4120 extra;
+extern Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 
-    data.unk0 = arg0;
-    data.unk4 = arg0[0x3B];
+/* Spawns an effect that follows `owner` (lifetime `duration`, -1 for the default 300) together with
+ * a pulsing particle. */
+void func_150C4120(struct127 *owner, s16 duration, u8 arg2, s32 arg3) {
+    EffectData data;
+    Effect *effect;
+    EffectData *state;
+    ParticleDesc spawn;
+    ParticlePulse pulse;
+
+    data.owner = owner;
+    data.ownerId = owner->unique_id;
     data.unk8 = 0.0f;
-    data.unkC = 0;
+    data.particle = NULL;
     data.unk10 = 0.0f;
     data.unk14 = -1;
-    data.unk16 = 0;
+    data.flags = 0;
     data.unk18 = 0;
-    if (arg0[4] == 0x34) {
+    if (owner->id == 0x34) {
         data.unk14 = 0x54;
-        data.unk16 = 1;
+        data.flags = 1;
     }
-    temp_v0 = func_15149130((arg1 == -1) ? 0x12C : arg1, -1, 0x53, -1, (arg1 == -1) ? 0 : 1, 0x40, (struct37 *)0x1C, arg2, arg3);
-    if (temp_v0 != NULL) {
-        memcpy((void *)((s32)temp_v0 + 0x28), &data, 0x1C);
-        arg0 = (u8 *)((s32)temp_v0 + 0x28);
+    effect = (Effect *)func_15149130((duration == -1) ? 300 : duration, -1, 0x53, -1, (duration == -1) ? 0 : 1,
+                                     0x40, (struct37 *)sizeof(EffectData), arg2, arg3); /* arg6 is the data size; its prototype is wrong */
+    if (effect != NULL) {
+        state = &effect->data;
+        memcpy(state, &data, sizeof(EffectData));
         {
-        const s32 tbl[4] = { 0x60, 0x61, 0x62, 0x63 };
+        const s32 textures[4] = { 0x60, 0x61, 0x62, 0x63 };
 
-        extra.unk0 = func_150ADA20();
-        extra.unk1 = (s8)func_150ADA20();
-        extra.unk4 = spawn.unk28 = spawn.unk2C = 700.0f;
-        extra.unk2 = (s8)(func_150ADA20() % 6U) + 5;
-        extra.unk3 = func_150ADA20() % 6U + 5;
-        extra.unk8 = (func_150ADA68() * 0.25f + 0.200000003f) * extra.unk4;
-        extra.unkC = (func_150ADA68() * 0.25f + 0.200000003f) * extra.unk4;
-        spawn.unk1D = *(tbl + (func_150ADA20() & 3));
-        spawn.unk8 = 0x2203;
+        pulse.phase[0] = func_150ADA20();
+        pulse.phase[1] = func_150ADA20();
+        pulse.baseSize = spawn.width = spawn.height = 700.0f;
+        pulse.phaseStep[0] = (s8)(func_150ADA20() % 6U) + 5; // matching: the (s8) steers t-register allocation
+        pulse.phaseStep[1] = func_150ADA20() % 6U + 5;
+        pulse.amplitude[0] = (func_150ADA68() * 0.25f + 0.200000003f) * pulse.baseSize;
+        pulse.amplitude[1] = (func_150ADA68() * 0.25f + 0.200000003f) * pulse.baseSize;
+        spawn.texture = *(textures + (func_150ADA20() & 3)); // matching: textures[i] reserves an extra temp
+        spawn.renderMode = 0x2203;
         spawn.unk0 = 0x200005;
         spawn.unk4 = 0;
-        spawn.unkC = 0;
-        spawn.unk10 = 0;
-        spawn.unk14 = 0;
-        spawn.unk15 = 0;
-        spawn.unk16 = 0;
-        spawn.unk17 = 0xFF;
-        spawn.unk18 = 0;
-        spawn.unk19 = 0;
-        spawn.unk1A = 0;
-        spawn.unk1B = 0xFF;
-        spawn.unk1C = 0xFF;
-        spawn.unk30 = *(struct17 *)&D_800A5480;
-        spawn.unk3C = *(struct17 *)&D_800A5480;
-        spawn.unk48 = *(struct17 *)&D_800A5480;
-        spawn.unk22 = 1;
-        spawn.unk54 = 0.0f;
-        spawn.unk24 = 1.0f;
-        spawn.unk58 = ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0) | 0x8000 | 0x4000;
-        spawn.unkA = 0x12C;
-        spawn.unk6C = 10000.0f;
-        spawn.unk1E = 1;
-        spawn.unk20 = 0xFF;
-        spawn.unk60 = 6;
-        spawn.unk61 = 8;
-        spawn.unk64 = -1;
-        spawn.unk62 = 0x26;
-        spawn.unk63 = -1;
-        spawn.unk65 = 0;
-        spawn.unk5C = 0;
-        spawn.unk66 = 0xFF;
-        spawn.unk68 = 0;
-        ((Data150C4120 *)arg0)->unkC = (s32)func_15130280(&spawn, 1, 0, 0x10, arg2, arg3);
-        if (((Data150C4120 *)arg0)->unkC != 0) {
-            memcpy((u8 *)((Data150C4120 *)arg0)->unkC + 0xA8, &extra, sizeof(extra));
+        spawn.frame = 0;
+        spawn.frameRate = 0;
+        spawn.r = 0;
+        spawn.g = 0;
+        spawn.b = 0;
+        spawn.a = 0xFF;
+        spawn.r2 = 0;
+        spawn.g2 = 0;
+        spawn.b2 = 0;
+        spawn.alpha = 0xFF;
+        spawn.brightness = 0xFF;
+        spawn.pos = *(struct17 *)&D_800A5480;
+        spawn.offset = *(struct17 *)&D_800A5480;
+        spawn.vel = *(struct17 *)&D_800A5480;
+        spawn.scaleStart = 1;
+        spawn.gravity = 0.0f;
+        spawn.scaleRate = 1.0f;
+        spawn.flags = ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0) | 0x8000 | 0x4000;
+        spawn.timer = 300;
+        spawn.maxSize = 10000.0f;
+        spawn.fadeStart = 1;
+        spawn.fadeRate = 0xFF;
+        spawn.primColorMode = 6;
+        spawn.envColorMode = 8;
+        spawn.drawFunc = -1;
+        spawn.updateFunc = 0x26;
+        spawn.deathFunc = -1;
+        spawn.handlerSet = 0;
+        spawn.viewMask = NULL;
+        spawn.views = 0xFF;
+        spawn.minSize = 0;
+        state->particle = func_15130280(&spawn, 1, 0, sizeof(ParticlePulse), arg2, arg3);
+        if (state->particle != NULL) {
+            memcpy(&state->particle->pulse, &pulse, sizeof(ParticlePulse));
         }
         }
     }
@@ -331,20 +349,21 @@ void func_150C4B34(struct260 *arg0) {
     func_15149368(arg0);
 }
 
-void func_150C4B60(s32 arg0, s32 arg1, u8 arg2) {
+/* Event handler: events 0x55/0x56 clear/set flag 2 (suspend), others go to func_15149514. */
+void func_150C4B60(s32 arg0, s32 arg1, u8 event) {
     s32 *p = &arg0;
-    EventPayloadFlags *q;
+    EffectData *data;
 
-    if (arg2 == 0x55) {
-        q = (EventPayloadFlags *)*p;
-        q = (EventPayloadFlags *)((s32)q + 0x28);
-        q->field_0x16 = q->field_0x16 & 0xFFFD;
-    } else if (arg2 == 0x56) {
-        q = (EventPayloadFlags *)*p;
-        q = (EventPayloadFlags *)((s32)q + 0x28);
-        q->field_0x16 = q->field_0x16 | 2;
+    if (event == 0x55) {
+        data = (EffectData *)*p;
+        data = (EffectData *)((s32)data + 0x28);
+        data->flags = data->flags & 0xFFFD;
+    } else if (event == 0x56) {
+        data = (EffectData *)*p;
+        data = (EffectData *)((s32)data + 0x28);
+        data->flags = data->flags | 2;
     } else {
-        q = (EventPayloadFlags *)(*p + 0x28);
-        func_15149514(arg1, arg2, (s32)q, (s32)&q->field_0x04, *p);
+        data = (EffectData *)(*p + 0x28);
+        func_15149514(arg1, event, (s32)data, (s32)&data->ownerId, *p);
     }
 }
