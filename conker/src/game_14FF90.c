@@ -1059,258 +1059,247 @@ extern f32 D_800DC000;
 #define BX(off) (*(u8 *)((u8 *)arg0 + (off)))
 #define HX(off) (*(u16 *)((u8 *)arg0 + (off)))
 
-void func_15123A54(struct108 *arg0) {
+void func_15123A54(struct108 *camera) {
     f32 angle;
-    f32 saved;
+    f32 savedDistance;
 
-    saved = arg0->unk374;
-    BX(0x600) = 0;
-    FX(0x604) = arg0->unk374;
+    savedDistance = CAM->targetDistance;
+    CAM->blocked = 0;
+    CAM->blockedDistance = CAM->targetDistance;
     if (D_800C3671 == 0) {
-        if (FX(0x6F8) != 0.0f) {
-            if (FX(0x6F8) < arg0->unk374) {
-                arg0->unk374 = FX(0x6F8);
-            } else {
-                arg0->unk374 = arg0->unk374;
-            }
+        if (CAM->maxDistance != 0.0f) {
+            CAM->targetDistance = (CAM->maxDistance < CAM->targetDistance) ? CAM->maxDistance : CAM->targetDistance;
         }
-        if (arg0->unk23C == 0) {
-            if ((arg0->unk5F0 & 0x10) && (*arg0->unk36C & 0x10)) {
-                arg0->unk374 = 130.0f;
+        if (CAM->snap == 0) {
+            if ((CAM->status & 0x10) && (CAM->contPad->button & R_TRIG)) {
+                CAM->targetDistance = 130.0f;
             }
-            if ((arg0->unk73C == 0) && (arg0->unk5F0 & 0x40)) {
-                arg0->unk374 = 420.0f;
+            if ((CAM->unk73C == 0) && (CAM->status & 0x40)) {
+                CAM->targetDistance = 420.0f;
             }
-            if (arg0->unk2C & 0x403) {
-                if (arg0->unk36A & 4) {
-                    BX(0x8E4) = 1;
-                    SX(0x8E8) = 180;
-                    FX(0x8E0) = 0.0f;
-                } else if ((*arg0->unk36C & 4) || BX(0x8E4)) {
-                    if (BX(0x8E4) && (*arg0->unk36C & 4)) {
-                        BX(0x8E4) += D_800BEA08;
-                        BX(0x8E4) = (BX(0x8E4) >= 16) ? 15 : BX(0x8E4);
+            if (CAM->mode & 0x403) {
+                if (CAM->buttonsPressed & D_CBUTTONS) {
+                    CAM->lookBehindTimer = 1;
+                    CAM->lookBehindHold = 180;
+                    CAM->lookBehindYawVel = 0.0f;
+                } else if ((CAM->contPad->button & D_CBUTTONS) || CAM->lookBehindTimer) {
+                    if (CAM->lookBehindTimer && (CAM->contPad->button & D_CBUTTONS)) {
+                        CAM->lookBehindTimer += D_800BEA08;
+                        CAM->lookBehindTimer = (CAM->lookBehindTimer >= 16) ? 15 : CAM->lookBehindTimer;
                     }
-                    if (BX(0x8E4) == 15) {
-                        BX(0x8EC) = 1;
-                        SX(0x7B8) = 20;
-                        arg0->unk374 = 300.0f;
-                        arg0->unk348 = 150.0f;
-                        func_15049688(&arg0->unk37C, arg0->unk3D0->unk40 - 180.0f, &FX(0x8E0), 1.5f, 2.0f, arg0->unk7B4);
-                        if (!(*arg0->unk36C & 4)) {
-                            BX(0x8E4) = 0;
+                    if (CAM->lookBehindTimer == 15) {
+                        CAM->lookingBehind = 1;
+                        CAM->presetCooldown = 20;
+                        CAM->targetDistance = 300.0f;
+                        CAM->height = 150.0f;
+                        func_15049688(&CAM->yaw, CAM->player->unk40 - 180.0f, &CAM->lookBehindYawVel, 1.5f, 2.0f,
+                                      CAM->dt);
+                        if (!(CAM->contPad->button & D_CBUTTONS)) {
+                            CAM->lookBehindTimer = 0;
                         }
                     } else {
-                        func_15049688(&arg0->unk37C, arg0->unk3D0->unk40 - 180.0f, &FX(0x8E0), 2.0f, 4.0f, arg0->unk7B4);
+                        func_15049688(&CAM->yaw, CAM->player->unk40 - 180.0f, &CAM->lookBehindYawVel, 2.0f, 4.0f,
+                                      CAM->dt);
                     }
-                    arg0->unk39C = arg0->unk37C * 0.01745329238474369f;
-                    if ((BX(0x8E4) < 15) && !(*arg0->unk36C & 4)) {
-                        if (*(s16 *)&arg0->unk298 == 0) {
-                            SX(0x8E8) -= D_800BEA08;
-                            if (SX(0x8E8) <= 0) {
-                                BX(0x8E4) = 0;
-                            } else if (fabsf(arg0->unk37C - (arg0->unk3D0->unk40 - 180.0f)) <= 2.0f) {
-                                BX(0x8E4) = 0;
+                    CAM->yawRad = CAM->yaw * DEG2RAD;
+                    if ((CAM->lookBehindTimer < 15) && !(CAM->contPad->button & D_CBUTTONS)) {
+                        if (CAM->playerMoved == 0) {
+                            CAM->lookBehindHold -= D_800BEA08;
+                            if (CAM->lookBehindHold <= 0) {
+                                CAM->lookBehindTimer = 0;
+                            } else if (fabsf(CAM->yaw - (CAM->player->unk40 - 180.0f)) <= 2.0f) {
+                                CAM->lookBehindTimer = 0;
                             }
                         } else {
-                            BX(0x8E4) = 0;
+                            CAM->lookBehindTimer = 0;
                         }
                     }
-                } else if (BX(0x8EC) != 0) {
-                    func_15124B18(arg0);
-                    BX(0x8EC) = 0;
-                    BX(0x8E4) = 0;
+                } else if (CAM->lookingBehind != 0) {
+                    func_15124B18(camera);
+                    CAM->lookingBehind = 0;
+                    CAM->lookBehindTimer = 0;
                 }
             }
         } else {
-            arg0->unk39C = arg0->unk37C * 0.01745329238474369f;
+            CAM->yawRad = CAM->yaw * DEG2RAD;
         }
-        angle = arg0->unk39C;
+        angle = CAM->yawRad;
         if (D_800BEA0C != 0) {
-            arg0->unk37C += (f32)1 * FX(0x7E0) * D_800BEA08;
-            arg0->unk39C = arg0->unk37C * 0.01745329238474369f;
-            angle = arg0->unk39C;
+            // matching: only the (f32)1 factor matches (dropping it or writing 1.0f changes the code)
+            CAM->yaw += (f32)1 * CAM->spinDir * D_800BEA08;
+            CAM->yawRad = CAM->yaw * DEG2RAD;
+            angle = CAM->yawRad;
         } else if (func_150ADA20() & 1) {
-            FX(0x7E0) = -1.0f;
+            CAM->spinDir = -1.0f;
         } else {
-            FX(0x7E0) = 1.0f;
+            CAM->spinDir = 1.0f;
         }
-        if ((*((u8 *)arg0->unk3D4 + 0x95) != 0) && (arg0->unk5F0 & 0x40)) {
-            angle = arg0->unk3D0->unk40 + 180.0f;
-            func_15049688(&arg0->unk37C, angle, &FX(0x844), 2.0f, 4.0f, arg0->unk7B4);
-            arg0->unk39C = arg0->unk37C * 0.01745329238474369f;
-            angle = arg0->unk39C;
-            arg0->unk374 = 530.0f;
+        if ((CAM->playerExt->unk95 != 0) && (CAM->status & 0x40)) {
+            angle = CAM->player->unk40 + 180.0f;
+            func_15049688(&CAM->yaw, angle, &CAM->yawVel, 2.0f, 4.0f, CAM->dt);
+            CAM->yawRad = CAM->yaw * DEG2RAD;
+            angle = CAM->yawRad;
+            CAM->targetDistance = 530.0f;
         }
-        if (arg0->unk2C != 0x2000) {
-            FX(0x370) = sqrtf((arg0->unk2F8 - arg0->unk2BC) * (arg0->unk2F8 - arg0->unk2BC) + (arg0->unk300 - arg0->unk2C4) * (arg0->unk300 - arg0->unk2C4));
-            if ((arg0->unk73C != 0) || (arg0->unk23C != 0) || (*((u8 *)arg0->unk3D0 + 0x102) != 0) ||
-                (!(arg0->unk84 & 0x1000) && (BX(0x92C) == 0) && !(arg0->unk84 & 0x40000) && !(arg0->unk5F0 & 0x80))) {
-                {
+        if (CAM->mode != 0x2000) {
+            CAM->distance = sqrtf((CAM->eye.x - CAM->target.x) * (CAM->eye.x - CAM->target.x) +
+                                  (CAM->eye.z - CAM->target.z) * (CAM->eye.z - CAM->target.z));
+            if ((CAM->unk73C != 0) || (CAM->snap != 0) || (CAM->player->unk102 != 0) ||
+                (!(CAM->unk84 & 0x1000) && (CAM->unk92C == 0) && !(CAM->unk84 & 0x40000) && !(CAM->status & 0x80))) {
                 struct17 dir;
                 s16 tri[10];
                 f32 hit[3];
                 f32 dist;
-                f32 d;
+                f32 pad1; // matching: unused stack slots (pad1, pad2) in the frame
                 s16 tri2[10];
-                f32 vz;
-                f32 vy;
-                f32 vx;
-                struct17 e1;
-                struct17 e2;
-                struct17 n;
+                f32 backZ;
+                f32 pad2;
+                f32 backX;
+                struct17 edge1;
+                struct17 edge2;
+                struct17 normal;
                 f32 hit2[3];
                 f32 dist2;
-                f32 prev;
-                struct17 p0;
-                struct17 p1;
-                struct17 p2;
+                f32 prevDistance;
+                struct17 v0;
+                struct17 v1;
+                struct17 v2;
 
-                dir.unk0 = sinf(arg0->unk39C);
+                dir.unk0 = sinf(CAM->yawRad);
                 dir.unk4 = 0.0f;
-                dir.unk8 = cosf(arg0->unk39C);
-                if ((func_150AC9C0(arg0->unk2A4, arg0->unk2A8 + 140.0f, FX(0x2AC), dir.unk0, dir.unk4, dir.unk8, 0, tri,
-                                   &hit[0], &hit[1], &hit[2], &dist, 0, 0, arg0->unk374 + 30.0f) != 0) &&
-                    (dist < arg0->unk374)) {
+                dir.unk8 = cosf(CAM->yawRad);
+                if ((func_150AC9C0(CAM->focus.x, CAM->focus.y + 140.0f, CAM->focus.z, dir.unk0, dir.unk4, dir.unk8, 0,
+                                   tri, &hit[0], &hit[1], &hit[2], &dist, 0, 0, CAM->targetDistance + 30.0f) != 0) &&
+                    (dist < CAM->targetDistance)) {
+                    backX = sinf(CAM->yawRad + 3.1415927410125732f) * CAM->targetDistance;
+                    backZ = cosf(CAM->yawRad + 3.1415927410125732f) * CAM->targetDistance;
+                    v0.unk0 = tri[0];
+                    v0.unk4 = tri[1];
+                    v0.unk8 = tri[2];
+                    v1.unk0 = tri[3];
+                    v1.unk4 = tri[4];
+                    v1.unk8 = tri[5];
+                    v2.unk0 = tri[6];
+                    v2.unk4 = tri[7];
+                    v2.unk8 = tri[8];
+                    func_15048F90(&v0, &v1, &edge1);
+                    func_15048F90(&v0, &v2, &edge2);
+                    func_150AD8B0(&edge2, &edge1, &normal);
+                    func_1504917C(&normal, &normal);
+                    if (0.3253220021724701f < func_150AD900(&dir.unk0, &normal.unk0)) {
+                        if (func_150AC9C0(CAM->focus.x - backX, CAM->focus.y + 140.0f, CAM->focus.z - backZ, backX,
+                                          0.0f, backZ, 0, tri2, &hit2[0], &hit2[1], &hit2[2], &dist2, 0, 0,
+                                          CAM->targetDistance + 30.0f) != 0) {
+                            f32 dx;
+                            f32 dz;
 
-                    vx = sinf(arg0->unk39C + 3.1415927410125732f) * arg0->unk374;
-                    vz = cosf(arg0->unk39C + 3.1415927410125732f) * arg0->unk374;
-                    p0.unk0 = tri[0];
-                    p0.unk4 = tri[1];
-                    p0.unk8 = tri[2];
-                    p1.unk0 = tri[3];
-                    p1.unk4 = tri[4];
-                    p1.unk8 = tri[5];
-                    p2.unk0 = tri[6];
-                    p2.unk4 = tri[7];
-                    p2.unk8 = tri[8];
-                    func_15048F90(&p0, &p1, &e1);
-                    func_15048F90(&p0, &p2, &e2);
-                    func_150AD8B0(&e2, &e1, &n);
-                    func_1504917C(&n, &n);
-                    if (0.3253220021724701f < func_150AD900(&dir.unk0, &n.unk0)) {
-                        if (func_150AC9C0(arg0->unk2A4 - vx, arg0->unk2A8 + 140.0f, FX(0x2AC) - vz, vx, 0.0f, vz, 0,
-                                       tri2, &hit2[0], &hit2[1], &hit2[2], &dist2, 0, 0, arg0->unk374 + 30.0f) != 0) {
-                        {
-                        f32 dx;
-                        f32 dz;
-
-                        dx = hit2[0] - hit[0];
-                        dz = hit2[2] - hit[2];
-                        if ((sqrtf(dx * dx + dz * dz) < 1.0f) ||
-                         (arg0->unk5F0 & 0x10) || (arg0->unk23E == 0xC) || (arg0->unk23E == 9) ||
-                         (arg0->unk23E == 0x38) || (arg0->unk23E == 0x39) || (arg0->unk23E == 0x37) ||
-                         (arg0->unk23E == 0x3B) || (arg0->unk23E == 0x12) || (arg0->unk23E == 0x15) ||
-                         (arg0->unk23E == 0x26) || (arg0->unk23E == 0x3A) || (arg0->unk23C != 0)) {
-                        prev = arg0->unk374;
-                        if (arg0->unk73C != 0) {
-                            dist -= 16.0f;
-                        } else {
-                            dist -= 12.0f;
-                        }
-                        if (dist < 50.0f) {
-                            dist = 50.0f;
-                        } else {
-                            dist = dist;
-                        }
-                        if (dist < arg0->unk374) {
-                            arg0->unk374 = dist;
-                        } else {
-                            arg0->unk374 = arg0->unk374;
-                        }
-                        if (arg0->unk23E == 3) {
-                            arg0->unk348 *= arg0->unk374 / prev;
-                            if (arg0->unk5F0 & 0x10) {
-                                if (arg0->unk348 < arg0->unk2C0 - arg0->unk354) {
-                                    arg0->unk348 = arg0->unk2C0 - arg0->unk354;
+                            dx = hit2[0] - hit[0];
+                            dz = hit2[2] - hit[2];
+                            if ((sqrtf(dx * dx + dz * dz) < 1.0f) || (CAM->status & 0x10) || (CAM->zone == 0xC) ||
+                                (CAM->zone == 9) || (CAM->zone == 0x38) || (CAM->zone == 0x39) ||
+                                (CAM->zone == 0x37) || (CAM->zone == 0x3B) || (CAM->zone == 0x12) ||
+                                (CAM->zone == 0x15) || (CAM->zone == 0x26) || (CAM->zone == 0x3A) ||
+                                (CAM->snap != 0)) {
+                                prevDistance = CAM->targetDistance;
+                                if (CAM->unk73C != 0) {
+                                    dist -= 16.0f;
                                 } else {
-                                    arg0->unk348 = arg0->unk348;
+                                    dist -= 12.0f;
                                 }
+                                dist = (dist < 50.0f) ? 50.0f : dist;
+                                CAM->targetDistance = (dist < CAM->targetDistance) ? dist : CAM->targetDistance;
+                                if (CAM->zone == 3) {
+                                    CAM->height *= CAM->targetDistance / prevDistance;
+                                    if (CAM->status & 0x10) {
+                                        CAM->height = (CAM->height < CAM->target.y - CAM->unk354)
+                                                          ? CAM->target.y - CAM->unk354
+                                                          : CAM->height;
+                                    }
+                                }
+                                CAM->blockedDistance = dist;
+                                CAM->blocked = 1;
                             }
                         }
-                        FX(0x604) = dist;
-                        BX(0x600) = 1;
-                    }
-                    }
-                    }
                     }
                 }
-                }
             }
-            if (arg0->unk7F4 != 0) {
-                arg0->unk374 = D_800DC000;
+            if (CAM->transition.state != 0) {
+                CAM->targetDistance = D_800DC000;
             }
-            if (arg0->unk23C != 0) {
-                FX(0x370) = arg0->unk374;
-                FX(0x258) = 0.0f;
-                if (arg0->unk84 & 0x200000) {
-                    if (arg0->unk2C & 0x40) {
-                        FX(0x974) = 1.0f;
-                        FX(0x964) = 1.0f;
-                        FX(0x978) = 2.0f;
-                        FX(0x968) = 2.0f;
+            if (CAM->snap != 0) {
+                CAM->distance = CAM->targetDistance;
+                CAM->distanceVel = 0.0f;
+                if (CAM->unk84 & 0x200000) {
+                    if (CAM->mode & 0x40) {
+                        CAM->unk974 = 1.0f;
+                        CAM->unk964 = 1.0f;
+                        CAM->unk978 = 2.0f;
+                        CAM->unk968 = 2.0f;
                     } else {
-                        FX(0x978) = 8.0f;
-                        FX(0x968) = 8.0f;
-                        FX(0x974) = 6.0f;
-                        FX(0x964) = 6.0f;
+                        CAM->unk978 = 8.0f;
+                        CAM->unk968 = 8.0f;
+                        CAM->unk974 = 6.0f;
+                        CAM->unk964 = 6.0f;
                     }
-                    FX(0x984) = 0.0f;
-                    FX(0x988) = 0.0f;
+                    CAM->unk984 = 0.0f;
+                    CAM->unk988 = 0.0f;
                 }
             } else {
-                if ((SX(0x7B8) != 0) || (arg0->unk2C & 0x100) || ((arg0->unk2C & 0x80) && (*arg0->unk36C & 0x10))) {
-                    FX(0x3B4) = 6.0f;
-                    FX(0x3B8) = 10.0f;
-                } else if ((D_800BE616 != 0) || (arg0->unk84 & 0x200000)) {
-                    if (arg0->unk2C & 0x40) {
-                        FX(0x974) = 1.0f;
-                        FX(0x978) = 2.0f;
+                if ((CAM->presetCooldown != 0) || (CAM->mode & 0x100) ||
+                    ((CAM->mode & 0x80) && (CAM->contPad->button & R_TRIG))) {
+                    CAM->distanceAccel = 6.0f;
+                    CAM->distanceMaxSpeed = 10.0f;
+                } else if ((D_800BE616 != 0) || (CAM->unk84 & 0x200000)) {
+                    if (CAM->mode & 0x40) {
+                        CAM->unk974 = 1.0f;
+                        CAM->unk978 = 2.0f;
                     } else {
-                        FX(0x974) = 6.0f;
-                        FX(0x978) = 8.0f;
+                        CAM->unk974 = 6.0f;
+                        CAM->unk978 = 8.0f;
                     }
-                    func_150495B0(&FX(0x964), FX(0x974), &FX(0x984), 1.0f, 2.0f, arg0->unk7B4);
-                    func_150495B0(&FX(0x968), FX(0x978), &FX(0x988), 1.0f, 2.0f, arg0->unk7B4);
-                    FX(0x3B4) = FX(0x964);
-                    FX(0x3B8) = FX(0x968);
-                } else if ((*((u8 *)arg0->unk3D0 + 0x102) != 0) || (BX(0x8EC) != 0) ||
-                           ((BX(0x92C) != 0) && (HX(0x920) & 0x40))) {
-                    FX(0x3B4) = 6.0f;
-                    FX(0x3B8) = 8.0f;
-                } else if ((arg0->unk36A & 3) || (arg0->unk2C & 0x40)) {
-                    FX(0x3B4) = 1.0f;
-                    FX(0x3B8) = 2.0f;
+                    func_150495B0(&CAM->unk964, CAM->unk974, &CAM->unk984, 1.0f, 2.0f, CAM->dt);
+                    func_150495B0(&CAM->unk968, CAM->unk978, &CAM->unk988, 1.0f, 2.0f, CAM->dt);
+                    CAM->distanceAccel = CAM->unk964;
+                    CAM->distanceMaxSpeed = CAM->unk968;
+                } else if ((CAM->player->unk102 != 0) || (CAM->lookingBehind != 0) ||
+                           ((CAM->unk92C != 0) && (CAM->unk920 & 0x40))) {
+                    CAM->distanceAccel = 6.0f;
+                    CAM->distanceMaxSpeed = 8.0f;
+                } else if ((CAM->buttonsPressed & (L_CBUTTONS | R_CBUTTONS)) || (CAM->mode & 0x40)) {
+                    CAM->distanceAccel = 1.0f;
+                    CAM->distanceMaxSpeed = 2.0f;
                 } else {
-                    FX(0x3B4) = 2.0f;
-                    FX(0x3B8) = 3.0f;
+                    CAM->distanceAccel = 2.0f;
+                    CAM->distanceMaxSpeed = 3.0f;
                 }
                 if (D_800BEA0C == 0) {
-                    if (BX(0x600) != 0) {
-                        if ((arg0->unk73C != 0) || (D_800BE616 != 0)) {
-                            func_150495B0(&FX(0x370), arg0->unk374, &FX(0x258), 8.0f, 10.0f, arg0->unk7B4);
+                    if (CAM->blocked != 0) {
+                        if ((CAM->unk73C != 0) || (D_800BE616 != 0)) {
+                            func_150495B0(&CAM->distance, CAM->targetDistance, &CAM->distanceVel, 8.0f, 10.0f, CAM->dt);
                         } else {
-                            func_150495B0(&FX(0x370), arg0->unk374, &FX(0x258), 6.0f, 8.0f, arg0->unk7B4);
+                            func_150495B0(&CAM->distance, CAM->targetDistance, &CAM->distanceVel, 6.0f, 8.0f, CAM->dt);
                         }
                     } else {
-                        func_150495B0(&FX(0x370), arg0->unk374, &FX(0x258), FX(0x3B4), FX(0x3B8), arg0->unk7B4);
+                        func_150495B0(&CAM->distance, CAM->targetDistance, &CAM->distanceVel, CAM->distanceAccel,
+                                      CAM->distanceMaxSpeed, CAM->dt);
                     }
-                } else if ((D_800895B0 == 0.0f) && ((arg0->unk3E8 != 0) || (*((u8 *)arg0->unk3D0 + 0x102) != 0))) {
-                    func_150495B0(&FX(0x370), 200.0f, &FX(0x258), 4.0f, 8.0f, arg0->unk7B4);
+                } else if ((D_800895B0 == 0.0f) && ((CAM->unk3E8 != 0) || (CAM->player->unk102 != 0))) {
+                    func_150495B0(&CAM->distance, 200.0f, &CAM->distanceVel, 4.0f, 8.0f, CAM->dt);
                 } else {
-                    func_150495B0(&FX(0x370), 200.0f, &FX(0x258), 0.5f, 1.0f, arg0->unk7B4);
+                    func_150495B0(&CAM->distance, 200.0f, &CAM->distanceVel, 0.5f, 1.0f, CAM->dt);
                 }
             }
-            arg0->unk2F8 = FX(0x370) * sinf(angle) + arg0->unk2BC;
-            arg0->unk300 = FX(0x370) * cosf(angle) + arg0->unk2C4;
-            FX(0x370) = sqrtf((arg0->unk2F8 - arg0->unk2BC) * (arg0->unk2F8 - arg0->unk2BC) + (arg0->unk300 - arg0->unk2C4) * (arg0->unk300 - arg0->unk2C4));
-            if (arg0->unk374 + arg0->unk374 < FX(0x370)) {
-                if ((*arg0->unk36C & 3) && (D_800BE616 == 0)) {
-                    *arg0->unk36C &= 0xFFFC;
-                    arg0->unk36A &= 0xFFFC;
+            CAM->eye.x = CAM->distance * sinf(angle) + CAM->target.x;
+            CAM->eye.z = CAM->distance * cosf(angle) + CAM->target.z;
+            CAM->distance = sqrtf((CAM->eye.x - CAM->target.x) * (CAM->eye.x - CAM->target.x) +
+                                  (CAM->eye.z - CAM->target.z) * (CAM->eye.z - CAM->target.z));
+            if (CAM->targetDistance + CAM->targetDistance < CAM->distance) {
+                if ((CAM->contPad->button & (L_CBUTTONS | R_CBUTTONS)) && (D_800BE616 == 0)) {
+                    CAM->contPad->button &= ~(L_CBUTTONS | R_CBUTTONS);
+                    CAM->buttonsPressed &= ~(L_CBUTTONS | R_CBUTTONS);
                 }
             }
-            arg0->unk374 = saved;
+            CAM->targetDistance = savedDistance;
         }
     }
 }
