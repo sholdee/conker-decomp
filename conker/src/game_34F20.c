@@ -69,7 +69,6 @@ void func_150031EC(s32);
 void func_150039E0(s32, s32);
 void func_150045C4(s32);
 void func_15005290(s32, s32);
-void func_1500C1E0(void);
 void func_150169A0(s32);
 void func_15017930(s32);
 void func_150A11C4(void *);

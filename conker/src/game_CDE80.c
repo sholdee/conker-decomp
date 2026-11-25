@@ -610,7 +610,6 @@ void func_150A23E4(TriggerZone *zone) {
     }
 }
 
-s32 func_15183290(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* A TriggerZone with data1 and data2 viewed as halves and bytes. */
 typedef struct {

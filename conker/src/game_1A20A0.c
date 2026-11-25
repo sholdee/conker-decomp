@@ -5,7 +5,7 @@
 
 /* A flying swarm member (bat/bird): spawned by func_15174BF0 / func_15174FA4 / func_15175390,
  * updated by func_15175958 and friends, drawn by func_151770C8 / func_15176DF0. */
-typedef struct SwarmActor {
+struct SwarmActor {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ Mtx mtx[2];           /* double-buffered by D_800BE9C0 */
     /* 0x90 */ u8 group;             /* index into D_800DDF5C / D_800DDF60 */
@@ -32,7 +32,7 @@ typedef struct SwarmActor {
     /* 0xEE */ u16 sound;
     /* 0xF0 */ u8 alpha;
     /* 0xF1 */ u8 fadingOut;
-} SwarmActor;
+};
 
 
 u16 func_10010E78(u16 arg0, s32 arg1, u16 arg2, s32 arg3, s32 arg4,

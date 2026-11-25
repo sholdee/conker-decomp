@@ -1624,7 +1624,6 @@ typedef struct ListedObject {
     /* 0xED */ u8 unkED;
 } ListedObject;
 
-void func_15183ACC(s32);
 s32 func_1510F8D8(s32, s32, s32, s32);
 
 /*
