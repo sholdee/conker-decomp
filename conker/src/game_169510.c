@@ -223,14 +223,14 @@ void func_1513C060(SpriteFx *sprite) {
 }
 
 /* Allocates a sprite from a template; extraSize bytes follow it. */
-struct210 *func_1513C350(struct210 *def, s32 colors, u8 updateFn, u8 expireFn, u8 flip, s32 model, s32 arg6,
+struct210 *func_1513C350(void *def, void *colors, u8 updateFn, u8 expireFn, u8 flip, s32 model, s32 arg6,
                          struct167 *pos, s32 extraSize, u8 arg9, s32 argA) {
     SpriteFx *sprite;
     u8 kind;
     s32 i;
 
-    if (colors == 0) {
-        colors = (s32)&D_800A4AA0;
+    if (colors == NULL) {
+        colors = &D_800A4AA0;
     }
     if (((SpriteDef *)def)->flags & 0x40000) {
         kind = 0x4A;
@@ -268,7 +268,7 @@ struct210 *func_1513C350(struct210 *def, s32 colors, u8 updateFn, u8 expireFn, u
 }
 
 /* Spawns a flat (xz-plane) sprite at (x, y, z). */
-struct210 *func_1513C4EC(s32 def, s32 colors, u8 updateFn, u8 expireFn, f32 x, f32 y, f32 z, f32 width, f32 length,
+struct210 *func_1513C4EC(void *def, void *colors, u8 updateFn, u8 expireFn, f32 x, f32 y, f32 z, f32 width, f32 length,
                          u8 angle, u8 flip, s32 model, s32 arg6, s32 extraSize, u8 argE, s32 argF) {
     struct210 *sprite;
     Vec3f pos;
@@ -297,7 +297,7 @@ struct210 *func_1513C5B0(void *def, void *colors, u8 updateFn, u8 expireFn, f32 
 }
 
 /* Spawns a sprite oriented by func_1513E2AC, with the default colours. */
-struct210 *func_1513C650(s32 def, u8 updateFn, u8 expireFn, s32 arg3, f32 x, f32 y, f32 z, f32 width, f32 height,
+struct210 *func_1513C650(void *def, u8 updateFn, u8 expireFn, s32 arg3, f32 x, f32 y, f32 z, f32 width, f32 height,
                          u8 angle, u8 flip, s32 model, s32 arg6, s32 extraSize, u8 argE, s32 argF) {
     struct210 *sprite;
     Vec3f pos;
@@ -319,7 +319,7 @@ struct210 *func_1513C650(s32 def, u8 updateFn, u8 expireFn, s32 arg3, f32 x, f32
 }
 
 /* As func_1513C650, without a model or stored position. */
-struct210 *func_1513C73C(s32 def, u8 updateFn, u8 expireFn, s32 arg3, f32 x, f32 y, f32 z, f32 width, f32 height,
+struct210 *func_1513C73C(void *def, u8 updateFn, u8 expireFn, s32 arg3, f32 x, f32 y, f32 z, f32 width, f32 height,
                          u8 angle, u8 flip, s32 extraSize, u8 argC, s32 argD) {
     struct210 *sprite = func_1513C350(def, 0, updateFn, expireFn, flip, 0, 0, NULL, extraSize, argC, argD);
 
@@ -335,7 +335,7 @@ struct210 *func_1513C73C(s32 def, u8 updateFn, u8 expireFn, s32 arg3, f32 x, f32
 }
 
 /* As func_1513C73C; arg1 is unused and the default colours are used. */
-struct210 *func_1513C804(s32 def, s32 arg1, u8 updateFn, u8 expireFn, s32 arg4, f32 x, f32 y, f32 z, f32 width,
+struct210 *func_1513C804(void *def, s32 arg1, u8 updateFn, u8 expireFn, s32 arg4, f32 x, f32 y, f32 z, f32 width,
                          f32 height, u8 angle, u8 flip, s32 extraSize, u8 argD, s32 argE) {
     struct210 *sprite = func_1513C350(def, 0, updateFn, expireFn, flip, 0, 0, NULL, extraSize, argD, argE);
 

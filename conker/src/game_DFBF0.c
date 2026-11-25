@@ -611,7 +611,7 @@ s32 func_150B37C8(PipeExplodeActor *actor, s32 arg1, s32 arg2, s32 arg3, f32 y, 
         rand1 = func_150ADA20();
         rand2 = func_150ADA20();
 
-        func_1513C73C((s32)&particle, 1, 0, arg5,
+        func_1513C73C(&particle, 1, 0, arg5,
                       particle.points[actor->pointIndex].x,
                       y,
                       particle.points[actor->pointIndex].z,

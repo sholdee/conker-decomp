@@ -936,7 +936,7 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
         debris.unk22 = 0x20;
         debris.unk24 = 7;
         ext = &trail->trail;
-        func_1513C650((s32)&debris, 0, 0, (s32)ext->path.surface, ext->path.hit.x, ext->path.hit.y, ext->path.hit.z,
+        func_1513C650(&debris, 0, 0, (s32)ext->path.surface, ext->path.hit.x, ext->path.hit.y, ext->path.hit.z,
                       scale, scale, func_150ADA20() & 0xFF, 0, 0, 0, 0, trail->unkC, trail->unk1);
     }
     if (func_150ADA68() < sparkChance) {

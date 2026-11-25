@@ -692,7 +692,7 @@ void func_150E7FEC(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 duration, u
         argB = 0;
         argC = 0;
     }
-    func_1513C650((s32)&arg, 0, 0, arg2, position->x, position->y, position->z, size, size, func_150ADA20() & 0xFF,
+    func_1513C650(&arg, 0, 0, arg2, position->x, position->y, position->z, size, size, func_150ADA20() & 0xFF,
                   (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2), argB, argC, 0, owner, kind);
 }
 
@@ -1435,7 +1435,7 @@ s32 func_150E971C(Game113D60Debris *debris) {
             splash.unk22 = 20;
             splash.unk24 = 12;
 
-            func_1513C73C((s32)&splash, 0, 0, (s32)extra->unk8, debris->position.x, extra->floorY + 5.0f,
+            func_1513C73C(&splash, 0, 0, (s32)extra->unk8, debris->position.x, extra->floorY + 5.0f,
                           debris->position.z, size, size, func_150ADA20() & 0xFF, 0, 0, debris->header.owner,
                           debris->header.kind);
         }

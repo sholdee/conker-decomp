@@ -286,7 +286,7 @@ s32 func_150E67D0(Streak *streak) {
     info.unk18 = 0x130001;
 
     impact = &streak->impact;
-    func_1513C73C((s32)&info, 0, 0, (s32)impact->unk14, impact->point.x, impact->point.y, impact->point.z, 50.0f,
+    func_1513C73C(&info, 0, 0, (s32)impact->unk14, impact->point.x, impact->point.y, impact->point.z, 50.0f,
                   50.0f, func_150ADA20() & 0xFF, 0, 0, streak->unkC, streak->unk1);
     return 0;
 }

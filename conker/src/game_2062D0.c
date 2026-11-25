@@ -490,7 +490,7 @@ void func_151D9B8C(u8 kind, f32 size, u8 arg2, s32 arg3, Vec3f *pos, s16 lifetim
     desc.unk17 = 7;
     desc.unk20 = 0xFF;
     desc.unk1C = 0;
-    if (func_1513C650((s32)&desc, 0, 0, arg3, pos->x, pos->y, pos->z, size, size,
+    if (func_1513C650(&desc, 0, 0, arg3, pos->x, pos->y, pos->z, size, size,
                       func_150ADA20() & 0xFF, (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2),
                       arg7 ? 3 : 0, arg7 ? 0xFF : 0, 0, arg9, argA) != NULL &&
         arg8 && func_15144E80(arg3, &outA, &outB, &normal)) {
@@ -1363,7 +1363,7 @@ void func_151DBCBC(u8 kind, f32 size, s16 arg2, s32 arg3, void *pos, u8 arg5, s3
     desc.unk20 = 0xFF;
     desc.unk1C = 0;
     if (arg3 != 0) {
-        func_1513C73C((s32)&desc, 0, 0, arg3, ((Vec3f *)pos)->x, ((Vec3f *)pos)->y,
+        func_1513C73C(&desc, 0, 0, arg3, ((Vec3f *)pos)->x, ((Vec3f *)pos)->y,
                       ((Vec3f *)pos)->z, size, size, func_150ADA20() & 0xFF,
                       (func_150ADA20() & 1) + (func_150ADA20() & 1) * 2, 0, arg5, arg6);
     } else {

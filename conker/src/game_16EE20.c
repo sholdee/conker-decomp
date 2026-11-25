@@ -346,7 +346,7 @@ void func_15141F78(u8 kind, Source15141F78 *src, f32 scale, u8 arg3, Vec3f *pos,
         flag = 0;
     }
 
-    func_1513C650((s32)&packet, 0, 0, (s32)src->unk4, pos->x, src->unk0, pos->z, size, size, arg3, flag, 3, 1, 0, 0xFF, 1);
+    func_1513C650(&packet, 0, 0, (s32)src->unk4, pos->x, src->unk0, pos->z, size, size, arg3, flag, 3, 1, 0, 0xFF, 1);
 }
 
 /* Template copied onto the stack for func_150A2AEC. */

@@ -1340,7 +1340,7 @@ void func_15136918(f32 size, u8 arg1, u8 arg2, s16 lifetime, s16 arg4, s32 arg5,
         desc.unk0 = 0x301;
         desc.unk4 = lifetime + 32;
     }
-    func_1513C73C((s32)&desc, 0xD, 0, arg5, position[0], position[1], position[2], size, size, arg4, 0, 0, arg7, arg8);
+    func_1513C73C(&desc, 0xD, 0, arg5, position[0], position[1], position[2], size, size, arg4, 0, 0, arg7, arg8);
 }
 
 /* Particle callback: fades unk28 out over the last 32 frames. */

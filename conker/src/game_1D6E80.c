@@ -867,7 +867,7 @@ void func_151AADF8(ActorTask *task) {
         part.unk18 = 0x440001;
         part.unk16 = 0;
         part.unk17 = 6;
-        fx->flicker = (FlickerFx *)func_1513C73C((s32)&part, 7, 1, (s32)task->hit.points, pos[0], pos[1], pos[2],
+        fx->flicker = (FlickerFx *)func_1513C73C(&part, 7, 1, (s32)task->hit.points, pos[0], pos[1], pos[2],
                                                  size, size, func_150ADA20() & 0xFF,
                                                  (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2), 0x20, 0xFF, 1);
         if (fx->flicker != NULL) {

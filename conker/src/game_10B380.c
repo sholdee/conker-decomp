@@ -141,7 +141,7 @@ s32 func_150DDFAC(EffectSpawnSource *source, s32 arg1, s32 arg2, s32 arg3, f32 y
     rand1 = func_150ADA20();
     rand2 = func_150ADA20();
 
-    func_1513C73C((s32)&def, 5, 0, arg5, points[source->pointIndex].x, y, points[source->pointIndex].z, size, size,
+    func_1513C73C(&def, 5, 0, arg5, points[source->pointIndex].x, y, points[source->pointIndex].z, size, size,
                   rand0 & 0xFF, (rand2 & 1) + (rand1 & 1), 0, source->unk0C, source->unk01);
     return 1;
 }
@@ -186,7 +186,7 @@ s32 func_150DE12C(EffectSpawnSource *source, s32 arg1, s32 arg2, s32 arg3, f32 y
     rand1 = func_150ADA20();
     rand2 = func_150ADA20();
 
-    func_1513C73C((s32)&def, 5, 0, arg5, points[source->pointIndex].x, y, points[source->pointIndex].z, size, size,
+    func_1513C73C(&def, 5, 0, arg5, points[source->pointIndex].x, y, points[source->pointIndex].z, size, size,
                   rand0 & 0xFF, (rand2 & 1) + (rand1 & 1), 0, source->unk0C, source->unk01);
     return 1;
 }

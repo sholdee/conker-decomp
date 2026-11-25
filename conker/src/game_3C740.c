@@ -42,7 +42,7 @@ void *func_1500F290(f32 arg0, f32 arg1, f32 arg2) {
     tmp.unk14 = 0;
     tmp.unk15 = 0xFF;
     tmp.unk18 = 0x30001;
-    return func_1513C5B0((s32)&tmp, 0, 0, 0, arg0, arg1, arg2, 110.0f, 110.0f, 0, 0, 0, 0xFF, 0);
+    return func_1513C5B0(&tmp, 0, 0, 0, arg0, arg1, arg2, 110.0f, 110.0f, 0, 0, 0, 0xFF, 0);
 }
 
 typedef struct {

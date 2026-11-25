@@ -104,7 +104,7 @@ struct210 *func_15102920(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 durat
         argB = 0;
         argC = 0;
     }
-    result = func_1513C650((s32)&arg, 0, 0, arg2, position->x, position->y, position->z, size, size,
+    result = func_1513C650(&arg, 0, 0, arg2, position->x, position->y, position->z, size, size,
                            func_150ADA20() & 0xFF, (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2), argB, argC, 0,
                            arg8, arg9);
     return result;

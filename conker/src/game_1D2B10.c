@@ -306,7 +306,7 @@ struct210 *func_151A5D58(f32 size, u8 arg1, s32 arg2, f32 *pos, s16 duration, u8
     params.unk16 = 0;
     params.unk17 = 6;
     params.unk20 = 0xFF;
-    return func_1513C650((s32)&params, 0, 0, arg2, pos[0], pos[1], pos[2], size, size,
+    return func_1513C650(&params, 0, 0, arg2, pos[0], pos[1], pos[2], size, size,
                          func_150ADA20() & 0xFF, (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2),
                          arg5 ? 3 : 0, arg5 ? 0xFF : 0, 0, arg7, arg8);
 }
