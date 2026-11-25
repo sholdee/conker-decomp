@@ -155,7 +155,6 @@ typedef struct {
     /* 0x2F */ u8 fallRate;
 } Struct150BF0F4;
 
-
 void func_150BEF70(s32 arg0) {
 }
 
