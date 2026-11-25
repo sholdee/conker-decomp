@@ -42,6 +42,19 @@ Each agent takes a list of subsystems. For each subsystem:
    definitions in its files.
 2. Move the declarations of those symbols out of `functions.h` and `variables.h`.
 3. Remove the local copies from every C file, in all subsystems.
+4. `effects.h` is in the umbrella now. Remove `#include "effects.h"` from the C files of the subsystem.
+
+Notes for phase 2:
+- `sched` is done. Use it as the example. `init_50A0.c` does not include the umbrella headers (see the
+  comment at its top). Do not change that.
+- **libultra.** The files under `src/libultra/` are SDK code. Their declarations come from the SDK
+  headers (`include/2.0L/PR/*.h` and the internal headers next to the files, for example
+  `controller.h`, `n_synthInternals.h`). Do not put libultra symbols into `include/conker/`. A Rare
+  function or global that a libultra file uses goes into the header of its subsystem.
+- **The .bss order can change in other files too.** IDO lays out a file's .bss in an order that
+  depends on the number of types and variables that the file declares before the .bss. Sometimes
+  a land fails because the .bss of a file that you did not edit moved. Then read the comment at the
+  top of `init_50A0.c`. Write the case in `notes.md` and skip the edit.
 
 ## Loop
 ```
