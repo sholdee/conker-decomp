@@ -1238,18 +1238,19 @@ typedef struct MarkerPoint {
     s16 z;
 } MarkerPoint;
 
+/* Spawns object D_800D1580 & 0xFF ahead of the current object, with its marker 5000 units out. */
 void func_1506D2E8(void) {
     struct127 *obj;
     f32 xOff;
     f32 zOff;
     f32 yOff;
-    s32 cmd;
+    s32 type;
     s32 angle;
     f32 height;
 
-    cmd = D_800D1580 & 0xFF;
-    obj = func_1505EEF4(func_15083E0C(cmd));
-    if (obj == 0) {
+    type = D_800D1580 & 0xFF;
+    obj = func_1505EEF4(func_15083E0C(type));
+    if (obj == NULL) {
         return;
     }
 
@@ -1269,7 +1270,7 @@ void func_1506D2E8(void) {
     ((MarkerPoint **)D_800D2104)[obj->unk13F]->z = D_800D154C->z_position + zOff;
     ((MarkerPoint **)D_800D2104)[obj->unk13F]->y = D_800D154C->y_position + yOff;
     obj->unk65 = 0;
-    obj->unk218 = 0;
+    obj->unk218 = NULL;
 
     if ((D_800D1580 & 0xFF00) != 0) {
         obj->y_position = D_800D154C->y_position + 70.0f;
@@ -1280,7 +1281,7 @@ void func_1506D2E8(void) {
         obj->unk232 = 2;
         obj->xz_velocity = -15.0f;
         obj->y_velocity = 34.0f;
-        obj->gravity = D_80099D44;
+        obj->gravity = 1.1f;
         obj->xz_scale = 0.5f;
         obj->y_scale = 0.5f;
     }
@@ -1290,7 +1291,7 @@ void func_1506D4EC(void) {
 }
 
 void func_1506D4F4(void) {
-    func_1505E650(D_800D154C, D_800D154C->unk84.uh, 0.009999999776482582f, 0.0f, 0.0f, 0.0f, 0);
+    func_1505E650(D_800D154C, D_800D154C->unk84.uh, 0.01f, 0.0f, 0.0f, 0.0f, 0);
 }
 
 void func_1506D538(void) {
@@ -1303,52 +1304,74 @@ void func_1506D570(void) {
     D_800D154C->unk6E = 0;
 }
 
-extern f32 D_80099D48;
 extern void func_1507E7E4(u8 *, u8, u8, u16, s32);
+
+/*
+ * func_1507E7E4 with the two bytes of D_800D1580's high half and its low half (0xFFFF = none)
+ * scaled by 1 / unk2D0->unk10.
+ */
 void func_1506D584(void) {
     struct127 *obj = D_800D154C;
-    f32 divisor; u16 val; u8 a; u8 b;
-    if (((u8 *)obj)[0x70] != 0x2A) {
-        a = D_800D1580 >> 24;
-        b = (D_800D1580 >> 16) & 0xFF;
-        val = D_800D1580 & 0xFFFF;
+    f32 divisor;
+    u16 value;
+    u8 hi;
+    u8 lo;
+
+    if (HIDDEN(obj)->unk70 != 0x2A) {
+        hi = D_800D1580 >> 24;
+        lo = (D_800D1580 >> 16) & 0xFF;
+        value = D_800D1580 & 0xFFFF;
         divisor = obj->unk2D0->unk10;
-        if (divisor == 0.0f) divisor = D_80099D48;
-        if (val != 0xFFFF) val = (u32)((f32)val / divisor);
-        func_1507E7E4((u8 *)obj, a, b, val, 0);
+        if (divisor == 0.0f) {
+            divisor = 0.01f;
+        }
+        if (value != 0xFFFF) {
+            value = (u32)(value / divisor);
+        }
+        func_1507E7E4((u8 *)obj, hi, lo, value, 0);
     }
 }
-// ???
+
 void func_1506D6B4(void) {
-    struct127 *p = D_800D154C;
+    struct127 *obj = D_800D154C;
     s32 sel;
-    if (D_80099D4C == p->unk118) { return; }
-    if (p->unk118 < (f32) p->unk1A6) { return; }
-    if (p->health >= 2) { sel = 0x2C; } else { sel = 0x29; }
-    D_800D1580 = (D_800D1580 & 0xFFFF) | (sel = (sel << 10) << 14);
+
+    if (obj->unk118 == -10000.0f) {
+        return;
+    }
+    if (obj->unk118 < obj->unk1A6) {
+        return;
+    }
+    if (obj->health >= 2) {
+        sel = 0x2C;
+    } else {
+        sel = 0x29;
+    }
+    D_800D1580 = (D_800D1580 & 0xFFFF) | (sel = (sel << 10) << 14); // matching: two-step shift + store to sel
     func_1506D584();
 }
+
 void func_1506D74C(void) {
-    f32 sp34;
-    f32 sp30;
-    f32 sp2C;
+    f32 xOff;
+    f32 zOff;
+    f32 yOff;
 
     if (D_800D154C->in_water == 0) {
         D_800D154C->gravity = 5.0f;
         D_800D154C->y_velocity = 0.0f;
     }
     D_800D154C->y_position += 70.0f;
-    ((u8 *)D_800D154C)[0x137] = 0;
+    HIDDEN(D_800D154C)->unk137 = 0;
     D_800D154C->disable_run = 0;
-    func_1505A184(D_800D154C->unk76, (f32)D_800D1580, 0, &sp34, &sp30, &sp2C);
-    func_1505E650(D_800D154C, 0xF, 1.0f, 0.0f, 0.0f, 0.0f, 0);
-    D_800D154C->x_position += sp34;
-    D_800D154C->z_position += sp30;
+    func_1505A184(D_800D154C->unk76, D_800D1580, 0, &xOff, &zOff, &yOff);
+    func_1505E650(D_800D154C, 15, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+    D_800D154C->x_position += xOff;
+    D_800D154C->z_position += zOff;
     D_800D154C->unk100 |= 2;
     D_800D154C->unk28 = 0.0f;
-    D_800D154C->unk83 = 0x14;
-    D_800D154C->unk31C->unk44 = 0xC;
-    D_800D154C->unk31C->unk54 = 0xA;
+    D_800D154C->unk83 = 20;
+    D_800D154C->unk31C->unk44 = 12;
+    D_800D154C->unk31C->unk54 = 10;
 }
 
 void func_1506D898(void) {
@@ -1389,53 +1412,53 @@ void func_1506DA78(void) {
 void func_1506DA94(void) {
     if (D_800D1580 != 0) {
         if ((D_800D154C->unk44 > 20.0f) && (D_800D154C->xz_velocity > 20.0f)) {
-            D_800D154C->unk83 = (u8)0;
+            D_800D154C->unk83 = 0;
         }
     }
     func_15174690(D_800C3E78, 0, 24, 0, 409, 4, 170, 0xFF, 0);
 }
 
 void func_1506DB30(void) {
-    D_800D1890 = (s8) D_800D1580;
+    D_800D1890 = D_800D1580;
     func_15076760();
 }
 
 void func_1506DB5C(void) {
-    D_800D154C->xz_velocity = (f32) D_800D1580;
+    D_800D154C->xz_velocity = D_800D1580;
 }
 
 void func_1506DB84(void) {
-    D_800D154C->unk239 = (s8) D_800D1580;
+    D_800D154C->unk239 = D_800D1580;
 }
 
 void func_1506DBA0(void) {
-    D_800D154C->unk1E5 = D_800D1580 & 0xff;
-    D_800D154C->unk1E6 = (D_800D1580 >> 8) & 0xff;
+    D_800D154C->unk1E5 = D_800D1580 & 0xFF;
+    D_800D154C->unk1E6 = (D_800D1580 >> 8) & 0xFF;
 }
 
 void func_1506DBD4(void) {
-    struct127 *temp_v0 = func_15072208(D_800D154C, 0);
-    if (temp_v0 != NULL) {
-        func_15054A5C(temp_v0, D_800D154C);
+    struct127 *obj = func_15072208(D_800D154C, 0);
+
+    if (obj != NULL) {
+        func_15054A5C(obj, D_800D154C);
     }
 }
 
-extern f32 D_80099D50;
-
 void func_1506DC10(void) {
-    s32 a0;
-    s32 v1;
-    if (((D_800D154C->unk118 - 60.0f) < D_800D154C->y_position) || (D_80099D50 == D_800D154C->unk118)) {
-        v1 = func_150ADA20() & 3;
-        if (v1 >= 2) {
-            a0 = v1 + 0x612;
+    s32 id;
+    s32 roll;
+
+    if (D_800D154C->unk118 - 60.0f < D_800D154C->y_position || D_800D154C->unk118 == -10000.0f) {
+        roll = func_150ADA20() & 3;
+        if (roll >= 2) {
+            id = roll + 0x612;
         } else {
-            a0 = v1 + 0x8F;
+            id = roll + 0x8F;
         }
     } else {
-        a0 = 9;
+        id = 9;
     }
-    func_15060A9C(a0, D_800D154C);
+    func_15060A9C(id, D_800D154C);
 }
 
 void func_1506DCA4(void) {
@@ -1443,25 +1466,22 @@ void func_1506DCA4(void) {
 }
 
 void func_1506DCC0(void) {
-    D_800D154C->unk2EC = (s32) D_800D1580;
+    D_800D154C->unk2EC = D_800D1580;
 }
 
 void func_1506DCDC(void) {
-    D_800D154C->health = (s8) D_800D1580;
+    D_800D154C->health = D_800D1580;
 }
 
 void func_1506DCF8(void) {
 }
 
+/* Sets bits D_800D1580 in unkF8, or resets it to the unk144 default when 0. */
 void func_1506DD00(void) {
-    struct127 *temp_v1;
-
     if (D_800D1580 == 0) {
-        temp_v1 = D_800D154C;
-        temp_v1->unkF8 = (s32) temp_v1->unk144->unk18;
+        D_800D154C->unkF8 = D_800D154C->unk144->unk18;
     } else {
-        temp_v1 = D_800D154C;
-        temp_v1->unkF8 |= D_800D1580;
+        D_800D154C->unkF8 |= D_800D1580;
     }
 }
 
@@ -1470,7 +1490,7 @@ void func_1506DD44(void) {
 }
 
 void func_1506DD6C(void) {
-    if (D_800D154C->unk31C != 0) {
+    if (D_800D154C->unk31C != NULL) {
         D_800D154C->unk31C->matrix_physics = D_800D1580 & 0x7F;
     }
     if (D_800D1580 == 0) {
@@ -1489,8 +1509,8 @@ void func_1506DDC0(void) {
 
 void func_1506DE04(void) {
     s32 i;
-    for(i = 0; i < 2; i++) {
-        func_15174690(D_800C3E78, 10, 18, 12, 0x199, 4, 0xAA, 0xFF, 0);
+    for (i = 0; i < 2; i++) {
+        func_15174690(D_800C3E78, 10, 18, 12, 409, 4, 170, 0xFF, 0);
     }
 }
 
@@ -1506,31 +1526,27 @@ void func_1506E2CC(void);
 void func_1506DE84(void) {
     switch (D_800D1580) {
     case 0:
-        if (*(f32 *)((u8 *)D_800D154C + 0x28) == 0.0f) {
-            func_151875E0(*(f32 *)((u8 *)D_800D154C + 0x14),
-                          *(f32 *)((u8 *)D_800D154C + 0x18),
-                          *(f32 *)((u8 *)D_800D154C + 0x1C),
+        if (D_800D154C->unk28 == 0.0f) {
+            func_151875E0(D_800D154C->x_position, D_800D154C->y_position, D_800D154C->z_position,
                           30, 30, 7, 0.1f, 0.1f);
         }
         return;
     case 1:
-        if ((u32)(func_150ADA20() & 0xFF) < 0x40U) {
-            func_151875E0(*(f32 *)((u8 *)D_800D154C + 0x14),
-                          *(f32 *)((u8 *)D_800D154C + 0x18),
-                          *(f32 *)((u8 *)D_800D154C + 0x1C),
+        if ((u32)(func_150ADA20() & 0xFF) < 0x40U) { // 1 in 4
+            func_151875E0(D_800D154C->x_position, D_800D154C->y_position, D_800D154C->z_position,
                           10, 20, 7, 0.03f, 0.02f);
-            D_800D1580 = 0x106;
-            func_1506BA4C(0x12C, 0x708);
+            D_800D1580 = 262;
+            func_1506BA4C(300, 1800);
         }
         return;
     case 2:
-        func_1516F1C0(D_800C3E78, 0x10, 0xFF, 0);
+        func_1516F1C0(D_800C3E78, 16, 0xFF, 0);
         return;
     case 3:
-        func_1516F1C0(D_800C3E78, 0x28, 0xFF, 0);
+        func_1516F1C0(D_800C3E78, 40, 0xFF, 0);
         return;
     case 4:
-        func_1516F1C0(D_800C3E78, 0x28, 0xFF, 0);
+        func_1516F1C0(D_800C3E78, 40, 0xFF, 0);
         return;
     case 5:
         func_1516F2F8(D_800C3E78, 30, 20, 2, 0xFF, 0);
@@ -1564,8 +1580,8 @@ void func_1506DE84(void) {
 
 void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 void func_151700D8(f32 *, f32, f32, s32, f32, s32, s32, s32, s32, s32);
-void func_151875E0(f32, f32, f32, s32, s32, s32, f32, f32);
 
+/* Passes the corners of a +-270 square in the object's root matrix, at height unk180, to func_151700D8. */
 void func_1506E0EC(void) {
     f32 x;
     f32 y;
@@ -1575,8 +1591,8 @@ void func_1506E0EC(void) {
     f32 depth;
     s32 i;
     f32 vertices[4][3];
-    f32 pos_x;
-    f32 pos_z;
+    f32 posX;
+    f32 posZ;
 
     if (D_800D154C->unk1D4 != NULL) {
         width = 270.0f;
@@ -1590,7 +1606,7 @@ void func_1506E0EC(void) {
             vertices[i][0] = x;
             vertices[i][1] = height;
             vertices[i][2] = z;
-            func_151875E0(x, y, z, 0x1E, 0x14, 7, 0.13f, 0.1f);
+            func_151875E0(x, y, z, 30, 20, 7, 0.13f, 0.1f);
             if (i == 0) {
                 z = depth;
                 x = -width;
@@ -1602,75 +1618,80 @@ void func_1506E0EC(void) {
                 z = -depth;
             }
         }
-        pos_x = D_800D154C->x_position;
-        pos_z = D_800D154C->z_position;
-        func_151700D8(vertices[0], pos_x, pos_z, 4, D_800D154C->xz_scale, 0, 4, 4, 0xFF, 0);
+        posX = D_800D154C->x_position;
+        posZ = D_800D154C->z_position;
+        func_151700D8(vertices[0], posX, posZ, 4, D_800D154C->xz_scale, 0, 4, 4, 0xFF, 0);
     }
 }
-void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-void func_151700D8(f32 *, f32, f32, s32, f32, s32, s32, s32, s32, s32);
 
+/* Same as func_1506E0EC with a +-100 quad at half scale. */
 void func_1506E2CC(void) {
     f32 x;
     f32 y;
     f32 z;
-    f32 s;
-    f32 t;
-    f32 h;
+    f32 halfX;
+    f32 halfZ;
+    f32 height;
     s32 i;
     f32 verts[4][3];
-    f32 px;
-    f32 pz;
+    f32 posX;
+    f32 posZ;
 
     if (D_800D154C->unk1D4 != NULL) {
-        s = 100.0f;
-        t = 100.0f;
-        h = D_800D154C->unk180;
-        x = s;
-        z = s;
+        halfX = 100.0f;
+        halfZ = 100.0f;
+        height = D_800D154C->unk180;
+        x = halfX;
+        z = halfX;
         for (i = 0; i < 4; i++) {
             y = 0.0f;
             func_150A7960((f32 *)D_800D154C->unk1D4, x, y, z, &x, &y, &z);
             verts[i][0] = x;
-            verts[i][1] = h;
+            verts[i][1] = height;
             verts[i][2] = z;
             if (i == 0) {
-                z = s;
-                x = -s;
+                z = halfX;
+                x = -halfX;
             } else if (i == 1) {
-                x = -s;
-                z = -t;
+                x = -halfX;
+                z = -halfZ;
             } else if (i == 2) {
-                x = s;
-                z = -s;
+                x = halfX;
+                z = -halfX;
             }
         }
-        px = D_800D154C->x_position;
-        pz = D_800D154C->z_position;
-        func_151700D8((f32 *)verts, px, pz, 5, D_800D154C->xz_scale * 0.5f, 0, 4, 4, 0xFF, 0);
+        posX = D_800D154C->x_position;
+        posZ = D_800D154C->z_position;
+        func_151700D8((f32 *)verts, posX, posZ, 5, D_800D154C->xz_scale * 0.5f, 0, 4, 4, 0xFF, 0);
     }
 }
 s32 func_151F2CDC(void);
 extern s32 *D_800BE5A8[];
-s32 func_1506E46C(struct127 *arg0, s32 *arg1, s32 arg2) {
-    volatile s32 pad0;
+/*
+ * Resolves a sound command in place: bit 21 skips it while func_100107F8 / func_10010894 /
+ * func_151F2CDC (by `mode`) reports busy, ids >= 2000 come from the object's D_800BE5A8 table,
+ * the top byte is a play chance out of 256 and bits 16-20 a count of random variants.
+ * Returns 0 if nothing should play.
+ */
+s32 func_1506E46C(struct127 *obj, s32 *command, s32 mode) {
+    s32 pad0; // matching: stack layout (pad0 / pad[3] / inner pad)
     u32 cmd;
     s32 pad[3];
-    u32 v1;
-    u32 v0;
+    u32 id;
+    u32 entry;
     u32 hi;
 
-    cmd = *arg1;
-    v1 = *arg1 & 0x7FFF;
+    cmd = *command;
+    id = *command & 0x7FFF;
     if (cmd & 0x200000) {
-        switch (arg2) {
+        switch (mode) {
         case 0:
-            if (func_100107F8(arg0) != 0) {
+            if (func_100107F8(obj) != 0) {
                 return 0;
             }
             break;
         case 1:
-            if (func_10010894(arg0) != 0) {
+            if (func_10010894(obj) != 0) {
                 return 0;
             }
             break;
@@ -1681,33 +1702,34 @@ s32 func_1506E46C(struct127 *arg0, s32 *arg1, s32 arg2) {
             break;
         }
     }
-    if (v1 >= 2000) {
-        v0 = D_800BE5A8[((u8 *)arg0)[0x288]][v1 - 2000];
-        if (v0 == 0) {
+    if (id >= 2000) {
+        entry = D_800BE5A8[HIDDEN(obj)->unk288][id - 2000];
+        if (entry == 0) {
             return 0;
         }
         cmd &= 0xFF200000;
         if (cmd != 0) {
-            cmd |= v0 & 0xFFFFFF;
+            cmd |= entry & 0xFFFFFF;
         } else {
-            cmd |= v0;
+            cmd |= entry;
         }
     }
-    v1 = cmd >> 16;
-    if (v1 != 0) {
-    lab:
+    id = cmd >> 16;
+    if (id != 0) {
+    lab: // matching: an unused label splits the block, which steers as1
         if ((cmd >> 24) >= (func_150ADA20() & 0xFF)) {
-            v1 &= 0x1F;
+            id &= 0x1F;
             cmd &= 0x7FFF;
-            if (v1) {
+            if (id) {
                 s32 pad;
-                cmd = func_1000F568(cmd, v1 | 0);
+
+                cmd = func_1000F568(cmd, id | 0); // matching: | 0 changes register allocation
             }
         } else {
             return 0;
         }
     }
-    *arg1 = cmd;
+    *command = cmd;
     return 1;
 }
 
