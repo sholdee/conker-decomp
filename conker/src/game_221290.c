@@ -127,7 +127,7 @@ typedef struct {
 
 /* nr_of_sfb_block for MPEG-2 LSF scalefactors: [isRight][slen class][block kind][part] */
 typedef struct {
-    /* 0x000 */ s32 unk000[2][3][3][4];
+    /* 0x000 */ s32 nrSfb[2][3][3][4];
 } Mp3SfbCounts; /* size 0x120 */
 
 extern u8  D_800AEB54[8];        /* scfsi band group boundaries: 0 6 11 16 21 | 0 6 12 */
@@ -151,6 +151,11 @@ extern s32 D_800B0734[2][4];     /* sample-rate table, indexed [id][sampleRateIn
 
 f32 func_1504A400(f32, f32);
 s32 func_151F8960(void *, s32 *, s32);
+
+/* func_151F8960(buf, &bitPos, n) reads n bits from buf at bitPos. This reads n
+ * bits from the main data, with a zero width reading as 0. */
+#define GET_MAIN_BITS(dec, n) \
+    (((n) != 0) ? func_151F8960((dec)->mainData, &(dec)->mainDataBit, (n)) : 0)
 s32 func_151F8994(void *, s32 *, s32, s32, s32, s32, s16 **, u8 **);
 s32 func_151F8B4C(void *, s32 *, s32, s32, s32, s16 **, u8 **);
 s32 func_151F8CF0(f32 *, s32, f32 *, f32 *, f32 *);
@@ -360,212 +365,194 @@ s32 func_151F42E8(Mp3Decoder *arg0, s32 arg1, s32 arg2) {
     return 1;
 }
 
-s32 func_151F4F38(Mp3Decoder *arg0, s32 arg1, s32 arg2) {
-    s32 sp34;
-    s32 sp30;
-    s32 sp2C;
+/* MPEG-1 scalefactors: short / mixed blocks read slen1 for the low bands and
+ * slen2 above; long blocks read the four scfsi groups, reusing granule 0's
+ * values for a group whose scfsi bit is set. */
+s32 func_151F4F38(Mp3Decoder *dec, s32 gr, s32 ch) {
+    s32 part;
+    s32 sfb;
+    s32 window;
 
-    if ((arg0->windowSwitching[arg1][arg2] != 0) && (arg0->blockType[arg1][arg2] == 2)) {
-        if (arg0->mixedBlock[arg1][arg2] != 0) {
-            for (sp30 = 0; sp30 < 8; sp30++) {
-                arg0->scalefac[arg1][arg2].l[sp30] =
-                    (D_800AEB5C[0][arg0->scalefacCompress[arg1][arg2]] != 0)
-                        ? func_151F8960(arg0->mainData, &arg0->mainDataBit,
-                                        D_800AEB5C[0][arg0->scalefacCompress[arg1][arg2]])
-                        : 0;
+    if ((dec->windowSwitching[gr][ch] != 0) && (dec->blockType[gr][ch] == 2)) {
+        if (dec->mixedBlock[gr][ch] != 0) {
+            for (sfb = 0; sfb < 8; sfb++) {
+                dec->scalefac[gr][ch].l[sfb] =
+                    GET_MAIN_BITS(dec, D_800AEB5C[0][dec->scalefacCompress[gr][ch]]);
             }
-            for (sp30 = 3; sp30 < 6; sp30++) {
-                for (sp2C = 0; sp2C < 3; sp2C++) {
-                    arg0->scalefac[arg1][arg2].s[sp2C][sp30] =
-                        (D_800AEB5C[0][arg0->scalefacCompress[arg1][arg2]] != 0)
-                            ? func_151F8960(arg0->mainData, &arg0->mainDataBit,
-                                            D_800AEB5C[0][arg0->scalefacCompress[arg1][arg2]])
-                            : 0;
+            for (sfb = 3; sfb < 6; sfb++) {
+                for (window = 0; window < 3; window++) {
+                    dec->scalefac[gr][ch].s[window][sfb] =
+                        GET_MAIN_BITS(dec, D_800AEB5C[0][dec->scalefacCompress[gr][ch]]);
                 }
             }
-            for (sp30 = 6; sp30 < 0xC; sp30++) {
-                for (sp2C = 0; sp2C < 3; sp2C++) {
-                    arg0->scalefac[arg1][arg2].s[sp2C][sp30] =
-                        (D_800AEB5C[1][arg0->scalefacCompress[arg1][arg2]] != 0)
-                            ? func_151F8960(arg0->mainData, &arg0->mainDataBit,
-                                            D_800AEB5C[1][arg0->scalefacCompress[arg1][arg2]])
-                            : 0;
+            for (sfb = 6; sfb < 12; sfb++) {
+                for (window = 0; window < 3; window++) {
+                    dec->scalefac[gr][ch].s[window][sfb] =
+                        GET_MAIN_BITS(dec, D_800AEB5C[1][dec->scalefacCompress[gr][ch]]);
                 }
             }
         } else {
-            for (sp34 = 0; sp34 < 2; sp34++) {
-                for (sp30 = D_800AEB54[sp34 + 5]; sp30 < D_800AEB54[sp34 + 6]; sp30++) {
-                    for (sp2C = 0; sp2C < 3; sp2C++) {
-                        arg0->scalefac[arg1][arg2].s[sp2C][sp30] =
-                            (D_800AEB5C[sp34][arg0->scalefacCompress[arg1][arg2]] != 0)
-                                ? func_151F8960(arg0->mainData, &arg0->mainDataBit,
-                                                D_800AEB5C[sp34][arg0->scalefacCompress[arg1][arg2]])
-                                : 0;
+            for (part = 0; part < 2; part++) {
+                for (sfb = D_800AEB54[part + 5]; sfb < D_800AEB54[part + 6]; sfb++) {
+                    for (window = 0; window < 3; window++) {
+                        dec->scalefac[gr][ch].s[window][sfb] =
+                            GET_MAIN_BITS(dec, D_800AEB5C[part][dec->scalefacCompress[gr][ch]]);
                     }
                 }
             }
         }
-        for (sp2C = 0; sp2C < 3; sp2C++) {
-            arg0->scalefac[arg1][arg2].s[sp2C][12] = 0;
+        for (window = 0; window < 3; window++) {
+            dec->scalefac[gr][ch].s[window][12] = 0;
         }
     } else {
-        for (sp34 = 0; sp34 < 4; sp34++) {
-            if ((arg0->scfsi[arg2][sp34] == 0) || (arg1 == 0)) {
-                for (sp30 = D_800AEB54[sp34]; sp30 < D_800AEB54[sp34 + 1]; sp30++) {
-                    arg0->scalefac[arg1][arg2].l[sp30] =
-                        (D_800AEB5C[(sp34 < 2) ? 0 : 1][arg0->scalefacCompress[arg1][arg2]] != 0)
-                            ? func_151F8960(arg0->mainData, &arg0->mainDataBit,
-                                            D_800AEB5C[(sp34 < 2) ? 0 : 1]
-                                                      [arg0->scalefacCompress[arg1][arg2]])
-                            : 0;
+        for (part = 0; part < 4; part++) {
+            if ((dec->scfsi[ch][part] == 0) || (gr == 0)) {
+                for (sfb = D_800AEB54[part]; sfb < D_800AEB54[part + 1]; sfb++) {
+                    dec->scalefac[gr][ch].l[sfb] = GET_MAIN_BITS(
+                        dec, D_800AEB5C[(part < 2) ? 0 : 1][dec->scalefacCompress[gr][ch]]);
                 }
             } else {
-                for (sp30 = D_800AEB54[sp34]; sp30 < D_800AEB54[sp34 + 1]; sp30++) {
-                    arg0->scalefac[1][arg2].l[sp30] = arg0->scalefac[0][arg2].l[sp30];
+                for (sfb = D_800AEB54[part]; sfb < D_800AEB54[part + 1]; sfb++) {
+                    dec->scalefac[1][ch].l[sfb] = dec->scalefac[0][ch].l[sfb];
                 }
             }
         }
-        arg0->scalefac[arg1][arg2].l[22] = 0;
+        dec->scalefac[gr][ch].l[22] = 0;
     }
     return 1;
 }
 
-s32 func_151F578C(Mp3Decoder *arg0, s32 arg1, s32 arg2) {
-    Mp3SfbCounts sp70 = D_800B0B0C;
-    s32 sp60[4];
-    s32 sp5C = arg0->scalefacCompress[0][arg2];
-    s32 *sp58 = &arg0->preflag[0][arg2];
-    s32 sp54 = arg0->mixedBlock[0][arg2];
-    s32 sp50 = arg0->blockType[0][arg2];
-    s32 sp4C = arg0->windowSwitching[0][arg2];
-    s32 sp48;
-    s32 sp44;
-    s32 sp40;
-    s32 sp3C;
-    s32 sp38;
-    s32 sp28[4];
-    s32 sp24;
-    s32 sp20;
-    s32 sp1C;
+/* MPEG-2 LSF scalefactors (ISO 13818-3): scalefacCompress selects the slen of
+ * each of four band groups and, through D_800B0B0C, how many bands each holds.
+ * The intensity-stereo right channel uses its own split and records each
+ * band's illegal intensity position in unk3EFC / unk3F14. Only granule 0
+ * exists in LSF, so gr is unused. */
+s32 func_151F578C(Mp3Decoder *dec, s32 gr, s32 ch) {
+    Mp3SfbCounts counts = D_800B0B0C;
+    s32 slen[4];
+    s32 sfCompress = dec->scalefacCompress[0][ch];
+    s32 *preflag = &dec->preflag[0][ch];
+    s32 mixedBlock = dec->mixedBlock[0][ch];
+    s32 blockType = dec->blockType[0][ch];
+    s32 windowSwitching = dec->windowSwitching[0][ch];
+    s32 isRight;
+    s32 slenClass;
+    s32 part;
+    s32 i;
+    s32 isCompress;
+    s32 nrSfb[4];
+    s32 sfb;
+    s32 nbits;
+    s32 maxPos;
 
-    if (((arg0->modeExtension != 1) && (arg0->modeExtension != 3)) || (arg2 != 1)) {
-        sp48 = 0;
-        if (sp5C < 0x190) {
-            sp60[0] = (sp5C >> 4) / 5;
-            sp60[1] = (sp5C >> 4) % 5;
-            sp60[2] = (sp5C % 16) >> 2;
-            sp60[3] = sp5C % 4;
-            *sp58 = 0;
-            sp44 = 0;
-        } else if ((sp5C >= 0x190) && (sp5C < 0x1F4)) {
-            sp60[0] = ((sp5C - 0x190) >> 2) / 5;
-            sp60[1] = ((sp5C - 0x190) >> 2) % 5;
-            sp60[2] = (sp5C - 0x190) % 4;
-            sp60[3] = 0;
-            *sp58 = 0;
-            sp44 = 1;
-        } else if ((sp5C >= 0x1F4) && (sp5C < 0x200)) {
-            sp60[0] = (sp5C - 0x1F4) / 3;
-            sp60[1] = (sp5C - 0x1F4) % 3;
-            sp60[2] = 0;
-            sp60[3] = 0;
-            *sp58 = 1;
-            sp44 = 2;
+    if (((dec->modeExtension != 1) && (dec->modeExtension != 3)) || (ch != 1)) {
+        isRight = 0;
+        if (sfCompress < 400) {
+            slen[0] = (sfCompress >> 4) / 5;
+            slen[1] = (sfCompress >> 4) % 5;
+            slen[2] = (sfCompress % 16) >> 2;
+            slen[3] = sfCompress % 4;
+            *preflag = 0;
+            slenClass = 0;
+        } else if ((sfCompress >= 400) && (sfCompress < 500)) {
+            slen[0] = ((sfCompress - 400) >> 2) / 5;
+            slen[1] = ((sfCompress - 400) >> 2) % 5;
+            slen[2] = (sfCompress - 400) % 4;
+            slen[3] = 0;
+            *preflag = 0;
+            slenClass = 1;
+        } else if ((sfCompress >= 500) && (sfCompress < 512)) {
+            slen[0] = (sfCompress - 500) / 3;
+            slen[1] = (sfCompress - 500) % 3;
+            slen[2] = 0;
+            slen[3] = 0;
+            *preflag = 1;
+            slenClass = 2;
         }
     }
-    if (((arg0->modeExtension == 1) || (arg0->modeExtension == 3)) && (arg2 == 1)) {
-        arg0->intensityScale = sp5C % 2;
-        sp38 = sp5C >> 1;
-        sp48 = 1;
-        if (sp38 < 0xB4) {
-            sp60[0] = sp38 / 0x24;
-            sp60[1] = (sp38 % 0x24) / 6;
-            sp60[2] = (sp38 % 0x24) % 6;
-            sp60[3] = 0;
-            *sp58 = 0;
-            sp44 = 0;
-        } else if ((sp38 >= 0xB4) && (sp38 < 0xF4)) {
-            sp60[0] = ((sp38 - 0xB4) % 0x40) >> 4;
-            sp60[1] = ((sp38 - 0xB4) % 0x10) >> 2;
-            sp60[2] = (sp38 - 0xB4) % 4;
-            sp60[3] = 0;
-            *sp58 = 0;
-            sp44 = 1;
-        } else if ((sp38 >= 0xF4) && (sp38 < 0xFF)) {
-            sp60[0] = (sp38 - 0xF4) / 3;
-            sp60[1] = (sp38 - 0xF4) % 3;
-            sp60[2] = 0;
-            sp60[3] = 0;
-            *sp58 = 0;
-            sp44 = 2;
+    if (((dec->modeExtension == 1) || (dec->modeExtension == 3)) && (ch == 1)) {
+        dec->intensityScale = sfCompress % 2;
+        isCompress = sfCompress >> 1;
+        isRight = 1;
+        if (isCompress < 180) {
+            slen[0] = isCompress / 36;
+            slen[1] = (isCompress % 36) / 6;
+            slen[2] = (isCompress % 36) % 6;
+            slen[3] = 0;
+            *preflag = 0;
+            slenClass = 0;
+        } else if ((isCompress >= 180) && (isCompress < 244)) {
+            slen[0] = ((isCompress - 180) % 64) >> 4;
+            slen[1] = ((isCompress - 180) % 16) >> 2;
+            slen[2] = (isCompress - 180) % 4;
+            slen[3] = 0;
+            *preflag = 0;
+            slenClass = 1;
+        } else if ((isCompress >= 244) && (isCompress < 255)) {
+            slen[0] = (isCompress - 244) / 3;
+            slen[1] = (isCompress - 244) % 3;
+            slen[2] = 0;
+            slen[3] = 0;
+            *preflag = 0;
+            slenClass = 2;
         }
     }
-    if ((sp4C != 0) && (sp50 == 2)) {
-        bcopy(&sp70.unk000[sp48][sp44][sp54 + 1][0], sp28, 0x10);
+    if ((windowSwitching != 0) && (blockType == 2)) {
+        bcopy(counts.nrSfb[isRight][slenClass][mixedBlock + 1], nrSfb, sizeof(nrSfb));
     } else {
-        bcopy(&sp70.unk000[sp48][sp44][0][0], sp28, 0x10);
+        bcopy(counts.nrSfb[isRight][slenClass][0], nrSfb, sizeof(nrSfb));
     }
-    sp24 = 0;
-    if ((sp4C == 0) || ((sp4C != 0) && (sp50 != 2))) {
-        for (sp40 = 0; sp40 < 4; sp40++) {
-            sp20 = sp60[sp40];
-            sp1C = (1 << sp20) - 1;
-            for (sp3C = 0; sp3C < sp28[sp40]; sp3C++) {
-                arg0->scalefac[0][arg2].l[sp24] =
-                    (sp20 != 0) ? func_151F8960(arg0->mainData, &arg0->mainDataBit, sp20) : 0;
-                if (arg2 != 0) {
-                    arg0->unk3EFC[sp24] = sp1C;
+    sfb = 0;
+    if ((windowSwitching == 0) || ((windowSwitching != 0) && (blockType != 2))) {
+        for (part = 0; part < 4; part++) {
+            nbits = slen[part];
+            maxPos = (1 << nbits) - 1;
+            for (i = 0; i < nrSfb[part]; i++) {
+                dec->scalefac[0][ch].l[sfb] = GET_MAIN_BITS(dec, nbits);
+                if (ch != 0) {
+                    dec->unk3EFC[sfb] = maxPos;
                 }
-                sp24++;
+                sfb++;
             }
         }
-    } else {
-        if (sp50 == 2) {
-            if (sp54 == 0) {
-                for (sp40 = 0; sp40 < 4; sp40++) {
-                    sp20 = sp60[sp40];
-                    sp1C = (1 << sp20) - 1;
-                    for (sp3C = 0; sp3C < sp28[sp40]; sp3C += 3) {
-                        arg0->scalefac[0][arg2].s[0][sp24] =
-                            (sp20 != 0) ? func_151F8960(arg0->mainData, &arg0->mainDataBit, sp20) : 0;
-                        arg0->scalefac[0][arg2].s[1][sp24] =
-                            (sp20 != 0) ? func_151F8960(arg0->mainData, &arg0->mainDataBit, sp20) : 0;
-                        arg0->scalefac[0][arg2].s[2][sp24] =
-                            (sp20 != 0) ? func_151F8960(arg0->mainData, &arg0->mainDataBit, sp20) : 0;
-                        if (arg2 != 0) {
-                            arg0->unk3F14[sp24] = sp1C;
-                        }
-                        sp24++;
+    } else if (blockType == 2) {
+        if (mixedBlock == 0) {
+            for (part = 0; part < 4; part++) {
+                nbits = slen[part];
+                maxPos = (1 << nbits) - 1;
+                for (i = 0; i < nrSfb[part]; i += 3) {
+                    dec->scalefac[0][ch].s[0][sfb] = GET_MAIN_BITS(dec, nbits);
+                    dec->scalefac[0][ch].s[1][sfb] = GET_MAIN_BITS(dec, nbits);
+                    dec->scalefac[0][ch].s[2][sfb] = GET_MAIN_BITS(dec, nbits);
+                    if (ch != 0) {
+                        dec->unk3F14[sfb] = maxPos;
                     }
+                    sfb++;
                 }
-            } else {
-                sp20 = sp60[0];
-                sp1C = (1 << sp20) - 1;
-                for (sp3C = 0; sp3C < 6; sp3C++) {
-                    arg0->scalefac[0][arg2].l[sp24] =
-                        (sp20 != 0) ? func_151F8960(arg0->mainData, &arg0->mainDataBit, sp20) : 0;
-                    if (arg2 != 0) {
-                        arg0->unk3EFC[sp24] = sp1C;
-                    }
-                    sp24++;
+            }
+        } else {
+            nbits = slen[0];
+            maxPos = (1 << nbits) - 1;
+            for (i = 0; i < 6; i++) {
+                dec->scalefac[0][ch].l[sfb] = GET_MAIN_BITS(dec, nbits);
+                if (ch != 0) {
+                    dec->unk3EFC[sfb] = maxPos;
                 }
-                sp28[0] -= 6;
-                sp24 = 3;
-                for (sp40 = 0; sp40 < 4; sp40++) {
-                    sp20 = sp60[sp40];
-                    sp1C = (1 << sp20) - 1;
-                    for (sp3C = 0; sp3C < sp28[sp40]; sp3C += 3) {
-                        arg0->scalefac[0][arg2].s[0][sp24] =
-                            (sp20 != 0) ? func_151F8960(arg0->mainData, &arg0->mainDataBit, sp20) : 0;
-                        arg0->scalefac[0][arg2].s[1][sp24] =
-                            (sp20 != 0) ? func_151F8960(arg0->mainData, &arg0->mainDataBit, sp20) : 0;
-                        arg0->scalefac[0][arg2].s[2][sp24] =
-                            (sp20 != 0) ? func_151F8960(arg0->mainData, &arg0->mainDataBit, sp20) : 0;
-                        if (arg2 != 0) {
-                            arg0->unk3F14[sp24] = sp1C;
-                        }
-                        sp24++;
+                sfb++;
+            }
+            nrSfb[0] -= 6;
+            sfb = 3;
+            for (part = 0; part < 4; part++) {
+                nbits = slen[part];
+                maxPos = (1 << nbits) - 1;
+                for (i = 0; i < nrSfb[part]; i += 3) {
+                    dec->scalefac[0][ch].s[0][sfb] = GET_MAIN_BITS(dec, nbits);
+                    dec->scalefac[0][ch].s[1][sfb] = GET_MAIN_BITS(dec, nbits);
+                    dec->scalefac[0][ch].s[2][sfb] = GET_MAIN_BITS(dec, nbits);
+                    if (ch != 0) {
+                        dec->unk3F14[sfb] = maxPos;
                     }
+                    sfb++;
                 }
             }
         }
@@ -573,85 +560,87 @@ s32 func_151F578C(Mp3Decoder *arg0, s32 arg1, s32 arg2) {
     return 1;
 }
 
-s32 func_151F63C4(Mp3Decoder *arg0, s32 arg1, s32 arg2) {
-    s32 sp64;
-    s32 sp60;
-    s32 sp54[3];
-    s16 *sp50;
-    u8 *sp4C;
-    s32 sp48;
-    s16 *sp44;
-    u8 *sp40;
-    s32 sp3C;
-    s32 sp38;
-    s32 sp34;
-    s32 sp30;
-    s32 sp2C;
-    s32 sp28;
+/* Reads the granule's scalefactors, then Huffman-decodes its big-value regions
+ * (zero-filling regions whose table is empty) and count1 region into huffVal /
+ * huffSign, padding the rest of the 576 lines with zeros. */
+s32 func_151F63C4(Mp3Decoder *dec, s32 gr, s32 ch) {
+    s32 part2Start;
+    s32 bigValueEnd;
+    s32 regionEnd[3];
+    s16 *longBands;
+    u8 *shortBands;
+    s32 line;
+    s16 *val;
+    u8 *sign;
+    s32 region;
+    s32 table;
+    s32 linbits;
+    s32 end;
+    s32 count;
+    s32 part23End;
 
-    sp64 = arg0->mainDataBit;
-    if (arg0->id != 0) {
-        func_151F4F38(arg0, arg1, arg2);
+    part2Start = dec->mainDataBit;
+    if (dec->id != 0) {
+        func_151F4F38(dec, gr, ch);
     } else {
-        func_151F578C(arg0, arg1, arg2);
+        func_151F578C(dec, gr, ch);
     }
-    sp60 = arg0->bigValues[arg1][arg2] * 2;
-    sp50 = &D_800AE840[arg0->id][arg0->sampleRateIndex][0];
-    sp4C = &D_800AE948[arg0->id][arg0->sampleRateIndex][0];
-    if ((arg0->windowSwitching[arg1][arg2] == 0) && (arg0->blockType[arg1][arg2] == 0)) {
-        sp54[0] = sp50[arg0->region0Count[arg1][arg2]] + 1;
-        if (sp54[0] > sp60) {
-            sp54[0] = sp54[1] = sp60;
+    bigValueEnd = dec->bigValues[gr][ch] * 2;
+    longBands = D_800AE840[dec->id][dec->sampleRateIndex];
+    shortBands = D_800AE948[dec->id][dec->sampleRateIndex];
+    if ((dec->windowSwitching[gr][ch] == 0) && (dec->blockType[gr][ch] == 0)) {
+        regionEnd[0] = longBands[dec->region0Count[gr][ch]] + 1;
+        if (regionEnd[0] > bigValueEnd) {
+            regionEnd[0] = regionEnd[1] = bigValueEnd;
         } else {
-            sp54[1] = sp50[arg0->region0Count[arg1][arg2] + arg0->region1Count[arg1][arg2] + 1] + 1;
-            if (sp54[1] > sp60) {
-                sp54[1] = sp60;
+            regionEnd[1] = longBands[dec->region0Count[gr][ch] + dec->region1Count[gr][ch] + 1] + 1;
+            if (regionEnd[1] > bigValueEnd) {
+                regionEnd[1] = bigValueEnd;
             }
         }
     } else {
-        if ((arg0->blockType[arg1][arg2] == 2) && (arg0->mixedBlock[arg1][arg2] == 0)) {
-            sp54[0] = (sp4C[2] * 3) + 3;
+        if ((dec->blockType[gr][ch] == 2) && (dec->mixedBlock[gr][ch] == 0)) {
+            regionEnd[0] = shortBands[2] * 3 + 3;
         } else {
-            sp54[0] = sp50[7] + 1;
+            regionEnd[0] = longBands[7] + 1;
         }
-        if (sp54[0] > sp60) {
-            sp54[0] = sp60;
+        if (regionEnd[0] > bigValueEnd) {
+            regionEnd[0] = bigValueEnd;
         }
-        sp54[1] = sp60;
+        regionEnd[1] = bigValueEnd;
     }
-    sp54[2] = sp60;
-    sp48 = 0;
-    sp44 = arg0->huffVal[arg2];
-    sp40 = arg0->huffSign[arg2];
-    for (sp3C = 0; sp3C < 3; sp3C++) {
-        sp38 = arg0->tableSelect[arg1][arg2][sp3C];
-        sp34 = D_800AE7B8[sp38];
-        sp30 = sp54[sp3C];
-        if (D_800E0E20[sp38] == 0) {
-            sp2C = sp30 - sp48;
-            bzero(sp44, sp2C * 2);
-            sp44 += sp2C;
-            sp40 += sp2C;
-            sp48 = sp30;
+    regionEnd[2] = bigValueEnd;
+    line = 0;
+    val = dec->huffVal[ch];
+    sign = dec->huffSign[ch];
+    for (region = 0; region < 3; region++) {
+        table = dec->tableSelect[gr][ch][region];
+        linbits = D_800AE7B8[table];
+        end = regionEnd[region];
+        if (D_800E0E20[table] == 0) {
+            count = end - line;
+            bzero(val, count * sizeof(*val));
+            val += count;
+            sign += count;
+            line = end;
         } else {
-            sp48 = func_151F8994(arg0->mainData, &arg0->mainDataBit, sp38, sp48, sp34, sp30, &sp44,
-                                 &sp40);
+            line = func_151F8994(dec->mainData, &dec->mainDataBit, table, line, linbits, end, &val, &sign);
         }
     }
-    sp38 = arg0->count1TableSelect[arg1][arg2] + 0x20;
-    sp28 = arg0->part23Length[arg1][arg2] + sp64;
-    sp48 = func_151F8B4C(arg0->mainData, &arg0->mainDataBit, sp38, sp48, sp28, &sp44, &sp40);
-    arg0->mainDataBit = sp28;
-    if (sp48 > 0x240) {
-        arg0->nonZero[arg2] = 0x240;
+    table = dec->count1TableSelect[gr][ch] + 32; /* count1 tables A/B are 32, 33 */
+    part23End = dec->part23Length[gr][ch] + part2Start;
+    line = func_151F8B4C(dec->mainData, &dec->mainDataBit, table, line, part23End, &val, &sign);
+    dec->mainDataBit = part23End;
+    if (line > 576) {
+        dec->nonZero[ch] = 576;
     } else {
-        arg0->nonZero[arg2] = sp48;
+        dec->nonZero[ch] = line;
     }
-    if (sp48 < 0x240) {
-        arg0->zeroTail[arg2] = 0x240 - sp48;
-        bzero(sp44, arg0->zeroTail[arg2] * 2);
+    if (line < 576) {
+        dec->zeroTail[ch] = 576 - line;
+        bzero(val, dec->zeroTail[ch] * sizeof(*val));
     } else {
-        arg0->zeroTail[arg2] = 0;
+        dec->zeroTail[ch] = 0;
     }
     return 1;
 }
@@ -685,6 +674,9 @@ s32 func_151F6970(Mp3Decoder *dec, s32 gr) {
     return 1;
 }
 
+/* Alias reduction: the eight butterflies between each pair of adjacent long-block
+ * subbands (skipped for short blocks). Written out in full; a loop compiles
+ * differently. */
 s32 func_151F6B28(Mp3Decoder *dec, s32 gr, s32 ch) {
     s32 sb;
     f32 *xr;
