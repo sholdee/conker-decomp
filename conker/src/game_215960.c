@@ -65,7 +65,7 @@ extern s32 func_1510D0EC(s32, s32, s32, s32); // matching: s32 params; convertin
 extern s32 func_1502B7F0(s32 *, s32, s32);
 extern void func_10004074(void *);
 Gfx *func_151ED1E0(Gfx *);
-void func_15042D94();
+void func_15042D94(s32 x, s32 y, u8 flags, void *fmt, ...);
 Gfx *func_151ED430(Gfx *gfx, HudSprite *sprite, s32 x, s32 y, s32 columns, s32 rows, f32 scale, s32 frame);
 Gfx *func_15096934(Gfx *);
 Gfx *func_1501A6CC(Gfx *arg0, s32 a, s32 b, s32 c, s32 d);
@@ -315,7 +315,7 @@ Gfx *func_151E89A0(Gfx *gfx, s32 unused, s32 alpha) {
             done = 0;
             gDPPipeSync(gfx++);
             {
-                u8 *color = (u8 *)D_800ABA90 + (i << 2);
+                u8 *color = (u8 *)D_800ABA90 + (i << 2); // matching: shift form, not D_800ABA90[i]
                 gDPSetEnvColor(gfx++, color[0], color[1], color[2], alpha);
             }
             gfx = func_151E86E4(gfx, (x + 3) << 2, y, (x + 10) << 2, y + 0x1C, 0, 0x1C0, 0x200, 0x400, 0x400);
@@ -421,11 +421,7 @@ Gfx *func_151E89A0(Gfx *gfx, s32 unused, s32 alpha) {
     return gfx;
 }
 
-extern u8 D_800ABA90[][4];
-extern s8 D_800E0BB0;
 extern s8 D_80087268;
-extern u8 D_D14;
-extern u8 D_D16;
 extern s16 D_800E0AA0[];
 extern s8 D_800E0C00[];
 
@@ -521,7 +517,7 @@ Gfx *func_151E966C(Gfx *gfx, s32 y, s32 extraPipTeam, s8 loadTexture, u8 refresh
             if (inactiveTeams & (1 << i)) {
                 gDPPipeSync(gfx++);
                 {
-                    u8 *color = (u8 *)D_800ABA90 + (i << 2);
+                    u8 *color = D_800ABA90[i];
                     gDPSetEnvColor(gfx++, color[0], color[1], color[2], 0xFF);
                 }
                 gfx = func_151E86E4(gfx, (x - 8) << 2, y - 0x18, (x + 8) << 2, y + 0x28, 0, 0x600, 0x280, 0x400, 0x400);
@@ -563,15 +559,11 @@ typedef struct {
 } ScoreState;
 
 extern ScoreState *D_8008FDD4;
-extern u16 D_8008FDC0;
 extern s8 D_8008FDC8;
 extern s8 D_8008FD7C;
 extern s8 D_8008FE44[];
-extern s8 D_800E0C00[];
 extern s8 D_800E0AC0[];
-extern s16 D_800E0AA0[];
 extern s16 D_800E0AD0[];
-extern u8 D_800ABA90[][4];
 extern u8 D_800ABAA8;
 extern u8 D_800ABAAC;
 extern u8 D_800ABAB0;
@@ -583,7 +575,6 @@ extern u8 D_843;
 extern u8 D_888;
 
 
-extern u8 D_D10;
 extern u8 D_800ABAA0;
 extern u8 D_800ABAA4;
 
@@ -975,6 +966,15 @@ Gfx *func_151EDBDC(Gfx *, HudModel *, f32, f32, f32);
 Gfx *func_151EA15C(Gfx *, s32, s32, s32);
 Gfx *func_151EADFC(Gfx *, s32, s32, s32);
 
+/* Per-player view, size 0x180; D_800BE628 points at an array of these. Only the fields used here. */
+typedef struct {
+    /* 0x00 */ f32 unk0;
+    /* 0x04 */ f32 width;
+    /* 0x08 */ f32 height;
+} HudView;
+
+#define VIEWS ((HudView *)D_800BE628)
+
 /* Draws the single-player HUD (counters and models) after preloading its textures; fades it in. */
 Gfx *func_151EB06C(Gfx *gfx) {
     s32 show;
@@ -1086,8 +1086,8 @@ Gfx *func_151EB06C(Gfx *gfx) {
             gSPSetGeometryMode(gfx++, 0x220404);
             gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFF);
             gfx = func_150900F0(gfx, 1);
-            halfWidth = ((f32 *)D_800BE628)[1] * 0.5f;
-            func_151EF954((f32 (*)[4])&D_800E0C38, -halfWidth, halfWidth, -(((f32 *)D_800BE628)[2] * 0.5f), ((f32 *)D_800BE628)[2] * 0.5f, 1.0f, 20000.0f, 1.0f);
+            halfWidth = VIEWS[0].width * 0.5f;
+            func_151EF954((f32 (*)[4])&D_800E0C38, -halfWidth, halfWidth, -(VIEWS[0].height * 0.5f), VIEWS[0].height * 0.5f, 1.0f, 20000.0f, 1.0f);
             D_800E0C30 = D_8008FDCC;
             if (D_80090058 != NULL) {
                 i = 10;
@@ -1131,8 +1131,6 @@ Gfx *func_151EB06C(Gfx *gfx) {
     return gfx;
 }
 
-extern s16 D_8008FDCC;
-Gfx *func_151EA15C(Gfx *, s32, s32, s32);
 
 /* Draws the results table while it is faded in. */
 Gfx *func_151EB930(Gfx *gfx) {
@@ -1204,11 +1202,9 @@ Gfx *func_151EB96C(Gfx *gfx) {
     return gfx;
 }
 
-extern HudSprite D_80090060;
 extern HudSprite D_800917EC;
 extern u8 D_85D;
 extern u8 D_89C;
-extern s32 D_800E0A90;
 extern s32 D_800BE620;
 extern s32 D_800BE624;
 
@@ -1325,9 +1321,6 @@ Gfx *func_151EBB50(Gfx *gfx) {
     return gfx;
 }
 
-extern s32 D_800E0A90;
-extern u8 **D_800E0BD8;
-void func_15042D94();
 
 /* Fades in a text line once the timer passes 0x5DC. */
 Gfx *func_151EC178(Gfx *gfx) {
@@ -1707,11 +1700,8 @@ Gfx *func_151EC648(Gfx *gfx) {
     return gfx;
 }
 
-extern u8 D_800E0B97;
-extern Gfx D_80090028;
 extern HudSprite D_8009181C;
 extern HudSprite D_80091828;
-Gfx *func_15096934(Gfx *);
 
 /* Draws a fading-in image with a tinted overlay (strength D_800E0B97). */
 Gfx *func_151ED09C(Gfx *gfx) {
@@ -1937,10 +1927,8 @@ void func_151EDB58(HudModel *model) {
 }
 
 extern Mtx D_80089470;
-extern Mtx D_800E0C38;
 extern Gfx D_80090110;
 extern Gfx D_80090128;
-extern s16 D_800E0C30;
 extern u8 D_507;
 extern u8 D_508;
 extern void func_1503F4B0(HudModelAnim *);
