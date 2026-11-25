@@ -82,49 +82,52 @@ void func_150415E0(s32 glyph, s32 *width, s32 *height, f32 *yOffset, s32 *noComb
     }
 }
 
+/* Per-player screen record, 0x180 bytes each, in the array that D_800BE628 points to. */
 typedef struct {
-    u8 pad0[0x14];
-    f32 unk14;
-    f32 unk18;
-    u8 pad1C[0x8];
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    u8 pad34[0x14C];
-} Cam417AC;
+    /* 0x00 */ u8 pad0[0x14];
+    /* 0x14 */ f32 scaleX;
+    /* 0x18 */ f32 scaleY;
+    /* 0x1C */ u8 pad1C[0x8];
+    /* 0x24 */ f32 yMin;
+    /* 0x28 */ f32 yMax;
+    /* 0x2C */ f32 xMin;
+    /* 0x30 */ f32 xMax;
+    /* 0x34 */ u8 pad34[0x14C];
+} ViewRec;
 
+/* Sprite parameters passed to func_15094F70 / func_15095A48. */
 typedef struct {
-    s32 unk0;
-    s16 unk4;
-    s16 w;
-    s16 h;
-    u8 alpha;
-    u8 unkB;
-    u8 unkC;
-    u8 flip;
-    u8 padE[2];
-} Sprite417AC;
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s16 unk4;
+    /* 0x06 */ s16 w;
+    /* 0x08 */ s16 h;
+    /* 0x0A */ u8 alpha;
+    /* 0x0B */ u8 unkB;
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 flags; /* flip bits */
+    /* 0x0E */ u8 padE[2];
+} GlyphSprite;
 
+/* Metrics of one font glyph, in texels. */
 typedef struct {
-    u8 w;
-    u8 h;
-    u8 x;
-    u8 y;
-} Glyph417AC;
+    /* 0x0 */ u8 w;
+    /* 0x1 */ u8 h;
+    /* 0x2 */ u8 x; /* advance before the glyph */
+    /* 0x3 */ u8 y; /* drop below the line top */
+} FontGlyph;
 
-extern u16 D_800CBD4E;
-extern u8 D_800CBD50;
-extern u8 D_800CBD57;
+extern u16 D_800CBD4E; // animation clock (high bits pick icon frames)
+extern u8 D_800CBD50; // control/icon code of the current character, 0xFF if none
+extern u8 D_800CBD57; // current primitive colour r, g, b, a (D_800CBD57-5A)
 extern u8 D_800CBD58;
 static u8 D_800CBD59;
 static u8 D_800CBD5A;
-static u8 D_800CBD5B;
-extern u8 D_800CBD5C;
-extern u8 D_800CBD5D;
-extern u8 D_800CBD5E;
-extern u8 *D_80085990[];
-extern Glyph417AC *D_80085994[];
+static u8 D_800CBD5B; // flashing text on
+extern u8 D_800CBD5C; // flash phase
+extern u8 D_800CBD5D; // waving text on
+extern u8 D_800CBD5E; // wave phase
+extern u8 *D_80085990[]; // per-font glyph bitmaps, 0xE0 bytes each
+extern FontGlyph *D_80085994[]; // per-font glyph metrics
 extern Gfx D_800859A0[];
 extern Gfx D_800873D0[];
 extern Gfx D_80087408[];
@@ -153,17 +156,23 @@ extern s32 D_800D2CA0;
 extern Gfx *D_800BE9C8[];
 extern s32 D_800BEBA4;
 f32 cosf(f32);
-Gfx *func_15094F70(Gfx *, u8 *, s32, Sprite417AC *, s32, s32, s32, s32, s32);
-Gfx *func_15095A48(Gfx *, Sprite417AC *, f32, f32);
+Gfx *func_15094F70(Gfx *, u8 *, s32, GlyphSprite *, s32, s32, s32, s32, s32);
+Gfx *func_15095A48(Gfx *, GlyphSprite *, f32, f32);
 s32 func_15042C40(u8 arg0);
 
-#define CAM417AC ((Cam417AC *)D_800BE628 + D_80082FA4)
+#define VIEW (&((ViewRec *)D_800BE628)[D_80082FA4])
 
+/*
+ * Draws len characters of str at (x, y) in the current view, scaled by scaleX/scaleY (4096 = 1.0).
+ * Codes 0xA1-0xA7 change colour or enable flashing (0xA6) and waving (0xA7) text; codes 0xA8 and up
+ * draw icon sprites. If the display list buffer fills up, returns the list as it was before the
+ * current character.
+ */
 Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 scaleX, f32 scaleY, s32 len) {
     u8 c;
     u8 *tex;
-    s32 pad1AC;
-    Sprite417AC sprite;
+    s32 pad1AC; // matching: stack-slot pads (frame layout of the IDO original)
+    GlyphSprite sprite;
     s32 shift;
     f32 sx;
     f32 sy;
@@ -202,8 +211,8 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
     if (str == NULL) {
         return gfx;
     }
-    scaleX *= CAM417AC->unk14;
-    scaleY *= CAM417AC->unk18;
+    scaleX *= VIEW->scaleX;
+    scaleY *= VIEW->scaleY;
     scaleX *= D_800380A0;
     scaleY *= D_800380A4;
     prevW = prevH = -1;
@@ -242,7 +251,7 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
             r = D_800CBD57;
             g = D_800CBD58;
             b = D_800CBD59;
-            a = (D_800CBD5A - 0x7F) * flash + 127.0f;
+            a = (D_800CBD5A - 127) * flash + 127.0f;
             if (D_800CBD5A < a) {
                 a = D_800CBD5A;
             }
@@ -387,6 +396,7 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
             if (c == 0x60) {
                 x += 4.0f * D_800380A0;
             } else if (c >= 0xA1 && c < 0xA8) {
+                // control code: nothing to draw
             } else if (c >= 0xA8 && c < 0x100) {
                 f32 yOff;
                 s32 noCombine;
@@ -398,10 +408,10 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
                 if (D_800CBD5D != 0) {
                     yOff += wave;
                 }
-                dx = CAM417AC->unk14 * ((w >> 1) * scale) * D_800380A0;
+                dx = VIEW->scaleX * ((w >> 1) * scale) * D_800380A0;
                 x += dx;
-                dy = CAM417AC->unk18 * ((h >> 1) * scale) * D_800380A4;
-                sprite.flip = 0;
+                dy = VIEW->scaleY * ((h >> 1) * scale) * D_800380A4;
+                sprite.flags = 0;
                 sprite.alpha = a;
                 y += dy;
                 sprite.w = scaleX * scale;
@@ -413,6 +423,7 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
                     gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0,
                                       0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
                 }
+                // matching: IDO allocates differently without the dead store in "shift <<= 8"
                 gfx = func_15094F70(gfx, tex, shift <<= 8, &sprite, 0, 0, 0, 2, 3);
                 if (D_800D2CA0 != 0x80000000) {
                     gfx = func_15095A48(gfx, &sprite, x, y - yOff);
@@ -432,7 +443,7 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
             s32 full;
 
             if (draw) {
-                {
+                { // matching: -g3 block marker keeps as1 from hoisting the 1/4096 mtc1 above it
                     extern f32 D_800380A4;
 
                 gy = 0.0f;
@@ -447,8 +458,8 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
                 y += ((f32)D_80085994[font][c].y - gy) * D_800380A4 * sy;
                 ix = scaleX;
                 iy = scaleY;
-                if (CAM417AC->unk2C <= x + w * D_800380A0 && x < CAM417AC->unk30 &&
-                    CAM417AC->unk24 <= y + h * D_800380A4 && y < CAM417AC->unk28) {
+                if (VIEW->xMin <= x + w * D_800380A0 && x < VIEW->xMax &&
+                    VIEW->yMin <= y + h * D_800380A4 && y < VIEW->yMax) {
                     dsdx = 0x400000 / ix;
                     dtdy = 0x400000 / iy;
                     if (w != prevW || h != prevH) {
