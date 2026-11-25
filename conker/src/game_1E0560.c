@@ -27,12 +27,12 @@ typedef struct {
     /* 0x034 */ s8 updateCallback;  // index into D_8008FAF8, -1 for none
     /* 0x035 */ u8 pad35[3];
     /* 0x038 */ f32 length;
-    /* 0x03C */ f32 gain;
-    /* 0x040 */ f32 stiffness;
+    /* 0x03C */ f32 accelScale;
+    /* 0x040 */ f32 lagScale;
     /* 0x044 */ u8 type;            // index into D_8008FB68 and D_8008FB70
     /* 0x045 */ u8 pad45[3];
     /* 0x048 */ HoltenRopePoint points[10];
-    /* 0x138 */ f32 maxSpanSq;      // 2 * length^2 / pi^2
+    /* 0x138 */ f32 axesSq;         // a^2 + b^2 of a half ellipse with arc length `length`: 2 * length^2 / pi^2
     /* 0x13C */ s32 texStep;        // texture t step per segment
     /* 0x140 */ u8 vtxBuffer[0x10];
     /* 0x150 */                     // type-specific data follows
@@ -77,7 +77,7 @@ HoltenRopeEffect *func_151B30B0(HoltenRopeDesc *desc, f32 texScale, s32 extraSiz
     HoltenRopeEffect *effect;
     HoltenRopeEffect *result;
     f32 length;
-    f32 spanSq;
+    f32 halfAxesSq;
 
     effect = func_15167A68(0x33, arg4, extraSize + sizeof(HoltenRopeEffect), 1, arg3, 1);
     if (effect == NULL) {
@@ -88,8 +88,8 @@ HoltenRopeEffect *func_151B30B0(HoltenRopeDesc *desc, f32 texScale, s32 extraSiz
     memcpy(&effect->flags, desc, sizeof(HoltenRopeDesc));
     length = effect->length;
     effect->flags |= 0xE;
-    spanSq = (length * length) / 9.869605064f;
-    effect->maxSpanSq = spanSq + spanSq;
+    halfAxesSq = (length * length) / 9.869605064f;
+    effect->axesSq = halfAxesSq + halfAxesSq;
     effect->texStep = length * texScale * 4096.0f;
     bzero(effect->vtxBuffer, sizeof(effect->vtxBuffer));
     return result;
@@ -442,85 +442,96 @@ s32 func_151B3F28(HoltenRopeAttached *rope, Vec3f_1E0560 *pos, u8 isStart) {
     return ret;
 }
 
-s32 func_151B3FDC(HoltenRopeEffect *arg0) {
+/*
+ * Update callback: hangs the points on a half ellipse below the start-end chord whose arc
+ * length is about `length`; falls back to a straight line when the ends are too far apart.
+ */
+s32 func_151B3FDC(HoltenRopeEffect *effect) {
     f32 dx;
     f32 dy;
     f32 dz;
     Vec3f_1E0560 mid;
     Vec3f_1E0560 relStart;
     Vec3f_1E0560 relEnd;
-    f32 len;
+    f32 horizDist;
     f32 inv;
-    f32 c;
-    f32 s;
-    f32 pad1;
-    f32 u;
-    f32 v;
-    f32 pad2[7];
-    f32 half;
-    f32 dist;
-    f32 d2;
-    f32 ux;
-    f32 uy;
-    f32 w;
+    f32 dirZ;
+    f32 dirX;
+    f32 pad1;    // matching: stack slot
+    f32 across;
+    f32 up;
+    f32 pad2[7]; // matching: stack slots
+    f32 semiMajor;
+    f32 chord;
+    f32 chordSq;
+    f32 chordX;
+    f32 chordY;
+    f32 semiMinor;
     f32 angle;
-    f32 sn;
-    f32 cs;
-    f32 a;
-    f32 b;
-    f32 t;
+    f32 sinA;
+    f32 cosA;
+    f32 ellipseX;
+    f32 ellipseY;
+    f32 acrossOffset;
     s32 i;
-    HoltenRopePoint *node;
+    HoltenRopePoint *points;
 
-    dx = arg0->end.x - arg0->start.x;
-    dy = arg0->end.y - arg0->start.y;
-    dz = arg0->end.z - arg0->start.z;
-    if ((fabsf(dx) > 9.999999747e-05f) || (fabsf(dz) > 9.999999747e-05f)) {
-        f32 h;
-        mid.x = arg0->start.x + (dx * 0.5f);
-        mid.y = arg0->start.y + (dy * 0.5f);
-        mid.z = arg0->start.z + (dz * 0.5f);
-        relStart.x = arg0->start.x - mid.x;
-        relStart.y = arg0->start.y - mid.y;
-        relStart.z = arg0->start.z - mid.z;
-        relEnd.x = arg0->end.x - mid.x;
-        relEnd.y = arg0->end.y - mid.y;
-        relEnd.z = arg0->end.z - mid.z;
-        len = sqrtf((dx * dx) + (dz * dz));
-        inv = 1.0f / len;
-        c = dz * inv;
-        s = dx * inv;
-        u = ((relEnd.z * c) + (relEnd.x * s)) - ((relStart.z * c) + (relStart.x * s));
-        v = relEnd.y - relStart.y;
-        d2 = (u * u) + (v * v);
-        dist = sqrtf(d2);
-        inv = 1.0f / dist;
-        half = dist * 0.5f;
-        ux = u * inv;
-        uy = v * inv;
-        h = d2 * 0.25f;
-        if (arg0->maxSpanSq < h) {
-            return func_151B3A7C(arg0);
+    dx = effect->end.x - effect->start.x;
+    dy = effect->end.y - effect->start.y;
+    dz = effect->end.z - effect->start.z;
+    if ((fabsf(dx) > 0.0001f) || (fabsf(dz) > 0.0001f)) {
+        f32 halfChordSq;
+
+        mid.x = effect->start.x + (dx * 0.5f);
+        mid.y = effect->start.y + (dy * 0.5f);
+        mid.z = effect->start.z + (dz * 0.5f);
+        relStart.x = effect->start.x - mid.x;
+        relStart.y = effect->start.y - mid.y;
+        relStart.z = effect->start.z - mid.z;
+        relEnd.x = effect->end.x - mid.x;
+        relEnd.y = effect->end.y - mid.y;
+        relEnd.z = effect->end.z - mid.z;
+        horizDist = sqrtf((dx * dx) + (dz * dz));
+        inv = 1.0f / horizDist;
+        dirZ = dz * inv;
+        dirX = dx * inv;
+        across = ((relEnd.z * dirZ) + (relEnd.x * dirX)) - ((relStart.z * dirZ) + (relStart.x * dirX));
+        up = relEnd.y - relStart.y;
+        chordSq = (across * across) + (up * up);
+        chord = sqrtf(chordSq);
+        inv = 1.0f / chord;
+        semiMajor = chord * 0.5f;
+        chordX = across * inv;
+        chordY = up * inv;
+        halfChordSq = chordSq * 0.25f;
+        if (effect->axesSq < halfChordSq) {
+            return func_151B3A7C(effect);
         }
-        w = sqrtf(arg0->maxSpanSq - h);
+        semiMinor = sqrtf(effect->axesSq - halfChordSq);
         angle = 0.0f;
-        node = arg0->points;
-        for (i = 0; i < 10; i++, angle += 0.3490658700f) {
-            HoltenRopePoint *n = &node[i];
-            sn = sinf(angle);
-            cs = cosf(angle);
-            a = half * cs;
-            b = w * sn;
-            t = (a * ux) - (b * uy);
-            n->pos.x = (t * s) + mid.x;
-            n->pos.y = ((a * uy) - (b * ux)) + mid.y;
-            n->pos.z = (t * c) + mid.z;
+        points = effect->points;
+        for (i = 0; i < 10; i++, angle += 0.34906587f) { // 20 degrees
+            HoltenRopePoint *point = &points[i];
+
+            sinA = sinf(angle);
+            cosA = cosf(angle);
+            ellipseX = semiMajor * cosA;
+            ellipseY = semiMinor * sinA;
+            acrossOffset = (ellipseX * chordX) - (ellipseY * chordY);
+            point->pos.x = (acrossOffset * dirX) + mid.x;
+            point->pos.y = ((ellipseX * chordY) - (ellipseY * chordX)) + mid.y;
+            point->pos.z = (acrossOffset * dirZ) + mid.z;
         }
     }
-    return 1;
+    return TRUE;
 }
 
-u8 func_151B42A4(HoltenRopeEffect *arg0) {
+/*
+ * Update callback: the half ellipse of func_151B3FDC, but each point keeps part of its offset
+ * from last frame (most in the middle of the rope) and is integrated with a velocity, so the
+ * rope swings. Points snap to the curve on a reset (flag 2) or while D_800DBFF4 is set.
+ */
+u8 func_151B42A4(HoltenRopeEffect *effect) {
     u8 ret;
     f32 dx;
     f32 dy;
@@ -528,118 +539,118 @@ u8 func_151B42A4(HoltenRopeEffect *arg0) {
     Vec3f_1E0560 mid;
     Vec3f_1E0560 relStart;
     Vec3f_1E0560 relEnd;
-    f32 len;
+    f32 horizDist;
     f32 inv;
-    f32 pad3[5];
-    f32 c;
-    f32 s;
-    f32 aZ;
-    f32 ux;
-    f32 uy;
-    f32 u;
-    f32 v;
-    f32 half;
-    f32 dist;
-    f32 d2;
-    f32 hpad;
-    f32 pad4;
-    f32 w;
-    f32 angle2;
-    f32 angleP;
-    f32 sn;
-    f32 cs;
-    f32 sn2;
-    f32 a;
-    f32 b;
-    f32 t;
-    f32 k;
-    Vec3f_1E0560 cur;
-    Vec3f_1E0560 np;
-    f32 dX;
-    f32 dY;
-    f32 dZ;
-    f32 vx;
-    f32 vy;
-    f32 aX;
-    f32 aY;
+    f32 pad3[5];  // matching: stack slots
+    f32 dirZ;
+    f32 dirX;
+    f32 accelZ;
+    f32 chordX;
+    f32 chordY;
+    f32 across;
+    f32 up;
+    f32 semiMajor;
+    f32 chord;
+    f32 chordSq;
+    f32 pad4[2];  // matching: stack slots
+    f32 semiMinor;
+    f32 weightAngle;
+    f32 pad5;     // matching: stack slot
+    f32 sinA;
+    f32 cosA;
+    f32 weight;
+    f32 ellipseX;
+    f32 ellipseY;
+    f32 acrossOffset;
+    f32 pad6;     // matching: stack slot
+    Vec3f_1E0560 prev;
+    Vec3f_1E0560 target;
+    f32 offsetX;
+    f32 offsetY;
+    f32 offsetZ;
+    f32 pad7[2];  // matching: stack slots
+    f32 accelX;
+    f32 accelY;
     s32 i;
-    HoltenRopePoint *node;
+    HoltenRopePoint *points;
 
-    ret = 1;
-    dx = -arg0->start.x + arg0->end.x;
-    dy = -arg0->start.y + arg0->end.y;
-    dz = arg0->end.z - arg0->start.z;
-    if ((fabsf(dx) > 9.999999747e-05f) || (fabsf(dz) > 9.999999747e-05f)) {
-        f32 h;
-        mid.x = arg0->start.x + (dx * 0.5f);
-        mid.y = arg0->start.y + (dy * 0.5f);
-        mid.z = arg0->start.z + (dz * 0.5f);
-        relStart.x = arg0->start.x - mid.x;
-        relStart.y = arg0->start.y - mid.y;
-        relStart.z = arg0->start.z - mid.z;
-        relEnd.x = arg0->end.x - mid.x;
-        relEnd.y = arg0->end.y - mid.y;
-        relEnd.z = arg0->end.z - mid.z;
-        len = sqrtf((dx * dx) + (dz * dz));
-        inv = 1.0f / len;
-        c = dz * inv;
-        s = dx * inv;
-        u = ((relEnd.z * c) + (relEnd.x * s)) - ((relStart.z * c) + (relStart.x * s));
-        v = relEnd.y - relStart.y;
-        d2 = (u * u) + (v * v);
-        dist = sqrtf(d2);
-        inv = 1.0f / dist;
-        half = dist * 0.5f;
-        ux = u * inv;
-        uy = v * inv;
-        h = d2 * 0.25f;
-        if (arg0->maxSpanSq < h) {
-            ret = func_151B3A7C(arg0);
+    ret = TRUE;
+    dx = -effect->start.x + effect->end.x;
+    dy = -effect->start.y + effect->end.y;
+    dz = effect->end.z - effect->start.z;
+    if ((fabsf(dx) > 0.0001f) || (fabsf(dz) > 0.0001f)) {
+        f32 halfChordSq;
+
+        mid.x = effect->start.x + (dx * 0.5f);
+        mid.y = effect->start.y + (dy * 0.5f);
+        mid.z = effect->start.z + (dz * 0.5f);
+        relStart.x = effect->start.x - mid.x;
+        relStart.y = effect->start.y - mid.y;
+        relStart.z = effect->start.z - mid.z;
+        relEnd.x = effect->end.x - mid.x;
+        relEnd.y = effect->end.y - mid.y;
+        relEnd.z = effect->end.z - mid.z;
+        horizDist = sqrtf((dx * dx) + (dz * dz));
+        inv = 1.0f / horizDist;
+        dirZ = dz * inv;
+        dirX = dx * inv;
+        across = ((relEnd.z * dirZ) + (relEnd.x * dirX)) - ((relStart.z * dirZ) + (relStart.x * dirX));
+        up = relEnd.y - relStart.y;
+        chordSq = (across * across) + (up * up);
+        chord = sqrtf(chordSq);
+        inv = 1.0f / chord;
+        semiMajor = chord * 0.5f;
+        chordX = across * inv;
+        chordY = up * inv;
+        halfChordSq = chordSq * 0.25f;
+        if (effect->axesSq < halfChordSq) {
+            ret = func_151B3A7C(effect);
         } else {
             f32 angle;
-            w = sqrtf(arg0->maxSpanSq - h);
-            node = arg0->points;
-            for (i = 0, angle = 0.0f, angle2 = 0.0f; i < 10; i++, angle += 0.3490658700f, angle2 += 0.3490658700f) {
-                HoltenRopePoint *n = &node[i];
-                cur = n->pos;
-                sn = sinf(angle);
-                cs = cosf(angle);
-                sn2 = sinf(angle2);
-                a = half * cs;
-                b = w * sn;
-                t = (a * ux) - (b * uy);
-                np.x = (t * s) + mid.x;
-                np.y = ((a * uy) - (b * ux)) + mid.y;
-                np.z = (t * c) + mid.z;
-                if (arg0->flags & 2) {
-                    n->pos = np;
-                    n->vel.x = 0.0f;
-                    n->vel.y = 0.0f;
-                    n->vel.z = 0.0f;
+
+            semiMinor = sqrtf(effect->axesSq - halfChordSq);
+            points = effect->points;
+            for (i = 0, angle = 0.0f, weightAngle = 0.0f; i < 10; i++, angle += 0.34906587f, weightAngle += 0.34906587f) {
+                HoltenRopePoint *point = &points[i];
+                prev = point->pos;
+                sinA = sinf(angle);
+                cosA = cosf(angle);
+                weight = sinf(weightAngle);
+                ellipseX = semiMajor * cosA;
+                ellipseY = semiMinor * sinA;
+                acrossOffset = (ellipseX * chordX) - (ellipseY * chordY);
+                target.x = (acrossOffset * dirX) + mid.x;
+                target.y = ((ellipseX * chordY) - (ellipseY * chordX)) + mid.y;
+                target.z = (acrossOffset * dirZ) + mid.z;
+                if (effect->flags & 2) {
+                    point->pos = target;
+                    point->vel.x = 0.0f;
+                    point->vel.y = 0.0f;
+                    point->vel.z = 0.0f;
                 } else if (*(s32 *)D_800DBFF4 != 0) {
-                    n->pos = np;
-                    n->vel = *(Vec3f_1E0560 *)&D_800A5480;
+                    point->pos = target;
+                    point->vel = *(Vec3f_1E0560 *)&D_800A5480;
                 } else {
-                    dX = (cur.x - np.x) * sn2 * arg0->stiffness;
-                    dY = (cur.y - np.y) * sn2 * arg0->stiffness;
-                    dZ = (cur.z - np.z) * sn2 * arg0->stiffness;
-                    n->pos.x = np.x + dX;
-                    n->pos.y = np.y + dY;
-                    n->pos.z = np.z + dZ;
-                    aX = arg0->gain * dX;
-                    aY = arg0->gain * dY;
-                    aZ = arg0->gain * dZ;
-                    n->pos.x += (n->vel.x * D_800BE9A4) + (0.5f * aX * D_800BE9A4 * D_800BE9A4);
-                    n->pos.y += (n->vel.y * D_800BE9A4) + (0.5f * aY * D_800BE9A4 * D_800BE9A4);
-                    n->pos.z += (n->vel.z * D_800BE9A4) + (0.5f * aZ * D_800BE9A4 * D_800BE9A4);
-                    n->vel.x = n->vel.x + (aX * D_800BE9A4);
-                    n->vel.y = n->vel.y + (aY * D_800BE9A4);
-                    n->vel.z = n->vel.z + (aZ * D_800BE9A4);
+                    offsetX = (prev.x - target.x) * weight * effect->lagScale;
+                    offsetY = (prev.y - target.y) * weight * effect->lagScale;
+                    offsetZ = (prev.z - target.z) * weight * effect->lagScale;
+                    point->pos.x = target.x + offsetX;
+                    point->pos.y = target.y + offsetY;
+                    point->pos.z = target.z + offsetZ;
+                    accelX = effect->accelScale * offsetX;
+                    accelY = effect->accelScale * offsetY;
+                    accelZ = effect->accelScale * offsetZ;
+                    point->pos.x += (point->vel.x * D_800BE9A4) + (0.5f * accelX * D_800BE9A4 * D_800BE9A4);
+                    point->pos.y += (point->vel.y * D_800BE9A4) + (0.5f * accelY * D_800BE9A4 * D_800BE9A4);
+                    point->pos.z += (point->vel.z * D_800BE9A4) + (0.5f * accelZ * D_800BE9A4 * D_800BE9A4);
+                    point->vel.x += accelX * D_800BE9A4;
+                    point->vel.y += accelY * D_800BE9A4;
+                    point->vel.z += accelZ * D_800BE9A4;
                 }
             }
         }
     }
-    arg0->flags &= ~2;
+    effect->flags &= ~2;
     return ret;
 }
 
@@ -700,8 +711,8 @@ typedef struct {
     s8 updateCallback;
     u8 pad35[3];
     f32 radius;
-    f32 gain;
-    f32 stiffness;
+    f32 accelScale;
+    f32 lagScale;
     u8 pad44[4];
     Struct151B48DCPoint points[10];
 } Struct151B48DC;
