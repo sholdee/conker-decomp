@@ -378,7 +378,7 @@ f32 func_1504B0FC(Actor *obj, f32 arg1) {
             targetPitch = -20.0f;
         }
         if (obj->unk28 < 40.0f) {
-            func_1510F820(obj->unk188, obj->floorVerts, &out0, &out1, &out2, &out3, &out4);
+            func_1510F820(obj->unk188, obj->floorTri.v, &out0, &out1, &out2, &out3, &out4);
             out3 = func_1505210C(obj, out3, out4, &out4, 180.0f);
             if (out4 < obj->unkB8) {
                 obj->unkB8 += (out4 - obj->unkB8) * 0.2f;

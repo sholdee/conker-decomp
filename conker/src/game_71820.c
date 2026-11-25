@@ -339,10 +339,6 @@ void func_15044E88(void) {
     func_1505D024(&D_800CC2D0[0], 1, D_800CC2D0[0].unk7A, -1);
 }
 
-typedef struct {
-    Vec3s v[3];
-} CollisionTri;
-
 /* Result of a floor/ceiling probe. */
 typedef struct CollisionHit {
     /* 0x00 */ f32 height;
@@ -1183,36 +1179,20 @@ s32 func_150470B0(Vec3f *pos, f32 top, CollisionHit *hit) {
 }
 
 /* Floor state an object keeps (overlays Actor, whose header copy lacks these fields). */
-typedef struct ObjFloorState {
-    /* 0x000 */ u8 pad0[0x14];
-    /* 0x014 */ f32 x;
-    /* 0x018 */ f32 y;
-    /* 0x01C */ f32 z;
-    /* 0x020 */ u8 pad20[0xD8];
-    /* 0x0F8 */ u32 flags;
-    /* 0x0FC */ u8 padFC[0x84];
-    /* 0x180 */ f32 floor_height;
-    /* 0x184 */ s32 floor_material;
-    /* 0x188 */ u8 pad188[4];
-    /* 0x18C */ CollisionTri floor_tri;
-    /* 0x19E */ u8 pad19E[2];
-    /* 0x1A0 */ u16 floor_surface; // 1-based index into D_800DBEF4; 0 = none
-} ObjFloorState;
-
 /* Seeds a CollisionHit from the floor an object last stood on (a flat triangle if flag 0x200000 is set). */
-void func_1504715C(CollisionHit *hit, ObjFloorState *obj) {
+void func_1504715C(CollisionHit *hit, Actor *obj) {
     s32 surface;
     s32 flag;
 
-    hit->height = obj->floor_height;
-    if (obj->flags & 0x200000) {
+    hit->height = obj->floorY;
+    if (obj->unkF8 & 0x200000) {
         s16 x;
         s16 y;
         s16 z;
 
-        x = obj->x;
-        y = obj->floor_height;
-        z = obj->z;
+        x = obj->x_position;
+        y = obj->floorY;
+        z = obj->z_position;
         hit->tri.v[0].x = x + 1000;
         hit->tri.v[0].y = y;
         hit->tri.v[0].z = z + 1000;
@@ -1223,12 +1203,12 @@ void func_1504715C(CollisionHit *hit, ObjFloorState *obj) {
         hit->tri.v[2].y = y;
         hit->tri.v[2].z = z - 1000;
     } else {
-        hit->tri = obj->floor_tri;
+        hit->tri = obj->floorTri;
     }
-    hit->material = obj->floor_material;
+    hit->material = obj->unk184;
     hit->flags = 6;
-    if (obj->floor_surface != 0) {
-        surface = obj->floor_surface - 1;
+    if (obj->propNum != 0) {
+        surface = obj->propNum - 1;
         hit->source = 2;
         hit->surface = &D_800DBEF4[surface];
         if (func_15145C90(surface) != 0) {

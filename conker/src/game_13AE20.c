@@ -111,7 +111,7 @@ void func_1510DA84(Shadow *shadow) {
                 ownerY = floorY;
             }
             triPtrs = obj->unk188;
-            tri = (Vec3s *)obj->floorVerts;
+            tri = obj->floorTri.v;
             scale = (f32)(u32)obj->unk160 * obj->xz_scale; // matching: the (u32) gives the unsigned-convert fixup
             angle = (obj->unk7A >> 8) + 0x20;
             break;

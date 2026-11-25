@@ -1141,13 +1141,13 @@ void func_15058898(Actor *actor, f32 prevY) {
         fastFloor = D_800CC2D0[flags].unkF8 & 2;
     }
     if (!fastFloor ||
-        !func_150A3FC4(actor->x_position, actor->z_position, actor->unk188, actor->floorVerts, &groundY)) {
+        !func_150A3FC4(actor->x_position, actor->z_position, actor->unk188, actor->floorTri.v, &groundY)) {
         if (actor->unkF8 & 8) {
             floorOut = &actor->unk118;
         } else {
             floorOut = NULL;
         }
-        func_1510E8BC(&actor->unk188, actor->floorVerts, &groundY, floorOut, &actor->unk184, &actor->floorType,
+        func_1510E8BC(&actor->unk188, actor->floorTri.v, &groundY, floorOut, &actor->unk184, &actor->floorType,
                       actor->x_position, actor->y_position, actor->z_position, prevY, 0, actor, -10000.0f,
                       actor->y_position, actor->unkF8 & 0x04000000);
     } else if (actor->unkF8 & 8) {
@@ -1214,8 +1214,8 @@ void func_15058898(Actor *actor, f32 prevY) {
                 }
             }
             if (!(actor->unkF8 & 2) ||
-                !func_150A3FC4(actor->x_position, actor->z_position, actor->unk188, actor->floorVerts, &groundY)) {
-                func_1510E8BC(&actor->unk188, actor->floorVerts, &groundY, &actor->unk118, &actor->unk184,
+                !func_150A3FC4(actor->x_position, actor->z_position, actor->unk188, actor->floorTri.v, &groundY)) {
+                func_1510E8BC(&actor->unk188, actor->floorTri.v, &groundY, &actor->unk118, &actor->unk184,
                               &actor->floorType, actor->x_position, actor->y_position, actor->z_position, prevY, 0,
                               actor, -10000.0f, actor->y_position, actor->unkF8 & 0x04000000);
             }
@@ -1687,9 +1687,9 @@ void func_15059C84(Actor *actor) {
         actor->in_water == 0 && !(actor->unk22C & 8)) {
         /* project the step onto the floor triangle */
         for (i = 0; i < 3; i++) {
-            triangle.vertices[i].values[0] = actor->floorVerts[i][0];
-            triangle.vertices[i].values[1] = actor->floorVerts[i][1];
-            triangle.vertices[i].values[2] = actor->floorVerts[i][2];
+            triangle.vertices[i].values[0] = actor->floorTri.v[i].x;
+            triangle.vertices[i].values[1] = actor->floorTri.v[i].y;
+            triangle.vertices[i].values[2] = actor->floorTri.v[i].z;
         }
         func_15049350(triangle);
         if (D_800CC214 != 0.0f) {
@@ -3933,15 +3933,15 @@ void func_1505F188(Actor *actor) {
     actor->unk1DD[0] = 0xFF;
     actor->unk1DD[1] = 0xFF;
     actor->unk1DD[2] = 0xFF;
-    actor->floorVerts[0][0] = 0;
-    actor->floorVerts[0][1] = 0;
-    actor->floorVerts[0][2] = 0;
-    actor->floorVerts[1][0] = 0;
-    actor->floorVerts[1][1] = 0;
-    actor->floorVerts[1][2] = 10;
-    actor->floorVerts[2][0] = 10;
-    actor->floorVerts[2][1] = 0;
-    actor->floorVerts[2][2] = 0;
+    actor->floorTri.v[0].x = 0;
+    actor->floorTri.v[0].y = 0;
+    actor->floorTri.v[0].z = 0;
+    actor->floorTri.v[1].x = 0;
+    actor->floorTri.v[1].y = 0;
+    actor->floorTri.v[1].z = 10;
+    actor->floorTri.v[2].x = 10;
+    actor->floorTri.v[2].y = 0;
+    actor->floorTri.v[2].z = 0;
 }
 extern u8 D_80099428[];
 void func_1000EFB4();

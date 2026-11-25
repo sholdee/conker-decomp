@@ -1919,7 +1919,7 @@ void func_1502178C(Actor *target, s32 scene, s32 onlyTrack) {
                     obj->unkCC = 0;
                     rescaled = 0;
                     *(u8 *)&D_800D35DC = (target - D_800CC2D0) + 1;
-                    func_1510E7A4(&obj->unk188, obj->floorVerts, &floorY, &obj->unk118, &obj->unk184, &obj->floorType,
+                    func_1510E7A4(&obj->unk188, obj->floorTri.v, &floorY, &obj->unk118, &obj->unk184, &obj->floorType,
                                   obj->x_position, obj->y_position, obj->z_position, obj->y_position, 0, obj,
                                   -10000.0f, target->y_position);
                     ((u8 *)&D_800D35E0)[-4] = 0;

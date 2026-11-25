@@ -245,8 +245,8 @@ void func_150D7928(Actor *obj) {
         obj->floorY = player->floorY;
         obj->unk184 = player->unk184;
         /* copy the player's floor triangle */
-        dst = obj->floorVerts[0];
-        src = player->floorVerts[0];
+        dst = &obj->floorTri.v[0].x;
+        src = &player->floorTri.v[0].x;
         for (i = 0; i < 9; i++) {
             dst[i] = src[i];
         }
