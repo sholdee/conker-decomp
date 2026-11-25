@@ -66,7 +66,9 @@ typedef struct Game13D350ViewAngles {
     f32 roll;
 } Game13D350ViewAngles;
 
-typedef Gfx *(*Game13D350ViewDraw)(Gfx *, f32, f32, f32, f32, f32, f32, s32);
+/* A sky mode's draw routine (D_800891D8 is indexed by D_800B0DF0->unk8): camera position, angles and the sky
+ * extent from func_151108C4. */
+typedef Gfx *(*SkyDrawFunc)(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent);
 
 Gfx *func_151106A8(Gfx *);
 s32 func_151108C4(f32, f32, f32, f32, f32);
@@ -94,7 +96,7 @@ extern u8 D_800D9B81;
 extern u8 D_800D9B82;
 extern u8 D_800D9B83;
 extern Game13D350ViewAngles D_800DCDE0[];
-extern Game13D350ViewDraw D_800891D8[];
+extern SkyDrawFunc D_800891D8[];
 
 /* Draws the sky for the current view: clears the depth buffer, then (unless the view is covered) wraps the
  * camera angles into range and calls the current sky's draw routine if func_151108C4 says the sky shows. */
@@ -529,6 +531,7 @@ Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 firstTex, Vtx *quad, s32 arg4,
                 if (!D_800DBEAB || rowIdx < limit) {
                     maxT = (u16)(s32)((tileH + 0.5f) * 32.0f);
                     maxS = (u16)(s32)((tileW + 0.5f) * 32.0f);
+                    // matching: the quad pointer lives in the unused parameter, built with byte arithmetic
                     quad = (Vtx *)((u8 *)vtxBuf + vtxIdx * 16 + vtxCount * 16);
                     if (axis == 'y' && (col == 0 || col == width - tileW)) {
                         x0 -= 3;
