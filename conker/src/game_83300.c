@@ -42,7 +42,7 @@ void func_1505A250(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4);
 void func_150611E8(struct127 *arg0, s32 arg1);
 void func_1505A770(struct127 *actor);
 void func_15059C84(struct127 *actor);
-void func_1505A3A8(f32 arg0, void *arg1, f32 arg2, f32 arg3, u8 arg4);
+void func_1505A3A8(f32 targetSpeed, struct127 *actor, f32 accel, f32 decel, u8 turnDiff);
 
 s32 func_15080738(s32 arg0);
 void func_150642AC(struct127 *arg0, s32 arg1, f32 arg2, s32 arg3, s32 arg4);
@@ -1743,78 +1743,101 @@ void func_1505A184(u16 angle, f32 speed, f32 pitch, f32 *outX, f32 *outZ, f32 *o
     *outX = sinYaw * speed;
     *outZ = -cosYaw * speed;
 }
-void func_1505A250(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4) {
-    f32 dx = arg0 - *arg3, dy = arg1 - *arg4, mag, sx, sy;
-    if (dx == 0.0f) { if (dy == 0.0f) return; }
-    mag = sqrtf((dx * dx) + (dy * dy));
-    arg2 *= D_800D1550;
-    sx = fabsf((dx / mag) * arg2);
-    sy = fabsf((dy / mag) * arg2);
-    if (0.0f <= dx) { *arg3 = *arg3 + sx; if (arg0 < *arg3) *arg3 = arg0; }
-    else            { *arg3 = *arg3 - sx; if (*arg3 < arg0) *arg3 = arg0; }
-    if (0.0f <= dy) { *arg4 = *arg4 + sy; if (arg1 < *arg4) *arg4 = arg1; }
-    else            { *arg4 = *arg4 - sy; if (*arg4 < arg1) *arg4 = arg1; }
+/* Steps the 2D vector (*x, *z) toward (targetX, targetZ) by rate * dt, without overshooting. */
+void func_1505A250(f32 targetX, f32 targetZ, f32 rate, f32 *x, f32 *z) {
+    f32 dx = targetX - *x, dz = targetZ - *z, mag, stepX, stepZ;
+
+    if (dx == 0.0f) {
+        if (dz == 0.0f) {
+            return;
+        }
+    }
+    mag = sqrtf((dx * dx) + (dz * dz));
+    rate *= D_800D1550;
+    stepX = fabsf((dx / mag) * rate);
+    stepZ = fabsf((dz / mag) * rate);
+    if (0.0f <= dx) {
+        *x = *x + stepX;
+        if (targetX < *x) {
+            *x = targetX;
+        }
+    } else {
+        *x = *x - stepX;
+        if (*x < targetX) {
+            *x = targetX;
+        }
+    }
+    if (0.0f <= dz) {
+        *z = *z + stepZ;
+        if (targetZ < *z) {
+            *z = targetZ;
+        }
+    } else {
+        *z = *z - stepZ;
+        if (*z < targetZ) {
+            *z = targetZ;
+        }
+    }
 }
 
 
-void func_1505A3A8(f32 arg0, void *arg1, f32 arg2, f32 arg3, u8 arg4) {
-    struct127 *obj = (struct127 *)arg1;
-
-    arg2 *= D_800D1550;
-    arg3 *= D_800D1550;
-    if (D_800CC27C != 0 && obj->unk28 < 5.0f && obj->interaction_state != 0x1E) {
-        arg2 = 0.0f;
+/* Accelerates/decelerates the actor's xz_velocity toward targetSpeed; player rates are scaled in water and other states. */
+void func_1505A3A8(f32 targetSpeed, struct127 *actor, f32 accel, f32 decel, u8 turnDiff) {
+    accel *= D_800D1550;
+    decel *= D_800D1550;
+    if (D_800CC27C != 0 && actor->unk28 < 5.0f && actor->interaction_state != 0x1E) {
+        accel = 0.0f;
     }
-    if (obj->interaction_state == 1) {
-        if (obj->in_water != 0) {
-            arg3 *= 0.400000006f;
-            arg2 = 2.0f;
+    if (actor->interaction_state == 1) {
+        if (actor->in_water != 0) {
+            decel *= 0.400000006f;
+            accel = 2.0f;
         }
-        if (obj->unkA8 != 0) {
-            arg3 *= 0.25f;
+        if (actor->unkA8 != 0) {
+            decel *= 0.25f;
         }
-        if (obj->unk81 != 0) {
-            if (obj->unk81 & 0x40) {
-                if (obj->unk81 & 0x20) {
-                    arg3 = 0.0f;
+        if (actor->unk81 != 0) {
+            if (actor->unk81 & 0x40) {
+                if (actor->unk81 & 0x20) {
+                    decel = 0.0f;
                 } else {
-                    arg3 = 1.299999952f;
+                    decel = 1.299999952f;
                 }
             } else {
-                arg3 *= 0.349999994f;
-                if (arg4 >= 0x2E) {
-                    arg2 *= 0.5f;
+                decel *= 0.349999994f;
+                if (turnDiff >= 46) {
+                    accel *= 0.5f;
                 }
-                if (arg4 >= 0x5B) {
-                    arg0 *= 0.5f;
+                if (turnDiff >= 91) {
+                    targetSpeed *= 0.5f;
                 }
             }
         }
-        if (obj->unkAE != 0) {
-            arg3 *= 0.200000003f;
+        if (actor->unkAE != 0) {
+            decel *= 0.200000003f;
         }
     }
-    if (arg0 < 0.0f) {
-        if (0.0f < obj->xz_velocity) {
-            arg3 += arg2;
+    if (targetSpeed < 0.0f) {
+        if (0.0f < actor->xz_velocity) {
+            decel += accel;
         } else {
-            arg3 = arg2;
+            decel = accel;
         }
-    } else if (obj->xz_velocity < 0.0f) {
-        arg2 += arg3;
+    } else if (actor->xz_velocity < 0.0f) {
+        accel += decel;
     }
-    if (arg0 < obj->xz_velocity) {
-        obj->xz_velocity -= arg3;
-        if (obj->xz_velocity < arg0) {
-            obj->xz_velocity = arg0;
+    if (targetSpeed < actor->xz_velocity) {
+        actor->xz_velocity -= decel;
+        if (actor->xz_velocity < targetSpeed) {
+            actor->xz_velocity = targetSpeed;
         }
     } else {
-        if ((arg0 - 1.0f) < obj->xz_velocity) {
-            arg2 *= 0.009999999776f;
+        if ((targetSpeed - 1.0f) < actor->xz_velocity) {
+            accel *= 0.009999999776f;
         }
-        obj->xz_velocity += arg2;
-        if (arg0 < obj->xz_velocity) {
-            obj->xz_velocity = arg0;
+        actor->xz_velocity += accel;
+        if (targetSpeed < actor->xz_velocity) {
+            actor->xz_velocity = targetSpeed;
         }
     }
 }
