@@ -2,50 +2,24 @@
 /* include/functions.h declares func_15169260's first parameter as s32; func_150E8930 passes
  * a struct address that IDO must build directly in a0, which only a pointer parameter
  * produces.  The header declaration is renamed out of the way and a file-local prototype
- * is used instead (same approach as game_10CD70.c). */
+ * is used instead (same approach as game_10CD70.c).  Likewise func_150ADA20 returns the full
+ * 32-bit random value (callers take it modulo n), not the u8 functions.h declares, and the
+ * seventh argument of func_15149130 is the size of the effect data, not a struct37 pointer. */
 #define func_15169260 func_15169260_s32_decl_in_functions_h
 #define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
+#define func_15149130 func_15149130_struct37_decl_in_functions_h
 #include "functions.h"
 #undef func_15169260
 #undef func_150ADA20
+#undef func_15149130
 u32 func_150ADA20(void);
 void func_15169260(void *, s32, s32, s32);
+struct260 *func_15149130(s16 duration, s8 arg1, s8 arg2, s8 arg3, u8 arg4, u8 arg5, s32 dataSize, u8 owner, s32 kind);
 #include "variables.h"
 
 typedef struct {
-    /* 0x0 */ s32 unk0;
-    /* 0x4 */ s32 unk4;
-    /* 0x8 */ s32 unk8;
-} Struct150E81A8Vec;
-
-typedef struct {
-    /* 0x00 */ s16 unk00;
-    /* 0x02 */ s16 unk02;
-    /* 0x04 */ s16 unk04;
-    /* 0x06 */ s16 unk06;
-    /* 0x08 */ s32 unk08;
-    /* 0x0C */ s32 unk0C;
-    /* 0x10 */ Struct150E81A8Vec unk10;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ s32 unk34;
-    /* 0x38 */ s32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ s16 unk4C;
-    /* 0x4E */ s16 unk4E;
-    /* 0x50 */ s16 unk50;
-    /* 0x52 */ s16 unk52;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-    /* 0x58 */ s8 unk58;
-} Struct150E81A8;
+    f32 x, y, z;
+} Vec3f;
 
 typedef struct {
     /* 0x0 */ s8 type;
@@ -71,20 +45,8 @@ typedef struct {
     s32 ids[3];
 } Game113D60Ids3;
 
-extern Struct150E81A8Vec D_800A1290[];
-extern f32 D_800A1354;
-extern f32 D_800A1358;
-extern f32 D_800A135C;
-extern f32 D_800A1360;
-extern f32 D_800A1364;
-extern void func_151D3FF4(Struct150E81A8Vec *arg0, u8 arg1, s32 arg2);
-extern void func_1514FCE8(Struct150E81A8 *arg0, u8 arg1, s32 arg2);
 extern void *func_151D8868(Game113D60Event *event, s32 arg1, s32 arg2, s32 arg3);
 extern s32 func_151337C0(f32 *arg0);
-
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
 
 typedef struct Game113D60Emission {
     /* 0x00 */ f32 x, y, amplitudeX, amplitudeY;
@@ -447,7 +409,7 @@ void func_150E7290(u8 arg0, u8 owner, s32 kind) {
     Game113D60Ids2 ids;
     Vec2f position;
     Game113D60Event event;
-    s32 unused;
+    s32 pad; // matching: unused stack slot
     u32 flip4;
     u32 flip2;
     u32 random;
@@ -679,8 +641,7 @@ struct260 *func_150E7994(s16 count, f32 rate, u8 owner, s32 kind) {
 
 /* Spawns the burst's next points, `rate` per frame, and ends the effect after the last one. */
 void func_150E7C9C(Game113D60BurstEffect *effect) {
-    s32 pad1;
-    s32 pad2;
+    s32 pad[2]; // matching: unused stack slots
     Vec2f position;
     f32 randomSize;
     s32 flip2;
@@ -708,7 +669,7 @@ void func_150E7C9C(Game113D60BurstEffect *effect) {
 }
 
 typedef struct {
-    /* 0x00 */ s32 unk00;
+    /* 0x00 */ s32 flags;
     /* 0x04 */ s16 unk04;
     /* 0x06 */ u8 unk06;
     /* 0x07 */ u8 unk07;
@@ -727,102 +688,149 @@ typedef struct {
     /* 0x20 */ s16 unk20;
     /* 0x22 */ s16 unk22;
     /* 0x24 */ s16 unk24;
-} Struct150E7FEC;
+} Struct1513C650Arg; // first argument of func_1513C650 / func_1513C73C (passed as an s32)
 
-void func_150E7FEC(f32 arg0, u8 arg1, s32 arg2, f32 *arg3, s16 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, s32 argB) {
-    s32 pad;
-    Struct150E7FEC sp5C;
-    s32 sp58;
-    s32 sp54;
+/* Spawns a func_1513C650 effect of the given size at `position`, lasting `duration` frames
+ * (-1: a fixed 300 frames without the timed flag). */
+void func_150E7FEC(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
+                   u8 arg9, u8 owner, s32 kind) {
+    s32 pad; // matching: unused stack slot
+    Struct1513C650Arg arg;
+    s32 argB;
+    s32 argC;
 
-    sp5C.unk22 = 0x14;
-    sp5C.unk24 = 0xC;
-    sp5C.unk06 = 0x4F;
-    sp5C.unk07 = 0;
-    sp5C.unk00 = ((arg4 == -1) ? 0 : 1) | (arg5 ? 0x400 : 0) | 0x100 | 0x200 | 0x1000 | 0x8000 | 0x40000;
-    sp5C.unk04 = (arg4 == -1) ? 0x12C : arg4 + 0x14;
-    sp5C.unk08 = 0;
-    sp5C.unk0C = 0;
-    sp5C.unk10 = arg1;
-    sp5C.unk11 = 0xFF;
-    sp5C.unk12 = arg7;
-    sp5C.unk13 = arg8;
-    sp5C.unk14 = arg9;
-    sp5C.unk15 = 0xFF;
-    sp5C.unk18 = ((arg6 != 0) ? 2 : 1) + 0x480000;
-    sp5C.unk16 = 0;
-    sp5C.unk17 = 6;
+    arg.unk22 = 20;
+    arg.unk24 = 12;
+    arg.unk06 = 0x4F;
+    arg.unk07 = 0;
+    arg.flags = ((duration == -1) ? 0 : 1) | (arg5 ? 0x400 : 0) | 0x100 | 0x200 | 0x1000 | 0x8000 | 0x40000;
+    arg.unk04 = (duration == -1) ? 300 : duration + 20;
+    arg.unk08 = 0;
+    arg.unk0C = 0;
+    arg.unk10 = arg1;
+    arg.unk11 = 0xFF;
+    arg.unk12 = arg7;
+    arg.unk13 = arg8;
+    arg.unk14 = arg9;
+    arg.unk15 = 0xFF;
+    arg.unk18 = ((arg6 != 0) ? 2 : 1) + 0x480000;
+    arg.unk16 = 0;
+    arg.unk17 = 6;
     if (arg5 != 0) {
-        sp58 = 3;
-        sp54 = 0xFF;
+        argB = 3;
+        argC = 0xFF;
     } else {
-        sp58 = 0;
-        sp54 = 0;
+        argB = 0;
+        argC = 0;
     }
-    func_1513C650((s32)&sp5C, 0, 0, arg2, arg3[0], arg3[1], arg3[2], arg0, arg0, func_150ADA20() & 0xFF, (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2), sp58, sp54, 0, argA, argB);
+    func_1513C650((s32)&arg, 0, 0, arg2, position->x, position->y, position->z, size, size, func_150ADA20() & 0xFF,
+                  (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2), argB, argC, 0, owner, kind);
 }
 
-void func_150E81A8(u8 arg0, s32 arg1, s32 arg2) {
-    Struct150E81A8Vec sp84;
-    Struct150E81A8 sp28;
-    Game113D60Event sp20;
+typedef struct {
+    /* 0x00 */ s16 unk00;
+    /* 0x02 */ s16 unk02;
+    /* 0x04 */ s16 unk04;
+    /* 0x06 */ s16 unk06;
+    /* 0x08 */ s32 unk08;
+    /* 0x0C */ s32 unk0C;
+    /* 0x10 */ Vec3f position;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ s32 unk34;
+    /* 0x38 */ s32 unk38;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ f32 unk40;
+    /* 0x44 */ f32 unk44;
+    /* 0x48 */ f32 unk48;
+    /* 0x4C */ s16 unk4C;
+    /* 0x4E */ s16 unk4E;
+    /* 0x50 */ s16 unk50;
+    /* 0x52 */ s16 unk52;
+    /* 0x54 */ s16 unk54;
+    /* 0x56 */ s16 unk56;
+    /* 0x58 */ s8 unk58;
+} Struct1514FCE8Arg; // first argument of func_1514FCE8
 
-    if (arg0 == 4 || arg0 == 5 || arg0 == 6 || arg0 == 7) {
-        sp84 = D_800A1290[arg0];
-        *(f32 *)&sp84.unk4 += 200.0f;
-        func_151D3FF4(&sp84, ((u8 *)&arg1)[3], arg2);
+extern Vec3f D_800A1290[];
+extern void func_151D3FF4(Vec3f *position, u8 owner, s32 kind);
+extern void func_1514FCE8(Struct1514FCE8Arg *arg0, u8 owner, s32 kind);
 
-        sp28.unk00 = 0;
-        sp28.unk02 = 0xFF;
-        sp28.unk04 = -0x40;
-        sp28.unk06 = 0x4D;
-        sp28.unk08 = 0xA;
-        sp28.unk0C = 5;
-        sp28.unk10 = sp84;
-        sp28.unk1C = 252.0f;
-        sp28.unk20 = 117.0f;
-        sp28.unk24 = 308.0f;
-        sp28.unk28 = 256.0f;
-        sp28.unk2C = D_800A1354;
-        sp28.unk30 = D_800A1358;
-        sp28.unk34 = 4;
-        sp28.unk38 = 7;
-        sp28.unk3C = 27.0f;
-        sp28.unk40 = D_800A135C;
-        sp28.unk44 = D_800A1360;
-        sp28.unk48 = D_800A1364;
-        sp28.unk4C = 25;
-        sp28.unk4E = 15;
-        sp28.unk50 = 100;
-        sp28.unk52 = 100;
-        sp28.unk54 = 12;
-        sp28.unk56 = 20;
-        sp28.unk58 = 0;
+/* For points 4-7 of the D_800A1290 table: spawns the func_151D3FF4 and func_1514FCE8 effects
+ * 200 units above the point, plus an event. */
+void func_150E81A8(index, owner, kind)
+    u8 index;
+    u8 owner;
+    s32 kind;
+{
+    Vec3f position;
+    Struct1514FCE8Arg arg;
+    Game113D60Event event;
 
-        func_1514FCE8(&sp28, ((u8 *)&arg1)[3], arg2);
+    if (index == 4 || index == 5 || index == 6 || index == 7) {
+        position = D_800A1290[index];
+        position.y += 200.0f;
+        func_151D3FF4(&position, owner, kind);
 
-        sp20.type = 1;
-        sp20.duration = (func_150ADA20() % 0xBU) + 0x1E;
-        sp20.unk4 = 8;
-        sp20.unk6 = -1;
-        sp20.unk5 = 1;
-        func_151D8868(&sp20, 0, 0xFF, 0);
+        arg.unk00 = 0;
+        arg.unk02 = 0xFF;
+        arg.unk04 = -0x40;
+        arg.unk06 = 0x4D;
+        arg.unk08 = 10;
+        arg.unk0C = 5;
+        arg.position = position;
+        arg.unk1C = 252.0f;
+        arg.unk20 = 117.0f;
+        arg.unk24 = 308.0f;
+        arg.unk28 = 256.0f;
+        arg.unk2C = 699.0f;
+        arg.unk30 = 511.0f;
+        arg.unk34 = 4;
+        arg.unk38 = 7;
+        arg.unk3C = 27.0f;
+        arg.unk40 = 0.7820000648f;
+        arg.unk44 = -0.9300000668f;
+        arg.unk48 = 0.7300000191f;
+        arg.unk4C = 25;
+        arg.unk4E = 15;
+        arg.unk50 = 100;
+        arg.unk52 = 100;
+        arg.unk54 = 12;
+        arg.unk56 = 20;
+        arg.unk58 = 0;
+
+        func_1514FCE8(&arg, owner, kind);
+
+        event.type = 1;
+        event.duration = (func_150ADA20() % 11) + 30;
+        event.unk4 = 8;
+        event.unk6 = -1;
+        event.unk5 = 1;
+        func_151D8868(&event, 0, 0xFF, 0);
     }
 }
 
-void func_150E83AC(struct127 *arg0, s16 arg1, u8 arg2, s32 arg3) {
-    struct {
-        Struct150E81A8Vec unk0;
-        f32 unkC;
-    } sp40;
-    struct260 *temp_v0;
+typedef struct {
+    /* 0x00 */ Vec3f position;
+    /* 0x0C */ f32 unkC;
+} Game113D60PointData;
 
-    sp40.unk0 = *(Struct150E81A8Vec *)arg0;
-    sp40.unkC = 0.0f;
+/* Creates a point effect (kind 0x28) at `position`, lasting `duration` frames (-1: 300). */
+void func_150E83AC(Vec3f *position, s16 duration, u8 owner, s32 kind) {
+    Game113D60PointData data;
+    struct260 *effect;
 
-    temp_v0 = func_15149130((arg1 == -1) ? 0x12C : arg1, -1, 0x28, -1, (arg1 == -1) ? 0 : 1, 0, (struct37 *)0x10, arg2, arg3);
-    if (temp_v0 != NULL) {
-        memcpy((void *)((s32)temp_v0 + 0x28), &sp40, 0x10);
+    data.position = *position;
+    data.unkC = 0.0f;
+
+    effect = func_15149130((duration == -1) ? 300 : duration, -1, 0x28, -1, (duration == -1) ? 0 : 1, 0, sizeof(data),
+                           owner, kind);
+    if (effect != NULL) {
+        memcpy((u8 *)effect + 0x28, &data, sizeof(data));
     }
 }
 
@@ -967,7 +975,7 @@ void func_150E8854(void) {
 
     sp30 = 10.0f;
 
-    temp_v0 = func_15149130(0x12C, -1, 0x35, -1, 0, 0, (struct37 *)0x4, 0xFF, 1);
+    temp_v0 = func_15149130(0x12C, -1, 0x35, -1, 0, 0, 0x4, 0xFF, 1);
     if (temp_v0 != NULL) {
         memcpy((void *)((s32)temp_v0 + 0x28), &sp30, 4);
     }
@@ -1028,7 +1036,7 @@ void func_150E8A80(void) {
     sp38.unk4 = D_800A1380;
     sp38.unk8 = 0.0f;
 
-    temp_v0 = func_15149130((func_150ADA20() % 0x29U) + 0x1E, -1, 0x33, -1, 1, 0, (struct37 *)0xC, 0xFF, 1);
+    temp_v0 = func_15149130((func_150ADA20() % 0x29U) + 0x1E, -1, 0x33, -1, 1, 0, 0xC, 0xFF, 1);
     if (temp_v0 != NULL) {
         memcpy((void *)((s32)temp_v0 + 0x28), &sp38, 0xC);
     }
@@ -1094,7 +1102,7 @@ void func_150E8B1C(Struct150E8B1C *arg0) {
                 sp.unk0C = 0.3171199858f;
                 sp.unk10 = 1.046509981f;
                 sp.unk14 = 0.0f;
-                ret = func_15149130((func_150ADA20() % 13U) + 5, -1, 0x34, -1, 1, 0, (struct37 *)0x18, arg0->unkC, arg0->unk1);
+                ret = func_15149130((func_150ADA20() % 13U) + 5, -1, 0x34, -1, 1, 0, 0x18, arg0->unkC, arg0->unk1);
                 if (ret != NULL) {
                     memcpy((void *)((s32)ret + 0x28), v, 0x18);
                 }
@@ -1252,7 +1260,7 @@ void func_150E90DC(void) {
     sp38.unk4 = D_800A13B4;
     sp38.unk8 = 0.0f;
 
-    temp_v0 = func_15149130((func_150ADA20() % 0x1AU) + 0x5, -1, 0x36, -1, 1, 0, (struct37 *)0xC, 0xFF, 1);
+    temp_v0 = func_15149130((func_150ADA20() % 0x1AU) + 0x5, -1, 0x36, -1, 1, 0, 0xC, 0xFF, 1);
     if (temp_v0 != NULL) {
         memcpy((void *)((s32)temp_v0 + 0x28), &sp38, 0xC);
     }
@@ -1318,7 +1326,7 @@ void func_150E9178(Struct150E8D5C *arg0) {
                 sp.unk34 = 0;
                 sp.unk35 = 0;
                 sp.unk38 = 0;
-                ret = func_15149130((func_150ADA20() % 13U) + 5, -1, 0x37, -1, 1, 0, (struct37 *)0x3C, arg0->unkC, arg0->unk1);
+                ret = func_15149130((func_150ADA20() % 13U) + 5, -1, 0x37, -1, 1, 0, 0x3C, arg0->unkC, arg0->unk1);
                 if (ret != NULL) {
                     memcpy((void *)((s32)ret + 0x28), v, 0x3C);
                 }
