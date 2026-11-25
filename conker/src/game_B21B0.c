@@ -186,81 +186,88 @@ s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, f32
     return 1;
 }
 
-void func_15085410(struct127 *arg0, s32 arg1) {
-    arg0->unk31C->pad11B[0] = arg1;
+/* Sets the spawn index func_15084D70 falls back to for this player object. */
+void func_15085410(struct127 *obj, s32 spawnIndex) {
+    obj->unk31C->pad11B[0] = spawnIndex;
 }
 
-u8 func_15085420(struct127 *arg0) {
-    return arg0->unk31C->pad11B[0];
+/* Returns the player object's stored spawn index. */
+u8 func_15085420(struct127 *obj) {
+    return obj->unk31C->pad11B[0];
 }
 
-extern s32  func_15084D70(s32, s32, s32, s16*, f32*, u8*, u8*, s32*, s32*, s32, s32*);
 extern f32  func_1506AD30(struct127 *, f32, s32);
 extern void func_1507C3E0(struct127 *, s16 *, s16 *, s16 *);
 extern void func_1505D6F0(struct127 *, s32);
 extern void func_15005818(struct108 *, struct127 *, f32 *);
-extern void func_15169040(s32, u8);
+extern void func_15169040(void *, u8);
 
-void func_15085430(struct127 *arg0, s32 arg1, s32 arg2) {
-    s16 sp78[3];
-    f32 sp6C[3];
-    u8 sp6B;
-    u8 sp6A;
-    s32 sp64;
-    s32 sp60;
-    struct127 *oldObject;
-    s32 oldIndex;
-    struct { s32 unk0; u8 unk4; } sp50;
+/* Moves obj to spawn point `spawnIndex` (see func_15084D70): sets its position and angles,
+ * clears its motion, places its camera and passes {obj, unique_id} to func_15169040. */
+void func_15085430(struct127 *obj, s32 spawnIndex, s32 unused) {
+    s16 pos[3];
+    f32 unk8[3];
+    u8 unk6;
+    u8 facing;
+    s32 unk15;
+    s32 unk14;
+    struct127 *savedObject;
+    s32 savedIndex;
+    struct {
+        struct127 *obj;
+        u8 uniqueId;
+    } event;
 
-    func_15084D70(arg0->unk127, arg1, D_800D18A8, sp78, sp6C, &sp6B, &sp6A, &sp60, &sp64, arg2, 0);
-    oldObject = D_800D154C;
-    oldIndex = D_800C3E78;
-    D_800D154C = arg0;
-    D_800C3E78 = arg0 - D_800CC2D0;
-    func_1506AD30(arg0, 800.0f, 1);
-    D_800D154C = oldObject;
-    D_800C3E78 = oldIndex;
-    arg0->x_position = sp78[0];
-    arg0->y_position = sp78[1];
-    arg0->z_position = sp78[2];
-    arg0->old_x_position = arg0->x_position;
-    arg0->old_y_position = *(volatile f32 *)&arg0->y_position;
-    arg0->old_z_position = arg0->z_position;
-    arg0->unk76 = arg0->unk78 = arg0->unk7A = sp6A << 8;
-    arg0->unk40 = (s16)(arg0->unk7A + 0x4000) * 0.0054931640625f;
-    arg0->unkB8 = (sp6B * 360) >> 8;
-    while (arg0->unkB8 > 180.0f) {
-        arg0->unkB8 -= 360.0f;
+    func_15084D70(obj->unk127, spawnIndex, D_800D18A8, pos, unk8, &unk6, &facing, &unk14, &unk15, unused, NULL);
+    savedObject = D_800D154C;
+    savedIndex = D_800C3E78;
+    D_800D154C = obj;
+    D_800C3E78 = obj - D_800CC2D0;
+    func_1506AD30(obj, 800.0f, 1);
+    D_800D154C = savedObject;
+    D_800C3E78 = savedIndex;
+    obj->x_position = pos[0];
+    obj->y_position = pos[1];
+    obj->z_position = pos[2];
+    obj->old_x_position = obj->x_position;
+    obj->old_y_position = *(volatile f32 *)&obj->y_position; // matching: stops IDO carrying y_position across the loop below
+    obj->old_z_position = obj->z_position;
+    obj->unk76 = obj->unk78 = obj->unk7A = facing << 8;
+    obj->unk40 = (s16)(obj->unk7A + 0x4000) * (360.0f / 65536);
+    obj->unkB8 = (unk6 * 360) >> 8;
+    while (obj->unkB8 > 180.0f) {
+        obj->unkB8 -= 360.0f;
     }
-    arg0->unk28 = 0.0f;
-    arg0->unk180 = arg0->y_position;
-    if (arg0->unk31C != NULL) {
-        func_1507C3E0(arg0, (s16 *)&arg0->unk31C->unk114, (s16 *)&arg0->unk31C->unk116, (s16 *)&arg0->unk31C->unk118);
+    obj->unk28 = 0.0f;
+    obj->unk180 = obj->y_position;
+    if (obj->unk31C != NULL) {
+        func_1507C3E0(obj, (s16 *)&obj->unk31C->unk114, (s16 *)&obj->unk31C->unk116, (s16 *)&obj->unk31C->unk118);
     }
-    arg0->unk1CC = arg0->y_position;
-    arg0->unk2F8 &= ~0x10;
-    arg0->unk22C |= 0x200;
-    arg0->unk164 = 0.0f;
-    arg0->unk168 = 0.0f;
-    arg0->unk16C = 0.0f;
-    arg0->unk170 = 0.0f;
-    if (arg0->unk127 != 0xFF) {
-        *((u8 *)arg0->unk31C + 0x23) = sp64;
+    obj->unk1CC = obj->y_position;
+    obj->unk2F8 &= ~0x10;
+    obj->unk22C |= 0x200;
+    obj->unk164 = 0.0f;
+    obj->unk168 = 0.0f;
+    obj->unk16C = 0.0f;
+    obj->unk170 = 0.0f;
+    if (obj->unk127 != 0xFF) {
+        /* state byte 0x23 is inside struct126's pad17 */
+        *((u8 *)obj->unk31C + 0x23) = unk15;
         if (D_800BE616 && D_800D18A8) {
-            func_1505D6F0(arg0, arg0 - D_800CC2D0);
+            func_1505D6F0(obj, obj - D_800CC2D0);
         }
-        if (arg0->unk31C->unk78 == 0 && arg0->unk31C->unk19B != 4 && arg0->unk31C->unk19B != 7) {
-            arg0->unk83 = 0;
+        if (obj->unk31C->unk78 == 0 && obj->unk31C->unk19B != 4 && obj->unk31C->unk19B != 7) {
+            obj->unk83 = 0;
         }
     } else {
-        arg0->unk83 = 0;
+        obj->unk83 = 0;
     }
-    if (arg0->camera != NULL) {
-        func_15005818(arg0->camera, arg0, sp6C);
+    if (obj->camera != NULL) {
+        func_15005818(obj->camera, obj, unk8);
     }
-    sp50.unk0 = (s32)arg0;
-    sp50.unk4 = arg0->unique_id;
-    func_15169040((s32)&sp50, 4);
+    event.obj = obj;
+    event.uniqueId = obj->unique_id;
+    func_15169040(&event, 4);
 }
 
 typedef struct GameB21B0PlayerRecordA {
