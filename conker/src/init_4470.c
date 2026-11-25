@@ -10,8 +10,7 @@ void func_10004470(void) {
 
     osCreatePiManager(OS_PRIORITY_PIMGR, &D_800388B0, &D_800380E0, 200);
 
-    for (i = 0; i < 3; i++)
-    {
+    for (i = 0; i < 3; i++) {
         osCreateMesgQueue(&gMessageQueue[i], &gMessages[i], 1);
     }
 
@@ -74,31 +73,28 @@ void func_10004674(void) {
     D_8003A571 = 0;
 }
 
+/* Blocking ROM read of any size, split into DMAs of at most 0x14000 bytes on the thread's queue. */
 void func_100046E4(s32 devAddr, void *dramAddr, u32 size) {
-    s32 ioMsg[4];
+    OSIoMesg ioMsg;
     OSMesg recvMsg;
-    OSMesgQueue *queue;
-    s32 threadId;
+    s32 threadIndex;
     u32 sent;
-    u32 transferSize;
+    u32 chunkSize;
 
     sent = 0;
-    threadId = __osRunningThread->id - 3;
-    if ((threadId >= 4) || (threadId < 0)) {
-        threadId = 0;
+    threadIndex = __osRunningThread->id - 3;
+    if (threadIndex >= 4 || threadIndex < 0) {
+        threadIndex = 0;
     }
 
     osInvalDCache(dramAddr, size);
-    if (size != 0) {
-        queue = &gMessageQueue[threadId];
-        do {
-            transferSize = ((size - sent) < 0x14000U) ? (size - sent) : 0x14000;
-            osPiStartDma((OSIoMesg *)((u8 *)ioMsg - 8), 0, 0, devAddr, dramAddr, transferSize, queue);
-            osRecvMesg(queue, (OSMesg *)((u8 *)&recvMsg - 8), OS_MESG_BLOCK);
-            sent += transferSize;
-            devAddr += transferSize;
-            dramAddr = (void *)((u8 *)dramAddr + transferSize);
-        } while (sent < size);
+    while (sent < size) {
+        chunkSize = MIN(size - sent, 0x14000);
+        osPiStartDma(&ioMsg, OS_MESG_PRI_NORMAL, OS_READ, devAddr, dramAddr, chunkSize, &gMessageQueue[threadIndex]);
+        osRecvMesg(&gMessageQueue[threadIndex], &recvMsg, OS_MESG_BLOCK);
+        sent += chunkSize;
+        devAddr += chunkSize;
+        dramAddr = (u8 *)dramAddr + chunkSize;
     }
 }
 
