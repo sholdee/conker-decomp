@@ -86,11 +86,9 @@ extern Vec3f_1DF510 D_800AA320;
 extern Vec3f_1DF510 D_800AA32C;
 extern Vec3f_1DF510 D_800AA368;
 extern Vec3f_1DF510 D_800AA374;
-extern f32 D_800AA388;
-extern f32 D_800AA38C;
 
 s32 func_151B22F4(RopeTie *self);
-void func_151B222C();
+void func_151B222C(RopeTie *self);
 void func_151B2348(RopeTie *self);
 void func_151B2690(RopeTie *self);
 void func_151B47D8(TiedRope *rope, RopeTieLink *link, s32 arg2, u8 event);
@@ -146,21 +144,17 @@ void func_151B2100(RopeTie *self) {
     }
 }
 
-void func_151B222C();
-
-void func_151B220C() {
-    func_151B222C();
+void func_151B220C(RopeTie *self) {
+    func_151B222C(self);
 }
 
 /* Kills the ropes and the line this RopeTie owns. */
-void func_151B222C(self)
-RopeTie *self;
-{
-    s32 i;
+void func_151B222C(RopeTie *self) {
+    u8 i;
     void *child;
     RopeTieData *tie = &self->tie;
 
-    for (i = 0; i < 3; i = (u8)(i + 1)) {
+    for (i = 0; i < 3; i++) {
         child = tie->ropes[i];
         if (child != NULL) {
             func_1516972C(child);
@@ -198,8 +192,6 @@ extern Vec3f_1DF510 D_800AA338;
 extern Vec3f_1DF510 D_800AA344;
 extern Vec3f_1DF510 D_800AA350;
 extern Vec3f_1DF510 D_800AA35C;
-extern f32 D_800AA380;
-extern f32 D_800AA384;
 
 /* State 1: hangs three ropes between bones of obj0 and obj1. */
 void func_151B2348(RopeTie *self) {
@@ -237,8 +229,8 @@ void func_151B2348(RopeTie *self) {
     desc.updateCallback = 3;
     desc.halfWidth = 5.0f;
     desc.length = 80.0f;
-    desc.accelScale = D_800AA380;
-    desc.lagScale = D_800AA384;
+    desc.accelScale = -0.01999999955f;
+    desc.lagScale = 0.7000000477f;
     tie = &self->tie;
     tie->ropes[2] = func_151B30B0(&desc, 0.0015f, sizeof(RopeTieLink), 0xFF, 0);
     if (tie->ropes[2] != NULL) {
@@ -324,8 +316,8 @@ void func_151B2690(RopeTie *self) {
     desc.updateCallback = 3;
     desc.halfWidth = 5.0f;
     desc.length = 180.0f;
-    desc.accelScale = D_800AA388;
-    desc.lagScale = D_800AA38C;
+    desc.accelScale = -0.01185000036f;
+    desc.lagScale = 0.7130000591f;
 
     tie = &self->tie;
     tie->ropes[1] = func_151B30B0(&desc, 0.0015f, sizeof(RopeTieLink), 0xFF, 0);
@@ -371,8 +363,8 @@ Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
 Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
 Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
-extern void func_15143134(Vec3f_1DF510 *in, Vec3f_1DF510 *out, s32 mtx);
-extern void func_151D5D60();
+extern void func_15143134(Vec3f_1DF510 *in, Vec3f_1DF510 *out, Mtx *mtx);
+extern void func_151D5D60(void *, s16, s32, void **, u8 *);
 extern u8 D_80090DE8[];
 extern s32 D_800D2C9C;
 extern struct {
@@ -399,7 +391,7 @@ Gfx *func_151B2974(Gfx *gfx, RopeLine *self, s16 view) {
     f32 toCamX;
     f32 toCamY;
     f32 toCamZ;
-    s32 boneMtx;
+    Mtx *boneMtx;
     f32 scale;
 
     dead = 0;
@@ -407,17 +399,16 @@ Gfx *func_151B2974(Gfx *gfx, RopeLine *self, s16 view) {
     if ((line->anchor.target->interaction_state == 0) || (line->anchor.target->unique_id != line->anchor.targetId)) {
         dead = 1;
     }
-    line = &self->line;
     if ((dead == 0) && (line->anchor.target->unk1D4 != NULL)) {
-        func_151D5D60(&self->base.unk14, view, 4 * sizeof(Vtx), &vtx, 0);
+        func_151D5D60(&self->base.unk14, view, 4 * sizeof(Vtx), (void **)&vtx, NULL);
         if (vtx == NULL) {
             return gfx;
         }
-        boneMtx = (s32)line->anchor.target->unk1D4 + (line->anchor.bone << 6);
+        boneMtx = &((Mtx *)line->anchor.target->unk1D4)[line->anchor.bone];
         func_15143134(&line->anchor.offset, &start, boneMtx);
         func_15143134(&line->endOffset, &end, boneMtx);
         update = 1;
-        camera = (f32 *)(view * 0x9A0 + (u8 *)D_800DBFF0 + 0x2F8);
+        camera = &D_800DBFF0[view].unk2F8;
         gfx = func_15142B7C(gfx, 0x200005, 0x60600);
         gfx = func_15142E24(gfx, (s32)D_80090DE8, 0, 0, 0, 0, 0x36, 0, 0, &update, 3);
         gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &update);
@@ -543,6 +534,6 @@ void func_151B3040(TiedRope *self, s32 arg1, u8 event) {
     RopeTieLink *link;
 
     link = &self->link;
-    func_15169850(arg1, event, (s32)&link->start.target, (s32)&self->link.start.targetId, (s32)self);
+    func_15169850(arg1, event, (s32)&link->start.target, (s32)&link->start.targetId, (s32)self);
     func_15169850(arg1, event, (s32)&link->end.target, (s32)&link->end.targetId, (s32)self);
 }
