@@ -2020,15 +2020,19 @@ extern s8 D_800E0C84;
 s32 *func_1502B6BC(s32, s32, s32, s32, s32, s32);
 s32 func_1510CE60(Gfx *, s32, u32, s32, s32 *);
 
+/*
+ * Loads the 30 display lists 0x1C5..0x1E2 and patches them: vertex addresses relocated with the
+ * first two vertices' colours set to opaque black, SetCombine and SetOtherMode rewritten.
+ */
 void func_151EDF4C(void) {
     s32 i;
     s32 j;
-    s32 pad1;
+    s32 pad1; // matching: stack slots
     s32 pad2;
     s32 *data;
     Gfx *dl;
     s32 cmd;
-    u8 *vtx;
+    Vtx *vtx;
 
     D_80090138 = NULL;
     D_800E0C7C = allocate_memory(0x1A8, 1, 0, 0);
@@ -2044,16 +2048,16 @@ void func_151EDF4C(void) {
                 cmd = (dl->words.w0 >> 24) & 0xFF;
                 if (cmd == 1) {
                     dl->words.w1 += (s32)data;
-                    vtx = (u8 *)(((volatile Gfx *)dl)->words.w1 | 0x80000000);
-                    vtx[0xC] = 0;
-                    vtx[0xD] = 0;
-                    vtx[0xE] = 0;
-                    vtx[0xF] = 0xFF;
-                    vtx += 0x10;
-                    vtx[0xC] = 0;
-                    vtx[0xD] = 0;
-                    vtx[0xE] = 0;
-                    vtx[0xF] = 0xFF;
+                    vtx = (Vtx *)(((volatile Gfx *)dl)->words.w1 | 0x80000000); // matching: volatile forces the reload of w1 after the store
+                    vtx->v.cn[0] = 0;
+                    vtx->v.cn[1] = 0;
+                    vtx->v.cn[2] = 0;
+                    vtx->v.cn[3] = 0xFF;
+                    vtx++;
+                    vtx->v.cn[0] = 0;
+                    vtx->v.cn[1] = 0;
+                    vtx->v.cn[2] = 0;
+                    vtx->v.cn[3] = 0xFF;
                 }
                 if (cmd == 0xFC) {
                     dl->words.w0 = 0xFC127E05;
