@@ -1291,38 +1291,38 @@ extern s32  D_800DDD20;
 extern u8   D_800DDD61;
 extern s32  D_800DDD64;
 
-extern u8   D_800DDDAC;
+extern s8   D_800DDDAC[]; // per view: colour fade direction (nonzero: fading to the colour)
 extern u8   D_800DDDAD;
 extern u8   D_800DDDAE;
 extern u8   D_800DDDAF;
-extern s32  D_800DDDB0;
+extern s32  D_800DDDB0[]; // per view: colour fade elapsed frames
 extern s32  D_800DDDB4;
 extern s32  D_800DDDB8;
 extern s32  D_800DDDBC;
-extern f32  D_800DDDC8;
+extern f32  D_800DDDC8[]; // per view: iris closure (0 open .. 1 closed)
 extern f32  D_800DDDCC;
 extern f32  D_800DDDD0;
 extern f32  D_800DDDD4;
-extern f32  D_800DDDD8;
+extern f32  D_800DDDD8[]; // per view: iris closure change per frame
 extern f32  D_800DDDDC;
 extern f32  D_800DDDE0;
 extern f32  D_800DDDE4;
 extern u16  D_800DDE08;
-extern s32  D_800DDE18;
-extern u8   D_800DDE1C;
+extern f32  *D_800DDE18;  // letterbox amount in percent, or NULL when off
+extern u8   D_800DDE1C[]; // per view: iris style
 extern u8   D_800DDE1D;
 extern u8   D_800DDE1E;
 extern u8   D_800DDE1F;
-extern u8   D_800DDE20;
+extern u8   D_800DDE20[]; // per view: scripted iris
 extern u8   D_800DDE21;
 extern u8   D_800DDE22;
 extern u8   D_800DDE23;
 extern s32  D_800DDE2C;
-extern s32  D_800DDE28;
+extern s32  D_800DDE28[]; // per view: colour fade duration
 extern s32  D_800DDE30;
 extern s32  D_800DDE34;
 extern u8   D_800DDE38;
-extern u8   D_800DDE3C;
+extern u8   D_800DDE3C[]; // per view: iris tracking the player
 extern u8   D_800DDE3D;
 extern u8   D_800DDE3E;
 extern u8   D_800DDE3F;

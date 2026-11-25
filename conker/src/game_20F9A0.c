@@ -1189,8 +1189,6 @@ void func_151E4E64(void) {
 }
 
 extern f32 D_8008FDD0;
-extern f32 D_800DDDC8;
-extern f32 D_800DDDD8;
 
 /* Advances the screen fade D_800E0B96; once fully faded, runs the pending transition D_800E0A88. */
 void func_151E4EE8(void) {
@@ -1198,15 +1196,15 @@ void func_151E4EE8(void) {
 
     D_8008FDD0 = 1.0f - (f32)D_800E0B96 / 255.0f;
     if (D_8008FD74 == 0xFF) {
-        if (0.8700000048f < D_800DDDC8) {
+        if (0.8700000048f < D_800DDDC8[0]) {
             D_800E0B96 += D_800BE9E4;
             if (D_800E0B96 < 0x55) {
-                D_800DDDD8 = 9.999999975e-07f;
+                D_800DDDD8[0] = 9.999999975e-07f;
             } else {
-                D_800DDDD8 = 0.01111111138f;
+                D_800DDDD8[0] = 0.01111111138f;
             }
         }
-        if (D_800DDDC8 < 1.0f) {
+        if (D_800DDDC8[0] < 1.0f) {
             return;
         }
         if (D_800E0B96 < 0x6E) {

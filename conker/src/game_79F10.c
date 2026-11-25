@@ -263,7 +263,7 @@ void func_1504CB98(Actor *actor) {
         D_800CC288 = D_800BE710[D_800C3E78];
         buttons = actor->unk31C->buttons;
     }
-    if ((D_80082FA0 >= D_800C3E78) && ((&D_800DDE3C)[D_800C3E78] != 0) && ((&D_800DDDC8)[D_800C3E78] > 0.75f) && (D_800E0B94 != 2)) {
+    if ((D_80082FA0 >= D_800C3E78) && (D_800DDE3C[D_800C3E78] != 0) && (D_800DDDC8[D_800C3E78] > 0.75f) && (D_800E0B94 != 2)) {
         D_800CC284->stick_x = 0;
         D_800CC284->stick_y = 0;
         D_800CC284->buttons = 0;

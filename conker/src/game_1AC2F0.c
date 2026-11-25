@@ -1,25 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
-#define D_800DDDAC D_800DDDAC_hdr
-#define D_800DDDB0 D_800DDDB0_hdr
-#define D_800DDDC8 D_800DDDC8_hdr
-#define D_800DDDD8 D_800DDDD8_hdr
-#define D_800DDE18 D_800DDE18_hdr
-#define D_800DDE1C D_800DDE1C_hdr
-#define D_800DDE20 D_800DDE20_hdr
-#define D_800DDE28 D_800DDE28_hdr
-#define D_800DDE3C D_800DDE3C_hdr
 #define D_800CC2D0 D_800CC2D0_hdr
 #include "variables.h"
-#undef D_800DDDAC
-#undef D_800DDDB0
-#undef D_800DDDC8
-#undef D_800DDDD8
-#undef D_800DDE18
-#undef D_800DDE1C
-#undef D_800DDE20
-#undef D_800DDE28
-#undef D_800DDE3C
 #undef D_800CC2D0
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
@@ -38,10 +20,7 @@ typedef struct {
 
 /* Colour fade (func_1517EE40) */
 extern FadeColor D_800DDDA0[]; // colour
-extern s8 D_800DDDAC[];        // nonzero: fading to the colour, 0: fading from it
-extern s32 D_800DDDB0[];       // elapsed frames
 extern u8 D_800DDDC0[];        // fixed alpha that overrides the timer when nonzero
-extern s32 D_800DDE28[];       // duration in frames
 
 /* Colour flash (func_1517F488) */
 extern FadeColor D_800DDD90[];
@@ -58,19 +37,13 @@ extern u8 D_800DDD8C;  // nonzero: alpha pulses
 extern u8 D_8008D010[][6]; // two RGB colours per entry
 
 /* Iris wipe */
-extern f32 D_800DDDC8[];     // closure: 0 open .. 1 closed
-extern f32 D_800DDDD8[];     // closure change per frame
 extern f32 D_800DDDE8[][2];  // hole centre, relative to the view centre
-extern u8 D_800DDE1C[];      // style: 0 plain, 1 with sight marks, 2 with an animated overlay
-extern u8 D_800DDE20[];      // nonzero: scripted iris driven by the player's mode state
-extern u8 D_800DDE3C[];      // nonzero: iris tracking the player (state 1..4)
 extern u8 D_800DDD70[];      // wobble frames left
 extern u8 D_800DDD74[];      // wobble angle
 extern u8 D_800DDD78[];      // overlay animation frame
 extern u16 D_800DDD80[];     // hold frames left
 
 /* Letterbox */
-extern f32 *D_800DDE18; // bar amount in percent, or NULL when off
 
 extern s32 D_800BE9E4; // frames elapsed this update
 

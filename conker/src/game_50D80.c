@@ -662,9 +662,9 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
     } else if (event->type == 5) {
         if (event->value == 0x3B) {
             if (event->unk4 == 0) {
-                D_800DDE18 = (s32) &D_800C3958[scene][track].unk28;
+                D_800DDE18 = &D_800C3958[scene][track].unk28;
             } else {
-                D_800DDE18 = 0;
+                D_800DDE18 = NULL;
             }
         } else if (event->value == 8) {
             D_800C3656[scene] = !event->unk4;
