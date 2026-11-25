@@ -60,19 +60,18 @@ typedef struct Camera {
 
 extern f32 D_800A34A0;
 extern f32 D_800894C0;
-extern struct17 D_800894C8;
+extern vertex D_800894C8;
 
 void func_150495B0(f32 *value, f32 target, f32 *vel, f32 accel, f32 maxSpeed, f32 dt);
-void func_15123070(struct108 *arg0);
+void func_15123070(Camera *camera);
 void func_15123A54(Camera *camera);
 void func_1512E140(Camera *camera);
-void func_1512A390(struct108 *arg0);
+void func_1512A390(Camera *camera);
 
 #define SQ(x) ((x) * (x))
-#define FLD(o) (*(f32 *)((u8 *)arg0 + (o)))
 
-void func_15122440(struct108 *arg0) {
-    struct17 v = D_800894C8;
+void func_15122440(Camera *camera) {
+    vertex v = D_800894C8;
     f32 tmp;
     f32 yaw;
     f32 pitch;
@@ -81,19 +80,19 @@ void func_15122440(struct108 *arg0) {
     f32 z;
     f32 y;
 
-    yaw = (arg0->unk3D0->unk40 + 90.0f) * 0.01745329238f;
-    func_1512A390(arg0);
-    if (!(arg0->unk5F0 & 1) && (arg0->unk3D0->unk102 == 0)) {
-        yaw = arg0->unk39C - 1.570796371f;
+    yaw = (camera->player->unk40 + 90.0f) * 0.01745329238f;
+    func_1512A390(camera);
+    if (!(camera->status & 1) && (camera->player->unk102 == 0)) {
+        yaw = camera->yawRad - 1.570796371f;
     }
-    if (arg0->unk86C != 999.0f) {
-        pitch = arg0->unk86C;
-    } else if (arg0->unk3D0->health == 0) {
+    if (camera->pitchOverride != 999.0f) {
+        pitch = camera->pitchOverride;
+    } else if (camera->player->health == 0) {
         pitch = 0.0f;
     } else {
-        pitch = (arg0->unk3D0->unk102 ? 10.0f : 0.0f) + arg0->unk3D0->unkB8;
+        pitch = (camera->player->unk102 ? 10.0f : 0.0f) + camera->player->unkB8;
     }
-    if (arg0->unk3D0->unk102) {
+    if (camera->player->unk102) {
         pitch *= 0.5f;
     }
     pitch = (pitch < -88.0f) ? -88.0f : ((pitch > 88.0f) ? 88.0f : pitch);
@@ -103,75 +102,75 @@ void func_15122440(struct108 *arg0) {
         D_800894C0 = pitch;
     }
     pitch *= 0.01745329238f;
-    func_15123070(arg0);
-    if (*arg0->unk36C & 0x10) {
-        v.unk0 = 150.0f;
+    func_15123070(camera);
+    if (camera->contPad->button & R_TRIG) {
+        v.x = 150.0f;
     } else {
-        v.unk0 = arg0->unk374;
+        v.x = camera->targetDistance;
     }
-    if ((arg0->unk3D0->unk102 != 0) && (arg0->unk3E8 == 0)) {
-        if (FLD(0x370) < arg0->unk374) {
-            v.unk0 = FLD(0x370);
+    if ((camera->player->unk102 != 0) && (camera->unk3E8 == 0)) {
+        if (camera->distance < camera->targetDistance) {
+            v.x = camera->distance;
         }
     }
-    tmp = cosf(pitch) * v.unk0;
-    v.unk4 = sinf(pitch) * v.unk0;
-    v.unk0 = tmp;
+    tmp = cosf(pitch) * v.x;
+    v.y = sinf(pitch) * v.x;
+    v.x = tmp;
 lbl:
     {
     f32 c;
     s = sinf(yaw);
     c = cosf(yaw);
-    FLD(0x3DC) = yaw;
+    camera->unk3DC = yaw;
     do {
-    v.unk8 = -v.unk0 * s;
-    v.unk0 = v.unk0 * c;
-    v.unk4 = (v.unk4 < -200.0f) ? -200.0f : ((v.unk4 > 200.0f) ? 200.0f : v.unk4);
+    v.z = -v.x * s;
+    v.x = v.x * c;
+    v.y = (v.y < -200.0f) ? -200.0f : ((v.y > 200.0f) ? 200.0f : v.y);
     } while (0);
-    v.unk0 += arg0->unk2BC;
-    v.unk4 += arg0->unk2C0;
-    v.unk8 += arg0->unk2C4;
+    v.x += camera->target.x;
+    v.y += camera->target.y;
+    v.z += camera->target.z;
     }
     {
     f32 accel = 1.0f;
     f32 maxv = 2.200000048f;
-    x = v.unk0;
-    y = v.unk4;
-    z = v.unk8;
-    if (arg0->unk23C) {
-        arg0->unk2F8 = x;
-        arg0->unk2FC = y;
-        arg0->unk300 = z;
-        FLD(0x3C0) = 0.0f;
-        FLD(0x3C4) = 0.0f;
-        FLD(0x3C8) = 0.0f;
+    x = v.x;
+    y = v.y;
+    z = v.z;
+    if (camera->snap) {
+        camera->eye.x = x;
+        camera->eye.y = y;
+        camera->eye.z = z;
+        camera->eyeVel.x = 0.0f;
+        camera->eyeVel.y = 0.0f;
+        camera->eyeVel.z = 0.0f;
     } else {
         accel += accel;
         maxv += maxv;
-        if (arg0->unk3D0->unk102) {
+        if (camera->player->unk102) {
             accel += accel;
             maxv += maxv;
         }
-        func_150495B0(&arg0->unk2F8, x, &FLD(0x3C0), accel, maxv, arg0->unk7B4);
-        func_150495B0(&arg0->unk2FC, y, &FLD(0x3C4), accel, maxv, arg0->unk7B4);
-        func_150495B0(&arg0->unk300, z, &FLD(0x3C8), accel, maxv, arg0->unk7B4);
+        func_150495B0(&camera->eye.x, x, &camera->eyeVel.x, accel, maxv, camera->dt);
+        func_150495B0(&camera->eye.y, y, &camera->eyeVel.y, accel, maxv, camera->dt);
+        func_150495B0(&camera->eye.z, z, &camera->eyeVel.z, accel, maxv, camera->dt);
     }
     }
-    if ((arg0->unk3D0->unk102 == 0) && !(arg0->unk36A & 0x10)) {
-        if (sqrtf(SQ(arg0->unk2F8 - arg0->unk2BC) + SQ(arg0->unk2FC - arg0->unk2C0) + SQ(arg0->unk300 - arg0->unk2C4)) < 120.0f) {
-            struct17 dir;
-            func_150491EC((struct17 *)&arg0->unk2BC, (struct17 *)&arg0->unk2F8, &dir);
-            arg0->unk2F8 = arg0->unk2BC + 120.0f * dir.unk0;
-            arg0->unk2FC = arg0->unk2C0 + 120.0f * dir.unk4;
-            arg0->unk300 = arg0->unk2C4 + 120.0f * dir.unk8;
+    if ((camera->player->unk102 == 0) && !(camera->buttonsPressed & R_TRIG)) {
+        if (sqrtf(SQ(camera->eye.x - camera->target.x) + SQ(camera->eye.y - camera->target.y) + SQ(camera->eye.z - camera->target.z)) < 120.0f) {
+            vertex dir;
+            func_150491EC((struct17 *)&camera->target, (struct17 *)&camera->eye, (struct17 *)&dir);
+            camera->eye.x = camera->target.x + 120.0f * dir.x;
+            camera->eye.y = camera->target.y + 120.0f * dir.y;
+            camera->eye.z = camera->target.z + 120.0f * dir.z;
         }
     }
-    if (arg0->unk2FC < arg0->unk35C + 30.0f) {
-        arg0->unk2FC = arg0->unk35C + 30.0f;
+    if (camera->eye.y < camera->unk35C + 30.0f) {
+        camera->eye.y = camera->unk35C + 30.0f;
     }
-    arg0->unk5E8 += (FLD(0x5EC) - arg0->unk5E8) * 0.150000006f;
-    FLD(0x370) = sqrtf(SQ(arg0->unk2F8 - arg0->unk2BC) + SQ(arg0->unk300 - arg0->unk2C4));
-    arg0->unk348 = FLD(0x344) = arg0->unk2FC - arg0->unk354;
+    camera->unk5E8 += (camera->swayAmount - camera->unk5E8) * 0.150000006f;
+    camera->distance = sqrtf(SQ(camera->eye.x - camera->target.x) + SQ(camera->eye.z - camera->target.z));
+    camera->height = camera->unk344 = camera->eye.y - camera->unk354;
 }
 
 /* Eases yawFollow toward a gain picked from the camera state and turns yaw by it toward the target's
@@ -201,5 +200,5 @@ void func_15122980(Camera *camera) {
 
     func_15123A54(camera);
     func_1512E140(camera);
-    func_1512A390((struct108 *)camera);
+    func_1512A390(camera);
 }
