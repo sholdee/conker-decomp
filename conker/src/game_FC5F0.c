@@ -17,6 +17,7 @@ struct ActorEmitter {
     /* 0x28 */ ActorEmitterState state;
 };
 
+// matching: s32 where the definition has u8 (args 3, 6, 11, 15), s16 (arg 5); a pointer where the definition has s32 (arg 12)
 void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32,
                    s32, CollisionHit *, s32, s32, s32, s32);
 

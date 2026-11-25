@@ -101,6 +101,7 @@ void func_150C4120(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
     }
 }
 
+// matching: s32 where the definition has u8 (args 3, 6, 11, 15), s16 (arg 5); a pointer where the definition has s32 (arg 12)
 extern void func_151D9014(Vec3f *, Vec3f *, s32, f32, s32, s32, f32, s32, f32, f32, s32, void *, s32, s32, s32, s32);
 const Vec3f D_800A0350[3] = {
     { 0.0f, 16.0f, 0.0f },
