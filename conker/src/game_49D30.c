@@ -2130,26 +2130,28 @@ s32 func_15021DB8(f32 *outX, f32 *outY, f32 *outZ, f32 *target, s32 objIndex, s3
 }
 
 
-s32 func_15022024(f32 *arg0, f32 *arg1, s32 arg2, s32 arg3) {
-    s32 i;
+/* If object `objIndex` is bound to a track of the scene, return 1 and its unk40 (outA) and unk3C
+   (outB) values, each written twice (0 where unset). */
+s32 func_15022024(f32 *outA, f32 *outB, s32 objIndex, s32 scene) {
+    s32 track;
 
-    if (D_800C35EA[arg3] != 1) {
+    if (D_800C35EA[scene] != 1) {
         return 0;
     }
-    for (i = 0; i < D_800C363A[arg3]; i++) {
-        if (D_800C35C8[arg3][i] != 0) {
-            if (D_800C35F0[arg3][i].type == 2 && D_800CC2D0[arg2].unique_id == D_800C35F0[arg3][i].unk2) {
-                arg0[1] = 0.0f;
-                arg1[1] = 0.0f;
-                arg0[0] = 0.0f;
-                arg1[0] = 0.0f;
-                if (D_800C3958[arg3][i].unk3C != -9999.0f) {
-                    arg1[0] = D_800C3958[arg3][i].unk3C;
-                    arg1[1] = arg1[0];
+    for (track = 0; track < D_800C363A[scene]; track++) {
+        if (D_800C35C8[scene][track] != 0) {
+            if (D_800C35F0[scene][track].type == 2 && D_800CC2D0[objIndex].unique_id == D_800C35F0[scene][track].unk2) {
+                outA[1] = 0.0f;
+                outB[1] = 0.0f;
+                outA[0] = 0.0f;
+                outB[0] = 0.0f;
+                if (D_800C3958[scene][track].unk3C != -9999.0f) {
+                    outB[0] = D_800C3958[scene][track].unk3C;
+                    outB[1] = outB[0];
                 }
-                if (D_800C3958[arg3][i].unk40 != -9999.0f) {
-                    arg0[0] = D_800C3958[arg3][i].unk40;
-                    arg0[1] = arg0[0];
+                if (D_800C3958[scene][track].unk40 != -9999.0f) {
+                    outA[0] = D_800C3958[scene][track].unk40;
+                    outA[1] = outA[0];
                 }
                 return 1;
             }
@@ -2162,11 +2164,12 @@ extern s16 D_800C358C[];
 extern f32 D_800C3594;
 extern u8 D_800C3663;
 
-void func_15022190(s16 arg0, s16 arg1, s16 arg2, f32 arg3) {
-    D_800C3594 = arg3;
-    D_800C358C[0] = arg0;
-    D_800C358C[1] = arg1;
-    D_800C358C[2] = arg2;
+/* Set D_800C358C/D_800C3594 and raise D_800C3663. */
+void func_15022190(s16 x, s16 y, s16 z, f32 value) {
+    D_800C3594 = value;
+    D_800C358C[0] = x;
+    D_800C358C[1] = y;
+    D_800C358C[2] = z;
     D_800C3663 = 1;
 }
 
@@ -2177,64 +2180,68 @@ extern u8 D_800C3518[][25];
 extern u8 D_800C354A[];
 extern u8 D_800C3550[][30];
 
-void func_150221E8(s16 arg0, s16 arg1, s16 arg2, f32 arg3) {
-    D_800C35A0 = arg3;
-    D_800C3598[0] = arg0;
-    D_800C3598[1] = arg1;
-    D_800C3598[2] = arg2;
+/* Set D_800C3598/D_800C35A0 (copied back to D_800C358C/D_800C3594 when a cutscene ends). */
+void func_150221E8(s16 x, s16 y, s16 z, f32 value) {
+    D_800C35A0 = value;
+    D_800C3598[0] = x;
+    D_800C3598[1] = y;
+    D_800C3598[2] = z;
 }
 
-void func_15022234(s32 arg0) {
-    D_800C3510[arg0] = 0;
+void func_15022234(s32 scene) {
+    D_800C3510[scene] = 0;
 }
 
-void func_15022248(s32 arg0) {
-    D_800C354A[arg0] = 0;
+void func_15022248(s32 scene) {
+    D_800C354A[scene] = 0;
 }
 
-void func_1502225C(s32 arg0, s32 arg1) {
+/* Add `id` to the scene's D_800C3518 list unless it is already there. */
+void func_1502225C(s32 id, s32 scene) {
     s32 i;
     s32 count;
     s32 limit;
-    u8 *count_ptr;
+    u8 *countPtr;
 
     i = 0;
-    count_ptr = &D_800C3510[arg1];
-    count = *count_ptr;
+    countPtr = &D_800C3510[scene];
+    count = *countPtr;
     limit = count;
+    // matching: a do-while over a copy of the count (the for loop form schedules differently)
     if (count > 0) {
         do {
-            if (arg0 == D_800C3518[arg1][i]) {
+            if (id == D_800C3518[scene][i]) {
                 return;
             }
             i++;
         } while (i < limit);
     }
 
-    D_800C3518[arg1][count] = arg0;
-    *count_ptr = count + 1;
+    D_800C3518[scene][count] = id;
+    *countPtr = count + 1;
 }
 
-void func_150222E0(s32 arg0, s32 arg1) {
-    struct127 *temp_v0;
-    SeqTrackInfo *temp_v1;
+/* Reset the animation state of the object bound to the scene's track `track`. */
+void func_150222E0(s32 track, s32 scene) {
+    struct127 *obj;
+    SeqTrackInfo *info;
 
-    if (D_800C35C8[arg1][arg0] != 0) {
-        temp_v1 = &D_800C35F0[arg1][arg0];
-        if (temp_v1->type == 2) {
-            temp_v0 = func_15083E90(temp_v1->unk2);
-            if (temp_v0 != 0) {
-                *(u8 *)((u8 *)temp_v0 + 0x6C) = 0;
-                *(u8 *)((u8 *)temp_v0 + 0x6D) = 0;
-                *(u8 *)((u8 *)temp_v0 + 0x6A) = 0;
-                *(u8 *)((u8 *)temp_v0 + 0x6B) = 0;
-                *(u16 *)((u8 *)temp_v0 + 0x282) = 0;
-                *(u16 *)((u8 *)temp_v0 + 0x27A) = 0;
-                *(u16 *)((u8 *)temp_v0 + 0x27C) = 0;
-                *(u16 *)((u8 *)temp_v0 + 0x27E) = 0;
-                *(u16 *)((u8 *)temp_v0 + 0x280) = 0;
-                func_1507E7E4(temp_v0, 0, 3, 0xFFFF, 0xA);
-                *(u8 *)((u8 *)temp_v0 + 0x71) = 0;
+    if (D_800C35C8[scene][track] != 0) {
+        info = &D_800C35F0[scene][track];
+        if (info->type == 2) {
+            obj = func_15083E90(info->unk2);
+            if (obj != NULL) {
+                ((Obj1501E73C *)obj)->unk6C = 0;
+                ((Obj1501E73C *)obj)->unk6D = 0;
+                ((Obj1501E73C *)obj)->unk6A = 0;
+                ((Obj1501E73C *)obj)->unk6B = 0;
+                obj->unk282 = 0;
+                *(u16 *)&obj->unk27A[0] = 0;
+                *(u16 *)&obj->unk27A[2] = 0;
+                *(u16 *)&obj->unk27A[4] = 0;
+                *(u16 *)&obj->unk27A[6] = 0;
+                func_1507E7E4(obj, 0, 3, 0xFFFF, 0xA);
+                *(u8 *)((u8 *)obj + 0x71) = 0;
             }
         }
     }
