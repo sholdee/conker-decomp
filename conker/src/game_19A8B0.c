@@ -4,18 +4,16 @@
 #undef func_15048A40
 #include "variables.h"
 
-struct Particle;
-void func_1516F864(struct Particle *particle);
-void func_1516F94C(struct Particle *particle, s32 factor);
 
-struct Table1516F024 {
-    u8 unk0[0xB];
+/* u8 tables indexed by a particle style */
+struct StyleTable {
+    u8 v[11];
 };
 
-extern struct Table1516F024 D_8008CBC4;
-extern struct Table1516F024 D_8008CBD0;
-extern struct Table1516F024 D_8008CBDC;
-extern struct Table1516F024 D_8008CBE8;
+extern struct StyleTable D_8008CBC4;
+extern struct StyleTable D_8008CBD0;
+extern struct StyleTable D_8008CBDC;
+extern struct StyleTable D_8008CBE8;
 
 typedef struct ParticleLink {
     u8 pad0[4];
@@ -149,6 +147,8 @@ typedef struct Emitter {
     /* 0x49 */ u8 pad49[3];
 } Emitter;
 
+void func_1516F864(Particle *particle);
+void func_1516F94C(Particle *particle, s32 factor);
 extern void *func_15167A68(s32 type, s32 arg1, s32 size, s32 arg3, s32 arg4, s32 arg5);
 extern ParticleLink *func_150448D0(s32, s32, s32, s32, s32, s32, s32, s16 *, s16 *);
 
@@ -864,10 +864,10 @@ void func_1516EED4(s32 object, s32 threshold, u8 arg2, s32 arg3) {
 s32 func_1516F024(Particle *particle) {
     u8 pad[16]; // matching: the original frame has 16 unused bytes here
     s32 style;
-    struct Table1516F024 damping;
-    struct Table1516F024 growth;
-    struct Table1516F024 maxAlpha;
-    struct Table1516F024 fadeRate;
+    struct StyleTable damping;
+    struct StyleTable growth;
+    struct StyleTable maxAlpha;
+    struct StyleTable fadeRate;
     s32 alpha;
     s32 limit;
     s32 lifetime;
@@ -881,7 +881,7 @@ s32 func_1516F024(Particle *particle) {
     style = particle->u.drift.unk2C;
     alpha = particle->alpha;
     if (lifetime != 0) {
-        limit = maxAlpha.unk0[style];
+        limit = maxAlpha.v[style];
         if (alpha != limit) {
             alpha += D_800BE9E4 << 4;
             if (limit < alpha) {
@@ -892,7 +892,7 @@ s32 func_1516F024(Particle *particle) {
         }
     } else {
         if (alpha != 0) {
-            alpha -= D_800BE9E4 * fadeRate.unk0[style];
+            alpha -= D_800BE9E4 * fadeRate.v[style];
             if (alpha < 0) {
                 alpha = 0;
             }
@@ -907,13 +907,13 @@ s32 func_1516F024(Particle *particle) {
 
     func_1516F864(particle);
     alpha = particle->scaleX;
-    alpha += D_800BE9E4 * growth.unk0[style];
+    alpha += D_800BE9E4 * growth.v[style];
     particle->scaleY = alpha;
     particle->scaleX = alpha;
     if (style == 3) {
         particle->velocityY = 100;
     }
-    func_1516F94C(particle, damping.unk0[style]);
+    func_1516F94C(particle, damping.v[style]);
     return 0;
 }
 
@@ -1215,68 +1215,66 @@ void func_1516FE1C(s32 object, s32 duration, u8 arg2, s32 arg3) {
     }
 }
 
-extern u8 func_150ADA20(void);
-extern f32 func_150489B0(u8);
-extern f32 func_15048A40(u8);
 
-void func_15170034(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
+/* A random unit direction vector; flags & 0x40 halves the range of its first angle. */
+void func_15170034(s32 flags, f32 *outX, f32 *outY, f32 *outZ) {
     s32 mask;
-    f32 r;
-    f32 sp24;
-    f32 sp20;
-    s32 v;
+    f32 yawA;
+    f32 yawB;
+    f32 horizontal;
+    s32 angle;
 
-    mask = (arg0 & 0x40) ? 0x3F : 0x7F;
-    v = func_150ADA20() & mask;
-    *arg2 = func_150489B0((u8)v);
-    sp20 = func_15048A40((u8)v);
-    v = func_150ADA20() & 0xFF;
-    sp24 = func_150489B0((u8)v);
-    r = func_15048A40((u8)v);
-    *arg1 = sp20 * r;
-    *arg3 = sp20 * sp24;
+    mask = (flags & 0x40) ? 0x3F : 0x7F;
+    angle = func_150ADA20() & mask;
+    *outY = func_150489B0((u8)angle);
+    horizontal = func_15048A40((u8)angle);
+    angle = func_150ADA20() & 0xFF;
+    yawB = func_150489B0((u8)angle);
+    yawA = func_15048A40((u8)angle);
+    *outX = horizontal * yawA;
+    *outZ = horizontal * yawB;
 }
 
-struct Vec3f151700D8 { f32 v[3]; };
-struct Col151700D8 { u8 c[3][3]; };
-extern struct Vec3f151700D8 D_8008CBF4;
-extern struct Vec3f151700D8 D_8008CC00;
-extern struct Col151700D8 D_8008CC0C;
+struct Vec3fTable { f32 v[3]; };
+struct RGBTable { u8 c[3][3]; };
+extern struct Vec3fTable D_8008CBF4;
+extern struct Vec3fTable D_8008CC00;
+extern struct RGBTable D_8008CC0C;
 
-void func_151700D8(f32 (*verts)[3], f32 x, f32 z, u8 alpha, f32 scale, s32 type, s32 n0, s32 n1, u8 arg8, s32 arg9) {
+void func_151700D8(f32 (*verts)[3], f32 x, f32 z, u8 style, f32 scale, s32 type, s32 countA, s32 countB, u8 arg8, s32 arg9) {
     s32 i;
     s32 j;
     s32 next;
-    s32 life;
+    s32 lifetime;
     s32 size;
-    u8 *col;
+    u8 *color;
     f32 t;
     f32 px;
     f32 py;
     f32 pz;
-    s32 dx;
-    s32 dz;
+    s32 velocityX;
+    s32 velocityZ;
     f32 *p1;
     s32 sizeMin;
-    s32 sizeVar;
-    s32 sizeRange;
-    s32 lifeMin;
-    s32 life2;
+    s32 sizeRandom;
+    s32 velocityYRandom;
+    s32 velocityYMin;
+    s32 velocityY;
     f32 *p0;
-    s32 a;
-    s32 pad7;
+    s32 particleStyle;
+    s32 pad; // matching: unused stack slot in the original frame
     s32 count;
-    struct Vec3f151700D8 unused;
-    struct Vec3f151700D8 sizes;
-    struct Col151700D8 colors;
+    struct Vec3fTable unused;
+    struct Vec3fTable velocityYRandoms;
+    struct RGBTable colors;
 
-    unused = D_8008CBF4;
-    sizes = D_8008CC00;
+    unused = D_8008CBF4; /* copied but never read, as in the original */
+    velocityYRandoms = D_8008CC00;
     colors = D_8008CC0C;
-    sizeRange = sizes.v[type] * scale;
+    velocityYRandom = velocityYRandoms.v[type] * scale;
     sizeMin = 731.0f * scale;
-    sizeVar = 836.0f * scale;
-    lifeMin = 143.0f * scale;
+    sizeRandom = 836.0f * scale;
+    velocityYMin = 143.0f * scale;
     p0 = verts[0];
     for (i = 0; i < 4; i++) {
         if (i != 3) {
@@ -1285,31 +1283,31 @@ void func_151700D8(f32 (*verts)[3], f32 x, f32 z, u8 alpha, f32 scale, s32 type,
             next = 0;
         }
         if (i == 0 || i == 2) {
-            count = n0;
+            count = countA;
         } else {
-            count = n1;
+            count = countB;
         }
         p1 = verts[next];
-        dx = (((p0[0] + p1[0]) * 0.5f) - x) * 2.0f;
-        px = (p0[1] + p1[1]) * 0.5f;
-        dz = (((p0[2] + p1[2]) * 0.5f) - z) * 2.0f;
+        velocityX = (((p0[0] + p1[0]) * 0.5f) - x) * 2.0f;
+        px = (p0[1] + p1[1]) * 0.5f; // matching: dead store, overwritten in the loop below
+        velocityZ = (((p0[2] + p1[2]) * 0.5f) - z) * 2.0f;
         for (j = 0; j < count; j++) {
             t = j * (1.0f / (count - 1));
-            col = colors.c[type];
-            a = alpha;
+            color = colors.c[type];
+            particleStyle = style;
             px = p0[0] + (p1[0] - p0[0]) * t;
             py = p0[1] + (p1[1] - p0[1]) * t;
             pz = p0[2] + (p1[2] - p0[2]) * t;
-            if (i) {
+            if (i) { // matching: the empty branch on i steers IDO's register allocation
             }
-            life = (func_150ADA20() & 0x1F) + 0xF;
-            size = (func_150ADA20() % (u32)sizeVar) + sizeMin;
-            life2 = (func_150ADA20() % (u32)sizeRange) + lifeMin;
+            lifetime = (func_150ADA20() & 0x1F) + 0xF;
+            size = (func_150ADA20() % (u32)sizeRandom) + sizeMin;
+            velocityY = (func_150ADA20() % (u32)velocityYRandom) + velocityYMin;
             func_1516D4E8((s16)(s32)px, (s16)(s32)py, (s16)(s32)pz, 0xD, 0,
-                col[0], col[1], col[2], 0, 0, 0, 0, 2,
-                (u8)((dx >> 8) & 0xFF), (u8)(dx & 0xFF), (u8)((dz >> 8) & 0xFF), (u8)(dz & 0xFF), 0, 0, a, 0, 0, 0,
-                (s16)size, (s16)size, life,
-                life2,
+                color[0], color[1], color[2], 0, 0, 0, 0, 2,
+                (u8)((velocityX >> 8) & 0xFF), (u8)(velocityX & 0xFF), (u8)((velocityZ >> 8) & 0xFF), (u8)(velocityZ & 0xFF),
+                0, 0, particleStyle, 0, 0, 0,
+                (s16)size, (s16)size, lifetime, velocityY,
                 0, 0, arg8, arg9);
         }
         p0 += 3;
@@ -1318,44 +1316,46 @@ void func_151700D8(f32 (*verts)[3], f32 x, f32 z, u8 alpha, f32 scale, s32 type,
 
 extern s32 func_151EF610(void);
 
-void func_15170500(s16 arg0, s16 arg1, s16 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6) {
-    f32 x;
-    f32 z;
-    f32 y;
-    f32 s;
-    s32 ix;
-    s32 iy;
-    s32 iz;
-    f32 w;
-    s32 p2;
-    s32 r;
+/* Spawns a single particle (isParticle) or an emitter heading off along `angle`, which
+ * defaults to object 0's facing angle. */
+void func_15170500(s16 x, s16 y, s16 z, s32 angle, s32 isParticle, u8 arg5, s32 arg6) {
+    f32 dirX;
+    f32 rise;
+    f32 dirZ;
+    f32 spread;
+    s32 velocityX;
+    s32 velocityZ;
+    s32 velocityY;
+    f32 dirY;
+    s32 pad; // matching: unused stack slot in the original frame
+    s32 tilt;
 
-    z = 0.0f;
-    if (arg4 == 0) {
-        arg3 = D_800CC34A[0];
+    rise = 0.0f;
+    if (isParticle == 0) {
+        angle = D_800CC2D0[0].unk7A;
     }
-    r = func_151EF610() % 50;
-    x = func_150489B0((u8)arg3);
-    y = -func_15048A40((u8)arg3);
-    s = func_150489B0((u8)r);
-    x *= s;
-    y *= s;
-    w = z * s;
-    x += x; y += y; w += w;
-    if (arg4 != 0) {
-        ix = x * 256.0f;
-        iy = y * 256.0f;
-        iz = w * 256.0f;
-        func_1516D4E8(arg0, arg1, arg2, 0x2A, 0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 6,
-            ix >> 8, ix & 0xFF, iy >> 8, iy & 0xFF, 0, 0, 0, 0, 0, 1, 0x200, 0x166, 0xFF,
-            iz - 0x32, 0, 0, arg5, arg6);
+    tilt = func_151EF610() % 50;
+    dirX = func_150489B0((u8)angle);
+    dirZ = -func_15048A40((u8)angle);
+    spread = func_150489B0((u8)tilt);
+    dirX *= spread;
+    dirZ *= spread;
+    dirY = rise * spread;
+    dirX += dirX; dirZ += dirZ; dirY += dirY;
+    if (isParticle != 0) {
+        velocityX = dirX * 256.0f;
+        velocityZ = dirZ * 256.0f;
+        velocityY = dirY * 256.0f;
+        func_1516D4E8(x, y, z, 0x2A, 0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 6,
+            velocityX >> 8, velocityX & 0xFF, velocityZ >> 8, velocityZ & 0xFF, 0, 0, 0, 0, 0, 1, 0x200, 0x166, 0xFF,
+            velocityY - 50, 0, 0, arg5, arg6);
     } else {
-        ix = x * 256.0f;
-        iy = y * 256.0f;
-        iz = w * 256.0f;
-        func_1516D99C(arg0, arg1, arg2, 0x2A, 0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 6,
-            ix >> 8, ix & 0xFF, iy >> 8, iy & 0xFF, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x200, 0x166,
-            0, 0, 0x14, 0, 0, 0xFF, 0xFF, iz - 0x32, 0xC8, 9, 1, 0, 1, 0x32, 0x14, 0, 0, 0,
+        velocityX = dirX * 256.0f;
+        velocityZ = dirZ * 256.0f;
+        velocityY = dirY * 256.0f;
+        func_1516D99C(x, y, z, 0x2A, 0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 6,
+            velocityX >> 8, velocityX & 0xFF, velocityZ >> 8, velocityZ & 0xFF, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x200, 0x166,
+            0, 0, 0x14, 0, 0, 0xFF, 0xFF, velocityY - 50, 0xC8, 9, 1, 0, 1, 0x32, 0x14, 0, 0, 0,
             arg5, arg6);
     }
 }
@@ -1411,27 +1411,27 @@ s32 func_151707E0(Particle *particle) {
     return 0;
 }
 
-void func_151709B4(s32 arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, u8 arg5, s32 arg6) {
+/* Spawns `count` particles flying off at `speed` in random directions from func_15170034. */
+void func_151709B4(s32 x, s32 y, s32 z, s32 count, f32 speed, u8 arg5, s32 arg6) {
     s32 i;
-    f32 x;
-    f32 y;
-    f32 z;
-    s32 ix;
-    s32 iz;
-    s32 iy;
-    s32 pad;
-    s32 pad2;
+    f32 dirX;
+    f32 dirY;
+    f32 dirZ;
+    s32 velocityX;
+    s32 velocityZ;
+    s32 velocityY;
+    s32 pad[2]; // matching: unused stack slots in the original frame
 
-    for (i = 0; i < arg3; i++) {
-        func_15170034(0x40, &x, &y, &z);
-        x *= arg4;
-        y *= arg4 + arg4;
-        z *= arg4;
-        ix = x;
-        iz = z;
-        iy = y;
-        func_1516D4E8(arg0, arg1, arg2, 0x2F, 0, 0xFF, 0xFF, 0xFF, 0, 0xFF, 0, 0, 7,
-            ix >> 8, ix & 0xFF, iz >> 8, iz & 0xFF, 0, 0, 0, 0, 0, 0, 0x200, 0x200, 0x28,
-            iy, 0, 0, arg5, arg6);
+    for (i = 0; i < count; i++) {
+        func_15170034(0x40, &dirX, &dirY, &dirZ);
+        dirX *= speed;
+        dirY *= speed + speed;
+        dirZ *= speed;
+        velocityX = dirX;
+        velocityZ = dirZ;
+        velocityY = dirY;
+        func_1516D4E8(x, y, z, 0x2F, 0, 0xFF, 0xFF, 0xFF, 0, 0xFF, 0, 0, 7,
+            velocityX >> 8, velocityX & 0xFF, velocityZ >> 8, velocityZ & 0xFF, 0, 0, 0, 0, 0, 0, 0x200, 0x200, 0x28,
+            velocityY, 0, 0, arg5, arg6);
     }
 }
