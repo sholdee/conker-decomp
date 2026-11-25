@@ -270,133 +270,128 @@ void func_15085430(struct127 *obj, s32 spawnIndex, s32 unused) {
     func_15169040(&event, 4);
 }
 
-typedef struct GameB21B0PlayerRecordA {
-    s32 field_0;
-    s32 field_4;
-    s8 field_8;
-    s8 field_9;
-    u8 field_A;
-    u8 padB;
-    s32 field_C;
-    u8 pad10[0xC];
-} GameB21B0PlayerRecordA;
+/* Per-player stats, read and written through func_150859AC / func_15085710. D_800D2138 is an s32
+ * followed by an array of these at D_800D213C. */
+typedef struct {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ s8 unk8;   /* 0..100 */
+    /* 0x09 */ s8 health; /* 0..99 */
+    /* 0x0A */ u8 unkA;
+    /* 0x0B */ u8 padB;
+    /* 0x0C */ s32 unkC;  /* >= 0 */
+    /* 0x10 */ u8 pad10[0xC];
+} PlayerStats;
 
-typedef struct GameB21B0PlayerTable {
-    s32 unk0;
-    GameB21B0PlayerRecordA recs[1];
-} GameB21B0PlayerTable;
+extern PlayerStats D_800D213C[];
 
-#define PREC(i) (((GameB21B0PlayerRecordA *)(&D_800D2138 + 1))[i])
-#define PPTR(i) ((GameB21B0PlayerRecordA *)((s32)&D_800D2138 + ((i) * 28 + 4)))
+/* &D_800D213C[i] */
+// matching: computed from D_800D2138 as an integer so the +4 is added before the base, not folded into it
+#define PLAYER_STATS(i) ((PlayerStats *)((s32)&D_800D2138 + ((i) * (s32)sizeof(PlayerStats) + 4)))
 
-void func_15085710(s16 arg0, s16 arg1, s32 arg2) {
-    GameB21B0PlayerRecordA *p;
+/* Changes one of player `player`'s stats: 0/1/2/5/8/9 set unk0/unk4/unk8/health/unkA/unkC to
+ * `value`; 3/6/10 add to unk8 (max 100), health (max 99) and unkC; 4/7/11 subtract from unk8,
+ * health (min 0) and unkC (min 0). While D_8008FDBC bit 0 is set, setting unk8 sets 6 and
+ * subtracting from it does nothing. */
+void func_15085710(s16 player, s16 stat, s32 value) {
+    PlayerStats *stats;
 
-    if (arg0 >= 0xFF) {
+    if (player >= 0xFF) {
         return;
     }
-    switch (arg1) {
+    switch (stat) {
     case 0:
-        PREC(arg0).field_0 = arg2;
+        D_800D213C[player].unk0 = value;
         break;
     case 1:
-        PREC(arg0).field_4 = arg2;
+        D_800D213C[player].unk4 = value;
         break;
     case 2:
         if (D_8008FDBC & 1) {
-            arg2 = 6;
+            value = 6;
         }
-        PREC(arg0).field_8 = arg2;
+        D_800D213C[player].unk8 = value;
         break;
     case 3:
-        p = PPTR(arg0);
-        p->field_8 += arg2;
-        p->field_8 = (p->field_8 > 100) ? 100 : p->field_8;
+        stats = PLAYER_STATS(player);
+        stats->unk8 += value;
+        stats->unk8 = (stats->unk8 > 100) ? 100 : stats->unk8;
         break;
     case 4:
         if (!(D_8008FDBC & 1)) {
-            p = PPTR(arg0);
-            p->field_8 -= arg2;
+            stats = PLAYER_STATS(player);
+            stats->unk8 -= value;
         }
         break;
     case 5:
-        PREC(arg0).field_9 = arg2;
+        D_800D213C[player].health = value;
         break;
     case 6:
-        p = PPTR(arg0);
-        p->field_9 += arg2;
-        p->field_9 = (p->field_9 > 99) ? 99 : p->field_9;
+        stats = PLAYER_STATS(player);
+        stats->health += value;
+        stats->health = (stats->health > 99) ? 99 : stats->health;
         break;
     case 7:
-        p = PPTR(arg0);
-        p->field_9 -= arg2;
-        p->field_9 = (p->field_9 < 0) ? 0 : p->field_9;
+        stats = PLAYER_STATS(player);
+        stats->health -= value;
+        stats->health = (stats->health < 0) ? 0 : stats->health;
         break;
     case 8:
-        PREC(arg0).field_A = arg2;
+        D_800D213C[player].unkA = value;
         break;
     case 9:
-        PREC(arg0).field_C = arg2;
+        D_800D213C[player].unkC = value;
         break;
     case 10:
         if (!D_800BE616 || !*(s8 *)&D_800E0C20) {
-            GameB21B0PlayerRecordA *q = PPTR(arg0);
-            q->field_C += arg2;
+            // matching: a block-scoped pointer leaves this case's delay slot unfilled
+            PlayerStats *target = PLAYER_STATS(player);
+            target->unkC += value;
         }
         break;
     case 11:
-        p = PPTR(arg0);
-        p->field_C -= arg2;
-        p->field_C = (p->field_C < 0) ? 0 : p->field_C;
+        stats = PLAYER_STATS(player);
+        stats->unkC -= value;
+        stats->unkC = (stats->unkC < 0) ? 0 : stats->unkC;
         break;
     }
 }
 
-/* Fields recovered from the shared 0x1C-byte player records. */
-typedef struct GameB21B0PlayerRecord {
-    s32 field_0;
-    s32 field_4;
-    s8 field_8;
-    s8 field_9;
-    u8 field_A;
-    u8 padB;
-    s32 field_C;
-    u8 pad10[0xC];
-} GameB21B0PlayerRecord;
-
-extern GameB21B0PlayerRecord D_800D213C[];
-
-s32 func_150859AC(s16 arg0, s16 arg1) {
-    if (arg0 >= 0xFF) {
+/* Returns one of player `player`'s stats: 0 = bit `player` of D_800D2340,
+ * 1..6 = unk0, unk4, unk8, health, unkA, unkC; 0 for player >= 0xFF. */
+s32 func_150859AC(s16 player, s16 stat) {
+    if (player >= 0xFF) {
         return 0;
     }
-    switch (arg1) {
+    switch (stat) {
     case 0:
-        return *(u16 *)&D_800D2340 & (1 << arg0);
+        return (u16)D_800D2340 & (1 << player);
     case 1:
-        return D_800D213C[arg0].field_0;
+        return D_800D213C[player].unk0;
     case 2:
-        return D_800D213C[arg0].field_4;
+        return D_800D213C[player].unk4;
     case 3:
-        return D_800D213C[arg0].field_8;
+        return D_800D213C[player].unk8;
     case 4:
-        return D_800D213C[arg0].field_9;
+        return D_800D213C[player].health;
     case 5:
-        return D_800D213C[arg0].field_A;
+        return D_800D213C[player].unkA;
     case 6:
-        return D_800D213C[arg0].field_C;
+        return D_800D213C[player].unkC;
     }
 }
 
-void func_15085ABC(s16 arg0) {
+/* Copies each object's health into the stats of the players (0..3) whose bit is set in `players`;
+ * skipped while D_800D18A8 is set. */
+void func_15085ABC(s16 players) {
     s32 i;
 
-    i = 0;
-    if (D_800D18A8 == 0) {
-        for (i = 0; i != 4; i++) {
-            if ((1 << i) & arg0) {
-                func_15085710((s16)i, 5, D_800CC2D0[i].health);
-            }
+    if (D_800D18A8 != 0) {
+        return;
+    }
+    for (i = 0; i < 4; i++) {
+        if ((1 << i) & players) {
+            func_15085710(i, 5, D_800CC2D0[i].health);
         }
     }
 }
