@@ -12,16 +12,6 @@ extern u8 D_800A1674;
 extern u8 D_800A1680;
 extern f32 sinf(f32);
 
-typedef struct {
-    u8 pad_0[0x68];
-    u8 field_0x68;
-    u8 field_0x69;
-    u8 pad_1[0x1A];
-    u16 field_0x84;
-    u8 pad_2[0x25E];
-    s32 field_0x2E4;
-} ActorStateFields;
-
 void func_15143134(void *, f32 *, Mtx *);
 void func_15143874(s32, f32, f32 *, f32 *);
 void func_151C329C(void *, s32, s32);
@@ -1689,18 +1679,30 @@ GameCommand *func_150F1B48(GameCommand *cmd, s32 index) {
     return cmd;
 }
 
-void func_150F1CB0(ActorStateFields *arg0) {
-    if (arg0->field_0x84 == 0x14) {
-        arg0->field_0x68 = 0x1B;
+/* struct127 view for func_150F1CB0: the header declares bytes 0x68-0x6B as one u32 pad. */
+typedef struct {
+    /* 0x000 */ u8 pad0[0x68];
+    /* 0x068 */ u8 unk68;
+    /* 0x069 */ u8 unk69;
+    /* 0x06A */ u8 pad6A[0x1A];
+    /* 0x084 */ u16 unk84;
+    /* 0x086 */ u8 pad86[0x25E];
+    /* 0x2E4 */ s32 unk2E4;
+} Actor150F1CB0;
+
+/* Picks actor->unk68 by state (0x14 or not) and actor->unk69 by the bit pairs of actor->unk2E4. */
+void func_150F1CB0(Actor150F1CB0 *actor) {
+    if (actor->unk84 == 0x14) {
+        actor->unk68 = 0x1B;
     } else {
-        arg0->field_0x68 = 0xC;
+        actor->unk68 = 0xC;
     }
-    arg0->field_0x69 = 0x13;
-    if ((arg0->field_0x2E4 & 0x3) == 0x3) {
-        arg0->field_0x69 = 0x14;
+    actor->unk69 = 0x13;
+    if ((actor->unk2E4 & 3) == 3) {
+        actor->unk69 = 0x14;
     }
-    if ((arg0->field_0x2E4 & 0xC) == 0xC) {
-        arg0->field_0x69 = 0x17;
+    if ((actor->unk2E4 & 0xC) == 0xC) {
+        actor->unk69 = 0x17;
     }
 }
 
@@ -1756,84 +1758,87 @@ void func_151541B8(struct17 *, f32, f32, f32, f32, u8, s32);
 void func_1515080C(Cfg150F1D10A *, s32 *, f32 *, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, u8, s32);
 void func_15152190(Cfg150F1D10B *, s32 *, f32 *, s32, f32, s32, u8, s32);
 
-void func_150F1D10(struct127 *arg0, u8 arg1, s32 arg2) {
+/* Burst of effects at `actor` (func_151D5404 and friends, sound 0x2B6/0x2BE, two particle
+ * sprays scaled by the actor's size). */
+void func_150F1D10(struct127 *actor, u8 arg1, s32 arg2) {
     struct17 pos;
     f32 scale;
 
-    if (arg0 == NULL) {
+    if (actor == NULL) {
         return;
     }
-    pos.unk0 = arg0->x_position;
-    pos.unk4 = arg0->y_position + 20.0f;
-    pos.unk8 = arg0->z_position;
-    scale = (arg0->xz_scale + arg0->y_scale) * 0.5f;
-    func_151D5404(&pos, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, arg1, arg2);
+    pos.unk0 = actor->x_position;
+    pos.unk4 = actor->y_position + 20.0f;
+    pos.unk8 = actor->z_position;
+    scale = (actor->xz_scale + actor->y_scale) * 0.5f;
+    func_151D5404(&pos, 506.0f, 1013.0f, 0.0009871669f, 15, 20, arg1, arg2);
     func_151D5334(&pos, 506.0f, 1013.0f, 0.0009871669f, 5, arg1, arg2);
     func_151D5514(&pos, arg1, arg2);
-    func_10010F88((func_150ADA20() & 8) + 0x2B6, 0x7FFF, 0, 0, 0, pos.unk0, pos.unk4, pos.unk8, 0xFA0, 0x1770);
+    func_10010F88((func_150ADA20() & 8) + 0x2B6, 0x7FFF, 0, 0, 0, pos.unk0, pos.unk4, pos.unk8, 4000, 6000);
     func_151D3FF4(&pos, arg1, arg2);
     func_151541B8(&pos, func_150ADA68() * 4.0f + 12.0f, 1.6409999f,
-                  (f32)(u32)(func_150ADA20() % 0x38U + 0xC8), 0.0f, arg1, arg2);
+                  (f32)(u32)(func_150ADA20() % 56U + 200), 0.0f, arg1, arg2);
     {
         Cfg150F1D10A a;
         Cfg150F1D10B b;
 
-    a.unk0 = 3;
-    a.unk4 = 0;
-    a.pos = pos;
-    a.unk1C = 30.0f;
-    a.unk20 = 20.0f;
-    a.unk24 = -1.855000138f;
-    a.unk28 = 0.6980000138f;
-    a.unk14 = 0;
-    a.unk16 = 0xFF;
-    a.unk18 = -0x40;
-    a.unk1A = 0x2C;
-    a.unk2C = 0x3C;
-    a.unk2E = 0x14;
-    a.unk30 = 1 * scale;
-    a.unk34 = 0 * scale;
-    a.unk38 = 8.990000725f;
-    a.unk3C = 0.0f;
-    a.unk40 = 0xC;
-    func_1515080C(&a, D_800A18C0, D_800A18CC, 3, 0, 0, 0, 1, -1, 0, 0.0f, 0, 0, arg1, arg2);
-    b.unk0 = 5;
-    b.unk4 = 3;
-    b.pos = pos;
-    b.unk1C = 25.0f;
-    b.unk20 = 15.0f;
-    b.unk14 = 0;
-    b.unk16 = 0xFF;
-    b.unk18 = -0x40;
-    b.unk1A = 0x1E;
-    b.unk2C = 0x46;
-    b.unk2E = 0x14;
-    b.unk24 = -1.239000082f;
-    b.unk28 = 0.3760000169f;
-    b.unk30 = 0.503000021f;
-    b.unk34 = 0.2560000122f;
-    b.unk38 = 13.93300056f;
-    func_15152190(&b, D_800A18D8, D_800A18E0, 2, 0.0f, 0, arg1, arg2);
+        a.unk0 = 3;
+        a.unk4 = 0;
+        a.pos = pos;
+        a.unk1C = 30.0f;
+        a.unk20 = 20.0f;
+        a.unk24 = -1.855000138f;
+        a.unk28 = 0.6980000138f;
+        a.unk14 = 0;
+        a.unk16 = 0xFF;
+        a.unk18 = -64;
+        a.unk1A = 44;
+        a.unk2C = 60;
+        a.unk2E = 20;
+        a.unk30 = 1 * scale; // matching: IDO emits both multiplies; plain scale / 0.0f differ
+        a.unk34 = 0 * scale;
+        a.unk38 = 8.990000725f;
+        a.unk3C = 0.0f;
+        a.unk40 = 12;
+        func_1515080C(&a, D_800A18C0, D_800A18CC, 3, 0, 0, 0, 1, -1, 0, 0.0f, 0, 0, arg1, arg2);
+        b.unk0 = 5;
+        b.unk4 = 3;
+        b.pos = pos;
+        b.unk1C = 25.0f;
+        b.unk20 = 15.0f;
+        b.unk14 = 0;
+        b.unk16 = 0xFF;
+        b.unk18 = -64;
+        b.unk1A = 30;
+        b.unk2C = 70;
+        b.unk2E = 20;
+        b.unk24 = -1.239000082f;
+        b.unk28 = 0.3760000169f;
+        b.unk30 = 0.503000021f;
+        b.unk34 = 0.2560000122f;
+        b.unk38 = 13.93300056f;
+        func_15152190(&b, D_800A18D8, D_800A18E0, 2, 0.0f, 0, arg1, arg2);
     }
 }
 
 extern u8 D_800D98F0;
-extern f32 D_800A191C;
 
-void func_150F20F0(s32 arg0) {
+/* Random sound 0x6C-0x6E for actor `index` once it is far enough from the origin, at most every
+ * 128-255 ticks (D_800D98F0 counts down); func_100114D0 derives the pan from its height. */
+void func_150F20F0(s32 index) {
     f32 x;
     f32 z;
-    s32 vol;
-    s32 sp48;
-    s32 sp44;
-    struct127 *obj;
+    s32 pan;
+    s32 out2;
+    s32 out3;
+    struct127 *actor;
 
-    obj = &D_800CC2D0[arg0];
-    x = obj->x_position;
-    z = obj->z_position;
+    actor = &D_800CC2D0[index];
+    x = actor->x_position;
+    z = actor->z_position;
     x *= x;
     z *= z;
-    /* squares the already-squared terms: compares x^4 + z^4, as golden does */
+    /* squares the already-squared terms: the test is on x^4 + z^4 */
     x = (x * x) + (z * z);
     if (D_800D98F0 != 0) {
         if (D_800BE9E4 < D_800D98F0) {
@@ -1841,24 +1846,27 @@ void func_150F20F0(s32 arg0) {
         } else {
             D_800D98F0 = 0;
         }
-    } else if (x > D_800A191C) {
-        func_100114D0(0, (s32)D_800CC2D0[arg0].y_position, 0, 0x7FFF, 0x4E20, 0x4A38, &vol, &sp48, &sp44);
-        vol += 0x80;
+    } else if (x > 6760000.0f) {
+        // matching: indexes D_800CC2D0 again rather than reading through `actor`
+        func_100114D0(0, (s32)D_800CC2D0[index].y_position, 0, 0x7FFF, 20000, 19000, &pan, &out2, &out3);
+        pan += 0x80;
         D_800D98F0 = (func_150ADA20() & 0x7F) + 0x80;
-        func_10010F30(((u32)func_150ADA20() % 3) + 0x6C, 0x5DC0, vol, 0, 0);
+        func_10010F30((func_150ADA20() % 3U) + 0x6C, 24000, pan, 0, 0);
     }
 }
 
-void func_150F2230(struct127 *arg0, s32 arg1, s32 arg2) {
-    struct { f32 x; f32 y; f32 z; } sp2C;
-    struct { f32 x; f32 y; f32 z; } sp20;
+/* Spawns func_151C329C's effect at a random point 100 units around bone 19 of `actor`
+ * (unless actor->unk74's low nibble is 0xF). */
+void func_150F2230(struct127 *actor, s32 arg1, s32 arg2) {
+    Vec3f offset;
+    Vec3f pos;
 
-    if ((arg0->unk1D4 != NULL) && ((arg0->unk74 & 0xF) != 0xF)) {
-        sp2C.x = 0.0f;
-        sp2C.y = 0.0f;
-        sp2C.z = 0.0f;
-        func_15143874((s16)(func_150ADA20() & 0xFF), 100.0f, &sp2C.x, &sp2C.z);
-        func_15143134(&sp2C.x, &sp20.x, (s32)arg0->unk1D4 + 0x4C0);
-        func_151C329C(&sp20.x, (u8)arg1, arg2);
+    if ((actor->unk1D4 != NULL) && ((actor->unk74 & 0xF) != 0xF)) {
+        offset.x = 0.0f;
+        offset.y = 0.0f;
+        offset.z = 0.0f;
+        func_15143874((s16)(func_150ADA20() & 0xFF), 100.0f, &offset.x, &offset.z);
+        func_15143134(&offset.x, &pos.x, (Mtx *)actor->unk1D4 + 19);
+        func_151C329C(&pos.x, (u8)arg1, arg2);
     }
 }
