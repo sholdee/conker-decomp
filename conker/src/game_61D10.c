@@ -4,207 +4,211 @@
 
 extern s16 D_800C3EF0;
 
+/* Four-byte entry of the game command stream (same layout as in game_61490.c). */
 typedef struct {
-    s16 a;
-    s16 b;
-} Pair15034860;
+    s16 opcode;
+    s16 value;
+} GameCommand;
 
+/*
+ * The actor fields this file uses. They overlap fields that struct127 declares with other
+ * types (e.g. struct127::unk204 is an s32), so the view stays local.
+ */
 typedef struct {
     u8 pad0[4];
-    u8 unk4;
+    /* 0x004 */ u8 id;
     u8 pad5[0x1FE - 5];
-    u8 unk1FE;
-    u8 unk1FF;
-    u8 unk200;
-    u8 unk201;
-    s8 unk202;
-    s8 unk203;
-    s16 unk204;
-    u8 unk206;
-    u8 unk207;
-    s8 unk208;
-    s8 unk209;
+    /* 0x1FE */ u8 level;      // 0..255, moved by levelStep each call
+    /* 0x1FF */ u8 levelMode;  // 0: fall, 2: rise, else random walk (3: until levelTimer runs out)
+    /* 0x200 */ u8 levelTimer;
+    /* 0x201 */ u8 unk201;
+    /* 0x202 */ s8 unk202;
+    /* 0x203 */ s8 levelStep;
+    /* 0x204 */ s16 level2;     // -255..255 (direction set by the sign of unk208)
+    /* 0x206 */ u8 level2Mode;  // same encoding as levelMode
+    /* 0x207 */ u8 level2Timer;
+    /* 0x208 */ s8 unk208;
+    /* 0x209 */ s8 level2Step;
 } Obj15034860;
 
-Pair15034860 *func_15034860(Pair15034860 *arg0, Obj15034860 *arg1, s32 arg2, s32 arg3) {
-    s32 flag;
-    s32 padA;
+/*
+ * Writes up to three commands for the actor's two channels (index 0xFF = channel unused) and
+ * advances the per-channel levels for the next call. Returns the cursor past the last command.
+ */
+GameCommand *func_15034860(GameCommand *cmd, Obj15034860 *actor, s32 channel, s32 channel2) {
+    s32 skipChannel;
+    s32 padA; // matching: unused stack slot keeps the frame layout
     s32 reroll;
     f32 scale;
-    s32 lo;
-    s32 hi;
-    s32 t1;
-    s32 padB;
-    s32 t0;
+    s32 minStep;
+    s32 maxStep;
+    s32 levelOp;
+    s32 padB; // matching: unused stack slot keeps the frame layout
+    s32 jitter;
     s32 sign;
-    s32 val;
-    s32 neg;
+    s32 value;
+    s32 reverse;
     s16 pos;
-    s8 vel;
+    s8 step;
     s16 sum;
 
-    if (arg1->unk4 == 0x70) {
-        flag = 1;
+    if (actor->id == 0x70) {
+        skipChannel = TRUE;
     } else {
-        flag = 0;
+        skipChannel = FALSE;
     }
-    if (arg1->unk4 == 0x7C) {
-        t1 = 4;
-        hi = 0;
+    if (actor->id == 0x7C) {
+        levelOp = 4;
+        maxStep = 0;
     } else {
-        t1 = 0;
-        hi = 2;
+        levelOp = 0;
+        maxStep = 2;
     }
-    switch (arg1->unk4) {
+    switch (actor->id) {
     case 0x69:
     case 0x7C:
     case 0x87:
-        t0 = 0;
+        jitter = 0;
         break;
     default:
-        t0 = 10;
+        jitter = 10;
         break;
     }
-    if (arg2 != 0xFF) {
-        if (arg1->unk201 == 0) {
+    if (channel != 0xFF) {
+        if (actor->unk201 == 0) {
             scale = 8191.875f;
         } else {
-            scale = arg1->unk201 * 182.04444885f;
+            scale = actor->unk201 * 182.04444885f;
         }
-        val = (s16)(s32)(arg1->unk1FE * scale * 0.003921568859f);
-        if (!flag) {
-            arg0->a = arg2 * 6 + t1;
-            arg0->b = val;
-            arg0++;
+        value = (s16)(actor->level * scale * (1.0f / 255));
+        if (!skipChannel) {
+            cmd->opcode = channel * 6 + levelOp;
+            cmd->value = value;
+            cmd++;
         }
-        D_800C3EF0 = val;
-        val = (s16)(s32)((f32)((arg1->unk202 * arg1->unk1FE) / 255) * 65535.0f * 0.003921568859f);
-        if (!flag) {
-            arg0->a = arg2 * 6 + hi;
-            arg0->b = val;
-            arg0++;
+        D_800C3EF0 = value;
+        value = (s16)((f32)((actor->unk202 * actor->level) / 255) * 65535.0f * (1.0f / 255));
+        if (!skipChannel) {
+            // matching: maxStep doubles as the second opcode offset; a separate local changes regalloc
+            cmd->opcode = channel * 6 + maxStep;
+            cmd->value = value;
+            cmd++;
         }
-        if (arg1->unk4 == 0x42) {
-            lo = 0x50;
-            hi = 0x78;
+        if (actor->id == 0x42) {
+            minStep = 80;
+            maxStep = 120;
         } else {
-            hi = 0x3C;
-            lo = 0x28;
+            maxStep = 60;
+            minStep = 40;
         }
-        flag = arg1->unk1FF;
-        if (flag == 0) {
-            arg1->unk203 = -hi;
-        } else if (flag == 2) {
-            arg1->unk203 = hi;
-            arg1->unk202 = 0;
-        } else if (arg1->unk203 == 0 || arg1->unk1FE == 0 || arg1->unk1FE == 0xFF) {
-            arg1->unk203 = func_150ADA20() % (u32)(hi - lo) + lo;
-            if (arg1->unk1FE == 0xFF) {
-                arg1->unk203 = -arg1->unk203;
-            } else if (arg1->unk1FE == 0 && t0 != 0) {
-                arg1->unk202 = func_150ADA20() % (u32)(t0 * 2) - t0;
+        if (actor->levelMode == 0) {
+            actor->levelStep = -maxStep;
+        } else if (actor->levelMode == 2) {
+            actor->levelStep = maxStep;
+            actor->unk202 = 0;
+        } else if (actor->levelStep == 0 || actor->level == 0 || actor->level == 0xFF) {
+            actor->levelStep = func_150ADA20() % (u32)(maxStep - minStep) + minStep;
+            if (actor->level == 0xFF) {
+                actor->levelStep = -actor->levelStep;
+            } else if (actor->level == 0 && jitter != 0) {
+                actor->unk202 = func_150ADA20() % (u32)(jitter * 2) - jitter;
             }
         }
-        sum = arg1->unk1FE;
-        sum += arg1->unk203;
+        sum = actor->level;
+        sum += actor->levelStep;
         sum = (sum < 0) ? 0 : ((sum >= 0x100) ? 0xFF : sum);
-        arg1->unk1FE = sum;
-        if (arg1->unk1FF == 3) {
-            if (arg1->unk200 >= D_800BE9E4) {
-                arg1->unk200 -= D_800BE9E4;
+        actor->level = sum;
+        if (actor->levelMode == 3) {
+            if (actor->levelTimer >= D_800BE9E4) {
+                actor->levelTimer -= D_800BE9E4;
             } else {
-                arg1->unk200 = 0;
-                arg1->unk1FF = 0;
+                actor->levelTimer = 0;
+                actor->levelMode = 0;
             }
         }
     }
-    if (arg3 != 0xFF) {
-        sign = 1;
-        if (arg1->unk208 == 0) {
+    if (channel2 != 0xFF) {
+        if (actor->unk208 == 0) {
             scale = 8191.875f;
         } else {
-            scale = arg1->unk208 * 182.04444885f;
+            scale = actor->unk208 * 182.04444885f;
         }
-        if (scale < 0.0f) {
-            sign = -1;
-        } else {
-            sign = 1;
-        }
+        sign = (scale < 0.0f) ? -1 : 1;
         scale = fabsf(scale);
-        sum = (s32)(arg1->unk204 * scale * 0.003921568859f);
-        arg0->a = arg3 * 6 + t1;
-        reroll = 0;
-        neg = 0;
-        arg0->b = -sum;
-        arg0++;
-        sum = arg1->unk206;
+        sum = (s32)(actor->level2 * scale * (1.0f / 255));
+        cmd->opcode = channel2 * 6 + levelOp;
+        reroll = FALSE;
+        reverse = FALSE;
+        cmd->value = -sum;
+        cmd++;
+        sum = actor->level2Mode; // matching: reusing sum (not a fresh local or a direct read) keeps IDO's allocation
         if (sum == 0) {
             if (sign > 0) {
-                arg1->unk209 = -0x3C;
+                actor->level2Step = -60;
             } else {
-                arg1->unk209 = 0x3C;
+                actor->level2Step = 60;
             }
         } else if (sum == 2) {
             if (sign > 0) {
-                arg1->unk209 = 0x3C;
+                actor->level2Step = 60;
             } else {
-                arg1->unk209 = -0x3C;
+                actor->level2Step = -60;
             }
-        } else if ((vel = arg1->unk209) == 0) {
-            reroll = 1;
+        } else if ((step = actor->level2Step) == 0) {
+            reroll = TRUE;
         } else {
-            pos = arg1->unk204;
+            pos = actor->level2;
             if (sign > 0) {
-                if (pos < 0 && vel < 0) {
-                    neg = 1;
-                } else if (pos == 0 && vel < 0) {
-                    reroll = 1;
-                } else if (pos * 1 == 0xFF) {
-                    neg = 1;
-                    reroll = 1;
+                if (pos < 0 && step < 0) {
+                    reverse = TRUE;
+                } else if (pos == 0 && step < 0) {
+                    reroll = TRUE;
+                } else if (pos * 1 == 0xFF) { // matching: non-leaf operand puts the constant's register first in bne
+                    reverse = TRUE;
+                    reroll = TRUE;
                 }
             } else {
-                if (pos > 0 && vel > 0) {
-                    neg = 1;
-                } else if (pos == 0 && vel > 0) {
-                    reroll = 1;
+                if (pos > 0 && step > 0) {
+                    reverse = TRUE;
+                } else if (pos == 0 && step > 0) {
+                    reroll = TRUE;
                 } else if (pos == -0xFF) {
-                    neg = 1;
-                    reroll = 1;
+                    reverse = TRUE;
+                    reroll = TRUE;
                 }
             }
         }
         if (reroll) {
-            arg1->unk209 = func_150ADA20() % 20U + 0x28;
-            arg1->unk209 = arg1->unk209 * sign;
+            actor->level2Step = func_150ADA20() % 20U + 40;
+            actor->level2Step = actor->level2Step * sign;
         }
-        if (neg) {
-            arg1->unk209 = -arg1->unk209;
+        if (reverse) {
+            actor->level2Step = -actor->level2Step;
         }
-        arg1->unk204 += arg1->unk209;
+        actor->level2 += actor->level2Step;
         if (sign > 0) {
-            if (arg1->unk204 < 0 && arg1->unk209 < 0) {
-                arg1->unk204 = 0;
-            } else if (arg1->unk204 >= 0x100) {
-                arg1->unk204 = 0xFF;
+            if (actor->level2 < 0 && actor->level2Step < 0) {
+                actor->level2 = 0;
+            } else if (actor->level2 >= 0x100) {
+                actor->level2 = 0xFF;
             }
         } else {
-            if (arg1->unk204 > 0 && arg1->unk209 > 0) {
-                arg1->unk204 = 0;
-            } else if (arg1->unk204 < -0xFF) {
-                arg1->unk204 = -0xFF;
+            if (actor->level2 > 0 && actor->level2Step > 0) {
+                actor->level2 = 0;
+            } else if (actor->level2 < -0xFF) {
+                actor->level2 = -0xFF;
             }
         }
-        if (arg1->unk206 == 3) {
-            if (arg1->unk207 >= D_800BE9E4) {
-                arg1->unk207 -= D_800BE9E4;
+        if (actor->level2Mode == 3) {
+            if (actor->level2Timer >= D_800BE9E4) {
+                actor->level2Timer -= D_800BE9E4;
             } else {
-                arg1->unk207 = 0;
-                arg1->unk206 = 0;
+                actor->level2Timer = 0;
+                actor->level2Mode = 0;
             }
         }
     }
-    return arg0;
+    return cmd;
 }
 
 /* Element of the array that struct127::unk1D4 points to here (0x40 bytes). */
