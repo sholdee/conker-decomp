@@ -85,7 +85,7 @@ void func_15171D4C(f32 x, f32 y, f32 z, s16 lifetime, u16 color, u8 animIndex, f
     }
 }
 
-s32 func_151725FC(Vtx *vtx, s32 tri, f32 x, f32 y, f32 z, f32 angle, s32 size, s32 width);
+s32 func_151725FC(Vtx *vtx, s32 tri, f32 x, f32 y, f32 z, f32 angle, s32 size, u8 width);
 
 /* Spawns a sprite particle laid on collision triangle `tri` at (x, y, z). */
 void func_15171F04(f32 x, f32 y, f32 z, s32 tri, s16 lifetime, u16 color, u8 animIndex, s32 size, s32 flags,
@@ -151,7 +151,8 @@ extern s16 D_800DD1C2;
 extern s16 D_800DD1C4;
 extern s16 D_800DD1C6;
 extern s32 D_800D2C9C;
-struct Sprite151720C4 {
+/* Filled in by func_15094F70; unused here. */
+struct TexState151720C4 {
     s32 unk0[5];
 };
 Gfx *func_15094F70(Gfx *, void *, s32, void *, s32, s32, s32, s32, s32);
@@ -167,250 +168,251 @@ Gfx *func_151720C4(Gfx *gfx, Particle19F150 *particle, s32 arg2) {
     s32 b;
     s32 a;
     s32 *frames;
-    s32 cyc;
-    s32 mode;
-    s32 newCyc;
-    s32 newMode;
-    struct Sprite151720C4 sprite;
+    s32 cycle;
+    s32 combine;
+    s32 newCycle;
+    s32 newCombine;
+    struct TexState151720C4 texState;
     s32 tex;
     s32 frame;
-    s32 update;
+    s32 needSync;
     SpriteAnim *anim;
     s32 othermodeH;
-    s32 othermodeL;
+    s32 othermodeL; // sic: left unset (garbage) when the cycle type is already current
 
-    update = 1;
+    needSync = 1;
     if (particle->lifetime >= 2) {
-    anim = D_8008CA4C[particle->animIndex];
-    frame = particle->animFrame >> 8;
-    frames = anim->frames;
-    tex = (s32)frames;
-    if ((u32)frames >= 0x10000000) {
-        tex = frames[frame];
-        frame = 0;
-    }
-    if (tex != D_800DD1B4 || frame != D_800DD1B8) {
-        gfx = func_15094F70(gfx, anim, particle->animFrame, &sprite, 0, 0, 0, 2, 3);
-        D_800DD1B4 = tex;
-        D_800DD1B8 = frame;
-    }
-    cyc = D_800DD1BC & 0xF;
-    mode = D_800DD1BC & 0xF0;
-    if (!(particle->flags & 1)) {
-        newCyc = 1;
-    } else {
-        newCyc = 2;
-    }
-    if (anim->unkA == 5) {
-        newCyc += 2;
-    }
-    if (cyc != newCyc) {
-        cyc = newCyc;
-        if (update) {
-            gDPPipeSync(gfx++);
+        anim = D_8008CA4C[particle->animIndex];
+        frame = particle->animFrame >> 8;
+        frames = anim->frames;
+        tex = (s32)frames;
+        if ((u32)frames >= 0x10000000) {
+            tex = frames[frame];
+            frame = 0;
         }
-        update = 0;
-        switch (newCyc) {
-        case 1:
-            othermodeH = G_CYC_1CYCLE;
-            othermodeL = G_RM_AA_ZB_XLU_DECAL | G_RM_AA_ZB_XLU_DECAL2;
-            break;
-        case 2:
-            othermodeH = G_CYC_1CYCLE;
-            othermodeL = G_RM_ZB_CLD_SURF | G_RM_ZB_CLD_SURF2;
-            break;
-        case 3:
-            othermodeH = G_CYC_2CYCLE;
-            othermodeL = G_RM_PASS | G_RM_AA_ZB_XLU_DECAL2;
-            break;
-        case 4:
-            othermodeH = G_CYC_2CYCLE;
-            othermodeL = G_RM_PASS | G_RM_ZB_CLD_SURF2;
-            break;
+        if (tex != D_800DD1B4 || frame != D_800DD1B8) {
+            gfx = func_15094F70(gfx, anim, particle->animFrame, &texState, 0, 0, 0, 2, 3);
+            D_800DD1B4 = tex;
+            D_800DD1B8 = frame;
         }
-        gDPSetAlphaCompare(gfx++, G_AC_NONE);
-        gSPClearGeometryMode(gfx++, G_FOG | G_LOD);
-    }
-    gfx = func_15142FBC(gfx, othermodeH | G_TP_PERSP | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_DISABLE, othermodeL, (u8 *)&update);
-    if (!(particle->flags & 8)) {
-        if (anim->unkA == 0) {
-            if (particle->color) {
-                newMode = 0x10;
-            } else {
-                newMode = 0x20;
+        cycle = D_800DD1BC & 0xF;
+        combine = D_800DD1BC & 0xF0;
+        if (!(particle->flags & 1)) {
+            newCycle = 1;
+        } else {
+            newCycle = 2;
+        }
+        if (anim->unkA == 5) {
+            newCycle += 2;
+        }
+        if (cycle != newCycle) {
+            cycle = newCycle;
+            if (needSync) {
+                gDPPipeSync(gfx++);
             }
-        } else if (anim->unkA == 5) {
-            if (particle->color) {
-                newMode = 0x60;
+            needSync = 0;
+            switch (newCycle) {
+            case 1:
+                othermodeH = G_CYC_1CYCLE;
+                othermodeL = G_RM_AA_ZB_XLU_DECAL | G_RM_AA_ZB_XLU_DECAL2;
+                break;
+            case 2:
+                othermodeH = G_CYC_1CYCLE;
+                othermodeL = G_RM_ZB_CLD_SURF | G_RM_ZB_CLD_SURF2;
+                break;
+            case 3:
+                othermodeH = G_CYC_2CYCLE;
+                othermodeL = G_RM_PASS | G_RM_AA_ZB_XLU_DECAL2;
+                break;
+            case 4:
+                othermodeH = G_CYC_2CYCLE;
+                othermodeL = G_RM_PASS | G_RM_ZB_CLD_SURF2;
+                break;
+            }
+            gDPSetAlphaCompare(gfx++, G_AC_NONE);
+            gSPClearGeometryMode(gfx++, G_FOG | G_LOD);
+        }
+        // sic: passes the high byte of the s32 needSync
+        gfx = func_15142FBC(gfx, othermodeH | G_TP_PERSP | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE |
+                                     G_AD_DISABLE,
+                            othermodeL, (u8 *)&needSync);
+        if (!(particle->flags & 8)) {
+            if (anim->unkA == 0) {
+                if (particle->color) {
+                    newCombine = 0x10;
+                } else {
+                    newCombine = 0x20;
+                }
+            } else if (anim->unkA == 5) {
+                if (particle->color) {
+                    newCombine = 0x60;
+                } else {
+                    newCombine = 0x50;
+                }
             } else {
-                newMode = 0x50;
+                newCombine = 0x30;
             }
         } else {
-            newMode = 0x30;
+            newCombine = 0x40;
         }
-    } else {
-        newMode = 0x40;
-    }
-    if (mode != newMode) {
-        mode = newMode;
-        if (update) {
-            gDPPipeSync(gfx++);
+        if (combine != newCombine) {
+            combine = newCombine;
+            if (needSync) {
+                gDPPipeSync(gfx++);
+            }
+            switch (newCombine) {
+            case 0x10:
+                gDPSetCombineLERP(gfx++, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0,
+                                  PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0);
+                break;
+            case 0x20:
+                gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0,
+                                  0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0);
+                break;
+            case 0x30:
+                gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0,
+                                  0, 0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0);
+                break;
+            case 0x40:
+                gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, 0, 0, 0, TEXEL0,
+                                  0, 0, 0, TEXEL0, 0, 0, 0, TEXEL0);
+                break;
+            case 0x50:
+                gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL1, 0,
+                                  0, 0, 0, COMBINED, 0, 0, 0, COMBINED);
+                break;
+            case 0x60:
+                gDPSetCombineLERP(gfx++, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL1, 0,
+                                  0, 0, 0, COMBINED, 0, 0, 0, COMBINED);
+                break;
+            }
         }
-        switch (newMode) {
-        case 0x10:
-            gDPSetCombineLERP(gfx++, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0,
-                              PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0);
-            break;
-        case 0x20:
-            gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0,
-                              0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0);
-            break;
-        case 0x30:
-            gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0,
-                              0, 0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0);
-            break;
-        case 0x40:
-            gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, 0, 0, 0, TEXEL0,
-                              0, 0, 0, TEXEL0, 0, 0, 0, TEXEL0);
-            break;
-        case 0x50:
-            gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL1, 0,
-                              0, 0, 0, COMBINED, 0, 0, 0, COMBINED);
-            break;
-        case 0x60:
-            gDPSetCombineLERP(gfx++, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL1, 0,
-                              0, 0, 0, COMBINED, 0, 0, 0, COMBINED);
-            break;
+        D_800DD1BC = cycle | combine;
+        r = (particle->color >> 8) & 0xF8;
+        g = (particle->color >> 3) & 0xF8;
+        b = (particle->color << 2) & 0xF8;
+        if (particle->lifetime >= 26) {
+            a = 0xFF;
+        } else {
+            a = particle->lifetime * 10;
         }
-    }
-    D_800DD1BC = cyc | mode;
-    r = (particle->color >> 8) & 0xF8;
-    g = (particle->color >> 3) & 0xF8;
-    b = (particle->color << 2) & 0xF8;
-    if (particle->lifetime >= 0x1A) {
-        a = 0xFF;
-    } else {
-        a = particle->lifetime * 10;
-    }
-    if (r != D_800DD1C0 || g != D_800DD1C2 || b != D_800DD1C4 || a != D_800DD1C6) {
-        D_800DD1C0 = r;
-        D_800DD1C2 = g;
-        D_800DD1C4 = b;
-        D_800DD1C6 = a;
-        if (update) {
-            gDPPipeSync(gfx++);
+        if (r != D_800DD1C0 || g != D_800DD1C2 || b != D_800DD1C4 || a != D_800DD1C6) {
+            D_800DD1C0 = r;
+            D_800DD1C2 = g;
+            D_800DD1C4 = b;
+            D_800DD1C6 = a;
+            if (needSync) {
+                gDPPipeSync(gfx++);
+            }
+            gDPSetPrimColor(gfx++, 1, 0, r, g, b, a);
         }
-        gDPSetPrimColor(gfx++, 1, 0, r, g, b, a);
-    }
-    gSPVertex(gfx++, particle->vtx, 4, 0);
-    gSP1Triangle(gfx++, 0, 1, 2, 0);
-    gSP1Triangle(gfx++, 0, 2, 3, 0);
+        gSPVertex(gfx++, particle->vtx, 4, 0);
+        gSP1Triangle(gfx++, 0, 1, 2, 0);
+        gSP1Triangle(gfx++, 0, 2, 3, 0);
     }
     return gfx;
 }
 
-typedef struct {
-    s16 ob[3];
-    u16 flag;
-    s16 tc[2];
-    u8 cn[4];
-} Vtx151725FC;
+extern s32 func_1510E388(s32 tri, void *verts, f32 *slopeX, f32 *slopeZ);
+/* Quad corner texture coordinates for 64-, 32- and 16-texel-wide textures. */
+extern s16 D_800A6FD0[4][2];
+extern s16 D_800A6FE0[4][2];
+extern s16 D_800A6FF0[4][2];
 
-extern s32 func_1510E388(s32, void *, f32 *, f32 *);
-extern s16 D_800A6FD0[];
-extern s16 D_800A6FE0[];
-extern s16 D_800A6FF0[];
-
-s32 func_151725FC(Vtx *arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6, s32 arg7) {
+/*
+ * Fills `vtx` with a quad of half-size `size` lying on the slope of collision triangle `tri`, centred on (x, y, z),
+ * with its texture coordinates (for a texture `width` texels wide) rotated by `angle` degrees.
+ */
+s32 func_151725FC(Vtx *vtx, s32 tri, f32 x, f32 y, f32 z, f32 angle, s32 size, u8 width) {
     f32 lenA;
     f32 lenB;
-    f32 minsq;
+    f32 minLenSq;
     f32 denom;
-    f32 unused1;
+    f32 unused1; // matching: stack padding
     f32 unused2;
     f32 unused3;
-    f32 v[2][3];
+    f32 axis[2][3];
     f32 unused4;
-    f32 angle;
-    f32 z;
-    f32 x;
-    f32 cx;
-    f32 cy;
-    f32 cs;
-    f32 sn;
-    s16 (*tbl)[2];
-    Vtx151725FC *vtx;
+    f32 theta;
+    f32 slopeZ;
+    f32 slopeX;
+    f32 centerS;
+    f32 centerT;
+    f32 cosT;
+    f32 sinT;
+    s16 (*cornerUV)[2];
+    Vtx *quad; // matching: the texture-coordinate loop must index the parameter, the others this copy
     s32 n;
     s32 i;
 
-    vtx = (Vtx151725FC *)arg0;
-    n = arg6 / 16;
+    quad = vtx;
+    n = size / 16;
     if (n == 0) {
         n = 1;
     }
-    if (func_1510E388(arg1, 0, &x, &z) == 0) {
+    if (func_1510E388(tri, NULL, &slopeX, &slopeZ) == 0) {
         return 0;
     }
-    v[0][0] = 0.0f;
-    v[0][2] = -n;
-    v[0][1] = x * v[0][0] + z * v[0][2];
-    denom = (z + z) * (-v[0][1] - v[0][1]) + ((-v[0][2] - v[0][2]) + (-v[0][2] - v[0][2]));
+    axis[0][0] = 0.0f;
+    axis[0][2] = -n;
+    axis[0][1] = slopeX * axis[0][0] + slopeZ * axis[0][2];
+    denom = (slopeZ + slopeZ) * (-axis[0][1] - axis[0][1]) + ((-axis[0][2] - axis[0][2]) + (-axis[0][2] - axis[0][2]));
     if (denom == 0.0f) {
         denom = 0.001000000047f;
     }
-    v[1][0] = -n;
-    v[1][1] = ((x * v[1][0] + x * v[1][0]) * (-v[0][2] - v[0][2])) / denom;
-    if (z == 0.0f) {
-        v[1][2] = 0.0f;
+    axis[1][0] = -n;
+    axis[1][1] = ((slopeX * axis[1][0] + slopeX * axis[1][0]) * (-axis[0][2] - axis[0][2])) / denom;
+    if (slopeZ == 0.0f) {
+        axis[1][2] = 0.0f;
     } else {
-        v[1][2] = (v[1][1] - x * v[1][0]) / z;
+        axis[1][2] = (axis[1][1] - slopeX * axis[1][0]) / slopeZ;
     }
-    lenA = v[0][0] * v[0][0] + v[0][1] * v[0][1] + v[0][2] * v[0][2];
+    lenA = axis[0][0] * axis[0][0] + axis[0][1] * axis[0][1] + axis[0][2] * axis[0][2];
     if (lenA > 100000000.0f) {
         lenA = 100000000.0f;
     }
-    minsq = n * n;
-    if (lenA < minsq) {
-        lenA = minsq;
+    minLenSq = n * n;
+    if (lenA < minLenSq) {
+        lenA = minLenSq;
     }
     lenA = sqrtf(lenA);
-    lenB = v[1][0] * v[1][0] + v[1][1] * v[1][1] + v[1][2] * v[1][2];
+    lenB = axis[1][0] * axis[1][0] + axis[1][1] * axis[1][1] + axis[1][2] * axis[1][2];
     if (lenB > 100000000.0f) {
         lenB = 100000000.0f;
     }
-    if (lenB < minsq) {
-        lenB = minsq;
+    if (lenB < minLenSq) {
+        lenB = minLenSq;
     }
     lenB = sqrtf(lenB);
     for (i = 0; i < 3; i++) {
-        v[0][i] = v[0][i] * arg6 / lenA;
-        v[1][i] = v[1][i] * arg6 / lenB;
-        vtx[0].ob[i] = v[0][i];
-        vtx[1].ob[i] = v[1][i];
-        vtx[2].ob[i] = -v[0][i];
-        vtx[3].ob[i] = -v[1][i];
+        axis[0][i] = axis[0][i] * size / lenA;
+        axis[1][i] = axis[1][i] * size / lenB;
+        quad[0].v.ob[i] = axis[0][i];
+        quad[1].v.ob[i] = axis[1][i];
+        quad[2].v.ob[i] = -axis[0][i];
+        quad[3].v.ob[i] = -axis[1][i];
     }
-    angle = (arg5 - 225.0f) * 0.01745329238f;
-    cs = cosf(angle);
-    sn = sinf(angle);
-    if ((u8)arg7 == 0x10) {
-        cy = cx = 256.0f;
-        tbl = (s16 (*)[2])D_800A6FF0;
-    } else if ((u8)arg7 == 0x20) {
-        cy = cx = 512.0f;
-        tbl = (s16 (*)[2])D_800A6FE0;
+    theta = (angle - 225.0f) * 0.01745329238f;
+    cosT = cosf(theta);
+    sinT = sinf(theta);
+    if (width == 0x10) {
+        centerT = centerS = 256.0f;
+        cornerUV = D_800A6FF0;
+    } else if (width == 0x20) {
+        centerT = centerS = 512.0f;
+        cornerUV = D_800A6FE0;
     } else {
-        cy = cx = 1024.0f;
-        tbl = (s16 (*)[2])D_800A6FD0;
+        centerT = centerS = 1024.0f;
+        cornerUV = D_800A6FD0;
     }
     for (i = 0; i < 4; i++) {
-        ((Vtx151725FC *)arg0)[i].tc[0] = ((tbl[i][0] - cx) * cs - (tbl[i][1] - cy) * sn) + cx + 8192.0f;
-        ((Vtx151725FC *)arg0)[i].tc[1] = ((tbl[i][0] - cx) * sn + (tbl[i][1] - cy) * cs) + cy + 8192.0f;
+        vtx[i].v.tc[0] = ((cornerUV[i][0] - centerS) * cosT - (cornerUV[i][1] - centerT) * sinT) + centerS + 8192.0f;
+        vtx[i].v.tc[1] = ((cornerUV[i][0] - centerS) * sinT + (cornerUV[i][1] - centerT) * cosT) + centerT + 8192.0f;
     }
     for (i = 0; i < 4; i++) {
-        vtx[i].ob[0] = vtx[i].ob[0] + arg2;
-        vtx[i].ob[1] = vtx[i].ob[1] + arg3;
-        vtx[i].ob[2] = vtx[i].ob[2] + arg4;
+        quad[i].v.ob[0] = quad[i].v.ob[0] + x;
+        quad[i].v.ob[1] = quad[i].v.ob[1] + y;
+        quad[i].v.ob[2] = quad[i].v.ob[2] + z;
     }
     return 1;
 }
