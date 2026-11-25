@@ -131,7 +131,7 @@ extern struct102 *D_800D9894;
 static struct102 *D_800D9898[10];
 struct Obj151A4FD0 *func_151A4FD0(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, u8 a6, s32 a7);
 
-/* Recreates the func_151A4FD0 effect and forgets all sprites. */
+/* Recreates the func_151A4FD0 effect and clears every sprite slot (without freeing the sprites). */
 void func_150B6C90(void) {
     s32 i;
 
@@ -145,7 +145,7 @@ void func_150B6C90(void) {
     }
 }
 
-/* Starts the three scrolling sprites (slots 5-7) moving on to their next stage. */
+/* Lets the three scrolling sprites in slots 5-7 stop once they reach their target frame and y. */
 void func_150B6D34(void) {
     s32 i;
     SpriteObj *sprite;
