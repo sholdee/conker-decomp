@@ -191,64 +191,68 @@ void func_151A5D2C(u16 soundHandle) {
     func_100111C8(soundHandle);
 }
 
+/* Effect template passed (by address) to func_1513C650. */
 typedef struct {
-    s32 field_0x00;
-    s16 field_0x04;
-    u8 field_0x06;
-    u8 field_0x07;
-    s32 field_0x08;
-    s32 field_0x0C;
-    u8 field_0x10;
-    u8 field_0x11;
-    u8 field_0x12;
-    u8 field_0x13;
-    u8 field_0x14;
-    u8 field_0x15;
-    u8 field_0x16;
-    u8 field_0x17;
-    s32 field_0x18;
-    s32 field_0x1C;
-    u8 field_0x20;
-    u8 pad_0x21;
-    s16 field_0x22;
-    s16 field_0x24;
-    u8 pad_0x26[0x6];
+    /* 0x00 */ s32 flags;
+    /* 0x04 */ s16 duration;
+    /* 0x06 */ u8 kind;
+    /* 0x07 */ u8 unk7;
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s32 step;
+    /* 0x10 */ u8 unk10;
+    /* 0x11 */ u8 unk11;
+    /* 0x12 */ u8 unk12;
+    /* 0x13 */ u8 unk13;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 unk16;
+    /* 0x17 */ u8 unk17;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ s32 unk1C;
+    /* 0x20 */ u8 unk20;
+    /* 0x21 */ u8 pad21;
+    /* 0x22 */ s16 unk22;
+    /* 0x24 */ s16 unk24;
+    /* 0x26 */ u8 pad26[6];
 } SparkSpawnParams;
 
+/*
+ * Spawns an effect via func_1513C650 at pos, scaled by size on both axes, living duration + 20 frames.
+ * Returns NULL if duration <= 0, so the duration == -1 cases below are unreachable (the original has them).
+ */
+struct210 *func_151A5D58(f32 size, u8 arg1, s32 arg2, f32 *pos, s16 duration, u8 arg5, u8 arg6, u8 arg7, s32 arg8) {
+    SparkSpawnParams params;
 
-struct210 *func_151A5D58(f32 arg0, u8 arg1, s32 arg2, f32 *arg3, s16 arg4, u8 arg5, u8 arg6, u8 arg7, s32 arg8) {
-    SparkSpawnParams tmp;
-
-    if (arg4 <= 0) {
+    if (duration <= 0) {
         return NULL;
     }
-    tmp.field_0x22 = 0x14;
-    tmp.field_0x24 = 0xC;
-    tmp.field_0x06 = 0x38;
-    tmp.field_0x07 = 0;
-    tmp.field_0x00 = ((arg4 == -1) ? 0 : 1) | (arg5 ? 0x400 : 0) | 0x100 | 0x200 | 0x1000 | 0x2000 | 0x8000 | 0x20000;
-    if (arg4 == -1) {
-        tmp.field_0x04 = 0x12C;
+    params.unk22 = 20;
+    params.unk24 = 12;
+    params.kind = 0x38;
+    params.unk7 = 0;
+    params.flags = ((duration == -1) ? 0 : 1) | (arg5 ? 0x400 : 0) | 0x100 | 0x200 | 0x1000 | 0x2000 | 0x8000 | 0x20000;
+    if (duration == -1) {
+        params.duration = 300;
     } else {
-        tmp.field_0x04 = arg4 + 0x14;
+        params.duration = duration + 20;
     }
-    tmp.field_0x08 = 0;
-    if (arg4 == -1) {
-        tmp.field_0x0C = 0;
+    params.unk8 = 0;
+    if (duration == -1) {
+        params.step = 0;
     } else {
-        tmp.field_0x0C = 0x140000 / (arg4 + 0x14);
+        params.step = 0x140000 / (duration + 20);
     }
-    tmp.field_0x10 = arg1;
-    tmp.field_0x11 = 0xFF;
-    tmp.field_0x12 = 0xFF;
-    tmp.field_0x13 = 0x83;
-    tmp.field_0x14 = 0x1E;
-    tmp.field_0x15 = 0xFF;
-    tmp.field_0x18 = (arg6 ? 2 : 3) + 0x440000;
-    tmp.field_0x16 = 0;
-    tmp.field_0x17 = 6;
-    tmp.field_0x20 = 0xFF;
-    return func_1513C650((s32)&tmp, 0, 0, arg2, arg3[0], arg3[1], arg3[2], arg0, arg0,
+    params.unk10 = arg1;
+    params.unk11 = 0xFF;
+    params.unk12 = 0xFF;
+    params.unk13 = 0x83;
+    params.unk14 = 30;
+    params.unk15 = 0xFF;
+    params.unk18 = (arg6 ? 2 : 3) + 0x440000;
+    params.unk16 = 0;
+    params.unk17 = 6;
+    params.unk20 = 0xFF;
+    return func_1513C650((s32)&params, 0, 0, arg2, pos[0], pos[1], pos[2], size, size,
                          func_150ADA20() & 0xFF, (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2),
                          arg5 ? 3 : 0, arg5 ? 0xFF : 0, 0, arg7, arg8);
 }
