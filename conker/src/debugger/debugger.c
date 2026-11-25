@@ -261,216 +261,118 @@ void func_160006CC(OSThread *thread) {
         entry += 3;
     } while (entry[0] != 0);
 }
-void func_160012B0(s32 arg0, u8 *arg1);
-void func_16001338(u8 arg0, u8 arg1, u8 arg2);
-extern s32 D_8002D4B0;
-extern s32 *D_8002D8B0;
-extern s32 D_16003B4C;
-extern struct118 *D_1600389C;
-extern u8 D_160047B0[];
-extern u8 D_160047BC[];
-extern u8 D_160047C0[];
-void func_1600078C(void)
-{
-  s32 temp_s0;
-  s32 temp_s0_2;
-  s32 y;
-  s32 i;
-  u32 *addr;
-  u32 word;
-  u32 dataStart;
-  u32 prefix;
-  temp_s0 = ((s32 *) D_1600389C)[0x3D];
-  func_16001338(0, 255, 0);
-  func_160012B0(0xB, D_160047B0);
-  addr = (u32 *) (temp_s0 + (D_16003B4C * 4));
-  if ((((((((u32) addr) & 3) & 0xFFFFu) & 0xFFFFu) == 0) && (((u32) addr) >= 0x80000000U)) && (((u32) addr) < 0x80800001U))
-  {
-    dataStart = (u32) (&D_8002D4B0);
-    if (D_16003B4C == 0)
-    {
-      func_16001338(255, 0, 0);
+/* True when addr lies in the 0x400 bytes at the start of BSS. */
+#define IN_BSS_START(addr) (((u32)(addr) >= (u32)&D_8002D4B0) && ((u32)(addr) < (u32)&D_8002D4B0 + 0x400))
+/* True when addr lies in the 0x4000 bytes at D_8002D8B0. */
+#define IN_D_8002D8B0(addr) (((u32)(addr) >= (u32)&D_8002D8B0) && ((u32)(addr) < (u32)&D_8002D8B0 + 0x4000))
+
+/*
+ * SCREEN_STACK: 22 words of the thread's stack from sp + D_16003B4C words, each as its address,
+ * its hex value (coloured by the segment it points into) and its decimal value.
+ */
+void func_1600078C(void) {
+    u32 *stack;
+    u32 *address;
+    s32 position;
+    s32 row;
+    s32 decimal_position;
+    u32 value;
+    u32 segment;
+
+    stack = (u32 *)(u32)((OSThread *)D_1600389C)->context.sp;
+    func_16001338(0, 255, 0);
+    func_160012B0(11, D_160047B0); // "STACK-VIEW"
+    address = stack + D_16003B4C;
+    if (!((u32)address & 3) && ((u32)address >= 0x80000000) && ((u32)address < 0x80800001)) {
+        if (D_16003B4C == 0) {
+            func_16001338(255, 0, 0);
+        } else if (IN_BSS_START(address)) {
+            func_16001338(128, 128, 255);
+        } else if (IN_D_8002D8B0(address)) {
+            func_16001338(255, 128, 128);
+        } else {
+            func_16001338(255, 255, 255);
+        }
+        position = 97;
+        for (row = 0; row < 22; row++) {
+            func_16001044(position, 0, (u32)address);
+            func_160012B0(position + 8, D_160047BC); // ":"
+            value = *address;
+            segment = (value >> 24) & 0xFF;
+            if (segment == 0x80) {
+                func_16001338(128, 128, 255);
+            } else if (segment == 0x15) {
+                func_16001338(255, 0, 0);
+            } else if (segment == 0x16) {
+                func_16001338(128, 255, 128);
+            } else if (segment == 0x10) {
+                func_16001338(255, 0, 0);
+            } else {
+                func_16001338(255, 255, 255);
+            }
+            func_16001044(position + 12, 0, value);
+            decimal_position = position + 22;
+            func_160012B0(decimal_position, D_160047C0); // blank out the previous number
+            func_16001338(255, 255, 255);
+            func_16001044(decimal_position, 1, value);
+            if (IN_BSS_START(address)) {
+                func_16001338(128, 128, 255);
+            } else if (IN_D_8002D8B0(address)) {
+                func_16001338(255, 128, 128);
+            } else {
+                func_16001338(255, 255, 255);
+            }
+            position += 32;
+            address++;
+        }
     }
-    else
-      if ((((u32) addr) >= dataStart) && (((u32) addr) < (dataStart + 0x400)))
-    {
-      func_16001338(128, 128, 255);
-    }
-    else
-      if ((((u32) addr) >= ((u32) (&D_8002D8B0))) && (((u32) addr) < (((u32) (&D_8002D8B0)) + 0x4000)))
-    {
-      func_16001338(255, 128, 128);
-    }
-    else
-    {
-      func_16001338(255, 255, 255);
-    }
-    y = 0x61;
-    i = 0;
-    do
-    {
-      func_16001044(y, 0, addr);
-      func_160012B0(y + 8, D_160047BC);
-      word = *addr;
-      prefix = (word >> 24) & 0xFF;
-      if (prefix == 0x80)
-      {
-        func_16001338(128, 128, 255);
-      }
-      else
-        if (prefix == 0x15)
-      {
-        func_16001338(255, 0, 0);
-      }
-      else
-        if (prefix == 0x16)
-      {
-        func_16001338(128, 255, 128);
-      }
-      else
-        if (prefix == 0x10)
-      {
-        func_16001338(255, 0, 0);
-      }
-      else
-      {
-        func_16001338(255, 255, 255);
-      }
-      func_16001044(y + 0xC, 0, word);
-      temp_s0_2 = y + 0x16;
-      func_160012B0(temp_s0_2, D_160047C0);
-      func_16001338(255, 255, 255);
-      func_16001044(temp_s0_2, 1, word);
-      if ((((u32) addr) >= dataStart) && (((u32) addr) < (dataStart + 0x400)))
-      {
-        func_16001338(128, 128, 255);
-      }
-      else
-        if ((((u32) addr) >= ((u32) (&D_8002D8B0))) && (((u32) addr) < (((u32) (&D_8002D8B0)) + 0x4000)))
-      {
-        func_16001338(255, 128, 128);
-      }
-      else
-      {
-        func_16001338(255, 255, 255);
-      }
-      i += 1;
-      y += 0x20;
-      addr += 1;
-    }
-    while (i != 0x16);
-  }
 }
 
-void func_160012B0(s32 arg0, u8 *arg1);
-void func_16001338(u8 arg0, u8 arg1, u8 arg2);
-
-// NON-MATCHING: close but still some stuff to figure out
-// void func_1600078C(void) {
-//     s32 temp_s0;
-//     u8 range_prefix;
-//     u32 temp_s2;
-//     s32 temp_s5;
-//     s32 phi_s1;
-//     u32 *phi_s2;
-//     u32 phi_s5;
-//     s32 i;
-//
-//     temp_s0 = D_1600389C->unkF4;
-//     func_16001338(0, 255, 0); // green
-//     func_160012B0(11, &D_160047B0);
-//     temp_s2 = (D_16003B4C * 4) + temp_s0;
-//     if (((temp_s2 & 3) == 0) && (temp_s2 >= 0x80000000U) && (temp_s2 < 0x80800001U)) {
-//         if (D_16003B4C == 0) {
-//             func_16001338(255, 0, 0); // red
-//             phi_s5 = &D_8002D4B0;
-//         } else {
-//             temp_s5 = &D_8002D4B0 - 0x2B50; // 11088 ?
-//             if ((temp_s2 >= temp_s5) && (temp_s2 < (temp_s5 + 0x400))) {
-//                 func_16001338(128, 128, 255); // purple
-//                 phi_s5 = temp_s5;
-//             } else if ((temp_s2 >= (u32) &D_8002D8B0) && (temp_s2 < ((u32)&D_8002D8B0 + 0x4000))) {
-//                 func_16001338(255, 128, 128); // light red
-//                 phi_s5 = temp_s5;
-//             } else {
-//                 func_16001338(255, 255, 255);
-//                 phi_s5 = temp_s5;
-//             }
-//         }
-//         phi_s1 = 97; // "a"
-//         phi_s2 = temp_s2;
-//         for (i = 0; i < 22; i++) {
-//             func_16001044(phi_s1, 0, phi_s2);
-//             func_160012B0(phi_s1 + 8, &D_160047BC);
-//             range_prefix = (*phi_s2 >> 24);
-//             if (range_prefix == 0x80) {                   // 0x80000000
-//                 func_16001338(128, 128, 255);
-//             } else if (range_prefix == 0x15) {            // 0x15000000
-//                 func_16001338(255, 0, 0);
-//             } else if (range_prefix == 0x16) {            // 0x16000000
-//                 func_16001338(128, 255, 128);
-//             } else if (range_prefix == 0x10) {            // 0x10000000
-//                 func_16001338(255, 0, 0);
-//             } else {
-//                 func_16001338(255, 255, 255);
-//             }
-//             func_16001044(phi_s1 + 0xC, 0, *phi_s2);
-//             func_160012B0(phi_s1 + 0x16, &D_160047C0);
-//             func_16001338(255, 255, 255);
-//             func_16001044(phi_s1 + 0x16, 1, *phi_s2);
-//             if (((u32) phi_s2 >= phi_s5) && ((u32) phi_s2 < (phi_s5 + 0x400))) {
-//                 func_16001338(128, 128, 0xFF);
-//             } else if (((u32) phi_s2 >= (u32) &D_8002D8B0) && ((u32) phi_s2 < ((u32)&D_8002D8B0 + 0x4000))) {
-//                 func_16001338(255, 128, 128);
-//             } else {
-//                 func_16001338(255, 255, 255);
-//             }
-//             phi_s1 += 0x20;
-//             phi_s2 += 4;
-//         }
-//     }
-// }
-
+/* SCREEN_STACK input: stick or C up/down scrolls through the stack, B returns to the main menu. */
 s32 func_16000A5C(void) {
-    s32 res = 0;
+    s32 result = 0;
 
     if ((D_160036F3 >= 41) || (D_16003890 & U_CBUTTONS)) {
-        D_16003B4C -= 1;
+        D_16003B4C--;
         if (D_16003B4C < 0) {
             D_16003B4C = 0;
         } else {
-            res = 3;
+            result = DEBUGGER_REDRAW | DEBUGGER_CLEAR;
         }
     } else if ((D_160036F3 < -40) || (D_16003890 & D_CBUTTONS)) {
-        D_16003B4C += 1;
+        D_16003B4C++;
         if (D_16003B4C >= 201) {
             D_16003B4C = 200;
         }
-        res = 3;
+        result = DEBUGGER_REDRAW | DEBUGGER_CLEAR;
     }
-    if ((D_16003890 & B_BUTTON)) {
-        D_16003AF4 = 1;
-        res = 3;
+    if (D_16003890 & B_BUTTON) {
+        D_16003AF4 = SCREEN_MAIN_MENU;
+        result = DEBUGGER_REDRAW | DEBUGGER_CLEAR;
     }
-    return res;
+    return result;
 }
 
-// called from func_10007DAC
+/* libultra's __OSViContext; only framep is used here. */
 typedef struct {
     u16 state;
     u16 retraceCount;
     void *framep;
 } DebuggerViContext;
 extern DebuggerViContext *D_8002BDE0;
-extern u32 D_8003C8E8[4];
+
+/* COP0 TLB snapshot taken by func_16003650: EntryLo0, EntryLo1, EntryHi and PageMask of each entry. */
 extern u32 D_160038AC[32];
 extern u32 D_1600392C[32];
 extern u32 D_160039AC[32];
 extern u32 D_16003A2C[32];
-extern u32 D_160039E8;
-extern u32 D_16003A68;
-extern s32 D_16003894;
-extern s32 D_16003898;
+/* TLB entry 15 as it was when the exception hit: EntryLo0, EntryLo1, EntryHi, PageMask. */
+extern u32 D_8003C8E8[4];
+extern u32 D_160039E8; // D_160039AC[15]
+extern u32 D_16003A68; // D_16003A2C[15]
+
+extern s32 D_16003894; // buttons held now (with the STICK_* bits)
+extern s32 D_16003898; // buttons held on the previous poll
 extern void (*D_16003AF8[4])(void);
 extern s32 (*D_16003B08[4])(void);
 extern OSContPad D_160036F0[4];
@@ -479,25 +381,26 @@ void func_16001678(void);
 s32 func_16001700(void);
 void func_16001830(OSContPad *data);
 
-s32 func_16000B14(struct OSThread_s *thread) {
-    u32 *context;
-    u32 *frame;
+/*
+ * Debugger entry for a faulted thread (called from func_10007DAC): run the screens until one
+ * returns DEBUGGER_EXIT. Returns 1 when the thread should be resumed.
+ */
+s32 func_16000B14(OSThread *thread) {
+    u32 *tlb;
+    u32 *framebuffer;
     u32 entryLo;
     s32 first;
-    s32 state;
+    s32 result;
     s32 stick;
-    u32 pc;
     u32 page;
     s32 odd;
-    u32 flags;
-    s32 offset;
-    s32 *entry;
-    u32 *saved;
+    s32 i;
+    u32 *tlbCopy;
     void (*draw)(void);
     s32 (*input)(void);
 
-    state = 0;
-    first = 1;
+    result = 0;
+    first = TRUE;
     if (D_8002AC5C != 0) {
         return 0;
     }
@@ -508,25 +411,24 @@ s32 func_16000B14(struct OSThread_s *thread) {
         return 0;
     }
     func_16003650();
-    context = D_8003C8E8;
-    saved = context;
-    D_160038AC[15] = saved[0];
-    D_1600392C[15] = saved[1];
-    D_160039E8 = saved[2];
-    D_16003A68 = saved[3];
-    if ((((u32 *)thread)[0x11C / 4] & 0xFF000000) != 0x15000000) {
+    tlb = D_8003C8E8;
+    tlbCopy = tlb; // matching: a second pointer keeps IDO's stack slot layout
+    D_160038AC[15] = tlbCopy[0];
+    D_1600392C[15] = tlbCopy[1];
+    D_160039E8 = tlbCopy[2];
+    D_16003A68 = tlbCopy[3];
+    if ((thread->context.pc & 0xFF000000) != 0x15000000) {
         D_16003AF0 = 1;
     } else {
-        page = ((u32 *)thread)[0x11C / 4] & ~0xFFF;
+        // the pc is in a TLB-mapped segment: look for a valid mapping of its page
+        page = thread->context.pc & ~0xFFF;
         odd = page & 0x1000;
-        pc = page & ~0x1000;
-        page = pc;
+        page &= ~0x1000;
         D_16003AF0 = 0;
-        for (offset = 0; offset < 32; offset++) {
-            if (page == D_160039AC[offset]) {
-                entryLo = odd ? D_1600392C[offset] : D_160038AC[offset];
-                flags = entryLo;
-                if (flags & 2) {
+        for (i = 0; i < 32; i++) {
+            if (page == D_160039AC[i]) {
+                entryLo = odd ? D_1600392C[i] : D_160038AC[i];
+                if (entryLo & 2) { // valid
                     D_16003AF0 = 1;
                 }
             }
@@ -535,63 +437,62 @@ s32 func_16000B14(struct OSThread_s *thread) {
     if ((((u32)D_8003C8E0 >> 24) & 0xFF) == 0xC) {
         thread = &D_80031AE0;
     }
-    frame = (u32 *)D_8002BDE0->framep;
-    if ((saved = frame) == (u32 *)D_8002AAE8[1]) {
-        *(s8 *)&D_16003888 = 1;
+    framebuffer = D_8002BDE0->framep;
+    if (framebuffer == (u32 *)D_8002AAE8[1]) {
+        *(s8 *)&D_16003888 = 1; // matching: an s8 store lets IDO reuse the 1 already in a register
     }
     D_1600389C = (struct118 *)thread;
     D_160038A4 = 0;
-    if ((((s32 *)thread)[0x120 / 4] == 0x20) &&
-        ((u32)func_150AD770 == ((u32 *)thread)[0x11C / 4])) {
-        *(s8 *)&D_160038A4 = 1;
+    if ((thread->context.cause == EXC_SYSCALL) && (thread->context.pc == (u32)func_150AD770)) {
+        *(s8 *)&D_160038A4 = 1; // matching: as above
     }
     do {
-        if ((first == 0) && (state & 2)) {
+        if (!first && (result & DEBUGGER_CLEAR)) {
             func_16001678();
         }
         draw = D_16003AF8[D_16003AF4];
-        if (draw != 0) {
+        if (draw != NULL) {
             draw();
         }
         osWritebackDCacheAll();
         do {
-            state = 0;
+            result = 0;
             D_16003898 = D_16003894;
             func_16001700();
             func_16001830(D_160036F0);
-            if (first != 0) {
+            if (first) {
                 D_16003898 = D_16003894;
             }
             D_16003894 = D_160036F0[0].button;
             stick = D_160036F0[0].stick_x;
-            if (stick >= 0x33) {
-                D_16003894 |= 0x20000;
+            if (stick >= 51) {
+                D_16003894 |= STICK_RIGHT;
             }
-            if (stick < -0x32) {
-                D_16003894 |= 0x10000;
+            if (stick < -50) {
+                D_16003894 |= STICK_LEFT;
             }
             stick = D_160036F0[0].stick_y;
-            if (stick >= 0x33) {
-                D_16003894 |= 0x40000;
+            if (stick >= 51) {
+                D_16003894 |= STICK_UP;
             }
-            if (stick < -0x32) {
-                D_16003894 |= 0x80000;
+            if (stick < -50) {
+                D_16003894 |= STICK_DOWN;
             }
-            D_16003890 = (D_16003894 ^ D_16003898) & D_16003894;
+            D_16003890 = (D_16003894 ^ D_16003898) & D_16003894; // newly pressed
             input = D_16003B08[D_16003AF4];
-            if (input != 0) {
-                state = input();
+            if (input != NULL) {
+                result = input();
             }
-        } while (!(state & 5));
-        first = 0;
-    } while (!(state & 4));
+        } while (!(result & (DEBUGGER_REDRAW | DEBUGGER_EXIT)));
+        first = FALSE;
+    } while (!(result & DEBUGGER_EXIT));
     if (D_16003AF0 == 0) {
-        ((s16 *)thread)[0x10 / 2] = 4;
-        ((s16 *)thread)[0x12 / 2] = 0;
+        thread->state = OS_STATE_RUNNING;
+        thread->flags = 0;
         return 1;
     }
-    if ((((s32 *)thread)[0x120 / 4] == 0x20) && (D_160038A4 == 0)) {
-        ((s32 *)thread)[0x11C / 4] += 4;
+    if ((thread->context.cause == EXC_SYSCALL) && (D_160038A4 == 0)) {
+        thread->context.pc += 4; // step over the syscall
         return 1;
     }
     return 0;
