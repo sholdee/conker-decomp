@@ -99,6 +99,25 @@ def main():
                 pinned.setdefault(sec, []).append(name)
             else:
                 fixed += 1
+    # 4. Raw pointers: a data word in a linked asm data file that equals a symbol's start address is a
+    #    pointer written as a number, so it would not move with its target (the relocation check above
+    #    cannot see it). Register the target in symbol_addrs.us.txt so splat writes it by name.
+    starts = {}
+    for name, value, ndx in syms:
+        if ndx not in ("ABS", "UND") and not name.startswith("$") and inside(value):
+            starts.setdefault(value, name)
+    raw = []
+    for f in sorted(set(re.findall(r"build/(asm/data/[\w.]+\.s)\.o", (conker / "conker.ld").read_text()))):
+        if not (conker / f).exists():
+            continue
+        for m in re.finditer(r"\.word\s+0x([0-9A-Fa-f]{8})\b", (conker / f).read_text()):
+            v = int(m.group(1), 16)
+            if v in starts:
+                raw.append(f"{f}: .word 0x{v:08X} is the address of {starts[v]}")
+    for r in raw[:20]:
+        print("RAW POINTER:", r)
+    print(f"raw pointers in linked data: {len(raw)}")
+    wrong += raw
     # 3. ROM layout: the code's fixed ROM offsets must equal where the outer link put the segments
     #    (the game segment has a reserved size, so this holds unless a reservation overflows)
     layout = {"game_us_rzip_ROM_START": "game_us_rzip_ROM_START", "debugger_us_ROM_START": "debugger_us_ROM_START",
