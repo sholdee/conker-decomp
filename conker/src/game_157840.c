@@ -14,8 +14,6 @@ extern u8 D_800DC0C0[];
 extern struct1512ABF8 D_800DC200[][4];
 extern s16 D_800DC204[];
 extern s16 D_800DC206[];
-extern f32 D_800A3694;
-extern f32 D_800A3698;
 
 void func_15123A54(struct108 *arg0);
 void func_1512AD54(struct108 *arg0);
@@ -313,7 +311,6 @@ typedef struct {
     f32 z;
 } Vec1512AD54;
 
-extern f32 D_800A3674;
 extern f32 D_800DC1F0;
 extern f32 D_800DC1F4;
 extern f32 D_800DC1F8;
@@ -772,48 +769,31 @@ typedef struct {
     /* 0x960 */ f32 unk960;
 } Obj1512BB10;
 
-typedef struct {
-    /* 0x000 */ s32 unk0;
-    /* 0x004 */ u8 pad4[0x10];
-    /* 0x014 */ f32 unk14;
-    /* 0x018 */ f32 unk18;
-    /* 0x01C */ f32 unk1C;
-    /* 0x020 */ f32 unk20;
-    /* 0x024 */ u8 pad24[0x4];
-    /* 0x028 */ f32 unk28;
-    /* 0x02C */ u8 pad2C[0x14];
-    /* 0x040 */ f32 unk40;
-    /* 0x044 */ u8 pad44[0x13C];
-    /* 0x180 */ f32 unk180;
-    /* 0x184 */ u8 pad184[0x4];
-    /* 0x188 */ s32 unk188;
-    /* 0x18C */ u8 pad18C[0x18C];
-    /* 0x318 */ void *unk318;
-    /* 0x31C */ u8 pad31C[0x10];
-} Obj1512BB10Probe;
-
 extern u8 D_80089120[];
 extern u8 D_800CBDD2;
 extern u8 D_800CBDD3;
 extern u8 D_800CBDD4;
 s32 func_15044380(f32 arg0, f32 arg1, f32 arg2, void *arg3, s32 arg4, s32 arg5);
 
+/* Picks the camera collision radii for the current mode, then moves a temporary probe object (type 0x2D)
+ * from the camera position through the world and applies the corrected position. */
 void func_1512BB10(Obj1512BB10 *arg0) {
-    s32 sp3A4;
-    s32 sp3A0;
-    Obj1512BB10Probe sp74;
-    s32 ret;
-    s32 sp6C;
-    s32 sp68;
-    s32 sp64;
-    f32 sp60;
+    s32 savedDD3;
+    s32 flag;
+    struct127 probe;
+    s32 hit;
+    s32 saved2;
+    s32 saved1;
+    s32 savedDD4;
+    f32 floorY;
     Obj1512BB10Sub *sub;
 
-    sp3A0 = 0;
+    flag = 0;
+    // matching: sub is loaded inside the condition, after the first flag test
     if (!(arg0->unk84 & 0x40000) && (sub = arg0->unk3D4, sub->unk95 == 0) && (arg0->unk2C != 0x40) &&
         !(arg0->unk84 & 0x80) && !(arg0->unk84 & 0x200)) {
-        sp6C = D_80089120[2];
-        sp68 = D_80089120[1];
+        saved2 = D_80089120[2];
+        saved1 = D_80089120[1];
         if (arg0->unk5F0 & 0x800) {
             arg0->unk94C = 20.0f;
             arg0->unk950 = 40.0f;
@@ -824,7 +804,7 @@ void func_1512BB10(Obj1512BB10 *arg0) {
             arg0->unk94C = 70.0f;
             arg0->unk950 = 140.0f;
         } else if ((D_800BE9F0 == 0x31) && (arg0->unk23E == 3)) {
-            sp3A0 = 1;
+            flag = 1;
             arg0->unk94C = 20.0f;
             arg0->unk950 = 50.0f;
         } else {
@@ -835,7 +815,7 @@ void func_1512BB10(Obj1512BB10 *arg0) {
                 arg0->unk94C = 20.0f;
                 arg0->unk950 = 20.0f;
             } else if (arg0->unk3D0->unk102 != 0) {
-                sp3A0 = 1;
+                flag = 1;
                 arg0->unk94C = 25.0f;
                 arg0->unk950 = 30.0f;
             } else {
@@ -852,20 +832,20 @@ void func_1512BB10(Obj1512BB10 *arg0) {
             func_150495B0(&arg0->unk95C, arg0->unk94C, &arg0->unk954, 4.0f, 6.0f, arg0->unk7B4);
             func_150495B0(&arg0->unk960, arg0->unk950, &arg0->unk958, 4.0f, 6.0f, arg0->unk7B4);
         }
-        sp74.unk0 = 0x2D;
-        sp74.unk318 = arg0;
-        sp74.unk14 = arg0->unk2F8;
+        probe.interaction_state = 0x2D;
+        probe.camera = (struct108 *)arg0;
+        probe.x_position = arg0->unk2F8;
         if (arg0->unk5F0 & 0x800) {
-            sp74.unk18 = arg0->unk2FC + arg0->unk18C;
+            probe.y_position = arg0->unk2FC + arg0->unk18C;
         } else {
-            sp74.unk18 = arg0->unk2FC;
+            probe.y_position = arg0->unk2FC;
         }
-        sp74.unk1C = arg0->unk300;
-        sp74.unk188 = arg0->unk644;
-        sp74.unk28 = sp74.unk18 - arg0->unk354;
-        sp74.unk180 = arg0->unk354;
-        sp74.unk20 = 0.0f;
-        sp74.unk40 = arg0->unk37C;
+        probe.z_position = arg0->unk300;
+        probe.pad188 = arg0->unk644;
+        probe.unk28 = probe.y_position - arg0->unk354;
+        probe.unk180 = arg0->unk354;
+        probe.y_velocity = 0.0f;
+        probe.unk40 = arg0->unk37C;
         if ((arg0->unk84 & 0x80000000) || (D_800BE9F0 == 0x37)) {
             D_80089120[2] = 0;
         }
@@ -873,46 +853,46 @@ void func_1512BB10(Obj1512BB10 *arg0) {
             D_80089120[1] = 0;
         }
         D_800CBDD2 = 1;
-        sp3A4 = D_800CBDD3;
+        savedDD3 = D_800CBDD3;
         if (arg0->unk3D0->unk102 != 0) {
             D_800CBDD3 = 1;
         } else {
             D_800CBDD3 = 0;
         }
-        sp64 = D_800CBDD4;
-        if ((arg0->unk23C != 0) || ((arg0->unk2C == 0x100) && (sp3A0 == 0))) {
+        savedDD4 = D_800CBDD4;
+        if ((arg0->unk23C != 0) || ((arg0->unk2C == 0x100) && (flag == 0))) {
             D_800CBDD4 = 1;
         } else {
             D_800CBDD4 = 0;
         }
-        ret = func_15044380(arg0->unk304, arg0->unk308, arg0->unk30C, &sp74, 0, 0);
-        D_800CBDD4 = sp64;
+        hit = func_15044380(arg0->unk304, arg0->unk308, arg0->unk30C, &probe, 0, 0);
+        D_800CBDD4 = savedDD4;
         D_800CBDD2 = 0;
-        D_800CBDD3 = sp3A4;
-        D_80089120[2] = sp6C;
-        D_80089120[1] = sp68;
-        if (ret != 0) {
+        D_800CBDD3 = savedDD3;
+        D_80089120[2] = saved2;
+        D_80089120[1] = saved1;
+        if (hit != 0) {
             arg0->unk3E8 = 0;
             arg0->unk26C = 0.004999999888f;
         } else {
             arg0->unk3E8 = 1;
-            arg0->unk26C = arg0->unk26C + (1.0f - arg0->unk26C) * 0.1000000015f;
+            arg0->unk26C += (1.0f - arg0->unk26C) * 0.1000000015f;
         }
-        arg0->unk2F8 = sp74.unk14;
+        arg0->unk2F8 = probe.x_position;
         if (arg0->unk2C != 0x100) {
             if (arg0->unk5F0 & 0x800) {
-                arg0->unk2FC = sp74.unk18 - arg0->unk18C;
+                arg0->unk2FC = probe.y_position - arg0->unk18C;
             } else {
-                arg0->unk2FC = sp74.unk18;
+                arg0->unk2FC = probe.y_position;
             }
         }
-        arg0->unk300 = sp74.unk1C;
-        if ((D_800BE9F0 != 0x1B) && (ret != 0) && (arg0->unk2C != 0x100)) {
-            func_1510E8BC(NULL, NULL, &sp60, NULL, NULL, 0, arg0->unk2F8, arg0->unk2FC, arg0->unk300,
+        arg0->unk300 = probe.z_position;
+        if ((D_800BE9F0 != 0x1B) && (hit != 0) && (arg0->unk2C != 0x100)) {
+            func_1510E8BC(NULL, NULL, &floorY, NULL, NULL, 0, arg0->unk2F8, arg0->unk2FC, arg0->unk300,
                           arg0->unk308, 0, 0, -10000.0f, arg0->unk2FC, 1);
-            if (arg0->unk2FC < sp60 + 40.0f) {
-                s32 pad;
-                arg0->unk2FC = sp60 + 40.0f;
+            if (arg0->unk2FC < floorY + 40.0f) {
+                s32 pad; // matching: IDO reserves a stack slot for this block-scoped unused local
+                arg0->unk2FC = floorY + 40.0f;
             }
         }
     } else {
@@ -921,26 +901,27 @@ void func_1512BB10(Obj1512BB10 *arg0) {
     func_151236D0(arg0);
 }
 
+/* Measures the horizontal distance to the target; when too close, swings the yaw by 90 degrees. */
 void func_1512C068(struct108 *arg0) {
-    f32 temp_f14;
-    f32 temp_f2;
-    f32 temp_f12;
-    f32 temp_f0;
+    f32 side;
+    f32 dx;
+    f32 dz;
+    f32 dist;
 
     if (arg0->unk390 < 180.0f) {
-        temp_f14 = 2.0f;
+        side = 2.0f;
     } else {
-        temp_f14 = -2.0f;
+        side = -2.0f;
     }
 
     if ((arg0->unk2C != 0x80) && (arg0->unk2C != 0x40)) {
-        temp_f2 = arg0->unk2F8 - arg0->unk2BC;
-        temp_f12 = arg0->unk300 - arg0->unk2C4;
-        temp_f0 = sqrtf((temp_f2 * temp_f2) + (temp_f12 * temp_f12));
-        *(f32 *)arg0->pad370 = temp_f0;
+        dx = arg0->unk2F8 - arg0->unk2BC;
+        dz = arg0->unk300 - arg0->unk2C4;
+        dist = sqrtf((dx * dx) + (dz * dz));
+        *(f32 *)arg0->pad370 = dist; // struct108 (shared header) has no f32 field at 0x370 yet
 
-        if (temp_f0 < 42.0f) {
-            arg0->unk384 = arg0->unk37C - (45.0f * temp_f14);
+        if (dist < 42.0f) {
+            arg0->unk384 = arg0->unk37C - (45.0f * side);
             arg0->unk5CC = 0.0f;
             func_15123A54(arg0);
             arg0->unk240 |= 2;
@@ -950,19 +931,13 @@ void func_1512C068(struct108 *arg0) {
     func_1512C150(arg0);
 }
 
+/* Advances the blend factor unk5CC towards 1, easing the yaw unk384 towards unk37C until it gets there. */
 void func_1512C150(struct108 *arg0) {
-    f32 temp_f0;
-
-    arg0->unk5CC += D_800A3694;
-    temp_f0 = arg0->unk5CC;
-    if (temp_f0 > 1.0f) {
-        arg0->unk5CC = 1.0f;
-    } else {
-        arg0->unk5CC = temp_f0;
-    }
+    arg0->unk5CC += 0.006000000052f;
+    arg0->unk5CC = (arg0->unk5CC > 1.0f) ? 1.0f : arg0->unk5CC;
 
     if (arg0->unk5CC == 1.0f) {
-        arg0->unk384 = D_800A3698;
+        arg0->unk384 = 999.0f;
         arg0->unk240 &= ~2;
     } else {
         arg0->unk384 += func_15048A70(arg0->unk384, arg0->unk37C) * arg0->unk5CC;
@@ -991,50 +966,53 @@ extern f32 D_800895B0;
 #define SQ(x) ((x) * (x))
 void func_1508EF80(struct17 *arg0, struct17 *arg1, f32 arg2, struct17 *arg3);
 
+/* Keeps the camera outside the circle of radius unk938 around unk93C (horizontally), pushing it out to the edge. */
 void func_1512C20C(struct1512C20C *arg0) {
-    f32 sp6C;
-    struct17 sp60;
-    struct17 sp54;
-    struct17 sp48;
+    f32 dz; // matching: also holds the target distance later (a separate local grows the frame)
+    struct17 pos;
+    struct17 offset;
+    struct17 toPos;
 
     if (arg0->unk948) {
-        f32 temp_f0;
-        temp_f0 = arg0->unk2F8.unk0 - arg0->unk93C.unk0;
-        sp6C = arg0->unk2F8.unk8 - arg0->unk93C.unk8;
-        sp60 = arg0->unk2F8;
-        if (sqrtf(SQ(temp_f0) + SQ(sp6C)) < arg0->unk938) {
-            struct17 sp38;
-            f32 sp34;
-            f32 sp30;
-            sp38 = arg0->unk2A4;
-            sp38.unk4 = 0.0f;
-            sp60.unk4 = 0.0f;
+        f32 dx; // matching: also holds the yaw difference later
+
+        dx = arg0->unk2F8.unk0 - arg0->unk93C.unk0;
+        dz = arg0->unk2F8.unk8 - arg0->unk93C.unk8;
+        pos = arg0->unk2F8;
+        if (sqrtf(SQ(dx) + SQ(dz)) < arg0->unk938) {
+            struct17 target;
+            f32 outwardYaw;
+            f32 yaw;
+
+            target = arg0->unk2A4;
+            target.unk4 = 0.0f;
+            pos.unk4 = 0.0f;
             arg0->unk93C.unk4 = 0.0f;
-            func_150491EC(&arg0->unk93C, &sp60, &sp54);
-            sp34 = func_15048FC8(&sp54) - 180.0f;
-            func_15048758(&sp34);
-            func_150491EC(&sp38, &sp60, &sp48);
-            func_15049148(&sp54, arg0->unk938, &sp54);
-            sp60.unk0 = arg0->unk93C.unk0 + sp54.unk0;
-            sp60.unk4 = 0.0f;
-            sp60.unk8 = arg0->unk93C.unk8 + sp54.unk8;
-            sp6C = sqrtf(SQ(sp38.unk0 - sp60.unk0) + SQ(sp38.unk8 - sp60.unk8));
-            func_15048F90(&sp60, &sp38, &sp54);
-            sp30 = func_15048FC8(&sp54);
-            func_15048758(&sp30);
-            arg0->unk930 = sp30;
-            temp_f0 = func_15048A70(sp34, sp30);
-            if (fabsf(temp_f0) < 35.0f) {
-                if (temp_f0 <= 0.0f) {
-                    temp_f0 = 5.0f;
+            func_150491EC(&arg0->unk93C, &pos, &offset);
+            outwardYaw = func_15048FC8(&offset) - 180.0f;
+            func_15048758(&outwardYaw);
+            func_150491EC(&target, &pos, &toPos);
+            func_15049148(&offset, arg0->unk938, &offset);
+            pos.unk0 = arg0->unk93C.unk0 + offset.unk0;
+            pos.unk4 = 0.0f;
+            pos.unk8 = arg0->unk93C.unk8 + offset.unk8;
+            dz = sqrtf(SQ(target.unk0 - pos.unk0) + SQ(target.unk8 - pos.unk8));
+            func_15048F90(&pos, &target, &offset);
+            yaw = func_15048FC8(&offset);
+            func_15048758(&yaw);
+            arg0->unk930 = yaw;
+            dx = func_15048A70(outwardYaw, yaw);
+            if (fabsf(dx) < 35.0f) {
+                if (dx <= 0.0f) {
+                    dx = 5.0f;
                 } else {
-                    temp_f0 = -5.0f;
+                    dx = -5.0f;
                 }
-                func_1508EF80(&sp60, &arg0->unk93C, temp_f0, &sp60);
+                func_1508EF80(&pos, &arg0->unk93C, dx, &pos);
             }
-            D_800895B0 = sp6C;
-            sp60.unk4 = arg0->unk2F8.unk4;
-            arg0->unk2F8 = sp60;
+            D_800895B0 = dz;
+            pos.unk4 = arg0->unk2F8.unk4;
+            arg0->unk2F8 = pos;
         } else {
             D_800895B0 = 0.0f;
             arg0->unk930 = arg0->unk37C;
@@ -1047,5 +1025,5 @@ void func_1512C20C(struct1512C20C *arg0) {
 }
 
 s32 func_1512C47C(s32 arg0) {
-    return 0x1;
+    return 1;
 }
