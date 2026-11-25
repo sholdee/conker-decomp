@@ -8,16 +8,9 @@ void func_15042ECC(u8 *format, s32 *argumentWords);
 Gfx *func_15043384(Gfx *gfx);
 s32 strlen(const char *);
 
-typedef struct Game70200Anchor {
-    u8 pad0[0x14];
-    f32 x;
-    f32 y;
-    f32 z;
-} Game70200Anchor;
-
 /* One queued line of HUD text (or, when `icon` is nonzero, one icon), freed after drawing. */
 typedef struct Game70200TextNode {
-    Game70200Anchor *anchor; /* if set, the text is drawn over this object */
+    Actor *anchor; /* if set, the text is drawn over this actor */
     f32 scale;
     s16 x;
     s16 y; /* height above the anchor while one is attached */
@@ -53,7 +46,7 @@ extern u8 D_800CBD6F;
 /*
  * Text queue state (declared in variables.h): D_800CBD64 = head node, D_800CBD68 = tail node,
  * D_800CBD60..63 = RGBA, D_800CBD6C..6F = node unk12..unk15, D_800CBD70/72 = x/y,
- * D_800CBD74 = TEXT_FLAG_*, D_800CBD78 = anchor object, D_800CBD7C = height above it,
+ * D_800CBD74 = TEXT_FLAG_*, D_800CBD78 = anchor actor, D_800CBD7C = height above it,
  * D_800CBD80 = scale. All apply to the next queued nodes; drawing resets them.
  */
 
@@ -194,7 +187,7 @@ void func_15042ECC(u8 *format, s32 *argumentWords) {
 
         node = newNode;
         node->flags = D_800CBD74;
-        node->anchor = (Game70200Anchor *)D_800CBD78;
+        node->anchor = (Actor *)D_800CBD78;
         if (node->anchor != NULL) {
             node->y = D_800CBD7C;
             node->flags |= TEXT_FLAG_CENTERED;
@@ -296,7 +289,7 @@ Gfx *func_15043384(Gfx *gfx) {
     s32 icon;
     Game70200TextNode *node;
     Game70200TextNode *next;
-    Game70200Anchor *anchor;
+    Actor *anchor;
     u32 visible;
     s32 shadow;
     f32 scale;
@@ -331,7 +324,7 @@ Gfx *func_15043384(Gfx *gfx) {
                 if (node->anchor != NULL) {
                     anchor = node->anchor;
                     D_80082FA4 = 0;
-                    visible = func_1509563C(anchor->x, anchor->y + node->y, anchor->z,
+                    visible = func_1509563C(anchor->x_position, anchor->y_position + node->y, anchor->z_position,
                                             &screenX, &screenY, &screenZ, &screenW, 30000.0f);
                     if (visible) {
                         node->x = screenX;
