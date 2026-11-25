@@ -31,28 +31,50 @@ typedef struct {
     /* 0x28 */ EmitterState state;
 } Emitter;
 
-/* State each emitted particle keeps at +0x110 (copied in by func_150F2D14, updated by func_150F3214). */
+/* Spawn template of a particle, copied to Particle.def (same layout as ParticleDef in game_169510.c). */
+typedef struct {
+    /* 0x00 */ u8 texture;
+    /* 0x01 */ u8 type;
+    /* 0x02 */ u16 renderModes;
+    /* 0x04 */ s16 lifetime;
+    /* 0x08 */ s32 frame;
+    /* 0x0C */ s32 frameSpeed;
+    /* 0x10 */ u8 rgba[4];
+    /* 0x14 */ f32 width;
+    /* 0x18 */ f32 height;
+    /* 0x1C */ struct17 pos;
+    /* 0x28 */ struct17 rot;
+    /* 0x34 */ struct17 scale;
+    /* 0x40 */ s32 flags;
+    /* 0x44 */ u8 unk44;
+    /* 0x45 */ u8 unk45;
+    /* 0x46 */ u8 unk46;
+    /* 0x47 */ u8 unk47;
+    /* 0x48 */ s16 *unk48;
+    /* 0x4C */ u8 viewportMask;
+    /* 0x50 */ s32 unk50;
+    /* 0x54 */ s16 fadeStart;
+    /* 0x56 */ s16 fadeRate;
+} ParticleDef;
+
+/* State each emitted particle keeps after its Particle (copied in by func_150F2D14, updated by func_150F3214). */
 typedef struct {
     /* 0x00 */ struct127 *target;
     /* 0x04 */ u8 targetId;
     /* 0x08 */ f32 age;
     /* 0x0C */ f32 lifetime;
-    /* 0x10 */ f32 growth;   // particle size = growth * sqrtf(age)
-    /* 0x14 */ f32 fadeStart; // particle->unk5C = fadeStart - fadeRate * age * age
-    /* 0x18 */ f32 fadeRate;  // fadeStart / (lifetime * lifetime): unk5C reaches 0 at lifetime
-    /* 0x1C */ struct17 unk1C;
-    /* 0x28 */ struct17 unk28;
+    /* 0x10 */ f32 growth;    // width = height = growth * sqrtf(age)
+    /* 0x14 */ f32 fadeFrom;  // def.unk44 = fadeFrom - fadeRate * age * age
+    /* 0x18 */ f32 fadeRate;  // fadeFrom / (lifetime * lifetime): def.unk44 reaches 0 at lifetime
+    /* 0x1C */ struct17 axisU; // quad axes for func_15140410
+    /* 0x28 */ struct17 axisV;
 } ParticleState;
 
 /* A particle spawned by func_1513D2F0. */
 typedef struct {
-    /* 0x000 */ u8 pad0[0x2C];
-    /* 0x02C */ f32 unk2C;
-    /* 0x030 */ f32 unk30;
-    /* 0x034 */ f32 unk34[3];
-    /* 0x040 */ u8 pad40[0x1C];
-    /* 0x05C */ u8 unk5C;
-    /* 0x05D */ u8 pad5D[0xB3];
+    /* 0x000 */ u8 pad0[0x18];
+    /* 0x018 */ ParticleDef def;
+    /* 0x070 */ u8 pad70[0xA0];
     /* 0x110 */ ParticleState state;
 } Particle;
 
@@ -126,36 +148,6 @@ void func_150F2C8C(struct127 *target) {
     }
 }
 
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    s16 unk2;
-    s16 unk4;
-    s32 unk8;
-    s32 unkC;
-    u8 unk10;
-    u8 unk11;
-    u8 unk12;
-    u8 unk13;
-    f32 unk14;
-    f32 unk18;
-    struct17 unk1C;
-    struct17 unk28;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    s32 unk40;
-    u8 unk44;
-    u8 unk45;
-    u8 unk46;
-    u8 unk47;
-    s32 unk48;
-    u8 unk4C;
-    s32 unk50;
-    s16 unk54;
-    s16 unk56;
-} ParticleSpawn;
-
 extern f32 D_800A195C[];
 void func_1502EA98(struct127 *, s32, s32, s32, s32, s32, s32);
 void func_15145EA4(f32 **, f32 **, Mtx *, s32);
@@ -166,7 +158,7 @@ extern s32 func_15146078(struct17 *, struct17 *, struct17 *);
 void func_150F2D14(Emitter *emitter) {
     EmitterState *state;
     struct127 *target;
-    ParticleSpawn spawn;
+    ParticleDef def;
     ParticleState particle;
     Particle *spawned;
 
@@ -189,73 +181,77 @@ void func_150F2D14(Emitter *emitter) {
     }
     if (target->unk1D4 != NULL && state->count > 0) {
         state->timer += 0.148f * D_800BE9A4;
-        if (state->timer > 1.0f) do {
-            particle.target = target;
-            particle.targetId = target->unique_id;
-            particle.age = 0.0f;
-            particle.lifetime = func_150ADA68() * 6.0f + 13.0f;
-            particle.growth = 58.14f;
-            particle.fadeStart = func_150ADA68() * 40.0f + 60.0f;
-            particle.fadeRate = particle.fadeStart / (particle.lifetime * particle.lifetime);
-            {
-                f32 *src[2];
-                f32 *dst[2];
-                struct17 dir;
+        if (state->timer > 1.0f) {
+            do {
+                particle.target = target;
+                particle.targetId = target->unique_id;
+                particle.age = 0.0f;
+                particle.lifetime = func_150ADA68() * 6.0f + 13.0f;
+                particle.growth = 58.14f;
+                particle.fadeFrom = func_150ADA68() * 40.0f + 60.0f;
+                particle.fadeRate = particle.fadeFrom / (particle.lifetime * particle.lifetime);
+                {
+                    f32 *src[2];
+                    f32 *dst[2];
+                    struct17 dir;
 
-                src[0] = D_800A1950;
-                src[1] = D_800A195C;
-                dst[0] = &spawn.unk1C.unk0;
-                dst[1] = &dir.unk0;
-                func_15145EA4(src, dst, (Mtx *)target->unk1D4 + 15, 2);
-            dir.unk0 -= spawn.unk1C.unk0;
-            dir.unk4 -= spawn.unk1C.unk4;
-            dir.unk8 -= spawn.unk1C.unk8;
-            if (!func_15146078(&dir, &particle.unk1C, &particle.unk28)) {
-                return;
-            }
-            spawn.unk44 = particle.fadeStart;
-            spawn.unk0 = 0x79;
-            spawn.unk1 = 0xC;
-            spawn.unk2 = 0x4405;
-            spawn.unk4 = 300;
-            spawn.unk8 = 0;
-            spawn.unkC = 0;
-            spawn.unk10 = 0xD5;
-            spawn.unk11 = 0xDB;
-            spawn.unk12 = 0xFF;
-            spawn.unk13 = 0xFF;
-            spawn.unk18 = 0.0f;
-            spawn.unk14 = 0.0f;
-            spawn.unk28 = *(struct17 *)&D_800A5480;
-            spawn.unk34 = 1.0f;
-            spawn.unk38 = 1.0f;
-            spawn.unk3C = 1.0f;
-            spawn.unk40 = 0x04EC0000;
-            spawn.unk45 = 0xFF;
-            spawn.unk46 = 0;
-            spawn.unk47 = 6;
-            spawn.unk48 = 0;
-            spawn.unk4C = 0xFF;
-            spawn.unk50 = 0;
-            spawn.unk54 = 1;
-            spawn.unk56 = 0xFF;
-            spawned = func_1513D2F0(&spawn, (s32)&D_800A4AA0, 0x26, 0, 0, 0x25, 0, 0, 0, 0x34, emitter->unkC, emitter->unk1);
-            if (spawned != NULL) {
-                memcpy(&spawned->state, &particle, sizeof(particle));
-            }
-            state->count--;
-            state->timer -= 1.0f;
-            }
-        } while (state->timer > 1.0f && state->count > 0);
+                    src[0] = D_800A1950;
+                    src[1] = D_800A195C;
+                    dst[0] = &def.pos.unk0;
+                    dst[1] = &dir.unk0;
+                    func_15145EA4(src, dst, (Mtx *)target->unk1D4 + 15, 2);
+                    dir.unk0 -= def.pos.unk0;
+                    dir.unk4 -= def.pos.unk4;
+                    dir.unk8 -= def.pos.unk8;
+                    if (!func_15146078(&dir, &particle.axisU, &particle.axisV)) {
+                        return;
+                    }
+                    def.unk44 = particle.fadeFrom;
+                    def.texture = 0x79;
+                    def.type = 0xC;
+                    def.renderModes = 0x4405;
+                    def.lifetime = 300;
+                    def.frame = 0;
+                    def.frameSpeed = 0;
+                    def.rgba[0] = 0xD5;
+                    def.rgba[1] = 0xDB;
+                    def.rgba[2] = 0xFF;
+                    def.rgba[3] = 0xFF;
+                    def.height = 0.0f;
+                    def.width = 0.0f;
+                    def.rot = *(struct17 *)&D_800A5480;
+                    def.scale.unk0 = 1.0f;
+                    def.scale.unk4 = 1.0f;
+                    def.scale.unk8 = 1.0f;
+                    def.flags = 0x04EC0000;
+                    def.unk45 = 0xFF;
+                    def.unk46 = 0;
+                    def.unk47 = 6;
+                    def.unk48 = NULL;
+                    def.viewportMask = 0xFF;
+                    def.unk50 = 0;
+                    def.fadeStart = 1;
+                    def.fadeRate = 0xFF;
+                    spawned = func_1513D2F0(&def, (s32)&D_800A4AA0, 0x26, 0, 0, 0x25, 0, 0, 0, 0x34, emitter->unkC, emitter->unk1);
+                    if (spawned != NULL) {
+                        memcpy(&spawned->state, &particle, sizeof(particle));
+                    }
+                    state->count--;
+                    state->timer -= 1.0f;
+                }
+            } while (state->timer > 1.0f && state->count > 0);
+        }
     }
 }
 
-void func_150F3194(s32 arg0, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
+/* Hands the emitter's target pointer and id to func_15169850. */
+void func_150F3194(Emitter *emitter, s32 arg1, u8 arg2) {
+    func_15169850(arg1, arg2, (s32)&emitter->state.target, (s32)&emitter->state.targetId, (s32)emitter);
 }
 
-void func_150F31D4(s32 arg0, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, arg0 + 0x110, arg0 + 0x114, arg0);
+/* Hands the particle's target pointer and id to func_15169850. */
+void func_150F31D4(Particle *particle, s32 arg1, u8 arg2) {
+    func_15169850(arg1, arg2, (s32)&particle->state.target, (s32)&particle->state.targetId, (s32)particle);
 }
 
 /* Particle update: follows the target's bone 15, grows and fades with age. Returns 0 when it should die. */
@@ -267,29 +263,17 @@ s32 func_150F3214(Particle *particle) {
     state = &particle->state;
     target = state->target;
 
-    if (target->interaction_state == 0) {
-        goto return_zero;
+    if (target->interaction_state == 0 || target->unique_id != state->targetId || target->unk1D4 == NULL) {
+        return 0;
     }
 
-    do {
-        if (target->unique_id != state->targetId) {
-            goto return_zero;
-        }
-
-        if (target->unk1D4 != NULL) {
-            break;
-        }
-return_zero:
-        return 0;
-    } while (0);
-
-    func_15143134(D_800A1950, particle->unk34, (Mtx *)target->unk1D4 + 15);
+    func_15143134(D_800A1950, &particle->def.pos.unk0, (Mtx *)target->unk1D4 + 15);
 
     size = sqrtf(state->age) * state->growth;
-    particle->unk30 = size;
-    particle->unk2C = size;
+    particle->def.height = size;
+    particle->def.width = size;
 
-    particle->unk5C = (u32)(state->fadeStart - ((state->fadeRate * state->age) * state->age));
+    particle->def.unk44 = (u32)(state->fadeFrom - ((state->fadeRate * state->age) * state->age));
     state->age = state->age + D_800BE9A4;
 
     if (state->lifetime < state->age) {
@@ -298,8 +282,9 @@ return_zero:
     return 1;
 }
 
-void func_150F337C(s32 arg0, s16 arg1) {
-    func_15140410(arg0, arg0 + 0x12C, arg0 + 0x138, arg1);
+/* Draws the particle as a quad spanned by its axes. */
+void func_150F337C(Particle *particle, s16 viewport) {
+    func_15140410(particle, &particle->state.axisU, &particle->state.axisV, viewport);
 }
 
 void func_150F33B0(struct131 *arg0) {
