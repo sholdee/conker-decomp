@@ -1125,152 +1125,132 @@ struct216 *func_1507BB28(s32, s32);
 u8 func_1505DADC(struct127 *arg0, u16 *arg1, u8 arg2, u8 arg3, u8 arg4);
 extern u8 D_800CBDD3;
 
-void func_15058898(struct127 *arg0, f32 arg1)
-{
-  f32 sp7C;
-  s32 idx;
-  s32 var_v1;
-  s32 i;
-  f32 *p;
-  arg0->unk118 = -10000.0f;
-  func_1502178C(arg0, 0, -1);
-  if (arg0->unkF8 & 0x8000)
-  {
-    if (arg0->unk5 == 7)
-    {
-      arg0->unk28 = 0.0f;
-    }
-    else
-    {
-      arg0->unk28 = 1.0f;
-    }
-    return;
-  }
-  if (arg0->unkF8 & 0x200000)
-  {
-    arg0->unk180 = (s16) arg0->unk224;
-    return;
-  }
-  var_v1 = arg0->unkF8 & 2;
-  idx = arg0->unk13C;
-  i = idx - 100;
-  if ((idx >= 100) && (i == 0))
-  {
-    var_v1 = D_800CC2D0[i].unkF8 & 2;
-  }
-  if ((!var_v1) || (!func_150A3FC4(arg0->x_position, arg0->z_position, arg0->pad188, &arg0->unk18C, &sp7C)))
-  {
-    if (arg0->unkF8 & 8)
-    {
-      p = &arg0->unk118;
-    }
-    else
-    {
-      p = 0;
-    }
-    func_1510E8BC(&arg0->pad188, &arg0->unk18C, &sp7C, p, &arg0->unk184, ((u8 *) arg0) + 0x1A2, arg0->x_position, arg0->y_position, arg0->z_position, arg1, 0, arg0, -10000.0f, arg0->y_position, arg0->unkF8 & 0x04000000);
-  }
-  else
-    if (arg0->unkF8 & 8)
-  {
-    arg0->unk118 = func_1510F648(arg0->x_position, arg0->y_position, arg0->z_position);
-  }
-  i = arg0->unkF8;
-  if ((arg0->unk13C != 0) && (arg0->id != 0x9A))
-  {
-    i = D_800CC2D0[arg0->unk13C - 100].unkF8;
-  }
-  if (((i & 4) && (arg0->unk13D == 0)) && (((((arg0->unk127 != 0xFF) || (arg0->x_position != arg0->old_x_position)) || (sp7C != arg0->old_y_position)) || (0.0f != arg0->unk28)) || (arg0->z_position != arg0->old_z_position)))
-  {
-    f32 x;
-    f32 z;
-    x = arg0->x_position;
-    z = arg0->z_position;
-    if ((arg0->id == 0x1B) || (arg0->id == 0x7E))
-    {
-      D_800CBDD3 = 1;
-    }
-    func_15044380(arg0->old_x_position, arg0->old_y_position, arg0->old_z_position, arg0, 1, 0);
-    if ((arg0->id == 0x1B) || (arg0->id == 0x7E))
-    {
-      D_800CBDD3 = 0;
-    }
-    if ((x != arg0->x_position) || (z != arg0->z_position))
-    {
-      arg0->unkF4 |= 0x10000;
-      if (arg0->unk24E != 0)
-      {
-        if (arg0->id == 0xC)
-        {
-          func_150B9ED0(arg0, x, z, 0xFF, 0);
+/* Updates the actor's floor height (unk180) and pushes it out of walls, reacting to a wall hit. */
+void func_15058898(struct127 *actor, f32 arg1) {
+    f32 groundY;
+    s32 hostIdx;
+    s32 fastFloor;
+    s32 flags;
+    f32 *floorOut;
+
+    actor->unk118 = -10000.0f;
+    func_1502178C(actor, 0, -1);
+    if (actor->unkF8 & 0x8000) {
+        if (actor->unk5 == 7) {
+            actor->unk28 = 0.0f;
+        } else {
+            actor->unk28 = 1.0f;
         }
-        arg0->unk232 = arg0->unk24E;
-        arg0->unk24E = 0;
-        arg0->unk218 = 0;
-        arg0->unk78 = (arg0->unk7A = arg0->unk76);
-      }
-      if (arg0->unkF8 & 0x1000)
-      {
-        u16 angle = func_1505A630(arg0->x_position - x, z - arg0->z_position, 0);
-        arg0->unk76 = ((angle - arg0->unk76) + angle) + 0x8000;
-        if (arg0->interaction_state == 0x21)
-        {
-          arg0->xz_velocity *= 0.8999999762f;
-        }
-        else
-          if (arg0->interaction_state == 0x26)
-        {
-          arg0->xz_velocity *= 0.3000000119f;
-        }
-        else
-          if ((arg0->interaction_state != 4) || (arg0->unk103 == 0))
-        {
-          arg0->xz_velocity *= 0.3000000119f;
-        }
-        else
-        {
-          u16 sp60;
-          arg0->xz_velocity *= 0.8999999762f;
-          arg0->unk7A = arg0->unk76;
-          if (func_1505DADC(arg0, &sp60, 0, arg0->unk124 - 1, 20) != 0xFF)
-          {
-            arg0->unk76 = sp60;
-          }
-        }
-        if ((arg0->unk2CC != 0) && (arg0->xz_velocity > 5.0f))
-        {
-          D_800D1580 = arg0->unk2CC;
-          func_1506E5FC();
-        }
-        if (arg0->interaction_state == 4)
-        {
-          arg0->unk102 = 0;
-          arg0->gravity = 3.0f;
-        }
-      }
-      if ((!(arg0->unkF8 & 2)) || (!func_150A3FC4(arg0->x_position, arg0->z_position, arg0->pad188, &arg0->unk18C, &sp7C)))
-      {
-        func_1510E8BC(&arg0->pad188, &arg0->unk18C, &sp7C, &arg0->unk118, &arg0->unk184, ((u8 *) arg0) + 0x1A2, arg0->x_position, arg0->y_position, arg0->z_position, arg1, 0, arg0, -10000.0f, arg0->y_position, arg0->unkF8 & 0x04000000);
-      }
-    }
-  }
-  {
-    u8 t = arg0->unk255;
-    if (1)
-    {
-      if (((t != 0) && (arg0->stunned == 0)) && (sp7C < (arg0->unk180 - ((f32) (arg0->unk256 * 8)))))
-      {
-        arg0->y_velocity = 0.0f;
-        arg0->gravity = 0.0f;
-        arg0->xz_velocity = 0.0f;
-        arg0->unk218 = func_1507BB28(0, arg0->unk255);
-        arg0->unk21C = 0;
-        arg0->unk255 = 0;
         return;
-      }
     }
-  }
-  arg0->unk180 = sp7C;
+    if (actor->unkF8 & 0x200000) {
+        actor->unk180 = (s16)actor->unk224;
+        return;
+    }
+    fastFloor = actor->unkF8 & 2;
+    hostIdx = actor->unk13C;
+    flags = hostIdx - 100;
+    if ((hostIdx >= 100) && (flags == 0)) {
+        fastFloor = D_800CC2D0[flags].unkF8 & 2;
+    }
+    if (!fastFloor ||
+        !func_150A3FC4(actor->x_position, actor->z_position, actor->pad188, &actor->unk18C, &groundY)) {
+        if (actor->unkF8 & 8) {
+            floorOut = &actor->unk118;
+        } else {
+            floorOut = NULL;
+        }
+        func_1510E8BC(&actor->pad188, &actor->unk18C, &groundY, floorOut, &actor->unk184, (u8 *)actor + 0x1A2,
+                      actor->x_position, actor->y_position, actor->z_position, arg1, 0, actor, -10000.0f,
+                      actor->y_position, actor->unkF8 & 0x04000000);
+    } else if (actor->unkF8 & 8) {
+        actor->unk118 = func_1510F648(actor->x_position, actor->y_position, actor->z_position);
+    }
+    flags = actor->unkF8;
+    if ((actor->unk13C != 0) && (actor->id != 0x9A)) {
+        flags = D_800CC2D0[actor->unk13C - 100].unkF8;
+    }
+    if ((flags & 4) && (actor->unk13D == 0) &&
+        ((actor->unk127 != 0xFF) || (actor->x_position != actor->old_x_position) ||
+         (groundY != actor->old_y_position) || (0.0f != actor->unk28) ||
+         (actor->z_position != actor->old_z_position))) {
+        f32 x;
+        f32 z;
+
+        x = actor->x_position;
+        z = actor->z_position;
+        if ((actor->id == 0x1B) || (actor->id == 0x7E)) {
+            D_800CBDD3 = 1;
+        }
+        func_15044380(actor->old_x_position, actor->old_y_position, actor->old_z_position, actor, 1, 0);
+        if ((actor->id == 0x1B) || (actor->id == 0x7E)) {
+            D_800CBDD3 = 0;
+        }
+        if ((x != actor->x_position) || (z != actor->z_position)) {
+            actor->unkF4 |= 0x10000;
+            if (actor->unk24E != 0) {
+                if (actor->id == 0xC) {
+                    func_150B9ED0(actor, x, z, 0xFF, 0);
+                }
+                actor->unk232 = actor->unk24E;
+                actor->unk24E = 0;
+                actor->unk218 = NULL;
+                actor->unk78 = (actor->unk7A = actor->unk76);
+            }
+            if (actor->unkF8 & 0x1000) {
+                /* bounce: reflect the moving angle about the push-out direction */
+                u16 angle = func_1505A630(actor->x_position - x, z - actor->z_position, 0);
+
+                actor->unk76 = ((angle - actor->unk76) + angle) + 0x8000;
+                if (actor->interaction_state == 0x21) {
+                    actor->xz_velocity *= 0.8999999762f;
+                } else if (actor->interaction_state == 0x26) {
+                    actor->xz_velocity *= 0.3000000119f;
+                } else if ((actor->interaction_state != 4) || (actor->unk103 == 0)) {
+                    actor->xz_velocity *= 0.3000000119f;
+                } else {
+                    u16 freeAngle;
+
+                    actor->xz_velocity *= 0.8999999762f;
+                    actor->unk7A = actor->unk76;
+                    if (func_1505DADC(actor, &freeAngle, 0, actor->unk124 - 1, 20) != 0xFF) {
+                        actor->unk76 = freeAngle;
+                    }
+                }
+                if ((actor->unk2CC != 0) && (actor->xz_velocity > 5.0f)) {
+                    D_800D1580 = actor->unk2CC;
+                    func_1506E5FC();
+                }
+                if (actor->interaction_state == 4) {
+                    actor->unk102 = 0;
+                    actor->gravity = 3.0f;
+                }
+            }
+            if (!(actor->unkF8 & 2) ||
+                !func_150A3FC4(actor->x_position, actor->z_position, actor->pad188, &actor->unk18C, &groundY)) {
+                func_1510E8BC(&actor->pad188, &actor->unk18C, &groundY, &actor->unk118, &actor->unk184,
+                              (u8 *)actor + 0x1A2, actor->x_position, actor->y_position, actor->z_position, arg1, 0,
+                              actor, -10000.0f, actor->y_position, actor->unkF8 & 0x04000000);
+            }
+        }
+    }
+    {
+        u8 fallScript = actor->unk255;
+
+        if (1) { // matching: the extra block makes IDO pick v0 for fallScript
+            if ((fallScript != 0) && (actor->stunned == 0) &&
+                (groundY < (actor->unk180 - (f32)(actor->unk256 * 8)))) {
+                actor->y_velocity = 0.0f;
+                actor->gravity = 0.0f;
+                actor->xz_velocity = 0.0f;
+                actor->unk218 = func_1507BB28(0, actor->unk255);
+                actor->unk21C = 0;
+                actor->unk255 = 0;
+                return;
+            }
+        }
+    }
+    actor->unk180 = groundY;
 }
 
 void func_15058EA4(struct127 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6) {
