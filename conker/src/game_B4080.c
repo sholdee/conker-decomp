@@ -2238,6 +2238,10 @@ s32 func_1508B9BC(void) {
     return 0;
 }
 
+/*
+ * Fills each player's row of weights with a random triangle wave between 0x55 and 0xFF,
+ * starting from a random unused column.
+ */
 void func_1508BC20(void) {
     s32 i;
     f32 fn;
@@ -2247,12 +2251,12 @@ void func_1508BC20(void) {
     s32 delta;
     s32 step;
     s32 h;
-    u8 *base;
+    u8 *row;
     s8 n;
     s8 used[16];
 
     n = D_8008FD8C;
-    base = (u8 *)D_800D23B0 + 0x15B4;
+    row = D_800D23B0->weights[0];
     h = n >> 1;
     if (h < 2) {
         h = 2;
@@ -2280,9 +2284,9 @@ void func_1508BC20(void) {
         used[pos] = 1;
         for (h = 0; h < n; h++) {
             if (val < 0x100) {
-                base[pos] = val;
+                row[pos] = val;
             } else {
-                base[pos] = 0xFF;
+                row[pos] = 0xFF;
             }
             pos++;
             if (pos >= n) {
@@ -2293,7 +2297,7 @@ void func_1508BC20(void) {
                 delta = -delta;
             }
         }
-        base += 0x10;
+        row += 0x10;
     }
 }
 
