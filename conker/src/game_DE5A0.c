@@ -7,44 +7,45 @@
 #define D_800D1550 D_800D1550_hdr
 #include "variables.h"
 #undef D_800D1550
-extern f32 D_800D1550;
+extern f32 D_800D1550; // matching: as an f32[] (header type) the multiply schedules differently
 
+/* Remembers the object's x/z, and drags a swimming player who comes within range down and sideways around it. */
+void func_150B10F0(struct127 *obj) {
+    f32 dist;
+    f32 pushX;
+    f32 pushZ;
+    f32 unusedOut;
+    f32 closeness;
+    f32 distCopy; // matching: IDO keeps dist in a second FP register only through this copy
+    f32 range;
+    u16 angle;
 
-void func_150B10F0(u8 *arg0) {
-    f32 temp_fv0;
-    f32 sp50;
-    f32 sp4C;
-    f32 sp48;
-    f32 temp_fv0_2;
-    f32 temp_ft4;
-    f32 temp_fv1;
-    s32 temp_v1;
-
-    *(f32 *)((u8 *)arg0 + 0x174) = (f32) *(f32 *)((u8 *)arg0 + 0x14);
-    *(f32 *)((u8 *)arg0 + 0x178) = (f32) *(f32 *)((u8 *)arg0 + 0x1C);
-    *(s8 *)((u8 *)arg0 + 0x125) = 0x64;
-    *(f32 *)((u8 *)arg0 + 0x40) = (f32) ((f32) (s16) (*(u16 *)((u8 *)arg0 + 0x7A) + 0x4000) * 0.005493164f);
-    if (func_1505A6F8(D_800CC2D0, (struct127 *)arg0) < 1100.0f) {
-        temp_fv0 = func_1505A6F8((struct127 *)arg0, D_800CC2D0);
-        temp_ft4 = temp_fv0;
-        temp_fv1 = *(f32 *)((u8 *)arg0 + 0x18) - *(f32 *)((u8 *)D_800CC2D0 + 0x18);
-        if (temp_fv1 < 0.0f) {
-            temp_fv1 = 1000.0f;
+    // 0x174/0x178 are f32 fields the shared header still declares as pads
+    *(f32 *)&obj->pad174 = obj->x_position;
+    *(f32 *)&obj->pad178 = obj->z_position;
+    obj->immune = 100;
+    obj->unk40 = (s16)(obj->unk7A + 0x4000) * 0.005493164f;
+    if (func_1505A6F8(D_800CC2D0, obj) < 1100.0f) {
+        dist = func_1505A6F8(obj, D_800CC2D0);
+        distCopy = dist;
+        range = obj->y_position - D_800CC2D0[0].y_position;
+        if (range < 0.0f) {
+            range = 1000.0f;
         } else {
-            temp_fv1 = 1050.0f - (temp_fv1 * 0.7f);
+            range = 1050.0f - range * 0.7f;
         }
-        if ((temp_fv0 < temp_fv1) && (*(u8 *)((u8 *)D_800CC2D0 + 0xAD) == 1)) {
-            temp_fv0_2 = 1100.0f - temp_ft4;
-            temp_v1 = func_1505A630(*(f32 *)((u8 *)arg0 + 0x174) - *(f32 *)((u8 *)D_800CC2D0 + 0x14), *(f32 *)((u8 *)D_800CC2D0 + 0x1C) - *(f32 *)((u8 *)arg0 + 0x178), 0) & 0xFFFF;
-            if (850.0f < temp_fv0_2) {
-                D_800CC2E8[0] = *(f32 *)((u8 *)D_800CC2D0 + 0x18) - ((temp_fv0_2 - 820.0f) * 0.09f * D_800D1550);
+        if (dist < range && D_800CC2D0[0].in_water == 1) {
+            closeness = 1100.0f - distCopy;
+            angle = func_1505A630(*(f32 *)&obj->pad174 - D_800CC2D0[0].x_position, D_800CC2D0[0].z_position - *(f32 *)&obj->pad178, 0);
+            if (850.0f < closeness) {
+                D_800CC2D0[0].y_position -= (closeness - 820.0f) * 0.09f * D_800D1550;
             }
-            func_1505A184(temp_v1 - 0x3000, (temp_fv0_2 * 0.045f) + 5.0f, 0.0f, &sp50, &sp4C, &sp48);
-            *(f32 *)((u8 *)D_800CC2D0 + 0x164) = sp50;
-            *(f32 *)((u8 *)D_800CC2D0 + 0x168) = sp4C;
+            func_1505A184(angle - 0x3000, closeness * 0.045f + 5.0f, 0.0f, &pushX, &pushZ, &unusedOut);
+            D_800CC2D0[0].unk164 = pushX;
+            D_800CC2D0[0].unk168 = pushZ;
         }
     }
-    func_1505E650((struct127 *)arg0, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+    func_1505E650(obj, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);
 }
 
 void func_15056B08(struct127 *arg0);
