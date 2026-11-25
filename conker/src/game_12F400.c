@@ -2,26 +2,26 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void func_151D5D60(Vtx **buffers, s16 index, s32 size, Vtx **out, u8 *isNew);
+extern void func_151D5D60(Vtx **buffers, s16 viewport, s32 size, Vtx **out, u8 *isNew);
 extern s32 func_15144E80(void *, struct17 *, struct17 *, struct17 *);
 extern s32 func_15145128(struct17 *, struct17 *, f32 *, f32 *);
 
-/* A camera-facing quad: four vertices around `center`, spanned by two axes scaled by scaleU/scaleV. */
+/* A quad particle (same layout as Particle in game_169510.c), followed by its motion state at 0x110. */
 typedef struct {
     char pad0[0x2C];
-    f32 scaleU;
-    f32 scaleV;
-    struct17 center;
+    f32 width;
+    f32 height;
+    struct17 pos;
     char pad40[0x80];
-    Vtx templateVtx[4];
-    Vtx *vtxBuffers[4];
+    Vtx vtxTemplate[4];
+    Vtx *vtxBuffers[4]; /* per viewport, refreshed from vtxTemplate */
     u8 flags;
     u8 unk111;
     u8 unk112[0xC];
 } Struct15101F50;
 
-/* Fetches vertex buffer `index` (initialised from templateVtx when new) and fills in the quad's corners. */
-Vtx *func_15101F50(Struct15101F50 *quad, s16 index) {
+/* Fills the viewport's vertex buffer with a quad centred on pos, half-axes axisU * width and axisV * height. */
+Vtx *func_15101F50(Struct15101F50 *particle, s16 viewport) {
     s32 pad; // matching: unused stack slot in the original frame
     Vtx *vtx;
     Vtx *ret;
@@ -29,57 +29,55 @@ Vtx *func_15101F50(Struct15101F50 *quad, s16 index) {
     struct17 axisV;
     u8 isNew;
 
-    func_151D5D60(quad->vtxBuffers, index, sizeof(quad->templateVtx), &vtx, &isNew);
-    ret = vtx;
+    func_151D5D60(particle->vtxBuffers, viewport, sizeof(particle->vtxTemplate), &vtx, &isNew);
+    ret = vtx; // matching: the result is returned from its own stack copy, not by reloading vtx
     // matching: an early `if (vtx == NULL) return NULL;` lays out the branches differently
     if (vtx != NULL) {
         if (isNew) {
-            memcpy(quad->vtxBuffers[index], quad->templateVtx, sizeof(quad->templateVtx));
-            memcpy(quad->vtxBuffers[index] + 4, quad->templateVtx, sizeof(quad->templateVtx));
+            memcpy(particle->vtxBuffers[viewport], particle->vtxTemplate, sizeof(particle->vtxTemplate));
+            memcpy(particle->vtxBuffers[viewport] + 4, particle->vtxTemplate, sizeof(particle->vtxTemplate));
         }
     } else {
         return NULL;
     }
 
-    if (!(quad->flags & 1)) {
+    if (!(particle->flags & 1)) {
         return NULL;
     }
 
-    if (func_15144E80(quad->unk112, &axisU, &axisV, NULL) == 0) {
+    if (func_15144E80(particle->unk112, &axisU, &axisV, NULL) == 0) {
         return NULL;
     }
 
     func_15145128(&axisU, &axisU, NULL, NULL);
     func_15145128(&axisV, &axisV, NULL, NULL);
 
-    axisU.unk0 *= quad->scaleU;
-    axisU.unk4 *= quad->scaleU;
-    axisU.unk8 *= quad->scaleU;
-    axisV.unk0 *= quad->scaleV;
-    axisV.unk4 *= quad->scaleV;
-    axisV.unk8 *= quad->scaleV;
+    axisU.unk0 *= particle->width;
+    axisU.unk4 *= particle->width;
+    axisU.unk8 *= particle->width;
+    axisV.unk0 *= particle->height;
+    axisV.unk4 *= particle->height;
+    axisV.unk8 *= particle->height;
 
-    vtx[0].v.ob[0] = (quad->center.unk0 - axisU.unk0) + axisV.unk0;
-    vtx[0].v.ob[1] = (quad->center.unk4 - axisU.unk4) + axisV.unk4;
-    vtx[0].v.ob[2] = (quad->center.unk8 - axisU.unk8) + axisV.unk8;
+    vtx[0].v.ob[0] = (particle->pos.unk0 - axisU.unk0) + axisV.unk0;
+    vtx[0].v.ob[1] = (particle->pos.unk4 - axisU.unk4) + axisV.unk4;
+    vtx[0].v.ob[2] = (particle->pos.unk8 - axisU.unk8) + axisV.unk8;
     vtx[0].v.flag = 0;
-    vtx[1].v.ob[0] = (quad->center.unk0 + axisU.unk0) + axisV.unk0;
-    vtx[1].v.ob[1] = (quad->center.unk4 + axisU.unk4) + axisV.unk4;
-    vtx[1].v.ob[2] = (quad->center.unk8 + axisU.unk8) + axisV.unk8;
+    vtx[1].v.ob[0] = (particle->pos.unk0 + axisU.unk0) + axisV.unk0;
+    vtx[1].v.ob[1] = (particle->pos.unk4 + axisU.unk4) + axisV.unk4;
+    vtx[1].v.ob[2] = (particle->pos.unk8 + axisU.unk8) + axisV.unk8;
     vtx[1].v.flag = 0;
-    vtx[2].v.ob[0] = (quad->center.unk0 + axisU.unk0) - axisV.unk0;
-    vtx[2].v.ob[1] = (quad->center.unk4 + axisU.unk4) - axisV.unk4;
-    vtx[2].v.ob[2] = (quad->center.unk8 + axisU.unk8) - axisV.unk8;
+    vtx[2].v.ob[0] = (particle->pos.unk0 + axisU.unk0) - axisV.unk0;
+    vtx[2].v.ob[1] = (particle->pos.unk4 + axisU.unk4) - axisV.unk4;
+    vtx[2].v.ob[2] = (particle->pos.unk8 + axisU.unk8) - axisV.unk8;
     vtx[2].v.flag = 0;
-    vtx[3].v.ob[0] = (quad->center.unk0 - axisU.unk0) - axisV.unk0;
-    vtx[3].v.ob[1] = (quad->center.unk4 - axisU.unk4) - axisV.unk4;
-    vtx[3].v.ob[2] = (quad->center.unk8 - axisU.unk8) - axisV.unk8;
+    vtx[3].v.ob[0] = (particle->pos.unk0 - axisU.unk0) - axisV.unk0;
+    vtx[3].v.ob[1] = (particle->pos.unk4 - axisU.unk4) - axisV.unk4;
+    vtx[3].v.ob[2] = (particle->pos.unk8 - axisU.unk8) - axisV.unk8;
     vtx[3].v.flag = 0;
 
     return ret;
 }
-
-extern f32 D_800BE9A4;
 
 typedef struct {
     u8 pad0[0x14];
@@ -87,9 +85,14 @@ typedef struct {
 } Sub151022AC_2C;
 
 typedef struct {
+    u8 pad0[0x28];
+    u8 rgba[4];
+} Sub151022AC_24;
+
+typedef struct {
     u8 pad0[0x2C];
-    f32 scaleU;
-    f32 scaleV;
+    f32 width;
+    f32 height;
     u8 pad34[0x28];
     u8 alpha;
 } Sub151022AC_28;
@@ -103,7 +106,7 @@ typedef struct {
 /* Randomly wandering spin, scale and alpha, pushed out to the linked objects each frame. */
 typedef struct {
     u8 pad0[0x24];
-    u8 *linked24;
+    Sub151022AC_24 *linked24;
     Sub151022AC_28 *linked28;
     Sub151022AC_2C *linked2C;
     u8 pad30[4];
@@ -163,7 +166,7 @@ s32 func_151022AC(Owner151022AC *obj) {
     state->scale += (state->targetScale - state->scale) * state->scaleBlend;
     if (state->linked28 != NULL) {
         quad = state->linked28;
-        quad->scaleU = quad->scaleV = (func_150ADA68() * 0.2f + 0.4f) * state->scale;
+        quad->width = quad->height = (func_150ADA68() * 0.2f + 0.4f) * state->scale;
     }
     state->alphaTimer -= D_800BE9A4;
     if (state->alphaTimer < 0.0f) {
@@ -176,7 +179,7 @@ s32 func_151022AC(Owner151022AC *obj) {
         state->linked28->alpha = obj->alpha;
     }
     if (state->linked24 != NULL) {
-        state->linked24[0x2B] = obj->alpha;
+        state->linked24->rgba[3] = obj->alpha;
     }
     if (state->linked2C != NULL) {
         particles = state->linked2C;
