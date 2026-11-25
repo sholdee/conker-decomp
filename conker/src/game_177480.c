@@ -97,7 +97,6 @@ Vtx *func_15149FD0(Effect *effect, s16 index) {
 /* Flickers width, height and unk24 towards random targets that are re-rolled on timers. */
 s32 func_1514A19C(Effect *effect) {
     EffectParams *params;
-    s32 prev;
 
     params = &effect->params;
 
@@ -110,22 +109,21 @@ s32 func_1514A19C(Effect *effect) {
             params->heightTarget = func_150ADA68() * (params->heightMax - params->heightMid) + params->heightMid;
         }
     }
-    effect->height = effect->height + (params->heightTarget - effect->height) * 0.359f;
+    effect->height += (params->heightTarget - effect->height) * 0.359f;
 
     params->widthTimer -= D_800BE9E4;
     if (params->widthTimer < 0) {
         params->widthTimer = func_150ADA20() % 17U;
         params->widthTarget = func_150ADA68() * (params->widthMax - params->widthMin) + params->widthMin;
     }
-    effect->width = effect->width + (params->widthTarget - effect->width) * 0.186f;
+    effect->width += (params->widthTarget - effect->width) * 0.186f;
 
     params->unk24Timer -= D_800BE9E4;
     if (params->unk24Timer < 0) {
         params->unk24Timer = func_150ADA20() % 15U;
         params->unk24Target = func_150ADA68() * (params->unk24Max - params->unk24Min) + params->unk24Min;
     }
-    prev = effect->unk24;
-    effect->unk24 += (s32)((params->unk24Target - (f32)prev) * 0.231f);
+    effect->unk24 += (s32)((params->unk24Target - effect->unk24) * 0.231f);
     return 1;
 }
 
@@ -160,8 +158,8 @@ s32 func_1514A380(Effect *effect) {
 
 /* Shrinks width and height by shrinkRate; while unk1C < unk156, sets unk5C = unk1C * unk158. */
 s32 func_1514A498(Effect *effect) {
-    effect->height = effect->height - effect->height * effect->params.shrinkRate;
-    effect->width = effect->width - effect->width * effect->params.shrinkRate;
+    effect->height -= effect->height * effect->params.shrinkRate;
+    effect->width -= effect->width * effect->params.shrinkRate;
     if (effect->unk1C < effect->params.unk156) {
         effect->unk5C = effect->unk1C * effect->params.unk158;
     }
@@ -171,42 +169,41 @@ s32 func_1514A498(Effect *effect) {
 /* Integrates velocity (damped x/z, gravity on y) into pos, remembering the previous pos. */
 s32 func_1514A4EC(Effect *effect) {
     f32 damping;
-    s32 dummy;
 
     damping = effect->params.damping;
     effect->prevPos = effect->pos;
-    effect->params.vel.unk0 = effect->params.vel.unk0 * damping;
-    effect->params.vel.unk4 = effect->params.vel.unk4 + effect->params.gravity * D_800BE9A4;
-    dummy = effect ? 1 : 0;
-    effect->params.vel.unk8 = effect->params.vel.unk8 * damping;
-    effect->pos.unk0 = effect->pos.unk0 + effect->params.vel.unk0 * D_800BE9A4;
-    effect->pos.unk4 = effect->pos.unk4 + effect->params.vel.unk4 * D_800BE9A4;
-    effect->pos.unk8 = effect->pos.unk8 + effect->params.vel.unk8 * D_800BE9A4;
+    effect->params.vel.unk0 *= damping;
+    effect->params.vel.unk4 += effect->params.gravity * D_800BE9A4;
+    // matching: block boundary makes IDO load the return value 1 into v0 early, freeing it from &D_800BE9A4
+    if (1) {}
+    effect->params.vel.unk8 *= damping;
+    effect->pos.unk0 += effect->params.vel.unk0 * D_800BE9A4;
+    effect->pos.unk4 += effect->params.vel.unk4 * D_800BE9A4;
+    effect->pos.unk8 += effect->params.vel.unk8 * D_800BE9A4;
     return 1;
 }
 
 /* Like func_1514A4EC, but moves prevPos along with pos and then pulls it towards pos by trailFactor. */
-s32 func_1514A594(Effect *arg0) {
-    f32 vx;
-    f32 vy;
-    f32 vz;
-    Effect *new_var;
+s32 func_1514A594(Effect *effect) {
+    f32 dx;
+    f32 dy;
+    f32 dz;
 
-    arg0->params.vel.unk0 = arg0->params.vel.unk0 * arg0->params.damping;
-    new_var = arg0;
-    new_var->params.vel.unk4 = arg0->params.vel.unk4 + (new_var->params.gravity * D_800BE9A4);
-    arg0->params.vel.unk8 = arg0->params.vel.unk8 * new_var->params.damping;
-    vx = new_var->params.vel.unk0 * D_800BE9A4;
-    vy = new_var->params.vel.unk4 * D_800BE9A4;
-    vz = new_var->params.vel.unk8 * D_800BE9A4;
-    new_var->pos.unk0 = arg0->pos.unk0 + vx;
-    arg0->pos.unk4 = new_var->pos.unk4 + vy;
-    arg0->pos.unk8 = arg0->pos.unk8 + vz;
-    new_var->prevPos.unk0 = new_var->prevPos.unk0 + vx;
-    new_var->prevPos.unk4 = arg0->prevPos.unk4 + vy;
-    arg0->prevPos.unk8 = new_var->prevPos.unk8 + vz;
-    new_var->prevPos.unk0 = new_var->pos.unk0 + ((new_var->prevPos.unk0 - arg0->pos.unk0) * new_var->trailFactor);
-    new_var->prevPos.unk4 = arg0->pos.unk4 + ((new_var->prevPos.unk4 - arg0->pos.unk4) * new_var->trailFactor);
-    new_var->prevPos.unk8 = arg0->pos.unk8 + ((new_var->prevPos.unk8 - arg0->pos.unk8) * new_var->trailFactor);
+    effect->params.vel.unk0 *= effect->params.damping;
+    effect->params.vel.unk4 += effect->params.gravity * D_800BE9A4;
+    effect->params.vel.unk8 *= effect->params.damping;
+    dx = effect->params.vel.unk0 * D_800BE9A4;
+    dy = effect->params.vel.unk4 * D_800BE9A4;
+    dz = effect->params.vel.unk8 * D_800BE9A4;
+    // matching: volatile read makes pos.x a fresh CSE entry after pos.y/z, giving the lerp its FP registers
+    effect->pos.unk0 = *(volatile f32 *)&effect->pos.unk0 + dx;
+    effect->pos.unk4 += dy;
+    effect->pos.unk8 += dz;
+    effect->prevPos.unk0 += dx;
+    effect->prevPos.unk4 += dy;
+    effect->prevPos.unk8 += dz;
+    effect->prevPos.unk0 = effect->pos.unk0 + (effect->prevPos.unk0 - effect->pos.unk0) * effect->trailFactor;
+    effect->prevPos.unk4 = effect->pos.unk4 + (effect->prevPos.unk4 - effect->pos.unk4) * effect->trailFactor;
+    effect->prevPos.unk8 = effect->pos.unk8 + (effect->prevPos.unk8 - effect->pos.unk8) * effect->trailFactor;
     return 1;
 }
