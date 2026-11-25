@@ -31,7 +31,6 @@ extern void *func_15167A68(s32 type, s32 list, s32 size, s32 arg3, u8 owner, s32
 
 /* Object lists: D_800DCE50[list][type] is the head of a linked list of objects of that type. */
 extern ScreenEffect *D_800DCE50[2][104];
-#define OBJ_ITER_NEXT ((ScreenEffect **)D_800DD198)
 
 extern s32 (*D_8008B0D0[])(ScreenEffect *);
 extern void (*D_8008B0D8[])(ScreenEffect *, s32);
@@ -46,8 +45,8 @@ void func_1515FDA0(s32 arg0) {
     for (list = 0; list < 2; list++) {
         effect = D_800DCE50[list][OBJ_TYPE_SCREEN_EFFECT];
         D_800DD190++;
-        for (; effect != NULL; effect = OBJ_ITER_NEXT[D_800DD190]) {
-            OBJ_ITER_NEXT[D_800DD190] = effect->next;
+        for (; effect != NULL; effect = D_800DD198[D_800DD190]) {
+            D_800DD198[D_800DD190] = effect->next;
             if (effect->desc.flags & 4) {
                 effect->desc.flags &= ~4;
                 continue;

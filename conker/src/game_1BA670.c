@@ -183,11 +183,11 @@ Emitter *func_1518D1C0(Actor *owner, s16 kind, s16 lifetime, u8 killExisting, u8
             D_800DD190++;
             emitter = D_800DCE50[i][0x21];
             while (emitter != NULL) {
-                ((Emitter **)D_800DD198)[D_800DD190] = emitter->next;
+                D_800DD198[D_800DD190] = emitter->next;
                 if (owner == emitter->params.owner || emitter->params.ownerId == owner->unique_id) {
                     func_1516972C((struct102 *)emitter);
                 }
-                emitter = ((Emitter **)D_800DD198)[D_800DD190];
+                emitter = D_800DD198[D_800DD190];
             }
             {
                 // matching: the block-scope redeclaration makes IDO rematerialize &D_800DD190

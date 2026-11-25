@@ -35,7 +35,6 @@ extern struct102 *D_800DCE50[2][OBJ_TYPE_COUNT];
  * While a list is being walked, the next node is saved in D_800DD198[depth] (depth D_800DD190) so that
  * callbacks may destroy the current node; func_151696DC repairs saved entries that point at a dying node.
  */
-#define OBJ_ITER_NEXT ((struct102 **)D_800DD198)
 
 /* Link fields shared by every object (struct102 has only u8 fields at 0x4). */
 typedef struct ObjLink {
@@ -178,9 +177,9 @@ void func_151670C0(void) {
                 node = D_800DCE50[list][type];
                 D_800DD190++;
                 while (node != NULL) {
-                    OBJ_ITER_NEXT[D_800DD190] = (struct102 *)node->unk8;
+                    D_800DD198[D_800DD190] = (struct102 *)node->unk8;
                     OBJ_TYPES[type].unk0(node);
-                    node = OBJ_ITER_NEXT[D_800DD190];
+                    node = D_800DD198[D_800DD190];
                 }
                 D_800DD190--;
             }
@@ -200,9 +199,9 @@ void func_151671E8(void) {
                 node = D_800DCE50[list][type];
                 D_800DD190++;
                 while (node != NULL) {
-                    OBJ_ITER_NEXT[D_800DD190] = (struct102 *)node->unk8;
+                    D_800DD198[D_800DD190] = (struct102 *)node->unk8;
                     OBJ_TYPES[type].unk4(node);
-                    node = OBJ_ITER_NEXT[D_800DD190];
+                    node = D_800DD198[D_800DD190];
                 }
                 D_800DD190--;
             }
@@ -236,9 +235,9 @@ void func_15167310(void) {
                     node = D_800DCE50[list][type];
                     D_800DD190++;
                     while (node != NULL) {
-                        OBJ_ITER_NEXT[D_800DD190] = (struct102 *)node->unk8;
+                        D_800DD198[D_800DD190] = (struct102 *)node->unk8;
                         OBJ_TYPES[type].unkC(node);
-                        node = OBJ_ITER_NEXT[D_800DD190];
+                        node = D_800DD198[D_800DD190];
                     }
                     D_800DD190--;
                 }
@@ -339,22 +338,22 @@ Gfx *func_151674F8(Gfx *gfx, s32 group, s16 arg2, s32 list) {
                     D_800DD190++;
                     while (node != NULL) {
                         prev = gfx;
-                        OBJ_ITER_NEXT[D_800DD190] = (struct102 *)node->unk8;
+                        D_800DD198[D_800DD190] = (struct102 *)node->unk8;
                         gfx = OBJ_TYPES[type].draw(gfx, node, arg2);
                         full = ((gfx - D_800BE9C8[D_800BE9C0]) > D_800BEBA4) ? TRUE : FALSE;
                         if (full) {
                             overflowed = TRUE;
                             gfx = prev;
                         }
-                        node = OBJ_ITER_NEXT[D_800DD190];
+                        node = D_800DD198[D_800DD190];
                     }
                     D_800DD190--;
                 } else {
                     D_800DD190++;
                     while (node != NULL) {
-                        OBJ_ITER_NEXT[D_800DD190] = (struct102 *)node->unk8;
+                        D_800DD198[D_800DD190] = (struct102 *)node->unk8;
                         gfx = OBJ_TYPES[type].draw(gfx, node, arg2);
-                        node = OBJ_ITER_NEXT[D_800DD190];
+                        node = D_800DD198[D_800DD190];
                     }
                     D_800DD190--;
                 }
@@ -1195,19 +1194,19 @@ void func_15169070(s32 first, s32 last, s32 event, u8 eventType) {
                 node = D_800DCE50[list][type];
                 D_800DD190++;
                 while (node != NULL) {
-                    OBJ_ITER_NEXT[D_800DD190] = (struct102 *)node->unk8;
+                    D_800DD198[D_800DD190] = (struct102 *)node->unk8;
                     func_1516968C((ObjLink *)node, (u8 *)event, eventType);
                     OBJ_TYPES[type].handleEvent(node, event, eventType);
-                    node = OBJ_ITER_NEXT[D_800DD190];
+                    node = D_800DD198[D_800DD190];
                 }
                 D_800DD190--;
             } else {
                 node = D_800DCE50[list][type];
                 D_800DD190++;
                 while (node != NULL) {
-                    OBJ_ITER_NEXT[D_800DD190] = (struct102 *)node->unk8;
+                    D_800DD198[D_800DD190] = (struct102 *)node->unk8;
                     func_1516968C((ObjLink *)node, (u8 *)event, eventType);
-                    node = OBJ_ITER_NEXT[D_800DD190];
+                    node = D_800DD198[D_800DD190];
                 }
                 D_800DD190--;
             }
@@ -1228,19 +1227,19 @@ void func_15169260(void *types, s32 count, s32 event, u8 eventType) {
                 node = D_800DCE50[list][*type];
                 D_800DD190++;
                 while (node != NULL) {
-                    OBJ_ITER_NEXT[D_800DD190] = (struct102 *)node->unk8;
+                    D_800DD198[D_800DD190] = (struct102 *)node->unk8;
                     func_1516968C((ObjLink *)node, (u8 *)event, eventType);
                     OBJ_TYPES[*type].handleEvent(node, event, eventType);
-                    node = OBJ_ITER_NEXT[D_800DD190];
+                    node = D_800DD198[D_800DD190];
                 }
                 D_800DD190--;
             } else {
                 node = D_800DCE50[list][*type];
                 D_800DD190++;
                 while (node != NULL) {
-                    OBJ_ITER_NEXT[D_800DD190] = (struct102 *)node->unk8;
+                    D_800DD198[D_800DD190] = (struct102 *)node->unk8;
                     func_1516968C((ObjLink *)node, (u8 *)event, eventType);
-                    node = OBJ_ITER_NEXT[D_800DD190];
+                    node = D_800DD198[D_800DD190];
                 }
                 D_800DD190--;
             }
@@ -1262,19 +1261,19 @@ void func_1516944C(s32 type, s32 event, u8 eventType) {
             node = D_800DCE50[list][type];
             D_800DD190++;
             while (node != NULL) {
-                OBJ_ITER_NEXT[D_800DD190] = (struct102 *)node->unk8;
+                D_800DD198[D_800DD190] = (struct102 *)node->unk8;
                 func_1516968C((ObjLink *)node, (u8 *)event, eventType);
                 OBJ_TYPES[type].handleEvent(node, event, eventType);
-                node = OBJ_ITER_NEXT[D_800DD190];
+                node = D_800DD198[D_800DD190];
             }
             D_800DD190--;
         } else {
             node = D_800DCE50[list][type];
             D_800DD190++;
             while (node != NULL) {
-                OBJ_ITER_NEXT[D_800DD190] = (struct102 *)node->unk8;
+                D_800DD198[D_800DD190] = (struct102 *)node->unk8;
                 func_1516968C((ObjLink *)node, (u8 *)event, eventType);
-                node = OBJ_ITER_NEXT[D_800DD190];
+                node = D_800DD198[D_800DD190];
             }
             D_800DD190--;
         }
@@ -1332,8 +1331,8 @@ void func_151696DC(struct102 *obj) {
     s8 depth;
 
     for (depth = 0; depth < D_800DD190; depth++) {
-        if (obj == OBJ_ITER_NEXT[depth]) {
-            OBJ_ITER_NEXT[depth] = (struct102 *)obj->unk8;
+        if (obj == D_800DD198[depth]) {
+            D_800DD198[depth] = (struct102 *)obj->unk8;
         }
     }
 }

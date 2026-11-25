@@ -1260,7 +1260,7 @@ extern u8 D_800DCD28[3];
 extern s32  D_800DCDC4; // probably wrong type
 extern u8   D_800DCDD0;
 extern s8   D_800DD190;
-extern u8   D_800DD198[]; // 24 bytes
+extern void *D_800DD198[6]; // per object-list walk depth (D_800DD190): the next node to visit
 extern f32  D_800DD1D8[];
 extern f32  D_800DD1E8[];
 

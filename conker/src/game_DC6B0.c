@@ -365,8 +365,8 @@ void func_150AFDB0(void) {
     Node150AFDB0 *node;
 
     D_800DD190++;
-    for (node = D_800DCE94; node != NULL; node = ((Node150AFDB0 **)D_800DD198)[D_800DD190]) {
-        ((Node150AFDB0 **)D_800DD198)[D_800DD190] = node->next;
+    for (node = D_800DCE94; node != NULL; node = D_800DD198[D_800DD190]) {
+        D_800DD198[D_800DD190] = node->next;
         if (node->unk3F == D_800C3E78) {
             func_1516972C((struct102 *)node);
         }

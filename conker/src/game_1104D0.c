@@ -54,7 +54,6 @@ typedef struct Effect {
 
 /* Object lists (see game_1944C0.c); list D_800DCE50[n][0x27] holds the effects. */
 extern Effect *D_800DCE50[2][104];
-#define OBJ_ITER_NEXT ((Effect **)D_800DD198)
 
 /* Creates an effect from (x, y, z) toward (targetX, targetY, targetZ) and registers it in a free slot. */
 Effect *func_150E3020(s32 x, s32 y, s32 z, s32 targetX, s32 targetY, s32 targetZ, s32 arg6, f32 speed,
@@ -196,11 +195,11 @@ void func_150E35DC(s32 handle) {
         D_800DD190++;
         effect = D_800DCE50[list][0x27];
         while (effect != NULL) {
-            OBJ_ITER_NEXT[D_800DD190] = effect->next;
+            D_800DD198[D_800DD190] = effect->next;
             if (handle == -1 || handle == effect->slot) {
                 func_150E3514(effect);
             }
-            effect = OBJ_ITER_NEXT[D_800DD190];
+            effect = D_800DD198[D_800DD190];
         }
         {
             s32 pad; // matching: -g3 block marker keeps the depth store out of the loop branch's delay slot

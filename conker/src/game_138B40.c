@@ -1,16 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
-#define D_800B0E00 D_800B0E00_hdr
-#define D_800B0E04 D_800B0E04_hdr
 #include "variables.h"
-#undef D_800B0E00
-#undef D_800B0E04
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define gRenderViews ((RenderView *)D_800BE628)
 
-extern Gfx *D_800B0E00;
-extern Gfx *D_800B0E04;
 extern Gfx *D_800B0E08;
 extern Mtx D_80089470;
 extern f32 D_800D35E0;
@@ -140,9 +134,9 @@ Gfx *func_1510B9D0(Gfx *gfx, s16 view) {
                 gDPPipeSync(gfx++);
                 if (D_800DBE62) {
                     if (D_800BE9F0 != 0x14 && D_800BE9F0 != 0x33 && D_800BE9F0 != 0x32) {
-                        gfx = func_150A5378(D_800B0E00, gfx, D_800D9C10[view], 0, 0, 1 << view);
+                        gfx = func_150A5378(D_800B0E00[0], gfx, D_800D9C10[view], 0, 0, 1 << view);
                     } else {
-                        gSPDisplayList(gfx++, D_800B0E00);
+                        gSPDisplayList(gfx++, D_800B0E00[0]);
                     }
                     if (D_800B0E04 != NULL) {
                         gDPPipeSync(gfx++);
@@ -160,12 +154,12 @@ Gfx *func_1510B9D0(Gfx *gfx, s16 view) {
                         gDPPipeSync(gfx++);
                     }
                 } else {
-                    gSPDisplayList(gfx++, D_800B0E00);
+                    gSPDisplayList(gfx++, D_800B0E00[0]);
                 }
             } else if (D_800BEAAA) {
-                gfx = func_150A50C0(D_800B0E00, gfx, D_800D9C10[view], 0, 0, 0);
+                gfx = func_150A50C0(D_800B0E00[0], gfx, D_800D9C10[view], 0, 0, 0);
             } else {
-                gSPDisplayList(gfx++, D_800B0E00);
+                gSPDisplayList(gfx++, D_800B0E00[0]);
             }
         }
         gfx = func_1515E544(gfx, D_800D9E10[view], D_800D9E20, D_800D9E21, D_800D9BD0[view][D_800BE9C0]);

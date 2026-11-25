@@ -18,11 +18,11 @@ void func_1515FDA0(s32 arg0) {
         D_800DD190++;
         node = ((Node150E35DC *(*)[104])D_800DCE50)[i][39];
         while (node != NULL) {
-            ((Node150E35DC **)D_800DD198)[D_800DD190] = node->unk8;
+            D_800DD198[D_800DD190] = node->unk8;
             if (arg0 == -1 || arg0 == node->unk48) {
                 func_150E3514(node);
             }
-            node = ((Node150E35DC **)D_800DD198)[D_800DD190];
+            node = D_800DD198[D_800DD190];
         }
         {
             extern s8 D_800DD190;

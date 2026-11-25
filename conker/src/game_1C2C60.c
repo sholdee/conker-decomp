@@ -1,9 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
-#define D_800DD198 D_800DD198_hdr
 #include "variables.h"
 #include "effects.h"
-#undef D_800DD198
 
 void *memcpy(void *, const void *, u32);
 
@@ -1650,7 +1648,6 @@ typedef struct ListedObject {
 
 /* Object lists, and the stack of saved `next` pointers (depth D_800DD190) that makes walking them reentrant. */
 extern ListedObject *D_800DCE50[];
-extern ListedObject *D_800DD198[];
 void func_15183ACC(s32);
 s32 func_1510F8D8(s32, s32, s32, s32);
 
