@@ -8,7 +8,6 @@ s32 func_150380C0(f32 *, s32, s32, s32, f32, s32, f32 *, s32, s32, s32, s32);
 extern f32 D_800C3FD0[];
 
 
-extern f32 D_80098250;
 extern s16 D_800C3FF4[];
 extern u16 *D_80084380[];
 extern u8 D_80097E7C[];
@@ -27,8 +26,8 @@ typedef struct {
 } AimLimits;
 
 extern AimLimits D_80098068[];
-void func_1503B708(void *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4,
-                   s32 arg5, f32 *arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10);
+void func_1503B708(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range,
+                   s32 preferId, f32 *bestDist, s32 noCheck, s32 skipUnk127, s32 anyRange, s32 axisMode);
 
 
 typedef struct {
@@ -75,11 +74,15 @@ void func_15036C70(struct127 *obj) {
     }
 }
 
-extern u8 D_800C3FFA;
-static f32 D_800C3FE8[3];
+extern u8 D_800C3FFA;         /* aim pass / slot counter */
+static f32 D_800C3FE8[3];     /* current aim target */
 void func_150379DC(f32 *, s32, s32, s32, f32, s32, s32);
 void func_15038620(s32, s32, f32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
+/*
+ * Aim update for the current object (D_800C3E78): the first pass (D_800C3FFA == 0) turns bone 7, later passes
+ * bone 12. The listed object types, and every type while D_800C35EA == 1, skip the first pass.
+ */
 void func_15036CE8(void) {
     struct127 *obj;
     s32 limitIdx;
@@ -148,6 +151,10 @@ void func_15036CE8(void) {
     D_800C3FFA++;
 }
 
+/*
+ * Per-type aim update for the current object: picks the bones, limits, rates and search options for its id,
+ * searches for a target on the first pass (or when forced), and turns the bone with func_15038620.
+ */
 void func_15036F34(void) {
     s32 bone;
     s32 refBone;
@@ -507,7 +514,7 @@ void func_15036F34(void) {
     D_800C3FFA++;
 }
 
-void func_15038468(f32 *arg0, f32 *arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5);
+void func_15038468(f32 *yaw, f32 *pitch, f32 x, f32 y, f32 z, s32 axisMode);
 
 /*
  * Tests whether world point (x, y, z) lies within +-range degrees of yaw as seen from object
@@ -978,7 +985,8 @@ typedef struct {
     /* 0x30 */ s32 unk30;
 } GameStruct_800BE9B4;
 
-void func_15039ED0(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 *arg4, f32 arg5, f32 arg6, s32 arg7, s32 arg8);
+void func_15039ED0(s32 limitIdx, f32 *yaw, f32 *pitch, f32 *prevYaw, f32 *prevPitch, f32 fallbackYaw,
+                   f32 fallbackPitch, s32 objIndex, s32 slot);
 void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
 extern u8 D_800BEA0C;
 extern u8 D_800C3FDC;
@@ -1728,9 +1736,6 @@ void func_1503A7F0(void) {
 }
 f32 func_15048A40(u8 arg0);
 
-extern u8 D_800C3FDC;
-extern f32 D_800C3FE0;
-extern f32 D_800C3FE4;
 f32 func_150489B0(u8);
 s32 func_15022024(f32 *, f32 *, s32, s32);
 
@@ -2083,21 +2088,22 @@ void func_1503A830(struct127 *obj) {
     }
 }
 
-void func_1503B708(void *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4,
-                   s32 arg5, f32 *arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10) {
-    f32 *scratch;
-    f32 value;
+/* Clears out and D_800C3FD0, then searches for a target object unless a fixed target mode applies. */
+void func_1503B708(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32 preferId, f32 *bestDist,
+                   s32 noCheck, s32 skipUnk127, s32 anyRange, s32 axisMode) {
+    f32 *lookAt;
+    f32 none;
 
-    scratch = D_800C3FD0;
-    value = -99999.0f;
-    *(f32 *)((u8 *)arg0 + 0) = value;
-    *(f32 *)((u8 *)arg0 + 4) = value;
-    *(f32 *)((u8 *)arg0 + 8) = value;
-    scratch[0] = value;
-    scratch[1] = value;
-    scratch[2] = value;
-    if (func_15037880(arg3, arg0) == 0) {
-        func_150380C0(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7,
-                      arg8, arg9, arg10);
+    lookAt = D_800C3FD0;
+    none = -99999.0f;
+    out[0] = none;
+    out[1] = none;
+    out[2] = none;
+    lookAt[0] = none;
+    lookAt[1] = none;
+    lookAt[2] = none;
+    if (!func_15037880(objIndex, out)) {
+        func_150380C0(out, refBone, bone, objIndex, range, preferId, bestDist, noCheck, skipUnk127, anyRange,
+                      axisMode);
     }
 }
