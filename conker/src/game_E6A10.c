@@ -7,7 +7,7 @@
  * The types below are local copies of layouts first worked out elsewhere (fields this file does not
  * use are padding):
  *   FxParticle, SpriteFx                         - the particle/sprite system of game_169510.c
- *   PhysicsParticle, ParticleFloor               - the pooled physics particles of game_15F680.c
+ *   PhysicsParticle, CollisionHit               - the pooled physics particles of game_15F680.c
  */
 
 /* A live particle of game_169510.c; the update callbacks of D_80089CB8 / D_80089D60 get one. */
@@ -23,14 +23,6 @@ typedef struct {
     /* 0x00 */ u8 pad0[0x18];
     /* 0x18 */ SpriteDef def;
 } SpriteFx;
-
-/* Ground contact written by func_15046C80. */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ u8 surface[0x14];
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8 pad1C[8];
-} ParticleFloor; /* size 0x24 */
 
 /* A pooled physics particle of game_15F680.c (the D_80089914 / D_8008998C callbacks get one). */
 typedef struct {
@@ -61,7 +53,7 @@ typedef struct {
     /* 0x077 */ u8 squashFn;
     /* 0x078 */ u8 matrixFn;
     /* 0x079 */ u8 pad79[0x97];
-    /* 0x110 */ ParticleFloor floor;
+    /* 0x110 */ CollisionHit floor;
     /* 0x134 */ u8 pad134[0x18];
     /* 0x14C */ s32 unk14C;
     /* 0x150 */ u8 pad150[0x18];
@@ -70,7 +62,7 @@ typedef struct {
 
 void *memcpy(void *, const void *, u32);
 void func_15151A38(PuffSpray *config, u8 arg1, s32 arg2);
-s32 func_15046C80(Vec3f *pos, s32 arg1, f32 bottom, ParticleFloor *floor);
+s32 func_15046C80(Vec3f *pos, s32 arg1, f32 bottom, CollisionHit *floor);
 extern s32 D_80088740;
 void func_15142600(Mtx *out, f32 scaleXZ, f32 scaleY, f32 sx, f32 sy, f32 sz, f32 x, f32 y, f32 z,
                    f32 atX, f32 atY, f32 atZ);
@@ -196,10 +188,10 @@ s32 func_150B963C(PhysicsParticle *particle) {
                     def.scale.y = 0.0f;
                     def.scale.z = 0.0f;
                     extra = ((func_150ADA68() * 80.0f) + 50.0f) * 1e-05f;
-                    def.unk50 = particle->floor.unk18;
+                    def.unk50 = particle->floor.material;
                     spawned = func_1513D594(&def, &D_800A4AA0, 0x18, 0, 0,
                                             (func_150ADA20() & 1) * 2 + (func_150ADA20() & 1), func_150ADA20() & 0xFF,
-                                            500.0f, 500.0f, 0, (s32)&particle->floor.surface, particle->unk14C,
+                                            500.0f, 500.0f, 0, (s32)&particle->floor.tri, particle->unk14C,
                                             particle->unk168, 0, 8, particle->unkC, particle->unk1);
                     if (spawned != 0) {
                         /* the 8-byte extra block after the particle and its motion axes (0x110 + 0x18); 4 bytes past extra are copied too */
@@ -251,7 +243,7 @@ s32 func_150B963C(PhysicsParticle *particle) {
                 burst.render.envMode = 7;
                 burst.unk80 = 10;
                 burst.unk82 = 25;
-                burst.unk84 = particle->floor.unk18;
+                burst.unk84 = particle->floor.material;
                 func_15151A38(&burst, particle->unkC, particle->unk1);
             }
             func_10010F88(D_80088740, 25000, 0, 0, 0, particle->pos.x, particle->pos.y, particle->pos.z, 1000, 4000);

@@ -14,15 +14,6 @@ typedef struct {
     f32 width, height;
 } Size2f;
 
-/* Ground probe state filled by func_1504715C and updated by func_15046C80. */
-typedef struct {
-    /* 0x00 */ f32 y;
-    /* 0x04 */ u8 unk4[0x18];
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x20 */ s32 unk20;
-} Ground; /* size 0x24 */
-
 /* Motion state of a drop that hangs on an actor's bone, then falls and splashes. */
 typedef struct {
     /* 0x00 */ Vec3f vel;
@@ -37,7 +28,7 @@ typedef struct {
     /* 0x23 */ s8 phaseSpeed[2];
     /* 0x28 */ Size2f baseSize;
     /* 0x30 */ Size2f wobble;
-    /* 0x38 */ Ground ground;
+    /* 0x38 */ CollisionHit ground;
     /* 0x5C */ u8 kind;             /* emitter kind, passed to the splash spawners */
     /* 0x5D */ u8 pad5D[3];
 } DripMotion; /* size 0x60 */
@@ -162,7 +153,7 @@ typedef struct {
 } EmitterKind; /* size 0x18 */
 
 extern EmitterKind D_8008FA70[];
-void func_1504715C(Ground *ground, Actor *actor);
+void func_1504715C(CollisionHit *ground, Actor *actor);
 void func_15143134(Vec3f *offset, Vec3f *out, Mtx *mtx);
 void func_1513F680(Particle *particle, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn);
 
@@ -459,7 +450,7 @@ void func_15191400(DripEmitter *emitter) {
 }
 
 s32 func_1514672C(Vec3f *pos);
-s32 func_15046C80(Vec3f *pos, s32 arg1, f32 minY, Ground *ground);
+s32 func_15046C80(Vec3f *pos, s32 arg1, f32 minY, CollisionHit *ground);
 void func_151DAB58(u8, f32, u8, Vec3f *, s32, u8, u8);
 
 /* Update of a falling drop: moves it under drag and gravity; on reaching the ground it splashes and dies. */
@@ -503,13 +494,13 @@ s8 func_15191520(Particle *drop) {
             return 0;
         }
         if (func_15046C80(&probe, 0, drop->def.pos.y - drop->def.height, &motion->ground) != 0) {
-            probe.y = motion->ground.y;
-            if (motion->ground.unk1D == 3) {
+            probe.y = motion->ground.height;
+            if (motion->ground.source == 3) {
                 func_151DBCBC(motion->kind, drop->def.width * drop->def.height * 0.25f, drop->def.unk44,
-                              (s32)motion->ground.unk4, &probe, drop->owner, drop->list);
+                              (s32)&motion->ground.tri, &probe, drop->owner, drop->list);
             } else if (func_150ADA20() & 1) {
                 func_151D9B8C(motion->kind, drop->def.width * drop->def.height * 0.150000006f, drop->def.unk44,
-                              (s32)motion->ground.unk4, &probe, func_150ADA20() % 41U + 80, 1, 1, 0,
+                              (s32)&motion->ground.tri, &probe, func_150ADA20() % 41U + 80, 1, 1, 0,
                               drop->owner, drop->list);
             } else {
                 func_151DAB58(motion->kind, drop->def.width * drop->def.height * 0.05000000075f, drop->def.unk44,

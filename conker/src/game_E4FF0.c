@@ -3,12 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Ground probe result filled by func_1504715C / func_15046C80. */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ u8 pad4[0x24 - 0x4];
-} Ground;
-
 extern f32 D_8009FD30[3];
 extern f32 D_8009FD3C[3];
 extern f32 D_8009FD48[3];
@@ -18,8 +12,8 @@ void func_15143134(f32 *in, f32 *out, void *mtx);
 void func_1515C244(Actor *, f32 *, f32 *, f32 *);
 void func_150B82D0(Vec3f *, f32 *, f32 *, f32 *, u8, s32);
 void func_150B85C0(Vec3f *, f32 *, f32 *, u8, s32);
-void func_1504715C(Ground *, Actor *);
-s32 func_15046C80(Vec3f *, s32, f32, Ground *);
+void func_1504715C(CollisionHit *, Actor *);
+s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
 void func_1514C678(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, s32, u8);
 s32 func_15132A4C(ParticleSpawn78 *, s32, s32, s32, u8, s32);
 void func_15151A38(PuffSpray *, u8, s32);
@@ -98,7 +92,7 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
         func_150B82D0(&center, &height, &radius, &aspect, arg1, arg2);
         func_150B85C0(&center, &height, &radius, arg1, arg2);
         {
-            Ground ground;
+            CollisionHit ground;
             Vec3f probe;
 
             probe.x = center.x;

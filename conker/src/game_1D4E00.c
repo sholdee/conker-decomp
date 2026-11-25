@@ -562,16 +562,6 @@ typedef struct {
     /* 0x18 */ s32 unk18;
 } LevelObject;
 
-/* Result of a ground probe (func_15046C80). */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ u8 unk4[0x14];
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8 flags;
-    /* 0x1D */ u8 surfaceType;
-    /* 0x20 */ s32 unk20;
-} GroundHit; /* size 0x24 */
-
 /* Spawn parameters of a particle emitter (func_151A8B20). */
 typedef struct {
     /* 0x00 */ u8 flags;             /* EMITTER_* */
@@ -594,7 +584,7 @@ typedef struct {
 typedef struct {
     /* 0x00 */ EmitterDef def;
     /* 0x28 */ f32 pending;          /* particles owed; one spawns per whole unit */
-    /* 0x2C */ GroundHit ground;
+    /* 0x2C */ CollisionHit ground;
     /* 0x50 */ s32 zone;             /* func_1510FD20 zone of the centre, with EMITTER_ZONED */
     /* 0x54 */ f32 area;
 } EmitterState; /* size 0x58 */
@@ -620,10 +610,10 @@ Emitter *func_151A8B20(EmitterDef *def, s16 lifetime, s32 extraSize, u8 arg3, s3
 
     init.pending = 0.0f;
     init.ground.height = 99999.9f;
-    init.ground.unk18 = 0;
+    init.ground.material = 0;
     init.ground.flags = 0;
-    init.ground.surfaceType = 0;
-    init.ground.unk20 = 0;
+    init.ground.source = 0;
+    init.ground.surface = 0;
 
     emitter = (Emitter *)func_15149130((lifetime == -1) ? 300 : lifetime, -1, 0x25, -1, (lifetime == -1) ? 0 : 1, 0x22, (extraSize + sizeof(EmitterState)), arg3, arg4);
     if (emitter != NULL) {
@@ -660,7 +650,7 @@ extern s32 (*D_8008F980[])(Emitter *);
 extern void (*D_8008F970[])(Emitter *, Vec3f *, f32, u8);
 
 s32 func_151464B8(s32);
-s32 func_15046C80(Vec3f *, s32, f32, GroundHit *);
+s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
 void func_151A8F1C(Emitter *, Vec3f *, f32 *, f32 *);
 void func_151A8F6C(Emitter *, Vec3f *, f32 *, f32 *);
 
@@ -874,7 +864,7 @@ void func_151A91AC(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround) {
 
     rand1 = func_150ADA20();
     rand2 = func_150ADA20();
-    func_1513C650(&spawn, 1, 0, (s32)emitter->state.ground.unk4, pos->x, pos->y, pos->z,
+    func_1513C650(&spawn, 1, 0, (s32)&emitter->state.ground.tri, pos->x, pos->y, pos->z,
                   size, size, rand1 & 0xFF,
                   (rand2 & 1) + (func_150ADA20() & 1), 3, 0xFF, 0,
                   emitter->base.header.owner, emitter->base.header.kind);
@@ -1058,16 +1048,16 @@ void func_151A9634(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround) {
     }
 }
 
-extern void (*D_8008FA60[])(Vec3f *, GroundHit *, s32, u8, s32);
+extern void (*D_8008FA60[])(Vec3f *, CollisionHit *, s32, u8, s32);
 
 /*
  * Calls spawn function D_8008FA60[spawnFunc] at `count` random points within radius of center
  * that have ground above minY (the spawn point is on the ground). hit is the probe result buffer;
  * NULL uses a local one.
  */
-void func_151A9834(Vec3f *center, f32 minY, f32 radius, GroundHit *hit,
+void func_151A9834(Vec3f *center, f32 minY, f32 radius, CollisionHit *hit,
                    s32 count, u8 spawnFunc, s32 arg6, u8 arg7, s32 arg8) {
-    GroundHit localHit;
+    CollisionHit localHit;
     Vec3f probe;
     Vec3f spawnPos;
     f32 angle;
@@ -1076,10 +1066,10 @@ void func_151A9834(Vec3f *center, f32 minY, f32 radius, GroundHit *hit,
     if (hit == NULL) {
         hit = &localHit;
         localHit.height = 99999.9f;
-        localHit.unk18 = 0;
+        localHit.material = 0;
         localHit.flags = 7;
-        localHit.surfaceType = 0;
-        localHit.unk20 = 0;
+        localHit.source = 0;
+        localHit.surface = 0;
     }
 
     probe.y = center->y;

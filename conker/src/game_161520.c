@@ -1030,18 +1030,7 @@ s32 func_15135BF8(BloodSplat *splat) {
     return alive;
 }
 
-/* Result of a ground probe (func_15046460 / func_15046C80). */
-typedef struct {
-    f32 height;
-    u8 unk4[0x14];
-    s32 unk18;
-    u8 flags;
-    u8 surfaceType;
-    u8 pad1E[2];
-    s32 unk20;
-} GroundHit;
-
-extern s32 func_15046460(Vec3f *, u16, f32, GroundHit *);
+extern s32 func_15046460(Vec3f *, u16, f32, CollisionHit *);
 extern void func_151DB5D0(u8, void *, Vec3f *, f32, f32, f32, f32, s32, s32, s32, s32, s32, u8, s32);
 extern void func_151DA6F8(void *, Vec3f *, f32, s16, s32, f32, s32, s32, f32, f32, s32, u8, s32, s32, s32, s32, u8, s32);
 extern void func_151D9014(void *, void *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
@@ -1052,7 +1041,7 @@ void func_15135DD0(Vec3f *from, Vec3f *to, f32 radius, u8 arg3, s32 arg4) {
     Vec3f direction;
     f32 fromX;
     Vec3f probe;
-    GroundHit hit;
+    CollisionHit hit;
     u32 flagsCopy;
     Vec3f velocity;
     s32 count;
@@ -1064,10 +1053,10 @@ void func_15135DD0(Vec3f *from, Vec3f *to, f32 radius, u8 arg3, s32 arg4) {
     s32 drops;
 
     flagsCopy = arg3; // matching: IDO keeps this u32 copy of arg3 live in a saved register for the last call
-    hit.unk18 = 0;
+    hit.material = 0;
     hit.flags = 0;
-    hit.surfaceType = 0;
-    hit.unk20 = 0;
+    hit.source = 0;
+    hit.surface = 0;
     hit.height = -10000.0f;
     direction.x = to->x - (fromX = from->x);
     direction.y = to->y - from->y;
@@ -1075,7 +1064,7 @@ void func_15135DD0(Vec3f *from, Vec3f *to, f32 radius, u8 arg3, s32 arg4) {
     probe.x = fromX;
     probe.y = 10000.0f;
     probe.z = from->z;
-    if (func_15046460(&probe, 0, from->y, &hit) != 0 && hit.surfaceType == 3) {
+    if (func_15046460(&probe, 0, from->y, &hit) != 0 && hit.source == 3) {
         for (drops = func_150ADA20() % 11U + 10; drops > 0; drops--) {
             speed = (func_150ADA68() * 67.0f + 86.0f) * 0.001000000047f;
             velocity.x = direction.x * speed;
@@ -1125,13 +1114,13 @@ void func_15135DD0(Vec3f *from, Vec3f *to, f32 radius, u8 arg3, s32 arg4) {
 
 extern void func_15143874(s16, f32, f32 *, f32 *);
 void func_1504715C();
-s32 func_15046C80(Vec3f *, u16, f32, GroundHit *);
+s32 func_15046C80(Vec3f *, u16, f32, CollisionHit *);
 
 /* Scatters blood decals on the ground within radius of the actor, more for a larger area. */
 void func_15136404(Actor *actor, f32 radius, u8 arg2, s32 arg3) {
     f32 area;
     f32 count;
-    GroundHit hit;
+    CollisionHit hit;
     Vec3f probe;
     Vec3f pos;
 
@@ -1144,11 +1133,11 @@ void func_15136404(Actor *actor, f32 radius, u8 arg2, s32 arg3) {
             probe.x += actor->x_position;
             probe.z += actor->z_position;
             probe.y = actor->y_position + 500.0f;
-            if (func_15046C80(&probe, 0, actor->y_position - 5000.0f, &hit) != 0 && hit.surfaceType != 3) {
+            if (func_15046C80(&probe, 0, actor->y_position - 5000.0f, &hit) != 0 && hit.source != 3) {
                 pos.x = probe.x;
                 pos.y = hit.height;
                 pos.z = probe.z;
-                func_151D9B8C(0, func_150ADA68() * 20.0f + 10.0f, func_150ADA20() % 101U + 100, hit.unk4, &pos,
+                func_151D9B8C(0, func_150ADA68() * 20.0f + 10.0f, func_150ADA20() % 101U + 100, &hit.tri, &pos,
                               func_150ADA20() % 201U + 400, 1, 1, 0, arg2, arg3);
             }
             count -= 1.0f;
@@ -1361,7 +1350,7 @@ void func_1515C244(Actor *, Vec3f *, f32 *, f32 *);
 void func_1513A24C(Vec3f *, s32 *, f32 *, s32, f32, u8, u8, u8 *, void *,
                    u8, s32);
 void func_15150D1C(DecalSpray *, u8, s32);
-void func_151A9834(Vec3f *, f32, f32, GroundHit *, s32, u8, s8 *, u8, s32);
+void func_151A9834(Vec3f *, f32, f32, CollisionHit *, s32, u8, s8 *, u8, s32);
 void func_151C61A0(s32, s32, u8, s32);
 void func_1513A48C(Vec3f *, u8, s32);
 extern f32 D_800A3C30;
@@ -1378,7 +1367,7 @@ void func_15136C3C(Actor *actor, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
     f32 unused0;
     f32 unused1;
     f32 scale;
-    GroundHit hit;
+    CollisionHit hit;
     s32 kind;
     DecalSpray spray;
     s8 heavy;
@@ -1659,7 +1648,7 @@ void func_1513783C(Actor *actor, u8 arg1, s32 arg2) {
     f32 unused1;
     f32 scale;
     Vec3f probe;
-    GroundHit hit;
+    CollisionHit hit;
     s32 kind;
     u8 pool;
     Vec3f origin;
@@ -1705,7 +1694,7 @@ void func_1513783C(Actor *actor, u8 arg1, s32 arg2) {
                           ((func_150ADA68() * 106.0f) + 75.0f) * 9.999999747e-06f,
                           (func_150ADA20() % 101U) + 155,
                           (func_150ADA20() % 101U) + 100,
-                          (func_150ADA20() % 56U) + 203, (s32)hit.unk4,
+                          (func_150ADA20() % 56U) + 203, (s32)&hit.tri,
                           &probe, 1, 1, arg1, arg2);
             if (func_150ADA20() & 1) {
                 spawn = func_151B5BF0;
@@ -2096,7 +2085,7 @@ void func_15138BC0(Actor *actor, u8 arg1, s32 arg2) {
     s32 kind;
     Vec3f position;
     u8 valid;
-    GroundHit hit;
+    CollisionHit hit;
 
     kind = func_15134070(actor);
     if (kind != BLOOD_PROFILE_NONE) {
@@ -2116,7 +2105,7 @@ void func_15139D74(Actor *, f32 *, void *, u8, s32);
 void func_1513A6E0(Actor *, f32 *, void *, u8, s32);
 void func_1513ABB8(Actor *, f32 *, u8, void *, u8, s32);
 void func_1513B0F8(Actor *, f32 *, void *, u8, s32);
-void func_1513A594(Actor *, Vec3f *, GroundHit *, u8, s32);
+void func_1513A594(Actor *, Vec3f *, CollisionHit *, u8, s32);
 void func_151036B4(void *, u8, s32);
 
 /* Blood for a fatal hit: strip and burst, then the per-profile gore effect. */
@@ -2124,7 +2113,7 @@ void func_15138C80(Actor *actor, u8 arg1, s32 arg2) {
     s32 kind;
     Vec3f position;
     u8 valid;
-    GroundHit hit;
+    CollisionHit hit;
 
     kind = func_15134070(actor);
     if (kind != BLOOD_PROFILE_NONE) {
@@ -2747,7 +2736,7 @@ void func_1513A48C(Vec3f *position, u8 arg1, s32 arg2) {
 }
 
 /* Gore for profile 4 actors: just a splash. */
-void func_1513A594(Actor *actor, Vec3f *origin, GroundHit *hit, u8 arg3, s32 arg4) {
+void func_1513A594(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 arg4) {
     func_1513A5E0(origin, arg3 & 0xFF, arg4);
     if (actor->unk1D4 != 0) { // matching: dead test, IDO still emits the unk1D4 load
         if (actor) {

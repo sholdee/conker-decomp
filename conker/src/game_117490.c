@@ -334,17 +334,6 @@ void func_150EA944(WorldObject *entry) {
     }
 }
 
-/* Ground probe result filled by func_15046C80. */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ s16 unk4[9];
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8  unk1C;
-    /* 0x1D */ u8  unk1D;
-    /* 0x1E */ u8  pad1E[2];
-    /* 0x20 */ s32 unk20;
-} GroundHit;
-
 /* A point on the ground plane (world x and z). */
 typedef struct {
     /* 0x00 */ f32 x;
@@ -358,7 +347,7 @@ typedef struct {
     /* 0x10 */ f32 height;      /* used when the ground probe finds nothing */
     /* 0x14 */ f32 probeHeight; /* height the ground probe starts from */
     /* 0x18 */ f32 lifetime;
-    /* 0x1C */ GroundHit ground;
+    /* 0x1C */ CollisionHit ground;
 } GroundFlash; // size 0x40
 
 /* Spawner state: flashes run between a random point on the start line and one on the end line. */
@@ -414,10 +403,10 @@ void func_150EAB10(struct_EAB10 *actor) {
     spawner = &actor->spawner;
     spawner->accumulator += (spawner->rate + func_150ADA68() * spawner->rateRange) * D_800BE9A4;
     if (spawner->accumulator > 1.0f) {
-        flash.ground.unk18 = 0;
-        flash.ground.unk1C = 0;
-        flash.ground.unk1D = 0;
-        flash.ground.unk20 = 0;
+        flash.ground.material = 0;
+        flash.ground.flags = 0;
+        flash.ground.source = 0;
+        flash.ground.surface = 0;
         flash.ground.height = -10000.0f;
         flash.height = spawner->height;
         flash.probeHeight = spawner->probeHeight;
@@ -467,7 +456,7 @@ void func_150EAB10(struct_EAB10 *actor) {
     }
 }
 
-s32 func_15046C80(f32 *, s32, f32, GroundHit *);
+s32 func_15046C80(f32 *, s32, f32, CollisionHit *);
 
 /* Slides the flash along the ground and keeps its light on the ground; returns 0 once it expires. */
 s32 func_150EAE24(FlashObject *obj) {

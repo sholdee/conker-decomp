@@ -3,12 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Ground probe result filled by func_1504715C. */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ u8 pad4[0x24 - 0x4];
-} Ground;
-
 /* Data of an object that emits particles around an actor while that actor has bones. */
 typedef struct {
     /* 0x00 */ Actor *actor;
@@ -22,11 +16,11 @@ typedef struct {
     /* 0x28 */ ActorEmitterState state;
 } ActorEmitter;
 
-void func_1504715C(Ground *, Actor *);
+void func_1504715C(CollisionHit *, Actor *);
 void func_15143794(s16 yaw, s16 pitch, f32 distance, f32 *out);
 void func_1515C244(Actor *, f32 *center, f32 *, f32 *);
 void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32,
-                   s32, Ground *, s32, s32, s32, s32);
+                   s32, CollisionHit *, s32, s32, s32, s32);
 
 /* Emitter update: removes itself once its actor is gone or replaced, otherwise emits particles
    from a sphere around the actor's center at a random rate. */
@@ -35,7 +29,7 @@ void func_150CF140(ActorEmitter *emitter) {
     Actor *actor;
     f32 center[3];
     f32 radius;
-    Ground ground;
+    CollisionHit ground;
     f32 extentA;
     f32 extentB;
     f32 pos[3];

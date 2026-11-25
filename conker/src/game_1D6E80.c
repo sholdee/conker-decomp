@@ -14,17 +14,6 @@ extern u8 func_151D8E20(void);
 
 extern void *func_1513418C(BloodDripDesc *desc, s32 payloadSize, u8 arg2, s32 arg3);
 
-/* Ground probe result filled in by func_15045800 (same layout as game_71820.c's Game71820Hit). */
-typedef struct GroundHit {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ s16 points[9];
-    /* 0x18 */ s32 object;
-    /* 0x1C */ u8 flags;
-    /* 0x1D */ u8 active;
-    /* 0x1E */ u8 pad1E[2];
-    /* 0x20 */ s32 unk20;
-} GroundHit; // size 0x24
-
 struct ActorTask;
 
 /*
@@ -104,14 +93,14 @@ typedef struct ActorTask {
     /* 0x10 */ u8 pad10[0x8];
     /* 0x18 */ Actor *actor;
     /* 0x1C */ u8 pad1C[0x18];
-    /* 0x34 */ GroundHit hit;
+    /* 0x34 */ CollisionHit hit;
     /* 0x58 */ ActorTaskFx fx;
 } ActorTask;
 
-void func_151AA264(Actor *actor, GroundHit *hit);
+void func_151AA264(Actor *actor, CollisionHit *hit);
 void func_151ABE00(Actor *actor);
-extern s32 func_15045800(f32 *pos, s32 arg1, f32 minY, GroundHit *hit);
-extern s32 func_151ABE40(f32 *pos, GroundHit *hit, s32 kind, s32 arg3, s32 arg4);
+extern s32 func_15045800(f32 *pos, s32 arg1, f32 minY, CollisionHit *hit);
+extern s32 func_151ABE40(f32 *pos, CollisionHit *hit, s32 kind, s32 arg3, s32 arg4);
 
 /* Probes the ground under the task's actor and spawns ground effect 3 there. */
 void func_151A99D0(ActorTask *task) {
@@ -140,7 +129,7 @@ void func_151A9AA4(ActorTask *task) {
 
     {
         f32 pos[3];
-        GroundHit *hit;
+        CollisionHit *hit;
 
         pos[0] = actor->x_position;
         if (-9500.0f < actor->unk118) {
@@ -165,7 +154,7 @@ void func_151A9BA0(ActorTask *task) {
 
     {
         f32 pos[3];
-        GroundHit *hit;
+        CollisionHit *hit;
 
         pos[0] = actor->x_position;
         if (-9500.0f < actor->unk118) {
@@ -215,7 +204,7 @@ void func_151A9DC0(ActorTask *task) {
 
     {
         f32 pos[3];
-        GroundHit *hit;
+        CollisionHit *hit;
 
         pos[0] = actor->x_position;
         if (-9500.0f < actor->unk118) {
@@ -239,7 +228,7 @@ void func_151A9EC0(ActorTask *task) {
 
     {
         f32 pos[3];
-        GroundHit *hit;
+        CollisionHit *hit;
 
         pos[0] = actor->x_position;
         if (-9500.0f < actor->unk118) {
@@ -358,7 +347,7 @@ void func_151AA210(Task151AA17C *task) {
 }
 
 /* When the ground hit has flag bit 0 set, spawns a func_1513418C effect on the actor. */
-void func_151AA264(Actor *actor, GroundHit *hit) {
+void func_151AA264(Actor *actor, CollisionHit *hit) {
     BloodDripDesc desc;
 
     if (hit->flags & 1) {
@@ -641,14 +630,14 @@ s32 func_151AABA0(PulseFx *fx) {
 }
 
 extern u8 D_800A8F70[];
-extern void func_1504715C(GroundHit *hit, Actor *actor);
-extern s32 func_1504697C(Vec3f *pos, s32 arg1, f32 minY, GroundHit *hit);
-extern void func_15153F18(AngleRange *, SplashSpray *, GroundHit *, u8, s32);
+extern void func_1504715C(CollisionHit *hit, Actor *actor);
+extern s32 func_1504697C(Vec3f *pos, s32 arg1, f32 minY, CollisionHit *hit);
+extern void func_15153F18(AngleRange *, SplashSpray *, CollisionHit *, u8, s32);
 
 /* Finds point D_800A8F70[index] of the actor's unk1D4 (func_15142314) and spawns two effects on the ground below it. */
 void func_151AABC4(Actor *actor, u8 index) {
     Vec3f pos;
-    GroundHit floor;
+    CollisionHit floor;
     f32 y;
     Vec3f probe;
     u8 color;
@@ -666,7 +655,7 @@ void func_151AABC4(Actor *actor, u8 index) {
             hit.x = pos.x;
             hit.y = floor.height;
             hit.z = pos.z;
-            func_151DBCBC(color, 40.0f, 150, (s32)floor.points, &hit, 0xFF, 1);
+            func_151DBCBC(color, 40.0f, 150, (s32)&floor.tri, &hit, 0xFF, 1);
             {
                 SplashSpraySpec c;
 
@@ -783,7 +772,7 @@ void func_151AADF8(ActorTask *task) {
         part.renderModes = 0x440001;
         part.unk16 = 0;
         part.unk17 = 6;
-        fx->flicker = (FlickerFx *)func_1513C73C(&part, 7, 1, (s32)task->hit.points, pos[0], pos[1], pos[2],
+        fx->flicker = (FlickerFx *)func_1513C73C(&part, 7, 1, (s32)&task->hit.tri, pos[0], pos[1], pos[2],
                                                  size, size, func_150ADA20() & 0xFF,
                                                  (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2), 0x20, 0xFF, 1);
         if (fx->flicker != NULL) {
@@ -830,7 +819,7 @@ void func_151AB1C4(ActorTask *task) {
 
     {
         f32 pos[3];
-        GroundHit *hit;
+        CollisionHit *hit;
 
         pos[0] = actor->x_position;
         if (-9500.0f < actor->unk118) {
@@ -1071,13 +1060,13 @@ void func_151AB930(Actor *actor) {
     }
 }
 
-extern void func_151D9014(f32 *, f32 *, u8, f32, s32, s32, f32, s32, f32, f32, s32, GroundHit *, s32, s32, u8, u8);
+extern void func_151D9014(f32 *, f32 *, u8, f32, s32, s32, f32, s32, f32, f32, s32, CollisionHit *, s32, s32, u8, u8);
 
 /* Spark emitter update: emits sparks around the actor, or ends the task once the actor is gone. */
 void func_151AB9C8(EmitterTask *task) {
     EmitterPayload *emitter;
     u8 dead;
-    GroundHit floor;
+    CollisionHit floor;
     f32 pos[3];
     f32 vel[3];
     s16 yaw;
