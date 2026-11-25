@@ -10,9 +10,11 @@
 #undef func_15072208
 #define D_800CC2D0 D_800CC2D0_hdr
 #define D_800C3E80 D_800C3E80_hdr
+#define D_800D19A0 D_800D19A0_hdr
 #include "variables.h"
 #undef D_800CC2D0
 #undef D_800C3E80
+#undef D_800D19A0
 
 /* Streamed per-frame animation data (obj->anim). */
 typedef struct ObjAnim {
@@ -182,6 +184,7 @@ typedef struct GameObj {
 
 extern GameObj D_800CC2D0[];
 extern s32 D_800C3E80[2]; // bone-matrix pool per frame buffer
+extern s32 D_800D19A0[]; // model data per object id
 
 /* struct104 (D_800B0DF0) with the s16 at 0x3E that struct104 still covers with pad2A; nonzero
    means level fog: objects take the level's fog colour and a distance-based fog alpha. */
@@ -935,34 +938,33 @@ Gfx *func_1502CCFC(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s32 
     return gdl;
 }
 
-void func_1502D54C(s32 arg0, s32 *arg1) {
-    u8 *temp_v0;
 
-    temp_v0 = (u8 *)&D_800CC2D0[arg0];
-    if ((temp_v0[0x66] & 0xC) == 4) {
-        arg1[0] = (temp_v0[0x1E0] + temp_v0[0x1DD]) / 2;
-        arg1[1] = (temp_v0[0x1E1] + temp_v0[0x1DE]) / 2;
-        arg1[2] = (temp_v0[0x1E2] + temp_v0[0x1DF]) / 2;
-        arg1[0] = 0xFF - arg1[0];
-        arg1[1] = 0xFF - arg1[1];
-        arg1[2] = 0xFF - arg1[2];
+/* Object colour: for (unk66 & 0xC) == 4 the inverse of the mean of unk1DD and unk1E0, else white. */
+void func_1502D54C(s32 index, s32 *colour) {
+    GameObj *obj;
+
+    obj = &D_800CC2D0[index];
+    if ((obj->unk66 & 0xC) == 4) {
+        colour[0] = (obj->unk1E0[0] + obj->unk1DD[0]) / 2;
+        colour[1] = (obj->unk1E0[1] + obj->unk1DD[1]) / 2;
+        colour[2] = (obj->unk1E0[2] + obj->unk1DD[2]) / 2;
+        colour[0] = 0xFF - colour[0];
+        colour[1] = 0xFF - colour[1];
+        colour[2] = 0xFF - colour[2];
         return;
     }
-    arg1[2] = 0xFF;
-    arg1[1] = 0xFF;
-    arg1[0] = 0xFF;
+    colour[2] = 0xFF;
+    colour[1] = 0xFF;
+    colour[0] = 0xFF;
 }
 
-void func_150A7A00(void *, f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
-extern f32 D_80096DE8;
-extern f32 D_80096DEC;
-extern f32 D_80096DF0;
-extern f32 D_80096DF4;
-extern u8 D_800D2CA8[];
+void func_150A7A00(f32 mtx[4][4], f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
+extern f32 D_800D2CA8[][4][4]; // view matrix per player
 extern u16 D_800DD2E8;
 extern u16 D_800DD2EC;
 
-void func_1502D630(GameObj *arg0, s32 *arg1, s32 arg2) {
+/* Sets colour[3] to the object's distance-fog alpha as seen from the player's view. */
+void func_1502D630(GameObj *obj, s32 *colour, s32 player) {
     f32 far;
     f32 near;
     f32 step;
@@ -977,20 +979,19 @@ void func_1502D630(GameObj *arg0, s32 *arg1, s32 arg2) {
     if (D_800D9B1C != 0.0f) {
         first = 1.0f / D_800D9B1C;
     } else {
-        first = D_80096DE8;
+        first = 0.001000000047f;
     }
     if (D_800D9B20 != 0.0f) {
         last = 1.0f / D_800D9B20;
     } else {
-        last = D_80096DEC;
+        last = 0.001000000047f;
     }
-    step = (first - last) * D_80096DF0;
+    step = (first - last) * 0.001000000047f;
     near = (f32)(u32)D_800DD2E8 * step + last;
     far = (f32)(u32)D_800DD2EC * step + last;
-    func_150A7A00(D_800D2CA8 + (arg2 << 6), arg0->x_position,
-                 arg0->y_position, arg0->z_position, &x, &y, &z, &w);
-    w = (w != 0.0f) ? 1.0f / w : D_80096DF4;
-    if (w < 0) {
+    func_150A7A00(D_800D2CA8[player], obj->x_position, obj->y_position, obj->z_position, &x, &y, &z, &w);
+    w = (w != 0.0f) ? 1.0f / w : 0.001000000047f;
+    if (w < 0) { // matching: integer zeros here; 0.0f literals share the 1.0f register differently
         amount = 0;
     } else if (w >= far) {
         amount = 0;
@@ -999,114 +1000,97 @@ void func_1502D630(GameObj *arg0, s32 *arg1, s32 arg2) {
     } else {
         amount = (w - far) / (near - far);
     }
-    arg1[3] = (1.0f - amount) * 255.0f;
+    colour[3] = (1.0f - amount) * 255.0f;
 }
 
-extern void func_1505DFDC(void *);
+extern void func_1505DFDC(GameObj *);
 
-typedef struct {
-    u8 pad0[0x8];
-    f32 pos[2];
-    u8 pad10[0x8];
-    f32 len[2];
-    u8 pad20[0x8];
-    u8 *src[2];
-    u8 *dst[2];
-    u8 off[2];
-    u8 pad3A[2];
-    s16 unk3C;
-    u8 pad3E[7];
-    u8 unk45;
-    u8 pad46[2];
-    u8 unk48;
-    u8 pad49[0x1D0 - 0x49];
-} Struct1502D824;
-
-void func_1502D824(Struct1502D824 *arg0, u8 *arg1, u8 *arg2) {
-    s32 n;
+/* DMAs the current frame of each animation channel into buf (anim, or obj->anim when obj is given). */
+void func_1502D824(ObjAnim *anim, GameObj *obj, u8 *buf) {
+    s32 frameSize;
     u32 size;
     u8 *src;
-    s32 twice;
+    s32 wrap;
     s32 frame;
     f32 pos;
-    f32 len;
-    s32 count;
-    s32 frames;
+    f32 frameCount;
+    s32 channels;
+    s32 step;
     s32 i;
     u8 off;
-    u8 offa;
+    u8 align;
 
-    count = 1;
-    offa = 0;
-    if (arg1 != NULL) {
-        if (*(u16 *)(arg1 + 0x84) == 0xFFFF) {
-            func_1505DFDC(arg1);
+    channels = 1;
+    align = 0;
+    if (obj != NULL) {
+        if (obj->unk84 == 0xFFFF) {
+            func_1505DFDC(obj);
         }
-        arg0 = *(Struct1502D824 **)(arg1 + 0x2D0);
+        anim = obj->anim;
     }
-    if (arg0 == NULL) {
+    if (anim == NULL) {
         return;
     }
-    if (arg0->unk3C > 0) {
-        count = 2;
+    if (anim->unk3C > 0) {
+        channels = 2;
     }
-    for (i = 0; i < count; i++) {
-        n = arg0[i].unk45;
-        twice = 0;
-        if (!n) {
-            arg0->off[i] = 0;
+    for (i = 0; i < channels; i++) {
+        frameSize = anim[i].frameSize;
+        wrap = FALSE;
+        if (!frameSize) {
+            anim->bufferOffset[i] = 0;
             continue;
         }
-        if (arg0->src[i] == NULL) {
+        if (anim->frameData[i] == NULL) {
             continue;
         }
-        pos = arg0->pos[i];
-        len = arg0->len[i];
-        size = n * 2;
+        pos = anim->frame[i];
+        frameCount = anim->frameCount[i];
+        size = frameSize * 2;
         frame = pos;
-        if (len <= frame) {
-            frame = len - 1.0f;
+        if (frameCount <= frame) {
+            frame = frameCount - 1.0f;
         }
-        frames = arg0[i].unk48 + 1;
-        if (frames >= 2) {
-            if (len - 1.0f <= frame) {
-                frame = (len - 1.0f + (frames - 1)) / frames;
+        step = anim[i].unk48 + 1;
+        if (step >= 2) {
+            if (frameCount - 1.0f <= frame) {
+                frame = (frameCount - 1.0f + (step - 1)) / step;
             } else {
-                frame = frame / frames;
+                frame = frame / step;
             }
         }
-        src = arg0->src[i] + n * frame;
-        offa = (u32)src & 3;
-        src -= offa;
-        if (len <= pos + 1) {
-            twice = 1;
-            size = n;
+        src = anim->frameData[i] + frameSize * frame;
+        align = (u32)src & 3;
+        src -= align;
+        if (frameCount <= pos + 1) {
+            wrap = TRUE;
+            size = frameSize;
         } else {
-            arg0->off[i] = n;
+            anim->bufferOffset[i] = frameSize;
         }
-        arg2 = (u8 *)((((u32)arg2 + 0xF) >> 4) << 4);
-        size += offa;
-        arg0->dst[i] = (u8 *)(offa + (u32)arg2);
-        off = (u8)(s32)offa;
-        if (size < 0xC8) {
-            func_1000480C((u32)src, arg2, size);
+        buf = (u8 *)((((u32)buf + 0xF) >> 4) << 4);
+        size += align;
+        anim->buffer[i] = (u8 *)(align + (u32)buf);
+        off = (u8)(s32)align; // matching: this dead use of off (see `off * 0` below) steers register allocation
+        if (size < 200) {
+            func_1000480C((u32)src, buf, size);
         } else {
-            func_10004514((s32)src, arg2, (size + 0xF) & ~0xF, 1);
+            func_10004514((s32)src, buf, (size + 0xF) & ~0xF, 1);
         }
-        arg2 += size + (off * 0);
-        if (twice) {
-            src = arg0->src[i];
-            arg2 = (u8 *)((((u32)arg2 + 0xF) >> 4) << 4);
+        buf += size + (off * 0);
+        if (wrap) {
+            src = anim->frameData[i];
+            buf = (u8 *)((((u32)buf + 0xF) >> 4) << 4);
             off = (u32)src & 1;
             src -= off;
-            size = off + n;
-            if (size < 0xC8) {
-                func_1000480C((u32)src, arg2, size);
+            size = off + frameSize;
+            if (size < 200) {
+                func_1000480C((u32)src, buf, size);
             } else {
-                func_10004514((s32)src, arg2, (size + 0xF) & ~0xF, 1);
+                func_10004514((s32)src, buf, (size + 0xF) & ~0xF, 1);
             }
-            arg0->off[i] = (arg2 + off) - arg0->dst[i];
-            arg2 += size;
+            anim->bufferOffset[i] = (buf + off) - anim->buffer[i];
+            buf += size;
         }
     }
 }
@@ -1143,39 +1127,42 @@ extern u8 D_800C3FFA;
 extern s32 func_1503CF20(s32, s32, void *, s32, s32);
 extern s32 func_150838EC(GameObj *arg0, s32 arg1, s32 arg2, f32 arg3);
 extern void func_15033FE0(void *, s32);
-extern void func_1502D824();
-extern void func_150A81D0(s32 *, s32, struct197 *, s32, s32, void *, u8 *, s32);
+extern void func_150A81D0(s32 *, f32 mtx[4][4], ObjAnim *, s32, s32, s16 *, u8 *, s32);
 extern void bzero(void *, int);
 
-void func_1502DB84(f32 arg0[4][4], s32 arg1) {
+/* Computes the object's bone matrices for this frame into the matrix pool (root transform mtx). */
+void func_1502DB84(f32 mtx[4][4], s32 index) {
     s16 cmd[42];
     s32 id;
-    u8 *ptr;
+    u8 *remap;
     GameObj *obj;
     s32 count;
-    s32 v;
-    u8 buf98[0x320];
-    u8 buf54[0x44];
-    struct129 *u144;
+    s32 moved;
+    u8 frameBuf[0x320];
+    u8 remapBuf[0x44];
+    struct129 *unk144;
 
-    obj = &D_800CC2D0[arg1];
+    obj = &D_800CC2D0[index];
     id = obj->id;
-    ptr = NULL;
-    if ((&D_800D19A0)[id] == 0) {
-        u144 = obj->unk144;
-        if (func_1503CF20(id, 0, u144, 1, obj->unkAC) != 0) {
+    remap = NULL;
+    if (D_800D19A0[id] == 0) {
+        unk144 = obj->unk144;
+        if (func_1503CF20(id, 0, unk144, 1, obj->unkAC) != 0) {
             obj->bones = NULL;
             return;
         }
-        if ((&D_800D19A0)[id] == 0) {
+        if (D_800D19A0[id] == 0) {
             obj->bones = NULL;
             return;
         }
     }
-    if (obj->anim != NULL) goto ok;
-    L2:
+    if (obj->anim != NULL) {
+        goto animated;
+    }
+    // matching: the unused label splits the block so as1 keeps the call's argument setup after the test
+load:
     if (func_150838EC(obj, 0, 0, 1.0f) == 0) {
-    ok:
+    animated:
         if (D_800C4ED0[id] < 2 || obj->anim != NULL) {
             count = func_1502DB20(id);
             if ((u32)(D_800C3E7C << 6) < (u32)(D_800C3E88 + (count << 6) - D_800C3E8C)) {
@@ -1183,25 +1170,26 @@ void func_1502DB84(f32 arg0[4][4], s32 arg1) {
                 return;
             }
             func_1502FD70(obj);
-            obj->bones = (struct255 *)D_800C3E88;
+            obj->bones = (void *)D_800C3E88;
             {
-            s32 k;
-            if (D_800D1C90[id]->data.i.unk1 != 0) {
-                u8 *p;
+                s32 k;
 
-                D_800C3FFA = 0;
-                bzero(buf54, D_800C4ED0[id]);
-                p = D_8008422C[D_800D1C90[id]->data.i.unk1];
-                while (*p != 0xFF) {
-                    k = p[0];
-                    buf54[k] = p[1];
-                    p += 2;
+                if (D_800D1C90[id]->data.i.unk1 != 0) {
+                    u8 *p;
+
+                    D_800C3FFA = 0;
+                    bzero(remapBuf, D_800C4ED0[id]);
+                    p = D_8008422C[D_800D1C90[id]->data.i.unk1];
+                    while (*p != 0xFF) {
+                        k = p[0];
+                        remapBuf[k] = p[1];
+                        p += 2;
+                    }
+                    remap = remapBuf;
                 }
-                ptr = buf54;
             }
-            }
-            func_15033FE0(cmd, arg1);
-            func_1502D824(0, obj, buf98);
+            func_15033FE0(cmd, index);
+            func_1502D824(NULL, obj, frameBuf);
             {
                 s16 scale;
 
@@ -1210,16 +1198,16 @@ void func_1502DB84(f32 arg0[4][4], s32 arg1) {
                 } else {
                     scale = 0;
                 }
-                func_150A81D0(&D_800C3E88, (s32)arg0, obj->anim, D_800C4BE0[id], count, cmd, ptr, scale);
+                func_150A81D0(&D_800C3E88, mtx, obj->anim, D_800C4BE0[id], count, cmd, remap, scale);
             }
             obj->unk7C = D_8008857C;
-            v = D_80088558;
-            if (v != 0) {
+            moved = D_80088558;
+            if (moved != 0) {
                 f32 f0;
 
                 f0 = D_80088554 / 32768.0f;
                 if (obj->unk1FC & 4) {
-                    obj->unk1F8 -= v * 0.03125f;
+                    obj->unk1F8 -= moved * 0.03125f;
                 }
                 obj->unk1F4 = f0 - obj->unk1F8;
                 obj->unk1F8 = f0;
@@ -1230,8 +1218,8 @@ void func_1502DB84(f32 arg0[4][4], s32 arg1) {
                     obj->unk1FC |= 1;
                 }
                 if (obj->unk246 & 0x40) {
-                    f0 = v * 0.03125f;
-                    if (1) {}
+                    f0 = moved * 0.03125f;
+                    if (1) {} // matching: with the volatile below, keeps IDO from reusing the earlier xz_velocity load
                     f0 = obj->xz_scale * f0;
                     f0 = f0 / obj->anim->frameCount[0];
                     f0 = *(volatile f32 *)&obj->xz_velocity / f0;
@@ -1931,7 +1919,7 @@ void func_1502F490(Obj1502F490 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, s32 arg4)
         return;
     }
     for (i = 0; i < 3; i++) {
-        p[i] = *(s32 *)(D_800C6070[id] + arg4 * 12 + i * 4) + (&D_800D19A0)[id];
+        p[i] = *(s32 *)(D_800C6070[id] + arg4 * 12 + i * 4) + D_800D19A0[id];
     }
     seg = 0;
     mask = 0;
