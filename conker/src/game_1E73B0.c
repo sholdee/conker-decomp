@@ -660,16 +660,20 @@ end:
     return 1;
 }
 
-typedef struct { f32 x, y, z; } Vec3_151BB61C;
-typedef struct { s16 v[9]; } Surf_151BB61C;
+/* Collision surface record filled in by the func_150AC9C0 ray cast. */
 typedef struct {
-    Vec3_151BB61C dir;      /* 0x00 */
-    Surf_151BB61C surf;     /* 0x0C */
+    s16 unk[9];
+} Surface;
+
+/* Effect descriptor read by func_1514FBFC. */
+typedef struct {
+    Vec3f dir;      /* 0x00 */
+    Surface surf;     /* 0x0C */
     u8 pad1E[2];
     f32 unk20;
     s32 unk24;
     s32 unk28;
-    Vec3_151BB61C pos;      /* 0x2C */
+    Vec3f pos;      /* 0x2C */
     f32 unk38;
     f32 unk3C;
     f32 unk40;
@@ -689,13 +693,15 @@ typedef struct {
     s16 unk70;
     s16 unk72;
     s8 unk74;
-} Fbfc_151BB61C;
+} Desc1514FBFC;
+
+/* Effect descriptor read by func_15151D6C. */
 typedef struct {
-    s32 count;
-    s32 spread;
-    Vec3_151BB61C pos;      /* 0x08 */
-    Vec3_151BB61C vel;      /* 0x14 */
-    Surf_151BB61C surf;     /* 0x20 */
+    s32 unk0;
+    s32 unk4;
+    Vec3f pos;      /* 0x08 */
+    Vec3f vel;      /* 0x14 */
+    Surface surf;     /* 0x20 */
     u8 pad32[2];
     f32 unk34;
     f32 unk38;
@@ -707,49 +713,55 @@ typedef struct {
     f32 unk4C;
     f32 unk50;
     f32 unk54;
-} Desc_151BB61C;
+} Desc15151D6C;
 
-typedef struct { s32 v[9]; } Colors_151BB61C;
-typedef struct { f32 v[9]; } Scales_151BB61C;
-extern Colors_151BB61C D_800AA718;
-extern Scales_151BB61C D_800AA73C;
+/* wrapped in structs so the tables are copied by struct assignment */
+typedef struct { s32 v[9]; } S32x9;
+typedef struct { f32 v[9]; } F32x9;
+extern S32x9 D_800AA718;
+extern F32x9 D_800AA73C;
 void func_15055A2C(s32, f32, f32, f32, s32);
-s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, void *, f32 *, f32 *, f32 *, s32, s32 *, s32, f32);
-s32 func_15145C90(s32);
-s32 func_15144E80(void *, Vec3_151BB61C *, Vec3_151BB61C *, Vec3_151BB61C *);
-void func_1514FBFC(void *, u8, s32);
-void func_15151D6C(void *, s32 *, f32 *, s32, u8, s32);
-void func_151C04F8(f32 *, u8, s32);
-void func_151C05A4(void *, u8, s32);
-void func_151C05F0(void *, u8, s32);
-void func_151C0644(void *, u8, s32);
-void func_151BBEE4(f32 *arg0, u8 arg1, s32 arg2);
-void func_151BBFBC(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, Surface *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
+s32 func_15145C90(s32 hitInfo);
+s32 func_15144E80(Surface *, Vec3f *, Vec3f *, Vec3f *);
+void func_1514FBFC(Desc1514FBFC *, u8, s32);
+void func_15151D6C(Desc15151D6C *, s32 *, f32 *, s32, u8, s32);
+void func_151C04F8(Vec3f *, u8, s32);
+void func_151C05A4(Vec3f *, u8, s32);
+void func_151C05F0(Vec3f *, u8, s32);
+void func_151C0644(Vec3f *, u8, s32);
+void func_151BBEE4(Vec3f *pos, u8 arg1, s32 arg2);
+void func_151BBFBC(Surface *surf, Vec3f *pos, s32 arg2, s32 arg3);
 
-void func_151BB61C(s32 arg0, Vec3_151BB61C *arg1, Vec3_151BB61C *arg2, u8 arg3, s32 arg4) {
-    Surf_151BB61C surf;
-    Vec3_151BB61C hit;
-    Vec3_151BB61C delta;
-    s32 sp1A0;
-    Vec3_151BB61C sp194;
-    Vec3_151BB61C sp188;
-    Vec3_151BB61C sp17C;
-    Fbfc_151BB61C fx;
+/*
+ * Impact effect for a shot from `from` towards `to`: effects at the origin, then a ray cast along the
+ * shot and, where it hits a surface, impact effects there.
+ */
+void func_151BB61C(struct127 *obj, Vec3f *from, Vec3f *to, u8 arg3, s32 arg4) {
+    Surface surf;
+    Vec3f hit;
+    Vec3f delta;
+    s32 hitInfo;
+    Vec3f edgeA;
+    Vec3f edgeB;
+    Vec3f normal;
+    Desc1514FBFC fx;
 
-    if (arg0 != 0) {
-        func_15055A2C(0, arg1->x, arg1->y, arg1->z, 0);
-        delta.x = arg2->x - arg1->x;
-        delta.y = arg2->y - arg1->y;
-        delta.z = arg2->z - arg1->z;
-        func_151C05A4(arg1, arg3, arg4);
-        func_151C05F0(arg1, arg3, arg4);
-        func_151C04F8((f32 *)arg1, arg3, arg4);
-        func_151BBEE4((f32 *)arg1, arg3, arg4);
-        if (func_150AC9C0(arg1->x, arg1->y, arg1->z, delta.x, delta.y, delta.z, 0, &surf, &hit.x, &hit.y, &hit.z, 0, &sp1A0, 0, 0.0f) != 0) {
-            if (func_15145C90(sp1A0) != 0) {
-                func_151BBFBC((s32)&surf, (s32)&hit, arg3 & 0xFF, arg4);
+    if (obj != NULL) {
+        func_15055A2C(0, from->x, from->y, from->z, 0);
+        delta.x = to->x - from->x;
+        delta.y = to->y - from->y;
+        delta.z = to->z - from->z;
+        func_151C05A4(from, arg3, arg4);
+        func_151C05F0(from, arg3, arg4);
+        func_151C04F8(from, arg3, arg4);
+        func_151BBEE4(from, arg3, arg4);
+        if (func_150AC9C0(from->x, from->y, from->z, delta.x, delta.y, delta.z, 0, &surf, &hit.x, &hit.y, &hit.z, NULL,
+                          &hitInfo, 0, 0.0f) != 0) {
+            if (func_15145C90(hitInfo) != 0) {
+                func_151BBFBC(&surf, &hit, arg3 & 0xFF, arg4);
             }
-            if (func_15144E80(&surf, &sp194, &sp188, &sp17C) != 0 && sp17C.y < 0.0f) {
+            if (func_15144E80(&surf, &edgeA, &edgeB, &normal) != 0 && normal.y < 0.0f) {
                 func_151C0644(&hit, arg3, arg4);
             }
             fx.dir.x = -delta.x;
@@ -760,8 +772,8 @@ void func_151BB61C(s32 arg0, Vec3_151BB61C *arg1, Vec3_151BB61C *arg2, u8 arg3, 
             fx.pos = hit;
             fx.unk24 = 3;
             fx.unk28 = 4;
-            fx.unk38 = 0.06089999899f;
-            fx.unk3C = 0.02520000003f;
+            fx.unk38 = 0.0609f;
+            fx.unk3C = 0.0252f;
             fx.unk40 = 45.0f;
             fx.unk44 = 53.0f;
             fx.unk48 = 203.0f;
@@ -781,13 +793,13 @@ void func_151BB61C(s32 arg0, Vec3_151BB61C *arg1, Vec3_151BB61C *arg2, u8 arg3, 
             fx.unk74 = 0;
             func_1514FBFC(&fx, arg3, arg4);
             {
-            Colors_151BB61C colors;
-            Scales_151BB61C scales;
-            Desc_151BB61C desc;
+            S32x9 colors;
+            F32x9 scales;
+            Desc15151D6C desc;
             colors = D_800AA718;
             scales = D_800AA73C;
-            desc.count = 6;
-            desc.spread = 6;
+            desc.unk0 = 6;
+            desc.unk4 = 6;
             desc.pos = hit;
             desc.vel.x = -delta.x;
             desc.vel.y = -delta.y;
@@ -796,13 +808,13 @@ void func_151BB61C(s32 arg0, Vec3_151BB61C *arg1, Vec3_151BB61C *arg2, u8 arg3, 
             desc.unk34 = 456.0f;
             desc.unk38 = 0.02000000142f;
             desc.unk3C = 0.02000000142f;
-            desc.unk40 = -1.710000038f;
-            desc.unk44 = 0.4480000138f;
+            desc.unk40 = -1.71f;
+            desc.unk44 = 0.448f;
             desc.unk48 = 50;
             desc.unk4A = 20;
-            desc.unk4C = 0.4990000129f;
+            desc.unk4C = 0.499f;
             desc.unk50 = 0.7010000348f;
-            desc.unk54 = 21.50200081f;
+            desc.unk54 = 21.502f;
             func_15151D6C(&desc, colors.v, scales.v, 9, arg3, arg4);
             }
         }
@@ -847,7 +859,7 @@ typedef struct Effect_151BBA9C {
 
 typedef struct Config_151BBA9C {
     s32 countBase, countRange;
-    Vec3_151BB61C position;
+    Vec3f position;
     s16 yawBase, yawRange, pitchBase, pitchRange;
     f32 speedBase, speedRange, durationBase, durationRange;
     s16 lifeBase, lifeRange;
@@ -857,8 +869,8 @@ typedef struct Config_151BBA9C {
 void func_15152190(void *, void *, void *, s32, f32, s32, s32, s32);
 s32 func_15046C80(f32 *, u16, f32, void *);
 void func_1504715C(void *, void *);
-extern Vec3_151BB61C D_8008FBA0;
-extern Vec3_151BB61C D_8008FBAC;
+extern Vec3f D_8008FBA0;
+extern Vec3f D_8008FBAC;
 extern f32 D_800AA80C;
 extern f32 D_800AA810;
 extern f32 D_800AA814;
@@ -869,25 +881,25 @@ extern f32 D_800AA824;
 extern f32 D_800AA828;
 
 void func_151BBA9C(s32 arg0, f32 *arg1, f32 *arg2, u8 arg3, s32 arg4) {
-    Vec3_151BB61C center;
+    Vec3f center;
     Effect_151BBA9C effect;
     f32 contact[8];
     f32 ground;
-    Vec3_151BB61C probe;
-    Vec3_151BB61C hit;
-    Vec3_151BB61C normal;
-    Vec3_151BB61C tangent;
-    Vec3_151BB61C facing;
+    Vec3f probe;
+    Vec3f hit;
+    Vec3f normal;
+    Vec3f tangent;
+    Vec3f facing;
 
     if (arg0 != 0) {
         center.x = (arg2[0] + arg1[0]) * 0.5f;
         center.y = (arg2[1] + arg1[1]) * 0.5f;
         center.z = (arg2[2] + arg1[2]) * 0.5f;
-        func_151C04F8(&center.x, arg3, arg4);
-        func_151C05A4(&center.x, arg3, arg4);
-        func_151C05F0(&center.x, arg3, arg4);
+        func_151C04F8(&center, arg3, arg4);
+        func_151C05A4(&center, arg3, arg4);
+        func_151C05F0(&center, arg3, arg4);
         func_15055A2C(1, center.x, center.y, center.z, 0);
-        func_151BBEE4(&center.x, arg3, arg4);
+        func_151BBEE4(&center, arg3, arg4);
         effect.field00 = 0;
         effect.field02 = 0xFF;
         effect.field04 = -0x40;
@@ -927,15 +939,15 @@ void func_151BBA9C(s32 arg0, f32 *arg1, f32 *arg2, u8 arg3, s32 arg4) {
             hit.x = probe.x;
             hit.y = ground;
             hit.z = probe.z;
-            func_151BBFBC((s32)contact, (s32)&hit, arg3, arg4);
-            if (func_15144E80(contact, &normal, &tangent, &facing) != 0 && facing.y < 0.0f) {
+            func_151BBFBC((Surface *)contact, &hit, arg3, arg4);
+            if (func_15144E80((Surface *)contact, &normal, &tangent, &facing) != 0 && facing.y < 0.0f) {
                 func_151C0644(&hit, arg3, arg4);
             }
         }
         {
             Config_151BBA9C config;
-            Vec3_151BB61C first = D_8008FBA0;
-            Vec3_151BB61C second = D_8008FBAC;
+            Vec3f first = D_8008FBA0;
+            Vec3f second = D_8008FBAC;
 
             config.countBase = 4;
             config.countRange = 8;
@@ -958,7 +970,7 @@ void func_151BBA9C(s32 arg0, f32 *arg1, f32 *arg2, u8 arg3, s32 arg4) {
     }
 }
 
-void func_151BBEE4(f32 *arg0, u8 arg1, s32 arg2) {
+void func_151BBEE4(Vec3f *pos, u8 arg1, s32 arg2) {
     Header header;
     Header2 header2;
 
@@ -967,16 +979,16 @@ void func_151BBEE4(f32 *arg0, u8 arg1, s32 arg2) {
     header.unk2 = (func_150ADA20() & 0xF) + 5;
     header.unk4 = 0;
 
-    header2.unk0 = (s32) arg0[0];
-    header2.unk4 = (s32) arg0[1];
-    header2.unk8 = (s32) arg0[2];
+    header2.unk0 = (s32) pos->x;
+    header2.unk4 = (s32) pos->y;
+    header2.unk8 = (s32) pos->z;
 
     func_151602C0(&header, &header2, (func_150ADA20() % 0x15U) + 0x1E, 0xFF, 0x61, 0x36, 0xFF, 0, 0, arg1, arg2);
 }
 
-void func_150E7FEC(f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+void func_150E7FEC(f32, s32, Surface *, Vec3f *, s32, s32, s32, s32, s32, s32, s32, s32);
 
-void func_151BBFBC(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+void func_151BBFBC(Surface *surf, Vec3f *pos, s32 arg2, s32 arg3) {
     union { u32 w; f64 _a; } r1;
     f32 temp_f;
     u32 r2;
@@ -984,7 +996,7 @@ void func_151BBFBC(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     temp_f = func_150ADA68();
     r1.w = func_150ADA20();
     r2 = func_150ADA20();
-    func_150E7FEC(temp_f * 75.0f + 75.0f, ((r1.w % 0x38) + 0xC8) & 0xFF, arg0, arg1,
+    func_150E7FEC(temp_f * 75.0f + 75.0f, ((r1.w % 0x38) + 0xC8) & 0xFF, surf, pos,
                   (r2 % 0xCD) + 0x12B, 1, 1, 0, 0, 0, (u8)arg2, 0);
 }
 
@@ -1025,14 +1037,9 @@ typedef struct {
     u8 ownerId;
 } Extra151BC104;
 
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec151BC104;
 
 typedef struct {
-    Vec151BC104 unk0;
+    Vec3f unk0;
     s16 unkC;
     s16 unkE;
     s32 unk10;
@@ -1046,7 +1053,7 @@ typedef struct {
     struct127 *owner;
     u8 ownerId;
     u8 pad5[3];
-    Vec151BC104 unk8;
+    Vec3f unk8;
     f32 unk14;
     f32 unk18;
     f32 unk1C;
