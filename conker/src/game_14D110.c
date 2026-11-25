@@ -165,7 +165,8 @@ void func_1511FC60(Camera *camera) {
     aim = &camera->aim;
     zone = camera->zone;
     camera->aimTimer = 60;
-    if ((camera->status & 2) || (camera->zone == 9) || (camera->zone == 0x38) || (camera->zone == 0x39) || (camera->zone == 0x37) || (camera->zone == 0x3B)) {
+    if ((camera->status & 2) || (camera->zone == 9) || (camera->zone == 0x38) || (camera->zone == 0x39) ||
+        (camera->zone == 0x37) || (camera->zone == 0x3B)) {
         // matching: the original stores 0 then 1; IDO drops the dead store unless it is volatile
         *(volatile u8 *)&aim->unk4D = 0;
         aim->unk4D = 1;
@@ -195,7 +196,7 @@ void func_1511FC60(Camera *camera) {
     } else if ((zone == 2) || (zone == 0x13)) {
         aim->targetPitch = 0.0f;
         aim->pitch = 0.0f;
-    } else if (zone == 0x1C) {
+    } else if (zone == 0x1C) { /* keeps the current pitch */
     } else if (zone == 0x34) {
         aim->targetPitch = 0.0f;
         aim->pitch = 0.0f;
@@ -218,7 +219,8 @@ void func_1511FC60(Camera *camera) {
     aim->savedYaw = camera->yaw;
     aim->savedUnk134 = camera->unk134;
     if (camera->unk92C) {
-        aim->savedTargetDistance = sqrtf((camera->target.x - camera->eye.x) * (camera->target.x - camera->eye.x) + (camera->target.z - camera->eye.z) * (camera->target.z - camera->eye.z));
+        aim->savedTargetDistance = sqrtf((camera->target.x - camera->eye.x) * (camera->target.x - camera->eye.x) +
+                                          (camera->target.z - camera->eye.z) * (camera->target.z - camera->eye.z));
         aim->savedHeight = camera->unk344;
         aim->savedUnk354 = camera->unk354;
     } else {
@@ -270,9 +272,11 @@ void func_15120158(Camera *camera) {
     aim = &camera->aim;
     zone = camera->zone;
     inMap42Zone1A = (D_800D1940 == 0x42) && (zone == 0x1A);
-    func_1510E7A4(0, 0, &probeY, &camera->unk360, 0, 0, camera->eye.x, camera->eye.y, camera->eye.z, camera->eye.y, 0, 0, -10000.0f, camera->eye.y);
+    func_1510E7A4(0, 0, &probeY, &camera->unk360, 0, 0,
+                 camera->eye.x, camera->eye.y, camera->eye.z, camera->eye.y, 0, 0, -10000.0f, camera->eye.y);
     camera->playerExt->aimActive = camera->aimState;
-    camera->distance = sqrtf((camera->eye.x - camera->target.x) * (camera->eye.x - camera->target.x) + (camera->eye.z - camera->target.z) * (camera->eye.z - camera->target.z));
+    camera->distance = sqrtf((camera->eye.x - camera->target.x) * (camera->eye.x - camera->target.x) +
+                             (camera->eye.z - camera->target.z) * (camera->eye.z - camera->target.z));
     if (camera->snap) {
         aim->savedUnk354 = probeY;
     }
@@ -435,6 +439,7 @@ void func_15120158(Camera *camera) {
                 aim->targetPitch += (f32)camera->contPad->stick_y * rate * (f32)D_800BE9E4;
             }
             if (zone == 0x38) {
+                // matching: sinPitch doubles as the pitch adjustment; a separate local changes the frame
                 if (camera->contPad->button & Z_TRIG) {
                     sinPitch = camera->unk8B4 - (f32)(((CamPlayerExt *)camera->player->unk31C)->unk1A2 >> 8) * 1.098632812f;
                 } else {
@@ -556,7 +561,8 @@ void func_15120158(Camera *camera) {
     camera->playerExt->aimTarget.z += aim->offset.z;
     camera->playerExt->aimEye.x += aim->offset.x;
     camera->playerExt->aimEye.z += aim->offset.z;
-    func_150491EC((struct17 *)&camera->playerExt->aimEye, (struct17 *)&camera->playerExt->aimTarget, (struct17 *)&camera->playerExt->aimDir);
+    func_150491EC((struct17 *)&camera->playerExt->aimEye, (struct17 *)&camera->playerExt->aimTarget,
+                  (struct17 *)&camera->playerExt->aimDir);
     func_15123A54(camera);
     func_1512E140(camera);
     func_15125594((struct108 *)camera);
