@@ -43,18 +43,8 @@ typedef struct SpriteParams {
     /* 0xE */ u8 padE[2];
 } SpriteParams;
 
-/* Entries of the D_800C5338[id] texture tables. */
-typedef struct ObjTexture {
-    /* 0x0 */ s32 addr;
-    /* 0x4 */ s32 unk4;
-    /* 0x8 */ u16 width;
-    /* 0xA */ u16 height;
-} ObjTexture;
-
 extern u8 D_800C3E70;
 extern s32 D_800C3E74;
-extern Gfx **D_800C4488[];
-extern ObjTexture *D_800C5338[];
 extern D_800C666FEntry D_800C666F[];
 extern u8 D_800C3E98[];
 extern u8 D_C3E98[];

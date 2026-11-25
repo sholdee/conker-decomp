@@ -5315,17 +5315,12 @@ void func_15062BDC(Actor *actor, f32 xzScale, f32 yScale) {
     }
 }
 
-typedef struct {
-    s32 unk0; /* flags in the top byte, s:t packed 12:12 */
-    s32 unk4; /* tile size - 2, packed the same way */
-} Entry62D10;
-extern Entry62D10 **D_800C4488[];
 /*
  * Scrolls texture tile `tile` of actor type `type` (set `set`) by (ds, dt), wrapping at the tile size;
  * with `absolute` set the coordinates are set instead. Coordinates are packed 12:12 in unk0.
  */
 void func_15062D10(s32 type, s32 tile, s32 ds, s32 dt, s32 set, s32 absolute) {
-    Entry62D10 *base, *entry;
+    Gfx *base, *entry; /* G_SETTILESIZE-style words: w0 = flags in the top byte, s:t packed 12:12; w1 = tile size - 2 */
     s32 packed, wrapS, wrapT, newS, newT, tmp, flag;
 
     newS = 0;
@@ -5335,11 +5330,11 @@ void func_15062D10(s32 type, s32 tile, s32 ds, s32 dt, s32 set, s32 absolute) {
         return;
     }
     base = D_800C4488[type][set];
-    packed = ((Entry62D10 *)((u8 *)base + tile * 8))->unk4; // matching: byte offsets, not base[tile]
+    packed = ((Gfx *)((u8 *)base + tile * 8))->words.w1; // matching: byte offsets, not base[tile]
     wrapS = ((packed >> 12) & 0xFFF) + 2;
     wrapT = (packed & 0xFFF) + 2;
-    entry = ((Entry62D10 *)((u8 *)base + tile * 8));
-    packed = entry->unk0;
+    entry = ((Gfx *)((u8 *)base + tile * 8));
+    packed = entry->words.w0;
     flag = absolute;
     if (flag != 0) {
         newS = ds & 0xFFF;
@@ -5364,15 +5359,8 @@ void func_15062D10(s32 type, s32 tile, s32 ds, s32 dt, s32 set, s32 absolute) {
         }
     }
     packed = (packed & 0xFF000000) | (newT & 0xFFF) | ((newS & 0xFFF) << 12);
-    entry->unk0 = packed;
+    entry->words.w0 = packed;
 }
-typedef struct Entry62E24 {
-    u8 pad0[8];
-    u16 unk8;
-    u16 unkA;
-} Entry62E24;
-
-extern Entry62E24 *D_800C5338[];
 void func_15094AB8(Vtx *arg0, s16 (*arg1)[2], s32 arg2, f32 arg3, s32 arg4, s32 arg5);
 
 /* Rewrites texture coordinates in the current vertex buffer of every visible actor of `type`. */
@@ -5387,8 +5375,8 @@ void func_15062E24(s32 type, s32 firstVtx, s32 arg2, s32 arg3, s32 arg4, s32 set
             if (D_800CC2D0[i].interaction_state == 0) continue;
             if (type != D_800CC2D0[i].id) continue;
             if (D_800CC2D0[i].unk2FA == 0) continue;
-            w = D_800C5338[type][set].unk8;
-            h = D_800C5338[type][set].unkA;
+            w = D_800C5338[type][set].width;
+            h = D_800C5338[type][set].height;
             if (doubleSize != 0) {
                 w *= 2;
                 h *= 2;

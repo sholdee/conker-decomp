@@ -1096,10 +1096,12 @@ extern u8  D_800C4000;
 
 extern s32 * D_800C4020[]; // per-id first vertex of each part
 extern u16 D_800C4310[]; // part count, indexed by VtxMorphGroup.kind
+extern Gfx **D_800C4488[]; // per-model display-list parts
 extern u16 D_800C4778[]; // display-list parts per model id
 extern Gfx **D_800C48F0[]; // per model: display list table (ModelHeader dlists2)
 extern void *D_800C4BE0[]; // per model: bone table (16-byte entries)
 extern u16 D_800C4ED0[]; // bone count per model id
+extern ObjTexture *D_800C5338[]; // per-model texture tables
 extern u16 D_800C5628[]; // textures count
 extern u16 D_800C57A0[]; // vertex count
 extern u16 D_800C5918[]; // triangle weight, see func_1503D984

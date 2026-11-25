@@ -41,17 +41,10 @@ typedef struct RayHit {
     /* 0x60 */ s32 unk60;
 } RayHit;
 
-typedef struct {
-    /* 0x0 */ u32 unk0;
-    /* 0x4 */ s32 unk4;
-    /* 0x8 */ s32 unk8;
-} ModelReloc;
-
 extern f32 D_8009CC3C;  // matching: 20000.0f, but as a literal IDO loads it into a different register
 extern PartSet D_80086CC4[];
 extern s32 (*D_80086C90[])(Actor *, Actor *, s32);
 extern u8 D_800A7230[][8];
-extern ModelReloc *D_800C5338[];
 
 extern void *allocate_memory(s32 size, s32, s32, s32);
 extern s32 func_10004074(void *);
@@ -1503,7 +1496,7 @@ void func_15084A18(void) {
     Actor *obj;
     s32 j;
     s32 k;
-    ModelReloc *relocs;
+    ObjTexture *textures;
     u8 *timer;
 
     timer = D_800D2040;
@@ -1528,10 +1521,10 @@ void func_15084A18(void) {
                         }
                     }
                 }
-                relocs = D_800C5338[i];
+                textures = D_800C5338[i];
                 for (k = 0; k < D_800C5628[i]; k++) {
-                    if (relocs[k].unk0 >= 0x10000000U) {
-                        func_1510D720(relocs[k].unk4);
+                    if (textures[k].addr >= 0x10000000U) {
+                        func_1510D720(textures[k].id);
                     }
                 }
                 func_10004074(D_800D19A0[i] - 0x38);

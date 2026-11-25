@@ -4239,4 +4239,12 @@ typedef struct PathNode {
     /* 0xF */ u8 param;
 } PathNode; /* size 0x10 */
 
+/* Entries of the per-model texture tables D_800C5338[id] (D_800C5628[id] entries each). */
+typedef struct ObjTexture {
+    /* 0x0 */ u32 addr;   // loaded address (>= 0x10000000 once loaded), or 0x80000000 if the load failed
+    /* 0x4 */ s32 id;     // texture id passed to func_1510D0EC
+    /* 0x8 */ u16 width;
+    /* 0xA */ u16 height;
+} ObjTexture; /* size 0xC */
+
 #endif
