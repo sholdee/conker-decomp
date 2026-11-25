@@ -146,129 +146,134 @@ void func_1509CE64(u16 *list, void (*callback)(s32)) {
     }
 }
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    u32 unkC;
-} Res1509CF28;
+/* A pointer fixup: `offset` is relative to its block until relocated; bit 31 of `flags` ends a list. */
+typedef struct RelocPair {
+    /* 0x0 */ s32 offset;
+    /* 0x4 */ u32 flags;
+} RelocPair;
 
-typedef struct {
-    s32 *unk0;
-    s32 unk4;
-} Ent1509CF28;
+#define RELOC_LAST 0x80000000
 
-extern s32 D_800D2FB0;
-extern Ent1509CF28 *func_1502B6BC(s32, s32, u32 *, s32, s32, s32, s32);
+/* Header of a loaded resource block; it starts with its own fixup list (0x0/0x4, 0x8/0xC). */
+typedef struct LoadedResource {
+    /* 0x0 */ s16 *unk0;
+    /* 0x4 */ u32 unk4;
+    /* 0x8 */ s16 *dependencies;
+    /* 0xC */ u32 dependencyCount;   // stored doubled in the file
+} LoadedResource;
 
-s32 func_1509CF28(s32 arg0, s32 *arg1)
-{
-  Ent1509CF28 *table;
-  u32 i;
-  s32 done;
-  u32 count;
-  s32 *p;
-  s32 flags;
-  s32 pad1;
-  s32 pad2;
-  count = 0;
-  D_800D2FB0 = (s32) func_1502B6BC(0, 0, &count, 3, 8, 0, arg0);
-  if (D_800D2FB0 == 0)
-  {
-    *arg1 = 0;
-    return 0;
-  }
-  table = (Ent1509CF28 *) D_800D2FB0;
-  table->unk4 = count - 1;
-  *arg1 = count - 1;
-  for (i = 1; i < count; i++)
-  {
-    done = 0;
-    p = ((Ent1509CF28 *) D_800D2FB0)[i].unk0;
-    do
-    {
-      p[0] += (s32) ((Ent1509CF28 *) D_800D2FB0)[i].unk0;
-      flags = p[1];
-      if (flags & 0x80000000)
-      {
-        if (1)
-        {
-          done = 1;
-        }
-      }
-      p[1] = flags & (~0xF0000000);
-      p += 2;
+/* The loaded resource table: slot 0's unk4 holds the slot count, slots 1.. point at resource blocks. */
+typedef struct ResourceSlot {
+    /* 0x0 */ LoadedResource *data;
+    /* 0x4 */ s32 unk4;
+} ResourceSlot;
+
+extern ResourceSlot *D_800D2FB0;
+extern void *func_1502B6BC(s32, s32, u32 *, s32, s32, s32, s32);
+extern void func_10004074(void *);
+
+/* Loads the resource table, relocates every block in it and returns its resource count in *countOut. */
+s32 func_1509CF28(s32 arg0, s32 *countOut) {
+    ResourceSlot *table;
+    u32 i;
+    s32 done;
+    u32 count;
+    RelocPair *reloc;
+    u32 flags;
+    s32 pad[2]; // matching: frame size
+
+    count = 0;
+    D_800D2FB0 = func_1502B6BC(0, 0, &count, 3, 8, 0, arg0);
+    if (D_800D2FB0 == NULL) {
+        *countOut = 0;
+        return 0;
     }
-    while (!done);
-    ((Res1509CF28 *) (&table[1])[i - 1].unk0)->unkC = (((Res1509CF28 *) (&table[1])[i - 1].unk0)->unkC & 0x0FFFFFFF) >> 1;
-  }
-
-  return 1;
+    table = D_800D2FB0;
+    table[0].unk4 = count - 1;
+    *countOut = count - 1;
+    for (i = 1; i < count; i++) {
+        done = 0;
+        reloc = (RelocPair *)D_800D2FB0[i].data;
+        do {
+            reloc->offset += (s32)D_800D2FB0[i].data;
+            flags = reloc->flags;
+            if (flags & RELOC_LAST) {
+                if (1) { // matching: -g3 block keeps IDO's register order
+                    done = 1;
+                }
+            }
+            reloc->flags = flags & 0x0FFFFFFF;
+            reloc++;
+        } while (!done);
+        // matching: indexing from &table[1] keeps IDO's stepped table pointer
+        (&table[1])[i - 1].data->dependencyCount = ((&table[1])[i - 1].data->dependencyCount & 0x0FFFFFFF) >> 1;
+    }
+    return 1;
 }
 
-extern s32 D_800D2FB0;
-extern s32 func_10004074(s32);
-
+/* Frees the loaded resource table. */
 void func_1509D054(void) {
-    s32 temp;
-    if (D_800D2FB0) {
-        temp = D_800D2FB0;
-        func_10004074(temp);
-        D_800D2FB0 = 0;
+    ResourceSlot *table;
+
+    if (D_800D2FB0 != NULL) {
+        table = D_800D2FB0;
+        func_10004074(table);
+        D_800D2FB0 = NULL;
     }
 }
 
-s32 func_1509D08C(s32 arg0, s32 arg1, s32 *arg2, s32 *arg3) {
-    u8 *base;
-    u8 *entry;
-    s16 **resource;
-    s16 *dependencies;
-    s16 dependency;
-    u32 index;
+/*
+ * Returns 1 if every dependency of loaded resource `index` is loaded. Also reports its first
+ * dependency (0xBF if missing) and the first halfword of its unk0 list (0 if missing).
+ */
+s32 func_1509D08C(s32 arg0, s32 index, s32 *firstDepOut, s32 *unk0Out) {
+    ResourceSlot *table;
+    ResourceSlot *slot;
+    LoadedResource *resource;
+    s16 *deps;
+    u32 i;
     u32 count;
 
-    base = (u8 *)D_800D2FB0;
-    entry = ((u8 (*)[8])base)[arg1];
-    if (base == 0) {
-        if (arg2 != 0) {
-            *arg2 = 0xBF;
+    table = D_800D2FB0;
+    slot = ((ResourceSlot (*)[1])table)[index]; // matching: row view keeps IDO's base+offset operand order
+    if (table == NULL) {
+        if (firstDepOut != NULL) {
+            *firstDepOut = 0xBF;
         }
-        if (arg3 != 0) {
-            *arg3 = 0;
-        }
-        return 0;
-    }
-    resource = *(s16 ***)(entry + 8);
-    if (resource == 0) {
-        if (arg2 != 0) {
-            *arg2 = 0xBF;
-        }
-        if (arg3 != 0) {
-            *arg3 = 0;
+        if (unk0Out != NULL) {
+            *unk0Out = 0;
         }
         return 0;
     }
-    if (arg2 != 0) {
-        *arg2 = resource[2][0];
-        resource = *(s16 ***)(entry + 8);
+    resource = slot[1].data;
+    if (resource == NULL) {
+        if (firstDepOut != NULL) {
+            *firstDepOut = 0xBF;
+        }
+        if (unk0Out != NULL) {
+            *unk0Out = 0;
+        }
+        return 0;
     }
-    if (arg3 != 0) {
-        *arg3 = resource[0][0];
-        resource = *(s16 ***)(entry + 8);
+    if (firstDepOut != NULL) {
+        *firstDepOut = resource->dependencies[0];
+        resource = slot[1].data;
     }
-    index = 0;
-    count = *(u32 *)((u8 *)resource + 0xC);
+    if (unk0Out != NULL) {
+        *unk0Out = resource->unk0[0];
+        resource = slot[1].data;
+    }
+    i = 0;
+    count = resource->dependencyCount;
     if (count != 0) {
-        dependencies = resource[2];
+        deps = resource->dependencies;
         do {
-            dependency = *dependencies;
-            index++;
-            if (!(
-                  ((u8 *)D_800D2E4C)[dependency >> 3] & 1 << (*dependencies & 7))) {
+            i++;
+            if (!RESOURCE_IS_LOADED(*deps)) {
                 return 0;
             }
-            dependencies++;
-        } while (index < count);
+            deps++;
+        } while (i < count);
     }
     return 1;
 }
