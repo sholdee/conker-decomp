@@ -894,32 +894,33 @@ extern char D_800AB844[];
 extern char D_800AB848[];
 extern char D_800AB84C[];
 extern s8 D_8008FE9C[];
-extern s8 D_8008FEC4[];
+extern s8 D_8008FEC4[]; /* [preset][4] team per player; a 2D declaration mismatches */
 extern s8 D_800E0B90[];
 extern u8 D_800E0B8C;
 extern s8 D_8008FDA0;
 extern s8 D_8008FDC4;
 void func_151E22BC(void);
 
+/* Mode-select page: up/down picks a game mode of category unk2C; accept opens its setup (page 4). */
 void func_151E0424(void) {
-    s32 alpha;
-    s32 count;
-    s32 sum;
-    s32 sel;
+    s32 titleAlpha;
+    s32 modeCount;
+    s32 first;
+    s32 cursor;
     s32 i;
     s32 x;
-    s32 v;
-    s32 alpha2;
+    s32 value;
+    s32 alpha;
     s32 flags;
     f32 step;
-    s8 t;
+    s8 teams;
 
-    alpha2 = D_800E0A94;
+    alpha = D_800E0A94;
     if (D_8008FDD4->unk2C != 0) {
-        alpha = alpha2;
+        titleAlpha = alpha;
         if (D_800E0A96 != -1) {
             D_8008FDD4->input &= ~MENU_BACK;
-            i = D_800E0A95 - (D_800BE9E4 << 5);
+            i = D_800E0A95 - (D_800BE9E4 << 5); // matching: the fade level shares i's register
             if (i <= 0) {
                 D_800E0A95 = 0;
                 D_8008FDD4->page = D_800E0A96;
@@ -933,9 +934,9 @@ void func_151E0424(void) {
                 return;
             }
             D_800E0A95 = i;
-            alpha2 = D_800E0A95;
+            alpha = D_800E0A95;
             if (D_800E0A96 != 2) {
-                alpha = alpha2;
+                titleAlpha = alpha;
             }
         } else {
             i = D_800E0A95 + (D_800BE9E4 << 5);
@@ -943,12 +944,12 @@ void func_151E0424(void) {
                 i = 0xFF;
             }
             D_800E0A95 = i;
-            alpha2 = (alpha2 * i) >> 8;
-            if (alpha2 >= 0xFE) {
-                alpha2 = 0xFF;
+            alpha = (alpha * i) >> 8;
+            if (alpha >= 0xFE) {
+                alpha = 0xFF;
             }
         }
-        count = D_8008FE9C[D_8008FDD4->unk2C - 1];
+        modeCount = D_8008FE9C[D_8008FDD4->unk2C - 1];
         D_8008FDA0 = 0;
         D_8008FDC4 = 0;
         D_800E0B8C = 0;
@@ -956,12 +957,12 @@ void func_151E0424(void) {
             D_8008FE2C = 1 - D_8008FE2C;
             func_10010F30(0x62D, 0x4650, 0x40, 0, 0);
         }
-        func_1504332C(0xFF, 0xFF, 0xFF, alpha);
+        func_1504332C(0xFF, 0xFF, 0xFF, titleAlpha);
         func_15042D94(0x94, 0x7E, 1, D_800AB844, 0x1A);
-        func_1504332C(0xFF, 0xFF, 0xFF, alpha2);
+        func_1504332C(0xFF, 0xFF, 0xFF, alpha);
         func_15042D94(0xD5, 0x7E, 1, D_800AB848, (D_8008FE2C == 1) + 0x1B);
-        if ((alpha2 == 0xFF) && (D_8008FE2C == 0)) {
-            if ((count != 5) || ((count == 5) && (D_8008FDE8 == 0.0f))) {
+        if ((alpha == 0xFF) && (D_8008FE2C == 0)) {
+            if ((modeCount != 5) || ((modeCount == 5) && (D_8008FDE8 == 0.0f))) { // matching: redundant == 5 test
                 flags = D_8008FDD4->input;
                 if (flags & MENU_UP) {
                     D_8008FDE8 = 1.0f;
@@ -974,34 +975,34 @@ void func_151E0424(void) {
                 }
             }
         }
-        v = D_8008FDD4->cursor;
-        if (v < 0) {
-            D_8008FDD4->cursor = v + count;
-            v = D_8008FDD4->cursor;
+        value = D_8008FDD4->cursor;
+        if (value < 0) {
+            D_8008FDD4->cursor = value + modeCount;
+            value = D_8008FDD4->cursor;
         }
-        if (v >= count) {
-            D_8008FDD4->cursor = v - count;
-            v = D_8008FDD4->cursor;
+        if (value >= modeCount) {
+            D_8008FDD4->cursor = value - modeCount;
+            value = D_8008FDD4->cursor;
         }
-        sel = v;
-        sum = 0;
+        cursor = value;
+        first = 0;
         for (i = 0; i < D_8008FDD4->unk2C - 1; i++) {
-            sum += D_8008FE9C[i];
+            first += D_8008FE9C[i];
         }
-        D_8008FDD4->selection = sel + sum;
-        if (count != 5) {
-            x = 0x8C - ((count * 0x1C) >> 1);
-            for (i = 0; i < count; i++) {
+        D_8008FDD4->selection = cursor + first;
+        if (modeCount != 5) {
+            x = 140 - ((modeCount * 28) >> 1);
+            for (i = 0; i < modeCount; i++) {
                 func_150432FC(0x53, x);
-                v = D_800AB68C[sum + i].nameText;
-                if ((i == sel) && (D_8008FE2C == 0)) {
-                    v++;
+                value = D_800AB68C[first + i].nameText;
+                if ((i == cursor) && (D_8008FE2C == 0)) {
+                    value++;
                 }
-                func_15042E3C(D_800AB84C, v);
-                x += 0x1C;
+                func_15042E3C(D_800AB84C, value);
+                x += 28;
             }
         } else {
-            step = D_800BE9E4 * 0.05000000075f;
+            step = D_800BE9E4 * 0.05f;
             if (D_8008FDE8 < 0.0f) {
                 D_8008FDE8 += step;
                 if (D_8008FDE8 > 0.0f) {
@@ -1017,16 +1018,16 @@ void func_151E0424(void) {
                 D_8008FDD4->input &= ~MENU_ACCEPT;
             }
         }
-        if (alpha2 == 0xFF) {
+        if (alpha == 0xFF) {
             flags = D_8008FDD4->input;
             if (flags & MENU_ACCEPT) {
                 D_8008FDD4->input = flags & ~MENU_BACK;
                 if (D_8008FE2C == 0) {
                     D_800E0A96 = 4;
                     D_800E0BE0[0] = D_8008FDD4->cursor;
-                    t = D_800AB68C[D_8008FDD4->selection].unk5;
-                    if (t < 0) {
-                        D_800E0B90[0] = D_8008FEC4[(-t - 1) << 2];
+                    teams = D_800AB68C[D_8008FDD4->selection].unk5;
+                    if (teams < 0) {
+                        D_800E0B90[0] = D_8008FEC4[(-teams - 1) << 2];
                     } else {
                         D_800E0B90[0] = 0;
                     }
@@ -1040,19 +1041,20 @@ void func_151E0424(void) {
     }
 }
 
+/* Options page for the selected mode (D_800AB754[mode]); leaving it saves the settings if D_8008FDE0 is set. */
 void func_151E09DC(void) {
-    s32 arg0;
-    s32 temp;
+    s32 options;
+    s32 alpha;
 
     func_1504332C(0xFF, 0xFF, 0xFF, 0xFF);
     func_15042D94(0x94, 0x7E, 1, D_800AB850, 0x1A);
     func_15042D78(0x81);
 
-    arg0 = D_800AB754[D_800AB68C[D_8008FDD4->selection].mode];
+    options = D_800AB754[D_800AB68C[D_8008FDD4->selection].mode];
     if (D_800E0A96 == 0) {
         D_8008FDD4->input &= ~MENU_BACK;
-        temp = D_800E0A95 - (D_800BE9E4 << 5);
-        if (temp <= 0) {
+        alpha = D_800E0A95 - (D_800BE9E4 << 5);
+        if (alpha <= 0) {
             D_8008FDD4->page = 0;
             if (D_8008FDE0 != 0) {
                 func_151E2404();
@@ -1061,19 +1063,19 @@ void func_151E09DC(void) {
             D_800E0A96 = -1;
             return;
         }
-        D_800E0A95 = temp;
+        D_800E0A95 = alpha; // matching: stored twice on this path
     } else {
-        temp = D_800E0A95 + (D_800BE9E4 << 5);
-        if (temp >= 0x100) {
-            temp = 0xFF;
+        alpha = D_800E0A95 + (D_800BE9E4 << 5);
+        if (alpha >= 0x100) {
+            alpha = 0xFF;
         }
     }
 
-    D_800E0A95 = temp;
-    if (temp != 0xFF) {
+    D_800E0A95 = alpha;
+    if (alpha != 0xFF) {
         D_8008FDD4->input = 0;
     }
-    func_151E3344(arg0, 1, 0, temp & 0xFF, 0);
+    func_151E3344(options, 1, 0, alpha & 0xFF, 0);
 
     if (D_8008FDD4->input & MENU_BACK) {
         D_800E0A96 = 0;
