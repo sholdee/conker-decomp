@@ -29,6 +29,8 @@ void func_10001420(void) {
     }
 }
 
+/* With interrupts disabled: clears D_80043B40 and invalidates the I-cache from
+ * D_1002AAD0 up to the end of 4MB RDRAM. */
 void func_10001444(void) {
     u32 saveMask = __osDisableInt();
     func_100061F8(2, 31);
@@ -38,10 +40,13 @@ void func_10001444(void) {
     __osRestoreInt(saveMask);
 }
 
+/* Stops thread D_80031AE0. */
 void func_100014A0(void) {
     osStopThread(&D_80031AE0);
 }
 
+/* With interrupts disabled: releases the D_8003BE74 and D_8003BE70 blocks (as KSEG0
+ * pointers) through func_10004074, then hands arg0 to func_10005B04 and clears D_80043B40. */
 void func_100014C4(s32 arg0) {
     u32 saveMask = __osDisableInt();
     func_100061F8(2, 31);
@@ -91,7 +96,8 @@ void func_10001AA8(_Pft *px, unsigned char code, unsigned char *p, short nsig, s
 /* _Ldtob (libultra xldtob.c). Unlike the SDK, this copy builds its 0.0/1.0 constants as
  * float locals converted to double at runtime (golden: mtc1/cvt.d.s, with 0.0 kept in a
  * double stack slot) -- IDO folds every literal spelling. The -g3 frame also holds one
- * extra pointer local, here the typed copy of arg0. */
+ * extra pointer local, here the typed copy of arg0. Formats the double in *arg0 for
+ * the %e/%E/%f/%g/%G conversion code. */
 void func_10001550(void *arg0, unsigned char code) {
     unsigned char buff[32];
     unsigned char *p;
@@ -130,6 +136,7 @@ void func_10001550(void *arg0, unsigned char code) {
                 ldval = -ldval;
             }
 
+            /* convert the binary exponent to a decimal one (30103 / 100000 ~= log10(2)) */
             if ((xexp = xexp * 30103 / 100000 - 4) < 0) {
                 n = (3 - xexp) & ~3, xexp = -n;
 
@@ -155,8 +162,8 @@ void func_10001550(void *arg0, unsigned char code) {
         {
             int gen = px->prec + ((code == 'f') ? 10 + xexp : 6);
 
-            if (gen > 0x13) {
-                gen = 0x13;
+            if (gen > 19) {
+                gen = 19;
             }
 
             for (*p++ = '0'; gen > 0 && zero < ldval; p += 8) {
@@ -235,6 +242,8 @@ s16 func_100019F0(s16 *pex, _Pft *px) {
     }
 }
 
+/* _Genld (libultra xldtob.c): lays out the nsig digits at p with decimal exponent xexp
+ * as %f or %e text in px->s, setting the n1/nz1/n2/nz2 field widths. */
 void func_10001AA8(_Pft *px, unsigned char code, unsigned char *p, short nsig, short xexp) {
     if (nsig <= 0) {
         p = (unsigned char *)"0";
