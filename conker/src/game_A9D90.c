@@ -1,12 +1,14 @@
 #include <ultra64.h>
 
-// matching: func_1506160C and D_800D20FC are declared below with types that differ from the shared headers
+// matching: func_1506160C, D_800D20FC and D_800BE9F4 are declared below with types that differ from the shared headers
 #define func_1506160C func_1506160C_hdr
 #include "functions.h"
 #undef func_1506160C
 #define D_800D20FC D_800D20FC_hdr
+#define D_800BE9F4 D_800BE9F4_hdr
 #include "variables.h"
 #undef D_800D20FC
+#undef D_800BE9F4
 
 extern s32 func_15084D70(s32, s32, s32, s16*, f32*, u8*, u8*, s32*, s32*, s32, s32*);
 extern void func_15022190(s16, s16, s16, f32);
@@ -343,6 +345,7 @@ void func_15181DC8(s32);
 void func_15082A44(D20FCEntry *, s32, s32, s32, s32);
 void func_15088D58(struct127 *);
 extern s16 D_800BE9F2;
+extern s32 D_800BE9F4;
 extern D20FCEntry *D_800D20FC;
 
 /* Re-initialises obj through func_15060F28/func_15082A44 (health back to D_8008726C), keeping a few state bytes. */
@@ -702,140 +705,145 @@ Gfx *func_1507DB6C(Gfx *gfx, s32 player) {
     return gfx;
 }
 
-void func_1507DE4C(struct127 *arg0) {
+void func_150836CC(struct127 *, s32);
 
-    if (arg0->interaction_state == 1) {
-        func_150836CC(arg0, 0x44);
-        func_150836CC(arg0, 0x23);
-        arg0->unk9C |= 0xF000;
-        func_150836CC(arg0, 0x44);
-        func_150836CC(arg0, 0x23);
+/* Sets bits in obj->unk9C (after re-running func_150836CC 0x44/0x23 when interaction_state is 1). */
+void func_1507DE4C(struct127 *obj) {
+    if (obj->interaction_state == 1) {
+        func_150836CC(obj, 0x44);
+        func_150836CC(obj, 0x23);
+        obj->unk9C |= 0xF000;
+        func_150836CC(obj, 0x44);
+        func_150836CC(obj, 0x23);
         return;
     }
 
-    switch(arg0->id) {
-        case 0x9F:
-        case 0xa0:
-            arg0->unk9C |= 0xF000;
-            break;
-        case 0x5A:
-        case 0x74:
-        case 0x7A:
-            arg0->unk9C |= 0xFF8;
-            break;
+    switch (obj->id) {
+    case 0x9F:
+    case 0xA0:
+        obj->unk9C |= 0xF000;
+        break;
+    case 0x5A:
+    case 0x74:
+    case 0x7A:
+        obj->unk9C |= 0xFF8;
+        break;
     }
 }
 
-
-void func_1507DF10(void *arg0, s32 arg1) {
-    switch (arg1) {
+/* Sets obj's unk94/unk9C flags and unk2E4 (1, 2, 4 or 8) for part 4..9. */
+void func_1507DF10(struct127 *obj, s32 part) {
+    switch (part) {
     case 9:
-        *(s32 *)((u8 *)arg0 + 0x94) = (s32) (*(s32 *)((u8 *)arg0 + 0x94) | 0x20);
-        *(s32 *)((u8 *)arg0 + 0x9C) = (s32) (*(s32 *)((u8 *)arg0 + 0x9C) | 0x78);
-        *(s32 *)((u8 *)arg0 + 0x2E4) = 1;
+        obj->unk94 |= 0x20;
+        obj->unk9C |= 0x78;
+        obj->unk2E4 = 1;
         return;
     case 8:
-        *(s32 *)((u8 *)arg0 + 0x94) |= 0x40;
-        *(s32 *)((u8 *)arg0 + 0x94) &= ~0x200;
-        *(s32 *)((u8 *)arg0 + 0x9C) = (s32) (*(s32 *)((u8 *)arg0 + 0x9C) | 0xF00);
-        *(s32 *)((u8 *)arg0 + 0x2E4) = 2;
+        obj->unk94 |= 0x40;
+        obj->unk94 &= ~0x200;
+        obj->unk9C |= 0xF00;
+        obj->unk2E4 = 2;
         return;
     case 6:
     case 7:
-        *(s32 *)((u8 *)arg0 + 0x94) |= 0xE;
-        *(s32 *)((u8 *)arg0 + 0x94) &= ~0x410;
-        *(s32 *)((u8 *)arg0 + 0x9C) = (s32) (*(s32 *)((u8 *)arg0 + 0x9C) | 0xEE0000);
-        *(s32 *)((u8 *)arg0 + 0x2E4) = 4;
+        obj->unk94 |= 0xE;
+        obj->unk94 &= ~0x410;
+        obj->unk9C |= 0xEE0000;
+        obj->unk2E4 = 4;
         return;
     case 4:
     case 5:
-        *(s32 *)((u8 *)arg0 + 0x94) |= 0x80;
-        *(s32 *)((u8 *)arg0 + 0x94) &= ~0x500;
-        *(s32 *)((u8 *)arg0 + 0x2E4) = 8;
-        /* fallthrough */
-    default:
+        obj->unk94 |= 0x80;
+        obj->unk94 &= ~0x500;
+        obj->unk2E4 = 8;
         return;
     }
 }
-void func_1507DFE4(s32 arg0, s32 arg1) {
-    s32 temp;
-    s16 sp5C[3];
-    f32 sp50[3];
-    u8 sp4F;
-    u8 sp4E;
-    s32 sp48;
-    s32 sp44;
-    f32 temp_f0;
-    s32 sp3C;
-    s32 sp38;
+
+/* Looks up resource's position and facing via func_15084D70 and calls func_1501D348(0x25, ...) from there. */
+void func_1507DFE4(s32 resource, s32 arg1) {
+    s32 savedMode;
+    s16 pos[3];
+    f32 vec[3];
+    u8 unk4F;
+    u8 angle;
+    s32 unk48;
+    s32 unk44;
+    f32 yaw;
+    s32 kind;
+    s32 type;
 
     if (D_800C35EA != 1) {
-        func_15084D70(0, arg0, 1, sp5C, sp50, &sp4F, &sp4E, &sp44, &sp48, 1, &sp38);
-        temp_f0 = ((f32)(sp4E - 0x40) * 1.40625f) + 180.0f;
-        if (sp38 == 0) {
-            sp3C = 1;
-        } else if (sp38 == 1) {
-            sp3C = 3;
+        func_15084D70(0, resource, 1, pos, vec, &unk4F, &angle, &unk44, &unk48, 1, &type);
+        yaw = (f32)(angle - 64) * (360.0f / 256.0f) + 180.0f;
+        if (type == 0) {
+            kind = 1;
+        } else if (type == 1) {
+            kind = 3;
         } else {
             return;
         }
-        func_15022190(sp5C[0], sp5C[1], sp5C[2], temp_f0);
-        temp = D_800BE9F0;
+        func_15022190(pos[0], pos[1], pos[2], yaw);
+        savedMode = D_800BE9F0;
         D_800BE9F0 = 0x25;
         D_800C3671 = 1;
-        func_1501D348(0x25, sp3C, 0, 0, 0);
+        func_1501D348(0x25, kind, 0, 0, 0);
         D_800C3670 = 1;
-        D_800BE9F0 = temp;
+        D_800BE9F0 = savedMode;
     }
 }
-extern s32 func_15084D70(s32, s32, s32, s16*, f32*, u8*, u8*, s32*, s32*, s32, s32*);
 
-
+/* Returns 0, or 1 + the type func_15084D70 reports for D_800BE3E0 (after setting D_800BE9F4 from D_800BE3DF). */
 s32 func_1507E114(s32 arg0) {
-    s32 sp5C;
-    s16 sp54[3];
-    f32 sp48[3];
-    s32 sp44;
-    u8 sp43;
-    u8 sp42;
-    s32 sp3C;
-    s32 temp;
+    s32 type;
+    s16 pos[3];
+    f32 vec[3];
+    s32 unk44;
+    u8 unk43;
+    u8 unk42;
+    s32 unk3C;
+    s32 mode;
 
     if (D_800D18A8 == 0) {
         return 0;
     }
-    temp = (s32)D_800BE9F4;
-    if (temp == 0x22 || temp == 0x18) {
+    mode = D_800BE9F4;
+    if (mode == 0x22 || mode == 0x18) {
         return 0;
     }
-    *(s32*)&D_800BE9F4 = (s8)D_800BE3DF;
-    func_15084D70(0, (u8)D_800BE3E0, 1, sp54, sp48, &sp43, &sp42, &sp44, &sp3C, 1, &sp5C);
-    return sp5C + 1;
+    D_800BE9F4 = (s8)D_800BE3DF;
+    func_15084D70(0, D_800BE3E0, 1, pos, vec, &unk43, &unk42, &unk44, &unk3C, 1, &type);
+    return type + 1;
 }
-void func_15143134(void *, f32 *, s32);
+/* unk1D4 points at an array of 4x4 f32 bone matrices (0x40 bytes each). */
+typedef f32 BoneMtx[4][4];
 
-void func_1507E1D0(struct127 *arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
-    if (arg0->unk1D4 != NULL) {
-        s32 base;
+void func_15143134(f32 *in, f32 *out, BoneMtx *mtx);
+
+/* Gets obj's tracking point: 30 * y_scale up through bone 0 (12 or 3 in some states), or its position. */
+void func_1507E1D0(struct127 *obj, f32 *x, f32 *y, f32 *z) {
+    if (obj->unk1D4 != NULL) {
+        BoneMtx *bone;
         f32 in[3];
         f32 out[3];
 
         in[0] = 0.0f;
-        in[1] = arg0->y_scale * 30.0f;
+        in[1] = obj->y_scale * 30.0f;
         in[2] = 0.0f;
-        base = (s32)arg0->unk1D4;
-        if (arg0->interaction_state == 1) {
-            base += 0x300;
-        } else if (arg0->interaction_state == 0x1E) {
-            base += 0xC0;
+        bone = (BoneMtx *)obj->unk1D4;
+        if (obj->interaction_state == 1) {
+            bone += 12;
+        } else if (obj->interaction_state == 0x1E) {
+            bone += 3;
         }
-        func_15143134(in, out, base);
-        *arg1 = out[0];
-        *arg2 = out[1];
-        *arg3 = out[2];
+        func_15143134(in, out, bone);
+        *x = out[0];
+        *y = out[1];
+        *z = out[2];
     } else {
-        *arg1 = arg0->x_position;
-        *arg2 = arg0->y_position;
-        *arg3 = arg0->z_position;
+        *x = obj->x_position;
+        *y = obj->y_position;
+        *z = obj->z_position;
     }
 }
