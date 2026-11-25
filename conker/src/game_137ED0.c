@@ -10,24 +10,6 @@ extern f32 D_800A26B8;
 extern void func_15114D24(s32, s32, s32, s16, s32, s32);
 
 typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-} struct_func_1510AEE0;
-
-typedef struct {
     f32 field_0x00;
     u8 pad_0x04[0x5C];
     f32 field_0x60;
@@ -139,37 +121,42 @@ void func_1510ADD8(OscillatorState *arg0) {
     }
 }
 
-s32 func_1510AEE0(struct_func_1510AEE0 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 *arg8, f32 *arg9) {
-    f32 temp_f2;
-    f32 temp_f16;
-    f32 temp_f18;
-    f32 sp0[1];
+/*
+ * Tests the point (x, y, z) against a view frustum given by the view matrix `mtx`: depth must lie in
+ * [nearZ, farZ] and the projected offsets within depth * slopeX / slopeY. Returns 1 when outside, else 0
+ * and (optionally) how far inside the frustum the point lies horizontally / vertically.
+ */
+s32 func_1510AEE0(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 nearZ, f32 farZ, f32 slopeX, f32 slopeY,
+                  f32 *marginX, f32 *marginY) {
+    f32 offsetY;
+    f32 offsetX;
+    f32 depth;
 
-    temp_f2 = -(arg0->unk38 + ((arg0->unk8 * arg1) + (arg0->unk18 * arg2) + (arg0->unk28 * arg3)));
-    if (temp_f2 < arg4) {
+    depth = -((mtx[0][2] * x) + (mtx[1][2] * y) + (mtx[2][2] * z) + mtx[3][2]);
+    if (depth < nearZ) {
         return 1;
     }
-    if (arg5 < temp_f2) {
-        return 1;
-    }
-
-    temp_f16 = arg0->unk30 + ((arg0->unk0 * arg1) + (arg0->unk10 * arg2) + (arg0->unk20 * arg3));
-    temp_f16 = fabsf(temp_f16) * arg6;
-    if (temp_f2 < temp_f16) {
-        return 1;
-    }
-
-    temp_f18 = arg0->unk34 + ((arg0->unk4 * arg1) + (arg0->unk14 * arg2) + (arg0->unk24 * arg3));
-    sp0[0] = fabsf(temp_f18) * arg7;
-    if (temp_f2 < sp0[0]) {
+    if (farZ < depth) {
         return 1;
     }
 
-    if (arg8 != 0) {
-        *arg8 = 1.0f - (temp_f16 / temp_f2);
+    offsetX = (mtx[0][0] * x) + (mtx[1][0] * y) + (mtx[2][0] * z) + mtx[3][0];
+    offsetX = fabsf(offsetX) * slopeX;
+    if (depth < offsetX) {
+        return 1;
     }
-    if (arg9 != 0) {
-        *arg9 = 1.0f - (sp0[0] / temp_f2);
+
+    offsetY = (mtx[0][1] * x) + (mtx[1][1] * y) + (mtx[2][1] * z) + mtx[3][1];
+    offsetY = fabsf(offsetY) * slopeY;
+    if (depth < offsetY) {
+        return 1;
+    }
+
+    if (marginX != NULL) {
+        *marginX = 1.0f - (offsetX / depth);
+    }
+    if (marginY != NULL) {
+        *marginY = 1.0f - (offsetY / depth);
     }
     return 0;
 }
