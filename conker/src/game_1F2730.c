@@ -124,27 +124,27 @@ typedef struct {
     /* 0x00 */ u8 unk0;
     /* 0x01 */ u8 unk1;
     /* 0x04 */ f32 unk4;
-} ParticleExtra;
+} ThrownParticleExtra;
 
 /* Caller-defined data of the particles spawned here (func_151C577C copies only unk0). */
 typedef struct {
     /* 0x00 */ f32 unk0;
     /* 0x04 */ u8 pad4[4];
-    /* 0x08 */ ParticleExtra extra;
-} ParticleData; /* size 0x10 */
+    /* 0x08 */ ThrownParticleExtra extra;
+} ThrownParticleData; /* size 0x10 */
 
 /* Live particle, as created by func_15130280; the caller-defined data starts at 0xA8. */
 typedef struct {
     /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ ParticleData data;
-} Particle;
+    /* 0xA8 */ ThrownParticleData data;
+} ThrownParticle;
 
 extern s32 func_15137C64(Vec3f *, Vec3f *, f32 *, f32 *, f32 *, Vec3f *, Vec3f *, Vec3f *);
 extern void func_151DC034(Vec3f *, f32, u8, s16, s32, u8, s32);
 extern void func_151DA6F8(Vec3f *, Vec3f *, f32, s16, s32, f32, s32, s32, f32, f32, s32, s32, s32, s32, s32, s32, u8, s32);
 extern void func_15143794(s16, s16, f32, Vec3f *);
 extern void func_15143874(s16, f32, f32 *, f32 *);
-extern Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
+extern ThrownParticle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 void func_151D9014(Vec3f *a0, Vec3f *a1, s32 a2, f32 a3, s32 sp10, s32 sp14, f32 sp18, s32 sp1C, f32 sp20, f32 sp24, s32 sp28, s32 sp2C, s32 sp30, s32 sp34, u8 sp38, s32 sp3C);
 
 /* Spawns a burst of effects from the frame func_15137C64 derives from arg0..arg2: always a
@@ -171,7 +171,7 @@ void func_151C577C(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u8 doRin
     f32 f2;
     s32 randA;
     s32 randC;
-    Particle *particle;
+    ThrownParticle *particle;
 
     if (func_15137C64(&unkPos, &origin, dir, basisA, basisB, arg0, arg1, arg2) != 0) {
         f2 = func_150ADA68();
@@ -291,12 +291,12 @@ void func_151C5E74(f32 *a0, f32 *a1, f32 *a2, f32 *a3, f32 arg4, EffectHeader *e
 
 /* Spawns a func_15130280 particle at `pos` moving at `vel`. A `unk0A` of -1 means 300 and leaves flag
  * bit 0 clear. Returns the particle, or NULL. */
-Particle *func_151C5F44(Vec3f *pos, Vec3f *vel, f32 unk54, f32 unkA8Value, u8 unk1B, s16 unk0A, f32 size,
+ThrownParticle *func_151C5F44(Vec3f *pos, Vec3f *vel, f32 unk54, f32 unkA8Value, u8 unk1B, s16 unk0A, f32 size,
                         u8 altUnk62, s32 arg8, u8 arg9, s32 argA) {
     ParticleDesc spawn;
     f32 unkA8;
-    Particle *particle;
-    ParticleExtra extra;
+    ThrownParticle *particle;
+    ThrownParticleExtra extra;
     s32 bit80;
     s32 hasUnk0A;
     s32 bit40;
@@ -351,7 +351,7 @@ Particle *func_151C5F44(Vec3f *pos, Vec3f *vel, f32 unk54, f32 unkA8Value, u8 un
     }
     spawn.height = size;
     spawn.width = size;
-    particle = func_15130280(&spawn, 1, arg8, sizeof(ParticleData), arg9, argA);
+    particle = func_15130280(&spawn, 1, arg8, sizeof(ThrownParticleData), arg9, argA);
     if (particle != NULL) {
         memcpy(&particle->data.unk0, &unkA8, sizeof(unkA8));
         memcpy(&particle->data.extra, &extra, sizeof(extra));

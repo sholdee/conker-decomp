@@ -10,13 +10,6 @@ typedef struct Emitter {
     /* 0x18 */ ActorEmitterParams params;
 } Emitter;
 
-/* An emitter's particle (see game_1BA670.c and game_1BDC20.c). */
-typedef struct Particle {
-    /* 0x00 */ DefParticleHead head;
-    /* 0x110 */ u8 pad110[0x50];
-    /* 0x160 */ f32 stretch; // tilt per sqrt of sideways speed
-} Particle;
-
 void *memcpy(void *, const void *, u32);
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
@@ -102,7 +95,7 @@ s32 func_1518E6D4(Emitter *emitter) {
  * Vertex function: builds the particle's quad in its vertex buffer for viewport vp, tilted by how fast
  * it moves sideways on screen (D_800DD1E8 / D_800DD1D8 are the viewport's view direction).
  */
-Vtx *func_1518E73C(Particle *p, s16 vp) {
+Vtx *func_1518E73C(ActorEmitterParticle *p, s16 vp) {
     Vtx *vtx;
     Vtx *ret;
     f32 halfWidthCos;
@@ -138,7 +131,7 @@ Vtx *func_1518E73C(Particle *p, s16 vp) {
         speed = -speed;
         negative = FALSE;
     }
-    angle = sqrtf(speed) * p->stretch;
+    angle = sqrtf(speed) * p->data.stretch;
     if (angle > 1.570796371f) {
         angle = 1.570796371f;
     }

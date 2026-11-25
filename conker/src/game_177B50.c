@@ -496,7 +496,7 @@ void *func_1514B8E4(Vec3f *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, Ve
     state.speed = 15935.0f;
     state.speedTarget = 15935.0f;
     state.drag = drag;
-    state.unk4C = arg7;
+    state.easeFactor = arg7;
     state.speedBase = 6733.0f;
     state.speedRange = 18404.0f;
     state.widthBase = scale->unk0 * 15.045272f;

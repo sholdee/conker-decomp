@@ -4,7 +4,7 @@
 #include "effects.h"
 
 /* Particle template, referenced by an EmitterInfo. */
-typedef struct {
+typedef struct ParticleTemplate {
     /* 0x00 */ f32 unk0;
     /* 0x04 */ f32 unk4;
     /* 0x08 */ f32 unk8;
@@ -30,38 +30,6 @@ typedef struct {
     /* 0x3E */ u8 unk3E;
     /* 0x3F */ u8 spawnCb; // index into D_8008D620
 } ParticleTemplate; /* 0x40 */
-
-/* Per-particle data the emitter copies into Particle.data. */
-typedef struct {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ s16 unk1C;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ u8 pad28[4];
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ u8 pad2E[2];
-    /* 0x30 */ Vec3f vel;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ s16 unk48;
-    /* 0x4A */ s16 unk4A;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ f32 unk50;
-    /* 0x54 */ ParticleTemplate *tmpl;
-} ParticleData; /* 0x58 */
-
-typedef struct {
-    /* 0x00 */ DefParticleHead head; /* head.def.rot: the previous position */
-    /* 0x110 */ ParticleData data;
-} Particle;
 
 /* An emission point attached to one of the owner's bones. */
 typedef struct {
@@ -111,7 +79,7 @@ typedef struct {
 } EmitterScaleSource;
 
 typedef struct EmitterSlot {
-    /* 0x00 */ Particle *particle;
+    /* 0x00 */ ActorEmitterParticle *particle;
     /* 0x04 */ s32 timer;
     /* 0x08 */ Vec3f offset;
     /* 0x14 */ struct EmitterSlot *next; // ring of free slots while emitting
@@ -401,7 +369,7 @@ void func_1518D6E0(Emitter *emitter) {
                     }
                     slot->timer -= D_800BE9E4;
                     if (slot->timer < 0) {
-                        ParticleData *data;
+                        ActorEmitterParticleData *data;
 
                         data = &slot->particle->data;
                         data->vel.x = (slot->particle->head.def.pos.x - slot->particle->head.def.rot.x) * D_800BE9A8;
@@ -441,7 +409,7 @@ void func_1518D6E0(Emitter *emitter) {
                 self->accum += info->rate;
                 if (self->accum > 1.0f) {
                     ParticleDef spawn;
-                    ParticleData data;
+                    ActorEmitterParticleData data;
                     ParticleTemplate *tmpl;
                     u8 ok;
                     u8 spawnFlag;
@@ -458,7 +426,7 @@ void func_1518D6E0(Emitter *emitter) {
                     data.unk40 = tmpl->unk20;
                     data.unk44 = tmpl->unk24;
                     data.unk4C = tmpl->unk2C;
-                    data.unk50 = tmpl->unk30;
+                    data.stretch = tmpl->unk30;
                     data.unk48 = tmpl->unk28;
                     data.unk4A = tmpl->unk2A;
                     data.unk0 = tmpl->unk0 * self->scale;
@@ -488,9 +456,9 @@ void func_1518D6E0(Emitter *emitter) {
                         D_8008D620[tmpl->spawnCb](&spawn.texture, &spawnFlag, &spawn.rgba[0], &spawn.rgba[1],
                                                   &spawn.rgba[2], &spawn.rgba[3], &spawn.renderModes);
                         freeSlot->particle = func_1513D524(&spawn, tmpl->unk38, tmpl->unk39, 0, tmpl->unk3A,
-                                                           spawnFlag, sizeof(ParticleData), 0xFF, 0);
+                                                           spawnFlag, sizeof(ActorEmitterParticleData), 0xFF, 0);
                         if (freeSlot->particle != NULL) {
-                            memcpy(&freeSlot->particle->data, &data, sizeof(ParticleData));
+                            memcpy(&freeSlot->particle->data, &data, sizeof(ActorEmitterParticleData));
                             freeSlot->particle->head.def.flags |= 0x40000000;
                             if (info->mode == 2 || attach == 2) {
                                 switch (info->spread) {

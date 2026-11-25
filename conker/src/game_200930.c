@@ -30,7 +30,7 @@ typedef struct {
     /* 0x4 */ f32 phase;
     /* 0x8 */ f32 phaseSpeed;
     /* 0xC */ f32 amplitude;
-} ParticleWobble;
+} BobMotion;
 
 /* Spawns the impact effects (sound, sparks, debris, decal) of a hit at pos travelling along dir. */
 void func_151D3480(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 kind, u8 arg4, s32 arg5) {
@@ -210,7 +210,7 @@ void func_151D3480(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 kind, u8 ar
                 func_15132A4C(&p, 3, 255, 0, arg4, arg5);
             }
         } else {
-            ParticleWobble wobble;
+            BobMotion wobble;
             void *obj;
 
             wobble.timer = (func_150ADA20() & 0xF) + 20;
@@ -226,9 +226,9 @@ void func_151D3480(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 kind, u8 ar
             p.flags = 0x3980;
             p.updateFn = 12;
             p.gravity = 0;
-            obj = func_15132A4C(&p, 3, 255, sizeof(ParticleWobble), arg4, arg5);
+            obj = func_15132A4C(&p, 3, 255, sizeof(BobMotion), arg4, arg5);
             if (obj != NULL) {
-                memcpy((u8 *)obj + 0x170, &wobble, sizeof(ParticleWobble));
+                memcpy((u8 *)obj + 0x170, &wobble, sizeof(BobMotion));
             }
         }
     }
@@ -244,12 +244,12 @@ typedef struct {
     /* 0x02C */ u8 pad2C[0x50 - 0x2C];
     /* 0x050 */ Vec3f unk50;
     /* 0x05C */ u8 pad5C[0x170 - 0x5C];
-    /* 0x170 */ ParticleWobble wobble;
+    /* 0x170 */ BobMotion wobble;
 } WobbleParticle;
 
 /* Particle update: bob unk20.y around unk50.y while the wobble timer runs, then settle on unk50. */
 s32 func_151D3D50(WobbleParticle *particle) {
-    ParticleWobble *wobble = &particle->wobble;
+    BobMotion *wobble = &particle->wobble;
 
     if (wobble->timer > 0) {
         wobble->phase += wobble->phaseSpeed * D_800BE9A4;

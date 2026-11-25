@@ -631,11 +631,11 @@ s32 func_15168118(Gfx *gfx, BillboardParticle *p, s16 viewIndex) {
         gfx = func_1513F4E4(gfx, combineMode, &update);
         gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | ((p->tmpl.flags & BILLBOARD_2CYCLE) ? G_CYC_2CYCLE : G_CYC_1CYCLE) | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             D_800A4AC8[renderMode].unk0 | D_800A4AC8[renderMode].unk4 | 4, &update);
-    } else if (p->tmpl.anim->unkA != 5) {
+    } else if (p->tmpl.anim->format != 5) {
         gfx = func_1513F4E4(gfx, 0xD, &update);
         gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4 | 4, &update);
-    } else if (p->tmpl.anim->unkA == 3) {
+    } else if (p->tmpl.anim->format == 3) {
         gfx = func_1513F4E4(gfx, 0xE, &update);
         gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4 | 4, &update);

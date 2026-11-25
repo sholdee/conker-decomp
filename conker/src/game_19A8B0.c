@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 
 /* u8 tables indexed by a particle style */
@@ -264,12 +265,7 @@ typedef struct ParticleSprite {
     /* 0x10 */ s32 unk10;
 } ParticleSprite;
 
-typedef struct ParticleTexture {
-    /* 0x00 */ u8 pad0[0xA];
-    /* 0x0A */ u8 format;
-} ParticleTexture;
-
-extern ParticleTexture *D_8008CA4C[];
+extern EffectTexture *D_8008CA4C[];
 Gfx *func_15142E24(Gfx *gfx, s32 texture, s32 frame, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7,
                    s32 sprite, u8 *synced, s32 argA);
 Gfx *func_15142FBC(Gfx *gfx, s32 othermodeH, s32 othermodeL, u8 *synced);
@@ -278,7 +274,7 @@ Gfx *func_15095760(Gfx *gfx, ParticleSprite *sprite);
 Gfx *func_1516D738(Gfx *gfx, Particle *particle, s32 arg2) {
     ParticleSprite sprite;
     s32 pad; // matching: unused stack slot in the original frame
-    ParticleTexture *texture;
+    EffectTexture *texture;
     s32 synced;
     s32 r;
     s32 g;

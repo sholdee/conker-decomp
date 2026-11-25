@@ -712,7 +712,7 @@ typedef struct EffectTexture {
     /* 0x5 */ u8 unk5;
     /* 0x6 */ u16 width;
     /* 0x8 */ u16 height;
-    /* 0xA */ u8 unkA;        /* 5: two-texture (two-cycle) animation; 2: a palette follows the texels */
+    /* 0xA */ u8 format;      /* 5: two-texture (two-cycle) animation; 2: a palette follows the texels */
     /* 0xB */ u8 paletteSize; /* 1: 0x200 bytes, else 0x20 */
 } EffectTexture; /* size 0xC */
 
@@ -2566,8 +2566,23 @@ typedef struct ParticleJitter {
     /* 0x38 */ Vec3f velocity;     /* ballistic motion (see game_179400.c's update) */
     /* 0x44 */ f32 gravity;
     /* 0x48 */ f32 drag;           /* velocity scale per tick */
-    /* 0x4C */ f32 unk4C;
+    /* 0x4C */ f32 easeFactor;     /* func_1514BE20 eases def.rot towards 100 units above def.pos by it */
 } ParticleJitter; /* size 0x50 */
+
+/* Caller data at 0x160 of a JitterParticle spawned by func_151A9634 (game_1D5FD0.c): func_1514C2B8
+ * (game_179400.c) relaunches the particle with this life and gravity. */
+typedef struct JitterRelaunch {
+    /* 0x0 */ f32 gravity;
+    /* 0x4 */ s16 lifetime;
+} JitterRelaunch; /* size 0x8 */
+
+/* The particle func_1514B8E4 (game_177B50.c) spawns through func_1513D2F0: its func_1514BC08 state, then
+ * the caller's data. */
+typedef struct JitterParticle {
+    /* 0x000 */ DefParticleHead head;
+    /* 0x110 */ ParticleJitter jitter;
+    /* 0x160 */ JitterRelaunch relaunch;
+} JitterParticle;
 
 /*
  * Per-particle motion state at +0x110 of a func_15149550 particle (game_176A00.c). Each channel (A, B, C)
@@ -2632,6 +2647,39 @@ typedef struct ActorEmitterParams {
     /* 0xA */ u8 table;     /* index into D_8008D5E0 */
     /* 0xB */ u8 padB;
 } ActorEmitterParams; /* size 0xC */
+
+/* Per-particle data that an actor emitter (game_1BA670.c) copies to 0x110 of each particle it spawns. */
+typedef struct ActorEmitterParticleData {
+    /* 0x00 */ f32 unk0;
+    /* 0x04 */ f32 unk4;
+    /* 0x08 */ f32 unk8;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ s16 unk1C;
+    /* 0x1E */ s16 unk1E;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ u8 pad28[4];
+    /* 0x2C */ s16 unk2C;
+    /* 0x2E */ u8 pad2E[2];
+    /* 0x30 */ Vec3f vel;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ f32 unk40;
+    /* 0x44 */ f32 unk44;
+    /* 0x48 */ s16 unk48;
+    /* 0x4A */ s16 unk4A;
+    /* 0x4C */ f32 unk4C;
+    /* 0x50 */ f32 stretch;   /* tilt per sqrt of sideways speed (func_1518E73C, game_1BB950.c) */
+    /* 0x54 */ struct ParticleTemplate *tmpl;
+} ActorEmitterParticleData; /* size 0x58 */
+
+/* A particle of an actor emitter (game_1BA670.c, its callbacks in game_1BB950.c), made by func_1513D524. */
+typedef struct ActorEmitterParticle {
+    /* 0x000 */ DefParticleHead head; /* head.def.rot: the previous position */
+    /* 0x110 */ ActorEmitterParticleData data;
+} ActorEmitterParticle;
 
 /*
  * Character watcher (object type 0x2E, func_15158BD0 in game_185560.c; attached to the character as

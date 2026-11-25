@@ -228,12 +228,12 @@ typedef struct {
     /* 0x5A */ u8 unk5A;
     /* 0x5C */ s32 unk5C;
     /* 0x60 */ s32 unk60;
-} ParticleDesc;
+} HomingSpawnDesc;
 
 extern s32 func_15046C80(Vec3f *, s32, f32, f32 *);
 extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
 extern void func_15143874(s16, f32, f32 *, f32 *);
-extern s32 func_151C229C(Vec3f *, void *, s32, s32, s32, ParticleDesc *, f32, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, s32, s32, s32);
+extern s32 func_151C229C(Vec3f *, void *, s32, s32, s32, HomingSpawnDesc *, f32, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, s32, s32, s32);
 extern void func_15103254(s16, u8, f32, Vec3f *, s32, s32, s32);
 
 /*
@@ -262,7 +262,7 @@ void func_150E3738(HomingEffect *arg0) {
     f32 unusedOut;
     f32 randWidth;
     s32 randByte;
-    ParticleDesc particle;
+    HomingSpawnDesc particle;
     f32 unusedR;
     s32 randAngle;
 

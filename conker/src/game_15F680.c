@@ -851,27 +851,27 @@ typedef struct {
     /* 0x2 */ u8 segment;
     /* 0x3 */ u8 pad3;
     /* 0x4 */ s32 arg;
-} ParticleTexture;
+} SegmentTexture;
 
 /* Variable-length texture list kept in Particle.extra. */
 typedef struct {
     /* 0x0 */ u8 count;
     /* 0x1 */ u8 pad1[3];
-    /* 0x4 */ ParticleTexture textures[1];
+    /* 0x4 */ SegmentTexture textures[1];
 } ParticleTextureList;
 
 Gfx *func_15133EEC(Gfx *gfx, u16 index, u8 segment, s32 arg3);
 
 /* Draw handler: bind the texture stored at extra. */
 Gfx *func_15133E84(Gfx *gfx, Particle *particle, s16 arg2) {
-    ParticleTexture *tex = (ParticleTexture *)particle->extra;
+    SegmentTexture *tex = (SegmentTexture *)particle->extra;
 
     return func_15133EEC(gfx, tex->index, tex->segment, tex->arg);
 }
 
 /* Draw handler: bind the first texture of the list stored at extra. */
 Gfx *func_15133EB8(Gfx *gfx, Particle *particle, s16 arg2) {
-    ParticleTexture *tex = ((ParticleTextureList *)particle->extra)->textures;
+    SegmentTexture *tex = ((ParticleTextureList *)particle->extra)->textures;
 
     return func_15133EEC(gfx, tex->index, tex->segment, tex->arg);
 }
@@ -882,18 +882,18 @@ extern s32 func_1510D0EC(s32, s32 *, s32, s32);
 /* Bind texture D_80090B60[index] to `segment` (and its palette, at the end of the data, to segment + 1). */
 Gfx *func_15133EEC(Gfx *gfx, u16 index, u8 segment, s32 arg3) {
     s32 data;
-    u8 unkA;
+    u8 format;
     u8 unkB;
     EffectTexture *entry;
     s32 size;
 
     entry = &D_80090B60[index];
     data = *entry->frames;
-    unkA = entry->unkA;
+    format = entry->format;
     unkB = entry->paletteSize;
     data = func_1510D0EC(data, &size, arg3, 0);
     gSPSegment(gfx++, segment, data);
-    if (unkA == 2) {
+    if (format == 2) {
         gSPSegment(gfx++, segment + 1, data + size - ((unkB == 1) ? 0x200 : 0x20));
     }
     return gfx;
@@ -903,7 +903,7 @@ Gfx *func_15133EEC(Gfx *gfx, u16 index, u8 segment, s32 arg3) {
 Gfx *func_15133FD8(Gfx *gfx, Particle *particle, s16 arg2) {
     u8 i;
     ParticleTextureList *list;
-    ParticleTexture *tex;
+    SegmentTexture *tex;
 
     list = (ParticleTextureList *)particle->extra;
     for (i = 0; i < list->count; i++) {

@@ -129,7 +129,7 @@ typedef struct {
     u8 kind;
     u8 flags;
     u8 pad1A[2];
-} ParticleWobble; /* 0x1C */
+} SteamWobble; /* 0x1C */
 
 #define SPIN_FLAG_SPIN 1 /* oscillate desc.unk3C */
 #define SPIN_FLAG_DRAG 2 /* scale the velocity by `drag` every frame */
@@ -151,7 +151,7 @@ typedef struct {
 typedef struct {
     /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ union {
-        ParticleWobble wobble;
+        SteamWobble wobble;
         ParticleSpin spin;
     } data;
 } Particle;
@@ -166,7 +166,7 @@ Particle *func_151D9014(Vec3f *pos, Vec3f *vel, u8 kind, f32 gravity, s16 lifeti
                         s32 argF) {
     Particle *particle;
     ParticleDesc desc;
-    ParticleWobble wobble;
+    SteamWobble wobble;
 
     desc.texture = D_8008FCD0[kind]();
     desc.renderMode = ((argA ? 0x44 : 0x22) << 8) + 3;
@@ -251,7 +251,7 @@ s32 func_151D93F4(Particle *particle, Vec3f *arg1) {
 
 /* Wobbles the particle's two scale axes around its base size. */
 s32 func_151D9450(Particle *particle, Vec3f *arg1) {
-    ParticleWobble *wobble;
+    SteamWobble *wobble;
 
     wobble = &particle->data.wobble;
     if (wobble->flags & WOBBLE_FLAG_FIXED_SIZE) {
@@ -271,7 +271,7 @@ s32 func_151D9450(Particle *particle, Vec3f *arg1) {
 u8 func_151D9534(Particle *particle, Vec3f *arg1) {
     volatile u8 alive; // matching: IDO keeps the result in its stack slot and reloads it after each call
     Vec3f point;
-    ParticleWobble *wobble;
+    SteamWobble *wobble;
     f32 avgScale;
 
     alive = 1;

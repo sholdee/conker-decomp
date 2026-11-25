@@ -212,7 +212,7 @@ typedef struct {
     /* 0x26 */ s16 size;
     /* 0x28 */ s16 count;      /* particles emitted per frame besides the 4 fast ones */
     /* 0x2A */ s16 timer;
-} ParticleEmitter;
+} FallingEmitter;
 
 void func_151B9690(s32, s32, s16, s16, s16, s16, f32, s16, s16, s16, s16, s16, s16, s16, s16, u8, s32);
 
@@ -220,9 +220,9 @@ void func_151B9690(s32, s32, s16, s16, s16, s16, f32, s16, s16, s16, s16, s16, s
 void func_151B9BF0(s32 animIndex, s32 kind, s16 x, s16 y, s16 z, s16 velY, s16 velYRange, s16 speed,
                    s16 speedRange, s16 minSize, s16 size, s16 count, s16 timer, f32 *followPos, u8 owner,
                    s32 list) {
-    ParticleEmitter *emitter;
+    FallingEmitter *emitter;
 
-    emitter = func_15167A68(7, list, sizeof(ParticleEmitter), 0, owner, 1);
+    emitter = func_15167A68(7, list, sizeof(FallingEmitter), 0, owner, 1);
     if (emitter != NULL) {
         emitter->animIndex = animIndex;
         emitter->kind = kind;
@@ -245,9 +245,9 @@ void func_151B9BF0(s32 animIndex, s32 kind, s16 x, s16 y, s16 z, s16 velY, s16 v
  * Type 7 update (D_8008B614): each frame emits `count` particles and 4 faster, higher ones in a full
  * circle around the emitter, then counts the timer down and destroys the emitter when it runs out.
  */
-void func_151B9CB0(ParticleEmitter *emitter) {
+void func_151B9CB0(FallingEmitter *emitter) {
     f32 *followPos;
-    ParticleEmitter *self; // matching: the target reloads count through a second copy of `emitter`
+    FallingEmitter *self; // matching: the target reloads count through a second copy of `emitter`
     s16 x;
     s16 y;
     s16 z;

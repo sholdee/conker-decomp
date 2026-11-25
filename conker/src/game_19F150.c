@@ -184,7 +184,7 @@ Gfx *func_151720C4(Gfx *gfx, Particle19F150 *particle, s32 arg2) {
         } else {
             newCycle = 2;
         }
-        if (anim->unkA == 5) {
+        if (anim->format == 5) {
             newCycle += 2;
         }
         if (cycle != newCycle) {
@@ -219,13 +219,13 @@ Gfx *func_151720C4(Gfx *gfx, Particle19F150 *particle, s32 arg2) {
                                      G_AD_DISABLE,
                             othermodeL, (u8 *)&needSync);
         if (!(particle->flags & 8)) {
-            if (anim->unkA == 0) {
+            if (anim->format == 0) {
                 if (particle->color) {
                     newCombine = 0x10;
                 } else {
                     newCombine = 0x20;
                 }
-            } else if (anim->unkA == 5) {
+            } else if (anim->format == 5) {
                 if (particle->color) {
                     newCombine = 0x60;
                 } else {

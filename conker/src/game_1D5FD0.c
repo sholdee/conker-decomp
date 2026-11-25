@@ -448,12 +448,6 @@ void func_151A9390(u8 options, u8 preset, TriggerZone *obj, Vec3f *pos,
     }
 }
 
-/* Extra data stored at 0x160 of each particle (the particle object is not typed here). */
-typedef struct {
-    f32 unk0;
-    s16 unk4;
-} ParticleExtra;
-
 u8 *func_1514B8E4(Vec3f *, f32 *, s16, s32, s32, f32, f32, f32,
     s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
@@ -461,7 +455,7 @@ u8 *func_1514B8E4(Vec3f *, f32 *, s16, s32, s32, f32, f32, f32,
 void func_151A9634(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround) {
     f32 vec[2];
     s32 choice;
-    ParticleExtra extra;
+    JitterRelaunch extra;
     s32 kind;
     s32 flags;
     u8 *particle;
@@ -472,8 +466,8 @@ void func_151A9634(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround) {
     settings = (ParticleSettings *)emitter->data;
     vec[0] = func_150ADA68() * settings->vec0Range + settings->vec0Base;
     vec[1] = func_150ADA68() * settings->vec1Range + settings->vec1Base;
-    extra.unk0 = func_150ADA68() * settings->unk20Range + settings->unk20Base;
-    extra.unk4 = func_150ADA20() % (u32)(settings->unk14.range + 1) + settings->unk14.base;
+    extra.gravity = func_150ADA68() * settings->unk20Range + settings->unk20Base;
+    extra.lifetime = func_150ADA20() % (u32)(settings->unk14.range + 1) + settings->unk14.base;
     rand1 = func_150ADA20();
     rand2 = func_150ADA20();
     if (settings->flags & 1) {

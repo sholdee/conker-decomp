@@ -42,7 +42,7 @@ typedef struct {
     /* 0x43 */ u8 pad43[5];
     /* 0x48 */ CollisionHit ground;
     /* 0x6C */ s32 unk6C;
-} ParticleEmitter;
+} RegionEmitterState;
 
 extern s32 func_151464B8(s32);
 extern s32 func_15046C80(f32 *, s32, f32, CollisionHit *);
@@ -53,14 +53,14 @@ extern void func_15149550(ParticleEmitterDesc *, s32, s32, s32, s32, s32);
  * particle per whole unit at a random point of the emitter's region, optionally snapped to the ground.
  */
 void func_151A5660(u8 *effect) {
-    ParticleEmitter *emitter;
+    RegionEmitterState *emitter;
     ParticleEmitterDesc particle;
     f32 low;
     f32 high;
     f32 xScale;
     f32 yScale;
 
-    emitter = (ParticleEmitter *)(effect + 0x28);
+    emitter = (RegionEmitterState *)(effect + 0x28);
     if (emitter->region == NULL) {
         *(s16 *)(effect + 0xE) = -1;
         return;

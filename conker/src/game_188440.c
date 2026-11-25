@@ -94,18 +94,18 @@ typedef struct {
     /* 0x0C */ f32 rate;        // particles per unit of D_800BE9A4
     /* 0x10 */ f32 accumulator; // pending particles; one is spawned per whole unit
     /* 0x14 */ f32 unk14;
-} ParticleEmitter;
+} RiseEmitterState;
 
 typedef struct {
     /* 0x00 */ TimedEffect base;
-    /* 0x28 */ ParticleEmitter emitter;
+    /* 0x28 */ RiseEmitterState emitter;
 } EmitterObject;
 
 void *func_151303BC(ParticleDesc6C *, s32, s32);
 
 /* Effect update: accumulates rate * D_800BE9A4 and spawns one func_151303BC particle per whole unit. */
 void func_1515B21C(EmitterObject *obj) {
-    ParticleEmitter *emitter;
+    RiseEmitterState *emitter;
     void *particle;
     ParticleDesc6C desc;
     RiseMotion extra;
