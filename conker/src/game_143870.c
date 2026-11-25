@@ -47,22 +47,18 @@ s32 func_15116888(s32 x, s32 z, s32 *unused, struct127 *other);
 
 /* Bobs the object: params bytes are (height scale, sway scale, height rate, sway rate) from low to high. */
 void func_151163C0(Game143870Object *obj) {
-    volatile f32 heightScale;
-    u32 heightRate;
-    u32 swayRate;
-    volatile f32 swayScale;
+    f32 heightScale;
+    s32 heightRate;
+    s32 swayRate;
+    f32 swayScale;
     s16 previousY;
     f32 previousSway;
     f32 sway;
-    u32 swayScaleByte;
-    s32 params;
 
-    params = obj->params.word;
-    swayScaleByte = (params >> 8) & 0xFF;
-    heightRate = (params >> 16) & 0xFF;
-    heightScale = (f32)(params & 0xFF);
-    swayRate = (params >> 24) & 0xFF;
-    swayScale = (f32)swayScaleByte * 1.40625f;
+    heightRate = (obj->params.word >> 16) & 0xFF;
+    heightScale = (f32)(obj->params.word & 0xFF);
+    swayRate = (obj->params.word >> 24) & 0xFF;
+    swayScale = (f32)(u32)((obj->params.word >> 8) & 0xFF) * 1.40625f;
     previousY = obj->y;
     previousSway = obj->unk0;
     obj->unk18 = cosf((f32)obj->unk7C * 9.58738e-05f) * heightScale;
