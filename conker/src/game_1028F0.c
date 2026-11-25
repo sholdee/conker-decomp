@@ -2,14 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern f32 D_800A0AB8;
-extern f32 D_800A0ABC;
-extern f32 D_800A0AC0;
-extern f32 D_800A0AC4;
-extern f32 D_800A0AC8;
-extern f32 D_800A0AB0;
-extern f32 D_800A0AB4;
-
 /* Particle spawn template passed to func_15130280. */
 typedef struct {
     /* 0x00 */ s32 unk0;
@@ -331,8 +323,8 @@ s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
 void func_151C05A4(void *, u8, s32);
 void func_151C05F0(void *, u8, s32);
 void func_151C0360(void *, void *, u8, s32);
-void func_150D6388(void *arg0, u8 arg1, s32 arg2);
-void func_150D6434(struct Vec3F *arg0, u8 arg1, s32 arg2);
+void func_150D6388(vertex *pos, u8 arg1, s32 arg2);
+void func_150D6434(vertex *pos, u8 arg1, s32 arg2);
 void func_150D65F0(s32 arg0, s32 arg1, u8 arg2, s32 arg3);
 void func_150D66A4(u8 arg0, u8 arg1, s32 arg2);
 
@@ -521,31 +513,31 @@ void func_150D5A6C(struct127 *arg0, u8 arg1, s32 arg2) {
             func_151C0360(sp188, &sp19C, arg1, arg2);
         }
     }
-    func_150D6434((struct Vec3F *)&pos, arg1, arg2);
+    func_150D6434(&pos, arg1, arg2);
     func_150D6388(&pos, arg1, arg2);
     }
 }
 
-void func_151541B8(void *, f32, s32, f32, f32, u8, s32);
+void func_151541B8(vertex *, f32, f32, f32, f32, u8, s32);
 
-void func_150D6388(void *arg0, u8 arg1, s32 arg2) {
-    union { f32 f; f64 _a; } temp_f0;
-    u32 temp_a;
+void func_150D6388(vertex *pos, u8 arg1, s32 arg2) {
+    u32 randInt;
+    f32 randFrac;
 
-    temp_f0.f = func_150ADA68();
-    temp_a = func_150ADA20();
-    func_151541B8(arg0, temp_f0.f * 4.0f + 15.0f, 0x3FAFF1E9,
-                  (f32)(u32)((temp_a % 0x38U) + 0xC8), 0.0f, arg1, arg2);
+    randFrac = func_150ADA68();
+    randInt = func_150ADA20();
+    func_151541B8(pos, randFrac * 4.0f + 15.0f, 1.374570012f, randInt % 56 + 200, 0.0f, arg1, arg2);
 }
 
-void func_150D6434(struct Vec3F *arg0, u8 arg1, s32 arg2) {
-    union { f32 f; f64 _a; } temp1;
-    f32 temp0;
+void func_150D6434(vertex *pos, u8 arg1, s32 arg2) {
+    f32 rand3;
+    f32 rand2;
+    f32 rand1;
 
-    temp0 = func_150ADA68();
-    temp1.f = func_150ADA68();
-    func_15154884(arg0, temp0 * 3.0f + 8.0f, temp1.f * D_800A0AB0 + D_800A0AB4,
-                  func_150ADA68() * 50.0f + 100.0f, arg1, arg2);
+    rand1 = func_150ADA68();
+    rand2 = func_150ADA68();
+    rand3 = func_150ADA68();
+    func_15154884(pos, rand1 * 3.0f + 8.0f, rand2 * 0.4030000269f + 1.305000067f, rand3 * 50.0f + 100.0f, arg1, arg2);
 }
 
 typedef struct {
@@ -576,9 +568,9 @@ typedef struct {
 void func_150D64E8(Struct150D64E8 *arg0, f32 *arg1) {
     arg0->unk00 = 6;
     arg0->unk04 = 3;
-    arg1[0] = D_800A0AB8;
-    arg0->unk14 = D_800A0ABC;
-    arg0->unk18 = D_800A0AC0;
+    arg1[0] = 1263.0f;
+    arg0->unk14 = 0.08999999613f;
+    arg0->unk18 = 0.03029999882f;
     arg0->unk1C = 150.0f;
     arg0->unk20 = 105.0f;
     arg0->unk24 = 396.0f;
@@ -586,9 +578,9 @@ void func_150D64E8(Struct150D64E8 *arg0, f32 *arg1) {
     arg0->unk2C = 4;
     arg0->unk30 = 3;
     arg0->unk34 = 25.0f;
-    arg0->unk38 = D_800A0AC4;
+    arg0->unk38 = 0.8120000362f;
     arg0->unk3C = -2.0f;
-    arg0->unk40 = D_800A0AC8;
+    arg0->unk40 = 1.618000031f;
     arg0->unk44 = 20;
     arg0->unk46 = 30;
     arg0->unk48 = 100;
@@ -596,17 +588,11 @@ void func_150D64E8(Struct150D64E8 *arg0, f32 *arg1) {
     arg0->unk4C = 12;
     arg0->unk4E = 20;
 
-    if (D_80082FA0 < 2) {
-        if (D_8008FD8C < 8) {
-            goto zero;
-        }
+    if (D_80082FA0 >= 2 || D_8008FD8C >= 8) {
+        arg0->unk50 = -1;
+    } else {
+        arg0->unk50 = 0;
     }
-
-    arg0->unk50 = -1;
-    return;
-
-zero:
-    arg0->unk50 = 0;
 }
 
 void func_151A5D58(f32, s32, s32, s32, s32, s32, s32, s32, s32);
@@ -827,17 +813,9 @@ s32 func_150D6F0C(Particle *particle, s32 arg1) {
     data = &particle->data.grow;
     owner = data->owner;
 
-    if (owner->interaction_state == 0) {
-        goto return_zero;
-    }
-
-    do {
-        if (owner->unique_id == data->ownerId) {
-            break;
-        }
-return_zero:
+    if (owner->interaction_state == 0 || owner->unique_id != data->ownerId) {
         return 0;
-    } while (0);
+    }
 
     func_150D6C98(owner, &particle->anchor);
 
@@ -845,8 +823,8 @@ return_zero:
     particle->unk3C = size;
     particle->unk38 = size;
 
-    particle->unk2B = (u32)(data->fadeStart - ((data->fadeRate * data->time) * data->time));
-    data->time = data->time + D_800BE9A4;
+    particle->unk2B = data->fadeStart - data->fadeRate * data->time * data->time;
+    data->time += D_800BE9A4;
 
     if (data->lifetime < data->time) {
         return 0;
