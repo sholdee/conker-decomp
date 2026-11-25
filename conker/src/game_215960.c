@@ -6,35 +6,6 @@
 #undef func_1510D0EC
 #include "variables.h"
 
-/* Animation state of a HUD model, created by func_1503F62C; only the fields used here. */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x3E0];
-    /* 0x3E0 */ f32 (*matrices[2])[4]; /* one per frame buffer */
-    /* 0x3E8 */ s32 segment3[2];        /* segment 3 base, one per frame buffer */
-} HudModelAnim;
-
-/* A 3D model drawn on the HUD: its display lists, patched copies, and a transform per frame buffer. */
-typedef struct {
-    /* 0x00 */ Gfx **srcDisplayLists;
-    /* 0x04 */ Gfx *displayLists[4];
-    /* 0x14 */ u8 displayListCount;
-    /* 0x15 */ u8 blinkTimer;
-    /* 0x16 */ u8 unk16[6];
-    /* 0x1C */ s32 unk1C; /* segment 1 base */
-    /* 0x20 */ s32 unk20;
-    /* 0x24 */ HudModelAnim *anim;
-    /* 0x28 */ MtxF matrices[2];
-} HudModel;
-
-Gfx *func_151EB06C(Gfx *gfx);
-Gfx *func_151EB930(Gfx *gfx);
-Gfx *func_151EB96C(Gfx *gfx);
-Gfx *func_151EBB50(Gfx *gfx);
-Gfx *func_151EC178(Gfx *gfx);
-Gfx *func_151EC1F0(Gfx *gfx);
-Gfx *func_151EC3E8(Gfx *gfx);
-Gfx *func_151ED09C(Gfx *gfx);
-
 /* Per-mode (D_800E0B94) overlay drawers, called by func_151E8620. */
 Gfx *(*D_8008FFC0[13])(Gfx *) = {
     func_151EB06C, NULL, NULL, func_151EC3E8, NULL, NULL, func_151EB930,
@@ -65,14 +36,11 @@ extern HudSprite D_80091810;
 extern u8 D_7FB;
 extern u8 D_887;
 extern u8 D_800E0C85;
-extern HudSprite D_8009013C;
 /* func_1510D0EC returns this instead of a texture address when it fails. */
 #define TEXTURE_NOT_LOADED ((s32)0x80000000)
 
 extern s32 func_1510D0EC(s32, s32, s32, s32); // matching: s32 params; converting &D_xxx ids to int steers scheduling
-Gfx *func_151ED1E0(Gfx *);
 void func_15042D94(s32 x, s32 y, u8 flags, void *fmt, ...);
-Gfx *func_151ED430(Gfx *gfx, HudSprite *sprite, s32 x, s32 y, s32 columns, s32 rows, f32 scale, s32 frame);
 Gfx *func_15096934(Gfx *);
 Gfx *func_1501A6CC(Gfx *gfx, s32, s32, s32, s32); /* fills a screen rectangle */
 
@@ -176,8 +144,6 @@ u8 D_8009006C[4] = { 1, 8, 15, 21 };
 u8 D_80090070[3] = { 0, 8, 16 };
 extern s32 func_15086D48(s32, s32);
 extern void func_15086CBC(s32, f32 *, f32 *, f32 *);
-Gfx *func_151E966C(Gfx *gfx, s32 y, s32 extraPipTeam, s8 loadTexture, u8 refresh);
-Gfx *func_151E9D18(Gfx *gfx, s32 rowY, s32 refresh);
 
 /* Draws the multiplayer score HUD: team scores, target and team icons, and arrows. */
 Gfx *func_151E89A0(Gfx *gfx, s32 unused, s32 alpha) {
@@ -803,10 +769,6 @@ Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
     return gfx;
 }
 
-typedef struct {
-    /* 0x00 */ s32 v[7];
-} PlaceValueTable;
-
 /* Texture ids of the digits 0-9. */
 void *D_80090074[10] = {
     (void *)0x8B2, (void *)0x890, (void *)0x8AB, (void *)0x8A8, (void *)0x882,
@@ -874,18 +836,11 @@ typedef struct {
     /* 0x64 */ s32 unk64;
 } Struct1509B570;
 s32 func_151E564C(void);
-Gfx *func_151E89A0(Gfx *, s32, s32);
 s32 func_1509BE40(s32, s32, s32);
 Struct1509B570 *func_1509B570(s32);
-Gfx *func_150900F0(Gfx *, s32);
 
 extern s16 D_800E0C30;
 extern Mtx D_800E0C38;
-void func_151EDB58(HudModel *model);
-HudModel *func_151ED90C(s32, s32, s32, f32);
-Gfx *func_151EDBDC(Gfx *, HudModel *, f32, f32, f32);
-Gfx *func_151EA15C(Gfx *, s32, s32, s32);
-Gfx *func_151EADFC(Gfx *, s32, s32, s32);
 
 /* Draws the single-player HUD (counters and models) after preloading its textures; fades it in. */
 Gfx *func_151EB06C(Gfx *gfx) {
@@ -1295,10 +1250,6 @@ Gfx *func_151EC1F0(Gfx *gfx) {
     return gfx;
 }
 
-
-Gfx *func_151EC648(Gfx *);
-Gfx *func_151EE184(Gfx *);
-Gfx *func_151EEBE8(Gfx *gfx, s32 index);
 
 /* Draws the fading image picked by D_8008FDD4->unk2C (or the func_151EC648 / func_151EE184 screens). */
 Gfx *func_151EC3E8(Gfx *gfx) {
@@ -1883,12 +1834,6 @@ Gfx *func_151EDBDC(Gfx *gfx, HudModel *model, f32 x, f32 y, f32 scale) {
     gSPDisplayList(gfx++, D_80090128);
     return gfx;
 }
-
-typedef struct {
-    Gfx *dl;
-    s32 *data;
-    s32 unk8;
-} Struct151EDF4C;
 
 Struct151EDF4C *D_80090138 = NULL;
 HudSprite D_8009013C = { NULL, 0x100, 64, 22, G_IM_FMT_RGBA, G_IM_SIZ_16b };

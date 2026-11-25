@@ -445,7 +445,6 @@ extern s8 D_8008FEF0;
 extern s8 D_8008FEF8;
 extern s8 D_8008FF00;
 extern u8 D_8008FF04;
-extern HudSprite D_80090060; // scratch HUD sprite (texId set before each func_151ED430 draw)
 extern s32 D_80090298[]; // texture ids
 extern s32 D_800902B8;
 extern s32 D_800902E4;

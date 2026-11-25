@@ -491,7 +491,6 @@ s32 func_1509D08C(s32, s32, s32 *, s32 *);
 
 void func_151DD9E4(void);
 
-void func_151EDF4C(void);
 void func_15007778(void);
 void func_151E81EC(void);
 void func_1000E7A0(s32, s32);
@@ -2893,7 +2892,6 @@ extern char D_800AB8F8[];
 extern char D_800AB8FC[];
 extern char D_800AB900[];
 extern char D_800AB904[];
-void func_150916B4(s32, s32, s32, s32);
 extern struct Struct151E4314 D_800AB7BC[];
 void func_151E4E00(void);
 

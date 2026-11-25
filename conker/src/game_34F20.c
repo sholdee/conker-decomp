@@ -60,7 +60,6 @@ void func_1511F980(void);
 void func_151732E0(s32);
 void func_15181E18(s32);
 void func_15187F90(void);
-void func_151BF340(s32, s32);
 void func_151D8DE8(void);
 void func_151E562C(void);
 s8 func_151E5FAC(void);

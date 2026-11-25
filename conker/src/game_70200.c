@@ -263,7 +263,6 @@ extern s32 D_80085CD0;
 void func_150428D4(u8 *, s32 *, s32 *, s32 *);
 s32 func_1509563C(f32, f32, f32, f32 *, f32 *, f32 *, f32 *, f32);
 Gfx *func_150417AC(Gfx *, f32, f32, u8 *, s32, s32, s32, s32, f32, f32, s32);
-Gfx *func_151ED430(Gfx *, void *, s32, s32, s32, s32, f32, s32);
 
 /**
  * Draw every queued text/icon node (projecting anchored ones to the screen), free the queue and

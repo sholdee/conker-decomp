@@ -431,10 +431,6 @@ void func_15075498(void);
 void func_15075A50(void);
 void func_15075B60(void) ;
 
-void func_1508F9C4(void);
-
-void func_15093818(s32 arg0);
-void func_15093878(void);
 void func_1509B4A0(s32 arg0, s32 arg1);
 void func_1509BFB0(s32 num, s32, s32, ...);
 void func_150CEF10(Camera *arg0);

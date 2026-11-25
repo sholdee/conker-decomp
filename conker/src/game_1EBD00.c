@@ -12,7 +12,6 @@ typedef struct {
 
 extern void func_1510F800(s32);
 extern void func_151436B4(f32 yaw, f32 pitch, f32 length, Vec3f *out);
-void *func_151BEEE0(f32 arg0, Vec3f *arg1, s32 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8);
 extern void *func_15157010(EffectParams *params, s32 arg1, f32 arg2, s32 attachArg, s32 arg4, s32 extraSize,
                            u8 owner, s32 list);
 

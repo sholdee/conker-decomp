@@ -107,7 +107,6 @@ Gfx *func_150198FC(Gfx *);
 Gfx *func_15019BB8(Gfx *, s32);
 Gfx *func_15019E60(Gfx *);
 Gfx *func_15019CC8(Gfx *, s32);
-Gfx *func_151E84B0(Gfx *);
 void func_1502E474(void);
 void func_15189118(s32);
 void func_15084A18(void);
@@ -536,7 +535,6 @@ Gfx *func_1517E28C(Gfx *gfx, s32 arg1);
 Gfx *func_15172F70(Gfx *gfx);
 Gfx *func_15181EE0(Gfx *gfx);
 Gfx *func_1517F564(Gfx *gfx);
-Gfx *func_1508FD38(Gfx *gfx);
 Gfx *func_15096934(Gfx *gfx);
 
 /* Full-screen pass drawn once after every player's main pass. */
@@ -619,8 +617,6 @@ Gfx *func_15019CC8(Gfx *gfx, s32 player) {
     gSPMatrix(gfx++, FRAME_MTX(D_800BE9C0, player), G_MTX_PROJECTION);
     return gfx;
 }
-
-Gfx *func_151E8620(Gfx *gfx);
 
 /* Sets the full-screen viewport and closes the frame's scene drawing. */
 Gfx *func_15019E60(Gfx *gfx) {

@@ -31,7 +31,6 @@ typedef struct {
 extern u16 *D_800C35C8[];
 s32 func_1501D2C4(s32 map, s32 cutscene);
 extern u8 D_800C35AA;
-extern void func_1508F060(void);
 extern void func_150242F8(s32, s32);
 void func_1501EC38(s32 scene);
 void func_15020EC4(s32 scene);

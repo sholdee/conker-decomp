@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 typedef struct { u8 ids[3]; } ParticleVariants;
 extern ParticleVariants D_8008FBC0;
@@ -141,44 +140,6 @@ void func_151BF0C8(Vec3f *pos) {
     second.extra = 0.9411770105f;
     func_15153634(&second, 0xFF, 0xFF, 1);
 }
-
-/* The block copied to the panel's +0x120. */
-typedef struct {
-    /* 0x00 */ Vec3f unk0;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-} PanelExtra;
-
-/* The object func_15157010 returns: the counter's background panel. */
-typedef struct {
-    /* 0x000 */ EffectHeader header;
-    /* 0x010 */ u8 pad10[0x44];
-    /* 0x054 */ f32 x;
-    /* 0x058 */ f32 y;
-    /* 0x05C */ u8  pad5C[0x120 - 0x5C];
-    /* 0x120 */ PanelExtra extra;
-} CounterPanel;
-
-/* The object func_1515548C returns: one digit of the counter. */
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ f32 x;
-    /* 0x14 */ f32 y;
-} CounterDigit;
-
-/* Effect data of the two-digit counter that slides onto the screen (the 0x18 bytes at effect+0x28). */
-typedef struct {
-    /* 0x00 */ CounterPanel *panel;
-    /* 0x04 */ CounterDigit *digits[2]; /* digits[1] is NULL for a one-digit count */
-    /* 0x0C */ f32 timer;               /* counts down from 110 */
-    /* 0x10 */ f32 plateau;             /* the slide curve's value while fully shown */
-    /* 0x14 */ u8  flags;               /* bit 0: the slide has started */
-} CounterDisplay;
-
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ CounterDisplay display;
-} CounterEffect;
 
 extern CounterPanel *func_15157010(EffectParams *config, s32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 owner,
                                    s32 kind);

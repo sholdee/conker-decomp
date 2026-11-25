@@ -1,11 +1,7 @@
 #include <ultra64.h>
 
 #include "functions.h"
-void func_1509093C(void);
 #include "variables.h"
-void func_1508F9F4(void);
-void func_1508F0D4(void);
-void func_1508F7BC(void);
 
 
 void func_15042D94(s32, s32, u8, s32 *, ...);
@@ -290,12 +286,6 @@ void func_1508F9F4(void) {
         }
     }
 }
-Gfx *func_150900F0(Gfx *, s32);
-Gfx *func_150918EC(Gfx *);
-Gfx *func_150938BC(Gfx *);
-Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large);
-Gfx *func_15090630(Gfx *);
-Gfx *func_150911F4(Gfx *);
 Gfx *func_15094F40(Gfx *);
 Gfx *func_15096934(Gfx *);
 void func_1518CA04(s32);
