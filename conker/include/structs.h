@@ -2624,6 +2624,12 @@ typedef struct IdRecordList {
     /* 0x08 */ IdRecord *tail;
 } IdRecordList; // size 0xC
 
+/* The BSS of task 0x83 (func_1509B570(0x83)); only the field read by the money counters is known. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x64];
+    /* 0x64 */ s32 unk64; /* money amount scale: game_203E20.c and game_215960.c apply it in thirds */
+} Struct1509B570;
+
   // size 0x28
 
 /* A debris particle of game_BC510.c's block stack (a block knocked off the top, func_1508F7BC), in the list

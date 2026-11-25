@@ -831,10 +831,6 @@ extern u8 D_80E;
 extern u8 D_82F;
 extern u8 D_830;
 extern u8 D_891;
-typedef struct {
-    /* 0x00 */ u8 pad0[0x64];
-    /* 0x64 */ s32 unk64;
-} Struct1509B570;
 s32 func_151E564C(void);
 s32 func_1509BE40(s32, s32, s32);
 Struct1509B570 *func_1509B570(s32);

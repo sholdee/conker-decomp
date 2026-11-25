@@ -91,11 +91,6 @@ void func_151D69B4(WorldObject *pickup, Actor *player) {
     }
 }
 
-typedef struct {
-    /* 0x00 */ u8 pad0[0x64];
-    /* 0x64 */ s32 unk64;
-} Struct1509B570;
-
 extern void *func_15157010(EffectParams *params, s32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 extraSize, u8 owner,
                            s32 list);
 extern Struct1509B570 *func_1509B570(s32);
