@@ -572,55 +572,7 @@ typedef struct {
 } Emitter;
 
 extern void func_1510F800(s32);
-
-/*
- * Spawns an emitter object for def with extraSize bytes of user data. lifetime -1 means untimed.
- * The spawn rate is scaled by the emitter's area: the anchor's, or that of a circle of def->radius.
- */
-Emitter *func_151A8B20(EmitterDef *def, s16 lifetime, s32 extraSize, u8 arg3, s32 arg4) {
-    Emitter *emitter;
-    EmitterState init;
-    EmitterState *state;
-
-    memcpy(&init, def, sizeof(EmitterDef));
-
-    init.pending = 0.0f;
-    init.ground.height = 99999.9f;
-    init.ground.material = 0;
-    init.ground.flags = 0;
-    init.ground.source = 0;
-    init.ground.surface = 0;
-
-    emitter = (Emitter *)func_15149130((lifetime == -1) ? 300 : lifetime, -1, 0x25, -1, (lifetime == -1) ? 0 : 1, 0x22, (extraSize + sizeof(EmitterState)), arg3, arg4);
-    if (emitter != NULL) {
-        state = &emitter->state;
-        memcpy(state, &init, sizeof(EmitterState));
-
-        if (state->def.flags & EMITTER_ZONED) {
-            f32 z;
-            f32 x;
-
-            if ((state->def.flags & EMITTER_ANCHORED) && (state->def.anchor != NULL)) {
-                x = state->def.anchor->x;
-                z = state->def.anchor->z;
-            } else {
-                x = state->def.pos.x;
-                z = state->def.pos.z;
-            }
-            func_1510F800(0);
-            state->zone = func_1510FD20(x, z);
-        } else {
-            state->zone = 0;
-        }
-
-        if ((state->def.flags & EMITTER_ANCHORED) && (state->def.anchor != NULL)) {
-            state->area = func_15144598(state->def.anchor);
-        } else {
-            state->area = (state->def.radius * state->def.radius) * 3.14159265f;
-        }
-    }
-    return emitter;
-}
+Emitter *func_151A8B20(EmitterDef *def, s16 lifetime, s32 extraSize, u8 arg3, s32 arg4);
 
 extern s32 (*D_8008F980[])(Emitter *);
 extern void (*D_8008F970[])(Emitter *, Vec3f *, f32, u8);
@@ -629,156 +581,20 @@ s32 func_151464B8(s32);
 s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
 void func_151A8F1C(Emitter *, Vec3f *, f32 *, f32 *);
 void func_151A8F6C(Emitter *, Vec3f *, f32 *, f32 *);
-
-/*
- * Per-frame update: runs the update hook (0 kills the object), then while switched on (and its zone
- * is visible) accumulates the spawn rate and calls the spawn hook once per whole particle, at a
- * random point of the area dropped to the ground.
- */
-void func_151A8CEC(Emitter *emitter) {
-    EmitterState *state;
-    void (*pick)(Emitter *, Vec3f *, f32 *, f32 *);
-    Vec3f pos;
-    f32 bottom;
-    f32 top;
-    u8 noGround;
-
-    state = &emitter->state;
-
-    if (state->def.update != -1) {
-        if (D_8008F980[state->def.update](emitter) == 0) {
-            emitter->base.header.state = -1;
-            return;
-        }
-    }
-
-    if ((state->def.flags & EMITTER_ZONED) && (state->zone != 0)) {
-        if (func_151464B8(state->zone) != 0) {
-            return;
-        }
-    }
-    if (!(state->def.flags & EMITTER_ON)) {
-        return;
-    }
-
-    state->pending += (state->def.rate + func_150ADA68() * state->def.rateRange) * D_800BE9A4 * state->area;
-
-    if (state->pending > 1.0f) {
-        if ((state->def.flags & EMITTER_ANCHORED) && (state->def.anchor != NULL)) {
-            pick = func_151A8F1C;
-        } else {
-            pick = func_151A8F6C;
-        }
-        do {
-            pick(emitter, &pos, &top, &bottom);
-            if (state->def.flags & EMITTER_NO_PROBE) {
-                pos.y = bottom;
-                noGround = TRUE;
-            } else if (func_15046C80(&pos, 0, bottom, &state->ground) != 0) {
-                pos.y = state->ground.height; /* noGround keeps its previous (at first unset) value */
-            } else {
-                pos.y = bottom;
-                noGround = TRUE;
-            }
-            if (state->def.spawn != -1) {
-                D_8008F970[state->def.spawn](emitter, &pos, top, noGround);
-            }
-            state->pending -= 1.0f;
-        } while (state->pending > 1.0f);
-    }
-}
+void func_151A8CEC(Emitter *emitter);
 
 extern void func_151432BC(TriggerZone *, f32 *, f32 *, f32 *, f32 *);
-
-/* Picks a random point of the anchor object's area; *top is its height. */
-void func_151A8F1C(Emitter *emitter, Vec3f *pos, f32 *top, f32 *bottom) {
-    func_151432BC(emitter->state.def.anchor, &pos->x, &pos->z, top, bottom);
-    pos->y = *top;
-}
+void func_151A8F1C(Emitter *emitter, Vec3f *pos, f32 *top, f32 *bottom);
 
 void func_15143874(s16, f32, f32 *, f32 *);
-
-/* Picks a random point within def.radius of def.pos; *top is def.pos.y, *bottom def.bottom. */
-void func_151A8F6C(Emitter *emitter, Vec3f *pos, f32 *top, f32 *bottom) {
-    EmitterDef *def;
-
-    def = &emitter->state.def;
-    func_15143874((s16)(func_150ADA20() & 0xFF), def->radius * func_150ADA68(), &pos->x, &pos->z);
-    pos->x += def->pos.x;
-    pos->z += def->pos.z;
-    pos->y = def->pos.y;
-    *top = def->pos.y;
-    *bottom = def->bottom;
-}
+void func_151A8F6C(Emitter *emitter, Vec3f *pos, f32 *top, f32 *bottom);
 
 void func_151A931C(Emitter *, u8 *, u8);
-
-/* Message handler: type 1 emitters are switched on and off by messages. */
-void func_151A9024(Emitter *emitter, u8 *msg, u8 msgType) {
-    if (emitter->state.def.type == 1) {
-        func_151A931C(emitter, msg, msgType);
-    }
-}
+void func_151A9024(Emitter *emitter, u8 *msg, u8 msgType);
 
 extern void (*D_8008F984[])(TriggerZone *, s32);
-
-/* Zone handler (D_80082ECC): marks the zone and runs the handler for its kind (data1, 0 to 7). */
-s32 func_151A9060(TriggerZone *obj) {
-    s32 kind;
-
-    obj->flags |= 4;
-    kind = obj->data1;
-    if (kind < 0 || kind >= 8) {
-        return 1;
-    }
-    if (D_8008F984[kind] != NULL) {
-        D_8008F984[kind](obj, kind);
-    }
-    return 1;
-}
-
-/*
- * Kind 0-5 zone handler: an emitter anchored to the zone obj, with message id `kind`; odd kinds
- * spawn faster.
- */
-void func_151A90C0(TriggerZone *obj, s32 kind) {
-    EmitterDef def;
-    // matching: the id byte sits 4 bytes below this unused slot, in frame padding no declared
-    // local reaches (a u8 local lands at sp+0x2F or grows the frame)
-    s32 idSlot;
-    f32 odd;
-    Emitter *emitter;
-
-    def.flags = EMITTER_ANCHORED;
-    def.anchor = obj;
-    odd = kind & 1;
-    if (odd) {
-        def.rate = 1.4e-6f;
-    } else {
-        def.rate = 4e-7f;
-    }
-
-    if (odd) {
-        def.rateRange = 8e-7f;
-    } else {
-        def.rateRange = 6e-7f;
-    }
-
-    def.pos.x = 0.0f;
-    def.pos.y = 0.0f;
-    def.pos.z = 0.0f;
-    def.bottom = 0.0f;
-    def.radius = 0.0f;
-    def.type = 1;
-    def.update = -1;
-    def.spawn = 0;
-    ((u8 *)&idSlot)[-4] = kind;
-
-    emitter = func_151A8B20(&def, -1, 1, 0xFF, 0);
-    if (emitter != NULL) {
-        memcpy(emitter->data, (u8 *)&idSlot - 4, 1);
-    }
-}
+s32 func_151A9060(TriggerZone *obj);
+void func_151A90C0(TriggerZone *obj, s32 kind);
 
 typedef struct {
     s16 ids[3];
@@ -808,64 +624,8 @@ typedef struct {
     /* 0x24 */ s32 unk24;
     /* 0x28 */ s32 unk28;
 } SpriteSpawn;
-
-/* Spawn hook 0: a sprite of random size (50 to 100) using one of three D_8008F9A4 images, at pos. */
-void func_151A91AC(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround) {
-    SpriteSpawn spawn;
-    f32 size;
-    SpriteChoices choices;
-    u32 pick;
-    s32 rand2;
-    s32 rand1;
-
-    choices = D_8008F9A4;
-    size = func_150ADA68() * 50.0f + 50.0f;
-    pick = func_150ADA20() % 3;
-
-    spawn.unk6 = choices.ids[pick];
-    spawn.unk7 = 0;
-    spawn.unk16 = 0;
-    spawn.unk17 = 7;
-    spawn.unk8 = 0;
-    spawn.unkC = 0;
-    spawn.flags = 0x1701;
-    spawn.lifetime = 60;
-    spawn.unk10 = 0xA0;
-    spawn.unk11 = 0xFF;
-    spawn.unk12 = 0;
-    spawn.unk13 = 0;
-    spawn.unk14 = 0;
-    spawn.unk15 = 0xFF;
-    spawn.unk18 = 0x3B0002;
-
-    rand1 = func_150ADA20();
-    rand2 = func_150ADA20();
-    func_1513C650(&spawn, 1, 0, (s32)&emitter->state.ground.tri, pos->x, pos->y, pos->z,
-                  size, size, rand1 & 0xFF,
-                  (rand2 & 1) + (func_150ADA20() & 1), 3, 0xFF, 0,
-                  emitter->base.header.owner, emitter->base.header.kind);
-}
-
-/* Type 1 message handler: 0x17 switches the emitter on, 0x18 off, when the message carries its id. */
-void func_151A931C(Emitter *emitter, u8 *msg, u8 msgType) {
-    EmitterState *state;
-
-    if (msgType == 0x17) {
-        state = &emitter->state;
-        // matching: the goto keeps IDO from sharing the 0x18 branch's return
-        if (*msg != emitter->data[0]) {
-            goto ret;
-        }
-        state->def.flags |= EMITTER_ON;
-    ret:
-        return;
-    } else if (msgType == 0x18) {
-        state = &emitter->state;
-        if (*msg == emitter->data[0]) {
-            state->def.flags &= ~EMITTER_ON;
-        }
-    }
-}
+void func_151A91AC(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround);
+void func_151A931C(Emitter *emitter, u8 *msg, u8 msgType);
 
 typedef struct {
     s16 base;
@@ -903,77 +663,7 @@ typedef struct {
 extern EmitterPreset D_8008F9AC[];
 
 void *func_1516284C(LightEffectHeader *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
-
-/*
- * Spawns particle emitter preset `preset` (0-8) on obj, or at pos when given. options:
- * 1 EMITTER_ZONED, 2 EMITTER_NO_PROBE, 4 also call func_1516284C there, 8 and 0x10 set settings
- * flags 1 and 2. lifetime -1 means untimed.
- */
-void func_151A9390(u8 options, u8 preset, TriggerZone *obj, Vec3f *pos,
-                   f32 bottom, f32 radius, s16 lifetime, u8 arg7, s32 arg8) {
-    EmitterDef def;
-    Emitter *emitter;
-
-    if (preset >= 9) {
-        return;
-    }
-
-    def.flags = EMITTER_ON | ((obj != NULL) ? EMITTER_ANCHORED : 0) | ((options & 1) ? EMITTER_ZONED : 0) |
-                ((options & 2) ? EMITTER_NO_PROBE : 0);
-    def.anchor = obj;
-    def.rate = D_8008F9AC[preset].rate;
-    def.rateRange = D_8008F9AC[preset].rateRange;
-    if (pos != NULL) {
-        def.pos = *pos;
-    } else {
-        def.pos.x = 0.0f;
-        def.pos.y = 0.0f;
-        def.pos.z = 0.0f;
-    }
-    def.bottom = bottom;
-    def.radius = radius;
-    def.type = 2;
-    def.update = -1;
-    def.spawn = 1;
-
-    emitter = func_151A8B20(&def, lifetime, sizeof(ParticleSettings), arg7, arg8);
-    if (emitter != NULL) {
-        ParticleSettings *settings;
-
-        settings = (ParticleSettings *)emitter->data;
-        memcpy(settings, D_8008F9AC[preset].settings, sizeof(ParticleSettings));
-        if (options & 8) {
-            settings->flags |= 1;
-        }
-        if (options & 0x10) {
-            settings->flags |= 2;
-        }
-    }
-
-    if (options & 4) {
-        LightEffectHeader spawn;
-        s32 spawnPos[3];
-
-        spawn.flags = ((lifetime == -1) ? 0 : 1) | 2;
-        spawn.update = 2;
-        spawn.lifetime = (lifetime == -1) ? 300 : lifetime;
-        spawn.lightType = D_8008F9AC[preset].unkB;
-
-        if (pos != NULL) {
-            spawnPos[0] = pos->x;
-            spawnPos[1] = pos->y;
-            spawnPos[2] = pos->z;
-        } else {
-            spawnPos[0] = obj->x;
-            spawnPos[1] = obj->y;
-            spawnPos[2] = obj->z;
-        }
-
-        func_1516284C(&spawn, spawnPos, D_8008F9AC[preset].unk8, D_8008F9AC[preset].unk9,
-                      D_8008F9AC[preset].unkA, 0xFF, 0, 0, D_8008F9AC[preset].unkC,
-                      0xFF, 1);
-    }
-}
+void func_151A9390(u8 options, u8 preset, TriggerZone *obj, Vec3f *pos, f32 bottom, f32 radius, s16 lifetime, u8 arg7, s32 arg8);
 
 /* Extra data stored at 0x160 of each particle (the particle object is not typed here). */
 typedef struct {
@@ -983,84 +673,7 @@ typedef struct {
 
 u8 *func_1514B8E4(Vec3f *, f32 *, s16, s32, s32, f32, f32, f32,
     s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-
-/* Spawn hook 1: launches one particle at pos with values drawn from the emitter's ParticleSettings. */
-void func_151A9634(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround) {
-    f32 vec[2];
-    s32 choice;
-    ParticleExtra extra;
-    s32 kind;
-    s32 flags;
-    u8 *particle;
-    ParticleSettings *settings;
-    u32 rand2;
-    u32 rand1;
-
-    settings = (ParticleSettings *)emitter->data;
-    vec[0] = func_150ADA68() * settings->vec0Range + settings->vec0Base;
-    vec[1] = func_150ADA68() * settings->vec1Range + settings->vec1Base;
-    extra.unk0 = func_150ADA68() * settings->unk20Range + settings->unk20Base;
-    extra.unk4 = func_150ADA20() % (u32)(settings->unk14.range + 1) + settings->unk14.base;
-    rand1 = func_150ADA20();
-    rand2 = func_150ADA20();
-    if (settings->flags & 1) {
-        kind = 0x71;
-    } else {
-        if (func_150ADA20() & 1) {
-            choice = 0x13;
-        } else {
-            choice = 0x14;
-        }
-        kind = choice; // matching: the extra copy shapes IDO's register use
-    }
-    flags = (settings->flags & 2) ? 0 : 2;
-    particle = func_1514B8E4(pos, vec,
-        (s16)(rand1 % (u32)(settings->unk10.range + 1) + settings->unk10.base),
-        (rand2 % (u32)(settings->unk18.range + 1) + settings->unk18.base) & 0xFF,
-        0, 0.0f, 1.0f, 1.0f, 0x21, 0x23, 2, kind, flags,
-        settings->unk1C, settings->unk1E, 8, emitter->base.header.owner, emitter->base.header.kind);
-    if (particle != NULL) {
-        memcpy(particle + 0x160, &extra, sizeof(extra));
-    }
-}
+void func_151A9634(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround);
 
 extern void (*D_8008FA60[])(Vec3f *, CollisionHit *, s32, u8, s32);
-
-/*
- * Calls spawn function D_8008FA60[spawnFunc] at `count` random points within radius of center
- * that have ground above minY (the spawn point is on the ground). hit is the probe result buffer;
- * NULL uses a local one.
- */
-void func_151A9834(Vec3f *center, f32 minY, f32 radius, CollisionHit *hit,
-                   s32 count, u8 spawnFunc, s32 arg6, u8 arg7, s32 arg8) {
-    CollisionHit localHit;
-    Vec3f probe;
-    Vec3f spawnPos;
-    f32 angle;
-    f32 dist;
-
-    if (hit == NULL) {
-        hit = &localHit;
-        localHit.height = 99999.9f;
-        localHit.material = 0;
-        localHit.flags = 7;
-        localHit.source = 0;
-        localHit.surface = 0;
-    }
-
-    probe.y = center->y;
-    for (; count > 0; count--) {
-        angle = func_150ADA68();
-        dist = func_150ADA68();
-        func_1514373C((angle + angle) * 3.14159265f, dist * radius, &probe.x, &probe.z);
-        probe.x += center->x;
-        probe.z += center->z;
-
-        if (func_15046C80(&probe, 0, minY, hit) != 0) {
-            spawnPos.x = probe.x;
-            spawnPos.y = hit->height;
-            spawnPos.z = probe.z;
-            D_8008FA60[spawnFunc](&spawnPos, hit, arg6, arg7, arg8);
-        }
-    }
-}
+void func_151A9834(Vec3f *center, f32 minY, f32 radius, CollisionHit *hit, s32 count, u8 spawnFunc, s32 arg6, u8 arg7, s32 arg8);
