@@ -1231,28 +1231,24 @@ load:
     }
 }
 
-extern void func_1502DB84(f32 mtx[4][4], s32 arg1);
-typedef struct {
-    u8 pad0[0xC8];
-    f32 unkC8;
-} Obj58F80C8;
 
-
-void func_1502DF38(s32 arg0, s32 arg1) {
+/* Builds the object's root matrix (from its parent's bone or its own transform); with
+   rootOnly it is stored as the object's only bone, otherwise the full skeleton is computed. */
+void func_1502DF38(s32 index, s32 rootOnly) {
     f32 mtx[4][4];
     GameObj *obj;
     GameObj *other;
-    s32 visible;
+    s32 canCull;
     s32 i;
     s32 j;
-    s32 max;
-    s32 v;
-    f32 (*src)[4];
+    s32 maxAlpha;
+    s32 alpha;
+    f32 (*bone)[4][4];
     f32 scale;
-    void *ptr;
-    s32 idx;
+    void *dst;
+    s32 parent;
 
-    obj = &D_800CC2D0[arg0];
+    obj = &D_800CC2D0[index];
     if (obj->xz_scale == 0.0f) {
         obj->xz_scale = 0.1000000015f;
         obj->unk154 = 0.1000000015f;
@@ -1262,45 +1258,45 @@ void func_1502DF38(s32 arg0, s32 arg1) {
         obj->unk158 = 0.1000000015f;
     }
     if ((obj->unk66 & 0x20) == 0x20) {
-        visible = 0;
+        canCull = FALSE;
     } else {
-        visible = 1;
+        canCull = TRUE;
     }
     if (obj->unk31C != NULL && obj->unk31C->unk197 != 0) {
-        visible = 0;
+        canCull = FALSE;
     }
-    if ((1 << arg0) & D_800C3E74) {
-        visible = 0;
+    if ((1 << index) & D_800C3E74) {
+        canCull = FALSE;
     }
     if (obj->id == 0x8A) {
         other = func_15072208(obj, 0);
         if (other != NULL && other->unk31C != NULL && other->unk31C->unk197 != 0) {
-            visible = 0;
+            canCull = FALSE;
         }
     }
-    if (visible) {
+    if (canCull) {
         if ((obj->unk74 & 0xF) == 0xF) {
             return;
         }
-        max = 0;
+        maxAlpha = 0;
         for (i = 0; i <= D_80082FA4; i++) {
-            v = func_1506196C(obj, i);
-            if (max < v) {
-                max = v;
+            alpha = func_1506196C(obj, i);
+            if (maxAlpha < alpha) {
+                maxAlpha = alpha;
             }
         }
-        if (max == 0) {
+        if (maxAlpha == 0) {
             return;
         }
     }
-    D_800C3E78 = arg0;
+    D_800C3E78 = index;
     if (obj->unk65 && !(obj->unk101 & 0x10)) {
-        idx = obj->unk65 - 1;
-        src = (f32 (*)[4])D_800CC2D0[idx].bones;
-        if (src == NULL) {
+        parent = obj->unk65 - 1;
+        bone = D_800CC2D0[parent].bones;
+        if (bone == NULL) {
             return;
         }
-        src = (f32 (*)[4])((u8 *)src + (obj->unk5C << 6));
+        bone += obj->unk5C;
         if (!(obj->unk101 & 4)) {
             for (i = 0; i < 3; i++) {
                 if (i == 1) {
@@ -1309,26 +1305,27 @@ void func_1502DF38(s32 arg0, s32 arg1) {
                     scale = obj->xz_scale;
                 }
                 for (j = 0; j < 3; j++) {
-                    mtx[i][j] = src[i][j] * scale;
+                    mtx[i][j] = (*bone)[i][j] * scale;
                 }
                 mtx[i][3] = 0.0f;
-                mtx[3][i] = src[3][i];
+                mtx[3][i] = (*bone)[3][i];
             }
             mtx[3][3] = 1.0f;
         } else {
             f32 len;
+
             for (i = 0; i < 3; i++) {
-                len = sqrtf(src[i][0] * src[i][0] + src[i][1] * src[i][1] + src[i][2] * src[i][2]);
+                len = sqrtf((*bone)[i][0] * (*bone)[i][0] + (*bone)[i][1] * (*bone)[i][1] + (*bone)[i][2] * (*bone)[i][2]);
                 if (i == 1) {
                     scale = obj->y_scale / len;
                 } else {
                     scale = obj->xz_scale / len;
                 }
                 for (j = 0; j < 3; j++) {
-                    mtx[i][j] = src[i][j] * scale;
+                    mtx[i][j] = (*bone)[i][j] * scale;
                 }
                 mtx[i][3] = 0.0f;
-                mtx[3][i] = src[3][i];
+                mtx[3][i] = (*bone)[3][i];
             }
             mtx[3][3] = 1.0f;
         }
@@ -1336,41 +1333,42 @@ void func_1502DF38(s32 arg0, s32 arg1) {
         func_150A9B0C(mtx, obj->unkB8, obj->unk40, obj->unkC4, obj->xz_scale, obj->y_scale, obj->xz_scale);
         if (obj->unk101 & 0x10) {
             other = &D_800CC2D0[obj->unk65 - 1];
-            src = (f32 (*)[4])D_800CC2D0[obj->unk65 - 1].bones;
-            if (src == NULL) {
+            bone = D_800CC2D0[obj->unk65 - 1].bones;
+            if (bone == NULL) {
                 mtx[3][0] = 0;
                 mtx[3][1] = 0;
                 mtx[3][2] = 0;
             } else {
-                src = (f32 (*)[4])((u8 *)src + (obj->unk5C << 6));
-                mtx[3][0] = src[3][0];
-                mtx[3][1] = src[3][1];
-                mtx[3][2] = src[3][2];
+                bone += obj->unk5C;
+                mtx[3][0] = (*bone)[3][0];
+                mtx[3][1] = (*bone)[3][1];
+                mtx[3][2] = (*bone)[3][2];
             }
         } else {
             other = obj;
             mtx[3][0] = obj->x_position;
-            mtx[3][1] = obj->y_position + obj->y_scale * ((Obj58F80C8 *)obj)->unkC8;
+            mtx[3][1] = obj->y_position + obj->y_scale * obj->unkC8;
             mtx[3][2] = obj->z_position;
         }
-        if (other->anim != NULL && *(s32 *)((u8 *)other->anim + 0x28) == 0) {
+        if (other->anim != NULL && other->anim->frameData[0] == NULL) {
             mtx[3][1] += other->unkCC;
         }
     }
-    if (arg1) {
-        ptr = (void *)D_800C3E88;
-        obj->bones = ptr;
-        bcopy(mtx, ptr, 0x40);
-        D_800C3E88 += 0x40;
+    if (rootOnly) {
+        dst = (void *)D_800C3E88;
+        obj->bones = dst;
+        bcopy(mtx, dst, sizeof(mtx));
+        D_800C3E88 += sizeof(mtx);
         D_800C3E7A++;
         return;
     }
-    func_1502DB84(mtx, arg0);
+    func_1502DB84(mtx, index);
 }
 
 extern u8 D_800C3E90;
 extern void func_150A9984(s32, s32);
 
+/* Flushes this frame's bone matrices (D_800C3E7A of them) from the pool. */
 void func_1502E474(void) {
     if (D_800C3E7A != 0) {
         func_150A9984(D_800C3E80[D_800BE9C0], D_800C3E7A);
@@ -1378,51 +1376,55 @@ void func_1502E474(void) {
     D_800C3E90 = 1;
 }
 
-typedef struct {
-    u8 pad0[0xE];
-    u16 unkE;
-    s16 unk10;
-    u8 pad12[0x2C];
-    u16 unk3E;
-} Ent1502E4C4;
+/* The D_800D1C90 entry fields func_1502E4C4 reads (struct124 is only 0x2C long and has unkE s16,
+   unk10 s32 here). */
+typedef struct ModelBounds {
+    /* 0x00 */ u8 pad0[0xE];
+    /* 0x0E */ u16 radius;
+    /* 0x10 */ s16 centreY;
+    /* 0x12 */ u8 pad12[0x2C];
+    /* 0x3E */ u16 unk3E; // cull distance: 0 = obj->unkE4, 1 = none, else scaled by xz_scale
+} ModelBounds;
 
 extern u8 D_800C3660;
 extern u8 D_800D9C10[][0x40];
 extern s32 func_150A6360(s32, void *, f32, f32, f32, f32, f32, f32);
 extern s32 func_1503F904(GameObj *, s32, s32);
-void func_1502E9FC(s32 arg0, s32 arg1);
+void func_1502E9FC(GameObj *obj, s32 dist);
 
-void func_1502E4C4(s32 arg0) {
+/* Visibility test of the object against each player's view; updates the per-player culled mask
+   (unk74) and reports the result per player through func_1506160C. */
+void func_1502E4C4(s32 index) {
     GameObj *obj;
     u8 id;
     u8 *tbl;
-    s32 base;
+    s32 view;
     f32 width;
     f32 height;
-    f32 yoff;
-    f32 thresh;
-    s32 maxv;
+    f32 yOffset;
+    f32 cullDist;
+    s32 maxDist;
     s32 i;
     s32 mask;
-    s32 flag;
-    s32 lim0;
-    s32 lim;
-    s32 old;
-    s32 cmd;
+    s32 inside;
+    s32 range;
+    s32 playerRange;
+    s32 oldMask;
+    s32 event;
 
     mask = 1;
-    obj = &D_800CC2D0[arg0];
+    obj = &D_800CC2D0[index];
     id = obj->id;
     if (obj->unk5 == 7) {
         obj->unk74 &= 0xFFF0;
         return;
     }
-    old = obj->unk74;
+    oldMask = obj->unk74;
     obj->unk74 |= 0xF;
-    if ((D_800C3638 != 0) && (D_800C3656 == 0) && (func_150229E4(obj) == 0)) {
+    if (D_800C3638 != 0 && D_800C3656 == 0 && func_150229E4(obj) == 0) {
         return;
     }
-    if ((obj->unk127 != 0xFF) && !((u16)D_800D2340 & (1 << obj->unk127))) {
+    if (obj->unk127 != 0xFF && !((u16)D_800D2340 & (1 << obj->unk127))) {
         return;
     }
     if ((obj->unk101 & 1) == 1) {
@@ -1435,75 +1437,75 @@ void func_1502E4C4(s32 arg0) {
         obj->unk74 = D_800CC2D0[obj->unk65 - 1].unk74;
         return;
     }
-    width = (u32)((Ent1502E4C4 *)D_800D1C90[id])->unkE * obj->xz_scale;
-    height = (u32)((Ent1502E4C4 *)D_800D1C90[id])->unkE * obj->y_scale;
-    yoff = (((Ent1502E4C4 *)D_800D1C90[id])->unk10 + obj->unkCC) * obj->y_scale;
-    *(f32 *)((u8 *)obj + 0x270) = width;
-    lim0 = *(u16 *)&obj->unk10;
-    if ((D_800C35EA == 1) && (D_800C3660 == 0)) {
-        lim0 = 0;
+    width = (u32)((ModelBounds *)D_800D1C90[id])->radius * obj->xz_scale;
+    height = (u32)((ModelBounds *)D_800D1C90[id])->radius * obj->y_scale;
+    yOffset = (((ModelBounds *)D_800D1C90[id])->centreY + obj->unkCC) * obj->y_scale;
+    obj->unk270 = width;
+    range = obj->unk10;
+    if (D_800C35EA == 1 && D_800C3660 == 0) {
+        range = 0;
     }
-    maxv = 0;
+    maxDist = 0;
     if (obj->unk101 & 0x80) {
-        thresh = 0.0f;
+        cullDist = 0.0f;
     } else {
-        if (((Ent1502E4C4 *)D_800D1C90[id])->unk3E == 0) {
-            thresh = obj->unkE4;
-        } else if (((Ent1502E4C4 *)D_800D1C90[id])->unk3E == 1) {
-            thresh = 0.0f;
+        if (((ModelBounds *)D_800D1C90[id])->unk3E == 0) {
+            cullDist = obj->unkE4;
+        } else if (((ModelBounds *)D_800D1C90[id])->unk3E == 1) {
+            cullDist = 0.0f;
         } else {
-            thresh = (u32)((Ent1502E4C4 *)D_800D1C90[id])->unk3E * obj->xz_scale;
+            cullDist = (u32)((ModelBounds *)D_800D1C90[id])->unk3E * obj->xz_scale;
         }
     }
     for (i = 0; i <= D_80082FA0; i++) {
-        s32 r;
+        s32 dist;
 
-        base = i * 0x180 + D_800BE628;
+        view = i * 0x180 + D_800BE628;
         tbl = D_800D9C10[i];
-        flag = 0;
+        inside = FALSE;
         if (D_800DBFF0[i].unk3D4->unk197 != 0) {
-            lim = 100000;
+            playerRange = 100000;
         } else {
-            lim = lim0;
+            playerRange = range;
         }
-        r = func_150A6360(base, tbl, obj->x_position, obj->y_position + yoff,
-                          obj->z_position, width, height, 20000.0f);
-        if (r == 0) {
-            flag = 1;
+        dist = func_150A6360(view, tbl, obj->x_position, obj->y_position + yOffset, obj->z_position, width,
+                             height, 20000.0f);
+        if (dist == 0) {
+            inside = TRUE;
         } else {
-            if (r < 0) {
-                r = -r;
+            if (dist < 0) {
+                dist = -dist;
             }
-            if (maxv < r) {
-                maxv = r;
+            if (maxDist < dist) {
+                maxDist = dist;
             }
-            if (((obj->unk66 & 0x80) != 0x80) && (r <= thresh) && (D_800C35EA != 1)) {
-                flag = 1;
+            if ((obj->unk66 & 0x80) != 0x80 && dist <= cullDist && D_800C35EA != 1) {
+                inside = TRUE;
             }
         }
-        if (flag == 0) {
-            if ((lim != 0) && (i != arg0)) {
-                if (lim < r) {
-                    cmd = 8;
+        if (!inside) {
+            if (playerRange != 0 && i != index) {
+                if (playerRange < dist) {
+                    event = 8;
                 } else {
-                    cmd = 9;
+                    event = 9;
                 }
-                func_1506160C(obj, cmd & 0xFF, 0, 0, i);
+                func_1506160C(obj, event & 0xFF, 0, 0, i);
             } else {
                 obj->unkF |= (1 << i) << 4;
                 func_1506160C(obj, 9, 0, 0, i);
-                cmd = -1;
+                event = -1;
             }
-            if ((obj->unkF8 & 0x800000) && (cmd != 8) && (D_800C35EA != 1) && (func_1503F904(obj, i, old) != 0)) {
-                flag = 1;
+            if ((obj->unkF8 & 0x800000) && event != 8 && D_800C35EA != 1 && func_1503F904(obj, i, oldMask) != 0) {
+                inside = TRUE;
             }
         } else {
-            cmd = 10;
+            event = 10;
         }
-        if (cmd != -1) {
-            func_1506160C(obj, cmd & 0xFF, 1, 0, i);
+        if (event != -1) {
+            func_1506160C(obj, event & 0xFF, 1, 0, i);
         }
-        if (flag == 0) {
+        if (!inside) {
             obj->unk74 &= ~mask;
         }
         if (func_1506196C(obj, i) == 0) {
@@ -1511,9 +1513,9 @@ void func_1502E4C4(s32 arg0) {
         }
         mask <<= 1;
     }
-    func_1502E9FC((s32)obj, maxv);
-    if ((obj->camera != NULL) && ((obj->camera->unk2C == 0x10000) || (obj->unk31C->unk197 != 0))) {
-        obj->unk74 |= 1 << arg0;
+    func_1502E9FC(obj, maxDist);
+    if (obj->camera != NULL && (obj->camera->unk2C == 0x10000 || obj->unk31C->unk197 != 0)) {
+        obj->unk74 |= 1 << index;
     }
     if (D_800C35EA != 1) {
         if (obj->unk2FC != 0) {
@@ -1522,7 +1524,8 @@ void func_1502E4C4(s32 arg0) {
     }
 }
 
-void func_1502E9FC(s32 arg0, s32 arg1) {
+/* Empty in the final game. */
+void func_1502E9FC(GameObj *obj, s32 dist) {
 }
 
 void func_1502EA0C(ActorInteractionFields *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
