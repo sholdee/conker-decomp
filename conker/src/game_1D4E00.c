@@ -5,10 +5,7 @@
 u32 func_150ADA20(void);
 #include "variables.h"
 
-extern f32 D_800A8F68;
-extern f32 D_800A8F6C;
 extern f32 D_800A8DE0;
-extern void (*D_8008FA60[])(f32 *, void *, s32, u8, s32);
 
 void func_1514373C(f32, f32, f32 *, f32 *);
 
@@ -1095,58 +1092,43 @@ void func_151A9634(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround) {
     }
 }
 
-typedef struct {
-    f32 unk0;
-    u8 pad4[0x14];
-    s32 unk18;
-    u8 unk1C;
-    u8 unk1D;
-    u8 pad1E[2];
-    s32 unk20;
-} Struct151A9834;
+extern void (*D_8008FA60[])(Vec3f *, GroundHit *, s32, u8, s32);
 
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f151A9834;
+/*
+ * Calls spawn function D_8008FA60[spawnFunc] at `count` random points within radius of center
+ * that have ground above minY (the spawn point is on the ground). hit is the probe result buffer;
+ * NULL uses a local one.
+ */
+void func_151A9834(Vec3f *center, f32 minY, f32 radius, GroundHit *hit,
+                   s32 count, u8 spawnFunc, s32 arg6, u8 arg7, s32 arg8) {
+    GroundHit localHit;
+    Vec3f probe;
+    Vec3f spawnPos;
+    f32 angle;
+    f32 dist;
 
-void func_151A9834(f32 *arg0, f32 arg1, f32 arg2, Struct151A9834 *arg3,
-                   s32 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8) {
-    Struct151A9834 sp8C;
-    Vec3f151A9834 sp80;
-    Vec3f151A9834 sp74;
-    f32 temp_f22;
-    f32 temp_f20;
-    f32 temp_f0;
-
-    if (arg3 == 0) {
-        arg3 = &sp8C;
-        sp8C.unk0 = D_800A8F68;
-        sp8C.unk18 = 0;
-        sp8C.unk1C = 7;
-        sp8C.unk1D = 0;
-        sp8C.unk20 = 0;
+    if (hit == NULL) {
+        hit = &localHit;
+        localHit.height = 99999.9f;
+        localHit.unk18 = 0;
+        localHit.flags = 7;
+        localHit.surfaceType = 0;
+        localHit.unk20 = 0;
     }
 
-    sp80.y = arg0[1];
-    if (arg4 > 0) {
-        temp_f22 = D_800A8F6C;
-        do {
-            temp_f20 = func_150ADA68();
-            temp_f0 = func_150ADA68();
-            func_1514373C((temp_f20 + temp_f20) * temp_f22, temp_f0 * arg2,
-                          &sp80.x, &sp80.z);
-            sp80.x += arg0[0];
-            sp80.z += arg0[2];
+    probe.y = center->y;
+    for (; count > 0; count--) {
+        angle = func_150ADA68();
+        dist = func_150ADA68();
+        func_1514373C((angle + angle) * 3.14159265f, dist * radius, &probe.x, &probe.z);
+        probe.x += center->x;
+        probe.z += center->z;
 
-            if (func_15046C80(&sp80.x, 0, arg1, arg3) != 0) {
-                sp74.x = sp80.x;
-                sp74.y = arg3->unk0;
-                sp74.z = sp80.z;
-                D_8008FA60[arg5](&sp74.x, arg3, arg6, arg7, arg8);
-            }
-            arg4--;
-        } while (arg4 > 0);
+        if (func_15046C80(&probe, 0, minY, hit) != 0) {
+            spawnPos.x = probe.x;
+            spawnPos.y = hit->height;
+            spawnPos.z = probe.z;
+            D_8008FA60[spawnFunc](&spawnPos, hit, arg6, arg7, arg8);
+        }
     }
 }
