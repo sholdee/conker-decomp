@@ -2043,7 +2043,8 @@ segments:
       - [0x24F2F4, .rodata, game_1E9820]
       - [0x24F308, .rodata, game_1E9A30]
       - [0x24F35C, .rodata, game_1EB6C0]
-      - [0x24F370, rodata]
+      - {start: 0x24F370, type: .data, name: game_1EBD00, linker_section_order: .rodata}
+      - {start: 0x24F374, type: .data, name: game_1EC390, linker_section_order: .rodata}
       - [0x24F39C, .rodata, game_1EBD00]
       - [0x24F3A0, .rodata, game_1EBFD0]
       - [0x24F3A4, .rodata, game_1EC390]
