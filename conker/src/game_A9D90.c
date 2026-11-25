@@ -1,6 +1,6 @@
 #include <ultra64.h>
 
-// matching: these two are declared here with types that differ from the shared headers
+// matching: func_1506160C and D_800D20FC are declared below with types that differ from the shared headers
 #define func_1506160C func_1506160C_hdr
 #include "functions.h"
 #undef func_1506160C
@@ -340,12 +340,12 @@ typedef struct D20FCEntry {
 void func_150054C4(struct108 *, u32, s32, s32);
 void func_15085430(struct127 *, s32, s32);
 void func_15181DC8(s32);
-void func_15082A44(s32, s32, s32, s32, s32);
+void func_15082A44(D20FCEntry *, s32, s32, s32, s32);
 void func_15088D58(struct127 *);
 extern s16 D_800BE9F2;
-extern s32 D_800D20FC;
+extern D20FCEntry *D_800D20FC;
 
-/* Respawns obj: re-initialises it through func_15082A44, keeping a few state bytes across the reset. */
+/* Re-initialises obj through func_15060F28/func_15082A44 (health back to D_8008726C), keeping a few state bytes. */
 void func_1507D1D8(struct127 *obj) {
     s32 value;
     s32 saved1AA;
@@ -354,39 +354,34 @@ void func_1507D1D8(struct127 *obj) {
     s8 saved328;
     s8 saved1AF;
     s32 choice;
-    ObjState *state;
     s32 slot;
-    union { s32 word; s16 halves[2]; } index; // matching: memory-resident; IDO reloads (s16)slot with lh from its low half
 
-    state = STATE(obj);
-    saved1AA = state->unk1AA;
-    saved1B0 = state->unk1B0;
+    saved1AA = STATE(obj)->unk1AA;
+    saved1B0 = STATE(obj)->unk1B0;
     saved328 = *(s8 *)&obj->pad320[8]; // signed byte at 0x328 (struct127 types it u8)
-    saved1AF = state->unk1AF;
+    saved1AF = STATE(obj)->unk1AF;
     if (D_800BE616 != 0) {
-        player = state->unk11B;
+        player = STATE(obj)->unk11B;
     } else {
         player = -1;
     }
     if (D_800BE9F0 == 0x2B) {
         slot = obj - D_800CC2D0;
-        index.word = (s16)slot;
         value = func_150859AC(slot, 1);
         if (value >= 0x11 && value < 0x21) {
             choice = (func_150ADA20() & 0xF) + 0x11;
-            func_15085710(index.halves[1], 0, choice);
+            func_15085710(slot, 0, choice);
             if (choice < 0x1D) {
-                ((D20FCEntry *)D_800D20FC)[slot].unk4 = 0x9C;
+                D_800D20FC[slot].unk4 = 0x9C;
             } else {
-                ((D20FCEntry *)D_800D20FC)[slot].unk4 = 0x9D;
+                D_800D20FC[slot].unk4 = 0x9D;
             }
         }
     }
     slot = obj - D_800CC2D0;
-    index.word = slot * sizeof(D20FCEntry);
     func_15060F28(obj, 0);
     D_800D18A8 = 1;
-    func_15082A44(index.word + D_800D20FC, slot, 0, 0, 0);
+    func_15082A44(&D_800D20FC[slot], slot, 0, 0, 0);
     STATE(obj)->unk1B0 = saved1B0;
     STATE(obj)->unk1AF = saved1AF;
     obj->pad320[8] = saved328;
@@ -422,7 +417,7 @@ void func_1507D1D8(struct127 *obj) {
     }
 }
 
-/* Handles object slot losing a life: respawns it, or takes it out of the game when none are left. */
+/* Ends slot's current run: re-initialises it if func_150859AC(slot, 3) allows, else retires it (state 10). */
 void func_1507D4F8(s32 slot) {
     struct127 *obj;
     ObjState *state;
