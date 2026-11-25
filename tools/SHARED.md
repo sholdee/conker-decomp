@@ -53,3 +53,9 @@ python3 ~/conker/tools/cw.py land  clean.ITEM -m "what changed"
   rename. rodata_extern derives addresses from `D_<hex>` names.
 - If you run low on context: land what matches and write `~/conker-ws/clean.ITEM/notes.md` with what's
   done and what's next.
+
+## Landed shared types (use these)
+- `Vec3f` {x, y, z} and `MtxF` (f32[4][4]) in include/structs.h. `struct17` and `vertex` are gone: write
+  `Vec3f` and `.x/.y/.z` (not `.unk0/.unk4/.unk8`). If your workspace predates this, rebase the conflicting files.
+- Header dependencies are tracked now (the Makefile generates `.d` files), and lands do a full rebuild,
+  so you no longer need to touch every `.c` file after a header edit.
