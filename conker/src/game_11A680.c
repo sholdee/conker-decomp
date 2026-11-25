@@ -39,9 +39,8 @@ typedef struct {
 #define PADS ((OSContPad *)D_800BE748)
 #define CONT_PADS (*(OSContPad ***)&D_800BE728)
 
-#define U8AT(p, o) (*(u8 *)((u8 *)(p) + (o)))
-#define S8AT(p, o) (*(s8 *)((u8 *)(p) + (o)))
-#define S16AT(p, o) (*(s16 *)((u8 *)(p) + (o)))
+/* struct127 (structs.h) declares 0x6C, 0x128, 0x1A8 and 0x2E4 with other widths, so the code below
+   reaches the bytes and halves it uses through those fields. */
 
 /* Signed angle in degrees from `from` to `to`, in (-180, 180]. */
 f32 func_150ED1D0(f32 from, f32 to) {
@@ -317,7 +316,8 @@ void func_150ED748(struct127 *obj) {
             obj->unk247 = 0x32;
             obj->unk248 = 0x32;
             throttleScale = 0.6399999857f;
-            stateFlags = STATE(&D_800CC2D0[player])->flags; if ((stateFlags & 1) && (CONT_PADS[player]->button & 0x8000) && (STATE(&D_800CC2D0[player])->timer != 0)) {
+            stateFlags = STATE(&D_800CC2D0[player])->flags;
+            if ((stateFlags & 1) && (CONT_PADS[player]->button & A_BUTTON) && (STATE(&D_800CC2D0[player])->timer != 0)) {
                 obj->unk247 = 0x1C;
                 obj->unk248 = 0x1C;
                 PADS[player].stick_y = 0x50;
@@ -334,23 +334,23 @@ void func_150ED748(struct127 *obj) {
             if (turnRate < 10) {
                 turnRate = 10;
             }
-            if ((CONT_PADS[player]->button & 0x10) && ((STATE(&D_800CC2D0[player])->flags & 2) || (D_800BE616 == 0))) {
+            if ((CONT_PADS[player]->button & R_TRIG) && ((STATE(&D_800CC2D0[player])->flags & 2) || (D_800BE616 == 0))) {
                 throttleScale = 0.0f;
                 lockFlags = 0x1F;
                 steer = 0;
                 obj->unk22B = 0;
                 obj->xz_velocity = 0.0f;
             }
-            S8AT(obj, 0x22B) += (steer - S8AT(obj, 0x22B)) / 4;
+            obj->unk22B = (s8)obj->unk22B + (steer - (s8)obj->unk22B) / 4;
             if (D_800BE616 != 0) {
                 obj->unk22B = steer;
             }
             if (steer == 0) {
-                if ((S8AT(obj, 0x22B) >= -4) && (S8AT(obj, 0x22B) < 5)) {
+                if (((s8)obj->unk22B >= -4) && ((s8)obj->unk22B < 5)) {
                     obj->unk22B = 0;
                 }
             }
-            obj->unk78 = obj->unk7A - S8AT(obj, 0x22B) * turnRate;
+            obj->unk78 = obj->unk7A - (s8)obj->unk22B * turnRate;
             obj->unkF4 |= 0x40;
             buttonPad = player;
             if ((D_800BE616 != 0) && (player < 2)) {
@@ -358,7 +358,7 @@ void func_150ED748(struct127 *obj) {
                     buttonPad = D_800E0BCE[player];
                 }
             }
-            if (D_800BE710[buttonPad] & 0x2000) {
+            if (D_800BE710[buttonPad] & Z_TRIG) {
                 obj->unk21C = 0;
                 obj->unk218 = func_1507BB28(0, 2);
             }
@@ -372,10 +372,10 @@ void func_150ED748(struct127 *obj) {
         STATE(&D_800CC2D0[player])->unk78 = lockFlags;
     } else if (D_800C3E78 < D_8008FD8C) {
         func_1504C854(obj);
-        if ((player < 4) && (CONT_PADS[player]->button & 0x2000)) {
-            D_800CC288 = 0x2000;
+        if ((player < 4) && (CONT_PADS[player]->button & Z_TRIG)) {
+            D_800CC288 = Z_TRIG;
         }
-        if (D_800CC288 & 0x2000) {
+        if (D_800CC288 & Z_TRIG) {
             obj->unk244 = 1;
         }
     }
@@ -425,13 +425,13 @@ void func_150ED748(struct127 *obj) {
                 reversing = 0;
             }
             if (reversing) {
-                func_1514D3B0((s32)obj, 0x19, 0xD, 0);
+                func_1514D3B0(obj, 25, 13, 0);
             } else {
-                func_1514D3B0((s32)obj, 0x19, 0xE, 0);
+                func_1514D3B0(obj, 25, 14, 0);
             }
             reversing = reversing ? 0xC : 0xF;
-            U8AT(obj, 0x6C) = reversing + 0xA;
-            U8AT(obj, 0x6D) = 0x13;
+            ((u8 *)&obj->pad6C)[0] = reversing + 10;
+            ((u8 *)&obj->pad6C)[1] = 19;
         }
         if (D_800CC2D0[viewer[0]].unk31C->unk84 != 0) {
             if (STATE(obj)->target >= 0) {
@@ -439,7 +439,8 @@ void func_150ED748(struct127 *obj) {
                 target = &D_800CC2D0[STATE(obj)->target];
                 a = target->x_position - obj->x_position;
                 score = target->z_position - obj->z_position;
-                lead = sqrtf(a * a + score * score) / 200.0f; lead = target->xz_velocity * lead;
+                lead = sqrtf(a * a + score * score) / 200.0f;
+                lead = target->xz_velocity * lead;
                 heading = target->unk40 * 0.01745329238f;
                 leadX = sinf(heading) * lead;
                 leadZ = cosf(heading) * lead;
@@ -469,10 +470,10 @@ void func_150ED748(struct127 *obj) {
                 camSlot = D_800E0BCE[viewer[0]] + 1;
             } else {
                 pad = &PADS[viewer[0]];
-                if (pad->button & 1) {
+                if (pad->button & R_CBUTTONS) {
                     STATE(obj)->aimYaw += yawStep;
                 }
-                if (pad->button & 2) {
+                if (pad->button & L_CBUTTONS) {
                     STATE(obj)->aimYaw -= yawStep;
                 }
             }
@@ -521,7 +522,7 @@ void func_150ED748(struct127 *obj) {
                     if (D_800BE616 != 0) {
                         limit = subject->y_position + 40.0f;
                     } else {
-                        limit = S16AT(subject, 0x1AA);
+                        limit = ((s16 *)&subject->pad1A8)[1];
                     }
                     deltaZ = func_150ED298(obj, 0.0f, subject->x_position, limit, subject->z_position, 0.0f) * 0.001000000047f;
                     limit = 4.0f * D_800BE9A4;
@@ -540,7 +541,10 @@ void func_150ED748(struct127 *obj) {
                 subject = camera->unk3D4;
                 if (camera->unk3D4->unk197 != 0) {
                     typedef s32 dummyT7;
-                    angle = -subject->unk170; angle -= obj->unkB8; angle2 = subject->unk16C; angle2 = (obj->unk40 - 90.0f) - angle2;
+                    angle = -subject->unk170;
+                    angle -= obj->unkB8;
+                    angle2 = subject->unk16C;
+                    angle2 = (obj->unk40 - 90.0f) - angle2;
                     while (angle > 180.0f) { angle -= 360.0f; if (angle) {} }
                     while (angle < -180.0f) {
                         angle += 360.0f;
@@ -567,7 +571,7 @@ void func_150ED748(struct127 *obj) {
                         hit = 1;
                     }
                     for (j = 0; j < D_8008FD8C; j++) {
-                        if (U8AT(obj, 0x128) != U8AT(&D_800CC2D0[j], 0x128)) {
+                        if (*(u8 *)&obj->pad128 != *(u8 *)&D_800CC2D0[j].pad128) {
                             hitX = D_800CC2D0[j].x_position - camera->unk2F8;
                             hitZ = D_800CC2D0[j].z_position - camera->unk300;
                             if (sqrtf(hitX * hitX + hitZ * hitZ) + 200.0f < dist) {
@@ -578,10 +582,10 @@ void func_150ED748(struct127 *obj) {
                             }
                         }
                     }
-                    U8AT(subject, 0x128) &= ~0x40;
+                    *(u8 *)&subject->pad128 &= ~0x40;
                     if (hit != 0) {
                         if (hit == 2) {
-                            U8AT(subject, 0x128) |= 0x40;
+                            *(u8 *)&subject->pad128 |= 0x40;
                         }
                         hitX = dir[0] * dist + camera->unk2F8;
                         hitY = dir[1] * dist + camera->unk2FC;
@@ -605,8 +609,8 @@ void func_150ED748(struct127 *obj) {
         if (STATE(obj)->aimYaw < 0.0f) {
             STATE(obj)->aimYaw += 360.0f;
         }
-        S16AT(obj, 0x2E4) = STATE(obj)->aimYaw * 50.0f;
-        S16AT(obj, 0x2E6) = -(s16)(STATE(obj)->aimPitch * 50.0f);
+        ((s16 *)&obj->unk2E4)[0] = STATE(obj)->aimYaw * 50.0f;
+        ((s16 *)&obj->unk2E4)[1] = -(s16)(STATE(obj)->aimPitch * 50.0f);
     }
 }
 
