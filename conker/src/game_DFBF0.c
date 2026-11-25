@@ -2,226 +2,247 @@
 #include "functions.h"
 #include "variables.h"
 
+typedef struct PipeVec3f {
+    f32 x, y, z;
+} PipeVec3f;
 
-typedef struct { f32 x, y, z; unsigned char u8c; } F2740Ent;
-typedef struct { s32 v[3]; } F2740V3i;
-typedef struct { f32 x, y, z; } F2740V3;
+/* One of the three exploding pipes: where it is and which way it faces. */
+typedef struct PipeSpot {
+    PipeVec3f pos;
+    u8 yaw;
+} PipeSpot;
 
-typedef struct {
-    s16 a00; s16 padA;
-    F2740V3 pos;
-    s16 a10; s16 padB;
-    f32 a14;
-    s16 a18, a1A, a1C, a1E;
-    f32 a20, a24, a28, a2C, a30, a34, a38, a3C, a40, a44, a48, a4C, a50;
-    u8 a54, a55;
-    s16 a56, a58;
-} F2740A;
-typedef struct {
-    s16 b00, b02;
-    F2740V3 pos;
-    s16 b10, b12, b14, b16;
-    f32 b18, b1C, b20, b24;
-    u8 b28, b29, b2A, b2B, b2C, b2D, b2E, b2F, b30;
-    u8 padC;
-    s16 b32, b34, b36;
-    f32 b38, b3C;
-    u8 b40, b41;
-    s16 b42, b44;
-    u8 b46;
-    s32 b48;
-} F2740B;
-typedef struct {
-    F2740V3 pos;
-    f32 c0C, c10, c14, c18, c1C, c20;
-    s16 c24, c26, c28, c2A, c2C, c2E, c30, c32, c34, c36;
-    u8 c38, c39;
-    s16 padD;
-    s32 c3C, c40, c44, c48, c4C, c50;
-    u8 c54, c55;
-} F2740C;
-typedef struct {
-    F2740V3 pos;
-    f32 d0C;
-    u8 d10;
-    f32 d14, d18;
-    u8 d1C;
-    f32 d20;
-    u8 d24;
-    s16 d26;
-    f32 d28, d2C;
-    u8 d30, d31, d32, d33, d34, d35;
-    s16 d36;
-    u8 d38;
-    f32 d3C;
-} F2740D;
+typedef struct PipeIds {
+    s32 id[3];
+} PipeIds;
 
-extern F2740Ent D_8009F920[];
-extern F2740V3i D_8009F950;
-extern F2740V3i D_8009F95C;
-extern f32 D_8009FB40, D_8009FB44, D_8009FB48, D_8009FB4C, D_8009FB50, D_8009FB54, D_8009FB58, D_8009FB5C;
-extern f32 D_8009FB60, D_8009FB64, D_8009FB68, D_8009FB6C, D_8009FB70, D_8009FB74, D_8009FB78, D_8009FB7C;
-extern f32 D_8009FB80, D_8009FB84, D_8009FB88;
-extern void func_151A6F00(void *, s32, u8, s32);
+/* Parameter block for func_151A6F00. */
+typedef struct Fx151A6F00Args {
+    s16 unk00;
+    s16 pad02;
+    PipeVec3f pos;
+    s16 unk10;
+    s16 pad12;
+    f32 unk14;
+    s16 angle;
+    s16 unk1A, unk1C, unk1E;
+    f32 unk20, unk24, unk28, unk2C, unk30, unk34, unk38, unk3C, unk40, unk44, unk48, unk4C, unk50;
+    u8 unk54, unk55;
+    s16 unk56, unk58;
+} Fx151A6F00Args;
+
+/* Parameter block for func_151539B4. */
+typedef struct Fx151539B4Args {
+    s16 unk00, unk02;
+    PipeVec3f pos;
+    s16 angle;
+    s16 unk12, unk14, unk16;
+    f32 unk18, unk1C, unk20, unk24;
+    u8 unk28, unk29, unk2A, unk2B, unk2C, unk2D, unk2E, unk2F, unk30;
+    u8 pad31;
+    s16 unk32, unk34, unk36;
+    f32 unk38, unk3C;
+    u8 unk40, unk41;
+    s16 unk42, unk44;
+    u8 unk46;
+    s32 unk48;
+} Fx151539B4Args;
+
+/* Parameter block for func_15152F70. */
+typedef struct Fx15152F70Args {
+    PipeVec3f pos;
+    f32 unk0C, unk10, unk14, unk18, unk1C, unk20;
+    s16 unk24, unk26;
+    s16 angle;
+    s16 unk2A, unk2C, unk2E, unk30, unk32, unk34, unk36;
+    u8 unk38, unk39;
+    s16 pad3A;
+    s32 unk3C, unk40, unk44, unk48, unk4C, unk50;
+    u8 unk54, unk55;
+} Fx15152F70Args;
+
+/* Parameter block for func_150B3F5C. */
+typedef struct Fx150B3F5CArgs {
+    PipeVec3f vel;
+    f32 unk0C;
+    u8 unk10;
+    f32 unk14, unk18;
+    u8 unk1C;
+    f32 unk20;
+    u8 unk24;
+    s16 unk26;
+    f32 unk28, unk2C;
+    u8 unk30, unk31, unk32, unk33, unk34, unk35;
+    s16 unk36;
+    u8 unk38;
+    f32 unk3C;
+} Fx150B3F5CArgs;
+
+extern PipeSpot D_8009F920[];
+extern PipeIds D_8009F950;
+extern PipeIds D_8009F95C;
+extern void func_151A6F00(Fx151A6F00Args *, s32, u8, s32);
 extern void func_1514C858(f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, f32, s32, u8);
-extern void func_151539B4(void *, u8);
-extern void func_15152F70(void *, u8);
-extern void func_150B3F5C(void *, void *, s32);
+extern void func_151539B4(Fx151539B4Args *, u8);
+extern void func_15152F70(Fx15152F70Args *, u8);
+extern void func_150B3F5C(Fx150B3F5CArgs *, PipeVec3f *, s32);
 
-#define E (&D_8009F920[arg0])
-void func_150B2740(u8 arg0, u8 arg1) {
-    F2740A sA;
+/* Spawns the full explosion effect (debris, smoke, sparks, sounds) for pipe `pipe`. */
+void func_150B2740(u8 pipe, u8 arg1) {
+    Fx151A6F00Args argsA;
     s16 i;
-    F2740B sB;
-    F2740C sC;
-    f32 f20;
-    f32 f0;
-    F2740V3 sE;
-    F2740D sD;
+    Fx151539B4Args argsB;
+    Fx15152F70Args argsC;
+    f32 yawSin; // matching: also holds the debris size; a separate local mismatches
+    f32 yawCos;
+    PipeVec3f origin;
+    Fx150B3F5CArgs argsD;
 
     func_1512D748(&D_800DBFF0[D_800BE9E8], 7, 1);
-    sA.a00 = (func_150ADA20() & 1) + 3;
-    sA.pos = *(F2740V3 *)E;
-    sA.a14 = 170.0f;
-    sA.a20 = 16.20000076f;
-    sA.a24 = 17.60000038f;
-    sA.a28 = 19.30000114f;
-    sA.a2C = 21.30000114f;
-    sA.a10 = 0x12C;
-    sA.a18 = E->u8c - 0x20;
-    sA.a1A = 0x41;
-    sA.a1C = -0x28;
-    sA.a1E = 0x50;
-    sA.a54 = 1;
-    sA.a55 = 0;
-    sA.a56 = 0x32;
-    sA.a58 = 0x19;
-    sA.a30 = 0.0f;
-    sA.a34 = 0.0f;
-    sA.a38 = 0.0f;
-    sA.a3C = 0.4670000076f;
-    sA.a40 = 0.5139999986f;
-    sA.a44 = -1.0f;
-    sA.a48 = -2.600000143f;
-    sA.a4C = -5.0f;
-    sA.a50 = 10.0f;
-    func_151A6F00(&sA, 0, arg1, 1);
+    argsA.unk00 = (func_150ADA20() & 1) + 3;
+    argsA.pos = D_8009F920[pipe].pos;
+    argsA.unk14 = 170.0f;
+    argsA.unk20 = 16.20000076f;
+    argsA.unk24 = 17.60000038f;
+    argsA.unk28 = 19.30000114f;
+    argsA.unk2C = 21.30000114f;
+    argsA.unk10 = 300;
+    argsA.angle = D_8009F920[pipe].yaw - 0x20;
+    argsA.unk1A = 65;
+    argsA.unk1C = -40;
+    argsA.unk1E = 80;
+    argsA.unk54 = 1;
+    argsA.unk55 = 0;
+    argsA.unk56 = 50;
+    argsA.unk58 = 25;
+    argsA.unk30 = 0.0f;
+    argsA.unk34 = 0.0f;
+    argsA.unk38 = 0.0f;
+    argsA.unk3C = 0.4670000076f;
+    argsA.unk40 = 0.5139999986f;
+    argsA.unk44 = -1.0f;
+    argsA.unk48 = -2.600000143f;
+    argsA.unk4C = -5.0f;
+    argsA.unk50 = 10.0f;
+    func_151A6F00(&argsA, 0, arg1, 1);
     i = (func_150ADA20() & 1) + 1;
     while (i--) {
-        f20 = (func_150ADA68() * 73.0f) + 31.0f;
-        func_1514C858(E->x, E->y, E->z, f20, E->u8c + 0x40, 0, 0xFF, (func_150ADA20() % 3U) + 4, 9, 0, 0.009615384974f, 0, arg1);
+        yawSin = (func_150ADA68() * 73.0f) + 31.0f;
+        func_1514C858(D_8009F920[pipe].pos.x, D_8009F920[pipe].pos.y, D_8009F920[pipe].pos.z, yawSin, D_8009F920[pipe].yaw + 0x40, 0, 0xFF, (func_150ADA20() % 3U) + 4, 9, 0, 0.009615384974f, 0, arg1);
     }
-    sB.b00 = 0x1E;
-    sB.b02 = 0xF;
-    sB.pos = *(F2740V3 *)E;
-    sB.b10 = E->u8c - 0x40;
-    sB.b14 = 0x80;
-    sB.b12 = -0x2D;
-    sB.b16 = 0x5A;
-    sB.b28 = 0xFF;
-    sB.b29 = 0xFF;
-    sB.b2A = 0xFF;
-    sB.b2B = 0xFF;
-    sB.b2C = 0xFF;
-    sB.b2D = 0xFF;
-    sB.b2E = 0xFF;
-    sB.b2F = 0xFF;
-    sB.b30 = 9;
-    sB.b32 = 0x10;
-    sB.b34 = 0x16;
-    sB.b36 = 0x1601;
-    sB.b40 = 0x7F;
-    sB.b41 = 0x7F;
-    sB.b42 = 0xA;
-    sB.b44 = 0x19;
-    sB.b46 = 0;
-    sB.b18 = 6.0f;
-    sB.b1C = 2.549999952f;
-    sB.b20 = 2.700000048f;
-    sB.b24 = 3.419999838f;
-    sB.b38 = 4.139999866f;
-    sB.b3C = 4.859999657f;
-    func_151539B4(&sB, arg1);
+    argsB.unk00 = 30;
+    argsB.unk02 = 15;
+    argsB.pos = D_8009F920[pipe].pos;
+    argsB.angle = D_8009F920[pipe].yaw - 0x40;
+    argsB.unk14 = 128;
+    argsB.unk12 = -45;
+    argsB.unk16 = 90;
+    argsB.unk28 = 0xFF;
+    argsB.unk29 = 0xFF;
+    argsB.unk2A = 0xFF;
+    argsB.unk2B = 0xFF;
+    argsB.unk2C = 0xFF;
+    argsB.unk2D = 0xFF;
+    argsB.unk2E = 0xFF;
+    argsB.unk2F = 0xFF;
+    argsB.unk30 = 9;
+    argsB.unk32 = 16;
+    argsB.unk34 = 22;
+    argsB.unk36 = 0x1601;
+    argsB.unk40 = 0x7F;
+    argsB.unk41 = 0x7F;
+    argsB.unk42 = 10;
+    argsB.unk44 = 25;
+    argsB.unk46 = 0;
+    argsB.unk18 = 6.0f;
+    argsB.unk1C = 2.549999952f;
+    argsB.unk20 = 2.700000048f;
+    argsB.unk24 = 3.419999838f;
+    argsB.unk38 = 4.139999866f;
+    argsB.unk3C = 4.859999657f;
+    func_151539B4(&argsB, arg1);
     {
-    extern void func_15152F70(void *, u8);
-    sC.pos = *(F2740V3 *)E;
-    sC.c24 = 0xF;
-    sC.c26 = 8;
-    sC.c28 = E->u8c - 0x19;
-    sC.c2A = 0x32;
-    sC.c2C = -0x32;
-    sC.c2E = 0x3C;
-    sC.c30 = 3;
-    sC.c32 = 2;
-    sC.c34 = 0x3C;
-    sC.c36 = 0x14;
-    sC.c38 = 6;
-    sC.c39 = 8;
-    sC.c3C = 1;
-    sC.c40 = 7;
-    sC.c44 = 0;
-    sC.c48 = 0;
-    sC.c4C = 0;
-    sC.c50 = 0;
-    sC.c54 = 0xFF;
-    sC.c55 = 0xA0;
-    sC.c1C = 20.0f;
-    sC.c20 = 40.0f;
-    sC.c0C = 10.0f;
-    sC.c10 = 30.0f;
-    sC.c14 = 1.5f;
-    sC.c18 = 1.0f;
-    func_15152F70(&sC, arg1);
-    }
-    sC.c24 = 0xA;
-    sC.c26 = 6;
-    sC.c34 = 0x64;
-    sC.c36 = 0;
-    sC.c39 = 9;
-    sC.c48 = 5;
-    func_15152F70(&sC, arg1);
-    f20 = func_151423D8(E->u8c);
-    f0 = func_151423D8(E->u8c - 0x40);
-    sE.x = E->x - 150.0f * f0;
-    sE.y = E->y;
-    sE.z = E->z - 150.0f * f20;
-    sD.d24 = 0x80;
-    sD.pos.x = 10.0f * f0;
-    sD.pos.y = 3.0f;
-    sD.pos.z = 10.0f * f20;
-    sD.d0C = -3.710000038f;
-    sD.d26 = 0xFF;
-    sD.d30 = 2;
-    sD.d31 = 5;
-    sD.d10 = 4;
-    sD.d38 = 0;
-    sD.d36 = 0x1E;
-    sD.d1C = 6;
-    sD.d32 = 5;
-    sD.d33 = 0x33;
-    sD.d34 = 3;
-    sD.d35 = 0x55;
-    sD.d20 = 0.400000006f;
-    sD.d2C = 47.0f;
-    sD.d28 = 1.840000033f;
-    sD.d14 = 3.299999952f;
-    sD.d18 = 0.6999999881f;
-    sD.d3C = 0.3000000119f;
-    {
-        u8 sp9C[4];
-        F2740V3i sp90;
-        F2740V3i sp84;
+    // matching: a declaration here opens a -g3 lexical block, which steers as1's scheduling
+    extern void func_15152F70(Fx15152F70Args *, u8);
 
-        sp90 = D_8009F950;
-        sp84 = D_8009F95C;
-        sp9C[0] = ((s32 *)&sp90)[arg0];
-        func_151494E0((s32)sp9C, 0x17);
-        sp9C[0] = ((s32 *)&sp84)[arg0];
-        func_151494E0((s32)sp9C, 0x17);
+    argsC.pos = D_8009F920[pipe].pos;
+    argsC.unk24 = 15;
+    argsC.unk26 = 8;
+    argsC.angle = D_8009F920[pipe].yaw - 25;
+    argsC.unk2A = 50;
+    argsC.unk2C = -50;
+    argsC.unk2E = 60;
+    argsC.unk30 = 3;
+    argsC.unk32 = 2;
+    argsC.unk34 = 60;
+    argsC.unk36 = 20;
+    argsC.unk38 = 6;
+    argsC.unk39 = 8;
+    argsC.unk3C = 1;
+    argsC.unk40 = 7;
+    argsC.unk44 = 0;
+    argsC.unk48 = 0;
+    argsC.unk4C = 0;
+    argsC.unk50 = 0;
+    argsC.unk54 = 0xFF;
+    argsC.unk55 = 0xA0;
+    argsC.unk1C = 20.0f;
+    argsC.unk20 = 40.0f;
+    argsC.unk0C = 10.0f;
+    argsC.unk10 = 30.0f;
+    argsC.unk14 = 1.5f;
+    argsC.unk18 = 1.0f;
+    func_15152F70(&argsC, arg1);
     }
-    func_150B3F5C(&sD, &sE, 0x14);
-    func_10010F88(0xE7, 0x7FFF, 0, 2, 0, (s16)(s32)E->x, (s16)(s32)E->y, (s16)(s32)E->z, 0x3E8, 0xBB8);
-    func_10010F88(0x22, 0x7FFF, 0, 0, 0, (s16)(s32)E->x, (s16)(s32)E->y, (s16)(s32)E->z, 0x3E8, 0xBB8);
+    argsC.unk24 = 10;
+    argsC.unk26 = 6;
+    argsC.unk34 = 100;
+    argsC.unk36 = 0;
+    argsC.unk39 = 9;
+    argsC.unk48 = 5;
+    func_15152F70(&argsC, arg1);
+    yawSin = func_151423D8(D_8009F920[pipe].yaw);
+    yawCos = func_151423D8(D_8009F920[pipe].yaw - 0x40);
+    origin.x = D_8009F920[pipe].pos.x - 150.0f * yawCos;
+    origin.y = D_8009F920[pipe].pos.y;
+    origin.z = D_8009F920[pipe].pos.z - 150.0f * yawSin;
+    argsD.unk24 = 0x80;
+    argsD.vel.x = 10.0f * yawCos;
+    argsD.vel.y = 3.0f;
+    argsD.vel.z = 10.0f * yawSin;
+    argsD.unk0C = -3.710000038f;
+    argsD.unk26 = 0xFF;
+    argsD.unk30 = 2;
+    argsD.unk31 = 5;
+    argsD.unk10 = 4;
+    argsD.unk38 = 0;
+    argsD.unk36 = 30;
+    argsD.unk1C = 6;
+    argsD.unk32 = 5;
+    argsD.unk33 = 0x33;
+    argsD.unk34 = 3;
+    argsD.unk35 = 0x55;
+    argsD.unk20 = 0.400000006f;
+    argsD.unk2C = 47.0f;
+    argsD.unk28 = 1.840000033f;
+    argsD.unk14 = 3.299999952f;
+    argsD.unk18 = 0.6999999881f;
+    argsD.unk3C = 0.3000000119f;
+    {
+        u8 idBuf[4];
+        PipeIds idsA;
+        PipeIds idsB;
+
+        idsA = D_8009F950;
+        idsB = D_8009F95C;
+        idBuf[0] = idsA.id[pipe];
+        func_151494E0((s32)idBuf, 0x17);
+        idBuf[0] = idsB.id[pipe];
+        func_151494E0((s32)idBuf, 0x17);
+    }
+    func_150B3F5C(&argsD, &origin, 20);
+    func_10010F88(0xE7, 0x7FFF, 0, 2, 0, (s16)D_8009F920[pipe].pos.x, (s16)D_8009F920[pipe].pos.y, (s16)D_8009F920[pipe].pos.z, 1000, 3000);
+    func_10010F88(0x22, 0x7FFF, 0, 0, 0, (s16)D_8009F920[pipe].pos.x, (s16)D_8009F920[pipe].pos.y, (s16)D_8009F920[pipe].pos.z, 1000, 3000);
 }
 
 extern s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
