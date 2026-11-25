@@ -28,23 +28,7 @@ typedef struct {
 } SpriteMotion;
 
 typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0xC];
-    /* 0x01C */ s16 unk1C;
-    /* 0x01E */ u8 pad1E[6];
-    /* 0x024 */ s32 unk24;
-    /* 0x028 */ u8 pad28[4];
-    /* 0x02C */ f32 unk2C;
-    /* 0x030 */ f32 unk30;
-    /* 0x034 */ Vec3f target;
-    /* 0x040 */ u8 pad40[0x18];
-    /* 0x058 */ s32 flags;
-    /* 0x05C */ u8 pad5C[0x10];
-    /* 0x06C */ s16 unk6C;
-    /* 0x06E */ s16 unk6E;
-    /* 0x070 */ u8 unk70;
-    /* 0x071 */ u8 unk71;
-    /* 0x072 */ u8 pad72[0x9E];
+    /* 0x00 */ DefParticleHead head;
     /* 0x110 */ union {
         SpriteWobble wobble;
         SpriteMotion motion;
@@ -155,19 +139,19 @@ s32 func_1518F1A0(EffectSprite *sprite) {
             state->target1 = func_150ADA68() * (state->peak1 - state->hi1) + state->hi1;
         }
     }
-    sprite->unk30 += (state->target1 - sprite->unk30) * 0.359f;
+    sprite->head.def.height += (state->target1 - sprite->head.def.height) * 0.359f;
     state->timer0 -= D_800BE9E4;
     if (state->timer0 < 0) {
         state->timer0 = func_150ADA20() % 17U;
         state->target0 = func_150ADA68() * (state->hi0 - state->lo0) + state->lo0;
     }
-    sprite->unk2C += (state->target0 - sprite->unk2C) * 0.186f;
+    sprite->head.def.width += (state->target0 - sprite->head.def.width) * 0.186f;
     state->timer2 -= D_800BE9E4;
     if (state->timer2 < 0) {
         state->timer2 = func_150ADA20() % 15U;
         state->target2 = func_150ADA68() * (state->hi2 - state->lo2) + state->lo2;
     }
-    sprite->unk24 += (s32)((state->target2 - sprite->unk24) * 0.231f);
+    sprite->head.def.frameSpeed += (s32)((state->target2 - sprite->head.def.frameSpeed) * 0.231f);
     return 1;
 }
 
@@ -183,8 +167,8 @@ s32 func_1518F384(EffectSprite *sprite) {
         state->target1 = func_150ADA68() * (state->hi1 - state->lo1) + state->lo1;
         state->timer1 = 1;
     }
-    sprite->unk30 += (state->target1 - sprite->unk30) * 0.359f;
-    sprite->unk2C += (state->target0 - sprite->unk2C) * 0.186f;
+    sprite->head.def.height += (state->target1 - sprite->head.def.height) * 0.359f;
+    sprite->head.def.width += (state->target0 - sprite->head.def.width) * 0.186f;
     return 1;
 }
 
@@ -365,7 +349,7 @@ s32 func_1518FC04(EmitterParticle *particle, Vec3f *target) {
     EffectSprite *sprite;
 
     sprite = particle->sprite;
-    sprite->target = *target;
+    sprite->head.def.pos = *target;
     func_1514BE20(sprite);
     return 1;
 }
@@ -374,7 +358,7 @@ s32 func_1518FC44(EmitterParticle *particle, Vec3f *target) {
     EffectSprite *sprite;
 
     sprite = particle->sprite;
-    sprite->target = *target;
+    sprite->head.def.pos = *target;
     func_1514BF50(sprite);
     return 1;
 }
@@ -388,7 +372,7 @@ void func_1518FC84(EmitterParticle *particle, Vec3f *dest) {
 
     sprite = particle->sprite;
     if (particle->parent == NULL) {
-        func_1516972C(&sprite->header);
+        func_1516972C(&sprite->head.header);
         return;
     }
     parent = particle->parent;
@@ -399,16 +383,16 @@ void func_1518FC84(EmitterParticle *particle, Vec3f *dest) {
     motion = &sprite->data.motion;
     motion->unk44 = func_150ADA68() * params->tmpl.unk34Range + params->tmpl.unk30;
     motion->unk48 = params->tmpl.unk38;
-    sprite->unk6C = params->tmpl.unk3C;
-    sprite->unk6E = params->tmpl.unk3E;
-    sprite->unk1C = func_150ADA20() % (u32)(params->tmpl.unk42Range + 1) + params->tmpl.unk40;
+    sprite->head.def.fadeStart = params->tmpl.unk3C;
+    sprite->head.def.fadeRate = params->tmpl.unk3E;
+    sprite->head.def.lifetime = func_150ADA20() % (u32)(params->tmpl.unk42Range + 1) + params->tmpl.unk40;
     if (params->tmpl.flags & 1) {
-        sprite->unk70 = 0x21;
+        sprite->head.updateFn1 = 0x21;
     } else {
-        sprite->unk70 = 0x20;
+        sprite->head.updateFn1 = 0x20;
     }
-    sprite->unk71 = 0x24;
-    sprite->flags |= 0x08000001;
+    sprite->head.updateFn2 = 0x24;
+    sprite->head.def.flags |= 0x08000001;
 }
 
 /* Maps an object id to its emitter kind; only variant 0 exists. Returns 0 for unknown ids. */

@@ -186,19 +186,8 @@ void func_150C2290(u8 arg0) {
 }
 
 typedef struct {
-    /* 0x000 */ u8 pad0[0x1C];
-    /* 0x01C */ s16 unk1C;
-    /* 0x01E */ u8 pad1E[0xE];
-    /* 0x02C */ f32 unk2C;
-    /* 0x030 */ f32 unk30;
-    /* 0x034 */ u8 pad34[4];
-    /* 0x038 */ f32 unk38;
-    /* 0x03C */ u8 pad3C[0x10];
-    /* 0x04C */ f32 unk4C;
-    /* 0x050 */ f32 unk50;
-    /* 0x054 */ u8 pad54[0x44];
-    /* 0x098 */ struct133 *unk98;
-    /* 0x09C */ u8 pad9C[0xB4];
+    /* 0x00 */ DefParticleHead head;
+    /* 0x110 */ u8 pad110[0x40];
     /* 0x150 */ f32 unk150;
     /* 0x154 */ u8 pad154[0xC];
     /* 0x160 */ f32 unk160;
@@ -214,8 +203,8 @@ void func_150C2424(u8 arg0) {
 }
 
 s32 func_150C251C(Particle_EF410 *particle) {
-    struct133 *sub = particle->unk98;
-    s32 alpha = particle->unk1C << 3;
+    struct133 *sub = particle->head.unk98;
+    s32 alpha = particle->head.def.lifetime << 3;
 
     if (alpha >= 0x100) {
         alpha = 0xFF;
@@ -480,11 +469,11 @@ void func_150C2C00(Struct150C29F0 *emitter) {
     }
 }
 s32 func_150C2FCC(Particle_EF410 *particle) {
-    particle->unk2C -= particle->unk2C * particle->unk150;
-    particle->unk30 -= particle->unk30 * particle->unk150;
-    particle->unk38 += (particle->unk50 * D_800BE9A4) + (0.5f * particle->unk4C * D_800BE9A4 * D_800BE9A4);
-    particle->unk50 += particle->unk4C * D_800BE9A4;
-    if ((particle->unk2C < 10.0f) || (particle->unk30 < 10.0f)) {
+    particle->head.def.width -= particle->head.def.width * particle->unk150;
+    particle->head.def.height -= particle->head.def.height * particle->unk150;
+    particle->head.def.pos.y += (particle->head.def.scale.y * D_800BE9A4) + (0.5f * particle->head.def.scale.x * D_800BE9A4 * D_800BE9A4);
+    particle->head.def.scale.y += particle->head.def.scale.x * D_800BE9A4;
+    if ((particle->head.def.width < 10.0f) || (particle->head.def.height < 10.0f)) {
         return 0;
     }
     return 1;
@@ -495,7 +484,7 @@ s32 func_150C308C(Particle_EF410 *particle) {
     Vec3f *pos;
 
     triggered = FALSE;
-    if (particle->unk1C >= 6) {
+    if (particle->head.def.lifetime >= 6) {
         pos = func_15144B34(D_80082FA4);
         value = pos->x * pos->x + pos->z * pos->z;
         if (value < 2500000.0f) {
@@ -508,7 +497,7 @@ s32 func_150C308C(Particle_EF410 *particle) {
         }
     }
     if (triggered) {
-        particle->unk1C = 5;
+        particle->head.def.lifetime = 5;
     }
     return 1;
 }
