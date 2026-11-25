@@ -8,7 +8,7 @@ extern void func_1514373C(f32, f32, f32 *, f32 *);
 extern void func_15145974(Vec3f *, f32 *, f32 *);
 
 extern void *func_1515548C(ScreenSpriteInfo *, u8, s32, s32, s32, u8, s32);
-extern void *func_1515FF74(void *, s32, u8, s32);
+// matching: func_15160274 takes (s32 data, u8 event); func_151C9ED4 passes a third argument
 extern void func_15160274(s32, s32, s32);
 extern void func_1515572C(s32, s32);
 extern void func_151A561C(s32, s32);
@@ -552,7 +552,7 @@ void func_151CAD28(Camera *player, u8 big) {
         spawn.drawIndex = 1;
         spawn.lifetime = 300;
         spawn.messageIndex = 1;
-        lensObj = func_1515FF74(&spawn, 0x498, 0xFF, 1);
+        lensObj = (SightLensObject *)func_1515FF74(&spawn, 0x498, 0xFF, 1);
         if (lensObj != NULL) {
             lens.pixels = lensObj->pixels;
             memcpy(&lensObj->lens, &lens, sizeof(SightLens));

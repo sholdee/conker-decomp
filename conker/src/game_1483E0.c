@@ -723,7 +723,6 @@ void func_1511C548(WorldObject *obj) {
 
 
 extern void func_15170F4C(WorldObject *, u8, s32);
-extern void func_150B2740(u8, u8);
 extern s32 func_1000EC24();
 
 /* The three sound ids func_1511C638 picks from: { 0x2B6, 0x2BD, 0x2BE }. The original local

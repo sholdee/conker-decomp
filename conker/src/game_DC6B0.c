@@ -145,8 +145,6 @@ s32 func_150AF6E4(SpriteParticle *particle, s32 arg1) {
     return 1;
 }
 
-extern void func_1515FF74(EffectDesc *desc, s32 dataSize, u8, s32);
-
 /* Starts a data-less effect (draw handler 2, no update) that ends after `lifetime` frames. */
 void func_150AF738(s16 lifetime, u8 arg1, s32 arg2) {
     EffectDesc desc;

@@ -1,31 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Object type 0x34: screen effects from ../Effects/ColourFrameBuffer/colourframebuffer.c */
 #define OBJ_TYPE_SCREEN_EFFECT 0x34
-
-/* Object node of type 0x34; the effect's own data (dataSize bytes) follows at 0x18. */
-typedef struct ScreenEffect {
-    /* 0x00 */ u8 pad0[8];
-    /* 0x08 */ struct ScreenEffect *next;
-    /* 0x0C */ u8 padC[2];
-    /* 0x0E */ EffectDesc desc;
-    /* 0x16 */ u8 pad16[2];
-} ScreenEffect;
-
-/* Effect data filled in by func_151600D8 from the debug tunables. */
-typedef struct {
-    /* 0x00 */ f32 pos[2];  /* s, t */
-    /* 0x08 */ f32 size[2]; /* s, t */
-    /* 0x10 */ s32 pixelation;
-} ColourFrameBufferData;
-
-typedef struct {
-    /* 0x00 */ ScreenEffect header;
-    /* 0x18 */ ColourFrameBufferData data;
-} ColourFrameBufferEffect;
 
 extern s32 (*D_8008B0D0[])(ScreenEffect *);
 extern void (*D_8008B0D8[])(ScreenEffect *, s32);

@@ -30,8 +30,6 @@ typedef struct {
     /* 0x18 */ MosaicData data;
 } MosaicEffect;
 
-extern MosaicEffect *func_1515FF74(EffectDesc *desc, s32 dataSize, u8 arg2, s32 arg3);
-
 /* Starts a mosaic effect over owner for lifetime frames. */
 MosaicEffect *func_150CE150(Actor *owner, s16 lifetime, u8 arg2, s32 arg3) {
     EffectDesc desc;
@@ -52,7 +50,7 @@ MosaicEffect *func_150CE150(Actor *owner, s16 lifetime, u8 arg2, s32 arg3) {
     data.halfHeight = 30000.0f;
     data.owner = owner;
     data.ownerId = owner->unique_id;
-    effect = func_1515FF74(&desc, sizeof(data), arg2, arg3);
+    effect = (MosaicEffect *)func_1515FF74(&desc, sizeof(data), arg2, arg3);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
