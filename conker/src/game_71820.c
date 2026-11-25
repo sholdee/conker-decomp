@@ -1,4 +1,5 @@
 #include <ultra64.h>
+// The headers declare these symbols with placeholder types; this file redeclares them with their real ones.
 #define func_15048A40 func_15048A40_hdr
 #include "functions.h"
 #undef func_15048A40
@@ -51,11 +52,12 @@ TriggerNode *func_15044964(s32 size, s32 check, s32 lifetime, s32 delay, s32 act
 
 #pragma function sqrtf
 
+/* Clears D_800CBD9C. */
 void func_15044370(void) {
     D_800CBD9C = 0;
 }
 
-extern u8 D_80089120[4];
+extern u8 D_80089120[4]; // per collision set: 1 = enabled
 extern u8 D_800CBDD3;
 extern f32 D_800CBDF4;
 extern f32 D_800CBDF8;
@@ -64,7 +66,11 @@ void func_15044660(struct127 *, f32, f32, f32);
 s32 func_150AB1F0(f32, f32, f32, struct127 *, s32);
 void func_150AC3E4(f32, f32, f32, struct127 *, s32);
 
-s32 func_15044380(f32 x, f32 y, f32 z, struct127 *obj, s32 arg4, s32 arg5) {
+/*
+ * Runs func_150AB1F0 for obj against each enabled collision set (3 down to 0; set 3 is skipped when obj
+ * flag 0x200 is set) and returns the summed results. With secondPass, also runs func_150AC3E4 on sets 0-2.
+ */
+s32 func_15044380(f32 x, f32 y, f32 z, struct127 *obj, s32 arg4, s32 secondPass) {
     s32 i;
     s32 total;
     s32 saved_mode;
@@ -82,7 +88,7 @@ s32 func_15044380(f32 x, f32 y, f32 z, struct127 *obj, s32 arg4, s32 arg5) {
             total += func_150AB1F0(x, y, z, obj, arg4);
         }
     }
-    if (arg5 != 0) {
+    if (secondPass) {
         for (i = 0; i < 3; i++) {
             if (D_80089120[i] == 1) {
                 func_1510F800(i);
@@ -401,7 +407,6 @@ typedef struct Game71820Candidate {
     /* 0x0C */ s32 surface;        // index into D_800DBEF4
 } Game71820Candidate;
 
-void func_1510F800(s32);
 s32 func_150A3A70(s32, s32);
 s32 func_150A4FA0(s32, s32);
 s32 func_150A43E0(s32, s32, s32, void *);
@@ -451,10 +456,10 @@ s32 func_15044ED0(struct17 *pos, f32 top, CollisionHit *hit) {
         vertices = candidate->vertices;
         index = candidate->index;
         for (j = 0; j != 3; j++) {
-            s16 *point = (s16 *)(vertices[j] + index * 16);
-            hit->tri.v[j].x = point[0];
-            hit->tri.v[j].y = point[1];
-            hit->tri.v[j].z = point[2];
+            Vtx *vtx = (Vtx *)vertices[j] + index;
+            hit->tri.v[j].x = vtx->v.ob[0];
+            hit->tri.v[j].y = vtx->v.ob[1];
+            hit->tri.v[j].z = vtx->v.ob[2];
         }
         {
             s32 triangle = ((u8 *)candidate->vertices - D_800DBE3C) / 12;
@@ -509,10 +514,10 @@ s32 func_150450CC(struct17 *pos, f32 bottom, CollisionHit *hit) {
         vertices = candidate->vertices;
         index = candidate->index;
         for (j = 0; j != 3; j++) {
-            s16 *point = (s16 *)(vertices[j] + index * 16);
-            hit->tri.v[j].x = point[0];
-            hit->tri.v[j].y = point[1];
-            hit->tri.v[j].z = point[2];
+            Vtx *vtx = (Vtx *)vertices[j] + index;
+            hit->tri.v[j].x = vtx->v.ob[0];
+            hit->tri.v[j].y = vtx->v.ob[1];
+            hit->tri.v[j].z = vtx->v.ob[2];
         }
         if (D_800DBE5C != NULL) {
             s32 triangle = ((u8 *)candidate->vertices - D_800DBE3C) / 12;
@@ -730,7 +735,7 @@ s32 func_15045880(struct17 *pos, f32 top, s32 *set, CollisionHit *hit) {
         }
         hit->flags |= 6;
         {
-            CollisionHit *alias; // matching: a scoped alias makes IDO reload flags here
+            CollisionHit *alias; // matching: this alias and re-reading candidate->surface make IDO reload both
 
             if ((D_800DBEF4[surface = candidate->surface].flags & 0x80) == 0x80) {
                 alias = hit;
@@ -794,7 +799,7 @@ s32 func_15045AE4(struct17 *pos, f32 bottom, s32 *set, CollisionHit *hit) {
         }
         hit->flags |= 6;
         {
-            CollisionHit *alias; // matching: a scoped alias makes IDO reload flags here
+            CollisionHit *alias; // matching: this alias and re-reading candidate->surface make IDO reload both
 
             if ((D_800DBEF4[surface = candidate->surface].flags & 0x80) == 0x80) {
                 alias = hit;
@@ -1398,11 +1403,12 @@ void func_15047390(f32 mf[4][4], f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt,
     mf[2][3] = 0.0f;
 }
 
-void func_15047688(Mtx *arg0, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp) {
-    f32 sp30[4][4];
+/* guLookAt equivalent: func_15047390 converted to a fixed-point Mtx. */
+void func_15047688(Mtx *m, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp) {
+    f32 mf[4][4];
 
-    func_15047390(&sp30, xEye, yEye, zEye, xAt, yAt, zAt, xUp, yUp, zUp);
-    guMtxF2L(&sp30, arg0);
+    func_15047390(mf, xEye, yEye, zEye, xAt, yAt, zAt, xUp, yUp, zUp);
+    guMtxF2L(mf, m);
 }
 
 #pragma intrinsic(sqrtf)
