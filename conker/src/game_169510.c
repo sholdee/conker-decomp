@@ -724,69 +724,80 @@ void *func_1513D2F0(void *def, s32 colors, u8 updateFn1, u8 updateFn2, u8 expire
     return particle;
 }
 
-void func_1513D4B8(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9) {
-    func_1513D2F0(arg0, arg1, arg2, arg3, arg4, arg5, arg6, 0, 0, arg7, arg8, arg9);
+void func_1513D4B8(s32 def, s32 colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip, s32 motionSize,
+                   u8 arg8, s32 arg9) {
+    func_1513D2F0(def, colors, updateFn1, updateFn2, expireFn, vertexFn, flip, 0, 0, motionSize, arg8, arg9);
 }
 
-void func_1513D524(s32 arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8) {
-    func_1513D2F0(arg0, &D_800A4AA0, arg1, arg2, arg3, arg4, arg5, 0, 0, arg6, arg7, arg8);
+/* As func_1513D4B8 with the default colours. */
+void func_1513D524(s32 def, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip, s32 motionSize, u8 arg7,
+                   s32 arg8) {
+    func_1513D2F0(def, &D_800A4AA0, updateFn1, updateFn2, expireFn, vertexFn, flip, 0, 0, motionSize, arg7, arg8);
 }
 
-s32 func_1513D594(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s16 arg6, f32 arg7, f32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, u8 argD, s32 argE, u8 argF, s32 arg10) {
-    struct210 *temp_v0;
+/* Spawns a particle whose quad is spanned by two axes from func_1513D6FC (vertex function 12). */
+s32 func_1513D594(s32 def, s32 colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 flip, s16 angle, f32 width,
+                  f32 height, s32 arg9, s32 argA, s32 model, s32 argC, u8 argD, s32 motionSize, u8 argF, s32 arg10) {
+    Particle *particle;
 
-    if (arg1 == 0) {
-        arg1 = &D_800A4AA0;
+    if (colors == 0) {
+        colors = (s32)&D_800A4AA0;
     }
-    temp_v0 = func_1513D2F0(arg0, arg1, arg2, arg3, arg4, 0xC, arg5, argB, argC, argE + 0x18, argF, arg10);
-    if ((temp_v0 != 0) && (func_1513D6FC(&temp_v0->unk110, arg6, arg7, arg8, arg9, argA, argD) == 0)) {
-        func_1516972C(temp_v0);
+    particle = func_1513D2F0(def, colors, updateFn1, updateFn2, expireFn, 12, flip, model, argC,
+                             motionSize + sizeof(particle->motion.axes), argF, arg10);
+    if ((particle != NULL) &&
+        (func_1513D6FC((struct211 *)&particle->motion.axes, angle, width, height, arg9, argA, argD) == 0)) {
+        func_1516972C(particle);
         return 0;
     }
-    return temp_v0;
+    return (s32)particle;
 }
 
-void func_1513D668(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s16 arg6, f32 arg7, f32 arg8, s32 arg9, s32 argA, u8 argB, s32 argC, u8 argD, s32 argE) {
-    func_1513D594(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA, 0, 0, argB, argC, argD, argE);
+void func_1513D668(s32 def, s32 colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 flip, s16 angle, f32 width,
+                   f32 height, s32 arg9, s32 argA, u8 argB, s32 motionSize, u8 argD, s32 argE) {
+    func_1513D594(def, colors, updateFn1, updateFn2, expireFn, flip, angle, width, height, arg9, argA, 0, 0, argB,
+                  motionSize, argD, argE);
 }
 
-/*FUNCSTART*/
-typedef struct { f32 x, y, z; } Vec1513D6FC;
 s32 func_1510E388(s32, s32, f32 *, f32 *);
-s32 func_15144E80(s32, Vec1513D6FC *, Vec1513D6FC *, Vec1513D6FC *);
-s32 func_15145128(Vec1513D6FC *, Vec1513D6FC *, f32 *, f32 *);
+s32 func_15144E80(s32, Vec3f *, Vec3f *, Vec3f *);
+s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
 
-s32 func_1513D6FC(struct211 *arg0, s16 arg1, f32 arg2, f32 arg3, s32 arg4, s32 arg5, u8 arg6) {
-    f32 bx;
-    f32 bz;
-    f32 c;
-    f32 s;
-    f32 xs;
+/*
+ * Computes the two half-axes of a particle quad rotated by angle. With onSlope the quad lies on the
+ * slope func_1510E388 returns (each axis keeps its length); otherwise it lies in the plane of the
+ * basis func_15144E80 returns.
+ */
+s32 func_1513D6FC(struct211 *axes, s16 angle, f32 width, f32 height, s32 arg4, s32 arg5, u8 onSlope) {
+    f32 slopeX;
+    f32 slopeZ;
+    f32 cosA;
+    f32 sinA;
+    f32 widthSin;
     f32 t;
-    f32 zs;
-    f32 a;
-    f32 kx;
+    f32 heightSin;
+    f32 heightCos;
+    f32 unused1;
     f32 p2;
     f32 q2;
     f32 r2;
-    Vec1513D6FC v;
+    Vec3f v;
     f32 k2;
-    f32 c2;
-    f32 s2;
-    Vec1513D6FC v1;
-    Vec1513D6FC v2;
-    Vec1513D6FC v3;
+    f32 cosB;
+    f32 sinB;
+    Vec3f basisU;
+    Vec3f basisV;
+    Vec3f basisN;
     f32 len;
-    f32 unused;
+    f32 unused2;
     f32 w;
 
-
-    if (arg6 != 0) {
-        c = func_151423D8(arg1 - 0x40);
-        s = func_151423D8(arg1);
-        xs = arg2 * s;
-        zs = arg3 * s;
-        if (func_1510E388(arg4, arg5, &bx, &bz) == 0) {
+    if (onSlope != 0) {
+        cosA = func_151423D8(angle - 0x40);
+        sinA = func_151423D8(angle);
+        widthSin = width * sinA;
+        heightSin = height * sinA;
+        if (func_1510E388(arg4, arg5, &slopeX, &slopeZ) == 0) {
             return 0;
         }
         {
@@ -794,205 +805,80 @@ s32 func_1513D6FC(struct211 *arg0, s16 arg1, f32 arg2, f32 arg3, s32 arg4, s32 a
             f32 q;
             f32 r;
 
-            a = arg3 * c;
-            t = zs * bz;
-            p = fabsf(zs);
-            q = sqrtf((zs * zs) + (t * t));
-            if (0 != a) {
-                w = a * bx;
+            heightCos = height * cosA;
+            t = heightSin * slopeZ;
+            // matching: p, q (and p2, q2, r2 below) are dead, but the original computed them
+            p = fabsf(heightSin);
+            q = sqrtf((heightSin * heightSin) + (t * t));
+            if (0 != heightCos) {
+                w = heightCos * slopeX;
                 v.z = w;
-                v.y = fabsf(a) / sqrtf((a * a) + (w * w));
+                v.y = fabsf(heightCos) / sqrtf((heightCos * heightCos) + (w * w));
             } else {
                 v.z = 0.0f;
                 v.y = 0.0f;
             }
-            if (zs != 0) {
+            if (heightSin != 0) {
                 v.x = t;
-                k2 = fabsf(zs) / sqrtf((zs * zs) + (t * t));
+                k2 = fabsf(heightSin) / sqrtf((heightSin * heightSin) + (t * t));
             } else {
                 v.x = 0.0f;
                 k2 = 0.0f;
             }
-            arg0->unk0 = v.y * a;
-            arg0->unk4 = (v.y * v.z) + (k2 * v.x) + 0.5f;
-            arg0->unk8 = k2 * zs;
-            t = -(arg2 * c);
-            p2 = t * bz;
+            axes->unk0 = v.y * heightCos;
+            axes->unk4 = (v.y * v.z) + (k2 * v.x) + 0.5f;
+            axes->unk8 = k2 * heightSin;
+            t = -(width * cosA);
+            p2 = t * slopeZ;
             q2 = fabsf(t);
             r2 = sqrtf((t * t) + (p2 * p2));
-            if (xs != 0) {
-                w = xs * bx; v.z = w; v.y = fabsf(xs) / sqrtf((xs * xs) + (w * w));
+            if (widthSin != 0) {
+                w = widthSin * slopeX; v.z = w; v.y = fabsf(widthSin) / sqrtf((widthSin * widthSin) + (w * w));
             } else {
                 v.z = 0.0f; v.y = 0.0f;
             }
             if (t != 0) {
-                v.x = t * bz;
-                k2 = fabsf(t) / sqrtf((t * t) + ((t * bz) * (t * bz)));
+                v.x = t * slopeZ;
+                k2 = fabsf(t) / sqrtf((t * t) + ((t * slopeZ) * (t * slopeZ)));
             } else {
                 v.x = 0.0f;
                 k2 = 0.0f;
             }
-            arg0->unkC = v.y * xs;
-            arg0->unk10 = (v.y * v.z) + (k2 * v.x) + 0.5f;
-            arg0->unk14 = k2 * t;
+            axes->unkC = v.y * widthSin;
+            axes->unk10 = (v.y * v.z) + (k2 * v.x) + 0.5f;
+            axes->unk14 = k2 * t;
         }
     } else {
-        c2 = func_151423D8(arg1 - 0x40);
-        s2 = func_151423D8(arg1);
-        if (func_15144E80(arg5, &v1, &v2, &v3) == 0) {
+        cosB = func_151423D8(angle - 0x40);
+        sinB = func_151423D8(angle);
+        if (func_15144E80(arg5, &basisU, &basisV, &basisN) == 0) {
             return 0;
         }
-        if (func_15145128(&v1, &v1, &len, &unused) == 0) {
+        if (func_15145128(&basisU, &basisU, &len, &unused2) == 0) {
             return 0;
         }
-        if (func_15145128(&v2, &v2, &len, &unused) == 0) {
+        if (func_15145128(&basisV, &basisV, &len, &unused2) == 0) {
             return 0;
         }
         {
-            extern s32 D_1513D6FC_dummy;
+            extern s32 D_1513D6FC_dummy; // matching: a declaration here opens the -g3 scope the scheduler keys on
 
-            s = arg2 * s2;
-            t = arg2 * c2;
-            arg0->unk0 = (s * v1.x) + (t * v2.x);
-            arg0->unk4 = (s * v1.y) + (t * v2.y);
-            arg0->unk8 = (s * v1.z) + (t * v2.z);
-            s = -arg3 * c2;
-            t = arg3 * s2;
-            arg0->unkC = (s * v1.x) + (t * v2.x);
-            arg0->unk10 = (s * v1.y) + (t * v2.y);
-            arg0->unk14 = (s * v1.z) + (t * v2.z);
+            sinA = width * sinB;
+            t = width * cosB;
+            axes->unk0 = (sinA * basisU.x) + (t * basisV.x);
+            axes->unk4 = (sinA * basisU.y) + (t * basisV.y);
+            axes->unk8 = (sinA * basisU.z) + (t * basisV.z);
+            sinA = -height * cosB;
+            t = height * sinB;
+            axes->unkC = (sinA * basisU.x) + (t * basisV.x);
+            axes->unk10 = (sinA * basisU.y) + (t * basisV.y);
+            axes->unk14 = (sinA * basisU.z) + (t * basisV.z);
         }
         return 1;
     }
-end:
+end: // matching: an unused label keeps the final return 1 in its own basic block
     return 1;
 }
-// s32 func_1513D6FC(struct211 *arg0, s16 arg1, f32 arg2, f32 arg3, s32 arg4, s32 arg5, u8 arg6) {
-//     f32 spBC;
-//     f32 spB8;
-//     f32 spB4;
-//     s32 spB0;
-//     f32 spAC;
-//     s32 spA8;
-//     f32 spA4;
-//     s32 spA0;
-//     s32 sp9C;
-//     s32 sp98;
-//     s32 sp94;
-//     s32 sp90;
-//     f32 sp8C;
-//     f32 sp88;
-//     f32 sp84;
-//     s32 sp80;
-//     f32 sp7C;
-//     f32 sp78;
-//     f32 sp74;
-//     f32 sp70;
-//     f32 sp6C;
-//     f32 sp68;
-//     f32 sp64;
-//     f32 sp60;
-//     s32 sp5C;
-//     s32 sp58;
-//     s32 sp54; // ?
-//     s32 sp50; // ?
-//     s32 sp4C; // ?
-//     s32 sp48; // ?
-//     s32 sp44; // ?
-//     s32 sp40; // ?
-//     s32 sp3C; // ?
-//     s32 sp38; // ?
-//     s32 sp34; // ?
-//     s32 sp30; // ?
-//     f32 sp2C;
-//     f32 sp28;
-//     f32 sp24;
-//
-//     f32 temp_f0;
-//     f32 temp_f16;
-//     f32 temp_f18;
-//     f32 phi_f12;
-//     f32 phi_f14;
-//     f32 phi_f12_2;
-//
-//     if (arg6 != 0) {
-//         spB4 = func_151423D8(arg1 - 64);
-//         temp_f0 = func_151423D8(arg1);
-//         spAC = arg2 * temp_f0;
-//         spA4 = arg3 * temp_f0;
-//         if (func_1510E388(arg4, arg5, &spBC, &spB8) == 0) {
-//             return 0;
-//         }
-//         temp_f18 = spA4 * spB8;
-//         sp2C = fabsf(spA4);
-//         temp_f16 = arg3 * spB4;
-//         sp28 = sqrtf((spA4 * spA4) + (temp_f18 * temp_f18));
-//         if (temp_f16 != 0.0f) {
-//             sp8C = temp_f16 * spBC;
-//             sp88 = fabsf(temp_f16) / sqrtf((temp_f16 * temp_f16) + (sp8C * sp8C));
-//         } else {
-//             sp8C = 0.0f;
-//             sp88 = 0.0f;
-//         }
-//         if (spA4 != 0.0f) {
-//             sp84 = temp_f18;
-//             phi_f12 = sp2C / sp28;
-//         } else {
-//             sp84 = 0.0f;
-//             phi_f12 = 0.0f;
-//         }
-//         arg0->unk0 = sp88 * temp_f16;
-//         arg0->unk8 = phi_f12 * spA4;
-//         arg0->unk4 = (sp88 * sp8C) + (phi_f12 * sp84) + 0.5f;
-//         temp_f18 = -(arg2 * spB4);
-//         temp_f16 = temp_f18 * spB8;
-//         sp28 = fabsf(temp_f18);
-//         sp2C = temp_f16;
-//         sp24 = sqrtf((temp_f18 * temp_f18) + (temp_f16 * temp_f16));
-//         if (spAC != 0.0f) {
-//             temp_f0 = spAC * spBC;
-//             sp8C = temp_f0;
-//             phi_f14 = fabsf(spAC) / sqrtf((spAC * spAC) + (temp_f0 * temp_f0));
-//         } else {
-//             sp8C = 0.0f;
-//             sp88 = 0.0f;
-//             phi_f14 = 0.0f;
-//         }
-//         if (temp_f18 != 0.0f) {
-//             sp84 = sp2C;
-//             phi_f12_2 = sp28 / sp24;
-//         } else {
-//             sp84 = 0.0f;
-//             phi_f12_2 = 0.0f;
-//         }
-//         arg0->unkC = phi_f14 * spAC;
-//         arg0->unk14 = phi_f12_2 * temp_f18;
-//         arg0->unk10 = (phi_f14 * sp8C) + (phi_f12_2 * sp84) + 0.5f;
-//     } else {
-//         sp7C = func_151423D8(arg1 - 64);
-//         sp78 = func_151423D8(arg1);
-//         if (func_15144E80(arg5, &sp6C, &sp60, &sp54) == 0) {
-//             return 0;
-//         }
-//         if (func_15145128(&sp6C, &sp6C, &sp50, &sp4C) == 0) {
-//             return 0;
-//         }
-//         if (func_15145128(&sp60, &sp60, &sp50, &sp4C) == 0) {
-//             return 0;
-//         }
-//         temp_f0 = arg2 * sp78;
-//         temp_f18 = arg2 * sp7C;
-//         arg0->unk0 = (temp_f0 * sp6C) + (temp_f18 * sp60);
-//         arg0->unk4 = (temp_f0 * sp70) + (temp_f18 * sp64);
-//         arg0->unk8 = (temp_f0 * sp74) + (temp_f18 * sp68);
-//         temp_f0 = -arg3 * sp7C;
-//         temp_f18 = arg3 * sp78;
-//         arg0->unkC = (temp_f0 * sp6C) + (temp_f18 * sp60);
-//         arg0->unk10 = (temp_f0 * sp70) + (temp_f18 * sp64);
-//         arg0->unk14 = (temp_f0 * sp74) + (temp_f18 * sp68);
-//     }
-//     return 1;
-// }
 
 typedef struct {
     u8 pad0[0x10];
@@ -1272,8 +1158,8 @@ s32 func_1513E2AC(s32 arg0, s32 arg1, s32 arg2, f32 x, f32 y, f32 z, f32 w, f32 
     f32 vx;
     f32 vy;
     f32 vz;
-    Vec1513D6FC a;
-    Vec1513D6FC b;
+    Vec3f a;
+    Vec3f b;
     f32 wc;
     f32 ws;
     f32 hs;
