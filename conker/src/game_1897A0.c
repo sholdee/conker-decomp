@@ -3,127 +3,130 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct {
-    u8 pad0[0x10];
-    s32 unk10;
-} Struct1515C2F0Arg0;
+/* Spawn header that func_15147A80 copies to 0x10 of a new trail. */
+typedef struct TrailHeader {
+    /* 0x00 */ vertex pos;
+    /* 0x0C */ s16 life;
+    /* 0x0E */ u16 flags;
+    /* 0x10 */ s32 kind;
+    /* 0x14 */ s8 unk14;
+    /* 0x15 */ u8 capacity; /* number of points in the ring buffer */
+    /* 0x16 */ u8 pad16[2];
+    /* 0x18 */ void *unk18;
+} TrailHeader; /* size 0x1C */
 
-typedef struct {
-    u8 pad0[0x98];
-    void *unk98;
-} Struct1515C2F0Ret;
+/* One point of a trail. */
+typedef struct TrailPoint {
+    /* 0x00 */ vertex pos;
+    /* 0x0C */ f32 velY;
+} TrailPoint; /* size 0x10 */
 
-extern Struct1515C2F0Ret *func_15147A80(void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+/* Per-trail settings, copied from the spawner by func_1515C2F0. */
+typedef struct TrailData {
+    /* 0x00 */ f32 width;     /* half-width of the ribbon */
+    /* 0x04 */ vertex vel;    /* initial point velocity; only vel.y is kept per point */
+    /* 0x10 */ f32 gravity;
+    /* 0x14 */ u8 flags;      /* 1: two-cycle mode; 4: fade out; 8: shrink */
+    /* 0x15 */ u8 primMode;
+    /* 0x16 */ u8 envMode;
+    /* 0x17 */ u8 color[4];
+    /* 0x1B */ u8 color2[4];
+    /* 0x1F */ u8 colorLevel;
+    /* 0x20 */ u8 renderMode; /* index into D_800A4AC8 */
+    /* 0x21 */ u8 unk21;
+    /* 0x22 */ u8 pad22[2];
+    /* 0x24 */ s32 setGeometryMode;
+    /* 0x28 */ s32 clearGeometryMode;
+    /* 0x2C */ s16 fadeStart;  /* life below which the alpha fades */
+    /* 0x2E */ s16 fadeRate;   /* alpha per unit of life */
+    /* 0x30 */ s16 shrinkStart; /* life below which the width shrinks */
+    /* 0x32 */ u8 shrinkPaused;
+    /* 0x33 */ u8 pad33;
+    /* 0x34 */ f32 shrinkFactor; /* width multiplier per frame */
+    /* 0x38 */ s8 unk38;      /* index into D_8008B080, -1: none */
+    /* 0x39 */ s8 unk39;      /* index into D_8008B084, -1: none */
+    /* 0x3A */ u8 pad3A[2];
+} TrailData; /* size 0x3C */
 
-void *func_1515C2F0(Struct1515C2F0Arg0 *arg0, s32 arg1, void *arg2, s32 arg3, u8 arg4, s32 arg5) {
-    Struct1515C2F0Ret *temp_v0;
-    Struct1515C2F0Ret *sp3C;
+/* A trail object made by func_15147A80: a ring buffer of points falling under gravity. */
+typedef struct Trail {
+    /* 0x00 */ u8 pad0[0x10];
+    /* 0x10 */ TrailHeader header;
+    /* 0x2C */ s8 count;
+    /* 0x2D */ s8 tail; /* oldest point */
+    /* 0x2E */ s8 head; /* next point to write */
+    /* 0x2F */ u8 pad2F[0x25];
+    /* 0x54 */ vertex tailPos;
+    /* 0x60 */ u8 pad60[0x24];
+    /* 0x84 */ u8 unk84[0x10];
+    /* 0x94 */ TrailPoint *points;
+    /* 0x98 */ TrailData *data;
+} Trail;
 
-    arg0->unk10 = 0xA;
-    temp_v0 = func_15147A80(arg0, arg1 + 0x40, 0x10, 8, 8, 8, 0, 0, arg3, arg4, arg5);
-    if (temp_v0 == 0) {
+extern Trail *func_15147A80(TrailHeader *, s32, s32, s32, s32, s32, s32, s32, void *, s32, s32);
+
+/* Spawns a trail with extraSize + 0x40 bytes of data and copies *data into it. */
+Trail *func_1515C2F0(TrailHeader *header, s32 extraSize, TrailData *data, void *arg3, u8 arg4, s32 arg5) {
+    Trail *trail;
+
+    header->kind = 10;
+    trail = func_15147A80(header, extraSize + 0x40, sizeof(TrailPoint), 8, 8, 8, 0, 0, arg3, arg4, arg5);
+    if (trail == NULL) {
         return NULL;
     }
-    sp3C = temp_v0;
-    memcpy(temp_v0->unk98, arg2, 0x3C);
-    return sp3C;
+    memcpy(trail->data, data, sizeof(TrailData));
+    return trail;
 }
-// void *func_1515C2F0(void *arg0, void *arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5) {
-//     void *sp3C;
-//     void *temp_v0;
-//
-//     arg0->unk10 = 0xA;
-//     temp_v0 = func_15147A80(&arg1->unk40, 0x10, 8, 8, 8, 0, 0, arg3, (?32) arg4, arg5);
-//     if (temp_v0 == 0) {
-//         return NULL;
-//     }
-//     sp3C = temp_v0;
-//     memcpy(temp_v0->unk98, arg2, 0x3C); // memcpy
-//     return sp3C;
-// }
 
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec1515C388;
+typedef s32 (*TrailHandler)(Trail *, TrailData *);
+extern TrailHandler D_8008B080[];
+extern TrailHandler D_8008B084[];
 
-typedef struct {
-    Vec1515C388 pos;
-    f32 w;
-} Ent1515C388;
-
-typedef struct {
-    u8 pad0[0x4];
-    f32 unk4;
-    u8 pad8[0xC - 0x8];
-    f32 unkC;
-    f32 unk10;
-    u8 pad14[0x38 - 0x14];
-    s8 unk38;
-} Set1515C388;
-
-typedef struct {
-    u8 pad0[0x25];
-    u8 unk25;
-    u8 pad26[0x2C - 0x26];
-    s8 unk2C;
-    s8 unk2D;
-    s8 unk2E;
-    u8 pad2F[0x54 - 0x2F];
-    Vec1515C388 unk54;
-    u8 pad60[0x94 - 0x60];
-    Ent1515C388 *unk94;
-    Set1515C388 *unk98;
-} Obj1515C388;
-
-typedef s32 (*Game1897A0Callback)(void *, void *);
-extern Game1897A0Callback D_8008B080[];
-
-s32 func_1515C388(Obj1515C388 *arg0)
+/* Moves every point by the trail's velocity under gravity, runs the unk38 handler and tracks the tail position. */
+s32 func_1515C388(Trail *trail)
 {
-  Set1515C388 *settings;
+  TrailData *data;
   s32 callbackFailed;
-  Ent1515C388 *ents;
-  Vec1515C388 start;
+  TrailPoint *points;
+  vertex start;
   s32 i;
-  Game1897A0Callback cb;
-  settings = arg0->unk98;
+  TrailHandler cb;
+  data = trail->data;
   callbackFailed = 0;
-  ents = arg0->unk94;
-  if (arg0->unk2C)
+  points = trail->points;
+  if (trail->count)
   {
-    start = ents[arg0->unk2D].pos;
-    i = arg0->unk2D;
-    while (i != arg0->unk2E)
+    start = points[trail->tail].pos;
+    i = trail->tail;
+    while (i != trail->head)
     {
-      ents[i].pos.x += settings->unk4 * D_800BE9A4;
-      ents[i].pos.y += (ents[i].w * D_800BE9A4) + (((settings->unk10 * D_800BE9A4) * D_800BE9A4) * 0.5f);
-      ents[i].pos.z += settings->unkC * D_800BE9A4;
-      ents[i].w += settings->unk10 * D_800BE9A4;
+      points[i].pos.x += data->vel.x * D_800BE9A4;
+      points[i].pos.y += (points[i].velY * D_800BE9A4) + (((data->gravity * D_800BE9A4) * D_800BE9A4) * 0.5f);
+      points[i].pos.z += data->vel.z * D_800BE9A4;
+      points[i].velY += data->gravity * D_800BE9A4;
       i++;
-      if (i == arg0->unk25)
+      if (i == trail->header.capacity)
       {
         i = 0;
       }
     }
 
   }
-  if (settings->unk38 != (-1))
+  if (data->unk38 != (-1))
   {
     {
-    callbackFailed = (D_8008B080[settings->unk38](arg0, settings) == 0) & 0xFF;
+    callbackFailed = (D_8008B080[data->unk38](trail, data) == 0) & 0xFF;
     }
   }
-  if (arg0->unk2C > 0)
+  if (trail->count > 0)
   {
-    arg0->unk54 = ents[arg0->unk2D].pos;
+    trail->tailPos = points[trail->tail].pos;
   }
   else
   {
-    arg0->unk54.x = 0.0f;
-    arg0->unk54.y = 0.0f;
-    arg0->unk54.z = 0.0f;
+    trail->tailPos.x = 0.0f;
+    trail->tailPos.y = 0.0f;
+    trail->tailPos.z = 0.0f;
   }
   if (callbackFailed != 0)
   {
@@ -131,58 +134,35 @@ s32 func_1515C388(Obj1515C388 *arg0)
   }
   return 1;
 }
-typedef s32 (*Game1897A0ActionCallback)(void *, void *);
-extern Game1897A0ActionCallback D_8008B084[];
 
-s32 func_1515C534(void *arg0) {
-    struct Actor {
-        u8 pad00[0x1C];
-        s16 time;
-        u8 pad1E[0x7A];
-        void *settings;
-    };
-    struct Settings {
-        f32 value;
-        u8 pad04[0x10];
-        u8 flags;
-        u8 pad15[5];
-        u8 intensity;
-        u8 pad1B[0x11];
-        s16 start;
-        s16 slope;
-        s16 end;
-        u8 paused;
-        u8 pad33;
-        f32 attenuation;
-        u8 pad38;
-        s8 callbackIndex;
-    } *settings;
-    struct Actor *actor = arg0;
+/* Runs the unk39 handler, then fades the alpha and shrinks the width as the trail's life runs out. */
+s32 func_1515C534(Trail *trail) {
+    TrailData *data;
     s32 callbackFailed;
     u32 count;
 
-    settings = actor->settings;
+    data = trail->data;
     callbackFailed = 0;
-    if (settings->callbackIndex != -1) {
-        callbackFailed = (D_8008B084[settings->callbackIndex](arg0, settings) == 0) & 0xFF;
+    if (data->unk39 != -1) {
+        callbackFailed = (D_8008B084[data->unk39](trail, data) == 0) & 0xFF;
     }
     if (callbackFailed == 0) {
-        if (settings->flags & 4) {
-            s16 time = actor->time;
-            s32 newValue;
+        if (data->flags & 4) {
+            s16 life = trail->header.life;
+            s32 alpha;
 
-            if (time < settings->start) {
-                newValue = time * settings->slope;
-                if (newValue < settings->intensity) {
-                    settings->intensity = newValue;
+            if (life < data->fadeStart) {
+                alpha = life * data->fadeRate;
+                if (alpha < data->color[3]) {
+                    data->color[3] = alpha;
                 }
             }
         }
-        if ((settings->flags & 8) && actor->time < settings->end && settings->paused == 0) {
+        if ((data->flags & 8) && trail->header.life < data->shrinkStart && data->shrinkPaused == 0) {
             count = D_800BE9E4;
             if (count != 0) {
                 do {
-                    settings->value *= settings->attenuation;
+                    data->width *= data->shrinkFactor;
                     count--;
                 } while (count != 0);
             }
@@ -193,157 +173,113 @@ s32 func_1515C534(void *arg0) {
     }
     return 1;
 }
-typedef struct {
-    f32 x, y, z;
-} TrailVec;
-
-typedef struct {
-    TrailVec pos;
-    s32 pad;
-} TrailPoint;
-
-typedef struct {
-    f32 width;
-    u8 pad4[0x10];
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    u8 unk1E;
-    u8 unk1F;
-    u8 unk20;
-    u8 unk21;
-    u8 pad22[2];
-    s32 unk24;
-    s32 unk28;
-} TrailParams;
-
-typedef struct {
-    u8 pad0[0x25];
-    u8 unk25;
-    u8 pad26[6];
-    s8 unk2C;
-    s8 unk2D;
-    s8 unk2E;
-    u8 pad2F[0x55];
-    u8 unk84[0x10];
-    TrailPoint *unk94;
-    TrailParams *unk98;
-} Trail;
-
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-} Struct800A4AC8;
 
 extern u8 D_80090E78[];
-extern Struct800A4AC8 D_800A4AC8[];
+extern struct {
+    s32 unk0;
+    s32 unk4;
+} D_800A4AC8[];
 extern s32 D_800D2C9C;
 
 extern void func_151D5D60(void *, s16, s32, Vtx **, s32);
 extern void func_151441A4(s16 *, s16 *, s16 *, s16 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_151442FC(s16 *, s16 *, s16 *, s16 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-extern Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
+extern Gfx *func_15142E24(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
 extern Gfx *func_1513F4E4(Gfx *, s32, u8 *);
-extern Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-extern Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
-extern Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
-extern Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
+extern Gfx *func_15142B7C(Gfx *gfx, s32 setGeometryMode, s32 clearGeometryMode);
+extern Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *update);
+extern Gfx *func_15142CF0(Gfx *gfx, s32 minLevel, s32 lodFrac, s32 r, s32 g, s32 b, s32 a, u8 *update);
+extern Gfx *func_15142FBC(Gfx *gfx, s32 otherModeH, s32 otherModeL, u8 *update);
 
-Gfx *func_1515C6F4(Trail *arg0, Gfx *gfx, s16 arg2) {
+/* Draws the trail as a camera-facing ribbon, newest point first, fading in alpha towards the tail. */
+Gfx *func_1515C6F4(Trail *trail, Gfx *gfx, s16 view) {
     Vtx *vtx;
     s32 i;
-    u8 flag;
-    TrailVec b;
-    TrailVec a;
-    TrailParams *params;
-    TrailPoint *pts;
+    u8 update;
+    vertex next;
+    vertex cur;
+    TrailData *data;
+    TrailPoint *points;
     f32 *cam;
     s32 j;
     f32 scale2;
-    s32 sStep;
-    s32 aStep;
-    s32 s;
-    s32 al;
+    s32 texStep;
+    s32 alphaStep;
+    s32 tex;
+    s32 alphaScale;
     s32 alpha;
-    s32 mode;
-    f32 dx;
-    f32 dy;
-    f32 dz;
-    s16 spE2;
-    s16 spE0;
-    s16 spDE;
-    s16 spDC;
-    s16 spDA;
-    s16 spD8;
-    s16 spD6;
-    s16 spD4;
-    f32 ex, ey, ez;
-    f32 nx, ny, nz;
-    f32 mag;
+    s32 cycleMode;
+    f32 toCamX;
+    f32 toCamY;
+    f32 toCamZ;
+    s16 primR;
+    s16 primG;
+    s16 primB;
+    s16 primA;
+    s16 envR;
+    s16 envG;
+    s16 envB;
+    s16 envA;
+    f32 segX, segY, segZ;
+    f32 sideX, sideY, sideZ;
+    f32 lenSq;
     f32 scale;
 
-    if (arg0->unk2C >= 2) {
-        func_151D5D60(arg0->unk84, arg2, (arg0->unk25 * 2 + 10) * sizeof(Vtx), &vtx, 0);
+    if (trail->count >= 2) {
+        func_151D5D60(trail->unk84, view, (trail->header.capacity * 2 + 10) * sizeof(Vtx), &vtx, 0);
         if (vtx != NULL) {
-            params = arg0->unk98;
-            flag = 1;
-            cam = &D_800DBFF0[arg2].unk2F8;
-            pts = arg0->unk94;
-            func_151441A4(&spE2, &spE0, &spDE, &spDC, params->unk1B, params->unk1C, params->unk1D, params->unk1E,
-                          params->unk17, params->unk18, params->unk19, params->unk1A, params->unk1F, params->unk15);
-            func_151442FC(&spDA, &spD8, &spD6, &spD4, params->unk1B, params->unk1C, params->unk1D, params->unk1E,
-                          params->unk17, params->unk18, params->unk19, params->unk1A, params->unk1F, params->unk16);
-            gfx = func_15142E24(gfx, (s32)D_80090E78, 0, 0, 0, 0, 0x42, 0, 0, &flag, 0x3E);
-            gfx = func_1513F4E4(gfx, params->unk21, &flag);
-            gfx = func_15142B7C(gfx, params->unk24, params->unk28);
-            gfx = func_15142CF0(gfx, 0, 0, spE2, spE0, spDE, spDC, &flag);
-            gfx = func_15142C10(gfx, spDA, spD8, spD6, spD4, &flag);
-            if (params->unk14 & 1) {
-                mode = 0x100000;
+            data = trail->data;
+            update = 1;
+            cam = &D_800DBFF0[view].unk2F8;
+            points = trail->points;
+            func_151441A4(&primR, &primG, &primB, &primA, data->color2[0], data->color2[1], data->color2[2], data->color2[3],
+                          data->color[0], data->color[1], data->color[2], data->color[3], data->colorLevel, data->primMode);
+            func_151442FC(&envR, &envG, &envB, &envA, data->color2[0], data->color2[1], data->color2[2], data->color2[3],
+                          data->color[0], data->color[1], data->color[2], data->color[3], data->colorLevel, data->envMode);
+            gfx = func_15142E24(gfx, (s32)D_80090E78, 0, 0, 0, 0, 0x42, 0, 0, &update, 0x3E);
+            gfx = func_1513F4E4(gfx, data->unk21, &update);
+            gfx = func_15142B7C(gfx, data->setGeometryMode, data->clearGeometryMode);
+            gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &update);
+            gfx = func_15142C10(gfx, envR, envG, envB, envA, &update);
+            if (data->flags & 1) {
+                cycleMode = 0x100000;
             } else {
-                mode = 0;
+                cycleMode = 0;
             }
-            gfx = func_15142FBC(gfx, mode | 0x80000 | D_800D2C9C | 0x2000 | 0xC00 | 0x80 | 0x20,
-                                D_800A4AC8[params->unk20].unk0 | D_800A4AC8[params->unk20].unk4, &flag);
-            i = arg0->unk2E - 1;
-            i = (i < 0) ? arg0->unk25 - 1 : i;
+            gfx = func_15142FBC(gfx, cycleMode | 0x80000 | D_800D2C9C | 0x2000 | 0xC00 | 0x80 | 0x20,
+                                D_800A4AC8[data->renderMode].unk0 | D_800A4AC8[data->renderMode].unk4, &update);
+            i = trail->head - 1;
+            i = (i < 0) ? trail->header.capacity - 1 : i;
             j = i - 1;
-            j = (j < 0) ? arg0->unk25 - 1 : j;
-            a = pts[i].pos;
-            b = pts[j].pos;
-            sStep = 0x800 / (arg0->unk2C - 1);
-            aStep = 0xFF / (arg0->unk2C - 1);
+            j = (j < 0) ? trail->header.capacity - 1 : j;
+            cur = points[i].pos;
+            next = points[j].pos;
+            texStep = 0x800 / (trail->count - 1);
+            alphaStep = 0xFF / (trail->count - 1);
 
-            ex = a.x - b.x;
-            ey = a.y - b.y;
-            ez = a.z - b.z;
-            dx = a.x - cam[0];
-            dy = a.y - cam[1];
-            dz = a.z - cam[2];
-            nx = ey * dz - dy * ez;
-            ny = ez * dx - dz * ex;
-            nz = ex * dy - dx * ey;
-            mag = nx * nx + ny * ny + nz * nz;
-            if (mag == 0.0f) {
-                nx = 0.0f;
-                ny = 0.0f;
-                nz = 0.0f;
+            segX = cur.x - next.x;
+            segY = cur.y - next.y;
+            segZ = cur.z - next.z;
+            toCamX = cur.x - cam[0];
+            toCamY = cur.y - cam[1];
+            toCamZ = cur.z - cam[2];
+            sideX = segY * toCamZ - toCamY * segZ;
+            sideY = segZ * toCamX - toCamZ * segX;
+            sideZ = segX * toCamY - toCamX * segY;
+            lenSq = sideX * sideX + sideY * sideY + sideZ * sideZ;
+            if (lenSq == 0.0f) {
+                sideX = 0.0f;
+                sideY = 0.0f;
+                sideZ = 0.0f;
             } else {
-                scale2 = params->width / sqrtf(mag);
-                nx = nx * scale2;
-                ny = ny * scale2;
-                nz = nz * scale2;
+                scale2 = data->width / sqrtf(lenSq);
+                sideX = sideX * scale2;
+                sideY = sideY * scale2;
+                sideZ = sideZ * scale2;
             }
-            vtx->v.ob[0] = a.x + nx;
-            vtx->v.ob[1] = a.y + ny;
-            vtx->v.ob[2] = a.z + nz;
+            vtx->v.ob[0] = cur.x + sideX;
+            vtx->v.ob[1] = cur.y + sideY;
+            vtx->v.ob[2] = cur.z + sideZ;
             vtx->v.tc[0] = 0;
             vtx->v.tc[1] = 0x3FF;
             vtx->v.cn[0] = 0xFF;
@@ -352,9 +288,9 @@ Gfx *func_1515C6F4(Trail *arg0, Gfx *gfx, s16 arg2) {
             vtx->v.cn[3] = 0;
             vtx->v.flag = 0;
             vtx++;
-            vtx->v.ob[0] = a.x - nx;
-            vtx->v.ob[1] = a.y - ny;
-            vtx->v.ob[2] = a.z - nz;
+            vtx->v.ob[0] = cur.x - sideX;
+            vtx->v.ob[1] = cur.y - sideY;
+            vtx->v.ob[2] = cur.z - sideZ;
             vtx->v.tc[0] = 0;
             vtx->v.tc[1] = 0;
             vtx->v.cn[0] = 0xFF;
@@ -363,36 +299,36 @@ Gfx *func_1515C6F4(Trail *arg0, Gfx *gfx, s16 arg2) {
             vtx->v.cn[3] = 0;
             vtx->v.flag = 0;
             vtx++;
-            s = sStep;
-            al = aStep;
+            tex = texStep;
+            alphaScale = alphaStep;
             do {
                 i = j;
-                ex = a.x - b.x;
-                ey = a.y - b.y;
-                ez = a.z - b.z;
-                dx = b.x - cam[0];
-                dy = b.y - cam[1];
-                dz = b.z - cam[2];
-                nx = ey * dz - dy * ez;
-                ny = ez * dx - dz * ex;
-                nz = ex * dy - dx * ey;
-                mag = nx * nx + ny * ny + nz * nz;
-                if (mag == 0.0f) {
-                    nx = 0.0f;
-                    ny = 0.0f;
-                    nz = 0.0f;
+                segX = cur.x - next.x;
+                segY = cur.y - next.y;
+                segZ = cur.z - next.z;
+                toCamX = next.x - cam[0];
+                toCamY = next.y - cam[1];
+                toCamZ = next.z - cam[2];
+                sideX = segY * toCamZ - toCamY * segZ;
+                sideY = segZ * toCamX - toCamZ * segX;
+                sideZ = segX * toCamY - toCamX * segY;
+                lenSq = sideX * sideX + sideY * sideY + sideZ * sideZ;
+                if (lenSq == 0.0f) {
+                    sideX = 0.0f;
+                    sideY = 0.0f;
+                    sideZ = 0.0f;
                 } else {
-                    scale = params->width / sqrtf(mag);
-                    nx = nx * scale;
-                    ny = ny * scale;
-                    nz = nz * scale;
+                    scale = data->width / sqrtf(lenSq);
+                    sideX = sideX * scale;
+                    sideY = sideY * scale;
+                    sideZ = sideZ * scale;
                 }
-                alpha = (params->unk1A * al) >> 8;
-                al += aStep;
-                vtx->v.ob[0] = b.x + nx;
-                vtx->v.ob[1] = b.y + ny;
-                vtx->v.ob[2] = b.z + nz;
-                vtx->v.tc[0] = s;
+                alpha = (data->color[3] * alphaScale) >> 8;
+                alphaScale += alphaStep;
+                vtx->v.ob[0] = next.x + sideX;
+                vtx->v.ob[1] = next.y + sideY;
+                vtx->v.ob[2] = next.z + sideZ;
+                vtx->v.tc[0] = tex;
                 vtx->v.tc[1] = 0x3FF;
                 vtx->v.cn[0] = 0xFF;
                 vtx->v.cn[1] = 0xFF;
@@ -400,11 +336,11 @@ Gfx *func_1515C6F4(Trail *arg0, Gfx *gfx, s16 arg2) {
                 vtx->v.cn[3] = alpha;
                 vtx->v.flag = 0;
                 vtx++;
-                vtx->v.ob[0] = b.x - nx;
-                vtx->v.ob[1] = b.y - ny;
-                vtx->v.ob[2] = b.z - nz;
-                vtx->v.tc[0] = s;
-                s += sStep;
+                vtx->v.ob[0] = next.x - sideX;
+                vtx->v.ob[1] = next.y - sideY;
+                vtx->v.ob[2] = next.z - sideZ;
+                vtx->v.tc[0] = tex;
+                tex += texStep;
                 vtx->v.tc[1] = 0;
                 vtx->v.cn[0] = 0xFF;
                 vtx->v.cn[1] = 0xFF;
@@ -417,85 +353,47 @@ Gfx *func_1515C6F4(Trail *arg0, Gfx *gfx, s16 arg2) {
                 gSP1Triangle(gfx++, 1, 3, 2, 0);
                 j--;
                 if (j < 0) {
-                    j = arg0->unk25 - 1;
+                    j = trail->header.capacity - 1;
                 }
-                a = b;
-                b = pts[j].pos;
-            } while (i != arg0->unk2D);
+                cur = next;
+                next = points[j].pos;
+            } while (i != trail->tail);
         }
     }
     return gfx;
 }
 
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec1515CF9C;
+/* Handler: adds a point at the trail's position, or stops the unk39 handler once the buffer is full. */
+s32 func_1515CF9C(Trail *trail, TrailData *data) {
+    if (trail->count < trail->header.capacity - 1) {
+        TrailPoint *points;
 
-typedef struct {
-    Vec1515CF9C pos;
-    f32 w;
-} Ent1515CF9C;
-
-typedef struct {
-    u8 pad0[0x10];
-    Vec1515CF9C unk10;
-    u8 pad1C[0x25 - 0x1C];
-    u8 unk25;
-    u8 pad26[0x2C - 0x26];
-    s8 unk2C;
-    u8 pad2D;
-    s8 unk2E;
-    u8 pad2F[0x94 - 0x2F];
-    Ent1515CF9C *unk94;
-} Obj1515CF9C;
-
-typedef struct {
-    u8 pad0[0x8];
-    f32 unk8;
-    u8 padC[0x39 - 0xC];
-    s8 unk39;
-} Arg1515CF9C;
-
-s32 func_1515CF9C(Obj1515CF9C *arg0, Arg1515CF9C *arg1) {
-    if (arg0->unk2C < arg0->unk25 - 1) {
-        Ent1515CF9C *ents;
-
-        ents = arg0->unk94;
-        arg0->unk2C++;
-        ents[arg0->unk2E].pos = arg0->unk10;
-        ents[arg0->unk2E].w = arg1->unk8;
-        arg0->unk2E++;
-        if (arg0->unk2E == arg0->unk25) {
-            arg0->unk2E = 0;
+        points = trail->points;
+        trail->count++;
+        points[trail->head].pos = trail->header.pos;
+        points[trail->head].velY = data->vel.y;
+        trail->head++;
+        if (trail->head == trail->header.capacity) {
+            trail->head = 0;
         }
     } else {
-        arg1->unk39 = -1;
+        data->unk39 = -1;
     }
     return 1;
 }
 
-typedef struct {
-    char pad0[0x25];
-    u8 unk25;
-    char pad26[0x6];
-    s8 unk2C;
-    char pad2D[0x1];
-    s8 unk2E;
-} Struct1515D030;
-
-s32 func_1515D030(Struct1515D030 *arg0, s32 arg1) {
+/* Handler: drops the newest point while more than two remain; returns 0 once the trail is down to two. */
+s32 func_1515D030(Trail *trail, TrailData *data) {
     s8 temp_v0;
     s32 result;
 
-    temp_v0 = arg0->unk2C;
+    temp_v0 = trail->count;
     result = 1;
     if ((s32) temp_v0 >= 3) {
-        arg0->unk2C = (s8) (temp_v0 - 1);
-        arg0->unk2E = (s8) (arg0->unk2E - 1);
-        if ((s32) arg0->unk2E < 0) {
-            arg0->unk2E = (s8) (arg0->unk25 - 1);
+        trail->count = (s8) (temp_v0 - 1);
+        trail->head = (s8) (trail->head - 1);
+        if ((s32) trail->head < 0) {
+            trail->head = (s8) (trail->header.capacity - 1);
             result = 1;
         }
     } else {
@@ -504,32 +402,27 @@ s32 func_1515D030(Struct1515D030 *arg0, s32 arg1) {
     return result;
 }
 
-// s32 func_1515D030(void *arg0, ? arg1) {
-//     s8 temp_v0;
-//     s32 result;
-//
-//     temp_v0 = arg0->unk2C;
-//     if ((s32) temp_v0 >= 3) {
-//         arg0->unk2C = (s8) (temp_v0 - 1);
-//         arg0->unk2E = (s8) (arg0->unk2E - 1);
-//         result = 1;
-//         if ((s32) arg0->unk2E < 0) {
-//             arg0->unk2E = (s8) (arg0->unk25 - 1);
-//             result = 1;
-//         }
-//     } else {
-//         result = 0;
-//     }
-//     return result;
-// }
+/* A level object placement (see game_40490.c). */
+typedef struct LevelObject {
+    /* 0x00 */ s16 x;
+    /* 0x02 */ s16 y;
+    /* 0x04 */ s16 z;
+    /* 0x06 */ s16 sizeX;
+    /* 0x08 */ s16 sizeY;
+    /* 0x0A */ s16 sizeZ;
+    /* 0x0C */ f32 rotX;
+    /* 0x10 */ f32 rotY;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 flags;
+    /* 0x17 */ u8 unk17;
+    /* 0x18 */ u32 unk18;
+    /* 0x1C */ u32 unk1C;
+    /* 0x20 */ u32 unk20;
+    /* 0x24 */ u8 pad24[0x10];
+} LevelObject;
 
-struct260 *func_151491F4(s16 arg0, s8 arg1, s8 arg2, u8 arg3, u8 arg4, s32 arg5, u8 arg6, s32 arg7);
-typedef struct 
-{
-  u8 pad0[0x18];
-  s32 unk18;
-} Struct1515D088Arg0;
-s32 func_1515D088(Struct1515D088Arg0 *arg0)
+s32 func_1515D088(LevelObject *arg0)
 {
   s32 temp_v0_2;
   struct 
@@ -553,34 +446,6 @@ s32 func_1515D088(Struct1515D088Arg0 *arg0)
   }
   return temp_v0_2;
 }
-
-// s32 func_1515D088(void *arg0) {
-//     s32 sp3C;
-//     s8 sp38;
-//     f32 sp34;
-//     void *sp30;
-//     s32 temp_t7;
-//     s32 temp_v0;
-//     void * temp_v0_2;
-//     s32 result;
-//
-//     temp_t7 = arg0->unk18;
-//     temp_v0 = temp_t7 & 0xFF;
-//     sp38 = (s8) temp_t7;
-//     if ((temp_v0 < 0) || (temp_v0 >= 2)) {
-//         return 0;
-//     }
-//     sp30 = arg0;
-//     sp34 = 0.0f;
-//     temp_v0_2 = func_151491F4(0x12C, -1, 0x11, 0, 0xD, 0xC, 0xFF, 1);
-//     result = &temp_v0_2;
-//     if (temp_v0_2 != 0) {
-//         sp3C = temp_v0_2;
-//         memcpy(temp_v0_2->unk28, &sp30, 0xC); // memcpy
-//         result = sp3C;
-//     }
-//     return result;
-// }
 
 typedef struct {
     s16 unk0;
