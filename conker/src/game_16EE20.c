@@ -779,28 +779,9 @@ void func_15143134(Vec3f *offset, f32 *out, Mtx *mtx) {
     D_800DCA00 = 0;
 }
 
-/* A spawn region around (x, y, z): a disc, cylinder, sphere or (rotated) box, by flags & 3. */
-typedef struct SpawnRegion {
-    /* 0x00 */ s16 x;
-    /* 0x02 */ s16 y;
-    /* 0x04 */ s16 z;
-    /* 0x06 */ s16 radiusX;
-    /* 0x08 */ s16 height;
-    /* 0x0A */ s16 radiusZ;
-    /* 0x0C */ u8 padC[4];
-    /* 0x10 */ f32 rotation; /* degrees */
-    /* 0x14 */ u8 pad14;
-    /* 0x15 */ u8 flags; /* bits 0-1: shape */
-    /* 0x16 */ u8 pad16[0xE];
-    /* 0x24 */ f32 cosineX;
-    /* 0x28 */ f32 sineX;
-    /* 0x2C */ f32 sineZ;
-    /* 0x30 */ f32 cosineZ;
-} SpawnRegion;
-
 /* Picks a random (x, z) in the region's footprint, with the region's top and bottom heights. */
-void func_151432BC(SpawnRegion *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
-    switch (region->flags & 3) {
+void func_151432BC(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
+    switch (region->kind & 3) {
     default:
         *x = region->x;
         *z = region->z;
@@ -816,11 +797,11 @@ void func_151432BC(SpawnRegion *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
             f32 offsetX;
             f32 offsetZ;
 
-            angle = region->rotation * (256.0f / 360.0f);
+            angle = region->yaw * (256.0f / 360.0f);
             sine = func_151423D8(angle - 0x40);
             cosine = func_151423D8(angle);
-            offsetX = func_150ADA68() * (2.0f * region->radiusX) + -region->radiusX;
-            offsetZ = func_150ADA68() * (2.0f * region->radiusZ) + -region->radiusZ;
+            offsetX = func_150ADA68() * (2.0f * region->radius) + -region->radius;
+            offsetZ = func_150ADA68() * (2.0f * region->depth) + -region->depth;
             *x = region->x + (offsetX * cosine + offsetZ * sine);
             *z = region->z + (offsetZ * cosine - offsetX * sine);
             *top = region->y + region->height;
@@ -838,7 +819,7 @@ void func_151432BC(SpawnRegion *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
             angle = func_150ADA20() & 0xFF;
             sine = func_151423D8(angle - 0x40);
             cosine = func_151423D8(angle);
-            radius = func_150ADA68() * region->radiusX;
+            radius = func_150ADA68() * region->radius;
             *x = region->x + radius * cosine;
             *z = region->z - radius * sine;
             *top = region->y + region->height;
@@ -856,7 +837,7 @@ void func_151432BC(SpawnRegion *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
             angle = func_150ADA20() & 0xFF;
             sine = func_151423D8(angle - 0x40);
             cosine = func_151423D8(angle);
-            radius = func_150ADA68() * region->radiusX;
+            radius = func_150ADA68() * region->radius;
             *x = region->x + radius * cosine;
             *z = region->z - radius * sine;
             *top = region->y + region->height;
@@ -1382,21 +1363,20 @@ f32 func_15144528(f32 value, f32 hi, f32 lo) {
 }
 
 /* Footprint area of a region: 2rx * 2rz for a box, pi r^2 for the round shapes. */
-f32 func_15144598(TriggerZone *zone) {
-    SpawnRegion *region = (SpawnRegion *)zone;
+f32 func_15144598(TriggerZone *region) {
     f32 area;
     s16 radius;
 
-    switch (region->flags & 3) {
+    switch (region->kind & 3) {
     default:
         area = 1.0f;
         break;
     case 2:
-        area = (f32)(region->radiusX * region->radiusZ) * 4.0f;
+        area = (f32)(region->radius * region->depth) * 4.0f;
         break;
     case 0:
     case 1:
-        radius = region->radiusX;
+        radius = region->radius;
         area = (f32)(radius * radius) * 3.1415927f;
         break;
     }
@@ -1405,22 +1385,22 @@ f32 func_15144598(TriggerZone *zone) {
 
 /* Volume of a region: box rx * h * rz, cylinder pi r^2 h, sphere (pi / 3) r^3. */
 f32 func_1514462C(s32 arg0) {
-    SpawnRegion *region = (SpawnRegion *)arg0;
+    TriggerZone *region = (TriggerZone *)arg0;
     f32 volume;
     f32 radius;
 
-    switch (region->flags & 3) {
+    switch (region->kind & 3) {
     default:
         volume = 1.0f;
         break;
     case 2:
-        volume = (f32)(region->radiusX * region->height * region->radiusZ);
+        volume = (f32)(region->radius * region->height * region->depth);
         break;
     case 0:
-        volume = (f32)(region->radiusX * region->radiusX) * 3.1415927f * (f32)region->height;
+        volume = (f32)(region->radius * region->radius) * 3.1415927f * (f32)region->height;
         break;
     case 1:
-        radius = (f32)region->radiusX;
+        radius = (f32)region->radius;
         volume = ((radius * 1.0471976f) * radius) * radius;
         break;
     }
@@ -1428,24 +1408,24 @@ f32 func_1514462C(s32 arg0) {
 }
 
 /* Picks a random point inside the region into out[3], applying its tilt for boxes and cylinders. */
-void func_1514470C(SpawnRegion *region, f32 *out) {
+void func_1514470C(TriggerZone *region, f32 *out) {
     f32 radiusZ;
     f32 height;
     f32 radiusX;
-    f32 cosineX;
-    f32 sineX;
-    f32 sineZ;
-    f32 cosineZ;
+    f32 sinPitch;
+    f32 cosPitch;
+    f32 sinYaw;
+    f32 cosYaw;
     s32 mode;
 
-    radiusX = region->radiusX;
+    radiusX = region->radius;
     height = region->height;
-    radiusZ = region->radiusZ;
-    cosineX = region->cosineX;
-    sineX = region->sineX;
-    sineZ = region->sineZ;
-    cosineZ = region->cosineZ;
-    mode = region->flags & 3;
+    radiusZ = region->depth;
+    sinPitch = region->sinPitch;
+    cosPitch = region->cosPitch;
+    sinYaw = region->sinYaw;
+    cosYaw = region->cosYaw;
+    mode = region->kind & 3;
     switch (mode) {
     default:
         out[0] = region->x;
@@ -1465,12 +1445,12 @@ void func_1514470C(SpawnRegion *region, f32 *out) {
             y = func_150ADA68() * height;
             z = func_150ADA68() * (2.0f * radiusZ) - radiusZ;
             savedX = x;
-            mixed = y * cosineX + z * sineX;
-            x = x * cosineZ + mixed * sineZ;
-            y = y * sineX - z * cosineX;
+            mixed = y * sinPitch + z * cosPitch;
+            x = x * cosYaw + mixed * sinYaw;
+            y = y * cosPitch - z * sinPitch;
             out[0] = region->x + x;
             out[1] = region->y + y;
-            rotatedZ = mixed * cosineZ - savedX * sineZ;
+            rotatedZ = mixed * cosYaw - savedX * sinYaw;
             out[2] = region->z + rotatedZ;
         }
         return;
@@ -1490,12 +1470,12 @@ void func_1514470C(SpawnRegion *region, f32 *out) {
             y = func_150ADA68() * height;
             z = func_151423D8(angle) * radius;
             savedX = x;
-            mixed = y * cosineX + z * sineX;
-            x = x * cosineZ + mixed * sineZ;
-            y = y * sineX - z * cosineX;
+            mixed = y * sinPitch + z * cosPitch;
+            x = x * cosYaw + mixed * sinYaw;
+            y = y * cosPitch - z * sinPitch;
             out[0] = region->x + x;
             out[1] = region->y + y;
-            out[2] = region->z + (mixed * cosineZ - savedX * sineZ);
+            out[2] = region->z + (mixed * cosYaw - savedX * sinYaw);
         }
         return;
     case 1:

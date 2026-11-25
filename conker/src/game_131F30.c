@@ -3,20 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Same layout as SpawnRegion in game_16EE20.c. */
-typedef struct SpawnRegion {
-    /* 0x00 */ s16 x;
-    /* 0x02 */ s16 y;
-    /* 0x04 */ s16 z;
-    /* 0x06 */ s16 radiusX;
-    /* 0x08 */ s16 height;
-    /* 0x0A */ s16 radiusZ;
-    /* 0x0C */ u8 padC[4];
-    /* 0x10 */ f32 rotation; /* degrees */
-    /* 0x14 */ u8 unk14;     /* the effects here set it to 1 while off */
-    /* 0x15 */ u8 flags;     /* bits 0-1: shape */
-} SpawnRegion;
-
 /* A node of the object lists D_800DCE50[list][type] (see game_1944C0.c), as func_15105C24 reads it. */
 typedef struct ListObj {
     /* 0x00 */ u8 pad0[8];
@@ -90,7 +76,7 @@ void func_15104A80(WorldObject *prop) {
 
 /* Rain of lightning bolts falling around a point onto the ground (func_15104C44, func_15104FF8). */
 typedef struct BoltRainState {
-    /* 0x00 */ SpawnRegion *region;
+    /* 0x00 */ TriggerZone *region;
     /* 0x04 */ f32 pending;      /* bolts owed, accumulated per frame */
     /* 0x08 */ s16 timer;        /* frames left; negative when off */
     /* 0x0A */ u8 padA[2];
@@ -181,7 +167,7 @@ void func_15104C44(BoltRainObj *obj) {
 void func_15104FF8(BoltRainObj *obj, s32 arg1, u8 msg) {
     BoltRainState *state = &obj->state;
 
-    if (msg == 0x38 && state->region->unk14 == 1) {
+    if (msg == 0x38 && state->region->disabled == 1) {
         state->timer = 300;
         // matching: the (s32) copy keeps IDO from sharing one register for region across the call
         func_1000FD38(func_1000EF40, (s32)state->region, 0);
@@ -192,7 +178,7 @@ void func_15104FF8(BoltRainObj *obj, s32 arg1, u8 msg) {
 
 /* Lightning arcing between the four edges of a quad (func_151050B0, func_15105548). */
 typedef struct BoltArcState {
-    /* 0x00 */ SpawnRegion *region;
+    /* 0x00 */ TriggerZone *region;
     /* 0x04 */ s16 timer;          /* frames left; negative when off */
     /* 0x06 */ u8 pad6[2];
     /* 0x08 */ f32 pending;        /* bolts owed, accumulated per frame */
@@ -222,10 +208,10 @@ void func_151050B0(BoltArcObj *obj) {
 
     state = &obj->state;
     if (state->timer < 0) {
-        state->region->unk14 = 1;
+        state->region->disabled = 1;
         return;
     }
-    state->region->unk14 = 0;
+    state->region->disabled = 0;
     state->timer -= D_800BE9E4;
     if (state->timer < 0) {
         func_151494E0(0, 0x39);
@@ -285,7 +271,7 @@ void func_1510550C(struct102 *obj, s32 arg1, u8 msg) {
 void func_15105548(BoltArcObj *obj, s32 *arg1, u8 msg) {
     BoltArcState *state = &obj->state;
 
-    if (msg == 0x38 && state->region->unk14 == 1) {
+    if (msg == 0x38 && state->region->disabled == 1) {
         state->unk70 = *arg1;
         state->timer = 300;
     }
@@ -378,7 +364,7 @@ void func_1510558C(ImpactObj *obj) {
 
 /* Sparks thrown up from random points of a spawn region (func_151058B4, func_15105848, func_15105BC8). */
 typedef struct SparkState {
-    /* 0x00 */ SpawnRegion *region;
+    /* 0x00 */ TriggerZone *region;
     /* 0x04 */ f32 rate;
     /* 0x08 */ s16 *unk8;
     /* 0x0C */ u8 flags;           /* bit 0: on (set by message 0x38, cleared by 0x39) */
@@ -390,7 +376,7 @@ struct SparkObj {
     /* 0x28 */ SparkState state;
 };
 
-extern void func_151432BC(SpawnRegion *region, f32 *x, f32 *z, f32 *top, f32 *bottom);
+extern void func_151432BC(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom);
 extern void func_15143794(s16, s16, f32, f32 *);
 extern void func_1515C2F0(EffectTemplate18 *, s32, TrailBurstParams *, s32, s32, s32);
 void func_151058B4(SparkObj *obj);
