@@ -6,6 +6,94 @@
 u32 func_150ADA20(void);
 #include "variables.h"
 
+typedef struct { f32 x, y, z; } Vec3f;
+typedef struct { u8 r, g, b, a; } ColorRGBA;
+
+/* Parameters of a lightning bolt: a cubic Bezier from start to end, split into jittered segments. */
+typedef struct BoltDesc {
+    /* 0x00 */ s16 life;
+    /* 0x02 */ u8 flags;          /* bit 0: life counts down */
+    /* 0x03 */ u8 pad3;
+    /* 0x04 */ Vec3f ctrl[4];     /* Bezier control points; ctrl[0] and ctrl[3] are the end points */
+    /* 0x34 */ s8 updateKind;     /* index into D_80088C10, -1: none */
+    /* 0x35 */ u8 pad35[3];
+    /* 0x38 */ s32 segments;
+    /* 0x3C */ f32 jitter;        /* max sideways offset of each joint */
+    /* 0x40 */ f32 width;         /* half width of the drawn strip */
+    /* 0x44 */ s16 rejitterBase;  /* frames between re-jitters: base + rand % (range + 1) */
+    /* 0x46 */ s16 rejitterRange;
+    /* 0x48 */ ColorRGBA color;
+    /* 0x4C */ u8 kind;           /* index into D_80088C18 / D_80088C28 */
+    /* 0x4D */ u8 pad4D[3];
+} BoltDesc; /* size 0x50 */
+
+/* One point of the Bezier sampled at parameter t, with a frame for the sideways jitter. */
+typedef struct BoltSample {
+    /* 0x00 */ f32 t;
+    /* 0x04 */ Vec3f pos;
+    /* 0x10 */ Vec3f tangent;
+    /* 0x1C */ Vec3f normal;
+    /* 0x28 */ Vec3f binormal;
+} BoltSample; /* size 0x34 */
+
+typedef struct BoltFlare {
+    /* 0x00 */ u8 pad0[0x40];
+    /* 0x40 */ Vec3f pos;
+} BoltFlare;
+
+/*
+ * A bolt object. It is followed in memory by desc.segments BoltSamples (func_151061E0),
+ * desc.segments + 2 jittered joint points (func_151061EC) and the per-kind user data.
+ */
+typedef struct BoltObj {
+    /* 0x00 */ u8 pad0[0x10];      /* object header */
+    /* 0x10 */ BoltDesc desc;
+    /* 0x60 */ void *userData;
+    /* 0x64 */ f32 step;           /* Bezier parameter step, 1 / (segments + 1) */
+    /* 0x68 */ s16 rejitterTimer;
+    /* 0x6A */ u8 pad6A[2];
+    /* 0x6C */ BoltFlare *flares[2];
+    /* 0x74 */ u8 vtxBuf[0x10];
+    /* 0x84 */ s32 vtxBufSize;
+} BoltObj; /* size 0x88 */
+
+/* Spawn descriptor for func_15130280 (an end flare). */
+typedef struct FlareSpawn {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ s16 unk8;
+    /* 0x0A */ s16 life;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ u8 color0[4];
+    /* 0x18 */ u8 color1[4];
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 unk1D;
+    /* 0x1E */ s16 unk1E;
+    /* 0x20 */ s16 unk20;
+    /* 0x22 */ s16 unk22;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ Vec3f pos;
+    /* 0x3C */ Vec3f unk3C;
+    /* 0x48 */ Vec3f vel;
+    /* 0x54 */ f32 unk54;
+    /* 0x58 */ u32 flags;          /* 0x40, 0x80: random flips */
+    /* 0x5C */ s32 unk5C;
+    /* 0x60 */ u8 unk60;
+    /* 0x61 */ u8 unk61;
+    /* 0x62 */ s8 unk62;
+    /* 0x63 */ s8 unk63;
+    /* 0x64 */ s8 unk64;
+    /* 0x65 */ u8 unk65;
+    /* 0x66 */ u8 unk66;
+    /* 0x67 */ u8 pad67;
+    /* 0x68 */ s16 unk68;
+    /* 0x6A */ u8 pad6A[2];
+    /* 0x6C */ f32 unk6C;
+} FlareSpawn;
+
 struct Vec15107A20 { f32 x; f32 y; f32 z; };
 struct Vec15106F98 { f32 x; f32 y; f32 z; };
 struct S15106F98Points { struct Vec15106F98 unk0[4]; };
@@ -80,148 +168,66 @@ void func_15107A20(struct127 *arg0, s32 arg1, s32 arg2, struct Vec15107A20 *arg3
 void func_15107AE0(struct Vec15107A20 *arg0, struct Vec15107A20 *arg1, struct Vec15107A20 *arg2, struct Vec15107A20 *arg3);
 void func_15107F54(s32 *arg0, u8 arg1, void *arg2, s32 arg3);
 void func_15081690(struct127 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, void *arg7, f32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, s32 argE);
-struct S15107C1CCreated *func_15105CE0(void *arg0, s32 arg1, u8 arg2, s32 arg3);
-void func_15106214(struct102 *arg0);
-void func_15106610(struct102 *arg0);
+BoltObj *func_15105CE0(BoltDesc *desc, s32 extraSize, u8 arg2, s32 arg3);
+void func_15106214(BoltObj *bolt);
+void func_15106610(BoltObj *bolt);
+BoltSample *func_151061E0(BoltObj *bolt);
+Vec3f *func_151061EC(BoltObj *bolt);
 
-struct S1510608CVec {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-};
-
-struct S1510608CChild {
-    u8 pad0[0x40];
-    struct S1510608CVec unk40;
-};
-
-struct S1510608C {
-    u8 pad0[0x10];
-    s16 unk10;
-    u8 unk12;
-    u8 pad13;
-    struct S1510608CVec unk14;
-    u8 pad20[0x38 - 0x20];
-    struct S1510608CVec unk38;
-    s8 unk44;
-    u8 pad45[0x54 - 0x45];
-    s16 unk54;
-    s16 unk56;
-    u8 pad58[0x68 - 0x58];
-    s16 unk68;
-    u8 pad6A[0x6C - 0x6A];
-    struct S1510608CChild *unk6C;
-    struct S1510608CChild *unk70;
-};
-
-extern s32 (*D_80088C10[])(struct S1510608C *arg0, u8 *arg1);
-
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s16 unk8;
-    s16 unkA;
-    s32 unkC;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    struct Vec15107A20 pos;
-    struct Vec15107A20 unk3C;
-    struct Vec15107A20 vel;
-    f32 unk54;
-    u32 unk58;
-    s32 unk5C;
-    u8 unk60;
-    u8 unk61;
-    s8 unk62;
-    s8 unk63;
-    s8 unk64;
-    u8 unk65;
-    u8 unk66;
-    u8 pad67;
-    s16 unk68;
-    u8 pad6A[2];
-    f32 unk6C;
-} Spawn15105CE0;
-
-typedef struct { u8 pad[0x34]; } S34;
-typedef struct {
-    u8 pad0[0x10];
-    struct S15107C1CInit init;
-    void *unk60;
-    f32 unk64;
-    s16 unk68;
-    u8 pad6A[2];
-    void *unk6C[2];
-    u8 unk74[0x10];
-    s32 unk84;
-} Obj15105CE0;
+extern s32 (*D_80088C10[])(BoltObj *bolt, u8 *moved);
 
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern void *func_15130280(void *, u8, s32, s32, u8, s32);
 
-#define INIT ((struct S15107C1CInit *)arg0)
-struct S15107C1CCreated *func_15105CE0(void *arg0, s32 arg1, u8 arg2, s32 arg3) {
-    Obj15105CE0 *obj;
-    s32 n;
+/* Allocates a bolt for desc with extraSize bytes of user data, samples and jitters it, and spawns its end flares. */
+BoltObj *func_15105CE0(BoltDesc *desc, s32 extraSize, u8 arg2, s32 arg3) {
+    BoltObj *bolt;
+    s32 segments;
     u8 i;
-    s32 m;
+    s32 points;
 
-    n = INIT->unk38;
-    m = INIT->unk38 + 2;
-    obj = func_15167A68(0x40, arg3, n * sizeof(S34) + m * 0xC + arg1 + 0x88, 1, arg2, 1);
-    if (obj == NULL) {
+    segments = desc->segments;
+    points = desc->segments + 2;
+    bolt = func_15167A68(0x40, arg3, segments * sizeof(BoltSample) + points * sizeof(Vec3f) + extraSize + sizeof(BoltObj), 1, arg2, 1);
+    if (bolt == NULL) {
         return NULL;
     }
-    memcpy(&obj->init, INIT, 0x50);
-    obj->unk60 = (u8 *)obj + n * sizeof(S34) + m * 0xC + 0x88;
-    obj->unk64 = 1.0f / (INIT->unk38 + 1);
-    obj->unk68 = func_150ADA20() % (INIT->unk46 + 1) + INIT->unk44;
-    func_15106214((struct102 *)obj);
-    func_15106610((struct102 *)obj);
-    obj->unk6C[0] = 0;
-    obj->unk6C[1] = 0;
-    bzero(obj->unk74, 0x10);
-    obj->unk84 = (obj->init.unk38 * 3 << 4) + 0x60;
+    memcpy(&bolt->desc, desc, sizeof(BoltDesc));
+    bolt->userData = (u8 *)bolt + segments * sizeof(BoltSample) + points * sizeof(Vec3f) + sizeof(BoltObj);
+    bolt->step = 1.0f / (desc->segments + 1);
+    bolt->rejitterTimer = func_150ADA20() % (desc->rejitterRange + 1) + desc->rejitterBase;
+    func_15106214(bolt);
+    func_15106610(bolt);
+    bolt->flares[0] = NULL;
+    bolt->flares[1] = NULL;
+    bzero(bolt->vtxBuf, sizeof(bolt->vtxBuf));
+    /* three vertices per joint point */
+    bolt->vtxBufSize = (bolt->desc.segments + 2) * 3 * sizeof(Vtx);
     {
-    Spawn15105CE0 spawn;
+    FlareSpawn spawn;
 
     spawn.unk1D = 0x2B;
     spawn.unk8 = 0x4404;
     spawn.unk0 = 0x200005;
     spawn.unk4 = 0;
-    spawn.unkA = 0x12C;
+    spawn.life = 300;
     spawn.unkC = 0;
     spawn.unk10 = 0;
-    spawn.unk14 = 0xFF;
-    spawn.unk15 = 0xFF;
-    spawn.unk16 = 0xFF;
-    spawn.unk17 = 0xFF;
-    spawn.unk18 = ((u8 *)&INIT->unk48)[0];
-    spawn.unk19 = ((u8 *)&INIT->unk48)[1];
-    spawn.unk1A = ((u8 *)&INIT->unk48)[2];
-    spawn.unk1B = ((u8 *)&INIT->unk48)[3];
+    spawn.color0[0] = 0xFF;
+    spawn.color0[1] = 0xFF;
+    spawn.color0[2] = 0xFF;
+    spawn.color0[3] = 0xFF;
+    spawn.color1[0] = desc->color.r;
+    spawn.color1[1] = desc->color.g;
+    spawn.color1[2] = desc->color.b;
+    spawn.color1[3] = desc->color.a;
     spawn.unk1C = 0xFF;
-    spawn.unk3C = *(struct Vec15107A20 *)&D_800A5480;
-    spawn.vel = *(struct Vec15107A20 *)&D_800A5480;
+    spawn.unk3C = *(Vec3f *)&D_800A5480;
+    spawn.vel = *(Vec3f *)&D_800A5480;
     spawn.unk1E = 1;
     spawn.unk20 = 0xFF;
     spawn.unk22 = 1;
-    spawn.unk58 = 0xC000;
+    spawn.flags = 0xC000;
     spawn.unk60 = 6;
     spawn.unk61 = 6;
     spawn.unk62 = -1;
@@ -234,121 +240,84 @@ struct S15107C1CCreated *func_15105CE0(void *arg0, s32 arg1, u8 arg2, s32 arg3) 
     spawn.unk54 = 0.0f;
     spawn.unk24 = 1.0f;
     spawn.unk6C = 1000000.0f;
-    spawn.unk28 = spawn.unk2C = INIT->unk40 * 0.07692307979f * 200.0f;
+    spawn.unk28 = spawn.unk2C = desc->width * 0.07692307979f * 200.0f;
     for (i = 0; i < 2; i++) {
-        spawn.pos = (&INIT->unk4)[(i == 0) ? 0 : 3];
-        spawn.unk58 = (func_150ADA20() ? 0x40 : 0) | (func_150ADA20() ? 0x80 : 0);
-        obj->unk6C[i] = func_15130280(&spawn, 0, 0, 0, arg2, arg3);
+        spawn.pos = desc->ctrl[(i == 0) ? 0 : 3];
+        spawn.flags = (func_150ADA20() ? 0x40 : 0) | (func_150ADA20() ? 0x80 : 0);
+        bolt->flares[i] = func_15130280(&spawn, 0, 0, 0, arg2, arg3);
     }
     }
-    return (struct S15107C1CCreated *)obj;
+    return bolt;
 }
-#undef INIT
 
-void func_1510608C(struct S1510608C *arg0) {
-    s32 (*fn)(struct S1510608C *, u8 *);
-    u8 sp2B;
-    struct S1510608CChild *child;
+/* Per-frame update: follow the owner, count down life, re-jitter on a timer, keep the flares on the end points. */
+void func_1510608C(BoltObj *bolt) {
+    s32 (*update)(BoltObj *, u8 *);
+    u8 moved;
+    BoltFlare *flare;
 
-    sp2B = 0;
-    if (arg0->unk44 != -1) {
-        fn = D_80088C10[arg0->unk44];
-        if (fn != NULL) {
-            if (fn(arg0, &sp2B) == 0) {
-                func_1516972C((struct102 *)arg0);
-            }
+    moved = FALSE;
+    if (bolt->desc.updateKind != -1) {
+        update = D_80088C10[bolt->desc.updateKind];
+        if (update != NULL && !update(bolt, &moved)) {
+            func_1516972C((struct102 *)bolt);
         }
     }
 
-    if (arg0->unk12 & 1) {
-        arg0->unk10 -= D_800BE9E4;
-        if (arg0->unk10 < 0) {
-            func_1516972C((struct102 *)arg0);
+    if (bolt->desc.flags & 1) {
+        bolt->desc.life -= D_800BE9E4;
+        if (bolt->desc.life < 0) {
+            func_1516972C((struct102 *)bolt);
         }
     }
 
-    if (sp2B != 0) {
-        func_15106214((struct102 *)arg0);
+    if (moved) {
+        func_15106214(bolt);
     }
 
-    arg0->unk68 -= D_800BE9E4;
-    if (arg0->unk68 < 0) {
-        func_15106610((struct102 *)arg0);
-        arg0->unk68 = (func_150ADA20() % (u32)(arg0->unk56 + 1)) + arg0->unk54;
+    bolt->rejitterTimer -= D_800BE9E4;
+    if (bolt->rejitterTimer < 0) {
+        func_15106610(bolt);
+        bolt->rejitterTimer = (func_150ADA20() % (u32)(bolt->desc.rejitterRange + 1)) + bolt->desc.rejitterBase;
     }
 
-    child = arg0->unk6C;
-    if (child != NULL) {
-        child->unk40 = arg0->unk14;
+    flare = bolt->flares[0];
+    if (flare != NULL) {
+        flare->pos = bolt->desc.ctrl[0];
     }
 
-    child = arg0->unk70;
-    if (child != NULL) {
-        child->unk40 = arg0->unk38;
+    flare = bolt->flares[1];
+    if (flare != NULL) {
+        flare->pos = bolt->desc.ctrl[3];
     }
 }
 
-struct S15106214Record;
-struct S15106214Record *func_151061E0(struct102 *arg0) {
-    return (struct S15106214Record *)((s32)arg0 + 0x88);
+/* The Bezier samples that follow the bolt object. */
+BoltSample *func_151061E0(BoltObj *bolt) {
+    return (BoltSample *)(bolt + 1);
 }
 
-struct S151061EC {
-    u8 pad0[0x48];
-    s32 idx;
-    u8 pad4C[0x88 - 0x4C];
-    u8 elems[1][0x34];
-};
-
-void *func_151061EC(struct S151061EC *arg0) {
-    s32 i = arg0->idx;
-    return &arg0->elems[i];
+/* The jittered joint points that follow the samples. */
+Vec3f *func_151061EC(BoltObj *bolt) {
+    s32 segments = bolt->desc.segments;
+    return (Vec3f *)((BoltSample *)(bolt + 1) + segments);
 }
 
-struct Vec15106214 { f32 x; f32 y; f32 z; };
-struct S15106214Record {
-    f32 unk0;
-    struct Vec15106214 unk4;
-    struct Vec15106214 unk10;
-    struct Vec15106214 unk1C;
-    struct Vec15106214 unk28;
-};
-struct S15106214Arg {
-    u8 pad0[0x14];
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    u8 pad44[0x48 - 0x44];
-    s32 unk48;
-    u8 pad4C[0x64 - 0x4C];
-    f32 unk64;
-};
+f32 func_151064B4(f32 t);
+f32 func_151064DC(f32 t);
+f32 func_15106510(f32 t);
+f32 func_15106540(f32 t);
+f32 func_15106558(f32 t);
+f32 func_15106584(f32 t);
+f32 func_151065BC(f32 t);
+f32 func_151065EC(f32 t);
+s32 func_15146078(Vec3f *dir, Vec3f *perp0, Vec3f *perp1);
 
-struct S15106214Record *func_151061E0(struct102 *arg0);
-f32 func_151064B4(f32 arg0);
-f32 func_151064DC(f32 arg0);
-f32 func_15106510(f32 arg0);
-f32 func_15106540(f32 arg0);
-f32 func_15106558(f32 arg0);
-f32 func_15106584(f32 arg0);
-f32 func_151065BC(f32 arg0);
-f32 func_151065EC(f32 arg0);
-s32 func_15146078(struct Vec15106214 *arg0, struct Vec15106214 *arg1, struct Vec15106214 *arg2);
-
-#define A ((struct S15106214Arg *)arg0)
-void func_15106214(struct102 *arg0) {
-    struct S15106214Record *rec;
+/* Samples the Bezier at t = step, 2 * step, ...: position, tangent and a frame around the tangent. */
+void func_15106214(BoltObj *bolt) {
+    BoltSample *samples;
     f32 step;
-    struct S15106214Record *out;
+    BoltSample *out;
     s32 i;
     f32 t;
     f32 b0;
@@ -359,15 +328,13 @@ void func_15106214(struct102 *arg0) {
     f32 d1;
     f32 d2;
     f32 d3;
-    rec = func_151061E0(arg0);
-    step = A->unk64;
-    i = 0;
-    t = step;
-    if (A->unk48 > 0) {
-        do {
 
-        out = &rec[i];
-        out->unk0 = t;
+    samples = func_151061E0(bolt);
+    step = bolt->step;
+    t = step;
+    for (i = 0; i < bolt->desc.segments; i++) {
+        out = &samples[i];
+        out->t = t;
         b0 = func_151064B4(t);
         b1 = func_151064DC(t);
         b2 = func_15106510(t);
@@ -376,96 +343,91 @@ void func_15106214(struct102 *arg0) {
         d1 = func_15106584(t);
         d2 = func_151065BC(t);
         d3 = func_151065EC(t);
-        out->unk4.x = (A->unk38 * b3) + ((A->unk14 * b0) + (A->unk20 * b1) + (A->unk2C * b2));
-        out->unk4.y = (A->unk3C * b3) + ((A->unk18 * b0) + (A->unk24 * b1) + (A->unk30 * b2));
-        out->unk4.z = (A->unk40 * b3) + ((A->unk1C * b0) + (A->unk28 * b1) + (A->unk34 * b2));
-        out->unk10.x = (A->unk38 * d3) + ((A->unk14 * d0) + (A->unk20 * d1) + (A->unk2C * d2));
-        out->unk10.y = (A->unk3C * d3) + ((A->unk18 * d0) + (A->unk24 * d1) + (A->unk30 * d2));
-        out->unk10.z = (A->unk40 * d3) + ((A->unk1C * d0) + (A->unk28 * d1) + (A->unk34 * d2));
-        if (func_15146078(&out->unk10, &out->unk1C, &out->unk28) == 0) {
-            out->unk1C.x = 0.0f;
-            out->unk1C.y = 0.0f;
-            out->unk1C.z = 0.0f;
-            out->unk28.x = 0.0f;
-            out->unk28.y = 0.0f;
-            out->unk28.z = 0.0f;
+        out->pos.x = bolt->desc.ctrl[0].x * b0 + bolt->desc.ctrl[1].x * b1 + bolt->desc.ctrl[2].x * b2 + bolt->desc.ctrl[3].x * b3;
+        out->pos.y = bolt->desc.ctrl[0].y * b0 + bolt->desc.ctrl[1].y * b1 + bolt->desc.ctrl[2].y * b2 + bolt->desc.ctrl[3].y * b3;
+        out->pos.z = bolt->desc.ctrl[0].z * b0 + bolt->desc.ctrl[1].z * b1 + bolt->desc.ctrl[2].z * b2 + bolt->desc.ctrl[3].z * b3;
+        out->tangent.x = bolt->desc.ctrl[0].x * d0 + bolt->desc.ctrl[1].x * d1 + bolt->desc.ctrl[2].x * d2 + bolt->desc.ctrl[3].x * d3;
+        out->tangent.y = bolt->desc.ctrl[0].y * d0 + bolt->desc.ctrl[1].y * d1 + bolt->desc.ctrl[2].y * d2 + bolt->desc.ctrl[3].y * d3;
+        out->tangent.z = bolt->desc.ctrl[0].z * d0 + bolt->desc.ctrl[1].z * d1 + bolt->desc.ctrl[2].z * d2 + bolt->desc.ctrl[3].z * d3;
+        if (func_15146078(&out->tangent, &out->normal, &out->binormal) == 0) {
+            out->normal.x = 0.0f;
+            out->normal.y = 0.0f;
+            out->normal.z = 0.0f;
+            out->binormal.x = 0.0f;
+            out->binormal.y = 0.0f;
+            out->binormal.z = 0.0f;
         }
-        i += 1;
         t += step;
-        } while (i < A->unk48);
     }
 }
-#undef A
 
-f32 func_151064B4(f32 arg0) {
-    f32 t = 1.0f - arg0;
+/* Cubic Bernstein basis B0(t) = (1 - t)^3. */
+f32 func_151064B4(f32 t) {
+    f32 u = 1.0f - t;
+    return u * u * u;
+}
+
+/* B1(t) = 3t(1 - t)^2. */
+f32 func_151064DC(f32 t) {
+    f32 u = 1.0f - t;
+    return 3.0f * t * u * u;
+}
+
+/* B2(t) = 3t^2(1 - t). */
+f32 func_15106510(f32 t) {
+    return 3.0f * t * t * (1.0f - t);
+}
+
+/* B3(t) = t^3. */
+f32 func_15106540(f32 t) {
     return t * t * t;
 }
 
-f32 func_151064DC(f32 arg0) {
-    f32 t = 1.0f - arg0;
-    return 3.0f * arg0 * t * t;
+/* B0'(t) = -3(1 - t)^2. */
+f32 func_15106558(f32 t) {
+    f32 u = 1.0f - t;
+    return -3.0f * u * u;
 }
 
-f32 func_15106510(f32 arg0) {
-    return 3.0f * arg0 * arg0 * (1.0f - arg0);
+/* B1'(t) = 9t^2 - 12t + 3. */
+f32 func_15106584(f32 t) {
+    return 9.0f * t * t - 12.0f * t + 3.0f;
 }
 
-f32 func_15106540(f32 arg0) {
-    return arg0 * arg0 * arg0;
+/* B2'(t) = -9t^2 + 6t. */
+f32 func_151065BC(f32 t) {
+    return -9.0f * t * t + 6.0f * t;
 }
 
-f32 func_15106558(f32 arg0) {
-    f32 t = 1.0f - arg0;
-    return -3.0f * t * t;
+/* B3'(t) = 3t^2. */
+f32 func_151065EC(f32 t) {
+    return 3.0f * t * t;
 }
 
-f32 func_15106584(f32 arg0) {
-    return 9.0f * arg0 * arg0 - 12.0f * arg0 + 3.0f;
-}
+void func_15143874(s16 angle, f32 radius, f32 *x, f32 *y);
 
-f32 func_151065BC(f32 arg0) {
-    return -9.0f * arg0 * arg0 + 6.0f * arg0;
-}
-
-f32 func_151065EC(f32 arg0) {
-    return 3.0f * arg0 * arg0;
-}
-
-struct S15106610Arg {
-    u8 pad0[0x14];
-    struct Vec15106214 unk14;
-    u8 pad20[0x38 - 0x20];
-    struct Vec15106214 unk38;
-    u8 pad44[0x48 - 0x44];
-    s32 unk48;
-    f32 unk4C;
-};
-void func_15143874(s16, f32, f32 *, f32 *);
-
-#define A ((struct S15106610Arg *)arg0)
-void func_15106610(struct102 *arg0) {
-    struct S15106214Record *rec;
-    struct Vec15106214 *out;
+/* Rebuilds the joint points: the fixed end points plus each sample pushed a random distance sideways. */
+void func_15106610(BoltObj *bolt) {
+    BoltSample *samples;
+    Vec3f *points;
     s32 i;
     s32 j;
 
-    rec = func_151061E0(arg0);
-    out = func_151061EC((struct S151061EC *)arg0);
-    out[0] = A->unk14;
-    out[A->unk48 + 1] = A->unk38;
-    for (i = 1, j = 0; i < A->unk48 + 1; i++, j++) {
-        struct Vec15106214 *o = &out[i];
-        struct S15106214Record *q = &rec[j];
-        f32 sp54;
-        f32 sp50;
-        func_15143874((s16)(func_150ADA20() & 0xFF), func_150ADA68() * A->unk4C, &sp50, &sp54);
-        o->x = q->unk1C.x * sp50 + q->unk28.x * sp54 + q->unk4.x;
-        o->y = q->unk1C.y * sp50 + q->unk28.y * sp54 + q->unk4.y;
-        o->z = q->unk1C.z * sp50 + q->unk28.z * sp54 + q->unk4.z;
+    samples = func_151061E0(bolt);
+    points = func_151061EC(bolt);
+    points[0] = bolt->desc.ctrl[0];
+    points[bolt->desc.segments + 1] = bolt->desc.ctrl[3];
+    for (i = 1, j = 0; i < bolt->desc.segments + 1; i++, j++) {
+        Vec3f *point = &points[i];
+        BoltSample *sample = &samples[j];
+        f32 offset1;
+        f32 offset0;
+        func_15143874((s16)(func_150ADA20() & 0xFF), func_150ADA68() * bolt->desc.jitter, &offset0, &offset1);
+        point->x = sample->normal.x * offset0 + sample->binormal.x * offset1 + sample->pos.x;
+        point->y = sample->normal.y * offset0 + sample->binormal.y * offset1 + sample->pos.y;
+        point->z = sample->normal.z * offset0 + sample->binormal.z * offset1 + sample->pos.z;
     }
 }
-#undef A
 
 struct Vec151067B8 { f32 x; f32 y; f32 z; };
 struct Curve151067B8 {
@@ -507,7 +469,7 @@ Gfx *func_151067B8(Gfx *gdl, u8 *arg1, s16 arg2) {
     }
     camera = (struct Vec151067B8 *)func_15144B34(arg2);
     flag = 1;
-    points = func_151061EC((struct S151061EC *)arg1);
+    points = (struct Vec151067B8 *)func_151061EC((BoltObj *)arg1);
     gdl = (Gfx *)func_15142E24((s32)gdl, (s32)D_80090D70, 0, 0, 0, 0, 0x2C, 0, 0, &flag, 3);
     gdl = func_15142C10(gdl, arg1[0x58], arg1[0x59], arg1[0x5A], arg1[0x5B], &flag);
     gdl = func_15142B7C(gdl, 0x200005, 0x1F0600);
@@ -781,7 +743,7 @@ void func_151072BC(u8 *arg0) {
         beam.color.bytes[3] = func_150ADA20() % (u32)(config->alphaRange + 1) + config->alphaBase;
         beam.mode = 1;
         beam.count = func_150ADA20() % (u32)(config->countRange + 1) + config->countBase;
-        chain->child = func_15105CE0(&beam, 4, arg0[0xC], arg0[1]);
+        chain->child = (struct S15107C1CCreated *)func_15105CE0((BoltDesc *)&beam, 4, arg0[0xC], arg0[1]);
         if (chain->child != NULL) {
             memcpy(chain->child->unk60, &owner, 4U);
         }
@@ -883,7 +845,7 @@ struct S15107C1CCreated *func_15107700(struct127 *arg0, s16 arg1, s16 arg2, s16 
     init.unk28 = trace.unk8;
 
     func_15107AE0(&init.unk4, &init.unk28, &init.unk10, &init.unk1C);
-    created = func_15105CE0(&init, 0xC, argA, argB);
+    created = (struct S15107C1CCreated *)func_15105CE0((BoltDesc *)&init, 0xC, argA, argB);
     if (created != NULL) {
         memcpy(created->unk60, &payload, 0xC);
     }
@@ -1037,7 +999,7 @@ struct S15107C1CCreated *func_15107C1C(struct127 *arg0, u8 arg1, void *arg2, s16
     }
 
     func_15107AE0(&init.unk4, &init.unk28, &init.unk10, &init.unk1C);
-    created = func_15105CE0(&init, 0x18, argC, argD);
+    created = (struct S15107C1CCreated *)func_15105CE0((BoltDesc *)&init, 0x18, argC, argD);
     if (created != NULL) {
         memcpy(created->unk60, &payload, 0x18);
     }
