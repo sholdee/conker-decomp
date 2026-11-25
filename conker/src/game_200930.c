@@ -1,5 +1,6 @@
 #include <ultra64.h>
-/* functions.h declares arg3/arg5 as s32; golden reads them as u8 from their home slots. */
+/* matching: functions.h declares func_151D5714's arg3/arg5 as s32, but the original takes u8 (read back
+   with lbu from the home slots), so its header prototype is renamed out of the way. */
 #define func_151D5714 func_151D5714_hdr
 #include "functions.h"
 #undef func_151D5714
@@ -1084,29 +1085,30 @@ void func_151D5648(struct17 *pos, u8 arg1, s32 arg2) {
                   (randU % 56U) + 200, 0.0f, arg1, arg2);
 }
 
-extern s32 func_15145EA4(s32 *arg0, s32 *arg1, s32 arg2, s32 arg3);
+extern s32 func_15145EA4(struct17 **src, struct17 **dst, s32 mtx, s32 count);
 
-void func_151D5714(struct127 *arg0, f32 *arg1, f32 *arg2, u8 arg3, f32 arg4, u8 arg5, s32 arg6) {
-    struct17 a;
-    struct17 b;
+/* Spawns a func_151D4408 particle on bone `bone` of obj, from local point from towards local point to. */
+void func_151D5714(struct127 *obj, struct17 *from, struct17 *to, u8 bone, f32 scale, u8 arg5, s32 arg6) {
+    struct17 start;
+    struct17 dir;
     s32 mtx;
-    s32 srcs[2];
-    s32 dsts[2];
+    struct17 *srcs[2];
+    struct17 *dsts[2];
 
-    if (arg0->unk1D4 != NULL) {
-        if ((arg0->unk74 & 0xF) != 0xF) {
-            mtx = (s32)arg0->unk1D4 + (arg3 << 6);
-            srcs[0] = (s32)arg1;
-            srcs[1] = (s32)arg2;
-            dsts[0] = (s32)&a;
-            dsts[1] = (s32)&b;
+    if (obj->unk1D4 != NULL) {
+        if ((obj->unk74 & 0xF) != 0xF) {
+            mtx = (s32)obj->unk1D4 + (bone << 6);
+            srcs[0] = from;
+            srcs[1] = to;
+            dsts[0] = &start;
+            dsts[1] = &dir;
             func_15145EA4(srcs, dsts, mtx, 2);
-            b.unk0 = b.unk0 - a.unk0;
-            b.unk4 = b.unk4 - a.unk4;
-            b.unk8 = b.unk8 - a.unk8;
-            {
+            dir.unk0 = dir.unk0 - start.unk0;
+            dir.unk4 = dir.unk4 - start.unk4;
+            dir.unk8 = dir.unk8 - start.unk8;
+            { // matching: a block holding a declaration changes how as1 schedules the call setup
                 void func_151D4408(struct17 *, struct17 *, void *, struct127 *, f32, u8, s32);
-                func_151D4408(&a, &b, (void *)mtx, arg0, arg4, arg5, arg6);
+                func_151D4408(&start, &dir, (void *)mtx, obj, scale, arg5, arg6);
             }
         }
     }
@@ -1163,13 +1165,13 @@ void func_15145740(struct127 *, struct17 *, struct17 *, struct17 *, f32);
 /* Computes obj's axes (forward, axis1, axis2) and the world position of localPos on bone `bone`;
    objects without bone matrices use a point 34 units out and 49 up from their origin. */
 void func_151D5A18(struct127 *obj, struct17 *out, struct17 *forward, struct17 *axis1, struct17 *axis2, struct17 *localPos, u8 bone) {
-    s32 src;
-    s32 dst;
+    struct17 *src;
+    struct17 *dst;
 
     func_15145740(obj, forward, axis1, axis2, 0.8110000491f);
     if (obj->unk1D4 != NULL) {
-        dst = (s32)out;
-        src = (s32)localPos;
+        dst = out;
+        src = localPos;
         func_15145EA4(&src, &dst, (s32)obj->unk1D4 + (bone << 6), 1);
     } else {
         f32 dz;
@@ -1193,18 +1195,21 @@ void func_151D5A18(struct127 *obj, struct17 *out, struct17 *forward, struct17 *a
     }
 }
 
-s32 func_151452C4(s32 arg0, s32 arg1, struct17 *arg2, f32 arg3, struct17 *arg4, struct17 *arg5, f32 *arg6, f32 *arg7);
+s32 func_151452C4(struct17 *arg0, struct17 *arg1, struct17 *arg2, f32 arg3, struct17 *arg4, struct17 *arg5, f32 *arg6, f32 *arg7);
 extern s32 (*D_80086C90[])(struct127 *, struct127 *, s32);
 
-s32 func_151D5B6C(s32 arg0, s32 arg1, struct127 *arg2, s8 arg3, s32 arg4) {
+/* Runs func_151452C4(p0, p1, center, 2 * radius) for every active object except `self` (and, when filter
+   is not -1, only for those D_80086C90[filter] accepts). Returns a mask with bit i cleared for each
+   object i it reports. */
+s32 func_151D5B6C(struct17 *p0, struct17 *p1, struct127 *self, s8 filter, s32 filterArg) {
     f32 radius;
     struct127 *obj;
     s32 mask;
-    struct17 pos;
-    struct17 sp74;
-    struct17 sp68;
-    f32 sp64;
-    f32 sp60;
+    struct17 center;
+    struct17 out0;
+    struct17 out1;
+    f32 outF0;
+    f32 outF1;
     u8 i;
 
     mask = -1;
@@ -1213,60 +1218,51 @@ s32 func_151D5B6C(s32 arg0, s32 arg1, struct127 *arg2, s8 arg3, s32 arg4) {
         if (obj->interaction_state == 0) continue;
         if (obj->unk5 == 3) continue;
         if (D_800BE9F0 != 0x23 && obj->id == 0xFF) continue;
-        if (obj == arg2) continue;
+        if (obj == self) continue;
         if (!(obj->unkF8 & 0x40)) continue;
-        if (arg3 != -1 && D_80086C90[arg3](obj, arg2, arg4) == 0) continue;
+        if (filter != -1 && D_80086C90[filter](obj, self, filterArg) == 0) continue;
         if (obj->unkD2 < obj->unkD4) {
             radius = obj->unkD4;
         } else {
             radius = obj->unkD2;
         }
-        pos.unk0 = obj->x_position;
-        pos.unk4 = obj->y_position + obj->unkD6;
-        pos.unk8 = obj->z_position;
-        if (func_151452C4(arg0, arg1, &pos, radius + radius, &sp74, &sp68, &sp64, &sp60)) {
+        center.unk0 = obj->x_position;
+        center.unk4 = obj->y_position + obj->unkD6;
+        center.unk8 = obj->z_position;
+        if (func_151452C4(p0, p1, &center, radius + radius, &out0, &out1, &outF0, &outF1)) {
             mask &= ~(1 << i);
         }
     }
     return mask;
 }
 
-void func_151D5D60(s32 arg0, s16 arg1, s32 arg2, s32 *arg3, s8 *arg4) {
-    s8 sp27;
-    s32 base;
-    s32 *slot;
+/* Returns in *out the half of the double buffer slots[index] selected by D_800BE9C0, allocating the buffer
+   (2 * size bytes) on first use; *allocated (optional) is set when it was allocated now. */
+void func_151D5D60(void **slots, s16 index, s32 size, void **out, s8 *allocated) {
+    s8 dummy;
 
-    if (arg4 == NULL) {
-        arg4 = &sp27;
+    if (allocated == NULL) {
+        allocated = &dummy;
     }
-    *arg4 = 0;
-
-    slot = (s32 *)(*(s32 *)&arg0 + (arg1 * 4));
-    base = *slot;
-    if (base != 0) {
-        goto block_6;
+    *allocated = 0;
+    if (slots[index] == NULL) {
+        slots[index] = (void *)allocate_memory(size * 2, 1, 2, 1);
+        if (slots[index] == NULL) {
+            *out = NULL;
+            return;
+        }
+        *allocated = 1;
     }
-    base = allocate_memory(arg2 * 2, 1, 2, 1);
-    *slot = base;
-    if (base == 0) {
-        *arg3 = 0;
-        return;
-    }
-    *arg4 = 1;
-    base = *slot;
-
-block_6:
-    *arg3 = ((D_800BE9C0 != 0) ? 0 : arg2) + base;
+    *out = (u8 *)slots[index] + ((D_800BE9C0 != 0) ? 0 : size);
 }
 
-void func_151D5E30(s32 *arg0) {
-    s32 i;
+/* Releases the four buffers of a func_151D5D60 slot array. */
+void func_151D5E30(s32 *slots) {
+    u8 i;
 
-    i = 0;
-    do {
-        if (arg0[i] != 0) {
-            func_100043B4((s32 *)arg0[i], 3);
+    for (i = 0; i < 4; i++) {
+        if (slots[i] != 0) {
+            func_100043B4((s32 *)slots[i], 3);
         }
-        i = (u8)(i + 1);
-    } while (i < 4);
+    }
 }
