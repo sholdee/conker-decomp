@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /* An object that can trigger a one-shot effect at its position. */
 typedef struct Game1D3420Emitter {
@@ -89,36 +90,12 @@ typedef struct Game1D3420Effect {
     /* 0x110 */ Game1D3420EffectState state;
 } Game1D3420Effect;
 
-/* Spawn descriptor passed to func_1513D2F0. */
-typedef struct Game1D3420Spawn {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ s16 unk4;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ u8 unk10[4];
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 height;
-    /* 0x1C */ f32 position[3];
-    /* 0x28 */ f32 unk28[3];
-    /* 0x34 */ f32 unk34[3];
-    /* 0x40 */ s32 unk40;
-    /* 0x44 */ u8 unk44;
-    /* 0x45 */ u8 unk45;
-    /* 0x46 */ u8 unk46;
-    /* 0x47 */ u8 unk47;
-    /* 0x48 */ s32 unk48;
-    /* 0x4C */ u8 unk4C;
-    /* 0x4D */ u8 pad4D[0xB];
-} Game1D3420Spawn; /* size 0x58 */
-
 extern s32 func_1516284C(Header *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
 
 /* Spawns an effect object at the emitter; with playSound also starts a func_1516284C handle at the
  * emitter's mid-height and plays sound 0x1AA there. */
 void func_151A6068(Game1D3420Emitter *emitter, s32 arg1, u8 playSound, u8 arg3, u8 arg4, s32 arg5) {
-    Game1D3420Spawn spawn;
+    ParticleDef spawn;
     Game1D3420EffectState init;
     Game1D3420Effect *effect;
     Game1D3420EffectState *state;
@@ -135,34 +112,34 @@ void func_151A6068(Game1D3420Emitter *emitter, s32 arg1, u8 playSound, u8 arg3, 
     init.unk16 = 0xFF;
     init.unk18 = 0.0f;
     init.unk17 = arg3;
-    spawn.unk0 = 0x6B;
-    spawn.unk1 = 10;
-    spawn.unk2 = 0x4C03;
-    spawn.unk4 = 240;
-    spawn.unk8 = 0;
-    spawn.unkC = 0;
-    spawn.unk10[0] = 0xFF;
-    spawn.unk10[1] = 0xFF;
-    spawn.unk10[2] = 0xFF;
-    spawn.unk10[3] = 0xFF;
-    spawn.unk14 = emitter->unk6;
+    spawn.texture = 0x6B;
+    spawn.type = 10;
+    spawn.renderModes = 0x4C03;
+    spawn.lifetime = 240;
+    spawn.frame = 0;
+    spawn.frameSpeed = 0;
+    spawn.rgba[0] = 0xFF;
+    spawn.rgba[1] = 0xFF;
+    spawn.rgba[2] = 0xFF;
+    spawn.rgba[3] = 0xFF;
+    spawn.width = emitter->unk6;
     spawn.height = emitter->height;
-    spawn.position[0] = emitter->x;
-    spawn.position[1] = emitter->y;
-    spawn.position[2] = emitter->z;
-    spawn.unk40 = 0x01EC0009;
+    spawn.pos.x = emitter->x;
+    spawn.pos.y = emitter->y;
+    spawn.pos.z = emitter->z;
+    spawn.flags = 0x01EC0009;
     spawn.unk44 = 0xFF;
     spawn.unk45 = 0xFF;
     spawn.unk46 = 0;
     spawn.unk47 = 0;
     spawn.unk48 = arg1;
-    spawn.unk4C = 0xFF;
-    spawn.unk28[0] = 0.0f;
-    spawn.unk28[1] = 0.0f;
-    spawn.unk28[2] = 0.0f;
-    spawn.unk34[0] = 1.0f;
-    spawn.unk34[1] = 1.0f;
-    spawn.unk34[2] = 1.0f;
+    spawn.viewportMask = 0xFF;
+    spawn.rot.x = 0.0f;
+    spawn.rot.y = 0.0f;
+    spawn.rot.z = 0.0f;
+    spawn.scale.x = 1.0f;
+    spawn.scale.y = 1.0f;
+    spawn.scale.z = 1.0f;
     effect = func_1513D2F0(&spawn, (s32)&D_800A4AA0, 0, 0x28, 0, 0x20, 0, 0, 0, sizeof(init), arg4, arg5);
     if (effect != NULL) {
         state = &effect->state;

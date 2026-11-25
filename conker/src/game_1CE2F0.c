@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 void func_15143794(s32, s32, f32, f32 *);
 void func_151A11CC(f32, f32, f32, f32, f32, s32, s32, s32,
@@ -738,49 +739,6 @@ void func_151A25E0(Particle *particle) {
     particle->envR = particle->envG = particle->envB = particle->life * data->tintStep;
 }
 
-/* Spawn parameters of a func_15130374 particle (layout as ParticleDesc in game_15D730.c). */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ u16 renderMode;
-    /* 0x0A */ s16 timer;
-    /* 0x0C */ s32 frame;
-    /* 0x10 */ s32 frameRate;
-    /* 0x14 */ u8 r;
-    /* 0x15 */ u8 g;
-    /* 0x16 */ u8 b;
-    /* 0x17 */ u8 a;
-    /* 0x18 */ u8 r2;
-    /* 0x19 */ u8 g2;
-    /* 0x1A */ u8 b2;
-    /* 0x1B */ u8 alpha;
-    /* 0x1C */ u8 brightness;
-    /* 0x1D */ u8 texture;     /* D_80090B60 index */
-    /* 0x1E */ s16 fadeStart;
-    /* 0x20 */ s16 fadeRate;
-    /* 0x22 */ s16 scaleStart;
-    /* 0x24 */ f32 scaleRate;
-    /* 0x28 */ f32 width;
-    /* 0x2C */ f32 height;
-    /* 0x30 */ struct17 pos;
-    /* 0x3C */ struct17 offset;
-    /* 0x48 */ struct17 vel;
-    /* 0x54 */ f32 gravity;
-    /* 0x58 */ s32 flags;
-    /* 0x5C */ void *viewMask;
-    /* 0x60 */ u8 primColorMode;
-    /* 0x61 */ u8 envColorMode;
-    /* 0x62 */ s8 updateFunc;  /* D_80089760 index, -1 for none */
-    /* 0x63 */ s8 deathFunc;   /* D_80089800 index, -1 for none */
-    /* 0x64 */ s8 drawFunc;    /* D_80089804 index, -1 for none */
-    /* 0x65 */ u8 handlerSet;
-    /* 0x66 */ u8 views;
-    /* 0x67 */ u8 pad67;
-    /* 0x68 */ s16 minSize;
-    /* 0x6A */ s16 unk6A;
-    /* 0x6C */ f32 maxSize;
-} ParticleDesc;
-
 /* Fade-out and one-shot event of func_151A26EC's particles, run by func_151A2960. */
 typedef struct {
     /* 0x0 */ s16 fadeOutStart;  /* desc.timer value */
@@ -815,7 +773,7 @@ extern void (*D_8008F8E0[])(DescParticle *, s32);
 extern DescParticle *func_15130374(ParticleDesc *, u8, s32, u8, s32);
 
 /* Spawns one func_15130374 particle (texture 39, update func 0x11) at pos/offset with velocity vel. */
-s32 func_151A26EC(struct17 *pos, struct17 *offset, struct17 *vel, f32 drag, f32 gravity, f32 size,
+s32 func_151A26EC(vertex *pos, vertex *offset, vertex *vel, f32 drag, f32 gravity, f32 size,
                   s16 timer, u8 alpha, s16 fadeStart, s16 fadeOutStart, s16 eventTime, s8 eventFunc,
                   u8 r, u8 g, u8 b, u8 argF, s32 arg10) {
     ParticleData151A26EC data;
@@ -1056,11 +1014,11 @@ void func_151A2F0C(DescParticle *particle) {
 
     config.countBase = 8;
     config.countRange = 6;
-    config.position = particle->desc.pos;
+    config.position = *(struct17 *)&particle->desc.pos; // TODO(vectors): struct17/vertex mix
     if (particle->desc.flags & 0x1000) {
-        config.position.unk0 += particle->desc.offset.unk0;
-        config.position.unk4 += particle->desc.offset.unk4;
-        config.position.unk8 += particle->desc.offset.unk8;
+        config.position.unk0 += particle->desc.offset.x;
+        config.position.unk4 += particle->desc.offset.y;
+        config.position.unk8 += particle->desc.offset.z;
     }
     config.sizeBase = (particle->desc.width + particle->desc.height) * 0.5f * 0.01999999955f;
     config.sizeRange = (particle->desc.width + particle->desc.height) * 0.5f * 0.03529999778f;

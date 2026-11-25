@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 
 /* Extra data of the swinging lamp particle: a sine swing whose amplitude and speed ramp at their rates
@@ -42,41 +43,6 @@ typedef struct {
     /* 0x8 */ f32 invScale;    // 1 / D_800AA528[kind]
 } SwingingLight;
 
-/* Spawn template for func_15132A4C: the layout of Particle 0x10..0x8B (see game_15F680.c). */
-typedef struct {
-    /* 0x00 */ f32 radius;
-    /* 0x04 */ f32 elasticity;
-    /* 0x08 */ f32 sizeXZ;
-    /* 0x0C */ f32 sizeY;
-    /* 0x10 */ vertex rot;
-    /* 0x1C */ vertex scale;
-    /* 0x28 */ vertex pos;
-    /* 0x34 */ vertex vel;
-    /* 0x40 */ vertex rotVel;
-    /* 0x4C */ f32 gravity;
-    /* 0x50 */ u32 flags;
-    /* 0x54 */ s16 lifetime;
-    /* 0x56 */ u16 model;
-    /* 0x58 */ u8 variant;
-    /* 0x5C */ s32 zone;        // func_1510FD20 leaf zone at the spawn point
-    /* 0x60 */ u8 alpha;
-    /* 0x61 */ u8 updateFn;
-    /* 0x62 */ u8 update2Fn;
-    /* 0x63 */ u8 floorHitFn;
-    /* 0x64 */ u8 floorType3Fn;
-    /* 0x65 */ u8 wallHitFn;
-    /* 0x66 */ u8 destroyFn;
-    /* 0x67 */ u8 squashFn;
-    /* 0x68 */ u8 matrixFn;
-    /* 0x69 */ s8 drawFn;
-    /* 0x6A */ u8 unk6A;
-    /* 0x6C */ struct127 *owner;
-    /* 0x70 */ u8 ownerId;
-    /* 0x72 */ s16 fadeStart;
-    /* 0x74 */ s16 fadeRate;
-    /* 0x78 */ s32 unk78;
-} ParticleSpawn; // size 0x7C
-
 /* First argument of func_151407D0 (see game_100810.c). */
 typedef struct {
     f32 unk0, unk4, unk8, unkC, unk10, unk14, unk18, unk1C, unk20;
@@ -88,33 +54,11 @@ typedef struct {
     u8 pad5A[6];
 } ParticleParams; // size 0x60
 
-/* Third argument of func_151407D0 (see game_100810.c). */
-typedef struct {
-    /* 0x00 */ u8 kind;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ s16 unk4;
-    /* 0x06 */ u8 pad6[2];
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ u8 color[4];
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ vertex pos;
-    /* 0x28 */ vertex end;
-    /* 0x34 */ f32 scale[3];
-    /* 0x40 */ s32 flags;
-    /* 0x44 */ u8 unk44, unk45, unk46, unk47;
-    /* 0x48 */ s32 zone;
-    /* 0x4C */ u8 unk4C;
-    /* 0x4D */ u8 pad4D[0xB];
-} ParticleDesc; // size 0x58
-
 extern vertex D_800AA4E0[];     // lamp position, by kind
 extern f32 D_800AA528[];        // lamp size, by kind
 Particle *func_15132A4C(ParticleSpawn *spawn, s32 arg1, s32 arg2, s32 extraSize, u8 arg4, s32 arg5);
 void func_1510F800(s32 type);
-Beam *func_151407D0(ParticleParams *, s32, ParticleDesc *, u8, u8, u8, u8, s8, u8, s32);
+Beam *func_151407D0(ParticleParams *, s32, ParticleDef *, u8, u8, u8, u8, s8, u8, s32);
 struct225 *func_1516037C(Header *src, struct226 *arg1, s32 size, u8 arg3, s32 arg4);
 
 /* Light callback: spawns a swinging lamp of the given kind with a light effect (D_8008B0F0 slot 7) that
@@ -152,8 +96,8 @@ void func_151B8DB0(s32 light, u8 kind, u8 arg2, s32 arg3) {
     spawn.lifetime = 300;
     spawn.model = 0x22;
     func_1510F800(0);
-    spawn.zone = func_1510FD20(spawn.pos.x, spawn.pos.z);
-    spawn.flags = (spawn.zone ? 0x400 : 0) | 0x100 | 0x800;
+    spawn.unk5C = func_1510FD20(spawn.pos.x, spawn.pos.z);
+    spawn.flags = (spawn.unk5C ? 0x400 : 0) | 0x100 | 0x800;
     spawn.variant = 0;
     spawn.alpha = 255;
     spawn.updateFn = 9;
@@ -191,7 +135,7 @@ void func_151B8DB0(s32 light, u8 kind, u8 arg2, s32 arg3) {
                 memcpy(state, &data, sizeof(data));
                 {
                     ParticleParams params;
-                    ParticleDesc desc;
+                    ParticleDef desc;
 
                     params.unk0 = params.unk4 = D_800AA528[kind] * 43.29999924f;
                     params.unk8 = params.unkC = D_800AA528[kind] * 30.20000076f;
@@ -221,32 +165,32 @@ void func_151B8DB0(s32 light, u8 kind, u8 arg2, s32 arg3) {
                     params.unk58 = 0;
                     params.unk59 = -1;
 
-                    desc.kind = 0x69;
-                    desc.unk1 = 3;
-                    desc.unk2 = 0x3403;
-                    desc.unk4 = 300;
-                    desc.unk8 = 0;
-                    desc.unkC = 0;
-                    desc.color[0] = 255;
-                    desc.color[1] = 255;
-                    desc.color[2] = 255;
-                    desc.color[3] = 255;
-                    desc.unk14 = 100.0f;
-                    desc.unk18 = 100.0f;
+                    desc.texture = 0x69;
+                    desc.type = 3;
+                    desc.renderModes = 0x3403;
+                    desc.lifetime = 300;
+                    desc.frame = 0;
+                    desc.frameSpeed = 0;
+                    desc.rgba[0] = 255;
+                    desc.rgba[1] = 255;
+                    desc.rgba[2] = 255;
+                    desc.rgba[3] = 255;
+                    desc.width = 100.0f;
+                    desc.height = 100.0f;
                     desc.pos = spawn.pos;
-                    desc.end.x = spawn.pos.x;
-                    desc.end.y = spawn.pos.y - 500.0f;
-                    desc.end.z = spawn.pos.z;
-                    desc.scale[0] = 1.0f;
-                    desc.scale[1] = 1.0f;
-                    desc.scale[2] = 1.0f;
+                    desc.rot.x = spawn.pos.x;
+                    desc.rot.y = spawn.pos.y - 500.0f;
+                    desc.rot.z = spawn.pos.z;
+                    desc.scale.x = 1.0f;
+                    desc.scale.y = 1.0f;
+                    desc.scale.z = 1.0f;
                     desc.flags = 0x1CD2006;
                     desc.unk44 = 255;
                     desc.unk45 = 255;
                     desc.unk46 = 0;
                     desc.unk47 = 6;
-                    desc.zone = spawn.zone;
-                    desc.unk4C = 255;
+                    desc.unk48 = spawn.unk5C;
+                    desc.viewportMask = 255;
                     state->beam = func_151407D0(&params, sizeof(params), &desc, 0, 0, 0, 0, -1, arg2, arg3);
                 }
             }

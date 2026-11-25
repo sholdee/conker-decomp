@@ -4,6 +4,7 @@
 #include "functions.h"
 #undef func_10010F30
 #include "variables.h"
+#include "effects.h"
 
 extern s32 func_10010F30(s32, u16, u8, s16, u8);
 extern s32 func_151EF610(void);
@@ -521,49 +522,6 @@ s32 func_151AA5A4(PulseFx *fx) {
     return 1;
 }
 
-typedef struct {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 z;
-} Vec3f;
-
-/* Particle burst descriptor for func_151303BC. */
-typedef struct {
-    /* 0x00 */ s32 flags;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s16 unk8;
-    /* 0x0A */ s16 unkA;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 unk1A;
-    /* 0x1B */ u8 unk1B;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ Vec3f pos;
-    /* 0x3C */ Vec3f unk3C;
-    /* 0x48 */ Vec3f vel;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ s32 unk58;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ s8 unk60;
-    /* 0x61 */ s8 unk61;
-    /* 0x62 */ s8 unk62;
-    /* 0x63 */ s8 unk63;
-    /* 0x64 */ u8 pad64[0xC];
-} BurstDesc;
-
 /* Payload copied to +0xA8 of a spawned burst. */
 typedef struct {
     /* 0x00 */ f32 size;
@@ -589,40 +547,40 @@ typedef struct {
     /* 0x74 */ f32 unk74;
 } Obj151AA6D8;
 
-void *func_151303BC(BurstDesc *desc, u8 arg1, s32 payloadSize);
+void *func_151303BC(ParticleDesc *desc, u8 arg1, s32 payloadSize);
 
 /* Spawns a particle burst moving from `from` toward `to`, advanced by `t` frames. */
-void func_151AA6D8(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, Obj151AA6D8 *obj) {
-    BurstDesc burst;
+void func_151AA6D8(vertex *from, vertex *to, s32 arg2, s32 arg3, f32 t, Obj151AA6D8 *obj) {
+    ParticleDesc burst;
     void *spawned;
     BurstPayload payload;
 
-    burst.unk1D = 0x2F;
-    burst.unk8 = 0xC01;
-    burst.flags = 0x200005;
+    burst.texture = 0x2F;
+    burst.renderMode = 0xC01;
+    burst.unk0 = 0x200005;
     burst.unk4 = 0;
-    burst.unk1A = 0;
-    burst.unk19 = 0;
-    burst.unk18 = 0;
-    burst.unk17 = 0;
-    burst.unk16 = 0;
-    burst.unk15 = 0;
-    burst.unk14 = 0;
-    burst.unk10 = 0;
-    burst.unkC = 0;
-    burst.unk1C = 0xFF;
-    burst.unk22 = 0;
-    burst.unk24 = 0.0f;
-    burst.unk58 = 0x1207;
-    burst.unk60 = 5;
-    burst.unk61 = 5;
-    burst.unk62 = 4;
-    burst.unk63 = -1;
-    burst.unk3C.x = 0.0f;
-    burst.unk3C.y = 0.0f;
-    burst.unk3C.z = 0.0f;
-    burst.unk1E = 20;
-    burst.unk20 = 12;
+    burst.b2 = 0;
+    burst.g2 = 0;
+    burst.r2 = 0;
+    burst.a = 0;
+    burst.b = 0;
+    burst.g = 0;
+    burst.r = 0;
+    burst.frameRate = 0;
+    burst.frame = 0;
+    burst.brightness = 0xFF;
+    burst.scaleStart = 0;
+    burst.scaleRate = 0.0f;
+    burst.flags = 0x1207;
+    burst.primColorMode = 5;
+    burst.envColorMode = 5;
+    burst.updateFunc = 4;
+    burst.deathFunc = -1;
+    burst.offset.x = 0.0f;
+    burst.offset.y = 0.0f;
+    burst.offset.z = 0.0f;
+    burst.fadeStart = 20;
+    burst.fadeRate = 12;
     payload.unk4 = 0;
     payload.unk5 = 0;
     payload.unk18 = 0;
@@ -639,15 +597,15 @@ void func_151AA6D8(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, Obj151AA6D
     burst.pos.z += burst.vel.z * t;
 
     if (func_150ADA20() & 1) {
-        burst.unk58 |= 0x40;
+        burst.flags |= 0x40;
     }
     if (func_150ADA20() & 1) {
-        burst.unk58 |= 0x80;
+        burst.flags |= 0x80;
     }
 
-    burst.unkA = (func_150ADA20() % 51U) + 50;
-    burst.unk1B = (func_150ADA20() % 101U) + 100;
-    payload.size = burst.unk28 = burst.unk2C = (func_150ADA68() * 39.0f) + 31.0f;
+    burst.timer = (func_150ADA20() % 51U) + 50;
+    burst.alpha = (func_150ADA20() % 101U) + 100;
+    payload.size = burst.width = burst.height = (func_150ADA68() * 39.0f) + 31.0f;
     payload.unk6 = (func_150ADA20() % 5U) + 4;
     payload.unk7 = (func_150ADA20() % 5U) + 4;
     payload.unk8 = ((func_150ADA68() * 0.25f) + 0.150000006f) * payload.size;
@@ -656,7 +614,7 @@ void func_151AA6D8(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, Obj151AA6D
     payload.unk1B = (func_150ADA20() % 5U) + 4;
     payload.unk1C = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * payload.size;
     payload.unk20 = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * payload.size;
-    burst.unk54 = ((func_150ADA68() * 70.0f) + 73.0f) * 0.001000000047f;
+    burst.gravity = ((func_150ADA68() * 70.0f) + 73.0f) * 0.001000000047f;
 
     spawned = func_151303BC(&burst, 2, sizeof(payload));
     if (spawned != NULL) {
@@ -740,7 +698,7 @@ typedef struct {
     /* 0x02 */ s16 unk02;
     /* 0x04 */ s16 unk04;
     /* 0x06 */ s16 unk06;
-    /* 0x08 */ Vec3f unk08;
+    /* 0x08 */ vertex unk08;
     /* 0x14 */ f32 unk14;
     /* 0x18 */ f32 unk18;
     /* 0x1C */ f32 unk1C;
@@ -763,19 +721,19 @@ typedef struct {
 } Cfg_151AABC4;
 
 extern u8 D_800A8F70[];
-extern void func_15142314(struct255 *, u8, Vec3f *, struct127 *);
+extern void func_15142314(struct255 *, u8, vertex *, struct127 *);
 extern void func_1504715C(GroundHit *hit, struct127 *actor);
-extern s32 func_1504697C(Vec3f *pos, s32 arg1, f32 minY, GroundHit *hit);
-extern void func_15153F18(Cfg_151AABC4 *, Vec3f *, GroundHit *, u8, s32);
+extern s32 func_1504697C(vertex *pos, s32 arg1, f32 minY, GroundHit *hit);
+extern void func_15153F18(Cfg_151AABC4 *, vertex *, GroundHit *, u8, s32);
 
 /* Finds point D_800A8F70[index] of the actor's unk1D4 (func_15142314) and spawns two effects on the ground below it. */
 void func_151AABC4(struct127 *actor, u8 index) {
-    Vec3f pos;
+    vertex pos;
     GroundHit floor;
     f32 y;
-    Vec3f probe;
+    vertex probe;
     u8 color;
-    Vec3f hit;
+    vertex hit;
 
     if ((actor != NULL) && (actor->unk1D4 != NULL)) {
         color = func_151D8E20();
@@ -1034,38 +992,38 @@ typedef struct {
 
 /* Spawns a particle burst at (x, y, z) drifting against (dx, dz). */
 void func_151AB3A4(f32 x, f32 y, f32 z, f32 dx, f32 arg4, f32 dz, Obj151AB3A4 *obj) {
-    BurstDesc burst;
+    ParticleDesc burst;
     void *spawned;
     BurstPayload payload;
 
-    burst.unk1D = 0x2F;
-    burst.unk8 = 0xC01;
-    burst.flags = 0x200005;
+    burst.texture = 0x2F;
+    burst.renderMode = 0xC01;
+    burst.unk0 = 0x200005;
     burst.unk4 = 0;
-    burst.unk1A = 0;
-    burst.unk19 = 0;
-    burst.unk18 = 0;
-    burst.unk17 = 0;
-    burst.unk16 = 0;
-    burst.unk15 = 0;
-    burst.unk14 = 0;
-    burst.unk10 = 0;
-    burst.unkC = 0;
-    burst.unk1C = 0xFF;
-    burst.unk22 = 0;
-    burst.unk24 = 0.0f;
-    burst.unk58 = 0x3207;
-    burst.unk60 = 5;
-    burst.unk61 = 5;
-    burst.unk62 = 4;
-    burst.unk63 = -1;
+    burst.b2 = 0;
+    burst.g2 = 0;
+    burst.r2 = 0;
+    burst.a = 0;
+    burst.b = 0;
+    burst.g = 0;
+    burst.r = 0;
+    burst.frameRate = 0;
+    burst.frame = 0;
+    burst.brightness = 0xFF;
+    burst.scaleStart = 0;
+    burst.scaleRate = 0.0f;
+    burst.flags = 0x3207;
+    burst.primColorMode = 5;
+    burst.envColorMode = 5;
+    burst.updateFunc = 4;
+    burst.deathFunc = -1;
     burst.pos.x = x;
     burst.pos.y = y;
-    burst.unk3C.x = 0.0f;
-    burst.unk3C.y = 0.0f;
-    burst.unk3C.z = 0.0f;
-    burst.unk1E = 30;
-    burst.unk20 = 8;
+    burst.offset.x = 0.0f;
+    burst.offset.y = 0.0f;
+    burst.offset.z = 0.0f;
+    burst.fadeStart = 30;
+    burst.fadeRate = 8;
     burst.pos.z = z;
     payload.unk24 = obj->unk60;
     payload.unk10 = 4.0f;
@@ -1078,14 +1036,14 @@ void func_151AB3A4(f32 x, f32 y, f32 z, f32 dx, f32 arg4, f32 dz, Obj151AB3A4 *o
     burst.vel.y = 0.0f;
     burst.vel.z = -dz * 0.2f;
     if (func_150ADA20() & 1) {
-        burst.unk58 |= 0x40;
+        burst.flags |= 0x40;
     }
     if (func_150ADA20() & 1) {
-        burst.unk58 |= 0x80;
+        burst.flags |= 0x80;
     }
-    burst.unkA = (func_150ADA20() % 51U) + 106;
-    burst.unk1B = (func_150ADA20() % 101U) + 100;
-    payload.size = burst.unk28 = burst.unk2C = (func_150ADA68() * 62.0f) + 41.0f;
+    burst.timer = (func_150ADA20() % 51U) + 106;
+    burst.alpha = (func_150ADA20() % 101U) + 100;
+    payload.size = burst.width = burst.height = (func_150ADA68() * 62.0f) + 41.0f;
     payload.unk6 = (func_150ADA20() % 5U) + 4;
     payload.unk7 = (func_150ADA20() % 5U) + 4;
     payload.unk8 = ((func_150ADA68() * 0.25f) + 0.150000006f) * payload.size;
@@ -1094,7 +1052,7 @@ void func_151AB3A4(f32 x, f32 y, f32 z, f32 dx, f32 arg4, f32 dz, Obj151AB3A4 *o
     payload.unk1B = (func_150ADA20() % 5U) + 4;
     payload.unk1C = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * payload.size;
     payload.unk20 = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * payload.size;
-    burst.unk54 = ((func_150ADA68() * 60.0f) + 21.0f) * 0.001000000047f;
+    burst.gravity = ((func_150ADA68() * 60.0f) + 21.0f) * 0.001000000047f;
     spawned = func_151303BC(&burst, 2, sizeof(payload));
     if (spawned != NULL) {
         memcpy((u8 *)spawned + 0xA8, &payload, sizeof(payload));

@@ -1,41 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
-/* Spawn template for func_15132A4C: the layout of Particle 0x10..0x8B (as in game_1E30A0.c). */
-typedef struct {
-    /* 0x00 */ f32 radius;
-    /* 0x04 */ f32 elasticity;
-    /* 0x08 */ f32 sizeXZ;
-    /* 0x0C */ f32 sizeY;
-    /* 0x10 */ vertex rot;
-    /* 0x1C */ vertex scale;
-    /* 0x28 */ vertex pos;
-    /* 0x34 */ vertex vel;
-    /* 0x40 */ vertex rotVel;
-    /* 0x4C */ f32 gravity;
-    /* 0x50 */ s32 flags;
-    /* 0x54 */ s16 lifetime;
-    /* 0x56 */ s16 model;
-    /* 0x58 */ u8 variant;
-    /* 0x5C */ s32 zone;
-    /* 0x60 */ u8 alpha;
-    /* 0x61 */ u8 updateFn;
-    /* 0x62 */ u8 update2Fn;
-    /* 0x63 */ u8 floorHitFn;
-    /* 0x64 */ u8 floorType3Fn;
-    /* 0x65 */ u8 wallHitFn;
-    /* 0x66 */ u8 destroyFn;
-    /* 0x67 */ u8 squashFn;
-    /* 0x68 */ u8 matrixFn;
-    /* 0x69 */ s8 drawFn;
-    /* 0x6A */ u8 unk6A;
-    /* 0x6C */ s32 owner;
-    /* 0x70 */ u8 ownerId;
-    /* 0x72 */ s16 fadeStart;
-    /* 0x74 */ s16 fadeRate;
-    /* 0x78 */ s32 unk78;
-} ParticleSpawn; // size 0x7C
+#include "effects.h"
 
 /* Extra data of a pulsing particle: its size wobbles around baseSize as phase cycles through 2 pi. */
 typedef struct {
@@ -107,7 +73,7 @@ Particle *func_151B6010(vertex *pos, vertex *vel, f32 size, vertex *rot, vertex 
     }
     spawn.model = 3;
     spawn.variant = 0;
-    spawn.zone = 0;
+    spawn.unk5C = 0;
     spawn.alpha = alpha;
     spawn.updateFn = 6;
     spawn.update2Fn = 0;
