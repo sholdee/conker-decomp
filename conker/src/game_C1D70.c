@@ -2,211 +2,80 @@
 #include "functions.h"
 #include "variables.h"
 
+/* One 16-byte entry of a point group; only the position is read here. */
 typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-} struct150948C0;
+    s16 x;
+    s16 y;
+    s16 z;
+    u8 pad6[0xA];
+} GroupPoint;
 
 typedef struct {
     u8 pad0;
-    u8 unk1;
+    u8 slots; /* low nibble: first slot, high nibble: last slot */
     u8 pad2[2];
-    s32 unk4;
-} struct1509499C_arg0;
+    GroupPoint *points;
+} PointGroup;
 
 extern f32 *D_800D2C20;
-void func_1509499C(struct1509499C_arg0 *, s32 *);
+void func_1509499C(PointGroup *group, GroupPoint **slots);
 void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 
-void func_150948C0(void *arg0, s32 arg1) {
-    struct150948C0 *sp50[16];
+/* Transforms the group's points by the matrix D_800D2C20 into out[slot] (16 slots; empty slots are skipped). */
+void func_150948C0(PointGroup *group, f32 (*out)[3]) {
+    GroupPoint *slots[16];
     s32 i;
-    struct150948C0 *point;
-    s32 out;
 
-    func_1509499C(arg0, (s32 *)sp50);
-    for (i = 0; i != 0x10; i++) {
-        point = sp50[i];
-        if (point != 0) {
-            out = (i * 0xC) + arg1;
-            func_150A7960(D_800D2C20, (f32)point->unk0, (f32)point->unk2, (f32)point->unk4,
-                          (f32 *)out, (f32 *)(out + 4), (f32 *)(out + 8));
+    func_1509499C(group, slots);
+    for (i = 0; i < 16; i++) {
+        if (slots[i] != NULL) {
+            func_150A7960(D_800D2C20, slots[i]->x, slots[i]->y, slots[i]->z, &out[i][0], &out[i][1], &out[i][2]);
         }
     }
 }
 
-void func_1509499C(struct1509499C_arg0 *arg0, s32 *arg1) {
-    s32 packed;
-    s32 value;
+/* Spreads a group's points over 16 slots: slots first..last (inclusive) get consecutive points, the rest NULL. */
+void func_1509499C(PointGroup *group, GroupPoint **slots) {
+    GroupPoint *point = group->points;
+    s16 end = group->slots; // matching: the packed byte and `end` share one register
+    s16 first = end & 0xF;
     s32 i;
-    s32 lo;
 
-    value = arg0->unk4;
-    packed = arg0->unk1;
-    lo = (s16)(packed & 0xF);
-    i = 0;
-    packed = (s16)((packed >> 4) + 1);
+    end = (end >> 4) + 1;
 
-    for (; i < lo; i++) {
-        arg1[i] = 0;
+    for (i = 0; i < first; i++) {
+        slots[i] = NULL;
     }
-
-    i = lo;
-    for (; i < packed; i++) {
-        arg1[i] = value;
-        value += 0x10;
+    for (i = first; i < end; i++) {
+        slots[i] = point;
+        point++;
     }
-
-    for (; i < 0x10; i++) {
-        arg1[i] = 0;
+    for (; i < 16; i++) {
+        slots[i] = NULL;
     }
 }
 
-void func_15094AB8(Vtx *arg0, s16 (*arg1)[2], s32 arg2, f32 arg3, s32 arg4, s32 arg5) {
-    f32 cx;
-    f32 cy;
-    f32 s;
-    f32 c;
+/*
+ * Writes texcoords[i] rotated by `angle` degrees about the centre of a width x height texture
+ * into verts[i].v.tc (S10.5 fixed point).
+ */
+void func_15094AB8(Vtx *verts, s16 (*texcoords)[2], s32 count, f32 angle, s32 width, s32 height) {
+    f32 centerS;
+    f32 centerT;
+    f32 sine;
+    f32 cosine;
     s32 i;
 
-    s = sinf(arg3 * 0.01745329238f);
-    c = cosf(arg3 * 0.01745329238f);
-    cx = (arg4 / 2) << 5;
-    cy = (arg5 / 2) << 5;
-    for (i = 0; i < arg2; i++) {
-        arg0[i].v.tc[0] = ((arg1[i][0] - cx) * c) - ((arg1[i][1] - cy) * s) + cx;
-        arg0[i].v.tc[1] = ((arg1[i][0] - cx) * s) + ((arg1[i][1] - cy) * c) + cy;
+    sine = sinf(angle * 0.01745329238f); /* degrees to radians */
+    cosine = cosf(angle * 0.01745329238f);
+    centerS = (width / 2) << 5;
+    centerT = (height / 2) << 5;
+    for (i = 0; i < count; i++) {
+        verts[i].v.tc[0] = ((texcoords[i][0] - centerS) * cosine) - ((texcoords[i][1] - centerT) * sine) + centerS;
+        verts[i].v.tc[1] = ((texcoords[i][0] - centerS) * sine) + ((texcoords[i][1] - centerT) * cosine) + centerT;
     }
 }
 
+/* Empty stub. */
 void func_15094E98(void) {
 }
-
-extern Mtx D_800D2CA8[];
-void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
-void func_150A7A00(void *, f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
-
-typedef struct {
-    u8 pad0[0xC];
-    f32 unkC;
-    f32 unk10;
-    u8 pad14[0x20];
-    f32 unk34;
-    f32 unk38;
-    u8 pad3C[0x144];
-} struct1509563C;void func_15094EA0(s32 arg0);
-
-extern Gfx D_800873D0[];
-extern u8 * D_800D2CA0;
-Gfx *func_15094F40(Gfx *arg0);
-
-typedef struct {
-    u32 unk0;
-    u8 unk4;
-    u8 pad5;
-    u16 unk6;
-    u16 unk8;
-    u8 unkA;
-    u8 unkB;
-} struct15095060_arg0;
-
-typedef struct {
-    u32 unk0;
-    u16 unk4;
-    u16 unk6;
-    u8 unk8;
-    u8 unk9;
-    u8 unkA;
-} struct15095060_d;
-
-typedef struct {
-    u8 pad0[0x10];
-    struct15095060_d *unk10;
-} struct15095060_arg2;
-
-extern void func_15095060(struct15095060_arg0 *, s32, struct15095060_arg2 *);
-extern Gfx *func_150950D4(Gfx *, struct15095060_d *, s32, s32, s32, s32, s32, s32, s32, s32);
-extern struct15095060_d D_800D2C90;
-void func_15094F70(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
-void func_15094FE8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10);
-void func_15095060(struct15095060_arg0 *arg0, s32 arg1, struct15095060_arg2 *arg2);
-
-extern s32 func_1510D0EC(s32, s32, s32, s32);
-extern u8 D_8009DEB0[];
-extern u8 D_8009DEB4[];
-extern u8 D_8009DEB8[];
-extern u8 D_8009DEBC[];
-extern s32 D_800D2C9C;
-Gfx *func_150950D4(Gfx *gfx, struct15095060_d *tex, s32 tmem, s32 tile, s32 frame, s32 sfrac, s32 cm, s32 s, s32 t, s32 arg9);
-s32 func_1509563C(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4, f32 *arg5, f32 *arg6, f32 arg7);
-
-s32 func_1509563C(f32, f32, f32, f32 *, f32 *, f32 *, f32 *, f32);
-void func_15095B08(s32, f32, f32, f32, s32, s32 *);
-s32 func_15095A90(s32, s32, f32, f32, f32, s32, s32, s32, s32);
-s32 func_15095D34(s32, s32, s32, s32, s32);
-
-struct Pt15095760 {
-    s16 x;
-    s16 y;
-    s16 z;
-};
-
-#define WGFX15095760(pkt, a, b)     \
-{                                   \
-    Gfx *_g = (Gfx *)(pkt);         \
-    _g->words.w0 = (u32)(a);        \
-    _g->words.w1 = (u32)(b);        \
-}
-s32 func_15095760(Gfx *arg0, struct Pt15095760 *arg1);
-
-typedef struct Cmd150958B0 {
-    u32 w0;
-    u32 w1;
-} Cmd150958B0;
-Cmd150958B0 *func_150958B0(Cmd150958B0 *arg0, s16 *arg1, s32 *arg2);
-void func_15095A48(s32 arg0, s32 arg1, f32 arg2, f32 arg3);
-s32 func_15095A90(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
-
-extern f32 D_800380A4;
-extern f32 D_800D2C70;
-extern f32 D_800D2C74;
-extern f32 D_800D2C78;
-extern f32 D_800D2C7C;
-extern f32 D_800D2C80;
-extern f32 D_800D2C84;
-extern f32 D_800D2C88;
-
-typedef struct {
-    u8 pad0[4];
-    u16 unk4;
-    u16 unk6;
-} Struct15095B08_sub;
-
-typedef struct {
-    u8 pad0[6];
-    s16 unk6;
-    s16 unk8;
-    u8 padA[6];
-    Struct15095B08_sub *unk10;
-} Struct15095B08_arg0;
-
-typedef struct {
-    u8 pad0[0x14];
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    u8 pad34[0x180 - 0x34];
-} Struct15095B08_cam;
-void func_15095B08(s32 arg0, f32 arg1, f32 arg2, f32 arg3, s32 arg4, s32 *arg5);
-
-s32 func_15095D34(s32, s32, s32, s32, s32);
-void func_15095D0C(s32 arg0, s32 arg1);
-
-extern Gfx D_80087408[];
-Gfx *func_15096934(Gfx *arg0);
