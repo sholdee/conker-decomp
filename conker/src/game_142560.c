@@ -122,7 +122,7 @@ void func_15115368(Game142560Object *obj) {
         t = obj->timer - start - hold;
         if (obj->returning == 0) {
             s = sinf(t * 0.628f * 2);
-            obj->angleX = -3 * s;
+            obj->angleX = -3 * s; // matching: int literals here; 2.0f/3.0f schedule differently
             s = sinf(t * 0.628f * 3);
             obj->angleZ = 2 * s;
             if (t > 10.0f) {
