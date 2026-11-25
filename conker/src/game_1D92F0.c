@@ -3,13 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Surface hit record from a ground/collision probe (cf. GroundHit in game_1D6E80.c). */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ u8 unk4[0x18];
-    /* 0x1C */ u8 flags;
-} FxSurfaceHit;
-
 /* Per-impact-type effect selection: indices into the tables below, -1 for none. */
 typedef struct {
     /* 0x00 */ s8 first;      /* D_800A9040 index */
@@ -33,7 +26,7 @@ typedef struct {
 
 /* Passed through func_1514C678 to the spawn callbacks (e.g. func_151AC078). */
 typedef struct {
-    /* 0x00 */ FxSurfaceHit *hit;
+    /* 0x00 */ CollisionHit *hit;
     /* 0x04 */ s32 unk4;
     /* 0x08 */ u8 kind;
 } FxSpawnPayload;
@@ -48,7 +41,7 @@ void func_1514C678(f32 x, f32 y, f32 z, f32, s32, s32, s32, s32, s32, f32, FxSpa
 void func_151DBE80(u8, f32, f32, s16, Vec3f *, void *, s32, s32, s32, s32);
 
 /* Spawns the effects listed for impact type `type` at `pos` on surface `hit`. */
-void func_151ABE40(Vec3f *pos, FxSurfaceHit *hit, s32 type, s32 arg3, s32 arg4) {
+void func_151ABE40(Vec3f *pos, CollisionHit *hit, s32 type, s32 arg3, s32 arg4) {
     FxImpactSet *set;
     u8 kind;
 
@@ -89,7 +82,7 @@ void func_151ABE40(Vec3f *pos, FxSurfaceHit *hit, s32 type, s32 arg3, s32 arg4) 
     if (set->impact != -1 && (hit->flags & 1)) {
         FxImpactEntry *impact = &D_800A925C[set->impact];
 
-        func_151DBE80(kind, impact->unk0, impact->unk8, impact->unk4, pos, hit->unk4, 150, 0, (u8)arg3, arg4);
+        func_151DBE80(kind, impact->unk0, impact->unk8, impact->unk4, pos, &hit->tri, 150, 0, (u8)arg3, arg4);
     }
 }
 
@@ -115,7 +108,7 @@ typedef struct {
 
 extern FxSprayParams D_800A9068[];
 s32 func_15147DA0(EffectTemplate18 *, TrailMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32, TrailRender *,
-                  FxSurfaceHit *, s32, s32);
+                  CollisionHit *, s32, s32);
 
 /* Spawn callback: launches one spray particle at (x, y, z) heading along `yaw`, with random
  * pitch and speed from the impact type's spray parameters. */
