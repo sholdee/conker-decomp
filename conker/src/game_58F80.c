@@ -390,7 +390,7 @@ void func_1502C1A4(void) {
         }
         obj++;
         // matching: the end is its own symbol (D_800D121C == &D_800CC2D0[25]), not CSE'd with the start
-    } while (obj != (Actor *)&D_800D121C);
+    } while (obj != &D_800D121C);
 }
 
 /* Resets this frame buffer's bone-matrix pool. */

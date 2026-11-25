@@ -462,7 +462,7 @@ s32 func_15019130(void) {
     func_15036148();
     func_1515D6C8();
     for (i = 0; i < TLB_SLOT_COUNT; i++) {
-        ((TlbSlot *)&D_80043B40)[i].age++;
+        ((TlbSlot *)D_80043B40)[i].age++;
     }
     return 1;
 }

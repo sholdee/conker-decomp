@@ -327,7 +327,7 @@ extern s32 *D_800428F8;
 
 // BSS ENDS AT D_80043B40
 
-extern s32  *D_80043B40; // 4064
+extern s32  D_80043B40[]; // 0xFE0-byte block past BSS end (TLB slot table in 45B80)
 extern u8   D_80044B20[];             // audio heap memory, 0x3E000 bytes
 
 // this space is filled by D_80044B20
@@ -809,7 +809,7 @@ extern s32 D_800BE9F0;
 
 extern s32  D_800BE2B0[]; // type?
 extern OSMesg  D_800BE2D0;
-extern u8   D_800BE358[8];
+extern u8   D_800BE358[0x80]; // EEPROM/mempak transfer buffer; [0..1] is a u16 checksum
 extern s8   D_800BE3D9;
 extern s8   D_800BE3DA;
 extern s8   D_800BE3DB;
@@ -971,7 +971,7 @@ extern f32 D_800CC2C8;
 
 extern u8  D_800CC2B0;
 extern u8  D_800CC2B8;
-extern s32 D_800CC2BA;
+extern u16 D_800CC2BA; // frame step of the actor being updated
 extern s32 D_800CC2BC;
 extern Actor D_800CC2D0[26]; // objects
 extern u8  D_800CC2D4[];
@@ -991,7 +991,7 @@ extern Actor *D_800CE370;
 
 /* 800D0000 */
 
-extern s32 D_800D121C;
+extern Actor D_800D121C; // == &D_800CC2D0[25]: dummy attacker for scripted hits; also the end of the 25 live actors
 extern f32 D_800D1230;
 extern f32 D_800D1234;
 extern f32 D_800D1238;
@@ -1109,7 +1109,7 @@ extern s32 D_800D2DB4;
 extern u32 D_800D3094; // number of trigger zones in D_800D3098
 extern TriggerZone *D_800D3098; // level placement / marker table (0x34-byte records)
 extern GroundCandidate D_800D3300[]; // ground-probe hits
-extern s32 D_800D35DC;
+extern u8  D_800D35DC; // 1-based slot of the actor being updated (0 = none)
 extern s32 D_800D3668;
 extern s32 D_800D366C;
 extern f32 D_800D3670;

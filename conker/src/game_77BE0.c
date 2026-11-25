@@ -56,8 +56,8 @@ void func_1504A730(void) {
         }
         D_800D154C = obj;
         obj->unk12++;
-        *(u8 *)&D_800D35DC = i + 1;
-        *(u16 *)&D_800CC2BA = 0;
+        D_800D35DC = i + 1;
+        D_800CC2BA = 0;
         tickResult = 0;
         if (D_800BE616 == 0 || (tickResult = func_1504C8BC(obj)) != 0) {
             maxStep = 2.0f;
@@ -125,7 +125,7 @@ void func_1504A730(void) {
             }
             obj->unk2FF = 1;
             if (tickResult == 2) {
-                D_800BE9E4 = *(u16 *)&D_800CC2BA;
+                D_800BE9E4 = D_800CC2BA;
                 D_800BE9A4 = D_800BE9E4 * 0.5f;
                 if (D_800BE9A4 != 0.0f) {
                     D_800BE9A8 = 1.0f / D_800BE9A4;
@@ -160,7 +160,7 @@ void func_1504A730(void) {
     func_15080C64();
     D_800D154C = D_800CC2D0;
     D_800C3E78 = 0;
-    *(u8 *)&D_800D35DC = 0;
+    D_800D35DC = 0;
 }
 
 void func_150ED578(Actor *arg0);
@@ -795,7 +795,7 @@ s32 func_1504C8BC(Actor *obj) {
     }
     if ((obj->unk127 & 1) == D_800CC2B8) {
         if (ext->unk1A8 != 0) {
-            *(s16 *)&D_800CC2BA = D_800BE9E4;
+            D_800CC2BA = D_800BE9E4;
             D_800BE9E4 += obj->unk31C->unk1A8;
             D_800BE9A4 = D_800BE9E4 * 0.5f;
             if (D_800BE9A4 != 0.0f) {

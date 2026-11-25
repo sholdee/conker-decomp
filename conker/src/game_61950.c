@@ -121,5 +121,5 @@ void func_150347E8(void) {
         }
         obj++;
         // matching: the end is its own symbol (D_800D121C == &D_800CC2D0[25]), and the loop is bottom-tested
-    } while (obj != (Actor *)&D_800D121C);
+    } while (obj != &D_800D121C);
 }

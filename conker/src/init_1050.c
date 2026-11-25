@@ -6,7 +6,7 @@
 
 /** Boot entry: clear BSS, set up the CPU/FPU and start the idle thread (func_100010F8). */
 void func_10001050(void) {
-    bzero(&D_8002D4B0, (s32)&D_80043B40 - (s32)&D_8002D4B0); // clear BSS
+    bzero(&D_8002D4B0, (s32)D_80043B40 - (s32)&D_8002D4B0); // clear BSS
     func_100061F8(1, 31);
     osInitialize();
     __osSetSR(__osGetSR() | SR_CU1 | SR_FR);
@@ -52,14 +52,14 @@ void func_10001194(s32 arg) {
     u32 framebufferSize;
 
     func_10005218();
-    clearSize = 0x80400000 - (s32)&D_80043B40;
+    clearSize = 0x80400000 - (s32)D_80043B40;
     if (D_8000030C == 0) { // osResetType: cold reset
-        bzero(&D_80043B40, clearSize);
+        bzero(D_80043B40, clearSize);
     } else {
         bzero(&D_800E9D10, 0x80400000 - (s32)&D_800E9D10);
     }
-    osInvalICache(&D_80043B40, clearSize);
-    osInvalDCache(&D_80043B40, clearSize);
+    osInvalICache(D_80043B40, clearSize);
+    osInvalDCache(D_80043B40, clearSize);
     func_10003920();
     func_10003930();
     func_10003BD0();

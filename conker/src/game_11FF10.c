@@ -553,7 +553,7 @@ void func_150F34F4(Actor *actor) {
                         count++;
                     }
                     obj++;
-                } while (obj != (Actor *)&D_800D121C);
+                } while (obj != &D_800D121C);
                 if (count < 5) {
                     D_800D1580 = 6;
                     actor->unk103 = 4;

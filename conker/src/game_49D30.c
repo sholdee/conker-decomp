@@ -722,7 +722,7 @@ void func_1501DF04(s32 scene) {
         }
     }
     // matching: the fade call and the loop setup share a source line (-g3 line numbers steer scheduling)
-    if (D_800C35A9 == 0 && D_800C3C8A != 1 && D_800C3C8D == 0) { func_1517EE40(0, 0, 0, 0x1E, 0, 0); } { Actor *obj = D_800CC2D0; Actor *end = (Actor *)&D_800D121C; do {
+    if (D_800C35A9 == 0 && D_800C3C8A != 1 && D_800C3C8D == 0) { func_1517EE40(0, 0, 0, 0x1E, 0, 0); } { Actor *obj = D_800CC2D0; Actor *end = &D_800D121C; do {
         if (obj->interaction_state != 0) {
             obj->fogMode = 0;
         }
@@ -1884,7 +1884,7 @@ void func_1502178C(Actor *target, s32 scene, s32 onlyTrack) {
                     obj->unk54 = 0.0f;
                     obj->unkCC = 0;
                     rescaled = 0;
-                    *(u8 *)&D_800D35DC = (target - D_800CC2D0) + 1;
+                    D_800D35DC = (target - D_800CC2D0) + 1;
                     func_1510E7A4(&obj->unk188, obj->floorTri.v, &floorY, &obj->unk118, &obj->unk184, &obj->floorType,
                                   obj->x_position, obj->y_position, obj->z_position, obj->y_position, 0, obj,
                                   -10000.0f, target->y_position);

@@ -16,6 +16,6 @@ void func_150FDD10(s32 arg0) {
                 func_150ED638(obj, 0x14, 0x14);
             }
             obj++;
-        } while (obj != (Actor *)&D_800D121C);
+        } while (obj != &D_800D121C);
     }
 }
