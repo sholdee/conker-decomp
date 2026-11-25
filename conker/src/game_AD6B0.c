@@ -116,7 +116,7 @@ void func_15080430(struct127 *actor, s32 expression, s32 morphDuration) {
                 }
             }
         } else {
-            // matching: assigning D_800D1928 directly makes IDO reload it for the test
+            // matching: assigning and testing D_800D1928 directly mismatches (grows the function)
             enabled = (expression != 0);
             D_800D1928 = enabled;
             if (!enabled) {
