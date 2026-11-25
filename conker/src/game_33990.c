@@ -1,26 +1,30 @@
 #include <ultra64.h>
 
 #include "functions.h"
+/* variables.h declares D_800BE3F8 as a pointer; this file uses it as the array of SaveSlotInfo. */
+#define D_800BE3F8 D_800BE3F8_ptr_decl_in_variables_h
 #include "variables.h"
+#undef D_800BE3F8
 
-extern u8 D_800BE2F0[];
-extern u8 D_800BE2F2;
-extern u8 D_800BE2F3;
-extern u8 D_800BE2F4[];
-extern u8 D_800BE35A[];
-extern s8 D_800E0BE0[0x1C];
-extern u8 D_800E0BFC;
-extern u8 D_800D2E69;
-static s8 D_800BE3D8[4];
-extern void *D_80082BBC;
-extern u8 D_8008FE30;
+/*
+ * EEPROM save data. The EEPROM is addressed in 8-byte blocks:
+ *   blocks 0x00-0x03  options (D_800E0BE0), 0x20 bytes
+ *   blocks 0x04-0x43  four save files of 0x80 bytes (16 blocks) each
+ *   blocks 0x44-0x51  D_800BE2F0, 0x70 bytes
+ * Every record starts with a u16 checksum of its remaining bytes (see the checksum loops below).
+ * D_800BE358 is the 0x80-byte transfer buffer.
+ */
 
-extern void func_151DD3A0(void *, s32, void *, s32);
-extern s32 func_151DCEF0(void *, s32, void *, s32);
-extern s32 func_151DD4E0(void *, u8, void *);
-extern void func_151DD9E4(void);
-extern void func_151E7EF8(void);
-extern void func_15007168(void);
+/* Summary of one of the three save files the player can pick. */
+typedef struct SaveSlotInfo {
+    /* 0x00 */ s32 unk0;       /* D_800BE3E8 */
+    /* 0x04 */ u32 unk4;       /* D_800BE3E4 */
+    /* 0x08 */ s32 sequence;   /* incremented on every save, -1 when the slot is empty */
+    /* 0x0C */ s8 unkC;        /* D_800BE3DF */
+    /* 0x0D */ u8 flagCount;   /* number of bits set in the 27 bytes at D_800D2E4C */
+    /* 0x0E */ s8 eepromSlot;  /* which of the four EEPROM save files holds it */
+    /* 0x0F */ s8 padF;
+} SaveSlotInfo; /* size = 0x10 */
 
 typedef struct Struct33990 {
     /* 0x00 */ u8 unk0;
@@ -35,90 +39,93 @@ typedef struct Struct33990 {
     /* 0x09 */ u8 unk9;
 } Struct33990; /* size = 0xA */
 
+extern SaveSlotInfo D_800BE3F8[3];
+extern u8 D_800BE2F0[0x70];
+extern u8 D_800BE35A[];
+extern s8 D_800E0BE0[0x1C];
+static s8 D_800BE3D8[4]; /* save slot loaded from each EEPROM save file, -1 if none */
+extern Struct33990 *D_80082BBC;
+extern u8 D_8008FE30;
+extern u8 *D_800BE3F0; /* bit width of each of the 69 D_800C3A60 entries in a save file */
+extern u32 D_800BE3E4;
+
+/* EEPROM access (game_20A3A0.c, game_20A850.c) */
+extern void func_151DD3A0(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size); /* read; matching: declared void (returns s32) */
+extern s32 func_151DCEF0(OSMesgQueue *mq, s32 block, u8 *buffer, s32 size); /* timed write */
+extern s32 func_151DD4E0(OSMesgQueue *mq, u8 block, u8 *buffer);           /* write one block */
+extern void func_151DD9E4(void);
+extern void func_151E7EF8(void);
+extern void *func_1502B5C8();
 
 void func_150064E0(void) {
-    s32 i = 0;
-    func_15017790();
+    s32 i;
 
-    do {
-        D_800C3A60[i++] = 0;
-    } while (i < 69);
+    func_15017790();
+    for (i = 0; i < 69; i++) { D_800C3A60[i] = 0; }
 
     D_800BE3DF = 24;
     D_800BE3E8 = 0;
     D_800D2E45 = 1;
 }
 
-extern u8 *D_800BE3F0;
-extern u32 D_800BE3E4;
-extern s32 func_1502B5C8();
 
-typedef struct LoadSlot33990 {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ u32 unk4;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s8 unkC;
-    /* 0x0D */ u8 unkD;
-    /* 0x0E */ s8 unkE;
-    /* 0x0F */ s8 padF;
-} LoadSlot33990;
-
-void func_15006590(s32 arg0) {
+/*
+ * Loads EEPROM save file `eepromSlot` (0-3) into the game state. A file whose checksum fails resets the
+ * state instead. While D_80082BC0 is set (scanning all files), it also records the file in its save
+ * slot's SaveSlotInfo if it is newer, and keeps the 27 bytes at D_800D2E4C from the file with the most
+ * bits set.
+ */
+void func_15006590(s32 eepromSlot) {
     u64 mask;
     s32 i;
     s32 j;
     u16 sum;
     u8 *p;
-    u8 *q;
+    s32 block;
     u8 byte;
     u8 bit;
-    s32 cnt;
-    u8 v;
-    u32 t;
-    LoadSlot33990 *ent;
-    u8 sp7F;
-    s32 sp78;
-    u8 buf[27];
+    s32 flagCount;
+    u8 bits;
+    u32 value;
+    s32 pad; // matching: unused stack slot (IDO -g3 keeps a slot for every declared local)
+    u8 saveSlot;
+    s32 sequence;
+    u8 backup[27];
 
     for (i = 0; i < 27; i++) {
-        buf[i] = ((u8 *)D_800D2E4C)[i];
+        backup[i] = ((u8 *)D_800D2E4C)[i];
     }
     if (D_800BE3F0 == NULL) {
-        D_800BE3F0 = (u8 *)func_1502B5C8(0, 1, 7) + 8;
+        D_800BE3F0 = (u8 *)func_1502B5C8(NULL, 1, 7) + 8;
     }
     osWritebackDCache(D_800BE358, 0x80);
     osInvalDCache(D_800BE358, 0x80);
-    func_151DD3A0(&D_800BE900, (u8)(arg0 * 16 + 4), D_800BE358, 0x80);
+    block = eepromSlot * 16 + 4;
+    func_151DD3A0(&D_800BE900, block, D_800BE358, 0x80);
     p = D_800BE358;
     sum = 0xCC;
-    i = 2;
-    do {
-        sum += p[i] << (i & 3);
-        i++;
-    } while (i < 0x80);
+    for (i = 2; i < 0x80; i++) { sum += p[i] << (i & 3); }
     p += 2;
-    i = 0;
     if (sum != *(u16 *)D_800BE358) {
         func_150064E0();
         if (D_800BE3DC >= 0 && D_80082BC0 != 0) {
             for (i = 0; i < 27; i++) {
-                ((u8 *)D_800D2E4C)[i] = buf[i];
+                ((u8 *)D_800D2E4C)[i] = backup[i];
             }
         }
-        if (arg0 * 16 + 4 == 0x34) {
+        if (block == 0x34) {
             D_80082BC0 = 0;
         }
     } else {
-        sp7F = *p;
+        saveSlot = *p;
         p += 5;
-        sp78 = p[-4] << 24;
-        sp78 |= p[-3] << 16;
-        sp78 |= p[-2] << 8;
-        sp78 |= p[-1];
-        do {
+        sequence = p[-4] << 24;
+        sequence |= p[-3] << 16;
+        sequence |= p[-2] << 8;
+        sequence |= p[-1];
+        for (i = 0; i < 27; i++) {
             ((u8 *)D_800D2E4C)[i] = *p++;
-            i++;
-        } while (i < 27);
+        }
         for (i = 0; i < 9; i++) {
             D_800D2E60[i] = *p++;
         }
@@ -127,14 +134,14 @@ void func_15006590(s32 arg0) {
         D_800BE3E4 = *p++ << 8;
         D_800BE3E4 |= *p++;
         func_15085710(0, 9, D_800BE3E4);
-        t = *p++ << 24;
-        t |= *p++ << 16;
-        t |= *p++ << 8;
-        t |= *p++;
-        D_800BE3E8 = t;
+        value = *p++ << 24;
+        value |= *p++ << 16;
+        value |= *p++ << 8;
+        value |= *p++;
+        D_800BE3E8 = value;
         byte = *p++;
         bit = 0x80;
-        for (i = 0; i < 0x45; i++) {
+        for (i = 0; i < 69; i++) {
             D_800C3A60[i] = 0;
             mask = (u64)1 << (D_800BE3F0[i] - 1);
             for (j = 0; j < D_800BE3F0[i]; j++) {
@@ -150,42 +157,42 @@ void func_15006590(s32 arg0) {
                 mask >>= 1;
             }
         }
-        if (D_80082BC0 != 0 && sp7F < 3) {
-            D_800BE3D8[arg0] = sp7F;
-            if (((LoadSlot33990 *)&D_800BE3F8)[sp7F].unk8 < sp78) {
-                cnt = 0;
+        if (D_80082BC0 != 0 && saveSlot < 3) {
+            D_800BE3D8[eepromSlot] = saveSlot;
+            if (D_800BE3F8[saveSlot].sequence < sequence) {
+                flagCount = 0;
                 for (i = 0; i < 27; i++) {
-                    v = ((u8 *)D_800D2E4C)[i];
+                    bits = ((u8 *)D_800D2E4C)[i];
                     for (j = 8; j != 0; j--) {
-                        if (v & 1) {
-                            cnt++;
+                        if (bits & 1) {
+                            flagCount++;
                         }
-                        v >>= 1;
+                        bits >>= 1;
                     }
                 }
-                ((LoadSlot33990 *)&D_800BE3F8)[sp7F].unk0 = D_800BE3E8;
-                ((LoadSlot33990 *)&D_800BE3F8)[sp7F].unkD = cnt;
-                ((LoadSlot33990 *)&D_800BE3F8)[sp7F].unkC = *(s8 *)&D_800BE3DF;
-                ((LoadSlot33990 *)&D_800BE3F8)[sp7F].unk4 = D_800BE3E4;
-                ((LoadSlot33990 *)&D_800BE3F8)[sp7F].unk8 = sp78;
-                ((LoadSlot33990 *)&D_800BE3F8)[sp7F].unkE = arg0;
-                if ((u8)cnt >= D_800BE3DC) {
-                    D_800BE3DC = (u8)cnt;
+                D_800BE3F8[saveSlot].unk0 = D_800BE3E8;
+                D_800BE3F8[saveSlot].flagCount = flagCount;
+                D_800BE3F8[saveSlot].unkC = *(s8 *)&D_800BE3DF; // matching: original loads it signed (lb)
+                D_800BE3F8[saveSlot].unk4 = D_800BE3E4;
+                D_800BE3F8[saveSlot].sequence = sequence;
+                D_800BE3F8[saveSlot].eepromSlot = eepromSlot;
+                if ((u8)flagCount >= D_800BE3DC) {
+                    D_800BE3DC = (u8)flagCount;
                     if (D_800D2E68 & 0x20) {
                         D_800BE3DE = 1;
                     }
                 } else {
                     for (i = 0; i < 27; i++) {
-                        ((u8 *)D_800D2E4C)[i] = buf[i];
+                        ((u8 *)D_800D2E4C)[i] = backup[i];
                     }
                 }
             } else {
                 for (i = 0; i < 27; i++) {
-                    ((u8 *)D_800D2E4C)[i] = buf[i];
+                    ((u8 *)D_800D2E4C)[i] = backup[i];
                 }
             }
         }
-        if (arg0 * 16 + 4 == 0x34) {
+        if (block == 0x34) {
             D_80082BC0 = 0;
         }
     }
@@ -198,9 +205,6 @@ typedef struct SaveSlot33990 {
     /* 0x0F */ s8 padF;
 } SaveSlot33990; /* size = 0x10 */
 
-extern u8 *D_800BE3F0;
-extern u32 D_800BE3E4;
-extern s32 func_1502B5C8(s32, s32, s32, s32);
 
 void func_15006BEC(s32 arg0) {
     u64 mask;
@@ -435,23 +439,23 @@ void func_15007644(void) {
 }
 
 void func_1500764C(void) {
-    D_80082BB4 = (u8)6;
-    D_800BE3EC = (u8)0;
+    D_80082BB4 = 6;
+    D_800BE3EC = 0;
 }
 
 void func_15007668(void) {
-    D_80082BB4 = (u8)7;
-    D_800BE3EC = (u8)0;
+    D_80082BB4 = 7;
+    D_800BE3EC = 0;
 }
 
 void func_15007684(void) {
-    D_80082BB4 = (u8)4;
-    D_800BE3EC = (u8)0;
+    D_80082BB4 = 4;
+    D_800BE3EC = 0;
 }
 
 void func_150076A0(void) {
-    D_80082BB4 = (u8)5;
-    D_800BE3EC = (u8)0;
+    D_80082BB4 = 5;
+    D_800BE3EC = 0;
 }
 
 void func_150076BC(s32 arg0) {
@@ -459,21 +463,21 @@ void func_150076BC(s32 arg0) {
         func_150064E0();
     }
     if ((arg0 >= 0) && (arg0 < 4) && (D_800BE616 == 0)) {
-        D_80082BB4 = (u8)1;
+        D_80082BB4 = 1;
         D_800BE3EC = arg0;
     }
 }
 
 void func_15007718(s32 arg0) {
     if ((arg0 >= 0) && (arg0 < 3) && (D_800BE616 == 0)) {
-        D_80082BB4 = (u8)2;
+        D_80082BB4 = 2;
         D_800BE3EC = arg0;
     }
 }
 
 void func_15007750(s32 arg0) {
     if ((arg0 >= 0) && (arg0 < 3)) {
-        D_80082BB4 = (u8)3;
+        D_80082BB4 = 3;
         D_800BE3EC = arg0;
     }
 }
