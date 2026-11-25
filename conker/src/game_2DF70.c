@@ -1098,59 +1098,65 @@ s32 func_150028BC(s32 map) {
 #undef W0
 #undef CMD
 
-void func_15002F40(s32 arg0) {
-    if (arg0 == 50 || arg0 == 51) {
+/** Sets D_800DBE64 for map `map`: 150 on maps 50 and 51, otherwise 85 when D_800BE616 is set, else 50. */
+void func_15002F40(s32 map) {
+    if (map == 50 || map == 51) {
         D_800DBE64 = 150.0f;
-        return;
-    }
-    if (D_800BE616) {
+    } else if (D_800BE616) {
         D_800DBE64 = 85.0f;
-        return;
-    }
-    D_800DBE64 = 50.0f;
-}
-
-s32 func_15002FA0(s32 arg0) {
-    return arg0 ^ 0xF0F0F0F0;
-}
-
-void func_15002FB4(s32 arg0) {
-    struct00 *sp3C; // TBD
-    s32 sp38;
-    s32 sp34;
-    struct104 *temp_v0;
-    s32 sp2C;
-
-    sp3C = func_1502B6BC(&sp34, 0, &sp38, 2, 21, arg0);
-    if ((sp38 != 0) && ((sp3C->unk4 << 8) != 0)) {
-        D_800B0DF0 = sp3C->unk0;
-        if (sp34 == 0) {
-            D_8003C8E0 = 0xC000037;
-            func_150AD770();
-        }
-        if (D_800B0DF0 == 0) {
-            D_8003C8E0 = 0xC000037;
-            func_150AD770();
-        }
-    }
-    func_151EF040(func_15002FA0(0x40F0FAAC), &sp2C);
-    sp2C = func_15002FA0(sp2C);
-    if (sp2C != 0xE7B00F09) {
-        temp_v0 = D_800B0DF0;
-        temp_v0->unk12 >>= 1;
-    }
-
-    temp_v0 = D_800B0DF0;
-    if (temp_v0->unk12 != 0) {
-        D_800D2F3C = temp_v0->unk12;
-        D_800D2F40 = sp3C->unk8;
     } else {
-        D_800D2F3C = 0U;
-        D_800D2F40 = 0;
+        D_800DBE64 = 50.0f;
+    }
+}
+
+/** XOR (un)scrambling for the constants of the ROM check below. */
+s32 func_15002FA0(s32 value) {
+    return value ^ 0xF0F0F0F0;
+}
+
+/**
+ * Loads map `map`'s settings resource into D_800B0DF0 (fatal error if it is missing) and
+ * publishes its D_800D2F3C/D_800D2F40 table. If the cartridge word at 0xB0000A5C is not the
+ * expected one, the table length unk12 is halved.
+ */
+void func_15002FB4(s32 map) {
+    struct00 *res; // TBD
+    s32 count;
+    s32 loaded;
+    struct104 *info;
+    s32 romWord;
+
+    res = func_1502B6BC(&loaded, 0, &count, 2, 21, map);
+    if (count != 0 && (res->unk4 << 8) != 0) {
+        D_800B0DF0 = res->unk0;
+        if (loaded == 0) {
+            D_8003C8E0 = 0xC000037;
+            func_150AD770();
+        }
+        if (D_800B0DF0 == NULL) {
+            D_8003C8E0 = 0xC000037;
+            func_150AD770();
+        }
+    }
+    // func_15002FA0(0x40F0FAAC) == 0xB0000A5C, func_15002FA0(0xE7B00F09) == 0x1740FFF9
+    func_151EF040(func_15002FA0(0x40F0FAAC), &romWord);
+    romWord = func_15002FA0(romWord);
+    if (romWord != 0xE7B00F09) {
+        info = D_800B0DF0;
+        info->unk12 >>= 1;
     }
 
-    if ((D_8008FD90 >= 2) && (temp_v0->unk8 == 4)) {
-        temp_v0->unk8 = 2U;
+    info = D_800B0DF0;
+    if (info->unk12 != 0) {
+        D_800D2F3C = info->unk12;
+        D_800D2F40 = res->unk8;
+    } else {
+        D_800D2F3C = 0;
+        D_800D2F40 = NULL;
+    }
+
+    if (D_8008FD90 >= 2 && info->unk8 == 4) {
+        info->unk8 = 2;
     }
 }
 
