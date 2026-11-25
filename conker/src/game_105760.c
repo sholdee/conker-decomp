@@ -324,7 +324,7 @@ s32 func_150D88E0(Vec3f *out, struct127 *actor, u8 point) {
 }
 
 s32 func_150D8A20(s32 arg0, s32 arg1) {
-    return 0x8;
+    return 8;
 }
 
 void func_151875E0(f32, f32, f32, s32, s32, s32, f32, f32);
