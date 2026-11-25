@@ -257,7 +257,7 @@ void func_150039E0(s32 level, s32 arg1) {
         obj->effectFlags = 0;
         obj->unk73 = 4;
         obj->spinX = obj->spinY = obj->spinZ = 0.0f;
-        obj->moveX = obj->moveY = obj->moveZ = obj->spinZ;
+        obj->moveX = obj->moveY = obj->moveZ = obj->spinZ; // matching: 0 via spinZ, not a literal
         obj->yOffset = 0;
         obj->alpha = 0xFF;
         obj->viewAlpha[0] = obj->viewAlpha[1] = obj->viewAlpha[2] = obj->viewAlpha[3] = 0xFF;
@@ -434,6 +434,7 @@ void func_15004574(void) {
     }
 }
 
+/* Does nothing. */
 void func_150045BC(void) {
 }
 
