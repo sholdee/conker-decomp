@@ -4336,4 +4336,17 @@ typedef struct HitReaction {
     /* 0x26 */ u8 pad26[2];
 } HitReaction; /* size 0x28 */
 
+/* File header of an attachment model (func_1502B6BC table 9), cached per model in D_800E0148 with the load
+ * reference counts in D_800DF7D0. game_5D2C0 relocates the display-list table; game_1B9DB0 passes the
+ * dlists pointer itself on as one display list. */
+typedef struct AttachModelHeader {
+    /* 0x00 */ Gfx **dlists;    // display list table (entries are relocated on first load)
+    /* 0x04 */ u32 dlistsSize;  // size of the table in bytes
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ u32 unkC;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ u8 data[1];      // vertex data, up to the display list table
+} AttachModelHeader;
+
 #endif

@@ -1678,6 +1678,7 @@ extern Gfx *D_800DDF78[]; // per effect model slot: the model's second display l
 /* 800E0000 */
 extern u8 D_800DF7D0[]; // per-model load reference counts
 extern s16 *D_800DF9B8[]; // per model: written by func_1510CE60
+extern AttachModelHeader *D_800E0148[]; // per model: loaded attachment model header
 extern struct TrailTask *D_800E0920; // type in 1CA420
 extern u8 D_800E0A00;
 extern s32 D_800E0A74;
