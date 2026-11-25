@@ -1797,65 +1797,76 @@ s32 func_15144E80(Tri15144E80 *tri, struct17 *binormal, struct17 *edgeOut, struc
     return 1;
 }
 
-void func_151450B4(struct17 *arg0, struct17 *arg1, struct17 *arg2) {
-    arg2->unk0 = arg0->unk4 * arg1->unk8 - arg0->unk8 * arg1->unk4;
-    arg2->unk4 = arg0->unk8 * arg1->unk0 - arg0->unk0 * arg1->unk8;
-    arg2->unk8 = arg0->unk0 * arg1->unk4 - arg0->unk4 * arg1->unk0;
+/* Cross product out = a x b. */
+void func_151450B4(struct17 *a, struct17 *b, struct17 *out) {
+    out->unk0 = a->unk4 * b->unk8 - a->unk8 * b->unk4;
+    out->unk4 = a->unk8 * b->unk0 - a->unk0 * b->unk8;
+    out->unk8 = a->unk0 * b->unk4 - a->unk4 * b->unk0;
 }
 
-s32 func_15145128(struct17 *arg0, struct17 *arg1, f32 *arg2, f32 *arg3) {
+/* Normalizes v into out; returns 0 for a zero vector. length and invLength are optional outputs. */
+s32 func_15145128(struct17 *v, struct17 *out, f32 *length, f32 *invLength) {
     f32 sq;
-    f32 sp0;
+    f32 invBuf;
 
-    if (arg3 != 0) {
-    } else {
-        arg3 = &sp0;
+    if (invLength == NULL) {
+        invLength = &invBuf;
     }
-    sq = arg0->unk0 * arg0->unk0 + arg0->unk4 * arg0->unk4 + arg0->unk8 * arg0->unk8;
+    sq = v->unk0 * v->unk0 + v->unk4 * v->unk4 + v->unk8 * v->unk8;
     if (sq == 0.0f) {
         return 0;
     }
-    if (arg2 != 0) {
-        *arg2 = sqrtf(sq);
-        *arg3 = 1.0f / sqrtf(sq);
+    if (length != NULL) {
+        *length = sqrtf(sq);
+        *invLength = 1.0f / sqrtf(sq);
     } else {
-        *arg3 = 1.0f / sqrtf(sq);
+        *invLength = 1.0f / sqrtf(sq);
     }
-    arg1->unk0 = *arg3 * arg0->unk0;
-    arg1->unk4 = *arg3 * arg0->unk4;
-    arg1->unk8 = *arg3 * arg0->unk8;
+    out->unk0 = *invLength * v->unk0;
+    out->unk4 = *invLength * v->unk4;
+    out->unk8 = *invLength * v->unk8;
     return 1;
 }
-s32 func_151452C4(struct17 *arg0, struct17 *arg1, struct17 *arg2, f32 arg3, struct17 *arg4, struct17 *arg5, f32 *arg6, f32 *arg7);
 
-s32 func_151451F0(struct17 *arg0, struct17 *arg1, struct17 *arg2, f32 arg3, f32 arg4, struct17 *arg5, struct17 *arg6, f32 *arg7, f32 *arg8) {
-    f32 temp_f0;
+s32 func_151452C4(struct17 *origin, struct17 *dir, struct17 *center, f32 radius, struct17 *hitNear,
+                  struct17 *hitFar, f32 *tNear, f32 *tFar);
 
-    if (func_151452C4(arg0, arg1, arg2, arg3, arg5, arg6, arg7, arg8) != 0) {
-        temp_f0 = *arg7;
-        if (temp_f0 < 0.0f) {
-            if (*arg8 < 0.0f) {
+/* Ray/sphere test (see func_151452C4) that also requires the hit to be closer than maxDist. */
+s32 func_151451F0(struct17 *origin, struct17 *dir, struct17 *center, f32 radius, f32 maxDist, struct17 *hitNear,
+                  struct17 *hitFar, f32 *tNear, f32 *tFar) {
+    f32 t;
+
+    if (func_151452C4(origin, dir, center, radius, hitNear, hitFar, tNear, tFar) != 0) {
+        t = *tNear;
+        if (t < 0.0f) {
+            if (*tFar < 0.0f) {
                 return 0;
             }
         }
-        if (0.0f <= temp_f0) {
-            if (*arg8 < 0.0f) {
+        if (0.0f <= t) {
+            if (*tFar < 0.0f) {
                 return 1;
             }
         }
-        if (temp_f0 < arg4) {
+        if (t < maxDist) {
             return 1;
         }
         return 0;
     }
     return 0;
 }
-s32 func_151452C4(struct17 *arg0, struct17 *arg1, struct17 *arg2, f32 arg3, struct17 *arg4, struct17 *arg5, f32 *arg6, f32 *arg7) {
+
+/*
+ * Intersects the ray origin + t * dir (dir normalized) with a sphere. Writes both intersection points
+ * and their t; returns 0 on a miss or when the near point is behind the origin.
+ */
+s32 func_151452C4(struct17 *origin, struct17 *dir, struct17 *center, f32 radius, struct17 *hitNear,
+                  struct17 *hitFar, f32 *tNear, f32 *tFar) {
     f32 dx;
     f32 dy;
     f32 dz;
-    struct17 dir;
-    struct17 org;
+    struct17 d;
+    struct17 o;
     f32 proj;
     f32 rr;
     f32 root;
@@ -1863,14 +1874,14 @@ s32 func_151452C4(struct17 *arg0, struct17 *arg1, struct17 *arg2, f32 arg3, stru
     f32 t1;
     f32 dd;
 
-    dx = arg2->unk0 - arg0->unk0;
-    dy = arg2->unk4 - arg0->unk4;
-    dz = arg2->unk8 - arg0->unk8;
-    dir = *arg1;
-    org = *arg0;
+    dx = center->unk0 - origin->unk0;
+    dy = center->unk4 - origin->unk4;
+    dz = center->unk8 - origin->unk8;
+    d = *dir;
+    o = *origin;
     dd = (dx * dx) + (dy * dy) + (dz * dz);
-    proj = (dx * dir.unk0) + (dy * dir.unk4) + (dz * dir.unk8);
-    rr = arg3 * arg3;
+    proj = (dx * d.unk0) + (dy * d.unk4) + (dz * d.unk8);
+    rr = radius * radius;
     if (rr < dd - (proj * proj)) {
         return 0;
     }
@@ -1880,84 +1891,88 @@ s32 func_151452C4(struct17 *arg0, struct17 *arg1, struct17 *arg2, f32 arg3, stru
     }
     t0 = proj - root;
     t1 = proj + root;
-    arg4->unk0 = (t0 * dir.unk0) + org.unk0;
-    arg4->unk4 = (t0 * dir.unk4) + org.unk4;
-    arg4->unk8 = (t0 * dir.unk8) + org.unk8;
-    *arg6 = t0;
-    arg5->unk0 = (t1 * dir.unk0) + org.unk0;
-    arg5->unk4 = (t1 * dir.unk4) + org.unk4;
-    arg5->unk8 = (t1 * dir.unk8) + org.unk8;
-    *arg7 = t1;
+    hitNear->unk0 = (t0 * d.unk0) + o.unk0;
+    hitNear->unk4 = (t0 * d.unk4) + o.unk4;
+    hitNear->unk8 = (t0 * d.unk8) + o.unk8;
+    *tNear = t0;
+    hitFar->unk0 = (t1 * d.unk0) + o.unk0;
+    hitFar->unk4 = (t1 * d.unk4) + o.unk4;
+    hitFar->unk8 = (t1 * d.unk8) + o.unk8;
+    *tFar = t1;
     {
         struct17 diff;
 
-        diff.unk0 = arg4->unk0 - arg0->unk0;
-        diff.unk4 = arg4->unk4 - arg0->unk4;
-        diff.unk8 = arg4->unk8 - arg0->unk8;
-        if (func_15144A74(&diff, arg1) < 0.0f) {
+        diff.unk0 = hitNear->unk0 - origin->unk0;
+        diff.unk4 = hitNear->unk4 - origin->unk4;
+        diff.unk8 = hitNear->unk8 - origin->unk8;
+        if (func_15144A74(&diff, dir) < 0.0f) {
             return 0;
         }
         return 1;
     }
 }
 
-s32 func_151454BC(u8 arg0, f32 arg1, struct17 *arg2) {
-    f32 tmp1;
-    f32 tmp2;
-    f32 tmp3;
-    struct17 *temp_v0;
+/* Whether point lies within radius of D_800DBFF0[index]'s position (unk2F8). */
+s32 func_151454BC(u8 index, f32 radius, struct17 *point) {
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    struct17 *pos;
 
-    temp_v0 = func_15144B34(arg0);
-    tmp1 = arg2->unk0 - temp_v0->unk0;
-    tmp2 = arg2->unk4 - temp_v0->unk4;
-    tmp3 = arg2->unk8 - temp_v0->unk8;
+    pos = func_15144B34(index);
+    dx = point->unk0 - pos->unk0;
+    dy = point->unk4 - pos->unk4;
+    dz = point->unk8 - pos->unk8;
 
-    if ((arg1 * arg1) < ((tmp1 * tmp1) + (tmp2 * tmp2) + (tmp3 * tmp3))) {
+    if ((radius * radius) < ((dx * dx) + (dy * dy) + (dz * dz))) {
         return 0;
     }
     return 1;
 }
 
-s32 func_1514563C(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, f32 *arg4);
+s32 func_1514563C(struct17 *start, struct17 *dir, struct17 *point, struct17 *out, f32 *t);
 
-void func_15145548(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, f32 *arg4) {
-    f32 sp0;
+/* Closest point to `point` on the segment start .. start + dir, into out (t optional). */
+void func_15145548(struct17 *start, struct17 *dir, struct17 *point, struct17 *out, f32 *t) {
+    f32 tBuf;
 
-    if (arg4 != 0) {
-    } else {
-        arg4 = &sp0;
+    if (t == NULL) {
+        t = &tBuf;
     }
-    if (func_1514563C(arg0, arg1, arg2, arg3, arg4) != 0) {
-        if (*arg4 < 0.0f) {
-            *arg3 = *arg0;
-        } else if (1.0f < *arg4) {
-            arg3->unk0 = arg0->unk0 + arg1->unk0;
-            arg3->unk4 = arg0->unk4 + arg1->unk4;
-            arg3->unk8 = arg0->unk8 + arg1->unk8;
+    if (func_1514563C(start, dir, point, out, t) != 0) {
+        if (*t < 0.0f) {
+            *out = *start;
+        } else if (1.0f < *t) {
+            out->unk0 = start->unk0 + dir->unk0;
+            out->unk4 = start->unk4 + dir->unk4;
+            out->unk8 = start->unk8 + dir->unk8;
         }
     } else {
-        *arg3 = *arg0;
+        *out = *start;
     }
 }
-s32 func_1514563C(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, f32 *arg4) {
-    f32 sp1C[1];
+
+/* Closest point to `point` on the line start + t * dir, into out; returns 0 when dir is zero. */
+s32 func_1514563C(struct17 *start, struct17 *dir, struct17 *point, struct17 *out, f32 *t) {
+    f32 tBuf[1];
     f32 denom;
     f32 dot0;
     f32 dot1;
 
-    if (arg4 == NULL) {
-        arg4 = &sp1C[-3];
+    if (t == NULL) {
+        // matching: the fallback slot is 3 words below the buffer (sp+0x10); no declaration places it there
+        t = &tBuf[-3];
     }
-    denom = (arg1->unk0 * arg1->unk0) + (arg1->unk4 * arg1->unk4) + (arg1->unk8 * arg1->unk8);
+    denom = (dir->unk0 * dir->unk0) + (dir->unk4 * dir->unk4) + (dir->unk8 * dir->unk8);
     if (denom == 0.0f) {
         return 0;
     }
-    dot0 = (arg1->unk0 * arg0->unk0) + (arg1->unk4 * arg0->unk4) + (arg1->unk8 * arg0->unk8);
-    dot1 = (arg1->unk0 * arg2->unk0) + (arg1->unk4 * arg2->unk4) + (arg1->unk8 * arg2->unk8);
-    *arg4 = (dot1 - dot0) / denom;
-    arg3->unk0 = arg0->unk0 + (*arg4 * arg1->unk0);
-    arg3->unk4 = arg0->unk4 + (*arg4 * arg1->unk4);
-    arg3->unk8 = arg0->unk8 + (*arg4 * arg1->unk8);
+    dot0 = (dir->unk0 * start->unk0) + (dir->unk4 * start->unk4) + (dir->unk8 * start->unk8);
+    dot1 = (dir->unk0 * point->unk0) + (dir->unk4 * point->unk4) + (dir->unk8 * point->unk8);
+    *t = (dot1 - dot0) / denom;
+    out->unk0 = start->unk0 + (*t * dir->unk0);
+    out->unk4 = start->unk4 + (*t * dir->unk4);
+    out->unk8 = start->unk8 + (*t * dir->unk8);
     return 1;
 }
 
