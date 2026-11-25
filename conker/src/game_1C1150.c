@@ -126,7 +126,7 @@ void func_15194394(struct127 *self, struct127 *other, u8 *arg2) {
     }
 }
 
-// Parameters for func_15153F18, which spawns a random number of particles flying out from a point.
+// Parameters for func_15153F18, which spawns a random number of effects flying out from a point.
 // Each xxxMin/xxxRange pair is picked as min + rand() % (range + 1) (or min + randf() * range).
 typedef struct BurstParams {
     /* 0x00 */ s16 yawMin;
@@ -159,7 +159,7 @@ typedef struct BurstParams {
 extern void func_15153F18(BurstParams *params, Vec3f *position, GroundInfo *ground, u8 arg3, s32 arg4);
 extern void *func_151AE7B0(struct127 *obj, f32 arg1, s16 arg2, u8 arg3, s32 arg4);
 
-// Spawns a burst of particles from other when its id is 0-4.
+// Spawns a burst of effects from other when its id is 0-4.
 void func_15194408(struct127 *self, struct127 *other) {
     BurstParams burst;
     GroundInfo ground;
@@ -217,7 +217,7 @@ extern u8 D_800A3FE6[];
 extern s32 func_15134070(struct127 *);
 extern void func_151B4CD0(struct127 *obj, u8 arg1, s32 arg2);
 
-// Spawns a burst of particles above other, aimed by self's facing angle, unless other's kind forbids it.
+// Spawns a burst of effects above other, aimed by self's facing angle, unless other's kind forbids it.
 void func_151945CC(struct127 *self, struct127 *other, u8 *arg2) {
     Vec3f pos;
     s16 facingYaw;
@@ -290,12 +290,12 @@ void func_15194794(struct127 *self, struct127 *other, u8 *arg2) {
     }
 }
 
-// For ids 0-4 and 0x53, spawns a burst of particles above other and calls func_151D8868.
+// For ids 0-4 and 0x53, spawns a burst of effects above other and calls func_151D8868.
 void func_15194810(struct127 *self, struct127 *other, u8 *arg2) {
     Vec3f pos;
     BurstParams burst;
     GroundInfo ground;
-    Struct15195738Small small;
+    Struct15195738Small params;
 
     switch (other->id) {
     case 0:
@@ -334,17 +334,17 @@ void func_15194810(struct127 *self, struct127 *other, u8 *arg2) {
         burst.speedRange = 25.10000038f;
         burst.unk40Chance = 0.5f;
         func_15153F18(&burst, &burst.position, &ground, 0xFF, 1);
-        small.unk0 = 1;
-        small.unk2 = (func_150ADA20() % 11U) + 20;
-        small.unk4 = 8;
-        small.unk6 = -1;
-        small.unk5 = 1;
-        func_151D8868(&small, 0, 0xFF, 0);
+        params.unk0 = 1;
+        params.unk2 = (func_150ADA20() % 11U) + 20;
+        params.unk4 = 8;
+        params.unk6 = -1;
+        params.unk5 = 1;
+        func_151D8868(&params, 0, 0xFF, 0);
         break;
     }
 }
 
-void func_151949E0(s32 arg0, s32 arg1, s32 arg2) {
+void func_151949E0(struct127 *self, struct127 *other, u8 *arg2) {
 }
 
 extern void func_15104170(s32 arg0, struct127 *self, struct127 *other);
