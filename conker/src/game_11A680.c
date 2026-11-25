@@ -196,132 +196,132 @@ extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f
 extern void func_15052590(struct127 *obj);
 extern s32 func_151452C4(f32 *, f32 *, f32 *, f32, f32 *, f32 *, f32 *, f32 *);
 
-void func_150ED748(struct127 *arg0) {
-    s32 idxa[1];
-    f32 vel;
+void func_150ED748(struct127 *obj) {
+    s32 viewer[1];
+    f32 velocity;
     s32 health;
-    u8 active;
+    u8 controlled;
     u8 player;
-    u16 oldAngle;
-    s32 v;
-    f32 yv;
-    s32 flags;
-    f32 xv;
-    f32 speed;
-    s8 stick;
+    u16 prevFacing;
+    s32 buttonPad;
+    f32 throttle;
+    s32 lockFlags;
+    f32 trackSpeed;
+    f32 throttleScale;
+    s8 steer;
+    s16 turnRate;
     s16 turn;
-    s16 d;
     s32 left;
     s32 right;
-    s32 iv;
-    f32 k;
-    struct127 *p;
-    struct127 *o;
-    s32 rev;
-    OSContPad *pp;
+    s32 stateFlags;
+    f32 blend;
+    struct127 *driver;
+    struct127 *other;
+    s32 reversing;
+    OSContPad *pad;
     s8 t;
-    struct127 *tgt;
-    f32 offs;
-    f32 rad;
-    f32 sx;
-    f32 sz;
+    struct127 *target;
+    f32 aimOffset;
+    f32 heading;
+    f32 leadX;
+    f32 leadZ;
     f32 dx;
-    f32 pitch;
-    f32 vel2;
-    f32 vx;
-    f32 dz;
-    f32 h;
-    f32 ddx;
-    f32 ddz;
-    f32 dd;
-    f32 best;
+    f32 bearing;
+    f32 lead;
+    f32 dirX;
+    f32 angle2;
+    f32 angle;
+    f32 deltaZ;
+    f32 distance;
+    f32 score;
+    f32 bestScore;
     s32 i;
     s32 bestIdx;
-    s32 count;
-    f32 step;
+    s32 objCount;
+    f32 yawStep;
     f32 a;
-    s8 cam;
+    s8 camSlot;
     s32 j;
-    s32 res;
+    s32 hit;
     f32 hitX;
     f32 hitY;
     f32 hitZ;
     f32 dir[3];
-    f32 lim;
+    f32 limit;
     f32 dist;
-    f32 vA[3];
-    f32 vB[3];
-    f32 t1;
-    f32 t2;
-    struct108 *c;
-    struct127 *co;
+    f32 nearPoint[3];
+    f32 farPoint[3];
+    f32 tNear;
+    f32 tFar;
+    struct108 *camera;
+    struct127 *subject;
 
 
     health = 1;
     if (D_800BE616) {
-        idxa[0] = arg0->unk127;
+        viewer[0] = obj->unk127;
     } else {
-        idxa[0] = 0;
+        viewer[0] = 0;
     }
-    arg0->pad2FC[0] = 0;
-    arg0->unk124 = 0;
-    active = 0;
-    player = arg0->unk124;
-    oldAngle = arg0->unk7A;
-    arg0->unk247 = 0x10;
-    arg0->unk248 = 8;
+    obj->pad2FC[0] = 0;
+    obj->unk124 = 0;
+    controlled = 0;
+    player = obj->unk124;
+    prevFacing = obj->unk7A;
+    obj->unk247 = 0x10;
+    obj->unk248 = 8;
     if (D_800BE616 == 0) {
-        if (arg0->unk13C != 0) {
-            active = 1;
-            vel = arg0->xz_velocity;
-            if (fabsf(vel) > 5.0f) {
-                arg0->unkD0 = 1;
-                arg0->unk114 = 2.0f;
-                if (vel < 0.0f) {
-                    arg0->unkD0 = 2;
+        if (obj->unk13C != 0) {
+            controlled = 1;
+            velocity = obj->xz_velocity;
+            if (fabsf(velocity) > 5.0f) {
+                obj->unkD0 = 1;
+                obj->unk114 = 2.0f;
+                if (velocity < 0.0f) {
+                    obj->unkD0 = 2;
                 }
             }
         }
     } else {
-        player = arg0->unk127;
-        if (arg0->unk127 != 0xFF) {
-            if (D_800CC2D0[arg0->unk127].unk31C->unk84 == 0) {
-                active = 1;
+        player = obj->unk127;
+        if (obj->unk127 != 0xFF) {
+            if (D_800CC2D0[obj->unk127].unk31C->unk84 == 0) {
+                controlled = 1;
             }
-            p = &D_800CC2D0[player];
-            if (p->health != 0) {
-                if (STATE(p)->flags & 0x80) {
-                    if (STATE(p)->timer != 0) {
-                        arg0->immune = 0xFF;
+            driver = &D_800CC2D0[player];
+            if (driver->health != 0) {
+                if (STATE(driver)->flags & 0x80) {
+                    if (STATE(driver)->timer != 0) {
+                        obj->immune = 0xFF;
                         if (D_800BE9E4 < STATE(&D_800CC2D0[player])->timer) {
                             STATE(&D_800CC2D0[player])->timer -= D_800BE9E4;
                         } else {
                             STATE(&D_800CC2D0[player])->timer = 0;
                             func_1508DAEC(player, 0);
-                            arg0->immune = 0;
+                            obj->immune = 0;
                         }
                     }
-                } else if ((STATE(p)->flags & 0x10) && (STATE(p)->timer == 0)) {
+                } else if ((STATE(driver)->flags & 0x10) && (STATE(driver)->timer == 0)) {
                     func_1508DAEC(player, 0);
                 }
             }
         }
     }
-    if (active) {
+    if (controlled) {
         s32 dummyA;
-        speed = 0.0f;
-        flags = 0;
+        throttleScale = 0.0f;
+        lockFlags = 0;
         health = D_800CC2D0[player].health;
         if (health != 0) {
-            stick = PADS[player].stick_x;
-            arg0->unk247 = 0x32;
-            arg0->unk248 = 0x32;
-            speed = 0.6399999857f;
-            iv = STATE(&D_800CC2D0[player])->flags; if ((iv & 1) && (CONT_PADS[player]->button & 0x8000) && (STATE(&D_800CC2D0[player])->timer != 0)) {
-                arg0->unk247 = 0x1C;
-                arg0->unk248 = 0x1C;
+            steer = PADS[player].stick_x;
+            obj->unk247 = 0x32;
+            obj->unk248 = 0x32;
+            throttleScale = 0.6399999857f;
+            stateFlags = STATE(&D_800CC2D0[player])->flags; if ((stateFlags & 1) && (CONT_PADS[player]->button & 0x8000) && (STATE(&D_800CC2D0[player])->timer != 0)) {
+                obj->unk247 = 0x1C;
+                obj->unk248 = 0x1C;
                 PADS[player].stick_y = 0x50;
-                speed += speed;
+                throttleScale += throttleScale;
                 if (D_800BE9E4 < STATE(&D_800CC2D0[player])->timer) {
                     STATE(&D_800CC2D0[player])->timer -= D_800BE9E4;
                 } else {
@@ -329,188 +329,186 @@ void func_150ED748(struct127 *arg0) {
                     func_1508DAEC(player, 0);
                 }
             }
-            turn = 18.0f - arg0->xz_velocity * (0.3199999928f / speed);
-            turn = (turn * 0.5f + 9.0f) * D_800BE9A4;
-            if (turn < 10) {
-                turn = 10;
+            turnRate = 18.0f - obj->xz_velocity * (0.3199999928f / throttleScale);
+            turnRate = (turnRate * 0.5f + 9.0f) * D_800BE9A4;
+            if (turnRate < 10) {
+                turnRate = 10;
             }
             if ((CONT_PADS[player]->button & 0x10) && ((STATE(&D_800CC2D0[player])->flags & 2) || (D_800BE616 == 0))) {
-                speed = 0.0f;
-                flags = 0x1F;
-                stick = 0;
-                arg0->unk22B = 0;
-                arg0->xz_velocity = 0.0f;
+                throttleScale = 0.0f;
+                lockFlags = 0x1F;
+                steer = 0;
+                obj->unk22B = 0;
+                obj->xz_velocity = 0.0f;
             }
-            S8AT(arg0, 0x22B) += (stick - S8AT(arg0, 0x22B)) / 4;
+            S8AT(obj, 0x22B) += (steer - S8AT(obj, 0x22B)) / 4;
             if (D_800BE616 != 0) {
-                arg0->unk22B = stick;
+                obj->unk22B = steer;
             }
-            if (stick == 0) {
-                if ((S8AT(arg0, 0x22B) >= -4) && (S8AT(arg0, 0x22B) < 5)) {
-                    arg0->unk22B = 0;
+            if (steer == 0) {
+                if ((S8AT(obj, 0x22B) >= -4) && (S8AT(obj, 0x22B) < 5)) {
+                    obj->unk22B = 0;
                 }
             }
-            arg0->unk78 = arg0->unk7A - S8AT(arg0, 0x22B) * turn;
-            arg0->unkF4 |= 0x40;
-            v = player;
+            obj->unk78 = obj->unk7A - S8AT(obj, 0x22B) * turnRate;
+            obj->unkF4 |= 0x40;
+            buttonPad = player;
             if ((D_800BE616 != 0) && (player < 2)) {
                 if (D_800E0BCE[player] != 0) {
-                    v = D_800E0BCE[player];
+                    buttonPad = D_800E0BCE[player];
                 }
             }
-            if (D_800BE710[v] & 0x2000) {
-                arg0->unk21C = 0;
-                arg0->unk218 = func_1507BB28(0, 2);
+            if (D_800BE710[buttonPad] & 0x2000) {
+                obj->unk21C = 0;
+                obj->unk218 = func_1507BB28(0, 2);
             }
         }
-        if (arg0->disable_run != 0) {
-            speed = 0.0f;
-            arg0->disable_run--;
+        if (obj->disable_run != 0) {
+            throttleScale = 0.0f;
+            obj->disable_run--;
         }
-        arg0->unk44 = PADS[player].stick_y * speed;
-        STATE(&D_800CC2D0[player])->unk75 = flags;
-        STATE(&D_800CC2D0[player])->unk78 = flags;
+        obj->unk44 = PADS[player].stick_y * throttleScale;
+        STATE(&D_800CC2D0[player])->unk75 = lockFlags;
+        STATE(&D_800CC2D0[player])->unk78 = lockFlags;
     } else if (D_800C3E78 < D_8008FD8C) {
-        func_1504C854(arg0);
+        func_1504C854(obj);
         if ((player < 4) && (CONT_PADS[player]->button & 0x2000)) {
             D_800CC288 = 0x2000;
         }
         if (D_800CC288 & 0x2000) {
-            arg0->unk244 = 1;
+            obj->unk244 = 1;
         }
     }
-    arg0->unk247 = 0x32;
-    arg0->unk248 = 0x32;
-    if ((D_800BE616 == 0) || (D_800C3E78 >= D_8008FD8C) || (STATE(arg0)->unk120 == 0)) {
-        func_15052590(arg0);
+    obj->unk247 = 0x32;
+    obj->unk248 = 0x32;
+    if ((D_800BE616 == 0) || (D_800C3E78 >= D_8008FD8C) || (STATE(obj)->unk120 == 0)) {
+        func_15052590(obj);
     }
-    if (arg0->interaction_state != 0) {
-        if (arg0->unk232 == 0xD) {
-            func_15052F9C(arg0, 180.0f, 5, 0x44, 1, 0x10, 0xFF, 0, 0, 0);
+    if (obj->interaction_state != 0) {
+        if (obj->unk232 == 0xD) {
+            func_15052F9C(obj, 180.0f, 5, 0x44, 1, 0x10, 0xFF, 0, 0, 0);
         } else if ((D_800BE616 == 0) && (D_800CC268 & 1)) {
-            co = &D_800CC2D0[arg0->unk124];
-            if ((co->unk65 == 0) && (STATE(co)->unk78 == 0) && (arg0->unk25C & 0x400)) {
-                if ((co->unk44 > 15.0f) && (co->y_velocity > 10.0f)) {
-                    func_1505327C(arg0, 68.0f, 4.0f, 0xD, 5);
-                } else if ((co->disable_run == 0) && (co->unk28 > 70.0f) && (co->stunned == 0) && (func_1505A6F8(co, arg0) < 100.0f)) {
-                    func_15052F9C(arg0, 180.0f, 5, 0x44, 1, 0x10, 0xFF, 0, 1, 0);
+            subject = &D_800CC2D0[obj->unk124];
+            if ((subject->unk65 == 0) && (STATE(subject)->unk78 == 0) && (obj->unk25C & 0x400)) {
+                if ((subject->unk44 > 15.0f) && (subject->y_velocity > 10.0f)) {
+                    func_1505327C(obj, 68.0f, 4.0f, 0xD, 5);
+                } else if ((subject->disable_run == 0) && (subject->unk28 > 70.0f) && (subject->stunned == 0) && (func_1505A6F8(subject, obj) < 100.0f)) {
+                    func_15052F9C(obj, 180.0f, 5, 0x44, 1, 0x10, 0xFF, 0, 1, 0);
                 }
             }
         }
         {
         s32 dummy;
-        k = 1.0f;
-        if (arg0->health != 0) {
+        blend = 1.0f;
+        if (obj->health != 0) {
             typedef s32 dummyTT2;
-            yv = arg0->unk44;
-            xv = arg0->xz_velocity;
-            d = (s16)(arg0->unk7A - oldAngle) / 70;
-            if (fabsf(yv) > 4.0f) {
-                xv = xv * 0.6000000238f + yv * (0.400000006f * k);
+            throttle = obj->unk44;
+            trackSpeed = obj->xz_velocity;
+            turn = (s16)(obj->unk7A - prevFacing) / 70;
+            if (fabsf(throttle) > 4.0f) {
+                trackSpeed = trackSpeed * 0.6000000238f + throttle * (0.400000006f * blend);
             }
-            left = (s32)xv + d;
-            right = (s32)xv - d;
+            left = (s32)trackSpeed + turn;
+            right = (s32)trackSpeed - turn;
         } else {
             right = 0;
             left = 0;
         }
-        func_150ED638(arg0, left, right);
+        func_150ED638(obj, left, right);
         }
-        if ((arg0->id == 0x77) || (arg0->id == 0x28)) {
-            if (((xv = arg0->xz_velocity) > 5.0f) && (arg0->unk44 <= 0.0f)) {
-                rev = 1;
-            } else if ((xv < -5.0f) && (arg0->unk44 >= 0.0f)) {
-                rev = 1;
+        if ((obj->id == 0x77) || (obj->id == 0x28)) {
+            if (((trackSpeed = obj->xz_velocity) > 5.0f) && (obj->unk44 <= 0.0f)) {
+                reversing = 1;
+            } else if ((trackSpeed < -5.0f) && (obj->unk44 >= 0.0f)) {
+                reversing = 1;
             } else {
-                rev = 0;
+                reversing = 0;
             }
-            if (rev) {
-                func_1514D3B0((s32)arg0, 0x19, 0xD, 0);
+            if (reversing) {
+                func_1514D3B0((s32)obj, 0x19, 0xD, 0);
             } else {
-                func_1514D3B0((s32)arg0, 0x19, 0xE, 0);
+                func_1514D3B0((s32)obj, 0x19, 0xE, 0);
             }
-            rev = rev ? 0xC : 0xF;
-            U8AT(arg0, 0x6C) = rev + 0xA;
-            U8AT(arg0, 0x6D) = 0x13;
+            reversing = reversing ? 0xC : 0xF;
+            U8AT(obj, 0x6C) = reversing + 0xA;
+            U8AT(obj, 0x6D) = 0x13;
         }
-        if (D_800CC2D0[idxa[0]].unk31C->unk84 != 0) {
-            if (STATE(arg0)->target >= 0) {
-                f32 s;
-                tgt = &D_800CC2D0[STATE(arg0)->target];
-                a = tgt->x_position - arg0->x_position;
-                dd = tgt->z_position - arg0->z_position;
-                vel2 = sqrtf(a * a + dd * dd) / 200.0f; vel2 = tgt->xz_velocity * vel2;
-                rad = tgt->unk40 * 0.01745329238f;
-                sx = sinf(rad) * vel2;
-                sz = cosf(rad) * vel2;
-                tgt->x_position += sx;
-                tgt->z_position += sz;
-                pitch = func_150ED234(arg0, tgt) * 0.01745329238f;
-                vx = sinf(pitch) * cosf(arg0->unkC4 * 0.01745329238f);
-                s = cosf(pitch) * cosf(arg0->unkB8 * 0.01745329238f);
-                h = func_150484A0(vx * 1000.0f, s * 1000.0f);
-                offs = STATE(arg0)->unk12A * 400.0f;
-                STATE(arg0)->aimYaw -= func_150ED1D0(h * 57.29577637f + STATE(arg0)->unk12A * 10.0f, STATE(arg0)->aimYaw) * 0.125f;
-                STATE(arg0)->aimPitch += func_150ED298(arg0, STATE(arg0)->aimPitch - arg0->unkB8, tgt->x_position, tgt->y_position, tgt->z_position, offs) * 0.001000000047f;
-                tgt->x_position -= sx;
-                tgt->z_position -= sz;
+        if (D_800CC2D0[viewer[0]].unk31C->unk84 != 0) {
+            if (STATE(obj)->target >= 0) {
+                f32 dirZ;
+                target = &D_800CC2D0[STATE(obj)->target];
+                a = target->x_position - obj->x_position;
+                score = target->z_position - obj->z_position;
+                lead = sqrtf(a * a + score * score) / 200.0f; lead = target->xz_velocity * lead;
+                heading = target->unk40 * 0.01745329238f;
+                leadX = sinf(heading) * lead;
+                leadZ = cosf(heading) * lead;
+                target->x_position += leadX;
+                target->z_position += leadZ;
+                bearing = func_150ED234(obj, target) * 0.01745329238f;
+                dirX = sinf(bearing) * cosf(obj->unkC4 * 0.01745329238f);
+                dirZ = cosf(bearing) * cosf(obj->unkB8 * 0.01745329238f);
+                angle = func_150484A0(dirX * 1000.0f, dirZ * 1000.0f);
+                aimOffset = STATE(obj)->unk12A * 400.0f;
+                STATE(obj)->aimYaw -= func_150ED1D0(angle * 57.29577637f + STATE(obj)->unk12A * 10.0f, STATE(obj)->aimYaw) * 0.125f;
+                STATE(obj)->aimPitch += func_150ED298(obj, STATE(obj)->aimPitch - obj->unkB8, target->x_position, target->y_position, target->z_position, aimOffset) * 0.001000000047f;
+                target->x_position -= leadX;
+                target->z_position -= leadZ;
             } else {
-                STATE(arg0)->aimYaw *= 0.8999999762f;
-                STATE(arg0)->aimPitch *= 0.8999999762f;
+                STATE(obj)->aimYaw *= 0.8999999762f;
+                STATE(obj)->aimPitch *= 0.8999999762f;
             }
-        } else if (active && health) {
+        } else if (controlled && health) {
             typedef s32 dummyT8;
-            best = 0.0f;
-            step = 3.0f * D_800BE9A4;
+            bestScore = 0.0f;
+            yawStep = 3.0f * D_800BE9A4;
             bestIdx = -1;
-            cam = 0;
-            count = D_8008FD8C;
-            if ((D_800BE616 != 0) && (idxa[0] < 2) && (D_800E0BCE[idxa[0]] != 0)) {
-                cam = D_800E0BCE[idxa[0]] + 1;
+            camSlot = 0;
+            objCount = D_8008FD8C;
+            if ((D_800BE616 != 0) && (viewer[0] < 2) && (D_800E0BCE[viewer[0]] != 0)) {
+                camSlot = D_800E0BCE[viewer[0]] + 1;
             } else {
-                pp = &PADS[idxa[0]];
-                if (pp->button & 1) {
-                    STATE(arg0)->aimYaw += step;
+                pad = &PADS[viewer[0]];
+                if (pad->button & 1) {
+                    STATE(obj)->aimYaw += yawStep;
                 }
-                if (pp->button & 2) {
-                    STATE(arg0)->aimYaw -= step;
+                if (pad->button & 2) {
+                    STATE(obj)->aimYaw -= yawStep;
                 }
             }
             if (STATE(&D_800CC2D0[player])->unk197 != 0) {
-                cam = idxa[0] + 1;
+                camSlot = viewer[0] + 1;
             }
             if (D_800BE616 == 0) {
-                count = 0x19;
+                objCount = 0x19;
             }
-            if (cam == 0) {
-                typedef s32 dummyT6;
-                for (i = 0; i < count; i++) {
-                    typedef s32 dummyT;
-                    if (i != idxa[0]) {
-                        o = &D_800CC2D0[i];
-                        if ((D_800BE616 == 0) && !(o->unkF8 & 0x40)) {
+            if (camSlot == 0) {
+                for (i = 0; i < objCount; i++) {
+                    if (i != viewer[0]) {
+                        other = &D_800CC2D0[i];
+                        if ((D_800BE616 == 0) && !(other->unkF8 & 0x40)) {
                             continue;
                         }
-                            a = func_150ED1D0(func_150ED234(arg0, o), STATE(arg0)->aimYaw);
-                            dd = a;
+                            a = func_150ED1D0(func_150ED234(obj, other), STATE(obj)->aimYaw);
+                            score = a;
                             if (a < 0.0f) {
-                                dd = -a;
+                                score = -a;
                             }
-                            dd = 35.0f - dd;
-                            if (dd < 0.0f) {
-                                dd = 0.0f;
+                            score = 35.0f - score;
+                            if (score < 0.0f) {
+                                score = 0.0f;
                             }
-                            if (dd > 0.0f) {
-                                ddz = arg0->x_position - o->x_position;
-                                ddx = arg0->z_position - o->z_position;
-                                ddz = sqrtf(ddz * ddz + ddx * ddx);
-                                if (ddz < 7000.0f) {
-                                    if (ddz < 1.0f) {
-                                        ddz = 1.0f;
+                            if (score > 0.0f) {
+                                distance = obj->x_position - other->x_position;
+                                deltaZ = obj->z_position - other->z_position;
+                                distance = sqrtf(distance * distance + deltaZ * deltaZ);
+                                if (distance < 7000.0f) {
+                                    if (distance < 1.0f) {
+                                        distance = 1.0f;
                                     }
-                                    dd = dd / ddz;
-                                    if (best < dd) {
-                                        best = dd;
+                                    score = score / distance;
+                                    if (bestScore < score) {
+                                        bestScore = score;
                                         bestIdx = i;
                                     }
                                 }
@@ -519,96 +517,96 @@ void func_150ED748(struct127 *arg0) {
                 }
                 if (bestIdx != -1) {
                     typedef s32 dummyT5;
-                    co = &D_800CC2D0[bestIdx];
+                    subject = &D_800CC2D0[bestIdx];
                     if (D_800BE616 != 0) {
-                        lim = co->y_position + 40.0f;
+                        limit = subject->y_position + 40.0f;
                     } else {
-                        lim = S16AT(co, 0x1AA);
+                        limit = S16AT(subject, 0x1AA);
                     }
-                    ddx = func_150ED298(arg0, 0.0f, co->x_position, lim, co->z_position, 0.0f) * 0.001000000047f;
-                    lim = 4.0f * D_800BE9A4;
-                    if (lim < ddx) {
-                        ddx = lim;
+                    deltaZ = func_150ED298(obj, 0.0f, subject->x_position, limit, subject->z_position, 0.0f) * 0.001000000047f;
+                    limit = 4.0f * D_800BE9A4;
+                    if (limit < deltaZ) {
+                        deltaZ = limit;
                     }
-                    if (ddx < -lim) {
-                        ddx = -lim;
+                    if (deltaZ < -limit) {
+                        deltaZ = -limit;
                     }
-                    STATE(arg0)->aimPitch += ddx;
+                    STATE(obj)->aimPitch += deltaZ;
                 } else {
-                    STATE(arg0)->aimPitch *= 0.8999999762f;
+                    STATE(obj)->aimPitch *= 0.8999999762f;
                 }
             } else {
-                c = &D_800DBFF0[cam - 1];
-                co = c->unk3D4;
-                if (c->unk3D4->unk197 != 0) {
+                camera = &D_800DBFF0[camSlot - 1];
+                subject = camera->unk3D4;
+                if (camera->unk3D4->unk197 != 0) {
                     typedef s32 dummyT7;
-                    h = -co->unk170; h -= arg0->unkB8; dz = co->unk16C; dz = (arg0->unk40 - 90.0f) - dz;
-                    while (h > 180.0f) { h -= 360.0f; if (h) {} }
-                    while (h < -180.0f) {
-                        h += 360.0f;
+                    angle = -subject->unk170; angle -= obj->unkB8; angle2 = subject->unk16C; angle2 = (obj->unk40 - 90.0f) - angle2;
+                    while (angle > 180.0f) { angle -= 360.0f; if (angle) {} }
+                    while (angle < -180.0f) {
+                        angle += 360.0f;
                     }
-                    while (dz > 180.0f) {
-                        dz -= 360.0f;
+                    while (angle2 > 180.0f) {
+                        angle2 -= 360.0f;
                     }
-                    while (dz < -180.0f) {
-                        dz += 360.0f;
+                    while (angle2 < -180.0f) {
+                        angle2 += 360.0f;
                     }
-                    STATE(arg0)->aimPitch = h;
-                    STATE(arg0)->aimYaw = dz;
+                    STATE(obj)->aimPitch = angle;
+                    STATE(obj)->aimYaw = angle2;
                 } else {
-                    dir[0] = c->unk2BC - c->unk2F8;
-                    dir[1] = c->unk2C0 - c->unk2FC;
-                    dir[2] = c->unk2C4 - c->unk300;
-                    dd = 1.0f / sqrtf(dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2]);
-                    dir[0] *= dd;
-                    dir[1] *= dd;
-                    dir[2] *= dd;
+                    dir[0] = camera->unk2BC - camera->unk2F8;
+                    dir[1] = camera->unk2C0 - camera->unk2FC;
+                    dir[2] = camera->unk2C4 - camera->unk300;
+                    score = 1.0f / sqrtf(dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2]);
+                    dir[0] *= score;
+                    dir[1] *= score;
+                    dir[2] *= score;
                     dist = 100000.0f;
-                    res = func_150AC9C0(c->unk2F8, c->unk2FC, c->unk300, dir[0], dir[1], dir[2], 0, 0, &hitX, &hitY, &hitZ, &dist, 0, 0, 0.0f);
-                    if (res != 0) {
-                        res = 1;
+                    hit = func_150AC9C0(camera->unk2F8, camera->unk2FC, camera->unk300, dir[0], dir[1], dir[2], 0, 0, &hitX, &hitY, &hitZ, &dist, 0, 0, 0.0f);
+                    if (hit != 0) {
+                        hit = 1;
                     }
                     for (j = 0; j < D_8008FD8C; j++) {
-                        if (U8AT(arg0, 0x128) != U8AT(&D_800CC2D0[j], 0x128)) {
-                            hitX = D_800CC2D0[j].x_position - c->unk2F8;
-                            hitZ = D_800CC2D0[j].z_position - c->unk300;
+                        if (U8AT(obj, 0x128) != U8AT(&D_800CC2D0[j], 0x128)) {
+                            hitX = D_800CC2D0[j].x_position - camera->unk2F8;
+                            hitZ = D_800CC2D0[j].z_position - camera->unk300;
                             if (sqrtf(hitX * hitX + hitZ * hitZ) + 200.0f < dist) {
-                                if (func_151452C4(&c->unk2F8, dir, &D_800CC2D0[j].x_position, 150.0f, vA, vB, &t1, &t2) && (t1 < dist)) {
-                                    dist = t1;
-                                    res = 2;
+                                if (func_151452C4(&camera->unk2F8, dir, &D_800CC2D0[j].x_position, 150.0f, nearPoint, farPoint, &tNear, &tFar) && (tNear < dist)) {
+                                    dist = tNear;
+                                    hit = 2;
                                 }
                             }
                         }
                     }
-                    U8AT(co, 0x128) &= ~0x40;
-                    if (res != 0) {
-                        if (res == 2) {
-                            U8AT(co, 0x128) |= 0x40;
+                    U8AT(subject, 0x128) &= ~0x40;
+                    if (hit != 0) {
+                        if (hit == 2) {
+                            U8AT(subject, 0x128) |= 0x40;
                         }
-                        hitX = dir[0] * dist + c->unk2F8;
-                        hitY = dir[1] * dist + c->unk2FC;
-                        hitZ = dir[2] * dist + c->unk300;
-                        STATE(arg0)->aimPitch += func_150ED298(arg0, 0.0f, hitX, hitY, hitZ, 0.0f) * 0.001000000047f;
+                        hitX = dir[0] * dist + camera->unk2F8;
+                        hitY = dir[1] * dist + camera->unk2FC;
+                        hitZ = dir[2] * dist + camera->unk300;
+                        STATE(obj)->aimPitch += func_150ED298(obj, 0.0f, hitX, hitY, hitZ, 0.0f) * 0.001000000047f;
                     } else {
-                        STATE(arg0)->aimPitch *= 0.8999999762f;
+                        STATE(obj)->aimPitch *= 0.8999999762f;
                     }
                 }
             }
         }
-        if (STATE(arg0)->aimPitch < -20.0f) {
-            STATE(arg0)->aimPitch = -20.0f;
+        if (STATE(obj)->aimPitch < -20.0f) {
+            STATE(obj)->aimPitch = -20.0f;
         }
-        if (STATE(arg0)->aimPitch > 80.0f) {
-            STATE(arg0)->aimPitch = 80.0f;
+        if (STATE(obj)->aimPitch > 80.0f) {
+            STATE(obj)->aimPitch = 80.0f;
         }
-        if (STATE(arg0)->aimYaw > 360.0f) {
-            STATE(arg0)->aimYaw -= 360.0f;
+        if (STATE(obj)->aimYaw > 360.0f) {
+            STATE(obj)->aimYaw -= 360.0f;
         }
-        if (STATE(arg0)->aimYaw < 0.0f) {
-            STATE(arg0)->aimYaw += 360.0f;
+        if (STATE(obj)->aimYaw < 0.0f) {
+            STATE(obj)->aimYaw += 360.0f;
         }
-        S16AT(arg0, 0x2E4) = STATE(arg0)->aimYaw * 50.0f;
-        S16AT(arg0, 0x2E6) = -(s16)(STATE(arg0)->aimPitch * 50.0f);
+        S16AT(obj, 0x2E4) = STATE(obj)->aimYaw * 50.0f;
+        S16AT(obj, 0x2E6) = -(s16)(STATE(obj)->aimPitch * 50.0f);
     }
 }
 
