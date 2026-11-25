@@ -81,7 +81,6 @@ typedef struct {
     f32 field18;
 } SoundSpatialRecord;
 
-
 // Deferred voice stop, queued by func_100112BC.
 typedef struct {
     u16 handle;
@@ -101,6 +100,8 @@ extern SoundSpatialRecord D_80041F68[];
 extern SoundRecord D_80041FE0[];
 extern SoundVariant D_8002C240[][5];
 extern u8 *D_80041F5C; // per-sound variant history for func_1000F568
+extern f32 D_8002C400;
+extern f32 D_8002C404;
 
 s32 func_10010344(u16 sound, void *owner, u32 volume, s16 nearDistance, u16 farDistance);
 void func_10010F30(s32, s32, s32, s32, s32);
@@ -109,6 +110,10 @@ u16 func_10010E78(u16 handle, s32 sound, u16 volume, s16 cents, s32 mix, s32 arg
 void func_10011624(SoundRecord *records, s32 *count, s32 start, s32 end);
 s32 func_1510F8CC(s32 arg0);
 s32 func_1000F568(s32 base, s32 count);
+u16 func_10010BE8(u16 handle, s32 sound, u16 volume, u8 pan, s16 cents, u8 mix, u8 bus);
+void func_10017780(u8 arg0, u16 arg1);
+s32 *allocate_memory(s32, s32, s32, s32);
+struct31 *func_10017438(s32, s16, u16, u8, f32, u8, u8, struct31 **);
 s32 func_1000A420(s32 dx, s32 dy, s32 dz, f32 arg3, s32 arg4, s32 arg5, s32 arg6,
                   s32 farDistance, s32 nearDistance, s32 *pan, s32 *volume, s32 *distance);
 
@@ -148,7 +153,6 @@ s32 func_1000EDA0(DelayedSoundRecord *record, s32 *active, u32 *volume, s32 *pan
 s32 func_1000EE70(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents,
                   s32 *mix, u16 *sound);
 
-
 // Random ambient chirp: every 128-255 ticks, play one of sounds 0x6C-0x6E.
 s32 func_1000EB00(TimedSoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents,
                   s32 *mix, u16 *sound) {
@@ -172,7 +176,6 @@ s32 func_1000EB00(TimedSoundRecord *record, s32 *active, u32 *volume, s32 *pan, 
     return 0;
 }
 
-
 // Fade out: once the timer runs out, lower the volume each tick; stop at zero.
 s32 func_1000EBC4(TimedSoundRecord *record, s32 *active, u32 *volume, s32 *pan) {
     s32 newVolume = record->volume;
@@ -189,7 +192,6 @@ s32 func_1000EBC4(TimedSoundRecord *record, s32 *active, u32 *volume, s32 *pan) 
     record->timer = timer;
     return 0;
 }
-
 
 // Delayed non-positional sound: the record's sound moves to unk1C, and plays when the
 // countdown in the low half of unk18 runs out.
@@ -271,9 +273,6 @@ s32 func_1000EDA0(DelayedSoundRecord *record, s32 *active, u32 *volume, s32 *pan
     return 0;
 }
 
-
-
-
 // Follow the owning object: copy its position into the record while it lives.
 s32 func_1000EE70(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents,
                   s32 *mix, u16 *sound) {
@@ -327,8 +326,6 @@ typedef struct {
     /* 0x1C */ u16 *ids;
 } OwnerListSoundRecord;
 
-
-
 s32 func_1000EFB4(OwnerListSoundRecord *record, s32 *active, u32 *volume, s32 *pan,
                   s32 *cents, s32 *mix, u16 *sound) {
     struct127 *owner = record->owner;
@@ -381,8 +378,6 @@ void func_1000F1A8(void) {
     D_80041F60 = D_80041F61 = 0;
 }
 
-void func_10017780(u8 arg0, u16 arg1);
-s32* allocate_memory(s32, s32, s32, s32);
 void func_1000F248(s32 mode) {
     func_1000F1A8();
     if (mode == 4) {
@@ -425,7 +420,6 @@ void func_1000F248(s32 mode) {
     if (mode) {} // matching: stops IDO caching &D_80041F56 in s0 across the calls above
 }
 
-
 // Is the voice behind this handle still playing? A bare slot number (< 16) matches any
 // handle in that slot.
 s32 func_1000F3D0(u16 handle) {
@@ -458,10 +452,6 @@ s32 func_1000F44C(u16 handle) {
     return 0;
 }
 
-
-s32 func_100173C4(struct31 **arg0);
-extern struct120 D_800425E0[];
-extern struct120 D_800426A0[];
 // Is any voice playing this sound id?
 s32 func_1000F4D8(u16 sound) {
     s32 i;
@@ -646,18 +636,6 @@ u16 func_1000FA64(u16 sound, s16 x, s16 y, s16 z, s32 volume, u16 farDistance,
     }
     return 0;
 }
-typedef struct {
-    u16 unk0;
-    s16 unk2;
-    s16 unk4;
-    s16 unk6;
-    u16 unk8;
-    u8 padA[6];
-    s32 unk10;
-    u8 pad14[0x10];
-    u16 unk24;
-    u8 pad26[0xA];
-} struct_init_EB00_FC18;
 
 void func_1000FC18(u16 sound, s16 x, s16 y, s16 z, u16 farDistance) {
     s32 soundId;
@@ -697,11 +675,6 @@ void func_1000FD38(SoundRecordCallback callback, void *owner, s32 key) {
         }
     }
 }
-// PERMUTER CANDIDATE / JUSTREG (best 40). The index form below is byte-perfect in
-// structure, ordering, and every other register EXCEPT the loop count D_80042760:
-// target keeps it in v0 (blez/slt/reload), IDO gives mine v1. Pure caller-saved
-// coloring; resisted for/while/reversed-compare/explicit-guard/do-while forms (all 40)
-// and a fn-ptr-cast (682, adds addr load). Needs the permuter to flip v0<->v1.
 void func_1000FDF4(u16 handle) {
     s32 i;
     s32 handleId = handle;
@@ -725,27 +698,6 @@ s32 func_1000FE88(SoundRecord *records, s32 index, s32 *count) {
     }
     return 1;
 }
-// ? func_1000FE88(s32 arg0, s32 arg1, void *arg2) {
-//     void *sp1C;
-//     s32 temp_t7;
-//     u16 temp_a0;
-//     void *temp_v1;
-//     ? phi_return;
-//
-//     phi_return = 1;
-//     if (arg1 < *arg2) {
-//         temp_t7 = arg1 * 0x30;
-//         temp_v1 = arg0 + temp_t7;
-//         temp_a0 = temp_v1->unk24;
-//         if (temp_a0 != 0) {
-//             sp1C = temp_v1;
-//             func_100111C8(temp_a0, arg0);
-//         }
-//         (arg0 + temp_t7)->unk10 = (s32) ((arg0 + temp_t7)->unk10 | 0x80);
-//         phi_return = 0;
-//     }
-//     return phi_return;
-// }
 
 s32 func_1000FEF0(u16 handle, void *owner, s32 key) {
     s32 i;
@@ -799,32 +751,6 @@ void func_100100E0(SoundRecordCallback callback, void *owner, s32 key,
         }
     }
 }
-typedef struct {
-    u32 field0;
-    u8 field4;
-    u8 pad5[0xF];
-    f32 field14;
-    f32 field18;
-    f32 field1C;
-    u8 pad20[0x1B];
-    u8 field3B;
-    u8 pad3C[0x48];
-    u16 field84;
-    u8 pad86[6];
-    u16 handle8C;
-    u16 handle8E;
-    u8 pad90[0xAC];
-    u8 field13C;
-    u8 pad13D[0xF];
-    f32 field14C;
-    u8 pad150[0x34];
-    u32 field184;
-    u8 pad188[0x190];
-    u32 field318;
-    u8 *field31C;
-} SoundOwnerState_10344;
-
-u16 func_10010BE8(u16, s32, u16, u8, s16, u8, u8);
 
 s32 func_10010154(u16 sound, struct127 *obj, s32 volume, s16 nearDistance, u16 farDistance) {
     s32 handle = 0;
@@ -913,7 +839,6 @@ void func_10010558(u16 sound, struct127 *obj, s32 volume, s16 nearDistance, u16 
     }
 }
 
-
 // matching: the empty ifs add uses of volume so that IDO keeps it in s1 like the target
 void func_10010630(u16 sound, struct127 *obj, s32 volume, s16 nearDistance, u16 farDistance) {
     if (volume) {}
@@ -1000,25 +925,6 @@ void func_1001091C(struct127 *obj, u32 volume) {
         }
     }
 }
-// NON-MATCHING: something isnt right...
-// void func_1001091C(struct127 *arg0, struct15 *arg1) {
-//     s32 temp_v0;
-//
-//     if ((arg1 != NULL) && (arg0->unk0 != 0)) {
-//         if (arg0->camera != 0) {
-//             if (arg0->unk8E != 0) {
-//                 func_1000F85C(arg0->unk8E, 8, arg1->unk1C); // help
-//             }
-//         } else {
-//             temp_v0 = func_1000FF90(func_1000EE70, arg0, arg0->unique_id | 0x10000);
-//             if (temp_v0 != -1) {
-//                 D_80041FEC[temp_v0][0] = arg1;
-//             } else {
-//                 arg0->unk8E = 0;
-//             }
-//         }
-//     }
-// }
 
 void func_100109D0(struct127 *obj) {
     if (obj->camera != NULL) {
@@ -1041,7 +947,6 @@ void func_10010A3C(struct127 *obj) {
     }
     obj->unk8C = 0;
 }
-
 
 void func_10010AA8(struct127 *obj) {
     s32 index;
@@ -1075,8 +980,6 @@ void func_10010AA8(struct127 *obj) {
     obj->unk8C = 0;
     obj->unk8E = 0;
 }
-
-struct31 *func_10017438(s32, s16, u16, u8, f32, u8, u8, struct31 **);
 
 // Starts `sound` on a free voice slot (reusing `handle`'s slot if it is still ours) and
 // returns the new handle, or 0. Handles are slot + 16 * n, so the low nibble is the slot.
@@ -1164,7 +1067,6 @@ void func_10010F88(s32 sound, u16 volume, s16 cents, u8 mix, s32 arg4,
     func_10010E78(0, sound, volume, cents, mix, arg4, x, y, z, nearDistance, farDistance);
 }
 
-
 // Plays a sound positioned on obj; a player-camera object (obj->camera set) plays it
 // unpositioned instead.
 s32 func_10010FFC(u16 handle, s32 sound, u16 volume, s16 cents, u8 mix, struct127 *obj) {
@@ -1196,7 +1098,6 @@ s32 func_10010FFC(u16 handle, s32 sound, u16 volume, s16 cents, u8 mix, struct12
     return handle;
 }
 
-
 // Stops the voice behind `handle` now.
 void func_100111C8(u16 handle) {
     struct120 *slot = &D_800425E0[handle & 0xF];
@@ -1208,7 +1109,6 @@ void func_100111C8(u16 handle) {
         slot->unk8 = NULL;
     }
 }
-
 
 // Stops the voice behind `handle` on the next update (now if the queue is full).
 void func_1001123C(u16 handle) {
@@ -1237,8 +1137,6 @@ s32 func_100112BC(s32 handle, s32 delay) {
         return 0;
     }
 }
-
-
 
 // Runs the stop queue: counts down each entry's delay and stops its voice when it expires.
 void func_10011310(void) {
@@ -1281,7 +1179,6 @@ void func_10011310(void) {
     D_80041F50 = remaining;
 }
 
-
 // Returns the sound id playing behind `handle`, or -1.
 s32 func_1001147C(u16 handle) {
     struct120 *slot;
@@ -1294,7 +1191,6 @@ s32 func_1001147C(u16 handle) {
     }
     return -1;
 }
-
 
 s32 func_100114D0(s32 x, s32 y, s32 z, s32 volume, s32 farDistance, s32 nearDistance,
                   s32 *pan, s32 *volumeOut, s32 *distance) {
@@ -1329,12 +1225,8 @@ s32 func_100114D0(s32 x, s32 y, s32 z, s32 volume, s32 farDistance, s32 nearDist
     return active;
 }
 
-
 s32 func_1000A750(s32, s32, s32, s32, f32, s32, s32, s32, s32, s32,
                   s32 *, s32 *, s32 *);
-extern f32 D_8002C400;
-extern f32 D_8002C404;
-
 
 void func_10011624(SoundRecord *records, s32 *count, s32 start, s32 end) {
     SoundRecord *record;
@@ -1510,7 +1402,6 @@ next_record:
         } while ((index < *count) && (index < end));
     }
 }
-
 
 void func_10011BB8(void) {
     s32 i;
