@@ -3,23 +3,6 @@
 #include "variables.h"
 
 
-#ifdef osMotorStop
-#undef osMotorStop
-#endif
-#ifdef osMotorStart
-#undef osMotorStart
-#endif
-
-typedef struct PakReply {
-    u8 dummy;
-    u8 txSize;
-    u8 rxSize;
-    u8 command;
-    u16 address;
-    u8 data[32];
-    u8 dataCrc;
-} PakReply;
-
 void __osSiGetAccess(void);
 void __osSiRelAccess(void);
 extern u8 __osPfsPifRam[64]; /* OSPifRam */

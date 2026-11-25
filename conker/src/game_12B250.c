@@ -19,7 +19,6 @@ extern s32 func_151C229C(Vec3f *origin, Vec3f *dir, Vec3f *hitPoint, Vec3f *line
 extern void func_151D3E04(Actor *obj, Vec3f *out, Vec3f *localPos, u8 bone, f32 yOffset);
 extern void func_151D3E6C(Actor *obj, Vec3f *a, Vec3f *b, s32 arg3);
 extern void func_151D3F14(Vec3f *position, u8 arg1, s32 arg2);
-extern void func_151D8868(RumbleParams *event, s32 arg1, s32 arg2, s32 arg3);
 
 void func_150FDF38(Actor *obj, s32 arg1, s32 arg2, Vec3f *muzzleOut, Vec3f *launchOut);
 void func_150FE0B8(Actor *obj, Vec3f *muzzle, s32 arg2, s32 arg3);

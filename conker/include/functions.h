@@ -217,7 +217,6 @@ void func_15005FB0(Camera *arg0);
 void func_15006010(Camera *arg0);
 void func_15006140(Camera *arg0);
 void func_15006170(Camera *arg0);
-void func_150061B0(void);
 void func_150064E0(void);
 void func_15007644(void);
 void func_1500764C(void);

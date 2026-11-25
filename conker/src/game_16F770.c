@@ -779,7 +779,6 @@ f32 func_15143E64(Vec3f *v) {
 
     return sqrtf(x * x + y * y + z * z);
 }
-extern void func_151D8868(RumbleParams *params, s32 arg1, s32 arg2, s32 arg3);
 
 /*
  * If any actor is alive and some i passes func_150A29C8(i, arg1) == 0, plays arg0 through func_1512D748

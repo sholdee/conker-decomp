@@ -216,7 +216,6 @@ extern void func_151C1860(void *, s32, s32);
 void func_15103E40(Actor *, Actor *, Vec3f *, u8, u8, u8, u8);
 extern void func_151D5334(Vec3f*, f32, f32, f32, s32, s32, s32);
 extern void func_150FE860(Actor *arg0, s32 arg1, s32 arg2);
-extern void func_151D8868(RumbleParams *params, s32 arg1, s32 arg2, s32 arg3);
 extern void func_150FF084(Actor *arg0, s32 arg1, s32 arg2);
 extern void func_150FED30(Actor *arg0, s32 arg1, s32 arg2);
 void func_151C329C(s32 arg0, s32 arg1, s32 arg2);

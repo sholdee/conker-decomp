@@ -25,7 +25,6 @@ u8 D_800BE617;
 #undef D_800BE9D0
 extern s32 D_800BE9D0;
 
-OSContPad **func_1501BBB8(void);
 
 
 Gfx *func_151674F8(Gfx *gfx, s32 group, s16 player, s32 list);

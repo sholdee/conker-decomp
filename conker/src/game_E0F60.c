@@ -11,7 +11,6 @@ extern void func_151429E0(u8, u8 *, u8 *, u8 *);
 extern void func_15156190(StreakParticleDesc *desc, u8 kind, s32 extraSize, u8 owner, s32 arg4);
 extern void func_15156388(StreakParticleDesc *desc, u8 kind, s32 extraSize);
 
-extern void func_151D8868(RumbleParams *event, s32 arg1, s32 arg2, s32 arg3);
 
 /* Spawns an effect at bone 25 of obj, plus a camera event (type 1, 12-27 long) and a func_151D3FF4 at the same point. */
 void func_150B3AB0(Actor *obj, u8 arg1) {

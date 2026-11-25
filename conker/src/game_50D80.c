@@ -1197,7 +1197,6 @@ extern void func_150FAE18(s16, u8, s32);
 extern s32 func_15046C80(f32 *, s32, f32, CollisionHit *);
 extern void func_15136698(f32, f32, u8, s32, s32, f32 *, f32 *, s32, s32, s32, s32);
 extern void func_150E3340(f32 *, s32 *, SeqTrackState *, s16);
-extern void func_151D8868(RumbleParams *, s32, u8, s32);
 extern void func_151B5240(s16, u8, s32);
 extern void func_15192D48(Actor *, s16, u8, s32);
 extern void func_151B09BC(Actor *, s32, s16, u8, s32);

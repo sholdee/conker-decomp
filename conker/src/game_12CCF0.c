@@ -111,7 +111,6 @@ void func_150FFBDC(Actor *obj, s32 arg1, Vec3f *out) {
     func_15145EA4(&src, &dst, obj->ob_matrix_ptr[D_80088BB0], 1);
 }
 
-void func_151D8868(RumbleParams *event, s32 arg1, s32 arg2, s32 arg3);
 
 /* Sends a func_151D8868 event (kind 1, 20-30 long) to `obj`'s camera, if it has one. */
 void func_150FFC3C(Actor *obj) {

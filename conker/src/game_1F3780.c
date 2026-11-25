@@ -19,7 +19,6 @@ void func_15145740(Actor *arg0, Vec3f *arg1, Vec3f *arg2, Vec3f *arg3, f32 arg4)
 s32 func_1514654C(Actor *, ModelAttachment *, s32, Vec3f **points, Vec3f **results, s32 count);
 void func_151D5174(Actor *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f **,
                    Vec3f **, Vec3f *);
-void *func_151D8868(RumbleParams *event, s32 arg1, s32 arg2, s32 arg3);
 s32 func_15142A5C(Actor *arg0);
 void func_151D5148(Actor *arg0);
 s32 func_15145EA4(Vec3f **points, Vec3f **results, s32 matrix, s32 count);

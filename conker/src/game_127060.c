@@ -11,7 +11,6 @@ static const Vec3f D_800A1CF0 = { -30.0f, -70.0f, -85.0f };
 static const Vec3f D_800A1CFC[3] = { { -31.0f, -6.0f, 24.0f }, { 31.0f, -6.0f, 24.0f }, { 1.0f, -51.0f, 53.0f } };
 
 void *func_151407D0(void *, s32, void *, u8, u8, u8, u8, s8, u8, s32);
-void func_151D8868(RumbleParams *, s32, u8, s32);
 s32 func_15160A58(void *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Spawns the burst effect on actor: two sparks and two glows that follow its second matrix. */

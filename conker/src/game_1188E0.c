@@ -217,7 +217,6 @@ void func_150EB8C4(void) {
     }
 }
 
-void *func_151D8868(RumbleParams *event, s32 arg1, u8 owner, s32 kind);
 
 /*
  * Effect burst at a gate cylinder: a func_150E83AC effect lasting 300-400 frames, a rumble

@@ -14,7 +14,6 @@ typedef struct {
 } Game113D60Ids1;
 
 
-extern void *func_151D8868(RumbleParams *event, s32 arg1, s32 arg2, s32 arg3);
 
 typedef struct {
     /* 0x00 */ TimedEffect base;

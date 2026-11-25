@@ -6,7 +6,6 @@
 #include "effects.h"
 
 extern void (*D_8008FC70[])(Actor *, s16, Vec3f *);
-extern void *func_151D8868(RumbleParams *params, s32 arg1, s32 arg2, s32 arg3);
 extern s32 allocate_memory(s32, s32, s32, s32);
 
 void func_1503F404(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);

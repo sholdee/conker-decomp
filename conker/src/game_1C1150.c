@@ -5,7 +5,6 @@
 
 extern void func_1504715C(CollisionHit *ground, Actor *obj);
 
-extern void func_151D8868(RumbleParams *params, s32 arg1, u8 arg2, s32 arg3);
 extern void func_151C0098(f32 *pos, Actor *obj, s32 arg2, u8 arg3, s32 arg4);
 extern void func_1507CD64(Actor *obj, s32 arg1);
 extern s32 func_1518D1C0(Actor *obj, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5, u8 *arg6);

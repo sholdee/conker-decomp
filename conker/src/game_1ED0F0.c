@@ -837,7 +837,6 @@ void func_151C1D5C(Actor *shooter, Vec3f *start, Vec3f *dir, RayHit *ray, f32 ar
     ray->dist = dist;
 }
 
-void func_151D8868(RumbleParams *, s32, s32, s32);
 
 void func_151C1FB8(Actor *obj) {
     RumbleParams event;

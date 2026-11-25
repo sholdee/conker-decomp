@@ -539,7 +539,6 @@ extern LightEffect *func_151602C0(LightEffectHeader *, s32 *, s32, s32, s32, s32
 // matching: s32 parameters where the definition has u8 and s16 (no truncation at the call)
 extern void func_150E7FEC(f32, s32, void *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_15164F0C(s32, u8, s32, u8, s32);
-extern void func_151D8868(RumbleParams *, s32, s32, s32);
 extern void func_1505D024(s32, s32, s32, s32);
 extern void func_1000EC24();
 

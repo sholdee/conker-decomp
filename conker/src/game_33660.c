@@ -3,12 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* This build's libultra exports osMotorStop/_MakeMotorData as real functions
-   instead of the __osMotorAccess macro that os_motor.h defines. */
-#undef osMotorStop
-extern s32 osMotorStop(OSPfs *pfs);
-extern s32 _MakeMotorData(OSMesgQueue *mq, OSPfs *pfs, s32 channel);
-
 extern OSContStatus D_800BE2C0[];
 extern s32 D_800BE72C;
 

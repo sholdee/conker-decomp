@@ -173,7 +173,6 @@ void func_150F887C(StageObj *obj, StageMsg *msg, u8 type) {
 }
 
 extern void func_15164F0C(s32 arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4);
-extern void func_151D8868(RumbleParams *params, s32 arg1, s32 arg2, s32 arg3);
 extern void func_15143874(s16 angle, f32 radius, f32 *x, f32 *z);
 extern void func_151C329C(Vec3f *pos, s32, s32);
 extern void func_15143794(s16, s16, f32, Vec3f *out);

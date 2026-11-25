@@ -339,7 +339,6 @@ typedef struct {
 
 extern void func_1508EE0C(s32, s32);
 extern void func_15164F0C(u8, u8, void *, u8, s32);
-extern void *func_151D8868(RumbleParams *, s32, s32, s32);
 extern s32 func_151EF610(void);
 
 /* Platform update. State 0 rests at the home height, 2 shakes then sinks by `travel`, 3 stays down
