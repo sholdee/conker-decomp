@@ -11,9 +11,9 @@ extern void func_10004074(void *ptr);
  * the line from its screen position through the screen centre.
  */
 
-#define FLARE_SUN       1 /* position comes from the level's D_8008CFFC sun table */
+#define FLARE_SUN       1 /* position comes from D_8008CFFC[D_800B0DF0->unk10] */
 #define FLARE_FLASH     2 /* also drives the screen flash level D_800DD2D0 */
-#define FLARE_DIRECTED  4 /* only visible when the viewer is within the cone pos/dir/minFacing */
+#define FLARE_DIRECTED  4 /* depth is only updated while the viewer is inside the cone dir/minFacing */
 
 typedef struct LensFlare {
     /* 0x00 */ f32 pos[3];
@@ -375,8 +375,8 @@ typedef union {
 
 /*
  * Projects a flare and computes its z-buffer depth. Stores the decoded z-buffer sample in *outZbufDepth.
- * Returns 0 when the flare is off screen or too far away, and 1 otherwise; a FLARE_DIRECTED flare that the
- * viewer is outside of returns 1 early without updating its depth.
+ * Returns 0 when func_1509563C rejects the flare (max distance 4000), and 1 otherwise; a FLARE_DIRECTED
+ * flare whose cone the viewer is outside of returns 1 early without updating anything.
  */
 s32 func_1517EC1C(LensFlare *flare, s32 *outZbufDepth) {
     f32 dx;
