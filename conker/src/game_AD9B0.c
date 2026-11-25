@@ -116,35 +116,25 @@ s32 func_15080738(s32 textId);
 /* Queues text textId on obj's text slot (0 or 1), unless a script has locked that slot. Slot 1 also
    records the trigger zone, which func_15080C64 disables once text 0x2B / 0x2C has been shown. */
 void func_15080500(struct127 *obj, TriggerZone *zone, s32 slot, s32 textId) {
-    ObjTextSlots *slots;
-    s32 idx;
-    s32 mask;
-
     if (obj != NULL && obj->interaction_state != 0 && obj->unk127 != 0xFF) {
         if (textId == 0x2B || textId == 0x2C) {
             D_800D1940 = textId;
             D_800D199C = zone;
             textId = 0x2A;
         } else if (func_15080738(textId)) {
-            idx = textId >> 3;
-            mask = 1 << (textId & 7);
             D_800D1940 = textId;
-            if (!(D_800D2E60[idx] & mask)) {
+            if (!BIT_IS_SET(D_800D2E60, textId)) {
                 textId = 0x1A;
             }
         }
 
         if (slot == 0) {
-            slots = TEXT_SLOTS(obj);
-            if (!(slots->unk74 & 0x80)) {
-                slots->unk74 = textId;
+            if (!(TEXT_SLOTS(obj)->unk74 & 0x80)) {
+                TEXT_SLOTS(obj)->unk74 = textId;
             }
-        } else {
-            slots = TEXT_SLOTS(obj);
-            if (!(slots->unk75 & 0x80)) {
-                slots->unk75 = textId;
-                TEXT_SLOTS(obj)->unk7A = zone - D_800D3098;
-            }
+        } else if (!(TEXT_SLOTS(obj)->unk75 & 0x80)) {
+            TEXT_SLOTS(obj)->unk75 = textId;
+            TEXT_SLOTS(obj)->unk7A = zone - D_800D3098;
         }
     }
 }
@@ -164,18 +154,12 @@ void func_15080620(s32 objIndex, s32 slot, s32 textId, s32 arg3) {
 /* Clears both of an object's text slots unless a script locked them. */
 void func_150806A8(s32 objIndex) {
     struct127 *obj = &D_800CC2D0[objIndex];
-    ObjTextSlots *slots = TEXT_SLOTS(obj);
 
-    if (slots->unk74 != 0) {
-        if (!(slots->unk74 & 0x80)) {
-            slots->unk74 = 0;
-            slots = TEXT_SLOTS(obj);
-        }
+    if (TEXT_SLOTS(obj)->unk74 != 0 && !(TEXT_SLOTS(obj)->unk74 & 0x80)) {
+        TEXT_SLOTS(obj)->unk74 = 0;
     }
-    if (slots->unk75 != 0) {
-        if (!(slots->unk75 & 0x80)) {
-            slots->unk75 = 0;
-        }
+    if (TEXT_SLOTS(obj)->unk75 != 0 && !(TEXT_SLOTS(obj)->unk75 & 0x80)) {
+        TEXT_SLOTS(obj)->unk75 = 0;
     }
 }
 
@@ -201,14 +185,12 @@ s32 func_15080738(s32 textId) {
 void func_15080784(void) {
     s32 sound;
 
-    if (D_800D1998 != NULL) {
-        if (D_800D1994 != D_800D1995) {
-            sound = D_800D1998[D_800D1994];
-            if (sound != 0) {
-                func_1001263C(sound, 0x7FFF, 0x40);
-            }
-            D_800D1994++;
+    if (D_800D1998 != NULL && D_800D1994 != D_800D1995) {
+        sound = D_800D1998[D_800D1994];
+        if (sound != 0) {
+            func_1001263C(sound, 0x7FFF, 0x40);
         }
+        D_800D1994++;
     }
 }
 
@@ -242,7 +224,7 @@ void func_15080828(s32 arg0) {
         if (withHeader) {
             s32 headerLen;
             s32 textLen;
-            TextResource *unused;
+            s32 pad; // matching: unused stack slot (frame size)
             s32 soundCount;
             u32 headerSoundCount;
 
@@ -305,7 +287,7 @@ void func_15080BE8(void) {
     func_1516D2E0(D_800D1950);
     func_10004074(D_800D1944);
     if (D_800D1948 != NULL) {
-        header = D_800D1948;
+        header = D_800D1948; // matching: a fresh load into a named temp, not the tested value
         func_10004074(header);
         func_10004074(D_800D194C);
         func_10004074(D_800D1998);
@@ -316,16 +298,14 @@ void func_15080BE8(void) {
 
 /* Per frame: once the open text box has closed, frees it and disables the zone that showed it. */
 void func_15080C64(void) {
-    if (D_800D1941) {
-        if (D_800D1950->unk15 == 0) {
-            func_15080BE8();
-            if (D_800BE9F0 != 0x29 && D_800BE9F0 != 0x2E) {
-                D_800D2E60[8] |= 0x10;
-            }
-            if (D_800D199C != NULL) {
-                D_800D199C->disabled = TRUE;
-                D_800D199C = NULL;
-            }
+    if (D_800D1941 && D_800D1950->unk15 == 0) {
+        func_15080BE8();
+        if (D_800BE9F0 != 0x29 && D_800BE9F0 != 0x2E) {
+            D_800D2E60[8] |= 0x10;
+        }
+        if (D_800D199C != NULL) {
+            D_800D199C->disabled = TRUE;
+            D_800D199C = NULL;
         }
     }
 }
