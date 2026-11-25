@@ -2,9 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* D_800C3FC0 is declared as a single struct222 *; it is really one vertex buffer per actor. */
-#define VTX_BUFFERS ((Vtx **)&D_800C3FC0)
-
 /* D_800C3FC4 (declared as one s32): a smoothed position per actor, as s16 x, y, z. */
 // matching: integer address math hides the base from IDO's alias analysis (s16 (*)[3] indexing reorders loads)
 #define QUAD_ANCHOR(index) ((s16 *)((s32)&D_800C3FC4 + (index) * 6))
@@ -30,7 +27,7 @@ void func_15036570(s32 index, MtxF pinMtx, MtxF followMtx) {
     f32 blend;
     f32 delta;
 
-    vtx = VTX_BUFFERS[index];
+    vtx = D_800C3FC0[index];
     actor = &D_800CC2D0[index];
     state = actor->unk84.uh;
     frame = actor->unk2D0->unk8;
@@ -105,9 +102,9 @@ Gfx *func_150368C4(Gfx *gfx, s32 index, s32 view) {
     }
     color = &attachment->vtx[D_800BE9C0][48];
     for (i = 0; i < 5; i++) {
-        VTX_BUFFERS[index][i].v.cn[0] = color->v.cn[0];
-        VTX_BUFFERS[index][i].v.cn[1] = color->v.cn[1];
-        VTX_BUFFERS[index][i].v.cn[2] = color->v.cn[2];
+        D_800C3FC0[index][i].v.cn[0] = color->v.cn[0];
+        D_800C3FC0[index][i].v.cn[1] = color->v.cn[1];
+        D_800C3FC0[index][i].v.cn[2] = color->v.cn[2];
     }
     bones = D_800CC2D0[index].unk1D4;
     if (bones == NULL) {
@@ -128,9 +125,9 @@ Gfx *func_150368C4(Gfx *gfx, s32 index, s32 view) {
     }
     gfx = func_15094F70(gfx, D_800903BC, 0, NULL, 0, 0, 0, 2, 3);
     gSPMatrix(gfx++, &D_80089470, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPVertex(gfx++, &VTX_BUFFERS[index][0], 1, 0);
+    gSPVertex(gfx++, &D_800C3FC0[index][0], 1, 0);
     gSPMatrix(gfx++, &bones[4], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPVertex(gfx++, &VTX_BUFFERS[index][1], 4, 1);
+    gSPVertex(gfx++, &D_800C3FC0[index][1], 4, 1);
     gSP1Triangle(gfx++, 0, 1, 2, 0);
     gSP1Triangle(gfx++, 0, 3, 4, 0);
     return gfx;

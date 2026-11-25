@@ -3345,9 +3345,6 @@ typedef struct {
     f32 unk8;
 } struct221; // size 0xC
 
-typedef struct {
-    u8 unk0[8];
-} struct222; //size 0x08
 
 typedef struct {
     s32 unk0;

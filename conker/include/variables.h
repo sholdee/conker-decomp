@@ -350,7 +350,7 @@ extern void (*D_80082F70[])(void);
 extern s32  D_80082FA0;
 extern s32  D_80082FA4;
 extern u8   D_80084064;
-extern s32  D_80084300;
+extern Vtx  D_80084300[5];
 extern s16  D_80084480;
 extern void (*D_800844B0[])(s32 arg0);
 extern s32  D_800848B0;
@@ -908,7 +908,7 @@ extern u16 D_800C3E7C;
 extern s32 D_800C3E80[2]; // bone-matrix pool per frame buffer
 extern s32 D_800C3E84;
 extern s32 D_800C3EE0;
-extern struct222* D_800C3FC0;
+extern Vtx *D_800C3FC0[]; // per actor: a 5-vertex quad buffer; [0] is the template D_80084300
 extern s32 D_800C3FC4;
 extern s64 D_800C3A60[];
 extern u8  D_800C4000;
