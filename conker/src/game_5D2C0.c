@@ -24,10 +24,9 @@ typedef struct ModelHeader {
 } ModelHeader;
 
 extern u8 D_800DF7D0[];            // per-model load reference counts
-extern s32 D_800DF9B8[];
 extern ModelHeader *D_800E0148[];  // per-model loaded headers
 ModelHeader *func_1502B6BC(s32, s32, s32, s32, s32, s32);
-void func_1510CE60(Gfx *, s32, s32, s32, s32 *);
+void func_1510CE60(Gfx *, s32, s32, s32, s16 **);
 void func_15168E54(Gfx *, ModelHeader *);
 
 /* Loads (or reuses) attachment model `model` and returns its display lists and vertex data. */

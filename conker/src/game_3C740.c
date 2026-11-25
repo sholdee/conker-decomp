@@ -84,7 +84,7 @@ void func_1500F40C(void) {
     Game3C740Descriptor descriptor;
 
     {
-        extern void *D_800D98D0[];
+        extern struct102 *D_800D98D0[4]; // matching: the block-scope redeclaration changes IDO's store scheduling
 
         func_1500F378(0x1612, -0x553, -0x2DC, -0x69F);
         func_1500F378(0x1633, -0x553, -0x3C2, -0x69F);

@@ -1837,7 +1837,6 @@ extern s8 D_800E0BEA;
 extern s8 D_800E0BD3;
 extern s32 D_800E0BD4;
 extern s32 D_8008FDD8;
-extern u8 **D_800E0B88;
 extern void func_10004074(void *);
 extern void *allocate_memory(s32, s32, s32, s32);
 s32 func_1502B5C8();

@@ -9,8 +9,6 @@ void func_15008E10(s32);
 void func_15189900(struct145 *, u8);
 
 extern u8 D_800D9950[];
-extern s32 *D_800D98D0[];
-extern s32 *D_800D9894;
 extern u8 *D_80088870;
 
 
@@ -33,7 +31,7 @@ void func_1500E5C0(void) {
     }
     {
         // matching: IDO materializes &D_800D98D0 before the two scalar stores only via a local
-        s32 **entries = D_800D98D0;
+        struct102 **entries = D_800D98D0;
 
         D_800D9890 = 0;
         D_800D9894 = NULL;

@@ -155,7 +155,6 @@ void func_150C4E9C(WorldObject *obj) {
 }
 
 // the four objects func_1500F40C spawns with func_1500F290
-extern struct102 *D_800D98D0[4];
 
 /* Destroys the four objects in D_800D98D0 (func_1516972C) and clears their slots. */
 void func_150C522C(void) {

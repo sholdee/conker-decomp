@@ -126,7 +126,6 @@ void func_150B6BC0(s32 unused) {
     }
 }
 
-extern struct102 *D_800D9894;
 // matching: defined in-file so as1 shares one lui across the unrolled stores in func_150B6C90
 static struct102 *D_800D9898[10];
 struct Obj151A4FD0 *func_151A4FD0(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, u8 a6, s32 a7);

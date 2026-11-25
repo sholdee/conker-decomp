@@ -456,7 +456,6 @@ extern s8 D_8008FDB0; /* highlighted row of the func_151DF574 list */
 extern s8 D_800AB804[];
 extern char D_800AB810[];
 extern s8 D_800BE91B; /* == D_800BE918[0].stick_y; the field spelling mismatches */
-extern char **D_800E0B88; /* text strings */
 void func_151E30C4(void);
 
 /*

@@ -1123,6 +1123,8 @@ extern f32 D_800D3670;
 extern s16 D_800D3674;
 extern s32 D_800D3858;
 
+extern struct102 *D_800D9894;
+extern struct102 *D_800D98D0[4];
 extern s32 D_800D98E0;
 extern u8  D_800D987C;
 extern u8  D_800D9890;
@@ -1340,7 +1342,9 @@ extern s8   D_800DDF68[];
 extern Gfx *D_800DDF78[]; // per effect model slot: the model's second display list
 
 /* 800E0000 */
+extern s16 *D_800DF9B8[]; // per model: written by func_1510CE60
 extern struct TrailTask *D_800E0920; // type in 1CA420
+extern u8 **D_800E0B88; // bank 2 text strings (80)
 extern u8   D_800E0B94;
 extern s8   D_800E0C20;
 extern s32  D_800E0E04;
