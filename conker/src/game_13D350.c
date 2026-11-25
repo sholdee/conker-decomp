@@ -687,24 +687,19 @@ void func_15111858(void) {
     }
 }
 
-typedef struct Game13D350Face {
-    u16 unk0;
-    u16 unk2;
-    s16 unk4;
-    s16 unk6;
-    s16 unk8;
-    s16 unkA;
-    s16 unkC;
-    s16 unkE;
-} Game13D350Face;
+/* One skybox face: its size and two opposite corners (the axis whose coordinates match is the face's plane). */
+typedef struct SkyFace {
+    u16 width;
+    u16 height;
+    s16 x0;
+    s16 y0;
+    s16 z0;
+    s16 x1;
+    s16 y1;
+    s16 z1;
+} SkyFace;
 
-
-typedef struct Game13D350Color {
-    u8 r;
-    u8 g;
-    u8 b;
-} Game13D350Color;
-
+/* Per-format texture load tables (two formats), wrapped so they can be copied to the stack. */
 struct Game13D350U8x2 { u8 v[2]; };
 struct Game13D350S16x2 { s16 v[2]; };
 extern struct Game13D350U8x2 D_800891EC;
@@ -712,13 +707,13 @@ extern struct Game13D350U8x2 D_800891F0;
 extern struct Game13D350S16x2 D_800891F4;
 extern struct Game13D350U8x2 D_800891F8;
 extern struct Game13D350U8x2 D_800891FC;
-extern Game13D350Face D_800A2DA0[];
+extern SkyFace D_800A2DA0[];
 extern Mtx *D_800DBEB0;
-extern s32 D_800DBE88[][2];
+extern Vtx *D_800DBE88[][2];
 extern Mtx D_80089470;
 
 
-Gfx *func_15111AF4(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, f32 pitch, f32 yaw, f32 roll, s32 dist);
+Gfx *func_15111AF4(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent);
 /* Last entry of the D_800891D8 draw table (still asm data). The original file defined that table
  * before this function; the `.word func_15111AF4` it emits makes as1 treat the function's entry
  * label as address-taken, so the switch's `jr` gets an edge back to it. That turns everything up
@@ -727,35 +722,38 @@ Gfx *func_15111AF4(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, f32 pitch, f32 yaw, f
  * colour branch's delay slot. Without this word the function cannot match. */
 static void *D_800891E8[] = { func_15111AF4 };
 
-Gfx *func_15111AF4(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, f32 pitch, f32 yaw, f32 roll, s32 dist) {
+/* Draws the textured skybox (sky mode 4): sets up a tinted CI texture pipeline and the rotation-only view
+ * matrix, then draws each face the camera can see (faces 0-3 by yaw, 4 and 5 by pitch) as a grid of 60x30
+ * tiles via func_15110CFC, flushing the last partial batch of queued tiles at the end. */
+Gfx *func_15111AF4(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent) {
     s32 i;
     s32 end;
     s32 start;
     s32 j;
-    s32 fmt;
-    s32 idx;
+    s32 axis;
+    s32 face;
     s32 *texList;
-    f32 mtx[4][4];
-    f32 mtx2[4][4];
-    s32 vtx;
-    s32 count;
-    s32 vtxBase;
+    f32 rotation[4][4];
+    f32 viewProj[4][4];
+    Vtx *vtx;
+    s32 vtxCount;
+    s32 vtxIdx;
     SkyTile queue[4];
-    Gfx *t;
-    s32 lastIdx;
+    s32 format;
+    s32 lastFormat;
     f32 fov;
     u8 color[3];
-    struct Game13D350U8x2 sp104;
-    struct Game13D350U8x2 sp100;
-    struct Game13D350S16x2 spFC;
-    struct Game13D350U8x2 spF8;
-    struct Game13D350U8x2 spF4;
+    struct Game13D350U8x2 sizes;
+    struct Game13D350U8x2 shifts;
+    struct Game13D350S16x2 palOffsets;
+    struct Game13D350U8x2 tlutCounts;
+    struct Game13D350U8x2 tiles;
 
-    sp104 = D_800891EC;
-    sp100 = D_800891F0;
-    spFC = D_800891F4;
-    spF8 = D_800891F8;
-    spF4 = D_800891FC;
+    sizes = D_800891EC;
+    shifts = D_800891F0;
+    palOffsets = D_800891F4;
+    tlutCounts = D_800891F8;
+    tiles = D_800891FC;
     gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
     gfx = func_1501A680((Gfx *)func_1501A490((s32)gfx, D_80082FA6, 0, 0, 0, 0));
     fov = (D_80082FA0 != 1) ? 80.0f : 95.0f;
@@ -789,83 +787,83 @@ Gfx *func_15111AF4(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, f32 pitch, f32 yaw, f
                G_TX_CLAMP, G_TX_NOMASK, G_TX_NOLOD);
     gDPSetTileSize(gfx++, G_TX_RENDERTILE + 1, 0, 0, 61 << G_TEXTURE_IMAGE_FRAC, 31 << G_TEXTURE_IMAGE_FRAC);
     gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_4b, 0, 256, G_TX_LOADTILE - 1, 0, 0, 0, 0, 0, 0, 0);
-    func_151102CC(mtx, pitch, yaw, roll);
-    func_150A7A48(mtx, RENDER_VIEWS[D_80082FA4].projection, mtx2);
-    guMtxF2L(mtx2, &D_800DBEB0[D_80082FA4 * 2 + D_800BE9C0]);
+    func_151102CC(rotation, pitch, yaw, roll);
+    func_150A7A48(rotation, RENDER_VIEWS[D_80082FA4].projection, viewProj);
+    guMtxF2L(viewProj, &D_800DBEB0[D_80082FA4 * 2 + D_800BE9C0]);
     gSPMatrix(gfx++, &D_800DBEB0[D_80082FA4 * 2 + D_800BE9C0], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPMatrix(gfx++, &D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPPerspNormalize(gfx++, RENDER_VIEWS[D_80082FA4].perspNorm);
     texList = D_800891BC[D_800B0DF0->unk9];
-    count = 0;
+    vtxCount = 0;
     vtx = D_800DBE88[D_80082FA4][D_800BE9C0];
-    vtxBase = 0;
-    lastIdx = -1;
-    if (dist < 0) {
-        dist = 0;
+    vtxIdx = 0;
+    lastFormat = -1;
+    if (extent < 0) {
+        extent = 0;
     }
     end = (D_800BE9F0 == 0xC) ? 6 : 5;
     start = (D_800BE9F0 != 0x19) ? 0 : 4;
     for (i = start; i < end; i++) {
         switch (i) {
             case 0:
-                if ((yaw <= 180.0f && fov < yaw) || (180.0f < yaw && yaw < 360.0f - fov)) {
+                if ((yaw <= 180.0f && yaw > fov) || (yaw > 180.0f && yaw < 360.0f - fov)) {
                     continue;
                 }
                 break;
             case 1:
-                if (270.0f + fov < yaw || yaw < 270.0f - fov) {
+                if (yaw > 270.0f + fov || yaw < 270.0f - fov) {
                     continue;
                 }
                 break;
             case 2:
-                if (180.0f + fov < yaw || yaw < 180.0f - fov) {
+                if (yaw > 180.0f + fov || yaw < 180.0f - fov) {
                     continue;
                 }
                 break;
             case 3:
-                if (90.0f + fov < yaw || yaw < 90.0f - fov) {
+                if (yaw > 90.0f + fov || yaw < 90.0f - fov) {
                     continue;
                 }
                 break;
             case 4:
-                if (-90.0f + fov < pitch || pitch < -90.0f - fov) {
+                if (pitch > -90.0f + fov || pitch < -90.0f - fov) {
                     continue;
                 }
                 break;
             case 5:
-                if (90.0f + fov < pitch || pitch < 90.0f - fov) {
+                if (pitch > 90.0f + fov || pitch < 90.0f - fov) {
                     continue;
                 }
-                if (dist < 300) {
+                if (extent < 300) {
                     continue;
                 }
                 break;
         }
-        if (D_800A2DA0[i].unk4 == D_800A2DA0[i].unkA) {
-            fmt = 0x78;
-        } else if (D_800A2DA0[i].unk6 == D_800A2DA0[i].unkC) {
-            fmt = 0x79;
+        if (D_800A2DA0[i].x0 == D_800A2DA0[i].x1) {
+            axis = 'x';
+        } else if (D_800A2DA0[i].y0 == D_800A2DA0[i].y1) {
+            axis = 'y';
         } else {
-            fmt = 0x7A;
+            axis = 'z';
         }
-        idx = (i == 5) ? 0 : i;
-        gfx = func_15110CFC(gfx, (Vtx **)&vtx, texList[idx], 0, 2, D_800A2DA0[i].unk0, D_800A2DA0[i].unk2, 0x3C, 0x1E,
-                            D_800A2DA0[i].unk4, D_800A2DA0[i].unk6, D_800A2DA0[i].unk8, fmt, mtx, dist, &count, &vtxBase,
-                            queue, &lastIdx, sp104.v, sp100.v, spFC.v, spF8.v, spF4.v, idx);
+        face = (i == 5) ? 0 : i;
+        gfx = func_15110CFC(gfx, &vtx, texList[face], 0, 2, D_800A2DA0[i].width, D_800A2DA0[i].height, 60, 30,
+                            D_800A2DA0[i].x0, D_800A2DA0[i].y0, D_800A2DA0[i].z0, axis, rotation, extent, &vtxCount, &vtxIdx,
+                            queue, &lastFormat, sizes.v, shifts.v, palOffsets.v, tlutCounts.v, tiles.v, face);
     }
-    if (count != 0) {
-        gSPVertex(gfx++, vtxBase * 16 + vtx, count, 0);
-        for (j = 0; j < count; j += 4) {
-            idx = queue[j >> 2].format;
+    if (vtxCount != 0) {
+        gSPVertex(gfx++, &vtx[vtxIdx], vtxCount, 0);
+        for (j = 0; j < vtxCount; j += 4) {
+            format = queue[j >> 2].format;
             gDPPipeSync(gfx++);
             gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, queue[j >> 2].texture);
             gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, 2047, 0);
-            gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, queue[j >> 2].texture + spFC.v[idx]);
+            gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, queue[j >> 2].texture + palOffsets.v[format]);
             gDPLoadSync(gfx++);
-            gDPLoadTLUTCmd(gfx++, G_TX_LOADTILE - 1, spF8.v[idx]);
-            if (idx != lastIdx) {
-                lastIdx = idx;
-                gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, spF4.v[idx], G_ON);
+            gDPLoadTLUTCmd(gfx++, G_TX_LOADTILE - 1, tlutCounts.v[format]);
+            if (format != lastFormat) {
+                lastFormat = format;
+                gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, tiles.v[format], G_ON);
             }
             gSP1Triangle(gfx++, j + 2, j, j + 1, 0);
             gSP1Triangle(gfx++, j + 3, j, j + 2, 0);
