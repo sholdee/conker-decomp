@@ -27,7 +27,7 @@ void func_1512E4B0(Camera *camera) {
     camera->target.y = obj->y_position + 150.0f;
     camera->target.z = obj->z_position;
 
-    heading = -*(s16 *)&obj->unk2E4;
+    heading = -*(s16 *)&obj->unk2E4; // matching: the high half of unk2E4
     heading += obj->unk40 * 10.0f;
     radians = (heading * D_800A3730) / 1800.0f;
 

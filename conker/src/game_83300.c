@@ -623,7 +623,7 @@ void func_15056B08(Actor *actor) {
                     actor->unk21C = 0;
                 }
             }
-            if ((u16)actor->unk22E != 0) {
+            if (actor->unk22E != 0) {
                 range = 0.0f;
             } else if (!actor->unk236) {
                 range = actor->unk23C * 8;
@@ -3411,7 +3411,7 @@ void func_1505E0C4(Actor *actor, u16 *animEntry, AnimPlaybackState *state, s32 a
             actor->unk84.uh = anim;
             actor->animation_speed = speed;
             actor->events = *(struct TimedEvent **)(animEntry + 2);
-            *(s8 *)&actor->unk138 = 0;
+            actor->unk138 = 0;
             actor->unk103 = 0;
             actor->lastEventTime = 0.0f;
             if (index < D_8008FD8C) {
@@ -3912,7 +3912,7 @@ void func_1505F188(Actor *actor) {
     one = 1.0f;
     initial = -10000.0f;
     actor->unk2FD = 2;
-    *(s16 *)&actor->unk38 = -10000;
+    actor->unk38 = -10000;
     actor->xz_scale = one;
     actor->y_scale = one;
     actor->unk118 = initial;

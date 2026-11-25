@@ -1934,7 +1934,7 @@ void func_1506EF5C(void) {
     index = (D_800D1580 >> 16) & 0xFF;
     first = (D_800D1580 >> 8) & 0xFF;
     second = D_800D1580 & 0xFF;
-    *(u16 *)&D_800D154C->unk282 = 0xFFFF; // unk282 is really u16 (structs.h: s16)
+    D_800D154C->unk282 = 0xFFFF;
     D_800D154C->unk276 = 5;
     index *= 2;
     (&D_800D154C->unk284)[index] = first;

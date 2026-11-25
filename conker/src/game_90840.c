@@ -1475,7 +1475,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
             obj = &D_800CC2D0[arg0->unk65 - 1];
             arg0->disable_jump = 0x14;
             if (pressedButtons & (A_BUTTON | B_BUTTON)) {
-                if ((obj->unk84.uh == 0) || (*(u16 *)&obj->unk22E != 0 /* matching: lhu; Actor says s16 */) || (obj->unk84.uh == 0xC) || (obj->unk84.uh == 0xD)) {
+                if ((obj->unk84.uh == 0) || (obj->unk22E != 0) || (obj->unk84.uh == 0xC) || (obj->unk84.uh == 0xD)) {
                     u8 mode;
 
                     mode = 0x10;

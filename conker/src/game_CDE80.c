@@ -267,7 +267,7 @@ void func_150A11C4(Actor *actor) {
         func_150806A8(actor->unk127);
     }
     func_150829D8(actor);
-    *(s16 *)&actor->unk120 = -10000; /* structs.h splits this s16 into bytes */
+    actor->unk120 = -10000;
     D_800D3278 = 0;
     idx = actor - D_800CC2D0;
     found = 0;
@@ -364,7 +364,7 @@ void func_150A11C4(Actor *actor) {
                         actor->unkF8 &= ~2;
                         break;
                     case 2:
-                        *(s16 *)&actor->unk120 = D_800D3098[i].y + D_800D3098[i].height;
+                        actor->unk120 = D_800D3098[i].y + D_800D3098[i].height;
                         break;
                     case 3:
                         actor->unkF8 |= 2;

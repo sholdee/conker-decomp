@@ -1532,7 +1532,7 @@ struct Actor {
     /* 0x22A */ u8  unk22A;
     u8  unk22B;
     u16 unk22C;
-    s16 unk22E;
+    /* 0x22E */ u16 unk22E;   // cooldown
     u8  pad230;
     u8  unk231;
     u8  unk232; // used
