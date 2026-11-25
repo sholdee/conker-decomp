@@ -936,6 +936,7 @@ u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32
     } else {
         mtx = (f32 *)D_800D154C->unk1D4;
         if (D_800C3E90) {
+            // matching: byte arithmetic for bone D_80099AD8[kind][3] (Mtx * indexing mismatches)
             guMtxL2F(mf, (Mtx *)((u8 *)mtx + (D_80099AD8[kind][3] << 6)));
             mtx = (f32 *)mf;
         } else {
