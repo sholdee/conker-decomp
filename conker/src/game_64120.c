@@ -1428,50 +1428,49 @@ void func_15039A78(f32 *yaw, f32 *pitch, f32 *prevYaw, f32 *prevPitch, f32 fallb
     }
 }
 
-void func_15039CC8(struct127 *arg0) {
+/*
+ * Per-frame aim bookkeeping: object 0x53 in anim 0x15 (or any object while D_800BE9B4 is set) resets all aim
+ * slots, and an object whose type has an "aim-locked" anim list gets unk2FB bit 2 set while it plays one of
+ * them, or (for interaction state 1) while dead, slow in water, flagged in unk31C, or moving fast.
+ */
+void func_15039CC8(struct127 *obj) {
     s32 id;
     s32 i;
-    s32 idx;
+    s32 group;
     s32 count;
-    s32 value;
-    u16 *table;
-    u8 *ptr;
-    u8 *write_ptr;
+    u16 *anims;
+    CamData *data;
 
-    ptr = *(u8 **)((u8 *)arg0 + 0x324);
-    if (ptr != NULL) {
-        id = arg0->id;
-        if (((id == 0x53) && (arg0->unk84.uh == 0x15)) || (D_800BE9B4 != 0)) {
-            for (value = 0x28, i = 0, write_ptr = ptr; i != 3;) {
-                i++;
-                write_ptr++;
-                write_ptr[0x2F] = value;
-                write_ptr[0x32] = 0;
-                write_ptr[0x35] = 4;
+    data = OBJ_CAM_DATA(obj);
+    if (data != NULL) {
+        id = obj->id;
+        if ((id == 0x53 && obj->unk84.uh == 0x15) || D_800BE9B4 != 0) {
+            for (i = 0; i < 3; i++) {
+                data->timer[i] = 40;
+                data->blend[i] = 0;
+                data->flag[i] = 4;
             }
         }
 
-        idx = D_80097E7C[id];
-        if (idx != 0) {
-            idx--;
-            table = D_80084380[idx];
-            count = D_80098050[idx];
+        group = D_80097E7C[id];
+        if (group != 0) {
+            group--;
+            anims = D_80084380[group];
+            count = D_80098050[group];
             for (i = 0; i < count; i++) {
-                if (arg0->unk84.uh == table[i]) {
-                    arg0->unk2FB |= 4;
+                if (obj->unk84.uh == anims[i]) {
+                    obj->unk2FB |= 4;
                     return;
                 }
             }
 
-            if (arg0->interaction_state == 1) {
-                if ((arg0->health == 0) ||
-                        ((arg0->in_water != 0) && (arg0->xz_velocity < 5.0f)) ||
-                        (((u8 *)arg0->unk31C)[0x197] != 0) ||
-                        (arg0->xz_velocity > 20.0f)) {
-                    arg0->unk2FB |= 4;
+            if (obj->interaction_state == 1) {
+                if (obj->health == 0 || (obj->in_water != 0 && obj->xz_velocity < 5.0f) ||
+                    obj->unk31C->pad196[1] != 0 /* +0x197 */ || obj->xz_velocity > 20.0f) {
+                    obj->unk2FB |= 4;
                 }
-            } else if (arg0->health == 0) {
-                arg0->unk2FB |= 4;
+            } else if (obj->health == 0) {
+                obj->unk2FB |= 4;
             }
         }
     }
@@ -1508,143 +1507,152 @@ void func_15039ED0(s32 limitIdx, f32 *yaw, f32 *pitch, f32 *prevYaw, f32 *prevPi
     }
 }
 
+/* Per-type object definitions in D_800D1C90 (include/structs.h types that array as struct124, which does not
+ * match these offsets); only the fields used here. */
 typedef struct {
-    s16 unk0;
-    u8 pad2[0x24];
-    u8 unk26;
-    u8 pad27[0x9];
-    s8 unk30;
-    u8 pad31[0x9];
-    u8 unk3A;
-} Def_1503A08C;
+    /* 0x00 */ s16 unk0; /* aim height above the bone */
+    /* 0x02 */ u8 pad2[0x24];
+    /* 0x26 */ u8 unk26; /* bone the aim points are taken from */
+    /* 0x27 */ u8 pad27[5];
+    /* 0x2C */ s8 unk2C; /* head turn range, yaw left/right and pitch up/down (see func_1503A830) */
+    /* 0x2D */ s8 unk2D;
+    /* 0x2E */ s8 unk2E;
+    /* 0x2F */ s8 unk2F;
+    /* 0x30 */ s8 unk30; /* aim reach along the bone's z axis */
+    /* 0x31 */ u8 pad31[9];
+    /* 0x3A */ u8 unk3A; /* aim half-width along the bone's x axis */
+} ObjTypeDef;
 
 s32 func_1503D774(s32 arg0, s32 arg1);
 void func_1507C3E0(struct127 *arg0, s16 *arg1, s16 *arg2, s16 *arg3);
 
-#define OBJ_S16(o) (*(s16 *)((u8 *)arg0 + (o)))
-#define OBJ_S8(o) (*(s8 *)((u8 *)arg0 + (o)))
 
-void func_1503A08C(struct127 *arg0) {
-    Def_1503A08C *def;
-    f32 (*m)[4];
-    f32 cx;
-    f32 cy;
-    f32 cz;
+/*
+ * Recomputes an object's aim points (OBJ_AIM) from its type's aim bone: the bone origin pushed out by
+ * unk30 along z, a top point unk0 up along y, two side points unk3A out along +-x, and a z direction in
+ * dir. Objects without that bone data get points from their position and func_1507C3E0's height.
+ */
+void func_1503A08C(struct127 *obj) {
+    ObjTypeDef *def;
+    f32 (*bone)[4];
+    f32 vx;
+    f32 vy;
+    f32 vz;
     f32 mag;
-    f32 ax;
-    f32 ay;
-    f32 az;
-    f32 alen;
-    f32 bx;
-    f32 by;
-    f32 bz;
-    f32 blen;
-    s16 sp36;
-    s16 sp34;
-    s16 sp32;
-    s32 h;
+    f32 sideX;
+    f32 sideY;
+    f32 sideZ;
+    f32 width;
+    f32 upX;
+    f32 upY;
+    f32 upZ;
+    f32 len;
+    s16 height;
+    s16 size2;
+    s16 size3;
+    s32 topHeight;
     f32 scale;
 
-    if (arg0->id != 0xFF) {
-        if ((arg0->unk1D4 != NULL) && (D_800D1C90[arg0->id] != NULL)) {
-            if (func_1503D774(arg0->id, 0) == 0) {
-                def = (Def_1503A08C *)D_800D1C90[arg0->id];
-                m = (f32 (*)[4])arg0->unk1D4;
-                m = (f32 (*)[4])((u8 *)m + (def->unk26 << 6));
-                scale = arg0->y_scale;
-                alen = def->unk3A * scale;
-                if (alen != 0) {
-                    cx = m[0][0];
-                    cy = m[0][1];
-                    cz = m[0][2];
-                    blen = cx * cx + cy * cy + cz * cz;
-                    mag = blen;
-                    if (blen != 0) {
-                        mag = sqrtf(blen);
+    if (obj->id != 0xFF) {
+        if ((obj->unk1D4 != NULL) && (D_800D1C90[obj->id] != NULL)) {
+            if (func_1503D774(obj->id, 0) == 0) {
+                def = (ObjTypeDef *)D_800D1C90[obj->id];
+                bone = (f32 (*)[4])obj->unk1D4;
+                bone = ((f32 (*)[4][4])bone)[def->unk26]; // matching: two steps; one OBJ_BONES() index mismatches
+                scale = obj->y_scale;
+                width = def->unk3A * scale;
+                if (width != 0) {
+                    vx = bone[0][0];
+                    vy = bone[0][1];
+                    vz = bone[0][2];
+                    len = vx * vx + vy * vy + vz * vz;
+                    mag = len;
+                    if (len != 0) {
+                        mag = sqrtf(len);
                     }
                     if (mag != 0) {
-                        mag = alen / mag;
+                        mag = width / mag;
                     }
-                    ax = cx * mag;
-                    ay = cy * mag;
-                    az = cz * mag;
+                    sideX = vx * mag;
+                    sideY = vy * mag;
+                    sideZ = vz * mag;
                 } else {
-                    az = 0.0f;
-                    ay = 0.0f;
-                    ax = 0.0f;
+                    sideZ = 0.0f;
+                    sideY = 0.0f;
+                    sideX = 0.0f;
                 }
-                blen = def->unk0 * scale;
-                if (blen != 0) {
-                    cx = m[1][0];
-                    cy = m[1][1];
-                    cz = m[1][2];
-                    mag = sqrtf(cx * cx + cy * cy + cz * cz);
+                len = def->unk0 * scale;
+                if (len != 0) {
+                    vx = bone[1][0];
+                    vy = bone[1][1];
+                    vz = bone[1][2];
+                    mag = sqrtf(vx * vx + vy * vy + vz * vz);
                     if (mag != 0) {
-                        mag = blen / mag;
+                        mag = len / mag;
                     }
-                    bx = cx * mag;
-                    by = cy * mag;
-                    bz = cz * mag;
+                    upX = vx * mag;
+                    upY = vy * mag;
+                    upZ = vz * mag;
                 } else {
-                    bx = by = bz = 0.0f;
+                    upX = upY = upZ = 0.0f;
                 }
-                cx = m[2][0];
-                cy = m[2][1];
-                cz = m[2][2];
-                blen = def->unk30 * scale;
-                if (blen != 0) {
-                    mag = sqrtf(cx * cx + cy * cy + cz * cz);
+                vx = bone[2][0];
+                vy = bone[2][1];
+                vz = bone[2][2];
+                len = def->unk30 * scale;
+                if (len != 0) {
+                    mag = sqrtf(vx * vx + vy * vy + vz * vz);
                     if (mag != 0) {
-                        mag = blen / mag;
+                        mag = len / mag;
                     }
-                    cx *= mag;
-                    cy *= mag;
-                    cz *= mag;
-                    mag = 127.0f / blen;
-                    OBJ_S8(0x1B8) = cx * mag;
-                    OBJ_S8(0x1B9) = cy * mag;
-                    OBJ_S8(0x1BA) = cz * mag;
+                    vx *= mag;
+                    vy *= mag;
+                    vz *= mag;
+                    mag = 127.0f / len;
+                    OBJ_AIM(obj).dir[0] = vx * mag;
+                    OBJ_AIM(obj).dir[1] = vy * mag;
+                    OBJ_AIM(obj).dir[2] = vz * mag;
                 } else {
-                    mag = sqrtf(cx * cx + cy * cy + cz * cz);
+                    mag = sqrtf(vx * vx + vy * vy + vz * vz);
                     if (mag != 0) {
                         mag = 127.0f / mag;
                     }
-                    OBJ_S8(0x1B8) = cx * mag;
-                    OBJ_S8(0x1B9) = cy * mag;
-                    OBJ_S8(0x1BA) = cz * mag;
-                    cx = cy = cz = 0.0f;
+                    OBJ_AIM(obj).dir[0] = vx * mag;
+                    OBJ_AIM(obj).dir[1] = vy * mag;
+                    OBJ_AIM(obj).dir[2] = vz * mag;
+                    vx = vy = vz = 0.0f;
                 }
-                OBJ_S16(0x1A4) = m[3][0] + cx;
-                OBJ_S16(0x1A6) = m[3][1] + cy;
-                OBJ_S16(0x1A8) = m[3][2] + cz;
-                OBJ_S16(0x1AA) = m[3][1] + by;
-                mag = OBJ_S16(0x1A4);
-                OBJ_S16(0x1AC) = mag + ax + bx;
-                OBJ_S16(0x1AE) = OBJ_S16(0x1A6) + ay + by;
-                OBJ_S16(0x1B0) = OBJ_S16(0x1A8) + az + bz;
-                OBJ_S16(0x1B2) = mag - ax + bx;
-                OBJ_S16(0x1B4) = OBJ_S16(0x1A6) - ay + by;
-                OBJ_S16(0x1B6) = OBJ_S16(0x1A8) - az + bz;
+                OBJ_AIM(obj).x = bone[3][0] + vx;
+                OBJ_AIM(obj).y = bone[3][1] + vy;
+                OBJ_AIM(obj).z = bone[3][2] + vz;
+                OBJ_AIM(obj).topY = bone[3][1] + upY;
+                mag = OBJ_AIM(obj).x;
+                OBJ_AIM(obj).sideA[0] = mag + sideX + upX;
+                OBJ_AIM(obj).sideA[1] = OBJ_AIM(obj).y + sideY + upY;
+                OBJ_AIM(obj).sideA[2] = OBJ_AIM(obj).z + sideZ + upZ;
+                OBJ_AIM(obj).sideB[0] = mag - sideX + upX;
+                OBJ_AIM(obj).sideB[1] = OBJ_AIM(obj).y - sideY + upY;
+                OBJ_AIM(obj).sideB[2] = OBJ_AIM(obj).z - sideZ + upZ;
             }
         } else {
-            def = (Def_1503A08C *)D_800D1C90[arg0->id];
+            def = (ObjTypeDef *)D_800D1C90[obj->id];
             if (def != NULL) {
-                h = def->unk0;
+                topHeight = def->unk0;
             } else {
-                h = 0;
+                topHeight = 0;
             }
-            func_1507C3E0(arg0, &sp36, &sp34, &sp32);
-            OBJ_S16(0x1A4) = arg0->x_position;
-            OBJ_S16(0x1A6) = arg0->y_position + (sp36 * 7) / 8;
-            OBJ_S16(0x1A8) = arg0->z_position;
-            OBJ_S16(0x1AA) = OBJ_S16(0x1A6) + h * arg0->y_scale;
-            OBJ_S16(0x1AC) = OBJ_S16(0x1A4);
-            OBJ_S16(0x1B2) = OBJ_S16(0x1A4);
-            OBJ_S16(0x1AE) = OBJ_S16(0x1AA);
-            OBJ_S16(0x1B4) = OBJ_S16(0x1AA);
-            OBJ_S16(0x1B0) = OBJ_S16(0x1A8);
-            OBJ_S16(0x1B6) = OBJ_S16(0x1A8);
-            arg0->unk2CA = 0;
+            func_1507C3E0(obj, &height, &size2, &size3);
+            OBJ_AIM(obj).x = obj->x_position;
+            OBJ_AIM(obj).y = obj->y_position + (height * 7) / 8;
+            OBJ_AIM(obj).z = obj->z_position;
+            OBJ_AIM(obj).topY = OBJ_AIM(obj).y + topHeight * obj->y_scale;
+            OBJ_AIM(obj).sideA[0] = OBJ_AIM(obj).x;
+            OBJ_AIM(obj).sideB[0] = OBJ_AIM(obj).x;
+            OBJ_AIM(obj).sideA[1] = OBJ_AIM(obj).topY;
+            OBJ_AIM(obj).sideB[1] = OBJ_AIM(obj).topY;
+            OBJ_AIM(obj).sideA[2] = OBJ_AIM(obj).z;
+            OBJ_AIM(obj).sideB[2] = OBJ_AIM(obj).z;
+            obj->unk2CA = 0;
         }
     }
 }
