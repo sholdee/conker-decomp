@@ -300,8 +300,6 @@ typedef struct {
     /* 0x170 */ u8 unk170; /* start of the per-type state block */
 } SpawnedEffect;
 
-SpawnedEffect *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
-
 /* Spawns an effect object owned by `owner` and initialises its one-byte state block. */
 void func_151C6EA0(Actor *owner, u8 arg1, s32 arg2) {
     ParticleSpawn spawn;

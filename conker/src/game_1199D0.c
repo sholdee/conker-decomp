@@ -70,8 +70,6 @@ void func_150EC520(EmitterEffect *effect) {
     }
 }
 
-extern SpriteParticle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
-
 /* Particle source effect: emits particles from its position at a random rate. */
 void func_150EC6B0(EmitterEffect *effect) {
     ParticleSourceData *source;

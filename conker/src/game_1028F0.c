@@ -45,7 +45,6 @@ typedef struct {
     } data;
 } FollowParticle;
 
-extern FollowParticle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 extern void func_1514373C(f32 arg0, f32 arg1, f32 *arg2, f32 *arg3);
 extern s32 func_1515C0F8(Actor *arg0, f32 **arg1);
 extern void func_15182670(u8, u8, u8, u8, s32, u8, u8, s32);
@@ -201,7 +200,6 @@ s32 func_15144E80(f32 *, Vec3f *, Vec3f *, Vec3f *);
 f32 func_15144A74(Vec3f *, Vec3f *);
 void func_15146078(Vec3f *, Vec3f *, Vec3f *);
 void func_15143874(s16, f32, f32 *, f32 *);
-s32 func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
 void func_151C05A4(Vec3f *, u8, s32);
 void func_151C05F0(Vec3f *, u8, s32);
 void func_151C0360(f32 *, s32 *, u8, s32);
@@ -638,8 +636,6 @@ void func_150D6C98(Actor *obj, Vec3f *out) {
     out->y = obj->ypos + 60.0f;
     out->z = obj->zpos;
 }
-
-void func_15131958(Vec3f *, f32);
 
 /* Drift particle update: follows the owner and integrates offset/velocity; returns 0 to kill. */
 s32 func_150D6CC4(FollowParticle *particle, s32 arg1) {

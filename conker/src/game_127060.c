@@ -289,7 +289,6 @@ extern void func_15143134(Vec3f *offset, Vec3f *out, Mtx *mtx);
 extern void func_1504715C(CollisionHit *ground, Actor *actor);
 extern void func_15153F18(AngleRange *, SplashSpray *, CollisionHit *, u8, s32);
 extern void func_15150178(AngleRange *, DropSpray *, CollisionHit *, u8, s32);
-extern ImpactParticle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 extern void func_151C329C(Vec3f *, u8, s32);
 
 /*

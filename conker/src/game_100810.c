@@ -813,7 +813,6 @@ s32 func_150D4CC4(TrailGlow *particle) {
     return 1;
 }
 
-extern void *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 extern void func_15143794(s16, s16, f32, f32 *);
 
 /* Throws 10-20 sparks from `pos`, fanned around the owner's facing `angle` (degrees) and against `vel`. */

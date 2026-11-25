@@ -9,7 +9,6 @@ s32 func_1514672C(Vec3f *arg0);
 s32 func_15046C80(Vec3f *point, s32 arg1, f32 startY, CollisionHit *hit);
 void func_151D9FC0(u8 kind, f32 size, u8 arg2, s32 arg3, Vec3f *pos, u8 arg5, s32 arg6);
 void func_151DAB58(u8 kind, f32 size, u8 arg2, Vec3f *pos, volatile u8 arg4, u8 arg5, s32 arg6);
-s32 func_15131918(Vec3f *vel, f32 scale);
 
 /* Per effect kind (0..12): sprite texture id, used by game_1BDC20 and game_1DD500 emitters. */
 const u8 D_800AB310[13] = { 176, 164, 172, 169, 168, 170, 174, 175, 164, 177, 178, 171, 173 };
@@ -156,7 +155,6 @@ typedef struct {
     } data;
 } SteamParticle;
 
-extern SteamParticle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 s32 func_151D9450(SteamParticle *particle, Vec3f *arg1);
 u8 func_151D9534(SteamParticle *particle, Vec3f *arg1);
 

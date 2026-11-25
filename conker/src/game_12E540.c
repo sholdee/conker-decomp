@@ -6,8 +6,6 @@
 extern void func_151D5D60(Vtx **bufs, s32 index, s32 size, Vtx **out, u8 *isNew);
 struct DescParticleHead;
 
-void func_1513173C(struct DescParticleHead *particle);
-void func_1513175C(struct DescParticleHead *particle);
 void func_151617C4(LightEffect *effect);
 void func_151617E4(LightEffect *effect);
 

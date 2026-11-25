@@ -103,8 +103,6 @@ typedef struct {
     /* 0xB2 */ s16 fadeStep;
 } Particle_150BAFEC;
 
-extern Particle_150BAFEC *func_15130374(ParticleDesc68 *, u8, s32, u8, s32);
-
 /* Spawns one particle at (x, y, z) flying off along `yaw` at a random pitch; it slows down by 0.95 per frame. */
 s32 func_150BAFEC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 yaw,
                   s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
@@ -207,8 +205,6 @@ s32 func_150BB450(Particle_150BAFEC *particle) {
     }
     return 1;
 }
-
-extern s32 func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
 
 /* Spawns one piece at (x, y, z) thrown along `yaw` at a random pitch, with random spin and size. */
 s32 func_150BB498(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 yaw,

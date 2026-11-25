@@ -1,5 +1,7 @@
 #include <ultra64.h>
+#define func_15131958 func_15131958_header // matching: this file keeps its own declaration of func_15131958
 #include "functions.h"
+#undef func_15131958
 #include "variables.h"
 #include "effects.h"
 
@@ -8,9 +10,7 @@ extern void *func_151D8868(RumbleParams *params, s32 arg1, s32 arg2, s32 arg3);
 extern s32 allocate_memory(s32, s32, s32, s32);
 
 void func_1503F404(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
-void *func_15132A4C(void *, s32, s32, s32, u8, s32);
-void func_15131828(void *, f32 *, u8 *, u8 *);
-void func_15131958(void *, f32, void *);
+void func_15131958(void *, f32, void *); // matching: called with a third argument (the definition takes two)
 void func_151541B8(Vec3f *, f32, f32, f32, f32, u8, s32);
 
 extern s32 func_1000EC24();
@@ -492,7 +492,6 @@ typedef struct {
     /* 0x28 */ ObjEmitter emitter;
 } ObjEmitterEffect;
 
-extern void *func_15130280(void *, u8, s32, s32, u8, s32);
 extern f32 func_15143E64(Vec3f *);
 
 /* Effect update: tracks the emitter's point on its object and spawns smoke puffs along the path it moved. */

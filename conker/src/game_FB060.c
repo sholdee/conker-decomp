@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 void func_15143794(s16 yaw, s16 pitch, f32 distance, f32 *out);
 
@@ -32,8 +31,6 @@ void func_150CDBB0(Actor *actor, u8 owner, s32 arg2) {
     func_1514C678(pos.x, pos.y, pos.z, 251.0f, 0, 0xFF, (func_150ADA20() & 0xF) + 35, 0x17, 0, 0.0f, 0, owner);
     func_1514C678(pos.x, pos.y, pos.z, 290.0f, 0, 0xFF, (func_150ADA20() % 21U) + 30, 0x18, 0, 0.0f, 0, owner);
 }
-
-SpriteParticle *func_15130374(ParticleDesc *desc, u8 kind, s32 dataSize, u8 arg3, s32 arg4);
 
 /* Spawns a randomly sized purple/yellow particle (kind 1) at (x, y, z), launched along `yaw` at a random pitch. */
 s32 func_150CDCF4(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 yaw, s32 arg9,
@@ -93,8 +90,6 @@ s32 func_150CDCF4(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     }
     return 1;
 }
-
-s32 func_15132A4C(ParticleSpawn80 *spawn, s32, s32, s32, u8, s32);
 
 /* Spawns a spinning model-0x20 particle at (x, y, z), launched along `yaw` at a random pitch. */
 s32 func_150CDF10(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 yaw, s32 arg9,

@@ -436,8 +436,6 @@ typedef struct {
     /* 0x74 */ f32 unk74;
 } Obj151AA6D8;
 
-void *func_151303BC(ParticleDesc *desc, u8 arg1, s32 payloadSize);
-
 /* Spawns a particle burst moving from `from` toward `to`, advanced by `t` frames. */
 void func_151AA6D8(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, Obj151AA6D8 *obj) {
     ParticleDesc burst;

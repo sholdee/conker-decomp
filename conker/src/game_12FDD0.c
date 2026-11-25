@@ -274,7 +274,6 @@ Vtx *func_15102EB8(BoneBeamParticle *particle, s16 viewport) {
 }
 
 extern s32 D_80088BD0[];
-extern void *func_15130374(ParticleDesc *, u8, s32, u8, s32);
 
 /* Spawns a flash particle of the given size at `pos`, with one of four random textures and random flips. */
 void func_15103254(s16 lifetime, u8 alpha, f32 size, Vec3f *pos, u8 views, u8 arg5, s32 arg6) {

@@ -2,9 +2,6 @@
 
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-ChannelParticle *func_15149550(ParticleEmitterDesc *arg0, u8 arg1, u8 arg2, s32 arg3, u8 arg4, s32 arg5);
 
 void func_150C29F0(Struct150C29F0 *emitter) {
     DiscEmitter *pos;

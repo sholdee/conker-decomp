@@ -148,7 +148,6 @@ void func_150FFD2C(Actor *obj, Actor *other, s32 arg2) {
     }
 }
 
-void *func_15130280(ParticleDesc *spawn, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out);
 void func_15145974(Vec3f *direction, f32 *yaw, f32 *pitch);
 

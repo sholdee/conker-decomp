@@ -2295,7 +2295,6 @@ s32 func_15199A10(CharacterFlamethrowerActor *actor) {
 void func_15145740(void *, void *, void *, void *, f32);
 s32 func_15146078(Vec3f *, Vec3f *, Vec3f *);
 void func_15143874(s16, f32, f32 *, f32 *);
-void *func_15130280(void *, u8, s32, s32, u8, s32);
 void func_151D8868(RumbleParams *, s32, s32, s32);
 
 /*

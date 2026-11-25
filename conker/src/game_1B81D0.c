@@ -5,7 +5,6 @@
 
 
 
-extern FloorParticle *func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
 extern void func_1518CA80(BillboardSpawn *, u8);
 extern void func_151429E0(u8, u8 *, u8 *, u8 *);
 extern s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);

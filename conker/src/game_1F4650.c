@@ -666,8 +666,6 @@ SightExtension *func_151C8FCC(SightBeamObject *owner, Vec3f *start, Vec3f *end, 
 }
 
 extern s32 func_15144E80(CollisionTri *, Vec3f *, Vec3f *, Vec3f *);
-extern void *func_15132A4C(void *, s32, s32, s32, u8, s32);
-extern void func_15133760(void *, void *);
 
 /* Spawns the three parts of a beam emitter on the surface triangle at `pos`. */
 void func_151C9198(SightEmitter **emitters, Vec3f *pos, CollisionTri *triangle, Vec3f *dir, SightZone *zone, u8 altColors, u8 zoneMasked, u8 arg7, s32 arg8) {

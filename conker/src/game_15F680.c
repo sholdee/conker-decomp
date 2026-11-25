@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 #define ARRAY_COUNT(arr) (s32)(sizeof(arr) / sizeof(arr[0]))
 
@@ -107,8 +106,6 @@ void func_151323F8(ModelParticle *particle) {
     D_800899D4[variant](particle);
 }
 
-void func_151325C8(ModelParticle *particle);
-
 /* Release a particle's model reference: drop the per-model count, and once no particle uses the model
  * (and it is not marked to stay resident) unlink its node and free the model. */
 void func_15132444(ModelParticle *particle) {
@@ -175,7 +172,6 @@ extern void func_15168A9C(void *);
 extern void func_10004074(void *);
 extern s32 func_1515D480(s32);
 extern s32 func_1515D440(void);
-s32 func_151336A8(s32 model, ParticleNode *node, ModelParticle *particle);
 
 /* Spawn a particle from a template: allocate it (failing past 300 live), find or load the shared node for
  * its model, copy the template, reset collision state (or copy `floor`) and allocate its buffers. */
@@ -798,8 +794,6 @@ typedef struct {
     /* 0x1 */ u8 pad1[3];
     /* 0x4 */ SegmentTexture textures[1];
 } ParticleTextureList;
-
-Gfx *func_15133EEC(Gfx *gfx, u16 index, u8 segment, s32 arg3);
 
 /* Draw handler: bind the texture stored in the particle's data. */
 Gfx *func_15133E84(Gfx *gfx, ModelParticle *particle, s16 arg2) {

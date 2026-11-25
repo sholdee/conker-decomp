@@ -124,7 +124,6 @@ extern void func_151DC034(Vec3f *, f32, u8, s16, s32, u8, s32);
 extern void func_151DA6F8(Vec3f *, Vec3f *, f32, s16, s32, f32, s32, s32, f32, f32, s32, s32, s32, s32, s32, s32, u8, s32);
 extern void func_15143794(s16, s16, f32, Vec3f *);
 extern void func_15143874(s16, f32, f32 *, f32 *);
-extern SpriteParticle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 void func_151D9014(Vec3f *a0, Vec3f *a1, s32 a2, f32 a3, s32 sp10, s32 sp14, f32 sp18, s32 sp1C, f32 sp20, f32 sp24, s32 sp28, s32 sp2C, s32 sp30, s32 sp34, u8 sp38, s32 sp3C);
 
 /* Spawns a burst of effects from the frame func_15137C64 derives from arg0..arg2: always a

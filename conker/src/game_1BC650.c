@@ -110,7 +110,6 @@ s32 func_1518E298();
 void func_15143134(Vec3f *offset, Vec3f *out, Mtx *mtx);
 void *func_1514B8E4(Vec3f *, SpriteSize *, s16, u8, Vec3f *, f32, f32, f32, u8, u8, u8, s32, u8, s16,
                     s16, s32, u8, s32);
-void func_1514BE20(EffectSprite *);
 void func_1514BF50(EffectSprite *);
 LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 void func_151D2AB0(s32);

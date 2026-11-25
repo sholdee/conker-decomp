@@ -204,8 +204,6 @@ void func_15170F4C(WorldObject *actor, u8 owner, s32 list) {
     actor->inactive = 1;
 }
 
-void func_150C3D5C(Actor *);
-
 /* Effect hook for objects: object 0x33 gets func_150C3D5C first. */
 void func_151711C4(Actor *obj) {
     if (obj->character_type == 0x33) {
@@ -383,7 +381,6 @@ void func_151718F0(f32 x, f32 y, f32 z, f32 radius, s32 baseSize, f32 sizeScale,
 
 void func_150AEEB0(Actor *);
 void func_150BD740(Actor *, u8, s32);
-void func_150CDBB0(Actor *, u8, s32);
 
 /* Effect hook for objects, by object id. */
 void func_15171BF4(Actor *obj, u8 owner) {

@@ -46,7 +46,6 @@ typedef struct {
 
 extern s32 func_151464B8(s32);
 extern s32 func_15046C80(f32 *, s32, f32, CollisionHit *);
-extern void func_15149550(ParticleEmitterDesc *, s32, s32, s32, s32, s32);
 
 /*
  * Per-frame update of a particle emitter effect: accumulates rate * scale * D_800BE9A4 and spawns one

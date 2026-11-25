@@ -212,8 +212,6 @@ void func_15150178(AngleRange *angles, DropSpray *config, s32 arg2, u8 arg3, s32
     }
 }
 
-extern void *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, void *floor, s32 arg4, u8 arg5, s32 arg6);
-
 /* Spawns a random number of pieces in random directions around config->origin; each picks a random
  * entry of the variant tables and gets a copy of config->extraData. */
 void func_15150400(DebrisScatter *config, AngleRange *angles, u8 arg2, s32 arg3) {
@@ -659,8 +657,6 @@ void func_15151A38(PuffSpray *config, u8 arg1, s32 arg2) {
     }
 }
 
-extern void *func_15132A4C(ParticleSpawn78 *, s32, s32, s32, u8, s32);
-
 /* Spawns a random number of pieces off a surface triangle, each moving in a random direction inside
  * the cone around the triangle's normal and using a random entry of the variant tables. */
 void func_15151D6C(SurfaceDebrisBurst *config, s32 *variantIds, f32 *variantScales, u32 variantCount, u8 arg4, s32 arg5) {
@@ -1067,8 +1063,6 @@ void func_15153298(BillboardBurst *config, u8 arg1, s32 arg2) {
         count--;
     }
 }
-
-extern void *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 
 /* Spawns a random number of particles (func_15130280) at config->position, each moving at a random
  * yaw and pitch, and copies config->extra into each. */

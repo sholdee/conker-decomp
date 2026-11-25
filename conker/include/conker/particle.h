@@ -106,4 +106,151 @@ typedef struct Rgb8 {
     /* 0x2 */ u8 b;
 } Rgb8; /* size 0x3 */
 
+/* game/done/game_35E80.c */
+void func_150089D0(void);
+
+/* game_39750.c */
+void func_1500C2A0(void);
+void func_1500C2F0(s32 region, f32 density);
+void func_1500C8D0(s32 region, f32 density);
+void func_1500CE4C(s32 region, f32 density);
+void func_1500D3AC(s32 region, f32 density);
+void func_1500D8C8(s32 region, f32 density);
+void func_1500DE88(s32 region, f32 density);
+
+/* game_DF930.c */
+s32 func_150B2480(s32 arg0, s32 arg1);
+void func_150B2494(Actor *obj, s32 arg1, s32 arg2);
+s32 func_150B2570(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 yaw, s32 arg9, s32 arg10,
+                  s32 arg11, s32 arg12, s32 arg13, u8 owner);
+
+/* game_E7DE0.c */
+s32 func_150BA930(Vec3f *pos, Actor *obj, CollisionHit *hit, s32 arg3);
+s32 func_150BAA00(s32 arg0, s32 arg1);
+void func_150BAA14(Actor *obj, s32 arg1, s32 arg2);
+
+/* game_EE710.c */
+void func_150C1260(Actor *actor, u8 foot);
+
+/* game_EF410.c */
+void func_150C1F60(u8 arg0);
+void func_150C2290(u8 arg0);
+void func_150C2424(u8 arg0);
+s32 func_150C251C(ChannelParticle *particle);
+s32 func_150C2558(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA,
+                  s32 argB, s32 argC, s32 argD, u8 argE);
+s32 func_150C2700(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA,
+                  s32 argB, s32 argC, s32 argD, u8 argE);
+void func_150C2804(f32 *x, f32 *y, f32 *z, s16 delay, s32 arg4, s32 arg5);
+void func_150C2898(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, Struct150C29F0 *emitter);
+
+/* game_EFEA0.c */
+void func_150C29F0(Struct150C29F0 *emitter);
+void func_150C2C00(Struct150C29F0 *emitter);
+s32 func_150C2FCC(ChannelParticle *particle);
+s32 func_150C308C(ChannelParticle *particle);
+
+/* game_F0610.c */
+Gfx *func_150C3160(Gfx *gdl, Actor *obj);
+void func_150C3230(Actor *obj);
+void func_150C3574(Actor *obj);
+void func_150C3994(Actor *obj);
+s32 func_150C3D48(s32 value);
+void func_150C3D5C(Actor *obj);
+
+/* game_FA240.c */
+void func_150CCD90(f32 z, f32 *r, f32 *g, f32 *b);
+
+/* game_FB060.c */
+void func_150CDBB0(Actor *actor, u8 owner, s32 arg2);
+s32 func_150CDCF4(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 yaw, s32 arg9, s32 arg10,
+                  s32 arg11, s32 arg12, s32 arg13, u8 arg14);
+s32 func_150CDF10(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 yaw, s32 arg9, s32 arg10,
+                  s32 arg11, s32 arg12, s32 arg13, u8 arg14);
+
+/* game_120950.c */
+f32 func_150F34A0(Actor *obj, f32 pitch);
+void func_150F34F4(Actor *actor);
+void func_150F43F0(Camera *actor);
+
+/* game_15D730.c */
+SpriteParticle *func_15130280(ParticleDesc *desc, u8 kind, CollisionHit *ground, s32 dataSize, u8 arg4, s32 arg5);
+SpriteParticle *func_15130374(ParticleDesc *desc, u8 kind, s32 dataSize, u8 arg3, s32 arg4);
+SpriteParticle *func_151303BC(ParticleDesc *desc, u8 kind, s32 dataSize);
+void func_151303EC(SpriteParticle *p);
+Gfx *func_15130A9C(Gfx *gfx, SpriteParticle *p, s16 viewIdx);
+void func_1513137C(s16 *r, s16 *g, s16 *b, s16 *a, SpriteParticle *p);
+void func_15131514(s16 *r, s16 *g, s16 *b, s16 *a, SpriteParticle *p);
+void func_1513164C(s16 *primR, s16 *primG, s16 *primB, s16 *primA, s16 *envR, s16 *envG, s16 *envB, s16 *envA,
+                   SpriteParticle *p);
+s32 func_151316AC(SpriteParticle *p, Vec3f *prevPos);
+s32 func_151316DC(SpriteParticle *p, Vec3f *prevPos);
+s32 func_1513170C(SpriteParticle *p, Vec3f *prevPos);
+void func_1513173C(SpriteParticle *p);
+void func_1513175C(SpriteParticle *p);
+void func_1513177C(SpriteParticle *p);
+s32 func_151317C8(SpriteParticle *p);
+s32 func_15131814(s32 arg0, s32 arg1);
+void func_15131828(SpriteParticle *p, f32 *amplitude, u8 *phase, u8 *phaseStep);
+void func_151318E8(Vec3f *vel, f32 drag);
+void func_15131918(Vec3f *vel, f32 drag);
+void func_15131958(Vec3f *vel, f32 drag);
+s32 func_151319A4(SpriteParticle *p, Vec3f *prevPos);
+s32 func_151319C4(SpriteParticle *p, Vec3f *prevPos, ParticleBounce *bounce);
+s32 func_15131AFC(SpriteParticle *p, Vec3f *prevPos);
+s32 func_15131B3C(SpriteParticle *p, Vec3f *prevPos);
+s32 func_15131B7C(SpriteParticle *p, Vec3f *prevPos, f32 *hit, ParticleBounce *bounce);
+void func_15131C2C(SpriteParticle *p, s32 arg1, u8 arg2);
+void func_15131C84(u8 *phase, s8 *phaseStep, f32 base, f32 *amplitude, f32 *outX, f32 *outY);
+void func_15131D4C(s32 arg0, u8 arg1);
+s32 func_15131D9C(SpriteParticle *p, Vec3f *prevPos);
+s32 func_15131DEC(SpriteParticle *p, Vec3f *prevPos);
+SpriteParticle *func_15131EE4(Vec3f *pos, f32 size, u8 arg2, s32 arg3);
+
+/* game_15F680.c */
+void func_151321D0(ModelParticle *particle);
+void func_151323AC(ModelParticle *particle);
+void func_151323F8(ModelParticle *particle);
+void func_15132444(ModelParticle *particle);
+void func_15132570(ModelParticle *particle);
+void func_1513259C(ModelParticle *particle);
+void func_151325C8(ModelParticle *particle);
+ModelParticle *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, CollisionHit *floor, s32 extraSize, u8 arg5,
+                             s32 arg6);
+ModelParticle *func_15132A4C(ParticleSpawn *spawn, s32 arg1, s32 arg2, s32 extraSize, u8 arg4, s32 arg5);
+void func_15132A88(ModelParticle *particle);
+Gfx *func_15132B80(Gfx *gfx, ModelParticle *arg1, s16 arg2);
+s32 func_15132DDC(ModelParticle *particle);
+s32 func_151332DC(ModelParticle *particle);
+s32 func_15133510(Mtx *mtx, ModelParticle *particle);
+void func_15133588(ModelParticle *particle, void *data, u8 event);
+s32 func_151336A8(s32 model, ParticleNode *node, ModelParticle *particle);
+s32 func_15133760(Mtx *mtx, ModelParticle *particle);
+s32 func_151337C0(ModelParticle *particle);
+s32 func_15133894(ModelParticle *particle);
+s32 func_151339D4(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floorHeight);
+s32 func_15133A50(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floorHeight);
+s32 func_15133A94(Mtx *mtx, ModelParticle *particle);
+s32 func_15133B98(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floorHeight, CollisionTri *surface);
+s32 func_15133C58(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floorHeight, CollisionTri *surface);
+s32 func_15133D20(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floorHeight, CollisionTri *surface);
+void func_15133DE8(ModelParticle *particle, ActorRef *data, u8 event);
+void func_15133E3C(s32 arg0, u8 arg1);
+Gfx *func_15133E84(Gfx *gfx, ModelParticle *particle, s16 arg2);
+Gfx *func_15133EB8(Gfx *gfx, ModelParticle *particle, s16 arg2);
+Gfx *func_15133EEC(Gfx *gfx, u16 index, u8 segment, s32 arg3);
+Gfx *func_15133FD8(Gfx *gfx, ModelParticle *particle, s16 arg2);
+
+/* game_176A00.c */
+ChannelParticle *func_15149550(ParticleEmitterDesc *emitter, u8 arg1, u8 arg2, u8 kind, u8 arg4, s32 arg5);
+s32 func_15149838(ChannelParticle *particle);
+s32 func_15149A94(ChannelParticle *particle);
+s32 func_15149BF4(ChannelParticle *particle);
+s32 func_15149C58(ChannelParticle *particle);
+Vtx *func_15149D18(ChannelParticle *particle, s16 index);
+s32 func_15149EC4(ChannelParticle *particle);
+
+/* game_1792D0.c */
+void func_1514BE20(void *arg);
+
 #endif

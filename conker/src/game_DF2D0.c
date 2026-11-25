@@ -48,8 +48,6 @@ void func_150B1EE0(EffectHeader *spawner, Vec3f *pos, s32 arg2, s32 arg3) {
     }
 }
 
-extern void *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
-
 /* Emitter effect update: accumulates a random rate per frame and spawns one particle at the
  * emitter's position per whole unit owed. */
 void func_150B1F90(PointEmitter *effect) {

@@ -25,8 +25,6 @@ typedef struct {
     /* 0xA8 */ f32 unkA8;
 } Particle1DEF60;
 
-Particle1DEF60 *func_15130374(ParticleDesc64 *spawn, u8 kind, s32 dataSize, u8 arg3, s32 arg4);
-
 
 /* Spawns the task that func_151B1B34 updates for this owner. */
 void func_151B1AB0(Actor *owner) {

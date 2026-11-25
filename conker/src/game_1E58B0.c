@@ -136,7 +136,6 @@ void func_151B86F4(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *ef
 }
 
 extern TextureChoices D_800AA4B8;
-extern void *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 
 /* Spawns a particle at the bullet's position, with a random texture choice and random flag bits 0x40 / 0x80. */
 void func_151B8908(Bullet *bullet) {

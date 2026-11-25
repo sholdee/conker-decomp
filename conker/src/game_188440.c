@@ -101,8 +101,6 @@ typedef struct {
     /* 0x28 */ RiseEmitterState emitter;
 } EmitterObject;
 
-void *func_151303BC(ParticleDesc6C *, s32, s32);
-
 /* Effect update: accumulates rate * D_800BE9A4 and spawns one func_151303BC particle per whole unit. */
 void func_1515B21C(EmitterObject *obj) {
     RiseEmitterState *emitter;

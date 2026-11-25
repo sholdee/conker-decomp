@@ -4,7 +4,6 @@
 #include "effects.h"
 
 
-extern void func_15132A4C(void *, s32, s32, s32, u8, s32);
 extern void func_1518CA80(void *, u8); // matching: takes a BillboardSpawn; this caller passes a BillboardSpawn38
 extern void func_151429E0(u8, u8 *, u8 *, u8 *);
 

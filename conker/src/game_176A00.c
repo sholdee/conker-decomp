@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 extern void func_1510F800(s32);
 extern void func_1513F680(void *obj, u8, u8 effect, u8, u8);

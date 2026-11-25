@@ -4,8 +4,6 @@
 #include "effects.h"
 
 void func_15143794(s16 yaw, s16 pitch, f32 speed, f32 *out);
-TimedEffect *func_15130374(void *, u8, s32, u8, s32);
-s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
 
 /* One entry of the D_800A0640 table: where on the owner's skeleton func_150CBF80 spawns, and its random ranges. */
 typedef struct {
@@ -55,7 +53,6 @@ extern GroundBurstDef D_800A0640[];
 void func_1504715C(CollisionHit *, Actor *);
 s32 func_15046C80(f32 *, s32, f32, CollisionHit *);
 void func_15143134(f32 *in, f32 *out, MtxF *mtx);
-void func_150CCD90(f32, f32 *, f32 *, f32 *);
 void func_1514C678(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, void *, u8);
 void func_150C88D0(RadialEffectDef *, s32, s32, s32);
 void *memcpy(void *, void *, s32);

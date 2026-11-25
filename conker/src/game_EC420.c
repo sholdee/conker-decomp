@@ -1,5 +1,7 @@
 #include <ultra64.h>
+#define func_15133B98 func_15133B98_header // matching: this file keeps its own declaration of func_15133B98
 #include "functions.h"
+#undef func_15133B98
 #include "variables.h"
 #include "effects.h"
 
@@ -653,7 +655,7 @@ void func_150C04C0(Vec3f *origin, void *arg1, s32 id, u8 arg3, u8 arg4, s32 arg5
     func_15150400(&config, &angles, arg4, arg5);
 }
 
-extern s32 func_15133B98(Piece *, s32, s32, s32, f32, s32);
+extern s32 func_15133B98(Piece *, s32, s32, s32, f32, s32); // matching: passes the coordinates in integer registers (the definition takes f32)
 
 /* Piece handler: with probability burstChance, bursts into smaller pieces and particles 20 units above
  * `y`; otherwise falls back to func_15133B98. */

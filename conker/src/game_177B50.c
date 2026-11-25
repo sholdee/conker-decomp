@@ -5,8 +5,6 @@
 
 extern void func_151D5D60(u8 **buffers, s16 index, s32 size, void **out, u8 *isNew);
 
-s32 func_15149550(ParticleEmitterDesc *arg0, u8 arg1, u8 arg2, s32 arg3, u8 arg4, s32 arg5);
-
 typedef struct Vtx1514A6A0 {
     s16 x, y, z, flag;
     u8 other[8];

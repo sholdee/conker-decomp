@@ -651,10 +651,7 @@ typedef struct {
     /* 0x4 */ FadeEvent fade;
 } ParticleData151A26EC;
 
-s32 func_1513170C(FadeEventParticle *, Vec3f *);
 extern void (*D_8008F8E0[])(FadeEventParticle *, s32);
-
-extern FadeEventParticle *func_15130374(ParticleDesc *, u8, s32, u8, s32);
 
 /* Spawns one func_15130374 particle (texture 39, update func 0x11) at pos/offset with velocity vel. */
 s32 func_151A26EC(Vec3f *pos, Vec3f *offset, Vec3f *vel, f32 drag, f32 gravity, f32 size,

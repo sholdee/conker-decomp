@@ -73,8 +73,6 @@ extern void (*D_80088C64[])(void *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f *)
 
 extern void func_15143134(const Vec3f *, Vec3f *, void *);
 extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
-extern Particle1368C0 *func_15130374(ParticleDesc *, u8, s32, u8, s32);
-extern void func_15132A4C(ParticleSpawn78 *, s32, s32, s32, u8, s32);
 extern void func_15152B38(TrailBurst *, u8, s32);
 extern void func_1511490C(MtxF mtx, void *arg1);
 extern void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);

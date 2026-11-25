@@ -5,7 +5,6 @@
 
 extern void func_150D6730(Actor *obj, u8 arg1, s32 arg2);
 extern s32 func_15042E3C(char *format, ...);
-extern Gfx *func_15133EEC(Gfx *gfx, u16 index, u8 segment, s32 arg3);
 
 /* Style 3 text box state: an amount shown as "$ %d" that fades out with its owner. */
 typedef struct {

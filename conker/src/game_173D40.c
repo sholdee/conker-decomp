@@ -13,7 +13,6 @@ extern u8 (*D_8008FD1C)(void);
 extern u8 (*D_8008FD30)(void);
 void func_15150F90(PieceSpray *config, u8 arg1, u8 arg2, s32 arg3);
 void func_15143794(s16 yaw, s16 pitch, f32 distance, f32 *out);
-TimedEffect *func_15130374(void *, u8, s32, u8, s32);
 
 /* Get the position of one of the actor's bones (0x13 for side 1, 0x17 for side 2; any other side
    fails with 0).  With a `hit` buffer, also look for the ground below that point and return

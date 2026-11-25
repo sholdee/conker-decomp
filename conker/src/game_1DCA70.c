@@ -74,7 +74,6 @@ typedef struct {
     /* 0x128 */ SprayGrowth growth;
 } SprayParticle;
 
-void func_150CCD90(f32, f32 *, f32 *, f32 *);
 void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 arg8,
                    f32 arg9, u8 *rgb, u8 argB);
 
@@ -216,7 +215,6 @@ s32 func_151AFC08(SprayParticle *spray) {
     return 1;
 }
 
-SparkParticle *func_15130374(ParticleDesc *desc, u8 arg1, s32 arg2, u8 arg3, s32 arg4);
 void func_15143794(s16 yaw, s16 pitch, f32 speed, f32 *vel);
 
 /* Spawns one spark at (x, y, z), thrown in a random direction around `yaw`. */

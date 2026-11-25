@@ -153,7 +153,6 @@ void func_151D3FF4(Vec3f *pos, u8 owner, s32 kind);
 void func_151D5514(Vec3f *pos, u8 owner, s32 kind);
 void *func_151541B8(Vec3f *position, f32 duration, f32 growth, f32 alpha, f32 arg4, u8 owner, s32 kind);
 extern void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out);
-extern s32 func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 owner, s32 kind);
 
 /*
  * Plays a fixed burst of effects: func_15164F0C, a func_150E83AC effect at D_800A149C lasting

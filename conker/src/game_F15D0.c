@@ -21,8 +21,6 @@ typedef struct {
     /* 0x28 */ EffectData data;
 } PulseEffect;
 
-extern SpriteParticle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
-
 /* Spawns an effect that follows `owner` (lifetime `duration`, -1 for the default 300) together with
  * a pulsing particle. */
 void func_150C4120(Actor *owner, s16 duration, u8 arg2, s32 arg3) {

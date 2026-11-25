@@ -1,5 +1,7 @@
 #include <ultra64.h>
+#define func_15131958 func_15131958_header // matching: this file keeps its own declaration of func_15131958
 #include "functions.h"
+#undef func_15131958
 #include "variables.h"
 #include "effects.h"
 
@@ -47,8 +49,7 @@ typedef struct {
 extern s32 func_151EF610(void);
 extern void func_1000D96C(s32, s32, s32);
 extern PissTrail *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_15131828(void *, f32 *, u8 *, u8 *);
-extern void func_15131958(void *, f32, void *);
+extern void func_15131958(void *, f32, void *); // matching: called with a third argument (the definition takes two)
 
 /* Trail anchor point: 20 units above the actor. */
 void func_150D8B10(Actor *actor, Vec3f *out) {
@@ -776,7 +777,6 @@ typedef struct {
     u8 unk0[0x24];
 } ImpactOrigin;
 
-extern TrailSpark *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 extern void func_150472C0(ImpactOrigin *, RayHit *);
 extern void func_15153CCC(ConeBasis *, SplashSpray *, ImpactOrigin *, u8, s32);
 extern void func_15153C84(TriangleSource *, SplashSpray *, ImpactOrigin *, u8, s32);

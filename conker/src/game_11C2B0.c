@@ -998,8 +998,6 @@ typedef struct {
     } link;
 } AttachedSpriteParticle;
 
-extern void *func_15130280(void *, u8, s32, s32, u8, s32);
-
 /* Spawns a particle that follows `actor` (see func_150F0E48). */
 void func_150F0BEC(Actor *actor) {
     ParticleDesc spawn;

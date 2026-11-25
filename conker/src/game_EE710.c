@@ -6,14 +6,12 @@
 #undef func_150ADA20
 u8 func_150ADA20(void);
 #include "variables.h"
-#include "effects.h"
 
 
 
 void func_1514C2F0(f32 x, f32 y, f32 z, f32 radius, u8 startAngle, s8 angleStep, s16 count,
                    u8 kind, s32 arg8, f32 arg9, s32 arg10, u8 arg11);
 void func_15165F80(s32 direction, s32 x, s32 y, s32 z, s32 growthRate, s32 life, s32 arg6, u8 arg7, s32 arg8);
-FloorParticle *func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
 
 /* Dust at one of actor's feet (foot 0 or 1: bone 13 or 17), on the ground height floorY: a func_1514C2F0
  * ring and a func_15165F80 quad under the foot, then 5-12 particles thrown outwards, sized by the actor's

@@ -52,7 +52,6 @@ typedef struct {
 } SpiralParticle;
 
 extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
-extern SpiralParticle *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, s32 arg3, s32 extraSize, u8 owner, s32 kind);
 
 /* Spawns an effect that spirals from `from` to `to` at `speed` (invSpeed = 1 / speed), playing
  * `sound` near the camera when it is non-zero. */

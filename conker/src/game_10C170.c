@@ -19,7 +19,6 @@ extern f32 D_80088960[3];
 extern f32 D_8008896C[3];
 
 void *memcpy(void *, const void *, u32);
-s32 func_1513264C(ParticleSpawn *, s32, s32, s32, s32, u8, s32);
 void func_15165F80(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_151D5334(Vec3f *, f32, f32, f32, s32, u8, s32);
 void func_151D5514(Vec3f *, u8, s32);
@@ -172,7 +171,6 @@ void func_150DF334(PointEffect *effect) {
                   effect->base.header.kind);
 }
 
-void *func_15149550(ParticleEmitterDesc *emitter, u8 arg1, u8 arg2, u8 arg3, u8 owner, s32 kind);
 void func_15143874(s16 angle, f32 dist, f32 *x, f32 *z);
 
 /* Spawns a particle at pos, then 1-3 more scattered within 30 units of it. */

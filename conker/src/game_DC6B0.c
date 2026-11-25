@@ -64,10 +64,6 @@ typedef struct {
     /* 0x28 */ SmokeEmitterData data;
 } SmokeEmitter;
 
-extern SpriteParticle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
-extern void func_15131828(SpriteParticle *, f32 *amplitude, u8 *phase, u8 *phaseStep);
-extern void func_15131958(Vec3f *vel, f32 drag);
-
 /* Emitter update: accumulates 0.1352..0.305 particles per unit of D_800BE9A4 and spawns one
  * randomly sized particle at the emitter's position for each whole one. */
 void func_150AF328(SmokeEmitter *emitter) {
@@ -404,7 +400,6 @@ typedef struct GameDC6B0TrailArgs {
     s32 unk4;
 } GameDC6B0TrailArgs;
 
-GameDC6B0Projectile *func_1513264C(ParticleSpawn *, s32, s32, s32, s32, u8, s32);
 void func_15145974(Vec3f *v, f32 *heading, f32 *elevation);
 EffectHeader *func_151B7328(void *args, s32 selector, s32 argsSize, s32, s32);
 s32 func_15145128(Vec3f *v, Vec3f *out, f32 *length, f32 *invLength);
@@ -475,15 +470,11 @@ void func_150B02C0(GameDC6B0Projectile *projectile) {
     }
 }
 
-extern void func_15132570(void *);
-
 /* Releases the trail, then func_15132570. */
 void func_150B02F0(GameDC6B0Projectile *projectile) {
     func_150B02C0(projectile);
     func_15132570(projectile);
 }
-
-extern void func_1513259C(void *);
 
 /* Releases the trail, then func_1513259C. */
 void func_150B031C(GameDC6B0Projectile *projectile) {

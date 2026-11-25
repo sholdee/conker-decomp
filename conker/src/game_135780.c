@@ -45,7 +45,6 @@ typedef struct {
     /* 0x28 */ AreaEmitterData data;
 } AreaEmitter;
 
-extern AreaFlashParticle *func_15130280(ParticleDesc *desc, u8 kind, s32, s32 dataSize, u8, s32);
 extern void func_1514373C(f32 angle, f32 radius, f32 *x, f32 *z);
 
 /* Emitter update: accumulates 0.03..0.04 particles per unit of D_800BE9A4 and, while enabled,

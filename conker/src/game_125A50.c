@@ -18,7 +18,6 @@ const u8 D_800A1C40[4][2] = { { 0, 4 }, { 1, 5 }, { 2, 6 }, { 3, 7 } };
 const Vec3f D_800A1C48 = { -124.0f, -8.0f, 28.0f };
 const Vec3f D_800A1C54 = { -170.0f, -8.0f, 28.0f };
 
-void *func_1513264C(void *spawn, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
 void func_151D3F14(Vec3f *pos, u8, s32);
 ModelAttachment *func_150FF288(Actor *);
 s32 func_150FF6E0(Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Actor *, ModelAttachment *);
@@ -178,7 +177,6 @@ extern void func_151D8868(RumbleParams *params, s32 arg1, s32 arg2, s32 arg3);
 extern void func_15143874(s16 angle, f32 radius, f32 *x, f32 *z);
 extern void func_151C329C(Vec3f *pos, s32, s32);
 extern void func_15143794(s16, s16, f32, Vec3f *out);
-extern void *func_15130280(ParticleDesc *spawn, u8, s32, s32, u8, s32);
 void func_151DB5D0(s32, Vec3f *pos, Vec3f *vel, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32);
 
 /*

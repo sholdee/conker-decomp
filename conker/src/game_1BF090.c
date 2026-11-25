@@ -158,8 +158,6 @@ void func_15191D54(DustEmitter *effect) {
     }
 }
 
-DustParticle *func_15130374(ParticleDesc *desc, u8 kind, s32 dataSize, u8 arg3, s32 arg4);
-
 /* Spawns a dust particle at `position` that pulses in size and splashes when it falls below floorY
  * (update func 0xF, func_1519257C). */
 DustParticle *func_1519203C(Vec3f *position, Vec3f *velocity, f32 gravity, s16 lifetime, u8 alpha,
@@ -233,8 +231,6 @@ DustParticle *func_1519203C(Vec3f *position, Vec3f *velocity, f32 gravity, s16 l
     }
     return particle;
 }
-
-void func_15131C84(u8 *phase, s8 *phaseStep, f32 base, f32 *amplitude, f32 *outX, f32 *outY);
 
 /* Particle update: pulses the dust particle's width and height around its base size. */
 u8 func_15192308(DustParticle *particle, Vec3f *prevPos) {

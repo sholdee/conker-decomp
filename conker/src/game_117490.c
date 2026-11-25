@@ -26,8 +26,6 @@ typedef struct {
     /* 0x74 */ f32 unk74;
 } struct_EA11C_arg5;
 
-void *func_151303BC(ParticleDesc *, s32, s32);
-
 void *func_15134DAC(BloodStripDesc *, s32);
 
 /* Creates a func_15134DAC object attached to `owner`, with a slowly pulsing oscillator. */

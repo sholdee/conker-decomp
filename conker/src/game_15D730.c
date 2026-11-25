@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 #include "libc/string.h"
 
 extern f32 sqrtf(f32);
@@ -50,12 +49,12 @@ SpriteParticle *func_15130280(ParticleDesc *desc, u8 kind, CollisionHit *ground,
     return particle;
 }
 
-void func_15130374(ParticleDesc *desc, u8 kind, s32 dataSize, u8 arg3, s32 arg4) {
-    func_15130280(desc, kind, NULL, dataSize, arg3, arg4);
+SpriteParticle *func_15130374(ParticleDesc *desc, u8 kind, s32 dataSize, u8 arg3, s32 arg4) {
+    return func_15130280(desc, kind, NULL, dataSize, arg3, arg4);
 }
 
-void func_151303BC(ParticleDesc *desc, u8 kind, s32 dataSize) {
-    func_15130374(desc, kind, dataSize, 0xFF, 0);
+SpriteParticle *func_151303BC(ParticleDesc *desc, u8 kind, s32 dataSize) {
+    return func_15130374(desc, kind, dataSize, 0xFF, 0);
 }
 
 extern EffectTexture D_80090B60[];
@@ -174,8 +173,6 @@ typedef struct ParticleRenderMode {
 extern s32 (*D_80089804[])(SpriteParticle *, s16);
 extern ParticleRenderMode D_800A4AC8[];
 s32 func_15144CEC(Vec3f *, f32 *, f32 *, f32 *, f32 *, s32);
-void func_1513137C(s16 *r, s16 *g, s16 *b, s16 *a, SpriteParticle *p);
-void func_1513164C(s16 *primR, s16 *primG, s16 *primB, s16 *primA, s16 *envR, s16 *envG, s16 *envB, s16 *envA, SpriteParticle *p);
 void func_1515E888(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5, u8 *arg6, u8 *arg7);
 Gfx *func_15142E24(Gfx *gfx, EffectTexture *tex, s32 frame, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *needSync, s32 argA);
 Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
@@ -439,23 +436,17 @@ void func_1513164C(s16 *primR, s16 *primG, s16 *primB, s16 *primA, s16 *envR, s1
     func_1513137C(primR, primG, primB, primA, p);
 }
 
-void func_151318E8(Vec3f *vel, f32 drag);
-
 /* Particle update func: applies p->data.drag to the vertical velocity. */
 s32 func_151316AC(SpriteParticle *p, Vec3f *prevPos) {
     func_151318E8(&p->head.desc.vel, p->data.drag);
     return TRUE;
 }
 
-void func_15131918(Vec3f *vel, f32 drag);
-
 /* Particle update func: applies p->data.drag to the horizontal velocity. */
 s32 func_151316DC(SpriteParticle *p, Vec3f *prevPos) {
     func_15131918(&p->head.desc.vel, p->data.drag);
     return TRUE;
 }
-
-void func_15131958(Vec3f *vel, f32 drag);
 
 /* Particle update func: applies p->data.drag to the whole velocity. */
 s32 func_1513170C(SpriteParticle *p, Vec3f *prevPos) {
@@ -540,8 +531,6 @@ void func_15131958(Vec3f *vel, f32 drag) {
         vel->z *= drag;
     }
 }
-
-s32 func_151319C4(SpriteParticle *p, Vec3f *prevPos, ParticleBounce *bounce);
 
 /* Particle update func: floor collision using p->data.bounce. */
 s32 func_151319A4(SpriteParticle *p, Vec3f *prevPos) {

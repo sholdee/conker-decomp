@@ -83,7 +83,6 @@ typedef struct {
     u8 pad5[3];
 } ChildData;
 
-extern u8 *func_15130374(ParticleDesc *, u8, s32, u8, s32);
 extern u8 *func_151407D0(GlowShape *, s32, ParticleDef *, u8, u8, u8, u8, s8, u8, s32);
 extern LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, u8, u8, u8, u8, u8, s32, u8, s32);
 

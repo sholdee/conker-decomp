@@ -15,7 +15,6 @@ void func_150B85C0(Vec3f *, f32 *, f32 *, u8, s32);
 void func_1504715C(CollisionHit *, Actor *);
 s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
 void func_1514C678(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, s32, u8);
-s32 func_15132A4C(ParticleSpawn78 *, s32, s32, s32, u8, s32);
 void func_15151A38(PuffSpray *, u8, s32);
 
 /*
@@ -268,8 +267,6 @@ typedef struct {
     /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ f32 extra;
 } FloatDataParticle;
-
-extern FloatDataParticle *func_15130374(ParticleDesc *spawn, u8 arg1, s32 dataSize, u8 arg3, s32 arg4);
 
 /* Spawns one particle at `center`, sized from `radius` and `height`. */
 void func_150B85C0(Vec3f *center, f32 *height, f32 *radius, u8 arg3, s32 arg4) {

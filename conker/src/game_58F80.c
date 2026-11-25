@@ -114,7 +114,6 @@ void func_150A7960(MtxF mtx, f32, f32, f32, f32 *, f32 *, f32 *);
 void func_150A7A00(MtxF mtx, f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
 void func_150A81D0(s32 *, MtxF mtx, ObjAnim *, s32, s32, s16 *, u8 *, s32);
 void func_150A9984(s32, s32);
-Gfx *func_150C3160(Gfx *, Actor *);
 Gfx *func_1515D914(Gfx *, s32, s32, s32, s32, s32, s32, s32, u8 *, u8 *, s32, u8 *, s32, void *);
 void func_1517AD00(s32, s32, s32);
 void func_151EFE88(void *);

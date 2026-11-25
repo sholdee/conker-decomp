@@ -1897,8 +1897,6 @@ void func_151382E0(Vec3f *position, s32 kind, void *arg2, u8 arg3, s32 arg4) {
 }
 
 extern void func_1503F404(void *matrix, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
-extern s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
-extern s32 func_1513264C(void *, s32, s32, s32, s32, u8, s32);
 
 /*
  * Throws a func_1513264C chunk (model D_800A3FD8[kind].chunkModel) off the actor from position, and for
@@ -2646,7 +2644,6 @@ typedef struct {
 } Extra080C_1513A24C;
 
 void func_1515080C(DebrisSpray *, s32 *, f32 *, s32, Extra080C_1513A24C *, s32, s32, s32, s32, void *, f32, s32, s32, u8, s32);
-void func_15133E3C(s32, u8);
 
 /* Blood burst (func_1515080C) for an actor of blood profile `kind`; actor is a Actor. */
 void func_1513A24C(Vec3f *position, s32 *table, f32 *arg2, s32 count, f32 scale, u8 kind, u8 arg6, u8 *actor, void *hit, u8 arg9, s32 argA) {
@@ -2781,8 +2778,6 @@ const Vec3f D_800A42A0[4] = {
     { 16.7724f, 15.549001f, 19.3364f },
 };
 extern void func_1503F404(void *matrix, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
-extern s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
-extern s32 func_1513264C(void *, s32, s32, s32, s32, u8, s32);
 
 /* Gore for profile 0/7 actors. */
 void func_1513A6E0(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {

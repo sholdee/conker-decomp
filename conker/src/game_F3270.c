@@ -121,8 +121,6 @@ WatcherEmitter *func_150C5F94(Actor *actor, GameF3270Emitter *emitter) {
     return obj;
 }
 
-RiseParticle *func_151303BC(ParticleDesc *burst, u8 arg1, s32 arg2);
-
 /* Spawns one randomised particle at (x, y, z), moving against (vx, vz) at a fifth of its speed. */
 void func_150C60D8(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz, WatcherEmitter *source) {
     ParticleDesc burst;

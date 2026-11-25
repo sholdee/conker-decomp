@@ -32,7 +32,6 @@ typedef struct ZoneEmitter {
     /* 0x110 */ ZoneEmitterState state;
 } ZoneEmitter;
 
-extern void *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 extern void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out);
 extern void func_15143874(s16 angle, f32 radius, f32 *x, f32 *z);
 extern f32 func_15144528(f32 value, f32 hi, f32 lo);

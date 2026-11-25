@@ -269,7 +269,6 @@ void func_150F5C08(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
 extern f32 D_800A1B00[3];
 extern f32 D_800A1B0C[3];
 extern s32 func_15145EA4(f32 **src, f32 **dst, Mtx *mtx, s32 count);
-extern SpriteParticle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 
 /* Spark effect: while the owner lives, emits sparks along the segment between two points of
  * its bone 5, at a random rate. */

@@ -172,8 +172,6 @@ void func_150B2740(u8 pipe, u8 arg1) {
     func_10010F88(0x22, 0x7FFF, 0, 0, 0, (s16)D_8009F920[pipe].pos.x, (s16)D_8009F920[pipe].pos.y, (s16)D_8009F920[pipe].pos.z, 1000, 3000);
 }
 
-extern PipeChunk *func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
-
 /* Spawns one pipe chunk at (x, y, z), flung out along yaw `arg8` with a random speed. */
 s32 func_150B2EB4(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
                   s32 arg6, s32 arg7, s32 arg8, s32 arg9, f32 argA, s32 argB,

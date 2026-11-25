@@ -9,9 +9,7 @@ typedef struct {
     /* 0x88 */ s32 sound;
 } SoundOwner;
 
-extern PulseParticle *func_15132A4C(ParticleSpawn *spawn, s32 arg1, s32 arg2, s32 extraSize, u8 arg4, s32 arg5);
 extern f32 sinf(f32);
-extern void func_15133894(PulseParticle *);
 
 /* Spawns a pulsing particle of the given size at pos (fading out over 0x100 >> fadeShift frames at the end
  * of its lifetime). Also checksums func_15002FB4's code as an anti-tamper check. */

@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 extern s32 func_15145128(Vec3f *out, Vec3f *in, f32 *length, f32 *invLength);
 

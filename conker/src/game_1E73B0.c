@@ -184,7 +184,6 @@ extern Vec3f D_800AA63C, D_800AA648[], D_800AA660[], D_800AA678[], D_800AA6A8[],
 extern f32 D_800AA708[];
 void func_1514FCE8(JetSpraySpec *, u8, s32);
 extern void func_1503F404(Mtx *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
-extern void func_1513264C(ParticleSpawn80 *, s32, s32, CollisionHit *, s32, u8, s32);
 extern void func_15143134(Vec3f *in, Vec3f *out, Mtx *mtx);
 
 /*

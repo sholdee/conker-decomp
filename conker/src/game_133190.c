@@ -66,8 +66,6 @@ Vec3f *func_151061EC(BoltObj *bolt);
 
 extern s32 (*D_80088C10[])(BoltObj *bolt, u8 *moved);
 
-extern void *func_15130280(void *, u8, s32, s32, u8, s32);
-
 /*
  * Allocates a bolt for desc with extraSize bytes of user data, samples and jitters it, and spawns its
  * end flares. arg2 and arg3 go through to the allocators; callers pass their own header bytes 0xC and 0x1.

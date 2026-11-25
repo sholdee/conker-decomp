@@ -2,7 +2,6 @@
 
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Pseudo-random value mixed from the CPU cycle counter and func_150ADA20. */
 #define RANDOM() (osGetCount() * func_150ADA20())
@@ -24,8 +23,6 @@ void func_1500C2A0(void) {
 
 void func_15008340(s32 region, f32 *x, f32 *z, f32 *top, f32 *bottom);
 void func_1510F800(s32);
-void *func_15132A4C(void *, s32, s32, s32, u8, s32);
-void *func_15130280(void *, s32, s32, s32, s32, s32);
 void *memcpy(void *, const void *, u32);
 
 /*

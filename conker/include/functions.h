@@ -451,7 +451,6 @@ void func_1509B4A0(s32 arg0, s32 arg1);
 void func_1509BFB0(s32 num, s32, s32, ...);
 void func_150AECCC(struct42 *arg0);
 void func_150AED4C(struct BillboardParticle *p);
-s32  func_150C3D48(s32 arg0);
 void func_150CEF10(Camera *arg0);
 
 void func_150DE310(s32 arg0);

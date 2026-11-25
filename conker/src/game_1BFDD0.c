@@ -48,7 +48,6 @@ void func_15192920(Actor *object) {
 
 extern s32 func_1515C0F8(Actor *, Vec3f **);
 extern void func_15143874(s16 angle, f32 radius, f32 *x, f32 *z);
-extern Particle1BFDD0 *func_15130374(ParticleDesc *, u8, s32, u8, s32);
 
 /* Effect 0x23 update: emits 0.31-0.91 particles per D_800BE9A4 tick, 20 units to either side of the object,
  * moving against the direction func_1515C0F8 returns. */

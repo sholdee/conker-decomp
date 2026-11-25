@@ -136,7 +136,6 @@ typedef struct {
     RingPoint *pts;
 } RingProfile;
 
-void func_150CCD90(f32, f32 *, f32 *, f32 *);
 extern RingProfile D_80088820;
 extern s32 *D_80090E84;
 extern struct { s32 unk0; s32 unk4; } D_800A4AC8[];
@@ -335,8 +334,6 @@ typedef struct {
     f32 damping;  /* 0xA8: velocity factor per tick, written by func_150CAA04 */
 } ParticleObject;
 
-ParticleObject *func_15130374(ParticleDesc *packet, u8, s32, u8, s32);
-
 /* Ring emit callback 0: spawns a dark particle at pos, moving along heading. */
 void func_150C99B4(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosine, f32 sine) {
     ParticleDesc packet;
@@ -430,8 +427,6 @@ typedef struct {
     u8 pad0[0x10];
     ParticleSpawn p; /* 0x10 */
 } BurstParticle;
-
-BurstParticle *func_15132A4C(ParticleSpawn *packet, s32, s32, s32, u8, s32);
 
 /* Ring emit callback 1: spawns a tumbling burst object at pos (the colour from func_150CCD90 goes unused). */
 void func_150C9DC4(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosine, f32 sine) {

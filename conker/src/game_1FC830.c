@@ -199,7 +199,6 @@ extern Vec3f D_800AAEEC[];
 void func_1503F404(s32, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
 void func_15143134(Vec3f *, Vec3f *, Mtx *);
 void func_15143794(s16, s16, f32, Vec3f *);
-s32 func_15132A4C(ParticleSpawn78 *, s32, s32, s32, u8, s32);
 void func_15150D1C(DecalSpray *, u8, s32);
 void func_151A9834(Vec3f *, f32, f32, CollisionHit *, s32, s32, s8 *, u8, s32);
 void func_15151A38(PuffSpray84 *, u8, s32);
@@ -593,8 +592,6 @@ typedef struct {
     /* 0xA8 */ TimedEffect *effect; /* effect that travels with the particle */
 } CarrierParticle;
 
-extern CarrierParticle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
-
 /* Emits two particle bursts along the line between two of the object's model points, and sometimes
  * 5-10 more particles that each carry a func_151CEAAC effect. */
 void func_151D09A8(Actor *obj, u8 arg1, s32 arg2) {
@@ -735,9 +732,6 @@ void func_151D0ED8(CarrierParticle *particle) {
         func_1516972C(*(EffectHeader *volatile *)&particle->effect);
     }
 }
-
-void func_1513173C(CarrierParticle *particle);
-void func_1513175C(CarrierParticle *particle);
 
 /* Particle handler: frees the attached effect, then runs func_1513173C. */
 void func_151D0F08(CarrierParticle *particle) {

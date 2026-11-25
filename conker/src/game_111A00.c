@@ -10,8 +10,6 @@ u8 func_150ADA20(void);
 
 extern s32 func_151EF610(void);
 
-extern s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
-
 extern s32 func_1510F8CC(s32);
 
 /* Per-material impact effects, indexed by the material id from func_1510F8CC. */

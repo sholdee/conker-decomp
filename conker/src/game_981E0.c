@@ -11,7 +11,6 @@ s32 func_10010154(u16 sound, void *obj, u32 volume, s16 nearDistance, u16 farDis
 void func_10010630(u16 arg0, Actor *arg1, u32 arg2, s16 arg3, u16 arg4);
 #include "variables.h"
 
-void func_15131D4C(s32 arg0, s32 arg1);
 s32 func_1000F568(s32 arg0, s32 arg1);
 extern s32 func_151EF610(void);
 extern s32 D_800D187C;

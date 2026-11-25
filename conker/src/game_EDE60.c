@@ -117,8 +117,6 @@ PoolEmitter *func_150C0AC0(PoolEmitterDesc *desc, s32 arg1, s32 arg2) {
     return emitter;
 }
 
-extern PoolParticle *func_15130280(ParticleDesc68 *, u8, s32, s32, u8, s32);
-
 /* Emitter update: follows its target and, while the target moves, spawns particles around it. */
 void func_150C0C38(PoolEmitter *emitter) {
     PoolEmitter *self; // matching: IDO's register/stack allocation needs this copy of the parameter

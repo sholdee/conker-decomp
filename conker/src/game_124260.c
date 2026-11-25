@@ -36,8 +36,6 @@ typedef struct {
     /* 0x28 */ BeamState beam;
 } BeamObj;
 
-extern BeamEnd *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
-
 /* Spawns a beam object for `owner`, with two end sprites (blue-tinted, then red-tinted). */
 BeamObj *func_150F6DE4(Actor *owner) {
     BeamState state;

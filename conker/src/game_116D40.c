@@ -4,8 +4,6 @@
 #include "effects.h"
 
 
-extern void *func_15130374(ParticleDesc6C *, u8, s32, u8, s32);
-extern s32 func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
 extern void *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out);
 

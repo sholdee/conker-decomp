@@ -515,8 +515,6 @@ void func_151C2F48(Game1EF500Trail *trail) {
     }
 }
 
-extern void *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
-
 /* Impact effect at pos: a burst, a randomly flipped particle and a flash. */
 void func_151C329C(Vec3f *pos, u8 arg1, s32 arg2) {
     TrailBurst burst;

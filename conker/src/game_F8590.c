@@ -83,7 +83,6 @@ typedef struct {
     s16 unk8;
 } DustColor;
 
-void func_150CCD90(f32, f32 *, f32 *, f32 *);
 void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 arg8,
                    f32 arg9, Rgb8 *argA, u8 argB);
 s32 func_1518ABD0(s32, DustPuff *, s32);
@@ -205,8 +204,6 @@ s32 func_150CB7CC(QuadSprite *sprite) {
     return 1;
 }
 
-s32 func_15132A4C(ParticleSpawn80 *, s32, s32, s32, u8, s32);
-
 /* Spawns one func_15132A4C particle at (x, y, z), its velocity built by func_15143794 from `angle`. */
 s32 func_150CB800(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 angle,
                   s32 arg9, s32 arg10, s32 arg11, s32 arg12, s32 arg13, u8 arg14) {
@@ -279,8 +276,6 @@ s32 func_150CBA30(DustPuff *dust) {
     }
     return 1;
 }
-
-SparkParticle *func_15130374(ParticleDesc *, u8, s32, u8, s32);
 
 /*
  * Spawns one func_15130374 particle at (x, y, z), its velocity built by func_15143794 from

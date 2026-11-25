@@ -268,7 +268,6 @@ typedef struct {
 f32 func_15144AA8(u8, Camera *);
 void func_15145740(Actor *, Vec3f *, void *, s32, f32);
 s32 func_151D5B6C(Vec3f *, Vec3f *, Actor *, s32, IgnoreList *);
-Bullet *func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
 void func_15145974(Vec3f *, f32 *, f32 *);
 FollowFx *func_151B8908(Bullet *);
 Bullet88 *func_151B8400(Bullet *);
@@ -609,9 +608,6 @@ void func_151C1570(Bullet *bullet) {
     }
     func_1000FD38(func_151C110C, bullet, 0);
 }
-
-void func_15132570(Bullet *);
-void func_1513259C(Bullet *);
 
 void func_151C15FC(Bullet *bullet) {
     func_151C1570(bullet);

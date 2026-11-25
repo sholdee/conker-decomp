@@ -25,7 +25,6 @@ typedef struct {
     /* 0x170 */ DebrisData debris;
 } BloodDebrisParticle;
 
-extern BloodDebrisParticle *func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
 extern BloodTrail *func_15134908(BloodTrailDesc18 *, s32, u8, s32);
 
 /*

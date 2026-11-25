@@ -105,8 +105,6 @@ typedef struct {
     /* 0x170 */ SeqTrackState *track;
 } TrackPhysicsParticle;
 
-TrackPhysicsParticle *func_1513264C(void *spawn, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
-
 /* Spawns a func_1513264C effect that follows a cutscene track (updated by func_1519ED24). */
 void func_1519EB8C(SeqTrackState *track, u16 id, s16 duration, u8 arg3, s32 arg4) {
     struct {

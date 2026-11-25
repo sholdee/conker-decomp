@@ -2,7 +2,6 @@
 
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 void func_151D9014(f32 *pos, f32 *vel, s32 arg2, f32 arg3, s32 arg4, s32 arg5,
                    f32 arg6, s32 arg7, f32 arg8, f32 arg9, s32 arg10, s32 arg11,

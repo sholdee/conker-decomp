@@ -5,8 +5,6 @@
 
 typedef struct { u8 ids[3]; } ParticleVariants;
 extern ParticleVariants D_8008FBC0;
-extern ModelParticle *func_15132A4C(ParticleSpawn *spawn, s32 arg1, s32 arg2, s32 extraSize, u8 arg4, s32 arg5);
-extern void func_15133760(Mtx *mtx, ModelParticle *particle);
 
 /* Spawns one of three particle variants at pos, turned rotY degrees about the vertical axis. */
 void *func_151BEEE0(f32 rotY, Vec3f *pos, s32 arg2, u8 arg3, u8 variant, u8 arg5, s32 arg6, u8 arg7, s32 arg8) {

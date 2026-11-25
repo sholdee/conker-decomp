@@ -441,8 +441,6 @@ void func_151B70B4(EffectObj *obj, void *msg, u8 msgType) {
     }
 }
 
-extern void *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
-
 /* Spawns a particle at target's position. */
 void func_151B7144(TrailTarget *target, u8 arg1, s32 arg2) {
     ParticleDesc spawn;

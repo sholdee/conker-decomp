@@ -4,8 +4,6 @@
 #include "effects.h"
 
 
-void *func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
-
 /* Actor id 0x20 with a ob_matrix_ptr model: spawns one 0x29E9 particle near it with the actor as owner. */
 s32 func_150BB760(Actor *actor) {
     ParticleSpawn particle;
@@ -628,8 +626,6 @@ s32 func_150BCFB8(struct Obj150BCFB8 *obj, s32 arg1, s32 arg2, s32 arg3, f32 flo
 
 void func_1514470C(TriggerZone *, Vec3f *);
 void func_15143794(s16, s16, f32, Vec3f *);
-s32 func_1513264C(ParticleSpawn *, s32, s32, s32, s32, u8, s32);
-SpriteParticle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 void func_151D5334(Vec3f *, f32, f32, f32, s32, u8, s32);
 
 /* Burst of particles and spawned particles from two random anchors (entries 0x4C/0x4D of zones). */

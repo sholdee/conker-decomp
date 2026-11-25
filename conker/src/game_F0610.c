@@ -2,7 +2,6 @@
 
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 void func_151B9BF0(s32 arg0, s32 arg1, s16 arg2, s16 arg3, s32 arg4, s32 arg5,
                    s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, s32 arg11,
                    s32 arg12, s32 arg13, s32 arg14, s32 arg15);
@@ -246,7 +245,6 @@ void func_150C3574(Actor *obj) {
 }
 void func_15188810(Actor *arg0, s32 arg1, s32 arg2);
 void func_150C1660(f32 arg0, f32 arg1, f32 arg2, u8 arg3);
-void func_150C3D5C(Actor *obj);
 
 void func_150C3994(Actor *obj) {
     if (obj->type == 0x14) {

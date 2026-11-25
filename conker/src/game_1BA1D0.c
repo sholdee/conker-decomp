@@ -4,7 +4,6 @@
 #include "effects.h"
 #include "libc/string.h"
 
-extern SpriteParticle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 extern void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z);
 extern void func_15145DB4(WorldObject *placement, Vec3f *in, Vec3f *out, s32 count);
 

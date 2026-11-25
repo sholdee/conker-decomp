@@ -703,8 +703,6 @@ typedef struct {
     /* 0x28 */ Game113D60Emitter emitter;
 } Game113D60EmitterEffect;
 
-extern Game113D60Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
-
 /* Spawns a random number of particles per frame at the effect's position. */
 void func_150E8470(Game113D60EmitterEffect *effect) {
     Game113D60Emitter *emitter;
@@ -769,8 +767,6 @@ void func_150E8470(Game113D60EmitterEffect *effect) {
         } while (emitter->accum > 1.0f);
     }
 }
-
-extern s32 func_15131828(Game113D60Particle *, f32 *, u8 *, u8 *);
 
 /* Update callback of the particles func_150E8470 spawns. */
 s32 func_150E8824(Game113D60Particle *particle, s32 arg1) {
@@ -937,8 +933,6 @@ typedef struct {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ Game113D60PointSpawner spawner;
 } Game113D60PointSpawnerEffect;
-
-TimedEffect *func_15130374(ParticleDesc64 *, u8, s32, u8, s32);
 
 /* Spawns func_15130374 particles within 20 units of the spawner's position. */
 void func_150E8D5C(Game113D60PointSpawnerEffect *effect) {
@@ -1119,7 +1113,6 @@ typedef struct {
 
 extern u8 D_800A12F0[];
 extern f32 D_800A12F4[];
-extern Game113D60Debris *func_15132A4C(ParticleSpawn78 *, s32, s32, s32, u8, s32);
 
 /* Spawns func_15132A4C debris particles (updated by func_150E971C) within 50 units of the
  * spawner's position. */
@@ -1187,8 +1180,6 @@ void func_150E93DC(Game113D60PointSpawnerEffect *effect) {
         }
     }
 }
-
-extern s32 func_151337C0(Game113D60Debris *);
 
 /* Update callback of the debris particles: when a particle falls below its floor height it
  * ends (returns 0), spawning a func_1513C73C splash first if its type is 0xA. */

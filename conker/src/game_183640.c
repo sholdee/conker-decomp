@@ -274,7 +274,6 @@ typedef struct {
 } StreakBurstEffectDesc;
 
 extern void func_151539B4(StreakBurst *, u8);
-extern void func_15130374(ParticleDesc *, u8, s32, u8, s32);
 
 /* Spawns the streak burst and the particle described by desc. */
 void func_151568F8(desc, owner)

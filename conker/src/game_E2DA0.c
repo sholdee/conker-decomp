@@ -180,8 +180,6 @@ void func_150B5C38(Vec3f *pos, u8 owner, s32 kind) {
     func_150B6000(pos, owner, kind);
 }
 
-extern void *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
-
 /** Spawns one func_15130280 particle at pos with some randomized fields and flags. */
 void func_150B5E34(Vec3f *pos, u8 owner, s32 kind) {
     ParticleDesc spawn;

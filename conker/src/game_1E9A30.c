@@ -497,10 +497,6 @@ typedef struct {
     ActorRef owner;    /* 0xB0 */
 } BloodDroplet;
 
-s32 func_1513170C(BloodDroplet *particle, Vec3f *prevPos);
-
-BloodDroplet *func_15130374(ParticleDesc68 *desc, u8 kind, s32 dataSize, u8 arg3, s32 arg4);
-
 /* BloodStrip emit callback: spawns one blood droplet at pointA moving towards pointB. */
 void func_151BD43C(Vec3f *pointA, Vec3f *pointB, Vec3f *velA, Vec3f *velB, f32 time,
                    BloodStrip *strip) {

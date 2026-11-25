@@ -837,8 +837,6 @@ s32 func_151596BC(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
     return alive;
 }
 
-EffectMotionParticle *func_151303BC(ParticleDesc6C *spawn, s32 arg1, s32 motionSize);
-
 /* Spawns one rising particle (func_151596BC family) at pos with the given velocity. */
 EffectMotionParticle *func_15159890(Vec3f *pos, Vec3f *velocity, s32 arg2, s32 arg3) {
     f32 size;
@@ -1076,8 +1074,6 @@ s32 func_1515A11C(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
     particle->head.desc.offset.z = osc->direction.z * sin0;
     return 1;
 }
-
-void *func_15130280(ParticleDesc6C *spawn, u8 arg1, CollisionHit *ground, s32 motionSize, u8 arg4, s32 arg5);
 
 /* Spawns one drifting particle; with no horizontal velocity it lands on the ground below pos. */
 EffectMotionParticle *func_1515A238(Vec3f *pos, Vec3f *velocity, f32 arg2, f32 damping, CollisionHit *ground, f32 size,

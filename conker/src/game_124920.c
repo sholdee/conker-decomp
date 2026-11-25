@@ -64,7 +64,6 @@ typedef struct {
 extern s32 func_151C4B0C(s32, ProjectileState *, Vec3f *, Vec3f *, f32 *, f32, u8, s32, Vec3f *, u8 *, s32,
                          f32, Actor *, s32, u8, u8, s32, u8);
 extern void func_15145974(Vec3f *, f32 *, f32 *);
-ProjectileParticle *func_1513264C(void *spawn, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
 
 /* Spawns a projectile at `pos`, aimed along `aim` (or at `target` when arg2 is set). */
 void func_150F7470(Vec3f *pos, Vec3f *aim, s32 arg2, Vec3f *target, u8 targetIsDir, s32 arg5, f32 speed,
