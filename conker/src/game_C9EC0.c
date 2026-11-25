@@ -546,46 +546,41 @@ s32 func_1509D180(s32 cmdId, ScriptCmd *cmd) {
 }
 
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-} Func1509D780Arg;
-
 extern void func_150EB8C4(void);
 extern void func_150F9720(u8);
-extern void func_150F6DB0(void *);
-extern void func_151616D0(u8, u8, s32);
+extern void func_150F6DB0(struct127 *);
 extern void func_151CD394(s32);
 extern void func_150E35DC(s32);
 extern void func_150B3DD0(void);
-extern void func_150C5C9C(void *);
+extern void func_150C5C9C(struct127 *);
 extern void func_150C522C(void);
 extern void func_151D2718(s16);
 
-s32 func_1509D780(s32 arg0, Func1509D780Arg *arg1) {
-    void *p;
+/* Ends script command `cmdId` started by func_1509D180. */
+s32 func_1509D780(s32 cmdId, ScriptCmd *cmd) {
+    struct127 *obj;
 
-    switch (arg0) {
+    switch (cmdId) {
         case 41:
             func_150EB8C4();
             break;
         case 39:
-            func_150F9720(*((u8 *)arg1 + 7));
+            func_150F9720(cmd->args[0].b.lo);
             break;
         case 38:
-            func_151616D0(0x29, 0x18, 0);
+            func_151616D0(41, 24, 0);
             break;
         case 36:
-            p = func_1505EEF4(arg1->unk4 & 0xFFF);
-            if (p != NULL) {
-                func_150F6DB0(p);
+            obj = func_1505EEF4(CMD_OBJECT_ID(cmd->args[0]));
+            if (obj != NULL) {
+                func_150F6DB0(obj);
             }
             break;
         case 26:
-            func_151616D0(0x26, 0x18, 0);
+            func_151616D0(38, 24, 0);
             break;
         case 18:
-            func_151CD394(arg1->unk4);
+            func_151CD394(cmd->args[0].w);
             break;
         case 2:
             D_800D9920 = 0;
@@ -593,213 +588,205 @@ s32 func_1509D780(s32 arg0, Func1509D780Arg *arg1) {
         case 4:
         case 5:
         case 6:
-            func_150E35DC(arg0 >> 6);
+            func_150E35DC(cmdId >> 6);
             break;
         case 8:
             func_150B3DD0();
             break;
         case 9:
-            p = func_1505EEF4(arg1->unk4 & 0xFFF);
-            if (p == NULL) {
+            obj = func_1505EEF4(CMD_OBJECT_ID(cmd->args[0]));
+            if (obj == NULL) {
                 return 0;
             }
-            func_150C5C9C(p);
+            func_150C5C9C(obj);
             break;
         case 10:
             func_150C522C();
             break;
         case 19:
-            func_151D2718(*(s16 *)((u8 *)arg1 + 6));
+            func_151D2718(cmd->args[0].h.lo);
             break;
         case 21:
-            func_151616D0(0x20, 0x18, 0);
+            func_151616D0(32, 24, 0);
             break;
         case 22:
-            func_151616D0(0x23, 0x28, 0);
-            func_151616D0(0x24, 0x28, 0);
+            func_151616D0(35, 40, 0);
+            func_151616D0(36, 40, 0);
             break;
     }
 }
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s32 unkC;
-    s32 unk10;
-    s32 unk14;
-    s32 unk18;
-} Func1509D8FCArg;
+typedef struct Msg1509D8FC {
+    /* 0x0 */ f32 unk0;
+    /* 0x4 */ u8 unk4;
+    /* 0x5 */ u8 unk5;
+    /* 0x6 */ u8 unk6;
+    /* 0x7 */ u8 unk7;
+} Msg1509D8FC;
 
-typedef struct {
-    f32 unk0;
-    u8 unk4;
-    u8 unk5;
-    u8 unk6;
-    u8 unk7;
-} Func1509D8FCMsg;
-
-extern void func_15197A7C(void *);
+extern void func_15197A7C(struct127 *);
 extern void func_151645C4(u8);
 extern void func_1515F170(s32 arg0, u8 arg1);
-extern void func_151616D0(u8, u8, s32);
 extern void func_150DEC28(u8, u8);
 extern u8 D_800A0960[][16];
 
-s32 func_1509D8FC(s32 arg0, s32 arg1, Func1509D8FCArg *arg2) {
-    switch (arg0) {
+/* Advances script command `cmdId` to `phase`. */
+s32 func_1509D8FC(s32 cmdId, s32 phase, ScriptCmd *cmd) {
+    switch (cmdId) {
         case 52:
-            if (arg1 == 3) {
-                func_15197A7C(func_1505EEF4(arg2->unk4 & 0xFFF));
+            if (phase == 3) {
+                func_15197A7C(func_1505EEF4(CMD_OBJECT_ID(cmd->args[0])));
             }
             break;
 
         case 50:
-            if (arg1 == 2) {
-                func_151403A8(0, 0x53);
-            } else if (arg1 == 3) {
-                func_151403A8(0, 0x54);
+            if (phase == 2) {
+                func_151403A8(0, 83);
+            } else if (phase == 3) {
+                func_151403A8(0, 84);
             }
             break;
         case 45:
-            func_151645C4(arg1 == 6);
+            func_151645C4(phase == 6);
             break;
         case 40:
-            if (arg1 == 2) {
+            if (phase == 2) {
                 func_1515F170(4, 1);
                 func_1515F170(5, 0);
-            } else if (arg1 == 3) {
+            } else if (phase == 3) {
                 func_1515F170(4, 0);
                 func_1515F170(5, 1);
             }
             break;
         case 31:
-            if (arg1 == 5) {
+            if (phase == 5) {
                 u8 buf[8];
-                buf[0] = arg2->unk8;
-                func_151403A8((s32)buf, 0x36);
+                buf[0] = cmd->args[1].w;
+                func_151403A8((s32)buf, 54);
             }
+            // fallthrough
         case 30:
-            if (arg1 == 2) {
+            if (phase == 2) {
                 u8 buf2[4];
-                buf2[0] = arg2->unk8;
-                func_151494E0((s32)buf2, 0x34);
+                buf2[0] = cmd->args[1].w;
+                func_151494E0((s32)buf2, 52);
             }
             break;
         case 29:
-            if (arg1 == 5) {
-                Func1509D8FCMsg msg;
-                msg.unk0 = arg2->unkC;
-                msg.unk4 = arg2->unk8;
-                msg.unk5 = arg2->unk10;
-                msg.unk6 = arg2->unk14;
-                msg.unk7 = arg2->unk18;
-                func_1516944C(0x35, (s32)&msg, 0x33);
+            if (phase == 5) {
+                Msg1509D8FC msg;
+                msg.unk0 = cmd->args[2].w;
+                msg.unk4 = cmd->args[1].w;
+                msg.unk5 = cmd->args[3].w;
+                msg.unk6 = cmd->args[4].w;
+                msg.unk7 = cmd->args[5].w;
+                func_1516944C(53, (s32)&msg, 51);
             }
             break;
         case 28:
-            if (arg1 == 5) {
-                s32 idx = arg2->unk8;
+            if (phase == 5) {
+                s32 idx = cmd->args[1].w;
                 if (idx < 0 || idx >= 3) {
                     return 1;
                 }
-                func_151494E0((s32)D_800A0960[idx], 0x32);
+                func_151494E0((s32)D_800A0960[idx], 50);
             }
             break;
         case 11:
         case 12:
         case 13:
         case 14: {
-            s32 x;
-            u8 a;
-            u8 b;
+            s32 type;
+            u8 index;
+            u8 param;
 
-            x = arg0 & 0x3F;
-            if (x == 11) {
-                a = 1;
-            } else if (x == 12) {
-                a = 2;
-            } else if (x == 13) {
-                a = 3;
-            } else if (x == 14) {
-                a = 4;
+            type = cmdId & 0x3F;
+            if (type == 11) {
+                index = 1;
+            } else if (type == 12) {
+                index = 2;
+            } else if (type == 13) {
+                index = 3;
+            } else if (type == 14) {
+                index = 4;
             } else {
-                a = 0;
+                index = 0;
             }
-            if (arg1 == 2) {
-                b = 0x17;
-            } else if (arg1 == 3) {
-                b = 0x18;
+            if (phase == 2) {
+                param = 23;
+            } else if (phase == 3) {
+                param = 24;
             } else {
-                b = 0x17;
+                param = 23;
             }
-            func_151616D0(a, b, 0);
+            func_151616D0(index, param, 0);
             break;
         }
         case 17:
-            func_150DEC28(arg2->unk8, arg1 == 3);
+            func_150DEC28(cmd->args[1].w, phase == 3);
             break;
     }
 }
 
 typedef struct Node1509DBBC {
-    u8 pad0[8];
-    struct Node1509DBBC *next;
-    u8 padC[0x3C];
-    u8 type;
+    /* 0x00 */ u8 pad0[8];
+    /* 0x08 */ struct Node1509DBBC *next;
+    /* 0x0C */ u8 padC[0x3C];
+    /* 0x48 */ u8 type;
 } Node1509DBBC;
 
 extern s32 D_800A6060[];
 extern Node1509DBBC *D_800DCE50[][0x68];
-void func_150E36BC(s32 arg0, s32 *arg1, s32 *arg2, s32 *arg3);
+void func_150E36BC(s32 handle, s32 *hi, s32 *result, s32 *lo);
 
-s32 func_1509DBBC(s32 arg0, s32 arg1, s32 arg2) {
-    s32 sp3C;
-    s32 sp38;
-    s32 sp34;
-    s32 id;
+/* Polls script command `cmdId` in `phase`; returns its status or query value. */
+s32 func_1509DBBC(s32 cmdId, s32 phase, s32 arg2) {
+    s32 hi;
+    s32 result;
+    s32 lo;
+    s32 handle;
 
-    sp3C = 0;
-    sp38 = 0;
-    sp34 = 0;
-    switch (arg0) {
-    case 0x19:
-        if (arg1 == 4) {
-            u8 i;
-            s8 j;
-            Node1509DBBC *node;
+    hi = 0;
+    result = 0;
+    lo = 0;
+    switch (cmdId) {
+        case 25:
+            if (phase == 4) {
+                u8 i;
+                s8 j;
+                Node1509DBBC *node;
 
-            i = 0;
-            do {
-                for (j = 0; j < 3; j++) {
-                    node = D_800DCE50[i][D_800A6060[j]];
-                    while (node != NULL) {
-                        Node1509DBBC *nx;
-                        nx = node->next;
-                        if (node->type == 2) {
-                            return 0;
+                /* Done once no node of type 2 is left in the watched lists. */
+                for (i = 0; i < 2; i++) {
+                    for (j = 0; j < 3; j++) {
+                        node = D_800DCE50[i][D_800A6060[j]];
+                        while (node != NULL) {
+                            Node1509DBBC *next;
+
+                            next = node->next;
+                            if (node->type == 2) {
+                                return 0;
+                            }
+                            node = next;
                         }
-                        node = nx;
                     }
                 }
-                i++;
-            } while (i < 2);
-            return 1;
-        }
-        break;
-    case 4:
-    case 5:
-    case 6:
-        if (arg1 == 0 || arg1 == 1) {
-            id = arg0 >> 6;
-            if (id != 0) {
-                func_150E36BC(id, &sp3C, &sp38, &sp34);
-                if (arg1 == 0) {
-                    sp38 = (sp3C << 16) | (sp34 & 0xFFFF);
-                }
-                return sp38;
+                return 1;
             }
-        }
-        break;
+            break;
+        case 4:
+        case 5:
+        case 6:
+            if (phase == 0 || phase == 1) {
+                handle = cmdId >> 6;
+                if (handle != 0) {
+                    func_150E36BC(handle, &hi, &result, &lo);
+                    if (phase == 0) {
+                        result = (hi << 16) | (lo & 0xFFFF);
+                    }
+                    return result;
+                }
+            }
+            break;
     }
 }
