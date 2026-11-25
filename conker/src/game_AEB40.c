@@ -1544,6 +1544,8 @@ s32 func_15084044(GameObj *obj, s32 model) {
     s32 i;
     s32 size;
 
+    // matching: every access to modelData[model] goes through this byte pointer (slot + 0x28C/0x290) or
+    // an s32 row view, as s32 lvalues; typed field access reallocates registers (see the func_15084044 ledger)
     slot = (u8 *)((s32)obj + model * 8);
     if (obj->unk65 != 0) {
         spawn = D_800CC2D0[obj->unk65 - 1].spawn;
@@ -1582,8 +1584,8 @@ s32 func_15084044(GameObj *obj, s32 model) {
                 }
             } else {
                 val = (s32)D_800D19A0[id];
-        *(s32 *)(slot + 0x290) = val;
-        *(s32 *)(slot + 0x28C) = val;
+                *(s32 *)(slot + 0x290) = val;
+                *(s32 *)(slot + 0x28C) = val;
                 D_800D1F80[id] += 2;
             }
         }
