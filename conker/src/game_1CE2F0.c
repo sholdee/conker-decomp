@@ -526,16 +526,16 @@ void func_151A1E34(Particle *particle) {
     data = (PuffParticleData *)(particle + 1);
     life = particle->life;
     if (data->fadeInEnd < life) {
-        particle->primA = (u32)(data->fadeInStart - life) * (u32)data->fadeInStep;
+        particle->primA = (data->fadeInStart - life) * data->fadeInStep;
     }
     if (data->growEnd < life) {
-        particle->width = particle->height = (u32)(data->growStart - life) * (u32)data->growStep;
+        particle->width = particle->height = (data->growStart - life) * data->growStep;
     }
     if (life < data->fadeOutStart) {
-        particle->primA = (u32)life * (u32)data->fadeOutStep;
+        particle->primA = life * data->fadeOutStep;
     }
     if (life < data->shrinkStart) {
-        particle->width = particle->height = (u32)life * (u32)data->shrinkStep;
+        particle->width = particle->height = life * data->shrinkStep;
     }
 }
 
@@ -545,21 +545,17 @@ typedef struct {
     /* 0x0C */ f32 unkC;
     /* 0x10 */ f32 unk10;
     /* 0x14 */ f32 unk14;
-    /* 0x18 */ union {
-        struct {
-            s16 unk18;
-            s16 unk1A;
-            s16 unk1C;
-            s16 unk1E;
-        } s;
-        f64 align; // matching: 8-byte alignment places this block at sp+0x38
-    } u18;
+    /* 0x18 */ s16 unk18;
+    /* 0x1A */ s16 unk1A;
+    /* 0x1C */ s16 unk1C;
+    /* 0x1E */ s16 unk1E;
     /* 0x20 */ s16 unk20;
     /* 0x22 */ s16 unk22;
 } EffectData151A1EE8;
 
 /* Creates a type 4 func_151491F4 effect from the spawner's settings. */
 void func_151A1EE8(EffectSpawner *spawner) {
+    s32 pad; // matching: unused stack slot
     EffectData151A1EE8 data;
     struct260 *effect;
 
@@ -567,414 +563,307 @@ void func_151A1EE8(EffectSpawner *spawner) {
     data.unkC = spawner->unk34;
     data.unk10 = 0.0f;
     data.unk14 = spawner->unk38;
-    data.u18.s.unk18 = spawner->unk3E;
-    data.u18.s.unk1A = spawner->unk40;
-    data.u18.s.unk1C = spawner->unk42;
-    data.u18.s.unk1E = spawner->unk44;
+    data.unk18 = spawner->unk3E;
+    data.unk1A = spawner->unk40;
+    data.unk1C = spawner->unk42;
+    data.unk1E = spawner->unk44;
     data.unk20 = spawner->unk46;
     data.unk22 = spawner->unk48;
 
     effect = func_151491F4(spawner->unk3C, -1, 4, 1, 0, 0x24, spawner->unkC, spawner->unk1);
     if (effect != NULL) {
-        memcpy((u8 *)effect + 0x28, &data, 0x24);
+        memcpy((u8 *)effect + 0x28, &data, sizeof(data));
     }
 }
 
-struct Sub151A1FB4 {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    s16 unk18;
-    s16 unk1A;
-    s16 unk1C;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-};
-
-struct Obj151A1FB4 {
-    u8 unk0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0x1B];
-    struct Sub151A1FB4 unk28;
-};
-
+/*
+ * Extra data of the particles spawned by func_151A1FB4, read by its callbacks func_151A24A8 and
+ * func_151A25E0. The *Start/*End fields are values of Particle.life, which counts down.
+ */
 typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    s16 unk6;
-    s16 unk8;
-    s16 unkA;
-    s16 unkC;
-    s16 unkE;
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    s16 unk16;
-    s16 unk18;
-    s16 unk1A;
-} Fade151A1FB4;
+    /* 0x00 */ s16 fadeInStep;
+    /* 0x02 */ s16 fadeInStart;
+    /* 0x04 */ s16 fadeInEnd;
+    /* 0x06 */ s16 growStep;
+    /* 0x08 */ s16 growStart;
+    /* 0x0A */ s16 growEnd;
+    /* 0x0C */ s16 tintStart;    /* from here the env colour follows life (callback 0x13) */
+    /* 0x0E */ s16 tintStep;
+    /* 0x10 */ s16 fadeOutStart;
+    /* 0x12 */ s16 fadeOutStep;
+    /* 0x14 */ s16 swellStart;   /* from here the size grows by swellRate per frame */
+    /* 0x16 */ s16 swellRate;
+    /* 0x18 */ s16 accelStart;   /* once life passes it, accelY = accel */
+    /* 0x1A */ s16 accel;
+} SmokeParticleData;
 
-typedef struct {
-    void *unk00;
-    s32 unk04;
-    s32 unk08;
-    s16 unk0C;
-    s16 unk0E;
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    s16 unk16;
-    s16 unk18;
-    s16 unk1A;
-    s8 unk1C;
-    s8 unk1D;
-    s8 unk1E;
-    u8 unk1F;
-    s16 unk20;
-    s16 unk22;
-    s16 unk24;
-    s16 unk26;
-    s16 unk28;
-    u8 unk2A;
-    u8 unk2B;
-    u8 unk2C;
-    u8 unk2D;
-    u8 unk2E;
-    u8 unk2F;
-    u8 unk30;
-    u8 unk31;
-    u8 unk32;
-    u8 unk33;
-    u16 unk34;
-    s16 unk36;
-} Packet151A1FB4;
-
-
-void func_151A1FB4(struct Obj151A1FB4 *arg0) {
-    struct Sub151A1FB4 *sub;
-    Packet151A1FB4 pkt;
-    Fade151A1FB4 fade;
-    u8 a;
-    u8 b;
-    f32 sinA;
-    f32 cosA;
-    f32 sinB;
-    f32 cosB;
+/* Spawns particles at random points in a sphere around the emitter; they grow, tint and accelerate. */
+void func_151A1FB4(Emitter *emitter) {
+    EmitterParams *params;
+    ParticleTemplate packet;
+    SmokeParticleData data;
+    u8 angle1;
+    u8 angle2;
+    f32 sin1;
+    f32 cos1;
+    f32 sin2;
+    f32 cos2;
     f32 x;
     f32 y;
     f32 z;
-    f32 r;
-    s16 n;
-    s32 ret;
+    f32 dist;
+    s16 size;
+    Particle *particle;
 
-    arg0->unk28.unk10 += arg0->unk28.unk14 * D_800BE9A4;
-    sub = &arg0->unk28;
-    if (arg0->unk28.unk10 > 1.0f) {
-        pkt.unk2C = 5;
-        pkt.unk2D = 0;
-        pkt.unk2E = 0;
-        pkt.unk30 = 0;
-        pkt.unk31 = 0;
-        pkt.unk32 = 0;
-        pkt.unk1F = 0x12;
-        pkt.unk34 = 0x120;
-        pkt.unk04 = 0xC0001;
-        pkt.unk0C = 0;
-        pkt.unk00 = &D_80090B60[39];
-        pkt.unk16 = 0;
-        pkt.unk20 = 0;
-        pkt.unk18 = 0;
-        pkt.unk22 = 0;
-        pkt.unk2A = 0;
-        pkt.unk2F = 0;
-        pkt.unk26 = 0x7D0;
-        pkt.unk24 = 0x7D0;
+    emitter->params.spawnAccum += emitter->params.spawnRate * D_800BE9A4;
+    params = &emitter->params;
+    if (emitter->params.spawnAccum > 1.0f) {
+        packet.primR = 5;
+        packet.primG = 0;
+        packet.primB = 0;
+        packet.envR = 0;
+        packet.envG = 0;
+        packet.envB = 0;
+        packet.callback = 0x12;
+        packet.flags = 0x120;
+        packet.unk4 = 0xC0001;
+        packet.frame = 0;
+        packet.anim = &D_80090B60[39];
+        packet.velX = 0;
+        packet.velY = 0;
+        packet.velZ = 0;
+        packet.accelY = 0;
+        packet.fadeStep = 0;
+        packet.primA = 0;
+        packet.height = 2000;
+        packet.width = 2000;
         do {
-            a = func_150ADA20() & 0xFF;
-            b = func_150ADA20() & 0xFF;
-            cosA = func_151423D8(a - 0x40);
-            sinA = func_151423D8(a);
-            cosB = func_151423D8(b - 0x40);
-            sinB = func_151423D8(b);
-            r = func_150ADA68() * sub->unkC;
-            x = sub->unk0 + r * sinB * cosA;
-            y = sub->unk4 - r * cosB;
-            z = sub->unk8 + r * sinB * sinA;
+            angle1 = func_150ADA20() & 255;
+            angle2 = func_150ADA20() & 255;
+            cos1 = func_151423D8(angle1 - 64);
+            sin1 = func_151423D8(angle1);
+            cos2 = func_151423D8(angle2 - 64);
+            sin2 = func_151423D8(angle2);
+            dist = func_150ADA68() * params->radius;
+            x = params->x + dist * sin2 * cos1;
+            y = params->y - dist * cos2;
+            z = params->z + dist * sin2 * sin1;
             if (func_150ADA20() & 1) {
-                pkt.unk34 |= 4;
+                packet.flags |= PARTICLE_FLIP_S;
             }
             if (func_150ADA20() & 1) {
-                pkt.unk34 |= 8;
+                packet.flags |= PARTICLE_FLIP_T;
             }
-            pkt.unk0E = (func_150ADA20() % (u32)(sub->unk1A + 1)) + sub->unk18;
-            n = (func_150ADA20() % (u32)(sub->unk1E + 1)) + sub->unk1C;
-            pkt.unk28 = D_80090B60[39].frameCount * (0x100 / pkt.unk0E);
-            fade.unk2 = pkt.unk28;
-            fade.unk8 = pkt.unk28;
-            fade.unk4 = pkt.unk28 - (pkt.unk28 >> 2);
-            fade.unk0 = 0xFF / (pkt.unk28 - fade.unk4);
-            fade.unkA = pkt.unk28 >> 1;
-            fade.unk6 = n / (pkt.unk28 - (s16)(pkt.unk28 >> 1));
-            fade.unkC = pkt.unk28 >> 1;
-            fade.unkE = 0xFF / (pkt.unk28 >> 1);
-            fade.unk10 = pkt.unk28 >> 2;
-            fade.unk12 = 0xFF / (pkt.unk28 >> 2);
-            fade.unk14 = pkt.unk28 >> 1;
-            fade.unk16 = (func_150ADA20() % (u32)(sub->unk22 + 1)) + sub->unk20;
-            fade.unk18 = pkt.unk28 >> 1;
-            fade.unk1A = (func_150ADA20() % 81U) + 0x50;
-            pkt.unk10 = x;
-            pkt.unk12 = y;
-            pkt.unk14 = z;
-            pkt.unk1C = ((s32)(x * 256.0f)) & 0xFF;
-            pkt.unk1E = ((s32)(y * 256.0f)) & 0xFF;
-            pkt.unk1D = ((s32)(z * 256.0f)) & 0xFF;
-            ret = func_15167D84(&pkt, 0, 0x1C, -1, arg0->unkC, arg0->unk1);
-            if (ret != 0) {
-                memcpy((u8 *)ret + 0x50, &fade, 0x1C);
+            packet.frameStep = func_150ADA20() % (u32)(params->frameStepRange + 1) + params->frameStep;
+            size = func_150ADA20() % (u32)(params->sizeRange + 1) + params->size;
+            packet.life = D_80090B60[39].frameCount * (256 / packet.frameStep);
+            data.fadeInStart = packet.life;
+            data.growStart = packet.life;
+            data.fadeInEnd = packet.life - (packet.life >> 2);
+            data.fadeInStep = 255 / (packet.life - data.fadeInEnd);
+            data.growEnd = packet.life >> 1;
+            // matching: the target recomputes life >> 1 here instead of reading growEnd
+            data.growStep = size / (packet.life - (s16)(packet.life >> 1));
+            data.tintStart = packet.life >> 1;
+            data.tintStep = 255 / (packet.life >> 1);
+            data.fadeOutStart = packet.life >> 2;
+            data.fadeOutStep = 255 / (packet.life >> 2);
+            data.swellStart = packet.life >> 1;
+            data.swellRate = func_150ADA20() % (u32)(params->growRateRange + 1) + params->growRate;
+            data.accelStart = packet.life >> 1;
+            data.accel = func_150ADA20() % 81U + 80;
+            packet.x = x;
+            packet.y = y;
+            packet.z = z;
+            packet.subX = (s32)(x * 256.0f) & 0xFF;
+            packet.subY = (s32)(y * 256.0f) & 0xFF;
+            packet.subZ = (s32)(z * 256.0f) & 0xFF;
+            particle = (Particle *)func_15167D84(&packet, 0, sizeof(data), -1, emitter->unkC, emitter->unk1);
+            if (particle != NULL) {
+                memcpy(particle + 1, &data, sizeof(data));
             }
-            sub->unk10 -= 1.0f;
-        } while (sub->unk10 > 1.0f);
+            params->spawnAccum -= 1.0f;
+        } while (params->spawnAccum > 1.0f);
     }
 }
 
-typedef struct Fade151A24A8 {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    s16 unk6;
-    s16 unk8;
-    s16 unkA;
-    s16 unkC;
-    s16 unkE;
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    s16 unk16;
-    s16 unk18;
-    s16 unk1A;
-} Fade151A24A8;
+/* Callback 0x12 (func_151A1FB4's particles): fade in, grow, fade out, swell; switches to 0x13 to tint. */
+void func_151A24A8(Particle *particle) {
+    SmokeParticleData *data = (SmokeParticleData *)(particle + 1);
 
-typedef struct Obj151A24A8 {
-    u8 pad0[0x14];
-    s32 unk14;
-    u8 pad18[0x2F - 0x18];
-    u8 unk2F;
-    u8 pad30[0x2];
-    s16 unk32;
-    s16 unk34;
-    s16 unk36;
-    s16 unk38;
-    u8 pad3A[0x5];
-    u8 unk3F;
-    u8 unk40;
-    u8 unk41;
-    u8 unk42;
-    u8 pad43;
-    u16 unk44;
-    u8 pad46[0xA];
-    Fade151A24A8 unk50;
-} Obj151A24A8;
+    if (particle->life > data->fadeInEnd) {
+        particle->primA = (data->fadeInStart - particle->life) * data->fadeInStep;
+    }
+    if (particle->life > data->growEnd) {
+        particle->width = particle->height = (data->growStart - particle->life) * data->growStep;
+    }
+    if (particle->life < data->fadeOutStart) {
+        particle->primA = particle->life * data->fadeOutStep;
+    }
+    if (particle->life < data->swellStart) {
+        s16 growth = data->swellRate * D_800BE9E4;
 
-void func_151A24A8(Obj151A24A8 *arg0) {
-    Fade151A24A8 *s = &arg0->unk50;
-
-    if (arg0->unk38 > s->unk4) {
-        arg0->unk3F = (s->unk2 - arg0->unk38) * s->unk0;
+        particle->width += growth;
+        particle->height += growth;
     }
-    if (arg0->unk38 > s->unkA) {
-        arg0->unk34 = arg0->unk36 = (s->unk8 - arg0->unk38) * s->unk6;
+    if (particle->life < data->tintStart) {
+        particle->callback = 0x13;
+        particle->flags |= PARTICLE_ENV_COLOR | PARTICLE_CUSTOM_MODE;
+        particle->envR = particle->envG = particle->envB = particle->life * data->tintStep;
+        particle->unk14 = 0x520003;
     }
-    if (arg0->unk38 < s->unk10) {
-        arg0->unk3F = arg0->unk38 * s->unk12;
-    }
-    if (arg0->unk38 < s->unk14) {
-        s16 d = s->unk16 * D_800BE9E4;
-
-        arg0->unk34 += d;
-        arg0->unk36 += d;
-    }
-    if (arg0->unk38 < s->unkC) {
-        arg0->unk2F = 0x13;
-        arg0->unk44 |= 0x101;
-        arg0->unk40 = arg0->unk41 = arg0->unk42 = arg0->unk38 * s->unkE;
-        arg0->unk14 = 0x520003;
-    }
-    if (arg0->unk38 < s->unk18) {
-        arg0->unk32 = s->unk1A;
-        s->unk18 = -9999;
+    if (particle->life < data->accelStart) {
+        particle->accelY = data->accel;
+        data->accelStart = -9999;
     }
 }
 
-typedef struct Fade151A25E0 {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    s16 unk6;
-    s16 unk8;
-    s16 unkA;
-    s16 unkC;
-    s16 unkE;
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    s16 unk16;
-    s16 unk18;
-    s16 unk1A;
-} Fade151A25E0;
+/* Callback 0x13: func_151A24A8 after the switch, with the env colour following life. */
+void func_151A25E0(Particle *particle) {
+    SmokeParticleData *data = (SmokeParticleData *)(particle + 1);
 
-typedef struct Obj151A25E0 {
-    u8 pad0[0x32];
-    s16 unk32;
-    s16 unk34;
-    s16 unk36;
-    s16 unk38;
-    u8 pad3A[0x5];
-    u8 unk3F;
-    u8 unk40;
-    u8 unk41;
-    u8 unk42;
-    u8 pad43[0xD];
-    Fade151A25E0 unk50;
-} Obj151A25E0;
+    if (particle->life > data->fadeInEnd) {
+        particle->primA = (data->fadeInStart - particle->life) * data->fadeInStep;
+    }
+    if (particle->life > data->growEnd) {
+        particle->width = particle->height = (data->growStart - particle->life) * data->growStep;
+    }
+    if (particle->life < data->fadeOutStart) {
+        particle->primA = particle->life * data->fadeOutStep;
+    }
+    if (particle->life < data->swellStart) {
+        s16 growth = data->swellRate * D_800BE9E4;
 
-void func_151A25E0(Obj151A25E0 *arg0) {
-    Fade151A25E0 *s = &arg0->unk50;
-
-    if (arg0->unk38 > s->unk4) {
-        arg0->unk3F = (s->unk2 - arg0->unk38) * s->unk0;
+        particle->width += growth;
+        particle->height += growth;
     }
-    if (arg0->unk38 > s->unkA) {
-        arg0->unk34 = arg0->unk36 = (s->unk8 - arg0->unk38) * s->unk6;
+    if (particle->life < data->accelStart) {
+        particle->accelY = data->accel;
+        data->accelStart = -9999;
     }
-    if (arg0->unk38 < s->unk10) {
-        arg0->unk3F = arg0->unk38 * s->unk12;
-    }
-    if (arg0->unk38 < s->unk14) {
-        s16 d = s->unk16 * D_800BE9E4;
-
-        arg0->unk34 += d;
-        arg0->unk36 += d;
-    }
-    if (arg0->unk38 < s->unk18) {
-        arg0->unk32 = s->unk1A;
-        s->unk18 = -9999;
-    }
-    arg0->unk40 = arg0->unk41 = arg0->unk42 = arg0->unk38 * s->unkE;
+    particle->envR = particle->envG = particle->envB = particle->life * data->tintStep;
 }
 
+/* Spawn parameters of a func_15130374 particle (layout as ParticleDesc in game_15D730.c). */
 typedef struct {
-    f32 x, y, z;
-} Vec151A26EC;
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ u16 renderMode;
+    /* 0x0A */ s16 timer;
+    /* 0x0C */ s32 frame;
+    /* 0x10 */ s32 frameRate;
+    /* 0x14 */ u8 r;
+    /* 0x15 */ u8 g;
+    /* 0x16 */ u8 b;
+    /* 0x17 */ u8 a;
+    /* 0x18 */ u8 r2;
+    /* 0x19 */ u8 g2;
+    /* 0x1A */ u8 b2;
+    /* 0x1B */ u8 alpha;
+    /* 0x1C */ u8 brightness;
+    /* 0x1D */ u8 texture;     /* D_80090B60 index */
+    /* 0x1E */ s16 fadeStart;
+    /* 0x20 */ s16 fadeRate;
+    /* 0x22 */ s16 scaleStart;
+    /* 0x24 */ f32 scaleRate;
+    /* 0x28 */ f32 width;
+    /* 0x2C */ f32 height;
+    /* 0x30 */ struct17 pos;
+    /* 0x3C */ struct17 offset;
+    /* 0x48 */ struct17 vel;
+    /* 0x54 */ f32 gravity;
+    /* 0x58 */ s32 flags;
+    /* 0x5C */ void *viewMask;
+    /* 0x60 */ u8 primColorMode;
+    /* 0x61 */ u8 envColorMode;
+    /* 0x62 */ s8 updateFunc;  /* D_80089760 index, -1 for none */
+    /* 0x63 */ s8 deathFunc;   /* D_80089800 index, -1 for none */
+    /* 0x64 */ s8 drawFunc;    /* D_80089804 index, -1 for none */
+    /* 0x65 */ u8 handlerSet;
+    /* 0x66 */ u8 views;
+    /* 0x67 */ u8 pad67;
+    /* 0x68 */ s16 minSize;
+    /* 0x6A */ s16 unk6A;
+    /* 0x6C */ f32 maxSize;
+} ParticleDesc;
 
+/* The particle func_15130374 returns (layout as Particle in game_15D730.c). */
 typedef struct {
-    s32 unk00;
-    s32 unk04;
-    s16 unk08;
-    s16 unk0A;
-    s32 unk0C;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    Vec151A26EC unk30;
-    Vec151A26EC unk3C;
-    Vec151A26EC unk48;
-    f32 unk54;
-    s32 unk58;
-    u8 pad5C[4];
-    u8 unk60;
-    u8 unk61;
-    u8 unk62;
-    s8 unk63;
-    s8 unk64;
-    u8 unk65;
-    u8 pad66[0xA];
-} Fx151A26EC;
+    /* 0x00 */ u8 pad0[0x10];
+    /* 0x10 */ ParticleDesc desc;
+    /* 0x80 */ u8 unk80[0x28];
+    /* 0xA8 */ u8 data[0x10];  /* caller-sized per-particle data */
+} DescParticle;
 
+/* Per-particle data of func_151A26EC's particles (only partly copied, see there). */
 typedef struct {
-    f32 unk0;
-    s16 unk4;
-    s16 unk6;
-    s16 unk8;
-    s8 unkA;
-} Extra151A26EC;
+    /* 0x0 */ f32 unk0;
+    /* 0x4 */ s16 unk4;
+    /* 0x6 */ s16 unk6;
+    /* 0x8 */ s16 unk8;
+    /* 0xA */ s8 unkA;
+} ParticleData151A26EC;
 
-s32 func_151A26EC(Vec151A26EC *arg0, Vec151A26EC *arg1, Vec151A26EC *arg2, f32 arg3, f32 arg4, f32 arg5,
-                  s16 arg6, u8 arg7, s16 arg8, s16 arg9, s16 argA, s8 argB, u8 argC, u8 argD, u8 argE,
+extern DescParticle *func_15130374(ParticleDesc *, u8, s32, u8, s32);
+
+/* Spawns one func_15130374 particle (texture 39, update func 0x11) at pos/offset with velocity vel. */
+s32 func_151A26EC(struct17 *pos, struct17 *offset, struct17 *vel, f32 arg3, f32 gravity, f32 size,
+                  s16 timer, u8 alpha, s16 fadeStart, s16 arg9, s16 argA, s8 argB, u8 r, u8 g, u8 b,
                   u8 argF, s32 arg10) {
-    Extra151A26EC sp9C;
-    struct260 *ret;
-    Fx151A26EC sp28;
+    ParticleData151A26EC data;
+    DescParticle *particle;
+    ParticleDesc desc;
 
-    if (arg8 <= 0) {
-        arg8 = 1;
+    if (fadeStart <= 0) {
+        fadeStart = 1;
     }
     if (arg9 <= 0) {
         arg9 = 1;
     }
-    sp9C.unk0 = arg3;
-    sp9C.unk4 = arg9;
-    sp9C.unk6 = 0xFF / arg9;
-    sp28.unk1E = arg8;
-    sp28.unk20 = 0xFF / arg8;
-    sp9C.unk8 = argA;
-    sp9C.unkA = argB;
-    sp28.unk1D = 0x27;
-    sp28.unk08 = 0x5203;
-    sp28.unk00 = 0x200005;
-    sp28.unk04 = 0;
-    sp28.unk0A = arg6;
-    sp28.unk0C = 0;
-    sp28.unk10 = 0;
-    sp28.unk14 = argC;
-    sp28.unk15 = argD;
-    sp28.unk16 = argE;
-    sp28.unk17 = 0xFF;
-    sp28.unk18 = 0xFF;
-    sp28.unk19 = 0xFF;
-    sp28.unk1A = 0xFF;
-    sp28.unk1B = arg7;
-    sp28.unk1C = 0xFF;
-    sp28.unk2C = arg5;
-    sp28.unk28 = arg5;
-    sp28.unk30 = *arg0;
-    sp28.unk3C = *arg1;
-    sp28.unk48 = *arg2;
-    sp28.unk22 = 1;
-    sp28.unk54 = arg4;
-    sp28.unk24 = 1.0f;
-    sp28.unk58 = (func_150ADA20() & 1 ? 0x40 : 0) | (1 | 2 | 4 | (func_150ADA20() & 1 ? 0x80 : 0)) | 0x200 | 0x1000 | 0x4000 | 0x8000 | 0x800000;
-    sp28.unk60 = 7;
-    sp28.unk61 = 2;
-    sp28.unk62 = 0x11;
-    sp28.unk63 = -1;
-    sp28.unk64 = -1;
-    sp28.unk65 = 2;
-    ret = func_15130374(&sp28, 1, 0x10, argF, arg10);
-    if (ret != NULL) {
-        memcpy((u8 *)ret + 0xA8, &sp9C.unk0, 8);
-        memcpy((u8 *)ret + 0xB0, &sp9C.unk4, 8);
+    data.unk0 = arg3;
+    data.unk4 = arg9;
+    data.unk6 = 255 / arg9;
+    desc.fadeStart = fadeStart;
+    desc.fadeRate = 255 / fadeStart;
+    data.unk8 = argA;
+    data.unkA = argB;
+    desc.texture = 39;
+    desc.renderMode = 0x5203;
+    desc.unk0 = 0x200005;
+    desc.unk4 = 0;
+    desc.timer = timer;
+    desc.frame = 0;
+    desc.frameRate = 0;
+    desc.r = r;
+    desc.g = g;
+    desc.b = b;
+    desc.a = 255;
+    desc.r2 = 255;
+    desc.g2 = 255;
+    desc.b2 = 255;
+    desc.alpha = alpha;
+    desc.brightness = 255;
+    desc.height = size;
+    desc.width = size;
+    desc.pos = *pos;
+    desc.offset = *offset;
+    desc.vel = *vel;
+    desc.scaleStart = 1;
+    desc.gravity = gravity;
+    desc.scaleRate = 1.0f;
+    // matching: this grouping of the constant flags sets IDO's or-chain order
+    desc.flags = (func_150ADA20() & 1 ? 0x40 : 0) | (1 | 2 | 4 | (func_150ADA20() & 1 ? 0x80 : 0)) | 0x200 |
+                 0x1000 | 0x4000 | 0x8000 | 0x800000;
+    desc.primColorMode = 7;
+    desc.envColorMode = 2;
+    desc.updateFunc = 0x11;
+    desc.deathFunc = -1;
+    desc.drawFunc = -1;
+    desc.handlerSet = 2;
+    particle = func_15130374(&desc, 1, 0x10, argF, arg10);
+    if (particle != NULL) {
+        memcpy(&particle->data[0], &data.unk0, 8);
+        memcpy(&particle->data[8], &data.unk4, 8);
     }
     return 0;
 }
@@ -1081,7 +970,7 @@ void func_151A2C24(s32 arg0, s32 arg1, s16 arg2, s16 arg3, f32 arg4, f32 arg5, f
         } else {
             b = -1;
         }
-        func_151A26EC((Vec151A26EC *) arg0, (Vec151A26EC *) pos, (Vec151A26EC *) vel, arg9, (r * argB) + argA, (arg6 * t) + arg5, delay + minLife, (a % (u32) (argF + 1)) + argE, arg10, arg11, b, arg12, colors.c[c][0], colors.c[c][1], colors.c[c][2], arg13, arg14);
+        func_151A26EC((struct17 *) arg0, (struct17 *) pos, (struct17 *) vel, arg9, (r * argB) + argA, (arg6 * t) + arg5, delay + minLife, (a % (u32) (argF + 1)) + argE, arg10, arg11, b, arg12, colors.c[c][0], colors.c[c][1], colors.c[c][2], arg13, arg14);
         t += step;
         arg7--;
     }
