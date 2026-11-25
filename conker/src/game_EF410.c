@@ -336,13 +336,7 @@ typedef struct {
 } PosSub;
 
 typedef struct {
-    u8 pad0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD;
-    s16 unkE;
-    u8 pad10[0x18];
+    TimedEffect base;
     PosSub unk28;
 } Struct150C29F0;
 
@@ -369,7 +363,7 @@ void func_150C2898(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, Struct150C
     func_151D9014(pos, vel, 6, rand0 * 0.27f + -0.31f,
                     (rand1 & 0xF) + 25, (rand2 % 101) + 155,
                     rand3 * 119.0f + 129.0f, 0, 1.0f, 1.0f, 1, 0, 1, 0,
-                    emitter->unkC, emitter->unk1);
+                    emitter->base.header.owner, emitter->base.header.kind);
 }
 
 Particle_EF410 *func_15149550(ParticleEmitterDesc *arg0, u8 arg1, u8 arg2, s32 arg3, u8 arg4, s32 arg5);
@@ -416,8 +410,8 @@ void func_150C29F0(Struct150C29F0 *emitter) {
     particle.maxB = 57.969f * scaleB;
     particle.minB = 42.714f * scaleB;
     particle.altB = 118.763f * scaleB;
-    func_15149550(&particle, 0xA, 1, 0, emitter->unkC, emitter->unk1);
-    emitter->unkE = (func_150ADA20() % 51U) + 25;
+    func_15149550(&particle, 0xA, 1, 0, emitter->base.header.owner, emitter->base.header.kind);
+    emitter->base.header.state = (func_150ADA20() % 51U) + 25;
 }
 void func_1514373C(f32 arg0, f32 arg1, f32 *arg2, f32 *arg3);
 Vec3f *func_15144B34(s32);
@@ -470,7 +464,7 @@ void func_150C2C00(Struct150C29F0 *emitter) {
                         particle.life = (func_150ADA20() % 151U) + 50;
                         particle.scale = (func_150ADA68() * 500.0f) * 0.001f;
                         particle.unk2C = (func_150ADA20() % 156U) + 100;
-                        created = func_15149550(&particle, 0xA, 1, 0, emitter->unkC, emitter->unk1);
+                        created = func_15149550(&particle, 0xA, 1, 0, emitter->base.header.owner, emitter->base.header.kind);
                         if (created != NULL) {
                             memcpy(&created->unk160, &angle, sizeof(angle));
                         }

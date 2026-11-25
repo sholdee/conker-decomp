@@ -35,13 +35,7 @@ typedef struct EmitterPos {
 } EmitterPos;
 
 typedef struct ObjectEmitter {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 cooldown;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ EmitterPos pos;
 } ObjectEmitter;
 
@@ -80,8 +74,8 @@ void func_15193390(ObjectEmitter *volatile emitter) {
     func_1516865C(&spawn, 0xFF, 0xFF, 0xFF, 0x80);
     // matching: one load of the volatile `emitter` serves both arguments
     pos = (EmitterPos *)emitter;
-    func_15168800(&spawn, ((ObjectEmitter *)pos)->unkC, ((ObjectEmitter *)pos)->unk1);
-    emitter->cooldown = (func_150ADA20() & 0x7F) + 100;
+    func_15168800(&spawn, ((ObjectEmitter *)pos)->base.header.owner, ((ObjectEmitter *)pos)->base.header.kind);
+    emitter->base.header.state = (func_150ADA20() & 0x7F) + 100;
 }
 
 typedef struct FallingObject {

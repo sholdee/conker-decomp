@@ -192,7 +192,7 @@ void func_150FA1B8(BurstEffect *effect) {
     actor = effect->data.owner;
     burst = &effect->data;
     if ((actor->interaction_state == 0) || (actor->unique_id != burst->ownerId)) {
-        effect->header.state = -1;
+        effect->base.header.state = -1;
         return;
     }
     if (actor->unk1D4 != NULL) {
@@ -251,7 +251,7 @@ void func_150FA1B8(BurstEffect *effect) {
             if (burst->sparks[i] != NULL) {
                 BurstSparkData *sparkData = &burst->sparks[i]->data;
 
-                if (effect->header.state < 10) {
+                if (effect->base.header.state < 10) {
                     sparkData->beamWidthTarget = 0.0f;
                     sparkData->beamLengthTarget = 0.0f;
                 } else {
@@ -262,7 +262,7 @@ void func_150FA1B8(BurstEffect *effect) {
             if (burst->glows[i] != NULL) {
                 BurstGlowData *glowData = &burst->glows[i]->data;
 
-                if (effect->header.state < 10) {
+                if (effect->base.header.state < 10) {
                     glowData->targetScale = 0.0f;
                 } else {
                     glowData->targetScale = 1.306000113f;

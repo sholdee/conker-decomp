@@ -190,13 +190,7 @@ typedef struct GameDC6B0SmokeTimers {
 } GameDC6B0SmokeTimers;
 
 typedef struct GameDC6B0SmokeSource {
-    u8 pad0;
-    u8 owner;
-    u8 pad2[0xA];
-    u8 group;
-    u8 padD;
-    s16 maxLifetime;
-    u8 pad10[0x18];
+    TimedEffect base;
     GameDC6B0SmokeTimers timers;
 } GameDC6B0SmokeSource;
 
@@ -238,8 +232,8 @@ void func_150AF7C4(GameDC6B0SmokeSource *source) {
         puff.halfWidth = 1.0f;
         puff.halfHeight = 115.0f;
         puff.timer = func_150ADA20() % 71U + 20;
-        if (source->maxLifetime < puff.timer) {
-            puff.timer = source->maxLifetime;
+        if (source->base.header.state < puff.timer) {
+            puff.timer = source->base.header.state;
         }
         puff.flags = 0x21;
         puff.fadeStart = 1;
@@ -264,7 +258,7 @@ void func_150AF7C4(GameDC6B0SmokeSource *source) {
         puff.unk40 = 0;
         puff.unk41 = 0xA;
         puff.viewport = 0;
-        sprite = func_1515548C(&puff, 6, 0, 0, 0x10, source->group, source->owner);
+        sprite = func_1515548C(&puff, 6, 0, 0, 0x10, source->base.header.owner, source->base.header.kind);
         if (sprite != NULL) {
             memcpy(&sprite->motion, &motion, sizeof(motion));
         }
@@ -277,8 +271,8 @@ void func_150AF7C4(GameDC6B0SmokeSource *source) {
         spark.halfWidth = spark.halfHeight = 2.0f * func_150ADA68() + 1.0f;
         spark.texture = func_151D8E6C();
         spark.timer = func_150ADA20() % 7U + 5;
-        if (source->maxLifetime < spark.timer) {
-            spark.timer = source->maxLifetime;
+        if (source->base.header.state < spark.timer) {
+            spark.timer = source->base.header.state;
         }
         spark.flags = 1 | (func_150ADA20() ? 2 : 0) | (func_150ADA20() ? 4 : 0) | 0x20;
         spark.fadeStart = 1;
@@ -303,7 +297,7 @@ void func_150AF7C4(GameDC6B0SmokeSource *source) {
         spark.unk40 = 0;
         spark.unk41 = 7;
         spark.viewport = 0;
-        func_1515548C(&spark, 0, 0, 0, 0, source->group, source->owner);
+        func_1515548C(&spark, 0, 0, 0, 0, source->base.header.owner, source->base.header.kind);
         timers->spark = func_150ADA20() % 11U + 3;
     }
 }

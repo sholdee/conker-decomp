@@ -10,13 +10,7 @@ void func_150B60E0(Actor *obj, Vec3f *out);
 
 /* Effect instance whose per-type data (from 0x28) tracks a game object. */
 typedef struct ObjBurstEffect {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 kind;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 owner;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 timer; /* frames left (as in FlashEffect, game_1AC2F0.c) */
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ Actor *obj;
     /* 0x2C */ u8 objUniqueId;
 } ObjBurstEffect;
@@ -48,7 +42,7 @@ void func_150B5950(ObjBurstEffect *effect) {
     obj = effect->obj;
     posp = &pos; // matching: IDO keeps &pos in a saved register only via a named pointer
     if ((obj->interaction_state == 0) || (obj->unique_id != effect->objUniqueId)) {
-        effect->timer = -1;
+        effect->base.header.state = -1;
         return;
     }
 
@@ -57,12 +51,12 @@ void func_150B5950(ObjBurstEffect *effect) {
             pos.x = obj->x_position;
             pos.y = obj->y_position;
             pos.z = obj->z_position;
-            func_150B5A3C(posp, effect->owner, effect->kind);
+            func_150B5A3C(posp, effect->base.header.owner, effect->base.header.kind);
         }
 
         if (func_150ADA68() < 0.10824f) {
             func_150B60E0(obj, posp);
-            func_150B5A3C(posp, effect->owner, effect->kind);
+            func_150B5A3C(posp, effect->base.header.owner, effect->base.header.kind);
         }
     }
 }

@@ -2040,8 +2040,7 @@ typedef struct BurstData {
 } BurstData; /* size 0x18 */
 
 typedef struct BurstEffect {
-    /* 0x00 */ EffectHeader header;   /* header.state: age in frames; -1 frees */
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;      /* base.header.state: age in frames; -1 frees */
     /* 0x28 */ BurstData data;
 } BurstEffect; /* size 0x40 */
 

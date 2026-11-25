@@ -88,20 +88,9 @@ typedef struct DripSlot {
 
 #define DRIP_SLOT_COUNT 60
 
-/* Leading fields of a func_151491F4 task. */
-typedef struct {
-    /* 0x00 */ u8 type;
-    /* 0x01 */ u8 list;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 owner;
-    /* 0x0D */ u8 flags;            /* bit 0: the timer counts down */
-    /* 0x0E */ s16 timer;
-} TaskHeader;
-
 /* A func_151491F4 task that keeps the link of an emitter that could not be created yet. */
 typedef struct {
-    /* 0x00 */ TaskHeader header;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ ActorLink link;
 } DripRetryTask;
 
@@ -562,17 +551,17 @@ void func_151918BC(DripRetryTask *task) {
         done = 1;
     }
     if (!done && actor->unk1D4 != NULL) {
-        if (task->header.flags & 1) {
-            link->timer = task->header.timer;
+        if (task->base.header.flags & 1) {
+            link->timer = task->base.header.state;
             link->flags |= 1;
         } else {
             link->timer = 300;
         }
         done = 1;
-        func_15190770(link, 0, task->header.owner, task->header.list);
+        func_15190770(link, 0, task->base.header.owner, task->base.header.kind);
     }
     if (done) {
-        func_1516972C((EffectHeader *)task);
+        func_1516972C(&task->base.header);
     }
 }
 
@@ -618,10 +607,10 @@ void func_15191A84(DripRetryTask *task, ActorRef *ref, u8 msg) {
         }
         if (ref->uniqueId == link->actorId) {
         hit:
-            func_1516972C((EffectHeader *)task);
+            func_1516972C(&task->base.header);
         }
     } else if (msg == 0x4E) {
-        func_1516972C((EffectHeader *)task);
+        func_1516972C(&task->base.header);
     } else if (msg == 0xD) {
         if (ref->actor == link->actor) {
             goto hit2;
@@ -630,8 +619,8 @@ void func_15191A84(DripRetryTask *task, ActorRef *ref, u8 msg) {
             goto skip;
         }
     hit2:
-        task->header.flags |= 1;
-        task->header.timer = 100;
+        task->base.header.flags |= 1;
+        task->base.header.state = 100;
     skip:;
     } else {
         func_15169850((s32)ref, msg, &link->actor, &link->actorId, task);

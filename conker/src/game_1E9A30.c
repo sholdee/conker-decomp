@@ -814,7 +814,7 @@ void func_151BDD8C(BurstEffect *effect) {
     data = &effect->data;
     owner = data->owner;
     if (owner->interaction_state == 0 || owner->unique_id != data->ownerId) {
-        effect->header.state = -1;
+        effect->base.header.state = -1;
         return;
     }
     if (owner->unk1D4 != NULL && (owner->unk74 & 0xF) != 0xF) {
@@ -926,10 +926,10 @@ void func_151BE138(BurstEffect *effect) {
 
 void func_151BE1B8(BurstEffect *effect) {
     func_151BE138(effect);
-    func_1514933C((TimedEffect *)effect);
+    func_1514933C(&effect->base);
 }
 
 void func_151BE1E4(BurstEffect *effect) {
     func_151BE138(effect);
-    func_15149368((TimedEffect *)effect);
+    func_15149368(&effect->base);
 }

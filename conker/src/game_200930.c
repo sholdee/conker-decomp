@@ -504,12 +504,7 @@ typedef struct {
 
 /* An effect created by func_151D469C; its user data is an ObjEmitter. */
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0E */ s16 unkE;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ ObjEmitter emitter;
 } EmitterEffect;
 
@@ -529,7 +524,7 @@ void func_151D4794(EmitterEffect *effect) {
     emitter = &effect->emitter;
     wasValid = effect->emitter.flags & 1;
     if (obj->interaction_state == 0 || obj->unique_id != emitter->uniqueId) {
-        effect->unkE = -1;
+        effect->base.header.state = -1;
         return;
     }
     if (obj->unk1D4 != NULL && (obj->unk74 & 0xF) != 0xF) {
@@ -601,7 +596,7 @@ void func_151D4794(EmitterEffect *effect) {
                 spawn.alpha = func_150ADA20() % 61U + 60;
                 spawn.timer = func_150ADA20() % 11U + 70;
                 spawn.width = spawn.height = func_150ADA68() * 40.0f + 40.0f;
-                ret = func_15130280(&spawn, 1, 0, sizeof(extra), effect->unkC, effect->unk1);
+                ret = func_15130280(&spawn, 1, 0, sizeof(extra), effect->base.header.owner, effect->base.header.kind);
                 if (ret != NULL) {
                     memcpy((u8 *)ret + 0xA8, &extra, sizeof(extra));
                 }
@@ -619,7 +614,7 @@ void func_151D4C38(EmitterEffect *effect, ActorRef *handle, u8 msg) {
     emitter = &effect->emitter;
     if (msg == 0x3C) {
         if ((handle->actor == emitter->obj) || (handle->uniqueId == emitter->uniqueId)) {
-            func_1516972C((EffectHeader *)effect);
+            func_1516972C(&effect->base.header);
         }
     } else if (msg == 4) {
         if ((handle->actor == emitter->obj) || (handle->uniqueId == emitter->uniqueId)) {

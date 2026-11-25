@@ -3419,13 +3419,7 @@ s32 func_1519C998(CharacterFlamethrowerActor *actor) {
 
 /* An object that carries a character's flamethrower (callbacks func_1519C9C4/func_1519CD64). */
 typedef struct FlamethrowerController {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 flags;
-    /* 0x0E */ s16 unkE;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ Actor *owner;
     /* 0x2C */ u8 ownerId;
     /* 0x2D */ u8 pad2D[3];
@@ -3529,7 +3523,7 @@ void func_1519C9C4(FlamethrowerController *ctrl) {
     setup.emit.unk34 = 0.1780000031f;
     setup.emit.unk38 = 23;
     setup.emit.unk3A = 11;
-    flame = func_151994B8(sizeof(ctrl->aliveState), &setup, ctrl->unkC, ctrl->unk1);
+    flame = func_151994B8(sizeof(ctrl->aliveState), &setup, ctrl->base.header.owner, ctrl->base.header.kind);
     if (flame != NULL) {
         state = flame->state;
         memcpy(&state->aliveState, ctrl->aliveState, sizeof(ctrl->aliveState));
@@ -3543,8 +3537,8 @@ void func_1519CD64(FlamethrowerController *ctrl) {
     if (owner->interaction_state != 0 && owner->id != 0xFF && owner->unique_id == ctrl->ownerId) {
         return;
     }
-    ctrl->unkE = -1;
-    ctrl->flags |= 1;
+    ctrl->base.header.state = -1;
+    ctrl->base.header.flags |= 1;
 }
 
 s32 func_1505D1C4(f32, f32, f32, s32, s32, s32, s32, s32);
