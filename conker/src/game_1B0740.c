@@ -44,7 +44,7 @@ typedef struct Game1B0740Wave {
 
 void func_15175390(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, f32, f32, s32);
 void func_1517AA20(f32, s32, s32, s32, s32);
-void func_15177F90(u8, s32, u8, s32, s32, s32, s32, s32, u8, s32, s32);
+void func_15177F90(u8, f32 *, u8, s32, s32, s32, s32, s32, u8, s32, s32);
 void func_15174BF0(s32, s32, s32, s32, s32, s32, f32, f32, s32);
 void func_15174FA4(s32, s32, s32, s32, s32, s32, s32, s32, f32, f32);
 void func_151838B0(s32);
@@ -62,10 +62,7 @@ void func_15179DB0(u8);
 void func_15183C28(s32);
 
 extern f32 D_800CC2E4;
-extern u8 D_800DDF69[];
 extern u8 D_800A72D0[];
-extern s8 D_800DDF70;
-extern s8 D_800DDF71;
 extern s32 D_800DDF20;
 extern s32 D_800DDF98;
 extern Game1B0740Wave D_8008D0B0[];
@@ -96,10 +93,10 @@ s32 func_15183290(s32 x, s32 y, s32 z, s32 count, s32 type, s32 radius, s32 play
     target = D_800DBFF0[player].unk3D0;
     switch (type) {
         case 0:
-            func_15177F90(count, 0, 0xFE, x, y, z, 0, 0x7FFF, 0xFF, 1, 0);
+            func_15177F90(count, NULL, 0xFE, x, y, z, 0, 0x7FFF, 0xFF, 1, 0);
             break;
         case 1:
-            func_15177F90(count, (s32)&D_800CC2E4, 0xFE, x, y, z, 0, 0x7FFF, 0xFF, 1, 0);
+            func_15177F90(count, &D_800CC2E4, 0xFE, x, y, z, 0, 0x7FFF, 0xFF, 1, 0);
             break;
         case 2:
             func_151838B0(0);
@@ -173,7 +170,7 @@ void func_151838B0(s32 slot) {
             gModelSlots[slot + 1].unk8 = res->unk8;
             gModelSlots[slot + 1].unk10 = NULL;
             gModelSlots[slot + 1].displayList = gModelSlots[slot].displayList;
-            D_800DDF69[slot] = 1;
+            D_800DDF68[slot + 1] = 1;
         }
     }
 }
@@ -196,17 +193,15 @@ void func_151839F0(s32 slot, s32 extraSlot) {
     if (gModelSlots[slot].resource == NULL) {
         func_15183ACC(slot);
     }
-    if (gModelSlots[slot].resource != NULL) {
-        if (gModelSlots[extraSlot].resource == NULL) {
-            res = func_1502B6BC(0, 0, 0, 2, 9, extraSlot + 0xAD);
-            if (res != NULL) {
-                gModelSlots[extraSlot].resource = res;
-                gModelSlots[extraSlot].unk4 = res->unk0;
-                gModelSlots[extraSlot].unk8 = res->unk8;
-                gModelSlots[extraSlot].displayList = res->unk18;
-                gModelSlots[extraSlot].unk10 = NULL;
-                D_800DDF68[extraSlot] = 1;
-            }
+    if (gModelSlots[slot].resource != NULL && gModelSlots[extraSlot].resource == NULL) {
+        res = func_1502B6BC(0, 0, 0, 2, 9, extraSlot + 0xAD);
+        if (res != NULL) {
+            gModelSlots[extraSlot].resource = res;
+            gModelSlots[extraSlot].unk4 = res->unk0;
+            gModelSlots[extraSlot].unk8 = res->unk8;
+            gModelSlots[extraSlot].displayList = res->unk18;
+            gModelSlots[extraSlot].unk10 = NULL;
+            D_800DDF68[extraSlot] = 1;
         }
     }
 }
@@ -236,39 +231,34 @@ Gfx *func_15183BA4(Gfx *gdl, s32 modelId, s32 arg2, s32 arg3) {
     s32 i;
 
     slot = -1;
-    for (i = 0; i != 11; i++) {
+    for (i = 0; i < 11; i++) {
         if (modelId == D_800A72D0[i]) {
             slot = i;
             break;
         }
     }
 
-    if (slot != -1) {
-        if (D_800DDF78[slot] != 0) {
-            gSPDisplayList(gdl++, D_800DDF78[slot]);
-        }
+    if (slot != -1 && D_800DDF78[slot] != 0) {
+        gSPDisplayList(gdl++, D_800DDF78[slot]);
     }
     return gdl;
 }
 
-/* Frees model `slot` (slot 8 only once D_800DDF71 is unused; slot 9 also frees D_800DDF20). */
+/* Frees model `slot`. Slots 8 and 9 are a pair: slot 8's model is kept until slot 9 is unused too, and freeing
+ * slot 9 after slot 8 also frees D_800DDF20. */
 void func_15183C28(s32 slot) {
     if (gModelSlots[slot].unk10 != NULL) {
         func_1510D630(gModelSlots[slot].unk10);
         gModelSlots[slot].unk10 = NULL;
     }
     if (slot == 8) {
-        if (D_800DDF71 != -2) {
+        if (D_800DDF68[9] != -2) {
             return;
         }
-    } else if (slot == 9) {
-        if (D_800DDF70 == -2) {
-            if (D_800DDF20 != 0) {
-                func_10004074((void *)D_800DDF20);
-                D_800DDF20 = 0;
-                D_800DDF98 = 0;
-            }
-        }
+    } else if (slot == 9 && D_800DDF68[8] == -2 && D_800DDF20 != 0) {
+        func_10004074((void *)D_800DDF20);
+        D_800DDF20 = 0;
+        D_800DDF98 = 0;
     }
     if (gModelSlots[slot].resource != NULL) {
         // matching: IDO reloads the argument into a0 directly unless it goes through an int-to-pointer cast
