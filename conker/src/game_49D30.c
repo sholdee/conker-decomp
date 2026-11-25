@@ -1,15 +1,11 @@
 #include <ultra64.h>
 #include "functions.h"
 /* variables.h declares these with the wrong types; they are redeclared below with the types this file uses. */
-#define D_800C3958 D_800C3958_hdr
 #define D_800C35EA D_800C35EA_hdr
-#define D_800C3654 D_800C3654_hdr
 #define D_800C3CA0 D_800C3CA0_hdr
 #define D_800C3600 D_800C3600_hdr
 #include "variables.h"
-#undef D_800C3958
 #undef D_800C35EA
-#undef D_800C3654
 #undef D_800C3CA0
 #undef D_800C3600
 
@@ -66,29 +62,7 @@ typedef struct {
 
 /* Current animated values of a track (one SeqTrackState array per slot at D_800C3958). Which property
    each unk field holds depends on the track's SeqTrackInfo type. */
-typedef struct {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 z;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 yOffset;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-} SeqTrackState; // size 0x44
-
-extern SeqTrackState *D_800C3958[];
 extern u8 D_800C35EA[];
-extern u8 D_800C3654[];
 
 extern u16 *D_800C35C8[];
 extern u16 *D_800C35D8[];

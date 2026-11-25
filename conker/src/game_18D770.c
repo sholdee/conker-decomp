@@ -808,15 +808,15 @@ struct225 *func_151619A0(s32 index, s16 lifetime, u8 arg2, s32 arg3) {
 /* Copies position, colour and intensity (each clamped to 0-255) from the effect's D_800C3958 entry to the light. */
 s32 func_15161A68(struct225 *effect) {
     // matching: both the table-address local and the (s32) read of unk18 are needed for IDO's register order
-    struct233 **table = &D_800C3958;
+    SeqTrackState **table = D_800C3958;
 
     if (D_800C35EA == 1) {
         f32 value;
-        struct233 *source = *table + (s32)effect->unk18;
+        SeqTrackState *source = *table + (s32)effect->unk18;
 
-        effect->unk14->unkE = source->unk0;
-        effect->unk14->unk10 = source->unk4;
-        effect->unk14->unk12 = source->unk8;
+        effect->unk14->unkE = source->x;
+        effect->unk14->unk10 = source->y;
+        effect->unk14->unk12 = source->z;
 
         value = (source->unk24 < 0.0f) ? 0.0f : (source->unk24 > 255.0f) ? 255.0f : source->unk24;
         source->unk24 = value;

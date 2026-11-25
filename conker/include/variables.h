@@ -899,14 +899,14 @@ extern u8  D_800C35C5;
 extern u8  D_800C35EA;
 extern struct168 *D_800C3600;
 extern u8  D_800C3638;
-extern s32 D_800C3654;
+extern u8 D_800C3654[];
 extern u8  D_800C3663;
 extern u8  D_800C3670;
 extern u8  D_800C3671;
 extern u8  D_800C3681;
 extern u8  D_800C3682;
 extern u8  D_800C3683;
-extern struct233 *D_800C3958;
+extern SeqTrackState *D_800C3958[]; // per scene: the track states
 extern u8  D_800C3C88;
 extern u8  D_800C3C90;
 extern s32 D_800C3C94;

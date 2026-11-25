@@ -3,12 +3,8 @@
 #include "functions.h"
 #undef func_1514D3B0
 /* variables.h declares these with the wrong types; they are redeclared below with the types this file uses. */
-#define D_800C3958 D_800C3958_hdr
-#define D_800C3654 D_800C3654_hdr
 #define D_800D3098 D_800D3098_hdr
 #include "variables.h"
-#undef D_800C3958
-#undef D_800C3654
 #undef D_800D3098
 
 /* One 8-byte cutscene script event. Each track starts with a 4-event header whose value is the start time. */
@@ -29,29 +25,6 @@ typedef struct {
     /* 0xA */ u16 index;
 } SeqQueueEntry;
 
-/* Per-track state of a running cutscene (0x44 bytes); D_800C3958[scene] holds one per track. */
-typedef struct {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 z;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-} SeqTrackState;
-
-extern SeqTrackState *D_800C3958[];
-extern u8 D_800C3654[];
 extern struct178 *D_800D3098;
 
 /* What a cutscene track is bound to: 2 = an object (func_15083E90), 3 = an actor (func_151149AC). */
@@ -132,7 +105,7 @@ s32 func_150238D8(SeqVoice *voice, s32 arg1, u32 *volume, s32 arg3, s32 arg4, s3
         if (states != NULL) {
             voice->x = states[snd->track].x;
             state = &D_800C3958[snd->scene][snd->track];
-            voice->y = state->unk38 + state->y;
+            voice->y = state->yOffset + state->y;
             voice->z = D_800C3958[snd->scene][snd->track].z;
         }
     }
@@ -1585,12 +1558,12 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 from[1] = D_800C3868[scene][track][1];
                 from[2] = D_800C3868[scene][track][2];
                 to[0] = D_800C3958[scene][track].x;
-                to[1] = D_800C3958[scene][track].y + D_800C3958[scene][track].unk38;
+                to[1] = D_800C3958[scene][track].y + D_800C3958[scene][track].yOffset;
                 to[2] = D_800C3958[scene][track].z;
                 func_150B0094(from, to, sceneTag, 1);
             } else {
                 func_150E1AB0(0, D_800C3868[scene][track][0], D_800C3868[scene][track][1], D_800C3868[scene][track][2],
-                              D_800C3958[scene][track].x, D_800C3958[scene][track].y + D_800C3958[scene][track].unk38,
+                              D_800C3958[scene][track].x, D_800C3958[scene][track].y + D_800C3958[scene][track].yOffset,
                               D_800C3958[scene][track].z, 40.0f, 0.0f, 8.0f, 60.0f, 0x258, 0x23, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                               0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
             }
@@ -2516,7 +2489,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             i4 = state->unk20 * 0.05000000075f;
             i5 = (state->unk10 + 180.0f) * 0.7111111283f;
             i6 = state->unkC * 0.7111111283f;
-            f7 = (state->unk38 * 0.1000000015f) + 0.5f;
+            f7 = (state->yOffset * 0.1000000015f) + 0.5f;
             f9 = (state->unk18 * 0.1000000015f) + 1.0f;
             f10 = state->unk1C * 0.1000000015f;
             n = (event->unk5 != 0) ? event->unk5 : 0x64;

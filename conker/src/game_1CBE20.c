@@ -4,28 +4,6 @@
 #include "effects.h"
 #include "libc/string.h"
 
-/* Per-track state of a running cutscene (as in game_50D80.c); the effects below follow one. */
-typedef struct {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 z;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-} SeqTrackState; // size 0x44
-
-
 /* First argument of func_15152190 (as Arg15108120 in game_1355D0.c). */
 typedef struct {
     /* 0x00 */ s32 unk00;

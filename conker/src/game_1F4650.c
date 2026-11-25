@@ -2142,7 +2142,7 @@ f32 func_151CC1D4(SightSprite *sprite) {
 
     payload = &sprite->payload;
     if (payload->flags & 4) {
-        f32 t = D_800C3958[payload->sourceIndex].unk28 * 0.009999999776f;
+        f32 t = D_800C3958[0][payload->sourceIndex].unk28 * 0.009999999776f;
 
         value = payload->rangeMin + (payload->rangeMax - payload->rangeMin) * t;
     } else {

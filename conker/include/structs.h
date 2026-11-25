@@ -3077,18 +3077,26 @@ typedef struct {
     u8  pad13;
 } struct232; // size 0x14
 
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    u8  padC[0xC];
-    f32 unk18;
-    u8  unk1C[0x8];
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    u8  pad30[0x14];
-} struct233; // size 0x44
+/* Per-track state of a running cutscene; D_800C3958[scene] points at one per track. */
+typedef struct SeqTrackState {
+    /* 0x00 */ f32 x;
+    /* 0x04 */ f32 y;
+    /* 0x08 */ f32 z;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18; // light intensity (func_15161A68)
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24; // light colour r, g, b (func_15161A68)
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ f32 unk34;
+    /* 0x38 */ f32 yOffset;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ f32 unk40;
+} SeqTrackState; // size 0x44
 
 typedef struct {
     s8  unk0;

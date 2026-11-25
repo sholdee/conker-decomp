@@ -167,8 +167,7 @@ void func_1507C22C(s32 onlyType4) {
         if (obj->interaction_state == 0) continue;
         if (obj->unk25C & 0x200) continue;
         if (onlyType4 && (obj->unk5 != 4)) continue;
-        // matching: the s32 D_800C3654 is tested through its high byte (lbu)
-        if (D_800C3638 && (*(u8 *)&D_800C3654 == 0) && (func_150229E4(obj) == 0)) continue;
+        if (D_800C3638 && (D_800C3654[0] == 0) && (func_150229E4(obj) == 0)) continue;
         anim = obj->unk2D0;
         if ((anim != NULL) && obj->unk2FA) {
             func_1507BDB0((AnimPlay *)anim, obj->unk48, obj, onlyType4);

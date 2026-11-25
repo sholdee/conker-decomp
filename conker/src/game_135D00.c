@@ -195,11 +195,9 @@ void func_15108BC0(DynModel *model) {
     if (track == TRACK_NONE) {
         lamp->height = 226.0f;
     } else if (D_800C35EA == 1) {
-        // D_800C3958 is really the per-scene array of track states (see game_49D30.c); this is scene 0
-        struct233 **sceneTracks = &D_800C3958;
-        struct233 *state = &sceneTracks[0][track];
+        SeqTrackState *state = &D_800C3958[0][track];
 
-        lamp->height = state->unk4;
+        lamp->height = state->y;
     } else {
         lamp->height = 226.0f;
     }

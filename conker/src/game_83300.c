@@ -3559,7 +3559,7 @@ void func_1505E650(Actor *actor, u16 anim, f32 speed, f32 blend, f32 arg4, f32 a
     u8 *data;
 
     idx = actor->id;
-    if ((D_800C3638 != 0) && ((*(u8 *)&D_800C3654 == 0) || (func_150229E4(actor) != 0))) {
+    if ((D_800C3638 != 0) && ((D_800C3654[0] == 0) || (func_150229E4(actor) != 0))) {
         return;
     }
     if (actor->id == 0xFF) {
