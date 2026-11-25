@@ -3,12 +3,46 @@
 #include "variables.h"
 #include "effects.h"
 
-extern u8 D_800A1638[];
-extern u8 D_800A163C[];
-extern f32 D_800A15F0[][3];
+static const f32 D_800A15F0[4][3] = { { -78.0f, 0.0f, 0.0f }, { 78.0f, 0.0f, 0.0f }, { -150.0f, 0.0f, 0.0f }, { 150.0f, 0.0f, 0.0f } };
+static const f32 D_800A1620[2][3] = { { -78.0f, 20.0f, 0.0f }, { 78.0f, 20.0f, 0.0f } };
+static const u8 D_800A1638[4] = { 0x16, 0x1A, 0x00, 0x00 };
+static const u8 D_800A163C[4] = { 0x40, 0x20, 0x00, 0x00 };
+static const f32 D_800A1640[2][3] = { { -175.0f, 42.0f, 0.0f }, { 175.0f, 42.0f, 0.0f } };
+static const f32 D_800A1658[2][3] = { { -300.0f, 42.0f, 0.0f }, { 300.0f, 42.0f, 0.0f } };
+static const u8 D_800A1670[4] = { 0x16, 0x1A, 0x00, 0x00 };
+static const f32 D_800A1674[3] = { 0.0f, -29.0f, 0.0f };
+static const f32 D_800A1680[3] = { 0.0f, 62.0f, 98.0f };
+static const f32 D_800A168C[2][4][2][3] = {
+    {
+        { { -125.0f, 10.0f, -30.0f }, { 125.0f, 10.0f, 30.0f } },
+        { { -125.0f, 10.0f, 30.0f }, { 125.0f, 10.0f, -30.0f } },
+        { { -125.0f, 75.0f, -30.0f }, { 125.0f, 75.0f, 30.0f } },
+        { { -125.0f, 75.0f, 30.0f }, { 125.0f, 75.0f, -30.0f } },
+    },
+    {
+        { { -170.0f, 20.0f, -40.0f }, { 170.0f, 20.0f, 40.0f } },
+        { { -170.0f, 20.0f, 40.0f }, { 170.0f, 20.0f, -40.0f } },
+        { { -170.0f, 90.0f, -40.0f }, { 170.0f, 90.0f, 40.0f } },
+        { { -170.0f, 90.0f, 40.0f }, { 170.0f, 90.0f, -40.0f } },
+    },
+};
+static const f32 D_800A174C[2][4][2][3] = {
+    {
+        { { -200.0f, 10.0f, -30.0f }, { 200.0f, 10.0f, 30.0f } },
+        { { -200.0f, 10.0f, 30.0f }, { 200.0f, 10.0f, -30.0f } },
+        { { -200.0f, 75.0f, -30.0f }, { 200.0f, 75.0f, 30.0f } },
+        { { -200.0f, 75.0f, 30.0f }, { 200.0f, 75.0f, -30.0f } },
+    },
+    {
+        { { -270.0f, 20.0f, -40.0f }, { 270.0f, 20.0f, 40.0f } },
+        { { -270.0f, 20.0f, 40.0f }, { 270.0f, 20.0f, -40.0f } },
+        { { -270.0f, 90.0f, -40.0f }, { 270.0f, 90.0f, 40.0f } },
+        { { -270.0f, 90.0f, 40.0f }, { 270.0f, 90.0f, -40.0f } },
+    },
+};
+static const u8 D_800A180C[2][2] = { { 0x16, 0x1A }, { 0x09, 0x06 } };
+
 extern s32 (*D_8008FD00)(s32, u8);
-extern u8 D_800A1674;
-extern u8 D_800A1680;
 extern f32 sinf(f32);
 
 void func_15143134(void *, f32 *, Mtx *);
@@ -453,7 +487,6 @@ void func_150EF910(Beam *beam, BeamMsg *msg, u8 type) {
     }
 }
 
-extern f32 D_800A1620[][3];
 
 /* Per-frame update of a beam spark: follows the beam while it is aimed, hides otherwise. */
 s32 func_150EFA4C(Spark *spark) {
@@ -767,9 +800,6 @@ void func_150F03E8(Flash *flash) {
     beam->link.flash = NULL;
 }
 
-extern f32 D_800A1640[][3];
-extern f32 D_800A1658[][3];
-extern u8 D_800A1670[];
 extern s32 func_15145EA4(f32 **src, f32 **dst, Mtx *mtx, s32 count);
 extern void func_15102B38(Actor *, u8, f32 *, f32 *, f32 *, s32, s32, f32, Vec3f *, s32, s32, s32, u8,
                           s32);
@@ -891,8 +921,8 @@ void func_150F088C(Glow *glow, ActorMsg *msg, u8 type) {
 }
 
 void func_150F0938(s32 arg0) {
-    func_15160A58(arg0, 0x25, &D_800A1674, 2, 300, 4, 0, 0xFF, 0, 0xFF, 0, -1, 0, 0, 0xFF, 1);
-    func_15160A58(arg0, 2, &D_800A1680, 2, 300, 0xD, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, 0xFF, 1);
+    func_15160A58(arg0, 0x25, D_800A1674, 2, 300, 4, 0, 0xFF, 0, 0xFF, 0, -1, 0, 0, 0xFF, 1);
+    func_15160A58(arg0, 2, D_800A1680, 2, 300, 0xD, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, 0xFF, 1);
 }
 
 void func_15152B38(TrailBurst *, s32, s32, void *); // matching: called with an extra argument
@@ -1269,9 +1299,6 @@ void func_150F1684(ActorBound *self, ActorMsg *msg, u8 type) {
     }
 }
 
-extern f32 D_800A168C[][4][2][3];
-extern f32 D_800A174C[][4][2][3];
-extern u8 D_800A180C[][2];
 
 /* Spark burst and func_15102B38 effect at slot `slot` of `actor`, muzzle variant
  * `variant` (0-3); actors with id 0x23 use the second table set. */
@@ -1336,221 +1363,5 @@ void func_150F16DC(actor, slot, variant, arg3, arg4)
         func_15102B38(actor, D_800A180C[kind][slot], D_800A168C[kind][variant][slot],
                       D_800A174C[kind][variant][slot], params, (randA % 6U) + 8, (randB % 1U) + 0xFF,
                       rand0, &muzzle, 0xFF, 0, -1, arg3, arg4);
-    }
-}
-
-typedef struct {
-    u16 v[3];
-} Rates150F1A00;
-
-extern Rates150F1A00 D_80088B00;
-f32 cosf(f32);
-
-/* Pulses the scale of bone matrix 62 of `actor`, faster as bit pairs of actor->taskint[0] are set. */
-void func_150F1A00(Actor *actor) {
-    f32 (*mtx)[4];
-    Rates150F1A00 rates;
-    s32 idx;
-    TexAnimState *rec;
-    u16 rate;
-    f32 scale;
-    s32 i;
-    s32 j;
-
-    rates = D_80088B00;
-    idx = 0;
-    if ((actor->taskint[0] & 3) == 3) {
-        idx = 1;
-    }
-    if ((actor->taskint[0] & 0xC) == 0xC) {
-        idx = 2;
-    }
-    rate = rates.v[idx];
-    rec = &D_800CC298;
-    rec->pulse += rate * D_800BE9E4;
-    scale = (((cosf(rec->pulse * 9.587380191e-05f) + 1.0f) * 0.5f) * 0.3500000238f) + 0.8999999762f;
-    mtx = actor->ob_matrix_ptr[62];
-    for (i = 0; i < 3; i++) {
-        for (j = 0; j < 3; j++) {
-            mtx[i][j] *= scale;
-        }
-    }
-}
-
-typedef struct GameCommand {
-    s16 opcode;
-    s16 value;
-} GameCommand;
-
-/* Eases D_800CC298's tilt toward its lower limit while actor `index` is in state 0x21 and toward
- * its upper limit otherwise, then emits it as commands 0xB2, 0xB8, ... 0xD0 at `cmd`. */
-GameCommand *func_150F1B48(GameCommand *cmd, s32 index) {
-    s32 down;
-    s32 step;
-    s32 tilt;
-    s32 i;
-
-    down = (movement_obj[index].animseq.uh == 0x21) ? 1 : 0;
-    step = D_800BE9E4 * 0x222;
-    if (down) {
-        tilt = D_800CC298.tilt - step;
-        if (-6553.600098f < tilt) {
-            D_800CC298.tilt = tilt;
-        } else {
-            D_800CC298.tilt = -0x1999;
-        }
-    } else {
-        tilt = D_800CC298.tilt + step;
-        if (tilt < 5461.333496f) {
-            D_800CC298.tilt = tilt;
-        } else {
-            D_800CC298.tilt = 0x1555;
-        }
-    }
-    for (i = 0; i < 6; i++) {
-        cmd->opcode = 0xB2 + i * 6;
-        cmd->value = D_800CC298.tilt;
-        cmd++;
-    }
-    return cmd;
-}
-
-/* Picks actor->unk68[0] by state (0x14 or not) and actor->unk68[1] by the bit pairs of actor->taskint[0]. */
-void func_150F1CB0(Actor *actor) {
-    if (actor->animseq.uh == 0x14) {
-        actor->unk68[0] = 0x1B;
-    } else {
-        actor->unk68[0] = 0xC;
-    }
-    actor->unk68[1] = 0x13;
-    if ((actor->taskint[0] & 3) == 3) {
-        actor->unk68[1] = 0x14;
-    }
-    if ((actor->taskint[0] & 0xC) == 0xC) {
-        actor->unk68[1] = 0x17;
-    }
-}
-
-extern s32 D_800A18C0[];
-extern f32 D_800A18CC[];
-extern s32 D_800A18D8[];
-extern f32 D_800A18E0[];
-
-void func_151D5334(Vec3f *, f32, f32, f32, s32, u8, s32);
-void func_151D5514(Vec3f *, u8, s32);
-void func_151D3FF4(Vec3f *, u8, s32);
-void func_151541B8(Vec3f *, f32, f32, f32, f32, u8, s32);
-void func_1515080C(DebrisSpray *, s32 *, f32 *, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, u8, s32);
-void func_15152190(DebrisBurst *, s32 *, f32 *, s32, f32, s32, u8, s32);
-
-/* Burst of effects at `actor` (func_151D5404 and friends, sound 0x2B6/0x2BE, two particle
- * sprays scaled by the actor's size). */
-void func_150F1D10(Actor *actor, u8 arg1, s32 arg2) {
-    Vec3f pos;
-    f32 scale;
-
-    if (actor == NULL) {
-        return;
-    }
-    pos.x = actor->xpos;
-    pos.y = actor->ypos + 20.0f;
-    pos.z = actor->zpos;
-    scale = (actor->scale_xz + actor->scale_y) * 0.5f;
-    func_151D5404(&pos, 506.0f, 1013.0f, 0.0009871669f, 15, 20, arg1, arg2);
-    func_151D5334(&pos, 506.0f, 1013.0f, 0.0009871669f, 5, arg1, arg2);
-    func_151D5514(&pos, arg1, arg2);
-    func_10010F88((func_150ADA20() & 8) + 0x2B6, 0x7FFF, 0, 0, 0, pos.x, pos.y, pos.z, 4000, 6000);
-    func_151D3FF4(&pos, arg1, arg2);
-    func_151541B8(&pos, func_150ADA68() * 4.0f + 12.0f, 1.6409999f,
-                  (f32)(u32)(func_150ADA20() % 56U + 200), 0.0f, arg1, arg2);
-    {
-        DebrisSpray a;
-        DebrisBurst b;
-
-        a.countBase = 3;
-        a.countRange = 0;
-        a.pos = pos;
-        a.speedBase = 30.0f;
-        a.speedRange = 20.0f;
-        a.gravityBase = -1.855000138f;
-        a.gravityRange = 0.6980000138f;
-        a.angles.yawBase = 0;
-        a.angles.yawRange = 0xFF;
-        a.angles.pitchBase = -64;
-        a.angles.pitchRange = 44;
-        a.lifeBase = 60;
-        a.lifeRange = 20;
-        a.scaleBase = 1 * scale; // matching: IDO emits both multiplies; plain scale / 0.0f differ
-        a.scaleRange = 0 * scale;
-        a.spin = 8.990000725f;
-        a.floorHitChance = 0.0f;
-        a.floorHitFn = 12;
-        func_1515080C(&a, D_800A18C0, D_800A18CC, 3, 0, 0, 0, 1, -1, 0, 0.0f, 0, 0, arg1, arg2);
-        b.countBase = 5;
-        b.countRange = 3;
-        b.pos = pos;
-        b.speedBase = 25.0f;
-        b.speedRange = 15.0f;
-        b.angles.yawBase = 0;
-        b.angles.yawRange = 0xFF;
-        b.angles.pitchBase = -64;
-        b.angles.pitchRange = 30;
-        b.lifeBase = 70;
-        b.lifeRange = 20;
-        b.gravityBase = -1.239000082f;
-        b.gravityRange = 0.3760000169f;
-        b.scaleBase = 0.503000021f;
-        b.scaleRange = 0.2560000122f;
-        b.spin = 13.93300056f;
-        func_15152190(&b, D_800A18D8, D_800A18E0, 2, 0.0f, 0, arg1, arg2);
-    }
-}
-
-
-/* Random sound 0x6C-0x6E for actor `index` once it is far enough from the origin, at most every
- * 128-255 ticks (D_800D98F0 counts down); func_100114D0 derives the pan from its height. */
-void func_150F20F0(s32 index) {
-    f32 x;
-    f32 z;
-    s32 pan;
-    s32 out2;
-    s32 out3;
-    Actor *actor;
-
-    actor = &movement_obj[index];
-    x = actor->xpos;
-    z = actor->zpos;
-    x *= x;
-    z *= z;
-    /* squares the already-squared terms: the test is on x^4 + z^4 */
-    x = (x * x) + (z * z);
-    if (D_800D98F0 != 0) {
-        if (D_800BE9E4 < D_800D98F0) {
-            D_800D98F0 -= D_800BE9E4;
-        } else {
-            D_800D98F0 = 0;
-        }
-    } else if (x > 6760000.0f) {
-        // matching: indexes movement_obj again rather than reading through `actor`
-        func_100114D0(0, (s32)movement_obj[index].ypos, 0, 0x7FFF, 20000, 19000, &pan, &out2, &out3);
-        pan += 0x80;
-        D_800D98F0 = (func_150ADA20() & 0x7F) + 0x80;
-        func_10010F30((func_150ADA20() % 3U) + 0x6C, 24000, pan, 0, 0);
-    }
-}
-
-/* Spawns func_151C329C's effect at a random point 100 units around bone 19 of `actor`
- * (unless actor->unk74's low nibble is 0xF). */
-void func_150F2230(Actor *actor, s32 arg1, s32 arg2) {
-    Vec3f offset;
-    Vec3f pos;
-
-    if ((actor->ob_matrix_ptr != NULL) && ((actor->unk74 & 0xF) != 0xF)) {
-        offset.x = 0.0f;
-        offset.y = 0.0f;
-        offset.z = 0.0f;
-        func_15143874((s16)(func_150ADA20() & 0xFF), 100.0f, &offset.x, &offset.z);
-        func_15143134(&offset.x, &pos.x, (Mtx *)actor->ob_matrix_ptr + 19);
-        func_151C329C(&pos.x, (u8)arg1, arg2);
     }
 }
