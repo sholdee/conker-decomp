@@ -433,9 +433,6 @@ typedef struct Game1483E0State {
     Actor *reference;
 } Game1483E0State;
 
-extern f32 D_800A31D0;
-extern f32 D_800A31D4;
-
 /*
  * Scrolls the mesh's texture coordinates so the texture stays fixed in world space under
  * (refX, refZ), scaled by 1/scaleS and 1/scaleT. Copies the source mesh into both buffers on first use.
@@ -466,8 +463,8 @@ void func_1511BB04(Game1483E0State *obj, f32 refX, f32 refZ, f32 scaleS, f32 sca
     }
 
     coords = obj->coords;
-    s_offset = refX - ((f32)obj->x + D_800A31D0);
-    t_offset = refZ - ((f32)obj->z + D_800A31D4);
+    s_offset = refX - ((f32)obj->x + 3128.0f);
+    t_offset = refZ - ((f32)obj->z + -2341.0f);
     s_offset = -s_offset;
     s_offset *= 4.300000191f;
     t_offset *= 4.300000191f;
@@ -715,6 +712,12 @@ extern void func_15170F4C(WorldObject *, u8, s32);
 extern void func_150B2740(u8, u8);
 extern s32 func_1000EC24();
 
+/* The three sound ids func_1511C638 picks from: { 0x2B6, 0x2BD, 0x2BE }. The original local
+ * initializer lies in the rodata of the larger original compilation unit (before game_142560's
+ * slice), so it is copied from there. */
+typedef struct { u16 ids[3]; } SoundTriple;
+extern const SoundTriple D_800A2F84;
+
 /*
  * Fades the object (and the one or two objects after it) in when triggered, playing the
  * effect chosen by the next object's param; turns them off again when reset.
@@ -770,11 +773,11 @@ void func_1511C638(WorldObject *obj) {
                 case 0: {
                     u16 first = func_150ADA20() % 3U;
                     u16 second;
-                    const u16 sounds[3] = { 0x2B6, 0x2BD, 0x2BE };
+                    SoundTriple sounds = D_800A2F84;
 
                     second = ((func_150ADA20() & 1) + first + 1) % 3U;
-                    first = sounds[first];
-                    second = sounds[second];
+                    first = sounds.ids[first];
+                    second = sounds.ids[second];
                     func_10010F30(0x2B7, 0x7FFF, 64, 0, 0);
                     func_10010F30(first, 0x7FFF, 10, 0, 0);
                     func_10010F30(second, 0x7FFF, 54, 0, 0);
@@ -818,11 +821,9 @@ void func_1511C638(WorldObject *obj) {
     obj->task_flag |= mode;
 }
 
-extern f32 D_800A31F4;
-
 /* Gives the fixed wave origin Z (22000) used by func_1511CB44. */
 void func_1511CB2C(s32 obj, f32 *originZ) {
-    *originZ = D_800A31F4;
+    *originZ = 22000.0f;
 }
 
 struct Wave1511CB44 {
