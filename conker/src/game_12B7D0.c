@@ -6,6 +6,7 @@
 #undef func_150ADA20
 u8 func_150ADA20(void);
 #include "variables.h"
+#include "effects.h"
 
 /* Bone whose matrix places the effect points below. */
 extern u8 D_80088B94;
@@ -129,29 +130,19 @@ void func_150FE794(Actor *obj, s32 arg1, Vec3f *out) {
     func_151D3E04(obj, out, &D_800A1FC8, D_80088B94, 0.0f);
 }
 
-typedef struct {
-    /* 0x0 */ u8 unk0;
-    /* 0x1 */ u8 unk1;
-    /* 0x2 */ s16 unk2;
-    /* 0x4 */ u8 unk4;
-    /* 0x5 */ u8 unk5;
-    /* 0x6 */ s8 unk6;
-    /* 0x7 */ u8 unk7;
-} Event151D8868;
-
-void func_151D8868(Event151D8868 *event, s32 arg1, s32 arg2, s32 arg3);
+void func_151D8868(RumbleParams *event, s32 arg1, s32 arg2, s32 arg3);
 
 /* Sends a func_151D8868 event (kind 1, 20-32 long) to `obj`'s camera, if it has one. */
 void func_150FE7D4(Actor *obj) {
-    Event151D8868 event;
+    RumbleParams event;
 
     if (obj->camera != NULL) {
-        event.unk0 = 1;
-        event.unk2 = (func_150ADA20() % 13U) + 20;
-        event.unk5 = 1 << obj->camera->playerIndex;
+        event.flags = 1;
+        event.duration = (func_150ADA20() % 13U) + 20;
+        event.playerMask = 1 << obj->camera->playerIndex;
         func_150ADA20(); // draws a random number that is never used
-        event.unk4 = 8;
-        event.unk6 = -1;
+        event.strength = 8;
+        event.updateKind = -1;
         func_151D8868(&event, 0, 0xFF, 1);
     }
 }

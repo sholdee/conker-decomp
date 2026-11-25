@@ -2208,4 +2208,16 @@ typedef struct EffectObjHead {
     /* 0x54 */ Vec3f modelPos;        /* func_151462C8's position; trails keep their tail point here */
 } EffectObjHead; /* size 0x60 */
 
+/* Spawn parameters of a rumble effect object (func_151D8868, kind 0x3F; copied into RumbleObj.params):
+ * a timed rumble on the controllers of the players in a mask. */
+typedef struct RumbleParams {
+    /* 0x0 */ u8 flags;       /* bit 0: duration counts down */
+    /* 0x1 */ u8 unk1;
+    /* 0x2 */ s16 duration;
+    /* 0x4 */ u8 strength;    /* 0 (off) to 8 (full), see func_1501C010 */
+    /* 0x5 */ u8 playerMask;  /* bit i: player i */
+    /* 0x6 */ s8 updateKind;  /* index into D_8008FCC0, -1: none */
+    /* 0x7 */ u8 unk7;
+} RumbleParams; /* size 0x8 */
+
 #endif

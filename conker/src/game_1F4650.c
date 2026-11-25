@@ -657,7 +657,6 @@ s32 func_151C87E0(Actor *actor, SightBeamObject *obj) {
     return 0;
 }
 
-typedef struct { s8 a; s16 b; s8 c, d, e; } Params151D8868;
 extern u8 *D_800AAC30[];
 extern void func_1514FBFC(SurfaceJetSpray *, u8, s32);
 extern LightEffect *func_151602C0(LightEffectHeader *, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
@@ -673,7 +672,7 @@ void func_151C899C(Actor *actor, SightBeamObject *obj) {
     SurfaceJetSpray burst;
     s32 pos[3];
     LightEffectHeader header;
-    Params151D8868 params8868;
+    RumbleParams params8868;
 
     state = &obj->state;
     burst.source.spread = 491.0f;
@@ -724,11 +723,11 @@ void func_151C899C(Actor *actor, SightBeamObject *obj) {
     func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle1, &obj->spawn.rot, -1, 1, 1, 0, 0, 0, obj->header.owner, 0);
     if (actor != NULL) {
         func_15164F0C(2, actor->camera->playerIndex, 0, obj->header.owner, obj->header.kind);
-        params8868.a = 1;
-        params8868.b = 40;
-        params8868.d = 1;
-        params8868.c = 8;
-        params8868.e = -1;
+        params8868.flags = 1;
+        params8868.duration = 40;
+        params8868.playerMask = 1;
+        params8868.strength = 8;
+        params8868.updateKind = -1;
         func_151D8868(&params8868, 0, 0xFF, 0);
     }
     if (actor != NULL) {

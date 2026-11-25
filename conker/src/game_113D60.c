@@ -3,23 +3,13 @@
 #include "variables.h"
 #include "effects.h"
 
-typedef struct {
-    /* 0x0 */ s8 type;
-    /* 0x1 */ u8 pad1;
-    /* 0x2 */ s16 duration;
-    /* 0x4 */ s8 unk4;
-    /* 0x5 */ s8 unk5;
-    /* 0x6 */ s8 unk6;
-    /* 0x7 */ u8 pad7;
-} Game113D60Event; // argument of func_151D8868
-
 /* A one-byte id table in rodata, copied onto the stack like the IdList ones. */
 typedef struct {
     u8 ids[1];
 } Game113D60Ids1;
 
 
-extern void *func_151D8868(Game113D60Event *event, s32 arg1, s32 arg2, s32 arg3);
+extern void *func_151D8868(RumbleParams *event, s32 arg1, s32 arg2, s32 arg3);
 
 typedef struct Game113D60Emission {
     /* 0x00 */ f32 x, y, amplitudeX, amplitudeY;
@@ -321,7 +311,7 @@ void func_150E76D0(f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16,
 void func_150E7290(u8 arg0, u8 owner, s32 kind) {
     IdList2 ids;
     Vec2f position;
-    Game113D60Event event;
+    RumbleParams event;
     s32 pad; // matching: unused stack slot
     u32 flip4;
     u32 flip2;
@@ -348,11 +338,11 @@ void func_150E7290(u8 arg0, u8 owner, s32 kind) {
         }
         func_10010F30(0x360, 0x7FFF, 0, 0, 0);
         func_15164F0C(1, arg0, NULL, owner, kind);
-        event.type = 1;
+        event.flags = 1;
         event.duration = (func_150ADA20() % 26) + 25;
-        event.unk5 = 1;
-        event.unk4 = (func_150ADA20() % 6) + 3;
-        event.unk6 = -1;
+        event.playerMask = 1;
+        event.strength = (func_150ADA20() % 6) + 3;
+        event.updateKind = -1;
         func_151D8868(&event, 0, 0xFF, 0);
     }
 }
@@ -501,7 +491,7 @@ extern f32 func_15142B44(f32);
 TimedEffect *func_150E7994(s16 count, f32 rate, u8 owner, s32 kind) {
     TimedEffect *obj;
     Game113D60BurstHead head;
-    Game113D60Event event;
+    RumbleParams event;
     Vec2f control[4];
     f32 *points;
     f32 t;
@@ -514,11 +504,11 @@ TimedEffect *func_150E7994(s16 count, f32 rate, u8 owner, s32 kind) {
 
     func_1512D748(&D_800DBFF0[D_800BE9E8], 0, 1);
 
-    event.type = 1;
+    event.flags = 1;
     event.duration = (func_150ADA20() % 11) + 30;
-    event.unk4 = 8;
-    event.unk6 = -1;
-    event.unk5 = 1;
+    event.strength = 8;
+    event.updateKind = -1;
+    event.playerMask = 1;
     func_151D8868(&event, 0, 0xFF, 0);
 
     head.rate = rate;
@@ -633,7 +623,7 @@ void func_150E81A8(index, owner, kind)
 {
     Vec3f position;
     JetSpraySpec arg;
-    Game113D60Event event;
+    RumbleParams event;
 
     if (index == 4 || index == 5 || index == 6 || index == 7) {
         position = D_800A1290[index];
@@ -669,11 +659,11 @@ void func_150E81A8(index, owner, kind)
 
         func_1514FCE8(&arg, owner, kind);
 
-        event.type = 1;
+        event.flags = 1;
         event.duration = (func_150ADA20() % 11) + 30;
-        event.unk4 = 8;
-        event.unk6 = -1;
-        event.unk5 = 1;
+        event.strength = 8;
+        event.updateKind = -1;
+        event.playerMask = 1;
         func_151D8868(&event, 0, 0xFF, 0);
     }
 }
@@ -836,16 +826,16 @@ void func_150E90DC(void);
  * D_800DCDC4 region list exists, and two sounds. */
 void func_150E8930(void) {
     IdList2 ids;
-    Game113D60Event event;
+    RumbleParams event;
 
     ids = D_80088A80;
     func_15169260(&ids, 2, 0, 0x1B);
     func_15164F0C(0, D_800BE9EB, NULL, 0xFF, 1);
-    event.type = 1;
+    event.flags = 1;
     event.duration = (func_150ADA20() % 21) + 20;
-    event.unk5 = 1;
-    event.unk4 = (func_150ADA20() % 6) + 3;
-    event.unk6 = -1;
+    event.playerMask = 1;
+    event.strength = (func_150ADA20() % 6) + 3;
+    event.updateKind = -1;
     func_151D8868(&event, 0, 0xFF, 1);
     if (D_800DCDC4 != NULL) {
         func_150E8A80();

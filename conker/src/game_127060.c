@@ -3,15 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Event argument of func_151D8868. */
-typedef struct {
-    /* 0x00 */ u8 type;
-    /* 0x02 */ s16 duration;
-    /* 0x04 */ u8 field4;
-    /* 0x05 */ u8 field5;
-    /* 0x06 */ s8 field6;
-} Event151D8868;
-
 extern s32 D_800A1CC0;
 void *func_151407D0(void *, s32, void *, u8, u8, u8, u8, s8, u8, s32);
 void func_151D8868(void *, s32, u8, s32);
@@ -162,13 +153,13 @@ void func_150F9BB0(Actor *actor, u8 owner, s32 kind) {
         }
     }
     {
-        Event151D8868 event;
+        RumbleParams event;
 
-        event.type = 1;
+        event.flags = 1;
         event.duration = 70;
-        event.field5 = 1;
-        event.field4 = 8;
-        event.field6 = -1;
+        event.playerMask = 1;
+        event.strength = 8;
+        event.updateKind = -1;
         func_151D8868(&event, 0, owner, kind);
         func_15160A58(actor, 1, &D_800A1CC0, 3, 70, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, owner, kind);
     }

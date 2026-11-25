@@ -1,17 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
-/* Argument of func_151D8868 (same layout as game_113D60.c's Game113D60Event). */
-typedef struct {
-    /* 0x0 */ u8 type;
-    /* 0x1 */ u8 pad1;
-    /* 0x2 */ s16 duration;
-    /* 0x4 */ u8 unk4;
-    /* 0x5 */ u8 cameraMask;
-    /* 0x6 */ s8 unk6;
-    /* 0x7 */ u8 pad7;
-} Event_150FE288;
+#include "effects.h"
 
 extern u8 D_80088B80;      // bone of the muzzle points below
 extern Vec3f D_800A1F70; // muzzle point, in bone space
@@ -29,7 +19,7 @@ extern s32 func_151C229C(Vec3f *origin, Vec3f *dir, Vec3f *hitPoint, Vec3f *line
 extern void func_151D3E04(Actor *obj, Vec3f *out, Vec3f *localPos, u8 bone, f32 yOffset);
 extern void func_151D3E6C(Actor *obj, Vec3f *a, Vec3f *b, s32 arg3);
 extern void func_151D3F14(Vec3f *position, u8 arg1, s32 arg2);
-extern void func_151D8868(Event_150FE288 *event, s32 arg1, s32 arg2, s32 arg3);
+extern void func_151D8868(RumbleParams *event, s32 arg1, s32 arg2, s32 arg3);
 
 void func_150FDF38(Actor *obj, s32 arg1, s32 arg2, Vec3f *muzzleOut, Vec3f *launchOut);
 void func_150FE0B8(Actor *obj, Vec3f *muzzle, s32 arg2, s32 arg3);
@@ -145,14 +135,14 @@ void func_150FE248(Actor *obj, s32 arg1, Vec3f *out) {
 
 /* Sends a func_151D8868 event (type 1, random duration 15-23) to the camera of obj. */
 void func_150FE288(Actor *obj) {
-    Event_150FE288 event;
+    RumbleParams event;
 
     if (obj->camera != NULL) {
-        event.type = 1;
+        event.flags = 1;
         event.duration = (func_150ADA20() % 9U) + 15;
-        event.cameraMask = 1 << obj->camera->playerIndex;
-        event.unk4 = (func_150ADA20() & 3) + 3;
-        event.unk6 = -1;
+        event.playerMask = 1 << obj->camera->playerIndex;
+        event.strength = (func_150ADA20() & 3) + 3;
+        event.updateKind = -1;
         func_151D8868(&event, 0, 0xFF, 1);
     }
 }

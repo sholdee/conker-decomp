@@ -8,22 +8,11 @@ extern s32 func_1000EC24();
 extern void func_15164F0C(s32 arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern void func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
 
-/* Parameter block for func_151D8868. */
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    s16 unk2;
-    u8 unk4;
-    u8 unk5;
-    s8 unk6;
-    u8 unk7;
-} Params151D8868;
-
 /* Spawns the effect at each of the three D_800D9AA0 spots, starts three positioned sounds,
  * then calls func_15164F0C for each of the D_80082FA0 + 1 entries and func_151D8868 once. */
 void func_150FCA30(void) {
     s32 i;
-    Params151D8868 params;
+    RumbleParams params;
 
     func_150FCBC0(0);
     func_150FCBC0(1);
@@ -38,11 +27,11 @@ void func_150FCA30(void) {
         func_15164F0C(4, i, 0, 0xFF, 1);
     }
 
-    params.unk0 = 1;
-    params.unk2 = 100;
-    params.unk5 = 15;
-    params.unk4 = 8;
-    params.unk6 = -1;
+    params.flags = 1;
+    params.duration = 100;
+    params.playerMask = 15;
+    params.strength = 8;
+    params.updateKind = -1;
     func_151D8868(&params, 0, 0xFF, 0);
 }
 

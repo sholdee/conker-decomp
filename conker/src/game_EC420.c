@@ -338,19 +338,11 @@ typedef struct {
 
 #define WORK(obj) ((PlatformWork *)&(obj)->work)
 
-typedef struct {
-    /* 0x0 */ u8 unk0;
-    /* 0x2 */ s16 unk2;
-    /* 0x4 */ u8 unk4;
-    /* 0x5 */ u8 unk5;
-    /* 0x6 */ s8 unk6;
-} Fx151D8868;
-
 extern void func_1508EE0C(s32, s32);
 extern void func_15164F0C(u8, u8, void *, u8, s32);
 extern void func_1518B6B0(f32, f32, f32, s32, s32);
 extern void func_1518CD20(WorldObject *, s32, s32);
-extern void *func_151D8868(Fx151D8868 *, s32, s32, s32);
+extern void *func_151D8868(RumbleParams *, s32, s32, s32);
 extern s32 func_151EF610(void);
 
 /* Platform update. State 0 rests at the home height, 2 shakes then sinks by `travel`, 3 stays down
@@ -365,7 +357,7 @@ void func_150BFA7C(WorldObject *platform) {
     s32 diff;
     s32 state;
     s32 kind;
-    Fx151D8868 fx;
+    RumbleParams fx;
 
     step = 0x10;
     kind = (platform->param.word >> 16) & 0xFFFF;
@@ -394,11 +386,11 @@ void func_150BFA7C(WorldObject *platform) {
         func_1518B6B0(D_800CC2D0[0].x_position, D_800CC2D0[0].y_position, D_800CC2D0[0].z_position, 0xFF, 0);
         if (state == 0) {
             func_15164F0C(3, D_800BE9EB, NULL, 0xFF, 0);
-            fx.unk0 = 1;
-            fx.unk2 = 60;
-            fx.unk5 = 1;
-            fx.unk4 = 8;
-            fx.unk6 = -1;
+            fx.flags = 1;
+            fx.duration = 60;
+            fx.playerMask = 1;
+            fx.strength = 8;
+            fx.updateKind = -1;
             func_151D8868(&fx, 0, 0xFF, 0);
         }
     }

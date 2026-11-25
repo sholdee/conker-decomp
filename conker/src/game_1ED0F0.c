@@ -898,27 +898,17 @@ void func_151C1D5C(Actor *shooter, Vec3f *start, Vec3f *dir, RayHit *ray, f32 ar
     ray->dist = dist;
 }
 
-typedef struct {
-    /* 0x0 */ u8 unk0;
-    /* 0x1 */ u8 unk1;
-    /* 0x2 */ s16 unk2;
-    /* 0x4 */ u8 unk4;
-    /* 0x5 */ u8 unk5;
-    /* 0x6 */ s8 unk6;
-    /* 0x7 */ u8 unk7;
-} Event151D8868;
-
-void func_151D8868(Event151D8868 *, s32, s32, s32);
+void func_151D8868(RumbleParams *, s32, s32, s32);
 
 void func_151C1FB8(Actor *obj) {
-    Event151D8868 event;
+    RumbleParams event;
 
     if (obj->camera != NULL) {
-        event.unk0 = 1;
-        event.unk2 = (func_150ADA20() & 7) + 13;
-        event.unk5 = 1 << obj->camera->playerIndex;
-        event.unk4 = func_150ADA20() % 3 + 6;
-        event.unk6 = -1;
+        event.flags = 1;
+        event.duration = (func_150ADA20() & 7) + 13;
+        event.playerMask = 1 << obj->camera->playerIndex;
+        event.strength = func_150ADA20() % 3 + 6;
+        event.updateKind = -1;
         func_151D8868(&event, 0, 0xFF, 1);
     }
 }

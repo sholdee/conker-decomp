@@ -1,19 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /* Rumble effect objects: a timed rumble on the controllers of the players in a mask. */
-
-/* Spawn parameters of a rumble, copied into RumbleObj.params. */
-typedef struct {
-    /* 0x0 */ u8 flags;       /* bit 0: duration counts down */
-    /* 0x1 */ u8 unk1;
-    /* 0x2 */ s16 duration;
-    /* 0x4 */ u8 strength;    /* 0 (off) to 8 (full), see func_1501C010 */
-    /* 0x5 */ u8 playerMask;  /* bit i: player i */
-    /* 0x6 */ s8 updateKind;  /* index into D_8008FCC0, -1: none */
-    /* 0x7 */ u8 unk7;
-} RumbleParams;
 
 /* Distance falloff data of a RumbleFalloffObj. */
 typedef struct {

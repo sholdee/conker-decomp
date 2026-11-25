@@ -1167,14 +1167,6 @@ typedef struct {
     s8 unkA;
 } Ev15190770;
 
-typedef struct {
-    s8 unk0;
-    s16 unk2;
-    s8 unk4;
-    s8 unk5;
-    s8 unk6;
-} Ev151D8868;
-
 extern s32 D_8008CA50;
 typedef struct {
     u8 c[3][6];
@@ -1227,7 +1219,7 @@ extern void func_150FAE18(s16, u8, s32);
 extern s32 func_15046C80(f32 *, s32, f32, CollisionHit *);
 extern void func_15136698(f32, f32, u8, s32, s32, f32 *, f32 *, s32, s32, s32, s32);
 extern void func_150E3340(f32 *, s32 *, SeqTrackState *, s16);
-extern void func_151D8868(Ev151D8868 *, s32, u8, s32);
+extern void func_151D8868(RumbleParams *, s32, u8, s32);
 extern void func_151B5240(s16, u8, s32);
 extern void func_15192D48(Actor *, s16, u8, s32);
 extern void func_151B09BC(Actor *, s32, s16, u8, s32);
@@ -1721,13 +1713,13 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         break;
                     }
                     case 26: {
-                        Ev151D8868 sp;
+                        RumbleParams sp;
 
-                        sp.unk0 = 1;
-                        sp.unk2 = duration;
-                        sp.unk4 = 8;
-                        sp.unk5 = 1;
-                        sp.unk6 = -1;
+                        sp.flags = 1;
+                        sp.duration = duration;
+                        sp.strength = 8;
+                        sp.playerMask = 1;
+                        sp.updateKind = -1;
                         func_151D8868(&sp, 0, sceneTag, 1);
                         break;
                     }
@@ -2082,13 +2074,13 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     break;
                 case 17: {
                     s32 unused; // matching: stack padding
-                    Ev151D8868 sp;
+                    RumbleParams sp;
 
-                    sp.unk0 = 1;
-                    sp.unk2 = 0x32;
-                    sp.unk4 = 8;
-                    sp.unk5 = 1;
-                    sp.unk6 = -1;
+                    sp.flags = 1;
+                    sp.duration = 0x32;
+                    sp.strength = 8;
+                    sp.playerMask = 1;
+                    sp.updateKind = -1;
                     func_151D8868(&sp, 0, sceneTag, 1);
                     break;
                 }

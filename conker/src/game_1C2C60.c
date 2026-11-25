@@ -2275,17 +2275,6 @@ s32 func_15199A10(CharacterFlamethrowerActor *actor) {
     return 1;
 }
 
-/* Spawn description for func_151D8868. */
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    s16 unk2;
-    u8 unk4;
-    u8 unk5;
-    s8 unk6;
-    u8 pad7;
-} FlameSpark;
-
 void func_15145740(void *, void *, void *, void *, f32);
 s32 func_15146078(Vec3f *, Vec3f *, Vec3f *);
 void func_15143874(s16, f32, f32 *, f32 *);
@@ -2550,13 +2539,13 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
         flame->sparkTimer -= D_800BE9E4;
         if (flame->sparkTimer < 0) {
             s32 pad2;
-            FlameSpark spark;
+            RumbleParams spark;
 
-            spark.unk0 = 1;
-            spark.unk2 = func_150ADA20() % 21U + 0x14;
-            spark.unk5 = 1 << obj->camera->playerIndex;
-            spark.unk4 = func_150ADA20() % 7U + 2;
-            spark.unk6 = -1;
+            spark.flags = 1;
+            spark.duration = func_150ADA20() % 21U + 0x14;
+            spark.playerMask = 1 << obj->camera->playerIndex;
+            spark.strength = func_150ADA20() % 7U + 2;
+            spark.updateKind = -1;
             func_151D8868(&spark, 0, actor->head.header.owner, actor->head.header.kind);
             flame->sparkTimer = func_150ADA20() % 21U + 0x78;
         }

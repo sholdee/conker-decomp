@@ -233,18 +233,7 @@ void func_150EB8C4(void) {
     }
 }
 
-/* Argument of func_151D8868 (CameraEvent in game_E0F60.c). */
-typedef struct {
-    /* 0x0 */ u8 type;
-    /* 0x1 */ u8 pad1;
-    /* 0x2 */ s16 duration;
-    /* 0x4 */ u8 unk4;
-    /* 0x5 */ u8 cameraMask;
-    /* 0x6 */ s8 unk6;
-    /* 0x7 */ u8 pad7;
-} CameraEvent;
-
-void *func_151D8868(CameraEvent *event, s32 arg1, u8 owner, s32 kind);
+void *func_151D8868(RumbleParams *event, s32 arg1, u8 owner, s32 kind);
 
 /*
  * Effect burst at a gate cylinder: a func_150E83AC effect lasting 300-400 frames, a camera event
@@ -255,7 +244,7 @@ void func_150EBC80(TriggerZone *gate, u8 owner, s32 kind) {
     Vec3f position;
     f32 random;
     f32 step;
-    CameraEvent event;
+    RumbleParams event;
     f32 growth;
     u8 i;
 
@@ -264,11 +253,11 @@ void func_150EBC80(TriggerZone *gate, u8 owner, s32 kind) {
     position.z = gate->z;
     step = gate->height * 0.5f;
     func_150E83AC(&position, func_150ADA20() % 101U + 300, owner, kind);
-    event.type = 1;
+    event.flags = 1;
     event.duration = func_150ADA20() % 21U + 15;
-    event.unk4 = 0;
-    event.unk6 = -1;
-    event.cameraMask = 1;
+    event.strength = 0;
+    event.updateKind = -1;
+    event.playerMask = 1;
     func_151D8868(&event, 0, owner, kind);
     func_15164F0C(0, 0, NULL, owner, kind);
     growth = 1.640999913f; // matching: a local (not a literal) is loaded once into a saved FP register

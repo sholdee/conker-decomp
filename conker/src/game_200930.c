@@ -797,14 +797,6 @@ void func_151D5334(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5, s
     }
 }
 
-typedef struct {
-    /* 0x0 */ u8 unk0;
-    /* 0x2 */ s16 unk2;
-    /* 0x4 */ u8 unk4;
-    /* 0x5 */ u8 mask; /* 1 << i */
-    /* 0x6 */ u8 unk6;
-} Header151D5404;
-
 /* User data of the effects func_151D5404 creates. */
 typedef struct {
     /* 0x00 */ Vec3f pos;
@@ -818,7 +810,7 @@ typedef struct {
 /* Creates one func_151D8868 effect for each i in 0..D_80082FA0, with unk2 random in [base, base + range]. */
 void func_151D5404(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, s32 base, s32 range, s32 arg6, s32 arg7) {
     Params151D5404 params;
-    Header151D5404 header;
+    RumbleParams header;
     void *effect;
     s32 i;
 
@@ -826,13 +818,13 @@ void func_151D5404(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, s32 base, s32 range
     params.unkC = arg1;
     params.unk10 = arg2;
     params.unk14 = arg3;
-    header.unk0 = 1;
-    header.unk2 = (func_150ADA20() % (u32)((s16)range + 1)) + (s16)base;
-    header.unk4 = 0;
-    header.unk6 = 0;
+    header.flags = 1;
+    header.duration = (func_150ADA20() % (u32)((s16)range + 1)) + (s16)base;
+    header.strength = 0;
+    header.updateKind = 0;
 
     for (i = 0; i < D_80082FA0 + 1; i++) {
-        header.mask = 1 << i;
+        header.playerMask = 1 << i;
         params.index = i;
         effect = func_151D8868(&header, 0x1C, 255, 0);
         if (effect != NULL) {

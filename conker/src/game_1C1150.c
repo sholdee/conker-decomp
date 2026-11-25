@@ -5,18 +5,7 @@
 
 extern void func_1504715C(CollisionHit *ground, Actor *obj);
 
-// Parameters for func_151D8868.
-typedef struct {
-    /* 0x0 */ u8 unk0;
-    /* 0x1 */ u8 unk1;
-    /* 0x2 */ s16 unk2;
-    /* 0x4 */ u8 unk4;
-    /* 0x5 */ u8 unk5;
-    /* 0x6 */ s8 unk6;
-    /* 0x7 */ u8 unk7;
-} Struct15195738Small;
-
-extern void func_151D8868(Struct15195738Small *params, s32 arg1, u8 arg2, s32 arg3);
+extern void func_151D8868(RumbleParams *params, s32 arg1, u8 arg2, s32 arg3);
 extern void func_151C0098(f32 *pos, Actor *obj, s32 arg2, u8 arg3, s32 arg4);
 extern void func_1507CD64(Actor *obj, s32 arg1);
 extern s32 func_1518D1C0(Actor *obj, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5, u8 *arg6);
@@ -255,7 +244,7 @@ void func_15194810(Actor *self, Actor *other, u8 *arg2) {
     Vec3f pos;
     SplashSpraySpec burst;
     CollisionHit ground;
-    Struct15195738Small params;
+    RumbleParams params;
 
     switch (other->id) {
     case 0:
@@ -294,11 +283,11 @@ void func_15194810(Actor *self, Actor *other, u8 *arg2) {
         burst.spray.speedRange = 25.10000038f;
         burst.spray.unk38 = 0.5f;
         func_15153F18(&burst.angles, &burst.spray, &ground, 0xFF, 1);
-        params.unk0 = 1;
-        params.unk2 = (func_150ADA20() % 11U) + 20;
-        params.unk4 = 8;
-        params.unk6 = -1;
-        params.unk5 = 1;
+        params.flags = 1;
+        params.duration = (func_150ADA20() % 11U) + 20;
+        params.strength = 8;
+        params.updateKind = -1;
+        params.playerMask = 1;
         func_151D8868(&params, 0, 0xFF, 0);
         break;
     }
@@ -630,12 +619,12 @@ void func_15195698(Actor *self, Actor *other, u8 *arg2) {
 }
 
 void func_15195738(Actor *self, Actor *other, u8 *arg2) {
-    Struct15195738Small params;
+    RumbleParams params;
 
-    params.unk0 = 1;
-    params.unk2 = (func_150ADA20() % 11U) + 20;
-    params.unk4 = 8;
-    params.unk6 = -1;
-    params.unk5 = 1;
+    params.flags = 1;
+    params.duration = (func_150ADA20() % 11U) + 20;
+    params.strength = 8;
+    params.updateKind = -1;
+    params.playerMask = 1;
     func_151D8868(&params, 0, 0xFF, 0);
 }

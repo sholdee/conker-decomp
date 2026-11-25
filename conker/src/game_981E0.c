@@ -2666,33 +2666,22 @@ void func_15071278(s32 cmd) {
     func_150FC438(D_800D154C, 0, 1, D_800D154C->unk84.ub[1]);
 }
 
-/* Argument block for func_151D8868. */
-typedef struct Struct151D8868Args {
-    /* 0x0 */ u8 unk0;
-    /* 0x1 */ u8 unk1;
-    /* 0x2 */ s16 unk2;
-    /* 0x4 */ u8 unk4;
-    /* 0x5 */ u8 unk5;
-    /* 0x6 */ s8 unk6;
-    /* 0x7 */ u8 unk7;
-} Struct151D8868Args;
-
 void func_150712AC(s32 cmd) {
-    Struct151D8868Args args;
+    RumbleParams args;
 
     func_150FE860(D_800D154C, 0xFF, 1);
     if (D_800D154C->camera != NULL) {
-        args.unk0 = 1;
-        args.unk2 = (func_150ADA20() % 7U) + 10;
-        args.unk5 = 1 << D_800D154C->camera->playerIndex;
-        args.unk4 = (func_150ADA20() % 7U) + 2;
-        args.unk6 = -1;
+        args.flags = 1;
+        args.duration = (func_150ADA20() % 7U) + 10;
+        args.playerMask = 1 << D_800D154C->camera->playerIndex;
+        args.strength = (func_150ADA20() % 7U) + 2;
+        args.updateKind = -1;
         func_151D8868(&args, 0, 0xFF, 1);
     }
 }
 
 void func_15071360(s32 cmd) {
-    Struct151D8868Args args;
+    RumbleParams args;
 
     if (func_151044F4() != 0) {
         func_150FF084(D_800D154C, 0xFF, 1);
@@ -2700,11 +2689,11 @@ void func_15071360(s32 cmd) {
         func_150FED30(D_800D154C, 0xFF, 1);
     }
     if (D_800D154C->camera != NULL) {
-        args.unk0 = 1;
-        args.unk2 = (func_150ADA20() % 5U) + 15;
-        args.unk5 = 1 << D_800D154C->camera->playerIndex;
-        args.unk4 = (func_150ADA20() % 4U) + 3;
-        args.unk6 = -1;
+        args.flags = 1;
+        args.duration = (func_150ADA20() % 5U) + 15;
+        args.playerMask = 1 << D_800D154C->camera->playerIndex;
+        args.strength = (func_150ADA20() % 4U) + 3;
+        args.updateKind = -1;
         func_151D8868(&args, 0, 0xFF, 1);
     }
 }

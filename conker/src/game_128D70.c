@@ -345,16 +345,6 @@ void func_150FC438(Actor *owner, Actor *other, u8 arg2, u8 arg3) {
     }
 }
 
-typedef struct {
-    u8 unk0;
-    u8 pad1;
-    s16 unk2;
-    u8 unk4;
-    u8 unk5;
-    s8 unk6;
-    u8 unk7;
-} Spark_150FC614;
-
 extern void func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
 
 /* Per-frame update of an emitter: destroys it once its owner is gone or changed, otherwise fires
@@ -362,7 +352,7 @@ extern void func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
 void func_150FC614(EmitterObj *obj) {
     EmitterState *state;
     Actor *owner;
-    Spark_150FC614 spark;
+    RumbleParams spark;
 
     state = &obj->state;
     owner = state->owner;
@@ -392,12 +382,12 @@ void func_150FC614(EmitterObj *obj) {
     }
     state->unk14 -= D_800BE9E4;
     if (state->unk14 < 0) {
-        spark.unk0 = 1;
+        spark.flags = 1;
         func_150ADA20();
-        spark.unk2 = 30;
-        spark.unk5 = 1 << state->unk16;
-        spark.unk4 = (func_150ADA20() % 6U) + 3;
-        spark.unk6 = -1;
+        spark.duration = 30;
+        spark.playerMask = 1 << state->unk16;
+        spark.strength = (func_150ADA20() % 6U) + 3;
+        spark.updateKind = -1;
         func_151D8868(&spark, 0, obj->base.header.owner, obj->base.header.kind);
         func_150ADA20();
         state->unk14 = 250;
