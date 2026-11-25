@@ -52,9 +52,6 @@ typedef struct {
     s32 loaded;
 } LevelModelEntry;
 
-/* Zero-terminated lists of asset ids loaded with each level (variables.h declares D_80082B20 as s32). */
-#define sLevelAssetLists ((s32 **)&D_80082B20)
-
 extern s32 D_800B0E10[];
 extern s32 D_800B0E20[];
 extern u8  D_800B0E38;
@@ -127,7 +124,7 @@ void func_150031EC(s32 level) {
     }
     if (D_800B0DF0->assetList != 0) {
         j = 0;
-        while ((id = sLevelAssetLists[D_800B0DF0->assetList][j++]) != 0) {
+        while ((id = D_80082B20[D_800B0DF0->assetList][j++]) != 0) {
             func_1510D0EC(id, &size, 62, 0);
         }
     }

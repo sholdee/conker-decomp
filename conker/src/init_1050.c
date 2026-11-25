@@ -70,12 +70,12 @@ void func_10001194(s32 arg) {
     osCreateViManager(OS_PRIORITY_VIMGR);
 
     romBase = (s32)&D_42450;
-    func_10004514(romBase, &D_80082B20, 16, 1);
-    compressedRomAddr = D_80082B20 + romBase;
+    func_10004514(romBase, D_80082B20, 16, 1);
+    compressedRomAddr = (s32)D_80082B20[0] + romBase; // the segment header, not yet a list pointer
     size = (u32)&D_19EA88 - compressedRomAddr;
     compressed = allocate_memory(size, 1, 2, 0);
     func_10004514(compressedRomAddr, compressed, size, 1);
-    func_10006240(compressed, &D_80082B20, D_8003809C);
+    func_10006240(compressed, D_80082B20, D_8003809C);
     func_10004074(compressed);
 
     D_800354F8 = ALIGN16(&D_80033330);

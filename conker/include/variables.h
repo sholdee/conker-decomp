@@ -334,7 +334,8 @@ extern u8   D_80044B20[];             // audio heap memory, 0x3E000 bytes
 // 0x80044B20 + 253952 = 0x80082B20
 
 /* 80080000 */
-extern s32  D_80082B20;
+extern s32 *D_80082B20[]; // per level (LevelHeader.assetList): zero-terminated asset id list. The segment
+                          // starts here; init_1050 first DMAs its 16-byte header in (word 0: compressed data offset).
 extern void (*D_80082B40[])(Camera *);
 extern s8   D_80082BB4; // pending EEPROM request (game_33990)
 extern u8   D_80082BC0;
