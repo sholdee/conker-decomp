@@ -1074,7 +1074,6 @@ u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32
 // requires jump table
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 extern void func_15145974(void *, f32 *, f32 *);
-extern void *D_800CC5EC;
 
 /* Fires projectile kind D_800D1580 from the current object, aimed by its facing and camera pitch. */
 void func_1506CE6C(void) {
@@ -2888,17 +2887,17 @@ extern u32 D_80099BB8;
 void func_15143134(void *, void *, s32);
 void func_151C329C(s32 arg0, s32 arg1, s32 arg2);
 
+/* Spawns effect func_151C329C at one of four random bones (packed bytes of D_80099BB8). */
 void func_150718E4(s32 cmd) {
     f32 *p;
-    f32 sp24[2];
-    u32 sp20;
+    f32 pos[2];
+    u32 bones;
 
-    sp20 = D_80099BB8;
-    if ((D_800D154C->unk1D4 != 0) || ((D_800D154C->unk74 & 0xF) == 0xF)) {
-        p = sp24;
-        func_15143134(&D_800A5480, p,
-                      (((s32)((u8 *)&sp20)[func_150ADA20() & 3]) << 6) + (s32)D_800D154C->unk1D4);
-        sp24[1] = D_800D154C->unk180 + 20.0f;
+    bones = D_80099BB8;
+    if (D_800D154C->unk1D4 != NULL || (D_800D154C->unk74 & 0xF) == 0xF) {
+        p = pos;
+        func_15143134(&D_800A5480, p, (s32)((Mtx *)D_800D154C->unk1D4 + ((u8 *)&bones)[func_150ADA20() & 3]));
+        pos[1] = D_800D154C->unk180 + 20.0f;
         func_151C329C((s32)p, 0xFF, 1);
     }
 }
@@ -2920,13 +2919,13 @@ void func_15071A34(s32 cmd) {
 }
 
 void func_15071A64(s32 cmd) {
-    struct199 tmp;
+    struct199 hit;
 
-    if (!(func_150ADA20() & 1) && (D_800D154C->unk1D4 != 0) && ((D_800D154C->unk74 & 0xF) != 0xF) &&
-        (D_800CC2D0->stunned != 0) && ((s32)D_800CC2D0->health > 0)) {
-        func_1504715C(&tmp, D_800D154C);
-        func_15143134(&D_80099BBC, &tmp.unk24, (s32)D_800D154C->unk1D4 + 0x3C0);
-        func_151DC484(&tmp.unk24, &tmp, 0, 0xFF, 1);
+    if (!(func_150ADA20() & 1) && D_800D154C->unk1D4 != NULL && (D_800D154C->unk74 & 0xF) != 0xF &&
+        D_800CC2D0[0].stunned != 0 && D_800CC2D0[0].health > 0) {
+        func_1504715C(&hit, D_800D154C);
+        func_15143134(&D_80099BBC, &hit.unk24, (s32)((Mtx *)D_800D154C->unk1D4 + 15));
+        func_151DC484(&hit.unk24, &hit, 0, 0xFF, 1);
     }
 }
 typedef struct Game981E0EffectPoint {
@@ -2962,10 +2961,8 @@ void func_15071B18(s32 cmd) {
     Game981E0EffectPoint point;
     u8 collision[0x24];
 
-    if ((*(s32 *)((u8 *)D_800D154C + 0x1D4) != 0) &&
-        ((((u8 *)D_800D154C)[0x74] & 0xF) != 0xF)) {
-        func_15143134(D_80099BC8[func_150ADA20() % 3U], point.values,
-                      *(s32 *)((u8 *)D_800D154C + 0x1D4) + 0x1C0);
+    if (D_800D154C->unk1D4 != NULL && (D_800D154C->unk74 & 0xF) != 0xF) {
+        func_15143134(D_80099BC8[func_150ADA20() % 3U], point.values, (s32)((Mtx *)D_800D154C->unk1D4 + 7));
         func_1504715C(collision, D_800D154C);
         if (func_150ADA20() & 1) {
             if (func_150ADA20() & 1) {
@@ -2982,12 +2979,12 @@ void func_15071B18(s32 cmd) {
             config.position = point;
             config.zero14 = 0;
             config.alpha = 0xFF;
-            config.minimum = -0x40;
-            config.maximum = 0x3C;
+            config.minimum = -64;
+            config.maximum = 60;
             config.size0 = 10.0f;
             config.size1 = 10.0f;
-            config.lifetime = 0x19;
-            config.rate = 0x14;
+            config.lifetime = 25;
+            config.rate = 20;
             config.range0 = -0.97800004f;
             config.range1 = 0.263f;
             config.value0 = 0.096f;
@@ -3013,16 +3010,17 @@ void func_15071D38(void) {
     }
 }
 
+/* Runs the D_80086150 handler on the object func_150721E8 returns. */
 void func_15071D78(void) {
-    struct127 *tmp;
-    struct127 *orig;
+    struct127 *target;
+    struct127 *saved;
 
-    tmp = func_150721E8(D_800D154C);
-    if (tmp != NULL) {
-        orig = D_800D154C;
-        D_800D154C = tmp;
+    target = func_150721E8(D_800D154C);
+    if (target != NULL) {
+        saved = D_800D154C;
+        D_800D154C = target;
         func_15071D38();
-        D_800D154C = orig;
+        D_800D154C = saved;
     }
 }
 
@@ -3035,11 +3033,11 @@ void func_15071DF4(void) {
 }
 
 void func_15071E20(void) {
-    D_800D154C->unk247 = (s8) D_800D1580;
+    D_800D154C->unk247 = D_800D1580;
 }
 
 void func_15071E3C(void) {
-    D_800D154C->unk248 = (s8) D_800D1580;
+    D_800D154C->unk248 = D_800D1580;
 }
 
 void func_15071E58(void) {
@@ -3049,11 +3047,11 @@ void func_15071E58(void) {
 }
 
 void func_15071ED4(void) {
-    func_1505E650(D_800D154C, 0x59, 1.0f, 3.0f, 0.0f, 0.0f, 0);
+    func_1505E650(D_800D154C, 89, 1.0f, 3.0f, 0.0f, 0.0f, 0);
 }
 
 void func_15071F14(void) {
-    func_1505E650(D_800D154C, 0x24, 1.0f, 3.0f, 0.0f, 0.0f, 0);
+    func_1505E650(D_800D154C, 36, 1.0f, 3.0f, 0.0f, 0.0f, 0);
 }
 
 void func_15071F54(void) {
@@ -3068,60 +3066,64 @@ void func_15071F80(void) {
 
 void func_15071FB0(void) {
     if (D_800D154C->unk28 == 0.0f) {
-        D_800D154C->unk10C = (u16)0;
+        D_800D154C->unk10C = 0;
     }
 }
 
-extern void *D_800CC5EC;
 
+/*
+ * Launches the player (D_800CC2D0[0]) with the current object's stored velocity unk2D8..unk2E0
+ * and an animation. With D_800D1580 == 0, only if player->unk274 names the object owned by the
+ * current player (unk65), and the player is turned around.
+ */
 void func_15071FDC(void) {
-    u8 *base;
-    u8 *entry;
+    struct127 *player;
+    struct127 *entry;
     s32 found;
-    s32 mode;
+    s32 anim;
     s32 visible;
     s32 i;
 
     visible = 1;
-    mode = 0x194;
-    base = (u8 *)&D_800CC2D0;
+    anim = 404;
+    player = D_800CC2D0;
     if (D_800D1580 == 0) {
         found = -1;
-        entry = base;
-        for (i = 0; i < 0x19; i++) {
-            if (*(u8 *)(entry + 0x65) == (D_800C3E78 + 1)) {
+        entry = player;
+        for (i = 0; i < 25; i++) {
+            if (entry->unk65 == D_800C3E78 + 1) {
                 found = i;
                 break;
             }
-            entry += 0x32C;
+            entry++;
         }
-        if ((found + 1) != *(u8 *)(base + 0x274)) {
+        if (found + 1 != player->unk274) {
             return;
         }
-        *(s16 *)(base + 0x76) = *(u16 *)((u8 *)D_800D154C + 0x76) + 0x8000;
-        *(f32 *)(base + 0x1CC) = -5000.0f;
+        player->unk76 = D_800D154C->unk76 + 0x8000;
+        player->unk1CC = -5000.0f;
     } else {
-        if (*(s32 *)((u8 *)D_800D154C + 0x2E8) >= 0x71) {
-            mode = 0x2E5;
-            *(f32 *)((u8 *)D_800D154C + 0x2E0) = 0.0f;
+        if (D_800D154C->unk2E8 >= 113) {
+            anim = 741;
+            HIDDEN(D_800D154C)->unk2E0 = 0.0f;
         } else {
-            mode = 0x32;
-            *(s16 *)(base + 0x76) = *(u16 *)((u8 *)D_800D154C + 0x76);
-            if (*(u8 *)((u8 *)D_800D154C + 0x251) != 0) {
-                *(f32 *)(base + 0x1CC) = D_800CC2E8[0] + 800.0f;
+            anim = 50;
+            player->unk76 = D_800D154C->unk76;
+            if (D_800D154C->unk251 != 0) {
+                player->unk1CC = D_800CC2D0[0].y_position + 800.0f;
             }
             visible = 0;
         }
-        *(s32 *)((u8 *)D_800D154C + 0x2E4) = 0x32;
+        D_800D154C->unk2E4 = 50;
     }
-    *(f32 *)((u8 *)base + 0x20) = *(f32 *)((u8 *)D_800D154C + 0x2D8);
-    *(f32 *)((u8 *)base + 0x24) = *(f32 *)((u8 *)D_800D154C + 0x2DC);
-    *(f32 *)((u8 *)base + 0x3C) = *(f32 *)((u8 *)D_800D154C + 0x2E0);
-    *((u8 *)base + 0x81) = 1;
-    func_1505E650((struct127 *)base, (u16)mode, 1.0f, 2.0f, 6.0f, 0.0f, 0);
-    *(s8 *)((u8 *)D_800CC5EC + 0x31) = visible;
-    if (*(u8 **)((u8 *)base + 0x318) != 0) {
-        *(s32 *)(*(u8 **)((u8 *)base + 0x318) + 0x5F0) |= 0x400;
+    player->y_velocity = HIDDEN(D_800D154C)->unk2D8;
+    player->gravity = HIDDEN(D_800D154C)->unk2DC;
+    player->xz_velocity = HIDDEN(D_800D154C)->unk2E0;
+    player->unk81 = 1;
+    func_1505E650(player, anim, 1.0f, 2.0f, 6.0f, 0.0f, 0);
+    D_800CC2D0[0].unk31C->unk31 = visible;
+    if (player->camera != NULL) {
+        player->camera->unk5F0 |= 0x400;
     }
 }
 
