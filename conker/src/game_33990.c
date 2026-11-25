@@ -8,11 +8,13 @@
 
 /*
  * EEPROM save data. The EEPROM is addressed in 8-byte blocks:
- *   blocks 0x00-0x03  options (D_800E0BE0), 0x20 bytes
+ *   blocks 0x00-0x03  settings (D_800E0BE0, range-checked by func_151DD9E4), 0x20 bytes
  *   blocks 0x04-0x43  four save files of 0x80 bytes (16 blocks) each
  *   blocks 0x44-0x51  D_800BE2F0, 0x70 bytes
  * Every record starts with a u16 checksum of its remaining bytes (see the checksum loops below).
  * D_800BE358 is the 0x80-byte transfer buffer.
+ * Under -g3 the line table steers the scheduling of the unrolled loops, so short loop bodies stay on
+ * one line.
  */
 
 /* Summary of one of the three save files the player can pick. */
@@ -38,6 +40,18 @@ typedef struct Struct33990 {
     /* 0x08 */ u8 unk8;
     /* 0x09 */ u8 unk9;
 } Struct33990; /* size = 0xA */
+
+/* EEPROM requests, queued in D_80082BB4 (argument in D_800BE3EC) and run by func_1501C57C. */
+enum EepromRequest {
+    EEPROM_REQ_NONE,
+    EEPROM_REQ_LOAD_FILE,     /* func_15006590 */
+    EEPROM_REQ_SAVE_SLOT,     /* func_15006BEC */
+    EEPROM_REQ_ERASE_SLOT,    /* func_1500707C */
+    EEPROM_REQ_LOAD_2F0,      /* func_1500727C */
+    EEPROM_REQ_SAVE_2F0,      /* func_15007360 */
+    EEPROM_REQ_LOAD_SETTINGS, /* func_15007440 */
+    EEPROM_REQ_SAVE_SETTINGS  /* func_15007558 */
+};
 
 extern SaveSlotInfo D_800BE3F8[3];
 extern u8 D_800BE2F0[0x70];
@@ -338,53 +352,22 @@ void func_15007168(void) {
         D_80082BBC[i].unk9 = 0;
     }
 }
-// PERMUTER CANDIDATE best 1165: loop structure byte-exact; remaining diff is a clean 3-register
-// rotation {sum,i,p}->{v0,v1,a0} (target sum=v0,i=v1,p=a0) plus seed 0xCC reassociation.
-// void func_1500727C(void) {
-//     u16 sum;
-//     s32 i;
-//     u8 *p;
-//     func_151DD3A0(&D_800BE900, 0x44, &D_800BE2F0, 0x70);
-//     sum = (D_800BE2F2 << 2) + 0xCC + (D_800BE2F3 << 3);
-//     p = D_800BE2F4;
-//     i = 4;
-//     do {
-//         sum += *p++ << (i & 3);
-//         i++;
-//     } while (i != 0x68);
-//     if (sum != D_800BE2F0) {
-//         func_15007168();
-//     }
-// }
+/* Reads the D_800BE2F0 record from EEPROM; resets it (func_15007168) if its checksum fails. */
 void func_1500727C(void) {
     s32 i;
     u16 sum;
 
-    func_151DD3A0(&D_800BE900, 0x44, (s16 *)D_800BE2F0, 0x70);
+    func_151DD3A0(&D_800BE900, 0x44, D_800BE2F0, 0x70);
     sum = 0xCC;
-    i = 2;
-    do {
-        sum += D_800BE2F0[i] << (i & 3);
-        i++;
-    } while (i < 0x68);
+    for (i = 2; i < 0x68; i++) { sum += D_800BE2F0[i] << (i & 3); }
     if (*(u16 *)D_800BE2F0 != sum) {
         func_15007168();
     }
 }
-// PERMUTER CANDIDATE best 1265: same unrolled-checksum 3-register rotation {sum,i,p}->{v0,v1,a0}
-// as func_1500727C, plus target keeps the (dead) func_151DCEF0 return in a stack slot (frame -0x20
-// vs my -0x18) which my build DCEs. Reconstruction:
-// void func_15007360(void) {
-//     u16 sum; s32 i; u8 *p; s32 ret;
-//     sum = (D_800BE2F2 << 2) + 0xCC + (D_800BE2F3 << 3);
-//     p = D_800BE2F4; i = 4;
-//     do { sum += *p++ << (i & 3); i++; } while (i != 0x68);
-//     D_800BE2F0 = sum;
-//     if (D_8002AC5C == 0) { ret = func_151DCEF0(&D_800BE900, 0x44, &D_800BE2F0, 0x70); }
-// }
+/* Checksums the D_800BE2F0 record and writes it to EEPROM. */
 void func_15007360(void) {
     u16 sum;
-    volatile s32 ret;
+    volatile s32 ret; // matching: the dead func_151DCEF0 result is stored to the stack
     s32 i;
 
     sum = 0xCC;
@@ -394,13 +377,16 @@ void func_15007360(void) {
         ret = func_151DCEF0(&D_800BE900, 0x44, D_800BE2F0, 0x70);
     }
 }
-/* Keep each loop body on one line: under -g3 the line table changes the unrolled store order. */
+/*
+ * Reads the settings record (D_800E0BE0) from EEPROM, or sets every entry to -1 if its checksum fails;
+ * entry 0x10 keeps its current value either way. func_151DD9E4 then resets out-of-range entries.
+ */
 void func_15007440(void) {
     u16 sum;
     s32 i;
     s8 saved;
 
-    func_151DD3A0(&D_800BE900, 0, &D_800BE358, 0x20);
+    func_151DD3A0(&D_800BE900, 0, D_800BE358, 0x20);
     sum = 0xCC;
     for (i = 2; i < 0x1E; i++) { sum += D_800BE358[i] << (i & 3); }
     saved = D_800E0BE0[0x10];
@@ -415,10 +401,10 @@ void func_15007440(void) {
     D_8008FE30 = 1;
 }
 
-/* The dead func_151DCEF0 result is kept on the stack via a volatile local (sw v0,0x18(sp)). */
+/* Checksums the settings record (D_800E0BE0) and writes it to EEPROM. */
 void func_15007558(void) {
     u16 sum;
-    volatile s32 ret;
+    volatile s32 ret; // matching: the dead func_151DCEF0 result is stored to the stack
     s32 i;
 
     for (i = 0; i < 0x1C; i++) { D_800BE358[i + 2] = D_800E0BE0[i]; }
@@ -433,58 +419,67 @@ void func_15007558(void) {
 void func_15007644(void) {
 }
 
+/* Requests a settings load (func_15007440). */
 void func_1500764C(void) {
-    D_80082BB4 = 6;
+    D_80082BB4 = EEPROM_REQ_LOAD_SETTINGS;
     D_800BE3EC = 0;
 }
 
+/* Requests a settings save (func_15007558). */
 void func_15007668(void) {
-    D_80082BB4 = 7;
+    D_80082BB4 = EEPROM_REQ_SAVE_SETTINGS;
     D_800BE3EC = 0;
 }
 
+/* Requests a D_800BE2F0 load (func_1500727C). */
 void func_15007684(void) {
-    D_80082BB4 = 4;
+    D_80082BB4 = EEPROM_REQ_LOAD_2F0;
     D_800BE3EC = 0;
 }
 
+/* Requests a D_800BE2F0 save (func_15007360). */
 void func_150076A0(void) {
-    D_80082BB4 = 5;
+    D_80082BB4 = EEPROM_REQ_SAVE_2F0;
     D_800BE3EC = 0;
 }
 
-void func_150076BC(s32 arg0) {
-    if (arg0 < 0) {
+/* Requests a load of EEPROM save file `eepromSlot` (func_15006590); a negative one resets the state. */
+void func_150076BC(s32 eepromSlot) {
+    if (eepromSlot < 0) {
         func_150064E0();
     }
-    if ((arg0 >= 0) && (arg0 < 4) && (D_800BE616 == 0)) {
-        D_80082BB4 = 1;
-        D_800BE3EC = arg0;
+    if (eepromSlot >= 0 && eepromSlot < 4 && D_800BE616 == 0) {
+        D_80082BB4 = EEPROM_REQ_LOAD_FILE;
+        D_800BE3EC = eepromSlot;
     }
 }
 
-void func_15007718(s32 arg0) {
-    if ((arg0 >= 0) && (arg0 < 3) && (D_800BE616 == 0)) {
-        D_80082BB4 = 2;
-        D_800BE3EC = arg0;
+/* Requests a save to save slot `saveSlot` (func_15006BEC). */
+void func_15007718(s32 saveSlot) {
+    if (saveSlot >= 0 && saveSlot < 3 && D_800BE616 == 0) {
+        D_80082BB4 = EEPROM_REQ_SAVE_SLOT;
+        D_800BE3EC = saveSlot;
     }
 }
 
-void func_15007750(s32 arg0) {
-    if ((arg0 >= 0) && (arg0 < 3)) {
-        D_80082BB4 = 3;
-        D_800BE3EC = arg0;
+/* Requests erasing save slot `saveSlot` (func_1500707C). */
+void func_15007750(s32 saveSlot) {
+    if (saveSlot >= 0 && saveSlot < 3) {
+        D_80082BB4 = EEPROM_REQ_ERASE_SLOT;
+        D_800BE3EC = saveSlot;
     }
 }
 
+/* Marks all save slots empty and clears the save state, ready to scan the EEPROM save files. */
 void func_15007778(void) {
     s32 i;
-    ((struct162 *)&D_800BE3F8)->unk8 = -1;
-    ((struct162 *)&D_800BE3F8)->unk18 = -1;
-    ((struct162 *)&D_800BE3F8)->unk28 = -1;
-    ((struct162 *)&D_800BE3F8)->unkE = -1;
-    ((struct162 *)&D_800BE3F8)->unk1E = -1;
-    ((struct162 *)&D_800BE3F8)->unk2E = -1;
+
+    D_800BE3F8[0].sequence = -1;
+    D_800BE3F8[1].sequence = -1;
+    D_800BE3F8[2].sequence = -1;
+    D_800BE3F8[0].eepromSlot = -1;
+    D_800BE3F8[1].eepromSlot = -1;
+    D_800BE3F8[2].eepromSlot = -1;
     D_800BE3DC = -1;
     D_800BE3DE = 0;
     D_80082BC0 = 1;
@@ -492,4 +487,3 @@ void func_15007778(void) {
     for (i = 0; i < 9; i++) { D_800D2E60[i] = 0; }
     for (i = 0; i < 4; i++) { D_800BE3D8[i] = -1; }
 }
-
