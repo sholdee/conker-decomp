@@ -3533,6 +3533,10 @@ typedef union LightEffectData {
         /* 0x08 */ LightJitter jitter;
     } actorJitter;    // func_151903D0
     struct {
+        /* 0x00 */ LightTrack track;
+        /* 0x10 */ LightActorRef ref;
+    } trackActor;     // func_151BC104 (game_1E73B0.c)
+    struct {
         /* 0x00 */ LightCycle cycle;
         /* 0x2C */ u8 pad2C[4];
         /* 0x30 */ u8 objectId; // WorldObject id (func_151149AC) flagged by the cycle callbacks

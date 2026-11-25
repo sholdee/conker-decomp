@@ -61,13 +61,6 @@ typedef struct {
 extern TimedEffect *func_15164780(EmitterEffect *, s32, u8, s32);
 
 
-/* First argument of func_151602C0. */
-typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ s8 unk1;
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ s8 unk4;
-} SparkArg_150FB8C0;
 
 /* First argument of func_1515572C. */
 typedef struct {
@@ -81,7 +74,7 @@ extern f32 D_800A1DD4[][3], D_800A1DEC[][3], D_800A1E04[][3], D_800A1E1C[][3], D
 extern Actor *func_1507515C(Actor *);
 extern void func_15145EA4(f32 **, f32 **, s32, s32);
 extern s32 func_151C229C(f32 *, f32 *, f32 *, f32 *, s32, s32, f32, f32, f32, f32, f32, s32, Actor *, s32, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, s32, s32, s32);
-extern s32 func_151602C0(SparkArg_150FB8C0 *, s32 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
+extern LightEffect *func_151602C0(LightEffectHeader *, s32 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 extern void func_15102B38(Actor *, u8, f32 *, f32 *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, u8, s32);
 extern void func_1515548C(ScreenSpriteInfo *, s32, s32, s32, s32, s32, s32);
 extern void func_1515572C(CameraArg_150FB8C0 *, s32);
@@ -111,7 +104,7 @@ void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, 
     Vec3f *linePoint;
     u8 cameraMask;
     s8 variant;
-    SparkArg_150FB8C0 spark;
+    LightEffectHeader spark;
     s32 sparkPos[3];
     f32 trailParams[2];
     u8 trailCameraMask;
@@ -212,10 +205,10 @@ void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, 
                   cameraMask, 0, 0, arg4, arg5);
     if ((obj->unk74 & 0xF) != 0xF) {
         if (!(func_150ADA20() & 7)) {
-            spark.unk0 = 3;
-            spark.unk1 = -1;
-            spark.unk2 = (func_150ADA20() % 5U) + 4;
-            spark.unk4 = 0;
+            spark.flags = LIGHT_EFFECT_TIMED | LIGHT_EFFECT_OWNS_LIGHT;
+            spark.update = -1;
+            spark.lifetime = (func_150ADA20() % 5U) + 4;
+            spark.lightType = 0;
             sparkPos[0] = (s32)origin[0];
             sparkPos[1] = (s32)origin[1];
             sparkPos[2] = (s32)origin[2];

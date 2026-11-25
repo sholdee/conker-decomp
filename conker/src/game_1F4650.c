@@ -667,11 +667,10 @@ s32 func_151C87E0(Actor *actor, SightBeamObject *obj) {
     return 0;
 }
 
-typedef struct { s8 a, b; s16 c; s8 d; } Params151602C0;
 typedef struct { s8 a; s16 b; s8 c, d, e; } Params151D8868;
 extern u8 *D_800AAC30[];
 extern void func_1514FBFC(SurfaceJetSpray *, u8, s32);
-extern void func_151602C0(void *, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern LightEffect *func_151602C0(LightEffectHeader *, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_150E7FEC(f32, s32, void *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_15164F0C(s32, u8, s32, u8, s32);
 extern void func_151D8868(void *, s32, s32, s32);
@@ -683,7 +682,7 @@ void func_151C899C(Actor *actor, SightBeamObject *obj) {
     SightBeamState *state;
     SurfaceJetSpray burst;
     s32 pos[3];
-    Params151602C0 params602C0;
+    LightEffectHeader header;
     Params151D8868 params8868;
 
     state = &obj->state;
@@ -722,15 +721,15 @@ void func_151C899C(Actor *actor, SightBeamObject *obj) {
     pos[0] = obj->spawn.pos.x;
     pos[1] = obj->spawn.pos.y;
     pos[2] = obj->spawn.pos.z;
-    params602C0.a = 3;
-    params602C0.b = -1;
-    params602C0.c = func_150ADA20() % 9U + 17;
-    params602C0.d = 0;
-    func_151602C0(&params602C0, pos, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, obj->unkC, obj->unk1);
+    header.flags = LIGHT_EFFECT_TIMED | LIGHT_EFFECT_OWNS_LIGHT;
+    header.update = -1;
+    header.lifetime = func_150ADA20() % 9U + 17;
+    header.lightType = 0;
+    func_151602C0(&header, pos, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, obj->unkC, obj->unk1);
     pos[0] = obj->spawn.rot.x;
     pos[1] = obj->spawn.rot.y;
     pos[2] = obj->spawn.rot.z;
-    func_151602C0(&params602C0, pos, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, obj->unkC, obj->unk1);
+    func_151602C0(&header, pos, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, obj->unkC, obj->unk1);
     func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle0, &obj->spawn.pos, -1, 1, 1, 0, 0, 0, obj->unkC, 0);
     func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle1, &obj->spawn.rot, -1, 1, 1, 0, 0, 0, obj->unkC, 0);
     if (actor != NULL) {

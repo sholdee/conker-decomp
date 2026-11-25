@@ -823,16 +823,11 @@ void func_151BC074(Actor *obj) {
 
 extern f32 D_800DCA24;
 
-/* Objects returned by func_15134908 and func_15163414 hold the owner reference at these offsets. */
+/* Objects returned by func_15134908 hold the owner reference at this offset. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x40];
     /* 0x40 */ ActorRef ref;
 } Fx15134908;
-
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ ActorRef ref;
-} Fx15163414;
 
 /* Data block of the object returned by func_15147A80. */
 typedef struct {
@@ -852,7 +847,7 @@ typedef struct {
 
 Fx15134908 *func_15134908(BloodTrailDesc *, s32, u8, s32);
 Fx15147A80 *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-Fx15163414 *func_15163414(LightEffectHeader *, f32 *, f32 *, f32 *, s8, u8, u8, u8, u8, u8, u8, u8, s32, u8, s32);
+LightEffect *func_15163414(LightEffectHeader *, f32 *, f32 *, f32 *, s8, u8, u8, u8, u8, u8, u8, u8, s32, u8, s32);
 
 /*
  * Spawns three effects that follow `obj` (the first only while D_80082FA0 < 2 and D_8008FD8C < 5),
@@ -908,7 +903,7 @@ void func_151BC104(Actor *obj, u8 arg1, s32 arg2) {
     }
     {
         ActorRef ref;
-        Fx15163414 *fx3;
+        LightEffect *fx3;
         LightEffectHeader header;
 
         ref.actor = obj;
@@ -920,7 +915,7 @@ void func_151BC104(Actor *obj, u8 arg1, s32 arg2) {
         fx3 = func_15163414(&header, &obj->x_position, &obj->y_position, &obj->z_position,
                            0, 0, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, 8, arg1, arg2);
         if (fx3 != NULL) {
-            memcpy(&fx3->ref, &ref, sizeof(ref));
+            memcpy(&fx3->data.trackActor.ref, &ref, sizeof(ref));
         }
     }
 }
