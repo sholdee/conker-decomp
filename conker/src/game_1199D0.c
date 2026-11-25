@@ -7,136 +7,171 @@ void func_151432BC(void *, f32 *, f32 *, f32 *, f32 *);
 void *memcpy(void *, const void *, u32);
 u8 func_151464B8(s16 *);
 
-typedef struct Game1199D0Point {
-    f32 x;
-    f32 y;
-    f32 z;
-    f32 w;
-} Game1199D0Point;
-typedef struct Game1199D0Spawner {
-    void *shape;
-    f32 rate;
-    s16 *owner;
-    f32 accumulator;
-} Game1199D0Spawner;
+/* Data of the emitter effect (func_150EC520): spawns points on a shape at a random rate. */
+typedef struct {
+    /* 0x00 */ void *shape;
+    /* 0x04 */ f32 rate;
+    /* 0x08 */ s16 *owner;
+    /* 0x0C */ f32 accumulator;
+} EmitterData;
 
-void func_150EC520(u8 *arg0) {
-    Game1199D0Spawner *state;
-    Game1199D0Point point;
+/* Data of each effect the emitter spawns. */
+typedef struct {
+    /* 0x00 */ f32 x;
+    /* 0x04 */ f32 y;
+    /* 0x08 */ f32 z;
+    /* 0x0C */ f32 w;
+} EmittedPoint;
+
+/* Data of the particle source effect (func_150EC6B0). */
+typedef struct {
+    /* 0x00 */ vertex pos;
+    /* 0x0C */ f32 accumulator;
+} ParticleSourceData;
+
+/* Data of the object tint effect (func_150ECB8C). */
+typedef struct {
+    /* 0x00 */ struct127 *owner;
+    /* 0x04 */ u8 ownerId; /* owner->unique_id when attached; a mismatch means the slot was reused */
+    /* 0x05 */ u8 r;
+    /* 0x06 */ u8 g;
+    /* 0x07 */ u8 b;
+    /* 0x08 */ u8 a;
+    /* 0x09 */ u8 unk9;
+} TintData;
+
+/* An effect (a struct260 with per-effect data at 0x28), as created by func_15149130. */
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xC - 0x2];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD;
+    /* 0x0E */ s16 state;
+    /* 0x10 */ u8 pad10[0x28 - 0x10];
+    /* 0x28 */ union {
+        EmitterData emitter;
+        EmittedPoint point;
+        ParticleSourceData source;
+        TintData tint;
+    } data;
+} Effect;
+
+/* Emitter effect: while its owner is alive, spawns effect 0x5A at random points on its shape. */
+void func_150EC520(Effect *effect) {
+    EmitterData *emitter;
+    EmittedPoint point;
     f32 upper;
 
-    if (func_151464B8(*(s16 **)(arg0 + 0x30)) == 0) {
-        state = (Game1199D0Spawner *)(arg0 + 0x28);
-        state->accumulator += (9.04e-08f + func_150ADA68() * 9.87e-08f) * state->rate * D_800BE9A4;
-        if (state->accumulator > 1.0f) {
+    if (func_151464B8(effect->data.emitter.owner) == 0) {
+        emitter = &effect->data.emitter;
+        emitter->accumulator += (9.04e-08f + func_150ADA68() * 9.87e-08f) * emitter->rate * D_800BE9A4;
+        if (emitter->accumulator > 1.0f) {
             point.w = 0.0f;
             do {
-                void *spawned;
-                func_151432BC(state->shape, &point.x, &point.z, &upper, &point.y);
-                spawned = func_15149130(func_150ADA20() % 131U + 0x50, -1, 0x5A, -1, 1, 0, (struct37 *)0x10, arg0[0xC], arg0[1]);
+                Effect *spawned;
+
+                func_151432BC(emitter->shape, &point.x, &point.z, &upper, &point.y);
+                spawned = (Effect *)func_15149130(func_150ADA20() % 131U + 80, -1, 0x5A, -1, TRUE, 0,
+                                                  (struct37 *)sizeof(point), effect->unkC, effect->unk1);
                 if (spawned != NULL) {
-                    memcpy((u8 *)spawned + 0x28, &point, 0x10);
+                    memcpy(&spawned->data, &point, sizeof(point));
                 }
-                state->accumulator -= 1.0f;
-            } while (state->accumulator > 1.0f);
+                emitter->accumulator -= 1.0f;
+            } while (emitter->accumulator > 1.0f);
         }
     }
 }
 
+/* Particle spawn template passed to func_15130280 (same layout as ParticleSpawn in game_1028F0.c). */
 typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s16 unk8;
-    s16 unkA;
-    s32 unkC;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    struct17 unk30;
-    struct17 unk3C;
-    struct17 unk48;
-    f32 unk54;
-    u32 unk58;
-    s32 unk5C;
-    u8 unk60;
-    u8 unk61;
-    u8 unk62;
-    s8 unk63;
-    s8 unk64;
-    u8 unk65;
-    u8 unk66;
-    u8 pad67[9];
-} Spawn150EC6B0;
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ s16 unk8;
+    /* 0x0A */ s16 unkA;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 unk16;
+    /* 0x17 */ u8 unk17;
+    /* 0x18 */ u8 unk18;
+    /* 0x19 */ u8 unk19;
+    /* 0x1A */ u8 unk1A;
+    /* 0x1B */ u8 unk1B;
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 unk1D;
+    /* 0x1E */ s16 unk1E;
+    /* 0x20 */ s16 unk20;
+    /* 0x22 */ s16 unk22;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ vertex pos;
+    /* 0x3C */ vertex unk3C;
+    /* 0x48 */ vertex vel;
+    /* 0x54 */ f32 unk54;
+    /* 0x58 */ u32 flags;
+    /* 0x5C */ s32 unk5C;
+    /* 0x60 */ u8 unk60;
+    /* 0x61 */ u8 unk61;
+    /* 0x62 */ u8 unk62;
+    /* 0x63 */ s8 unk63;
+    /* 0x64 */ s8 unk64;
+    /* 0x65 */ u8 unk65;
+    /* 0x66 */ u8 unk66;
+    /* 0x67 */ u8 pad67[0x70 - 0x67];
+} ParticleSpawn; /* size 0x70 */
 
+/* Per-particle data of the particles the source effect emits. */
 typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-    u8 unk3;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-} Extra150EC6B0;
+    /* 0x00 */ u8 unk0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 unk2;
+    /* 0x03 */ u8 unk3;
+    /* 0x04 */ f32 unk4;
+    /* 0x08 */ f32 unk8;
+    /* 0x0C */ f32 unkC;
+} SourceParticleData;
 
+/* Live particle, as created by func_15130280 from a ParticleSpawn. */
 typedef struct {
-    struct17 pos;
-    f32 accum;
-} Sub150EC6B0;
+    /* 0x00 */ u8 pad0[0xA8];
+    /* 0xA8 */ SourceParticleData data;
+} Particle;
 
-typedef struct {
-    u8 pad0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0x1B];
-    Sub150EC6B0 unk28;
-} Obj150EC6B0;
+extern Particle *func_15130280(ParticleSpawn *, u8, s32, s32, u8, s32);
 
-extern void *func_15130280(void *, u8, s32, s32, u8, s32);
+/* Particle source effect: emits particles from its position at a random rate. */
+void func_150EC6B0(Effect *effect) {
+    ParticleSourceData *source;
 
-void func_150EC6B0(Obj150EC6B0 *arg0) {
-    Sub150EC6B0 *sub;
+    source = &effect->data.source;
+    source->accumulator += (1352.0f + func_150ADA68() * 1698.0f) * 0.0001f * D_800BE9A4;
+    if (source->accumulator > 1.0f) {
+        ParticleSpawn spawn;
+        SourceParticleData data;
+        Particle *particle;
 
-    sub = &arg0->unk28;
-    sub->accum += (1352.0f + func_150ADA68() * 1698.0f) * 0.0001f * D_800BE9A4;
-    if (sub->accum > 1.0f) {
-        Spawn150EC6B0 spawn;
-        Extra150EC6B0 extra;
-        void *ret;
-
-        extra.unkC = 0.9704700112f;
+        data.unkC = 0.9704700112f;
         spawn.unk1D = 0x6C;
         spawn.unk8 = 0x5103;
         spawn.unk0 = 0x200005;
-        spawn.unk1E = 0x46;
+        spawn.unk1E = 70;
         spawn.unk20 = 3;
-        spawn.unk58 = 0x80DE07;
+        spawn.flags = 0x80DE07;
         spawn.unk60 = 8;
         spawn.unk61 = 6;
-        extra.unk0 = 0;
-        extra.unk1 = 0;
+        data.unk0 = 0;
+        data.unk1 = 0;
         spawn.unk4 = 0;
         spawn.unkC = 0;
         spawn.unk10 = 0;
-        spawn.unk62 = 0x16;
+        spawn.unk62 = 22;
         spawn.unk63 = -1;
         spawn.unk64 = -1;
         spawn.unk65 = 0;
-        spawn.unk22 = 0x46;
+        spawn.unk22 = 70;
         spawn.unk14 = 0x47;
         spawn.unk15 = 0xC2;
         spawn.unk16 = 0;
@@ -146,30 +181,30 @@ void func_150EC6B0(Obj150EC6B0 *arg0) {
         spawn.unk1A = 0;
         spawn.unk1C = 0xFF;
         spawn.unk24 = 1.021028996f;
-        spawn.unk30 = sub->pos;
-        spawn.unk3C.unk0 = 0.0f;
-        spawn.unk3C.unk4 = 0.0f;
-        spawn.unk3C.unk8 = 0.0f;
-        spawn.unk48.unk0 = 0.0f;
-        spawn.unk48.unk4 = 0.0f;
-        spawn.unk48.unk8 = 0.0f;
+        spawn.pos = source->pos;
+        spawn.unk3C.x = 0.0f;
+        spawn.unk3C.y = 0.0f;
+        spawn.unk3C.z = 0.0f;
+        spawn.vel.x = 0.0f;
+        spawn.vel.y = 0.0f;
+        spawn.vel.z = 0.0f;
         do {
-            extra.unk2 = func_150ADA20() % 5U + 4;
-            extra.unk3 = func_150ADA20() % 5U + 4;
-            extra.unk4 = func_150ADA68() * 11.0f;
-            extra.unk8 = func_150ADA68() * 11.0f;
+            data.unk2 = func_150ADA20() % 5U + 4;
+            data.unk3 = func_150ADA20() % 5U + 4;
+            data.unk4 = func_150ADA68() * 11.0f;
+            data.unk8 = func_150ADA68() * 11.0f;
             spawn.unk54 = func_150ADA68() * 0.172f + 0.09800000489f;
-            spawn.unk58 &= ~0xC0;
-            spawn.unk58 |= ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);
+            spawn.flags &= ~0xC0;
+            spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);
             spawn.unk1B = func_150ADA20() % 101U + 100;
             spawn.unkA = func_150ADA20() % 51U + 80;
             spawn.unk28 = spawn.unk2C = func_150ADA68() * 80.0f + 92.0f;
-            ret = func_15130280(&spawn, 0, 0, 0x10, arg0->unkC, arg0->unk1);
-            if (ret != NULL) {
-                memcpy((u8 *)ret + 0xA8, &extra, sizeof(extra));
+            particle = func_15130280(&spawn, 0, 0, 0x10, effect->unkC, effect->unk1);
+            if (particle != NULL) {
+                memcpy(&particle->data, &data, sizeof(data));
             }
-            sub->accum -= 1.0f;
-        } while (sub->accum > 1.0f);
+            source->accumulator -= 1.0f;
+        } while (source->accumulator > 1.0f);
     }
 }
 
