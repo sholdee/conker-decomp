@@ -744,19 +744,24 @@ void func_1506BF1C(void) {
     }
 }
 
+/*
+ * Plays sound command D_800D1580 at the current object: bits 0-10 the sound id, bits 14/15 play
+ * only for / except owner id (top byte), bit 16 defers to func_1506C32C, bits 11-13 the mode
+ * (0x2000: surface-dependent sound from func_10011EB8, volume scaled by speed).
+ */
 void func_1506BF5C(void) {
     u32 sound;
     u32 owner;
     u16 volume;
     f32 level;
     f32 max;
-    u32 top;
+    u32 ownerFilter;
     s32 type;
     u8 id;
 
     sound = D_800D1580 & 0x7FF;
     id = D_800D154C->id;
-    top = (u32)D_800D1580 >> 24;
+    ownerFilter = (u32)D_800D1580 >> 24;
     if (D_800D1C90[id]->unk4 != 0) {
         owner = *D_80086CAC[(u8)D_800D1C90[id]->unk5];
     } else {
@@ -765,12 +770,12 @@ void func_1506BF5C(void) {
     D_800D187C = 0;
     switch (D_800D1580 & 0xC000) {
     case 0x4000:
-        if (owner != top) {
+        if (owner != ownerFilter) {
             return;
         }
         break;
     case 0x8000:
-        if (owner == top) {
+        if (owner == ownerFilter) {
             return;
         }
         break;
@@ -798,7 +803,7 @@ void func_1506BF5C(void) {
             break;
         }
         if (D_800D154C->unk31C != NULL) {
-            level = *(f32 *)D_800D154C->unk31C;
+            level = HIDDEN126(D_800D154C->unk31C)->unk0;
         } else {
             level = D_800D154C->y_velocity;
         }
@@ -887,7 +892,6 @@ void func_1506C43C(void) {
     func_100109D0(D_800D154C);
 }
 
-// requires jump table
 
 /*
  * Spawns a projectile object of the given kind (D_80099AD8 / D_80099AC4 rows) from the current
@@ -1132,7 +1136,6 @@ u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32
     }
     return (u8 *)obj;
 }
-// requires jump table
 
 /* Fires projectile kind D_800D1580 from the current object, aimed by its facing and camera pitch. */
 void func_1506CE6C(void) {
@@ -1536,7 +1539,6 @@ void func_1506DE04(void) {
     }
 }
 
-// jump table
 
 void func_1506DE84(void) {
     switch (D_800D1580) {
