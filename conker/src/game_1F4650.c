@@ -213,6 +213,29 @@ s32 func_151C71A0(Game1F4650Beam *beam) {
     return 1;
 }
 
+typedef struct {
+    u8 pad0[9];
+    u8 hidden;
+} SightModel;
+
+/* An effect object whose model can be hidden. */
+typedef struct {
+    u8 pad0[0x14];
+    SightModel *model;
+} SightModelOwner;
+
+/* Emitter object created by func_151C9198; flag 0x20000 toggles its flash. */
+typedef struct {
+    u8 pad0[0x60];
+    u32 flags;
+} SightEmitter;
+
+/* Visibility record returned by func_1510FD20 for a map position. */
+typedef struct {
+    u8 pad0[2];
+    s16 viewMask;
+} SightZone;
+
 /* Sight beam state, stored at +0x110 of the beam object (see func_151C82D0). */
 typedef struct {
     f32 texS;
@@ -226,12 +249,12 @@ typedef struct {
     f32 speedS;
     f32 speedT;
     Game1F4650Beam *unk28;
-    s32 midEffect;
+    SightModelOwner *midEffect;
     s32 unk30;
     s32 endEffect0;
     s32 endEffect1;
-    struct102 *emitter0[3];
-    struct102 *emitter1[3];
+    SightEmitter *emitter0[3];
+    SightEmitter *emitter1[3];
     f32 phase;
     u8 alternate;
     SightTriangle triangle0;
@@ -242,14 +265,14 @@ typedef struct {
     s16 period;
     u8 flags;
     Game1F4650Beam *beam;
-    s32 zone0;
-    s32 zone1;
+    SightZone *zone0;
+    SightZone *zone1;
     u8 unk94;
     f32 pulseAngle;
     f32 pulseSpeed;
 } SightBeamState;
 
-/* Spawn descriptor for the beam object; func_1513D4B8 copies it to +0x18 of the object. */
+/* Spawn descriptor for func_1513D4B8 / func_151407D0; the spawned object holds a copy at +0x18. */
 typedef struct {
     u8 kind;
     u8 mode;
@@ -266,36 +289,36 @@ typedef struct {
     f32 width;
     vertex start;
     vertex end;
-    vertex delta;
+    vertex unk34;
     s32 options;
-    u8 unk44;
+    u8 brightness;
     u8 unk45;
     u8 unk46;
     u8 unk47;
-    s32 unk48;
+    SightZone *zone;
     u8 unk4C;
     u8 pad4D[0xB];
-} SightBeamSpawn;
+} SightSpawnDesc;
 
 
 extern void func_1510F800(s32);
 extern s32 func_15145128(vertex *, vertex *, f32 *, f32 *);
-extern s32 func_1516284C(Header *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
+extern SightModelOwner *func_1516284C(Header *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
 s32 func_151C8FCC(s32 arg0, vertex *arg1, vertex *arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, u8 arg8, s32 arg9);
 s32 func_151C87AC(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 *arg6);
 
 /* Spawns a sight beam object between two surface points, with emitters at both ends. */
 s32 func_151C756C(vertex *start, SightTriangle *startTri, vertex *end, SightTriangle *endTri, Game1F4650Beam *beam, Game1F4650Beam *source, u8 red, u8 green, u8 blue, u8 hasMidEffect, s16 activeTime, s16 inactiveTime, s16 startTime, u8 blinks, u8 startsOff, u8 zoneMasked, u8 hasEndEffects, u8 arg11, u8 pulses, f32 pulseAngle, f32 pulseSpeed, u8 keepEnabled, u8 arg16, s32 arg17) {
     s32 obj;
-    SightBeamSpawn spawn;
+    SightSpawnDesc spawn;
     SightBeamState state;
     s32 pos[3];
     vertex ndir;
 
     func_1510F800(0);
-    state.zone0 = func_1510FD20(start->x, start->z);
-    state.zone1 = func_1510FD20(end->x, end->z);
-    if (state.zone0 == 0 || state.zone1 == 0) {
+    state.zone0 = (SightZone *)func_1510FD20(start->x, start->z);
+    state.zone1 = (SightZone *)func_1510FD20(end->x, end->z);
+    if (state.zone0 == NULL || state.zone1 == NULL) {
         return 0;
     }
     state.beam = beam;
@@ -324,14 +347,14 @@ s32 func_151C756C(vertex *start, SightTriangle *startTri, vertex *end, SightTria
     {
         extern void func_151C9198(struct102 **, vertex *, void *, vertex *, s32, u8, u8, u8, s32);
 
-        spawn.delta.x = end->x - start->x;
-        spawn.delta.y = end->y - start->y;
-        spawn.delta.z = end->z - start->z;
-        ndir.x = -spawn.delta.x;
-        ndir.y = -spawn.delta.y;
-        ndir.z = -spawn.delta.z;
+        spawn.unk34.x = end->x - start->x;
+        spawn.unk34.y = end->y - start->y;
+        spawn.unk34.z = end->z - start->z;
+        ndir.x = -spawn.unk34.x;
+        ndir.y = -spawn.unk34.y;
+        ndir.z = -spawn.unk34.z;
         func_151C9198(state.emitter0, start, startTri, &ndir, state.zone0, red < blue, zoneMasked, arg16, 0);
-        func_151C9198(state.emitter1, end, endTri, &spawn.delta, state.zone1, red < blue, zoneMasked, arg16, 0);
+        func_151C9198(state.emitter1, end, endTri, &spawn.unk34, state.zone1, red < blue, zoneMasked, arg16, 0);
         if (state.emitter0[0] == NULL || state.emitter0[1] == NULL || state.emitter0[2] == NULL ||
             state.emitter1[0] == NULL || state.emitter1[1] == NULL || state.emitter1[2] == NULL) {
             if (state.emitter0[0] != NULL) {
@@ -361,16 +384,16 @@ s32 func_151C756C(vertex *start, SightTriangle *startTri, vertex *end, SightTria
     if (hasMidEffect) {
         Header hdr;
 
-        pos[0] = start->x + spawn.delta.x * 0.5f;
-        pos[1] = start->y + spawn.delta.y * 0.5f;
-        pos[2] = start->z + spawn.delta.z * 0.5f;
+        pos[0] = start->x + spawn.unk34.x * 0.5f;
+        pos[1] = start->y + spawn.unk34.y * 0.5f;
+        pos[2] = start->z + spawn.unk34.z * 0.5f;
         hdr.unk0 = 2;
         hdr.unk1 = 2;
         hdr.unk2 = 0x12C;
         hdr.unk4 = 0;
         state.midEffect = func_1516284C(&hdr, pos, red, green, blue, 0xFF, 0, 0, 0x10, arg16, arg17);
     } else {
-        state.midEffect = 0;
+        state.midEffect = NULL;
     }
     spawn.kind = 0x59;
     spawn.mode = 6;
@@ -387,7 +410,7 @@ s32 func_151C756C(vertex *start, SightTriangle *startTri, vertex *end, SightTria
     spawn.start = *start;
     spawn.end = *end;
     spawn.options = (D_800BE9F0 == 0x36 ? 0 : 0x02000000) | 0x6C0000 | 0x40000000;
-    spawn.unk44 = 0xFF;
+    spawn.brightness = 0xFF;
     spawn.unk45 = 0xFF;
     spawn.unk46 = 0;
     spawn.unk47 = 6;
@@ -409,7 +432,7 @@ s32 func_151C756C(vertex *start, SightTriangle *startTri, vertex *end, SightTria
             objState = (SightBeamState *)(obj + 0x110);
             memcpy(objState, &state, sizeof(SightBeamState));
         }
-        dir = spawn.delta;
+        dir = spawn.unk34;
         if (func_15145128(&dir, &dir, &len, &inv) != 0 && hasEndEffects) {
             p0.x = start->x + dir.x * 20.0f;
             p0.y = start->y + dir.y * 20.0f;
@@ -429,7 +452,7 @@ s32 func_151C756C(vertex *start, SightTriangle *startTri, vertex *end, SightTria
             objState->endEffect0 = 0;
             objState->endEffect1 = 0;
         }
-        if (objState->midEffect != 0) {
+        if (objState->midEffect != NULL) {
             func_1000FA64(0x4D0, pos[0], pos[1], pos[2], 0x1F40, 0xFA, 0x64, (s32)func_151C87AC, objState, 0, 8, (u8)func_150ADA20());
         }
     }
@@ -437,153 +460,109 @@ s32 func_151C756C(vertex *start, SightTriangle *startTri, vertex *end, SightTria
 }
 
 typedef struct {
-    u8 pad0[2];
-    s16 mask;
-} Mask_151C7E98;
+    u8 pad0[0x18];
+    SightSpawnDesc spawn;
+    u8 pad70[0x50];
+    u8 vtxTemplate[0x40];
+    u8 *vtxBuffers[4];
+    SightBeamState state;
+} SightBeamObject;
 
-typedef struct {
-    f32 tu;
-    f32 tv;
-    u8 pad8[0x7E];
-    u8 flags;
-    u8 pad87[5];
-    Mask_151C7E98 *m1;
-    Mask_151C7E98 *m2;
-} Sub_151C7E98;
-
-typedef struct {
-    u8 pad0[0x30];
-    f32 width;
-    struct17 start;
-    struct17 end;
-    u8 pad4C[0x74];
-    u8 tmpl[0x40];
-    u8 *buffers[4];
-    Sub_151C7E98 sub;
-} Obj_151C7E98;
-
-typedef struct {
-    s16 x;
-    s16 y;
-    s16 z;
-    s16 flag;
-    s16 tc0;
-    u8 padA[6];
-} Vtx_151C7E98;
-
-extern struct17 *func_15144B34(s32);
+extern vertex *func_15144B34(s32);
 void func_151D5D60(void *, s16, s32, void **, u8 *);
-void func_15145548(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, f32 *arg4);
+void func_15145548(vertex *arg0, vertex *arg1, vertex *arg2, vertex *arg3, f32 *arg4);
 
-void *func_151C7E98(Obj_151C7E98 *arg0, s16 arg1) {
-    Vtx_151C7E98 *vertices;
+/* Builds the beam's quad for one view: a strip of the beam's width facing the camera. */
+void *func_151C7E98(SightBeamObject *obj, s16 view) {
+    Vtx *vertices;
     void *result;
-    struct17 *pos;
-    struct17 dir;
-    struct17 closest;
+    vertex *camera;
+    vertex dir;
+    vertex closest;
     f32 dx, dy, dz;
     f32 nx, ny, nz;
     f32 lengthSquared;
     f32 scale;
     u8 fresh;
-    Sub_151C7E98 *sub;
+    SightBeamState *state;
 
-    sub = &arg0->sub;
-    if (!(*((u8 *)arg0 + 0x196) & 2)) {
+    state = &obj->state;
+    if (!(state->flags & 2)) {
         return NULL;
     }
-    if (sub->flags & 4) {
-        if (!(sub->m1->mask & (1 << arg1)) && !(sub->m2->mask & (1 << arg1))) {
+    if (state->flags & 4) {
+        if (!(state->zone0->viewMask & (1 << view)) && !(state->zone1->viewMask & (1 << view))) {
             return NULL;
         }
     }
-    func_151D5D60(arg0->buffers, arg1, 0x40, (void **)&vertices, &fresh);
+    func_151D5D60(obj->vtxBuffers, view, 0x40, (void **)&vertices, &fresh);
     result = vertices;
     if (vertices != NULL) {
         if (fresh) {
-            memcpy(arg0->buffers[arg1], arg0->tmpl, 0x40);
-            memcpy(arg0->buffers[arg1] + 0x40, arg0->tmpl, 0x40);
+            memcpy(obj->vtxBuffers[view], obj->vtxTemplate, 0x40);
+            memcpy(obj->vtxBuffers[view] + 0x40, obj->vtxTemplate, 0x40);
         }
     } else {
         return NULL;
     }
-    pos = func_15144B34(arg1);
-    dir.unk0 = arg0->end.unk0 - arg0->start.unk0;
-    dir.unk4 = arg0->end.unk4 - arg0->start.unk4;
-    dir.unk8 = arg0->end.unk8 - arg0->start.unk8;
-    func_15145548(&arg0->start, &dir, pos, &closest, 0);
-    dx = closest.unk0 - pos->unk0;
-    dy = closest.unk4 - pos->unk4;
-    dz = closest.unk8 - pos->unk8;
-    nx = dir.unk4 * dz - dy * dir.unk8;
-    ny = dir.unk8 * dx - dz * dir.unk0;
-    nz = dir.unk0 * dy - dx * dir.unk4;
+    camera = func_15144B34(view);
+    dir.x = obj->spawn.end.x - obj->spawn.start.x;
+    dir.y = obj->spawn.end.y - obj->spawn.start.y;
+    dir.z = obj->spawn.end.z - obj->spawn.start.z;
+    func_15145548(&obj->spawn.start, &dir, camera, &closest, 0);
+    dx = closest.x - camera->x;
+    dy = closest.y - camera->y;
+    dz = closest.z - camera->z;
+    nx = dir.y * dz - dy * dir.z;
+    ny = dir.z * dx - dz * dir.x;
+    nz = dir.x * dy - dx * dir.y;
     lengthSquared = nx * nx + ny * ny + nz * nz;
     if (lengthSquared == 0.0f) {
         nx = 0.0f;
         ny = 0.0f;
         nz = 0.0f;
     } else {
-        scale = arg0->width / sqrtf(lengthSquared);
+        scale = obj->spawn.width / sqrtf(lengthSquared);
         nx *= scale;
         ny *= scale;
         nz *= scale;
     }
-    vertices->x = arg0->end.unk0 - nx;
-    vertices->y = arg0->end.unk4 - ny;
-    vertices->z = arg0->end.unk8 - nz;
-    vertices->tc0 = sub->tu;
-    vertices->flag = 0;
+    vertices->v.ob[0] = obj->spawn.end.x - nx;
+    vertices->v.ob[1] = obj->spawn.end.y - ny;
+    vertices->v.ob[2] = obj->spawn.end.z - nz;
+    vertices->v.tc[0] = state->texS;
+    vertices->v.flag = 0;
     vertices++;
-    vertices->x = arg0->start.unk0 - nx;
-    vertices->y = arg0->start.unk4 - ny;
-    vertices->z = arg0->start.unk8 - nz;
-    vertices->tc0 = sub->tv;
-    vertices->flag = 0;
+    vertices->v.ob[0] = obj->spawn.start.x - nx;
+    vertices->v.ob[1] = obj->spawn.start.y - ny;
+    vertices->v.ob[2] = obj->spawn.start.z - nz;
+    vertices->v.tc[0] = state->texT;
+    vertices->v.flag = 0;
     vertices++;
-    vertices->x = arg0->start.unk0 + nx;
-    vertices->y = arg0->start.unk4 + ny;
-    vertices->z = arg0->start.unk8 + nz;
-    vertices->tc0 = sub->tv;
-    vertices->flag = 0;
+    vertices->v.ob[0] = obj->spawn.start.x + nx;
+    vertices->v.ob[1] = obj->spawn.start.y + ny;
+    vertices->v.ob[2] = obj->spawn.start.z + nz;
+    vertices->v.tc[0] = state->texT;
+    vertices->v.flag = 0;
     vertices++;
-    vertices->x = arg0->end.unk0 + nx;
-    vertices->y = arg0->end.unk4 + ny;
-    vertices->z = arg0->end.unk8 + nz;
-    vertices->tc0 = sub->tu;
-    vertices->flag = 0;
+    vertices->v.ob[0] = obj->spawn.end.x + nx;
+    vertices->v.ob[1] = obj->spawn.end.y + ny;
+    vertices->v.ob[2] = obj->spawn.end.z + nz;
+    vertices->v.tc[0] = state->texS;
+    vertices->v.flag = 0;
     return result;
 }
 
-typedef struct SightOscillation {
-    f32 x, y, centerX, centerY, radiusX, radiusY;
-    f32 angleX, angleY, speedX, speedY;
-    u8 pad28[4];
-    void *animation;
-    u8 pad30[0x10];
-    void *objects[5];
-    f32 phase;
-    u8 alternate;
-    u8 pad59[0x25];
-    s16 activeTime;
-    u8 pad80[2];
-    s16 timer, period;
-    u8 flags;
-    u8 pad87;
-    void *secondary;
-    u8 pad8C[0xC];
-    f32 brightnessAngle, brightnessSpeed;
-} SightOscillation;
-
-extern f32 D_800AAC50, D_800AAC54;
-
-s32 func_151C82D0(void *arg0) {
-    SightOscillation *state = (SightOscillation *)((u8 *)arg0 + 0x110);
+/* Per-frame update: blink timer, texture scroll, emitter flashing and brightness pulse. */
+s32 func_151C82D0(SightBeamObject *obj) {
+    SightBeamState *state = &obj->state;
     s16 period;
-    void *object;
-    void *object1;
-    void *object2;
-    void *object3;
+    SightModelOwner *midEffect;
+    Game1F4650Beam *beam;
+    SightEmitter *emitter0;
+    SightEmitter *emitter1;
+    SightEmitter *emitter2;
+    SightEmitter *emitter3;
 
     if (state->flags & 1) {
         period = state->period;
@@ -594,63 +573,63 @@ s32 func_151C82D0(void *arg0) {
         if (state->timer < state->activeTime) {
             state->flags |= 2;
         } else {
-            state->flags &= 0xFFFD;
+            state->flags &= ~2;
         }
     }
     if (state->flags & 2) {
-        state->angleX += state->speedX * D_800BE9A4;
-        state->angleY += state->speedY * D_800BE9A4;
-        state->angleX = func_15144B68(state->angleX);
-        state->angleY = func_15144B68(state->angleY);
-        state->x = func_150AD78C(state->angleX) * state->radiusX + state->centerX;
-        state->y = func_150AD78C(state->angleY) * state->radiusY + state->centerY;
-        object = state->animation;
-        if (object != NULL) {
-            *((u8 *)*(void **)((u8 *)object + 0x14) + 9) = 0;
+        state->angleS += state->speedS * D_800BE9A4;
+        state->angleT += state->speedT * D_800BE9A4;
+        state->angleS = func_15144B68(state->angleS);
+        state->angleT = func_15144B68(state->angleT);
+        state->texS = func_150AD78C(state->angleS) * state->radiusS + state->centerS;
+        state->texT = func_150AD78C(state->angleT) * state->radiusT + state->centerT;
+        midEffect = state->midEffect;
+        if (midEffect != NULL) {
+            midEffect->model->hidden = 0;
         }
-        object = state->secondary;
-        if (object != NULL && (state->flags & 0x10)) {
-            *((u8 *)object + 0x14) = 0;
+        beam = state->beam;
+        if (beam != NULL && (state->flags & 0x10)) {
+            beam->disabled = 0;
         }
     } else {
-        object = state->animation;
-        if (object != NULL) {
-            *((u8 *)*(void **)((u8 *)object + 0x14) + 9) = 1;
+        midEffect = state->midEffect;
+        if (midEffect != NULL) {
+            midEffect->model->hidden = 1;
         }
-        object = state->secondary;
-        if (object != NULL) {
-            *((u8 *)object + 0x14) = 1;
+        beam = state->beam;
+        if (beam != NULL) {
+            beam->disabled = 1;
         }
     }
-    state->phase += D_800AAC50 * D_800BE9A4;
+    state->phase += 0.08000000566f * D_800BE9A4;
     while (state->phase > 1.0f) {
         if (state->flags & 2) {
             state->alternate ^= 1;
         }
         state->phase -= 1.0f;
     }
-    if (state->alternate != 0) {
-        object = state->objects[0];
-        *(u32 *)((u8 *)object + 0x60) &= 0xFFFDFFFF;
-        object1 = state->objects[1];
-        *(u32 *)((u8 *)object1 + 0x60) |= 0x20000;
-        object2 = state->objects[3];
-        *(u32 *)((u8 *)object2 + 0x60) &= 0xFFFDFFFF;
-        object3 = state->objects[4];
-        *(u32 *)((u8 *)object3 + 0x60) |= 0x20000;
+    if (state->alternate) {
+        emitter0 = state->emitter0[1];
+        emitter0->flags &= ~0x20000;
+        emitter1 = state->emitter0[2];
+        emitter1->flags |= 0x20000;
+        emitter2 = state->emitter1[1];
+        emitter2->flags &= ~0x20000;
+        emitter3 = state->emitter1[2];
+        emitter3->flags |= 0x20000;
     } else {
-        object = state->objects[0];
-        *(u32 *)((u8 *)object + 0x60) |= 0x20000;
-        object1 = state->objects[1];
-        *(u32 *)((u8 *)object1 + 0x60) &= 0xFFFDFFFF;
-        object2 = state->objects[3];
-        *(u32 *)((u8 *)object2 + 0x60) |= 0x20000;
-        object3 = state->objects[4];
-        *(u32 *)((u8 *)object3 + 0x60) &= 0xFFFDFFFF;
+        emitter0 = state->emitter0[1];
+        emitter0->flags |= 0x20000;
+        emitter1 = state->emitter0[2];
+        emitter1->flags &= ~0x20000;
+        emitter2 = state->emitter1[1];
+        emitter2->flags |= 0x20000;
+        emitter3 = state->emitter1[2];
+        emitter3->flags &= ~0x20000;
     }
     if (state->flags & 8) {
-        *((u8 *)arg0 + 0x5C) = (u32)(func_150AD78C(state->brightnessAngle) * 112.5f + D_800AAC54);
-        state->brightnessAngle = func_15144B68(state->brightnessAngle + state->brightnessSpeed * D_800BE9A4);
+        obj->spawn.brightness = func_150AD78C(state->pulseAngle) * 112.5f + 142.5f;
+        state->pulseAngle = func_15144B68(state->pulseAngle + state->pulseSpeed * D_800BE9A4);
     }
     return 1;
 }
@@ -922,79 +901,51 @@ typedef struct {
     u8 pad5A[2];
 } Struct90_151C8FCC;
 
-typedef struct {
-    u8 unk00;
-    u8 unk01;
-    s16 unk02;
-    s16 unk04;
-    u8 pad06[2];
-    s32 unk08;
-    s32 unk0C;
-    u8 unk10;
-    u8 unk11;
-    u8 unk12;
-    u8 unk13;
-    f32 unk14;
-    f32 unk18;
-    vertex unk1C;
-    vertex unk28;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    s32 unk40;
-    u8 unk44;
-    u8 unk45;
-    u8 unk46;
-    u8 unk47;
-    s32 unk48;
-    u8 unk4C;
-    u8 pad4D[0xB];
-} Struct38_151C8FCC;
 
 void *func_151407D0(void *, s32, void *, s32, s32, s32, s32, s32, s32, s32);
 
 s32 func_151C8FCC(s32 arg0, vertex *arg1, vertex *arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, u8 arg8, s32 arg9) {
     void *temp_v0;
     Struct90_151C8FCC sp90;
-    Struct38_151C8FCC sp38;
+    SightSpawnDesc sp38;
     s32 sp34;
 
-    sp38.unk1C = *arg1;
-    sp38.unk28 = *arg2;
+    sp38.start = *arg1;
+    sp38.end = *arg2;
     sp34 = arg0;
     sp90.unk00 = sp90.unk04 = 30.10000038f;
     sp90.unk08 = sp90.unk0C = 40.0f;
     sp90.unk18 = 1.0f;
     sp90.unk10 = 0.0f;
     sp90.unk14 = 0.0f;
-    sp38.unk00 = 0x15;
-    sp38.unk02 = 0x3403;
-    sp38.unk04 = 0x12C;
-    sp38.unk08 = 0;
-    sp38.unk0C = 0;
-    sp38.unk10 = arg3;
+    sp38.kind = 0x15;
+    sp38.flags = 0x3403;
+    sp38.lifetime = 0x12C;
+    sp38.callback0 = 0;
+    sp38.callback1 = 0;
+    sp38.red = arg3;
     sp90.unk1C = 0.3000000119f;
-    sp38.unk11 = arg4;
-    sp38.unk12 = arg5;
-    sp38.unk13 = 0xFF;
+    sp38.green = arg4;
+    sp38.blue = arg5;
+    sp38.alpha = 0xFF;
     sp38.unk14 = 0.0f;
-    sp38.unk18 = 0.0f;
-    sp38.unk34 = 1.0f;
-    sp38.unk38 = 1.0f;
-    sp38.unk3C = 1.0f;
-    sp38.unk40 = (arg7 ? 0x01000000 : 0) | 0x024D2006 | 0x40000000;
+    sp38.width = 0.0f;
+    sp38.unk34.x = 1.0f;
+    sp38.unk34.y = 1.0f;
+    sp38.unk34.z = 1.0f;
+    sp38.options = (arg7 ? 0x01000000 : 0) | 0x024D2006 | 0x40000000;
     sp38.unk45 = 0xFF;
-    sp38.unk44 = 0xFF;
+    sp38.brightness = 0xFF;
     sp38.unk46 = 0;
     sp38.unk47 = 6;
-    sp38.unk01 = 3;
+    sp38.mode = 3;
     sp90.unk54 = 0;
     sp90.unk55 = 0;
     sp90.unk56 = 0;
     sp90.unk57 = 0;
     sp90.unk48 = 1.0f;
     sp90.unk58 = 0;
-    sp38.unk48 = arg6;
+    sp38.zone = arg6;
     sp90.unk20 = 9.999999975e-07f;
     temp_v0 = func_151407D0(&sp90, 0x64, &sp38, 0, 0, 0, 0, 1, arg8, arg9);
     if (temp_v0 != NULL) {
