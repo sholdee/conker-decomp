@@ -50,16 +50,16 @@ void func_151D6970(Actor *character, void *obj) {
     }
 }
 
-extern void func_1504715C(void *ground, Actor *actor);
-extern void func_15153F18(AngleRange *angles, SplashSpray *spray, void *ground, s32 arg3, s32 arg4);
-extern void func_15150178(AngleRange *angles, DropSpray *spray, void *ground, s32 arg3, s32 arg4);
+extern void func_1504715C(CollisionHit *ground, Actor *actor);
+extern void func_15153F18(AngleRange *angles, SplashSpray *spray, CollisionHit *ground, s32 arg3, s32 arg4);
+extern void func_15150178(AngleRange *angles, DropSpray *spray, CollisionHit *ground, s32 arg3, s32 arg4);
 
 /* Spawns the func_15153F18 and func_15150178 bursts at `pickup`, on the ground under `player`. */
 void func_151D69B4(WorldObject *pickup, Actor *player) {
-    u8 ground[0x24]; // ground probe result (Ground in game_1228D0.c)
+    CollisionHit ground;
     SplashSpraySpec first;
 
-    func_1504715C(ground, player);
+    func_1504715C(&ground, player);
     first.spray.pos.x = pickup->x;
     first.spray.pos.y = pickup->y;
     first.spray.pos.z = pickup->z;
@@ -86,7 +86,7 @@ void func_151D69B4(WorldObject *pickup, Actor *player) {
     first.spray.speedBase = 17.0f;
     first.spray.speedRange = 3.5f;
     first.spray.unk38 = 0.400000006f;
-    func_15153F18(&first.angles, &first.spray, ground, 0xFF, 1);
+    func_15153F18(&first.angles, &first.spray, &ground, 0xFF, 1);
     {
         DropSpraySpec second;
 
@@ -114,7 +114,7 @@ void func_151D69B4(WorldObject *pickup, Actor *player) {
         second.spray.gravityRange = 0.8140000105f;
         second.spray.sizeBase = 44.0f;
         second.spray.sizeRange = 88.0f;
-        func_15150178(&second.angles, &second.spray, ground, 0xFF, 1);
+        func_15150178(&second.angles, &second.spray, &ground, 0xFF, 1);
     }
 }
 

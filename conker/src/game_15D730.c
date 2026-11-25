@@ -48,7 +48,7 @@ typedef struct Particle {
     /* 0x10 */ ParticleDesc desc;
     /* 0x80 */ union {
         ParticleAttach attach;
-        f32 floorY;
+        CollisionHit floor;
     } unk80;
     /* 0xA4 */ u8 padA4[4];
     /* 0xA8 */ union {              /* caller-sized, see func_15130280 */
@@ -615,7 +615,7 @@ s32 func_151319A4(Particle *p, Vec3f *prevPos) {
 }
 
 extern s32 func_1514672C(Vec3f *);
-extern s32 func_15046C80(Vec3f *, s32, f32, f32 *);
+extern s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
 extern s32 (*D_80089874[])(Particle *, Vec3f *, f32 *, ParticleBounce *);
 
 /*
@@ -634,11 +634,11 @@ s32 func_151319C4(Particle *p, Vec3f *prevPos, ParticleBounce *bounce) {
         if (func_1514672C(&probe) == 0) {
             return FALSE;
         }
-        if (func_15046C80(&probe, 0, p->desc.pos.y - p->desc.height * 0.06000000238f, &p->unk80.floorY) != 0) {
+        if (func_15046C80(&probe, 0, p->desc.pos.y - p->desc.height * 0.06000000238f, &p->unk80.floor) != 0) {
             f32 hit[3];
 
             hit[0] = probe.x;
-            hit[1] = p->unk80.floorY;
+            hit[1] = p->unk80.floor.height;
             hit[2] = probe.z;
             alive = D_80089874[bounce->hitFunc](p, prevPos, hit, bounce);
         }

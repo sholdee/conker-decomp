@@ -12,8 +12,8 @@ extern s32 D_800AB110[];
 extern f32 D_800AB114[];
 
 void func_1515C244(Actor *, Vec3f *, f32 *, f32 *);
-void func_1504715C(void *, Actor *);
-void func_1515080C(DebrisSpray *, s32 *, f32 *, s32, s32, s32, s32, s32, s32, void *, f32, s32, s32, u8, s32);
+void func_1504715C(CollisionHit *, Actor *);
+void func_1515080C(DebrisSpray *, s32 *, f32 *, s32, s32, s32, s32, s32, s32, CollisionHit *, f32, s32, s32, u8, s32);
 void func_15152190(DebrisBurst *, s32 *, f32 *, s32, f32, s32, u8, s32);
 void func_15151A38(PuffSpray *, u8, s32);
 
@@ -24,14 +24,14 @@ void func_151D22B0(Actor *actor, u8 arg1, s32 arg2) {
     f32 extent1;
     f32 extent2;
     f32 scale;
-    u8 surface[0x24];
+    CollisionHit surface;
 
     if (actor != NULL) {
         func_10010154(0xAA, actor, 0x7FFF, 1000, 3000);
         func_10010A3C(actor);
         scale = (actor->xz_scale + actor->y_scale) * 0.5f;
         func_1515C244(actor, &origin, &extent1, &extent2);
-        func_1504715C(surface, actor);
+        func_1504715C(&surface, actor);
         {
             DebrisSpray params;
             params.countBase = 5;
@@ -52,7 +52,7 @@ void func_151D22B0(Actor *actor, u8 arg1, s32 arg2) {
             params.spin = 20.24800110f;
             params.floorHitChance = 1.0f;
             params.floorHitFn = 11;
-            func_1515080C(&params, D_800AB0B0, D_800AB0E0, 12, 0, 0, 0, 1, -1, surface, 20.0f, 0, 0, arg1, arg2);
+            func_1515080C(&params, D_800AB0B0, D_800AB0E0, 12, 0, 0, 0, 1, -1, &surface, 20.0f, 0, 0, arg1, arg2);
         }
         {
             DebrisBurst params;

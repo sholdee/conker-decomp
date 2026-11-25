@@ -83,8 +83,7 @@ typedef struct BoltRainState {
     /* 0x0C */ Vec3f pos;
     /* 0x18 */ f32 radius;
     /* 0x1C */ f32 height;       /* bolts start this far above pos */
-    /* 0x20 */ f32 groundY;
-    /* 0x24 */ u8 pad24[0x20];
+    /* 0x20 */ CollisionHit ground; /* where the next bolt lands */
     /* 0x44 */ s16 *unk44;
 } BoltRainState;
 
@@ -96,7 +95,7 @@ typedef struct BoltRainObj {
 s32 func_1000FD38();
 extern s32 func_151464B8(s16 *);
 extern void func_15143874(s16 angle, f32 radius, f32 *x, f32 *z);
-extern s32 func_15046C80(f32 *pos, s32, f32 y, f32 *groundY);
+extern s32 func_15046C80(f32 *pos, s32, f32 y, CollisionHit *hit);
 extern void func_15105CE0(BoltDesc *desc, s32 extraSize, s32, s32);
 
 /* While the timer runs, drops lightning bolts from above pos to random ground points within radius. */
@@ -139,13 +138,13 @@ void func_15104C44(BoltRainObj *obj) {
                                   &ground[0], &ground[2]);
                     ground[0] += state->pos.x;
                     ground[2] += state->pos.z;
-                    if (func_15046C80(ground, 0, state->pos.y, &state->groundY) != 0) {
+                    if (func_15046C80(ground, 0, state->pos.y, &state->ground) != 0) {
                         func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * 220.0f, &offX1, &offZ1);
                         func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * 220.0f, &offX2, &offZ2);
                         desc.ctrl[1].x = state->pos.x + offX1;
                         desc.ctrl[1].z = state->pos.z + offZ1;
                         desc.ctrl[3].x = ground[0];
-                        desc.ctrl[3].y = state->groundY;
+                        desc.ctrl[3].y = state->ground.height;
                         desc.ctrl[3].z = ground[2];
                         desc.ctrl[2].x = offX2 + ground[0];
                         desc.ctrl[2].y = desc.ctrl[3].y + 180.0f;

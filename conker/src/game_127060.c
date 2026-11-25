@@ -294,9 +294,9 @@ typedef struct {
 
 extern Vec3f D_800A1CFC[];
 extern void func_15143134(Vec3f *offset, Vec3f *out, Mtx *mtx);
-extern void func_1504715C(void *ground, Actor *actor);
-extern void func_15153F18(AngleRange *, SplashSpray *, void *, u8, s32);
-extern void func_15150178(AngleRange *, DropSpray *, void *, u8, s32);
+extern void func_1504715C(CollisionHit *ground, Actor *actor);
+extern void func_15153F18(AngleRange *, SplashSpray *, CollisionHit *, u8, s32);
+extern void func_15150178(AngleRange *, DropSpray *, CollisionHit *, u8, s32);
 extern ImpactParticle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 extern void func_151C329C(Vec3f *, u8, s32);
 
@@ -306,11 +306,11 @@ extern void func_151C329C(Vec3f *, u8, s32);
  */
 void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
     Vec3f pos;
-    u8 ground[0x24];
+    CollisionHit ground;
 
     if (actor->unk1D4) {
         func_15143134(&D_800A1CFC[point], &pos, (Mtx *)actor->unk1D4 + 5);
-        func_1504715C(ground, actor);
+        func_1504715C(&ground, actor);
         {
             SplashSpraySpec first;
 
@@ -338,7 +338,7 @@ void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
             first.spray.speedBase = 12.0f;
             first.spray.speedRange = 13.90000057f;
             first.spray.unk38 = 1.0f;
-            func_15153F18(&first.angles, &first.spray, ground, owner, kind);
+            func_15153F18(&first.angles, &first.spray, &ground, owner, kind);
         }
         {
             DropSpraySpec second;
@@ -365,7 +365,7 @@ void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
             second.spray.sizeRange = 104.0f;
             second.spray.unk34 = 1.0f;
             second.spray.bounceChance = 0.3f;
-            func_15150178(&second.angles, &second.spray, ground, owner, kind);
+            func_15150178(&second.angles, &second.spray, &ground, owner, kind);
         }
         {
             ParticleDesc spawn;
