@@ -50,11 +50,6 @@ void func_150F1A00(Actor *actor) {
     }
 }
 
-typedef struct GameCommand {
-    s16 opcode;
-    s16 value;
-} GameCommand;
-
 /* Eases D_800CC298's tilt toward its lower limit while actor `index` is in state 0x21 and toward
  * its upper limit otherwise, then emits it as commands 0xB2, 0xB8, ... 0xD0 at `cmd`. */
 GameCommand *func_150F1B48(GameCommand *cmd, s32 index) {

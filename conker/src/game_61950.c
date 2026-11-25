@@ -9,11 +9,6 @@ extern void func_150DFDA4(Actor *);
 extern s32 func_1502DB20(u8);
 void func_1503B9BC(void);
 
-typedef struct GameCommand {
-    s16 opcode;
-    s16 value;
-} GameCommand;
-
 /*
  * Appends two commands built from the object's taskint[0] angle pair (two s16s):
  * opcode 0x12 with the second angle, opcode 0xE with the negated first one,

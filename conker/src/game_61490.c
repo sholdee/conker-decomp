@@ -2,11 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct GameCommand {
-    s16 opcode;
-    s16 value;
-} GameCommand;
-
 GameCommand *func_150341BC(GameCommand *, s32);
 GameCommand *func_15034340(GameCommand *, s32);
 GameCommand *func_150343B0(GameCommand *, s32);

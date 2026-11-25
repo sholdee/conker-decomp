@@ -1456,6 +1456,14 @@ typedef struct CamCmd {
     /* 0x36 */ u8 pad36[0x2];
 } CamCmd; // size 0x38
 
+/* Four-byte entry of a game command stream (an opcode and its value), as written by the bone command
+ * builders (game_61490.c, func_150344A0, func_15034860) and their per-actor helpers (func_150B58F0,
+ * func_150F1B48). An opcode of 0x1000 ends the stream. */
+typedef struct GameCommand {
+    /* 0x0 */ s16 opcode;
+    /* 0x2 */ s16 value;
+} GameCommand; /* size 0x4 */
+
 /* Aim (first-person swing) state (Camera.aim, at 0x740). */
 typedef struct CamAim {
     /* 0x00 */ Vec3f orbitPos;                      /* eye position on the orbit around the target */
