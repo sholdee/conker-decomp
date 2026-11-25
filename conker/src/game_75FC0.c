@@ -14,7 +14,10 @@ void func_1503E5F8(f32 mtx[4][4], f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, 
                    f32 *scaleX, f32 *scaleY, f32 *scaleZ);
 void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 out[4][4]);
 
-/* Builds the inverse of the rigid part (translation and rotation, no scale) of a transform. */
+/*
+ * Builds the inverse of the rigid part (translation and rotation, no scale) of a transform.
+ * mtx and out are f32[4][4] matrices; functions.h still declares them as s32.
+ */
 void func_15048B10(s32 mtx, s32 out) {
     f32 x;
     f32 y;
@@ -47,7 +50,10 @@ void func_15048B10(s32 mtx, s32 out) {
     func_150A7A48(tmp2, rotXMtx, (f32 (*)[4])out);
 }
 
-/* asinf: rational approximation, with range reduction for |x| >= 0.5 */
+/*
+ * asinf: rational approximation, with range reduction for |x| >= 0.5.
+ * D_80085FD0 / D_80085FD4 are 1.0f / -1.0f; matching: they are loaded from rodata, a literal would use lui/mtc1.
+ */
 f32 func_15048C30(f32 x) {
     f32 root;
     f32 num;
@@ -81,11 +87,10 @@ f32 func_15048C30(f32 x) {
             sq = reduced * reduced;
             num = (((((((D_80099020[5] * sq) + D_80099020[4]) * sq) + D_80099020[3]) * sq) + D_80099020[2]) * sq) + D_80099020[1];
             den = ((((((sq + D_80099038[3]) * sq) + D_80099038[2]) * sq) + D_80099038[1]) * sq) + D_80099038[0];
+            result = ((sq * num * reduced) / den) + reduced;
             if (bits > 0) {
-                result = ((sq * num * reduced) / den) + reduced;
                 return (0.5f * result) + 0.785398006f;
             } else {
-                result = ((sq * num * reduced) / den) + reduced;
                 return -0.785398006f - (0.5f * result);
             }
         }
@@ -114,93 +119,101 @@ f32 func_15048C30(f32 x) {
     return 0.0f;
 }
 
-void func_15048F20(struct17 *arg0, struct17 *arg1, struct17 *arg2) {
-    arg2->unk0 = arg0->unk0 + arg1->unk0;
-    arg2->unk4 = arg0->unk4 + arg1->unk4;
-    arg2->unk8 = arg0->unk8 + arg1->unk8;
+/* out = a + b */
+void func_15048F20(struct17 *a, struct17 *b, struct17 *out) {
+    out->unk0 = a->unk0 + b->unk0;
+    out->unk4 = a->unk4 + b->unk4;
+    out->unk8 = a->unk8 + b->unk8;
 }
 
-void func_15048F58(struct17 *arg0, struct17 *arg1, struct17 *arg2) {
-    arg2->unk0 = arg0->unk0 - arg1->unk0;
-    arg2->unk4 = arg0->unk4 - arg1->unk4;
-    arg2->unk8 = arg0->unk8 - arg1->unk8;
+/* out = a - b */
+void func_15048F58(struct17 *a, struct17 *b, struct17 *out) {
+    out->unk0 = a->unk0 - b->unk0;
+    out->unk4 = a->unk4 - b->unk4;
+    out->unk8 = a->unk8 - b->unk8;
 }
 
-void func_15048F90(struct17 *arg0, struct17 *arg1, struct17 *arg2) {
-    arg2->unk0 = arg1->unk0 - arg0->unk0;
-    arg2->unk4 = arg1->unk4 - arg0->unk4;
-    arg2->unk8 = arg1->unk8 - arg0->unk8;
+/* out = to - from */
+void func_15048F90(struct17 *from, struct17 *to, struct17 *out) {
+    out->unk0 = to->unk0 - from->unk0;
+    out->unk4 = to->unk4 - from->unk4;
+    out->unk8 = to->unk8 - from->unk8;
 }
 
-f32 func_15048FC8(struct17 *arg0) {
-    f32 tmp1;
-    f32 tmp2;
-    f32 tmp3;
+/* Heading of a vector in the XZ plane, in degrees [0, 360). */
+f32 func_15048FC8(struct17 *vec) {
+    f32 len;
+    f32 angle;
 
-    tmp1 = sqrtf((arg0->unk0 * arg0->unk0) + (arg0->unk8 * arg0->unk8));
-    if (tmp1 == 0.0f) {
+    len = sqrtf((vec->unk0 * vec->unk0) + (vec->unk8 * vec->unk8));
+    if (len == 0.0f) {
         return 0.0f;
     }
 
-    tmp2 = -arg0->unk0 / tmp1;
-    tmp2 = func_15048C30(tmp2);
+    angle = -vec->unk0 / len; // matching: the sine goes through `angle` before the asinf call
+    angle = func_15048C30(angle);
 
-    if (arg0->unk8 > 0.0f) {
-        tmp2 = 270.0f - (tmp2 * 57.29577637f);
+    if (vec->unk8 > 0.0f) {
+        angle = 270.0f - (angle * 57.29577637f);
     } else {
-        tmp2 = 90.0f + (tmp2 * 57.29577637f);
+        angle = 90.0f + (angle * 57.29577637f);
     }
 
-    tmp2 -= 90.0f;
+    angle -= 90.0f;
 
-    if (tmp2 < 0.0f) {
-        tmp2 += 360.0f;
+    if (angle < 0.0f) {
+        angle += 360.0f;
     }
-    return tmp2;
+    return angle;
 }
 
-s32 func_150490A8(struct17 *arg0) {
-    f32 temp_f12;
-    s32 phi_v1;
+/* Heading of a vector in the XZ plane as an integer angle, from the func_15048864 lookup table. */
+s32 func_150490A8(struct17 *vec) {
+    f32 len;
+    s32 angle;
 
-    temp_f12 = sqrtf((arg0->unk0 * arg0->unk0) + (arg0->unk8 * arg0->unk8));
+    len = sqrtf((vec->unk0 * vec->unk0) + (vec->unk8 * vec->unk8));
 
-    if (temp_f12 == 0.0f) {
+    if (len == 0.0f) {
         return 0;
     }
 
-    temp_f12 = arg0->unk0 / temp_f12;
-    phi_v1 = func_15048864(temp_f12);
+    len = vec->unk0 / len; // matching: IDO needs the ratio in the same f32 local as the length
+    angle = func_15048864(len);
 
-    if (0.0f < arg0->unk8) {
-        if (phi_v1 < 64) {
-            phi_v1 = 128 - phi_v1;
+    if (vec->unk8 > 0.0f) {
+        if (angle < 64) {
+            angle = 128 - angle;
         } else {
-            phi_v1 = 384 - phi_v1;
+            angle = 384 - angle;
         }
     }
-    return phi_v1;
+    return angle;
 }
 
-void func_15049148(struct17 *arg0, f32 arg1, struct17 *arg2) {
-    arg2->unk0 = arg0->unk0 * arg1;
-    arg2->unk4 = arg0->unk4 * arg1;
-    arg2->unk8 = arg0->unk8 * arg1;
+/* out = vec * scale */
+void func_15049148(struct17 *vec, f32 scale, struct17 *out) {
+    out->unk0 = vec->unk0 * scale;
+    out->unk4 = vec->unk4 * scale;
+    out->unk8 = vec->unk8 * scale;
 }
 
-void func_1504917C(struct17 *arg0, struct17 *arg1) {
-    f32 tmp = func_150AD930(arg0);
-    if (tmp != 0.0f) {
-        tmp = 1.0f / tmp;
+/* out = vec normalized (a zero vector stays zero) */
+void func_1504917C(struct17 *vec, struct17 *out) {
+    f32 scale = func_150AD930(&vec->unk0);
+
+    if (scale != 0.0f) {
+        scale = 1.0f / scale;
     }
-    arg1->unk0 = arg0->unk0 * tmp;
-    arg1->unk4 = arg0->unk4 * tmp;
-    arg1->unk8 = arg0->unk8 * tmp;
+    out->unk0 = vec->unk0 * scale;
+    out->unk4 = vec->unk4 * scale;
+    out->unk8 = vec->unk8 * scale;
 }
 
-void func_150491EC(struct17 *arg0, struct17 *arg1, struct17 *arg2) {
-    arg2->unk0 = arg1->unk0 - arg0->unk0;
-    arg2->unk4 = arg1->unk4 - arg0->unk4;
-    arg2->unk8 = arg1->unk8 - arg0->unk8;
-    func_1504917C(arg2, arg2);
+/* out = unit vector pointing from `from` to `to` */
+void func_150491EC(struct17 *from, struct17 *to, struct17 *out) {
+    out->unk0 = to->unk0 - from->unk0;
+    out->unk4 = to->unk4 - from->unk4;
+    out->unk8 = to->unk8 - from->unk8;
+    func_1504917C(out, out);
 }
