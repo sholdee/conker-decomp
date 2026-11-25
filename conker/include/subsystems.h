@@ -1,6 +1,8 @@
 #ifndef SUBSYSTEMS_H
 #define SUBSYSTEMS_H
 
+#include "effects.h"
+
 /* One header for each subsystem (tools/subsystems.tsv). functions.h and variables.h include them all. */
 #include "conker/actor.h"
 #include "conker/aim.h"
