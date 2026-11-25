@@ -158,7 +158,7 @@ typedef struct MotionEffect {
     /* 0x110 */ Motion motion;
 } MotionEffect;
 
-LightEffect *func_151602C0(Header *header, Header2 *header2, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7,
+LightEffect *func_151602C0(LightEffectHeader *header, Vec3i *header2, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7,
                          s32 offset, u8 arg9, s32 argA);
 
 /* Spawns an effect tied to owner, with a moving child effect and a light attached to it. */
@@ -179,8 +179,8 @@ void func_1501175C(Actor *owner, u8 arg1, s32 arg2) {
         {
             Motion motion;
             ParticleDef packet;
-            Header2 header2;
-            Header header;
+            Vec3i header2;
+            LightEffectHeader header;
 
             motion.unk58 = 0;
             motion.size = (owner->xz_scale + owner->y_scale) * 0.5f;
@@ -233,13 +233,13 @@ void func_1501175C(Actor *owner, u8 arg1, s32 arg2) {
             if (controller->effect != NULL) {
                 memcpy(&controller->effect->motion, &motion, sizeof(motion));
             }
-            header.unk0 = 2;
-            header.unk1 = -1;
-            header.unk2 = 300;
-            header.unk4 = 0;
-            header2.unk0 = 0;
-            header2.unk4 = 0;
-            header2.unk8 = 0;
+            header.flags = 2;
+            header.update = -1;
+            header.lifetime = 300;
+            header.lightType = 0;
+            header2.x = 0;
+            header2.y = 0;
+            header2.z = 0;
             controller->light = func_151602C0(&header, &header2, 40, 255, 255, 255, 255, 1, 0, arg1, arg2);
         }
     }

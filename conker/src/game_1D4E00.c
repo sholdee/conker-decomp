@@ -943,7 +943,7 @@ typedef struct {
 
 extern EmitterPreset D_8008F9AC[];
 
-void *func_1516284C(Header *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
+void *func_1516284C(LightEffectHeader *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
 
 /*
  * Spawns particle emitter preset `preset` (0-8) on obj, or at pos when given. options:
@@ -992,13 +992,13 @@ void func_151A9390(u8 options, u8 preset, LevelObject *obj, Vec3f *pos,
     }
 
     if (options & 4) {
-        Header spawn;
+        LightEffectHeader spawn;
         s32 spawnPos[3];
 
-        spawn.unk0 = ((lifetime == -1) ? 0 : 1) | 2;
-        spawn.unk1 = 2;
-        spawn.unk2 = (lifetime == -1) ? 300 : lifetime;
-        spawn.unk4 = D_8008F9AC[preset].unkB;
+        spawn.flags = ((lifetime == -1) ? 0 : 1) | 2;
+        spawn.update = 2;
+        spawn.lifetime = (lifetime == -1) ? 300 : lifetime;
+        spawn.lightType = D_8008F9AC[preset].unkB;
 
         if (pos != NULL) {
             spawnPos[0] = pos->x;

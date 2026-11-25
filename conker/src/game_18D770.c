@@ -31,8 +31,8 @@ typedef struct {
 
 extern void (*D_8008B358[])(LightEffect *, ActorEvent *, u8);
 
-LightEffect *func_151602C0(Header *header, Header2 *position, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7, s32 size, u8 arg9, s32 argA);
-LightEffect *func_1516037C(Header *header, PointLight *light, s32 size, u8 arg3, s32 arg4);
+LightEffect *func_151602C0(LightEffectHeader *header, Vec3i *position, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7, s32 size, u8 arg9, s32 argA);
+LightEffect *func_1516037C(LightEffectHeader *header, PointLight *light, s32 size, u8 arg3, s32 arg4);
 void func_151603FC(LightEffect *effect);
 s32 func_15160600(LightEffect *effect);
 s32 func_1516065C(LightEffect *effect);
@@ -63,11 +63,11 @@ s32 func_15161F2C(LightEffect *effect);
 LightEffect *func_15162034(PointLight *light, u8 arg1, s32 arg2);
 void func_15162110(s32 arg0);
 LightEffect *func_15162740(PointLight *light, u8 kind, u8 type, u8 arg3, s16 lifetime, s8 update, u8 arg6, s32 arg7);
-LightEffect *func_1516284C(Header *header, Header2 *position, s32 arg2, s32 arg3, s32 arg4, u8 arg5, u8 arg6, s32 extraSize, u8 kind, u8 arg9, s32 argA);
+LightEffect *func_1516284C(LightEffectHeader *header, Vec3i *position, s32 arg2, s32 arg3, s32 arg4, u8 arg5, u8 arg6, s32 extraSize, u8 kind, u8 arg9, s32 argA);
 void func_15162EF8(LightEffect *effect);
 void func_15162F50(LightEffect *effect);
 LightEffect *func_15162FAC(PointLight *light, u8 kind, u8 type, u8 arg3, s16 lifetime, s8 update, u8 arg6, s32 arg7);
-LightEffect *func_15163414(Header *header, f32 *x, f32 *y, f32 *z, s8 callback, u8 handler, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, u8 argB, s32 extraSize, u8 argD, s32 argE);
+LightEffect *func_15163414(LightEffectHeader *header, f32 *x, f32 *y, f32 *z, s8 callback, u8 handler, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, u8 argB, s32 extraSize, u8 argD, s32 argE);
 LightEffect *func_15163604(PointLight *light, u8 kind, u8 type, s16 lifetime, u8 arg4, s32 arg5, u8 arg6, s32 arg7);
 s32 func_15163704(LightEffect *effect);
 void func_1516381C(PointLight *light, u8 type, u8 arg2, s32 arg3);
@@ -89,12 +89,12 @@ void func_151644F4(LightEffect *effect, Vec3f *pivot, f32 offset, f32 angleX, f3
 s32 func_151644A8(LightEffect *effect);
 
 /* Creates a light at `position` and an effect instance (with `size` bytes of payload) that owns it. */
-LightEffect *func_151602C0(Header *header, Header2 *position, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7, s32 size, u8 arg9, s32 argA) {
+LightEffect *func_151602C0(LightEffectHeader *header, Vec3i *position, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7, s32 size, u8 arg9, s32 argA) {
     LightEffect *effect;
     PointLight *light;
 
     effect = NULL;
-    light = func_1515D5F8(position->unk0, position->unk4, position->unk8, arg2, arg3, arg4, arg5, arg6, arg7, 0);
+    light = func_1515D5F8(position->x, position->y, position->z, arg2, arg3, arg4, arg5, arg6, arg7, 0);
     if (light != NULL) {
         effect = func_1516037C(header, light, size, arg9, argA);
         if (effect != NULL) {
@@ -107,13 +107,13 @@ LightEffect *func_151602C0(Header *header, Header2 *position, s32 arg2, s32 arg3
 }
 
 /* Allocates an effect instance (0x18-byte header plus `size` bytes of payload) for a light. */
-LightEffect *func_1516037C(Header *header, PointLight *light, s32 size, u8 arg3, s32 arg4) {
+LightEffect *func_1516037C(LightEffectHeader *header, PointLight *light, s32 size, u8 arg3, s32 arg4) {
     LightEffect *effect = func_15167A68(53, arg4, size + 0x18, 1, arg3, 1);
 
     if (effect == NULL) {
         return NULL;
     }
-    memcpy(&effect->flags, header, sizeof(Header));
+    memcpy(&effect->flags, header, sizeof(LightEffectHeader));
     effect->light = light;
     return effect;
 }
@@ -275,27 +275,27 @@ void func_15160954(f32 *level, f32 *peak, f32 *rate, f32 *delay, LightEffect *ef
 /* Creates a light that follows `actor` (see func_15160B74). */
 LightEffect *func_15160A58(Actor *actor, u8 bone, Vec3f *offset, u8 arg3, s16 lifetime, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s8 callback, s32 extraSize, u8 unk15, u8 argE, s32 argF) {
     LightEffect *effect;
-    Header header;
+    LightEffectHeader header;
     LightAttach attach;
-    Header2 position;
+    Vec3i position;
 
     if (actor == NULL) {
         return NULL;
     }
 
-    header.unk0 = arg3;
-    header.unk1 = 5;
-    header.unk2 = lifetime;
-    header.unk4 = 16;
+    header.flags = arg3;
+    header.update = 5;
+    header.lifetime = lifetime;
+    header.lightType = 16;
 
     attach.actor = actor;
     attach.actorId = actor->unique_id;
     attach.bone = bone;
     attach.offset = *offset;
 
-    position.unk0 = 0;
-    position.unk4 = 0;
-    position.unk8 = 0;
+    position.x = 0;
+    position.y = 0;
+    position.z = 0;
 
     attach.callback = callback;
     attach.unk15 = unk15;
@@ -347,9 +347,9 @@ u8 func_15160B74(LightEffect *effect) {
 /* Creates a beam light on `actor` (see func_15160E30). */
 LightEffect *func_15160CDC(Actor *actor, u8 bone, Vec3f *start, Vec3f *end, f32 scale, u8 arg5, s16 lifetime, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 fromBone, u8 unk25, u8 flagHit, u8 argE, s32 argF) {
     LightEffect *effect;
-    Header header;
+    LightEffectHeader header;
     LightBeam beam;
-    Header2 position;
+    Vec3i position;
     s32 flag1;
     s32 flag2;
 
@@ -357,10 +357,10 @@ LightEffect *func_15160CDC(Actor *actor, u8 bone, Vec3f *start, Vec3f *end, f32 
         return NULL;
     }
 
-    header.unk0 = arg5;
-    header.unk1 = 6;
-    header.unk2 = lifetime;
-    header.unk4 = 17;
+    header.flags = arg5;
+    header.update = 6;
+    header.lifetime = lifetime;
+    header.lightType = 17;
 
     beam.actor = actor;
     beam.actorId = actor->unique_id;
@@ -374,9 +374,9 @@ LightEffect *func_15160CDC(Actor *actor, u8 bone, Vec3f *start, Vec3f *end, f32 
     beam.flags = flag2 | flag1;
     beam.unk25 = unk25;
 
-    position.unk0 = 0;
-    position.unk4 = 0;
-    position.unk8 = 0;
+    position.x = 0;
+    position.y = 0;
+    position.z = 0;
 
     effect = func_151602C0(&header, &position, arg7, arg8, arg9, argA, 0xFF, 0, sizeof(LightBeam), argE, argF);
     if (effect != NULL) {
@@ -504,17 +504,17 @@ s32 func_15161238(Actor *actor, Actor *exclude) {
 
 LightEffect *func_1516127C(PointLight *light, u8 arg1, s32 arg2) {
     LightEffect *effect;
-    Header header;
+    LightEffectHeader header;
     LightPulse pulse;
 
     pulse.base = 50.0f;
     pulse.amplitude = 40.0f;
     pulse.phase = func_150ADA68() * 6.283185482f;
 
-    header.unk0 = 0;
-    header.unk1 = 1;
-    header.unk2 = 300;
-    header.unk4 = 5;
+    header.flags = 0;
+    header.update = 1;
+    header.lifetime = 300;
+    header.lightType = 5;
 
     pulse.speed = 0.1020999998f;
 
@@ -527,16 +527,16 @@ LightEffect *func_1516127C(PointLight *light, u8 arg1, s32 arg2) {
 
 LightEffect *func_15161334(PointLight *light, u8 arg1, s32 arg2) {
     LightEffect *effect;
-    Header header;
+    LightEffectHeader header;
     LightJitter jitter;
 
     jitter.low = 1.0f;
     jitter.target = 1.0f;
 
-    header.unk0 = 0;
-    header.unk1 = 2;
-    header.unk2 = 300;
-    header.unk4 = 6;
+    header.flags = 0;
+    header.update = 2;
+    header.lifetime = 300;
+    header.lightType = 6;
 
     jitter.mid = 20.0f;
     jitter.high = 50.0f;
@@ -554,15 +554,15 @@ LightEffect *func_15161334(PointLight *light, u8 arg1, s32 arg2) {
 
 LightEffect *func_15161408(PointLight *light, u8 arg1, s32 arg2) {
     LightEffect *effect;
-    Header header;
+    LightEffectHeader header;
     WorldObject *mount;
 
     mount = func_151149AC(249);
 
-    header.unk0 = 0;
-    header.unk1 = 3;
-    header.unk2 = 300;
-    header.unk4 = 8;
+    header.flags = 0;
+    header.update = 3;
+    header.lifetime = 300;
+    header.lightType = 8;
 
     effect = func_1516037C(&header, light, sizeof(mount), arg1, arg2);
     if (effect != NULL) {
@@ -573,13 +573,13 @@ LightEffect *func_15161408(PointLight *light, u8 arg1, s32 arg2) {
 
 LightEffect *func_15161494(PointLight *light, u8 arg1, s32 arg2) {
     LightEffect *effect;
-    Header header;
+    LightEffectHeader header;
     LightPulse pulse;
 
-    header.unk0 = 0;
-    header.unk1 = 1;
-    header.unk2 = 300;
-    header.unk4 = 5;
+    header.flags = 0;
+    header.update = 1;
+    header.lifetime = 300;
+    header.lightType = 5;
 
     pulse.base = 127.0f;
     pulse.amplitude = 100.0f;
@@ -595,7 +595,7 @@ LightEffect *func_15161494(PointLight *light, u8 arg1, s32 arg2) {
 
 LightEffect *func_15161540(PointLight *light, u8 arg1, s32 arg2) {
     LightEffect *effect;
-    Header header;
+    LightEffectHeader header;
     LightPulse pulse;
 
     pulse.base = 28.0f;
@@ -603,10 +603,10 @@ LightEffect *func_15161540(PointLight *light, u8 arg1, s32 arg2) {
     pulse.phase = func_150ADA68() * 6.283185482f;
     pulse.speed = 0.07660000026f;
 
-    header.unk0 = 0;
-    header.unk1 = 1;
-    header.unk2 = 300;
-    header.unk4 = 5;
+    header.flags = 0;
+    header.update = 1;
+    header.lifetime = 300;
+    header.lightType = 5;
 
     effect = func_1516037C(&header, light, sizeof(pulse), arg1, arg2);
     if (effect != NULL) {
@@ -618,7 +618,7 @@ LightEffect *func_15161540(PointLight *light, u8 arg1, s32 arg2) {
 /* Creates a flicker effect; `kind` picks the peak intensity from D_800A66C0. */
 LightEffect *func_151615F8(PointLight *light, u8 sound, u8 kind, u8 type, u8 arg4, s32 arg5) {
     LightEffect *effect;
-    Header header;
+    LightEffectHeader header;
     LightFlicker flicker;
     f32 peak;
 
@@ -637,10 +637,10 @@ LightEffect *func_151615F8(PointLight *light, u8 sound, u8 kind, u8 type, u8 arg
     flicker.count = 0;
     flicker.sound = sound;
 
-    header.unk0 = 0;
-    header.unk1 = 4;
-    header.unk2 = 300;
-    header.unk4 = type;
+    header.flags = 0;
+    header.update = 4;
+    header.lifetime = 300;
+    header.lightType = type;
 
     effect = func_1516037C(&header, light, sizeof(flicker), arg4, arg5);
     if (effect != NULL) {
@@ -713,20 +713,20 @@ void func_151618BC(u16 arg0, s16 arg1, u8 arg2, s32 arg3, Vec3f *position, s16 a
 /* Creates a light driven by entry `index` of D_800C3958 (see func_15161A68). */
 LightEffect *func_151619A0(s32 index, s16 lifetime, u8 arg2, s32 arg3) {
     LightEffect *effect;
-    Header header;
+    LightEffectHeader header;
     s32 payload;
-    Header2 position;
+    Vec3i position;
 
     payload = index;
 
-    header.unk0 = 3;
-    header.unk1 = 9;
-    header.unk2 = lifetime;
-    header.unk4 = 20;
+    header.flags = 3;
+    header.update = 9;
+    header.lifetime = lifetime;
+    header.lightType = 20;
 
-    position.unk0 = 0;
-    position.unk4 = 0;
-    position.unk8 = 0;
+    position.x = 0;
+    position.y = 0;
+    position.z = 0;
 
     effect = func_151602C0(&header, &position, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0, sizeof(payload), arg2, arg3);
     if (effect != NULL) {
@@ -770,26 +770,26 @@ s32 func_15161A68(LightEffect *effect) {
 /* Creates a light at `actor` that stays tied to it (see func_15163F50). */
 LightEffect *func_15161E24(Actor *actor, u8 unk5, u8 arg2, s16 lifetime, s32 arg4, s32 arg5, s32 arg6, s32 arg7, u8 arg8, s32 arg9) {
     LightEffect *effect;
-    Header header;
+    LightEffectHeader header;
     LightActorRef ref;
-    Header2 position;
+    Vec3i position;
 
     if (actor == NULL) {
         return NULL;
     }
 
-    header.unk0 = arg2;
-    header.unk1 = 10;
-    header.unk2 = lifetime;
-    header.unk4 = 21;
+    header.flags = arg2;
+    header.update = 10;
+    header.lifetime = lifetime;
+    header.lightType = 21;
 
     ref.actor = actor;
     ref.actorId = actor->unique_id;
     ref.unk5 = unk5;
 
-    position.unk0 = actor->x_position;
-    position.unk4 = actor->y_position;
-    position.unk8 = actor->z_position;
+    position.x = actor->x_position;
+    position.y = actor->y_position;
+    position.z = actor->z_position;
 
     effect = func_151602C0(&header, &position, arg4, arg5, arg6, arg7, 0xFF, 0, sizeof(ref), arg8, arg9);
     if (effect != NULL) {
@@ -832,13 +832,13 @@ void func_15161F4C(LightEffect *effect, ActorEvent *event, u8 eventId) {
 
 LightEffect *func_15162034(PointLight *light, u8 arg1, s32 arg2) {
     LightEffect *effect;
-    Header header;
+    LightEffectHeader header;
     LightJitter jitter;
 
-    header.unk0 = 0;
-    header.unk1 = 2;
-    header.unk2 = 300;
-    header.unk4 = 6;
+    header.flags = 0;
+    header.update = 2;
+    header.lifetime = 300;
+    header.lightType = 6;
 
     jitter.low = 15.0f;
     jitter.mid = 22.0f;
@@ -897,7 +897,7 @@ void func_151621B8(struct236 *object) {
 /* Creates a colour-cycling effect; `kind` (0-2) picks the base, amplitude and speed tables. */
 LightEffect *func_151623F4(PointLight *light, u8 kind, u8 type, u8 arg3, s8 update, s16 lifetime, u8 arg6, s32 arg7) {
     LightColourPulse pulse;
-    Header header;
+    LightEffectHeader header;
     LightEffect *effect;
 
     if (kind >= 3) {
@@ -909,10 +909,10 @@ LightEffect *func_151623F4(PointLight *light, u8 kind, u8 type, u8 arg3, s8 upda
 
     pulse.phase = 0.0f;
     pulse.speed = D_800A6754[kind];
-    header.unk0 = arg3;
-    header.unk1 = update;
-    header.unk2 = lifetime;
-    header.unk4 = type;
+    header.flags = arg3;
+    header.update = update;
+    header.lifetime = lifetime;
+    header.lightType = type;
 
     effect = func_1516037C(&header, light, sizeof(pulse), arg6, arg7);
     if (effect != NULL) {
@@ -941,7 +941,7 @@ s32 func_15162510(LightEffect *effect) {
 /* Creates a jitter effect; `kind` (0-23) picks mid, low and high from tables. */
 LightEffect *func_15162740(PointLight *light, u8 kind, u8 type, u8 arg3, s16 lifetime, s8 update, u8 arg6, s32 arg7) {
     LightEffect *effect;
-    Header header;
+    LightEffectHeader header;
     LightJitter jitter;
 
     if (kind >= 24) {
@@ -957,10 +957,10 @@ LightEffect *func_15162740(PointLight *light, u8 kind, u8 type, u8 arg3, s16 lif
     jitter.smoothing = 0.2488999963f;
     jitter.level = 127.0f;
 
-    header.unk0 = arg3;
-    header.unk1 = update;
-    header.unk2 = lifetime;
-    header.unk4 = type;
+    header.flags = arg3;
+    header.update = update;
+    header.lifetime = lifetime;
+    header.lightType = type;
 
     effect = func_1516037C(&header, light, sizeof(jitter), arg6, arg7);
     if (effect != NULL) {
@@ -970,7 +970,7 @@ LightEffect *func_15162740(PointLight *light, u8 kind, u8 type, u8 arg3, s16 lif
 }
 
 /* Like func_15162740, but also creates the light at `position`; `extraSize` bytes follow the jitter payload. */
-LightEffect *func_1516284C(Header *header, Header2 *position, s32 arg2, s32 arg3, s32 arg4, u8 arg5, u8 arg6, s32 extraSize, u8 kind, u8 arg9, s32 argA) {
+LightEffect *func_1516284C(LightEffectHeader *header, Vec3i *position, s32 arg2, s32 arg3, s32 arg4, u8 arg5, u8 arg6, s32 extraSize, u8 kind, u8 arg9, s32 argA) {
     LightEffect *effect;
     LightJitter jitter;
 
@@ -996,7 +996,7 @@ LightEffect *func_1516284C(Header *header, Header2 *position, s32 arg2, s32 arg3
 /* Creates a cycle effect; `kind` (0-4) picks the levels and phase lengths from tables. */
 LightEffect *func_1516295C(PointLight *light, u8 kind, u8 type, u8 arg3, s16 lifetime, s8 update, s8 onLow, s8 onRise, s8 onHigh, s8 onFall, s32 extraSize, u8 argB, s32 argC) {
     LightEffect *effect;
-    Header header;
+    LightEffectHeader header;
     LightCycle cycle;
 
     if (kind >= 5) {
@@ -1028,10 +1028,10 @@ LightEffect *func_1516295C(PointLight *light, u8 kind, u8 type, u8 arg3, s16 lif
         cycle.state = 4;
     }
 
-    header.unk0 = arg3;
-    header.unk1 = update;
-    header.unk2 = lifetime;
-    header.unk4 = type;
+    header.flags = arg3;
+    header.update = update;
+    header.lifetime = lifetime;
+    header.lightType = type;
 
     cycle.invRamp = 1.0f / D_800A68D0[kind];
 
@@ -1132,7 +1132,7 @@ void func_15162F50(LightEffect *effect) {
 /* Creates a lightning effect; `kind` (0-2) picks its timings from tables. */
 LightEffect *func_15162FAC(PointLight *light, u8 kind, u8 type, u8 arg3, s16 lifetime, s8 update, u8 arg6, s32 arg7) {
     LightEffect *effect;
-    Header header;
+    LightEffectHeader header;
     LightStorm storm;
 
     if (kind >= 3) {
@@ -1153,10 +1153,10 @@ LightEffect *func_15162FAC(PointLight *light, u8 kind, u8 type, u8 arg3, s16 lif
     storm.flashesRange = D_800A6928[kind];
     storm.flashRange = D_800A6958[kind];
 
-    header.unk0 = arg3;
-    header.unk1 = update;
-    header.unk2 = lifetime;
-    header.unk4 = type;
+    header.flags = arg3;
+    header.update = update;
+    header.lifetime = lifetime;
+    header.lightType = type;
 
     effect = func_1516037C(&header, light, sizeof(storm), arg6, arg7);
     if (effect != NULL) {
@@ -1212,10 +1212,10 @@ s32 func_151630F4(LightEffect *effect) {
 }
 
 /* Creates a light at (*x, *y, *z) that follows those coordinates. */
-LightEffect *func_15163414(Header *header, f32 *x, f32 *y, f32 *z, s8 callback, u8 handler, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, u8 argB, s32 extraSize, u8 argD, s32 argE) {
+LightEffect *func_15163414(LightEffectHeader *header, f32 *x, f32 *y, f32 *z, s8 callback, u8 handler, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, u8 argB, s32 extraSize, u8 argD, s32 argE) {
     LightEffect *effect;
     LightTrack track;
-    Header2 position;
+    Vec3i position;
 
     track.x = x;
     track.y = y;
@@ -1223,9 +1223,9 @@ LightEffect *func_15163414(Header *header, f32 *x, f32 *y, f32 *z, s8 callback, 
     track.callback = callback;
     track.handler = handler;
 
-    position.unk0 = *x;
-    position.unk4 = *y;
-    position.unk8 = *z;
+    position.x = *x;
+    position.y = *y;
+    position.z = *z;
 
     effect = func_151602C0(header, &position, arg6, arg7, arg8, arg9, argA, argB, extraSize + sizeof(track), argD, argE);
     if (effect != NULL) {
@@ -1262,7 +1262,7 @@ void func_151635A8(LightEffect *effect, s32 arg1, u8 eventId) {
 /* Creates a pulse effect; `kind` (0-13) picks base, amplitude and speed from tables, with a random phase. */
 LightEffect *func_15163604(PointLight *light, u8 kind, u8 type, s16 lifetime, u8 arg4, s32 arg5, u8 arg6, s32 arg7) {
     LightEffect *effect;
-    Header header;
+    LightEffectHeader header;
     LightPulse pulse;
 
     if (kind < 0) { // matching: always false for a u8, kept like func_151615F8's
@@ -1277,10 +1277,10 @@ LightEffect *func_15163604(PointLight *light, u8 kind, u8 type, s16 lifetime, u8
     pulse.phase = func_150ADA68() * 6.283185482f;
     pulse.speed = D_800A69D4[kind];
 
-    header.unk0 = arg4;
-    header.unk1 = 1;
-    header.unk2 = lifetime;
-    header.unk4 = type;
+    header.flags = arg4;
+    header.update = 1;
+    header.lifetime = lifetime;
+    header.lightType = type;
 
     effect = func_1516037C(&header, light, sizeof(pulse), arg6, arg7);
     if (effect != NULL) {
@@ -1310,23 +1310,23 @@ s32 func_15163704(LightEffect *effect) {
 
 /* Creates an effect with no payload and no update. */
 void func_1516381C(PointLight *light, u8 type, u8 arg2, s32 arg3) {
-    Header header;
+    LightEffectHeader header;
 
-    header.unk0 = 0;
-    header.unk1 = -1;
-    header.unk2 = 300;
-    header.unk4 = type;
+    header.flags = 0;
+    header.update = -1;
+    header.lifetime = 300;
+    header.lightType = type;
     func_1516037C(&header, light, 0, arg2, arg3);
 }
 
 /* Creates an effect with an uninitialised payload of `size` bytes. */
 void func_1516387C(PointLight *light, u8 arg1, s8 update, s16 lifetime, u8 type, s32 size, u8 arg6, s32 arg7) {
-    Header header;
+    LightEffectHeader header;
 
-    header.unk0 = arg1;
-    header.unk1 = update;
-    header.unk2 = lifetime;
-    header.unk4 = type;
+    header.flags = arg1;
+    header.update = update;
+    header.lifetime = lifetime;
+    header.lightType = type;
 
     func_1516037C(&header, light, size, arg6, arg7);
 }
@@ -1364,10 +1364,10 @@ void func_15163A18(LightEffect *effect, s32 arg1, u8 eventId) {
 /* Creates a pulsing light at object `objectId` that lasts until the object is inactive (see func_15163B98). */
 LightEffect *func_15163A60(u8 objectId, u8 arg1, s32 arg2) {
     LightEffect *effect;
-    Header header;
+    LightEffectHeader header;
     LightPulse pulse;
     WorldObject *object;
-    Header2 position;
+    Vec3i position;
 
     object = func_151149AC(objectId);
     if (object == NULL) {
@@ -1378,14 +1378,14 @@ LightEffect *func_15163A60(u8 objectId, u8 arg1, s32 arg2) {
     pulse.phase = func_150ADA68() * 6.283185482f;
     pulse.speed = D_800A69D4[6];
 
-    position.unk0 = object->x;
-    position.unk4 = object->y;
-    position.unk8 = object->z;
+    position.x = object->x;
+    position.y = object->y;
+    position.z = object->z;
 
-    header.unk0 = 2;
-    header.unk1 = 17;
-    header.unk2 = 300;
-    header.unk4 = 5;
+    header.flags = 2;
+    header.update = 17;
+    header.lifetime = 300;
+    header.lightType = 5;
 
     effect = func_151602C0(&header, &position, D_800A6964[6], 0, 0xFF, 0, 0xFF, 0, sizeof(pulse) + sizeof(object), arg1, arg2);
     if (effect != NULL) {
@@ -1558,16 +1558,16 @@ typedef struct {
 
 LightEffect *func_15164208(PointLight *light, u8 id, u8 arg2, s32 arg3) {
     LightEffect *effect;
-    Header header;
+    LightEffectHeader header;
     LightFlash flash;
 
     flash.level = 0.0f;
     flash.id = id;
 
-    header.unk0 = 0;
-    header.unk1 = 20;
-    header.unk2 = 300;
-    header.unk4 = 39;
+    header.flags = 0;
+    header.update = 20;
+    header.lifetime = 300;
+    header.lightType = 39;
 
     effect = func_1516037C(&header, light, sizeof(flash), arg2, arg3);
     if (effect != NULL) {

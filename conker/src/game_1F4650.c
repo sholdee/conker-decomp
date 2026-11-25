@@ -237,7 +237,7 @@ typedef struct {
 
 extern void func_1510F800(s32);
 extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
-extern SightModelOwner *func_1516284C(Header *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
+extern SightModelOwner *func_1516284C(LightEffectHeader *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
 struct SightExtension *func_151C8FCC(SightBeamObject *owner, Vec3f *start, Vec3f *end, u8 red, u8 green, u8 blue, SightZone *zone, u8 zoneMasked, u8 arg8, s32 arg9);
 s32 func_151C87AC(SightSoundHandle *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 *volume);
 
@@ -317,15 +317,15 @@ s32 func_151C756C(Vec3f *start, SurfaceTriangle *startTri, Vec3f *end, SurfaceTr
     state.phase = 0.0f;
     state.source = source;
     if (hasMidEffect) {
-        Header hdr;
+        LightEffectHeader hdr;
 
         pos[0] = start->x + spawn.scale.x * 0.5f;
         pos[1] = start->y + spawn.scale.y * 0.5f;
         pos[2] = start->z + spawn.scale.z * 0.5f;
-        hdr.unk0 = 2;
-        hdr.unk1 = 2;
-        hdr.unk2 = 300;
-        hdr.unk4 = 0;
+        hdr.flags = 2;
+        hdr.update = 2;
+        hdr.lifetime = 300;
+        hdr.lightType = 0;
         state.midEffect = func_1516284C(&hdr, pos, red, green, blue, 0xFF, 0, 0, 0x10, arg16, arg17);
     } else {
         state.midEffect = NULL;

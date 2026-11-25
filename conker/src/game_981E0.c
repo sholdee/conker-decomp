@@ -138,8 +138,8 @@ typedef struct Vec3w {
 
 /* Locals of the effect spawners func_15070D24 / func_15070F60, in stack order. */
 typedef struct EffectLocals {
-    Header2 header2;
-    Header header;
+    Vec3i header2;
+    LightEffectHeader header;
     u8 pad16[2];
     f32 worldPos[3];
     f32 randoms[2];
@@ -2307,17 +2307,17 @@ void func_150701F4(s32 cmd) {
 }
 
 void func_15070224(s32 cmd) {
-    Header header;
-    Header2 header2;
+    LightEffectHeader header;
+    Vec3i header2;
 
-    header.unk0 = 3;
-    header.unk1 = -1;
-    header.unk2 = (func_150ADA20() % 5U) + 4;
-    header.unk4 = 0;
+    header.flags = 3;
+    header.update = -1;
+    header.lifetime = (func_150ADA20() % 5U) + 4;
+    header.lightType = 0;
 
-    header2.unk0 = D_800D154C->x_position;
-    header2.unk4 = D_800D154C->y_position;
-    header2.unk8 = D_800D154C->z_position;
+    header2.x = D_800D154C->x_position;
+    header2.y = D_800D154C->y_position;
+    header2.z = D_800D154C->z_position;
 
     func_151602C0(&header, &header2, (func_150ADA20() % 3U) + 4, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
 }
@@ -2604,14 +2604,14 @@ void func_15070D24(s32 cmd) {
                   (func_150ADA68() * 2496.0f) + 3496.0f,
                   (s32)fx.worldPos, 0xFF, 0, -1, 0xFF, 0);
 
-    fx.header.unk0 = 3;
-    fx.header.unk1 = -1;
-    fx.header.unk2 = (func_150ADA20() % 6U) + 0xA;
-    fx.header.unk4 = 0;
+    fx.header.flags = 3;
+    fx.header.update = -1;
+    fx.header.lifetime = (func_150ADA20() % 6U) + 0xA;
+    fx.header.lightType = 0;
 
-    fx.header2.unk0 = fx.worldPos[0];
-    fx.header2.unk4 = fx.worldPos[1];
-    fx.header2.unk8 = fx.worldPos[2];
+    fx.header2.x = fx.worldPos[0];
+    fx.header2.y = fx.worldPos[1];
+    fx.header2.z = fx.worldPos[2];
 
     func_151602C0(&fx.header, &fx.header2, (func_150ADA20() % 201U) + 55, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0);
 }
@@ -2641,14 +2641,14 @@ void func_15070F60(cmd)
                   (func_150ADA68() * 4000.0f) + 4000.0f,
                   (s32)fx.worldPos, 0xFF, 0, -1, 0xFF, 0);
 
-    fx.header.unk0 = 3;
-    fx.header.unk1 = -1;
-    fx.header.unk2 = (func_150ADA20() % 5U) + 3;
-    fx.header.unk4 = 0;
+    fx.header.flags = 3;
+    fx.header.update = -1;
+    fx.header.lifetime = (func_150ADA20() % 5U) + 3;
+    fx.header.lightType = 0;
 
-    fx.header2.unk0 = fx.worldPos[0];
-    fx.header2.unk4 = fx.worldPos[1];
-    fx.header2.unk8 = fx.worldPos[2];
+    fx.header2.x = fx.worldPos[0];
+    fx.header2.y = fx.worldPos[1];
+    fx.header2.z = fx.worldPos[2];
 
     func_151602C0(&fx.header, &fx.header2, (func_150ADA20() % 201U) + 55, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0);
     func_151D5404((Vec3f *)fx.worldPos, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, 0xFF, 0);

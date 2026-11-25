@@ -90,7 +90,7 @@ typedef struct Game1D3420Effect {
     /* 0x110 */ Game1D3420EffectState state;
 } Game1D3420Effect;
 
-extern s32 func_1516284C(Header *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
+extern s32 func_1516284C(LightEffectHeader *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
 
 /* Spawns an effect object at the emitter; with playSound also starts a func_1516284C handle at the
  * emitter's mid-height and plays sound 0x1AA there. */
@@ -99,7 +99,7 @@ void func_151A6068(Game1D3420Emitter *emitter, s32 arg1, u8 playSound, u8 arg3, 
     Game1D3420EffectState init;
     Game1D3420Effect *effect;
     Game1D3420EffectState *state;
-    Header header;
+    LightEffectHeader header;
     s32 pos[3];
 
     init.emitter = emitter;
@@ -148,10 +148,10 @@ void func_151A6068(Game1D3420Emitter *emitter, s32 arg1, u8 playSound, u8 arg3, 
             pos[0] = emitter->x;
             pos[1] = emitter->y + (emitter->height >> 1);
             pos[2] = emitter->z;
-            header.unk0 = 2;
-            header.unk1 = 2;
-            header.unk2 = 300;
-            header.unk4 = 6;
+            header.flags = 2;
+            header.update = 2;
+            header.lifetime = 300;
+            header.lightType = 6;
             state->unk10 = func_1516284C(&header, pos, 0xFF, 0x79, 0, 0xFF, 0, 0, 14, arg4, arg5);
         }
     }

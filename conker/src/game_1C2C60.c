@@ -9,7 +9,7 @@ struct CharacterFlamethrowerActor;
 void func_1519CDB0(struct CharacterFlamethrowerActor *actor, f32 fraction, s32 kind);
 extern void *allocate_memory(s32, s32, s32, s32);
 
-LightEffect *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
+LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 
 
 /* Generic doubly linked list node; every list allocated by func_151957B0 starts with one. */
@@ -3209,27 +3209,27 @@ typedef struct FlameLightData {
 LightEffect *func_1519C09C(CharacterFlamethrowerActor *flame, Vec3f *pos, u8 red, u8 green, u8 blue, u8 alpha, u8 arg6,
                          s32 arg7) {
     LightEffect *light;
-    Header header;
-    Header2 header2;
+    LightEffectHeader header;
+    Vec3i header2;
     CharacterFlamethrowerActor *owner;
     LightJitter params;
 
     params.mid = 35.0f;
     params.low = 5.0f;
     owner = flame;
-    header.unk0 = 2;
-    header.unk1 = 2;
-    header.unk2 = 300;
-    header.unk4 = 0x22;
+    header.flags = 2;
+    header.update = 2;
+    header.lifetime = 300;
+    header.lightType = 0x22;
     params.high = 110.0f;
     params.target = 1.0f;
     params.timer = 0.0f;
     params.interval = 7.0f;
     params.smoothing = 0.2488999963f;
     params.level = 127.0f;
-    header2.unk0 = pos->x;
-    header2.unk4 = pos->y;
-    header2.unk8 = pos->z;
+    header2.x = pos->x;
+    header2.y = pos->y;
+    header2.z = pos->z;
 
     light = func_151602C0(&header, &header2, red, green, blue, alpha, 0xFF, 0, 0x24, arg6, arg7);
     if (light != NULL) {

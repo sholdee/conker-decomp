@@ -183,7 +183,7 @@ extern s32 D_800A1EEC[];
 extern void func_1504715C(GroundHit *, Actor *);
 extern s32 func_15046C80(Vec3f *, s32, f32, GroundHit *);
 extern void func_1505D024(Actor *, s32, u16, s32);
-extern s32 func_1516284C(Header *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
+extern s32 func_1516284C(LightEffectHeader *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
 
 /*
  * Spawns a particle that follows obj, standing on the ground below it when the probe finds ground, with a
@@ -198,7 +198,7 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
     Ext150FCFD4 ext;
     Actor150FD514 *particle;
     Ext150FCFD4 *dst;
-    Header header;
+    LightEffectHeader header;
     s32 posInt[3];
     ParticleDef groundDef;
     s32 flag;
@@ -268,10 +268,10 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
     if (particle != NULL) {
         dst = &particle->ext;
         memcpy(dst, &ext, sizeof(ext));
-        header.unk0 = 2;
-        header.unk1 = 2;
-        header.unk2 = 300;
-        header.unk4 = 6;
+        header.flags = 2;
+        header.update = 2;
+        header.lifetime = 300;
+        header.lightType = 6;
         posInt[0] = pos.x;
         posInt[1] = pos.y;
         posInt[2] = pos.z;

@@ -810,7 +810,7 @@ s32 func_1501474C(TriggerZone *obj) {
     return 1;
 }
 extern u8 D_800A0938[][3];
-struct102 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+struct102 *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 typedef struct Game4049014B60Packet {
     f32 pos[3];
@@ -830,8 +830,8 @@ s32 func_15014B60(TriggerZone *obj) {
     Game4049014B60Packet packet;
     s32 i;
     struct260 *effect;
-    Header2 pos;
-    Header header;
+    Vec3i pos;
+    LightEffectHeader header;
     u32 count;
 
     obj->flags |= 4;
@@ -850,17 +850,17 @@ s32 func_15014B60(TriggerZone *obj) {
     packet.unk1C = (f32)((obj->unk18 >> 16) & 0xFFFF) * 0.152587890625f * 0.001000000047f;
     packet.unk20 = (f32)(obj->unk1C & 0xFFFF) * 0.152587890625f * 0.001000000047f;
     packet.unk3C = (f32)((obj->unk1C >> 16) & 0xFFFF) * 0.457763671875f * 9.999999975e-07f;
-    pos.unk0 = obj->x;
-    pos.unk4 = obj->y;
-    pos.unk8 = obj->z;
+    pos.x = obj->x;
+    pos.y = obj->y;
+    pos.z = obj->z;
     for (i = 0; i < 6; i++) {
         s32 r;
         s32 g;
 
-        header.unk0 = 2;
-        header.unk1 = -1;
-        header.unk2 = 300;
-        header.unk4 = 0;
+        header.flags = 2;
+        header.update = -1;
+        header.lifetime = 300;
+        header.lightType = 0;
         r = (D_800BE9F0 == 0x40) ? 0xFF : D_800A0938[i][0];
         g = (D_800BE9F0 == 0x40) ? 0 : D_800A0938[i][1];
         count = (D_800BE9F0 == 0x40) ? 0 : D_800A0938[i][2]; // matching: blue reuses count's register

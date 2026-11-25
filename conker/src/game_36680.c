@@ -144,13 +144,13 @@ void func_15009600(s32 light, s32 id) {
 }
 
 void func_15009628(s32 light, s32 id) {
-    Header header;
+    LightEffectHeader header;
     u8 kinds[4] = D_80082BE0;
 
-    header.unk0 = 0;
-    header.unk1 = -1;
-    header.unk2 = 300;
-    header.unk4 = kinds[id - 3];
+    header.flags = 0;
+    header.update = -1;
+    header.lifetime = 300;
+    header.lightType = kinds[id - 3];
 
     func_1516037C(&header, light, 0, 255, 1);
 }
@@ -160,13 +160,13 @@ void func_1500969C(s32 light, s32 id) {
 }
 
 void func_150096C4(s32 light, s32 id) {
-    Header header;
+    LightEffectHeader header;
     u8 kinds[5] = D_80082BE4;
 
-    header.unk0 = 0;
-    header.unk1 = -1;
-    header.unk2 = 300;
-    header.unk4 = kinds[id - 8];
+    header.flags = 0;
+    header.update = -1;
+    header.lifetime = 300;
+    header.lightType = kinds[id - 8];
 
     func_1516037C(&header, light, 0, 255, 1);
 }
@@ -231,12 +231,12 @@ void func_15009990(s32 light, s32 id) {
 }
 
 void func_15009A38(s32 light, s32 id) {
-    Header header;
+    LightEffectHeader header;
 
-    header.unk0 = 2;
-    header.unk1 = -1;
-    header.unk2 = 300;
-    header.unk4 = D_80095B27[id];
+    header.flags = 2;
+    header.update = -1;
+    header.lifetime = 300;
+    header.lightType = D_80095B27[id];
     func_1516037C(&header, light, 0, 255, 1);
 }
 
@@ -436,7 +436,7 @@ s32 func_150B060C(u8, void *, s32);
 
 /** Attaches the light to the level object picked by `id` (and by whether D_800BE9F0 is 6). */
 void func_1500A6D8(s32 light, s32 id) {
-    Header header;
+    LightEffectHeader header;
     LightSwing attachment;
     s32 variant;
     u8 objects[2][3] = D_80082BEC;
@@ -444,10 +444,10 @@ void func_1500A6D8(s32 light, s32 id) {
 
     variant = (D_800BE9F0 == 6) ? 1 : 0;
     if (func_150B060C(objects[variant][id - 73], &attachment, id) != 0) {
-        header.unk0 = 0;
-        header.unk1 = 23;
-        header.unk2 = 300;
-        header.unk4 = 0;
+        header.flags = 0;
+        header.update = 23;
+        header.lifetime = 300;
+        header.lightType = 0;
         effect = func_1516037C(&header, light, sizeof(attachment), 255, 1);
         if (effect != NULL) {
             memcpy(&effect->data.swing, &attachment, sizeof(attachment));
@@ -465,7 +465,7 @@ extern WorldObject *func_151149AC(u8);
 
 /** Attaches the light to the object func_151149AC returns for `id`, starting at its position. */
 void func_1500A7E8(s32 light, s32 id) {
-    Header header;
+    LightEffectHeader header;
     LightSwing attachment;
     LightEffect *effect;
     u8 objects[6] = D_80082BF4;
@@ -477,10 +477,10 @@ void func_1500A7E8(s32 light, s32 id) {
         attachment.pivot.x = attachment.object->x;
         attachment.pivot.y = attachment.object->y;
         attachment.pivot.z = attachment.object->z;
-        header.unk0 = 0;
-        header.unk1 = 23;
-        header.unk2 = 300;
-        header.unk4 = 0;
+        header.flags = 0;
+        header.update = 23;
+        header.lifetime = 300;
+        header.lightType = 0;
         effect = func_1516037C(&header, light, sizeof(attachment), 255, 1);
         if (effect != NULL) {
             memcpy(&effect->data.swing, &attachment, sizeof(attachment));

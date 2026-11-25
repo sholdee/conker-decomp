@@ -214,20 +214,20 @@ void func_151C0360(SurfaceTriangle *surface, Vec3f *pos, u8 fxOwner, s32 fxList)
                   duration % 205 + 299, 1, 1, 0, 0, 0, fxOwner, 0);
 }
 
-s32 func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
+s32 func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
 void func_151C0418(Vec3f *pos, u8 fxOwner, s32 fxList) {
-    Header header;
-    Header2 header2;
+    LightEffectHeader header;
+    Vec3i header2;
 
-    header.unk0 = 3;
-    header.unk1 = -1;
-    header.unk2 = func_150ADA20() % 11 + 20;
-    header.unk4 = 0;
+    header.flags = 3;
+    header.update = -1;
+    header.lifetime = func_150ADA20() % 11 + 20;
+    header.lightType = 0;
 
-    header2.unk0 = pos->x;
-    header2.unk4 = pos->y;
-    header2.unk8 = pos->z;
+    header2.x = pos->x;
+    header2.y = pos->y;
+    header2.z = pos->z;
 
     func_151602C0(&header, &header2, func_150ADA20() % 121 + 60, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, fxOwner, fxList);
 }
@@ -382,8 +382,8 @@ void func_151C0698(Actor *shooter, Actor *aimer, IgnoreList *ignore, u8 impactTy
     ParticleSpawn desc;
     void *obj; // matching: one local (one stack slot) holds the camera, then the new bullet
     BulletState *bulletState;
-    Header header;
-    Header2 header2;
+    LightEffectHeader header;
+    Vec3i header2;
 
     passDist = 0.0f;
     if (D_800BE616 != 0) {
@@ -512,13 +512,13 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
         if (obj != NULL) {
             bulletState = &((Bullet *)obj)->state;
             memcpy(bulletState, &state, sizeof(BulletState));
-            header.unk0 = 2;
-            header.unk1 = -1;
-            header.unk2 = 300;
-            header.unk4 = 0;
-            header2.unk0 = pos.x;
-            header2.unk4 = pos.y;
-            header2.unk8 = pos.z;
+            header.flags = 2;
+            header.update = -1;
+            header.lifetime = 300;
+            header.lightType = 0;
+            header2.x = pos.x;
+            header2.y = pos.y;
+            header2.z = pos.z;
             bulletState->trail = (TrailFx *)func_151602C0(&header, &header2, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, fxOwner, fxList);
             bulletState->follow = func_151B8908(obj);
             bulletState->sound = func_1000FA64(func_150ADA20() % 3 + 750, pos.x, pos.y, pos.z, 30000, 1000, 500,
@@ -766,17 +766,17 @@ void func_151C1814(Bullet *bullet, Actor **pair, u8 event) {
 }
 
 void func_151C1860(Vec3f *pos, u8 fxOwner, s32 fxList) {
-    Header header;
-    Header2 header2;
+    LightEffectHeader header;
+    Vec3i header2;
 
-    header.unk0 = 3;
-    header.unk1 = -1;
-    header.unk2 = func_150ADA20() % 5 + 5;
-    header.unk4 = 0;
+    header.flags = 3;
+    header.update = -1;
+    header.lifetime = func_150ADA20() % 5 + 5;
+    header.lightType = 0;
 
-    header2.unk0 = pos->x;
-    header2.unk4 = pos->y;
-    header2.unk8 = pos->z;
+    header2.x = pos->x;
+    header2.y = pos->y;
+    header2.z = pos->z;
 
     func_151602C0(&header, &header2, func_150ADA20() % 11 + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, fxOwner, fxList);
 }

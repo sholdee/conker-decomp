@@ -268,7 +268,7 @@ typedef struct {
     /* 0x28 */ BoltSource src;
 } BoltEmitter;
 
-extern LightEffect *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
+extern LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 extern void func_15107700(Actor *, s16, s16, s16, s32, f32, f32, s16, s16, u8 *, u8, s32);
 extern void func_15107B78(Actor *, s32, s32, s32, s32);
 
@@ -278,8 +278,8 @@ extern void func_15107B78(Actor *, s32, s32, s32, s32);
 void func_150DFEFC(BoltEmitter *emitter) {
     BoltSource *src;
     Actor *obj;
-    Header header;
-    Header2 pos;
+    LightEffectHeader header;
+    Vec3i pos;
     s8 count;
 
     obj = emitter->src.obj;
@@ -290,13 +290,13 @@ void func_150DFEFC(BoltEmitter *emitter) {
     }
     src->flashTimer -= D_800BE9E4;
     if (src->flashTimer < 0) {
-        pos.unk0 = obj->x_position;
-        pos.unk4 = obj->y_position;
-        pos.unk8 = obj->z_position;
-        header.unk0 = 3;
-        header.unk1 = -1;
-        header.unk2 = func_150ADA20() % 11U + 5;
-        header.unk4 = 0;
+        pos.x = obj->x_position;
+        pos.y = obj->y_position;
+        pos.z = obj->z_position;
+        header.flags = 3;
+        header.update = -1;
+        header.lifetime = func_150ADA20() % 11U + 5;
+        header.lightType = 0;
         func_151602C0(&header, &pos, func_150ADA20() % 121U + 50, 255, 255, 255, 255, 0, 0,
                       emitter->unkC, emitter->unk1);
         src->flashTimer = func_150ADA20() % 81U + 69;

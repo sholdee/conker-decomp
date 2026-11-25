@@ -3355,19 +3355,6 @@ typedef struct {
     u8  unk12;
 } struct219;
 
-typedef struct {
-    s8  unk0;
-    s8  unk1;
-    s16 unk2;
-    u8  unk4;
-} struct220;
-
-typedef struct {
-    s32 unk0; // struct pointer
-    f32 unk4;
-    f32 unk8;
-} struct221; // size 0xC
-
 
 typedef struct {
     s32 unk0;
@@ -3599,23 +3586,24 @@ typedef struct LightEffect {
     /* 0x08 */ struct EffectHeader *next;
     /* 0x0C */ u8 owner;
     /* 0x0D */ u8 unkD;
-    /* 0x0E */ u8 flags;       // LIGHT_EFFECT_* (Header.unk0)
-    /* 0x0F */ s8 update;      // index into D_8008B0F0, or -1 (Header.unk1)
-    /* 0x10 */ s16 lifetime;   // frames left when LIGHT_EFFECT_TIMED (Header.unk2)
+    /* 0x0E */ u8 flags;       // LIGHT_EFFECT_*
+    /* 0x0F */ s8 update;      // index into D_8008B0F0, or -1
+    /* 0x10 */ s16 lifetime;   // frames left when LIGHT_EFFECT_TIMED
     /* 0x12 */ u8 lightType;   // index into the handler tables D_8008B150 / D_8008B208 / D_8008B2B0;
-                               // also the id events 0x17-0x22 are addressed to (Header.unk4)
+                               // also the id events 0x17-0x22 are addressed to
     /* 0x13 */ u8 pad13;
     /* 0x14 */ PointLight *light;
     /* 0x18 */ LightEffectData data;
 } LightEffect;
 
-typedef struct {
-    s8  unk0;
-    s8  unk1;
-    s16 unk2;
-    s8  unk4;
-    u8  pad5;
-} Header; // size 0x6
+/* The first fields of a LightEffect (0xE-0x13), passed to func_1516037C and copied into the effect. */
+typedef struct LightEffectHeader {
+    /* 0x0 */ s8  flags;     // LIGHT_EFFECT_*
+    /* 0x1 */ s8  update;    // index into D_8008B0F0, or -1
+    /* 0x2 */ s16 lifetime;
+    /* 0x4 */ s8  lightType;
+    /* 0x5 */ u8  pad5;
+} LightEffectHeader; // size 0x6
 
 /* Per-track state of a running cutscene; D_800C3958[scene] points at one per track. */
 typedef struct SeqTrackState {
@@ -3715,12 +3703,6 @@ typedef struct {
     u8  unkD;
     u8  padE[0x2];
 } struct245; // size 0x10
-
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-} Header2; // size 0xC
 
 typedef struct {
     u8  pad0[0x8];

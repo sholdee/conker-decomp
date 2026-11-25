@@ -47,7 +47,7 @@ typedef struct {
 } GlowParams60;
 
 DefParticleHead *func_151407D0(GlowShape *, s32, ParticleDef *, u8, u8, u8, u8, s8, u8, s32);
-LightEffect *func_1516037C(Header *src, PointLight *arg1, s32 size, u8 arg3, s32 arg4);
+LightEffect *func_1516037C(LightEffectHeader *src, PointLight *arg1, s32 size, u8 arg3, s32 arg4);
 
 /* Light callback: spawns a swinging lamp of the given kind with a light effect (D_8008B0F0 slot 7) that
  * follows it, and a beam shining from it. */
@@ -103,7 +103,7 @@ void func_151B8DB0(s32 light, u8 kind, u8 arg2, s32 arg3) {
     spawn.fadeRate = 255;
     obj = func_15132A4C(&spawn, 3, 255, sizeof(LampSwing), arg2, arg3);
     if (obj != NULL) {
-        Header header;
+        LightEffectHeader header;
 
         memcpy(&((Particle *)obj)->swing, &swing, sizeof(swing));
         {
@@ -113,10 +113,10 @@ void func_151B8DB0(s32 light, u8 kind, u8 arg2, s32 arg3) {
             data.lamp = obj;
             data.beam = NULL;
             data.invScale = 1.0f / D_800AA528[kind];
-            header.unk0 = 0;
-            header.unk1 = 7;
-            header.unk2 = 300;
-            header.unk4 = 0x12;
+            header.flags = 0;
+            header.update = 7;
+            header.lifetime = 300;
+            header.lightType = 0x12;
             obj = func_1516037C(&header, (PointLight *)light, sizeof(data), arg2, arg3);
             if (obj != NULL) {
                 state = (SwingingLight *)&((LightEffect *)obj)->data;

@@ -4,7 +4,7 @@
 #include "effects.h"
 
 s32 func_151BB0E0(); /* sound update callback, defined below */
-void func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
+void func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
 /* Floor below a point, from func_1504715C / func_15046C80. */
 typedef struct {
@@ -778,17 +778,17 @@ void func_151BBA9C(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
 
 /* Spawns a short-lived effect at `pos` with a random size and lifetime. */
 void func_151BBEE4(Vec3f *pos, u8 arg1, s32 arg2) {
-    Header header;
-    Header2 header2;
+    LightEffectHeader header;
+    Vec3i header2;
 
-    header.unk0 = 3;
-    header.unk1 = -1;
-    header.unk2 = (func_150ADA20() & 0xF) + 5;
-    header.unk4 = 0;
+    header.flags = 3;
+    header.update = -1;
+    header.lifetime = (func_150ADA20() & 0xF) + 5;
+    header.lightType = 0;
 
-    header2.unk0 = pos->x;
-    header2.unk4 = pos->y;
-    header2.unk8 = pos->z;
+    header2.x = pos->x;
+    header2.y = pos->y;
+    header2.z = pos->z;
 
     func_151602C0(&header, &header2, (func_150ADA20() % 21U) + 30, 0xFF, 0x61, 0x36, 0xFF, 0, 0, arg1, arg2);
 }
@@ -852,7 +852,7 @@ typedef struct {
 
 Fx15134908 *func_15134908(BloodTrailDesc *, s32, u8, s32);
 Fx15147A80 *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-Fx15163414 *func_15163414(Header *, f32 *, f32 *, f32 *, s8, u8, u8, u8, u8, u8, u8, u8, s32, u8, s32);
+Fx15163414 *func_15163414(LightEffectHeader *, f32 *, f32 *, f32 *, s8, u8, u8, u8, u8, u8, u8, u8, s32, u8, s32);
 
 /*
  * Spawns three effects that follow `obj` (the first only while D_80082FA0 < 2 and D_8008FD8C < 5),
@@ -909,14 +909,14 @@ void func_151BC104(Actor *obj, u8 arg1, s32 arg2) {
     {
         ActorRef ref;
         Fx15163414 *fx3;
-        Header header;
+        LightEffectHeader header;
 
         ref.actor = obj;
         ref.uniqueId = obj->unique_id;
-        header.unk0 = 2;
-        header.unk1 = 14;
-        header.unk2 = 300;
-        header.unk4 = 31;
+        header.flags = 2;
+        header.update = 14;
+        header.lifetime = 300;
+        header.lightType = 31;
         fx3 = func_15163414(&header, &obj->x_position, &obj->y_position, &obj->z_position,
                            0, 0, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, 8, arg1, arg2);
         if (fx3 != NULL) {

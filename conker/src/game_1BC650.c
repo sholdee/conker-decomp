@@ -114,7 +114,7 @@ typedef struct {
     /* 0x00 */ AnchorEmitter *emitter;
     /* 0x04 */ f32 params[8];
     /* 0x24 */ ActorRef owner;
-    /* 0x2C */ Header header;
+    /* 0x2C */ LightEffectHeader header;
     /* 0x34 */ s32 pad34;
 } ChildDesc;
 
@@ -125,7 +125,7 @@ void *func_1514B8E4(Vec3f *, SpriteSize *, s16, u8, Vec3f *, f32, f32, f32, u8, 
                     s16, s32, u8, s32);
 void func_1514BE20(EffectSprite *);
 void func_1514BF50(EffectSprite *);
-LightEffect *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
+LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 void func_151D2AB0(s32);
 void func_151D2BA4(EmitterParticleDesc *, Vec3f *, s32, u8, s32);
 AnchorEmitter *func_151D2F00(EmitterDesc *, s32, u8, s32);
@@ -669,7 +669,7 @@ u8 *func_1519003C(Actor *obj, s32 *found) {
 /* Creates the child sprite of an emitter, colored from the D_800A67C0/6760/6820 tables. */
 LightEffect *func_1519021C(AnchorEmitter *emitter, Actor *owner, u8 kind, s16 duration, u8 arg4, s32 arg5) {
     ChildDesc desc;
-    Header2 pos;
+    Vec3i pos;
     LightEffect *child;
 
     if (kind >= 24) {
@@ -686,21 +686,21 @@ LightEffect *func_1519021C(AnchorEmitter *emitter, Actor *owner, u8 kind, s16 du
     desc.params[6] = 0.2489f;
     desc.emitter = emitter;
 
-    desc.header.unk0 = ((duration == -1) ? 0 : 1) | 2;
-    desc.header.unk1 = 0x12;
+    desc.header.flags = ((duration == -1) ? 0 : 1) | 2;
+    desc.header.update = 0x12;
     if (duration == -1) {
-        desc.header.unk2 = 300;
+        desc.header.lifetime = 300;
     } else {
-        desc.header.unk2 = duration;
+        desc.header.lifetime = duration;
     }
-    desc.header.unk4 = 0x25;
+    desc.header.lightType = 0x25;
 
     desc.owner.actor = owner;
     desc.owner.uniqueId = owner->unique_id;
 
-    pos.unk0 = owner->x_position;
-    pos.unk4 = owner->y_position;
-    pos.unk8 = owner->z_position;
+    pos.x = owner->x_position;
+    pos.y = owner->y_position;
+    pos.z = owner->z_position;
 
     child = func_151602C0(&desc.header, &pos, 0, 0xFF, 0xD1, 0, 0xFF, 0, 0x30, arg4, arg5);
     if (child != NULL) {

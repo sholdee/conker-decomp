@@ -302,33 +302,33 @@ void func_151D3E6C(Actor *obj, f32 *a, f32 *b, s32 arg3) {
 }
 
 void func_151D3F14(Vec3f *pos, u8 arg1, s32 arg2) {
-    Header header;
-    Header2 header2;
+    LightEffectHeader header;
+    Vec3i header2;
 
-    header.unk0 = 3;
-    header.unk1 = -1;
-    header.unk2 = (func_150ADA20() % 3U) + 4;
-    header.unk4 = 0;
+    header.flags = 3;
+    header.update = -1;
+    header.lifetime = (func_150ADA20() % 3U) + 4;
+    header.lightType = 0;
 
-    header2.unk0 = pos->x;
-    header2.unk4 = pos->y;
-    header2.unk8 = pos->z;
+    header2.x = pos->x;
+    header2.y = pos->y;
+    header2.z = pos->z;
 
     func_151602C0(&header, &header2, (func_150ADA20() % 13U) + 20, 255, 232, 171, 255, 0, 0, arg1, arg2);
 }
 
 void func_151D3FF4(Vec3f *pos, u8 arg1, s32 arg2) {
-    Header header;
-    Header2 header2;
+    LightEffectHeader header;
+    Vec3i header2;
 
-    header.unk0 = 3;
-    header.unk1 = -1;
-    header.unk2 = (func_150ADA20() % 11U) + 20;
-    header.unk4 = 0;
+    header.flags = 3;
+    header.update = -1;
+    header.lifetime = (func_150ADA20() % 11U) + 20;
+    header.lightType = 0;
 
-    header2.unk0 = pos->x;
-    header2.unk4 = pos->y;
-    header2.unk8 = pos->z;
+    header2.x = pos->x;
+    header2.y = pos->y;
+    header2.z = pos->z;
 
     func_151602C0(&header, &header2, (func_150ADA20() % 24U) + 34, 255, 161, 162, 255, 0, 0, arg1, arg2);
 }

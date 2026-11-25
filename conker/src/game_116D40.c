@@ -6,7 +6,7 @@
 
 extern void *func_15130374(ParticleDesc6C *, u8, s32, u8, s32);
 extern s32 func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
-extern void *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
+extern void *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out);
 
 /* Spawns a burst at pos scaled by scale: one func_15130374 particle moving along vel,
@@ -16,8 +16,8 @@ void func_150E9890(Vec3f *pos, Vec3f *vel, f32 scale, u8 arg3, s32 arg4) {
     ParticleDesc6C spawn;
     s32 yaw;
     ParticleSpawn piece;
-    Header flash;
-    Header2 origin;
+    LightEffectHeader flash;
+    Vec3i origin;
     s32 pitch;
 
     spawn.fadeStart = spawn.scaleStart = spawn.timer = (func_150ADA20() % 31U) + 20;
@@ -101,13 +101,13 @@ void func_150E9890(Vec3f *pos, Vec3f *vel, f32 scale, u8 arg3, s32 arg4) {
         count--;
     }
 
-    flash.unk0 = 3;
-    flash.unk1 = -1;
-    flash.unk2 = (func_150ADA20() % 13U) + 8;
-    flash.unk4 = 0;
-    origin.unk0 = pos->x;
-    origin.unk4 = pos->y;
-    origin.unk8 = pos->z;
+    flash.flags = 3;
+    flash.update = -1;
+    flash.lifetime = (func_150ADA20() % 13U) + 8;
+    flash.lightType = 0;
+    origin.x = pos->x;
+    origin.y = pos->y;
+    origin.z = pos->z;
     func_151602C0(&flash, &origin, (func_150ADA20() % 31U) + 70, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg3, arg4);
 }
 

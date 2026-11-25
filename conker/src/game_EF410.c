@@ -26,15 +26,15 @@ void func_1516D99C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
                    s32 arg37, s32 arg38, s32 arg39, s32 arg40, s32 arg41,
                    s32 arg42, s32 arg43, s32 arg44, s32 arg45, s32 arg46,
                    s32 arg47, s32 arg48);
-LightEffect *func_151602C0(Header *header, Header2 *header2, s32 arg2, s32 arg3,
+LightEffect *func_151602C0(LightEffectHeader *header, Vec3i *header2, s32 arg2, s32 arg3,
                          s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 offset,
                          s32 arg9, s32 argA);
 extern s32 func_10004074[];
 
 // matching: one struct pins the stack layout of these locals (checksum at sp+0xFC)
 typedef struct {
-    Header2 pos;
-    Header header;
+    Vec3i pos;
+    LightEffectHeader header;
     u8 pad12[0xA];
     s32 checksum;
 } Struct150C3D5CLocals;
@@ -806,13 +806,13 @@ void func_150C3D5C(Actor *obj) {
                   0x51, 0x51, 0xA, 1, 0, 0xFF, 0xA, 0x578, 0x190, 1, 1, 0, 1,
                   0, 0, 0, 0, 0, 0xFF, 0);
 
-    locals.header.unk0 = 3;
-    locals.header.unk1 = -1;
-    locals.header.unk2 = (func_150ADA20() % 11U) + 0xA;
-    locals.header.unk4 = 0;
-    locals.pos.unk0 = (s32)obj->x_position;
-    locals.pos.unk4 = (s32)obj->y_position;
-    locals.pos.unk8 = (s32)obj->z_position;
+    locals.header.flags = 3;
+    locals.header.update = -1;
+    locals.header.lifetime = (func_150ADA20() % 11U) + 0xA;
+    locals.header.lightType = 0;
+    locals.pos.x = (s32)obj->x_position;
+    locals.pos.y = (s32)obj->y_position;
+    locals.pos.z = (s32)obj->z_position;
     func_151602C0(&locals.header, &locals.pos, (func_150ADA20() % 52U) + 0x28,
                   0xFF, 0xFF, 0x5A, 0xFF, 0, 0, 0xFF, 1);
 }

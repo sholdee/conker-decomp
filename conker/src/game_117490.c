@@ -400,20 +400,20 @@ typedef struct {
     /* 0x18 */ GroundFlash flash;
 } FlashObject;
 
-FlashObject *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+FlashObject *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Spawns this frame's share of flashes, each sliding from one line to the other along the ground. */
 void func_150EAB10(struct_EAB10 *actor) {
     s32 pad; // matching: unused stack slots that keep the frame layout
     GroundFlash flash;
-    Header header;
+    LightEffectHeader header;
     s32 padB0; // matching: see pad
     Vec2f end;
     Vec2f start;
     f32 speed;
     f32 length;
     f32 random;
-    Header2 origin;
+    Vec3i origin;
     FlashObject *obj;
     FlashSpawner *spawner;
 
@@ -427,10 +427,10 @@ void func_150EAB10(struct_EAB10 *actor) {
         flash.ground.height = -10000.0f;
         flash.height = spawner->height;
         flash.probeHeight = spawner->probeHeight;
-        header.unk0 = 2;
-        header.unk1 = 19;
-        header.unk2 = 300;
-        header.unk4 = 0;
+        header.flags = 2;
+        header.update = 19;
+        header.lifetime = 300;
+        header.lightType = 0;
         do {
             speed = spawner->speed + spawner->speedRange * func_150ADA68();
             if (speed != 0.0f) {
@@ -457,9 +457,9 @@ void func_150EAB10(struct_EAB10 *actor) {
                     flash.velocity.x *= speed;
                     flash.velocity.z *= speed;
                     flash.lifetime = length / speed;
-                    origin.unk0 = flash.position.x;
-                    origin.unk4 = spawner->height;
-                    origin.unk8 = flash.position.z;
+                    origin.x = flash.position.x;
+                    origin.y = spawner->height;
+                    origin.z = flash.position.z;
                     obj = func_151602C0(&header, &origin, spawner->colour[3], spawner->colour[0],
                                         spawner->colour[1], spawner->colour[2], 0xFF, 0, 0x40, actor->unkC,
                                         actor->unk1);

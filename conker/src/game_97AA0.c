@@ -55,7 +55,7 @@ void func_151BB61C(Actor *, f32 *, f32 *, s32, s32);
 void func_151BBA9C(Actor *, f32 *, f32 *, s32, s32);
 void func_151D3480(f32 *, f32 *, s32, s32, s32, s32);
 void func_151BC104(Actor *, s32, s32);
-LightEffect *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_151B7144(Actor *, s32, s32);
 void func_151B6320(Actor *, s32, s32);
 void func_15137610(Actor *, f32 *, f32 *, s32, s32, s32);
@@ -95,19 +95,19 @@ void func_1506A83C(Actor *obj, s32 arg1) {
 /* Spawns a flash 50 units above the object. */
 void func_1506A864(Actor *obj, s32 arg1) {
     LightEffect *flash;
-    Header header;
+    LightEffectHeader header;
     f32 params[4];
-    Header2 pos;
+    Vec3i pos;
 
-    pos.unk0 = obj->x_position;
-    pos.unk4 = obj->y_position + 50.0f;
-    pos.unk8 = obj->z_position;
+    pos.x = obj->x_position;
+    pos.y = obj->y_position + 50.0f;
+    pos.z = obj->z_position;
     params[0] = 0.0f;
     params[2] = 0.0f;
-    header.unk0 = 2;
-    header.unk1 = 15;
-    header.unk2 = 300;
-    header.unk4 = 5;
+    header.flags = 2;
+    header.update = 15;
+    header.lifetime = 300;
+    header.lightType = 5;
     params[1] = 80.0f;
     params[3] = 0.1020999998f;
 

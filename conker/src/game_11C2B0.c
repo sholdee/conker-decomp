@@ -15,7 +15,7 @@ void func_15143134(void *, f32 *, Mtx *);
 void func_15143874(s32, f32, f32 *, f32 *);
 void func_151C329C(void *, s32, s32);
 void *func_151407D0(GlowShape *, s32, ParticleDef *, s32, s32, s32, s32, s32, s32, s32);
-LightEffect *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
+LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 s32 func_15160A58(s32, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_150F0A24(f32 *);
 
@@ -25,8 +25,8 @@ struct Beam *func_150EEF80(Actor *, u8, u8, s32);
  * at the muzzle. */
 void func_150EEE00(Actor *actor, u8 slot) {
     f32 muzzle[3];
-    Header header;
-    Header2 origin;
+    LightEffectHeader header;
+    Vec3i origin;
     MtxF *bones;
 
     if (D_800A163C[slot] & actor->unk94) {
@@ -37,13 +37,13 @@ void func_150EEE00(Actor *actor, u8 slot) {
     bones = actor->unk1D4;
     if (bones != NULL) {
         func_15143134(D_800A15F0[slot], muzzle, (Mtx *)bones + D_800A1638[slot]);
-        header.unk0 = 3;
-        header.unk1 = -1;
-        header.unk2 = (func_150ADA20() % 3U) + 4;
-        header.unk4 = 0;
-        origin.unk0 = muzzle[0];
-        origin.unk4 = muzzle[1];
-        origin.unk8 = muzzle[2];
+        header.flags = 3;
+        header.update = -1;
+        header.lifetime = (func_150ADA20() % 3U) + 4;
+        header.lightType = 0;
+        origin.x = muzzle[0];
+        origin.y = muzzle[1];
+        origin.z = muzzle[2];
         func_151602C0(&header, &origin, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
         func_150F0A24(muzzle);
     }
@@ -679,18 +679,18 @@ s32 func_150F00EC(Glow *glow) {
 /* Spawns the muzzle flash of `beam`, colored (r, g, b, a). */
 Flash *func_150F0198(u8 r, u8 g, u8 b, u8 a, Beam *beam, u8 arg5, s32 arg6) {
     Flash *flash;
-    Header header;
-    Header2 origin;
+    LightEffectHeader header;
+    Vec3i origin;
     Beam *link;
 
     link = beam; // matching: the payload is copied from a stack local, not the arg slot
-    header.unk0 = 2;
-    header.unk1 = -1;
-    header.unk2 = 300;
-    header.unk4 = 0x21;
-    origin.unk0 = 0;
-    origin.unk4 = 0;
-    origin.unk8 = 0;
+    header.flags = 2;
+    header.update = -1;
+    header.lifetime = 300;
+    header.lightType = 0x21;
+    origin.x = 0;
+    origin.y = 0;
+    origin.z = 0;
 
     flash = (Flash *)func_151602C0(&header, &origin, r, g, b, a, 0xFF, 0, 4, arg5, arg6);
     if (flash != NULL) {
@@ -800,8 +800,8 @@ s32 func_150F03F8(actor, slot, arg2, arg3)
     Vec3f dir;
     f32 *src[2];
     f32 *dst[2];
-    Header hdr;
-    Header2 origin;
+    LightEffectHeader hdr;
+    Vec3i origin;
     f32 params[2];
     s32 randB;
     f32 rand1;
@@ -838,13 +838,13 @@ s32 func_150F03F8(actor, slot, arg2, arg3)
                             rand1 * 363.0f + 149.0f, 50.0f, 0xFF, actor, 1, 1, 0, 8, 0, 1, 0, 0xA0038, 0.0f,
                             0xFF, -1, 0, arg2, arg3);
     }
-    hdr.unk0 = 3;
-    hdr.unk1 = -1;
-    hdr.unk2 = (func_150ADA20() % 5U) + 4;
-    hdr.unk4 = 0;
-    origin.unk0 = muzzle.x;
-    origin.unk4 = muzzle.y;
-    origin.unk8 = muzzle.z;
+    hdr.flags = 3;
+    hdr.update = -1;
+    hdr.lifetime = (func_150ADA20() % 5U) + 4;
+    hdr.lightType = 0;
+    origin.x = muzzle.x;
+    origin.y = muzzle.y;
+    origin.z = muzzle.z;
     randA = (func_150ADA20() % 51U) + 80;
     func_151602C0(&hdr, &origin, randA, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg2, arg3);
     params[1] = (func_150ADA68() * 1906.0f + 969.0f) * 0.001000000047f;
@@ -1328,8 +1328,8 @@ void func_150F16DC(actor, slot, variant, arg3, arg4)
     {
         f32 *src[1];
         f32 *dst[1];
-        Header hdr;
-        Header2 origin;
+        LightEffectHeader hdr;
+        Vec3i origin;
         f32 params[2];
         s32 randB;
         f32 rand0;
@@ -1341,13 +1341,13 @@ void func_150F16DC(actor, slot, variant, arg3, arg4)
         src[0] = D_800A168C[kind][variant][slot];
         dst[0] = &muzzle.x;
         func_15145EA4(src, dst, (Mtx *)actor->unk1D4 + D_800A180C[kind][slot], 1);
-        hdr.unk0 = 3;
-        hdr.unk1 = -1;
-        hdr.unk2 = (func_150ADA20() % 5U) + 4;
-        hdr.unk4 = 0;
-        origin.unk0 = muzzle.x;
-        origin.unk4 = muzzle.y;
-        origin.unk8 = muzzle.z;
+        hdr.flags = 3;
+        hdr.update = -1;
+        hdr.lifetime = (func_150ADA20() % 5U) + 4;
+        hdr.lightType = 0;
+        origin.x = muzzle.x;
+        origin.y = muzzle.y;
+        origin.z = muzzle.z;
         randA = (func_150ADA20() % 51U) + 80;
         func_151602C0(&hdr, &origin, randA, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg3, arg4);
         params[1] = (func_150ADA68() * 701.0f + 1925.0f) * 0.001000000047f;

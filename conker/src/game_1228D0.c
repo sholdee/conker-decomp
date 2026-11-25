@@ -613,7 +613,7 @@ typedef struct {
 
 extern f32 D_800A1B30[3];
 void func_15143134(void *, f32 *, Mtx *);
-extern LightEffect *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
+extern LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 void *func_15107C1C(Actor *, u8, void *, s16, s32, s32, s32, f32, f32, s32, s32, u8 *, s32, s32);
 
 /* Burst effect: while the owner lives and has a model (and unk94 bit 1 is clear), every 90-180
@@ -638,21 +638,21 @@ void func_150F64DC(FlashBurstEffect *effect) {
             count = (func_150ADA20() & 1) + 2;
             {
                 f32 pos[3];
-                Header header;
-                Header2 origin;
+                LightEffectHeader header;
+                Vec3i origin;
                 u8 color[4];
                 s32 rand1;
                 s32 rand2;
                 s32 rand3;
 
                 func_15143134(D_800A1B30, pos, (Mtx *)owner->unk1D4);
-                header.unk0 = 3;
-                header.unk1 = -1;
-                header.unk2 = (func_150ADA20() % 9U) + 10;
-                header.unk4 = 0;
-                origin.unk0 = pos[0];
-                origin.unk4 = pos[1];
-                origin.unk8 = pos[2];
+                header.flags = 3;
+                header.update = -1;
+                header.lifetime = (func_150ADA20() % 9U) + 10;
+                header.lightType = 0;
+                origin.x = pos[0];
+                origin.y = pos[1];
+                origin.z = pos[2];
                 rand3 = (func_150ADA20() % 61U) + 60;
                 func_151602C0(&header, &origin, rand3, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, effect->head.owner,
                               effect->head.kind);

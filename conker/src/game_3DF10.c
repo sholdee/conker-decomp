@@ -37,7 +37,7 @@ extern void func_150E8854(void);
 extern void func_1510F800(s32);
 extern void *func_15132A4C(void *, s32, s32, s32, u8, s32);
 extern Obj3DF10 *func_1513B5E0(void *, s32, s32, s32, s32);
-extern LightEffect *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
+extern LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 extern u32 osGetCount(void);
 
 extern Vec3f D_80096450[];
@@ -52,8 +52,8 @@ void func_15010A60(void) {
     f32 sp[6];
     f32 rnd;
     Obj3DF10 *ent;
-    Header header;
-    Header2 header2;
+    LightEffectHeader header;
+    Vec3i header2;
     void *payload;
     LightEffect *snd;
     Vec3f pos;
@@ -155,14 +155,14 @@ void func_15010A60(void) {
             if (ent != NULL) {
                 memcpy((u8 *)ent + ent->unk50 + 0xF8, &tail, 0x2C);
             }
-            header2.unk0 = (s32)D_80096450[i].x;
-            header2.unk4 = (s32)D_80096450[i].y;
-            header2.unk8 = (s32)D_80096450[i].z;
+            header2.x = (s32)D_80096450[i].x;
+            header2.y = (s32)D_80096450[i].y;
+            header2.z = (s32)D_80096450[i].z;
             payload = result;
-            header.unk0 = 2;
-            header.unk1 = 0x16;
-            header.unk2 = 0x12C;
-            header.unk4 = 0;
+            header.flags = 2;
+            header.update = 0x16;
+            header.lifetime = 0x12C;
+            header.lightType = 0;
             snd = func_151602C0(&header, &header2, 0xC, 0xFF, 0xFF, 0xFF, 0xFF, 0, 4, 0xFF, 1);
             if (snd != NULL) {
                 memcpy((u8 *)snd + 0x18, &payload, 4);

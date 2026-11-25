@@ -453,25 +453,25 @@ s32 func_151C2EF0(void *actor, Actor *owner, Game1EF500Trail *trail, Vec3f *hitP
 extern f32 D_800DCA24;
 void func_15102920(f32, s32, s16 *, Vec3f *, s32, s32, s32, s32, u8, u8);
 void func_15152B38(TrailBurst *, u8, s32);
-s32 func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
+s32 func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
 /* Expiry handler 0 (D_8008FBD0[0]): debris, a flash and sometimes a burst where the projectile ended. */
 void func_151C2F48(Game1EF500Trail *trail) {
     Game1EF500TrailExt *ext;
-    Header header;
-    Header2 header2;
+    LightEffectHeader header;
+    Vec3i header2;
 
     ext = &trail->trail;
     func_15102920((func_150ADA68() * 30.0f) + 8.0f, 0xFF, ext->path.surface, &ext->path.hit,
                   (func_150ADA20() % 46U) + 25, 1, 1, ext->path.field_60, trail->head.header.owner, trail->head.header.kind);
     if (func_150ADA68() < 0.253000021f * D_800DCA24) {
-        header.unk0 = 3;
-        header.unk1 = -1;
-        header.unk2 = (func_150ADA20() % 7U) + 4;
-        header.unk4 = 0;
-        header2.unk0 = ext->path.hit.x;
-        header2.unk4 = ext->path.hit.y;
-        header2.unk8 = ext->path.hit.z;
+        header.flags = 3;
+        header.update = -1;
+        header.lifetime = (func_150ADA20() % 7U) + 4;
+        header.lightType = 0;
+        header2.x = ext->path.hit.x;
+        header2.y = ext->path.hit.y;
+        header2.z = ext->path.hit.z;
         func_151602C0(&header, &header2, (func_150ADA20() % 9U) + 12, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, trail->head.header.owner,
                       trail->head.header.kind);
 
@@ -541,8 +541,8 @@ extern void *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 void func_151C329C(Vec3f *pos, u8 arg1, s32 arg2) {
     TrailBurst burst;
     ParticleDesc particle;
-    Header header;
-    Header2 header2;
+    LightEffectHeader header;
+    Vec3i header2;
 
     burst.countBase = 5;
     burst.countRange = 7;
@@ -635,13 +635,13 @@ void func_151C329C(Vec3f *pos, u8 arg1, s32 arg2) {
     particle.drawFunc = -1;
     particle.handlerSet = 4;
     func_15130280(&particle, 1, 0, 0, arg1, arg2);
-    header.unk0 = 3;
-    header.unk1 = -1;
-    header.unk2 = (func_150ADA20() % 7U) + 6;
-    header.unk4 = 0;
-    header2.unk0 = pos->x;
-    header2.unk4 = pos->y;
-    header2.unk8 = pos->z;
+    header.flags = 3;
+    header.update = -1;
+    header.lifetime = (func_150ADA20() % 7U) + 6;
+    header.lightType = 0;
+    header2.x = pos->x;
+    header2.y = pos->y;
+    header2.z = pos->z;
     func_151602C0(&header, &header2, (func_150ADA20() & 1) + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg1, arg2);
 }
 
@@ -649,8 +649,8 @@ void func_151C329C(Vec3f *pos, u8 arg1, s32 arg2) {
 void func_151C36D8(Vec3f *pos, u8 arg1, s32 arg2) {
     TrailBurst burst;
     ParticleDesc particle;
-    Header header;
-    Header2 header2;
+    LightEffectHeader header;
+    Vec3i header2;
 
     burst.countBase = 8;
     burst.countRange = 6;
@@ -745,13 +745,13 @@ void func_151C36D8(Vec3f *pos, u8 arg1, s32 arg2) {
     particle.handlerSet = 4;
     func_15130280(&particle, 1, 0, 0, arg1, arg2);
 
-    header.unk0 = 3;
-    header.unk1 = -1;
-    header.unk2 = (func_150ADA20() % 7U) + 6;
-    header.unk4 = 0;
-    header2.unk0 = pos->x;
-    header2.unk4 = pos->y;
-    header2.unk8 = pos->z;
+    header.flags = 3;
+    header.update = -1;
+    header.lifetime = (func_150ADA20() % 7U) + 6;
+    header.lightType = 0;
+    header2.x = pos->x;
+    header2.y = pos->y;
+    header2.z = pos->z;
     func_151602C0(&header, &header2, (func_150ADA20() & 1) + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg1, arg2);
 }
 
@@ -908,19 +908,19 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
         func_15153634(&smoke, smokeArg, trail->head.header.owner, trail->head.header.kind);
     }
     if (func_150ADA68() < flashChance) {
-        Header header;
-        Header2 header2;
+        LightEffectHeader header;
+        Vec3i header2;
         const u8 color[2][3] = { { 0xFF, 0xFF, 0xFF }, { 0xFF, 0xA7, 0xA7 } };
         u8 sel;
 
-        header.unk0 = 3;
-        header.unk1 = -1;
+        header.flags = 3;
+        header.update = -1;
         ext = &trail->trail;
-        header.unk2 = (func_150ADA20() % 6U) + 3;
-        header.unk4 = 0;
-        header2.unk0 = (s32)ext->path.hit.x;
-        header2.unk4 = (s32)ext->path.hit.y;
-        header2.unk8 = (s32)ext->path.hit.z;
+        header.lifetime = (func_150ADA20() % 6U) + 3;
+        header.lightType = 0;
+        header2.x = (s32)ext->path.hit.x;
+        header2.y = (s32)ext->path.hit.y;
+        header2.z = (s32)ext->path.hit.z;
         sel = func_150ADA20() & 1;
         func_151602C0(&header, &header2, (func_150ADA20() % 6U) + 0xA, color[sel][0], color[sel][1], color[sel][2], 0xFF, 0, 0, trail->head.header.owner, trail->head.header.kind);
     }

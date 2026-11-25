@@ -11,7 +11,7 @@ extern void func_15145EA4(f32 **src, f32 **dst, Mtx *mtx, s32 count);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, void *, s32 *, void *, f32);
 extern void func_15143874(s16, f32, f32 *, f32 *);
 extern void func_15102B38(Actor *, u8, f32 *, f32 *, f32 *, s32, s32, f32, Vec3f *, s32, s32, s32, u8, s32);
-extern s32 func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
+extern s32 func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 s32 func_151C229C(Vec3f *, Vec3f *, s32, s32, s32, s32, f32, f32, f32, f32, f32, s32, Actor *, s32, s32, s32,
                   s32, s32, s32, s32, s32, f32, s32, s32, s32, s32, s32);
 
@@ -31,8 +31,8 @@ s32 func_150EBEC0(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     f32 *muzzleDst[1];
     Vec3f hit;
     f32 jitter[2];
-    Header flashHeader;
-    Header2 flashPos;
+    LightEffectHeader flashHeader;
+    Vec3i flashPos;
     f32 beamSize[2];
     f32 randB;
     s32 randInt;
@@ -94,13 +94,13 @@ s32 func_150EBEC0(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
                                randB * 400.0f + 262.0f, 100.0f, 255, actor, 1, 1, 0, 0, 0, 1, 3, 26, 0.0f, 255, -1,
                                0, arg2, arg3);
     }
-    flashHeader.unk0 = 3;
-    flashHeader.unk1 = -1;
-    flashHeader.unk2 = (func_150ADA20() % 3U) + 3;
-    flashHeader.unk4 = 0;
-    flashPos.unk0 = muzzle.x;
-    flashPos.unk4 = muzzle.y;
-    flashPos.unk8 = muzzle.z;
+    flashHeader.flags = 3;
+    flashHeader.update = -1;
+    flashHeader.lifetime = (func_150ADA20() % 3U) + 3;
+    flashHeader.lightType = 0;
+    flashPos.x = muzzle.x;
+    flashPos.y = muzzle.y;
+    flashPos.z = muzzle.z;
     randInt = (func_150ADA20() % 13U) + 90;
     func_151602C0(&flashHeader, &flashPos, randInt, 255, 255, 255, 255, 0, 0, arg2, arg3);
     beamSize[1] = (func_150ADA68() * 2586.0f + 1758.0f) * 0.001000000047f;

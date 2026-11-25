@@ -240,21 +240,21 @@ void func_150B5E34(Vec3f *pos, u8 owner, s32 kind) {
     func_15130280(&spawn, 1, 0, 0, owner, kind);
 }
 
-extern s32 func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
+extern s32 func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
 /** Spawns a func_151602C0 effect at pos (as integer coordinates) with randomized parameters. */
 void func_150B6000(Vec3f *pos, u8 owner, s32 kind) {
-    Header header;
-    Header2 ipos;
+    LightEffectHeader header;
+    Vec3i ipos;
 
-    header.unk0 = 3;
-    header.unk1 = -1;
-    header.unk2 = func_150ADA20() % 9U + 3;
-    header.unk4 = 0;
+    header.flags = 3;
+    header.update = -1;
+    header.lifetime = func_150ADA20() % 9U + 3;
+    header.lightType = 0;
 
-    ipos.unk0 = pos->x;
-    ipos.unk4 = pos->y;
-    ipos.unk8 = pos->z;
+    ipos.x = pos->x;
+    ipos.y = pos->y;
+    ipos.z = pos->z;
 
     func_151602C0(&header, &ipos, func_150ADA20() % 201U + 55, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, owner, kind);
 }

@@ -495,7 +495,7 @@ s32 func_150F81BC(EffectObj *obj) {
     return 1;
 }
 
-extern LightEffect *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
+extern LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 extern void func_15152B38(TrailBurst *, u8, s32);
 
 /* Effects 50 units above `obj`: a func_151602C0 burst and a func_15152B38 emitter. */
@@ -506,16 +506,16 @@ void func_150F85A0(s32 arg0, Actor *obj, s32 arg2) {
     pos.y = obj->y_position + 50.0f;
     pos.z = obj->z_position;
     {
-        Header header;
-        Header2 header2;
+        LightEffectHeader header;
+        Vec3i header2;
 
-        header.unk0 = 3;
-        header.unk1 = -1;
-        header.unk2 = (func_150ADA20() % 9U) + 5;
-        header.unk4 = 0;
-        header2.unk0 = pos.x;
-        header2.unk4 = pos.y;
-        header2.unk8 = pos.z;
+        header.flags = 3;
+        header.update = -1;
+        header.lifetime = (func_150ADA20() % 9U) + 5;
+        header.lightType = 0;
+        header2.x = pos.x;
+        header2.y = pos.y;
+        header2.z = pos.z;
         func_151602C0(&header, &header2, (func_150ADA20() % 31U) + 90, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
     }
     {

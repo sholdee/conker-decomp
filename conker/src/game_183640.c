@@ -373,7 +373,7 @@ typedef struct {
 } RandomBurstEffect;
 
 void func_15156D24(f32 *pos, u8 owner);
-extern LightEffect *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
+extern LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 
 /* When the timer runs out, sets off a burst (func_15156D24 and func_151602C0) at a random table point
  * that has no zero coordinate, then restarts the timer at a random interval. */
@@ -381,8 +381,8 @@ void func_15156B54(RandomBurstEffect *effect) {
     RandomTimer *timer;
     u32 row;
     u32 col;
-    Header header;
-    Header2 intPos;
+    LightEffectHeader header;
+    Vec3i intPos;
 
     effect->timer.value -= D_800BE9E4;
     if (effect->timer.value < 0) {
@@ -390,13 +390,13 @@ void func_15156B54(RandomBurstEffect *effect) {
         col = func_150ADA20() % 10U;
         if (D_800DCA30[row][col].pos.x != 0.0f && D_800DCA30[row][col].pos.y != 0.0f && D_800DCA30[row][col].pos.z != 0.0f) {
             func_15156D24(&D_800DCA30[row][col].pos.x, effect->header.owner);
-            header.unk0 = 3;
-            header.unk1 = -1;
-            header.unk2 = (func_150ADA20() % 11U) + 5;
-            header.unk4 = 0;
-            intPos.unk0 = D_800DCA30[row][col].pos.x;
-            intPos.unk4 = D_800DCA30[row][col].pos.y;
-            intPos.unk8 = D_800DCA30[row][col].pos.z;
+            header.flags = 3;
+            header.update = -1;
+            header.lifetime = (func_150ADA20() % 11U) + 5;
+            header.lightType = 0;
+            intPos.x = D_800DCA30[row][col].pos.x;
+            intPos.y = D_800DCA30[row][col].pos.y;
+            intPos.z = D_800DCA30[row][col].pos.z;
             func_151602C0(&header, &intPos, (func_150ADA20() % 156U) + 100, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0,
                           effect->header.owner, effect->header.kind);
         }

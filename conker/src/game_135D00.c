@@ -59,7 +59,7 @@ typedef struct {
 #define LAMP_DATA(model) ((LampData *)((s32)(model) + (model)->buffersSize + 0xF8))
 
 DynModel *func_1513B5E0(DynModelDesc *desc, u8 arg1, s32 userDataSize, u8 arg3, s32 arg4);
-LightEffect *func_1516037C(Header *header, PointLight *light, s32 size, u8 arg3, s32 arg4);
+LightEffect *func_1516037C(LightEffectHeader *header, PointLight *light, s32 size, u8 arg3, s32 arg4);
 
 /*
  * Spawns the two swinging lamp models (assets 427 and 428). The first gets a light effect that moves
@@ -102,15 +102,15 @@ void func_15108850(PointLight *light) {
         if (model != NULL) {
             memcpy(LAMP_DATA(model), &lamp, sizeof(LampData));
             {
-                Header header;
+                LightEffectHeader header;
                 DynModel *owner;
                 LightEffect *effect;
 
                 owner = model;
-                header.unk0 = 2;
-                header.unk1 = 8;
-                header.unk2 = 300;
-                header.unk4 = 0x13;
+                header.flags = 2;
+                header.update = 8;
+                header.lifetime = 300;
+                header.lightType = 0x13;
                 effect = func_1516037C(&header, light, 4, 0xFF, 1);
                 if (effect != NULL) {
                     memcpy(&effect->data.object, &owner, sizeof(owner));
