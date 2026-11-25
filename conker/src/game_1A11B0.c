@@ -20,7 +20,7 @@ Gfx *func_15173D00(Gfx *gfx, s32 x, s32 y, s32 unused, s32 zDest, s32 colorDest,
     gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 4, zDest);
     gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, (s32)D_800BE628[view].width, 1);
     gSPTextureRectangle(gfx++, 0, 0, 3 << 2, 1 << 2, G_TX_RENDERTILE, x << 5, 0, 4 << 10, 1 << 10);
-    gDPLoadTextureBlock(gfx++, D_8002AAE8[D_800BE9C0] + (y * D_800BE620 * 2), G_IM_FMT_RGBA, G_IM_SIZ_16b, (s32)D_800BE628[view].width, 1, 0, 0, 0, 0, 0, 0, 0);
+    gDPLoadTextureBlock(gfx++, (u8 *)D_8002AAE8[D_800BE9C0] + (y * D_800BE620 * 2), G_IM_FMT_RGBA, G_IM_SIZ_16b, (s32)D_800BE628[view].width, 1, 0, 0, 0, 0, 0, 0, 0);
     gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 4, colorDest);
     gSPTextureRectangle(gfx++, 0, 0, 3 << 2, 1 << 2, G_TX_RENDERTILE, x << 5, 0, 4 << 10, 1 << 10);
 

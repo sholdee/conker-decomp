@@ -91,7 +91,7 @@ extern s32  D_8000031C[16]; // 64 bytes
 
 extern u8   D_8002AAE0;
 extern u8   D_8002AAE4;
-extern s32  D_8002AAE8[2]; // pointer to framebuffer
+extern u16 *D_8002AAE8[2]; // the two framebuffers
 extern u8   D_8002AB40;
 extern OSViMode D_8002AB90;
 extern OSViMode D_8002ABE0;

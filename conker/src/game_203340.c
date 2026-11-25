@@ -154,7 +154,7 @@ Gfx *func_151D6778(Gfx *gfx) {
         }
         gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, D_800BE620, D_800BE570);
         gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, D_800BE620, D_800BE624);
-        gfx = func_151D5E90(gfx, (void *)D_8002AAE8[D_800BE9C0], 0, 4);
+        gfx = func_151D5E90(gfx, D_8002AAE8[D_800BE9C0], 0, 4);
         gDPSetOtherMode(gfx++, 0x82C3F, 0x552230);
         gSPSetGeometryMode(gfx++, 0x220405);
         gfx = func_1501A680(gfx);

@@ -13,29 +13,29 @@ void func_15040D9C(s32 arg0) {
     s32 j;
 
     i = D_800BE9C0;
-    ptr = (u16 *)D_8002AAE8[i == 0];
+    ptr = D_8002AAE8[i == 0];
     for (j = 0; j != 8; j++) {
         for (i = 0; i != 8; i += 4) {
             *(ptr + (arg0 + i) + D_800BE620 * (j + 225) + 200) = 0xF800;
-            ptr = (u16 *)D_8002AAE8[D_800BE9C0];
+            ptr = D_8002AAE8[D_800BE9C0];
             *(ptr + (arg0 + i) + D_800BE620 * (j + 225) + 200) = 0xF800;
             ptr = D_800BE9C4;
             *(ptr + (arg0 + i) + D_800BE620 * (j + 225) + 200) = 0;
 
             *(ptr + (arg0 + i) + D_800BE620 * (j + 225) + 201) = 0xF800;
-            ptr = (u16 *)D_8002AAE8[D_800BE9C0];
+            ptr = D_8002AAE8[D_800BE9C0];
             *(ptr + (arg0 + i) + D_800BE620 * (j + 225) + 201) = 0xF800;
             ptr = D_800BE9C4;
             *(ptr + (arg0 + i) + D_800BE620 * (j + 225) + 201) = 0;
 
             *(ptr + (arg0 + i) + D_800BE620 * (j + 225) + 202) = 0xF800;
-            ptr = (u16 *)D_8002AAE8[D_800BE9C0];
+            ptr = D_8002AAE8[D_800BE9C0];
             *(ptr + (arg0 + i) + D_800BE620 * (j + 225) + 202) = 0xF800;
             ptr = D_800BE9C4;
             *(ptr + (arg0 + i) + D_800BE620 * (j + 225) + 202) = 0;
 
             *(ptr + (arg0 + i) + D_800BE620 * (j + 225) + 203) = 0xF800;
-            ptr = (u16 *)D_8002AAE8[D_800BE9C0];
+            ptr = D_8002AAE8[D_800BE9C0];
             *(ptr + (arg0 + i) + D_800BE620 * (j + 225) + 203) = 0xF800;
             ptr = D_800BE9C4;
             *(ptr + (arg0 + i) + D_800BE620 * (j + 225) + 203) = 0;
@@ -51,8 +51,8 @@ void func_15040FCC(s32 arg0) {
     s32 j;
 
     j = D_800BE9C0 == 0;
-    fb1 = (u16 *)D_8002AAE8[j];
-    fb2 = (u16 *)D_8002AAE8[D_800BE9C0];
+    fb1 = D_8002AAE8[j];
+    fb2 = D_8002AAE8[D_800BE9C0];
     zb = D_800BE9C4;
     j = 0;
     for (i = 0; i < 8; i++) {
