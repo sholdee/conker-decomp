@@ -1011,16 +1011,16 @@ u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32
     }
     angle = (s16)(yaw * 182.04445f) - 0x4000;
     if (D_800BE616 && !(flags & 1) && kind != 5 && kind != 9 && kind != 10 && kind != 4) {
-        u8 ret;
+        u8 targetIndex;
         f32 dist;
-        u16 tmp;
+        u16 rawAngle;
         f32 targetY;
 
-        aimAngle = tmp = func_1505A630(speed, yVelocity, 0);
-        ret = func_1505DADC(obj, &aimAngle, (tmp >> 8) & 0xFF, 0xFF, 20);
-        if (ret != 0xFF) {
-            targetY = D_800CC2D0[ret].y_position;
-            dist = func_1505A6F8(D_800D154C, &D_800CC2D0[ret]);
+        aimAngle = rawAngle = func_1505A630(speed, yVelocity, 0);
+        targetIndex = func_1505DADC(obj, &aimAngle, (rawAngle >> 8) & 0xFF, 0xFF, 20);
+        if (targetIndex != 0xFF) {
+            targetY = D_800CC2D0[targetIndex].y_position;
+            dist = func_1505A6F8(D_800D154C, &D_800CC2D0[targetIndex]);
             angle = aimAngle;
             if (kind == 2 || kind == 18) {
                 targetY -= 30.0f;
