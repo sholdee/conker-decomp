@@ -23,6 +23,8 @@ void func_151A0F28(f32 x, f32 y, f32 z, u8 arg3, s32 arg4) {
                   4, 1, arg3, arg4);
 }
 
+// matching: only read in the dead `& 0` terms below (no code, no relocation); the 1500.0f it once
+// named is now this file's own literal
 extern f32 D_800A8D28;
 
 /* Calls func_151A11CC with parameters scaled by scaleA/scaleB and a duration-derived count. */
@@ -47,7 +49,7 @@ void func_151A1010(f32 x, f32 y, f32 z, s16 duration, f32 scaleA, f32 scaleB, u8
     func_151A11CC(x, y, z, 250.0f * scaleA, 1.0f,
                   a = a32 = (s32)(70.0f * scaleB) | (D_800A8D28 == 0 & 0),
                   b = b32 = (s32)(30.0f * scaleB) | (D_800A8D28 == 0 & 0),
-                  c = c32 = D_800A8D28 * scaleA,
+                  c = c32 = (s32)(1500.0f * scaleA) | (D_800A8D28 == 0 & 0),
                   d = d32 = (s32)(100.0f * scaleA) | (D_800A8D28 == 0 & 0), 18, 1.0f,
                   90.0f * scaleB, 20.0f * scaleB, c, d,
                   count, 16, 1.0f,
