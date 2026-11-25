@@ -66,7 +66,6 @@ void func_1510B128(s32 viewIndex, f32 fovXDelta, f32 fovYDelta, f32 scale, f32 n
     {
         f32 dist;
         f32 cosine;
-        f32 sine; // matching: unused, keeps the stack frame size
         f32 angle;
 
         /* half the FOV in radians; dist = halfWidth / tan(angle) */
