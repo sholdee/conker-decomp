@@ -134,52 +134,27 @@ s32  func_10012E04(s32 *arg0, f32 *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5);
 s32  func_10012F94(struct124 *arg0, f32 *arg1);
 void func_100131D8(s32 *arg0);
 void func_100131FC(struct13 *arg0, s32 arg1);
-void func_10015550(struct26 *arg0, s32 arg1);
 s32  func_10015878(struct04 *arg0);
-void func_10016E90(struct31 *arg0);
+void func_10016E90(SndState *arg0);
 void func_10016F00(struct154 *arg0);
-struct31 *func_10017100(s32 arg0, s16 arg1);
-void func_10017298(struct31 *arg0);
-s32  func_100173C4(struct31 **arg0);
-void func_10017594(struct31 *arg0);
+SndState *func_10017100(s32 arg0, s16 arg1);
+void func_10017298(SndState *arg0);
+s32  func_100173C4(SndState **arg0);
+void func_10017594(SndState *arg0);
 void func_100176C4(void);
 void func_100176EC(void);
 void func_10017714(s32 arg0, s16 arg1, s32 arg2);
 void func_10017870(u8 arg0);
 void func_10017944(s32 arg0, u32 arg1);
-s32  func_10017A80(struct26 *arg0);
-void func_10017AA0(struct26 *arg0);
-void func_10017AF0(struct26 *arg0, s32 arg1);
-void func_10017B04(struct26 *arg0, s32 arg1, u8 arg2);
-void func_10017B30(struct26 *arg0);
-void func_10017BB8(struct26 *arg0, s32 arg1);
 
-void func_10017D80(struct26 *arg0, u8 arg1, u8 arg2);
-void func_10017DF0(struct26 *arg0, f32 arg1, f32 arg2);
-void func_10017E4C(struct26 *arg0, u8 arg1, u8 arg2);
-void func_10017F10(struct26 *arg0, u8 arg1, u8 arg2, u8 arg3, s32 arg4);
 
 void n_alInit(struct07 *arg0, s32 arg1);
 void n_alClose(s32 arg0);
 s32  _n_timeToSamplesNoRound(s32 micros);
 s32  _n_timeToSamples(s32 micros);
 f32  alCents2Ratio(s32 arg0);
-void func_10019B50(struct26 *arg0, s32 arg1, s32 arg2, s32 arg3);
-void func_10019C28(struct26 *arg0, s32 arg1, s32 arg2, s32 arg3);
-void func_10019CD0(struct26 *arg0, s32 arg1, s32 arg2, s32 arg3);
-void func_10019D6C(struct26 *arg0, s32 arg1, s32 arg2, s32 arg3);
-void func_10019ED8(struct26 *arg0, s32 arg1, s32 arg2, s32 arg3);
-void func_10019F38(struct26 *arg0, s32 arg1, s32 arg2, s32 arg3);
-void func_10019F98(struct26 *arg0, s32 arg1, s32 arg2, s32 arg3);
-void func_1001A224(struct26 *arg0, s32 arg1, s32 arg2, s32 arg3);
-void func_1001A2F8(struct26 *arg0, s32 arg1, s32 arg2, s32 arg3);
-void func_1001A39C(struct26 *arg0, s32 arg1, s32 arg2, u32 arg3);
 void func_1001A3E0(struct24 *arg0, s32 arg1, s32 arg2, s32 arg3);
-void func_1001A3FC(struct26 *arg0, s32 arg1, s32 arg2, s32 arg3);
-void func_1001A9DC(struct26 *arg0, s32 arg1, s32 arg2, s32 arg3);
-void func_1001AA08(struct26 *arg0, s32 arg1, s32 arg2, s32 arg3);
 s32  __n_vsDelta(struct07 *arg0, s32 arg1);
-void func_1001B620(struct26 *arg0, s32 arg1);
 void func_1001CBF0(f32 arg0, f32 arg1, f32 arg2, f32 arg3[3], f32 arg4[3]);
 void func_1001CD54(struct125 *arg0);
 f32  func_1001CEA4(s32 arg0);
@@ -189,7 +164,6 @@ s32  func_1001DA28(s16 arg0);
 void func_1001DAA0(s32 arg0, s16 arg1, s32 arg2);
 void func_1001DAE4(ALVoiceConfig *arg0, s16 arg1, s32 *arg2);
 // void func_1001E170(struct22 *arg0, s32 *w, f32 pitch, s16 vol, u8 pan, u8 fxmix, u8 arg6, f32 arg7, u8 arg8, s32 arg9);
-// void func_1001E400(struct26 *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4);
 s32  func_1001E4A0(s16 arg0, s32 arg1, s32 arg2);
 f32  func_1001FA78(MtxF arg0, s32 arg1);
 /* chunk0 */
@@ -1010,9 +984,6 @@ s32  func_100114D0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
 // void func_10017870(u8 arg0);
 void func_100186DC(ALCSeq *seq, ALCSeqMarker *marker);
 void func_10018790(ALCSeq *seq, ALCSeqMarker *markers, u32 count, u32 base);
-// void func_10019D98(struct26 *arg0, u8 arg1);
-// void func_1001A030(struct26 *arg0, s32 arg1, s32 arg2, u32 arg3);
-// void func_1001A508(struct26 *arg0, struct25 *arg1, s32 arg2, s32 arg3);
 //func_1001AAE0
 //func_1001ADA4
 //func_1001AFEC

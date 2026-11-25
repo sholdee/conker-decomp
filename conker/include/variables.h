@@ -313,7 +313,7 @@ extern f32  D_80042798;
 extern struct105 D_800427A0;
 extern s32  D_800427B0;
 extern u16  D_800427F4;
-extern struct120 D_800425E0[];
+extern SoundSlot D_800425E0[];
 extern struct124 *D_80042800;
 extern s32  D_80042804;
 extern u16 *D_800428B8;

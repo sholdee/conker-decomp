@@ -79,7 +79,7 @@ s32 func_1510F8CC(s32 arg0);
 s32 func_1000F568(s32 base, s32 count);
 void func_10017780(u8 arg0, u16 arg1);
 s32 *allocate_memory(s32, s32, s32, s32);
-struct31 *func_10017438(s32, s16, u16, u8, f32, u8, u8, struct31 **);
+SndState *func_10017438(s32, s16, u16, u8, f32, u8, u8, SndState **);
 s32 func_1000A420(s32 dx, s32 dy, s32 dz, f32 field18, s32 dx0, s32 dy0, s32 dz0,
                   s32 farDistance, s32 nearDistance, s32 *pan, s32 *volume, s32 *distance);
 
@@ -332,7 +332,7 @@ void func_1000F1A8(void) {
     bzero(D_800425E0, 0x180); // also clears D_800426A0, the table after it
 
     for (i = 0; i < 16; i++) {
-        D_800425E0[i].unk2 = i + 16;
+        D_800425E0[i].nextHandle = i + 16;
     }
 
     D_80041F50 = 0;
@@ -385,12 +385,12 @@ void func_1000F248(s32 mode) {
 // Is the voice behind this handle still playing? A bare slot number (< 16) matches any
 // handle in that slot.
 s32 func_1000F3D0(u16 handle) {
-    struct120 *slot;
+    SoundSlot *slot;
 
     slot = &D_800425E0[handle & 0xF];
-    if (slot->unk8 != NULL) {
-        if ((slot->unk0 == handle) || (handle == (handle & 0xF))) {
-            if (func_100173C4(&slot->unk8) != 0) {
+    if (slot->voice != NULL) {
+        if ((slot->handle == handle) || (handle == (handle & 0xF))) {
+            if (func_100173C4(&slot->voice) != 0) {
                 return 1;
             }
         }
@@ -400,13 +400,13 @@ s32 func_1000F3D0(u16 handle) {
 
 s32 func_1000F44C(u16 handle) {
     u32 mask;
-    struct120 *slot;
-    struct31 *voice;
+    SoundSlot *slot;
+    SndState *voice;
 
     mask = __osDisableInt();
     slot = &D_800425E0[handle & 0xF];
-    voice = slot->unk8;
-    if ((voice != NULL) && (slot->unk0 == handle) && (voice->unk53 & 2)) {
+    voice = slot->voice;
+    if ((voice != NULL) && (slot->handle == handle) && (voice->flags & 2)) {
         __osRestoreInt(mask);
         return 1;
     }
@@ -420,9 +420,9 @@ s32 func_1000F4D8(u16 sound) {
 
     sound &= 0x7FFF;
     for (i = 0; i < 16; i++) {
-        if (D_800425E0[i].unk8 != NULL) {
-            if ((D_800425E0[i].unk4 & 0x7FFF) == sound) {
-                if (func_100173C4(&D_800425E0[i].unk8) != 0) {
+        if (D_800425E0[i].voice != NULL) {
+            if ((D_800425E0[i].sound & 0x7FFF) == sound) {
+                if (func_100173C4(&D_800425E0[i].voice) != 0) {
                     return 1;
                 }
             }
@@ -525,7 +525,7 @@ void func_1000F85C(u16 handle, s16 param, s32 value) {
             // value already holds a ratio's f32 bits
             param = 0x10;
         }
-        func_10017714((s32)D_800425E0[handle & 0xF].unk8, param, value);
+        func_10017714((s32)D_800425E0[handle & 0xF].voice, param, value);
     }
 }
 
@@ -954,17 +954,17 @@ u16 func_10010BE8(u16 handle, s32 sound, u16 volume, u8 pan, s16 cents, u8 mix, 
     u32 slot;
 
     slot = handle & 0xF;
-    if ((handle == D_800425E0[slot].unk0) && (handle != 0)) {
-        if ((D_800425E0[slot].unk8 != NULL) && (func_100173C4(&D_800425E0[slot].unk8) != 0)) {
-            func_10017594(D_800425E0[slot].unk8);
-            D_800425E0[slot].unk8 = NULL;
+    if ((handle == D_800425E0[slot].handle) && (handle != 0)) {
+        if ((D_800425E0[slot].voice != NULL) && (func_100173C4(&D_800425E0[slot].voice) != 0)) {
+            func_10017594(D_800425E0[slot].voice);
+            D_800425E0[slot].voice = NULL;
         }
-    } else if (((D_800425E0[slot].unk8 != NULL) && (func_100173C4(&D_800425E0[slot].unk8) != 0)) ||
-               (D_800425E0[slot].unk4 & 0x8000)) {
+    } else if (((D_800425E0[slot].voice != NULL) && (func_100173C4(&D_800425E0[slot].voice) != 0)) ||
+               (D_800425E0[slot].sound & 0x8000)) {
         slot = 0;
         while ((slot < 16) &&
-               (((D_800425E0[slot].unk8 != NULL) && (func_100173C4(&D_800425E0[slot].unk8) != 0)) ||
-                (D_800425E0[slot].unk4 & 0x8000))) {
+               (((D_800425E0[slot].voice != NULL) && (func_100173C4(&D_800425E0[slot].voice) != 0)) ||
+                (D_800425E0[slot].sound & 0x8000))) {
             slot++;
         }
     }
@@ -980,16 +980,16 @@ u16 func_10010BE8(u16 handle, s32 sound, u16 volume, u8 pan, s16 cents, u8 mix, 
         if ((sound & 0x7FFF) >= 1763) {
             return 0;
         }
-        newHandle = D_800425E0[slot].unk2;
+        newHandle = D_800425E0[slot].nextHandle;
         next = newHandle + 16;
-        D_800425E0[slot].unk0 = newHandle;
+        D_800425E0[slot].handle = newHandle;
         if (next < 16) { // wrapped around: never hand out a bare slot number
             next += 16;
         }
-        D_800425E0[slot].unk2 = next;
-        D_800425E0[slot].unk4 = sound;
-        if (D_800425E0[slot].unk8 != NULL) {
-            D_800425E0[slot].unk8->unk54 = 5;
+        D_800425E0[slot].nextHandle = next;
+        D_800425E0[slot].sound = sound;
+        if (D_800425E0[slot].voice != NULL) {
+            D_800425E0[slot].voice->state = 5;
         }
         if ((mix & 0x7F) + (u8)D_80041FD8 < 0x80) {
             mix += (u8)D_80041FD8;
@@ -997,7 +997,7 @@ u16 func_10010BE8(u16 handle, s32 sound, u16 volume, u8 pan, s16 cents, u8 mix, 
             mix |= 0x7F;
         }
         func_10017438((s32)D_8003E368, sound & 0x7FFF, volume, pan, alCents2Ratio(cents), mix, bus,
-                      &D_800425E0[slot].unk8);
+                      &D_800425E0[slot].voice);
     }
     return newHandle;
 }
@@ -1065,24 +1065,24 @@ s32 func_10010FFC(u16 handle, s32 sound, u16 volume, s16 cents, u8 mix, Actor *o
 
 // Stops the voice behind `handle` now.
 void func_100111C8(u16 handle) {
-    struct120 *slot = &D_800425E0[handle & 0xF];
+    SoundSlot *slot = &D_800425E0[handle & 0xF];
 
-    if ((slot->unk8 != NULL) && (slot->unk0 == handle)) {
-        slot->unk0 = 0;
-        slot->unk4 = 0;
-        func_10017594(slot->unk8);
-        slot->unk8 = NULL;
+    if ((slot->voice != NULL) && (slot->handle == handle)) {
+        slot->handle = 0;
+        slot->sound = 0;
+        func_10017594(slot->voice);
+        slot->voice = NULL;
     }
 }
 
 // Stops the voice behind `handle` on the next update (now if the queue is full).
 void func_1001123C(u16 handle) {
-    struct120 *slot = &D_800425E0[handle & 0xF];
+    SoundSlot *slot = &D_800425E0[handle & 0xF];
 
-    if ((slot->unk8 != NULL) && (slot->unk0 == handle)) {
+    if ((slot->voice != NULL) && (slot->handle == handle)) {
         if (func_100112BC(handle, 1) == 0) {
-            func_10017594(slot->unk8);
-            slot->unk8 = NULL;
+            func_10017594(slot->voice);
+            slot->voice = NULL;
         }
     }
 }
@@ -1110,7 +1110,7 @@ void func_10011310(void) {
     s32 stopped;
     s32 remaining;
     s32 slot;
-    struct31 *voice;
+    SndState *voice;
 
     stopped = 0;
     j = 0;
@@ -1120,14 +1120,14 @@ void func_10011310(void) {
             D_80041F10[i].delay--;
         } else {
             slot = D_80041F10[i].slot;
-            if (D_800425E0[slot].unk0 == D_80041F10[i].handle) {
-                voice = D_800425E0[slot].unk8;
-                D_800425E0[slot].unk0 = 0;
-                D_800425E0[slot].unk4 = 0;
+            if (D_800425E0[slot].handle == D_80041F10[i].handle) {
+                voice = D_800425E0[slot].voice;
+                D_800425E0[slot].handle = 0;
+                D_800425E0[slot].sound = 0;
                 if (voice != NULL) {
                     func_10017594(voice);
                 }
-                D_800425E0[slot].unk8 = NULL;
+                D_800425E0[slot].voice = NULL;
             }
             remaining--;
             stopped = 1;
@@ -1146,12 +1146,12 @@ void func_10011310(void) {
 
 // Returns the sound id playing behind `handle`, or -1.
 s32 func_1001147C(u16 handle) {
-    struct120 *slot;
+    SoundSlot *slot;
 
     if (handle != 0) {
         slot = &D_800425E0[handle & 0xF];
-        if (slot->unk0 == handle) {
-            return slot->unk4 & 0x7FFF;
+        if (slot->handle == handle) {
+            return slot->sound & 0x7FFF;
         }
     }
     return -1;

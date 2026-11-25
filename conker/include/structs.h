@@ -4,7 +4,7 @@
 typedef struct struct12 struct12;
 typedef struct struct25 struct25;
 typedef struct struct27 struct27;
-typedef struct struct31 struct31;
+typedef struct SndState SndState;
 typedef struct struct54 struct54;
 typedef struct struct56 struct56;
 typedef struct struct119 struct119;
@@ -383,76 +383,36 @@ typedef struct {
 } struct30;
 
 typedef struct {
-    u32 unk0;
-    u32 unk4;
-    u32 unk8;
-    u32 unkC;
-    u32 unk10;
-    u32 unk14;
-    u32 unk18;
-    u32 unk1C;
-    u32 unk20;
-    u32 unk24;
-    s32 unk28;
-    u32 unk2C;
-    u16 unk30;
-    u16 unk32;
-    u8  unk34;
-    u8  unk35;
-    u8  unk36;
-    u8  unk37;
-    u16 unk38;
-    u16 unk3A;
-    u32 unk3C;
-    u32 unk40;
-    u32 unk44;
-    u32 unk48;
-    u32 unk4C;
-    u32 unk50;
-    u32 unk54;
-    u32 unk58;
-    u32 unk5C;
-    struct25 *unk60;
-    struct25 *unk64;
-    s32 unk68;
-    struct30 *unk6C;
-    u32 unk70;
-    u32 unk74;
-    u32 unk78;
-    f32 unk7C;
-    f32 unk80;
-    s32 unk84; // address of mesgQueue?
-    s32 unk88;
-    u8  unk8C;
-    u8  unk8D;
-} struct26;
-
-typedef struct {
     s32 unk0;
     s32 unk4;
 } struct32;
 
-struct struct31 {
-    struct31 *unk0;     // used
-    struct31 **unk4;    // used
-    s32 unk8;
-    s32 unkC;           // used
-    s32 unk10;
-    u8 pad[0x1C];
-    f32 unk30;          // used
-    s32 unk34;
-    struct31** unk38;   // used
-    s32 unk3C;          // used
-    s32 unk40;          // used
-    s32 unk44;
-    s32 unk48;
-    s16 unk4C;          // used
-    s8  unk4E;          // used
-    s16 unk50;
-    s8  unk52;
-    u8  unk53;          // used
-    u8  unk54;          // used
-};
+/* A sound player voice record: init_15550.c's SndState (the audio library's sound state), as seen by game code
+ * that cannot include n_libaudio.h; the sound slots of init_EB00.c (D_800425E0) point at one. */
+struct SndState {
+    /* 0x00 */ struct SndState *next;
+    /* 0x04 */ struct SndState *prev;
+    /* 0x08 */ u8 pad8[0x4];
+    /* 0x0C */ ALSound *snd;
+    /* 0x10 */ u8 voice[0x20];       /* N_ALVoice */
+    /* 0x30 */ f32 ratio;            /* key-map cents ratio */
+    /* 0x34 */ f32 pitch;            /* pitch requested by the client */
+    /* 0x38 */ struct SndState **owner;
+    /* 0x3C */ ALBank *bank;
+    /* 0x40 */ s32 retries;
+    /* 0x44 */ s16 volume;           /* client volume */
+    /* 0x46 */ s16 envVolume;        /* envelope volume */
+    /* 0x48 */ s32 segEnd;
+    /* 0x4C */ s16 soundIndex;       /* within the instrument */
+    /* 0x4E */ u8 priority;
+    /* 0x4F */ u8 pan;
+    /* 0x50 */ u8 fxMix;
+    /* 0x51 */ u8 fxBus;
+    /* 0x52 */ u8 unk52;
+    /* 0x53 */ u8 flags;             /* bit 0: allocated, bit 1: looping, bit 2: stopping; 0x10/0x20 from keyMax */
+    /* 0x54 */ u8 state;             /* play state */
+    /* 0x55 */ u8 pad55[3];
+}; /* size 0x58 */
 
 typedef struct {
     s16 unk0;   // used
@@ -891,13 +851,14 @@ struct struct119 {
     struct119 *unk170;
 };
 
+/* A positional sound slot of init_EB00.c (D_800425E0[16]); a handle's low 4 bits are its slot. */
 typedef struct {
-    u16 unk0;       // used
-    u16 unk2;
-    u16 unk4;       // used
-    u16 unk6;
-    struct31 *unk8; // used
-} struct120;
+    /* 0x0 */ u16 handle;
+    /* 0x2 */ u16 nextHandle;  /* handed out next, then advanced by 16 */
+    /* 0x4 */ u16 sound;       /* bit 15: reserved */
+    /* 0x6 */ u16 unk6;
+    /* 0x8 */ SndState *voice;
+} SoundSlot;
 
 typedef struct {
     s16 unk0;
