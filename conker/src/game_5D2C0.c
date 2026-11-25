@@ -404,7 +404,7 @@ void func_15030468(void) {
                             guMtxL2F(boneMtx, parentMtx);
                         }
                     } else {
-                        boneMtx = (f32 (*)[4])((u8 *)owner->unk1D4 + (att->bone << 6));
+                        boneMtx = (f32 (*)[4])((Mtx *)owner->unk1D4 + att->bone);
                     }
                     if (att->mtx != NULL) {
                         mtx = att->mtx;
@@ -750,7 +750,7 @@ Gfx *func_150311C4(Gfx *gdl, Attachment *att, struct127 *owner, s32 view, s32 ar
     Mtx *boneMtx;
     s32 segScratch[3];
     s32 fogOverride;
-    s32 pad;
+    s32 pad; // matching: unused stack slot
     s32 primR;
     s32 primG;
     s32 primB;
@@ -2576,7 +2576,7 @@ Attachment *func_150335C8(struct127 *obj, struct127 *target, s32 setId, s32 bone
             att->unk16 |= 4;
         }
 
-        guMtxL2F(boneMtx, (Mtx *)((u8 *)target->unk1D4 + (bone << 6)));
+        guMtxL2F(boneMtx, (Mtx *)target->unk1D4 + bone);
         func_15048B10((s32)boneMtx, (s32)invBoneMtx);
 
         scale = obj->xz_scale;
