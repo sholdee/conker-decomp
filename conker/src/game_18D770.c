@@ -36,6 +36,26 @@ typedef struct {
 
 extern void (*D_8008B358[])(struct225 *, ActorEvent *, u8);
 
+/* Payload of func_15163CF8: intensity = base + amplitude * sin(phase). */
+typedef struct {
+    f32 base;
+    f32 amplitude;
+    f32 phase;
+    f32 speed; // phase advance per frame
+} LightPulse;
+
+/* Payload of func_15163DEC: intensity eases towards random targets, mostly between low and mid. */
+typedef struct {
+    f32 mid;
+    f32 low;
+    f32 high;
+    f32 target;
+    f32 timer;     // frames until the next target
+    f32 interval;  // longest time between targets
+    f32 smoothing; // fraction of the distance to the target covered per frame
+    f32 level;     // current intensity
+} LightJitter;
+
 struct225 *func_151602C0(Header *header, Header2 *header2, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7, s32 offset, u8 arg9, s32 argA);
 struct225 *func_1516037C(Header *src, struct226 *arg1, s32 size, u8 arg3, s32 arg4);
 void func_151603FC(struct225 *arg0);
@@ -73,18 +93,18 @@ void func_15162EF8(struct239 *effect);
 void func_15162F50(struct239 *effect);
 struct225 *func_15162FAC(struct226 *light, u8 kind, u8 type, u8 arg3, s16 lifetime, s8 update, u8 arg6, s32 arg7);
 struct225 *func_15163414(Header *header, f32 *x, f32 *y, f32 *z, s8 callback, u8 handler, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, u8 argB, s32 extraSize, u8 argD, s32 argE);
-struct225 *func_15163604(s32 arg0, u8 arg1, u8 arg2, s16 arg3, u8 arg4, s32 arg5, u8 arg6, s32 arg7);
+struct225 *func_15163604(struct226 *light, u8 kind, u8 type, s16 lifetime, u8 arg4, s32 arg5, u8 arg6, s32 arg7);
 s32  func_15163704(struct225 *arg0);
-void func_1516381C(s32 arg0, u8 arg1, u8 arg2, s32 arg3);
-void func_1516387C(s32 arg0, u8 arg1, s8 arg2, s16 arg3, u8 arg4, s32 arg5, u8 arg6, s32 arg7);
-s32  func_151639D0(struct225 *arg0, s32 arg1, u8 arg2);
+void func_1516381C(struct226 *light, u8 type, u8 arg2, s32 arg3);
+void func_1516387C(struct226 *light, u8 arg1, s8 update, s16 lifetime, u8 type, s32 size, u8 arg6, s32 arg7);
+void func_151639D0(struct225 *effect, s32 arg1, u8 eventId);
 void func_15163A18(struct225 *arg0, s32 arg1, u8 arg2);
 struct225 *func_15163A60(u8 arg0, u8 arg1, s32 arg2);
 s32  func_15163B98(struct230 *arg0);
-struct225 *func_15163BE8(s32 arg0, u8 arg1, s32 arg2);
+struct225 *func_15163BE8(struct127 *actor, u8 arg1, s32 arg2);
 s32  func_15163CD0(struct225 *arg0);
-void func_15163CF8(struct227 *arg0, struct225 *arg1);
-void func_15163DEC(struct225 *arg0, struct228 *arg1);
+void func_15163CF8(LightPulse *pulse, struct225 *effect);
+void func_15163DEC(struct225 *effect, LightJitter *jitter);
 s32  func_15163F50(struct225 *effect, LightActorRef *ref);
 struct225 *func_15164208(s32 arg0, u8 arg1, u8 arg2, s32 arg3);
 s32  func_1516429C(struct237 *arg0);
@@ -552,26 +572,6 @@ s32 func_15161238(struct127 *actor, struct127 *exclude) {
     }
     return 1;
 }
-
-/* Payload of func_15163CF8: intensity = base + amplitude * sin(phase). */
-typedef struct {
-    f32 base;
-    f32 amplitude;
-    f32 phase;
-    f32 speed; // phase advance per frame
-} LightPulse;
-
-/* Payload of func_15163DEC: intensity eases towards random targets, mostly between low and mid. */
-typedef struct {
-    f32 mid;
-    f32 low;
-    f32 high;
-    f32 target;
-    f32 timer;     // frames until the next target
-    f32 interval;  // longest time between targets
-    f32 smoothing; // fraction of the distance to the target covered per frame
-    f32 level;     // current intensity
-} LightJitter;
 
 struct225 *func_1516127C(struct226 *light, u8 arg1, s32 arg2) {
     struct225 *effect;
@@ -1382,152 +1382,157 @@ void func_151635A8(struct225 *effect, s32 arg1, u8 eventId) {
     }
 }
 
-struct225 *func_15163604(s32 arg0, u8 arg1, u8 arg2, s16 arg3, u8 arg4, s32 arg5, u8 arg6, s32 arg7) {
-    struct225 *temp_v0;
+/* Creates a pulse effect; `kind` (0-13) picks base, amplitude and speed from tables, with a random phase. */
+struct225 *func_15163604(struct226 *light, u8 kind, u8 type, s16 lifetime, u8 arg4, s32 arg5, u8 arg6, s32 arg7) {
+    struct225 *effect;
     Header header;
-    f32 src[4];
+    LightPulse pulse;
 
-    if (arg1 < 0) {
-        return 0;
+    if (kind < 0) { // matching: always false for a u8, kept like func_151615F8's
+        return NULL;
     }
-    if (arg1 >= 14) {
-        return 0;
+    if (kind >= 14) {
+        return NULL;
     }
 
-    src[0] = D_800A6964[arg1];
-    src[1] = D_800A699C[arg1];
-    src[2] = func_150ADA68() * D_800A6B00;
-    src[3] = D_800A69D4[arg1];
+    pulse.base = D_800A6964[kind];
+    pulse.amplitude = D_800A699C[kind];
+    pulse.phase = func_150ADA68() * 6.283185482f;
+    pulse.speed = D_800A69D4[kind];
 
     header.unk0 = arg4;
     header.unk1 = 1;
-    header.unk2 = arg3;
-    header.unk4 = arg2;
+    header.unk2 = lifetime;
+    header.unk4 = type;
 
-    temp_v0 = func_1516037C(&header, arg0, sizeof(src), arg6, arg7);
-    if (temp_v0 != NULL) {
-        memcpy(&temp_v0->unk18, &src, sizeof(src));
+    effect = func_1516037C(&header, light, sizeof(pulse), arg6, arg7);
+    if (effect != NULL) {
+        memcpy(&effect->unk18, &pulse, sizeof(pulse));
     }
-    return temp_v0;
+    return effect;
 }
 
-s32 func_15163704(struct225 *arg0) {
-    struct227 *temp_v0;
-    f32 tmp;
-    s32 pad1;
+/* One-shot pulse: like func_15163CF8, but returns 0 once the phase passes pi. */
+s32 func_15163704(struct225 *effect) {
+    LightPulse *pulse;
+    f32 sine;
+    s32 pad; // matching: unused stack slot
 
-    temp_v0 = &arg0->unk18;
-    tmp = sinf(temp_v0->unk8);
-    arg0->unk14->unk2F = temp_v0->unk0 + (temp_v0->unk4 * tmp);
+    pulse = (LightPulse *)&effect->unk18;
+    sine = sinf(pulse->phase);
+    effect->unk14->unk2F = pulse->base + (pulse->amplitude * sine);
 
-    temp_v0->unk8 += temp_v0->unkC * D_800BE9A4;
-    temp_v0->unk8 = func_15144B68(temp_v0->unk8);
+    pulse->phase += pulse->speed * D_800BE9A4;
+    pulse->phase = func_15144B68(pulse->phase);
 
-    if (temp_v0->unk8 > D_800A6B04) {
+    if (pulse->phase > 3.141592741f) {
         return 0;
     }
     return 1;
 }
 
-void func_1516381C(s32 arg0, u8 arg1, u8 arg2, s32 arg3) {
-    Header tmp;
-    tmp.unk0 = 0;
-    tmp.unk1 = -1;
-    tmp.unk2 = 300;
-    tmp.unk4 = arg1;
-    func_1516037C(&tmp, arg0, 0, arg2, arg3);
-}
-
-void func_1516387C(s32 arg0, u8 arg1, s8 arg2, s16 arg3, u8 arg4, s32 offset, u8 arg6, s32 arg7) {
-    Header tmp;
-    tmp.unk0 = arg1;
-    tmp.unk1 = arg2;
-    tmp.unk2 = arg3;
-    tmp.unk4 = arg4;
-
-    func_1516037C(&tmp, arg0, offset, arg6, arg7);
-}
-
-s32 func_151638E0(struct225 *arg0) {
-    struct227 *temp_v1;
-    s32 sp20[3];
-    f32 sp1C;
-
-    temp_v1 = &arg0->unk18;
-    func_15187FC0(*(s32 *)temp_v1, sp20);
-    func_15188010(*(s32 *)temp_v1, &sp1C);
-    arg0->unk14->unk2F = temp_v1->unk4 + (temp_v1->unk8 * sp1C);
-    return 1;
-}
-// NON-MATCHING: struct isnt quite right..
-// s32 func_151638E0(struct225 *arg0) {
-//     struct227 *temp_v1;
-//     f32 sp20[3];
-//     f32 sp1C;
-//
-//     temp_v1 = &arg0->unk18;
-//     func_15187FC0(arg0->unk18, &sp20); // missing a lw here
-//     func_15188010(temp_v1, &sp1C);
-//     arg0->unk14->unk2F = (temp_v1->unk4 + (temp_v1->unk8 * sp1C));
-//     return 1;
-// }
-
-s32 func_151639D0(struct225 *arg0, s32 arg1, u8 arg2) {
-    if (arg2 == 0x27) {
-        arg0->unk14->unk9 = 1;
-    } else if (arg2 == 0x28) {
-        arg0->unk14->unk9 = 0;
-    }
-}
-
-void func_15163A18(struct225 *arg0, s32 arg1, u8 arg2) {
-    if (arg2 == 0x27) {
-        arg0->unk14->unk9 = 0;
-    } else if (arg2 == 0x28) {
-        arg0->unk14->unk9 = 1;
-    }
-}
-
-struct225 *func_15163A60(u8 arg0, u8 arg1, s32 arg2) {
-    struct225 *temp_v0_2;
+/* Creates an effect with no payload and no update. */
+void func_1516381C(struct226 *light, u8 type, u8 arg2, s32 arg3) {
     Header header;
-    f32 tmp1[4];
-    struct226 *temp_v0;
-    Header2 header2;
 
-    temp_v0 = func_151149AC(arg0); // maybe different types?
-    if (temp_v0 == 0) {
-        return 0;
+    header.unk0 = 0;
+    header.unk1 = -1;
+    header.unk2 = 300;
+    header.unk4 = type;
+    func_1516037C(&header, light, 0, arg2, arg3);
+}
+
+/* Creates an effect with an uninitialised payload of `size` bytes. */
+void func_1516387C(struct226 *light, u8 arg1, s8 update, s16 lifetime, u8 type, s32 size, u8 arg6, s32 arg7) {
+    Header header;
+
+    header.unk0 = arg1;
+    header.unk1 = update;
+    header.unk2 = lifetime;
+    header.unk4 = type;
+
+    func_1516037C(&header, light, size, arg6, arg7);
+}
+
+/* Payload of func_151638E0: intensity follows the value read by func_15188010. */
+typedef struct {
+    s32 source;
+    f32 base;
+    f32 scale;
+} LightFollow;
+
+s32 func_151638E0(struct225 *effect) {
+    LightFollow *follow;
+    s32 unused[3];
+    f32 value;
+
+    follow = (LightFollow *)&effect->unk18;
+    func_15187FC0(follow->source, unused);
+    func_15188010(follow->source, &value);
+    effect->unk14->unk2F = follow->base + (follow->scale * value);
+    return 1;
+}
+
+/* Event handler: event 0x27 turns the light off (unk9 = 1), event 0x28 back on. */
+void func_151639D0(struct225 *effect, s32 arg1, u8 eventId) {
+    if (eventId == 0x27) {
+        effect->unk14->unk9 = 1;
+    } else if (eventId == 0x28) {
+        effect->unk14->unk9 = 0;
     }
-    tmp1[0] = D_800A6964[6]; // D_800A697C
-    tmp1[1] = D_800A699C[6]; // D_800A69B4
-    tmp1[2] = func_150ADA68() * D_800A6B08;
-    tmp1[3] = D_800A69D4[6]; // D_800A69EC;
+}
 
-    header2.unk0 = temp_v0->unk10;
-    header2.unk4 = temp_v0->unk12;
-    header2.unk8 = temp_v0->unk14;
+/* Event handler: the inverse of func_151639D0. */
+void func_15163A18(struct225 *effect, s32 arg1, u8 eventId) {
+    if (eventId == 0x27) {
+        effect->unk14->unk9 = 0;
+    } else if (eventId == 0x28) {
+        effect->unk14->unk9 = 1;
+    }
+}
+
+/* Creates a pulsing light at object `objectId` that lasts until the object's unk6E is 1 (see func_15163B98). */
+struct225 *func_15163A60(u8 objectId, u8 arg1, s32 arg2) {
+    struct225 *effect;
+    Header header;
+    LightPulse pulse;
+    struct226 *object;
+    Header2 position;
+
+    object = func_151149AC(objectId);
+    if (object == NULL) {
+        return NULL;
+    }
+    pulse.base = D_800A6964[6];
+    pulse.amplitude = D_800A699C[6];
+    pulse.phase = func_150ADA68() * 6.283185482f;
+    pulse.speed = D_800A69D4[6];
+
+    position.unk0 = object->unk10;
+    position.unk4 = object->unk12;
+    position.unk8 = object->unk14;
 
     header.unk0 = 2;
     header.unk1 = 17;
     header.unk2 = 300;
     header.unk4 = 5;
 
-    temp_v0_2 = func_151602C0(&header, &header2, D_800A6964[6], 0, 0xFF, 0, 0xFF, 0, 20, arg1, arg2);
-    if (temp_v0_2 != 0) {
-        memcpy(&temp_v0_2->unk18, &tmp1, 16);
-        memcpy(&temp_v0_2->unk28, &temp_v0, 4);
+    effect = func_151602C0(&header, &position, D_800A6964[6], 0, 0xFF, 0, 0xFF, 0, sizeof(pulse) + sizeof(object), arg1, arg2);
+    if (effect != NULL) {
+        memcpy(&effect->unk18, &pulse, sizeof(pulse));
+        memcpy(&effect->unk28, &object, sizeof(object));
     }
-    return temp_v0_2;
+    return effect;
 }
 
-s32 func_15163B98(struct230 *arg0) {
-    struct228* tmp;
-    if (func_1516065C(arg0) == 0) {
+s32 func_15163B98(struct230 *effect) {
+    struct228 *object;
+
+    if (func_1516065C(effect) == 0) {
         return 0;
     } else {
-        tmp = arg0->unk28;
-        if (tmp->unk6E == 1) {
+        object = effect->unk28;
+        if (object->unk6E == 1) {
             return 0;
         } else {
             return 1;
@@ -1535,49 +1540,58 @@ s32 func_15163B98(struct230 *arg0) {
     }
 }
 
-struct225 *func_15163BE8(s32 arg0, u8 arg1, s32 arg2) {
-    struct225 *temp_v0;
-    f32 src[4];
+/* Payload of func_15163CD0: an actor-attached light that also pulses. */
+typedef struct {
+    LightAttach attach;
+    LightPulse pulse;
+} LightAttachPulse;
 
-    src[0] = D_800A6964[6];
-    src[1] = D_800A699C[6];
-    src[2] = func_150ADA68() * D_800A6B0C;
-    src[3] = D_800A69D4[6];
+/* Creates a pulsing light attached to `actor`. */
+struct225 *func_15163BE8(struct127 *actor, u8 arg1, s32 arg2) {
+    struct225 *effect;
+    LightPulse pulse;
 
-    temp_v0 = func_15160A58(arg0, 1, &D_800A6A0C, 2, 300, 100, 0, 0xFF, 0, 0xFF, 0, 0, sizeof(src), 1, arg1, arg2);
-    if (temp_v0 != NULL) {
-        memcpy(&temp_v0->unk30, &src, sizeof(src));
+    pulse.base = D_800A6964[6];
+    pulse.amplitude = D_800A699C[6];
+    pulse.phase = func_150ADA68() * 6.283185482f;
+    pulse.speed = D_800A69D4[6];
+
+    effect = func_15160A58(actor, 1, (struct17 *)&D_800A6A0C, 2, 300, 100, 0, 0xFF, 0, 0xFF, 0, 0, sizeof(pulse), 1, arg1, arg2);
+    if (effect != NULL) {
+        memcpy(&((LightAttachPulse *)&effect->unk18)->pulse, &pulse, sizeof(pulse));
     }
-    return temp_v0;
+    return effect;
 }
 
-s32 func_15163CD0(struct225 *arg0) {
-    func_15163CF8(&arg0->unk30, arg0);
+s32 func_15163CD0(struct225 *effect) {
+    func_15163CF8(&((LightAttachPulse *)&effect->unk18)->pulse, effect);
     return 1;
 }
 
-void func_15163CF8(struct227 *arg0, struct225 *arg1) {
-    f32 tmp = sinf(arg0->unk8);
-    arg1->unk14->unk2F = arg0->unk0 + (arg0->unk4 * tmp);
-    arg0->unk8 = arg0->unk8 + (arg0->unkC * D_800BE9A4);
-    arg0->unk8 = func_15144B68(arg0->unk8);
+/* Sets the intensity from the pulse and advances its phase. */
+void func_15163CF8(LightPulse *pulse, struct225 *effect) {
+    f32 sine = sinf(pulse->phase);
+
+    effect->unk14->unk2F = pulse->base + (pulse->amplitude * sine);
+    pulse->phase = pulse->phase + (pulse->speed * D_800BE9A4);
+    pulse->phase = func_15144B68(pulse->phase);
 }
 
-void func_15163DEC(struct225 *arg0, struct228 *arg1) {
-    arg1->unk10 = arg1->unk10 - D_800BE9A4;
-    if (arg1->unk10 < 0.0f) {
-        arg1->unk10 = func_150ADA68() * arg1->unk14;
+/* Sets the intensity from the jitter state, picking a new random target when its timer runs out. */
+void func_15163DEC(struct225 *effect, LightJitter *jitter) {
+    jitter->timer = jitter->timer - D_800BE9A4;
+    if (jitter->timer < 0.0f) {
+        jitter->timer = func_150ADA68() * jitter->interval;
         if ((func_150ADA20() & 3) != 0) {
-            arg1->unkC = (func_150ADA68() * (arg1->unk0 - arg1->unk4)) + arg1->unk4;
+            jitter->target = (func_150ADA68() * (jitter->mid - jitter->low)) + jitter->low;
         } else {
-            arg1->unkC = (func_150ADA68() * (arg1->unk8 - arg1->unk0)) + arg1->unk0;
+            jitter->target = (func_150ADA68() * (jitter->high - jitter->mid)) + jitter->mid;
         }
     }
-    arg1->unk1C += (arg1->unkC - arg1->unk1C) * arg1->unk18;
-    arg0->unk14->unk2F = arg1->unk1C;
+    jitter->level += (jitter->target - jitter->level) * jitter->smoothing;
+    effect->unk14->unk2F = jitter->level;
 }
 
-/* Update for actor-tied effects: keeps the light at the actor; returns 0 once the actor is gone. */
 s32 func_15163F50(struct225 *effect, LightActorRef *ref) {
     struct127 *actor;
 
