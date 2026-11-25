@@ -158,7 +158,7 @@ s32 func_1503FB40(Gfx **gfxp, u16 backButtons, u16 selectButtons) {
             step = (CONT_PADS[0]->button & Z_TRIG) ? 3 : 1;
             if (D_80084488 == 1) {
                 D_80084498 -= step;
-                if (taskCount < D_80084498) {
+                if (D_80084498 > taskCount) {
                     D_80084498 += taskCount;
                 }
             } else if (D_80084488 == -1) {
@@ -175,7 +175,7 @@ s32 func_1503FB40(Gfx **gfxp, u16 backButtons, u16 selectButtons) {
         D_800C6850 = 0.0f;
     }
     entry = D_80084498 - (u8)((rowCount - 1) >> 1);
-    if (taskCount < entry) {
+    if (entry > taskCount) {
         entry += taskCount;
     }
     D_80084490 -= D_800BE9E4;
@@ -226,7 +226,7 @@ s32 func_1503FB40(Gfx **gfxp, u16 backButtons, u16 selectButtons) {
         }
         if (row < 3) {
             alpha = row * 64 + 64;
-        } else if (rowCount - 3 < row) {
+        } else if (row > rowCount - 3) {
             alpha = (rowCount - row) * 64;
         } else {
             alpha = 255;
