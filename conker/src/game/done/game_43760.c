@@ -19,6 +19,6 @@ void func_150162B0(void) {
     }
     D_800CC2B0 = 0;
     bzero(&D_800CC298, 24);
-    D_800CC2A2 = 1;
+    D_800CC298.unkA = 1;
     D_800D18D0 = 0;
 }

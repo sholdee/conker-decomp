@@ -919,7 +919,6 @@ extern s32 D_800CC288;
 extern s32 D_800CC28C;
 extern s32 D_800CC290;
 extern TexAnimState D_800CC298;
-extern u8  D_800CC2A2;
 
 extern u8 D_800CC2B1;
 extern s16 D_800CC2B2;
