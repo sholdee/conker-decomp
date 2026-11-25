@@ -5,8 +5,6 @@
 #include "variables.h"
 
 
-extern s32 func_151ABE40(f32 *, CollisionHit *, s32, u8, s32);
-
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, void *, void *, s32, f32);
 

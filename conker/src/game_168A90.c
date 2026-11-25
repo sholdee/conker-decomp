@@ -20,7 +20,6 @@ typedef struct {
 } VtxRange;
 
 extern void func_15109064(DynModel *, s32, u8);
-extern void func_151BA468(DynModel *, s32, u8);
 
 extern s32 (*D_80089C18[])(DynModel *);
 extern s32 (*D_80089C28[])(DynModel *, s16);

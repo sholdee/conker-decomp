@@ -43,7 +43,7 @@ void func_15193390(ObjectEmitter *volatile emitter) {
     emitter->base.header.state = (func_150ADA20() & 0x7F) + 100;
 }
 
-typedef struct FallingObject {
+struct FallingObject {
     /* 0x00 */ u8 pad0;
     /* 0x01 */ u8 unk1;
     /* 0x02 */ u8 pad2[0xA];
@@ -63,7 +63,7 @@ typedef struct FallingObject {
     /* 0xAA */ s16 timer;
     /* 0xAC */ u8 padAC[7];
     /* 0xB3 */ s8 unkB3;
-} FallingObject;
+};
 
 /*
  * While unkA4 is below unk96, grows unkA4/unkA2 with the timer. After that the object falls with

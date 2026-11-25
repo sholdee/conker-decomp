@@ -9,7 +9,6 @@ struct HandlerObject {
 
 typedef void (*HandlerFunc)(HandlerObject *, s32, u8);
 
-extern void func_151D33FC(void *, s32);
 extern HandlerFunc D_8008D684[];
 
 /* Runs func_151D33FC for event 0x2A, then the object's handler from D_8008D684 if it has one. */

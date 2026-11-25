@@ -241,9 +241,6 @@ void func_15128774(Camera *arg0, Actor *arg1);
 void func_1512D380(s32 arg0);
 struct DefParticleHead;
 
-/* Actor attachment lists (Actor.attachments, game_179F30): `handle` is the attached effect or object. */
-void func_1519EF70(Actor *arg0, s32 arg1, s32 arg2);
-
 void func_151DB004(struct ParticleDesc *desc);
 void func_151DB068(struct ParticleDesc *desc);
 void func_151DB0CC(struct ParticleDesc *desc);

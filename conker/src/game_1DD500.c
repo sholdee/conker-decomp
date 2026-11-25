@@ -213,7 +213,7 @@ typedef struct Game1DD500Motion {
 } Game1DD500Motion; // size 0x28
 
 /* Particle object created by func_1513D524. */
-typedef struct Game1DD500Particle {
+struct Game1DD500Particle {
     /* 0x000 */ EffectHeader header;
     /* 0x010 */ u8 pad10[0xC];
     /* 0x01C */ s16 life;
@@ -231,7 +231,7 @@ typedef struct Game1DD500Particle {
     /* 0x0C0 */ Vtx quadTemplate[4];
     /* 0x100 */ Vtx *quads[4];
     /* 0x110 */ Game1DD500Motion motion;
-} Game1DD500Particle;
+};
 
 /* A particle held at one of the owner's joints until its timer runs out. */
 typedef struct Game1DD500Slot {
@@ -251,12 +251,10 @@ typedef struct Game1DD500Emitter {
 } Game1DD500Emitter; // size 0x98
 
 /* Effect task: a TimedEffect header followed by the effect's data. */
-typedef struct Game1DD500Task {
+struct Game1DD500Task {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ Game1DD500Emitter emitter;
-} Game1DD500Task;
-
-void func_151B1918(Game1DD500Task *task);
+};
 
 void *memcpy(void *, const void *, u32);
 

@@ -7,7 +7,14 @@
 // matching: func_1506FB60 passes the side to these as an int, (cmd - 0x13) & 0xFF; hide the header's prototypes
 #define func_151C6A28 func_151C6A28_hdr
 #define func_151C62D0 func_151C62D0_hdr
+// matching: two calls here pass a different number of arguments than these take, so the file keeps them unprototyped
+#define func_151942E8 func_151942E8_effect_h
+#define func_151B5BA0 func_151B5BA0_effect_h
 #include "functions.h"
+#undef func_151942E8
+#undef func_151B5BA0
+void func_151942E8();
+void func_151B5BA0();
 #undef func_151C6A28
 void func_151C6A28(Actor *, s32, s32, s32);
 #undef func_151C62D0
@@ -22,7 +29,6 @@ void func_10010630(u16 arg0, Actor *arg1, u32 arg2, s16 arg3, u16 arg4);
 extern u8 func_1505DADC(Actor *arg0, s16 *arg1, s32 arg2, u8 arg3, s32 arg4); // matching: s32 pitch and halfCone: this caller does not narrow them
 
 extern s32 D_800D187C;
-extern void func_151942E8();
 
 /* Parameter block for func_151994B8 (CharacterFlamethrowerSetup in game_1C2C60.c). */
 typedef struct Func151994B8Desc {
@@ -202,7 +208,6 @@ s32 func_151F2CDC(void);
 extern void func_151D5334(Vec3f*, f32, f32, f32, s32, s32, s32);
 void func_151DC260(f32 *, void *, s32, s32, s32);
 extern void func_150F16DC(Actor *, u8, u8, s32, s32);
-void func_15194408(Actor *arg0, Actor *arg1);
 
 /* One entry of an object's timed event list. */
 typedef struct TimedEvent {

@@ -5334,7 +5334,6 @@ void func_15062FC0(Actor *actor, s32 group, u8 arg2, s32 wrapS, s32 wrapT, s32 c
         target[i].v.tc[1] = source[i].v.tc[1] + dt;
     }
 }
-void func_15194FF4(Actor *, Actor *, s32);
 
 /* Calls func_15194FF4 for every other player touching the actor this frame (D_800CC268 mask). */
 void func_15063168(Actor *actor) {

@@ -3,8 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-extern s32 func_151ABE40(f32 *pos, CollisionHit *hit, s32 kind, s32 arg3, s32 arg4);
-
 /* ActorTask callback (see game_1D6E80.c; only the task's CharacterWatcher is read here): ground effect 5
  * under the task's actor, with sound 0x5208. */
 void func_151AE6B0(CharacterWatcher *task) {

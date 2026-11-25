@@ -1,5 +1,15 @@
 #include <ultra64.h>
 
+// This file's .bss, defined before functions.h and variables.h declare the globals: IDO lays out .bss in
+// the order it first sees each name, and that order also depends on how many types and variables are
+// declared before it (see init_50A0.c), which the subsystem headers change often.
+f32 D_800BE5E8[10]; // the last 10 frame deltas
+u32 D_800BE610;     // the leftover tick remainder
+u8 D_800BE614;
+u8 D_800BE615;
+u8 D_800BE616;
+u8 D_800BE617;
+
 // matching: like D_800BE9D0 below, func_1515D6D0 (Gfx *(Gfx *, s32)) is used through an integer view here
 #define func_1515D6D0 func_1515D6D0_functions_h
 // matching: func_1000D758 takes three floats; this file passes z as raw bits in a2 through an integer view
@@ -11,15 +21,6 @@ void func_1000D758(f32 x, f32 y, s32 zBits);
 s32 func_1515D6D0(s32 gfx, s32 player);
 // matching: this file's display-list code only matches with the write head D_800BE9D0 read as an integer
 // (pointer-typed loads pick different registers in func_1501878C's command appends)
-// This file's .bss, defined before variables.h declares the globals: IDO lays out .bss in the order
-// it first sees each name.
-f32 D_800BE5E8[10]; // the last 10 frame deltas
-u32 D_800BE610;     // the leftover tick remainder
-u8 D_800BE614;
-u8 D_800BE615;
-u8 D_800BE616;
-u8 D_800BE617;
-
 #define D_800BE9D0 D_800BE9D0_hdr
 #include "variables.h"
 #undef D_800BE9D0

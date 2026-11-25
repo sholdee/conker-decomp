@@ -465,8 +465,6 @@ s32 func_151C110C(SoundEmitter *emitter, s32 arg1, void **arg2, s32 arg3, s32 ar
     return 0;
 }
 
-s32 func_151ABE40(Vec3f *, CollisionHit *, s32, s32, s32);
-
 /* Per-frame bullet update: moves it, traces for hits and spawns the impact. Returns FALSE when it is done. */
 s32 func_151C1180(Bullet *bullet) {
     BulletState *state;

@@ -3,10 +3,10 @@
 #include "effects.h"
 
 /* Payload of message 0x2D: two objects whose references are exchanged. */
-typedef struct ObjectPair {
+struct ObjectPair {
     /* 0x0 */ Actor *a;
     /* 0x4 */ Actor *b;
-} ObjectPair;
+};
 
 struct TimedSoundTrigger {
     /* 0x0 */ s32 interval;
@@ -18,8 +18,6 @@ struct TimedSoundObject {
     /* 0x00 */ u8 pad0[0x90];
     /* 0x90 */ struct TimedSoundTrigger trigger;
 };
-
-extern void func_151D343C(ActorRef *, s32);
 
 /* Message 0x2D: swap the trigger's target between the two objects in the message. */
 void func_151906E0(struct TimedSoundObject *self, ObjectPair *pair, u8 msg) {

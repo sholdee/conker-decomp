@@ -14,8 +14,9 @@ typedef struct {
 /*
  * Spawns an effect (variant 0-2) at `pos`, facing `angle` degrees. In one mode (D_800D2E4C[0x19] bit 2,
  * or variant 2) it is a model effect 39 units ahead of and 40 below `pos`; otherwise func_151BEEE0 makes it.
+ * The callers also pass the usual effect owner and list, which it does not use.
  */
-void *func_151BE850(Vec3f *pos, f32 angle, u8 count, u8 arg3, u8 variant) {
+void *func_151BE850(Vec3f *pos, f32 angle, u8 count, u8 arg3, u8 variant, u8 owner, s32 list) {
     void *fx;
     s32 zone;
     EffectParams params;

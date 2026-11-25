@@ -55,9 +55,6 @@ typedef struct {
 
 void *memcpy(void *, const void *, u32);
 LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
-void func_151D2AB0(s32);
-void func_151D2BA4(EmitterParticleDesc *, Vec3f *, s32, u8, s32);
-AnchorEmitter *func_151D2F00(FollowerGroupDesc *, s32, u8, s32);
 
 extern AnchorEmitterTemplate *D_8008D630[];
 extern s32 (*D_8008D67C[])(AnchorEmitter *);

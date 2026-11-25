@@ -46,7 +46,7 @@ typedef struct {
     /* 0x10 */ u8 unk10;
 } S151BECB8Params;
 
-typedef struct {
+struct S151BECB8 {
     /* 0x000 */ u8 pad0;
     /* 0x001 */ u8 unk1;
     /* 0x002 */ u8 pad2[0xA];
@@ -64,10 +64,9 @@ typedef struct {
     /* 0x11B */ u8 unk11B;
     /* 0x11C */ u8 pad11C[4];
     /* 0x120 */ S151BECB8Params params;
-} S151BECB8;
+};
 
 extern void func_1515C1A0(Actor *, f32 *, f32 *, f32 *);
-s32 func_151BEE94(Actor *arg0);
 
 /*
  * Proximity check: for every active object whose bounding radius comes within 43 units of

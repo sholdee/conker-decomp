@@ -5,9 +5,7 @@
 #include "variables.h"
 #include "effects.h"
 
-s32 func_151BB0E0(); /* sound update callback, defined below */
 void func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-
 
 
 
@@ -402,7 +400,7 @@ void func_151BB044(Actor *obj) {
 }
 
 /* A playing positional sound, as seen by its update callback. */
-typedef struct {
+struct SoundChannel {
     /* 0x00 */ u16 unk0;
     /* 0x02 */ s16 x;
     /* 0x04 */ s16 y;
@@ -414,7 +412,7 @@ typedef struct {
     /* 0x1C */ u32 userData; /* bits 0-6 state, 7 fading in, 8-15 fade volume, 16-27 timer */
     /* 0x20 */ u8 pad20[0x24 - 0x20];
     /* 0x24 */ u16 unk24;
-} SoundChannel;
+};
 
 /*
  * Update callback of the sounds started by func_151BB044: follows the object, switches between the
@@ -529,8 +527,6 @@ typedef struct { f32 v[9]; } F32x9;
 extern S32x9 D_800AA718;
 extern F32x9 D_800AA73C;
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, CollisionTri *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
-void func_151BBEE4(Vec3f *pos, u8 arg1, s32 arg2);
-void func_151BBFBC(CollisionTri *surf, Vec3f *pos, s32 arg2, s32 arg3);
 
 /*
  * Impact effect for a shot from `from` towards `to`: effects at the origin, then a ray cast along the

@@ -3,8 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-extern void func_151D2AB0(s32);
-
 /* Per-effect data (at 0x28) of the spark effect that follows an object. */
 typedef struct {
     /* 0x00 */ Actor *owner;
@@ -79,8 +77,6 @@ void func_150B54A8(OwnerSparkEffect *effect) {
         data->unkCAccum -= 1.0f;
     }
 }
-
-extern void func_151D2B4C(s32);
 
 void func_150B57C4(OwnerSparkEffect *effect) {
     func_151D2B4C(6);

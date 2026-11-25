@@ -1,4 +1,14 @@
 #include <ultra64.h>
+#include "structs.h"
+
+// This file's .bss (0x800D9890-0x800D98BF), in the original order. IDO places the variables that
+// a header declares after the ones the .c file declares first, so these are declared only here, before
+// functions.h: the order also depends on how many types and variables come before them (see init_50A0.c).
+u8 D_800D9890; // queued command for func_150B6BC0
+EffectHeader *D_800D9894;
+// matching: defined in-file so as1 shares one lui across the unrolled stores in func_150B6C90
+static EffectHeader *D_800D9898[10];
+
 #include "functions.h"
 #include "variables.h"
 #include "effects.h"
@@ -13,13 +23,6 @@ void func_150B765C(void);
 void func_150B77A8(void);
 void func_150B768C(void);
 void func_150B791C(void);
-
-// This file's .bss (0x800D9890-0x800D98BF), in the original order. IDO places the variables that
-// a header declares after the ones the .c file declares first, so these are declared only here.
-u8 D_800D9890; // queued command for func_150B6BC0
-EffectHeader *D_800D9894;
-// matching: defined in-file so as1 shares one lui across the unrolled stores in func_150B6C90
-static EffectHeader *D_800D9898[10];
 
 /* Runs the command queued in D_800D9890 (each handler resets it to 3). */
 void func_150B6BC0(s32 unused) {

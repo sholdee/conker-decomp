@@ -205,9 +205,6 @@ void func_151945CC(Actor *self, Actor *other, u8 *arg2) {
     }
 }
 
-void func_151B01B8(Actor *self, Actor *other);
-void func_151B09BC(Actor *self, Actor *other, s16 arg2, u8 arg3, s32 arg4);
-
 void func_15194794(Actor *self, Actor *other, u8 *arg2) {
     func_151B01B8(self, other);
     func_151B09BC(self, other, 1000, 0xFF, 0);
@@ -385,8 +382,6 @@ void func_15194BF0(Actor *self, Actor *other, u8 *arg2) {
         break;
     }
 }
-
-void func_15194FF4(Actor *self, Actor *other, s32 arg2);
 
 void func_15194D80(Actor *self, Actor *other, u8 *arg2) {
     func_15194FF4(self, other, FALSE);

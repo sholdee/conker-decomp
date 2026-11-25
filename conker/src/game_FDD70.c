@@ -4,8 +4,6 @@
 #include "effects.h"
 
 
-extern void func_151951E0(Actor *);
-
 s32 func_1509BE40(s32, s32, s32, ...);
 /* Eases *value toward target, tracking its rate of change in *velocity. */
 

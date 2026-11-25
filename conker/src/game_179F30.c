@@ -40,9 +40,6 @@ void func_1515F10C(void *);
 void *func_15160A58(Actor *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_15160CDC(Actor *, s32, void *, void *, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void *func_1515D5F8(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-void func_151B9F00(Actor *obj, s32, s32);
-void func_151BB044(Actor *obj);
-void func_151BC074(Actor *obj);
 void func_151D0F60(Actor *obj, s32, s32, s32);
 void func_151D74B0(Actor *obj, s32, s32, s32, s32);
 

@@ -416,6 +416,7 @@ struct Obj150BCFB8;
 struct Obj150BCFB8;
 struct Obj150BCFB8;
 struct Obj150BCFB8;
+struct Obj150BCFB8;
 s32 func_150BB760(Actor *actor);
 s32 func_150BBB5C(Actor *actor);
 s32 func_150BC488(Actor *actor);
@@ -424,6 +425,7 @@ s32 func_150BCFB8(struct Obj150BCFB8 *obj, s32 arg1, s32 arg2, s32 arg3, f32 flo
 void func_150BD070(u8 arg0, s32 arg1);
 
 /* game_EABF0.c */
+struct Obj150BDB3C;
 struct Obj150BDB3C;
 struct Obj150BDB3C;
 struct Obj150BDB3C;
@@ -1006,6 +1008,7 @@ s32 func_1514EA1C(ModeTarget *target, s32 msg, s32 arg);
 void func_1514EB6C(ToggleTarget *target, s32 msg, s32 arg);
 s32 func_1514EB8C(s32 handle, s32 msg, s32 arg);
 Attachment *func_1514EBA4(void *handle, s16 type, s32 extraSize);
+/* Actor attachment lists (Actor.attachments): `handle` is the attached effect or object. */
 Attachment *func_1514EC1C(void *handle, Actor *owner, s16 type);
 s32 func_1514ECE0(Attachment *list, s16 type, Attachment **out);
 s32 func_1514ED3C(Attachment *list, void *handle, Attachment **out);
@@ -1268,5 +1271,233 @@ typedef struct HandlerObject HandlerObject;
 void func_15190550(HandlerObject *obj, s32 arg1, u8 event);
 s32 func_151905BC(PeriodicObject *obj);
 void func_151906C4(PeriodicObject *obj);
+
+/* game_1BDB90.c */
+struct TimedSoundObject;
+typedef struct ObjectPair ObjectPair;
+void func_151906E0(struct TimedSoundObject *self, ObjectPair *pair, u8 msg);
+void func_1519072C(Actor *self);
+
+/* game_1BFCB0.c */
+void func_15192800(Actor *obj, s32 arg1);
+s32 func_151928B0(Actor *obj, s32 *group);
+
+/* game_1C0840.c */
+typedef struct FallingObject FallingObject;
+void func_15193390(ObjectEmitter *volatile emitter);
+void func_151934B4(FallingObject *obj);
+
+/* game_1C1150.c */
+void func_15193CA0(Actor *obj, u8 arg1, u8 arg2, s32 arg3);
+void func_151942B0(Actor *self, Actor *other, u8 *arg2);
+void func_151942E8(Actor *self, Actor *other, u8 *arg2);
+void func_15194320(Actor *self, Actor *other, u8 *arg2);
+void func_15194394(Actor *self, Actor *other, u8 *arg2);
+void func_15194408(Actor *self, Actor *other);
+void func_15194588(Actor *self, Actor *other, u8 *arg2);
+void func_151945CC(Actor *self, Actor *other, u8 *arg2);
+void func_15194794(Actor *self, Actor *other, u8 *arg2);
+void func_15194810(Actor *self, Actor *other, u8 *arg2);
+void func_151949E0(Actor *self, Actor *other, u8 *arg2);
+void func_151949F4(s32 arg0, Actor *self, Actor *other);
+void func_15194A68(Actor *self, Actor *other, u8 *arg2);
+void func_15194AB4(Actor *obj);
+void func_15194B1C(Actor *obj);
+void func_15194B94(Actor *self, Actor *other, u8 *arg2);
+void func_15194BF0(Actor *self, Actor *other, u8 *arg2);
+void func_15194D80(Actor *self, Actor *other, u8 *arg2);
+void func_15194DA4(Actor *self, Actor *other, u8 *arg2);
+void func_15194DC8(Actor *self, Actor *other, u8 *arg2);
+void func_15194E54(Actor *self, Actor *other, u8 *arg2);
+void func_15194EA8(Actor *self, Actor *other, u8 *arg2);
+void func_15194F48(Actor *self, Actor *other, u8 *arg2);
+void func_15194FF4(Actor *self, Actor *other, s32 arg2);
+void func_151951E0(Actor *obj);
+void func_15195528(Actor *self, Actor *other, u8 *arg2);
+void func_15195650(Actor *self, Actor *other, u8 *arg2);
+void func_15195698(Actor *self, Actor *other, u8 *arg2);
+void func_15195738(Actor *self, Actor *other, u8 *arg2);
+
+/* game/done/game_1CC420.c */
+void func_1519EF70(Actor *arg0, s32 arg1, s32 arg2);
+
+/* game_1D3420.c */
+typedef struct Game1D3420Listener Game1D3420Listener;
+typedef struct Game1D3420Emitter Game1D3420Emitter;
+typedef struct Game1D2B10QuadVertex Game1D2B10QuadVertex;
+typedef struct Game1D2B10QuadOwner Game1D2B10QuadOwner;
+void func_151A5F70(Game1D3420Listener *listener, void *data, u8 type);
+void func_151A6068(Game1D3420Emitter *emitter, s32 arg1, u8 playSound, u8 arg3, u8 arg4, s32 arg5);
+Game1D2B10QuadVertex *func_151A6350(Game1D2B10QuadOwner *owner, s16 index);
+
+/* game_1D3FC0.c */
+void func_151A6B10(struct DefParticleHead *obj);
+void func_151A6B3C(struct DefParticleHead *obj);
+void func_151A6B68(Actor *target, s32 owner);
+ListObj *func_151A6BD8(s32 owner);
+
+/* game_1D4140.c */
+void func_151A6C90(Actor *obj, u8 arg1, s32 arg2);
+
+/* game_1D6E80.c */
+typedef struct Task151AA30C Task151AA30C;
+typedef struct Task151AA17C Task151AA17C;
+typedef struct PulseFx PulseFx;
+typedef struct Obj151AB3A4 Obj151AB3A4;
+typedef struct Obj151AADBC Obj151AADBC;
+typedef struct Obj151AA6D8 Obj151AA6D8;
+typedef struct LoopSoundFx LoopSoundFx;
+typedef struct EmitterTask EmitterTask;
+typedef struct ActorTask ActorTask;
+void func_151A99D0(ActorTask *task);
+void func_151A9AA4(ActorTask *task);
+void func_151A9BA0(ActorTask *task);
+void func_151A9CA0(ActorTask *task);
+void func_151A9DC0(ActorTask *task);
+void func_151A9EC0(ActorTask *task);
+void func_151A9FC8(ActorTask *task);
+void func_151AA09C(ActorTask *task);
+void func_151AA170(s32 arg0);
+void func_151AA17C(Task151AA17C *task);
+void func_151AA1D0(void);
+void func_151AA1F0(void);
+void func_151AA210(Task151AA17C *task);
+void func_151AA264(Actor *actor, CollisionHit *hit);
+void func_151AA30C(f32 x, f32 y, f32 z, f32 arg3, f32 scale, f32 arg5, Task151AA30C *task);
+PulseFx *func_151AA48C(Actor *actor, ActorTask *task);
+s32 func_151AA5A4(PulseFx *fx);
+void func_151AA6D8(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, Obj151AA6D8 *obj);
+f32 func_151AAA4C(PulseFx *fx);
+void func_151AAABC(ActorTask *task);
+void func_151AAB50(PulseFx *fx);
+void func_151AAB78(PulseFx *fx);
+s32 func_151AABA0(PulseFx *fx);
+void func_151AABC4(Actor *actor, u8 index);
+s32 func_151AADBC(Obj151AADBC *obj);
+void func_151AADF8(ActorTask *task);
+s32 func_151AB090(FlickerSprite *fx);
+s32 func_151AB180(FlickerSprite *fx);
+void func_151AB1C4(ActorTask *task);
+LoopSoundFx *func_151AB2C4(Actor *actor, ActorTask *task);
+void func_151AB3A4(f32 x, f32 y, f32 z, f32 dx, f32 arg4, f32 dz, Obj151AB3A4 *obj);
+s32 func_151AB6B8(LoopSoundFx *fx);
+void func_151AB788(LoopSoundFx *fx);
+void func_151AB7D8(LoopSoundFx *fx);
+void func_151AB828(ActorTask *task);
+void func_151AB854(ActorTask *task);
+void func_151AB920(s32 arg0, s32 arg1);
+void func_151AB930(Actor *actor);
+void func_151AB9C8(EmitterTask *task);
+void func_151ABD54(EmitterTask *task, ActorMsg *msg, u8 msgId);
+void func_151ABE00(Actor *actor);
+
+/* game_1D92F0.c */
+typedef struct FxSpawnPayload FxSpawnPayload;
+typedef struct FxEmitter FxEmitter;
+void func_151ABE40(Vec3f *pos, CollisionHit *hit, s32 type, s32 arg3, s32 arg4);
+s32 func_151AC078(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 yaw, s32 arg9, s32 argA,
+                  s32 type, s32 argC, FxSpawnPayload *payload, u8 argE);
+s32 func_151AC3CC(FxEmitter *emitter);
+s32 func_151AC408(FxEmitter *emitter, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5);
+
+/* game_1DBB60.c */
+void func_151AE6B0(CharacterWatcher *task);
+
+/* game_1DC150.c */
+void func_151AECA0(Actor *obj, u8 arg1, s32 arg2);
+
+/* game_1DD500.c */
+typedef struct Game1DD500Task Game1DD500Task;
+typedef struct Game1DD500Particle Game1DD500Particle;
+s32 func_151B0050(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 pitch, s16 yaw, s32 argA,
+                  s32 argB, s32 argC, s32 argD, u8 argE);
+void func_151B01B8(Actor *actor, Actor *other);
+void func_151B03B8(Actor *actor, u8 arg1, s32 arg2);
+Game1DD500Task *func_151B09BC(Actor *actor, Actor *other, s16 lifetime, u8 arg3, s32 arg4);
+void func_151B0B88(Game1DD500Task *task);
+s32 func_151B118C(Game1DD500Particle *particle);
+s32 func_151B1478(Game1DD500Particle *particle);
+Vtx *func_151B14AC(Game1DD500Particle *particle, s16 view);
+s32 func_151B1828(Game1DD500Particle *arg0);
+void func_151B1918(Game1DD500Task *task);
+void func_151B19A4(Game1DD500Task *task, void *msg, u8 type);
+void func_151B1A58(Game1DD500Task *task);
+void func_151B1A84(Game1DD500Task *task);
+
+/* game_1E3050.c */
+void func_151B5BA0(Actor *spawner, Actor *spawned);
+
+/* game_1E5820.c */
+typedef struct Effect1E5820 Effect1E5820;
+void func_151B8370(Effect1E5820 *effect);
+void func_151B83A0(Effect1E5820 *effect);
+void func_151B83CC(Effect1E5820 *effect);
+
+/* game_1E73B0.c */
+typedef struct SoundChannel SoundChannel;
+void *func_151B9F00(Actor *owner, u8 arg1, s32 arg2);
+s32 func_151BA084(DynModel *effect, s16 viewport);
+void func_151BA468(DynModel *effect, ActorMsg *msg, u8 msgType);
+void func_151BA518(Actor *obj, u8 arg1, s32 arg2);
+void func_151BB044(Actor *obj);
+s32 func_151BB0E0(SoundChannel *chan, s32 arg1, u32 *volume, s32 arg3, s32 *speedOut, s32 arg5, u16 *soundId); /* sound update callback, defined below */
+void func_151BB61C(Actor *obj, Vec3f *from, Vec3f *to, u8 arg3, s32 arg4);
+void func_151BBA9C(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4);
+void func_151BBEE4(Vec3f *pos, u8 arg1, s32 arg2);
+void func_151BBFBC(CollisionTri *surf, Vec3f *pos, s32 arg2, s32 arg3);
+void func_151BC074(Actor *obj);
+void func_151BC104(Actor *obj, u8 arg1, s32 arg2);
+
+/* game_1EB6C0.c */
+typedef struct OwnedParticle OwnedParticle;
+s32 func_151BE210(BurstSpark *spark);
+Vtx *func_151BE4B8(BurstSpark *spark, s16 viewport);
+void func_151BE558(OwnedParticle *particle, ActorMsg *msg, u8 msgId);
+void func_151BE604(BurstSpark *spark, s32 msg, u8 msgId);
+void func_151BE644(BurstSpark *spark);
+void func_151BE674(BurstSpark *spark);
+void func_151BE6A0(BurstSpark *spark);
+s32 func_151BE6CC(BurstGlow *glow);
+void func_151BE788(BurstGlow *glow, s32 msg, u8 msgId);
+void func_151BE7C8(BurstGlow *glow);
+void func_151BE7F8(BurstGlow *glow);
+void func_151BE824(BurstGlow *glow);
+
+/* game_1EBD00.c */
+void *func_151BE850(Vec3f *pos, f32 angle, u8 count, u8 arg3, u8 variant, u8 owner, s32 list);
+
+/* game_1EBFD0.c */
+struct S151BEB20;
+typedef struct S151BECB8 S151BECB8;
+s32 func_151BEB20(struct S151BEB20 *arg0);
+s32 func_151BEC94(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4);
+s32 func_151BECB8(S151BECB8 *arg0);
+s32 func_151BEE94(Actor *arg0);
+
+/* game_1FF760.c */
+void func_151D22B0(Actor *actor, u8 arg1, s32 arg2);
+
+/* game_1FFF60.c */
+typedef struct BoneFollower BoneFollower;
+typedef struct ActorFollowerGroup ActorFollowerGroup;
+void func_151D2AB0(s32 index);
+void func_151D2B4C(s32 index);
+BoneFollower *func_151D2BA4(void *params, Vec3f *position, s32 extraSize, u8 arg3, s32 arg4);
+void func_151D2C40(BoneFollower *follower);
+void func_151D2DAC(BoneFollower *follower);
+void func_151D2DCC(BoneFollower *arg0);
+void func_151D2E14(BoneFollower *arg0);
+void func_151D2E5C(BoneFollower *follower, ActorMsg *msg, u8 type);
+ActorFollowerGroup *func_151D2F00(void *params, s32 extraSize, u8 arg2, s32 arg3);
+void func_151D2F90(ActorFollowerGroup *group);
+void func_151D3130(ActorFollowerGroup *group);
+void func_151D31F4(ActorFollowerGroup *group);
+void func_151D3220(ActorFollowerGroup *group);
+void func_151D324C(ActorFollowerGroup *group, ActorMsg *msg, u8 type);
+void func_151D3308(BoneFollower *follower);
+void func_151D3354(BoneFollower *follower);
+void func_151D33B8(ActorFollowerGroup *group);
+void func_151D33FC(ActorFollowerGroup *group, ActorMsg *msg);
+void func_151D343C(s32 arg0, u8 arg1);
 
 #endif

@@ -28,14 +28,14 @@ typedef struct {
     /* 0x14 */ f32 amplitude;
 } PulseFxPayload;
 
-typedef struct {
+struct PulseFx {
     /* 0x00 */ u8 pad0[0x58];
     /* 0x58 */ f32 unk58;
     /* 0x5C */ f32 unk5C;
     /* 0x60 */ f32 unk60;
     /* 0x64 */ u8 pad64[0x1C];
     /* 0x80 */ PulseFxPayload payload;
-} PulseFx;
+};
 
 /* Payload at +0x58 of the effect spawned by func_151AB2C4: holds a looping sound. */
 typedef struct {
@@ -46,11 +46,11 @@ typedef struct {
     /* 0x08 */ f32 unk8;
 } LoopSoundFxPayload;
 
-typedef struct {
+struct LoopSoundFx {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8 pad10[0x48];
     /* 0x58 */ LoopSoundFxPayload payload;
-} LoopSoundFx;
+};
 
 typedef struct {
     /* 0x00 */ u8 pad0[0x14];
@@ -60,14 +60,10 @@ typedef struct {
 } ActorTaskFx;
 
 /* Callback block attached to an actor; the callbacks below drop effects onto the ground under it. */
-typedef struct ActorTask {
+struct ActorTask {
     /* 0x00 */ CharacterWatcher watcher;
     /* 0x58 */ ActorTaskFx fx;
-} ActorTask;
-
-void func_151AA264(Actor *actor, CollisionHit *hit);
-void func_151ABE00(Actor *actor);
-extern s32 func_151ABE40(f32 *pos, CollisionHit *hit, s32 kind, s32 arg3, s32 arg4);
+};
 
 /* Probes the ground under the task's actor and spawns ground effect 3 there. */
 void func_151A99D0(ActorTask *task) {
@@ -261,12 +257,12 @@ void func_151AA09C(ActorTask *task) {
 void func_151AA170(s32 arg0) {
 }
 
-typedef struct {
+struct Task151AA17C {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8 pad10[0x8];
     /* 0x18 */ s32 unk18;
     /* 0x1C */ u8 unk1C;
-} Task151AA17C;
+};
 
 typedef struct {
     /* 0x00 */ s32 unk0;
@@ -336,11 +332,11 @@ void func_151AA264(Actor *actor, CollisionHit *hit) {
     }
 }
 
-typedef struct {
+struct Task151AA30C {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8 pad10[0xC];
     /* 0x1C */ Actor *actor;
-} Task151AA30C;
+};
 
 /* Spawns one falling particle at (x, y, z) when that point is not above the task actor's unk118. */
 void func_151AA30C(f32 x, f32 y, f32 z, f32 arg3, f32 scale, f32 arg5, Task151AA30C *task) {
@@ -419,10 +415,10 @@ s32 func_151AA5A4(PulseFx *fx) {
     return 1;
 }
 
-typedef struct {
+struct Obj151AA6D8 {
     /* 0x00 */ u8 pad0[0x74];
     /* 0x74 */ f32 unk74;
-} Obj151AA6D8;
+};
 
 /* Spawns a particle burst moving from `from` toward `to`, advanced by `t` frames. */
 void func_151AA6D8(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, Obj151AA6D8 *obj) {
@@ -507,8 +503,6 @@ f32 func_151AAA4C(PulseFx *fx) {
     pulse->phase += pulse->phaseStep * D_800BE9E4;
     return value;
 }
-
-LoopSoundFx *func_151AB2C4(Actor *actor, ActorTask *task);
 
 /* Refreshes the task's pulse and loop-sound effects, spawning whichever is missing. */
 void func_151AAABC(ActorTask *task) {
@@ -624,12 +618,12 @@ typedef struct {
     /* 0x1B */ u8 unk1B;
 } Obj151AADBC_98;
 
-typedef struct {
+struct Obj151AADBC {
     /* 0x00 */ u8 pad0[0x1C];
     /* 0x1C */ s16 unk1C;
     /* 0x1E */ u8 pad1E[0x7A];
     /* 0x98 */ Obj151AADBC_98 *unk98;
-} Obj151AADBC;
+};
 
 /* Caps obj->unk98->unk1B at obj->unk1C * 16 (at most 255). */
 s32 func_151AADBC(Obj151AADBC *obj) {
@@ -799,10 +793,10 @@ LoopSoundFx *func_151AB2C4(Actor *actor, ActorTask *task) {
     return fx;
 }
 
-typedef struct {
+struct Obj151AB3A4 {
     /* 0x00 */ u8 pad0[0x60];
     /* 0x60 */ f32 unk60;
-} Obj151AB3A4;
+};
 
 /* Spawns a particle burst at (x, y, z) drifting against (dx, dz). */
 void func_151AB3A4(f32 x, f32 y, f32 z, f32 dx, f32 arg4, f32 dz, Obj151AB3A4 *obj) {
@@ -963,10 +957,10 @@ typedef struct {
     /* 0x18 */ u8 color;
 } EmitterPayload;
 
-typedef struct {
+struct EmitterTask {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ EmitterPayload payload;
-} EmitterTask;
+};
 
 /* Spawns a spark emitter task that follows `actor`. */
 void func_151AB930(Actor *actor) {

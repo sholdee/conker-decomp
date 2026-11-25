@@ -59,11 +59,11 @@ Vtx *func_151BE4B8(BurstSpark *spark, s16 viewport) {
 }
 
 /* A func_15130280 particle (game_15D730.c's Particle) whose caller-sized data (at 0xA8) holds its owner at +8. */
-typedef struct {
+struct OwnedParticle {
     EffectHeader header;
     u8 pad10[0xA0];
     ActorRef owner;
-} OwnedParticle;
+};
 
 /* Message handler: 0x2D makes the particle follow its owner through a swap; message 0 for its owner frees it. */
 void func_151BE558(OwnedParticle *particle, ActorMsg *msg, u8 msgId) {

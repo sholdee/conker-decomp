@@ -4,8 +4,6 @@
 #include "variables.h"
 #include "effects.h"
 
-typedef struct BoneFollower BoneFollower;
-typedef struct ActorFollowerGroup ActorFollowerGroup;
 
 /* Object type 0x3D: a point on one bone of an actor, re-transformed every frame. */
 struct BoneFollower {
@@ -48,10 +46,6 @@ struct ActorFollowerGroup {
     /* 0x28 */ BoneFollower *tail;
     /* 0x2C */ u8 pad2C[4];
 }; // size 0x30
-
-void func_151D3308(BoneFollower *follower);
-void func_151D3354(BoneFollower *follower);
-void func_151D33FC(ActorFollowerGroup *group, ActorMsg *msg);
 
 extern s32 (*D_8008FC40[])(BoneFollower *, Vec3f *);
 extern void (*D_8008FC48[])(BoneFollower *, Vec3f *);

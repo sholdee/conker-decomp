@@ -27,11 +27,11 @@ typedef struct {
 } FxImpactEntry; // size 0xC
 
 /* Passed through func_1514C678 to the spawn callbacks (e.g. func_151AC078). */
-typedef struct {
+struct FxSpawnPayload {
     /* 0x00 */ CollisionHit *hit;
     /* 0x04 */ s32 unk4;
     /* 0x08 */ u8 kind;
-} FxSpawnPayload;
+};
 
 extern FxImpactSet D_800A9020[];
 extern FxSpawnRange D_800A9040[];
@@ -209,13 +209,13 @@ typedef struct {
 } FxEmitterData;
 
 /* Effect state passed to the callbacks in the D_8008A3F8 / D_8008A430 handler tables. */
-typedef struct {
+struct FxEmitter {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
     /* 0x84 */ u8 unk84[0x10];
     /* 0x94 */ FxEmitterPoint *points;
     /* 0x98 */ FxEmitterData *data;
-} FxEmitter;
+};
 
 /* Lowers the effect's alpha to unk1C * 8 (capped at 255) once that is below it. */
 s32 func_151AC3CC(FxEmitter *emitter) {
