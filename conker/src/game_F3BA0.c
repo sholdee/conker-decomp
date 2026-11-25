@@ -29,7 +29,6 @@ s32 func_15045800(f32 *pos, s32 mask, f32 bottom, CollisionHit *hit);
 void func_15143134(Vec3f *in, Vec3f *out, MtxF *matrix);
 u8 func_151D8E20(void);
 WatcherEmitter *func_1513418C(BloodDripDesc *desc, s32 dataSize, u8 arg2, s32 arg3);
-void func_1513F6C0(FlickerSprite *sprite, u8 updateFn, u8 expireFn);
 
 extern Vec3f D_800887E0;
 /*

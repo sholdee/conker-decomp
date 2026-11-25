@@ -2,56 +2,7 @@
 /* functions.h declares these two void, but both return a value. */
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 #include "libc/string.h"
-
-/* State of the effect, stored after its main particle. */
-typedef struct {
-    /* 0x00 */ Actor *owner;
-    /* 0x04 */ u8 ownerId;          /* owner->unique_id */
-    /* 0x05 */ u8 pad5[3];
-    /* 0x08 */ Vec3f unk8;
-    /* 0x14 */ Vec3f unk14;
-    /* 0x20 */ u8 unk20;
-    /* 0x21 */ s8 ownerSlot;        /* owner's index in movement_obj */
-    /* 0x22 */ u8 unk22;            /* owner->camera->CNumber, 0xFF without a camera */
-    /* 0x23 */ u8 unk23;
-    /* 0x24 */ u8 *particleA;       /* func_15130374 particle */
-    /* 0x28 */ u8 *subParticle;     /* func_1513D4B8 particle */
-    /* 0x2C */ LightEffect *flash;    /* func_151602C0 */
-    /* 0x30 */ u8 *glow;            /* func_151407D0 glow */
-    /* 0x34 */ u8 *particleB;       /* func_15130374 particle */
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ f32 unk50;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ f32 unk58;
-    /* 0x5C */ f32 unk5C;
-    /* 0x60 */ f32 unk60;
-    /* 0x64 */ f32 unk64;
-    /* 0x68 */ f32 unk68;
-    /* 0x6C */ f32 unk6C;
-    /* 0x70 */ f32 unk70;
-    /* 0x74 */ f32 unk74;
-    /* 0x78 */ f32 unk78;
-    /* 0x7C */ f32 unk7C;
-    /* 0x80 */ f32 unk80;
-    /* 0x84 */ f32 unk84;
-    /* 0x88 */ f32 unk88;
-    /* 0x8C */ f32 unk8C;
-    /* 0x90 */ s16 sound;           /* func_10010F30 handle */
-    /* 0x92 */ u8 pad92[2];
-} EffectParticleState; /* size 0x94 */
-
-/* The main particle: a func_1513D4B8 particle (0x110 bytes) followed by its EffectParticleState. */
-typedef struct {
-    DefParticleHead head;
-    EffectParticleState state;
-} EffectParticle;
 
 /* Data of the child subParticle (after its 0x110-byte particle). */
 typedef struct {

@@ -1,5 +1,7 @@
 #include <ultra64.h>
+#define func_1510A344 func_1510A344_header // matching: this file keeps its own declaration of func_1510A344
 #include "functions.h"
+#undef func_1510A344
 #include "effects.h"
 #include "variables.h"
 
@@ -1181,8 +1183,7 @@ extern void func_151A3390(Actor *, u8);
 extern void func_15165F80(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_15136A50(f32 *, f32 *, f32 *, s16, s32, s32);
 extern void func_150CE150(Actor *, s16, u8, s32);
-extern void func_15109410(Actor *, s16, s32, s32, f32, s32, s32, s32);
-extern void func_15109ED4(WorldObject *, s16, s32, s32, f32, s32, s32, s32);
+// matching: an s16 duration where the definition has s32 (the call truncates it)
 extern void func_1510A344(Actor *, s16, u8, s32);
 extern void func_151619A0(s32, s16, u8, s32);
 extern void func_15108FFC(s32, s32, u8);

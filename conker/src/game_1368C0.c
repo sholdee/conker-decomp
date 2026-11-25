@@ -1,50 +1,11 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /*
  * Object-attached particle emitters: effects 0x1A, 0x1B and 0x1C (TimedEffects with their own data
  * at 0x28), the per-frame updates that emit their particles, and their spawn callbacks.
  */
-
-/* Data of effect 0x1A (func_15109410 / func_151094FC). */
-typedef struct {
-    /* 0x00 */ Actor *object;
-    /* 0x04 */ u8 objectId; /* object->unique_id when attached; a mismatch means the slot was reused */
-    /* 0x08 */ f32 spawnAccum;
-    /* 0x0C */ f32 spawnRate;
-    /* 0x10 */ s8 tickFunc; /* index into D_80088C60, -1: none */
-    /* 0x11 */ s8 emitFunc; /* index into D_80088C64, -1: none */
-} ObjectEmitterData; /* size 0x14 */
-
-/* Data of effect 0x1B (func_15109ED4 / func_15109FB8). */
-typedef struct {
-    /* 0x00 */ void *unk0; /* passed to func_1511490C to build the emitter's matrix */
-    /* 0x04 */ f32 spawnAccum;
-    /* 0x08 */ f32 spawnRate;
-    /* 0x0C */ s8 tickFunc; /* index into D_80088C60, -1: none */
-    /* 0x0D */ s8 emitFunc; /* index into D_80088C64, -1: none */
-} MatrixEmitterData; /* size 0x10 */
-
-/* Data of effect 0x1C (func_1510A344 / func_1510A40C). */
-typedef struct {
-    /* 0x00 */ Actor *object;
-    /* 0x04 */ u8 objectId;
-    /* 0x08 */ f32 spawnAccum;
-    /* 0x0C */ f32 spawnRate;
-    /* 0x10 */ f32 spawnRateRandom; /* added to spawnRate scaled by a random [0, 1) */
-} PairEmitterData; /* size 0x14 */
-
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ union {
-        ActorRef tracked;
-        ObjectEmitterData object;
-        MatrixEmitterData matrix;
-        PairEmitterData pair;
-    } data;
-} Effect1368C0;
 
 /* Live particle returned by func_15130374; its extra data (dataSize bytes) starts at 0xA8. */
 typedef struct {

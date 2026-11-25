@@ -72,8 +72,6 @@ s32 func_151B85AC(BulletParticle *particle) {
     return 1;
 }
 
-void func_1513FA70(BulletParticle *particle, s16 viewport);
-
 /* Draws the particle with the default particle drawer. */
 void func_151B863C(BulletParticle *particle, s16 viewport) {
     func_1513FA70(particle, viewport);

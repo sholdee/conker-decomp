@@ -1,49 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-/*
- * Per-particle data of the particles func_151082D0 spawns (update function 0x18, func_15108658).
- * The animation frame steps 0 -> 1 -> 2 at the start of the particle's life and back at the end.
- */
-typedef struct {
-    /* 0x00 */ f32 life;       /* remaining; the particle dies below 0 */
-    /* 0x04 */ f32 lifetime;   /* initial life */
-    /* 0x08 */ f32 frame1Time; /* time spent below frame 2 at either end */
-    /* 0x0C */ f32 frame0Time; /* time spent at frame 0 at either end */
-    /* 0x10 */ f32 flashTimer; /* counts down from 11 while flashing, 0 otherwise */
-} FlashParticleData;
-
-/* Particle created by func_15130280 (only the fields used here, see game_15D730.c). */
-typedef struct {
-    /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ FlashParticleData data;
-} AreaFlashParticle;
-
-/* Points the emitter spawns particles around: a centre, a radius and a height range. */
-typedef struct {
-    /* 0x00 */ s16 x;
-    /* 0x02 */ s16 y;
-    /* 0x04 */ s16 z;
-    /* 0x06 */ s16 radius;
-    /* 0x08 */ s16 height;
-} EmitterArea;
 
 #define EMITTER_ENABLED 1
-
-/* Per-effect data of the func_151082D0 emitter. */
-typedef struct {
-    /* 0x00 */ f32 spawnAccum;
-    /* 0x04 */ EmitterArea *area;
-    /* 0x08 */ u8 flags;
-} AreaEmitterData;
-
-/* Timed effect of func_151082D0. */
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ AreaEmitterData data;
-} AreaEmitter;
 
 extern void func_1514373C(f32 angle, f32 radius, f32 *x, f32 *z);
 

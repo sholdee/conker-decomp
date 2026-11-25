@@ -62,7 +62,6 @@ extern Game196DB0RenderMode D_800A4AC8[];
 Gfx *func_15094F70(Gfx *, void *, s32, void *, s32, s32, s32, s32, s32);
 Gfx *func_1509629C(Gfx *, void *, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32);
 Gfx *func_15142FBC(Gfx *gfx, s32 otherModeH, s32 otherModeL, u8 *update);
-Gfx *func_1513F4E4(Gfx *gfx, u8 arg1, u8 *update);
 
 /* Draws the sprite as a scaled textured rectangle. */
 Gfx *func_15169A48(Gfx *gfx, Sprite2D *sprite, s32 arg2) {

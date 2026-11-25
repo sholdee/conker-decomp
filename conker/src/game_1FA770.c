@@ -399,7 +399,6 @@ Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
 Gfx *func_15142E24(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *update,
                    s32 argA);
 Gfx *func_15142FBC(Gfx *gfx, s32 otherModeH, s32 otherModeL, u8 *update);
-Gfx *func_1513F4E4(Gfx *gfx, u8 arg1, u8 *update);
 void func_151D5D60(void *buffers, s16 index, s32 size, void **out, u8 *fresh);
 
 /* Draws a stream as a camera-facing ribbon: one quad per pair of neighbouring particles, newest to oldest. */

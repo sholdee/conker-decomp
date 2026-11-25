@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-s32 func_1513F6C0(void *obj, s32 arg1, s32 arg2);
 void *memcpy(void *, const void *, u32);
 
 /* Keeps the emitter's particle alive, spawning it if it doesn't exist yet. */

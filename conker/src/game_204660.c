@@ -551,7 +551,6 @@ void func_151D5D60(void *, s16, s32, void **, u8 *);
 Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
 Gfx *func_15142E24(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *needSync, s32 argA);
 Gfx *func_15142FBC(Gfx *gfx, s32 modeH, s32 modeL, u8 *needSync);
-Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
 
 
 /*

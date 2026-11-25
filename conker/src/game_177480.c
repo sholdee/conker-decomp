@@ -3,7 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-extern void func_1513F680(void *obj, u8 arg1, s32 arg2, u8 arg3, u8 arg4);
 extern void func_151D5D60(Vtx **buffers, s16 index, s32 size, Vtx **outVtx, u8 *outFresh);
 
 /* Per-effect behaviour parameters, at 0x110 in FlickerParticle. */

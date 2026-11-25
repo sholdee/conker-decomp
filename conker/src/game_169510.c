@@ -2,7 +2,6 @@
 
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Per-behaviour state that follows a particle (a DefParticleHead). */
 typedef union {
@@ -30,15 +29,7 @@ typedef union {
 
 #define PARTICLE_MOTION(particle) ((DefParticleMotion *)((particle) + 1))
 
-/* Source of the four vertex colours given to func_151400D0. */
-typedef struct {
-    s16 r, g, b, a;
-    u16 flag;
-} VtxColor;
-
 extern EffectTexture D_80090B60[];
-void func_1513FFF4(Vtx *vtx, u8 texture, u8 flip);
-void func_151400D0(Vtx *vtx, VtxColor *colors);
 
 extern s32 (*D_80089C70[])(QuadSprite *);
 extern s32 (*D_80089CA8[])(QuadSprite *);
@@ -372,7 +363,6 @@ Gfx *func_15142FBC(Gfx *gfx, s32 modeHi, s32 modeLo, u8 *needSync);
 void func_151441A4(s16 *r, s16 *g, s16 *b, s16 *a, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32 mode);
 void func_151442FC(s16 *r, s16 *g, s16 *b, s16 *a, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32 mode);
 Gfx *func_151462C8(Gfx *gfx, ModelLink *link, s32, s32, s32, s16 viewport, Vec3f *pos, s32, s32);
-Gfx *func_1513F4E4(Gfx *gfx, u8 combiner, u8 *needSync);
 
 /* Draws a sprite's quad (and attached model) for one viewport. */
 Gfx *func_1513CBF0(Gfx *gfx, QuadSprite *sprite, s16 viewport) {
@@ -1238,8 +1228,6 @@ Vtx *func_1513EAD8(particle, reversed, viewport)
     return result;
 }
 
-Vtx *func_1513EAD8(DefParticleHead *particle, s32 reversed, s32 viewport);
-
 Vtx *func_1513EDB4(void *particle, s16 viewport) {
     return func_1513EAD8(particle, FALSE, viewport);
 }
@@ -1386,8 +1374,6 @@ Vtx *func_1513F114(DefParticleHead *particle, s16 viewport) {
     return result;
 }
 
-Vtx *func_15140410(DefParticleHead *particle, Vec3f *axisU, Vec3f *axisV, s16 viewport);
-
 /* Quad spanned by the two axes in motion.axes (vertex function 12). */
 void func_1513F4B0(DefParticleHead *head, s16 viewport) {
     DefParticleHead *particle = head;
@@ -1484,8 +1470,6 @@ s32 func_1513F728(DefParticleHead *particle) {
 
 extern Vec3f *func_15144B34(s32 viewport);
 extern void func_150AD8B0(Vec3f *a, Vec3f *b, Vec3f *out);
-
-Vtx *func_1513FAB4(DefParticleHead *particle, u8 reversed, BeamScale *scale, s16 viewport);
 
 void func_1513FA2C(DefParticleHead *particle, s16 viewport) {
     BeamScale scale;

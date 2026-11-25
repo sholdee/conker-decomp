@@ -1035,7 +1035,6 @@ void func_15080828(s32 arg0);
 void func_15080BE8(void);
 s32 func_15080CF4(void);
 void func_150D8B88(Actor *);
-void func_150FC438(Actor *, Actor *, u8, u8);
 void func_1514F568(Actor *);
 void func_151D4668(void *);
 void func_151D469C(void *arg0, s32 a1, s32 a2, s32 a3, s32 a4);

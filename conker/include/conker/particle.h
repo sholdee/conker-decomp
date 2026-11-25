@@ -906,10 +906,347 @@ typedef struct {
 void func_150E9890(Vec3f *pos, Vec3f *vel, f32 scale, u8 arg3, s32 arg4);
 void func_150E9E34(RandomBurstEmitter *emitter);
 
+/* game_1199D0.c */
+/* Data of each effect the emitter spawns. */
+typedef struct {
+    /* 0x00 */ f32 x;
+    /* 0x04 */ f32 y;
+    /* 0x08 */ f32 z;
+    /* 0x0C */ f32 w;
+} EmittedPoint;
+
+/* Data of the particle source effect (func_150EC6B0). */
+typedef struct {
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ f32 accumulator;
+} ParticleSourceData;
+
+/* Data of the fog flash effect (func_150ECB8C). */
+typedef struct {
+    /* 0x00 */ Actor *owner;
+    /* 0x04 */ u8 ownerId; /* owner->unique_id when attached; a mismatch means the slot was reused */
+    /* 0x05 */ u8 r;
+    /* 0x06 */ u8 g;
+    /* 0x07 */ u8 b;
+    /* 0x08 */ u8 a;
+    /* 0x09 */ u8 rate;
+} FogFlashData;
+
+/* An effect (a TimedEffect with per-effect data at 0x28), as created by func_15149130. */
+typedef struct {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ union {
+        ShapeEmitter emitter;
+        EmittedPoint point;
+        ParticleSourceData source;
+        FogFlashData fog;
+    } data;
+} EmitterEffect;
+
+void func_150EC520(EmitterEffect *effect);
+void func_150EC6B0(EmitterEffect *effect);
+void func_150ECA68(Actor *obj, u8 r, u8 g, u8 b, u8 a, u8 rate, s16 duration, u8 owner, s32 kind);
+void func_150ECB4C(EmitterEffect *effect, s32 arg1, u8 arg2);
+void func_150ECB8C(EmitterEffect *effect);
+void func_150ECC00(Actor *obj, u8 owner, s32 kind);
+void func_150ECC70(Camera *obj);
+
+/* game_11FF10.c */
+/* State the emitter object keeps at +0x28: func_150F2C8C fills it, func_150F2D14 updates it each frame. */
+typedef struct {
+    /* 0x00 */ Actor *target;
+    /* 0x04 */ u8 targetId;   // target->unique_id when attached; a mismatch means the slot was reused
+    /* 0x05 */ u8 prevUnk222; // target->unk222 seen last frame
+    /* 0x08 */ f32 timer;     // one particle is emitted per 1.0 accumulated
+    /* 0x0C */ s8 count;      // particles left in the current burst
+} BoneBurstState;
+
+/* The emitter object spawned by func_150F2C8C. */
+typedef struct {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ BoneBurstState state;
+} BoneBurstEmitter;
+
+/* State each emitted particle keeps after its DefParticleHead (copied in by func_150F2D14, updated by func_150F3214). */
+typedef struct {
+    /* 0x00 */ Actor *target;
+    /* 0x04 */ u8 targetId;
+    /* 0x08 */ f32 age;
+    /* 0x0C */ f32 lifetime;
+    /* 0x10 */ f32 growth;    // width = height = growth * sqrtf(age)
+    /* 0x14 */ f32 fadeFrom;  // def.unk44 = fadeFrom - fadeRate * age * age
+    /* 0x18 */ f32 fadeRate;  // fadeFrom / (lifetime * lifetime): def.unk44 reaches 0 at lifetime
+    /* 0x1C */ Vec3f axisU; // quad axes for func_15140410
+    /* 0x28 */ Vec3f axisV;
+} ParticleState;
+
+/* A particle spawned by func_1513D2F0. */
+typedef struct {
+    /* 0x000 */ DefParticleHead head;
+    /* 0x110 */ ParticleState state;
+} BoneBurstParticle;
+
+void func_150F2A60(s32 arg0);
+void func_150F2C8C(Actor *target);
+void func_150F2D14(BoneBurstEmitter *emitter);
+void func_150F3194(BoneBurstEmitter *emitter, s32 arg1, u8 arg2);
+void func_150F31D4(BoneBurstParticle *particle, s32 arg1, u8 arg2);
+s32 func_150F3214(BoneBurstParticle *particle);
+void func_150F337C(BoneBurstParticle *particle, s16 viewport);
+void func_150F33B0(WorldObject *obj);
+void func_150F33F8(s32 player);
+
 /* game_120950.c */
 f32 func_150F34A0(Actor *obj, f32 pitch);
 void func_150F34F4(Actor *actor);
 void func_150F43F0(Camera *actor);
+
+/* game_121A20.c */
+/* Per-object state of the effect spawned by func_150F4570: it circles a centre that moves
+ * from one point towards another (updated by func_150F48D0). */
+typedef struct {
+    /* 0x00 */ f32 timeLeft;
+    /* 0x04 */ Vec3f center;
+    /* 0x10 */ f32 phase; /* radians */
+    /* 0x14 */ f32 phaseRate;
+    /* 0x18 */ f32 cosDir;
+    /* 0x1C */ f32 sinDir;
+    /* 0x20 */ f32 radius;
+    /* 0x24 */ u8 flags; /* SPIRAL_* */
+    /* 0x25 */ u8 pad25[3];
+} SpiralState;
+
+/* An object spawned by func_1513264C with a SpiralState. */
+typedef struct {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x10];
+    /* 0x020 */ Vec3f rot; /* degrees */
+    /* 0x02C */ u8 pad2C[0xC];
+    /* 0x038 */ Vec3f pos;
+    /* 0x044 */ Vec3f vel;
+    /* 0x050 */ Vec3f spin;
+    /* 0x05C */ u8 pad5C[0x14];
+    /* 0x070 */ u8 alpha;
+    /* 0x071 */ u8 unk71;
+    /* 0x072 */ u8 pad72[0x16];
+    /* 0x088 */ u32 sound; /* sound id in the low half, playing handle in the high half */
+    /* 0x08C */ u8 pad8C[0xE4];
+    /* 0x170 */ SpiralState spiral;
+} SpiralParticle;
+
+/* Per-object state of the emitter started by func_150F4D5C (updated by func_150F4DEC). */
+typedef struct {
+    /* 0x00 */ Camera *camera;
+    /* 0x04 */ f32 pending; /* spirals owed; one is spawned per whole unit */
+    /* 0x08 */ s8 condition; /* index into D_80088B38, or -1 for none */
+    /* 0x09 */ u8 variants; /* index into D_80088B20 */
+    /* 0x0A */ u8 padA[2];
+} CameraEmitterData;
+
+/* The emitter effect object created by func_15149130. */
+typedef struct {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ CameraEmitterData data;
+} CameraEmitter;
+
+void func_150F4570(Vec3f *from, Vec3f *to, u8 id, f32 speed, f32 invSpeed, f32 scale, u8 fadeNear, s32 sound, u8 owner,
+                   s32 kind);
+s32 func_150F48D0(SpiralParticle *obj);
+s32 func_150F4A38(SpiralParticle *obj);
+void func_150F4CFC(SpiralParticle *obj, s32 arg1, u8 event);
+void func_150F4D5C(Camera *camera, s8 condition, u8 variants, u8 owner, s32 kind);
+void func_150F4DEC(CameraEmitter *emitter);
+extern const s16 D_800A19F0[3];
+extern const f32 D_800A19F8[3];
+extern const s16 D_800A1A04[16];
+extern const f32 D_800A1A24[16];
+
+/* game_128D70.c */
+/* State block that func_150FC438 copies into its spawned object at offset 0x28. */
+typedef struct {
+    /* 0x00 */ Actor *owner;
+    /* 0x04 */ u8 ownerUniqueId;
+    /* 0x05 */ u8 pad5[3];
+    /* 0x08 */ f32 spawnTimer;
+    /* 0x0C */ u8 side;
+    /* 0x0D */ u8 unkD;
+    /* 0x0E */ u8 padE[2];
+    /* 0x10 */ TimedEffect *unk10;
+    /* 0x14 */ s16 unk14;
+    /* 0x16 */ s8 unk16; // owner camera's unk23D, or -1
+    /* 0x17 */ u8 pad17;
+    /* 0x18 */ Actor *other;
+    /* 0x1C */ u8 otherUniqueId;
+    /* 0x1D */ u8 unk1D;
+    /* 0x1E */ u8 pad1E[2];
+} TwoSidedEmitterState; // size 0x20
+
+/* The object spawned by func_150FC438. */
+typedef struct {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ TwoSidedEmitterState state;
+} TwoSidedEmitter;
+
+typedef struct {
+    /* 0x000 */ u8 pad0[0x1A0];
+    /* 0x1A0 */ Actor *owner;
+    /* 0x1A4 */ u8 ownerUniqueId;
+} Particle_150FC368;
+
+void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, s32 arg5);
+void func_150FC368(Particle_150FC368 *particle);
+void func_150FC438(Actor *owner, Actor *other, u8 arg2, u8 arg3);
+void func_150FC614(TwoSidedEmitter *obj);
+void func_150FC818(TwoSidedEmitter *obj, ActorMsg *msg, u8 msgType);
+
+/* game_12DAB0.c */
+/* State of the effect, stored after its main particle. */
+typedef struct {
+    /* 0x00 */ Actor *owner;
+    /* 0x04 */ u8 ownerId;          /* owner->unique_id */
+    /* 0x05 */ u8 pad5[3];
+    /* 0x08 */ Vec3f unk8;
+    /* 0x14 */ Vec3f unk14;
+    /* 0x20 */ u8 unk20;
+    /* 0x21 */ s8 ownerSlot;        /* owner's index in movement_obj */
+    /* 0x22 */ u8 unk22;            /* owner->camera->CNumber, 0xFF without a camera */
+    /* 0x23 */ u8 unk23;
+    /* 0x24 */ u8 *particleA;       /* func_15130374 particle */
+    /* 0x28 */ u8 *subParticle;     /* func_1513D4B8 particle */
+    /* 0x2C */ LightEffect *flash;    /* func_151602C0 */
+    /* 0x30 */ u8 *glow;            /* func_151407D0 glow */
+    /* 0x34 */ u8 *particleB;       /* func_15130374 particle */
+    /* 0x38 */ f32 unk38;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ f32 unk40;
+    /* 0x44 */ f32 unk44;
+    /* 0x48 */ f32 unk48;
+    /* 0x4C */ f32 unk4C;
+    /* 0x50 */ f32 unk50;
+    /* 0x54 */ f32 unk54;
+    /* 0x58 */ f32 unk58;
+    /* 0x5C */ f32 unk5C;
+    /* 0x60 */ f32 unk60;
+    /* 0x64 */ f32 unk64;
+    /* 0x68 */ f32 unk68;
+    /* 0x6C */ f32 unk6C;
+    /* 0x70 */ f32 unk70;
+    /* 0x74 */ f32 unk74;
+    /* 0x78 */ f32 unk78;
+    /* 0x7C */ f32 unk7C;
+    /* 0x80 */ f32 unk80;
+    /* 0x84 */ f32 unk84;
+    /* 0x88 */ f32 unk88;
+    /* 0x8C */ f32 unk8C;
+    /* 0x90 */ s16 sound;           /* func_10010F30 handle */
+    /* 0x92 */ u8 pad92[2];
+} EffectParticleState; /* size 0x94 */
+
+/* The main particle: a func_1513D4B8 particle (0x110 bytes) followed by its EffectParticleState. */
+typedef struct {
+    DefParticleHead head;
+    EffectParticleState state;
+} EffectParticle;
+
+EffectParticle *func_15100600(Actor *owner, Vec3f *vec1, Vec3f *vec2, u8 arg3, s16 lifetime, u8 r, u8 g, u8 b, f32 arg8,
+                              f32 arg9, f32 argA, f32 argB, u8 argC, u8 argD, s32 argE);
+
+/* game_135780.c */
+/*
+ * Per-particle data of the particles func_151082D0 spawns (update function 0x18, func_15108658).
+ * The animation frame steps 0 -> 1 -> 2 at the start of the particle's life and back at the end.
+ */
+typedef struct {
+    /* 0x00 */ f32 life;       /* remaining; the particle dies below 0 */
+    /* 0x04 */ f32 lifetime;   /* initial life */
+    /* 0x08 */ f32 frame1Time; /* time spent below frame 2 at either end */
+    /* 0x0C */ f32 frame0Time; /* time spent at frame 0 at either end */
+    /* 0x10 */ f32 flashTimer; /* counts down from 11 while flashing, 0 otherwise */
+} FlashParticleData;
+
+/* Particle created by func_15130280 (only the fields used here, see game_15D730.c). */
+typedef struct {
+    /* 0x00 */ DescParticleHead head;
+    /* 0xA8 */ FlashParticleData data;
+} AreaFlashParticle;
+
+/* Points the emitter spawns particles around: a centre, a radius and a height range. */
+typedef struct {
+    /* 0x00 */ s16 x;
+    /* 0x02 */ s16 y;
+    /* 0x04 */ s16 z;
+    /* 0x06 */ s16 radius;
+    /* 0x08 */ s16 height;
+} EmitterArea;
+
+/* Per-effect data of the func_151082D0 emitter. */
+typedef struct {
+    /* 0x00 */ f32 spawnAccum;
+    /* 0x04 */ EmitterArea *area;
+    /* 0x08 */ u8 flags;
+} AreaEmitterData;
+
+/* Timed effect of func_151082D0. */
+typedef struct {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ AreaEmitterData data;
+} AreaEmitter;
+
+void func_151082D0(AreaEmitter *emitter);
+s32 func_15108658(AreaFlashParticle *particle, s32 arg1);
+void func_151087FC(AreaEmitter *emitter, s32 arg1, u8 event);
+
+/* game_1368C0.c */
+/* Data of effect 0x1A (func_15109410 / func_151094FC). */
+typedef struct {
+    /* 0x00 */ Actor *object;
+    /* 0x04 */ u8 objectId; /* object->unique_id when attached; a mismatch means the slot was reused */
+    /* 0x08 */ f32 spawnAccum;
+    /* 0x0C */ f32 spawnRate;
+    /* 0x10 */ s8 tickFunc; /* index into D_80088C60, -1: none */
+    /* 0x11 */ s8 emitFunc; /* index into D_80088C64, -1: none */
+} ObjectEmitterData; /* size 0x14 */
+
+/* Data of effect 0x1B (func_15109ED4 / func_15109FB8). */
+typedef struct {
+    /* 0x00 */ void *unk0; /* passed to func_1511490C to build the emitter's matrix */
+    /* 0x04 */ f32 spawnAccum;
+    /* 0x08 */ f32 spawnRate;
+    /* 0x0C */ s8 tickFunc; /* index into D_80088C60, -1: none */
+    /* 0x0D */ s8 emitFunc; /* index into D_80088C64, -1: none */
+} MatrixEmitterData; /* size 0x10 */
+
+/* Data of effect 0x1C (func_1510A344 / func_1510A40C). */
+typedef struct {
+    /* 0x00 */ Actor *object;
+    /* 0x04 */ u8 objectId;
+    /* 0x08 */ f32 spawnAccum;
+    /* 0x0C */ f32 spawnRate;
+    /* 0x10 */ f32 spawnRateRandom; /* added to spawnRate scaled by a random [0, 1) */
+} PairEmitterData; /* size 0x14 */
+
+typedef struct {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ union {
+        ActorRef tracked;
+        ObjectEmitterData object;
+        MatrixEmitterData matrix;
+        PairEmitterData pair;
+    } data;
+} Effect1368C0;
+
+TimedEffect *func_15109410(Actor *object, s16 duration, s8 tickFunc, s8 emitFunc, f32 spawnRate, s32 extraSize,
+                           u8 owner, s32 kind);
+void func_151094FC(Effect1368C0 *effect);
+void func_15109848(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f *end, Vec3f *tip, Vec3f *dir);
+void func_15109C20(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f *end, Vec3f *tip, Vec3f *dir);
+TimedEffect *func_15109ED4(void *arg0, s16 duration, s8 tickFunc, s8 emitFunc, f32 spawnRate, s32 extraSize, u8 owner,
+                           s32 kind);
+void func_15109FB8(Effect1368C0 *effect);
+TimedEffect *func_1510A344(Actor *object, s32 duration, u8 owner, s32 kind);
+void func_1510A40C(Effect1368C0 *effect);
+void func_1510A870(Effect1368C0 *effect, ActorSwapMsg *msg, u8 msgType);
+void func_1510A8CC(Effect1368C0 *effect, ActorSwapMsg *msg, u8 msgType);
 
 /* game_15D730.c */
 SpriteParticle *func_15130280(ParticleDesc *desc, u8 kind, CollisionHit *ground, s32 dataSize, u8 arg4, s32 arg5);
@@ -978,6 +1315,84 @@ Gfx *func_15133E84(Gfx *gfx, ModelParticle *particle, s16 arg2);
 Gfx *func_15133EB8(Gfx *gfx, ModelParticle *particle, s16 arg2);
 Gfx *func_15133EEC(Gfx *gfx, u16 index, u8 segment, s32 arg3);
 Gfx *func_15133FD8(Gfx *gfx, ModelParticle *particle, s16 arg2);
+
+/* game_169510.c */
+/* Source of the four vertex colours given to func_151400D0. */
+typedef struct {
+    s16 r, g, b, a;
+    u16 flag;
+} VtxColor;
+
+void func_1513C060(QuadSprite *sprite);
+QuadSprite *func_1513C350(void *def, void *colors, u8 updateFn, u8 expireFn, u8 flip, s32 model, s32 arg6, Vec3f *pos,
+                          s32 extraSize, u8 arg9, s32 argA);
+QuadSprite *func_1513C4EC(void *def, void *colors, u8 updateFn, u8 expireFn, f32 x, f32 y, f32 z, f32 width, f32 length,
+                          u8 angle, u8 flip, s32 model, s32 arg6, s32 extraSize, u8 argE, s32 argF);
+QuadSprite *func_1513C5B0(void *def, void *colors, u8 updateFn, u8 expireFn, f32 x, f32 y, f32 z, f32 width, f32 length,
+                          u8 angle, u8 flip, s32 extraSize, u8 argC, s32 argD);
+QuadSprite *func_1513C650(void *def, u8 updateFn, u8 expireFn, s32 arg3, f32 x, f32 y, f32 z, f32 width, f32 height,
+                          u8 angle, u8 flip, s32 model, s32 arg6, s32 extraSize, u8 argE, s32 argF);
+QuadSprite *func_1513C73C(void *def, u8 updateFn, u8 expireFn, s32 arg3, f32 x, f32 y, f32 z, f32 width, f32 height,
+                          u8 angle, u8 flip, s32 extraSize, u8 argC, s32 argD);
+QuadSprite *func_1513C804(void *def, s32 arg1, u8 updateFn, u8 expireFn, s32 arg4, f32 x, f32 y, f32 z, f32 width,
+                          f32 height, u8 angle, u8 flip, s32 extraSize, u8 argD, s32 argE);
+void func_1513C8D4(QuadSprite *sprite);
+void func_1513C900(QuadSprite *sprite);
+void func_1513C92C(QuadSprite *sprite);
+void func_1513C9B0(QuadSprite *sprite);
+void func_1513C9FC(QuadSprite *sprite);
+void func_1513CA48(DefParticleHead *particle);
+void func_1513CA6C(DefParticleHead *particle);
+void func_1513CAA0(DefParticleHead *particle);
+void func_1513CAD4(DefParticleHead *arg0);
+void func_1513CB58(DefParticleHead *particle);
+void func_1513CBA4(DefParticleHead *particle);
+Gfx *func_1513CBF0(Gfx *gfx, QuadSprite *sprite, s16 viewport);
+void func_1513CF9C(s32 arg0, s32 arg1, u8 arg2);
+void func_1513CFD0(s32 arg0, s32 arg1, s32 arg2);
+void func_1513CFE4(DefParticleHead *particle);
+void *func_1513D2F0(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip, s32 model,
+                    s32 arg8, s32 motionSize, u8 argA, s32 argB);
+void *func_1513D4B8(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip,
+                    s32 motionSize, u8 arg8, s32 arg9);
+void *func_1513D524(void *def, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip, s32 motionSize, u8 arg7,
+                    s32 arg8);
+void *func_1513D594(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 flip, s16 angle, f32 width,
+                    f32 height, s32 arg9, s32 argA, s32 model, s32 argC, u8 argD, s32 motionSize, u8 argF, s32 arg10);
+void *func_1513D668(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 flip, s16 angle, f32 width,
+                    f32 height, s32 arg9, s32 argA, u8 argB, s32 motionSize, u8 argD, s32 argE);
+s32 func_1513D6FC(ParticleAxes *axes, s16 angle, f32 width, f32 height, s32 arg4, s32 arg5, u8 onSlope);
+Gfx *func_1513DB00(Gfx *gfx, DefParticleHead *particle, s16 viewport);
+void func_1513DF9C(DefParticleHead *particle, s32 arg1, u8 arg2);
+void func_1513E070(s32 arg0, s32 arg1, s32 arg2);
+void func_1513E084(DefParticleHead *particle, ActorMsg *msg, u8 eventId);
+void func_1513E134(void);
+void func_1513E13C(QuadSprite *sprite, f32 x, f32 y, f32 z, f32 width, f32 length, u8 angle);
+void func_1513E2A4(void);
+s32 func_1513E2AC(s32 sprite, s32 arg1, s32 surface, f32 x, f32 y, f32 z, f32 width, f32 height, u8 angle);
+s32 func_1513E6E8(DefParticleHead *particle);
+Vtx *func_1513E83C(DefParticleHead *particle, s16 viewport);
+Vtx *func_1513EAD8(DefParticleHead *particle, s32 reversed, s32 viewport);
+Vtx *func_1513EDB4(void *particle, s16 viewport);
+Vtx *func_1513EDE4(void *particle, s16 viewport);
+Vtx *func_1513EE14(DefParticleHead *particle, s16 viewport);
+Vtx *func_1513F114(DefParticleHead *particle, s16 viewport);
+void func_1513F4B0(DefParticleHead *head, s16 viewport);
+Gfx *func_1513F4E4(Gfx *gfx, u8 combiner, u8 *needSync);
+void func_1513F680(DefParticleHead *particle, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn);
+void func_1513F6C0(QuadSprite *sprite, u8 updateFn, u8 expireFn);
+s32 func_1513F6E8(DefParticleHead *particle);
+s32 func_1513F728(DefParticleHead *particle);
+void func_1513FA2C(DefParticleHead *particle, s16 viewport);
+void func_1513FA70(DefParticleHead *particle, s16 viewport);
+Vtx *func_1513FAB4(DefParticleHead *particle, u8 reversed, BeamScale *scale, s16 viewport);
+void func_1513FFF4(Vtx *vtx, u8 texture, u8 flip);
+void func_151400D0(Vtx *vtx, VtxColor *colors);
+Vtx *func_15140190(DefParticleHead *particle, s16 viewport);
+void func_151403A8(s32 arg0, u8 arg1);
+void func_151403DC(s32 arg0, u8 arg1);
+Vtx *func_15140410(DefParticleHead *particle, Vec3f *axisU, Vec3f *axisV, s16 viewport);
+s32 func_151406AC(s32 arg0, s32 list, s32 group, s16 phase);
 
 /* game_176A00.c */
 ChannelParticle *func_15149550(ParticleEmitterDesc *emitter, u8 arg1, u8 arg2, u8 kind, u8 arg4, s32 arg5);

@@ -79,7 +79,6 @@ extern void (*D_8008D620[])(u8 *, u8 *, u8 *, u8 *, u8 *, u8 *, s16 *);
 extern s32 (*D_8008D628[])(ActorEmitterProcess *);
 
 void *memcpy(void *, const void *, u32);
-extern void func_1513F680();
 extern void func_15143134(void *, void *, void *);
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 void func_1518E308(ActorEmitterProcess *emitter);

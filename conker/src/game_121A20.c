@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Spawn-variant tables, reached through D_80088B20 (VariantList: count, ids, scales). */
 const s16 D_800A19F0[3] = { 9, 10, 11 };
@@ -18,38 +17,6 @@ const f32 D_800A1A24[16] = {
 #define SPIRAL_FADE_NEAR 1 /* fade out as the camera gets close */
 #define SPIRAL_SOUND 2     /* plays a positional sound */
 #define SPIRAL_MUTED 4     /* sound no longer updated or restarted */
-
-/* Per-object state of the effect spawned by func_150F4570: it circles a centre that moves
- * from one point towards another (updated by func_150F48D0). */
-typedef struct {
-    /* 0x00 */ f32 timeLeft;
-    /* 0x04 */ Vec3f center;
-    /* 0x10 */ f32 phase; /* radians */
-    /* 0x14 */ f32 phaseRate;
-    /* 0x18 */ f32 cosDir;
-    /* 0x1C */ f32 sinDir;
-    /* 0x20 */ f32 radius;
-    /* 0x24 */ u8 flags; /* SPIRAL_* */
-    /* 0x25 */ u8 pad25[3];
-} SpiralState;
-
-/* An object spawned by func_1513264C with a SpiralState. */
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x10];
-    /* 0x020 */ Vec3f rot; /* degrees */
-    /* 0x02C */ u8 pad2C[0xC];
-    /* 0x038 */ Vec3f pos;
-    /* 0x044 */ Vec3f vel;
-    /* 0x050 */ Vec3f spin;
-    /* 0x05C */ u8 pad5C[0x14];
-    /* 0x070 */ u8 alpha;
-    /* 0x071 */ u8 unk71;
-    /* 0x072 */ u8 pad72[0x16];
-    /* 0x088 */ u32 sound; /* sound id in the low half, playing handle in the high half */
-    /* 0x08C */ u8 pad8C[0xE4];
-    /* 0x170 */ SpiralState spiral;
-} SpiralParticle;
 
 extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
 
@@ -210,21 +177,6 @@ void func_150F4CFC(SpiralParticle *obj, s32 arg1, u8 event) {
         func_1516972C(&obj->header);
     }
 }
-
-/* Per-object state of the emitter started by func_150F4D5C (updated by func_150F4DEC). */
-typedef struct {
-    /* 0x00 */ Camera *camera;
-    /* 0x04 */ f32 pending; /* spirals owed; one is spawned per whole unit */
-    /* 0x08 */ s8 condition; /* index into D_80088B38, or -1 for none */
-    /* 0x09 */ u8 variants; /* index into D_80088B20 */
-    /* 0x0A */ u8 padA[2];
-} CameraEmitterData;
-
-/* The emitter effect object created by func_15149130. */
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ CameraEmitterData data;
-} CameraEmitter;
 
 /* Starts an emitter that spawns spirals around `camera` (see func_150F4DEC). */
 void func_150F4D5C(Camera *camera, s8 condition, u8 variants, u8 owner, s32 kind) {

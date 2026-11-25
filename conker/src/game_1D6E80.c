@@ -749,8 +749,6 @@ s32 func_151AB090(FlickerSprite *fx) {
     return alive;
 }
 
-extern s32 func_1513F6C0(FlickerSprite *fx, s32 arg1, s32 arg2);
-
 /* FlickerSprite destructor: detaches from the owner task. */
 s32 func_151AB180(FlickerSprite *fx) {
     ActorTaskFx *ownerFx = &((ActorTask *)fx->flicker.owner)->fx;

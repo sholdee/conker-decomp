@@ -1,48 +1,11 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 void func_151432BC(void *, f32 *, f32 *, f32 *, f32 *);
 void *memcpy(void *, const void *, u32);
 u8 func_151464B8(s16 *);
 
-
-/* Data of each effect the emitter spawns. */
-typedef struct {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 z;
-    /* 0x0C */ f32 w;
-} EmittedPoint;
-
-/* Data of the particle source effect (func_150EC6B0). */
-typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ f32 accumulator;
-} ParticleSourceData;
-
-/* Data of the fog flash effect (func_150ECB8C). */
-typedef struct {
-    /* 0x00 */ Actor *owner;
-    /* 0x04 */ u8 ownerId; /* owner->unique_id when attached; a mismatch means the slot was reused */
-    /* 0x05 */ u8 r;
-    /* 0x06 */ u8 g;
-    /* 0x07 */ u8 b;
-    /* 0x08 */ u8 a;
-    /* 0x09 */ u8 rate;
-} FogFlashData;
-
-/* An effect (a TimedEffect with per-effect data at 0x28), as created by func_15149130. */
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ union {
-        ShapeEmitter emitter;
-        EmittedPoint point;
-        ParticleSourceData source;
-        FogFlashData fog;
-    } data;
-} EmitterEffect;
 
 /* Emitter effect: while its owner is alive, spawns effect 0x5A at random points on its shape. */
 void func_150EC520(EmitterEffect *effect) {

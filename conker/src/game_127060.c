@@ -445,8 +445,6 @@ void func_150FAA40(u8 owner, s32 kind) {
 }
 
 void func_1514470C(s32, Vec3f *);
-void func_150F4570(Vec3f *from, Vec3f *to, u8 id, f32 duration, f32 rate, f32 scale, u8 arg6, s32 arg7, u8 owner,
-                   s32 kind);
 
 /* Emitter update: spawns func_150F4570 effects between the two endpoints, 0.08-0.26 per frame (times D_800BE9A4). */
 void func_150FAAEC(LineEmitter *effect) {

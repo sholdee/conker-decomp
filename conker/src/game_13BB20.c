@@ -13,7 +13,6 @@ extern f32 D_800DBDD0;
 
 extern s32 func_150A3A70(s32, s32);
 extern void func_150A6760(s32);
-extern void func_150F33F8(s32);
 extern s32 func_1510FE30(s32);
 
 extern void func_150AD8B0(f32 *, f32 *, f32 *);

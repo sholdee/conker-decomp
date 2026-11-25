@@ -182,8 +182,6 @@ s32 func_150BB260(Particle_150BAFEC *particle, s32 arg1) {
     return 1;
 }
 
-extern void func_1513F6C0(Particle_150BAFEC *, s32, s32);
-
 /* Init callback: 50 frames of life, fading out over all of them at 5 alpha per frame. */
 void func_150BB408(Particle_150BAFEC *particle) {
     particle->flags |= 1;

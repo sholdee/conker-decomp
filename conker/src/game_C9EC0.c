@@ -280,7 +280,6 @@ extern Actor *func_1505EEF4(s32);
 extern void func_150FAD28(void);
 extern void func_150FAA40(s32, s32);
 extern void func_15108120(Actor *, s32, s32);
-extern void func_150ECC00(Actor *, s32, s32);
 extern void func_150FAD78(void);
 extern void func_150FCFD4(Actor *, s32, s32);
 extern void func_150E0300(void);

@@ -1,32 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-/* State block that func_150FC438 copies into its spawned object at offset 0x28. */
-typedef struct {
-    /* 0x00 */ Actor *owner;
-    /* 0x04 */ u8 ownerUniqueId;
-    /* 0x05 */ u8 pad5[3];
-    /* 0x08 */ f32 spawnTimer;
-    /* 0x0C */ u8 side;
-    /* 0x0D */ u8 unkD;
-    /* 0x0E */ u8 padE[2];
-    /* 0x10 */ TimedEffect *unk10;
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ s8 unk16; // owner camera's unk23D, or -1
-    /* 0x17 */ u8 pad17;
-    /* 0x18 */ Actor *other;
-    /* 0x1C */ u8 otherUniqueId;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ u8 pad1E[2];
-} TwoSidedEmitterState; // size 0x20
-
-/* The object spawned by func_150FC438. */
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ TwoSidedEmitterState state;
-} TwoSidedEmitter;
 
 
 extern TimedEffect *func_15164780(CamWobbleDef *, s32, u8, s32);
@@ -242,12 +216,6 @@ void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, 
 
 
 void func_151C3B0C(void *, f32, f32, f32, f32, s32, s32, s32);
-
-typedef struct {
-    /* 0x000 */ u8 pad0[0x1A0];
-    /* 0x1A0 */ Actor *owner;
-    /* 0x1A4 */ u8 ownerUniqueId;
-} Particle_150FC368;
 
 /* Calls func_151C3B0C for a particle. The last argument is a mask of every camera except the owner's,
  * or 0xFF when the owner is gone, has no camera or fails one of the other checks. */

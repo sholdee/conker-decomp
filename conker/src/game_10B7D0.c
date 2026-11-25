@@ -142,7 +142,6 @@ typedef struct {
 void *memcpy(void *, const void *, u32);
 void func_1514470C(s32, Vec3f *);
 s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
-s32 func_15140410(TravelParticle *, Vec3f *, Vec3f *, s16);
 /* Particle textures: 0xBE, or 0xBF for the slower ones. */
 const TexturePair D_800A0D00 = { { 0xBE, 0xBF } };
 

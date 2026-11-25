@@ -8,8 +8,6 @@
  * message handler of a particle that follows an owner actor.
  */
 
-Vtx *func_1513FAB4(void *particle, u8 reversed, BeamScale *scale, s16 viewport);
-
 /* Per-frame update of a burst spark: flickers its width, height and alpha towards random targets. */
 s32 func_151BE210(BurstSpark *spark) {
     BurstSparkData *data = &spark->data;

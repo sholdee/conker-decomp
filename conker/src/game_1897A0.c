@@ -124,7 +124,6 @@ extern void func_151442FC(s16 *outR, s16 *outG, s16 *outB, s16 *outA, s32 r0, s3
                           s32 b1, s32 a1, s32 weight, s32 mode);
 extern Gfx *func_15142E24(Gfx *gfx, u8 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8,
                           u8 *update, s32 argA);
-extern Gfx *func_1513F4E4(Gfx *, s32, u8 *);
 extern Gfx *func_15142B7C(Gfx *gfx, s32 setGeometryMode, s32 clearGeometryMode);
 extern Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *update);
 extern Gfx *func_15142CF0(Gfx *gfx, s32 minLevel, s32 lodFrac, s32 r, s32 g, s32 b, s32 a, u8 *update);

@@ -1,47 +1,12 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 static const f32 D_800A1950[3] = { 0.0f, 24.0f, 11.0f };
 static const f32 D_800A195C[3] = { 0.0f, 71.0f, 9.0f };
 
 s32 func_1509BE40();
 void func_15143134(f32 *, f32 *, Mtx *);
-
-/* State the emitter object keeps at +0x28: func_150F2C8C fills it, func_150F2D14 updates it each frame. */
-typedef struct {
-    /* 0x00 */ Actor *target;
-    /* 0x04 */ u8 targetId;   // target->unique_id when attached; a mismatch means the slot was reused
-    /* 0x05 */ u8 prevUnk222; // target->unk222 seen last frame
-    /* 0x08 */ f32 timer;     // one particle is emitted per 1.0 accumulated
-    /* 0x0C */ s8 count;      // particles left in the current burst
-} BoneBurstState;
-
-/* The emitter object spawned by func_150F2C8C. */
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ BoneBurstState state;
-} BoneBurstEmitter;
-
-/* State each emitted particle keeps after its DefParticleHead (copied in by func_150F2D14, updated by func_150F3214). */
-typedef struct {
-    /* 0x00 */ Actor *target;
-    /* 0x04 */ u8 targetId;
-    /* 0x08 */ f32 age;
-    /* 0x0C */ f32 lifetime;
-    /* 0x10 */ f32 growth;    // width = height = growth * sqrtf(age)
-    /* 0x14 */ f32 fadeFrom;  // def.unk44 = fadeFrom - fadeRate * age * age
-    /* 0x18 */ f32 fadeRate;  // fadeFrom / (lifetime * lifetime): def.unk44 reaches 0 at lifetime
-    /* 0x1C */ Vec3f axisU; // quad axes for func_15140410
-    /* 0x28 */ Vec3f axisV;
-} ParticleState;
-
-/* A particle spawned by func_1513D2F0. */
-typedef struct {
-    /* 0x000 */ DefParticleHead head;
-    /* 0x110 */ ParticleState state;
-} BoneBurstParticle;
 
 // matching: D_800CC5EC is movement_obj[0].mv; func_150F2A60 tests it through the array and reads through
 // this alias so IDO reloads it (as the original does) instead of reusing the first load

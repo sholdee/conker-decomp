@@ -222,7 +222,6 @@ s32 func_151025F4(Owner151025F4 *obj, s32 arg1) {
 extern f32 D_800A21A0[][3];
 extern f32 D_800A21F4[][3];
 extern u8 D_800A2248[];
-s32 func_15100600(u8 *, f32 *, f32 *, u8, s16, u8, u8, u8, f32, f32, f32, f32, u8, u8, s32);
 
 /* Starts effect `kind` on obj, using the effect tables for its parameters; picks one of two styles by object id. */
 s32 func_151026BC(Actor *obj, s16 arg1, u8 kind, u8 arg3, u8 arg4, s32 arg5) {

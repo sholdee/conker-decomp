@@ -505,7 +505,6 @@ s32 func_150D942C(PissTrail *trail) {
 void func_151D5D60(void *, s16, s32, void **, u8 *);
 Vec3f *func_15144B34(s32);
 Gfx *func_15142E24(Gfx *, u8 *, s32, s32, s32, s32, s32, u8, s32, u8 *, s32);
-Gfx *func_1513F4E4(Gfx *, u8, u8 *);
 Gfx *func_15142B7C(Gfx *, s32, s32);
 Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
 extern s32 D_800A4AC8[][2];
