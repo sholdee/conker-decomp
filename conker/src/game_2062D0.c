@@ -93,6 +93,7 @@ typedef struct {
 } Struct151DA08CMain;
 
 
+/* Effect kind for the current context: D_800E0A10, or kind 10 when D_800BE9F0 is clear and func_150A29C8(0, 0x1C) fails. */
 u8 func_151D8E20(void) {
     if ((D_800BE9F0 == 0) && (func_150A29C8(0, 0x1C) == 0)) {
         return 10;
@@ -100,76 +101,67 @@ u8 func_151D8E20(void) {
     return D_800E0A10;
 }
 
+/* Id picker for effect kind 0 in the D_8008FCD0 table. */
 u8 func_151D8E6C(void) {
-    u8 tmp[3] = D_800AB340;
-    return tmp[(func_150ADA20() % 3U)];
+    u8 ids[3] = D_800AB340;
+    return ids[func_150ADA20() % 3U];
 }
 
+/* Id picker for effect kind 1 in the D_8008FCD0 table. */
 u8 func_151D8EB0(void) {
     return 117;
 }
 
+/* Id picker for effect kind 2 in the D_8008FCD0 table. */
 u8 func_151D8EBC(void) {
     return 29;
 }
 
+/* Id picker for effect kind 3 in the D_8008FCD0 table. */
 u8 func_151D8EC8(void) {
-    s32 tmp;
-
-    if (func_150ADA20() & 1) {
-        tmp = 17;
-    } else {
-        tmp = 147;
-    }
-    return tmp;
+    return (func_150ADA20() & 1) ? 17 : 147;
 }
 
+/* Id picker for effect kind 4 in the D_8008FCD0 table. */
 u8 func_151D8EFC(void) {
-    s32 tmp;
-
-    if (func_150ADA20() & 1) {
-        tmp = 90;
-    } else {
-        tmp = 91;
-    }
-    return tmp;
+    return (func_150ADA20() & 1) ? 90 : 91;
 }
 
+/* Id picker for effect kind 5 in the D_8008FCD0 table. */
 u8 func_151D8F30(void) {
-    u8 tmp[5] = D_800AB344;
-    return tmp[func_150ADA20() % 5U];
+    u8 ids[5] = D_800AB344;
+    return ids[func_150ADA20() % 5U];
 }
 
+/* Id picker for effect kind 6 in the D_8008FCD0 table. */
 u8 func_151D8F7C(void) {
-    s32 tmp;
-
-    if ((func_150ADA20() & 1) != 0) {
-        tmp = 102;
-    } else {
-        tmp = 103;
-    }
-    return tmp;
+    return (func_150ADA20() & 1) ? 102 : 103;
 }
 
+/* Id picker for effect kinds 7 and 8 in the D_8008FCD0 table. */
 u8 func_151D8FB0(void) {
     return 149;
 }
 
+/* Id picker for effect kind 9 in the D_8008FCD0 table. */
 u8 func_151D8FBC(void) {
     return 159;
 }
 
+/* Id picker for effect kind 10 in the D_8008FCD0 table. */
 u8 func_151D8FC8(void) {
     return 179;
 }
 
+/* Id picker for effect kind 11 in the D_8008FCD0 table. */
 u8 func_151D8FD4(void) {
     return 117;
 }
 
+/* Id picker for effect kind 12 in the D_8008FCD0 table. */
 u8 func_151D8FE0(void) {
-    u8 tmp[4] = D_800AB34C;
-    return tmp[func_150ADA20() & 3];
+    u8 ids[4] = D_800AB34C;
+    return ids[func_150ADA20() & 3];
 }
 
 // big struct definition
@@ -428,64 +420,76 @@ u8 func_151D9534(Struct151D9534 *arg0, struct17 *arg1) {
     return sp5F;
 }
 
+/* Id picker for effect kind 0 in the D_8008FD04 table. */
 u8 func_151D97A8(void) {
-    s32 tmp[7] = D_800AB350;
-    return tmp[func_150ADA20() % 7U];
+    s32 ids[7] = D_800AB350;
+    return ids[func_150ADA20() % 7U];
 }
 
+/* Id picker for effect kind 3 in the D_8008FD04 table. */
 u8 func_151D9820(void) {
-    s32 tmp[3] = D_800AB36C;
-    return tmp[func_150ADA20() % 3U];
+    s32 ids[3] = D_800AB36C;
+    return ids[func_150ADA20() % 3U];
 }
 
+/* Id picker for effect kind 1 in the D_8008FD04 table. */
 u8 func_151D9878(void) {
-    s32 tmp[3] = D_800AB378;
-    return tmp[func_150ADA20() % 3U];
+    s32 ids[3] = D_800AB378;
+    return ids[func_150ADA20() % 3U];
 }
 
+/* Id picker for effect kind 2 in the D_8008FD04 table. */
 u8 func_151D98D0(void) {
-    s32 tmp[2] = D_800AB384;
-    return tmp[func_150ADA20() & 1];
+    s32 ids[2] = D_800AB384;
+    return ids[func_150ADA20() & 1];
 }
 
+/* Id picker for effect kind 4 in the D_8008FD04 table. */
 u8 func_151D9918(void) {
-    s32 tmp[2] = D_800AB38C;
-    return tmp[func_150ADA20() & 1];
+    s32 ids[2] = D_800AB38C;
+    return ids[func_150ADA20() & 1];
 }
 
+/* Id picker for effect kind 5 in the D_8008FD04 table. */
 u8 func_151D9960(void) {
-    s32 tmp[5] = D_800AB394;
-    return tmp[func_150ADA20() % 5U];
+    s32 ids[5] = D_800AB394;
+    return ids[func_150ADA20() % 5U];
 }
 
+/* Id picker for effect kind 6 in the D_8008FD04 table. */
 u8 func_151D99C8(void) {
-    s32 tmp[3] = D_800AB3A8;
-    return tmp[func_150ADA20() % 3U];
+    s32 ids[3] = D_800AB3A8;
+    return ids[func_150ADA20() % 3U];
 }
 
+/* Id picker for effect kinds 7 and 8 in the D_8008FD04 table. */
 u8 func_151D9A20(void) {
-    s32 tmp[2] = D_800AB3B4;
-    return tmp[func_150ADA20() & 1];
+    s32 ids[2] = D_800AB3B4;
+    return ids[func_150ADA20() & 1];
 }
 
+/* Id picker for effect kind 9 in the D_8008FD04 table. */
 u8 func_151D9A68(void) {
-    s32 tmp[3] = D_800AB3BC;
-    return tmp[func_150ADA20() % 3U];
+    s32 ids[3] = D_800AB3BC;
+    return ids[func_150ADA20() % 3U];
 }
 
+/* Id picker for effect kind 10 in the D_8008FD04 table. */
 u8 func_151D9AC0(void) {
-    s32 tmp[1] = D_800AB3C8;
-    return tmp[0];
+    s32 ids[1] = D_800AB3C8;
+    return ids[0];
 }
 
+/* Id picker for effect kind 11 in the D_8008FD04 table. */
 u8 func_151D9ADC(void) {
-    s32 tmp[3] = D_800AB3CC;
-    return tmp[func_150ADA20() % 3U];
+    s32 ids[3] = D_800AB3CC;
+    return ids[func_150ADA20() % 3U];
 }
 
+/* Id picker for effect kind 12 in the D_8008FD04 table. */
 u8 func_151D9B34(void) {
-    s32 tmp[4] = D_800AB3D8;
-    return tmp[func_150ADA20() & 3];
+    s32 ids[4] = D_800AB3D8;
+    return ids[func_150ADA20() & 3];
 }
 
 typedef struct {
@@ -1184,58 +1188,65 @@ s16 *func_151DAE28(Struct151DAE28 *arg0, s16 arg1) {
     return ret;
 }
 
+/* Colour setter for effect kind 0 (D_8008FD38): fills the RGB triples unk14-16 and unk18-1A. */
 void func_151DB004(struct218 *arg0) {
-    arg0->unk14 = (func_150ADA20() % 0x38U) + 80;
+    arg0->unk14 = (func_150ADA20() % 56U) + 80;
     arg0->unk15 = 0;
     arg0->unk16 = 0;
-    arg0->unk18 = (func_150ADA20() % 0x2EU) + 180;
+    arg0->unk18 = (func_150ADA20() % 46U) + 180;
     arg0->unk19 = 0;
     arg0->unk1A = 0;
 }
 
+/* Colour setter for effect kinds 1 and 11 (D_8008FD38): fills the RGB triples unk14-16 and unk18-1A. */
 void func_151DB068(struct218 *arg0) {
-    arg0->unk14 = arg0->unk15 = (func_150ADA20() % 0x38U) + 100;
+    arg0->unk14 = arg0->unk15 = (func_150ADA20() % 56U) + 100;
     arg0->unk16 = 0;
-    arg0->unk18 = arg0->unk19 = (func_150ADA20() % 0x2EU) + 180;
+    arg0->unk18 = arg0->unk19 = (func_150ADA20() % 46U) + 180;
     arg0->unk1A = 0;
 }
 
+/* Colour setter for effect kind 2 (D_8008FD38): fills the RGB triples unk14-16 and unk18-1A. */
 void func_151DB0CC(struct218 *arg0) {
-    arg0->unk14 = (func_150ADA20() % 0x38U) + 80;
-    arg0->unk15 = (func_150ADA20() % 0x38U) + 80;
+    arg0->unk14 = (func_150ADA20() % 56U) + 80;
+    arg0->unk15 = (func_150ADA20() % 56U) + 80;
     arg0->unk16 = 0;
-    arg0->unk18 = (func_150ADA20() % 0x2EU) + 180;
-    arg0->unk19 = (func_150ADA20() % 0x2EU) + 180;
+    arg0->unk18 = (func_150ADA20() % 46U) + 180;
+    arg0->unk19 = (func_150ADA20() % 46U) + 180;
     arg0->unk1A = 0;
 }
 
+/* Colour setter for effect kind 3 (D_8008FD38): fills the RGB triples unk14-16 and unk18-1A. */
 void func_151DB15C(struct218 *arg0) {
-    arg0->unk14 = (func_150ADA20() % 0x38U) + 80;
-    arg0->unk15 = (func_150ADA20() % 0x38U) + 80;
+    arg0->unk14 = (func_150ADA20() % 56U) + 80;
+    arg0->unk15 = (func_150ADA20() % 56U) + 80;
     arg0->unk16 = 0;
-    arg0->unk18 = (func_150ADA20() % 0x2EU) + 180;
-    arg0->unk19 = (func_150ADA20() % 0x2EU) + 180;
+    arg0->unk18 = (func_150ADA20() % 46U) + 180;
+    arg0->unk19 = (func_150ADA20() % 46U) + 180;
     arg0->unk1A = 0;
 }
 
+/* Colour setter for effect kind 4 (D_8008FD38): fills the RGB triples unk14-16 and unk18-1A. */
 void func_151DB1EC(struct218 *arg0) {
-    arg0->unk14 = (func_150ADA20() % 0x38U) + 80;
-    arg0->unk15 = (func_150ADA20() % 0x38U) + 80;
+    arg0->unk14 = (func_150ADA20() % 56U) + 80;
+    arg0->unk15 = (func_150ADA20() % 56U) + 80;
     arg0->unk16 = 0;
-    arg0->unk18 = (func_150ADA20() % 0x2EU) + 180;
-    arg0->unk19 = (func_150ADA20() % 0x2EU) + 180;
+    arg0->unk18 = (func_150ADA20() % 46U) + 180;
+    arg0->unk19 = (func_150ADA20() % 46U) + 180;
     arg0->unk1A = 0;
 }
 
+/* Colour setter for effect kind 5 (D_8008FD38): fills the RGB triples unk14-16 and unk18-1A. */
 void func_151DB27C(struct218 *arg0) {
-    arg0->unk14 = 0xFF;
-    arg0->unk15 = 0xFF;
-    arg0->unk16 = 0xFF;
-    arg0->unk18 = 0xB4;
-    arg0->unk19 = 0xC8;
-    arg0->unk1A = 0xC8;
+    arg0->unk14 = 255;
+    arg0->unk15 = 255;
+    arg0->unk16 = 255;
+    arg0->unk18 = 180;
+    arg0->unk19 = 200;
+    arg0->unk1A = 200;
 }
 
+/* Colour setter for effect kind 6 (D_8008FD38): fills the RGB triples unk14-16 and unk18-1A. */
 void func_151DB2A8(struct218 *arg0) {
     arg0->unk14 = 0;
     arg0->unk15 = 200;
@@ -1245,40 +1256,45 @@ void func_151DB2A8(struct218 *arg0) {
     arg0->unk1A = 0;
 }
 
+/* Colour setter for effect kind 7 (D_8008FD38): fills the RGB triples unk14-16 and unk18-1A. */
 void func_151DB2CC(struct218 *arg0) {
     arg0->unk14 = 0;
-    arg0->unk15 = (func_150ADA20() % 0x38U) + 80;
+    arg0->unk15 = (func_150ADA20() % 56U) + 80;
     arg0->unk16 = 0;
     arg0->unk18 = 0;
-    arg0->unk19 = (func_150ADA20() % 0x2EU) + 180;
+    arg0->unk19 = (func_150ADA20() % 46U) + 180;
     arg0->unk1A = 0;
 }
 
+/* Colour setter for effect kind 8 (D_8008FD38): fills the RGB triples unk14-16 and unk18-1A. */
 void func_151DB330(struct218 *arg0) {
-    arg0->unk14 = (func_150ADA20() % 0x15U) + 95;
-    arg0->unk15 = (func_150ADA20() % 0x15U) + 95;
-    arg0->unk16 = (func_150ADA20() % 0xBU) + 45;
+    arg0->unk14 = (func_150ADA20() % 21U) + 95;
+    arg0->unk15 = (func_150ADA20() % 21U) + 95;
+    arg0->unk16 = (func_150ADA20() % 11U) + 45;
     arg0->unk18 = (func_150ADA20() & 0xF) + 58;
     arg0->unk19 = (func_150ADA20() & 0xF) + 60;
-    arg0->unk1A = (func_150ADA20() % 0xBU) + 25;
+    arg0->unk1A = (func_150ADA20() % 11U) + 25;
 }
 
+/* Colour setter for effect kind 9 (D_8008FD38): fills the RGB triples unk14-16 and unk18-1A. */
 void func_151DB3D8(struct218 *arg0) {
     arg0->unk14 = 0;
-    arg0->unk15 = arg0->unk16 = (func_150ADA20() % 0x38U) + 80;
+    arg0->unk15 = arg0->unk16 = (func_150ADA20() % 56U) + 80;
     arg0->unk18 = 0;
-    arg0->unk19 = arg0->unk1A = (func_150ADA20() % 0x2EU) + 180;
+    arg0->unk19 = arg0->unk1A = (func_150ADA20() % 46U) + 180;
 }
 
+/* Colour setter for effect kind 10 (D_8008FD38): fills the RGB triples unk14-16 and unk18-1A. */
 void func_151DB43C(struct218 *arg0) {
-    arg0->unk14 = (func_150ADA20() % 0x38U) + 80;
+    arg0->unk14 = (func_150ADA20() % 56U) + 80;
     arg0->unk15 = 0;
-    arg0->unk16 = (func_150ADA20() % 0x38U) + 80;
-    arg0->unk18 = (func_150ADA20() % 0x2EU) + 180;
+    arg0->unk16 = (func_150ADA20() % 56U) + 80;
+    arg0->unk18 = (func_150ADA20() % 46U) + 180;
     arg0->unk19 = 0;
-    arg0->unk1A = (func_150ADA20() % 0x2EU) + 180;
+    arg0->unk1A = (func_150ADA20() % 46U) + 180;
 }
 
+/* Colour setter for effect kind 12 (D_8008FD38): fills the RGB triples unk14-16 and unk18-1A. */
 void func_151DB4CC(struct218 *arg0) {
     arg0->unk14 = (func_150ADA20() % 56U) + 200;
     arg0->unk15 = (func_150ADA20() % 56U) + 200;
