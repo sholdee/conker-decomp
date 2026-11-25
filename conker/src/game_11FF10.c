@@ -273,10 +273,10 @@ void func_150F33B0(WorldObject *obj) {
 void func_150F33F8(s32 player) {
     if (D_800DBFF0[player].eye.z < -2100.0f) {
         if (D_800DBFF0[player].eye.y > 840.0f) {
-            *(s16 *)D_800D9A40 |= 1 << player;
+            *D_800D9A40 |= 1 << player;
             return;
         }
-        *(s16 *)D_800D9A40 &= ~(1 << player);
+        *D_800D9A40 &= ~(1 << player);
     }
 }
 

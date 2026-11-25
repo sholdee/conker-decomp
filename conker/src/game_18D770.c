@@ -973,8 +973,8 @@ struct225 *func_151623F4(struct226 *light, u8 kind, u8 type, u8 arg3, s8 update,
         return NULL;
     }
 
-    pulse.base = *(Vec3f *)D_800A670C[kind];
-    pulse.amplitude = *(Vec3f *)D_800A6730[kind];
+    pulse.base = D_800A670C[kind];
+    pulse.amplitude = D_800A6730[kind];
 
     pulse.phase = 0.0f;
     pulse.speed = D_800A6754[kind];

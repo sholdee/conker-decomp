@@ -209,8 +209,8 @@ void func_15183ACC(s32 slot) {
             D_800DDE80[slot].unk4 = res->unk0;
             D_800DDE80[slot].unk8 = res->unk8;
             D_800DDE80[slot].displayList = res->unk18;
-            D_800DDF78[slot] = (s32)res->unk10;
-            func_1510CE60((Gfx *)D_800DDF78[slot], 0, 1, 0x3E, &D_800DDE80[slot].unk10);
+            D_800DDF78[slot] = res->unk10;
+            func_1510CE60(D_800DDF78[slot], 0, 1, 0x3E, &D_800DDE80[slot].unk10);
             D_800DDF68[slot] = 1;
         }
     }
@@ -229,7 +229,7 @@ Gfx *func_15183BA4(Gfx *gdl, s32 modelId, s32 arg2, s32 arg3) {
         }
     }
 
-    if (slot != -1 && D_800DDF78[slot] != 0) {
+    if (slot != -1 && D_800DDF78[slot] != NULL) {
         gSPDisplayList(gdl++, D_800DDF78[slot]);
     }
     return gdl;
@@ -255,7 +255,7 @@ void func_15183C28(s32 slot) {
         // matching: IDO reloads the argument into a0 directly unless it goes through an int-to-pointer cast
         func_10004074((void *)(s32)D_800DDE80[slot].resource);
         D_800DDE80[slot].resource = NULL;
-        D_800DDF78[slot] = 0;
+        D_800DDF78[slot] = NULL;
     }
 }
 
@@ -266,7 +266,7 @@ void func_15183D28(void) {
     Game1B0740Wave *wave;
 
     for (i = 0; i < 11; i++) {
-        if (D_800DDF68[i] >= -1 && (D_800DDE80[i].resource == NULL || D_800DDF78[i] == 0)) {
+        if (D_800DDF68[i] >= -1 && (D_800DDE80[i].resource == NULL || D_800DDF78[i] == NULL)) {
             D_800DDF68[i] = -2;
         }
     }

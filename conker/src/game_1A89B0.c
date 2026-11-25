@@ -221,7 +221,7 @@ extern void func_10004074(s32);
 #define FRAMES_PER_TYPE 26
 
 /* This frame's sprite vertex buffer, four vertices per sprite. */
-#define VTX(n) (((Vtx *) D_800DDD10[D_800BE9C0])[n])
+#define VTX(n) (((Vtx *)(s32)D_800DDD10[D_800BE9C0])[n]) // matching: the int round trip keeps the original addressing
 
 /* Whether sorted sprite k is still inside the box, walking from its near edge in direction dir along the axis. */
 #define IN_WINDOW(k)                                                                \
@@ -334,12 +334,12 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fa
     i = mid;
     if (IN_WINDOW(mid)) {
         j = ((u32) D_800DDD20 < (u32) D_800DDD0C) ? D_800DDD20 : D_800DDD0C;
-        D_800DDD10[D_800BE9C0] = (s32) allocate_memory(j << 6, 4, 2, 0);
-        if (D_800DDD10[D_800BE9C0] == 0) {
+        D_800DDD10[D_800BE9C0] = allocate_memory(j << 6, 4, 2, 0);
+        if (D_800DDD10[D_800BE9C0] == NULL) {
             return;
         }
     } else {
-        D_800DDD10[D_800BE9C0] = 0;
+        D_800DDD10[D_800BE9C0] = NULL;
         return;
     }
     for (j = 0; (u32) j < (u32) D_800DDD0C && IN_WINDOW(i); i += dir) {
@@ -676,7 +676,7 @@ void func_1517D7B0(Gfx **gfx, s32 pass) {
     s16 height;
 
     tex = 0xFFFF; /* no texture loaded yet */
-    if (D_800DDD10[D_800BE9C0] == 0) {
+    if (D_800DDD10[D_800BE9C0] == NULL) {
         return;
     }
     *gfx = func_1517D690(*gfx, D_800DDD24);

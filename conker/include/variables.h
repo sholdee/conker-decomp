@@ -434,7 +434,7 @@ extern ObjType D_8008B4A8[104];
 
 extern u8   D_8008CEB0;
 extern u8   D_8008CD00;
-extern s32  D_8008CFFC[];
+extern f32 *D_8008CFFC[]; // per LevelHeader.unk10: sun position (game_1AB530 FLARE_SUN)
 
 extern s8   D_8008FD8C;
 extern s8   D_8008FD90;
@@ -697,8 +697,8 @@ extern f32 D_800A6AF0;
 extern f32 D_800A6AF4;
 extern f32 D_800A6AF8;
 extern f32 D_800A6AFC;
-extern s32 D_800A670C[][3]; // { {128.0f, 59.5f, 59.5f}, {187.0f, 59.5f, 59.5f}, {128.0f, 17.5f, 0.0f} }
-extern s32 D_800A6730[][3];
+extern Vec3f D_800A670C[]; // { {128.0f, 59.5f, 59.5f}, {187.0f, 59.5f, 59.5f}, {128.0f, 17.5f, 0.0f} }
+extern Vec3f D_800A6730[];
 extern f32 D_800A6754[];
 extern f32 D_800A6760[24];
 extern f32 D_800A67C0[24];
@@ -1132,7 +1132,7 @@ extern u8  D_800D993A[];
 
 extern struct HomingEffect *D_800D99D0[8]; // live homing effects by handle - 1 (defined in game_1104D0)
 extern TriggerZone *D_800D9A20[2]; // registered by func_15014040 (by unk18)
-extern s32 D_800D9A40;
+extern s16 *D_800D9A40; // bit per player (game_11FF10)
 extern Vec3f D_800D9A50;
 extern TriggerZone *D_800D9AA0[3];
 extern u16 D_800D9AB0[4];
@@ -1275,7 +1275,7 @@ extern ParticleTexFile D_800DDA90[15];
 extern s32  D_800DDC00;
 extern s32  D_800DDC08;
 extern s32  D_800DDC04;
-extern s32  D_800DDD10[];
+extern Vtx *D_800DDD10[2]; // this frame's sprite vertex buffer (game_1A89B0), one per frame buffer
 extern s32  D_800DDD0C;
 extern u8   D_800DDD1C;
 extern s32  D_800DDD20;
@@ -1325,7 +1325,7 @@ extern BoneTrail *D_800DF7C8[2]; // [0]: Actor owners, [1]: world object owners
 extern u8   D_800DDF5C[];
 extern u8   D_800DDF60[];
 extern s8   D_800DDF68[];
-extern s32  D_800DDF78[];
+extern Gfx *D_800DDF78[]; // per effect model slot: the model's second display list
 
 /* 800E0000 */
 extern u8   D_800E0B94;

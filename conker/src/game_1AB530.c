@@ -119,7 +119,7 @@ Gfx *func_1517E28C(Gfx *gfx, s32 arg1) {
                 if (D_800DCDD0 == 0) {
                     hidden = TRUE;
                 } else {
-                    sunPos = (f32 *)D_8008CFFC[D_800B0DF0->unk10];
+                    sunPos = D_8008CFFC[D_800B0DF0->unk10];
                     if (func_1517EAAC(sunPos[0], sunPos[1], sunPos[2], &flare->screenX, &flare->screenY) != 1) {
                         hidden = TRUE;
                     }

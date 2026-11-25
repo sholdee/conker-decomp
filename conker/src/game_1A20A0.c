@@ -386,7 +386,7 @@ void func_15175958(SwarmActor *actor) {
     f32 dz;
     u16 sound;
 
-    if (D_800DDE80[actor->modelIndex].resource == NULL || D_800DDF78[actor->modelIndex] == 0) {
+    if (D_800DDE80[actor->modelIndex].resource == NULL || D_800DDF78[actor->modelIndex] == NULL) {
         func_1516972C((struct102 *)actor);
         return;
     }
@@ -712,7 +712,7 @@ void func_1517685C(SwarmActor *actor) {
 void func_15176B84(SwarmActor *actor) {
     s32 alpha;
 
-    if ((D_800DDE80[actor->modelIndex].resource == NULL) || (D_800DDF78[actor->modelIndex] == 0)) {
+    if ((D_800DDE80[actor->modelIndex].resource == NULL) || (D_800DDF78[actor->modelIndex] == NULL)) {
         func_1516972C((struct102 *)actor);
         return;
     }
@@ -779,7 +779,7 @@ Gfx *func_15176DF0(Gfx *gdl, SwarmActor *actor, s16 camera) {
     s32 brightness;
     s32 target;
 
-    if ((D_800DDE80[actor->modelIndex].resource == NULL) || (D_800DDF78[actor->modelIndex] == 0)) {
+    if ((D_800DDE80[actor->modelIndex].resource == NULL) || (D_800DDF78[actor->modelIndex] == NULL)) {
         return gdl;
     }
     func_150A8050(mtx, 0.0f, actor->yaw, 0.0f);

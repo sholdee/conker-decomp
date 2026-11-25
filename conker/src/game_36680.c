@@ -926,8 +926,8 @@ void func_1500BC7C(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, s16 **t
 }
 
 void func_1500BE40(s32 unused) {
-    D_800DDD10[0] = 0;
-    D_800DDD10[1] = 0;
+    D_800DDD10[0] = NULL;
+    D_800DDD10[1] = NULL;
     D_800DDD0C = 110;
 }
 
