@@ -2568,41 +2568,6 @@ typedef struct ParticlePulse {
     /* 0x08 */ f32 amplitude[2];
 } ParticlePulse; /* size 0x10 */
 
-/* Per-particle data for the floor-collision update funcs (func_151319C4). */
-typedef struct ParticleBounce {
-    /* 0x0 */ u8 flags;
-    /* 0x1 */ s8 hitFunc;      /* D_80089874 index, -1 for none */
-    /* 0x2 */ u8 pad2[2];
-    /* 0x4 */ f32 restitution;
-} ParticleBounce; /* size 0x8 */
-
-/* Per-particle data for func_15131DEC (spawned by func_15131EE4). */
-typedef struct ParticleFlash {
-    /* 0x00 */ f32 elapsed;
-    /* 0x04 */ f32 duration;
-    /* 0x08 */ f32 growth;
-    /* 0x0C */ f32 startAlpha;
-    /* 0x10 */ f32 alphaDecay;
-} ParticleFlash; /* size 0x14 */
-
-/* A sprite particle (game_15D730.c): its DescParticleHead, then dataSize bytes of per-particle data (see
- * func_15130280). The variants of data are those of the update funcs in game_15D730.c; other kinds keep
- * their own types (a DescParticleHead followed by their data). */
-typedef struct SpriteParticle {
-    /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ union {              /* caller-sized, see func_15130280 */
-        f32 drag;               /* update funcs 10, 16, 26 (horizontal, whole, vertical velocity) */
-        ParticleBounce bounce;
-        struct {
-            f32 drag;
-            u8 pad4[4];
-            ParticleBounce bounce;
-        } dragBounce;
-        ParticlePulse pulse;
-        ParticleFlash flash;
-    } data;
-} SpriteParticle;
-
 /* Particle data at 0xA8 of the rising-and-swaying particles (update func 4: func_151596BC, func_15159594):
  * size wobble, rise speed limit, x/z sway, and a ceiling (particle flag 0x2000 kills it above). */
 typedef struct RiseMotion {
@@ -2719,6 +2684,43 @@ typedef struct AgeFadeParams {
     /* 0x8 */ s16 growStart;
     /* 0xA */ s16 growRate;
 } AgeFadeParams; /* size 0xC */
+
+/* Per-particle data for the floor-collision update funcs (func_151319C4). */
+typedef struct ParticleBounce {
+    /* 0x0 */ u8 flags;
+    /* 0x1 */ s8 hitFunc;      /* D_80089874 index, -1 for none */
+    /* 0x2 */ u8 pad2[2];
+    /* 0x4 */ f32 restitution;
+} ParticleBounce; /* size 0x8 */
+
+/* Per-particle data for func_15131DEC (spawned by func_15131EE4). */
+typedef struct ParticleFlash {
+    /* 0x00 */ f32 elapsed;
+    /* 0x04 */ f32 duration;
+    /* 0x08 */ f32 growth;
+    /* 0x0C */ f32 startAlpha;
+    /* 0x10 */ f32 alphaDecay;
+} ParticleFlash; /* size 0x14 */
+
+/* A sprite particle (game_15D730.c): its DescParticleHead, then dataSize bytes of per-particle data (see
+ * func_15130280). The variants of data are those of the update funcs in game_15D730.c and the ones whose data
+ * type is shared; other kinds keep their own types (a DescParticleHead followed by their data). */
+typedef struct SpriteParticle {
+    /* 0x00 */ DescParticleHead head;
+    /* 0xA8 */ union {              /* caller-sized, see func_15130280 */
+        f32 drag;               /* update funcs 10, 16, 26 (horizontal, whole, vertical velocity) */
+        ParticleBounce bounce;
+        struct {
+            f32 drag;
+            u8 pad4[4];
+            ParticleBounce bounce;
+        } dragBounce;
+        ParticlePulse pulse;
+        ParticleFlash flash;
+        WobbleData wobble;      /* update func 22 (func_150AF6E4, game_DC6B0.c) and the like */
+        AgeFadeParams ageFade;  /* update funcs 0 and 1 (func_151A483C / func_151A4900, game_1D0840.c) */
+    } data;
+} SpriteParticle;
 
 /* Settings an actor-attached particle emitter (object type 0x21, func_1518E3C4 / func_1518D1C0 in
  * game_1BA670.c) is created with; copied verbatim into the emitter at +0x18. */

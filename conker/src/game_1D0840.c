@@ -71,12 +71,6 @@ typedef struct {
     /* 0x98 */ BoneTrailState *state;
 } BoneTrailEffect;
 
-/* A particle created by func_15130374. */
-typedef struct {
-    /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ AgeFadeParams ageParams;
-} Particle;
-
 /* Emits particles from a point on one of the owner's bones (task data of func_151A499C). */
 typedef struct {
     /* 0x00 */ Actor *owner;
@@ -591,7 +585,7 @@ void func_151A4638(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, EffectHead
     ParticleDesc spawn;
     f32 scale;
     s16 params[6];
-    Particle *particles;
+    SpriteParticle *particles;
 
     spawn.texture = 0x27;
     spawn.renderMode = 0x1401;
@@ -646,16 +640,16 @@ void func_151A4638(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, EffectHead
 
     particles = func_15130374(&spawn, 0, 12, parent->owner, 1);
     if (particles != NULL) {
-        memcpy(&particles->ageParams, params, sizeof(params));
+        memcpy(&particles->data.ageFade, params, sizeof(params));
     }
 }
 
 /* Particle update for func_151A4638's bursts: fades and resizes by age. */
-s32 func_151A483C(Particle *particle, u8 arg1) {
+s32 func_151A483C(SpriteParticle *particle, u8 arg1) {
     s16 age;
     AgeFadeParams *params;
 
-    params = &particle->ageParams;
+    params = &particle->data.ageFade;
     age = particle->head.desc.timer;
     if (age < params->fadeStart) {
         particle->head.desc.alpha = age * params->fadeStep;
@@ -680,11 +674,11 @@ s32 func_151A483C(Particle *particle, u8 arg1) {
 }
 
 /* Like func_151A483C, but always sets unk2C from the age. */
-s32 func_151A4900(Particle *particle, u8 arg1) {
+s32 func_151A4900(SpriteParticle *particle, u8 arg1) {
     s16 age;
     AgeFadeParams *params;
 
-    params = &particle->ageParams;
+    params = &particle->data.ageFade;
     age = particle->head.desc.timer;
     if (age < params->fadeStart) {
         particle->head.desc.alpha = age * params->fadeStep;

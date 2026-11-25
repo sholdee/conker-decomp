@@ -70,13 +70,7 @@ void func_150EC520(Effect *effect) {
     }
 }
 
-/* Live particle, as created by func_15130280 from a ParticleDesc. */
-typedef struct {
-    /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ WobbleData data;
-} Particle;
-
-extern Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
+extern SpriteParticle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 
 /* Particle source effect: emits particles from its position at a random rate. */
 void func_150EC6B0(Effect *effect) {
@@ -87,7 +81,7 @@ void func_150EC6B0(Effect *effect) {
     if (source->accumulator > 1.0f) {
         ParticleDesc spawn;
         WobbleData data;
-        Particle *particle;
+        SpriteParticle *particle;
 
         data.drag = 0.9704700112f;
         spawn.texture = 0x6C;
@@ -137,7 +131,7 @@ void func_150EC6B0(Effect *effect) {
             spawn.width = spawn.height = func_150ADA68() * 80.0f + 92.0f;
             particle = func_15130280(&spawn, 0, 0, 0x10, effect->base.header.owner, effect->base.header.kind);
             if (particle != NULL) {
-                memcpy(&particle->data, &data, sizeof(data));
+                memcpy(&particle->data.wobble, &data, sizeof(data));
             }
             source->accumulator -= 1.0f;
         } while (source->accumulator > 1.0f);

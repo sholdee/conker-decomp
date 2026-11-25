@@ -5,11 +5,11 @@
 
 
 /* Live particle spawned by an emitter (see func_15130280). */
-typedef struct Particle Particle;
+typedef struct PoolParticle PoolParticle;
 
 /* One entry of an emitter's slot pool; slots are chained by index, -1 ends a chain. */
 typedef struct {
-    /* 0x00 */ Particle *particle;
+    /* 0x00 */ PoolParticle *particle;
     /* 0x04 */ s16 next;
     /* 0x06 */ s16 pad6;
 } PoolEmitterSlot;
@@ -42,11 +42,8 @@ typedef struct {
     /* 0x46 */ s16 freeHead;       /* chain of unused slots */
 } PoolEmitter; /* size 0x48 */
 
-struct Particle {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x30];
-    /* 0x40 */ Vec3f anchor;
-    /* 0x4C */ u8 pad4C[0xA8 - 0x4C];
+struct PoolParticle {
+    /* 0x00 */ DescParticleHead head;  /* head.desc.pos: the anchor the emitter moves it to */
     /* 0xA8 */ PoolEmitter *owner;
 };
 
@@ -74,7 +71,7 @@ void func_150C0A48(PoolEmitter *emitter) {
     s16 i;
 
     for (i = emitter->activeHead; i != -1; i = emitter->slots[i].next) {
-        func_1516972C(&emitter->slots[i].particle->header);
+        func_1516972C(&emitter->slots[i].particle->head.header);
     }
 }
 
@@ -120,7 +117,7 @@ PoolEmitter *func_150C0AC0(PoolEmitterDesc *desc, s32 arg1, s32 arg2) {
     return emitter;
 }
 
-extern Particle *func_15130280(ParticleDesc68 *, u8, s32, s32, u8, s32);
+extern PoolParticle *func_15130280(ParticleDesc68 *, u8, s32, s32, u8, s32);
 
 /* Emitter update: follows its target and, while the target moves, spawns particles around it. */
 void func_150C0C38(PoolEmitter *emitter) {
@@ -155,7 +152,7 @@ void func_150C0C38(PoolEmitter *emitter) {
 
         active = TRUE;
         for (i = emitter->activeHead; i != -1; i = emitter->slots[i].next) {
-            emitter->slots[i].particle->anchor = pos;
+            emitter->slots[i].particle->head.desc.pos = pos;
         }
         if (emitter->desc.flags & 4) {
             if (emitter->desc.target->animseq.uh != 0x1D && emitter->desc.target->animseq.uh != 0x1E) {
@@ -248,7 +245,7 @@ void func_150C0C38(PoolEmitter *emitter) {
 }
 
 /* Particle destructor hook: moves the particle's slot from its emitter's active chain to the free chain. */
-void func_150C1198(Particle *particle) {
+void func_150C1198(PoolParticle *particle) {
     PoolEmitter *emitter;
     s32 found;
     s16 prev;

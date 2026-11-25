@@ -646,16 +646,10 @@ s32 func_150BCFB8(struct Obj150BCFB8 *obj, s32 arg1, s32 arg2, s32 arg3, f32 flo
     return 1;
 }
 
-/* Live particle created by func_15130280. */
-typedef struct {
-    /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ u8 data[4]; /* per-particle handler state */
-} Particle;
-
 void func_1514470C(TriggerZone *, Vec3f *);
 void func_15143794(s16, s16, f32, Vec3f *);
 s32 func_1513264C(ParticleSpawn *, s32, s32, s32, s32, u8, s32);
-Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
+SpriteParticle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 void func_151D5334(Vec3f *, f32, f32, f32, s32, u8, s32);
 
 /* Burst of particles and spawned particles from two random anchors (entries 0x4C/0x4D of zones). */
@@ -754,7 +748,7 @@ void func_150BD070(u8 arg0, s32 arg1) {
         spawn.maxSize = 0.0f;
         scale = 0.917015f;
         while (count > 0) {
-            Particle *spawned;
+            SpriteParticle *spawned;
 
             spawn.scaleStart = spawn.timer = func_150ADA20() % 31U + 30;
             spawn.alpha = func_150ADA20() % 101U + 155;
@@ -765,7 +759,7 @@ void func_150BD070(u8 arg0, s32 arg1) {
             spawn.gravity = func_150ADA68() * 0.559f + -0.777f;
             spawned = func_15130280(&spawn, 1, 0, 4, arg0, arg1);
             if (spawned != NULL) {
-                memcpy(spawned->data, &scale, sizeof(scale));
+                memcpy(&spawned->data.drag, &scale, sizeof(scale));
             }
             count--;
         }

@@ -78,13 +78,7 @@ void func_151DC8BC(Vec3f *pos, s32 duration, u8 burst, u8 randomColors, u8 owner
     }
 }
 
-/* Particle created by func_15130280 (only the fields used here). */
-typedef struct {
-    /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ WobbleData data;
-} Particle;
-
-extern Particle *func_15130280(ParticleDesc *desc, u8, s32, s32 dataSize, u8, s32);
+extern SpriteParticle *func_15130280(ParticleDesc *desc, u8, s32, s32 dataSize, u8, s32);
 
 /* Update function of the func_151DC8BC emitter: emits particles at its position at a random rate
  * of (0.136 to 0.257) * D_800BE9A4 per frame, in a fixed colour or one of three random colour pairs. */
@@ -96,7 +90,7 @@ void func_151DC97C(ColorEmitter *emitter) {
     if (data->accum > 1.0f) {
         ParticleDesc desc;
         WobbleData extra;
-        Particle *particle;
+        SpriteParticle *particle;
         u8 colorIndex;
 
         extra.drag = 0.97047f;
@@ -161,7 +155,7 @@ void func_151DC97C(ColorEmitter *emitter) {
             }
             particle = func_15130280(&desc, 0, 0, sizeof(extra), emitter->base.header.owner, emitter->base.header.kind);
             if (particle != NULL) {
-                memcpy(&particle->data, &extra, sizeof(extra));
+                memcpy(&particle->data.wobble, &extra, sizeof(extra));
             }
             data->accum -= 1.0f;
         } while (data->accum > 1.0f);

@@ -8,14 +8,6 @@
 void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32,
                   s32, s32, s32, s32, s32, s32, s32, s32);
 
-/* Live particle created by func_15130280. */
-typedef struct {
-    /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ u8 data[4]; /* per-particle handler state */
-} Particle;
-
-Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
-
 const Vec3f D_8009FF40[4] = {
     { -270.0f, 3.0f, -270.0f },
     { 270.0f, 3.0f, -270.0f },

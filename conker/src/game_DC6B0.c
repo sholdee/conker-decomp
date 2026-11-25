@@ -52,14 +52,6 @@ void func_150AF2E0(void *arg0, Range150AF2E0 *range) {
     func_151CF898(arg0, range->unk2 + range->unk8, range->unk2);
 }
 
-/* A particle created by func_15130280. */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x58];
-    /* 0x58 */ Vec3f vel;
-    /* 0x64 */ u8 pad64[0xA8 - 0x64];
-    /* 0xA8 */ WobbleData wobble;
-} Particle;
-
 /* Per-effect data of the func_150AF328 emitter. */
 typedef struct {
     /* 0x00 */ Vec3f pos;
@@ -72,8 +64,8 @@ typedef struct {
     /* 0x28 */ SmokeEmitterData data;
 } SmokeEmitter;
 
-extern Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
-extern void func_15131828(Particle *, f32 *amplitude, u8 *phase, u8 *phaseStep);
+extern SpriteParticle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
+extern void func_15131828(SpriteParticle *, f32 *amplitude, u8 *phase, u8 *phaseStep);
 extern void func_15131958(Vec3f *vel, f32 drag);
 
 /* Emitter update: accumulates 0.1352..0.305 particles per unit of D_800BE9A4 and spawns one
@@ -86,7 +78,7 @@ void func_150AF328(SmokeEmitter *emitter) {
     if (data->spawnAccum > 1.0f) {
         ParticleDesc spawn;
         WobbleData wobble;
-        Particle *particle;
+        SpriteParticle *particle;
 
         wobble.drag = 0.9704700112f;
         spawn.texture = 0x6C;
@@ -136,7 +128,7 @@ void func_150AF328(SmokeEmitter *emitter) {
             spawn.width = spawn.height = func_150ADA68() * 71.0f + 80.0f;
             particle = func_15130280(&spawn, 0, 0, 0x10, emitter->base.header.owner, emitter->base.header.kind);
             if (particle != NULL) {
-                memcpy(&particle->wobble, &wobble, sizeof(wobble));
+                memcpy(&particle->data.wobble, &wobble, sizeof(wobble));
             }
             data->spawnAccum -= 1.0f;
         } while (data->spawnAccum > 1.0f);
@@ -144,12 +136,12 @@ void func_150AF328(SmokeEmitter *emitter) {
 }
 
 /* Update for func_150AF328's particles: wobbles the offset and applies drag to the velocity. */
-s32 func_150AF6E4(Particle *particle, s32 arg1) {
+s32 func_150AF6E4(SpriteParticle *particle, s32 arg1) {
     WobbleData *wobble;
 
-    wobble = &particle->wobble;
+    wobble = &particle->data.wobble;
     func_15131828(particle, wobble->amplitude, wobble->phase, wobble->phaseStep);
-    func_15131958(&particle->vel, wobble->drag);
+    func_15131958(&particle->head.desc.vel, wobble->drag);
     return 1;
 }
 
