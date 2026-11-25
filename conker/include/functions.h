@@ -440,7 +440,7 @@ void func_15059140(Actor *arg0);
 void func_150593C4(Actor *arg0, u16 arg1, f32 arg2, f32 arg3);
 void func_15059444(Actor *arg0);
 void func_1505959C(Actor *arg0, s32 arg1);
-f32  func_1505A5CC(struct49 *arg0);
+f32  func_1505A5CC(OSContPad *arg0);
 u16  func_1505A630(f32 arg0, f32 arg1, s32 arg2);
 f32  func_1505A6F8(Actor *arg0, Actor *arg1);
 s16  func_1505C140(Actor *arg0, Actor *arg1);

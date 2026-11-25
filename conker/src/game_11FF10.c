@@ -295,12 +295,6 @@ f32 func_150F34A0(Actor *obj, f32 pitch) {
     return speed;
 }
 
-typedef struct {
-    /* 0x0 */ u16 buttons;
-    /* 0x2 */ s8 stick_x;
-    /* 0x3 */ s8 stick_y;
-} ContPad;
-
 extern u8 D_800CC26D;
 extern u8 D_800CBDD3;
 void func_150585F0(Actor *arg0, f32 arg1);
@@ -309,7 +303,6 @@ u8 func_150599C8(Actor *arg0, u8 arg1, u16 arg2);
 f32 func_1505A3A8(f32 arg0, void *arg1, f32 arg2, f32 arg3, u8 arg4);
 void func_15073FA0(void);
 
-#define PAD ((ContPad *)D_800CC284) // controller state for this frame
 
 /* Per-frame control of a flying mode: the stick steers and pitches, B thrusts, A reverses, R holds altitude,
  * Z fires (only when D_800BE9F0 is 0x3C and fewer than 5 id-0x25 objects exist). Also picks up the
@@ -337,11 +330,11 @@ void func_150F34F4(Actor *actor) {
     actor->unk80 = 1;
     actor->unk222 = 0;
     D_800CC288 = D_800BE710[0];
-    D_800CC284 = (s32)D_800BE728[0];
+    D_800CC284 = D_800BE728[0];
     if ((D_800C3E78 <= D_80082FA0) && (D_800DDE3C[D_800C3E78] != 0) && (D_800DDDC8[D_800C3E78] > 0.75f) && (D_800E0B94 != 2)) {
-        PAD->stick_x = 0;
-        PAD->stick_y = 0;
-        PAD->buttons = 0;
+        D_800CC284->stick_x = 0;
+        D_800CC284->stick_y = 0;
+        D_800CC284->button = 0;
         D_800CC288 = 0;
     }
     actor->unkF8 |= 0x40;
@@ -370,9 +363,9 @@ void func_150F34F4(Actor *actor) {
     }
     if (actor->unk102 == 0) {
         actor->in_water = 0;
-        angle = func_1505A630(PAD->stick_x, PAD->stick_y, 0);
-        mag = func_1505A5CC((struct49 *)D_800CC284);
-        if (PAD->buttons & R_TRIG) {
+        angle = func_1505A630(D_800CC284->stick_x, D_800CC284->stick_y, 0);
+        mag = func_1505A5CC(D_800CC284);
+        if (D_800CC284->button & R_TRIG) {
             mag = 0.0f;
         }
         angle += D_800CC280;
@@ -409,8 +402,8 @@ void func_150F34F4(Actor *actor) {
     if (speed > 60.0f) {
         speed = 60.0f;
     }
-    pitch = PAD->stick_y * 1.25f;
-    rHeld = PAD->buttons & R_TRIG;
+    pitch = D_800CC284->stick_y * 1.25f;
+    rHeld = D_800CC284->button & R_TRIG;
     if (rHeld) {
         pitch = 0.0f;
     }
@@ -444,7 +437,7 @@ void func_150F34F4(Actor *actor) {
         }
         pitch = 40.0f;
     }
-    temp = PAD->stick_x;
+    temp = D_800CC284->stick_x;
     actor->unkC4 += (temp - actor->unkC4) * (0.2f * D_800D1550);
     actor->unk76 -= (s16)(actor->unkC4 * D_800D1550 * 0.04f * ((100.0f - speed) * 0.015f) * 220.0f);
     actor->unk7E = 0x19;
@@ -462,13 +455,13 @@ void func_150F34F4(Actor *actor) {
         actor->unk86 = 0;
         actor->y_velocity = 9.0f;
     }
-    if (!(PAD->buttons & R_TRIG)) {
-        if (PAD->buttons & A_BUTTON) {
+    if (!(D_800CC284->button & R_TRIG)) {
+        if (D_800CC284->button & A_BUTTON) {
             actor->target_speed = -22.0f;
             speed = 1.0f;
             accel = 1.8f;
         }
-        if (PAD->buttons & B_BUTTON) {
+        if (D_800CC284->button & B_BUTTON) {
             actor->target_speed = 30.0f;
             if (actor->y_velocity < 0.0f) {
                 actor->target_speed -= actor->y_velocity * 0.6f;
@@ -507,8 +500,8 @@ void func_150F34F4(Actor *actor) {
         actor->gravity = 0.0f;
     }
     actor->in_water = 10;
-    if (PAD->buttons & R_TRIG) {
-        actor->unkB8 += (PAD->stick_y - actor->unkB8) * 0.2f;
+    if (D_800CC284->button & R_TRIG) {
+        actor->unkB8 += (D_800CC284->stick_y - actor->unkB8) * 0.2f;
         actor->y_velocity = 0.0f;
         actor->gravity = 0.0f;
     } else {
@@ -526,7 +519,7 @@ void func_150F34F4(Actor *actor) {
     if ((actor->unk13C != 0) && (actor->unk28 < 50.0f)) {
         floorLevel = 50.0f;
     }
-    if (!(PAD->buttons & R_TRIG)) {
+    if (!(D_800CC284->button & R_TRIG)) {
         if ((D_800CC26D != 0) && (actor->unk13C == 0) && (D_800CC2D0[D_800CC26D - 100].unk28 == 0.0f)) {
             actor->y_position = D_800CC2D0[D_800CC26D - 100].y_position + 70.0f;
             actor->y_velocity = 20.0f;
@@ -573,7 +566,7 @@ void func_150F34F4(Actor *actor) {
     }
     if (actor->unk28 <= floorLevel) {
         actor->xz_velocity *= 0.6f;
-        if ((PAD->buttons & B_BUTTON) || (actor->unk86 != 0) || (actor->unk13C != 0)) {
+        if ((D_800CC284->button & B_BUTTON) || (actor->unk86 != 0) || (actor->unk13C != 0)) {
             if (actor->unk13C != 0) {
                 if (actor->y_velocity < -10.0f) {
                     D_800D1580 = 0xFF0100A7;
@@ -598,7 +591,7 @@ void func_150F34F4(Actor *actor) {
             actor->unkB8 = 0.0f;
         }
     }
-    if (!(PAD->buttons & R_TRIG)) {
+    if (!(D_800CC284->button & R_TRIG)) {
         actor->unkB8 += 20.0f;
     } else {
         actor->y_velocity = actor->unkB8 * -0.35f;

@@ -64,15 +64,6 @@ typedef struct Sub9C {
 
 
 
-typedef struct {
-    /* 0x0 */ u16 buttons;
-    /* 0x2 */ s8 stick_x;
-    /* 0x3 */ s8 stick_y;
-    /* 0x4 */ u16 unk4;
-} ContPad;
-
-// variables.h declares D_800CC284 as s32; it points at the current player's controller input.
-#define D_800CC284 (*(ContPad **)&D_800CC284)
 extern u16 D_8009917C[];
 extern u8 D_800BEA0C;
 extern f32 D_800CBD90;
@@ -100,7 +91,7 @@ f32 func_1505A3A8(f32, Actor *, f32, f32, u8);
 void func_1505A9AC(Actor *, f32);
 void func_1505D024(Actor *, s32, u16, s32);
 void func_1505D6F0(Actor *, u8);
-void func_1505F298(Actor *, ContPad *);
+void func_1505F298(Actor *, OSContPad *);
 void func_1506045C(Actor *, u16, s32, f32, s32);
 void func_15063168(Actor *);
 s32 func_1506E46C(Actor *, s32 *, s32);
@@ -110,8 +101,8 @@ s32 func_150A3FC4(f32, f32, void *, s16 (*)[3], f32 *);
 void func_150D5A6C(Actor *, s32, s32);
 void func_150D7790(Actor *, s32);
 void func_1510E8BC(void **, s16 (*)[3], f32 *, f32 *, u32 *, s16 *, f32, f32, f32, f32, s32, Actor *, f32, f32, s32);
-void func_15121490(Actor *, ContPad *);
-void func_151279A0(Actor *, ContPad *);
+void func_15121490(Actor *, OSContPad *);
+void func_151279A0(Actor *, OSContPad *);
 void func_151AE264(Actor *);
 
 // matching: same addresses as D_800CC280/D_800CC2BC (rodata_extern places a D_<addr> static there), but as
@@ -154,7 +145,7 @@ void func_1504CB98(Actor *actor) {
     f32 startX;
     f32 startZ;
     s32 buttons;
-    ContPad savedPad;
+    OSContPad savedPad;
     s32 padOverridden;
     f32 probeTop;
     s32 mode;
@@ -233,7 +224,7 @@ void func_1504CB98(Actor *actor) {
     pushAnim = 0;
     lean = 0;
     D_800CC28C = D_800BE710[D_800C3E78];
-    D_800CC290 = D_800CC284->buttons;
+    D_800CC290 = D_800CC284->button;
     D_800CC2B1 = 0;
     D_800CC2B2 = 0;
     D_800CC2B4 = 4.0f;
@@ -249,7 +240,7 @@ void func_1504CB98(Actor *actor) {
         savedPad = *D_800CC284;
         D_800CC284->stick_x = actor->unk31C->stick_x;
         D_800CC284->stick_y = actor->unk31C->stick_y;
-        D_800CC284->buttons = actor->unk31C->buttons;
+        D_800CC284->button = actor->unk31C->buttons;
         D_800CC288 = actor->unk31C->unk8C;
         buttons = actor->unk31C->buttons;
         if (actor->camera == NULL) {
@@ -258,19 +249,19 @@ void func_1504CB98(Actor *actor) {
         }
         func_1504C854(actor);
     } else {
-        actor->unk31C->buttons = D_800CC284->buttons;
+        actor->unk31C->buttons = D_800CC284->button;
         D_800CC288 = D_800BE710[D_800C3E78];
         buttons = actor->unk31C->buttons;
     }
     if ((D_80082FA0 >= D_800C3E78) && (D_800DDE3C[D_800C3E78] != 0) && (D_800DDDC8[D_800C3E78] > 0.75f) && (D_800E0B94 != 2)) {
         D_800CC284->stick_x = 0;
         D_800CC284->stick_y = 0;
-        D_800CC284->buttons = 0;
+        D_800CC284->button = 0;
         D_800CC288 = 0;
         padOverridden = 1;
         D_800CC2BC |= 2;
     }
-    if ((actor->stunned != 0) && (actor->health != 0) && ((((actor->unk31C->unk26 & 1) != 0) && (D_800CC288 & 0x8000)) || ((actor->unk31C->unk26 & 2) && (func_1505A5CC((struct49 *) D_800CC284) > 15.0f)))) {
+    if ((actor->stunned != 0) && (actor->health != 0) && ((((actor->unk31C->unk26 & 1) != 0) && (D_800CC288 & 0x8000)) || ((actor->unk31C->unk26 & 2) && (func_1505A5CC(D_800CC284) > 15.0f)))) {
         actor->unk10C = 0;
         actor->unk105 = 3;
         func_150585F0(actor, 0.05f);
@@ -293,11 +284,11 @@ void func_1504CB98(Actor *actor) {
             }
         }
     }
-    actor->unk31C->unk38 = D_800CC284->buttons;
+    actor->unk31C->unk38 = D_800CC284->button;
     if (D_800C3638 != 0) {
         D_800CC284->stick_x = 0;
         D_800CC284->stick_y = 0;
-        D_800CC284->buttons = 0;
+        D_800CC284->button = 0;
         D_800CC288 = 0;
         D_800CC2BC |= 4;
     }
@@ -307,7 +298,7 @@ void func_1504CB98(Actor *actor) {
     if ((actor->unk228 != 0) || (actor->unk2F8 & 0x10)) {
         D_800CC284->stick_x = 0;
         D_800CC284->stick_y = 0;
-        D_800CC284->buttons = 0;
+        D_800CC284->button = 0;
         D_800CC288 = 0;
         padOverridden = 1;
         D_800cc2bc |= 8;
@@ -331,7 +322,7 @@ void func_1504CB98(Actor *actor) {
             mode = actor->unk31C->unk78;
             D_800CC2BC |= 0x10;
             moveAngle = func_1505A630(D_800CC284->stick_x, D_800CC284->stick_y, 0);
-            moveSpeed = func_1505A5CC((struct49 *) D_800CC284);
+            moveSpeed = func_1505A5CC(D_800CC284);
             physics = actor->unk31C->unk4E;
             if (physics == 2) {
                 angleDelta = D_800CC284->stick_x * D_800CC264;
@@ -402,7 +393,7 @@ void func_1504CB98(Actor *actor) {
                 }
                 scratch *= 0.91022223f;
                 lean = scratch;
-                if ((D_800BE616 != 0) && ((actor->id == 0x3B) || (actor->id == 0x80)) && ((mode == 0x18) || (mode == 0x41) || (mode == 0x23) || (mode == 0x24)) && (D_800CC284->buttons & 0x2000) && ((actor->unk31C->unk109 == 3) || (actor->unk31C->unk109 == 2))) {
+                if ((D_800BE616 != 0) && ((actor->id == 0x3B) || (actor->id == 0x80)) && ((mode == 0x18) || (mode == 0x41) || (mode == 0x23) || (mode == 0x24)) && (D_800CC284->button & 0x2000) && ((actor->unk31C->unk109 == 3) || (actor->unk31C->unk109 == 2))) {
                     chance = 0;
                     if (actor->unk31C->unkAF < 0x3C) {
                         chance = 0x30;
@@ -416,7 +407,7 @@ void func_1504CB98(Actor *actor) {
                                     variant = (mode == 0x23) ? 4 : 5;
                                     func_15060A30(func_1000F568(0x574, variant), actor);
                                 }
-                            } else if ((D_800CC284->buttons & 8) && !(func_150ADA20() & 1)) {
+                            } else if ((D_800CC284->button & 8) && !(func_150ADA20() & 1)) {
                                 func_15060A30(0x532, actor);
                             } else {
                                 if ((actor->unk31C->unk109 == 3) && (actor->unk31C->unk108 == 0xA) && !(func_150ADA20() & 3)) {
@@ -478,7 +469,7 @@ void func_1504CB98(Actor *actor) {
             moveAngle = 0;
             moveSpeed = 0.0f;
             D_800cc2bc |= 0x20;
-            if ((actor->unk31C->unk78 == 2) || (actor->unk31C->unk78 == 0x12) || (actor->unk31C->unk78 == 0x13) || (actor->unk31C->unk78 == 0x10) || (actor->unk31C->unk78 == 0xA) || (actor->unk31C->unk78 == 0x34) || ((D_800CC284->buttons & 0x10) && (actor->unk31C->unk78 == 0x16)) || (actor->unk31C->unk78 == 9) || (actor->unk31C->unk78 == 0x38) || (actor->unk31C->unk78 == 0x39) || (actor->unk31C->unk78 == 0x37) || (actor->unk31C->unk78 == 0x3B) || (actor->unk31C->unk78 == 0x15) || (actor->unk31C->unk78 == 0x26) || (actor->unk31C->unk78 == 0x3A)) {
+            if ((actor->unk31C->unk78 == 2) || (actor->unk31C->unk78 == 0x12) || (actor->unk31C->unk78 == 0x13) || (actor->unk31C->unk78 == 0x10) || (actor->unk31C->unk78 == 0xA) || (actor->unk31C->unk78 == 0x34) || ((D_800CC284->button & 0x10) && (actor->unk31C->unk78 == 0x16)) || (actor->unk31C->unk78 == 9) || (actor->unk31C->unk78 == 0x38) || (actor->unk31C->unk78 == 0x39) || (actor->unk31C->unk78 == 0x37) || (actor->unk31C->unk78 == 0x3B) || (actor->unk31C->unk78 == 0x15) || (actor->unk31C->unk78 == 0x26) || (actor->unk31C->unk78 == 0x3A)) {
                 if ((actor->unk31C->unk78 == 0x10) || (actor->unk31C->unk78 == 0x14) || (actor->unk31C->unk78 == 0x3F)) {
                     lean = (D_800CC284->stick_y / 2);
                 }
@@ -499,20 +490,20 @@ void func_1504CB98(Actor *actor) {
                 }
             } else if ((actor->unk31C->unk78 != 0x14) && (actor->unk31C->unk78 != 0x3F)) {
                 D_800CC2BC |= 0x100;
-                D_800CC284->buttons &= ~0x2000;
+                D_800CC284->button &= ~0x2000;
                 D_800CC288 &= ~0x2000;
             }
             if (actor->unk31C->unk78 != 9) {
                 D_800CC2BC |= 0x200;
-                D_800CC284->buttons &= ~0x8000;
+                D_800CC284->button &= ~0x8000;
                 D_800CC288 &= ~0x8000;
             }
         }
     }
     if (!(actor->unk31C->unk4E & 0xF) && (actor->health != 0) && (actor->stunned == 0) && (actor->unk28 == 0.0f) && ((D_800BE616 != 0) || ((actor->unk31C->unk78 == 9) && (actor->unk31C->matrix_physics == 0)) || (actor->unk31C->unk78 == 0x16) || (actor->unk31C->unk78 == 0x3B)) && ((actor->unk31C->unk11A == 2) || (actor->unk31C->unk11A == 0))) { BLK;
         dirMask = ((actor->unk31C->unk78) && ((actor->unk31C->aimState == 0) || (actor->unk31C->unk78 == 0x16)) && (actor->unk31C->unk19B == 0)) ? 0xF : 3;
-        if ((D_800CC284->buttons & dirMask) != 0) {
-            dirMask = (D_800CC284->buttons & dirMask);
+        if ((D_800CC284->button & dirMask) != 0) {
+            dirMask = (D_800CC284->button & dirMask);
             if ((actor->unk31C->aimState == 0) && (actor->unk31C->unk198 == 0)) {
                 if (D_800CC284->stick_y >= 6) {
                     dirMask |= 8;
@@ -557,7 +548,7 @@ void func_1504CB98(Actor *actor) {
         moveAngle = actor->unk76 - D_800CC280;
         D_800CC284->stick_x = 0;
         D_800CC284->stick_y = 0;
-        D_800CC284->buttons = 0;
+        D_800CC284->button = 0;
         D_800CC288 = 0;
         padOverridden = 1;
         actor->unk31C->unk23 -= D_800BE9A0;
@@ -572,7 +563,7 @@ void func_1504CB98(Actor *actor) {
     }
     actor->unk11C = actor->unk118;
     if (actor->unk31C->unk84 == 0) {
-        actor->unk31C->buttons = D_800CC284->buttons;
+        actor->unk31C->buttons = D_800CC284->button;
         actor->unk31C->unk8C = D_800CC288;
     }
     if ((actor->unk84.uh == 0) && (actor->animation_speed == 0.0f)) {
@@ -630,7 +621,7 @@ void func_1504CB98(Actor *actor) {
             if (actor->unk31C->unk21 == 0) {
                 moveSpeed = swimSpeed;
                 moveAngle = actor->unk76;
-                if (!(D_800CC284->buttons & 0x4000)) {
+                if (!(D_800CC284->button & 0x4000)) {
                     if ((actor->unk31C->unk22 <= 0) && (((actor->unk118 - 60.0f) - 30.0f) < actor->y_position)) {
                         actor->unk31C->unk21 = 1;
                         actor->disable_run = 0xC;
@@ -709,7 +700,7 @@ void func_1504CB98(Actor *actor) {
                         }
                     }
                 }
-                if (((actor->unk13C != 0) && (D_800CC2D0[D_800D154C->unk13C - 100].id != 0x57)) || (actor->unk31C->unk198 != 0) || (D_800CC284->buttons & 0x2000)) {
+                if (((actor->unk13C != 0) && (D_800CC2D0[D_800D154C->unk13C - 100].id != 0x57)) || (actor->unk31C->unk198 != 0) || (D_800CC284->button & 0x2000)) {
                     steer = 0.0f;
                 }
             }
@@ -717,7 +708,7 @@ void func_1504CB98(Actor *actor) {
         if (actor->unk31C->unk17 != 0) {
             if (actor->unk84.uh == 0x279) {
                 if (actor->disable_run == 0) {
-                    if (D_800CC284->buttons & 0x8000) {
+                    if (D_800CC284->button & 0x8000) {
                         actor->gravity = 1.1f;
                     } else {
                         if (actor->y_velocity > 0.0f) {
@@ -880,7 +871,7 @@ void func_1504CB98(Actor *actor) {
             steer = 2.5f;
             if (actor->unk84.uh == 0x16) {
                 steer = 3.2f;
-                if (D_800CC284->buttons & 0x2000) {
+                if (D_800CC284->button & 0x2000) {
                     moveSpeed = 0.0f;
                 }
             } else if (actor->unk13C != 0) {
@@ -913,7 +904,7 @@ void func_1504CB98(Actor *actor) {
             func_1504B0FC(actor, surfaceDelta);
         }
         if (actor->stunned != 0xFF) {
-            func_1506045C(actor, D_800CC284->buttons, D_800CC288, actor->unk28, 0);
+            func_1506045C(actor, D_800CC284->button, D_800CC288, actor->unk28, 0);
             actor->unk54 = 0.0f;
             actor->disable_run = 0;
             actor->unk83 = 0;
@@ -1497,7 +1488,7 @@ void func_1504CB98(Actor *actor) {
     }
     if (actor->unk100 & 1) {
         if (actor->unk31C->unk78 == 0) {
-            if ((actor->unk31C->unk11A != 1) && (actor->unk31C->unk11A != 3) && (actor->in_water == 0) && (actor->stunned == 0) && (D_800CC2B1 == 0) && ((actor->disable_run == 0) || (actor->unk84.uh == 0x279)) && (actor->unk31C->unk8 <= 0) && (actor->unk28 == 0.0f) && (D_800CC284->buttons & 0x2000)) {
+            if ((actor->unk31C->unk11A != 1) && (actor->unk31C->unk11A != 3) && (actor->in_water == 0) && (actor->stunned == 0) && (D_800CC2B1 == 0) && ((actor->disable_run == 0) || (actor->unk84.uh == 0x279)) && (actor->unk31C->unk8 <= 0) && (actor->unk28 == 0.0f) && (D_800CC284->button & 0x2000)) {
                 actor->unk81 = 0;
                 actor->unk83 = 0;
                 actor->unk100 &= 0xFE;

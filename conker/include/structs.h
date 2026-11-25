@@ -550,11 +550,6 @@ typedef struct {
     u8  unk1F;
 } struct47;
 
-typedef struct {
-    s16 unk0;
-    s8  unk2;
-    s8  unk3;
-} struct49;
 
 typedef struct {
     s32 unk0;   // used

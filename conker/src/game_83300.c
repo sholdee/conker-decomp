@@ -1797,14 +1797,14 @@ void func_1505A3A8(f32 targetSpeed, Actor *actor, f32 accel, f32 decel, u8 turnD
     }
 }
 
-/* Analog stick deflection of a controller pad (unk2/unk3 = stick x/y), scaled and capped at 35. */
-f32 func_1505A5CC(struct49 *pad) {
+/* Analog stick deflection of a controller pad, scaled and capped at 35. */
+f32 func_1505A5CC(OSContPad *pad) {
     f32 x, y;
     f32 mag;
 
-    mag = pad->unk2; // matching: staging x through mag steers IDO's register choice
+    mag = pad->stick_x; // matching: staging x through mag steers IDO's register choice
     x = mag;
-    y = pad->unk3;
+    y = pad->stick_y;
 
     x = sqrtf(x * x + y * y) * 0.6000000238f;
     mag = x;
@@ -4365,7 +4365,7 @@ void func_1506045C(Actor *actor, s32 buttons, s32 pressed, f32 height, s32 neste
     }
 
     if ((D_800BE9F0 != 0x29) && (D_800BE9F0 != 0x2E) && (actor->unk31C->unk78 == 0) &&
-        (*(u16 *)D_800CC284 & 0x20) && (func_15080738(state) != 0)) {
+        (D_800CC284->button & 0x20) && (func_15080738(state) != 0)) {
         state = 0x1A;
     }
 

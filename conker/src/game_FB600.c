@@ -291,8 +291,8 @@ void func_150CE740(Actor *obj) {
         if (D_800BE616 != 0) {
             /* camera yaw in degrees -> 16-bit binary angle (65536 / 360) */
             D_800CC280 = D_800DBFF0[D_800C3E78].yaw * 182.0444488525390625f;
-            heading = func_1505A630(((struct49 *)D_800CC284)->unk2, ((struct49 *)D_800CC284)->unk3, 0) + D_800CC280;
-            obj->unk44 = func_1505A5CC((struct49 *)D_800CC284);
+            heading = func_1505A630(D_800CC284->stick_x, D_800CC284->stick_y, 0) + D_800CC280;
+            obj->unk44 = func_1505A5CC(D_800CC284);
         } else {
             obj->unk44 = D_800CC2D0[obj->unk124].unk44 * 1.75f;
             heading = D_800CC2D0[obj->unk124].unk31C->unk4C;

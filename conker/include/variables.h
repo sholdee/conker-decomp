@@ -961,7 +961,7 @@ extern s32 D_800CC268;
 extern u8  D_800CC26E;
 extern u8  D_800CC27C;
 extern s32 D_800CC280;
-extern s32 D_800CC284; //pointer to 6 u8s
+extern OSContPad *D_800CC284; // the current player's controller input
 extern s32 D_800CC288;
 extern TexAnimState D_800CC298;
 extern u8  D_800CC2A2;

@@ -67,12 +67,11 @@ void func_1504A730(void) {
                     obj->unk31C->unk195 = 0;
                 }
                 obj->unk31C->unk57 = 0;
-                // D_800CC284 is the current controller's OSContPad *, D_800BE728 points at one per controller
                 if (i < 4) {
-                    D_800CC284 = (s32)D_800BE728[i];
+                    D_800CC284 = D_800BE728[i];
                 } else {
                     bzero(&noPad, sizeof(noPad));
-                    *(OSContPad **)&D_800CC284 = &noPad;
+                    D_800CC284 = &noPad;
                 }
             }
             if (obj->camera != NULL) {
@@ -181,10 +180,10 @@ void func_1504ADD0(void) {
             D_800D154C = obj;
             if (i < D_8008FD8C) {
                 if (i < 4) {
-                    D_800CC284 = (s32)D_800BE728[i];
+                    D_800CC284 = D_800BE728[i];
                 } else {
                     bzero(&noPad, sizeof(noPad));
-                    *(OSContPad **)&D_800CC284 = &noPad;
+                    D_800CC284 = &noPad;
                 }
             }
             switch (obj->id) {
@@ -263,8 +262,8 @@ f32 func_1504B0FC(Actor *obj, f32 arg1) {
     obj->unk31C->unk68 = 0;
     obj->unk110 = 0;
     if (obj->stunned == 0 && obj->health != 0 && obj->unk31C->unk198 == 0) {
-        stickX = (*(OSContPad **)&D_800CC284)->stick_x;
-        stickY = (*(OSContPad **)&D_800CC284)->stick_y;
+        stickX = D_800CC284->stick_x;
+        stickY = D_800CC284->stick_y;
     } else {
         stickX = 0;
         stickY = 0;
@@ -600,7 +599,7 @@ void func_1504BE2C(Actor *obj, u16 *arg1, f32 *arg2, s8 *arg3) {
     }
     obj->unk54 *= 0.5f;
     if (obj->unk84.uh == 0x2C || obj->unk84.uh == 0xE0) {
-        *arg3 = (*(OSContPad **)&D_800CC284)->stick_y >> 1;
+        *arg3 = D_800CC284->stick_y >> 1;
     } else {
         if (!(func_150ADA20() & 0x3F)) {
             obj->unk31C->unk14 = (func_150ADA20() % 25000U) - 12500;
@@ -691,7 +690,7 @@ void func_1504C0E8(Actor *obj, s32 arg1, f32 arg2) {
                 }
                 ext = obj->unk31C;
             }
-            pressed = (*(OSContPad **)&D_800CC284)->button & Z_TRIG;
+            pressed = D_800CC284->button & Z_TRIG;
             if (pressed == 0 || D_800CC2B1 != 0 || ext->unk78 != 0 || (ext->unk4E & 0xF) == 1) {
                 if (obj->xz_velocity > 4.0f) {
                     ext->unk37 = 0;
@@ -764,7 +763,7 @@ void func_1504C0E8(Actor *obj, s32 arg1, f32 arg2) {
             func_1505E650(obj, anim, speed, blend, start, 0.0f, 0);
         }
     } else if (obj->unk84.uh == 0x21 && D_800CC2B1 == 0 && obj->unk44 == 0.0f &&
-               ((*(OSContPad **)&D_800CC284)->button & Z_TRIG)) {
+               (D_800CC284->button & Z_TRIG)) {
         func_1505E650(obj, 0x16, 1.5f, 6.0f, 0.0f, 0.0f, 0);
     }
 }

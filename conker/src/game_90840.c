@@ -9,15 +9,6 @@ s32 func_100109D0();
 s32 func_10010A3C();
 #include "variables.h"
 
-/* Controller state that D_800CC284 points to. */
-typedef struct ContPad {
-    /* 0x0 */ u16 buttons;
-    /* 0x2 */ s8 stick_x;
-    /* 0x3 */ s8 stick_y;
-} ContPad;
-
-#define PAD ((ContPad *)D_800CC284)
-
 extern s16 D_800CC2B2;
 extern f32 D_800CC2B4;
 void func_15143134(void *, f32 *, s32);
@@ -220,7 +211,7 @@ s32 func_150639BC(Actor *arg0) {
  * toward its linked object), limited to +-9000; the excess turns the whole object. */
 s32 func_15063A38(Actor *arg0, s32 buttons, s32 mask) {
     if (buttons & mask) {
-        D_800CC2B2 = PAD->stick_x * 200;
+        D_800CC2B2 = D_800CC284->stick_x * 200;
         if (arg0->unk31C->unk84 != 0) {
             D_800CC2B2 = func_150639BC(arg0);
         }
@@ -990,7 +981,7 @@ s32 func_15064B94(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg4) {
         }
     } else if (ctl->unk17 != 0) {
         blend = 5.0f;
-        if (PAD->buttons & Z_TRIG) {
+        if (D_800CC284->button & Z_TRIG) {
             if (arg0->unk84.uh != 0x283) {
                 arg0->xz_velocity *= 0.2f;
                 D_800D1580 = 0xFF010604;
@@ -1172,7 +1163,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
             if (((arg0->unk84.uh == D_800996A0[idx][1]) || (arg0->unk84.uh == D_800996A0[idx][0]) ||
                  (arg0->unk84.uh == D_800996A0[idx][2]) || (anim != 0)) && (anim != D_800996A0[idx][3])) {
                 arg0->unk31C->unk78 = act;
-                PAD->buttons &= ~Z_TRIG;
+                D_800CC284->button &= ~Z_TRIG;
                 setUnk58 = 1;
             } else {
                 arg0->unk31C->unk78 = 0;
@@ -1342,7 +1333,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                     if (D_800BE616 != 0) {
                         arg0->disable_jump = 0xA;
                     }
-                    D_800CC2B2 = PAD->stick_x * 0x96;
+                    D_800CC2B2 = D_800CC284->stick_x * 0x96;
                     if (arg0->unk31C->unk84 != 0) {
                         arg0->unk31C->unk12 = 0;
                     } else if ((D_800CC2B2 < -0x1F40) && (arg0->unk31C->unk12 < -0x1B58)) {
@@ -1512,7 +1503,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
         if (act == arg0->unk31C->unk78) {
             s16 delta;
 
-            delta = (PAD->stick_x * -100) - arg0->unk31C->unk80;
+            delta = (D_800CC284->stick_x * -100) - arg0->unk31C->unk80;
             if (delta > 600) {
                 delta = 600;
             }
@@ -1520,7 +1511,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 delta = -600;
             }
             arg0->unk31C->unk80 += delta;
-            delta = ((PAD->stick_y << 5) - arg0->unk31C->unk82) + 576;
+            delta = ((D_800CC284->stick_y << 5) - arg0->unk31C->unk82) + 576;
             if (delta > 300) {
                 delta = 300;
             }
@@ -1947,7 +1938,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
     case 0x10:
         speed = 1.399999976f;
         if (act == arg0->unk31C->unk78) {
-            D_800CC2B2 = PAD->stick_x * 0xC8;
+            D_800CC2B2 = D_800CC284->stick_x * 0xC8;
             arg0->disable_jump = 0xA;
             if ((heldButtons & Z_TRIG) && (anim = 0xC1, (arg0->unk84.uh != 0xBE))) {
                 speed = 1.0f;
@@ -2019,12 +2010,12 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                     arg0->disable_jump = 0xA;
                     arg0->disable_run = 0;
                     arg0->unk83 = 0xA;
-                    if ((PAD->buttons & Z_TRIG) || (arg0->unk31C->prevButtons & Z_TRIG)) {
+                    if ((D_800CC284->button & Z_TRIG) || (arg0->unk31C->prevButtons & Z_TRIG)) {
                         arg0->unk31C->unk1B4 |= 1;
                         D_800CC2B0 = 1;
                     }
                     if (animStart != arg0->unk84.uh) {
-                        if (!(PAD->buttons & Z_TRIG) && (arg0->unk31C->prevButtons & Z_TRIG) && (arg0->unk31C->unk19E == 0)) {
+                        if (!(D_800CC284->button & Z_TRIG) && (arg0->unk31C->prevButtons & Z_TRIG) && (arg0->unk31C->unk19E == 0)) {
                             arg0->unk31C->unk1B4 |= 2;
                             D_800CC2B0 = 1;
                             blend = 0.0f;
@@ -2246,12 +2237,12 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 arg0->disable_jump = 0xA;
                 arg0->disable_run = 0;
                 arg0->unk83 = 0xA;
-                if ((arg0->unk31C->unk19E == 0) && ((PAD->buttons & Z_TRIG) || (arg0->unk31C->prevButtons & Z_TRIG))) {
+                if ((arg0->unk31C->unk19E == 0) && ((D_800CC284->button & Z_TRIG) || (arg0->unk31C->prevButtons & Z_TRIG))) {
                     arg0->unk31C->unk1B4 |= 1;
                     D_800CC2B0 = 1;
                 }
                 if (arg0->unk84.uh != 0x152) {
-                    if (!(PAD->buttons & Z_TRIG) && (arg0->unk31C->prevButtons & Z_TRIG) && (arg0->unk84.uh == 0x157) && (arg0->unk31C->unk19E == 0)) {
+                    if (!(D_800CC284->button & Z_TRIG) && (arg0->unk31C->prevButtons & Z_TRIG) && (arg0->unk84.uh == 0x157) && (arg0->unk31C->unk19E == 0)) {
                         arg0->unk31C->unk1B4 |= 2;
                         D_800CC2B0 = 1;
                         blend = 0.0f;
@@ -2352,7 +2343,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                                     ((held == 0) && (D_800CC28C & Z_TRIG))) &&
                                    (arg0->unk84.uh != 0x225) && (arg0->unk84.uh != 0x222) && (arg0->unk84.uh != 0x236) &&
                                    (arg0->unk84.uh != 0x227) && (arg0->unk84.uh != 0x237) && (arg0->unk31C->unk19E == 0)) {
-                            if (PAD->buttons & R_TRIG) {
+                            if (D_800CC284->button & R_TRIG) {
                                 if (func_150ADA20() & 3) {
                                     anim = 0x227;
                                 } else {
@@ -2408,7 +2399,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 arg0->unk31C->unk11A = 0;
             } else {
                 arg0->disable_jump = 0x14;
-                if ((PAD->buttons & Z_TRIG) || (arg0->unk31C->prevButtons & Z_TRIG)) {
+                if ((D_800CC284->button & Z_TRIG) || (arg0->unk31C->prevButtons & Z_TRIG)) {
                     if (arg0->unk31C->unk198 == 2) {
                         arg0->unk31C->unk1B4 |= 8;
                         D_800CC2B0 = 1;
@@ -2424,13 +2415,13 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                     if ((s32)arg0->unk28 != 0) {
                         arg0->unk31C->unk11A = 0;
                     }
-                } else if (!(PAD->buttons & Z_TRIG) && (arg0->unk31C->prevButtons & Z_TRIG) && (arg0->unk84.uh != 0xC4) && (arg0->unk31C->unk19E == 0)) {
+                } else if (!(D_800CC284->button & Z_TRIG) && (arg0->unk31C->prevButtons & Z_TRIG) && (arg0->unk84.uh != 0xC4) && (arg0->unk31C->unk19E == 0)) {
                     anim = 0xC7;
                     blend = 0.0f;
                     arg0->disable_run = 0xFF;
                     arg0->unk83 = 0xFF;
                     arg0->unk31C->unk19E = 0x3C;
-                } else if ((PAD->buttons & Z_TRIG) && (arg0->unk84.uh != 0xC4)) {
+                } else if ((D_800CC284->button & Z_TRIG) && (arg0->unk84.uh != 0xC4)) {
                     arg0->disable_run = 0;
                     arg0->disable_jump = 8;
                     arg0->unk83 = 8;
@@ -2459,7 +2450,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 arg0->disable_jump = 0xA;
                 arg0->disable_run = 0;
                 arg0->unk83 = 0xA;
-                if ((arg0->unk31C->unk19E == 0) && ((PAD->buttons & Z_TRIG) || (arg0->unk31C->prevButtons & Z_TRIG))) {
+                if ((arg0->unk31C->unk19E == 0) && ((D_800CC284->button & Z_TRIG) || (arg0->unk31C->prevButtons & Z_TRIG))) {
                     arg0->unk31C->unk1B4 |= 1;
                     D_800CC2B0 = 1;
                 }
@@ -2472,7 +2463,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                             anim = 0x26E;
                             arg0->unk31C->unk199 = 0;
                         }
-                    } else if (!(PAD->buttons & Z_TRIG) && (arg0->unk31C->prevButtons & Z_TRIG) && (arg0->unk84.uh == 0x165) && (arg0->unk31C->unk19E == 0)) {
+                    } else if (!(D_800CC284->button & Z_TRIG) && (arg0->unk31C->prevButtons & Z_TRIG) && (arg0->unk84.uh == 0x165) && (arg0->unk31C->unk19E == 0)) {
                         arg0->unk31C->unk1B4 |= 2;
                         D_800CC2B0 = 1;
                         blend = 0.0f;
@@ -2641,7 +2632,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                     animGrab = 1;
                     animSpecial = 0;
                 }
-                if (PAD->buttons & Z_TRIG) {
+                if (D_800CC284->button & Z_TRIG) {
                     if (animHold != obj->unk232) {
                         func_10010A3C(obj);
                         func_100109D0(obj);
