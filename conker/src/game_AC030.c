@@ -220,7 +220,7 @@ void func_1507EFD0(void) {
     } else if (D_800D18C0 & 2) {
         func_1507EB80(candidates, &count, 3);
         D_800D18C0 = 0;
-    } else if (D_800D154C->unk31C->idle.delay != 0 && D_800D154C->unk31C->unk78 == 0) {
+    } else if (D_800D154C->unk31C->idle.delay != 0 && D_800D154C->unk31C->rt_context_b == 0) {
         seq = 0xB;
         if (idle->timer >= 121) {
             D_800D154C->unk31C->idle.delay = 0;
@@ -241,11 +241,11 @@ void func_1507EFD0(void) {
         category = -1;
         if (D_800D154C->unk2F8 & 0x200) {
             category = 2;
-        } else if (D_800D154C->unk31C->unk78 == 9) {
+        } else if (D_800D154C->unk31C->rt_context_b == 9) {
             category = 5;
-        } else if (D_800D154C->unk31C->unk78 == 0x23) {
+        } else if (D_800D154C->unk31C->rt_context_b == 0x23) {
             category = 9;
-        } else if (D_800D154C->unk31C->unk78 == 0x16) {
+        } else if (D_800D154C->unk31C->rt_context_b == 0x16) {
             category = 10;
         } else if (func_1503195C(D_800D154C, 0x17, 0) != NULL) {
             category = 6;
@@ -406,7 +406,7 @@ void func_1507F640(void) {
     if (D_800D154C->unk2F8 & 0x20) {
         return;
     }
-    if (D_800D154C->unk31C->unk120) {
+    if (D_800D154C->unk31C->death_State) {
         return;
     }
     if (idle->holdFrames > 0) {
@@ -432,7 +432,7 @@ void func_1507F640(void) {
     D_800D154C->unk2F8 &= ~7;
     D_800D154C->unk2F8 |= 0; // matching: a second store, as from setting a 3-bit field to 0
     owner = D_800D154C->unk31C;
-    if (owner->unk17) {
+    if (owner->env_suit) {
         s32 pad; // matching: unused stack slot
         if (func_150ADA20() & 3) {
             anim = 0x4D;
@@ -440,7 +440,7 @@ void func_1507F640(void) {
         func_1505E650(D_800D154C, anim, 1.0f, 4.0f, 0.0f, 0.0f, 0);
         return;
     }
-    type = owner->unk78;
+    type = owner->rt_context_b;
     override = -1;
     switch (type) {
     case 2:
@@ -506,22 +506,22 @@ void func_1507F640(void) {
     if (owner->unk1B2 && type == 22) {
         override = 0x2C5;
     }
-    if (owner->unk4E == 2) {
+    if (owner->transport == 2) {
         override = 5;
     }
-    if (owner->unk8) {
+    if (owner->pissed_up) {
         blend = 8.0f;
         speed = 1.5f;
         override = 0xAB;
     }
-    if (owner->unk1A) {
+    if (owner->injured) {
         override = 0x63;
         blend = 8.0f;
     }
-    if (owner->unk32 & 2) {
+    if (owner->walk_attrib & 2) {
         override = 0x6B;
         blend = 8.0f;
-    } else if (owner->unk32 & 1) {
+    } else if (owner->walk_attrib & 1) {
         override = 0xAF;
         blend = 8.0f;
     }
@@ -539,8 +539,8 @@ void func_1507F640(void) {
     }
     if (func_1507F454()) {
         owner = D_800D154C->unk31C;
-        if (owner->unk198 && idle->sequence == 0) {
-            switch (owner->unk78) {
+        if (owner->AimState && idle->sequence == 0) {
+            switch (owner->rt_context_b) {
             case 3:
                 override = 0x2C;
                 break;
@@ -571,7 +571,7 @@ void func_1507F640(void) {
     if (override == 0) {
         owner = D_800D154C->unk31C;
         sequence = -1;
-        switch (owner->unk78) {
+        switch (owner->rt_context_b) {
         case 9:
             sequence = 0x3A;
             break;
@@ -584,7 +584,7 @@ void func_1507F640(void) {
         default:
             if (D_800D154C->health == 1) {
                 sequence = 0xE;
-            } else if (owner->unk1A) {
+            } else if (owner->injured) {
                 sequence = 0x25;
             }
             break;

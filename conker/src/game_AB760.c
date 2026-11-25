@@ -42,7 +42,7 @@ extern u8 D_8009D910[];
 /* Advances eye blinking: random open periods of 10-149 frames, closed for one frame. */
 void func_1507E2B0(Actor *actor) {
     if ((actor->id != 0x2B) && (D_800C35EA[0] != 1)) {
-        if ((actor->unk127 != 0xFF) && (actor->unk31C->unk120 != 0)) {
+        if ((actor->unk127 != 0xFF) && (actor->unk31C->death_State != 0)) {
             actor->eyeClosed[0] = 1;
             actor->eyeClosed[1] = 1;
             return;

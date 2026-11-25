@@ -31,22 +31,22 @@ s16 func_15063390(Actor *arg0) {
 void func_15063404(Actor *arg0) {
     Actor *self = &movement_obj[arg0 - movement_obj];
 
-    self->unk31C->unk78 = 9;
+    self->unk31C->rt_context_b = 9;
     func_15083568(arg0, 0x1D, 1.0f, 0);
     func_15083568(arg0, 0x1E, 1.0f, 0);
     arg0->disable_jump = 20;
     arg0->disable_run = 0;
     arg0->unk83 = 0;
-    self->unk31C->unk24 = 60;
-    self->unk31C->unk11A = 2;
+    self->unk31C->gun_before_reload = 60;
+    self->unk31C->weapon_status = 2;
     func_1505E650(arg0, 0x7F, 1.0f, 0.0f, 0.0f, 0.0f, 0);
 }
 
 void func_150836CC(Actor *arg0, s32 arg1);
 
 void func_150634E4(Actor *arg0) {
-    movement_obj[arg0 - movement_obj].unk31C->unk78 = 0;
-    movement_obj[arg0 - movement_obj].unk31C->unk11A = 0;
+    movement_obj[arg0 - movement_obj].unk31C->rt_context_b = 0;
+    movement_obj[arg0 - movement_obj].unk31C->weapon_status = 0;
     func_150836CC(arg0, 0x1D);
     func_150836CC(arg0, 0x1E);
     arg0->disable_jump = 0;
@@ -55,8 +55,8 @@ void func_150634E4(Actor *arg0) {
 }
 
 void func_15063570(Actor *arg0) {
-    movement_obj[arg0 - movement_obj].unk31C->unk78 = 0x3B;
-    movement_obj[arg0 - movement_obj].unk31C->unk11A = 2;
+    movement_obj[arg0 - movement_obj].unk31C->rt_context_b = 0x3B;
+    movement_obj[arg0 - movement_obj].unk31C->weapon_status = 2;
     func_15083568(arg0, 0x89, 1.0f, 0);
     arg0->disable_jump = 20;
     arg0->disable_run = 0;
@@ -85,8 +85,8 @@ void func_150636A4(Actor *arg0) {
     if (target != NULL) {
         targetCtl = target->unk31C;  // matching: the null test uses this copy; the stores reload unk31C
         if (targetCtl != NULL) {
-            target->unk31C->unk195 = 30;
-            target->unk31C->unk196 = arg0 - movement_obj;
+            target->unk31C->being_sniped = 30;
+            target->unk31C->being_s_char = arg0 - movement_obj;
         }
     }
 }
@@ -131,13 +131,13 @@ void func_150636F0(void) {
                 ctl = actor->unk31C;
             }
             if (ctl->unk1B4 & 2) {
-                action = ctl->unk78 & ~0x80;
+                action = ctl->rt_context_b & ~0x80;
                 switch (action) {
                 case 0x18:
                 case 0x41:
                     func_15063FA0(actor, 6);
                     ctl = actor->unk31C;
-                    ctl->unk1AA++;
+                    ctl->shotsfired++;
                     camera = actor->camera;
                     if (camera != NULL) {
                         func_1512D2E4(camera, 1);
@@ -151,7 +151,7 @@ void func_150636F0(void) {
                         func_15063FA0(actor, 0x12);
                     }
                     ctl = actor->unk31C;
-                    ctl->unk1AA++;
+                    ctl->shotsfired++;
                     camera = actor->camera;
                     if (camera != NULL) {
                         func_1512D2E4(camera, 1);
@@ -195,7 +195,7 @@ void func_150636F0(void) {
 /* Stores in D_800CC2B2 (and returns) how far this object's heading is off the bearing to its
  * linked object, clamped to +-16000. */
 s32 func_150639BC(Actor *arg0) {
-    D_800CC2B2 = arg0->unk7A - arg0->unk31C->unk12 - func_15063390(arg0);
+    D_800CC2B2 = arg0->unk7A - arg0->unk31C->pssd_waist_tilt - func_15063390(arg0);
     if (D_800CC2B2 > 16000) {
         D_800CC2B2 = 16000;
     }
@@ -210,12 +210,12 @@ s32 func_150639BC(Actor *arg0) {
 s32 func_15063A38(Actor *arg0, s32 buttons, s32 mask) {
     if (buttons & mask) {
         D_800CC2B2 = D_800CC284->stick_x * 200;
-        if (arg0->unk31C->unk84 != 0) {
+        if (arg0->unk31C->bot != 0) {
             D_800CC2B2 = func_150639BC(arg0);
         }
 
         D_800CC2B4 = 12.0f;
-        D_800CC2B2 = arg0->unk31C->unk12 + ((D_800CC2B2 * D_800CC264) / 2000);
+        D_800CC2B2 = arg0->unk31C->pssd_waist_tilt + ((D_800CC2B2 * D_800CC264) / 2000);
 
         if (D_800CC2B2 < -9000) {
             arg0->unk76 = arg0->unk7A = (arg0->unk7A - D_800CC2B2) - 9000;
@@ -227,7 +227,7 @@ s32 func_15063A38(Actor *arg0, s32 buttons, s32 mask) {
             D_800CC2B2 = 9000;
         }
 
-        arg0->unk31C->unk12 = D_800CC2B2;
+        arg0->unk31C->pssd_waist_tilt = D_800CC2B2;
         return 1;
     }
     return 0;
@@ -257,10 +257,10 @@ void func_15063B64(Actor *arg0) {
         func_1506AC8C(arg0, 0xB, &packet);
         func_150836CC(arg0, packet.anim);
 
-        if (arg0->unk31C->grenade_count != 0) {
-            arg0->unk31C->grenade_count--;
+        if (arg0->unk31C->numGrenades != 0) {
+            arg0->unk31C->numGrenades--;
         }
-        arg0->unk31C->unk11A = 0;
+        arg0->unk31C->weapon_status = 0;
     }
 }
 
@@ -285,9 +285,9 @@ s32 func_15063E84(Actor *arg0, u16 anim, u16 flags, s32 action, s32 buttons) {
     s32 state;
 
     if ((buttons & B_BUTTON) && (arg0->unk28 == 0.0f) && (arg0->y_velocity <= 0.0f) &&
-        (arg0->unk31C->unk95 == 0) && (arg0->unk84.uh != anim)) {
-        state = arg0->unk31C->unk11A;
-        if ((state == 0 || state == 2) && (arg0->unk31C->unk27 == 0)) {
+        (arg0->unk31C->ladder == 0) && (arg0->unk84.uh != anim)) {
+        state = arg0->unk31C->weapon_status;
+        if ((state == 0 || state == 2) && (arg0->unk31C->jump_on_char == 0)) {
             if (action != 0 && arg0->disable_jump != 0) {
                 return 999;
             }
@@ -295,14 +295,14 @@ s32 func_15063E84(Actor *arg0, u16 anim, u16 flags, s32 action, s32 buttons) {
                 arg0->disable_jump = 20;
             }
             if (action != 0) {
-                if (arg0->unk31C->unk11A == 2) {
+                if (arg0->unk31C->weapon_status == 2) {
                     return 999;
                 }
-                arg0->unk31C->unk11A = 1;
+                arg0->unk31C->weapon_status = 1;
             } else {
-                arg0->unk31C->unk11A = 3;
+                arg0->unk31C->weapon_status = 3;
             }
-            arg0->unk31C->unk78 = action;
+            arg0->unk31C->rt_context_b = action;
             arg0->disable_run = 0xFF;
             arg0->unk83 = 0xFF;
             return anim;
@@ -430,8 +430,8 @@ void func_150642AC(Actor *arg0, s32 buttons, f32 arg2, s32 noPlay, s32 lockB) {
         buttons &= ~B_BUTTON;
         D_800CC28C &= ~B_BUTTON;
     }
-    if (arg0->unk31C->unk7B != 0) {
-        switch (arg0->unk31C->unk7B) {
+    if (arg0->unk31C->inst_context != 0) {
+        switch (arg0->unk31C->inst_context) {
         case 1: {
             s16 pad;  // matching: unused stack slot
 
@@ -440,9 +440,9 @@ void func_150642AC(Actor *arg0, s32 buttons, f32 arg2, s32 noPlay, s32 lockB) {
             x = (arg0->unk2E4 >> 16) & 0xFFFF;
             z = arg0->unk2E4 & 0xFFFF;
             arg0->unk84.uh = 0;
-            arg0->unk31C->unk30 = 0xD;
-            arg0->unk31C->unk28 = x;
-            arg0->unk31C->unk2C = z;
+            arg0->unk31C->gpoint = 0xD;
+            arg0->unk31C->swing_xvel = x;
+            arg0->unk31C->swing_zvel = z;
             anim = 0x96;
             arg0->unk76 = arg0->unk2E8 & 0xFFFF;
         }
@@ -458,14 +458,14 @@ void func_150642AC(Actor *arg0, s32 buttons, f32 arg2, s32 noPlay, s32 lockB) {
             func_15074664();
             if (arg0->in_water != 0 || (s32)arg0->unk28 != 0) {
                 func_15083568(arg0, 0x17, 1.0f, 0);
-                arg0->unk31C->unk11A = 2;
+                arg0->unk31C->weapon_status = 2;
             } else {
                 arg0->disable_run = 0xFF;
                 arg0->disable_jump = 0xFF;
                 arg0->unk83 = 0xFF;
                 speed = 3.0f;
                 anim = 0x151;
-                arg0->unk31C->unk11A = 1;
+                arg0->unk31C->weapon_status = 1;
             }
             break;
         case 4:
@@ -473,14 +473,14 @@ void func_150642AC(Actor *arg0, s32 buttons, f32 arg2, s32 noPlay, s32 lockB) {
             func_15074664();
             if (arg0->in_water != 0 || (s32)arg0->unk28 != 0) {
                 func_150836CC(arg0, 0x17);
-                arg0->unk31C->unk11A = 0;
+                arg0->unk31C->weapon_status = 0;
             } else {
                 arg0->disable_run = 0xFF;
                 arg0->disable_jump = 0xFF;
                 arg0->unk83 = 0xFF;
                 speed = 3.0f;
                 anim = 0x14E;
-                arg0->unk31C->unk11A = 3;
+                arg0->unk31C->weapon_status = 3;
             }
             break;
         case 5:
@@ -551,9 +551,9 @@ void func_150642AC(Actor *arg0, s32 buttons, f32 arg2, s32 noPlay, s32 lockB) {
         default:
             break;
         }
-        arg0->unk31C->unk7B = 0;
+        arg0->unk31C->inst_context = 0;
     }
-    if (arg0->unk31C->unk198 == 0 && anim == 0 && (buttons & B_BUTTON) && (arg0->unk31C->unk4E & 0xF) != 1 &&
+    if (arg0->unk31C->AimState == 0 && anim == 0 && (buttons & B_BUTTON) && (arg0->unk31C->transport & 0xF) != 1 &&
         arg2 <= 0.0f && arg0->disable_run != 0xFF) {
         if (arg0->unk13C >= 100) {
             if (!(arg0->unk25C & 0x20)) {
@@ -569,10 +569,10 @@ void func_150642AC(Actor *arg0, s32 buttons, f32 arg2, s32 noPlay, s32 lockB) {
                 arg0->unk83 = 0xFF;
                 arg0->disable_run = 0xFF;
             }
-        } else if ((arg0->unk31C->unk75 == 0 && arg0->unk31C->unk7C == 0) || arg0->unk31C->unk4E == 2) {
+        } else if ((arg0->unk31C->context_b == 0 && arg0->unk31C->unk7C == 0) || arg0->unk31C->transport == 2) {
             if (D_800BE9F0 != 0x2D && D_800BE9F0 != 0x2B && D_800BE9F0 != 0x30 && D_800BE9F0 != 0x34) {
                 anim = 0x33;
-                if (arg0->unk31C->unk8 != 0) {
+                if (arg0->unk31C->pissed_up != 0) {
                     arg0->unk83 = 0xFF;
                     arg0->disable_run = 0xFF;
                     speed = 1.600000024f;
@@ -588,10 +588,10 @@ void func_150642AC(Actor *arg0, s32 buttons, f32 arg2, s32 noPlay, s32 lockB) {
                         anim = 0x354;
                     }
                     speed = 1.350000024f;
-                    if (arg0->unk31C->unk84 == 0 && arg0->unk31C->unk4E == 0) {
+                    if (arg0->unk31C->bot == 0 && arg0->unk31C->transport == 0) {
                         arg0->disable_run = 0xFF;
                         arg0->y_velocity = -4.0f;
-                        arg0->unk76 = arg0->unk31C->unk4C;
+                        arg0->unk76 = arg0->unk31C->press_angle;
                         speed = 1.0;  // matching: double literal; 1.0f drops its .rodata entry
                         anim = 0x46;
                     }
@@ -674,10 +674,10 @@ s32 func_15064B94(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg4) {
     blend = 4.0f;
     ctl = arg0->unk31C;
     speed = 1.0f;
-    if (ctl->unk46 > 0) {
+    if (ctl->bitten > 0) {
         anim = 0x4C;
         speed = arg1 / 24.0f;
-    } else if (ctl->unk4E == 2) {
+    } else if (ctl->transport == 2) {
         anim = 5;
         if (ctl->unk50 > 0) {
             anim = 0x54;
@@ -736,15 +736,15 @@ s32 func_15064B94(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg4) {
                 break;
             }
         }
-    } else if (overrideAnim != 0 && ctl->unk78 == 0) {
+    } else if (overrideAnim != 0 && ctl->rt_context_b == 0) {
         anim = overrideAnim;
         speed = arg1 / 15.0f + 0.6f;
-    } else if (2.6f < arg0->unk44 && (ctl->unk32 & 1)) {
+    } else if (2.6f < arg0->unk44 && (ctl->walk_attrib & 1)) {
         arg0->unkAA = 0x28;
         blend = 5.0f;
         speed = arg0->unk44 / 15.0f + 0.5f;
         anim = func_1504C0B8();
-    } else if (ctl->unk78 == 0x16) {
+    } else if (ctl->rt_context_b == 0x16) {
         if (arg0->unk44 >= 1.0f) {
             anim = ctl->unk1B2 != 0 ? 0x2C6 : 0xE8;
             arg0->unkAA = 0x1E;
@@ -753,7 +753,7 @@ s32 func_15064B94(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg4) {
             speed = 1.0f;
             anim = func_1504C078();
         }
-    } else if (ctl->unk78 == 9) {
+    } else if (ctl->rt_context_b == 9) {
         if (arg0->unk44 >= 1.0f) {
             if (D_800BE616 == 0) {
                 arg0->unkAA = 0x37;
@@ -769,7 +769,7 @@ s32 func_15064B94(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg4) {
             speed = 1.0f;
             anim = func_1504C078();
         }
-    } else if (ctl->unk78 == 0x38) {
+    } else if (ctl->rt_context_b == 0x38) {
         if (arg0->unk44 >= 1.0f) {
             anim = 0x1E1;
             if (arg0->unk44 >= 20.0f) {
@@ -780,7 +780,7 @@ s32 func_15064B94(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg4) {
             speed = 1.0f;
             anim = func_1504C078();
         }
-    } else if (ctl->unk78 == 0x39) {
+    } else if (ctl->rt_context_b == 0x39) {
         if (arg0->unk84.uh != 0x1EB) {
             if (arg0->unk44 >= 1.0f) {
                 anim = 0x1EC;
@@ -795,7 +795,7 @@ s32 func_15064B94(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg4) {
         } else {
             anim = 999;
         }
-    } else if (ctl->unk78 == 0x37) {
+    } else if (ctl->rt_context_b == 0x37) {
         if (arg0->unk84.uh != 0x1F4) {
             if (arg0->unk44 >= 1.0f) {
                 anim = 0x1F5;
@@ -810,9 +810,9 @@ s32 func_15064B94(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg4) {
         } else {
             anim = 999;
         }
-    } else if (ctl->unk78 == 0x3B) {
+    } else if (ctl->rt_context_b == 0x3B) {
         if (arg0->unk84.uh != 0x222 && arg0->unk84.uh != 0x236) {
-            if (arg0->unk44 >= 1.0f || ctl->unk23 > 0) {
+            if (arg0->unk44 >= 1.0f || ctl->door_walkf_time > 0) {
                 anim = 0x223;
                 arg0->unkAA = 0x37;
                 if (arg0->unk44 >= 20.0f) {
@@ -826,7 +826,7 @@ s32 func_15064B94(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg4) {
         } else {
             anim = 999;
         }
-    } else if (ctl->unk78 == 0x12 || ctl->unk78 == 0x18 || ctl->unk78 == 0x41) {
+    } else if (ctl->rt_context_b == 0x12 || ctl->rt_context_b == 0x18 || ctl->rt_context_b == 0x41) {
         if (arg0->unk44 >= 1.0f) {
             arg0->unkAA = 0x50;
             anim = 0xEC;
@@ -839,7 +839,7 @@ s32 func_15064B94(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg4) {
             speed = 1.0f;
             anim = func_1504C078();
         }
-    } else if (ctl->unk78 == 0x24) {
+    } else if (ctl->rt_context_b == 0x24) {
         if (arg0->unk44 >= 1.0f) {
             arg0->unkAA = 0x50;
             anim = 0x158;
@@ -852,7 +852,7 @@ s32 func_15064B94(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg4) {
             speed = 1.0f;
             anim = func_1504C078();
         }
-    } else if (ctl->unk78 == 0x22) {
+    } else if (ctl->rt_context_b == 0x22) {
         if (arg0->unk44 >= 1.0f) {
             arg0->unkAA = 0x50;
             anim = 0x15B;
@@ -865,7 +865,7 @@ s32 func_15064B94(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg4) {
             speed = 1.0f;
             anim = func_1504C078();
         }
-    } else if (ctl->unk78 == 0x21) {
+    } else if (ctl->rt_context_b == 0x21) {
         if (arg0->unk44 >= 1.0f) {
             arg0->unkAA = 0x6E;
             anim = 0x123;
@@ -878,7 +878,7 @@ s32 func_15064B94(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg4) {
             speed = 1.0f;
             anim = func_1504C078();
         }
-    } else if (ctl->unk78 == 0x26) {
+    } else if (ctl->rt_context_b == 0x26) {
         if (arg0->unk44 >= 1.0f) {
             arg0->unkAA = 0x50;
             anim = 0x178;
@@ -891,7 +891,7 @@ s32 func_15064B94(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg4) {
             speed = 1.0f;
             anim = func_1504C078();
         }
-    } else if (ctl->unk78 == 0x3A) {
+    } else if (ctl->rt_context_b == 0x3A) {
         if (arg0->unk44 >= 1.0f) {
             arg0->unkAA = 0x50;
             anim = 0x1FB;
@@ -900,7 +900,7 @@ s32 func_15064B94(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg4) {
             speed = 1.0f;
             anim = func_1504C078();
         }
-    } else if (ctl->unk78 == 0x25) {
+    } else if (ctl->rt_context_b == 0x25) {
         if (arg0->unk44 >= 1.0f) {
             arg0->unkAA = 0x50;
             anim = 0xD7;
@@ -912,7 +912,7 @@ s32 func_15064B94(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg4) {
             speed = 1.0f;
             anim = func_1504C078();
         }
-    } else if (ctl->unk78 == 0x2D || ctl->unk78 == 0x2E) {
+    } else if (ctl->rt_context_b == 0x2D || ctl->rt_context_b == 0x2E) {
         if (arg0->unk44 >= 1.0f) {
             anim = 0x1B0;
             speed = arg1 * 0.0625f + 0.6f;
@@ -924,7 +924,7 @@ s32 func_15064B94(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg4) {
             speed = 1.0f;
             anim = func_1504C078();
         }
-    } else if (ctl->unk78 == 0x23) {
+    } else if (ctl->rt_context_b == 0x23) {
         if (arg0->unk44 >= 1.0f) {
             arg0->unkAA = 0x50;
             anim = 0x161;
@@ -937,7 +937,7 @@ s32 func_15064B94(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg4) {
             speed = 1.0f;
             anim = func_1504C078();
         }
-    } else if (ctl->unk78 == 0x15) {
+    } else if (ctl->rt_context_b == 0x15) {
         if (arg0->unk44 >= 1.0f) {
             arg0->unkAA = 0x50;
             anim = 0xED;
@@ -949,7 +949,7 @@ s32 func_15064B94(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg4) {
             speed = 1.0f;
             anim = func_1504C078();
         }
-    } else if (ctl->unk78 == 0x19 || ctl->unk78 == 0x40) {
+    } else if (ctl->rt_context_b == 0x19 || ctl->rt_context_b == 0x40) {
         if (arg0->xz_velocity >= 1.0f) {
             anim = 0x112;
             blend = 8.0f;
@@ -962,21 +962,21 @@ s32 func_15064B94(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg4) {
             speed = 1.0f;
             anim = func_1504C078();
         }
-    } else if (ctl->unk1A != 0 && arg2 > 1.0f) {
+    } else if (ctl->injured != 0 && arg2 > 1.0f) {
         anim = 0x6D;
         speed = arg1 / 6.5f + 0.3f;
         arg0->unkAA = 0x28;
         blend = 8.0f;
-    } else if (ctl->unk8 > 0) {
+    } else if (ctl->pissed_up > 0) {
         if (arg2 < 1.0f) {
             speed = 1.0f;
             anim = func_1504C078();
         } else {
-            anim = ctl->unkE;
+            anim = ctl->pissed_walk;
             speed = arg1 / 6.0f + 0.3f;
             blend = 16.0f;
         }
-    } else if (ctl->unk17 != 0) {
+    } else if (ctl->env_suit != 0) {
         blend = 5.0f;
         if (D_800CC284->button & Z_TRIG) {
             if (arg0->unk84.uh != 0x283) {
@@ -1002,8 +1002,8 @@ s32 func_15064B94(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg4) {
                 anim = func_1504C078();
             }
         }
-    } else if ((ctl->unk32 & 2) && arg0->unk44 >= 1.0f) {
-        ctl->unk3C = 0x1C;
+    } else if ((ctl->walk_attrib & 2) && arg0->unk44 >= 1.0f) {
+        ctl->turn = 0x1C;
         arg0->unkAA = 0xF;
         speed = arg4 / 5.0f + 0.3f;
         blend = 8.0f;
@@ -1070,7 +1070,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
     animParam = 0.0f;
     anim = 0;
 
-    if ((arg0->unk31C->unk11A == 3) || (arg0->stunned != 0) || (arg4 != 0)) {
+    if ((arg0->unk31C->weapon_status == 3) || (arg0->stunned != 0) || (arg4 != 0)) {
         pressedButtons &= ~B_BUTTON;
         D_800CC28C &= ~B_BUTTON;
         if (arg4 != 0) {
@@ -1107,68 +1107,68 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 switch (act) {
                 case 0x34:
                     func_150836CC(arg0, 0x3D);
-                    arg0->unk31C->unk11A = 0;
+                    arg0->unk31C->weapon_status = 0;
                     break;
                 case 0xA:
                     func_150836CC(arg0, 0x28);
                     func_150836CC(arg0, 0x29);
-                    arg0->unk31C->unk11A = 0;
+                    arg0->unk31C->weapon_status = 0;
                     break;
                 }
             }
-            if (act == arg0->unk31C->unk78) {
+            if (act == arg0->unk31C->rt_context_b) {
                 arg0->xz_velocity = 0.0f;
             }
-            if ((arg0->in_water != 0) && ((act == arg0->unk31C->unk78) || (arg0->unk31C->unk11A != 0))) {
-                arg0->unk31C->unk78 = 0;
+            if ((arg0->in_water != 0) && ((act == arg0->unk31C->rt_context_b) || (arg0->unk31C->weapon_status != 0))) {
+                arg0->unk31C->rt_context_b = 0;
                 arg0->disable_run = 0;
                 arg0->unk83 = 0;
                 if (act == 0xA) {
                     func_150836CC(arg0, 0x28);
                     func_150836CC(arg0, 0x29);
-                    arg0->unk31C->unk11A = 0;
+                    arg0->unk31C->weapon_status = 0;
                 }
             } else if (((arg3 <= 0.0f) && (pressedButtons & B_BUTTON)) || (arg4 != 0)) {
-                if ((arg0->unk31C->unk78 != 0) || (arg4 != 0)) {
-                    if ((arg0->unk31C->unk72 == 0) || (arg4 != 0)) {
+                if ((arg0->unk31C->rt_context_b != 0) || (arg4 != 0)) {
+                    if ((arg0->unk31C->context_exclude_time == 0) || (arg4 != 0)) {
                         arg0->disable_run = 0xFF;
                         arg0->disable_jump = 0xFF;
                         arg0->unk83 = 0xFF;
                         anim = D_800996A0[idx][3];
-                        arg0->unk31C->unk11A = 3;
-                        arg0->unk31C->unk72 = 0x5A;
+                        arg0->unk31C->weapon_status = 3;
+                        arg0->unk31C->context_exclude_time = 0x5A;
                         setUnk58 = 1;
                     }
-                } else if (arg0->unk31C->unk72 == 0) {
+                } else if (arg0->unk31C->context_exclude_time == 0) {
                     if ((arg0->camera->aimState != 1) && (arg0->camera->aimState != 3)) {
-                        arg0->unk31C->unk1B = 0;
-                        arg0->unk31C->unk11A = 1;
+                        arg0->unk31C->ind_cnt = 0;
+                        arg0->unk31C->weapon_status = 1;
                         anim = D_800996A0[idx][0];
                         arg0->unk83 = 0xFF;
                         arg0->disable_run = 0xFF;
-                        arg0->unk31C->unk72 = 0x5A;
+                        arg0->unk31C->context_exclude_time = 0x5A;
                     }
                 }
                 pressedButtons &= ~B_BUTTON;
             }
-            if (arg0->unk31C->unk78 && (pressedButtons & Z_TRIG) && (anim == 0) && (arg0->unk84.uh == D_800996A0[idx][1])) {
+            if (arg0->unk31C->rt_context_b && (pressedButtons & Z_TRIG) && (anim == 0) && (arg0->unk84.uh == D_800996A0[idx][1])) {
                 anim = D_800996A0[idx][2];
-                arg0->unk31C->unk1B++;
+                arg0->unk31C->ind_cnt++;
             }
             if (((arg0->unk84.uh == D_800996A0[idx][1]) || (arg0->unk84.uh == D_800996A0[idx][0]) ||
                  (arg0->unk84.uh == D_800996A0[idx][2]) || (anim != 0)) && (anim != D_800996A0[idx][3])) {
-                arg0->unk31C->unk78 = act;
+                arg0->unk31C->rt_context_b = act;
                 D_800CC284->button &= ~Z_TRIG;
                 setUnk58 = 1;
             } else {
-                arg0->unk31C->unk78 = 0;
+                arg0->unk31C->rt_context_b = 0;
             }
             if (D_800C3A58 != 0) {
-                if ((arg0->unk31C->unk11A == 1) || (arg0->unk31C->unk11A == 2U)) {
+                if ((arg0->unk31C->weapon_status == 1) || (arg0->unk31C->weapon_status == 2U)) {
                     anim = D_800996A0[idx][1];
                     arg0->unk83 = 0xFF;
-                    arg0->unk31C->unk78 = act;
-                    arg0->unk31C->unk11A = 2;
+                    arg0->unk31C->rt_context_b = act;
+                    arg0->unk31C->weapon_status = 2;
                     switch (act) {
                     case 0xA:
                         func_15083568(arg0, 0x28, 1.0f, 0);
@@ -1180,8 +1180,8 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                         break;
                     }
                 } else {
-                    arg0->unk31C->unk11A = 0;
-                    arg0->unk31C->unk78 = 0;
+                    arg0->unk31C->weapon_status = 0;
+                    arg0->unk31C->rt_context_b = 0;
                     switch (act) {
                     case 0x34:
                         func_150836CC(arg0, 0x3D);
@@ -1225,52 +1225,52 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 animFast = 0x2CD;
             }
             anim = 999;
-            if ((arg7 != 0) && (arg0->unk31C->unk78 != 0)) {
+            if ((arg7 != 0) && (arg0->unk31C->rt_context_b != 0)) {
                 func_15083568(arg0, sfx, 1.0f, 0);
             }
             if ((pressedButtons & B_BUTTON) && (arg3 <= 0.0f)) {
-                if (arg0->unk31C->unk78 != 0) {
+                if (arg0->unk31C->rt_context_b != 0) {
                     arg0->disable_run = 0xFF;
                     arg0->unk83 = 0xFF;
                     arg0->disable_jump = 0xFF;
-                    arg0->unk31C->unk11A = 3;
+                    arg0->unk31C->weapon_status = 3;
                     speed = 2.0f;
                     anim = animEnd;
-                    arg0->unk31C->unk78 = 0;
+                    arg0->unk31C->rt_context_b = 0;
                 } else {
                     arg0->disable_run = 0x10;
                     arg0->unk83 = 0x10;
                     arg0->disable_jump = 0x10;
                     speed = 2.0f;
-                    arg0->unk31C->unk11A = 1;
+                    arg0->unk31C->weapon_status = 1;
                     anim = animStart;
-                    arg0->unk31C->unk78 = act;
+                    arg0->unk31C->rt_context_b = act;
                 }
             }
             if (anim != 999) {
                 speed = 2.0f;
             } else if ((arg4 != 0) && (arg0->unk65 != 0)) {
                 func_150836CC(arg0, sfx);
-                arg0->unk31C->unk11A = 0;
-            } else if (act == arg0->unk31C->unk78) {
+                arg0->unk31C->weapon_status = 0;
+            } else if (act == arg0->unk31C->rt_context_b) {
                 arg0->unkAA = 0x4B;
                 if (arg6 != 0) {
                     clearAction = 0;
-                } else if (arg0->unk31C->aimState != 0) {
+                } else if (arg0->unk31C->SniperState != 0) {
                     arg0->disable_jump = 0xA;
                     arg0->disable_run = 0;
                     if (pressedButtons & Z_TRIG) {
-                        if (arg0->unk31C->unk72 == 0) {
+                        if (arg0->unk31C->context_exclude_time == 0) {
                             arg0->unk83 = 0xF;
                             arg0->unk31C->unk1B4 |= 3;
                             D_800CC2B0 = 1;
                             anim = animHit;
                             animParam = 6.0f;
-                            arg0->unk31C->unk72 = 0x28;
+                            arg0->unk31C->context_exclude_time = 0x28;
                         }
                     }
-                } else if ((pressedButtons & Z_TRIG) && (arg3 <= 0.0f) && (arg0->disable_run == 0) && (arg0->unk31C->unk72 == 0)) {
-                    arg0->unk31C->unk72 = 0x28;
+                } else if ((pressedButtons & Z_TRIG) && (arg3 <= 0.0f) && (arg0->disable_run == 0) && (arg0->unk31C->context_exclude_time == 0)) {
+                    arg0->unk31C->context_exclude_time = 0x28;
                     if (arg0->xz_velocity > 2.0f) {
                         anim = animFast;
                     } else {
@@ -1287,55 +1287,55 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
         handled = 1;
         if ((arg4 != 0) || (arg6 != 0)) {
             if (D_800BE9F0 != 0xA) {
-                arg0->unk31C->unk78 = 0;
-                arg0->unk31C->unkD = 0;
+                arg0->unk31C->rt_context_b = 0;
+                arg0->unk31C->pssd_is_pissing = 0;
                 arg0->unk83 = 0;
             }
             if (arg6 != 0) {
                 clearAction = 0;
             }
-        } else if (arg0->unk31C->unk16 == 0) {
-            if (arg0->unk31C->unk8 != 0) {
-                arg0->unk31C->unk8 -= D_800BE9A0;
-                if (arg0->unk31C->unk8 < 0x64) {
-                    arg0->unk31C->unkE = 0xAD;
-                    arg0->unk31C->unk16 = 0xC8;
+        } else if (arg0->unk31C->pissed_hangover == 0) {
+            if (arg0->unk31C->pissed_up != 0) {
+                arg0->unk31C->pissed_up -= D_800BE9A0;
+                if (arg0->unk31C->pissed_up < 0x64) {
+                    arg0->unk31C->pissed_walk = 0xAD;
+                    arg0->unk31C->pissed_hangover = 0xC8;
                     func_1507EB4C(arg0, 0x2A);
                     speed = 1.3f;
                     arg0->disable_run = 0xFF;
                     arg0->unk83 = 0xFF;
                     anim = 0x2D;
-                    arg0->unk31C->unk78 = 0;
+                    arg0->unk31C->rt_context_b = 0;
                 }
             }
-            if (arg0->unk31C->unk16 == 0) {
+            if (arg0->unk31C->pissed_hangover == 0) {
                 if ((arg3 <= 0.0f) && (pressedButtons & B_BUTTON)) {
                     arg0->disable_run = 0xFF;
                     arg0->unk83 = 0xFF;
-                    if (arg0->unk31C->unk78 != 0) {
+                    if (arg0->unk31C->rt_context_b != 0) {
                         anim = 0x2D;
                         speed = 1.3f;
-                        arg0->unk31C->unk78 = 0;
+                        arg0->unk31C->rt_context_b = 0;
                     } else {
-                        arg0->unk31C->unk78 = 3;
+                        arg0->unk31C->rt_context_b = 3;
                         anim = 0x2E;
-                        arg0->unk31C->unkD = 0;
+                        arg0->unk31C->pssd_is_pissing = 0;
                         speed = 1.6f;
                     }
-                } else if ((arg0->unk31C->unk78 == 3) && (arg0->disable_run != 0xFF)) {
-                    arg0->unk31C->unk78 = 3;
+                } else if ((arg0->unk31C->rt_context_b == 3) && (arg0->disable_run != 0xFF)) {
+                    arg0->unk31C->rt_context_b = 3;
                     anim = 0x2C;
                     if (D_800BE616 != 0) {
                         arg0->disable_jump = 0xA;
                     }
                     D_800CC2B2 = D_800CC284->stick_x * 0x96;
-                    if (arg0->unk31C->unk84 != 0) {
-                        arg0->unk31C->unk12 = 0;
-                    } else if ((D_800CC2B2 < -0x1F40) && (arg0->unk31C->unk12 < -0x1B58)) {
+                    if (arg0->unk31C->bot != 0) {
+                        arg0->unk31C->pssd_waist_tilt = 0;
+                    } else if ((D_800CC2B2 < -0x1F40) && (arg0->unk31C->pssd_waist_tilt < -0x1B58)) {
                         arg0->unk76 = arg0->unk7A = arg0->unk76 + (D_800CC264 * 7);
                         anim = 0xE0;
                         speed = 3.0f;
-                    } else if ((D_800CC2B2 > 0x1F40) && (arg0->unk31C->unk12 > 0x1B58)) {
+                    } else if ((D_800CC2B2 > 0x1F40) && (arg0->unk31C->pssd_waist_tilt > 0x1B58)) {
                         arg0->unk76 = arg0->unk7A = arg0->unk76 - (D_800CC264 * 7);
                         anim = 0xE0;
                         speed = 3.0f;
@@ -1344,8 +1344,8 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                     blend = 8.0f;
                     arg0->disable_run = 0x10;
                     arg0->unk83 = 0x10;
-                    if (arg0->unk31C->unkD == 0) {
-                        arg0->unk31C->unkD = 1;
+                    if (arg0->unk31C->pssd_is_pissing == 0) {
+                        arg0->unk31C->pssd_is_pissing = 1;
                         func_150D8B88(arg0);
                     }
                 }
@@ -1365,23 +1365,23 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
             arg0->xz_velocity *= 0.5f;
             speed = 1.799999952f;
             arg0->y_velocity = 80.0f;
-            arg0->unk31C->unk31 = 0;
+            arg0->unk31C->prop = 0;
         }
         break;
     case 0x4:
         if (pressedButtons & B_BUTTON) {
-            arg0->unk31C->unk78 = act;
+            arg0->unk31C->rt_context_b = act;
             return 0;
         }
-        arg0->unk31C->unk78 = 0;
+        arg0->unk31C->rt_context_b = 0;
         return 0;
     case 0x42:
         if (!(D_800D2E68 & 4)) {
             if (pressedButtons & B_BUTTON) {
-                arg0->unk31C->unk78 = act;
+                arg0->unk31C->rt_context_b = act;
                 return 0;
             }
-            arg0->unk31C->unk78 = 0;
+            arg0->unk31C->rt_context_b = 0;
         }
         return 0;
     case 0x5:
@@ -1389,15 +1389,15 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
             if (arg0->unk84.uh == 0x2F) {
                 anim = 999;
             } else {
-                arg0->unk31C->unk30 = 0x12;
+                arg0->unk31C->gpoint = 0x12;
                 anim = 0x2F;
                 if (D_800BE9F0 == 0x31) {
-                    arg0->unk31C->unk28 = D_800D3098[12].x;
-                    arg0->unk31C->unk2C = D_800D3098[12].z;
+                    arg0->unk31C->swing_xvel = D_800D3098[12].x;
+                    arg0->unk31C->swing_zvel = D_800D3098[12].z;
                     func_150DBD70(5);
                 } else {
-                    arg0->unk31C->unk28 = D_800D3098[2].x;
-                    arg0->unk31C->unk2C = D_800D3098[2].z;
+                    arg0->unk31C->swing_xvel = D_800D3098[2].x;
+                    arg0->unk31C->swing_zvel = D_800D3098[2].z;
                     func_150DBD70(0);
                 }
                 arg0->unk76 = 0xC000;
@@ -1410,17 +1410,17 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
         }
         break;
     case 0x6:
-        if (arg0->unk31C->unk78 == 0) {
-            if ((pressedButtons & B_BUTTON) && (arg3 <= 0.0f) && (arg0->unk31C->unk72 == 0)) {
+        if (arg0->unk31C->rt_context_b == 0) {
+            if ((pressedButtons & B_BUTTON) && (arg3 <= 0.0f) && (arg0->unk31C->context_exclude_time == 0)) {
                 arg0->disable_run = 0xFF;
                 arg0->unk83 = 0xFF;
                 anim = 0x44;
-                arg0->unk31C->unk78 = 6;
+                arg0->unk31C->rt_context_b = 6;
             }
         } else if (arg0->unk84.uh != 0x44) {
             arg0->disable_run = 0;
             arg0->unk83 = 0;
-            arg0->unk31C->unk78 = 0;
+            arg0->unk31C->rt_context_b = 0;
         } else {
             anim = 999;
         }
@@ -1439,17 +1439,17 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
         }
         break;
     case 0x7:
-        if (arg0->unk31C->unk78 == 0) {
-            if ((pressedButtons & B_BUTTON) && (arg3 <= 0.0f) && (arg0->unk31C->unk72 == 0)) {
+        if (arg0->unk31C->rt_context_b == 0) {
+            if ((pressedButtons & B_BUTTON) && (arg3 <= 0.0f) && (arg0->unk31C->context_exclude_time == 0)) {
                 arg0->disable_run = 0xFF;
                 arg0->unk83 = 0xFF;
                 anim = 0x45;
-                arg0->unk31C->unk78 = 7;
+                arg0->unk31C->rt_context_b = 7;
             }
         } else if (arg0->unk84.uh != 0x45) {
             arg0->disable_run = 0;
             arg0->unk83 = 0;
-            arg0->unk31C->unk78 = 0;
+            arg0->unk31C->rt_context_b = 0;
         } else {
             anim = 999;
         }
@@ -1481,21 +1481,21 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
         }
         break;
     case 0x27:
-        if (act != arg0->unk31C->unk78) {
-            arg0->unk31C->unk78 = 0x27;
+        if (act != arg0->unk31C->rt_context_b) {
+            arg0->unk31C->rt_context_b = 0x27;
             arg0->lodRequest = 6;
-            arg0->unk31C->unk17 = 1;
+            arg0->unk31C->env_suit = 1;
         }
         break;
     case 0x9:
         if (D_800C3A58 != 0) {
-            if ((arg0->unk31C->unk11A == 1) || (arg0->unk31C->unk11A == 2)) {
+            if ((arg0->unk31C->weapon_status == 1) || (arg0->unk31C->weapon_status == 2)) {
                 func_15063404(arg0);
             } else {
                 func_150634E4(arg0);
             }
         }
-        if (act == arg0->unk31C->unk78) {
+        if (act == arg0->unk31C->rt_context_b) {
             s16 delta;
 
             delta = (D_800CC284->stick_x * -100) - arg0->unk31C->unk80;
@@ -1560,12 +1560,12 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                         if (!(heldButtons & Z_TRIG) && (arg0->unk31C->prevButtons & Z_TRIG)) {
                             endEffect = 1;
                         }
-                        if ((arg0->unk31C->unk24 == 0) || (pressedButtons & A_BUTTON)) {
+                        if ((arg0->unk31C->gun_before_reload == 0) || (pressedButtons & A_BUTTON)) {
                             anim = 0x11A;
                             if (!(pressedButtons & A_BUTTON)) {
                                 endEffect = 1;
                             }
-                            arg0->unk31C->unk24 = 0x3C;
+                            arg0->unk31C->gun_before_reload = 0x3C;
                             arg0->disable_run = 0xFF;
                             arg0->unk83 = 0xFF;
                         } else if ((heldButtons & Z_TRIG) && (arg0->disable_run == 0)) {
@@ -1577,10 +1577,10 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                                     anim = 0x20D;
                                 }
                                 if (!(heldButtons & R_TRIG)) {
-                                    arg0->unk31C->unk12 = 0;
-                                    arg0->unk31C->unk3C = 3;
+                                    arg0->unk31C->pssd_waist_tilt = 0;
+                                    arg0->unk31C->turn = 3;
                                 } else {
-                                    arg0->unk31C->unk3C = 0;
+                                    arg0->unk31C->turn = 0;
                                 }
                                 if (D_800BE616 == 0) {
                                     arg0->unkAA = 0x37;
@@ -1632,15 +1632,15 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
             speed = 1.399999976f;
             anim = func_15063E84(arg0, 0x7B, 1, act, pressedButtons);
             if (anim != 999) {
-                arg0->unk31C->unk24 = 0x3C;
+                arg0->unk31C->gun_before_reload = 0x3C;
             }
         }
         break;
     case 0x38:
-        if (act == arg0->unk31C->unk78) {
+        if (act == arg0->unk31C->rt_context_b) {
             if ((arg4 != 0) && (arg0->unk65 != 0)) {
                 func_150836CC(arg0, 0x7B);
-                arg0->unk31C->unk11A = 0;
+                arg0->unk31C->weapon_status = 0;
             } else if (arg6 != 0) {
                 clearAction = 0;
             } else {
@@ -1663,8 +1663,8 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                                 anim = 0x253;
                             }
                             if (!(heldButtons & R_TRIG)) {
-                                arg0->unk31C->unk3C = 3;
-                                arg0->unk31C->unk12 = 0;
+                                arg0->unk31C->turn = 3;
+                                arg0->unk31C->pssd_waist_tilt = 0;
                             }
                         } else {
                             anim = 0x1E0;
@@ -1710,10 +1710,10 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
         }
         break;
     case 0x39:
-        if (act == arg0->unk31C->unk78) {
+        if (act == arg0->unk31C->rt_context_b) {
             if ((arg4 != 0) && (arg0->unk65 != 0)) {
                 func_150836CC(arg0, 0x82);
-                arg0->unk31C->unk11A = 0;
+                arg0->unk31C->weapon_status = 0;
             } else if (arg6 != 0) {
                 clearAction = 0;
             } else {
@@ -1723,9 +1723,9 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                     if (arg0->unk84.uh == 0x21E) {
                         arg0->disable_run = 0xFF;
                     }
-                    if ((arg0->unk31C->unk24 == 0) || ((pressedButtons & A_BUTTON) && (arg0->unk84.uh != 0x21E))) {
+                    if ((arg0->unk31C->gun_before_reload == 0) || ((pressedButtons & A_BUTTON) && (arg0->unk84.uh != 0x21E))) {
                         if (arg0->unk28 == 0.0f) {
-                            arg0->unk31C->unk24 = 0x1E;
+                            arg0->unk31C->gun_before_reload = 0x1E;
                             arg0->disable_run = 0xFF;
                             arg0->unk83 = 0xFF;
                             anim = 0x21E;
@@ -1753,28 +1753,28 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
             speed = 1.399999976f;
             anim = func_15063E84(arg0, 0x1EE, 1, act, pressedButtons);
             if (anim != 999) {
-                arg0->unk31C->unk24 = 0x1E;
+                arg0->unk31C->gun_before_reload = 0x1E;
             }
         }
         break;
     case 0x37:
-        if (act == arg0->unk31C->unk78) {
+        if (act == arg0->unk31C->rt_context_b) {
             if ((arg4 != 0) && (arg0->unk65 != 0)) {
                 func_150836CC(arg0, 0x85);
-                arg0->unk31C->unk11A = 0;
+                arg0->unk31C->weapon_status = 0;
             } else if (arg6 != 0) {
                 clearAction = 0;
             } else {
                 arg0->disable_jump = 0xA;
                 func_15063A38(arg0, heldButtons, Z_TRIG | R_TRIG);
-                if ((pressedButtons & Z_TRIG) && (arg0->unk84.uh != 0x1F7) && (arg0->unk31C->unk19E == 0)) {
+                if ((pressedButtons & Z_TRIG) && (arg0->unk84.uh != 0x1F7) && (arg0->unk31C->ReloadTimer == 0)) {
                     if (func_150ADA20() & 3) {
                         anim = 0x1F4;
                     } else {
                         anim = 0x235;
                     }
                     blend = 0.0f;
-                    arg0->unk31C->unk19E = 0x78;
+                    arg0->unk31C->ReloadTimer = 0x78;
                     arg0->disable_run = 0xFF;
                     arg0->unk83 = 0xFF;
                 } else if (pressedButtons & B_BUTTON) {
@@ -1806,7 +1806,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
     case 0x16:
         anim = 999;
         if ((arg4 != 0) && (act == 0x16)) {
-            if (act == arg0->unk31C->unk78) {
+            if (act == arg0->unk31C->rt_context_b) {
                 s32 cancel;
 
                 cancel = 1;
@@ -1819,32 +1819,32 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 }
                 if (cancel != 0) {
                     func_150836CC(arg0, 0x24);
-                    arg0->unk31C->unk11A = 0;
+                    arg0->unk31C->weapon_status = 0;
                     arg0->unk83 = 0;
                     arg0->disable_run = 0;
                 }
             }
-        } else if (act == arg0->unk31C->unk78) {
+        } else if (act == arg0->unk31C->rt_context_b) {
             arg0->disable_jump = 0xA;
             if ((arg4 != 0) && ((arg0->unk65 != 0) || ((s32)arg0->unk28 != 0))) {
                 func_150836CC(arg0, 0x24);
-                arg0->unk31C->unk11A = 0;
+                arg0->unk31C->weapon_status = 0;
             } else if (arg6 != 0) {
                 if ((act == 0x16) || ((act == 0xC) && (arg0->unk28 == 0.0f) && (arg0->health != 0))) {
                     clearAction = 0;
                 } else {
                     func_150836CC(arg0, 0x24);
-                    arg0->unk31C->unk11A = 0;
+                    arg0->unk31C->weapon_status = 0;
                 }
             } else if ((pressedButtons & B_BUTTON) || (arg4 != 0)) {
                 pressedButtons |= B_BUTTON;
                 anim = func_15063E84(arg0, 0x78, 1, 0, pressedButtons);
                 if ((anim == 999) && (arg4 != 0)) {
                     func_150836CC(arg0, 0x24);
-                    arg0->unk31C->unk11A = 0;
+                    arg0->unk31C->weapon_status = 0;
                     arg0->unk83 = 0;
                 }
-            } else if ((pressedButtons & Z_TRIG) && (arg0->unk84.uh != 0x76) && (arg0->unk31C->unk19E == 0)) {
+            } else if ((pressedButtons & Z_TRIG) && (arg0->unk84.uh != 0x76) && (arg0->unk31C->ReloadTimer == 0)) {
                 if (arg0->unk31C->unk1B2 != 0) {
                     anim = 0x2C7;
                 } else if ((act == 0xC) || (D_800BE9F0 == 0x2B) || (D_800BE616 == 0)) {
@@ -1855,24 +1855,24 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 blend = 0.0f;
                 arg0->disable_run = 0xFF;
                 arg0->unk83 = 0xFF;
-                if (arg0->unk31C->aimState != 0) {
+                if (arg0->unk31C->SniperState != 0) {
                     if (arg0->camera != NULL) {
                         func_1512D2E4(arg0->camera, 0);
                     }
                 }
-                arg0->unk31C->unk19E = 0x78;
-            } else if ((arg0->unk31C->aimState != 0) && (arg0->camera != NULL) && (arg0->id == 0x80) && (func_10010894(arg0) == 0) && !(func_150ADA20() & 0x7F)) {
+                arg0->unk31C->ReloadTimer = 0x78;
+            } else if ((arg0->unk31C->SniperState != 0) && (arg0->camera != NULL) && (arg0->id == 0x80) && (func_10010894(arg0) == 0) && !(func_150ADA20() & 0x7F)) {
                 func_15060A30(func_1000F568(0x568, 4), arg0);
             }
         } else {
             anim = func_15063E84(arg0, 0x76, 1, act, pressedButtons);
         }
-        if ((act == 0xC) && ((act == arg0->unk31C->unk78) || (arg0->unk31C->unk11A != 0))) {
+        if ((act == 0xC) && ((act == arg0->unk31C->rt_context_b) || (arg0->unk31C->weapon_status != 0))) {
             arg0->xz_velocity = 0.0f;
             if ((s32)arg0->unk28 != 0) {
                 func_150836CC(arg0, 0x24);
-                arg0->unk31C->unk11A = 0;
-                arg0->unk31C->unk78 = 0;
+                arg0->unk31C->weapon_status = 0;
+                arg0->unk31C->rt_context_b = 0;
             }
         }
         break;
@@ -1891,8 +1891,8 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
             }
             if (arg6 != 0) {
                 clearAction = 0;
-            } else if (act == arg0->unk31C->unk78) {
-                if (arg0->unk31C->unk11A == 2) {
+            } else if (act == arg0->unk31C->rt_context_b) {
+                if (arg0->unk31C->weapon_status == 2) {
                     if (pressedButtons & Z_TRIG) {
                         anim = func_150641D8(arg0, 0x113, 0x113, 0x119);
                         arg0->disable_run = 0xFF;
@@ -1911,28 +1911,28 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
         break;
     case 0xF:
         anim = 999;
-        if ((act == arg0->unk31C->unk78) && ((arg6 != 0) || (arg0->unk65 != 0) || (arg4 != 0))) {
+        if ((act == arg0->unk31C->rt_context_b) && ((arg6 != 0) || (arg0->unk65 != 0) || (arg4 != 0))) {
             func_150836CC(arg0, 0x3A);
-            arg0->unk31C->unk11A = 0;
+            arg0->unk31C->weapon_status = 0;
             arg0->disable_run = 0;
             arg0->unk83 = 0;
         } else if ((pressedButtons & B_BUTTON) && (arg3 <= 0.0f)) {
             anim = 0xB4;
-            if (act == arg0->unk31C->unk78) {
+            if (act == arg0->unk31C->rt_context_b) {
                 anim = 0xB6;
             }
             arg0->disable_run = 0xFF;
             arg0->unk83 = 0xFF;
-            arg0->unk31C->unk78 = act;
+            arg0->unk31C->rt_context_b = act;
         }
-        if (act == arg0->unk31C->unk78) {
+        if (act == arg0->unk31C->rt_context_b) {
             arg0->disable_jump = 0xA;
             arg0->xz_velocity = 0.0f;
         }
         break;
     case 0x10:
         speed = 1.399999976f;
-        if (act == arg0->unk31C->unk78) {
+        if (act == arg0->unk31C->rt_context_b) {
             D_800CC2B2 = D_800CC284->stick_x * 0xC8;
             arg0->disable_jump = 0xA;
             if ((heldButtons & Z_TRIG) && (anim = 0xC1, (arg0->unk84.uh != 0xBE))) {
@@ -1945,10 +1945,10 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
         }
         break;
     case 0x15:
-        if (act == arg0->unk31C->unk78) {
+        if (act == arg0->unk31C->rt_context_b) {
             if ((arg4 != 0) && (arg0->unk65 != 0)) {
                 func_150836CC(arg0, 0x4B);
-                arg0->unk31C->unk11A = 0;
+                arg0->unk31C->weapon_status = 0;
             } else if (arg6 != 0) {
                 clearAction = 0;
             } else {
@@ -1957,8 +1957,8 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 if ((heldButtons & Z_TRIG) && (arg0->unk84.uh != 0x168)) {
                     if (arg0->xz_velocity != 0.0f) {
                         arg0->unkAA = 0x50;
-                        arg0->unk31C->unk3C = 3;
-                        arg0->unk31C->unk12 = 0;
+                        arg0->unk31C->turn = 3;
+                        arg0->unk31C->pssd_waist_tilt = 0;
                         anim = 0x22B;
                         speed = (arg0->xz_velocity * 0.0625f) + 0.6000000238f;
                         if (arg0->unk44 >= 20.0f) {
@@ -1974,7 +1974,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
 
                         anims[0] = 0xE7;
                         anims[1] = 0x22B;
-                        arg0->unk31C->unk1AA++;
+                        arg0->unk31C->shotsfired++;
                         func_1506AC8C(arg0, 9, anims);
                     }
                 } else {
@@ -1998,10 +1998,10 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 animStart = 0x2C8;
                 animAlt = 0x2C9;
             }
-            if (act == arg0->unk31C->unk78) {
+            if (act == arg0->unk31C->rt_context_b) {
                 if (arg6 != 0) {
                     clearAction = 0;
-                } else if ((arg0->unk31C->aimState != 0) && (arg0->unk31C->unk11A == 2)) {
+                } else if ((arg0->unk31C->SniperState != 0) && (arg0->unk31C->weapon_status == 2)) {
                     arg0->disable_jump = 0xA;
                     arg0->disable_run = 0;
                     arg0->unk83 = 0xA;
@@ -2010,26 +2010,26 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                         D_800CC2B0 = 1;
                     }
                     if (animStart != arg0->unk84.uh) {
-                        if (!(D_800CC284->button & Z_TRIG) && (arg0->unk31C->prevButtons & Z_TRIG) && (arg0->unk31C->unk19E == 0)) {
+                        if (!(D_800CC284->button & Z_TRIG) && (arg0->unk31C->prevButtons & Z_TRIG) && (arg0->unk31C->ReloadTimer == 0)) {
                             arg0->unk31C->unk1B4 |= 2;
                             D_800CC2B0 = 1;
                             blend = 0.0f;
                             arg0->disable_run = 0xFF;
                             arg0->unk83 = 0xFF;
                             anim = 0x10C;
-                            arg0->unk31C->unk19E = 0x3C;
+                            arg0->unk31C->ReloadTimer = 0x3C;
                         } else if (arg0->unk84.uh != 0x10C) {
                             anim = 0x10A;
                         }
                     }
                 } else {
                     arg0->disable_jump = 0x14;
-                    if ((pressedButtons & Z_TRIG) && (animStart != arg0->unk84.uh) && (arg0->unk31C->unk19E == 0)) {
+                    if ((pressedButtons & Z_TRIG) && (animStart != arg0->unk84.uh) && (arg0->unk31C->ReloadTimer == 0)) {
                         anim = animAlt;
                         blend = 0.0f;
                         arg0->disable_run = 0xFF;
                         arg0->unk83 = 0xFF;
-                        arg0->unk31C->unk19E = 0x3C;
+                        arg0->unk31C->ReloadTimer = 0x3C;
                     } else {
                         anim = func_15063E84(arg0, 0xC6, 1, 0, pressedButtons);
                     }
@@ -2049,15 +2049,15 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
     case 0x25:
     case 0x2D:
     case 0x2E:
-        arg0->unk31C->unk78 = act;
+        arg0->unk31C->rt_context_b = act;
         arg0->disable_jump = 0x14;
         break;
     case 0x28:
         if (arg4 != 0) {
-            arg0->unk31C->unk78 = 0;
+            arg0->unk31C->rt_context_b = 0;
         } else if ((arg3 <= 0.0f) && (pressedButtons & B_BUTTON)) {
-            if (act != arg0->unk31C->unk78) {
-                arg0->unk31C->unk78 = act;
+            if (act != arg0->unk31C->rt_context_b) {
+                arg0->unk31C->rt_context_b = act;
             }
         }
         break;
@@ -2088,7 +2088,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 if (arg0->unk44 > 10.0f) {
                     s16 diff;
 
-                    diff = arg0->unk31C->unk4C - arg0->unk31C->unk7E;
+                    diff = arg0->unk31C->press_angle - arg0->unk31C->unk7E;
                     if ((diff < 0x2000) && (diff > -0x2000) && ((diff > 0x100) || (diff < -0x100))) {
                         if (diff & 0x8000) {
                             arg0->unk31C->unk18 -= 0x28;
@@ -2112,7 +2112,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                         func_1506E5FC();
                     }
                 }
-                arg0->unk31C->unk7E = arg0->unk31C->unk4C;
+                arg0->unk31C->unk7E = arg0->unk31C->press_angle;
                 anim = 0x288;
                 mag = fabsf(arg0->unk31C->unk18);
                 if (mag > 200.0f) {
@@ -2160,12 +2160,12 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
     case 0x21:
         if ((arg4 != 0) && (arg0->unk65 != 0)) {
             func_150836CC(arg0, 0x58);
-            arg0->unk31C->unk11A = 0;
+            arg0->unk31C->weapon_status = 0;
         } else if (arg6 != 0) {
             clearAction = 0;
         } else if (arg3 <= 0.0f) {
-            if (act == arg0->unk31C->unk78) {
-                if (arg0->unk31C->unk11A == 2) {
+            if (act == arg0->unk31C->rt_context_b) {
+                if (arg0->unk31C->weapon_status == 2) {
                     if (pressedButtons & Z_TRIG) {
                         anim = func_150641D8(arg0, 0x129, 0x12A, 0x128);
                         speed = 1.299999952f;
@@ -2185,11 +2185,11 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
         speed = 1.399999976f;
         if ((arg4 != 0) && (arg0->unk65 != 0)) {
             func_150836CC(arg0, 0x56);
-            arg0->unk31C->unk11A = 0;
+            arg0->unk31C->weapon_status = 0;
         } else if (arg6 != 0) {
             clearAction = 0;
-        } else if ((act == arg0->unk31C->unk78) && (arg3 <= 0.0f)) {
-            if (arg0->unk31C->unk11A == 2) {
+        } else if ((act == arg0->unk31C->rt_context_b) && (arg3 <= 0.0f)) {
+            if (arg0->unk31C->weapon_status == 2) {
                 if (pressedButtons & Z_TRIG) {
                     anim = func_150641D8(arg0, 0x15F, 0x15F, 0x15F);
                     speed = 1.299999952f;
@@ -2204,11 +2204,11 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
         break;
     case 0x24:
         if (arg4 != 0) {
-            if (act == arg0->unk31C->unk78) {
+            if (act == arg0->unk31C->rt_context_b) {
                 s32 cancel;
 
                 cancel = 1;
-                if (((s32)arg0->unk28 == 0) && (arg0->unk31C->unk11A == 2)) {
+                if (((s32)arg0->unk28 == 0) && (arg0->unk31C->weapon_status == 2)) {
                     pressedButtons |= B_BUTTON;
                     anim = func_15063E84(arg0, 0x155, 1, 0, pressedButtons);
                     if (anim != 999) {
@@ -2217,33 +2217,33 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 }
                 if (cancel != 0) {
                     func_150836CC(arg0, 0x63);
-                    arg0->unk31C->unk11A = 0;
+                    arg0->unk31C->weapon_status = 0;
                     arg0->unk83 = 0;
                     arg0->disable_run = 0;
                 }
             }
-        } else if (act == arg0->unk31C->unk78) {
+        } else if (act == arg0->unk31C->rt_context_b) {
             if ((arg4 != 0) && (arg0->unk65 != 0)) {
                 func_150836CC(arg0, 0x63);
-                arg0->unk31C->unk11A = 0;
+                arg0->unk31C->weapon_status = 0;
             } else if (arg6 != 0) {
                 clearAction = 0;
-            } else if ((arg0->unk31C->aimState != 0) && (arg0->unk31C->unk11A == 2) && (arg4 == 0)) {
+            } else if ((arg0->unk31C->SniperState != 0) && (arg0->unk31C->weapon_status == 2) && (arg4 == 0)) {
                 arg0->disable_jump = 0xA;
                 arg0->disable_run = 0;
                 arg0->unk83 = 0xA;
-                if ((arg0->unk31C->unk19E == 0) && ((D_800CC284->button & Z_TRIG) || (arg0->unk31C->prevButtons & Z_TRIG))) {
+                if ((arg0->unk31C->ReloadTimer == 0) && ((D_800CC284->button & Z_TRIG) || (arg0->unk31C->prevButtons & Z_TRIG))) {
                     arg0->unk31C->unk1B4 |= 1;
                     D_800CC2B0 = 1;
                 }
                 if (arg0->unk84.uh != 0x152) {
-                    if (!(D_800CC284->button & Z_TRIG) && (arg0->unk31C->prevButtons & Z_TRIG) && (arg0->unk84.uh == 0x157) && (arg0->unk31C->unk19E == 0)) {
+                    if (!(D_800CC284->button & Z_TRIG) && (arg0->unk31C->prevButtons & Z_TRIG) && (arg0->unk84.uh == 0x157) && (arg0->unk31C->ReloadTimer == 0)) {
                         arg0->unk31C->unk1B4 |= 2;
                         D_800CC2B0 = 1;
                         blend = 0.0f;
                         arg0->disable_run = 0xFF;
                         arg0->unk83 = 0xFF;
-                        arg0->unk31C->unk19E = 0x78;
+                        arg0->unk31C->ReloadTimer = 0x78;
                         anim = 0x156;
                         if ((arg0->camera != NULL) && (((arg0->unk184 & 0x1F) == 5) || ((arg0->unk184 & 0x1F) == 3) ||
                                                        ((arg0->unk184 & 0x1F) == 6) || ((arg0->unk184 & 0x1F) == 9))) {
@@ -2261,14 +2261,14 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                     anim = 0x155;
                     if ((s32)arg0->unk28 != 0) {
                         func_150836CC(arg0, 0x63);
-                        arg0->unk31C->unk11A = 0;
+                        arg0->unk31C->weapon_status = 0;
                     }
-                } else if ((pressedButtons & Z_TRIG) && (arg0->unk84.uh != 0x152) && (arg0->unk31C->unk19E == 0)) {
+                } else if ((pressedButtons & Z_TRIG) && (arg0->unk84.uh != 0x152) && (arg0->unk31C->ReloadTimer == 0)) {
                     anim = 0x154;
                     blend = 0.0f;
                     arg0->disable_run = 0xFF;
                     arg0->unk83 = 0xFF;
-                    arg0->unk31C->unk19E = 0x78;
+                    arg0->unk31C->ReloadTimer = 0x78;
                 } else {
                     anim = func_15063E84(arg0, 0x155, 1, 0, pressedButtons);
                 }
@@ -2282,32 +2282,32 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
             s32 held;
 
             if (D_800C3A58 != 0) {
-                if (act == arg0->unk31C->unk78) {
+                if (act == arg0->unk31C->rt_context_b) {
                     func_15083568(arg0, 0x89, 1.0f, 0);
-                    arg0->unk31C->unk11A = 2;
+                    arg0->unk31C->weapon_status = 2;
                 } else {
                     func_150836CC(arg0, 0x89);
-                    arg0->unk31C->unk11A = 0;
+                    arg0->unk31C->weapon_status = 0;
                 }
             }
-            if (((act == arg0->unk31C->unk78) || (arg0->unk31C->unk11A != 0)) && (arg0->in_water != 0)) {
-                arg0->unk31C->unk78 = 0;
+            if (((act == arg0->unk31C->rt_context_b) || (arg0->unk31C->weapon_status != 0)) && (arg0->in_water != 0)) {
+                arg0->unk31C->rt_context_b = 0;
                 arg0->disable_run = 0;
                 arg0->unk83 = 0;
                 func_150836CC(arg0, 0x89);
-                arg0->unk31C->unk11A = 0;
-            } else if (act == arg0->unk31C->unk78) {
+                arg0->unk31C->weapon_status = 0;
+            } else if (act == arg0->unk31C->rt_context_b) {
                 if ((arg4 != 0) && ((arg0->unk65 != 0) || (arg0->stunned != 0) || (arg0->unk13C != 0))) {
                     func_150836CC(arg0, 0x89);
-                    arg0->unk31C->unk11A = 0;
-                    arg0->unk31C->unk78 = 0;
+                    arg0->unk31C->weapon_status = 0;
+                    arg0->unk31C->rt_context_b = 0;
                 } else if (arg4 != 0) {
                     pressedButtons |= B_BUTTON;
                     anim = func_15063E84(arg0, 0x226, 1, 0, pressedButtons);
                     if (anim == 999) {
                         func_150836CC(arg0, 0x89);
-                        arg0->unk31C->unk11A = 0;
-                        arg0->unk31C->unk78 = 0;
+                        arg0->unk31C->weapon_status = 0;
+                        arg0->unk31C->rt_context_b = 0;
                         arg0->unk83 = 0;
                     }
                 } else if (arg6 != 0) {
@@ -2315,8 +2315,8 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 } else {
                     arg0->disable_jump = 0x14;
                     func_15063A38(arg0, heldButtons, Z_TRIG | R_TRIG);
-                    if ((arg0->unk31C->unk19E == 0) && ((D_800CC290 & Z_TRIG) || (arg0->unk31C->prevButtons & Z_TRIG))) {
-                        if (arg0->unk31C->unk198 == 2) {
+                    if ((arg0->unk31C->ReloadTimer == 0) && ((D_800CC290 & Z_TRIG) || (arg0->unk31C->prevButtons & Z_TRIG))) {
+                        if (arg0->unk31C->AimState == 2) {
                             arg0->unk31C->unk1B4 |= 4;
                             D_800CC2B0 = 1;
                         } else {
@@ -2330,14 +2330,14 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                         anim = 0x226;
                         if ((s32)arg0->unk28 != 0) {
                             func_150836CC(arg0, 0x89);
-                            arg0->unk31C->unk11A = 0;
+                            arg0->unk31C->weapon_status = 0;
                         }
                     } else {
                         held = D_800CC290 & R_TRIG;
                         if ((((held != 0) && !(D_800CC290 & Z_TRIG) && (arg0->unk31C->prevButtons & Z_TRIG)) ||
                                     ((held == 0) && (D_800CC28C & Z_TRIG))) &&
                                    (arg0->unk84.uh != 0x225) && (arg0->unk84.uh != 0x222) && (arg0->unk84.uh != 0x236) &&
-                                   (arg0->unk84.uh != 0x227) && (arg0->unk84.uh != 0x237) && (arg0->unk31C->unk19E == 0)) {
+                                   (arg0->unk84.uh != 0x227) && (arg0->unk84.uh != 0x237) && (arg0->unk31C->ReloadTimer == 0)) {
                             if (D_800CC284->button & R_TRIG) {
                                 if (func_150ADA20() & 3) {
                                     anim = 0x227;
@@ -2356,13 +2356,13 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                             blend = 0.0f;
                             arg0->disable_run = 0xFF;
                             arg0->unk83 = 0xFF;
-                            arg0->unk31C->unk19E = 0x3C;
+                            arg0->unk31C->ReloadTimer = 0x3C;
                         } else if ((held != 0) && (D_800CC290 & Z_TRIG) && (arg0->unk84.uh != 0x225)) {
                             arg0->disable_run = 0;
                             arg0->disable_jump = 8;
                             arg0->unk83 = 8;
                             if ((arg0->unk84.uh != 0x222) && (arg0->unk84.uh != 0x236) && (arg0->unk84.uh != 0x227) && (arg0->unk84.uh != 0x237)) {
-                                if ((arg0->unk44 >= 1.0f) || (arg0->unk31C->unk23 > 0)) {
+                                if ((arg0->unk44 >= 1.0f) || (arg0->unk31C->door_walkf_time > 0)) {
                                     anim = 0x223;
                                     if (arg0->unk44 >= 20.0f) {
                                         anim = 0x31B;
@@ -2383,19 +2383,19 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
         }
         break;
     case 0x12:
-        if (((act == arg0->unk31C->unk78) || (arg0->unk31C->unk11A != 0)) && (arg0->in_water != 0)) {
-            arg0->unk31C->unk78 = 0;
+        if (((act == arg0->unk31C->rt_context_b) || (arg0->unk31C->weapon_status != 0)) && (arg0->in_water != 0)) {
+            arg0->unk31C->rt_context_b = 0;
             arg0->disable_run = 0;
             arg0->unk83 = 0;
-            arg0->unk31C->unk11A = 0;
-        } else if (act == arg0->unk31C->unk78) {
+            arg0->unk31C->weapon_status = 0;
+        } else if (act == arg0->unk31C->rt_context_b) {
             arg0->xz_velocity = 0.0f;
             if ((arg4 != 0) && (arg0->unk65 != 0)) {
-                arg0->unk31C->unk11A = 0;
+                arg0->unk31C->weapon_status = 0;
             } else {
                 arg0->disable_jump = 0x14;
                 if ((D_800CC284->button & Z_TRIG) || (arg0->unk31C->prevButtons & Z_TRIG)) {
-                    if (arg0->unk31C->unk198 == 2) {
+                    if (arg0->unk31C->AimState == 2) {
                         arg0->unk31C->unk1B4 |= 8;
                         D_800CC2B0 = 1;
                     } else {
@@ -2408,14 +2408,14 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                     arg0->unk83 = 0xFF;
                     anim = 0xC6;
                     if ((s32)arg0->unk28 != 0) {
-                        arg0->unk31C->unk11A = 0;
+                        arg0->unk31C->weapon_status = 0;
                     }
-                } else if (!(D_800CC284->button & Z_TRIG) && (arg0->unk31C->prevButtons & Z_TRIG) && (arg0->unk84.uh != 0xC4) && (arg0->unk31C->unk19E == 0)) {
+                } else if (!(D_800CC284->button & Z_TRIG) && (arg0->unk31C->prevButtons & Z_TRIG) && (arg0->unk84.uh != 0xC4) && (arg0->unk31C->ReloadTimer == 0)) {
                     anim = 0xC7;
                     blend = 0.0f;
                     arg0->disable_run = 0xFF;
                     arg0->unk83 = 0xFF;
-                    arg0->unk31C->unk19E = 0x3C;
+                    arg0->unk31C->ReloadTimer = 0x3C;
                 } else if ((D_800CC284->button & Z_TRIG) && (arg0->unk84.uh != 0xC4)) {
                     arg0->disable_run = 0;
                     arg0->disable_jump = 8;
@@ -2435,63 +2435,63 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
         }
         break;
     case 0x23:
-        if (act == arg0->unk31C->unk78) {
+        if (act == arg0->unk31C->rt_context_b) {
             if ((arg4 != 0) && (arg0->unk65 != 0)) {
                 func_150836CC(arg0, 0x16);
-                arg0->unk31C->unk11A = 0;
+                arg0->unk31C->weapon_status = 0;
             } else if (arg6 != 0) {
                 clearAction = 0;
-            } else if ((arg0->unk31C->aimState != 0) && (arg0->unk31C->unk11A == 2)) {
+            } else if ((arg0->unk31C->SniperState != 0) && (arg0->unk31C->weapon_status == 2)) {
                 arg0->disable_jump = 0xA;
                 arg0->disable_run = 0;
                 arg0->unk83 = 0xA;
-                if ((arg0->unk31C->unk19E == 0) && ((D_800CC284->button & Z_TRIG) || (arg0->unk31C->prevButtons & Z_TRIG))) {
+                if ((arg0->unk31C->ReloadTimer == 0) && ((D_800CC284->button & Z_TRIG) || (arg0->unk31C->prevButtons & Z_TRIG))) {
                     arg0->unk31C->unk1B4 |= 1;
                     D_800CC2B0 = 1;
                 }
                 if (arg0->unk84.uh != 0x163) {
-                    if ((arg0->unk31C->unk199 >= 6) || ((pressedButtons & A_BUTTON) && (arg0->unk84.uh != 0x26E))) {
+                    if ((arg0->unk31C->shotCount >= 6) || ((pressedButtons & A_BUTTON) && (arg0->unk84.uh != 0x26E))) {
                         if (arg0->unk28 == 0.0f) {
                             arg0->disable_run = 0xFF;
                             arg0->unk83 = 0xFF;
-                            arg0->unk31C->unk19E = 0xB4;
+                            arg0->unk31C->ReloadTimer = 0xB4;
                             anim = 0x26E;
-                            arg0->unk31C->unk199 = 0;
+                            arg0->unk31C->shotCount = 0;
                         }
-                    } else if (!(D_800CC284->button & Z_TRIG) && (arg0->unk31C->prevButtons & Z_TRIG) && (arg0->unk84.uh == 0x165) && (arg0->unk31C->unk19E == 0)) {
+                    } else if (!(D_800CC284->button & Z_TRIG) && (arg0->unk31C->prevButtons & Z_TRIG) && (arg0->unk84.uh == 0x165) && (arg0->unk31C->ReloadTimer == 0)) {
                         arg0->unk31C->unk1B4 |= 2;
                         D_800CC2B0 = 1;
                         blend = 0.0f;
                         arg0->disable_run = 0xFF;
                         arg0->unk83 = 0xFF;
                         anim = 0x167;
-                        arg0->unk31C->unk199++;
-                        arg0->unk31C->unk19E = 0x1E;
+                        arg0->unk31C->shotCount++;
+                        arg0->unk31C->ReloadTimer = 0x1E;
                     } else if (arg0->unk84.uh != 0x167) {
                         anim = 0x165;
                     }
                 }
             } else {
                 arg0->disable_jump = 0x14;
-                if ((arg0->unk84.uh != 0x163) && ((arg0->unk31C->unk199 >= 6) || ((pressedButtons & A_BUTTON) && (arg0->unk84.uh != 0x26E)))) {
+                if ((arg0->unk84.uh != 0x163) && ((arg0->unk31C->shotCount >= 6) || ((pressedButtons & A_BUTTON) && (arg0->unk84.uh != 0x26E)))) {
                     if (arg0->unk28 == 0.0f) {
                         arg0->disable_run = 0xFF;
                         arg0->unk83 = 0xFF;
-                        arg0->unk31C->unk19E = 0xB4;
+                        arg0->unk31C->ReloadTimer = 0xB4;
                         anim = 0x26E;
-                        arg0->unk31C->unk199 = 0;
+                        arg0->unk31C->shotCount = 0;
                     }
-                } else if ((pressedButtons & Z_TRIG) && (arg0->unk84.uh != 0x163) && (arg0->unk84.uh != 0x166) && (arg0->unk31C->unk19E == 0)) {
+                } else if ((pressedButtons & Z_TRIG) && (arg0->unk84.uh != 0x163) && (arg0->unk84.uh != 0x166) && (arg0->unk31C->ReloadTimer == 0)) {
                     blend = 0.0f;
                     arg0->disable_run = 0xFF;
                     arg0->unk83 = 0xFF;
                     anim = 0x166;
-                    arg0->unk31C->unk199++;
-                    arg0->unk31C->unk19E = 0x1E;
+                    arg0->unk31C->shotCount++;
+                    arg0->unk31C->ReloadTimer = 0x1E;
                 } else {
                     anim = func_15063E84(arg0, 0x164, 1, 0, pressedButtons);
                     if (anim == 0x163) {
-                        arg0->unk31C->unk199 = 0;
+                        arg0->unk31C->shotCount = 0;
                     }
                 }
             }
@@ -2507,40 +2507,40 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
             f32 angle;
 
             ok = 1;
-            if (arg0->unk31C->unk7A != 0) {
-                angle = func_15048A70(D_800D3098[arg0->unk31C->unk7A].yaw, arg0->unk40);
-                if ((D_800D3098[arg0->unk31C->unk7A].unk18 != 0) && ((angle < -90.0f) || (angle > 90.0f))) {
+            if (arg0->unk31C->cont_zone_ind != 0) {
+                angle = func_15048A70(D_800D3098[arg0->unk31C->cont_zone_ind].yaw, arg0->unk40);
+                if ((D_800D3098[arg0->unk31C->cont_zone_ind].unk18 != 0) && ((angle < -90.0f) || (angle > 90.0f))) {
                     ok = 0;
                 }
             }
             if (ok != 0) {
                 arg0->disable_run = 0xFF;
                 arg0->unk83 = 0xFF;
-                arg0->unk31C->unk78 = 0x17;
+                arg0->unk31C->rt_context_b = 0x17;
                 anim = 0x8E;
-                arg0->unk76 = (u32)(D_800D3098[arg0->unk31C->unk7A].yaw * 182.0444489f) - 0x4000;
+                arg0->unk76 = (u32)(D_800D3098[arg0->unk31C->cont_zone_ind].yaw * 182.0444489f) - 0x4000;
             }
         }
         break;
     case 0x1A:
         handled = 1;
         anim = 999;
-        if (act != arg0->unk31C->unk78) {
+        if (act != arg0->unk31C->rt_context_b) {
             if ((pressedButtons & B_BUTTON) && (arg3 <= 0.0f)) {
                 arg0->disable_run = 0xFF;
                 arg0->disable_jump = 0xFF;
                 arg0->unk83 = 0xFF;
                 arg0->xz_velocity = 0.0f;
                 anim = 0x12C;
-                arg0->unk31C->unk78 = act;
+                arg0->unk31C->rt_context_b = act;
                 func_15080828(0);
             }
         } else if (arg6 != 0) {
             func_15080BE8();
-            arg0->unk31C->unk78 = 0;
+            arg0->unk31C->rt_context_b = 0;
         } else if (func_15080CF4() != 0) {
             if (D_800D1940 == 0x42) {
-                arg0->unk31C->unk78 = 0;
+                arg0->unk31C->rt_context_b = 0;
                 anim = 0x358;
                 D_800D2E60[D_800D1940 >> 3] |= 1 << (D_800D1940 & 7);
             } else {
@@ -2555,13 +2555,13 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
     case 0x2A:
         handled = 1;
         anim = 999;
-        if (act != arg0->unk31C->unk78) {
+        if (act != arg0->unk31C->rt_context_b) {
             if ((arg3 <= 0.0f) && (arg0->unk110 == 0) && (arg0->disable_jump == 0)) {
                 arg0->disable_run = 0xFF;
                 arg0->disable_jump = 0xFF;
                 arg0->unk83 = 0xFF;
                 arg0->xz_velocity = 0.0f;
-                arg0->unk31C->unk78 = act;
+                arg0->unk31C->rt_context_b = act;
                 anim = 0x26F;
                 arg0->unk276 = 6;
                 arg0->unk282 = 0x64;
@@ -2571,9 +2571,9 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
             }
         } else if (arg6 != 0) {
             func_15080BE8();
-            arg0->unk31C->unk78 = 0;
+            arg0->unk31C->rt_context_b = 0;
         } else if (func_15080CF4() != 0) {
-            arg0->unk31C->unk78 = 0;
+            arg0->unk31C->rt_context_b = 0;
             arg0->disable_run = 0xFF;
             arg0->unk83 = 0;
             func_1507EABC(arg0);
@@ -2607,12 +2607,12 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
             s32 next;
 
             obj = &movement_obj[arg0->unk65 - 1];
-            arg0->unk31C->unk78 = 0x1B;
+            arg0->unk31C->rt_context_b = 0x1B;
             arg0->disable_jump = 0x14;
             if ((D_800BE616 == 0) || (arg0->unk65 != 0)) {
                 clearAction = 0;
             }
-            if (arg0->unk31C->unk19E == 0) {
+            if (arg0->unk31C->ReloadTimer == 0) {
                 next = 0;
                 if (obj->id == 0x23) {
                     animHold = 0xD;
@@ -2634,7 +2634,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                     }
                     obj->unk232 = animHold;
                     obj->unk218 = NULL;
-                    arg0->unk31C->unk199 = 1;
+                    arg0->unk31C->shotCount = 1;
                     if ((animGrab != obj->unk84.uh) || ((D_800C3A58 != 0) && (animSpecial != 0))) {
                         func_150FC438(obj, arg0, 0, animGrab);
                         func_10010A3C(obj);
@@ -2642,8 +2642,8 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                             func_1000FA64(func_1000F568(0x57C, 6), arg0->x_position, arg0->y_position, arg0->z_position, 0x7FFF, 0x3E8, 0x1F4, func_1000EFB4, arg0, D_800996D0, 0, 0);
                         }
                     }
-                    if (D_800BE9E4 < arg0->unk31C->unk24) {
-                        arg0->unk31C->unk24 -= D_800BE9E4;
+                    if (D_800BE9E4 < arg0->unk31C->gun_before_reload) {
+                        arg0->unk31C->gun_before_reload -= D_800BE9E4;
                     } else {
                         next = animRelease;
                         func_100109D0(obj);
@@ -2651,8 +2651,8 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 } else if ((D_800C3A58 != 0) && (animSpecial != obj->unk232) && (animSpecial != 0)) {
                     obj->unk232 = animSpecial;
                     obj->unk218 = NULL;
-                } else if (arg0->unk31C->unk199 == 1) {
-                    arg0->unk31C->unk199 = 0;
+                } else if (arg0->unk31C->shotCount == 1) {
+                    arg0->unk31C->shotCount = 0;
                     if (func_1000FF90(func_1000EC24, -1, -1) == -1) {
                         func_1000FA64((func_150ADA20() % 3U) + 0x618, arg0->x_position, arg0->y_position, arg0->z_position, 0x7D00, 0x1F4, 0xC8, func_1000EC24, (void *)0x1E, 0, 0x300, 0);
                     }
@@ -2663,8 +2663,8 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                     func_100109D0(obj);
                 }
                 if (next != 0) {
-                    arg0->unk31C->unk24 = 0x258;
-                    arg0->unk31C->unk19E = 0x96;
+                    arg0->unk31C->gun_before_reload = 0x258;
+                    arg0->unk31C->ReloadTimer = 0x96;
                     func_1000FA64((func_150ADA20() % 3U) + 0x618, arg0->x_position, arg0->y_position, arg0->z_position, 0x7D00, 0x1F4, 0xC8, func_1000EC24, (void *)0x1E, 0, 0x300, 0);
                     obj->unk232 = next;
                     obj->unk218 = NULL;
@@ -2691,53 +2691,53 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 sfx = 0x12;
             }
             if (arg6 != 0) {
-                if ((act == arg0->unk31C->unk78) || (arg0->unk31C->unk19B == 4)) {
-                    if ((func_1503195C(arg0, item, 0) != NULL) || (arg0->unk31C->unk19B == 4)) {
+                if ((act == arg0->unk31C->rt_context_b) || (arg0->unk31C->GrenadeThrowState == 4)) {
+                    if ((func_1503195C(arg0, item, 0) != NULL) || (arg0->unk31C->GrenadeThrowState == 4)) {
                         func_150836CC(arg0, item);
                         D_800D1580 = (u16)sfx | 0x10000;
                         func_15073FA0();
-                        if (arg0->unk31C->grenade_count != 0) {
-                            arg0->unk31C->grenade_count--;
+                        if (arg0->unk31C->numGrenades != 0) {
+                            arg0->unk31C->numGrenades--;
                         }
                     }
-                    arg0->unk31C->unk19B = 0;
-                    arg0->unk31C->unk11A = 0;
+                    arg0->unk31C->GrenadeThrowState = 0;
+                    arg0->unk31C->weapon_status = 0;
                 }
             } else {
                 func_15063A38(arg0, heldButtons, R_TRIG);
-                if (arg0->unk31C->unk19B == 1) {
-                    if (act != arg0->unk31C->unk78) {
-                        arg0->unk31C->unk78 = act;
-                        arg0->unk31C->unk11A = 1;
+                if (arg0->unk31C->GrenadeThrowState == 1) {
+                    if (act != arg0->unk31C->rt_context_b) {
+                        arg0->unk31C->rt_context_b = act;
+                        arg0->unk31C->weapon_status = 1;
                         arg0->disable_run = 0x1E;
                         arg0->disable_jump = 0x1E;
                         arg0->unk83 = 0x1E;
-                        arg0->unk31C->unk19B = 2;
+                        arg0->unk31C->GrenadeThrowState = 2;
                         anim = animThrow;
-                        arg0->unk31C->unk19C = 0xF0;
-                        arg0->unk31C->unk1AA++;
+                        arg0->unk31C->GrenadeTimer = 0xF0;
+                        arg0->unk31C->shotsfired++;
                     }
-                } else if (arg0->unk31C->unk19B == 2) {
+                } else if (arg0->unk31C->GrenadeThrowState == 2) {
                     if (!(D_800CC290 & D_CBUTTONS) && !(arg0->unk2F8 & 0x10)) {
-                        arg0->unk31C->unk19B = 3;
+                        arg0->unk31C->GrenadeThrowState = 3;
                     }
-                    if (D_800BE9E4 < arg0->unk31C->unk19C) {
-                        arg0->unk31C->unk19C -= D_800BE9E4;
+                    if (D_800BE9E4 < arg0->unk31C->GrenadeTimer) {
+                        arg0->unk31C->GrenadeTimer -= D_800BE9E4;
                     } else {
-                        arg0->unk31C->unk19B = 0;
-                        arg0->unk31C->unk78 = 0;
+                        arg0->unk31C->GrenadeThrowState = 0;
+                        arg0->unk31C->rt_context_b = 0;
                         arg0->immune = 0;
                         func_15063B64(arg0);
                     }
-                } else if ((arg0->unk31C->unk19B == 3) && (arg3 <= 0.0f) && (animThrow != arg0->unk84.uh)) {
+                } else if ((arg0->unk31C->GrenadeThrowState == 3) && (arg3 <= 0.0f) && (animThrow != arg0->unk84.uh)) {
                     arg0->disable_run = 0xFF;
                     arg0->unk83 = 0xFF;
-                    arg0->unk31C->unk19B = 4;
+                    arg0->unk31C->GrenadeThrowState = 4;
                     anim = animDrop;
-                    arg0->unk31C->unk78 = 0;
-                    arg0->unk31C->unk11A = 3;
-                    if (arg0->unk31C->grenade_count != 0) {
-                        arg0->unk31C->grenade_count--;
+                    arg0->unk31C->rt_context_b = 0;
+                    arg0->unk31C->weapon_status = 3;
+                    if (arg0->unk31C->numGrenades != 0) {
+                        arg0->unk31C->numGrenades--;
                     }
                 }
             }
@@ -2754,7 +2754,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 item = 0x89;
             }
             if (arg6 != 0) {
-                if (act == arg0->unk31C->unk78) {
+                if (act == arg0->unk31C->rt_context_b) {
                     obj = func_15063C60(arg0, item);
                     if (obj != NULL) {
                         obj->unk65 = 0;
@@ -2762,27 +2762,27 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                         obj->y_velocity = 0.0f;
                         obj->xz_velocity = 0.0f;
                     }
-                    arg0->unk31C->unk19B = 0;
-                    arg0->unk31C->unk78 = 0;
-                    arg0->unk31C->unk11A = 0;
+                    arg0->unk31C->GrenadeThrowState = 0;
+                    arg0->unk31C->rt_context_b = 0;
+                    arg0->unk31C->weapon_status = 0;
                 }
             } else {
                 func_15063A38(arg0, heldButtons, R_TRIG);
-                if (arg0->unk31C->unk19B == 5) {
-                    if (act != arg0->unk31C->unk78) {
+                if (arg0->unk31C->GrenadeThrowState == 5) {
+                    if (act != arg0->unk31C->rt_context_b) {
                         if (item == 0x89) {
                             obj = func_15083568(arg0, 0x86, 1.0f, 0);
                         } else {
                             obj = func_15083568(arg0, 0x9F, 1.0f, 0);
                         }
                         if (obj != NULL) {
-                            arg0->unk31C->unk78 = act;
+                            arg0->unk31C->rt_context_b = act;
                             anim = 0x1F9;
-                            arg0->unk31C->unk11A = 1;
+                            arg0->unk31C->weapon_status = 1;
                             arg0->disable_run = 0x1E;
                             arg0->disable_jump = 0xFF;
                             arg0->unk83 = 0xFF;
-                            arg0->unk31C->unk19B = 6;
+                            arg0->unk31C->GrenadeThrowState = 6;
                             obj->immune = 0xFF;
                             func_15062BDC(obj, 1.0f, 1.0f);
                             obj->unk2E4 = 0xF0;
@@ -2792,24 +2792,24 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                             func_1505E650(obj, 2, 0.0f, 0.0f, 0.0f, 0.0f, 0);
                             func_1514F568(obj);
                         } else {
-                            arg0->unk31C->unk19B = 0;
+                            arg0->unk31C->GrenadeThrowState = 0;
                         }
                     }
-                } else if (arg0->unk31C->unk19B == 6) {
+                } else if (arg0->unk31C->GrenadeThrowState == 6) {
                     if (!(D_800CC290 & D_CBUTTONS)) {
-                        arg0->unk31C->unk19B = 7;
+                        arg0->unk31C->GrenadeThrowState = 7;
                     }
-                } else if ((arg0->unk31C->unk19B == 7) && (arg3 <= 0.0f) && (arg0->unk84.uh != 0x1F9)) {
+                } else if ((arg0->unk31C->GrenadeThrowState == 7) && (arg3 <= 0.0f) && (arg0->unk84.uh != 0x1F9)) {
                     arg0->disable_run = 0xFF;
                     arg0->unk83 = 0xFF;
-                    arg0->unk31C->unk19B = 0;
+                    arg0->unk31C->GrenadeThrowState = 0;
                     anim = 0x1FC;
-                    arg0->unk31C->unk78 = 0;
-                    arg0->unk31C->unk11A = 0;
-                    if (arg0->unk31C->grenade_count != 0) {
-                        arg0->unk31C->grenade_count--;
+                    arg0->unk31C->rt_context_b = 0;
+                    arg0->unk31C->weapon_status = 0;
+                    if (arg0->unk31C->numGrenades != 0) {
+                        arg0->unk31C->numGrenades--;
                     }
-                    arg0->unk31C->unk1AA++;
+                    arg0->unk31C->shotsfired++;
                     obj = func_15063C60(arg0, item);
                     if (obj != NULL) {
                         s16 pitch;
@@ -2821,7 +2821,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                         obj->unk65 = 0;
                         dist = ((240 - obj->unk2E4) * 210.0f) / 240.0f;
                         dist += 40.0f;
-                        if (arg0->unk31C->unk198 != 0) {
+                        if (arg0->unk31C->AimState != 0) {
                             pitch = (30.0f - arg0->unk31C->aimPitch) * 182.0444489f;
                         } else {
                             pitch = 0x1555;
@@ -2830,7 +2830,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                         obj->y_velocity = -vy;
                         obj->xz_velocity = vx;
                         obj->gravity = 4.0f;
-                        obj->unk76 = obj->unk7A = arg0->unk7A - arg0->unk31C->unk12;
+                        obj->unk76 = obj->unk7A = arg0->unk7A - arg0->unk31C->pssd_waist_tilt;
                     }
                 }
             }
@@ -2853,18 +2853,18 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
     }
 
     if ((arg4 != 0) || (arg6 != 0)) {
-        arg0->unk31C->unk72 = 0;
+        arg0->unk31C->context_exclude_time = 0;
         if (arg6 != 0) {
             anim = 0;
             handled = 1;
             if (clearAction != 0) {
-                arg0->unk31C->unk78 = 0;
+                arg0->unk31C->rt_context_b = 0;
             }
         } else {
-            arg0->unk31C->unk75 = 0;
-            arg0->unk31C->unk78 = 0;
-            if (arg0->unk31C->unk11A != 3) {
-                arg0->unk31C->unk11A = 0;
+            arg0->unk31C->context_b = 0;
+            arg0->unk31C->rt_context_b = 0;
+            if (arg0->unk31C->weapon_status != 3) {
+                arg0->unk31C->weapon_status = 0;
             }
         }
     }

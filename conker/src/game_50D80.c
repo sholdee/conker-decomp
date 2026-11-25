@@ -967,9 +967,9 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             }
         } else if (event->value == 0x71) {
             movement_obj->unkCC = 0;
-            movement_obj->unk31C->unk4E = 0;
+            movement_obj->unk31C->transport = 0;
             movement_obj->unk65 = 0;
-            movement_obj->unk31C->unk27 = 0;
+            movement_obj->unk31C->jump_on_char = 0;
             movement_obj->unkF8 &= ~0x01000000;
             if (obj != NULL) {
                 obj->unk13C = 0;
@@ -1073,7 +1073,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     D_800D154C = obj;
                     func_15073F1C();
                 } else if (event->unk4 == 6) {
-                    obj->unk31C->unk4E = 0;
+                    obj->unk31C->transport = 0;
                 }
             }
         } else if (event->value == 0x6A) {

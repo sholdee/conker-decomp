@@ -60,9 +60,9 @@ void func_1504A730(void) {
         if (D_800BE616 == 0 || (tickResult = func_1504C8BC(obj)) != 0) {
             maxStep = 2.0f;
             if (i < D_8008FD8C) {
-                obj->unk31C->unk195 -= D_800BE9E4;
-                if (obj->unk31C->unk195 < 0) {
-                    obj->unk31C->unk195 = 0;
+                obj->unk31C->being_sniped -= D_800BE9E4;
+                if (obj->unk31C->being_sniped < 0) {
+                    obj->unk31C->being_sniped = 0;
                 }
                 obj->unk31C->unk57 = 0;
                 if (i < 4) {
@@ -259,7 +259,7 @@ f32 func_1504B0FC(Actor *obj, f32 arg1) {
     result = 0.0f;
     obj->unk31C->unk68 = 0;
     obj->unk110 = 0;
-    if (obj->stunned == 0 && obj->health != 0 && obj->unk31C->unk198 == 0) {
+    if (obj->stunned == 0 && obj->health != 0 && obj->unk31C->AimState == 0) {
         stickX = D_800CC284->stick_x;
         stickY = D_800CC284->stick_y;
     } else {
@@ -270,7 +270,7 @@ f32 func_1504B0FC(Actor *obj, f32 arg1) {
         stickY = 80;
     }
     delta = (obj->y_position - ((obj->unk118 - 60.0f) - 170.0f)) * 2.0f;
-    if ((obj->unk31C->unk20 & 1) || obj->unk31C->unk21 != 0) {
+    if ((obj->unk31C->water_attribs & 1) || obj->unk31C->unk21 != 0) {
         obj->unkB2 = 0;
         if (delta < 400.0f) {
             // matching: loading 8.0f into step first gives the target's mul.s operand order
@@ -315,7 +315,7 @@ f32 func_1504B0FC(Actor *obj, f32 arg1) {
     }
     if (obj->in_water != 1 || obj->unk28 >= 10.0f || obj->y_position < (obj->unk118 - 60.0f) + 20.0f) {
         if (obj->in_water == 1) {
-            if ((obj->unk118 - 50.0f < obj->aim.y || (obj->unk31C->unk20 & 1)) && obj->health != 0) {
+            if ((obj->unk118 - 50.0f < obj->aim.y || (obj->unk31C->water_attribs & 1)) && obj->health != 0) {
                 if (obj->unkB2 > 30) {
                     if (obj->unkB2 > 1500) {
                         func_15060A30(0x1A7, obj);
@@ -326,7 +326,7 @@ f32 func_1504B0FC(Actor *obj, f32 arg1) {
                 obj->unkB2 = 0;
             } else {
                 obj->unkB2 += D_800BE9E4;
-                if (obj->unkB2 > 1560 || (obj->health == 0 && obj->unk31C->unk120 == 0)) {
+                if (obj->unkB2 > 1560 || (obj->health == 0 && obj->unk31C->death_State == 0)) {
                     obj->unkB2 -= 60;
                     if (obj->health >= 2) {
                         if (obj->health == 4) {
@@ -354,18 +354,18 @@ f32 func_1504B0FC(Actor *obj, f32 arg1) {
                 obj->y_velocity = 0.0f;
             }
             if (((obj->unk118 - 60.0f) - 175.0f) < obj->y_position && obj->unk84.uh != 0x28) {
-                if (obj->unk31C->unk1C < 2.5f) {
-                    obj->unk31C->unk1C += 0.05f;
+                if (obj->unk31C->water_up < 2.5f) {
+                    obj->unk31C->water_up += 0.05f;
                 }
             } else {
-                obj->unk31C->unk1C = 0.0f;
+                obj->unk31C->water_up = 0.0f;
             }
-            obj->y_position += obj->unk31C->unk1C * D_800D1550;
+            obj->y_position += obj->unk31C->water_up * D_800D1550;
             excess = obj->y_position - ((obj->unk118 - 60.0f) + 14.0f);
             if (excess > 0.0f) {
                 excess *= 0.65f;
                 obj->y_position -= excess;
-                obj->unk31C->unk1C = 0.0f;
+                obj->unk31C->water_up = 0.0f;
             }
             if (((obj->unk118 - 60.0f) - 75.0f) < obj->y_position) {
                 targetPitch -= 30.0f;
@@ -414,7 +414,7 @@ f32 func_1504B0FC(Actor *obj, f32 arg1) {
         }
         result = obj->xz_velocity;
     }
-    if (obj->unk31C->unk95 != 0) {
+    if (obj->unk31C->ladder != 0) {
         obj->y_position = obj->old_y_position;
         belowLevel = obj->unk118 != -10000.0f && obj->y_position < obj->unk118 - 60.0f;
         if (!belowLevel) {
@@ -528,8 +528,8 @@ void func_1504BC38(Actor *obj) {
     if (obj->unk31C->chasing > 0) {
         obj->unk31C->chasing -= D_800BE9A0;
     }
-    if (obj->unk31C->unk44 > 0) {
-        obj->unk31C->unk44 -= D_800BE9A0;
+    if (obj->unk31C->camjolt > 0) {
+        obj->unk31C->camjolt -= D_800BE9A0;
     }
     if (obj->unk107 != 0) {
         obj->unk107--;
@@ -537,20 +537,20 @@ void func_1504BC38(Actor *obj) {
     if (obj->unk1D0 > 0) {
         obj->unk1D0 -= D_800BE9A0;
     }
-    if (obj->unk31C->unk54 > 0) {
-        obj->unk31C->unk54 -= D_800BE9A0;
+    if (obj->unk31C->side > 0) {
+        obj->unk31C->side -= D_800BE9A0;
     }
-    if (obj->unk31C->unk55 != 0) {
-        obj->unk31C->unk55--;
+    if (obj->unk31C->save_done != 0) {
+        obj->unk31C->save_done--;
     }
 
-    obj->unk31C->unk52 >>= 1;
+    obj->unk31C->use_cam_butt >>= 1;
 
-    if (obj->unk31C->unk19E != 0) {
-        if (obj->unk31C->unk19E > D_800BE9E4) {
-            obj->unk31C->unk19E -= D_800BE9E4;
+    if (obj->unk31C->ReloadTimer != 0) {
+        if (obj->unk31C->ReloadTimer > D_800BE9E4) {
+            obj->unk31C->ReloadTimer -= D_800BE9E4;
         } else {
-            obj->unk31C->unk19E = 0;
+            obj->unk31C->ReloadTimer = 0;
         }
     }
     if (obj->unk31C->unk1A0 != 0) {
@@ -568,27 +568,27 @@ void func_1504BE2C(Actor *obj, u16 *arg1, f32 *arg2, s8 *arg3) {
     s32 pad[2]; // matching: the frame has two unused words
     f32 angle;
 
-    angle = obj->unk31C->unkB * 0.024543693f; // pi / 128: unkB counts 256ths of a turn
+    angle = obj->unk31C->pissed_cycle * 0.024543693f; // pi / 128: unkB counts 256ths of a turn
     D_800CC2B4 = 16.0f;
-    if (obj->unk31C->unk16 != 0 && obj->unk31C->unk16 == 0) { // never true, but compiled in
+    if (obj->unk31C->pissed_hangover != 0 && obj->unk31C->pissed_hangover == 0) { // never true, but compiled in
         func_1507EB2C(obj);
-        obj->unk31C->unk8 = 0;
+        obj->unk31C->pissed_up = 0;
     }
-    if (obj->unk31C->unkE == 0) {
-        obj->unk31C->unkE = 0xA6;
+    if (obj->unk31C->pissed_walk == 0) {
+        obj->unk31C->pissed_walk = 0xA6;
     }
-    obj->unk31C->unk3C = 5;
+    obj->unk31C->turn = 5;
     if (arg1) { // matching: this and the empty if below keep arg1 live in a1 across the calls
     }
     if (*arg2 > 4.0f && obj->unk84.uh == 0xAA) {
-        obj->unk31C->unk3C = 1;
-        obj->unk31C->unk10 = *arg1;
+        obj->unk31C->turn = 1;
+        obj->unk31C->pissed_angle = *arg1;
     }
     func_150AD78C(angle);
     if (arg1) {
     }
-    obj->unk31C->unkB += 2;
-    if (obj->unk31C->unk16 != 0) {
+    obj->unk31C->pissed_cycle += 2;
+    if (obj->unk31C->pissed_hangover != 0) {
         obj->unkAA = 25;
     } else if (obj->unk84.uh == 0xA7) {
         obj->unkAA = 50;
@@ -600,14 +600,14 @@ void func_1504BE2C(Actor *obj, u16 *arg1, f32 *arg2, s8 *arg3) {
         *arg3 = D_800CC284->stick_y >> 1;
     } else {
         if (!(func_150ADA20() & 0x3F)) {
-            obj->unk31C->unk14 = (func_150ADA20() % 25000U) - 12500;
+            obj->unk31C->pssd_waist_wobble = (func_150ADA20() % 25000U) - 12500;
         }
-        D_800CC2B2 = obj->unk31C->unk14;
-        if (obj->unk31C->unk16 != 0) {
+        D_800CC2B2 = obj->unk31C->pssd_waist_wobble;
+        if (obj->unk31C->pissed_hangover != 0) {
             D_800CC2B2 /= 3;
         }
     }
-    if (D_800C35EA[0] == 0 && obj->unk31C->unk16 == 0) {
+    if (D_800C35EA[0] == 0 && obj->unk31C->pissed_hangover == 0) {
         obj->unk282 = 30;
         obj->unk276 = 0;
     }
@@ -651,14 +651,14 @@ void func_1504C0E8(Actor *obj, s32 arg1, f32 arg2) {
     ActorCtl *ext;
     f32 diff;
 
-    if (D_800CC2B2 == 0 && (ext = obj->unk31C)->unk12 >= -29 && ext->unk12 < 30) {
-        ext->unk12 = 0;
+    if (D_800CC2B2 == 0 && (ext = obj->unk31C)->pssd_waist_tilt >= -29 && ext->pssd_waist_tilt < 30) {
+        ext->pssd_waist_tilt = 0;
     } else {
         ext = obj->unk31C;
         // matching: computed in two statements to keep the target's float register order
-        diff = D_800CC2B2 - ext->unk12;
+        diff = D_800CC2B2 - ext->pssd_waist_tilt;
         diff = (D_800D1550 / D_800CC2B4) * diff;
-        ext->unk12 += (s16)diff;
+        ext->pssd_waist_tilt += (s16)diff;
     }
     ext = obj->unk31C;
     if (ext->unk6B != 0) {
@@ -670,7 +670,7 @@ void func_1504C0E8(Actor *obj, s32 arg1, f32 arg2) {
         return;
     }
     if (obj->unk81 == 0 && obj->stunned == 0 && obj->in_water == 0) {
-        if (obj->unk83 == 0 && ext->unk11A != 3) {
+        if (obj->unk83 == 0 && ext->weapon_status != 3) {
             obj->unk80 = 1;
             obj->unk100 &= 0xF3;
             D_800CC2BC |= 0x80;
@@ -679,22 +679,22 @@ void func_1504C0E8(Actor *obj, s32 arg1, f32 arg2) {
             blend = 4.0f;
             vel = obj->xz_velocity * D_800991DC + arg2 * D_800991E0;
             ext = obj->unk31C;
-            if (ext->unk46 > 0 || ext->unk4E != 0 || obj->unk13C >= 100 || arg1 != 0 ||
-                (ext->unk32 & 3) || ext->unk78 != 0 || ext->unk1A != 0 ||
-                ext->unk8 > 0 || ext->unk17 != 0) {
+            if (ext->bitten > 0 || ext->transport != 0 || obj->unk13C >= 100 || arg1 != 0 ||
+                (ext->walk_attrib & 3) || ext->rt_context_b != 0 || ext->injured != 0 ||
+                ext->pissed_up > 0 || ext->env_suit != 0) {
                 if (func_15064B94(obj, vel, vel, arg1, arg2) != 0) {
                     return;
                 }
                 ext = obj->unk31C;
             }
             pressed = D_800CC284->button & Z_TRIG;
-            if (pressed == 0 || D_800CC2B1 != 0 || ext->unk78 != 0 || (ext->unk4E & 0xF) == 1) {
+            if (pressed == 0 || D_800CC2B1 != 0 || ext->rt_context_b != 0 || (ext->transport & 0xF) == 1) {
                 if (obj->xz_velocity > 4.0f) {
-                    ext->unk37 = 0;
+                    ext->dwalk = 0;
                     ext = obj->unk31C;
                 }
-                pressed = ext->unk4E; // matching: reusing pressed for this value sets the register allocation
-                if ((ext->unk4E == 1 || pressed == 0x81) && vel > 1.0f) {
+                pressed = ext->transport; // matching: reusing pressed for this value sets the register allocation
+                if ((ext->transport == 1 || pressed == 0x81) && vel > 1.0f) {
                     arg2 = 10.0f;
                     anim = 0x302;
                     speed = obj->xz_velocity / 7.0f + D_800991E4;
@@ -709,7 +709,7 @@ void func_1504C0E8(Actor *obj, s32 arg1, f32 arg2) {
                     anim = 0xDF;
                     speed = vel / 12.0f;
                 } else if (obj->unk118 != D_800991EC && obj->y_position < obj->unk118 &&
-                           obj->xz_velocity >= 1.0f && ext->unk4E == 0) {
+                           obj->xz_velocity >= 1.0f && ext->transport == 0) {
                     speed = vel / 18.0f + D_800991F0;
                     anim = 0x8B;
                     obj->unkAA = 0x4B;
@@ -726,12 +726,12 @@ void func_1504C0E8(Actor *obj, s32 arg1, f32 arg2) {
                 } else {
                     anim = func_1504C078();
                 }
-                if (obj->unk28 > 60.0f && obj->unk31C->unk4E == 0) {
+                if (obj->unk28 > 60.0f && obj->unk31C->transport == 0) {
                     speed = 0.5f;
                     anim = 0x38;
                     obj->unk100 |= 0x10;
                 }
-                if (obj->xz_velocity > 18.0f && obj->unk31C->unk11A != 1 && obj->unk31C->unk11A != 3 && arg2 == 0.0f &&
+                if (obj->xz_velocity > 18.0f && obj->unk31C->weapon_status != 1 && obj->unk31C->weapon_status != 3 && arg2 == 0.0f &&
                     obj->unk28 == 0.0f && D_800CC27C == 0) {
                     speed = 0.5f;
                     anim = 0x21;
@@ -741,10 +741,10 @@ void func_1504C0E8(Actor *obj, s32 arg1, f32 arg2) {
                 }
             } else if (pressed != 0) {
                 if (obj->xz_velocity < 3.0f) {
-                    ext->unk37 = 1;
+                    ext->dwalk = 1;
                 }
-                if (obj->unk44 > D_80099200 && (ext = obj->unk31C)->unk37 != 0) {
-                    ext->unk4 = 1;
+                if (obj->unk44 > D_80099200 && (ext = obj->unk31C)->dwalk != 0) {
+                    ext->duck_tilt = 1;
                     obj->unkAA = 0x28;
                     blend = 5.0f;
                     speed = obj->unk44 / 15.0f + 0.5f;

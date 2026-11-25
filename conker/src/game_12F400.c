@@ -248,7 +248,7 @@ s32 func_151026BC(Actor *obj, s16 arg1, u8 kind, u8 arg3, u8 arg4, s32 arg5) {
             unk6 = 0;
             break;
         default:
-            if (obj->unk31C->unk78 == 0x3B) {
+            if (obj->unk31C->rt_context_b == 0x3B) {
                 unk5 = 0xFF;
                 unk6 = 0;
             } else {
@@ -300,7 +300,7 @@ s32 func_1510281C(Owner1510281C *owner, s16 key) {
 
     if (key == block->unk22) {
         linked = block->linked;
-        if (linked == NULL || linked->unk31C->aimState != 0) {
+        if (linked == NULL || linked->unk31C->SniperState != 0) {
             return 0;
         }
     }
@@ -330,7 +330,7 @@ s32 func_151028AC(Owner1510281C *owner, s16 key) {
 
     if (key == block->unk22) {
         linked = block->linked;
-        if (linked == NULL || linked->unk31C->aimState != 0) {
+        if (linked == NULL || linked->unk31C->SniperState != 0) {
             return 0;
         }
     }

@@ -1091,7 +1091,7 @@ s32 func_15143E08(Actor *actor) {
 s32 func_15143E24(Actor *actor) {
     ActorCtl *ref = actor->unk31C;
     if (ref != NULL) {
-        return (s16)((actor->unk7A - ref->unk12) >> 8);
+        return (s16)((actor->unk7A - ref->pssd_waist_tilt) >> 8);
     }
     return (s16)(actor->unk7A >> 8);
 }
@@ -1859,7 +1859,7 @@ void func_15145740(Actor *actor, Vec3f *target, Vec3f *dir, Vec3f *offsetDir, f3
     if ((actor->id == 150) && (actor->unk31C->matrix_physics != 0)) {
         yaw = actor->unk7A + actor->unk31C->unk80;
     } else if (actor->unk31C != NULL) {
-        yaw = actor->unk7A - actor->unk31C->unk12;
+        yaw = actor->unk7A - actor->unk31C->pssd_waist_tilt;
     } else {
         yaw = actor->unk7A;
     }
@@ -1918,7 +1918,7 @@ void func_15145A50(Actor *actor) {
             (actor->interaction_state == 21)) {
             actor->interaction_state = 5;
             if (actor->unk31C != NULL) {
-                actor->unk31C->unk78 = 0;
+                actor->unk31C->rt_context_b = 0;
             }
         } else {
             func_15053694(actor);

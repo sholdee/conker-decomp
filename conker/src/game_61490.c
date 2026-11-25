@@ -84,7 +84,7 @@ GameCommand *func_150341BC(GameCommand *cmd, s32 index) {
         angle = actor->unk54 * (65536.0f / 360.0f);
         kind = actor->unk84.uh;
         if ((kind != 0x42) && (kind != 0x14) && (kind != 0x76)) {
-            offset = (sub->unk78 == 10) ? 0 : 4;
+            offset = (sub->rt_context_b == 10) ? 0 : 4;
             cmd->opcode = offset + 6;
             cmd->value = angle;
             cmd++;
@@ -104,10 +104,10 @@ GameCommand *func_150341BC(GameCommand *cmd, s32 index) {
         cmd++;
         cmd[-1].value = actor->unk1D1 * 200;
     }
-    if ((movement_obj[dc_glbl_CharNum].unk31C != NULL) && (movement_obj[dc_glbl_CharNum].unk31C->unk12 != 0)) {
+    if ((movement_obj[dc_glbl_CharNum].unk31C != NULL) && (movement_obj[dc_glbl_CharNum].unk31C->pssd_waist_tilt != 0)) {
         cmd->opcode = 8;
         cmd++;
-        cmd[-1].value = -movement_obj[dc_glbl_CharNum].unk31C->unk12;
+        cmd[-1].value = -movement_obj[dc_glbl_CharNum].unk31C->pssd_waist_tilt;
     }
     return cmd;
 }

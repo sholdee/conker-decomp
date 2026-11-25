@@ -1440,7 +1440,7 @@ void func_1511DF6C(WorldObject *obj) {
             data = (u8 *)character->unk31C;
             radius = 100.0f;
             scale = (f32)(((ActorCtl *)data)->unk1AF & 0xFF) * 0.015625f;
-            if (((ActorCtl *)data)->unk84 != 0) {
+            if (((ActorCtl *)data)->bot != 0) {
                 scale *= 1.399999976f;
             }
             radius *= scale;

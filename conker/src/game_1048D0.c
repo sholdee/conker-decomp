@@ -151,7 +151,7 @@ void func_150D7790(Actor *obj, s32 action) {
     Actor *projectile;
 
     variant = 0;
-    if (obj->unk31C != NULL && obj->unk31C->unk1AE <= 0) {
+    if (obj->unk31C != NULL && obj->unk31C->ammo_count <= 0) {
         return;
     }
     switch (action) {
@@ -159,7 +159,7 @@ void func_150D7790(Actor *obj, s32 action) {
     case 0x31:
         if (obj->unk31C != NULL) {
             obj->unk31C->unk12C = 120;
-            obj->unk31C->unk1AE -= 1;
+            obj->unk31C->ammo_count -= 1;
             func_10010154(0x628, obj, 0x7FFF, 500, 1000);
         }
         return;
@@ -186,7 +186,7 @@ void func_150D7790(Actor *obj, s32 action) {
         }
     }
     if (obj->unk31C != NULL) {
-        obj->unk31C->unk1AE -= 1;
+        obj->unk31C->ammo_count -= 1;
     }
 }
 
@@ -239,7 +239,7 @@ void func_150D7928(Actor *obj) {
     if (obj->bodyRadius != 0) {
         obj->unk90 = obj->bodyRadius;
     }
-    if (obj->unk13C != 0 && (player = &movement_obj[playerIndex])->unk31C->unk4E != 0) {
+    if (obj->unk13C != 0 && (player = &movement_obj[playerIndex])->unk31C->transport != 0) {
         n = player->unk7A;
         obj->bodyRadius = 0;
         obj->floorY = player->floorY;
@@ -261,7 +261,7 @@ void func_150D7928(Actor *obj) {
             obj->x_position += (player->x_position - obj->x_position) * 0.5f;
             obj->z_position += (player->z_position - obj->z_position) * 0.5f;
             player->disable_jump = 10;
-            if (player->unk31C->unk4F == 2) {
+            if (player->unk31C->transport_surface == 2) {
                 if (speed < player->unk44 * 1.35f) {
                     speed = player->unk44 * 1.35f;
                 }
@@ -307,7 +307,7 @@ void func_150D7928(Actor *obj) {
         } else {
             for (n = 0; n != 2; n++) {
                 if (movement_obj[n].interaction_state == 1) {
-                    if (movement_obj[n].unk31C->unk78 == 0 && movement_obj[n].unk31C->unk11A == 0 && (D_800CC268 & (1 << n)) &&
+                    if (movement_obj[n].unk31C->rt_context_b == 0 && movement_obj[n].unk31C->weapon_status == 0 && (D_800CC268 & (1 << n)) &&
                         movement_obj[n].y_velocity < 0.0f) {
                         obj->unk124 = n;
                         offset = 39.0f;
@@ -351,10 +351,10 @@ void func_150D7928(Actor *obj) {
             }
         }
         if (timer > 10 && ((player = &movement_obj[playerIndex])->unk28 == 0.0f || obj->in_water != 0 ||
-                            (obj->unk124 != 0 && player->unk31C->unk4F == 2))) {
+                            (obj->unk124 != 0 && player->unk31C->transport_surface == 2))) {
             if (obj->unk13C != 0) {
                 movement_obj[obj->unk124].unkCC = 0;
-                movement_obj[obj->unk124].unk31C->unk4E = 0;
+                movement_obj[obj->unk124].unk31C->transport = 0;
                 movement_obj[obj->unk124].in_water = 0;
                 movement_obj[obj->unk124].gravity = 4.0f;
             }

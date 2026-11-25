@@ -102,7 +102,7 @@ void func_150D8B88(Actor *actor) {
         data.texScroll = -16384.0f;
 
         if (actor->unk31C != NULL) {
-            if (actor->unk31C->unk84 != 0) {
+            if (actor->unk31C->bot != 0) {
                 data.flags &= ~1;
             }
         }
@@ -172,7 +172,7 @@ s32 func_150D8E4C(Trail *trail) {
     data->timer += D_800BE9E4;
     if (data->timer >= 61) {
         if (data->owner != NULL && data->owner->unk31C != NULL) {
-            data->owner->unk31C->unk1AA++;
+            data->owner->unk31C->shotsfired++;
         }
         data->timer = 0;
     }
@@ -197,7 +197,7 @@ s32 func_150D8FAC(Trail *trail) {
     data = trail->data;
     points = trail->points;
     actor = data->owner;
-    if ((actor->unk31C->unk78 != 3) || (actor->health <= 0)) {
+    if ((actor->unk31C->rt_context_b != 3) || (actor->health <= 0)) {
         func_150D8E1C(trail);
     }
     if ((actor->interaction_state == 0) || (actor->unique_id != data->ownerId)) {

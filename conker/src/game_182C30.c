@@ -82,9 +82,9 @@ void func_1515589C(PlayerMarker *marker) {
     switch (marker->state) {
     case 0:
         info = movement_obj[playerId].unk31C;
-        kind = (info != NULL) ? info->unk75 : 0;
+        kind = (info != NULL) ? info->context_b : 0;
         if (!(kind & 0x80) && (kind != 0x2A) && (kind != 0x2B) && ((kind != 0x42) || !(D_800D2E68 & 4)) &&
-            (kind != 0x2C) && (info->aimState == 0) && (kind != 0) && (kind != 0x1F) && !player->in_water) {
+            (kind != 0x2C) && (info->SniperState == 0) && (kind != 0) && (kind != 0x1F) && !player->in_water) {
             marker->state = 1;
             marker->header.state = 120;
             func_10010F30(0x1EB, 0x7FFF, 0x40, 0, 0);
@@ -96,7 +96,7 @@ void func_1515589C(PlayerMarker *marker) {
     case 1:
         timer = marker->header.state;
         timer -= D_800BE9E4; // matching: a single `timer = marker->header.state - D_800BE9E4;` schedules differently
-        if ((timer <= 0) || (movement_obj[playerId].unk31C->unk75 == 0)) {
+        if ((timer <= 0) || (movement_obj[playerId].unk31C->context_b == 0)) {
             marker->state = 2;
             timer = 0;
         }
@@ -105,7 +105,7 @@ void func_1515589C(PlayerMarker *marker) {
         if (marker->light != NULL) {
             f32 extraHeight;
 
-            if (movement_obj[playerId].unk31C->unk75 == 5) {
+            if (movement_obj[playerId].unk31C->context_b == 5) {
                 extraHeight = 85.0f;
             } else {
                 extraHeight = 0.0f;
@@ -119,7 +119,7 @@ void func_1515589C(PlayerMarker *marker) {
         }
         break;
     case 2:
-        if (movement_obj[playerId].unk31C->unk75 == 0) {
+        if (movement_obj[playerId].unk31C->context_b == 0) {
             marker->state = 0;
         }
         if (marker->light != NULL) {
@@ -163,7 +163,7 @@ Gfx *func_15155CFC(Gfx *gfx, PlayerMarker *marker, s16 view) {
     playerId = marker->playerId;
     if ((state == 1) || (state == 3)) {
         player = &movement_obj[playerId];
-        if (player->unk31C->unk75 == 5) {
+        if (player->unk31C->context_b == 5) {
             extraHeight = 85.0f;
         } else {
             extraHeight = 0.0f;

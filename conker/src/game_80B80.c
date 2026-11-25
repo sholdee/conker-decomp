@@ -139,7 +139,7 @@ void func_150538CC(Actor *obj) {
             } else {
                 target = &movement_obj[obj->unk221];
             }
-            if ((target != NULL) && ((target->unk31C->unk120 != 0) || (target->immune > 0))) {
+            if ((target != NULL) && ((target->unk31C->death_State != 0) || (target->immune > 0))) {
                 target = NULL;
                 obj->unk221 = -1;
             }
@@ -478,7 +478,7 @@ void func_15054A0C(Actor *obj) {
 }
 
 void func_15054A5C(Actor *obj, Actor *other) {
-    other->unk31C->unk11A = 0;
+    other->unk31C->weapon_status = 0;
     func_151027E8(other);
     func_15060F28(obj, 0);
 }
@@ -529,7 +529,7 @@ void func_15054A94(Actor *obj) {
         return;
     }
     state = other->unk31C;
-    if (state->unk78 != 0x12 && state->unk78 != 0x18 && state->unk78 != 0x41 && state->unk11A != 3) {
+    if (state->rt_context_b != 0x12 && state->rt_context_b != 0x18 && state->rt_context_b != 0x41 && state->weapon_status != 3) {
         func_15054A5C(obj, other);
         return;
     }
@@ -585,11 +585,11 @@ void func_15054A94(Actor *obj) {
         func_1507C324(obj, other);
     }
     state = other->unk31C;
-    if (state->unk78 == 0x12) {
+    if (state->rt_context_b == 0x12) {
         ready = 1;
     } else {
-        ready = state->aimState;
-        if (state->unk84 == 0) {
+        ready = state->SniperState;
+        if (state->bot == 0) {
             index = other - movement_obj;
             // D_800BE728[0] points to the per-player controller pads
             if (index < 4 && !(D_800BE728[index]->button & R_TRIG)) {
@@ -877,7 +877,7 @@ void func_15055C88(Actor *obj) {
     if (!(obj->unk9C & 0x1000) && func_1506E46C(obj, &sfx, 1)) {
         func_15060A30(sfx, obj);
     }
-    obj->unk31C->unk36 = 100;
+    obj->unk31C->over_edge = 100;
     func_1506160C(obj, 2, 0, 6, 0);
     obj->disable_run = 200;
     obj->unk83 = 200;
@@ -890,8 +890,8 @@ void func_15055C88(Actor *obj) {
 }
 
 void func_15055D48(Actor *obj) {
-    obj->unk31C->unk36 += D_800BE9A0;
-    if (obj->unk31C->unk36 >= 141) {
+    obj->unk31C->over_edge += D_800BE9A0;
+    if (obj->unk31C->over_edge >= 141) {
         D_800D18A0 |= 1 << (obj - movement_obj);
         if (D_800D18A0 != 0) {
             obj->immune = 0xFF;

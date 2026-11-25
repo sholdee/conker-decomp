@@ -39,7 +39,7 @@ void func_1512E8E0(Camera *camera) {
         func_151239CC(camera, 2);
         func_151239CC(camera, 7);
     }
-    if ((cmd->type != 4) && (camera->playerExt->unk120 != 0) && (camera->unk92C == 0)) {
+    if ((cmd->type != 4) && (camera->playerExt->death_State != 0) && (camera->unk92C == 0)) {
         cam->unk6 = 1;
     }
     if (cam->unk6 != 0) {

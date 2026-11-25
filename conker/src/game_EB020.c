@@ -48,7 +48,7 @@ void func_150BDB70(Actor *self) {
         }
         // matching: the state pointer must reuse mask's register (a separate local grows the frame)
         mask = (s32) owner->unk31C;
-        if (mask != 0 && ((ActorCtl *) mask)->aimState != 0) {
+        if (mask != 0 && ((ActorCtl *) mask)->SniperState != 0) {
             self->unk7A = (s32) (((ActorCtl *) mask)->aimYaw * (65536.0f / 360.0f));
             self->unk76 = self->unk7A;
             angle = owner->unk31C->aimPitch;
@@ -76,12 +76,12 @@ void func_150BDB70(Actor *self) {
                 return;
             }
             other = &movement_obj[i];
-            if (other->unk127 != 0xFF && other->unk65 == 0 && other->unk31C->unk19B == 0 &&
-                other->unk31C->aimState == 0 && other->unk13C == 0) {
+            if (other->unk127 != 0xFF && other->unk65 == 0 && other->unk31C->GrenadeThrowState == 0 &&
+                other->unk31C->SniperState == 0 && other->unk13C == 0) {
                 self->unk124 = i;
                 func_1505327C(self, 44.0f, 3.2f, runState, stateArg);
-                other->unk31C->unk24 = 600;
-                other->unk31C->unk19E = 0;
+                other->unk31C->gun_before_reload = 600;
+                other->unk31C->ReloadTimer = 0;
                 return;
             }
         }

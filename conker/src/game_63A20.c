@@ -81,7 +81,7 @@ Gfx *func_150368C4(Gfx *gfx, s32 index, s32 view) {
     Vtx *color;
     s32 i;
 
-    if (movement_obj[index].unk31C->unk75 != 2 && movement_obj[index].unk31C->unk75 != 0x13) {
+    if (movement_obj[index].unk31C->context_b != 2 && movement_obj[index].unk31C->context_b != 0x13) {
         return gfx;
     }
     attachment = func_1503195C(&movement_obj[index], 8, 0);

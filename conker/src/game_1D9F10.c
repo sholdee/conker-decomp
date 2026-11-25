@@ -110,7 +110,7 @@ s32 func_151ACB38(Actor *obj, u8 *out) {
 /** RopeRider update: moves the owner along its rope while it is riding one. */
 s32 func_151ACB60(RopeRider *rider) {
     s32 result;
-    Rope *rope = rider->owner->unk31C->rope;
+    Rope *rope = rider->owner->unk31C->ropePtr;
 
     if (rope != NULL) {
         result = func_151AE3A8(rider);
@@ -489,9 +489,9 @@ void func_151AE06C(Actor *obj, struct133 *msg) {
 
     if (func_151ACB38(obj, &canRide) != 0) {
         ropeId = msg->unk1B;
-        if (obj->unk31C->ropeId == 0) {
+        if (obj->unk31C->rope == 0) {
             func_151AE0E4(obj, ropeId);
-        } else if (obj->unk31C->ropeId != ropeId) {
+        } else if (obj->unk31C->rope != ropeId) {
             func_151AE264(obj);
             func_151AE0E4(obj, ropeId);
         }
@@ -526,24 +526,24 @@ void func_151AE0E4(Actor *obj, u8 ropeId) {
     if (dist > 10000.0f) {
         return;
     }
-    obj->unk31C->ropeId = ropeId;
+    obj->unk31C->rope = ropeId;
     obj->disable_jump = 18;
-    obj->unk31C->rope = rope;
+    obj->unk31C->ropePtr = rope;
     rope->rider = obj;
 }
 
 /** Lets go of the current rope, giving it a swing impulse from obj's horizontal speed. */
 void func_151AE264(Actor *obj) {
     f32 force = obj->xz_velocity * 0.8899999857f;
-    Rope *rope = obj->unk31C->rope;
+    Rope *rope = obj->unk31C->ropePtr;
 
     rope->releaseForce = force;
     rope->releaseAngle = obj->unk76 >> 8;
     rope->releaseNode = obj->unk31C->ropeNode;
     rope->regrabTimer = 20;
     rope->rider = NULL;
-    obj->unk31C->ropeId = 0;
-    obj->unk31C->rope = NULL;
+    obj->unk31C->rope = 0;
+    obj->unk31C->ropePtr = NULL;
 }
 
 /** Sets *progress to how far up the rope height y is (0.0f bottom, 1.0f top). */
@@ -600,7 +600,7 @@ s32 func_151AE3A8(RopeRider *rider) {
     f32 b[3];
 
     obj = rider->owner;
-    rope = obj->unk31C->rope;
+    rope = obj->unk31C->ropePtr;
     angle = func_15143E08(obj) - 0x80;
     dirX = func_151423D8(angle - 0x40);
     dirZ = func_151423D8(angle);

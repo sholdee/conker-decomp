@@ -74,7 +74,7 @@ void func_15172D80(s32 player) {
 void func_15172E7C(Actor *actor, s32 level, s32 spawnIndex) {
     s32 player = actor->unk127;
 
-    if (actor->health != 0 && (actor->unk31C == NULL || actor->unk31C->unk23 <= 0)) {
+    if (actor->health != 0 && (actor->unk31C == NULL || actor->unk31C->door_walkf_time <= 0)) {
         if (actor->camera != NULL) {
             if (D_800DD2B0[player] == -1) {
                 func_1517EE40(0, 0, 0, 10, 1, player);

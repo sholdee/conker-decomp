@@ -1439,7 +1439,7 @@ void func_15039CC8(Actor *obj) {
 
             if (obj->interaction_state == 1) {
                 if (obj->health == 0 || (obj->in_water != 0 && obj->xz_velocity < 5.0f) ||
-                    obj->unk31C->aimState != 0 || obj->xz_velocity > 20.0f) {
+                    obj->unk31C->SniperState != 0 || obj->xz_velocity > 20.0f) {
                     obj->unk2FB |= 4;
                 }
             } else if (obj->health == 0) {
@@ -1916,7 +1916,7 @@ void func_1503A830(Actor *obj) {
             clamp = 0;
             mirror = 0;
         } else if (obj->unk276 == 6) {
-            if (obj->unk31C->unk78 == 0x2A) {
+            if (obj->unk31C->rt_context_b == 0x2A) {
                 pitch[0] = 30.0f;
                 yaw[0] = -6.0f;
                 yaw[1] = 6.0f;

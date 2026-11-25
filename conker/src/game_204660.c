@@ -188,7 +188,7 @@ s32 func_151D75C4(TrailEmitter *emitter) {
         anchor->flags &= ~1;
         return 1;
     }
-    if ((actor->unk31C != NULL) && (actor->unk31C->aimState != 0) && (actor->camera != NULL)) {
+    if ((actor->unk31C != NULL) && (actor->unk31C->SniperState != 0) && (actor->camera != NULL)) {
         anchor->flags &= ~1;
         return 1;
     }

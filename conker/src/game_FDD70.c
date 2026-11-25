@@ -64,7 +64,7 @@ void func_150D08C0(Camera *camera) {
     func_1509BFB0(1, 0x30F8, 0x12, (u8)D_800888C8);
 }
 
-/* Steps four scroll counters by D_800BE9E4; then, unless movement_obj[0]'s unk31C->unk120 is set, kills
+/* Steps four scroll counters by D_800BE9E4; then, unless movement_obj[0]'s unk31C->death_State is set, kills
  * movement_obj[0] once per prop 0xFA-0xF8 it stands on, and if it stands on prop 0xFB plays sound 0x627 and
  * runs it through func_15136C3C .. func_1507CD64(6). */
 void func_150D0E90(s32 arg0) {
@@ -77,7 +77,7 @@ void func_150D0E90(s32 arg0) {
     D_80088898 += D_800BE9E4 * -8;
     D_8008889C += D_800BE9E4 * 92;
 
-    if (movement_obj->unk31C->unk120 == 0) {
+    if (movement_obj->unk31C->death_State == 0) {
         for (i = 0; i < 3; i++) {
             prop = func_151149AC(0xFA - i);
             propIndex = prop - db_Object_array;

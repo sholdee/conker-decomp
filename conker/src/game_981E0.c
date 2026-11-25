@@ -400,7 +400,7 @@ void func_1506B520(void) {
     s32 id;
 
     if (D_800D154C->health != 0) {
-        if (D_800D154C->unk31C != NULL && D_800D154C->unk31C->unk78 == 0x25) {
+        if (D_800D154C->unk31C != NULL && D_800D154C->unk31C->rt_context_b == 0x25) {
             id = 427;
         } else {
             id = 240;
@@ -431,7 +431,7 @@ void func_1506B5E4(void) {
     D_800D154C->unk2D0->speed = 0.0f;
 }
 
-/* Picks a random entry (0..count-1) of D_80099ABC / D_80099AB4 for the object's unk31C->unkE. */
+/* Picks a random entry (0..count-1) of D_80099ABC / D_80099AB4 for the object's unk31C->pissed_walk. */
 void func_1506B634(s32 count) {
     u32 rand;
     u32 pick;
@@ -442,20 +442,20 @@ void func_1506B634(s32 count) {
     pick = rand % (u32)(u8)count;
     index = pick;
     ext = D_800D154C->unk31C;
-    if (ext->unk16 != 0) {
+    if (ext->pissed_hangover != 0) {
         if (D_800BE9F0 == 41) {
             if ((u8)pick == 7) {
                 index = 0;
             }
         }
-        ext->unkE = D_80099ABC[index];
+        ext->pissed_walk = D_80099ABC[index];
     } else {
-        ext->unkE = D_80099AB4[(u8)pick];
+        ext->pissed_walk = D_80099AB4[(u8)pick];
     }
 
-    if (D_800D154C->unk31C->unkE == 0xA7) {
+    if (D_800D154C->unk31C->pissed_walk == 0xA7) {
         D_800D1580 = 0xFF020144;
-        D_800D154C->unk31C->unkC = (func_150ADA20() % 3U) + 2;
+        D_800D154C->unk31C->pissed_stumble = (func_150ADA20() % 3U) + 2;
         func_1506E8D8();
         D_800D154C->xz_velocity = D_800D154C->xz_velocity * 0.2f;
     }
@@ -465,13 +465,13 @@ void func_1506B740(void) {
     u8 roll = func_150ADA20() & 0xFF;
 
     if (D_800D154C->unk118 != -10000.0f && D_800D154C->y_position < D_800D154C->unk118) {
-        D_800D154C->unk31C->unkE = 720;
+        D_800D154C->unk31C->pissed_walk = 720;
     } else {
         if (D_800D154C->unk84.uh == 0xA7) {
-            if (D_800D154C->unk31C->unkC == 0) {
+            if (D_800D154C->unk31C->pissed_stumble == 0) {
                 roll = 0;
             } else {
-                D_800D154C->unk31C->unkC--;
+                D_800D154C->unk31C->pissed_stumble--;
                 roll = 0xFF;
             }
         }
@@ -502,7 +502,7 @@ void func_1506B88C(void) {
 }
 
 void func_1506B8B4(void) {
-    D_800D154C->unk31C->unk78 = 0;
+    D_800D154C->unk31C->rt_context_b = 0;
     D_800D154C->disable_run = 0;
     D_800D154C->unk83 = 0;
     func_1507F640();
@@ -536,7 +536,7 @@ void func_1506B9C0(void) {
     D_800BE720[dc_glbl_CharNum] |= 0x4000;
     ext = D_800D154C->unk31C;
     if (ext != NULL) {
-        ext->unk78 = 0;
+        ext->rt_context_b = 0;
         D_800D2E60[D_800D1940 >> 3] |= 1 << (D_800D1940 & 7);
     }
     func_1507F640();
@@ -711,7 +711,7 @@ void func_1506BF5C(void) {
             break;
         }
         if (D_800D154C->unk31C != NULL) {
-            level = D_800D154C->unk31C->unk0;
+            level = D_800D154C->unk31C->actual_speed;
         } else {
             level = D_800D154C->y_velocity;
         }
@@ -1297,8 +1297,8 @@ void func_1506D74C(void) {
     D_800D154C->unk100 |= 2;
     D_800D154C->unk28 = 0.0f;
     D_800D154C->unk83 = 20;
-    D_800D154C->unk31C->unk44 = 12;
-    D_800D154C->unk31C->unk54 = 10;
+    D_800D154C->unk31C->camjolt = 12;
+    D_800D154C->unk31C->side = 10;
 }
 
 void func_1506D898(void) {
@@ -1308,7 +1308,7 @@ void func_1506D898(void) {
     D_800D154C->unk83 = 0;
     D_800D154C->disable_run = 0;
     D_800D154C->unk31C->unk97 = 0;
-    D_800D154C->unk31C->unk44 = 12;
+    D_800D154C->unk31C->camjolt = 12;
 }
 
 void func_1506D934(void) {
@@ -1828,7 +1828,7 @@ void func_1506ECF0(void) {
 void func_1506ED0C(void) {
     D_800D154C->unk83 = D_800D1580;
     D_800D154C->unk100 |= 0x10;
-    D_800D154C->unk31C->unk31 = 1;
+    D_800D154C->unk31C->prop = 1;
 }
 
 void func_1506ED4C(void) {
@@ -1837,7 +1837,7 @@ void func_1506ED4C(void) {
 
 void func_1506ED68(void) {
     D_800D154C->unkA9 = 5;
-    D_800D154C->unk31C->unk31 = 0;
+    D_800D154C->unk31C->prop = 0;
 }
 
 void func_1506ED90(void) {
@@ -2356,7 +2356,7 @@ void func_15070300(s32 cmd) {
             goto done; // matching: an else branch drops the dead flag = 0 below
         }
         flag = 0;
-        if (obj->unk31C->aimState != 0) {
+        if (obj->unk31C->SniperState != 0) {
             flag = 1;
         } else {
             flag = 0;
@@ -2366,7 +2366,7 @@ void func_15070300(s32 cmd) {
         obj = func_1507515C(D_800D154C);
         mode = 0;
         flag = 0;
-        if (obj->unk31C->aimState != 0) {
+        if (obj->unk31C->SniperState != 0) {
             flag = 1;
         } else {
             flag = 0;
@@ -3003,7 +3003,7 @@ void func_15071FDC(void) {
     player->xz_velocity = D_800D154C->unk2D8[2];
     player->unk81 = 1;
     func_1505E650(player, anim, 1.0f, 2.0f, 6.0f, 0.0f, 0);
-    movement_obj[0].unk31C->unk31 = visible;
+    movement_obj[0].unk31C->prop = visible;
     if (player->camera != NULL) {
         player->camera->status |= 0x400;
     }
@@ -3208,7 +3208,7 @@ void func_150729B4(void) {
 }
 
 void func_150729D0(void) {
-    D_800D154C->unk31C->unk8 = 1;
+    D_800D154C->unk31C->pissed_up = 1;
     func_1507EB4C(D_800D154C, 21);
     func_1506B82C();
 }
@@ -3219,8 +3219,8 @@ void func_15072A14(void) {
 }
 
 void func_15072A40(void) {
-    D_800D154C->unk31C->unk19B = 0;
-    D_800D154C->unk31C->unk78 = 0;
+    D_800D154C->unk31C->GrenadeThrowState = 0;
+    D_800D154C->unk31C->rt_context_b = 0;
     func_1507F640();
 }
 
@@ -3294,28 +3294,28 @@ void func_15072B44(void) {
         anim = 0x3E;
         break;
     case 0x10C:
-        if (D_800D154C->unk31C->aimState) {
+        if (D_800D154C->unk31C->SniperState) {
             anim = 0x10A;
         } else {
             func_1507F640();
         }
         break;
     case 0x156:
-        if (D_800D154C->unk31C->aimState) {
+        if (D_800D154C->unk31C->SniperState) {
             anim = 0x157;
         } else {
             func_1507F640();
         }
         break;
     case 0x167:
-        if (D_800D154C->unk31C->aimState) {
+        if (D_800D154C->unk31C->SniperState) {
             anim = 0x165;
         } else {
             func_1507F640();
         }
         break;
     default:
-        if (state == 0xBE || (state == 0xC1 && !(D_800D154C->unk31C->unk38 & 0x2000))) {
+        if (state == 0xBE || (state == 0xC1 && !(D_800D154C->unk31C->old_keys & 0x2000))) {
             anim = 0xBF;
         }
         break;
@@ -3339,8 +3339,8 @@ void func_15072DA0(void) {
 void func_15072DD8(void) {
     func_15083568(D_800D154C, D_800D1580, 1.0f, 0);
 
-    if (D_800D154C->unk31C != NULL && D_800D154C->unk31C->unk11A == 1) {
-        D_800D154C->unk31C->unk11A = 2;
+    if (D_800D154C->unk31C != NULL && D_800D154C->unk31C->weapon_status == 1) {
+        D_800D154C->unk31C->weapon_status = 2;
     }
 }
 
@@ -3348,7 +3348,7 @@ void func_15072E38(void) {
     func_150836CC(D_800D154C, D_800D1580);
 
     if (D_800D154C->unk31C != NULL) {
-        D_800D154C->unk31C->unk11A = 0;
+        D_800D154C->unk31C->weapon_status = 0;
     }
 }
 
@@ -3380,8 +3380,8 @@ void func_15072F10(void) {
     s16 pitch;
 
     pitch = (s16)(D_800D154C->unk1D1 * 200);
-    D_800D154C->unk31C->unk24 -= 1;
-    func_1505A184((u16)(D_800D154C->unk7A - D_800D154C->unk31C->unk12), 2000.0f, pitch * 0.0054931640625f,
+    D_800D154C->unk31C->gun_before_reload -= 1;
+    func_1505A184((u16)(D_800D154C->unk7A - D_800D154C->unk31C->pssd_waist_tilt), 2000.0f, pitch * 0.0054931640625f,
                   &targetX, &targetZ, &targetY);
     targetX = targetX * 5000.0f + D_800D154C->x_position;
     targetZ = targetZ * 5000.0f + D_800D154C->z_position;
@@ -3780,19 +3780,19 @@ void func_15073FA0(void) {
                 obj->z_position = player->z_position;
             }
             if (D_800BE616 != 0) {
-                obj->unk2E4 = player->unk31C->unk19C;
+                obj->unk2E4 = player->unk31C->GrenadeTimer;
                 state = 5;
-                player->unk31C->unk19B = 0;
-                D_800D154C->unk31C->unk78 = 0;
+                player->unk31C->GrenadeThrowState = 0;
+                D_800D154C->unk31C->rt_context_b = 0;
                 cmd = (D_800D1580 >> 16) & 1;
                 obj->gravity = 4.0; // matching: double literal
                 player = D_800D154C;
-                speed = ((f32)(0xF0 - player->unk31C->unk19C) * 60.0f) / 240.0f;
+                speed = ((f32)(0xF0 - player->unk31C->GrenadeTimer) * 60.0f) / 240.0f;
                 speed += 40.0f;
                 if (cmd) {
                     speed = 0.0f;
                 }
-                if (player->unk31C->unk198 != 0) {
+                if (player->unk31C->AimState != 0) {
                     {
                         typedef s32 padT; // matching: as above
                         func_1505A184((u16)(s32)((45.0f - player->unk31C->aimPitch) * 182.04445f) & 0xFFFF, speed * 4.0f, 0.0f, &x1, &y1, &z1);
@@ -3815,7 +3815,7 @@ void func_15073FA0(void) {
             }
             angle = (s16)player->unk7A;
             if (player->unk31C != NULL) {
-                angle -= player->unk31C->unk12;
+                angle -= player->unk31C->pssd_waist_tilt;
             }
             obj->unk7A = angle;
             obj->unk76 = angle;
@@ -3866,7 +3866,7 @@ void func_15073FA0(void) {
 }
 
 void func_15074644(void) {
-    D_800D154C->unk31C->unk11A = D_800D1580;
+    D_800D154C->unk31C->weapon_status = D_800D1580;
 }
 
 void func_15074664(void) {
@@ -3908,7 +3908,7 @@ void func_150746F0(void) {
             if (ext != NULL) {
                 camera = target->camera;
                 if (camera != NULL) {
-                    if (ext->aimState != 0) {
+                    if (ext->SniperState != 0) {
                         func_1517F488(0xFF, 0, 0, 180, 20, camera->playerIndex);
                     }
                 }
@@ -3932,7 +3932,7 @@ void func_150747E4(void) {
 
 void func_15074840(void) {
     if (D_800D154C->unk31C != NULL) {
-        D_800D154C->unk31C->unk1AA += D_800D1580;
+        D_800D154C->unk31C->shotsfired += D_800D1580;
     }
 }
 
@@ -3991,7 +3991,7 @@ void func_15074980(void) {
 
 void func_15074A44(void) {
     if (D_800D154C->unk31C != NULL) {
-        D_800D154C->unk31C->unk26 = D_800D1580;
+        D_800D154C->unk31C->break_stun = D_800D1580;
     }
 }
 

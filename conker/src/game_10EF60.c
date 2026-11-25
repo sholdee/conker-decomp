@@ -164,7 +164,7 @@ void func_150E1D14(Game10EF60Effect *effect) {
 
     // matching: dead stores; first mentions order uopt'len CSE temp slots
     impact = (s32)D_800D9960[aim].normal;
-    fire = effect->owner->unk76 - effect->owner->unk31C->unk12;
+    fire = effect->owner->unk76 - effect->owner->unk31C->pssd_waist_tilt;
     i = (s32)&effect->target_x;
     bone = &effect->target_z;
     texture = 0x23;
@@ -207,7 +207,7 @@ void func_150E1D14(Game10EF60Effect *effect) {
                 }
                 impact = 0;
                 if (aim != 0xFF) {
-                    if (effect->owner->unk76 - effect->owner->unk31C->unk12 == D_800D9960[aim].unk0 && effect->owner->unk1D1 == D_800D9960[aim].unk2) {
+                    if (effect->owner->unk76 - effect->owner->unk31C->pssd_waist_tilt == D_800D9960[aim].unk0 && effect->owner->unk1D1 == D_800D9960[aim].unk2) {
                         effect->target_x = D_800D9960[aim].x;
                         effect->target_y = D_800D9960[aim].y;
                         effect->target_z = D_800D9960[aim].z;
@@ -228,7 +228,7 @@ void func_150E1D14(Game10EF60Effect *effect) {
                         stopDist = 1.0f;
                     } else {
                         angle = effect->owner->unk1D1 * 200;
-                        func_1505A184(effect->owner->unk76 - effect->owner->unk31C->unk12, 2000.0f, (f32)angle * 0.005493164f, &effect->target_x, &effect->target_z, &effect->target_y);
+                        func_1505A184(effect->owner->unk76 - effect->owner->unk31C->pssd_waist_tilt, 2000.0f, (f32)angle * 0.005493164f, &effect->target_x, &effect->target_z, &effect->target_y);
                         effect->target_x += effect->x;
                         effect->target_y += effect->y;
                         effect->target_z += effect->z;

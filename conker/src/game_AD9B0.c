@@ -35,12 +35,12 @@ void func_15080500(Actor *obj, TriggerZone *zone, s32 slot, s32 textId) {
         }
 
         if (slot == 0) {
-            if (!(obj->unk31C->unk74 & 0x80)) {
-                obj->unk31C->unk74 = textId;
+            if (!(obj->unk31C->context_a & 0x80)) {
+                obj->unk31C->context_a = textId;
             }
-        } else if (!(obj->unk31C->unk75 & 0x80)) {
-            obj->unk31C->unk75 = textId;
-            obj->unk31C->unk7A = zone - D_800D3098;
+        } else if (!(obj->unk31C->context_b & 0x80)) {
+            obj->unk31C->context_b = textId;
+            obj->unk31C->cont_zone_ind = zone - D_800D3098;
         }
     }
 }
@@ -51,9 +51,9 @@ void func_15080620(s32 objIndex, s32 slot, s32 textId, s32 arg3) {
         textId |= 0x80;
     }
     if (slot == 0) {
-        movement_obj[objIndex].unk31C->unk74 = textId;
+        movement_obj[objIndex].unk31C->context_a = textId;
     } else {
-        movement_obj[objIndex].unk31C->unk75 = textId;
+        movement_obj[objIndex].unk31C->context_b = textId;
     }
 }
 
@@ -61,11 +61,11 @@ void func_15080620(s32 objIndex, s32 slot, s32 textId, s32 arg3) {
 void func_150806A8(s32 objIndex) {
     Actor *obj = &movement_obj[objIndex];
 
-    if (obj->unk31C->unk74 != 0 && !(obj->unk31C->unk74 & 0x80)) {
-        obj->unk31C->unk74 = 0;
+    if (obj->unk31C->context_a != 0 && !(obj->unk31C->context_a & 0x80)) {
+        obj->unk31C->context_a = 0;
     }
-    if (obj->unk31C->unk75 != 0 && !(obj->unk31C->unk75 & 0x80)) {
-        obj->unk31C->unk75 = 0;
+    if (obj->unk31C->context_b != 0 && !(obj->unk31C->context_b & 0x80)) {
+        obj->unk31C->context_b = 0;
     }
 }
 

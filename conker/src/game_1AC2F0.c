@@ -592,14 +592,14 @@ void func_151814FC(void) {
             D_800DDDC8[i] += D_800DDDD8[i] * D_800BE9E4;
             if (player->unk31C == NULL) {
                 D_800DDDC8[i] = 1.0f;
-            } else if (player->unk31C->unk120 == 3) {
+            } else if (player->unk31C->death_State == 3) {
                 if (D_800A7260[D_80082FA0] <= D_800DDDC8[i]) {
                     D_800DDDC8[i] = D_800A7260[D_80082FA0];
-                    player->unk31C->unk120 = 4;
+                    player->unk31C->death_State = 4;
                     D_800DDD70[i] = 30;
                     D_800DDD74[i] = 0;
                 }
-            } else if (player->unk31C->unk120 == 4) {
+            } else if (player->unk31C->death_State == 4) {
                 if (D_800DDD70[i]) {
                     f32 scale;
 
@@ -617,23 +617,23 @@ void func_151814FC(void) {
                     D_800DDDC8[i] = D_800A7260[D_80082FA0] + scale * func_15048A40(D_800DDD74[i]);
                 } else {
                     D_800DDDC8[i] = D_800A7260[D_80082FA0];
-                    player->unk31C->unk120 = 5;
+                    player->unk31C->death_State = 5;
                 }
-            } else if (player->unk31C->unk120 == 5) {
+            } else if (player->unk31C->death_State == 5) {
                 D_800DDDC8[i] = D_800A7260[D_80082FA0];
-            } else if (player->unk31C->unk120 == 6) {
+            } else if (player->unk31C->death_State == 6) {
                 D_800DDDD8[i] = 0.009f;
                 if (D_800A7270[D_80082FA0] <= D_800DDDC8[i]) {
                     D_800DDDC8[i] = D_800A7270[D_80082FA0];
-                    player->unk31C->unk120 = 7;
+                    player->unk31C->death_State = 7;
                     player->unk31C->unk124 = 30;
                     D_800DDDD8[i] = 0.0f;
                 }
-            } else if (player->unk31C->unk120 == 8) {
+            } else if (player->unk31C->death_State == 8) {
                 D_800DDDD8[i] = 0.004f;
                 if (D_800DDDC8[i] >= 1.0f) {
                     D_800DDDC8[i] = 1.0f;
-                    player->unk31C->unk120 = 9;
+                    player->unk31C->death_State = 9;
                 }
             }
         } else if (D_800DDE3C[i] != 0) {

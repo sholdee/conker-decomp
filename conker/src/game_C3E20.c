@@ -172,7 +172,7 @@ s32 func_15096D78(s32 actorIndex, s32 command, s32 *args) {
         }
         return 1;
     case 8:
-        if (actor->playerExt->unk120 == 0) {
+        if (actor->playerExt->death_State == 0) {
             actor->targetDistance = args[2];
             actor->unk34C = args[3];
             actor->height = args[3];

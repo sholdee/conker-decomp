@@ -58,7 +58,7 @@ void func_150C7E00(Camera *camera)
         {
           func_151254F4(camera, 0);
           camera->flags &= ~0x01000000;
-          camera->playerExt->unk198 = 0;
+          camera->playerExt->AimState = 0;
           camera->aimState = 0;
           if (camera->cmdRunning == 0)
           {
@@ -122,7 +122,7 @@ void func_150C7E00(Camera *camera)
         camera->status &= ~0x200;
         func_151254F4(camera, 0);
         camera->flags &= ~0x01000000;
-        camera->playerExt->unk198 = 0;
+        camera->playerExt->AimState = 0;
         camera->aimState = 0;
         if (camera->cmdRunning == 0)
         {
@@ -136,7 +136,7 @@ void func_150C7E00(Camera *camera)
       camera->flags |= 4;
       D_80088800 = 1;
       func_151254F4(camera, 0);
-      camera->playerExt->unk198 = 0;
+      camera->playerExt->AimState = 0;
       camera->aimState = 0;
       camera->preset = 3;
       func_15124B18(camera);

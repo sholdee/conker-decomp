@@ -49,7 +49,7 @@ CamWobble *func_15164780(CamWobbleDef *def, s32 extraSize, u8 arg2, s32 arg3) {
     Camera *player;
 
     player = &camera_global_Cameras[def->playerIndex];
-    if (player->player != NULL && player->player->unk31C != NULL && player->player->unk31C->unk198 != 0) {
+    if (player->player != NULL && player->player->unk31C != NULL && player->player->unk31C->AimState != 0) {
         return NULL;
     }
     wobble = func_15167A68(0x39, arg3, extraSize + sizeof(CamWobble), 1, arg2, 1);

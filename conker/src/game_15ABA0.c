@@ -31,7 +31,7 @@ void func_1512D748(Camera *view, s32 presetIndex, s32 mode) {
     f32 decayEnd;
     f32 sustainEnd;
 
-    if (view->playerExt->unk120 == 0) {
+    if (view->playerExt->death_State == 0) {
         preset = D_800895D0[presetIndex];
         env->frequency0 = preset[0];
         env->frequency1 = preset[1];

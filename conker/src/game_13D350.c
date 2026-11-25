@@ -184,7 +184,7 @@ Gfx *func_15110544(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry, u8 r, u8 g, u8 
 Gfx *func_15110600(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3) {
     // unk78 is the high byte of Actor's u16 unk78
     if (D_800BE9F0 == 0x1B || D_800BE9F0 == 0x1E ||
-        (D_800BE9F0 == 0x31 && camera_global_Cameras->playerExt->unk78 == 3)) {
+        (D_800BE9F0 == 0x31 && camera_global_Cameras->playerExt->rt_context_b == 3)) {
         gfx = func_15110544(gfx, 2, 0, D_800BE620 - 2, D_800BE624,
                             D_800DBEA8[0], D_800DBEA8[1], D_800DBEA8[2]);
     }

@@ -220,11 +220,11 @@ void func_15085430(Actor *obj, s32 spawnIndex, s32 unused) {
     obj->unk16C = 0.0f;
     obj->unk170 = 0.0f;
     if (obj->unk127 != 0xFF) {
-        obj->unk31C->unk23 = unk15;
+        obj->unk31C->door_walkf_time = unk15;
         if (D_800BE616 && D_800D18A8) {
             func_1505D6F0(obj, obj - movement_obj);
         }
-        if (obj->unk31C->unk78 == 0 && obj->unk31C->unk19B != 4 && obj->unk31C->unk19B != 7) {
+        if (obj->unk31C->rt_context_b == 0 && obj->unk31C->GrenadeThrowState != 4 && obj->unk31C->GrenadeThrowState != 7) {
             obj->unk83 = 0;
         }
     } else {

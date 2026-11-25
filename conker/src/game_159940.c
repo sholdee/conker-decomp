@@ -52,7 +52,7 @@ void func_1512C490(Camera *camera) {
 
     shakeScale = D_800BE628[camera->playerIndex].perspScale;
     shakeScale = (1.0f - shakeScale) * 0.5f + shakeScale;
-    if (camera->playerExt->unk120 != 0) {
+    if (camera->playerExt->death_State != 0) {
         camera->sideTarget = 0.0f;
         camera->liftTarget = 0.0f;
         camera->aim.offset.x = 0.0f;
@@ -75,7 +75,7 @@ void func_1512C490(Camera *camera) {
     if ((camera->mode & 0x40000) || (camera->mode & 0x20)) {
         eye = camera->eye;
         at = camera->focus;
-    } else if (camera->playerExt->aimState != 0) {
+    } else if (camera->playerExt->SniperState != 0) {
         eye = camera->eye;
         at = camera->target;
         func_1512523C(camera);
@@ -121,7 +121,7 @@ void func_1512C490(Camera *camera) {
             func_1512D070(camera);
             return;
         }
-        if (camera->playerExt->aimState != 0) {
+        if (camera->playerExt->SniperState != 0) {
             if (camera->shakeState == 2) {
                 CamOffset *tbl;
 
@@ -167,7 +167,7 @@ void func_1512C490(Camera *camera) {
             camera->playerExt->aimDir.y = dirY;
             camera->playerExt->aimDir.z = dirZ;
         }
-        if (camera->playerExt->aimState != 0) {
+        if (camera->playerExt->SniperState != 0) {
             func_150A7DF0(&rotMtx, D_800DCDE0[camera->playerIndex].rot.x, D_800DCDE0[camera->playerIndex].rot.y,
                           D_800DCDE0[camera->playerIndex].rot.z);
             func_150A7D00(&transMtx, D_800DCDE0[camera->playerIndex].pos.x, D_800DCDE0[camera->playerIndex].pos.y,

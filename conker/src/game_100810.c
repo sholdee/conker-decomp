@@ -348,7 +348,7 @@ s32 func_150D3A68(TrailActor *actor) {
         if (owner->unk31C != NULL) {
             tail = (state->effects[1] != NULL) ? &state->effects[1]->tail : NULL;
             prevMode = state->mode;
-            if (owner->unk31C->unk84 != 0) {
+            if (owner->unk31C->bot != 0) {
                 if (owner->unk44 > 6.0f) {
                     state->mode = 0;
                 } else if (owner->unk44 > 3.0f) {

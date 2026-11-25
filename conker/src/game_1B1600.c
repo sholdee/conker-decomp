@@ -857,7 +857,7 @@ Gfx *func_15186794(Gfx *gfx, s32 view) {
             (movement_obj[i].unk66 & 0x10) != 0x10 ||
             (u32)(movement_obj[i].unk74 & (1 << view)) == (u32)(1 << view) ||
             movement_obj[i].unk84.uh == 0x2D8 ||
-            (movement_obj[i].unk31C != NULL && (movement_obj[i].unk31C->unk95 != 0 || movement_obj[i].unk31C->ropeId != 0)) ||
+            (movement_obj[i].unk31C != NULL && (movement_obj[i].unk31C->ladder != 0 || movement_obj[i].unk31C->rope != 0)) ||
             (D_800DF0E0 & (1 << i))) {
             continue;
         }

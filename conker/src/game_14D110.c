@@ -46,7 +46,7 @@ void func_1511FC60(Camera *camera) {
         aim->targetYaw = camera->yaw;
     } else if (aim->unk4D) {
         if (IS_FACING_ZONE(camera->zone)) {
-            aim->targetYaw = (f32)((camera->player->unk7A - camera->playerExt->unk12) + 0xC000) * BAM2DEG;
+            aim->targetYaw = (f32)((camera->player->unk7A - camera->playerExt->pssd_waist_tilt) + 0xC000) * BAM2DEG;
         } else if ((D_800D1940 == 0x42) && (zone == 0x1A)) {
             aim->targetYaw = camera->player->unk40;
         } else {
@@ -142,7 +142,7 @@ void func_15120158(Camera *camera) {
     inMap42Zone1A = (D_800D1940 == 0x42) && (zone == 0x1A);
     func_1510E7A4(0, 0, &probeY, &camera->unk360, 0, 0,
                  camera->eye.x, camera->eye.y, camera->eye.z, camera->eye.y, 0, 0, -10000.0f, camera->eye.y);
-    camera->playerExt->unk198 = camera->aimState;
+    camera->playerExt->AimState = camera->aimState;
     camera->distance = sqrtf((camera->eye.x - camera->target.x) * (camera->eye.x - camera->target.x) +
                              (camera->eye.z - camera->target.z) * (camera->eye.z - camera->target.z));
     if (camera->snap) {
@@ -185,7 +185,7 @@ void func_15120158(Camera *camera) {
         if (camera->aimTimer != 0) {
             camera->aimTimer -= D_800BE9E4;
             if (camera->aimTimer <= 0) {
-                camera->playerExt->unk198 = 1;
+                camera->playerExt->AimState = 1;
                 camera->aimState = 2;
                 aim->targetYaw = camera->yaw;
                 return;
@@ -214,7 +214,7 @@ void func_15120158(Camera *camera) {
                 if (fabsf(func_15048A70(camera->yaw, aim->targetYaw)) < 0.009999999776f) {
                 }
             } else {
-                camera->playerExt->unk198 = 1;
+                camera->playerExt->AimState = 1;
                 camera->aimState = 2;
                 break;
             }
@@ -290,12 +290,12 @@ void func_15120158(Camera *camera) {
                 }
             }
             if (IS_FACING_ZONE(zone)) {
-                aim->targetYaw = (f32)((camera->player->unk7A - camera->playerExt->unk12) + 0xC000) * BAM2DEG;
+                aim->targetYaw = (f32)((camera->player->unk7A - camera->playerExt->pssd_waist_tilt) + 0xC000) * BAM2DEG;
             } else if (inMap42Zone1A) {
                 aim->targetYaw = camera->player->unk40;
             } else if (zone != 0xF) {
                 if (camera->status & 2) {
-                    aim->targetYaw = (((f32)camera->player->unk7A - (f32)camera->playerExt->unk12 * 0.349999994f) + 49152.0f) * BAM2DEG;
+                    aim->targetYaw = (((f32)camera->player->unk7A - (f32)camera->playerExt->pssd_waist_tilt * 0.349999994f) + 49152.0f) * BAM2DEG;
                 } else {
                     if (zone == 0x34) {
                         aim->targetYaw -= (f32)camera->contPad->stick_x * rate * (f32)D_800BE9E4;
@@ -373,7 +373,7 @@ void func_15120158(Camera *camera) {
         if (camera->aimTimer != 0) {
             camera->aimTimer -= D_800BE9E4;
             if (camera->aimTimer <= 0) {
-                camera->playerExt->unk198 = 0;
+                camera->playerExt->AimState = 0;
                 camera->aimState = 0;
                 return;
             }
@@ -393,7 +393,7 @@ void func_15120158(Camera *camera) {
             }
         }
         if (!aim->unk4D || (yawDelta < 0.05000000075f)) {
-            camera->playerExt->unk198 = 0;
+            camera->playerExt->AimState = 0;
             camera->aimState = 0;
         } else {
             func_15049688(&camera->yaw, aim->savedYaw, &aim->yawVel, 5.0f, 9.0f, camera->dt);
@@ -447,9 +447,9 @@ void func_15121490(Actor *player, OSContPad *pad) {
     Vec3f dir;
     f32 temp;
 
-    player->unk31C->unk198 = 0;
+    player->unk31C->AimState = 0;
     if (pad->button & R_TRIG) {
-        zone = player->unk31C->unk78;
+        zone = player->unk31C->rt_context_b;
         if (IS_FACING_ZONE(zone)) {
             ext = player->unk31C;
             angle = (player->unk40 - 90.0f) * DEG2RAD;
@@ -463,7 +463,7 @@ void func_15121490(Actor *player, OSContPad *pad) {
             eye.y += player->y_position - player->old_y_position;
             ext->aimEye = eye;
             ext->aimTarget = target;
-            ext->unk198 = 1;
+            ext->AimState = 1;
             dir.x = 1.0f;
             temp = dir.x * cosf(ext->aimPitch * -DEG2RAD);
             dir.y = dir.x * sinf(ext->aimPitch * -DEG2RAD);
@@ -547,7 +547,7 @@ void func_151218C4(Camera *camera) {
             camera->rail.eyeEaseA = 0.0f;
             camera->rail.eyeEaseB = 0.0f;
         }
-        camera->playerExt->unk198 = 0;
+        camera->playerExt->AimState = 0;
         camera->aimState = 0;
         camera->aimTimer = 60;
     } else {

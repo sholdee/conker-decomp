@@ -107,21 +107,21 @@ void func_15128CB0(Camera *cam) {
         msg = func_1512D604(cam);
         switch (msg->type) {
         case 5:
-            cam->zone = cam->playerExt->unk78;
+            cam->zone = cam->playerExt->rt_context_b;
             if (cam->zone == 0) {
                 func_151239CC(cam, 1);
-                cam->playerExt->unk198 = 0;
-                cam->playerExt->aimState = 0;
+                cam->playerExt->AimState = 0;
+                cam->playerExt->SniperState = 0;
                 cam->unk5F8 = 1;
                 cam->unk5FC = 2;
-                cam->playerExt->unk198 = 0;
+                cam->playerExt->AimState = 0;
                 cam->aimState = 0;
                 func_15127EB8(cam);
                 D_80089524[cam->playerIndex] = 0;
                 D_80089534[cam->playerIndex] = 0;
             } else {
-                D_80089524[cam->playerIndex] = cam->playerExt->aimState;
-                D_80089534[cam->playerIndex] = cam->playerExt->unk198;
+                D_80089524[cam->playerIndex] = cam->playerExt->SniperState;
+                D_80089534[cam->playerIndex] = cam->playerExt->AimState;
             }
             func_1512D6F0(cam);
             if (cam->zoneHookActive) {
@@ -137,7 +137,7 @@ void func_15128CB0(Camera *cam) {
         {
             f32 angle;
 
-            cam->zone = cam->playerExt->unk78;
+            cam->zone = cam->playerExt->rt_context_b;
             if (D_80089520 != 0) {
                 D_80089520--;
             } else if (cam->mode == 0x40000) {
@@ -156,7 +156,7 @@ void func_15128CB0(Camera *cam) {
                     camera_global_Cameras[cam->playerIndex] = D_800DC010[msg->arg.index];
                     cam->contPad = D_800BE728[cam->playerIndex];
                     cam->buttonsPressed = D_800BE710[cam->playerIndex];
-                    cam->zone = cam->playerExt->unk78;
+                    cam->zone = cam->playerExt->rt_context_b;
                     cam->snap = 1;
                     func_1512E8E0(cam);
                     if (D_80089534[cam->playerIndex] != 0) {
@@ -167,18 +167,18 @@ void func_15128CB0(Camera *cam) {
                         if ((cam->zone == 12 && cam->player->unk84.uh != 0x76) || cam->zone == 27 || (cam->contPad->button & 0x10)) {
                             cam->buttonsPressed |= 0x10;
                             cam->contPad->button |= 0x10;
-                            cam->playerExt->aimState = D_80089524[cam->playerIndex];
+                            cam->playerExt->SniperState = D_80089524[cam->playerIndex];
                             func_151C9BA0(cam, cam->zone);
                             angle = cam->aim.targetYaw;
                         } else {
-                            cam->playerExt->unk198 = 0;
+                            cam->playerExt->AimState = 0;
                             cam->aimState = 0;
                             D_80089524[cam->playerIndex] = 0;
                             D_80089534[cam->playerIndex] = 0;
                             func_15127EB8(cam);
                         }
                     } else {
-                        cam->playerExt->unk198 = 0;
+                        cam->playerExt->AimState = 0;
                         cam->aimState = 0;
                         func_15127EB8(cam);
                     }

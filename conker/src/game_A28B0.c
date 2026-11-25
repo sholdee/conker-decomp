@@ -1365,7 +1365,7 @@ s32 func_15078A60(s32 index) {
         break;
     case 9:
         value = 0;
-        if ((movement_obj[index].unk31C->unk8 != 0) && (movement_obj[index].unk31C->unk16 != 0)) {
+        if ((movement_obj[index].unk31C->pissed_up != 0) && (movement_obj[index].unk31C->pissed_hangover != 0)) {
             value = 2;
         }
         break;
@@ -1373,7 +1373,7 @@ s32 func_15078A60(s32 index) {
         value = movement_obj[index].unk28;
         break;
     case 11:
-        value = movement_obj[0].unk31C->unk78;
+        value = movement_obj[0].unk31C->rt_context_b;
         break;
     case 12:
         value = movement_obj[0].unk31C->matrix_physics;
@@ -1803,7 +1803,7 @@ void func_15079FBC(void) {
         return;
     }
 
-    D_800D154C->unk78 = movement_obj[0].unk31C->unk4C;
+    D_800D154C->unk78 = movement_obj[0].unk31C->press_angle;
 
     if (movement_obj[0].unk31C->chased) {
         speed = movement_obj[0].unk44;
@@ -2297,9 +2297,9 @@ void func_1507B578(void) {
     D_800D154C->unk114 = D_800D1891;
 }
 
-/* Jumps to arg0 when unk31C->unk75 is (arg2 == 0) or is not (arg2 == 1) arg1. */
+/* Jumps to arg0 when unk31C->context_b is (arg2 == 0) or is not (arg2 == 1) arg1. */
 void func_1507B5C4(void) {
-    if (D_800D154C->unk31C->unk75 == D_800D1891) {
+    if (D_800D154C->unk31C->context_b == D_800D1891) {
         D_800D1892 ^= 1;
     }
     if (D_800D1892 != 0) {
@@ -2309,7 +2309,7 @@ void func_1507B5C4(void) {
 
 void func_1507B630(void) {
     if ((D_800D154C->disable_run == 0) && (D_800D154C->unk28 == 0.0f)) {
-        if (D_800D154C->unk31C->unk78 != 0) {
+        if (D_800D154C->unk31C->rt_context_b != 0) {
             D_800D1890 ^= 1;
         }
         if (D_800D1890 != 0) {
@@ -2380,7 +2380,7 @@ void func_1507B884(void) {
 
 void func_1507B8F4(void) {
     if (D_800BE616 != 0) {
-        if ((D_800D1891 != 0) || ((D_800D154C->unk31C != NULL) && (D_800D154C->unk31C->unk84 != 0))) {
+        if ((D_800D1891 != 0) || ((D_800D154C->unk31C != NULL) && (D_800D154C->unk31C->bot != 0))) {
             func_15075400(D_800D1890);
         }
     }

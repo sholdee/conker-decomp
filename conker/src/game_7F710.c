@@ -45,10 +45,10 @@ void func_15052260(Actor *actor) {
     }
 }
 
-/* Clears in_water, unkB2 and unk31C->unk95, sets gravity 4, xz_velocity 15; a living actor also gets disable_run 6. */
+/* Clears in_water, unkB2 and unk31C->ladder, sets gravity 4, xz_velocity 15; a living actor also gets disable_run 6. */
 void func_15052408(Actor *actor) {
     actor->unkB2 = 0;
-    actor->unk31C->unk95 = 0;
+    actor->unk31C->ladder = 0;
     if (actor->health != 0) {
         actor->unk81 = 0;
         actor->unk83 = 0;

@@ -863,7 +863,7 @@ void func_1515FC60(Actor *obj, TriggerZone *zone) {
     f32 scale;
     s32 value;
 
-    if (obj->unk31C != NULL && obj->unk31C->unk120 == 0) {
+    if (obj->unk31C != NULL && obj->unk31C->death_State == 0) {
         value = zone->unk1C;
         if (value != 0) {
             scale = (f32)(u32)value * 0.009999999776f;

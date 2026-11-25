@@ -288,7 +288,7 @@ void func_151D3E6C(Actor *obj, f32 *a, f32 *b, s32 arg3) {
         u16 angle;
 
         if (obj->unk31C != NULL) {
-            angle = obj->unk76 - obj->unk31C->unk12;
+            angle = obj->unk76 - obj->unk31C->pssd_waist_tilt;
         } else {
             angle = obj->unk76;
         }
@@ -704,12 +704,12 @@ void func_151D4DAC(Actor *victim, Actor *attacker, f32 *arg2, f32 *arg3, S151D4D
     }
 }
 
-/* Counts down unk31C->unk24 and counts up unk31C->unk1AA. */
+/* Counts down unk31C->gun_before_reload and counts up unk31C->shotsfired. */
 void func_151D5148(Actor *obj) {
-    if (obj->unk31C->unk24 > 0) {
-        obj->unk31C->unk24--;
+    if (obj->unk31C->gun_before_reload > 0) {
+        obj->unk31C->gun_before_reload--;
     }
-    obj->unk31C->unk1AA++;
+    obj->unk31C->shotsfired++;
 }
 
 /* If obj's unk31C is in state 2 (or unk84 is set): intersects the line through unk31C->aimEye along
@@ -726,7 +726,7 @@ void func_151D5174(Actor *obj, Vec3f *arg1, Vec3f *arg2, Vec3f *arg3, Vec3f *arg
     f32 t;
 
     if (obj->unk1D4 != NULL) {
-        if (obj->unk31C != NULL && (obj->unk31C->unk198 == 2 || obj->unk31C->unk84 != 0)) {
+        if (obj->unk31C != NULL && (obj->unk31C->AimState == 2 || obj->unk31C->bot != 0)) {
             origin = &obj->unk31C->aimEye;
             func_151450B4(arg2, arg3, &temp);
             func_151450B4(&temp, arg4, &normal);

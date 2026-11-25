@@ -422,10 +422,10 @@ void func_15117F3C(WorldObject *prop) {
                 continue;
             }
             control = obj->unk31C;
-            if (control->unk17) {
+            if (control->env_suit) {
                 continue;
             }
-            if (control->unk27) {
+            if (control->jump_on_char) {
                 continue;
             }
             if (control->unk6B >= 4) {

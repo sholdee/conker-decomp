@@ -107,7 +107,7 @@ void func_150FE604(Actor *obj, Vec3f *position, u8 arg2, s32 arg3) {
             motion[1] = func_150ADA68() * (1.0f + 1.0f) + 3.7099998f; // matching: a plain 2.0f literal mismatches
             motion[0] = func_150ADA68() * 15.0f + 35.0f;
 
-            if ((obj->unk31C != NULL) && (obj->unk31C->aimState != 0) && (obj->camera != NULL)) {
+            if ((obj->unk31C != NULL) && (obj->unk31C->SniperState != 0) && (obj->camera != NULL)) {
                 mask = ~(1 << obj->camera->playerIndex) & 0xFF;
             } else {
                 mask = 0xFF;

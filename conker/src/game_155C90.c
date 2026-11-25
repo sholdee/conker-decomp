@@ -40,7 +40,7 @@ void func_151287E0(Camera *camera, f32 *outUnk5E8, f32 *outUnk3A8) {
     if (camera->mode & 0x40) {
         camera->unk134 = 0;
     }
-    if ((D_800D2DB4 != 0) || ((camera->aimState != 0) && (camera->aimState != 3)) || (camera->playerExt->unk120 != 0)) {
+    if ((D_800D2DB4 != 0) || ((camera->aimState != 0) && (camera->aimState != 3)) || (camera->playerExt->death_State != 0)) {
         func_150495B0(&camera->unk5E8, 0.0f, &camera->unk660, 6.0f, 9.0f, camera->dt);
         func_150495B0(&camera->unk3A8, 0.0f, &camera->unk65C, 1.5f, 2.5f, camera->dt);
         return;

@@ -1003,7 +1003,7 @@ Gfx *func_150918EC(Gfx *gfx) {
                 if (D_8008FDC0 & 4) {
                     player = &movement_obj[i];
                     n = 1;
-                    h = player->unk31C->unk75;
+                    h = player->unk31C->context_b;
                     h &= 0x7F;
                     if (player->interaction_state == 0x1F) {
                         h = 0;
@@ -1056,7 +1056,7 @@ Gfx *func_150918EC(Gfx *gfx) {
                         break;
                     case 0x32:
                     case 0x33:
-                        n = player->unk31C->unk1AE;
+                        n = player->unk31C->ammo_count;
                         icon = 11;
                         break;
                     case 0x40:
@@ -1157,7 +1157,7 @@ Gfx *func_150918EC(Gfx *gfx) {
                     }
                 } else {
                     cellOffset = 3;
-                    switch (movement_obj[i].unk31C->unk75 & 0x7F) {
+                    switch (movement_obj[i].unk31C->context_b & 0x7F) {
                     case 0x37:
                         icon = 7;
                         break;
@@ -1169,7 +1169,7 @@ Gfx *func_150918EC(Gfx *gfx) {
                         break;
                     case 0x30:
                     case 0x31:
-                        n = movement_obj[i].unk31C->unk1AE;
+                        n = movement_obj[i].unk31C->ammo_count;
                         icon = 6;
                         break;
                     case 0x3E:
@@ -1238,7 +1238,7 @@ Gfx *func_150918EC(Gfx *gfx) {
         { Gfx *g = gfx++; g->words.w0 = cellW; g->words.w1 = 0; } /* gDPPipeSync */
         gDPSetOtherMode(gfx++, 0x002C3F, 0x00504244);
         for (i = 0; i <= D_80082FA0; i++) {
-            j = movement_obj[i].unk31C->unk75;
+            j = movement_obj[i].unk31C->context_b;
             if ((j &= 0x7F) == 0x26 || j == 0x3A) {
                 x = (s32)D_800BE628[i].right - 15;
                 x *= 4;
@@ -1266,7 +1266,7 @@ Gfx *func_150918EC(Gfx *gfx) {
                     texS = 0x240;
                     v = 0x60;
                 }
-                for (j = 0; j < movement_obj[i].unk31C->grenade_count; j++) {
+                for (j = 0; j < movement_obj[i].unk31C->numGrenades; j++) {
                     gSPScisTextureRectangle(gfx++, x, rowY, scaled[cellW] * 4 + x, scaled[cellH] * 4 + rowY, 0, texS, v, 0x400, step);
                     x -= 44;
                 }
@@ -1554,7 +1554,7 @@ Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large) {
                                 color = -1;
                             } else if (other->health == 0) {
                                 color = -1;
-                            } else if ((other->unk31C->unk75 & 0x7F) == 0x21) {
+                            } else if ((other->unk31C->context_b & 0x7F) == 0x21) {
                                 color = -1;
                             }
                         }

@@ -480,7 +480,7 @@ void func_15087350(s32 index, s32 started, f32 lookahead) {
         if (racer->state == 0 && racer->started > 0 && !(D_800D18A0 & (1 << racer->actorIndex))) {
             racer->raceTime += D_800BE9E4;
         }
-        if (racer->state >= 2 && obj->unk31C->unk84 == 0) {
+        if (racer->state >= 2 && obj->unk31C->bot == 0) {
             func_1508802C(racer, obj, 13);
         }
         if (index == 0) {
@@ -634,7 +634,7 @@ s32 func_1508802C(Racer *racer, Actor *obj, s32 mode) {
     ActorCtl *state;
 
     state = obj->unk31C;
-    if (state->unk120 != 0) {
+    if (state->death_State != 0) {
         return 1;
     }
 
@@ -642,7 +642,7 @@ s32 func_1508802C(Racer *racer, Actor *obj, s32 mode) {
         return 1;
     }
 
-    state->unk84 = 1;
+    state->bot = 1;
     obj->interaction_state = 12;
     obj->unk232 = mode;
     D_800D154C = obj;
@@ -1781,7 +1781,7 @@ s32 func_1508A6FC(void) {
             attackers[i] = D_800E0BB8[i];
             D_800E0BB8[i] &= 0x7F;
             if (D_800D23B0->grenades != NULL) {
-                D_800D23B0->grenades[i] = obj->unk31C->grenade_count;
+                D_800D23B0->grenades[i] = obj->unk31C->numGrenades;
             }
             arr39C[i] = func_150859AC(i, 4);
             layers[i] = func_15085DA8(obj->y_position);
@@ -1883,7 +1883,7 @@ s32 func_1508A6FC(void) {
                 arr19C[i] = 0;
                 arr1C[i] = 1;
             }
-            if (obj->unk31C->unk1AC != 0) {
+            if (obj->unk31C->on_fire != 0) {
                 arr25C[i] = 20;
             }
         } else {
@@ -2349,15 +2349,15 @@ void func_1508C1A4(s32 a, s32 b) {
         x0 = from->x_position;
         z0 = from->z_position;
         fromInner = from->unk31C;
-        fromFlag = fromInner->unk84;
+        fromFlag = fromInner->bot;
         if (fromFlag) {
             y0 = from->y_position + fromInner->height * 0.75f;
-            if ((fromInner->unk75 & 0x7F) == 9) {
+            if ((fromInner->context_b & 0x7F) == 9) {
                 y0 -= 50.0f;
             }
         } else if (from->interaction_state == 0x1F) {
             y0 = from->y_position + 80.0f;
-        } else if (to->unk31C->unk84 && D_800872C4[D_800E0BD0] != -1) {
+        } else if (to->unk31C->bot && D_800872C4[D_800E0BD0] != -1) {
             /* 0x1A4..0x1A9 is an s16 point; structs.h types it as u16 pad1A4/s16 unk1A6/u32 pad1A8 */
             x0 = from->aim.x;
             y0 = from->aim.y;
@@ -2367,10 +2367,10 @@ void func_1508C1A4(s32 a, s32 b) {
         }
         x1 = to->x_position;
         z1 = to->z_position;
-        toFlag = to->unk31C->unk84;
+        toFlag = to->unk31C->bot;
         if (toFlag) {
             y1 = to->y_position + to->unk31C->height * 0.75f;
-            if ((to->unk31C->unk75 & 0x7F) == 9) {
+            if ((to->unk31C->context_b & 0x7F) == 9) {
                 y1 -= 50.0f;
             }
         } else if (to->interaction_state == 0x1F) {
@@ -2522,7 +2522,7 @@ s32 func_1508C9CC(void) {
         obj = &movement_obj[cur];
         if (obj->interaction_state != 0) {
             state = obj->unk31C;
-            if (state != NULL && state->unk84 != 0 && !(D_800D18A0 & (1 << cur))) {
+            if (state != NULL && state->bot != 0 && !(D_800D18A0 & (1 << cur))) {
                 count = D_8008FD8C;
                 ret = cur;
             }
@@ -2601,7 +2601,7 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
         } else {
             hasCam = 0;
         }
-        type = obj->unk31C->unk78;
+        type = obj->unk31C->rt_context_b;
         if (type == 9 || type == 0x38 || type == 0x15) {
             hasCam = 0;
         }
@@ -2635,7 +2635,7 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
         dx = 0.0f;
         dz = 0.0f;
         if (D_800D23B0->gameType == 0xB9 || D_800E0BD0 >= 3) {
-            switch (obj->unk31C->unk78) {
+            switch (obj->unk31C->rt_context_b) {
                 case 0x18:
                 case 0x41:
                     V = 0.01600000076f;
@@ -3042,11 +3042,11 @@ void func_1508DC24(void) {
         if (kind == 0xB9 && movement_obj[i].team != 0) {
             continue;
         }
-        prev = movement_obj[i].unk31C->unk75 & 0x7F;
+        prev = movement_obj[i].unk31C->context_b & 0x7F;
         cur = overrides[i];
-        if (movement_obj[i].unk31C->unk19B >= 5) {
+        if (movement_obj[i].unk31C->GrenadeThrowState >= 5) {
             cur = 0x3A;
-        } else if (movement_obj[i].unk31C->unk19B > 0) {
+        } else if (movement_obj[i].unk31C->GrenadeThrowState > 0) {
             cur = 0x26;
         }
         if (cur == 0) {
@@ -3069,7 +3069,7 @@ void func_1508DC24(void) {
                 if (setId == 0x1D) {
                     func_1508EB90(i, 0x4C, 0x1E);
                 }
-                movement_obj[i].unk31C->unk11A = 0;
+                movement_obj[i].unk31C->weapon_status = 0;
             }
             setId = func_1508E780(cur);
             if (setId > 0x1000) {
@@ -3094,7 +3094,7 @@ void func_1508DC24(void) {
             } else {
                 func_15080620(i, 1, cur, 0);
                 if (cur == 0 && prev != 3) {
-                    movement_obj[i].unk31C->unk78 = 0;
+                    movement_obj[i].unk31C->rt_context_b = 0;
                 }
                 if (prev == 0x20) {
                     func_1508EB90(i, 0x45, 4);
@@ -3109,7 +3109,7 @@ void func_1508DC24(void) {
             setId = func_1508E780(cur);
             found = 0;
             numAttached = func_15033E28(&movement_obj[i], attached);
-            if (numAttached == 0 && movement_obj[i].unk31C->unk11A == 2 && setId != 0x55 && setId != 0x2E) {
+            if (numAttached == 0 && movement_obj[i].unk31C->weapon_status == 2 && setId != 0x55 && setId != 0x2E) {
                 func_15083568(&movement_obj[i], setId, 1.0f, 0);
                 if (setId == 0x1D) {
                     func_15083568(&movement_obj[i], 0x1E, 1.0f, 0);
@@ -3125,12 +3125,12 @@ void func_1508DC24(void) {
                             attached[j]->setId != 0x73 && attached[j]->setId != 0x76 &&
                             attached[j]->setId != 0x77 && attached[j]->setId != 0x78 && attached[j]->setId != 7) {
                             func_15030158(attached[j], 0);
-                            movement_obj[i].unk31C->unk11A = 0;
+                            movement_obj[i].unk31C->weapon_status = 0;
                         } else if (setId == attached[j]->setId) {
                             found = 1;
                         }
                     }
-                    if (found == 0 && movement_obj[i].unk31C->unk11A == 2 && setId != 0x55 && setId != 0x2E) {
+                    if (found == 0 && movement_obj[i].unk31C->weapon_status == 2 && setId != 0x55 && setId != 0x2E) {
                         func_15083568(&movement_obj[i], setId, 1.0f, 0);
                         if (setId == 0x1D) {
                             func_15083568(&movement_obj[i], 0x1E, 1.0f, 0);
@@ -3144,7 +3144,7 @@ void func_1508DC24(void) {
                             attached[j]->setId != 0x73 && attached[j]->setId != 0x76 &&
                             attached[j]->setId != 0x77 && attached[j]->setId != 0x78 && attached[j]->setId != 7) {
                             func_15030158(attached[j], 0);
-                            movement_obj[i].unk31C->unk11A = 0;
+                            movement_obj[i].unk31C->weapon_status = 0;
                         }
                     }
                 }
@@ -3231,9 +3231,9 @@ void func_1508DC24(void) {
             if (j != -1) {
                 pickup->touch.i.b = 0;
                 if (items[i] == 0x8AE) {
-                    movement_obj[j].unk31C->grenade_count += 3;
-                    if (movement_obj[j].unk31C->grenade_count >= 7) {
-                        movement_obj[j].unk31C->grenade_count = 6;
+                    movement_obj[j].unk31C->numGrenades += 3;
+                    if (movement_obj[j].unk31C->numGrenades >= 7) {
+                        movement_obj[j].unk31C->numGrenades = 6;
                     }
                     timers[i] = D_800D23B0->respawnDelay;
                 } else {
@@ -3410,7 +3410,7 @@ s32 func_1508E89C(s32 player, s32 source) {
                 }
             }
             D_800D23B0->unk16C0[player] = D_800D23B0->unk16C0[source];
-            savedRot = obj->unk31C->unk1AA;
+            savedRot = obj->unk31C->shotsfired;
             func_15062800(&movement_obj[source], obj);
             if (D_800BE9F0 == 0x3F) {
                 if (obj->unk13C >= 100) {
@@ -3427,9 +3427,9 @@ s32 func_1508E89C(s32 player, s32 source) {
                     }
                 }
             }
-            obj->unk31C->unk84 = 0;
+            obj->unk31C->bot = 0;
             obj->immune = 90;
-            obj->unk31C->unk1AA = savedRot;
+            obj->unk31C->shotsfired = savedRot;
             obj->unk31C->unk1AF = 0x40;
             func_15128774(obj->camera, obj);
             D_8008FD94++;

@@ -178,7 +178,7 @@ s32 func_150A04D8(s32 slot, s32 query, Msg_CD860 *msg) {
                         return 1;
                     }
                     if (msg->params[1] != 0) {
-                        if (movement_obj[i].unk31C->unk78 != 3 && func_150A2D84(i, msg->params[0] & 0xFFFF0FFF) == 0) {
+                        if (movement_obj[i].unk31C->rt_context_b != 3 && func_150A2D84(i, msg->params[0] & 0xFFFF0FFF) == 0) {
                             return 1;
                         }
                     } else {

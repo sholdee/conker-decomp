@@ -133,7 +133,7 @@ void func_15122C5C(Camera *camera) {
     target = &camera->target;
     eye = &camera->eye;
     if ((camera->playerExt != NULL) && (camera->aimState != 3) && ((camera->mode != 0x100) || (camera->aimState != 0))) {
-        camera->zone = camera->playerExt->unk78;
+        camera->zone = camera->playerExt->rt_context_b;
     }
     if (D_800DBFF4[camera->playerIndex] != 4) {
         camera->status &= ~4;
@@ -166,7 +166,7 @@ void func_15122C5C(Camera *camera) {
     func_15125A6C(camera);
     func_15128CB0(camera);
     func_15125DB4(camera);
-    if ((camera->playerExt->unk120 != 0) && (camera->playerExt->aimState != 0)) {
+    if ((camera->playerExt->death_State != 0) && (camera->playerExt->SniperState != 0)) {
         func_15127EB8(camera);
     }
     if (func_15128540(camera) == 0) {
@@ -193,7 +193,7 @@ void func_15122C5C(Camera *camera) {
             func_151283B8(camera);
         }
         func_15123508(camera);
-        if ((camera->flags & 2) && (camera->playerExt->unk120 == 0)) {
+        if ((camera->flags & 2) && (camera->playerExt->death_State == 0)) {
             func_1512D390(camera);
         }
         func_15125594(camera);
@@ -259,14 +259,14 @@ void func_1512317C(Camera *camera) {
     blocked = ((camera->mode & 0x80) != 0) ||
               ((camera->flags & 0x1000000) != 0) ||
               ((camera->player->unk28 != 0.0f) && (camera->player->in_water == 0) &&
-               (camera->playerExt->rope == NULL) && (status100 == 0) && (status200 == 0) &&
+               (camera->playerExt->ropePtr == NULL) && (status100 == 0) && (status200 == 0) &&
                (camera->zone != 3)) ||
               ((camera->player->unk65 != 0) && (status100 == 0) && (status200 == 0)) ||
               (stunned != 0) ||
               (func_15125490(camera) != 0) ||
               (camera->player->health == 0) ||
-              (((camera->playerExt->unk4E & 0xF) == 1) && (camera->player->xz_velocity > 15.0f)) ||
-              (camera->playerExt->unk1AC != 0);
+              (((camera->playerExt->transport & 0xF) == 1) && (camera->player->xz_velocity > 15.0f)) ||
+              (camera->playerExt->on_fire != 0);
 
     if ((camera->contPad->button & R_TRIG) && !blocked) {
         if (!(camera->buttonsPressed & R_TRIG)) {
@@ -280,8 +280,8 @@ void func_1512317C(Camera *camera) {
 
     if ((camera->mode == 0x100) && (camera->aimState == 0)) {
         func_151239CC(camera, 1);
-        camera->playerExt->unk198 = 0;
-        camera->playerExt->aimState = 0;
+        camera->playerExt->AimState = 0;
+        camera->playerExt->SniperState = 0;
         camera->unk5F8 = 1;
         camera->unk5FC = 2;
         camera->buttonsPressed &= ~R_TRIG;
@@ -292,7 +292,7 @@ void func_1512317C(Camera *camera) {
         camera->buttonsPressed &= ~R_TRIG;
         camera->contPad->button &= ~R_TRIG;
     }
-    camera->playerExt->unk198 = camera->aimState;
+    camera->playerExt->AimState = camera->aimState;
 
     if ((camera->aimState != 0) || (camera->aimState == 3)) {
         func_150495B0(&camera->aim.offset.x, 0.0f, &camera->aim.offsetXVel, 4.0f, 9.0f, camera->dt);
@@ -320,7 +320,7 @@ void func_15123508(Camera *camera) {
 void func_15123568(Camera *camera) {
     s32 cycle;
 
-    if ((camera->playerExt->unk120 == 4) && (camera->mode != 0x40) && (camera->unk92C == 0)) {
+    if ((camera->playerExt->death_State == 4) && (camera->mode != 0x40) && (camera->unk92C == 0)) {
         camera->unk7C0 = 999.0f;
         camera->preset = 1;
         func_15124B18(camera);
@@ -360,8 +360,8 @@ void func_151236D0(Camera *camera) {
 
     wasBelow = camera->status & 1;
     if (camera->playerExt != NULL) {
-        if ((camera->playerExt->rope != NULL) ||
-            ((camera->playerExt->unk95 != 0) && (camera->player->unk137 == 0))) {
+        if ((camera->playerExt->ropePtr != NULL) ||
+            ((camera->playerExt->ladder != 0) && (camera->player->unk137 == 0))) {
             camera->status |= 0x40;
         } else {
             camera->status &= ~0x40;
@@ -369,12 +369,12 @@ void func_151236D0(Camera *camera) {
         if (camera->player->unk28 == 0.0f) {
             camera->status &= ~0x400;
         }
-        if ((camera->playerExt->unk8 != 0) && (camera->playerExt->unk16 == 0)) {
+        if ((camera->playerExt->pissed_up != 0) && (camera->playerExt->pissed_hangover == 0)) {
             camera->status |= 8;
         } else {
             camera->status &= ~8;
         }
-        if (camera->playerExt->unk4E == 2) {
+        if (camera->playerExt->transport == 2) {
             camera->status |= 0x80;
         } else {
             camera->status &= ~0x80;
@@ -526,7 +526,7 @@ void func_15123A54(Camera *camera) {
         } else {
             camera->spinDir = 1.0f;
         }
-        if ((camera->playerExt->unk95 != 0) && (camera->status & 0x40)) {
+        if ((camera->playerExt->ladder != 0) && (camera->status & 0x40)) {
             angle = camera->player->unk40 + 180.0f;
             func_15049688(&camera->yaw, angle, &camera->yawVel, 2.0f, 4.0f, camera->dt);
             camera->yawRad = camera->yaw * DEG2RAD;
@@ -720,7 +720,7 @@ void func_151247C0(Camera *camera) {
 
     if (camera->transition.state == 0) {
         ext = camera->playerExt;
-        slow = (ext != NULL) ? ((s32)ext->rope | ext->unk95) : 0;
+        slow = (ext != NULL) ? ((s32)ext->ropePtr | ext->ladder) : 0;
         if (slow) {
             camera->followRateTarget = 0.25f;
         } else {
@@ -825,7 +825,7 @@ void func_15124C38(Camera *camera, f32 *outY) {
 
     if ((camera->transition.state == 0) || (outY != 0)) {
         if (camera->playerExt != NULL) {
-            if ((camera->playerExt->unk4E & 0xF) == 1) {
+            if ((camera->playerExt->transport & 0xF) == 1) {
                 if (camera->mode & 0x100) {
                     height = camera->playerExt->height * 0.65f;
                 } else {
@@ -861,7 +861,7 @@ void func_15124C38(Camera *camera, f32 *outY) {
             func_1507C3E0(camera->player, &top, &discard1, &discard2);
             height = top;
         }
-        if (camera->playerExt->unk120 != 0) {
+        if (camera->playerExt->death_State != 0) {
             f32 z;
             f32 y;
             f32 x;
@@ -998,7 +998,7 @@ s32 func_151253CC(Camera *camera) {
         camera->unk3A0 = camera->yaw * DEG2RAD;
         camera->pitchRad = camera->pitch * DEG2RAD;
         func_15124AB4(camera);
-        if (camera->playerExt->aimState != 0) {
+        if (camera->playerExt->SniperState != 0) {
             func_15127EB8(camera);
         }
         func_1512C490(camera);
@@ -1032,7 +1032,7 @@ void func_151254F4(Camera *camera, s32 index) {
     camera->pitchRad = camera->pitch * DEG2RAD;
     func_15124AB4(camera);
     func_151239CC(camera, 1);
-    camera->playerExt->unk198 = 0;
+    camera->playerExt->AimState = 0;
     camera->aimState = 0;
     camera->player = &movement_obj[index];
     camera->followRate = 0.0f;
@@ -1136,8 +1136,8 @@ void func_15125924(Camera *camera) {
     s32 extUnk1C;
 
     if (camera->playerExt != NULL) {
-        extUnk1C = camera->playerExt->unk1C;
-        extUnk4E = camera->playerExt->unk4E;
+        extUnk1C = camera->playerExt->water_up;
+        extUnk4E = camera->playerExt->transport;
     } else {
         extUnk1C = 0;
         extUnk4E = 0;
@@ -1257,7 +1257,7 @@ void func_15125DB4(Camera *camera) {
     s32 zone;
 
     zone = camera->zone;
-    if ((camera->playerExt->unk120 != 0) || (D_80084480 != 0)) {
+    if ((camera->playerExt->death_State != 0) || (D_80084480 != 0)) {
         camera->buttonsPressed = 0;
         camera->contPad->button &= ~(R_TRIG | CAM_C_BUTTONS);
         return;
@@ -1304,12 +1304,12 @@ void func_15125DB4(Camera *camera) {
         camera->contPad->button &= ~(R_TRIG | CAM_C_BUTTONS);
     }
 
-    if ((camera->playerExt->matrix_physics != 0) || (camera->playerExt->unk1AC != 0) || (camera->playerExt->unk27 != 0)) {
+    if ((camera->playerExt->matrix_physics != 0) || (camera->playerExt->on_fire != 0) || (camera->playerExt->jump_on_char != 0)) {
         camera->buttonsPressed &= ~R_TRIG;
         camera->contPad->button &= ~R_TRIG;
     }
 
-    if ((camera->playerExt->unk95 != 0) || ((camera->unk5FC != 0) && (camera->playerExt->unk1B3 != 0))) {
+    if ((camera->playerExt->ladder != 0) || ((camera->unk5FC != 0) && (camera->playerExt->unk1B3 != 0))) {
         camera->buttonsPressed &= ~(R_TRIG | CAM_C_BUTTONS);
         camera->contPad->button &= ~(R_TRIG | CAM_C_BUTTONS);
     }
@@ -1443,19 +1443,19 @@ s32 func_15126378(Camera *camera) {
         camera->buttonsPressed |= R_TRIG;
         camera->contPad->button |= R_TRIG;
     }
-    if ((ext->aimState == 0) && ((camera->contPad->stick_x != 0) || (camera->contPad->stick_y != 0))) {
+    if ((ext->SniperState == 0) && ((camera->contPad->stick_x != 0) || (camera->contPad->stick_y != 0))) {
         ext->aimReset = 1;
     }
     // matching: [linked] - 1 rather than [linked - 1]
     viewer = (camera->player->unk65 != 0) ? &movement_obj[camera->player->unk65] - 1 : camera->player;
-    valid = (ext->unk11A == 2) || (zone == 0x1B) || (zone == 0x1F) || (zone == 0x29);
+    valid = (ext->weapon_status == 2) || (zone == 0x1B) || (zone == 0x1F) || (zone == 0x29);
     if (((zone == 0x23) || (zone == 0x24) || (zone == 0x16) || (zone == 0x18) || (zone == 0x41) ||
          (zone == 0xC) || (zone == 0x14) || (zone == 0x3F) || (zone == 0x1B) || (zone == 0x1F) ||
          (zone == 0x29)) &&
         (camera->contPad->button & R_TRIG) && valid &&
         (((s32)camera->player->unk28 == 0) || ((s32)viewer->unk28 == 0)) &&
-        (camera->player->stunned == 0) && (ext->aimState == 0)) {
-        camera->playerExt->unk198 = 0;
+        (camera->player->stunned == 0) && (ext->SniperState == 0)) {
+        camera->playerExt->AimState = 0;
         camera->aimState = 0;
         if (((zone == 0x1F) || (zone == 0x29)) && !(camera->status & 4)) {
             t = *(s16 *)&viewer->unk2E4 * scale;
@@ -1467,7 +1467,7 @@ s32 func_15126378(Camera *camera) {
         func_15048758(&angle);
         yawRad = angle * DEG2RAD;
         func_151239CC(camera, 1);
-        ext->aimState = 2;
+        ext->SniperState = 2;
         func_151C9BA0(camera, zone);
         func_1512623C(viewer, camera->playerExt, zone, &camera->eye.x, &camera->eye.y, &camera->eye.z, camera->status & 0x10);
         camera->target.x = (sinf(yawRad) * 100.0f) + camera->eye.x;
@@ -1520,9 +1520,9 @@ s32 func_15126378(Camera *camera) {
         }
         viewer->unk2FC |= 1 << camera->playerIndex;
         viewer->unk74 |= 1 << camera->playerIndex;
-        { typedef s32 LineMark; } // matching: -g3 line marker; as1 then schedules the aimState load after the a2 reload
+        { typedef s32 LineMark; } // matching: -g3 line marker; as1 then schedules the SniperState load after the a2 reload
     }
-    state = ext->aimState;
+    state = ext->SniperState;
     if (state == 0) {
         return 0;
     }
@@ -1531,7 +1531,7 @@ s32 func_15126378(Camera *camera) {
         func_1512623C(viewer, camera->playerExt, zone, &camera->eye.x, &camera->eye.y, &camera->eye.z, camera->status & 0x10);
         zoomRatio = camera->unk19C / maxZoom;
         zoomRatio = (zoomRatio < 0.0f) ? 0.0f : ((zoomRatio > 1.0f) ? 1.0f : zoomRatio);
-        if (!(buttons & R_TRIG) || (zone == 0) || (ext->unk1AC != 0) ||
+        if (!(buttons & R_TRIG) || (zone == 0) || (ext->on_fire != 0) ||
             ((camera->player->health == 0) && (zone != 0x29)) ||
             ((camera->player->stunned != 0) && (camera->player->unk65 == 0) && ((s32)camera->player->unk28 != 0) &&
              (zone != 0x1F) && (zone != 0x29))) {
@@ -1658,7 +1658,7 @@ s32 func_15127520(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 a
     sound->y = camera->player->y_position;
     sound->z = camera->player->z_position;
 
-    if (camera->playerExt->aimState == 2) {
+    if (camera->playerExt->SniperState == 2) {
         newZoom = (u32)zoom;
         if (oldZoom != newZoom) {
             changed = 1;
@@ -1718,7 +1718,7 @@ s32 func_151277B0(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 a
     sound->y = camera->player->y_position;
     sound->z = camera->player->z_position;
 
-    if (camera->playerExt->aimState == 2) {
+    if (camera->playerExt->SniperState == 2) {
         if (oldKey != newKey) {
             if (count < 10) {
                 if ((((oldKey - newKey) < 0) ? -(oldKey - newKey) : (oldKey - newKey)) > 100) {
@@ -1774,7 +1774,7 @@ s32 func_151279A0(Actor *obj, OSContPad *contPad) {
     f32 angle;
 
     ext = obj->unk31C;
-    zone = ext->unk78;
+    zone = ext->rt_context_b;
     dt = D_800BE9E4 * (1.0f / 60.0f);
     if ((zone == 0xC) || (zone == 0x1B)) {
         contPad->button |= R_TRIG;
@@ -1782,8 +1782,8 @@ s32 func_151279A0(Actor *obj, OSContPad *contPad) {
     if (((zone == 0x23) || (zone == 0x24) || (zone == 0x16) || (zone == 0x12) || (zone == 0x18) ||
          (zone == 0x41) || (zone == 0xC) || (zone == 0x14) || (zone == 0x3F) || (zone == 0x1B) ||
          (zone == 0x1F) || (zone == 0x29)) &&
-        (contPad->button & R_TRIG) && (ext->aimState == 0)) {
-        ext->aimState = 2;
+        (contPad->button & R_TRIG) && (ext->SniperState == 0)) {
+        ext->SniperState = 2;
         ext->aimEye = base;
         ext->aimYawTarget = obj->unk40 - 90.0f;
         ext->aimPitchTarget = 0.0f;
@@ -1793,10 +1793,10 @@ s32 func_151279A0(Actor *obj, OSContPad *contPad) {
         ext->aimYaw = ext->aimYawTarget;
         func_150627D4(obj);
     }
-    if (ext->aimState == 0) {
+    if (ext->SniperState == 0) {
         return 0;
     }
-    if (ext->aimState == 2) {
+    if (ext->SniperState == 2) {
         buttons = contPad->button;
         angle = (obj->unk40 - 90.0f) * DEG2RAD;
         pos.x = obj->x_position;
@@ -1807,7 +1807,7 @@ s32 func_151279A0(Actor *obj, OSContPad *contPad) {
         pos.z = (cosf(angle) * 100.0f) + base.z;
         base.y += obj->y_position - obj->old_y_position;
         if (!(buttons & R_TRIG) || (zone == 0)) {
-            ext->aimState = 0;
+            ext->SniperState = 0;
             func_150627D4(obj);
             return 0;
         }
@@ -1848,7 +1848,7 @@ void func_15127EB8(Camera *camera) {
     u8 linked;
 
     func_151239CC(camera, 1);
-    camera->playerExt->aimState = 0;
+    camera->playerExt->SniperState = 0;
     func_151C9ED4(camera);
     camera->unk19C = 0.0f;
     camera->unk1A0 = 0.0f;
@@ -2098,7 +2098,7 @@ void func_1512868C(Camera *camera) {
     camera->lift = 0.0f;
     camera->side = 0.0f;
     camera->followRateTarget = 1.0f;
-    camera->playerExt->unk198 = 0;
+    camera->playerExt->AimState = 0;
     camera->aimState = 0;
 }
 

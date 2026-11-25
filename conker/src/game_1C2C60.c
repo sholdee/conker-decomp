@@ -2531,7 +2531,7 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
     flame->timer151 += D_800BE9E4;
     if (flame->timer151 >= 0x3D) {
         if (flame->seed.owner != NULL && flame->seed.owner->unk31C != NULL) {
-            flame->seed.owner->unk31C->unk1AA++;
+            flame->seed.owner->unk31C->shotsfired++;
         }
         flame->timer151 = 0;
     }

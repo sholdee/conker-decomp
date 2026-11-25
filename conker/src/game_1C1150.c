@@ -403,7 +403,7 @@ void func_15194BF0(Actor *self, Actor *other, u8 *arg2) {
         func_15136C3C(other, 1, 1, 1, 1, 0, 0xFF, 1);
         func_15145A50(other);
         func_1507CD64(other, 6);
-        if (other->unk31C != NULL && other->unk31C->unk19B != 0) {
+        if (other->unk31C != NULL && other->unk31C->GrenadeThrowState != 0) {
             func_15063B64(other);
         }
         break;
@@ -510,7 +510,7 @@ u8 arg2;
                     ActorCtl *ext = other->unk31C;
 
                     if (ext != NULL) {
-                        ext->unk1AC = 1;
+                        ext->on_fire = 1;
                     }
                 }
             }

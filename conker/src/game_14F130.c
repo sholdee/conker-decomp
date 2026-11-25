@@ -44,7 +44,7 @@ void func_15121C80(Camera *camera, f32 yawOffset) {
         }
         if (camera->zone == 9 || camera->zone == 56 || camera->zone == 57 || camera->zone == 55 ||
             camera->zone == 59 || camera->zone == 18) {
-            angle -= (f32) camera->playerExt->unk12 * (360.0f / 65536);
+            angle -= (f32) camera->playerExt->pssd_waist_tilt * (360.0f / 65536);
         }
         func_15048758(&angle);
         if (camera->snap) {

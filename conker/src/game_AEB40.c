@@ -295,7 +295,7 @@ s32 func_15081E78(Actor *self, RayHit *hit, s32 kind) {
     playImpact = 1;
     ext = self->unk31C;
     if (ext != NULL) {
-        ext->unk1AA++;
+        ext->shotsfired++;
     }
     if (hit->hitType == 0) {
         return 0;
@@ -670,7 +670,7 @@ s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot
     }
     obj->unk232 = spawn->unkD;
     if ((spawnIdx < D_8008FD8C) && (D_8008FE44[spawnIdx] == -2)) {
-        obj->unk31C->unk84 = 1;
+        obj->unk31C->bot = 1;
         obj->unk232 = 1;
     }
     {
@@ -679,7 +679,7 @@ s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot
 
         if (obj->unk127 != 0xFF) {
             obj->team = func_151E5F64(obj->unk127);
-            obj->unk31C->grenade_count = D_800D2130;
+            obj->unk31C->numGrenades = D_800D2130;
             obj->unk31C->unk1AF = 0x40;
             obj->unk31C->lastSpawnIndex = -1;
         }

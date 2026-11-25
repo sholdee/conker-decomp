@@ -118,11 +118,11 @@ void func_150ED578(Actor *obj) {
     Camera *camera;
 
     state = obj->unk31C;
-    if ((state != NULL) && (state->unk84 == 0)) {
+    if ((state != NULL) && (state->bot == 0)) {
         player = D_800BE616 ? obj->unk127 : obj->unk124;
         if (D_800BE728[player]->button & R_TRIG) {
             owner = &movement_obj[player];
-            if (owner->unk31C->aimState != 0) {
+            if (owner->unk31C->SniperState != 0) {
                 camera = owner->camera;
                 if (camera != NULL) {
                     obj->unk2FC |= 1 << camera->playerIndex;
@@ -262,7 +262,7 @@ void func_150ED748(Actor *obj) {
     } else {
         player = obj->unk127;
         if (obj->unk127 != 0xFF) {
-            if (movement_obj[obj->unk127].unk31C->unk84 == 0) {
+            if (movement_obj[obj->unk127].unk31C->bot == 0) {
                 controlled = 1;
             }
             driver = &movement_obj[player];
@@ -347,8 +347,8 @@ void func_150ED748(Actor *obj) {
             obj->disable_run--;
         }
         obj->unk44 = D_800BE748[player].stick_y * throttleScale;
-        movement_obj[player].unk31C->unk75 = lockFlags;
-        movement_obj[player].unk31C->unk78 = lockFlags;
+        movement_obj[player].unk31C->context_b = lockFlags;
+        movement_obj[player].unk31C->rt_context_b = lockFlags;
     } else if (dc_glbl_CharNum < D_8008FD8C) {
         func_1504C854(obj);
         if ((player < 4) && (D_800BE728[player]->button & Z_TRIG)) {
@@ -360,7 +360,7 @@ void func_150ED748(Actor *obj) {
     }
     obj->unk247 = 50;
     obj->unk248 = 50;
-    if ((D_800BE616 == 0) || (dc_glbl_CharNum >= D_8008FD8C) || (obj->unk31C->unk120 == 0)) {
+    if ((D_800BE616 == 0) || (dc_glbl_CharNum >= D_8008FD8C) || (obj->unk31C->death_State == 0)) {
         func_15052590(obj);
     }
     if (obj->interaction_state != 0) {
@@ -368,7 +368,7 @@ void func_150ED748(Actor *obj) {
             func_15052F9C(obj, 180.0f, 5, 0x44, 1, 0x10, 0xFF, 0, 0, 0);
         } else if ((D_800BE616 == 0) && (D_800CC268 & 1)) {
             subject = &movement_obj[obj->unk124];
-            if ((subject->unk65 == 0) && (subject->unk31C->unk78 == 0) && (obj->unk25C & 0x400)) {
+            if ((subject->unk65 == 0) && (subject->unk31C->rt_context_b == 0) && (obj->unk25C & 0x400)) {
                 if ((subject->unk44 > 15.0f) && (subject->y_velocity > 10.0f)) {
                     func_1505327C(obj, 68.0f, 4.0f, 13, 5);
                 } else if ((subject->disable_run == 0) && (subject->unk28 > 70.0f) && (subject->stunned == 0) && (func_1505A6F8(subject, obj) < 100.0f)) {
@@ -414,7 +414,7 @@ void func_150ED748(Actor *obj) {
             obj->eyeCode[1] = 19;
         }
         /* Gun aim. */
-        if (movement_obj[viewer[0]].unk31C->unk84 != 0) {
+        if (movement_obj[viewer[0]].unk31C->bot != 0) {
             if (obj->unk31C->unk129 >= 0) {
                 /* Lead the target: move it along its heading by speed * distance / 200 while aiming. */
                 f32 dirZ;
@@ -459,7 +459,7 @@ void func_150ED748(Actor *obj) {
                     obj->unk31C->unk1BC -= yawStep;
                 }
             }
-            if (movement_obj[player].unk31C->aimState != 0) {
+            if (movement_obj[player].unk31C->SniperState != 0) {
                 camSlot = viewer[0] + 1;
             }
             if (D_800BE616 == 0) {
@@ -522,7 +522,7 @@ void func_150ED748(Actor *obj) {
             } else {
                 camera = &camera_global_Cameras[camSlot - 1];
                 subject = camera->playerExt;
-                if (camera->playerExt->aimState != 0) {
+                if (camera->playerExt->SniperState != 0) {
                     /* Copy the camera subject's angles. */
                     typedef s32 scope; // matching: as above
                     angle = -subject->unk170;
@@ -619,7 +619,7 @@ void func_150EEC84(Actor *obj) {
             index = 1;
         }
         func_151254F4(camera, index);
-        obj->unk31C->unk78 = 0x29;
+        obj->unk31C->rt_context_b = 0x29;
         D_800BE748[index].button &= ~R_TRIG;
         player = &movement_obj[index];
         player->unk2FC |= 1 << camera->playerIndex;

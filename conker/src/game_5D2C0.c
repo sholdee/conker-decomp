@@ -2358,7 +2358,7 @@ s32 func_150333A8(ModelAttachment *att, Actor *owner) {
     if (owner->in_water != 0) {
         unk = owner->unk31C;
         if (unk != NULL) {
-            unk->unk11A = 0;
+            unk->weapon_status = 0;
         }
         return 1;
     }
@@ -2556,7 +2556,7 @@ s32 func_15033838(ModelAttachment *att, Actor *owner) {
         case 0x221:
         case 0x223:
         case 0x31B:
-            if (owner->unk31C->unk198 == 2) {
+            if (owner->unk31C->AimState == 2) {
                 triggered = 1;
             }
             break;
@@ -2570,9 +2570,9 @@ s32 func_15033838(ModelAttachment *att, Actor *owner) {
     if (att->unk38 == 0) {
         if (triggered) {
             unk = owner->unk31C;
-            if ((unk->aimState != 0) || (kind == 6)) {
+            if ((unk->SniperState != 0) || (kind == 6)) {
                 if ((unk->buttons & 0x2000) == 0x2000) {
-                    if (unk->unk19E == 0) {
+                    if (unk->ReloadTimer == 0) {
                         att->unk38 = 1;
                         func_151026BC(owner, -1, kind, 1, 0xFF, 1);
                     }
@@ -2580,7 +2580,7 @@ s32 func_15033838(ModelAttachment *att, Actor *owner) {
             }
         }
     } else if (!triggered || (unk = owner->unk31C, (unk->buttons & 0x2000) == 0) ||
-               ((unk->aimState == 0) && (kind != 6))) {
+               ((unk->SniperState == 0) && (kind != 6))) {
         att->unk38 = 0;
         func_151027E8(owner);
     }
@@ -2669,7 +2669,7 @@ s32 func_15033BDC(AttachmentSound *sound, s32 arg1, s32 *arg2, s32 arg3, s32 arg
             } else {
                 unk = owner->unk31C;
                 if (unk != NULL) {
-                    if (unk->unk19C < 120) {
+                    if (unk->GrenadeTimer < 120) {
                         if (att->unk38 == 0x513) {
                             att->unk38 = 0x3A1;
                             att->unk3C = func_1000FA64(0x3A1, owner->x_position, owner->y_position,
@@ -2768,7 +2768,7 @@ void func_15033EC4(s32 a, s32 b) {
     }
 }
 
-/* Hook: removes the attachment (clearing unk31C->unk11A) unless unk31C->unk78 is 9 or unk11A is 3. */
+/* Hook: removes the attachment (clearing unk31C->weapon_status) unless unk31C->rt_context_b is 9 or weapon_status is 3. */
 s32 func_15033F0C(ModelAttachment *att, Actor *owner) {
     ActorCtl *unk;
 
@@ -2777,9 +2777,9 @@ s32 func_15033F0C(ModelAttachment *att, Actor *owner) {
     }
     unk = owner->unk31C;
     if (unk != NULL) {
-        if (unk->unk78 != 9) {
-            if (unk->unk11A != 3) {
-                unk->unk11A = 0;
+        if (unk->rt_context_b != 9) {
+            if (unk->weapon_status != 3) {
+                unk->weapon_status = 0;
                 return 1;
             }
         }
@@ -2787,7 +2787,7 @@ s32 func_15033F0C(ModelAttachment *att, Actor *owner) {
     return 0;
 }
 
-/* Hook: like func_15033F0C, but keeps the attachment while unk31C->unk78 is 0xC or 0x16. */
+/* Hook: like func_15033F0C, but keeps the attachment while unk31C->rt_context_b is 0xC or 0x16. */
 s32 func_15033F70(ModelAttachment *att, Actor *owner) {
     ActorCtl *unk;
 
@@ -2796,9 +2796,9 @@ s32 func_15033F70(ModelAttachment *att, Actor *owner) {
     }
     unk = owner->unk31C;
     if (unk != NULL) {
-        if ((unk->unk78 != 0xC) && (unk->unk78 != 0x16)) {
-            if (unk->unk11A != 3) {
-                unk->unk11A = 0;
+        if ((unk->rt_context_b != 0xC) && (unk->rt_context_b != 0x16)) {
+            if (unk->weapon_status != 3) {
+                unk->weapon_status = 0;
                 return 1;
             }
         }

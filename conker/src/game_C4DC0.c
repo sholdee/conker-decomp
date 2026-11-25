@@ -433,21 +433,21 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     }
     case 0x25:
-        obj->unk31C->unk8 = cmd->a[0];
-        obj->unk31C->unkE = 0xA6;
+        obj->unk31C->pissed_up = cmd->a[0];
+        obj->unk31C->pissed_walk = 0xA6;
         break;
     case 0x24:
         if (cmd->a[0] == 0) {
             func_1507EB2C(obj);
-            obj->unk31C->unk8 = 0;
-            obj->unk31C->unk16 = 0;
+            obj->unk31C->pissed_up = 0;
+            obj->unk31C->pissed_hangover = 0;
         } else {
-            obj->unk31C->unk8 = 1;
+            obj->unk31C->pissed_up = 1;
             if (cmd->a[0] == 1) {
                 func_1507EB4C(obj, 0x15);
             } else if (cmd->a[0] == 2) {
                 func_1507EB4C(obj, 0x2A);
-                obj->unk31C->unk16 = 0xFF;
+                obj->unk31C->pissed_hangover = 0xFF;
             }
         }
         break;
@@ -457,7 +457,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0x27:
         func_15080620(objId, 1, cmd->a[0], 0);
         if (D_800D3840 == 3 && cmd->a[0] == 0) {
-            obj->unk31C->unk78 = 0;
+            obj->unk31C->rt_context_b = 0;
         }
         break;
     case 0x70:
@@ -468,7 +468,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         }
         break;
     case 0x28:
-        obj->unk31C->unk76 = cmd->a[0];
+        obj->unk31C->context_z = cmd->a[0];
         break;
     case 0x29:
         obj->unk251 = cmd->a[0];
@@ -560,9 +560,9 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     case 0x36:
         if (cmd->a[0] != 0) {
-            obj->unk31C->unk20 |= cmd->a[1];
+            obj->unk31C->water_attribs |= cmd->a[1];
         } else {
-            obj->unk31C->unk20 &= ~cmd->a[1];
+            obj->unk31C->water_attribs &= ~cmd->a[1];
         }
         break;
     case 0x37:
@@ -582,16 +582,16 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     }
     case 0x3B:
-        obj->unk31C->unk32 |= cmd->a[0];
+        obj->unk31C->walk_attrib |= cmd->a[0];
         if (D_800D3840 == 4) {
             obj->unk31C->unk34 = cmd->a[1];
         }
         break;
     case 0x3C:
         if (cmd->a[0] != 0) {
-            obj->unk31C->unk1A = 1;
+            obj->unk31C->injured = 1;
         } else {
-            obj->unk31C->unk1A = 0;
+            obj->unk31C->injured = 0;
         }
         break;
     case 0x3D:
@@ -643,7 +643,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     }
     case 0x45:
-        obj->unk31C->unk7B = cmd->a[0];
+        obj->unk31C->inst_context = cmd->a[0];
         break;
     case 0x46:
         obj->unk234 = cmd->a[0];
@@ -651,7 +651,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->unk237 = cmd->a[2];
         break;
     case 0x47:
-        obj->unk31C->unk1B = cmd->a[0];
+        obj->unk31C->ind_cnt = cmd->a[0];
         break;
     case 0x48:
         obj->unkD0 = cmd->a[0];
@@ -830,7 +830,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->interaction_state = cmd->a[0];
         break;
     case 0x74:
-        obj->unk31C->unk31 = cmd->a[0];
+        obj->unk31C->prop = cmd->a[0];
         break;
     case 0x75:
         if (cmd->a[0] != 0) {
@@ -841,7 +841,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     case 0x76:
         if (obj->unk31C != NULL) {
-            obj->unk31C->unk1AE = cmd->a[0];
+            obj->unk31C->ammo_count = cmd->a[0];
         }
         break;
     case 0x77:
@@ -857,7 +857,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
             v = 0x79;
             func_15083568(obj, v, 0.0f, 0);
             if (OBJ_INDEX(obj) < D_8008FD90) {
-                obj->unk31C->unk4E = 2;
+                obj->unk31C->transport = 2;
                 func_1505E650(obj, 5, 1.0f, 0.0f, 0.0f, 0.0f, 0);
             }
         }
@@ -866,7 +866,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
             func_1514DE94(obj);
             break;
         case 2:
-            obj->unk31C->unk17 = 1;
+            obj->unk31C->env_suit = 1;
             obj->lodRequest = 6;
             break;
         case 3: {
@@ -874,7 +874,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
 
             other = func_1505EEF4(cmd->a[1] & 0xFFFF0FFF);
             if (other != NULL) {
-                obj->unk31C->unk4E = 1;
+                obj->unk31C->transport = 1;
                 func_15052F9C(other, 50.0f, 0x17, 4, 0, 1, 0, 0, 1, 0);
             }
             break;
@@ -947,7 +947,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->unk238 = cmd->a[0];
         break;
     case 0x84:
-        obj->unk31C->unk4E = cmd->a[0];
+        obj->unk31C->transport = cmd->a[0];
         break;
     case 0x85:
         func_1507D4F8(OBJ_INDEX(obj));
@@ -972,7 +972,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->fogFade = cmd->a[4];
         break;
     case 0x8C:
-        obj->unk31C->unk11A = cmd->a[0];
+        obj->unk31C->weapon_status = cmd->a[0];
         break;
     case 0x8B:
         if (OBJ_INDEX(obj) <= D_80082FA0) {
@@ -1133,11 +1133,11 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xA7:
         return func_15085420(obj) | 0xD000;
     case 0xA9:
-        return obj->unk31C->unk77;
+        return obj->unk31C->rt_context_a;
     case 0xAA:
-        return obj->unk31C->unk78;
+        return obj->unk31C->rt_context_b;
     case 0xAB:
-        return obj->unk31C->unk79;
+        return obj->unk31C->rt_context_z;
     case 0xAC:
         ret = func_150A2AEC(OBJ_INDEX(obj), D_800D3840 - 2, cmd->a);
         if (ret != -1) {
@@ -1149,10 +1149,10 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xAE:
         return obj->xz_velocity;
     case 0xAF:
-        if (obj->unk31C->unk16 != 0) {
+        if (obj->unk31C->pissed_hangover != 0) {
             return 2;
         }
-        if (obj->unk31C->unk8 != 0) {
+        if (obj->unk31C->pissed_up != 0) {
             return 1;
         }
         return 0;
@@ -1207,9 +1207,9 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xBF:
         return (f32)(s32)obj->unk28 * 65536.0f;
     case 0xC0:
-        return obj->unk31C->unk1B;
+        return obj->unk31C->ind_cnt;
     case 0xC1:
-        return obj->unk31C->unk4E;
+        return obj->unk31C->transport;
     case 0xC2:
         return obj->unique_id;
     case 0xC3:
@@ -1419,7 +1419,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         p = obj->unk31C;
         v = 0;
         if (p != NULL) {
-            v = p->unk78;
+            v = p->rt_context_b;
         }
         return v;
     }
@@ -1429,7 +1429,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         p = obj->unk31C;
         v = 0;
         if (p != NULL) {
-            switch (p->unk75 & 0x7F) {
+            switch (p->context_b & 0x7F) {
             case 3:
             case 9:
             case 21:
@@ -1472,13 +1472,13 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xDA:
         return obj->floorY;
     case 0xDC:
-        if (obj->unk31C->unk195 != 0) {
-            return obj->unk31C->unk196 | 0x80;
+        if (obj->unk31C->being_sniped != 0) {
+            return obj->unk31C->being_s_char | 0x80;
         }
         return 0;
     case 0xDD:
         if (obj->unk31C != NULL) {
-            return obj->unk31C->unk23;
+            return obj->unk31C->door_walkf_time;
         }
         return 0;
     case 0xDE:
@@ -1491,7 +1491,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     case 0xDF:
         if (obj->unk31C != NULL) {
-            return obj->unk31C->unk1AE;
+            return obj->unk31C->ammo_count;
         }
         return 0;
     case 0xE0:
@@ -1564,7 +1564,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xE8:
         return obj->unk84.uh;
     case 0xE9:
-        return obj->unk31C->unk51;
+        return obj->unk31C->land_floor;
     case 0xEA: {
         ModelAttachment *p;
         s32 a;
@@ -1611,7 +1611,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         return (ret << 16) | (iz & 0xFFFF);
     }
     case 0xEC:
-        return obj->unk31C->unk95;
+        return obj->unk31C->ladder;
     case 0xED:
         return D_800BE710[objId];
     case 0xEE: {

@@ -189,7 +189,7 @@ Gfx *func_151E89A0(Gfx *gfx, s32 unused, s32 alpha) {
     for (i = 0; i < D_8008FD8C; i++) {
         obj = &movement_obj[i];
         sub = obj->unk31C;
-        kind = sub->unk75 & 0x7F;
+        kind = sub->context_b & 0x7F;
         if ((obj->unk13C != 0) || (sub->unk128 & 0x20)) {
             team = obj->team;
             (&D_800E0BCC)[zero] = D_800E0BCC | (1 << i);
@@ -723,7 +723,7 @@ Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
             gfx = func_151E86E4(gfx, (xbase + 8) << 2, (y - 2) << 2, (xbase + 0x18) << 2, (y + 0xE) << 2, 0,
                                 (icon & 1) << 9, (icon >> 1) << 9, 0x400, 0x400);
             if (live != 0) {
-                total = movement_obj[i].unk31C->unk1AA;
+                total = movement_obj[i].unk31C->shotsfired;
             } else {
                 total = D_8008FDD4->stats[i].unk6;
             }

@@ -1739,7 +1739,7 @@ void func_151CB510(SightSprite *sprite) {
 
     player = sprite->payload.player;
     payload = &sprite->payload;
-    if ((player->contPad->button & 0x2000) && player->playerExt->unk19E == 0) {
+    if ((player->contPad->button & 0x2000) && player->playerExt->ReloadTimer == 0) {
         target = payload->unk8;
     } else {
         target = 0.0f;

@@ -19,7 +19,7 @@ void func_1517F814(s32, f32, f32, f32, s32);
 
 /* Puts obj into state 2 with the given timer. */
 void func_1507C8E0(Actor *obj, s32 timer) {
-    obj->unk31C->unk120 = 2;
+    obj->unk31C->death_State = 2;
     obj->unk31C->unk124 = timer;
 }
 
@@ -37,46 +37,46 @@ void func_1507C8FC(void) {
             if (player->unk31C == NULL) {
                 continue;
             }
-            if (player->unk31C->unk120 == 0) {
+            if (player->unk31C->death_State == 0) {
                 player->unk31C->unk126 = 0;
                 continue;
             }
-            if (player->unk31C->unk120 == 1) {
+            if (player->unk31C->death_State == 1) {
                 continue;
             }
             if (i <= D_80082FA0) {
                 if (D_800BE616 != 0 && (D_800D18A2 & (1 << i))) {
-                    player->unk31C->unk120 = 2;
+                    player->unk31C->death_State = 2;
                     player->unk31C->unk124 = 60;
                 }
-                if (player->unk31C->unk120 == 11) {
+                if (player->unk31C->death_State == 11) {
                     func_1517EE40(0, 0, 0, 15, 1, i);
-                    player->unk31C->unk120 = 12;
+                    player->unk31C->death_State = 12;
                     continue;
                 }
-                if (player->unk31C->unk120 == 12) {
+                if (player->unk31C->death_State == 12) {
                     if (func_1517EFAC(i) != 0) {
                         func_1507D4F8(i);
                     }
                     continue;
                 }
-                if (player->unk31C->unk120 == 2) {
+                if (player->unk31C->death_State == 2) {
                     if (player->unk31C->unk124 > 0) {
                         player->unk31C->unk124 -= D_800BE9E4;
                     } else {
                         func_1507CD0C(player);
                     }
-                } else if (player->unk31C->unk120 == 7) {
+                } else if (player->unk31C->death_State == 7) {
                     if (player->unk31C->unk124 > 0) {
                         player->unk31C->unk124 -= D_800BE9E4;
                     } else {
-                        player->unk31C->unk120 = 8;
+                        player->unk31C->death_State = 8;
                         func_1506160C(player, 2, 0, 60, 0);
                     }
                 }
                 player->unk31C->unk126 += D_800BE9E4;
-                if ((D_800BE710[i] & 0x8000) || (D_800BE616 != 0 && player->unk31C->unk84 == 0) ||
-                    func_150859AC(i, 3) < 2 || (player->unk31C->unk84 == 1 && player->unk31C->unk126 >= 181)) {
+                if ((D_800BE710[i] & 0x8000) || (D_800BE616 != 0 && player->unk31C->bot == 0) ||
+                    func_150859AC(i, 3) < 2 || (player->unk31C->bot == 1 && player->unk31C->unk126 >= 181)) {
                     player->unk31C->unk122 = TRUE;
                 }
                 if (D_8008FDBC & 0x80) {
@@ -84,27 +84,27 @@ void func_1507C8FC(void) {
                 }
                 func_1507E1D0(player, &x, &y, &z);
                 func_1517F814(0, x, y, z, i);
-                if (player->unk31C->unk122 && player->unk31C->unk120 == 5) {
-                    player->unk31C->unk120 = 6;
+                if (player->unk31C->unk122 && player->unk31C->death_State == 5) {
+                    player->unk31C->death_State = 6;
                 }
-                if (player->unk31C->unk120 == 9) {
+                if (player->unk31C->death_State == 9) {
                     func_1507D4F8(i);
                 }
-            } else if (player->unk31C->unk120 == 11) {
+            } else if (player->unk31C->death_State == 11) {
                 func_1507D4F8(i);
                 continue;
-            } else if (player->unk31C->unk120 == 2) {
+            } else if (player->unk31C->death_State == 2) {
                 if (player->unk31C->unk124 > 0) {
                     player->unk31C->unk124 -= D_800BE9E4;
                 } else {
-                    player->unk31C->unk120 = 7;
+                    player->unk31C->death_State = 7;
                 }
             } else {
                 player->unk31C->unk126 += D_800BE9E4;
                 if (player->unk7 == 0xFF && player->unk31C->unk126 >= 161) {
                     func_1506160C(player, 2, 0, 60, 0);
                 }
-                if (player->unk31C->unk126 >= 181 && player->unk31C->unk120 != 10) {
+                if (player->unk31C->unk126 >= 181 && player->unk31C->death_State != 10) {
                     func_1507D4F8(i);
                 }
             }
@@ -117,7 +117,7 @@ void func_1507C8FC(void) {
 void func_1507CD0C(Actor *obj) {
     s32 slot = obj - movement_obj;
 
-    obj->unk31C->unk120 = 3;
+    obj->unk31C->death_State = 3;
 
     if (slot <= D_80082FA0) {
         func_15181D70(slot);
@@ -147,7 +147,7 @@ void func_1507CD64(Actor *obj, s32 cause) {
     if (slot >= D_8008FD8C) {
         return;
     }
-    if (obj->unk31C->unk120 != 0) {
+    if (obj->unk31C->death_State != 0) {
         if (cause != 9 || cause == obj->unk31C->unk121) {
             return;
         }
@@ -172,7 +172,7 @@ lbl2: // matching: unused label splits the basic block; as1 then hoists the relo
     sound = -1;
     flag = 0;
     mode = 0;
-    if (obj->unk31C->unk1AC) {
+    if (obj->unk31C->on_fire) {
         D_800D18A9 = 2;
     }
     switch (cause) {
@@ -258,7 +258,7 @@ lbl2: // matching: unused label splits the basic block; as1 then hoists the relo
     obj->bodyRadius = 0;
     obj->bodyHeight = 0;
     obj->xz_velocity = 0.0f;
-    obj->unk31C->unk46 = 0;
+    obj->unk31C->bitten = 0;
     if (obj->unk13C != 0) {
         saved = D_800D154C;
         D_800D154C = obj;
@@ -266,12 +266,12 @@ lbl2: // matching: unused label splits the basic block; as1 then hoists the relo
         D_800D154C = saved;
     }
     if (mode == 0 || mode == 3) {
-        obj->unk31C->unk120 = 1;
+        obj->unk31C->death_State = 1;
     } else {
         func_1507C8E0(obj, 0);
     }
     if (mode == 2) {
-        obj->unk31C->unk120 = 11;
+        obj->unk31C->death_State = 11;
     } else if (mode == 3) {
         func_1507D4F8(slot);
     }
@@ -306,7 +306,7 @@ void func_1507D1D8(Actor *obj) {
     s32 choice;
     s32 slot;
 
-    saved1AA = obj->unk31C->unk1AA;
+    saved1AA = obj->unk31C->shotsfired;
     saved1B0 = obj->unk31C->lastSpawnIndex;
     saved328 = obj->unk328; // signed byte at 0x328 (Actor types it u8)
     saved1AF = obj->unk31C->unk1AF;
@@ -344,13 +344,13 @@ void func_1507D1D8(Actor *obj) {
         func_15085430(obj, player, 0);
     }
     D_800D18A8 = 0;
-    obj->unk31C->unk120 = 0;
+    obj->unk31C->death_State = 0;
     obj->unk31C->unk122 = FALSE;
     obj->unk31C->unk124 = 0;
-    obj->unk31C->unk1AA = saved1AA;
+    obj->unk31C->shotsfired = saved1AA;
     obj->health = D_8008726C;
     obj->unk22C |= 0x100;
-    obj->unk31C->unk75 = 0;
+    obj->unk31C->context_b = 0;
     obj->unk20F = 0xFF;
     obj->unk210 = 0xFF;
     obj->unk211 = 0xFF;
@@ -386,7 +386,7 @@ void func_1507D4F8(s32 slot) {
                 func_1507D1D8(obj);
                 return;
             }
-            obj->unk31C->unk120 = 10;
+            obj->unk31C->death_State = 10;
             return;
         }
 
@@ -412,12 +412,12 @@ void func_1507D4F8(s32 slot) {
 
     obj = &movement_obj[slot];
     state = obj->unk31C;
-    if (state->unk84 == 0) {
+    if (state->bot == 0) {
         // matching: the volatile store and load make IDO reload unk31C after the decrement, as the original does
         *(volatile s8 *)&D_8008FD94 = D_8008FD94 - 1;
         state = *(ActorCtl *volatile *)&obj->unk31C;
     }
-    state->unk120 = 10;
+    state->death_State = 10;
     D_800BE618--;
 }
 

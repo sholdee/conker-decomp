@@ -365,7 +365,7 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
                 pos.x = src->x;
                 pos.y = src->y + -13.0f;
                 pos.z = src->z;
-            } else if (shooter->unk31C->aimState != 0) {
+            } else if (shooter->unk31C->SniperState != 0) {
                 extern u8 D_800BE616; // matching: a declaration makes this an IDO scope block (register choice)
 
                 angle = func_15144AA8(((Camera *)obj)->playerIndex, obj) * 0.01745329238f;
@@ -388,7 +388,7 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
         }
     }
 
-    if ((shooter->unk31C != NULL && shooter->unk31C->aimState != 0) || aimer != NULL) {
+    if ((shooter->unk31C != NULL && shooter->unk31C->SniperState != 0) || aimer != NULL) {
         extern u8 D_800BE616; // matching: a declaration makes this an IDO scope block (register choice)
 
         who = (aimer != NULL) ? aimer : shooter;

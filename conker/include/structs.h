@@ -630,60 +630,62 @@ typedef struct {
 
 /* Per-character control block (Actor.unk31C, 0x1C0 bytes, allocated for player-controlled and
  * scripted characters): movement state, controller input, rope riding, idle animation and the
- * first-person aim state. */
+ * first-person aim state.
+ * original: mv_struct (rom_debug_struct.c, reached through movement_move "->mv"); the Oct 2000
+ * layout equals US. Field names in Rare's spelling come from that viewer. */
 typedef struct {
-    /* 0x000 */ f32 unk0;
-    /* 0x004 */ s32 unk4;
-    /* 0x008 */ s16 unk8;
-    /* 0x00A */ u8  padA;
-    /* 0x00B */ u8  unkB;
-    /* 0x00C */ u8  unkC;
-    /* 0x00D */ u8  unkD;
-    /* 0x00E */ u16 unkE;
-    /* 0x010 */ s16 unk10;
-    /* 0x012 */ s16 unk12;
-    /* 0x014 */ u16 unk14;
-    /* 0x016 */ u8  unk16;
-    /* 0x017 */ u8  unk17;
+    /* 0x000 */ f32 actual_speed;
+    /* 0x004 */ s32 duck_tilt;       // nonzero suppresses the walk lean (game_79F10.c)
+    /* 0x008 */ s16 pissed_up;
+    /* 0x00A */ u8  pissed_amount;   // not accessed by US code
+    /* 0x00B */ u8  pissed_cycle;
+    /* 0x00C */ u8  pissed_stumble;
+    /* 0x00D */ u8  pssd_is_pissing;
+    /* 0x00E */ u16 pissed_walk;
+    /* 0x010 */ s16 pissed_angle;
+    /* 0x012 */ s16 pssd_waist_tilt;
+    /* 0x014 */ u16 pssd_waist_wobble;
+    /* 0x016 */ u8  pissed_hangover;
+    /* 0x017 */ u8  env_suit;
     /* 0x018 */ s16 unk18;
-    /* 0x01A */ u8  unk1A;
-    /* 0x01B */ u8  unk1B;
-    /* 0x01C */ f32 unk1C;
-    /* 0x020 */ u8  unk20;
+    /* 0x01A */ u8  injured;
+    /* 0x01B */ u8  ind_cnt;         // original label "ind.cnt."
+    /* 0x01C */ f32 water_up;
+    /* 0x020 */ u8  water_attribs;
     /* 0x021 */ u8  unk21;
     /* 0x022 */ s8  unk22;
-    /* 0x023 */ s8  unk23;
-    /* 0x024 */ s16 unk24;
-    /* 0x026 */ u8  unk26;
-    /* 0x027 */ u8  unk27;
-    /* 0x028 */ f32 unk28;
-    /* 0x02C */ f32 unk2C;
-    /* 0x030 */ s8  unk30;
-    /* 0x031 */ u8  unk31;
-    /* 0x032 */ u16 unk32;
+    /* 0x023 */ s8  door_walkf_time;
+    /* 0x024 */ s16 gun_before_reload;
+    /* 0x026 */ u8  break_stun;
+    /* 0x027 */ u8  jump_on_char;
+    /* 0x028 */ f32 swing_xvel;
+    /* 0x02C */ f32 swing_zvel;
+    /* 0x030 */ s8  gpoint;
+    /* 0x031 */ u8  prop;
+    /* 0x032 */ u16 walk_attrib;
     /* 0x034 */ u16 unk34;
-    /* 0x036 */ u8  unk36;
-    /* 0x037 */ u8  unk37;
-    /* 0x038 */ s32 unk38;
-    /* 0x03C */ u8  unk3C;
+    /* 0x036 */ u8  over_edge;
+    /* 0x037 */ u8  dwalk;
+    /* 0x038 */ s32 old_keys;
+    /* 0x03C */ u8  turn;
     /* 0x03D */ u8  pad3D;
-    /* 0x03E */ u16 unk3E;
-    /* 0x040 */ f32 unk40;
-    /* 0x044 */ s8  unk44;
+    /* 0x03E */ u16 xslopeangle;
+    /* 0x040 */ f32 lean_last;
+    /* 0x044 */ s8  camjolt;
     /* 0x045 */ u8  pad45;
-    /* 0x046 */ s16 unk46;
-    /* 0x048 */ s16 unk48;
+    /* 0x046 */ s16 bitten;
+    /* 0x048 */ s16 lockout;
     /* 0x04A */ s8  chased;
     /* 0x04B */ s8  chasing;
-    /* 0x04C */ u16 unk4C;
-    /* 0x04E */ u8  unk4E;
-    /* 0x04F */ u8  unk4F;
+    /* 0x04C */ u16 press_angle;
+    /* 0x04E */ u8  transport;
+    /* 0x04F */ u8  transport_surface;
     /* 0x050 */ s8  unk50;
-    /* 0x051 */ u8  unk51;
-    /* 0x052 */ u8  unk52;
-    /* 0x053 */ u8  unk53;
-    /* 0x054 */ s8  unk54;
-    /* 0x055 */ s8  unk55;
+    /* 0x051 */ u8  land_floor;
+    /* 0x052 */ u8  use_cam_butt;
+    /* 0x053 */ u8  hang_ledge;
+    /* 0x054 */ s8  side;
+    /* 0x055 */ s8  save_done;
     /* 0x056 */ u8  unk56;
     /* 0x057 */ u8  unk57;
     /* 0x058 */ IdleState idle;
@@ -693,21 +695,21 @@ typedef struct {
     /* 0x06C */ s16 holdX;      // held position (s16 world units)
     /* 0x06E */ s16 holdY;
     /* 0x070 */ s16 holdZ;
-    /* 0x072 */ u16 unk72;
-    /* 0x074 */ u8  unk74;
-    /* 0x075 */ u8  unk75;
-    /* 0x076 */ u8  unk76;
-    /* 0x077 */ u8  unk77;
-    /* 0x078 */ u8  unk78;
-    /* 0x079 */ u8  unk79;
-    /* 0x07A */ u8  unk7A;
-    /* 0x07B */ u8  unk7B;
+    /* 0x072 */ u16 context_exclude_time;
+    /* 0x074 */ u8  context_a;
+    /* 0x075 */ u8  context_b;
+    /* 0x076 */ u8  context_z;
+    /* 0x077 */ u8  rt_context_a;
+    /* 0x078 */ u8  rt_context_b;
+    /* 0x079 */ u8  rt_context_z;
+    /* 0x07A */ u8  cont_zone_ind;
+    /* 0x07B */ u8  inst_context;
     /* 0x07C */ u8  unk7C;
     /* 0x07D */ u8  matrix_physics;
     /* 0x07E */ u16 unk7E;
     /* 0x080 */ s16 unk80;
     /* 0x082 */ s16 unk82;
-    /* 0x084 */ u8  unk84;
+    /* 0x084 */ u8  bot;
     /* 0x085 */ s8  stick_x;    // this frame's controller input
     /* 0x086 */ s8  stick_y;
     /* 0x087 */ u8  pad87;
@@ -718,12 +720,12 @@ typedef struct {
     /* 0x08F */ s8  unk8F;
     /* 0x090 */ f32 unk90;
     /* 0x094 */ u8  unk94;
-    /* 0x095 */ u8  unk95;
+    /* 0x095 */ u8  ladder;
     /* 0x096 */ u8  unk96;
     /* 0x097 */ u8  unk97;
-    /* 0x098 */ u8  ropeId;
+    /* 0x098 */ u8  rope;            // rope index (func_151AE590), 0 = none
     /* 0x099 */ u8  pad99[3];
-    /* 0x09C */ struct Rope *rope;     // rope being ridden, or NULL
+    /* 0x09C */ struct Rope *ropePtr;     // rope being ridden, or NULL
     /* 0x0A0 */ f32 ropeProgress;      // 0..1 along the rope
     /* 0x0A4 */ u8  padA4[4];
     /* 0x0A8 */ f32 ropeSwingForce;
@@ -746,10 +748,10 @@ typedef struct {
     /* 0x114 */ s16 height;      // cached size from func_1507C3E0
     /* 0x116 */ s16 width;
     /* 0x118 */ s16 depth;
-    /* 0x11A */ u8  unk11A;
+    /* 0x11A */ u8  weapon_status;
     /* 0x11B */ u8  spawnIndex;
     /* 0x11C */ struct BoneChain *boneChain;
-    /* 0x120 */ u8  unk120;
+    /* 0x120 */ u8  death_State;
     /* 0x121 */ u8  unk121;
     /* 0x122 */ u8  unk122;
     /* 0x123 */ u8  unk123;
@@ -777,25 +779,25 @@ typedef struct {
     /* 0x18C */ f32 unk18C;
     /* 0x190 */ s32 aimZone;
     /* 0x194 */ u8  aimReset;
-    /* 0x195 */ s8  unk195;
-    /* 0x196 */ s8  unk196;
-    /* 0x197 */ u8  aimState;      // nonzero while aiming in first person
-    /* 0x198 */ u8  unk198;
-    /* 0x199 */ u8  unk199;
-    /* 0x19A */ u8  grenade_count;
-    /* 0x19B */ u8  unk19B;
-    /* 0x19C */ u16 unk19C;
-    /* 0x19E */ u16 unk19E;
+    /* 0x195 */ s8  being_sniped;
+    /* 0x196 */ s8  being_s_char;
+    /* 0x197 */ u8  SniperState;      // nonzero while aiming in first person (our earlier name: aimState)
+    /* 0x198 */ u8  AimState;        // copied from Camera.aimState (game_14FF90.c)
+    /* 0x199 */ u8  shotCount;
+    /* 0x19A */ u8  numGrenades;
+    /* 0x19B */ u8  GrenadeThrowState;
+    /* 0x19C */ u16 GrenadeTimer;
+    /* 0x19E */ u16 ReloadTimer;
     /* 0x1A0 */ u16 unk1A0;
     /* 0x1A2 */ u16 unk1A2;
     /* 0x1A4 */ u16 unk1A4;
     /* 0x1A6 */ u16 unk1A6;
     /* 0x1A8 */ u8  unk1A8;
     /* 0x1A9 */ u8  unk1A9;
-    /* 0x1AA */ s16 unk1AA;
-    /* 0x1AC */ u8  unk1AC;
+    /* 0x1AA */ s16 shotsfired;
+    /* 0x1AC */ u8  on_fire;
     /* 0x1AD */ u8  unk1AD;
-    /* 0x1AE */ s8  unk1AE;
+    /* 0x1AE */ s8  ammo_count;
     /* 0x1AF */ s8  unk1AF;
     /* 0x1B0 */ s8  lastSpawnIndex;   // last multiplayer spawn point used
     /* 0x1B1 */ u8  unk1B1;

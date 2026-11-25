@@ -120,7 +120,7 @@ void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, 
         if (target->unk31C == NULL) {
             return;
         }
-        if (target->unk31C->aimState != 0) {
+        if (target->unk31C->SniperState != 0) {
             useTarget = 1;
         } else {
             useTarget = 0;
@@ -282,7 +282,7 @@ void func_150FC368(Particle_150FC368 *particle) {
     owner = particle->owner;
     if ((owner == NULL) || (owner->interaction_state == 0) || (owner->id == 0xFF) ||
         (owner->unique_id != particle->ownerUniqueId) || (owner->unk31C == NULL) ||
-        (owner->unk31C->unk84 != 0) || (owner->unk127 == 0xFF) || (owner->camera == NULL)) {
+        (owner->unk31C->bot != 0) || (owner->unk127 == 0xFF) || (owner->camera == NULL)) {
         cameraMask = 0xFF;
     } else {
         cameraMask = ~(1U << owner->camera->playerIndex) & 0xFF;
@@ -371,7 +371,7 @@ void func_150FC614(EmitterObj *obj) {
         state->side ^= 1;
         if (state->other != NULL) {
             if (state->other->unk31C != NULL) {
-                state->other->unk31C->unk1AA++;
+                state->other->unk31C->shotsfired++;
             }
         }
         state->spawnTimer += 4.0f + (func_150ADA68() * 4.0f);

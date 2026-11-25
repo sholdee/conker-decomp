@@ -1041,7 +1041,7 @@ void func_1502DF38(s32 index, s32 rootOnly) {
     } else {
         canCull = TRUE;
     }
-    if (obj->unk31C != NULL && obj->unk31C->aimState != 0) {
+    if (obj->unk31C != NULL && obj->unk31C->SniperState != 0) {
         canCull = FALSE;
     }
     if ((1 << index) & D_800C3E74) {
@@ -1049,7 +1049,7 @@ void func_1502DF38(s32 index, s32 rootOnly) {
     }
     if (obj->id == 0x8A) {
         other = func_15072208(obj, 0);
-        if (other != NULL && other->unk31C != NULL && other->unk31C->aimState != 0) {
+        if (other != NULL && other->unk31C != NULL && other->unk31C->SniperState != 0) {
             canCull = FALSE;
         }
     }
@@ -1224,7 +1224,7 @@ void func_1502E4C4(s32 index) {
         view = (s32)&D_800BE628[i];
         tbl = &D_800D9C10[i];
         inside = FALSE;
-        if (camera_global_Cameras[i].playerExt->aimState != 0) {
+        if (camera_global_Cameras[i].playerExt->SniperState != 0) {
             playerRange = 100000;
         } else {
             playerRange = range;
@@ -1275,7 +1275,7 @@ void func_1502E4C4(s32 index) {
         mask <<= 1;
     }
     func_1502E9FC(obj, maxDist);
-    if (obj->camera != NULL && (obj->camera->mode == 0x10000 || obj->unk31C->aimState != 0)) {
+    if (obj->camera != NULL && (obj->camera->mode == 0x10000 || obj->unk31C->SniperState != 0)) {
         obj->unk74 |= 1 << index;
     }
     if (D_800C35EA[0] != 1) {

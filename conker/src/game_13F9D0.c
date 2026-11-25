@@ -174,7 +174,7 @@ void func_15112A80(s32 player) {
 
                         mtx = D_800D9C10[view];
                         dp = (s32 *)((u8 *)dist + (i - start) * 4); // matching: &dist[i - start] scales i and start separately
-                        if (camera_global_Cameras[view].playerExt->aimState != 0) {
+                        if (camera_global_Cameras[view].playerExt->SniperState != 0) {
                             drawDist = D_800D9B1C;
                         } else if (obj->drawDistance == 0) {
                             drawDist = D_800D9B1C;

@@ -1233,7 +1233,7 @@ void func_151E53E8(s32 flag) {
             D_800E0A88 = func_151DDBA0;
         }
         for (i = 0; i < D_8008FD90; i++) {
-            D_8008FDD4->stats[i].unk6 = movement_obj[i].unk31C->unk1AA;
+            D_8008FDD4->stats[i].unk6 = movement_obj[i].unk31C->shotsfired;
         }
         D_8008FDC0 &= 0xE35F;
         D_800E0A86 = flag;
@@ -1374,9 +1374,9 @@ s32 func_151E565C(void) {
                                 if (score < other) {
                                     D_800E0AC0[i]++;
                                 } else if (score == other) {
-                                    if (movement_obj[j].unk31C->unk1AA < movement_obj[i].unk31C->unk1AA) {
+                                    if (movement_obj[j].unk31C->shotsfired < movement_obj[i].unk31C->shotsfired) {
                                         D_800E0AC0[i]++;
-                                    } else if (movement_obj[i].unk31C->unk1AA == movement_obj[j].unk31C->unk1AA) {
+                                    } else if (movement_obj[i].unk31C->shotsfired == movement_obj[j].unk31C->shotsfired) {
                                         if (j < i && D_80082FA0 < j) {
                                             D_800E0AC0[i]++;
                                         }
@@ -1401,7 +1401,7 @@ s32 func_151E565C(void) {
         teamStats[team] += D_8008FDD4->score[i];
         teamStats[team + 4] += func_150859AC(i, 3) * 6 + func_150859AC(i, 4);
         teamStats[team + 8] = func_150859AC(team, 6);
-        teamStats[team + 12] += movement_obj[i].unk31C->unk1AA;
+        teamStats[team + 12] += movement_obj[i].unk31C->shotsfired;
     }
     statBase = 8;
     team = -1;
@@ -1565,7 +1565,7 @@ void func_151E5FF4(Actor *source, Actor *victim, s32 cause) {
             attacker->unk31C->unkAF = 0;
             variants = 0;
             if (cause == 0x33) {
-                victimKind = victim->unk31C->unk78;
+                victimKind = victim->unk31C->rt_context_b;
                 if ((victimKind == 0x21) || (victimKind == 0x22)) {
                     func_10010630(0x510, victim, 0x61A8, 0x12C, 0x190);
                 }
@@ -1604,7 +1604,7 @@ void func_151E5FF4(Actor *source, Actor *victim, s32 cause) {
                         variants = 3;
                         sound = 0x571;
                     }
-                } else if (victim->unk31C->unk1AC != 0) {
+                } else if (victim->unk31C->on_fire != 0) {
                     if ((cause != 0x21) && ((victim->health <= 0) || ((func_150ADA20() & 3) == 3))) {
                         variants = 4;
                         sound = 0x582;
@@ -1612,7 +1612,7 @@ void func_151E5FF4(Actor *source, Actor *victim, s32 cause) {
                     }
                 } else if (cause == 0x2E) {
                     delay = 0x1E;
-                    if ((attacker->unk31C->unk78 == 0x23) && ((func_150ADA20() & 3) == 0)) {
+                    if ((attacker->unk31C->rt_context_b == 0x23) && ((func_150ADA20() & 3) == 0)) {
                         sound = 0x587;
                     } else {
                         sound = 0x579;

@@ -146,13 +146,13 @@ void func_151A9BA0(ActorTask *task) {
 }
 
 
-/* Unless the actor's unk31C->unk95 is set: ground effect 1 (sound 0x6978), func_151AA264, func_151ABE00. */
+/* Unless the actor's unk31C->ladder is set: ground effect 1 (sound 0x6978), func_151AA264, func_151ABE00. */
 void func_151A9CA0(ActorTask *task) {
     Actor *actor = task->watcher.character;
     f32 pos[3];
 
     // matching: structs.h types unk95 as s8, but this read is unsigned (lbu)
-    if ((actor->unk31C != NULL) && (actor->unk31C->unk95 != 0)) {
+    if ((actor->unk31C != NULL) && (actor->unk31C->ladder != 0)) {
         return;
     }
     pos[0] = actor->x_position;

@@ -55,8 +55,8 @@ s32 func_151905BC(PeriodicObject *obj) {
         trigger->elapsed -= trigger->interval;
     }
     state = obj->linked->unk31C;
-    if (state != NULL && state->unk84 == 0) {
-        state->unk46 = 1000;
+    if (state != NULL && state->bot == 0) {
+        state->bitten = 1000;
     }
     return TRUE;
 }
@@ -66,6 +66,6 @@ void func_151906C4(PeriodicObject *obj) {
     ActorCtl *state = obj->linked->unk31C;
 
     if (state != NULL) {
-        state->unk1AC = 0;
+        state->on_fire = 0;
     }
 }

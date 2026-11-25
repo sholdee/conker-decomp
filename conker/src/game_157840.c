@@ -54,7 +54,7 @@ void func_1512A390(Camera *arg0) {
 
     unused28 = arg0->player->unk28;
     if (arg0->playerExt != NULL) {
-        flag4E = arg0->playerExt->unk4E;
+        flag4E = arg0->playerExt->transport;
         targetHeight = arg0->playerExt->height;
     } else {
         flag4E = 0;
@@ -461,7 +461,7 @@ s32 func_1512B730(Camera *arg0, f32 *offset, f32 *unused) {
     if (state0 == 2 || state1 == 2) {
         halfWidth = D_800DC200[arg0->playerIndex][arg0->preset].halfWidth + 1;
         if (state0 == 2 && state1 == 2) {
-            if (arg0->player->in_water != 1 && arg0->playerExt->unk120 == 0) {
+            if (arg0->player->in_water != 1 && arg0->playerExt->death_State == 0) {
                 arg0->unk5FE -= D_800BE9E4;
                 if (arg0->unk5FE < 0) {
                     arg0->unk5FE = 0;
@@ -546,7 +546,7 @@ void func_1512BB10(Camera *arg0) {
 
     flag = 0;
     // matching: sub is loaded inside the condition, after the first flag test
-    if (!(arg0->flags & 0x40000) && (sub = arg0->playerExt, sub->unk95 == 0) && (arg0->mode != 0x40) &&
+    if (!(arg0->flags & 0x40000) && (sub = arg0->playerExt, sub->ladder == 0) && (arg0->mode != 0x40) &&
         !(arg0->flags & 0x80) && !(arg0->flags & 0x200)) {
         saved2 = D_80089120[2];
         saved1 = D_80089120[1];

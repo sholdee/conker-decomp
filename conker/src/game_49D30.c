@@ -1789,7 +1789,7 @@ void func_1502178C(Actor *target, s32 scene, s32 onlyTrack) {
                         obj->xz_velocity = 0.0f;
                     }
                     if (obj->unk31C != NULL) {
-                        obj->unk31C->unk0 = obj->xz_velocity * 2.0f;
+                        obj->unk31C->actual_speed = obj->xz_velocity * 2.0f;
                     }
                     obj->unk54 = 0.0f;
                     obj->unkCC = 0;
@@ -2495,7 +2495,7 @@ s32 func_150235DC(s32 scene) {
             ctl = obj->unk31C;
             obj->xz_velocity = 0.0f;
             if (ctl != NULL) {
-                ctl->unk0 = 0.0f;
+                ctl->actual_speed = 0.0f;
             }
             obj->unk54 = 0.0f;
             obj->unkCC = 0;
@@ -2505,7 +2505,7 @@ s32 func_150235DC(s32 scene) {
                 obj->in_water = 1;
                 obj->y_velocity = 0.0f;
                 obj->gravity = 0.0f;
-                if (((obj->unk118 - 50.0f) < obj->aim.y) || ((obj->unk31C->unk20 & 1) != 0)) {
+                if (((obj->unk118 - 50.0f) < obj->aim.y) || ((obj->unk31C->water_attribs & 1) != 0)) {
                     obj->unkB2 = 0;
                     func_1508F060();
                 }
@@ -2526,7 +2526,7 @@ s32 func_150235DC(s32 scene) {
             obj->unk28 = obj->y_position - obj->floorY;
             D_800D154C = obj;
             func_1507F640();
-            obj->unk31C->unk23 = 0;
+            obj->unk31C->door_walkf_time = 0;
             obj->unk287 = 0;
             zero = obj->unk287;
             obj->unk276 = 0;

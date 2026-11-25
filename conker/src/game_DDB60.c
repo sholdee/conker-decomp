@@ -222,7 +222,7 @@ void func_150B0D20(DDB60Effect *effect) {
     }
     idx = owner->unk124;
     emit = 0;
-    if (movement_obj[idx].unk31C->unk4F == 2) {
+    if (movement_obj[idx].unk31C->transport_surface == 2) {
         speed = owner->xz_velocity;
         minSpeed = movement_obj[idx].unk44 * 1.350000024f;
         if (speed < minSpeed) {

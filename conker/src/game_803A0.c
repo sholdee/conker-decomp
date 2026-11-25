@@ -55,7 +55,7 @@ void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 ar
         }
         obj->unk1CC = obj->y_position;
         obj->unk76 = arg0->unk7A;
-        obj->unk31C->unk30 = 0;
+        obj->unk31C->gpoint = 0;
         if (arg0->interaction_state == 0x20) {
             obj->y_velocity = 0.0f;
             state = 2;
@@ -81,7 +81,7 @@ void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 ar
             obj->unk78 = obj->unk76;
             obj->unk7A = obj->unk76;
             obj->unk40 = (s16)(obj->unk76 + 0x4000) * 0.005493164f; // binary angle to degrees
-            obj->unk31C->unk4E = state;
+            obj->unk31C->transport = state;
             obj->unk83 = 0;
             obj->disable_run = 0;
         // matching: an empty label here makes IDO fill the branch delay slot as the original
@@ -94,7 +94,7 @@ void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 ar
         }
         obj->immune = immune;
         obj->unk239 = arg7;
-        obj->unk31C->unk27 = 0;
+        obj->unk31C->jump_on_char = 0;
         arg0->unk232 = arg5;
         arg0->unk218 = NULL;
         if (arg4 != 0) {
@@ -130,17 +130,17 @@ void func_1505327C(Actor *arg0, f32 yVelocity, f32 gravity, s32 arg3, s32 mtxInd
         arg0->unk232 = arg3;
         arg0->unk218 = NULL;
         func_1505E650(obj, 50, 1.3f, 4.0f, 0.0f, 0.0f, 0);
-        movement_obj[arg0->unk124].unk31C->unk30 = 70;
+        movement_obj[arg0->unk124].unk31C->gpoint = 70;
         // unk28/unk2C are declared s32 in ActorCtl but hold floats
-        *(f32 *)&movement_obj[arg0->unk124].unk31C->unk28 = arg0->x_position;
-        *(f32 *)&movement_obj[arg0->unk124].unk31C->unk2C = arg0->z_position;
+        *(f32 *)&movement_obj[arg0->unk124].unk31C->swing_xvel = arg0->x_position;
+        *(f32 *)&movement_obj[arg0->unk124].unk31C->swing_zvel = arg0->z_position;
         if ((arg0->unk1D4 != NULL) && (mtxIndex != -1)) {
         // matching: an unused label keeps IDO from sinking the index shift below the -1 test
         joint:
             func_15043FF0(&pos, &((struct113 *)arg0->unk1D4)[mtxIndex]);
-            *(f32 *)&movement_obj[arg0->unk124].unk31C->unk28 = pos.x;
-            *(f32 *)&movement_obj[arg0->unk124].unk31C->unk2C = pos.z;
+            *(f32 *)&movement_obj[arg0->unk124].unk31C->swing_xvel = pos.x;
+            *(f32 *)&movement_obj[arg0->unk124].unk31C->swing_zvel = pos.z;
         }
-        movement_obj[arg0->unk124].unk31C->unk27 = 1;
+        movement_obj[arg0->unk124].unk31C->jump_on_char = 1;
     }
 }

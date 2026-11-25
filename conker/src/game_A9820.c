@@ -69,10 +69,10 @@ void func_1507C3E0(Actor *obj, s16 *outHeight, s16 *outWidth, s16 *outDepth) {
         case 117: case 128: case 130: case 136: case 144: case 150: case 152:
         case 156: case 157: case 159: case 160: case 176: case 177: case 178: case 180:
             ext = obj->unk31C;
-            if (ext != NULL && ext->unk4 != 0) {
+            if (ext != NULL && ext->duck_tilt != 0) {
                 width = depth = 60.0f;
                 height = 80.0f;
-            } else if (ext != NULL && ext->unk17 != 0) {
+            } else if (ext != NULL && ext->env_suit != 0) {
                 width = depth = 70.0f;
                 height = 300.0f;
             } else if (obj->in_water) {
@@ -84,13 +84,13 @@ void func_1507C3E0(Actor *obj, s16 *outHeight, s16 *outWidth, s16 *outDepth) {
                 height = 180.0f;
                 if (ext != NULL) {
                     if ((obj->camera != NULL && obj->camera->aimState != 0) ||
-                        ext->aimState != 0 || ext->unk1B3 != 0) {
+                        ext->SniperState != 0 || ext->unk1B3 != 0) {
                         width *= 2.0f; depth *= 2.0f;
                     }
                     height += ext->unk1A6;
                 }
             }
-            if (ext != NULL && (ext->unk4E & 0xF) == 1 && ext->unk4F == 0 &&
+            if (ext != NULL && (ext->transport & 0xF) == 1 && ext->transport_surface == 0 &&
                 obj->xz_velocity < 40.0f) {
                 width = depth = 110.0f;
                 height = 500.0f;

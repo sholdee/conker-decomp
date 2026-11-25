@@ -244,7 +244,7 @@ void func_150CE740(Actor *obj) {
     }
     action = 0;
     if (D_800BE616 != 0) {
-        if (obj->unk31C->unk84 != 0) {
+        if (obj->unk31C->bot != 0) {
             func_1504C854(obj);
         } else {
             D_800CC288 = D_800BE710[dc_glbl_CharNum];
@@ -270,11 +270,11 @@ void func_150CE740(Actor *obj) {
         obj->unk232 = D_800A080F[action];
         obj->unk218 = NULL;
         if ((obj->unk232 == 0x22) && (obj->unk2E4 == 0)) {
-            obj->unk31C->unk1AA++;
+            obj->unk31C->shotsfired++;
         }
     }
     obj->unk124 = 0;
-    if ((obj->disable_run == 0) && ((D_800BE616 == 0) || (obj->unk31C->unk84 == 0))) {
+    if ((obj->disable_run == 0) && ((D_800BE616 == 0) || (obj->unk31C->bot == 0))) {
         if (D_800BE616 != 0) {
             /* camera yaw in degrees -> 16-bit binary angle (65536 / 360) */
             D_800CC280 = camera_global_Cameras[dc_glbl_CharNum].yaw * 182.0444488525390625f;
@@ -282,7 +282,7 @@ void func_150CE740(Actor *obj) {
             obj->unk44 = func_1505A5CC(D_800CC284);
         } else {
             obj->unk44 = movement_obj[obj->unk124].unk44 * 1.75f;
-            heading = movement_obj[obj->unk124].unk31C->unk4C;
+            heading = movement_obj[obj->unk124].unk31C->press_angle;
         }
         if (obj->unk223 == 13) {
             obj->unk44 = 0.0f;
@@ -326,11 +326,11 @@ void func_150CE740(Actor *obj) {
         }
     }
 control_done:
-    if ((D_800BE616 == 0) || (dc_glbl_CharNum >= D_8008FD8C) || (obj->unk31C->unk120 == 0)) {
+    if ((D_800BE616 == 0) || (dc_glbl_CharNum >= D_8008FD8C) || (obj->unk31C->death_State == 0)) {
         func_15052590(obj);
     }
-    if ((movement_obj[0].unk31C->unk27 != 0) && ((obj->unk232 != D_800A0818[isType21]) || (obj->stunned != 0))) {
-        movement_obj[0].unk31C->unk27 = 0;
+    if ((movement_obj[0].unk31C->jump_on_char != 0) && ((obj->unk232 != D_800A0818[isType21]) || (obj->stunned != 0))) {
+        movement_obj[0].unk31C->jump_on_char = 0;
         movement_obj[0].disable_run = 0;
         movement_obj[0].unk83 = 0;
         movement_obj[0].immune = 0;

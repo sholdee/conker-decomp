@@ -136,7 +136,7 @@ void func_150528C8(Actor *obj) {
                 obj->unk31C->unk12C = 0;
             }
             if ((obj->unk31C->unk8C & 0x2000) && (obj->health != 0)) {
-                func_150D7790((u8 *)obj, obj->unk31C->unk75 & 0x7F);
+                func_150D7790((u8 *)obj, obj->unk31C->context_b & 0x7F);
             }
         }
         func_1504CA60(obj);
