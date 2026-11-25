@@ -132,15 +132,20 @@ void func_150E1AB0(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32
     }
 }
 
+/* An aim point a tracer snaps to when its owner's angle and unk1D1 match. */
 typedef struct {
-    s16 unk0;
-    s8 unk2;
-    u8 unk3;
+    s16 unk0;           // compared with the owner's angle
+    s8 unk2;            // compared with owner->unk1D1
+    u8 ricochetChance;  // percent
     f32 x, y, z;
-    f32 dir[3];
+    f32 normal[3];
 } Game10EF60Impact;
 
 extern Game10EF60Impact D_800D9960[];
+
+/* An actor's bone matrices: struct127.unk1D4 points at an array of these. */
+typedef f32 MtxF[4][4];
+
 void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, u32 *, s32, f32 *, f32 *, f32 *, s32, s32, s32, f32);
 s32 func_150E1570(struct127 *, f32, f32, f32, f32, f32, f32, s32, s32);
@@ -148,195 +153,196 @@ void func_150E4550(f32, f32, f32, s32, s32, s32, s32);
 s32 func_1510F8CC(s32);
 s32 func_151EF610(void);
 
-
-void func_150E1D14(Game10EF60Effect *arg0) {
+/* Per-frame update of a tracer: re-fires attached ones from the owner's bone, then moves it. */
+void func_150E1D14(Game10EF60Effect *effect) {
     f32 vx;
     f32 vy;
     f32 vz;
-    f32 a;
-    f32 b;
-    f32 c;
-    f32 sn;
-    f32 cs;
-    f32 hit;
+    f32 rx;
+    f32 ry;
+    f32 rz;
+    f32 sinA;
+    f32 cosA;
+    f32 stopDist;
     f32 dist;
     f32 speed;
     f32 *bone;
-    s32 idx;
-    s32 type;
+    s32 aim;
+    s32 texture;
     s32 fire;
-    s32 surf;
-    s16 p;
-    f32 dir[3];
-    struct17 out;
-    f32 y0;
-    f32 z0;
-    f32 hx;
-    f32 hy;
-    f32 hz;
-    f32 s;
-    u32 tri;
-    s32 ang;
+    s32 impact;
+    s16 angle;
+    f32 incoming[3];
+    struct17 reflected;
+    f32 fwdY;
+    f32 fwdZ;
+    f32 rayX;
+    f32 rayY;
+    f32 rayZ;
+    f32 len;
+    u32 hitTri;
+    s32 unused; // matching: frame size
     s32 i;
 
-    surf = (s32)D_800D9960[idx].dir;
-    fire = arg0->owner->unk76 - arg0->owner->unk31C->unk12;
-    i = (s32)&arg0->target_x;
-    bone = &arg0->target_z;
-    type = 0x23;
+    // matching: dead stores; first mentions order uopt'len CSE temp slots
+    impact = (s32)D_800D9960[aim].normal;
+    fire = effect->owner->unk76 - effect->owner->unk31C->unk12;
+    i = (s32)&effect->target_x;
+    bone = &effect->target_z;
+    texture = 0x23;
     dist = 0.0f;
-    arg0->lifetime -= D_800BE9E4;
-    if (arg0->lifetime < 0 || (arg0->owner != NULL && arg0->ownerTag != -1 && arg0->owner->unk84.uh != arg0->ownerTag)) {
-        func_1516972C((struct102 *)arg0);
+    effect->lifetime -= D_800BE9E4;
+    if (effect->lifetime < 0 || (effect->owner != NULL && effect->ownerTag != -1 && effect->owner->unk84.uh != effect->ownerTag)) {
+        func_1516972C((struct102 *)effect);
         return;
     }
-    if (arg0->mode != 0) {
-        if (arg0->attachDelay == 0) {
-            if (arg0->owner != NULL && arg0->owner->unk1D4 != NULL && arg0->owner->unique_id == arg0->ownerId && (idx = arg0->owner->unk127) != 0xFF) {
-                bone = (f32 *)((u8 *)arg0->owner->unk1D4 + (arg0->bone << 6));
-                func_150A7960(bone, arg0->startOffset[0], arg0->startOffset[1], arg0->startOffset[2], &arg0->x, &arg0->y, &arg0->z);
-                func_150A7960(bone, arg0->endOffset[0], arg0->endOffset[1], arg0->endOffset[2], &arg0->target_x, &arg0->target_y, &arg0->target_z);
-                arg0->attachDelay = 3;
+    if (effect->mode != 0) {
+        if (effect->attachDelay == 0) {
+            if (effect->owner != NULL && effect->owner->unk1D4 != NULL && effect->owner->unique_id == effect->ownerId && (aim = effect->owner->unk127) != 0xFF) {
+                bone = ((MtxF *)effect->owner->unk1D4)[effect->bone][0];
+                func_150A7960(bone, effect->startOffset[0], effect->startOffset[1], effect->startOffset[2], &effect->x, &effect->y, &effect->z);
+                func_150A7960(bone, effect->endOffset[0], effect->endOffset[1], effect->endOffset[2], &effect->target_x, &effect->target_y, &effect->target_z);
+                effect->attachDelay = 3;
             }
         } else {
-            arg0->attachDelay--;
+            effect->attachDelay--;
         }
-        arg0->timer -= D_800BE9E4;
-        if (arg0->timer < -arg0->offTime) {
-            arg0->timer = arg0->onTime;
-            if (arg0->owner != NULL && arg0->owner->unk1D4 != NULL && arg0->owner->unique_id == arg0->ownerId) {
-                bone = (f32 *)((u8 *)arg0->owner->unk1D4 + (arg0->bone << 6));
-                func_150A7960(bone, arg0->startOffset[0], arg0->startOffset[1], arg0->startOffset[2], &arg0->x, &arg0->y, &arg0->z);
-                idx = arg0->owner->unk127;
-                func_150A7960(bone, arg0->endOffset[0], arg0->endOffset[1], arg0->endOffset[2], &arg0->target_x, &arg0->target_y, &arg0->target_z);
-                hit = 0.0f;
-                if (arg0->fireCounter-- == 0) {
-                    arg0->fireCounter = 2;
+        effect->timer -= D_800BE9E4;
+        if (effect->timer < -effect->offTime) {
+            effect->timer = effect->onTime;
+            if (effect->owner != NULL && effect->owner->unk1D4 != NULL && effect->owner->unique_id == effect->ownerId) {
+                bone = ((MtxF *)effect->owner->unk1D4)[effect->bone][0];
+                func_150A7960(bone, effect->startOffset[0], effect->startOffset[1], effect->startOffset[2], &effect->x, &effect->y, &effect->z);
+                aim = effect->owner->unk127;
+                func_150A7960(bone, effect->endOffset[0], effect->endOffset[1], effect->endOffset[2], &effect->target_x, &effect->target_y, &effect->target_z);
+                stopDist = 0.0f;
+                if (effect->fireCounter-- == 0) {
+                    effect->fireCounter = 2;
                     fire = 1;
                 } else {
                     fire = 0;
                 }
-                if (arg0->speed == 0.0f) {
+                if (effect->speed == 0.0f) {
                     speed = (f32)(func_151EF610() % 70) + 40.0f;
                 } else {
-                    speed = arg0->speed;
+                    speed = effect->speed;
                 }
-                surf = 0;
-                if (idx != 0xFF) {
-                    if ((arg0->owner->unk76 - arg0->owner->unk31C->unk12) == D_800D9960[idx].unk0 && arg0->owner->unk1D1 == D_800D9960[idx].unk2) {
-                        arg0->target_x = D_800D9960[idx].x;
-                        arg0->target_y = D_800D9960[idx].y;
-                        arg0->target_z = D_800D9960[idx].z;
+                impact = 0;
+                if (aim != 0xFF) {
+                    if (effect->owner->unk76 - effect->owner->unk31C->unk12 == D_800D9960[aim].unk0 && effect->owner->unk1D1 == D_800D9960[aim].unk2) {
+                        effect->target_x = D_800D9960[aim].x;
+                        effect->target_y = D_800D9960[aim].y;
+                        effect->target_z = D_800D9960[aim].z;
                         if (D_800BE616 == 0) {
-                            if (func_151EF610() % 100 < D_800D9960[idx].unk3) {
-                                dir[0] = arg0->target_x - arg0->x;
-                                dir[1] = arg0->target_y - arg0->y;
-                                dir[2] = arg0->target_z - arg0->z;
-                                func_15049148((struct17 *)D_800D9960[idx].dir, 2.0f * func_150AD900(D_800D9960[idx].dir, dir), &out);
-                                func_15048F58((struct17 *)dir, &out, &out);
-                                out.unk0 += arg0->target_x;
-                                out.unk4 += arg0->target_y;
-                                out.unk8 += arg0->target_z;
-                                func_150E1AB0(0, arg0->target_x, arg0->target_y, arg0->target_z, out.unk0, out.unk4, out.unk8, (f32)(func_151EF610() % 35) + 20.0f, 0.0f, 8.0f, 320.0f, 30, 0x23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-                                func_10010F88(func_151EF610() % 6 + 0x2B, 10000, 0, 0, idx, arg0->target_x, arg0->target_y, arg0->target_z, 500, 2000);
+                            if (func_151EF610() % 100 < D_800D9960[aim].ricochetChance) {
+                                incoming[0] = effect->target_x - effect->x;
+                                incoming[1] = effect->target_y - effect->y;
+                                incoming[2] = effect->target_z - effect->z;
+                                func_15049148((struct17 *)D_800D9960[aim].normal, 2.0f * func_150AD900(D_800D9960[aim].normal, incoming), &reflected);
+                                func_15048F58((struct17 *)incoming, &reflected, &reflected);
+                                reflected.unk0 += effect->target_x;
+                                reflected.unk4 += effect->target_y;
+                                reflected.unk8 += effect->target_z;
+                                func_150E1AB0(0, effect->target_x, effect->target_y, effect->target_z, reflected.unk0, reflected.unk4, reflected.unk8, (f32)(func_151EF610() % 35) + 20.0f, 0.0f, 8.0f, 320.0f, 30, 0x23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+                                func_10010F88(func_151EF610() % 6 + 0x2B, 10000, 0, 0, aim, effect->target_x, effect->target_y, effect->target_z, 500, 2000);
                             }
                         }
-                        hit = 1.0f;
+                        stopDist = 1.0f;
                     } else {
-                        p = arg0->owner->unk1D1 * 200;
-                        func_1505A184((arg0->owner->unk76 - arg0->owner->unk31C->unk12), 2000.0f, (f32)p * 0.005493164f, &arg0->target_x, &arg0->target_z, &arg0->target_y);
-                        arg0->target_x += arg0->x;
-                        arg0->target_y += arg0->y;
-                        arg0->target_z += arg0->z;
+                        angle = effect->owner->unk1D1 * 200;
+                        func_1505A184(effect->owner->unk76 - effect->owner->unk31C->unk12, 2000.0f, (f32)angle * 0.005493164f, &effect->target_x, &effect->target_z, &effect->target_y);
+                        effect->target_x += effect->x;
+                        effect->target_y += effect->y;
+                        effect->target_z += effect->z;
                     }
-                    arg0->length = (f32)(func_151EF610() % 3) * 80.0f + 80.0f;
+                    effect->length = (f32)(func_151EF610() % 3) * 80.0f + 80.0f;
                 } else {
                     if (fire) {
-                        hx = arg0->target_x - arg0->x;
-                        hy = arg0->target_y - arg0->y;
-                        hz = arg0->target_z - arg0->z;
-                        s = (75.0f * speed) / sqrtf(hx * hx + hy * hy + hz * hz);
-                        if (func_150AC9C0(arg0->x, arg0->y, arg0->z, hx * s, hy * s, hz * s, &tri, 0, &hx, &hy, &hz, 0, 0, 0, 0.0f)) {
-                            arg0->target_x = hx;
-                            arg0->target_y = hy;
-                            arg0->target_z = hz;
-                            hit = 1.0f;
-                            i = (tri - D_800DBE3C) / 12;
+                        rayX = effect->target_x - effect->x;
+                        rayY = effect->target_y - effect->y;
+                        rayZ = effect->target_z - effect->z;
+                        len = (75.0f * speed) / sqrtf(rayX * rayX + rayY * rayY + rayZ * rayZ);
+                        if (func_150AC9C0(effect->x, effect->y, effect->z, rayX * len, rayY * len, rayZ * len, &hitTri, 0, &rayX, &rayY, &rayZ, 0, 0, 0, 0.0f)) {
+                            effect->target_x = rayX;
+                            effect->target_y = rayY;
+                            effect->target_z = rayZ;
+                            stopDist = 1.0f;
+                            i = (hitTri - D_800DBE3C) / 12;
                             if (i >= 0 && i < D_800DBE4C && D_800DBE5C != 0) {
-                                surf = func_1510F8CC(((s32 *)D_800DBE5C)[i]);
+                                impact = func_1510F8CC(((s32 *)D_800DBE5C)[i]);
                             }
                         }
                     }
-                    type = 0x43;
+                    texture = 0x43;
                 }
-                arg0->yaw = func_150484A0(-(arg0->target_x - arg0->x), -(arg0->target_z - arg0->z));
-                arg0->pitch = func_150484A0(arg0->target_y - arg0->y, sqrtf((arg0->target_x - arg0->x) * (arg0->target_x - arg0->x) + (arg0->target_z - arg0->z) * (arg0->target_z - arg0->z)));
-                arg0->dx = 0.0f;
-                arg0->dy = 0.0f;
-                arg0->dz = 0.0f;
+                effect->yaw = func_150484A0(-(effect->target_x - effect->x), -(effect->target_z - effect->z));
+                effect->pitch = func_150484A0(effect->target_y - effect->y, sqrtf((effect->target_x - effect->x) * (effect->target_x - effect->x) + (effect->target_z - effect->z) * (effect->target_z - effect->z)));
+                effect->dx = 0.0f;
+                effect->dy = 0.0f;
+                effect->dz = 0.0f;
                 if (fire) {
-                    func_150E1AB0(0, arg0->x, arg0->y, arg0->z, arg0->target_x, arg0->target_y, arg0->target_z, speed, hit, 15.0f, 820.0f, 75, type, 0, 0, 0, arg0->owner, 0, 0, 0, surf, arg0->unkFE, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+                    func_150E1AB0(0, effect->x, effect->y, effect->z, effect->target_x, effect->target_y, effect->target_z, speed, stopDist, 15.0f, 820.0f, 75, texture, 0, 0, 0, effect->owner, 0, 0, 0, impact, effect->unkFE, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
                 }
             } else {
-                func_1516972C((struct102 *)arg0);
+                func_1516972C((struct102 *)effect);
                 return;
             }
         }
-    } else {
+    } else { // matching: empty else changes IDO'len branch layout
     }
-    if (arg0->timer > 0) {
-        y0 = 0.0f;
-        z0 = -1.0f;
-        sn = func_150AD78C(arg0->pitch);
-        cs = func_150AD780(arg0->pitch);
-        a = y0 * cs;
-        b = y0 * cs - sn * z0;
-        c = y0 * sn + cs * z0;
-        sn = func_150AD78C(arg0->yaw);
-        cs = func_150AD780(arg0->yaw);
-        vx = cs * a + sn * c;
-        vy = b;
-        vz = -sn * a + cs * c;
-        if (arg0->stopDist != 0.0f) {
-            dist = sqrtf((arg0->target_x - arg0->x) * (arg0->target_x - arg0->x) + (arg0->target_y - arg0->y) * (arg0->target_y - arg0->y) + (arg0->target_z - arg0->z) * (arg0->target_z - arg0->z));
+    if (effect->timer > 0) {
+        fwdY = 0.0f;
+        fwdZ = -1.0f;
+        sinA = func_150AD78C(effect->pitch);
+        cosA = func_150AD780(effect->pitch);
+        rx = fwdY * cosA;
+        ry = fwdY * cosA - sinA * fwdZ;
+        rz = fwdY * sinA + cosA * fwdZ;
+        sinA = func_150AD78C(effect->yaw);
+        cosA = func_150AD780(effect->yaw);
+        vx = cosA * rx + sinA * rz;
+        vy = ry;
+        vz = -sinA * rx + cosA * rz;
+        if (effect->stopDist != 0.0f) {
+            dist = sqrtf((effect->target_x - effect->x) * (effect->target_x - effect->x) + (effect->target_y - effect->y) * (effect->target_y - effect->y) + (effect->target_z - effect->z) * (effect->target_z - effect->z));
         }
-        if (arg0->drawn == 0) {
+        if (effect->drawn == 0) {
             vx *= 0.5f;
             vy *= 0.5f;
             vz *= 0.5f;
         }
-        arg0->dx = vx;
-        arg0->dy = vy;
-        arg0->dz = vz;
-        s = arg0->speed * D_800BE9E4;
-        if (dist < s && arg0->stopDist != 0.0f) {
+        effect->dx = vx;
+        effect->dy = vy;
+        effect->dz = vz;
+        len = effect->speed * D_800BE9E4;
+        if (dist < len && effect->stopDist != 0.0f) {
             vx *= dist;
             vy *= dist;
             vz *= dist;
-            arg0->length = dist;
+            effect->length = dist;
         } else {
-            vx *= s;
-            vy *= s;
-            vz *= s;
+            vx *= len;
+            vy *= len;
+            vz *= len;
         }
-        if (arg0->unkFE == 1) {
-            i = arg0->owner != NULL ? arg0->owner - D_800CC2D0 : 0;
-            func_150E1570(arg0->owner, arg0->x, arg0->y, arg0->z, arg0->x + vx, arg0->y + vy, arg0->z + vz, i, 0);
+        if (effect->unkFE == 1) {
+            i = effect->owner != NULL ? effect->owner - D_800CC2D0 : 0;
+            func_150E1570(effect->owner, effect->x, effect->y, effect->z, effect->x + vx, effect->y + vy, effect->z + vz, i, 0);
         }
-        arg0->x += vx;
-        arg0->y += vy;
-        arg0->z += vz;
-        if (arg0->stopDist != 0.0f) {
-            s = sqrtf((arg0->target_x - arg0->x) * (arg0->target_x - arg0->x) + (arg0->target_y - arg0->y) * (arg0->target_y - arg0->y) + (arg0->target_z - arg0->z) * (arg0->target_z - arg0->z));
-            if (s < arg0->stopDist || dist < s) {
-                if (arg0->impactEffect != 0) {
-                    func_150E4550(arg0->target_x, arg0->target_y, arg0->target_z, 1, arg0->impactEffect, 0, 0xFF);
+        effect->x += vx;
+        effect->y += vy;
+        effect->z += vz;
+        if (effect->stopDist != 0.0f) {
+            len = sqrtf((effect->target_x - effect->x) * (effect->target_x - effect->x) + (effect->target_y - effect->y) * (effect->target_y - effect->y) + (effect->target_z - effect->z) * (effect->target_z - effect->z));
+            if (len < effect->stopDist || dist < len) {
+                if (effect->impactEffect != 0) {
+                    func_150E4550(effect->target_x, effect->target_y, effect->target_z, 1, effect->impactEffect, 0, 0xFF);
                 }
-                func_1516972C((struct102 *)arg0);
+                func_1516972C((struct102 *)effect);
                 return;
             }
-            if (s < arg0->length) {
-                arg0->length = s;
+            if (len < effect->length) {
+                effect->length = len;
             }
         }
     }
