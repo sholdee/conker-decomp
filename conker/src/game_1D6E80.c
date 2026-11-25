@@ -11,7 +11,6 @@ s32 func_150ADA20(void);
 extern s32 func_10010F30(s32, u16, u8, s16, u8);
 extern s32 func_151EF610(void);
 extern s32 func_10010FFC(s32, s32, s32, s32, s32, struct127 *);
-extern void *func_15190770(void *, s32, s32, s32);
 extern u8 func_151D8E20(void);
 
 /* Spawn descriptor for func_1513418C. */
@@ -160,6 +159,7 @@ void func_151A99D0(ActorTask *task) {
     }
 }
 
+/* Ground effect 3 under the actor (with sound 0x5208), then func_151ABE00. */
 void func_151A9AA4(ActorTask *task) {
     struct127 *actor = task->actor;
 
@@ -184,6 +184,7 @@ void func_151A9AA4(ActorTask *task) {
     func_151ABE00(actor);
 }
 
+/* Ground effect 1 under the actor, with sound 0x5208. */
 void func_151A9BA0(ActorTask *task) {
     struct127 *actor = task->actor;
 
@@ -208,10 +209,12 @@ void func_151A9BA0(ActorTask *task) {
 }
 
 
+/* Unless the actor's unk31C->unk95 is set: ground effect 1 (sound 0x6978), func_151AA264, func_151ABE00. */
 void func_151A9CA0(ActorTask *task) {
     struct127 *actor = task->actor;
     f32 pos[3];
 
+    // matching: structs.h types unk95 as s8, but this read is unsigned (lbu)
     if ((actor->unk31C != NULL) && ((u8)actor->unk31C->unk95 != 0)) {
         return;
     }
@@ -231,6 +234,7 @@ void func_151A9CA0(ActorTask *task) {
     func_151ABE00(actor);
 }
 
+/* Ground effect 2 under the actor, with sound 0x5208. */
 void func_151A9DC0(ActorTask *task) {
     struct127 *actor = task->actor;
 
@@ -254,6 +258,7 @@ void func_151A9DC0(ActorTask *task) {
     }
 }
 
+/* Ground effect 2 (sound 0x6978), then func_151AA264 and func_151ABE00. */
 void func_151A9EC0(ActorTask *task) {
     struct127 *actor = task->actor;
 
@@ -279,6 +284,7 @@ void func_151A9EC0(ActorTask *task) {
     func_151ABE00(actor);
 }
 
+/* Ground effect 4 under the actor. */
 void func_151A9FC8(ActorTask *task) {
     struct127 *actor = task->actor;
 
@@ -299,6 +305,7 @@ void func_151A9FC8(ActorTask *task) {
     }
 }
 
+/* Ground effect 4 under the actor. */
 void func_151AA09C(ActorTask *task) {
     struct127 *actor = task->actor;
 
@@ -319,6 +326,7 @@ void func_151AA09C(ActorTask *task) {
     }
 }
 
+/* Empty callback. */
 void func_151AA170(s32 arg0) {
 }
 
@@ -337,6 +345,7 @@ extern void func_15147D64(s32, s32);
 extern void func_1519F3B8(Task151AA17C *);
 extern void func_1519F400(void);
 
+/* Sends message 10 ({unk18, unk1C}) through func_15147D64 and func_151494E0, then func_1519F3B8. */
 void func_151AA17C(Task151AA17C *task) {
     s32 word;
     Msg151AA17C msg;
@@ -358,6 +367,7 @@ void func_151AA1F0(void) {
     func_1519F400();
 }
 
+/* Same as func_151AA17C. */
 void func_151AA210(Task151AA17C *task) {
     s32 word;
     Msg151AA17C msg;
@@ -371,6 +381,7 @@ void func_151AA210(Task151AA17C *task) {
     func_1519F3B8(task);
 }
 
+/* When the ground hit has flag bit 0 set, spawns a func_1513418C effect on the actor. */
 void func_151AA264(struct127 *actor, GroundHit *hit) {
     SpawnDesc1513418C desc;
 
@@ -760,8 +771,8 @@ extern void func_1504715C(GroundHit *hit, struct127 *actor);
 extern s32 func_1504697C(Vec3f *pos, s32 arg1, f32 minY, GroundHit *hit);
 extern void func_15153F18(Cfg_151AABC4 *, Vec3f *, GroundHit *, u8, s32);
 
-/* Spawns a ground decal and splash under the actor's joint D_800A8F70[jointIndex]. */
-void func_151AABC4(struct127 *actor, u8 jointIndex) {
+/* Finds point D_800A8F70[index] of the actor's unk1D4 (func_15142314) and spawns two effects on the ground below it. */
+void func_151AABC4(struct127 *actor, u8 index) {
     Vec3f pos;
     GroundHit floor;
     f32 y;
@@ -771,7 +782,7 @@ void func_151AABC4(struct127 *actor, u8 jointIndex) {
 
     if ((actor != NULL) && (actor->unk1D4 != NULL)) {
         color = func_151D8E20();
-        func_15142314(actor->unk1D4, D_800A8F70[jointIndex], &pos, actor);
+        func_15142314(actor->unk1D4, D_800A8F70[index], &pos, actor);
         func_1504715C(&floor, actor);
         y = pos.y + 50.0f;
         probe.x = pos.x;
@@ -961,6 +972,7 @@ s32 func_151AB180(FlickerFx *fx) {
     return 0;
 }
 
+/* Ground effect 3 (sound 0x5208), then func_151AA264. */
 void func_151AB1C4(ActorTask *task) {
     struct127 *actor = task->actor;
 
@@ -1136,36 +1148,39 @@ void func_151AB7D8(LoopSoundFx *fx) {
     func_1513470C(fx);
 }
 
-void func_151AB828(u8 *arg0) {
-    u8 *a3;
-
-    a3 = arg0;
-    func_15141DA4(*(void **)(a3 + 0x18), 0, 4);
+/* func_15141DA4(actor, 0, 4). */
+void func_151AB828(ActorTask *task) {
+    func_15141DA4(task->actor, 0, 4);
 }
 
-void func_151AB854(u8 *arg0) {
-    u8 *v1;
-    struct185 tmp;
+extern void *func_15190770(struct185 *desc, s32 arg1, s32 arg2, s32 arg3);
 
-    v1 = *(u8 **)(arg0 + 0x18);
-    if ((v1[4] == 0) || (v1[4] == 1) || (v1[4] == 2) || (v1[4] == 3) || (v1[4] == 4) || (v1[4] == 0x96)) {
-        tmp.unk0 = (struct127 *)v1;
-        tmp.unk4 = v1[0x3B];
-        tmp.unk6 = 0x12C;
-        tmp.unk8 = 0;
-        tmp.unk9 = 0;
-        if (v1[4] == 0x96) {
-            tmp.unkA = 3;
+/* For actors of kind 0-4 or 150: spawns a func_15190770 effect on the actor. */
+void func_151AB854(ActorTask *task) {
+    struct127 *actor;
+    struct185 desc;
+
+    actor = task->actor;
+    if ((actor->id == 0) || (actor->id == 1) || (actor->id == 2) || (actor->id == 3) || (actor->id == 4) ||
+        (actor->id == 150)) {
+        desc.unk0 = actor;
+        desc.unk4 = actor->unique_id;
+        desc.unk6 = 300;
+        desc.unk8 = 0;
+        desc.unk9 = 0;
+        if (actor->id == 150) {
+            desc.unkA = 3;
         } else {
-            tmp.unkA = 0;
+            desc.unkA = 0;
         }
-        if (v1[0x127] != 0xFF) {
-            *(s16 *)(*(u8 **)(v1 + 0x31C) + 0x66) = 0x1F4;
+        if (actor->unk127 != 0xFF) {
+            actor->unk31C->unk66 = 500;
         }
-        func_15190770(&tmp, 0, arg0[0xC], arg0[1]);
+        func_15190770(&desc, 0, task->unkC, task->unk1);
     }
 }
 
+/* Empty callback. */
 void func_151AB920(s32 arg0, s32 arg1) {
 }
 
@@ -1204,9 +1219,9 @@ void func_151AB930(struct127 *actor) {
     payload.rate = 0.400000006f;
     payload.rateRandom = 3.0f;
     payload.color = func_151D8E20();
-    task = func_151491F4(0x3C, -1, 0xE, 1, 9, 0x1C, 0xFF, 0);
+    task = func_151491F4(0x3C, -1, 0xE, 1, 9, sizeof(payload), 0xFF, 0);
     if (task != NULL) {
-        memcpy(&((EmitterTask *)task)->payload, &payload, 0x1C);
+        memcpy(&((EmitterTask *)task)->payload, &payload, sizeof(payload));
     }
 }
 
@@ -1274,36 +1289,38 @@ void func_151AB9C8(EmitterTask *task) {
     }
 }
 
-typedef struct {
-    s32 unk0;
-    u8  unk4;
-} SubA_151ABD54;
+/* Message data for func_151ABD54; the layout depends on the message id. */
+typedef union {
+    struct {
+        /* 0x00 */ struct127 *actor;
+        /* 0x04 */ u8 actorId;
+    } m0;
+    struct {
+        /* 0x00 */ struct127 *actorA;
+        /* 0x04 */ struct127 *actorB;
+        /* 0x08 */ u8 idA;
+        /* 0x09 */ u8 idB;
+    } m2D;
+} TaskMsg151ABD54;
 
-typedef struct {
-    s32 unk0;
-    union {
-        s32 w4;
-        u8  b4;
-    } u4;
-    u8  unk8;
-    u8  unk9;
-} ArgB_151ABD54;
+/*
+ * Message handler for a task whose payload (at +0x28, as in EmitterTask) names an actor:
+ * message 0 ends the task when it concerns that actor; message 0x2D swaps actor A and B.
+ */
+void func_151ABD54(EmitterTask *task, TaskMsg151ABD54 *msg, u8 msgId) {
+    EmitterPayload *payload = &task->payload;
 
-void func_151ABD54(struct260 *arg0, s32 arg1, u8 arg2) {
-    SubA_151ABD54 *temp_v0 = (SubA_151ABD54 *)((u8 *)arg0 + 0x28);
-    ArgB_151ABD54 *b = (ArgB_151ABD54 *)arg1;
-
-    if (arg2 == 0) {
-        if ((b->unk0 == temp_v0->unk0) || (b->u4.b4 == temp_v0->unk4)) {
-            func_1516972C((struct102 *)arg0);
+    if (msgId == 0) {
+        if ((msg->m0.actor == payload->actor) || (msg->m0.actorId == payload->actorId)) {
+            func_1516972C((struct102 *)task);
         }
-    } else if (arg2 == 0x2D) {
-        if (temp_v0->unk0 == b->unk0) {
-            temp_v0->unk0 = b->u4.w4;
-            temp_v0->unk4 = b->unk9;
-        } else if (temp_v0->unk0 == b->u4.w4) {
-            temp_v0->unk0 = b->unk0;
-            temp_v0->unk4 = b->unk8;
+    } else if (msgId == 0x2D) {
+        if (payload->actor == msg->m2D.actorA) {
+            payload->actor = msg->m2D.actorB;
+            payload->actorId = msg->m2D.idB;
+        } else if (payload->actor == msg->m2D.actorB) {
+            payload->actor = msg->m2D.actorA;
+            payload->actorId = msg->m2D.idA;
         }
     }
 }
@@ -1313,6 +1330,7 @@ typedef struct {
     /* 0x04 */ s8 actorId;
 } Msg151ABE00;
 
+/* Broadcasts message 0x20 ({actor, unique_id}) via func_1516944C. */
 void func_151ABE00(struct127 *actor) {
     Msg151ABE00 msg;
 
