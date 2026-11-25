@@ -22,18 +22,7 @@ typedef struct {
     /* 0x28 */ MtxF matrices[2];
 } HudModel;
 
-/* A HUD image drawn by func_151ED430: a texture id (split into 4KB chunks of consecutive ids) and its format. */
-typedef struct {
-    /* 0x00 */ void *texId;
-    /* 0x04 */ u16 pad4;
-    /* 0x06 */ u16 width;
-    /* 0x08 */ u16 height;
-    /* 0x0A */ u8 fmt;
-    /* 0x0B */ u8 siz;
-} HudSprite; /* size 0xC */
-
 extern Gfx D_80090028;
-extern HudSprite D_800917F8;
 extern HudSprite D_80091804;
 extern HudSprite D_80091810;
 extern Gfx *(*D_8008FFF4[])(Gfx *);
@@ -865,7 +854,6 @@ Gfx *func_151EADFC(Gfx *gfx, s32 x, s32 y, s32 value) {
 
     return gfx;
 }
-extern HudSprite D_80090060;
 extern u8 D_1647;
 extern u8 D_1648;
 extern u8 D_1653;
@@ -1125,7 +1113,6 @@ Gfx *func_151EB96C(Gfx *gfx) {
     return gfx;
 }
 
-extern HudSprite D_800917EC;
 extern u8 D_85D;
 extern u8 D_89C;
 

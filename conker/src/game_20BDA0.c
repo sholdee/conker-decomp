@@ -1302,7 +1302,6 @@ void func_151E1214(void) {
 /* Per-team x jitter for stacked names; a struct so the initial copy is one word */
 typedef struct { s8 v[4]; } Offs4;
 extern Offs4 D_8008FF34;
-extern u8 D_800AB62C[];
 /* Team layout of a mode (D_800AB710[MenuEntry.unk5]) */
 typedef struct {
     /* 0x0 */ s8 teamCount;
@@ -1534,7 +1533,8 @@ void func_151E1744(void) {
     for (i = 0; i < D_800E0BB0; i++) {
         x = teamX[i];
         old = D_800E0BC8[i] * 3;
-        func_1504332C(D_800AB62C[old], D_800AB62C[old + 1], D_800AB62C[old + 2], alpha);
+        // matching: flat byte index into the RGB rows (old is the tripled colour)
+        func_1504332C(D_800AB62C[0][old], D_800AB62C[0][old + 1], D_800AB62C[0][old + 2], alpha);
         func_150432FC(x, 0x50);
         if (D_800E0BC8[i] == 4) {
             func_15042E3C(D_800AB868, 9);

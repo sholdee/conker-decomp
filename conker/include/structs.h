@@ -4136,4 +4136,14 @@ typedef struct ModeSettings {
     /* 0x9 */ u8 unk9; /* -> D_800E0BE0[6] */
 } ModeSettings; /* size 0xA */
 
+/* A HUD image drawn by func_151ED430: a texture id (split into 4KB chunks of consecutive ids) and its format. */
+typedef struct {
+    /* 0x00 */ void *texId;
+    /* 0x04 */ u16 pad4;
+    /* 0x06 */ u16 width;
+    /* 0x08 */ u16 height;
+    /* 0x0A */ u8 fmt;
+    /* 0x0B */ u8 siz;
+} HudSprite; /* size 0xC */
+
 #endif

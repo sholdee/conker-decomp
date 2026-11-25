@@ -14,7 +14,6 @@ s32 func_15131918(Vec3f *vel, f32 scale);
 extern u8 (*D_8008FCD0[])(void);
 extern u8 (*D_8008FD04[])(void);
 extern u8 D_800AB330[]; /* per effect kind flag */
-extern u8 D_800AB414[]; /* RGB per effect kind */
 
 /* Start of a live effect created from an ParticleDef. */
 typedef struct {
@@ -1235,9 +1234,9 @@ void func_151DBCBC(u8 kind, f32 size, s16 arg2, s32 arg3, void *pos, u8 arg5, s3
     desc.frame = 0;
     desc.unk10 = arg2;
     desc.unk11 = 0xFF;
-    desc.rgba[0] = D_800AB414[kind * 3];
-    desc.rgba[1] = D_800AB414[kind * 3 + 1];
-    desc.rgba[2] = D_800AB414[kind * 3 + 2];
+    desc.rgba[0] = D_800AB414[kind].r;
+    desc.rgba[1] = D_800AB414[kind].g;
+    desc.rgba[2] = D_800AB414[kind].b;
     desc.rgba[3] = 0xFF;
     desc.renderModes = 0x440001;
     desc.unk7 = 0;
@@ -1267,11 +1266,11 @@ void func_151DBE80(u8 kind, f32 size, f32 arg2, s16 lifetime, Vec3f *pos, s32 ar
     desc.lifetime = lifetime;
     desc.frame = 0;
     desc.frameSpeed = 0x4000;
-    desc.rgba[0] = D_800AB414[kind * 3];
+    desc.rgba[0] = D_800AB414[kind].r;
     desc.width = 1.0f;
     desc.height = 1.0f;
-    desc.rgba[1] = D_800AB414[kind * 3 + 1];
-    desc.rgba[2] = D_800AB414[kind * 3 + 2];
+    desc.rgba[1] = D_800AB414[kind].g;
+    desc.rgba[2] = D_800AB414[kind].b;
     desc.rgba[3] = 0xFF;
 
     desc.pos = *pos;

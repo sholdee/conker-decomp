@@ -256,19 +256,11 @@ typedef struct Game70200Glyph {
     u8 height;
     u8 scale; /* 128 = 1.0 */
     u8 flags; /* 1: draw the previous entry behind it and pulse the alpha; 2: 16x16 sprite (default 32x32) */
-    s32 image;
+    u8 *image; /* texture id (a symbol address), consecutive ids for animation frames */
 } Game70200Glyph;
-
-typedef struct Game70200Sprite {
-    s32 image;
-    s16 pad4;
-    s16 width;
-    s16 height;
-} Game70200Sprite;
 
 extern Game70200Glyph D_800859E0[];
 extern s32 D_80085CD0;
-extern Game70200Sprite D_80090060;
 void func_10004074(void *);
 void func_150428D4(u8 *, s32 *, s32 *, s32 *);
 s32 func_1509563C(f32, f32, f32, f32 *, f32 *, f32 *, f32 *, f32);
@@ -359,7 +351,7 @@ Gfx *func_15043384(Gfx *gfx) {
                     gDPPipeSync(gfx++);
                     gDPSetEnvColor(gfx++, node->red, node->green, node->blue,
                                    node->alpha);
-                    D_80090060.image = D_800859E0[icon - 1].image;
+                    D_80090060.texId = D_800859E0[icon - 1].image;
                     gfx = func_151ED430(gfx, &D_80090060, node->x, node->y, D_800859E0[icon - 1].width,
                                         D_800859E0[icon - 1].height, scale, 0);
                     /* pulse the alpha: scale by (63 + 3 * a 0..63..0 triangle wave) / 256 */
@@ -376,14 +368,14 @@ Gfx *func_15043384(Gfx *gfx) {
                 gDPPipeSync(gfx++);
                 gDPSetEnvColor(gfx++, node->red, node->green, node->blue,
                                node->alpha);
-                D_80090060.image = D_800859E0[icon].image;
+                D_80090060.texId = D_800859E0[icon].image;
                 if (icon == 25) {
                     frame = (D_80085CD0 >> 1) % 10;
                     pulse = frame;
                     if (frame >= 6) {
                         pulse = 10 - frame;
                     }
-                    D_80090060.image = D_800859E0[icon].image + pulse;
+                    D_80090060.texId = D_800859E0[icon].image + pulse;
                 }
                 gfx = func_151ED430(gfx, &D_80090060, node->x, node->y, D_800859E0[icon].width,
                                     D_800859E0[icon].height, scale, 0);

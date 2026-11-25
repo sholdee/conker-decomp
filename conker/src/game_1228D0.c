@@ -34,7 +34,6 @@ typedef struct {
     /* 0x39 */ u8  unk39;
 } struct_7484;
 
-extern u8 D_800917F8;
 extern u8 D_80091930;
 extern u8 D_8009193C;
 extern u8 D_80091948;

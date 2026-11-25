@@ -514,6 +514,7 @@ extern s8 D_8008FEF0;
 extern s8 D_8008FEF8;
 extern s8 D_8008FF00;
 extern u8 D_8008FF04;
+extern HudSprite D_80090060; // scratch HUD sprite (texId set before each func_151ED430 draw)
 extern s32 D_80090298[]; // texture ids
 extern s32 D_800902B8;
 extern s32 D_800902E4;
@@ -536,6 +537,8 @@ extern u8 D_80091100[];
 extern u8 D_80091238[];
 extern s32 D_80091564[];
 extern s32 D_800917B8;
+extern HudSprite D_800917EC;
+extern HudSprite D_800917F8;
 extern u8 D_8009187C[];
 extern u8 D_800918A0[];
 extern s32 D_80091AF0[];
@@ -845,6 +848,7 @@ extern f32 D_800AB3EC; //-1.0f
 
 extern u8 D_800AB3F4[];
 extern u8 D_800AB404[];
+extern Color24 D_800AB414[]; // effect colours (RGB per colour index / effect kind)
 extern f32 D_800AB464;
 extern f32 D_800AB468;
 extern f32 D_800AB46C; // 0.0003000000142492354f
@@ -865,6 +869,7 @@ extern f32 D_800A548C[];
 
 /* 800B0000 */
 
+extern u8 D_800AB62C[][3]; // team colours (RGB)
 extern s32 D_800AB754[];
 extern s32  D_800B0DC0;
 extern s32  D_800B0DC4;

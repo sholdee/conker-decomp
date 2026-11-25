@@ -114,7 +114,6 @@ extern Vec3f D_800887E0;
 extern f32 D_800A0450, D_800A0454; /* 5000.0f */
 extern f32 D_800A0464;             /* 0.15f */
 extern f32 D_800A0470, D_800A0474; /* 0.1f, 0.08f */
-extern u8 D_800AB414[][3];
 
 /* Watcher action: keeps the floor sprite alive, creating it on first use. */
 void func_150C66F0(Watcher *watcher) {
@@ -362,9 +361,9 @@ FlickerSprite *func_150C6D90(Watcher *watcher) {
             def.unk10 = 150;
             def.frame = 0;
             def.unk11 = 0xFF;
-            def.rgba[0] = D_800AB414[color][0];
-            def.rgba[1] = D_800AB414[color][1];
-            def.rgba[2] = D_800AB414[color][2];
+            def.rgba[0] = D_800AB414[color].r;
+            def.rgba[1] = D_800AB414[color].g;
+            def.rgba[2] = D_800AB414[color].b;
             def.rgba[3] = 0xFF;
             def.renderModes = 0x440001;
             def.unk16 = 0;

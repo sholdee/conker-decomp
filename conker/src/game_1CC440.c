@@ -215,7 +215,6 @@ void func_1519F168(Trail *trail) {
     func_15147928(trail);
 }
 
-extern u8 D_800AB414[][3]; /* rgb per colour index */
 u8 func_151D8E20(void);
 Trail *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, void *, s32, s32);
 
@@ -266,9 +265,9 @@ Trail *func_1519F1C8(owner, side)
         config.emitPos = header.pos;
         header.flags |= 4;
     }
-    config.color[0] = D_800AB414[colorIndex][0];
-    config.color[1] = D_800AB414[colorIndex][1];
-    config.color[2] = D_800AB414[colorIndex][2];
+    config.color[0] = D_800AB414[colorIndex].r;
+    config.color[1] = D_800AB414[colorIndex].g;
+    config.color[2] = D_800AB414[colorIndex].b;
     trail = func_15147A80(&header, sizeof(TrailConfig), sizeof(TrailPoint), 5, 5, 5, 0, 0, owner->unk34, 0xFF, 1);
     if (trail != NULL) {
         memcpy(trail->config, &config, sizeof(TrailConfig));

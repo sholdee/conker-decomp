@@ -735,7 +735,6 @@ s32 func_151AADBC(Obj151AADBC *obj) {
     return 1;
 }
 
-extern u8 D_800AB414[];
 
 /* Keeps the task's flicker effect alive, or spawns it on the ground under the actor. */
 void func_151AADF8(ActorTask *task) {
@@ -784,9 +783,9 @@ void func_151AADF8(ActorTask *task) {
         part.unk10 = 150;
         part.frame = 0;
         part.unk11 = 0xFF;
-        part.rgba[0] = D_800AB414[color * 3];
-        part.rgba[1] = D_800AB414[color * 3 + 1];
-        part.rgba[2] = D_800AB414[color * 3 + 2];
+        part.rgba[0] = D_800AB414[color].r;
+        part.rgba[1] = D_800AB414[color].g;
+        part.rgba[2] = D_800AB414[color].b;
         part.rgba[3] = 0xFF;
         part.renderModes = 0x440001;
         part.unk16 = 0;

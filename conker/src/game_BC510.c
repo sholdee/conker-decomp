@@ -1432,7 +1432,6 @@ Gfx *func_150938BC(Gfx *gfx) {
     gSPDisplayList(gfx++, D_800D2448);
     return gfx;
 }
-extern u8 D_800AB62C[][3];
 u8 func_15085DA8(f32 arg0);
 
 /* Draws the radar: a disc around each local player (larger when `large`) with a dot for every

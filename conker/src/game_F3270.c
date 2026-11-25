@@ -294,7 +294,6 @@ void func_150C6438(GameF3270LinkedObject *obj) {
 }
 
 extern Vec3f D_800887D0;
-extern u8 D_800AB414[][3]; // RGB colours
 void func_15143134(Vec3f *in, Vec3f *out, MtxF *mtx);
 u8 func_151D8E20(void);
 
@@ -350,9 +349,9 @@ GameF3270Particle *func_150C6460(GameF3270Emitter *emitter) {
             desc.unk10 = 150;
             desc.frame = 0;
             desc.unk11 = 0xFF;
-            desc.rgba[0] = D_800AB414[colorIndex][0];
-            desc.rgba[1] = D_800AB414[colorIndex][1];
-            desc.rgba[2] = D_800AB414[colorIndex][2];
+            desc.rgba[0] = D_800AB414[colorIndex].r;
+            desc.rgba[1] = D_800AB414[colorIndex].g;
+            desc.rgba[2] = D_800AB414[colorIndex].b;
             desc.rgba[3] = 0xFF;
             desc.renderModes = 0x440001;
             desc.unk16 = 0;
