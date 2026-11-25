@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* A scripted actor move: actor `actor` is sent to pose `poseIndex` for `timer` frames. */
+/* A scripted actor move: actor `actor` is sent to pose `poseIndex` until `timer` runs out. */
 typedef struct {
     /* 0x00 */ u8 state; // 0 = idle, 1 = start pending, 2 = running
     /* 0x01 */ u8 actor; // index into D_800DBFF0
@@ -11,7 +11,7 @@ typedef struct {
     /* 0x04 */ s16 timer;
     /* 0x06 */ u8 pad6[6];
     /* 0x0C */ s32 flags;
-    /* 0x10 */ f32 scale; // copied to D_800D2E30 while running
+    /* 0x10 */ f32 scale; // copied (truncated) to D_800D2E30 when the command starts
     /* 0x14 */ u8 pad14[0xC];
     /* 0x20 */ f32 unk20; // actor->unk37C at setup, written to actor->pad3A4 when done
 } C3E20Command; // size 0x24
@@ -394,22 +394,21 @@ unknown_query:
     return 0;
 }
 
-void func_15097798(s32 arg0) {
-    struct108 *temp_v0;
-    struct17 sp20;
-    s32 *temp_v1;
+/* While a command runs, moves both actor points (unk2A4, unk2F8) along the unit vector between them, scaled by D_800D2E30. */
+void func_15097798(s32 actorIndex) {
+    struct108 *actor;
+    struct17 dir;
 
-    temp_v0 = &D_800DBFF0[arg0];
+    actor = &D_800DBFF0[actorIndex];
     if (D_800D2DB4 != 0) {
-        func_15048F90((struct17 *)&temp_v0->unk2A4, (struct17 *)&temp_v0->unk2F8, &sp20);
-        func_1504917C(&sp20, &sp20);
+        func_15048F90((struct17 *)&actor->unk2A4, (struct17 *)&actor->unk2F8, &dir);
+        func_1504917C(&dir, &dir);
 
-        temp_v1 = &D_800D2E30[arg0];
-        ((struct17 *)&temp_v0->unk2A4)->unk0 += (sp20.unk0 * -2.5f) * (f32)*temp_v1;
-        ((struct17 *)&temp_v0->unk2A4)->unk4 += (sp20.unk4 * -2.0f) * (f32)*temp_v1;
-        ((struct17 *)&temp_v0->unk2A4)->unk8 += (sp20.unk8 * -2.5f) * (f32)*temp_v1;
-        ((struct17 *)&temp_v0->unk2F8)->unk0 += (sp20.unk0 * -2.5f) * (f32)*temp_v1;
-        ((struct17 *)&temp_v0->unk2F8)->unk4 += (sp20.unk4 * -2.0f) * (f32)*temp_v1;
-        ((struct17 *)&temp_v0->unk2F8)->unk8 += (sp20.unk8 * -2.5f) * (f32)*temp_v1;
+        actor->unk2A4 += dir.unk0 * -2.5f * D_800D2E30[actorIndex];
+        actor->unk2A8 += dir.unk4 * -2.0f * D_800D2E30[actorIndex];
+        *(f32 *)&actor->unk2AC += dir.unk8 * -2.5f * D_800D2E30[actorIndex];
+        actor->unk2F8 += dir.unk0 * -2.5f * D_800D2E30[actorIndex];
+        actor->unk2FC += dir.unk4 * -2.0f * D_800D2E30[actorIndex];
+        actor->unk300 += dir.unk8 * -2.5f * D_800D2E30[actorIndex];
     }
 }
