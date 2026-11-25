@@ -983,14 +983,7 @@ typedef struct {
 } TrailParticleLink;
 
 typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x1B];
-    /* 0x2B */ u8 alpha;
-    /* 0x2C */ u8 pad2C[0xC];
-    /* 0x38 */ f32 width;
-    /* 0x3C */ f32 height;
-    /* 0x40 */ Vec3f pos;
-    /* 0x4C */ u8 pad4C[0x5C];
+    /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ union {
         ActorParticleLink actor;
         TrailParticleLink trail;
@@ -1078,18 +1071,18 @@ s32 func_150F0E48(Particle *particle, s32 arg1) {
         return 0;
     }
 
-    particle->pos.x = actor->x_position;
-    particle->pos.y = actor->y_position;
-    particle->pos.z = actor->z_position;
+    particle->head.desc.pos.x = actor->x_position;
+    particle->head.desc.pos.y = actor->y_position;
+    particle->head.desc.pos.z = actor->z_position;
     link->phase[0] += 0.2630000114f * D_800BE9A4;
     link->phase[1] += 0.3030000031f * D_800BE9A4;
     link->phase[2] += 0.25f * D_800BE9A4;
     link->phase[0] = func_15144B68(link->phase[0]);
     link->phase[1] = func_15144B68(link->phase[1]);
     link->phase[2] = func_15144B68(link->phase[2]);
-    particle->width = (sinf(link->phase[0]) * 243.0f) + 780.0f;
-    particle->height = (sinf(link->phase[1]) * 243.0f) + 780.0f;
-    particle->alpha = (sinf(link->phase[2]) * 50.0f) + 200.0f;
+    particle->head.desc.width = (sinf(link->phase[0]) * 243.0f) + 780.0f;
+    particle->head.desc.height = (sinf(link->phase[1]) * 243.0f) + 780.0f;
+    particle->head.desc.alpha = (sinf(link->phase[2]) * 50.0f) + 200.0f;
     return 1;
 }
 
@@ -1115,7 +1108,7 @@ void func_150F1020(Particle *particle, s32 data, u8 type) {
     } else if (type == 0 || type == 0x43) {
         msgActor = msg->ref.actor;
         if ((msgActor == link->actor) || (msg->ref.uniqueId == link->actorId)) {
-            func_1516972C(&particle->header);
+            func_1516972C(&particle->head.header);
         }
     }
 }

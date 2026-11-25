@@ -38,17 +38,7 @@ typedef struct {
 
 /* Live particle, as created by func_15130280 from a ParticleDesc. */
 typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x1B];
-    /* 0x2B */ u8 unk2B;
-    /* 0x2C */ u8 pad2C[0x38 - 0x2C];
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ Vec3f anchor;
-    /* 0x4C */ Vec3f offset;
-    /* 0x58 */ Vec3f vel;
-    /* 0x64 */ f32 accelY;
-    /* 0x68 */ u8 pad68[0xA8 - 0x68];
+    /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ union {
         DriftParticleData drift;
         GrowParticleData grow;
@@ -661,23 +651,23 @@ s32 func_150D6CC4(Particle *particle, s32 arg1) {
     if (owner->interaction_state == 0 || owner->unique_id != data->ownerId) {
         return 0;
     }
-    func_150D6C98(owner, &particle->anchor);
+    func_150D6C98(owner, &particle->head.desc.pos);
     {
-        Vec3f prevVel = particle->vel;
+        Vec3f prevVel = particle->head.desc.vel;
         f32 accelX;
         f32 accelY;
         f32 accelZ;
 
-        particle->vel.y += particle->accelY * D_800BE9A4;
-        func_15131958(&particle->vel, data->drag);
-        accelX = (particle->vel.x - prevVel.x) * D_800BE9A8;
-        accelY = (particle->vel.y - prevVel.y) * D_800BE9A8;
-        accelZ = (particle->vel.z - prevVel.z) * D_800BE9A8;
-        particle->offset.x += prevVel.x * D_800BE9A4 +
+        particle->head.desc.vel.y += particle->head.desc.gravity * D_800BE9A4;
+        func_15131958(&particle->head.desc.vel, data->drag);
+        accelX = (particle->head.desc.vel.x - prevVel.x) * D_800BE9A8;
+        accelY = (particle->head.desc.vel.y - prevVel.y) * D_800BE9A8;
+        accelZ = (particle->head.desc.vel.z - prevVel.z) * D_800BE9A8;
+        particle->head.desc.offset.x += prevVel.x * D_800BE9A4 +
             accelX * D_800BE9A4 * D_800BE9A4 * 0.5f;
-        particle->offset.y += prevVel.y * D_800BE9A4 +
+        particle->head.desc.offset.y += prevVel.y * D_800BE9A4 +
             accelY * D_800BE9A4 * D_800BE9A4 * 0.5f;
-        particle->offset.z += prevVel.z * D_800BE9A4 +
+        particle->head.desc.offset.z += prevVel.z * D_800BE9A4 +
             accelZ * D_800BE9A4 * D_800BE9A4 * 0.5f;
     }
     return 1;
@@ -703,7 +693,7 @@ void func_150D6E60(Particle *particle, ActorMsg *msg, u8 type) {
     } else if (type == 0) {
         object = msg->ref.actor;
         if (object == data->owner || msg->ref.uniqueId == data->ownerId) {
-            func_1516972C(&particle->header);
+            func_1516972C(&particle->head.header);
         }
     }
 }
@@ -721,13 +711,13 @@ s32 func_150D6F0C(Particle *particle, s32 arg1) {
         return 0;
     }
 
-    func_150D6C98(owner, &particle->anchor);
+    func_150D6C98(owner, &particle->head.desc.pos);
 
     size = sqrtf(data->time) * data->growth;
-    particle->unk3C = size;
-    particle->unk38 = size;
+    particle->head.desc.height = size;
+    particle->head.desc.width = size;
 
-    particle->unk2B = data->fadeStart - data->fadeRate * data->time * data->time;
+    particle->head.desc.alpha = data->fadeStart - data->fadeRate * data->time * data->time;
     data->time += D_800BE9A4;
 
     if (data->lifetime < data->time) {
@@ -756,7 +746,7 @@ void func_150D7068(Particle *particle, ActorMsg *msg, u8 type) {
     } else if (type == 0) {
         object = msg->ref.actor;
         if (object == data->owner || msg->ref.uniqueId == data->ownerId) {
-            func_1516972C(&particle->header);
+            func_1516972C(&particle->head.header);
         }
     }
 }
