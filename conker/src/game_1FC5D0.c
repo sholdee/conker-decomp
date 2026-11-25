@@ -2,17 +2,18 @@
 #include "functions.h"
 #include "variables.h"
 
+/* One ring-buffer entry; distance is the segment length to the next-older entry. */
 typedef struct {
     f32 x, y, z, distance;
     u8 pad10[4];
     f32 wave;
     u8 pad18[0x10];
-} Game1FC5D0Point;
+} TrailPoint;
 
 typedef struct {
     u8 pad00[0x20];
     f32 limit, phase;
-} Game1FC5D0Config;
+} TrailConfig;
 
 typedef struct {
     u8 pad00[0x25];
@@ -22,18 +23,18 @@ typedef struct {
     s8 head;
     s8 tail;
     u8 pad2F[0x65];
-    Game1FC5D0Point *points;
-    Game1FC5D0Config *config;
-} Game1FC5D0Actor;
+    TrailPoint *points;
+    TrailConfig *config;
+} TrailActor;
 
 /*
  * Updates a ring buffer of trail points: trims the oldest points so the summed segment
  * distance stays within config->limit, then gives each point a sine wave offset that
  * grows in amplitude along the trail.
  */
-s32 func_151CF120(Game1FC5D0Actor *actor) {
-    Game1FC5D0Config *config;
-    Game1FC5D0Point *points;
+s32 func_151CF120(TrailActor *actor) {
+    TrailConfig *config;
+    TrailPoint *points;
     s32 count;
 
     count = actor->count;
@@ -44,7 +45,7 @@ s32 func_151CF120(Game1FC5D0Actor *actor) {
         f32 limit;
         s32 index;
         s32 current;
-        Game1FC5D0Point *point;
+        TrailPoint *point;
 
         total = 0.0f;
         index = actor->tail - 1;
@@ -58,8 +59,9 @@ s32 func_151CF120(Game1FC5D0Actor *actor) {
                 point = &points[current];
                 total += point->distance;
                 if (limit < total) {
+                    // matching: comparing with 0.0f instead of int 0 changes the emitted code
                     if (point->distance != 0) {
-                        Game1FC5D0Point *previous;
+                        TrailPoint *previous;
                         f32 ratio;
                         f32 px, py, pz;
                         f32 dx, dy, dz;
@@ -100,7 +102,7 @@ s32 func_151CF120(Game1FC5D0Actor *actor) {
         index = actor->tail;
         phase = config->phase;
         do {
-            Game1FC5D0Point *point;
+            TrailPoint *point;
             f32 distance;
 
             index--;
