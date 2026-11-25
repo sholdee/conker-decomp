@@ -766,7 +766,7 @@ typedef struct {
     /* 0x18 */ f32 swayZ;
     /* 0x1C */ f32 damping;
     /* 0x20 */ f32 groundHeight; /* GROUND_UNKNOWN: query func_15046C00 each frame */
-} DriftMotion;
+} ParticleDriftMotion;
 
 #define GROUND_UNKNOWN -99999.8984375f
 
@@ -776,7 +776,7 @@ typedef struct {
     /* 0xA8 */ union {
         RiseMotion rise;
         OscillateMotion oscillate;
-        DriftMotion drift;
+        ParticleDriftMotion drift;
     } motion;
 } Particle;
 
@@ -1109,7 +1109,7 @@ Particle *func_1515A238(Vec3f *pos, Vec3f *velocity, f32 arg2, f32 damping, Coll
     Particle *particle;
     s32 pad; // matching: 4 unused frame bytes sit above spawn
     ParticleDesc6C spawn;
-    DriftMotion drift;
+    ParticleDriftMotion drift;
     CollisionHit hit;
     s32 flipY;
     s32 flipX;
@@ -1188,16 +1188,16 @@ Particle *func_1515A238(Vec3f *pos, Vec3f *velocity, f32 arg2, f32 damping, Coll
             drift.groundHeight = 10000.0f;
         }
     }
-    particle = func_15130280(&spawn, 2, ground, sizeof(DriftMotion), arg9, argA);
+    particle = func_15130280(&spawn, 2, ground, sizeof(ParticleDriftMotion), arg9, argA);
     if (particle != NULL) {
-        memcpy(&particle->motion, &drift, sizeof(DriftMotion));
+        memcpy(&particle->motion, &drift, sizeof(ParticleDriftMotion));
     }
     return particle;
 }
 
 /* Update callback: wobbles the size, sways the offset and damps the velocity. */
 s32 func_1515A60C(Particle *particle, ParticleUpdateArg *arg1) {
-    DriftMotion *drift;
+    ParticleDriftMotion *drift;
     s32 i;
 
     drift = &particle->motion.drift;
@@ -1221,7 +1221,7 @@ s32 func_1515A60C(Particle *particle, ParticleUpdateArg *arg1) {
 
 /* Update callback: drifts, then dies on reaching the ground (sometimes splashing on surface 3). */
 u8 func_1515A78C(Particle *particle, ParticleUpdateArg *arg1) {
-    DriftMotion *drift;
+    ParticleDriftMotion *drift;
     u8 alive;
     Vec3f pos;
 

@@ -22,7 +22,7 @@ typedef struct {
     /* 0x04 */ u8 ownerId;
     /* 0x05 */ u8 pad5[3];
     /* 0x08 */ f32 drag; /* passed to func_15131958 with the velocity */
-} DriftParticleData;
+} FollowDriftData;
 
 /* Per-particle data of the growing, fading particle that follows an object (func_150D6F0C). */
 typedef struct {
@@ -40,7 +40,7 @@ typedef struct {
 typedef struct {
     /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ union {
-        DriftParticleData drift;
+        FollowDriftData drift;
         GrowParticleData grow;
     } data;
 } Particle;
@@ -518,7 +518,7 @@ extern void func_15143794(s16, s16, f32, Vec3f *);
 void func_150D6730(Actor *obj, u8 arg1, s32 arg2) {
     s32 count;
     ParticleDesc spawn;
-    DriftParticleData drift;
+    FollowDriftData drift;
     Particle *particle;
     ParticleDesc growSpawn;
     GrowParticleData grow;
@@ -643,7 +643,7 @@ void func_15131958(Vec3f *, f32);
 
 /* Drift particle update: follows the owner and integrates offset/velocity; returns 0 to kill. */
 s32 func_150D6CC4(Particle *particle, s32 arg1) {
-    DriftParticleData *data;
+    FollowDriftData *data;
     Actor *owner;
 
     data = &particle->data.drift;
@@ -675,7 +675,7 @@ s32 func_150D6CC4(Particle *particle, s32 arg1) {
 
 /* Drift particle message handler: dies with its owner and follows it through message 0x2D. */
 void func_150D6E60(Particle *particle, ActorMsg *msg, u8 type) {
-    DriftParticleData *data = &particle->data.drift;
+    FollowDriftData *data = &particle->data.drift;
     Actor *object;
 
     if (type == 0x2D) {

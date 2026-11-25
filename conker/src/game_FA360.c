@@ -17,7 +17,7 @@ typedef struct {
     /* 0x34 */ f32 phaseSpeed;
     /* 0x38 */ f32 phaseScale;
     /* 0x3C */ f32 minVy;
-} DriftMotion; /* size 0x40 */
+} QuadDriftMotion; /* size 0x40 */
 
 /* Effect instance created by func_1513D524 from an ParticleDef. */
 typedef struct {
@@ -30,7 +30,7 @@ typedef struct {
     /* 0x058 */ u8 pad58[0x68];
     /* 0x0C0 */ Vtx_t template[4];
     /* 0x100 */ Vtx_t *buffers[4]; /* each holds two copies of the 4-vertex quad */
-    /* 0x110 */ DriftMotion drift;
+    /* 0x110 */ QuadDriftMotion drift;
 } Effect;
 
 
@@ -38,7 +38,7 @@ typedef struct {
 Effect *func_150CCEB0(DriftSpawn *spawn, u8 arg1, u8 arg2) {
     Effect *effect;
     ParticleDef packet;
-    DriftMotion drift;
+    QuadDriftMotion drift;
 
     packet.texture = 0x57;
     packet.renderModes = 0x2D03;
@@ -88,7 +88,7 @@ void func_151436B4(f32 yaw, f32 pitch, f32 length, f32 *out);
 
 /* Per-frame update of a drifting quad: integrates velocity with gravity and drag, sways it while falling. */
 s32 func_150CD17C(Effect *effect) {
-    DriftMotion *drift;
+    QuadDriftMotion *drift;
     s32 i;
     f32 wave;
     f32 pitch;

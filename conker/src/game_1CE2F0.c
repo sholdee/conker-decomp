@@ -111,7 +111,7 @@ typedef struct {
     /* 0x1C */ s16 fadeOutStep;
     /* 0x1E */ s16 shrinkStart;
     /* 0x20 */ s16 shrinkStep;
-} DriftParticleData;
+} ConvergeParticleData;
 
 extern EffectTexture D_80090B60[];
 BillboardParticle *func_15167D84(BillboardTemplate *, s32, s32, s8, u8, s32);
@@ -120,7 +120,7 @@ BillboardParticle *func_15167D84(BillboardTemplate *, s32, s32, s8, u8, s32);
 void func_151A11E4(Emitter *emitter) {
     EmitterParams *params;
     BillboardTemplate packet;
-    DriftParticleData data;
+    ConvergeParticleData data;
     u8 angle1;
     u8 angle2;
     f32 cos1;
@@ -224,7 +224,7 @@ void func_151A11E4(Emitter *emitter) {
 
 /* Callback 0x10 (func_151A11E4's particles): fade in and grow, drift, then fade out and shrink. */
 void func_151A175C(BillboardParticle *particle) {
-    DriftParticleData *data = (DriftParticleData *)(particle + 1);
+    ConvergeParticleData *data = (ConvergeParticleData *)(particle + 1);
 
     if (particle->tmpl.life > data->fadeInEnd) {
         particle->tmpl.primA = (data->fadeInStart - particle->tmpl.life) * data->fadeInStep;
