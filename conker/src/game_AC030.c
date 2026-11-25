@@ -2,332 +2,390 @@
 #include "functions.h"
 #include "variables.h"
 
+/*
+ * Idle animations: while an actor stands still it plays short "sequences" (lists of frames
+ * from D_8009B8B0), picked at random from per-category candidate lists while avoiding the
+ * ones played most recently.
+ */
 
-extern u8 D_800B85A4[];
-
-void func_1507EB80(u8 *buf, s32 *count, u8 c) {
-    if (*count + 1 < 40) {
-        buf[*count] = c;
-        *count = *count + 1;
-    }
-}
-
-extern u8 *D_80086C24[];
-extern u8 D_8009BBF0[];
-
+/* Per-actor idle state, stored at offset 0x58 of the actor's struct126 (actor->unk31C). */
 typedef struct {
-    char pad_0[0x3B];
-    u8 field_0x3B;
-} ActorUniqueIdFields;
+    /* 0x0 */ u8 active;
+    /* 0x1 */ u8 holdFrames;  // frames left before the next sequence frame
+    /* 0x2 */ u16 timer;      // time spent idle in the current phase
+    /* 0x4 */ u8 sequence;    // index into D_80086BA0, 0 = none
+    /* 0x5 */ u8 frame;       // position within the sequence
+    /* 0x6 */ u8 frameFlags;  // flags of the frame applied last
+    /* 0x7 */ u8 recent[5];   // most recently played sequences, newest first
+    /* 0xC */ u8 phase;
+    /* 0xD */ u8 phaseCount;  // sequences played in the current phase
+    /* 0xE */ s16 delay;
+} IdleState;
 
-void func_1507EBB8(u8 *arg0, s32 *arg1, s32 arg2) {
-    u8 *dst = D_80086C24[arg2];
-    s32 len = D_8009BBF0[arg2];
-    if (*arg1 + len < 40) {
-        bcopy(dst, arg0 + *arg1, len);
-        *arg1 += len;
+/* The parts of struct126 this file uses. include/structs.h does not declare 0x17, 0x1A, 0x32,
+ * 0x1B2 or the idle block at 0x58 yet. */
+typedef struct {
+    /* 0x000 */ u8 pad0[8];
+    /* 0x008 */ s16 unk8;
+    /* 0x00A */ u8 padA[0xD];
+    /* 0x017 */ u8 unk17;
+    /* 0x018 */ u8 pad18[2];
+    /* 0x01A */ u8 unk1A;
+    /* 0x01B */ u8 pad1B[0x17];
+    /* 0x032 */ u16 unk32;
+    /* 0x034 */ u8 pad34[0x1A];
+    /* 0x04E */ u8 unk4E;
+    /* 0x04F */ u8 pad4F[9];
+    /* 0x058 */ IdleState idle;
+    /* 0x068 */ u8 pad68[0x10];
+    /* 0x078 */ u8 unk78;
+    /* 0x079 */ u8 pad79[0xA7];
+    /* 0x120 */ u8 unk120;
+    /* 0x121 */ u8 pad121[0x77];
+    /* 0x198 */ u8 unk198;
+    /* 0x199 */ u8 pad199[0x19];
+    /* 0x1B2 */ u8 unk1B2;
+} IdleOwner;
+
+/* One frame of an idle sequence. */
+typedef struct {
+    /* 0x0 */ u16 anim;
+    /* 0x2 */ u8 speed;       // in 1/100ths
+    /* 0x3 */ u8 blend;       // in 1/10ths
+    /* 0x4 */ u8 holdFrames;
+    /* 0x5 */ u8 pad5;
+    /* 0x6 */ u8 flags;
+    /* 0x7 */ u8 unk7;
+} IdleFrame;
+
+extern u8 *D_80086C24[];      // candidate sequences per category
+extern u8 D_8009BBF0[];       // number of candidates per category
+extern u8 *D_80086BA0[];      // sequences: 0-terminated lists of D_8009B8B0 indices
+extern IdleFrame D_8009B8B0[];
+extern s32 D_800D18C4;
+
+void func_1507EEB8(u8 seq, u8 *recent);
+s32 func_1507FFD8(struct127 *actor);
+s32 func_1507F4C0(s32 phase);
+void func_1507FF94(struct127 *actor);
+s32 func_1515942C(struct127 *, s32, s32, s32, s32, s32);
+void func_1507CD64(struct127 *actor, s32 arg1);
+void func_1000D96C(s32 arg0, s32 arg1, s32 arg2);
+void func_1000DE1C(s32 arg0, s32 arg1);
+void func_1000E7A0(u32 arg0, s32 arg1);
+void func_1000E8C4(s32 arg0);
+void func_15191B8C(s32 arg0, u8 arg1);
+
+/* Appends one sequence to a 40-entry candidate list. */
+void func_1507EB80(u8 *list, s32 *count, u8 seq) {
+    if (*count + 1 < 40) {
+        list[*count] = seq;
+        (*count)++;
     }
 }
 
-s32 func_1507EC38(u8 *src, s32 srcLen, u8 *out, s32 *outLen, u8 *used) {
-    s32 ret;
+/* Appends every candidate sequence of a category to a 40-entry candidate list. */
+void func_1507EBB8(u8 *list, s32 *count, s32 category) {
+    u8 *src = D_80086C24[category];
+    s32 len = D_8009BBF0[category];
+
+    if (*count + len < 40) {
+        bcopy(src, list + *count, len);
+        *count += len;
+    }
+}
+
+/*
+ * Copies the distinct candidates not among the recent sequences to out. If none remain, falls
+ * back to (up to half of) the recent sequences that are candidates, oldest first, and returns 1;
+ * with no candidates at all, out is { 0 }.
+ */
+s32 func_1507EC38(u8 *candidates, s32 numCandidates, u8 *out, s32 *outLen, u8 *recent) {
+    s32 reused;
     s32 i;
     s32 j;
     s32 found;
-    s32 num;
-    u8 buf[5];
-    s32 n;
+    s32 numReusable;
+    u8 reusable[5];
+    s32 take;
 
-    ret = 0;
+    reused = FALSE;
     *outLen = 0;
-    for (i = 0; i < srcLen; i++) {
-        found = 0;
+    for (i = 0; i < numCandidates; i++) {
+        found = FALSE;
         for (j = 0; j < *outLen; j++) {
-            if (out[j] == src[i]) {
-                found = 1;
+            if (out[j] == candidates[i]) {
+                found = TRUE;
                 break;
             }
         }
         if (!found) {
             for (j = 0; j < 5; j++) {
-                if (used[j] == src[i]) {
-                    found = 1;
+                if (recent[j] == candidates[i]) {
+                    found = TRUE;
                     break;
                 }
             }
             if (!found) {
-                out[*outLen] = src[i];
-                *outLen = *outLen + 1;
+                out[*outLen] = candidates[i];
+                (*outLen)++;
             }
         }
     }
 
     if (*outLen == 0) {
-        num = 0;
+        numReusable = 0;
         for (i = 0; i < 5; i++) {
-            if (used[i] != 0) {
-                for (j = 0; j < srcLen; j++) {
-                    if (used[i] == src[j]) {
-                        buf[num] = used[i];
-                        num++;
+            if (recent[i] != 0) {
+                for (j = 0; j < numCandidates; j++) {
+                    if (recent[i] == candidates[j]) {
+                        reusable[numReusable] = recent[i];
+                        numReusable++;
                         break;
                     }
                 }
             }
         }
-        if (num == 0) {
+        if (numReusable == 0) {
             out[0] = 0;
             *outLen = 1;
         } else {
-            n = num >> 1;
-            if (n == 0) {
-                n = 1;
+            take = numReusable >> 1;
+            if (take == 0) {
+                take = 1;
             }
-            while (n != 0) {
-                num--;
-                out[*outLen] = buf[num];
-                *outLen = *outLen + 1;
-                n--;
+            while (take != 0) {
+                numReusable--;
+                out[*outLen] = reusable[numReusable];
+                (*outLen)++;
+                take--;
             }
-            ret = 1;
+            reused = TRUE;
         }
     }
-    return ret;
+    return reused;
 }
 
-void func_1507EEB8(u8 arg0, u8 *arg1);
-
-void func_1507EE58(s32 arg0, void *arg1) {
-    func_1507EEB8(*((u8*)&arg0 + 3), arg1);
-    if (*((u8*)&arg0 + 3) == 0x11) {
-        func_1507EEB8(0x12, arg1);
-    } else if (*((u8*)&arg0 + 3) == 0x12) {
-        func_1507EEB8(0x11, arg1);
+/* Records seq as the newest recent sequence; 0x11 and 0x12 are recorded as a pair. */
+void func_1507EE58(seq, recent)
+    u8 seq;
+    u8 *recent;
+{
+    func_1507EEB8(seq, recent);
+    if (seq == 0x11) {
+        func_1507EEB8(0x12, recent);
+    } else if (seq == 0x12) {
+        func_1507EEB8(0x11, recent);
     }
 }
 
-void func_1507EEB8(u8 arg0, u8 *arg1) {
+/* Pushes seq onto the front of the 5-entry recent list, dropping the oldest. */
+void func_1507EEB8(u8 seq, u8 *recent) {
     s32 i;
 
     for (i = 4; i > 0; i--) {
-        arg1[i] = arg1[i - 1];
+        recent[i] = recent[i - 1];
     }
-    arg1[0] = arg0;
+    recent[0] = seq;
 }
 
+/* Advances the current actor's idle phase: 0 -> 1, 1 -> 2 after 3 sequences, 2 -> 1 after 8-11. */
 void func_1507EEF4(void) {
-    u8 *state;
-    s32 value;
+    IdleState *idle;
+    s32 phase;
 
-    state = (u8 *)D_800D154C->unk31C;
-    value = state[0x64];
-    state += 0x58;
+    idle = &((IdleOwner *)D_800D154C->unk31C)->idle;
+    phase = idle->phase;
 
-    if (value == 0) {
-        state[0xC] = 1;
-        state[0xD] = 0;
+    if (phase == 0) {
+        idle->phase = 1;
+        idle->phaseCount = 0;
         return;
     }
 
-    if (value == 1) {
+    if (phase == 1) {
         func_150ADA20();
-        if (state[0xD] >= 3) {
-            state[0xC] = 2;
-            state[0xD] = 0;
+        if (idle->phaseCount >= 3) {
+            idle->phase = 2;
+            idle->phaseCount = 0;
         }
         return;
     }
 
-    if (state[0xD] >= ((func_150ADA20() & 3) + 8)) {
-        state[0xC] = 1;
-        state[0xD] = 0;
+    if (idle->phaseCount >= (func_150ADA20() & 3) + 8) {
+        idle->phase = 1;
+        idle->phaseCount = 0;
     }
 }
 
-void func_1507EFA0(s32 c, u8 *arg1) {
-    s32 i = 4;
-    u8 *p = arg1 + 4;
-    do {
-        if (*p == c) {
-            *p = 0;
+/* Clears the oldest occurrence of seq from the recent list. */
+void func_1507EFA0(s32 seq, u8 *recent) {
+    s32 i;
+
+    for (i = 4; i >= 0; i--) {
+        if (recent[i] == seq) {
+            recent[i] = 0;
             return;
         }
-        i--;
-        p--;
-    } while (i >= 0);
+    }
 }
 
-typedef struct {
-    u8 pad0[2];
-    u16 timer;
-    u8 cur;
-    u8 unk5;
-    u8 pad6;
-    u8 used[5];
-    u8 mode;
-    u8 count;
-} SpeechState;
-
-s32 func_1507FFD8(struct127 *);
-s32 func_1507F4C0(s32 arg0);
-void func_1507FF94(ActorUniqueIdFields *arg0);
-s32 func_1515942C(struct127 *, s32, s32, s32, s32, s32);
-
+/* Picks the current actor's next idle sequence from the candidates its situation allows. */
 void func_1507EFD0(void) {
-    SpeechState *state;
-    u8 buf[40];
-    u8 out[40];
+    IdleState *idle;
+    u8 candidates[40];
+    u8 choices[40];
     s32 count;
-    s32 outLen;
-    s32 idx;
-    u8 *used;
-    s32 sel;
-    s32 ret;
-    s32 v;
+    s32 numChoices;
+    s32 pick;
+    u8 *recent;
+    s32 category;
+    s32 reused;
+    s32 seq;
 
-    state = (SpeechState *)&D_800D154C->unk31C->unk58;
+    idle = &((IdleOwner *)D_800D154C->unk31C)->idle;
     count = 0;
     if (D_800D154C->pad139[1] != 0) {
         if (D_800D154C->pad139[0] < 0x21) {
-            func_1507EB80(buf, &count, D_800D154C->pad139[0]);
+            func_1507EB80(candidates, &count, D_800D154C->pad139[0]);
         }
     } else if (D_800D18C0 & 2) {
-        func_1507EB80(buf, &count, 3);
+        func_1507EB80(candidates, &count, 3);
         D_800D18C0 = 0;
     } else {
         if ((s16)D_800D154C->unk31C->unk66 != 0 && D_800D154C->unk31C->unk78 == 0) {
-            v = 0xB;
-            if (state->timer >= 0x79) {
+            seq = 0xB;
+            if (idle->timer >= 121) {
                 D_800D154C->unk31C->unk66 = 0;
-                state->timer = 0;
-                state->mode = 0;
-                v = 0xC;
-                func_1507FF94((ActorUniqueIdFields *)D_800D154C);
+                idle->timer = 0;
+                idle->phase = 0;
+                seq = 0xC;
+                func_1507FF94(D_800D154C);
             } else {
-                v = 0xB;
+                seq = 0xB;
             }
-            func_1507EB80(buf, &count, v);
+            func_1507EB80(candidates, &count, seq);
         } else if (D_800D154C->health < 2) {
-            func_1507EB80(buf, &count, 0);
+            func_1507EB80(candidates, &count, 0);
         } else if (func_1515942C(&D_800CC2D0[D_800C3E78], 0, 0, -1, -1, -1) != 0) {
-            func_1507EB80(buf, &count, 0);
-        } else if (state->timer >= func_1507F4C0(state->mode)) {
+            func_1507EB80(candidates, &count, 0);
+        } else if (idle->timer >= func_1507F4C0(idle->phase)) {
             func_1507EEF4();
-            sel = -1;
+            category = -1;
             if (D_800D154C->unk2F8 & 0x200) {
-                sel = 2;
+                category = 2;
             } else if (D_800D154C->unk31C->unk78 == 9) {
-                sel = 5;
+                category = 5;
             } else if (D_800D154C->unk31C->unk78 == 0x23) {
-                sel = 9;
+                category = 9;
             } else if (D_800D154C->unk31C->unk78 == 0x16) {
-                sel = 0xA;
+                category = 10;
             } else if (func_1503195C(D_800D154C, 0x17, 0) != NULL) {
-                sel = 6;
+                category = 6;
             } else if (D_800BE9F0 == 0x31) {
                 if (D_800D18C0 & 4) {
-                    sel = 8;
+                    category = 8;
                 } else {
-                    sel = 7;
+                    category = 7;
                 }
             } else if (D_800D154C->id == 0x96 || D_800BE9F0 == 0x10 || D_800BE9F0 == 0x1B ||
                        D_800BE9F0 == 0x1E || D_800BE9F0 == 0x26 || D_800BE9F0 == 0x2F ||
                        D_800BE9F0 == 0xE || D_800BE9F0 == 0x28 || D_800BE9F0 == 0x23 ||
                        D_800BE9F0 == 0x1C || D_800BE9F0 == 0x36 || D_800BE9F0 == 0x3A) {
-                sel = 2;
+                category = 2;
             } else if (D_800D18C0 != 0) {
                 if (D_800D18C0 & 1) {
-                    sel = 4;
+                    category = 4;
                 }
                 D_800D18C0 = 0;
             }
-            if (sel != -1) {
+            if (category != -1) {
                 count = 0;
-                func_1507EBB8(buf, &count, sel);
-            } else if (state->mode == 1) {
-                func_1507EBB8(buf, &count, 0);
+                func_1507EBB8(candidates, &count, category);
+            } else if (idle->phase == 1) {
+                func_1507EBB8(candidates, &count, 0);
             } else {
-                func_1507EBB8(buf, &count, 1);
-                if (state->mode == 2 && state->count >= 4 && func_1507FFD8(D_800D154C) != 0) {
-                    func_1507EBB8(buf, &count, 3);
+                func_1507EBB8(candidates, &count, 1);
+                if (idle->phase == 2 && idle->phaseCount >= 4 && func_1507FFD8(D_800D154C) != 0) {
+                    func_1507EBB8(candidates, &count, 3);
                 }
             }
         } else {
-            func_1507EB80(buf, &count, 0);
+            func_1507EB80(candidates, &count, 0);
         }
     }
-    used = state->used;
-    ret = func_1507EC38(buf, count, out, &outLen, used);
-    if (outLen >= 2) {
-        idx = func_150ADA20() % (u32)outLen;
+    recent = idle->recent;
+    reused = func_1507EC38(candidates, count, choices, &numChoices, recent);
+    if (numChoices >= 2) {
+        pick = func_150ADA20() % (u32)numChoices;
     } else {
-        idx = 0;
+        pick = 0;
     }
-    state->cur = out[idx];
-    state->unk5 = 0;
-    state->count++;
-    if (state->mode != 0) {
-        state->timer = 0;
+    idle->sequence = choices[pick];
+    idle->frame = 0;
+    idle->phaseCount++;
+    if (idle->phase != 0) {
+        idle->timer = 0;
     }
-    if (ret) {
-        func_1507EFA0(state->cur, used);
+    if (reused) {
+        func_1507EFA0(idle->sequence, recent);
     }
-    func_1507EE58(state->cur, used);
+    func_1507EE58(idle->sequence, recent);
 }
 
-extern u8 *D_80086BA0[];
-
+/* Steps the current actor's idle sequence; returns 1 when it has none or it just ended. */
 s32 func_1507F454(void) {
-    u8 *state;
-    s32 value;
-    s32 frame;
+    IdleState *idle;
+    s32 sequence;
+    s32 next;
 
-    state = (u8 *)D_800D154C->unk31C;
-    value = state[0x5C];
-    state += 0x58;
+    idle = &((IdleOwner *)D_800D154C->unk31C)->idle;
+    sequence = idle->sequence;
 
-    if (value == 0) {
-        return 1;
+    if (sequence == 0) {
+        return TRUE;
     }
-    state[5]++;
-    frame = *(state[5] + D_80086BA0[value]);
-    if (frame == 0) {
-        state[4] = 0;
-        state[5] = 0;
-        return 1;
+    idle->frame++;
+    next = D_80086BA0[sequence][idle->frame];
+    if (next == 0) {
+        idle->sequence = 0;
+        idle->frame = 0;
+        return TRUE;
     }
-    return 0;
+    return FALSE;
 }
 
-
-s32 func_1507F4C0(s32 arg0) {
-    s32 pad;
+/* Returns a random idle time to wait in phase before picking the next sequence. */
+s32 func_1507F4C0(s32 phase) {
+    s32 pad; // matching: unused stack slot
     s32 base;
-    u32 mod;
+    u32 range;
 
-    if (arg0 == 0) {
-        base = 0xB4;
-        mod = 0x3C;
+    if (phase == 0) {
+        base = 180;
+        range = 60;
     } else if (D_800BE9F0 == 0x31) {
         return 0;
-    } else if (arg0 == 1) {
-        base = 0x3C;
-        mod = 0x3C;
+    } else if (phase == 1) {
+        base = 60;
+        range = 60;
     } else {
         base = 0;
-        mod = 0x1E;
+        range = 30;
     }
 
-    return func_150ADA20() % mod + base;
+    return func_150ADA20() % range + base;
 }
 
-void func_1507F54C(struct127 *arg0) {
-    s32 idx;
+/* Plays the actor's idle animation; when unk13C names an object slot (100 and up), one that
+ * suits that object's id. */
+void func_1507F54C(struct127 *actor) {
+    s32 slot;
     s32 anim;
 
-    idx = arg0->unk13C;
-    if (idx >= 0x64) {
-        switch (D_800B85A4[idx * 0x32C]) {
+    slot = actor->unk13C;
+    if (slot >= 100) {
+        switch (D_800CC2D0[slot - 100].id) {
         case 0x57:
             anim = 0x115;
             break;
@@ -346,37 +404,25 @@ void func_1507F54C(struct127 *arg0) {
             anim = 0xD8;
             break;
         }
-        func_1505E650(arg0, anim, 1.0f, 4.0f, 0.0f, 0.0f, 0);
+        func_1505E650(actor, anim, 1.0f, 4.0f, 0.0f, 0.0f, 0);
         return;
     }
 
-    func_1505E650(arg0, 0xF, 1.0f, 3.0f, 0.0f, 0.0f, 0);
+    func_1505E650(actor, 0xF, 1.0f, 3.0f, 0.0f, 0.0f, 0);
 }
 
-typedef struct {
-    u16 anim;
-    u8 speed;
-    u8 blend;
-    u8 time;
-    u8 pad5;
-    u8 unk6;
-    u8 unk7;
-} MoveFlags;
-typedef MoveFlags AnimEntry_1507F640;
-extern MoveFlags D_8009B8B0[];
-void func_1507CD64(struct127 *arg0, s32 arg1);
-
+/* Per-frame idle animation update for the current actor (D_800D154C). */
 void func_1507F640(void) {
     s32 type;
-    AnimEntry_1507F640 *entry;
-    u8 *state;
-    u8 *s;
+    IdleFrame *entry;
+    IdleState *idle;
+    IdleOwner *owner;
     f32 speed;
     f32 blend;
     s32 anim;
-    s32 anim2;
-    s32 pose;
-    s32 k;
+    s32 override;
+    s32 frame;
+    s32 sequence;
 
     speed = 1.0f;
     blend = 4.0f;
@@ -389,17 +435,17 @@ void func_1507F640(void) {
     if (D_800C3E78 >= D_8008FD8C) {
         return;
     }
-    state = (u8 *)D_800D154C->unk31C + 0x58;
-    state[0] = 1;
+    idle = &((IdleOwner *)D_800D154C->unk31C)->idle;
+    idle->active = TRUE;
     if (D_800D154C->unk2F8 & 0x20) {
         return;
     }
-    if (((u8 *)D_800D154C->unk31C)[0x120]) {
+    if (((IdleOwner *)D_800D154C->unk31C)->unk120) {
         return;
     }
-    if (state[1] > 0) {
-        state[1]--;
-        *(s16 *)(state + 2) = 0;
+    if (idle->holdFrames > 0) {
+        idle->holdFrames--;
+        idle->timer = 0;
         return;
     }
     if (D_800D154C->health == 0) {
@@ -407,7 +453,7 @@ void func_1507F640(void) {
         return;
     }
     anim = 0x4F;
-    if (D_800D154C->disable_run >= 0xFA) {
+    if (D_800D154C->disable_run >= 250) {
         D_800D154C->disable_run = 0;
     }
     if (D_800D154C->disable_jump == 0xFF) {
@@ -417,10 +463,10 @@ void func_1507F640(void) {
     D_800D154C->unkAA = 0;
     D_800D154C->unk76 = D_800D154C->unk7A;
     D_800D154C->unk100 &= 0xFE;
-    D_800D154C->unk2F8 &= 0xFFF8;
+    D_800D154C->unk2F8 &= ~7;
     D_800D154C->unk2F8 |= 0;
-    s = (u8 *)D_800D154C->unk31C;
-    if (s[0x17]) {
+    owner = (IdleOwner *)D_800D154C->unk31C;
+    if (owner->unk17) {
         s32 pad;
         if (func_150ADA20() & 3) {
             anim = 0x4D;
@@ -428,221 +474,207 @@ void func_1507F640(void) {
         func_1505E650(D_800D154C, anim, 1.0f, 4.0f, 0.0f, 0.0f, 0);
         return;
     }
-    type = s[0x78];
-    anim2 = -1;
+    type = owner->unk78;
+    override = -1;
     switch (type) {
     case 2:
     case 19:
-        anim2 = 0x3E;
+        override = 0x3E;
         break;
     case 56:
-        anim2 = 0x1DF;
+        override = 0x1DF;
         break;
     case 57:
-        anim2 = 0x1EA;
+        override = 0x1EA;
         break;
     case 55:
-        anim2 = 0x1F3;
+        override = 0x1F3;
         break;
     case 59:
-        anim2 = 0x221;
+        override = 0x221;
         break;
     case 38:
-        anim2 = 0x177;
+        override = 0x177;
         break;
     case 58:
-        anim2 = 0x1FA;
+        override = 0x1FA;
         break;
     case 37:
-        anim2 = 0xD8;
+        override = 0xD8;
         break;
     case 45:
     case 46:
-        anim2 = 0x1AF;
+        override = 0x1AF;
         break;
     case 21:
-        anim2 = 0xE2;
+        override = 0xE2;
         break;
     case 12:
-        anim2 = 0xBD;
+        override = 0xBD;
         break;
     case 20:
     case 63:
-        anim2 = 0xF9;
+        override = 0xF9;
         break;
     case 34:
-        anim2 = 0x15A;
+        override = 0x15A;
         break;
     case 33:
-        anim2 = 0x122;
+        override = 0x122;
         break;
     case 25:
     case 64:
-        anim2 = 0x10F;
+        override = 0x10F;
         break;
     case 18:
-        anim2 = 0x10A;
+        override = 0x10A;
         break;
     case 24:
     case 65:
-        anim2 = 0xC5;
+        override = 0xC5;
         break;
     case 36:
-        anim2 = 0x153;
+        override = 0x153;
         break;
     }
-    if (s[0x1B2]) {
-        if (type == 0x16) {
-            anim2 = 0x2C5;
+    if (owner->unk1B2) {
+        if (type == 22) {
+            override = 0x2C5;
         }
     }
-    if (s[0x4E] == 2) {
-        anim2 = 5;
+    if (owner->unk4E == 2) {
+        override = 5;
     }
-    if (*(s16 *)(s + 8)) {
+    if (owner->unk8) {
         blend = 8.0f;
         speed = 1.5f;
-        anim2 = 0xAB;
+        override = 0xAB;
     }
-    if (s[0x1A]) {
-        anim2 = 0x63;
+    if (owner->unk1A) {
+        override = 0x63;
         blend = 8.0f;
     }
-    if (*(u16 *)(s + 0x32) & 2) {
-        anim2 = 0x6B;
+    if (owner->unk32 & 2) {
+        override = 0x6B;
         blend = 8.0f;
     } else {
-        if (*(u16 *)(s + 0x32) & 1) {
-            anim2 = 0xAF;
+        if (owner->unk32 & 1) {
+            override = 0xAF;
             blend = 8.0f;
         }
     }
-    if (anim2 != -1) {
-        func_1505E650(D_800D154C, anim2, speed, blend, 0.0f, 0.0f, 0);
+    if (override != -1) {
+        func_1505E650(D_800D154C, override, speed, blend, 0.0f, 0.0f, 0);
         return;
     }
     if (D_800D154C->unk13C >= 100) {
         func_1507F54C(D_800D154C);
         return;
     }
-    if (D_800BE616 && type != 0x23 && type != 0x16 && type != 9) {
+    if (D_800BE616 && type != 35 && type != 22 && type != 9) {
         func_1505E650(D_800D154C, 0xF, 1.0f, 3.0f, 0.0f, 0.0f, 0);
         return;
     }
     if (func_1507F454()) {
-        s = (u8 *)D_800D154C->unk31C;
-        if (s[0x198] && state[4] == 0) {
-            switch (s[0x78]) {
+        owner = (IdleOwner *)D_800D154C->unk31C;
+        if (owner->unk198 && idle->sequence == 0) {
+            switch (owner->unk78) {
             case 3:
-                anim2 = 0x2C;
+                override = 0x2C;
                 break;
-            case 0x16:
-                anim2 = 0xBD;
+            case 22:
+                override = 0xBD;
                 break;
             case 9:
-                anim2 = 0x7F;
+                override = 0x7F;
                 break;
-            case 0x23:
-                anim2 = 0x165;
+            case 35:
+                override = 0x165;
                 break;
             default:
                 func_1507F54C(D_800D154C);
                 return;
             }
-            if (anim2 != -1) {
-                func_1505E650(D_800D154C, anim2, 1.0f, 4.0f, 0.0f, 0.0f, 0);
+            if (override != -1) {
+                func_1505E650(D_800D154C, override, 1.0f, 4.0f, 0.0f, 0.0f, 0);
                 return;
             }
         }
         func_1507EFD0();
     }
-    k = state[4];
-    pose = state[5];
-    anim2 = D_80086BA0[k][pose];
-    entry = &D_8009B8B0[anim2];
-    if (anim2 == 0) {
-        s = (u8 *)D_800D154C->unk31C;
-        k = -1;
-        switch (s[0x78]) {
+    sequence = idle->sequence;
+    frame = idle->frame;
+    override = D_80086BA0[sequence][frame];
+    entry = &D_8009B8B0[override];
+    if (override == 0) {
+        owner = (IdleOwner *)D_800D154C->unk31C;
+        sequence = -1;
+        switch (owner->unk78) {
         case 9:
-            k = 0x3A;
+            sequence = 0x3A;
             break;
-        case 0x23:
-            k = 0x42;
+        case 35:
+            sequence = 0x42;
             break;
-        case 0x16:
-            k = 0x44;
+        case 22:
+            sequence = 0x44;
             break;
         default:
             if (D_800D154C->health == 1) {
-                k = 0xE;
-            } else if (s[0x1A]) {
-                k = 0x25;
+                sequence = 0xE;
+            } else if (owner->unk1A) {
+                sequence = 0x25;
             }
             break;
         }
-        if (k != -1) {
-            entry = &D_8009B8B0[k];
+        if (sequence != -1) {
+            entry = &D_8009B8B0[sequence];
         }
     }
-    func_1505E650(D_800D154C, entry->anim, (u32)entry->speed * 0.009999999776f,
-                  (u32)entry->blend * 0.1000000015f, 0.0f, 0.0f, 0);
-    state[1] = entry->time;
-    state[0] = 1;
+    func_1505E650(D_800D154C, entry->anim, (u32)entry->speed * 0.01f, (u32)entry->blend * 0.1f, 0.0f,
+                  0.0f, 0);
+    idle->holdFrames = entry->holdFrames;
+    idle->active = TRUE;
 }
 
-extern u8 *D_80086BA0[];
-extern s32 D_800D18C4;
-
-
-/* D_800418B0 is really an array of 0x40-byte records; variables.h types it as s32[]. */
-typedef struct {
-    s32 unk0;
-    u8 pad4[0x3C];
-} MoveTimer;
-
-void func_1000D96C(s32 arg0, s32 arg1, s32 arg2);
-void func_1000DE1C(s32 arg0, s32 arg1);
-void func_1000E7A0(u32 arg0, s32 arg1);
-void func_1000E8C4(s32 arg0);
-
-void func_1507FC2C(struct127 *arg0) {
+/* Applies the side effects of the actor's current idle frame flags, on their rising/falling edges. */
+void func_1507FC2C(struct127 *actor) {
     struct197 *sound;
-    f32 timer;
+    f32 level;
     s32 flags;
     s32 prev;
-    u8 *state;
-    s32 pose;
-    MoveFlags *info;
+    IdleState *idle;
+    s32 frame;
+    IdleFrame *entry;
     s32 changed;
-    u8 anim;
+    u8 sequence;
 
-    state = (u8 *)arg0->unk31C + 0x58;
-    if (state[4] != 0) {
-        anim = state[4];
-        pose = state[5];
-        info = &D_8009B8B0[D_80086BA0[anim][pose]];
-        flags = info->unk6;
+    idle = &((IdleOwner *)actor->unk31C)->idle;
+    if (idle->sequence != 0) {
+        sequence = idle->sequence;
+        frame = idle->frame;
+        entry = &D_8009B8B0[D_80086BA0[sequence][frame]];
+        flags = entry->flags;
     } else {
         flags = 0;
     }
 
     if (flags & 0x10) {
-        timer = ((MoveTimer *)D_800418B0)[D_800419A0].unk0;
-        if (timer >= 0.0f) {
-            sound = arg0->unk2D0;
-            sound->unk8 = (sound->unk18 * (32768.0f - timer)) / 32768.0f;
+        level = ((s32 (*)[16])D_800418B0)[D_800419A0][0];
+        if (level >= 0.0f) {
+            sound = actor->unk2D0;
+            sound->unk8 = (sound->unk18 * (32768.0f - level)) / 32768.0f;
         }
     }
 
-    prev = state[6];
+    prev = idle->frameFlags;
     if (flags != prev) {
         changed = flags ^ prev;
 
         if ((changed & flags & 1) == 1) {
-            arg0->unk2F8 |= 1;
+            actor->unk2F8 |= 1;
         } else if ((changed & prev & 1) == 1) {
-            arg0->unk2F8 &= ~1;
+            actor->unk2F8 &= ~1;
         }
 
         if ((changed & flags & 2) == 2) {
@@ -662,136 +694,131 @@ void func_1507FC2C(struct127 *arg0) {
             func_1000DE1C(D_800D18C4, 0);
         }
 
-        if (((changed & flags & 8) != 8) && ((changed & prev & 8) == 8)) {
-            func_100109D0(arg0);
+        if ((changed & flags & 8) != 8 && (changed & prev & 8) == 8) {
+            func_100109D0(actor);
         }
 
-        state[6] = flags;
+        idle->frameFlags = flags;
     }
 }
 
-typedef struct GameAC030AnimationState {
-    u8 mode;
-    u8 pad1;
-    u16 timer;
-    u8 sequence;
-    u8 frame;
-    u8 pad6[6];
-    u8 field_C;
-    u8 field_D;
-    s16 delay;
-} GameAC030AnimationState;
-
-typedef struct GameAC030NestedState {
-    u8 pad0[0x58];
-    GameAC030AnimationState animation;
-} GameAC030NestedState;
-
-typedef struct GameAC030RootState {
-    u8 pad0[0x127];
-    u8 field_127;
-    u8 pad128[0x12];
-    u8 cooldown;
-    u8 pad13B[0x1E1];
-    GameAC030NestedState *nested;
-} GameAC030RootState;
-
-void func_1507FEA0(GameAC030RootState *arg0) {
-    GameAC030AnimationState *anim;
-    u8 cooldown;
+/* Per-frame idle bookkeeping for an actor: counts down unk13A, advances the idle timer while
+ * idle (resetting the state otherwise), runs the delay, then applies the frame flags. */
+void func_1507FEA0(struct127 *actor) {
+    IdleState *idle;
+    u8 countdown;
     u16 timer;
     s16 delay;
     s32 limit;
 
-    if ((arg0->nested == NULL) || (arg0->field_127 == 0xFF)) {
+    if (actor->unk31C == NULL || actor->unk127 == 0xFF) {
         return;
     }
-    cooldown = arg0->cooldown;
-    anim = &arg0->nested->animation;
-    if (cooldown != 0) {
-        arg0->cooldown = cooldown - 1;
+    countdown = actor->pad139[1];
+    idle = &((IdleOwner *)actor->unk31C)->idle;
+    if (countdown != 0) {
+        actor->pad139[1] = countdown - 1;
     }
-    if ((anim->mode == 1) && (D_800C35EA != 1)) {
+    if (idle->active == TRUE && D_800C35EA != 1) {
         limit = 0xFFFF - D_800BE9E4;
-        timer = anim->timer;
+        timer = idle->timer;
         if (timer < limit) {
-            anim->timer = timer + D_800BE9E4;
+            idle->timer = timer + D_800BE9E4;
         }
     } else {
-        anim->timer = 0;
-        anim->sequence = 0;
-        anim->frame = 0;
-        anim->field_C = 0;
-        anim->field_D = 0;
+        idle->timer = 0;
+        idle->sequence = 0;
+        idle->frame = 0;
+        idle->phase = 0;
+        idle->phaseCount = 0;
     }
-    delay = arg0->nested->animation.delay;
+    delay = ((IdleOwner *)actor->unk31C)->idle.delay;
     if (delay != 0) {
         if (D_800BE9E4 < delay) {
-            arg0->nested->animation.delay = delay - D_800BE9E4;
+            ((IdleOwner *)actor->unk31C)->idle.delay = delay - D_800BE9E4;
         } else {
-            func_1507FF94((ActorUniqueIdFields *)arg0);
-            arg0->nested->animation.delay = 0;
+            func_1507FF94(actor);
+            ((IdleOwner *)actor->unk31C)->idle.delay = 0;
         }
     }
-    func_1507FC2C((struct127 *)arg0);
+    func_1507FC2C(actor);
 }
 
-void func_15191B8C(s32 arg0, u8 arg1);
-
-void func_1507FF94(ActorUniqueIdFields *arg0) {
+/* Sends event 0xD about actor (pointer plus unique id) to both event handlers. */
+void func_1507FF94(struct127 *actor) {
     struct {
-        s32 unk0;
-        u8 unk4;
-    } sp20;
+        struct127 *actor;
+        u8 uniqueId;
+    } event;
 
-    sp20.unk0 = (s32)arg0;
-    sp20.unk4 = arg0->field_0x3B;
-    func_15191B8C((s32)&sp20, 0xD);
-    func_151494E0((s32)&sp20, 0xD);
+    event.actor = actor;
+    event.uniqueId = actor->unique_id;
+    func_15191B8C((s32)&event, 0xD);
+    func_151494E0((s32)&event, 0xD);
 }
 
-extern s32 func_15037698(s32 arg0, s32 arg1, s32 arg2, f32 x, f32 y, f32 z, f32 *out, f32 range, s32 arg8, s32 arg9);
-extern s32 func_150A3194(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-extern void *D_800DCE50[];
-typedef struct { s32 v[3]; } Types1507FFD8;
-extern Types1507FFD8 D_80086C50;
+/* A node of the D_800DCE50 per-type object lists. */
+typedef struct ListObject {
+    /* 0x00 */ u8 pad0[8];
+    /* 0x08 */ struct ListObject *next;
+    /* 0x0C */ u8 padC[0x8C];
+    /* 0x98 */ f32 x;
+    /* 0x9C */ f32 y;
+    /* 0xA0 */ f32 z;
+} ListObject;
 
-s32 func_1507FFD8(struct127 *arg0) {
-    s32 found;
+typedef struct {
+    s32 type[3];
+} ObjTypeList;
+
+extern s32 func_15037698(s32 objIndex, s32 refBone, s32 bone, f32 x, f32 y, f32 z, f32 *out, f32 range,
+                         s32 noCheck, s32 axisMode);
+extern s32 func_150A3194(s32 type, s32 subtype, s32 x, s32 y, s32 z);
+extern ListObject *D_800DCE50[];
+extern ObjTypeList D_80086C50;
+
+/*
+ * Returns 1 when the actor stands in a trigger zone (type 4, subtype 5 or 11) and one of the
+ * objects of the three D_80086C50 types is within 1000 units and inside its 90-degree view.
+ */
+s32 func_1507FFD8(struct127 *actor) {
+    s32 inZone;
     s32 i;
-    struct127 *obj;
-    Types1507FFD8 types;
+    ListObject *obj;
+    ObjTypeList types;
     f32 x;
     f32 y;
     f32 z;
-    f32 dist;
+    f32 distSq;
     f32 out[3];
     f32 dx;
     f32 dy;
     f32 dz;
     s32 type;
 
-    found = func_150A3194(4, 5, (s32) arg0->x_position, (s32) arg0->y_position, (s32) arg0->z_position);
-    if (found == 0) {
-        found = func_150A3194(4, 0xB, (s32) arg0->x_position, (s32) arg0->y_position, (s32) arg0->z_position);
+    inZone = func_150A3194(4, 5, actor->x_position, actor->y_position, actor->z_position);
+    if (!inZone) {
+        inZone = func_150A3194(4, 11, actor->x_position, actor->y_position, actor->z_position);
     }
-    if (found != 0) {
+    if (inZone) {
         types = D_80086C50;
         for (i = 0; i < 3; i++) {
-            type = types.v[i];
+            type = types.type[i];
             obj = D_800DCE50[type];
             while (obj != NULL) {
-                x = *(f32 *)((u8 *)obj + 0x98);
-                y = *(f32 *)((u8 *)obj + 0x9C);
-                z = *(f32 *)((u8 *)obj + 0xA0);
-                dist = (x - arg0->x_position) * (x - arg0->x_position) + (y - arg0->y_position) * (y - arg0->y_position) + (z - arg0->z_position) * (z - arg0->z_position);
-                if (dist < 1000000.0f &&
-                    func_15037698(arg0 - D_800CC2D0, 0, 0, x, y, z, out, 90.0f, 0, 0) != 0) {
-                    return 1;
+                x = obj->x;
+                y = obj->y;
+                z = obj->z;
+                distSq = (x - actor->x_position) * (x - actor->x_position) +
+                         (y - actor->y_position) * (y - actor->y_position) +
+                         (z - actor->z_position) * (z - actor->z_position);
+                if (distSq < 1000000.0f &&
+                    func_15037698(actor - D_800CC2D0, 0, 0, x, y, z, out, 90.0f, 0, 0) != 0) {
+                    return TRUE;
                 }
-                obj = *(struct127 **)((u8 *)obj + 8);
+                obj = obj->next;
             }
         }
     }
-    return 0;
+    return FALSE;
 }
