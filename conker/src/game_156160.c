@@ -1,9 +1,19 @@
 #include <ultra64.h>
 #include "functions.h"
+// variables.h declares these as arrays/ints; the code uses them as pointers.
 #define D_800D3098 D_800D3098_header
+#define D_800BE728 D_800BE728_header
+#define D_800DC010 D_800DC010_header
+#define D_800C35EA D_800C35EA_header
 #include "variables.h"
 #undef D_800D3098
+#undef D_800BE728
+#undef D_800DC010
+#undef D_800C35EA
 extern struct178 *D_800D3098;
+extern u16 **D_800BE728;
+extern struct108 *D_800DC010;
+extern u8 D_800C35EA[];
 
 struct Entry151298C0 {
     s16 unk0;
@@ -64,7 +74,12 @@ typedef struct {
 
 typedef struct {
     s32 type;
-    void *data;
+    union {
+        s32 index;          /* types 5, 6 */
+        Cfg15128CB0 *cfg;   /* type 1 */
+        Data15128CB0 *data; /* types 7, 8, 10 */
+        f32 *value;         /* type 9 */
+    } arg;
 } Msg15128CB0;
 
 /* Camera state; same 0x9A0-byte layout as struct108 (see include/structs.h). */
@@ -187,6 +202,7 @@ typedef struct {
 s32 func_1509BE40(s32, s32, s32, s32);
 void func_1512D560(Camera *, s32, struct178 *);
 Msg15128CB0 *func_1512D604(Camera *);
+s32 func_1512D6B0(Camera *);
 void func_1512D6F0(Camera *);
 void func_151C9ED4(Camera *);
 void func_1512E8E0(Camera *);
@@ -197,193 +213,194 @@ void func_151287E0(Camera *, s32, s32);
 void func_151283B8(Camera *);
 void func_1510B128(s32, f32, f32, f32, f32);
 void func_1501B320(s32);
-void func_1510E7A4(s32 a0, s32 a1, void *a2, void *a3, void *arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 arg10, s32 arg11, f32 arg12, f32 arg13);
-void func_151236D0(void *);
+void func_1510E7A4(s32 *, s32 *, f32 *, f32 *, s32 *, s32, f32, f32, f32, f32, u16, s32, f32, f32);
+void func_151236D0(Camera *);
+void func_150495B0(f32 *value, f32 target, f32 *velocity, f32, f32, f32);
+s32 func_150A3FC4(f32, f32, s32, s32 *, f32 *);
+void func_1512C150(Camera *);
 extern u8 D_800C3672;
 extern s32 D_800C367C;
 extern s32 D_800C3678;
 extern struct17 D_80089544;
 extern f32 D_800C3648;
 
-void func_15128CB0(Camera *arg0) {
+void func_15128CB0(Camera *cam) {
     Msg15128CB0 *msg;
 
-    arg0->unk6CC = 0;
-    if (arg0->unk734 != 0) {
-        if (func_1512D6B0((u8 *)arg0)) {
-            if (func_1509BE40(1, arg0->unk734, 6, 0x9000) && arg0->unk738) {
-                func_1512D560(arg0, 1, &D_800D3098[arg0->unk734 & 0xFFF]);
-                arg0->unk700 = arg0->unk734 & 0xFFF;
-            } else {
-                arg0->unk734 = 0;
-                arg0->unk738 = 0;
-            }
+    cam->unk6CC = 0;
+    if (cam->unk734 != 0 && func_1512D6B0(cam)) {
+        if (func_1509BE40(1, cam->unk734, 6, 0x9000) && cam->unk738) {
+            func_1512D560(cam, 1, &D_800D3098[cam->unk734 & 0xFFF]);
+            cam->unk700 = cam->unk734 & 0xFFF;
+        } else {
+            cam->unk734 = 0;
+            cam->unk738 = 0;
         }
     }
-    if (func_1512D6B0((u8 *)arg0)) {
-        if (arg0->unk2C & 1) {
-            func_151239CC((struct108 *)arg0, 0xC);
+    if (func_1512D6B0(cam)) {
+        if (cam->unk2C & 1) {
+            func_151239CC((struct108 *)cam, 12);
         }
         return;
     }
-    while (!func_1512D6B0((u8 *)arg0)) {
-        msg = func_1512D604(arg0);
+    while (!func_1512D6B0(cam)) {
+        msg = func_1512D604(cam);
         switch (msg->type) {
         case 5:
-            arg0->unk23E = arg0->unk3D4->unk78;
-            if (arg0->unk23E == 0) {
-                func_151239CC((struct108 *)arg0, 1);
-                arg0->unk3D4->unk198 = 0;
-                arg0->unk3D4->unk197 = 0;
-                arg0->unk5F8 = 1;
-                arg0->unk5FC = 2;
-                arg0->unk3D4->unk198 = 0;
-                arg0->unk73C = 0;
-                func_15127EB8((struct108 *)arg0);
-                D_80089524[arg0->index] = 0;
-                D_80089534[arg0->index] = 0;
+            cam->unk23E = cam->unk3D4->unk78;
+            if (cam->unk23E == 0) {
+                func_151239CC((struct108 *)cam, 1);
+                cam->unk3D4->unk198 = 0;
+                cam->unk3D4->unk197 = 0;
+                cam->unk5F8 = 1;
+                cam->unk5FC = 2;
+                cam->unk3D4->unk198 = 0;
+                cam->unk73C = 0;
+                func_15127EB8((struct108 *)cam);
+                D_80089524[cam->index] = 0;
+                D_80089534[cam->index] = 0;
             } else {
-                D_80089524[arg0->index] = arg0->unk3D4->unk197;
-                D_80089534[arg0->index] = arg0->unk3D4->unk198;
+                D_80089524[cam->index] = cam->unk3D4->unk197;
+                D_80089534[cam->index] = cam->unk3D4->unk198;
             }
-            func_1512D6F0(arg0);
-            if (arg0->unk84C) {
-                func_151C9ED4(arg0);
-                arg0->unk84C = 0;
+            func_1512D6F0(cam);
+            if (cam->unk84C) {
+                func_151C9ED4(cam);
+                cam->unk84C = 0;
             }
-            ((struct108 *)D_800DC010)[(s32)msg->data] = D_800DBFF0[arg0->index];
-            func_15123934((struct108 *)arg0, 0x40000, 0, 0, 10);
-            arg0->unk5F0 |= 4;
-            arg0->unk3A4 = -1.0f;
+            D_800DC010[msg->arg.index] = D_800DBFF0[cam->index];
+            func_15123934((struct108 *)cam, 0x40000, 0, 0, 10);
+            cam->unk5F0 |= 4;
+            cam->unk3A4 = -1.0f;
             break;
         case 6:
         {
             f32 angle;
 
-            arg0->unk23E = arg0->unk3D4->unk78;
+            cam->unk23E = cam->unk3D4->unk78;
             if (D_80089520 != 0) {
                 D_80089520--;
-            } else if (arg0->unk2C == 0x40000) {
-                angle = arg0->unk3A4;
+            } else if (cam->unk2C == 0x40000) {
+                angle = cam->unk3A4;
                 if (D_800D2DB0 != 999.0f) {
                     angle = D_800D2DB0;
                     D_800D2DB0 = 999.0f;
                 }
-                func_151239CC((struct108 *)arg0, 10);
+                func_151239CC((struct108 *)cam, 10);
                 if (D_800C3672) {
-                    arg0->unk820 = 999.0f;
-                    arg0->unk834 = 0;
-                    arg0->unk7F4 = 0;
+                    cam->unk820 = 999.0f;
+                    cam->unk834 = 0;
+                    cam->unk7F4 = 0;
                 }
-                if (arg0->unk834 == 0) {
-                    D_800DBFF0[arg0->index] = ((struct108 *)D_800DC010)[(s32)msg->data];
-                    arg0->unk36C = (*(u16 ***)&D_800BE728)[arg0->index];
-                    arg0->unk36A = D_800BE710[arg0->index];
-                    arg0->unk23E = arg0->unk3D4->unk78;
-                    arg0->unk23C = 1;
-                    func_1512E8E0(arg0);
-                    if (D_80089534[arg0->index] != 0) {
-                        arg0->unk36A |= 0x10;
-                        *arg0->unk36C |= 0x10;
-                        angle = arg0->unk774;
-                    } else if (D_80089524[arg0->index] != 0) {
-                        if ((arg0->unk23E == 0xC && arg0->unk3D0->unk84 != 0x76) || arg0->unk23E == 0x1B || (*arg0->unk36C & 0x10)) {
-                            arg0->unk36A |= 0x10;
-                            *arg0->unk36C |= 0x10;
-                            arg0->unk3D4->unk197 = D_80089524[arg0->index];
-                            func_151C9BA0(arg0, arg0->unk23E);
-                            angle = arg0->unk774;
+                if (cam->unk834 == 0) {
+                    D_800DBFF0[cam->index] = D_800DC010[msg->arg.index];
+                    cam->unk36C = D_800BE728[cam->index];
+                    cam->unk36A = D_800BE710[cam->index];
+                    cam->unk23E = cam->unk3D4->unk78;
+                    cam->unk23C = 1;
+                    func_1512E8E0(cam);
+                    if (D_80089534[cam->index] != 0) {
+                        cam->unk36A |= 0x10;
+                        *cam->unk36C |= 0x10;
+                        angle = cam->unk774;
+                    } else if (D_80089524[cam->index] != 0) {
+                        if ((cam->unk23E == 12 && cam->unk3D0->unk84 != 0x76) || cam->unk23E == 27 || (*cam->unk36C & 0x10)) {
+                            cam->unk36A |= 0x10;
+                            *cam->unk36C |= 0x10;
+                            cam->unk3D4->unk197 = D_80089524[cam->index];
+                            func_151C9BA0(cam, cam->unk23E);
+                            angle = cam->unk774;
                         } else {
-                            arg0->unk3D4->unk198 = 0;
-                            arg0->unk73C = 0;
-                            D_80089524[arg0->index] = 0;
-                            D_80089534[arg0->index] = 0;
-                            func_15127EB8((struct108 *)arg0);
+                            cam->unk3D4->unk198 = 0;
+                            cam->unk73C = 0;
+                            D_80089524[cam->index] = 0;
+                            D_80089534[cam->index] = 0;
+                            func_15127EB8((struct108 *)cam);
                         }
                     } else {
-                        arg0->unk3D4->unk198 = 0;
-                        arg0->unk73C = 0;
-                        func_15127EB8((struct108 *)arg0);
+                        cam->unk3D4->unk198 = 0;
+                        cam->unk73C = 0;
+                        func_15127EB8((struct108 *)cam);
                     }
-                    func_15126138((struct108 *)arg0);
-                    if (arg0->unk5F0 & 2) {
-                        angle = arg0->unk3D0->unk40 - 180.0f;
+                    func_15126138((struct108 *)cam);
+                    if (cam->unk5F0 & 2) {
+                        angle = cam->unk3D0->unk40 - 180.0f;
                     }
-                    arg0->unk37C = angle;
-                    arg0->unk39C = angle * 0.01745329238f;
-                    arg0->unk2E0 = arg0->unk2BC;
-                    arg0->unk2EC = arg0->unk2F8;
-                    arg0->unk2C8 = arg0->unk2BC;
-                    arg0->unk304 = arg0->unk2F8;
+                    cam->unk37C = angle;
+                    cam->unk39C = angle * 0.01745329238f;
+                    cam->unk2E0 = cam->unk2BC;
+                    cam->unk2EC = cam->unk2F8;
+                    cam->unk2C8 = cam->unk2BC;
+                    cam->unk304 = cam->unk2F8;
                     func_150A09D0(D_800BE9E4);
-                    func_150A11C4(&D_800CC2D0[arg0->index]);
-                    func_1512E8E0(arg0);
-                    func_151287E0(arg0, 0, 0);
-                    func_151283B8(arg0);
-                    func_15126138((struct108 *)arg0);
-                    arg0->unk5F0 |= 4;
-                    arg0->unk670 = 0.0f;
-                    arg0->unk678 = 0.0f;
-                    arg0->unk8ED = 1;
-                    arg0->unk23C = 1;
-                    arg0->unk674 = 1.0f;
+                    func_150A11C4(&D_800CC2D0[cam->index]);
+                    func_1512E8E0(cam);
+                    func_151287E0(cam, 0, 0);
+                    func_151283B8(cam);
+                    func_15126138((struct108 *)cam);
+                    cam->unk5F0 |= 4;
+                    cam->unk670 = 0.0f;
+                    cam->unk678 = 0.0f;
+                    cam->unk8ED = 1;
+                    cam->unk23C = 1;
+                    cam->unk674 = 1.0f;
                 } else {
-                    arg0->unk36C = (*(u16 ***)&D_800BE728)[arg0->index];
-                    arg0->unk36A = D_800BE710[arg0->index];
-                    func_15127FEC((struct108 *)arg0, D_800C367C, D_800C3678);
-                    arg0->unk23C = 0;
+                    cam->unk36C = D_800BE728[cam->index];
+                    cam->unk36A = D_800BE710[cam->index];
+                    func_15127FEC((struct108 *)cam, D_800C367C, D_800C3678);
+                    cam->unk23C = 0;
                 }
             }
         }
             break;
         case 8:
         {
-            Data15128CB0 *data = (Data15128CB0 *)msg->data;
-            arg0->unk3A4 = data->unkC;
+            Data15128CB0 *data = msg->arg.data;
+            cam->unk3A4 = data->unkC;
         }
             break;
         case 9:
-            arg0->unk364 = *(f32 *)msg->data;
+            cam->unk364 = *msg->arg.value;
             break;
         case 10:
         {
             Data15128CB0 *data;
 
-            data = msg->data;
-            arg0->unk834 = data->unk10;
+            data = msg->arg.data;
+            cam->unk834 = data->unk10;
             if (data->unkC == 999.0f) {
-                arg0->unk820 = arg0->unk3D0->unk40 - 180.0f;
+                cam->unk820 = cam->unk3D0->unk40 - 180.0f;
             } else {
-                arg0->unk820 = data->unkC;
+                cam->unk820 = data->unkC;
             }
         }
             break;
         case 7:
         {
             Data15128CB0 *data;
-            s32 sp;
+            f32 surface;
             struct17 pos;
             f32 angle;
-            f32 x;
+            f32 x; // matching: stack-slot pads that place pos and angle in the frame
             f32 y;
 
-            data = msg->data;
-            arg0->unk2F8.unk0 = data->unk14;
-            arg0->unk2F8.unk4 = data->unk18;
-            arg0->unk2F8.unk8 = data->unk1C;
+            data = msg->arg.data;
+            cam->unk2F8.unk0 = data->unk14;
+            cam->unk2F8.unk4 = data->unk18;
+            cam->unk2F8.unk8 = data->unk1C;
             if (data->unk0 == 0 || data->unk0 == 2) {
-                arg0->unk2A4.unk0 = data->unk20;
-                arg0->unk2A4.unk4 = data->unk24;
-                arg0->unk2A4.unk8 = data->unk28;
-                arg0->unk19C = data->unk30;
-                arg0->unk1A0 = data->unk34;
-                arg0->unk1A4 = data->unk30;
-                arg0->unk1A8 = data->unk34;
-                arg0->unk2BC = arg0->unk2A4;
-                arg0->unk5EC = data->unk2C;
-                arg0->unk3A8 = 0.0f;
-                arg0->unk5E8 = 0.0f;
-                arg0->unk38C = 0.0f;
+                cam->unk2A4.unk0 = data->unk20;
+                cam->unk2A4.unk4 = data->unk24;
+                cam->unk2A4.unk8 = data->unk28;
+                cam->unk19C = data->unk30;
+                cam->unk1A0 = data->unk34;
+                cam->unk1A4 = data->unk30;
+                cam->unk1A8 = data->unk34;
+                cam->unk2BC = cam->unk2A4;
+                cam->unk5EC = data->unk2C;
+                cam->unk3A8 = 0.0f;
+                cam->unk5E8 = 0.0f;
+                cam->unk38C = 0.0f;
             } else {
                 pos = D_80089544;
                 while (data->unk20 > 180.0f) {
@@ -395,66 +412,68 @@ void func_15128CB0(Camera *arg0) {
                 while (data->unk28 > 180.0f) {
                     data->unk28 -= 360.0f;
                 }
-                arg0->unk5EC = data->unk20;
+                cam->unk5EC = data->unk20;
                 angle = data->unk24 * 0.01745329238f;
                 pos.unk4 = sinf(angle) * -pos.unk8;
                 pos.unk8 = cosf(angle) * pos.unk8;
                 if (D_800DBFF4[0]) {
-                    arg0->unk37C = data->unk28;
-                    arg0->unk380 = data->unk28;
-                    arg0->unk39C = arg0->unk37C * 0.01745329238f;
-                    arg0->unk3A0 = arg0->unk380 * 0.01745329238f;
+                    cam->unk37C = data->unk28;
+                    cam->unk380 = data->unk28;
+                    cam->unk39C = cam->unk37C * 0.01745329238f;
+                    cam->unk3A0 = cam->unk380 * 0.01745329238f;
                 } else {
-                    x = arg0->unk37C;
+                    x = cam->unk37C; // matching: dead store steers register allocation
                 }
-                angle = arg0->unk37C; angle += func_15048A70(arg0->unk37C, data->unk28) / 1.0f; angle *= 0.01745329238f;
+                angle = cam->unk37C;
+                angle += func_15048A70(cam->unk37C, data->unk28) / 1.0f;
+                angle *= 0.01745329238f;
                 pos.unk0 = sinf(angle) * pos.unk8;
                 pos.unk8 = cosf(angle) * pos.unk8;
                 pos.unk0 += data->unk14;
                 pos.unk4 += data->unk18;
                 pos.unk8 += data->unk1C;
-                arg0->unk19C = data->unk2C;
-                arg0->unk1A0 = data->unk30;
-                arg0->unk1A4 = data->unk2C;
-                arg0->unk1A8 = data->unk30;
-                arg0->unk2A4.unk0 = pos.unk0;
-                arg0->unk2A4.unk4 = pos.unk4;
-                arg0->unk2A4.unk8 = pos.unk8;
-                arg0->unk2BC = arg0->unk2A4;
-                arg0->unk3A8 = 0.0f;
-                arg0->unk5E8 = 0.0f;
-                arg0->unk38C = 0.0f;
+                cam->unk19C = data->unk2C;
+                cam->unk1A0 = data->unk30;
+                cam->unk1A4 = data->unk2C;
+                cam->unk1A8 = data->unk30;
+                cam->unk2A4.unk0 = pos.unk0;
+                cam->unk2A4.unk4 = pos.unk4;
+                cam->unk2A4.unk8 = pos.unk8;
+                cam->unk2BC = cam->unk2A4;
+                cam->unk3A8 = 0.0f;
+                cam->unk5E8 = 0.0f;
+                cam->unk38C = 0.0f;
             }
-            if ((&D_800C35EA)[data->unk4] == 1) {
+            if (D_800C35EA[data->unk4] == 1) {
                 D_800C3648 = data->unk8;
-                func_1510B128(arg0->index, arg0->unk19C, arg0->unk1A0, 1.0f, 0.0f);
+                func_1510B128(cam->index, cam->unk19C, cam->unk1A0, 1.0f, 0.0f);
             }
             if (D_800DBFF4[0]) {
                 func_1501B320(0);
             }
             if (!D_800BEAC0) {
-                func_1510E7A4((s32)&arg0->unk644, (s32)&arg0->unk648, &sp, &arg0->unk360, &arg0->unk640, 0,
-                              arg0->unk2F8.unk0, arg0->unk2F8.unk4, arg0->unk2F8.unk8, arg0->unk2F8.unk4, 0, 0, -10000.0f, arg0->unk2F8.unk4);
-                func_151236D0(arg0);
+                func_1510E7A4(&cam->unk644, &cam->unk648, &surface, &cam->unk360, &cam->unk640, 0,
+                              cam->unk2F8.unk0, cam->unk2F8.unk4, cam->unk2F8.unk8, cam->unk2F8.unk4, 0, 0, -10000.0f, cam->unk2F8.unk4);
+                func_151236D0(cam);
             }
         }
             break;
         case 1:
-            arg0->unk6FC = ((Cfg15128CB0 *)msg->data)->unk17;
-            arg0->unk718 = ((Cfg15128CB0 *)msg->data)->unk18;
-            arg0->unk71C = ((Cfg15128CB0 *)msg->data)->unk1C;
-            arg0->unk704 = ((Cfg15128CB0 *)msg->data)->unk20;
-            arg0->unk70C = ((Cfg15128CB0 *)msg->data)->unk0;
-            arg0->unk70E = ((Cfg15128CB0 *)msg->data)->unk2;
-            arg0->unk710 = ((Cfg15128CB0 *)msg->data)->unk4;
-            arg0->unk712 = ((Cfg15128CB0 *)msg->data)->unk6;
-            arg0->unk714 = ((Cfg15128CB0 *)msg->data)->unk8;
-            arg0->unk716 = ((Cfg15128CB0 *)msg->data)->unkA;
-            arg0->unk720 = ((Cfg15128CB0 *)msg->data)->unk28;
-            arg0->unk724 = ((Cfg15128CB0 *)msg->data)->unk24;
-            arg0->unk728 = ((Cfg15128CB0 *)msg->data)->unk30;
-            arg0->unk72C = ((Cfg15128CB0 *)msg->data)->unk2C;
-            arg0->unk6CC = 1;
+            cam->unk6FC = msg->arg.cfg->unk17;
+            cam->unk718 = msg->arg.cfg->unk18;
+            cam->unk71C = msg->arg.cfg->unk1C;
+            cam->unk704 = msg->arg.cfg->unk20;
+            cam->unk70C = msg->arg.cfg->unk0;
+            cam->unk70E = msg->arg.cfg->unk2;
+            cam->unk710 = msg->arg.cfg->unk4;
+            cam->unk712 = msg->arg.cfg->unk6;
+            cam->unk714 = msg->arg.cfg->unk8;
+            cam->unk716 = msg->arg.cfg->unkA;
+            cam->unk720 = msg->arg.cfg->unk28;
+            cam->unk724 = msg->arg.cfg->unk24;
+            cam->unk728 = msg->arg.cfg->unk30;
+            cam->unk72C = msg->arg.cfg->unk2C;
+            cam->unk6CC = 1;
             break;
         }
     }
@@ -468,11 +487,6 @@ void func_151298C0(Camera *cam, s32 arg1) {
     }
 }
 
-void func_150495B0(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
-s32 func_150A3FC4(f32, f32, s32, void *, void *);
-void func_1510E7A4(s32 a0, s32 a1, void *a2, void *a3, void *arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 arg10, s32 arg11, f32 arg12, f32 arg13);
-void func_151236D0(void *);
-void func_1512C150(void *);
 
 /*
  * Eases the camera point unk2F8 toward the point unk278 short of unk2BC on the line from
@@ -534,7 +548,7 @@ void func_15129934(Camera *cam) {
         func_1512C150(cam);
         if (cam->unk23C || (cam->unk84 & 0x400000) ||
             !func_150A3FC4(cam->unk2F8.unk0, cam->unk2F8.unk8, cam->unk644, &cam->unk648, &cam->unk35C)) {
-            func_1510E7A4(0, 0, &surface, &cam->unk360, &cam->unk640, 0, cam->unk2F8.unk0, cam->unk2F8.unk4,
+            func_1510E7A4(NULL, NULL, &surface, &cam->unk360, &cam->unk640, 0, cam->unk2F8.unk0, cam->unk2F8.unk4,
                           cam->unk2F8.unk8, cam->unk2F8.unk4, 0, 0, -10000.0f, cam->unk2F8.unk4);
             if (cam->unk364 != -10000.0f) {
                 cam->unk360 = cam->unk364;
