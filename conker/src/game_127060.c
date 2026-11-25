@@ -620,46 +620,6 @@ typedef struct {
 extern TaggedModel *func_15157010(void *, s32, f32, s32, s32, s32, u8, s32);
 extern TaggedSprite *func_1515548C(ScreenSpriteInfo *, s32, s32, s32, s32, u8, s32);
 
-typedef struct {
-    /* 0x00 */ u8 unk00;
-    /* 0x01 */ s8 unk01;
-    /* 0x02 */ u8 unk02;
-    /* 0x03 */ s8 unk03;
-    /* 0x04 */ s8 unk04;
-    /* 0x05 */ u8 pad05;
-    /* 0x06 */ s16 unk06;
-    /* 0x08 */ s32 unk08;
-    /* 0x0C */ s32 unk0C;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ s32 unk20;
-    /* 0x24 */ s32 unk24;
-    /* 0x28 */ s32 unk28;
-    /* 0x2C */ u8 unk2C;
-    /* 0x2D */ u8 unk2D;
-    /* 0x2E */ u8 pad2E[2];
-    /* 0x30 */ u8 unk30;
-    /* 0x31 */ u8 unk31;
-    /* 0x32 */ u8 unk32;
-    /* 0x33 */ u8 unk33;
-    /* 0x34 */ u8 unk34;
-    /* 0x35 */ u8 unk35;
-    /* 0x36 */ u8 unk36;
-    /* 0x37 */ u8 unk37;
-    /* 0x38 */ u8 unk38;
-    /* 0x39 */ u8 pad39[3];
-    /* 0x3C */ s32 unk3C;
-    /* 0x40 */ u8 unk40;
-    /* 0x41 */ u8 unk41;
-    /* 0x42 */ u8 pad42[2];
-    /* 0x44 */ Vec3f unk44;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-} Spawn15157010;
-
 /*
  * Spawns a func_15157010 object and a row of 8 func_1515548C sprites (the first with kind 0xCE,
  * the rest 0xC5/0xC4), each tagged with duration in its data.
@@ -670,41 +630,41 @@ void func_150FAE18(s16 duration, u8 owner, s32 kind) {
 
     tag = duration;
     {
-        Spawn15157010 model;
+        EffectParams model;
         void *spawned; // matching: one variable for both spawned objects (separate ones reallocate)
 
         model.unk38 = 0;
-        model.unk00 = 0x61;
-        model.unk01 = 3;
-        model.unk02 = 4;
-        model.unk03 = 2;
-        model.unk04 = 0;
-        model.unk06 = duration;
-        model.unk08 = 0xA5;
-        model.unk0C = 0x17;
-        model.unk10 = 0;
-        model.unk14 = 0x200405;
-        model.unk18 = 0x60200;
-        model.unk2D = 8;
-        model.unk1C = 1;
-        model.unk20 = 0x38;
-        model.unk2C = 0;
-        model.unk24 = 0x80;
-        model.unk28 = 0x20;
-        model.unk30 = 0xFF;
-        model.unk31 = 0xFF;
-        model.unk32 = 0xFF;
-        model.unk33 = 0xFF;
-        model.unk34 = 0xFF;
-        model.unk35 = 0xFF;
-        model.unk36 = 0xFF;
-        model.unk37 = 0xFF;
-        model.unk3C = 0;
-        model.unk40 = 0;
+        model.flags = 0x61;
+        model.updateFunc = 3;
+        model.updateFunc2 = 4;
+        model.preDrawFunc = 2;
+        model.postDrawFunc = 0;
+        model.lifetime = duration;
+        model.model = 0xA5;
+        model.unkC = 0x17;
+        model.render.unk0 = 0;
+        model.render.setGeometryMode = 0x200405;
+        model.render.clearGeometryMode = 0x60200;
+        model.render.envMode = 8;
+        model.render.renderMode = 1;
+        model.render.unk10 = 0x38;
+        model.render.primMode = 0;
+        model.render.unk14 = 0x80;
+        model.render.unk18 = 0x20;
+        model.color0.red = 0xFF;
+        model.color0.green = 0xFF;
+        model.color0.blue = 0xFF;
+        model.color0.alpha = 0xFF;
+        model.color1.red = 0xFF;
+        model.color1.green = 0xFF;
+        model.color1.blue = 0xFF;
+        model.color1.alpha = 0xFF;
+        model.owner = 0;
+        model.ownerId = 0;
         model.unk41 = 1;
-        model.unk44 = D_800A5480;
-        model.unk54 = 10;
-        model.unk56 = 25;
+        model.pos = D_800A5480;
+        model.fadeStart = 10;
+        model.fadeRate = 25;
         spawned = func_15157010(&model, 0, 1.0, 0, 0, 2, owner, kind);
         if (spawned != NULL) {
             memcpy(&((TaggedModel *)spawned)->tag, &tag, sizeof(tag));

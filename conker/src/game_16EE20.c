@@ -282,25 +282,6 @@ void func_15141E38(Actor *actor, s32 handler) {
     }
 }
 
-/* Particle spawn packet for func_1513C650 (struct157 layout with unsigned colour bytes). */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s16 unk4;
-    /* 0x06 */ u8 unk6;
-    /* 0x07 */ u8 unk7;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ u8 color[6];
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ u8 unk20;
-    /* 0x21 */ u8 pad21;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ s16 unk24;
-} Packet15141F78;
-
 typedef struct {
     /* 0x00 */ f32 unk0;
     /* 0x04 */ u8 unk4[0x14];
@@ -309,29 +290,29 @@ typedef struct {
 
 /* Spawns a burst of particles of the given kind, sized by `scale`. */
 void func_15141F78(u8 kind, Source15141F78 *src, f32 scale, u8 arg3, Vec3f *pos, u8 arg5) {
-    Packet15141F78 packet;
+    SpriteDef packet;
     f32 size;
     s32 flag;
 
-    packet.unk6 = kind;
+    packet.texture = kind;
     packet.unk7 = 0;
-    packet.unk0 = 0x6F701;
-    packet.unk4 = (func_150ADA20() % 61U) + 100;
-    packet.unk8 = 0;
-    packet.unkC = 0;
-    packet.color[0] = (func_150ADA20() & 0x7F) + 128;
-    packet.color[1] = 0xFF;
-    packet.color[2] = 0xFF;
-    packet.color[3] = 0xFF;
-    packet.color[4] = 0xFF;
-    packet.color[5] = 0xFF;
-    packet.unk18 = 0x3B0002;
+    packet.flags = 0x6F701;
+    packet.lifetime = (func_150ADA20() % 61U) + 100;
+    packet.frame = 0;
+    packet.frameSpeed = 0;
+    packet.unk10 = (func_150ADA20() & 0x7F) + 128;
+    packet.unk11 = 0xFF;
+    packet.rgba[0] = 0xFF;
+    packet.rgba[1] = 0xFF;
+    packet.rgba[2] = 0xFF;
+    packet.rgba[3] = 0xFF;
+    packet.renderModes = 0x3B0002;
     packet.unk16 = 0;
     packet.unk17 = 7;
-    packet.unk20 = 0xFF;
+    packet.viewportMask = 0xFF;
     packet.unk1C = src->unk18;
-    packet.unk22 = 40;
-    packet.unk24 = 6;
+    packet.fadeStart = 40;
+    packet.fadeRate = 6;
 
     size = ((func_150ADA68() * 5.0f) + 10.0f) * scale;
     if (arg5 == 2) {

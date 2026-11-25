@@ -406,29 +406,6 @@ u8 func_151D9B34(void) {
     return ids[func_150ADA20() & 3];
 }
 
-/* Emitter descriptor consumed by func_1513C650, func_1513C73C and func_1513C5B0. */
-typedef struct {
-    s32 flags;
-    s16 unk4;
-    u8 unk6;
-    u8 unk7;
-    s32 unk8;
-    s32 unkC;
-    u8 unk10;
-    u8 unk11;
-    u8 unk12;
-    u8 unk13;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    s32 unk18;
-    s32 unk1C;
-    u8 unk20;
-    u8 pad21;
-    s16 unk22;
-    s16 unk24;
-} EmitterDesc; /* 0x28 */
 
 /* Data of a func_15149130 effect that drops a func_151D9014 particle whenever its timer runs out. */
 typedef struct {
@@ -459,36 +436,36 @@ f32 func_15144A74(Vec3f *, Vec3f *);
  */
 void func_151D9B8C(u8 kind, f32 size, u8 arg2, s32 arg3, Vec3f *pos, s16 lifetime, u8 arg6, u8 arg7, u8 arg8,
                    u8 arg9, s32 argA) {
-    EmitterDesc desc;
+    SpriteDef desc;
     struct260 *effect;
     Vec3f outA;
     Vec3f outB;
     Vec3f normal;
     Vec3f down;
 
-    desc.unk22 = 32;
-    desc.unk24 = 7;
-    desc.unk6 = D_8008FD04[kind]();
+    desc.fadeStart = 32;
+    desc.fadeRate = 7;
+    desc.texture = D_8008FD04[kind]();
     desc.flags = ((lifetime == -1) ? 0 : 1) | (D_800AB330[kind] ? 0x20000 : 0) | 0x100 | 0x200 | 0x400 | 0x1000 |
                  0x2000 | 0x4000 | 0x8000;
     if (lifetime == -1) {
-        desc.unk4 = 300;
+        desc.lifetime = 300;
     } else {
-        desc.unk4 = lifetime;
+        desc.lifetime = lifetime;
     }
-    desc.unk8 = 0;
-    desc.unkC = 0;
+    desc.frame = 0;
+    desc.frameSpeed = 0;
     desc.unk10 = arg2;
     desc.unk11 = 0xFF;
-    desc.unk14 = 0;
-    desc.unk13 = 0;
-    desc.unk12 = 0;
-    desc.unk15 = 0xFF;
-    desc.unk18 = (arg6 ? 2 : 3) + ((arg7 ? 0x3B : 0x22) << 16);
+    desc.rgba[2] = 0;
+    desc.rgba[1] = 0;
+    desc.rgba[0] = 0;
+    desc.rgba[3] = 0xFF;
+    desc.renderModes = (arg6 ? 2 : 3) + ((arg7 ? 0x3B : 0x22) << 16);
     desc.unk7 = 0;
     desc.unk16 = 0;
     desc.unk17 = 7;
-    desc.unk20 = 0xFF;
+    desc.viewportMask = 0xFF;
     desc.unk1C = 0;
     if (func_1513C650(&desc, 0, 0, arg3, pos->x, pos->y, pos->z, size, size,
                       func_150ADA20() & 0xFF, (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2),
@@ -1264,26 +1241,26 @@ void func_151DBBD4(Vec3f *pos, s32 arg1, u8 *kind, u8 arg3, s32 arg4) {
 
 /* Spawns an emitter of effect kind `kind` (coloured from D_800AB414) at `pos`, via func_1513C73C when arg3 is set. */
 void func_151DBCBC(u8 kind, f32 size, s16 arg2, s32 arg3, void *pos, u8 arg5, s32 arg6) {
-    EmitterDesc desc;
+    SpriteDef desc;
 
-    desc.unk6 = 0x38;
-    desc.unkC = 0x8000;
+    desc.texture = 0x38;
+    desc.frameSpeed = 0x8000;
     desc.flags = 0x67B02;
-    desc.unk4 = 300;
-    desc.unk8 = 0;
+    desc.lifetime = 300;
+    desc.frame = 0;
     desc.unk10 = arg2;
     desc.unk11 = 0xFF;
-    desc.unk12 = D_800AB414[kind * 3];
-    desc.unk13 = D_800AB414[kind * 3 + 1];
-    desc.unk14 = D_800AB414[kind * 3 + 2];
-    desc.unk15 = 0xFF;
-    desc.unk18 = 0x440001;
+    desc.rgba[0] = D_800AB414[kind * 3];
+    desc.rgba[1] = D_800AB414[kind * 3 + 1];
+    desc.rgba[2] = D_800AB414[kind * 3 + 2];
+    desc.rgba[3] = 0xFF;
+    desc.renderModes = 0x440001;
     desc.unk7 = 0;
     desc.unk16 = 0;
     desc.unk17 = 6;
-    desc.unk22 = 1;
-    desc.unk24 = 0xFF;
-    desc.unk20 = 0xFF;
+    desc.fadeStart = 1;
+    desc.fadeRate = 0xFF;
+    desc.viewportMask = 0xFF;
     desc.unk1C = 0;
     if (arg3 != 0) {
         func_1513C73C(&desc, 0, 0, arg3, ((Vec3f *)pos)->x, ((Vec3f *)pos)->y,

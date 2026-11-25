@@ -797,29 +797,6 @@ void func_151C36D8(Vec3f *pos, u8 arg1, s32 arg2) {
     func_151602C0(&header, &header2, (func_150ADA20() & 1) + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg1, arg2);
 }
 
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s16 unk4;
-    /* 0x06 */ u8 unk6;
-    /* 0x07 */ u8 unk7;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ u8 unk10;
-    /* 0x11 */ u8 unk11;
-    /* 0x12 */ u8 unk12;
-    /* 0x13 */ u8 unk13;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ u8 unk20;
-    /* 0x21 */ u8 pad21;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ s16 unk24;
-} DebrisPacket; /* 0x28, func_1513C650 packet (as Packet15141F78 in game_16EE20.c) */
-
 void func_15153634(SpriteBurst *, u8, u8, s32);
 
 /*
@@ -857,31 +834,31 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
         smokeChance = sparkChance = debrisChance = 0.0f;
     }
     if (func_150ADA68() < debrisChance) {
-        DebrisPacket debris;
+        SpriteDef debris;
         f32 scale;
         const s32 shade[6] = { 0x6F, 0x6F, 0x70, 0x70, 0x4F, 0x76 };
         u8 big;
 
         scale = (func_150ADA68() * 15.0f) + 15.0f;
-        debris.unk6 = shade[type];
+        debris.texture = shade[type];
         debris.unk7 = 0;
-        debris.unk0 = (D_800BE616 ? 0x20000 : 0) | 0xBF01;
-        debris.unk4 = (func_150ADA20() % 61U) + 0x3C;
-        debris.unk8 = 0;
-        debris.unkC = 0;
+        debris.flags = (D_800BE616 ? 0x20000 : 0) | 0xBF01;
+        debris.lifetime = (func_150ADA20() % 61U) + 0x3C;
+        debris.frame = 0;
+        debris.frameSpeed = 0;
         debris.unk10 = (func_150ADA20() % 56U) + 0xC8;
         debris.unk11 = 0xFF;
-        debris.unk12 = 0;
-        debris.unk13 = 0;
-        debris.unk14 = 0;
-        debris.unk15 = 0xFF;
+        debris.rgba[0] = 0;
+        debris.rgba[1] = 0;
+        debris.rgba[2] = 0;
+        debris.rgba[3] = 0xFF;
         big = (type == 4);
-        debris.unk18 = ((big ? 0x48 : 0x3B) << 16) + 2;
+        debris.renderModes = ((big ? 0x48 : 0x3B) << 16) + 2;
         debris.unk16 = 0;
         debris.unk17 = big ? 6 : 7;
-        debris.unk20 = debrisArg;
-        debris.unk22 = 0x20;
-        debris.unk24 = 7;
+        debris.viewportMask = debrisArg;
+        debris.fadeStart = 0x20;
+        debris.fadeRate = 7;
         ext = &trail->trail;
         func_1513C650(&debris, 0, 0, (s32)ext->path.surface, ext->path.hit.x, ext->path.hit.y, ext->path.hit.z,
                       scale, scale, func_150ADA20() & 0xFF, 0, 0, 0, 0, trail->unkC, trail->unk1);
