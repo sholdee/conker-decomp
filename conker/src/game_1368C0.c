@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /*
  * Object-attached particle emitters: effects 0x1A, 0x1B and 0x1C (struct260s with their own data
@@ -58,39 +59,6 @@ typedef struct {
         PairEmitterData pair;
     } data;
 } Effect1368C0;
-
-/* Particle spawn template passed to func_15130374 (same layout as ParticleSpawn in game_12C1E0.c). */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s16 unk8;
-    /* 0x0A */ s16 lifetime;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 color0[4];
-    /* 0x18 */ u8 color1[4];
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ s16 fadeDuration;
-    /* 0x20 */ s16 fadeStep;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 width;
-    /* 0x2C */ f32 height;
-    /* 0x30 */ vertex position;
-    /* 0x3C */ vertex unk3C;
-    /* 0x48 */ vertex velocity;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ s32 flags; /* 0x40, 0x80: random flips */
-    /* 0x5C */ u8 pad5C[4];
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ s8 unk62;
-    /* 0x63 */ s8 unk63;
-    /* 0x64 */ s8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 pad66[0x70 - 0x66];
-} ParticleSpawn; /* size 0x70 */
 
 /* Live particle returned by func_15130374; its extra data (dataSize bytes) starts at 0xA8. */
 typedef struct {
@@ -219,7 +187,7 @@ extern void (*D_80088C64[])(void *, vertex *, vertex *, vertex *, vertex *, vert
 
 extern void func_15143134(const vertex *, vertex *, void *);
 extern s32 func_15145128(vertex *, vertex *, f32 *, f32 *);
-extern Particle1368C0 *func_15130374(ParticleSpawn *, u8, s32, u8, s32);
+extern Particle1368C0 *func_15130374(ParticleDesc *, u8, s32, u8, s32);
 extern void func_15132A4C(DebrisSpawn *, s32, s32, s32, u8, s32);
 extern void func_15152B38(EmitterSpawn *, u8, s32);
 extern void func_1511490C(f32 mtx[4][4], void *arg1);
@@ -325,52 +293,52 @@ void func_151094FC(Effect1368C0 *effect) {
 
 /* Particle emitter: a particle flying along `dir` from `point`, plus a func_15152B38 emitter there. */
 void func_15109848(Effect1368C0 *effect, vertex *point, vertex *start, vertex *end, vertex *tip, vertex *dir) {
-    ParticleSpawn spawn;
+    ParticleDesc spawn;
     f32 speed;
     EmitterSpawn emitter;
     s32 flip80;
     s32 flip40;
 
     speed = (func_150ADA68() * 851.0f + 525.0f) * 0.001000000047f;
-    spawn.unk1D = 0x2B;
-    spawn.unk8 = 0x4401;
+    spawn.texture = 0x2B;
+    spawn.renderMode = 0x4401;
     spawn.unk0 = 0x200005;
     spawn.unk4 = 0x20000;
-    spawn.lifetime = (func_150ADA20() & 0xF) + 10;
-    spawn.unkC = 0;
-    spawn.unk10 = 0;
-    spawn.color0[0] = 0xFF;
-    spawn.color0[1] = 0xFF;
-    spawn.color0[2] = 0xFF;
-    spawn.color0[3] = 0xFF;
-    spawn.color1[0] = 0xFF;
-    spawn.color1[1] = 0xFF;
-    spawn.color1[2] = 0xFF;
-    spawn.color1[3] = 0xFF;
-    spawn.unk1C = 0xFF;
+    spawn.timer = (func_150ADA20() & 0xF) + 10;
+    spawn.frame = 0;
+    spawn.frameRate = 0;
+    spawn.r = 0xFF;
+    spawn.g = 0xFF;
+    spawn.b = 0xFF;
+    spawn.a = 0xFF;
+    spawn.r2 = 0xFF;
+    spawn.g2 = 0xFF;
+    spawn.b2 = 0xFF;
+    spawn.alpha = 0xFF;
+    spawn.brightness = 0xFF;
     spawn.width = spawn.height = func_150ADA68() * 25.0f + 35.0f;
-    spawn.position = *point;
-    spawn.unk3C.x = 0.0f;
-    spawn.unk3C.y = 0.0f;
-    spawn.unk3C.z = 0.0f;
-    spawn.velocity.x = dir->x * speed;
-    spawn.velocity.y = dir->y * speed;
-    spawn.velocity.z = dir->z * speed;
-    spawn.fadeDuration = 5;
-    spawn.fadeStep = 0x33;
-    spawn.unk22 = 1;
-    spawn.unk54 = 0.0f;
-    spawn.unk24 = 1.0f;
+    spawn.pos = *point;
+    spawn.offset.x = 0.0f;
+    spawn.offset.y = 0.0f;
+    spawn.offset.z = 0.0f;
+    spawn.vel.x = dir->x * speed;
+    spawn.vel.y = dir->y * speed;
+    spawn.vel.z = dir->z * speed;
+    spawn.fadeStart = 5;
+    spawn.fadeRate = 0x33;
+    spawn.scaleStart = 1;
+    spawn.gravity = 0.0f;
+    spawn.scaleRate = 1.0f;
     /* random flips */
     flip40 = func_150ADA20() & 1 ? 0x40 : 0;
     flip80 = func_150ADA20() & 1 ? 0x80 : 0;
     spawn.flags = flip80 | 5 | flip40 | 0x8000 | 0x4000 | 0x200;
-    spawn.unk60 = 6;
-    spawn.unk61 = 6;
-    spawn.unk62 = -1;
-    spawn.unk63 = -1;
-    spawn.unk64 = -1;
-    spawn.unk65 = 4;
+    spawn.primColorMode = 6;
+    spawn.envColorMode = 6;
+    spawn.updateFunc = -1;
+    spawn.deathFunc = -1;
+    spawn.drawFunc = -1;
+    spawn.handlerSet = 4;
     func_15130374(&spawn, 1, 0, effect->owner, effect->kind);
 
     emitter.unk0 = 1;
@@ -614,7 +582,7 @@ void func_1510A40C(Effect1368C0 *effect) {
     vertex points[2];
     vertex dirs[2];
     void *matrix;
-    ParticleSpawn spawn;
+    ParticleDesc spawn;
     f32 extra;
     f32 speed;
     u8 side;
@@ -640,36 +608,36 @@ void func_1510A40C(Effect1368C0 *effect) {
         dirs[1].y -= points[1].y;
         dirs[1].z -= points[1].z;
         extra = 0.9108009934f;
-        spawn.unk1D = 0x29;
-        spawn.unk8 = 0xE03;
+        spawn.texture = 0x29;
+        spawn.renderMode = 0xE03;
         spawn.unk0 = 0x200005;
         spawn.unk4 = 0;
-        spawn.unkC = 0;
-        spawn.unk10 = 0;
-        spawn.fadeDuration = 25;
-        spawn.fadeStep = 10;
+        spawn.frame = 0;
+        spawn.frameRate = 0;
+        spawn.fadeStart = 25;
+        spawn.fadeRate = 10;
         spawn.flags = 0xCE05;
-        spawn.unk60 = 3;
-        spawn.unk61 = 3;
-        spawn.unk62 = 0x10;
-        spawn.unk63 = -1;
-        spawn.unk64 = -1;
-        spawn.unk65 = 0;
-        spawn.unk22 = 25;
-        spawn.color0[0] = 0xDD;
-        spawn.color0[1] = 0xD3;
-        spawn.color0[2] = 0xCD;
-        spawn.color0[3] = 0xFF;
-        spawn.color1[0] = 0x57;
-        spawn.color1[1] = 0x55;
-        spawn.color1[2] = 0x5A;
-        spawn.color1[3] = 0xFF;
-        spawn.unk1C = 0xFF;
-        spawn.unk24 = 1.043205976f;
-        spawn.unk3C.x = 0.0f;
-        spawn.unk3C.y = 0.0f;
-        spawn.unk3C.z = 0.0f;
-        spawn.unk54 = 0.0f;
+        spawn.primColorMode = 3;
+        spawn.envColorMode = 3;
+        spawn.updateFunc = 0x10;
+        spawn.deathFunc = -1;
+        spawn.drawFunc = -1;
+        spawn.handlerSet = 0;
+        spawn.scaleStart = 25;
+        spawn.r = 0xDD;
+        spawn.g = 0xD3;
+        spawn.b = 0xCD;
+        spawn.a = 0xFF;
+        spawn.r2 = 0x57;
+        spawn.g2 = 0x55;
+        spawn.b2 = 0x5A;
+        spawn.alpha = 0xFF;
+        spawn.brightness = 0xFF;
+        spawn.scaleRate = 1.043205976f;
+        spawn.offset.x = 0.0f;
+        spawn.offset.y = 0.0f;
+        spawn.offset.z = 0.0f;
+        spawn.gravity = 0.0f;
         do {
             if (func_150ADA20() & 1) {
                 spawn.flags |= 0x40;
@@ -683,12 +651,12 @@ void func_1510A40C(Effect1368C0 *effect) {
             }
             side = func_150ADA20() & 1;
             speed = (func_150ADA68() * 203.0f + 96.0f) * 0.001f;
-            spawn.lifetime = (func_150ADA20() & 0xF) + 20;
+            spawn.timer = (func_150ADA20() & 0xF) + 20;
             spawn.width = spawn.height = func_150ADA68() * 60.0f + 60.0f;
-            spawn.position = points[side];
-            spawn.velocity.x = dirs[side].x * speed;
-            spawn.velocity.y = dirs[side].y * speed;
-            spawn.velocity.z = dirs[side].z * speed;
+            spawn.pos = points[side];
+            spawn.vel.x = dirs[side].x * speed;
+            spawn.vel.y = dirs[side].y * speed;
+            spawn.vel.z = dirs[side].z * speed;
             particle = func_15130374(&spawn, 1, sizeof(extra), effect->owner, effect->kind);
             if (particle != NULL) {
                 memcpy(&particle->unkA8, &extra, sizeof(extra));

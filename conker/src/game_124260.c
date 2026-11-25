@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /* Message 0x3E payload: "this actor is gone"; beams owned by it destroy themselves (func_150F7310). */
 typedef struct {
@@ -16,43 +17,6 @@ void func_150F6DB0(struct127 *owner) {
     msg.ownerId = owner->unique_id;
     func_151494E0((s32)&msg, 0x3E);
 }
-
-/* Spawn descriptor for func_15130280 (a beam end sprite). */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s16 unk8;
-    /* 0x0A */ s16 life;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 color0[4];
-    /* 0x18 */ u8 color1[4];
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ struct17 pos;
-    /* 0x3C */ struct17 unk3C;
-    /* 0x48 */ struct17 vel;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ u32 flags;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ s8 unk62;
-    /* 0x63 */ s8 unk63;
-    /* 0x64 */ s8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 unk66;
-    /* 0x67 */ u8 pad67;
-    /* 0x68 */ s16 unk68;
-    /* 0x6A */ u8 pad6A[2];
-    /* 0x6C */ f32 unk6C;
-} BeamEndSpawn;
 
 /* A sprite spawned by func_15130280 that marks one end of the beam. */
 typedef struct {
@@ -93,7 +57,7 @@ typedef struct {
     /* 0x28 */ BeamState beam;
 } BeamObj;
 
-extern BeamEnd *func_15130280(BeamEndSpawn *, u8, s32, s32, u8, s32);
+extern BeamEnd *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 
 /* Spawns a beam object for `owner`, with two end sprites (blue-tinted, then red-tinted). */
 BeamObj *func_150F6DE4(struct127 *owner) {
@@ -115,49 +79,49 @@ BeamObj *func_150F6DE4(struct127 *owner) {
         beam = &obj->beam;
         memcpy(beam, &state, sizeof(state));
         {
-            BeamEndSpawn spawn;
+            ParticleDesc spawn;
 
-            spawn.unk8 = 0x4417;
+            spawn.renderMode = 0x4417;
             spawn.unk0 = 0x200004;
             spawn.unk4 = 0;
-            spawn.life = 300;
-            spawn.unkC = 0;
-            spawn.unk10 = 0;
-            spawn.color0[0] = 0xFF;
-            spawn.color0[1] = 0xFF;
-            spawn.color0[2] = 0xFF;
-            spawn.color0[3] = 0xFF;
-            spawn.unk1C = 0xFF;
-            spawn.unk28 = spawn.unk2C = 1511.0f;
-            spawn.pos = *(struct17 *)&D_800A5480;
-            spawn.unk3C = *(struct17 *)&D_800A5480;
-            spawn.vel = *(struct17 *)&D_800A5480;
-            spawn.unk1E = 1;
-            spawn.unk20 = 0xFF;
-            spawn.unk22 = 1;
+            spawn.timer = 300;
+            spawn.frame = 0;
+            spawn.frameRate = 0;
+            spawn.r = 0xFF;
+            spawn.g = 0xFF;
+            spawn.b = 0xFF;
+            spawn.a = 0xFF;
+            spawn.brightness = 0xFF;
+            spawn.width = spawn.height = 1511.0f;
+            spawn.pos = *(vertex *)&D_800A5480;
+            spawn.offset = *(vertex *)&D_800A5480;
+            spawn.vel = *(vertex *)&D_800A5480;
+            spawn.fadeStart = 1;
+            spawn.fadeRate = 0xFF;
+            spawn.scaleStart = 1;
             spawn.flags = 0x64C000;
-            spawn.unk60 = 8;
-            spawn.unk61 = 6;
-            spawn.unk62 = -1;
-            spawn.unk63 = -1;
-            spawn.unk64 = 3;
-            spawn.unk65 = 0;
-            spawn.unk5C = 0;
-            spawn.unk66 = 0xFF;
-            spawn.unk68 = 10;
-            spawn.unk1D = 100;
-            spawn.color1[0] = 0;
-            spawn.color1[1] = 0;
-            spawn.color1[2] = 0xFF;
-            spawn.color1[3] = 0xFF;
-            spawn.unk54 = 0.0f;
-            spawn.unk24 = 1.0f;
-            spawn.unk6C = 20.0f;
+            spawn.primColorMode = 8;
+            spawn.envColorMode = 6;
+            spawn.updateFunc = -1;
+            spawn.deathFunc = -1;
+            spawn.drawFunc = 3;
+            spawn.handlerSet = 0;
+            spawn.viewMask = 0;
+            spawn.views = 0xFF;
+            spawn.minSize = 10;
+            spawn.texture = 100;
+            spawn.r2 = 0;
+            spawn.g2 = 0;
+            spawn.b2 = 0xFF;
+            spawn.alpha = 0xFF;
+            spawn.gravity = 0.0f;
+            spawn.scaleRate = 1.0f;
+            spawn.maxSize = 20.0f;
             beam->ends[0] = func_15130280(&spawn, 1, 0, 0, obj->unkC, obj->unk1);
-            spawn.color1[0] = 0xFF;
-            spawn.color1[1] = 0;
-            spawn.color1[2] = 0;
-            spawn.color1[3] = 0xFF;
+            spawn.r2 = 0xFF;
+            spawn.g2 = 0;
+            spawn.b2 = 0;
+            spawn.alpha = 0xFF;
             beam->ends[1] = func_15130280(&spawn, 1, 0, 0, obj->unkC, obj->unk1);
         }
     }

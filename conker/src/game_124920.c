@@ -4,54 +4,12 @@
 #include "functions.h"
 #undef func_10010F88
 #include "variables.h"
+#include "effects.h"
 
 extern f32 D_800A1BD8;
 extern f32 sinf(f32);
 extern s32 func_15145128(struct17 *, struct17 *, f32 *, f32 *);
 extern s32 func_15146078(struct17 *, struct17 *, struct17 *);
-
-/* Spawn descriptor for func_1513264C (0x7C bytes); EffectObj holds the same fields 0x10.. at +0x10. */
-typedef struct {
-    /* 0x00 */ f32 unk00;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ f32 unk08;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ struct17 pos;
-    /* 0x34 */ struct17 vel;
-    /* 0x40 */ struct17 unk40;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-    /* 0x58 */ u8 unk58;
-    /* 0x59 */ u8 pad59[3];
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ u8 unk63;
-    /* 0x64 */ u8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 unk66;
-    /* 0x67 */ u8 unk67;
-    /* 0x68 */ u8 unk68;
-    /* 0x69 */ s8 unk69;
-    /* 0x6A */ u8 unk6A;
-    /* 0x6B */ u8 pad6B;
-    /* 0x6C */ struct127 *owner;
-    /* 0x70 */ u8 ownerId; /* owner->unique_id */
-    /* 0x71 */ u8 pad71;
-    /* 0x72 */ s16 unk72;
-    /* 0x74 */ s16 unk74;
-    /* 0x76 */ u8 pad76[2];
-    /* 0x78 */ s32 sound; /* positional sound handle (func_10010F88), or 0 */
-} EffectSpawn;
 
 /* Per-object state of the projectile spawned by func_150F7470 (updated by func_150F78B4). */
 typedef struct {
@@ -115,11 +73,11 @@ s32 func_10010F88(s32 sound, u16 volume, s16 cents, u8 mix, s32 arg4, s16 x, s16
                   s16 farDistance);
 
 /* Spawns a projectile at `pos`, aimed along `aim` (or at `target` when arg2 is set). */
-void func_150F7470(struct17 *pos, struct17 *aim, s32 arg2, struct17 *target, u8 targetIsDir, s32 arg5, f32 speed,
+void func_150F7470(vertex *pos, struct17 *aim, s32 arg2, struct17 *target, u8 targetIsDir, s32 arg5, f32 speed,
                    f32 arg7, f32 arg8, struct127 *owner, u8 arg10, u8 arg11, u8 arg12, u8 arg13, s32 arg14,
                    s8 arg15, s32 sound, u8 arg17, u8 arg18, s32 arg19) {
     ProjectileState state;
-    EffectSpawn spawn;
+    ParticleSpawn spawn;
     EffectObj *obj;
     struct17 aimDir;
     u8 hasAimDir;
@@ -158,48 +116,48 @@ void func_150F7470(struct17 *pos, struct17 *aim, s32 arg2, struct17 *target, u8 
     state.trailAge = 0.0f;
     state.trailDist = 0.0f;
     state.trailAgeStep = 70.0f * arg7;
-    state.trailPos = *pos;
+    state.trailPos = *(struct17 *)pos; // TODO(vectors): struct17/vertex mix
     state.speed = speed;
     state.trailStep.unk0 = state.dir.unk0 * 70.0f;
     state.trailStep.unk4 = state.dir.unk4 * 70.0f;
     state.trailStep.unk8 = state.dir.unk8 * 70.0f;
     state.flags |= (state.unk4 > 150.0f) ? 1 : 0;
-    spawn.unk00 = 1.0f;
-    spawn.unk04 = 1.0f;
-    spawn.unk0C = 0.02000000142f;
-    spawn.unk08 = 0.02000000142f;
-    func_15145974(&state.dir, &spawn.unk14, &spawn.unk10);
-    spawn.unk1C = 1.0f;
-    spawn.unk20 = 1.0f;
-    spawn.unk24 = 1.0f;
-    spawn.unk18 = 0.0f;
+    spawn.radius = 1.0f;
+    spawn.elasticity = 1.0f;
+    spawn.sizeY = 0.02000000142f;
+    spawn.sizeXZ = 0.02000000142f;
+    func_15145974(&state.dir, &spawn.rot.y, &spawn.rot.x);
+    spawn.scale.x = 1.0f;
+    spawn.scale.y = 1.0f;
+    spawn.scale.z = 1.0f;
+    spawn.rot.z = 0.0f;
     spawn.pos = *pos;
-    spawn.vel.unk0 = state.dir.unk0 * speed;
-    spawn.vel.unk4 = state.dir.unk4 * speed;
-    spawn.vel.unk8 = state.dir.unk8 * speed;
-    spawn.unk40 = *(struct17 *)&D_800A5480;
-    spawn.unk4C = 0.0f;
-    spawn.unk50 = 0x120;
-    spawn.unk54 = 300;
-    spawn.unk56 = 0x2F;
-    spawn.unk58 = 0;
+    spawn.vel.x = state.dir.unk0 * speed;
+    spawn.vel.y = state.dir.unk4 * speed;
+    spawn.vel.z = state.dir.unk8 * speed;
+    spawn.rotVel = *(vertex *)&D_800A5480;
+    spawn.gravity = 0.0f;
+    spawn.flags = 0x120;
+    spawn.lifetime = 300;
+    spawn.model = 0x2F;
+    spawn.variant = 0;
     spawn.unk5C = 0;
-    spawn.unk60 = 0xFF;
-    spawn.unk61 = 0x13;
-    spawn.unk62 = 0;
-    spawn.unk63 = 0;
-    spawn.unk64 = 0;
-    spawn.unk65 = 0;
-    spawn.unk66 = 0;
-    spawn.unk67 = 0;
-    spawn.unk68 = 0;
+    spawn.alpha = 0xFF;
+    spawn.updateFn = 0x13;
+    spawn.update2Fn = 0;
+    spawn.floorHitFn = 0;
+    spawn.floorType3Fn = 0;
+    spawn.wallHitFn = 0;
+    spawn.destroyFn = 0;
+    spawn.squashFn = 0;
+    spawn.matrixFn = 0;
     spawn.unk6A = 0;
     spawn.owner = owner;
     spawn.ownerId = owner->unique_id;
-    spawn.unk72 = 1;
-    spawn.unk74 = 0xFF;
+    spawn.fadeStart = 1;
+    spawn.fadeRate = 0xFF;
     if (sound != 0) {
-        spawn.sound = func_10010F88(sound, 18000, -500, 0, -1, spawn.pos.unk0, spawn.pos.unk4, spawn.pos.unk8, 1000,
+        spawn.sound = func_10010F88(sound, 18000, -500, 0, -1, spawn.pos.x, spawn.pos.y, spawn.pos.z, 1000,
                                     2000);
     } else {
         spawn.sound = 0;
@@ -434,7 +392,7 @@ void func_150F7F8C(struct17 *pos, u8 arg1, s32 arg2) {
 /* Spawns an effect that follows `target` (a position followed by three more floats), trailing puffs behind it. */
 void func_150F802C(f32 *target, s16 arg1, u8 arg2, s32 arg3) {
     struct {
-        EffectSpawn spawn;
+        ParticleSpawn spawn;
         FollowState follow;
     } packet;
     EffectObj *obj;
@@ -444,43 +402,43 @@ void func_150F802C(f32 *target, s16 arg1, u8 arg2, s32 arg3) {
     packet.follow.trailPos.unk4 = target[1];
     packet.follow.trailPos.unk8 = target[2];
     packet.follow.trailAge = 0.0f;
-    packet.spawn.unk00 = 1.0f;
-    packet.spawn.unk04 = 1.0f;
-    packet.spawn.unk08 = 0.02000000142f;
-    packet.spawn.unk0C = 0.02000000142f;
-    packet.spawn.unk10 = target[3];
-    packet.spawn.unk14 = target[4];
-    packet.spawn.unk18 = target[5];
-    packet.spawn.unk1C = 1.0f;
-    packet.spawn.unk20 = 1.0f;
-    packet.spawn.unk24 = 1.0f;
-    packet.spawn.pos.unk0 = target[0];
-    packet.spawn.pos.unk4 = target[1];
-    packet.spawn.pos.unk8 = target[2];
-    packet.spawn.vel.unk0 = 0.0f;
-    packet.spawn.vel.unk4 = 0.0f;
-    packet.spawn.vel.unk8 = 0.0f;
-    packet.spawn.unk40 = *(struct17 *)&D_800A5480;
-    packet.spawn.unk4C = 0.0f;
-    packet.spawn.unk50 = 0x980;
-    packet.spawn.unk54 = arg1;
-    packet.spawn.unk56 = 0x2F;
-    packet.spawn.unk58 = 0;
+    packet.spawn.radius = 1.0f;
+    packet.spawn.elasticity = 1.0f;
+    packet.spawn.sizeXZ = 0.02000000142f;
+    packet.spawn.sizeY = 0.02000000142f;
+    packet.spawn.rot.x = target[3];
+    packet.spawn.rot.y = target[4];
+    packet.spawn.rot.z = target[5];
+    packet.spawn.scale.x = 1.0f;
+    packet.spawn.scale.y = 1.0f;
+    packet.spawn.scale.z = 1.0f;
+    packet.spawn.pos.x = target[0];
+    packet.spawn.pos.y = target[1];
+    packet.spawn.pos.z = target[2];
+    packet.spawn.vel.x = 0.0f;
+    packet.spawn.vel.y = 0.0f;
+    packet.spawn.vel.z = 0.0f;
+    packet.spawn.rotVel = *(vertex *)&D_800A5480;
+    packet.spawn.gravity = 0.0f;
+    packet.spawn.flags = 0x980;
+    packet.spawn.lifetime = arg1;
+    packet.spawn.model = 0x2F;
+    packet.spawn.variant = 0;
     packet.spawn.unk5C = 0;
-    packet.spawn.unk60 = 0xFF;
-    packet.spawn.unk61 = 0x14;
-    packet.spawn.unk62 = 0;
-    packet.spawn.unk63 = 0;
-    packet.spawn.unk64 = 0;
-    packet.spawn.unk65 = 0;
-    packet.spawn.unk66 = 0;
-    packet.spawn.unk67 = 0;
-    packet.spawn.unk68 = 0;
+    packet.spawn.alpha = 0xFF;
+    packet.spawn.updateFn = 0x14;
+    packet.spawn.update2Fn = 0;
+    packet.spawn.floorHitFn = 0;
+    packet.spawn.floorType3Fn = 0;
+    packet.spawn.wallHitFn = 0;
+    packet.spawn.destroyFn = 0;
+    packet.spawn.squashFn = 0;
+    packet.spawn.matrixFn = 0;
     packet.spawn.unk6A = 0;
     packet.spawn.owner = NULL;
     packet.spawn.ownerId = 0;
-    packet.spawn.unk72 = 1;
-    packet.spawn.unk74 = 0xFF;
+    packet.spawn.fadeStart = 1;
+    packet.spawn.fadeRate = 0xFF;
     packet.spawn.sound = 0;
     obj = func_1513264C(&packet, 3, 0xFF, 0, 0xB4, arg2, arg3);
     if (obj != NULL) {
@@ -802,55 +760,12 @@ void func_150F887C(StageObj *obj, StageMsg *msg, u8 type) {
     }
 }
 
-/* Spawn descriptor for func_15130280 (same layout as FlareSpawn in game_133190.c). */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s16 unk8;
-    /* 0x0A */ s16 life;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 unk1A;
-    /* 0x1B */ u8 unk1B;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ struct17 pos;
-    /* 0x3C */ struct17 unk3C;
-    /* 0x48 */ struct17 vel;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ u32 flags; /* 0x40, 0x80: random flips */
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ s8 unk62;
-    /* 0x63 */ s8 unk63;
-    /* 0x64 */ s8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 unk66;
-    /* 0x67 */ u8 pad67;
-    /* 0x68 */ s16 unk68;
-    /* 0x6A */ u8 pad6A[2];
-    /* 0x6C */ f32 unk6C;
-} FlareSpawn;
-
 extern void func_15164F0C(s32 arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern void func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
 extern void func_15143874(s16 angle, f32 radius, f32 *x, f32 *z);
 extern void func_151C329C(struct17 *pos, s32, s32);
 extern void func_15143794(s16, s16, f32, struct17 *out);
-extern void *func_15130280(FlareSpawn *spawn, u8, s32, s32, u8, s32);
+extern void *func_15130280(ParticleDesc *spawn, u8, s32, s32, u8, s32);
 void func_151DB5D0(s32, struct17 *pos, struct17 *vel, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32);
 
 /*
@@ -929,54 +844,54 @@ void func_150F892C(StageObj *obj) {
     if (state->unk34 > 1.0f) {
         s16 pieces;
         s16 side;
-        EffectSpawn spawn;
+        ParticleSpawn spawn;
         side = (state->unk5 & 1) ? -1 : 1;
-        spawn.unk00 = 1.0f;
-        spawn.unk04 = 1.0f;
-        spawn.unk1C = 1.0f;
-        spawn.unk20 = 1.0f;
-        spawn.unk24 = 1.0f;
-        spawn.unk50 = 0x39E8;
-        spawn.unk56 = 0x86;
-        spawn.unk58 = 0;
+        spawn.radius = 1.0f;
+        spawn.elasticity = 1.0f;
+        spawn.scale.x = 1.0f;
+        spawn.scale.y = 1.0f;
+        spawn.scale.z = 1.0f;
+        spawn.flags = 0x39E8;
+        spawn.model = 0x86;
+        spawn.variant = 0;
         spawn.unk5C = 0;
-        spawn.unk60 = 0xFF;
-        spawn.unk61 = 8;
-        spawn.unk62 = 0;
-        spawn.unk63 = 0;
-        spawn.unk64 = 0;
-        spawn.unk65 = 0;
-        spawn.unk66 = 0;
-        spawn.unk67 = 0;
-        spawn.unk68 = 0;
+        spawn.alpha = 0xFF;
+        spawn.updateFn = 8;
+        spawn.update2Fn = 0;
+        spawn.floorHitFn = 0;
+        spawn.floorType3Fn = 0;
+        spawn.wallHitFn = 0;
+        spawn.destroyFn = 0;
+        spawn.squashFn = 0;
+        spawn.matrixFn = 0;
         spawn.unk6A = 2;
         spawn.owner = NULL;
         spawn.ownerId = 0;
-        spawn.unk72 = 12;
-        spawn.unk74 = 21;
+        spawn.fadeStart = 12;
+        spawn.fadeRate = 21;
         spawn.sound = 0;
-        spawn.unk40.unk4 = 0.0f;
+        spawn.rotVel.y = 0.0f;
         do {
             s16 angle;
 
             pieces = func_150ADA20() % 7U + 5;
             angle = (func_150ADA20() % 126U - 220) * side;
-            func_15143874(angle, state->unk48, &spawn.pos.unk0, &spawn.pos.unk8);
-            spawn.pos.unk4 = func_150ADA68() * 150.0f + 30.0f;
-            spawn.pos.unk0 += state->unk40;
-            spawn.pos.unk8 += state->unk44;
+            func_15143874(angle, state->unk48, &spawn.pos.x, &spawn.pos.z);
+            spawn.pos.y = func_150ADA68() * 150.0f + 30.0f;
+            spawn.pos.x += state->unk40;
+            spawn.pos.z += state->unk44;
             i = angle - 7; // matching: the base angle reuses the counter i (a new local changes registers)
             for (; pieces > 0; pieces--) {
-                spawn.unk54 = (func_150ADA20() & 0xF) + 35;
-                spawn.unk08 = spawn.unk0C = func_150ADA68() * 0.012f + 0.005f;
-                spawn.unk10 = func_150ADA68() * 360.0f;
-                spawn.unk14 = func_150ADA68() * 360.0f;
-                spawn.unk18 = func_150ADA68() * 360.0f;
+                spawn.lifetime = (func_150ADA20() & 0xF) + 35;
+                spawn.sizeXZ = spawn.sizeY = func_150ADA68() * 0.012f + 0.005f;
+                spawn.rot.x = func_150ADA68() * 360.0f;
+                spawn.rot.y = func_150ADA68() * 360.0f;
+                spawn.rot.z = func_150ADA68() * 360.0f;
                 func_15143794((func_150ADA20() & 0xF) + i, func_150ADA20() % 37U - 63,
                               func_150ADA68() * 8.0f + 10.0f, &spawn.vel);
-                spawn.unk40.unk0 = func_150ADA68() * 32.41f + -16.205f;
-                spawn.unk40.unk8 = func_150ADA68() * 32.41f + -16.205f;
-                spawn.unk4C = func_150ADA68() * 0.337f + -1.177f;
+                spawn.rotVel.x = func_150ADA68() * 32.41f + -16.205f;
+                spawn.rotVel.z = func_150ADA68() * 32.41f + -16.205f;
+                spawn.gravity = func_150ADA68() * 0.337f + -1.177f;
                 func_1513264C(&spawn, 3, 1, 0, 0, 0xFF, 1);
             }
             state->unk34 -= 1.0f;
@@ -987,59 +902,59 @@ void func_150F892C(StageObj *obj) {
     if (state->unk30 > 1.0f) {
         s16 side;
         s32 flares;
-        FlareSpawn flare;
+        ParticleDesc flare;
         side = (state->unk5 & 1) ? -1 : 1;
-        flare.unk1D = 0x86;
-        flare.unk8 = 0x4404;
+        flare.texture = 0x86;
+        flare.renderMode = 0x4404;
         flare.unk0 = 0x200005;
         flare.unk4 = 0x9F0600;
-        flare.unkC = 0;
-        flare.unk10 = 0;
-        flare.unk14 = 0xFF;
-        flare.unk15 = 0xFF;
-        flare.unk16 = 0xFF;
-        flare.unk17 = 0xFF;
-        flare.unk18 = 0xFF;
-        flare.unk19 = 0xFF;
-        flare.unk1A = 0xFF;
-        flare.unk3C = *(struct17 *)&D_800A5480;
-        flare.unk1E = 8;
-        flare.unk20 = 0x1F;
-        flare.unk22 = 1;
+        flare.frame = 0;
+        flare.frameRate = 0;
+        flare.r = 0xFF;
+        flare.g = 0xFF;
+        flare.b = 0xFF;
+        flare.a = 0xFF;
+        flare.r2 = 0xFF;
+        flare.g2 = 0xFF;
+        flare.b2 = 0xFF;
+        flare.offset = *(vertex *)&D_800A5480;
+        flare.fadeStart = 8;
+        flare.fadeRate = 0x1F;
+        flare.scaleStart = 1;
         flare.flags = 0x1C207;
-        flare.unk60 = 6;
-        flare.unk61 = 5;
-        flare.unk62 = -1;
-        flare.unk63 = -1;
-        flare.unk64 = -1;
-        flare.unk65 = 0;
-        flare.unk5C = 0;
-        flare.unk66 = 0xFF;
-        flare.unk68 = 0;
-        flare.unk24 = 1.0f;
-        flare.unk6C = 0.0f;
+        flare.primColorMode = 6;
+        flare.envColorMode = 5;
+        flare.updateFunc = -1;
+        flare.deathFunc = -1;
+        flare.drawFunc = -1;
+        flare.handlerSet = 0;
+        flare.viewMask = 0;
+        flare.views = 0xFF;
+        flare.minSize = 0;
+        flare.scaleRate = 1.0f;
+        flare.maxSize = 0.0f;
         do {
             s16 angle;
 
             flares = func_150ADA20() % 13U + 7;
             angle = (func_150ADA20() % 126U - 220) * side;
-            func_15143874(angle, state->unk48, &flare.pos.unk0, &flare.pos.unk8);
-            flare.pos.unk4 = func_150ADA68() * 150.0f + 30.0f;
-            flare.pos.unk0 += state->unk40;
-            flare.pos.unk8 += state->unk44;
+            func_15143874(angle, state->unk48, &flare.pos.x, &flare.pos.z);
+            flare.pos.y = func_150ADA68() * 150.0f + 30.0f;
+            flare.pos.x += state->unk40;
+            flare.pos.z += state->unk44;
             i = angle - 4; // matching: the base angle reuses the counter i (a new local changes registers)
             for (; flares > 0; flares--) {
                 s32 flip;
 
-                flare.life = func_150ADA20() % 21U + 30;
-                flare.unk1B = func_150ADA20() % 156U + 100;
-                flare.unk28 = flare.unk2C = func_150ADA68() * 110.0f + 70.0f;
+                flare.timer = func_150ADA20() % 21U + 30;
+                flare.alpha = func_150ADA20() % 156U + 100;
+                flare.width = flare.height = func_150ADA68() * 110.0f + 70.0f;
                 flare.flags &= ~0xC0;
                 flip = (func_150ADA20() & 1) ? 0x80 : 0;
                 flare.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | flip;
                 func_15143794(func_150ADA20() % 9U + i, (func_150ADA20() & 7) - 16,
                               func_150ADA68() * 10.0f + 6.0f, &flare.vel);
-                flare.unk54 = func_150ADA68() * 0.268f + -0.3870000243f;
+                flare.gravity = func_150ADA68() * 0.268f + -0.3870000243f;
                 func_15130280(&flare, 1, 0, 0, 0xFF, 1);
             }
             state->unk30 -= 1.0f;

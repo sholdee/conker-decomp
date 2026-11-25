@@ -6,6 +6,7 @@
 /* variables.h declares D_800D3098 as an array, but the code loads it as a pointer to the table. */
 #define D_800D3098 D_800D3098_array_decl_in_variables_h
 #include "variables.h"
+#include "effects.h"
 #undef D_800D3098
 #undef func_1513D2F0
 extern struct178 *D_800D3098;
@@ -85,34 +86,6 @@ typedef struct {
     /* 0x28 */ BurstData data;
 } BurstEffect;
 
-/* Spawn parameters shared by func_1513D2F0 and func_151407D0. */
-typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ s16 lifetime;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ u8 color[4];
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ struct17 unk1C;
-    /* 0x28 */ struct17 unk28;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ s32 unk40;
-    /* 0x44 */ u8 unk44;
-    /* 0x45 */ u8 unk45;
-    /* 0x46 */ u8 unk46;
-    /* 0x47 */ u8 unk47;
-    /* 0x48 */ s32 unk48;
-    /* 0x4C */ u8 unk4C;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-} SpawnParams; /* 0x58 */
-
 /* Shape parameters of a glow (func_151407D0). */
 typedef struct {
     /* 0x00 */ f32 unk0;
@@ -178,7 +151,7 @@ void func_150F9BB0(struct127 *actor, u8 owner, s32 kind) {
         memcpy(burst, &data, sizeof(data));
         {
             BurstSparkData spark;
-            SpawnParams spawn;
+            ParticleDef spawn;
 
             spark.flags = 0;
             spark.ownerScale = (actor->xz_scale + actor->y_scale) * 0.5f;
@@ -191,8 +164,8 @@ void func_150F9BB0(struct127 *actor, u8 owner, s32 kind) {
             spark.unk24 = 0.0f;
             spark.unk28 = 0.0f;
             spark.unk38 = 0.0f;
-            spawn.unk14 = 0.0f;
-            spawn.unk18 = 0.0f;
+            spawn.width = 0.0f;
+            spawn.height = 0.0f;
             spark.unk3C = 0.0f;
             spark.width = 1.0f;
             spark.unk40 = 1.0f;
@@ -205,22 +178,22 @@ void func_150F9BB0(struct127 *actor, u8 owner, s32 kind) {
             spark.unk30 = 95.0f;
             spark.unk34 = 207.5f;
             spark.effect = &effect->header;
-            spawn.unk0 = 0x5F;
-            spawn.unk1 = 8;
-            spawn.unk2 = 0x2203;
+            spawn.texture = 0x5F;
+            spawn.type = 8;
+            spawn.renderModes = 0x2203;
             spawn.lifetime = 300;
-            spawn.unk8 = 0;
-            spawn.unkC = 0;
-            spawn.color[0] = 0xFF;
-            spawn.color[1] = 0xFF;
-            spawn.color[2] = 0xFF;
-            spawn.color[3] = 0xFF;
-            spawn.unk1C = *(struct17 *)&D_800A5480;
-            spawn.unk28 = *(struct17 *)&D_800A5480;
-            spawn.unk34 = 1.0f;
-            spawn.unk38 = 1.0f;
-            spawn.unk3C = 1.0f;
-            spawn.unk40 = 0x40EC0000;
+            spawn.frame = 0;
+            spawn.frameSpeed = 0;
+            spawn.rgba[0] = 0xFF;
+            spawn.rgba[1] = 0xFF;
+            spawn.rgba[2] = 0xFF;
+            spawn.rgba[3] = 0xFF;
+            spawn.pos = *(vertex *)&D_800A5480;
+            spawn.rot = *(vertex *)&D_800A5480;
+            spawn.scale.x = 1.0f;
+            spawn.scale.y = 1.0f;
+            spawn.scale.z = 1.0f;
+            spawn.flags = 0x40EC0000;
             spawn.unk44 = 0;
             spawn.unk45 = 0xFF;
             spawn.unk46 = 0;
@@ -235,7 +208,7 @@ void func_150F9BB0(struct127 *actor, u8 owner, s32 kind) {
         }
         {
             GlowShape shape;
-            SpawnParams spawn;
+            ParticleDef spawn;
             BurstGlowData glow;
 
             glow.unk0 = 0;
@@ -272,30 +245,30 @@ void func_150F9BB0(struct127 *actor, u8 owner, s32 kind) {
             shape.unk57 = 0;
             shape.unk58 = 15;
             shape.unk59 = -1;
-            spawn.unk0 = 0x60;
-            spawn.unk1 = 3;
-            spawn.unk2 = 0x2203;
+            spawn.texture = 0x60;
+            spawn.type = 3;
+            spawn.renderModes = 0x2203;
             spawn.lifetime = 300;
-            spawn.unk8 = 0;
-            spawn.unkC = 0;
-            spawn.color[0] = 0xFF;
-            spawn.color[1] = 0xFF;
-            spawn.color[2] = 0xFF;
-            spawn.color[3] = 0xFF;
-            spawn.unk14 = 100.0f;
-            spawn.unk18 = 100.0f;
-            spawn.unk1C = *(struct17 *)&D_800A5480;
-            spawn.unk28 = *(struct17 *)&D_800A5480;
-            spawn.unk34 = 1.0f;
-            spawn.unk38 = 1.0f;
-            spawn.unk3C = 1.0f;
-            spawn.unk40 = 0xCD2002;
+            spawn.frame = 0;
+            spawn.frameSpeed = 0;
+            spawn.rgba[0] = 0xFF;
+            spawn.rgba[1] = 0xFF;
+            spawn.rgba[2] = 0xFF;
+            spawn.rgba[3] = 0xFF;
+            spawn.width = 100.0f;
+            spawn.height = 100.0f;
+            spawn.pos = *(vertex *)&D_800A5480;
+            spawn.rot = *(vertex *)&D_800A5480;
+            spawn.scale.x = 1.0f;
+            spawn.scale.y = 1.0f;
+            spawn.scale.z = 1.0f;
+            spawn.flags = 0xCD2002;
             spawn.unk44 = 0xFF;
             spawn.unk45 = 0xFF;
             spawn.unk46 = 0;
             spawn.unk47 = 7;
             spawn.unk48 = 0;
-            spawn.unk4C = 0xFF;
+            spawn.viewportMask = 0xFF;
             for (glow.index = 0; glow.index < 2; glow.index++) {
                 burst->glows[glow.index] = func_151407D0(&shape, 0x78, &spawn, 0, 0x2A, 0, 0, -1, owner, kind);
                 if (burst->glows[glow.index] != NULL) {
@@ -485,49 +458,6 @@ typedef struct {
     f32 unk44;
 } Spawn15150178;
 
-/* Particle spawn template passed to func_15130280. */
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s16 unk8;
-    s16 unkA;
-    s32 unkC;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    struct17 pos;
-    struct17 unk3C;
-    struct17 vel;
-    f32 unk54;
-    u32 flags;
-    s32 unk5C;
-    u8 unk60;
-    u8 unk61;
-    s8 unk62;
-    s8 unk63;
-    s8 unk64;
-    u8 unk65;
-    u8 unk66;
-    u8 pad67;
-    s16 unk68;
-    u8 pad6A[2];
-    f32 unk6C;
-} ParticleSpawn; /* 0x70 */
-
 /* A particle created by func_15130280; this caller's data lives at 0xA8. */
 typedef struct {
     /* 0x00 */ u8 pad0[0xA8];
@@ -539,7 +469,7 @@ extern void func_15143134(struct17 *offset, struct17 *out, Mtx *mtx);
 extern void func_1504715C(void *ground, struct127 *actor);
 extern void func_15153F18(s16 *, void *, void *, u8, s32);
 extern void func_15150178(s16 *, void *, void *, u8, s32);
-extern ImpactParticle *func_15130280(ParticleSpawn *, u8, s32, s32, u8, s32);
+extern ImpactParticle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 extern void func_151C329C(struct17 *, u8, s32);
 
 /*
@@ -547,7 +477,7 @@ extern void func_151C329C(struct17 *, u8, s32);
  * func_15150178 bursts, a particle with a random rise, and func_151C329C at the point.
  */
 void func_150FA520(struct127 *actor, u8 point, u8 owner, s32 kind) {
-    struct17 pos;
+    vertex pos;
     u8 ground[0x24];
 
     if (actor->unk1D4) {
@@ -556,7 +486,7 @@ void func_150FA520(struct127 *actor, u8 point, u8 owner, s32 kind) {
         {
             Spawn15153F18 first;
 
-            first.pos = pos;
+            first.pos = *(struct17 *)&pos; // TODO(vectors): struct17/vertex mix
             first.unk14 = 4.0f;
             first.unk2C = 9;
             first.unk2E = 6;
@@ -585,7 +515,7 @@ void func_150FA520(struct127 *actor, u8 point, u8 owner, s32 kind) {
         {
             Spawn15150178 second;
 
-            second.pos = pos;
+            second.pos = *(struct17 *)&pos; // TODO(vectors): struct17/vertex mix
             second.unk14 = 7;
             second.unk16 = 6;
             second.unk00 = 0;
@@ -610,7 +540,7 @@ void func_150FA520(struct127 *actor, u8 point, u8 owner, s32 kind) {
             func_15150178(&second.unk00, &second.pos, ground, owner, kind);
         }
         {
-            ParticleSpawn spawn;
+            ParticleDesc spawn;
             f32 data[5];
             ImpactParticle *particle;
 
@@ -619,41 +549,41 @@ void func_150FA520(struct127 *actor, u8 point, u8 owner, s32 kind) {
             data[1] = func_150ADA68() * 3.0f + 10.0f;
             data[3] = func_150ADA68() * 100.0f + 100.0f;
             data[4] = data[3] / (data[1] * data[1]);
-            spawn.unk1B = data[3];
-            spawn.unk1D = 0x79;
-            spawn.unk8 = 0x4403;
+            spawn.alpha = data[3];
+            spawn.texture = 0x79;
+            spawn.renderMode = 0x4403;
             spawn.unk0 = 0x200005;
             spawn.unk4 = 0;
-            spawn.unkC = 0;
-            spawn.unk10 = 0;
-            spawn.unk18 = 0xDC;
-            spawn.unk19 = 0xDC;
-            spawn.unk1A = 0xFF;
-            spawn.unk17 = 0xFF;
-            spawn.unk14 = 0xFF;
-            spawn.unk15 = 0xFF;
-            spawn.unk16 = 0xFF;
-            spawn.unk1C = 0xFF;
+            spawn.frame = 0;
+            spawn.frameRate = 0;
+            spawn.r2 = 0xDC;
+            spawn.g2 = 0xDC;
+            spawn.b2 = 0xFF;
+            spawn.a = 0xFF;
+            spawn.r = 0xFF;
+            spawn.g = 0xFF;
+            spawn.b = 0xFF;
+            spawn.brightness = 0xFF;
             spawn.pos = pos;
-            spawn.unk3C = *(struct17 *)&D_800A5480;
-            spawn.unk1E = 1;
-            spawn.unk20 = 0xFF;
-            spawn.unk22 = 1;
-            spawn.unk24 = 1.0f;
+            spawn.offset = *(vertex *)&D_800A5480;
+            spawn.fadeStart = 1;
+            spawn.fadeRate = 0xFF;
+            spawn.scaleStart = 1;
+            spawn.scaleRate = 1.0f;
             spawn.flags = 0x4C000 | ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);
-            spawn.unk60 = 6;
-            spawn.unk61 = 6;
-            spawn.unk62 = 0x27;
-            spawn.unk63 = -1;
-            spawn.unk64 = -1;
-            spawn.unk65 = 0;
-            spawn.unk5C = 0;
-            spawn.unk66 = 0xFF;
-            spawn.vel = *(struct17 *)&D_800A5480;
-            spawn.unkA = 300;
-            spawn.unk28 = 0.0f;
-            spawn.unk2C = 0.0f;
-            spawn.unk54 = 0.0f;
+            spawn.primColorMode = 6;
+            spawn.envColorMode = 6;
+            spawn.updateFunc = 0x27;
+            spawn.deathFunc = -1;
+            spawn.drawFunc = -1;
+            spawn.handlerSet = 0;
+            spawn.viewMask = 0;
+            spawn.views = 0xFF;
+            spawn.vel = *(vertex *)&D_800A5480;
+            spawn.timer = 300;
+            spawn.width = 0.0f;
+            spawn.height = 0.0f;
+            spawn.gravity = 0.0f;
             particle = func_15130280(&spawn, 1, 0, sizeof(data), owner, kind);
             if (particle != NULL) {
                 memcpy(particle->data, data, sizeof(data));
