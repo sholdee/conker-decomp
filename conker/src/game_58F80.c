@@ -389,7 +389,7 @@ Gfx *func_1502C408(Gfx *gdl, s32 index) {
     }
     alpha = movement_obj[index].unk7;
     size = movement_obj[index].unk122;
-    scroll = movement_obj[index].unk60;
+    scroll = movement_obj[index].texScroll;
     if (alpha == 0) {
         return gdl;
     }
@@ -422,8 +422,8 @@ void func_1502C608(s32 index) {
     s16 speed;
 
     if (D_800BEAC0 == 0) {
-        scroll = movement_obj[index].unk60;
-        speed = movement_obj[index].unk62;
+        scroll = movement_obj[index].texScroll;
+        speed = movement_obj[index].texScrollSpeed;
         if (movement_obj[index].unk7 != 0) {
             period = D_8008CA4C[func_1502C3BC(index)][4] << 8;
             scroll += speed;
@@ -432,7 +432,7 @@ void func_1502C608(s32 index) {
             } else if (scroll < 0) {
                 scroll += period;
             }
-            movement_obj[index].unk60 = scroll;
+            movement_obj[index].texScroll = scroll;
         }
     }
 }
@@ -1202,7 +1202,7 @@ void func_1502E4C4(s32 index) {
     height = (u32)D_800D1C90[id]->bodyRadius * obj->scale_y;
     yOffset = (D_800D1C90[id]->bodyHeight + obj->unkCC) * obj->scale_y;
     obj->cull_radius_xz = width;
-    range = obj->unk10;
+    range = obj->cullDistance;
     if (D_800C35EA[0] == 1 && D_800C3660[0] == 0) {
         range = 0;
     }

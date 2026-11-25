@@ -751,7 +751,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->unk20B[cmd->a[1]] = cmd->a[0];
         break;
     case 0x68:
-        obj->unk10 = cmd->a[0];
+        obj->cullDistance = cmd->a[0];
         break;
     case 0x69:
         D_800D18C0 |= cmd->a[0];

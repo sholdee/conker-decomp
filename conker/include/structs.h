@@ -961,7 +961,7 @@ struct Actor {
     /* 0x00A */ u8  unkA;
     /* 0x00B */ u8  unkB[4];  // one per player
     /* 0x00F */ u8  unkF;     // per-player bits (<< 4: seen by player i)
-    /* 0x010 */ u16 unk10;    // view range
+    /* 0x010 */ u16 cullDistance; // from the model definition, or the spawn record override (game_AEB40)
     /* 0x012 */ u16 unk12;    // frame counter
     /* 0x014 */ f32 xpos;
     /* 0x018 */ f32 ypos;
@@ -984,8 +984,8 @@ struct Actor {
     /* 0x054 */ f32 unk54;
     /* 0x058 */ s32 unk58;
     /* 0x05C */ s32 basemtx;
-    /* 0x060 */ s16 unk60;    // texture scroll
-    /* 0x062 */ s16 unk62;    // its speed
+    /* 0x060 */ s16 texScroll;
+    /* 0x062 */ s16 texScrollSpeed;
     /* 0x064 */ s8  unk64;
     /* 0x065 */ u8  attach_char;
     /* 0x066 */ u8  unk66;      // flags

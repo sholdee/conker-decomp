@@ -1003,19 +1003,19 @@ void func_150839B8(Actor *obj, s32 modelId, SpawnRecord *spawn) {
         if (spawn != NULL) {
             override = spawn->unk2C;
             if (override == 0) {
-                obj->unk10 = def->unk2A;
+                obj->cullDistance = def->unk2A;
             } else {
                 if (override == 1) {
-                    obj->unk10 = 0;
+                    obj->cullDistance = 0;
                 } else {
-                    obj->unk10 = override;
+                    obj->cullDistance = override;
                 }
             }
             if (D_800BE9F0 == 29) {
-                obj->unk10 = 1000;
+                obj->cullDistance = 1000;
             }
         } else {
-            obj->unk10 = 0;
+            obj->cullDistance = 0;
         }
         obj->unk13B = def->unk39;
         obj->unk2CB = def->unk33;
