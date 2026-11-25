@@ -3,32 +3,43 @@
 #include "variables.h"
 
 
-void func_1503F9F0(s16 arg0, s16 *arg1, s16 *arg2) {
-    static s16 D_80084484;
-    s8 *p;
+/* variables.h declares D_800BE728 as s32[]; it holds a pointer to the per-controller OSContPad pointers. */
+#define CONT_PADS (*(OSContPad ***)&D_800BE728)
 
-    p = (*(s8 ***)&D_800BE728)[arg0];
+#define STICK_DEADZONE 20
+
+/*
+ * Menu repeat for the analog stick: every 5th call, reports the direction (-1, 0 or 1) the stick of
+ * `controller` points along each axis, ignoring deflections within STICK_DEADZONE, and clears the
+ * stick reading. On the other calls both outputs are 0.
+ */
+void func_1503F9F0(s16 controller, s16 *dirX, s16 *dirY) {
+    static s16 D_80084484; // frames until the next repeat
+    OSContPad *pad;
+    s16 stickX;
+
+    pad = CONT_PADS[controller];
     if (--D_80084484 != 0) {
-        *arg1 = 0;
-        *arg2 = 0;
+        *dirX = 0;
+        *dirY = 0;
         return;
     }
-    arg0 = p[2];
+    stickX = pad->stick_x;
     D_80084484 = 5;
-    if (arg0 < -20 || arg0 > 20) {
-        *arg1 = arg0;
+    if (stickX < -STICK_DEADZONE || stickX > STICK_DEADZONE) {
+        *dirX = stickX;
     } else {
-        *arg1 = 0;
+        *dirX = 0;
     }
-    if (p[3] < -20 || p[3] > 20) {
-        *arg2 = p[3];
+    if (pad->stick_y < -STICK_DEADZONE || pad->stick_y > STICK_DEADZONE) {
+        *dirY = pad->stick_y;
     } else {
-        *arg2 = 0;
+        *dirY = 0;
     }
-    p[2] = 0;
-    p[3] = 0;
-    *arg1 = (*arg1 < -1) ? -1 : (*arg1 > 1) ? 1 : *arg1;
-    *arg2 = (*arg2 < -1) ? -1 : (*arg2 > 1) ? 1 : *arg2;
+    pad->stick_x = 0;
+    pad->stick_y = 0;
+    *dirX = (*dirX < -1) ? -1 : (*dirX > 1) ? 1 : *dirX;
+    *dirY = (*dirY < -1) ? -1 : (*dirY > 1) ? 1 : *dirY;
 }
 
 extern s32 D_80084488;
