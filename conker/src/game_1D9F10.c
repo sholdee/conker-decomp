@@ -177,13 +177,13 @@ Rope *func_151ACBD4(void *spawn, s32 extraSize) {
     u8 r;
     u8 g;
     u8 b;
-    s32 t;
+    s32 vtxT;
     s32 rowH;
-    s32 u;
-    s32 s0;
-    s32 s1;
-    s32 s2;
-    s32 s3;
+    s32 texT;
+    s32 texS0;
+    s32 texS1;
+    s32 texS2;
+    s32 texS3;
 
     rope = func_15167A68((D_800BE9F0 == 0x2C) ? 0x4E : 0x2F, 0, extraSize + 0x58, 1, 0xFF, 1);
     if (rope == NULL) {
@@ -229,39 +229,39 @@ Rope *func_151ACBD4(void *spawn, s32 extraSize) {
     tex = &D_80090B60[rope->textureId];
     quarterW = tex->width >> 2;
     rowH = tex->height - 1;
-    s0 = 0x100 << 5;
-    s1 = (quarterW + 0x100) << 5;
-    s2 = ((quarterW * 2) + 0x100) << 5;
-    s3 = ((quarterW * 3) + 0x100) << 5;
+    texS0 = 0x100 << 5;
+    texS1 = (quarterW + 0x100) << 5;
+    texS2 = ((quarterW * 2) + 0x100) << 5;
+    texS3 = ((quarterW * 3) + 0x100) << 5;
     for (buf = 0; buf < 2; buf++) {
         if (segments) { // matching: stops IDO strength-reducing the buf index into the inner loop
-            for (i = 0, u = 0x100; i < 20; i++, u += rowH) {
-                t = u << shift;
+            for (i = 0, texT = 0x100; i < 20; i++, texT += rowH) {
+                vtxT = texT << shift;
                 rope->vertices[((buf * 20 + i) * 4) + 0].v.flag = 0;
-                rope->vertices[((buf * 20 + i) * 4) + 0].v.tc[0] = s0;
+                rope->vertices[((buf * 20 + i) * 4) + 0].v.tc[0] = texS0;
                 if (1) {} // matching: block boundary fixes IDO's register choice in this loop
-                rope->vertices[((buf * 20 + i) * 4) + 0].v.tc[1] = t;
+                rope->vertices[((buf * 20 + i) * 4) + 0].v.tc[1] = vtxT;
                 rope->vertices[((buf * 20 + i) * 4) + 0].v.cn[0] = r;
                 rope->vertices[((buf * 20 + i) * 4) + 0].v.cn[1] = g;
                 rope->vertices[((buf * 20 + i) * 4) + 0].v.cn[2] = b;
                 rope->vertices[((buf * 20 + i) * 4) + 0].v.cn[3] = 0xFF;
                 rope->vertices[((buf * 20 + i) * 4) + 1].v.flag = 0;
-                rope->vertices[((buf * 20 + i) * 4) + 1].v.tc[0] = s1;
-                rope->vertices[((buf * 20 + i) * 4) + 1].v.tc[1] = t;
+                rope->vertices[((buf * 20 + i) * 4) + 1].v.tc[0] = texS1;
+                rope->vertices[((buf * 20 + i) * 4) + 1].v.tc[1] = vtxT;
                 rope->vertices[((buf * 20 + i) * 4) + 1].v.cn[0] = r;
                 rope->vertices[((buf * 20 + i) * 4) + 1].v.cn[1] = g;
                 rope->vertices[((buf * 20 + i) * 4) + 1].v.cn[2] = b;
                 rope->vertices[((buf * 20 + i) * 4) + 1].v.cn[3] = 0xFF;
                 rope->vertices[((buf * 20 + i) * 4) + 2].v.flag = 0;
-                rope->vertices[((buf * 20 + i) * 4) + 2].v.tc[0] = s2;
-                rope->vertices[((buf * 20 + i) * 4) + 2].v.tc[1] = t;
+                rope->vertices[((buf * 20 + i) * 4) + 2].v.tc[0] = texS2;
+                rope->vertices[((buf * 20 + i) * 4) + 2].v.tc[1] = vtxT;
                 rope->vertices[((buf * 20 + i) * 4) + 2].v.cn[0] = r;
                 rope->vertices[((buf * 20 + i) * 4) + 2].v.cn[1] = g;
                 rope->vertices[((buf * 20 + i) * 4) + 2].v.cn[2] = b;
                 rope->vertices[((buf * 20 + i) * 4) + 2].v.cn[3] = 0xFF;
                 rope->vertices[((buf * 20 + i) * 4) + 3].v.flag = 0;
-                rope->vertices[((buf * 20 + i) * 4) + 3].v.tc[0] = s3;
-                rope->vertices[((buf * 20 + i) * 4) + 3].v.tc[1] = t;
+                rope->vertices[((buf * 20 + i) * 4) + 3].v.tc[0] = texS3;
+                rope->vertices[((buf * 20 + i) * 4) + 3].v.tc[1] = vtxT;
                 rope->vertices[((buf * 20 + i) * 4) + 3].v.cn[0] = r;
                 rope->vertices[((buf * 20 + i) * 4) + 3].v.cn[1] = g;
                 rope->vertices[((buf * 20 + i) * 4) + 3].v.cn[2] = b;
@@ -421,7 +421,7 @@ Gfx *func_151AD92C(Gfx *dl, Rope *rope, s32 arg2) {
     u16 w;
     s32 rowH;
     s32 shift;
-    f32 ax, ay, nx;
+    f32 offX, offY, offZ;
     f32 x, y, z;
     f32 dx, dy, dz;
     f32 len, inv;
@@ -437,16 +437,16 @@ Gfx *func_151AD92C(Gfx *dl, Rope *rope, s32 arg2) {
         shift = 4;
     }
     for (i = 0; i < n; i++) {
-        f32 *pt = rope->nodes[i].pos;
+        RopeNode *node = &rope->nodes[i];
 
-        x = pt[0];
-        y = pt[1];
-        z = pt[2];
+        x = node->pos[0];
+        y = node->pos[1];
+        z = node->pos[2];
         if (i != n - 1) {
-            /* direction to the next node up (pt[6..8] is nodes[i + 1].pos) */
-            dx = pt[6] - pt[0];
-            dy = pt[7] - pt[1];
-            dz = pt[8] - pt[2];
+            /* direction to the next node up */
+            dx = node[1].pos[0] - node->pos[0];
+            dy = node[1].pos[1] - node->pos[1];
+            dz = node[1].pos[2] - node->pos[2];
         } else {
             dy = 1.0f;
             dx = 0.0f;
@@ -454,44 +454,44 @@ Gfx *func_151AD92C(Gfx *dl, Rope *rope, s32 arg2) {
         }
         len = sqrtf(dz * dz + (-dy) * (-dy));
         if (len != 0.0f) {
-            ax = 0.0f;
+            offX = 0.0f;
             inv = 1.0f / len;
-            ay = dz * inv;
-            nx = (-dy) * inv;
+            offY = dz * inv;
+            offZ = (-dy) * inv;
         } else {
-            ax = 100.0f;
-            ay = 0.0f;
-            nx = 0.0f;
+            offX = 100.0f;
+            offY = 0.0f;
+            offZ = 0.0f;
         }
-        ax *= 4.0f;
-        ay *= 4.0f;
-        nx *= 4.0f;
-        rope->vertices[(D_800BE9C0 * n + i) * 4 + 0].v.ob[0] = x + ax;
-        rope->vertices[(D_800BE9C0 * n + i) * 4 + 0].v.ob[1] = y + ay;
-        rope->vertices[(D_800BE9C0 * n + i) * 4 + 0].v.ob[2] = z + nx;
-        rope->vertices[(D_800BE9C0 * n + i) * 4 + 2].v.ob[0] = x - ax;
-        rope->vertices[(D_800BE9C0 * n + i) * 4 + 2].v.ob[1] = y - ay;
-        rope->vertices[(D_800BE9C0 * n + i) * 4 + 2].v.ob[2] = z - nx;
+        offX *= 4.0f;
+        offY *= 4.0f;
+        offZ *= 4.0f;
+        rope->vertices[(D_800BE9C0 * n + i) * 4 + 0].v.ob[0] = x + offX;
+        rope->vertices[(D_800BE9C0 * n + i) * 4 + 0].v.ob[1] = y + offY;
+        rope->vertices[(D_800BE9C0 * n + i) * 4 + 0].v.ob[2] = z + offZ;
+        rope->vertices[(D_800BE9C0 * n + i) * 4 + 2].v.ob[0] = x - offX;
+        rope->vertices[(D_800BE9C0 * n + i) * 4 + 2].v.ob[1] = y - offY;
+        rope->vertices[(D_800BE9C0 * n + i) * 4 + 2].v.ob[2] = z - offZ;
         len = sqrtf((-dy) * (-dy) + dx * dx);
         if (len != 0.0f) {
-            nx = 0.0f;
+            offZ = 0.0f;
             inv = 1.0f / len;
-            ax = (-dy) * inv;
-            ay = dx * inv;
+            offX = (-dy) * inv;
+            offY = dx * inv;
         } else {
-            ax = 1.0f;
-            nx = 1.0f;
-            ay = 0.0f;
+            offX = 1.0f;
+            offZ = 1.0f;
+            offY = 0.0f;
         }
-        ax *= 4.0f;
-        ay *= 4.0f;
-        nx *= 4.0f;
-        rope->vertices[(D_800BE9C0 * n + i) * 4 + 1].v.ob[0] = x + ax;
-        rope->vertices[(D_800BE9C0 * n + i) * 4 + 1].v.ob[1] = y + ay;
-        rope->vertices[(D_800BE9C0 * n + i) * 4 + 1].v.ob[2] = z + nx;
-        rope->vertices[(D_800BE9C0 * n + i) * 4 + 3].v.ob[0] = x - ax;
-        rope->vertices[(D_800BE9C0 * n + i) * 4 + 3].v.ob[1] = y - ay;
-        rope->vertices[(D_800BE9C0 * n + i) * 4 + 3].v.ob[2] = z - nx;
+        offX *= 4.0f;
+        offY *= 4.0f;
+        offZ *= 4.0f;
+        rope->vertices[(D_800BE9C0 * n + i) * 4 + 1].v.ob[0] = x + offX;
+        rope->vertices[(D_800BE9C0 * n + i) * 4 + 1].v.ob[1] = y + offY;
+        rope->vertices[(D_800BE9C0 * n + i) * 4 + 1].v.ob[2] = z + offZ;
+        rope->vertices[(D_800BE9C0 * n + i) * 4 + 3].v.ob[0] = x - offX;
+        rope->vertices[(D_800BE9C0 * n + i) * 4 + 3].v.ob[1] = y - offY;
+        rope->vertices[(D_800BE9C0 * n + i) * 4 + 3].v.ob[2] = z - offZ;
     }
     gSPSetGeometryMode(dl++, G_CULL_BACK);
     gSPClearGeometryMode(dl++, G_CULL_FRONT);
@@ -633,7 +633,7 @@ s32 func_151AE3A8(RopeRider *rider) {
     s32 endNodes;
     s32 i;
     f32 t;
-    s32 pad;
+    s32 pad; // matching: unused stack slot
     f32 a[3];
     f32 b[3];
 
