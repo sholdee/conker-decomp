@@ -51,7 +51,9 @@ typedef struct struct126Hidden {
     /* 0x000 */ f32 unk0;
     /* 0x004 */ u8 pad4[0x24 - 0x4];
     /* 0x024 */ s16 unk24;
-    /* 0x026 */ u8 pad26[0xA8 - 0x26];
+    /* 0x026 */ u8 pad26[0x3C - 0x26];
+    /* 0x03C */ s32 unk3C;
+    /* 0x040 */ u8 pad40[0xA8 - 0x40];
     /* 0x0A8 */ f32 unkA8;
     /* 0x0AC */ u8 unkAC;
     /* 0x0AD */ s8 unkAD;
@@ -59,8 +61,12 @@ typedef struct struct126Hidden {
     /* 0x0DC */ f32 unkDC[3];
     /* 0x0E8 */ u8 unkE8[0x12C - 0xE8];
     /* 0x12C */ u16 unk12C;
-    /* 0x12E */ u8 pad12E[0x197 - 0x12E];
+    /* 0x12E */ u8 pad12E[0x170 - 0x12E];
+    /* 0x170 */ f32 unk170;
+    /* 0x174 */ u8 pad174[0x197 - 0x174];
     /* 0x197 */ u8 unk197;
+    /* 0x198 */ u8 pad198[0x19C - 0x198];
+    /* 0x19C */ u16 unk19C;
 } struct126Hidden;
 #define HIDDEN126(ext) ((struct126Hidden *)(ext))
 
@@ -3847,15 +3853,15 @@ void func_15073F78(void) {
 }
 
 extern u8 *D_800D210C;
-extern f32 D_800CC2E4;
-extern f32 D_800CC2EC;
 extern s32 func_15082A44(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern s32 func_15033BDC();
 extern void func_100100E0(void *, void *, void *, void *, void *, s32);
 extern void func_1506AC8C(struct127 *, s32, s32);
 extern void func_150F16DC(struct127 *, u8, u8, s32, s32);
-typedef struct MP { u8 pad0[8]; s16 unk8; s16 unkA; s16 unkC; } MP;
-#define B(p, o, t) (*(t *)((u8 *)(p) + (o)))
+/*
+ * Spawns the object D_800D1580 & 0xFFFF as a thrown/fired item of the current object, at a bone
+ * or above it, then sets its launch velocity and state (unk232) per thrower id.
+ */
 void func_15073FA0(void) {
     s32 state;
     s32 idx;
@@ -3881,7 +3887,7 @@ void func_15073FA0(void) {
     if (slot != -1) {
         state = 1;
         D_800D210C[slot] = 0;
-        idx = func_15082A44((void *)((slot * 0x30) + (s32)D_800D20FC), slot, 0, 0, 0);
+        idx = func_15082A44((SpawnSlot *)(slot * 0x30 + (s32)D_800D20FC), slot, 0, 0, 0); // matching: integer address math
         if (idx != 0) {
             idx--;
             obj = &D_800CC2D0[idx];
@@ -3898,11 +3904,11 @@ void func_15073FA0(void) {
                     bone = 4;
                     break;
                 case 0x5A:
-                    bone = 0x13;
+                    bone = 19;
                     break;
                 case 0x7B:
                     if (arg == 0x10) {
-                        bone = (D_800D1580 >> 0x10) & 0xFF;
+                        bone = (D_800D1580 >> 16) & 0xFF;
                     } else {
                         useDefault = 1;
                     }
@@ -3912,10 +3918,10 @@ void func_15073FA0(void) {
                     break;
                 }
                 if (!useDefault) {
-                    slot = (s32)player->unk1D4 + (bone << 6);
+                    slot = (s32)((Mtx *)player->unk1D4 + bone);
                     func_15143134(NULL, &obj->x_position, slot);
                     {
-                        typedef s32 padA;
+                        typedef s32 padA; // matching: a scope with a declaration steers as1 (-g3)
                         player = D_800D154C;
                     }
                 }
@@ -3926,22 +3932,22 @@ void func_15073FA0(void) {
                 obj->z_position = player->z_position;
             }
             if (D_800BE616 != 0) {
-                obj->unk2E4 = B(player->unk31C, 0x19C, u16);
+                obj->unk2E4 = HIDDEN126(player->unk31C)->unk19C;
                 state = 5;
                 player->unk31C->unk19B = 0;
                 D_800D154C->unk31C->unk78 = 0;
-                cmd = (D_800D1580 >> 0x10) & 1;
-                obj->gravity = 4.0;
+                cmd = (D_800D1580 >> 16) & 1;
+                obj->gravity = 4.0; // matching: double literal
                 player = D_800D154C;
-                speed = ((f32)(0xF0 - B(player->unk31C, 0x19C, u16)) * 60.0f) / 240.0f;
+                speed = ((f32)(0xF0 - HIDDEN126(player->unk31C)->unk19C) * 60.0f) / 240.0f;
                 speed += 40.0f;
                 if (cmd) {
                     speed = 0.0f;
                 }
                 if (player->unk31C->unk198 != 0) {
                     {
-                        typedef s32 padT;
-                        func_1505A184((u16)(s32)((45.0f - B(player->unk31C, 0x170, f32)) * 182.04445f) & 0xFFFF, speed * 4.0f, 0.0f, &x1, &y1, &z1);
+                        typedef s32 padT; // matching: as above
+                        func_1505A184((u16)(s32)((45.0f - HIDDEN126(player->unk31C)->unk170) * 182.04445f) & 0xFFFF, speed * 4.0f, 0.0f, &x1, &y1, &z1);
                         obj->y_velocity = -y1;
                     }
                     player = D_800D154C;
@@ -3954,7 +3960,7 @@ void func_15073FA0(void) {
                     slot = (s32)func_1503195C(player, 0x2C, 0);
                 }
                 if (slot != 0) {
-                    obj->unk8E = B(slot, 0x3C, s32);
+                    obj->unk8E = HIDDEN126(slot)->unk3C;
                     func_100100E0(func_15033BDC, (void *)slot, D_800D154C, func_1000EE70, obj, obj->unique_id);
                 }
                 player = D_800D154C;
@@ -3971,14 +3977,14 @@ void func_15073FA0(void) {
                 state = 5;
                 obj->xz_velocity = 0.0f;
                 func_151A3390(obj, 0xFF);
-                ((MP **)D_800D2104)[obj->unk13F]->unk8 = D_800CC2E4;
-                ((MP **)D_800D2104)[obj->unk13F]->unkC = D_800CC2EC;
+                ((MarkerPoint **)D_800D2104)[obj->unk13F]->x = D_800CC2D0[0].x_position;
+                ((MarkerPoint **)D_800D2104)[obj->unk13F]->z = D_800CC2D0[0].z_position;
             } else if (player->id == 0x7B) {
                 if (arg == 0x10) {
                     state = 7;
-                    ((MP **)D_800D2104)[obj->unk13F]->unk8 = D_800CC2E4;
-                    ((MP **)D_800D2104)[obj->unk13F]->unkA = 0x3D4;
-                    ((MP **)D_800D2104)[obj->unk13F]->unkC = D_800CC2EC;
+                    ((MarkerPoint **)D_800D2104)[obj->unk13F]->x = D_800CC2D0[0].x_position;
+                    ((MarkerPoint **)D_800D2104)[obj->unk13F]->y = 980;
+                    ((MarkerPoint **)D_800D2104)[obj->unk13F]->z = D_800CC2D0[0].z_position;
                     obj->unique_id = 0xFF - idx;
                     func_1506AC8C(obj, 0xC, 0);
                     func_150F16DC(D_800D154C, func_150ADA20() & 1, func_150ADA20() & 3, 0xFF, 1);
