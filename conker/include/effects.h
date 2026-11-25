@@ -1346,7 +1346,11 @@ typedef struct StreakBurst4C {
     /* 0x48 */ u8 pad48[0x4];
 } StreakBurst4C;
 
-struct EffectMask;
+/* Visibility mask: bit n set = draw in view n. */
+typedef struct EffectMask {
+    /* 0x0 */ s16 unk0;
+    /* 0x2 */ s16 viewBits;
+} EffectMask; /* size 0x4 */
 
 /* func_15157010 (game_1844C0.c): spawn parameters of a model effect, copied into the effect. */
 typedef struct EffectParams {
@@ -1402,7 +1406,7 @@ typedef struct BillboardBurst {
     /* 0x3E */ u8 pad3E[2];
 } BillboardBurst; /* size 0x40 */
 
-/* Motion extension of a model effect: func_15157898 (game_1844C0.c) copies it to Effect.extra, and the
+/* Motion extension of a model effect: func_15157898 (game_1844C0.c) copies it to ModelEffect.extra, and the
  * D_8008AD90 / D_8008ADA0 update callbacks integrate it. */
 typedef struct EffectMotion {
     /* 0x00 */ Vec3f rot;          /* degrees */
@@ -1423,6 +1427,38 @@ typedef union EffectExtra {
     f32 raw[0xE];
     EffectMotion motion;
 } EffectExtra; /* size 0x38 */
+
+/* Model instance created by func_1503F62C (see game_6C960.c); only the fields used here. */
+typedef struct ModelInstance {
+    /* 0x000 */ u8 pad0[0x3E0];
+    /* 0x3E0 */ f32 (*rootMtx[2])[4]; /* per frame: the owner's float matrix */
+    /* 0x3E8 */ s32 mtxBuf[2];        /* per frame: matrix buffer bound to segment 3 */
+} ModelInstance;
+
+/* Attachment state handed to func_151462C8. */
+typedef struct EffectAttach {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ u8 unk4;
+    /* 0x08 */ s32 unk8[4]; /* func_1515D480 allocations, one per entry up to D_80082FA0 */
+    /* 0x18 */ s32 unk18;   /* func_1515D440 allocation */
+} EffectAttach; /* size 0x1C */
+
+/* Model effect object (types 0x36 / 0x4C / 0x5B), made by func_15157010 / func_15157898 (game_1844C0.c). */
+typedef struct ModelEffect {
+    /* 0x00 */ EffectHeader header;
+    /* 0x010 */ EffectParams params;
+    /* 0x068 */ ModelInstance *model;
+    /* 0x06C */ s32 *displayLists;
+    /* 0x070 */ u8 displayListCount;
+    /* 0x071 */ u8 pad71[3];
+    /* 0x074 */ s32 segment1;
+    /* 0x078 */ s32 unk78;
+    /* 0x07C */ MtxF mtx[2]; /* per frame */
+    /* 0x0FC */ EffectAttach attach;
+    /* 0x118 */ s32 unk118;
+    /* 0x11C */ u8 pad11C[4];
+    /* 0x120 */ EffectExtra extra; /* optional extension (func_15157898) */
+} ModelEffect; /* size 0x120 + the optional extension */
 
 /* func_15134DAC (game_161520.c): spawn parameters of a blood strip (object type 0x29), copied to the strip
  * at +0x18. Every duration frames (after pause) offsetA/offsetB are sampled in bone space. */

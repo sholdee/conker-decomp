@@ -93,14 +93,6 @@ void func_151D69B4(WorldObject *pickup, Actor *player) {
     }
 }
 
-/* Model effect object (Effect in game_1844C0.c; only the fields used here). */
-typedef struct {
-    /* 0x00 */ u8 header[0x10];
-    /* 0x10 */ EffectParams params;
-    /* 0x68 */ u8 pad68[0x7C - 0x68];
-    /* 0x7C */ MtxF mtx[2]; // per frame
-} ModelEffect;
-
 typedef struct {
     /* 0x00 */ u8 pad0[0x64];
     /* 0x64 */ s32 unk64;
